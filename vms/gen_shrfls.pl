@@ -119,8 +119,8 @@ sub scan_enum {
   $line =~ s/,?\s*\n?$//;
   print "\tfiltered to \\$line\\\n" if $debug > 1;
   if ($line =~ /(\w+)$/) {
-    print "\tvar name is \\$1\\\n" if $debug > 1;
-    $vars{$1}++;
+    print "\tconstant name is \\$1\\\n" if $debug > 1;
+    $enums{$1}++;
   }
 }
 
@@ -152,6 +152,7 @@ sub scan_func {
   }
 }
 
+$used_expectation_enum = $used_opcode_enum = 0; # avoid warnings
 if ($docc) {
   open(CPP,"${cc_cmd}/NoObj/PreProc=Sys\$Output ${dir}perl.h|")
     or die "$0: Can't preprocess ${dir}perl.h: $!\n";
@@ -190,7 +191,19 @@ LINE: while (<CPP>) {
     last LINE unless $_ = <CPP>;
   }
   print $_ if $debug > 3;
-  if (/^EXT/) { &scan_var($_); }
+  if (($type) = /^EXT\s+(\w+)/) {
+    if ($isvaxc) {
+      if ($type eq 'expectation') {
+        $used_expectation_enum++;
+        print "\tsaw global use of enum \"expectation\"\n" if $debug > 1;
+      }
+      if ($type eq 'opcode') {
+        $used_opcode_enum++;
+        print "\tsaw global use of enum \"opcode\"\n" if $debug > 1;
+      }
+    }
+    &scan_var($_);
+  }
 }
 close CPP;
 while (<DATA>) {
@@ -206,6 +219,22 @@ foreach (split /\s+/, $extnames) {
   $pkgname =~ s/::/__/g;
   $fcns{"boot_$pkgname"}++;
   print "Adding boot_$pkgname to \%fcns (for extension $_)\n" if $debug;
+}
+
+# If we're using VAXC, fold in the names of the constants for enums
+# we've seen as the type of global vars.
+if ($isvaxc) {
+  foreach (keys %enums) {
+    if (/^OP/) {
+      $vars{$_}++ if $used_opcode_enum;
+      next;
+    }
+    if (/^X/) {
+      $vars{$_}++ if $used_expectation_enum;
+      next;
+    }
+    print STDERR "Unrecognized enum constant \"$_\" ignored\n";
+  }
 }
 
 # Eventually, we'll check against existing copies here, so we can add new

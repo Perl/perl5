@@ -3,7 +3,7 @@ package Exporter;
 require 5.001;
 
 $ExportLevel = 0;
-$Verbose = 0;
+$Verbose = 0 unless $Verbose;
 
 require Carp;
 
@@ -125,7 +125,7 @@ sub export {
 	}
     }
 
-    warn "Importing from $pkg into $callpkg: ",
+    warn "Importing into $callpkg from $pkg: ",
 		join(", ",sort @imports) if $Verbose;
 
     foreach $sym (@imports) {
@@ -155,7 +155,7 @@ sub import {
 sub _push_tags {
     my($pkg, $var, $syms) = @_;
     my $nontag;
-    *export_tags = *{"${pkg}::EXPORT_TAGS"};
+    *export_tags = \%{"${pkg}::EXPORT_TAGS"};
     push(@{"${pkg}::$var"},
 	map { $export_tags{$_} ? @{$export_tags{$_}} : scalar(++$nontag,$_) }
 		(@$syms) ? @$syms : keys %export_tags);

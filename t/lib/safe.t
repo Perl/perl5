@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bSafe\b/) {
+    if ($Config{'extensions'} !~ /\bSafe\b/ && $Config{'osname'} ne 'VMS') {
         print "1..0\n";
         exit 0;
     }
@@ -81,8 +81,8 @@ push(@Root::bar, "18"); # Two steps to prevent "Identifier used only once..."
 print "$Root::foo\n";
 print "@{$cpt->varglob('bar')}\n";
 
-print opname(22) eq "bless" ? "ok 19\n" : "not ok 19\n";
-print opcode("bless") == 22 ? "ok 20\n" : "not ok 20\n";
+print opname(23) eq "bless" ? "ok 19\n" : "not ok 19\n";
+print opcode("bless") == 23 ? "ok 20\n" : "not ok 20\n";
 
 $m1 = $cpt->mask();
 $cpt->trap("negate");

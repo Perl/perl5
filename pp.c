@@ -148,14 +148,6 @@ PP(pp_rv2gv)
     RETURN;
 }
 
-PP(pp_sv2len)
-{
-    dSP; dTARGET;
-    dPOPss;
-    PUSHi(sv_len(sv));
-    RETURN;
-}
-
 PP(pp_rv2sv)
 {
     dSP; dTOPss;
@@ -268,6 +260,24 @@ PP(pp_rv2cv)
     RETURN;
 }
 
+PP(pp_prototype)
+{
+    dSP;
+    CV *cv;
+    HV *stash;
+    GV *gv;
+    SV *ret;
+
+    ret = &sv_undef;
+    cv = sv_2cv(TOPs, &stash, &gv, FALSE);
+    if (cv && SvPOK(cv)) {
+	char *p = SvPVX(cv);
+	ret = sv_2mortal(newSVpv(p ? p : "", SvLEN(cv)));
+    }
+    SETs(ret);
+    RETURN;
+}
+
 PP(pp_anoncode)
 {
     dSP;
@@ -360,7 +370,7 @@ PP(pp_bless)
 
 PP(pp_study)
 {
-    dSP; dTARGET;
+    dSP; dPOPss;
     register unsigned char *s;
     register I32 pos;
     register I32 ch;
@@ -369,11 +379,17 @@ PP(pp_study)
     I32 retval;
     STRLEN len;
 
-    s = (unsigned char*)(SvPV(TARG, len));
+    s = (unsigned char*)(SvPV(sv, len));
     pos = len;
-    if (lastscream)
-	SvSCREAM_off(lastscream);
-    lastscream = TARG;
+    if (sv == lastscream)
+	SvSCREAM_off(sv);
+    else {
+	if (lastscream) {
+	    SvSCREAM_off(lastscream);
+	    SvREFCNT_dec(lastscream);
+	}
+	lastscream = SvREFCNT_inc(sv);
+    }
     if (pos <= 0) {
 	retval = 0;
 	goto ret;
@@ -416,7 +432,7 @@ PP(pp_study)
 	    sfirst[fold[ch]] = pos;
     }
 
-    SvSCREAM_on(TARG);
+    SvSCREAM_on(sv);
     retval = 1;
   ret:
     XPUSHs(sv_2mortal(newSViv((I32)retval)));
@@ -1386,7 +1402,8 @@ PP(pp_substr)
 	    rem = len;
 	sv_setpvn(TARG, tmps, rem);
 	if (lvalue) {			/* it's an lvalue! */
-	    (void)SvPOK_only(sv);
+	    if (!SvGMAGICAL(sv))
+		(void)SvPOK_only(sv);
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
 		sv_magic(TARG, Nullsv, 'x', Nullch, 0);
@@ -1704,7 +1721,7 @@ PP(pp_quotemeta)
 
     if (len) {
 	(void)SvUPGRADE(TARG, SVt_PV);
-	SvGROW(TARG, len * 2);
+	SvGROW(TARG, (len * 2) + 1);
 	d = SvPVX(TARG);
 	while (len--) {
 	    if (!isALNUM(*s))
@@ -1772,18 +1789,24 @@ PP(pp_each)
 {
     dSP; dTARGET;
     HV *hash = (HV*)POPs;
-    HE *entry = hv_iternext(hash);
+    HE *entry;
     I32 i;
     char *tmps;
+    
+    PUTBACK;
+    entry = hv_iternext(hash);                        /* might clobber stack_sp */
+    SPAGAIN;
 
     EXTEND(SP, 2);
     if (entry) {
-	tmps = hv_iterkey(entry, &i);
+	tmps = hv_iterkey(entry, &i);	              /* won't clobber stack_sp */
 	if (!i)
 	    tmps = "";
 	PUSHs(sv_2mortal(newSVpv(tmps, i)));
 	if (GIMME == G_ARRAY) {
-	    sv_setsv(TARG, hv_iterval(hash, entry));
+	    PUTBACK;
+	    sv_setsv(TARG, hv_iterval(hash, entry));  /* might clobber stack_sp */
+	    SPAGAIN;
 	    PUSHs(TARG);
 	}
     }
@@ -3305,6 +3328,7 @@ PP(pp_split)
     AV *oldstack = stack;
     register REGEXP *rx = pm->op_pmregexp;
     I32 gimme = GIMME;
+    I32 oldsave = savestack_ix;
 
     if (!pm || !s)
 	DIE("panic: do_split");
@@ -3332,6 +3356,11 @@ PP(pp_split)
 	while (isSPACE(*s))
 	    s++;
     }
+    if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
+	SAVEINT(multiline);
+	multiline = pm->op_pmflags & PMf_MULTILINE;
+    }
+
     if (!limit)
 	limit = maxiters + 2;
     if (pm->op_pmflags & PMf_WHITE) {
@@ -3443,6 +3472,7 @@ PP(pp_split)
 	    s = rx->endp[0];
 	}
     }
+    LEAVE_SCOPE(oldsave);
     iters = (SP - stack_base) - base;
     if (iters > maxiters)
 	DIE("Split loop");

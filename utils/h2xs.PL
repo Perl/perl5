@@ -149,7 +149,7 @@ The usual warnings if it can't read or write the files involved.
 
 =cut
 
-my( $H2XS_VERSION ) = '$Revision: 1.12 $' =~ /\$Revision:\s+([^\s]+)/;
+my( $H2XS_VERSION ) = '$Revision: 1.14 $' =~ /\$Revision:\s+([^\s]+)/;
 my $TEMPLATE_VERSION = '0.01';
 
 use Getopt::Std;
@@ -238,8 +238,13 @@ else {
 
 
 die "Won't overwrite existing $ext$modpname\n" if -e $modpname;
-# quick hack, should really loop over @modparts
-mkdir($modparts[0], 0777) if $nested;
+if( $nested ){
+	$modpath = "";
+	foreach (@modparts){
+		mkdir("$modpath$_", 0777);
+		$modpath .= "$_/";
+	}
+}
 mkdir($modpname, 0777);
 chdir($modpname) || die "Can't chdir $ext$modpname: $!\n";
 
@@ -481,7 +486,7 @@ use ExtUtils::MakeMaker;
 END
 print PL "WriteMakefile(\n";
 print PL "    'NAME'	=> '$module',\n";
-print PL "    'VERSION'	=> '$TEMPLATE_VERSION',\n";
+print PL "    'VERSION_FROM' => '$modfname.pm', # finds \$VERSION\n"; 
 print PL "    'LIBS'	=> ['$extralibs'],   # e.g., '-lm' \n";
 print PL "    'DEFINE'	=> '',     # e.g., '-DHAVE_SOMETHING' \n";
 print PL "    'INC'	=> '',     # e.g., '-I/usr/include/other' \n";
@@ -518,6 +523,14 @@ print "ok 1\n";
 _END_
 close(EX) || die "Can't close $ext$modpname/test.pl: $!\n";
 
+warn "Writing $ext$modpname/Changes\n";
+open(EX, ">Changes") || die "Can't create $ext$modpname/Changes: $!\n";
+print EX "Revision history for Perl extension $module.\n\n";
+print EX "$TEMPLATE_VERSION  ",scalar localtime,"\n";
+print EX "\t- original version; created by h2xs $H2XS_VERSION\n\n";
+close(EX) || die "Can't close $ext$modpname/Changes: $!\n";
+
+warn "Writing $ext$modpname/MANIFEST\n";
 system '/bin/ls > MANIFEST' or system 'ls > MANIFEST';
 !NO!SUBS!
 

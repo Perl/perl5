@@ -1373,11 +1373,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define Uid_t $uidtype		/* UID type */
 
+/* UNLINK_ALL_VERSIONS:
+ *	This symbol, if defined, indicates that the program should arrange
+ *	ro remove all versions of a file if unlink() is called.
+ */
+#$d_unlnkallvers UNLINK_ALL_VERSIONS		/**/
+
 /* VMS:
  *	This symbol, if defined, indicates that the program is running under
- *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
+ *	VMS.  It is currently automatically set by cpps running under VMS,
+ *	and is included here for completeness only.
  */
-#$d_eunice VMS		/**/
+#$d_vms VMS		/**/
 
 /* LOC_SED:
  *	This symbol holds the complete pathname to the sed program.

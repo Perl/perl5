@@ -190,7 +190,7 @@ For more on this, see L<perlobj>.
 
 =head2 Perl Modules
 
-A module is a just package that is defined in a library file of
+A module is just a package that is defined in a library file of
 the same name, and is designed to be reusable.  It may do this by
 providing a mechanism for exporting some of its symbols into the symbol
 table of any package using it.  Or it may function as a class

@@ -858,11 +858,12 @@ mess(pat, args)
 		  SvPVX(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
 		s += strlen(s);
 	    }
-	    if (GvIO(last_in_gv) &&
-		IoLINES(GvIOp(last_in_gv)) ) {
+	    if (GvIO(last_in_gv) && IoLINES(GvIOp(last_in_gv))) {
+		bool line_mode = (RsSIMPLE(rs) &&
+				  SvLEN(rs) == 1 && *SvPVX(rs) == '\n');
 		(void)sprintf(s,", <%s> %s %ld",
 		  last_in_gv == argvgv ? "" : GvNAME(last_in_gv),
-		  strEQ(rs,"\n") ? "line" : "chunk", 
+		  line_mode ? "line" : "chunk", 
 		  (long)IoLINES(GvIOp(last_in_gv)));
 		s += strlen(s);
 	    }

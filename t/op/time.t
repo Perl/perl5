@@ -41,7 +41,7 @@ if ($sec != $xsec && $mday && $year)
 else
     {print "not ok 4\n";}
 
-if (index(" :0:1:-1:365:366:-365:-366:",':' . ($localyday - $yday) . ':') > 0)
+if (index(" :0:1:-1:364:365:-364:-365:",':' . ($localyday - $yday) . ':') > 0)
     {print "ok 5\n";}
 else
     {print "not ok 5\n";}

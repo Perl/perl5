@@ -21,6 +21,58 @@
 #endif
 */
 
+/*
+ * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
+ */
+
+struct magic_state {
+    SV* mgs_sv;
+    U32 mgs_flags;
+};
+typedef struct magic_state MGS;
+
+static void restore_magic _((void *p));
+
+static MGS *
+save_magic(sv)
+SV* sv;
+{
+    MGS* mgs;
+
+    assert(SvMAGICAL(sv));
+
+    mgs = (MGS*)safemalloc(sizeof(MGS));
+    mgs->mgs_sv = sv;
+    mgs->mgs_flags = SvMAGICAL(sv) | SvREADONLY(sv);
+    SAVEDESTRUCTOR(restore_magic, mgs);
+
+    SvMAGICAL_off(sv);
+    SvREADONLY_off(sv);
+    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+
+    return mgs;
+}
+
+static void
+restore_magic(p)
+void* p;
+{
+    MGS *mgs = (MGS*)p;
+    SV* sv = mgs->mgs_sv;
+
+    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
+    {
+	if (mgs->mgs_flags)
+	    SvFLAGS(sv) |= mgs->mgs_flags;
+	else
+	    mg_magical(sv);
+	if (SvGMAGICAL(sv))
+	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    }
+
+    Safefree(mgs);
+}
+
 
 void
 mg_magical(sv)
@@ -44,30 +96,22 @@ int
 mg_get(sv)
 SV* sv;
 {
+    MGS* mgs;
     MAGIC* mg;
-    U32 savemagic = SvMAGICAL(sv) | SvREADONLY(sv);
 
-    assert(SvGMAGICAL(sv));
-    SvMAGICAL_off(sv);
-    SvREADONLY_off(sv);
-    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+    ENTER;
+    mgs = save_magic(sv);
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    (*vtbl->svt_get)(sv, mg);
 	    if (mg->mg_flags & MGf_GSKIP)
-		savemagic = 0;
+		mgs->mgs_flags = 0;
 	}
     }
 
-    if (savemagic)
-	SvFLAGS(sv) |= savemagic;
-    else
-	mg_magical(sv);
-    if (SvGMAGICAL(sv))
-	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-
+    LEAVE;
     return 0;
 }
 
@@ -75,33 +119,25 @@ int
 mg_set(sv)
 SV* sv;
 {
+    MGS* mgs;
     MAGIC* mg;
     MAGIC* nextmg;
-    U32 savemagic = SvMAGICAL(sv);
 
-    SvMAGICAL_off(sv);
-    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+    ENTER;
+    mgs = save_magic(sv);
 
     for (mg = SvMAGIC(sv); mg; mg = nextmg) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	nextmg = mg->mg_moremagic;	/* it may delete itself */
 	if (mg->mg_flags & MGf_GSKIP) {
 	    mg->mg_flags &= ~MGf_GSKIP;	/* setting requires another read */
-	    savemagic = 0;
+	    mgs->mgs_flags = 0;
 	}
 	if (vtbl && vtbl->svt_set)
 	    (*vtbl->svt_set)(sv, mg);
     }
 
-    if (SvMAGIC(sv)) {
-	if (savemagic)
-	    SvFLAGS(sv) |= savemagic;
-	else
-	    mg_magical(sv);
-	if (SvGMAGICAL(sv))
-	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-    }
-
+    LEAVE;
     return 0;
 }
 
@@ -116,18 +152,11 @@ SV* sv;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (vtbl && vtbl->svt_len) {
-	    U32 savemagic = SvMAGICAL(sv);
-
-	    SvMAGICAL_off(sv);
-	    SvFLAGS(sv) |= (SvFLAGS(sv)&(SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-
+	    ENTER;
+	    save_magic(sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = (*vtbl->svt_len)(sv, mg);
-
-	    SvFLAGS(sv) |= savemagic;
-	    if (SvGMAGICAL(sv))
-		SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-
+	    LEAVE;
 	    return len;
 	}
     }
@@ -141,10 +170,9 @@ mg_clear(sv)
 SV* sv;
 {
     MAGIC* mg;
-    U32 savemagic = SvMAGICAL(sv);
 
-    SvMAGICAL_off(sv);
-    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+    ENTER;
+    save_magic(sv);
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
@@ -154,10 +182,7 @@ SV* sv;
 	    (*vtbl->svt_clear)(sv, mg);
     }
 
-    SvFLAGS(sv) |= savemagic;
-    if (SvGMAGICAL(sv))
-	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-
+    LEAVE;
     return 0;
 }
 
@@ -1078,19 +1103,10 @@ MAGIC* mg;
 	multiline = (i != 0);
 	break;
     case '/':
-	if (SvOK(sv)) {
-	    nrs = rs = SvPV_force(sv,rslen);
-	    nrslen = rslen;
-	    if (rspara = !rslen) {
-		nrs = rs = "\n\n";
-		nrslen = rslen = 2;
-	    }
-	    nrschar = rschar = rs[rslen - 1];
-	}
-	else {
-	    nrschar = rschar = 0777;	/* fake a non-existent char */
-	    nrslen = rslen = 1;
-	}
+	SvREFCNT_dec(nrs);
+	nrs = newSVsv(sv);
+	SvREFCNT_dec(rs);
+	rs = SvREFCNT_inc(nrs);
 	break;
     case '\\':
 	if (ors)

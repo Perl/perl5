@@ -78,7 +78,7 @@ static int findbucket _((union overhead *freep, int srchlen));
 static	union overhead *nextf[NBUCKETS];
 extern	char *sbrk();
 
-#ifdef MSTATS
+#ifdef DEBUGGING_MSTATS
 /*
  * nmalloc[i] is the difference between the number of mallocs and frees
  * for a given block size.
@@ -169,7 +169,7 @@ malloc(nbytes)
   	nextf[bucket] = p->ov_next;
 	p->ov_magic = MAGIC;
 	p->ov_index= bucket;
-#ifdef MSTATS
+#ifdef DEBUGGING_MSTATS
   	nmalloc[bucket]++;
 #endif
 #ifdef RCHECK
@@ -291,7 +291,7 @@ free(mp)
   	size = op->ov_index;
 	op->ov_next = nextf[size];
   	nextf[size] = op;
-#ifdef MSTATS
+#ifdef DEBUGGING_MSTATS
   	nmalloc[size]--;
 #endif
 }
@@ -429,7 +429,7 @@ findbucket(freep, srchlen)
 	return (-1);
 }
 
-#ifdef MSTATS
+#ifdef DEBUGGING_MSTATS
 /*
  * mstats - print out statistics about malloc
  * 
@@ -438,28 +438,41 @@ findbucket(freep, srchlen)
  * frees for each size category.
  */
 void
-mstats(s)
+dump_mstats(s)
 	char *s;
 {
   	register int i, j;
   	register union overhead *p;
-  	int totfree = 0,
-  	totused = 0;
+  	int topbucket=0, totfree=0, totused=0;
+	u_int nfree[NBUCKETS];
 
-  	fprintf(stderr, "Memory allocation statistics %s\nfree:\t", s);
-  	for (i = 0; i < NBUCKETS; i++) {
+  	for (i=0; i < NBUCKETS; i++) {
   		for (j = 0, p = nextf[i]; p; p = p->ov_next, j++)
   			;
-  		fprintf(stderr, " %d", j);
-  		totfree += j * (1 << (i + 3));
-  	}
-  	fprintf(stderr, "\nused:\t");
-  	for (i = 0; i < NBUCKETS; i++) {
-  		fprintf(stderr, " %d", nmalloc[i]);
+		nfree[i] = j;
+  		totfree += nfree[i]   * (1 << (i + 3));
   		totused += nmalloc[i] * (1 << (i + 3));
+		if (nfree[i] || nmalloc[i])
+			topbucket = i;
   	}
-  	fprintf(stderr, "\n\tTotal in use: %d, total free: %d\n",
-	    totused, totfree);
+  	if (s)
+		fprintf(stderr, "Memory allocation statistics %s (buckets 8..%d)\n",
+			s, (1 << (topbucket + 3)) );
+  	fprintf(stderr, " %7d free: ", totfree);
+  	for (i=0; i <= topbucket; i++) {
+  		fprintf(stderr, (i<5)?" %5d":" %3d", nfree[i]);
+  	}
+  	fprintf(stderr, "\n %7d used: ", totused);
+  	for (i=0; i <= topbucket; i++) {
+  		fprintf(stderr, (i<5)?" %5d":" %3d", nmalloc[i]);
+  	}
+  	fprintf(stderr, "\n");
+}
+#else
+void
+dump_mstats(s)
+    char *s;
+{
 }
 #endif
 #endif /* lint */

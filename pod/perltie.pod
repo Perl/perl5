@@ -604,6 +604,14 @@ for the C<$#ARRAY> access (which is hard, as it's an lvalue), as well as
 the other obvious array functions, like push(), pop(), shift(), unshift(),
 and splice().
 
+You cannot easily tie a multilevel data structure (such as a hash of
+hashes) to a dbm file.  The first problem is that all but GDBM and
+Berkeley DB have size limitations, but beyond that, you also have problems
+with how references are to be represented on disk.  One experimental
+module that does attempt to partially address this need is the MLDBM
+module.  Check your nearest CPAN site as described in L<perlmod> for
+source code to MLDBM.
+
 =head1 AUTHOR
 
 Tom Christiansen

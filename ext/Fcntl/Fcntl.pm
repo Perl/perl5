@@ -27,6 +27,7 @@ require Exporter;
 use AutoLoader;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
+$VERSION = $VERSION = "1.00";
 # Items to export into callers namespace by default
 # (move infrequently used names to @EXPORT_OK below)
 @EXPORT =

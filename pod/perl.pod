@@ -4,6 +4,17 @@ perl - Practical Extraction and Report Language
 
 =head1 SYNOPSIS
 
+B<perl>	[ B<-acdhnpPsSTuUvw> ] 
+[ S<B<-0>[I<octal>]> ] 
+[ S<B<-D>I<number/list>]> ]
+[ S<B<-F>I<string>> ] 
+[ S<B<-i>[I<extension>]> ] 
+[ S<B<-I>I<dir>> ]
+[ S<B<-l>I<octal>> ] 
+[ S<B<-x>I<dir>> ]
+[ I<programfile> | S<B<-e> I<command>> ] 
+[ I<argument> ... ]
+
 For ease of access, the Perl manual has been split up into a number
 of sections:
 
@@ -82,7 +93,7 @@ grow as necessary to prevent degraded performance.  Perl uses
 sophisticated pattern matching techniques to scan large amounts of data
 very quickly.  Although optimized for scanning text, Perl can also
 deal with binary data, and can make dbm files look like associative
-arrays (where dbm is available).  Setuid Perl scripts are safer than
+arrays.  Setuid Perl scripts are safer than
 C programs through a dataflow tracing mechanism which prevents many
 stupid security holes.  If you have a problem that would ordinarily use
 B<sed> or B<awk> or B<sh>, but it exceeds their capabilities or must
@@ -140,7 +151,7 @@ A package can function as a class.  Dynamic multiple inheritance and
 virtual methods are supported in a straightforward manner and with very
 little new syntax.  Filehandles may now be treated as objects.
 
-=item * Embeddible and Extensible
+=item * Embeddable and Extensible
 
 Perl may now be embedded easily in your C or C++ application, and can
 either call or be called by your routines through a documented
@@ -239,7 +250,7 @@ honest:
 
 =head1 AUTHOR
 
-Larry Wall E<lt><F<lwall@netlabs.com>E<gt>, with the help of oodles of other folks.
+Larry Wall E<lt><F<lwall@sems.com>E<gt>, with the help of oodles of other folks.
 
 =head1 FILES
 
@@ -291,6 +302,8 @@ See the perl bugs database at F<http://perl.com/perl/bugs/>.  You may
 mail your bug reports (be sure to include full configuration information
 as output by the myconfig program in the perl source tree) to
 F<perlbug@perl.com>.
+If you've succeeded in compiling perl, the perlbug script in the utils/
+subdirectory can be used to help mail in a bug report.
 
 Perl actually stands for Pathologically Eclectic Rubbish Lister, but
 don't tell anyone I said that.

@@ -1,4 +1,4 @@
-CONVERTERS = pod2html pod2latex pod2man
+CONVERTERS = pod2html pod2latex pod2man pod2text
 
 all: $(CONVERTERS) man
 PERL = ../miniperl
@@ -139,44 +139,44 @@ TEX = 	\
 	perlxs.tex	\
 	perlxstut.tex
 
-man:  pod2man -I../lib $(MAN)
+man:	pod2man ($MAN)
 
 # pod2html normally runs on all the pods at once in order to build up
 # cross-references.
 html: pod2html
-	$(PERL) pod2html -I../lib $(POD)
+	$(PERL) -I../lib pod2html $(POD)
 
 tex:	pod2latex $(TEX)
 
 .SUFFIXES: .pm .pod .man
 
 .pm.man:     pod2man
-	$(PERL) pod2man -I../lib $*.pm >$*.man
+	$(PERL) -I../lib pod2man $*.pm >$*.man
 
 .pod.man:     pod2man
-	$(PERL) pod2man -I../lib $*.pod >$*.man
+	$(PERL) -I../lib pod2man $*.pod >$*.man
 
 .SUFFIXES: .mp .pod .html
 
 .pm.html:    pod2html
-	$(PERL) pod2html -I../lib $*.pod
+	$(PERL) -I../lib pod2html $*.pod
 
 .pod.html:    pod2html
-	$(PERL) pod2html -I../lib $*.pod
+	$(PERL) -I../lib pod2html $*.pod
 
 .SUFFIXES: .pm .pod .tex
 
 .pod.tex: pod2latex
-	$(PERL) pod2latex -I../lib $*.pod
+	$(PERL) -I../lib pod2latex $*.pod
 
 .pm.tex: pod2latex
-	$(PERL) pod2latex -I../lib $*.pod
+	$(PERL) -I../lib pod2latex $*.pod
 
 clean:
 	rm -f $(MAN) $(HTML) $(TEX)
 
 realclean:	clean
-	rm -f pod2man pod2latex pod2html
+	rm -f $(CONVERTERS)
 
 distclean:	realclean
 
@@ -189,3 +189,6 @@ pod2html:	pod2html.PL ../lib/Config.pm
 
 pod2man:	pod2man.PL ../lib/Config.pm
 	$(PERL) -I ../lib pod2man.PL
+
+pod2text:	pod2text.PL ../lib/Config.pm
+	$(PERL) -I ../lib pod2text.PL

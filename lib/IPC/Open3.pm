@@ -102,7 +102,7 @@ sub open3 {
     }
 
     if (($kidpid = fork) < 0) {
-        croak "open2: fork failed: $!";
+        croak "open3: fork failed: $!";
     } elsif ($kidpid == 0) {
 	if ($dup_wtr) {
 	    open(STDIN,  "<&$dad_wtr") if (fileno(STDIN) != fileno($dad_wtr));
@@ -128,8 +128,8 @@ sub open3 {
 	    open(STDERR, ">&STDOUT") if (fileno(STDERR) != fileno(STDOUT));
 	}
 	local($")=(" ");
-	exec @cmd;
-        croak "open2: exec of @cmd failed";
+	exec @cmd
+	    or croak "open3: exec of @cmd failed";
     }
 
     close $kid_rdr; close $kid_wtr; close $kid_err;

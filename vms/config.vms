@@ -135,7 +135,7 @@
  *	This symbol, if defined, indicates that the crypt routine is available
  *	to encrypt passwords and the like.
  */
-#undef HAS_CRYPT		/**/
+#define HAS_CRYPT		/**/
 
 /* BYTEORDER:
  *	This symbol hold the hexadecimal constant defined in byteorder,
@@ -461,6 +461,12 @@
  */
 #undef Shmat_t 	/**/ /* config-skip */
 #undef HAS_SHMAT_PROTOTYPE	/**/
+
+/* HAS_SIGACTION:
+ *	This symbol, if defined, indicates that Vr4's sigaction() routine
+ *	is available.
+ */
+#undef HAS_SIGACTION	/**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -1002,7 +1008,7 @@
  *	This symbol, if defined, indicates that the getlogin routine is
  *	available.
  */
-#undef HAS_GETLOGIN		/**/
+#define HAS_GETLOGIN		/**/
 
 /* HAS_GETPPID:
  *	This symbol, if defined, indicates that the getppid routine is
@@ -1357,7 +1363,7 @@
 /* VMS: true for gcc, undef for VAXC/DECC.  This is handled in Descrip.MMS
  * C. Bailey  26-Aug-1994
  */
-/*#define 	GNUC_ATTRIBUTE_CHECK 	*/
+/*#define 	GNUC_ATTRIBUTE_CHECK 	/**/
 
 /* VOID_CLOSEDIR:
  *	This symbol, if defined, indicates that the closedir() routine
@@ -1485,6 +1491,13 @@
  *	some sort is available.
  */
 #define USE_DYNAMIC_LOADING		/**/
+
+/* STARTPERL:
+ *	This variable contains the string to put in front of a perl
+ *	script to make sure (one hopes) that it runs with perl and not
+ *	some shell.
+ */
+#define STARTPERL ""		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this

@@ -2,8 +2,9 @@ package Safe;
 require Exporter;
 require DynaLoader;
 use Carp;
+$VERSION = $VERSION = "1.00";
 @ISA = qw(Exporter DynaLoader);
-@EXPORT_OK = qw(op_mask ops_to_mask mask_to_ops opcode opname
+@EXPORT_OK = qw(op_mask ops_to_mask mask_to_ops opcode opname opdesc
 		MAXO emptymask fullmask);
 
 =head1 NAME
@@ -250,13 +251,6 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 
 =cut
 
-my $safes = "1111111111111111111111101111111111111111111111111111111111111111"
-	  . "1111111111111111111111111111111111111111111111111111111111111111"
-	  . "1111110011111111111011111111111111111111111111111111111101001010"
-	  . "0110111111111111111111110011111111100001000000000000000000000100"
-	  . "0000000000000111110000001111111110100000000000001111111111111111"
-	  . "11111111111111111110";
-
 my $default_root = 'Root000000000';
 
 my $default_mask;
@@ -392,7 +386,282 @@ EOT
 
 bootstrap Safe;
 
-$safes .= "0" x (MAXO() - length($safes));
-($default_mask = $safes) =~ tr/01/\1\0/;	# invert for mask
+$default_mask = fullmask;
+my $name;
+while (defined ($name = <DATA>)) {
+    chomp $name;
+    next if $name =~ /^#/;
+    my $code = opcode($name);
+    substr($default_mask, $code, 1) = "\0";
+}
 
 1;
+
+__DATA__
+null
+stub
+scalar
+pushmark
+wantarray
+const
+gvsv
+gv
+gelem
+padsv
+padav
+padhv
+padany
+pushre
+rv2gv
+rv2sv
+av2arylen
+rv2cv
+anoncode
+prototype
+refgen
+srefgen
+ref
+bless
+glob
+readline
+rcatline
+regcmaybe
+regcomp
+match
+subst
+substcont
+trans
+sassign
+aassign
+chop
+schop
+chomp
+schomp
+defined
+undef
+study
+pos
+preinc
+i_preinc
+predec
+i_predec
+postinc
+i_postinc
+postdec
+i_postdec
+pow
+multiply
+i_multiply
+divide
+i_divide
+modulo
+i_modulo
+repeat
+add
+i_add
+subtract
+i_subtract
+concat
+stringify
+left_shift
+right_shift
+lt
+i_lt
+gt
+i_gt
+le
+i_le
+ge
+i_ge
+eq
+i_eq
+ne
+i_ne
+ncmp
+i_ncmp
+slt
+sgt
+sle
+sge
+seq
+sne
+scmp
+bit_and
+bit_xor
+bit_or
+negate
+i_negate
+not
+complement
+atan2
+sin
+cos
+rand
+srand
+exp
+log
+sqrt
+int
+hex
+oct
+abs
+length
+substr
+vec
+index
+rindex
+sprintf
+formline
+ord
+chr
+crypt
+ucfirst
+lcfirst
+uc
+lc
+quotemeta
+rv2av
+aelemfast
+aelem
+aslice
+each
+values
+keys
+delete
+exists
+rv2hv
+helem
+hslice
+split
+join
+list
+lslice
+anonlist
+anonhash
+splice
+push
+pop
+shift
+unshift
+reverse
+grepstart
+grepwhile
+mapstart
+mapwhile
+range
+flip
+flop
+and
+or
+xor
+cond_expr
+andassign
+orassign
+method
+entersub
+leavesub
+caller
+warn
+die
+reset
+lineseq
+nextstate
+dbstate
+unstack
+enter
+leave
+scope
+enteriter
+iter
+enterloop
+leaveloop
+return
+last
+next
+redo
+goto
+close
+fileno
+tie
+untie
+dbmopen
+dbmclose
+sselect
+select
+getc
+read
+enterwrite
+leavewrite
+prtf
+print
+sysread
+syswrite
+send
+recv
+eof
+tell
+seek
+truncate
+fcntl
+ioctl
+sockpair
+bind
+connect
+listen
+accept
+shutdown
+gsockopt
+ssockopt
+getsockname
+ftrwrite
+ftsvtx
+open_dir
+readdir
+telldir
+seekdir
+rewinddir
+kill
+getppid
+getpgrp
+setpgrp
+getpriority
+setpriority
+time
+tms
+localtime
+alarm
+dofile
+entereval
+leaveeval
+entertry
+leavetry
+ghbyname
+ghbyaddr
+ghostent
+gnbyname
+gnbyaddr
+gnetent
+gpbyname
+gpbynumber
+gprotoent
+gsbyname
+gsbyport
+gservent
+shostent
+snetent
+sprotoent
+sservent
+ehostent
+enetent
+eprotoent
+eservent
+gpwnam
+gpwuid
+gpwent
+spwent
+epwent
+ggrnam
+ggrgid
+ggrent
+sgrent
+egrent

@@ -1,5 +1,5 @@
 package Socket;
-$VERSION = 1.5;
+$VERSION = $VERSION = "1.5";
 
 =head1 NAME
 

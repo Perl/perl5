@@ -28,6 +28,7 @@ not where carp() was called.
 # exceptions outside of the current package.
 
 $CarpLevel = 0;		# How many extra package levels to skip on carp.
+$MaxEvalLen = 0;	# How much eval '...text...' to show. 0 = all.
 
 require Exporter;
 @ISA = Exporter;
@@ -37,11 +38,24 @@ sub longmess {
     my $error = shift;
     my $mess = "";
     my $i = 1 + $CarpLevel;
-    my ($pack,$file,$line,$sub);
-    while (($pack,$file,$line,$sub) = caller($i++)) {
+    my ($pack,$file,$line,$sub,$eval,$require);
+    while (($pack,$file,$line,$sub,undef,undef,$eval,$require) = caller($i++)) {
 	if ($error =~ m/\n$/) {
 	    $mess .= $error;
 	} else {
+	    if (defined $eval) {
+	        if ($require) {
+		    $sub = "require $eval";
+		} else {
+		    $eval =~ s/[\\\']/\\$&/g;
+		    if ($MaxEvalLen && length($eval) > $MaxEvalLen) {
+			substr($eval,$MaxEvalLen) = '...';
+		    }
+		    $sub = "eval '$eval'";
+		}
+	    } elsif ($sub eq '(eval)') {
+		$sub = 'eval {...}';
+	    }
 	    $mess .= "\t$sub " if $error eq "called";
 	    $mess .= "$error at $file line $line\n";
 	}
@@ -55,8 +69,8 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
     my ($curpack) = caller(1);
     my $extra = $CarpLevel;
     my $i = 2;
-    my ($pack,$file,$line,$sub);
-    while (($pack,$file,$line,$sub) = caller($i++)) {
+    my ($pack,$file,$line);
+    while (($pack,$file,$line) = caller($i++)) {
 	if ($pack ne $curpack) {
 	    if ($extra-- > 0) {
 		$curpack = $pack;

@@ -64,7 +64,9 @@ I32 key;
 	}
 	else {
 	    if (AvALLOC(av)) {
+#ifndef STRANGE_MALLOC
 		U32 bytes;
+#endif
 
 		newmax = key + AvMAX(av) / 5;
 	      resize:
@@ -82,8 +84,10 @@ I32 key;
 		newmax = tmp - 1;
 		New(2,ary, newmax+1, SV*);
 		Copy(AvALLOC(av), ary, AvMAX(av)+1, SV*);
-		if (AvMAX(av) > 64 && !AvREUSED(av))
-		    sv_add_arena((char*)AvALLOC(av), AvMAX(av) * sizeof(SV*),0);
+		if (AvMAX(av) > 64 && !nice_chunk) {
+		    nice_chunk = (char*)AvALLOC(av);
+		    nice_chunk_size = (AvMAX(av) + 1) * sizeof(SV*);
+		}
 		else
 		    Safefree(AvALLOC(av));
 		AvALLOC(av) = ary;
@@ -326,7 +330,6 @@ register AV *av;
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
     AvMAX(av) = AvFILL(av) = -1;
-    AvREUSED_on(av);	/* Avoid leak of making SVs out of old memory again. */
     if (AvARYLEN(av)) {
 	SvREFCNT_dec(AvARYLEN(av));
 	AvARYLEN(av) = 0;

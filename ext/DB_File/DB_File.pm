@@ -170,12 +170,12 @@ sub CLEAR { croak "DB_File::BTREEINFO::CLEAR is not implemented" }
 package DB_File ;
 use Carp;
 
-$VERSION = 1.01 ;
+$VERSION = $VERSION = 1.01 ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
-$DB_BTREE = TIEHASH DB_File::BTREEINFO ;
-$DB_HASH  = TIEHASH DB_File::HASHINFO ;
-$DB_RECNO = TIEHASH DB_File::RECNOINFO ;
+$DB_BTREE = $DB_BTREE = TIEHASH DB_File::BTREEINFO ;
+$DB_HASH  = $DB_HASH  = TIEHASH DB_File::HASHINFO ;
+$DB_RECNO = $DB_RECNO = TIEHASH DB_File::RECNOINFO ;
 
 require TieHash;
 require Exporter;
@@ -233,11 +233,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-@liblist = ();
-@liblist = split ' ', $Config::Config{"DB_File_loadlibs"} 
-    if defined $Config::Config{"DB_File_loadlibs"};
-
-bootstrap DB_File @liblist;
+bootstrap DB_File ;
 
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.

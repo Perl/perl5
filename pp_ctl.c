@@ -102,7 +102,7 @@ PP(pp_substcont)
     register char *s = cx->sb_s;
     register char *m = cx->sb_m;
     char *orig = cx->sb_orig;
-    register REGEXP *rx = pm->op_pmregexp;
+    register REGEXP *rx = cx->sb_rx;
 
     if (cx->sb_iters++) {
 	if (cx->sb_iters > cx->sb_maxiters)
@@ -969,7 +969,7 @@ char *message;
 	    }
 	}
 	else
-	    sv_catpv(GvSV(errgv), message);
+	    sv_setpv(GvSV(errgv), message);
 	
 	cxix = dopoptoeval(cxstack_ix);
 	if (cxix >= 0) {
@@ -1980,10 +1980,8 @@ int gimme;
     error_count = 0;
     curcop = &compiling;
     curcop->cop_arybase = 0;
-    rs = "\n";
-    rslen = 1;
-    rschar = '\n';
-    rspara = 0;
+    SvREFCNT_dec(rs);
+    rs = newSVpv("\n", 1);
     sv_setpv(GvSV(errgv),"");
     if (yyparse() || error_count || !eval_root) {
 	SV **newsp;
@@ -2003,16 +2001,12 @@ int gimme;
 	LEAVE;
 	if (optype == OP_REQUIRE)
 	    DIE("%s", SvPVx(GvSV(errgv), na));
-	rs = nrs;
-	rslen = nrslen;
-	rschar = nrschar;
-	rspara = (nrslen == 2);
+	SvREFCNT_dec(rs);
+	rs = SvREFCNT_inc(nrs);
 	RETPUSHUNDEF;
     }
-    rs = nrs;
-    rslen = nrslen;
-    rschar = nrschar;
-    rspara = (nrslen == 2);
+    SvREFCNT_dec(rs);
+    rs = SvREFCNT_inc(nrs);
     compiling.cop_line = 0;
     SAVEFREEOP(eval_root);
     if (gimme & G_ARRAY)

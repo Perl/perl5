@@ -104,8 +104,9 @@ as C<$self-E<gt>{TERMCAP}>.
 sub termcap_path { ## private
     my @termcap_path;
     # $TERMCAP, if it's a filespec
-    push(@termcap_path, $ENV{TERMCAP}) if $ENV{TERMCAP} =~ /^\//;
-    if ($ENV{TERMPATH}) {
+    push(@termcap_path, $ENV{TERMCAP}) if ((exists $ENV{TERMCAP}) &&
+                                           ($ENV{TERMCAP} =~ /^\//));
+    if ((exists $ENV{TERMPATH}) && ($ENV{TERMPATH})) {
 	# Add the users $TERMPATH
 	push(@termcap_path, split(/(:|\s+)/, $ENV{TERMPATH}))
     }
@@ -150,7 +151,7 @@ sub Tgetent { ## public -- static method
     # protect any pattern metacharacters in $tmp_term 
     $termpat = $tmp_term; $termpat =~ s/(\W)/\\$1/g;
 
-    my $foo = $ENV{TERMCAP};
+    my $foo = (exists $ENV{TERMCAP} ? $ENV{TERMCAP} : '');
 
     # $entry is the extracted termcap entry
     if (($foo !~ m:^/:) && ($foo =~ m/(^|\|)${termpat}[:|]/)) {

@@ -104,17 +104,23 @@ In general, the distributed kit for a Perl extension includes
 a file named Makefile.PL, which is a Perl program which is used
 to create a F<Descrip.MMS> file which can be used to build and
 install the files required by the extension.  The kit should be
-unpacked into a directory tree E<not> under the main Perl source
+unpacked into a directory tree B<not> under the main Perl source
 directory, and the procedure for building the extension is simply
-
-=over 4
 
     $ perl Makefile.PL  ! Create Descrip.MMS
     $ mmk               ! Build necessary files
     $ mmk test          ! Run test code, if supplied
     $ mmk install       ! Install into public Perl tree
 
-=back
+I<N.B.> The procedure by which extensions are built and
+tested creates several levels (at least 4) under the
+directory in which the extension's source files live.
+For this reason, you shouldn't nest the source directory
+too deeply in your directory structure, lest you eccedd RMS'
+maximum of 8 levels of subdirectory in a filespec.  (You
+can use rooted logical names to get another 8 levels of
+nesting, if you can't place the files near the top of
+the physical directory structure.)
 
 VMS support for this process in the current release of Perl
 is sufficient to handle most extensions.  However, it does
@@ -241,10 +247,24 @@ specifications may use either VMS or Unix syntax.
 Reading the elements of the %ENV array returns the 
 translation of the logical name specified by the key, 
 according to the normal search order of access modes and 
-logical name tables.  In addition, the keys C<home>, 
-C<path>,C<term>, and C<user> return the CRTL "environment 
-variables" of the same names.  The key C<default> returns the 
-current default device and directory specification.
+logical name tables.  If you append a semicolon to the
+logical name, followed by an integer, that integer is
+used as the translation index for the logical name,
+so that you can look up successive values for search
+list logical names.  For instance, if you say
+
+   $  Define STORY  once,upon,a,time,there,was
+   $  perl -e "for ($i = 0; $i <= 6; $i++) " -
+   _$ -e "{ print $ENV{'foo'.$i},' '}"
+
+Perl will print C<ONCE UPON A TIME THERE WAS>.
+
+The %ENV keys C<home>, C<path>,C<term>, and C<user>
+return the CRTL "environment variables" of the same
+names, if these logical names are not defined.  The
+key C<default> returns the current default device
+and directory specification, regardless of whether
+there is a logical name DEFAULT defined..
 
 Setting an element of %ENV defines a supervisor-mode logical 
 name in the process logical name table.  C<Undef>ing or 
@@ -254,7 +274,8 @@ name table.  If you use C<undef>, the %ENV element remains
 empty.  If you use C<delete>, another attempt is made at 
 logical name translation after the deletion, so an inner-mode 
 logical name or a name in another logical name table will 
-replace the logical name just deleted.
+replace the logical name just deleted.  It is not possible
+at present to define a search list logical name via %ENV.
 
 In all operations on %ENV, the key string is treated as if it 
 were entirely uppercase, regardless of the case actually 
@@ -268,15 +289,15 @@ Perl functions were implemented in the VMS port of Perl
 
     file tests*, abs, alarm, atan, binmode*, bless,
     caller, chdir, chmod, chown, chomp, chop, chr,
-    close, closedir, cos, defined, delete, die, do,
-    each, endpwent, eof, eval, exec*, exists, exit,
-    exp, fileno, fork*, getc, getpwent*, getpwnam*,
-    getpwuid*, glob, gmtime*, goto, grep, hex, import,
-    index, int, join, keys, kill*, last, lc, lcfirst,
-    length, local, localtime, log, m//, map, mkdir, my,
-    next, no, oct, open, opendir, ord, pack, pipe, pop,
-    pos, print, printf, push, q//, qq//, qw//, qx//,
-    quotemeta, rand, read, readdir, redo, ref, rename,
+    close, closedir, cos, crypt*, defined, delete,
+    die, do, each, endpwent, eof, eval, exec*, exists,
+    exit, exp, fileno, fork*, getc, getlogin, getpwent*,
+    getpwnam*, getpwuid*, glob, gmtime*, goto, grep, hex,
+    import, index, int, join, keys, kill*, last, lc,
+    lcfirst, length, local, localtime, log, m//, map,
+    mkdir, my, next, no, oct, open, opendir, ord, pack,
+    pipe, pop, pos, print, printf, push, q//, qq//, qw//,
+    qx//, quotemeta, rand, read, readdir, redo, ref, rename,
     require, reset, return, reverse, rewinddir, rindex,
     rmdir, s///, scalar, seek, seekdir, select(internal),
     select (system call)*, setpwent, shift, sin, sleep,
@@ -290,14 +311,12 @@ The following functions were not implemented in the VMS port,
 and calling them produces a fatal error (usually) or 
 undefined behavior (rarely, we hope):
 
-    chroot, crypt, dbmclose, dbmopen, dump, fcntl,
-    flock, getlogin, getpgrp, getppid, getpriority,
-    getgrent, kill, getgrgid, getgrnam, setgrent,
-    endgrent, ioctl, link, lstst, msgctl, msgget,
-    msgsend, msgrcv, readlink, select(system call),
-    semctl, semget, semop, setpgrp, setpriority, shmctl,
-    shmget, shmread, shmwrite, socketpair, symlink,
-    syscall, truncate
+    chroot, dbmclose, dbmopen, dump, fcntl, flock,
+    getpgrp, getppid, getpriority, getgrent, getgrgid,
+    getgrnam, setgrent, endgrent, ioctl, link, lstat,
+    msgctl, msgget, msgsend, msgrcv, readlink, semctl,
+    semget, semop, setpgrp, setpriority, shmctl, shmget,
+    shmread, shmwrite, socketpair, symlink, syscall, truncate
 
 The following functions may or may not be implemented, 
 depending on what type of socket support you've built into 
@@ -309,8 +328,8 @@ your copy of Perl:
     getnetent, getprotoent, getservent, sethostent,
     setnetent, setprotoent, setservent, endhostent,
     endnetent, endprotoent, endservent, getsockname,
-    getsockopt, listen, recv, send, setsockopt,
-    shutdown, socket
+    getsockopt, listen, recv, select(system call)*,
+    send, setsockopt, shutdown, socket
 
 
 =item File tests
@@ -335,6 +354,33 @@ well as if passed a directory.
 The C<binmode> operator has no effect under VMS.  It will 
 return TRUE whenever called, but will not affect I/O 
 operations on the filehandle given as its argument.
+
+=item crypt PLAINTEXT, USER
+
+The C<crypt> operator uses the C<sys$hash_password> system
+service to generate the hashed representation of PLAINTEXT.
+If USER is a valid username, the algorithm and salt values
+are taken from that user's UAF record.  If it is not, then
+the preferred algorithm and a salt of 0 are used.  The
+quadword encrypted value is returned as an 8-character string.
+
+The value returned by C<crypt> may be compared against
+the encrypted password from the UAF returned by the C<getpw*>
+functions, in order to authenticate users.  If you're
+going to do this, remember that the encrypted password in
+the UAF was generated using uppercase username and
+password strings; you'll have to upcase the arguments to
+C<crypt> to insure that you'll get the proper value:
+
+  sub validate_passwd {
+    my($user,$passwd) = @_;
+    my($pwdhash);
+    if ( !($pwdhash = (getpwnam($user))[1]) ||
+         $pwdhash ne crypt("\U$passwd","\U$name") ) {
+      intruder_alert($name);
+    }
+    return 1;
+  }
 
 =item exec LIST
 
@@ -379,7 +425,9 @@ subprocess is not recommended under VMS; wherever possible,
 use the C<system> operator or piped filehandles instead.
 
 =item getpwent
+
 =item getpwnam
+
 =item getpwuid
 
 These operators obtain the information described in L<perlfunc>,

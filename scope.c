@@ -641,8 +641,9 @@ CONTEXT* cx;
     case CXt_EVAL:
 	fprintf(stderr, "BLK_EVAL.OLD_IN_EVAL = %ld\n",
 		(long)cx->blk_eval.old_in_eval);
-	fprintf(stderr, "BLK_EVAL.OLD_OP_TYPE = %s\n",
-		op_name[cx->blk_eval.old_op_type]);
+	fprintf(stderr, "BLK_EVAL.OLD_OP_TYPE = %s (%s)\n",
+		op_name[cx->blk_eval.old_op_type],
+		op_desc[cx->blk_eval.old_op_type]);
 	fprintf(stderr, "BLK_EVAL.OLD_NAME = %s\n",
 		cx->blk_eval.old_name);
 	fprintf(stderr, "BLK_EVAL.OLD_EVAL_ROOT = 0x%lx\n",

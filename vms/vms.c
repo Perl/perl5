@@ -2,7 +2,7 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 22-Nov-1995 by Charles Bailey  bailey@genetics.upenn.edu
+ * Last revised: 18-Jan-1996 by Charles Bailey  bailey@genetics.upenn.edu
  * Version: 5.2.0
  */
 
@@ -36,6 +36,19 @@
 #include "perl.h"
 #include "XSUB.h"
 
+/* gcc's header files don't #define direct access macros
+ * corresponding to VAXC's variant structs */
+#ifdef __GNUC__
+#  define uic$v_format uic$r_uic_form.uiv$v_format
+#  define uic$v_group uic$r_uic_form.uiv$v_group
+#  define uic$v_member uic$r_uic_form.uiv$v_member
+#  define prv$v_bypass  prv$r_prvdef_bits0.prv$v_bypass
+#  define prv$v_grpprv  prv$r_prvdef_bits0.prv$v_grpprv
+#  define prv$v_readall prv$r_prvdef_bits0.prv$v_readall
+#  define prv$v_sysprv  prv$r_prvdef_bits0.prv$v_sysprv
+#endif
+
+
 struct itmlst_3 {
   unsigned short int buflen;
   unsigned short int itmcode;
@@ -43,30 +56,34 @@ struct itmlst_3 {
   unsigned short int *retlen;
 };
 
-static char *
-my_trnlnm(char *lnm, char *eqv)
+int
+my_trnlnm(char *lnm, char *eqv, unsigned long int idx)
 {
     static char __my_trnlnm_eqv[LNM$C_NAMLENGTH+1];
     unsigned short int eqvlen;
     unsigned long int retsts, attr = LNM$M_CASE_BLIND;
     $DESCRIPTOR(tabdsc,"LNM$FILE_DEV");
     struct dsc$descriptor_s lnmdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
-    struct itmlst_3 lnmlst[2] = {{LNM$C_NAMLENGTH, LNM$_STRING,0, &eqvlen},
+    struct itmlst_3 lnmlst[3] = {{sizeof idx,      LNM$_INDEX,  &idx, 0},
+                                 {LNM$C_NAMLENGTH, LNM$_STRING, 0,    &eqvlen},
                                  {0, 0, 0, 0}};
 
     if (!eqv) eqv = __my_trnlnm_eqv;
-    lnmlst[0].bufadr = (void *)eqv;
+    lnmlst[1].bufadr = (void *)eqv;
     lnmdsc.dsc$a_pointer = lnm;
     lnmdsc.dsc$w_length = strlen(lnm);
     retsts = sys$trnlnm(&attr,&tabdsc,&lnmdsc,0,lnmlst);
-    if (retsts == SS$_NOLOGNAM || retsts == SS$_IVLOGNAM) return Nullch;
+    if (retsts == SS$_NOLOGNAM || retsts == SS$_IVLOGNAM) {
+      set_vaxc_errno(retsts); set_errno(EINVAL); return 0;
+    }
     else if (retsts & 1) {
       eqv[eqvlen] = '\0';
-      return eqv;
+      return 1;
     }
     _ckvmssts(retsts);  /* Must be an error */
-    return Nullch;      /* Not reached, assuming _ckvmssts() bails out */
-}
+    return 0;      /* Not reached, assuming _ckvmssts() bails out */
+
+}  /* end of my_trnlnm */
 
 /* my_getenv
  * Translate a logical name.  Substitute for CRTL getenv() to avoid
@@ -82,6 +99,7 @@ my_getenv(char *lnm)
 {
     static char __my_getenv_eqv[LNM$C_NAMLENGTH+1];
     char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2;
+    unsigned long int idx = 0;
 
     for (cp1 = lnm, cp2= uplnm; *cp1; cp1++, cp2++) *cp2 = _toupper(*cp1);
     *cp2 = '\0';
@@ -89,24 +107,31 @@ my_getenv(char *lnm)
       getcwd(__my_getenv_eqv,sizeof __my_getenv_eqv);
       return __my_getenv_eqv;
     }
-    else if (my_trnlnm(uplnm,__my_getenv_eqv) != NULL) {
-      return __my_getenv_eqv;
-    }
     else {
-      unsigned long int retsts;
-      struct dsc$descriptor_s symdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
-                              valdsc = {sizeof __my_getenv_eqv,DSC$K_DTYPE_T,
-                                        DSC$K_CLASS_S, __my_getenv_eqv};
-      symdsc.dsc$w_length = cp1 - lnm;
-      symdsc.dsc$a_pointer = uplnm;
-      retsts = lib$get_symbol(&symdsc,&valdsc,&(valdsc.dsc$w_length),0);
-      if (retsts == LIB$_INVSYMNAM) return Nullch;
-      if (retsts != LIB$_NOSUCHSYM) {
-        /* We want to return only logical names or CRTL Unix emulations */
-        if (retsts & 1) return Nullch;
-        _ckvmssts(retsts);
+      if ((cp2 = strchr(uplnm,';')) != NULL) {
+        *cp2 = '\0';
+        idx = strtoul(cp2+1,NULL,0);
       }
-      else return getenv(lnm); /* Try for CRTL emulation of a Unix/POSIX name */
+      if (my_trnlnm(uplnm,__my_getenv_eqv,idx)) {
+        return __my_getenv_eqv;
+      }
+      else {
+        unsigned long int retsts;
+        struct dsc$descriptor_s symdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
+                                valdsc = {sizeof __my_getenv_eqv,DSC$K_DTYPE_T,
+                                          DSC$K_CLASS_S, __my_getenv_eqv};
+        symdsc.dsc$w_length = cp1 - lnm;
+        symdsc.dsc$a_pointer = uplnm;
+        retsts = lib$get_symbol(&symdsc,&valdsc,&(valdsc.dsc$w_length),0);
+        if (retsts == LIB$_INVSYMNAM) return Nullch;
+        if (retsts != LIB$_NOSUCHSYM) {
+          /* We want to return only logical names or CRTL Unix emulations */
+          if (retsts & 1) return Nullch;
+          _ckvmssts(retsts);
+        }
+        /* Try for CRTL emulation of a Unix/POSIX name */
+        else return getenv(lnm);
+      }
     }
     return Nullch;
 
@@ -148,6 +173,69 @@ my_setenv(char *lnm,char *eqv)
 
 }  /* end of my_setenv() */
 /*}}}*/
+
+
+/*{{{ char *my_crypt(const char *textpasswd, const char *usrname)*/
+/* my_crypt - VMS password hashing
+ * my_crypt() provides an interface compatible with the Unix crypt()
+ * C library function, and uses sys$hash_password() to perform VMS
+ * password hashing.  The quadword hashed password value is returned
+ * as a NUL-terminated 8 character string.  my_crypt() does not change
+ * the case of its string arguments; in order to match the behavior
+ * of LOGINOUT et al., alphabetic characters in both arguments must
+ *  be upcased by the caller.
+ */
+char *
+my_crypt(const char *textpasswd, const char *usrname)
+{
+#   ifndef UAI$C_PREFERRED_ALGORITHM
+#     define UAI$C_PREFERRED_ALGORITHM 127
+#   endif
+    unsigned char alg = UAI$C_PREFERRED_ALGORITHM;
+    unsigned short int salt = 0;
+    unsigned long int sts;
+    struct const_dsc {
+        unsigned short int dsc$w_length;
+        unsigned char      dsc$b_type;
+        unsigned char      dsc$b_class;
+        const char *       dsc$a_pointer;
+    }  usrdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0},
+       txtdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+    struct itmlst_3 uailst[3] = {
+        { sizeof alg,  UAI$_ENCRYPT, &alg, 0},
+        { sizeof salt, UAI$_SALT,    &salt, 0},
+        { 0,           0,            NULL,  NULL}};
+    static char hash[9];
+
+    usrdsc.dsc$w_length = strlen(usrname);
+    usrdsc.dsc$a_pointer = usrname;
+    if (!((sts = sys$getuai(0, 0, &usrdsc, uailst, 0, 0, 0)) & 1)) {
+      switch (sts) {
+        case SS$_NOGRPPRV:
+        case SS$_NOSYSPRV:
+          set_errno(EACCES);
+          break;
+        case RMS$_RNF:
+          set_errno(ESRCH);  /* There isn't a Unix no-such-user error */
+          break;
+        default:
+          set_errno(EVMSERR);
+      }
+      set_vaxc_errno(sts);
+      if (sts != RMS$_RNF) return NULL;
+    }
+
+    txtdsc.dsc$w_length = strlen(textpasswd);
+    txtdsc.dsc$a_pointer = textpasswd;
+    if (!((sts = sys$hash_password(&txtdsc, alg, salt, &usrdsc, &hash)) & 1)) {
+      set_errno(EVMSERR);  set_vaxc_errno(sts);  return NULL;
+    }
+
+    return (char *) hash;
+
+}  /* end of my_crypt() */
+/*}}}*/
+
 
 static char *do_fileify_dirspec(char *, char *, int);
 static char *do_tovmsspec(char *, char *, int);
@@ -560,10 +648,10 @@ I32 my_pclose(FILE *fp)
       /* get here => no such pipe open */
       croak("No such pipe open");
 
+    fclose(info->fp);
+
     if (info->done) retsts = info->completion;
     else waitpid(info->pid,(int *) &retsts,0);
-
-    fclose(info->fp);
 
     /* remove from list of open pipes */
     if (last) last->next = info->next;
@@ -691,14 +779,31 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
     char *retspec, *cp1, *cp2, *lastdir;
     char trndir[NAM$C_MAXRSS+1], vmsdir[NAM$C_MAXRSS+1];
 
-    if (dir == NULL) return NULL;
+    if (!dir || !*dir) {
+      set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
+    }
     dirlen = strlen(dir);
     if (dir[dirlen-1] == '/') dir[--dirlen] = '\0';
+    if (!dirlen) {
+      set_errno(ENOTDIR);
+      set_vaxc_errno(RMS$_DIR);
+      return NULL;
+    }
     if (!strpbrk(dir+1,"/]>:")) {
       strcpy(trndir,*dir == '/' ? dir + 1: dir);
-      while (!strpbrk(trndir,"/]>:>") && my_trnlnm(trndir,trndir) != NULL) ;
+      while (!strpbrk(trndir,"/]>:>") && my_trnlnm(trndir,trndir,0)) ;
       dir = trndir;
       dirlen = strlen(dir);
+    }
+    /* If we were handed a rooted logical name or spec, treat it like a
+     * simple directory, so that
+     *    $ Define myroot dev:[dir.]
+     *    ... do_fileify_dirspec("myroot",buf,1) ...
+     * does something useful.
+     */
+    if (!strcmp(dir+dirlen-2,".]")) {
+      dir[--dirlen] = '\0';
+      dir[dirlen-1] = ']';
     }
 
     if (!strpbrk(dir,"]:>")) { /* Unix-style path or plain dir name */
@@ -848,6 +953,11 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         strcpy(retspec,esa);
         return retspec;
       }
+      if ((cp1 = strstr(esa,".][000000]")) != NULL) {
+        for (cp2 = cp1 + 9; *cp2; cp1++,cp2++) *cp1 = *cp2;
+        *cp1 = '\0';
+        dirnam.nam$b_esl -= 9;
+      }
       if ((cp1 = strrchr(esa,']')) == NULL) cp1 = strrchr(esa,'>');
       if (cp1 == NULL) return NULL; /* should never happen */
       term = *cp1;
@@ -930,10 +1040,26 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
     unsigned long int retlen;
     char *retpath, *cp1, *cp2, trndir[NAM$C_MAXRSS+1];
 
-    if (dir == NULL) return NULL;
+    if (!dir || !*dir) {
+      set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
+    }
 
-    strcpy(trndir,dir);
-    while (!strpbrk(trndir,"/]:>") && my_trnlnm(trndir,trndir) != NULL) ;
+    if (*dir) strcpy(trndir,dir);
+    else getcwd(trndir,sizeof trndir - 1);
+
+    while (!strpbrk(trndir,"/]:>") && my_trnlnm(trndir,trndir,0)) {
+      STRLEN trnlen = strlen(trndir);
+
+      /* Trap simple rooted lnms, and return lnm:[000000] */
+      if (!strcmp(trndir+trnlen-2,".]")) {
+        if (buf) retpath = buf;
+        else if (ts) New(7018,retpath,strlen(dir)+10,char);
+        else retpath = __pathify_retbuf;
+        strcpy(retpath,dir);
+        strcat(retpath,":[000000]");
+        return retpath;
+      }
+    }
     dir = trndir;
 
     if (!strpbrk(dir,"]:>")) { /* Unix-style path or plain dir name */
@@ -1201,7 +1327,7 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
 
     while (*(++cp2) != '/' && *cp2) *(cp1++) = *cp2;
     *cp1 = '\0';
-    islnm =  (my_trnlnm(rslt,trndev) != Nullch);
+    islnm =  my_trnlnm(rslt,trndev,0);
     trnend = islnm ? strlen(trndev) - 1 : 0;
     islnm =  trnend ? (trndev[trnend] == ']' || trndev[trnend] == '>') : 0;
     rooted = islnm ? (trndev[trnend-1] == '.') : 0;
@@ -1658,7 +1784,6 @@ static void expand_wild_cards(char *item,
 int expcount = 0;
 unsigned long int context = 0;
 int isunix = 0;
-int status_value;
 char *had_version;
 char *had_device;
 int had_directory;
@@ -1667,7 +1792,7 @@ char vmsspec[NAM$C_MAXRSS+1];
 $DESCRIPTOR(filespec, "");
 $DESCRIPTOR(defaultspec, "SYS$DISK:[]");
 $DESCRIPTOR(resultspec, "");
-unsigned long int zero = 0;
+unsigned long int zero = 0, sts;
 
     if (strcspn(item, "*%") == strlen(item))
 	{
@@ -1692,8 +1817,8 @@ unsigned long int zero = 0;
     had_device = strchr(item, ':');
     had_directory = (isunix || NULL != strchr(item, '[')) || (NULL != strchr(item, '<'));
     
-    while (1 == (1&lib$find_file(&filespec, &resultspec, &context,
-    				 &defaultspec, 0, &status_value, &zero)))
+    while (1 == (1 & (sts = lib$find_file(&filespec, &resultspec, &context,
+    				  &defaultspec, 0, 0, &zero))))
 	{
 	char *string;
 	char *c;
@@ -1720,10 +1845,28 @@ unsigned long int zero = 0;
 	add_item(head, tail, string, count);
 	++expcount;
 	}
+    if (sts != RMS$_NMF)
+	{
+	set_vaxc_errno(sts);
+	switch (sts)
+	    {
+	    case RMS$_FNF:
+	    case RMS$_DIR:
+		set_errno(ENOENT); break;
+	    case RMS$_DEV:
+		set_errno(ENODEV); break;
+	    case RMS$_SYN:
+		set_errno(EINVAL); break;
+	    case RMS$_PRV:
+		set_errno(EACCES); break;
+	    default:
+		_ckvmssts(sts);
+	    }
+	}
     if (expcount == 0)
 	add_item(head, tail, item, count);
-    lib$sfree1_dd(&resultspec);
-    lib$find_file_end(&context);
+    _ckvmssts(lib$sfree1_dd(&resultspec));
+    _ckvmssts(lib$find_file_end(&context));
 }
 
 static int child_st[2];/* Event Flag set when child process completes	*/
@@ -2035,17 +2178,12 @@ readdir(DIR *dd)
       set_vaxc_errno(tmpsts);
       switch (tmpsts) {
         case RMS$_PRV:
-          set_errno(EACCES);
-          break;
+          set_errno(EACCES); break;
         case RMS$_DEV:
-          set_errno(ENODEV);
-          break;
+          set_errno(ENODEV); break;
         case RMS$_DIR:
-          set_errno(ENOTDIR);
-          break;
         case RMS$_FNF:
-          set_errno(ENOENT);
-          break;
+          set_errno(ENOENT); break;
         default:
           set_errno(EVMSERR);
       }
@@ -2479,7 +2617,7 @@ static int fillpasswd (const char *name, struct passwd *pwd)
 
     static unsigned short lowner, luic, ldefdev, ldefdir, ldefcli, lpwd;
     struct dsc$descriptor_s name_desc;
-    int status;
+    unsigned long int sts;
 
     static struct itmlst_3 itmlst[]= {
         {UAI$S_OWNER+1,    UAI$_OWNER,  &owner,    &lowner},
@@ -2496,8 +2634,12 @@ static int fillpasswd (const char *name, struct passwd *pwd)
     name_desc.dsc$a_pointer= (char *) name;
 
 /*  Note that sys$getuai returns many fields as counted strings. */
-    status= sys$getuai(0, 0, &name_desc, &itmlst, 0, 0, 0);
-    if (!(status&1)) return status;
+    sts= sys$getuai(0, 0, &name_desc, &itmlst, 0, 0, 0);
+    if (sts == SS$_NOSYSPRV || sts == SS$_NOGRPPRV || sts == RMS$_RNF) {
+      set_vaxc_errno(sts); set_errno(sts == RMS$_RNF ? EINVAL : EACCES);
+    }
+    else { _ckvmssts(sts); }
+    if (!(sts & 1)) return 0;  /* out here in case _ckvmssts() doesn't abort */
 
     if ((int) owner.length  < lowner)  lowner=  (int) owner.length;
     if ((int) defdev.length < ldefdev) ldefdev= (int) defdev.length;
@@ -2526,7 +2668,7 @@ static int fillpasswd (const char *name, struct passwd *pwd)
     else
         strcpy(pwd->pw_unixdir, pwd->pw_dir);
     _mystrtolower(pwd->pw_unixdir);
-    return status;
+    return 1;
 }
 
 /*
@@ -2540,8 +2682,7 @@ struct passwd *my_getpwnam(char *name)
     unsigned long int status, stat;
                                   
     __pwdcache = __passwd_empty;
-    if ((status = fillpasswd(name, &__pwdcache)) == SS$_NOSYSPRV
-        || status == SS$_NOGRPPRV  || status == RMS$_RNF) {
+    if (!fillpasswd(name, &__pwdcache)) {
       /* We still may be able to determine pw_uid and pw_gid */
       name_desc.dsc$w_length=  strlen(name);
       name_desc.dsc$b_dtype=   DSC$K_DTYPE_T;
@@ -2551,10 +2692,15 @@ struct passwd *my_getpwnam(char *name)
         __pwdcache.pw_uid= uic.uic$l_uic;
         __pwdcache.pw_gid= uic.uic$v_group;
       }
-      else if (stat == SS$_NOSUCHID || stat == RMS$_PRV) return NULL;
-      else { _ckvmssts(stat); }
+      else {
+        if (stat == SS$_NOSUCHID || stat == SS$_IVIDENT || stat == RMS$_PRV) {
+          set_vaxc_errno(stat);
+          set_errno(stat == RMS$_PRV ? EACCES : EINVAL);
+          return NULL;
+        }
+        else { _ckvmssts(stat); }
+      }
     }
-    else { _ckvmssts(status); }
     strncpy(__pw_namecache, name, sizeof(__pw_namecache));
     __pw_namecache[sizeof __pw_namecache - 1] = '\0';
     __pwdcache.pw_name= __pw_namecache;
@@ -2578,6 +2724,8 @@ struct passwd *my_getpwuid(Uid_t uid)
       do {
         status = sys$idtoasc(-1, &lname, &name_desc, &uic, 0, &contxt);
         if (status == SS$_NOSUCHID || status == RMS$_PRV) {
+          set_vaxc_errno(status);
+          set_errno(status == RMS$_PRV ? EACCES : EINVAL);
           my_endpwent();
           return NULL;
         }
@@ -2586,11 +2734,17 @@ struct passwd *my_getpwuid(Uid_t uid)
     }
     else {
       uic.uic$l_uic= uid;
-      if (!uic.uic$v_group) uic.uic$v_group= getgid();
+      if (!uic.uic$v_group)
+        uic.uic$v_group= getgid();
       if (valid_uic(uic))
         status = sys$idtoasc(uic.uic$l_uic, &lname, &name_desc, 0, 0, 0);
       else status = SS$_IVIDENT;
-      _ckvmssts(status);
+      if (status == SS$_IVIDENT || status == SS$_NOSUCHID ||
+          status == RMS$_PRV) {
+        set_vaxc_errno(status); set_errno(status == RMS$_PRV ? EACCES : EINVAL);
+        return NULL;
+      }
+      else { _ckvmssts(status); }
     }
     __pw_namecache[lname]= '\0';
     _mystrtolower(__pw_namecache);
@@ -2604,9 +2758,7 @@ struct passwd *my_getpwuid(Uid_t uid)
     __pwdcache.pw_uid =  uic.uic$l_uic;
     __pwdcache.pw_gid =  uic.uic$v_group;
 
-    status = fillpasswd(__pw_namecache, &__pwdcache);
-    if (status != SS$_NOSYSPRV && status != SS$_NOGRPPRV &&
-        status != RMS$_RNF) { _ckvmssts(status); }
+    fillpasswd(__pw_namecache, &__pwdcache);
     return &__pwdcache;
 
 }  /* end of my_getpwuid() */
@@ -2810,7 +2962,7 @@ cando(I32 bit, I32 effective, struct stat *statbufp)
     namdsc.dsc$a_pointer = fname;
     namdsc.dsc$w_length = sizeof fname - 1;
 
-    retsts = lib$fid_to_name(&devdsc,statbufp->st_inode_u.fid,&namdsc,
+    retsts = lib$fid_to_name(&devdsc,&(statbufp->st_ino),&namdsc,
                              &namdsc.dsc$w_length,0,0);
     if (retsts & 1) {
       fname[namdsc.dsc$w_length] = '\0';
@@ -2825,6 +2977,7 @@ cando(I32 bit, I32 effective, struct stat *statbufp)
   }
 }  /* end of cando() */
 /*}}}*/
+
 
 /*{{{I32 cando_by_name(I32 bit, I32 effective, char *fname)*/
 I32
@@ -2884,10 +3037,10 @@ cando_by_name(I32 bit, I32 effective, char *fname)
        necessary privs currently enabled? */
     _ckvmssts(sys$getjpiw(0,0,0,jpilst,iosb,0,0));
     if ((privused & CHP$M_BYPASS) &&  !curprv.prv$v_bypass)  return FALSE;
-    if ((privused & CHP$M_SYSPRV) &&  !curprv.prv$v_sysprv
-                                  &&  !curprv.prv$v_bypass)  return FALSE;
-    if ((privused & CHP$M_GRPPRV) &&  !curprv.prv$v_grpprv
-         && !curprv.prv$v_sysprv  &&  !curprv.prv$v_bypass)  return FALSE;
+    if ((privused & CHP$M_SYSPRV) &&  !curprv.prv$v_sysprv &&
+                                      !curprv.prv$v_bypass)  return FALSE;
+    if ((privused & CHP$M_GRPPRV) &&  !curprv.prv$v_grpprv &&
+         !curprv.prv$v_sysprv &&      !curprv.prv$v_bypass)  return FALSE;
     if ((privused & CHP$M_READALL) && !curprv.prv$v_readall) return FALSE;
     return TRUE;
   }
@@ -2961,6 +3114,17 @@ flex_stat(char *fspec, struct mystat *statbufp)
 /* Reset definition for later calls */
 #define stat mystat
 /*}}}*/
+
+/*{{{char *my_getlogin()*/
+/* VMS cuserid == Unix getlogin, except calling sequence */
+char *
+my_getlogin()
+{
+    static char user[L_cuserid];
+    return cuserid(user);
+}
+/*}}}*/
+
 
 /***  The following glue provides 'hooks' to make some of the routines
  * from this file available from Perl.  These routines are sufficiently

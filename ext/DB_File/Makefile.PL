@@ -5,7 +5,7 @@ WriteMakefile(
 	LIBS 	=> ["-L/usr/local/lib -ldb"],
 	MAN3PODS 	=> ' ', 	# Pods will be built by installman.
 	#INC	=> '-I/usr/local/include',
-	VERSION	=> 1.01,
+	VERSION_FROM	=> 'DB_File.pm',
 	XSPROTOARG => '-noprototypes', 		# XXX remove later?
 );
 

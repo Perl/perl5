@@ -19,37 +19,47 @@ extern "C" {
 static void xs_init _((void));
 static PerlInterpreter *my_perl;
 
-void
-i18nl14n()
+int
+perl_init_i18nl14n(printwarn)	/* XXX move to perl.c */
+    int printwarn;
 {
-  char * lang = getenv("LANG");
+    int ok = 1;
+    /* returns
+     *    1 = set ok or not applicable,
+     *    0 = fallback to C locale,
+     *   -1 = fallback to C locale failed
+     */
 #if defined(HAS_SETLOCALE) && defined(LC_CTYPE)
-  {
+    char * lang     = getenv("LANG");
     char * lc_all   = getenv("LC_ALL");
     char * lc_ctype = getenv("LC_CTYPE");
     int i;
 
     if (setlocale(LC_CTYPE, "") == NULL && (lc_all || lc_ctype || lang)) {
-      fprintf(stderr, "warning: setlocale(LC_CTYPE, \"\") failed.\n");
-      fprintf(stderr,
+	if (printwarn) {
+	    fprintf(stderr, "warning: setlocale(LC_CTYPE, \"\") failed.\n");
+	    fprintf(stderr,
 	      "warning: LC_ALL = \"%s\", LC_CTYPE = \"%s\", LANG = \"%s\",\n",
 	      lc_all   ? lc_all   : "(null)",
 	      lc_ctype ? lc_ctype : "(null)",
 	      lang     ? lang     : "(null)"
 	      );
-      fprintf(stderr, "warning: falling back to the \"C\" locale.\n");
-      setlocale(LC_CTYPE, "C");
+	    fprintf(stderr, "warning: falling back to the \"C\" locale.\n");
+	}
+	ok = 0;
+	if (setlocale(LC_CTYPE, "C") == NULL)
+	    ok = -1;
     }
 
     for (i = 0; i < 256; i++) {
-      if (isUPPER(i)) fold[i] = toLOWER(i);
-      else if (isLOWER(i)) fold[i] = toUPPER(i);
-      else fold[i] = i;
+	if (isUPPER(i)) fold[i] = toLOWER(i);
+	else if (isLOWER(i)) fold[i] = toUPPER(i);
+	else fold[i] = i;
     }
-
-  }
 #endif
+    return ok;
 }
+
 
 int
 #ifndef CAN_PROTOTYPE
@@ -63,19 +73,9 @@ main(int argc, char **argv, char **env)
 {
     int exitstatus;
 
-#ifdef OS2
-    _response(&argc, &argv);
-    _wildcard(&argc, &argv);
-#endif
+    PERL_SYS_INIT(&argc,&argv);
 
-#ifdef VMS
-    getredirection(&argc,&argv);
-#endif
-
-/* here a union of the cpp #if:s inside i18nl14n() */
-#if (defined(HAS_SETLOCALE) && defined(LC_CTYPE))
-    i18nl14n();
-#endif
+    perl_init_i18nl14n(1);
 
     if (!do_undump) {
 	my_perl = perl_alloc();

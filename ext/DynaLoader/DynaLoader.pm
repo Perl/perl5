@@ -18,6 +18,7 @@ require AutoLoader;
 
 @ISA=qw(AutoLoader);
 
+$VERSION = $VERSION = "1.00" ;
 
 sub import { }		# override import inherited from AutoLoader
 

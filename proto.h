@@ -80,7 +80,8 @@ OP*	do_kv _((void));
 I32	do_msgrcv _((SV** mark, SV** sp));
 I32	do_msgsnd _((SV** mark, SV** sp));
 #endif
-bool	do_open _((GV* gv, char* name, I32 len, FILE* supplied_fp));
+bool	do_open _((GV* gv, char* name, I32 len,
+		   int as_raw, int rawmode, int rawperm, FILE* supplied_fp));
 void	do_pipe _((SV* sv, GV* rgv, GV* wgv));
 bool	do_print _((SV* sv, FILE* fp));
 OP *	do_readline _((void));
@@ -103,6 +104,7 @@ int	dump_fds _((char* s));
 #endif
 void	dump_form _((GV* gv));
 void	dump_gv _((GV* gv));
+void	dump_mstats _((char* s));
 void	dump_op _((OP* arg));
 void	dump_pm _((PMOP* pm));
 void	dump_packsubs _((HV* stash));
@@ -210,9 +212,6 @@ void	mg_magical _((SV* sv));
 int	mg_set _((SV* sv));
 OP*	mod _((OP* op, I32 type));
 char*	moreswitches _((char* s));
-#ifdef MSTATS
-void	mstats _((char* s));
-#endif
 OP *	my _(( OP *));
 char*	my_bcopy _((char* from, char* to, I32 len));
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
@@ -243,7 +242,6 @@ OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* scalar, OP* expr, OP
 OP*	newLOGOP _((I32 optype, I32 flags, OP* left, OP* right));
 OP*	newLOOPEX _((I32 type, OP* label));
 OP*	newLOOPOP _((I32 flags, I32 debuggable, OP* expr, OP* block));
-OP*	newMETHOD _((OP* ref, OP* name));
 OP*	newNULLLIST _((void));
 OP*	newOP _((I32 optype, I32 flags));
 void	newPROG _((OP* op));
@@ -258,8 +256,7 @@ CV*	newXSUB _((char *name, I32 ix, I32 (*subaddr)(int,int,int), char *filename))
 AV*	newAV _((void));
 OP*	newAVREF _((OP* o));
 OP*	newBINOP _((I32 type, I32 flags, OP* first, OP* last));
-OP*	newCVREF _((OP* o));
-OP*	newCVOP _((I32 type, I32 flags, CV* cv, OP* cont));
+OP*	newCVREF _((I32 flags, OP* o));
 OP*	newGVOP _((I32 type, I32 flags, GV* gv));
 GV*	newGVgen _((char *pack));
 OP*	newGVREF _((I32 type, OP* o));
@@ -459,7 +456,7 @@ void	taint_proper _((char* f, char* s));
 #ifdef UNLINK_ALL_VERSIONS
 I32	unlnk _((char* f));
 #endif
-void	utilize _((int aver, OP* id, OP* arg));
+void	utilize _((int aver, I32 floor, OP* id, OP* arg));
 I32	wait4pid _((int pid, int* statusp, int flags));
 void	warn _((char* pat,...)) __attribute__((format(printf,1,2)));
 void	watch _((char **addr));

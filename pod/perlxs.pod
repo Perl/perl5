@@ -129,6 +129,16 @@ separate lines.
     double x                       sin(x)
 				     double x
 
+The function body may be indented or left-adjusted.  The following example
+shows a function with its body left-adjusted.  Most examples in this
+document will indent the body.
+
+  CORRECT
+
+  double
+  sin(x)
+  double x
+
 =head2 The Argument Stack
 
 The argument stack is used to store the values which are
@@ -278,10 +288,20 @@ The XSUB follows.
           timep
           RETVAL
 
-In many of the examples shown here the CODE: block (and
-other blocks) will often be contained within braces ( C<{> and
-C<}> ).  This protects the CODE: block from complex INPUT
-typemaps and ensures the resulting C code is legal.
+=head2 The INIT: Keyword
+
+The INIT: keyword allows initialization to be inserted into the XSUB before
+the compiler generates the call to the C function.  Unlike the CODE: keyword
+above, this keyword does not affect the way the compiler handles RETVAL.
+
+    bool_t
+    rpcb_gettime(host,timep)
+          char *host
+          time_t &timep
+	  INIT:
+	  printf("# Host is %s\n", host );
+          OUTPUT:
+          timep
 
 =head2 The NO_INIT Keyword
 
@@ -362,6 +382,86 @@ the parameters in the correct order for that function.
           timep
           RETVAL
 
+=head2 The PREINIT: Keyword
+
+The PREINIT: keyword allows extra variables to be declared before the
+typemaps are expanded.  If a variable is declared in a CODE: block then that
+variable will follow any typemap code.  This may result in a C syntax
+error.  To force the variable to be declared before the typemap code, place
+it into a PREINIT: block.  The PREINIT: keyword may be used one or more
+times within an XSUB.
+
+The following examples are equivalent, but if the code is using complex
+typemaps then the first example is safer.
+
+     bool_t
+     rpcb_gettime(timep)
+          time_t timep = NO_INIT
+	  PREINIT:
+          char *host = "localhost";
+          CODE:
+	  RETVAL = rpcb_gettime( host, &timep );
+          OUTPUT:
+          timep
+          RETVAL
+
+A correct, but error-prone example.
+
+     bool_t
+     rpcb_gettime(timep)
+          time_t timep = NO_INIT
+	  CODE:
+          char *host = "localhost";
+	  RETVAL = rpcb_gettime( host, &timep );
+          OUTPUT:
+          timep
+          RETVAL
+
+=head2 The INPUT: Keyword
+
+The XSUB's parameters are usually evaluated immediately after entering the
+XSUB.  The INPUT: keyword can be used to force those parameters to be
+evaluated a little later.  The INPUT: keyword can be used multiple times
+within an XSUB and can be used to list one or more input variables.  This
+keyword is used with the PREINIT: keyword.
+
+The following example shows how the input parameter C<timep> can be
+evaluated late, after a PREINIT.
+
+    bool_t
+    rpcb_gettime(host,timep)
+          char *host
+	  PREINIT:
+	  time_t tt;
+	  INPUT:
+          time_t timep
+          CODE:
+               RETVAL = rpcb_gettime( host, &tt );
+	       timep = tt;
+          OUTPUT:
+          timep
+          RETVAL
+
+The next example shows each input parameter evaluated late.
+
+    bool_t
+    rpcb_gettime(host,timep)
+	  PREINIT:
+	  time_t tt;
+	  INPUT:
+          char *host
+	  PREINIT:
+	  char *h;
+	  INPUT:
+          time_t timep
+          CODE:
+	       h = host;
+	       RETVAL = rpcb_gettime( h, &tt );
+	       timep = tt;
+          OUTPUT:
+          timep
+          RETVAL
+
 =head2 Variable-length Parameter Lists
 
 XSUBs can have variable-length parameter lists by specifying an ellipsis
@@ -385,14 +485,12 @@ The XS code, with ellipsis, follows.
      bool_t
      rpcb_gettime(timep, ...)
           time_t timep = NO_INIT
-          CODE:
-          {
+	  PREINIT:
           char *host = "localhost";
-
-          if( items > 1 )
-               host = (char *)SvPV(ST(1), na);
-          RETVAL = rpcb_gettime( host, &timep );
-          }
+          CODE:
+		  if( items > 1 )
+		       host = (char *)SvPV(ST(1), na);
+		  RETVAL = rpcb_gettime( host, &timep );
           OUTPUT:
           timep
           RETVAL
@@ -414,15 +512,14 @@ Perl as a single list.
      void
      rpcb_gettime(host)
           char *host
-          PPCODE:
-          {
+	  PREINIT:
           time_t  timep;
           bool_t  status;
+          PPCODE:
           status = rpcb_gettime( host, &timep );
           EXTEND(sp, 2);
           PUSHs(sv_2mortal(newSViv(status)));
           PUSHs(sv_2mortal(newSViv(timep)));
-          }
 
 Notice that the programmer must supply the C code necessary
 to have the real rpcb_gettime() function called and to have
@@ -466,14 +563,13 @@ the default return value.
      void
      rpcb_gettime(host)
           char *  host
-          CODE:
-          {
+	  PREINIT:
           time_t  timep;
           bool_t x;
+          CODE:
           ST(0) = sv_newmortal();
           if( rpcb_gettime( host, &timep ) )
                sv_setnv( ST(0), (double)timep);
-          }
 
 The next example demonstrates how one would place an explicit undef in the
 return value, should the need arise.
@@ -481,17 +577,16 @@ return value, should the need arise.
      void
      rpcb_gettime(host)
           char *  host
-          CODE:
-          {
+	  PREINIT:
           time_t  timep;
           bool_t x;
+          CODE:
           ST(0) = sv_newmortal();
           if( rpcb_gettime( host, &timep ) ){
                sv_setnv( ST(0), (double)timep);
           }
           else{
                ST(0) = &sv_undef;
-          }
           }
 
 To return an empty list one must use a PPCODE: block and
@@ -500,15 +595,14 @@ then not push return values on the stack.
      void
      rpcb_gettime(host)
           char *host
-          PPCODE:
-          {
+	  PREINIT:
           time_t  timep;
+          PPCODE:
           if( rpcb_gettime( host, &timep ) )
                PUSHs(sv_2mortal(newSViv(timep)));
           else{
           /* Nothing pushed on stack, so an empty */
           /* list is implicitly returned. */
-          }
           }
 
 =head2 The REQUIRE: Keyword
@@ -544,6 +638,186 @@ terminate the code block.
      # The following message will be printed when the
      # bootstrap function executes.
      printf("Hello from the bootstrap!\n");
+
+=head2 The VERSIONCHECK: Keyword
+
+The VERSIONCHECK: keyword corresponds to B<xsubpp>'s C<-versioncheck> and
+C<-noversioncheck> options.  This keyword overrides the commandline
+options.  Version checking is enabled by default.  When version checking is
+enabled the XS module will attempt to verify that its version matches the
+version of the PM module.
+
+To enable version checking:
+
+    VERSIONCHECK: ENABLE
+
+To disable version checking:
+
+    VERSIONCHECK: DISABLE
+
+=head2 The PROTOTYPES: Keyword
+
+The PROTOTYPES: keyword corresponds to B<xsubpp>'s C<-prototypes> and
+C<-noprototypes> options.  This keyword overrides the commandline options.
+Prototypes are enabled by default.  When prototypes are enabled XSUBs will
+be given Perl prototypes.  This keyword may be used multiple times in an XS
+module to enable and disable prototypes for different parts of the module.
+
+To enable prototypes:
+
+    PROTOTYPES: ENABLE
+
+To disable prototypes:
+
+    PROTOTYPES: DISABLE
+
+=head2 The PROTOTYPE: Keyword
+
+This keyword is similar to the PROTOTYPES: keyword above but can be used to
+force B<xsubpp> to use a specific prototype for the XSUB.  This keyword
+overrides all other prototype options and keywords but affects only the
+current XSUB.  Consult L<perlsub/Prototypes> for information about Perl
+prototypes.
+
+    bool_t
+    rpcb_gettime(timep, ...)
+          time_t timep = NO_INIT
+	  PROTOTYPE: $;$
+	  PREINIT:
+          char *host = "localhost";
+          CODE:
+		  if( items > 1 )
+		       host = (char *)SvPV(ST(1), na);
+		  RETVAL = rpcb_gettime( host, &timep );
+          OUTPUT:
+          timep
+          RETVAL
+
+=head2 The ALIAS: Keyword
+
+The ALIAS: keyword allows an XSUB to have two more more unique Perl names
+and to know which of those names was used when it was invoked.  The Perl
+names may be fully-qualified with package names.  Each alias is given an
+index.  The compiler will setup a variable called C<ix> which contain the
+index of the alias which was used.  When the XSUB is called with its
+declared name C<ix> will be 0.
+
+The following example will create aliases C<FOO::gettime()> and
+C<BAR::getit()> for this function.
+
+    bool_t
+    rpcb_gettime(host,timep)
+          char *host
+          time_t &timep
+	  ALIAS:
+	    FOO::gettime = 1
+	    BAR::getit = 2
+	  INIT:
+	  printf("# ix = %d\n", ix );
+          OUTPUT:
+          timep
+
+=head2 The INCLUDE: Keyword
+
+This keyword can be used to pull other files into the XS module.  The other
+files may have XS code.  INCLUDE: can also be used to run a command to
+generate the XS code to be pulled into the module.
+
+The file F<Rpcb1.xsh> contains our C<rpcb_gettime()> function:
+
+    bool_t
+    rpcb_gettime(host,timep)
+          char *host
+          time_t &timep
+          OUTPUT:
+          timep
+
+The XS module can use INCLUDE: to pull that file into it.
+
+    INCLUDE: Rpcb1.xsh
+
+If the parameters to the INCLUDE: keyword are followed by a pipe (C<|>) then
+the compiler will interpret the parameters as a command.
+
+    INCLUDE: cat Rpcb1.xsh |
+
+=head2 The CASE: Keyword
+
+The CASE: keyword allows an XSUB to have multiple distinct parts with each
+part acting as a virtual XSUB.  CASE: is greedy and if it is used then all
+other XS keywords must be contained within a CASE:.  This means nothing may
+precede the first CASE: in the XSUB and anything following the last CASE: is
+included in that case.
+
+A CASE: might switch via a parameter of the XSUB, via the C<ix> ALIAS:
+variable (see L<"The ALIAS: Keyword">), or maybe via the C<items> variable
+(see L<"Variable-length Parameter Lists">).  The last CASE: becomes the
+B<default> case if it is not associated with a conditional.  The following
+example shows CASE switched via C<ix> with a function C<rpcb_gettime()>
+having an alias C<x_gettime()>.  When the function is called as
+C<rpcb_gettime()> it's parameters are the usual C<(char *host, time_t
+*timep)>, but when the function is called as C<x_gettime()> is parameters are
+reversed, C<(time_t *timep, char *host)>.
+
+    long
+    rpcb_gettime(a,b)
+      CASE: ix == 1
+	  ALIAS:
+	  x_gettime = 1
+	  INPUT:
+	  # 'a' is timep, 'b' is host
+          char *b
+          time_t a = NO_INIT
+          CODE:
+               RETVAL = rpcb_gettime( b, &a );
+          OUTPUT:
+          a
+          RETVAL
+      CASE:
+	  # 'a' is host, 'b' is timep
+          char *a
+          time_t &b = NO_INIT
+          OUTPUT:
+          b
+          RETVAL
+
+That function can be called with either of the following statements.  Note
+the different argument lists.
+
+	$status = rpcb_gettime( $host, $timep );
+
+	$status = x_gettime( $timep, $host );
+
+=head2 The & Unary Operator
+
+The & unary operator is used to tell the compiler that it should dereference
+the object when it calls the C function.  This is used when a CODE: block is
+not used and the object is a not a pointer type (the object is an C<int> or
+C<long> but not a C<int*> or C<long*>).
+
+The following XSUB will generate incorrect C code.  The xsubpp compiler will
+turn this into code which calls C<rpcb_gettime()> with parameters C<(char
+*host, time_t timep)>, but the real C<rpcb_gettime()> wants the C<timep>
+parameter to be of type C<time_t*> rather than C<time_t>.
+
+    bool_t
+    rpcb_gettime(host,timep)
+          char *host
+          time_t timep
+          OUTPUT:
+          timep
+
+That problem is corrected by using the C<&> operator.  The xsubpp compiler
+will now turn this into code which calls C<rpcb_gettime()> correctly with
+parameters C<(char *host, time_t *timep)>.  It does this by carrying the
+C<&> through, so the function call looks like C<rpcb_gettime(host, &timep)>.
+
+    bool_t
+    rpcb_gettime(host,timep)
+          char *host
+          time_t &timep
+          OUTPUT:
+          timep
 
 =head2 Inserting Comments and C Preprocessor Directives
 
@@ -635,7 +909,7 @@ example.
     # char* having the name of the package for the blessing.
     O_OBJECT
     	sv_setref_pv( $arg, CLASS, (void*)$var );
-
+    
     INPUT
     O_OBJECT
     	if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) )
@@ -787,13 +1061,12 @@ File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
      void
      rpcb_gettime(host="localhost")
           char *host
-          CODE:
-          {
+	  PREINIT:
           time_t  timep;
+          CODE:
           ST(0) = sv_newmortal();
           if( rpcb_gettime( host, &timep ) )
                sv_setnv( ST(0), (double)timep );
-          }
 
      Netconfig *
      getnetconfigent(netid="udp")
@@ -840,7 +1113,11 @@ File C<rpctest.pl>: Perl test program for the RPC extension.
      print "netconf = $netconf\n";
 
 
+=head1 XS VERSION
+
+This document covers features supported by C<xsubpp> 1.931.
+
 =head1 AUTHOR
 
 Dean Roehrich F<E<lt>roehrich@cray.comE<gt>>
-Dec 10, 1995
+Jan 25, 1996

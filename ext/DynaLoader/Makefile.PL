@@ -6,6 +6,7 @@ WriteMakefile(
     MAN3PODS 	=> ' ', 	# Pods will be built by installman.
     SKIP	=> [qw(dynamic dynamic_lib dynamic_bs)],
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
+    VERSION_FROM => 'DynaLoader.pm',
     clean	=> {FILES => 'DynaLoader.c'},
 );
 

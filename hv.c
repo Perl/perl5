@@ -320,7 +320,9 @@ HV *hv;
     register HE **b;
     register HE *entry;
     register HE **oentry;
+#ifndef STRANGE_MALLOC
     I32 tmp;
+#endif
 
     a = (HE**)xhv->xhv_array;
     nomemok = TRUE;
@@ -337,11 +339,9 @@ HV *hv;
     assert(tmp >= newsize);
     New(2,a, tmp, HE*);
     Copy(xhv->xhv_array, a, oldsize, HE*);
-    if (oldsize >= 64 && *(char*)&xhv->xnv_nv == 0) {
-	sv_add_arena((char*)xhv->xhv_array, oldsize * sizeof(HE*), 0);
-	sv_add_arena(((char*)a) + newsize * sizeof(HE*),
-		     newsize * sizeof(HE*) - MALLOC_OVERHEAD,
-		     SVf_FAKE);
+    if (oldsize >= 64 && !nice_chunk) {
+	nice_chunk = (char*)xhv->xhv_array;
+	nice_chunk_size = oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD;
     }
     else
 	Safefree(xhv->xhv_array);
@@ -387,7 +387,6 @@ newHV()
     xhv->xhv_max = 7;		/* start with 8 buckets */
     xhv->xhv_fill = 0;
     xhv->xhv_pmroot = 0;
-    *(char*)&xhv->xnv_nv = 0;
     (void)hv_iterinit(hv);	/* so each() will start off right */
     return hv;
 }
@@ -475,14 +474,7 @@ HV *hv;
 	return;
     xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
-#ifdef STRANGE_MALLOC
     Safefree(xhv->xhv_array);
-#else
-    if (xhv->xhv_max < 127 || *(char*)&xhv->xnv_nv)
-	Safefree(xhv->xhv_array);
-    else  /* We used last half, so use first half for SV arena too. */
-	sv_add_arena((char*)xhv->xhv_array, (xhv->xhv_max + 1) * sizeof(HE*),0);
-#endif
     if (HvNAME(hv)) {
 	Safefree(HvNAME(hv));
 	HvNAME(hv) = 0;
@@ -491,7 +483,6 @@ HV *hv;
     xhv->xhv_max = 7;		/* it's a normal associative array */
     xhv->xhv_fill = 0;
     xhv->xhv_keys = 0;
-    *(char*)&xhv->xnv_nv = 1;
 
     if (SvRMAGICAL(hv))
 	mg_clear((SV*)hv); 

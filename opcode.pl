@@ -9,9 +9,15 @@ while (<DATA>) {
     chop;
     next unless $_;
     next if /^#/;
-    ($key, $name, $check, $flags, $args) = split(/\t+/, $_, 5);
+    ($key, $desc, $check, $flags, $args) = split(/\t+/, $_, 5);
+
+    warn qq[Description "$desc" duplicates $seen{$desc}\n] if $seen{$desc};
+    die qq[Opcode "$key" duplicates $seen{$key}\n] if $seen{$key};
+    $seen{$desc} = qq[description of opcode "$key"];
+    $seen{$key} = qq[opcode "$key"];
+
     push(@ops, $key);
-    $name{$key} = $name;
+    $desc{$key} = $desc;
     $check{$key} = $check;
     $ckname{$check}++;
     $flags{$key} = $flags;
@@ -36,7 +42,7 @@ print "\t", &tab(3,"OP_max"), "\n";
 print "} opcode;\n";
 print "\n#define MAXO ", scalar @ops, "\n\n"; 
 
-# Emit opnames.
+# Emit op names and descriptions.
 
 print <<END;
 #ifndef DOINIT
@@ -46,7 +52,24 @@ EXT char *op_name[] = {
 END
 
 for (@ops) {
-    print qq(\t"$name{$_}",\n);
+    print qq(\t"$_",\n);
+}
+
+print <<END;
+};
+#endif
+
+END
+
+print <<END;
+#ifndef DOINIT
+EXT char *op_desc[];
+#else
+EXT char *op_desc[] = {
+END
+
+for (@ops) {
+    print qq(\t"$desc{$_}",\n);
 }
 
 print <<END;
@@ -176,6 +199,7 @@ const		constant item		ck_svconst	s
 
 gvsv		scalar variable		ck_null		ds	
 gv		glob value		ck_null		ds	
+gelem		glob elem		ck_null		d	S S
 padsv		private variable	ck_null		ds
 padav		private array		ck_null		d
 padhv		private hash		ck_null		d
@@ -186,11 +210,11 @@ pushre		push regexp		ck_null		0
 # References and stuff.
 
 rv2gv		ref-to-glob cast	ck_rvconst	ds	
-sv2len		scalar value length	ck_null		ist	
 rv2sv		scalar deref		ck_rvconst	ds	
 av2arylen	array length		ck_null		is	
 rv2cv		subroutine deref	ck_rvconst	d
 anoncode	anonymous subroutine	ck_null		0	
+prototype	subroutine prototype	ck_null		s	S
 refgen		reference constructor	ck_spair	m	L
 srefgen		scalar ref constructor	ck_null		fs	S
 ref		reference-type operator	ck_fun		stu	S?
@@ -223,7 +247,7 @@ chomp		safe chop		ck_spair	mts	L
 schomp		scalar safe chop	ck_null		stu	S?
 defined		defined operator	ck_rfun		isu	S?
 undef		undef operator		ck_lfun		s	S?
-study		study			ck_fun		stu	S?
+study		study			ck_fun		su	S?
 pos		match position		ck_lfun		stu	S?
 
 preinc		preincrement		ck_lfun		dIs	S
@@ -428,6 +452,7 @@ binmode		binmode			ck_fun		s	F
 
 tie		tie			ck_fun		idms	R S L
 untie		untie			ck_fun		is	R
+tied		tied			ck_fun		st	R
 dbmopen		dbmopen			ck_fun		is	H S S
 dbmclose	dbmclose		ck_fun		is	H
 
@@ -442,6 +467,7 @@ leavewrite	write exit		ck_null		0
 prtf		printf			ck_listiob	ims	F? L
 print		print			ck_listiob	ims	F? L
 
+sysopen		sysopen			ck_fun		st	F S S S?
 sysread		sysread			ck_fun		imst	F R S S?
 syswrite	syswrite		ck_fun		imst	F S S S?
 

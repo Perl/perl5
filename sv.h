@@ -313,8 +313,14 @@ struct xpvio {
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
 #define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
-#define SvPOK_only(sv)		(SvOK_off(sv), \
+
+#ifdef OVERLOAD
+#define SvPOK_only(sv)            (SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC),   \
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
+#else
+#define SvPOK_only(sv)            (SvFLAGS(sv) &= ~SVf_OK, \
+				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
+#endif /* OVERLOAD */
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		(SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)

@@ -1,6 +1,6 @@
 =head1 NAME
 
-C<Term::ReadLine>: Perl interface to various C<readline> packages. If
+Term::ReadLine - Perl interface to various C<readline> packages. If
 no real package is found, substitutes stubs instead of basic functions.
 
 =head1 SYNOPSIS
@@ -15,6 +15,13 @@ no real package is found, substitutes stubs instead of basic functions.
     print $OUT $res, "\n" unless $@;
     $term->addhistory($_) if /\S/;
   }
+
+=head1 DESCRIPTION
+
+This package is just a front end to some other packages. At the moment
+this description is written, the only such package is Term-ReadLine,
+available on CPAN near you. The real target of this stub package is to
+set up a common interface to whatever Readline emerges with time.
 
 =head1 Minimal set of supported functions
 

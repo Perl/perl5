@@ -5,9 +5,9 @@
 $| = 1;
 print "1..8\n";
 
-open(PIPE, "|-") || (exec 'tr', '[A-Z]', '[a-z]');
-print PIPE "OK 1\n";
-print PIPE "ok 2\n";
+open(PIPE, "|-") || (exec 'tr', 'YX', 'ko');
+print PIPE "Xk 1\n";
+print PIPE "oY 2\n";
 close PIPE;
 
 if (open(PIPE, "-|")) {

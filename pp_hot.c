@@ -76,6 +76,64 @@ PP(pp_gv)
     RETURN;
 }
 
+PP(pp_gelem)
+{
+    GV *gv;
+    SV *sv;
+    SV *ref;
+    char *elem;
+    dSP;
+
+    sv = POPs;
+    elem = SvPV(sv, na);
+    gv = (GV*)POPs;
+    ref = Nullsv;
+    sv = Nullsv;
+    switch (elem ? *elem : '\0')
+    {
+    case 'A':
+	if (strEQ(elem, "ARRAY"))
+	    ref = (SV*)GvAV(gv);
+	break;
+    case 'C':
+	if (strEQ(elem, "CODE"))
+	    ref = (SV*)GvCV(gv);
+	break;
+    case 'F':
+	if (strEQ(elem, "FILEHANDLE"))
+	    ref = (SV*)GvIOp(gv);
+	break;
+    case 'G':
+	if (strEQ(elem, "GLOB"))
+	    ref = (SV*)gv;
+	break;
+    case 'H':
+	if (strEQ(elem, "HASH"))
+	    ref = (SV*)GvHV(gv);
+	break;
+    case 'N':
+	if (strEQ(elem, "NAME"))
+	    sv = newSVpv(GvNAME(gv), GvNAMELEN(gv));
+	break;
+    case 'P':
+	if (strEQ(elem, "PACKAGE"))
+	    sv = newSVpv(HvNAME(GvSTASH(gv)), 0);
+	break;
+    case 'S':
+	if (strEQ(elem, "SCALAR"))
+	    ref = GvSV(gv);
+	break;
+    }
+    if (ref)
+	sv = newRV(ref);
+    if (sv)
+	sv_2mortal(sv);
+    else
+	sv = &sv_undef;
+    XPUSHs(sv);
+    RETURN;
+}
+
 PP(pp_and)
 {
     dSP;
@@ -144,12 +202,12 @@ PP(pp_concat)
     dPOPTOPssrl;
     STRLEN len;
     char *s;
-    if (SvGMAGICAL(left))
-        mg_get(left);
     if (TARG != left) {
 	s = SvPV(left,len);
 	sv_setpvn(TARG,s,len);
     }
+    else if (SvGMAGICAL(TARG))
+	mg_get(TARG);
     else if (!SvOK(TARG)) {
 	s = SvPV_force(TARG, len);
 	sv_setpv(TARG, "");	/* Suppress warning. */
@@ -984,6 +1042,10 @@ do_readline()
 		        if (ok && sts != RMS$_NMF &&
 		            sts != RMS$_DNF && sts != RMS$_FNF) ok = 0;
 		        if (!ok) {
+		            if (!(sts & 1)) {
+		              SETERRNO((sts == RMS$_SYN ? EINVAL : EVMSERR),sts);
+		            }
+		            fclose(tmpfp);
 		            fp = NULL;
 		        }
 		        else {
@@ -1014,7 +1076,8 @@ do_readline()
 #endif
 #endif /* !CSH */
 #endif /* !MSDOS */
-		(void)do_open(last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),Nullfp);
+		(void)do_open(last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),
+			      FALSE, 0, 0, Nullfp);
 		fp = IoIFP(io);
 #endif /* !VMS */
 		LEAVE;
@@ -1075,12 +1138,13 @@ do_readline()
 	if (type == OP_GLOB) {
 	    char *tmps;
 
-	    if (SvCUR(sv) > 0)
-		SvCUR(sv)--;
-	    if (*SvEND(sv) == rschar)
-		*SvEND(sv) = '\0';
-	    else
-		SvCUR(sv)++;
+	    if (SvCUR(sv) > 0 && SvCUR(rs) > 0) {
+		tmps = SvEND(sv) - 1;
+		if (*tmps == *SvPVX(rs)) {
+		    *tmps = '\0';
+		    SvCUR(sv)--;
+		}
+	    }
 	    for (tmps = SvPVX(sv); *tmps; tmps++)
 		if (!isALPHA(*tmps) && !isDIGIT(*tmps) &&
 		    strchr("$&*(){}[]'\";\\|?<>~`", *tmps))
@@ -1664,6 +1728,8 @@ PP(pp_entersub)
 	    if (ngv && ngv != gv && (cv = GvCV(ngv))) {	/* One more chance... */
 		gv = ngv;
 		sv_setsv(GvSV(CvGV(cv)), tmpstr);	/* Set CV's $AUTOLOAD */
+		if (tainting)
+		    sv_unmagic(GvSV(CvGV(cv)), 't');
 		goto retry;
 	    }
 	    else
@@ -1673,7 +1739,7 @@ PP(pp_entersub)
     }
 
     gimme = GIMME;
-    if ((op->op_private & OPpDEREF_DB) && !CvXSUB(cv)) {
+    if ((op->op_private & OPpENTERSUB_DB) && !CvXSUB(cv)) {
 	sv = GvSV(DBsub);
 	save_item(sv);
 	if (SvFLAGS(cv) & (SVpcv_ANON | SVpcv_CLONED)) /* Is GV potentially non-unique? */
@@ -1892,7 +1958,7 @@ DIE("Can't call method \"%s\" without a package or object reference", name);
 	    SETs(gv);
 	    RETURN;
 	}
-	*(stack_base + TOPMARK + 1) = iogv;
+	*(stack_base + TOPMARK + 1) = sv_2mortal(newRV(iogv));
     }
 
     if (!ob || !SvOBJECT(ob)) {

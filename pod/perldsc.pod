@@ -814,6 +814,16 @@ many different sorts:
          print "\n";
      }
 
+=head1 Database Ties
+
+You cannot easily tie a multilevel data structure (such as a hash of
+hashes) to a dbm file.  The first problem is that all but GDBM and
+Berkeley DB have size limitations, but beyond that, you also have problems
+with how references are to be represented on disk.  One experimental
+module that does attempt to partially address this need is the MLDBM
+module.  Check your nearest CPAN site as described in L<perlmod> for
+source code to MLDBM.
+
 =head1 SEE ALSO
 
 L<perlref>, L<perllol>, L<perldata>, L<perlobj>

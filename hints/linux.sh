@@ -8,12 +8,8 @@
 #
 # Consolidated by Andy Dougherty <doughera@lafcol.lafayette.edu>
 #
-# Last updated Tue May 30 14:25:02 EDT 1995
-#
-# If you wish to use something other than 'gcc' for your compiler,
-# you should specify it on the Configure command line.  To use
-# gcc-elf, for exmample, type
-# ./Configure -Dcc=gcc-elf
+# Updated Tue May 30 14:25:02 EDT 1995
+# Add ability to use command-line overrides for optinal settings.
 
 # perl goes into the /usr tree.  See the Filesystem Standard
 # available via anonymous FTP at tsx-11.mit.edu in
@@ -23,28 +19,27 @@ case "$prefix" in
 '') prefix='/usr' ;;
 esac
 
-# Perl expects BSD style signal handling.
+# Perl users typically expect BSD style signal handling.
+# This may not be needed in 5.002 since sigaction is used.
 # gcc-2.6.3 defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
 ccflags="-D__USE_BSD_SIGNAL -Dbool=char -DHAS_BOOL $ccflags"
-
-# The following functions are gcc built-ins, but the Configure tests
-# may fail because they don't supply proper prototypes.
-# This should be fixed as of 5.001f.  I'd appreciate reports.
-d_memcmp=define
-d_memcpy=define
 
 # Configure may fail to find lstat() since it's a static/inline
 # function in <sys/stat.h>.
 d_lstat=define
 
 # Explanation?
-d_dosuid='define'
+case "$d_dosuid" in
+'') d_dosuid='define' ;;
+esac
 
 # I think Configure gets this right now, but I'd appreciate reports.
 malloctype='void *'
 
 # Explanation?
-usemymalloc='n'
+case "$usemymalloc" in
+'') usemymalloc='n' ;;
+esac
 
 case "$optimize" in
 '') optimize='-O2' ;;
@@ -89,6 +84,7 @@ EOM
     # Linux ELF values.
     ccdlflags=' '
     cccdlflags=' '
+    ccflags="-DOVR_DBL_DIG=14 $ccflags"
     so='sa'
     dlext='o'
     ## If you are using DLD 3.2.4 which does not support shared libs,
@@ -119,5 +115,7 @@ fi
 # This will generate a harmless message:
 # Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
 #	Propagating recommended variable d_dbm_open
-d_dbm_open=undef
+case "$d_dbm_open" in
+'') d_dbm_open=undef ;;
+esac
 

@@ -1392,5 +1392,5 @@ close OUT or die "Can't close $file: $!";
 chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
 unlink 'pstruct';
 print "Linking c2ph to pstruct.\n";
-link c2ph, pstruct;
+link c2ph, pstruct unless $Config{'osname'} eq 'VMS';
 exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';

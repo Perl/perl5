@@ -273,7 +273,7 @@ you opened whatever your kid writes to his STDOUT.
     my $sleep_count = 0;
 
     do { 
-	$pid = open(KID, "-|");
+	$pid = open(KID_TO_WRITE, "|-");
 	unless (defined $pid) {
 	    warn "cannot fork: $!";
 	    die "bailing out" if $sleep_count++ > 6;
@@ -282,8 +282,8 @@ you opened whatever your kid writes to his STDOUT.
     } until defined $pid;
 
     if ($pid) {  # parent
-	print KID @some_data;
-	close(KID) || warn "kid exited $?";
+	print KID_TO_WRITE @some_data;
+	close(KID_TO_WRITE) || warn "kid exited $?";
     } else {     # child
 	($EUID, $EGID) = ($UID, $GID); # suid progs only
 	open (FILE, "> /safe/file") 
@@ -303,13 +303,13 @@ your arguments.   Instead, use lower-level control to call exec() directly.
 Here's a safe backtick or pipe open for read:
 
     # add error processing as above
-    $pid = open(KID, "-|");
+    $pid = open(KID_TO_READ, "-|");
 
     if ($pid) {   # parent
-	while (<KID>) {
+	while (<KID_TO_READ>) {
 	    # do something interesting
 	} 	  
-	close(KID) || warn "kid exited $?";
+	close(KID_TO_READ) || warn "kid exited $?";
 
     } else {      # child
 	($EUID, $EGID) = ($UID, $GID); # suid only
@@ -322,14 +322,14 @@ Here's a safe backtick or pipe open for read:
 And here's a safe pipe open for writing:
 
     # add error processing as above
-    $pid = open(KID, "|-");
+    $pid = open(KID_TO_WRITE, "|-");
     $SIG{ALRM} = sub { die "whoops, $program pipe broke" };
 
     if ($pid) {  # parent
 	for (@data) {
-	    print KID;
+	    print KID_TO_WRITE;
 	} 
-	close(KID) || warn "kid exited $?";
+	close(KID_TO_WRITE) || warn "kid exited $?";
 
     } else {     # child
 	($EUID, $EGID) = ($UID, $GID);
@@ -349,9 +349,9 @@ While this works reasonably well for unidirectional communication, what
 about bidirectional communication?  The obvious thing you'd like to do
 doesn't actually work:
 
-    open(KID, "| some program |")
+    open(PROG_FOR_READING_AND_WRITING, "| some program |")
 
-and if you forgot to use the B<-w> flag, then you'll miss out 
+and if you forget to use the B<-w> flag, then you'll miss out 
 entirely on the diagnostic message:
 
     Can't do bidirectional pipe at -e line 1.
@@ -458,7 +458,50 @@ Here's a sample TCP client using Internet-domain sockets:
 
 And here's a corresponding server to go along with it.  We'll
 leave the address as INADDR_ANY so that the kernel can choose
-the appropriate interface on multihomed hosts:
+the appropriate interface on multihomed hosts.  If you want sit
+on a particular interface (like the external side of a gateway
+or firewall machine), you should fill this in with your real address
+instead.
+
+    #!/usr/bin/perl -Tw
+    require 5.002;
+    use strict;
+    BEGIN { $ENV{PATH} = '/usr/ucb:/bin' }
+    use Socket;
+    use Carp;
+
+    sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" } 
+
+    my $port = shift || 2345;
+    my $proto = getprotobyname('tcp');
+    socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
+    setsockopt(Server, SOL_SOCKET, SO_REUSEADDR, 
+					pack("l", 1)) 	|| die "setsockopt: $!";
+    bind(Server, sockaddr_in($port, INADDR_ANY))	|| die "bind: $!";
+    listen(Server,SOMAXCONN) 				|| die "listen: $!";
+
+    logmsg "server started on port $port";
+
+    my $paddr;
+
+    $SIG{CHLD} = \&REAPER;
+
+    for ( ; $paddr = accept(Client,Server); close Client) {
+	my($port,$iaddr) = sockaddr_in($paddr);
+	my $name = gethostbyaddr($iaddr,AF_INET);
+
+	logmsg "connection from $name [", 
+		inet_ntoa($iaddr), "] 
+		at port $port";
+
+	print CLIENT "Hello there, $name, it's now ", 
+			scalar localtime, "\n";
+    } 
+
+And here's a multithreaded version.  It's multithreaded in that
+like most typical servers, it spawns (forks) a slave server to 
+handle the client request so that the master server can quickly
+go back to service a new client.
 
     #!/usr/bin/perl -Tw
     require 5.002;
@@ -472,10 +515,11 @@ the appropriate interface on multihomed hosts:
 
     my $port = shift || 2345;
     my $proto = getprotobyname('tcp');
-    socket(SERVER, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
-    setsockopt(SERVER, SOL_SOCKET, SO_REUSEADDR, 1) 	|| die "setsockopt: $!";
-    bind(SERVER, sockaddr_in($port, INADDR_ANY))	|| die "bind: $!";
-    listen(SERVER,5) 					|| die "listen: $!";
+    socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
+    setsockopt(Server, SOL_SOCKET, SO_REUSEADDR, 
+					pack("l", 1)) 	|| die "setsockopt: $!";
+    bind(Server, sockaddr_in($port, INADDR_ANY))	|| die "bind: $!";
+    listen(Server,SOMAXCONN) 				|| die "listen: $!";
 
     logmsg "server started on port $port";
 
@@ -491,8 +535,8 @@ the appropriate interface on multihomed hosts:
     $SIG{CHLD} = \&REAPER;
 
     for ( $waitedpid = 0; 
-	  ($paddr = accept(CLIENT,SERVER)) || $waitedpid; 
-	  $waitedpid = 0, close CLIENT) 
+	  ($paddr = accept(Client,Server)) || $waitedpid; 
+	  $waitedpid = 0, close Client) 
     {
 	next if $waitedpid;
 	my($port,$iaddr) = sockaddr_in($paddr);
@@ -527,8 +571,8 @@ the appropriate interface on multihomed hosts:
 	}
 	# else i'm the child -- go spawn
 
-	open(STDIN,  "<&CLIENT")   || die "can't dup client to stdin";
-	open(STDOUT, ">&CLIENT")   || die "can't dup client to stdout";
+	open(STDIN,  "<&Client")   || die "can't dup client to stdin";
+	open(STDOUT, ">&Client")   || die "can't dup client to stdout";
 	## open(STDERR, ">&STDOUT") || die "can't dup stdout to stderr";
 	exit &$coderef();
     } 
@@ -628,18 +672,18 @@ And here's a corresponding server.
     my $uaddr = sockaddr_un($NAME);
     my $proto = getprotobyname('tcp');
 
-    socket(SERVER,PF_UNIX,SOCK_STREAM,0) 	|| die "socket: $!";
+    socket(Server,PF_UNIX,SOCK_STREAM,0) 	|| die "socket: $!";
     unlink($NAME);
-    bind  (SERVER, $uaddr) 			|| die "bind: $!";
-    listen(SERVER,5)			|| die "listen: $!";
+    bind  (Server, $uaddr) 			|| die "bind: $!";
+    listen(Server,SOMAXCONN)			|| die "listen: $!";
 
     logmsg "server started on $NAME";
 
     $SIG{CHLD} = \&REAPER;
 
     for ( $waitedpid = 0; 
-	  accept(CLIENT,SERVER) || $waitedpid; 
-	  $waitedpid = 0, close CLIENT) 
+	  accept(Client,Server) || $waitedpid; 
+	  $waitedpid = 0, close Client) 
     {
 	next if $waitedpid;
 	logmsg "connection on $NAME";

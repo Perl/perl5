@@ -41,19 +41,20 @@ cf_time='$time'
 osname='VMS'
 ld='Link'
 lddlflags='/Share'
-libc=''
 ranlib=''
 ar=''
 eunicefix=':'
+hint='none'
 hintfile=''
 intsize='4'
 alignbytes='8'
 shrplib='define'
 usemymalloc='n'
+spitshell='write sys\$output '
 EndOfIntro
 
 $cf_by = (getpwuid($<))[0];
-print OUT "cf_by='$cf_by'\nperladmin='$cf_by'\n";
+print OUT "cf_by='$cf_by'\n";
 
 $hw_model = `Write Sys\$Output F\$GetSyi("HW_MODEL")`;
 chomp $hw_model;
@@ -68,46 +69,80 @@ else {
   $archsufx = 'VAX';
 }
 $osvers = `Write Sys\$Output F\$GetSyi("VERSION")`;
-$osvers =~ s/^V(\S+)\s*\n?$/$1/;
+$osvers =~ s/^V?(\S+)\s*\n?$/$1/;
 print OUT "osvers='$osvers'\n";
 foreach (@ARGV) {
   ($key,$val) = split('=',$_,2);
   if ($key eq 'cc') {  # Figure out which C compiler we're using
-    if (`$val/NoObject/NoList _nla0:/Version` =~ /GNU/) {
-      print OUT "vms_cc_type='gcc'\n";
-      print OUT "d_attribut='define'\n";
+    my($cc,$ccflags) = split('/',$val,2);
+    my($d_attr);
+    $ccflags = "/$ccflags";
+    if ($ccflags =~s!/DECC!!ig) { 
+      $cc .= '/DECC';
+      $cctype = 'decc';
+      $d_attr = 'undef';
+    }
+    elsif ($ccflags =~s!/VAXC!!ig) {
+      $cc .= '/VAXC';
+      $cctype = 'vaxc';
+      $d_attr = 'undef';
+    }
+    elsif (`$val/NoObject/NoList _nla0:/Version` =~ /GNU/) {
+      $cctype = 'gcc';
+      $d_attr = 'define';
     }
     elsif ($archsufx eq 'VAX' &&
            `$val/NoObject/NoList /prefix=all _nla0:` =~ /IVQUAL/) {
-      print OUT "vms_cc_type='vaxc'\n";
-      print OUT "d_attribut='undef'\n";
+      $cctype = 'vaxc';
+      $d_attr = 'undef';
     }
     else {
-      print OUT "vms_cc_type='decc'\n";
-      print OUT "d_attribut='undef'\n";
-      # DECC for VAX requires filename in /object qualifier, so we
+      $cctype = 'decc';
+      $d_attr = 'undef';
+    }
+    print OUT "vms_cc_type='$cctype'\n";
+    print OUT "d_attribut='$d_attr'\n";
+    print OUT "cc='$cc'\n";
+    if ( ($cctype eq 'decc' and $archsufx eq 'VAX') || $cctype eq 'gcc') {
+      # gcc and DECC for VAX requires filename in /object qualifier, so we
       # have to remove it here.  Alas, this means we lose the user's
       # object file suffix if it's not .obj.
-      $val =~ s#/obj(?:ect)?=[^/\s]+##i if $archsufx eq 'VAX';;
+      $ccflags =~ s#/obj(?:ect)?=[^/\s]+##i;
     }
+    print OUT "ccflags='$ccflags'\n";
+    $dosock = ($ccflags =~ m!/DEF[^/]+VMS_DO_SOCKETS!i and
+               $ccflags !~ m!/UND[^/]+VMS_DO_SOCKETS!i);
+    next;
   }
   print OUT "$key=\'$val\'\n";
-  if ($val =~/VMS_DO_SOCKETS/i) {
-    $dosock = 1;
-    # Are there any other logicals which TCP/IP stacks use for the host name?
-    $myname = $ENV{'ARPANET_HOST_NAME'}  || $ENV{'INTERNET_HOST_NAME'} ||
-              $ENV{'MULTINET_HOST_NAME'} || $ENV{'UCX$INET_HOST'}      ||
-              $ENV{'TCPWARE_DOMAINNAME'} || $ENV{'NEWS_ADDRESS'};
-    if (!$myname) {
-      ($myname) = `hostname` =~ /^(\S+)/;
-      if ($myname =~ /IVVERB/) {
-        warn "Can't determine TCP/IP hostname; skipping \$Config{'myhostname'}";
-      }
-    }
-    print OUT "myhostname='$myname'\n" if $myname;
+}
+
+# Are there any other logicals which TCP/IP stacks use for the host name?
+$myname = $ENV{'ARPANET_HOST_NAME'}  || $ENV{'INTERNET_HOST_NAME'} ||
+          $ENV{'MULTINET_HOST_NAME'} || $ENV{'UCX$INET_HOST'}      ||
+          $ENV{'TCPWARE_DOMAINNAME'} || $ENV{'NEWS_ADDRESS'};
+if (!$myname) {
+  ($myname) = `hostname` =~ /^(\S+)/;
+  if ($myname =~ /IVVERB/) {
+    warn "Can't determine TCP/IP hostname" if $dosock;
+    $myname = '';
   }
 }
-if (!$dosock) { print OUT "myhostname='$ENV{'SYS$NODE'}'\n"; }
+$myname = $ENV{'SYS$NODE'} unless $myname;
+($myhostname,$mydomain) = split(/\./,$myname,2);
+print OUT "myhostname='$myhostname'\n" if $myhostname;
+if ($mydomain) {
+  print OUT "mydomain='.$mydomain'\n";
+  print OUT "perladmin='$cf_by\@$myhostname.$mydomain'\n";
+  print OUT "cf_email='$cf_by\@$myhostname.$mydomain'\n";
+}
+else {
+  print OUT "perladmin='$cf_by'\n";
+  print OUT "cf_email='$cf_by'\n";
+}
+chomp($hwname = `Write Sys\$Output F\$GetSyi("HW_NAME")`);
+$hwname = $archsufx if $hwname =~ /IVKEYW/;  # *really* old VMS version
+print OUT "myuname='VMS $myname $osvers $hwname'\n";
 
 while (<IN>) {  # roll through the comment header in Config.VMS
   last if /config-start/;
@@ -122,12 +157,18 @@ while (<IN>) {
     s/^\s*//;
     $_ = $line . $_;
   }              
-  next unless my ($blocked,$un,$token,$val) = m%(\/\*)?\s*\#\s*(un)?def\w*\s*([A-za-z0-9]\w+)\S*\s*(.*)%;
+  next unless my ($blocked,$un,$token,$val) = m%^(\/\*)?\s*\#\s*(un)?def\w*\s*([A-za-z0-9]\w+)\S*\s*(.*)%;
   next if /config-skip/;
   $state = ($blocked || $un) ? 'undef' : 'define';
   $token =~ tr/A-Z/a-z/;
   $token =~ s/_exp$/exp/;  # Config.pm has 'privlibexp' etc. where config.h
                            # has 'privlib_exp' etc.
+  # Fixup differences between Configure vars and config.h manifests
+  # This isn't comprehensize; we fix 'em as we need 'em.
+  $token = 'castneg'   if $token eq 'castnegfloat';
+  $token = 'dlsymun'   if $token eq 'dlsym_needs_underscore';
+  $token = 'stdstdio'  if $token eq 'use_stdio_ptr';
+  $token = 'stdiobase'  if $token eq 'use_stdio_base';
   $val =~ s%/\*.*\*/\s*%%g;  $val =~ s/\s*$//;  # strip off trailing comment
   $val =~ s/^"//; $val =~ s/"$//;               # remove end quotes
   $val =~ s/","/ /g;                            # make signal list look nice
@@ -161,12 +202,25 @@ if (open(OPT,"${outdir}crtl.opt")) {
   while (<OPT>) {
     next unless m#/(sha|lib)#i;
     chomp;
-    push(@libs,$_);
+    if (/crtl/i || /gcclib/i) { push(@crtls,$_); }
+    else                      { push(@libs,$_);  }
   }
   close OPT;
   print OUT "libs='",join(' ',@libs),"'\n";
+  push(@crtls,'(DECCRTL)') if $cctype eq 'decc';
+  print OUT "libc='",join(' ',@crtls),"'\n";
 }
-else { warn "Can't read ${outdir}crtl.opt - skipping \$Config{'libs'}"; }
+else { warn "Can't read ${outdir}crtl.opt - skipping 'libs' & 'libc'"; }
+
+if (open(PL,"${outdir}patchlevel.h")) {
+  while (<PL>) {
+    next unless /PATCHLEVEL\s+(\S+)/;
+    print OUT "PATCHLEVEL='$1'\n";
+    last;
+  }
+  close PL;
+}
+else { warn "Can't read ${outdir}patchlevel.h - skipping 'PATCHLEVEL'"; }
 
 # simple pager support for perldoc
 if    (`most nl:` =~ /IVVERB/) {
@@ -186,20 +240,16 @@ __END__
 
 # The definitions in this block are constant across most systems, and
 # should only rarely need to be changed.
-PATCHLEVEL=002
 ccdlflags=
 cccdlflags=
 usedl=true
 dlobj=dl_vms.obj
 dlsrc=dl_vms.c
-d_dlsymun=undef
 so=exe
 dlext=exe
 libpth=/sys$share /sys$library
-d_stdstdio=undef
 usevfork=false
 castflags=0
-d_castneg=define  # should be same as d_castnegfloat from config.vms
 signal_t=void
 timetype=long
 builddir=perl_root:[000000]
@@ -209,6 +259,7 @@ privlib=perl_root:[lib]
 installbin=perl_root:[000000]
 installman1dir=perl_root:[man.man1]
 installman3dir=perl_root:[man.man3]
-man1ext=.rno
-man3ext=.rno
+man1ext=rno
+man3ext=rno
 binexp=perl_root:[000000]  # should be same as installbin
+useposix=false

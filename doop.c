@@ -442,10 +442,13 @@ I32
 do_chomp(sv)
 register SV *sv;
 {
-    register I32 count = 0;
+    register I32 count;
     STRLEN len;
     char *s;
-    
+
+    if (RsSNARF(rs))
+	return 0;
+    count = 0;
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;
         I32 max;
@@ -472,7 +475,7 @@ register SV *sv;
 	s = SvPV_force(sv, len);
     if (s && len) {
 	s += --len;
-	if (rspara) {
+	if (RsPARA(rs)) {
 	    if (*s != '\n')
 		goto nope;
 	    ++count;
@@ -482,21 +485,24 @@ register SV *sv;
 		++count;
 	    }
 	}
-	else if (rslen == 1) {
-	    if (*s != rschar)
-		goto nope;
-	    ++count;
-	} 
 	else {
-	    if (len < rslen - 1)
-		goto nope;
-	    len -= rslen - 1;
-	    s -= rslen - 1;
-	    if (bcmp(s, rs, rslen))
-		goto nope;
-	    count += rslen;
+	    STRLEN rslen;
+	    char *rsptr = SvPV(rs, rslen);
+	    if (rslen == 1) {
+		if (*s != *rsptr)
+		    goto nope;
+		++count;
+	    }
+	    else {
+		if (len < rslen)
+		    goto nope;
+		len -= rslen - 1;
+		s -= rslen - 1;
+		if (bcmp(s, rsptr, rslen))
+		    goto nope;
+		count += rslen;
+	    }
 	}
-
 	*s = '\0';
 	SvCUR_set(sv, len);
 	SvNIOK_off(sv);

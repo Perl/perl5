@@ -90,8 +90,6 @@ mystack_max
 mystack_sp
 mystrk
 nrs
-nrschar
-nrslen
 ofmt
 ofs
 ofslen
@@ -116,9 +114,6 @@ preprocess
 restartop
 rightgv
 rs
-rschar
-rslen
-rspara
 runlevel
 sawampersand
 sawi

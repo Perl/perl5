@@ -30,7 +30,7 @@ case "$osvers" in
 *)  # These hints at least work for 4.x, possibly other systems too.
     d_setregid='undef'
     d_setreuid='undef'
-    ccflags='-D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE'
+    ccflags='-qmaxmem=8192 -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE'
     nm_opt='-B'
     ;;
 esac
@@ -38,7 +38,8 @@ esac
 # The optimizer in 4.1.1 apparently generates bad code for scope.c.
 # Configure doesn't offer an easy way to propagate extra variables
 # only for certain cases, so the following contortion is required:
-scope_cflags='case "$osvers" in 4.1*) optimize=" ";; esac'
+# This is probably not needed in 5.002 and later.
+# scope_cflags='case "$osvers" in 4.1*) optimize=" ";; esac'
 
 # Changes for dynamic linking by Wayne Scott <wscott@ichips.intel.com>
 #
@@ -53,7 +54,12 @@ esac
 # -bI:$(PERL_INC)/perl.exp  Read the exported symbols from the perl binary
 # -bE:$(BASEEXT).exp        Export these symbols.  This file contains only one
 #                           symbol: boot_$(EXP)  can it be auto-generated?
+case "$osvers" in
+3*) 
 lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc'
+    ;;
+*) 
+lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc'
 
-# The '-e _nostart' might not be needed on AIX 4.1, but appears to be
-# harmless.
+;;
+esac

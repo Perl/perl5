@@ -9,7 +9,6 @@
 #ifndef H_PERL
 #define H_PERL 1
 #define OVERLOAD
-#define STRANGE_MALLOC
 
 #include "embed.h"
 
@@ -57,15 +56,21 @@
 #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
 #define TAINT_ENV()	if (tainting) taint_env()
 
-#ifdef HAS_GETPGRP2
+#if defined(HAS_GETPGRP2) && defined(HAS_SETPGRP2)
+#   define getpgrp getpgrp2
+#   define setpgrp setpgrp2
 #   ifndef HAS_GETPGRP
 #	define HAS_GETPGRP
 #   endif
-#endif
-
-#ifdef HAS_SETPGRP2
 #   ifndef HAS_SETPGRP
 #	define HAS_SETPGRP
+#   endif
+#   ifndef USE_BSDPGRP
+#	define USE_BSDPGRP
+#   endif
+#else
+#   if defined(HAS_GETPGRP2) || defined(HAS_SETPGRP2)
+	#include "Gack, you have one but not both of getpgrp2() and setpgrp2()."
 #   endif
 #endif
 
@@ -499,7 +504,6 @@ typedef struct pmop PMOP;
 typedef struct svop SVOP;
 typedef struct gvop GVOP;
 typedef struct pvop PVOP;
-typedef struct cvop CVOP;
 typedef struct loop LOOP;
 
 typedef struct Outrec Outrec;
@@ -828,6 +832,9 @@ I32 unlnk _((char*));
 # ifndef register
 #  define register
 # endif
+# ifdef MYMALLOC
+# define DEBUGGING_MSTATS
+# endif
 # define PAD_SV(po) pad_sv(po)
 #else
 # define PAD_SV(po) curpad[po]
@@ -849,7 +856,7 @@ EXT int		egid;		/* current effective group id */
 EXT bool	nomemok;	/* let malloc context handle nomem */
 EXT U32		an;		/* malloc sequence number */
 EXT U32		cop_seqmax;	/* statement sequence number */
-EXT U32		op_seqmax;	/* op sequence number */
+EXT U16		op_seqmax;	/* op sequence number */
 EXT U32		evalseq;	/* eval sequence number */
 EXT U32		sub_generation;	/* inc to force methods to be looked up again */
 EXT char **	origenviron;
@@ -863,6 +870,8 @@ EXT double *	xnv_root;	/* free xnv list--shared by interpreters */
 EXT XRV *	xrv_root;	/* free xrv list--shared by interpreters */
 EXT XPV *	xpv_root;	/* free xpv list--shared by interpreters */
 EXT HE *	he_root;	/* free he list--shared by interpreters */
+EXT char *	nice_chunk;	/* a nice chunk of memory to reuse */
+EXT U32		nice_chunk_size;/* how nice the chunk of memory is */
 
 /* Stack for currently executing thread--context switch must handle this.     */
 EXT SV **	stack_base;	/* stack->array_ary */
@@ -1191,13 +1200,16 @@ IEXT SV *	Idiehook;
 IEXT SV *	Iwarnhook;
 IEXT SV *	Iparsehook;
 
+/* Various states of an input record separator SV (rs, nrs) */
+#define RsSNARF(sv)   (! SvOK(sv))
+#define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))
+#define RsPARA(sv)    (SvOK(sv) && ! SvCUR(sv))
+
 /* switches */
 IEXT char *	Icddir;
 IEXT bool	Iminus_c;
 IEXT char	Ipatchlevel[6];
-IEXT char *	Inrs IINIT("\n");
-IEXT U32	Inrschar IINIT('\n');   /* final char of rs, or 0777 if none */
-IEXT I32	Inrslen IINIT(1);
+IEXT SV *	Inrs;
 IEXT char *	Isplitstr IINIT(" ");
 IEXT bool	Ipreprocess;
 IEXT bool	Iminus_n;
@@ -1226,10 +1238,7 @@ IEXT int	Iperl_destruct_level;	/* 0=none, 1=full, 2=full with checks */
 IEXT Time_t	Ibasetime;		/* $^T */
 IEXT SV *	Iformfeed;		/* $^L */
 IEXT char *	Ichopset IINIT(" \n-");	/* $: */
-IEXT char *	Irs IINIT("\n");	/* $/ */
-IEXT U32	Irschar IINIT('\n');	/* final char of rs, or 0777 if none */
-IEXT STRLEN	Irslen IINIT(1);
-IEXT bool	Irspara;
+IEXT SV *	Irs;			/* $/ */
 IEXT char *	Iofs;			/* $, */
 IEXT STRLEN	Iofslen;
 IEXT char *	Iors;			/* $\ */

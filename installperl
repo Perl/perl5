@@ -75,7 +75,7 @@ if ($d_shrplib) {
 	    "  (Installing other things anyway.)\n";
     } else {
 	mkpath($shrpdir, 1, 0777);
-	-w $shrpdir	|| die "$shrpdir is not writable by you\n";
+	-w $shrpdir	|| $nonono || die "$shrpdir is not writable by you\n";
 	&cmd("cp libperl*.$so* $shrpdir");
     }
 }

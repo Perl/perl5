@@ -86,14 +86,6 @@ extern int h_errno;
 #include <sys/file.h>
 #endif
 
-#ifdef HAS_GETPGRP2
-#   define getpgrp getpgrp2
-#endif
-
-#ifdef HAS_SETPGRP2
-#   define setpgrp setpgrp2
-#endif
-
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 static int dooneliner _((char *cmd, char *filename));
 #endif
@@ -145,22 +137,18 @@ PP(pp_glob)
 {
     OP *result;
     ENTER;
-    SAVEINT(rschar);
-    SAVEINT(rslen);
 
     SAVESPTR(last_in_gv);	/* We don't want this to be permanent. */
     last_in_gv = (GV*)*stack_sp--;
 
-    rslen = 1;
-#ifdef DOSISH
-    rschar = 0;
-#else
-#ifdef CSH
-    rschar = 0;
-#else
-    rschar = '\n';
+    SAVESPTR(rs);		/* This is not permanent, either. */
+    rs = sv_2mortal(newSVpv("", 1));
+#ifndef DOSISH
+#ifndef CSH
+    *SvPVX(rs) = '\n';
 #endif	/* !CSH */
 #endif	/* !MSDOS */
+
     result = do_readline();
     LEAVE;
     return result;
@@ -247,7 +235,7 @@ PP(pp_open)
 	DIE(no_usym, "filehandle");
     gv = (GV*)POPs;
     tmps = SvPV(sv, len);
-    if (do_open(gv, tmps, len,Nullfp)) {
+    if (do_open(gv, tmps, len, FALSE, 0, 0, Nullfp)) {
 	IoLINES(GvIOp(gv)) = 0;
 	PUSHi( (I32)forkprocess );
     }
@@ -462,6 +450,28 @@ PP(pp_untie)
     RETSETYES;
 }
 
+PP(pp_tied)
+{
+    dSP; dTARGET ;
+    SV * sv ;
+    MAGIC * mg ;
+
+    sv = POPs;
+    if (SvMAGICAL(sv)) {
+        if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
+            mg = mg_find(sv, 'P') ;
+        else
+            mg = mg_find(sv, 'q') ;
+
+        if (mg)  {
+            PUSHs(sv_2mortal(newSVsv(mg->mg_obj))) ; 
+            RETURN ;
+	}
+    }
+
+    RETPUSHUNDEF;
+}
+
 PP(pp_dbmopen)
 {
     dSP;
@@ -621,11 +631,13 @@ PP(pp_sselect)
 	j = SvLEN(sv);
 	if (j < growsize) {
 	    Sv_Grow(sv, growsize);
-	    s = SvPVX(sv) + j;
-	    while (++j <= growsize) {
-		*s++ = '\0';
-	    }
 	}
+	j = SvCUR(sv);
+	s = SvPVX(sv) + j;
+	while (++j <= growsize) {
+	    *s++ = '\0';
+	}
+
 #if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
 	s = SvPVX(sv);
 	New(403, fd_sets[i], growsize, char);
@@ -965,6 +977,35 @@ PP(pp_prtf)
     SvREFCNT_dec(sv);
     SP = ORIGMARK;
     PUSHs(&sv_undef);
+    RETURN;
+}
+
+PP(pp_sysopen)
+{
+    dSP; dTARGET;
+    GV *gv;
+    IO *io;
+    SV *sv;
+    char *tmps;
+    STRLEN len;
+    int mode, perm;
+
+    if (MAXARG > 3)
+	perm = POPi;
+    else
+	perm = 0666;
+    mode = POPi;
+    sv = POPs;
+    gv = (GV *)POPs;
+
+    tmps = SvPV(sv, len);
+    if (do_open(gv, tmps, len, TRUE, mode, perm, Nullfp)) {
+	IoLINES(GvIOp(gv)) = 0;
+	PUSHs(&sv_yes);
+    }
+    else {
+	PUSHs(&sv_undef);
+    }
     RETURN;
 }
 

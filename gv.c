@@ -284,6 +284,8 @@ char* name;
 		sv_catpvn(tmpstr,"::", 2);
 		sv_catpvn(tmpstr, name, nend - name);
 		sv_setsv(GvSV(CvGV(cv)), tmpstr);
+		if (tainting)
+		    sv_unmagic(GvSV(CvGV(cv)), 't');
 	    }
 	}
     }
@@ -337,6 +339,9 @@ I32 sv_type;
     HV *stash = 0;
     bool global = FALSE;
     char *tmpbuf;
+
+    if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
+	name++;
 
     for (namend = name; *namend; namend++) {
 	if ((*namend == '\'' && namend[1]) ||
@@ -422,7 +427,8 @@ I32 sv_type;
 		    sv_type != SVt_PVCV &&
 		    sv_type != SVt_PVGV &&
 		    sv_type != SVt_PVFM &&
-		    sv_type != SVt_PVIO)
+		    sv_type != SVt_PVIO &&
+		    !(len == 1 && sv_type == SVt_PV && index("ab",*name)) )
 		{
 		    gvp = (GV**)hv_fetch(stash,name,len,0);
 		    if (!gvp ||
@@ -432,10 +438,7 @@ I32 sv_type;
 			stash = 0;
 		    else if (sv_type == SVt_PVAV && !GvAV(*gvp) ||
 			     sv_type == SVt_PVHV && !GvHV(*gvp) ||
-			     sv_type == SVt_PV &&
-				 (!GvSV(*gvp) ||
-				    (!SvTYPE(GvSV(*gvp)) &&
-				     SvREFCNT(GvSV(*gvp)) == 1) ))
+			     sv_type == SVt_PV   && !GvSV(*gvp) )
 		    {
 			warn("Variable \"%c%s\" is not exported",
 			    sv_type == SVt_PVAV ? '@' :
@@ -1074,7 +1077,7 @@ int flags;
       } else {
         if (off==-1) off=method;
 	sprintf(buf, "Operation `%s': no method found,\n\tleft argument %s%.256s,\n\tright argument %s%.256s",
-		      ((char**)AMG_names)[method],
+		      ((char**)AMG_names)[method + assignshift],
 		      SvAMAGIC(left)? 
 		        "in overloaded package ":
 		        "has no overloaded magic",
@@ -1113,7 +1116,7 @@ int flags;
      * to dublicate the contents, probably calling user-supplied
      * version of copy operator
      */
-    if ((method+assignshift==off 
+    if ((method + assignshift==off 
 	 && (assign || method==inc_amg || method==dec_amg))
 	|| inc_dec_ass) RvDEEPCP(left);
   }
@@ -1138,7 +1141,7 @@ int flags;
     PUSHs(lr>0? left: right);
     PUSHs( assign ? &sv_undef : (lr>0? &sv_yes: &sv_no));
     if (notfound) {
-      PUSHs( sv_2mortal(newSVpv(((char**)AMG_names)[off],0)) );
+      PUSHs( sv_2mortal(newSVpv(((char**)AMG_names)[method + assignshift],0)) );
     }
     PUSHs((SV*)cv);
     PUTBACK;

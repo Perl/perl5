@@ -45,7 +45,7 @@ dep()
 %token <ival> RELOP EQOP MULOP ADDOP
 %token <ival> DOLSHARP DO LOCAL HASHBRACK NOAMP
 
-%type <ival> prog decl format remember startsub
+%type <ival> prog decl format remember startsub '&'
 %type <opval> block lineseq line loop cond nexpr else argexpr
 %type <opval> expr term scalar ary hsh arylen star amper sideff
 %type <opval> listexpr listexprcom indirob
@@ -55,7 +55,7 @@ dep()
 
 %left <ival> OROP
 %left ANDOP
-%left NOTOP
+%right NOTOP
 %nonassoc <ival> LSTOP
 %left ','
 %right <ival> ASSIGNOP
@@ -267,16 +267,14 @@ package :	PACKAGE WORD ';'
 			{ package(Nullop); }
 	;
 
-use	:	USE WORD listexpr ';'
-			{ utilize($1, $2, $3); }
+use	:	USE startsub WORD listexpr ';'
+			{ utilize($1, $2, $3, $4); }
 	;
 
 expr	:	expr ANDOP expr
 			{ $$ = newLOGOP(OP_AND, 0, $1, $3); }
 	|	expr OROP expr
 			{ $$ = newLOGOP($2, 0, $1, $3); }
-	|	NOTOP expr
-			{ $$ = newUNOP(OP_NOT, 0, scalar($2)); }
 	|	argexpr
 	;
 
@@ -394,6 +392,8 @@ term	:	term ASSIGNOP term
 			{ $$ = newANONSUB($2, $3, $4); }
 	|	scalar	%prec '('
 			{ $$ = $1; }
+	|	star '{' expr ';' '}'
+			{ $$ = newBINOP(OP_GELEM, 0, newGVREF(0,$1), $3); }
 	|	star	%prec '('
 			{ $$ = $1; }
 	|	scalar '[' expr ']'	%prec '('
@@ -445,8 +445,7 @@ term	:	term ASSIGNOP term
 	|	THING	%prec '('
 			{ $$ = $1; }
 	|	amper
-			{ $$ = newUNOP(OP_ENTERSUB, 0,
-				scalar($1)); }
+			{ $$ = newUNOP(OP_ENTERSUB, 0, scalar($1)); }
 	|	amper '(' ')'
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1)); }
 	|	amper '(' expr ')'
@@ -455,34 +454,44 @@ term	:	term ASSIGNOP term
 	|	NOAMP WORD listexpr
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    append_elem(OP_LIST,
-				$3, newCVREF(scalar($2)))); }
+				$3, newCVREF(0,scalar($2)))); }
 	|	DO term	%prec UNIOP
 			{ $$ = newUNOP(OP_DOFILE, 0, scalar($2)); }
 	|	DO block	%prec '('
 			{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, scope($2)); }
 	|	DO WORD '(' ')'
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
+			{ $$ = newUNOP(OP_ENTERSUB,
+			    OPf_SPECIAL|OPf_STACKED,
 			    prepend_elem(OP_LIST,
-				scalar(newCVREF(scalar($2))), Nullop)); dep();}
+				scalar(newCVREF(
+				    (OPpENTERSUB_AMPER<<8),
+				    scalar($2)
+				)),Nullop)); dep();}
 	|	DO WORD '(' expr ')'
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
+			{ $$ = newUNOP(OP_ENTERSUB,
+			    OPf_SPECIAL|OPf_STACKED,
 			    append_elem(OP_LIST,
 				$4,
-				scalar(newCVREF(scalar($2))))); dep();}
+				scalar(newCVREF(
+				    (OPpENTERSUB_AMPER<<8),
+				    scalar($2)
+				)))); dep();}
 	|	DO scalar '(' ')'
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
 			    prepend_elem(OP_LIST,
-				scalar(newCVREF(scalar($2))), Nullop)); dep();}
+				scalar(newCVREF(0,scalar($2))), Nullop)); dep();}
 	|	DO scalar '(' expr ')'
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
 			    prepend_elem(OP_LIST,
 				$4,
-				scalar(newCVREF(scalar($2))))); dep();}
+				scalar(newCVREF(0,scalar($2))))); dep();}
 	|	LOOPEX
 			{ $$ = newOP($1, OPf_SPECIAL);
 			    hints |= HINT_BLOCK_SCOPE; }
 	|	LOOPEX term
 			{ $$ = newLOOPEX($1,$2); }
+	|	NOTOP argexpr
+			{ $$ = newUNOP(OP_NOT, 0, scalar($2)); }
 	|	UNIOP
 			{ $$ = newOP($1, 0); }
 	|	UNIOP block
@@ -526,7 +535,7 @@ listexprcom:	/* NULL */
 	;
 
 amper	:	'&' indirob
-			{ $$ = newCVREF($2); }
+			{ $$ = newCVREF($1,$2); }
 	;
 
 scalar	:	'$' indirob

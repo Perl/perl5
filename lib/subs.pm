@@ -20,8 +20,6 @@ See L<perlmod/Pragmatic Modules> and L<strict/subs>.
 =cut
 require 5.000;
 
-$ExportLevel = 0;
-
 sub import {
     my $callpack = caller;
     my $pack = shift;

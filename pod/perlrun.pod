@@ -4,7 +4,10 @@ perlrun - how to execute the Perl interpreter
 
 =head1 SYNOPSIS
 
-B<perl> [switches] filename args
+B<perl>	[B<-acdhnpPsSTuUvw>] [B<-0[octal>]] [B<-D[number/list]>]
+	[B<-F regexp>] [B<-i[extension>]] [B<-I<lt>dir<gt>>]
+	[B<-l[octal]>] [B<-x[dir]>]
+	[programfile | B<-e command>] [argument ...]
 
 =head1 DESCRIPTION
 
@@ -246,14 +249,21 @@ separator if the B<-l> switch is followed by a B<-0> switch:
 
 This sets $\ to newline and then sets $/ to the null character.
 
-=item B<-M>I<module>
-
-executes C<use> I<module> C<;> before executing your script. You can
-also do C<-M'Foo qw(Bar Baz)'>.
-
 =item B<-m>I<module>
 
-executes C<use> I<module> C<();> before executing your script.
+=item B<-M>I<module>
+
+C<-m>I<module> executes C<use> I<module> C<();> before executing your
+script.
+
+C<-M>I<module> executes C<use> I<module> C<;> before executing your
+script.  You can use quotes to add extra code after the module name,
+e.g., C<-M'module qw(foo bar)'>.
+
+A little built-in syntactic sugar means you can also say
+C<-mmodule=foo> or C<-Mmodule=foo> as a shortcut for
+C<-M'module qw(foo)'>.  Note that using the C<=> form
+removes the distinction between -m and -M.
 
 =item B<-n>
 

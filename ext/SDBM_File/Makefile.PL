@@ -9,6 +9,7 @@ WriteMakefile(
     MYEXTLIB => 'sdbm/libsdbm$(LIB_EXT)',
     MAN3PODS 	=> ' ', 	# Pods will be built by installman.
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
+    VERSION_FROM => 'SDBM_File.pm',
 );
 
 

@@ -1,4 +1,4 @@
-Last revised: 14-Dec-1995 by Charles Bailey  bailey@genetics.upenn.edu
+Last revised: 19-Jan-1996 by Charles Bailey  bailey@genetics.upenn.edu
 
 The VMS port of Perl is still under development.  At this time, the Perl
 binaries built under VMS handle internal operations properly, for the most
@@ -12,8 +12,8 @@ you'd like to add something yourself, or join the porting team, we'd love to
 have you!
 
 The current sources and build procedures have been tested on a VAX using VAXC
-and on an AXP using DECC.  If you run into problems with other compilers,
-please let us know.
+and DECC, and on an AXP using DECC.  If you run into problems with other
+compilers, please let us know.
 
 Note to DECC users: Some early versions of the DECCRTL contained a few bugs
 which affect Perl performance:
@@ -49,7 +49,7 @@ stacks available, so it's difficult to automate the process of building Perl
 with socket support in a way which will work on all systems.  
 
 By default, Perl is built without IP socket support.  If you define the macro
-SOCKET when invoking MMS, however, socket support will be included.  As
+SOCKET when invoking MMK, however, socket support will be included.  As
 distributed, Perl for VMS includes support for the SOCKETSHR socket library,
 which is layered on MadGoat software's vendor-independent NETLIB interface. 
 This provides support for all socket calls used by Perl except the
@@ -114,7 +114,10 @@ subdirectory contains several files, among which are the following:
   WriteMain.Pl   - Perl script to generate Perlmain.C
 The [.Ext...] directories contain VMS-specific extensions distributed with
 Perl.  There may also be other files in [.VMS...] pertaining to features under
-development; for the most part, you can ignore them.
+development; for the most part, you can ignore them.  Note that packages in
+[.ext.*] are not built with Perl by default; you build the ones you want
+once the basic Perl build is complete (see the perlvms docs for instructions
+on building extensions.)
 
 Config.VMS and Decrip.MMS/Makefile are set up to build a version of Perl which
 includes all features known to work when this release was assembled.  If you
@@ -141,7 +144,7 @@ it specifically from Config.
 Examine the information at the beginning of Descrip.MMS for information about
 specifying alternate C compilers or building a version of Perl with debugging
 support.  For instance, if you want to use DECC, you'll need to include the
-/macro="decc=1" qualifier to MMS  (If you're using make, these options are not
+/macro="decc=1" qualifier to MMK  (If you're using make, these options are not
 supported.)  If you're on an AXP system, define the macro __AXP__ (MMK does
 this for you), and DECC will automatically be selected.
 
@@ -160,7 +163,14 @@ set up to use VAXC on a VAX, and does not include socket support.  You can
 either edit the Makefile by hand, using Descrip.MMS as a guide, or use the
 Makefile to build Miniperl.Exe, and then run the Perl script MMS2Make.pl,
 found in the [.VMS] subdirectory, to generate a new Makefile with the options
-appropriate to your site.
+appropriate to your site.  If you are using MM[SK], and you decide to rebuild
+Perl with a different set of parameters (e.g. changing the C compiler, or
+adding socket support), be sure to say
+$ MMK/Descrip=[.VMS] realclean
+first, in order to remove files generated during the previous build.  If
+you omit this step, you risk ending up with a copy of Perl which
+composed partially of old files and partially of new ones, which may lead
+to strange effects when you try to run Perl.
 
 Note for sites using DECC:  A bug in some early versions of the DECC RTL on the
 AXP causes newlines to be lost when writing to a pipe.  This causes
@@ -191,6 +201,17 @@ This will build the following files:
                         used to build PerlShr.Exe.  It should be used when
                         rebuilding PerlShr.Exe via MakeMaker-produced
                         Descrip.MMS files for static extensions.
+  c2ph                - Perl program which generates template code to access
+                        C struct members from Perl.
+  h2ph                - Perl program which generates template code to access
+                        #defined constants in a C header file from Perl,
+                        using the "old-style" interface.  (Largely supplanted
+                        by h2xs.)
+  h2xs                - Perl program which generates template files for creating
+                        XSUB extensions, optionally beginning with the #defined
+                        constants in a C header file.
+  [.pod]perldoc       - A Perl program which locates and displays documentation
+                        for Perl and its extensions.
   [.Lib]Config.pm     - the Perl extension which saves configuration information
                         about Perl and your system.
   [.Lib]DynaLoader.pm - The Perl extension which performs dynamic linking of
@@ -200,6 +221,30 @@ This will build the following files:
 There are, of course, a number of other files created for use during the build. 
 Once you've got the binaries built, you may wish to `build' the `tidy' or
 `clean' targets to remove extra files.
+
+If you run into problems during the build, you can get help from the VMSPerl
+or perl5-porters mailing lists (see below).  When you report the problem,
+please include the following information:
+  - The version of Perl you're trying to build.  Please include any
+    "letter" patchlevel, in addition to the version number.  If the
+    build successfully created Miniperl.Exe, you can check this by
+    saying '$ MCR Sys$Disk:[]Miniperl -v'.  Also, please mention
+    where you obtained the distribution kit; in particular, note
+    whether you were using a basic Perl kit or the VMS test kit
+    (see below).
+  - The exact command you issued to build Perl.
+  - A copy of all error messages which were generated during the build.
+    Please include enough of the build log to establish the context of
+    the error messages.
+  - A summary of your configuration.  If the build progressed far enough
+    to generate Miniperl.Exe and [.Lib]Config.pm, you can obtain this
+    by saying '$ MCR Sys$Disk:[]Miniperl "-V"' (note the "" around -V).
+    If not, then you can say '$ MMK/Descrip=[.VMS] printconfig' to
+    produce the summary.
+This may sound like a lot of information to send, but it'll often make
+it easier for someone to spot the problem, instead of having to give
+a spectrum of possibilities.
+  
 
 
 * Installing Perl once it's built
@@ -227,12 +272,17 @@ Once the build is complete, you'll need to do the following:
     is written in a simple markup format which can be easily read.  In this
     directory as well are pod2man and pod2html translators to reformat the
     docs for common display engines; a pod2hlp translator is under development.
-    Information on Perl can also be gleaned from the files in the [.doc]
-    subdirectory (internals documents and summaries of changes), and from
-    the test scripts in the [.t...] subdirectories.  For this reason,
-    you may wish to copy these subtrees into directories under Perl_Root.
+    These files are copied to [.lib.pod] during the installation.
+  - Define a foreign command to execute perldoc, such as
+    $ Perldoc == "''Perl' Perl_Root:[lib.pod]Perldoc -t"
+    This will allow users to retrieve documentation using Perldoc.  For
+    more details, say "perldoc perldoc".
 That's it.
 
+If you run into a bug in Perl, please submit a bug report.  The PerlBug
+program, found in the [.lib] directory, will walk you through the process
+of assembling the necessary information into a bug report, and sending
+of to the Perl bug reporting address, perlbug@perl.com.
 
 * For more information
 
@@ -294,7 +344,7 @@ and to the entire VMSperl group for useful advice and suggestions.  In addition
 the perl5-porters, especially Andy Dougherty <doughera@lafcol.lafayette.edu>
 and Tim Bunce <Tim.Bunce@ig.co.uk>,  deserve credit for their creativity and
 willingness to work with the VMS newcomers.  Finally, the greatest debt of
-gratitude is due to Larry Wall <lwall@netlabs.com>, for having the ideas which
+gratitude is due to Larry Wall <lwall@sems.com>, for having the ideas which
 have made our sleepless nights possible.
 
 Thanks,

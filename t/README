@@ -8,4 +8,4 @@ If you put out extra lines with a '#' character on the front, you don't
 have to worry about removing the extra print statements later since TEST
 ignores lines beginning with '#'.
 
-If you come up with new tests, send them to lwall@netlabs.com.
+If you come up with new tests, send them to lwall@sems.com.

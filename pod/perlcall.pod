@@ -295,6 +295,37 @@ from the stack.
 
 See I<Using G_EVAL> for details of using G_EVAL.
 
+=head2 G_KEEPERR
+
+You may have noticed that using the G_EVAL flag described above will
+B<always> clear the C<$@> variable and set it to a string describing
+the error iff there was an error in the called code.  This unqualified
+resetting of C<$@> can be problematic in the reliable identification of
+errors using the C<eval {}> mechanism, because the possibility exists
+that perl will call other code (end of block processing code, for
+example) between the time the error causes C<$@> to be set within
+C<eval {}>, and the subsequent statement which checks for the value of
+C<$@> gets executed in the user's script.
+
+This scenario will mostly be applicable to code that is meant to be
+called from within destructors, asynchronous callbacks, signal
+handlers, C<__DIE__> or C<__WARN__> hooks, and C<tie> functions.  In
+such situations, you will not want to clear C<$@> at all, but simply to
+append any new errors to any existing value of C<$@>.
+
+The G_KEEPERR flag is meant to be used in conjunction with G_EVAL in
+I<perl_call_*> functions that are used to implement such code.  This flag
+has no effect when G_EVAL is not used.
+
+When G_KEEPERR is used, any errors in the called code will be prefixed
+with the string "\t(in cleanup)", and appended to the current value
+of C<$@>.
+
+The G_KEEPERR flag was introduced in Perl version 5.002.
+
+See I<Using G_KEEPERR> for an example of a situation that warrants the
+use of this flag.
+
 =head2 Determining the Context 
 
 As mentioned above, you can determine the context of the currently
@@ -892,7 +923,6 @@ and some C to call it
     {
         dSP ;
         int count ;
-        SV * sv ;
 
         ENTER ;
         SAVETMPS;
@@ -907,10 +937,9 @@ and some C to call it
         SPAGAIN ;
 
         /* Check the eval first */
-        sv = GvSV(gv_fetchpv("@", TRUE, SVt_PV));
-        if (SvTRUE(sv))
+        if (SvTRUE(GvSV(errgv)))
         {
-            printf ("Uh oh - %s\n", SvPV(sv, na)) ;
+            printf ("Uh oh - %s\n", SvPV(GvSV(errgv), na)) ;
             POPs ;
         }
         else
@@ -950,10 +979,9 @@ I<Subtract>.
 
 The code 
 
-    sv = GvSV(gv_fetchpv("@", TRUE, SVt_PV));
-    if (SvTRUE(sv))
+    if (SvTRUE(GvSV(errgv)))
     {
-        printf ("Uh oh - %s\n", SvPVx(sv, na)) ;
+        printf ("Uh oh - %s\n", SvPV(GvSV(errgv), na)) ;
         POPs ;
     }
 
@@ -961,10 +989,14 @@ is the direct equivalent of this bit of Perl
 
     print "Uh oh - $@\n" if $@ ;
 
+C<errgv> is a perl global of type C<GV *> that points to the
+symbol table entry containing the error.  C<GvSV(errgv)> therefore
+refers to the C equivalent of C<$@>.
+
 =item 3.
 
 Note that the stack is popped using C<POPs> in the block where
-C<SvTRUE(sv)> is true.  This is necessary because whenever a
+C<SvTRUE(GvSV(errgv))> is true.  This is necessary because whenever a
 I<perl_call_*> function invoked with G_EVAL|G_SCALAR returns an error,
 the top of the stack holds the value I<undef>. Since we want the
 program to continue after detecting this error, it is essential that
@@ -972,6 +1004,39 @@ the stack is tidied up by removing the I<undef>.
 
 =back
 
+
+=head2 Using G_KEEPERR
+
+Consider this rather facetious example, where we have used an XS
+version of the call_Subtract example above inside a destructor:
+
+    package Foo;
+    sub new { bless {}, $_[0] }
+    sub Subtract { 
+        my($a,$b) = @_;
+        die "death can be fatal" if $a < $b ;
+        $a - $b;
+    }
+    sub DESTROY { call_Subtract(5, 4); }
+    sub foo { die "foo dies"; }
+
+    package main;
+    eval { Foo->new->foo };
+    print "Saw: $@" if $@;             # should be, but isn't
+
+This example will fail to recognize that an error occurred inside the
+C<eval {}>.  Here's why: the call_Subtract code got executed while perl
+was cleaning up temporaries when exiting the eval block, and since
+call_Subtract is implemented with I<perl_call_pv> using the G_EVAL
+flag, it promptly reset C<$@>.  This results in the failure of the
+outermost test for C<$@>, and thereby the failure of the error trap.
+
+Appending the G_KEEPERR flag, so that the I<perl_call_pv> call in
+call_Subtract reads:
+
+        count = perl_call_pv("Subtract", G_EVAL|G_SCALAR|G_KEEPERR);
+
+will preserve the error and restore reliable error handling.
 
 =head2 Using perl_call_sv
 
@@ -1829,8 +1894,9 @@ Paul Marquess <pmarquess@bfsec.bt.co.uk>
 Special thanks to the following people who assisted in the creation of
 the document.
 
-Jeff Okamoto, Tim Bunce, Nick Gianniotis, Steve Kelem and Larry Wall. 
+Jeff Okamoto, Tim Bunce, Nick Gianniotis, Steve Kelem, Gurusamy Sarathy
+and Larry Wall.
 
 =head1 DATE
 
-Version 1.1, 17th May 1995
+Version 1.2, 16th Jan 1996

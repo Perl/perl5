@@ -54,30 +54,25 @@
 #endif
 
 bool
-do_open(gv,name,len,supplied_fp)
+do_open(gv,name,len,as_raw,rawmode,rawperm,supplied_fp)
 GV *gv;
 register char *name;
 I32 len;
+int as_raw;
+int rawmode, rawperm;
 FILE *supplied_fp;
 {
-    FILE *fp;
     register IO *io = GvIOn(gv);
-    char *myname = savepv(name);
-    int result;
-    int fd;
-    int writing = 0;
-    int dodup;
-    char mode[3];		/* stdio file mode ("r\0" or "r+\0") */
     FILE *saveifp = Nullfp;
     FILE *saveofp = Nullfp;
     char savetype = ' ';
+    int writing = 0;
+    FILE *fp;
+    int fd;
+    int result;
 
-    SAVEFREEPV(myname);
-    mode[0] = mode[1] = mode[2] = '\0';
-    name = myname;
     forkprocess = 1;		/* assume true if no fork */
-    while (len && isSPACE(name[len-1]))
-	name[--len] = '\0';
+
     if (IoIFP(io)) {
 	fd = fileno(IoIFP(io));
 	if (IoTYPE(io) == '-')
@@ -105,95 +100,119 @@ FILE *supplied_fp;
 	      GvENAME(gv));
 	IoOFP(io) = IoIFP(io) = Nullfp;
     }
-    if (*name == '+' && len > 1 && name[len-1] != '|') {	/* scary */
-	mode[1] = *name++;
-	mode[2] = '\0';
-	--len;
-	writing = 1;
-    }
-    else  {
-	mode[1] = '\0';
-    }
-    IoTYPE(io) = *name;
-    if (*name == '|') {
-	/*SUPPRESS 530*/
-	for (name++; isSPACE(*name); name++) ;
-	if (strNE(name,"-"))
-	    TAINT_ENV();
-	TAINT_PROPER("piped open");
-	if (dowarn && name[strlen(name)-1] == '|')
-	    warn("Can't do bidirectional pipe");
-	fp = my_popen(name,"w");
-	writing = 1;
-    }
-    else if (*name == '>') {
-	TAINT_PROPER("open");
-	name++;
-	if (*name == '>') {
-	    mode[0] = IoTYPE(io) = 'a';
-	    name++;
-	}
-	else
-	    mode[0] = 'w';
-	writing = 1;
-	if (*name == '&') {
-	  duplicity:
-	    dodup = 1;
-	    name++;
-	    if (*name == '=') {
-		dodup = 0;
-		name++;
-	    }
-	    if (!*name && supplied_fp)
-		fp = supplied_fp;
-	    else {
-		while (isSPACE(*name))
-		    name++;
-		if (isDIGIT(*name))
-		    fd = atoi(name);
-		else {
-		    IO* thatio;
-		    gv = gv_fetchpv(name,FALSE,SVt_PVIO);
-		    thatio = GvIO(gv);
-		    if (!thatio) {
-#ifdef EINVAL
-			SETERRNO(EINVAL,SS$_IVCHAN);
-#endif
-			goto say_false;
-		    }
-		    if (IoIFP(thatio)) {
-			fd = fileno(IoIFP(thatio));
-			if (IoTYPE(thatio) == 's')
-			    IoTYPE(io) = 's';
-		    }
-		    else
-			fd = -1;
-		}
-		if (dodup)
-		    fd = dup(fd);
-		if (!(fp = fdopen(fd,mode)))
-		    if (dodup)
-			close(fd);
-	    }
-	}
+
+    if (as_raw) {
+	result = rawmode & 3;
+	IoTYPE(io) = "<>++"[result];
+	writing = (result > 0);
+	fd = open(name, rawmode, rawperm);
+	if (fd == -1)
+	    fp = NULL;
 	else {
-	    while (isSPACE(*name))
-		name++;
-	    if (strEQ(name,"-")) {
-		fp = stdout;
-		IoTYPE(io) = '-';
-	    }
-	    else  {
-		fp = fopen(name,mode);
-	    }
+	    fp = fdopen(fd, ((result == 0) ? "r"
+			     : (result == 1) ? "w"
+			     : "r+"));
+	    if (!fp)
+		close(fd);
 	}
     }
     else {
-	if (*name == '<') {
-	    mode[0] = 'r';
+	char *myname;
+	char mode[3];		/* stdio file mode ("r\0" or "r+\0") */
+	int dodup;
+
+	myname = savepvn(name, len);
+	SAVEFREEPV(myname);
+	name = myname;
+	while (len && isSPACE(name[len-1]))
+	    name[--len] = '\0';
+
+	mode[0] = mode[1] = mode[2] = '\0';
+	IoTYPE(io) = *name;
+	if (*name == '+' && len > 1 && name[len-1] != '|') { /* scary */
+	    mode[1] = *name++;
+	    --len;
+	    writing = 1;
+	}
+
+	if (*name == '|') {
+	    /*SUPPRESS 530*/
+	    for (name++; isSPACE(*name); name++) ;
+	    if (strNE(name,"-"))
+		TAINT_ENV();
+	    TAINT_PROPER("piped open");
+	    if (dowarn && name[strlen(name)-1] == '|')
+		warn("Can't do bidirectional pipe");
+	    fp = my_popen(name,"w");
+	    writing = 1;
+	}
+	else if (*name == '>') {
+	    TAINT_PROPER("open");
 	    name++;
-	    while (isSPACE(*name))
+	    if (*name == '>') {
+		mode[0] = IoTYPE(io) = 'a';
 		name++;
+	    }
+	    else
+		mode[0] = 'w';
+	    writing = 1;
+
+	    if (*name == '&') {
+	      duplicity:
+		dodup = 1;
+		name++;
+		if (*name == '=') {
+		    dodup = 0;
+		    name++;
+		}
+		if (!*name && supplied_fp)
+		    fp = supplied_fp;
+		else {
+		    /*SUPPRESS 530*/
+		    for (; isSPACE(*name); name++) ;
+		    if (isDIGIT(*name))
+			fd = atoi(name);
+		    else {
+			IO* thatio;
+			gv = gv_fetchpv(name,FALSE,SVt_PVIO);
+			thatio = GvIO(gv);
+			if (!thatio) {
+#ifdef EINVAL
+			    SETERRNO(EINVAL,SS$_IVCHAN);
+#endif
+			    goto say_false;
+			}
+			if (IoIFP(thatio)) {
+			    fd = fileno(IoIFP(thatio));
+			    if (IoTYPE(thatio) == 's')
+				IoTYPE(io) = 's';
+			}
+			else
+			    fd = -1;
+		    }
+		    if (dodup)
+			fd = dup(fd);
+		    if (!(fp = fdopen(fd,mode)))
+			if (dodup)
+			    close(fd);
+		}
+	    }
+	    else {
+		/*SUPPRESS 530*/
+		for (; isSPACE(*name); name++) ;
+		if (strEQ(name,"-")) {
+		    fp = stdout;
+		    IoTYPE(io) = '-';
+		}
+		else  {
+		    fp = fopen(name,mode);
+		}
+	    }
+	}
+	else if (*name == '<') {
+	    /*SUPPRESS 530*/
+	    for (name++; isSPACE(*name); name++) ;
+	    mode[0] = 'r';
 	    if (*name == '&')
 		goto duplicity;
 	    if (strEQ(name,"-")) {
@@ -340,7 +359,7 @@ register GV *gv;
 	sv_setsv(GvSV(gv),sv);
 	SvSETMAGIC(GvSV(gv));
 	oldname = SvPVx(GvSV(gv), len);
-	if (do_open(gv,oldname,len,Nullfp)) {
+	if (do_open(gv,oldname,len,FALSE,0,0,Nullfp)) {
 	    if (inplace) {
 		TAINT_PROPER("inplace open");
 		if (strEQ(oldname,"-")) {
@@ -388,7 +407,7 @@ register GV *gv;
 		    do_close(gv,FALSE);
 		    (void)unlink(SvPVX(sv));
 		    (void)rename(oldname,SvPVX(sv));
-		    do_open(gv,SvPVX(sv),SvCUR(GvSV(gv)),Nullfp);
+		    do_open(gv,SvPVX(sv),SvCUR(GvSV(gv)),FALSE,0,0,Nullfp);
 #endif /* MSDOS */
 #else
 		    (void)UNLINK(SvPVX(sv));
@@ -417,7 +436,7 @@ register GV *gv;
 		sv_setpvn(sv,">",1);
 		sv_catpv(sv,oldname);
 		SETERRNO(0,0);		/* in case sprintf set errno */
-		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv),Nullfp)) {
+		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv),FALSE,0,0,Nullfp)) {
 		    warn("Can't do inplace edit on %s: %s",
 		      oldname, Strerror(errno) );
 		    do_close(gv,FALSE);
@@ -1286,7 +1305,7 @@ SV **sp;
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
-	croak("%s not implemented", op_name[optype]);
+	croak("%s not implemented", op_desc[optype]);
 #endif
     }
     return -1;			/* should never happen */
@@ -1342,7 +1361,7 @@ SV **sp;
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
-	croak("%s not implemented", op_name[optype]);
+	croak("%s not implemented", op_desc[optype]);
 #endif
     }
 
@@ -1359,7 +1378,7 @@ SV **sp;
 	    a = SvPV(astr, len);
 	    if (len != infosize)
 		croak("Bad arg length for %s, is %d, should be %d",
-			op_name[optype], len, infosize);
+			op_desc[optype], len, infosize);
 	}
     }
     else

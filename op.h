@@ -83,7 +83,8 @@ typedef U32 PADOFFSET;
 
 /* Private for OP_ENTERSUB, OP_RV2?V, OP_?ELEM */
   /* (lower bits carry hints) */
-#define OPpDEREF_DB		16	/* Debug subroutine. */
+#define OPpENTERSUB_AMPER	8	/* Used & form to call. */
+#define OPpENTERSUB_DB		16	/* Debug subroutine. */
 #define OPpDEREF_AV		32	/* Want ref to AV. */
 #define OPpDEREF_HV		64	/* Want ref to HV. */
 
@@ -183,12 +184,6 @@ struct pvop {
     char *	op_pv;
 };
 
-struct cvop {
-    BASEOP
-    CV *	op_cv;
-    OP *	op_cont;
-};
-
 struct loop {
     BASEOP
     OP *	op_first;
@@ -208,7 +203,6 @@ struct loop {
 #define cSVOP ((SVOP*)op)
 #define cGVOP ((GVOP*)op)
 #define cPVOP ((PVOP*)op)
-#define cCVOP ((CVOP*)op)
 #define cCOP ((COP*)op)
 #define cLOOP ((LOOP*)op)
 
@@ -221,7 +215,6 @@ struct loop {
 #define kSVOP ((SVOP*)kid)
 #define kGVOP ((GVOP*)kid)
 #define kPVOP ((PVOP*)kid)
-#define kCVOP ((CVOP*)kid)
 #define kCOP ((COP*)kid)
 #define kLOOP ((LOOP*)kid)
 

@@ -1,9 +1,8 @@
-# Hints for the Power UNIX operating system running on Harris NightHawk
+# Hints for the PowerUX operating system running on Harris NightHawk
 # machines.  Written by Tom.Horsley@mail.hcsc.com
 #
 # This config uses dynamic linking and the Harris C compiler.  It has been
-# tested on a Harris 5800 running Power UNIX as well as a (prototype) Harris
-# 6800 running Power UNIX.
+# tested on a Harris 6800 running PowerUX.
 
 # Internally at Harris, we use a source management tool which winds up
 # giving us read-only copies of source trees that are mostly symbolic links.

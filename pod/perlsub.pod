@@ -32,7 +32,8 @@ Like many languages, Perl provides for user-defined subroutines.  These
 may be located anywhere in the main program, loaded in from other files
 via the C<do>, C<require>, or C<use> keywords, or even generated on the
 fly using C<eval> or anonymous subroutines (closures).  You can even call
-a function indirectly using a variable containing its name or a CODE reference.
+a function indirectly using a variable containing its name or a CODE reference
+to it, as in C<$var = \&function>.
 
 The Perl model for function call and return values is simple: all
 functions are passed as parameters one single flat list of scalars, and
@@ -126,7 +127,8 @@ of changing them in place:
     sub upcase {
 	my @parms = @_;
 	for (@parms) { tr/a-z/A-Z/ } 
-	return @parms;
+	# wantarray checks if we were called in list context
+  	return wantarray ? @parms : $parms[0];
     } 
 
 Notice how this (unprototyped) function doesn't care whether it was passed
@@ -169,6 +171,11 @@ new users may wish to avoid.
 
     &foo;		# foo() get current args, like foo(@_) !!
     foo;		# like foo() IFF sub foo pre-declared, else "foo"
+
+Not only does the "&" form make the argument list optional, but it also
+disables any prototype checking on the arguments you do provide.  This
+is partly for historical reasons, and partly for having a convenient way
+to cheat if you know what you're doing.  See the section on Prototypes below.
 
 =head2 Private Variables via my()
 
@@ -450,7 +457,8 @@ the individual arrays.  For more on typeglobs, see L<perldata/"Typeglobs">.
 If you want to pass more than one array or hash into a function--or 
 return them from it--and have them maintain their integrity,
 then you're going to have to use an explicit pass-by-reference.
-Before you do that, you need to understand references; see L<perlref>.
+Before you do that, you need to understand references as detailed in L<perlref>.
+This section may not make much sense to you otherwise.
 
 Here are a few simple examples.  First, let's pass in several
 arrays to a function and have it pop all of then, return a new
@@ -509,7 +517,7 @@ in order of how many elements they have in them:
 	if (@$cref > @$dref) {
 	    return ($cref, $dref);
 	} else {
-	    return ($cref, $cref);
+	    return ($dref, $cref);
 	} 
     } 
 
@@ -564,13 +572,23 @@ As of the 5.002 release of perl, if you declare
 
     sub mypush (\@@)
 
-then mypush() takes arguments exactly like push() does.  (This only works
-for function calls that are visible at compile time, not indirect function
-calls through a C<&$func> reference nor for method calls as described in
-L<perlobj>.)
+then mypush() takes arguments exactly like push() does.  The declaration
+of the function to be called must be visible at compile time.  The prototype
+only affects the interpretation of new-style calls to the function, where
+new-style is defined as not using the C<&> character.  In other words,
+if you call it like a builtin function, then it behaves like a builtin
+function.  If you call it like an old-fashioned subroutine, then it
+behaves like an old-fashioned subroutine.  It naturally falls out from
+this rule that prototypes have no influence on subroutine references
+like C<\&foo> or on indirect subroutine calls like C<&{$subref}>.
 
-Here are the prototypes for some other functions that parse almost exactly
-like the corresponding builtins.
+Method calls are not influenced by prototypes either, because the
+function to be called is indeterminate at compile time, since it depends
+on inheritance.
+
+Since the intent is primarily to let you define subroutines that work
+like builtin commands, here are the prototypes for some other functions
+that parse almost exactly like the corresponding builtins.
 
     Declared as			Called as
 
@@ -589,15 +607,21 @@ like the corresponding builtins.
     sub myrand ($)		myrand 42
     sub mytime ()		mytime
 
-Any backslashed prototype character must be passed something starting
-with that character.  Any unbackslashed @ or % eats all the rest of the
-arguments, and forces list context.  An argument represented by $
-forces scalar context.  An & requires an anonymous subroutine, and *
-does whatever it has to do to turn the argument into a reference to a
-symbol table entry.  A semicolon separates mandatory arguments from
-optional arguments.
+Any backslashed prototype character represents an actual argument
+that absolutely must start with that character.
 
-Note that the last three are syntactically distinguished by the lexer.
+Unbackslashed prototype characters have special meanings.  Any
+unbackslashed @ or % eats all the rest of the arguments, and forces
+list context.  An argument represented by $ forces scalar context.  An
+& requires an anonymous subroutine, which, if passed as the first
+argument, does not require the "sub" keyword or a subsequent comma.  A
+* does whatever it has to do to turn the argument into a reference to a
+symbol table entry.
+
+A semicolon separates mandatory arguments from optional arguments.
+(It is redundant before @ or %.)
+
+Note how the last three examples above are treated specially by the parser.
 mygrep() is parsed as a true list operator, myrand() is parsed as a
 true unary operator with unary precedence the same as rand(), and
 mytime() is truly argumentless, just like time().  That is, if you

@@ -237,7 +237,7 @@ sub expr {
 		}
 	    }
 	    else {
-		if ($inif && $new !~ /defined\($/) {
+		if ($inif && $new !~ /defined\s*\($/) {
 		    $new .= '(defined(&' . $id . ') ? &' . $id . ' : 0)';
 		} 
 		elsif (/^\[/) { 

@@ -224,9 +224,15 @@ FORCE:
 
 # The $& notation tells Sequent machines that it can do a parallel make,
 # and is harmless otherwise.
+# The miniperl -w -MExporter line is a basic cheap test to catch errors
+# before make goes on to run preplibrary and then MakeMaker on extensions.
+# This is very handy because later errors are often caused by miniperl
+# build problems but that's not obvious to the novice.
+# The Module used here must not depend on Config or any extensions.
 
 miniperl: $& miniperlmain.o $(perllib)
 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain.o $(perllib) $(libs)
+	@miniperl -w -MExporter -e 0 || $(MAKE) minitest
 
 miniperlmain.o: miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -327,7 +333,7 @@ install.man:	all
 # normally shouldn't remake perly.[ch].
 
 run_byacc:	FORCE
-	@ echo 'Expect' 129 shift/reduce and 1 reduce/reduce conflict
+	@ echo 'Expect' 130 shift/reduce and 1 reduce/reduce conflict
 	$(BYACC) -d perly.y
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
 	mv y.tab.h perly.h

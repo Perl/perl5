@@ -261,7 +261,7 @@ T_ARRAY
 T_IN
 	{
 	    GV *gv = newGVgen("$Package");
-	    if ( do_open(gv, "<&", 2, $var) )
+	    if ( do_open(gv, "<&", 2, FALSE, 0, 0, $var) )
 		sv_setsv($arg, sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1)));
 	    else
 		$arg = &sv_undef;
@@ -269,7 +269,7 @@ T_IN
 T_INOUT
 	{
 	    GV *gv = newGVgen("$Package");
-	    if ( do_open(gv, "+<&", 3, $var) )
+	    if ( do_open(gv, "+<&", 3, FALSE, 0, 0, $var) )
 		sv_setsv($arg, sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1)));
 	    else
 		$arg = &sv_undef;
@@ -277,7 +277,7 @@ T_INOUT
 T_OUT
 	{
 	    GV *gv = newGVgen("$Package");
-	    if ( do_open(gv, "+>&", 3, $var) )
+	    if ( do_open(gv, "+>&", 3, FALSE, 0, 0, $var) )
 		sv_setsv($arg, sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1)));
 	    else
 		$arg = &sv_undef;

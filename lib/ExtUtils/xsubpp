@@ -76,13 +76,12 @@ perl(1), perlxs(1), perlxstut(1), perlapi(1)
 =cut
 
 # Global Constants
-$XSUBPP_version = "1.929";
+$XSUBPP_version = "1.932";
 require 5.002;
 
 sub Q ;
 
-$FH_string = 'File0000' ;
-*FH = $FH_string ;
+$FH = 'File0000' ;
 
 $usage = "Usage: xsubpp [-v] [-C++] [-except] [-prototypes] [-noversioncheck] [-s pattern] [-typemap typemap]... file.xs\n";
 
@@ -405,6 +404,9 @@ sub VERSIONCHECK_handler ()
 
 sub PROTOTYPE_handler ()
 {
+    death("Error: Only 1 PROTOTYPE definition allowed per xsub") 
+        if $proto_in_this_xsub ++ ;
+
     for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
 	next unless /\S/;
 	TrimWhitespace($_) ;
@@ -422,7 +424,9 @@ sub PROTOTYPE_handler ()
             $ProtoThisXSUB = C_string($_) ;
         }
     }
+
     $ProtoUsed = 1 ;
+
 }
 
 sub PROTOTYPES_handler ()
@@ -448,9 +452,6 @@ sub INCLUDE_handler ()
  
     TrimWhitespace($_) ;
  
-    # If the filename is enclosed in quotes, remove them.
-    s/^'([^']*)'$/$1/ or s/^"([^"]*)"$/$1/ ;
-
     death("INCLUDE: filename missing")
         unless $_ ;
 
@@ -470,13 +471,13 @@ sub INCLUDE_handler ()
         Line            => \@line,
         LineNo          => \@line_no,
         Filename        => $filename,
-        Handle          => $FH_string,
+        Handle          => $FH,
         }) ;
  
-    ++ $FH_string ;
+    ++ $FH ;
 
     # open the new file
-    open ($FH_string, "$_") or death("Cannot open '$_': $!") ;
+    open ($FH, "$_") or death("Cannot open '$_': $!") ;
  
     print Q<<"EOF" ;
 #
@@ -484,11 +485,17 @@ sub INCLUDE_handler ()
 #
 EOF
 
-    *FH = $FH_string ;
     $filename = $_ ;
 
-    # Prime the pump by reading the first line
-    $lastline = <FH> ;
+    # Prime the pump by reading the first 
+    # non-blank line
+
+    # skip leading blank lines
+    while (<$FH>) {
+        last unless /^\s*$/ ;
+    }
+
+    $lastline = $_ ;
     $lastline_no = $. ;
  
 }
@@ -504,9 +511,9 @@ sub PopFile()
     -- $IncludedFiles{$filename}
         unless $isPipe ;
 
-    close FH ;
+    close $FH ;
 
-    *FH         = $data->{Handle} ;
+    $FH         = $data->{Handle} ;
     $filename   = $data->{Filename} ;
     $lastline   = $data->{LastLine} ;
     $lastline_no = $data->{LastLineNo} ;
@@ -581,7 +588,7 @@ sub Q {
     $text;
 }
 
-open(FH, $filename) or die "cannot open $filename: $!\n";
+open($FH, $filename) or die "cannot open $filename: $!\n";
 
 # Identify the version of xsubpp used
 print <<EOM ;
@@ -596,7 +603,7 @@ print <<EOM ;
 EOM
  
 
-while (<FH>) {
+while (<$FH>) {
     last if ($Module, $Package, $Prefix) =
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
     print $_;
@@ -607,14 +614,14 @@ $lastline    = $_;
 $lastline_no = $.;
 
 
-# Read next xsub into @line from ($lastline, <FH>).
+# Read next xsub into @line from ($lastline, <$FH>).
 sub fetch_para {
     # parse paragraph
     @line = ();
     @line_no = () ;
     if (! defined $lastline) {
         return 1 if PopFile() ;
-        return 0 ; 
+        return 0 ;
     }
 
     if ($lastline =~
@@ -638,11 +645,11 @@ sub fetch_para {
 	}
 
 	# Read next line and continuation lines
-	last unless defined($lastline = <FH>);
+	last unless defined($lastline = <$FH>);
 	$lastline_no = $.;
 	my $tmp_line;
 	$lastline .= $tmp_line
-	    while ($lastline =~ /\\$/ && defined($tmp_line = <FH>));
+	    while ($lastline =~ /\\$/ && defined($tmp_line = <$FH>));
 	    
 	chomp $lastline;
 	$lastline =~ s/^\s+$//;
@@ -673,6 +680,7 @@ while (fetch_para()) {
     undef($wantRETVAL) ;
     undef(%arg_list) ;
     undef(@proto_arg) ;
+    undef($proto_in_this_xsub) ;
     $ProtoThisXSUB = $WantPrototypes ;
 
     $_ = shift(@line);
@@ -986,7 +994,7 @@ for (@Func_name) {
 #        XSANY.any_i32 = $value ;
 EOF
             print Q<<"EOF" if $proto ;
-#        sv_setpv(cv, $ProtoXSUB{$pname}) ;
+#        sv_setpv((SV*)cv, $ProtoXSUB{$pname}) ;
 EOF
         }
     }

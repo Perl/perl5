@@ -119,7 +119,7 @@ pack, read, syscall, sysread, syswrite, unpack, vec
 
 =item Functions for filehandles, files, or directories
 
-C<-X>, chdir, chmod, chown, chroot, fcntl, glob, ioctl, link,
+-X, chdir, chmod, chown, chroot, fcntl, glob, ioctl, link,
 lstat, mkdir, open, opendir, readlink, rename, rmdir,
 stat, symlink, umask, unlink, utime
 
@@ -1561,7 +1561,7 @@ or the undefined value if there is an error.
 
 Calls the System V IPC function msgsnd to send the message MSG to the
 message queue ID.  MSG must begin with the long integer message type,
-which may be created with C<pack("L", $type)>.  Returns TRUE if
+which may be created with C<pack("l", $type)>.  Returns TRUE if
 successful, or FALSE if there is an error.
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
@@ -1646,7 +1646,6 @@ dealing with this.  The key distinction between systems that need binmode
 and those that don't is their text file formats.  Systems like Unix and
 Plan9 that delimit lines with a single character, and that encode that
 character in C as '\n', do not need C<binmode>.  The rest need it.
-
 
 Examples:
 
@@ -1751,6 +1750,24 @@ Note: on any operation which may do a fork, unflushed buffers remain
 unflushed in both processes, which means you may need to set $| to
 avoid duplicate output.
 
+Using the FileHandle constructor from the FileHandle package,
+you can generate anonymous filehandles which have the scope of whatever
+variables hold references to them, and automatically close whenever
+and however you leave that scope:
+
+    use FileHandle;
+    ...
+    sub read_myfile_munged {
+	my $ALL = shift;
+	my $handle = new FileHandle;
+	open($handle, "myfile") or die "myfile: $!";
+	$first = <$handle>
+	    or return ();     # Automatically closed here.
+	mung $first or die "mung failed";	# Or here.
+	return $first, <$handle> if $ALL;	# Or here.
+	$first;					# Or here.
+    }
+
 The filename that is passed to open will have leading and trailing
 whitespace deleted.  In order to open a file with arbitrary weird
 characters in it, it's necessary to protect any leading and trailing
@@ -1759,19 +1776,17 @@ whitespace thusly:
     $file =~ s#^(\s)#./$1#;
     open(FOO, "< $file\0");
 
-If you want a "real" C open() (see L<open(2)) on your system, then
-you should probably use the POSIX::open() function as found in the L<POSIX> 
-documents.  For example:
+If you want a "real" C open() (see L<open(2)> on your system), then
+you should use the sysopen() function.  This is another way to
+protect your filenames from interpretation.  For example:
 
     use FileHandle;
-    use POSIX qw(:fcntl_h);
-    $fd = POSIX::open($path, O_RDWR|O_CREAT|O_EXCL, 0700);
-    die "POSIX::open $path: $!" unless defined $fd;
-    $fh = FileHandle->new_from_fd($fd, $amode) || die "fdopen: $!";
-    $fh->autoflush(1);
-    $fh->print("stuff $$\n");
-    seek($fh, 0, SEEK_SET);
-    print "File contains: ", <$fh>;
+    sysopen(HANDLE, $path, O_RDWR|O_CREAT|O_EXCL, 0700)
+	or die "sysopen $path: $!";
+    HANDLE->autoflush(1);
+    HANDLE->print("stuff $$\n");
+    seek(HANDLE, 0, 0);
+    print "File contains: ", <HANDLE>;
 
 See L</seek()> for some details about mixing reading and writing.
 
@@ -2326,9 +2341,12 @@ The usual idiom is:
     ($nfound,$timeleft) =
       select($rout=$rin, $wout=$win, $eout=$ein, $timeout);
 
-or to block until something becomes ready:
+or to block until something becomes ready just do this 
 
     $nfound = select($rout=$rin, $wout=$win, $eout=$ein, undef);
+
+Most systems do not both to return anything useful in $timeleft, so
+calling select() in a scalar context just returns $nfound.
 
 Any of the bitmasks can also be undef.  The timeout, if specified, is
 in seconds, which may be fractional.  Note: not all implementations are
@@ -2524,6 +2542,10 @@ Examples:
 	$age{$a} <=> $age{$b};	# presuming integers
     }
     @sortedclass = sort byage @class;
+
+    # this sorts the %age associative arrays by value 
+    # instead of key using an inline function
+    @eldest = sort { $age{$b} <=> $age{$a} } keys %age;
 
     sub backwards { $b cmp $a; }
     @harry = ('dog','cat','x','Cain','Abel');
@@ -2732,6 +2754,25 @@ the stat fails.  Typically used as follows:
        $atime,$mtime,$ctime,$blksize,$blocks)
            = stat($filename);
 
+Not all fields are supported on all filesystem types.  Here are the 
+meaning of the fields:
+
+  dev	    device number of filesystem 
+  ino	    inode number 
+  mode	    file mode  (type and permissions)
+  nlink	    number of (hard) links to the file 
+  uid	    numeric user ID of file's owner 
+  gid	    numer group ID of file's owner 
+  rdev	    the device identifier (special files only)
+  size	    total size of file, in bytes 
+  atime	    last access time since the epoch
+  mtime	    last modify time since the epoch
+  ctime	    inode change time (NOT creation type!) since the epoch
+  blksize   preferred blocksize for file system I/O
+  blocks    actual number of blocks allocated
+
+(The epoch was at 00:00 January 1, 1970 GMT.)
+
 If stat is passed the special filehandle consisting of an underline, no
 stat is done, but the current contents of the stat structure from the
 last stat or filetest are returned.  Example:
@@ -2857,6 +2898,27 @@ like numbers.
 
 Note that Perl only supports passing of up to 14 arguments to your system call,
 which in practice should usually suffice.
+
+=item sysopen FILEHANDLE,FILENAME,MODE
+
+=item sysopen FILEHANDLE,FILENAME,MODE,PERMS
+
+Opens the file whose filename is given by FILENAME, and associates it
+with FILEHANDLE.  If FILEHANDLE is an expression, its value is used as
+the name of the real filehandle wanted.  This function calls the
+underlying operating system's C<open> function with the parameters
+FILENAME, MODE, PERMS.
+
+The possible values and flag bits of the MODE parameter are
+system-dependent; they are available via the standard module C<Fcntl>.
+However, for historical reasons, some values are universal: zero means
+read-only, one means write-only, and two means read/write.
+
+If the file named by FILENAME does not exist and the C<open> call
+creates it (typically because MODE includes the O_CREAT flag), then
+the value of PERMS specifies the permissions of the newly created
+file.  If PERMS is omitted, the default value is 0666, which allows
+read and write for all.  This default is reasonable: see C<umask>.
 
 =item sysread FILEHANDLE,SCALAR,LENGTH,OFFSET
 
@@ -3151,7 +3213,7 @@ Returns a normal array consisting of all the values of the named
 associative array.  (In a scalar context, returns the number of
 values.)  The values are returned in an apparently random order, but it
 is the same order as either the keys() or each() function would produce
-on the same array.  See also keys() and each().
+on the same array.  See also keys(), each(), and sort().
 
 =item vec EXPR,OFFSET,BITS
 

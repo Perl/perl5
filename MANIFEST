@@ -93,6 +93,9 @@ ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs		Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL		Fcntl extension makefile writer
+ext/FileHandle/FileHandle.pm	FileHandle extension Perl module
+ext/FileHandle/FileHandle.xs	FileHandle extension external subroutines
+ext/FileHandle/Makefile.PL	FileHandle extension makefile writer
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
@@ -211,7 +214,7 @@ hints/next_3.sh		Hints for named architecture
 hints/next_3_0.sh	Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
-hints/powerunix.sh	Hints for named architecture
+hints/powerux.sh	Hints for named architecture
 hints/sco.sh		Hints for named architecture
 hints/sco_2_3_0.sh	Hints for named architecture
 hints/sco_2_3_1.sh	Hints for named architecture
@@ -244,6 +247,7 @@ lib/Benchmark.pm	A module to time pieces of code and such
 lib/Carp.pm		Error message base class
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
 lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
+lib/DirHandle.pm	like FileHandle only for directories
 lib/English.pm		Readable aliases for short variables
 lib/Env.pm		Map environment into ordinary variables
 lib/Exporter.pm		Exporter base class
@@ -252,12 +256,14 @@ lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS.
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
+lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/File/Basename.pm	A module to emulate the basename program
 lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	A module to do things like `mkdir -p' and `rm -r'
+lib/FileCache.pm	Keep more files open than the system permits
 lib/FileHandle.pm	FileHandle methods
 lib/Getopt/Long.pm	A module to fetch command options (GetOptions)
 lib/Getopt/Std.pm	A module to fetch command options (getopt, getopts)
@@ -270,9 +276,11 @@ lib/Math/Complex.pm	A Complex package
 lib/Net/Ping.pm		Ping methods
 lib/Pod/Text.pm		Convert POD data to formatted ASCII text
 lib/Search/Dict.pm	A module to do binary search on dictionaries
+lib/SelectSaver.pm	A module to enforce proper select scoping
 lib/SelfLoader.pm	A module to load functions only on demand.
 lib/Shell.pm		A module to make AUTOLOADEed system() calls
 lib/SubstrHash.pm	Compact hash for known key, value and table size
+lib/Symbol.pm		Symbol table manipulation routines
 lib/Sys/Hostname.pm	Hostname methods
 lib/Sys/Syslog.pm	Perl module supporting syslogging
 lib/Term/Cap.pm		Perl module supporting termcap usage
@@ -331,6 +339,7 @@ lib/tainted.pl		Old code for tainting
 lib/termcap.pl		Perl library supporting termcap usage
 lib/timelocal.pl	Perl library supporting inverse of localtime, gmtime
 lib/validate.pl		Perl library supporting wholesale file mode validation
+lib/vars.pm		Declare pseudo-imported global variables
 makeaperl.SH		perl script that produces a new perl binary
 makedepend.SH		Precursor to makedepend
 makedir.SH		Precursor to makedir
@@ -464,7 +473,9 @@ t/lib/bigintpm.t	See if BigInt.pm works
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
+t/lib/dirhand.t		See if DirHandle works
 t/lib/english.t		See if English works
+t/lib/filehand.t	See if FileHandle works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
@@ -544,13 +555,15 @@ vms/config.vms		default config.h for VMS
 vms/descrip.mms		MM[SK] description file for build
 vms/ext/Filespec.pm	VMS-Unix file syntax interconversion
 vms/ext/MM_VMS.pm	VMS-specific methods for MakeMaker
-vms/ext/VMS/stdio/Makefile.PL	MakeMaker driver for VMS::stdio
-vms/ext/VMS/stdio/stdio.pm	VMS options to stdio routines
-vms/ext/VMS/stdio/stdio.xs	VMS options to stdio routines
+vms/ext/stdio/Makefile.PL	MakeMaker driver for VMS::stdio
+vms/ext/stdio/stdio.pm	VMS options to stdio routines
+vms/ext/stdio/stdio.xs	VMS options to stdio routines
 vms/gen_shrfls.pl	generate options files and glue for shareable image
 vms/genconfig.pl	retcon config.sh from config.h
 vms/genopt.com		hack to write options files in case of broken makes
 vms/mms2make.pl		convert descrip.mms to make syntax
+vms/make_command.com	record MM[SK] command used to build Perl
+vms/myconfig.com	record local configuration info for bug report
 vms/perlvms.pod		VMS-specific additions to Perl documentation
 vms/perly_c.vms		perly.c with fixed declarations for global syms
 vms/perly_h.vms		perly.h with fixed declarations for global syms

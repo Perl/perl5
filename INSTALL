@@ -522,6 +522,21 @@ If individual tests bomb, you can run them by hand, e.g.,
 
 	./perl op/groups.t
 
+B<NOTE>: one possible reason for errors is that some external programs
+may be broken due to the combination of your environment and the way
+C<make test> exercises them. This may happen for example if you have
+one or more of these environment variables set:
+C<LC_ALL LC_CTYPE LANG>. In certain UNIXes especially the non-English
+locales are known to cause programs to exhibit mysterious errors.
+If you have any of the above environment variables set, please try
+C<setenv LC_ALL C> or <LC_ALL=C;export LC_ALL>, for C<csh>-style and
+C<Bourne>-style shells, respectively, from the command line and then
+retry C<make test>. If the tests then succeed, you may have a broken
+program that is confusing the testing. Please run the troublesome test
+by hand as shown above and see whether you can locate the program.
+Look for things like:
+C<exec, `backquoted command`, system, open("|...")> or C<open("...|")>.
+All these mean that Perl is trying to run some external program.
 =head1 INSTALLING PERL5
 
 =head1 make install

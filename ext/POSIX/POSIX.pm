@@ -1,11 +1,15 @@
 package POSIX;
 
 use Carp;
-require Exporter;
 use AutoLoader;
-require DynaLoader;
 require Config;
+use Symbol;
+
+require Exporter;
+require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
+
+$VERSION = $VERSION = "1.00" ;
 
 %EXPORT_TAGS = (
 
@@ -78,8 +82,8 @@ require Config;
     stddef_h =>	[qw(NULL offsetof)],
 
     stdio_h =>	[qw(BUFSIZ EOF FILENAME_MAX L_ctermid L_cuserid
-		L_tmpname NULL SEEK_CUR SEEK_END SEEK_SET STREAM_MAX
-		TMP_MAX stderr stdin stdout _IOFBF _IOLBF _IONBF
+		L_tmpname NULL SEEK_CUR SEEK_END SEEK_SET
+		STREAM_MAX TMP_MAX stderr stdin stdout
 		clearerr fclose fdopen feof ferror fflush fgetc fgetpos
 		fgets fopen fprintf fputc fputs fread freopen
 		fscanf fseek fsetpos ftell fwrite getchar gets
@@ -206,28 +210,19 @@ sub AUTOLOAD {
 }
 
 sub usage { 
-    local ($mess) = @_;
+    my ($mess) = @_;
     croak "Usage: POSIX::$mess";
 }
 
 sub redef { 
-    local ($mess) = @_;
+    my ($mess) = @_;
     croak "Use method $mess instead";
 }
 
 sub unimpl { 
-    local ($mess) = @_;
+    my ($mess) = @_;
     $mess =~ s/xxx//;
     croak "Unimplemented: POSIX::$mess";
-}
-
-sub gensym {
-    my $pkg = @_ ? ref($_[0]) || $_[0] : "";
-    local *{$pkg . "::GLOB" . ++$seq};
-    \delete ${$pkg . "::"}{'GLOB' . $seq};
-}
-
-sub ungensym {
 }
 
 ############################
@@ -237,75 +232,6 @@ sub new {
     bless {HANDLER => $_[1], MASK => $_[2], FLAGS => $_[3]};
 }
 
-############################
-package FileHandle;
-
-sub new {
-    POSIX::usage "FileHandle->new(filename, posixmode)" if @_ != 3;
-    local($class,$filename,$mode) = @_;
-    local($sym) = $class->POSIX::gensym;
-    $mode =~ s/a.*/>>/ ||
-    $mode =~ s/w.*/>/ ||
-    ($mode = '<');
-    open($sym, "$mode $filename") and
-    bless $sym => $class;
-}
-
-sub new_from_fd {
-    POSIX::usage "FileHandle->new_from_fd(fd,mode)" if @_ != 3;
-    local($class,$fd,$mode) = @_;
-    local($sym) = $class->POSIX::gensym;
-    $mode =~ s/a.*/>>/ ||
-    $mode =~ s/w.*/>/ ||
-    ($mode = '<');
-    open($sym, "$mode&=$fd") and
-    bless $sym => $class;
-}
-
-sub clearerr {
-    POSIX::usage "clearerr(filehandle)" if @_ != 1;
-    seek($_[0], 0, 1);
-}
-
-sub close {
-    POSIX::usage "close(filehandle)" if @_ != 1;
-    close($_[0]);
-}
-
-sub DESTROY {
-    close($_[0]);
-}
-
-sub eof {
-    POSIX::usage "eof(filehandle)" if @_ != 1;
-    eof($_[0]);
-}
-
-sub getc {
-    POSIX::usage "getc(filehandle)" if @_ != 1;
-    getc($_[0]);
-}
-
-sub gets {
-    POSIX::usage "gets(filehandle)" if @_ != 1;
-    local($handle) = @_;
-    scalar <$handle>;
-}
-
-sub fileno {
-    POSIX::usage "fileno(filehandle)" if @_ != 1;
-    fileno($_[0]);
-}
-
-sub seek {
-    POSIX::usage "seek(filehandle,pos,whence)" if @_ != 3;
-    seek($_[0], $_[1], $_[2]);
-}
-
-sub tell {
-    POSIX::usage "tell(filehandle)" if @_ != 1;
-    tell($_[0]);
-}
 ############################
 package POSIX; # return to package POSIX so AutoSplit is happy
 1;
@@ -335,7 +261,7 @@ sub closedir {
 
 sub opendir {
     usage "opendir(directory)" if @_ != 1;
-    local($dirhandle) = POSIX->gensym;
+    my $dirhandle = gensym;
     opendir($dirhandle, $_[0])
 	? $dirhandle
 	: undef;
@@ -807,9 +733,9 @@ sub chmod {
 
 sub fstat {
     usage "fstat(fd)" if @_ != 1;
-    local(*TMP);
+    local *TMP;
     open(TMP, "<&$_[0]");		# Gross.
-    local(@l) = stat(TMP);
+    my @l = stat(TMP);
     close(TMP);
     @l;
 }
@@ -922,7 +848,7 @@ sub getgid {
 
 sub getgroups {
     usage "getgroups()" if @_ != 0;
-    local(%seen) = ();
+    my %seen;
     grep(!$seen{$_}++, split(' ', $) ));
 }
 

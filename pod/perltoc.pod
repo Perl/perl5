@@ -2793,7 +2793,7 @@ have man pages yet:
 
 =head1 AUTHOR
 
-Larry Wall E<lt><F<lwall@netlabs.com>E<gt>, with the help of oodles of
+Larry Wall E<lt><F<lwall@sems.com>E<gt>, with the help of oodles of
 other folks.
 
 

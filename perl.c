@@ -84,6 +84,9 @@ register PerlInterpreter *sv_interp;
 	SvNV(&sv_yes);
 	SvREADONLY_on(&sv_yes);
 
+	nrs = newSVpv("\n", 1);
+	rs = SvREFCNT_inc(nrs);
+
 #ifdef MSDOS
 	/*
 	 * There is no way we can refer to them from Perl so close them to save
@@ -105,13 +108,7 @@ register PerlInterpreter *sv_interp;
     laststype	= OP_STAT;
     maxscream	= -1;
     maxsysfd	= MAXSYSFD;
-    nrs		= "\n";
-    nrschar	= '\n';
-    nrslen	= 1;
-    rs		= "\n";
-    rschar	= '\n';
     rsfp	= Nullfp;
-    rslen	= 1;
     statname	= Nullsv;
     tmps_floor	= -1;
 #endif
@@ -379,7 +376,7 @@ setuid perl scripts securely.\n");
 		s += strlen(s);
 	    }
 	    av_push(preambleav, Sv);
-	    scriptname = "/dev/null";	/* don't look for script or read stdin */
+	    scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
 	    goto reswitch;
 	case 'x':
 	    doextract = TRUE;
@@ -473,12 +470,9 @@ setuid perl scripts securely.\n");
     }
 
     /* now that script is parsed, we can modify record separator */
-
-    rs = nrs;
-    rslen = nrslen;
-    rschar = nrschar;
-    rspara = (nrslen == 2);
-    sv_setpvn(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), rs, rslen);
+    SvREFCNT_dec(rs);
+    rs = SvREFCNT_inc(nrs);
+    sv_setsv(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), rs);
 
     if (do_undump)
 	my_unexec();
@@ -488,6 +482,12 @@ setuid perl scripts securely.\n");
 
     LEAVE;
     FREETMPS;
+
+#ifdef DEBUGGING_MSTATS
+    if ((s=getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
+	dump_mstats("after compilation:");
+#endif
+
     ENTER;
     restartop = 0;
     return 0;
@@ -508,6 +508,10 @@ PerlInterpreter *sv_interp;
 	if (endav)
 	    calllist(endav);
 	FREETMPS;
+#ifdef DEBUGGING_MSTATS
+	if (getenv("PERL_DEBUG_MSTATS"))
+	    dump_mstats("after execution:  ");
+#endif
 	return(statusvalue);		/* my_exit() was called */
     case 3:
 	if (!restartop) {
@@ -986,20 +990,19 @@ moreswitches(s)
 char *s;
 {
     I32 numlen;
+    U32 rschar;
 
     switch (*s) {
     case '0':
-	nrschar = scan_oct(s, 4, &numlen);
-	nrs = savepvn("\n",1);
-	*nrs = nrschar;
-	if (nrschar > 0377) {
-	    nrslen = 0;
-	    nrs = "";
-	}
-	else if (!nrschar && numlen >= 2) {
-	    nrslen = 2;
-	    nrs = "\n\n";
-	    nrschar = '\n';
+	rschar = scan_oct(s, 4, &numlen);
+	SvREFCNT_dec(nrs);
+	if (rschar & ~((U8)~0))
+	    nrs = &sv_undef;
+	else if (!rschar && numlen >= 2)
+	    nrs = newSVpv("", 0);
+	else {
+	    char ch = rschar;
+	    nrs = newSVpv(&ch, 1);
 	}
 	return s + numlen;
     case 'F':
@@ -1018,7 +1021,7 @@ char *s;
     case 'd':
 	taint_not("-d");
 	s++;
-	if (*s == ':')  {
+	if (*s == ':' || *s == '=')  {
 	    sprintf(buf, "use Devel::%s;", ++s);
 	    s += strlen(s);
 	    my_setenv("PERL5DB",buf);
@@ -1084,8 +1087,12 @@ char *s;
 	    s += numlen;
 	}
 	else {
-	    ors = savepvn(nrs,nrslen);
-	    orslen = nrslen;
+	    if (RsPARA(nrs)) {
+		ors = savepvn("\n\n", 2);
+		orslen = 2;
+	    }
+	    else
+		ors = SvPV(nrs, orslen);
 	}
 	return s;
     case 'M':
@@ -1094,16 +1101,27 @@ char *s;
     case 'm':
 	taint_not("-m");	/* XXX ? */
 	if (*++s) {
-	    char tmpbuf[90];
+	    char *start = s;
+	    Sv = newSVpv("use ",4);
+	    /* We allow -M'Module qw(Foo Bar)'	*/
+	    while(isALNUM(*s) || *s==':') ++s;
+	    if (*s != '=') {
+		sv_catpv(Sv, start);
+		if (*(start-1) == 'm') {
+		    if (*s != '\0')
+			croak("Can't use '%c' after -mname", *s);
+		    sv_catpv( Sv, " ()");
+		}
+	    } else {
+		sv_catpvn(Sv, start, s-start);
+		sv_catpv(Sv, " qw(");
+		sv_catpv(Sv, ++s);
+		sv_catpv(Sv,    ")");
+	    }
+	    s += strlen(s);
 	    if (preambleav == NULL)
 		preambleav = newAV();
-	    /* We allow -M'Module qw(Foo Bar)'	*/
-	    if (*(s-1) == 'M')
-		sprintf(tmpbuf, "use %s;", s);
-	    else
-		sprintf(tmpbuf, "use %s ();", s);
-	    av_push(preambleav, newSVpv(tmpbuf,0));
-	    s += strlen(s);
+	    av_push(preambleav, Sv);
 	}
 	else
 	    croak("No space allowed after -%c", *(s-1));
@@ -1134,7 +1152,7 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	printf("\nThis is perl, version %s beta2",patchlevel);
+	printf("\nThis is perl, version %s beta3",patchlevel);
 
 #if defined(DEBUGGING) || defined(EMBED) || defined(MULTIPLICITY)
 	fputs(" with", stdout);
@@ -1254,6 +1272,13 @@ SV *sv;
     register char *s;
     I32 len;
 
+#ifdef VMS
+    if (dosearch && !strpbrk(scriptname,":[</") && (my_getenv("DCL$PATH"))) {
+	int idx = 0;
+
+	while (my_trnlnm("DCL$PATH",tokenbuf,idx++)) {
+	    strcat(tokenbuf,scriptname);
+#else  /* !VMS */
     if (dosearch && !strchr(scriptname, '/') && (s = getenv("PATH"))) {
 
 	bufend = s + strlen(s);
@@ -1282,6 +1307,7 @@ SV *sv;
 #endif
 		(void)strcat(tokenbuf+len,"/");
 	    (void)strcat(tokenbuf+len,scriptname);
+#endif  /* !VMS */
 	    DEBUG_p(fprintf(stderr,"Looking for %s\n",tokenbuf));
 	    if (Stat(tokenbuf,&statbuf) < 0)		/* not there? */
 		continue;
@@ -1660,8 +1686,11 @@ init_debugger()
     DBline = gv_fetchpv("dbline", GV_ADDMULTI, SVt_PVAV);
     DBsub = gv_HVadd(gv_fetchpv("sub", GV_ADDMULTI, SVt_PVHV));
     DBsingle = GvSV((gv_fetchpv("single", GV_ADDMULTI, SVt_PV)));
+    sv_setiv(DBsingle, 0); 
     DBtrace = GvSV((gv_fetchpv("trace", GV_ADDMULTI, SVt_PV)));
+    sv_setiv(DBtrace, 0); 
     DBsignal = GvSV((gv_fetchpv("signal", GV_ADDMULTI, SVt_PV)));
+    sv_setiv(DBsignal, 0); 
     curstash = defstash;
 }
 

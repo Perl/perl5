@@ -233,7 +233,7 @@ gdbm_sync(db)
 	GDBM_File	db
 
 int
-gdbm_exists(db, key)
+gdbm_EXISTS(db, key)
 	GDBM_File	db
 	datum		key
 

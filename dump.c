@@ -185,7 +185,9 @@ register OP *op;
 		 op->op_type == OP_AELEM ||
 		 op->op_type == OP_HELEM )
 	{
-	    if (op->op_private & OPpDEREF_DB)
+	    if (op->op_private & OPpENTERSUB_AMPER)
+		(void)strcat(buf,"AMPER,");
+	    if (op->op_private & OPpENTERSUB_DB)
 		(void)strcat(buf,"DB,");
 	    if (op->op_private & OPpDEREF_AV)
 		(void)strcat(buf,"AV,");

@@ -52,8 +52,6 @@
 #include <utime.h>
 #endif
 
-typedef FILE * InputStream;
-typedef FILE * OutputStream;
 typedef int SysRet;
 typedef long SysRetLong;
 typedef sigset_t* POSIX__SigSet;
@@ -2123,25 +2121,6 @@ int arg;
 #endif
 	    break;
 	}
-	if (strEQ(name, "_IOFBF"))
-#ifdef _IOFBF
-	    return _IOFBF;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "_IOLBF"))
-#ifdef _IOLBF
-	    return _IOLBF;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "_IONBF"))
-#ifdef _IONBF
-	    return _IONBF;
-#else
-	    goto not_there;
-#endif
-	break;
     }
     errno = EINVAL;
     return 0;
@@ -2381,65 +2360,6 @@ setcc(termios_ref, ccix, cc)
 	    not_here("setcc");
 #endif
 
-
-
-MODULE = FileHandle	PACKAGE = FileHandle	PREFIX = f
-
-SV *
-fgetpos(handle)
-	InputStream	handle
-    CODE:
-	{
-	    Fpos_t pos;
-	    fgetpos(handle, &pos);
-	    ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
-	}
-
-SysRet
-fsetpos(handle, pos)
-	InputStream	handle
-	SV *		pos
-    CODE:
-	RETVAL = fsetpos(handle, (Fpos_t*)SvPVX(pos));
-    OUTPUT:
-	RETVAL
-
-int
-ungetc(handle, c)
-	InputStream	handle
-	int		c
-    CODE:
-	RETVAL = ungetc(c, handle);
-    OUTPUT:
-	RETVAL
-
-OutputStream
-new_tmpfile(packname = "FileHandle")
-    char *		packname
-    CODE:
-	RETVAL = tmpfile();
-    OUTPUT:
-	RETVAL
-
-int
-ferror(handle)
-	InputStream	handle
-
-SysRet
-fflush(handle)
-	OutputStream	handle
-
-void
-setbuf(handle, buf)
-	OutputStream	handle
-	char *		buf = SvPOK(ST(1)) ? sv_grow(ST(1), BUFSIZ) : 0;
-
-SysRet
-setvbuf(handle, buf, type, size)
-	OutputStream	handle
-	char *		buf = SvPOK(ST(1)) ? sv_grow(ST(1), SvIV(ST(3))) : 0;
-	int		type
-	int		size
 
 MODULE = POSIX		PACKAGE = POSIX
 

@@ -96,8 +96,8 @@ sub open2 {
 	open(STDIN,  "<&$kid_rdr");
 	open(STDOUT, ">&$kid_wtr");
 	warn "execing @cmd\n" if $debug;
-	exec @cmd;
-	croak "open2: exec of @cmd failed";   
+	exec @cmd
+	    or croak "open2: exec of @cmd failed";   
     } 
     close $kid_rdr; close $kid_wtr;
     select((select($dad_wtr), $| = 1)[0]); # unbuffer pipe

@@ -122,7 +122,7 @@ declare a scalar variable to be of type "string", or of type "number", or
 type "filehandle", or anything else.  Perl is a contextually polymorphic
 language whose scalars can be strings, numbers, or references (which
 includes objects).  While strings and numbers are considered the pretty
-much same thing for nearly all purposes, but references are strongly-typed
+much same thing for nearly all purposes, references are strongly-typed
 uncastable pointers with built-in reference-counting and destructor
 invocation.
 
@@ -315,7 +315,7 @@ first blank line--see the Merry Christmas example below.)  The terminating
 string must appear by itself (unquoted and with no surrounding
 whitespace) on the terminating line.
 
-	print <<EOF;	# same as above
+	print <<EOF;	
     The price is $Price.
     EOF
 

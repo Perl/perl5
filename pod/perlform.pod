@@ -5,9 +5,9 @@ perlform - Perl formats
 =head1 DESCRIPTION
 
 Perl has a mechanism to help you generate simple reports and charts.  To
-facilitate this, Perl helps you lay out your output page in your code in a
-fashion that's close to how it will look when it's printed.  It can keep
-track of things like how many lines on a page, what page you're, when to
+facilitate this, Perl helps you code up your output page 
+close to how it will look when it's printed.  It can keep
+track of things like how many lines on a page, what page you're on, when to
 print page headers, etc.  Keywords are borrowed from FORTRAN:
 format() to declare and write() to execute; see their entries in
 L<perlfunc>.  Fortunately, the layout is much more legible, more like

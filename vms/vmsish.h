@@ -3,7 +3,7 @@
  * VMS-specific C header file for perl5.
  *
  * Last revised: 01-Oct-1995 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.2.b1
+ * Version: 5.1.6
  */
 
 #ifndef __vmsish_h_included
@@ -89,6 +89,8 @@
 #include "sockadapt.h"
 #endif
 
+#define BIT_BUCKET "_NLA0:"
+#define PERL_SYS_INIT(c,v)  getredirection((c),(v))
 #define HAS_KILL
 #define HAS_WAIT
 
@@ -177,6 +179,12 @@ struct tms {
 #define DYNAMIC_ENV_FETCH 1
 #define ENV_HV_NAME "%EnV%VmS%"
 
+/* Thin jacket around cuserid() tomatch Unix' calling sequence */
+#define getlogin my_getlogin
+
+/* Ditto for sys$hash_passwrod() . . . */
+#define crypt  my_crypt
+
 /* Use our own stat() clones, which handle Unix-style directory names */
 #define Stat(name,bufptr) flex_stat(name,bufptr)
 #define Fstat(fd,bufptr) flex_fstat(fd,bufptr)
@@ -228,7 +236,14 @@ struct passwd {
 
 /* Our own stat_t substitute, since we play with st_dev and st_ino -
  * we want atomic types so Unix-bound code which compares these fields
- * for two files will work most of the time under VMS
+ * for two files will work most of the time under VMS.
+ * N.B. 1. The st_ino hack assumes that sizeof(unsigned short[3]) ==
+ * sizeof(unsigned) + sizeof(unsigned short).  We can't use a union type
+ * to map the unsigned int we want and the unsigned short[3] the CRTL
+ * returns into the same member, since gcc has different ideas than DECC
+ * and VAXC about sizing union types.
+ * N.B 2. The routine cando() in vms.c assumes that &stat.st_ino is the
+ * address of a FID.
  */
 /* First, grab the system types, so we don't clobber them later */
 #include <stat.h>
@@ -247,10 +262,8 @@ struct passwd {
 struct mystat
 {
         char *st_devnam;  /* pointer to device name */
-        union {
-          unsigned short fid[3];
-          unsigned long st_ino_mostly;
-        } st_inode_u;
+        unsigned st_ino;    /* hack - CRTL uses unsigned short[3] for */
+        unsigned short rvn; /* FID (num,seq,rvn) */
         unsigned short st_mode;	/* file "mode" i.e. prot, dir, reg, etc. */
         int	st_nlink;	/* for compatibility - not really used */
         unsigned st_uid;	/* from ACP - QIO uic field */
@@ -265,14 +278,10 @@ struct mystat
         char	st_fab_fsz;	/* fixed header size */
         unsigned st_dev;	/* encoded device name */
 };
-#ifdef st_ino
-#  undef st_ino
-#endif
-#define st_ino st_inode_u.st_ino_mostly
 #define stat mystat
 typedef unsigned mydev_t;
 #define dev_t mydev_t
-typedef unsigned long myino_t;
+typedef unsigned myino_t;
 #define ino_t myino_t
 #if defined(__DECC) || defined(__DECCXX)
 #  pragma __member_alignment __restore
@@ -294,8 +303,11 @@ typedef unsigned long myino_t;
  * __VMS_PROTOTYPES__ and __VMS_SEPYTOTORP__ lines, and must be in the form
  *    <data type><TAB>name<WHITESPACE>_((<prototype args>));
  */
-typedef char  __VMS_PROTOTYPES__; /* prototype section start marker */
+/* prototype section start marker; `typedef' passes through cpp */
+typedef char  __VMS_PROTOTYPES__;
+int	my_trnlnm _((char *, char *, unsigned long int));
 char *	my_getenv _((char *));
+char *	my_crypt _((const char *, const char *));
 unsigned long int	waitpid _((unsigned long int, int *, int));
 char *	my_gconvert _((double, int, int, char *));
 int	do_rmdir _((char *));
@@ -335,8 +347,10 @@ struct passwd *	my_getpwnam _((char *name));
 struct passwd *	my_getpwuid _((Uid_t uid));
 struct passwd *	my_getpwent _(());
 void	my_endpwent _(());
+char *	my_getlogin _(());
 void	init_os_extras _(());
-typedef char __VMS_SEPYTOTORP__; /* prototype section end marker */
+typedef char __VMS_SEPYTOTORP__;
+/* prototype section end marker; `typedef' passes through cpp */
 
 #ifndef VMS_DO_SOCKETS
 /* This relies on tricks in perl.h to pick up that these manifest constants

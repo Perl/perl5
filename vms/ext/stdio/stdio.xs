@@ -90,7 +90,7 @@ vmsfopen(name,...)
                  if (c == 'a') *(name++) = '>';
                }
                *(name++) = '&';
-	       if (do_open(gv,mode,name - mode,fp))
+	       if (do_open(gv,mode,name - mode,FALSE,0,0,fp))
 	         sv_setsv(ST(0),newRV((SV*)gv));
 	    }
 

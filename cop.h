@@ -180,6 +180,7 @@ struct subst {
     char *	sbu_m;
     char *	sbu_strend;
     char *	sbu_subbase;
+    REGEXP *	sbu_rx;
 };
 #define sb_iters	cx_u.cx_subst.sbu_iters
 #define sb_maxiters	cx_u.cx_subst.sbu_maxiters
@@ -193,6 +194,7 @@ struct subst {
 #define sb_m		cx_u.cx_subst.sbu_m
 #define sb_strend	cx_u.cx_subst.sbu_strend
 #define sb_subbase	cx_u.cx_subst.sbu_subbase
+#define sb_rx		cx_u.cx_subst.sbu_rx
 
 #define PUSHSUBST(cx) CXINC, cx = &cxstack[cxstack_ix],			\
 	cx->sb_iters		= iters,				\
@@ -206,6 +208,7 @@ struct subst {
 	cx->sb_s		= s,					\
 	cx->sb_m		= m,					\
 	cx->sb_strend		= strend,				\
+	cx->sb_rx		= rx,					\
 	cx->cx_type		= CXt_SUBST
 
 #define POPSUBST(cx) cxstack_ix--

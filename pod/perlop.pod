@@ -8,7 +8,8 @@ Perl operators have the following associativity and precedence,
 listed from highest precedence to lowest.  Note that all operators
 borrowed from C keep the same precedence relationship with each other,
 even where C's precedence is slightly screwy.  (This makes learning
-Perl easier for C folks.)
+Perl easier for C folks.)  With very few exceptions, these all 
+operate on scalar values only, not array values.
 
     left	terms and list operators (leftward)
     left	->
@@ -88,7 +89,7 @@ well as subroutine and method calls, and the anonymous
 constructors C<[]> and C<{}>.
 
 See also L<Quote and Quotelike Operators> toward the end of this section,
-as well as L<I/O Operators>.
+as well as L<"I/O Operators">.
 
 =head2 The Arrow Operator
 
@@ -157,7 +158,7 @@ thing from interpretation.
 
 =head2 Binding Operators
 
-Binary "=~" binds an expression to a pattern match.  Certain operations
+Binary "=~" binds a scalar expression to a pattern match.  Certain operations
 search or modify the string $_ by default.  This operator makes that kind
 of operation work on some other string.  The right argument is a search
 pattern, substitution, or translation.  The left argument is what is

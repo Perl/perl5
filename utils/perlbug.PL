@@ -36,15 +36,35 @@ $Config{'startperl'}
 print OUT <<'!NO!SUBS!';
 
 use Config;
-use Mail::Send;
-use Mail::Util;
 use Getopt::Std;
+
+BEGIN {
+	eval "use Mail::Send;";
+	$::HaveSend = ($@ eq "");
+	eval "use Mail::Util;";
+	$::HaveUtil = ($@ eq "");
+};
+
 
 use strict;
 
 sub paraprint;
 
-my($Version) = "1.06";
+
+my($Version) = "1.11";
+
+# Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
+# Changed in 1.07 to see more sendmail execs, and added pipe output
+# Changed in 1.08 to use correct address for sendmail
+# Changed in 1.09 to close the REP file before calling it up in the editor.
+#                 Also removed some old comments duplicated elsewhere.
+# Changed in 1.10 to run under VMS without Mail::Send; also fixed
+#                 temp filename generation
+# Changed in 1.11 to clean up some text and removed Mail::Send deactivator.
+
+# TODO: Allow the user to re-name the file on mail failure, and
+#       make sure failure (transmission-wise) of Mail::Send is 
+#       accounted for.
 
 my( $file, $cc, $address, $perlbug, $testaddress, $filename,
     $subject, $from, $verbose, $ed, 
@@ -53,6 +73,8 @@ my( $file, $cc, $address, $perlbug, $testaddress, $filename,
 Init();
 
 if($::opt_h) { Help(); exit; }
+
+if($::opt_d or !-t STDOUT) { Dump(*STDOUT); exit; }
 
 Query();
 Edit();
@@ -67,7 +89,7 @@ sub Init {
 
 	$Is_VMS = $::Config{'osname'} eq 'VMS';
 
-	getopts("hva:s:b:f:r:e:SCc:t");
+	getopts("dhva:s:b:f:r:e:SCc:t");
 	
 
 	# This comment is needed to notify metaconfig that we are
@@ -124,7 +146,7 @@ sub Query {
 	# Explain what perlbug is
 	
 	paraprint <<EOF;
-This program allows you to enter a bug report,
+This program allows you to create a bug report,
 which will be sent as an e-mail message to $address
 once you have filled in the report.
 
@@ -135,8 +157,8 @@ EOF
 	if(! $subject) {
 		paraprint <<EOF;
 First of all, please provide a subject for the 
-message. It should be concise description of the bug, 
-if at all possible.
+message. It should be as a concise description of 
+the bug as is possible.
 
 EOF
 		print "Subject: ";
@@ -160,17 +182,27 @@ EOF
 	if( !$from) {
 
 		# Try and guess return address
-		my($domain) = Mail::Util::maildomain();
+		my($domain);
+		
+		if($::HaveUtil) {
+			$domain = Mail::Util::maildomain();
+		} elsif ($Is_VMS) {
+			require Sys::Hostname;
+			$domain = Sys::Hostname::hostname();
+		} else {
+			$domain = `hostname`.".".`domainname`;
+			$domain =~ s/[\r\n]+//g;
+		}
 	    
 	    my($guess);
 	                     
 	        if( !$domain) {
 	        	$guess = "";
 	        } elsif ($Is_VMS && !$::Config{'d_has_sockets'}) { 
-	        	$guess = "$domain$me";
+	        	$guess = "$domain\:\:$me";
 	        } else {
-		    $guess = "$me\@$domain" if $domain;
-		    $guess = "$me\@unknown.addresss" unless $domain;
+		    	$guess = "$me\@$domain" if $domain;
+		    	$guess = "$me\@unknown.addresss" unless $domain;
 			}
 	
 		if( $guess ) {
@@ -178,7 +210,7 @@ EOF
 
 
 Your e-mail address will be useful if you need to be contacted.
-If the default is not your proper address, please correct it here.
+If the default shown is not your proper address, please correct it.
 
 EOF
 		} else {
@@ -205,7 +237,7 @@ EOF
 
 	if( $from eq $cc or $me eq $cc ) {
 		# Try not to copy ourselves
-		$cc = "none";
+		$cc = "yourself";
 	}
 
 
@@ -216,7 +248,8 @@ EOF
 
 A copy of this report can be sent to your local
 perl administrator. If the address is wrong, please 
-correct it, or enter 'none' to not send a copy.
+correct it, or enter 'none' or 'yourself' to not send
+a copy.
 
 EOF
 
@@ -232,7 +265,7 @@ EOF
 	
 	}
 
-	if($cc eq "none") { $cc = "" }
+	if($cc =~ /^(none|yourself|myself|ourselves)$/i) { $cc = "" }
 
 	$andcc = " and $cc" if $cc;
 
@@ -242,7 +275,7 @@ EOF
 		paraprint <<EOF;
 
 
-Now you need to enter the bug report. Try to make
+Now you need to supply the bug report. Try to make
 the report concise but descriptive. Include any 
 relevant detail. Some information about your local
 perl configuration will automatically be included 
@@ -253,7 +286,7 @@ the report. If "$ed" is the editor you want
 to use, then just press Enter, otherwise type in
 the name of the editor you would like to use.
 
-If you would like to use a prepared file, just enter
+If you would like to use a prepared file, type
 "file", and you will be asked for the filename.
 
 EOF
@@ -271,8 +304,12 @@ EOF
 
 	# Generate scratch file to edit report in
 	
-	$filename = ($Is_VMS ? 'sys$scratch:' : '/tmp/') . "bugrep0$$";
-	$filename++ while -e $filename;
+	{
+	my($dir) = $Is_VMS ? 'sys$scratch:' : '/tmp/';
+	$filename = "bugrep0$$";
+	$filename++ while -e "$dir$filename";
+	$filename = "$dir$filename";
+	}
 	
 	
 	# Prompt for file to read report from, if needed
@@ -291,7 +328,7 @@ EOF
 		chop($entry);
 
 		if(!-f $entry or !-r $entry) {
-			print "\n\nUnable to read `$entry'.\nExiting.\n";
+			print "\n\nUnable to read from `$entry'.\nExiting.\n";
 			exit;
 		}
 		$file = $entry;
@@ -320,8 +357,16 @@ EOF
 	} else {
 		print REP "[Please enter your report here]\n";
 	}
+	
+	Dump(*REP);
+	close(REP);
 
-	print REP <<EOF;
+}
+
+sub Dump {
+	local(*OUT) = @_;
+	
+	print OUT <<EOF;
 
 
 
@@ -330,30 +375,29 @@ Site configuration information for perl $]:
 EOF
 
 	if( $::Config{cf_by} and $::Config{cf_time}) {
-		print REP "Configured by $::Config{cf_by} at $::Config{cf_time}.\n\n";
+		print OUT "Configured by $::Config{cf_by} at $::Config{cf_time}.\n\n";
 	}
 
-	print REP Config::myconfig;
+	print OUT Config::myconfig;
 
 	if($verbose) {
-		print REP "\nComplete configuration data for perl $]:\n\n";
+		print OUT "\nComplete configuration data for perl $]:\n\n";
 		my($value);
 		foreach (sort keys %::Config) {
 			$value = $::Config{$_};
 			$value =~ s/'/\\'/g;
-			print REP "$_='$value'\n";
+			print OUT "$_='$value'\n";
 		}
 	}
-
-	close(REP);
 }
 
 sub Edit {
 	# Edit the report
 	
 	if(!$file and !$body) {
-		if( system("$ed $filename") ) {
-			print "\nUnabled to run editor!\n";
+		my($sts) = system("$ed $filename");
+		if( $Is_VMS ? !($sts & 1) : $sts ) {
+			print "\nUnable to run editor!\n";
 		} 
 	}
 }
@@ -422,19 +466,69 @@ EOF
 sub Send {
 
 	# Message has been accepted for transmission -- Send the message
+	
+	if($::HaveSend) {
 
-	$msg = new Mail::Send Subject => $subject, To => $address;
+		$msg = new Mail::Send Subject => $subject, To => $address;
 	
-	$msg->cc($cc) if $cc;
-	$msg->add("Reply-To",$from) if $from;
+		$msg->cc($cc) if $cc;
+		$msg->add("Reply-To",$from) if $from;
 	    
-	$fh = $msg->open;
+		$fh = $msg->open;
+
+		open(REP,"<$filename");
+		while(<REP>) { print $fh $_ }
+		close(REP);
 	
-	open(REP,"<$filename");
-	while(<REP>) { print $fh $_ }
-	close(REP);
+		$fh->close;  
 	
-	$fh->close;  
+	} else {
+		if ($Is_VMS) {
+			if ( ($address =~ /@/ and $address !~ /^\w+%"/) or
+			     ($cc      =~ /@/ and $cc      !~ /^\w+%"/) ){
+				my($prefix);
+				foreach (qw[ IN MX SMTP UCX PONY WINS ],'') {
+					$prefix = "$_%",last if $ENV{"MAIL\$PROTOCOL_$_"};
+				}
+				$address = qq[${prefix}"$address"] unless $address =~ /^\w+%"/;
+				$cc = qq[${prefix}"$cc"] unless !$cc || $cc =~ /^\w+%"/;
+			}
+			$subject =~ s/"/""/g; $address =~ s/"/""/g; $cc =~ s/"/""/g;
+			my($sts) = system(qq[mail/Subject="$subject" $filename. "$address","$cc"]);
+			if (!($sts & 1)) { die "Can't spawn off mail\n\t(leaving bug report in $filename): $sts\n;" }
+		} else {
+			my($sendmail) = "";
+			
+			foreach (qw(/usr/lib/sendmail /usr/sbin/sendmail /usr/ucblib/sendmail))
+			{
+				$sendmail = $_, last if -e $_;
+			}
+			
+			paraprint <<"EOF" and die "\n" if $sendmail eq "";
+			
+I am terribly sorry, but I cannot find sendmail, or a close equivalent, and
+the perl package Mail::Send has not been installed, so I can't send your bug
+report. We apologize for the inconveniencence.
+
+So you may attempt to find some way of sending your message, it has
+been left in the file `$filename'.
+
+EOF
+			
+			open(SENDMAIL,"|$sendmail -t");
+			print SENDMAIL "To: $address\n";
+			print SENDMAIL "Subject: $subject\n";
+			print SENDMAIL "Cc: $cc\n" if $cc;
+			print SENDMAIL "Reply-To: $from\n" if $from;
+			print SENDMAIL "\n\n";
+			open(REP,"<$filename");
+			while(<REP>) { print SENDMAIL $_ }
+			close(REP);
+			
+			close(SENDMAIL);
+		}
+	
+	}
 	
 	print "\nMessage sent.\n";
 
@@ -453,7 +547,7 @@ Usage:
 $0  [-v] [-a address] [-s subject] [-b body | -f file ]
     [-r returnaddress] [-e editor] [-c adminaddress | -C] [-S] [-t]
     
-Simplest usage:  execute "$0", and follow the prompts.
+Simplest usage:  run "$0", and follow the prompts.
 
 Options:
 
@@ -472,13 +566,16 @@ Options:
         this if you don't give it here.
   -e    Editor to use. 
   -t    Test mode. The target address defaults to `$testaddress'.
+  -d	Data mode (the default if you redirect or pipe output.) 
+        This prints out your configuration data, without mailing
+        anything. You can use this with -v to get more complete data.
   
 EOF
 }
 
 sub paraprint {
     my @paragraphs = split /\n{2,}/, "@_";
-    print "\n";
+    print "\n\n";
     for (@paragraphs) {   # implicit local $_
     	s/(\S)\s*\n/$1 /g;
 	    write;

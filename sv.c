@@ -14,6 +14,13 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef OVR_DBL_DIG
+/* Use an overridden DBL_DIG */
+# ifdef DBL_DIG
+#  undef DBL_DIG
+# endif
+# define DBL_DIG OVR_DBL_DIG
+#else
 /* The following is all to get DBL_DIG, in order to pick a nice
    default value for printing floating point numbers in Gconvert.
    (see config.h)
@@ -26,6 +33,11 @@
 #endif
 #ifndef HAS_DBL_DIG
 #define DBL_DIG	15   /* A guess that works lots of places */
+#endif
+#endif
+
+#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
+#  define FAST_SV_GETS
 #endif
 
 static SV *more_sv _((void));
@@ -160,7 +172,12 @@ U32 flags;
 static SV*
 more_sv()
 {
-    sv_add_arena(safemalloc(1008), 1008, 0);
+    if (nice_chunk) {
+	sv_add_arena(nice_chunk, nice_chunk_size, 0);
+	nice_chunk = Nullch;
+    }
+    else
+	sv_add_arena(safemalloc(1008), 1008, 0);
     return new_sv();
 }
 #endif
@@ -1071,7 +1088,7 @@ SV *sv;
     *d = '\0';
 
     if (op)
-	warn("Argument \"%s\" isn't numeric for %s", tmpbuf,
+	warn("Argument \"%s\" isn't numeric in %s", tmpbuf,
 		op_name[op->op_type]);
     else
 	warn("Argument \"%s\" isn't numeric", tmpbuf);
@@ -1502,6 +1519,11 @@ register SV *sstr;
     case SVt_RV:
 	if (dtype < SVt_RV)
 	    sv_upgrade(dstr, SVt_RV);
+	else if (dtype == SVt_PVGV &&
+		 SvTYPE(SvRV(sstr)) == SVt_PVGV) {
+	    sstr = SvRV(sstr);
+	    goto glob_assign;
+	}
 	break;
     case SVt_PV:
 	if (dtype < SVt_PV)
@@ -1523,7 +1545,6 @@ register SV *sstr;
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
-    case SVt_PVFM:
     case SVt_PVIO:
 	if (op)
 	    croak("Bizarre copy of %s in %s", sv_reftype(sstr, 0),
@@ -1534,6 +1555,7 @@ register SV *sstr;
 
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
+  glob_assign:
 	    if (dtype == SVt_PVGV)
 		GvFLAGS(sstr) |= GVf_IMPORTED;
 	    else {
@@ -1625,7 +1647,7 @@ register SV *sstr;
 		    GvSV(dstr) = sref;
 		    break;
 		}
-		if (dref != sref)
+		if (curcop->cop_stash != GvSTASH(dstr))
 		    GvFLAGS(dstr) |= GVf_IMPORTED;	/* crude */
 		if (dref)
 		    SvREFCNT_dec(dref);
@@ -1734,7 +1756,11 @@ register STRLEN len;
 	(void)SvOK_off(sv);
 	return;
     }
-    if (!SvUPGRADE(sv, SVt_PV))
+    if (SvTYPE(sv) >= SVt_PV) {
+	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
+	    sv_unglob(sv);
+    }
+    else if (!sv_upgrade(sv, SVt_PV))
 	return;
     SvGROW(sv, len + 1);
     Move(ptr,SvPVX(sv),len,char);
@@ -1762,7 +1788,11 @@ register char *ptr;
 	return;
     }
     len = strlen(ptr);
-    if (!SvUPGRADE(sv, SVt_PV))
+    if (SvTYPE(sv) >= SVt_PV) {
+	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
+	    sv_unglob(sv);
+    }
+    else if (!sv_upgrade(sv, SVt_PV))
 	return;
     SvGROW(sv, len + 1);
     Move(ptr,SvPVX(sv),len+1,char);
@@ -2040,7 +2070,7 @@ int type;
 {
     MAGIC* mg;
     MAGIC** mgp;
-    if (!SvMAGICAL(sv))
+    if (SvTYPE(sv) < SVt_PVMG)
 	return 0;
     mgp = &SvMAGIC(sv);
     for (mg = *mgp; mg; mg = *mgp) {
@@ -2058,7 +2088,7 @@ int type;
 	else
 	    mgp = &mg->mg_moremagic;
     }
-    if (!SvMAGIC(sv)) {
+    if (!SvMAGICAL(sv) && !SvMAGIC(sv)) {
 	SvMAGICAL_off(sv);
 	SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
     }
@@ -2222,7 +2252,7 @@ register SV *sv;
 		--sv_objcount;	/* XXX Might want something more general */
 	}
     }
-    if (SvMAGICAL(sv))
+    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
 	mg_free(sv);
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
@@ -2455,15 +2485,22 @@ register SV *sv;
 register FILE *fp;
 I32 append;
 {
-    register char *bp;		/* we're going to steal some values */
-#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
-    register I32 cnt;		/*  from the stdio struct and put EVERYTHING */
-    register STDCHAR *ptr;	/*   in the innermost loop into registers */
+    char *rsptr;
+    STRLEN rslen;
+    register STDCHAR rslast;
+    register STDCHAR *bp;
+    register I32 cnt;
+    I32 i;
+
+#ifdef FAST_SV_GETS
+    /*
+     * We're going to steal some values from the stdio struct
+     * and put EVERYTHING in the innermost loop into registers.
+     */
+    register STDCHAR *ptr;
     STRLEN bpx;
     I32 shortbuffered;
 #endif
-    register I32 newline = rschar;/* (assuming >= 6 registers) */
-    I32 i;
 
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv) && curcop != &compiling)
@@ -2473,7 +2510,20 @@ I32 append;
     }
     if (!SvUPGRADE(sv, SVt_PV))
 	return 0;
-    if (rspara) {		/* have to do this both before and after */
+
+    if (RsSNARF(rs)) {
+	rsptr = NULL;
+	rslen = 0;
+    }
+    else if (RsPARA(rs)) {
+	rsptr = "\n\n";
+	rslen = 2;
+    }
+    else
+	rsptr = SvPV(rs, rslen);
+    rslast = rslen ? rsptr[rslen - 1] : '\0';
+
+    if (RsPARA(rs)) {		/* have to do this both before and after */
 	do {			/* to make sure file boundaries work right */
 	    if (feof(fp))
 		return 0;
@@ -2486,8 +2536,11 @@ I32 append;
 	    }
 	} while (i != EOF);
     }
-#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
+
+#ifdef FAST_SV_GETS
+
     /* Here is some breathtakingly efficient cheating */
+
     cnt = FILE_cnt(fp);			/* get count into register */
     (void)SvPOK_only(sv);		/* validate pointer */
     if (SvLEN(sv) - append <= cnt + 1) { /* make sure we have the room */
@@ -2502,24 +2555,31 @@ I32 append;
     }
     else
 	shortbuffered = 0;
-    bp = SvPVX(sv) + append;		/* move these two too to registers */
+    bp = (STDCHAR*)SvPVX(sv) + append;  /* move these two too to registers */
     ptr = FILE_ptr(fp);
     for (;;) {
       screamer:
 	if (cnt > 0) {
-	    while (--cnt >= 0) {		 /* this */	/* eat */
-		if ((*bp++ = *ptr++) == newline) /* really */	/* dust */
-		    goto thats_all_folks;	 /* screams */	/* sed :-) */ 
+	    if (rslen) {
+		while (--cnt >= 0) {		     /* this     |  eat */
+		    if ((*bp++ = *ptr++) == rslast)  /* really   |  dust */
+			goto thats_all_folks;	     /* screams  |  sed :-) */
+		}
+	    }
+	    else {
+	        memcpy((char*)bp, (char*)ptr, cnt);  /* this     |  eat */    
+		bp += cnt;			     /* screams  |  dust */   
+		ptr += cnt;			     /* louder   |  sed :-) */
 	    }
 	}
 	
 	if (shortbuffered) {		/* oh well, must extend */
 	    cnt = shortbuffered;
 	    shortbuffered = 0;
-	    bpx = bp - SvPVX(sv);	/* prepare for possible relocation */
+	    bpx = bp - (STDCHAR*)SvPVX(sv); /* box up before relocation */
 	    SvCUR_set(sv, bpx);
 	    SvGROW(sv, SvLEN(sv) + append + cnt + 2);
-	    bp = SvPVX(sv) + bpx;	/* reconstitute our pointer */
+	    bp = (STDCHAR*)SvPVX(sv) + bpx; /* unbox after relocation */
 	    continue;
 	}
 
@@ -2532,20 +2592,20 @@ I32 append;
 	if (i == EOF)			/* all done for ever? */
 	    goto thats_really_all_folks;
 
-	bpx = bp - SvPVX(sv);		/* prepare for possible relocation */
+	bpx = bp - (STDCHAR*)SvPVX(sv);	/* box up before relocation */
 	SvCUR_set(sv, bpx);
 	SvGROW(sv, bpx + cnt + 2);
-	bp = SvPVX(sv) + bpx;		/* reconstitute our pointer */
+	bp = (STDCHAR*)SvPVX(sv) + bpx;	/* unbox after relocation */
 
-	if (i == newline) {		/* all done for now? */
-	    *bp++ = i;
+	*bp++ = i;			/* store character from _filbuf */
+
+	if (rslen && (STDCHAR)i == rslast)  /* all done for now? */
 	    goto thats_all_folks;
-	}
-	*bp++ = i;			/* now go back to screaming loop */
     }
 
 thats_all_folks:
-    if (rslen > 1 && (bp - SvPVX(sv) < rslen || bcmp(bp - rslen, rs, rslen)))
+    if ((rslen > 1 && (bp - (STDCHAR*)SvPVX(sv) < rslen)) ||
+	  bcmp((char*)bp - rslen, rsptr, rslen))
 	goto screamer;			/* go back to the fray */
 thats_really_all_folks:
     if (shortbuffered)
@@ -2553,45 +2613,47 @@ thats_really_all_folks:
     FILE_cnt(fp) = cnt;			/* put these back or we're in trouble */
     FILE_ptr(fp) = ptr;
     *bp = '\0';
-    SvCUR_set(sv, bp - SvPVX(sv));	/* set length */
+    SvCUR_set(sv, bp - (STDCHAR*)SvPVX(sv));  /* set length */
 
-#else /* USE_STDIO_PTR && STDIO_PTR_LVALUE && STDIO_CNT_LVALUE */
+#else /* SV_FAST_GETS */
+
     /*The big, slow, and stupid way */
+
     {
-	char buf[8192];
-	register char * bpe = buf + sizeof(buf) - 3;
+	STDCHAR buf[8192];
 
 screamer:
-	bp = buf;
-	while ((i = getc(fp)) != EOF && (*bp++ = i) != newline && bp < bpe) ;
+	if (rslen) {
+	    register STDCHAR *bpe = buf + sizeof(buf);
+	    bp = buf;
+	    while ((i = getc(fp)) != EOF && (*bp++ = i) != rslast && bp < bpe)
+		; /* keep reading */
+	    cnt = bp - buf;
+	}
+	else {
+	    cnt = fread((char*)buf, 1, sizeof(buf), fp);
+	    i = (cnt == EOF) ? EOF : (U8)buf[cnt - 1];
+	}
 
 	if (append)
-	    sv_catpvn(sv, buf, bp - buf);
+	    sv_catpvn(sv, buf, cnt);
 	else
-	    sv_setpvn(sv, buf, bp - buf);
-	if (i != EOF			/* joy */
-	    &&
-	    (i != newline
-	     ||
-	     (rslen > 1
-	      &&
-	      (SvCUR(sv) < rslen
-	       ||
-	       bcmp(SvPVX(sv) + SvCUR(sv) - rslen, rs, rslen)
-	      )
-	     )
-	    )
-	   )
+	    sv_setpvn(sv, buf, cnt);
+
+	if (i != EOF &&			/* joy */
+	    (!rslen ||
+	     SvCUR(sv) < rslen ||
+	     bcmp(SvPVX(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
 	{
 	    append = -1;
 	    goto screamer;
 	}
     }
 
-#endif /* USE_STDIO_PTR && STDIO_PTR_LVALUE && STDIO_CNT_LVALUE */
+#endif /* SV_FAST_GETS */
 
-    if (rspara) {
-        while (i != EOF) {
+    if (RsPARA(rs)) {		/* have to do this both before and after */  
+        while (i != EOF) {	/* to make sure file boundaries work right */
 	    i = getc(fp);
 	    if (i != '\n') {
 		ungetc(i,fp);
@@ -2599,7 +2661,8 @@ screamer:
 	    }
 	}
     }
-    return SvCUR(sv) - append ? SvPVX(sv) : Nullch;
+
+    return (SvCUR(sv) - append) ? SvPVX(sv) : Nullch;
 }
 
 void

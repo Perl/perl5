@@ -6,20 +6,26 @@
 # If it finds that the input files are already patches for VMS,
 # it just copies the input to the output.
 #
-# Revised 26-May-1995 by Charles Bailey  bailey@genetics.upenn.edu
+# Revised 29-Jan-1996 by Charles Bailey  bailey@genetics.upenn.edu
+
+$VERSION = '1.1';
 
 ($cinfile,$hinfile,$coutfile,$houtfile) = @ARGV;
 
 open C,$cinfile or die "Can't read $cinfile: $!\n";
 open COUT, ">$coutfile" or die "Can't create $coutfile: $!\n";
+print COUT <<EOH;
+/* Postprocessed by vms_yfix.pl $VERSION to add VMS declarations of globals */
+EOH
 while (<C>) {
-  if (/^dEXT/) {  # we've already got a fixed copy
-    print COUT $_,<C>;
-    last;
+  # "y.tab.c" is illegal as a VMS filename; DECC 5.2/VAX preprocessor
+  # doesn't like this.
+  if ( s/^#line\s+(\d+)\s+"y.tab.c"/#line $1 "y_tab.c"/ ) { 1; }
+  else {
+    # add the dEXT tag to definitions of global vars, so we'll insert
+    # a globaldef when perly.c is compiled
+    s/^(short|int|YYSTYPE|char \*)\s*yy/dEXT $1 yy/;
   }
-  # add the dEXT tag to definitions of global vars, so we'll insert
-  # a globaldef when perly.c is compiled
-  s/^(short|int|YYSTYPE|char \*)\s*yy/dEXT $1 yy/;
   print COUT;
 }
 close C;
@@ -27,6 +33,9 @@ close COUT;
 
 open H,$hinfile  or die "Can't read $hinfile: $!\n";
 open HOUT, ">$houtfile" or die "Can't create $houtfile: $!\n";
+print HOUT <<EOH;
+/* Postprocessed by vms_yfix.pl $VERSION to add VMS declarations of globals */
+EOH
 $hfixed = 0;  # keep -w happy
 while (<H>) {
   $hfixed = /globalref/ unless $hfixed;  # we've already got a fixed copy

@@ -56,12 +56,12 @@ sub warndirectuse {
 
 package ExtUtils::MakeMaker;
 
-# Last edited $Date: 1996/01/05 20:40:47 $ by Andreas Koenig
-# $Id: MakeMaker.pm,v 1.135 1996/01/05 20:40:47 k Exp $
+# Last edited $Date: 1996/01/28 11:33:38 $ by Andreas Koenig
+# $Id: MakeMaker.pm,v 1.141 1996/01/28 11:33:38 k Exp $
 
-$Version = $VERSION = "5.16";
+$Version = $VERSION = "5.18";
 
-$ExtUtils::MakeMaker::Version_OK = 4.13;	# Makefiles older than $Version_OK will die
+$ExtUtils::MakeMaker::Version_OK = "5.05";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 
 use Config;
@@ -116,7 +116,7 @@ unshift(@MY::ISA, qw(MM));
 # default routine without having to know under what OS
 # it's running.
 
-@MM::ISA = qw[MM_Unix ExtUtils::MakeMaker];
+@MM::ISA = qw[ExtUtils::MM_Unix ExtUtils::MakeMaker];
 unshift @MM::ISA, 'ExtUtils::MM_VMS' if $Is_VMS;
 unshift @MM::ISA, 'ExtUtils::MM_OS2' if $Is_OS2;
 
@@ -132,6 +132,7 @@ unshift @MM::ISA, 'ExtUtils::MM_OS2' if $Is_OS2;
     tools_other		=> {},
     dist		=> {},
     macro		=> {},
+    depend		=> {},
     post_constants	=> {},
     pasthru		=> {},
     c_o			=> {},
@@ -633,25 +634,25 @@ sub Version_check {
 Current Version is $ExtUtils::MakeMaker::VERSION. There have been considerable
 changes in the meantime.
 Please rerun 'perl Makefile.PL' to regenerate the Makefile.\n"
-    if $checkversion < $ExtUtils::MakeMaker::Version_OK;
+    if $checkversion lt $ExtUtils::MakeMaker::Version_OK;
     printf STDOUT "%s %s %s %s.\n", "Makefile built with ExtUtils::MakeMaker v",
     $checkversion, "Current Version is", $ExtUtils::MakeMaker::VERSION
 	unless $checkversion == $ExtUtils::MakeMaker::VERSION;
-}
-
-sub mksymlists {
-    my $class = shift;
-    my $self = shift;
-    bless $self, $class;
-    tie %att, ExtUtils::MakeMaker::TieAtt, $self;
-    $self->parse_args(@ARGV);
-    $self->mksymlists(@_);
 }
 
 # The following mkbootstrap() is only for installations that are calling
 # the pre-4.1 mkbootstrap() from their old Makefiles. This MakeMaker
 # writes Makefiles, that use ExtUtils::Mkbootstrap directly.
 sub mkbootstrap {
+    die <<END;
+!!! Your Makefile has been built such a long time ago, !!!
+!!! that is unlikely to work with current MakeMaker.   !!!
+!!! Please rebuild your Makefile                       !!!
+END
+}
+
+# Ditto for mksymlists() as of MakeMaker 5.17
+sub mksymlists {
     die <<END;
 !!! Your Makefile has been built such a long time ago, !!!
 !!! that is unlikely to work with current MakeMaker.   !!!
@@ -705,7 +706,7 @@ sub selfdocument {
  #     # #     #         #     #  #   ##     #     #  #
  #     # #     # #######  #####   #    #     #    #    #
 
-package MM_Unix;
+package ExtUtils::MM_Unix;
 
 use Config;
 use Cwd;
@@ -713,7 +714,7 @@ use File::Basename;
 require Exporter;
 
 Exporter::import('ExtUtils::MakeMaker',
-	qw( $Verbose));
+	qw( $Verbose &neatvalue));
 
 # These attributes cannot be overridden externally
 @Other_Att_Keys{qw(EXTRALIBS BSLOADLIBS LDLOADLIBS)} = (1) x 3;
@@ -1026,8 +1027,6 @@ EOM
 	close PM;
     }
     $self->{VERSION} = "0.10" unless $self->{VERSION};
-    $self->{VERSION} = sprintf("%.10g",$self->{VERSION})
-	if ($self->{VERSION} =~ /^[\d.]{9,}$/);
     ($self->{VERSION_SYM} = $self->{VERSION}) =~ s/\W/_/g;
 
     # Graham Barr and Paul Marquess had some ideas how to ensure
@@ -1089,7 +1088,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	} elsif ($name =~ /\.h$/i){
 	    $h{$name} = 1;
 	} elsif ($name =~ /\.(p[ml]|pod)$/){
-	    $pm{$name} = $self->catfile('$(INST_LIBDIR)',"$name");
+	    $pm{$name} = $self->catfile('$(INST_LIBDIR)',$name);
 	} elsif ($name =~ /\.PL$/ && $name ne "Makefile.PL") {
 	    ($pl_files{$name} = $name) =~ s/\.PL$// ;
 	} elsif ($Is_VMS && $name =~ /\.pl$/ && $name ne 'makefile.pl' &&
@@ -1153,7 +1152,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	    my($striplibpath,$striplibname);
 	    $prefix =  '$(INST_LIB)' if (($striplibpath = $path) =~ s:^(\W*)lib\W:$1:);
 	    ($striplibname,$striplibpath) = fileparse($striplibpath);
-	    my($inst) = $self->catfile($self->catdir($prefix,$striplibpath),$striplibname);
+	    my($inst) = $self->catfile($prefix,$striplibpath,$striplibname);
 	    local($_) = $inst; # for backwards compatibility
 	    $inst = $self->libscan($inst);
 	    print "libscan($path) => '$inst'\n" if ($ExtUtils::MakeMaker::Verbose >= 2);
@@ -1901,6 +1900,13 @@ MKPATH = $(PERL) -wle '$$"="/"; foreach $$p (@ARGV){' \\
 -e 'next if -d $$p; my(@p); foreach(split(/\//,$$p)){' \\
 -e 'push(@p,$$_); next if -d "@p/"; print "mkdir @p" if 0;' \\
 -e 'mkdir("@p",0777)||die $$! } } exit 0;'
+
+# This helps us to minimize the effect of the .exists files A yet
+# better solution would be to have a stable file in the perl
+# distribution with a timestamp of zero. But this solution doesn't
+# need any changes to the core distribution and works with older perls
+EQUALIZE_TIMESTAMP = $(PERL) -we 'open F, ">$$ARGV[1]"; close F;' \\
+-e 'utime ((stat("$$ARGV[0]"))[8,9], $$ARGV[1])'
 };
 }
 
@@ -1955,6 +1961,19 @@ sub macro {
     join "", @m;
 }
 
+sub depend {
+    my($self,%attribs) = @_;
+    unless (ref $self){
+	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
+	$self = $ExtUtils::MakeMaker::Parent[-1];
+    }
+    my(@m,$key,$val);
+    while (($key,$val) = each %attribs){
+	push @m, "$key: $val\n";
+    }
+    join "", @m;
+}
+
 sub post_constants{
     my($self) = shift;
     unless (ref $self){
@@ -1976,7 +1995,7 @@ sub pasthru {
 
     foreach $key (qw(INSTALLPRIVLIB INSTALLARCHLIB INSTALLBIN
 		     INSTALLMAN1DIR INSTALLMAN3DIR LIBPERL_A
-		     LINKTYPE)){
+		     LINKTYPE PREFIX)){
 	push @pasthru, "$key=\"\$($key)\"";
     }
 
@@ -2130,11 +2149,10 @@ static :: $self->{BASEEXT}.exp
 
     push(@m,"
 $self->{BASEEXT}.exp: Makefile.PL
-",'	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e \'use ExtUtils::MakeMaker qw(&mksymlists); \\
-	MM->new({NAME => "'.$self->{NAME}.'"})->mksymlists({DL_FUNCS => ',
-	%$funcs ? neatvalue($funcs) : '""',', DL_VARS => ',
-	@$vars  ? neatvalue($vars)  : '""', ", NAME => \"$self->{NAME}\"})'
-");
+",'	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e \'use ExtUtils::Mksymlists; \\
+	Mksymlists("NAME" => "',$self->{NAME},'", "DL_FUNCS" => ',
+	neatvalue($funcs),', "DL_VARS" => ', neatvalue($vars), ');\'
+');
 
     join('',@m);
 }
@@ -3101,39 +3119,6 @@ sub extliblist {
     ExtUtils::Liblist::ext($libs, $ExtUtils::MakeMaker::Verbose);
 }
 
-sub mksymlists {
-    my($self) = shift;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
-    my($pkg);
-
-    # only AIX requires a symbol list at this point
-    # (so does VMS, but that's handled by the MM_VMS package)
-    return '' unless $Config::Config{osname} eq 'aix';
-
-    $self->init_main(@ARGV) unless defined $self->{BASEEXT};
-    if (! $self->{DL_FUNCS}) {
-	my($bootfunc);
-	($bootfunc = $self->{NAME}) =~ s/\W/_/g;
-	$self->{DL_FUNCS} = {$self->{BASEEXT} => ["boot_$bootfunc"]};
-    }
-    rename "$self->{BASEEXT}.exp", "$self->{BASEEXT}.exp_old";
-
-    open(EXP,">$self->{BASEEXT}.exp") or die $!;
-    print EXP join("\n",@{$self->{DL_VARS}}, "\n") if $self->{DL_VARS};
-    foreach $pkg (keys %{$self->{DL_FUNCS}}) {
-        (my($prefix) = $pkg) =~ s/\W/_/g;
-	my $func;
-        foreach $func (@{$self->{DL_FUNCS}->{$pkg}}) {
-            $func = "XS_${prefix}_$func" unless $func =~ /^boot_/;
-            print EXP "$func\n";
-        }
-    }
-    close EXP;
-}
-
 # --- Make-Directories section (internal method) ---
 # dir_target(@array) returns a Makefile entry for the file .exists in each
 # named directory. Returns nothing, if the entry has already been processed.
@@ -3154,7 +3139,7 @@ sub dir_target {
 	push @m, "
 $dir/.exists :: \$(PERL)
 	$self->{NOECHO}\$(MKPATH) $dir
-	$self->{NOECHO}\$(TOUCH) $dir/.exists
+	$self->{NOECHO}\$(EQUALIZE_TIMESTAMP) \$(PERL) $dir/.exists
 	$self->{NOECHO}-\$(CHMOD) 755 $dir
 ";
     }
@@ -3233,7 +3218,7 @@ package ExtUtils::MM_OS2;
 require Exporter;
 
 Exporter::import('ExtUtils::MakeMaker',
-       qw( $Verbose));
+       qw( $Verbose &neatvalue));
 
 sub dlsyms {
     my($self,%attribs) = @_;
@@ -3245,20 +3230,12 @@ sub dlsyms {
 
     if (not $self->{SKIPHASH}{'dynamic'}) {
 	push(@m,"
-$self->{BASEEXT}.def: Makefile.PL"
-          . '
-	echo "LIBRARY ' . "'$self->{DLBASE}'" . ' INITINSTANCE TERMINSTANCE" > $@ ; \\
-	echo "CODE LOADONCALL" >> $@ ; \\
-	echo "DATA LOADONCALL NONSHARED MULTIPLE" >> $@ ; \\
-	echo "EXPORTS" >> $@ ; \\
-	echo "  ' . "boot_$boot" . '" >> $@');
-	foreach $sym (keys %$funcs, @$vars) {
-	    push(@m, " ; \\
-       echo \"  $sym\" >> \$@");
-	}
-	push(@m,"\n");
+$self->{BASEEXT}.def: Makefile.PL
+",'	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e \'use ExtUtils::Mksymlists; \\
+	Mksymlists("NAME" => "',$self->{NAME},'", "DLBASE" => "',$self->{DLBASE},
+	'", "DL_FUNCS" => ',neatvalue($funcs),', "DL_VARS" => ', neatvalue($vars), ');\'
+');
     }
-
     join('',@m);
 }
 
@@ -3979,7 +3956,7 @@ B<after> the eval() will be assigned to the VERSION attribute of the
 MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
-    ( $VERSION ) = '$Revision: 1.135 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.141 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
 
 but these will fail:
@@ -4030,6 +4007,10 @@ part of the Makefile. These are not normally required:
 =item clean
 
   {FILES => "*.xyz foo"}
+
+=item depend
+
+  {ANY_TARGET => ANY_DEPENDECY, ...}
 
 =item dist
 

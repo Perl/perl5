@@ -25,3 +25,26 @@ useposix=false
 
 #MachTen might have an incomplete Berkeley DB implementation.
 i_db=$undef
+
+#MachTen versions 2.X have no hard links.  This variable is used
+# by File::Find.
+# This will generate a harmless message:
+# Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
+#	Propagating recommended variable dont_use_nlink
+case "$osver" in
+2*) dont_use_nlink=define ;;
+*) ;;
+esac
+
+case "$osvers" in
+2*)
+	cat <<'EOM' >&4
+
+Tests
+	io/fs test 4  and
+	op/stat test 3
+may fail since MachTen versions 2.X have no hard links.
+
+EOM
+    ;;
+esac

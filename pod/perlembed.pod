@@ -117,11 +117,11 @@ I<miniperlmain.c> containing the essentials of embedding:
     
     static PerlInterpreter *my_perl;  /***    The Perl interpreter    ***/
    
-    int main(int argc, char **argv)
+    int main(int argc, char **argv, char **env)
     {
         my_perl = perl_alloc();
         perl_construct(my_perl);
-        perl_parse(my_perl, NULL, argc, argv, (char **) NULL);
+        perl_parse(my_perl, NULL, argc, argv, env);
         perl_run(my_perl);
         perl_destruct(my_perl);
         perl_free(my_perl);
@@ -164,12 +164,12 @@ That's shown below, in a program I'll call I<showtime.c>.
     
     static PerlInterpreter *my_perl;  
     
-    int main(int argc, char **argv)
+    int main(int argc, char **argv, char **env)
     {
         my_perl = perl_alloc();
         perl_construct(my_perl);
     
-        perl_parse(my_perl, NULL, argc, argv, (char **) NULL);
+        perl_parse(my_perl, NULL, argc, argv, env);
     
                                      /*** This replaces perl_run() ***/
         perl_call_argv("showtime", G_DISCARD | G_NOARGS, argv);
@@ -241,7 +241,7 @@ the first, a C<float> from the second, and a C<char *> from the third.
      perl_call_argv("_eval_", 0, argv);
    }
    
-   main (int argc, char **argv)
+   main (int argc, char **argv, char **env)
    {
      char *embedding[] = { "", "-e", "sub _eval_ { eval $_[0] }" };
      STRLEN length;
@@ -249,7 +249,7 @@ the first, a C<float> from the second, and a C<char *> from the third.
      my_perl = perl_alloc();
      perl_construct( my_perl );
    
-     perl_parse(my_perl, NULL, 3, embedding, (char **) NULL);
+     perl_parse(my_perl, NULL, 3, embedding, env);
    
                                        /** Treat $a as an integer **/
      perl_eval("$a = 3; $a **= 2");
@@ -388,7 +388,7 @@ Here's a sample program, I<match.c>, that uses all three:
      return num_matches;
    }
    
-   main (int argc, char **argv)
+   main (int argc, char **argv, char **env)
    {
      char *embedding[] = { "", "-e", "sub _eval_ { eval $_[0] }" };
      char *text, **matches;
@@ -398,7 +398,7 @@ Here's a sample program, I<match.c>, that uses all three:
      my_perl = perl_alloc();
      perl_construct( my_perl );
    
-     perl_parse(my_perl, NULL, 3, embedding, (char **) NULL);
+     perl_parse(my_perl, NULL, 3, embedding, env);
    
      text = (char *) malloc(sizeof(char) * 486); /** A long string follows! **/
      sprintf(text, "%s", "When he is at a convenience store and the bill comes to some amount like 76 cents, Maynard is aware that there is something he *should* do, something that will enable him to get back a quarter, but he has no idea *what*.  He fumbles through his red squeezey changepurse and gives the boy three extra pennies with his dollar, hoping that he might luck into the correct amount.  The boy gives him back two of his own pennies and then the big shiny quarter that is his prize. -RICHH");  
@@ -517,7 +517,7 @@ deep breath...
       LEAVE;                       /* ...and the XPUSHed "mortal" args.*/
     }
     
-    int main (int argc, char **argv) 
+    int main (int argc, char **argv, char **env) 
     {
       char *my_argv[2];
     
@@ -527,7 +527,7 @@ deep breath...
       my_argv[1] = (char *) malloc(10);
       sprintf(my_argv[1], "power.pl");
     
-      perl_parse(my_perl, NULL, argc, my_argv, (char **) NULL);
+      perl_parse(my_perl, NULL, argc, my_argv, env);
       
       PerlPower(3, 4);                      /*** Compute 3 ** 4 ***/
     

@@ -39,9 +39,9 @@ as the my if you expect to to be able to access those private variables.
 
 Declaring a subroutine allows a subroutine name to be used as if it were a
 list operator from that point forward in the program.  You can declare a
-subroutine without defining it by saying just
+subroutine (prototyped to take one scalar parameter) without defining it by saying just:
 
-    sub myname;
+    sub myname ($);
     $me = myname $0 		or die "can't get myname";
 
 Note that it functions as a list operator though, not as a unary
@@ -316,17 +316,19 @@ do it:
 
 See how much easier this is?  It's cleaner, safer, and faster.  It's
 cleaner because it's less noisy.  It's safer because if code gets added
-between the inner and outer loops later, you won't accidentally excecute
-it because you've explicitly asked to iterate the other loop rather than
-merely terminating the inner one.  And it's faster because Perl executes a
-C<foreach> statement more rapidly than it would the equivalent C<for>
-loop.
+between the inner and outer loops later on, the new code won't be
+accidentally excecuted:  the C<next> explicitly iterates the other loop
+rather than merely terminating the inner one.  And it's faster because
+Perl executes a C<foreach> statement more rapidly than it would the
+equivalent C<for> loop.
 
 =head2 Basic BLOCKs and Switch Statements
 
 A BLOCK by itself (labeled or not) is semantically equivalent to a loop
 that executes once.  Thus you can use any of the loop control
-statements in it to leave or restart the block.  The C<continue> block
+statements in it to leave or restart the block.  (Note that this
+is I<NOT> true in C<eval{}>, C<sub{}>, or contrary to popular belief C<do{}> blocks,
+which do I<NOT> count as loops.)  The C<continue> block
 is optional.  
 
 The BLOCK construct is particularly nice for doing case
@@ -419,10 +421,10 @@ for a C<do> block to return the proper value:
 
     $amode = do {
 	if     ($flag & O_RDONLY) { "r" } 
-	elsif  ($flag & O_WRONLY) { ($flag & O_APPEND) ? "w" : "a" } 
+	elsif  ($flag & O_WRONLY) { ($flag & O_APPEND) ? "a" : "w" } 
 	elsif  ($flag & O_RDWR)   {
 	    if ($flag & O_CREAT)  { "w+" }
-	    else                  { ($flag & O_APPEND) ? "r+" : "a+" }
+	    else                  { ($flag & O_APPEND) ? "a+" : "r+" }
 	}
     };
 
@@ -456,15 +458,15 @@ pretend that the other subroutine had been called in the first place
 propagated to the other subroutine.)  After the C<goto>, not even caller()
 will be able to tell that this routine was called first.
 
-In almost cases like this, it's usually a far, far better idea to use the
-structured control flow mechanisms of C<next>, C<last>, or C<redo> insetad
+In almost all cases like this, it's usually a far, far better idea to use the
+structured control flow mechanisms of C<next>, C<last>, or C<redo> instead of
 resorting to a C<goto>.  For certain applications, the catch and throw pair of
 C<eval{}> and die() for exception processing can also be a prudent approach.
 
 =head2 PODs: Embedded Documentation
 
 Perl has a mechanism for intermixing documentation with source code.
-If while expecting the beginning of a new statement, the compiler
+While it's expecting the beginning of a new statement, if the compiler
 encounters a line that begins with an equal sign and a word, like this
 
     =head1 Here There Be Pods!

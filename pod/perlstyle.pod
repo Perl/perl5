@@ -159,6 +159,13 @@ previous example.
 
 =item *
 
+Avoid using grep() (or map()) or `backticks` in a void context, that is,
+when you just throw away their return values.  Those functions all 
+have return values, so use them.  Otherwise use a foreach() loop or
+the system() function instead.
+
+=item *
+
 For portability, when using features that may not be implemented on
 every machine, test the construct in an eval to see if it fails.  If
 you know what version or patchlevel a particular feature was

@@ -169,6 +169,7 @@ pop
 pos
 print
 printf
+prototype
 push
 q
 qq
@@ -232,12 +233,14 @@ sub
 substr
 symlink
 syscall
+sysopen
 sysread
 system
 syswrite
 tell
 telldir
 tie
+tied
 time
 times
 tr

@@ -137,11 +137,6 @@ Enable debugging output. Default is 0.
 
 =back
 
-=head1 NOTE
-
-Does not yet use the Exporter--or even packages!!
-Thus, it's not a real module.
-
 =cut
 
 # newgetopt.pl -- new options parsing

@@ -56,6 +56,8 @@ require DynaLoader;
 	GDBM_WRITER
 );
 
+$VERSION = $VERSION = "1.00";
+
 sub AUTOLOAD {
     local($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;

@@ -324,6 +324,12 @@ Using local() actually gives a local value to a global
 variable, which leaves you open to unforeseen side-effects
 of dynamic scoping.
 
+=item *
+
+If you localize an exported variable in a module, its exported value will
+not change.  The local name becomes an alias to a new value but the
+external name is still an alias for the original.
+
 =back
 
 =head2 Perl4 Traps
@@ -483,6 +489,27 @@ since this capability may be onerous for some modules to implement.
 The construct "this is $$x" used to interpolate the pid at that
 point, but now tries to dereference $x.  C<$$> by itself still
 works fine, however.
+
+=item *
+
+The meaning of foreach has changed slightly when it is iterating over a
+list which is not an array.  This used to assign the list to a
+temporary array, but no longer does so (for efficiency).  This means
+that you'll now be iterating over the actual values, not over copies of
+the values.  Modifications to the loop variable can change the original
+values.  To retain Perl 4 semantics you need to assign your list
+explicitly to a temporary array and then iterate over that.  For
+example, you might need to change
+
+    foreach $var (grep /x/, @list) { ... }
+
+to
+
+    foreach $var (my @tmp = grep /x/, @list) { ... }
+
+Otherwise changing C<$var> will clobber the values of @list.  (This most often
+happens when you use C<$_> for the loop variable, and call subroutines in
+the loop that don't properly localize C<$_>.)
 
 =item *
 

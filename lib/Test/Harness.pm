@@ -3,85 +3,127 @@ package Test::Harness;
 use Exporter;
 use Benchmark;
 use Config;
+require 5.002;
 
-$Is_OS2 = $Config{'osname'} =~ m|^os/?2$|i ;
+$VERSION = $VERSION = "1.02";
 
-$ENV{EMXSHELL} = 'sh' if $Is_OS2; # to run commands
-$path_s = $Is_OS2 ? ';' : ':' ;
-
-@ISA=(Exporter);
+@ISA=('Exporter');
 @EXPORT= qw(&runtests);
 @EXPORT_OK= qw($verbose $switches);
 
-$verbose = 0;
-$switches = "-w";
+
+$Test::Harness::verbose = 0;
+$Test::Harness::switches = "-w";
 
 sub runtests {
     my(@tests) = @_;
     local($|) = 1;
-    my($test,$te,$ok,$next,$max,$totmax, $files,$pct);
+    my($test,$te,$ok,$next,$max,$totmax, $files,$pct,@failed);
     my $bad = 0;
     my $good = 0;
     my $total = @tests;
-    local($ENV{'PERL5LIB'}) = join($path_s, @INC); # pass -I flags to children
+    local($ENV{'PERL5LIB'}) = join($Config{path_sep}, @INC); # pass -I flags to children
 
     my $t_start = new Benchmark;
     while ($test = shift(@tests)) {
-      $te = $test;
-      chop($te);
-      print "$te" . '.' x (20 - length($te));
-      my $fh = "RESULTS";
-      open($fh,"$^X $switches $test|") || (print "can't run. $!\n");
-      $ok = 0;
-      $next = 0;
-      while (<$fh>) {
-	  if( $verbose ){
-		  print $_;
-	  }
-          unless (/^#/) {
-              if (/^1\.\.([0-9]+)/) {
-                  $max = $1;
-                  $totmax += $max;
-                  $files += 1;
-                  $next = 1;
-                  $ok = 1;
-              } else {
-		  $next = $1, $ok = 0, last if /^not ok ([0-9]*)/;
-                  if (/^ok (.*)/ && $1 == $next) {
-                      $next = $next + 1;
-                  }
-              }
-          }
-      }
-      close($fh); # must close to reap child resource values
-      $next -= 1;
-      if ($ok && $next == $max) {
-          print "ok\n";
-          $good += 1;
-      } else {
-          $next += 1;
-          print "FAILED on test $next\n";
-          $bad += 1;
-          $_ = $test;
-      }
+	$te = $test;
+	chop($te);
+	print "$te" . '.' x (20 - length($te));
+	my $fh = "RESULTS";
+	open($fh,"$^X $Test::Harness::switches $test|") || (print "can't run. $!\n");
+	$ok = $next = $max = 0;
+	@failed = ();
+	while (<$fh>) {
+	    if( $Test::Harness::verbose ){
+		print $_;
+	    }
+	    unless (/^\#/) {
+		if (/^1\.\.([0-9]+)/) {
+		    $max = $1;
+		    $totmax += $max;
+		    $files++;
+		    $next = 1;
+		} elsif ($max) {
+		    if (/^not ok ([0-9]*)/){
+			push @failed, $next;
+		    } elsif (/^ok (.*)/ && $1 == $next) {
+			$ok++;
+		    }
+		    $next = $1 + 1;
+		}
+	    }
+	}
+	close($fh); # must close to reap child resource values
+	my $wstatus = $?;
+	my $estatus = $wstatus >> 8;
+	$next-- if $next;
+	if ($ok == $max && $next == $max && ! $wstatus) {
+	    print "ok\n";
+	    $good++;
+	} else {
+	    if (@failed) {
+		print canonfailed($max,@failed);
+	    } else {
+		if ($next == 0) {
+		    print "FAILED before any test output arrived\n";
+		} else {
+		    print canonfailed($max,$next+1..$max);
+		}
+	    }
+	    if ($wstatus) {
+		print "\tTest returned status $estatus (wstat $wstatus)\n";
+	    }
+	    $bad++;
+	    $_ = $test;
+	}
     }
     my $t_total = timediff(new Benchmark, $t_start);
-
+    
     if ($bad == 0) {
-      if ($ok) {
-          print "All tests successful.\n";
-      } else {
-          die "FAILED--no tests were run for some reason.\n";
-      }
+	if ($ok) {
+	    print "All tests successful.\n";
+	} else {
+	    die "FAILED--no tests were run for some reason.\n";
+	}
     } else {
-      $pct = sprintf("%.2f", $good / $total * 100);
-      if ($bad == 1) {
-          die "Failed 1 test, $pct% okay.\n";
-      } else {
-          die "Failed $bad/$total tests, $pct% okay.\n";
-      }
+	$pct = sprintf("%.2f", $good / $total * 100);
+	if ($bad == 1) {
+	    die "Failed 1 test script, $pct% okay.\n";
+	} else {
+	    die "Failed $bad/$total test scripts, $pct% okay.\n";
+	}
     }
-    printf("Files=%d,  Tests=%d, %s\n", $files,$totmax, timestr($t_total, 'nop'));
+    printf("Files=%d,  Tests=%d, %s\n", $files, $totmax, timestr($t_total, 'nop'));
+}
+
+sub canonfailed ($@) {
+    my($max,@failed) = @_;
+    my $failed = @failed;
+    my @result = ();
+    my @canon = ();
+    my $min;
+    my $last = $min = shift @failed;
+    if (@failed) {
+	for (@failed, $failed[-1]) { # don't forget the last one
+	    if ($_ > $last+1 || $_ == $last) {
+		if ($min == $last) {
+		    push @canon, $last;
+		} else {
+		    push @canon, "$min-$last";
+		}
+		$min = $_;
+	    }
+	    $last = $_;
+	}
+	local $" = ", ";
+	push @result, "FAILED tests @canon\n";
+    } else {
+	push @result, "FAILED test $last\n";
+    }
+
+    push @result, "\tFailed $failed/$max tests, ";
+    push @result, sprintf("%.2f",100*(1-$failed/$max)), "% okay\n";
+    join "", @result;
 }
 
 1;
@@ -134,7 +176,14 @@ above messages.
 
 =head1 SEE ALSO
 
-See L<Benchmerk> for the underlying timing routines.
+See L<Benchmark> for the underlying timing routines.
+
+=head1 AUTHORS
+
+Either Tim Bunce or Andreas Koenig, we don't know. What we know for
+sure is, that it was inspired by Larry Wall's TEST script that came
+with perl distributions for ages. Current maintainer is Andreas
+Koenig.
 
 =head1 BUGS
 

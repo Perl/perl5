@@ -104,6 +104,17 @@ sub ext {
 	    } elsif (-f ($fullname="$thispth/lib$thislib$Config_libext")){
 	    } elsif (-f ($fullname="$thispth/$thislib$Config_libext")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib$Config_libext")){
+	    } elsif ($Config{'osname'} eq 'dgux'
+		 && -l ($fullname="$thispth/lib$thislib$Config_libext")
+		 && readlink($fullname) =~ /^elink:/) {
+		 # Some of DG's libraries look like misconnected symbolic
+		 # links, but development tools can follow them.  (They
+		 # look like this:
+		 #
+		 #    libm.a -> elink:${SDE_PATH:-/usr}/sde/\
+		 #    ${TARGET_BINARY_INTERFACE:-m88kdgux}/usr/lib/libm.a
+		 #
+		 # , the compilation tools expand the environment variables.)
 	    } else {
 		print STDOUT "$thislib not found in $thispth\n" if $Verbose;
 		next;
