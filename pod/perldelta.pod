@@ -872,6 +872,11 @@ where data sharing was implicit.  See L<threads::shared>.
 
 =item *
 
+C<Tie::File>, by Mark-Jason Dominis, allows one to handle a file
+like an array of lines.
+
+=item *
+
 C<Tie::Memoize>, by Ilya Zakharevich, provides on-demand loaded hashes.
 
 =item *
