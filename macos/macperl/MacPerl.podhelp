@@ -2,6 +2,7 @@
 pod:pod/perl.pod			Perl Overview (perl)
 pod:pod/perltoc.pod			Table of contents (perltoc)
 pod:pod/macperl.pod			Macintosh specific features (macperl)
+pod:pod/macperldelta.pod		New for MacPerl 5.6 (macperldelta)
 @sub				Macintosh Toolbox Modules
 pod:lib/Mac/Toolbox.pod			Overview
 @sep
@@ -99,7 +100,6 @@ pod:pod/perlmod.pod			How they work (perlmod)
 pod:pod/perlmodlib.pod			How to write and use (perlmodlib)
 pod:pod/perlmodinstall.pod		How to install from CPAN (perlmodinstall)
 pod:pod/perlnewmod.pod			Preparing a new module for distribution (perlnewmod)
-pod:pod/macperlbundled.pod		Modules Bundled with MacPerl (macperlbundled)
 @end
 @sub				Interfacing to C
 pod:pod/perlcompile.pod			Compiler suite intro (perlcompile)
@@ -278,7 +278,7 @@ http://sourceforge.net/projects/shuck/	Shuck Project on SourceForge.net
 @file macperl pod:pod/macperl.pod
 @file macperlcat pod:pod/macperlcat.pod
 @file macperlbook pod:pod/macperlbook.pod
-@file macperlbundled pod:pod/macperlbundled.pod
+@file macperldelta pod:pod/macperldelta.pod
 @file perl pod:pod/perl.pod
 @file perlfaq pod:pod/perlfaq.pod
 @file perltoc pod:pod/perltoc.pod
