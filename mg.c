@@ -57,6 +57,11 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 {
     MGS* mgs;
     assert(SvMAGICAL(sv));
+#ifdef PERL_COPY_ON_WRITE
+    /* Turning READONLY off for a copy-on-write scalar is a bad idea.  */
+    if (SvIsCOW(sv))
+      sv_force_normal(sv);
+#endif
 
     SAVEDESTRUCTOR_X(restore_magic, INT2PTR(void*, (IV)mgs_ix));
 

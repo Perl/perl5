@@ -600,8 +600,8 @@ Perl_do_trans(pTHX_ SV *sv)
                     (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF));
 
     if (SvREADONLY(sv)) {
-        if (SvFAKE(sv))
-            sv_force_normal(sv);
+        if (SvIsCOW(sv))
+            sv_force_normal_flags(sv, 0);
         if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
             Perl_croak(aTHX_ PL_no_modify);
     }

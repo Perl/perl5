@@ -996,6 +996,10 @@ PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
 PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ OP* op);
 PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op);
 
+#if defined(PERL_COPY_ON_WRITE)
+PERL_CALLCONV int	Perl_sv_release_IVX(pTHX_ SV *sv);
+#endif
+
 PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *);
 PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *);
 PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *);
@@ -1269,6 +1273,9 @@ STATIC I32	S_expect_number(pTHX_ char** pattern);
 #  if defined(USE_ITHREADS)
 STATIC SV*	S_gv_share(pTHX_ SV *sv, CLONE_PARAMS *param);
 #  endif
+#if defined(PERL_COPY_ON_WRITE)
+STATIC void	S_sv_release_COW(pTHX_ SV *sv, char *pvx, STRLEN cur, STRLEN len, U32 hash, SV *after);
+#endif
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

@@ -954,6 +954,10 @@ Ap	|void	|sys_intern_init
 Ap |char * |custom_op_name|OP* op
 Ap |char * |custom_op_desc|OP* op
 
+#if defined(PERL_COPY_ON_WRITE)
+pM	|int	|sv_release_IVX	|SV *sv
+#endif
+
 Adp	|void	|sv_nosharing	|SV *
 Adp	|void	|sv_nolocking	|SV *
 Adp	|void	|sv_nounlocking	|SV *
@@ -1235,6 +1239,10 @@ s	|I32	|expect_number	|char** pattern
 #  if defined(USE_ITHREADS)
 s	|SV*	|gv_share	|SV *sv|CLONE_PARAMS *param
 #  endif
+#if defined(PERL_COPY_ON_WRITE)
+sM	|void	|sv_release_COW	|SV *sv|char *pvx|STRLEN cur|STRLEN len \
+				|U32 hash|SV *after
+#endif
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

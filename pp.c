@@ -764,8 +764,7 @@ PP(pp_undef)
     if (!sv)
 	RETPUSHUNDEF;
 
-    if (SvTHINKFIRST(sv))
-	sv_force_normal(sv);
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
 
     switch (SvTYPE(sv)) {
     case SVt_NULL:

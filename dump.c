@@ -1083,12 +1083,22 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	return;
     }
     if (type >= SVt_PVIV || type == SVt_IV) {
-	if (SvIsUV(sv))
+	if (SvIsUV(sv)
+#ifdef PERL_COPY_ON_WRITE
+	               || SvIsCOW(sv)
+#endif
+	                             )
 	    Perl_dump_indent(aTHX_ level, file, "  UV = %"UVuf, (UV)SvUVX(sv));
 	else
 	    Perl_dump_indent(aTHX_ level, file, "  IV = %"IVdf, (IV)SvIVX(sv));
 	if (SvOOK(sv))
 	    PerlIO_printf(file, "  (OFFSET)");
+#ifdef PERL_COPY_ON_WRITE
+	if (SvIsCOW_shared_hash(sv))
+	    PerlIO_printf(file, "  (HASH)");
+	else if (SvIsCOW_normal(sv))
+	    PerlIO_printf(file, "  (COW from 0x%"UVxf")", (UV)SvUVX(sv));
+#endif
 	PerlIO_putc(file, '\n');
     }
     if (type >= SVt_PVNV || type == SVt_NV) {

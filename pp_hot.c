@@ -1610,7 +1610,11 @@ PP(pp_helem)
     U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
+#ifdef PERL_COPY_ON_WRITE
+    U32 hash = (SvIsCOW_shared_hash(keysv)) ? SvUVX(keysv) : 0;
+#else
     U32 hash = (SvFAKE(keysv) && SvREADONLY(keysv)) ? SvUVX(keysv) : 0;
+#endif
     I32 preeminent = 0;
 
     if (SvTYPE(hv) == SVt_PVHV) {
@@ -1886,8 +1890,8 @@ PP(pp_subst)
 	EXTEND(SP,1);
     }
 
-    if (SvFAKE(TARG) && SvREADONLY(TARG))
-	sv_force_normal(TARG);
+    if (SvIsCOW(TARG))
+	sv_force_normal_flags(TARG,0);
     if (SvREADONLY(TARG)
 	|| (SvTYPE(TARG) > SVt_PVLV
 	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG))))

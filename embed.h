@@ -859,6 +859,9 @@
 #endif
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
+#if defined(PERL_COPY_ON_WRITE)
+#define sv_release_IVX		Perl_sv_release_IVX
+#endif
 #define sv_nosharing		Perl_sv_nosharing
 #define sv_nolocking		Perl_sv_nolocking
 #define sv_nounlocking		Perl_sv_nounlocking
@@ -1113,6 +1116,9 @@
 #  if defined(USE_ITHREADS)
 #define gv_share		S_gv_share
 #  endif
+#if defined(PERL_COPY_ON_WRITE)
+#define sv_release_COW		S_sv_release_COW
+#endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni		S_check_uni
@@ -2412,6 +2418,9 @@
 #endif
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
+#if defined(PERL_COPY_ON_WRITE)
+#define sv_release_IVX(a)	Perl_sv_release_IVX(aTHX_ a)
+#endif
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
 #define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
@@ -2665,6 +2674,9 @@
 #  if defined(USE_ITHREADS)
 #define gv_share(a,b)		S_gv_share(aTHX_ a,b)
 #  endif
+#if defined(PERL_COPY_ON_WRITE)
+#define sv_release_COW(a,b,c,d,e,f)	S_sv_release_COW(aTHX_ a,b,c,d,e,f)
+#endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni()		S_check_uni(aTHX)
