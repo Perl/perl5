@@ -70,7 +70,7 @@ void* p;
 	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
     }
 
-    Safefree(mgs);
+    safefree((void *)mgs);
 }
 
 
@@ -210,7 +210,7 @@ mg_copy(sv, nsv, key, klen)
 SV* sv;
 SV* nsv;
 char *key;
-STRLEN klen;
+I32 klen;
 {
     int count = 0;
     MAGIC* mg;
@@ -235,7 +235,10 @@ SV* sv;
 	if (vtbl && vtbl->svt_free)
 	    (*vtbl->svt_free)(sv, mg);
 	if (mg->mg_ptr && mg->mg_type != 'g')
-	    Safefree(mg->mg_ptr);
+	    if (mg->mg_len >= 0)
+		Safefree(mg->mg_ptr);
+	    else if (mg->mg_len == HEf_SVKEY)
+		SvREFCNT_dec((SV*)mg->mg_ptr);
 	if (mg->mg_flags & MGf_REFCOUNTED)
 	    SvREFCNT_dec(mg->mg_obj);
 	Safefree(mg);
@@ -346,8 +349,13 @@ MAGIC *mg;
 		sv_setpv(sv,"");
 	}
 #else
+#ifdef OS2
+	sv_setnv(sv,(double)Perl_rc);
+	sv_setpv(sv, os2error(Perl_rc));
+#else
 	sv_setnv(sv,(double)errno);
 	sv_setpv(sv, errno ? Strerror(errno) : "");
+#endif
 #endif
 	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
@@ -370,7 +378,11 @@ MAGIC *mg;
 	sv_setiv(sv,(I32)perldb);
 	break;
     case '\024':		/* ^T */
+#ifdef BIG_TIME
+ 	sv_setnv(sv,basetime);
+#else
 	sv_setiv(sv,(I32)basetime);
+#endif
 	break;
     case '\027':		/* ^W */
 	sv_setiv(sv,(I32)dowarn);
@@ -378,7 +390,7 @@ MAGIC *mg;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (curpm) {
-	    paren = atoi(GvENAME(mg->mg_obj));
+	    paren = atoi(GvENAME((GV*)mg->mg_obj));
 	  getparen:
 	    if (curpm->op_pmregexp &&
 	      paren <= curpm->op_pmregexp->nparens &&
@@ -485,10 +497,19 @@ MAGIC *mg;
     case '!':
 #ifdef VMS
 	sv_setnv(sv,(double)((errno == EVMSERR) ? vaxc$errno : errno));
+	sv_setpv(sv, errno ? Strerror(errno) : "");
 #else
+	{
+	int saveerrno = errno;
 	sv_setnv(sv,(double)errno);
+#ifdef OS2
+	if (errno == errno_isOS2) sv_setpv(sv, os2error(Perl_rc));
+	else
 #endif
 	sv_setpv(sv, errno ? Strerror(errno) : "");
+	errno = saveerrno;
+	}
+#endif
 	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '<':
@@ -548,23 +569,25 @@ SV* sv;
 MAGIC* mg;
 {
     register char *s;
+    char *ptr;
     STRLEN len;
     I32 i;
     s = SvPV(sv,len);
-    my_setenv(mg->mg_ptr,s);
+    ptr = (mg->mg_len == HEf_SVKEY) ? SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr;
+    my_setenv(ptr, s);
 #ifdef DYNAMIC_ENV_FETCH
      /* We just undefd an environment var.  Is a replacement */
      /* waiting in the wings? */
     if (!len) {
-	SV **envsvp;
-	if (envsvp = hv_fetch(GvHVn(envgv),mg->mg_ptr,mg->mg_len,FALSE))
-	    s = SvPV(*envsvp,len);
+	HE *envhe;
+	if (envhe = hv_fetch_ent(GvHVn(envgv),HeSVKEY((HE*)(mg->mg_ptr)),FALSE,0))
+	    s = SvPV(HeVAL(envhe),len);
     }
 #endif
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
     if (tainting) {
-	if (s && strEQ(mg->mg_ptr,"PATH")) {
+	if (s && strEQ(ptr,"PATH")) {
 	    char *strend = s + len;
 
 	    while (s < strend) {
@@ -584,7 +607,8 @@ magic_clearenv(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    my_setenv(mg->mg_ptr,Nullch);
+    my_setenv(((mg->mg_len == HEf_SVKEY) ?
+	       SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr),Nullch);
     return 0;
 }
 
@@ -603,19 +627,9 @@ Sigfunc handler;
     act.sa_handler = handler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
-#ifdef SIGALRM    
-    if (signo == SIGALRM) {
-#else
-    if (0) {
-#endif        
-#ifdef SA_INTERRUPT
-	act.sa_flags |= SA_INTERRUPT;	/* SunOS */
-#endif	
-    } else {
 #ifdef SA_RESTART
-	act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+    act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
-    }
     if (sigaction(signo, &act, &oact) < 0)
     	return(SIG_ERR);
     else
@@ -630,6 +644,64 @@ Sigfunc handler;
 
 #endif
 
+static sig_trapped;
+static
+Signal_t
+sig_trap(signo)
+int signo;
+{
+    sig_trapped++;
+}
+int
+magic_getsig(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    I32 i;
+    /* Are we fetching a signal entry? */
+    i = whichsig(mg->mg_ptr);
+    if (i) {
+    	if(psig_ptr[i])
+    	    sv_setsv(sv,psig_ptr[i]);
+    	else {
+    	    void (*origsig)(int);
+    	    /* get signal state without losing signals */
+    	    sig_trapped=0;
+    	    origsig = rsignal(i,sig_trap);
+    	    rsignal(i,origsig);
+    	    if(sig_trapped)
+    	    	kill(getpid(),i);
+    	    /* cache state so we don't fetch it again */
+    	    if(origsig == SIG_IGN)
+    	    	sv_setpv(sv,"IGNORE");
+    	    else
+    	    	sv_setsv(sv,&sv_undef);
+    	    psig_ptr[i] = SvREFCNT_inc(sv);
+    	    SvTEMP_off(sv);
+    	}
+    }
+    return 0;
+}
+int
+magic_clearsig(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    I32 i;
+    /* Are we clearing a signal entry? */
+    i = whichsig(mg->mg_ptr);
+    if (i) {
+    	if(psig_ptr[i]) {
+    	    SvREFCNT_dec(psig_ptr[i]);
+    	    psig_ptr[i]=0;
+    	}
+    	if(psig_name[i]) {
+    	    SvREFCNT_dec(psig_name[i]);
+    	    psig_name[i]=0;
+    	}
+    }
+    return 0;
+}
 
 int
 magic_setsig(sv,mg)
@@ -640,7 +712,7 @@ MAGIC* mg;
     I32 i;
     SV** svp;
 
-    s = mg->mg_ptr;
+    s = (mg->mg_len == HEf_SVKEY) ? SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr;
     if (*s == '_') {
 	if (strEQ(s,"__DIE__"))
 	    svp = &diehook;
@@ -663,6 +735,14 @@ MAGIC* mg;
 		warn("No such signal: SIG%s", s);
 	    return 0;
 	}
+        if(psig_ptr[i])
+   	    SvREFCNT_dec(psig_ptr[i]);
+	psig_ptr[i] = SvREFCNT_inc(sv);
+	if(psig_name[i])
+	    SvREFCNT_dec(psig_name[i]);
+	psig_name[i] = newSVpv(mg->mg_ptr,strlen(mg->mg_ptr));
+	SvTEMP_off(sv); /* Make sure it doesn't go away on us */
+	SvREADONLY_on(psig_name[i]);
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
 	if (i)
@@ -733,8 +813,12 @@ char *meth;
     PUSHMARK(sp);
     EXTEND(sp, 2);
     PUSHs(mg->mg_obj);
-    if (mg->mg_ptr)
-	PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_len)));
+    if (mg->mg_ptr) {
+	if (mg->mg_len >= 0)
+	    PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_len)));
+	else if (mg->mg_len == HEf_SVKEY)
+	    PUSHs((SV*)mg->mg_ptr);
+    }
     else if (mg->mg_type == 'p')
 	PUSHs(sv_2mortal(newSViv(mg->mg_len)));
     PUTBACK;
@@ -768,8 +852,12 @@ MAGIC* mg;
     PUSHMARK(sp);
     EXTEND(sp, 3);
     PUSHs(mg->mg_obj);
-    if (mg->mg_ptr)
-	PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_len)));
+    if (mg->mg_ptr) {
+	if (mg->mg_len >= 0)
+	    PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_len)));
+	else if (mg->mg_len == HEf_SVKEY)
+	    PUSHs((SV*)mg->mg_ptr);
+    }
     else if (mg->mg_type == 'p')
 	PUSHs(sv_2mortal(newSViv(mg->mg_len)));
     PUSHs(sv);
@@ -957,7 +1045,7 @@ MAGIC* mg;
     if (sv == (SV*)gv)
 	return 0;
     if (GvGP(sv))
-	gp_free(sv);
+	gp_free((GV*)sv);
     GvGP(sv) = gp_ref(GvGP(gv));
     if (!GvAV(gv))
 	gv_AVadd(gv);
@@ -1106,7 +1194,11 @@ MAGIC* mg;
 	perldb = i;
 	break;
     case '\024':	/* ^T */
+#ifdef BIG_TIME
+	basetime = (Time_t)(SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv));
+#else
 	basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+#endif
 	break;
     case '\027':	/* ^W */
 	dowarn = (bool)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
@@ -1116,7 +1208,7 @@ MAGIC* mg;
 	    if (localizing == 1)
 		save_sptr((SV**)&last_in_gv);
 	}
-	else if (SvOK(sv))
+	else if (SvOK(sv) && GvIO(last_in_gv))
 	    IoLINES(GvIOp(last_in_gv)) = (long)SvIV(sv);
 	break;
     case '^':
@@ -1362,41 +1454,26 @@ int sig;
     SV *sv;
     CV *cv;
     AV *oldstack;
-    char *signame; 
 
-#ifdef OS2		/* or anybody else who requires SIG_ACK */
-    signal(sig, SIG_ACK);
-#endif
-
-    signame = sig_name[sig];
-    cv = sv_2cv(*hv_fetch(GvHVn(siggv),signame,strlen(signame),
-			  TRUE),
-		&st, &gv, TRUE);
-    if (!cv || !CvROOT(cv) &&
-	*signame == 'C' && instr(signame,"LD")) {
-	
-	if (signame[1] == 'H')
-	    cv = sv_2cv(*hv_fetch(GvHVn(siggv),"CLD",3,TRUE),
-			&st, &gv, TRUE);
-	else
-	    cv = sv_2cv(*hv_fetch(GvHVn(siggv),"CHLD",4,TRUE),
-			&st, &gv, TRUE);
-	/* gag */
-    }
+    cv = sv_2cv(psig_ptr[sig],&st,&gv,TRUE);
     if (!cv || !CvROOT(cv)) {
 	if (dowarn)
 	    warn("SIG%s handler \"%s\" not defined.\n",
-		signame, GvENAME(gv) );
+		sig_name[sig], GvENAME(gv) );
 	return;
     }
 
-    oldstack = stack;
-    if (stack != signalstack)
+    oldstack = curstack;
+    if (curstack != signalstack)
 	AvFILL(signalstack) = 0;
-    SWITCHSTACK(stack, signalstack);
+    SWITCHSTACK(curstack, signalstack);
 
-    sv = sv_newmortal();
-    sv_setpv(sv,signame);
+    if(psig_name[sig])
+    	sv = SvREFCNT_inc(psig_name[sig]);
+    else {
+        sv = sv_newmortal();
+        sv_setpv(sv,sig_name[sig]);
+    }
     PUSHMARK(sp);
     PUSHs(sv);
     PUTBACK;
