@@ -4304,11 +4304,9 @@ Example, assuming array lengths are passed before arrays:
 Splits a string into a list of strings and returns that list.  By default,
 empty leading fields are preserved, and empty trailing ones are deleted.
 
-If not in list context, returns the number of fields found and splits into
-the C<@_> array.  (In list context, you can force the split into C<@_> by
-using C<??> as the pattern delimiters, but it still returns the list
-value.)  The use of implicit split to C<@_> is deprecated, however, because
-it clobbers your subroutine arguments.
+In scalar context, returns the number of fields found and splits into
+the C<@_> array.  Use of split in scalar context is deprecated, however,
+because it clobbers your subroutine arguments.
 
 If EXPR is omitted, splits the C<$_> string.  If PATTERN is also omitted,
 splits on whitespace (after skipping any leading whitespace).  Anything

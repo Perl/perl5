@@ -62,7 +62,7 @@ function.  For more information on the format of output of mstat() see
 L<perldebug/Using C<$ENV{PERL_DEBUG_MSTATS}>>.
 
 Function C<DumpArray()> allows dumping of multiple values (useful when you
-need to analize returns of functions).
+need to analyze returns of functions).
 
 The global variable $Devel::Peek::pv_limit can be set to limit the
 number of character printed in various string values.  Setting it to 0

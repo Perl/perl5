@@ -1609,7 +1609,6 @@ L<perlcall>.
 
 I32
 Perl_call_sv(pTHX_ SV *sv, I32 flags)
-       
           		/* See G_* flags in cop.h */
 {
     dSP;
@@ -1667,7 +1666,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	CATCH_SET(oldcatch);
     }
     else {
-	cLOGOP->op_other = PL_op;
+	myop.op_other = (OP*)&myop;
 	PL_markstack_ptr--;
 	/* we're trying to emulate pp_entertry() here */
 	{

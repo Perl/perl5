@@ -449,7 +449,7 @@ if you "use locale".
 	a A b B c C d D e E
 	a b c d e A B C D E
 
-Here is a code snippet to tell what alphanumeric
+Here is a code snippet to tell what "word"
 characters are in the current locale, in that locale's order:
 
         use locale;
@@ -518,8 +518,9 @@ results, and so always obey the current C<LC_COLLATE> locale.
 In the scope of S<C<use locale>>, Perl obeys the C<LC_CTYPE> locale
 setting.  This controls the application's notion of which characters are
 alphabetic.  This affects Perl's C<\w> regular expression metanotation,
-which stands for alphanumeric characters--that is, alphabetic and
-numeric characters.  (Consult L<perlre> for more information about
+which stands for alphanumeric characters--that is, alphabetic,
+numeric, and including other special characters such as the underscore or
+hyphen.  (Consult L<perlre> for more information about
 regular expressions.)  Thanks to C<LC_CTYPE>, depending on your locale
 setting, characters like 'E<aelig>', 'E<eth>', 'E<szlig>', and
 'E<oslash>' may be understood as C<\w> characters.

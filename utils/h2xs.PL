@@ -688,7 +688,7 @@ warn "Writing $ext$modpname/$modfname.pm\n";
 print PM <<"END";
 package $module;
 
-require 5.005_62;
+use 5.006;
 use strict;
 use warnings;
 END
@@ -905,7 +905,7 @@ my $pod = <<"END" unless $opt_P;
 #
 #=head1 SEE ALSO
 #
-#perl(1).
+#L<perl>.
 #
 #=cut
 END
