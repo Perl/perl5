@@ -7,7 +7,7 @@
 #
 
 # Package name      : perl5
-# Source directory  : /m/fs/work/work/permanent/perl/pp4/maint-5.6/perl
+# Source directory  : .
 # Configuration time: Sat Mar  3 01:13:55 EET 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
@@ -546,6 +546,7 @@ installvendorarch=''
 installvendorbin=''
 installvendorlib=''
 intsize='4'
+issymlink='-h'
 ivdformat='"ld"'
 ivsize='8'
 ivtype='long'

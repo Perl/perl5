@@ -25,6 +25,7 @@ sub walk_table (&@) {
 	$F = $filename;
     }
     else {
+	unlink $filename;
 	open F, ">$filename" or die "Can't open $filename: $!";
 	$F = \*F;
     }
