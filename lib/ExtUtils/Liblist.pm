@@ -77,7 +77,8 @@ sub _unix_os2_ext {
 		# For gcc-2.6.2 on linux (March 1995), DLD can not load
 		# .sa libraries, with the exception of libm.sa, so we
 		# deliberately skip them.
-	    if (@fullname = $self->lsdir($thispth,"^lib$thislib\.$so\.[0-9]+")){
+	    if (@fullname =
+		    $self->lsdir($thispth,"^\Qlib$thislib.$so.\E[0-9]+")){
 		# Take care that libfoo.so.10 wins against libfoo.so.9.
 		# Compare two libraries to find the most recent version
 		# number.  E.g.  if you have libfoo.so.9.0.7 and
