@@ -833,7 +833,7 @@ SV.
 
 The C<name> and C<namlen> arguments are used to associate a string with
 the magic, typically the name of a variable. C<namlen> is stored in the
-C<mg_len> field and if C<name> is non-null and C<namlen> >= 0 a malloc'd
+C<mg_len> field and if C<name> is non-null and C<namlen> E<gt>= 0 a malloc'd
 copy of the name is stored in C<mg_ptr> field.
 
 The sv_magic function uses C<how> to determine which, if any, predefined
@@ -2386,15 +2386,15 @@ the Perl interpreter.
 =head1 AUTHORS
 
 Until May 1997, this document was maintained by Jeff Okamoto
-<okamoto@corp.hp.com>.  It is now maintained as part of Perl itself
-by the Perl 5 Porters <perl5-porters@perl.org>.
+E<lt>okamoto@corp.hp.comE<gt>.  It is now maintained as part of Perl
+itself by the Perl 5 Porters E<lt>perl5-porters@perl.orgE<gt>.
 
 With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
 Bowers, Matthew Green, Tim Bunce, Spider Boardman, Ulrich Pfeifer,
 Stephen McCamant, and Gurusamy Sarathy.
 
-API Listing originally by Dean Roehrich <roehrich@cray.com>.
+API Listing originally by Dean Roehrich E<lt>roehrich@cray.comE<gt>.
 
 Modifications to autogenerate the API listing (L<perlapi>) by Benjamin
 Stuhl.
