@@ -7777,7 +7777,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     We allow format specification elements in this order:
 	\d+\$              explicit format parameter index
 	[-+ 0#]+           flags
-	v|*(\d+\$)?v       vector with optional (optionally specified) arg
+	v|\*(\d+\$)?v      vector with optional (optionally specified) arg
 	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
 	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
 	[hlqLV]            size
