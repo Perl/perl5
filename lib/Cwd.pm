@@ -170,7 +170,14 @@ sub chdir {
     my $newdir = @_ ? shift : '';	# allow for no arg (chdir to HOME dir)
     $newdir =~ s|///*|/|g unless $^O eq 'MSWin32';
     chdir_init() unless $chdir_init;
+    my $newpwd;
+    if ($^O eq 'MSWin32') {
+	# get the full path name *before* the chdir()
+	$newpwd = Win32::GetFullPathName($newdir);
+    }
+
     return 0 unless CORE::chdir $newdir;
+
     if ($^O eq 'VMS') {
 	return $ENV{'PWD'} = $ENV{'DEFAULT'}
     }
@@ -178,7 +185,7 @@ sub chdir {
 	return $ENV{'PWD'} = cwd();
     }
     elsif ($^O eq 'MSWin32') {
-	$ENV{'PWD'} = Win32::GetFullPathName($newdir);
+	$ENV{'PWD'} = $newpwd;
 	return 1;
     }
 
