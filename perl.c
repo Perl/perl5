@@ -121,31 +121,37 @@ register PerlInterpreter *sv_interp;
     Zero(sv_interp, 1, PerlInterpreter);
 #endif
 
+   /* Init the real globals? */
+    if (!linestr) {
 #ifdef USE_THREADS
 #ifdef NEED_PTHREAD_INIT
-    pthread_init();
+    	pthread_init();
 #endif /* NEED_PTHREAD_INIT */
-    New(53, thr, 1, struct thread);
+	New(53, thr, 1, struct thread);
+	MUTEX_INIT(&malloc_mutex);
+	MUTEX_INIT(&sv_mutex);
+	MUTEX_INIT(&eval_mutex);
+	COND_INIT(&eval_cond);
+	MUTEX_INIT(&nthreads_mutex);
+	COND_INIT(&nthreads_cond);
+	nthreads = 1;
+	cvcache = newHV();
+	thrflags = 0;
+	curcop = &compiling;
 #ifdef FAKE_THREADS
-    self = thr;
-    thr->next = thr->prev = thr->next_run = thr->prev_run = thr;
-    thr->wait_queue = 0;
-    thr->private = 0;
+	self = thr;
+	thr->next = thr->prev = thr->next_run = thr->prev_run = thr;
+	thr->wait_queue = 0;
+	thr->private = 0;
 #else
-    self = pthread_self();
-    if (pthread_key_create(&thr_key, thread_destruct))
-	croak("panic: pthread_key_create");
-    if (pthread_setspecific(thr_key, (void *) thr))
-	croak("panic: pthread_setspecific");
-#endif /* !FAKE_THREADS */
-    nthreads = 1;
-    cvcache = newHV();
-    thrflags = 0;
-    curcop = &compiling;
+	self = pthread_self();
+	if (pthread_key_create(&thr_key, thread_destruct))
+	    croak("panic: pthread_key_create");
+	if (pthread_setspecific(thr_key, (void *) thr))
+	    croak("panic: pthread_setspecific");
+#endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
 
-    /* Init the real globals? */
-    if (!linestr) {
 	linestr = NEWSV(65,80);
 	sv_upgrade(linestr,SVt_PVIV);
 
@@ -165,12 +171,6 @@ register PerlInterpreter *sv_interp;
 	rs = SvREFCNT_inc(nrs);
 
 	sighandlerp = sighandler;
-	MUTEX_INIT(&malloc_mutex);
-	MUTEX_INIT(&sv_mutex);
-	MUTEX_INIT(&eval_mutex);
-	MUTEX_INIT(&nthreads_mutex);
-	COND_INIT(&nthreads_cond);
-
 	pidstatus = newHV();
 
 #ifdef MSDOS
@@ -532,6 +532,7 @@ register PerlInterpreter *sv_interp;
     MUTEX_DESTROY(&sv_mutex);
     MUTEX_DESTROY(&malloc_mutex);
     MUTEX_DESTROY(&eval_mutex);
+    COND_DESTROY(&eval_cond);
 #endif /* USE_THREADS */
 
     /* As the absolutely last thing, free the non-arena SV for mess() */
