@@ -26,7 +26,6 @@
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
 static OP *docatch _((OP *o));
-static OP *doeval _((int gimme));
 static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
 static I32 dopoptoeval _((I32 startingblock));
@@ -37,6 +36,7 @@ static void save_lines _((AV *array, SV *sv));
 static int sortcv _((const void *, const void *));
 static int sortcmp _((const void *, const void *));
 static int sortcmp_locale _((const void *, const void *));
+static OP *doeval _((int gimme, OP** startop));
 
 static I32 sortcxix;
 
@@ -71,21 +71,34 @@ PP(pp_regcomp) {
     register char *t;
     SV *tmpstr;
     STRLEN len;
+    MAGIC *mg = Null(MAGIC*);
 
     tmpstr = POPs;
-    t = SvPV(tmpstr, len);
+    if(SvROK(tmpstr)) {
+	SV *sv = SvRV(tmpstr);
+	if(SvMAGICAL(sv))
+	    mg = mg_find(sv, 'r');
+    }
+    if(mg) {
+	regexp *re = (regexp *)mg->mg_obj;
+	ReREFCNT_dec(pm->op_pmregexp);
+	pm->op_pmregexp = ReREFCNT_inc(re);
+    }
+    else {
+	t = SvPV(tmpstr, len);
 
-    /* JMR: Check against the last compiled regexp */
-    if ( ! pm->op_pmregexp  || ! pm->op_pmregexp->precomp
-	|| strnNE(pm->op_pmregexp->precomp, t, len) 
-	|| pm->op_pmregexp->precomp[len]) {
-	if (pm->op_pmregexp) {
-	    pregfree(pm->op_pmregexp);
-	    pm->op_pmregexp = Null(REGEXP*);	/* crucial if regcomp aborts */
+	/* JMR: Check against the last compiled regexp */
+	if ( ! pm->op_pmregexp  || ! pm->op_pmregexp->precomp
+	    || strnNE(pm->op_pmregexp->precomp, t, len) 
+	    || pm->op_pmregexp->precomp[len]) {
+	    if (pm->op_pmregexp) {
+		ReREFCNT_dec(pm->op_pmregexp);
+		pm->op_pmregexp = Null(REGEXP*);	/* crucial if regcomp aborts */
+	    }
+
+	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
+	    pm->op_pmregexp = pregcomp(t, t + len, pm);
 	}
-
-	pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
-	pm->op_pmregexp = pregcomp(t, t + len, pm);
     }
 
     if (!pm->op_pmregexp->prelen && curpm)
@@ -95,7 +108,6 @@ PP(pp_regcomp) {
 
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
-	hoistmust(pm);
 	cLOGOP->op_first->op_next = op->op_next;
     }
     RETURN;
@@ -123,13 +135,14 @@ PP(pp_substcont)
 	sv_catsv(dstr, POPs);
 
 	/* Are we done */
-	if (cx->sb_once || !pregexec(rx, s, cx->sb_strend, orig,
-				s == m, Nullsv, cx->sb_safebase))
+	if (cx->sb_once || !regexec_flags(rx, s, cx->sb_strend, orig,
+				     s == m, Nullsv, NULL,
+				     cx->sb_safebase ? 0 : REXEC_COPY_STR))
 	{
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
 
-	    TAINT_IF(cx->sb_rxtainted || rx->exec_tainted);
+	    TAINT_IF(cx->sb_rxtainted || RX_MATCH_TAINTED(rx));
 
 	    (void)SvOOK_off(targ);
 	    Safefree(SvPVX(targ));
@@ -158,7 +171,7 @@ PP(pp_substcont)
     cx->sb_m = m = rx->startp[0];
     sv_catpvn(dstr, s, m-s);
     cx->sb_s = rx->endp[0];
-    cx->sb_rxtainted |= rx->exec_tainted;
+    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmreplstart);
 }
@@ -2087,9 +2100,63 @@ docatch(OP *o)
     return Nullop;
 }
 
+OP *
+sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
+/* sv Text to convert to OP tree. */
+/* startop op_free() this to undo. */
+/* code Short string id of the caller. */
+{
+    dSP;				/* Make POPBLOCK work. */
+    PERL_CONTEXT *cx;
+    SV **newsp;
+    I32 gimme;
+    I32 optype;
+    OP dummy;
+    OP *oop = op, *rop;
+    char tmpbuf[TYPE_DIGITS(long) + 12 + 10];
+    char *safestr;
+
+    ENTER;
+    lex_start(sv);
+    SAVETMPS;
+    /* switch to eval mode */
+
+    SAVESPTR(compiling.cop_filegv);
+    SAVEI16(compiling.cop_line);
+    sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++evalseq);
+    compiling.cop_filegv = gv_fetchfile(tmpbuf+2);
+    compiling.cop_line = 1;
+    /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
+       deleting the eval's FILEGV from the stash before gv_check() runs
+       (i.e. before run-time proper). To work around the coredump that
+       ensues, we always turn GvMULTI_on for any globals that were
+       introduced within evals. See force_ident(). GSAR 96-10-12 */
+    safestr = savepv(tmpbuf);
+    SAVEDELETE(defstash, safestr, strlen(safestr));
+    SAVEI32(hints);
+    SAVEPPTR(op);
+    hints = 0;
+
+    op = &dummy;
+    op->op_type = 0;			/* Avoid uninit warning. */
+    op->op_flags = 0;			/* Avoid uninit warning. */
+    PUSHBLOCK(cx, CXt_EVAL, SP);
+    PUSHEVAL(cx, 0, compiling.cop_filegv);
+    rop = doeval(G_SCALAR, startop);
+    POPBLOCK(cx,curpm);
+    POPEVAL(cx);
+
+    (*startop)->op_type = OP_NULL;
+    (*startop)->op_ppaddr = ppaddr[OP_NULL];
+    lex_end();
+    *avp = (AV*)SvREFCNT_inc(comppad);
+    LEAVE;
+    return rop;
+}
+
 /* With USE_THREADS, eval_owner must be held on entry to doeval */
 static OP *
-doeval(int gimme)
+doeval(int gimme, OP** startop)
 {
     dSP;
     OP *saveop = op;
@@ -2141,7 +2208,7 @@ doeval(int gimme)
     av_store(comppadlist, 1, (SV*)comppad);
     CvPADLIST(compcv) = comppadlist;
 
-    if (saveop->op_type != OP_REQUIRE)
+    if (!saveop || saveop->op_type != OP_REQUIRE)
 	CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(caller);
 
     SAVEFREESV(compcv);
@@ -2165,7 +2232,7 @@ doeval(int gimme)
     curcop->cop_arybase = 0;
     SvREFCNT_dec(rs);
     rs = newSVpv("\n", 1);
-    if (saveop->op_flags & OPf_SPECIAL)
+    if (saveop && saveop->op_flags & OPf_SPECIAL)
 	in_eval |= 4;
     else
 	sv_setpv(ERRSV,"");
@@ -2173,7 +2240,7 @@ doeval(int gimme)
 	SV **newsp;
 	I32 gimme;
 	PERL_CONTEXT *cx;
-	I32 optype;
+	I32 optype = 0;			/* Might be reset by POPEVAL. */
 
 	op = saveop;
 	if (eval_root) {
@@ -2181,14 +2248,22 @@ doeval(int gimme)
 	    eval_root = Nullop;
 	}
 	SP = stack_base + POPMARK;		/* pop original mark */
-	POPBLOCK(cx,curpm);
-	POPEVAL(cx);
-	pop_return();
+	if (!startop) {
+	    POPBLOCK(cx,curpm);
+	    POPEVAL(cx);
+	    pop_return();
+	}
 	lex_end();
 	LEAVE;
 	if (optype == OP_REQUIRE) {
 	    char* msg = SvPVx(ERRSV, na);
 	    DIE("%s", *msg ? msg : "Compilation failed in require");
+	} else if (startop) {
+	    char* msg = SvPVx(ERRSV, na);
+
+	    POPBLOCK(cx,curpm);
+	    POPEVAL(cx);
+	    croak("%sCompilation failed in regexp", (*msg ? msg : "Unknown error\n"));
 	}
 	SvREFCNT_dec(rs);
 	rs = SvREFCNT_inc(nrs);
@@ -2203,7 +2278,12 @@ doeval(int gimme)
     SvREFCNT_dec(rs);
     rs = SvREFCNT_inc(nrs);
     compiling.cop_line = 0;
-    SAVEFREEOP(eval_root);
+    if (startop) {
+	*startop = eval_root;
+	SvREFCNT_dec(CvOUTSIDE(compcv));
+	CvOUTSIDE(compcv) = Nullcv;
+    } else
+	SAVEFREEOP(eval_root);
     if (gimme & G_VOID)
 	scalarvoid(eval_root);
     else if (gimme & G_ARRAY)
@@ -2229,7 +2309,7 @@ doeval(int gimme)
 
     CvDEPTH(compcv) = 1;
     SP = stack_base + POPMARK;		/* pop original mark */
-    op = saveop;					/* The caller may need it. */
+    op = saveop;			/* The caller may need it. */
 #ifdef USE_THREADS
     MUTEX_LOCK(&eval_mutex);
     eval_owner = 0;
@@ -2288,7 +2368,7 @@ PP(pp_require)
     )
     {
 	tryname = name;
-	tryrsfp = PerlIO_open(name,"r");
+	tryrsfp = PerlIO_open(name,PERL_SCRIPT_MODE);
     }
     else {
 	AV *ar = GvAVn(incgv);
@@ -2311,7 +2391,7 @@ PP(pp_require)
 		sv_setpvf(namesv, "%s/%s", dir, name);
 #endif
 		tryname = SvPVX(namesv);
-		tryrsfp = PerlIO_open(tryname, "r");
+		tryrsfp = PerlIO_open(tryname, PERL_SCRIPT_MODE);
 		if (tryrsfp) {
 		    if (tryname[0] == '.' && tryname[1] == '/')
 			tryname += 2;
@@ -2382,7 +2462,7 @@ PP(pp_require)
     eval_owner = thr;
     MUTEX_UNLOCK(&eval_mutex);
 #endif /* USE_THREADS */
-    return DOCATCH(doeval(G_SCALAR));
+    return DOCATCH(doeval(G_SCALAR, NULL));
 }
 
 PP(pp_dofile)
@@ -2442,7 +2522,7 @@ PP(pp_entereval)
     eval_owner = thr;
     MUTEX_UNLOCK(&eval_mutex);
 #endif /* USE_THREADS */
-    ret = doeval(gimme);
+    ret = doeval(gimme, NULL);
     if (PERLDB_INTER && was != sub_generation /* Some subs defined here. */
 	&& ret != op->op_next) {	/* Successive compilation. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */

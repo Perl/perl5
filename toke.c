@@ -187,7 +187,7 @@ missingterm(char *s)
     char q;
     if (s) {
 	char *nl = strrchr(s,'\n');
-	if (nl)
+	if (nl) 
 	    *nl = '\0';
     }
     else if (multi_close < 32 || multi_close == 127) {
@@ -218,6 +218,19 @@ depcom(void)
 {
     deprecate("comma-less variable list");
 }
+
+#ifdef WIN32
+
+static I32
+win32_textfilter(int idx, SV *sv, int maxlen)
+{
+ I32 count = FILTER_READ(idx+1, sv, maxlen);
+ if (count > 0 && !maxlen)
+  win32_strip_return(sv);
+ return count;
+}
+#endif
+
 
 void
 lex_start(SV *line)
@@ -784,7 +797,7 @@ scan_const(char *start)
 	else if (*s == '$') {
 	    if (!lex_inpat)	/* not a regexp, so $ must be var */
 		break;
-	    if (s + 1 < send && !strchr(")| \n\t", s[1]))
+	    if (s + 1 < send && !strchr("()| \n\t", s[1]))
 		break;		/* in regexp, $ might be tail anchor */
 	}
 	if (*s == '\\' && s+1 < send) {
@@ -1159,6 +1172,7 @@ filter_read(int idx, SV *buf_sv, int maxlen)
 	        else
 		    return 0 ;		/* end of file */
 	    }
+
 	}
 	return SvCUR(buf_sv);
     }
@@ -1179,9 +1193,15 @@ filter_read(int idx, SV *buf_sv, int maxlen)
     return (*funcp)(idx, buf_sv, maxlen);
 }
 
+
 static char *
 filter_gets(register SV *sv, register FILE *fp, STRLEN append)
 {
+#ifdef WIN32FILTER
+    if (!rsfp_filters) {
+	filter_add(win32_textfilter,NULL);
+    }
+#endif
     if (rsfp_filters) {
 
 	if (!append)
@@ -1193,7 +1213,6 @@ filter_gets(register SV *sv, register FILE *fp, STRLEN append)
     }
     else 
         return (sv_gets(sv, fp, append));
-    
 }
 
 
@@ -1724,9 +1743,11 @@ yylex(void)
 	}
 	goto retry;
     case '\r':
+#ifndef WIN32CHEAT
 	warn("Illegal character \\%03o (carriage return)", '\r');
 	croak(
       "(Maybe you didn't strip carriage returns after a network transfer?)\n");
+#endif
     case ' ': case '\t': case '\f': case 013:
 	s++;
 	goto retry;
@@ -2389,7 +2410,11 @@ yylex(void)
     case '/':			/* may either be division or pattern */
     case '?':			/* may either be conditional or pattern */
 	if (expect != XOPERATOR) {
-	    check_uni();
+	    /* Disable warning on "study /blah/" */
+	    if (oldoldbufptr == last_uni 
+		&& (*last_uni != 's' || s - last_uni < 5 
+		    || memNE(last_uni, "study", 5) || isALNUM(last_uni[5])))
+		check_uni();
 	    s = scan_pat(s);
 	    TERM(sublex_start());
 	}
@@ -4674,46 +4699,6 @@ scan_subst(char *start)
     lex_op = (OP*)pm;
     yylval.ival = OP_SUBST;
     return s;
-}
-
-void
-hoistmust(register PMOP *pm)
-{
-    dTHR;
-    if (!pm->op_pmshort && pm->op_pmregexp->regstart &&
-	(!pm->op_pmregexp->regmust || pm->op_pmregexp->reganch & ROPT_ANCH)
-       ) {
-	if (!(pm->op_pmregexp->reganch & ROPT_ANCH))
-	    pm->op_pmflags |= PMf_SCANFIRST;
-	pm->op_pmshort = SvREFCNT_inc(pm->op_pmregexp->regstart);
-	pm->op_pmslen = SvCUR(pm->op_pmshort);
-    }
-    else if (pm->op_pmregexp->regmust) {/* is there a better short-circuit? */
-	if (pm->op_pmshort &&
-	  sv_eq(pm->op_pmshort,pm->op_pmregexp->regmust))
-	{
-	    if (pm->op_pmflags & PMf_SCANFIRST) {
-		SvREFCNT_dec(pm->op_pmshort);
-		pm->op_pmshort = Nullsv;
-	    }
-	    else {
-		SvREFCNT_dec(pm->op_pmregexp->regmust);
-		pm->op_pmregexp->regmust = Nullsv;
-		return;
-	    }
-	}
-	/* promote the better string */
-	if ((!pm->op_pmshort &&
-	     !(pm->op_pmregexp->reganch & ROPT_ANCH_GPOS)) ||
-	    ((pm->op_pmflags & PMf_SCANFIRST) &&
-	     (SvCUR(pm->op_pmshort) < SvCUR(pm->op_pmregexp->regmust)))) {
-	    SvREFCNT_dec(pm->op_pmshort);		/* ok if null */
-	    pm->op_pmshort = pm->op_pmregexp->regmust;
-	    pm->op_pmslen = SvCUR(pm->op_pmshort);
-	    pm->op_pmregexp->regmust = Nullsv;
-	    pm->op_pmflags |= PMf_SCANFIRST;
-	}
-    }
 }
 
 static char *

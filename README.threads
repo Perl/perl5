@@ -4,6 +4,7 @@ If you want to build with multi-threading support and you are
 running Linux 2.x (with the LinuxThreads library installed:
 that's the linuxthreads and linuxthreads-devel RPMs for RedHat)
 or Digital UNIX 4.x or Solaris 2.x for recentish x (2.5 is OK)
+or IRIX 6.2 or newer (6.2 will require a few os patches),
 then you should be able to use
     ./Configure -Dusethreads -Doptimize=-g -ders
     make
@@ -42,6 +43,19 @@ For Digital Unix 4.x:
     Zap mallocobj and mallocsrc (foo='')
     Change d_mymalloc to undef
 For Solaris, do the same as for Linux above.
+For IRIX:
+    Add -DUSE_THREADS -DDEBUGGING to ccflags
+    Add -DUSE_THREADS -DDEBUGGING to cppflags
+    Add -lpthread to libs
+    Change optimize to -g
+    For IRIX 6.2, you have to have the following patches installed:
+	1404 Irix 6.2 Posix 1003.1b man pages
+	1645 IRIX 6.2 & 6.3 POSIX header file updates
+	2000 Irix 6.2 Posix 1003.1b support modules
+	2254 Pthread library fixes
+    For IRIX 6.3 and 6.4 the pthreads should work out of the box.
+    Thanks to Hannu Napari <Hannu.Napari@hut.fi> for the IRIX
+    pthreads patches information.
 
 Now you can do a
     make

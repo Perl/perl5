@@ -314,6 +314,11 @@ d_Gconvert=''
 d_getgrps=''
 d_setgrps=''
 d_gethent=''
+d_gethbadd=''
+gethbadd_addr_type=''
+gethbadd_alen_type=''
+d_getnbadd=''
+getnbadd_net_type=''
 aphostname=''
 d_gethname=''
 d_phostname=''
@@ -482,6 +487,7 @@ i_malloc=''
 i_math=''
 i_memory=''
 i_ndbm=''
+i_netdb=''
 i_neterrno=''
 i_niin=''
 i_sysin=''
@@ -6624,6 +6630,14 @@ eval $inlibc
 set fsetpos d_fsetpos
 eval $inlibc
 
+: see if gethostbyaddr exists
+set gethostbyaddr d_gethbadd
+eval $inlibc
+
+: see if getnetbyaddr exists
+set getnetbyaddr d_getnbadd
+eval $inlibc
+
 : see if gethostent exists
 set gethostent d_gethent
 eval $inlibc
@@ -9223,6 +9237,148 @@ EOM
 fi
 $rm -f ssize ssize.[co] ssize.out
 
+: see if this is a netdb.h system
+set netdb.h i_netdb
+eval $inhdr
+
+: check for type of arguments to gethostbyaddr.  This will only really
+: work if the system supports prototypes and provides one for
+: gethostbyaddr.
+case "$d_gethbadd" in
+$define)
+        if test "X$gethbadd_addr_type" = X -o "X$gethbadd_alen_type" = X; then
+	    $cat <<EOM
+
+Checking to see what type of arguments are expected by gethostbyaddr().
+EOM
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_niin I_NIIN
+#$i_netdb I_NETDB
+#$i_unistd I_UNISTD
+#$d_socket HAS_SOCKET
+#$d_socket HAS_SOCKET
+#ifdef HAS_SOCKET
+#include <sys/socket.h> /* Might include <sys/bsdtypes.h> */
+#endif
+#ifdef I_NIIN
+#include <netinet/in.h>
+#endif
+#ifdef I_NETDB
+#include <netdb.h>
+#endif
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+#define Size_t $sizetype
+main()
+{
+	Gethbadd_addr_t	addr;
+        Gethbadd_alen_t	alen;
+	struct hostent*	hent;
+
+	extern struct hostent *gethostbyaddr(const Gethbadd_addr_t, Gethbadd_alen_t, int);
+
+	alen = sizeof(struct in_addr);
+	addr = (Gethbadd_addr_t)malloc(alen);
+	/* We do not execute this so the contents of the addr matter not. */
+	hent = gethostbyaddr(addr, alen, AF_INET);
+
+	exit(0);
+}
+EOCP
+	    for xxx in "void *" "char *"; do
+		    for yyy in Size_t int; do
+			    if $cc $ccflags -c -DGethbadd_addr_t="$xxx" -DGethbadd_alen_t="$yyy" try.c >/dev/null 2>&1 ; then
+				gethbadd_addr_type="$xxx"
+				gethbadd_alen_type="$yyy"
+				echo "Your system uses $xxx for the 1st argument to gethostbyaddr." >&4
+				echo "and the the 2nd argument to gethostbyaddr is $yyy." >&4
+				break
+			    fi
+		    done
+		    test "X$gethbadd_addr_type" != X && break
+	    done
+	    if test "X$gethbadd_addr_type" = X; then
+		    rp='What is the type for the 1st argument to gethostbyaddr?'
+		    dflt="void *"
+		    . ./myread
+		    gethbadd_addr_type="$ans"
+
+		    # Remove the "const" if needed.
+		    gethbadd_addr_type=`echo $gethbadd_addr_type | sed 's/^const //'`
+
+		    rp='What is the type for the 2nd argument to gethostbyaddr ?'
+		    dflt="Size_t"
+		    . ./myread
+		    gethbadd_alen_type="$ans"
+	    fi
+	    $rm -f try.[co]
+	fi
+	;;
+*)	gethbadd_addr_type='void *'
+	gethbadd_alen_type='Size_t'
+	;;
+esac
+
+: check for type of arguments to getnetbyaddr.  This will only really
+: work if the system supports prototypes and provides one for
+: getnetbyaddr.
+case "$d_getnbadd" in
+$define)
+        if test "X$getnbadd_addr_type" = X -o "X$getnbadd_alen_type" = X; then
+	    $cat <<EOM
+
+Checking to see what type of arguments are expected by getnetbyaddr().
+EOM
+	$cat >try.c <<EOCP
+#$i_niin I_NIIN
+#$i_netdb I_NETDB
+#$d_socket HAS_SOCKET
+#$d_socket HAS_SOCKET
+#include <sys/types.h>
+#ifdef HAS_SOCKET
+#include <sys/socket.h> /* Might include <sys/bsdtypes.h> */
+#endif
+#ifdef I_NIIN
+#include <netinet/in.h>
+#endif
+#ifdef I_NETDB
+#include <netdb.h>
+#endif
+main()
+{
+	Getnbadd_net_t	net;
+	struct netent*	nent;
+
+	extern struct netent *getnetbyaddr(Getnbadd_net_t, int);
+
+	/* We do not execute this so the contents of the net matter not. */
+	nent = getnetbyaddr(net, AF_INET);
+
+	exit(0);
+}
+EOCP
+	    for xxx in in_addr_t long int; do
+		    if $cc $ccflags -c -DGetnbadd_net_t="$xxx" try.c >/dev/null 2>&1 ; then
+			getnbadd_net_type="$xxx"
+			echo "Your system uses $xxx for the 1st argument to getnetbyaddr." >&4
+			break
+		    fi
+	    done
+	    if test "X$getnbadd_net_type" = X; then
+		    rp='What is the type for the 1st argument to getnetbyaddr?'
+		    dflt="long"
+		    . ./myread
+		    getnbadd_net_type="$ans"
+	    fi
+	    $rm -f try.[co]
+	fi
+	;;
+*)	getnbadd_net_type='long'
+	;;
+esac
+
 : see what type of char stdio uses.
 echo " "
 if $contains 'unsigned.*char.*_ptr;' `./findhdr stdio.h` >/dev/null 2>&1 ; then
@@ -10089,9 +10245,14 @@ d_fsetpos='$d_fsetpos'
 d_ftime='$d_ftime'
 d_getgrps='$d_getgrps'
 d_setgrps='$d_setgrps'
+d_gethbadd='$d_gethbadd'
+gethbadd_addr_type='$gethbadd_addr_type'
+gethbadd_alen_type='$gethbadd_alen_type'
 d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_getlogin='$d_getlogin'
+d_getnbadd='$d_getnbadd'
+getnbadd_net_type='$getnbadd_net_type'
 d_getpgid='$d_getpgid'
 d_getpgrp2='$d_getpgrp2'
 d_getpgrp='$d_getpgrp'
@@ -10273,6 +10434,7 @@ i_malloc='$i_malloc'
 i_math='$i_math'
 i_memory='$i_memory'
 i_ndbm='$i_ndbm'
+i_netdb='$i_netdb'
 i_neterrno='$i_neterrno'
 i_niin='$i_niin'
 i_pwd='$i_pwd'

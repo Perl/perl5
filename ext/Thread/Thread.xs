@@ -581,8 +581,10 @@ void
 data(classname = "Thread::Specific")
 	char *	classname
     PPCODE:
+#ifdef USE_THREADS
 	if (AvFILL(thr->specific) == -1) {
 	    GV *gv = gv_fetchpv("Thread::Specific::FIELDS", TRUE, SVt_PVHV);
 	    av_store(thr->specific, 0, newRV((SV*)GvHV(gv)));
 	}
 	XPUSHs(sv_bless(newRV((SV*)thr->specific),gv_stashpv(classname,TRUE)));
+#endif

@@ -108,7 +108,7 @@ typedef THREAD_RET_TYPE thread_func_t(void *);
 
 START_EXTERN_C
 
-#if defined(PERLDLL) && defined(_DLL)
+#if defined(PERLDLL) && (!defined(__BORLANDC__) || defined(_DLL))
 extern __declspec(thread) struct thread *Perl_current_thread;
 #define SET_THR(t)   		(Perl_current_thread = t)
 #define THR			Perl_current_thread

@@ -289,6 +289,104 @@ easier just to say:
 
     if (/foo/ && $` =~ /bar$/)
 
+For lookbehind see below.
+
+=item (?<=regexp)
+
+A zero-width positive lookbehind assertion.  For example, C</(?=\t)\w+/>
+matches a word following a tab, without including the tab in C<$&>.
+Works only for fixed-width lookbehind.
+
+=item (?<!regexp)
+
+A zero-width negative lookbehind assertion.  For example C</(?<!bar)foo/>
+matches any occurrence of "foo" that isn't following "bar".  
+Works only for fixed-width lookbehind.
+
+=item (?{ code })
+
+Experimental "evaluate any Perl code" zero-width assertion.  Always
+succeeds.  Currently the quoting rules are somewhat convoluted, as is the
+determination where the C<code> ends.
+
+
+=item C<(?E<gt>regexp)>
+
+An "independend" subexpression.  Matches the substring which a
+I<standalone> C<regexp> would match if anchored at the given position,
+B<and only this substring>.
+
+Say, C<^(?E<gt>a*)ab> will never match, since C<(?E<gt>a*)> (anchored
+at the beginning of string, as above) will match I<all> the characters
+C<a> at the beginning of string, leaving no C<a> for C<ab> to match.
+In contrast, C<a*ab> will match the same as C<a+b>, since the match of
+the subgroup C<a*> is influenced by the following group C<ab> (see
+L<"Backtracking">).  In particular, C<a*> inside C<a*ab> will match
+less characters that a standalone C<a*>, since this makes the tail match.
+
+Note that a similar effect to C<(?E<gt>regexp)> may be achieved by
+
+   (?=(regexp))\1
+
+since the lookahead is in I<"logical"> context, thus matches the same
+substring as a standalone C<a+>.  The following C<\1> eats the matched
+string, thus making a zero-length assertion into an analogue of
+C<(?>...)>.  (The difference of these two constructions is that the
+second one uses a catching group, thus shifts ordinals of
+backreferences in the rest of a regular expression.)
+
+This construction is very useful for optimizations of "eternal"
+matches, since it will not backtrack (see L<"Backtracking">).  Say,
+
+  / \( ( 
+	 [^()]+ 
+       | 
+         \( [^()]* \)
+       )+
+    \) /x
+
+will match a nonempty group with matching two-or-less-level-deep
+parentheses.  It is very efficient in finding such groups.  However,
+if there is no such group, it is going to take forever (on reasonably
+long string), since there are so many different ways to split a long
+string into several substrings (this is essentially what C<(.+)+> is
+doing, and this is a subpattern of the above pattern).  Say, on
+C<((()aaaaaaaaaaaaaaaaaa> the above pattern detects no-match in 5sec
+(on kitchentop'96 processor), and each extra letter doubles this time.
+
+However, a tiny modification of this
+
+  / \( ( 
+	 (?> [^()]+ )
+       | 
+         \( [^()]* \)
+       )+
+    \) /x
+
+which uses (?>...) matches exactly when the above one does (it is a
+good excercise to check this), but finishes in a fourth of the above
+time on a similar string with 1000000 C<a>s.
+
+Note that on simple groups like the above C<(?> [^()]+ )> a similar
+effect may be achieved by negative lookahead, as in C<[^()]+ (?! [^()] )>.
+This was only 4 times slower on a string with 1000000 C<a>s.
+
+=item (?(condition)yes-regexp|no-regexp)
+
+=item (?(condition)yes-regexp)
+
+Conditional expression.  C<(condition)> should be either an integer in
+parentheses (which is valid if the corresponding pair of parentheses
+matched), or lookahead/lookbehind/evaluate zero-width assertion.
+
+Say,
+
+    / ( \( )? 
+      [^()]+ 
+      (?(1) \) )/x
+
+matches a chunk of non-parentheses, possibly included in parentheses
+themselves.
 
 =item (?imsx)
 
@@ -306,6 +404,15 @@ pattern.  For example:
     $pattern = "(?i)foobar";
     if ( /$pattern/ )
 
+Note that these modifiers are localized inside an enclosing group (if
+any).  Say,
+
+    ( (?i) blah ) \s+ \1
+
+(assuming C<x> modifier, and no C<i> modifier outside of this group)
+will match a repeated (I<including the case>!) word C<blah> in any
+case.
+
 =back
 
 The specific choice of question mark for this and the new minimal
@@ -315,10 +422,10 @@ and "question" exactly what is going on.  That's psychology...
 
 =head2 Backtracking
 
-A fundamental feature of regular expression matching involves the notion
-called I<backtracking>.  which is used (when needed) by all regular
-expression quantifiers, namely C<*>, C<*?>, C<+>, C<+?>, C<{n,m}>, and
-C<{n,m}?>.
+A fundamental feature of regular expression matching involves the
+notion called I<backtracking>.  which is currently used (when needed)
+by all regular expression quantifiers, namely C<*>, C<*?>, C<+>,
+C<+?>, C<{n,m}>, and C<{n,m}?>.
 
 For a regular expression to match, the I<entire> regular expression must
 match, not just part of it.  So if the beginning of a pattern containing a
@@ -497,6 +604,14 @@ time to run
 
 And if you used C<*>'s instead of limiting it to 0 through 5 matches, then
 it would take literally forever--or until you ran out of stack space.
+
+A powerful tool for optimizing such beasts is "independent" groups,
+which do not backtrace (see L<C<(?E<gt>regexp)>>).  Note also that
+zero-length lookahead/lookbehind assertions will not backtrace to make
+the tail match, since they are in "logical" context: only the fact
+whether they match or not is considered relevant.  For an example
+where side-effects of a lookahead I<might> have influenced the
+following match, see L<C<(?E<gt>regexp)>>.
 
 =head2 Version 8 Regular Expressions
 

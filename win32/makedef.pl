@@ -253,6 +253,7 @@ while (<DATA>) {
 	my $symbol;
 	next if (!/^[A-Za-z]/);
 	next if (/^#/);
+        s/\r//g;
 	$symbol = $_;
     	next if ($skip_sym =~ m/^$symbol/m);
         $symbol = "Perl_".$symbol if ($define{'USE_THISPTR'} 

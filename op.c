@@ -522,6 +522,12 @@ find_thread_magical(char *name)
 	case ';':
 	    sv_setpv(sv, "\034");
 	    break;
+	case '&':
+	case '`':
+	case '\'':
+	    sawampersand = TRUE;
+	    SvREADONLY_on(sv);
+	    break;
 	}
 	sv_magic(sv, 0, 0, name, 1); 
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
@@ -594,8 +600,7 @@ op_free(OP *o)
 	/* FALL THROUGH */
     case OP_PUSHRE:
     case OP_MATCH:
-	pregfree(cPMOPo->op_pmregexp);
-	SvREFCNT_dec(cPMOPo->op_pmshort);
+	ReREFCNT_dec(cPMOPo->op_pmregexp);
 	break;
     }
 
@@ -1914,7 +1919,12 @@ newUNOP(I32 type, I32 flags, OP *first)
     unop->op_first = first;
     unop->op_flags = flags | OPf_KIDS;
     unop->op_private = 1 | (flags >> 8);
-
+#if 1
+    if(type == OP_STUDY && first->op_type == OP_MATCH) {
+	first->op_type = OP_PUSHRE;
+	first->op_ppaddr = ppaddr[OP_PUSHRE];
+    }
+#endif
     unop = (UNOP*) CHECKOP(type, unop);
     if (unop->op_next)
 	return (OP*)unop;
@@ -2065,7 +2075,6 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	pm->op_pmregexp = pregcomp(p, p + plen, pm);
 	if (strEQ("\\s+", pm->op_pmregexp->precomp))
 	    pm->op_pmflags |= PMf_WHITE;
-	hoistmust(pm);
 	op_free(expr);
     }
     else {
@@ -4446,7 +4455,6 @@ OP *
 ck_split(OP *o)
 {
     register OP *kid;
-    PMOP* pm;
 
     if (o->op_flags & OPf_STACKED)
 	return no_fh_allowed(o);
@@ -4470,11 +4478,6 @@ ck_split(OP *o)
 	    cLISTOPo->op_last = kid;
 	cLISTOPo->op_first = kid;
 	kid->op_sibling = sibl;
-    }
-    pm = (PMOP*)kid;
-    if (pm->op_pmshort && !(pm->op_pmflags & PMf_ALL)) {
-	SvREFCNT_dec(pm->op_pmshort);	/* can't use substring to optimize */
-	pm->op_pmshort = 0;
     }
 
     kid->op_type = OP_PUSHRE;
@@ -4679,7 +4682,7 @@ peep(register OP *o)
 	case OP_LC:
 	case OP_LCFIRST:
 	case OP_QUOTEMETA:
-	    if (o->op_next->op_type == OP_STRINGIFY)
+	    if (o->op_next && o->op_next->op_type == OP_STRINGIFY)
 		null(o->op_next);
 	    o->op_seq = op_seqmax++;
 	    break;

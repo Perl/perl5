@@ -329,6 +329,36 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_gethent HAS_GETHOSTENT		/**/
 
+/* HAS_GETHBADD:
+ *	This symbol, if defined, indicates that the gethostbyaddr routine is
+ *	available to lookup host names by their IP addresses.
+ */
+#$d_gethbadd HAS_GETHBADD		/**/
+
+/* Gethbadd_addr_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to gethostbyaddr().
+ */
+#define Gethbadd_addr_t		$gethbadd_addr_type
+
+/* Gethbadd_alen_t:
+ *	This symbol holds the type used for the 2nd argument
+ *	to gethostbyaddr().
+ */
+#define Gethbadd_alen_t		$gethbadd_alen_type
+
+/* HAS_GETNBADD:
+ *	This symbol, if defined, indicates that the getnetbyaddr routine is
+ *	available to lookup networks by their IP addresses.
+ */
+#$d_getnbadd HAS_GETNBADD		/**/
+
+/* Gethbadd_net_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to getnetbyaddr().
+ */
+#define Getnbadd_net_t		$getnbadd_net_type
+
 /* HAS_UNAME:
  *	This symbol, if defined, indicates that the C program may use the
  *	uname() routine to derive the host name.  See also HAS_GETHOSTNAME
@@ -1116,6 +1146,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	include <netinet/in.h>. Otherwise, you may try <sys/in.h>.
  */
 #$i_niin I_NETINET_IN	/**/
+
+/* I_NETDB:
+ *	This symbol, if defined, indicates that <netdb.h> exists and 
+ *	should be included.
+ */
+#$i_netdb I_NETDB		/**/
 
 /* I_PWD:
  *	This symbol, if defined, indicates to the C program that it should

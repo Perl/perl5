@@ -2,7 +2,7 @@
 
 # $RCSfile: array.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:37 $
 
-print "1..36\n";
+print "1..39\n";
 
 @ary = (1,2,3,4,5);
 if (join('',@ary) eq '12345') {print "ok 1\n";} else {print "not ok 1\n";}
@@ -118,3 +118,29 @@ print $foo eq 'e' ? "ok 35\n" : "not ok 35\n";
 
 $foo = ('a','b','c','d','e','f')[1];
 print $foo eq 'b' ? "ok 36\n" : "not ok 36\n";
+
+# Test pseudo-hashes and %FIELDS. Real programs would "use fields..."
+# but we assign to %FIELDS manually since the real module tests come later.
+
+BEGIN {
+    %Base::WithFields::FIELDS = (foo => 1, bar => 2, baz => 3, __MAX__ => 3);
+    %OtherBase::WithFields::FIELDS = (one => 1, two => 2, __MAX__ => 2);
+}
+{
+    package Base::WithoutFields;
+}
+@ISA = qw(Base::WithoutFields Base::WithFields);
+@k = sort keys %FIELDS;
+print "not " unless "@k" eq "__MAX__ bar baz foo";
+print "ok 37\n";
+eval {
+    @ISA = 'OtherBase::WithFields';
+};
+print "not " unless $@ =~ /Inherited %FIELDS can't override existing %FIELDS/;
+print "ok 38\n";
+undef %FIELDS;
+eval {
+    @ISA = qw(Base::WithFields OtherBase::WithFields);
+};
+print "not " unless $@ =~ /Can't multiply inherit %FIELDS/;
+print "ok 39\n";

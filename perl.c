@@ -418,36 +418,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
 
     /* defgv, aka *_ should be taken care of elsewhere */
 
-#if 0  /* just about all regexp stuff, seems to be ok */
-
-    /* shortcuts to regexp stuff */
-    leftgv = Nullgv;
-    ampergv = Nullgv;
-
-    SAVEFREEOP(curpm);
-    SAVEFREEOP(oldlastpm); /* for saving regexp context during debugger */
-
-    regprecomp = NULL;	/* uncompiled string. */
-    regparse = NULL;	/* Input-scan pointer. */
-    regxend = NULL;	/* End of input for compile */
-    regnpar = 0;	/* () count. */
-    regcode = NULL;	/* Code-emit pointer; &regdummy = don't. */
-    regsize = 0;	/* Code size. */
-    regnaughty = 0;	/* How bad is this pattern? */
-    regsawback = 0;	/* Did we see \1, ...? */
-
-    reginput = NULL;		/* String-input pointer. */
-    regbol = NULL;		/* Beginning of input, for ^ check. */
-    regeol = NULL;		/* End of input, for $ check. */
-    regstartp = (char **)NULL;	/* Pointer to startp array. */
-    regendp = (char **)NULL;	/* Ditto for endp. */
-    reglastparen = 0;		/* Similarly for lastparen. */
-    regtill = NULL;		/* How far we are required to go. */
-    regflags = 0;		/* are we folding, multilining? */
-    regprev = (char)NULL;	/* char before regbol, \n if none */
-
-#endif /* if 0 */
-
     /* clean up after study() */
     SvREFCNT_dec(lastscream);
     lastscream = Nullsv;
@@ -1716,6 +1686,9 @@ GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n")
 	break;
     case '-':
     case 0:
+#ifdef WIN32
+    case '\r':
+#endif
     case '\n':
     case '\t':
 	break;
@@ -2017,7 +1990,7 @@ SV *sv;
     if (strEQ(origfilename,"-"))
 	scriptname = "";
     if (fdscript >= 0) {
-	rsfp = PerlIO_fdopen(fdscript,"r");
+	rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
@@ -2101,7 +2074,7 @@ sed %s -e \"/^[^#]/b\" \
 	rsfp = PerlIO_stdin();
     }
     else {
-	rsfp = PerlIO_open(scriptname,"r");
+	rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */

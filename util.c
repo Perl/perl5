@@ -819,7 +819,8 @@ fbm_compile(SV *sv)
     I32 rarest = 0;
     U32 frequency = 256;
 
-    if (len > 255)
+    sv_upgrade(sv, SVt_PVBM);
+    if (len > 255 || len == 0)	/* TAIL might be on on a zero-length string. */
 	return;			/* can't have offsets that big */
     Sv_Grow(sv,len+258);
     table = (unsigned char*)(SvPVX(sv) + len + 1);
@@ -834,7 +835,6 @@ fbm_compile(SV *sv)
 	    table[*s] = i;
 	s--,i++;
     }
-    sv_upgrade(sv, SVt_PVBM);
     sv_magic(sv, Nullsv, 'B', Nullch, 0);	/* deep magic */
     SvVALID_on(sv);
 
@@ -864,8 +864,15 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr)
     if (SvTYPE(littlestr) != SVt_PVBM || !SvVALID(littlestr)) {
 	STRLEN len;
 	char *l = SvPV(littlestr,len);
-	if (!len)
+	if (!len) {
+	    if (SvTAIL(littlestr)) {
+		if (bigend > big && bigend[-1] == '\n')
+		    return bigend - 1;
+		else
+		    return bigend;
+	    }
 	    return (char*)big;
+	}
 	return ninstr((char*)big,(char*)bigend, l, l + len);
     }
 
@@ -911,20 +918,35 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr)
 	    while (tmp--) {
 		if (*--s == *--little)
 		    continue;
+	      differ:
 		s = olds + 1;	/* here we pay the price for failure */
 		little = oldlittle;
 		if (s < bigend)	/* fake up continue to outer loop */
 		    goto top2;
 		return Nullch;
 	    }
+	    if (SvTAIL(littlestr)	/* automatically multiline */
+		&& olds + 1 != bigend
+		&& olds[1] != '\n') 
+		goto differ;
 	    return (char *)s;
 	}
     }
     return Nullch;
 }
 
+/* start_shift, end_shift are positive quantities which give offsets
+   of ends of some substring of bigstr.
+   If `last' we want the last occurence.
+   old_posp is the way of communication between consequent calls if
+   the next call needs to find the . 
+   The initial *old_posp should be -1.
+   Note that we do not take into account SvTAIL, so it may give wrong
+   positives if _ALL flag is set.
+ */
+
 char *
-screaminstr(SV *bigstr, SV *littlestr)
+screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
 {
     register unsigned char *s, *x;
     register unsigned char *big;
@@ -932,54 +954,65 @@ screaminstr(SV *bigstr, SV *littlestr)
     register I32 previous;
     register I32 first;
     register unsigned char *little;
-    register unsigned char *bigend;
+    register I32 stop_pos;
     register unsigned char *littleend;
+    I32 found = 0;
 
-    if ((pos = screamfirst[BmRARE(littlestr)]) < 0) 
+    if (*old_posp == -1
+	? (pos = screamfirst[BmRARE(littlestr)]) < 0
+	: (((pos = *old_posp), pos += screamnext[pos]) == 0))
 	return Nullch;
     little = (unsigned char *)(SvPVX(littlestr));
     littleend = little + SvCUR(littlestr);
     first = *little++;
+    /* The value of pos we can start at: */
     previous = BmPREVIOUS(littlestr);
     big = (unsigned char *)(SvPVX(bigstr));
-    bigend = big + SvCUR(bigstr);
-    while (pos < previous) {
+    /* The value of pos we can stop at: */
+    stop_pos = SvCUR(bigstr) - end_shift - (SvCUR(littlestr) - 1 - previous);
+    if (previous + start_shift > stop_pos) return Nullch;
+    while (pos < previous + start_shift) {
 	if (!(pos += screamnext[pos]))
 	    return Nullch;
     }
 #ifdef POINTERRIGOR
     do {
+	if (pos >= stop_pos) return Nullch;
 	if (big[pos-previous] != first)
 	    continue;
 	for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
-	    if (x >= bigend)
-		return Nullch;
 	    if (*s++ != *x++) {
 		s--;
 		break;
 	    }
 	}
-	if (s == littleend)
-	    return (char *)(big+pos-previous);
+	if (s == littleend) {
+	    *old_posp = pos;
+	    if (!last) return (char *)(big+pos-previous);
+	    found = 1;
+	}
     } while ( pos += screamnext[pos] );
+    return (last && found) ? (char *)(big+(*old_posp)-previous) : Nullch;
 #else /* !POINTERRIGOR */
     big -= previous;
     do {
+	if (pos >= stop_pos) return Nullch;
 	if (big[pos] != first)
 	    continue;
 	for (x=big+pos+1,s=little; s < littleend; /**/ ) {
-	    if (x >= bigend)
-		return Nullch;
 	    if (*s++ != *x++) {
 		s--;
 		break;
 	    }
 	}
-	if (s == littleend)
-	    return (char *)(big+pos);
+	if (s == littleend) {
+	    *old_posp = pos;
+	    if (!last) return (char *)(big+pos);
+	    found = 1;
+	}
     } while ( pos += screamnext[pos] );
+    return (last && found) ? (char *)(big+(*old_posp)) : Nullch;
 #endif /* POINTERRIGOR */
-    return Nullch;
 }
 
 I32

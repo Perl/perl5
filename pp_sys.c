@@ -38,7 +38,9 @@ extern "C" int syscall(unsigned long,...);
 
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
-# include <netdb.h>
+# ifdef I_NETDB
+#  include <netdb.h>
+# endif
 # ifndef ENOTSOCK
 #  ifdef I_NET_ERRNO
 #   include <net/errno.h>
@@ -3638,7 +3640,7 @@ PP(pp_ghostent)
     register SV *sv;
 #if defined(HAS_GETHOSTENT) && !defined(DONT_DECLARE_STD)
     struct hostent *gethostbyname(const char *);
-    struct hostent *gethostbyaddr(const char *, int, int);
+    struct hostent *gethostbyaddr(const Gethbadd_addr_t, Gethbadd_alen_t, int);
     struct hostent *gethostent(void);
 #endif
     struct hostent *hent;
@@ -3652,9 +3654,9 @@ PP(pp_ghostent)
 	int addrtype = POPi;
 	SV *addrsv = POPs;
 	STRLEN addrlen;
-	char *addr = SvPV(addrsv, addrlen);
+	Gethbadd_addr_t addr = (Gethbadd_addr_t) SvPV(addrsv, addrlen);
 
-	hent = gethostbyaddr(addr, addrlen, addrtype);
+	hent = gethostbyaddr(addr, (Gethbadd_alen_t) addrlen, addrtype);
     }
     else
 #ifdef HAS_GETHOSTENT
@@ -3743,7 +3745,7 @@ PP(pp_gnetent)
      * long is wrong for getnetbyadddr (e.g. on Alpha). POSIX.1g says
      * in_addr_t but then such systems don't have broken netdb.h anyway.
      */
-    struct netent *getnetbyaddr(long int, int);
+    struct netent *getnetbyaddr(Getnbadd_net_t, int);
     struct netent *getnetent(void);
 #endif
     struct netent *nent;
@@ -3752,8 +3754,8 @@ PP(pp_gnetent)
 	nent = getnetbyname(POPp);
     else if (which == OP_GNBYADDR) {
 	int addrtype = POPi;
-	unsigned long addr = U_L(POPn);
-	nent = getnetbyaddr((long)addr, addrtype);
+	Getnbadd_net_t addr = (Getnbadd_net_t) U_L(POPn);
+	nent = getnetbyaddr(addr, addrtype);
     }
     else
 	nent = getnetent();

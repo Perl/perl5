@@ -42,12 +42,6 @@
 #  define EXTERN_C
 #endif
 
-#if defined(USE_THREADS) /* && !defined(PERL_CORE) && !defined(PERLDLL) */
-#ifndef CRIPPLED_CC
-#define CRIPPLED_CC
-#endif
-#endif
-
 #ifdef OP_IN_REGISTER
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
@@ -119,7 +113,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -1381,7 +1375,7 @@ EXT struct thread *	thr;		/* Currently executing (fake) thread */
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
 #if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
-#if !defined(DONT_DECLARE_STD) || (defined(__svr4__) && defined(__GNUC__) && defined(sun))
+#if !defined(DONT_DECLARE_STD) || (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || defined(__sgi)
 extern char **	environ;	/* environment variables supplied via exec */
 #endif
 #else
@@ -1754,29 +1748,6 @@ EXT U32		hints;		/* various compilation flags */
 #define HINT_STRICT_VARS	0x00000400
 #define HINT_LOCALE		0x00000800
 
-/**************************************************************************/
-/* This regexp stuff is global since it always happens within 1 expr eval */
-/**************************************************************************/
-
-EXT char *	regprecomp;	/* uncompiled string. */
-EXT char *	regparse;	/* Input-scan pointer. */
-EXT char *	regxend;	/* End of input for compile */
-EXT I32		regnpar;	/* () count. */
-EXT char *	regcode;	/* Code-emit pointer; &regdummy = don't. */
-EXT I32		regsize;	/* Code size. */
-EXT I32		regnaughty;	/* How bad is this pattern? */
-EXT I32		regsawback;	/* Did we see \1, ...? */
-
-EXT char *	reginput;	/* String-input pointer. */
-EXT char *	regbol;		/* Beginning of input, for ^ check. */
-EXT char *	regeol;		/* End of input, for $ check. */
-EXT char **	regstartp;	/* Pointer to startp array. */
-EXT char **	regendp;	/* Ditto for endp. */
-EXT U32 *	reglastparen;	/* Similarly for lastparen. */
-EXT char *	regtill;	/* How far we are required to go. */
-EXT U16		regflags;	/* are we folding, multilining? */
-EXT char	regprev;	/* char before regbol, \n if none */
-
 EXT bool	do_undump;	/* -u or dump seen? */
 EXT VOL U32	debug;
 
@@ -2078,6 +2049,8 @@ EXT MGVTBL vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
 EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
 					0,	0,	magic_freedefelem};
 
+EXT MGVTBL vtbl_regexp = {0,0,0,0, magic_freeregexp};
+
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm = {0,
 				magic_setcollxfrm,
@@ -2120,6 +2093,7 @@ EXT MGVTBL vtbl_mutex;
 #endif /* USE_THREADS */
 
 EXT MGVTBL vtbl_defelem;
+EXT MGVTBL vtbl_regexp;
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm;
@@ -2317,6 +2291,10 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
  * Remap printf 
  */
 #define printf PerlIO_stdoutf
+#endif
+
+#ifndef PERL_SCRIPT_MODE
+#define PERL_SCRIPT_MODE "r"
 #endif
 
 /*

@@ -20,6 +20,9 @@
 # Tweaked by Chip Salzenberg <chip@perl.com> on 5/13/97
 #    - don't assume 'cc -n32' if the n32 libm.so is missing
 
+# Threaded by Jarkko Hietaniemi <jhi@iki.fi> on 11/18/97
+#    - POSIX threads knowledge by IRIX version
+
 # Use   sh Configure -Dcc='cc -n32' to try compiling with -n32.
 #     or -Dcc='cc -n32 -mips3' (or -mips4) to force (non)portability
 # Don't bother with -n32 unless you have the 7.1 or later compilers.
@@ -112,3 +115,49 @@ libswanted="$*"
 set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /' -e 's/ PW / /'`
 shift
 libswanted="$*"
+
+if [ "X$usethreads" != "X" ]; then
+    if test ! -f /usr/include/pthread.h -o ! -f /usr/lib/libpthread.so; then
+	uname_r=`uname -r`
+	case "`uname -r`" in
+	6.0|6.1)
+	    echo >&4 "IRIX $uname_r does not have the POSIX threads."
+	    echo >&4 "You should upgrade to at least IRIX 6.3."
+	    echo >&4 "Cannot continue, aborting."
+	    exit 1
+	    ;;
+	6.2)
+	    echo >&4 ""
+cat >&4 <<EOF
+IRIX 6.2 $uname_r can have the POSIX threads.
+The following IRIX patches must, however, be installed:
+
+        1404 Irix 6.2 Posix 1003.1b man pages
+        1645 IRIX 6.2 & 6.3 POSIX header file updates
+        2000 Irix 6.2 Posix 1003.1b support modules
+        2254 Pthread library fixes
+
+Cannot continue, aborting.
+EOF
+	    exit 1
+	    ;;
+	6.*|7.*)
+	    echo >&4 "IRIX $uname_r should have the POSIX threads."
+	    echo >&4 "But somehow you do not seem to have them installed."
+	    echo >&4 "Cannot continue, aborting."
+	    exit 1
+	    ;;
+	esac
+	unset uname-r
+    fi
+    ccflags="-DUSE_THREADS $ccflags"
+    cppflags="-DUSE_THREADS $cppflags"
+    # -lpthread needs to come before -lc but after other libraries such
+    # as -lgdbm and such like. We assume here that -lc is present in
+    # libswanted. If that fails to be true in future, then this can be
+    # changed to add pthread to the very end of libswanted.
+    set `echo X "$libswanted "| sed -e 's/ c / pthread /'`
+    ld="cc"
+    shift
+    libswanted="$*"
+fi

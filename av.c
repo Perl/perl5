@@ -462,16 +462,37 @@ av_fill(register AV *av, I32 fill)
 	(void)av_store(av,fill,&sv_undef);
 }
 
+  
+HV*
+avhv_keys(AV *av)
+{
+    SV **keysp;
+    HV *keys = Nullhv;
+
+    keysp = av_fetch(av, 0, FALSE);
+    if (keysp) {
+	SV *sv = *keysp;
+	if (SvGMAGICAL(sv))
+	    mg_get(sv);
+	if (SvROK(sv)) {
+	    sv = SvRV(sv);
+	    if (SvTYPE(sv) == SVt_PVHV)
+		keys = (HV*)sv;
+	}
+    }
+    if (!keys)
+	croak("Can't coerce array into hash");
+    return keys;
+}
+
 SV**
 avhv_fetch(AV *av, char *key, U32 klen, I32 lval)
 {
-    SV **keys, **indsvp;
+    SV **indsvp;
+    HV *keys = avhv_keys(av);
     I32 ind;
     
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    indsvp = hv_fetch((HV*)SvRV(*keys), key, klen, FALSE);
+    indsvp = hv_fetch(keys, key, klen, FALSE);
     if (indsvp) {
 	ind = SvIV(*indsvp);
 	if (ind < 1)
@@ -481,7 +502,7 @@ avhv_fetch(AV *av, char *key, U32 klen, I32 lval)
 	    return 0;
 	
 	ind = AvFILL(av) + 1;
-	hv_store((HV*)SvRV(*keys), key, klen, newSViv(ind), 0);
+	hv_store(keys, key, klen, newSViv(ind), 0);
     }
     return av_fetch(av, ind, lval);
 }
@@ -489,14 +510,12 @@ avhv_fetch(AV *av, char *key, U32 klen, I32 lval)
 SV**
 avhv_fetch_ent(AV *av, SV *keysv, I32 lval, U32 hash)
 {
-    SV **keys, **indsvp;
+    SV **indsvp;
+    HV *keys = avhv_keys(av);
     HE *he;
     I32 ind;
     
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    he = hv_fetch_ent((HV*)SvRV(*keys), keysv, FALSE, hash);
+    he = hv_fetch_ent(keys, keysv, FALSE, hash);
     if (he) {
 	ind = SvIV(HeVAL(he));
 	if (ind < 1)
@@ -506,7 +525,7 @@ avhv_fetch_ent(AV *av, SV *keysv, I32 lval, U32 hash)
 	    return 0;
 	
 	ind = AvFILL(av) + 1;
-	hv_store_ent((HV*)SvRV(*keys), keysv, newSViv(ind), 0);
+	hv_store_ent(keys, keysv, newSViv(ind), 0);
     }
     return av_fetch(av, ind, lval);
 }
@@ -514,20 +533,18 @@ avhv_fetch_ent(AV *av, SV *keysv, I32 lval, U32 hash)
 SV**
 avhv_store(AV *av, char *key, U32 klen, SV *val, U32 hash)
 {
-    SV **keys, **indsvp;
+    SV **indsvp;
+    HV *keys = avhv_keys(av);
     I32 ind;
     
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    indsvp = hv_fetch((HV*)SvRV(*keys), key, klen, FALSE);
+    indsvp = hv_fetch(keys, key, klen, FALSE);
     if (indsvp) {
 	ind = SvIV(*indsvp);
 	if (ind < 1)
 	    croak("Bad index while coercing array into hash");
     } else {
 	ind = AvFILL(av) + 1;
-	hv_store((HV*)SvRV(*keys), key, klen, newSViv(ind), hash);
+	hv_store(keys, key, klen, newSViv(ind), hash);
     }
     return av_store(av, ind, val);
 }
@@ -535,21 +552,18 @@ avhv_store(AV *av, char *key, U32 klen, SV *val, U32 hash)
 SV**
 avhv_store_ent(AV *av, SV *keysv, SV *val, U32 hash)
 {
-    SV **keys;
+    HV *keys = avhv_keys(av);
     HE *he;
     I32 ind;
     
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    he = hv_fetch_ent((HV*)SvRV(*keys), keysv, FALSE, hash);
+    he = hv_fetch_ent(keys, keysv, FALSE, hash);
     if (he) {
 	ind = SvIV(HeVAL(he));
 	if (ind < 1)
 	    croak("Bad index while coercing array into hash");
     } else {
 	ind = AvFILL(av) + 1;
-	hv_store_ent((HV*)SvRV(*keys), keysv, newSViv(ind), hash);
+	hv_store_ent(keys, keysv, newSViv(ind), hash);
     }
     return av_store(av, ind, val);
 }
@@ -557,38 +571,27 @@ avhv_store_ent(AV *av, SV *keysv, SV *val, U32 hash)
 bool
 avhv_exists_ent(AV *av, SV *keysv, U32 hash)
 {
-    SV **keys;
-    
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    return hv_exists_ent((HV*)SvRV(*keys), keysv, hash);
+    HV *keys = avhv_keys(av);
+    return hv_exists_ent(keys, keysv, hash);
 }
 
 bool
 avhv_exists(AV *av, char *key, U32 klen)
 {
-    SV **keys;
-    
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    return hv_exists((HV*)SvRV(*keys), key, klen);
+    HV *keys = avhv_keys(av);
+    return hv_exists(keys, key, klen);
 }
 
 /* avhv_delete leaks. Caller can re-index and compress if so desired. */
 SV *
 avhv_delete(AV *av, char *key, U32 klen, I32 flags)
 {
-    SV **keys;
+    HV *keys = avhv_keys(av);
     SV *sv;
     SV **svp;
     I32 ind;
     
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    sv = hv_delete((HV*)SvRV(*keys), key, klen, 0);
+    sv = hv_delete(keys, key, klen, 0);
     if (!sv)
 	return Nullsv;
     ind = SvIV(sv);
@@ -611,15 +614,12 @@ avhv_delete(AV *av, char *key, U32 klen, I32 flags)
 SV *
 avhv_delete_ent(AV *av, SV *keysv, I32 flags, U32 hash)
 {
-    SV **keys;
+    HV *keys = avhv_keys(av);
     SV *sv;
     SV **svp;
     I32 ind;
     
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    sv = hv_delete_ent((HV*)SvRV(*keys), keysv, 0, hash);
+    sv = hv_delete_ent(keys, keysv, 0, hash);
     if (!sv)
 	return Nullsv;
     ind = SvIV(sv);
@@ -641,36 +641,25 @@ avhv_delete_ent(AV *av, SV *keysv, I32 flags, U32 hash)
 I32
 avhv_iterinit(AV *av)
 {
-    SV **keys;
-    
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    return hv_iterinit((HV*)SvRV(*keys));
+    HV *keys = avhv_keys(av);
+    return hv_iterinit(keys);
 }
 
 HE *
 avhv_iternext(AV *av)
 {
-    SV **keys;
-    
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    return hv_iternext((HV*)SvRV(*keys));
+    HV *keys = avhv_keys(av);
+    return hv_iternext(keys);
 }
 
 SV *
 avhv_iterval(AV *av, register HE *entry)
 {
-    SV **keys;
+    HV *keys = avhv_keys(av);
     SV *sv;
     I32 ind;
     
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    sv = hv_iterval((HV*)SvRV(*keys), entry);
+    sv = hv_iterval(keys, entry);
     ind = SvIV(sv);
     if (ind < 1)
 	croak("Bad index while coercing array into hash");
@@ -680,18 +669,16 @@ avhv_iterval(AV *av, register HE *entry)
 SV *
 avhv_iternextsv(AV *av, char **key, I32 *retlen)
 {
-    SV **keys;
+    HV *keys = avhv_keys(av);
     HE *he;
     SV *sv;
     I32 ind;
     
-    keys = av_fetch(av, 0, FALSE);
-    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
-	croak("Can't coerce array into hash");
-    if ( (he = hv_iternext((HV*)SvRV(*keys))) == NULL)
-        return NULL;
+    he = hv_iternext(keys);
+    if (!he)
+        return Nullsv;
     *key = hv_iterkey(he, retlen);
-    sv = hv_iterval((HV*)SvRV(*keys), he);
+    sv = hv_iterval(keys, he);
     ind = SvIV(sv);
     if (ind < 1)
 	croak("Bad index while coercing array into hash");

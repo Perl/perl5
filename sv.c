@@ -2355,7 +2355,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     mg->mg_moremagic = SvMAGIC(sv);
 
     SvMAGIC(sv) = mg;
-    if (!obj || obj == sv || how == '#')
+    if (!obj || obj == sv || how == '#' || how == 'r')
 	mg->mg_obj = obj;
     else {
 	dTHR;
@@ -2434,6 +2434,9 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     case 'p':
     case 'q':
 	mg->mg_virtual = &vtbl_packelem;
+	break;
+    case 'r':
+	mg->mg_virtual = &vtbl_regexp;
 	break;
     case 'S':
 	mg->mg_virtual = &vtbl_sig;
@@ -3215,6 +3218,10 @@ screamer2:
 	    }
 	}
     }
+
+#ifdef WIN32
+    win32_strip_return(sv);
+#endif
 
     return (SvCUR(sv) - append) ? SvPVX(sv) : Nullch;
 }
@@ -4657,6 +4664,10 @@ sv_dump(SV *sv)
 		sv_catpv(d, " ),");
 	    }
 	}
+    case SVt_PVBM:
+	if (SvTAIL(sv))	sv_catpv(d, "TAIL,");
+	if (SvCOMPILED(sv))	sv_catpv(d, "COMPILED,");
+	break;
     }
 
     if (*(SvEND(d) - 1) == ',')
