@@ -1261,7 +1261,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #endif
 
 #ifdef USE_SOCKS
+#   ifdef HAS_SOCKS5_INIT
+    socks5_init(argv[0]);
+#   else
     SOCKSinit(argv[0]);
+#   endif
 #endif    
 
     init_predump_symbols();
