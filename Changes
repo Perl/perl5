@@ -32,6 +32,146 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7776] By: jhi                                   on 2000/11/20  15:27:56
+        Log: Assume SOCKS is broken in all 64bitall platforms, not just Solaris.
+             This may be overly harsh but until proven otherwise, we think this
+             way, or until we have a simple test for Configure (having to start
+             up servers is does not count as simple) to check for the problems.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  7775] By: jhi                                   on 2000/11/20  15:22:17
+        Log: Solaris hints tweaks.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  7774] By: jhi                                   on 2000/11/20  15:01:20
+        Log: Add a workaround to SOCKS 64-bit problems.
+     Branch: perl
+	   ! doio.c embed.h embed.pl perlsdio.h proto.h
+____________________________________________________________________________
+[  7773] By: jhi                                   on 2000/11/20  14:51:47
+        Log: sysseek() instead of seek().
+     Branch: perl
+	   ! t/lib/syslfs.t
+____________________________________________________________________________
+[  7761] By: jhi                                   on 2000/11/20  04:09:55
+        Log: Miraculous typo.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  7760] By: jhi                                   on 2000/11/20  04:06:08
+        Log: Subject: [PATCH 5.7.0] The first step in removing recursion from the REx engine
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 19 Nov 2000 22:30:26 -0500
+             Message-ID: <20001119223026.A5165@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! regexec.c scope.h t/op/pat.t
+____________________________________________________________________________
+[  7759] By: jhi                                   on 2000/11/20  02:05:22
+        Log: Make certain MacOS Classic has NO_ENVIRON_ARRAY.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  7758] By: jhi                                   on 2000/11/20  01:58:11
+        Log: Subject: [perl 7711: EPOC] updates
+             From: Olaf Flebbe <o.flebbe@gmx.de>
+             Date: Sun, 19 Nov 2000 19:33:30 +0100 (MET)
+             Message-ID: <25575.974658810@www23.gmx.net>               
+     Branch: perl
+	   + lib/File/Spec/Epoc.pm
+	   ! MANIFEST epoc/epocish.c lib/CGI.pm lib/Cwd.pm
+	   ! lib/File/Basename.pm lib/File/Find.pm lib/File/Path.pm
+	   ! lib/File/Spec.pm perl.c sv.c
+____________________________________________________________________________
+[  7757] By: jhi                                   on 2000/11/20  01:53:11
+        Log: ext/re/hints/MSWin32.pl seems to be missing from perlio.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  7756] By: jhi                                   on 2000/11/20  01:47:22
+        Log: Integrate perlio.
+     Branch: perl
+	   - ext/re/hints/MSWin32.pl
+	  !> global.sym perlio.c perlio.h perliol.h pod/perlapi.pod sv.c
+	  !> win32/config.gc win32/config_H.gc win32/win32sck.c
+____________________________________________________________________________
+[  7749] By: jhi                                   on 2000/11/19  16:28:40
+        Log: Subject: [ID 20001118.006] [PATCH] perl@7707 djgpp/config.over, hints/dos_djgpp.sh and Storable.pm
+             From: "Peter J. Farley III" <pjfarley@banet.net>
+             Date: Sun, 19 Nov 2000 01:42:58 -0500
+             Message-Id: <5.0.1.4.0.20001119011855.00a55ec0@pop5.banet.net>
+     Branch: perl
+	   ! djgpp/config.over ext/Storable/Storable.pm hints/dos_djgpp.sh
+____________________________________________________________________________
+[  7748] By: jhi                                   on 2000/11/19  16:08:10
+        Log: Subject: podlators 1.05 available        
+             From: Russ Allbery <rra@stanford.edu>   
+             Date: 18 Nov 2000 22:04:28 -0800
+             Message-ID: <ylitpkijkj.fsf@windlord.stanford.edu>
+     Branch: perl
+	   ! lib/Pod/Man.pm lib/Pod/Text.pm pod/pod2man.PL
+____________________________________________________________________________
+[  7746] By: jhi                                   on 2000/11/19  06:42:22
+        Log: Make hex scanning warn on "\x{x}" and "\xx".
+             "\x" and and hex("x") are still valid.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  7744] By: jhi                                   on 2000/11/18  22:50:28
+        Log: Introduce Perl_utf8_length().  Use it.
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h perlapi.c proto.h sv.c utf8.c
+____________________________________________________________________________
+[  7743] By: jhi                                   on 2000/11/18  22:38:51
+        Log: Compiler denit.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7742] By: jhi                                   on 2000/11/18  20:33:05
+        Log: Integrate perlio.
+     Branch: perl
+	  !> cop.h doio.c gv.c lib/open.pm mg.c op.c perl.c perlio.c
+	  !> perlio.h pp_ctl.c pp_sys.c sv.c
+____________________________________________________________________________
+[  7741] By: jhi                                   on 2000/11/18  20:31:27
+        Log: Subject: [PATCH 5.7.0] make regcomp reenterable
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 17 Nov 2000 20:35:11 -0500
+             Message-ID: <20001117203511.A13121@monk.mps.ohio-state.edu>
+             
+             Subject: Re: [PATCH 5.7.0] make regcomp reenterable
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 17 Nov 2000 21:03:47 -0500
+             Message-ID: <20001117210347.A16570@monk.mps.ohio-state.edu>
+             
+             Plus a little bit of tweaking in pregcomp().
+     Branch: perl
+	   ! embed.h embed.pl perl.h proto.h regcomp.c regcomp.h
+____________________________________________________________________________
+[  7739] By: jhi                                   on 2000/11/18  19:54:00
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doio.c perlio.c pp.c
+____________________________________________________________________________
+[  7738] By: jhi                                   on 2000/11/18  17:16:13
+        Log: Subject: [PATCH 5.7.0] etags broken again
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 18 Nov 2000 02:41:36 -0500
+             Message-ID: <20001118024136.A19097@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! emacs/ptags
+____________________________________________________________________________
+[  7737] By: jhi                                   on 2000/11/18  17:12:18
+        Log: Upgrade to CPAN.pm 1.58_93 (the RC1 for 1.59), from Andreas König.
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  7734] By: jhi                                   on 2000/11/18  01:18:56
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7733] By: jhi                                   on 2000/11/18  00:32:54
         Log: Subject: [PATCH 5.7.0] restore match data on backtracing
              From: Ilya Zakharevich <ilya@math.ohio-state.edu>
