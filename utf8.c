@@ -1646,8 +1646,8 @@ Allows length and flags to be passed to low level routine.
 
 =cut
 */
-/* On ASCII machines this is normally a macro but we want a
-   real function in case XS code wants it
+/* On ASCII machines this is normally a macro but we want
+   a real function in case XS code wants it
 */
 #undef Perl_utf8n_to_uvchr
 UV
@@ -1663,8 +1663,14 @@ Perl_utf8n_to_uvchr(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 Build to the scalar dsv a displayable version of the string spv,
 length len, the displayable version being at most pvlim bytes long
 (if longer, the rest is truncated and "..." will be appended).
+
 The flags argument can have UNI_DISPLAY_ISPRINT set to display
-isprint() characters as themselves.
+isprint()able characters as themselves, UNI_DISPLAY_BACKSLASH
+to display the \\[nrfta\\] as the backslashed versions (like '\n')
+(UNI_DISPLAY_BACKSLASH is preferred over UNI_DISPLAY_ISPRINT for \\).
+UNI_DISPLAY_QQ (and its alias UNI_DISPLAY_REGEX) have both
+UNI_DISPLAY_BACKSLASH and UNI_DISPLAY_ISPRINT turned on.
+
 The pointer to the PV of the dsv is returned.
 
 =cut */
@@ -1685,10 +1691,6 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 	 }
 	 u = utf8_to_uvchr((U8*)s, 0);
 	 if (u < 256) {
-	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isprint(u & 0xFF)) {
-	         Perl_sv_catpvf(aTHX_ dsv, "%c", u);
-		 ok = TRUE;
-	     }
 	     if (!ok && (flags & UNI_DISPLAY_BACKSLASH)) {
 	         switch (u & 0xFF) {
 		 case '\n':
@@ -1706,6 +1708,10 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 		 default: break;
 		 }
 	     }
+	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isprint(u & 0xFF)) {
+	         Perl_sv_catpvf(aTHX_ dsv, "%c", u);
+		 ok = TRUE;
+	     }
 	 }
 	 if (!ok)
 	     Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
@@ -1720,9 +1726,11 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 =for apidoc A|char *|sv_uni_display|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
 
 Build to the scalar dsv a displayable version of the scalar sv,
-he displayable version being at most pvlim bytes long
+the displayable version being at most pvlim bytes long
 (if longer, the rest is truncated and "..." will be appended).
-The flags argument is currently unused but available for future extensions.
+
+The flags argument is as in pv_uni_display().
+
 The pointer to the PV of the dsv is returned.
 
 =cut */
