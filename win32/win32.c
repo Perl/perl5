@@ -4533,6 +4533,8 @@ Perl_init_os_extras(void)
      */
 }
 
+#ifdef MULTIPLICITY
+
 PerlInterpreter *
 win32_signal_context(void)
 {
@@ -4544,13 +4546,17 @@ win32_signal_context(void)
     return my_perl;
 }
 
+#endif
+
 BOOL WINAPI
 win32_ctrlhandler(DWORD dwCtrlType)
 {
+#ifdef MULTIPLICITY
     dTHXa(PERL_GET_SIG_CONTEXT);
 
     if (!my_perl)
 	return FALSE;
+#endif
 
     switch(dwCtrlType) {
     case CTRL_CLOSE_EVENT:
@@ -4673,7 +4679,11 @@ Perl_sys_intern_init(pTHX)
     for (i=0; i < SIG_SIZE; i++) {
     	w32_sighandler[i] = SIG_DFL;
     }
+#  ifdef MULTIPLICTY
     if (my_perl == PL_curinterp) {
+#  else
+    {
+#  endif
 	/* Force C runtime signal stuff to set its console handler */
 	signal(SIGINT,&win32_csighandler);
 	signal(SIGBREAK,&win32_csighandler);
@@ -4693,7 +4703,11 @@ Perl_sys_intern_clear(pTHX)
     	KillTimer(NULL,w32_timerid);
     	w32_timerid=0;
     }
+#  ifdef MULTIPLICITY
     if (my_perl == PL_curinterp) {
+#  else
+    {
+#  endif
 	SetConsoleCtrlHandler(win32_ctrlhandler,FALSE);
     }
 #  ifdef USE_ITHREADS
