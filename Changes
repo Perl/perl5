@@ -31,6 +31,365 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13660] By: jhi                                   on 2001/12/12  15:04:03
+        Log: Subject: [PATCH] Passing in env to perl_parse did not work
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 11 Dec 2001 20:52:57 -0800
+             Message-ID: <lrheqxniom.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! perl.c perl.h
+____________________________________________________________________________
+[ 13659] By: jhi                                   on 2001/12/12  14:33:30
+        Log: Fixes for casting problems detected on a SuSE 7.2 Itanium,
+             mostly gcc -Wall complaining about the argument of %p not
+             being a void *.
+     Branch: perl
+	   ! perlio.c regcomp.c taint.c toke.c
+____________________________________________________________________________
+[ 13657] By: jhi                                   on 2001/12/12  14:08:49
+        Log: Try YP/NIS also from /usr/lib/yp.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13656] By: jhi                                   on 2001/12/12  14:05:28
+        Log: Subject: [PATCH Configure t/op/grent.t] ypcat working, but NIS not used
+             From: Michael G Schwern <schwern@pobox.com>                
+             Date: Wed, 12 Dec 2001 05:27:02 -0500      
+             Message-ID: <20011212102702.GW17250@blackrider>
+             
+             (the op/grent part)
+     Branch: perl
+	   ! t/op/grent.t
+____________________________________________________________________________
+[ 13655] By: jhi                                   on 2001/12/12  14:01:55
+        Log: Weed out .files from ls and readdir() results.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13654] By: jhi                                   on 2001/12/12  13:45:21
+        Log: Subject: Re: [PATCH] ID 20011206.007 File::Find:name set to empty string for "/"  
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at>
+             Date: Wed, 12 Dec 2001 10:52:21 +0100
+             Message-ID: <200112121052210220.001ACE6B@smtp.chello.at>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 13653] By: jhi                                   on 2001/12/12  13:34:06
+        Log: Subject: [PATCH] doio fatal on cygwin for 13651
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>               
+             Date: Wed, 12 Dec 2001 11:28:13 +0100      
+             Message-Id: <20011212112548.4611.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 13652] By: jhi                                   on 2001/12/12  13:32:51
+        Log: Get the whole line of ls, makes debugging easier
+             (from Schwern)
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13651] By: jhi                                   on 2001/12/12  05:42:05
+        Log: rename() must be tested even without link()
+             or the utime() and rename-directory tests fail.
+             (Also got the BeOS utime atime/time the wrong way round.)
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 13650] By: jhi                                   on 2001/12/12  05:36:31
+        Log: Now that the beos.c is compiled at the main level
+             the header is in the beos/
+     Branch: perl
+	   ! beos/beos.c
+____________________________________________________________________________
+[ 13649] By: jhi                                   on 2001/12/12  04:25:21
+        Log: Must remember to require Socket.
+     Branch: perl
+	   ! ext/Sys/Syslog/syslog.t
+____________________________________________________________________________
+[ 13648] By: jhi                                   on 2001/12/12  04:12:05
+        Log: In BeOS Errno must resort to actual compilation
+             and execution for some of the error constants.
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[ 13647] By: jhi                                   on 2001/12/12  03:23:26
+        Log: BeOS still has no good sockets.
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_sel.t
+____________________________________________________________________________
+[ 13646] By: jhi                                   on 2001/12/12  03:19:56
+        Log: BeOS sockets are not true sockets.
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_poll.t
+____________________________________________________________________________
+[ 13645] By: jhi                                   on 2001/12/12  03:14:32
+        Log: No Socket, no Syslog.
+     Branch: perl
+	   ! ext/Sys/Syslog/syslog.t
+____________________________________________________________________________
+[ 13644] By: jhi                                   on 2001/12/12  03:12:46
+        Log: (On some platforms) missing truncate FH.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 13643] By: jhi                                   on 2001/12/12  03:09:37
+        Log: io/fs cleanup: testing on win32/cygwin/netware/djgpp/...
+             and vms would be muchly appreciated.
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 13642] By: jhi                                   on 2001/12/12  02:32:05
+        Log: utime() updates only the mtime in BeOS. 
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 13641] By: jhi                                   on 2001/12/12  01:50:13
+        Log: No link(), no need to dSP.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 13640] By: jhi                                   on 2001/12/12  01:49:40
+        Log: Missing argument.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13639] By: jhi                                   on 2001/12/12  01:44:39
+        Log: (1) To assume any setuid programs is silly.
+             (2) Chaining tests with booleans means that some
+             of them may not get run which means getting out
+             of test count sync.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13638] By: jhi                                   on 2001/12/12  01:12:49
+        Log: The beos.c needs to be in the main directory.
+     Branch: perl
+	   ! hints/beos.sh
+____________________________________________________________________________
+[ 13637] By: jhi                                   on 2001/12/12  00:37:20
+        Log: Detypo and rename.
+     Branch: perl
+	   ! doio.c perl.h perlio.c perliol.h
+____________________________________________________________________________
+[ 13636] By: jhi                                   on 2001/12/12  00:22:16
+        Log: This time I test compiled.  Honest.
+     Branch: perl
+	   ! beos/beos.c
+____________________________________________________________________________
+[ 13635] By: jhi                                   on 2001/12/11  22:57:07
+        Log: Subject: [PATCH] slightly more pack tests
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 11 Dec 2001 23:41:23 +0000
+             Message-ID: <20011211234123.Y21702@plum.flirble.org>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13634] By: jhi                                   on 2001/12/11  21:49:58
+        Log: Subject: [PATCH perl@13600] Gconvert for VMS again
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 11 Dec 2001 16:39:13 -0600
+             Message-Id: <5.1.0.14.2.20011211162600.02a4b008@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 13632] By: jhi                                   on 2001/12/11  21:48:26
+        Log: Subject: $Config{perlpath} and -Dversiononly
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 11 Dec 2001 23:32:33 +0100
+             Message-ID: <20011211233233.A11587@rafael>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13631] By: jhi                                   on 2001/12/11  21:01:00
+        Log: Subject: [PATCH] _qq pack.t Re: [PATCH] tests for hash assignment
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 11 Dec 2001 21:59:36 +0000
+             Message-ID: <20011211215935.W21702@plum.flirble.org>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13630] By: jhi                                   on 2001/12/11  20:16:29
+        Log: More UTF-8 API docs.
+     Branch: perl
+	   ! embed.pl pod/perlapi.pod pod/perlunicode.pod utf8.c
+____________________________________________________________________________
+[ 13629] By: jhi                                   on 2001/12/11  19:17:16
+        Log: Subject: [PATCH] Re: [PATCH] Re: [PATCH t/op/pack.t] Cleanup
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 11 Dec 2001 20:08:59 +0000
+             Message-ID: <20011211200859.S21702@plum.flirble.org>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13628] By: jhi                                   on 2001/12/11  19:13:57
+        Log: Subject: Re: use utf8; with bad utf8
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 11 Dec 2001 19:49:21 +0000
+             Message-ID: <20011211194921.R21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/utf8.t
+____________________________________________________________________________
+[ 13627] By: jhi                                   on 2001/12/11  17:29:01
+        Log: Can't spell worth a dam.  (Try Three Gorges.)
+     Branch: perl
+	   ! beos/beos.c
+____________________________________________________________________________
+[ 13626] By: jhi                                   on 2001/12/11  15:55:51
+        Log: We need DWIM cpps.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 13625] By: jhi                                   on 2001/12/11  15:53:41
+        Log: The unixish.h needs to be found and the waitpid wrapper
+             could use a proto.
+     Branch: perl
+	   ! beos/beosish.h
+____________________________________________________________________________
+[ 13624] By: jhi                                   on 2001/12/11  15:27:06
+        Log: The BeOS waitpid() seems to be broken,
+             have a wrapper for it.
+     Branch: perl
+	   + beos/beos.c beos/beosish.h
+	   ! MANIFEST hints/beos.sh perl.h
+____________________________________________________________________________
+[ 13623] By: jhi                                   on 2001/12/11  15:12:18
+        Log: Unlean the leaning tower of Babel.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 13622] By: jhi                                   on 2001/12/11  14:34:53
+        Log: Retract #13607 until we figure out what to do with autouse.
+     Branch: perl
+	   ! lib/Carp.pm
+____________________________________________________________________________
+[ 13621] By: jhi                                   on 2001/12/11  14:33:14
+        Log: Try to handle platforms that have O_TEXT != O_BINARY but
+             which are not DOSish, BeOS being one of such platforms.
+             Ideally this should be a Configure test, not a hardwired
+             cpp symbol test... 
+     Branch: perl
+	   ! doio.c perl.h perlio.c perliol.h
+____________________________________________________________________________
+[ 13620] By: jhi                                   on 2001/12/11  13:56:17
+        Log: Subject: [PATCH lib/Term/Cap.pm lib/Term/Cap.t] Sync changes in CPAN version
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Tue, 11 Dec 2001 07:28:45 +0000 (GMT) 
+             Message-ID: <Pine.LNX.4.33.0112110720470.31242-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/Term/Cap.pm lib/Term/Cap.t
+____________________________________________________________________________
+[ 13619] By: jhi                                   on 2001/12/11  13:51:21
+        Log: Subject: [patch perlio.c] test for NULL before derefencing
+             From: Stas Bekman <stas@stason.org>
+             Date: Tue, 11 Dec 2001 16:17:55 +0800
+             Message-ID: <3C15C133.8@stason.org>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 13617] By: jhi                                   on 2001/12/11  05:22:08
+        Log: BeOS has socket() but not enough to build a working Socket.
+             Go figure.  ("BONE" (BeOS NEtworking?) is some sort of rumored
+             new networking implementation, which is rumored to fix the
+             non-standardness of sockets, but it's apparently not publicly
+             available, and anything to do with BeOS has become quite
+             complicated with the sale of the Be assets to Palm.)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13611] By: jhi                                   on 2001/12/11  04:29:32
+        Log: Subject: Exporter's documentation shouldn't lie               
+             From: "Benjamin J. Tilly" <ben_tilly@operamail.com>
+             Date: Mon, 10 Dec 2001 21:30:20 -0500
+             Message-ID: <3C4AA201@operamail.com>
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[ 13610] By: jhi                                   on 2001/12/11  04:28:31
+        Log: Make Errno better in BeOS (the second hunk is
+             good on any platform).  Still not working in BeOS
+             are the E constants that refer BeOS native error
+             constants (B_...) which are enums (*groan*).
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[ 13609] By: jhi                                   on 2001/12/11  00:59:31
+        Log: The BeOS linker seems to link the last seen symbol,
+             not the first (so the symbols of op.o from libperl.so
+             would get linked to miniperl instead of the symbols of
+             opmini.o)-- use the same trick as for NeXT4 for linking
+             miniperl.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 13608] By: jhi                                   on 2001/12/11  00:49:15
+        Log: Subject: Re: [PATCH] tests for hash assignment
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Tue, 11 Dec 2001 01:48:55 +0000
+             Message-Id: <200112110148.fBB1mtl19148@crypt.compulink.co.uk>
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13607] By: jhi                                   on 2001/12/11  00:40:47
+        Log: (retracted by #13622)
+             
+             Subject: RE: More verbose POD for Carp
+             From: "Benjamin J. Tilly" <ben_tilly@operamail.com>
+             Date: Mon, 10 Dec 2001 20:23:20 -0500
+             Message-ID: <3C4A3566@operamail.com>
+     Branch: perl
+	   ! lib/Carp.pm
+____________________________________________________________________________
+[ 13606] By: jhi                                   on 2001/12/11  00:39:20
+        Log: Subject: [PATCH follow-up] (was Re: [PATCH perl@13600] cat2type in tests for VMS)
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 10 Dec 2001 18:25:37 -0600
+             Message-Id: <5.1.0.14.2.20011210174517.029c7ec0@mail.mac.com>
+     Branch: perl
+	   ! t/op/write.t t/test.pl
+____________________________________________________________________________
+[ 13605] By: jhi                                   on 2001/12/11  00:37:54
+        Log: Subject: [PATCH t/io/multiline.t] Cleanup and $. check
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 08:00:01 -0500
+             Message-ID: <20011210130000.GK1770@blackrider>
+     Branch: perl
+	   ! t/comp/multiline.t
+____________________________________________________________________________
+[ 13604] By: jhi                                   on 2001/12/10  22:51:44
+        Log: Subject: Re: [PATCH] tests for hash assignment
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 10 Dec 2001 23:22:28 +0000
+             Message-ID: <20011210232228.M21702@plum.flirble.org>
+     Branch: perl
+	   + t/op/hashassign.t
+	   ! MANIFEST t/op/each.t t/test.pl
+____________________________________________________________________________
+[ 13603] By: jhi                                   on 2001/12/10  21:34:46
+        Log: Subject: [PATCH perl@13600] cat2type in tests for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 10 Dec 2001 16:38:14 -0600
+             Message-Id: <5.1.0.14.2.20011210154846.01aef188@exchi01>
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_dup.t t/comp/multiline.t t/io/dup.t
+____________________________________________________________________________
+[ 13602] By: jhi                                   on 2001/12/10  19:52:01
+        Log: Subject: [PATCH perl@13600] configure.com fixes
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 10 Dec 2001 14:40:20 -0600
+             Message-Id: <5.1.0.14.2.20011210142528.01aff2e8@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 13601] By: jhi                                   on 2001/12/10  18:25:30
+        Log: Silence BeOS compilation moaning.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 13600] By: jhi                                   on 2001/12/10  15:11:40
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13599] By: jhi                                   on 2001/12/10  13:35:57
         Log: Subject: [PATCH lib/ExtUtils/Command.t] Bad touch
              From: Michael G Schwern <schwern@pobox.com>
