@@ -257,7 +257,6 @@ hv_magic_check (HV *hv, bool *needs_copy, bool *needs_store)
 	    *needs_copy = TRUE;
 	    switch (mg->mg_type) {
 	    case 'P':
-	    case 'I':
 	    case 'S':
 		*needs_store = FALSE;
 	    }
@@ -429,15 +428,21 @@ hv_delete(HV *hv, char *key, U32 klen, I32 flags)
     if (!hv)
 	return Nullsv;
     if (SvRMAGICAL(hv)) {
-	sv = *hv_fetch(hv, key, klen, TRUE);
-	mg_clear(sv);
-	if (mg_find(sv, 's')) {
-	    return Nullsv;		/* %SIG elements cannot be deleted */
-	}
-	else if (mg_find(sv, 'p')) {
-	    sv_unmagic(sv, 'p');	/* No longer an element */
-	    return sv;
-	}
+	bool needs_copy;
+	bool needs_store;
+	hv_magic_check (hv, &needs_copy, &needs_store);
+
+	if (needs_copy) {
+	    sv = *hv_fetch(hv, key, klen, TRUE);
+	    mg_clear(sv);
+	    if (!needs_store) {
+		if (mg_find(sv, 'p')) {
+		    sv_unmagic(sv, 'p');        /* No longer an element */
+		    return sv;
+		}
+		return Nullsv;          /* element cannot be deleted */
+	    }
+        }
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
 	    sv = sv_2mortal(newSVpv(key,klen));
@@ -492,12 +497,21 @@ hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
     if (!hv)
 	return Nullsv;
     if (SvRMAGICAL(hv)) {
-	entry = hv_fetch_ent(hv, keysv, TRUE, hash);
-	sv = HeVAL(entry);
-	mg_clear(sv);
-	if (mg_find(sv, 'p')) {
-	    sv_unmagic(sv, 'p');	/* No longer an element */
-	    return sv;
+	bool needs_copy;
+	bool needs_store;
+	hv_magic_check (hv, &needs_copy, &needs_store);
+
+	if (needs_copy) {
+	    entry = hv_fetch_ent(hv, keysv, TRUE, hash);
+	    sv = HeVAL(entry);
+	    mg_clear(sv);
+	    if (!needs_store) {
+		if (mg_find(sv, 'p')) {
+		    sv_unmagic(sv, 'p');	/* No longer an element */
+		    return sv;
+		}		
+		return Nullsv;		/* element cannot be deleted */
+	    }
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {

@@ -1825,7 +1825,7 @@ EOM
 		osf1|mls+)	case "$5" in
 				alpha)
 					osname=dec_osf
-					osvers=`echo "$3" | sed 's/^[vt]//'`
+					osvers=`echo "$3" | sed 's/^[xvt]//'`
 					;;
 			hp*)	osname=hp_osf1	;;
 			mips)	osname=mips_osf1 ;;
@@ -9327,7 +9327,7 @@ EOM
 		    gethbadd_addr_type="$ans"
 
 		    # Remove the "const" if needed.
-		    gethbadd_addr_type=`echo $gethbadd_addr_type | sed 's/^const //'`
+		    gethbadd_addr_type=`echo "$gethbadd_addr_type" | sed 's/^const //'`
 
 		    rp='What is the type for the 2nd argument to gethostbyaddr ?'
 		    dflt="Size_t"
@@ -9966,11 +9966,16 @@ int main() {
     exit(0);
 }
 EOCP
-	: Compile and link separately because the used cc might not be
-	: able to link the right CRT and libs for pthreading.
-	if $cc $ccflags -c try.c >/dev/null 2>&1 &&
-	   $ld $ldflags -o try try$obj_ext $libs >/dev/null 2>&1; then
+	if $cc $ccflags $ldflags -o try try.c $libs >/dev/null 2>&1; then
 	    yyy=`./try`
+	    case "$yyy" in
+	    detached)
+	        echo "Nope, they aren't."
+	        ;;
+	    *)
+	        echo "Yup, they are."
+	        ;;
+	    esac
 	else
 	    echo "(I can't execute the test program--assuming they are.)"
 	    yyy=joinable
@@ -9978,11 +9983,9 @@ EOCP
 	case "$yyy" in
 	detached)
 	    val="$undef"
-	    echo "Nope, they aren't."
 	    ;;
 	*)
 	    val="$define"
-	    echo "Yup, they are."
 	    ;;
 	esac
 	set d_pthreads_created_joinable
@@ -9990,7 +9993,7 @@ EOCP
 	$rm -f try try.*
     fi
 else
-    d_pthreads_created_joinable=$undef
+    d_pthreads_created_joinable="$undef"
 fi
 
 : see whether the various POSIXish _yields exist within given cccmd

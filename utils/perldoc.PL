@@ -64,6 +64,7 @@ $global_target = "";
 
 $Is_VMS = $^O eq 'VMS';
 $Is_MSWin32 = $^O eq 'MSWin32';
+$Is_Dos = $^O eq 'dos';
 
 sub usage{
     warn "@_\n" if @_;
@@ -111,7 +112,7 @@ usage if $opt_h || $opt_h; # avoid -w warning
 
 if ($opt_t + $opt_u + $opt_m + $opt_l > 1) {
     usage("only one of -t, -u, -m or -l")
-} elsif ($Is_MSWin32) {
+} elsif ($Is_MSWin32 || $Is_Dos) {
     $opt_t = 1 unless $opt_t + $opt_u + $opt_m + $opt_l;
 }
 
@@ -151,7 +152,7 @@ sub containspod {
 sub minus_f_nocase {
      my($file) = @_;
      # on a case-forgiving file system we can simply use -f $file
-     if ($Is_VMS or $Is_MSWin32 or $^O eq 'os2') {
+     if ($Is_VMS or $Is_MSWin32 or $Is_Dos or $^O eq 'os2') {
         return $file if -f $file and -r _;
 	warn "Ignored $file: unreadable\n" if -f _;
 	return '';
@@ -224,7 +225,7 @@ sub searchfor {
 		     $ret = check_file "$dir/$s.com")
 		or ( $^O eq 'os2' and 
 		     $ret = check_file "$dir/$s.cmd")
-		or ( ($Is_MSWin32 or $^O eq 'os2') and 
+		or ( ($Is_MSWin32 or $Is_Dos or $^O eq 'os2') and
 		     $ret = check_file "$dir/$s.bat")
 		or ( $ret = check_file "$dir/pod/$s.pod")
 		or ( $ret = check_file "$dir/pod/$s")
@@ -320,6 +321,11 @@ if ($Is_MSWin32) {
 } elsif ($Is_VMS) {
 	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
 	push @pagers, qw( most more less type/page );
+} elsif ($Is_Dos) {
+	$tmp = "$ENV{TEMP}/perldoc1.$$";
+	$tmp =~ tr!\\/!//!s;
+	push @pagers, qw( less.exe more.com< );
+	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
 } else {
 	if ($^O eq 'os2') {
 	  require POSIX;

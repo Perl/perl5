@@ -295,7 +295,7 @@ PP(pp_print)
 	gv = (GV*)*++MARK;
     else
 	gv = defoutgv;
-    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	if (MARK == ORIGMARK) {
 	    MEXTEND(SP, 1);
 	    ++MARK;
@@ -983,7 +983,7 @@ do_readline(void)
     I32 gimme = GIMME_V;
     MAGIC *mg;
 
-    if (SvMAGICAL(last_in_gv) && (mg = mg_find((SV*)last_in_gv, 'q'))) {
+    if (SvRMAGICAL(last_in_gv) && (mg = mg_find((SV*)last_in_gv, 'q'))) {
 	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
 	PUTBACK;

@@ -209,9 +209,9 @@ EXTCONST U8 regkind[] = {
 
 /* The following have no fixed length. char* since we do strchr on it. */
 #ifndef DOINIT
-EXT const char varies[];
+EXTCONST char varies[];
 #else
-EXT const char varies[] = {
+EXTCONST char varies[] = {
     BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL, 
     WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, 0
 };
@@ -219,9 +219,9 @@ EXT const char varies[] = {
 
 /* The following always have a length of 1. char* since we do strchr on it. */
 #ifndef DOINIT
-EXT const char simple[];
+EXTCONST char simple[];
 #else
-EXT const char simple[] = {
+EXTCONST char simple[] = {
     ANY, SANY, ANYOF,
     ALNUM, ALNUML, NALNUM, NALNUML,
     SPACE, SPACEL, NSPACE, NSPACEL,
