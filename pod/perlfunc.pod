@@ -1029,7 +1029,8 @@ I<EACH> file in a while (E<lt>E<gt>) loop.  Examples:
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
-input operators return C<undef> when they run out of data.
+input operators return false values when they run out of data, or if there
+was an error.
 
 =item eval EXPR
 
@@ -1427,9 +1428,10 @@ formline() always returns TRUE.  See L<perlform> for other examples.
 =item getc
 
 Returns the next character from the input file attached to FILEHANDLE,
-or a null string at end of file.  If FILEHANDLE is omitted, reads from STDIN.
-This is not particularly efficient.  It cannot be used to get unbuffered
-single-characters, however.  For that, try something more like:
+or a null string at end of file, or undef if there was an error.  If
+FILEHANDLE is omitted, reads from STDIN.  This is not particularly
+efficient.  It cannot be used to get unbuffered single-characters,
+however.  For that, try something more like:
 
     if ($BSD_STYLE) {
 	system "stty cbreak </dev/tty >/dev/tty 2>&1";
@@ -2624,12 +2626,12 @@ with the wrong number of RANDBITS.)
 =item read FILEHANDLE,SCALAR,LENGTH
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE.  Returns the number of bytes actually read, or
-undef if there was an error.  SCALAR will be grown or shrunk to the
-length actually read.  An OFFSET may be specified to place the read
-data at some other place than the beginning of the string.  This call
-is actually implemented in terms of stdio's fread(3) call.  To get a true
-read(2) system call, see sysread().
+specified FILEHANDLE.  Returns the number of bytes actually read,
+C<0> at end of file, or undef if there was an error.  SCALAR will be grown
+or shrunk to the length actually read.  An OFFSET may be specified to
+place the read data at some other place than the beginning of the
+string.  This call is actually implemented in terms of stdio's fread(3)
+call.  To get a true read(2) system call, see sysread().
 
 =item readdir DIRHANDLE
 
@@ -3804,9 +3806,9 @@ Attempts to read LENGTH bytes of data into variable SCALAR from the
 specified FILEHANDLE, using the system call read(2).  It bypasses
 stdio, so mixing this with other kinds of reads, print(), write(),
 seek(), or tell() can cause confusion because stdio usually buffers
-data.  Returns the number of bytes actually read, or undef if there
-was an error.  SCALAR will be grown or shrunk so that the last byte
-actually read is the last byte of the scalar after the read.
+data.  Returns the number of bytes actually read, C<0> at end of file,
+or undef if there was an error.  SCALAR will be grown or shrunk so that
+the last byte actually read is the last byte of the scalar after the read.
 
 An OFFSET may be specified to place the read data at some place in the
 string other than the beginning.  A negative OFFSET specifies
