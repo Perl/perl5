@@ -76,7 +76,7 @@ if ($docc) {
   open CONFIG, "< $config";
   while(<CONFIG>) {
     $use_threads++ if /usethreads='(define|yes|true|t|y|1)'/i;
-    $use_mymalloc++ if /usemymalloc='(define|yes|true|t|y1)'/i;
+    $use_mymalloc++ if /usemymalloc='(define|yes|true|t|y|1)'/i;
     $care_about_case++ if /d_vms_case_sensitive_symbols='(define|yes|true|t|y|1)'/i;
     $debugging_enabled++ if /usedebugging_perl='(define|yes|true|t|y|1)'/i;
     $hide_mymalloc++ if /embedmymalloc='(define|yes|true|t|y|1)'/i;
