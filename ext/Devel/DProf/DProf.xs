@@ -23,6 +23,7 @@
 #  define HZ ((I32)CLK_TCK)
 #  define DPROF_HZ HZ
 #  include <starlet.h>  /* prototype for sys$gettim() */
+#  include <lib$routines.h>
 #  define Times(ptr) (dprof_times(aTHX_ ptr))
 #else
 #  ifndef HZ
