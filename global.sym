@@ -459,6 +459,7 @@ newAV
 newAVREF
 newBINOP
 newCONDOP
+newCONSTSUB
 newCVREF
 newFORM
 newFOROP

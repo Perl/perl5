@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised:  9-Nov-1997 by Charles Bailey  bailey@newman.upenn.edu
- * Version: 5.4.53a
+ * Last revised: 27-Feb-1998 by Charles Bailey  bailey@newman.upenn.edu
+ * Version: 5.4.61
  */
 
 #include <acedef.h>
@@ -2339,6 +2339,12 @@ vms_image_init(int *argcp, char ***argvp)
     *argcp++; argvp = newap;
   }
   getredirection(argcp,argvp);
+#if defined(USE_THREADS) && defined(__DECC)
+  {
+# include <reentrancy.h>
+  (void) decc$set_reentrancy(C$C_MULTITHREAD);
+  }
+#endif
   return;
 }
 /*}}}*/
@@ -2878,6 +2884,7 @@ setup_cmddsc(char *cmd, int check_img)
       s = resspec;
       while (*s && !isspace(*s)) s++;
       *s = '\0';
+      if (!cando_by_name(S_IXUSR,0,resspec)) return RMS$_PRV;
       New(402,VMScmd.dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
       strcpy(VMScmd.dsc$a_pointer,"$ MCR ");
       strcat(VMScmd.dsc$a_pointer,resspec);
@@ -2936,7 +2943,22 @@ vms_do_exec(char *cmd)
     if ((retsts = setup_cmddsc(cmd,1)) & 1)
       retsts = lib$do_command(&VMScmd);
 
-    set_errno(EVMSERR);
+    switch (retsts) {
+      case RMS$_FNF:
+        set_errno(ENOENT); break;
+      case RMS$_DNF: case RMS$_DIR: case RMS$_DEV:
+        set_errno(ENOTDIR); break;
+      case RMS$_PRV:
+        set_errno(EACCES); break;
+      case RMS$_SYN:
+        set_errno(EINVAL); break;
+      case CLI$_BUFOVF:
+        set_errno(E2BIG); break;
+      case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
+        _ckvmssts(retsts); /* fall through */
+      default:  /* SS$_DUPLNAM, SS$_CLI, resource exhaustion, etc. */
+        set_errno(EVMSERR); 
+    }
     set_vaxc_errno(retsts);
     if (dowarn)
       warn("Can't exec \"%s\": %s", VMScmd.dsc$a_pointer, Strerror(errno));
@@ -2965,21 +2987,36 @@ do_aspawn(void *really,void **mark,void **sp)
 unsigned long int
 do_spawn(char *cmd)
 {
-  unsigned long int substs, hadcmd = 1;
+  unsigned long int sts, substs, hadcmd = 1;
 
   TAINT_ENV();
   TAINT_PROPER("spawn");
   if (!cmd || !*cmd) {
     hadcmd = 0;
-    _ckvmssts(lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0));
+    sts = lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0);
   }
-  else if ((substs = setup_cmddsc(cmd,0)) & 1) {
-    _ckvmssts(lib$spawn(&VMScmd,0,0,0,0,0,&substs,0,0,0,0,0,0));
+  else if ((sts = setup_cmddsc(cmd,0)) & 1) {
+    sts = lib$spawn(&VMScmd,0,0,0,0,0,&substs,0,0,0,0,0,0);
   }
   
-  if (!(substs&1)) {
-    set_errno(EVMSERR);
-    set_vaxc_errno(substs);
+  if (!(sts & 1)) {
+    switch (sts) {
+      case RMS$_FNF:
+        set_errno(ENOENT); break;
+      case RMS$_DNF: case RMS$_DIR: case RMS$_DEV:
+        set_errno(ENOTDIR); break;
+      case RMS$_PRV:
+        set_errno(EACCES); break;
+      case RMS$_SYN:
+        set_errno(EINVAL); break;
+      case CLI$_BUFOVF:
+        set_errno(E2BIG); break;
+      case LIB$_INVARG: case LIB$_INVSTRDES: case SS$_ACCVIO: /* shouldn't happen */
+        _ckvmssts(sts); /* fall through */
+      default:  /* SS$_DUPLNAM, SS$_CLI, resource exhaustion, etc. */
+        set_errno(EVMSERR); 
+    }
+    set_vaxc_errno(sts);
     if (dowarn)
       warn("Can't spawn \"%s\": %s",
            hadcmd ? VMScmd.dsc$a_pointer : "", Strerror(errno));
@@ -4065,11 +4102,21 @@ flex_stat(char *fspec, Stat_t *statbufp)
 FILE *
 my_binmode(FILE *fp, char iotype)
 {
-    char filespec[NAM$C_MAXRSS], *acmode;
+    char filespec[NAM$C_MAXRSS], *acmode, *s, *colon, *dirend = Nullch;
+    int ret = 0, saverrno = errno, savevmserrno = vaxc$errno;
     fpos_t pos;
 
     if (!fgetname(fp,filespec)) return NULL;
-    if (iotype != '-' && fgetpos(fp,&pos) == -1) return NULL;
+    for (s = filespec; *s; s++) {
+      if (*s == ':') colon = s;
+      else if (*s == ']' || *s == '>') dirend = s;
+    }
+    /* Looks like a tmpfile, which will go away if reopened */
+    if (s == dirend + 3) return fp;
+    /* If we've got a non-file-structured device, clip off the trailing
+     * junk, and don't lose sleep if we can't get a stream position.  */
+    if (dirend == Nullch) *(colon+1) = '\0';
+    if (iotype != '-'&& (ret = fgetpos(fp, &pos)) == -1 && dirend) return NULL;
     switch (iotype) {
       case '<': case 'r':           acmode = "rb";                      break;
       case '>': case 'w':
@@ -4083,7 +4130,8 @@ my_binmode(FILE *fp, char iotype)
         acmode = "rb+";
     }
     if (freopen(filespec,acmode,fp) == NULL) return NULL;
-    if (iotype != '-' && fsetpos(fp,&pos) == -1) return NULL;
+    if (iotype != '-' && ret != -1 && fsetpos(fp,&pos) == -1) return NULL;
+    if (ret == -1) { set_errno(saverrno); set_vaxc_errno(savevmserrno); }
     return fp;
 }  /* end of my_binmode() */
 /*}}}*/

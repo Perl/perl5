@@ -98,17 +98,13 @@ trailing slash :-)
 # ';
 
 sub catdir {
-    shift;
+    my $self = shift @_;
     my @args = @_;
     for (@args) {
 	# append a slash to each argument unless it has one there
 	$_ .= "/" if $_ eq '' or substr($_,-1) ne "/";
     }
-    my $result = join('', @args);
-    # remove a trailing slash unless we are root
-    substr($result,-1) = ""
-	if length($result) > 1 && substr($result,-1) eq "/";
-    $result;
+    $self->canonpath(join('', @args));
 }
 
 =item catfile
@@ -121,12 +117,12 @@ complete path ending with a filename
 sub catfile {
     my $self = shift @_;
     my $file = pop @_;
-    return $file unless @_;
+    return $self->canonpath($file) unless @_;
     my $dir = $self->catdir(@_);
     for ($dir) {
 	$_ .= "/" unless substr($_,length($_)-1,1) eq "/";
     }
-    return $dir.$file;
+    return $self->canonpath($dir.$file);
 }
 
 =item curdir

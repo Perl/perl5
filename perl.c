@@ -559,6 +559,7 @@ perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **a
     char *validarg = "";
     I32 oldscope;
     AV* comppadlist;
+    int e_tmpfd = -1;
     dJMPENV;
     int ret;
 
@@ -679,12 +680,20 @@ setuid perl scripts securely.\n");
 		croak("No -e allowed in setuid scripts");
 	    if (!e_fp) {
 	        e_tmpname = savepv(TMPPATH);
+#ifdef HAS_MKSTEMP
+		e_tmpfd = PerlLIO_mkstemp(e_tmpname);
+
+		if (e_tmpfd < 0)
+		    croak("Can't mkstemp() temporary file \"%s\"", e_tmpname);
+		e_fp = PerlIO_fdopen(e_tmpfd,"w");
+#else /* use mktemp() */
 		(void)PerlLIO_mktemp(e_tmpname);
 		if (!*e_tmpname)
-		    croak("Can't mktemp()");
+		    croak("Can't mktemp() temporary file \"%s\"", e_tmpname);
 		e_fp = PerlIO_open(e_tmpname,"w");
-		if (!e_fp)
-		    croak("Cannot open temporary file");
+#endif /* HAS_MKSTEMP */
+  		if (!e_fp)
+ 		    croak("Cannot open temporary file \"%s\"", e_tmpname);
 	    }
 	    if (*++s)
 		PerlIO_puts(e_fp,s);
@@ -916,6 +925,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	(void)UNLINK(e_tmpname);
 	Safefree(e_tmpname);
 	e_tmpname = Nullch;
+	e_tmpfd = -1;
     }
 
     /* now that script is parsed, we can modify record separator */
@@ -2391,26 +2401,33 @@ init_debugger(void)
     curstash = defstash;
 }
 
+#ifndef STRESS_REALLOC
+#define REASONABLE(size) (size)
+#else
+#define REASONABLE(size) (1) /* unreasonable */
+#endif
+
 void
 init_stacks(ARGSproto)
 {
     curstack = newAV();
     mainstack = curstack;		/* remember in case we switch stacks */
     AvREAL_off(curstack);		/* not a real array */
-    av_extend(curstack,127);
+    av_extend(curstack,REASONABLE(127));
 
     stack_base = AvARRAY(curstack);
     stack_sp = stack_base;
-    stack_max = stack_base + 127;
+    stack_max = stack_base + REASONABLE(127);
 
-    cxstack_max = 8192 / sizeof(PERL_CONTEXT) - 2;	/* Use most of 8K. */
+    /* Use most of 8K. */
+    cxstack_max = REASONABLE(8192 / sizeof(PERL_CONTEXT) - 2);
     New(50,cxstack,cxstack_max + 1,PERL_CONTEXT);
     cxstack_ix	= -1;
 
-    New(50,tmps_stack,128,SV*);
+    New(50,tmps_stack,REASONABLE(128),SV*);
     tmps_floor = -1;
     tmps_ix = -1;
-    tmps_max = 128;
+    tmps_max = REASONABLE(128);
 
     /*
      * The following stacks almost certainly should be per-interpreter,
@@ -2420,35 +2437,37 @@ init_stacks(ARGSproto)
     if (markstack) {
 	markstack_ptr = markstack;
     } else {
-	New(54,markstack,64,I32);
+	New(54,markstack,REASONABLE(32),I32);
 	markstack_ptr = markstack;
-	markstack_max = markstack + 64;
+	markstack_max = markstack + REASONABLE(32);
     }
 
     if (scopestack) {
 	scopestack_ix = 0;
     } else {
-	New(54,scopestack,32,I32);
+	New(54,scopestack,REASONABLE(32),I32);
 	scopestack_ix = 0;
-	scopestack_max = 32;
+	scopestack_max = REASONABLE(32);
     }
 
     if (savestack) {
 	savestack_ix = 0;
     } else {
-	New(54,savestack,128,ANY);
+	New(54,savestack,REASONABLE(128),ANY);
 	savestack_ix = 0;
-	savestack_max = 128;
+	savestack_max = REASONABLE(128);
     }
 
     if (retstack) {
 	retstack_ix = 0;
     } else {
-	New(54,retstack,16,OP*);
+	New(54,retstack,REASONABLE(16),OP*);
 	retstack_ix = 0;
-	retstack_max = 16;
+	retstack_max = REASONABLE(16);
     }
 }
+
+#undef REASONABLE
 
 static void
 nuke_stacks(void)

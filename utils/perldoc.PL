@@ -284,6 +284,7 @@ foreach (@pages) {
 		for ($i = 0; $trn = $ENV{'DCL$PATH'.$i}; $i++) {
 		    push(@searchdirs,$trn);
 		}
+	    push(@dirs,'perl_root:[lib.pod]')  # installed pods
 	    } else {
 	        push(@searchdirs, grep(-d, split($Config{path_sep}, 
 						 $ENV{'PATH'})));

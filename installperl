@@ -11,8 +11,10 @@ use File::Find;
 use File::Compare;
 use File::Copy ();
 use File::Path ();
+use ExtUtils::Packlist;
 use Config;
 use subs qw(unlink link chmod);
+use vars qw($packlist);
 
 # override the ones in the rest of the script
 sub mkpath {
@@ -102,6 +104,9 @@ safe_unlink("$installbin/perl.$dlext");
 copy("perl.$dlext", "$installbin/perl.$dlext");
 chmod(0755, "$installbin/perl.$dlext");
 }
+
+# This will be used to store the packlist
+$packlist = ExtUtils::Packlist->new("$installarchlib/.packlist");
 
 # First we install the version-numbered executables.
 
@@ -272,6 +277,7 @@ if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
     # Link perldiag.pod into archlib
     my ($from, $to) = ("${installprivlib}/pod/perldiag.pod",
 		       "${installarchlib}/pod/perldiag.pod");
+    $packlist->{$to} = { from => $from, type => 'link' };
     if (compare($from, $to) || $nonono) {
 	mkpath("${installarchlib}/pod", 1, 0777);
 	unlink($to);
@@ -311,6 +317,7 @@ if (!$versiononly) {
 
 }
 
+$packlist->write() unless $nono;
 print STDERR "  Installation complete\n";
 
 exit 0;
@@ -384,12 +391,14 @@ sub link {
 	      ? die "AFS"  # okay inside eval {}
 	      : warn "Couldn't link $from to $to: $!\n"
 	  unless $nonono;
+        $packlist->{$to} = { from => $from, type => 'link' };
     };
     if ($@) {
 	File::Copy::copy($from, $to)
 	    ? $success++
 	    : warn "Couldn't copy $from to $to: $!\n"
 	  unless $nonono;
+        $packlist->{$to} = { type => 'file' };
     }
     $success;
 }
@@ -411,6 +420,7 @@ sub copy {
     File::Copy::copy($from, $to)
 	|| warn "Couldn't copy $from to $to: $!\n"
       unless $nonono;
+    $packlist->{$to} = { type => 'file' };
 }
 
 sub samepath {
@@ -466,6 +476,7 @@ sub installlib {
 	    #This might not work because $archname might have changed.
 	    unlink("$installarchlib/$name");
 	}
+        $packlist->{"$installlib/$name"} = { type => 'file' };
 	if (compare($_, "$installlib/$name") || $nonono) {
 	    unlink("$installlib/$name");
 	    mkpath("$installlib/$dir", 1, 0777);
@@ -493,6 +504,7 @@ sub installlib {
 sub copy_if_diff {
     my($from,$to)=@_;
     -f $from || die "$0: $from not found";
+    $packlist->{$to} = { type => 'file' };
     if (compare($from, $to) || $nonono) {
 	safe_unlink($to);   # In case we don't have write permissions.
         if ($nonono) {

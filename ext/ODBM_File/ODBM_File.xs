@@ -3,7 +3,7 @@
 #include "XSUB.h"
 
 #ifdef NULL
-#undef NULL
+#undef NULL  /* XXX Why? */
 #endif
 #ifdef I_DBM
 #  include <dbm.h>
@@ -45,6 +45,10 @@ static int dbmrefcnt;
 #endif
 
 MODULE = ODBM_File	PACKAGE = ODBM_File	PREFIX = odbm_
+
+#ifndef NULL
+#  define NULL 0
+#endif
 
 ODBM_File
 odbm_TIEHASH(dbtype, filename, flags, mode)

@@ -10,7 +10,7 @@ foreach (<DATA>) {
   next if /^\s*$/;
   push(@tests,$_);
 }
-print '1..',scalar(@tests)+3,"\n";
+print '1..',scalar(@tests)+5,"\n";
 
 foreach $test (@tests) {
   ($arg,$func,$expect) = split(/\t+/,$test);
@@ -52,6 +52,11 @@ else {
   print 'not ok ', ++$idx, ': expected |cant:[get.there]from.here;2|, got |',
         rmsexpand('from.here','cant:[get.there];2'),"|\n";
 }
+
+# Make sure we're using redirected mkdir, which strips trailing '/', since
+# the CRTL's mkdir can't handle this.
+print +(mkdir('testdir/',0777) ? 'ok ' : 'not ok '),++$idx,"\n";
+print +(rmdir('testdir/') ? 'ok ' : 'not ok '),++$idx,"\n";
 
 __DATA__
 

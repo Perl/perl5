@@ -24,7 +24,7 @@ static char nomem[] = "Out of memory!\n";
 
 
 Malloc_t
-safemalloc(size_t size)
+safemalloc(MEM_SIZE size)
 {
     Malloc_t ptr;
 
@@ -47,7 +47,7 @@ safemalloc(size_t size)
 /* paranoid version of realloc */
 
 Malloc_t
-saferealloc(void *where, size_t size)
+saferealloc(Malloc_t where, MEM_SIZE size)
 {
     Malloc_t ptr;
 
@@ -71,7 +71,7 @@ saferealloc(void *where, size_t size)
 /* safe version of free */
 
 Free_t
-safefree(void *where)
+safefree(Malloc_t where)
 {
 #ifdef DEBUGGING
     if (debug & 128)

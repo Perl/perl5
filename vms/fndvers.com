@@ -63,10 +63,6 @@ $   Call update_file "''p2'" "#define ARCHNAME" "''token'"
 $   teststs = $Status
 $   If .not.teststs Then Exit teststs
 $!
-$   token = """""""""/perl_root/lib/VMS_''arch'""""""""  /**/"
-$   Call update_file "''p2'" "#define OLDARCHLIB_EXP" "''token'"
-$   If .not.$Status Then Exit $Status
-$!
 $   token = """""""""/perl_root/lib/site_perl/VMS_''arch'""""""""  /**/"
 $   Call update_file "''p2'" "#define SITEARCH_EXP" "''token'"
 $   If .not.$Status Then Exit $Status

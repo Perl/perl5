@@ -693,10 +693,17 @@ to exist.
 
 (F) List assignment to %ENV is not supported on some systems, notably VMS.
 
-=item Can't mktemp()
+=item Can't mkstemp() temporary file %s
 
-(F) The mktemp() routine failed for some reason while trying to process
-a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
+(F) The mkstemp() routine failed for some reason while trying to
+process a B<-e> switch.  Maybe your temporary file partition
+is full, or over-protected, or clobbered.
+
+=item Can't mktemp() temporary file %s
+
+(F) The mktemp() routine failed for some reason while trying to
+process a B<-e> switch.  Maybe your temporary file partition
+is full, or over-protected, or clobbered.
 
 =item Can't modify %s in %s
 
@@ -899,10 +906,11 @@ Perhaps you need to copy the value to a temporary, and repeat that.
 (F) A string of a form C<CORE::word> was given to prototype(), but
 there is no builtin with the name C<word>.
 
-=item Cannot open temporary file
+=item Cannot open temporary file %s
 
-(F) The create routine failed for some reason while trying to process
-a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
+(F) A temporary file could not created for some reason while trying to
+process a B<-e> switch.  Maybe your temporary file partition is full,
+or over-protected, or clobbered.
 
 =item Cannot resolve method `%s' overloading `%s' in package `%s'
 

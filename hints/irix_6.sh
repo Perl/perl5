@@ -117,7 +117,7 @@ libswanted="$*"
 # makes IRIX 6.2 cc to emit bad code.
 pp_ctl_cflags='optimize=-O'
 
-if [ "X$usethreads" != "X" ]; then
+if [ "X$usethreads" = "X$define" ]; then
     if test ! -f /usr/include/pthread.h -o ! -f /usr/lib/libpthread.so; then
 	uname_r=`uname -r`
 	case "`uname -r`" in

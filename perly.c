@@ -1275,7 +1275,7 @@ YYSTYPE yyval;
 YYSTYPE yylval;
 #line 636 "perly.y"
  /* PROGRAM */
-#line 1349 "y.tab.c"
+#line 1349 "perly.c"
 #define YYABORT goto yyabort
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
@@ -1371,7 +1371,7 @@ yyloop:
             yys = 0;
             if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
             if (!yys) yys = "illegal-symbol";
-            fprintf(stderr, "yydebug: state %d, reading %d (%s)\n", yystate,
+            PerlIO_printf(Perl_debug_log, "yydebug: state %d, reading %d (%s)\n", yystate,
                     yychar, yys);
         }
 #endif
@@ -1381,7 +1381,7 @@ yyloop:
     {
 #if YYDEBUG
         if (yydebug)
-            fprintf(stderr, "yydebug: state %d, shifting to state %d\n",
+            PerlIO_printf(Perl_debug_log, "yydebug: state %d, shifting to state %d\n",
                     yystate, yytable[yyn]);
 #endif
         if (yyssp >= yyss + yystacksize - 1)
@@ -1436,7 +1436,7 @@ yyinrecovery:
             {
 #if YYDEBUG
                 if (yydebug)
-                    fprintf(stderr,
+                    PerlIO_printf(Perl_debug_log,
 		     "yydebug: state %d, error recovery shifting to state %d\n",
 		     *yyssp, yytable[yyn]);
 #endif
@@ -1466,7 +1466,7 @@ yyinrecovery:
             {
 #if YYDEBUG
                 if (yydebug)
-                    fprintf(stderr,
+                    PerlIO_printf(Perl_debug_log,
 			"yydebug: error recovery discarding state %d\n",
 			*yyssp);
 #endif
@@ -1485,7 +1485,7 @@ yyinrecovery:
             yys = 0;
             if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
             if (!yys) yys = "illegal-symbol";
-            fprintf(stderr,
+            PerlIO_printf(Perl_debug_log,
 		"yydebug: state %d, error recovery discards token %d (%s)\n",
 		yystate, yychar, yys);
         }
@@ -1496,7 +1496,7 @@ yyinrecovery:
 yyreduce:
 #if YYDEBUG
     if (yydebug)
-        fprintf(stderr, "yydebug: state %d, reducing by rule %d (%s)\n",
+        PerlIO_printf(Perl_debug_log, "yydebug: state %d, reducing by rule %d (%s)\n",
                 yystate, yyn, yyrule[yyn]);
 #endif
     yym = yylen[yyn];
@@ -2281,7 +2281,7 @@ case 176:
 #line 633 "perly.y"
 { yyval.opval = yyvsp[0].opval; }
 break;
-#line 2267 "y.tab.c"
+#line 2267 "perly.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
@@ -2291,7 +2291,7 @@ break;
     {
 #if YYDEBUG
         if (yydebug)
-            fprintf(stderr,
+            PerlIO_printf(Perl_debug_log,
 		"yydebug: after reduction, shifting from state 0 to state %d\n",
 		YYFINAL);
 #endif
@@ -2307,7 +2307,7 @@ break;
                 yys = 0;
                 if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                 if (!yys) yys = "illegal-symbol";
-                fprintf(stderr, "yydebug: state %d, reading %d (%s)\n",
+                PerlIO_printf(Perl_debug_log, "yydebug: state %d, reading %d (%s)\n",
                         YYFINAL, yychar, yys);
             }
 #endif
@@ -2322,7 +2322,7 @@ break;
         yystate = yydgoto[yym];
 #if YYDEBUG
     if (yydebug)
-        fprintf(stderr,
+        PerlIO_printf(Perl_debug_log,
 	    "yydebug: after reduction, shifting from state %d to state %d\n",
 	    *yyssp, yystate);
 #endif

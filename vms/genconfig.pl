@@ -6,7 +6,7 @@
 # that went into your perl binary.  In addition, values which change from run
 # to run may be supplied on the command line as key=val pairs.
 #
-# Rev. 10-Nov-1997  Charles Bailey  bailey@newman.upenn.edu
+# Rev. 16-Feb-1998  Charles Bailey  bailey@newman.upenn.edu
 #
 
 #==== Locations of installed Perl components
@@ -26,6 +26,7 @@ if ($ARGV[0] eq '-f') {
   open(ARGS,$ARGV[1]) or die "Can't read data from $ARGV[1]: $!\n";
   @ARGV = ();
   while (<ARGS>) {
+    chomp;
     push(@ARGV,split(/\|/,$_));
   }
   close ARGS;
@@ -88,6 +89,8 @@ man1ext='rno'
 man3ext='rno'
 arch='VMS_$archsufx'
 archname='VMS_$archsufx'
+bincompat3='undef'
+d_bincompat3='undef'
 osvers='$osvers'
 prefix='$prefix'
 builddir='$builddir'
@@ -154,43 +157,64 @@ foreach (@ARGV) {
       $optimize = $qual;
       $ccflags =~ s/$qual//;
     }
+    $usethreads = ($ccflags =~ m!/DEF[^/]+USE_THREADS!i and
+                   $ccflags !~ m!/UND[^/]+USE_THREADS!i);
+    print OUT "usethreads='",($usethreads ? 'define' : 'undef'),"'\n";;
     $optimize = "$debug$optimize";
     print OUT "ccflags='$ccflags'\n";
     print OUT "optimize='$optimize'\n";
-    $usethreads = ($ccflags =~ m!/DEF[^/]+USE_THREADS!i and
-                   $ccflags !~ m!/UND[^/]+USE_THREADS!i);
-    print OUT "usethreads='$usethreads'\n";
     $dosock = ($ccflags =~ m!/DEF[^/]+VMS_DO_SOCKETS!i and
                $ccflags !~ m!/UND[^/]+VMS_DO_SOCKETS!i);
     print OUT "d_vms_do_sockets=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "d_socket=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "d_sockpair=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "d_gethent=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_sethent=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "d_select=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_netdb=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_niin=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_neterrno=",$dosock ? "'define'\n" : "'undef'\n";
-    print OUT "d_gethbadd=",$dosock ? "'define'\n" : "'undef'\n";
-    print OUT "gethbadd_addr_type=",$dosock ? "'char *'\n" : "'undef'\n";
-    print OUT "gethbadd_alen_type=",$dosock ? "'int'\n" : "'undef'\n";
+    print OUT "d_gethbyname=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_gethbyaddr=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_getpbyname=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_getpbynumber=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_getsbyname=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_getsbyport=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "netdb_name_type=",$dosock ? "'char *'\n" : "'undef'\n";
+    print OUT "netdb_host_type=",$dosock ? "'char *'\n" : "'undef'\n";
+    print OUT "netdb_hlen_type=",$dosock ? "'int'\n" : "'undef'\n";
 
     if ($dosock and $cctype eq 'decc' and $ccflags =~ /DECCRTL_SOCKETS/) {
       print OUT "selecttype='fd_set'\n";
-      print OUT "d_getnbadd='define'\n";
-      print OUT "getnbadd_net_type='long'\n";
+      print OUT "d_getnbyaddr='define'\n";
+      print OUT "d_getnbyname='define'\n";
+      print OUT "netdb_net_type='long'\n";
     }
     else {
       print OUT "selecttype='int'\n";
-      print OUT "d_getnbadd='undef'\n";
-      print OUT "getnbadd_net_type='undef'\n";
+      print OUT "d_getnybname='undef'\n";
+      print OUT "d_getnybaddr='undef'\n";
+      print OUT "netdb_net_type='undef'\n";
     }
 
-    if ($cctype eq 'decc') { $rtlhas  = 'define'; print OUT "useposix='true'\n";  }
-    else                   { $rtlhas  = 'undef';  print OUT "useposix='false'\n"; }
+    if ($cctype eq 'decc') {
+      $rtlhas  = 'define';
+      print OUT "useposix='true'\n";
+      ($ccver,$vmsver) = `$cc/VERSION` =~ /V(\S+) on .*V(\S+)$/;
+      # Best guess; the may be wrong on systems which have separately
+      # installed the new CRTL.
+      if ($ccver >= 5.2 and $vmsver >= 7) { $rtlnew = 'define'; }
+      else                                { $rtlnew = 'undef';  }
+    }
+    else { $rtlhas = $rtlnew = 'undef';  print OUT "useposix='false'\n"; }
     foreach (qw[ d_stdstdio d_stdio_ptr_lval d_stdio_cnt_lval d_stdiobase
                  d_locconv d_setlocale i_locale d_mbstowcs d_mbtowc
                  d_wcstombs d_wctomb d_mblen d_mktime d_strcoll d_strxfrm ]) {
       print OUT "$_='$rtlhas'\n";
+    }
+    foreach (qw[ d_gettimeod d_uname d_truncate d_wait4 d_index
+                 d_pathconf d_fpathconf d_sysconf d_sigsetjmp ]) {
+      print OUT "$_='$rtlnew'\n";
     }
     next;
   }
@@ -323,6 +347,9 @@ close IN;
 # on VMS systems, but is also used erroneously by the Perl build process
 # as the manifest for the obsolete variable $d_eunice.
 print OUT "d_eunice='undef'\n";  delete $pp_vars{VMS};
+
+# XXX temporary -- USE_THREADS is currently on CC command line
+delete $pp_vars{'USE_THREADS'};
 
 foreach (sort keys %pp_vars) {
   warn "Didn't see $_ in $infile\n";

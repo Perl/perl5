@@ -117,8 +117,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) \
-	|| defined(__DGUX)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) || defined(__DGUX)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -2042,7 +2041,7 @@ enum {
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(PERLIO_IS_STDIO) && defined(HAS_ATTRIBUTE)
+#if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)
 /* 
  * Now we have __attribute__ out of the way 
  * Remap printf 

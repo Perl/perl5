@@ -795,18 +795,41 @@ instance of this qualifier on the command line.
 
 sub cflags {
     my($self,$libperl) = @_;
-    my($quals) = $Config{'ccflags'};
+    my($quals) = $self->{CCFLAGS} || $Config{'ccflags'};
+    my($definestr,$undefstr,$flagoptstr) = ('','','');
+    my($incstr) = '/Include=($(PERL_INC)';
     my($name,$sys,@m);
-    my($optimize) = '/Optimize';
 
     ( $name = $self->{NAME} . "_cflags" ) =~ s/:/_/g ;
     print STDOUT "Unix shell script ".$Config{"$self->{'BASEEXT'}_cflags"}.
          " required to modify CC command for $self->{'BASEEXT'}\n"
     if ($Config{$name});
 
+    if ($quals =~ / -[DIUOg]/) {
+	while ($quals =~ / -([Og])(\d*)\b/) {
+	    my($type,$lvl) = ($1,$2);
+	    $quals =~ s/ -$type$lvl\b\s*//;
+	    if ($type eq 'g') { $flagoptstr = '/NoOptimize'; }
+	    else { $flagoptstr = '/Optimize' . (defined($lvl) ? "=$lvl" : ''); }
+	}
+	while ($quals =~ / -([DIU])(\S+)/) {
+	    my($type,$def) = ($1,$2);
+	    $quals =~ s/ -$type$def\s*//;
+	    $def =~ s/"/""/g;
+	    if    ($type eq 'D') { $definestr .= qq["$def",]; }
+	    elsif ($type eq 'I') { $flagincstr .= ',' . $self->fixpath($def,1); }
+	    else                 { $undefstr  .= qq["$def",]; }
+	}
+    }
+    if (length $quals and $quals !~ m!/!) {
+	warn "MM_VMS: Ignoring unrecognized CCFLAGS elements \"$quals\"\n";
+	$quals = '';
+    }
+    if (length $definestr) { chop($definestr); $quals .= "/Define=($definestr)"; }
+    if (length $undefstr)  { chop($undefstr);  $quals .= "/Undef=($undefstr)";   }
     # Deal with $self->{DEFINE} here since some C compilers pay attention
     # to only one /Define clause on command line, so we have to
-    # conflate the ones from $Config{'cc'} and $self->{DEFINE}
+    # conflate the ones from $Config{'ccflags'} and $self->{DEFINE}
     if ($quals =~ m:(.*)/define=\(?([^\(\/\)\s]+)\)?(.*)?:i) {
 	$quals = "$1/Define=($2," . ($self->{DEFINE} ? "$self->{DEFINE}," : '') .
 	         "\$(DEFINE_VERSION),\$(XS_DEFINE_VERSION))$3";
@@ -817,16 +840,18 @@ sub cflags {
     }
 
     $libperl or $libperl = $self->{LIBPERL_A} || "libperl.olb";
+    if ($libperl =~ s/^$Config{'dbgprefix'}//) { $libperl =~ s/perl([^Dd]*)\./perld$1./; }
     if ($libperl =~ /libperl(\w+)\./i) {
-        my($type) = uc $1;
-        my(%map) = ( 'D'  => 'DEBUGGING', 'E' => 'EMBED', 'M' => 'MULTIPLICITY',
-                     'DE' => 'DEBUGGING,EMBED', 'DM' => 'DEBUGGING,MULTIPLICITY',
-                     'EM' => 'EMBED,MULTIPLICITY', 'DEM' => 'DEBUGGING,EMBED,MULTIPLICITY' );
-        $quals =~ s:/define=\(([^\)]+)\):/Define=($1,$map{$type}):i
+	my($type) = uc $1;
+	my(%map) = ( 'D'  => 'DEBUGGING', 'E' => 'EMBED', 'M' => 'MULTIPLICITY',
+	             'DE' => 'DEBUGGING,EMBED', 'DM' => 'DEBUGGING,MULTIPLICITY',
+	             'EM' => 'EMBED,MULTIPLICITY', 'DEM' => 'DEBUGGING,EMBED,MULTIPLICITY' );
+	my($add) = join(',', grep { $quals !~ /\b$_\b/ } split(/,/,$map{$type}));
+	$quals =~ s:/define=\(([^\)]+)\):/Define=($1,$add):i if $add;
+	$self->{PERLTYPE} ||= $type;
     }
 
     # Likewise with $self->{INC} and /Include
-    my($incstr) = '/Include=($(PERL_INC)';
     if ($self->{'INC'}) {
 	my(@includes) = split(/\s+/,$self->{INC});
 	foreach (@includes) {
@@ -835,14 +860,24 @@ sub cflags {
 	}
     }
     $quals .= "$incstr)";
+    $self->{CCFLAGS} = $quals;
 
-    $optimize = '/Debug/NoOptimize'
-	if ($self->{OPTIMIZE} =~ /-g/ or $self->{OPTIMIZE} =~ m!/Debug!i);
+    $self->{OPTIMIZE} ||= $flagoptstr || $Config{'optimize'};
+    if ($self->{OPTIMIZE} !~ m!/!) {
+	if    ($self->{OPTIMIZE} =~ m!\b-g\b!) { $self->{OPTIMIZE} = '/Debug/NoOptimize' }
+	elsif ($self->{OPTIMIZE} =~ /-O(\d*)/) {
+	    $self->{OPTIMIZE} = '/Optimize' . (defined($1) ? "=$1" : '');
+	}
+	else {
+	    warn "MM_VMS: Can't parse OPTIMIZE \"$self->{OPTIMIZE}\"; using default\n" if length $self->{OPTIMIZE};
+	    $self->{OPTIMIZE} = '/Optimize';
+	}
+    }
 
     return $self->{CFLAGS} = qq{
-CCFLAGS = $quals
-OPTIMIZE = $optimize
-PERLTYPE =
+CCFLAGS = $self->{CCFLAGS}
+OPTIMIZE = $self->{OPTIMIZE}
+PERLTYPE = $self->{PERLTYPE}
 SPLIT =
 LARGE =
 };
@@ -1274,30 +1309,13 @@ sub dlsyms {
 
     my($funcs) = $attribs{DL_FUNCS} || $self->{DL_FUNCS} || {};
     my($vars)  = $attribs{DL_VARS}  || $self->{DL_VARS}  || [];
-    my($srcdir)= $attribs{PERL_SRC} || $self->{PERL_SRC} || '';
     my(@m);
 
     unless ($self->{SKIPHASH}{'dynamic'}) {
 	push(@m,'
-dynamic :: rtls.opt $(INST_ARCHAUTODIR)$(BASEEXT).opt
+dynamic :: $(INST_ARCHAUTODIR)$(BASEEXT).opt
 	$(NOECHO) $(NOOP)
 ');
-	if ($srcdir) {
-	   my($popt) = $self->catfile($srcdir,'perlshr.opt');
-	   my($lopt) = $self->catfile($srcdir,'crtl.opt');
-	   push(@m,"# Depend on \$(BASEEXT).opt to insure we copy here *after* autogenerating (wrong) rtls.opt in Mksymlists
-rtls.opt : $popt $lopt \$(BASEEXT).opt
-	Copy/Log $popt Sys\$Disk:[]rtls.opt
-	Append/Log $lopt Sys\$Disk:[]rtls.opt
-");
-	}
-	else {
-	    push(@m,'
-# rtls.opt is built in the same step as $(BASEEXT).opt
-rtls.opt : $(BASEEXT).opt
-	$(TOUCH) $(MMS$TARGET)
-');
-	}
     }
 
     push(@m,'
@@ -1355,10 +1373,10 @@ INST_DYNAMIC_DEP = $inst_dynamic_dep
 
 ";
     push @m, '
-$(INST_DYNAMIC) : $(INST_STATIC) $(PERL_INC)perlshr_attr.opt rtls.opt $(INST_ARCHAUTODIR).exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
+$(INST_DYNAMIC) : $(INST_STATIC) $(PERL_INC)perlshr_attr.opt $(INST_ARCHAUTODIR).exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
 	$(NOECHO) $(MKPATH) $(INST_ARCHAUTODIR)
 	$(NOECHO) If F$TrnLNm("PerlShr").eqs."" Then Define/NoLog/User PerlShr Sys$Share:PerlShr.',$Config{'dlext'},'
-	Link $(LDFLAGS) /Shareable=$(MMS$TARGET)$(OTHERLDFLAGS) $(BASEEXT).opt/Option,rtls.opt/Option,$(PERL_INC)perlshr_attr.opt/Option
+	Link $(LDFLAGS) /Shareable=$(MMS$TARGET)$(OTHERLDFLAGS) $(BASEEXT).opt/Option,$(PERL_INC)perlshr_attr.opt/Option
 ';
 
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');

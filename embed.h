@@ -367,6 +367,7 @@
 #define newAVREF		Perl_newAVREF
 #define newBINOP		Perl_newBINOP
 #define newCONDOP		Perl_newCONDOP
+#define newCONSTSUB		Perl_newCONSTSUB
 #define newCVREF		Perl_newCVREF
 #define newFORM			Perl_newFORM
 #define newFOROP		Perl_newFOROP

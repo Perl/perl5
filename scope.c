@@ -25,18 +25,28 @@ stack_grow(SV **sp, SV **p, int n)
       abort();
 #endif
     stack_sp = sp;
+#ifndef STRESS_REALLOC
     av_extend(curstack, (p - stack_base) + (n) + 128);
+#else
+    av_extend(curstack, (p - stack_base) + (n) + 1);
+#endif
 #if defined(DEBUGGING) && !defined(USE_THREADS)
     growing--;
 #endif
     return stack_sp;
 }
 
+#ifndef STRESS_REALLOC
+#define GROW(old) ((old) * 3 / 2)
+#else
+#define GROW(old) ((old) + 1)
+#endif
+
 I32
 cxinc(void)
 {
     dTHR;
-    cxstack_max = cxstack_max * 3 / 2;
+    cxstack_max = GROW(cxstack_max);
     Renew(cxstack, cxstack_max + 1, PERL_CONTEXT);	/* XXX should fix CXINC macro */
     return cxstack_ix + 1;
 }
@@ -46,7 +56,7 @@ push_return(OP *retop)
 {
     dTHR;
     if (retstack_ix == retstack_max) {
-	retstack_max = retstack_max * 3 / 2;
+	retstack_max = GROW(retstack_max);
 	Renew(retstack, retstack_max, OP*);
     }
     retstack[retstack_ix++] = retop;
@@ -67,7 +77,7 @@ push_scope(void)
 {
     dTHR;
     if (scopestack_ix == scopestack_max) {
-	scopestack_max = scopestack_max * 3 / 2;
+	scopestack_max = GROW(scopestack_max);
 	Renew(scopestack, scopestack_max, I32);
     }
     scopestack[scopestack_ix++] = savestack_ix;
@@ -87,7 +97,7 @@ markstack_grow(void)
 {
     dTHR;
     I32 oldmax = markstack_max - markstack;
-    I32 newmax = oldmax * 3 / 2;
+    I32 newmax = GROW(oldmax);
 
     Renew(markstack, newmax, I32);
     markstack_ptr = markstack + oldmax;
@@ -98,9 +108,11 @@ void
 savestack_grow(void)
 {
     dTHR;
-    savestack_max = savestack_max * 3 / 2;
+    savestack_max = GROW(savestack_max) + 4; 
     Renew(savestack, savestack_max, ANY);
 }
+
+#undef GROW
 
 void
 free_tmps(void)
