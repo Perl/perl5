@@ -227,11 +227,11 @@ flock STDIN, 8;
 flock FOO, 8;
 flock $a, 8;
 EXPECT
-flock() on closed filehandle STDIN at - line 14.
 flock() on closed filehandle STDIN at - line 16.
+flock() on closed filehandle STDIN at - line 18.
 	(Are you trying to call flock() on dirhandle STDIN?)
-flock() on unopened filehandle FOO at - line 17.
-flock() on unopened filehandle at - line 18.
+flock() on unopened filehandle FOO at - line 19.
+flock() on unopened filehandle at - line 20.
 ########
 # pp_sys.c [pp_prtf pp_send pp_bind pp_connect pp_listen pp_accept pp_shutdown pp_ssockopt ppp_getpeername]
 use warnings 'io' ;
