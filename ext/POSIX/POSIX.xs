@@ -1875,3 +1875,18 @@ getcwd()
 	XSprePUSH; PUSHTARG;
       }
 
+SysRet
+lchown(uid, gid, path)
+       Uid_t           uid
+       Gid_t           gid
+       char *          path
+    CODE:
+#ifdef HAS_LCHOWN
+       /* yes, the order of arguments is different,
+        * but consistent with CORE::chown() */
+       RETVAL = lchown(path, uid, gid);
+#else
+       RETVAL = not_here("lchown");
+#endif
+    OUTPUT:
+       RETVAL

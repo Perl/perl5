@@ -1352,6 +1352,7 @@ lib/Math/BigFloat/Trace.pm	bignum tracing
 lib/Math/BigInt/CalcEmu.pm	Pure Perl module to support Math::BigInt
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
+lib/Math/BigInt/t/_e_math.t	Helper routine in BigFloat for _e math
 lib/Math/BigInt/t/alias.inc	Support for BigInt tests
 lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
