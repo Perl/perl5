@@ -20,7 +20,7 @@ else                   { print "1..78\n";  }
 
 use File::Find;
 use File::Spec;
-if ($^O eq 'MSWin32')
+if ($^O eq 'MSWin32' || $^O eq 'cygwin')
  {
   # This is a hack - at present File::Find does not produce native names on Win32
   # So force File::Spec to use Unix names.
