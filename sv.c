@@ -8757,7 +8757,6 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
     for (tblent = *otblent; tblent; i=0, tblent = tblent->next) {
 	if (tblent->oldval == oldv) {
 	    tblent->newval = newv;
-	    tbl->tbl_items++;
 	    return;
 	}
     }
