@@ -378,7 +378,8 @@ them to all the .SH files by running  B<sh Configure -S>.
 You can also supply a shell script config.over to over-ride Configure's
 guesses.  It will get loaded up at the very end, just before config.sh
 is created.  You have to be careful with this, however, as Configure
-does no checking that your changes make sense.
+does no checking that your changes make sense.  See the section on
+changing the installation directory for an example.
 
 =item config.h
 
@@ -629,13 +630,23 @@ files.
 The standard library files in F</usr/local/lib/perl5>
 should be useable by all versions of perl5.
 
-Most extensions will not need to be recompiled to use with a newer
+Most extensions will probably not need to be recompiled to use with a newer
 version of perl.  If you do run into problems, and you want to continue
 to use the old version of perl along with your extension, simply move
 those extension files to the appropriate version directory, such as
 F</usr/local/lib/perl/archname/5.002>.  Then perl5.002 will find your
 files in the 5.002 directory, and newer versions of perl will find your
 newer extension in the site_perl directory.
+
+Some users may prefer to keep all versions of perl in completely
+separate directories.  One convenient way to do this is by
+using a separate prefix for each version, such as
+
+	sh Configure -Dprefix=/opt/perl5.002
+
+and adding /opt/perl5.002/bin to the shell PATH variable.  Such users
+may also wish to add a symbolic link /usr/local/bin/perl so that
+scripts can still start with #!/usr/local/bin/perl.
 
 =head1 Coexistence with perl4
 
