@@ -2,7 +2,7 @@ package UNIVERSAL;
 
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT_OK = qw(isa);
+@EXPORT_OK = qw(isa can);
 
 1;
 __END__
@@ -58,7 +58,7 @@ C<UNIVERSAL> also optionally exports the following subroutines
 
 =over 4
 
-=item isa ( REF, TYPE )
+=item isa ( VAL, TYPE )
 
 C<isa> returns I<true> if the first argument is a reference and either
 of the following statements is true.
@@ -67,14 +67,21 @@ of the following statements is true.
 
 =item
 
-C<REF> is a blessed reference and is blessed into package C<TYPE>
+C<VAL> is a blessed reference and is blessed into package C<TYPE>
 or inherits from package C<TYPE>
 
 =item
 
-C<REF> is a reference to a C<TYPE> of perl variable (er 'HASH')
+C<VAL> is a reference to a C<TYPE> of perl variable (er 'HASH')
 
 =back
+
+=item can ( VAL, METHOD )
+
+If C<VAL> is a blessed reference which has a method called C<METHOD>,
+C<can> returns a reference to the subroutine.   If C<VAL> is not
+a blessed reference, or if it does not have a method C<METHOD>,
+I<undef> is returned.
 
 =back
 
