@@ -962,13 +962,22 @@ sub pp_refgen {
 		 $kid->sibling->ppaddr eq "pp_anoncode") {
 	    return "sub " .
 		$self->deparse_sub($self->padval($kid->sibling->targ));
-	} elsif ($kid->ppaddr eq "pp_pushmark"
-		 and $kid->sibling->ppaddr =~ /^pp_(pad|rv2)[ah]v$/
-		 and not $kid->sibling->flags & OPf_REF) {
-	    # The @a in \(@a) isn't in ref context, but only when the
-	    # parens are there.
-	    return "\\(" . $self->deparse($kid->sibling, 1) . ")";
-	}
+	} elsif ($kid->ppaddr eq "pp_pushmark") {
+            my $sib_ppaddr = $kid->sibling->ppaddr;
+            if ($sib_ppaddr =~ /^pp_(pad|rv2)[ah]v$/
+                and not $kid->sibling->flags & OPf_REF)
+            {
+                # The @a in \(@a) isn't in ref context, but only when the
+                # parens are there.
+                return "\\(" . $self->deparse($kid->sibling, 1) . ")";
+            } elsif ($kid->sibling->ppaddr eq 'pp_entersub') {
+                my $text = $self->deparse($kid->sibling, 1);
+                # Always show parens for \(&func()), but only with -p otherwise
+                $text = "($text)" if $self->{'parens'}
+                                 or $kid->sibling->private & OPpENTERSUB_AMPER;
+                return "\\$text";
+            }
+        }
     }
     $self->pfixop($op, $cx, "\\", 20);
 }
