@@ -162,7 +162,7 @@ This variable is read-only.
 
 =item $*
 
-Set to 1 to do multiline matching within a string, 0 to tell Perl
+Set to 1 to do multi-line matching within a string, 0 to tell Perl
 that it can assume that strings contain a single line, for the purpose
 of optimizing pattern matches.  Pattern matches on strings containing
 multiple newlines can produce confusing results when "C<$*>" is 0.  Default
@@ -200,7 +200,7 @@ number.)
 The input record separator, newline by default.  Works like B<awk>'s RS
 variable, including treating empty lines as delimiters if set to the
 null string.  (Note: An empty line cannot contain any spaces or tabs.)
-You may set it to a multicharacter string to match a multicharacter
+You may set it to a multi-character string to match a multi-character
 delimiter, or to C<undef> to read to end of file.  Note that setting it
 to C<"\n\n"> means something slightly different than setting it to
 C<"">, if the file contains consecutive empty lines.  Setting it to

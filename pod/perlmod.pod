@@ -1106,7 +1106,7 @@ Inherit methods from other modules if appropriate.
 
 Avoid class name tests like: C<die "Invalid" unless ref $ref eq 'FOO'>.
 Generally you can delete the "C<eq 'FOO'>" part with no harm at all.
-Let the objects look after themselves! Generally, avoid hardwired
+Let the objects look after themselves! Generally, avoid hard-wired
 class names as far as possible.
 
 Avoid C<$r-E<gt>Class::func()> where using C<@ISA=qw(... Class ...)> and

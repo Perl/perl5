@@ -3805,7 +3805,7 @@ examples.
 
 =item write
 
-Writes a formatted record (possibly multiline) to the specified file,
+Writes a formatted record (possibly multi-line) to the specified file,
 using the format associated with that file.  By default the format for
 a file is the one having the same name as the filehandle, but the
 format for the current output channel (see the select() function) may be set

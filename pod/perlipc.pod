@@ -483,7 +483,7 @@ If you're not writing a server/client for an existing protocol like
 NNTP or SMTP, you should give some thought to how your server will
 know when the client has finished talking, and vice-versa.  Most
 protocols are based on one-line messages and responses (so one party
-knows the other has finished when a "\n" is received) or multiline
+knows the other has finished when a "\n" is received) or multi-line
 messages and responses that end with a period on an empty line
 ("\n.\n" terminates a message/response).
 

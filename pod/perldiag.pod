@@ -2454,7 +2454,7 @@ Use an explicit printf() or sprintf() instead.
 
 =item Use of $* is deprecated
 
-(D) This variable magically turned on multiline pattern matching, both for
+(D) This variable magically turned on multi-line pattern matching, both for
 you and for any luckless subroutine that you happen to call.  You should
 use the new C<//m> and C<//s> modifiers now to do that without the dangerous
 action-at-a-distance effects of C<$*>.

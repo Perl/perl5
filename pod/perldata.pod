@@ -190,7 +190,7 @@ intervening values.  Lengthening an array that was previously shortened
 I<NO LONGER> recovers the values that were in those elements.  (It used to
 in Perl 4, but we had to break this to make sure destructors were
 called when expected.)  You can also gain some measure of efficiency by
-preextending an array that is going to get big.  (You can also extend
+pre-extending an array that is going to get big.  (You can also extend
 an array by assigning to an element that is off the end of the array.)
 You can truncate an array down to nothing by assigning the null list ()
 to it.  The following are equivalent:

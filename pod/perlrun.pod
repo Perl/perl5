@@ -113,7 +113,7 @@ distribution for more information).
 The Win95/NT installation, when using the Activeware port of Perl,
 will modify the Registry to associate the .pl extension with the perl
 interpreter.  If you install another port of Perl, including the one
-in the win32 directory of the Perl distribution, then you'll have to
+in the Win32 directory of the Perl distribution, then you'll have to
 modify the Registry yourself.
 
 =item Macintosh
@@ -258,7 +258,7 @@ may be used to enter one line of script.
 If B<-e> is given, Perl
 will not look for a script filename in the argument list.
 Multiple B<-e> commands may
-be given to build up a multiline script.
+be given to build up a multi-line script.
 Make sure to use semicolons where you would in a normal program.
 
 =item B<-F>I<pattern>

@@ -17,7 +17,7 @@ useful.
 
 Regarding aesthetics of code lay out, about the only thing Larry
 cares strongly about is that the closing curly brace of
-a multiline BLOCK should line up with the keyword that started the construct.
+a multi-line BLOCK should line up with the keyword that started the construct.
 Beyond that, he has other preferences that aren't so strong:
 
 =over 4
@@ -32,7 +32,7 @@ Opening curly on same line as keyword, if possible, otherwise line up.
 
 =item *
 
-Space before the opening curly of a multiline BLOCK.
+Space before the opening curly of a multi-line BLOCK.
 
 =item *
 

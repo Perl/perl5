@@ -797,7 +797,7 @@ A double-quoted, interpolated string.
 
 A string which is interpolated and then executed as a system command.
 The collected standard output of the command is returned.  In scalar
-context, it comes back as a single (potentially multiline) string.
+context, it comes back as a single (potentially multi-line) string.
 In list context, returns a list of lines (however you've defined lines
 with $/ or $INPUT_RECORD_SEPARATOR).
 

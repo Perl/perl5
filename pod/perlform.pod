@@ -53,7 +53,7 @@ that substitute values into the line.  Each field in a picture line starts
 with either "@" (at) or "^" (caret).  These lines do not undergo any kind
 of variable interpolation.  The at field (not to be confused with the array
 marker @) is the normal kind of field; the other kind, caret fields, are used
-to do rudimentary multiline text block filling.  The length of the field
+to do rudimentary multi-line text block filling.  The length of the field
 is supplied by padding out the field with multiple "E<lt>", "E<gt>", or "|"
 characters to specify, respectively, left justification, right
 justification, or centering.  If the variable would exceed the width
@@ -63,7 +63,7 @@ As an alternate form of right justification, you may also use "#"
 characters (with an optional ".") to specify a numeric field.  This way
 you can line up the decimal points.  If any value supplied for these
 fields contains a newline, only the text up to the newline is printed.
-Finally, the special field "@*" can be used for printing multiline,
+Finally, the special field "@*" can be used for printing multi-line,
 nontruncated values; it should appear by itself on a line.
 
 The values are specified on the following line in the same order as

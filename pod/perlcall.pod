@@ -1795,7 +1795,7 @@ series of C functions to act as the interface to Perl, thus
 
 In this case the functions C<fn1>, C<fn2>, and C<fn3> are used to
 remember the Perl subroutine to be called. Each of the functions holds
-a separate hardwired index which is used in the function C<Pcb> to
+a separate hard-wired index which is used in the function C<Pcb> to
 access the C<Map> array and actually call the Perl subroutine.
 
 There are some obvious disadvantages with this technique.
@@ -1803,7 +1803,7 @@ There are some obvious disadvantages with this technique.
 Firstly, the code is considerably more complex than with the previous
 example.
 
-Secondly, there is a hardwired limit (in this case 3) to the number of
+Secondly, there is a hard-wired limit (in this case 3) to the number of
 callbacks that can exist simultaneously. The only way to increase the
 limit is by modifying the code to add more functions and then
 recompiling.  None the less, as long as the number of functions is

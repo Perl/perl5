@@ -468,37 +468,37 @@ See L<"Debugger Internals"> below for more details.
 =item E<lt> [ command ]
 
 Set an action (Perl command) to happen before every debugger prompt.
-A multiline command may be entered by backslashing the newlines.  If
+A multi-line command may be entered by backslashing the newlines.  If
 C<command> is missing, resets the list of actions.
 
 =item E<lt>E<lt> command
 
 Add an action (Perl command) to happen before every debugger prompt.
-A multiline command may be entered by backslashing the newlines.
+A multi-line command may be entered by backslashing the newlines.
 
 =item E<gt> command
 
 Set an action (Perl command) to happen after the prompt when you've
-just given a command to return to executing the script.  A multiline
+just given a command to return to executing the script.  A multi-line
 command may be entered by backslashing the newlines.  If C<command> is
 missing, resets the list of actions.
 
 =item E<gt>E<gt> command
 
 Adds an action (Perl command) to happen after the prompt when you've
-just given a command to return to executing the script.  A multiline
+just given a command to return to executing the script.  A multi-line
 command may be entered by backslashing the newlines.
 
 =item { [ command ]
 
 Set an action (debugger command) to happen before every debugger prompt.
-A multiline command may be entered by backslashing the newlines.  If
+A multi-line command may be entered by backslashing the newlines.  If
 C<command> is missing, resets the list of actions.
 
 =item {{ command
 
 Add an action (debugger command) to happen before every debugger prompt.
-A multiline command may be entered by backslashing the newlines.
+A multi-line command may be entered by backslashing the newlines.
 
 =item ! number
 
@@ -602,7 +602,7 @@ expression via C<s/n/t expression> command.
 
 =item Multiline commands
 
-If you want to enter a multiline command, such as a subroutine
+If you want to enter a multi-line command, such as a subroutine
 definition with several statements, or a format, you may escape the
 newline that would normally end the debugger command with a backslash.
 Here's an example:

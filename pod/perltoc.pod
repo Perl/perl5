@@ -897,6 +897,8 @@ constant NAME => VALUE, use locale, use ops, use vmsish
 
 =item Math::Complex
 
+=item Math::Trig
+
 =item DB_File
 
 =item Net::Ping
@@ -2681,7 +2683,7 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =item SEE ALSO
 
-=head2 AutoLoader - load functions only on demand
+=head2 AutoLoader - load subroutines only on demand
 
 =item SYNOPSIS
 
@@ -2689,17 +2691,21 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =over
 
-=item __END__
+=item Subroutine Stubs
 
-=item Loading Stubs
+=item Using B<AutoLoader>'s AUTOLOAD Subroutine
+
+=item Overriding B<AutoLoader>'s AUTOLOAD Subroutine
 
 =item Package Lexicals
 
-=item AutoLoader vs. SelfLoader
+=item B<AutoLoader> vs. B<SelfLoader>
 
 =back
 
-=item CAVEAT
+=item CAVEATS
+
+=item SEE ALSO
 
 =head2 AutoSplit - split a package for autoloading
 
@@ -4087,9 +4093,27 @@ functions
 
 =item USAGE
 
+=item CAVEATS
+
 =item BUGS
 
 =item AUTHORS
+
+=head2 Math::Trig - trigonometric functions
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item TRIGONOMETRIC FUNCTIONS
+
+=over
+
+=item SIMPLE ARGUMENTS, COMPLEX RESULTS
+
+=back
+
+=item ANGLE CONVERSIONS
 
 =head2 NDBM_File - Tied access to ndbm files
 

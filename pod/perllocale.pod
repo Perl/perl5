@@ -46,7 +46,7 @@ B<Definitions for the locales which you use must be installed>.  You, or
 your system administrator, must make sure that this is the case. The
 available locales, the location in which they are kept, and the manner
 in which they are installed, vary from system to system.  Some systems
-provide only a few, hardwired, locales, and do not allow more to be
+provide only a few, hard-wired, locales, and do not allow more to be
 added; others allow you to add "canned" locales provided by the system
 supplier; still others allow you or the system administrator to define
 and add arbitrary locales.  (You may have to ask your supplier to

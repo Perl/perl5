@@ -80,13 +80,13 @@ beginning of the string, the "$" character at only the end (or before the
 newline at the end) and Perl does certain optimizations with the
 assumption that the string contains only one line.  Embedded newlines
 will not be matched by "^" or "$".  You may, however, wish to treat a
-string as a multiline buffer, such that the "^" will match after any
+string as a multi-line buffer, such that the "^" will match after any
 newline within the string, and "$" will match before any newline.  At the
 cost of a little more overhead, you can do this by using the /m modifier
 on the pattern match operator.  (Older programs did this by setting C<$*>,
 but this practice is now deprecated.)
 
-To facilitate multiline substitutions, the "." character never matches a
+To facilitate multi-line substitutions, the "." character never matches a
 newline unless you use the C</s> modifier, which in effect tells Perl to pretend
 the string is a single line--even if it isn't.  The C</s> modifier also
 overrides the setting of C<$*>, in case you have some (badly behaved) older
