@@ -2592,6 +2592,15 @@ are run by hand, they succeed.  We suggest upgrading to at least
 vac version 5.0.1.0, that has been known to compile Perl correctly.
 "lslpp -L|grep vac.C" will tell you the vac version. See README.aix.
 
+=item *
+
+If building threaded Perl, you may get compilation warning from pp_sys.c:
+
+  "pp_sys.c", line 4651.39: 1506-280 (W) Function argument assignment between types "unsigned char*" and "const void*" is not allowed.
+
+This is harmless; it is caused by the getnetbyaddr() and getnetbyaddr_r()
+having slightly different types for their first argument.
+
 =back
 
 =head2 Amiga Perl Invoking Mystery
