@@ -152,7 +152,7 @@ my $X  ;
 my @h ;
 ok(17, $X = tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $DB_RECNO ) ;
 
-ok(18, ((stat($Dfile))[2] & 0777) == ($^O eq 'os2' ? 0666 : 0640)
+ok(18, ((stat($Dfile))[2] & 0777) == (($^O eq 'os2' || $^O eq 'MacOS') ? 0666 : 0640)
 	||  $^O eq 'MSWin32' ||  $^O eq 'NetWare' || $^O eq 'amigaos') ;
 
 #my $l = @h ;
