@@ -14,7 +14,8 @@ B<perl>	S<[ B<-sTtuUWX> ]>
 	S<[ B<-x>[I<dir>] ]>
 	S<[ B<-i>[I<extension>] ]>
 	S<[ B<-e> I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
-	S<[ B<-C [I<number/list>] >]> ]>
+	S<[ B<-A [I<assertions>] >]>
+	S<[ B<-C [I<number/list>] >]>
 
 =head1 DESCRIPTION
 
@@ -252,6 +253,12 @@ If you want to specify any Unicode character, use the hexadecimal
 format: C<-0xHHH...>, where the C<H> are valid hexadecimal digits.
 (This means that you cannot use the C<-x> with a directory name that
 consists of hexadecimal digits.)
+
+=item B<-A [I<assertions>]>
+
+Activates the assertions given after the switch as a comma-separated
+list of assertion names. If no assertion name is given, activates all
+assertions. See L<assertions>.
 
 =item B<-a>
 
