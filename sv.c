@@ -2207,12 +2207,12 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     }
     if (SvNOKp(sv)) {			/* See note in sv_2uv() */
 	/* XXXX 64-bit?  IV may have better precision... */
-	/* I tried changing this for to be 64-bit-aware and
+	/* I tried changing this to be 64-bit-aware and
 	 * the t/op/numconvert.t became very, very, angry.
 	 * --jhi Sep 1999 */
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
-	SvGROW(sv, 28);
+	SvGROW(sv, NV_DIG + 1);
 	s = SvPVX(sv);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
 #ifdef apollo
