@@ -1013,6 +1013,8 @@ sub maybe_local {
 	and not $self->{'avoid_local'}{$$op}) {
 	my $our_local = ($op->private & OPpLVAL_INTRO) ? "local" : "our";
 	if( $our_local eq 'our' ) {
+	    # XXX This assertion fails code with non-ASCII identifiers,
+	    # like ./ext/Encode/t/jperl.t
 	    die "Unexpected our($text)\n" unless $text =~ /^\W(\w+::)*\w+\z/;
 	    $text =~ s/(\w+::)+//;
 	}
@@ -2514,8 +2516,13 @@ sub loop_common {
 	} elsif ($var->name eq "gv") {
 	    $var = "\$" . $self->deparse($var, 1);
 	}
-	$head = "foreach $var ($ary) ";
 	$body = $kid->first->first->sibling; # skip OP_AND and OP_ITER
+	if (!is_state $body->first and $body->first->name ne "stub") {
+	    confess unless $var eq '$_';
+	    $body = $body->first;
+	    return $self->deparse($body, 2) . " foreach ($ary)";
+	}
+	$head = "foreach $var ($ary) ";
     } elsif ($kid->name eq "null") { # while/until
 	$kid = $kid->first;
 	my $name = {"and" => "while", "or" => "until"}->{$kid->name};
