@@ -1557,7 +1557,7 @@ t/op/regexp.t		See if regular expressions work
 t/op/regexp_noamp.t	See if regular expressions work with optimizations
 t/op/regmesg.t		See if one can get regular expression errors
 t/op/repeat.t		See if x operator works
-t/op/reverset.t		See if reverse operator works
+t/op/reverse.t		See if reverse operator works
 t/op/runlevel.t		See if die() works from perl_call_*()
 t/op/sleep.t		See if sleep works
 t/op/sort.t		See if sort works
