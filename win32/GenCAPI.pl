@@ -377,7 +377,6 @@ opsave
 eval_mutex
 orslen
 ofmt
-mh
 modcount
 generation
 DBcv
@@ -385,7 +384,7 @@ archpat_auto
 sortcxix
 lastgotoprobe
 regdummy
-regparse
+regcomp_parse
 regxend
 regcode
 regnaughty
@@ -396,7 +395,7 @@ regsize
 regflags
 regseen
 seen_zerolen
-rx
+regcomp_rx
 extralen
 colorset
 colors

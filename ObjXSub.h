@@ -315,8 +315,6 @@
 #define maxsysfd		pPerl->Perl_maxsysfd
 #undef  mess_sv
 #define mess_sv			pPerl->Perl_mess_sv
-#undef  mh
-#define mh			pPerl->Perl_mh
 #undef  min_intro_pending
 #define min_intro_pending	pPerl->Perl_min_intro_pending
 #undef  minus_F
@@ -473,8 +471,8 @@
 #define regnaughty		pPerl->Perl_regnaughty
 #undef  regnpar
 #define regnpar			pPerl->Perl_regnpar
-#undef  regparse
-#define regparse		pPerl->Perl_regparse
+#undef  regcomp_parse
+#define regcomp_parse		pPerl->Perl_regcomp_parse
 #undef  regprecomp
 #define regprecomp		pPerl->Perl_regprecomp
 #undef  regprev
@@ -511,8 +509,8 @@
 #define rsfp_filters		pPerl->Perl_rsfp_filters
 #undef  runops
 #define runops			pPerl->Perl_runops
-#undef  rx
-#define rx			pPerl->Perl_rx
+#undef  regcomp_rx
+#define regcomp_rx		pPerl->Perl_regcomp_rx
 #undef  savestack
 #define savestack		pPerl->Perl_savestack
 #undef  savestack_ix

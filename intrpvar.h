@@ -161,14 +161,13 @@ PERLVAR(Isys_intern,	struct interp_intern)		/* platform internals */
 #endif
 
 /* more statics moved here */
-PERLVAR(Imh,		HE)		/* from hv.c */
 PERLVARI(Igeneration,	int,	100)	/* from op.c */
 PERLVAR(IDBcv,		CV *)		/* from perl.c */
 PERLVAR(Iarchpat_auto,	char*)		/* from perl.c */
 PERLVAR(Isortcxix,	I32)		/* from pp_ctl.c */
 PERLVAR(Ilastgotoprobe,	OP*)		/* from pp_ctl.c */
 PERLVAR(Iregdummy,	regnode)	/* from regcomp.c */
-PERLVAR(Iregparse,	char*)		/* Input-scan pointer. */
+PERLVAR(Iregcomp_parse,	char*)		/* Input-scan pointer. */
 PERLVAR(Iregxend,	char*)		/* End of input for compile */
 PERLVAR(Iregcode,	regnode*)	/* Code-emit pointer; &regdummy = don't. */
 PERLVAR(Iregnaughty,	I32)		/* How bad is this pattern? */
@@ -182,7 +181,7 @@ PERLVAR(Iregflags,	U16)		/* are we folding, multilining? */
 
 PERLVAR(Iregseen,	U32)		/* from regcomp.c */
 PERLVAR(Iseen_zerolen,	I32)		/* from regcomp.c */
-PERLVAR(Irx,		regexp *)	/* from regcomp.c */
+PERLVAR(Iregcomp_rx,	regexp *)	/* from regcomp.c */
 PERLVAR(Iextralen,	I32)		/* from regcomp.c */
 #ifdef DEBUGGING
 PERLVAR(Icolorset,	int)		/* from regcomp.c */
