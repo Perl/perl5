@@ -1317,6 +1317,8 @@ You can also insert hooks into the file inclusion system by putting Perl
 code directly into @INC.  Those hooks may be subroutine references, array
 references or blessed objects.  See L<perlfunc/require> for details.
 
+=item @ARG
+
 =item @_
 
 Within a subroutine the array @_ contains the parameters passed to that
