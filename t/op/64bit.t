@@ -11,7 +11,7 @@ BEGIN {
 # Nota bene: bit operations are not 64-bit clean.  See the beginning
 # of pp.c and the explanation next to IBW/UBW.
 
-print "1..27\n";
+print "1..30\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
@@ -113,22 +113,35 @@ print "not " unless $x == $q && $x eq $q;
 print "ok 22\n";
 
 
+$x = sprintf("%D", $q);
+print "not " unless $x == $q && $x eq $q;
+print "ok 23\n";
+
+$x = sprintf("%U", $q);
+print "not " unless $x == $q && $x eq $q;
+print "ok 24\n";
+
+$x = sprintf("%O", $q);
+print "not " unless oct($x) == $q;
+print "ok 25\n";
+
+
 $x = $q + $r;
 print "not " unless $x == 35802467913;
-print "ok 23\n";
+print "ok 26\n";
 
 $x = $q - $r;
 print "not " unless $x == -11111110111;
-print "ok 24\n";
+print "ok 27\n";
 
 $x = $q * $r;
 print "not " unless $x == 289589985190657035812;
-print "ok 25\n";
+print "ok 28\n";
 
 $x /= $r;
 print "not " unless $x == $q;
-print "ok 26\n";
+print "ok 29\n";
 
 $x = 98765432109 % 12345678901;
 print "not " unless $x == 901;
-print "ok 27\n";
+print "ok 30\n";

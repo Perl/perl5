@@ -4925,7 +4925,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto integer;
 
 	case 'D':
+#ifdef IV_IS_QUAD
+	    /* nothing */
+#else
 	    intsize = 'l';
+#endif
 	    /* FALL THROUGH */
 	case 'd':
 	case 'i':
@@ -4973,7 +4977,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto integer;
 
 	case 'U':
+#ifdef IV_IS_QUAD
+	    /* nothing */
+#else
 	    intsize = 'l';
+#endif
 	    /* FALL THROUGH */
 	case 'u':
 	    base = 10;
@@ -4984,7 +4992,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto uns_integer;
 
 	case 'O':
+#ifdef IV_IS_QUAD
+	    /* nothing */
+#else
 	    intsize = 'l';
+#endif
 	    /* FALL THROUGH */
 	case 'o':
 	    base = 8;
