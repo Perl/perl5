@@ -624,21 +624,6 @@ The accessors methods Re, Im, arg, abs, rho, theta, methods can
 
 =item Math::Trig
 
-=item Fcntl
-
-More Fcntl constants added: F_SETLK64, F_SETLKW64, O_LARGEFILE for
-large (more than 4G) file access (the 64-bit support is not yet
-working, though, so no need to get overly excited), Free/Net/OpenBSD
-locking behaviour flags F_FLOCK, F_POSIX, Linux F_SHLCK, and
-O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
-
-=item Math::Complex
-
-The accessors methods Re, Im, arg, abs, rho, theta, methods can
-($z->Re()) now also act as mutators ($z->Re(3)).
-
-=item Math::Trig
-
 A little bit of radial trigonometry (cylindrical and spherical) added,
 for example the great circle distance.
 
