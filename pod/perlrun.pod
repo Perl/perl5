@@ -961,7 +961,7 @@ C<:perlio> will insert a C<:unix> layer below itself to do low level IO.
 
 Applying the <:raw> layer is equivalent to calling C<binmode($fh)>.
 It makes the stream pass each byte as-is without any translation.
-In particular CRLF translation, and/or :utf8 inuited from locale
+In particular CRLF translation, and/or :utf8 intuited from locale
 are disabled.
 
 Arranges for all accesses go straight to the lowest buffered layer provided
