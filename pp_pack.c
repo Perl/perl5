@@ -2107,7 +2107,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    }
 	    if ((I32)fromlen >= len) {
 		sv_catpvn(cat, aptr, len);
-		if (datumtype == 'Z')
+		if (datumtype == 'Z' && len > 0)
 		    *(SvEND(cat)-1) = '\0';
 	    }
 	    else {

@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 13863;
+plan tests => 13864;
 
 use strict;
 use warnings;
@@ -1517,4 +1517,10 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(join(',', unpack("aC/CU",   "b\0\341\277\274")), 'b,225');
     is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,8188');
     is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,8188');
+}
+
+{
+    # "Z0" (bug #34062)
+    my (@x) = unpack("C*", pack("CZ0", 1, "b"));
+    is(join(',', @x), '1', 'pack Z0 doesn\'t destroy the character before');
 }
