@@ -3616,7 +3616,7 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
 	SvPOK_off(sv);
 	New(0, buf, MAXPATHLEN, char);
 	if (buf) {
-	    buf[MAXPATHLEN] = 0;
+	    buf[MAXPATHLEN - 1] = 0;
 	    /* Yes, some getcwd()s automatically allocate a buffer
 	     * if given a NULL one.  Portability is the problem.
 	     * XXX Configure probe needed. */
