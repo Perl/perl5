@@ -56,6 +56,7 @@ void* Perl_thread_run(void * arg) {
 	}
 
 	MUTEX_LOCK(&thread->mutex);
+	PerlIO_flush((PerlIO*)NULL);
  	perl_destruct(thread->interp);	
 	perl_free(thread->interp);
 	if(thread->detached == 1) {
