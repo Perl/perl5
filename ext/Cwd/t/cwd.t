@@ -91,7 +91,7 @@ SKIP: {
 
 my $Top_Test_Dir = '_ptrslt_';
 my $Test_Dir     = File::Spec->catdir($Top_Test_Dir, qw/_path_ _to_ _a_ _dir_/);
-my $want = quotemeta File::Spec->catdir('t', $Test_Dir);
+my $want = quotemeta File::Spec->rel2abs($Test_Dir);
 
 mkpath([$Test_Dir], 0, 0777);
 Cwd::chdir $Test_Dir;
@@ -99,11 +99,11 @@ Cwd::chdir $Test_Dir;
 foreach my $func (qw(cwd getcwd fastcwd fastgetcwd)) {
   my $result = eval "$func()";
   is $@, '';
-  like( File::Spec->canonpath($result), qr|$want$|, "$func()" );
+  like( File::Spec->canonpath($result), qr|$want$|i, "$func()" );
 }
 
 # Cwd::chdir should also update $ENV{PWD}
-like(File::Spec->canonpath($ENV{PWD}), qr|$want$|,      'Cwd::chdir() updates $ENV{PWD}');
+like(File::Spec->canonpath($ENV{PWD}), qr|$want$|i,      'Cwd::chdir() updates $ENV{PWD}');
 my $updir = File::Spec->updir;
 Cwd::chdir $updir;
 print "#$ENV{PWD}\n";
