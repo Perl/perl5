@@ -15,6 +15,7 @@ use Socket;
 use Test::More;
 use strict;
 use warnings;
+use Errno 'EPIPE';
 
 my $skip_reason;
 
@@ -30,7 +31,7 @@ if( !$Config{d_alarm} ) {
     if ($@ =~ /^Your vendor has not defined Socket macro AF_UNIX/) {
       plan skip_all => 'No AF_UNIX';
     } else {
-      plan tests => 42;
+      plan tests => 44;
     }
   }
 }
@@ -42,7 +43,7 @@ alarm(60);
 
 ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_STREAM, PF_UNSPEC),
     "socketpair (LEFT, RIGHT, AF_UNIX, SOCK_STREAM, PF_UNSPEC)")
-  or print "# \$\! = $!";
+  or print "# \$\! = $!\n";
 
 my @left = ("hello ", "world\n");
 my @right = ("perl ", "rules!"); # Not like I'm trying to bias any survey here.
@@ -65,9 +66,28 @@ $expect = join '', @left;
 is (read (RIGHT, $buffer, length $expect), length $expect, "read on right");
 is ($buffer, $expect, "content what we expected?");
 
-ok (shutdown(LEFT, 1), "shutdown left for writing");
+ok (shutdown(LEFT, SHUT_WR), "shutdown left for writing");
 # This will hang forever if eof is buggy.
-ok (eof RIGHT, "right is at EOF");
+{
+  local $SIG{ALRM} = sub { warn "EOF on right took over 3 seconds" };
+  alarm 3;
+  ok (eof RIGHT, "right is at EOF");
+  alarm 60;
+}
+
+$SIG{PIPE} = 'IGNORE';
+{
+  local $SIG{ALRM}
+    = sub { warn "syswrite to left didn't fail within 3 seconds" };
+  alarm 3;
+  is (syswrite (LEFT, "void"), undef, "syswrite to shutdown left should fail");
+  alarm 60;
+}
+SKIP: {
+  # This may need skipping on some OSes
+  ok ($! == EPIPE, '$! should be EPIPE')
+    or printf "\$\!=%d(%s)\n", $!, $!;
+}
 
 my @gripping = (chr 255, chr 127);
 foreach (@gripping) {
@@ -89,7 +109,7 @@ ok (close RIGHT, "close right");
 
 ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC),
     "socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC)")
-  or print "# \$\! = $!";
+  or print "# \$\! = $!\n";
 
 foreach (@left) {
   # is (syswrite (LEFT, $_), length $_, "write " . _qq ($_) . " to left");
