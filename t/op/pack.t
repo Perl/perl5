@@ -556,7 +556,9 @@ ok ("@{[unpack('U*', pack('U*', 100, 200, 300))]}" eq "100 200 300");
 # is unpack U the reverse of pack U for byte string?
 ok ("@{[unpack('U*', pack('U*', 100, 200))]}" eq "100 200");
 
-if (ord('A') == 65) {
+if (ord('A') == 193) {
+    ok(1, undef, "skipped") for 1..4; # EBCDIC
+} else {
     # does unpack C unravel pack U?
     ok ("@{[unpack('C*', pack('U*', 100, 200))]}" eq "100 195 136");
 
@@ -565,15 +567,13 @@ if (ord('A') == 65) {
 
     # does pack C0U create characters?
     ok ("@{[pack('C0U*', 100, 200)]}" eq pack("C*", 100, 195, 136));
-} else {
-    ok(1, undef, "skipped") for 1..3; # EBCDIC?
-}
 
-# does unpack U0U on byte data warn?
-{
-    local $SIG{__WARN__} = sub { $@ = "@_" };
-    my @null = unpack('U0U', chr(255));
-    ok ($@ =~ /^Malformed UTF-8 character /, undef, $@);
+    # does unpack U0U on byte data warn?
+    {
+        local $SIG{__WARN__} = sub { $@ = "@_" };
+        my @null = unpack('U0U', chr(255));
+        ok ($@ =~ /^Malformed UTF-8 character /, undef, $@);
+    }
 }
 
 {
