@@ -40,7 +40,7 @@ sub hostname {
 
     # method 2 - no sockets ==> return DECnet node name
     eval {local $SIG{'__DIE__'};
-          my($test) = gethostbyname('me')}; # returns 'me' on most systems
+          ($host) = gethostbyname('me')}; # returns 'me' on most systems
     if ($@) { return $host = $ENV{'SYS$NODE'}; }
 
     # method 3 - has someone else done the job already?  It's common for the
