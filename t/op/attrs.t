@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 37;
+plan tests => 39;
 
 $SIG{__WARN__} = sub { die @_ };
 
@@ -49,6 +49,12 @@ eval_ok 'my ($x,$y) : ;';
 
 eval 'my ($x,$y) : plugh;';
 like $@, qr/^Invalid SCALAR attribute: ["']?plugh["']? at/;
+
+# bug #16080
+eval '{my $x : plugh}';
+like $@, qr/^Invalid SCALAR attribute: ["']?plugh["']? at/;
+eval '{my ($x,$y) : plugh(})}';
+like $@, qr/^Invalid SCALAR attribute: ["']?plugh\(}\)["']? at/;
 
 sub A::MODIFY_SCALAR_ATTRIBUTES { return }
 eval 'my A $x : plugh;';

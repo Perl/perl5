@@ -3049,7 +3049,7 @@ Perl_yylex(pTHX)
 		    break;	/* require real whitespace or :'s */
 	    }
 	    tmp = (PL_expect == XOPERATOR ? '=' : '{'); /*'}(' for vi */
-	    if (*s != ';' && *s != tmp && (tmp != '=' || *s != ')')) {
+	    if (*s != ';' && *s != '}' && *s != tmp && (tmp != '=' || *s != ')')) {
 		char q = ((*s == '\'') ? '"' : '\'');
 		/* If here for an expression, and parsed no attrs, back off. */
 		if (tmp == '=' && !attrs) {
