@@ -44,8 +44,7 @@ main(int argc, char **argv, char **env)
     char *ptr;
 
     GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
-    (void)GetFullPathName(szModuleName, sizeof(szModuleName),
-			  szModuleName, &ptr);
+    (void)win32_longpath(szModuleName);
     argv[0] = szModuleName;
 #endif
 
@@ -93,8 +92,7 @@ main(int argc, char **argv, char **env)
     char *ptr;
 
     GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
-    (void)GetFullPathName(szModuleName, sizeof(szModuleName),
-			  szModuleName, &ptr);
+    (void)win32_longpath(szModuleName);
     argv[0] = szModuleName;
 #endif
     return RunPerl(argc, argv, env, (void*)0);

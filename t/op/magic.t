@@ -120,8 +120,9 @@ ok 18, $$ > 0, $$;
     $script = "$wd/show-shebang";
     if ($Is_MSWin32) {
 	chomp($wd = `cd`);
-	$perl = "$wd\\perl.exe";
-	$script = "$wd\\show-shebang.bat";
+	$wd =~ s|\\|/|g;
+	$perl = "$wd/perl.exe";
+	$script = "$wd/show-shebang.bat";
 	$headmaybe = <<EOH ;
 \@rem ='
 \@echo off
