@@ -51,17 +51,22 @@ sub output_tables {
     print "unsigned char size_${arrayname}[", scalar @$array, "] = {\n";
     my @lines;
     foreach (@$array) {
-	# There is an assumption here that the last entry isn't conditonal
+	# Remove the assumption here that the last entry isn't conditonal
 	if (ref $_) {
-	    push @lines, "#if $_->[0]", "  $_->[1]", "#else", "  0,", "#endif";
+	    push @lines,
+	      ["#if $_->[0]", "  $_->[1]", "#else", "  0,", "#endif"];
 	} else {
 	    push @lines, $_ ? "  $_" : "  0,";
 	}
     }
     # remove the last, annoying, comma
-    die "Last entry was a conditional: '$lines[$#lines]'"
-	unless $lines[$#lines] =~ s/,$//;
-    print "$_\n" foreach @lines;
+    my $last = $lines[$#lines];
+    my $got;
+    foreach (ref $last ? @$last : $last) {
+      $got += s/,$//;
+    }
+    die "Last entry had no commas" unless $got;
+    print map {"$_\n"} ref $_ ? @$_ : $_ foreach @lines;
     print "};\n";
     $earliest{$arrayname} = $earliest;
   }
@@ -105,8 +110,8 @@ S!			unsigned short
 v			=SIZE16
 n			=SIZE16
 S			=SIZE16
-v!			=SIZE16
-n!			=SIZE16
+v!			=SIZE16	PERL_PACK_CAN_SHRIEKSIGN
+n!			=SIZE16	PERL_PACK_CAN_SHRIEKSIGN
 i			int
 i!			int
 I			unsigned int
@@ -118,8 +123,8 @@ l			=SIZE32
 L!			unsigned long
 V			=SIZE32
 N			=SIZE32
-V!			=SIZE32
-N!			=SIZE32
+V!			=SIZE32	PERL_PACK_CAN_SHRIEKSIGN
+N!			=SIZE32	PERL_PACK_CAN_SHRIEKSIGN
 L			=SIZE32
 p	*	*	char *
 w		*	char

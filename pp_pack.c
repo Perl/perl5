@@ -31,6 +31,11 @@
 #define PERL_IN_PP_PACK_C
 #include "perl.h"
 
+#if PERL_VERSION >= 9
+#define PERL_PACK_CAN_BYTEORDER
+#define PERL_PACK_CAN_SHRIEKSIGN
+#endif
+
 /*
  * Offset for integer pack/unpack.
  *
@@ -135,14 +140,39 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #define TYPE_IS_BIG_ENDIAN	0x200
 #define TYPE_IS_LITTLE_ENDIAN	0x400
 #define TYPE_ENDIANNESS_MASK	(TYPE_IS_BIG_ENDIAN|TYPE_IS_LITTLE_ENDIAN)
-#define TYPE_ENDIANNESS(t)	((t) & TYPE_ENDIANNESS_MASK)
-#define TYPE_NO_ENDIANNESS(t)	((t) & ~TYPE_ENDIANNESS_MASK)
 #define TYPE_MODIFIERS(t)	((t) & ~0xFF)
 #define TYPE_NO_MODIFIERS(t)	((t) & 0xFF)
 
-#define ENDIANNESS_ALLOWED_TYPES   "sSiIlLqQjJfFdDpP("
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
+#define SHRIEKING_ALLOWED_TYPES "sSiIlLxXnNvV"
+#else
+#define SHRIEKING_ALLOWED_TYPES "sSiIlLxX"
+#endif
 
-#define DO_BO_UNPACK(var, type)                                               \
+#ifndef PERL_PACK_CAN_BYTEORDER
+/* Put "can't" first because it is shorter  */
+# define TYPE_ENDIANNESS(t)	0
+# define TYPE_NO_ENDIANNESS(t)	(t)
+
+# define ENDIANNESS_ALLOWED_TYPES   ""
+
+# define DO_BO_UNPACK(var, type)
+# define DO_BO_PACK(var, type)
+# define DO_BO_UNPACK_PTR(var, type, pre_cast)
+# define DO_BO_PACK_PTR(var, type, pre_cast)
+# define DO_BO_UNPACK_N(var, type)
+# define DO_BO_PACK_N(var, type)
+# define DO_BO_UNPACK_P(var)
+# define DO_BO_PACK_P(var)
+
+#else
+
+# define TYPE_ENDIANNESS(t)	((t) & TYPE_ENDIANNESS_MASK)
+# define TYPE_NO_ENDIANNESS(t)	((t) & ~TYPE_ENDIANNESS_MASK)
+
+# define ENDIANNESS_ALLOWED_TYPES   "sSiIlLqQjJfFdDpP("
+
+# define DO_BO_UNPACK(var, type)                                              \
         STMT_START {                                                          \
           switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:    var = my_betoh ## type (var); break;  \
@@ -151,7 +181,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
           }                                                                   \
         } STMT_END
 
-#define DO_BO_PACK(var, type)                                                 \
+# define DO_BO_PACK(var, type)                                                \
         STMT_START {                                                          \
           switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:    var = my_htobe ## type (var); break;  \
@@ -160,7 +190,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
           }                                                                   \
         } STMT_END
 
-#define DO_BO_UNPACK_PTR(var, type, pre_cast)                                 \
+# define DO_BO_UNPACK_PTR(var, type, pre_cast)                                \
         STMT_START {                                                          \
           switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:                                          \
@@ -174,7 +204,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
           }                                                                   \
         } STMT_END
 
-#define DO_BO_PACK_PTR(var, type, pre_cast)                                   \
+# define DO_BO_PACK_PTR(var, type, pre_cast)                                  \
         STMT_START {                                                          \
           switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:                                          \
@@ -188,7 +218,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
           }                                                                   \
         } STMT_END
 
-#define BO_CANT_DOIT(action, type)                                            \
+# define BO_CANT_DOIT(action, type)                                           \
         STMT_START {                                                          \
           switch (TYPE_ENDIANNESS(datumtype)) {                               \
              case TYPE_IS_BIG_ENDIAN:                                         \
@@ -204,20 +234,20 @@ S_mul128(pTHX_ SV *sv, U8 m)
            }                                                                  \
          } STMT_END
 
-#if PTRSIZE == INTSIZE
-# define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, i, int)
-# define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, i, int)
-#elif PTRSIZE == LONGSIZE
-# define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, l, long)
-# define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, long)
-#else
-# define DO_BO_UNPACK_P(var)	BO_CANT_DOIT(unpack, pointer)
-# define DO_BO_PACK_P(var)	BO_CANT_DOIT(pack, pointer)
-#endif
+# if PTRSIZE == INTSIZE
+#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, i, int)
+#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, i, int)
+# elif PTRSIZE == LONGSIZE
+#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, l, long)
+#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, long)
+# else
+#  define DO_BO_UNPACK_P(var)	BO_CANT_DOIT(unpack, pointer)
+#  define DO_BO_PACK_P(var)	BO_CANT_DOIT(pack, pointer)
+# endif
 
-#if defined(my_htolen) && defined(my_letohn) && \
+# if defined(my_htolen) && defined(my_letohn) && \
     defined(my_htoben) && defined(my_betohn)
-# define DO_BO_UNPACK_N(var, type)                                            \
+#  define DO_BO_UNPACK_N(var, type)                                           \
          STMT_START {                                                         \
            switch (TYPE_ENDIANNESS(datumtype)) {                              \
              case TYPE_IS_BIG_ENDIAN:    my_betohn(&var, sizeof(type)); break;\
@@ -226,7 +256,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
            }                                                                  \
          } STMT_END
 
-# define DO_BO_PACK_N(var, type)                                              \
+#  define DO_BO_PACK_N(var, type)                                             \
          STMT_START {                                                         \
            switch (TYPE_ENDIANNESS(datumtype)) {                              \
              case TYPE_IS_BIG_ENDIAN:    my_htoben(&var, sizeof(type)); break;\
@@ -234,9 +264,11 @@ S_mul128(pTHX_ SV *sv, U8 m)
              default: break;                                                  \
            }                                                                  \
          } STMT_END
-#else
-# define DO_BO_UNPACK_N(var, type)	BO_CANT_DOIT(unpack, type)
-# define DO_BO_PACK_N(var, type)	BO_CANT_DOIT(pack, type)
+# else
+#  define DO_BO_UNPACK_N(var, type)	BO_CANT_DOIT(unpack, type)
+#  define DO_BO_PACK_N(var, type)	BO_CANT_DOIT(pack, type)
+# endif
+
 #endif
 
 #define PACK_SIZE_CANNOT_CSUM		0x80
@@ -307,28 +339,44 @@ unsigned char size_normal[53] = {
   /* s */ SIZE16,
   0, 0,
   /* v */ SIZE16,
-  /* w */ sizeof(char) | PACK_SIZE_CANNOT_CSUM
+  /* w */ sizeof(char) | PACK_SIZE_CANNOT_CSUM,
 };
 unsigned char size_shrieking[46] = {
   /* I */ sizeof(unsigned int),
   0, 0,
   /* L */ sizeof(unsigned long),
   0,
+#if defined(PERL_PACK_CAN_SHRIEKSIGN)
   /* N */ SIZE32,
+#else
+  0,
+#endif
   0, 0, 0, 0,
   /* S */ sizeof(unsigned short),
   0, 0,
+#if defined(PERL_PACK_CAN_SHRIEKSIGN)
   /* V */ SIZE32,
+#else
+  0,
+#endif
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   /* i */ sizeof(int),
   0, 0,
   /* l */ sizeof(long),
   0,
+#if defined(PERL_PACK_CAN_SHRIEKSIGN)
   /* n */ SIZE16,
+#else
+  0,
+#endif
   0, 0, 0, 0,
   /* s */ sizeof(short),
   0, 0,
+#if defined(PERL_PACK_CAN_SHRIEKSIGN)
   /* v */ SIZE16
+#else
+  0
+#endif
 };
 struct packsize_t packsize[2] = {
   {size_normal, 67, 53},
@@ -389,29 +437,45 @@ unsigned char size_normal[99] = {
   /* S */ SIZE16,
   0,
   /* U */ sizeof(char),
-  /* V */ SIZE32
+  /* V */ SIZE32,
 };
 unsigned char size_shrieking[93] = {
   /* i */ sizeof(int),
   0, 0, 0, 0, 0, 0, 0, 0, 0,
   /* l */ sizeof(long),
   0,
+#if defined(PERL_PACK_CAN_SHRIEKSIGN)
   /* n */ SIZE16,
+#else
+  0,
+#endif
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   /* s */ sizeof(short),
   0, 0,
+#if defined(PERL_PACK_CAN_SHRIEKSIGN)
   /* v */ SIZE16,
+#else
+  0,
+#endif
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0,
   /* I */ sizeof(unsigned int),
   0, 0, 0, 0, 0, 0, 0, 0, 0,
   /* L */ sizeof(unsigned long),
   0,
+#if defined(PERL_PACK_CAN_SHRIEKSIGN)
   /* N */ SIZE32,
+#else
+  0,
+#endif
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   /* S */ sizeof(unsigned short),
   0, 0,
+#if defined(PERL_PACK_CAN_SHRIEKSIGN)
   /* V */ SIZE32
+#else
+  0
+#endif
 };
 struct packsize_t packsize[2] = {
   {size_normal, 131, 99},
@@ -641,8 +705,9 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
         switch (*patptr) {
           case '!':
             modifier = TYPE_IS_SHRIEKING;
-            allowed = "sSiIlLxXnNvV";
+            allowed = SHRIEKING_ALLOWED_TYPES;
             break;
+#ifdef PERL_PACK_CAN_BYTEORDER
           case '>':
             modifier = TYPE_IS_BIG_ENDIAN;
             allowed = ENDIANNESS_ALLOWED_TYPES;
@@ -651,6 +716,7 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
             modifier = TYPE_IS_LITTLE_ENDIAN;
             allowed = ENDIANNESS_ALLOWED_TYPES;
             break;
+#endif
           default:
             break;
         }
@@ -1217,6 +1283,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    cuv += au16;
 	    }
 	    break;
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'v' | TYPE_IS_SHRIEKING:
 	case 'n' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
@@ -1239,6 +1306,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    cuv += ai16;
 	    }
 	    break;
+#endif
 	case 'i':
 	case 'i' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
@@ -1387,6 +1455,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		     cuv += au32;
 	    }
 	    break;
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'V' | TYPE_IS_SHRIEKING:
 	case 'N' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
@@ -1409,6 +1478,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    cuv += ai32;
 	    }
 	    break;
+#endif
 	case 'p':
 	    while (len-- > 0) {
 		assert (sizeof(char*) <= strend - s);
@@ -2278,7 +2348,9 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	    }
 	    break;
 #endif
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'n' | TYPE_IS_SHRIEKING:
+#endif
 	case 'n':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -2289,7 +2361,9 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		CAT16(cat, &ai16);
 	    }
 	    break;
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'v' | TYPE_IS_SHRIEKING:
+#endif
 	case 'v':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -2494,7 +2568,9 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		sv_catpvn(cat, (char*)&aint, sizeof(int));
 	    }
 	    break;
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'N' | TYPE_IS_SHRIEKING:
+#endif
 	case 'N':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -2505,7 +2581,9 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		CAT32(cat, &au32);
 	    }
 	    break;
+#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'V' | TYPE_IS_SHRIEKING:
+#endif
 	case 'V':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
