@@ -41,7 +41,7 @@ sed -e $SDBMX -e $SDBHASH t/lib/gdbm.t >s; mv -f s t/lib/gdbm.t
 sed -e $SDBMX -e $SDBHASH t/lib/sdbm.t >s; mv -f s t/lib/sdbm.t
 sed -e $SSTAT -e $STMP2 t/op/stat.t >s; mv -f s t/op/stat.t
 sed -e $SLIST x2p/Makefile.SH |tr -d '\r' >s; mv -f s x2p/Makefile.SH
-sed -e 's=^#define.\([A-Z]\+\)_EXP.*$=#define \1_EXP djgpp_pathexp("\1")=g' config_h.SH >s; mv -f s config_h.SH
+#sed -e 's=^#define.\([A-Z]\+\)_EXP.*$=#define \1_EXP djgpp_pathexp("\1")=g' config_h.SH >s; mv -f s config_h.SH
 sed -e 's=:^/:={^([a-z]:)?[\\\\/]}=g' lib/termcap.pl >s; mv -f s lib/termcap.pl
 sed -e $SPACKLIST installman >s; mv -f s installman
 sed -e $SPACKLIST lib/ExtUtils/Installed.pm >s; mv -f s lib/ExtUtils/Installed.pm
