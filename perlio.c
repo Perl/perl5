@@ -2187,13 +2187,13 @@ IV
 PerlIOStdio_close(PerlIO *f)
 {
  dTHX;
-#ifdef HAS_SOCKS5_INIT
+#ifdef SOCKS5_VERSION_NAME
  int optval;
  Sock_size_t optlen = sizeof(int);
 #endif
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
  return(
-#ifdef HAS_SOCKS5_INIT
+#ifdef SOCKS5_VERSION_NAME
    (getsockopt(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (void *)&optval, &optlen) < 0) ?
        PerlSIO_fclose(stdio) :
        close(PerlIO_fileno(f))
