@@ -10,12 +10,3 @@
 set X $myuname
 shift
 osvers=$4
-# ConvexOS 10.2 uses POSIX process group semantics for getpgrp but
-# BSD semantics for setpgrp.  Perl assumes you don't have such
-# a mixed system, so we undef d_getpgrp.
-#   Andy Dougherty		doughera@lafcol.lafayette.edu
-#
-if [ "$osvers" -ge 10.2 ]
-then 
-	d_getpgrp='undef' ;;
-fi
