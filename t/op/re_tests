@@ -789,3 +789,4 @@ tt+$	xxxtt	y	-	-
 (abc)?(abc)+	abc	y	$1:$2	:abc	-
 'b\s^'m	a\nb\n	n	-	-
 \ba	a	y	-	-
+^(a(??{"(?!)"})|(a)(?{1}))b	ab	y	$2	a	# [ID 20010811.006]

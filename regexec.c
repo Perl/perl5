@@ -2625,6 +2625,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    /* XXXX This is too dramatic a measure... */
 		    PL_reg_maxiter = 0;
 
+		    logical = 0;
 		    sayNO;
 		}
 		sw = SvTRUE(ret);
