@@ -1333,6 +1333,9 @@ PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 PERL_CALLCONV void	Perl_sv_copypv(pTHX_ SV* dsv, SV* ssv);
 PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value);
 PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
+#ifdef PERL_COPY_ON_WRITE
+PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dsv, SV* ssv);
+#endif
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 PERL_CALLCONV int	Perl_PerlIO_close(pTHX_ PerlIO *);

@@ -1367,8 +1367,26 @@ yup:					/* Confirmed by INTUIT */
     }
     if (PL_sawampersand) {
 	I32 off;
+#ifdef PERL_COPY_ON_WRITE
+	if (SvIsCOW(TARG) || (SvFLAGS(TARG) & CAN_COW_MASK) == CAN_COW_FLAGS) {
+	    if (DEBUG_C_TEST) {
+		PerlIO_printf(Perl_debug_log,
+			      "Copy on write: pp_match $& capture, type %d, truebase=%p, t=%p, difference %d\n",
+			      (int) SvTYPE(TARG), truebase, t,
+			      (int)(t-truebase));
+	    }
+	    rx->saved_copy = sv_setsv_cow(rx->saved_copy, TARG);
+	    rx->subbeg = SvPVX(rx->saved_copy) + (t - truebase);
+	    assert (SvPOKp(rx->saved_copy));
+	} else
+#endif
+	{
 
-	rx->subbeg = savepvn(t, strend - t);
+	    rx->subbeg = savepvn(t, strend - t);
+#ifdef PERL_COPY_ON_WRITE
+	    rx->saved_copy = Nullsv;
+#endif
+	}
 	rx->sublen = strend - t;
 	RX_MATCH_COPIED_on(rx);
 	off = rx->startp[0] = s - t;
@@ -1880,6 +1898,9 @@ PP(pp_subst)
     I32 oldsave = PL_savestack_ix;
     STRLEN slen;
     bool doutf8 = FALSE;
+#ifdef PERL_COPY_ON_WRITE
+    bool is_cow;
+#endif
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
@@ -1890,11 +1911,21 @@ PP(pp_subst)
 	EXTEND(SP,1);
     }
 
+#ifdef PERL_COPY_ON_WRITE
+    /* Awooga. Awooga. "bool" types that are actually char are dangerous,
+       because they make integers such as 256 "false".  */
+    is_cow = SvIsCOW(TARG) ? TRUE : FALSE;
+#else
     if (SvIsCOW(TARG))
 	sv_force_normal_flags(TARG,0);
-    if (SvREADONLY(TARG)
+#endif
+    if (
+#ifdef PERL_COPY_ON_WRITE
+	!is_cow &&
+#endif
+	(SvREADONLY(TARG)
 	|| (SvTYPE(TARG) > SVt_PVLV
-	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG))))
+	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
 	DIE(aTHX_ PL_no_modify);
     PUTBACK;
 
@@ -1924,7 +1955,7 @@ PP(pp_subst)
 	rx = PM_GETRE(pm);
     }
     r_flags = (rx->nparens || SvTEMP(TARG) || PL_sawampersand)
-		? REXEC_COPY_STR : 0;
+	       ? REXEC_COPY_STR : 0;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
@@ -1975,7 +2006,11 @@ PP(pp_subst)
     }
     
     /* can do inplace substitution? */
-    if (c && (I32)clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
+    if (c
+#ifdef PERL_COPY_ON_WRITE
+	&& !is_cow
+#endif
+	&& (I32)clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
 	if (!CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED))
@@ -1985,6 +2020,12 @@ PP(pp_subst)
 	    LEAVE_SCOPE(oldsave);
 	    RETURN;
 	}
+#ifdef PERL_COPY_ON_WRITE
+	if (SvIsCOW(TARG)) {
+	    assert (!force_on_match);
+	    goto have_a_cow;
+	}
+#endif
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
@@ -2086,6 +2127,9 @@ PP(pp_subst)
 	    s = SvPV_force(TARG, len);
 	    goto force_it;
 	}
+#ifdef PERL_COPY_ON_WRITE
+      have_a_cow:
+#endif
 	rxtainted |= RX_MATCH_TAINTED(rx);
 	dstr = NEWSV(25, len);
 	sv_setpvn(dstr, m, s-m);
@@ -2128,9 +2172,21 @@ PP(pp_subst)
 	else
 	    sv_catpvn(dstr, s, strend - s);
 
-	(void)SvOOK_off(TARG);
-	if (SvLEN(TARG))
-	    Safefree(SvPVX(TARG));
+#ifdef PERL_COPY_ON_WRITE
+	/* The match may make the string COW. If so, brilliant, because that's
+	   just saved us one malloc, copy and free - the regexp has donated
+	   the old buffer, and we malloc an entirely new one, rather than the
+	   regexp malloc()ing a buffer and copying our original, only for
+	   us to throw it away here during the substitution.  */
+	if (SvIsCOW(TARG)) {
+	    sv_force_normal_flags(TARG, SV_COW_DROP_PV);
+	} else
+#endif
+	{
+	    (void)SvOOK_off(TARG);
+	    if (SvLEN(TARG))
+		Safefree(SvPVX(TARG));
+	}
 	SvPVX(TARG) = SvPVX(dstr);
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));

@@ -181,9 +181,16 @@ PP(pp_substcont)
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
-	    (void)SvOOK_off(targ);
-	    if (SvLEN(targ))
-		Safefree(SvPVX(targ));
+#ifdef PERL_COPY_ON_WRITE
+	    if (SvIsCOW(targ)) {
+		sv_force_normal_flags(targ, SV_COW_DROP_PV);
+	    } else
+#endif
+	    {
+		(void)SvOOK_off(targ);
+		if (SvLEN(targ))
+		    Safefree(SvPVX(targ));
+	    }
 	    SvPVX(targ) = SvPVX(dstr);
 	    SvCUR_set(targ, SvCUR(dstr));
 	    SvLEN_set(targ, SvLEN(dstr));
@@ -244,7 +251,11 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     U32 i;
 
     if (!p || p[1] < rx->nparens) {
+#ifdef PERL_COPY_ON_WRITE
+	i = 7 + rx->nparens * 2;
+#else
 	i = 6 + rx->nparens * 2;
+#endif
 	if (!p)
 	    New(501, p, i, UV);
 	else
@@ -254,6 +265,11 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 
     *p++ = PTR2UV(RX_MATCH_COPIED(rx) ? rx->subbeg : Nullch);
     RX_MATCH_COPIED_off(rx);
+
+#ifdef PERL_COPY_ON_WRITE
+    *p++ = PTR2UV(rx->saved_copy);
+    rx->saved_copy = Nullsv;
+#endif
 
     *p++ = rx->nparens;
 
@@ -271,10 +287,16 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     UV *p = (UV*)*rsp;
     U32 i;
 
-    if (RX_MATCH_COPIED(rx))
-	Safefree(rx->subbeg);
+    RX_MATCH_COPY_FREE(rx);
     RX_MATCH_COPIED_set(rx, *p);
     *p++ = 0;
+
+#ifdef PERL_COPY_ON_WRITE
+    if (rx->saved_copy)
+	SvREFCNT_dec (rx->saved_copy);
+    rx->saved_copy = INT2PTR(SV*,*p);
+    *p++ = 0;
+#endif
 
     rx->nparens = *p++;
 
@@ -293,6 +315,11 @@ Perl_rxres_free(pTHX_ void **rsp)
 
     if (p) {
 	Safefree(INT2PTR(char*,*p));
+#ifdef PERL_COPY_ON_WRITE
+	if (p[1]) {
+	    SvREFCNT_dec (INT2PTR(SV*,p[1]));
+	}
+#endif
 	Safefree(p);
 	*rsp = Null(void*);
     }

@@ -3764,7 +3764,7 @@ an xpvmg; if we're a copy-on-write scalar, this is the on-write time when
 we do the copy, and is also used locally. If C<SV_COW_DROP_PV> is set
 then a copy-on-write scalar drops its PV buffer (if any) and becomes
 SvPOK_off rather than making a copy. (Used where this scalar is about to be
-set to some other value. In addtion, the C<flags> parameter gets passed to
+set to some other value.) In addtion, the C<flags> parameter gets passed to
 C<sv_unref_flags()> when unrefing. C<sv_force_normal> calls this function
 with flags set to 0.
 

@@ -1303,6 +1303,9 @@ Apd	|char*	|sv_2pv_flags	|SV* sv|STRLEN* lp|I32 flags
 Apd	|void	|sv_copypv	|SV* dsv|SV* ssv
 Ap	|char*	|my_atof2	|const char *s|NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
+#ifdef PERL_COPY_ON_WRITE
+Ap	|SV*	|sv_setsv_cow	|SV* dsv|SV* ssv
+#endif
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 Ap	|int	|PerlIO_close		|PerlIO *

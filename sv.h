@@ -1069,6 +1069,12 @@ otherwise.
 #  define SvRELEASE_IVX(sv)   ((void)((SvFLAGS(sv) & (SVf_OOK|SVf_READONLY|SVf_FAKE)) \
 				&& Perl_sv_release_IVX(aTHX_ sv)))
 #  define SvIsCOW_normal(sv)	(SvIsCOW(sv) && SvLEN(sv))
+
+#define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
+			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \
+			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_AMAGIC)
+#define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
+
 #else
 #  define SvRELEASE_IVX(sv)   ((void)SvOOK_off(sv))
 #endif /* PERL_COPY_ON_WRITE */
