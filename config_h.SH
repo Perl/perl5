@@ -2339,7 +2339,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	It can be int, long, off_t, etc... It may be necessary to include
  *	<sys/types.h> to get any typedef'ed information.
  */
+/* LSEEKSIZE:
+ *	This symbol holds the number of bytes used by the Off_t.
+ */
 #define Off_t $lseektype		/* <offset> type */
+#define LSEEKSIZE $lseeksize		/* <offset> size */
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 
