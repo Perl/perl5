@@ -5,7 +5,7 @@ BEGIN {
     }
 }
 
-BEGIN { print "1..5\n"; }
+BEGIN { print "1..10\n"; }
 use NEXT;
 
 my $count=1;

@@ -13,7 +13,6 @@ WriteMakefile(
 #    LINKTYPE  => 'static',
     DEFINE    => $define,
     INC       => '-I$(PERL_INC)', # force PERL_INC dir ahead of system -I's
-    INST_ARCHLIB => '.',
     SKIP      => [qw(dynamic dynamic_lib dlsyms)],
     OBJECT    => '$(O_FILES)',
     clean     => {'FILES' => 'dbu libsdbm.a dbd dba dbe x-dbu *.dir *.pag'},
