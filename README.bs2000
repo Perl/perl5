@@ -184,13 +184,18 @@ L<INSTALL>, L<perlport>.
 
 =head2 Mailing list
 
-The Perl Institute ( http://www.perl.org/ ) maintains a perl-mvs mailing
-list of interest to all folks building and/or using perl on EBCDIC
-platforms.  To subscribe, send a message of:
+If you are interested in the VM/ESA, z/OS (formerly known as OS/390)
+and POSIX-BC (BS2000) ports of Perl then see the perl-mvs mailing list.
+To subscribe, send an empty message to perl-mvs-subscribe@perl.org.
 
-    subscribe perl-mvs
+See also:
 
-to majordomo@perl.org.
+    http://lists.perl.org/showlist.cgi?name=perl-mvs
+
+There are web archives of the mailing list at:
+
+    http://www.xray.mpe.mpg.de/mailing-lists/perl-mvs/
+    http://archive.develooper.com/perl-mvs@perl.org/
 
 =head1 HISTORY
 

@@ -115,16 +115,10 @@ L<INSTALL>, L<perlport>, L<perlebcdic>.
 =head2 Mailing list for Perl on VM/ESA
 
 If you are interested in the VM/ESA, z/OS (formerly known as OS/390)
-and POSIX-BC (BS2000) ports of Perl then see the perl-mvs mailing list:
-The Perl Institute ( http://www.perl.org/ ) maintains a mailing list of
-interest to all folks building and/or using perl on EBCDIC platforms.
-To subscribe, send a message of:
+and POSIX-BC (BS2000) ports of Perl then see the perl-mvs mailing list.
+To subscribe, send an empty message to perl-mvs-subscribe@perl.org.
 
-    subscribe perl-mvs
-
-to majordomo@perl.org.
-
-   See also:
+See also:
 
     http://lists.perl.org/showlist.cgi?name=perl-mvs
 
