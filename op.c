@@ -6719,7 +6719,8 @@ Perl_peep(pTHX_ register OP *o)
 	}
 
 	case OP_REVERSE: {
-	    OP *ourmark, *theirmark, *ourlast, *iter;
+	    OP *ourmark, *theirmark, *ourlast, *iter, *expushmark;
+	    OP *gvop = NULL;
 	    LISTOP *enter, *exlist;
 	    o->op_opt = 1;
 
@@ -6731,6 +6732,19 @@ Perl_peep(pTHX_ register OP *o)
 		if (!enter)
 		    break;
 	    }
+	    /* for $a (...) will have OP_GV then OP_RV2GV here.  */
+	    if (enter->op_type == OP_GV) {
+		gvop = (OP *) enter;
+		enter = (LISTOP *) enter->op_next;
+		if (!enter)
+		    break;
+		if (enter->op_type != OP_RV2GV)
+		    break;
+		enter = (LISTOP *) enter->op_next;
+		if (!enter)
+		    break;
+	    }
+
 	    if (enter->op_type != OP_ENTERITER)
 		break;
 
@@ -6738,7 +6752,12 @@ Perl_peep(pTHX_ register OP *o)
 	    if (!iter || iter->op_type != OP_ITER)
 		break;
 	    
-	    exlist = (LISTOP *) enter->op_last;
+	    expushmark = enter->op_first;
+	    if (!expushmark || expushmark->op_type != OP_NULL
+		|| expushmark->op_targ != OP_PUSHMARK)
+		break;
+
+	    exlist = (LISTOP *) expushmark->op_sibling;
 	    if (!exlist || exlist->op_type != OP_NULL
 		|| exlist->op_targ != OP_LIST)
 		break;
@@ -6770,7 +6789,7 @@ Perl_peep(pTHX_ register OP *o)
 	       ours.  */
 	    theirmark->op_next = ourmark->op_next;
 	    theirmark->op_flags = ourmark->op_flags;
-	    ourlast->op_next = (OP *) enter;
+	    ourlast->op_next = gvop ? gvop : (OP *) enter;
 	    op_null(ourmark);
 	    op_null(o);
 	    enter->op_private |= OPpITER_REVERSED;
