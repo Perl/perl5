@@ -9,7 +9,7 @@ WriteMakefile(
     realclean => {FILES=> 'constants.c constants.xs'},
 );
 WriteConstants(
-    NAME => 'GDBM_File',
+    NAME => 'Sys::Syslog',
     NAMES => [qw(LOG_ALERT LOG_AUTH LOG_AUTHPRIV LOG_CONS LOG_CRIT LOG_CRON
                  LOG_DAEMON LOG_DEBUG LOG_EMERG LOG_ERR LOG_FACMASK LOG_FTP
                  LOG_INFO LOG_KERN LOG_LFMT LOG_LOCAL0 LOG_LOCAL1 LOG_LOCAL2
