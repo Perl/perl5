@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Apr  1 20:39:33 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Tue Apr 15 20:15:31 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -353,7 +353,7 @@ d_closedir=''
 d_void_closedir=''
 d_cmsghdr_s=''
 d_const=''
-d_copysign=''
+d_copysignl=''
 cryptlib=''
 d_crypt=''
 crypt_r_proto=''
@@ -4516,50 +4516,6 @@ case "$firstmakefile" in
 '') firstmakefile='makefile';;
 esac
 
-case "$ccflags" in
-*-DUSE_LONG_DOUBLE*|*-DUSE_MORE_BITS*) uselongdouble="$define" ;;
-esac
-
-case "$uselongdouble" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
-cat <<EOM
-
-Perl can be built to take advantage of long doubles which
-(if available) may give more accuracy and range for floating point numbers.
-
-If this doesn't make any sense to you, just accept the default '$dflt'.
-EOM
-rp='Try to use long doubles if available?'
-. ./myread
-case "$ans" in
-y|Y) 	val="$define"	;;
-*)      val="$undef"	;;
-esac
-set uselongdouble
-eval $setvar
-
-case "$uselongdouble" in
-true|[yY]*) uselongdouble="$define" ;;
-esac
-
-case "$uselongdouble" in
-$define)
-: Look for a hint-file generated 'call-back-unit'.  If the
-: user has specified that long doubles should be used,
-: we may need to set or change some other defaults.
-	if $test -f uselongdouble.cbu; then
-		echo "Your platform has some specific hints for long doubles, using them..."
-		. ./uselongdouble.cbu
-	else
-		$cat <<EOM
-(Your platform doesn't have any specific hints for long doubles.)
-EOM
-	fi
-	;;
-esac
-
 : Looking for optional libraries
 echo " "
 echo "Checking for optional libraries..." >&4
@@ -5481,6 +5437,130 @@ case "$use64bitall" in
 	;;
 esac
 
+case "$ccflags" in
+*-DUSE_LONG_DOUBLE*|*-DUSE_MORE_BITS*) uselongdouble="$define" ;;
+esac
+
+case "$uselongdouble" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+cat <<EOM
+
+Perl can be built to take advantage of long doubles which
+(if available) may give more accuracy and range for floating point numbers.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Try to use long doubles if available?'
+. ./myread
+case "$ans" in
+y|Y) 	val="$define"	;;
+*)      val="$undef"	;;
+esac
+set uselongdouble
+eval $setvar
+
+case "$uselongdouble" in
+true|[yY]*) uselongdouble="$define" ;;
+esac
+
+case "$uselongdouble" in
+$define)
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that long doubles should be used,
+: we may need to set or change some other defaults.
+	if $test -f uselongdouble.cbu; then
+		echo "Your platform has some specific hints for long doubles, using them..."
+		. ./uselongdouble.cbu
+	else
+		$cat <<EOM
+(Your platform doesn't have any specific hints for long doubles.)
+EOM
+	fi
+	;;
+esac
+
+: check for length of double
+echo " "
+case "$doublesize" in
+'')
+	echo "Checking to see how big your double precision numbers are..." >&4
+	$cat >try.c <<EOCP
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int main()
+{
+    printf("%d\n", (int)sizeof(double));
+    exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		doublesize=`$run ./try`
+		echo "Your double is $doublesize bytes long."
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a double precision number (in bytes)?"
+		. ./myread
+		doublesize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
+
+: check for long doubles
+echo " "
+echo "Checking to see if you have long double..." >&4
+echo 'int main() { long double x = 7.0; }' > try.c
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have long double."
+else
+	val="$undef"
+	echo "You do not have long double."
+fi
+$rm try.*
+set d_longdbl
+eval $setvar
+
+: check for length of long double
+case "${d_longdbl}${longdblsize}" in
+$define)
+	echo " "
+	echo "Checking to see how big your long doubles are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(long double));
+}
+EOCP
+	set try
+	set try
+	if eval $compile; then
+		longdblsize=`$run ./try`
+		echo "Your long doubles are $longdblsize bytes long."
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
+		rp="What is the size of a long double (in bytes)?"
+		. ./myread
+		longdblsize="$ans"
+	fi
+	if $test "X$doublesize" = "X$longdblsize"; then
+		echo "(That isn't any different from an ordinary double.)"
+	fi	
+	;;
+esac
+$rm -f try.* try
+
 echo " "
 echo "Checking for GNU C Library..." >&4
 cat >try.c <<'EOCP'
@@ -5986,86 +6066,6 @@ set $varname;
 eval $setvar;
 $rm -f try.c tryout.c'
 
-: check for length of double
-echo " "
-case "$doublesize" in
-'')
-	echo "Checking to see how big your double precision numbers are..." >&4
-	$cat >try.c <<EOCP
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-int main()
-{
-    printf("%d\n", (int)sizeof(double));
-    exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		doublesize=`$run ./try`
-		echo "Your double is $doublesize bytes long."
-	else
-		dflt='8'
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a double precision number (in bytes)?"
-		. ./myread
-		doublesize="$ans"
-	fi
-	;;
-esac
-$rm -f try.c try
-
-: check for long doubles
-echo " "
-echo "Checking to see if you have long double..." >&4
-echo 'int main() { long double x = 7.0; }' > try.c
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have long double."
-else
-	val="$undef"
-	echo "You do not have long double."
-fi
-$rm try.*
-set d_longdbl
-eval $setvar
-
-: check for length of long double
-case "${d_longdbl}${longdblsize}" in
-$define)
-	echo " "
-	echo "Checking to see how big your long doubles are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("%d\n", sizeof(long double));
-}
-EOCP
-	set try
-	set try
-	if eval $compile; then
-		longdblsize=`$run ./try`
-		echo "Your long doubles are $longdblsize bytes long."
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)" >&4
-		rp="What is the size of a long double (in bytes)?"
-		. ./myread
-		longdblsize="$ans"
-	fi
-	if $test "X$doublesize" = "X$longdblsize"; then
-		echo "(That isn't any different from an ordinary double.)"
-	fi	
-	;;
-esac
-$rm -f try.* try
-
 echo " "
 
 if $test X"$d_longdbl" = X"$define"; then
@@ -6185,14 +6185,6 @@ esac
 set modfl d_modfl
 eval $inlibc
 
-: see if aintl exists - used along with copysignl if modfl is missing
-set aintl d_aintl
-eval $inlibc
-
-: see if copysignl exists - used along with aintl if modfl is missing
-set copysign d_copysignl
-eval $inlibc
-
 : see if prototype for modfl is available
 echo " "
 set d_modflproto modfl math.h
@@ -6261,40 +6253,13 @@ EOCP
 	;;
 esac
 
-if $test "$uselongdouble" = "$define"; then
-    message=X
-    case "$d_sqrtl:$d_modfl" in
-    $define:$define)
-	: You have both
-	;;
-    $define:$undef)
-	if $test "$d_aintl:$d_copysignl" = "$define:$define"; then
-	    echo "You have both aintl and copysignl, so I can emulate modfl"
-	else
-	    message="I could not find modfl"
-	fi
-	;;
-    $undef:$define)
-	message="I could not find sqrtl"
-	;;
-    $undef:$undef)
-	message="I found neither sqrtl nor modfl"
-	;;
-    esac
+: see if aintl exists
+set aintl d_aintl
+eval $inlibc
 
-    if $test "$message" != X; then
-	$cat <<EOM >&4
-
-*** You requested the use of long doubles but you do not seem to have
-*** the mathematic functions for long doubles.
-*** ($message)
-*** I'm disabling the use of long doubles.
-
-EOM
-
-	uselongdouble=$undef
-    fi
-fi
+: see if copysignl exists
+set copysignl d_copysignl
+eval $inlibc
 
 : determine the architecture name
 echo " "
@@ -12009,14 +11974,6 @@ eval $setvar
 set frexpl d_frexpl
 eval $inlibc
 
-: see if ilogbl exists - used along with scalbnl if frexpl is missing
-set ilogbl d_ilogbl
-eval $inlibc
-
-: see if scalbnl exists - used along with ilogbl if frexpl is missing
-set scalbnl d_scalbnl
-eval $inlibc
-
 : see if this is a sys/param system
 set sys/param.h i_sysparam
 eval $inhdr
@@ -13522,6 +13479,10 @@ esac
 set d_htonl
 eval $setvar
 
+: see if ilogbl exists
+set ilogbl d_ilogbl
+eval $inlibc
+
 : index or strchr
 echo " "
 if set index val -f; eval $csym; $val; then
@@ -13561,7 +13522,7 @@ eval $inlibc
 
 : Look for isascii
 echo " "
-$cat >isascii.c <<'EOCP'
+$cat >isascii.c <<EOCP
 #include <stdio.h>
 #include <ctype.h>
 #$i_stdlib I_STDLIB
@@ -14802,7 +14763,7 @@ EOCP
 #  include <memory.h>
 #endif
 #ifdef I_STDLIB
-#include <stdlib.h>
+#  include <stdlib.h>
 #endif
 #ifdef I_STRING
 #  include <string.h>
@@ -14842,6 +14803,10 @@ eval $setvar
 echo " "
 set d_sbrkproto sbrk $i_unistd unistd.h
 eval $hasproto
+
+: see if scalbnl exists
+set scalbnl d_scalbnl
+eval $inlibc
 
 : see if select exists
 set select d_select

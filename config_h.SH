@@ -2302,6 +2302,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d__fwalk HAS__FWALK		/**/
 
+/* HAS_AINTL:
+ *	This symbol, if defined, indicates that the aintl routine is
+ *	available.  If copysignl is also present we can emulate modfl.
+ */
+#$d_aintl HAS_AINTL		/**/
+
 /* HAS_CLASS:
  *	This symbol, if defined, indicates that the class routine is
  *	available to classify doubles.  Available for example in AIX.
@@ -2325,6 +2331,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	is supported.
  */
 #$d_cmsghdr_s HAS_STRUCT_CMSGHDR	/**/
+
+/* HAS_COPYSIGNL:
+ *	This symbol, if defined, indicates that the copysignl routine is
+ *	available.  If aintl is also present we can emulate modfl.
+ */
+#$d_copysignl HAS_COPYSIGNL		/**/
 
 /* HAS_DBMINIT_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -2462,17 +2474,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_frexpl HAS_FREXPL		/**/
 
-/* HAS_ILOGBL
- *	This symbol, if defined, indicates that the ilogbl function is
- *	available. If scalbnl is also present we can emulate frexpl
- */
-/* HAS_SCALBNL
- *	This symbol, if defined, indicates that the scalbnl function is
- *	available. If ilogbl is also present we can emulate frexpl
- */
-#$d_ilogbl HAS_ILOGBL		/**/
-#$d_scalbnl HAS_SCALBNL		/**/
-
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
  *	to do statfs() is supported.
@@ -2558,6 +2559,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_hasmntopt HAS_HASMNTOPT		/**/
 
+/* HAS_ILOGBL:
+ *	This symbol, if defined, indicates that the ilogbl routine is
+ *	available.  If scalbnl is also present we can emulate frexpl.
+ */
+#$d_ilogbl HAS_ILOGBL		/**/
+
 /* HAS_INT64_T:
  *     This symbol will defined if the C compiler supports int64_t.
  *     Usually the <inttypes.h> needs to be included, but sometimes
@@ -2637,17 +2644,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_modflproto HAS_MODFL_PROTO		/**/
 #$d_modfl_pow32_bug HAS_MODFL_POW32_BUG		/**/
 
-/* HAS_AINTL
- *	This symbol, if defined, indicates that the aintl function is
- *	available. If copysignl is also present we can emulate modfl
- */
-/* HAS_COPYSIGNL
- *	This symbol, if defined, indicates that the copysignl function is
- *	available. If aintl is also present we can emulate modfl
- */
-#$d_aintl HAS_AINTL		/**/
-#$d_copysignl HAS_COPYSIGNL	/**/
-
 /* HAS_MPROTECT:
  *	This symbol, if defined, indicates that the mprotect system call is
  *	available to modify the access protection of a memory mapped file.
@@ -2713,6 +2709,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *		extern void* sbrk(size_t);
  */
 #$d_sbrkproto	HAS_SBRK_PROTO	/**/
+
+/* HAS_SCALBNL:
+ *	This symbol, if defined, indicates that the scalbnl routine is
+ *	available.  If ilogbl is also present we can emulate frexpl.
+ */
+#$d_scalbnl HAS_SCALBNL		/**/
 
 /* HAS_SENDMSG:
  *	This symbol, if defined, indicates that the sendmsg routine is
