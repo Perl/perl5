@@ -4033,6 +4033,35 @@ Perl_my_atof(pTHX_ const char* s)
     return x;
 }
 
+NV
+S_mulexp10(NV value, I32 exponent)
+{
+    NV result = value;
+    NV power = 10.0;
+    I32 bit;
+
+    if (exponent > 0) {
+	for (bit = 1; exponent; bit <<= 1) {
+	    if (exponent & bit) {
+		exponent ^= bit;
+		result *= power;
+	    }
+	    power *= power;
+	}
+    }
+    else if (exponent < 0) {
+	exponent = -exponent;
+	for (bit = 1; exponent; bit <<= 1) {
+	    if (exponent & bit) {
+		exponent ^= bit;
+		result /= power;
+	    }
+	    power *= power;
+	}
+    }
+    return result;
+}
+
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
@@ -4042,10 +4071,26 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     char* point = ".";	/* locale-dependent decimal point equivalent */
     STRLEN pointlen = 1;
     bool seendigit = 0;
+    I32 expextra = 0;
+    I32 exponent = 0;
+    I32 i;
+/* this is arbitrary */
+#define PARTLIM 6
+/* we want the largest integers we can usefully use */
+#if defined(HAS_QUAD) && defined(USE_64_BIT_INT)
+#   define PARTSIZE ((int)TYPE_DIGITS(U64)-1)
+    U64 part[PARTLIM];
+#else
+#   define PARTSIZE ((int)TYPE_DIGITS(U32)-1)
+    U32 part[PARTLIM];
+#endif
+    I32 ipart = 0;	/* index into part[] */
+    I32 offcount;	/* number of digits in least significant part */
 
     if (PL_numeric_radix_sv)
 	point = SvPV(PL_numeric_radix_sv, pointlen);
 
+    /* sign */
     switch (*s) {
 	case '-':
 	    negative = 1;
@@ -4053,23 +4098,77 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	case '+':
 	    ++s;
     }
-    while (isDIGIT(*s)) {
-	result = result * 10 + (*s++ - '0');
-	seendigit = 1;
-    }
-    if (memEQ(s, point, pointlen)) {
-	NV decimal = 0.1;
 
+    part[0] = offcount = 0;
+    if (isDIGIT(*s)) {
+	seendigit = 1;	/* get this over with */
+
+	/* skip leading zeros */
+	while (*s == '0')
+	    ++s;
+    }
+
+    /* integer digits */
+    while (isDIGIT(*s)) {
+	if (++offcount > PARTSIZE) {
+	    if (++ipart < PARTLIM) {
+		part[ipart] = 0;
+		offcount = 1;	/* ++0 */
+	    }
+	    else {
+		/* limits of precision reached */
+		--ipart;
+		--offcount;
+		if (*s >= '5')
+		    ++part[ipart];
+		while (isDIGIT(*s)) {
+		    ++expextra;
+		    ++s;
+		}
+		/* warn of loss of precision? */
+		break;
+	    }
+	}
+	part[ipart] = part[ipart] * 10 + (*s++ - '0');
+    }
+
+    /* decimal point */
+    if (memEQ(s, point, pointlen)) {
 	s += pointlen;
+	if (isDIGIT(*s))
+	    seendigit = 1;	/* get this over with */
+
+	/* decimal digits */
 	while (isDIGIT(*s)) {
-	    result += (*s++ - '0') * decimal;
-	    decimal *= 0.1;
-	    seendigit = 1;
+	    if (++offcount > PARTSIZE) {
+		if (++ipart < PARTLIM) {
+		    part[ipart] = 0;
+		    offcount = 1;	/* ++0 */
+		}
+		else {
+		    /* limits of precision reached */
+		    --ipart;
+		    --offcount;
+		    if (*s >= '5')
+			++part[ipart];
+		    while (isDIGIT(*s))
+			++s;
+		    /* warn of loss of precision? */
+		    break;
+		}
+	    }
+	    --expextra;
+	    part[ipart] = part[ipart] * 10 + (*s++ - '0');
 	}
     }
+
+    /* combine components of mantissa */
+    for (i = 0; i <= ipart; ++i)
+	result += S_mulexp10((NV)part[ipart - i],
+		i ? offcount + (i - 1) * PARTSIZE : 0);
+
     if (seendigit && (*s == 'e' || *s == 'E')) {
-	I32 exponent = 0;
-	I32 expnegative = 0;
+	bool expnegative = 0;
 	I32 bit;
 	NV power;
 
@@ -4083,17 +4182,15 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	}
 	while (isDIGIT(*s))
 	    exponent = exponent * 10 + (*s++ - '0');
-
-	/* now apply the exponent */
-	power = (expnegative) ? 0.1 : 10.0;
-	for (bit = 1; exponent; bit <<= 1) {
-	    if (exponent & bit) {
-		exponent ^= bit;
-		result *= power;
-	    }
-	    power *= power;
-	}
+	if (expnegative)
+	    exponent = -exponent;
     }
+
+    /* now apply the exponent */
+    exponent += expextra;
+    result = S_mulexp10(result, exponent);
+
+    /* now apply the sign */
     if (negative)
 	result = -result;
     *value = result;
