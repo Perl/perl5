@@ -3612,6 +3612,10 @@ XS(w32_GetCwd)
 	sv_setpv(sv, ptr);
 	PerlEnv_free_childdir(ptr);
 
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(sv);
+#endif
+
 	EXTEND(SP,1);
 	SvPOK_on(sv);
 	ST(0) = sv;
