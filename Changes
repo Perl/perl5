@@ -103,6 +103,112 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6975] By: jhi                                   on 2000/09/01  14:37:36
+        Log: microperl config update.
+     Branch: perl
+	   ! uconfig.h uconfig.sh
+____________________________________________________________________________
+[  6974] By: jhi                                   on 2000/09/01  14:36:53
+        Log: Document known deficiencies.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6973] By: jhi                                   on 2000/09/01  14:10:20
+        Log: Mention warnings fixes and updates.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6972] By: jhi                                   on 2000/09/01  14:01:52
+        Log: Drop unused argument.
+             
+             Subject: Re: [ID 20000831.034] overload::constant and number of arguments. 
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Thu, 31 Aug 2000 16:10:15 -0400
+             Message-Id: <200008312010.QAA20392@leggy.zk3.dec.com>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  6971] By: jhi                                   on 2000/09/01  13:59:24
+        Log: Add the overload warnings to perldiag.
+     Branch: perl
+	   ! lib/overload.pm pod/perldiag.pod
+____________________________________________________________________________
+[  6970] By: jhi                                   on 2000/09/01  13:55:10
+        Log: Subject: RE: [PATCH lib/overload.pm] Sanaty checking of arguments to overload::constant
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Fri, 1 Sep 2000 13:43:15 +0100 
+             Message-ID: <001001c01412$32c7dde0$a20a140a@bfs.phone.com>                
+     Branch: perl
+	   ! lib/overload.pm t/pragma/overload.t
+____________________________________________________________________________
+[  6969] By: jhi                                   on 2000/09/01  13:52:27
+        Log: Subject: [PATCH lib/overload.pm] Sanaty checking of arguments to overload::constant
+             From: <abigail@foad.org>
+             Date: Fri, 1 Sep 2000 05:46:54 -0400
+             Message-ID: <20000901094654.6476.qmail@foad.org>
+     Branch: perl
+	   ! lib/overload.pm
+____________________________________________________________________________
+[  6968] By: jhi                                   on 2000/09/01  13:50:05
+        Log: Subject: [PATCH@6961] Fix misleading example in perlretut.pod
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Fri, 1 Sep 2000 02:10:55 -0700
+             Message-ID: <20000901021055.C3400@ilmd.chetlin.org>
+     Branch: perl
+	   ! pod/perlretut.pod
+____________________________________________________________________________
+[  6967] By: jhi                                   on 2000/09/01  13:47:54
+        Log: Part of the solution.
+             
+             Subject: Re: [ID 20000807.004] [PATCH] conditional breakpoints leak memory
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 01 Sep 2000 14:16:01 +0100
+             Message-Id: <E13Uqfp-0006dN-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! gv.c mg.c
+____________________________________________________________________________
+[  6966] By: jhi                                   on 2000/09/01  13:46:17
+        Log: Subject: CPAN.pm beta 1.57_57 for the core
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 01 Sep 2000 15:16:31 +0200
+             Message-ID: <m3r974z1zk.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  6965] By: jhi                                   on 2000/09/01  13:43:18
+        Log: Subject: [PATCH perl@6962] 2 more vms.c fix-ups and status
+             From: "Craig A. Berry" <craig.berry@psinetcs.com>
+             Date: Fri, 01 Sep 2000 01:47:22 -0500
+             Message-Id: <4.3.2.7.2.20000901011206.01ca2e88@exchi01>
+     Branch: perl
+	   ! pod/perldelta.pod vms/vms.c
+____________________________________________________________________________
+[  6964] By: jhi                                   on 2000/09/01  13:35:35
+        Log: File::Temp patches from Andreas König,
+             
+             Subject: Re: [ID 20000831.046] OK: perl v5.7.0 +DEVEL6961 on sun4-solaris 2.8  (UNINSTALLED)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 01 Sep 2000 10:07:20 +0200
+             Message-ID: <m3lmxc1qo7.fsf@ak-71.mind.de>
+             
+             Subject: Re: Almost OK: perl v5.7.0 +DEVEL6937 on PA-RISC2.0 11.00 (INSTALLED)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 31 Aug 2000 23:26:08 +0200
+             Message-ID: <m3bsy92kcv.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/File/Temp.pm t/lib/ftmp-security.t
+____________________________________________________________________________
+[  6963] By: jhi                                   on 2000/09/01  02:22:24
+        Log: Retract the mergesort code, way too incompatible licensing
+             and copyrights.
+     Branch: perl
+	   ! pod/perldelta.pod pp_ctl.c
+____________________________________________________________________________
+[  6962] By: jhi                                   on 2000/08/31  23:27:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6961] By: jhi                                   on 2000/08/31  23:20:04
         Log: Small tweaks all over.
      Branch: metaconfig
