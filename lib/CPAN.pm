@@ -4419,7 +4419,7 @@ install foreign, unmasked, unsigned code on your machine. We compare
 to a checksum that comes from the net just as the distribution file
 itself. If somebody has managed to tamper with the distribution file,
 they may have as well tampered with the CHECKSUMS file. Future
-development will go towards strong authentification.
+development will go towards strong authentication.
 
 =head1 EXPORT
 
@@ -4456,14 +4456,14 @@ CPAN.pm unattained.
 
 Thanks to Graham Barr for contributing the firewall following howto.
 
-Firewalls can be categorized into threee basic types.
+Firewalls can be categorized into three basic types.
 
 =over
 
 =item http firewall
 
 This is where the firewall machine runs a web server and to access the
-outside world you must do it via the web server. If you set envronment
+outside world you must do it via the web server. If you set environment
 variables like http_proxy or ftp_proxy to a values beginning with http://
 or in your web browser you have to set proxy information then you know
 you are running a http firewall.
@@ -4481,9 +4481,9 @@ connecting to the firewall with ftp, then entering a username like
 To access servers outside these type of firewalls with perl you
 will need to use Net::FTP.
 
-=item One way visability
+=item One way visibility
 
-I say one way visability as these firewalls try to make themselve look
+I say one way visability as these firewalls try to make themselves look
 invisible to the users inside the firewall. An FTP data connection is
 normally created by sending the remote server your IP address and then
 listening for the connection. But the remote server will not be able to
@@ -4501,7 +4501,7 @@ it with the SOCKS library, this is what is normally called a ``socksified''
 perl. With this executable you will be able to connect to servers outside
 the firewall as if it is not there.
 
-=item IP Masquarade
+=item IP Masquerade
 
 This is the firewall implemented in the Linux kernel, it allows you to
 hide a complete network behind one IP address. With this firewall no

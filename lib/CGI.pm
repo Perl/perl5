@@ -3273,10 +3273,10 @@ the CGI script, and because each object's parameter list is
 independent of the others, this allows you to save the state of the
 script and restore it later.
 
-For example, using the object oriented style, here is now you create
+For example, using the object oriented style, here is how you create
 a simple "Hello World" HTML page:
 
-   #!/usr/local/bin/pelr
+   #!/usr/local/bin/perl -w
    use CGI;                             # load CGI routines
    $q = new CGI;                        # create new CGI object
    print $q->header,                    # create the HTTP header
@@ -3319,7 +3319,7 @@ acceptable.  In fact, only the first argument needs to begin with a
 dash.  If a dash is present in the first argument, CGI.pm assumes
 dashes for the subsequent ones.
 
-You don't have to use the hyphen at allif you don't want to.  After
+You don't have to use the hyphen at all if you don't want to.  After
 creating a CGI object, call the B<use_named_parameters()> method with
 a nonzero value.  This will tell CGI.pm that you intend to use named
 parameters exclusively:
@@ -3667,7 +3667,7 @@ methods, and then use them directly:
    $zipcode = param('zipcode');
 
 More frequently, you'll import common sets of functions by referring
-to the gropus by name.  All function sets are preceded with a ":"
+to the groups by name.  All function sets are preceded with a ":"
 character as in ":html3" (for tags defined in the HTML 3 standard).
 
 Here is a list of the function sets you can import:
@@ -3719,7 +3719,7 @@ provide for the rapidly-evolving HTML "standard."  For example, say
 Microsoft comes out with a new tag called <GRADIENT> (which causes the
 user's desktop to be flooded with a rotating gradient fill until his
 machine reboots).  You don't need to wait for a new version of CGI.pm
-to start using it immeidately:
+to start using it immediately:
 
    use CGI qw/:standard :html3 gradient/;
    print gradient({-start=>'red',-end=>'blue'});
@@ -3799,7 +3799,7 @@ This causes the indicated autoloaded methods to be compiled up front,
 rather than deferred to later.  This is useful for scripts that run
 for an extended period of time under FastCGI or mod_perl, and for
 those destined to be crunched by Malcom Beattie's Perl compiler.  Use
-it in conjunction with the methods or method familes you plan to use.
+it in conjunction with the methods or method families you plan to use.
 
    use CGI qw(-compile :standard :html3);
 
@@ -4114,19 +4114,19 @@ header.  Just pass the list of script sections as an array reference.
 this allows you to specify different source files for different dialects
 of JavaScript.  Example:     
 
-     print $q-&gt;start_html(-title=&gt;'The Riddle of the Sphinx',
-                          -script=&gt;[
-                                    { -language =&gt; 'JavaScript1.0',
-                                      -src      =&gt; '/javascript/utilities10.js'
+     print $q->start_html(-title=>'The Riddle of the Sphinx',
+                          -script=>[
+                                    { -language => 'JavaScript1.0',
+                                      -src      => '/javascript/utilities10.js'
                                     },
-                                    { -language =&gt; 'JavaScript1.1',
-                                      -src      =&gt; '/javascript/utilities11.js'
+                                    { -language => 'JavaScript1.1',
+                                      -src      => '/javascript/utilities11.js'
                                     },
-                                    { -language =&gt; 'JavaScript1.2',
-                                      -src      =&gt; '/javascript/utilities12.js'
+                                    { -language => 'JavaScript1.2',
+                                      -src      => '/javascript/utilities12.js'
                                     },
-                                    { -language =&gt; 'JavaScript28.2',
-                                      -src      =&gt; '/javascript/utilities219.js'
+                                    { -language => 'JavaScript28.2',
+                                      -src      => '/javascript/utilities219.js'
                                     }
                                  ]
                              );
@@ -4262,7 +4262,7 @@ This example shows how to use the HTML methods:
    print $q->blockquote(
 		     "Many years ago on the island of",
 		     $q->a({href=>"http://crete.org/"},"Crete"),
-		     "there lived a minotaur named",
+		     "there lived a Minotaur named",
 		     $q->strong("Fred."),
 		    ),
        $q->hr;
@@ -4325,7 +4325,7 @@ that points to an undef string:
 
 Prior to CGI.pm version 2.41, providing an empty ('') string as an
 attribute argument was the same as providing undef.  However, this has
-changed in order to accomodate those who want to create tags of the form 
+changed in order to accommodate those who want to create tags of the form 
 <IMG ALT="">.  The difference is shown in these two pieces of code:
   
    CODE                   RESULT
@@ -5093,7 +5093,7 @@ To include row and column headings in the returned table, you
 can use the B<-rowheader> and B<-colheader> parameters.  Both
 of these accept a pointer to an array of headings to use.
 The headings are just decorative.  They don't reorganize the
-interpetation of the radio buttons -- they're still a single named
+interpretation of the radio buttons -- they're still a single named
 unit.
 
 =back
