@@ -11,7 +11,6 @@ sub DESTROY { }
 sub EXTEND  { }
 sub UNSHIFT { scalar shift->SPLICE(0,0,@_) }
 sub SHIFT { shift->SPLICE(0,1) }
-#sub SHIFT   { (shift->SPLICE(0,1))[0] }
 sub CLEAR   { shift->STORESIZE(0) }
 
 sub PUSH
@@ -70,7 +69,7 @@ sub SPLICE {
     for (my $i=0; $i < @_; $i++) {
         $obj->STORE($off+$i,$_[$i]);
     }
-    return @result;
+    return wantarray ? @result : pop @result;
 }
 
 sub EXISTS {
