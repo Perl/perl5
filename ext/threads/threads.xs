@@ -168,6 +168,11 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 #  ifdef PTHREAD_ATTR_SETDETACHSTATE
             PTHREAD_ATTR_SETDETACHSTATE(&attr, attr_joinable);
 #  endif
+#  ifdef THREAD_CREATE_NEEDS_STACK
+	    if(pthread_attr_setstacksize(&attr, THREAD_CREATE_NEEDS_STACK))
+	      croak("panic: pthread_attr_setstacksize failed");
+#  endif
+
 #ifdef OLD_PTHREADS_API
 	  pthread_create( &thread->thr, attr, Perl_thread_run, (void *)thread);
 #else
