@@ -2384,7 +2384,7 @@ is made, a warning is given.
 =item *
 
 C<push @a;> and C<unshift @a;> (with no values to push or unshift)
-now give a warning.  This may be a problem for generated and evaled
+now gives a warning.  This may be a problem for generated and evaled
 code.
 
 =item *
@@ -2396,11 +2396,12 @@ for the C<"c"> format and a number less than -128 or more than 127.
 =item *
 
 Certain regex modifiers such as C<(?o)> make sense only if applied to
-the entire regex.  You will an optional warning if you try to do otherwise.
+the entire regex.  You will get an optional warning if you try to do
+otherwise. 
 
 =item *
 
-Using arrays or hashes as references (e.g. C<< %foo-&gt;{bar} >>
+Using arrays or hashes as references (e.g. C<< %foo->{bar} >>
 has been deprecated for a while.  Now you will get an optional warning.
 
 =item *
