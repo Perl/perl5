@@ -5440,6 +5440,95 @@ esac
 set useperlio
 eval $setvar 
 
+: see if sfio.h is available
+set sfio.h i_sfio
+eval $inhdr
+
+: see if sfio library is available
+case "$i_sfio" in
+$define)
+	val=''
+	set sfreserve val
+	eval $inlibc
+	;;
+*)
+	val="$undef"
+	;;
+esac
+: Ok, but do we want to use it.
+case "$val" in
+$define)
+	case "$usesfio" in
+	true|$define|[yY]*) dflt='y';;
+	*) dflt='n';;
+	esac
+	echo "$package can use the sfio library, but it is experimental."
+	rp="You seem to have sfio available, do you want to try using it?"
+	. ./myread
+	case "$ans" in
+	y|Y) 
+		# If sfio is mis-configured, then the following test program
+		# might run and exit with 0 status but generate no output!.
+		# I think it has to do with sfio's use of _exit vs. exit,
+		# but I don't know for sure.  --Andy Dougherty  2/25/97.
+		echo "Checking if I can use sfio in a simple test program."
+		$cat > try.c <<'EOM'
+#include <stdio.h>
+main()
+{
+	printf("42\n");
+	exit(0);
+}
+EOM
+		echo 42 > try.42
+		: Deliberately let user see errors and warnings.
+		if $cc $optimize $ccflags $ldflags -o try try.c $libs &&
+			./try > try.out && cmp try.42 try.out ; then
+			echo Sfio looks ok. >&4
+		else
+			$cat >&4 <<'EOM'
+
+Help! I can't compile and run the following simple test program:
+'EOM'
+			$cat try.c >&4
+			$cat >&4 <<'EOM'
+
+(This is probably a misconfiguration in your system or libraries, and
+you really ought to fix it.  In the meantime, I'll just skip sfio.)
+
+EOM
+			val=$undef
+		fi
+		$rm -f try.c try try.out try.42
+		;;
+	*)	echo "Ok, avoiding sfio this time.  I'll use stdio instead."
+		val="$undef"
+		;;
+	esac
+	case $val in
+	$undef)	echo Removing sfio from list of libraries to use >&4
+		set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
+		shift
+		libs="$*"
+		echo "libs = $libs" >&4
+		;;
+	esac
+	;;
+*)	case "$usesfio" in
+	true|$define|[yY]*)
+		echo "Sorry, cannot find sfio on this machine" >&4
+		echo "Ignoring your setting of usesfio=$usesfio" >&4
+		;;
+	esac
+	;;
+esac
+set d_sfio
+eval $setvar
+case "$d_sfio" in
+$define) usesfio='true';;
+*) usesfio='false';;
+esac
+
 : Check how to convert floats to strings.
 echo " "
 echo "Checking for an efficient way to convert floats to strings."
@@ -7339,59 +7428,6 @@ eval $inlibc
 : see if setsid exists
 set setsid d_setsid
 eval $inlibc
-
-: see if sfio.h is available
-set sfio.h i_sfio
-eval $inhdr
-
-
-: see if sfio library is available
-case "$i_sfio" in
-$define)
-	val=''
-	set sfreserve val
-	eval $inlibc
-	;;
-*)
-	val="$undef"
-	;;
-esac
-: Ok, but do we want to use it.
-case "$val" in
-$define)
-	case "$usesfio" in
-	true|$define|[yY]*) dflt='y';;
-	*) dflt='n';;
-	esac
-	echo "$package can use the sfio library, but it is experimental."
-	rp="You seem to have sfio available, do you want to try using it?"
-	. ./myread
-	case "$ans" in
-	y|Y) ;;
-	*)	echo "Ok, avoiding sfio this time.  I'll use stdio instead."
-		val="$undef"
-		: Remove sfio from list of libraries to use
-		set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
-		shift
-		libs="$*"
-		echo "libs = $libs" >&4
-		;;
-	esac
-	;;
-*)	case "$usesfio" in
-	true|$define|[yY]*)
-		echo "Sorry, cannot find sfio on this machine" >&4
-		echo "Ignoring your setting of usesfio=$usesfio" >&4
-		;;
-	esac
-	;;
-esac
-set d_sfio
-eval $setvar
-case "$d_sfio" in
-$define) usesfio='true';;
-*) usesfio='false';;
-esac
 
 : see if shmctl exists
 set shmctl d_shmctl
