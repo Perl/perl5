@@ -79,6 +79,111 @@ Version v5.5.640        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4895] By: gsar                                  on 2000/01/26  00:45:45
+        Log: fix parse failure of (my $foo : bar) and similar (from Spider
+             Boardman)
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  4894] By: gsar                                  on 2000/01/26  00:33:53
+        Log: avoid failure if directories already read by rmtree() are
+             deleted by another process
+     Branch: perl
+	   ! lib/File/Path.pm
+____________________________________________________________________________
+[  4893] By: gsar                                  on 2000/01/25  23:19:18
+        Log: typo in change#4892
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  4892] By: gsar                                  on 2000/01/25  22:16:19
+        Log: eliminate need for perl95.exe on Windows 9x by working around CRT
+             bug internally (from Benjamin Stuhl <sho_pi@hotmail.com>); modified
+             to call the fixed version of open_osfhandle() only on Windows 9x;
+             updated the makefiles and README.win32 to suit
+     Branch: perl
+	   ! README.win32 win32/Makefile win32/makefile.mk win32/win32.c
+	   ! win32/win32.h
+____________________________________________________________________________
+[  4891] By: gsar                                  on 2000/01/25  20:22:01
+        Log: produce redeclaration warning on C<our $foo; { our $foo; ... }>
+     Branch: perl
+	   ! op.c pod/perldelta.pod pod/perldiag.pod t/pragma/strict-vars
+____________________________________________________________________________
+[  4890] By: gsar                                  on 2000/01/25  19:21:17
+        Log: update Makefile notes on the now deprecated USE_5005THREADS and
+             USE_OBJECT
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  4889] By: jhi                                   on 2000/01/25  14:44:55
+        Log: Misedit in #4888.
+     Branch: cfgperl
+	   ! pp.c
+____________________________________________________________________________
+[  4888] By: jhi                                   on 2000/01/25  14:38:59
+        Log: UNICOS/mk patches.  Removing the _CRAYMPP test may be
+             rash but it's the best move I can think of right now.
+             UNICOS/mk doesn't anymore (2.0.4.82) define _CRAYMPP,
+             but I think it did in the past.
+             Removing the _CRAYMPP test fixes a legion of pack/unpack
+             failures (hint: SHORTSIZE=4,INTSIZE=8,LONGSIZE=8).
+             One subtest, t/lib/io_sock.t #14, is still failing.
+     Branch: cfgperl
+	   ! Configure config_h.SH hints/unicosmk.sh pp.c
+     Branch: metaconfig
+	   ! U/modified/Oldconfig.U
+____________________________________________________________________________
+[  4887] By: jhi                                   on 2000/01/25  06:13:14
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes Makefile.SH XSUB.h cflags.SH embed.pl globals.c
+	  !> installperl lib/Pod/Html.pm makedef.pl mg.c objXSUB.h perl.h
+	  !> perlapi.c perlapi.h pod/perldelta.pod pod/perldiag.pod
+	  !> t/io/fs.t win32/Makefile win32/makefile.mk win32/perlhost.h
+	  !> win32/perllib.c win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  4886] By: gsar                                  on 2000/01/25  02:54:00
+        Log: consistently use MAX_PATH+1 buffer sizes
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  4885] By: gsar                                  on 2000/01/25  02:51:35
+        Log: workaround for rename('x','X') bug in Windows NT
+     Branch: perl
+	   ! t/io/fs.t win32/win32.c
+____________________________________________________________________________
+[  4884] By: gsar                                  on 2000/01/25  01:32:57
+        Log: windows build fixups from uniform DLL name change to perl56.dll
+     Branch: perl
+	   ! installperl makedef.pl win32/perllib.c
+____________________________________________________________________________
+[  4883] By: gsar                                  on 2000/01/25  01:31:27
+        Log: more fixes for warnings from change#4840
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[  4882] By: gsar                                  on 2000/01/24  15:35:12
+        Log: assorted little nits
+     Branch: perl
+	   ! mg.c win32/Makefile win32/makefile.mk win32/perlhost.h
+	   ! win32/win32.c
+____________________________________________________________________________
+[  4881] By: gsar                                  on 2000/01/24  14:32:31
+        Log: add new warnings to perldelta
+     Branch: perl
+	   ! Changes pod/perldelta.pod pod/perldiag.pod
+____________________________________________________________________________
+[  4880] By: jhi                                   on 2000/01/24  14:14:23
+        Log: From: Stephane Payrard <properler@freesurf.fr>
+             To: Gurusamy Sarathy <gsar@ActiveState.com>
+             Cc: perl5-porters@perl.org
+             Subject: <patch> avoid division by 0 in Benchmark.pm
+             Date: Mon, 24 Jan 2000 16:15:38 +0100
+             Message-ID: <20000124161538.A995@freesurf.fr>
+     Branch: cfgperl
+	   ! lib/Benchmark.pm
+____________________________________________________________________________
 [  4879] By: gsar                                  on 2000/01/24  14:14:20
         Log: force linkage of the function wrappers for globals in change#4878
      Branch: perl

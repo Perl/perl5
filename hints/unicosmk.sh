@@ -8,3 +8,11 @@ case "$usemymalloc" in
     ccflags="$ccflags -DNO_RCHECK"
     ;;
 esac
+# If somebody ignores the Cray PATH.
+case ":$PATH:" in
+*:/opt/ctl/bin:*) ;;
+'') case "$cc" in
+    '') test -x /opt/ctl/bin/cc && cc=/opt/ctl/bin/cc ;;
+    esac
+    ;;
+esac

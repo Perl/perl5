@@ -544,7 +544,9 @@ start losing precision (their lower digits).
 If you have filesystems that support "large files" (files larger than
 2 gigabytes), you may now also be able to create and access them from
 Perl.  You have to use Configure -Duselargefiles.  Turning on the
-large file support turns on also the 64-bit support, for obvious reasons.
+large file support turns on also the 64-bit support on many platforms.
+Beware that unless your filesystem also supports "sparse files" seeking
+to umpteen petabytes may be unadvisable.
 
 Note that in addition to requiring a proper file system to do large
 files you may also need to adjust your per-process (or your
@@ -567,13 +569,13 @@ process resource usage limits, including the maximum filesize limit.
 =head2 Long doubles
 
 In some systems you may be able to use long doubles to enhance the
-range of precision of your double precision floating point numbers
+range and precision of your double precision floating point numbers
 (that is, Perl's numbers).  Use Configure -Duselongdouble to enable
 this support (if it is available).
 
 =head2 "more bits"
 
-You can Configure -Dusemorebits to turn on both the 64-bit support
+You can "Configure -Dusemorebits" to turn on both the 64-bit support
 and the long double support.
 
 =head2 Enhanced support for sort() subroutines
@@ -1259,10 +1261,12 @@ change#4135, also needs docs in module pod
 =item Fcntl
 
 More Fcntl constants added: F_SETLK64, F_SETLKW64, O_LARGEFILE for
-large (more than 4G) file access (64-bit support is not yet
-working, though, so no need to get overly excited), Free/Net/OpenBSD
-locking behaviour flags F_FLOCK, F_POSIX, Linux F_SHLCK, and
-O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
+large file (more than 4GB) access Note that the O_LARGEFILE is
+automatically/transparently added to sysopen() flags if large file
+support has been configured), Free/Net/OpenBSD locking behaviour flags
+F_FLOCK, F_POSIX, Linux F_SHLCK, and O_ACCMODE: the combined mask of
+O_RDONLY, O_WRONLY, and O_RDWR.  Also SEEK_SET, SEEK_CUR, and SEEK_END
+added for one-stop shopping of the seek/sysseek constants.
 
 =item File::Compare
 
