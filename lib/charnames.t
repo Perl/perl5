@@ -12,7 +12,7 @@ BEGIN {
 
 $| = 1;
 
-print "1..42\n";
+print "1..44\n";
 
 use charnames ':full';
 
@@ -226,7 +226,6 @@ print "ok 38\n";
     print "ok 39\n";
 }
 
-
 print "not " unless ord("\N{ZWNJ}") == 0x200C;
 print "ok 40\n";
 
@@ -236,3 +235,8 @@ print "ok 41\n";
 print "not " unless "\N{U+263A}" eq "\N{WHITE SMILING FACE}";
 print "ok 42\n";
 
+print "not " if defined charnames::viacode(0x110000);
+print "ok 43\n";
+
+print "not " if grep { /you asked for U+110000/ } @WARN;
+print "ok 44\n";

@@ -203,7 +203,7 @@ sub viacode
     }
 
     if ($code > 0x10FFFF) {
-	carp "Unicode characters only allocated up to 0x10FFFF (you asked for $hex)";
+	carp sprintf "Unicode characters only allocated up to U+10FFFF (you asked for U+%X)", $hex;
 	return;
     }
 
@@ -415,8 +415,12 @@ will also give a warning about being deprecated.
 
 =head1 ILLEGAL CHARACTERS
 
-If you ask for a character that does not exist, a warning is given
-and the Unicode I<replacement character> "\x{FFFD}" is returned.
+If you ask by name for a character that does not exist, a warning is
+given and the Unicode I<replacement character> "\x{FFFD}" is returned.
+
+If you ask by code for a character that does not exist, no warning is
+given and C<undef> is returned.  (Though if you ask for a code point
+past U+10FFFF you do get a warning.)
 
 =head1 BUGS
 
