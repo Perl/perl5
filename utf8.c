@@ -1574,7 +1574,7 @@ SV*
 Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
 {
     SV* retval;
-    SV* tokenbufsv = sv_2mortal(NEWSV(0,0));
+    SV* tokenbufsv = sv_newmortal();
     dSP;
     size_t pkg_len = strlen(pkg);
     size_t name_len = strlen(name);
