@@ -1111,7 +1111,10 @@ reverse is no longer allowed as the name of a sort subroutine.
     # perl4 prints: yup yup yup yup abc
     # perl5 prints: abc 
 
-=item * warn() specifically implies STDERR
+=item * warn() won't let you specify a filehandle.
+
+Although it _always_ printed to STDERR, warn() would let you specify a
+filehandle in perl4.  With perl5 it does not.
 
     warn STDERR "Foo!";
 
