@@ -20,7 +20,7 @@ The basic steps to build and install perl5 on a Unix system are:
 Each of these is explained in further detail below.
 
 For information on non-Unix systems, see the section on
-L<"Porting Information"> below.
+L<"Porting information"> below.
 
 =head1 DESCRIPTION
 
@@ -616,11 +616,22 @@ In a future version of perl, these might be enabled by default.
 
 =over 4
 
+=item -DDEBUGGING_MSTATS
+
+If C<DEBUGGING_MSTATS> is defined, you can extract malloc
+statistics from the Perl interpreter.  The overhead this imposes is not
+large (perl just twiddles integers at malloc/free/sbrk time).  When you
+run perl with the environment variable C<PERL_DEBUG_MSTATS> set to
+either 1 or 2, the interpreter will dump statistics to stderr at exit
+time and (with a value of 2) after compilation.  If you install the
+Devel::Peek module you can get the statistics whenever you like by
+invoking its mstat() function.
+
 =item -DEMERGENCY_SBRK
 
-If this macro is defined, running out of memory need not be a fatal
-error: a memory pool can allocated by assigning to the special
-variable C<$^M>.
+If C<EMERGENCY_SBRK> is defined, running out of memory need not be a
+fatal error: a memory pool can allocated by assigning to the special
+variable C<$^M>.  See L<perlvar> for more details.
 
 =item -DPACK_MALLOC
 
@@ -787,7 +798,7 @@ mechanism.
 
 =item Porting information
 
-Specific information for the OS/2, Plan9, VMS and Win32 ports are in the
+Specific information for the OS/2, Plan9, VMS and Win32 ports is in the
 corresponding subdirectories.  Additional information, including
 a glossary of all those config.sh variables, is in the Porting
 subdirectory.
@@ -1274,4 +1285,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.3 1997/02/28 16:34:11 doughera Released $
+$Id: INSTALL,v 1.5 1997/03/08 18:15:49 doughera Released $
