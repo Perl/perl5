@@ -7,6 +7,19 @@
 #define PERL_VERSION	5		/* epoch */
 #define PERL_SUBVERSION	61		/* generation */
 
+/* Compatibility across versions:  MakeMaker will install add-on
+   modules in a directory with the PERL_APIVERSION version number.  
+   Normally this should not change across maintenance releases.
+   perl.c:incpush() and lib/lib.pm will automatically search older 
+   directories across major versions back to to PERL_XS_APIVERSION
+   for XS modules and back to PERL_PM_APIVERSION for pure PERL modules.
+   (Since the versioned directory layout didn't start until 5.005,
+   that's the earliest these can go back.
+
+   See INSTALL for how this works.
+*/
+#define PERL_APIVERSION 5.00561		/* Adjust manually as needed.  */
+
 #define __PATCHLEVEL_H_INCLUDED__
 #endif
 

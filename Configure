@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Sep 30 19:41:54 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sat Oct  2 13:06:57 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -842,6 +842,8 @@ vendorprefix=''
 vendorprefixexp=''
 defvoidused=''
 voidflags=''
+pm_apiversion=''
+xs_apiversion=''
 CONFIG=''
 
 define='define'
@@ -11938,6 +11940,15 @@ rp="What is the type of process ids on this system?"
 set pid_t pidtype int stdio.h sys/types.h
 eval $typedef_ask
 
+: Find earliest binary compatible site_perl subdirectory perl can use.
+case "$bincompat5005" in
+"$define") xs_apiversion='5.005' ;;
+*) xs_apiversion=$apiversion ;;   # The current site_perl version.
+esac
+: Find earliest pure perl site_perl subdirectory perl can use.
+: The versioned directories started at 5.005.
+pm_apiversion='5.005'
+
 : check for length of pointer
 echo " "
 case "$ptrsize" in
@@ -13901,6 +13912,7 @@ pg='$pg'
 phostname='$phostname'
 pidtype='$pidtype'
 plibpth='$plibpth'
+pm_apiversion='$pm_apiversion'
 pmake='$pmake'
 pr='$pr'
 prefix='$prefix'
@@ -14024,6 +14036,7 @@ version='$version'
 vi='$vi'
 voidflags='$voidflags'
 xlibpth='$xlibpth'
+xs_apiversion='$xs_apiversion'
 zcat='$zcat'
 zip='$zip'
 EOT
