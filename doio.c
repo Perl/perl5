@@ -1071,6 +1071,36 @@ register SV **sp;
 	}
 	else
 	    val = SvIVx(*mark);
+#ifdef VMS
+	/* kill() doesn't do process groups (job trees?) under VMS */
+	if (val < 0) val = -val;
+	if (val == SIGKILL) {
+#	    include <starlet.h>
+	    /* Use native sys$delprc() to insure that target process is
+	     * deleted; supervisor-mode images don't pay attention to
+	     * CRTL's emulation of Unix-style signals and kill()
+	     */
+	    while (++mark <= sp) {
+		I32 proc = SvIVx(*mark);
+		register unsigned long int __vmssts;
+		if (!((__vmssts = sys$delprc(&proc,0)) & 1)) {
+		    tot--;
+		    switch (__vmssts) {
+			case SS$_NONEXPR:
+			case SS$_NOSUCHNODE:
+			    SETERRNO(ESRCH,__vmssts);
+			    break;
+			case SS$_NOPRIV:
+			    SETERRNO(EPERM,__vmssts);
+			    break;
+			default:
+			    SETERRNO(EVMSERR,__vmssts);
+		    }
+		}
+	    }
+	    break;
+	}
+#endif
 	if (val < 0) {
 	    val = -val;
 	    while (++mark <= sp) {
