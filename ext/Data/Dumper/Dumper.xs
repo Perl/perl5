@@ -27,7 +27,8 @@ static I32 DD_dump (pTHX_ SV *val, char *name, STRLEN namelen, SV *retval,
 		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
 		    SV *pad, SV *xpad, SV *apad, SV *sep,
 		    SV *freezer, SV *toaster,
-		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless);
+		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless,
+		    I32 maxdepth);
 
 /* does a string need to be protected? */
 static I32
@@ -130,7 +131,7 @@ static I32
 DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	AV *postav, I32 *levelp, I32 indent, SV *pad, SV *xpad,
 	SV *apad, SV *sep, SV *freezer, SV *toaster, I32 purity,
-	I32 deepcopy, I32 quotekeys, SV *bless)
+	I32 deepcopy, I32 quotekeys, SV *bless, I32 maxdepth)
 {
     char tmpbuf[128];
     U32 i;
@@ -253,33 +254,46 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	}
 
-	if (realpack) {
-	    if (*realpack == 'R' && strEQ(realpack, "Regexp")) {
-		STRLEN rlen;
-		char *rval = SvPV(val, rlen);
-		char *slash = strchr(rval, '/');
-		sv_catpvn(retval, "qr/", 3);
-		while (slash) {
-		    sv_catpvn(retval, rval, slash-rval);
-		    sv_catpvn(retval, "\\/", 2);
-		    rlen -= slash-rval+1;
-		    rval = slash+1;
-		    slash = strchr(rval, '/');
-		}
-		sv_catpvn(retval, rval, rlen);
-		sv_catpvn(retval, "/", 1);
-		return 1;
+	if (realpack && *realpack == 'R' && strEQ(realpack, "Regexp")) {
+	    STRLEN rlen;
+	    char *rval = SvPV(val, rlen);
+	    char *slash = strchr(rval, '/');
+	    sv_catpvn(retval, "qr/", 3);
+	    while (slash) {
+		sv_catpvn(retval, rval, slash-rval);
+		sv_catpvn(retval, "\\/", 2);
+		rlen -= slash-rval+1;
+		rval = slash+1;
+		slash = strchr(rval, '/');
 	    }
-	    else {				/* we have a blessed ref */
-		STRLEN blesslen;
-		char *blessstr = SvPV(bless, blesslen);
-		sv_catpvn(retval, blessstr, blesslen);
-		sv_catpvn(retval, "( ", 2);
-		if (indent >= 2) {
-		    blesspad = apad;
-		    apad = newSVsv(apad);
-		    sv_x(aTHX_ apad, " ", 1, blesslen+2);
-		}
+	    sv_catpvn(retval, rval, rlen);
+	    sv_catpvn(retval, "/", 1);
+	    return 1;
+	}
+
+	/* If purity is not set and maxdepth is set, then check depth:
+	 * if we have reached maximum depth, return the string
+	 * representation of the thing we are currently examining
+	 * at this depth (i.e., 'Foo=ARRAY(0xdeadbeef)'). 
+	 */
+	if (!purity && maxdepth > 0 && *levelp >= maxdepth) {
+	    STRLEN vallen;
+	    char *valstr = SvPV(val,vallen);
+	    sv_catpvn(retval, "'", 1);
+	    sv_catpvn(retval, valstr, vallen);
+	    sv_catpvn(retval, "'", 1);
+	    return 1;
+	}
+
+	if (realpack) {				/* we have a blessed ref */
+	    STRLEN blesslen;
+	    char *blessstr = SvPV(bless, blesslen);
+	    sv_catpvn(retval, blessstr, blesslen);
+	    sv_catpvn(retval, "( ", 2);
+	    if (indent >= 2) {
+		blesspad = apad;
+		apad = newSVsv(apad);
+		sv_x(aTHX_ apad, " ", 1, blesslen+2);
 	    }
 	}
 
@@ -294,14 +308,16 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_catpvn(retval, "do{\\(my $o = ", 13);
 		DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep,
-			freezer, toaster, purity, deepcopy, quotekeys, bless);
+			freezer, toaster, purity, deepcopy, quotekeys, bless,
+			maxdepth);
 		sv_catpvn(retval, ")}", 2);
 	    }						     /* plain */
 	    else {
 		sv_catpvn(retval, "\\", 1);
 		DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep,
-			freezer, toaster, purity, deepcopy, quotekeys, bless);
+			freezer, toaster, purity, deepcopy, quotekeys, bless,
+			maxdepth);
 	    }
 	    SvREFCNT_dec(namesv);
 	}
@@ -312,7 +328,8 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catpvn(retval, "\\", 1);
 	    DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
 		    postav, levelp,	indent, pad, xpad, apad, sep,
-		    freezer, toaster, purity, deepcopy, quotekeys, bless);
+		    freezer, toaster, purity, deepcopy, quotekeys, bless,
+		    maxdepth);
 	    SvREFCNT_dec(namesv);
 	}
 	else if (realtype == SVt_PVAV) {
@@ -380,7 +397,8 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_catsv(retval, ipad);
 		DD_dump(aTHX_ elem, iname, ilen, retval, seenhv, postav,
 			levelp,	indent, pad, xpad, apad, sep,
-			freezer, toaster, purity, deepcopy, quotekeys, bless);
+			freezer, toaster, purity, deepcopy, quotekeys, bless,
+			maxdepth);
 		if (ix < ixmax)
 		    sv_catpvn(retval, ",", 1);
 	    }
@@ -486,7 +504,8 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
 		DD_dump(aTHX_ hval, SvPVX(sname), SvCUR(sname), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, newapad, sep,
-			freezer, toaster, purity, deepcopy, quotekeys, bless);
+			freezer, toaster, purity, deepcopy, quotekeys, bless,
+			maxdepth);
 		SvREFCNT_dec(sname);
 		Safefree(nkey);
 		if (indent >= 2)
@@ -626,7 +645,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			DD_dump(aTHX_ e, SvPVX(nname), SvCUR(nname), postentry,
 				seenhv, postav, &nlevel, indent, pad, xpad,
 				newapad, sep, freezer, toaster, purity,
-				deepcopy, quotekeys, bless);
+				deepcopy, quotekeys, bless, maxdepth);
 			SvREFCNT_dec(e);
 		    }
 		}
@@ -686,7 +705,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    SV **svp;
 	    SV *val, *name, *pad, *xpad, *apad, *sep, *tmp, *varname;
 	    SV *freezer, *toaster, *bless;
-	    I32 purity, deepcopy, quotekeys;
+	    I32 purity, deepcopy, quotekeys, maxdepth;
 	    char tmpbuf[1024];
 	    I32 gimme = GIMME;
 
@@ -769,6 +788,8 @@ Data_Dumper_Dumpxs(href, ...)
 		    quotekeys = SvTRUE(*svp);
 		if ((svp = hv_fetch(hv, "bless", 5, FALSE)))
 		    bless = *svp;
+		if ((svp = hv_fetch(hv, "maxdepth", 8, FALSE)))
+		    maxdepth = SvIV(*svp);
 		postav = newAV();
 
 		if (todumpav)
@@ -834,7 +855,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    DD_dump(aTHX_ val, SvPVX(name), SvCUR(name), valstr, seenhv,
 			    postav, &level, indent, pad, xpad, newapad, sep,
 			    freezer, toaster, purity, deepcopy, quotekeys,
-			    bless);
+			    bless, maxdepth);
 		    
 		    if (indent >= 2)
 			SvREFCNT_dec(newapad);

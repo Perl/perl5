@@ -20,6 +20,8 @@ sub TEST {
   my $string = shift;
   my $t = eval $string;
   ++$TNUM;
+  $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
+      if ($WANT =~ /deadbeef/);
   print( ($t eq $WANT and not $@) ? "ok $TNUM\n"
 	: "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 
@@ -29,17 +31,19 @@ sub TEST {
 
   $t = eval $string;
   ++$TNUM;
+  $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
+      if ($WANT =~ /deadbeef/);
   print( ($t eq $WANT and not $@) ? "ok $TNUM\n"
 	: "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 }
 
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 162; $XS = 1;
+  $TMAX = 174; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 81; $XS = 0;
+  $TMAX = 87; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -700,5 +704,50 @@ EOT
 
 TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Purity(1)->Dump;);
 TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Purity(1)->Dumpxs;)
+	if $XS;
+}
+
+{
+    $f = "pearl";
+    $e = [        $f ];
+    $d = { 'e' => $e };
+    $c = [        $d ];
+    $b = { 'c' => $c };
+    $a = { 'b' => $b };
+
+############# 163
+##
+  $WANT = <<'EOT';
+#$a = {
+#  b => {
+#    c => [
+#      {
+#        e => 'ARRAY(0xdeadbeef)'
+#      }
+#    ]
+#  }
+#};
+#$b = $a->{b};
+#$c = $a->{b}{c};
+EOT
+
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(4)->Dump;);
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(4)->Dumpxs;)
+	if $XS;
+
+############# 169
+##
+  $WANT = <<'EOT';
+#$a = {
+#  b => 'HASH(0xdeadbeef)'
+#};
+#$b = $a->{b};
+#$c = [
+#  'HASH(0xdeadbeef)'
+#];
+EOT
+
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(1)->Dump;);
+TEST q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Maxdepth(1)->Dumpxs;)
 	if $XS;
 }
