@@ -8,7 +8,7 @@ my %tables = (iso8859 => ['ascii.ucm', 'cp1250.ucm', 'koi8-r.ucm' ],
 opendir(ENC,'Encode');
 while (defined(my $file = readdir(ENC)))
  {
-  if ($file =~ /iso8859.*\.ucm/)
+  if ($file =~ /8859.*\.ucm/)
    {
     push(@{$tables{iso8859}},$file);
    }

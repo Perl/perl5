@@ -42,7 +42,7 @@ my %ideodigit = ( # cjk ideograph 'one' to 'ten'
 my @ideodigit = qw(one two three four five six seven eight nine ten);
 
 my $jis = '7bit-jis';
-my $kr  = 'iso2022-kr';
+my $kr  = '2022-kr';
 my %esc_str;
 
 $esc_str{$jis} = {qw(
