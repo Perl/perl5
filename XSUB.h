@@ -29,13 +29,10 @@
 #define XSINTERFACE_FUNC_SET(cv,f)	\
 		CvXSUBANY(cv).any_dptr = (void (*) _((void*)))(f)
 
-#define XSFLUSHARGS \
-	PL_stack_sp = PL_stack_base + ax + ((off) - 1)
-
-#define XSRETURN(off)				\
-    STMT_START {				\
-	XSFLUSHARGS;				\
-	return;					\
+#define XSRETURN(off)					\
+    STMT_START {					\
+	PL_stack_sp = PL_stack_base + ax + ((off) - 1);	\
+	return;						\
     } STMT_END
 
 /* Simple macros to put new mortal values onto the stack.   */
