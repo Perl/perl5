@@ -3190,12 +3190,15 @@ PP(pp_index)
     dSP; dTARGET;
     SV *big;
     SV *little;
+    SV *temp = Nullsv;
     I32 offset;
     I32 retval;
     char *tmps;
     char *tmps2;
     STRLEN biglen;
     I32 arybase = PL_curcop->cop_arybase;
+    int big_utf8;
+    int little_utf8;
 
     if (MAXARG < 3)
 	offset = 0;
@@ -3203,9 +3206,31 @@ PP(pp_index)
 	offset = POPi - arybase;
     little = POPs;
     big = POPs;
-    tmps = SvPV(big, biglen);
-    if (offset > 0 && DO_UTF8(big))
+    big_utf8 = DO_UTF8(big);
+    little_utf8 = DO_UTF8(little);
+    if (big_utf8 ^ little_utf8) {
+	/* One needs to be upgraded.  */
+	SV *bytes = little_utf8 ? big : little;
+	STRLEN len;
+	char *p = SvPV(bytes, len);
+
+	temp = newSVpvn(p, len);
+
+	if (PL_encoding) {
+	    sv_recode_to_utf8(temp, PL_encoding);
+	} else {
+	    sv_utf8_upgrade(temp);
+	}
+	if (little_utf8) {
+	    big = temp;
+	    big_utf8 = TRUE;
+	} else {
+	    little = temp;
+	}
+    }
+    if (big_utf8 && offset > 0)
 	sv_pos_u2b(big, &offset, 0);
+    tmps = SvPV(big, biglen);
     if (offset < 0)
 	offset = 0;
     else if (offset > (I32)biglen)
@@ -3215,8 +3240,10 @@ PP(pp_index)
 	retval = -1;
     else
 	retval = tmps2 - tmps;
-    if (retval > 0 && DO_UTF8(big))
+    if (retval > 0 && big_utf8)
 	sv_pos_b2u(big, &retval);
+    if (temp)
+	SvREFCNT_dec(temp);
     PUSHi(retval + arybase);
     RETURN;
 }
@@ -3226,6 +3253,7 @@ PP(pp_rindex)
     dSP; dTARGET;
     SV *big;
     SV *little;
+    SV *temp = Nullsv;
     STRLEN blen;
     STRLEN llen;
     I32 offset;
@@ -3233,17 +3261,42 @@ PP(pp_rindex)
     char *tmps;
     char *tmps2;
     I32 arybase = PL_curcop->cop_arybase;
+    int big_utf8;
+    int little_utf8;
 
     if (MAXARG >= 3)
 	offset = POPi;
     little = POPs;
     big = POPs;
+    big_utf8 = DO_UTF8(big);
+    little_utf8 = DO_UTF8(little);
+    if (big_utf8 ^ little_utf8) {
+	/* One needs to be upgraded.  */
+	SV *bytes = little_utf8 ? big : little;
+	STRLEN len;
+	char *p = SvPV(bytes, len);
+
+	temp = newSVpvn(p, len);
+
+	if (PL_encoding) {
+	    sv_recode_to_utf8(temp, PL_encoding);
+	} else {
+	    sv_utf8_upgrade(temp);
+	}
+	if (little_utf8) {
+	    big = temp;
+	    big_utf8 = TRUE;
+	} else {
+	    little = temp;
+	}
+    }
     tmps2 = SvPV(little, llen);
     tmps = SvPV(big, blen);
+
     if (MAXARG < 3)
 	offset = blen;
     else {
-	if (offset > 0 && DO_UTF8(big))
+	if (offset > 0 && big_utf8)
 	    sv_pos_u2b(big, &offset, 0);
 	offset = offset - arybase + llen;
     }
@@ -3256,8 +3309,10 @@ PP(pp_rindex)
 	retval = -1;
     else
 	retval = tmps2 - tmps;
-    if (retval > 0 && DO_UTF8(big))
+    if (retval > 0 && big_utf8)
 	sv_pos_b2u(big, &retval);
+    if (temp)
+	SvREFCNT_dec(temp);
     PUSHi(retval + arybase);
     RETURN;
 }
@@ -4749,3 +4804,13 @@ PP(pp_threadsv)
 {
     DIE(aTHX_ "tried to access per-thread data in non-threaded perl");
 }
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: expandtab shiftwidth=4:
+*/
