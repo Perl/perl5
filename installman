@@ -3,6 +3,7 @@ BEGIN { @INC = ('lib') }
 use Config;
 use Getopt::Long;
 use File::Find;
+use File::Path qw(mkpath);
 require Cwd;
 
 umask 022;
@@ -76,7 +77,7 @@ sub runpod2man {
     # installed by occult means.)
     $pod2man = "../perl -I ../lib ../pod/pod2man --section=$manext --official";
 
-    &makedir($mandir);
+    mkpath($mandir, 1, 0777);  # In File::Path
     # Make a list of all the .pm and .pod files in the directory.  We will
     # always run pod2man from the lib directory and feed it the full pathname
     # of the pod.  This might be useful for pod2man someday.
@@ -145,19 +146,6 @@ sub chmod {
     printf STDERR "  chmod %o %s\n", $mode, $name;
     chmod($mode,$name) || warn sprintf("Couldn't chmod %o %s: $!\n",$mode,$name)
 	unless $notify;
-}
-
-sub makedir {
-    local($dir) = @_;
-    unless (-d $dir) {
-	local($shortdir) = $dir;
-
-	$shortdir =~ s#(.*)/.*#$1#;
-	&makedir($shortdir);
-
-	print STDERR "  mkdir $dir\n";
-	mkdir($dir, 0777) || warn "Couldn't create $dir: $!\n" unless $notify;
-    }
 }
 
 sub samepath {
