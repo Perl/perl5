@@ -19,7 +19,7 @@ dirname - extract just the directory from a path
 
     ($name,$path,$suffix) = fileparse("lib/File/Basename.pm",qr{\.pm});
     fileparse_set_fstype("VMS");
-    $basename = basename("lib/File/Basename.pm",qr{\.pm});
+    $basename = basename("lib/File/Basename.pm",".pm");
     $dirname = dirname("lib/File/Basename.pm");
 
 =head1 DESCRIPTION
