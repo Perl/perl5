@@ -85,8 +85,8 @@
 
 typedef char		I8;
 typedef unsigned char	U8;
-#define I8_MAX PERL_CHAR_MAX
-#define I8_MIN PERL_CHAR_MIN
+/* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
+   Please search CHAR_MAX in perl.h for further details. */
 #define U8_MAX PERL_UCHAR_MAX
 #define U8_MIN PERL_UCHAR_MIN
 
