@@ -31,6 +31,548 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13022] By: jhi                                   on 2001/11/15  15:11:37
+        Log: Subject: [PATCH] new tests for command-line switches
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 15 Nov 2001 17:00:30 +0100
+             Message-ID: <20011115170030.A14193@rafael>
+     Branch: perl
+	   + t/run/switches.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13021] By: jhi                                   on 2001/11/15  15:06:36
+        Log: Upgrade to podlators 1.13.
+     Branch: perl
+	   + lib/Pod/ParseLink.pm
+	   ! MANIFEST lib/Pod/Html.pm lib/Pod/Man.pm lib/Pod/Text.pm
+	   ! lib/Pod/Text/Color.pm lib/Pod/Text/Overstrike.pm
+	   ! lib/Pod/Text/Termcap.pm pod/pod2man.PL t/pod/lref.xr
+	   ! t/pod/pod2usage.xr t/pod/podselect.xr
+____________________________________________________________________________
+[ 13020] By: jhi                                   on 2001/11/15  14:47:29
+        Log: skip "might be used uninitialized".
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 13019] By: jhi                                   on 2001/11/15  14:35:55
+        Log: Fix for "perlio bug in koi8-r encoding".  The problem
+             seemed to be that binmode() always flushed the handle,
+             which is not so good when switching encodings.  Fixed,
+             added Matt Sergeant's testcase, documented in perlfunc/binmode,
+             also added a pointer about disciplines to perlfunc/open,
+             and in general cleaned up and reformatted the open entry.
+     Branch: perl
+	   ! ext/PerlIO/t/encoding.t perlio.c pod/perlfunc.pod
+____________________________________________________________________________
+[ 13018] By: jhi                                   on 2001/11/15  13:22:57
+        Log: Subject: Re: [ID 20011114.118] chop and chomp bind too tightly
+             From: rgarciasuarez@free.fr (Rafael Garcia-Suarez)
+             Date: 15 Nov 2001 08:57:06 -0000
+             Message-Id: <slrn9v70s9.gqe.rgarciasuarez@rafael.kazibao.net>
+             
+             chop() and chomp() are not real list functions,
+             so let's not have them overrideable.  (Casey will
+             be confused since in #7071 he patched the other way.)
+     Branch: perl
+	   ! pod/perlfunc.pod toke.c
+____________________________________________________________________________
+[ 13017] By: ams                                   on 2001/11/15  12:56:49
+        Log: Subject: [PATCH pod/perltrap.pod] Re: Strange syntax error with map
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 15 Nov 2001 13:48:34 GMT
+             Message-Id: <200111151348.NAA01299@tempest.npl.co.uk>
+             (Applied with tweaks.)
+     Branch: perl
+	   ! pod/perltrap.pod
+____________________________________________________________________________
+[ 13016] By: ams                                   on 2001/11/15  09:12:48
+        Log: Subject: [DOC PATCH] mention Filter::cpp in perlrun
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 15 Nov 2001 09:06:39 +0100
+             Message-Id: <20011115090639.A13005@rafael>
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 13015] By: jhi                                   on 2001/11/15  04:08:50
+        Log: "link =" from utils.lst was being processed oddly.
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[ 13014] By: ams                                   on 2001/11/15  02:52:52
+        Log: Subject: [PATCH current] CreateTTY in -d
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 14 Nov 2001 21:26:31 -0500
+             Message-Id: <20011114212631.A25705@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 13013] By: jhi                                   on 2001/11/15  00:46:07
+        Log: Corify the Filter::Simple tests. 
+     Branch: perl
+	   ! lib/Filter/Simple/t/data.t lib/Filter/Simple/t/filter.t
+	   ! lib/Filter/Simple/t/filter_only.t
+____________________________________________________________________________
+[ 13012] By: jhi                                   on 2001/11/15  00:42:25
+        Log: Upgrade to Filter::Simple 0.70.
+     Branch: perl
+	   + lib/Filter/Simple/t/data.t lib/Filter/Simple/t/filter_only.t
+	   + t/lib/FilterOnlyTest.pm
+	   ! MANIFEST lib/Filter/Simple.pm lib/Filter/Simple/Changes
+	   ! lib/Filter/Simple/README lib/Filter/Simple/t/filter.t
+	   ! t/lib/FilterTest.pm
+____________________________________________________________________________
+[ 13011] By: jhi                                   on 2001/11/14  22:38:31
+        Log: Cleanliness inspired by Cygwin.
+     Branch: perl
+	   ! Makefile.SH x2p/Makefile.SH
+____________________________________________________________________________
+[ 13010] By: jhi                                   on 2001/11/14  22:30:59
+        Log: Add perlunintro (formerly known as perlunitut); regen toc.
+     Branch: perl
+	   + pod/perlunintro.pod
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13009] By: jhi                                   on 2001/11/14  22:27:12
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq6.pod
+____________________________________________________________________________
+[ 13008] By: jhi                                   on 2001/11/14  22:16:06
+        Log: Quieten pgcc 2.91.66 worries.
+     Branch: perl
+	   ! gv.c pp_ctl.c utf8.c
+____________________________________________________________________________
+[ 13007] By: jhi                                   on 2001/11/14  22:05:01
+        Log: Upgrade to Switch 2.06.
+     Branch: perl
+	   ! lib/Switch.pm lib/Switch/Changes lib/Switch/README
+	   ! lib/Switch/t/nested.t
+____________________________________________________________________________
+[ 13006] By: jhi                                   on 2001/11/14  21:55:51
+        Log: Upgrade to Attribute::Handlers 0.76.
+     Branch: perl
+	   ! lib/Attribute/Handlers.pm lib/Attribute/Handlers/Changes
+	   ! lib/Attribute/Handlers/README
+	   ! lib/Attribute/Handlers/demo/Demo.pm
+	   ! lib/Attribute/Handlers/demo/Descriptions.pm
+	   ! lib/Attribute/Handlers/demo/MyClass.pm
+	   ! lib/Attribute/Handlers/demo/demo_cycle.pl
+	   ! lib/Attribute/Handlers/demo/demo_hashdir.pl
+	   ! lib/Attribute/Handlers/t/multi.t
+____________________________________________________________________________
+[ 13005] By: jhi                                   on 2001/11/14  21:53:22
+        Log: Signedness nit.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 13004] By: jhi                                   on 2001/11/14  21:24:39
+        Log: VERSIONize.
+     Branch: perl
+	   ! lib/File/Spec/Epoc.pm lib/PerlIO.pm lib/encoding.pm
+	   ! lib/integer.pm
+____________________________________________________________________________
+[ 13003] By: jhi                                   on 2001/11/14  21:17:02
+        Log: No pod in internal Net::FTP classes.
+     Branch: perl
+	   ! pod/buildtoc.PL
+____________________________________________________________________________
+[ 13002] By: jhi                                   on 2001/11/14  21:11:48
+        Log: Subject: Re: [PATCH regexec.c] lookahead for REF, MINMOD, PLUS, CURLY* 
+             From: "Jeff 'japhy' Pinyan" <jeffp@crusoe.net>
+             Date: Wed, 14 Nov 2001 09:59:31 -0500 (EST)
+             Message-ID: <Pine.GSO.4.21.0111140958390.1124-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 13001] By: jhi                                   on 2001/11/14  21:09:48
+        Log: test.pl tweaks from Rafael and Pudge (assuming I deciphered
+             Pudge correctly).
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13000] By: jhi                                   on 2001/11/14  21:00:23
+        Log: Add comments to mark where $^X is being handled.
+     Branch: perl
+	   ! perl.c toke.c
+____________________________________________________________________________
+[ 12999] By: jhi                                   on 2001/11/14  20:45:42
+        Log: Subject: Re: Test [ID 25] [PATCH t/op/repeat.t] Cleanup and bug test
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 14 Nov 2001 16:38:25 -0500
+             Message-ID: <20011114163825.D6519@blackrider>
+     Branch: perl
+	   ! t/op/repeat.t
+____________________________________________________________________________
+[ 12998] By: jhi                                   on 2001/11/14  20:22:06
+        Log: Subject: [PATCH t/op/die_exit.t] Fwd: [craigberry@mac.com: die_exit.t]
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 14 Nov 2001 13:19:15 -0500
+             Message-ID: <20011114131915.K5096@blackrider>
+     Branch: perl
+	   ! t/op/die_exit.t
+____________________________________________________________________________
+[ 12997] By: jhi                                   on 2001/11/14  19:36:57
+        Log: Subject: Re: [PATCH] new version of runperl()
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Wed, 14 Nov 2001 15:39:12 EST
+             Message-Id: <011114153711.30f96@DUPHY4.Physics.Drexel.Edu>
+             
+             "VMS $^X pipes etc" patch.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 12996] By: jhi                                   on 2001/11/14  19:31:01
+        Log: test.pl runperl() nits from Chris Nandor and Craig Berry,
+             and add "verbose" option to show the final command.
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 12995] By: jhi                                   on 2001/11/14  15:02:29
+        Log: Goof in some of the comment fields of #12994.
+     Branch: perl
+	   ! lib/unicore/In/0.pl lib/unicore/In/1.pl lib/unicore/In/2.pl
+	   ! lib/unicore/In/3.pl lib/unicore/In/4.pl lib/unicore/In/5.pl
+	   ! lib/unicore/In/6.pl lib/unicore/In/7.pl lib/unicore/In/8.pl
+	   ! lib/unicore/In/9.pl
+____________________________________________________________________________
+[ 12994] By: jhi                                   on 2001/11/14  14:59:32
+        Log: The First, Last ranges in the Unicode data weren't
+             getting their general categories added properly;
+             noticed by Jeffrey Friedl.
+     Branch: perl
+	   ! lib/unicore/Category.pl lib/unicore/In/0.pl
+	   ! lib/unicore/In/1.pl lib/unicore/In/164.pl
+	   ! lib/unicore/In/169.pl lib/unicore/In/170.pl
+	   ! lib/unicore/In/2.pl lib/unicore/In/3.pl lib/unicore/In/4.pl
+	   ! lib/unicore/In/5.pl lib/unicore/In/6.pl lib/unicore/In/7.pl
+	   ! lib/unicore/In/8.pl lib/unicore/In/9.pl
+	   ! lib/unicore/Is/Alnum.pl lib/unicore/Is/Alpha.pl
+	   ! lib/unicore/Is/C.pl lib/unicore/Is/Cntrl.pl
+	   ! lib/unicore/Is/Co.pl lib/unicore/Is/Cs.pl
+	   ! lib/unicore/Is/Graph.pl lib/unicore/Is/L.pl
+	   ! lib/unicore/Is/Lo.pl lib/unicore/Is/Print.pl
+	   ! lib/unicore/Is/Word.pl lib/unicore/Name.pl
+	   ! lib/unicore/mktables
+____________________________________________________________________________
+[ 12993] By: jhi                                   on 2001/11/14  13:54:20
+        Log: Subject: [PATCH] new version of runperl()
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 14 Nov 2001 12:23:01 +0100
+             Message-ID: <20011114122301.A29384@rafael>
+     Branch: perl
+	   ! t/io/argv.t t/test.pl
+____________________________________________________________________________
+[ 12992] By: ams                                   on 2001/11/14  13:40:39
+        Log: Subject: [PATCH perl.c] s/parse_perl/parse_body/
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 13 Nov 2001 23:17:54 -0500
+             Message-Id: <20011113231754.S32567@blackrider>
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 12991] By: jhi                                   on 2001/11/14  13:24:34
+        Log: Subject: Re: [PATCH pod/perlapio.pod double-word fix]
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Wed, 14 Nov 2001 10:59:53 +0100
+             Message-ID: <e6b4vt8mfasdv0vlm1tqggqhtjbpchvpmg@4ax.com>
+             
+             plus a lot of paragraph reformatting because of long lines.
+     Branch: perl
+	   ! pod/perlapio.pod
+____________________________________________________________________________
+[ 12990] By: jhi                                   on 2001/11/14  13:19:19
+        Log: A bool is not a pointer.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 12989] By: jhi                                   on 2001/11/14  02:41:42
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 12988] By: jhi                                   on 2001/11/14  02:18:44
+        Log: There are several MIME RFCs.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 12987] By: ams                                   on 2001/11/14  01:09:28
+        Log: Subject: [PATCH t/op/groups.t vms/test.com] Simple little VMS fix
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 13 Nov 2001 20:59:13 -0500
+             Message-Id: <20011113205913.H32567@blackrider>
+     Branch: perl
+	   ! t/op/groups.t vms/test.com
+____________________________________________________________________________
+[ 12986] By: ams                                   on 2001/11/14  01:07:06
+        Log: Subject: [PATCH ext/IO/lib/IO/t/io_sel.t vms/test.com] VMS fix
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 13 Nov 2001 20:51:34 -0500
+             Message-Id: <20011113205134.F32567@blackrider>
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_sel.t vms/test.com
+____________________________________________________________________________
+[ 12985] By: ams                                   on 2001/11/14  00:43:59
+        Log: Subject: [PATCH pod/perlport.pod] Re: select() broken under VMS?
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 13 Nov 2001 20:38:42 -0500
+             Message-Id: <20011113203842.E32567@blackrider>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12984] By: ams                                   on 2001/11/14  00:32:15
+        Log: Subject: [PATCH ext/IO/lib/IO/t/*.t vms/test.com] VMS fixups for IO::* tests
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 13 Nov 2001 20:27:02 -0500
+             Message-Id: <20011113202702.D32567@blackrider>
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_const.t ext/IO/lib/IO/t/io_dir.t
+	   ! ext/IO/lib/IO/t/io_dup.t ext/IO/lib/IO/t/io_pipe.t
+	   ! ext/IO/lib/IO/t/io_sock.t ext/IO/lib/IO/t/io_unix.t
+	   ! ext/IO/lib/IO/t/io_xs.t vms/test.com
+____________________________________________________________________________
+[ 12983] By: ams                                   on 2001/11/14  00:00:27
+        Log: Subject: [PATCH pod/perlport.pod] s/socket/select/ typo
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 13 Nov 2001 19:51:59 -0500
+             Message-Id: <20011113195159.B32567@blackrider>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12982] By: ams                                   on 2001/11/13  23:53:11
+        Log: Subject: [PATCH pod/perlapio.pod double-word fix]
+             From: Larry Shatzer <fugazi@zippy.zyx.net>
+             Date: Tue, 13 Nov 2001 17:27:59 -0700
+             Message-Id: <20011113172759.E27768@zippy.zyx.net>
+     Branch: perl
+	   ! pod/perlapio.pod
+____________________________________________________________________________
+[ 12981] By: jhi                                   on 2001/11/13  22:50:27
+        Log: Fix for the :utf8 read() bug noticed by Matt Sergeant:
+             "large enough" Unicode characters returned more than one
+             as their "Unicode size".
+     Branch: perl
+	   ! pp_sys.c t/io/utf8.t
+____________________________________________________________________________
+[ 12980] By: ams                                   on 2001/11/13  19:32:33
+        Log: Subject: [PATCH] vms/gen_shrfls.pl tweak
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 13 Nov 2001 14:33:25 -0600
+             Message-Id: <5.1.0.14.2.20011113142319.01c3ad50@exchi01>
+     Branch: perl
+	   ! vms/gen_shrfls.pl
+____________________________________________________________________________
+[ 12979] By: jhi                                   on 2001/11/13  18:10:15
+        Log: Subject: Minor patch to Encode.pm (detypo)
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Tue, 13 Nov 2001 20:11:01 +0100
+             Message-ID: <20011113.200845@ID-11583.news.dfncis.de>
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 12978] By: jhi                                   on 2001/11/13  17:55:02
+        Log: Evil tabulators.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 12977] By: jhi                                   on 2001/11/13  17:52:17
+        Log: Document the available encodings.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 12976] By: ams                                   on 2001/11/13  17:14:07
+        Log: Subject: Re: Why *not* use UNIVERSAL qw( isa can ) ; ??
+             From: Barrie Slaymaker <barries@slaysys.com>
+             Date: Tue, 13 Nov 2001 12:41:36 -0500
+             Message-Id: <20011113124133.C24305@sizzle.whoville.com>
+     Branch: perl
+	   ! t/op/universal.t
+____________________________________________________________________________
+[ 12975] By: ams                                   on 2001/11/13  16:24:21
+        Log: Subject: Re: Why *not* use UNIVERSAL qw( isa can ) ; ??
+             From: Barrie Slaymaker <barries@slaysys.com>
+             Date: Tue, 13 Nov 2001 10:56:20 -0500
+             Message-Id: <20011113105620.B24192@sizzle.whoville.com>
+             (Test applied with minor tweaks and ->isa("HASH") omission.)
+     Branch: perl
+	   ! lib/UNIVERSAL.pm t/op/universal.t
+____________________________________________________________________________
+[ 12974] By: ams                                   on 2001/11/13  15:46:07
+        Log: Subject: [PATCH Benchmark.pm] docco tweaks
+             From: Barrie Slaymaker <barries@slaysys.com>
+             Date: Tue, 13 Nov 2001 11:34:45 -0500
+             Message-Id: <20011113113442.B24305@sizzle.whoville.com>
+     Branch: perl
+	   ! lib/Benchmark.pm
+____________________________________________________________________________
+[ 12973] By: jhi                                   on 2001/11/13  13:42:40
+        Log: Subject: [PATCH] Attack of the C loops, round 1
+             From: Richard Soderberg <rs@oregonnet.com>
+             Date: Mon, 12 Nov 2001 12:07:29 -0800
+             Message-Id: <200111122007.MAA01994@oregonnet.com>
+             
+             Subject: [PATCH] bytecode.pl (tiny patch)
+             From: Richard Soderberg <rs@oregonnet.com>
+             Date: Mon, 12 Nov 2001 12:53:24 -0800
+             Message-Id: <200111122053.MAA06272@oregonnet.com>
+     Branch: perl
+	   ! bytecode.pl installhtml
+____________________________________________________________________________
+[ 12972] By: jhi                                   on 2001/11/13  13:41:02
+        Log: Subject: [PATCH] Update to Filter::Util::Call
+             From: "Paul Marquess" <Paul_Marquess@yahoo.co.uk>
+             Date: Sun, 11 Nov 2001 22:33:33 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLAEKFDEAA.Paul_Marquess@Yahoo.co.uk>
+             
+             Use the new CXT* macros.
+     Branch: perl
+	   ! ext/Filter/Util/Call/Call.pm ext/Filter/Util/Call/Call.xs
+____________________________________________________________________________
+[ 12971] By: jhi                                   on 2001/11/13  13:31:34
+        Log: Subject: [PATCH vms/ext/vmsish.* vms/descrip_mms.template MANIFEST] Making vmsish.pm a no-op on non-VMS  
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 12 Nov 2001 20:50:34 -0500
+             Message-ID: <20011112205034.H2888@blackrider>
+     Branch: perl
+	   + lib/vmsish.pm lib/vmsish.t
+	   - vms/ext/vmsish.pm vms/ext/vmsish.t
+	   ! MANIFEST vms/descrip_mms.template
+____________________________________________________________________________
+[ 12970] By: jhi                                   on 2001/11/13  13:09:23
+        Log: :utf8 works only with perlio.
+     Branch: perl
+	   ! lib/open.t
+____________________________________________________________________________
+[ 12969] By: jhi                                   on 2001/11/13  13:03:36
+        Log: Subject: Re: @Config -"des" not quite working on VMS
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Tue, 13 Nov 2001 08:35:13 EST 
+             Message-Id: <011113083447.28742@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 12968] By: jhi                                   on 2001/11/13  12:59:11
+        Log: Subject: [PATCH] lib/charnames.pm 
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Tue, 13 Nov 2001 00:36:21 -0800 (PST) 
+             Message-Id: <200111130836.fAD8aLG76010@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! lib/charnames.pm
+____________________________________________________________________________
+[ 12967] By: pudge                                 on 2001/11/13  05:44:13
+        Log: Docs for Mac::err.
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/err/err.pm
+____________________________________________________________________________
+[ 12966] By: pudge                                 on 2001/11/13  05:43:58
+        Log: Some cleanup; change some globals to references for
+             possible persistence later.
+     Branch: maint-5.6/macperl
+	   ! macos/lib/Mac/Glue.pm
+____________________________________________________________________________
+[ 12965] By: pudge                                 on 2001/11/13  05:42:59
+        Log: Add in a bunch of Mac OS 9 constants for Mac::Files.
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Files/Files.pm
+____________________________________________________________________________
+[ 12964] By: pudge                                 on 2001/11/13  05:42:35
+        Log: Get Mac::Navigation to compile (bug #464684).
+     Branch: maint-5.6/macperl
+	   ! macos/Makefile.mk macos/ext/Mac/Makefile.mk
+	   ! macos/ext/Mac/Navigation/Makefile.PL
+	   ! macos/ext/Mac/Navigation/Navigation.xs
+	   ! macos/macperl/Makefile.mk
+____________________________________________________________________________
+[ 12963] By: pudge                                 on 2001/11/13  05:41:12
+        Log: Add in modules and POD to help menu.
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 12962] By: pudge                                 on 2001/11/13  05:28:18
+        Log: Update bundled modules.
+     Branch: maint-5.6/macperl
+	   + macos/bundled_ext/Filter/t/FilterTest.pm
+	   + macos/bundled_ext/List/Util/t/shuffle.t
+	   + macos/bundled_ext/Storable/t/compat06.t
+	   + macos/bundled_ext/Storable/t/st-dump.pl
+	   + macos/bundled_ext/Time/HiRes/hints/dynixptx.pl
+	   + macos/bundled_lib/blib/lib/LWP/ConnCache.pm
+	   + macos/bundled_lib/blib/lib/LWP/Protocol/http10.pm
+	   + macos/bundled_lib/blib/lib/LWP/Protocol/https10.pm
+	   + macos/bundled_lib/blib/lib/LWP/Protocol/nogo.pm
+	   + macos/bundled_lib/blib/lib/Net/HTTP/NB.pm
+	   + macos/bundled_lib/blib/lib/lwpcook.pod
+	   + macos/bundled_lib/t/Filter/Simple/filter.t
+	   + macos/bundled_lib/t/Switch/t/given.t
+	   + macos/bundled_lib/t/Switch/t/nested.t
+	   + macos/bundled_lib/t/Switch/t/switch.t
+	   + macos/bundled_lib/t/Text/Balanced/t/extbrk.t
+	   + macos/bundled_lib/t/Text/Balanced/t/extcbk.t
+	   + macos/bundled_lib/t/Text/Balanced/t/extdel.t
+	   + macos/bundled_lib/t/Text/Balanced/t/extmul.t
+	   + macos/bundled_lib/t/Text/Balanced/t/extqlk.t
+	   + macos/bundled_lib/t/Text/Balanced/t/exttag.t
+	   + macos/bundled_lib/t/Text/Balanced/t/extvar.t
+	   + macos/bundled_lib/t/Text/Balanced/t/gentag.t
+	   + macos/bundled_lib/t/URI/rfc2732.t
+	   + macos/bundled_lib/t/libnet/config.t
+	   + macos/bundled_lib/t/libnet/libnet_t.pl
+	   + macos/bundled_lib/t/libwww-perl/live/google.t
+	   + macos/bundled_lib/t/libwww-perl/live/jigsaw-auth-b.t
+	   + macos/bundled_lib/t/libwww-perl/live/jigsaw-auth-d.t
+	   + macos/bundled_lib/t/libwww-perl/live/jigsaw-chunk.t
+	   + macos/bundled_lib/t/libwww-perl/live/jigsaw-md5.t
+	   + macos/bundled_lib/t/libwww-perl/live/jigsaw-neg.t
+	   + macos/bundled_lib/t/libwww-perl/live/jigsaw-te.t
+	   + macos/bundled_lib/t/libwww-perl/live/validator.t
+	   - macos/bundled_ext/Filter/t/MyFilter.pm
+	   - macos/bundled_ext/Storable/t/compat-0.6.t
+	   - macos/bundled_ext/Storable/t/dump.pl
+	   - macos/bundled_ext/Time/Piece/Makefile.PL
+	   - macos/bundled_ext/Time/Piece/Piece.pm
+	   - macos/bundled_ext/Time/Piece/Piece.t
+	   - macos/bundled_ext/Time/Piece/Piece.xs
+	   - macos/bundled_ext/Time/Piece/README
+	   - macos/bundled_ext/Time/Piece/Seconds.pm
+	   - macos/bundled_lib/blib/lib/LWP/Protocol/http11.pm
+	   - macos/bundled_lib/blib/lib/Net/DummyInetd.pm
+	   - macos/bundled_lib/blib/lib/Net/PH.pm
+	   - macos/bundled_lib/blib/lib/Net/SNPP.pm
+	   - macos/bundled_lib/blib/lib/Text/Balanced.pod
+	   - macos/bundled_lib/t/Filter/Simple/test.pl
+	   - macos/bundled_lib/t/Switch/test.pl
+	   - macos/bundled_lib/t/Text/Balanced/t/genxt.t
+	   - macos/bundled_lib/t/Text/Balanced/t/xbrak.t
+	   - macos/bundled_lib/t/Text/Balanced/t/xcode.t
+	   - macos/bundled_lib/t/Text/Balanced/t/xdeli.t
+	   - macos/bundled_lib/t/Text/Balanced/t/xmult.t
+	   - macos/bundled_lib/t/Text/Balanced/t/xquot.t
+	   - macos/bundled_lib/t/Text/Balanced/t/xtagg.t
+	   - macos/bundled_lib/t/Text/Balanced/t/xvari.t
+	   - macos/bundled_lib/t/libnet/ph.t
+	   ! (edit 125 files)
+____________________________________________________________________________
+[ 12961] By: ams                                   on 2001/11/13  00:45:08
+        Log: Subject: [PATCH pod/perlport.pod] exit docs out of order
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 12 Nov 2001 20:16:45 -0500
+             Message-Id: <20011112201644.G2888@blackrider>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12960] By: ams                                   on 2001/11/12  23:54:00
+        Log: Subject: [PATCH t/io/dup.t ext/IO/lib/IO/t/io_dup.t vms/test.com]
+             Recoving dup tests for VMS
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 12 Nov 2001 19:35:33 -0500
+             Message-Id: <20011112193533.D2888@blackrider>
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_dup.t t/io/dup.t vms/test.com
+____________________________________________________________________________
+[ 12959] By: jhi                                   on 2001/11/12  20:23:59
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12958] By: jhi                                   on 2001/11/12  16:33:01
         Log: Subject: [Patch Perl@12856] MULTIPLICITY on VMS                
              From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)             
