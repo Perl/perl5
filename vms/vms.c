@@ -2441,7 +2441,7 @@ trim_unixpath(char *fspec, char *wildspec, int opts)
       for (front = end ; front >= base; front--)
          if (*front == '/' && !dirs--) { front++; break; }
     }
-    for (cp1=template,cp2=lcres; *cp1 && cp2 <= lcend + sizeof lcend; 
+    for (cp1=template,cp2=lcres; *cp1; 
          cp1++,cp2++) *cp2 = _tolower(*cp1);  /* Make lc copy for match */
     if (cp1 != '\0') return 0;  /* Path too long. */
     lcend = cp2;

@@ -126,7 +126,7 @@ threadstart(void *arg)
 	av_store(av, 0, &sv_no);
 	av_store(av, 1, newSVsv(thr->errsv));
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p died: %s\n",
-			      SvPV(thr->errsv, na)));
+			      thr, SvPV(thr->errsv, na)));
     } else {
 	DEBUG_L(STMT_START {
 	    for (i = 1; i <= retval; i++) {
