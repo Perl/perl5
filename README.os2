@@ -1,17 +1,15 @@
-Current state of the patches here is with respect to perl5.002b1d ;-).
-
-========================================================
-
-The OS/2 patchkit was submitted by ilya@math.ohio-state.edu.  I have
-applied some parts that I suspect won't cause any problems.
-Others do things that I haven't had time to fully consider.
-
-Still other patches included here should perhaps be integrated with the
-metaconfig package that generates Configure.
-
-	Andy Dougherty		<doughera@lafcol.lafayette.edu>
-
-========================================================
+Contents:
+	Notes on the patch
+	IMPORTANT NOTE
+	Target
+	Binary Install
+	Reading the docs
+	Notes on build on OS/2
+	Compile summary
+	Tests which fail
+	Calls to external programs
+	OS/2 extensions
+	Report from the battlefield on 5.002_01
 
 Notes on the patch:
 ~~~~~~~~~~~~~~~~~~~
@@ -23,6 +21,36 @@ Additional files are available on
 	ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2
 including patched pdksh and gnumake, needed for build.
 
+		   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+IMPORTANT NOTE     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+Note with the release 5.003_01 the dynamically loadable libraries
+should be rebuilt. In particular, DLLs are now created with the names
+which contain a checksum, thus allowing workaround for OS/2 scheme of
+caching DLLs.
+
+In particular, it is VERY IMPORTANT to have a correct perl.dll on
+LIBPATH during build, otherwise DLLs with wrong names will be
+created. Or have a perl.dll with the same naming convention for DLLs
+(hopefully, it should not change any time soon), or remove it from
+LIBPATH, add . to LIBPATH, wait until the build of DynaLoader fails,
+and then move the built DLL into LIBPATH.
+
+I also used this possibility to change perl linking type to -Zmt. It
+means that Perl now uses multithreaded CRTDLL, so your extensions can
+be multithreaded (note that the perl core is not thread-safe so far,
+so make sure you access Perl from one thread only). In particular, it
+is no longer needed to statically link X11_s.lib if you compile
+Perl/Tk/XFree.
+
+This newer port includes 
+	. numeric first argument to system(), see OS2::Process docs;
+	. modules OS2::Process, OS2::REXX, OS2::PrfDB, OS2::ExtAttrib.
+	. {get,set,end}*ent may work now (not checked)
+(most of this merged from ak's port).
+
+Note that static build of OS2::ExtAttrib fails some tests!
 
 Target:
 ~~~~~~~
@@ -30,7 +58,7 @@ Target:
 This is not supposed to make a perfect Perl on OS/2. This patch is
 concerned only with perfect _build_ of Perl on OS/2. Some good
 features from Andreas Kaiser port missed this port. However, most of
-the features are available in different form. 
+the features are available (possibly in different form). 
 
 !!! Note that [gs]etpriority functions in this port are compatible
 !!! with *nix, not with ak's port!!! 
@@ -38,17 +66,84 @@ the features are available in different form.
 The priorities are absolute, go from 32 to -95, lower is quickier. 0
 is default,
 
+Binary Install:
+~~~~~~~~~~~~~~
+This version of perl allows binary installation on another site. There
+are two possibilities:
+	a) sh.exe is in the directory with the same name as on machine
+where perl was compiled (f:/bin here), and perl library is installed
+into the same directory as the built target (f:/perllib);
+	b) One of the above conditions is not true. Perl may be
+informed about location of sh.exe via PERL_SH_DRIVE or PERL_SH_DIR
+(see below). To relocate the perl library, one can
+	b1) either use the usual PERLLIB environment variable - but
+you should deduce yourself which components should be put there, say,
+by doing 
+		perl -de 0
+		x \@INC
+		q
+in the directory of the perl library. Another problem with this is
+that a module is missing, then perl will try to scan the builtin
+directories nevertheless. If perl was intended to be installed on
+f:/perllib, but your f: is a CDROM, then you may have some trouble.
+	b2) Best: binary edit perl.dll and perl_.exe (using perl
+itself as a binary editor) to fix the paths. Note that the new paths
+should be better no longer than the old.
+	b3) More convinient: set PERLLIB_PREFIX environment
+variable. It should contain two components, separated by whitespace
+and/or semicolon `;'. The first component is translated to the second
+one if it is 
+	     a prefix of 
+			 a component of
+				        Perl library lookup path.
+Say, if you install perllibrary into c:/lib/perl/ instead of
+f:/perllib/, set it to
+	set PERLLIB_PREFIX=f:/perllib/;c:/lib/perl/
+
+Reading the docs:
+~~~~~~~~~~~~~~~~
+If your `man' is correctly installed, you should just add
+x:/perllib/man directory to the end of MANPATH like this:
+	set MANPATH=c:/man;f:/perllib/man
+After this you can access the docs like this:
+	man perlfunc
+	man 3 less
+	man ExtUtils.MakeMaker
+Note that dot is used as package separator for package documentation,
+and as usual, sometimes you need to give the section - 3 above - to
+avoid shadowing by the less(1) manpage.
+
+Alternatively, you can build HTML docs by running
+	pod2html
+in x:/perllib/lib/pod directory.
+
+Alternatively, you can build IPF source by running
+	pod2ipf > perl.ipf
+in x:/perllib/lib/pod directory, and build (excellent! - best of perl
+docs available!) .INF documentation by running
+	ipfc /inf perl.ipf
+Move it on your BOOKSHELF path, and now you may inspect docs by
+	view perl
+or
+	view perl keyword_to_see
+
+Alternatively you may pick up precompiled HTML and .INF docs from the
+net, as usual, .INF is available on CPAN/.../os2/ilyaz.
+
+There are also _very_ good docs in TexInfo and Adobe PDF format.
+
 Notes on build on OS/2:
 ~~~~~~~~~~~~~~~~~~~~~~~
-The change of C code in this patch is based on the ak port of 5.001+.
-
 a) Make sure your sort is not the broken OS/2 one, and that you have /tmp
-on the build partition.
+on the build partition. Make sure that your pdksh.exe, make.exe and
+db.lib are OK (look elsewhere in this file).
 
 b) when extracting perl5.*.tar.gz you need to extract perl5.*/Configure
 separately, since by default perl5.001m/configure may overwrite it;
 	like this:
 		tar vzxf perl5.004.tar.gz --case-sensitive perl5.004/Configure
+or
+		tar --case-sensitive -vzxf perl5.004.tar.gz perl5.004/Configure
 
 c) Necessary manual intervention when compiling on OS/2:
 
@@ -64,6 +159,8 @@ d) Compile summary:
 
 	# Prefix means where to install:
 sh Configure -des -D prefix=f:/perl5.005
+	# Note that you need to have /tmp/ ready.
+	#
 	# Ignore the message about missing `ln', and about `c' option
 	# to tr.
 make
@@ -82,31 +179,35 @@ make test
 	# To run finer tests, cd t && perl harness
 make install
 
-e) At the end of August GNU make and pdksh were too buggy for compile.
-Both maintainers have patches that make it possible to compile perl.
-The binaries are included in
+e) At the end of July 1996 GNU make was too buggy for compile.
+The maintainer has the patch (for a year now) that make it possible to
+compile perl. The binaries are included in
 	ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2
 patches are available too.
-Note that the pdksh5.2.4 broke builds with -Zexe option because of a
-changed order of executable extensions. A patch is sent to
-maintainer. The version 5.2.5alpha was OK for the build,
+
+Note that the pdksh5.2.7 or later is required.
 
 !!!!!!!!!!!!!!!!!
-If you see that some '/' became '\' in pdksh 5.2.3, you did not apply
-my patches!
-Same with segfaults in Make 3.74.
+If you see that some '/' became '\' in pdksh, you use an old pdksh!
+Same with segfaults in Make 3.76 (?) - use my patched verions.
 !!!!!!!!!!!!!!!!!
+
+f) As distributed the DB library db.a-db.lib is not suitable for
+linking with -Zmt. A recompiled version must be available from my FTP
+site in os2/db_mt.zip.
+
+!!!!!!!!!!!!!!!!
+If you see: 
+	'errno' - unresolved external
+it means you use a wrong db.lib.
+!!!!!!!!!!!!!!!!
 
 Problems reported: 
 
 a) one of the latest tr is broken, get an old one :-(
 	1.11 works. (On compuserver?)
-b) You need a link386.
+b) You need a perlglob.exe and link386.
 c) Get rid of invalid perl.dll on your LIBPATH.
-
-Note the EMX does not support en_us locale (most nobody does ;-). Some
-TCP/IP update could have installed it to your config.sys. You need to
-delete it until EMX is updated to support this newest discovery by IBM.
 
 
 Send comments to ilya@math.ohio-state.edu.
@@ -120,8 +221,12 @@ difference automatically, though I try).
 
 Building with a.out style is supported by the `perl_' target of make.
 Dynamic extensions are not possible with perl_.exe, since boot code
-should return the retvalue on stack, the address of which is not known
-to the extension.
+should return the retvalue on the Perl stack, the address of which is
+not known to the extension. Moreover: The build process for `perl_'
+DOES NOT KNOW about dependencies, so you should make sure that
+anything is up-to-date, say, by doing
+	make perl.dll
+first.
 
 The reason why compiling with a.out style executables leads to problems
 with dynamic extensions is:
@@ -132,18 +237,32 @@ with dynamic extensions is:
 On the other hand, aout-style compiled extension enjoys all the 
 (dis)advantages of fork().
 
-Check A.OUT compile with the following make targets:
+======================================================
 
-	aout_test 
-	aout_install
-	aout_clean
+If you need to run PM code from perl, you may use PM mode executable
+perl__.exe. It is subject to restrictions specific to PM programs: it
+will close the VIO window the moment any PM call is performed.
+
+It is needed to run Perl/Tk (currently 7/96 - pre-alpha).
 
 ======================================================
-Tests which fail with OMF compile:
+
+The reason why the executables are named perl_.exe and perl__.exe is
+the following: Perl may parse #! lines in perl scripts to find out the
+additional switches to enable. Thus there is a convention `What is a
+perl executable - judging by name', and the above names conform to
+this convention.
+
+======================================================
+Tests which fail 
+~~~~~~~~~~~~~~~~
+with OMF compile (fork works - and all the related
+test - with A.OUT compile):
 
 io/fs.t: 2-5, 7-11, 18  as they should.
 io/pipe: all, since open("|-") is not working (works with perl_.exe).
 lib/"all the dbm".t: 1 test should fail (file permission).
+lib/io_pipe io_sock, as they should: use fork.
 op/fork all fail, as they should (except with perl_.exe)
 op/stat 3 20 35 as they should, 39 (-t on /dev/null) ???? Sometimes 4
 - timing problem ????
@@ -151,23 +270,62 @@ op/stat 3 20 35 as they should, 39 (-t on /dev/null) ???? Sometimes 4
 Sometimes I have seen segfault in socket ????, only if run with Testing tools.
 
 A lot of `bad free'... in databases, bug in DB confirmed on other
-platforms.
+platforms. You may disable it by setting PERL_BADFREE environment variable
+to 0.
 
-Fail: Total 30 subtests (if stat:4 fails) in 10 scripts (one of 10
-is socket, which runs OK standalone). With newer configs I could not
-reproduce most the crashes.
+Here is my result with OMF:
+
+Test         Status Wstat Total Fail Success  List of failed
+------------------------------------------------------------------------------
+io/fs.t                      22   10  45.45%  2-5, 7-11, 18
+io/pipe.t         1   256     8   ??       %  ??
+lib/anydbm.t                 12    1   8.33%  2
+lib/db-btree.t               86    1   1.16%  20
+lib/db-hash.t                43    1   2.33%  16
+lib/db-recno.t               35    1   2.86%  18
+lib/io_pipe.t     2   512     6   ??       %  ??
+lib/io_sock.t   255 65280     5   ??       %  ??
+lib/sdbm.t                   12    1   8.33%  2
+op/exec.t                     8    1  12.50%  5
+op/fork.t       255 65280     2   ??       %  ??
+op/stat.t                    56    4   7.14%  3, 20, 35, 39
+Failed 12/104 test scripts, 88.46% okay. 41/2224 subtests failed, 98.16% okay.
+
+and with A.OUT:
+
+Test         Status Wstat Total Fail  Failed  List of failed
+------------------------------------------------------------------------------
+io/fs.t                      22   10  45.45%  2-5, 7-11, 18
+lib/anydbm.t                 12    1   8.33%  2
+lib/db-btree.t               86    1   1.16%  20
+lib/db-hash.t                43    1   2.33%  16
+lib/db-recno.t               35    1   2.86%  18
+lib/sdbm.t                   12    1   8.33%  2
+op/exec.t                     8    1  12.50%  5
+op/stat.t                    56    4   7.14%  3, 20, 35, 39
+Failed 8/104 test scripts, 92.31% okay. 20/2224 subtests failed, 99.10% okay.
+
+Note that op/exec.5 fail because I do not have /bin/sh on this drive.
+
+With newer configs I could not reproduce most the crashes. However,
+after fixpak17 REXX variables acquire a trailing '\0' at end when go
+through the variable pool (even if they had one), thus making some
+REXX tests fail.
 
 =======================================================
 
-Changes to calls to external programs:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Due to a popular demand the perl
-external program calling has been changed.  _If_ perl needs to call an
-external program _via shell_, the X:/bin/sh.exe will be called. The
-name of the shell is not overridable, except the drive letter.
+Calls to external programs:
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+Due to a popular demand the perl external program calling has been
+changed.  _If_ perl needs to call an external program _via shell_, the
+X:/bin/sh.exe will be called. The name of the shell is 
+overridable, as described below.
 
 Thus means that you need to pickup some copy of a sh.exe as well (I use one
 from pdksh). The drive X: above is set up automatically during the
-build, is settable in runtime from $ENV{PERL_SH_DRIVE}.
+build, is settable in runtime from $ENV{PERL_SH_DRIVE}. Another way to
+change it is to set $ENV{PERL_SH_DIR} to be the directory in which
+sh.exe resides.
 
 Reasons: a consensus on perl5-porters was that perl should use one 
 non-overridable shell per platform. The obvious choices for OS/2 are cmd.exe
@@ -220,12 +378,15 @@ Two new functions are supported by REXX code,
 	REXX_eval 'string';
 	REXX_eval_with 'string', REXX_function_name => \&perl_sub_reference;
 
-If you have some other extensions you want to share, send the code to me.
-Two jump to mind: tied access to EA's, and tied access to system databases.
+If you have some other extensions you want to share, send the code to
+me.  At least two are available: tied access to EA's, and tied access
+to system databases.
 
 ==================================================================
 ==								==
 ==		User report [my comments in brackets, IZ]	==
+==								==
+==	A web page: http://www.shadow.net/~troc/os2perl.html	==
 ==								==
 ==================================================================
 
@@ -575,7 +736,8 @@ of Configure, like I did with prefix.]
             and the same tests fail.  This new build is a success.
 [Note that bad free() mentioned above are bugs in the Berkeley
 DB. They just are more visible under OS/2 with perl free(), because of
-"rigid" function name resolution.
+"rigid" function name resolution. You may disable it by setting 
+PERL_BADFREE environment variable to 0.
 	To get finer tests, cd to ./t and run 
 		perl harness
 ]
