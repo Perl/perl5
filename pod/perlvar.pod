@@ -919,6 +919,11 @@ of perl in the right bracket?)  Example:
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
+When testing the variable, to steer clear of floating point
+inaccuracies you might want to prefer the inequality tests C<< < >>
+and C<< > >> to the tests containing equivalence: C<< <= >>, C<< == >>,
+and C<< >= >>.
+
 =item $COMPILING
 
 =item $^C
