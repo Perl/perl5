@@ -24,7 +24,7 @@ i_utime=undef
 # compile/link flags
 ldflags=-g
 optimize=-g
-static_ext="B Data/Dumper Digest/MD5 Errno Fcntl Filter::Util::Call IO IPC/SysV Opcode PerlIO::Scalar POSIX SDBM_File Socket Storable attrs re"
+static_ext="B Data/Dumper Digest/MD5 Errno Fcntl Filter::Util::Call IO IPC/SysV MIME::Base64 Opcode PerlIO::Scalar POSIX SDBM_File Socket Storable attrs re"
 #static_ext=none
 # dynamic loading needs work
 usedl=undef

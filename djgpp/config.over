@@ -39,7 +39,8 @@ repair()
      -e 's/encode/Encode/'\
      -e 's=filter/util/call=Filter/Util/Call=' \
      -e 's=digest/md5=Digest/MD5=' \
-     -e 's=perlio/scalar=PerlIO/Scalar='
+     -e 's=perlio/scalar=PerlIO/Scalar=' \
+     -e 's=mime/base64=MIME/Base64='
 }
 static_ext=$(repair "$static_ext")
 extensions=$(repair "$extensions")
