@@ -170,7 +170,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.04';
+$VERSION = '3.04_01';
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -583,7 +583,9 @@ sub fast_abs_path {
 	    return fast_abs_path($link_target);
 	}
 	
-	return $dir eq File::Spec->rootdir
+	my $tdir = $dir;
+	$tdir =~ s!\\!/!g if $^O eq 'MSWin32';
+	return $tdir eq File::Spec->rootdir
 	  ? File::Spec->catpath($vol, $dir, $file)
 	  : fast_abs_path(File::Spec->catpath($vol, $dir, '')) . '/' . $file;
     }
