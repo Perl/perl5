@@ -906,50 +906,75 @@ print "ok $test\n";
 $test++;
 
 @a = map chr,0..255;
-print "not " if grep(/\S/,@a) != grep(/[^\s]/,@a);
+
+@b = grep(/\S/,@a);
+@c = grep(/[^\s]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\S/,@a) != grep(/[\S]/,@a);
+@b = grep(/\S/,@a);
+@c = grep(/[\S]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\s/,@a) != grep(/[^\S]/,@a);
+@b = grep(/\s/,@a);
+@c = grep(/[^\S]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\s/,@a) != grep(/[\s]/,@a);
+@b = grep(/\s/,@a);
+@c = grep(/[\s]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\D/,@a) != grep(/[^\d]/,@a);
+@b = grep(/\D/,@a);
+@c = grep(/[^\d]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\D/,@a) != grep(/[\D]/,@a);
+@b = grep(/\D/,@a);
+@c = grep(/[\D]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\d/,@a) != grep(/[^\D]/,@a);
+@b = grep(/\d/,@a);
+@c = grep(/[^\D]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\d/,@a) != grep(/[\d]/,@a);
+@b = grep(/\d/,@a);
+@c = grep(/[\d]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\W/,@a) != grep(/[^\w]/,@a);
+@b = grep(/\W/,@a);
+@c = grep(/[^\w]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\W/,@a) != grep(/[\W]/,@a);
+@b = grep(/\W/,@a);
+@c = grep(/[\W]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\w/,@a) != grep(/[^\W]/,@a);
+@b = grep(/\w/,@a);
+@c = grep(/[^\W]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
 
-print "not " if grep(/\w/,@a) != grep(/[\w]/,@a);
+@b = grep(/\w/,@a);
+@c = grep(/[\w]/,@a);
+print "not " if "@b" ne "@c";
 print "ok $test\n";
 $test++;
