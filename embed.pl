@@ -49,7 +49,8 @@ sub walk_table (&@) {
 	else {
 	    @args = split /\s*\|\s*/, $_;
 	}
-	print $F $function->(@args);
+        my @outs = &{$function}(@args);
+        print $F @outs; # $function->(@args) is not 5.003
     }
     print $F $trailer if $trailer;
     close $F unless ref $filename;
@@ -251,7 +252,8 @@ readvars %intrp,  'intrpvar.h','I';
 readvars %thread, 'thrdvar.h','T';
 readvars %globvar, 'perlvars.h','G';
 
-foreach my $sym (sort keys %thread) {
+my $sym;
+foreach $sym (sort keys %thread) {
   warn "$sym in intrpvar.h as well as thrdvar.h\n" if exists $intrp{$sym};
 }
 
@@ -856,15 +858,15 @@ START_EXTERN_C
 
 EOT
 
-foreach my $sym (sort keys %intrp) {
+foreach $sym (sort keys %intrp) {
     print CAPIH bincompat_var('I',$sym);
 }
 
-foreach my $sym (sort keys %thread) {
+foreach $sym (sort keys %thread) {
     print CAPIH bincompat_var('T',$sym);
 }
 
-foreach my $sym (sort keys %globvar) {
+foreach $sym (sort keys %globvar) {
     print CAPIH bincompat_var('G',$sym);
 }
 
@@ -985,7 +987,7 @@ sub emit_func {
 	if (length $return) {
 	    $decl .= "    $rettype retval;\n";
 	    $retarg .= "retval = ";
-	    $return = "\n    ${return}retval;\n";
+	    $return = "\n    " . $return . "retval;\n";
 	}
 	$emitval .= <<EOT
 $rettype
@@ -1011,7 +1013,6 @@ EOT
 }
 
 # XXXX temporary hack
-my $sym;
 for $sym (qw(
 		perl_construct
 		perl_destruct
