@@ -587,6 +587,12 @@ output is highly customisable.  See L<B::Concise>.
 
 =item *
 
+The new bignum, bigint, and bigrat pragmas implement transparent
+bignum support (using the Math::BigInt, Math::BigFloat, and
+Math::BigRat backends), by Tels.
+
+=item *
+
 C<Class::ISA> for reporting the search path for a class's ISA tree,
 by Sean Burke, has been added.  See L<Class::ISA>.
 
@@ -739,6 +745,11 @@ C<Locale::Maketext> is localization framework from Sean Burke.  See
 L<Locale::Maketext>, and L<Locale::Maketext::TPJ13>.  The latter is an
 article about software localization, originally published in The Perl
 Journal #13, republished here with kind permission.
+
+=item *
+
+Math::BigRat for big rational numbers, to accompany Math::BigInt and
+Math::BigFloat, from Tels.
 
 =item *
 
