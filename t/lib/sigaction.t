@@ -43,7 +43,7 @@ my $oldaction=POSIX::SigAction->new('::bar', new POSIX::SigSet(), 0);
 	if($bad) { print "not ok 1\n" } else { print "ok 1\n"}
 }
 
-if($oldaction->{HANDLER} eq 'DEFAULT')
+if($oldaction->{HANDLER} eq (-t STDIN ? 'DEFAULT' : 'IGNORE'))
   { print "ok 2\n" } else { print "not ok 2\n"}
 print $SIG{HUP} eq '::foo' ? "ok 3\n" : "not ok 3\n";
 
