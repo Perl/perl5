@@ -137,7 +137,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	     break;
 	}
 
-	writing = (result > 0);
+	writing = (result != O_RDONLY);
 	fd = PerlLIO_open3(name, rawmode, rawperm);
 
 	if (fd == -1)
