@@ -48,7 +48,7 @@ static OP *too_few_arguments _((OP *o, char* name));
 static OP *too_many_arguments _((OP *o, char* name));
 static void null _((OP* o));
 static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
-	CV* startcv, I32 cx_ix, I32 saweval));
+	CV* startcv, I32 cx_ix, I32 saweval, U32 flags));
 static OP *newDEFSVOP _((void));
 static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 static void simplify_sort _((OP *o));
@@ -176,8 +176,11 @@ pad_allocmy(char *name)
     return off;
 }
 
+#define FINDLEX_NOSEARCH	1		/* don't search outer contexts */
+
 STATIC PADOFFSET
-pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval)
+pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval,
+	    U32 flags)
 {
     dTHR;
     CV *cv;
@@ -272,6 +275,9 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 	}
     }
 
+    if (flags & FINDLEX_NOSEARCH)
+	return 0;
+
     /* Nothing in current lexical context--try eval's context, if any.
      * This is necessary to let the perldb get at lexically scoped variables.
      * XXX This will also probably interact badly with eval tree caching.
@@ -283,7 +289,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 	default:
 	    if (i == 0 && saweval) {
 		seq = cxstack[saweval].blk_oldcop->cop_seq;
-		return pad_findlex(name, newoff, seq, PL_main_cv, -1, saweval);
+		return pad_findlex(name, newoff, seq, PL_main_cv, -1, saweval, 0);
 	    }
 	    break;
 	case CXt_EVAL:
@@ -306,7 +312,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 		continue;
 	    }
 	    seq = cxstack[saweval].blk_oldcop->cop_seq;
-	    return pad_findlex(name, newoff, seq, cv, i-1, saweval);
+	    return pad_findlex(name, newoff, seq, cv, i-1, saweval,FINDLEX_NOSEARCH);
 	}
     }
 
@@ -366,7 +372,7 @@ pad_findmy(char *name)
     }
 
     /* See if it's in a nested scope */
-    off = pad_findlex(name, 0, seq, outside, cxstack_ix, 0);
+    off = pad_findlex(name, 0, seq, outside, cxstack_ix, 0, 0);
     if (off) {
 	/* If there is a pending local definition, this new alias must die */
 	if (pendoff)
@@ -3666,7 +3672,7 @@ cv_clone2(CV *proto, CV *outside)
 	    char *name = SvPVX(namesv);    /* XXX */
 	    if (SvFLAGS(namesv) & SVf_FAKE) {   /* lexical from outside? */
 		I32 off = pad_findlex(name, ix, SvIVX(namesv),
-				      CvOUTSIDE(cv), cxstack_ix, 0);
+				      CvOUTSIDE(cv), cxstack_ix, 0, 0);
 		if (!off)
 		    PL_curpad[ix] = SvREFCNT_inc(ppad[ix]);
 		else if (off != ix)

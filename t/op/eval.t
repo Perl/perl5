@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..29\n";
+print "1..30\n";
 
 eval 'print "ok 1\n";';
 
@@ -129,3 +129,14 @@ eval <<'EOT';
   }
 EOT
 create_closure("ok $x\n")->();
+$x++;
+
+# does lexical search terminate correctly at subroutine boundary?
+$main::r = "ok $x\n";
+sub terminal { eval 'print $r' }
+{
+   my $r = "not ok $x\n";
+   eval 'terminal($r)';
+}
+$x++;
+
