@@ -2797,8 +2797,10 @@ Perl_yylex(pTHX)
 						newSVpvn(s, len)));
 		}
 		s = skipspace(d);
-		while (*s == ',')
+		if (*s == ':' && s[1] != ':')
 		    s = skipspace(s+1);
+		else if (s == d)
+		    break;	/* require real whitespace or :'s */
 	    }
 	    tmp = (PL_expect == XOPERATOR ? '=' : '{'); /*'}(' for vi */
 	    if (*s != ';' && *s != tmp && (tmp != '=' || *s != ')')) {

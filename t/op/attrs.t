@@ -63,12 +63,12 @@ mytest;
 BEGIN {++$ntests}
 
 my $anon1;
-eval '$anon1 = sub ($) : locked,,method { $_[0]++ }';
+eval '$anon1 = sub ($) : locked:method { $_[0]++ }';
 mytest;
 BEGIN {++$ntests}
 
 my $anon2;
-eval '$anon2 = sub : locked , method { $_[0]++ }';
+eval '$anon2 = sub : locked : method { $_[0]++ }';
 mytest;
 BEGIN {++$ntests}
 

@@ -1,6 +1,6 @@
 package attributes;
 
-$VERSION = 0.02;
+$VERSION = 0.03;
 
 @EXPORT_OK = qw(get reftype);
 @EXPORT = ();
@@ -54,7 +54,7 @@ sub import {
 		my $s = ((@pkgattrs == 1) ? '' : 's');
 		carp "$svtype package attribute$s " .
 		    "may clash with future reserved word$s: " .
-		    join(' , ' , @pkgattrs);
+		    join(' : ' , @pkgattrs);
 	    }
 	}
     }
@@ -65,7 +65,7 @@ sub import {
 	croak "Invalid $svtype attribute" .
 	    (( @badattrs == 1 ) ? '' : 's') .
 	    ": " .
-	    join(' , ', @badattrs);
+	    join(' : ', @badattrs);
     }
 }
 
@@ -267,7 +267,8 @@ will use that package name.
 =head2 Syntax of Attribute Lists
 
 An attribute list is a sequence of attribute specifications, separated by
-whitespace, commas, or both.  Each attribute specification is a simple
+whitespace or a colon (with optional whitespace).
+Each attribute specification is a simple
 name, optionally followed by a parenthesised parameter list.
 If such a parameter list is present, it is scanned past as for the rules
 for the C<q()> operator.  (See L<perlop/"Quote and Quote-like Operators">.)
@@ -275,8 +276,8 @@ The parameter list is passed as it was found, however, and not as per C<q()>.
 
 Some examples of syntactically valid attribute lists:
 
-    switch(10,foo(7,3)) , ,  expensive
-    Ugly('\(") , Bad
+    switch(10,foo(7,3))  :  expensive
+    Ugly('\(") :Bad
     _5x5
     locked method
 
@@ -286,7 +287,7 @@ Some examples of syntactically invalid attribute lists (with annotation):
     Ugly('(')			# ()-string not balanced
     5x5				# "5x5" not a valid identifier
     Y2::north			# "Y2::north" not a simple identifier
-    foo + bar			# "+" neither a comma nor whitespace
+    foo + bar			# "+" neither a colon nor whitespace
 
 =head1 EXPORTS
 

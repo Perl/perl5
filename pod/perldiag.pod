@@ -1745,7 +1745,7 @@ See L<perlfunc/sprintf>.
 
 =item Invalid separator character %s in attribute list
 
-(F) Something other than a comma or whitespace was seen between the
+(F) Something other than a colon or whitespace was seen between the
 elements of an attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.  See L<attributes>.

@@ -679,9 +679,9 @@ as requiring an automatic lock() when it is entered, you had to declare
 that with a C<use attrs> pragma in the body of the subroutine.
 That can now be accomplished with a declaration syntax, like this:
 
-    sub mymethod : locked, method ;
+    sub mymethod : locked method ;
     ...
-    sub mymethod : locked, method {
+    sub mymethod : locked :method {
 	...
     }
 
@@ -1914,14 +1914,14 @@ The offending range is now explicitly displayed.
 
 =item Invalid separator character %s in attribute list
 
-(F) Something other than a comma or whitespace was seen between the
+(F) Something other than a colon or whitespace was seen between the
 elements of an attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.  See L<attributes>.
 
 =item Invalid separator character %s in subroutine attribute list
 
-(F) Something other than a comma or whitespace was seen between the
+(F) Something other than a colon or whitespace was seen between the
 elements of a subroutine attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.
