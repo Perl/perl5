@@ -173,85 +173,85 @@ are available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.
 The C<\p{Is...}> test for "general properties" such as "letter",
 "digit", while the C<\p{In...}> test for Unicode scripts and blocks.
 
-The official Unicode script and block names have spaces and
-dashes and separators, but for convenience you can have
-dashes, spaces, and underbars at every word division, and
-you need not care about correct casing.  It is recommended,
-however, that for consistency you use the following naming:
-the official Unicode script or block name (see below for
-the additional rules that apply to block names), with the whitespace
-and dashes removed, and the words "uppercase-first-lowercase-otherwise".
-That is, "Latin-1 Supplement" becomes "Latin1Supplement".
+The official Unicode script and block names have spaces and dashes and
+separators, but for convenience you can have dashes, spaces, and
+underbars at every word division, and you need not care about correct
+casing.  It is recommended, however, that for consistency you use the
+following naming: the official Unicode script, block, or property name
+(see below for the additional rules that apply to block names),
+with whitespace and dashes replaced with underbar, and the words
+"uppercase-first-lowercase-rest".  That is, "Latin-1 Supplement"
+becomes "Latin_1_Supplement".
 
 You can also negate both C<\p{}> and C<\P{}> by introducing a caret
-(^) between the first curly and the property name: C<\p{^InTamil}> is
-equal to C<\P{InTamil}>.
+(^) between the first curly and the property name: C<\p{^In_Tamil}> is
+equal to C<\P{In_Tamil}>.
 
 The C<In> and C<Is> can be left out: C<\p{Greek}> is equal to
-C<\p{InGreek}>, C<\P{Pd}> is equal to C<\P{Pd}>.
+C<\p{In_Greek}>, C<\P{Pd}> is equal to C<\P{Pd}>.
 
     Short       Long
 
     L           Letter
-    Lu          Uppercase Letter
-    Ll          Lowercase Letter
-    Lt          Titlecase Letter
-    Lm          Modifier Letter
-    Lo          Other Letter
+    Lu          Uppercase_Letter
+    Ll          Lowercase_Letter
+    Lt          Titlecase_Letter
+    Lm          Modifier_Letter
+    Lo          Other_Letter
 
     M           Mark
-    Mn          Non-Spacing Mark
-    Mc          Spacing Combining Mark
-    Me          Enclosing Mark
+    Mn          Nonspacing_Mark
+    Mc          Spacing_Mark
+    Me          Enclosing_Mark
 
     N           Number
-    Nd          Decimal Digit Number
-    Nl          Letter Number
-    No          Other Number
+    Nd          Decimal_Number
+    Nl          Letter_Number
+    No          Other_Number
 
     P           Punctuation
-    Pc          Connector Punctuation
-    Pd          Dash Punctuation
-    Ps          Open Punctuation
-    Pe          Close Punctuation
-    Pi          Initial Punctuation
+    Pc          Connector_Punctuation
+    Pd          Dash_Punctuation
+    Ps          Open_Punctuation
+    Pe          Close_Punctuation
+    Pi          Initial_Punctuation
                 (may behave like Ps or Pe depending on usage)
-    Pf          Final Punctuation
+    Pf          Final_Punctuation
                 (may behave like Ps or Pe depending on usage)
-    Po          Other Punctuation
+    Po          Other_Punctuation
 
     S           Symbol
-    Sm          Math Symbol
-    Sc          Currency Symbol
-    Sk          Modifier Symbol
-    So          Other Symbol
+    Sm          Math_Symbol
+    Sc          Currency_Symbol
+    Sk          Modifier_Symbol
+    So          Other_Symbol
 
     Z           Separator
-    Zs          Space Separator
-    Zl          Line Separator
-    Zp          Paragraph Separator
+    Zs          Space_Separator
+    Zl          Line_Separator
+    Zp          Paragraph_Separator
 
     C           Other
-    Cc          (Other) Control
-    Cf          (Other) Format
-    Cs          (Other) Surrogate
-    Co          (Other) Private Use
-    Cn          (Other) Not Assigned
+    Cc          Control
+    Cf          Format
+    Cs          Surrogate
+    Co          Private_Use
+    Cn          Unassigned
 
 There's also C<L&> which is an alias for C<Ll>, C<Lu>, and C<Lt>.
 
 The following reserved ranges have C<In> tests:
 
-    CJK Ideograph Extension A
-    CJK Ideograph
-    Hangul Syllable
-    Non Private Use High Surrogate
-    Private Use High Surrogate
-    Low Surrogate
-    Private Surrogate
-    CJK Ideograph Extension B
-    Plane 15 Private Use
-    Plane 16 Private Use
+    CJK_Ideograph_Extension_A
+    CJK_Ideograph
+    Hangul_Syllable
+    Non_Private_Use_High_Surrogate
+    Private_Use_High_Surrogate
+    Low_Surrogate
+    Private_Surrogate
+    CJK_Ideograph_Extension_B
+    Plane_15_Private_Use
+    Plane_16_Private_Use
 
 For example C<"\x{AC00}" =~ \p{HangulSyllable}> will test true.
 (Handling of surrogates is not implemented yet, because Perl
@@ -345,7 +345,7 @@ properties, defined by the F<PropList> Unicode database:
     Other_Math
     Other_Uppercase
     Quotation_Mark
-    White_space
+    White_Space
 
 and further derived properties:
 
@@ -360,7 +360,7 @@ and further derived properties:
     Any             Any character
     Assigned        Any non-Cn character
     Common          Any character (or unassigned code point)
-                    not explicitly assigned to a script.
+                    not explicitly assigned to a script
 
 =head2 Blocks
 
@@ -385,7 +385,7 @@ a script called C<Katakana> and a block called C<Katakana>, the block
 version has C<Block> appended to its name, C<\p{InKatakanaBlock}>.
 
 Notice that this definition was introduced in Perl 5.8.0: in Perl
-5.6.0 only the blocks were used; in Perl 5.8.0 scripts became the
+5.6 only the blocks were used; in Perl 5.8.0 scripts became the
 preferential Unicode character class definition; this meant that
 the definitions of some character classes changed (the ones in the
 below list that have the C<Block> appended).

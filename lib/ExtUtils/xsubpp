@@ -124,7 +124,7 @@ $FH = 'File0000' ;
 
 $usage = "Usage: xsubpp [-v] [-C++] [-except] [-prototypes] [-noversioncheck] [-nolinenumbers] [-nooptimize] [-noinout] [-noargtypes] [-s pattern] [-typemap typemap]... file.xs\n";
 
-$proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
+$proto_re = "[" . quotemeta('\$%&*@;[]') . "]" ;
 
 $except = "";
 $WantPrototypes = -1 ;

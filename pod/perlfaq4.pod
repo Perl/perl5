@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.6 $, $Date: 2001/10/23 04:39:28 $)
+perlfaq4 - Data Manipulation ($Revision: 1.7 $, $Date: 2001/10/26 19:46:03 $)
 
 =head1 DESCRIPTION
 
@@ -225,7 +225,7 @@ Using pack and unpack for larger strings
 	substr("0" x 32 . "11110101011011011111011101111", -32)));
     $dec = sprintf("%d", $int);
 
-    Substr() is used to left pad a 32 character string with zeros.
+    # substr() is used to left pad a 32 character string with zeros.
 
 Using Bit::Vector:
 

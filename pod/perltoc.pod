@@ -2764,8 +2764,8 @@ mean?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.5 $, $Date: 2001/10/12
-15:20:13 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.7 $, $Date: 2001/10/26
+19:46:03 $)
 
 =over 4
 
@@ -2783,7 +2783,12 @@ numbers I should be getting (eg, 19.95)?
 =item Does Perl have a round() function?  What about ceil() and floor()? 
 Trig functions?
 
-=item How do I convert bits into ints?
+=item How do I convert between numeric representations:
+
+B<How do I convert Hexadecimal into decimal:>, B<How do I convert from
+decimal to hexadecimal:>, B<How do I convert from octal to decimal:>, B<How
+do I convert from decimal to octal:>, B<How do I convert from binary to
+decimal:>, B<How do I convert from decimal to binary:>
 
 =item Why doesn't & work the way I want it to?
 
@@ -3133,8 +3138,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - Perl Language Issues ($Revision: 1.2 $, $Date: 2001/10/16
-13:27:22 $)
+=head2 perlfaq7 - Perl Language Issues ($Revision: 1.3 $, $Date: 2001/10/19
+14:39:24 $)
 
 =over 4
 
@@ -4704,6 +4709,11 @@ It's easier to rsync the source tree, It's more recent, It's more reliable
 
 It's easier to rsync the patches, It's a good reference, Finding a start
 point, Finding how to fix a bug, Finding the source of misbehaviour
+
+=item Perlbug remote interface
+
+1 http://bugs.perl.org, 2 bugdb@perl.org, 3
+commands_and_bugdids@bugs.perl.org, notes, patches, tests
 
 =item Submitting patches
 
@@ -7144,6 +7154,29 @@ method, locked
 
 =back
 
+=head2 threadshared::shared, threads::shared - Perl extension for sharing
+data structures between threads
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+=back
+
+=item BUGS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 threads - Perl extension allowing use of interpreter based threads
 from perl
 
@@ -7213,18 +7246,6 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 =item EXAMPLES
 
 =item SEE ALSO
-
-=back
-
-=head2 attrs - set/get attributes of a subroutine (deprecated)
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-method, locked
 
 =back
 
@@ -7629,34 +7650,6 @@ C<strict refs>, C<strict vars>, C<strict subs>
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=back
-
-=head2 threads - Perl extension allowing use of interpreter based threads
-from perl
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-new, function, LIST, $threads->join, $threads->detach, threads->self,
-$threads->tid
-
-=item TODO
-
-Fix so the return value is returned when you join, Add join_all, Fix memory
-leaks!
-
-=item AUTHOR and COPYRIGHT
-
-=item BUGS
-
-creating a thread from within a thread is unsafe under win32,
-PERL_OLD_SIGNALS are not threadsafe, will not be
-
-=item SEE ALSO
 
 =back
 
@@ -9385,7 +9378,7 @@ B<DB_HASH>, B<DB_BTREE>, B<DB_RECNO>
 
 =over 4
 
-=item Using DB_File with Berkeley DB version 2 or 3
+=item Using DB_File with Berkeley DB version 2 or greater
 
 =item Interface to Berkeley DB
 
@@ -9908,22 +9901,6 @@ arrays
 =item LIMITATIONS
 
 =item AUTHOR
-
-=back
-
-=head2 Errno - System errno constants
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CAVEATS
-
-=item AUTHOR
-
-=item COPYRIGHT
 
 =back
 
@@ -10660,7 +10637,7 @@ shdist,    make zipdist,    make ci
 
 =item ENVIRONMENT
 
-PERL_MM_OPT
+PERL_MM_OPT, PERL_MM_USE_DEFAULT
 
 =item SEE ALSO
 
@@ -10892,6 +10869,8 @@ C<untaint>, C<untaint_pattern>, C<untaint_skip>
 
 =item CAVEAT
 
+$dont_use_nlink, symlinks
+
 =item NOTES
 
 =item HISTORY
@@ -11040,7 +11019,7 @@ splitpath
 
 splitdir
 
-catpath()
+catpath
 
 abs2rel
 
@@ -11497,7 +11476,7 @@ B<$_>, B<$status>, B<filter_read> and B<filter_read_exact>, B<filter_del>
 
 =item The lonesome dash
 
-=item Argument call-back
+=item Argument callback
 
 =back
 
@@ -11531,6 +11510,10 @@ prefix_pattern, debug (default: disabled)
 
 =item GetOptions does not return a false result when an option is not
 supplied
+
+=item GetOptions does not split the command line correctly
+
+=item How do I put a "-?" option into a Getopt::Long?
 
 =back
 
@@ -14991,13 +14974,14 @@ B<-output>, B<-sections>, B<-ranges>
 
 =item DESCRIPTION
 
-alt, indent, loose, quotes, sentence, width
+alt, code, indent, loose, quotes, sentence, width
 
 =item DIAGNOSTICS
 
-Bizarre space in item, Can't open %s for reading: %s, Invalid quote
-specification "%s", %s:%d: Unknown command paragraph "%s", Unknown escape:
-%s, Unknown sequence: %s, Unmatched =back
+Bizarre space in item, Item called without tag, Can't open %s for reading:
+%s, Invalid quote specification "%s", %s:%d: Unknown command paragraph
+"%s", %s:%d: Unknown escape: %s, %s:%d: Unknown sequence: %s, %s:%d:
+Unmatched =back
 
 =item RESTRICTIONS
 
@@ -16174,7 +16158,8 @@ TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
 
 =back
 
-=head2 Time::HiRes - High resolution ualarm, usleep, and gettimeofday
+=head2 Time::HiRes - High resolution alarm, sleep, gettimeofday, interval
+timers
 
 =over 4
 

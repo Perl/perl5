@@ -2552,14 +2552,14 @@ Found in file sv.h
 
 Like C<SvPV_nolen>, but converts sv to byte representation first if necessary.
 
-	char*	SvPVbyte_nolen(SV* sv, STRLEN len)
+	char*	SvPVbyte_nolen(SV* sv)
 
 =for hackers
 Found in file sv.h
 
 =item SvPVutf8
 
-Like C<SvPV>, but converts sv to uft8 first if necessary.
+Like C<SvPV>, but converts sv to utf8 first if necessary.
 
 	char*	SvPVutf8(SV* sv, STRLEN len)
 
@@ -2568,7 +2568,7 @@ Found in file sv.h
 
 =item SvPVutf8x
 
-Like C<SvPV>, but converts sv to uft8 first if necessary.
+Like C<SvPV>, but converts sv to utf8 first if necessary.
 Guarantees to evalute sv only once; use the more efficient C<SvPVutf8>
 otherwise.
 
@@ -2579,7 +2579,7 @@ Found in file sv.h
 
 =item SvPVutf8x_force
 
-Like C<SvPV_force>, but converts sv to uft8 first if necessary.
+Like C<SvPV_force>, but converts sv to utf8 first if necessary.
 Guarantees to evalute sv only once; use the more efficient C<SvPVutf8_force>
 otherwise.
 
@@ -2590,7 +2590,7 @@ Found in file sv.h
 
 =item SvPVutf8_force
 
-Like C<SvPV_force>, but converts sv to uft8 first if necessary.
+Like C<SvPV_force>, but converts sv to utf8 first if necessary.
 
 	char*	SvPVutf8_force(SV* sv, STRLEN len)
 
@@ -2599,9 +2599,9 @@ Found in file sv.h
 
 =item SvPVutf8_nolen
 
-Like C<SvPV_nolen>, but converts sv to uft8 first if necessary.
+Like C<SvPV_nolen>, but converts sv to utf8 first if necessary.
 
-	char*	SvPVutf8_nolen(SV* sv, STRLEN len)
+	char*	SvPVutf8_nolen(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2950,22 +2950,22 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvUVx
-
-Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficent C<SvUV> otherwise.
-
-	UV	SvUVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvUVX
 
 Returns the raw value in the SV's UV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvUV()>.
 
 	UV	SvUVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUVx
+
+Coerces the given SV to an unsigned integer and returns it. Guarantees to
+evaluate sv only once. Use the more efficent C<SvUV> otherwise.
+
+	UV	SvUVx(SV* sv)
 
 =for hackers
 Found in file sv.h

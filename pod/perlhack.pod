@@ -460,11 +460,66 @@ If searching the patches is too bothersome, you might consider using
 perl's bugtron to find more information about discussions and
 ramblings on posted bugs.
 
-=back
-
 If you want to get the best of both worlds, rsync both the source
 tree for convenience, reliability and ease and rsync the patches
 for reference.
+
+=back
+
+
+=head2 Perlbug remote interface
+
+=over 4
+
+There are three (3) remote administrative interfaces for modifying bug status, category, etc.  In all cases an admin must be first registered with the Perlbug database by sending an email request to richard@perl.org or bugmongers@perl.org.  
+
+The main requirement is the willingness to classify, (with the emphasis on closing where possible :), outstanding bugs.  Further explanation can be garnered from the web at http://bugs.perl.org/, or by asking on the admin mailing list at: bugmongers@perl.org
+
+For more info on the web see
+
+	http://bugs.perl.org/perlbug.cgi?req=spec
+
+
+B<The interfaces:>
+
+
+=item 1 http://bugs.perl.org
+
+Login via the web, (remove B<admin/> if only browsing), where interested Cc's, tests, patches and change-ids, etc. may be assigned.
+
+	http://bugs.perl.org/admin/index.html
+
+
+=item 2 bugdb@perl.org
+
+Where the subject line is used for commands:
+
+	To: bugdb@perl.org
+	Subject: -a close bugid1 bugid2 aix install
+
+	To: bugdb@perl.org
+	Subject: -h
+
+
+=item 3 commands_and_bugdids@bugs.perl.org
+
+Where the address itself is the source for the commands:
+
+	To: close_bugid1_bugid2_aix@bugs.perl.org
+
+	To: help@bugs.perl.org
+
+
+=item notes, patches, tests
+
+For patches and tests, the message body is assigned to the appropriate bug/s and forwarded to p5p for their attention.  
+
+	To: test_<bugid1>_aix_close@bugs.perl.org
+	Subject: this is a test for the (now closed) aix bug
+
+	Test is the body of the mail
+
+=back
 
 =head2 Submitting patches
 
