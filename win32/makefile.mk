@@ -5,12 +5,12 @@
 #	Borland C++ 5.02
 #	Mingw32 with gcc-2.95.2 or better  **experimental**
 #
-# This is set up to build a perl.exe that runs off a shared library
-# (perl56.dll).  Also makes individual DLLs for the XS extensions.
-#
 
 ##
 ## Make sure you read README.win32 *before* you mess with anything here!
+##
+## If you want a configuration that is the same as ActivePerl (see
+## www.ActiveState.com) make sure you set at least BUILD_FLAVOR below!
 ##
 
 ##
@@ -18,11 +18,78 @@
 ##
 
 #
-# Set these to wherever you want "dmake install" to put your
-# newly built perl.
+# Set these to wherever you want "dmake install" to put your newly
+# built perl.  Setting it to a path with spaces is NOT recommended.
 #
 INST_DRV	*= c:
 INST_TOP	*= $(INST_DRV)\perl
+
+#
+# uncomment exactly one of the following
+# 
+# Visual C++ 2.x
+#CCTYPE		*= MSVC20
+# Visual C++ > 2.x and < 5.x SP3
+#CCTYPE		*= MSVC_PRE_50SP3
+# Visual C++ >= 5.x SP3
+#CCTYPE		*= MSVC60
+# Borland 5.02 or later
+#CCTYPE		*= BORLAND
+# mingw32+gcc-2.95.2 or better
+CCTYPE		*= GCC
+
+#
+# set the install locations of the compiler include/libraries. Running
+# VCVARS32.BAT is *required* when using Visual C.  Some versions of
+# Visual C earlier than 5.x SP3 don't define MSVCDIR in the environment.
+# If such is the case you may have to set CCHOME explicitly.  Spaces in
+# the path name should not be quoted.
+#
+#CCHOME		*= c:\bc5
+#CCHOME		*= $(MSVCDIR)
+CCHOME		*= c:\gcc-2.95.2-msvcrt
+CCINCDIR	*= $(CCHOME)\include
+CCLIBDIR	*= $(CCHOME)\lib
+
+#
+# uncomment this if you are compiling under Windows 95/98 and command.com
+# (not needed if you're running under 4DOS/NT 6.01 or later)
+#IS_WIN95	*= define
+
+#
+# if you have the source for des_fcrypt(), uncomment CRYPT_SRC and make sure
+# the file exists (see README.win32).  File should be located in the same
+# directory as this makefile.
+#
+# If you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
+# library, uncomment CRYPT_LIB, and make sure the library exists (see
+# README.win32).  Specify the full pathname of the library.
+#
+# If you don't enable one of these, the crypt() builtin will fail to work.
+# (Generally not critical.)
+#
+#CRYPT_SRC	*= fcrypt.c
+#CRYPT_LIB	*= fcrypt.lib
+
+#
+# uncomment this option if you want to bulk-enable all the options that
+# ActiveState uses to build their ActivePerl distribution.  If you set this,
+# there should be no need to set any of the other options that follow.
+#
+# If you don't enable this, the defaults below will get you the most
+# efficient perl configuration possible that will also be compatible
+# with the build defaults used on Unix platforms.  On the other hand,
+# the ActivePerl configuration will get you fork() emulation at the
+# cost of some added bloat.
+#
+#BUILD_FLAVOR	*= ActivePerl
+
+#
+# uncomment next line if you want debug version of perl (big and slow).
+# If not enabled, we automatically try to use maximum optimization
+# with all compilers that are known to have a working optimizer.
+#
+#CFG		*= Debug
 
 #
 # Comment this out if you DON'T want your perl installation to be versioned.
@@ -83,35 +150,9 @@ INST_ARCH	*= \$(ARCHNAME)
 # uncomment next line if you want to use the PERL_OBJECT build option.
 # DO NOT ENABLE unless you have legacy code that relies on the C++
 # CPerlObj class that was available in 5.005.  This cannot be enabled
-# if you ask for USE_5005THREADS above.
+# if you ask for USE_5005THREADS or USE_MULTI above.
 #
 #USE_OBJECT	*= define
-
-#
-# uncomment exactly one of the following
-# 
-# Visual C++ 2.x
-#CCTYPE		*= MSVC20
-# Visual C++ > 2.x and < 6.x
-#CCTYPE		*= MSVC
-# Visual C++ >= 6.x
-#CCTYPE		*= MSVC60
-# Borland 5.02 or later
-#CCTYPE		*= BORLAND
-# mingw32+gcc-2.95.2 or better
-CCTYPE		*= GCC
-
-#
-# uncomment this if you are compiling under Windows 95/98 and command.com
-# (not needed if you're running under 4DOS/NT 6.01 or later)
-#IS_WIN95	*= define
-
-#
-# uncomment next line if you want debug version of perl (big,slow)
-# If not enabled, we automatically try to use maximum optimization
-# with all compilers that are known to have a working optimizer.
-#
-#CFG		*= Debug
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
@@ -126,26 +167,13 @@ CCTYPE		*= GCC
 
 #
 # uncomment to enable linking with setargv.obj under the Visual C
-# compiler. Setting this options enables perl to expand wildcards in
+# compiler. Setting this option enables perl to expand wildcards in
 # arguments, but it may be harder to use alternate methods like
-# File::DosGlob that are more powerful.  This option is supported only with
-# Visual C.
+# File::DosGlob that are more powerful, or use perl inside shells
+# that do the expansion for you.  This option is supported only
+# with Visual C.
 #
 #USE_SETARGV	*= define
-
-#
-# if you have the source for des_fcrypt(), uncomment this and make sure the
-# file exists (see README.win32).  File should be located in the same
-# directory as this file.
-#
-#CRYPT_SRC	*= fcrypt.c
-
-#
-# if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
-# library, uncomment this, and make sure the library exists (see README.win32)
-# Specify the full pathname of the library.
-#
-#CRYPT_LIB	*= fcrypt.lib
 
 #
 # set this if you wish to use perl's malloc
@@ -155,19 +183,6 @@ CCTYPE		*= GCC
 # if you ask for USE_IMP_SYS above.
 #
 #PERL_MALLOC	*= define
-
-#
-# set the install locations of the compiler include/libraries
-# Running VCVARS32.BAT is *required* when using Visual C.
-# Some versions of Visual C don't define MSVCDIR in the environment,
-# so you may have to set CCHOME explicitly (spaces in the path name should
-# not be quoted)
-#
-#CCHOME		*= c:\bc5
-#CCHOME		*= $(MSVCDIR)
-CCHOME		*= c:\gcc-2.95.2-msvcrt
-CCINCDIR	*= $(CCHOME)\include
-CCLIBDIR	*= $(CCHOME)\lib
 
 #
 # Additional compiler flags can be specified here.
@@ -217,6 +232,19 @@ EXTRALIBDIRS	*=
 ##
 
 ##################### CHANGE THESE ONLY IF YOU MUST #####################
+
+.IF "$(BUILD_FLAVOR)" == "ActivePerl"
+INST_VER	!= 
+INST_ARCH	!= 
+USE_MULTI	!= define
+USE_ITHREADS	!= define
+USE_IMP_SYS	!= define
+USE_5005THREADS	!= undef
+USE_OBJECT	!= undef
+USE_PERLCRT	!= undef
+USE_SETARGV	!=
+PERL_MALLOC	!= undef
+.ENDIF
 
 .IF "$(CRYPT_SRC)$(CRYPT_LIB)" == ""
 D_CRYPT		= undef
