@@ -176,7 +176,7 @@ sub walkoptree_exec {
 	$op->$method($level);
 	$ppname = $op->name;
 	if ($ppname =~
-	    /^(or|and|mapwhile|grepwhile|entertry|range|cond_expr)$/)
+	    /^(d?or(assign)?|and(assign)?|mapwhile|grepwhile|entertry|range|cond_expr)$/)
 	{
 	    print $prefix, uc($1), " => {\n";
 	    walkoptree_exec($op->other, $method, $level + 1);
