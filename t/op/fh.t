@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..6\n";
+print "1..5\n";
 
 my $test = 0;
 
