@@ -11,7 +11,7 @@
 \bblib/
 \bMakeMaker-\d
 \bpm_to_blib$
-\bblibdirs$
+\bblibdirs\.exists$
 
 # Avoid Module::Build generated and utility files.
 \bBuild$
