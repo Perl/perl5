@@ -627,9 +627,11 @@ included since its further use is discouraged.
 C<Encode>, by Nick Ing-Simmons, provides a mechanism to translate
 between different character encodings.  Support for Unicode,
 ISO-8859-*, ASCII, CP*, KOI8-R, and three variants of EBCDIC are
-compiled in to the module.  Several other encodings (like Japanese,
-Chinese, and MacIntosh encodings) are included and will be loaded at
-runtime.  See L<Encode>.
+compiled in to the module.  Several other encodings (like Chinese,
+Japanese, Korean, and MacIntosh encodings) are included and will be
+loaded at runtime.  (For space considerations, the largest Chinese
+encodings have been separated into their own CPAN module,
+Encode::HanExtra).  See L<Encode>.
 
 Any encoding supported by Encode module is also available to the
 ":encoding()" layer if PerlIO is used.
@@ -2377,11 +2379,11 @@ respectively.
 
 =item *
 
-perl5db.pl has been modified to present a more consistent commands
-interface, via (CommandSet=580).  perl5db.t was also added to test the
-changes, and as a placeholder for further tests.
+The debugger (perl5db.pl) has been modified to present a more
+consistent commands interface, via (CommandSet=580).  perl5db.t was
+also added to test the changes, and as a placeholder for further tests.
 
-See L<perldebug>
+See L<perldebug>.
 
 =item *
 
@@ -2389,6 +2391,11 @@ The debugger has a new C<dumpDepth> option to control the maximum
 depth to which nested structures are dumped.  The C<x> command has
 been extended so that C<x N EXPR> dumps out the value of I<EXPR> to a
 depth of at most I<N> levels.
+
+=item *
+
+The debugger can now show lexical variables if you have the CPAN
+module PadWalker installed.
 
 =item *
 
