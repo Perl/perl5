@@ -5579,6 +5579,7 @@ is_null_device(name)
 bool
 Perl_cando(pTHX_ Mode_t bit, Uid_t effective, Stat_t *statbufp)
 {
+  char fname_phdev[NAM$C_MAXRSS+1];
   if (statbufp == &PL_statcache) return cando_by_name(bit,effective,namecache);
   else {
     char fname[NAM$C_MAXRSS+1];
@@ -5602,7 +5603,6 @@ Perl_cando(pTHX_ Mode_t bit, Uid_t effective, Stat_t *statbufp)
  * but if someone has redefined that logical, Perl gets very lost.  Since
  * we have the physical device name from the stat buffer, just paste it on.
  */
-      char fname_phdev[NAM$C_MAXRSS+1];
       strcpy( fname_phdev, statbufp->st_devnam );
       strcat( fname_phdev, strrchr(fname, ':') );
 
