@@ -435,6 +435,7 @@ $priv{$_}{128} = "LVINTRO"
        "padav", "padhv", "enteriter");
 $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
+$priv{"aassign"}{32} = "PHASH" if $] < 5.009;
 $priv{"sassign"}{64} = "BKWARD";
 $priv{$_}{64} = "RTIME" for ("match", "subst", "substcont");
 @{$priv{"trans"}}{1,2,4,8,16,64} = ("<UTF", ">UTF", "IDENT", "SQUASH", "DEL",
@@ -558,11 +559,17 @@ sub concise_op {
 	if (defined $padname and class($padname) ne "SPECIAL") {
 	    $h{targarg}  = $padname->PVX;
 	    if ($padname->FLAGS & SVf_FAKE) {
-		my $fake = '';
-		$fake .= 'a' if $padname->IVX & 1; # PAD_FAKELEX_ANON
-		$fake .= 'm' if $padname->IVX & 2; # PAD_FAKELEX_MULTI
-		$fake .= ':' . $padname->NVX if $curcv->CvFLAGS & CVf_ANON;
-		$h{targarglife} = "$h{targarg}:FAKE:$fake";
+		if ($] < 5.009) {
+		    $h{targarglife} = "$h{targarg}:FAKE";
+		} else {
+		    # These changes relate to the jumbo closure fix.
+		    # See changes 19939 and 20005
+		    my $fake = '';
+		    $fake .= 'a' if $padname->IVX & 1; # PAD_FAKELEX_ANON
+		    $fake .= 'm' if $padname->IVX & 2; # PAD_FAKELEX_MULTI
+		    $fake .= ':' . $padname->NVX if $curcv->CvFLAGS & CVf_ANON;
+		    $h{targarglife} = "$h{targarg}:FAKE:$fake";
+		}
 	    }
 	    else {
 		my $intro = $padname->NVX - $cop_seq_base;
