@@ -2557,7 +2557,7 @@ PP(pp_stat)
 
     if (PL_op->op_flags & OPf_REF) {
 	gv = cGVOP_gv;
-	if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO))
+	if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO) && gv != PL_defgv)
 	    Perl_warner(aTHX_ WARN_IO,
 			"lstat() on filehandle %s", GvENAME(gv));
       do_fstat:
