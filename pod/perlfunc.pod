@@ -5399,8 +5399,9 @@ called).  Note that there is no comma after VERSION!
 Because this is a wide-open interface, pragmas (compiler directives)
 are also implemented this way.  Currently implemented pragmas are:
 
-    use integer;
+    use constant;
     use diagnostics;
+    use integer;
     use sigtrap  qw(SEGV BUS);
     use strict   qw(subs vars refs);
     use subs     qw(afunc blurfl);
