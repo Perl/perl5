@@ -91,26 +91,54 @@
 #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
 #define TAINT_ENV()	if (tainting) taint_env()
 
-#ifdef USE_BSDPGRP
-#   ifdef HAS_GETPGRP
-#       define BSD_GETPGRP(pid) getpgrp((pid))
-#   endif
-#   ifdef HAS_SETPGRP
-#       define BSD_SETPGRP(pid, pgrp) setpgrp((pid), (pgrp))
-#   endif
+/* XXX All process group stuff is handled in pp_sys.c.  Should these 
+   defines move there?  If so, I could simplify this a lot. --AD  9/96.
+*/
+/* Process group stuff changed from traditional BSD to POSIX.
+   perlfunc.pod documents the traditional BSD-style syntax, so we'll
+   try to preserve that, if possible.
+*/
+#ifdef HAS_SETPGID
+#  define BSD_SETPGRP(pid, pgrp)	setpgid((pid), (pgrp))
 #else
-#   ifdef HAS_GETPGRP2
-#       define BSD_GETPGRP(pid) getpgrp2((pid))
-#       ifndef HAS_GETPGRP
-#    	    define HAS_GETPGRP
-#    	endif
-#   endif
-#   ifdef HAS_SETPGRP2
-#       define BSD_SETPGRP(pid, pgrp) setpgrp2((pid), (pgrp))
-#       ifndef HAS_SETPGRP
-#    	    define HAS_SETPGRP
-#    	endif
-#   endif
+#  if defined(HAS_SETPGRP) && defined(USE_BSD_SETPGRP)
+#    define BSD_SETPGRP(pid, pgrp)	setpgrp((pid), (pgrp))
+#  else
+#    ifdef HAS_SETPGRP2  /* DG/UX */
+#      define BSD_SETPGRP(pid, pgrp)	setpgrp2((pid), (pgrp))
+#    endif
+#  endif
+#endif
+#if defined(BSD_SETPGRP) && !defined(HAS_SETPGRP)
+#  define HAS_SETPGRP  /* Well, effectively it does . . . */
+#endif
+
+/* getpgid isn't POSIX, but at least Solaris and Linux have it, and it makes
+    our life easier :-) so we'll try it.
+*/
+#ifdef HAS_GETPGID
+#  define BSD_GETPGRP(pid)		getpgid((pid))
+#else
+#  if defined(HAS_GETPGRP) && defined(USE_BSD_GETPGRP)
+#    define BSD_GETPGRP(pid)		getpgrp((pid))
+#  else
+#    ifdef HAS_GETPGRP2  /* DG/UX */
+#      define BSD_GETPGRP(pid)		getpgrp2((pid))
+#    endif
+#  endif
+#endif
+#if defined(BSD_GETPGRP) && !defined(HAS_GETPGRP)
+#  define HAS_GETPGRP  /* Well, effectively it does . . . */
+#endif
+
+/* These are not exact synonyms, since setpgrp() and getpgrp() may 
+   have different behaviors, but perl.h used to define USE_BSDPGRP
+   (prior to 5.003_05) so some extension might depend on it.
+*/
+#if defined(USE_BSD_SETPGRP) || defined(USE_BSD_GETPGRP)
+#  ifndef USE_BSDPGRP
+#    define USE_BSDPGRP
+#  endif
 #endif
 
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
@@ -724,7 +752,7 @@
 #  ifdef QUAD_MIN
 #    define PERL_QUAD_MIN QUAD_MIN
 #  else
-#    define PERL_QUAD_MIN 	(-PERL_LONG_MAX - ((3 & -1) == 3))
+#    define PERL_QUAD_MIN 	(-PERL_QUAD_MAX - ((3 & -1) == 3))
 #  endif
 
 #  ifdef UQUAD_MAX
@@ -917,7 +945,13 @@ EXT char Error[1];
 #define U_I(what) ((unsigned int)(what))
 #define U_L(what) ((U32)(what))
 #else
+#  ifdef __cplusplus
+    extern "C" {
+#  endif
 U32 cast_ulong _((double));
+#  ifdef __cplusplus
+    }
+#  endif
 #define U_S(what) ((U16)cast_ulong((double)(what)))
 #define U_I(what) ((unsigned int)cast_ulong((double)(what)))
 #define U_L(what) (cast_ulong((double)(what)))
@@ -928,11 +962,17 @@ U32 cast_ulong _((double));
 #define I_V(what) ((IV)(what))
 #define U_V(what) ((UV)(what))
 #else
+#  ifdef __cplusplus
+    extern "C" {
+#  endif
 I32 cast_i32 _((double));
-#define I_32(what) (cast_i32((double)(what)))
 IV cast_iv _((double));
-#define I_V(what) (cast_iv((double)(what)))
 UV cast_uv _((double));
+#  ifdef __cplusplus
+    }
+#  endif
+#define I_32(what) (cast_i32((double)(what)))
+#define I_V(what) (cast_iv((double)(what)))
 #define U_V(what) (cast_uv((double)(what)))
 #endif
 
@@ -1002,12 +1042,14 @@ Gid_t getegid _((void));
 #endif
 #define YYMAXDEPTH 300
 
+#ifndef assert  /* <assert.h> might have been included somehow */
 #define assert(what)	DEB( {						\
 	if (!(what)) {							\
 	    croak("Assertion failed: file \"%s\", line %d",		\
 		__FILE__, __LINE__);					\
 	    exit(1);							\
 	}})
+#endif
 
 struct ufuncs {
     I32 (*uf_val)_((IV, SV*));
@@ -1867,3 +1909,4 @@ enum {
 #endif
 
 #endif /* Include guard */
+
