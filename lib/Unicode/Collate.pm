@@ -1,5 +1,11 @@
 package Unicode::Collate;
 
+BEGIN {
+    if (ord("A") == 193) {
+	die "Unicode::Collate not ported to EBCDIC\n";
+    }
+}
+
 use 5.006;
 use strict;
 use warnings;
@@ -775,6 +781,16 @@ is primary equal to C<"m>E<252>C<ss">.
 =head2 EXPORT
 
 None by default.
+
+=head2 TODO
+
+Unicode::Collate has not been ported to EBCDIC.  The code mostly would
+work just fine but a decision needs to be made: how the module should
+work in EBCDIC?  Should the low 256 characters be understood as
+Unicode or as EBCDIC code points?  Should one be chosen or should
+there be a way to do either?  Or should such translation be left
+outside the module for the user to do, for example by using
+Encode::from_to()?
 
 =head2 CAVEAT
 

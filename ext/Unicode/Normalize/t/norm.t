@@ -1,6 +1,13 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
+BEGIN {
+    if (ord("A") == 193) {
+	print "1..0 # Unicode::Normalize not ported to EBCDIC\n";
+	exit 0;
+    }
+}
+
 #########################
 
 use Test;

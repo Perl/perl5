@@ -3,6 +3,13 @@
 
 #########################
 
+BEGIN {
+    if (ord("A") == 193) {
+	print "1..0 # Unicode::Collate not ported to EBCDIC\n";
+	exit 0;
+    }
+}
+
 use Test;
 BEGIN { plan tests => 54 };
 use Unicode::Collate;
