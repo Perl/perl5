@@ -33,6 +33,7 @@ print "ok 3\n";
 }
 
 {
+    use utf8; # make "\x{80}" to produce UTF-8
     my $a = "\x{80}";
     
     print "not " unless length($a) == 1;
