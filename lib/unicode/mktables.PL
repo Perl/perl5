@@ -331,20 +331,58 @@ while (<UNICODEDATA>) {
     
     $code{$name} = $code;
     $name{$code} = $name;
+    $category{$code} = $category;
 
-    next unless $category =~ /^L/ && $decomposition ne '';
-    $decomposition =~ s/^<\w+> //;
-    @decomposition = split(' ', $decomposition);
+    next unless $category =~ /^L/;
 
-    push @base, [ $code, $decomposition[0] ];
+    # The definition of "equivalence" is twofold.
+    if ($decomposition ne '') {
+	# (1) If there's an official Unicode decomposition
+        #     and the base is a Unicode letter.
+	$decomposition =~ s/^<\w+> //;
+	@decomposition = split(' ', $decomposition);
+	# Some Arabic ligatures like
+	# FC5E;ARABIC LIGATURE SHADDA WITH DAMMATAN ISOLATED FORM;Lo;...
+	# are problematic because their decomposition begins with
+	# a space (0020) -- which could be just skipped -- but then
+	# their base glyph is not a letter, for example
+	# the above decomposes as <isolated> 0020 064C 0651,
+	# but 064C is 064C;ARABIC DAMMATAN;Mn;...
+	# (the 0651 being ARABIC SHADDA;Mn)
+	($basecode) = shift @decomposition;
+	push @base, [ $code, $basecode ];
+    } elsif ($name =~ /^(.+?) WITH /) {
+	# (2) If there's a "FOO WITH ..." Unicode name and FOO
+	#     happens to be valid Unicode letter.  This is
+	#     a debatable definition and all fault is by me (jhi).
+        #     For example this definition adds
+        #     LATIN SMALL LETTER O WITH STROKE
+        #     as a derivative of 
+        #     LATIN SMALL LETTER O
+        #     which some might rightfully contest, especially
+        #     the speakers of languages who have the former
+        #     phonetically as very distinct from the latter.
+	push @with, [ $code, $1 ];
+    }
 }
+
+foreach my $w (@with) {
+    ($code, $basename) = @$w;
+    next if not exists $code{$basename} or
+            not $category{$code{$basename}} =~ /^L/;
+    push @base, [ $code, $code{$basename} ];
+}
+
+@base = sort { $a->[0] cmp $b->[0] } @base;
 
 foreach my $b (@base) {
     ($code, $basecode) = @$b;
-    $base = $name{$basecode};
-    next unless exists $code{$base};
-    push @{$unicode{$code{$base}}}, $code;
-#   print "$code: $name{$code} -> $base\n",
+    $basename = $name{$basecode};
+    next if not defined $basename or
+            not exists $code{$basename} or
+            not $category{$code{$basename}} =~ /^L/;
+    push @{$unicode{$code{$basename}}}, $code;
+#   print "$code: $name{$code} -> $basename\n",
 }
 
 @unicode = sort keys %unicode;
@@ -363,7 +401,7 @@ print "EqLatin1\n";
 if (open(EQ_LATIN1, ">Eq/Latin1")) {
     foreach my $c (@unicode) {
 	last if hex($c) > 255;
-	my @c = grep { hex($_) <= 255 } @{$unicode{$c}};
+	my @c = grep { hex($_) < 256 } @{$unicode{$c}};
 	next unless @c;
 	print EQ_LATIN1 "$c @c\n";
     }
@@ -373,4 +411,3 @@ if (open(EQ_LATIN1, ">Eq/Latin1")) {
 }
 
 # eof
-  

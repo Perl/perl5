@@ -184,8 +184,8 @@ start losing precision (their lower digits).
 
 If you have filesystems that support "large files" (files larger than
 2 gigabytes), you may now also be able to create and access them from
-Perl.  You have to use Configure -Duselfs.  Turning on the large file
-support turns on also the 64-bit support, for obvious reasons.
+Perl.  You have to use Configure -Duselargefiles.  Turning on the
+large file support turns on also the 64-bit support, for obvious reasons.
 
 Note that in addition to requiring a proper file system to do large
 files you may also need to adjust your per-process (or your
