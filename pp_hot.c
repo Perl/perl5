@@ -2820,6 +2820,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     char* name;
     STRLEN namelen;
     char* packname = 0;
+    SV *packsv = Nullsv;
     STRLEN packlen;
 
     name = SvPV(meth, namelen);
@@ -2855,6 +2856,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    }
 	    /* assume it's a package name */
 	    stash = gv_stashpvn(packname, packlen, FALSE);
+	    if (!stash)
+		packsv = sv;
 	    goto fetch;
 	}
 	/* it _is_ a filehandle name -- replace with a reference */
@@ -2887,7 +2890,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
     }
 
-    gv = gv_fetchmethod(stash, name);
+    gv = gv_fetchmethod(stash ? stash : (HV*)packsv, name);
 
     if (!gv) {
 	/* This code tries to figure out just what went wrong with
