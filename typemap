@@ -1,5 +1,4 @@
 Thread		T_IVOBJ
-Thread::Cond	T_IVOBJ
 
 INPUT
 T_IVOBJ
@@ -7,6 +6,11 @@ T_IVOBJ
 	    $var = ($type) SvIV((SV*)SvRV($arg));
 	else
 	    croak(\"$var is not an object\")
+T_IVREF
+	if (SvROK($arg))
+	    $var = ($type) SvIV((SV*)SvRV($arg));
+	else
+	    croak(\"$var is not a reference\")
 
 OUTPUT
 T_IVOBJ	

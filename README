@@ -1,19 +1,17 @@
-The file thrpatch-oct1 contains patches against perl5.001m which makes
-a first stab at a multithreading perl5.  If your version of patch can't
-create file from scratch, then you'll need to create an empty thread.h
-manually first.  Perl itself will need to be built with -DUSE_THREADS
-and very probably -DDEBUGGING since I haven't tested it without that
-yet.  If you're using MIT pthreads or another threads package that
-needs pthread_init() to be called, then add -DNEED_PTHREAD_INIT.  If
-you're not using a threads library that follows the latest POSIX draft,
-then you'll probably need to add -DOLD_PTHREADS_API.  I haven't tested
--DOLD_PTHREADS_API properly yet and I think you may still have to tweak
-a couple of the mutex calls to follow the old API.
+If your version of patch can't create a file from scratch, then you'll
+need to create an empty thread.h manually first.  Perl itself will need
+to be built with -DUSE_THREADS yet. If you're using MIT pthreads or
+another threads package that needs pthread_init() to be called, then
+add -DNEED_PTHREAD_INIT. If you're using a threads library that only
+follows one of the old POSIX drafts, then you'll probably need to add
+-DOLD_PTHREADS_API. I haven't tested -DOLD_PTHREADS_API properly yet
+and I think you may still have to tweak a couple of the mutex calls
+to follow the old API.
 
-These patches are copyright Malcolm Beattie 1995 and are freely
+These patches are copyright Malcolm Beattie 1995-1997 and are freely
 distributable under your choice of the GNU Public License or the
 Artistic License (see the main perl distribution).
 
-These are very preliminary patches and although it should be sufficient
-to show roughly what's been going on, they're almost certainly not
+These are preliminary patches and although it should be sufficient
+to show roughly what's been going on, they're probably not
 going to produce a perl of any practical use yet.
