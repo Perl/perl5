@@ -20,6 +20,8 @@ my $exe = 'embed_test' . $Config{'exe_ext'};
 my $obj = 'embed_test' . $Config{'obj_ext'};
 my $inc = File::Spec->updir;
 my $lib = File::Spec->updir;
+my $libperl_copied;
+my $testlib;
 my @cmd;
 my (@cmd2) if $^O eq 'VMS';
 
@@ -77,11 +79,26 @@ if ($^O eq 'VMS') {
     for (@cmd) {
         s!-bE:(\S+)!-bE:$perl_exp!;
     }
-   } elsif ($^O eq 'cygwin') { # Cygwin needs the libperl copied
+   }
+   elsif ($^O eq 'cygwin') { # Cygwin needs the libperl copied
      my $v_e_r_s = $Config{version};
      $v_e_r_s =~ tr/./_/;
      system("cp ../libperl$v_e_r_s.dll ./");    # for test 1
      system("cp ../$Config{'libperl'} ../libperl.a");    # for test 1
+   }
+   elsif ($Config{'libperl'} !~ /\Alibperl\./) {
+     # Everyone needs libperl copied if it's not found by '-lperl'.
+     $testlib = $Config{'libperl'};
+     my $srclib = $testlib;
+     $testlib =~ s/^[^.]+/libperl/;
+     $testlib = File::Spec::->catfile($lib, $testlib);
+     $srclib = File::Spec::->catfile($lib, $srclib);
+     if (-f $srclib) {
+       unlink $testlib if -f $testlib;
+       my $lncmd = "$Config{'ln'} $srclib $testlib";
+       #print "# $lncmd\n";
+       $libperl_copied = 1	unless system($lncmd);
+     }
    }
 }
 my $status;
@@ -104,6 +121,7 @@ unlink($exe,"embed_test.c",$obj);
 unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
 unlink(glob("./libperl*.dll")) if $^O eq 'cygwin';
 unlink("../libperl.a")         if $^O eq 'cygwin';
+unlink($testlib)	       if $libperl_copied;
 
 # gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccopts -e ldopts`
 
