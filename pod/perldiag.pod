@@ -1816,6 +1816,15 @@ transparently promotes all numbers to a floating point representation
 internally--subject to loss of precision errors in subsequent
 operations.
 
+=item Integer overflow in version
+
+(F) Some portion of a version initialization is too large for the
+size of integers for your architecture.  This is not a warning
+because there is no rational reason for a version to try and use a
+element larger than typically 2**32.  This is usually caused by
+trying to use some odd mathematical operation as a version, like
+100/9.
+
 =item Internal disaster in regex; marked by <-- HERE in m/%s/
 
 (P) Something went badly wrong in the regular expression parser.
@@ -1891,6 +1900,17 @@ silently ignored.
 L<perlfunc/unpack>.
 (W unpack) The given character is not a valid unpack type but used to be
 silently ignored.
+
+=item Invalid version format (multiple underscores)
+
+(F) Versions may contain at most a single underscore, which signals
+that the version is a beta release.  See L<version> for the allowed
+version formats.
+
+=item Invalid version format (underscores before decimal)
+
+(F) Versions may not contain decimals after the optional underscore.
+See L<version> for the allowed version formats.
 
 =item ioctl is not implemented
 

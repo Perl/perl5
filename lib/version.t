@@ -1,10 +1,10 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
-# $Revision: 2.0 $
+# $Revision: 2.1 $
 
 #########################
 
-use Test::More tests => 60;
+use Test::More tests => 64;
 use_ok(version); # If we made it this far, we are ok.
 
 my ($version, $new_version);
@@ -33,6 +33,14 @@ like($@, qr/multiple underscores/,
 eval {my $version = new version "1.2_3.4";};
 like($@, qr/underscores before decimal/,
     "Invalid version format (underscores before decimal)");
+
+$version = new version "99 and 44/100 pure";
+ok ("$version" eq "99.0", '$version eq "99.0"');
+ok ($version->numify == 99.0, '$version->numify == 99.0');
+
+$version = new version "something";
+ok ("$version" eq "", '$version eq ""');
+ok ($version->numify == 0, '$version->numify == 99.0');
 
 # Test boolean operator
 ok ($version, 'boolean');

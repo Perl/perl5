@@ -9,7 +9,7 @@ use vars qw(@ISA $VERSION $CLASS);
 
 @ISA = qw(DynaLoader);
 
-$VERSION = (qw$Revision: 2.1 $)[1]/10;
+$VERSION = (qw$Revision: 2.2 $)[1]/10;
 
 $CLASS = 'version';
 
@@ -54,6 +54,22 @@ positive integral values separated by decimal points and optionally a
 single underscore.  This corresponds to what Perl itself uses for a
 version, as well as extending the "version as number" that is discussed
 in the various editions of the Camel book.
+
+However, in order to be compatible with earlier Perl version styles,
+any use of versions of the form 5.006001 will be translated as 5.6.1,
+In other words a version with a single decimal place will be parsed
+as implicitely having three places between subversion.
+
+Any value passed to the new() operator will be parsed only so far as it
+contains a numeric, decimal, or underscore character.  So, for example:
+
+  $v1 = new version "99 and 94/100 percent pure"; # $v1 == 99.0
+  $v2 = new version "something"; # $v2 == "" and $v2->numify == 0
+
+NOTE: it is strongly recommended that version objects only be created
+with numeric values based on the different types of versions in this
+documentation, see L<"Types of Versions Objects">.  That way, there is
+no confusion about what constitutes the version.
 
 =head2 Object Methods
 
@@ -159,11 +175,6 @@ Revision will have three or more elements; otherwise, it will
 have only two.  This allows you to automatically increment
 your module version by using the Revision number from the primary
 file in a distribution, see L<ExtUtils::MakeMaker/"VERSION_FROM">.
-
-In order to be compatible with earlier Perl version styles, any use
-of versions of the form 5.006001 will be translated as 5.6.1,  In 
-other words a version with a single decimal place will be parsed
-as implicitely having three places between subversion.
 
 =item * Beta versions - For module authors using CPAN, the 
 convention has been to note unstable releases with an underscore

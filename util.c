@@ -4004,7 +4004,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv)
 	    if ( saw_under )
 		Perl_croak(aTHX_ "Invalid version format (underscores before decimal)");
 	    saw_period++ ;
-	    }
+	}
 	else if ( *pos == '_' )
 	{
 	    if ( saw_under )
@@ -4017,7 +4017,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv)
 
     if (*pos == 'v') pos++;  /* get past 'v' */
     while (isDIGIT(*pos))
-    pos++;
+	pos++;
     if (!isALPHA(*pos)) {
 	I32 rev;
 
@@ -4036,7 +4036,6 @@ Perl_scan_version(pTHX_ char *s, SV *rv)
 			mult = -1;	/* beta version */
 		}
 		while (--end >= s) {
-
 		    I32 orev;
 		    orev = rev;
 		    rev += (*end - '0') * mult;
@@ -4057,7 +4056,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv)
 		break;
 	    }
 	    while ( isDIGIT(*pos) ) {
-		if ( saw_period == 1 && pos-s == 3 )
+		if ( !saw_under && saw_period == 1 && pos-s == 3 )
 		    break;
 		pos++;
 	    }
@@ -4144,6 +4143,11 @@ Perl_vnumify(pTHX_ SV *vs)
     if ( SvROK(vs) )
 	vs = SvRV(vs);
     len = av_len((AV *)vs);
+    if ( len == -1 )
+    {
+	Perl_sv_catpv(aTHX_ sv,"0");
+	return sv;
+    }
     digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
     Perl_sv_setpvf(aTHX_ sv,"%d.",abs(digit));
     for ( i = 1 ; i <= len ; i++ )
@@ -4178,10 +4182,15 @@ Perl_vstringify(pTHX_ SV *vs)
     if ( SvROK(vs) )
 	vs = SvRV(vs);
     len = av_len((AV *)vs);
+    if ( len == -1 )
+    {
+	Perl_sv_catpv(aTHX_ sv,"");
+	return sv;
+    }
     digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
     Perl_sv_setpvf(aTHX_ sv,"%d",digit);
     for ( i = 1 ; i <= len ; i++ )
-{
+    {
 	digit = SvIVX(*av_fetch((AV *)vs, i, 0));
 	if ( digit < 0 )
 	    Perl_sv_catpvf(aTHX_ sv,"_%d",-digit);
