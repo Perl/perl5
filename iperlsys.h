@@ -81,7 +81,9 @@ typedef Signal_t (*Sighandler_t) (int);
 #if defined(PERL_IMPLICIT_SYS)
 
 #ifndef PerlIO
-typedef struct _PerlIO PerlIO;
+typedef struct _PerlIO PerlIOl;
+typedef PerlIOl *PerlIO;
+#define PerlIO PerlIO
 #endif
 
 /* IPerlStdIO		*/
@@ -331,7 +333,8 @@ struct IPerlStdIOInfo
 #endif
 
 #ifndef PerlIO
-typedef struct _PerlIO PerlIO;
+typedef struct _PerlIO PerlIOl;
+typedef PerlIOl *PerlIO;
 #define PerlIO PerlIO
 #endif /* No PerlIO */
 
