@@ -41,7 +41,7 @@ my $usage =
 my %opts;
 GetOptions( \%opts,
             qw( man1dir=s man1ext=s man3dir=s man3ext=s batchlimit=i
-                destdir=s notify n help silent S verbose V)) 
+                destdir:s notify n help silent S verbose V)) 
 	|| die $usage;
 die $usage if $opts{help};
 
