@@ -742,7 +742,7 @@ and leaves the UTF-8 status as it was.
 
 #ifdef DEBUGGING
 #define SvMAGIC(sv)	((assert(SvTYPE(sv) >= SVt_PVMG)), ((XPVMG*)  SvANY(sv))->xmg_magic)
-#define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
+#define SvSTASH(sv)	((assert(SvTYPE(sv) >= SVt_PVMG)), (XPVMG*)  SvANY(sv))->xmg_stash
 #else
 #define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
 #define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash

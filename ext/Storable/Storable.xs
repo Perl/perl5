@@ -4287,9 +4287,8 @@ static SV *retrieve_ref(pTHX_ stcxt_t *cxt, char *cname)
 	 */
 
 	if (cname) {
-		/* Do not use sv_upgrade to preserve STASH */
-		SvFLAGS(rv) &= ~SVTYPEMASK;
-		SvFLAGS(rv) |= SVt_RV;
+		/* No need to do anything, as rv will already be PVMG.  */
+		assert (SvTYPE(rv) >= SVt_RV);
 	} else {
 		sv_upgrade(rv, SVt_RV);
 	}
