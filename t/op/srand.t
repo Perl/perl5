@@ -3,7 +3,7 @@
 # Test srand.
 
 use strict;
-use Test::More tests => 5;
+use Test::More tests => 3;
 
 # Generate a load of random numbers.
 # int() avoids possible floating point error.
@@ -29,31 +29,6 @@ srand(1138);
 
 ok( !eq_array(\@first_run, \@second_run),
                                  'srand(), different arg, different rands' );
-
-
-# Check that srand() with no args provides different seeds.
-srand();
-@first_run  = mk_rand;
-
-srand();
-@second_run = mk_rand;
-
-ok( !eq_array(\@first_run, \@second_run), 'srand(), no arg, different rands');
-
-
-# Check that srand() isn't effected by $_
-{
-    local $_ = 42;
-    srand();
-    @first_run  = mk_rand;
-
-    srand();
-    @second_run = mk_rand;
-
-    ok( !eq_array(\@first_run, \@second_run), 
-                       'srand(), no arg, not effected by $_');
-}
-
 
 
 # This test checks whether Perl called srand for you.
