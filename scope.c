@@ -433,11 +433,7 @@ save_delete(HV *hv, char *key, I32 klen)
 }
 
 void
-save_list(register SV **sarg, I32 maxsarg)
-save_aelem(av,idx,sptr)
-AV *av;
-I32 idx;
-SV **sptr;
+save_aelem(AV *av, I32 idx, SV **sptr)
 {
     SSCHECK(4);
     SSPUSHPTR(av);
@@ -448,10 +444,7 @@ SV **sptr;
 }
 
 void
-save_helem(hv,key,sptr)
-HV *hv;
-SV *key;
-SV **sptr;
+save_helem(HV *hv, SV *key, SV **sptr)
 {
     SSCHECK(4);
     SSPUSHPTR(hv);
@@ -462,6 +455,7 @@ SV **sptr;
 }
 
 void
+save_list(register SV **sarg, I32 maxsarg)
 {
     dTHR;
     register SV *sv;

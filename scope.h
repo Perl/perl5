@@ -24,7 +24,7 @@
 #define SAVEt_I16	23
 #define SAVEt_AELEM     24
 #define SAVEt_HELEM     25
-#define SAVEt_OP	24
+#define SAVEt_OP	26
 
 #define SSCHECK(need) if (savestack_ix + need > savestack_max) savestack_grow()
 #define SSPUSHINT(i) (savestack[savestack_ix++].any_i32 = (I32)(i))
