@@ -1625,8 +1625,8 @@ EXT U32 PL_opargs[] = {
 	0x00004805,	/* anonhash */
 	0x05326801,	/* splice */
 	0x0004691d,	/* push */
-	0x00007604,	/* pop */
-	0x00007604,	/* shift */
+	0x00017604,	/* pop */
+	0x00017604,	/* shift */
 	0x0004691d,	/* unshift */
 	0x0005a801,	/* sort */
 	0x00004809,	/* reverse */
