@@ -2783,7 +2783,7 @@ sub parse_version {
     my $inpod = 0;
     while (<FH>) {
 	$inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
-	next if $inpod;
+	next if $inpod || /^\s*#/;
 	chop;
 	# next unless /\$(([\w\:\']*)\bVERSION)\b.*\=/;
 	next unless /([\$*])(([\w\:\']*)\bVERSION)\b.*\=/;
