@@ -6173,10 +6173,18 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	rslen = 1;
     }
     else if (RsSNARF(PL_rs)) {
+    	/* If it is a regular disk file use size from stat() as estimate 
+	   of amount we are going to read - may result in malloc-ing 
+	   more memory than we realy need if layers bellow reduce 
+	   size we read (e.g. CRLF or a gzip layer)
+	 */
 	Stat_t st;
-	if (!PerlLIO_fstat(PerlIO_fileno(fp), &st) && st.st_size
-		&& (recsize = st.st_size - PerlIO_tell(fp)))
-	    goto read_record;
+	if (!PerlLIO_fstat(PerlIO_fileno(fp), &st) && S_ISREG(st.st_mode))  {
+	    Off_t offset = PerlIO_tell(fp);
+	    if (offset != (Off_t) -1) {
+	     	(void) SvGROW(sv, (STRLEN)((st.st_size - offset) + append + 1));
+	    }
+	}
 	rsptr = NULL;
 	rslen = 0;
     }
@@ -6186,14 +6194,14 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 
       /* Grab the size of the record we're getting */
       recsize = SvIV(SvRV(PL_rs));
-
-    read_record:
       buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
       /* Go yank in */
 #ifdef VMS
       /* VMS wants read instead of fread, because fread doesn't respect */
       /* RMS record boundaries. This is not necessarily a good thing to be */
-      /* doing, but we've got no other real choice */
+      /* doing, but we've got no other real choice - except avoid stdio
+         as implementation - perhaps write a :vms layer ?
+       */
       bytesread = PerlLIO_read(PerlIO_fileno(fp), buffer, recsize);
 #else
       bytesread = PerlIO_read(fp, buffer, recsize);
@@ -6269,8 +6277,13 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     /* Here is some breathtakingly efficient cheating */
 
     cnt = PerlIO_get_cnt(fp);			/* get count into register */
-    if ((I32)(SvLEN(sv) - append) <= cnt + 1) { /* make sure we have the room */
-	if (cnt > 80 && (I32)SvLEN(sv) > append) {
+    /* make sure we have the room */
+    if ((I32)(SvLEN(sv) - append) <= cnt + 1) { 
+    	/* Not room for all of it
+	   if we are looking for a separator and room for some 
+	 */
+	if (rslen && cnt > 80 && (I32)SvLEN(sv) > append) {
+	    /* just process what we have room for */ 
 	    shortbuffered = cnt - SvLEN(sv) + append + 1;
 	    cnt -= shortbuffered;
 	}
@@ -6280,7 +6293,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	    SvGROW(sv, (STRLEN)(append + (cnt <= 0 ? 2 : (cnt + 1))));
 	}
     }
-    else
+    else 
 	shortbuffered = 0;
     bp = (STDCHAR*)SvPVX(sv) + append;  /* move these two too to registers */
     ptr = (STDCHAR*)PerlIO_get_ptr(fp);
