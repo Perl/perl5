@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.33 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.34 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -203,7 +203,7 @@ sub predefine_encodings{
 	    $_[1] = '' if $chk;
 	    return $res;
 	};
-	$Encode::Encoding{Internal} = 
+	$Encode::Encoding{Unicode} = 
 	    bless {Name => "UTF_EBCDIC"} => "Encode::UTF_EBCDIC";
     } else {  
 	# was in Encode::UTF_EBCDIC
