@@ -142,7 +142,7 @@ transparently upgraded to Unicode.
 Internally, Perl currently uses either whatever the native eight-bit
 character set of the platform (for example Latin-1) or UTF-8 to encode
 Unicode strings. Specifically, if all code points in the string are
-0xFF or less, Perl uses Latin-1.  Otherwise, it uses UTF-8.
+0xFF or less, Perl uses the native eight-bit character set.  Otherwise, it uses UTF-8.
 
 A user of Perl does not normally need to know nor care how Perl happens
 to encodes its internal strings, but it becomes relevant when outputting
@@ -164,8 +164,7 @@ To output UTF-8 always, use the ":utf8" output discipline.  Prepending
       binmode(STDOUT, ":utf8");
 
 to this sample program ensures the output is completely UTF-8, and      
-of course, removes the warning.  Another way to achieve this is the
-L<encoding> pragma, discussed later in L</Legacy Encodings>.
+of course, removes the warning.
 
 Perl 5.8.0 will also support Unicode on EBCDIC platforms.  There the
 support is somewhat harder to implement since additional conversions
