@@ -1123,8 +1123,8 @@ PP(pp_modulo)
     {
 	UV left  = 0;
 	UV right = 0;
-	bool left_neg;
-	bool right_neg;
+	bool left_neg = FALSE;
+	bool right_neg = FALSE;
 	bool use_double = FALSE;
 	bool dright_valid = FALSE;
 	NV dright = 0.0;
