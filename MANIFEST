@@ -382,6 +382,7 @@ lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
+lib/Fatal.pm		Make errors in functions/builtins fatal
 lib/File/Basename.pm	Emulate the basename program
 lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 lib/File/Compare.pm	Emulation of cmp command

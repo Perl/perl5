@@ -883,6 +883,11 @@ a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
+=item Cannot find an opnumber for "%s"
+
+(F) A string of a form C<CORE::word> was given to prototype(), but
+there is no builtin with the name C<word>.
+
 =item Cannot open temporary file
 
 (F) The create routine failed for some reason while trying to process
