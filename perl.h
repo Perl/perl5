@@ -2198,9 +2198,9 @@ char *crypt (const char*, const char*);
 #    ifndef getenv
 char *getenv (const char*);
 #    endif /* !getenv */
-#    if !defined(HAS_LSEEK_PROTO) && !defined(EPOC) && !(defined(__hpux)
+#    if !defined(HAS_LSEEK_PROTO) && !defined(EPOC) && !defined(__hpux)
 #      ifdef _FILE_OFFSET_BITS
-#        if_FILE_OFFSET_BITS == 64
+#        if _FILE_OFFSET_BITS == 64
 Off_t lseek (int,Off_t,int);
 #        endif
 #      endif
