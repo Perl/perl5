@@ -177,9 +177,14 @@ if ($^O eq 'VMS') {
     $privlib = VMS::Filespec::unixify($privlib);
     $archlib = VMS::Filespec::unixify($archlib);
 }
-@trypod = ("$archlib/pod/perldiag.pod",
+@trypod = (
+	   "$archlib/pod/perldiag.pod",
 	   "$privlib/pod/perldiag-$].pod",
-	   "$privlib/pod/perldiag.pod");
+	   "$privlib/pod/perldiag.pod"
+	   "$archlib/pods/perldiag.pod",
+	   "$privlib/pods/perldiag-$].pod",
+	   "$privlib/pods/perldiag.pod"
+	  );
 # handy for development testing of new warnings etc
 unshift @trypod, "./pod/perldiag.pod" if -e "pod/perldiag.pod";
 ($PODFILE) = ((grep { -e } @trypod), $trypod[$#trypod])[0];

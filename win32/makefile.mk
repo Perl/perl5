@@ -25,6 +25,11 @@ INST_DRV	*= c:
 INST_TOP	*= $(INST_DRV)\perl
 
 #
+# Uncomment this if you are compiling under Windows 95/98 and command.com
+# (not needed if you're running under 4DOS/NT 6.01 or later)
+#IS_WIN95	*= define
+
+#
 # Comment this out if you DON'T want your perl installation to be versioned.
 # This means that the new installation will overwrite any files from the
 # old installation at the same INST_TOP location.  Leaving it enabled is
@@ -308,7 +313,9 @@ LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -xc++
 
-LIBC		= -lcrtdll
+# crtdll doesn't define _wopen and friends
+#LIBC		= -lcrtdll
+LIBC		= -lmsvcrt
 LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 \
 		-lmingw32 -lgcc -lmoldname $(LIBC) -lkernel32
 
@@ -765,12 +772,27 @@ CFG_VARS	=					\
 # Top targets
 #
 
+.IF "$(IS_WIN95)" != ""
+MK2		= .\makew95.mk
+
+all : .\config.h $(GLOBEXE) $(MINIMOD) $(MK2)
+all2 : $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(X2P) $(EXTENSION_DLL) \
+	$(EXTENSIOM_PM)
+.ELSE
 all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) \
 	$(X2P) $(EXTENSION_DLL) $(EXTENSION_PM)
+.ENDIF
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 #------------------------------------------------------------
+
+# This target is used to generate the makew95.mk for Win95
+.IF "$(IS_WIN95)" != ""
+$(MK2): makefile.mk
+	$(MINIPERL) genmk95.pl makefile.mk $(MK2)
+	$(MAKE) -f $(MK2) all2
+.ENDIF
 
 $(GLOBEXE) : perlglob$(o)
 .IF "$(CCTYPE)" == "BORLAND"
