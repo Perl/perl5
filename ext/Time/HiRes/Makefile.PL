@@ -284,7 +284,7 @@ EOD
     }
 
     if ($has_setitimer && $has_getitimer) {
-	print "You have interval timers (both setitimer and setitimer).\n";
+	print "You have interval timers (both setitimer and getitimer).\n";
     } else {
 	print "You do not have interval timers.\n";
     }
