@@ -2580,7 +2580,8 @@ functionality and better error handling. [561]
 
 File access tests now use current process privileges rather than the
 user's default privileges, which could sometimes result in a mismatch
-between reported access and actual access.
+between reported access and actual access.  This improvement is only
+available on VMS v6.0 and later.
 
 There is a new C<kill> implementation based on C<sys$sigprc> that allows
 older VMS systems (pre-7.0) to use C<kill> to send signals rather than
