@@ -3954,7 +3954,7 @@ the original version contained 1 or more dots, respectively
 SV *
 Perl_vstringify(pTHX_ SV *vs)
 {
-    I32 i, len, digit;
+    I32 len;
     if ( SvROK(vs) )
 	vs = SvRV(vs);
     len = av_len((AV *)vs);
