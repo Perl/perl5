@@ -31,6 +31,77 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11237] By: jhi                                   on 2001/07/09  14:27:27
+        Log: Subject: [PATCH] OPpCONST_OCTAL fixes
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Mon, 9 Jul 2001 07:38:45 +0530
+             Message-ID: <20010709073845.A25406@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11236] By: jhi                                   on 2001/07/09  14:10:07
+        Log: Add a pseudolayer ":locale" to the open pragma which
+             will get the encoding from the locale.  Yet undocumented
+             because I can't get the PerlIO :encoding(foobar) to work.
+     Branch: perl
+	   ! ext/Encode/Encode.pm lib/open.pm
+____________________________________________________________________________
+[ 11235] By: jhi                                   on 2001/07/09  13:38:43
+        Log: Add more encoding mappings.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 11234] By: jhi                                   on 2001/07/09  13:24:54
+        Log: Document that using :encoding layer requires using Encode.
+     Branch: perl
+	   ! ext/Encode/Encode.pm lib/PerlIO.pm
+____________________________________________________________________________
+[ 11233] By: jhi                                   on 2001/07/09  13:19:34
+        Log: Netware tweak from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/netware.h
+____________________________________________________________________________
+[ 11232] By: gsar                                  on 2001/07/09  04:40:07
+        Log: t/harness doesn't know about run/*.t
+     Branch: perl
+	   ! t/harness
+____________________________________________________________________________
+[ 11231] By: gsar                                  on 2001/07/09  04:36:30
+        Log: run/exit.t busted on windows
+     Branch: perl
+	   ! t/run/exit.t
+____________________________________________________________________________
+[ 11230] By: gsar                                  on 2001/07/09  04:14:54
+        Log: fix a couple of UCD.t tests that fail due to bad case
+     Branch: perl
+	   ! lib/Unicode/UCD.t
+____________________________________________________________________________
+[ 11229] By: gsar                                  on 2001/07/09  03:57:06
+        Log: test skip logic was broken
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.t
+____________________________________________________________________________
+[ 11228] By: gsar                                  on 2001/07/09  03:42:20
+        Log: remove *.pdb files on windows upon $(MAKE) clean (fixes
+             failure of ExtUtils.t#27 when built in debug mode)
+     Branch: perl
+	   ! lib/ExtUtils/MM_Win32.pm
+____________________________________________________________________________
+[ 11227] By: gsar                                  on 2001/07/09  02:11:04
+        Log: I18N::Langinfo is not available on windows
+     Branch: perl
+	   ! win32/FindExt.pm
+____________________________________________________________________________
+[ 11226] By: gsar                                  on 2001/07/09  01:55:23
+        Log: save a dTHX
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 11225] By: jhi                                   on 2001/07/08  23:42:37
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11224] By: jhi                                   on 2001/07/08  23:05:41
         Log: Guard the nl_langinfo() with HAS_NL_LANGINFO 
              as pointed out by Sarathy.
