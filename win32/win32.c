@@ -2436,26 +2436,31 @@ win32_link(const char *oldname, const char *newname)
 DllExport int
 win32_rename(const char *oname, const char *newname)
 {
-    WCHAR wOldName[MAX_PATH];
-    WCHAR wNewName[MAX_PATH];
-    char szOldName[MAX_PATH];
+    WCHAR wOldName[MAX_PATH+1];
+    WCHAR wNewName[MAX_PATH+1];
+    char szOldName[MAX_PATH+1];
+    char szNewName[MAX_PATH+1];
     BOOL bResult;
+    dTHXo;
+
     /* XXX despite what the documentation says about MoveFileEx(),
      * it doesn't work under Windows95!
      */
     if (IsWinNT()) {
-	dTHXo;
+	DWORD dwFlags = MOVEFILE_COPY_ALLOWED;
 	if (USING_WIDE()) {
 	    A2WHELPER(oname, wOldName, sizeof(wOldName));
 	    A2WHELPER(newname, wNewName, sizeof(wNewName));
+	    if (wcsicmp(wNewName, wOldName))
+		dwFlags |= MOVEFILE_REPLACE_EXISTING;
 	    wcscpy(wOldName, PerlDir_mapW(wOldName));
-	    bResult = MoveFileExW(wOldName,PerlDir_mapW(wNewName),
-			MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING);
+	    bResult = MoveFileExW(wOldName,PerlDir_mapW(wNewName), dwFlags);
 	}
 	else {
-	    strcpy(szOldName, PerlDir_mapA(szOldName));
-	    bResult = MoveFileExA(szOldName,PerlDir_mapA(newname),
-			MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING);
+	    if (stricmp(newname, oname))
+		dwFlags |= MOVEFILE_REPLACE_EXISTING;
+	    strcpy(szOldName, PerlDir_mapA(oname));
+	    bResult = MoveFileExA(szOldName,PerlDir_mapA(newname), dwFlags);
 	}
 	if (!bResult) {
 	    DWORD err = GetLastError();
@@ -2480,14 +2485,17 @@ win32_rename(const char *oname, const char *newname)
     }
     else {
 	int retval = 0;
-	char tmpname[MAX_PATH+1];
+	char szTmpName[MAX_PATH+1];
 	char dname[MAX_PATH+1];
 	char *endname = Nullch;
 	STRLEN tmplen = 0;
 	DWORD from_attr, to_attr;
 
+	strcpy(szOldName, PerlDir_mapA(oname));
+	strcpy(szNewName, PerlDir_mapA(newname));
+
 	/* if oname doesn't exist, do nothing */
-	from_attr = GetFileAttributes(oname);
+	from_attr = GetFileAttributes(szOldName);
 	if (from_attr == 0xFFFFFFFF) {
 	    errno = ENOENT;
 	    return -1;
@@ -2497,7 +2505,7 @@ win32_rename(const char *oname, const char *newname)
 	 * don't delete it in case oname happens to be the same file
 	 * (but perhaps accessed via a different path)
 	 */
-	to_attr = GetFileAttributes(newname);
+	to_attr = GetFileAttributes(szNewName);
 	if (to_attr != 0xFFFFFFFF) {
 	    /* if newname is a directory, we fail
 	     * XXX could overcome this with yet more convoluted logic */
@@ -2505,29 +2513,29 @@ win32_rename(const char *oname, const char *newname)
 		errno = EACCES;
 		return -1;
 	    }
-	    tmplen = strlen(newname);
-	    strcpy(tmpname,newname);
-	    endname = tmpname+tmplen;
-	    for (; endname > tmpname ; --endname) {
+	    tmplen = strlen(szNewName);
+	    strcpy(szTmpName,szNewName);
+	    endname = szTmpName+tmplen;
+	    for (; endname > szTmpName ; --endname) {
 		if (*endname == '/' || *endname == '\\') {
 		    *endname = '\0';
 		    break;
 		}
 	    }
-	    if (endname > tmpname)
-		endname = strcpy(dname,tmpname);
+	    if (endname > szTmpName)
+		endname = strcpy(dname,szTmpName);
 	    else
 		endname = ".";
 
 	    /* get a temporary filename in same directory
 	     * XXX is this really the best we can do? */
-	    if (!GetTempFileName((LPCTSTR)endname, "plr", 0, tmpname)) {
+	    if (!GetTempFileName((LPCTSTR)endname, "plr", 0, szTmpName)) {
 		errno = ENOENT;
 		return -1;
 	    }
-	    DeleteFile(tmpname);
+	    DeleteFile(szTmpName);
 
-	    retval = rename(newname, tmpname);
+	    retval = rename(szNewName, szTmpName);
 	    if (retval != 0) {
 		errno = EACCES;
 		return retval;
@@ -2535,16 +2543,16 @@ win32_rename(const char *oname, const char *newname)
 	}
 
 	/* rename oname to newname */
-	retval = rename(oname, newname);
+	retval = rename(szOldName, szNewName);
 
 	/* if we created a temporary file before ... */
 	if (endname != Nullch) {
 	    /* ...and rename succeeded, delete temporary file/directory */
 	    if (retval == 0)
-		DeleteFile(tmpname);
+		DeleteFile(szTmpName);
 	    /* else restore it to what it was */
 	    else
-		(void)rename(tmpname, newname);
+		(void)rename(szTmpName, szNewName);
 	}
 	return retval;
     }

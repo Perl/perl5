@@ -16,7 +16,7 @@ if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
     $Is_Dosish = '' if Win32::FsType() eq 'NTFS';
 }
 
-print "1..28\n";
+print "1..29\n";
 
 $wd = (($^O eq 'MSWin32') ? `cd` : `pwd`);
 chop($wd);
@@ -177,10 +177,20 @@ else {
   close FH;
 }
 
+# check if rename() can be used to just change case of filename
+chdir './tmp';
+open(fh,'>x') || die "Can't create x";
+close(fh);
+rename('x', 'X');
+print 'not ' unless -e 'X';
+print "ok 27\n";
+unlink 'X';
+chdir $wd || die "Can't cd back to $wd";
+
 # check if rename() works on directories
 rename 'tmp', 'tmp1' or print "not ";
-print "ok 27\n";
--d 'tmp1' or print "not ";
 print "ok 28\n";
+-d 'tmp1' or print "not ";
+print "ok 29\n";
 
 END { rmdir 'tmp1'; unlink "Iofs.tmp"; }
