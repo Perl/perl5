@@ -96,8 +96,44 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6776] By: jhi                                   on 2000/08/22  18:44:46
+        Log: cSVOPo_*v things index into the current PL_curpad
+             under ithreads, which is different from the curpad
+             used by the XSUB.  (In other words, the code as-is
+             before this patch wouldn't work under ithreads.)
+             From Sarathy.
+     Branch: perl
+	   ! ext/B/B.xs
+____________________________________________________________________________
+[  6775] By: jhi                                   on 2000/08/22  18:18:37
+        Log: Make the selection of NVff et al stricter.
+     Branch: metaconfig/U/perl
+	   ! perlxvf.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  6774] By: jhi                                   on 2000/08/22  17:19:42
+        Log: perldelta nits.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6773] By: jhi                                   on 2000/08/22  17:06:26
+        Log: Long double fixes from Spider Boardman.
+             
+             Subject: [ID 20000821.014] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6756 on alpha-dec_osf 5.1 (UNINSTALLED)
+             From: system PRIVILEGED account <root@peano.zk3.dec.com>
+             Date: Mon, 21 Aug 2000 18:41:15 -0400 (EDT)
+             Message-Id: <200008212241.SAA0000014255@peano.zk3.dec.com>
+     Branch: perl
+	   ! t/lib/bigfltpm.t t/lib/st-06compat.t
+____________________________________________________________________________
+[  6772] By: jhi                                   on 2000/08/22  15:04:53
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6771] By: jhi                                   on 2000/08/22  15:01:44
-        Log: perldelta fixes from HUgo van der Sanden.
+        Log: perldelta fixes from Hugo van der Sanden.
      Branch: perl
 	   ! pod/perldelta.pod
 ____________________________________________________________________________
@@ -153,7 +189,7 @@ ____________________________________________________________________________
 	   ! pod/perlutil.pod utils/Makefile utils/perlbc.PL
 ____________________________________________________________________________
 [  6763] By: jhi                                   on 2000/08/22  13:36:44
-        Log: Bytecompiler patches from Benajim Stuhl.
+        Log: Bytecompiler patches from Benjamin Stuhl.
      Branch: perl
 	   ! bytecode.pl embedvar.h ext/B/B.pm ext/B/B.xs
 	   ! ext/B/B/Asmdata.pm ext/B/B/Assembler.pm ext/B/B/Bytecode.pm
@@ -4052,7 +4088,7 @@ ____________________________________________________________________________
 	   ! op.c sv.c t/pragma/constant.t t/pragma/warn/op
 ____________________________________________________________________________
 [  6256] By: jhi                                   on 2000/06/28  15:40:22
-        Log: tweaks from Simon Conzes to further fix tr/// under utf8
+        Log: tweaks from Simon Cozens to further fix tr/// under utf8
      Branch: cfgperl
 	   ! doop.c
 ____________________________________________________________________________
