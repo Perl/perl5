@@ -245,9 +245,10 @@ get_emd_part(char **prev_path, char *trailing_path, ...)
 	Renew(*prev_path, newsize, char);
 	(*prev_path)[oldsize-1] = ';';
 	strcpy(&(*prev_path)[oldsize], mod_name);
+	return *prev_path;
     }
 
-    return *prev_path;
+    return Nullch;
 }
 
 char *
@@ -294,6 +295,12 @@ win32_get_sitelib(char *pl)
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/$]/lib";  */
     sprintf(pathstr, "site/%s/lib", pl);
     str1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
+    if (!str1 && strlen(pl) == 7) {
+	/* pl may have been SUBVERSION-specific; try again without
+	 * SUBVERSION */
+	sprintf(pathstr, "site/%.5s/lib", pl);
+	str1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
+    }
 
     /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
     path2 = &SvPVX(sv2);
