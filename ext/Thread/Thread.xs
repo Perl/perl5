@@ -82,7 +82,7 @@ threadstart(void *arg)
 #else
     Thread thr = (Thread) arg;
     LOGOP myop;
-    djSP;
+    dSP;
     I32 oldmark = TOPMARK;
     I32 oldscope = PL_scopestack_ix;
     I32 retval;
