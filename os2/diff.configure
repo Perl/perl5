@@ -1,6 +1,6 @@
---- Configure.dist	Tue Feb 11 09:45:57 1997
-+++ Configure	Tue Feb 11 09:46:04 1997
-@@ -1467,7 +1467,7 @@
+--- Configure.dist	Fri Feb 28 10:45:27 1997
++++ Configure	Fri Feb 28 10:45:31 1997
+@@ -1481,7 +1481,7 @@
  	*)
  		echo "I don't know where '$file' is, and my life depends on it." >&4
  		echo "Go find a public domain implementation or fix your PATH setting!" >&4
@@ -9,7 +9,7 @@
  		;;
  	esac
  done
-@@ -1476,7 +1476,9 @@
+@@ -1490,7 +1490,9 @@
  say=offhand
  for file in $trylist; do
  	xxx=`./loc $file $file $pth`
@@ -20,7 +20,7 @@
  	eval _$file=$xxx
  	case "$xxx" in
  	/*)
-@@ -3164,7 +3166,7 @@
+@@ -3178,7 +3180,7 @@
  	exit(0);
  }
  EOM
@@ -29,7 +29,7 @@
  	gccversion=`./gccvers`
  	case "$gccversion" in
  	'') echo "You are not using GNU cc." ;;
-@@ -3367,6 +3369,12 @@
+@@ -3381,6 +3383,12 @@
  		*"-l$thislib "*);;
  		*) dflt="$dflt -l$thislib";;
  		esac
@@ -42,7 +42,7 @@
  	else
  		echo "No -l$thislib."
  	fi
-@@ -3914,7 +3922,7 @@
+@@ -3930,7 +3938,7 @@
  	esac
  	;;
  esac
@@ -51,7 +51,7 @@
  case "$libs" in
  '') ;;
  *)  for thislib in $libs; do
-@@ -4116,6 +4124,10 @@
+@@ -4136,6 +4144,10 @@
  	eval $xscan;\
  	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
  		eval $xrun
@@ -62,7 +62,7 @@
  else
  	nm -p $* 2>/dev/null >libc.tmp
  	$grep fprintf libc.tmp > libc.ptf
-@@ -4126,23 +4138,33 @@
+@@ -4146,23 +4158,33 @@
  		eval $xrun
  	else
  		echo " "
@@ -103,7 +103,7 @@
  				done
  				echo "Ok." >&4
  			else
-@@ -5845,7 +5867,7 @@
+@@ -5871,7 +5893,7 @@
  	exit(result);
  }
  EOCP
@@ -112,7 +112,7 @@
  	./try
  	yyy=$?
  else
-@@ -5926,7 +5948,7 @@
+@@ -5952,7 +5974,7 @@
  
  }
  EOCP
@@ -121,7 +121,7 @@
  	./try
  	castflags=$?
  else
-@@ -5965,7 +5987,7 @@
+@@ -5991,7 +6013,7 @@
  	exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
  }
  EOF
@@ -130,7 +130,7 @@
  		echo "Your vsprintf() returns (int)." >&4
  		val2="$undef"
  	else
-@@ -6310,7 +6332,7 @@
+@@ -6336,7 +6358,7 @@
  EOCP
  : check sys/file.h first to get FREAD on Sun
  if $test `./findhdr sys/file.h` && \
@@ -139,7 +139,7 @@
  	h_sysfile=true;
  	echo "<sys/file.h> defines the O_* constants..." >&4
  	if ./open3; then
-@@ -6321,7 +6343,7 @@
+@@ -6347,7 +6369,7 @@
  		val="$undef"
  	fi
  elif $test `./findhdr fcntl.h` && \
@@ -148,7 +148,7 @@
  	h_fcntl=true;
  	echo "<fcntl.h> defines the O_* constants..." >&4
  	if ./open3; then
-@@ -6827,7 +6849,7 @@
+@@ -6853,7 +6875,7 @@
  y*|true)
  	usemymalloc='y'
  	mallocsrc='malloc.c'
@@ -157,7 +157,7 @@
  	d_mymalloc="$define"
  	case "$libs" in
  	*-lmalloc*)
-@@ -8080,7 +8102,7 @@
+@@ -8111,7 +8133,7 @@
  	printf("%d\n", (char *)&try.bar - (char *)&try.foo);
  }
  EOCP
@@ -166,7 +166,7 @@
  		dflt=`./try`
  	else
  		dflt='8'
-@@ -8128,7 +8150,7 @@
+@@ -8159,7 +8181,7 @@
  }
  EOCP
  	xxx_prompt=y
@@ -175,16 +175,7 @@
  		dflt=`./try`
  		case "$dflt" in
  		[1-4][1-4][1-4][1-4]|12345678|87654321)
-@@ -8550,7 +8572,7 @@
- 	printf("%d\n",i);
- }
- EOCP
--	if $cc try.c -o try >/dev/null 2>&1 ; then
-+	if $cc $ldflags try.c -o try >/dev/null 2>&1 ; then
- 		dflt=`try`
- 	else
- 		dflt='?'
-@@ -8660,7 +8682,7 @@
+@@ -8692,7 +8714,7 @@
  	'') $echo $n ".$c"
  		if $cc $ccflags \
  		$i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone \
@@ -193,7 +184,7 @@
  			set X $i_time $i_systime $i_systimek $sysselect $s_timeval
  			shift
  			flags="$*"
-@@ -8729,7 +8751,7 @@
+@@ -8761,7 +8783,7 @@
  #endif
  }
  EOCP
@@ -202,7 +193,7 @@
  	d_fds_bits="$define"
  	d_fd_set="$define"
  	echo "Well, your system knows about the normal fd_set typedef..." >&4
-@@ -8746,7 +8768,7 @@
+@@ -8778,7 +8800,7 @@
  	$cat <<'EOM'
  Hmm, your compiler has some difficulty with fd_set.  Checking further...
  EOM
@@ -211,7 +202,7 @@
  		d_fds_bits="$undef"
  		d_fd_set="$define"
  		echo "Well, your system has some sort of fd_set available..." >&4
-@@ -9493,7 +9515,7 @@
+@@ -9525,7 +9547,7 @@
  else
  	echo "false"
  fi
@@ -220,7 +211,7 @@
  EOP
  chmod +x varargs
  
-@@ -9820,7 +9842,7 @@
+@@ -9852,7 +9874,7 @@
  	echo " "
  	echo "Stripping down executable paths..." >&4
  	for file in $loclist $trylist; do
