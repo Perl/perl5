@@ -37,7 +37,11 @@ $spitshell >>writemain <<'!NO!SUBS!'
 orig="$*"
 args=''
 : Remove any .a suffixes and any leading path components
-for file in `echo $orig | sed 's/\.a//g'` ; do
+for file in $orig ; do
+        case "$file" in
+           *.a)  file=`echo $file | sed 's/\.a//g'`
+                 ;;
+        esac
 	case "$file" in
 	ext/*)	file=`echo $file | sed 's:ext/\(.*\)/[^/]*:\1:'`
 		;;
