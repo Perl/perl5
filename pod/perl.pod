@@ -31,6 +31,7 @@ of sections:
     perlsub	Perl subroutines
     perlmod	Perl modules
     perlform	Perl formats
+    perli18n	Perl internalization
 
     perlref	Perl references 
     perldsc	Perl data structures intro
@@ -246,6 +247,9 @@ directory.  If PERL5LIB is defined, PERLLIB is not used.
 
 =back
 
+Perl also has environment variables that control how Perl handles
+language-specific data. Please consult the L<perli18n> section.
+
 Apart from these, Perl uses no other environment variables, except
 to make them available to the script being executed, and to child
 processes.  However, scripts running setuid would do well to execute
@@ -258,7 +262,7 @@ honest:
 
 =head1 AUTHOR
 
-Larry Wall E<lt>F<lwall@sems.com>E<gt>, with the help of oodles of other folks.
+Larry Wall E<lt>F<larry@wall.org>E<gt>, with the help of oodles of other folks.
 
 =head1 FILES
 
@@ -306,9 +310,9 @@ given variable name may not be longer than 255 characters, and no
 component of your PATH may be longer than 255 if you use B<-S>.  A regular
 expression may not compile to more than 32767 bytes internally.
 
-See the perl bugs database at F< http://perl.com/perl/bugs/ >.  You may
+See the perl bugs database at F<http://perl.com/perl/bugs/>.  You may
 mail your bug reports (be sure to include full configuration information
-as output by the myconfig program in the perl source tree) to
+as output by the myconfig program in the perl source tree, or by C<perl -V>) to
 F<perlbug@perl.com>.
 If you've succeeded in compiling perl, the perlbug script in the utils/
 subdirectory can be used to help mail in a bug report.
