@@ -1,7 +1,5 @@
 #./perl
 
-use integer;
-
 BEGIN {
 	eval { my $q = pack "q", 0 };
 	if ($@) {
