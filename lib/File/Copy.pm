@@ -269,13 +269,13 @@ File::Copy - Copy files or filehandles
 
 =head1 SYNOPSIS
 
-  	use File::Copy;
+	use File::Copy;
 
-	copy("file1","file2");
-  	copy("Copy.pm",\*STDOUT);'
+	copy("file1","file2") or die "Copy failed: $!";
+	copy("Copy.pm",\*STDOUT);
 	move("/dev1/fileA","/dev2/fileB");
 
-  	use POSIX;
+	use POSIX;
 	use File::Copy cp;
 
 	$n = FileHandle->new("/a/file","r");
