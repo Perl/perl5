@@ -36,7 +36,7 @@ use vars qw(@ISA %ESCAPES $VERSION);
 # Table of supported E<> escapes
 ############################################################################
 
-# This table is taken near verbatim from Pod::Text in Pod::Parser,
+# This table is taken near verbatim from Pod::PlainText in Pod::Parser,
 # which got it near verbatim from the original Pod::Text.  It is therefore
 # credited to Tom Christiansen, and I'm glad I didn't have to write it.  :)
 %ESCAPES = (

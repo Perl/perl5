@@ -1,5 +1,5 @@
 # Pod::Text::Color -- Convert POD data to formatted color ASCII text
-# $Id: Color.pm,v 0.1 1999/06/13 02:41:06 eagle Exp $
+# $Id: Color.pm,v 0.5 1999/09/20 10:15:16 eagle Exp $
 #
 # Copyright 1999 by Russ Allbery <rra@stanford.edu>
 #
@@ -27,7 +27,7 @@ use vars qw(@ISA $VERSION);
 @ISA = qw(Pod::Text);
 
 # Use the CVS revision of this file as its version number.
-($VERSION = (split (' ', q$Revision: 0.1 $ ))[1]) =~ s/\.(\d)$/.0$1/;
+($VERSION = (split (' ', q$Revision: 0.5 $ ))[1]) =~ s/\.(\d)$/.0$1/;
 
 
 ############################################################################
@@ -100,10 +100,19 @@ Pod::Text::Color - Convert POD data to formatted color ASCII text
 
 =head1 DESCRIPTION
 
-Pod::Text::Color is a simple subclass of Pod::Text that highlights
-output text using ANSI color escape sequences.  Apart from the color, it in
-all ways functions like Pod::Text.  See L<Pod::Text> for details
-and available options.
+Pod::Text::Color is a simple subclass of Pod::Text that highlights output
+text using ANSI color escape sequences.  Apart from the color, it in all
+ways functions like Pod::Text.  See L<Pod::Text> for details and available
+options.
+
+Term::ANSIColor is used to get colors and therefore must be installed to use
+this module.
+
+=head1 BUGS
+
+This is just a basic proof of concept.  It should be seriously expanded to
+support configurable coloration via options passed to the constructor, and
+B<pod2text> should be taught about those.
 
 =head1 SEE ALSO
 
