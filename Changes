@@ -28,6 +28,29 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20107] By: jhi                                   on 2003/07/10  04:55:03
+        Log: Integrate:
+             [ 20103]
+             perlfaq sync.
+             
+             [ 20104]
+             Deprecate v-strings.
+             
+             [ 20106]
+             Upgrade to podlators 1.27.
+     Branch: maint-5.8/perl
+	  !> lib/Pod/Text/Termcap.pm pod/perldata.pod pod/perlfaq1.pod
+____________________________________________________________________________
+[ 20105] By: jhi                                   on 2003/07/10  04:46:01
+        Log: Add deprecations to perldelta. 
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20102] By: jhi                                   on 2003/07/09  17:55:46
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20101] By: jhi                                   on 2003/07/09  17:49:23
         Log: Integrate:
              [ 20094]
