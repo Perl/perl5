@@ -97,11 +97,12 @@ use File::Basename ();
 use Exporter ();
 use strict;
 
-our $VERSION = "1.0403";
+our $VERSION = "1.0404";
 our @ISA = qw( Exporter );
 our @EXPORT = qw( mkpath rmtree );
 
 my $Is_VMS = $^O eq 'VMS';
+my $Is_MacOS = $^O eq 'MacOS';
 
 # These OSes complain if you want to remove a file that you have no
 # write permission to:
@@ -113,7 +114,7 @@ sub mkpath {
     # $paths   -- either a path string or ref to list of paths
     # $verbose -- optional print "mkdir $path" for each directory created
     # $mode    -- optional permissions, defaults to 0777
-    local($")="/";
+    local($")=$Is_MacOS ? ":" : "/";
     $mode = 0777 unless defined($mode);
     $paths = [$paths] unless ref $paths;
     my(@created,$path);
@@ -160,7 +161,12 @@ sub rmtree {
 
     my($root);
     foreach $root (@{$roots}) {
-	$root =~ s#/\z##;
+    	if ($Is_MacOS) {
+	    $root = ":$root" if $root !~ /:/;
+	    $root =~ s#([^:])\z#$1:#;
+	} else {
+	    $root =~ s#/\z##;
+	}
 	(undef, undef, my $rp) = lstat $root or next;
 	$rp &= 07777;	# don't forget setuid, setgid, sticky bits
 	if ( -d _ ) {
@@ -185,7 +191,11 @@ sub rmtree {
 	    # is faster if done in reverse ASCIIbetical order 
 	    @files = reverse @files if $Is_VMS;
 	    ($root = VMS::Filespec::unixify($root)) =~ s#\.dir\z## if $Is_VMS;
-	    @files = map("$root/$_", grep $_!~/^\.{1,2}\z/s,@files);
+	    if ($Is_MacOS) {
+		@files = map("$root$_", @files);
+	    } else {
+		@files = map("$root/$_", grep $_!~/^\.{1,2}\z/s,@files);
+	    }
 	    $count += rmtree(\@files,$verbose,$safe);
 	    if ($safe &&
 		($Is_VMS ? !&VMS::Filespec::candelete($root) : !-w $root)) {

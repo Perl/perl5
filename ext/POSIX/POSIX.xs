@@ -155,8 +155,6 @@
 #  endif /* !HAS_MKFIFO */
 
 #  ifdef MACOS_TRADITIONAL
-	 struct tms { time_t tms_utime, tms_stime, tms_cutime, tms_cstime; }; 
-#    define times(a) not_here("times")
 #    define ttyname(a) (char*)not_here("ttyname")
 #    define tzset() not_here("tzset")
 #  else
