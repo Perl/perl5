@@ -393,6 +393,19 @@ if (! $versiononly && (-f 'cppstdin') && (! samepath($installbin, '.'))) {
     chmod(0755, "$installbin/cppstdin");
 }
 
+sub script_alias {
+    my ($installscript, $orig, $alias, $scr_ext) = @_;
+
+    safe_unlink("$installscript/pstruct$scr_ext");
+    if ($^O eq 'dos' or $Is_VMS or $^O eq 'transit') {
+	copy("$installscript/$orig$scr_ext",
+	     "$installscript/$alias$scr_ext"); 
+    } else {
+	link("$installscript/$orig$scr_ext",
+	     "$installscript/$alias$scr_ext");
+    }
+}
+
 if (! $versiononly) {
     # Install scripts.
 
@@ -405,14 +418,10 @@ if (! $versiononly) {
     }
 
     # pstruct should be a link to c2ph
-    safe_unlink("$installscript/pstruct$scr_ext");
-    if ($^O eq 'dos' or $Is_VMS or $^O eq 'transit') {
-	copy("$installscript/c2ph$scr_ext",
-	     "$installscript/pstruct$scr_ext"); 
-    } else {
-	link("$installscript/c2ph$scr_ext",
-	     "$installscript/pstruct$scr_ext");
-    }
+    script_alias('c2ph', 'pstruct');
+
+    # psed should be a link to s2p
+    script_alias('s2p', 'psed');
 }
 
 # Install pod pages.  Where? I guess in $installprivlib/pod
