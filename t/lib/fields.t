@@ -90,7 +90,7 @@ my %expect = (
     'Foo::Bar::Baz' => 'b1:1,b2:2,b3:3,foo:4,bar:5,baz:6',
 );
 
-print "1..", int(keys %expect)+13, "\n";
+print "1..", int(keys %expect)+14, "\n";
 my $testno = 0;
 while (my($class, $exp) = each %expect) {
    no strict 'refs';
@@ -170,3 +170,16 @@ print "ok ", ++$testno, "\n";
     print $a->{foo}[1], "\n";
     print $a->{bar}->{A}, "\n";
 }
+
+
+# Test $VERSION bug
+package No::Version;
+
+use vars qw($Foo);
+sub VERSION { 42 }
+
+package Test::Version;
+
+use base qw(No::Version);
+print "not " unless $No::Version::VERSION =~ /set by base\.pm/;
+print "ok ", ++$testno ,"\n";
