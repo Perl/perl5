@@ -18,7 +18,7 @@ use threads::shared;
 # call is() from within the DESTROY() function at global destruction time,
 # and parts of Test::* may have already been freed by then
 
-print "1..8\n";
+print "1..10\n";
 
 my $test : shared = 1;
 
@@ -92,5 +92,16 @@ threads->new(
 	$test++;
     }
 )->join;
+
+# bugid #24940 :unique should fail on my and sub declarations
+
+for my $decl ('my $x : unique', 'sub foo : unique') {
+    eval $decl;
+    print $@ =~
+	/^The 'unique' attribute may only be applied to 'our' variables/
+	    ? '' : 'not ', "ok $test - $decl\n";
+    $test++;
+}
+
 
 1;
