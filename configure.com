@@ -6169,9 +6169,11 @@ $     WRITE CONFIG "$ dprofpp     == ""'"+"'Perl' ''vms_prefix':[utils]dprofpp.c
 $   ENDIF 
 $   WRITE CONFIG "$ h2ph     == ""'"+"'Perl' ''vms_prefix':[utils]h2ph.com"""
 $   WRITE CONFIG "$ h2xs     == ""'"+"'Perl' ''vms_prefix':[utils]h2xs.com"""
+$   WRITE CONFIG "$ libnetcfg == ""'"+"'Perl' ''vms_prefix':[utils]libnetcfg.com"""
 $   WRITE CONFIG "$!perlcc   == ""'"+"'Perl' ''vms_prefix':[utils]perlcc.com"""
 $   WRITE CONFIG "$ perlivp  == ""'"+"'Perl' ''vms_prefix':[utils]perlivp.com"""
 $   WRITE CONFIG "$ splain   == ""'"+"'Perl' ''vms_prefix':[utils]splain.com"""
+$   WRITE CONFIG "$ xsubpp   == ""'"+"'Perl' ''vms_prefix':[utils]xsubpp.com"""
 $ ELSE
 $   WRITE CONFIG "$ Perldoc  == ""Perl ''vms_prefix':[lib.pod]Perldoc.com -t"""
 $   WRITE CONFIG "$ pod2text == ""Perl pod2text"""
@@ -6186,9 +6188,11 @@ $     WRITE CONFIG "$ dprofpp     == ""Perl ''vms_prefix':[utils]dprofpp.com"""
 $   ENDIF 
 $   WRITE CONFIG "$ h2ph     == ""Perl ''vms_prefix':[utils]h2ph.com"""
 $   WRITE CONFIG "$ h2xs     == ""Perl ''vms_prefix':[utils]h2xs.com"""
+$   WRITE CONFIG "$ libnetcfg == ""Perl ''vms_prefix':[utils]libnetcfg.com"""
 $   WRITE CONFIG "$!perlcc   == ""Perl ''vms_prefix':[utils]perlcc.com"""
 $   WRITE CONFIG "$ perlivp  == ""Perl ''vms_prefix':[utils]perlivp.com"""
 $   WRITE CONFIG "$ splain   == ""Perl ''vms_prefix':[utils]splain.com"""
+$   WRITE CONFIG "$ xsubpp   == ""Perl ''vms_prefix':[utils]xsubpp.com"""
 $ ENDIF
 $ CLOSE CONFIG
 $!

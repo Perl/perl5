@@ -327,8 +327,9 @@ CRTLOPTS =,$(CRTL)/Options
 # Modules which must be installed before we can build extensions
 LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
 
-utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com
-utils2 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com
+utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
+utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com 
+utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.lib.ExtUtils]xsubpp.com
 
 .ifdef NOX2P
 all : base extras archcorefiles preplibrary perlpods
@@ -345,7 +346,7 @@ extras : dynext libmods utils podxform extra.pods
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
-utils : $(utils1) $(utils2)
+utils : $(utils1) $(utils2) $(utils3)
 	@ $(NOOP)
 podxform : [.lib.pod]pod2text.com [.lib.pod]pod2html.com [.lib.pod]pod2latex.com [.lib.pod]pod2man.com [.lib.pod]podchecker.com [.lib.pod]pod2usage.com [.lib.pod]podselect.com
 	@ $(NOOP)
@@ -523,6 +524,9 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 [.utils]h2xs.com : [.utils]h2xs.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
+[.utils]libnetcfg.com : [.utils]libnetcfg.PL $(ARCHDIR)Config.pm
+       $(MINIPERL) $(MMS$SOURCE)
+
 [.lib]perlbug.com : [.utils]perlbug.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 	Copy/Log [.utils]perlbug.com $(MMS$TARGET)
@@ -543,6 +547,9 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 
 [.x2p]s2p.com : [.x2p]s2p.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
+
+[.lib.ExtUtils]xsubpp.com : [.lib.ExtUtils]xsubpp 
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
 # Rename catches problem with some DECC versions in which object file is
 # placed in current default dir, not same one as source file.

@@ -197,6 +197,7 @@ sub fileparse {
       my $devspec  = $1;
       my $remainder = $3;
       ($dirpath,$basename) = ($remainder =~ m#^(.*/)?(.*)#s);
+      $dirpath ||= '';  # should always be defined
       $dirpath = $devspec.$dirpath;
     }
     $dirpath = './' unless $dirpath;
