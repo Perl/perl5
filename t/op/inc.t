@@ -6,11 +6,11 @@
 print "1..6\n";
 
 # Verify that addition/subtraction properly upgrade to doubles.
-# These tests are only useful on machines with 32 bit longs,
-# and one's complement negation, but shouldn't fail anywhere.
+# These tests are only significant on machines with 32 bit longs,
+# and two's complement negation, but shouldn't fail anywhere.
 
 $a = 2147483647;
-$a++;
+$c=$a++;
 if ($a == 2147483648) 
 	{print "ok 1\n"}
 else

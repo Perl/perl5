@@ -1743,6 +1743,12 @@ double f;
    ccflags.
 	       --Andy Dougherty      <doughera@lafcol.lafayette.edu>
 */
+
+/* Code modified to prefer proper named type ranges, I32, IV, or UV, instead
+   of LONG_(MIN/MAX).
+                           -- Kenneth Albanowski <kjahds@kjahds.com>
+*/                                      
+
 #ifndef MY_UV_MAX
 #  define MY_UV_MAX ((UV)IV_MAX * (UV)2 + (UV)1)
 #endif
