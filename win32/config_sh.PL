@@ -76,6 +76,8 @@ else {
 }
 $opt{VERSION} = "$opt{PERL_REVISION}.$opt{PERL_VERSION}.$opt{PERL_SUBVERSION}";
 $opt{INST_VER} =~ s|~VERSION~|$opt{VERSION}|g;
+$opt{'version_patchlevel_string'} = "version $opt{PERL_VERSION} subversion $opt{PERL_SUBVERSION}";
+$opt{'version_patchlevel_string'} .= " patchlevel $opt{PERL_PATCHLEVEL}" if exists $opt{PERL_PATCHLEVEL};
 
 $opt{'cf_by'} = $ENV{USERNAME} unless $opt{'cf_by'};
 $opt{'cf_email'} = $opt{'cf_by'} . '@' . (gethostbyname('localhost'))[0]
