@@ -38,7 +38,7 @@ calls.
 static void
 dl_private_init(CPERLarg)
 {
-    (void)dl_generic_private_init(THIS);
+    (void)dl_generic_private_init(PERL_OBJECT_THIS);
 }
 
 /* 
@@ -80,7 +80,7 @@ dl_static_linked(char *filename)
 MODULE = DynaLoader	PACKAGE = DynaLoader
 
 BOOT:
-    (void)dl_private_init(THIS);
+    (void)dl_private_init(PERL_OBJECT_THIS);
 
 void *
 dl_load_file(filename,flags=0)
@@ -96,7 +96,7 @@ dl_load_file(filename,flags=0)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr()," libref=%x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError(THIS_ "%d",GetLastError()) ;
+	SaveError(PERL_OBJECT_THIS_ "%d",GetLastError()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 
@@ -112,7 +112,7 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"  symbolref = %x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError(THIS_ "%d",GetLastError()) ;
+	SaveError(PERL_OBJECT_THIS_ "%d",GetLastError()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 

@@ -108,9 +108,9 @@ class CPerlObj;
 #define CPERLarg CPerlObj *pPerl
 #define CPERLarg_ CPERLarg,
 #define _CPERLarg ,CPERLarg
-#define THIS this
-#define _THIS ,this
-#define THIS_ this,
+#define PERL_OBJECT_THIS this
+#define _PERL_OBJECT_THIS ,this
+#define PERL_OBJECT_THIS_ this,
 #define CALLRUNOPS (this->*runops)
 
 #else /* !PERL_OBJECT */
@@ -122,9 +122,9 @@ class CPerlObj;
 #define CPERLarg void
 #define CPERLarg_
 #define _CPERLarg
-#define THIS
-#define _THIS
-#define THIS_
+#define PERL_OBJECT_THIS
+#define _PERL_OBJECT_THIS
+#define PERL_OBJECT_THIS_
 #define CALLRUNOPS runops
 
 #endif /* PERL_OBJECT */

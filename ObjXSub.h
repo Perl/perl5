@@ -2001,10 +2001,10 @@
 #define socketpair PerlSock_socketpair
 #endif  /* NO_XSLOCKS */
 
-#undef  THIS
-#define THIS pPerl
-#undef  THIS_
-#define THIS_ pPerl,
+#undef  PERL_OBJECT_THIS
+#define PERL_OBJECT_THIS pPerl
+#undef  PERL_OBJECT_THIS_
+#define PERL_OBJECT_THIS_ pPerl,
 
 #undef  SAVEDESTRUCTOR
 #define SAVEDESTRUCTOR(f,p) \
