@@ -166,6 +166,7 @@ foreach (@processes) {
       # unless ($bit) { use Devel::Peek; Dump $copy_s1; Dump $$copy_s; }
     } else {
       fail ("$process $copy1");
+      fail ("$process $copy1");
     }
   }
 }
