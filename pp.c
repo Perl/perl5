@@ -2794,7 +2794,6 @@ PP(pp_int)
 	      if (value > (NV)IV_MIN - 0.5) {
 		  SETi(I_V(value));
 	      } else {
-		/* This is maint, and we don't have Perl_ceil in perl.h  */
 		  SETn(Perl_ceil(value));
 	      }
 	  }
