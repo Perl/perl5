@@ -1099,8 +1099,10 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		goto reswitch;
 	    break;
 
-    case 't':
-        PL_taint_warn = TRUE;
+	case 't':
+	    PL_taint_warn = TRUE;
+	    if (! (PL_dowarn & G_WARN_ALL_MASK))
+	        PL_dowarn |= G_WARN_ON;
 	case 'T':
 	    PL_tainting = TRUE;
 	    s++;
