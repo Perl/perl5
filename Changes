@@ -79,6 +79,18 @@ Version 5.005_56        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3045] By: gsar                                  on 1999/03/01  03:32:30
+        Log: destroy PL_svref_mutex in perl_destruct()
+     Branch: perl
+           ! perl.c
+____________________________________________________________________________
+[  3044] By: gsar                                  on 1999/03/01  00:38:50
+        Log: up patchlevel &c.
+     Branch: perl
+	   ! Changes patchlevel.h pod/perlhist.pod win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+           ! win32/makefile.mk
+____________________________________________________________________________
 [  3043] By: gsar                                  on 1999/03/01  00:14:15
         Log: integrate cfgperl contents into mainline
      Branch: perl
