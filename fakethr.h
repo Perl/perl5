@@ -1,6 +1,10 @@
 typedef int perl_mutex;
 typedef int perl_key;
 
+typedef struct thread *perl_thread;
+/* With fake threads, thr is global(ish) so we don't need dTHR */
+#define dTHR extern int errno
+
 struct perl_wait_queue {
     struct thread *		thread;
     struct perl_wait_queue *	next;
@@ -24,3 +28,29 @@ struct thread_intern {
 	(t)->i.private = 0;				\
     } STMT_END
 
+/*
+ * Note that SCHEDULE() is only callable from pp code (which
+ * must be expecting to be restarted). We'll have to do
+ * something a bit different for XS code.
+ */
+
+#define SCHEDULE() return schedule(), op
+
+#define MUTEX_LOCK(m)
+#define MUTEX_UNLOCK(m)
+#define MUTEX_INIT(m)
+#define MUTEX_DESTROY(m)
+#define COND_INIT(c) perl_cond_init(c)
+#define COND_SIGNAL(c) perl_cond_signal(c)
+#define COND_BROADCAST(c) perl_cond_broadcast(c)
+#define COND_WAIT(c, m)		\
+    STMT_START {		\
+	perl_cond_wait(c);	\
+	SCHEDULE();		\
+    } STMT_END
+#define COND_DESTROY(c)
+
+#define THREAD_CREATE(t, f)	f((t))
+#define THREAD_POST_CREATE(t)	NOOP
+
+#define YIELD	NOOP

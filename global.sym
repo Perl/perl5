@@ -69,6 +69,7 @@ gid
 gt_amg
 hexdigit
 hints
+init_thread_intern
 in_my
 in_my_stash
 inc_amg
@@ -139,6 +140,7 @@ nomem
 nomemok
 nomethod_amg
 not_amg
+nthreads
 numeric_local
 numeric_name
 numeric_standard
@@ -236,6 +238,7 @@ sv_no
 sv_undef
 sv_yes
 thisexpr
+thr_key
 timesbuf
 tokenbuf
 uid

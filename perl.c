@@ -124,7 +124,7 @@ register PerlInterpreter *sv_interp;
 	XPV *xpv;
 
     	INIT_THREADS;
-	New(53, thr, 1, struct thread);
+	Newz(53, thr, 1, struct thread);
 	MUTEX_INIT(&malloc_mutex);
 	MUTEX_INIT(&sv_mutex);
 	/* Safe to use SVs from now on */
@@ -158,9 +158,8 @@ register PerlInterpreter *sv_interp;
 	self = pthread_self();
 	if (pthread_key_create(&thr_key, 0))
 	    croak("panic: pthread_key_create");
-	if (pthread_setspecific(thr_key, (void *) thr))
-	    croak("panic: pthread_setspecific");
-#endif /* FAKE_THREADS */
+#endif /* HAVE_THREAD_INTERN */
+	SET_THR(thr);
 #endif /* USE_THREADS */
 
 	linestr = NEWSV(65,80);
@@ -279,8 +278,7 @@ register PerlInterpreter *sv_interp;
 	     * all over again.
 	     */
 	    MUTEX_UNLOCK(&threads_mutex);
-	    if (pthread_join(t->Tself, (void**)&av))
-		croak("panic: pthread_join failed during global destruction");
+	    JOIN(t, &av);
 	    SvREFCNT_dec((SV*)av);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 				  "perl_destruct: joined zombie %p OK\n", t));
@@ -2178,6 +2176,7 @@ char *scriptname;
      */
 
 #ifdef DOSUID
+    dTHR;
     char *s, *s2;
 
     if (Fstat(PerlIO_fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */

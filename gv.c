@@ -638,7 +638,7 @@ I32 sv_type;
         if (strEQ(name, "OVERLOAD")) {
             HV* hv = GvHVn(gv);
             GvMULTI_on(gv);
-            sv_magic((SV*)hv, (SV*)gv, 'A', 0, 0);
+            hv_magic(hv, gv, 'A');
         }
         break;
 #endif /* OVERLOAD */

@@ -63,15 +63,20 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #define NOOP (void)0
 
 #define WITH_THR(s) do { dTHR; s; } while (0)
+
 #ifdef USE_THREADS
-#ifdef FAKE_THREADS
-#include "fakethr.h"
-#else
-#include <pthread.h>
+#  ifdef FAKE_THREADS
+#    include "fakethr.h"
+#  else
+#    ifdef WIN32
+#      include "win32/win32thread.h"
+#    else
+#      include <pthread.h>
 typedef pthread_mutex_t perl_mutex;
 typedef pthread_cond_t perl_cond;
 typedef pthread_key_t perl_key;
-#endif /* FAKE_THREADS */
+#    endif /* WIN32 */
+#  endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
 
 /*

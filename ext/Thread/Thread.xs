@@ -23,7 +23,7 @@ Thread t;
     MUTEX_UNLOCK(&threads_mutex);
 }
 
-static void *
+static THREAD_RET_TYPE
 threadstart(arg)
 void *arg;
 {
@@ -81,8 +81,8 @@ void *arg;
      * Wait until our creator releases us. If we didn't do this, then
      * it would be potentially possible for out thread to carry on and
      * do stuff before our creator fills in our "self" field. For example,
-     * if we went and created another thread which tried to pthread_join
-     * with us, then we'd be in a mess.
+     * if we went and created another thread which tried to JOIN with us,
+     * then we'd be in a mess.
      */
     MUTEX_LOCK(&thr->mutex);
     MUTEX_UNLOCK(&thr->mutex);
@@ -92,8 +92,7 @@ void *arg;
      * from our pthread_t structure to our struct thread, since we're
      * the only thread who can get at it anyway.
      */
-    if (pthread_setspecific(thr_key, (void *) thr))
-	croak("panic: pthread_setspecific");
+    SET_THR(thr);
 
     /* Only now can we use SvPEEK (which calls sv_newmortal which does dTHR) */
     DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
@@ -182,9 +181,9 @@ void *arg;
 	croak("panic: illegal state %u at end of threadstart", ThrSTATE(thr));
 	/* NOTREACHED */
     }
-    return (void *) returnav;	/* Available for anyone to join with us */
-				/* unless we are detached in which case */
-				/* noone will see the value anyway. */
+    return THREAD_RET_CAST(returnav);	/* Available for anyone to join with */
+					/* us unless we're detached, in which */
+					/* case noone sees the value anyway. */
 #endif    
 }
 
@@ -199,7 +198,10 @@ char *class;
     Thread savethread;
     int i;
     SV *sv;
+    int err;
+#ifndef THREAD_CREATE
     sigset_t fullmask, oldmask;
+#endif
     
     savethread = thr;
     sv = newSVpv("", 0);
@@ -245,21 +247,32 @@ char *class;
     XPUSHs(SvREFCNT_inc(startsv));
     PUTBACK;
 
-#ifdef FAKE_THREADS
-    threadstart(thr);
+#ifdef THREAD_CREATE
+    THREAD_CREATE(thr, threadstart);
 #else    
     /* On your marks... */
     MUTEX_LOCK(&thr->mutex);
-    /* Get set...
-     * Increment the global thread count.
-     */
+    /* Get set...  */
     sigfillset(&fullmask);
     if (sigprocmask(SIG_SETMASK, &fullmask, &oldmask) == -1)
 	croak("panic: sigprocmask");
-    if (pthread_create(&self, NULL, threadstart, (void*) thr))
-	return NULL;	/* XXX should clean up first */
+    err = pthread_create(&self, pthread_attr_default, threadstart, (void*) thr);
     /* Go */
     MUTEX_UNLOCK(&thr->mutex);
+#endif
+    if (err) {
+	/* Thread creation failed--clean up */
+	SvREFCNT_dec(cvcache);
+	remove_thread(thr);
+	MUTEX_DESTROY(&thr->mutex);
+	for (i = 0; i <= AvFILL(initargs); i++)
+	    SvREFCNT_dec(*av_fetch(initargs, i, FALSE));
+	SvREFCNT_dec(startsv);
+	return NULL;
+    }
+#ifdef THREAD_POST_CREATE
+    THREAD_POST_CREATE(thr);
+#else
     if (sigprocmask(SIG_SETMASK, &oldmask, 0))
 	croak("panic: sigprocmask");
 #endif
@@ -312,8 +325,7 @@ join(t)
 	    croak("can't join with thread");
 	    /* NOTREACHED */
 	}
-	if (pthread_join(t->Tself, (void **) &av))
-	    croak("pthread_join failed");
+	JOIN(t, &av);
 
 	/* Could easily speed up the following if necessary */
 	for (i = 0; i <= AvFILL(av); i++)
@@ -389,13 +401,7 @@ DESTROY(t)
 void
 yield()
     CODE:
-#ifdef OLD_PTHREADS_API
-	pthread_yield();
-#else
-#ifndef NO_SCHED_YIELD
-	sched_yield();
-#endif /* NO_SCHED_YIELD */
-#endif /* OLD_PTHREADS_API */
+	YIELD;
 
 void
 cond_wait(sv)
@@ -536,7 +542,7 @@ SV *
 await_signal()
     PREINIT:
 	char c;
-	ssize_t ret;
+	SSize_t ret;
     CODE:
 	do {
 	    ret = read(sig_pipe[1], &c, 1);
