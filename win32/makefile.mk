@@ -359,7 +359,7 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 .IF "$(CCTYPE)" == "BORLAND"
 
 CC		= bcc32
-.IF $(BCCVER) >= 5.5
+.IF $(BCCVER) > 5.2
 LINK32		= ilink32
 .ELSE
 LINK32		= tlink32
@@ -395,7 +395,7 @@ LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
 LIBOUT_FLAG	= 
-.IF $(BCCVER) >= 5.5
+.IF $(BCCVER) > 5.2
 LINK_FLAGS     += -Gn
 .END
 
@@ -1260,7 +1260,6 @@ distclean: clean
 	-del /f $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\File\Glob.pm
-	-del /f $(LIBDIR)\Storable.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
