@@ -3317,16 +3317,16 @@ Perl_unsharepvn(pTHXo_ const char* sv, I32 len, U32 hash)
 
 #undef  Perl_utf16_to_utf8
 U8*
-Perl_utf16_to_utf8(pTHXo_ U16* p, U8 *d, I32 bytelen)
+Perl_utf16_to_utf8(pTHXo_ U8* p, U8 *d, I32 bytelen, I32 *newlen)
 {
-    return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8(p, d, bytelen);
+    return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8(p, d, bytelen, newlen);
 }
 
 #undef  Perl_utf16_to_utf8_reversed
 U8*
-Perl_utf16_to_utf8_reversed(pTHXo_ U16* p, U8 *d, I32 bytelen)
+Perl_utf16_to_utf8_reversed(pTHXo_ U8* p, U8 *d, I32 bytelen, I32 *newlen)
 {
-    return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8_reversed(p, d, bytelen);
+    return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8_reversed(p, d, bytelen, newlen);
 }
 
 #undef  Perl_utf8_distance

@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, "../lib";
 }
 
-print "1..15\n";
+print "1..19\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -108,3 +108,21 @@ $y = $x =~ tr/\x{190}/\x{190}/;
 print "not " if $y != 0;
 print "ok 15\n";
 }
+
+# 16: test cannot update if read-only
+eval '$1 =~ tr/x/y/';
+print (($@ =~ /^Modification of a read-only value attempted/) ? '' : 'not ',
+       "ok 16\n");
+
+# 17: test can count read-only
+'abcdef' =~ /(bcd)/;
+print (( eval '$1 =~ tr/abcd//' == 3) ? '' : 'not ', "ok 17\n");
+
+# 18: test lhs OK if not updating
+print ((eval '"123" =~ tr/12//' == 2) ? '' : 'not ', "ok 18\n");
+
+# 19: test lhs bad if updating
+eval '"123" =~ tr/1/1/';
+print (($@ =~ m|^Can't modify constant item in transliteration \(tr///\)|)
+       ? '' : 'not ', "ok 19\n");
+

@@ -3878,21 +3878,48 @@ Perl_my_atof(pTHX_ const char* s)
 }
 
 void
-Perl_report_closed_fh(pTHX_ GV *gv, IO *io, const char *func, const char *obj)
+Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 {
-    SV *sv;
-    char *name;
+    char *vile;
+    I32   warn;
+    char *func =
+	op == OP_READLINE   ? "readline"  :
+	op == OP_LEAVEWRITE ? "write" :
+	PL_op_desc[op];
+    char *pars = OP_IS_FILETEST(op) ? "" : "()";
+    char *type = OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET) ?
+                     "socket" : "filehandle";
+    char *name = NULL;
 
-    assert(gv);
+    if (isGV(gv)) {
+	SV *sv = sv_newmortal();
+	gv_efullname4(sv, gv, Nullch, FALSE);
+	name = SvPVX(sv);
+    }
 
-    sv = sv_newmortal();
-    gv_efullname3(sv, gv, Nullch);
-    name = SvPVX(sv);
+    if (io && IoTYPE(io) == IoTYPE_CLOSED) {
+	vile = "closed";
+	warn = WARN_CLOSED;
+    }
+    else {
+	vile = "unopened";
+	warn = WARN_UNOPENED;
+    }
 
-    Perl_warner(aTHX_ WARN_CLOSED, "%s() on closed %s %s", func, obj, name);
-
-    if (io && IoDIRP(io))
-	Perl_warner(aTHX_ WARN_CLOSED,
-		    "\t(Are you trying to call %s() on dirhandle %s?)\n",
-		    func, name);
+    if (name && *name) {
+	Perl_warner(aTHX_ warn,
+		    "%s%s on %s %s %s", func, pars, vile, type, name);
+	if (io && IoDIRP(io))
+	    Perl_warner(aTHX_ warn,
+			"\t(Are you trying to call %s%s on dirhandle %s?)\n",
+			func, pars, name);
+    }
+    else {
+	Perl_warner(aTHX_ warn,
+		    "%s%s on %s %s", func, pars, vile, type);
+	if (io && IoDIRP(io))
+	    Perl_warner(aTHX_ warn,
+			"\t(Are you trying to call %s%s on dirhandle?)\n",
+			func, pars);
+    }
 }

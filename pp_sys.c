@@ -612,8 +612,8 @@ PP(pp_pipe_op)
     IoIFP(rstio) = PerlIO_fdopen(fd[0], "r");
     IoOFP(wstio) = PerlIO_fdopen(fd[1], "w");
     IoIFP(wstio) = IoOFP(wstio);
-    IoTYPE(rstio) = '<';
-    IoTYPE(wstio) = '>';
+    IoTYPE(rstio) = IoTYPE_RDONLY;
+    IoTYPE(wstio) = IoTYPE_WRONLY;
 
     if (!IoIFP(rstio) || !IoOFP(wstio)) {
 	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
@@ -1070,7 +1070,7 @@ PP(pp_select)
     else {
 	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv) {
-	    gv_efullname3(TARG, PL_defoutgv, Nullch);
+	    gv_efullname4(TARG, PL_defoutgv, Nullch, FALSE);
 	    XPUSHTARG;
 	}
 	else {
@@ -1174,11 +1174,14 @@ PP(pp_enterwrite)
 
     cv = GvFORM(fgv);
     if (!cv) {
+        char *name = NULL;
 	if (fgv) {
 	    SV *tmpsv = sv_newmortal();
-	    gv_efullname3(tmpsv, fgv, Nullch);
-	    DIE(aTHX_ "Undefined format \"%s\" called",SvPVX(tmpsv));
+	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
+	    name = SvPV_nolen(tmpsv);
 	}
+	if (name && *name)
+	    DIE(aTHX_ "Undefined format \"%s\" called", name);
 	DIE(aTHX_ "Not a format reference");
     }
     if (CvCLONE(cv))
@@ -1255,10 +1258,19 @@ PP(pp_leavewrite)
 	if (!fgv)
 	    DIE(aTHX_ "bad top format reference");
 	cv = GvFORM(fgv);
-	if (!cv) {
-	    SV *tmpsv = sv_newmortal();
-	    gv_efullname3(tmpsv, fgv, Nullch);
-	    DIE(aTHX_ "Undefined top format \"%s\" called",SvPVX(tmpsv));
+	{
+	    char *name = NULL;
+	    if (!cv) {
+	        SV *sv = sv_newmortal();
+		gv_efullname4(sv, fgv, Nullch, FALSE);
+		name = SvPV_nolen(sv);
+	    }
+	    if (name && *name)
+	        DIE(aTHX_ "Undefined top format \"%s\" called",name);
+	    /* why no:
+	    else
+	        DIE(aTHX_ "Undefined top format called");
+	    ?*/
 	}
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
@@ -1274,14 +1286,22 @@ PP(pp_leavewrite)
     if (!fp) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
 	    if (IoIFP(io)) {
-		SV* sv = sv_newmortal();
-		gv_efullname3(sv, gv, Nullch);
-		Perl_warner(aTHX_ WARN_IO,
-			    "Filehandle %s opened only for input",
-			    SvPV_nolen(sv));
+		/* integrate with report_evil_fh()? */
+	        char *name = NULL;
+		if (isGV(gv)) {
+		    SV* sv = sv_newmortal();
+		    gv_efullname4(sv, gv, Nullch, FALSE);
+		    name = SvPV_nolen(sv);
+		}
+		if (name && *name)
+		    Perl_warner(aTHX_ WARN_IO,
+				"Filehandle %s opened only for input", name);
+		else
+		    Perl_warner(aTHX_ WARN_IO,
+				"Filehandle opened only for input");
 	    }
 	    else if (ckWARN(WARN_CLOSED))
-		report_closed_fh(gv, io, "write", "filehandle");
+		report_evil_fh(gv, io, PL_op->op_type);
 	}
 	PUSHs(&PL_sv_no);
     }
@@ -1344,24 +1364,30 @@ PP(pp_prtf)
 
     sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
-	if (ckWARN(WARN_UNOPENED)) {
-	    gv_efullname3(sv, gv, Nullch);
-	    Perl_warner(aTHX_ WARN_UNOPENED,
-			"Filehandle %s never opened", SvPV(sv,n_a));
-	}
+        dTHR;
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
+	    /* integrate with report_evil_fh()? */
 	    if (IoIFP(io)) {
-		gv_efullname3(sv, gv, Nullch);
-		Perl_warner(aTHX_ WARN_IO,
-			    "Filehandle %s opened only for input",
-			    SvPV(sv,n_a));
+	        char *name = NULL;
+		if (isGV(gv)) {
+		    gv_efullname4(sv, gv, Nullch, FALSE);
+		    name = SvPV_nolen(sv);
+		}
+		if (name && *name)
+		    Perl_warner(aTHX_ WARN_IO,
+				"Filehandle %s opened only for input", name);
+		else
+		    Perl_warner(aTHX_ WARN_IO,
+				"Filehandle opened only for input");
 	    }
 	    else if (ckWARN(WARN_CLOSED))
-		report_closed_fh(gv, io, "printf", "filehandle");
+		report_evil_fh(gv, io, PL_op->op_type);
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1515,7 +1541,7 @@ PP(pp_sysread)
     }
     if (PL_op->op_type == OP_SYSREAD) {
 #ifdef PERL_SOCK_SYSREAD_IS_RECV
-	if (IoTYPE(io) == 's') {
+	if (IoTYPE(io) == IoTYPE_SOCKET) {
 	    length = PerlSock_recv(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length, 0);
 	}
@@ -1528,7 +1554,7 @@ PP(pp_sysread)
     }
     else
 #ifdef HAS_SOCKET__bad_code_maybe
-    if (IoTYPE(io) == 's') {
+    if (IoTYPE(io) == IoTYPE_SOCKET) {
 	char namebuf[MAXPATHLEN];
 #if defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)
 	bufsize = sizeof (struct sockaddr_in);
@@ -1547,13 +1573,22 @@ PP(pp_sysread)
 	    length = -1;
     }
     if (length < 0) {
-	if ((IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
+	if ((IoTYPE(io) == IoTYPE_WRONLY || IoIFP(io) == PerlIO_stdout()
 	    || IoIFP(io) == PerlIO_stderr()) && ckWARN(WARN_IO))
 	{
-	    SV* sv = sv_newmortal();
-	    gv_efullname3(sv, gv, Nullch);
-	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
-			SvPV_nolen(sv));
+	    /* integrate with report_evil_fh()? */
+	    char *name = NULL;
+	    if (isGV(gv)) {
+		SV* sv = sv_newmortal();
+		gv_efullname4(sv, gv, Nullch, FALSE);
+		name = SvPV_nolen(sv);
+	    }
+	    if (name && *name)
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle %s opened only for output", name);
+	    else
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle opened only for output");
 	}
 	goto say_undef;
     }
@@ -1630,12 +1665,8 @@ PP(pp_send)
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
 	retval = -1;
-	if (ckWARN(WARN_CLOSED)) {
-	    if (PL_op->op_type == OP_SYSWRITE)
-		report_closed_fh(gv, io, "syswrite", "filehandle");
-	    else
-		report_closed_fh(gv, io, "send", "socket");
-	}
+	if (ckWARN(WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
@@ -1651,7 +1682,7 @@ PP(pp_send)
 	if (length > blen - offset)
 	    length = blen - offset;
 #ifdef PERL_SOCK_SYSWRITE_IS_SEND
-	if (IoTYPE(io) == 's') {
+	if (IoTYPE(io) == IoTYPE_SOCKET) {
 	    retval = PerlSock_send(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length, 0);
 	}
@@ -1992,6 +2023,7 @@ PP(pp_flock)
     I32 value;
     int argtype;
     GV *gv;
+    IO *io = NULL;
     PerlIO *fp;
 
 #ifdef FLOCK
@@ -2000,19 +2032,21 @@ PP(pp_flock)
 	gv = PL_last_in_gv;
     else
 	gv = (GV*)POPs;
-    if (gv && GvIO(gv))
-	fp = IoIFP(GvIOp(gv));
-    else
+    if (gv && (io = GvIO(gv)))
+	fp = IoIFP(io);
+    else {
 	fp = Nullfp;
+	io = NULL;
+    }
     if (fp) {
 	(void)PerlIO_flush(fp);
 	value = (I32)(PerlLIO_flock(PerlIO_fileno(fp), argtype) >= 0);
     }
     else {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
 	value = 0;
 	SETERRNO(EBADF,RMS$_IFI);
-	if (ckWARN(WARN_CLOSED))
-	    report_closed_fh(gv, GvIO(gv), "flock", "filehandle");
     }
     PUSHi(value);
     RETURN;
@@ -2051,7 +2085,7 @@ PP(pp_socket)
 	RETPUSHUNDEF;
     IoIFP(io) = PerlIO_fdopen(fd, "r");	/* stdio gets confused about sockets */
     IoOFP(io) = PerlIO_fdopen(fd, "w");
-    IoTYPE(io) = 's';
+    IoTYPE(io) = IoTYPE_SOCKET;
     if (!IoIFP(io) || !IoOFP(io)) {
 	if (IoIFP(io)) PerlIO_close(IoIFP(io));
 	if (IoOFP(io)) PerlIO_close(IoOFP(io));
@@ -2098,10 +2132,10 @@ PP(pp_sockpair)
 	RETPUSHUNDEF;
     IoIFP(io1) = PerlIO_fdopen(fd[0], "r");
     IoOFP(io1) = PerlIO_fdopen(fd[0], "w");
-    IoTYPE(io1) = 's';
+    IoTYPE(io1) = IoTYPE_SOCKET;
     IoIFP(io2) = PerlIO_fdopen(fd[1], "r");
     IoOFP(io2) = PerlIO_fdopen(fd[1], "w");
-    IoTYPE(io2) = 's';
+    IoTYPE(io2) = IoTYPE_SOCKET;
     if (!IoIFP(io1) || !IoOFP(io1) || !IoIFP(io2) || !IoOFP(io2)) {
 	if (IoIFP(io1)) PerlIO_close(IoIFP(io1));
 	if (IoOFP(io1)) PerlIO_close(IoOFP(io1));
@@ -2173,7 +2207,7 @@ PP(pp_bind)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io, "bind", "socket");
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2203,7 +2237,7 @@ PP(pp_connect)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io, "connect", "socket");
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2229,7 +2263,7 @@ PP(pp_listen)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io, "listen", "socket");
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2270,7 +2304,7 @@ PP(pp_accept)
 	goto badexit;
     IoIFP(nstio) = PerlIO_fdopen(fd, "r");
     IoOFP(nstio) = PerlIO_fdopen(fd, "w");
-    IoTYPE(nstio) = 's';
+    IoTYPE(nstio) = IoTYPE_SOCKET;
     if (!IoIFP(nstio) || !IoOFP(nstio)) {
 	if (IoIFP(nstio)) PerlIO_close(IoIFP(nstio));
 	if (IoOFP(nstio)) PerlIO_close(IoOFP(nstio));
@@ -2286,7 +2320,7 @@ PP(pp_accept)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(ggv, ggv ? GvIO(ggv) : 0, "accept", "socket");
+	report_evil_fh(ggv, ggv ? GvIO(ggv) : 0, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
 
 badexit:
@@ -2313,7 +2347,7 @@ PP(pp_shutdown)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io, "shutdown", "socket");
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2392,9 +2426,7 @@ PP(pp_ssockopt)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io,
-			 optype == OP_GSOCKOPT ? "getsockopt" : "setsockopt",
-			 "socket");
+	report_evil_fh(gv, io, optype);
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2467,10 +2499,7 @@ PP(pp_getpeername)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_closed_fh(gv, io,
-			 optype == OP_GETSOCKNAME ? "getsockname"
-						  : "getpeername",
-			 "socket");
+	report_evil_fh(gv, io, optype);
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2490,7 +2519,7 @@ PP(pp_lstat)
 PP(pp_stat)
 {
     djSP;
-    GV *tmpgv;
+    GV *gv;
     I32 gimme;
     I32 max = 13;
     STRLEN n_a;
@@ -2498,24 +2527,28 @@ PP(pp_stat)
     if (PL_op->op_flags & OPf_REF) {
 	tmpgv = cGVOP_gv;
       do_fstat:
-	if (tmpgv != PL_defgv) {
+	if (gv != PL_defgv) {
 	    PL_laststype = OP_STAT;
-	    PL_statgv = tmpgv;
+	    PL_statgv = gv;
 	    sv_setpv(PL_statname, "");
-	    PL_laststatval = (GvIO(tmpgv) && IoIFP(GvIOp(tmpgv))
-		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), &PL_statcache) : -1);
+	    PL_laststatval = (GvIO(gv) && IoIFP(GvIOp(gv))
+		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(gv))), &PL_statcache) : -1);
 	}
-	if (PL_laststatval < 0)
+	if (PL_laststatval < 0) {
+	    dTHR;
+	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
 	    max = 0;
+	}
     }
     else {
 	SV* sv = POPs;
 	if (SvTYPE(sv) == SVt_PVGV) {
-	    tmpgv = (GV*)sv;
+	    gv = (GV*)sv;
 	    goto do_fstat;
 	}
 	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
-	    tmpgv = (GV*)SvRV(sv);
+	    gv = (GV*)SvRV(sv);
 	    goto do_fstat;
 	}
 	sv_setpv(PL_statname, SvPV(sv,n_a));
@@ -3057,10 +3090,10 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    if (ckWARN(WARN_UNOPENED)) {
+	    dTHR;
+	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
 		gv = cGVOP_gv;
-		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file <%s>",
-			    GvENAME(gv));
+		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
 	    }
 	    SETERRNO(EBADF,RMS$_IFI);
 	    RETPUSHUNDEF;

@@ -372,7 +372,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 
     gv = gv_fetchmeth(stash, name, nend - name, 0);
     if (!gv) {
-	if (strEQ(name,"import"))
+	if (strEQ(name,"import") || strEQ(name,"unimport"))
 	    gv = (GV*)&PL_sv_yes;
 	else if (autoload)
 	    gv = gv_autoload4(stash, name, nend - name, TRUE);
@@ -919,6 +919,22 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 }
 
 void
+Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
+{
+    HV *hv = GvSTASH(gv);
+    if (!hv) {
+	(void)SvOK_off(sv);
+	return;
+    }
+    sv_setpv(sv, prefix ? prefix : "");
+    if (keepmain || strNE(HvNAME(hv), "main")) {
+	sv_catpv(sv,HvNAME(hv));
+	sv_catpvn(sv,"::", 2);
+    }
+    sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
+}
+
+void
 Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
 {
     HV *hv = GvSTASH(gv);
@@ -930,6 +946,15 @@ Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
     sv_catpv(sv,HvNAME(hv));
     sv_catpvn(sv,"::", 2);
     sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
+}
+
+void
+Perl_gv_efullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
+{
+    GV *egv = GvEGV(gv);
+    if (!egv)
+	egv = gv;
+    gv_fullname4(sv, egv, prefix, keepmain);
 }
 
 void

@@ -2847,6 +2847,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 	    if (tmpstatbuf.st_dev != PL_statbuf.st_dev ||
 		tmpstatbuf.st_ino != PL_statbuf.st_ino) {
 		(void)PerlIO_close(PL_rsfp);
+#ifdef MAIL_CAN_BE_USED_SAFELY /* No, it can't.  As of Aug 05 200, there's bugtraq exploit.  */
 		if (PL_rsfp = PerlProc_popen("/bin/mail root","w")) {	/* heh, heh */
 		    PerlIO_printf(PL_rsfp,
 "User %"Uid_t_f" tried to run dev %ld ino %ld in place of dev %ld ino %ld!\n\
@@ -2857,6 +2858,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 			PL_statbuf.st_uid, PL_statbuf.st_gid);
 		    (void)PerlProc_pclose(PL_rsfp);
 		}
+#endif
 		Perl_croak(aTHX_ "Permission denied\n");
 	    }
 	    if (

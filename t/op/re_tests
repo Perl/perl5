@@ -756,9 +756,22 @@ tt+$	xxxtt	y	-	-
 ^(.,){2}c	a,b,c	y	$1	b,
 ^(?:[^,]*,){2}c	a,b,c	y	-	-
 ^([^,]*,){2}c	a,b,c	y	$1	b,
+^([^,]*,){3}d	aaa,b,c,d	y	$1	c,
+^([^,]*,){3,}d	aaa,b,c,d	y	$1	c,
+^([^,]*,){0,3}d	aaa,b,c,d	y	$1	c,
+^([^,]{1,3},){3}d	aaa,b,c,d	y	$1	c,
+^([^,]{1,3},){3,}d	aaa,b,c,d	y	$1	c,
+^([^,]{1,3},){0,3}d	aaa,b,c,d	y	$1	c,
+^([^,]{1,},){3}d	aaa,b,c,d	y	$1	c,
+^([^,]{1,},){3,}d	aaa,b,c,d	y	$1	c,
+^([^,]{1,},){0,3}d	aaa,b,c,d	y	$1	c,
+^([^,]{0,3},){3}d	aaa,b,c,d	y	$1	c,
+^([^,]{0,3},){3,}d	aaa,b,c,d	y	$1	c,
+^([^,]{0,3},){0,3}d	aaa,b,c,d	y	$1	c,
 (?i)		y	-	-
 '(?!\A)x'm	a\nxb\n	y	-	-
 ^(a(b)?)+$	aba	y	-$1-$2-	-a--
 ^(aa(bb)?)+$	aabbaa	y	-$1-$2-	-aa--
+'^.{9}abc.*\n'm	123\nabcabcabcabc\n	y	-	-
 ^(a)?a$	a	y	-$1-	--
 ^(a)?(?(1)a|b)+$	a	n	-	-

@@ -1545,6 +1545,7 @@ Ap	|GV*	|gv_autoload4	|HV* stash|const char* name|STRLEN len \
 Ap	|void	|gv_check	|HV* stash
 Ap	|void	|gv_efullname	|SV* sv|GV* gv
 Ap	|void	|gv_efullname3	|SV* sv|GV* gv|const char* prefix
+Ap	|void	|gv_efullname4	|SV* sv|GV* gv|const char* prefix|bool keepmain
 Ap	|GV*	|gv_fetchfile	|const char* name
 Apd	|GV*	|gv_fetchmeth	|HV* stash|const char* name|STRLEN len \
 				|I32 level
@@ -1554,6 +1555,7 @@ Apd	|GV*	|gv_fetchmethod_autoload|HV* stash|const char* name \
 Ap	|GV*	|gv_fetchpv	|const char* name|I32 add|I32 sv_type
 Ap	|void	|gv_fullname	|SV* sv|GV* gv
 Ap	|void	|gv_fullname3	|SV* sv|GV* gv|const char* prefix
+Ap	|void	|gv_fullname4	|SV* sv|GV* gv|const char* prefix|bool keepmain
 Ap	|void	|gv_init	|GV* gv|HV* stash|const char* name \
 				|STRLEN len|int multi
 Apd	|HV*	|gv_stashpv	|const char* name|I32 create
@@ -2064,8 +2066,8 @@ Ap	|void	|unlock_condpair|void* svv
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|HEK* hek
 p	|void	|utilize	|int aver|I32 floor|OP* version|OP* id|OP* arg
-Ap	|U8*	|utf16_to_utf8	|U16* p|U8 *d|I32 bytelen
-Ap	|U8*	|utf16_to_utf8_reversed|U16* p|U8 *d|I32 bytelen
+Ap	|U8*	|utf16_to_utf8	|U8* p|U8 *d|I32 bytelen|I32 *newlen
+Ap	|U8*	|utf16_to_utf8_reversed|U8* p|U8 *d|I32 bytelen|I32 *newlen
 Ap	|I32	|utf8_distance	|U8 *a|U8 *b
 Ap	|U8*	|utf8_hop	|U8 *s|I32 off
 ApM	|U8*	|utf8_to_bytes	|U8 *s|STRLEN len
@@ -2075,7 +2077,7 @@ Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
-p	|void	|report_closed_fh|GV *gv|IO *io|const char *func|const char *obj
+p	|void	|report_evil_fh	|GV *gv|IO *io|I32 op
 p	|void	|report_uninit
 Afpd	|void	|warn		|const char* pat|...
 Ap	|void	|vwarn		|const char* pat|va_list* args

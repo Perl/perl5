@@ -53,7 +53,6 @@
 #else
 #include <utime.h>
 #endif
-
 #ifdef __GNUC__
 /* Mingw32 defaults to globing command line 
  * So we turn it off like this:
@@ -1645,8 +1644,12 @@ win32_waitpid(int pid, int *status, int flags)
 	long child = find_pseudo_pid(-pid);
 	if (child >= 0) {
 	    HANDLE hThread = w32_pseudo_child_handles[child];
-	    DWORD waitcode = WaitForSingleObject(hThread, INFINITE);
-	    if (waitcode != WAIT_FAILED) {
+	    DWORD timeout = (flags & WNOHANG) ? 0 : INFINITE;
+	    DWORD waitcode = WaitForSingleObject(hThread, timeout);
+	    if (waitcode == WAIT_TIMEOUT) {
+		return 0;
+	    }
+	    else if (waitcode != WAIT_FAILED) {
 		if (GetExitCodeThread(hThread, &waitcode)) {
 		    *status = (int)((waitcode & 0xff) << 8);
 		    retval = (int)w32_pseudo_child_pids[child];
@@ -1663,14 +1666,18 @@ win32_waitpid(int pid, int *status, int flags)
 	long child = find_pid(pid);
 	if (child >= 0) {
 	    HANDLE hProcess = w32_child_handles[child];
-	    DWORD waitcode = WaitForSingleObject(hProcess, INFINITE);
-	    if (waitcode != WAIT_FAILED) {
-		if (GetExitCodeProcess(hProcess, &waitcode)) {
-		    *status = (int)((waitcode & 0xff) << 8);
-		    retval = (int)w32_child_pids[child];
-		    remove_dead_process(child);
-		    return retval;
-		}
+	    DWORD timeout = (flags & WNOHANG) ? 0 : INFINITE;
+	    DWORD waitcode = WaitForSingleObject(hProcess, timeout);
+	    if (waitcode == WAIT_TIMEOUT) {
+		return 0;
+	    }
+	    else if (waitcode != WAIT_FAILED) {
+		 if (GetExitCodeProcess(hProcess, &waitcode)) {
+		     *status = (int)((waitcode & 0xff) << 8);
+		     retval = (int)w32_child_pids[child];
+		     remove_dead_process(child);
+		     return retval;
+		 }
 	    }
 	    else
 		errno = ECHILD;

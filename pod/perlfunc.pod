@@ -688,8 +688,11 @@ On POSIX systems, you can detect this condition this way:
 
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is C<"A"> in either ASCII or Unicode, and
-chr(0x263a) is a Unicode smiley face (but only within the scope of
-a C<use utf8>).  For the reverse, use L</ord>.  
+chr(0x263a) is a Unicode smiley face. Within the scope of C<use utf8>, 
+characters higher than 127 are encoded in Unicode; if you don't want
+this, temporarily C<use bytes> or use C<pack("C*",...)>
+
+For the reverse, use L</ord>.  
 See L<utf8> for more about Unicode.
 
 If NUMBER is omitted, uses C<$_>.
@@ -5375,7 +5378,8 @@ derive their C<import> method via inheritance from the C<Exporter> class that
 is defined in the C<Exporter> module.  See L<Exporter>.  If no C<import>
 method can be found then the call is skipped.
 
-If you don't want your namespace altered, explicitly supply an empty list:
+If you do not want to call the package's C<import> method (for instance,
+to stop your namespace from being altered), explicitly supply the empty list:
 
     use Module ();
 
@@ -5396,8 +5400,9 @@ called).  Note that there is no comma after VERSION!
 Because this is a wide-open interface, pragmas (compiler directives)
 are also implemented this way.  Currently implemented pragmas are:
 
-    use integer;
+    use constant;
     use diagnostics;
+    use integer;
     use sigtrap  qw(SEGV BUS);
     use strict   qw(subs vars refs);
     use subs     qw(afunc blurfl);
@@ -5417,7 +5422,9 @@ by C<use>, i.e., it calls C<unimport Module LIST> instead of C<import>.
 
 If no C<unimport> method can be found the call fails with a fatal error.
 
-See L<perlmod> for a list of standard modules and pragmas.
+See L<perlmod> for a list of standard modules and pragmas.  See L<perlrun>
+for the C<-M> and C<-m> command-line options to perl that give C<use>
+functionality from the command-line.
 
 =item utime LIST
 

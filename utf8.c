@@ -321,26 +321,25 @@ Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
 }
 
 /*
- * Convert native or reversed UTF-16 to UTF-8.
+ * Convert native (big-endian) or reversed (little-endian) UTF-16 to UTF-8.
  *
  * Destination must be pre-extended to 3/2 source.  Do not use in-place.
  * We optimize for native, for obvious reasons. */
 
-/* There are several problems with utf16_to_utf8().
- * (1) U16 is not necessarily *exactly* two bytes.
- * (2) Secondly, no check is made for odd length.
- * (3) Thirdly, the "Malformed UTF-16 surrogate" should probably be
- *     a hard error (and it should be listed in perldiag).
- * (4) The tests (in comp/t/require.t) are a joke: the UTF16 BOM
- *     really ought to be followed by valid UTF16 characters.
- * See swallow_bom() in toke.c.
- * --Mike Guy */
 U8*
-Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
+Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 {
-    U16* pend = p + bytelen / 2;
+    U8* pend;
+    U8* dstart = d;
+
+    if (bytelen & 1)
+	Perl_croak(aTHX_ "panic: utf16_to_utf8: odd bytelen");
+
+    pend = p + bytelen;
+
     while (p < pend) {
-	UV uv = *p++;
+	UV uv = (p[0] << 8) + p[1]; /* UTF-16BE */
+	p += 2;
 	if (uv < 0x80) {
 	    *d++ = uv;
 	    continue;
@@ -352,13 +351,9 @@ Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
 	}
 	if (uv >= 0xd800 && uv < 0xdbff) {	/* surrogates */
             dTHR;
-	    int low = *p++;
-	    if (low < 0xdc00 || low >= 0xdfff) {
-		if (ckWARN_d(WARN_UTF8))     
-	    	    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-16 surrogate");
-		p--;
-		uv = 0xfffd;
-	    }
+	    UV low = *p++;
+	    if (low < 0xdc00 || low >= 0xdfff)
+		Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
 	    uv = ((uv - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
 	}
 	if (uv < 0x10000) {
@@ -375,13 +370,14 @@ Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
 	    continue;
 	}
     }
+    *newlen = d - dstart;
     return d;
 }
 
 /* Note: this one is slightly destructive of the source. */
 
 U8*
-Perl_utf16_to_utf8_reversed(pTHX_ U16* p, U8* d, I32 bytelen)
+Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 {
     U8* s = (U8*)p;
     U8* send = s + bytelen;
@@ -391,7 +387,7 @@ Perl_utf16_to_utf8_reversed(pTHX_ U16* p, U8* d, I32 bytelen)
 	s[1] = tmp;
 	s += 2;
     }
-    return utf16_to_utf8(p, d, bytelen);
+    return utf16_to_utf8(p, d, bytelen, newlen);
 }
 
 /* for now these are all defined (inefficiently) in terms of the utf8 versions */

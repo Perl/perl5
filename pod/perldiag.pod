@@ -1057,7 +1057,7 @@ not realizing that 777 will be interpreted as a decimal number,
 equivalent to 01411.  Octal constants are introduced with a leading 0 in
 Perl, as in C.
 
-=item Close on unopened file <%s>
+=item close() on unopened filehandle %s
 
 (W unopened) You tried to close a filehandle that was never opened.
 
@@ -1352,12 +1352,6 @@ you which section of the Perl source code is distressed.
 
 (F) Your machine apparently doesn't implement fcntl().  What is this, a
 PDP-11 or something?
-
-=item Filehandle %s never opened
-
-(W unopened) An I/O operation was attempted on a filehandle that was
-never initialized.  You need to do an open() or a socket() call, or call
-a constructor from the FileHandle package.
 
 =item Filehandle %s opened only for input
 
@@ -1775,6 +1769,11 @@ with nonempty prefix1 and prefix2.  If C<prefix1> is indeed a prefix of
 a builtin library search path, prefix2 is substituted.  The error may
 appear if components are not found, or are too long.  See
 "PERLLIB_PREFIX" in L<perlos2>.
+
+=item Malformed UTF-16 surrogate
+
+Perl thought it was reading UTF-16 encoded character data but while
+doing it Perl met a malformed Unicode surrogate.
 
 =item %s matches null string many times
 
@@ -2230,6 +2229,17 @@ pointing outside the buffer.  This is difficult to imagine.  The sole
 exception to this is that C<sysread()>ing past the buffer will extend
 the buffer and zero pad the new area.
 
+=item -%s on unopened filehandle %s
+
+(W unopened) You tried to invoke a file test operator on a filehandle
+that isn't open.  Check your logic.  See also L<perlfunc/-X>.
+
+=item %s() on unopened %s %s
+
+(W unopened) An I/O operation was attempted on a filehandle that was
+never initialized.  You need to do an open(), a sysopen(), or a socket()
+call, or call a constructor from the FileHandle package.
+
 =item oops: oopsAV
 
 (S internal) An internal warning that the grammar is screwed up.
@@ -2477,6 +2487,11 @@ was string.
 =item panic: yylex
 
 (P) The lexer got into a bad state while processing a case modifier.
+
+=item panic: utf16_to_utf8: odd bytelen
+
+(P) Something tried to call utf16_to_utf8 with an odd (as opposed
+to even) byte length. 
 
 =item Parentheses missing around "%s" list
 
@@ -2793,7 +2808,7 @@ or setgid bit set.  This doesn't make much sense.
 construct.  Remember that bracketing delimiters count nesting level.
 Missing the leading C<$> from a variable C<$m> may cause this error.
 
-=item %sseek() on unopened file
+=item %sseek() on unopened filehandle
 
 (W unopened) You tried to use the seek() or sysseek() function on a
 filehandle that was either never opened or has since been closed.
@@ -2968,11 +2983,10 @@ unless there was a failure.  You probably wanted to use system()
 instead, which does return.  To suppress this warning, put the exec() in
 a block by itself.
 
-=item Stat on unopened file <%s>
+=item stat() on unopened filehandle %s
 
-(W unopened) You tried to use the stat() function (or an equivalent file
-test) on a filehandle that was either never opened or has since been
-closed.
+(W unopened) You tried to use the stat() function on a filehandle that
+was either never opened or has since been closed.
 
 =item Strange *+?{} on zero-length expression
 
@@ -3083,15 +3097,10 @@ before now.  Check your logic flow.
 (F) You tried to use C<goto> to reach a label that was too deeply nested
 for Perl to reach.  Perl is doing you a favor by refusing.
 
-=item tell() on unopened file
+=item tell() on unopened filehandle
 
 (W unopened) You tried to use the tell() function on a filehandle that
 was either never opened or has since been closed.
-
-=item Test on unopened file <%s>
-
-(W unopened) You tried to invoke a file test operator on a filehandle
-that isn't open.  Check your logic.  See also L<perlfunc/-X>.
 
 =item That use of $[ is unsupported
 

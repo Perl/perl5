@@ -76,6 +76,20 @@ for ($i = 1; @tests; $i++) {
 # number of elements.  Even so, subterfuge is sometimes required: see
 # tests for %n and %p.
 #
+# The following tests are not currently run, for the reasons stated:
+
+=pod
+
+=begin problematic
+
+>%.0f<      >-0.1<        >-0<  >C library bug: no minus on VMS, HP-UX<
+>%.0f<      >1.5<         >2<   >Standard vague: no rounding rules<
+>%.0f<      >2.5<         >2<   >Standard vague: no rounding rules<
+
+=end problematic
+
+=cut
+
 # template    data          result
 __END__
 >%6. 6s<    >''<          >%6. 6s INVALID< >(See use of $w in code above)<
@@ -176,6 +190,7 @@ __END__
 >%+e<       >-1234.875<   >-1.234875e+03<
 >%#e<       >-1234.875<   >-1.234875e+03<
 >%.0e<      >1234.875<    >1e+03<
+>%#.0e<     >1234.875<    >1.e+03<
 >%.*e<      >[0, 1234.875]< >1e+03<
 >%.1e<      >1234.875<    >1.2e+03<
 >%-12.4e<   >1234.875<    >1.2349e+03  <
@@ -205,13 +220,15 @@ __END__
 >%.0f<      >0<           >0<
 >%.0f<      >2**38<       >274877906944<   >Should have exact int'l rep'n<
 >%.0f<      >0.1<         >0<
->%.0f<      >-0.1<        >-0<
->%.0f<      >0.6<         >1<
->%.0f<      >-0.6<        >-1<
+>%.0f<      >0.6<         >1<              >Known to fail with sfio<
+>%.0f<      >-0.6<        >-1<             >Known to fail with sfio<
+>%.0f<      >1<           >1<
+>%#.0f<     >1<           >1.<
 >%g<        >12345.6789<  >12345.7<
 >%+g<       >12345.6789<  >+12345.7<
 >%#g<       >12345.6789<  >12345.7<
 >%.0g<      >12345.6789<  >1e+04<
+>%#.0g<     >12345.6789<  >1.e+04<
 >%.2g<      >12345.6789<  >1.2e+04<
 >%.*g<      >[2, 12345.6789]< >1.2e+04<
 >%.9g<      >12345.6789<  >12345.6789<

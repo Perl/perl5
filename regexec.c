@@ -641,7 +641,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		       than for "\n", so one should lower the limit for t? */
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
 			PL_colors[0],PL_colors[1], (long)(t + 1 - i_strpos)));
-		    strpos = s = t + 1;
+		    other_last = strpos = s = t + 1;
 		    goto restart;
 		}
 		t++;

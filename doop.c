@@ -21,12 +21,14 @@
 
 #define HALF_UTF8_UPGRADE(start,end) \
     STMT_START {				\
+      if ((start)<(end)) {			\
 	U8* NeWsTr;				\
 	STRLEN LeN = (end) - (start);		\
 	NeWsTr = bytes_to_utf8(start, &LeN);	\
 	Safefree(start);			\
 	(start) = NeWsTr;			\
 	(end) = (start) + LeN;			\
+      }						\
     } STMT_END
 
 STATIC I32
@@ -89,8 +91,8 @@ S_do_trans_simple(pTHX_ SV *sv)
     }
     *d = '\0';
     sv_setpvn(sv, (const char*)dstart, d - dstart);
+    Safefree(dstart);
     SvUTF8_on(sv);
-    SvLEN_set(sv, 2*len+1);
     SvSETMAGIC(sv);
     return matches;
 }

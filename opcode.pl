@@ -193,6 +193,9 @@ END
     '}',  13,		# loopexop
 );
 
+my %OP_IS_SOCKET;
+my %OP_IS_FILETEST;
+
 for (@ops) {
     $argsum = 0;
     $flags = $flags{$_};
@@ -210,7 +213,12 @@ for (@ops) {
     $argsum |= $opclass{$1} << 9;
     $mul = 0x2000;				# 2 ^ OASHIFT
     for $arg (split(' ',$args{$_})) {
+	if ($arg =~ /^F/) {
+           $OP_IS_SOCKET{$_}   = 1 if $arg =~ s/s//;
+           $OP_IS_FILETEST{$_} = 1 if $arg =~ s/-//;
+        }
 	$argnum = ($arg =~ s/\?//) ? 8 : 0;
+        die "op = $_, arg = $arg\n" unless length($arg) == 1;
 	$argnum += $argnum{$arg};
 	warn "# Conflicting bit 32 for '$_'.\n"
 	    if $argnum & 8 and $mul == 0x10000000;
@@ -227,6 +235,20 @@ print <<END;
 
 END_EXTERN_C
 END
+
+if (keys %OP_IS_SOCKET) {
+    print ON "\n#define OP_IS_SOCKET(op)	\\\n\t(";
+    print ON join(" || \\\n\t ",
+               map { "(op) == OP_" . uc() } sort keys %OP_IS_SOCKET);
+    print ON ")\n\n";
+}
+
+if (keys %OP_IS_FILETEST) {
+    print ON "\n#define OP_IS_FILETEST(op)	\\\n\t(";
+    print ON join(" || \\\n\t ",
+               map { "(op) == OP_" . uc() } sort keys %OP_IS_FILETEST);
+    print ON ")\n\n";
+}
 
 close OC or die "Error closing opcode.h: $!";
 close ON or die "Error closing opnames.h: $!";
@@ -635,8 +657,8 @@ sysseek		sysseek			ck_fun		s@	F S S
 sysread		sysread			ck_fun		imst@	F R S S?
 syswrite	syswrite		ck_fun		imst@	F S S? S?
 
-send		send			ck_fun		imst@	F S S S?
-recv		recv			ck_fun		imst@	F R S S
+send		send			ck_fun		imst@	Fs S S S?
+recv		recv			ck_fun		imst@	Fs R S S
 
 eof		eof			ck_eof		is%	F?
 tell		tell			ck_fun		st%	F?
@@ -650,52 +672,52 @@ flock		flock			ck_fun		isT@	F S
 
 # Sockets.
 
-socket		socket			ck_fun		is@	F S S S
-sockpair	socketpair		ck_fun		is@	F F S S S
+socket		socket			ck_fun		is@	Fs S S S
+sockpair	socketpair		ck_fun		is@	Fs Fs S S S
 
-bind		bind			ck_fun		is@	F S
-connect		connect			ck_fun		is@	F S
-listen		listen			ck_fun		is@	F S
-accept		accept			ck_fun		ist@	F F
-shutdown	shutdown		ck_fun		ist@	F S
+bind		bind			ck_fun		is@	Fs S
+connect		connect			ck_fun		is@	Fs S
+listen		listen			ck_fun		is@	Fs S
+accept		accept			ck_fun		ist@	Fs Fs
+shutdown	shutdown		ck_fun		ist@	Fs S
 
-gsockopt	getsockopt		ck_fun		is@	F S S
-ssockopt	setsockopt		ck_fun		is@	F S S S
+gsockopt	getsockopt		ck_fun		is@	Fs S S
+ssockopt	setsockopt		ck_fun		is@	Fs S S S
 
-getsockname	getsockname		ck_fun		is%	F
-getpeername	getpeername		ck_fun		is%	F
+getsockname	getsockname		ck_fun		is%	Fs
+getpeername	getpeername		ck_fun		is%	Fs
 
 # Stat calls.
 
 lstat		lstat			ck_ftst		u-	F
 stat		stat			ck_ftst		u-	F
-ftrread		-R			ck_ftst		isu-	F
-ftrwrite	-W			ck_ftst		isu-	F
-ftrexec		-X			ck_ftst		isu-	F
-fteread		-r			ck_ftst		isu-	F
-ftewrite	-w			ck_ftst		isu-	F
-fteexec		-x			ck_ftst		isu-	F
-ftis		-e			ck_ftst		isu-	F
-fteowned	-O			ck_ftst		isu-	F
-ftrowned	-o			ck_ftst		isu-	F
-ftzero		-z			ck_ftst		isu-	F
-ftsize		-s			ck_ftst		istu-	F
-ftmtime		-M			ck_ftst		stu-	F
-ftatime		-A			ck_ftst		stu-	F
-ftctime		-C			ck_ftst		stu-	F
-ftsock		-S			ck_ftst		isu-	F
-ftchr		-c			ck_ftst		isu-	F
-ftblk		-b			ck_ftst		isu-	F
-ftfile		-f			ck_ftst		isu-	F
-ftdir		-d			ck_ftst		isu-	F
-ftpipe		-p			ck_ftst		isu-	F
-ftlink		-l			ck_ftst		isu-	F
-ftsuid		-u			ck_ftst		isu-	F
-ftsgid		-g			ck_ftst		isu-	F
-ftsvtx		-k			ck_ftst		isu-	F
-fttty		-t			ck_ftst		is-	F
-fttext		-T			ck_ftst		isu-	F
-ftbinary	-B			ck_ftst		isu-	F
+ftrread		-R			ck_ftst		isu-	F-
+ftrwrite	-W			ck_ftst		isu-	F-
+ftrexec		-X			ck_ftst		isu-	F-
+fteread		-r			ck_ftst		isu-	F-
+ftewrite	-w			ck_ftst		isu-	F-
+fteexec		-x			ck_ftst		isu-	F-
+ftis		-e			ck_ftst		isu-	F-
+fteowned	-O			ck_ftst		isu-	F-
+ftrowned	-o			ck_ftst		isu-	F-
+ftzero		-z			ck_ftst		isu-	F-
+ftsize		-s			ck_ftst		istu-	F-
+ftmtime		-M			ck_ftst		stu-	F-
+ftatime		-A			ck_ftst		stu-	F-
+ftctime		-C			ck_ftst		stu-	F-
+ftsock		-S			ck_ftst		isu-	F-
+ftchr		-c			ck_ftst		isu-	F-
+ftblk		-b			ck_ftst		isu-	F-
+ftfile		-f			ck_ftst		isu-	F-
+ftdir		-d			ck_ftst		isu-	F-
+ftpipe		-p			ck_ftst		isu-	F-
+ftlink		-l			ck_ftst		isu-	F-
+ftsuid		-u			ck_ftst		isu-	F-
+ftsgid		-g			ck_ftst		isu-	F-
+ftsvtx		-k			ck_ftst		isu-	F-
+fttty		-t			ck_ftst		is-	F-
+fttext		-T			ck_ftst		isu-	F-
+ftbinary	-B			ck_ftst		isu-	F-
 
 # File calls.
 

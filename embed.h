@@ -230,6 +230,7 @@
 #define gv_check		Perl_gv_check
 #define gv_efullname		Perl_gv_efullname
 #define gv_efullname3		Perl_gv_efullname3
+#define gv_efullname4		Perl_gv_efullname4
 #define gv_fetchfile		Perl_gv_fetchfile
 #define gv_fetchmeth		Perl_gv_fetchmeth
 #define gv_fetchmethod		Perl_gv_fetchmethod
@@ -237,6 +238,7 @@
 #define gv_fetchpv		Perl_gv_fetchpv
 #define gv_fullname		Perl_gv_fullname
 #define gv_fullname3		Perl_gv_fullname3
+#define gv_fullname4		Perl_gv_fullname4
 #define gv_init			Perl_gv_init
 #define gv_stashpv		Perl_gv_stashpv
 #define gv_stashpvn		Perl_gv_stashpvn
@@ -730,7 +732,7 @@
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
 #define wait4pid		Perl_wait4pid
-#define report_closed_fh	Perl_report_closed_fh
+#define report_evil_fh		Perl_report_evil_fh
 #define report_uninit		Perl_report_uninit
 #define warn			Perl_warn
 #define vwarn			Perl_vwarn
@@ -1688,6 +1690,7 @@
 #define gv_check(a)		Perl_gv_check(aTHX_ a)
 #define gv_efullname(a,b)	Perl_gv_efullname(aTHX_ a,b)
 #define gv_efullname3(a,b,c)	Perl_gv_efullname3(aTHX_ a,b,c)
+#define gv_efullname4(a,b,c,d)	Perl_gv_efullname4(aTHX_ a,b,c,d)
 #define gv_fetchfile(a)		Perl_gv_fetchfile(aTHX_ a)
 #define gv_fetchmeth(a,b,c,d)	Perl_gv_fetchmeth(aTHX_ a,b,c,d)
 #define gv_fetchmethod(a,b)	Perl_gv_fetchmethod(aTHX_ a,b)
@@ -1695,6 +1698,7 @@
 #define gv_fetchpv(a,b,c)	Perl_gv_fetchpv(aTHX_ a,b,c)
 #define gv_fullname(a,b)	Perl_gv_fullname(aTHX_ a,b)
 #define gv_fullname3(a,b,c)	Perl_gv_fullname3(aTHX_ a,b,c)
+#define gv_fullname4(a,b,c,d)	Perl_gv_fullname4(aTHX_ a,b,c,d)
 #define gv_init(a,b,c,d,e)	Perl_gv_init(aTHX_ a,b,c,d,e)
 #define gv_stashpv(a,b)		Perl_gv_stashpv(aTHX_ a,b)
 #define gv_stashpvn(a,b,c)	Perl_gv_stashpvn(aTHX_ a,b,c)
@@ -2172,8 +2176,8 @@
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)
 #define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
-#define utf16_to_utf8(a,b,c)	Perl_utf16_to_utf8(aTHX_ a,b,c)
-#define utf16_to_utf8_reversed(a,b,c)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c)
+#define utf16_to_utf8(a,b,c,d)	Perl_utf16_to_utf8(aTHX_ a,b,c,d)
+#define utf16_to_utf8_reversed(a,b,c,d)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c,d)
 #define utf8_distance(a,b)	Perl_utf8_distance(aTHX_ a,b)
 #define utf8_hop(a,b)		Perl_utf8_hop(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
@@ -2183,7 +2187,7 @@
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
-#define report_closed_fh(a,b,c,d)	Perl_report_closed_fh(aTHX_ a,b,c,d)
+#define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
 #define report_uninit()		Perl_report_uninit(aTHX)
 #define vwarn(a,b)		Perl_vwarn(aTHX_ a,b)
 #define vwarner(a,b,c)		Perl_vwarner(aTHX_ a,b,c)
@@ -3305,6 +3309,8 @@
 #define gv_efullname		Perl_gv_efullname
 #define Perl_gv_efullname3	CPerlObj::Perl_gv_efullname3
 #define gv_efullname3		Perl_gv_efullname3
+#define Perl_gv_efullname4	CPerlObj::Perl_gv_efullname4
+#define gv_efullname4		Perl_gv_efullname4
 #define Perl_gv_fetchfile	CPerlObj::Perl_gv_fetchfile
 #define gv_fetchfile		Perl_gv_fetchfile
 #define Perl_gv_fetchmeth	CPerlObj::Perl_gv_fetchmeth
@@ -3319,6 +3325,8 @@
 #define gv_fullname		Perl_gv_fullname
 #define Perl_gv_fullname3	CPerlObj::Perl_gv_fullname3
 #define gv_fullname3		Perl_gv_fullname3
+#define Perl_gv_fullname4	CPerlObj::Perl_gv_fullname4
+#define gv_fullname4		Perl_gv_fullname4
 #define Perl_gv_init		CPerlObj::Perl_gv_init
 #define gv_init			Perl_gv_init
 #define Perl_gv_stashpv		CPerlObj::Perl_gv_stashpv
@@ -4278,8 +4286,8 @@
 #define vivify_ref		Perl_vivify_ref
 #define Perl_wait4pid		CPerlObj::Perl_wait4pid
 #define wait4pid		Perl_wait4pid
-#define Perl_report_closed_fh	CPerlObj::Perl_report_closed_fh
-#define report_closed_fh	Perl_report_closed_fh
+#define Perl_report_evil_fh	CPerlObj::Perl_report_evil_fh
+#define report_evil_fh		Perl_report_evil_fh
 #define Perl_report_uninit	CPerlObj::Perl_report_uninit
 #define report_uninit		Perl_report_uninit
 #define Perl_warn		CPerlObj::Perl_warn

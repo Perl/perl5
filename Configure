@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jul 29 02:48:03 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Aug  5 00:21:09 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -625,6 +625,7 @@ i_grp=''
 i_iconv=''
 i_ieeefp=''
 i_inttypes=''
+i_libutil=''
 i_limits=''
 i_locale=''
 i_machcthr=''
@@ -900,6 +901,9 @@ uidtype=''
 archname64=''
 use64bitall=''
 use64bitint=''
+ccflags_uselargefiles=''
+ldflags_uselargefiles=''
+libswanted_uselargefiles=''
 uselargefiles=''
 uselongdouble=''
 usemorebits=''
@@ -993,6 +997,9 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
+ccflags_uselargefiles=''
+ldflags_uselargefiles=''
+libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
 : set usethreads on the Configure command line to enable threads.
@@ -3179,9 +3186,12 @@ case "$gccversion" in
 esac
 case "$gccversion" in
 '') gccosandvers='' ;;
-*) gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed 's!.*/[^-]*-[^-]*-\([^/]*\)/'$gccversion'/specs$!\1!'`
+*) gccshortvers=`echo "$gccversion"|sed 's/ .*//'`
+   gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed "s!.*/[^-/]*-[^-/]*-\([^-/]*\)/$gccshortvers/specs!\1!"`
+   gccshortvers=''
    case "$gccosandvers" in
-   $osname$osvers) ;;
+   $osname) gccosandvers='' ;; # linux gccs seem to have no linux osvers, grr
+   $osname$osvers) ;; # looking good
    $osname*) cat <<EOM >&4
 
 *** WHOA THERE!!! ***
@@ -3195,7 +3205,8 @@ case "$gccversion" in
 
     I'm trying to be optimistic here, though, and will continue.
     If later during the configuration and build icky compilation
-    problems appear, I suggest reinstalling the gcc to match
+    problems appear (headerfile conflicts being the most common
+    manifestation), I suggest reinstalling the gcc to match
     your operating system release.
 
 EOM
@@ -14366,6 +14377,10 @@ eval $inhdr
 set ieeefp.h i_ieeefp
 eval $inhdr
 
+: see if this is a libutil.h system
+set libutil.h i_libutil
+eval $inhdr
+
 : see if locale.h is available
 set locale.h i_locale
 eval $inhdr
@@ -14517,8 +14532,9 @@ $osname
 EOSH
 ./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
 ./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
-$cat Cppsym.a Cppsym.b | $tr ' ' $trnl | sort | uniq > Cppsym.know
-$rm -f Cppsym.a Cppsym.b
+$cat Cppsym.know > Cppsym.c
+$cat Cppsym.a Cppsym.b Cppsym.c | $tr ' ' $trnl | sort | uniq > Cppsym.know
+$rm -f Cppsym.a Cppsym.b Cppsym.c
 cat <<EOSH > Cppsym
 $startsh
 if $test \$# -gt 0; then
@@ -14557,6 +14573,7 @@ cat <<EOSH >> Cppsym.try
 ccflags="$ccflags"
 case "$osname-$gccversion" in
 irix-) ccflags="\$ccflags -woff 1178" ;;
+os2-*) ccflags="\$ccflags -Zlinker /PM:VIO" ;;
 esac
 $cc $optimize \$ccflags $ldflags -o try try.c $libs && ./try$exe_ext
 EOSH
@@ -14612,7 +14629,7 @@ if $test -z ccsym.raw; then
 else
 	if $test -s ccsym.com; then
 		echo "Your C compiler and pre-processor define these symbols:"
-		$sed -e 's/\(.*\)=.*/\1/' ccsym.com
+		$sed -e 's/\(..*\)=.*/\1/' ccsym.com
 		also='also '
 		symbols='ones'
 		cppccsymbols=`$cat ccsym.com`
@@ -14622,7 +14639,7 @@ else
 	if $test -s ccsym.cpp; then
 		$test "$also" && echo " "
 		echo "Your C pre-processor ${also}defines the following symbols:"
-		$sed -e 's/\(.*\)=.*/\1/' ccsym.cpp
+		$sed -e 's/\(..*\)=.*/\1/' ccsym.cpp
 		also='further '
 		cppsymbols=`$cat ccsym.cpp`
 		cppsymbols=`echo $cppsymbols`
@@ -14631,14 +14648,14 @@ else
 	if $test -s ccsym.own; then
 		$test "$also" && echo " "
 		echo "Your C compiler ${also}defines the following cpp symbols:"
-		$sed -e 's/\(.*\)=1/\1/' ccsym.own
-		$sed -e 's/\(.*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
+		$sed -e 's/\(..*\)=1/\1/' ccsym.own
+		$sed -e 's/\(..*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
 	        ccsymbols=`$cat ccsym.own`
 	        ccsymbols=`echo $ccsymbols`
 		$test "$silent" || sleep 1
 	fi
 fi
-$rm -f ccsym*
+$rm -f ccsym* Cppsym.*
 
 : see if this is a termio system
 val="$undef"
@@ -15283,6 +15300,7 @@ cc='$cc'
 cccdlflags='$cccdlflags'
 ccdlflags='$ccdlflags'
 ccflags='$ccflags'
+ccflags_uselargefiles='$ccflags_uselargefiles'
 ccsymbols='$ccsymbols'
 cf_by='$cf_by'
 cf_email='$cf_email'
@@ -15675,6 +15693,7 @@ i_grp='$i_grp'
 i_iconv='$i_iconv'
 i_ieeefp='$i_ieeefp'
 i_inttypes='$i_inttypes'
+i_libutil='$i_libutil'
 i_limits='$i_limits'
 i_locale='$i_locale'
 i_machcthr='$i_machcthr'
@@ -15770,6 +15789,7 @@ large='$large'
 ld='$ld'
 lddlflags='$lddlflags'
 ldflags='$ldflags'
+ldflags_uselargefiles='$ldflags_uselargefiles'
 ldlibpthname='$ldlibpthname'
 less='$less'
 lib_ext='$lib_ext'
@@ -15782,6 +15802,7 @@ libsfiles='$libsfiles'
 libsfound='$libsfound'
 libspath='$libspath'
 libswanted='$libswanted'
+libswanted_uselargefiles='$libswanted_uselargefiles'
 line='$line'
 lint='$lint'
 lkflags='$lkflags'

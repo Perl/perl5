@@ -19,6 +19,7 @@ sub do_require {
 sub write_file {
     my $f = shift;
     open(REQ,">$f") or die "Can't write '$f': $!";
+    binmode REQ;
     print REQ @_;
     close REQ;
 }
@@ -122,18 +123,19 @@ do "bleah.do";
 dofile();
 sub dofile { do "bleah.do"; };
 print $x;
-$i++;
 
 # UTF-encoded things
 my $utf8 = chr(0xFEFF);
-my $utf16 = chr(255).chr(254);
-do_require("${utf8}print \"ok $i\n\"; 1;\n");
-$i++;
-do_require("$utf8\nprint \"ok $i\n\"; 1;\n");
-$i++;
-do_require("$utf16\n1;");
-print "not " unless $@ =~ /^Unrecognized character /;
-print "ok $i\n";
+
+$i++; do_require(qq(${utf8}print "ok $i\n"; 1;\n));
+
+sub bytes_to_utf16 {
+    my $utf16 = pack("$_[0]*", unpack("C*", $_[1]));
+    return @_ == 3 && $_[2] ? pack("$_[0]", 0xFEFF) . $utf16 : $utf16; 
+}
+
+$i++; do_require(bytes_to_utf16('n', qq(print "ok $i\\n"; 1;\n), 1)); # BE
+$i++; do_require(bytes_to_utf16('v', qq(print "ok $i\\n"; 1;\n), 1)); # LE
 
 END { 1 while unlink 'bleah.pm'; 1 while unlink 'bleah.do'; }
 

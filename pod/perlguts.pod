@@ -1317,6 +1317,21 @@ destination starting points.  Perl will move, copy, or zero out C<number>
 instances of the size of the C<type> data structure (using the C<sizeof>
 function).
 
+Here is a handy table of equivalents between ordinary C and Perl's
+memory abstraction layer:
+
+    Instead Of:                Use:
+
+    malloc                     New
+    calloc                     Newz
+    realloc                    Renew
+    memcopy                    Copy
+    memmove                    Move
+    free                       Safefree
+    strdup                     savepv
+    strndup                    savepvn (Hey, strndup doesn't exist!)
+    memcpy/*(struct foo *)    StructCopy
+
 =head2 PerlIO
 
 The most recent development releases of Perl has been experimenting with
@@ -1861,6 +1876,19 @@ This function isn't exported out of the Perl core.
 
 If you edit F<embed.pl>, you will need to run C<make regen_headers> to
 force a rebuild of F<embed.h> and other auto-generated files.
+
+=head2 Formatted Printing of IVs and UVs
+
+If you are printing IVs or UVs instead of the stdio(3) style formatting
+codes like C<%d> you should use the following macros for portability
+
+	IVdf		IV in decimal
+	UVuf		UV in decimal
+	UVof		UV in octal
+	UVxf		UV in hexadecimal
+
+For example: printf("IV is %"IVdf"\n", iv);  That will expand
+to whatever is the correct format for the IVs.
 
 =head2 Source Documentation
 

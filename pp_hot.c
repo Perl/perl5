@@ -398,26 +398,31 @@ PP(pp_print)
 	RETURN;
     }
     if (!(io = GvIO(gv))) {
-	if (ckWARN(WARN_UNOPENED)) {
-	    SV* sv = sv_newmortal();
-	    gv_efullname3(sv, gv, Nullch);
-            Perl_warner(aTHX_ WARN_UNOPENED, "Filehandle %s never opened",
-			SvPV(sv,n_a));
-        }
+        dTHR;
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED, WARN_IO))  {
 	    if (IoIFP(io)) {
-		SV* sv = sv_newmortal();
-		gv_efullname3(sv, gv, Nullch);
-		Perl_warner(aTHX_ WARN_IO,
-			    "Filehandle %s opened only for input",
-			    SvPV(sv,n_a));
+		/* integrate with report_evil_fh()? */
+	        char *name = NULL;
+		if (isGV(gv)) {
+		    SV* sv = sv_newmortal();
+		    gv_efullname4(sv, gv, Nullch, FALSE);
+		    name = SvPV_nolen(sv);
+		}
+		if (name && *name)
+		  Perl_warner(aTHX_ WARN_IO,
+			      "Filehandle %s opened only for input", name);
+		else
+		    Perl_warner(aTHX_ WARN_IO,
+				"Filehandle opened only for input");
 	    }
-	    else if (ckWARN(WARN_CLOSED))
-		report_closed_fh(gv, io, "print", "filehandle");
+	    else if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+		report_evil_fh(gv, io, PL_op->op_type);
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1381,10 +1386,19 @@ Perl_do_readline(pTHX)
 		 && (IoTYPE(io) == '>' || fp == PerlIO_stdout()
 		     || fp == PerlIO_stderr()))
 	{
-	    SV* sv = sv_newmortal();
-	    gv_efullname3(sv, PL_last_in_gv, Nullch);
-	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
-			SvPV_nolen(sv));
+	    /* integrate with report_evil_fh()? */
+	    char *name = NULL;
+	    if (isGV(PL_last_in_gv)) { /* can this ever fail? */
+		SV* sv = sv_newmortal();
+		gv_efullname4(sv, PL_last_in_gv, Nullch, FALSE);
+		name = SvPV_nolen(sv);
+	    }
+	    if (name && *name)
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle %s opened only for output", name);
+	    else
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle opened only for output");
 	}
     }
     if (!fp) {
@@ -1394,7 +1408,7 @@ Perl_do_readline(pTHX)
 			    "glob failed (can't start child: %s)",
 			    Strerror(errno));
 	    else
-		report_closed_fh(PL_last_in_gv, io, "readline", "filehandle");
+		report_evil_fh(PL_last_in_gv, io, PL_op->op_type);
 	}
 	if (gimme == G_SCALAR) {
 	    (void)SvOK_off(TARG);
