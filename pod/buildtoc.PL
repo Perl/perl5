@@ -160,6 +160,7 @@ if (-d "pod") {
     perlos2             
     perlos390           
     perlposix-bc
+    perlsolaris
     perlvms             
     perlvos             
     perlwin32           
@@ -176,6 +177,7 @@ if (-d "pod") {
     perlos2             
     perlos390           
     perlposix-bc
+    perlsolaris
     perlvms             
     perlvos             
     perlwin32           

@@ -1397,36 +1397,6 @@ numbers and function name may vary in different versions of perl):
 it might well be a symptom of the gcc "varargs problem".  See the
 previous L<"varargs"> item.
 
-=item Solaris and SunOS dynamic loading
-
-If you have problems with dynamic loading using gcc on SunOS or
-Solaris, and you are using GNU as and GNU ld, you may need to add
--B/bin/ (for SunOS) or -B/usr/ccs/bin/ (for Solaris) to your
-$ccflags, $ldflags, and $lddlflags so that the system's versions of as
-and ld are used.  Note that the trailing '/' is required.
-Alternatively, you can use the GCC_EXEC_PREFIX
-environment variable to ensure that Sun's as and ld are used.  Consult
-your gcc documentation for further information on the -B option and
-the GCC_EXEC_PREFIX variable.
-
-One convenient way to ensure you are not using GNU as and ld is to
-invoke Configure with
-
-    sh Configure -Dcc='gcc -B/usr/ccs/bin/'
-
-for Solaris systems.  For a SunOS system, you must use -B/bin/
-instead.
-
-Alternatively, recent versions of GNU ld reportedly work if you
-include C<-Wl,-export-dynamic> in the ccdlflags variable in
-config.sh.
-
-=item ld.so.1: ./perl: fatal: relocation error:
-
-If you get this message on SunOS or Solaris, and you're using gcc,
-it's probably the GNU as or GNU ld problem in the previous item
-L<"Solaris and SunOS dynamic loading">.
-
 =item LD_LIBRARY_PATH
 
 If you run into dynamic loading problems, check your setting of
@@ -1434,18 +1404,6 @@ the LD_LIBRARY_PATH environment variable.  If you're creating a static
 Perl library (libperl.a rather than libperl.so) it should build
 fine with LD_LIBRARY_PATH unset, though that may depend on details
 of your local set-up.
-
-=item dlopen: stub interception failed
-
-The primary cause of the 'dlopen: stub interception failed' message is
-that the LD_LIBRARY_PATH environment variable includes a directory
-which is a symlink to /usr/lib (such as /lib).
-
-The reason this causes a problem is quite subtle.  The file libdl.so.1.0
-actually *only* contains functions which generate 'stub interception
-failed' errors!  The runtime linker intercepts links to
-"/usr/lib/libdl.so.1.0" and links in internal implementation of those
-functions instead.  [Thanks to Tim Bunce for this explanation.]
 
 =item nm extraction
 
@@ -1632,23 +1590,10 @@ official site named at the start of this document.  If you do find
 that any site is carrying a corrupted or incomplete source code
 archive, please report it to the site's maintainer.
 
-This message can also be a symptom of using (say) a GNU tar compiled
-for SunOS4 on Solaris.  When you run SunOS4 binaries on Solaris the
-run-time system magically alters pathnames matching m#lib/locale# - so
-when tar tries to create lib/locale.pm a differently-named file gets
-created instead.
-
-You may find the file under its assumed name and be able to rename it
-back.  Or use Sun's tar to do the extract.
-
 =item invalid token: ##
 
 You are using a non-ANSI-compliant C compiler.  See L<WARNING:  This
 version requires a compiler that supports ANSI C>.
-
-=item lib/locale.pm: No such file or directory
-
-See L<THIS PACKAGE SEEMS TO BE INCOMPLETE>.
 
 =item Miscellaneous
 

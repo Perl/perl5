@@ -220,6 +220,13 @@
  */
 #define HAS_GETLOGIN		/**/
 
+/* HAS_GETPAGESIZE:
+ *	This symbol, if defined, indicates that the getpagesize system call
+ *	is available to get system page size, which is the granularity of
+ *	many memory management calls.
+ */
+/*#define HAS_GETPAGESIZE		/**/
+
 /* HAS_GETPGID:
  *	This symbol, if defined, indicates to the C program that 
  *	the getpgid(pid) function is available to get the
@@ -1349,6 +1356,13 @@
  *	available to stat filesystems by file descriptors.
  */
 /*#define HAS_FSTATFS		/**/
+
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+/*#define HAS_FSYNC		/**/
 
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is

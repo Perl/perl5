@@ -253,14 +253,6 @@ closed pipe.  You will see the following messages:
 At least for consistency with WinNT, you should keep the recommended
 value.
 
-=item * Checking how std your stdio is...
-
-Configure reports:
-
-  Your stdio doesn't appear very std.
-
-This is correct.
-
 =item * Compiler/Preprocessor defines
 
 The following error occurs because of the Cygwin C<#define> of
@@ -582,6 +574,10 @@ On WinNT Cygwin provides setuid(), seteuid(), setgid() and setegid().
 However, additional Cygwin calls for manipulating WinNT access tokens
 and security contexts are required.
 
+When building DLLs, `C<dllwrap --export-all-symbols>' is used to export
+global symbols.  It might be better to generate an explicit F<.def> file
+(see F<makedef.pl>).  Also, DLLs can now be build with `C<gcc -shared>'.
+
 =head1 AUTHORS
 
 Charles Wilson <cwilson@ece.gatech.edu>,
@@ -593,4 +589,4 @@ Teun Burgers <burgers@ecn.nl>.
 
 =head1 HISTORY
 
-Last updated: 7 November 2000
+Last updated: 9 November 2000

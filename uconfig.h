@@ -1483,6 +1483,13 @@
  */
 /*#define	HAS_GETNET_PROTOS	/ **/
 
+/* HAS_GETPAGESIZE:
+ *	This symbol, if defined, indicates that the getpagesize system call
+ *	is available to get system page size, which is the granularity of
+ *	many memory management calls.
+ */
+/*#define HAS_GETPAGESIZE		/ **/
+
 /* HAS_GETPROTOENT:
  *	This symbol, if defined, indicates that the getprotoent() routine is
  *	available to look up protocols in some data base or another.
@@ -3186,5 +3193,12 @@
  *	It may be undefined on VMS.
  */
 /*#define FCNTL_CAN_LOCK		/ **/
+
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+# HAS_FSYNC		/**/
 
 #endif

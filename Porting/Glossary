@@ -614,6 +614,10 @@ d_fstatvfs (d_statvfs.U):
 	This variable conditionally defines the HAS_FSTATVFS symbol, which
 	indicates to the C program that the fstatvfs() routine is available.
 
+d_fsync (d_fsync.U):
+	This variable conditionally defines the HAS_FSYNC symbol, which
+	indicates to the C program that the fsync() routine is available.
+
 d_ftello (d_ftello.U):
 	This variable conditionally defines the HAS_FTELLO symbol, which
 	indicates to the C program that the ftello() routine is available.
@@ -714,6 +718,10 @@ d_getnetprotos (d_getnetprotos.U):
 	which indicates to the C program that <netdb.h> supplies
 	prototypes for the various getnet*() functions.  
 	See also netdbtype.U for probing for various netdb types.
+
+d_getpagsz (d_getpagsz.U):
+	This variable conditionally defines HAS_GETPAGESIZE if getpagesize()
+	is available to get the system page size.
 
 d_getpbyname (d_getprotby.U):
 	This variable conditionally defines the HAS_GETPROTOBYNAME 
