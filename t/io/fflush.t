@@ -122,9 +122,9 @@ for (qw(system qx popen)) {
     my $command = qq{$runperl "ff-prog" "$f" "rl"};
     open OUT, "> $f" or die "open $f: $!";
     print OUT "Pe";
+    close OUT;
     print "# $command\n";
     $code->($command);
-    close OUT;
     print file_eq($f, "Perl") ? "ok $t\n" : "not ok $t\n";
     push @delete, $f;
     ++$t;
