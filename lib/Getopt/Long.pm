@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.9 1997-03-02 15:00:05+01 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.10 1997-04-18 22:21:10+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Mar  2 14:59:41 1997
-# Update Count    : 586
+# Last Modified On: Wed Apr 16 16:27:33 1997
+# Update Count    : 597
 # Status          : Released
 
 =head1 NAME
@@ -49,7 +49,7 @@ the value it can take. The option linkage is usually a reference to a
 variable that will be set when the option is used. For example, the
 following call to GetOptions:
 
-  &GetOptions("size=i" => \$offset);
+  GetOptions("size=i" => \$offset);
 
 will accept a command line option "size" that must have an integer
 value. With a command line of "--size 24" this will cause the variable
@@ -60,7 +60,7 @@ a HASH describing the linkage for the options. The following call is
 equivalent to the example above:
 
   %optctl = ("size" => \$offset);
-  &GetOptions(\%optctl, "size=i");
+  GetOptions(\%optctl, "size=i");
 
 Linkage may be specified using either of the above methods, or both.
 Linkage specified in the argument list takes precedence over the
@@ -144,7 +144,7 @@ specified but a ref HASH is passed, GetOptions will place the value in
 the HASH. For example:
 
   %optctl = ();
-  &GetOptions (\%optctl, "size=i");
+  GetOptions (\%optctl, "size=i");
 
 will perform the equivalent of the assignment
 
@@ -153,7 +153,7 @@ will perform the equivalent of the assignment
 For array options, a reference to an array is used, e.g.:
 
   %optctl = ();
-  &GetOptions (\%optctl, "sizes=i@");
+  GetOptions (\%optctl, "sizes=i@");
 
 with command line "-sizes 24 -sizes 48" will perform the equivalent of
 the assignment
@@ -164,7 +164,7 @@ For hash options (an option whose argument looks like "name=value"),
 a reference to a hash is used, e.g.:
 
   %optctl = ();
-  &GetOptions (\%optctl, "define=s%");
+  GetOptions (\%optctl, "define=s%");
 
 with command line "--define foo=hello --define bar=world" will perform the
 equivalent of the assignment
@@ -180,7 +180,7 @@ the variable $opt_fpp_struct_return. Note that this variable resides
 in the namespace of the calling program, not necessarily B<main>.
 For example:
 
-  &GetOptions ("size=i", "sizes=i@");
+  GetOptions ("size=i", "sizes=i@");
 
 with command line "-size 10 -sizes 24 -sizes 48" will perform the
 equivalent of the assignments
@@ -302,7 +302,7 @@ In GNU or POSIX format, option names and values can be combined:
 
 Example of using variable references:
 
-   $ret = &GetOptions ('foo=s', \$foo, 'bar=i', 'ar=s', \@ar);
+   $ret = GetOptions ('foo=s', \$foo, 'bar=i', 'ar=s', \@ar);
 
 With command line options "-foo blech -bar 24 -ar xx -ar yy" 
 this will result in:
@@ -314,17 +314,17 @@ this will result in:
 Example of using the E<lt>E<gt> option specifier:
 
    @ARGV = qw(-foo 1 bar -foo 2 blech);
-   &GetOptions("foo=i", \$myfoo, "<>", \&mysub);
+   GetOptions("foo=i", \$myfoo, "<>", \&mysub);
 
 Results:
 
-   &mysub("bar") will be called (with $myfoo being 1)
-   &mysub("blech") will be called (with $myfoo being 2)
+   mysub("bar") will be called (with $myfoo being 1)
+   mysub("blech") will be called (with $myfoo being 2)
 
 Compare this with:
 
    @ARGV = qw(-foo 1 bar -foo 2 blech);
-   &GetOptions("foo=i", \$myfoo);
+   GetOptions("foo=i", \$myfoo);
 
 This will leave the non-options in @ARGV:
 
@@ -525,7 +525,7 @@ BEGIN {
     require 5.003;
     use Exporter ();
     use vars   qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION   = sprintf("%d.%02d", q$Revision: 2.9 $ =~ /(\d+)\.(\d+)/);
+    $VERSION   = sprintf("%d.%02d", q$Revision: 2.10 $ =~ /(\d+)\.(\d+)/);
 
     @ISA       = qw(Exporter);
     @EXPORT    = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
@@ -576,7 +576,7 @@ sub GetOptions {
     $genprefix = $gen_prefix;	# so we can call the same module many times
     $error = 0;
 
-    print STDERR ('GetOptions $Revision: 2.9 $ ',
+    print STDERR ('GetOptions $Revision: 2.10 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",
@@ -662,7 +662,7 @@ sub GetOptions {
 			warn ("Ignoring '!' modifier for short option $_\n");
 			$c = '';
 		    }
-		    $bopctl{$_} = $c;
+		    $opctl{$_} = $bopctl{$_} = $c;
 		}
 		else {
 		    $_ = lc ($_) if $ignorecase;
@@ -710,11 +710,17 @@ sub GetOptions {
 	    }
 	    elsif ( ref($optionlist[0]) =~ /^(ARRAY)$/ ) {
 		$linkage{$o} = shift (@optionlist);
-		$opctl{$o} .= '@' unless $opctl{$o} =~ /\@$/;
+		$opctl{$o} .= '@'
+		  if $opctl{$o} ne '' and $opctl{$o} !~ /\@$/;
+		$bopctl{$o} .= '@'
+		  if $bundling and $bopctl{$o} ne '' and $bopctl{$o} !~ /\@$/;
 	    }
 	    elsif ( ref($optionlist[0]) =~ /^(HASH)$/ ) {
 		$linkage{$o} = shift (@optionlist);
-		$opctl{$o} .= '%' unless $opctl{$o} =~ /\%$/;
+		$opctl{$o} .= '%'
+		  if $opctl{$o} ne '' and $opctl{$o} !~ /\%$/;
+		$bopctl{$o} .= '%'
+		  if $bundling and $bopctl{$o} ne '' and $bopctl{$o} !~ /\%$/;
 	    }
 	    else {
 		warn ("Invalid option linkage for \"", $opt, "\"\n");
