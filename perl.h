@@ -3247,7 +3247,7 @@ typedef struct am_table_short AMTS;
 
    HAS_GETCWD
 
-   HAS-MMAP
+   HAS_MMAP
    HAS_MPROTECT
    HAS_MSYNC
    HAS_MADVSISE
