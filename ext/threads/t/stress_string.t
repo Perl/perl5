@@ -35,11 +35,11 @@ ok(2,1,"");
 
 sub test9 {
   my $i = shift;
-  ok($i,1,"Multiple thread test");
   for(1..20000) { $i++};
 }
 my @threads;
 for(3..33) {
+  ok($_,1,"Multiple thread test");
   push @threads ,threads->create('test9',$_);
 }
 sleep 1;
