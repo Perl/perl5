@@ -1,6 +1,20 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+__declspec(thread) struct thread *current_thread;
+
+void
+Perl_setTHR(struct thread *t)
+{
+ current_thread = t;
+}
+
+struct thread *
+Perl_getTHR(void)
+{
+ return current_thread;
+}
+
 void
 Perl_alloc_thread_key(void)
 {

@@ -402,4 +402,6 @@ win32_open_osfhandle
 win32_get_osfhandle
 Perl_win32_init
 Perl_init_os_extras
+Perl_setTHR
+Perl_getTHR
 RunPerl
