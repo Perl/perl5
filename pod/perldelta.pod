@@ -241,6 +241,9 @@ the deprecation warnings, use:
 PerlIO::get_layers(FH) returns the names of the PerlIO layers
 active on a filehandle.
 
+PerlIO::via layers can now have an optional UTF8 method to
+indicate whether the layer wants to "auto-:utf8" the stream.
+
 utf8::is_utf8() has been added as a quick way to test whether
 a scalar is encoded internally in UTF-8 (Unicode).
 
