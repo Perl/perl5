@@ -491,12 +491,14 @@ sub sreftest (\$$) {
 }
 
 # test prototypes when they are evaled and there is a syntax error
+# Byacc generates the string "syntax error".  Bison gives the
+# string "parse error".
 #
 for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   no warnings 'redefine';
   my $eval = "sub evaled_subroutine $p { &void *; }";
   eval $eval;
-  print "# eval[$eval]\nnot " unless $@ && $@ =~ /syntax error/;
+  print "# eval[$eval]\nnot " unless $@ && $@ =~ /(parse|syntax) error/i;
   print "ok ", $i++, "\n";
 }
 
