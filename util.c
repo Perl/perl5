@@ -3490,14 +3490,10 @@ Perl_get_context(void)
     return (void*)t;
 #  else
 #    ifdef I_MACH_CTHREADS
-      return (void*)cthread_data(cthread_self());
+    return (void*)cthread_data(cthread_self());
 #    else
-#      if defined(__ALPHA) && (__VMS_VER >= 70000000)
-         return (void*)pthread_unchecked_getspecific_np(PL_thr_key);
-#      else
-         return (void*)pthread_getspecific(PL_thr_key);
-#      endif 
-#  endif
+    return (void*)PTHREAD_GETSPECIFIC(PL_thr_key);
+#    endif
 #  endif
 #else
     return (void*)NULL;

@@ -249,15 +249,22 @@
     } STMT_END
 #endif /* JOIN */
 
-#ifndef PERL_GET_CONTEXT
-#  if (defined(__ALPHA) && (__VMS_VER >= 70000000)) || (defined(__alpha) && defined(__osf__))
 /* Use an unchecked fetch of thread-specific data instead of a checked one.
  * It would fail if the key were bogus, but if the key were bogus then
  * Really Bad Things would be happening anyway. --dan */
-#    define PERL_GET_CONTEXT	pthread_unchecked_getspecific_np(PL_thr_key)
-#  else
-#    define PERL_GET_CONTEXT	pthread_getspecific(PL_thr_key)
-#  endif
+#if (defined(__ALPHA) && (__VMS_VER >= 70000000)) ||
+    (defined(__alpha) && defined(__osf__)) /* Available only on >= 4.0 */
+#  define HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP /* Configure test needed */
+#endif
+
+#ifdef HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP
+#  define PTHREAD_GETSPECIFIC(key) pthread_unchecked_getspecific_np(key)
+#else
+#  define PTHREAD_GETSPECIFIC(key) pthread_getspecific(key)
+#endif
+
+#ifndef PERL_GET_CONTEXT
+#  define PERL_GET_CONTEXT	PTHREAD_GETSPECIFIC(PL_thr_key)
 #endif
 
 #ifndef PERL_SET_CONTEXT
