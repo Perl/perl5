@@ -1216,6 +1216,16 @@ test-wide-notty : test-prep
 	    set HARNESS_PERL_SWITCHES=-C && \
 	    cd ..\t && $(PERLEXE) -I..\lib harness
 
+_test : $(RIGHTMAKE)
+       $(XCOPY) $(PERLEXE) ..\t\$(NULL)
+       $(XCOPY) $(PERLDLL) ..\t\$(NULL)
+.IF "$(CCTYPE)" == "BORLAND"
+       $(XCOPY) $(GLOBBAT) ..\t\$(NULL)
+.ELSE
+       $(XCOPY) $(GLOBEXE) ..\t\$(NULL)
+.ENDIF
+       cd ..\t && $(PERLEXE) -I..\lib harness
+
 clean : Extensions_clean
 	-@erase miniperlmain$(o)
 	-@erase $(MINIPERL)
