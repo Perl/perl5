@@ -2584,6 +2584,12 @@ in the current lexical scope.
 remaining memory (or virtual memory) to satisfy the request.  Perl has
 no option but to exit immediately.
 
+At least in Unix you may be able to get past this by increasing your
+process datasize limits: in csh/tcsh use C<limit> and
+C<limit datasize n> (where C<n> is the number of kilobytes) to check
+the current limits and change them, and in ksh/bash/zsh use C<ulimit -a>
+and C<ulimit -d n>, respectively.
+
 =item Out of memory during "large" request for %s
 
 (F) The malloc() function returned 0, indicating there was insufficient
