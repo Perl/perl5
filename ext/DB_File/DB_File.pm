@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 30th July 2001
-# version 1.78
+# last modified 22nc Oct 2001
+# version 1.79
 #
 #     Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -11,7 +11,7 @@
 
 package DB_File::HASHINFO ;
 
-require 5.003 ;
+require 5.00404;
 
 use warnings;
 use strict;
@@ -151,7 +151,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO
 use Carp;
 
 
-$VERSION = "1.78" ;
+$VERSION = "1.79" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -163,7 +163,7 @@ require Exporter;
 use AutoLoader;
 BEGIN {
     $use_XSLoader = 1 ;
-    eval { require XSLoader } ;
+    { local $SIG{__DIE__} ; eval { require XSLoader } ; }
 
     if ($@) {
         $use_XSLoader = 0 ;
@@ -595,7 +595,7 @@ DB_File - Perl5 access to Berkeley DB version 1.x
 
 B<DB_File> is a module which allows Perl programs to make use of the
 facilities provided by Berkeley DB version 1.x (if you have a newer
-version of DB, see L<Using DB_File with Berkeley DB version 2 or 3>).
+version of DB, see L<Using DB_File with Berkeley DB version 2 or greater).
 It is assumed that you have a copy of the Berkeley DB manual pages at
 hand when reading this documentation. The interface defined here
 mirrors the Berkeley DB interface closely.
@@ -639,27 +639,27 @@ number.
 
 =back
 
-=head2 Using DB_File with Berkeley DB version 2 or 3
+=head2 Using DB_File with Berkeley DB version 2 or greater
 
 Although B<DB_File> is intended to be used with Berkeley DB version 1,
-it can also be used with version 2 or 3. In this case the interface is
+it can also be used with version 2, 3 or 4. In this case the interface is
 limited to the functionality provided by Berkeley DB 1.x. Anywhere the
-version 2 or 3 interface differs, B<DB_File> arranges for it to work
+version 2 or greater interface differs, B<DB_File> arranges for it to work
 like version 1. This feature allows B<DB_File> scripts that were built
-with version 1 to be migrated to version 2 or 3 without any changes.
+with version 1 to be migrated to version 2 or greater without any changes.
 
 If you want to make use of the new features available in Berkeley DB
 2.x or greater, use the Perl module B<BerkeleyDB> instead.
 
-B<Note:> The database file format has changed in both Berkeley DB
-version 2 and 3. If you cannot recreate your databases, you must dump
-any existing databases with either the C<db_dump> or the C<db_dump185>
-utility that comes with Berkeley DB.
-Once you have rebuilt DB_File to use Berkeley DB version 2 or 3, your
-databases can be recreated using C<db_load>. Refer to the Berkeley DB
+B<Note:> The database file format has changed multiple times in Berkeley
+DB version 2, 3 and 4. If you cannot recreate your databases, you
+must dump any existing databases with either the C<db_dump> or the
+C<db_dump185> utility that comes with Berkeley DB.
+Once you have rebuilt DB_File to use Berkeley DB version 2 or greater,
+your databases can be recreated using C<db_load>. Refer to the Berkeley DB
 documentation for further details.
 
-Please read L<"COPYRIGHT"> before using version 2.x or 3.x of Berkeley
+Please read L<"COPYRIGHT"> before using version 2.x or greater of Berkeley
 DB with DB_File.
 
 =head2 Interface to Berkeley DB
