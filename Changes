@@ -31,6 +31,147 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10104] By: jhi                                   on 2001/05/14  18:09:07
+        Log: Retract #10094.
+     Branch: perl
+	   ! lib/Pod/Text.pm
+____________________________________________________________________________
+[ 10103] By: jhi                                   on 2001/05/14  15:20:58
+        Log: Integrate change #10100 from maintperl.
+             
+             PL_last_in_gv may not be a GV if it was a stale filehandle (fix for
+             bug ID 20010514.027)
+     Branch: perl
+	  !> mg.c pp_ctl.c
+____________________________________________________________________________
+[ 10102] By: jhi                                   on 2001/05/14  15:19:21
+        Log: Document the deprecatedness of suidperl.
+     Branch: perl
+	   ! INSTALL pod/perlfaq1.pod
+____________________________________________________________________________
+[ 10101] By: jhi                                   on 2001/05/14  14:54:31
+        Log: Subject: Re: [ID 20010514.022] Makemaker a bit too prefix-happy
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Mon, 14 May 2001 09:38:59 -0400
+             Message-ID: <20010514093859.A1479715@linguist.thayer.dartmouth.edu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 10100] By: gsar                                  on 2001/05/14  14:43:50
+        Log: PL_last_in_gv may not be a GV if it was a stale filehandle (fix for
+             bug ID 20010514.027)
+             
+             TODO: this needs a testsuite addition
+     Branch: maint-5.6/perl
+	   ! mg.c pp_ctl.c
+____________________________________________________________________________
+[ 10099] By: jhi                                   on 2001/05/14  13:42:38
+        Log: More DWIMminess for Class::Struct: calling the array or hash
+             accessors only with one argument, an array or a hash reference,
+             sets the underlying array or hash.  This mirrors nicely also
+             the usage in the constructor.
+             From Bernd Sokolowsky <ulmo@garozzo.franken.de>, via Damian Conway.
+     Branch: perl
+	   ! lib/Class/Struct.pm t/lib/class-struct.t
+____________________________________________________________________________
+[ 10098] By: jhi                                   on 2001/05/14  13:10:34
+        Log: Reference cmp'ing should go through the whole stringification
+             process shebang, as pointed out by Sarathy in #10091.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 10097] By: jhi                                   on 2001/05/14  12:54:31
+        Log: Subject: Re: [LONG] Cleaning up Todo/Todo-5.6/perltodo
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sat, 12 May 2001 16:36:27 +0100
+             Message-ID: <20010512163627.A5522@netthink.co.uk>
+             
+             with some additions salvaged from Todo and Todo-5.6 before
+             retiring them.
+     Branch: perl
+	   - Todo Todo-5.6
+	   ! MANIFEST pod/perltodo.pod
+____________________________________________________________________________
+[ 10096] By: jhi                                   on 2001/05/14  12:37:01
+        Log: Subject: [ID 20010514.025] _SVID3 in <sys/statvfs.h>
+             From: "Golubev I. N." <gin@mo.msk.ru>
+             Date: Mon, 07 May 2001 14:33:34 (GMT)
+             Message-Id: <02453af6b23e63-gin@mo.msk.ru>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 10095] By: jhi                                   on 2001/05/14  12:34:24
+        Log: Subject: [ID 20010514.022] Makemaker a bit too prefix-happy
+             From: "Todd C. Miller" <Todd.Miller@courtesan.com>
+             Date: Mon, 7 May 2001 09:35:57 -0600 (MDT)
+             Message-Id: <200105071535.f47FZvf27235@xerxes.courtesan.com>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 10094] By: jhi                                   on 2001/05/14  12:32:44
+        Log: (Retracted by #10104.)
+             
+             Subject: [PATCH bleadperl Pod::Text] avoid overquoting [Was: rand(0) is rand(1)]
+             From: barries <barries@slaysys.com>
+             Date: Sat, 12 May 2001 01:28:10 -0400
+             Message-ID: <20010512012810.B26358@jester.slaysys.com>
+     Branch: perl
+	   ! lib/Pod/Text.pm
+____________________________________________________________________________
+[ 10093] By: jhi                                   on 2001/05/14  12:30:38
+        Log: Subject: [PATCH] Incorrect line numbers in AutoSplit
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Sat, 12 May 2001 19:24:33 +0100
+             Message-Id: <E14ye49-0006Fn-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/AutoSplit.pm
+____________________________________________________________________________
+[ 10092] By: jhi                                   on 2001/05/14  12:29:21
+        Log: Yet another HP-UX hints tweak from Merijn.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 10091] By: gsar                                  on 2001/05/14  04:38:32
+        Log: $ref1 == $ref2 behaves unpredictably on platforms where NV_PRESERVES_UV
+             isn't defined (changes#9366,9368,9370 from mainline without the
+             pp_scmp() change)
+     Branch: maint-5.6/perl
+	   ! pp.c pp.h pp_hot.c
+____________________________________________________________________________
+[ 10090] By: jhi                                   on 2001/05/12  13:39:43
+        Log: The sorting seems to happen now automatically.
+     Branch: perl
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[ 10089] By: jhi                                   on 2001/05/12  03:38:15
+        Log: Subject: Re: [PATCH perlfunc.pod] split on an empty string
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Fri, 11 May 2001 11:36:04 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105111131540.1804-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10088] By: jhi                                   on 2001/05/12  03:37:00
+        Log: Subject: Re: undef(&foo) does not work for XS functions
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Fri, 11 May 2001 16:52:29 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0105111647240.4478-100000@mako.covalent.net>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 10087] By: jhi                                   on 2001/05/12  03:35:58
+        Log: Subject: [PATCH: perl@10086] fixup t/op/append.t for UTF-EBCDIC
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 11 May 2001 17:38:43 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10105111736190.73589-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/append.t
+____________________________________________________________________________
+[ 10086] By: jhi                                   on 2001/05/11  14:23:08
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10085] By: jhi                                   on 2001/05/11  14:08:20
         Log: Remove the 'asciir' re subpragma.  Should instead implement
              the 'physical vs logical' range scheme:
