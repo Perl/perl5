@@ -21,6 +21,309 @@ http://dev.macperl.org/.
 This file contains only changes that affect the maint-5.6/macperl branch.
 
 ----------------
+Version v5.6.1b2
+----------------
+
+____________________________________________________________________________
+[ 13615] By: pudge                                 on 2001/12/11  05:09:34
+        Log: Add extra pod to help
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 13614] By: pudge                                 on 2001/12/11  05:08:51
+        Log: Return DoAppleScript errors in $@
+     Branch: maint-5.6/macperl
+	   ! macos/ext/MacPerl/OSA.xs
+____________________________________________________________________________
+[ 13613] By: pudge                                 on 2001/12/11  05:08:19
+        Log: Clear out $^E before each script run
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPScript.c
+____________________________________________________________________________
+[ 13612] By: pudge                                 on 2001/12/11  04:58:52
+        Log: Integrate various changes from maint-5.6/perl/.
+     Branch: maint-5.6/macperl
+	  !> op.c pp.c pp_hot.c t/io/pipe.t t/op/cmp.t t/op/misc.t
+	  !> t/op/system_tests util.c win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[ 13156] By: pudge                                 on 2001/11/21  03:19:09
+        Log: Slight doc changes.
+     Branch: maint-5.6/macperl
+           ! macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 13155] By: pudge                                 on 2001/11/21  03:18:48
+        Log: Add UTF-16 coercion.
+     Branch: maint-5.6/macperl
+           ! macos/lib/Mac/AppleEvents/Simple.pm
+____________________________________________________________________________
+[ 13154] By: pudge                                 on 2001/11/21  03:16:55
+        Log: Remove comments.
+     Branch: maint-5.6/macperl
+           ! lib/File/Spec/Mac.pm
+____________________________________________________________________________
+[ 13153] By: pudge                                 on 2001/11/21  03:16:00
+        Log: Fix FSpGetCatInfo (and other functions) corrupting
+             memory with bad filespecs (bug #471867)
+     Branch: maint-5.6/macperl
+           ! macos/ext/Mac/Files/typemap macos/ext/Mac/typemap
+____________________________________________________________________________
+[ 13126] By: pudge                                 on 2001/11/20  03:28:51
+        Log: Make configpm work with extra keys
+     Branch: maint-5.6/macperl
+           ! macos/configpm
+____________________________________________________________________________
+[ 13125] By: pudge                                 on 2001/11/20  03:28:09
+        Log: Version and doc updates
+     Branch: maint-5.6/macperl
+           ! macos/MPVersion.r macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 13124] By: pudge                                 on 2001/11/20  03:27:44
+        Log: More fixes for error message parsing (bug #470316)
+     Branch: maint-5.6/macperl
+           ! macos/macish.c
+____________________________________________________________________________
+[ 13123] By: pudge                                 on 2001/11/20  03:26:32
+        Log: Fix ctrl-D handling (bug #471436), more exit fixes (bug #467732),
+             remove obsolete function (bug #465225)
+     Branch: maint-5.6/macperl
+           ! macos/macperl/MPConsole.cp macos/macperl/MPMain.c
+           ! macos/macperl/MPScript.c
+____________________________________________________________________________
+[ 13122] By: pudge                                 on 2001/11/20  03:20:17
+        Log: Add p2as droplet to distribution.
+     Branch: maint-5.6/macperl
+           + macos/macperl/Droplets/p2as.plx
+____________________________________________________________________________
+[ 13121] By: pudge                                 on 2001/11/20  03:10:36
+        Log: Bundle File::Sort.
+     Branch: maint-5.6/macperl
+           + macos/bundled_lib/blib/lib/File/Sort.pm
+____________________________________________________________________________
+[ 13120] By: pudge                                 on 2001/11/20  03:09:21
+        Log: Various bundled module fixes.
+     Branch: maint-5.6/macperl
+           ! macos/bundled_ext/Compress/Zlib/Makefile.mk
+           ! macos/bundled_ext/Digest/MD5/t/files.t
+           ! macos/bundled_ext/Filter/t/filter-util.pl
+           ! macos/bundled_lib/blib/lib/Net/Config.pm
+           ! macos/bundled_lib/t/libwww-perl/live/jigsaw-chunk.t
+____________________________________________________________________________
+[ 13119] By: pudge                                 on 2001/11/20  03:08:27
+        Log: Portability fix for Pod::Html.
+     Branch: maint-5.6/macperl
+           ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 13116] By: pudge                                 on 2001/11/20  02:47:23
+        Log: Integrate with maint-5.6/perl.
+     Branch: maint-5.6/macperl
+          !> win32/win32.c
+____________________________________________________________________________
+[ 12967] By: pudge                                 on 2001/11/13  05:44:13
+        Log: Docs for Mac::err.
+     Branch: maint-5.6/macperl
+           ! macos/ext/Mac/err/err.pm
+____________________________________________________________________________
+[ 12966] By: pudge                                 on 2001/11/13  05:43:58
+        Log: Some cleanup; change some globals to references for
+             possible persistence later.
+     Branch: maint-5.6/macperl
+           ! macos/lib/Mac/Glue.pm
+____________________________________________________________________________
+[ 12965] By: pudge                                 on 2001/11/13  05:42:59
+        Log: Add in a bunch of Mac OS 9 constants for Mac::Files.
+     Branch: maint-5.6/macperl
+           ! macos/ext/Mac/Files/Files.pm
+____________________________________________________________________________
+[ 12964] By: pudge                                 on 2001/11/13  05:42:35
+        Log: Get Mac::Navigation to compile (bug #464684).
+     Branch: maint-5.6/macperl
+           ! macos/Makefile.mk macos/ext/Mac/Makefile.mk
+           ! macos/ext/Mac/Navigation/Makefile.PL
+           ! macos/ext/Mac/Navigation/Navigation.xs
+           ! macos/macperl/Makefile.mk
+____________________________________________________________________________
+[ 12963] By: pudge                                 on 2001/11/13  05:41:12
+        Log: Add in modules and POD to help menu.
+     Branch: maint-5.6/macperl
+           ! macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 12962] By: pudge                                 on 2001/11/13  05:28:18
+        Log: Update bundled modules.
+     Branch: maint-5.6/macperl
+           + macos/bundled_ext/Filter/t/FilterTest.pm
+           + macos/bundled_ext/List/Util/t/shuffle.t
+           + macos/bundled_ext/Storable/t/compat06.t
+           + macos/bundled_ext/Storable/t/st-dump.pl
+           + macos/bundled_ext/Time/HiRes/hints/dynixptx.pl
+           + macos/bundled_lib/blib/lib/LWP/ConnCache.pm
+           + macos/bundled_lib/blib/lib/LWP/Protocol/http10.pm
+           + macos/bundled_lib/blib/lib/LWP/Protocol/https10.pm
+           + macos/bundled_lib/blib/lib/LWP/Protocol/nogo.pm
+           + macos/bundled_lib/blib/lib/Net/HTTP/NB.pm
+           + macos/bundled_lib/blib/lib/lwpcook.pod
+           + macos/bundled_lib/t/Filter/Simple/filter.t
+           + macos/bundled_lib/t/Switch/t/given.t
+           + macos/bundled_lib/t/Switch/t/nested.t
+           + macos/bundled_lib/t/Switch/t/switch.t
+           + macos/bundled_lib/t/Text/Balanced/t/extbrk.t
+           + macos/bundled_lib/t/Text/Balanced/t/extcbk.t
+           + macos/bundled_lib/t/Text/Balanced/t/extdel.t
+           + macos/bundled_lib/t/Text/Balanced/t/extmul.t
+           + macos/bundled_lib/t/Text/Balanced/t/extqlk.t
+           + macos/bundled_lib/t/Text/Balanced/t/exttag.t
+           + macos/bundled_lib/t/Text/Balanced/t/extvar.t
+           + macos/bundled_lib/t/Text/Balanced/t/gentag.t
+           + macos/bundled_lib/t/URI/rfc2732.t
+           + macos/bundled_lib/t/libnet/config.t
+           + macos/bundled_lib/t/libnet/libnet_t.pl
+           + macos/bundled_lib/t/libwww-perl/live/google.t
+           + macos/bundled_lib/t/libwww-perl/live/jigsaw-auth-b.t
+           + macos/bundled_lib/t/libwww-perl/live/jigsaw-auth-d.t
+           + macos/bundled_lib/t/libwww-perl/live/jigsaw-chunk.t
+           + macos/bundled_lib/t/libwww-perl/live/jigsaw-md5.t
+           + macos/bundled_lib/t/libwww-perl/live/jigsaw-neg.t
+           + macos/bundled_lib/t/libwww-perl/live/jigsaw-te.t
+           + macos/bundled_lib/t/libwww-perl/live/validator.t
+           - macos/bundled_ext/Filter/t/MyFilter.pm
+           - macos/bundled_ext/Storable/t/compat-0.6.t
+           - macos/bundled_ext/Storable/t/dump.pl
+           - macos/bundled_ext/Time/Piece/Makefile.PL
+           - macos/bundled_ext/Time/Piece/Piece.pm
+           - macos/bundled_ext/Time/Piece/Piece.t
+           - macos/bundled_ext/Time/Piece/Piece.xs
+           - macos/bundled_ext/Time/Piece/README
+           - macos/bundled_ext/Time/Piece/Seconds.pm
+           - macos/bundled_lib/blib/lib/LWP/Protocol/http11.pm
+           - macos/bundled_lib/blib/lib/Net/DummyInetd.pm
+           - macos/bundled_lib/blib/lib/Net/PH.pm
+           - macos/bundled_lib/blib/lib/Net/SNPP.pm
+           - macos/bundled_lib/blib/lib/Text/Balanced.pod
+           - macos/bundled_lib/t/Filter/Simple/test.pl
+           - macos/bundled_lib/t/Switch/test.pl
+           - macos/bundled_lib/t/Text/Balanced/t/genxt.t
+           - macos/bundled_lib/t/Text/Balanced/t/xbrak.t
+           - macos/bundled_lib/t/Text/Balanced/t/xcode.t
+           - macos/bundled_lib/t/Text/Balanced/t/xdeli.t
+           - macos/bundled_lib/t/Text/Balanced/t/xmult.t
+           - macos/bundled_lib/t/Text/Balanced/t/xquot.t
+           - macos/bundled_lib/t/Text/Balanced/t/xtagg.t
+           - macos/bundled_lib/t/Text/Balanced/t/xvari.t
+           - macos/bundled_lib/t/libnet/ph.t
+           ! (edit 125 files)
+____________________________________________________________________________
+[ 12822] By: pudge                                 on 2001/11/02  21:38:22
+        Log: Several fixes for various exit problems and clearing out
+             task queue, as well as another (incomplete) go at
+             fixing error message handling
+     Branch: maint-5.6/macperl
+           ! macos/macish.c macos/macish.h macos/macperl/MPConsole.cp
+____________________________________________________________________________
+[ 12821] By: pudge                                 on 2001/11/02  21:36:26
+        Log: Add source files for bleadperl builds
+     Branch: maint-5.6/macperl
+           ! macos/Makefile.mk
+____________________________________________________________________________
+[ 12820] By: pudge                                 on 2001/11/02  21:35:15
+        Log: Fix up to work properly with multiplicity
+     Branch: maint-5.6/macperl
+           ! ext/DynaLoader/dl_mac.xs
+____________________________________________________________________________
+[ 12819] By: pudge                                 on 2001/11/02  21:21:56
+        Log: Integrate with maintperl.
+     Branch: maint-5.6/macperl
+          +> t/op/system.t t/op/system_tests
+          !> MANIFEST Todo-5.6 ext/ODBM_File/ODBM_File.xs perl.h
+          !> pod/perltodo.pod util.c win32/win32.c
+____________________________________________________________________________
+[ 12699] By: pudge                                 on 2001/10/26  20:49:00
+        Log: Integrate a buncha things from maintperl.
+     Branch: maint-5.6/macperl
+          !> (integrate 32 files)
+____________________________________________________________________________
+[ 12586] By: pudge                                 on 2001/10/22  19:42:04
+        Log: Integrate with maintperl.
+     Branch: maint-5.6/macperl
+          !> win32/bin/pl2bat.pl win32/win32.c
+____________________________________________________________________________
+[ 12585] By: pudge                                 on 2001/10/22  19:32:02
+        Log: Oops, forgot to include Win32 ... just as well, since it
+             seems in bleadperl, change #7764 was not included
+             (adding C:\temp).  Re-added.  Rip it back out if it
+             doesn't belong.  :-)
+     Branch: maint-5.6/macperl
+           ! lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 12583] By: pudge                                 on 2001/10/22  19:26:00
+        Log: Add in lots of File::Spec changes, from Thomas Wegner,
+             and sync with changes from bleadperl.
+     Branch: maint-5.6/macperl
+           ! lib/File/Spec.pm lib/File/Spec/Epoc.pm
+           ! lib/File/Spec/Functions.pm lib/File/Spec/Mac.pm
+           ! lib/File/Spec/Unix.pm lib/File/Spec/VMS.pm
+           ! lib/File/Spec/Win32.pm t/lib/filespec.t
+____________________________________________________________________________
+[ 12582] By: pudge                                 on 2001/10/22  19:23:28
+        Log: Sync with latest File::Find and tests from bleadperl.
+     Branch: maint-5.6/macperl
+           ! lib/File/Find.pm t/lib/filefind-taint.t t/lib/filefind.t
+____________________________________________________________________________
+[ 12581] By: pudge                                 on 2001/10/22  19:22:12
+        Log: Nit.
+     Branch: maint-5.6/macperl
+           ! perl.c
+____________________________________________________________________________
+[ 12580] By: pudge                                 on 2001/10/22  19:21:37
+        Log: Fix path construction.
+     Branch: maint-5.6/macperl
+           ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[ 12578] By: pudge                                 on 2001/10/22  19:02:34
+        Log: Fix up exported symbols, move relevant docs
+             over from macperl.pod.
+     Branch: maint-5.6/macperl
+           ! macos/ext/MacPerl/MacPerl.pm
+____________________________________________________________________________
+[ 12577] By: pudge                                 on 2001/10/22  19:01:38
+        Log: Make ADDRESS called optionally as a method.
+     Branch: maint-5.6/macperl
+           ! macos/lib/Mac/Glue.pm
+____________________________________________________________________________
+[ 12576] By: pudge                                 on 2001/10/22  18:58:22
+        Log: Fix exit code (MacPerl bug #422129) and add Stop Script
+             Apple event.
+     Branch: maint-5.6/macperl
+           ! macos/macish.c macos/macish.h macos/macperl/MPAppleEvents.c
+           ! macos/macperl/MPConsole.cp macos/macperl/MPMain.c
+           ! macos/macperl/MPTerminology.aete
+____________________________________________________________________________
+[ 12575] By: pudge                                 on 2001/10/22  18:56:34
+        Log: Clean up some build utilities. Change Entab to Duplicate;
+             fix docs and error reporting; improve macify() of paths;
+             remove requirement for Exporter.pm presence.
+     Branch: maint-5.6/macperl
+           ! macos/InstallBLIB macos/MacPerlTests.cmd
+           ! macos/lib/ExtUtils/MM_MacOS.pm macos/lib/Mac/BuildTools.pm
+____________________________________________________________________________
+[ 12574] By: pudge                                 on 2001/10/22  18:53:28
+        Log: Sync Time::HiRes with bleadperl
+     Branch: maint-5.6/macperl
+           ! macos/bundled_ext/Time/HiRes/HiRes.pm
+           ! macos/bundled_ext/Time/HiRes/HiRes.t
+           ! macos/bundled_ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12573] By: pudge                                 on 2001/10/22  18:52:58
+        Log: Fix up Changes
+     Branch: maint-5.6/macperl
+           ! macos/Changes
+____________________________________________________________________________
+[ 12553] By: pudge                                 on 2001/10/21  21:51:34
+        Log: Integrate from maintperl
+             (Changes 12350, 12496, 12548, 12549, 12550)
+     Branch: maint-5.6/macperl
+          !> ext/IO/lib/IO/Seekable.pm lib/Carp/Heavy.pm t/base/rs.t
+          !> t/lib/filefind-taint.t t/pragma/strict-vars toke.c
+
+----------------
 Version v5.6.1b1
 ----------------
 
