@@ -3,8 +3,15 @@ package B::Concise;
 # This program is free software; you can redistribute and/or modify it
 # under the same terms as Perl itself.
 
-our $VERSION = "0.51";
 use strict;
+use warnings;
+
+use Exporter ();
+
+our $VERSION   = "0.52";
+our @ISA       = qw(Exporter);
+our @EXPORT_OK = qw(set_style add_callback);
+
 use B qw(class ppname main_start main_root main_cv cstring svref_2object
 	 SVf_IOK SVf_NOK SVf_POK OPf_KIDS);
 
@@ -38,6 +45,15 @@ my %style =
 my($format, $gotofmt, $treefmt);
 my $curcv;
 my($seq_base, $cop_seq_base);
+my @callbacks;
+
+sub set_style {
+    ($format, $gotofmt, $treefmt) = @_;
+}
+
+sub add_callback {
+    push @callbacks, @_;
+}
 
 sub concise_cv {
     my ($order, $cvref) = @_;
@@ -68,11 +84,12 @@ my $big_endian = 1;
 
 my $order = "basic";
 
+set_style(@{$style{concise}});
+
 sub compile {
     my @options = grep(/^-/, @_);
     my @args = grep(!/^-/, @_);
     my $do_main = 0;
-    ($format, $gotofmt, $treefmt) = @{$style{"concise"}};
     for my $o (@options) {
 	if ($o eq "-basic") {
 	    $order = "basic";
@@ -97,7 +114,7 @@ sub compile {
 	} elsif ($o eq "-littleendian") {
 	    $big_endian = 0;
 	} elsif (exists $style{substr($o, 1)}) {
-	    ($format, $gotofmt, $treefmt) = @{$style{substr($o, 1)}};
+	    set_style(@{$style{substr($o, 1)}});
 	} else {
 	    warn "Option $o unrecognized";
 	}
@@ -432,6 +449,7 @@ sub concise_op {
     $h{label} = $labels{$op->seq};
     $h{typenum} = $op->type;
     $h{noise} = $linenoise[$op->type];
+    $_->(\%h, $op, \$format, \$level) for @callbacks;
     return fmt_line(\%h, $format, $level);
 }
 
@@ -496,6 +514,8 @@ B::Concise - Walk Perl syntax tree, printing concise info about ops
 =head1 SYNOPSIS
 
     perl -MO=Concise[,OPTIONS] foo.pl
+
+    use B::Concise qw(set_style add_callback);
 
 =head1 DESCRIPTION
 
@@ -824,6 +844,43 @@ The numeric value of the OP's type, in decimal.
     "      PVOP             An OP with a string
     {      LOOP             An OP that holds pointers for a loop
     ;      COP              An OP that marks the start of a statement
+
+=head1 Using B::Concise outside of the O framework
+
+It is possible to extend B<B::Concise> by using it outside of the B<O>
+framework and providing new styles and new variables.
+
+    use B::Concise qw(set_style add_callback);
+    set_style($format, $gotofmt, $treefmt);
+    add_callback
+    (
+        sub
+        {
+            my ($h, $op, $level, $format) = @_;
+            $h->{variable} = some_func($op);
+        }
+    );
+    B::Concise::compile(@options)->();
+
+You can specify a style by calling the B<set_style> subroutine.  If you
+have a new variable in your style, or you want to change the value of an
+existing variable, you will need to add a callback to specify the value
+for that variable.
+
+This is done by calling B<add_callback> passing references to any
+callback subroutines.  The subroutines are called in the same order as
+they are added.  Each subroutine is passed four parameters.  These are a
+reference to a hash, the keys of which are the names of the variables
+and the values of which are their values, the op, the level and the
+format.
+
+To define your own variables, simply add them to the hash, or change
+existing values if you need to.  The level and format are passed in as
+references to scalars, but it is unlikely that they will need to be
+changed or even used.
+
+To see the output, call the subroutine returned by B<compile> in the
+same way that B<O> does.
 
 =head1 AUTHOR
 
