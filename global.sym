@@ -444,6 +444,7 @@ Perl_sv_taint
 Perl_sv_tainted
 Perl_sv_unmagic
 Perl_sv_unref
+Perl_sv_unref_flags
 Perl_sv_untaint
 Perl_sv_upgrade
 Perl_sv_usepvn
@@ -529,6 +530,7 @@ Perl_sv_utf8_downgrade
 Perl_sv_utf8_encode
 Perl_sv_utf8_decode
 Perl_sv_force_normal
+Perl_sv_force_normal_flags
 Perl_tmps_grow
 Perl_sv_rvweaken
 Perl_newANONATTRSUB

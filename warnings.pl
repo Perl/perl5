@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-our $VERSION = '1.00';
+
+$VERSION = '1.00';
 
 BEGIN {
   push @INC, './lib';
@@ -106,7 +107,7 @@ sub mkRange
 
 
     for ($i = 1 ; $i < @a; ++ $i) {
-      	$out[$i] = ".." 
+      	$out[$i] = ".."
           if $a[$i] == $a[$i - 1] + 1 && $a[$i] + 1 == $a[$i + 1] ;
     }
 
@@ -132,9 +133,9 @@ sub printTree
 	print $prefix . "|\n" ;
 	print $prefix . "+- $k" ;
 	if (ref $v)
-	{ 
+	{
 	    print " " . "-" x ($max - length $k ) . "+\n" ;
-	    printTree ($v, $prefix . "|" , $max + $indent - 1) 
+	    printTree ($v, $prefix . "|" , $max + $indent - 1)
 	}
 	else
 	  { print "\n" }
@@ -291,9 +292,9 @@ foreach $k (sort keys  %list) {
     my $v = $list{$k} ;
     my @list = sort { $a <=> $b } @$v ;
 
-    print PM tab(4, "    '$k'"), '=> "', 
-		# mkHex($warn_size, @list), 
-		mkHex($warn_size, map $_ * 2 , @list), 
+    print PM tab(4, "    '$k'"), '=> "',
+		# mkHex($warn_size, @list),
+		mkHex($warn_size, map $_ * 2 , @list),
 		'", # [', mkRange(@list), "]\n" ;
 }
 
@@ -305,9 +306,9 @@ foreach $k (sort keys  %list) {
     my $v = $list{$k} ;
     my @list = sort { $a <=> $b } @$v ;
 
-    print PM tab(4, "    '$k'"), '=> "', 
-		# mkHex($warn_size, @list), 
-		mkHex($warn_size, map $_ * 2 + 1 , @list), 
+    print PM tab(4, "    '$k'"), '=> "',
+		# mkHex($warn_size, @list),
+		mkHex($warn_size, map $_ * 2 + 1 , @list),
 		'", # [', mkRange(@list), "]\n" ;
 }
 
@@ -365,7 +366,7 @@ warnings - Perl pragma to control optional warnings
 If no import list is supplied, all possible warnings are either enabled
 or disabled.
 
-A number of functions are provided to assist module authors. 
+A number of functions are provided to assist module authors.
 
 =over 4
 
@@ -469,7 +470,7 @@ sub bits {
 	    $mask |= $DeadBits{$word} if $fatal ;
 	}
 	else
-          { croak("unknown warnings category '$word'")}  
+          { croak("unknown warnings category '$word'")}
     }
 
     return $mask ;
@@ -515,13 +516,13 @@ sub __chk
 	    unless defined $offset;
     }
     else {
-        $category = (caller(1))[0] ; 
+        $category = (caller(1))[0] ;
         $offset = $Offsets{$category};
         croak("package '$category' not registered for warnings")
 	    unless defined $offset ;
     }
 
-    my $this_pkg = (caller(1))[0] ; 
+    my $this_pkg = (caller(1))[0] ;
     my $i = 2 ;
     my $pkg ;
 
@@ -535,11 +536,11 @@ sub __chk
         for ($i = 2 ; $pkg = (caller($i))[0] ; ++ $i) {
             last if $pkg ne $this_pkg ;
         }
-        $i = 2 
+        $i = 2
             if !$pkg || $pkg eq $this_pkg ;
     }
 
-    my $callers_bitmask = (caller($i))[9] ; 
+    my $callers_bitmask = (caller($i))[9] ;
     return ($callers_bitmask, $offset, $i) ;
 }
 
@@ -564,7 +565,7 @@ sub warn
     my $message = pop ;
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
     local $Carp::CarpLevel = $i ;
-    croak($message) 
+    croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
 	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
     carp($message) ;
@@ -579,12 +580,12 @@ sub warnif
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
     local $Carp::CarpLevel = $i ;
 
-    return 
+    return
         unless defined $callers_bitmask &&
             	(vec($callers_bitmask, $offset, 1) ||
             	vec($callers_bitmask, $Offsets{'all'}, 1)) ;
 
-    croak($message) 
+    croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
 	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
 
