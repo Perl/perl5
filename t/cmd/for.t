@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..58\n";
+print "1..78\n";
 
 for ($i = 0; $i <= 10; $i++) {
     $x[$i] = $i;
@@ -193,6 +193,48 @@ for my $i (reverse map {$_} 1,2,3) {
 }
 is ($r, '321', 'Reverse for list via map with var');
 
+# For some reason the generate optree is different when $_ is implicit.
+$r = '';
+for $_ (@array) {
+    $r .= $_;
+}
+is ($r, 'ABC', 'Forwards for array with explicit $_');
+$r = '';
+for $_ (1,2,3) {
+    $r .= $_;
+}
+is ($r, '123', 'Forwards for list with explicit $_');
+$r = '';
+for $_ (map {$_} @array) {
+    $r .= $_;
+}
+is ($r, 'ABC', 'Forwards for array via map with explicit $_');
+$r = '';
+for $_ (map {$_} 1,2,3) {
+    $r .= $_;
+}
+is ($r, '123', 'Forwards for list via map with explicit $_');
+
+$r = '';
+for $_ (reverse @array) {
+    $r .= $_;
+}
+is ($r, 'CBA', 'Reverse for array with explicit $_');
+$r = '';
+for $_ (reverse 1,2,3) {
+    $r .= $_;
+}
+is ($r, '321', 'Reverse for list with explicit $_');
+$r = '';
+for $_ (reverse map {$_} @array) {
+    $r .= $_;
+}
+is ($r, 'CBA', 'Reverse for array via map with explicit $_');
+$r = '';
+for $_ (reverse map {$_} 1,2,3) {
+    $r .= $_;
+}
+is ($r, '321', 'Reverse for list via map with explicit $_');
 
 # I don't think that my is that different from our in the optree. But test a
 # few:
@@ -262,6 +304,51 @@ is ($r, '321A', 'Reverse for list via map with trailing value');
 
 
 $r = '';
+for $_ (1, reverse @array) {
+    $r .= $_;
+}
+is ($r, '1CBA', 'Reverse for array with leading value with explicit $_');
+$r = '';
+for $_ ('A', reverse 1,2,3) {
+    $r .= $_;
+}
+is ($r, 'A321', 'Reverse for list with leading value with explicit $_');
+$r = '';
+for $_ (1, reverse map {$_} @array) {
+    $r .= $_;
+}
+is ($r, '1CBA',
+    'Reverse for array via map with leading value with explicit $_');
+$r = '';
+for $_ ('A', reverse map {$_} 1,2,3) {
+    $r .= $_;
+}
+is ($r, 'A321', 'Reverse for list via map with leading value with explicit $_');
+
+$r = '';
+for $_ (reverse (@array), 1) {
+    $r .= $_;
+}
+is ($r, 'CBA1', 'Reverse for array with trailing value with explicit $_');
+$r = '';
+for $_ (reverse (1,2,3), 'A') {
+    $r .= $_;
+}
+is ($r, '321A', 'Reverse for list with trailing value with explicit $_');
+$r = '';
+for $_ (reverse (map {$_} @array), 1) {
+    $r .= $_;
+}
+is ($r, 'CBA1',
+    'Reverse for array via map with trailing value with explicit $_');
+$r = '';
+for $_ (reverse (map {$_} 1,2,3), 'A') {
+    $r .= $_;
+}
+is ($r, '321A',
+    'Reverse for list via map with trailing value with explicit $_');
+
+$r = '';
 for my $i (1, reverse @array) {
     $r .= $i;
 }
@@ -325,6 +412,28 @@ for (reverse (map {$_} @array, 1)) {
     $r .= $_;
 }
 is ($r, '1CBA', 'Reverse for array and value via map');
+
+$r = '';
+for $_ (reverse 1, @array) {
+    $r .= $_;
+}
+is ($r, 'CBA1', 'Reverse for value and array with explicit $_');
+$r = '';
+for $_ (reverse map {$_} 1, @array) {
+    $r .= $_;
+}
+is ($r, 'CBA1', 'Reverse for value and array via map with explicit $_');
+
+$r = '';
+for $_ (reverse (@array, 1)) {
+    $r .= $_;
+}
+is ($r, '1CBA', 'Reverse for array and value with explicit $_');
+$r = '';
+for $_ (reverse (map {$_} @array, 1)) {
+    $r .= $_;
+}
+is ($r, '1CBA', 'Reverse for array and value via map with explicit $_');
 
 
 $r = '';
