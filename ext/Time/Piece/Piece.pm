@@ -7,7 +7,6 @@ require Exporter;
 require DynaLoader;
 use Time::Seconds;
 use Carp;
-use UNIVERSAL;
 
 @ISA = qw(Exporter DynaLoader);
 
