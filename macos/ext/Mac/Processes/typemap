@@ -14,7 +14,7 @@ T_PSN
 		$var.highLongOfPSN = (long) ((psn - low)/4294967296.0);
 	}
 T_FSSPECPTR
-	GUSIPath2FSp((char *) SvPV($arg,na), $var)
+	GUSIPath2FSp((char *) SvPV_nolen($arg), $var)
 OUTPUT
 T_PSN
 	$arg = newSVnv($var.highLongOfPSN * 4294967296.0 + $var.lowLongOfPSN);	

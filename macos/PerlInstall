@@ -36,6 +36,7 @@ foreach $dir (@ARGV) {
 
 	opendir(DIR, $dir);
 	while ($d = readdir(DIR)) {
+		next if $d eq "CVS";
 		next unless -d "$dir:$d";
 		$fromdir = "$dir:$d";
 		$todir   = $dirs{$d};

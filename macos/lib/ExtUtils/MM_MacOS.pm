@@ -338,10 +338,6 @@ sub init_main {
 	close FH;
     }
 
-    # if your FOO.pm says
-    #	$VERSION = substr(q$Revision: 1.5 $, 10);
-    # then MM says something like
-    #	-DXS_VERSION=\"n.nn \"
     if ($self->{VERSION}) {
 	$self->{VERSION} =~ s/^\s+//;
 	$self->{VERSION} =~ s/\s+$//;
