@@ -527,8 +527,7 @@ $priv{"repeat"}{64} = "DOLIST";
 $priv{"leaveloop"}{64} = "CONT";
 @{$priv{$_}}{32,64,96} = ("DREFAV", "DREFHV", "DREFSV")
   for (qw(rv2gv rv2sv padsv aelem helem));
-$priv{"entersub"}{16} = "DBG";
-$priv{"entersub"}{32} = "TARG";
+@{$priv{"entersub"}}{16,32,64} = ("DBG","TARG","NOMOD");
 @{$priv{$_}}{4,8,128} = ("INARGS","AMPER","NO()") for ("entersub", "rv2cv");
 $priv{"gv"}{32} = "EARLYCV";
 $priv{"aelem"}{16} = $priv{"helem"}{16} = "LVDEFER";
@@ -547,7 +546,7 @@ $priv{$_}{16} = "TARGMY"
        "exec", "kill", "getppid", "getpgrp", "setpgrp", "getpriority",
        "setpriority", "time", "sleep");
 $priv{$_}{4} = "REVERSED" for ("enteriter", "iter");
-@{$priv{"const"}}{8,16,32,64,128} = ("STRICT","ENTERED", '$[', "BARE", "WARN");
+@{$priv{"const"}}{4,8,16,32,64,128} = ("SHORT","STRICT","ENTERED",'$[',"BARE","WARN");
 $priv{"flip"}{64} = $priv{"flop"}{64} = "LINENUM";
 $priv{"list"}{64} = "GUESSED";
 $priv{"delete"}{64} = "SLICE";
