@@ -9361,7 +9361,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if ( !(width || left || plus || alt) && fill != '0'
 		 && has_precis && intsize != 'q' ) {	/* Shortcuts */
 		if ( c == 'g') {
-		    Gconvert(nv, precis, 0, PL_efloatbuf);
+		    Gconvert((NV)nv, precis, 0, PL_efloatbuf);
 		    if (*PL_efloatbuf)	/* May return an empty string for digits==0 */
 			goto float_converted;
 		} else if ( c == 'f' && !precis) {
