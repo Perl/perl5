@@ -1342,8 +1342,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.8.1/alpha-dec_osf"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.8.1/alpha-dec_osf"		/**/
+#define ARCHLIB "/opt/perl/lib/5.8.2/alpha-dec_osf"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.8.2/alpha-dec_osf"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1391,8 +1391,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.8.1"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.8.1"		/**/
+#define PRIVLIB "/opt/perl/lib/5.8.2"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.8.2"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1409,8 +1409,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.8.1/alpha-dec_osf"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.8.1/alpha-dec_osf"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.8.2/alpha-dec_osf"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.8.2/alpha-dec_osf"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1432,8 +1432,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.8.1"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.8.1"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.8.2"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.8.2"		/**/
 #define SITELIB_STEM "/opt/perl/lib/site_perl"		/**/
 
 /* PERL_VENDORARCH:
@@ -3370,7 +3370,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.8.1/alpha-dec_osf for older
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.8.2/alpha-dec_osf for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -3389,7 +3389,7 @@
  *	compatible with the present perl.  (That is, pure perl modules
  *	written for pm_apiversion will still work for the current
  *	version).  perl.c:incpush() and lib/lib.pm will automatically
- *	search in /opt/perl/lib/site_perl/5.8.1 for older directories across major versions
+ *	search in /opt/perl/lib/site_perl/5.8.2 for older directories across major versions
  *	back to pm_apiversion.  This is only useful if you have a perl
  *	library directory tree structured like the default one.  The
  *	versioned site_perl library was introduced in 5.005, so that's
@@ -3399,7 +3399,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.8.1"
+#define PERL_XS_APIVERSION "5.8.2"
 #define PERL_PM_APIVERSION "5.005"
 
 /* HAS_DRAND48_PROTO:

@@ -19,7 +19,7 @@ You need a working and tested cross-compiler for your build
 and target combination.  The binary directory must be in
 your path.
 
-1)	You should be reading me (README) in perl-5.8.1/Cross
+1)	You should be reading me (README) in perl-5.8.2/Cross
 
 2)	Make sure you are in the Cross directory.
 
