@@ -499,7 +499,7 @@ int usleep(unsigned int);
 		  panic_write2("panic: tainting with $ENV{PERL_MALLOC_OPT}\n");\
 		  exit(1); })
 #  define MALLOC_CHECK_TAINT(argc,argv,env)	STMT_START {	\
-	if (PL_earlytaint) {					\
+	if (doing_taint(argc,argv,env)) {			\
 		MallocCfg_ptr[MallocCfg_skip_cfg_env] = 1;	\
     }} STMT_END;
 #else  /* MYMALLOC */
@@ -1940,23 +1940,6 @@ typedef struct clone_params CLONE_PARAMS;
 #      define PERL_FPU_INIT
 #    endif
 #  endif
-#endif
-
-/* The PL_earlytaint is to be used instead PL_tainting before
- * perl_parse() has had the chance to set up PL_tainting. */
-
-#ifndef EARLY_INIT3
-#  define EARLY_INIT3(argcp,argvp,envp) \
-	STMT_START {		\
-		PL_earlytaint = doing_taint(argcp, argvp, envp); \
-	} STMT_END;
-#endif
-
-#ifndef EARLY_INIT2
-#  define EARLY_INIT2(argcp,argvp) \
-	STMT_START {		\
-		PL_earlytaint = doing_taint(argcp, argvp, 0); \
-	} STMT_END;
 #endif
 
 #ifndef PERL_SYS_INIT3

@@ -218,7 +218,6 @@ void Perl_OS2_term(void **excH, int exitstatus, int flags);
 
 #  define PERL_SYS_INIT3(argcp, argvp, envp)	\
   { void *xreg[2];				\
-    EARLY_INIT3(argcp, argvp, envp) 		\
     MALLOC_CHECK_TAINT(*argcp, *argvp, *envp)	\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
@@ -226,7 +225,6 @@ void Perl_OS2_term(void **excH, int exitstatus, int flags);
 
 #  define PERL_SYS_INIT(argcp, argvp)  {	\
   { void *xreg[2];				\
-    EARLY_INIT2(argcp, argvp)			\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
     Perl_OS2_init3(NULL, xreg, 0)
@@ -235,11 +233,9 @@ void Perl_OS2_term(void **excH, int exitstatus, int flags);
 
 #  define PERL_SYS_INIT3(argcp, argvp, envp)	\
   { void *xreg[2];				\
-    EARLY_INIT3(argcp, argvp, envp) 		\
     Perl_OS2_init3(*envp, xreg, 0)
 #  define PERL_SYS_INIT(argcp, argvp)	{	\
   { void *xreg[2];				\
-    EARLY_INIT2(argcp, argvp) 			\
     Perl_OS2_init3(NULL, xreg, 0)
 #endif
 
