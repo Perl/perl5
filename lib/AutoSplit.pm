@@ -248,7 +248,10 @@ sub autosplit_file{
 
     open(OUT,">/dev/null") || open(OUT,">nla0:"); # avoid 'not opened' warning
     my(@subnames, %proto);
+    my @cache = ();
+    my $caching = 1;
     while (<IN>) {
+	next if /^=\w/ .. /^=cut/;
 	if (/^package ([\w:]+)\s*;/) {
 	    warn "package $1; in AutoSplit section ignored. Not currently supported.";
 	}
@@ -275,10 +278,26 @@ sub autosplit_file{
 	    print OUT "# NOTE: Derived from $filename.  ",
 			"Changes made here will be lost.\n";
 	    print OUT "package $package;\n\n";
+	    print OUT @cache;
+	    @cache = ();
+	    $caching = 0;
 	}
-	print OUT $_;
+	if($caching) {
+	    push(@cache, $_) if @cache || /\S/;
+	}
+	else {
+	    print OUT $_;
+	}
+	if(/^}/) {
+	    if($caching) {
+		print OUT @cache;
+		@cache = ();
+	    }
+	    print OUT "\n";
+	    $caching = 1;
+	}
     }
-    print OUT "1;\n";
+    print OUT @cache,"1;\n";
     close(OUT);
     close(IN);
 
