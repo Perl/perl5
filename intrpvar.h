@@ -560,6 +560,8 @@ PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
 PERLVARI(Ihash_seed_set, bool, FALSE)		/* Hash initialized? */
 
+PERLVAR(Iin_require,		I32)		/* we're compiling a "require" (or "use") declaration */
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)

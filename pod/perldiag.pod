@@ -4419,17 +4419,16 @@ are automatically rebound to the current values of such variables.
 its equivalent C<BEGIN> block found an internal inconsistency with
 the version number.
 
-=item v-string in use/require is non-portable
+=item Version objects are deprecated outside of use/require
 
-(W portable) The use of v-strings is non-portable to older, pre-5.6, Perls.
-If you want your scripts to be backward portable, use the floating
-point version number: for example, instead of C<use 5.6.1> say
-C<use 5.006_001>.  This of course won't help: the older Perls
-won't suddenly start understanding newer features, but at least
-they will show a sensible error message indicating the required
-minimum version.
+(D deprecated) What used to be "version strings" or v-strings is
+deprecated.  What looks like those (but always without the leading
+'v') can still be used, but only when using C<use> or C<require>,
+and these are called "Version Objects".  See L<perldata/"Version
+Strings">, L<perlfunc/use>, and L<perlfunc/require> for more
+information.
 
-=item v-strings are deprecated
+=item v-strings are deprecated (especially those beginning with 'v')
 
 (D deprecated) v-strings are deprecated.  Their semantics and use were
 found to be overly confusing and error-prone.

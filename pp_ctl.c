@@ -2980,9 +2980,6 @@ PP(pp_require)
 		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
 		    PERL_VERSION, PERL_SUBVERSION);
 	    }
-	    if (ckWARN(WARN_PORTABLE))
-		Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
-                        "v-string in use/require non-portable");
 	    RETPUSHYES;
 	}
 	else if (!SvPOKp(sv)) {			/* require 5.005_03 */

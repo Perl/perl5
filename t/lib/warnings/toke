@@ -806,5 +806,6 @@ $v = v65.66;
 no warnings 'deprecated';
 $v = v65.66;
 EXPECT
-v-strings are deprecated at - line 3.
+v-strings are deprecated (especially those starting with 'v') at - line 3.
+Version objects are deprecated outside of use/require at - line 3.
 
