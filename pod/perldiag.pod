@@ -2567,13 +2567,14 @@ C<sh>-shell in.  See "PERL_SH_DIR" in L<perlos2>.
 
 Exactly what were the failed locale settings varies.  In the above the
 settings were that the LC_ALL was "En_US" and the LANG had no value.
-This error means that Perl detected that you and/or your system
-administrator have set up the so-called variable system but Perl could
-not use those settings.  This was not dead serious, fortunately: there
-is a "default locale" called "C" that Perl can and will use, the script
-will be run.  Before you really fix the problem, however, you will get
-the same error message each time you run Perl.  How to really fix the
-problem can be found in L<perllocale> section B<LOCALE PROBLEMS>.
+This error means that Perl detected that you and/or your operating
+system supplier and/or system administrator have set up the so-called
+locale system but Perl could not use those settings.  This was not
+dead serious, fortunately: there is a "default locale" called "C" that
+Perl can and will use, the script will be run.  Before you really fix
+the problem, however, you will get the same error message each time
+you run Perl.  How to really fix the problem can be found in
+L<perllocale> section B<LOCALE PROBLEMS>.
 
 =item Permission denied
 
