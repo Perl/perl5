@@ -6517,7 +6517,7 @@ Perl_scan_num(pTHX_ char *start)
 		s += 2;
 	    }
 	    /* check for a decimal in disguise */
-	    else if (strchr(".Ee", s[1]))
+	    else if (s[1] == '.' || s[1] == 'e' || s[1] == 'E')
 		goto decimal;
 	    /* so it must be octal */
 	    else
