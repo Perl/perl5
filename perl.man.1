@@ -1,7 +1,18 @@
 .rn '' }`
-''' $Header: perl_man.1,v 3.0.1.5 90/03/27 16:14:37 lwall Locked $
+''' $Header: perl_man.1,v 3.0.1.7 90/08/09 04:24:03 lwall Locked $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 3.0.1.7  90/08/09  04:24:03  lwall
+''' patch19: added -x switch to extract script from input trash
+''' patch19: Added -c switch to do compilation only
+''' patch19: bare identifiers are now strings if no other interpretation possible
+''' patch19: -s now returns size of file
+''' patch19: Added __LINE__ and __FILE__ tokens
+''' patch19: Added __END__ token
+''' 
+''' Revision 3.0.1.6  90/08/03  11:14:44  lwall
+''' patch19: Intermediate diffs for Randal
+''' 
 ''' Revision 3.0.1.5  90/03/27  16:14:37  lwall
 ''' patch16: .. now works using magical string increment
 ''' 
@@ -181,6 +192,11 @@ is equivalent to
 	}
 
 .fi
+.TP 5
+.B \-c
+causes
+.I perl
+to check the syntax of the script and then exit without executing it.
 .TP 5
 .BI \-d
 runs the script under the perl debugger.
@@ -372,6 +388,16 @@ by csh.
 In order to start up sh rather than csh, some systems may have to replace the
 #! line with a line containing just
 a colon, which will be politely ignored by perl.
+Other systems can't control that, and need a totally devious construct that
+will work under any of csh, sh or perl, such as the following:
+.nf
+
+.ne 3
+	eval '(exit $?0)' && eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
+	& eval 'exec /usr/bin/perl -S $0 $argv:q'
+		if 0;
+
+.fi
 .TP 5
 .B \-u
 causes
@@ -386,6 +412,8 @@ If you are going to run your executable as a set-id program then you
 should probably compile it using taintperl rather than normal perl.
 If you want to execute a portion of your script before dumping, use the
 dump operator instead.
+Note: availability of undump is platform specific and may not be available
+for a specific port of perl.
 .TP 5
 .B \-U
 allows
@@ -407,6 +435,23 @@ filehandles or filehandles opened readonly that you are attempting to
 write on.
 Also warns you if you use == on values that don't look like numbers, and if
 your subroutines recurse more than 100 deep.
+.TP 5
+.BI \-x directory
+tells
+.I perl
+that the script is embedded in a message.
+Leading garbage will be discarded until the first line that starts
+with #! and contains the string "perl".
+Any meaningful switches on that line will be applied (but only one
+group of switches, as with normal #! processing).
+If a directory name is specified, Perl will switch to that directory
+before running the script.
+The
+.B \-x
+switch only controls the the disposal of leading garbage.
+The script must be terminated with __END__ if there is trailing garbage
+to be ignored (the script can process any or all of the trailing garbage
+via standard input if desired).
 .Sh "Data Types and Objects"
 .PP
 .I Perl
@@ -570,6 +615,27 @@ from following alphanumerics.
 Also note that a single quoted string must be separated from a preceding
 word by a space, since single quote is a valid character in an identifier
 (see Packages).
+.PP
+Two special literals are __LINE__ and __FILE__, which represent the current
+line number and filename at that point in your program.
+They may only be used as separate tokens; they will not be interpolated
+into strings.
+In addition, the token __END__ may be used to indicate the logical end of the
+script before the actual end of file.
+Any following text is ignored (but if the script is being read from
+the standard input, then the rest of the input is available by reading
+from filehandle STDIN).
+The two control characters ^D and ^Z are synonyms for __END__.
+.PP
+A word that doesn't have any other interpretation in the grammar will be
+treated as if it had single quotes around it.
+For this purpose, a word consists only of alphanumeric characters and underline,
+and must start with an alphabetic character.
+As with filehandles and labels, a bare word that consists entirely of
+lowercase letters risks conflict with future reserved words, and if you
+use the
+.B \-w
+switch, Perl will warn you about any such words.
 .PP
 Array values are interpolated into double-quoted strings by joining all the
 elements of the array with the delimiter specified in the $" variable,
@@ -739,6 +805,11 @@ If a string is enclosed by backticks (grave accents), it first undergoes
 variable substitution just like a double quoted string.
 It is then interpreted as a command, and the output of that command
 is the value of the pseudo-literal, like in a shell.
+In a scalar context, a single string consisting of all the output is
+returned.
+In an array context, an array of values is returned, one for each line
+of output.
+(You can set $/ to use a different line terminator.)
 The command is executed each time the pseudo-literal is evaluated.
 The status value of the command is returned in $? (see Predefined Names
 for the interpretation of $?).
@@ -1046,6 +1117,8 @@ is the same as
 .PP
 The foreach loop iterates over a normal array value and sets the variable
 VAR to be each element of the array in turn.
+The variable is implicitly local to the loop, and regains its former value
+upon exiting the loop.
 The \*(L"foreach\*(R" keyword is actually identical to the \*(L"for\*(R" keyword,
 so you can use \*(L"foreach\*(R" for readability or \*(L"for\*(R" for brevity.
 If VAR is omitted, $_ is set to each value.
@@ -1070,7 +1143,7 @@ Examples:
 	for (1..15) { print "Merry Christmas\en"; }
 
 .ne 3
-	foreach $item (split(/:[\e\e\en:]*/, $ENV{\'TERMCAP\'}) {
+	foreach $item (split(/:[\e\e\en:]*/, $ENV{\'TERMCAP\'})) {
 		print "Item: $item\en";
 	}
 
@@ -1112,9 +1185,9 @@ or
 
 .ne 6
 	foo: {
-		/^abc/ && do { $abc = 1; last foo; }
-		/^def/ && do { $def = 1; last foo; }
-		/^xyz/ && do { $xyz = 1; last foo; }
+		/^abc/ && do { $abc = 1; last foo; };
+		/^def/ && do { $def = 1; last foo; };
+		/^xyz/ && do { $xyz = 1; last foo; };
 		$nothing = 1;
 	}
 
@@ -1336,7 +1409,7 @@ The operator may be any of:
 	\-O	File is owned by real uid.
 	\-e	File exists.
 	\-z	File has zero size.
-	\-s	File has non-zero size.
+	\-s	File has non-zero size (returns size).
 	\-f	File is a plain file.
 	\-d	File is a directory.
 	\-l	File is a symbolic link.
@@ -1472,3 +1545,13 @@ to get dates with leading zeros.
 (If the final value specified is not in the sequence that the magical increment
 would produce, the sequence goes until the next value would be longer than
 the final value specified.)
+.PP
+The || and && operators differ from C's in that, rather than returning 0 or 1,
+they return the last value evaluated. 
+Thus, a portable way to find out the home directory might be:
+.nf
+
+	$home = $ENV{'HOME'} || $ENV{'LOGDIR'} ||
+	    (getpwuid($<))[7] || die "You're homeless!\en";
+
+.fi

@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.6 90/03/27 16:13:45 lwall Locked $
+/* $Header: perl.y,v 3.0.1.7 90/08/09 04:17:44 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.7  90/08/09  04:17:44  lwall
+ * patch19: did preliminary work toward debugging packages and evals
+ * patch19: added require operator
+ * patch19: bare identifiers are now strings if no other interpretation possible
+ * patch19: null-label lines threw off line number of next statement
+ * patch19: split; didn't pass correct bufend to scanpat
+ * 
  * Revision 3.0.1.6  90/03/27  16:13:45  lwall
  * patch16: formats didn't work inside eval
  * 
@@ -57,7 +64,7 @@ ARG *arg5;
 }
 
 %token <cval> WORD
-%token <ival> APPEND OPEN SELECT LOOPEX
+%token <ival> APPEND OPEN SSELECT LOOPEX
 %token <ival> USING FORMAT DO SHIFT PUSH POP LVALFUN
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE SPLIT FLIST
 %token <ival> FOR FILOP FILOP2 FILOP3 FILOP4 FILOP22 FILOP25
@@ -72,7 +79,7 @@ ARG *arg5;
 %type <ival> prog decl format remember
 %type <cmdval> block lineseq line loop cond sideff nexpr else
 %type <arg> expr sexpr cexpr csexpr term handle aryword hshword
-%type <arg> texpr listop
+%type <arg> texpr listop bareword
 %type <cval> label
 %type <compval> compblock
 
@@ -153,8 +160,11 @@ line	:	decl
 			{ if ($1 != Nullch) {
 			      $$ = add_label($1, make_acmd(C_EXPR, Nullstab,
 				  Nullarg, Nullarg) );
-			    } else
-			      $$ = Nullcmd; }
+			    }
+			    else {
+			      $$ = Nullcmd;
+			      cmdline = NOLINE;
+			    } }
 	|	label sideff ';'
 			{ $$ = add_label($1,$2); }
 	;
@@ -228,7 +238,7 @@ loop	:	label WHILE '(' texpr ')' compblock
 				      l(make_op(O_ASSIGN,2,
 					listish(make_op(O_ARRAY, 1,
 					  stab2arg(A_STAB,scrstab),
-					  Nullarg,Nullarg, 1)),
+					  Nullarg,Nullarg )),
 					listish(make_list($5)),
 					Nullarg)),
 				      Nullarg),
@@ -255,7 +265,7 @@ loop	:	label WHILE '(' texpr ')' compblock
 				      l(make_op(O_ASSIGN,2,
 					listish(make_op(O_ARRAY, 1,
 					  stab2arg(A_STAB,scrstab),
-					  Nullarg,Nullarg, 1 )),
+					  Nullarg,Nullarg )),
 					listish(make_list($4)),
 					Nullarg)),
 				      Nullarg),
@@ -325,12 +335,15 @@ subrout	:	SUB WORD block
 
 package :	PACKAGE WORD ';'
 			{ char tmpbuf[256];
+			  STAB *tmpstab;
 
 			  savehptr(&curstash);
 			  saveitem(curstname);
 			  str_set(curstname,$2);
 			  sprintf(tmpbuf,"'_%s",$2);
-			  curstash = stab_xhash(hadd(stabent(tmpbuf,TRUE)));
+			  tmpstab = hadd(stabent(tmpbuf,TRUE));
+			  curstash = stab_xhash(tmpstab);
+			  curpack = stab_name(tmpstab);
 			  curstash->tbl_coeffsize = 0;
 			  Safefree($2);
 			}
@@ -569,17 +582,17 @@ term	:	'-' term %prec UMINUS
 			    Nullarg,Nullarg); }
 	|	UNIOP
 			{ $$ = make_op($1,0,Nullarg,Nullarg,Nullarg);
-			  if ($1 == O_EVAL || $1 == O_RESET)
+			  if ($1 == O_EVAL || $1 == O_RESET || $1 == O_REQUIRE)
 			    $$ = fixeval($$); }
 	|	UNIOP sexpr
 			{ $$ = make_op($1,1,$2,Nullarg,Nullarg);
-			  if ($1 == O_EVAL || $1 == O_RESET)
+			  if ($1 == O_EVAL || $1 == O_RESET || $1 == O_REQUIRE)
 			    $$ = fixeval($$); }
-	|	SELECT
+	|	SSELECT
 			{ $$ = make_op(O_SELECT, 0, Nullarg, Nullarg, Nullarg);}
-	|	SELECT '(' handle ')'
+	|	SSELECT '(' handle ')'
 			{ $$ = make_op(O_SELECT, 1, $3, Nullarg, Nullarg); }
-	|	SELECT '(' sexpr csexpr csexpr csexpr ')'
+	|	SSELECT '(' sexpr csexpr csexpr csexpr ')'
 			{ arg4 = $6;
 			  $$ = make_op(O_SSELECT, 4, $3, $4, $5); }
 	|	OPEN WORD	%prec '('
@@ -646,7 +659,7 @@ term	:	'-' term %prec UMINUS
 			      aadd(stabent(subline ? "_" : "ARGV", TRUE))),
 			    Nullarg, Nullarg); }
 	|	SPLIT	%prec '('
-			{ (void)scanpat("/\\s+/");
+{static char p[]="/\\s+/";char*o=bufend;bufend=p+5;(void)scanpat(p);bufend=o;
 			    $$ = make_split(defstab,yylval.arg,Nullarg); }
 	|	SPLIT '(' sexpr csexpr csexpr ')'
 			{ $$ = mod_match(O_MATCH, $4,
@@ -681,11 +694,11 @@ term	:	'-' term %prec UMINUS
 			{ $$ = make_op($1, 0, Nullarg, Nullarg, Nullarg); }
 	|	FUNC1 '(' ')'
 			{ $$ = make_op($1, 0, Nullarg, Nullarg, Nullarg);
-			  if ($1 == O_EVAL || $1 == O_RESET)
+			  if ($1 == O_EVAL || $1 == O_RESET || $1 == O_REQUIRE)
 			    $$ = fixeval($$); }
 	|	FUNC1 '(' expr ')'
 			{ $$ = make_op($1, 1, $3, Nullarg, Nullarg);
-			  if ($1 == O_EVAL || $1 == O_RESET)
+			  if ($1 == O_EVAL || $1 == O_RESET || $1 == O_REQUIRE)
 			    $$ = fixeval($$); }
 	|	FUNC2 '(' sexpr cexpr ')'
 			{ $$ = make_op($1, 2, $3, $4, Nullarg);
@@ -707,6 +720,7 @@ term	:	'-' term %prec UMINUS
 				Nullarg); }
 	|	HSHFUN3 '(' hshword csexpr cexpr ')'
 			{ $$ = make_op($1, 3, $3, $4, $5); }
+	|	bareword
 	|	listop
 	;
 
@@ -755,5 +769,24 @@ hshword	:	WORD
 	|	HSH
 			{ $$ = stab2arg(A_STAB,$1); }
 	;
+
+/*
+ * NOTE:  The following entry must stay at the end of the file so that
+ * reduce/reduce conflicts resolve to it only if it's the only option.
+ */
+
+bareword:	WORD
+			{ char *s = $1;
+			    $$ = op_new(1);
+			    $$->arg_type = O_ITEM;
+			    $$[1].arg_type = A_SINGLE;
+			    $$[1].arg_ptr.arg_str = str_make($1,0);
+			    while (*s) {
+				if (!islower(*s))
+				    break;
+			    }
+			    if (dowarn && !*s)
+				warn("\"%s\" may clash with future reserved word", $1);
+			}
 
 %% /* PROGRAM */

@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.7 90/03/27 16:12:52 lwall Locked $
+/* $Header: perl.h,v 3.0.1.8 90/08/09 04:10:53 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.8  90/08/09  04:10:53  lwall
+ * patch19: various MSDOS and OS/2 patches folded in
+ * patch19: did preliminary work toward debugging packages and evals
+ * patch19: added -x switch to extract script from input trash
+ * 
  * Revision 3.0.1.7  90/03/27  16:12:52  lwall
  * patch16: MSDOS support
  * patch16: support for machines that can't cast negative floats to unsigned ints
@@ -134,11 +139,12 @@
 
 #ifdef MEMCPY
 #ifndef memcpy
-#ifdef __STDC__
+#if defined(__STDC__ ) || defined(MSDOS)
 extern void *memcpy(), *memset();
 #else
 extern char *memcpy(), *memset();
 #endif
+extern int memcmp();
 #endif
 #define bcopy(s1,s2,l) memcpy(s2,s1,l)
 #define bzero(s,l) memset(s,0,l)
@@ -268,6 +274,8 @@ EXT int dbmlen;
 #   endif
 #endif
 
+typedef unsigned int STRLEN;
+
 typedef struct arg ARG;
 typedef struct cmd CMD;
 typedef struct formcmd FCMD;
@@ -293,7 +301,7 @@ typedef struct stab STAB;
 #include "array.h"
 #include "hash.h"
 
-#if defined(iAPX286) || defined(M_I286) || defined(I80286) || defined(M_I86)
+#if defined(iAPX286) || defined(M_I286) || defined(I80286)
 #   define I286
 #endif
 
@@ -361,7 +369,15 @@ EXT STR *Str;
 
 #define GROWSTR(pp,lp,len) if (*(lp) < (len)) growstr(pp,lp,len)
 
+#ifndef MSDOS
 #define STR_GROW(str,len) if ((str)->str_len < (len)) str_grow(str,len)
+#define Str_Grow str_grow
+#else
+/* extra parentheses intentionally NOT placed around "len"! */
+#define STR_GROW(str,len) if ((str)->str_len < (unsigned long)len) \
+		str_grow(str,(unsigned long)len)
+#define Str_Grow(str,len) str_grow(str,(unsigned long)(len))
+#endif /* MSDOS */
 
 #ifndef BYTEORDER
 #define BYTEORDER 0x1234
@@ -504,7 +520,6 @@ ARRAY *saveary();
 
 EXT char **origargv;
 EXT int origargc;
-EXT line_t line INIT(0);
 EXT line_t subline INIT(0);
 EXT STR *subname INIT(Nullstr);
 EXT int arybase INIT(0);
@@ -547,6 +562,7 @@ EXT STR *DBsingle INIT(Nullstr);
 EXT int lastspbase;
 EXT int lastsize;
 
+EXT char *curpack;
 EXT char *filename;
 EXT char *origfilename;
 EXT FILE * VOLATILE rsfp;
@@ -574,6 +590,7 @@ EXT bool minus_p INIT(FALSE);
 EXT bool minus_a INIT(FALSE);
 EXT bool doswitches INIT(FALSE);
 EXT bool dowarn INIT(FALSE);
+EXT bool doextract INIT(FALSE);
 EXT bool allstabs INIT(FALSE);	/* init all customary symbols in symbol table?*/
 EXT bool sawampersand INIT(FALSE);	/* must save all match strings */
 EXT bool sawstudy INIT(FALSE);		/* do fbminstr on all strings */
@@ -590,7 +607,11 @@ int cshlen INIT(0);
 EXT bool tainted INIT(FALSE);		/* using variables controlled by $< */
 #endif
 
+#ifndef MSDOS
 #define TMPPATH "/tmp/perl-eXXXXXX"
+#else
+#define TMPPATH "/tmp/plXXXXXX"
+#endif /* MSDOS */
 EXT char *e_tmpname;
 EXT FILE *e_fp INIT(Nullfp);
 
@@ -657,6 +678,12 @@ EXT int loop_max INIT(128);
 EXT jmp_buf top_env;
 
 EXT char * VOLATILE goto_targ INIT(Nullch); /* cmd_exec gets strange when set */
+
+struct ufuncs {
+    int (*uf_val)();
+    int (*uf_set)();
+    int uf_index;
+};
 
 EXT ARRAY *stack;		/* THE STACK */
 

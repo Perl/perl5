@@ -1,0 +1,209 @@
+#!./curseperl
+
+eval <<'EndOfMain';   $evaloffset = 3;	# line number of this line
+
+    $| = 1;		# command buffering on stdout
+    &initterm;
+    &inithelp;
+    &slurpfile && &pagearray;
+
+EndOfMain
+
+&endwin;
+
+if ($@) {
+    print "";		# force flush of stdout
+    $@ =~ s/\(eval\)/$0/ && $@ =~ s/line (\d+)/'line ' . ($1 + $evaloffset)/e;
+    die $@;
+}
+
+exit;
+
+################################################################################
+
+sub initterm {
+
+    &initscr; &cbreak; &noecho; &scrollok($stdscr, 1);
+    &defbell unless defined &bell;
+
+    $lines = $LINES; $lines1 = $lines - 1; $lines2 = $lines - 2;
+    $cols = $COLS;   $cols1  = $cols  - 1; $cols2  = $cols  - 2;;
+
+    $dl = &getcap('dl');
+    $al = &getcap('al');
+    $ho = &getcap('ho');
+    $ce = &getcap('ce');
+}
+
+sub slurpfile {
+    while (<>) {
+	s/^(\t+)/'        ' x length($1)/e;
+	&expand($_) if /\t/;
+	if (length($_) < $cols) {
+	    push(@lines, $_);
+	}
+	else {
+	    while ($_ && $_ ne "\n") {
+		push(@lines, substr($_,0,$cols));
+		substr($_,0,$cols) = '';
+	    }
+	}
+    }
+    1;
+}
+
+sub drawscreen {
+    &move(0,0);
+    for ($line .. $line + $lines2) {
+	&addstr($lines[$_]);
+    }
+    &clrtobot;
+    &percent;
+    &refresh;
+}
+
+sub expand {
+    while (($off = index($_[0],"\t")) >= 0) {
+	substr($_[0], $off, 1) = ' ' x (8 - $off % 8);
+    }
+}
+
+sub pagearray {
+    $line = 0;
+
+    $| = 1;
+
+    for (&drawscreen;;&drawscreen) {
+
+	$ch = &getch;
+	$ch = "j" if $ch eq "\n";
+
+	if ($ch eq ' ') {
+	    last if $percent >= 100;
+	    &move(0,0);
+	    $line += $lines1;
+	}
+	elsif ($ch eq 'b') {
+	    $line -= $lines1;
+	    &move(0,0);
+	    $line = 0 if $line < 0;
+	}
+	elsif ($ch eq "j") {
+	    $line += 1;
+	    if ($dl) {
+		print $ho, $dl;
+		&mvcur(0,0,$lines2,0);
+		print $ce,$lines[$line+$lines2],$ce;
+		&wmove($curscr,0,0);
+		&wdeleteln($curscr);
+		&wmove($curscr,$lines2,0);
+		&waddstr($curscr,$lines[$line+$lines2]);
+	    }
+	    &wmove($stdscr,0,0);
+	    &wdeleteln($stdscr);
+	    &wmove($stdscr,$lines2,0);
+	    &waddstr($stdscr,$lines[$line+$lines2]);
+	    &percent;
+	    &refresh;
+	    redo;
+	}
+	elsif ($ch eq "k") {
+	    next if $line <= 0;
+	    $line -= 1;
+	    if ($al) {
+		print $ho, $al, $ce, $lines[$line];
+		&wmove($curscr,0,0);
+		&winsertln($curscr);
+		&waddstr($curscr,$lines[$line]);
+	    }
+	    &wmove($stdscr,0,0);
+	    &winsertln($stdscr);
+	    &waddstr($stdscr,$lines[$line]);
+	    &percent;
+	    &refresh;
+	    redo;
+	}
+	elsif ($ch eq "\f") {
+	    &clear;
+	}
+	elsif ($ch eq "q") {
+	    last;
+	}
+	elsif ($ch eq "h") {
+	    &clear;
+	    &help;
+	    &clear;
+	}
+	else {
+	    &bell;
+	}
+    }
+}
+
+sub defbell {
+    eval q#
+	sub bell {
+	    print "\007";
+	}
+    #;
+}
+
+sub help {
+    local(*lines) = *helplines;
+    local($line);
+    &pagearray;
+}
+
+sub inithelp {
+    @helplines = split(/\n/,<<'EOT');
+
+      Commands marked with * may be preceeded by a number, N.
+
+  h              Display this help.
+  q              Exit.
+
+  f, SPACE    *  Forward  N lines, default one screen.
+  b           *  Backward N lines, default one screen.
+  e, j, CR    *  Forward  N lines, default 1 line.
+  y, k        *  Backward N lines, default 1 line.
+  d           *  Forward  N lines, default 10 or last N to d or u command.
+  u           *  Backward N lines, default 10 or last N to d or u command.
+  r              Repaint screen.
+  R              Repaint screen, discarding buffered input.
+
+  /pattern    *  Search forward for N-th line containing the pattern.
+  ?pattern    *  Search backward for N-th line containing the pattern.
+  n           *  Repeat previous search (for N-th occurence).
+
+  g           *  Go to line N, default 1.
+  G           *  Like g, but default is last line in file.
+  p, %        *  Position to N percent into the file.
+  m<letter>      Mark the current position with <letter>.
+  '<letter>      Return to a previously marked position.
+  ''             Return to previous position.
+
+  E [file]       Examine a new file.
+  N           *  Examine the next file (from the command line).
+  P           *  Examine the previous file (from the command line).
+  =              Print current file name.
+  V              Print version number of "less".
+
+  -<flag>        Toggle a command line flag.
+  +cmd           Execute the less cmd each time a new file is examined.
+
+  !command       Passes the command to a shell to be executed.
+  v              Edit the current file with $EDITOR.
+EOT
+    for (@helplines) {
+	s/$/\n/;
+    }
+}
+
+sub percent {
+    &standout;
+      $percent = int(($line + $lines1) * 100 / @lines);
+      &move($lines1,0);
+      &addstr("($percent%)");
+    &standend;
+    &clrtoeol;
+}

@@ -1,7 +1,13 @@
 ''' Beginning of part 2
-''' $Header: perl_man.2,v 3.0.1.5 90/03/27 16:15:17 lwall Locked $
+''' $Header: perl_man.2,v 3.0.1.7 90/08/09 04:27:04 lwall Locked $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 3.0.1.7  90/08/09  04:27:04  lwall
+''' patch19: added require operator
+''' 
+''' Revision 3.0.1.6  90/08/03  11:15:29  lwall
+''' patch19: Intermediate diffs for Randal
+''' 
 ''' Revision 3.0.1.5  90/03/27  16:15:17  lwall
 ''' patch16: MSDOS support
 ''' 
@@ -65,6 +71,11 @@ See example in section on Interprocess Communication.
 Returns the arctangent of X/Y in the range
 .if t \-\(*p to \(*p.
 .if n \-PI to PI.
+.Ip "bind(SOCKET,NAME)" 8 2
+Does the same thing that the bind system call does.
+Returns true if it succeeded, false otherwise.
+NAME should be a packed address of the proper type for the socket.
+See example in section on Interprocess Communication.
 .Ip "binmode(FILEHANDLE)" 8 4
 .Ip "binmode FILEHANDLE" 8 4
 Arranges for the file to be read in \*(L"binary\*(R" mode in operating systems
@@ -74,11 +85,6 @@ to LF on input and LF translated to CR LF on output.
 Binmode has no effect under Unix.
 If FILEHANDLE is an expression, the value is taken as the name of
 the filehandle.
-.Ip "bind(SOCKET,NAME)" 8 2
-Does the same thing that the bind system call does.
-Returns true if it succeeded, false otherwise.
-NAME should be a packed address of the proper type for the socket.
-See example in section on Interprocess Communication.
 .Ip "chdir(EXPR)" 8 2
 .Ip "chdir EXPR" 8 2
 Changes the working directory to EXPR, if possible.
@@ -414,6 +420,8 @@ Note that the following are NOT equivalent:
 	do $foo();	# call a subroutine
 
 .fi
+Note that inclusion of library routines is better done with
+the \*(L"require\*(R" operator.
 .Ip "dump LABEL" 8 6
 This causes an immediate core dump.
 Primarily this is so that you can use the undump program to turn your
@@ -433,8 +441,8 @@ Example:
 
 .ne 16
 	#!/usr/bin/perl
-	do 'getopt.pl';
-	do 'stat.pl';
+	require 'getopt.pl';
+	require 'stat.pl';
 	%days = (
 	    'Sun',1,
 	    'Mon',2,
@@ -479,6 +487,8 @@ See also keys() and values().
 Returns 1 if the next read on FILEHANDLE will return end of file, or if
 FILEHANDLE is not open.
 FILEHANDLE may be an expression whose value gives the real filehandle name.
+(Note that this function actually reads a character and then ungetc's it,
+so it is not very useful in an interactive context.)
 An eof without an argument returns the eof status for the last file read.
 Empty parentheses () may be used to indicate the pseudo file formed of the
 files listed on the command line, i.e. eof() is reasonable to use inside
@@ -584,7 +594,7 @@ Implements the fcntl(2) function.
 You'll probably have to say
 .nf
 
-	do "fcntl.h";	# probably /usr/local/lib/perl/fcntl.h
+	require "fcntl.ph";	# probably /usr/local/lib/perl/fcntl.ph
 
 .fi
 first to get the correct function definitions.
@@ -627,7 +637,7 @@ Here's a mailbox appender for BSD systems.
 	    flock(MBOX,$LOCK_UN);
 	}
 
-	open(MBOX, ">>/usr/spool/mail/$USER")
+	open(MBOX, ">>/usr/spool/mail/$ENV{'USER'}")
 		|| die "Can't open mailbox: $!";
 
 	do lock();
@@ -650,7 +660,7 @@ If FILEHANDLE is omitted, reads from STDIN.
 Returns the current login from /etc/utmp, if any.
 If null, use getpwuid.
 
-	($login = getlogin) || (($login) = getpwuid($<));
+	$login = getlogin || (getpwuid($<))[0] || "Somebody";
 
 .Ip "getpeername(SOCKET)" 8 3
 Returns the packed sockaddr address of other end of the SOCKET connection.
@@ -805,18 +815,26 @@ In a scalar context, returns the number of times the expression was true.
 Note that, since $_ is a reference into the array value, it can be
 used to modify the elements of the array.
 While this is useful and supported, it can cause bizarre results if
-the LIST contains literal values.
+the LIST is not a named array.
 .Ip "hex(EXPR)" 8 4
 .Ip "hex EXPR" 8
 Returns the decimal value of EXPR interpreted as an hex string.
 (To interpret strings that might start with 0 or 0x see oct().)
+If EXPR is omitted, uses $_.
+.Ip "index(STR,SUBSTR)" 8 4
+Returns the position of the first occurrence of SUBSTR in STR, based at 0, or whatever you've
+set the $[ variable to.
+If the substring is not found, returns one less than the base, ordinarily \-1.
+.Ip "int(EXPR)" 8 4
+.Ip "int EXPR" 8
+Returns the integer portion of EXPR.
 If EXPR is omitted, uses $_.
 .Ip "ioctl(FILEHANDLE,FUNCTION,SCALAR)" 8 4
 Implements the ioctl(2) function.
 You'll probably have to say
 .nf
 
-	do "ioctl.h";	# probably /usr/local/lib/perl/ioctl.h
+	require "ioctl.ph";	# probably /usr/local/lib/perl/ioctl.ph
 
 .fi
 first to get the correct function definitions.
@@ -837,7 +855,7 @@ The following example sets the erase character to DEL.
 .nf
 
 .ne 9
-	do 'ioctl.h';
+	require 'ioctl.ph';
 	$sgttyb_t = "ccccs";		# 4 chars and a short
 	if (ioctl(STDIN,$TIOCGETP,$sgttyb)) {
 		@ary = unpack($sgttyb_t,$sgttyb);
@@ -865,14 +883,6 @@ easily determine the actual value returned by the operating system:
 	($retval = ioctl(...)) || ($retval = -1);
 	printf "System returned %d\en", $retval;
 .fi
-.Ip "index(STR,SUBSTR)" 8 4
-Returns the position of the first occurrence of SUBSTR in STR, based at 0, or whatever you've
-set the $[ variable to.
-If the substring is not found, returns one less than the base, ordinarily \-1.
-.Ip "int(EXPR)" 8 4
-.Ip "int EXPR" 8
-Returns the integer portion of EXPR.
-If EXPR is omitted, uses $_.
 .Ip "join(EXPR,LIST)" 8 8
 .Ip "join(EXPR,ARRAY)" 8
 Joins the separate strings of LIST or ARRAY into a single string with fields
@@ -1057,7 +1067,8 @@ the $_ string is searched.
 See also the section on regular expressions.
 .Sp
 If / is the delimiter then the initial \*(L'm\*(R' is optional.
-With the \*(L'm\*(R' you can use any pair of characters as delimiters.
+With the \*(L'm\*(R' you can use any pair of non-alphanumeric characters
+as delimiters.
 This is particularly useful for matching Unix path names that contain \*(L'/\*(R'.
 If the final delimiter is followed by the optional letter \*(L'i\*(R', the matching is
 done in a case-insensitive manner.
