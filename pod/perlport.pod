@@ -1662,7 +1662,7 @@ Only implemented on sockets. (Win32)
 
 Only reliable on sockets. (S<RISC OS>)
 
-Note that the C<socket FILEHANDLE> form is generally portable.
+Note that the C<select FILEHANDLE> form is generally portable.
 
 =item semctl ID,SEMNUM,CMD,ARG
 
