@@ -1136,11 +1136,14 @@ lib/Net/README.libnet		libnet
 lib/Net/servent.pm		By-name interface to Perl's builtin getserv*
 lib/Net/servent.t		See if Net::servtent works
 lib/Net/SMTP.pm			libnet
+lib/Net/t/config.t		libnet
 lib/Net/t/ftp.t			libnet
 lib/Net/t/hostname.t		libnet
+lib/Net/t/libnet_t.pl		libnet
 lib/Net/t/nntp.t		libnet
 lib/Net/t/require.t		libnet
 lib/Net/t/smtp.t		libnet
+lib/Net/t/time.t		libnet
 lib/Net/Time.pm			libnet
 lib/newgetopt.pl		A perl library supporting long option parsing
 lib/NEXT.pm			Pseudo-class NEXT for method redispatch

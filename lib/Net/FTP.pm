@@ -22,7 +22,7 @@ use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.61"; # $Id: //depot/libnet/Net/FTP.pm#61 $
+$VERSION = "2.62"; # $Id: //depot/libnet/Net/FTP.pm#64 $
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -142,11 +142,7 @@ sub quit
  $ftp->close;
 }
 
-sub DESTROY
-{
- my $ftp = shift;
- defined(fileno($ftp)) && $ftp->quit
-}
+sub DESTROY {}
 
 sub ascii  { shift->type('A',@_); }
 sub binary { shift->type('I',@_); }
@@ -310,7 +306,7 @@ sub login {
       ($ruser,$pass,$acct) = $rc->lpa()
 	 if ($rc);
 
-      $pass = "-" . (eval { (getpwuid($>))[0] } || $ENV{NAME} ) . '@'
+      $pass = '-anonymous@'
          if (!defined $pass && (!defined($ruser) || $ruser =~ /^anonymous/o));
     }
 
@@ -1200,7 +1196,7 @@ Net::FTP - FTP Client class
     use Net::FTP;
 
     $ftp = Net::FTP->new("some.host.name", Debug => 0);
-    $ftp->login("anonymous",'me@here.there');
+    $ftp->login("anonymous",'-anonymous@');
     $ftp->cwd("/pub");
     $ftp->get("that.file");
     $ftp->quit;
@@ -1517,7 +1513,7 @@ C<put_unique> and those that do not require data connections.
 =item port ( [ PORT ] )
 
 Send a C<PORT> command to the server. If C<PORT> is specified then it is sent
-to the server. If not, the a listen socket is created and the correct information
+to the server. If not, then a listen socket is created and the correct information
 sent to the server.
 
 =item pasv ()
@@ -1718,6 +1714,6 @@ under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/FTP.pm#61 $>
+I<$Id: //depot/libnet/Net/FTP.pm#64 $>
 
 =cut

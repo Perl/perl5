@@ -13,7 +13,7 @@ use strict;
 
 @EXPORT  = qw(%NetConfig);
 @ISA     = qw(Net::LocalCfg Exporter);
-$VERSION = "1.08"; # $Id: //depot/libnet/Net/Config.pm#13 $
+$VERSION = "1.09"; # $Id: //depot/libnet/Net/Config.pm#16 $
 
 eval { local $SIG{__DIE__}; require Net::LocalCfg };
 
@@ -32,6 +32,30 @@ eval { local $SIG{__DIE__}; require Net::LocalCfg };
     test_hosts => 1,
     test_exist => 1,
 );
+
+#
+# Try to get as much configuration info as possible from InternetConfig
+#
+$^O eq 'MacOS' and eval <<'TRY_INTERNET_CONFIG';
+use Mac::InternetConfig;
+
+{
+my %nc = (
+    nntp_hosts      => [ $InternetConfig{ kICNNTPHost()} ],
+    pop3_hosts      => [ $InternetConfig{ kICMailAccount()} =~ /@(.*)/ ],
+    smtp_hosts      => [ $InternetConfig{ kICSMTPHost()} ],
+    ftp_testhost    => [ $InternetConfig{ kICFTPHost()}  ],
+    ph_hosts        => [ $InternetConfig{ kICPhHost()}   ],
+    ftp_ext_passive => $InternetConfig{"646F676F€UsePassiveMode"} || 0,
+    ftp_int_passive => $InternetConfig{"646F676F€UsePassiveMode"} || 0,
+    socks_hosts     => 
+    	$InternetConfig{kICUseSocks()}    ? [ $InternetConfig{kICSocksHost()}    ] : [],
+    ftp_firewall    => 
+    	$InternetConfig{kICUseFTPProxy()} ? [ $InternetConfig{kICFTPProxyHost()} ] : [],
+);
+@NetConfig{keys %nc} = values %nc;
+}
+TRY_INTERNET_CONFIG
 
 my $file = __FILE__;
 my $ref;
@@ -56,7 +80,7 @@ if ($< == $> and !$CONFIGURE)  {
 my ($k,$v);
 while(($k,$v) = each %NetConfig) {
 	$NetConfig{$k} = [ $v ]
-		if($k =~ /_hosts$/ && !ref($v));
+		if($k =~ /_hosts$/ and $k ne "test_hosts" and defined($v) and !ref($v));
 }
 
 # Take a hostname and determine if it is inside the firewall
@@ -285,6 +309,6 @@ If true then C<Configure> will check each hostname given that it exists
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/Config.pm#13 $>
+I<$Id: //depot/libnet/Net/Config.pm#16 $>
 
 =cut
