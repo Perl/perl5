@@ -650,6 +650,11 @@ and so on, varies.  Finding the right level of interfacing to Perl
 requires some thought.  Remember that an OS does not implicate a
 filesystem.
 
+Note that in Windows the -C command line flag already does quite
+a bit of the above (but even there the support is not complete:
+for example the exec/spawn are not Unicode-aware) by turning on
+the so-called "wide API support". 
+
 =head1 Recently done things
 
 These are things which have been on the todo lists in previous releases
