@@ -86,6 +86,7 @@ Encode_XSEncoding(pTHX_ encode_t *enc)
 }
 
 MODULE = Encode::$name	PACKAGE = Encode::$name
+PROTOTYPES: DISABLE
 BOOT:
 {
 END
