@@ -299,12 +299,15 @@ provides seven bits of the total value, with the most significant
 first.  Bit eight of each byte is set, except for the last byte, in
 which bit eight is clear.
 
-=item sysseek() and systell()
+Both pack() and unpack() now fail when their templates contain invalid
+types.  (Invalid types used to be ignored.)
 
-These are new.  The sysseek() operator is a variant of seek() that works
-on the system file pointer.  It is the only reliable way to seek before
-using sysread() or syswrite().  Its companion operator systell() reports
-the current position of the system file pointer.
+=item sysseek()
+
+The new sysseek() operator is a variant of seek() that sets and gets the
+file's system read/write position, using the lseek(2) system call.  It is
+the only reliable way to seek before using sysread() or syswrite().  Its
+return value is the new position, or the undefined value on failure.
 
 =item use VERSION
 
@@ -907,7 +910,7 @@ on the first call).
 
 =item C<perl_eval_pv>
 
-A new function handy for eval'ing strings of Perl code inside C code. 
+A new function handy for eval'ing strings of Perl code inside C code.
 This function returns the value from the eval statement, which can
 be used instead of fetching globals from the symbol table.  See
 L<perlguts>, L<perlembed> and L<perlcall> for details and examples.
@@ -1063,6 +1066,13 @@ you called it with no args and both C<$@> and C<$_> were empty.
 subroutine) by unconventional means, such as a goto, or a loop control
 statement.  See L<perlfunc/sort>.
 
+=item Identifier too long
+
+(F) Perl limits identifiers (names for variables, functions, etc.) to
+252 characters for simple names, somewhat more for compound names (like
+C<$A::B>).  You've exceeded Perl's limits.  Future versions of Perl are
+likely to eliminate these arbitrary limitations.
+
 =item Illegal character %s (carriage return)
 
 (F) A carriage return character was found in the input.  This is an
@@ -1096,6 +1106,14 @@ were csh (e.g. C<full_csh='/usr/bin/tcsh'>); otherwise, make them all
 empty (except that C<d_csh> should be C<'undef'>) so that Perl will
 think csh is missing.  In either case, after editing config.sh, run
 C<./Configure -S> and rebuild Perl.
+
+=item Invalid type in pack: '%s'
+
+(F) The given character is not a valid pack type.  See L<perlfunc/pack>.
+
+=item Invalid type in unpack: '%s'
+
+(F) The given character is not a valid unpack type.  See L<perlfunc/unpack>.
 
 =item Name "%s::%s" used only once: possible typo
 

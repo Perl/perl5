@@ -1098,6 +1098,13 @@ an emergency basis to prevent a core dump.
 (D) Really old Perl let you omit the % on hash names in some spots.  This
 is now heavily deprecated.
 
+=item Identifier too long
+
+(F) Perl limits identifiers (names for variables, functions, etc.) to
+252 characters for simple names, somewhat more for compound names (like
+C<$A::B>).  You've exceeded Perl's limits.  Future versions of Perl are
+likely to eliminate these arbitrary limitations.
+
 =item Ill-formed logical name |%s| in prime_env_iter
 
 (W) A warning peculiar to VMS.  A logical name was encountered when preparing
@@ -1231,11 +1238,11 @@ greater than the maximum character.  See L<perlre>.
 
 =item Invalid type in pack: '%s'
 
-(F) The given character is not a valid pack type.  See L<perlop/pack>.
+(F) The given character is not a valid pack type.  See L<perlfunc/pack>.
 
 =item Invalid type in unpack: '%s'
 
-(F) The given character is not a valid unpack type.  See L<perlop/unpack>.
+(F) The given character is not a valid unpack type.  See L<perlfunc/unpack>.
 
 =item ioctl is not implemented
 
@@ -2214,10 +2221,10 @@ or "msg".  See L<perlfunc/semctl>, for example.
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
 
-=item %stell() on unopened file
+=item tell() on unopened file
 
-(W) You tried to use the tell() or systell() function on a filehandle that
-was either never opened or has since been closed.
+(W) You tried to use the tell() function on a filehandle that was either
+never opened or has since been closed.
 
 =item Test on unopened file E<lt>%sE<gt>
 

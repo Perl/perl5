@@ -8,13 +8,13 @@ or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
 
----------------
- Cast and Crew
----------------
+			   ---------------
+			    CAST AND CREW
+			   ---------------
 
-To save space, and to give due honor to those who have made Perl 5.004
-what is is today, here are some of the more common names in the Changes
-file, and their current addresses (as of March 1997):
+To give due honor to those who have made Perl 5.004 what is is today,
+here are some of the more common names in the Changes file, and their
+current addresses (as of March 1997):
 
     Gisle Aas           <gisle@aas.no>
     Kenneth Albanowski  <kjahds@kjahds.com>
@@ -45,9 +45,106 @@ And the Keepers of the Patch Pumpkin:
     Chip Salzenberg     <chip@perl.com>
 
 
--------------------
- Version 5.003_97f
--------------------
+-----------------
+Version 5.003_97g
+-----------------
+
+This one has two security bug fixes for buffer overflows.  Perl has
+not yet been searched to see if more fixes are needed.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Improve sysseek(), remove systell(), fix Opcode"
+   From:  Chip Salzenberg
+  Files:  doio.c ext/Opcode/Makefile.PL ext/Opcode/Opcode.pm
+          ext/Opcode/Opcode.xs global.sym keywords.pl opcode.pl
+          pod/perldelta.pod pod/perldiag.pod pod/perlfunc.pod pp_sys.c
+          proto.h t/op/sysio.t toke.c
+
+  Title:  "Fix (and test) spaces in {,un}pack()"
+   From:  Chip Salzenberg
+  Files:  pp.c t/op/pack.t
+
+ CORE PORTABILITY
+
+  Title:  "Irix update"
+   From:  Scott Henry <scotth@sgi.com>
+ Msg-ID:  <yd8d8rsi0ln.fsf@hoshi.engr.sgi.com>
+   Date:  18 Apr 1997 12:37:24 -0700
+  Files:  MANIFEST hints/irix_6.sh hints/irix_6_0.sh hints/irix_6_1.sh
+
+  Title:  "ExtUtils/Miniperl.pm not built on Win32"
+   From:  Nick Ing-Simmons
+ Msg-ID:  <199704181742.SAA08407@ni-s.u-net.com>
+   Date:  Fri, 18 Apr 1997 18:42:32 +0100
+  Files:  win32/Makefile
+
+ OTHER CORE CHANGES
+
+  Title:  "SECURITY FIX: 'Identifier too long'"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perldiag.pod toke.c
+
+  Title:  "SECURITY FIX: Buffer overflow in gv_fetchfile()"
+   From:  Chip Salzenberg
+  Files:  gv.c
+
+  Title:  "Remove pp_method() inefficiency from last patch"
+   From:  Chip Salzenberg
+  Files:  pp_hot.c
+
+ BUILD PROCESS
+
+  Title:  "Fix unnecessary re-linking"
+   From:  Chip Salzenberg
+  Files:  lib/ExtUtils/MM_Unix.pm
+
+  Title:  "Fix tcsh hack in Configure"
+   From:  Chip Salzenberg
+  Files:  Configure
+
+  Title:  "Minor, optional patch to Makefile.SH"
+   From:  "Randy J. Ray" <rjray@uswest.com>
+ Msg-ID:  <rjray-9703180132.AA00374040@snakepit.ecte.uswc.uswest.com>
+   Date:  Thu, 17 Apr 1997 19:32:17 -0600
+  Files:  Makefile.SH
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Patch to Getopt::Long"
+   From:  Johan Vromans <jvromans@squirrel.nl>
+ Msg-ID:  <m0wIKCO-00081IC@phoenix.squirrel.nl>
+   Date:  Fri, 18 Apr 97 22:24 MET DST
+  Files:  lib/Getopt/Long.pm
+
+  Title:  "Fix NAME in SDBM_File build"
+   From:  Chip Salzenberg
+  Files:  ext/SDBM_File/sdbm/Makefile.PL
+
+ TESTS
+
+   (no other changes)
+
+ UTILITIES
+
+  Title:  "Make h2ph generate constant subs"
+   From:  Roderick Schertler
+ Msg-ID:  <pz2088w5ot.fsf@eeyore.ibcinc.com>
+   Date:  18 Apr 1997 14:23:46 -0400
+  Files:  utils/h2ph.PL
+
+ DOCUMENTATION
+
+  Title:  "Document {,un}pack changes"
+   From:  Paul Marquess
+ Msg-ID:  <9704181249.AA11733@claudius.bfsec.bt.co.uk>
+   Date:  Fri, 18 Apr 97 13:49:39 BST
+  Files:  pod/perldelta.pod pod/perldiag.pod
+
+
+-----------------
+Version 5.003_97f
+-----------------
 
 This is it before _98.  No more last-minute features.  Really, I mean
 it this time.  No kidding.
@@ -139,9 +236,9 @@ it this time.  No kidding.
   Files:  pod/perlfunc.pod
 
 
--------------------
- Version 5.003_97e
--------------------
+-----------------
+Version 5.003_97e
+-----------------
 
 Y'know, I've heard of this "beta" thing, but it's been so long since
 I've seen one, I'm not sure it really exists...
@@ -295,9 +392,9 @@ I've seen one, I'm not sure it really exists...
   Files:  pod/perlop.pod
 
 
--------------------
- Version 5.003_97d
--------------------
+-----------------
+Version 5.003_97d
+-----------------
 
 Any minute now... second public beta... no, really...
 
@@ -430,9 +527,9 @@ Any minute now... second public beta... no, really...
   Files:  pod/perlpod.pod
 
 
--------------------
- Version 5.003_97c
--------------------
+-----------------
+Version 5.003_97c
+-----------------
 
 That second public beta will be Real Soon Now...
 
@@ -537,9 +634,9 @@ That second public beta will be Real Soon Now...
   Files:  ext/IO/lib/IO/Socket.pm
 
 
--------------------
- Version 5.003_97b
--------------------
+-----------------
+Version 5.003_97b
+-----------------
 
 Working on the second public beta...
 
@@ -649,9 +746,9 @@ Working on the second public beta...
   Files:  pod/perltrap.pod
 
 
--------------------
- Version 5.003_97a
--------------------
+-----------------
+Version 5.003_97a
+-----------------
 
 This release gets a letter instead of a full subversion because I'm
 planning on making 5.003_98 the second public beta.
@@ -776,9 +873,9 @@ planning on making 5.003_98 the second public beta.
           pod/perlstyle.pod pod/perltoc.pod pod/perlvar.pod
 
 
-------------------
- Version 5.003_97
-------------------
+----------------
+Version 5.003_97
+----------------
 
  CORE LANGUAGE CHANGES
 
@@ -899,9 +996,9 @@ planning on making 5.003_98 the second public beta.
   Files:  lib/CGI.pm lib/ExtUtils/Command.pm
 
 
-------------------
- Version 5.003_96
-------------------
+----------------
+Version 5.003_96
+----------------
 
  CORE LANGUAGE CHANGES
 
@@ -1183,9 +1280,9 @@ planning on making 5.003_98 the second public beta.
   Files:  pod/*.pod
 
 
-------------------
- Version 5.003_95
-------------------
+----------------
+Version 5.003_95
+----------------
 
  CORE LANGUAGE CHANGES
 
@@ -1348,9 +1445,9 @@ planning on making 5.003_98 the second public beta.
   Files:  pod/perlfaq*.pod
 
 
-------------------
- Version 5.003_94
-------------------
+----------------
+Version 5.003_94
+----------------
 
  CORE LANGUAGE CHANGES
 
@@ -1737,9 +1834,9 @@ planning on making 5.003_98 the second public beta.
   Files:  ext/DB_File/DB_File.pm
 
 
-------------------
- Version 5.003_93
-------------------
+----------------
+Version 5.003_93
+----------------
 
 Me, last time:
      "This release will be the public beta of 5.004,
@@ -1901,9 +1998,9 @@ Me, now:
           pod/perlop.pod pod/perlsub.pod
 
 
-------------------
- Version 5.003_92
-------------------
+----------------
+Version 5.003_92
+----------------
 
 This release will be the public beta of 5.004, or my name isn't
 Larson T. Pettifogger.
@@ -2110,9 +2207,9 @@ Larson T. Pettifogger.
   Files:  pod/*.pod
 
 
-------------------
- Version 5.003_91
-------------------
+----------------
+Version 5.003_91
+----------------
 
 This is (should be?  must be!) the public beta of 5.004.
 
@@ -2302,9 +2399,9 @@ This is (should be?  must be!) the public beta of 5.004.
           pod/perltoc.pod
 
 
-------------------
- Version 5.003_90
-------------------
+----------------
+Version 5.003_90
+----------------
 
 At last, a mil[le]stone:  The first beta of Perl 5.004.
 
@@ -2463,9 +2560,9 @@ At last, a mil[le]stone:  The first beta of Perl 5.004.
   Files:  pod/perldiag.pod pod/perlsec.pod
 
 
-------------------
- Version 5.003_28
-------------------
+----------------
+Version 5.003_28
+----------------
 
 This release is beta candidate #6.  If this isn't good enough to go beta,
 I'll eat a floppy disk.  (Okay, it's a chocolate floppy, but still....)
@@ -2642,9 +2739,9 @@ I'll eat a floppy disk.  (Okay, it's a chocolate floppy, but still....)
           pod/perltie.pod pod/perltoc.pod pod/perltrap.pod x2p/a2p.pod
 
 
-------------------
- Version 5.003_27
-------------------
+----------------
+Version 5.003_27
+----------------
 
 This release is beta candidate #5: Our last, best hope for a beta.
 
@@ -2820,9 +2917,9 @@ This release is beta candidate #5: Our last, best hope for a beta.
   Files:  pod/perldiag.pod
 
 
-------------------
- Version 5.003_26
-------------------
+----------------
+Version 5.003_26
+----------------
 
 This release is beta candidate #4.  "Once more, dear friends...."
 
@@ -2958,9 +3055,9 @@ This release is beta candidate #4.  "Once more, dear friends...."
   Files:  pod/perltie.pod
 
 
-------------------
- Version 5.003_25
-------------------
+----------------
+Version 5.003_25
+----------------
 
 This release is beta candidate #3.  Here's hoping...
 
@@ -3125,9 +3222,9 @@ This release is beta candidate #3.  Here's hoping...
   Files:  pod/perldiag.pod
 
 
-------------------
- Version 5.003_24
-------------------
+----------------
+Version 5.003_24
+----------------
 
 This release is the second candidate for a public beta test.
 It's, well, bunches better than _23.
@@ -3311,9 +3408,9 @@ It's, well, bunches better than _23.
   Files:  pod/perlsyn.pod
 
 
-------------------
- Version 5.003_23
-------------------
+----------------
+Version 5.003_23
+----------------
 
 This release is our first candidate for a public beta test.
 
@@ -3616,9 +3713,9 @@ This release is our first candidate for a public beta test.
   Files:  pod/perllocale.pod
 
 
-------------------
- Version 5.003_22
-------------------
+----------------
+Version 5.003_22
+----------------
 
 This release is primarily made up of bug fixes, the foremost among
 which repairs a showstopper memory corruption bug in formats.
@@ -3692,9 +3789,9 @@ which repairs a showstopper memory corruption bug in formats.
   Files:  configpm
 
 
-------------------
- Version 5.003_21
-------------------
+----------------
+Version 5.003_21
+----------------
 
 This release includes several important bug fixes, and a couple of
 minor but valuable language tweaks.  Please read on for a list of the
@@ -3990,9 +4087,9 @@ significant changes:
   Files:  pod/perlsub.pod pod/perltoc.pod pod/perlvar.pod
 
 
-------------------
- Version 5.003_20
-------------------
+----------------
+Version 5.003_20
+----------------
 
 The only language change in this release is the recension of support
 for named closures:  Now, no subroutine declared "sub foo {}" can be
@@ -4158,9 +4255,9 @@ updates, and expanded tests.  This is good stuff.  "I love you, man!"
   Files:  pod/perlfunc.pod pod/perltoc.pod
 
 
-------------------
- Version 5.003_19
-------------------
+----------------
+Version 5.003_19
+----------------
 
 Lots of internal cleanup in this patch, especially plugged memory
 leaks when embedded Perl interpreters shut down and restart.  The
@@ -4291,9 +4388,9 @@ Here's a list of the more significant changes...
           vms/descrip.mms
 
 
-------------------
- Version 5.003_18
-------------------
+----------------
+Version 5.003_18
+----------------
 
 Yet further down the road to 5.004....
 
@@ -4401,9 +4498,9 @@ Yet further down the road to 5.004....
   Files:  pod/perldiag.pod
 
 
-------------------
- Version 5.003_17
-------------------
+----------------
+Version 5.003_17
+----------------
 
 The rate of patches is slowing down....  I see 5.004 at the end of the
 tunnel!  (Hey, what's that whistle?)
@@ -4487,9 +4584,9 @@ tunnel!  (Hey, what's that whistle?)
   Files:  pod/perllocale.pod
 
 
-------------------
- Version 5.003_16
-------------------
+----------------
+Version 5.003_16
+----------------
 
 This patch is all bug fixes, library updates, and documentation
 updates.  We'll get to 5.004 RSN, I promise.  :-)
@@ -4576,9 +4673,9 @@ updates.  We'll get to 5.004 RSN, I promise.  :-)
   Files:  pod/perllocale.pod
 
 
-------------------
- Version 5.003_15
-------------------
+----------------
+Version 5.003_15
+----------------
 
 As soon as I posted 5.003_14, I found a fatal error in it.  :-(
 
@@ -4586,9 +4683,9 @@ This release is strictly a bug fix -- it removes some function caching
 changes that were supposed to be improvements, but weren't.
 
 
-------------------
- Version 5.003_14
-------------------
+----------------
+Version 5.003_14
+----------------
 
 We seem to have achieved "release candidate" status.
 
@@ -4745,9 +4842,9 @@ We seem to have achieved "release candidate" status.
   Files:  lib/Class/Template.pm lib/Time/tm.pm
 
 
-------------------
- Version 5.003_13
-------------------
+----------------
+Version 5.003_13
+----------------
 
 The watchword here is "synchronization."  There were a couple of
 show-stopper bugs in 5.003_12, so I'm issuing this patch to bring
@@ -4835,9 +4932,9 @@ everyone up to a common working base.
   Files:  pod/perlpod.pod pod/pod2html.PL
 
 
-------------------
- Version 5.003_12
-------------------
+----------------
+Version 5.003_12
+----------------
 
 This patch is huge.  A multitude of bug fixes, new modules (especially
 CPAN and Net::FTP), a couple of new Configure variables, updated
@@ -5110,9 +5207,9 @@ the more significant changes in 5.003_12:
    Date:  Sat, 14 Dec 1996 18:56:33 -0700
   Files:  pod/*
 
-------------------
- Version 5.003_11
-------------------
+----------------
+Version 5.003_11
+----------------
 
 This patch is (still) closing in on 5.004.  Nothing dramatic, lots of
 value.
@@ -5277,9 +5374,9 @@ value.
   Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs
 
 
-------------------
- Version 5.003_10
-------------------
+----------------
+Version 5.003_10
+----------------
 
 This patch is closing in on 5.004.  It contains lots of small and
 valuable changes, but nothing dramatic.
@@ -5419,9 +5516,9 @@ valuable changes, but nothing dramatic.
   Files:  pod/perlfunc.pod
 
 
-------------------
- Version 5.003_09
-------------------
+----------------
+Version 5.003_09
+----------------
 
 This patch was a compendium of various fixes and enhancements from
 many people, including some serious improvement in lexical variable
@@ -5607,9 +5704,9 @@ scoping and locale handling.
   Files:  x2p/util.c
 
 
-------------------
- Version 5.003_08
-------------------
+----------------
+Version 5.003_08
+----------------
 
 This patch was a compendium of various fixes and enhancements from
 many people.  Here are some of the more significant changes.
@@ -5758,9 +5855,9 @@ many people.  Here are some of the more significant changes.
   Files:  x2p/a2p.c x2p/a2p.y
 
 
-------------------
- Version 5.003_07
-------------------
+----------------
+Version 5.003_07
+----------------
 
 This patch was primarily to fix bugs or include little things I missed
 in 5.003_06.  5.003_07 is intended to be stable enough to merit serious
@@ -6409,9 +6506,9 @@ Index: x2p/cflags.SH
     pathname of the file being extracted.
 
 
-------------------
- Version 5.003_06
-------------------
+----------------
+Version 5.003_06
+----------------
 
 This patch was primarily to fix bugs, improve the documentation,
 and work towards restoring binary compatibility with 5.003.
@@ -8658,9 +8755,9 @@ Index: x2p/s2p.PL
     I then embedded the pod into the s2p script.
 
 
-------------------
- Version 5.003_05
-------------------
+----------------
+Version 5.003_05
+----------------
 
 This patch was primarily to fix bugs and to clean up some of
 the remaining issues from in 5.003_04.  The details are described below.
@@ -9369,9 +9466,9 @@ Index: vms/vmsish.h
     VMS 5.003_05 Update.
 
 
-------------------
- Version 5.003_04
-------------------
+----------------
+Version 5.003_04
+----------------
 
 This patch was primarily to fix bugs and to clean up some of
 the changes made in 5.003_03.  The details are described below.
@@ -9894,9 +9991,9 @@ Index: utils/perldoc.PL
     doesn't support the -x option.)
 
 
-------------------
- Version 5.003_03
-------------------
+----------------
+Version 5.003_03
+----------------
 
 Most of the changes in 5.003_03 are to make the build and installation
 process more robust.  The details are described below.  A very brief
@@ -10506,9 +10603,9 @@ Index: x2p/str.c
 	Use Configure's FILE_filbuf macro instead of a raw _filbuf.
 
 
-------------------
- Version 5.003_02
-------------------
+----------------
+Version 5.003_02
+----------------
 
 o Visible Changes to Core Functionality
   - Redefining constant subs, or changing sub's prototype now give warnings.
@@ -10550,9 +10647,9 @@ o Changes in OS-specific and Build-time Support
   - Typo patch for VMS.
 
 
-------------------
- Version 5.003_01
-------------------
+----------------
+Version 5.003_01
+----------------
 
 Version 5.003_01 contains bugfixes and additions accumulated since
 version 5.002_01, since the patch to version 5.003 was deliberately

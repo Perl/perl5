@@ -606,7 +606,7 @@ longjmp() is C-specific: use die instead.
 
 =item lseek
 
-Move the read/write file pointer.  This uses file descriptors such as
+Move the file's read/write position.  This uses file descriptors such as
 those obtained by calling C<POSIX::open>.
 
 	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );

@@ -155,6 +155,9 @@ static int dooneliner _((char *cmd, char *filename));
 #endif /* no flock() */
 
 
+#define ZBTLEN 10
+static char zero_but_true[ZBTLEN + 1] = "0 but true";
+
 /* Pushy I/O. */
 
 PP(pp_backtick)
@@ -1357,11 +1360,6 @@ PP(pp_eof)
 
 PP(pp_tell)
 {
-    return pp_systell(ARGS);
-}
-
-PP(pp_systell)
-{
     dSP; dTARGET;
     GV *gv;
 
@@ -1386,7 +1384,14 @@ PP(pp_sysseek)
     long offset = POPl;
 
     gv = last_in_gv = (GV*)POPs;
-    PUSHs(boolSV(do_seek(gv, offset, whence)));
+    if (op->op_type == OP_SEEK)
+	PUSHs(boolSV(do_seek(gv, offset, whence)));
+    else {
+	long n = do_sysseek(gv, offset, whence);
+	PUSHs((n < 0) ? &sv_undef
+	      : sv_2mortal(n ? newSViv((IV)n)
+			   : newSVpv(zero_but_true, ZBTLEN)));
+    }
     RETURN;
 }
 
@@ -1527,7 +1532,7 @@ PP(pp_ioctl)
 	PUSHi(retval);
     }
     else {
-	PUSHp("0 but true", 10);
+	PUSHp(zero_but_true, ZBTLEN);
     }
     RETURN;
 }
@@ -3459,7 +3464,7 @@ PP(pp_semctl)
 	PUSHi(anum);
     }
     else {
-	PUSHp("0 but true",10);
+	PUSHp(zero_but_true, ZBTLEN);
     }
     RETURN;
 #else

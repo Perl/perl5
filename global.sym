@@ -399,6 +399,7 @@ do_seek
 do_semop
 do_shmio
 do_sprintf
+do_sysseek
 do_tell
 do_trans
 do_vecset

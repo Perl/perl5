@@ -46,7 +46,7 @@ op_names_init()
     while(i-- > 0)
 	bitmap[i] = 0xFF;
     /* Take care to set the right number of bits in the last byte */
-    bitmap[len-1] = ~(0xFF << (maxo & 0x07));
+    bitmap[len-1] = (maxo & 0x07) ? ~(0xFF << (maxo & 0x07)) : 0xFF;
     put_op_bitspec(":all",0, opset_all); /* don't mortalise */
 }
 
@@ -290,7 +290,8 @@ invert_opset(opset)
     while(len-- > 0)
 	bitmap[len] = ~bitmap[len];
     /* take care of extra bits beyond maxo in last byte	*/
-    bitmap[opset_len-1] &= ~(0xFF << (maxo & 0x07));
+    if (maxo & 07)
+	bitmap[opset_len-1] &= ~(0xFF << (maxo & 0x07));
     }
     ST(0) = opset;
 

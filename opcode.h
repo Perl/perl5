@@ -212,147 +212,146 @@ typedef enum {
 	OP_PRTF,	/* 205 */
 	OP_PRINT,	/* 206 */
 	OP_SYSOPEN,	/* 207 */
-	OP_SYSTELL,	/* 208 */
-	OP_SYSSEEK,	/* 209 */
-	OP_SYSREAD,	/* 210 */
-	OP_SYSWRITE,	/* 211 */
-	OP_SEND,	/* 212 */
-	OP_RECV,	/* 213 */
-	OP_EOF,		/* 214 */
-	OP_TELL,	/* 215 */
-	OP_SEEK,	/* 216 */
-	OP_TRUNCATE,	/* 217 */
-	OP_FCNTL,	/* 218 */
-	OP_IOCTL,	/* 219 */
-	OP_FLOCK,	/* 220 */
-	OP_SOCKET,	/* 221 */
-	OP_SOCKPAIR,	/* 222 */
-	OP_BIND,	/* 223 */
-	OP_CONNECT,	/* 224 */
-	OP_LISTEN,	/* 225 */
-	OP_ACCEPT,	/* 226 */
-	OP_SHUTDOWN,	/* 227 */
-	OP_GSOCKOPT,	/* 228 */
-	OP_SSOCKOPT,	/* 229 */
-	OP_GETSOCKNAME,	/* 230 */
-	OP_GETPEERNAME,	/* 231 */
-	OP_LSTAT,	/* 232 */
-	OP_STAT,	/* 233 */
-	OP_FTRREAD,	/* 234 */
-	OP_FTRWRITE,	/* 235 */
-	OP_FTREXEC,	/* 236 */
-	OP_FTEREAD,	/* 237 */
-	OP_FTEWRITE,	/* 238 */
-	OP_FTEEXEC,	/* 239 */
-	OP_FTIS,	/* 240 */
-	OP_FTEOWNED,	/* 241 */
-	OP_FTROWNED,	/* 242 */
-	OP_FTZERO,	/* 243 */
-	OP_FTSIZE,	/* 244 */
-	OP_FTMTIME,	/* 245 */
-	OP_FTATIME,	/* 246 */
-	OP_FTCTIME,	/* 247 */
-	OP_FTSOCK,	/* 248 */
-	OP_FTCHR,	/* 249 */
-	OP_FTBLK,	/* 250 */
-	OP_FTFILE,	/* 251 */
-	OP_FTDIR,	/* 252 */
-	OP_FTPIPE,	/* 253 */
-	OP_FTLINK,	/* 254 */
-	OP_FTSUID,	/* 255 */
-	OP_FTSGID,	/* 256 */
-	OP_FTSVTX,	/* 257 */
-	OP_FTTTY,	/* 258 */
-	OP_FTTEXT,	/* 259 */
-	OP_FTBINARY,	/* 260 */
-	OP_CHDIR,	/* 261 */
-	OP_CHOWN,	/* 262 */
-	OP_CHROOT,	/* 263 */
-	OP_UNLINK,	/* 264 */
-	OP_CHMOD,	/* 265 */
-	OP_UTIME,	/* 266 */
-	OP_RENAME,	/* 267 */
-	OP_LINK,	/* 268 */
-	OP_SYMLINK,	/* 269 */
-	OP_READLINK,	/* 270 */
-	OP_MKDIR,	/* 271 */
-	OP_RMDIR,	/* 272 */
-	OP_OPEN_DIR,	/* 273 */
-	OP_READDIR,	/* 274 */
-	OP_TELLDIR,	/* 275 */
-	OP_SEEKDIR,	/* 276 */
-	OP_REWINDDIR,	/* 277 */
-	OP_CLOSEDIR,	/* 278 */
-	OP_FORK,	/* 279 */
-	OP_WAIT,	/* 280 */
-	OP_WAITPID,	/* 281 */
-	OP_SYSTEM,	/* 282 */
-	OP_EXEC,	/* 283 */
-	OP_KILL,	/* 284 */
-	OP_GETPPID,	/* 285 */
-	OP_GETPGRP,	/* 286 */
-	OP_SETPGRP,	/* 287 */
-	OP_GETPRIORITY,	/* 288 */
-	OP_SETPRIORITY,	/* 289 */
-	OP_TIME,	/* 290 */
-	OP_TMS,		/* 291 */
-	OP_LOCALTIME,	/* 292 */
-	OP_GMTIME,	/* 293 */
-	OP_ALARM,	/* 294 */
-	OP_SLEEP,	/* 295 */
-	OP_SHMGET,	/* 296 */
-	OP_SHMCTL,	/* 297 */
-	OP_SHMREAD,	/* 298 */
-	OP_SHMWRITE,	/* 299 */
-	OP_MSGGET,	/* 300 */
-	OP_MSGCTL,	/* 301 */
-	OP_MSGSND,	/* 302 */
-	OP_MSGRCV,	/* 303 */
-	OP_SEMGET,	/* 304 */
-	OP_SEMCTL,	/* 305 */
-	OP_SEMOP,	/* 306 */
-	OP_REQUIRE,	/* 307 */
-	OP_DOFILE,	/* 308 */
-	OP_ENTEREVAL,	/* 309 */
-	OP_LEAVEEVAL,	/* 310 */
-	OP_ENTERTRY,	/* 311 */
-	OP_LEAVETRY,	/* 312 */
-	OP_GHBYNAME,	/* 313 */
-	OP_GHBYADDR,	/* 314 */
-	OP_GHOSTENT,	/* 315 */
-	OP_GNBYNAME,	/* 316 */
-	OP_GNBYADDR,	/* 317 */
-	OP_GNETENT,	/* 318 */
-	OP_GPBYNAME,	/* 319 */
-	OP_GPBYNUMBER,	/* 320 */
-	OP_GPROTOENT,	/* 321 */
-	OP_GSBYNAME,	/* 322 */
-	OP_GSBYPORT,	/* 323 */
-	OP_GSERVENT,	/* 324 */
-	OP_SHOSTENT,	/* 325 */
-	OP_SNETENT,	/* 326 */
-	OP_SPROTOENT,	/* 327 */
-	OP_SSERVENT,	/* 328 */
-	OP_EHOSTENT,	/* 329 */
-	OP_ENETENT,	/* 330 */
-	OP_EPROTOENT,	/* 331 */
-	OP_ESERVENT,	/* 332 */
-	OP_GPWNAM,	/* 333 */
-	OP_GPWUID,	/* 334 */
-	OP_GPWENT,	/* 335 */
-	OP_SPWENT,	/* 336 */
-	OP_EPWENT,	/* 337 */
-	OP_GGRNAM,	/* 338 */
-	OP_GGRGID,	/* 339 */
-	OP_GGRENT,	/* 340 */
-	OP_SGRENT,	/* 341 */
-	OP_EGRENT,	/* 342 */
-	OP_GETLOGIN,	/* 343 */
-	OP_SYSCALL,	/* 344 */
+	OP_SYSSEEK,	/* 208 */
+	OP_SYSREAD,	/* 209 */
+	OP_SYSWRITE,	/* 210 */
+	OP_SEND,	/* 211 */
+	OP_RECV,	/* 212 */
+	OP_EOF,		/* 213 */
+	OP_TELL,	/* 214 */
+	OP_SEEK,	/* 215 */
+	OP_TRUNCATE,	/* 216 */
+	OP_FCNTL,	/* 217 */
+	OP_IOCTL,	/* 218 */
+	OP_FLOCK,	/* 219 */
+	OP_SOCKET,	/* 220 */
+	OP_SOCKPAIR,	/* 221 */
+	OP_BIND,	/* 222 */
+	OP_CONNECT,	/* 223 */
+	OP_LISTEN,	/* 224 */
+	OP_ACCEPT,	/* 225 */
+	OP_SHUTDOWN,	/* 226 */
+	OP_GSOCKOPT,	/* 227 */
+	OP_SSOCKOPT,	/* 228 */
+	OP_GETSOCKNAME,	/* 229 */
+	OP_GETPEERNAME,	/* 230 */
+	OP_LSTAT,	/* 231 */
+	OP_STAT,	/* 232 */
+	OP_FTRREAD,	/* 233 */
+	OP_FTRWRITE,	/* 234 */
+	OP_FTREXEC,	/* 235 */
+	OP_FTEREAD,	/* 236 */
+	OP_FTEWRITE,	/* 237 */
+	OP_FTEEXEC,	/* 238 */
+	OP_FTIS,	/* 239 */
+	OP_FTEOWNED,	/* 240 */
+	OP_FTROWNED,	/* 241 */
+	OP_FTZERO,	/* 242 */
+	OP_FTSIZE,	/* 243 */
+	OP_FTMTIME,	/* 244 */
+	OP_FTATIME,	/* 245 */
+	OP_FTCTIME,	/* 246 */
+	OP_FTSOCK,	/* 247 */
+	OP_FTCHR,	/* 248 */
+	OP_FTBLK,	/* 249 */
+	OP_FTFILE,	/* 250 */
+	OP_FTDIR,	/* 251 */
+	OP_FTPIPE,	/* 252 */
+	OP_FTLINK,	/* 253 */
+	OP_FTSUID,	/* 254 */
+	OP_FTSGID,	/* 255 */
+	OP_FTSVTX,	/* 256 */
+	OP_FTTTY,	/* 257 */
+	OP_FTTEXT,	/* 258 */
+	OP_FTBINARY,	/* 259 */
+	OP_CHDIR,	/* 260 */
+	OP_CHOWN,	/* 261 */
+	OP_CHROOT,	/* 262 */
+	OP_UNLINK,	/* 263 */
+	OP_CHMOD,	/* 264 */
+	OP_UTIME,	/* 265 */
+	OP_RENAME,	/* 266 */
+	OP_LINK,	/* 267 */
+	OP_SYMLINK,	/* 268 */
+	OP_READLINK,	/* 269 */
+	OP_MKDIR,	/* 270 */
+	OP_RMDIR,	/* 271 */
+	OP_OPEN_DIR,	/* 272 */
+	OP_READDIR,	/* 273 */
+	OP_TELLDIR,	/* 274 */
+	OP_SEEKDIR,	/* 275 */
+	OP_REWINDDIR,	/* 276 */
+	OP_CLOSEDIR,	/* 277 */
+	OP_FORK,	/* 278 */
+	OP_WAIT,	/* 279 */
+	OP_WAITPID,	/* 280 */
+	OP_SYSTEM,	/* 281 */
+	OP_EXEC,	/* 282 */
+	OP_KILL,	/* 283 */
+	OP_GETPPID,	/* 284 */
+	OP_GETPGRP,	/* 285 */
+	OP_SETPGRP,	/* 286 */
+	OP_GETPRIORITY,	/* 287 */
+	OP_SETPRIORITY,	/* 288 */
+	OP_TIME,	/* 289 */
+	OP_TMS,		/* 290 */
+	OP_LOCALTIME,	/* 291 */
+	OP_GMTIME,	/* 292 */
+	OP_ALARM,	/* 293 */
+	OP_SLEEP,	/* 294 */
+	OP_SHMGET,	/* 295 */
+	OP_SHMCTL,	/* 296 */
+	OP_SHMREAD,	/* 297 */
+	OP_SHMWRITE,	/* 298 */
+	OP_MSGGET,	/* 299 */
+	OP_MSGCTL,	/* 300 */
+	OP_MSGSND,	/* 301 */
+	OP_MSGRCV,	/* 302 */
+	OP_SEMGET,	/* 303 */
+	OP_SEMCTL,	/* 304 */
+	OP_SEMOP,	/* 305 */
+	OP_REQUIRE,	/* 306 */
+	OP_DOFILE,	/* 307 */
+	OP_ENTEREVAL,	/* 308 */
+	OP_LEAVEEVAL,	/* 309 */
+	OP_ENTERTRY,	/* 310 */
+	OP_LEAVETRY,	/* 311 */
+	OP_GHBYNAME,	/* 312 */
+	OP_GHBYADDR,	/* 313 */
+	OP_GHOSTENT,	/* 314 */
+	OP_GNBYNAME,	/* 315 */
+	OP_GNBYADDR,	/* 316 */
+	OP_GNETENT,	/* 317 */
+	OP_GPBYNAME,	/* 318 */
+	OP_GPBYNUMBER,	/* 319 */
+	OP_GPROTOENT,	/* 320 */
+	OP_GSBYNAME,	/* 321 */
+	OP_GSBYPORT,	/* 322 */
+	OP_GSERVENT,	/* 323 */
+	OP_SHOSTENT,	/* 324 */
+	OP_SNETENT,	/* 325 */
+	OP_SPROTOENT,	/* 326 */
+	OP_SSERVENT,	/* 327 */
+	OP_EHOSTENT,	/* 328 */
+	OP_ENETENT,	/* 329 */
+	OP_EPROTOENT,	/* 330 */
+	OP_ESERVENT,	/* 331 */
+	OP_GPWNAM,	/* 332 */
+	OP_GPWUID,	/* 333 */
+	OP_GPWENT,	/* 334 */
+	OP_SPWENT,	/* 335 */
+	OP_EPWENT,	/* 336 */
+	OP_GGRNAM,	/* 337 */
+	OP_GGRGID,	/* 338 */
+	OP_GGRENT,	/* 339 */
+	OP_SGRENT,	/* 340 */
+	OP_EGRENT,	/* 341 */
+	OP_GETLOGIN,	/* 342 */
+	OP_SYSCALL,	/* 343 */
 	OP_max		
 } opcode;
 
-#define MAXO 345
+#define MAXO 344
 
 #ifndef DOINIT
 EXT char *op_name[];
@@ -566,7 +565,6 @@ EXT char *op_name[] = {
 	"prtf",
 	"print",
 	"sysopen",
-	"systell",
 	"sysseek",
 	"sysread",
 	"syswrite",
@@ -918,7 +916,6 @@ EXT char *op_desc[] = {
 	"printf",
 	"print",
 	"sysopen",
-	"systell",
 	"sysseek",
 	"sysread",
 	"syswrite",
@@ -1299,7 +1296,6 @@ OP *	pp_leavewrite	_((void));
 OP *	pp_prtf		_((void));
 OP *	pp_print	_((void));
 OP *	pp_sysopen	_((void));
-OP *	pp_systell	_((void));
 OP *	pp_sysseek	_((void));
 OP *	pp_sysread	_((void));
 OP *	pp_syswrite	_((void));
@@ -1649,7 +1645,6 @@ EXT OP * (*ppaddr[])() = {
 	pp_prtf,
 	pp_print,
 	pp_sysopen,
-	pp_systell,
 	pp_sysseek,
 	pp_sysread,
 	pp_syswrite,
@@ -2001,7 +1996,6 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_listiob,	/* prtf */
 	ck_listiob,	/* print */
 	ck_fun,		/* sysopen */
-	ck_fun,		/* systell */
 	ck_fun,		/* sysseek */
 	ck_fun,		/* sysread */
 	ck_fun,		/* syswrite */
@@ -2353,7 +2347,6 @@ EXT U32 opargs[] = {
 	0x00002e15,	/* prtf */
 	0x00002e15,	/* print */
 	0x00911604,	/* sysopen */
-	0x00000e0c,	/* systell */
 	0x00011604,	/* sysseek */
 	0x0091761d,	/* sysread */
 	0x0091161d,	/* syswrite */

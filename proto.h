@@ -97,6 +97,7 @@ I32	do_semop _((SV** mark, SV** sp));
 I32	do_shmio _((I32 optype, SV** mark, SV** sp));
 #endif
 void	do_sprintf _((SV* sv, I32 len, SV** sarg));
+long	do_sysseek _((GV* gv, long pos, int whence));
 long	do_tell _((GV* gv));
 I32	do_trans _((SV* sv, OP* arg));
 void	do_vecset _((SV* sv));

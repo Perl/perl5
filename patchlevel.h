@@ -44,6 +44,7 @@ static	char	*local_patches[] = {
 	,"Dev97D - Fourth development patch to 5.003_97"
 	,"Dev97E - Fifth development patch to 5.003_97"
 	,"Dev97F - Sixth development patch to 5.003_97"
+	,"Dev97G - Seventh development patch to 5.003_97"
 	,NULL
 };
 

@@ -22,13 +22,15 @@ static SV *q _((SV *sv));
 static char *scan_const _((char *start));
 static char *scan_formline _((char *s));
 static char *scan_heredoc _((char *s));
-static char *scan_ident _((char *s, char *send, char *dest, I32 ck_uni));
+static char *scan_ident _((char *s, char *send, char *dest, STRLEN destlen,
+			   I32 ck_uni));
 static char *scan_inputsymbol _((char *start));
 static char *scan_pat _((char *start));
 static char *scan_str _((char *start));
 static char *scan_subst _((char *start));
 static char *scan_trans _((char *start));
-static char *scan_word _((char *s, char *dest, int allow_package, STRLEN *slp));
+static char *scan_word _((char *s, char *dest, STRLEN destlen,
+			  int allow_package, STRLEN *slp));
 static char *skipspace _((char *s));
 static void checkcomma _((char *s, char *name, char *what));
 static void force_ident _((char *s, int kind));
@@ -47,6 +49,8 @@ static int uni _((I32 f, char *s));
 #endif
 static char * filter_gets _((SV *sv, PerlIO *fp, STRLEN append));
 static void restore_rsfp _((void *f));
+
+static char too_long[] = "Identifier too long";
 
 static char *linestart;		/* beg. of most recently read line */
 
@@ -505,7 +509,7 @@ int allow_tick;
 	(allow_pack && *s == ':') ||
 	(allow_tick && *s == '\'') )
     {
-	s = scan_word(s, tokenbuf, allow_pack, &len);
+	s = scan_word(s, tokenbuf, sizeof tokenbuf, allow_pack, &len);
 	if (check_keyword && keyword(tokenbuf, len))
 	    return start;
 	if (token == METHOD) {
@@ -923,7 +927,7 @@ register char *s;
 	char seen[256];
 	unsigned char un_char = 0, last_un_char;
 	char *send = strchr(s,']');
-	char tmpbuf[512];
+	char tmpbuf[sizeof tokenbuf * 4];
 
 	if (!send)		/* has to be an expression */
 	    return TRUE;
@@ -948,7 +952,7 @@ register char *s;
 	    case '$':
 		weight -= seen[un_char] * 10;
 		if (isALNUM(s[1])) {
-		    scan_ident(s,send,tmpbuf,FALSE);
+		    scan_ident(s, send, tmpbuf, sizeof tmpbuf, FALSE);
 		    if ((int)strlen(tmpbuf) > 1 && gv_fetchpv(tmpbuf,FALSE, SVt_PV))
 			weight -= 100;
 		    else
@@ -1018,7 +1022,7 @@ char *start;
 GV *gv;
 {
     char *s = start + (*start == '$');
-    char tmpbuf[1024];
+    char tmpbuf[sizeof tokenbuf];
     STRLEN len;
     GV* indirgv;
 
@@ -1028,7 +1032,7 @@ GV *gv;
 	if (!GvCVu(gv))
 	    gv = 0;
     }
-    s = scan_word(s, tmpbuf, TRUE, &len);
+    s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
     if (*start == '$') {
 	if (gv || last_lop_op == OP_PRINT || isUPPER(*tokenbuf))
 	    return 0;
@@ -1853,7 +1857,7 @@ yylex()
 
     case '*':
 	if (expect != XOPERATOR) {
-	    s = scan_ident(s, bufend, tokenbuf, TRUE);
+	    s = scan_ident(s, bufend, tokenbuf, sizeof tokenbuf, TRUE);
 	    expect = XOPERATOR;
 	    force_ident(tokenbuf, '*');
 	    if (!*tokenbuf)
@@ -1873,7 +1877,7 @@ yylex()
 	    Mop(OP_MODULO);
 	}
 	tokenbuf[0] = '%';
-	s = scan_ident(s, bufend, tokenbuf+1, TRUE);
+	s = scan_ident(s, bufend, tokenbuf + 1, sizeof tokenbuf - 1, TRUE);
 	if (!tokenbuf[1]) {
 	    if (s == bufend)
 		yyerror("Final % should be \\% or %name");
@@ -1963,7 +1967,8 @@ yylex()
 		    d++;
 	    }
 	    if (d < bufend && isIDFIRST(*d)) {
-		d = scan_word(d, tokenbuf + 1, FALSE, &len);
+		d = scan_word(d, tokenbuf + 1, sizeof tokenbuf - 1,
+			      FALSE, &len);
 		while (d < bufend && (*d == ' ' || *d == '\t'))
 		    d++;
 		if (*d == '}') {
@@ -2068,7 +2073,7 @@ yylex()
 	    BAop(OP_BIT_AND);
 	}
 
-	s = scan_ident(s-1, bufend, tokenbuf, TRUE);
+	s = scan_ident(s - 1, bufend, tokenbuf, sizeof tokenbuf, TRUE);
 	if (*tokenbuf) {
 	    expect = XOPERATOR;
 	    force_ident(tokenbuf, '&');
@@ -2190,7 +2195,8 @@ yylex()
 	    if (expect == XOPERATOR)
 		no_op("Array length", bufptr);
 	    tokenbuf[0] = '@';
-	    s = scan_ident(s+1, bufend, tokenbuf+1, FALSE);
+	    s = scan_ident(s + 1, bufend, tokenbuf + 1, sizeof tokenbuf - 1,
+			   FALSE);
 	    if (!tokenbuf[1])
 		PREREF(DOLSHARP);
 	    expect = XOPERATOR;
@@ -2201,7 +2207,7 @@ yylex()
 	if (expect == XOPERATOR)
 	    no_op("Scalar", bufptr);
 	tokenbuf[0] = '$';
-	s = scan_ident(s, bufend, tokenbuf+1, FALSE);
+	s = scan_ident(s, bufend, tokenbuf + 1, sizeof tokenbuf - 1, FALSE);
 	if (!tokenbuf[1]) {
 	    if (s == bufend)
 		yyerror("Final $ should be \\$ or $name");
@@ -2242,11 +2248,11 @@ yylex()
 		if (dowarn && strEQ(tokenbuf+1, "SIG") &&
 		    (t = strchr(s, '}')) && (t = strchr(t, '=')))
 		{
-		    char tmpbuf[1024];
+		    char tmpbuf[sizeof tokenbuf];
 		    STRLEN len;
 		    for (t++; isSPACE(*t); t++) ;
 		    if (isIDFIRST(*t)) {
-			t = scan_word(t, tmpbuf, TRUE, &len);
+			t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE, &len);
 			if (*t != '(' && perl_get_cv(tmpbuf, FALSE))
 			    warn("You need to quote \"%s\"", tmpbuf);
 		    }
@@ -2264,8 +2270,8 @@ yylex()
 	    else if (strchr("&*<%", *s) && isIDFIRST(s[1]))
 		expect = XTERM;		/* e.g. print $fh &sub */
 	    else if (isIDFIRST(*s)) {
-		char tmpbuf[1024];
-		scan_word(s, tmpbuf, TRUE, &len);
+		char tmpbuf[sizeof tokenbuf];
+		scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
 		if (keyword(tmpbuf, len))
 		    expect = XTERM;	/* e.g. print $fh length() */
 		else {
@@ -2290,7 +2296,7 @@ yylex()
 	if (expect == XOPERATOR)
 	    no_op("Array", s);
 	tokenbuf[0] = '@';
-	s = scan_ident(s, bufend, tokenbuf+1, FALSE);
+	s = scan_ident(s, bufend, tokenbuf + 1, sizeof tokenbuf - 1, FALSE);
 	if (!tokenbuf[1]) {
 	    if (s == bufend)
 		yyerror("Final @ should be \\@ or @name");
@@ -2456,7 +2462,7 @@ yylex()
 
       keylookup:
 	bufptr = s;
-	s = scan_word(s, tokenbuf, FALSE, &len);
+	s = scan_word(s, tokenbuf, sizeof tokenbuf, FALSE, &len);
 
 	/* Some keywords can be followed by any delimiter, including ':' */
 	tmp = (len == 1 && strchr("msyq", tokenbuf[0]) ||
@@ -2520,7 +2526,8 @@ yylex()
 		/* Get the rest if it looks like a package qualifier */
 
 		if (*s == '\'' || *s == ':' && s[1] == ':') {
-		    s = scan_word(s, tokenbuf + len, TRUE, &len);
+		    s = scan_word(s, tokenbuf + len, sizeof tokenbuf - len,
+				  TRUE, &len);
 		    if (!len)
 			croak("Bad name after %s::", tokenbuf);
 		}
@@ -2746,7 +2753,7 @@ yylex()
 	    if (*s == ':' && s[1] == ':') {
 		s += 2;
 		d = s;
-		s = scan_word(s, tokenbuf, FALSE, &len);
+		s = scan_word(s, tokenbuf, sizeof tokenbuf, FALSE, &len);
 		tmp = keyword(tokenbuf, len);
 		if (tmp < 0)
 		    tmp = -tmp;
@@ -3451,9 +3458,9 @@ yylex()
 	    s = skipspace(s);
 
 	    if (isIDFIRST(*s) || *s == '\'' || *s == ':') {
-		char tmpbuf[128];
+		char tmpbuf[sizeof tokenbuf];
 		expect = XBLOCK;
-		d = scan_word(s, tmpbuf, TRUE, &len);
+		d = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
 		if (strchr(tmpbuf, ':'))
 		    sv_setpv(subname, tmpbuf);
 		else {
@@ -3528,9 +3535,6 @@ yylex()
 
 	case KEY_sysopen:
 	    LOP(OP_SYSOPEN,XTERM);
-
-	case KEY_systell:
-	    UNI(OP_SYSTELL);
 
 	case KEY_sysseek:
 	    LOP(OP_SYSSEEK,XTERM);
@@ -4190,7 +4194,6 @@ I32 len;
 		if (strEQ(d,"sysopen"))		return -KEY_sysopen;
 		if (strEQ(d,"sysread"))		return -KEY_sysread;
 		if (strEQ(d,"sysseek"))		return -KEY_sysseek;
-		if (strEQ(d,"systell"))		return -KEY_systell;
 		break;
 	    case 8:
 		if (strEQ(d,"syswrite"))	return -KEY_syswrite;
@@ -4330,14 +4333,18 @@ char *what;
 }
 
 static char *
-scan_word(s, dest, allow_package, slp)
+scan_word(s, dest, destlen, allow_package, slp)
 register char *s;
 char *dest;
+STRLEN destlen;
 int allow_package;
 STRLEN *slp;
 {
     register char *d = dest;
+    register char *e = d + destlen - 3;  /* two-character token, ending NUL */
     for (;;) {
+	if (d >= e)
+	    croak(too_long);
 	if (isALNUM(*s))
 	    *d++ = *s++;
 	else if (*s == '\'' && allow_package && isIDFIRST(s[1])) {
@@ -4358,13 +4365,15 @@ STRLEN *slp;
 }
 
 static char *
-scan_ident(s,send,dest,ck_uni)
+scan_ident(s, send, dest, destlen, ck_uni)
 register char *s;
 register char *send;
 char *dest;
+STRLEN destlen;
 I32 ck_uni;
 {
     register char *d;
+    register char *e;
     char *bracket = 0;
     char funny = *s++;
 
@@ -4373,12 +4382,18 @@ I32 ck_uni;
     if (isSPACE(*s))
 	s = skipspace(s);
     d = dest;
+    e = d + destlen - 3;	/* two-character token, ending NUL */
     if (isDIGIT(*s)) {
-	while (isDIGIT(*s))
+	while (isDIGIT(*s)) {
+	    if (d >= e)
+		croak(too_long);
 	    *d++ = *s++;
+	}
     }
     else {
 	for (;;) {
+	    if (d >= e)
+		croak(too_long);
 	    if (isALNUM(*s))
 		*d++ = *s++;
 	    else if (*s == '\'' && isIDFIRST(s[1])) {

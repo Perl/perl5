@@ -667,13 +667,10 @@ GV *gv;
 	if (PerlIO_eof(fp))
 	    (void)PerlIO_seek(fp, 0L, 2);	/* ultrix 1.2 workaround */
 #endif
-	if (op->op_type == OP_SYSTELL)
-	    return lseek(PerlIO_fileno(fp), 0L, 1);
-	else
-	    return PerlIO_tell(fp);
+	return PerlIO_tell(fp);
     }
     if (dowarn)
-	warn("%s() on unopened file", op_name[op->op_type]);
+	warn("tell() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
 }
@@ -692,15 +689,29 @@ int whence;
 	if (PerlIO_eof(fp))
 	    (void)PerlIO_seek(fp, 0L, 2);	/* ultrix 1.2 workaround */
 #endif
-	if (op->op_type == OP_SYSSEEK)
-	    return lseek(PerlIO_fileno(fp), pos, whence) >= 0;
-	else
-	    return PerlIO_seek(fp, pos, whence) >= 0;
+	return PerlIO_seek(fp, pos, whence) >= 0;
     }
     if (dowarn)
-	warn("%s() on unopened file", op_name[op->op_type]);
+	warn("seek() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
+}
+
+long
+do_sysseek(gv, pos, whence)
+GV *gv;
+long pos;
+int whence;
+{
+    register IO *io;
+    register PerlIO *fp;
+
+    if (gv && (io = GvIO(gv)) && (fp = IoIFP(io)))
+	return lseek(PerlIO_fileno(fp), pos, whence);
+    if (dowarn)
+	warn("sysseek() on unopened file");
+    SETERRNO(EBADF,RMS$_IFI);
+    return -1L;
 }
 
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)

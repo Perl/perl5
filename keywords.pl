@@ -238,7 +238,6 @@ syscall
 sysopen
 sysread
 sysseek
-systell
 system
 syswrite
 tell

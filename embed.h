@@ -166,6 +166,7 @@
 #define do_semop		Perl_do_semop
 #define do_shmio		Perl_do_shmio
 #define do_sprintf		Perl_do_sprintf
+#define do_sysseek		Perl_do_sysseek
 #define do_tell			Perl_do_tell
 #define do_trans		Perl_do_trans
 #define do_vecset		Perl_do_vecset

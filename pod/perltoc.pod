@@ -860,11 +860,10 @@ $^E, $^H, $^M
 =item New and changed builtin functions
 
 delete on slices, flock, printf and sprintf, keys as an lvalue, my() in
-Control Structures, pack() and unpack(), sysseek() and systell(), use
-VERSION, use Module VERSION LIST, prototype(FUNCTION), srand, $_ as
-Default, C<m//g> does not reset search position on failure, C<m//x> ignores
-whitespace before ?*+{}, nested C<sub{}> closures work now, formats work
-right on changing lexicals
+Control Structures, pack() and unpack(), sysseek(), use VERSION, use Module
+VERSION LIST, prototype(FUNCTION), srand, $_ as Default, C<m//g> does not
+reset search position on failure, C<m//x> ignores whitespace before ?*+{},
+nested C<sub{}> closures work now, formats work right on changing lexicals
 
 =item New builtin methods
 
@@ -943,21 +942,22 @@ nonexistent shared string, Attempt to use reference as lvalue in substr,
 Can't use bareword ("%s") as %s ref while "strict refs" in use, Cannot
 resolve method `%s' overloading `%s' in package `%s', Constant subroutine
 %s redefined, Constant subroutine %s undefined, Copy method did not return
-a reference, Died, Exiting pseudo-block via %s, Illegal character %s
-(carriage return), Illegal switch in PERL5OPT: %s, Integer overflow in hex
-number, Integer overflow in octal number, internal error: glob failed, Name
-"%s::%s" used only once: possible typo, Null picture in formline, Offset
-outside string, Out of memory!, Out of memory during request for %s,
-Possible attempt to put comments in qw() list, Possible attempt to separate
-words with commas, Scalar value @%s{%s} better written as $%s{%s}, Stub
-found while resolving method `%s' overloading `%s' in package `%s', Too
-late for "B<-T>" option, untie attempted while %d inner references still
-exist, Unrecognized character %s, Unsupported function fork, Use of
-"$$<digit>" to mean "${$}<digit>" is deprecated, Value of %s can be "0";
-test with defined(), Variable "%s" may be unavailable, Variable "%s" will
-not stay shared, Warning: something's wrong, Ill-formed logical name |%s|
-in prime_env_iter, Got an error from DosAllocMem, Malformed PERLLIB_PREFIX,
-PERL_SH_DIR too long, Process terminated by SIG%s
+a reference, Died, Exiting pseudo-block via %s, Identifier too long,
+Illegal character %s (carriage return), Illegal switch in PERL5OPT: %s,
+Integer overflow in hex number, Integer overflow in octal number, internal
+error: glob failed, Invalid type in pack: '%s', Invalid type in unpack:
+'%s', Name "%s::%s" used only once: possible typo, Null picture in
+formline, Offset outside string, Out of memory!, Out of memory during
+request for %s, Possible attempt to put comments in qw() list, Possible
+attempt to separate words with commas, Scalar value @%s{%s} better written
+as $%s{%s}, Stub found while resolving method `%s' overloading `%s' in
+package `%s', Too late for "B<-T>" option, untie attempted while %d inner
+references still exist, Unrecognized character %s, Unsupported function
+fork, Use of "$$<digit>" to mean "${$}<digit>" is deprecated, Value of %s
+can be "0"; test with defined(), Variable "%s" may be unavailable, Variable
+"%s" will not stay shared, Warning: something's wrong, Ill-formed logical
+name |%s| in prime_env_iter, Got an error from DosAllocMem, Malformed
+PERLLIB_PREFIX, PERL_SH_DIR too long, Process terminated by SIG%s
 
 =item BUGS
 
@@ -1175,26 +1175,26 @@ defined EXPR, defined, delete EXPR, die LIST, do BLOCK, do
 SUBROUTINE(LIST), do EXPR, dump LABEL, each HASH, eof FILEHANDLE, eof (),
 eof, eval EXPR, eval BLOCK, exec LIST, exists EXPR, exit EXPR, exp EXPR,
 exp, fcntl FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock
-FILEHANDLE,OPERATION, fork, format, formline PICTURE, LIST, getc
-FILEHANDLE, getc, getlogin, getpeername SOCKET, getpgrp PID, getppid,
-getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME, gethostbyname NAME,
-getnetbyname NAME, getprotobyname NAME, getpwuid UID, getgrgid GID,
-getservbyname NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE, getnetbyaddr
-ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent,
-getgrent, gethostent, getnetent, getprotoent, getservent, setpwent,
-setgrent, sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN,
-setservent STAYOPEN, endpwent, endgrent, endhostent, endnetent,
-endprotoent, endservent, getsockname SOCKET, getsockopt
-SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL, goto EXPR,
-goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex, import, index
-STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
-FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill LIST, last
-LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length, link
-OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR, log
-EXPR, log, lstat FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK LIST, map
-EXPR,LIST, mkdir FILENAME,MODE, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd
-ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, my EXPR, next LABEL, next, no
-Module LIST, oct EXPR, oct, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
+FILEHANDLE,OPERATION, fork, format, formline PICTURE,LIST, getc FILEHANDLE,
+getc, getlogin, getpeername SOCKET, getpgrp PID, getppid, getpriority
+WHICH,WHO, getpwnam NAME, getgrnam NAME, gethostbyname NAME, getnetbyname
+NAME, getprotobyname NAME, getpwuid UID, getgrgid GID, getservbyname
+NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE,
+getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent, getgrent,
+gethostent, getnetent, getprotoent, getservent, setpwent, setgrent,
+sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN, setservent
+STAYOPEN, endpwent, endgrent, endhostent, endnetent, endprotoent,
+endservent, getsockname SOCKET, getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR,
+glob, gmtime EXPR, goto LABEL, goto EXPR, goto &NAME, grep BLOCK LIST, grep
+EXPR,LIST, hex EXPR, hex, import, index STR,SUBSTR,POSITION, index
+STR,SUBSTR, int EXPR, int, ioctl FILEHANDLE,FUNCTION,SCALAR, join
+EXPR,LIST, keys HASH, kill LIST, last LABEL, last, lc EXPR, lc, lcfirst
+EXPR, lcfirst, length EXPR, length, link OLDFILE,NEWFILE, listen
+SOCKET,QUEUESIZE, local EXPR, localtime EXPR, log EXPR, log, lstat
+FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST, mkdir
+FILENAME,MODE, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS,
+msgrcv ID,VAR,SIZE,TYPE,FLAGS, my EXPR, next LABEL, next, no Module LIST,
+oct EXPR, oct, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
 DIRHANDLE,EXPR, ord EXPR, ord, pack TEMPLATE,LIST, package NAMESPACE, pipe
 READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
 LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
@@ -1222,16 +1222,15 @@ sub NAME, sub NAME BLOCK, substr EXPR,OFFSET,LEN, substr EXPR,OFFSET,
 symlink OLDFILE,NEWFILE, syscall LIST, sysopen FILEHANDLE,FILENAME,MODE,
 sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
 FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
-FILEHANDLE,POSITION,WHENCE, systell FILEHANDLE, systell, system LIST,
-syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite
-FILEHANDLE,SCALAR,LENGTH, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
-VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
-FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
-ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
-TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module LIST, use
-Module, use Module VERSION LIST, use VERSION, utime LIST, values HASH, vec
-EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn LIST, write
-FILEHANDLE, write EXPR, write, y///
+FILEHANDLE,POSITION,WHENCE, system LIST, syswrite
+FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH, tell
+FILEHANDLE, tell, telldir DIRHANDLE, tie VARIABLE,CLASSNAME,LIST, tied
+VARIABLE, time, times, tr///, truncate FILEHANDLE,LENGTH, truncate
+EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR, ucfirst, umask EXPR, umask, undef
+EXPR, undef, unlink LIST, unlink, unpack TEMPLATE,EXPR, untie VARIABLE,
+unshift ARRAY,LIST, use Module LIST, use Module, use Module VERSION LIST,
+use VERSION, utime LIST, values HASH, vec EXPR,OFFSET,BITS, wait, waitpid
+PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR, write, y///
 
 =back
 
