@@ -447,6 +447,12 @@ been fixed.
 FETCH etc may now safely access tied values (ie resulting in a recursive
 call to FETCH etc).
 
+At startup Perl blocks the SIGFPE signal away since there isn't much
+Perl can do about it.  Previously this blocking was in effect also for
+programs executed from within Perl.  Now Perl restores the original
+SIGFPE handling routine, whatever it was, before running external
+programs.
+
 Linenumbers in Perl scripts may now be greater than 65536, or 2**16.
 (Perl scripts have always been able to be larger than that, it's just
 that the linenumber for reported errors and warnings have "wrapped
