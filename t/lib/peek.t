@@ -1,3 +1,15 @@
+#!./perl
+
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bPeek\b/) {
+        print "1..0 # Skip: Devel::Peek was not built\n";
+        exit 0;
+    }
+}
+
 use Devel::Peek;
 
 print "1..17\n";
@@ -218,9 +230,9 @@ do_test(14,
     DEPTH = 1
     FLAGS = 0x0
     PADLIST = $ADDR
-      1\\. $ADDR \\("\\$pattern" 49-57\\)
-     12\\. $ADDR \\(FAKE "\\$DEBUG" 0-51\\)
-     13\\. $ADDR \\("\\$dump" 50-51\\)
+      1\\. $ADDR \\("\\$pattern" \\d+-\\d+\\)
+     12\\. $ADDR \\(FAKE "\\$DEBUG" 0-\\d+\\)
+     13\\. $ADDR \\("\\$dump" \\d+-\\d+\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(15,
@@ -286,7 +298,7 @@ do_test(17,
     CV = 0x0
     CVGEN = 0x0
     GPFLAGS = 0x0
-    LINE = 30
+    LINE = \\d+
     FILE = ".+\\b(?i:peek\\.t)"
     FLAGS = 0x2
     EGV = $ADDR\\t"a"');
