@@ -4,7 +4,6 @@ my %alias_to = (
     I32 => [qw(SSize_t long)],
     U16 => [qw(OPCODE line_t short)],
     U8 => [qw(char)],
-    objindex => [qw(svindex opindex)]		
 );
 
 my @optype= qw(OP UNOP BINOP LOGOP CONDOP LISTOP PMOP SVOP GVOP PVOP LOOP COP);
@@ -165,9 +164,6 @@ struct bytestream {
     int (*fread)(char *, size_t, size_t, void*);
     void (*freadpv)(U32, void*);
 };
-void byterun _((struct bytestream));
-#else
-void byterun _((PerlIO *));
 #endif /* INDIRECT_BGET_MACROS */
 
 void *bset_obj_store _((void *, I32));
@@ -215,8 +211,7 @@ print BYTERUN_H <<'EOT';
 
 EOT
 
-printf BYTERUN_H <<'EOT', scalar(@specialsv);
-EXT SV * specialsv_list[%d];
+print BYTERUN_H <<'EOT';
 #define INIT_SPECIALSV_LIST STMT_START { \
 EOT
 for ($i = 0; $i < @specialsv; $i++) {
@@ -244,7 +239,7 @@ EOT
 __END__
 # First set instruction ord("#") to read comment to end-of-line (sneaky)
 %number 35
-comment		arg			comment
+comment		arg			comment_t
 # Then make ord("\n") into a no-op
 %number 10
 nop		none			none

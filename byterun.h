@@ -15,9 +15,6 @@ struct bytestream {
     int (*fread)(char *, size_t, size_t, void*);
     void (*freadpv)(U32, void*);
 };
-void byterun _((struct bytestream));
-/* #else
-void byterun _((PerlIO *)); */
 #endif /* INDIRECT_BGET_MACROS */
 
 void *bset_obj_store _((void *, I32));
