@@ -4169,8 +4169,6 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 
     if (seendigit && (*s == 'e' || *s == 'E')) {
 	bool expnegative = 0;
-	I32 bit;
-	NV power;
 
 	++s;
 	switch (*s) {
