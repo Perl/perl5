@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.63";
+our $VERSION   = "0.64";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -274,7 +274,8 @@ sub compile {
 	warn "disregarding non-options: @newargs\n" if @newargs;
 
 	for my $objname (@args) {
-	    
+	    next unless $objname; # skip null args to avoid noisy responses
+
 	    if ($objname eq "BEGIN") {
 		concise_specials("BEGIN", $order,
 			       B::begin_av->isa("B::AV") ?
