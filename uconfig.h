@@ -3503,6 +3503,11 @@
  *	This symbol is defined if PROCSELFEXE_PATH is a symlink
  *	to the absolute pathname of the executing program.
  */
+/* PROCSELFEXE_PATH:
+ *	If HAS_PROCSELFEXE is defined this symbol is the filename
+ *	of the symbolic link pointing to the absolute pathname of
+ *	the executing program.
+ */
 /*#define HAS_PROCSELFEXE	/ **/
 #if defined(HAS_PROCSELFEXE) && !defined(PROCSELFEXE_PATH)
 #define PROCSELFEXE_PATH		/**/
