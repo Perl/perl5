@@ -468,7 +468,10 @@ $SIG{__WARN__} = sub {
     warn @_ unless $_[0] =~ /^Enormous test number/ ||
                    $_[0] =~ /^Can't detailize/
 };
-while( my($test, $expect) = each %samples ) {
+
+for my $test ( sort keys %samples ) {
+    my $expect = $samples{$test};
+
     for (0..$#{$expect->{details}}) {
         $expect->{details}[$_]{type} = ''
             unless exists $expect->{details}[$_]{type};

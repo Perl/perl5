@@ -813,12 +813,13 @@ sub installlib {
     return if $name =~ m{\.orig$|\.rej$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.plc$|\.t$|^test\.pl$} ||
 	      $dir  =~ m{/t(?:/|$)};
 
-    # XXX xsubpp back out of the list. p4 will conflict when T::H 2.38
-    # is integrated.
+    # XXX xsubpp back out of the list. prove now integrated. Out of order, so
+    # p4 will conflict on the next update to the following lines:
 
-    # ignore the cpan script in lib/CPAN/bin and the instmodsh and xsubpp
-    # scripts in lib/ExtUtils (they're installed later with other utils)
-    return if $name =~ /^(?:cpan|instmodsh)\z/;
+    # ignore the cpan script in lib/CPAN/bin, the instmodsh and xsubpp
+    # scripts in lib/ExtUtils, and the prove script in lib/Test/Harness
+    # (they're installed later with other utils)
+    return if $name =~ /^(?:cpan|instmodsh|prove)\z/;
 
     # ignore the Makefiles
     return if $name =~ /^makefile$/i;

@@ -53,7 +53,9 @@ $strap->{callback} = sub {
     push @out, $type;
 };
 
-while( my($test, $expect) = each %samples ) {
+for my $test ( sort keys %samples ) {
+    my $expect = $samples{$test};
+
     local @out = ();
     $strap->analyze_file(File::Spec->catfile($SAMPLE_TESTS, $test));
 

@@ -19,6 +19,7 @@ utils/perldoc   # pod = pod/perldoc.pod
 utils/perlivp
 utils/piconv
 utils/pl2pm
+utils/prove
 utils/splain
 utils/xsubpp
 x2p/a2p         # pod = x2p/a2p.pod
