@@ -96,7 +96,7 @@ while (@ARGV) {
     }
     elsif ($_ eq 'group') {
 	$gname = shift;
-	$out .= &tab . "\$gid == \$gid('$gname')";
+	$out .= &tab . "\$gid == \$gid{'$gname'}";
 	$initgroup++;
     }
     elsif ($_ eq 'nouser') {
@@ -381,7 +381,7 @@ sub cpio {
 	($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
 	  $atime,$mtime,$ctime,$blksize,$blocks) = lstat(_);
 	if (-f _) {
-	    open(IN, $_) || do {
+	    open(IN, "./$_\0") || do {
 		warn "Couldn't open $name: $!\n";
 		return;
 	    };
@@ -471,7 +471,7 @@ sub tar {
 	}
     }
     if (-f _) {
-	open(IN, $_) || do {
+	open(IN, "./$_\0") || do {
 	    warn "Couldn't open $name: $!\n";
 	    return;
 	};

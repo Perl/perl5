@@ -1,4 +1,4 @@
-/* $RCSfile: dolist.c,v $$Revision: 4.0.1.2 $$Date: 91/06/10 01:22:15 $
+/* $RCSfile: dolist.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 17:07:02 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,17 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	dolist.c,v $
+ * Revision 4.0.1.3  91/11/05  17:07:02  lwall
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * patch11: /$foo/o optimizer could access deallocated data
+ * patch11: certain optimizations of //g in array context returned too many values
+ * patch11: regexp with no parens in array context returned wacky $`, $& and $'
+ * patch11: $' not set right on some //g
+ * patch11: added some support for 64-bit integers
+ * patch11: grep of a split lost its values
+ * patch11: added sort {} LIST
+ * patch11: multiple reallocations now avoided in 1 .. 100000
+ * 
  * Revision 4.0.1.2  91/06/10  01:22:15  lwall
  * patch10: //g only worked first time through
  * 
@@ -94,10 +105,10 @@ int *arglast;
 	if (!spat->spat_regexp->prelen && lastspat)
 	    spat = lastspat;
 	if (spat->spat_flags & SPAT_KEEP) {
+	    scanconst(spat,spat->spat_regexp->precomp, spat->spat_regexp->prelen);
 	    if (spat->spat_runtime)
 		arg_free(spat->spat_runtime);	/* it won't change, so */
 	    spat->spat_runtime = Nullarg;	/* no point compiling again */
-	    scanconst(spat, t, tmpstr->str_cur);
 	    hoistmust(spat);
 	    if (curcmd->c_expr && (curcmd->c_flags & CF_OPTIMIZE) == CFT_EVAL) {
 		curcmd->c_flags &= ~CF_OPTIMIZE;
@@ -145,7 +156,7 @@ int *arglast;
 	t = s;
     play_it_again:
 	if (global && spat->spat_regexp->startp[0])
-	    s = spat->spat_regexp->endp[0];
+	    t = s = spat->spat_regexp->endp[0];
 	if (myhint) {
 	    if (myhint < s || myhint > strend)
 		fatal("panic: hint in do_match");
@@ -192,8 +203,10 @@ int *arglast;
 		spat->spat_short = Nullstr;	/* opt is being useless */
 	    }
 	}
-	if (!spat->spat_regexp->nparens && !global)
+	if (!spat->spat_regexp->nparens && !global) {
 	    gimme = G_SCALAR;			/* accidental array context? */
+	    safebase = FALSE;
+	}
 	if (regexec(spat->spat_regexp, s, strend, t, 0,
 	  srchstr->str_pok & SP_STUDIED ? srchstr : Nullstr,
 	  safebase)) {
@@ -233,6 +246,7 @@ int *arglast;
 
 	for (i = !i; i <= iters; i++) {
 	    st[++sp] = str_mortal(&str_no);
+	    /*SUPPRESS 560*/
 	    if (s = spat->spat_regexp->startp[i]) {
 		len = spat->spat_regexp->endp[i] - s;
 		if (len > 0)
@@ -256,6 +270,8 @@ yup:
     if (spat->spat_flags & SPAT_ONCE)
 	spat->spat_flags |= SPAT_USED;
     if (global) {
+	spat->spat_regexp->subbeg = t;
+	spat->spat_regexp->subend = strend;
 	spat->spat_regexp->startp[0] = s;
 	spat->spat_regexp->endp[0] = s + spat->spat_short->str_cur;
 	curspat = spat;
@@ -363,14 +379,15 @@ int *arglast;
 	ary = stack;
     orig = s;
     if (spat->spat_flags & SPAT_SKIPWHITE) {
-	while (isascii(*s) && isspace(*s))
+	while (isSPACE(*s))
 	    s++;
     }
     if (!limit)
 	limit = maxiters + 2;
     if (strEQ("\\s+",spat->spat_regexp->precomp)) {
 	while (--limit) {
-	    for (m = s; m < strend && !(isascii(*m)&&isspace(*m)); m++) ;
+	    /*SUPPRESS 530*/
+	    for (m = s; m < strend && !isSPACE(*m); m++) ;
 	    if (m >= strend)
 		break;
 	    dstr = Str_new(30,m-s);
@@ -378,11 +395,13 @@ int *arglast;
 	    if (!realarray)
 		str_2mortal(dstr);
 	    (void)astore(ary, ++sp, dstr);
-	    for (s = m + 1; s < strend && isascii(*s) && isspace(*s); s++) ;
+	    /*SUPPRESS 530*/
+	    for (s = m + 1; s < strend && isSPACE(*s); s++) ;
 	}
     }
     else if (strEQ("^",spat->spat_regexp->precomp)) {
 	while (--limit) {
+	    /*SUPPRESS 530*/
 	    for (m = s; m < strend && *m != '\n'; m++) ;
 	    m++;
 	    if (m >= strend)
@@ -401,17 +420,17 @@ int *arglast;
 	    int fold = (spat->spat_flags & SPAT_FOLD);
 
 	    i = *spat->spat_short->str_ptr;
-	    if (fold && isupper(i))
+	    if (fold && isUPPER(i))
 		i = tolower(i);
 	    while (--limit) {
 		if (fold) {
 		    for ( m = s;
 			  m < strend && *m != i &&
-			    (!isupper(*m) || tolower(*m) != i);
-			  m++)
+			    (!isUPPER(*m) || tolower(*m) != i);
+			  m++)			/*SUPPRESS 530*/
 			;
 		}
-		else
+		else				/*SUPPRESS 530*/
 		    for (m = s; m < strend && *m != i; m++) ;
 		if (m >= strend)
 		    break;
@@ -548,9 +567,15 @@ int *arglast;
     short ashort;
     int aint;
     long along;
+#ifdef QUAD
+    quad aquad;
+#endif
     unsigned short aushort;
     unsigned int auint;
     unsigned long aulong;
+#ifdef QUAD
+    unsigned quad auquad;
+#endif
     char *aptr;
     float afloat;
     double adouble;
@@ -559,10 +584,11 @@ int *arglast;
     double cdouble;
 
     if (gimme != G_ARRAY) {		/* arrange to do first one only */
-	for (patend = pat; !isalpha(*patend); patend++);
+	/*SUPPRESS 530*/
+	for (patend = pat; !isALPHA(*patend) || *patend == 'x'; patend++) ;
 	if (index("aAbBhH", *patend) || *pat == '%') {
 	    patend++;
-	    while (isdigit(*patend) || *patend == '*')
+	    while (isDIGIT(*patend) || *patend == '*')
 		patend++;
 	}
 	else
@@ -578,9 +604,9 @@ int *arglast;
 	    len = strend - strbeg;	/* long enough */
 	    pat++;
 	}
-	else if (isdigit(*pat)) {
+	else if (isDIGIT(*pat)) {
 	    len = *pat++ - '0';
-	    while (isdigit(*pat))
+	    while (isDIGIT(*pat))
 		len = (len * 10) + (*pat++ - '0');
 	}
 	else
@@ -624,7 +650,7 @@ int *arglast;
 	    if (datumtype == 'A') {
 		aptr = s;	/* borrow register */
 		s = str->str_ptr + len - 1;
-		while (s >= str->str_ptr && (!*s || (isascii(*s)&&isspace(*s))))
+		while (s >= str->str_ptr && (!*s || isSPACE(*s)))
 		    s--;
 		*++s = '\0';
 		str->str_cur = s - str->str_ptr;
@@ -644,7 +670,7 @@ int *arglast;
 	    if (datumtype == 'b') {
 		aint = len;
 		for (len = 0; len < aint; len++) {
-		    if (len & 7)
+		    if (len & 7)		/*SUPPRESS 595*/
 			bits >>= 1;
 		    else
 			bits = *s++;
@@ -912,6 +938,34 @@ int *arglast;
 		(void)astore(stack, ++sp, str_2mortal(str));
 	    }
 	    break;
+#ifdef QUAD
+	case 'q':
+	    while (len-- > 0) {
+		if (s + sizeof(quad) > strend)
+		    aquad = 0;
+		else {
+		    bcopy(s,(char*)&aquad,sizeof(quad));
+		    s += sizeof(quad);
+		}
+		str = Str_new(42,0);
+		str_numset(str,(double)aquad);
+		(void)astore(stack, ++sp, str_2mortal(str));
+	    }
+	    break;
+	case 'Q':
+	    while (len-- > 0) {
+		if (s + sizeof(unsigned quad) > strend)
+		    auquad = 0;
+		else {
+		    bcopy(s,(char*)&auquad,sizeof(unsigned quad));
+		    s += sizeof(unsigned quad);
+		}
+		str = Str_new(43,0);
+		str_numset(str,(double)auquad);
+		(void)astore(stack, ++sp, str_2mortal(str));
+	    }
+	    break;
+#endif
 	/* float and double added gnb@melba.bby.oz.au 22/11/89 */
 	case 'f':
 	case 'F':
@@ -1158,11 +1212,11 @@ int *arglast;
 		length = 0;
 	}
 	else
-	    length = ary->ary_max;		/* close enough to infinity */
+	    length = ary->ary_max + 1;		/* close enough to infinity */
     }
     else {
 	offset = 0;
-	length = ary->ary_max;
+	length = ary->ary_max + 1;
     }
     if (offset < 0) {
 	length += offset;
@@ -1335,8 +1389,10 @@ int *arglast;
     }
     arg = arg[1].arg_ptr.arg_arg;
     while (i-- > 0) {
-	if (st[src])
+	if (st[src]) {
+	    st[src]->str_pok &= ~SP_TEMP;
 	    stab_val(defstab) = st[src];
+	}
 	else
 	    stab_val(defstab) = str_mortal(&str_undef);
 	(void)eval(arg,G_SCALAR,sp);
@@ -1407,9 +1463,9 @@ static STAB *firststab = Nullstab;
 static STAB *secondstab = Nullstab;
 
 int
-do_sort(str,stab,gimme,arglast)
+do_sort(str,arg,gimme,arglast)
 STR *str;
-STAB *stab;
+ARG *arg;
 int gimme;
 int *arglast;
 {
@@ -1423,6 +1479,7 @@ int *arglast;
     STR *oldfirst;
     STR *oldsecond;
     ARRAY *oldstack;
+    HASH *stash;
     static ARRAY *sortstack = Null(ARRAY*);
 
     if (gimme != G_ARRAY) {
@@ -1434,6 +1491,7 @@ int *arglast;
     up = &st[sp];
     st += sp;		/* temporarily make st point to args */
     for (i = 1; i <= max; i++) {
+	/*SUPPRESS 560*/
 	if (*up = st[i]) {
 	    if (!(*up)->str_pok)
 		(void)str_2ptr(*up);
@@ -1446,11 +1504,31 @@ int *arglast;
     max = up - &st[sp];
     sp--;
     if (max > 1) {
-	if (stab) {
+	STAB *stab;
+
+	if (arg[1].arg_type == (A_CMD|A_DONT)) {
+	    sortcmd = arg[1].arg_ptr.arg_cmd;
+	    stash = curcmd->c_stash;
+	}
+	else {
+	    if ((arg[1].arg_type & A_MASK) == A_WORD)
+		stab = arg[1].arg_ptr.arg_stab;
+	    else
+		stab = stabent(str_get(st[sp+1]),TRUE);
+
+	    if (stab) {
+		if (!stab_sub(stab) || !(sortcmd = stab_sub(stab)->cmd))
+		    fatal("Undefined subroutine \"%s\" in sort", 
+			stab_name(stab));
+		stash = stab_stash(stab);
+	    }
+	    else
+		sortcmd = Nullcmd;
+	}
+
+	if (sortcmd) {
 	    int oldtmps_base = tmps_base;
 
-	    if (!stab_sub(stab) || !(sortcmd = stab_sub(stab)->cmd))
-		fatal("Undefined subroutine \"%s\" in sort", stab_name(stab));
 	    if (!sortstack) {
 		sortstack = anew(Nullstab);
 		astore(sortstack, 0, Nullstr);
@@ -1460,10 +1538,10 @@ int *arglast;
 	    oldstack = stack;
 	    stack = sortstack;
 	    tmps_base = tmps_max;
-	    if (sortstash != stab_stash(stab)) {
+	    if (sortstash != stash) {
 		firststab = stabent("a",TRUE);
 		secondstab = stabent("b",TRUE);
-		sortstash = stab_stash(stab);
+		sortstash = stash;
 	    }
 	    oldfirst = stab_val(firststab);
 	    oldsecond = stab_val(secondstab);
@@ -1505,11 +1583,13 @@ STR **strp2;
     int retval;
 
     if (str1->str_cur < str2->str_cur) {
+	/*SUPPRESS 560*/
 	if (retval = memcmp(str1->str_ptr, str2->str_ptr, str1->str_cur))
 	    return retval;
 	else
 	    return -1;
     }
+    /*SUPPRESS 560*/
     else if (retval = memcmp(str1->str_ptr, str2->str_ptr, str2->str_cur))
 	return retval;
     else if (str1->str_cur == str2->str_cur)
@@ -1537,6 +1617,8 @@ int *arglast;
       (looks_like_number(st[sp+1]) && *st[sp+1]->str_ptr != '0') ) {
 	i = (int)str_gnum(st[sp+1]);
 	max = (int)str_gnum(st[sp+2]);
+	if (max > i)
+	    (void)astore(ary, sp + max - i + 1, Nullstr);
 	while (i <= max) {
 	    (void)astore(ary, ++sp, str = str_mortal(&str_no));
 	    str_numset(str,(double)i++);
@@ -1567,7 +1649,6 @@ int *arglast;
     register int sp = arglast[0];
     register int items = arglast[1] - sp;
     register int count = (int) str_gnum(st[arglast[2]]);
-    register ARRAY *ary = stack;
     register int i;
     int max;
 
@@ -1639,7 +1720,6 @@ int *arglast;
       str_2mortal(str_nmake((double)csv->wantarray)) );
     if (csv->hasargs) {
 	ARRAY *ary = csv->argarray;
-	STAB *tmpstab;
 
 	if (!dbargs)
 	    dbargs = stab_xarray(aadd(stabent("DB'args", TRUE)));
@@ -1750,6 +1830,7 @@ int *arglast;
 	return sp;
     }
     (void)hiterinit(hash);
+    /*SUPPRESS 560*/
     while (entry = hiternext(hash)) {
 	if (dokeys) {
 	    tmps = hiterkey(entry,&i);

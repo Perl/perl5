@@ -1,4 +1,4 @@
-/* $RCSfile: eval.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:07:23 $
+/* $RCSfile: eval.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 17:15:21 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,16 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	eval.c,v $
+ * Revision 4.0.1.3  91/11/05  17:15:21  lwall
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * patch11: various portability fixes
+ * patch11: added sort {} LIST
+ * patch11: added eval {}
+ * patch11: sysread() in socket was substituting recv()
+ * patch11: a last statement outside any block caused occasional core dumps
+ * patch11: missing arguments caused core dump in -D8 code
+ * patch11: eval 'stuff' now optimized to eval {stuff}
+ * 
  * Revision 4.0.1.2  91/06/07  11:07:23  lwall
  * patch4: new copyright notice
  * patch4: length($`), length($&), length($') now optimized to avoid string copy
@@ -326,6 +336,7 @@ register int sp;
 	    if (fp) {
 		if (gimme == G_SCALAR) {
 		    while (str_gets(str,fp,str->str_cur) != Nullch)
+			/*SUPPRESS 530*/
 			;
 		}
 		else {
@@ -490,7 +501,7 @@ register int sp;
 		    else
 			str->str_cur++;
 		    for (tmps = str->str_ptr; *tmps; tmps++)
-			if (!isalpha(*tmps) && !isdigit(*tmps) &&
+			if (!isALPHA(*tmps) && !isDIGIT(*tmps) &&
 			    index("$&*(){}[]'\";\\|?<>~`",*tmps))
 				break;
 		    if (*tmps && stat(str->str_ptr,&statbuf) < 0)
@@ -694,7 +705,7 @@ register int sp;
     case O_DIVIDE:
 	if ((value = str_gnum(st[2])) == 0.0)
 	    fatal("Illegal division by zero");
-#ifdef cray
+#ifdef SLOPPYDIVIDE
 	/* insure that 20./5. == 4. */
 	{
 	    double x;
@@ -884,7 +895,11 @@ register int sp;
 	value = -str_gnum(st[1]);
 	goto donumset;
     case O_NOT:
+#ifdef NOTNOT
+	{ char xxx = str_true(st[1]); value = (double) !xxx; }
+#else
 	value = (double) !str_true(st[1]);
+#endif
 	goto donumset;
     case O_COMPLEMENT:
 	if (!sawvec || st[1]->str_nok) {
@@ -1179,6 +1194,7 @@ register int sp;
     case O_SUBSTR:
 	anum = ((int)str_gnum(st[2])) - arybase;	/* anum=where to start*/
 	tmps = str_get(st[1]);		/* force conversion to string */
+	/*SUPPRESS 560*/
 	if (argtype = (str == st[1]))
 	    str = arg->arg_ptr.arg_str;
 	if (anum < 0)
@@ -1204,6 +1220,7 @@ register int sp;
 	}
 	break;
     case O_PACK:
+	/*SUPPRESS 701*/
 	(void)do_pack(str,arglast);
 	break;
     case O_GREP:
@@ -1253,11 +1270,7 @@ register int sp;
 	st = stack->ary_array + arglast[0];		/* maybe realloced */
 	goto array_return;
     case O_SORT:
-	if ((arg[1].arg_type & A_MASK) == A_WORD)
-	    stab = arg[1].arg_ptr.arg_stab;
-	else
-	    stab = stabent(str_get(st[1]),TRUE);
-	sp = do_sort(str,stab,
+	sp = do_sort(str,arg,
 	  gimme,arglast);
 	goto array_return;
     case O_REVERSE:
@@ -1451,6 +1464,10 @@ register int sp;
 	    goto badsock;
 #endif
 	STR_GROW(st[2], anum+maxarg+1), (tmps = str_get(st[2]));  /* sneaky */
+	if (optype == O_SYSREAD) {
+	    anum = read(fileno(stab_io(stab)->ifp), tmps+maxarg, anum);
+	}
+	else
 #ifdef HAS_SOCKET
 	if (stab_io(stab)->type == 's') {
 	    argtype = sizeof buf;
@@ -1459,10 +1476,6 @@ register int sp;
 	}
 	else
 #endif
-	if (optype == O_SYSREAD) {
-	    anum = read(fileno(stab_io(stab)->ifp), tmps+maxarg, anum);
-	}
-	else
 	    anum = fread(tmps+maxarg, 1, anum, stab_io(stab)->ifp);
 	if (anum < 0)
 	    goto say_undef;
@@ -1541,6 +1554,7 @@ register int sp;
     case O_REDO:
     case O_NEXT:
     case O_LAST:
+	tmps = Nullch;
 	if (maxarg > 0) {
 	    tmps = str_get(arg[1].arg_ptr.arg_str);
 	  dopop:
@@ -1887,9 +1901,10 @@ register int sp;
 	if (anum < 0)
 	    goto say_undef;
 	if (!anum) {
+	    /*SUPPRESS 560*/
 	    if (tmpstab = stabent("$",allstabs))
 		str_numset(STAB_STR(tmpstab),(double)getpid());
-	    hclear(pidstatus);	/* no kids, so don't wait for 'em */
+	    hclear(pidstatus, FALSE);	/* no kids, so don't wait for 'em */
 	}
 	value = (double)anum;
 	goto donumset;
@@ -2005,7 +2020,7 @@ register int sp;
 	    tmps = str_get(stab_val(defstab));
 	else
 	    tmps = str_get(st[1]);
-	while (*tmps && isascii(*tmps) && (isspace(*tmps) || *tmps == '0'))
+	while (*tmps && (isSPACE(*tmps) || *tmps == '0'))
 	    tmps++;
 	if (*tmps == 'x')
 	    value = (double)scanhex(++tmps, 99, &argtype);
@@ -2014,7 +2029,7 @@ register int sp;
 	goto donumset;
 
 /* These common exits are hidden here in the middle of the switches for the
-/* benefit of those machines with limited branch addressing.  Sigh.  */
+   benefit of those machines with limited branch addressing.  Sigh.  */
 
 array_return:
 #ifdef DEBUGGING
@@ -2027,12 +2042,14 @@ array_return:
 		deb("%s RETURNS ()\n",opname[optype]);
 		break;
 	    case 1:
-		deb("%s RETURNS (\"%s\")\n",opname[optype],str_get(st[1]));
+		deb("%s RETURNS (\"%s\")\n",opname[optype],
+		    st[1] ? str_get(st[1]) : "");
 		break;
 	    default:
-		tmps = str_get(st[1]);
+		tmps = st[1] ? str_get(st[1]) : "";
 		deb("%s RETURNS %d ARGS (\"%s\",%s\"%s\")\n",opname[optype],
-		  anum,tmps,anum==2?"":"...,",str_get(st[anum]));
+		  anum,tmps,anum==2?"":"...,",
+			st[anum] ? str_get(st[anum]) : "");
 		break;
 	    }
 	}
@@ -2410,6 +2427,22 @@ donumset:
 	value = (double)(ary->ary_fill + 1);
 	goto donumset;
 
+    case O_TRY:
+	sp = do_try(arg[1].arg_ptr.arg_cmd,
+	    gimme,arglast);
+	goto array_return;
+
+    case O_EVALONCE:
+	sp = do_eval(st[1], O_EVAL, curcmd->c_stash, TRUE,
+	    gimme,arglast);
+	if (eval_root) {
+	    str_free(arg[1].arg_ptr.arg_str);
+	    arg[1].arg_ptr.arg_cmd = eval_root;
+	    arg[1].arg_type = (A_CMD|A_DONT);
+	    arg[0].arg_type = O_TRY;
+	}
+	goto array_return;
+
     case O_REQUIRE:
     case O_DOFILE:
     case O_EVAL:
@@ -2422,7 +2455,7 @@ donumset:
 	tainted |= tmpstr->str_tainted;
 	taintproper("Insecure dependency in eval");
 #endif
-	sp = do_eval(tmpstr, optype, curcmd->c_stash,
+	sp = do_eval(tmpstr, optype, curcmd->c_stash, FALSE,
 	    gimme,arglast);
 	goto array_return;
 
@@ -2598,7 +2631,7 @@ donumset:
 	    stab = stabent(tmps = str_get(st[1]),FALSE);
 	if (stab && stab_io(stab) && stab_io(stab)->ifp)
 	    anum = fileno(stab_io(stab)->ifp);
-	else if (isdigit(*tmps))
+	else if (isDIGIT(*tmps))
 	    anum = atoi(tmps);
 	else
 	    goto say_undef;

@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: eval.t,v 4.0 91/03/20 01:52:20 lwall Locked $
+# $RCSfile: eval.t,v $$Revision: 4.0.1.1 $$Date: 91/11/05 18:43:19 $
 
-print "1..10\n";
+print "1..16\n";
 
 eval 'print "ok 1\n";';
 
@@ -40,3 +40,18 @@ print try 'print "ok 10\n"; unlink "Op.eval";',"\n";
 close try;
 
 do 'Op.eval'; print $@;
+
+# Test the singlequoted eval optimizer
+
+$i = 11;
+for (1..3) {
+    eval 'print "ok ", $i++, "\n"';
+}
+
+eval {
+    print "ok 14\n";
+    die "ok 16\n";
+    1;
+} || print "ok 15\n$@";
+
+

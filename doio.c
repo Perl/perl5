@@ -1,4 +1,4 @@
-/* $RCSfile: doio.c,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:21:19 $
+/* $RCSfile: doio.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 16:51:43 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,15 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doio.c,v $
+ * Revision 4.0.1.4  91/11/05  16:51:43  lwall
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * patch11: perl mistook some streams for sockets because they return mode 0 too
+ * patch11: reopening STDIN, STDOUT and STDERR failed on some machines
+ * patch11: certain perl errors should set EBADF so that $! looks better
+ * patch11: truncate on a closed filehandle could dump
+ * patch11: stats of _ forgot whether prior stat was actually lstat
+ * patch11: -T returned true on NFS directory
+ * 
  * Revision 4.0.1.3  91/06/10  01:21:19  lwall
  * patch10: read didn't work from character special files open for writing
  * patch10: close-on-exec wrongly set on system file descriptors
@@ -93,7 +102,7 @@ int len;
 
     name = myname;
     forkprocess = 1;		/* assume true if no fork */
-    while (len && isspace(name[len-1]))
+    while (len && isSPACE(name[len-1]))
 	name[--len] = '\0';
     if (!stio)
 	stio = stab_io(stab) = stio_new();
@@ -135,7 +144,8 @@ int len;
     }
     stio->type = *name;
     if (*name == '|') {
-	for (name++; isspace(*name); name++) ;
+	/*SUPPRESS 530*/
+	for (name++; isSPACE(*name); name++) ;
 #ifdef TAINT
 	taintenv();
 	taintproper("Insecure dependency in piped open");
@@ -158,9 +168,9 @@ int len;
 	if (*name == '&') {
 	  duplicity:
 	    name++;
-	    while (isspace(*name))
+	    while (isSPACE(*name))
 		name++;
-	    if (isdigit(*name))
+	    if (isDIGIT(*name))
 		fd = atoi(name);
 	    else {
 		stab = stabent(name,FALSE);
@@ -183,7 +193,7 @@ int len;
 	    }
 	}
 	else {
-	    while (isspace(*name))
+	    while (isSPACE(*name))
 		name++;
 	    if (strEQ(name,"-")) {
 		fp = stdout;
@@ -198,7 +208,7 @@ int len;
 	if (*name == '<') {
 	    mode[0] = 'r';
 	    name++;
-	    while (isspace(*name))
+	    while (isSPACE(*name))
 		name++;
 	    if (*name == '&')
 		goto duplicity;
@@ -215,15 +225,17 @@ int len;
 	    taintproper("Insecure dependency in piped open");
 #endif
 	    name[--len] = '\0';
-	    while (len && isspace(name[len-1]))
+	    while (len && isSPACE(name[len-1]))
 		name[--len] = '\0';
-	    for (; isspace(*name); name++) ;
+	    /*SUPPRESS 530*/
+	    for (; isSPACE(*name); name++) ;
 	    fp = mypopen(name,"r");
 	    stio->type = '|';
 	}
 	else {
 	    stio->type = '<';
-	    for (; isspace(*name); name++) ;
+	    /*SUPPRESS 530*/
+	    for (; isSPACE(*name); name++) ;
 	    if (strEQ(name,"-")) {
 		fp = stdin;
 		stio->type = '-';
@@ -243,9 +255,18 @@ int len;
 	}
 	if (S_ISSOCK(statbuf.st_mode))
 	    stio->type = 's';	/* in case a socket was passed in to us */
+#ifdef HAS_SOCKET
+	else if (
 #ifdef S_IFMT
-	else if (!(statbuf.st_mode & S_IFMT))
-	    stio->type = 's';	/* some OS's return 0 on fstat()ed socket */
+	    !(statbuf.st_mode & S_IFMT)
+#else
+	    !statbuf.st_mode
+#endif
+	) {
+	    if (getsockname(fileno(fp), tokenbuf, 0) >= 0 || errno != ENOTSOCK)
+		stio->type = 's'; /* some OS's return 0 on fstat()ed socket */
+				/* but some return 0 for streams too, sigh */
+	}
 #endif
     }
     if (saveifp) {		/* must use old fp? */
@@ -254,7 +275,8 @@ int len;
 	    fflush(saveofp);		/* emulate fclose() */
 	    if (saveofp != saveifp) {	/* was a socket? */
 		fclose(saveofp);
-		Safefree(saveofp);
+		if (fd > 2)
+		    Safefree(saveofp);
 	    }
 	}
 	if (fd != fileno(fp)) {
@@ -294,8 +316,10 @@ nextargv(stab)
 register STAB *stab;
 {
     register STR *str;
+#ifndef FLEXFILENAMES
     int filedev;
     int fileino;
+#endif
     int fileuid;
     int filegid;
     static int filemode = 0;
@@ -328,8 +352,10 @@ register STAB *stab;
 		    defoutstab = stabent("STDOUT",TRUE);
 		    return stab_io(stab)->ifp;
 		}
+#ifndef FLEXFILENAMES
 		filedev = statbuf.st_dev;
 		fileino = statbuf.st_ino;
+#endif
 		filemode = statbuf.st_mode;
 		fileuid = statbuf.st_uid;
 		filegid = statbuf.st_gid;
@@ -503,8 +529,10 @@ bool explicit;
 
     if (!stab)
 	stab = argvstab;
-    if (!stab)
+    if (!stab) {
+	errno = EBADF;
 	return FALSE;
+    }
     stio = stab_io(stab);
     if (!stio) {		/* never opened */
 	if (dowarn && explicit)
@@ -601,6 +629,7 @@ STAB *stab;
 phooey:
     if (dowarn)
 	warn("tell() on unopened file");
+    errno = EBADF;
     return -1L;
 }
 
@@ -627,6 +656,7 @@ int whence;
 nuts:
     if (dowarn)
 	warn("seek() on unopened file");
+    errno = EBADF;
     return FALSE;
 }
 
@@ -641,11 +671,10 @@ STR *argstr;
     register char *s;
     int retval;
 
-    if (!stab || !argstr)
+    if (!stab || !argstr || !(stio = stab_io(stab)) || !stio->ifp) {
+	errno = EBADF;	/* well, sort of... */
 	return -1;
-    stio = stab_io(stab);
-    if (!stio)
-	return -1;
+    }
 
     if (argstr->str_pok || !argstr->str_nok) {
 	if (!argstr->str_pok)
@@ -847,7 +876,7 @@ off_t length;		/* length to set file to */
 }
 #endif /* F_FREESP */
 
-int
+int					/*SUPPRESS 590*/
 do_truncate(str,arg,gimme,arglast)
 STR *str;
 register ARG *arg;
@@ -864,7 +893,7 @@ int *arglast;
 #ifdef HAS_TRUNCATE
     if ((arg[1].arg_type & A_MASK) == A_WORD) {
 	tmpstab = arg[1].arg_ptr.arg_stab;
-	if (!stab_io(tmpstab) ||
+	if (!stab_io(tmpstab) || !stab_io(tmpstab)->ifp ||
 	  ftruncate(fileno(stab_io(tmpstab)->ifp), len) < 0)
 	    result = 0;
     }
@@ -873,7 +902,7 @@ int *arglast;
 #else
     if ((arg[1].arg_type & A_MASK) == A_WORD) {
 	tmpstab = arg[1].arg_ptr.arg_stab;
-	if (!stab_io(tmpstab) ||
+	if (!stab_io(tmpstab) || !stab_io(tmpstab)->ifp ||
 	  chsize(fileno(stab_io(tmpstab)->ifp), len) < 0)
 	    result = 0;
     }
@@ -913,13 +942,13 @@ STR *str;
 	return TRUE;
     s = str->str_ptr; 
     send = s + str->str_cur;
-    while (isspace(*s))
+    while (isSPACE(*s))
 	s++;
     if (s >= send)
 	return FALSE;
     if (*s == '+' || *s == '-')
 	s++;
-    while (isdigit(*s))
+    while (isDIGIT(*s))
 	s++;
     if (s == send)
 	return TRUE;
@@ -927,7 +956,7 @@ STR *str;
 	s++;
     else if (s == str->str_ptr)
 	return FALSE;
-    while (isdigit(*s))
+    while (isDIGIT(*s))
 	s++;
     if (s == send)
 	return TRUE;
@@ -935,10 +964,10 @@ STR *str;
 	s++;
 	if (*s == '+' || *s == '-')
 	    s++;
-	while (isdigit(*s))
+	while (isDIGIT(*s))
 	    s++;
     }
-    while (isspace(*s))
+    while (isSPACE(*s))
 	s++;
     if (s >= send)
 	return TRUE;
@@ -955,6 +984,7 @@ FILE *fp;
     if (!fp) {
 	if (dowarn)
 	    warn("print to unopened file");
+	errno = EBADF;
 	return FALSE;
     }
     if (!str)
@@ -995,6 +1025,7 @@ int *arglast;
     if (!fp) {
 	if (dowarn)
 	    warn("print to unopened file");
+	errno = EBADF;
 	return FALSE;
     }
     st += ++sp;
@@ -1028,12 +1059,12 @@ STR *str;
 {
     STIO *stio;
 
-    laststype = O_STAT;
     if (arg[1].arg_type & A_DONT) {
 	stio = stab_io(arg[1].arg_ptr.arg_stab);
 	if (stio && stio->ifp) {
 	    statstab = arg[1].arg_ptr.arg_stab;
 	    str_set(statname,"");
+	    laststype = O_STAT;
 	    return (laststatval = fstat(fileno(stio->ifp), &statcache));
 	}
 	else {
@@ -1050,6 +1081,7 @@ STR *str;
     else {
 	statstab = Nullstab;
 	str_set(statname,str_get(str));
+	laststype = O_STAT;
 	return (laststatval = stat(str_get(str),&statcache));
     }
 }
@@ -1107,6 +1139,8 @@ STR *str;
 	if (stio && stio->ifp) {
 #ifdef STDSTDIO
 	    fstat(fileno(stio->ifp),&statcache);
+	    if (S_ISDIR(statcache.st_mode))	/* handle NFS glitch */
+		return arg->arg_type == O_FTTEXT ? &str_no : &str_yes;
 	    if (stio->ifp->_cnt <= 0) {
 		i = getc(stio->ifp);
 		if (i != EOF)
@@ -1117,13 +1151,14 @@ STR *str;
 	    len = stio->ifp->_cnt + (stio->ifp->_ptr - stio->ifp->_base);
 	    s = stio->ifp->_base;
 #else
-	    fatal("-T and -B not implemented on filehandles\n");
+	    fatal("-T and -B not implemented on filehandles");
 #endif
 	}
 	else {
 	    if (dowarn)
 		warn("Test on unopened file <%s>",
 		  stab_name(arg[1].arg_ptr.arg_stab));
+	    errno = EBADF;
 	    return &str_undef;
 	}
     }
@@ -1137,8 +1172,11 @@ STR *str;
 	fstat(i,&statcache);
 	len = read(i,tbuf,512);
 	(void)close(i);
-	if (len <= 0)		/* null file is anything */
-	    return &str_yes;
+	if (len <= 0) {
+	    if (S_ISDIR(statcache.st_mode) && arg->arg_type == O_FTTEXT)
+		return &str_no;		/* special case NFS directories */
+	    return &str_yes;		/* null file is anything */
+	}
 	s = tbuf;
     }
 
@@ -1253,11 +1291,12 @@ char *cmd;
 
     /* see if there are shell metacharacters in it */
 
-    for (s = cmd; *s && isalpha(*s); s++) ;	/* catch VAR=val gizmo */
+    /*SUPPRESS 530*/
+    for (s = cmd; *s && isALPHA(*s); s++) ;	/* catch VAR=val gizmo */
     if (*s == '=')
 	goto doshell;
     for (s = cmd; *s; s++) {
-	if (*s != ' ' && !isalpha(*s) && index("$&*(){}[]'\";\\|?<>~`\n",*s)) {
+	if (*s != ' ' && !isALPHA(*s) && index("$&*(){}[]'\";\\|?<>~`\n",*s)) {
 	    if (*s == '\n' && !s[1]) {
 		*s = '\0';
 		break;
@@ -1271,10 +1310,10 @@ char *cmd;
     Cmd = nsavestr(cmd, s-cmd);
     a = Argv;
     for (s = Cmd; *s;) {
-	while (*s && isspace(*s)) s++;
+	while (*s && isSPACE(*s)) s++;
 	if (*s)
 	    *(a++) = s;
-	while (*s && !isspace(*s)) s++;
+	while (*s && !isSPACE(*s)) s++;
 	if (*s)
 	    *s++ = '\0';
     }
@@ -1301,8 +1340,10 @@ int *arglast;
     register STIO *stio;
     int domain, type, protocol, fd;
 
-    if (!stab)
+    if (!stab) {
+	errno = EBADF;
 	return FALSE;
+    }
 
     stio = stab_io(stab);
     if (!stio)
@@ -1358,6 +1399,7 @@ int *arglast;
 nuts:
     if (dowarn)
 	warn("bind() on closed fd");
+    errno = EBADF;
     return FALSE;
 
 }
@@ -1388,6 +1430,7 @@ int *arglast;
 nuts:
     if (dowarn)
 	warn("connect() on closed fd");
+    errno = EBADF;
     return FALSE;
 
 }
@@ -1415,6 +1458,7 @@ int *arglast;
 nuts:
     if (dowarn)
 	warn("listen() on closed fd");
+    errno = EBADF;
     return FALSE;
 }
 
@@ -1463,6 +1507,7 @@ STAB *gstab;
 nuts:
     if (dowarn)
 	warn("accept() on closed fd");
+    errno = EBADF;
 badexit:
     str_sset(str,&str_undef);
     return;
@@ -1491,6 +1536,7 @@ int *arglast;
 nuts:
     if (dowarn)
 	warn("shutdown() on closed fd");
+    errno = EBADF;
     return FALSE;
 
 }
@@ -1520,7 +1566,7 @@ int *arglast;
     optname = (int)str_gnum(st[sp+2]);
     switch (optype) {
     case O_GSOCKOPT:
-	st[sp] = str_2mortal(str_new(257));
+	st[sp] = str_2mortal(Str_new(22,257));
 	st[sp]->str_cur = 256;
 	st[sp]->str_pok = 1;
 	if (getsockopt(fd, lvl, optname, st[sp]->str_ptr, &st[sp]->str_cur) < 0)
@@ -1540,6 +1586,7 @@ nuts:
     if (dowarn)
 	warn("[gs]etsockopt() on closed fd");
     st[sp] = &str_undef;
+    errno = EBADF;
     return sp;
 
 }
@@ -1562,7 +1609,7 @@ int *arglast;
     if (!stio || !stio->ifp)
 	goto nuts;
 
-    st[sp] = str_2mortal(str_new(257));
+    st[sp] = str_2mortal(Str_new(22,257));
     st[sp]->str_cur = 256;
     st[sp]->str_pok = 1;
     fd = fileno(stio->ifp);
@@ -1582,6 +1629,7 @@ int *arglast;
 nuts:
     if (dowarn)
 	warn("get{sock,peer}name() on closed fd");
+    errno = EBADF;
 nuts2:
     st[sp] = &str_undef;
     return sp;
@@ -2208,6 +2256,7 @@ int *arglast;
     case O_READDIR:
 	if (gimme == G_ARRAY) {
 	    --sp;
+	    /*SUPPRESS 560*/
 	    while (dp = readdir(stio->dirp)) {
 #ifdef DIRNAMLEN
 		(void)astore(ary,++sp,
@@ -2258,6 +2307,8 @@ int *arglast;
 
 nope:
     st[sp] = &str_undef;
+    if (!errno)
+	errno = EBADF;
     return sp;
 
 #else
@@ -2323,7 +2374,7 @@ int *arglast;
 	if (--items > 0) {
 	    tot = items;
 	    s = str_get(st[++sp]);
-	    if (isupper(*s)) {
+	    if (isUPPER(*s)) {
 		if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		    s += 3;
 		if (!(val = whichsig(s)))
