@@ -12,7 +12,11 @@ Unicode support
     eliminate need for "use utf8;"
     autoload byte.pm when byte:: is seen by the parser
     check uv_to_utf8() calls for buffer overflow
-    (see also "Locales", "Regexen", and "Miscellaneous")
+    make \uXXXX (and \u{XXXX}?) where XXXX are hex digits
+	to work similarly to Unicode tech reports and Java
+	notation \uXXXX (and already existing \x{XXXX))?
+	more than four hexdigits? make also \U+XXXX work?
+    See also "Locales", "Regexen", and "Miscellaneous".
 
 Multi-threading
     support "use Thread;" under useithreads
