@@ -316,8 +316,7 @@ char *tzname[] = { "" , "" };
 
 #ifdef STRUCT_TM_HASZONE
 static void
-init_tm(ptm)		/* see mktime, strftime and asctime	*/
-    struct tm *ptm;
+init_tm(struct tm *ptm)		/* see mktime, strftime and asctime	*/
 {
     Time_t now;
     (void)time(&now);
