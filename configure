@@ -46,6 +46,7 @@ It emulates the following GNU configure options (must be fully spelled out):
 	--help
 	--no-create
 	--prefix=PREFIX
+ 	--cache-file  (ignored)
 	--quiet
 	--silent
 	--verbose
@@ -64,6 +65,9 @@ EOM
 		opts="$opts $arg"
 		shift
 		;;
+ 	--cache-file=*)
+ 		shift		# Just ignore it.
+ 		;;
 	--quiet|--silent)
 		exec >/dev/null 2>&1
 		shift
