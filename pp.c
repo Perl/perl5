@@ -86,7 +86,7 @@ typedef unsigned UBW;
 #   define PERL_NATINT_PACK
 #endif
 
-#if LONGSIZE > 0xFFFF && defined(_CRAY)
+#if LONGSIZE > 4 && defined(_CRAY)
 #  if BYTEORDER == 0x12345678
 #    define OFF16(p)	(char*)(p)
 #    define OFF32(p)	(char*)(p)
