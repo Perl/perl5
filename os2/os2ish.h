@@ -292,6 +292,10 @@ typedef struct OS2_Perl_data {
   int (*xs_init)();
   unsigned long rc;
   unsigned long severity;
+  unsigned long	phmq;			/* Handle to message queue */
+  unsigned long	phmq_refcnt;
+  unsigned long	phmq_servers;
+  unsigned long	initial_mode;		/* VIO etc. mode we were started in */
 } OS2_Perl_data_t;
 
 extern OS2_Perl_data_t OS2_Perl_data;
@@ -305,6 +309,42 @@ extern OS2_Perl_data_t OS2_Perl_data;
 #define Perl_HAB_set	(OS2_Perl_flags & Perl_HAB_set_f)
 #define set_Perl_HAB_f	(OS2_Perl_flags |= Perl_HAB_set_f)
 #define set_Perl_HAB(h) (set_Perl_HAB_f, Perl_hab = h)
+#define _obtain_Perl_HAB (init_PMWIN_entries(),				\
+			  Perl_hab = (*PMWIN_entries.Initialize)(0),	\
+			  set_Perl_HAB_f, Perl_hab)
+#define perl_hab_GET()	(Perl_HAB_set ? Perl_hab : _obtain_Perl_HAB)
+#define Acquire_hab()	perl_hab_GET()
+#define Perl_hmq	((HMQ)OS2_Perl_data.phmq)
+#define Perl_hmq_refcnt	(OS2_Perl_data.phmq_refcnt)
+#define Perl_hmq_servers	(OS2_Perl_data.phmq_servers)
+#define Perl_os2_initial_mode	(OS2_Perl_data.initial_mode)
+
+unsigned long Perl_hab_GET();
+unsigned long Perl_Register_MQ(int serve);
+void	Perl_Deregister_MQ(int serve);
+int	Perl_Serve_Messages(int force);
+/* Cannot prototype with I32 at this point. */
+int	Perl_Process_Messages(int force, long *cntp);
+
+struct _QMSG;
+struct PMWIN_entries_t {
+    unsigned long (*Initialize)( unsigned long fsOptions );
+    unsigned long (*CreateMsgQueue)(unsigned long hab, long cmsg);
+    int (*DestroyMsgQueue)(unsigned long hmq);
+    int (*PeekMsg)(unsigned long hab, struct _QMSG *pqmsg,
+		   unsigned long hwndFilter, unsigned long msgFilterFirst,
+		   unsigned long msgFilterLast, unsigned long fl);
+    int (*GetMsg)(unsigned long hab, struct _QMSG *pqmsg,
+		  unsigned long hwndFilter, unsigned long msgFilterFirst,
+		  unsigned long msgFilterLast);
+    void * (*DispatchMsg)(unsigned long hab, struct _QMSG *pqmsg);
+};
+extern struct PMWIN_entries_t PMWIN_entries;
+void init_PMWIN_entries(void);
+
+#define perl_hmq_GET(serve)	Perl_Register_MQ(serve);
+#define perl_hmq_UNSET(serve)	Perl_Deregister_MQ(serve);
+
 #define OS2_XS_init() (*OS2_Perl_data.xs_init)()
 /* The expressions below return true on error. */
 /* INCL_DOSERRORS needed. rc should be declared outside. */
@@ -319,11 +359,6 @@ extern OS2_Perl_data_t OS2_Perl_data;
 			errno = errno_isOS2,				\
 			Perl_severity = ERRORIDSEV(Perl_rc),		\
 			Perl_rc = ERRORIDERROR(Perl_rc)) 
-#define Acquire_hab() if (!Perl_HAB_set) {				\
-	   Perl_hab = WinInitialize(0);					\
-	   if (!Perl_hab) die("WinInitialize failed");			\
-	   set_Perl_HAB_f;						\
-	}
 
 #define STATIC_FILE_LENGTH 127
 
