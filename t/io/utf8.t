@@ -135,8 +135,9 @@ print "ok 21\n";
 
 # Now let's make it suffer.
 open F, ">", "a" or die $!;
-eval { print F $a; };
-print "not " unless $@ and $@ =~ /Wide character in print/i;
+my $w;
+eval {local $SIG{__WARN__} = sub { $w = $_[0] };  print F $a; };
+print "not " if ($@ || $w !~ /Wide character in print/i);
 print "ok 22\n";
 }
 
