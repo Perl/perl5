@@ -305,7 +305,6 @@ UTILS		=			\
 		..\pod\pod2text		\
 		..\x2p\find2perl	\
 		..\x2p\s2p		\
-		bin\www.pl		\
 		bin\runperl.pl		\
 		bin\pl2bat.pl		\
 		bin\perlglob.pl		\
@@ -876,7 +875,6 @@ installbare : utils
 !ENDIF
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
-	$(XCOPY) bin\network.pl $(INST_LIB)\*.*
 
 installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*

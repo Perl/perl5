@@ -78,6 +78,41 @@ Version 5.005_52        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  1882] By: gsar                                  on 1998/09/25  02:04:43
+        Log: missing file in last submit
+     Branch: perl
+           ! proto.h
+____________________________________________________________________________
+[  1881] By: gsar                                  on 1998/09/25  01:56:54
+        Log: serial access to PL_x[inpr]v_root for USE_THREADS
+     Branch: perl
+           ! sv.c
+____________________________________________________________________________
+[  1880] By: gsar                                  on 1998/09/25  01:19:38
+        Log: lock sv_mutex in new_he() and del_he() for USE_THREADS
+             From: Drago Goricanec <drago@king.otsd.ts.fujitsu.co.jp>
+             Date: Thu, 24 Sep 1998 22:01:09 +0900
+             Message-Id: <19980924220109J.drago@otsd.ts.fujitsu.co.jp>
+             Subject: [PATCH 5.005_51] Re: Perl 5.005_51 not yet multi Thread safe 
+     Branch: perl
+           ! hv.c proto.h
+____________________________________________________________________________
+[  1879] By: gsar                                  on 1998/09/25  00:20:07
+        Log: tweaks to enable PERL_OBJECT to build & test on win32
+     Branch: perl
+	   ! Changes doop.c mg.c objpp.h proto.h regexec.c util.c
+           ! win32/GenCAPI.pl
+____________________________________________________________________________
+[  1878] By: gsar                                  on 1998/09/25  00:13:36
+        Log: fix change#1861, which breaks default boot_xxx symbol generation
+     Branch: perl
+           ! lib/ExtUtils/Mksymlists.pm
+____________________________________________________________________________
+[  1877] By: gsar                                  on 1998/09/24  10:29:54
+        Log: two tweaks for clean build and test on Solaris
+     Branch: perl
+           ! op.c t/op/subst.t
+____________________________________________________________________________
 [  1876] By: gsar                                  on 1998/09/24  09:04:43
         Log: From: Colin Kuskie <ckuskie@cadence.com>
              Date: Wed, 26 Aug 1998 14:53:01 -0700 (PDT)

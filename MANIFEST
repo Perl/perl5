@@ -1223,13 +1223,10 @@ win32/GenCAPI.pl	Win32 port for C API with PERL_OBJECT
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/TEST		Win32 port
 win32/autosplit.pl	Win32 port
-win32/bin/network.pl	Win32 port
 win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake
 win32/bin/search.pl	Win32 port
-win32/bin/webget.pl	Win32 port
-win32/bin/www.pl	Win32 port
 win32/config.bc		Win32 base line config.sh (Borland C++ build)
 win32/config.gc		Win32 base line config.sh (mingw32/gcc build)
 win32/config.vc		Win32 base line config.sh (Visual C++ build)
