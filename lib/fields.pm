@@ -57,7 +57,7 @@ class fields using this pragma, then the operation is turned into an
 array access at compile time.
 
 The related C<base> pragma will combine fields from base classes and any
-fields declared using the C<fields> pragma.  This enables fields
+fields declared using the C<fields> pragma.  This enables field
 inheritance to work properly.
 
 Field names that start with an underscore character are made private to
@@ -85,9 +85,9 @@ This makes it possible to write a constructor like this:
 
     sub new {
 	my Critter::Sounds $self = shift;
-	$self = fields::new($class) unless ref $self;
+	$self = fields::new($self) unless ref $self;
 	$self->{cat} = 'meow';				# scalar element
-	@$self->{'dog','bird'} = ('bark','tweet');	# slice
+	@$self{'dog','bird'} = ('bark','tweet');	# slice
 	return $self;
     }
 
