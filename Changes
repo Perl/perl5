@@ -78,6 +78,30 @@ Version 5.005_50        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  1664] By: gsar                                  on 1998/07/26  05:08:48
+        Log: integrate proto.h additions from maint-5.005
+     Branch: perl
+          !> pod/perlhist.pod proto.h
+____________________________________________________________________________
+[  1663] By: gsar                                  on 1998/07/26  05:07:05
+        Log: add new files to MANIFEST; add missing prototypes to proto.h;
+             s/PL_utf8skip/utf8skip/ for now, or we end up with Perl_PL_;
+             add typecasts to silence warnings; tweaks for win32 builds
+     Branch: perl
+	   ! MANIFEST embed.h global.sym proto.h regexec.c toke.c utf8.h
+           ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  1662] By: gsar                                  on 1998/07/26  05:01:52
+        Log: add missing sv_*_mg() prototypes in proto.h, update perlhist.pod
+     Branch: maint-5.005/perl
+           ! pod/perlhist.pod proto.h
+____________________________________________________________________________
+[  1661] By: gsar                                  on 1998/07/26  02:52:48
+        Log: up patchlevel to 5.005_50
+     Branch: perl
+	   ! Changes patchlevel.h win32/Makefile win32/config_H.bc
+           ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
 [  1660] By: gsar                                  on 1998/07/26  02:43:57
         Log: integrate utfperl
      Branch: perl
