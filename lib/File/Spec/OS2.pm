@@ -29,11 +29,6 @@ sub path {
     return @path;
 }
 
-sub cwd {
-    require Cwd;
-    return Cwd::sys_cwd();
-}
-
 =pod
 
 =item tmpdir
