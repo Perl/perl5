@@ -2762,6 +2762,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
     SAVESPTR(PL_beginav);
     PL_beginav = newAV();
     SAVEFREESV(PL_beginav);
+    SAVEI32(PL_error_count);
 
     /* try to compile it */
 
