@@ -1519,10 +1519,11 @@ at Configure time.
 
 =item MAN3PODS
 
-Hashref of .pm and .pod files. MakeMaker will default this to all
- .pod and any .pm files that include POD directives. The files listed
-here will be converted to man pages and installed as was requested
-at Configure time.
+Hashref that assigns to *.pm and *.pod files the files into which the
+manpages are to be written. MakeMaker parses all *.pod and *.pm files
+for POD directives. Files that contain POD will be the default keys of
+the MAN3PODS hashref. These will then be converted to man pages during
+C<make> and will be installed during C<make install>.
 
 =item MAP_TARGET
 

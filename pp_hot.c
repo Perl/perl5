@@ -1532,8 +1532,11 @@ PP(pp_helem)
     U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
     U32 hash = (SvFAKE(keysv) && SvREADONLY(keysv)) ? SvUVX(keysv) : 0;
+    I32 preeminent;
 
     if (SvTYPE(hv) == SVt_PVHV) {
+	if (PL_op->op_private & OPpLVAL_INTRO)
+	    preeminent = SvRMAGICAL(hv) ? 1 : hv_exists_ent(hv, keysv, 0);
 	he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
 	svp = he ? &HeVAL(he) : 0;
     }
@@ -1566,8 +1569,14 @@ PP(pp_helem)
 	if (PL_op->op_private & OPpLVAL_INTRO) {
 	    if (HvNAME(hv) && isGV(*svp))
 		save_gp((GV*)*svp, !(PL_op->op_flags & OPf_SPECIAL));
-	    else
-		save_helem(hv, keysv, svp);
+	    else {
+		if (!preeminent) {
+		    STRLEN keylen;
+		    char *key = SvPV(keysv, keylen);
+		    save_delete(hv, key, keylen);
+		} else 
+		    save_helem(hv, keysv, svp);
+            }
 	}
 	else if (PL_op->op_private & OPpDEREF)
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);

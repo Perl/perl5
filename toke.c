@@ -2850,15 +2850,14 @@ Perl_yylex(pTHX)
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
                         "### Saw file test %c\n", ftst);
 		} )
-		if (*s == '(' && ckWARN(WARN_AMBIGUOUS))
-		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
-				"Ambiguous -%c() resolved as a file test",
-				tmp);
 		FTST(ftst);
 	    }
 	    else {
 		/* Assume it was a minus followed by a one-letter named
 		 * subroutine call (or a -bareword), then. */
+		DEBUG_T( { PerlIO_printf(Perl_debug_log,
+                        "### %c looked like a file test but was not\n", ftst);
+		} )
 		s -= 2;
 	    }
 	}

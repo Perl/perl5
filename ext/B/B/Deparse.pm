@@ -1792,7 +1792,7 @@ sub pp_leaveloop {
        my $state = $kid->first;
        my $cuddle = $self->{'cuddle'};
        my($expr, @exprs);
-       for (; $$state != $$cont; $state = $state->sibling) {
+       for (; $$state != $$cont and can $state "sibling"; $state = $state->sibling) {
 	   $expr = "";
 	   if (is_state $state) {
 	       $expr = $self->deparse($state, 0);
@@ -1803,8 +1803,12 @@ sub pp_leaveloop {
 	   push @exprs, $expr if $expr;
        }
        $kid = join(";\n", @exprs);
+       if (class($cont) eq "LISTOP") {
        $cont = $cuddle . "continue {\n\t" .
 	 $self->deparse($cont, 0) . "\n\b}\cK";
+       } else {
+	   $cont = "\cK";
+       }
     } else {
 	$cont = "\cK";
 	$kid = $self->deparse($kid, 0);

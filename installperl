@@ -162,8 +162,8 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 -x 'suidperl' . $exe_ext|| die "suidperl isn't executable!\n" if $d_dosuid;
 
 -f 't/rantests'		|| $Is_W32
-			|| warn "WARNING: You've never run 'make test'!!!",
-				"  (Installing anyway.)\n";
+                        || warn "WARNING: You've never run 'make test' or",
+                                " some tests failed! (Installing anyway.)\n";
 
 if ($Is_W32 or $Is_Cygwin) {
   my $perldll;

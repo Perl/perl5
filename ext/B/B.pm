@@ -9,12 +9,16 @@ package B;
 use XSLoader ();
 require Exporter;
 @ISA = qw(Exporter);
+
+# walkoptree comes from B.pm (you are there), walkoptree comes from B.xs
 @EXPORT_OK = qw(minus_c ppname save_BEGINs
 		class peekop cast_I32 cstring cchar hash threadsv_names
-		main_root main_start main_cv svref_2object opnumber amagic_generation
+		main_root main_start main_cv svref_2object opnumber
+		amagic_generation
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
 		begin_av init_av end_av);
+
 sub OPf_KIDS ();
 use strict;
 @B::SV::ISA = 'B::OBJECT';
@@ -80,7 +84,7 @@ sub peekop {
     return sprintf("%s (0x%x) %s", class($op), $$op, $op->name);
 }
 
-sub walkoptree {
+sub walkoptree_slow {
     my($op, $method, $level) = @_;
     $op_count++; # just for statistics
     $level ||= 0;
@@ -90,13 +94,11 @@ sub walkoptree {
 	my $kid;
 	unshift(@parents, $op);
 	for ($kid = $op->first; $$kid; $kid = $kid->sibling) {
-	    walkoptree($kid, $method, $level + 1);
+	    walkoptree_slow($kid, $method, $level + 1);
 	}
 	shift @parents;
     }
 }
-
-*walkoptree_slow = \&walkoptree; # Who is using this?
 
 sub compile_stats {
     return "Total number of OPs processed: $op_count\n";

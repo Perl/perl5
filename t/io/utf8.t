@@ -11,7 +11,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..13\n";
+print "1..25\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
@@ -54,5 +54,110 @@ print "not " unless $buf eq "\x{200}\x{100}£";
 print "ok 13\n";
 close(F);
 
-# unlink('a');
+{
+$a = chr(300); # This *is* UTF-encoded
+$b = chr(130); # This is not.
+
+open F, ">:utf8", 'a' or die $!;
+print F $a,"\n";
+close F;
+
+open F, "<:utf8", 'a' or die $!;
+$x = <F>;
+chomp($x);
+print "not " unless $x eq chr(300);
+print "ok 14\n";
+
+open F, "a" or die $!; # Not UTF
+$x = <F>;
+chomp($x);
+print "not " unless $x eq chr(196).chr(172);
+print "ok 15\n";
+close F;
+
+open F, ">:utf8", 'a' or die $!;
+
+print F $a;
+my $y;
+{ my $x = tell(F); 
+    { use bytes; $y = length($a);}
+    print "not " unless $x == $y;
+    print "ok 16\n";
+}
+
+{ # Check byte length of $b
+use bytes; my $y = length($b);
+print "not " unless $y == 1;
+print "ok 17\n";
+}
+
+print F $b,"\n"; # This upgrades $b!
+
+{ # Check byte length of $b
+use bytes; my $y = length($b);
+print "not " unless $y == 2;
+print "ok 18\n";
+}
+
+{ my $x = tell(F); 
+    { use bytes; $y += 3;}
+    print "not " unless $x == $y;
+    print "ok 19\n";
+}
+
+close F;
+
+open F, "a" or die $!; # Not UTF
+$x = <F>;
+chomp($x);
+print "not " unless $x eq v196.172.194.130;
+print "ok 20\n";
+
+open F, "<:utf8", "a" or die $!;
+$x = <F>;
+chomp($x);
+close F;
+print "not " unless $x eq chr(300).chr(130);
+print "ok 21\n";
+
+# Now let's make it suffer.
+open F, ">", "a" or die $!;
+eval { print F $a; };
+print "not " unless $@ and $@ =~ /Wide character in print/i;
+print "ok 22\n";
+}
+
+# Hm. Time to get more evil.
+open F, ">:utf8", "a" or die $!;
+print F $a;
+binmode(F, ":bytes");
+print F chr(130)."\n";
+close F;
+
+open F, "<", "a" or die $!;
+$x = <F>; chomp $x;
+print "not " unless $x eq v196.172.130;
+print "ok 23\n";
+
+# Right.
+open F, ">:utf8", "a" or die $!;
+print F $a;
+close F;
+open F, ">>", "a" or die $!;
+print F chr(130)."\n";
+close F;
+
+open F, "<", "a" or die $!;
+$x = <F>; chomp $x;
+print "not " unless $x eq v196.172.130;
+print "ok 24\n";
+
+# Now we have a deformed file.
+open F, "<:utf8", "a" or die $!;
+$x = <F>; chomp $x;
+{ local $SIG{__WARN__} = sub { print "ok 25\n"; };
+eval { sprintf "%vd\n", $x; }
+}
+
+unlink('a');
 
