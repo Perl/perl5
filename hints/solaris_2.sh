@@ -56,8 +56,8 @@ esac
 
 # Here's another draft of the perl5/solaris/gcc sanity-checker. 
 
-test -z "`${cc:-cc} -V 2>/dev/null|grep -i workshop`" || ccisworkshop="$define"
-test -z "`${cc:-cc} -v 2>/dev/null|grep -i gcc`"      || ccisgcc="$define"
+test -z "`${cc:-cc} -V 2>&1|grep -i workshop`" || ccisworkshop="$define"
+test -z "`${cc:-cc} -v 2>&1|grep -i gcc`"      || ccisgcc="$define"
 
 case "$ccisworkshop" in
 "$define")
@@ -380,8 +380,8 @@ EOCBU
 cat > UU/use64bitall.cbu <<'EOCBU'
 # This script UU/use64bitall.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to be maximally 64 bitty.
-case "$use64bitall" in
-"$define"|true|[yY]*)
+case "$use64bitall-$use64bitall_done" in
+"$define-"|true-|[yY]*-)
 	    libc='/usr/lib/sparcv9/libc.so'
 	    if test ! -f $libc; then
 		cat >&4 <<EOM
@@ -427,12 +427,13 @@ EOM
 *64-bit*|*SPARCV9*) ;;
 *) xxx=/no/64-bit$xxx ;;
 esac'
+	    use64bitall_done=yes
 	    ;;
 esac
 EOCBU
  
 # Actually, we want to run this already now, if so requested,
-# because we need to fix up the flags right now.
+# because we need to fix up things right now.
 case "$use64bitall" in
 "$define"|true|[yY]*)
 	. ./UU/use64bitall.cbu
@@ -442,8 +443,8 @@ esac
 cat > UU/uselongdouble.cbu <<'EOCBU'
 # This script UU/uselongdouble.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use long doubles.
-case "$uselongdouble" in
-"$define"|true|[yY]*)
+case "$uselongdouble-$uselongdouble_done" in
+"$define-"|true-|[yY]*-)
 	case "$ccisworkshop" in
 	'')
 		cat <<EOM
@@ -456,9 +457,18 @@ EOM
 	esac
 	libswanted="$libswanted sunmath"
 	loclibpth="$loclibpth /opt/SUNWspro/lib"
+	uselongdouble_done=yes
 	;;
 esac
 EOCBU
+
+# Actually, we want to run this already now, if so requested,
+# because we need to fix up things right now.
+case "$uselongdouble" in
+"$define"|true|[yY]*)
+	. ./UU/uselongdouble.cbu
+	;;
+esac
 
 rm -f try.c try.o try
 # keep that leading tab
