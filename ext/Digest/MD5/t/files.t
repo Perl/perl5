@@ -30,7 +30,7 @@ b362148b17a451f0d81e0ebb2487756e  Changes
 4850753428db9422e8e5f97b401d5a13  MD5.xs
 276da0aa4e9a08b7fe09430c9c5690aa  rfc1321.txt
 EOT
-} elsif ("\n" == "\015") { # MacOS
+} elsif ("\n" eq "\015") { # MacOS
     $EXPECT = <<EOT;
 cc90a85f89b397341f97c9279640fbf5  Changes
 127952946201e6afc19eb41250c56871  README

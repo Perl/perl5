@@ -128,7 +128,7 @@ SKIP: {
 
     my $abs_path      =  Cwd::abs_path("linktest");
     my $fast_abs_path =  Cwd::fast_abs_path("linktest");
-    my $want          =  File::Spec->catdir("t", $Test_Dir) if $IsMacOS;
+    my $want          =  File::Spec->catdir("t", $Test_Dir);
 
     like($abs_path,      qr|$want$|);
     like($fast_abs_path, qr|$want$|);
