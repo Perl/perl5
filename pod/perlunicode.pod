@@ -254,7 +254,8 @@ The following reserved ranges have C<In> tests:
     Plane 16 Private Use
 
 For example C<"\x{AC00}" =~ \p{HangulSyllable}> will test true.
-(Handling of surrogates is not implemented yet.)
+(Handling of surrogates is not implemented yet, because Perl
+uses UTF-8 and not UTF-16 internally to represent Unicode.)
 
 Additionally, because scripts differ in their directionality
 (for example Hebrew is written right to left), all characters
@@ -285,66 +286,66 @@ have their directionality defined:
 The scripts available for C<\p{In...}> and C<\P{In...}>, for example
 \p{InCyrillic>, are as follows, for example C<\p{InLatin}> or C<\P{InHan}>:
 
-    Latin
-    Greek
-    Cyrillic
-    Armenian
-    Hebrew
     Arabic
-    Syriac
-    Thaana
-    Devanagari
+    Armenian
     Bengali
-    Gurmukhi
+    Bopomofo
+    Canadian-Aboriginal
+    Cherokee
+    Cyrillic
+    Deseret
+    Devanagari
+    Ethiopic
+    Georgian
+    Gothic
+    Greek
     Gujarati
+    Gurmukhi
+    Han
+    Hangul
+    Hebrew
+    Hiragana
+    Inherited
+    Kannada
+    Katakana
+    Khmer
+    Lao
+    Latin
+    Malayalam
+    Mongolian
+    Myanmar
+    Ogham
+    Old-Italic
     Oriya
+    Runic
+    Sinhala
+    Syriac
     Tamil
     Telugu
-    Kannada
-    Malayalam
-    Sinhala
+    Thaana
     Thai
-    Lao
     Tibetan
-    Myanmar
-    Georgian
-    Hangul
-    Ethiopic
-    Cherokee
-    Canadian Aboriginal
-    Ogham
-    Runic
-    Khmer
-    Mongolian
-    Hiragana
-    Katakana
-    Bopomofo
-    Han
     Yi
-    Old Italic
-    Gothic
-    Deseret
-    Inherited
 
 There are also extended property classes that supplement the basic
 properties, defined by the F<PropList> Unicode database:
 
-    White_space
-    Bidi_Control
-    Join_Control
-    Dash
-    Hyphen
-    Quotation_Mark
-    Other_Math
-    Hex_Digit
     ASCII_Hex_Digit
-    Other_Alphabetic
-    Ideographic
+    Bidi_Control
+    Dash
     Diacritic
     Extender
-    Other_Lowercase
-    Other_Uppercase
+    Hex_Digit
+    Hyphen
+    Ideographic
+    Join_Control
     Noncharacter_Code_Point
+    Other_Alphabetic
+    Other_Lowercase
+    Other_Math
+    Other_Uppercase
+    Quotation_Mark
+    White_space
 
 and further derived properties:
 
@@ -365,11 +366,14 @@ and further derived properties:
 
 In addition to B<scripts>, Unicode also defines B<blocks> of
 characters.  The difference between scripts and blocks is that the
-former concept is closer to natural languages, while the latter
+scripts concept is closer to natural languages, while the blocks
 concept is more an artificial grouping based on groups of 256 Unicode
 characters.  For example, the C<Latin> script contains letters from
-many blocks, but it does not contain all the characters from those
-blocks, it does not for example contain digits.
+many blocks.  On the other hand, the C<Latin> script does not contain
+all the characters from those blocks, it does not for example contain
+digits because digits are shared across many scripts.  Digits and
+other similar groups, like punctuation, are in a category called
+C<Common>.
 
 For more about scripts see the UTR #24:
 http://www.unicode.org/unicode/reports/tr24/
@@ -386,102 +390,102 @@ preferential Unicode character class definition; this meant that
 the definitions of some character classes changed (the ones in the
 below list that have the C<Block> appended).
 
+   Alphabetic Presentation Forms
+   Arabic Block
+   Arabic Presentation Forms-A
+   Arabic Presentation Forms-B
+   Armenian Block
+   Arrows
    Basic Latin
+   Bengali Block
+   Block Elements
+   Bopomofo Block
+   Bopomofo Extended
+   Box Drawing
+   Braille Patterns
+   Byzantine Musical Symbols
+   CJK Compatibility
+   CJK Compatibility Forms
+   CJK Compatibility Ideographs
+   CJK Compatibility Ideographs Supplement
+   CJK Radicals Supplement
+   CJK Symbols and Punctuation
+   CJK Unified Ideographs
+   CJK Unified Ideographs Extension A
+   CJK Unified Ideographs Extension B
+   Cherokee Block
+   Combining Diacritical Marks
+   Combining Half Marks
+   Combining Marks for Symbols
+   Control Pictures
+   Currency Symbols
+   Cyrillic Block
+   Deseret Block
+   Devanagari Block
+   Dingbats
+   Enclosed Alphanumerics
+   Enclosed CJK Letters and Months
+   Ethiopic Block
+   General Punctuation
+   Geometric Shapes
+   Georgian Block
+   Gothic Block
+   Greek Block
+   Greek Extended
+   Gujarati Block
+   Gurmukhi Block
+   Halfwidth and Fullwidth Forms
+   Hangul Compatibility Jamo
+   Hangul Jamo
+   Hangul Syllables
+   Hebrew Block
+   High Private Use Surrogates
+   High Surrogates
+   Hiragana Block
+   IPA Extensions
+   Ideographic Description Characters
+   Kanbun
+   Kangxi Radicals
+   Kannada Block
+   Katakana Block
+   Khmer Block
+   Lao Block
    Latin 1 Supplement
+   Latin Extended Additional
    Latin Extended-A
    Latin Extended-B
-   IPA Extensions
-   Spacing Modifier Letters
-   Combining Diacritical Marks
-   Greek Block
-   Cyrillic Block
-   Armenian Block
-   Hebrew Block
-   Arabic Block
-   Syriac Block
-   Thaana Block
-   Devanagari Block
-   Bengali Block
-   Gurmukhi Block
-   Gujarati Block
+   Letterlike Symbols
+   Low Surrogates
+   Malayalam Block
+   Mathematical Alphanumeric Symbols
+   Mathematical Operators
+   Miscellaneous Symbols
+   Miscellaneous Technical
+   Mongolian Block
+   Musical Symbols
+   Myanmar Block
+   Number Forms
+   Ogham Block
+   Old Italic Block
+   Optical Character Recognition
    Oriya Block
+   Private Use
+   Runic Block
+   Sinhala Block
+   Small Form Variants
+   Spacing Modifier Letters
+   Specials
+   Superscripts and Subscripts
+   Syriac Block
+   Tags
    Tamil Block
    Telugu Block
-   Kannada Block
-   Malayalam Block
-   Sinhala Block
+   Thaana Block
    Thai Block
-   Lao Block
    Tibetan Block
-   Myanmar Block
-   Georgian Block
-   Hangul Jamo
-   Ethiopic Block
-   Cherokee Block
    Unified Canadian Aboriginal Syllabics
-   Ogham Block
-   Runic Block
-   Khmer Block
-   Mongolian Block
-   Latin Extended Additional
-   Greek Extended
-   General Punctuation
-   Superscripts and Subscripts
-   Currency Symbols
-   Combining Marks for Symbols
-   Letterlike Symbols
-   Number Forms
-   Arrows
-   Mathematical Operators
-   Miscellaneous Technical
-   Control Pictures
-   Optical Character Recognition
-   Enclosed Alphanumerics
-   Box Drawing
-   Block Elements
-   Geometric Shapes
-   Miscellaneous Symbols
-   Dingbats
-   Braille Patterns
-   CJK Radicals Supplement
-   Kangxi Radicals
-   Ideographic Description Characters
-   CJK Symbols and Punctuation
-   Hiragana Block
-   Katakana Block
-   Bopomofo Block
-   Hangul Compatibility Jamo
-   Kanbun
-   Bopomofo Extended
-   Enclosed CJK Letters and Months
-   CJK Compatibility
-   CJK Unified Ideographs Extension A
-   CJK Unified Ideographs
-   Yi Syllables
    Yi Radicals
-   Hangul Syllables
-   High Surrogates
-   High Private Use Surrogates
-   Low Surrogates
-   Private Use
-   CJK Compatibility Ideographs
-   Alphabetic Presentation Forms
-   Arabic Presentation Forms-A
-   Combining Half Marks
-   CJK Compatibility Forms
-   Small Form Variants
-   Arabic Presentation Forms-B
-   Specials
-   Halfwidth and Fullwidth Forms
-   Old Italic Block
-   Gothic Block
-   Deseret Block
-   Byzantine Musical Symbols
-   Musical Symbols
-   Mathematical Alphanumeric Symbols
-   CJK Unified Ideographs Extension B
-   CJK Compatibility Ideographs Supplement
-   Tags
+   Yi Syllables
 
 =item *
 
