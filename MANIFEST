@@ -1491,6 +1491,7 @@ win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
 win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile 
 win32/des_fcrypt.patch	Win32 port
 win32/dl_win32.xs	Win32 port
+win32/genmk95.pl	Perl code to generate command.com-usable makew95.mk
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
 win32/include/netdb.h		Win32 port
