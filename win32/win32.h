@@ -164,7 +164,6 @@ extern	char *	getlogin(void);
 
 DllExport void		Perl_win32_init(int *argcp, char ***argvp);
 DllExport void		Perl_init_os_extras(void);
-/*DllExport void		win32_str_os_error(struct sv *s, DWORD err);*/
 DllExport void		win32_str_os_error(void *sv, DWORD err);
 
 #ifndef USE_SOCKETS_AS_HANDLES

@@ -23,8 +23,8 @@ INST_TOP	*= $(INST_DRV)\perl5004.5x
 # uncomment one
 #CCTYPE		*= MSVC20
 #CCTYPE		*= MSVC
-#CCTYPE		*= BORLAND
-CCTYPE		*= GCC
+CCTYPE		*= BORLAND
+#CCTYPE		*= GCC
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -43,8 +43,8 @@ CCTYPE		*= GCC
 #
 # set the install locations of the compiler include/libraries
 #CCHOME		*= f:\msdev\vc
-#CCHOME		*= C:\bc5
-CCHOME		*= D:\packages\mingw32
+CCHOME		*= C:\bc5
+#CCHOME		*= D:\packages\mingw32
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -128,7 +128,7 @@ EXEOUT_FLAG = -e
 .ELIF "$(CCTYPE)" == "GCC"
 
 CC = gcc -pipe
-LINK32 = gcc
+LINK32 = gcc -pipe
 LIB32 = ar
 IMPLIB = dlltool
 
