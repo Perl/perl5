@@ -1,3 +1,19 @@
+2003-07-04   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.25
+
+   The $md5->addfile method now croaks if it discovers
+   errors on the handle after reading from it.  This should
+   make it more difficult to end up with the wrong digest
+   just because you are to lazy to check the error status
+   on your file handles after reading from them.
+
+   Improved documentation.
+
+   Sync up with bleadperl; even safer patchlevel include.
+
+
+
 2003-03-09   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.24
