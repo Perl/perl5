@@ -2735,7 +2735,7 @@
 #  endif
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
-#define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
+#define isa_lookup(a,b,c,d,e)	S_isa_lookup(aTHX_ a,b,c,d,e)
 #endif
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)

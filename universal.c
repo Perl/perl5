@@ -8,7 +8,8 @@
  */
 
 STATIC SV *
-S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
+S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
+             int len, int level)
 {
     AV* av;
     GV* gv;
@@ -16,8 +17,10 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
     HV* hv = Nullhv;
     SV* subgen = Nullsv;
 
-    if (!stash)
-	return &PL_sv_undef;
+    /* A stash/class can go by many names (ie. User == main::User), so 
+       we compare the stash itself just in case */
+    if (name_stash && (stash == name_stash))
+        return &PL_sv_yes;
 
     if (strEQ(HvNAME(stash), name))
 	return &PL_sv_yes;
@@ -80,7 +83,8 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
 			    SvPVX(sv), HvNAME(stash));
 		    continue;
 		}
-		if (&PL_sv_yes == isa_lookup(basestash, name, len, level + 1)) {
+		if (&PL_sv_yes == isa_lookup(basestash, name, name_stash, 
+                                             len, level + 1)) {
 		    (void)hv_store(hv,name,len,&PL_sv_yes,0);
 		    return &PL_sv_yes;
 		}
@@ -109,6 +113,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {
     char *type;
     HV *stash;
+    HV *name_stash;
 
     stash = Nullhv;
     type = Nullch;
@@ -126,8 +131,11 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
         stash = gv_stashsv(sv, FALSE);
     }
 
+    name_stash = gv_stashpv(name, FALSE);
+
     return (type && strEQ(type,name)) ||
-            (stash && isa_lookup(stash, name, strlen(name), 0) == &PL_sv_yes)
+            (stash && isa_lookup(stash, name, name_stash, strlen(name), 0) 
+             == &PL_sv_yes)
         ? TRUE
         : FALSE ;
 }

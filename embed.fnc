@@ -1287,7 +1287,7 @@ s	|I32	|cr_textfilter	|int idx|SV *sv|int maxlen
 #endif
 
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
-s	|SV*|isa_lookup	|HV *stash|const char *name|int len|int level
+s	|SV*|isa_lookup	|HV *stash|const char *name|HV *name_stash|int len|int level
 #endif
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)

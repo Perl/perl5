@@ -1312,7 +1312,7 @@ STATIC I32	S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #endif
 
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
-STATIC SV*	S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level);
+STATIC SV*	S_isa_lookup(pTHX_ HV *stash, const char *name, HV *name_stash, int len, int level);
 #endif
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
