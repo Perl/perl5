@@ -1262,6 +1262,7 @@ NaN:inf:NaN
 # fourths root
 16:4:2
 81:4:3
+# see t/bigroot() for more tests
 &fsqrt
 +0:0
 -1:NaN

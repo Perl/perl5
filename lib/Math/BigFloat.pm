@@ -14,7 +14,8 @@ package Math::BigFloat;
 
 $VERSION = '1.42';
 require 5.005;
-use Exporter;
+
+require Exporter;
 @ISA =       qw(Exporter Math::BigInt);
 
 use strict;
@@ -1366,7 +1367,14 @@ sub bmod
 sub broot
   {
   # calculate $y'th root of $x
-  my ($self,$x,$y,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(2,@_);
+  
+  # set up parameters
+  my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+    }
 
   # NaN handling: $x ** 1/0, x or y NaN, or y inf/-inf or y == 0
   return $x->bnan() if $x->{sign} !~ /^\+/ || $y->is_zero() ||
@@ -1425,9 +1433,31 @@ sub broot
     }
   else
     {
-    my $u = $self->bone()->bdiv($y,$scale+4);
-    delete $u->{_a}; delete $u->{_p};		# otherwise it conflicts
-    $x->bpow($u,$scale+4); 			# el cheapo
+    # calculate the broot() as integer result first, and if it fits, return
+    # it rightaway (but only if $x and $y are integer):
+
+    my $done = 0;				# not yet
+    if ($y->is_int() && $x->is_int())
+      {
+      my $int = $x->{_m}->copy();
+      $int->blsft($x->{_e},10) unless $x->{_e}->is_zero();
+      $int->broot($y->as_number());
+      # if ($exact)
+      if ($int->copy()->bpow($y) == $x)
+        {
+        # found result, return it
+        $x->{_m} = $int;
+        $x->{_e} = $MBI->bzero();
+        $x->bnorm();
+        $done = 1;
+        }
+      }
+    if ($done == 0)
+      {
+      my $u = $self->bone()->bdiv($y,$scale+4);
+      delete $u->{_a}; delete $u->{_p};         # otherwise it conflicts
+      $x->bpow($u,$scale+4);                    # el cheapo
+      }
     }
   $x->bneg() if $sign == 1;
   
