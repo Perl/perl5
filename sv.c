@@ -9937,7 +9937,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #ifdef CSH
     PL_cshlen		= proto_perl->Icshlen;
-    PL_cshname		= SAVEPVN(proto_perl->Icshname, PL_cshlen);
+    PL_cshname		= proto_perl->Icshname; /* XXX never deallocated */
 #endif
 
     PL_lex_state	= proto_perl->Ilex_state;
