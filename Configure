@@ -3911,6 +3911,8 @@ case "$libs" in
 			:
 		elif try=`./loc lib$thislib$lib_ext X $libpth`; $test -f "$try"; then
 			:
+		elif try=`./loc $thislib$lib_ext X $libpth`; $test -f "$try"; then
+			:
 		elif try=`./loc lib$thislib X $libpth`; $test -f "$try"; then
 			:
 		elif try=`./loc $thislib X $libpth`; $test -f "$try"; then
@@ -9036,6 +9038,7 @@ main()
 		printf("int\n");
 	else 
 		printf("long\n");
+	fflush(stdout);
 	exit(0);
 }
 EOM
