@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00304"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00305"  /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
 /* CPPSTDIN:
@@ -219,18 +219,6 @@
  *	and PHOSTNAME.
  */
 #undef HAS_UNAME		/**/
-
-/* HAS_GETPGRP:
- *	This symbol, if defined, indicates that the getpgrp routine is
- *	available to get the current process group.
- */
-#undef HAS_GETPGRP		/**/
-
-/* HAS_GETPGRP2:
- *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
- *	routine is available to get the current process group.
- */
-#undef HAS_GETPGRP2		/**/
 
 /* HAS_GETPRIORITY:
  *	This symbol, if defined, indicates that the getpriority routine is
@@ -389,18 +377,6 @@
  */
 #undef HAS_SETLOCALE	/**/
 
-/* HAS_SETPGID:
- *	This symbol, if defined, indicates that the setpgid routine is
- *	available to set process group ID.
- */
-#undef HAS_SETPGID	/**/
-
-/* HAS_SETPGRP2:
- *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
- *	routine is available to set the current process group.
- */
-#undef HAS_SETPGRP2		/**/
-
 /* HAS_SETPRIORITY:
  *	This symbol, if defined, indicates that the setpriority routine is
  *	available to set a process's priority.
@@ -499,36 +475,40 @@
  *	to determine the number of bytes in the buffer.  USE_STDIO_BASE
  *	will never be defined unless USE_STDIO_PTR is.
  */
-/* VMS:
- * Regular FILE * are pretty close to meeting these criteria, but socket
- * I/O uses a summy FILE *, and Perl doesn't distinguish between socket
- * and non-socket filehandles.
+/* STDIO_PTR_LVALUE:
+ *	This symbol is defined if the FILE_ptr macro can be used as an
+ *	lvalue.
  */
-#define USE_STDIO_PTR 	/**/
-#define USE_STDIO_BASE 	/**/
+/* STDIO_CNT_LVALUE:
+ *	This symbol is defined if the FILE_cnt macro can be used as an
+ *	lvalue.
+ */
+#ifdef __DECC
+#  define USE_STDIO_PTR		/*config-skip*/
+#  define USE_STDIO_BASE	/*config-skip*/
+#  define STDIO_PTR_LVALUE	/*config-skip*/
+#  define STDIO_CNT_LVALUE	/*config-skip*/
+#else
+#  undef USE_STDIO_PTR		/*config-skip*/
+#  undef USE_STDIO_BASE		/*config-skip*/
+#  undef STDIO_PTR_LVALUE	/*config-skip*/
+#  undef STDIO_CNT_LVALUE	/*config-skip*/
+#endif
 
 /* FILE_ptr:
  *	This macro is used to access the _ptr field (or equivalent) of the
  *	FILE structure pointed to by its argument. This macro will always be
  *	defined if USE_STDIO_PTR is defined.
  */
-/* STDIO_PTR_LVALUE:
- *	This symbol is defined if the FILE_ptr macro can be used as an
- *	lvalue.
- */
 /* FILE_cnt:
  *	This macro is used to access the _cnt field (or equivalent) of the
  *	FILE structure pointed to by its argument. This macro will always be
  *	defined if USE_STDIO_PTR is defined.
  */
-/* STDIO_CNT_LVALUE:
- *	This symbol is defined if the FILE_cnt macro can be used as an
- *	lvalue.
- */
-#define FILE_ptr(fp)	((*fp)->_ptr)
-#define STDIO_PTR_LVALUE
-#define FILE_cnt(fp)	((*fp)->_cnt)
-#define STDIO_CNT_LVALUE
+#ifdef USE_STDIO_PTR
+#  define FILE_ptr(fp)	((*fp)->_ptr)
+#  define FILE_cnt(fp)	((*fp)->_cnt)
+#endif
 
 /* FILE_filbuf:
  *	This macro is used to access the internal stdio _filbuf function
@@ -551,8 +531,10 @@
  *	structure pointed to its argument. This macro will always be defined
  *	if USE_STDIO_BASE is defined.
  */
-#define FILE_base(fp)	((*fp)->_base)
-#define FILE_bufsiz(fp)	((*fp)->_cnt + (*fp)->_ptr - (*fp)->_base)
+#ifdef USE_STDIO_BASE
+#  define FILE_base(fp)	((*fp)->_base)
+#  define FILE_bufsiz(fp)	((*fp)->_cnt + (*fp)->_ptr - (*fp)->_base)
+#endif
 
 /* USE_STRUCT_COPY:
  *	This symbol, if defined, indicates that this C compiler knows how
@@ -1536,13 +1518,31 @@
  *	This symbol, if defined, indicates that the setpgrp routine is
  *	available to set the current process group.
  */
+/* USE_BSD_SETPGRP:
+ *	This symbol, if defined, indicates that setpgrp needs two
+ *	arguments whereas USG one needs none.  See also HAS_SETPGID
+ *	for a POSIX interface.
+ */
 /* USE_BSDPGRP:
  *	This symbol, if defined, indicates that the BSD notion of process
  *	group is to be used. For instance, you have to say setpgrp(pid, pgrp)
  *	instead of the USG setpgrp().
  */
 #undef HAS_SETPGRP		/**/
+#undef USE_BSD_SETPGRP	/**/
 #undef USE_BSDPGRP		/**/
+
+/* HAS_SETPGID:
+ *	This symbol, if defined, indicates that the setpgid routine is
+ *	available to set process group ID.
+ */
+#undef HAS_SETPGID	/**/
+
+/* HAS_SETPGRP2:
+ *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
+ *	routine is available to set the current process group.
+ */
+#undef HAS_SETPGRP2		/**/
 
 /* HAS_SYSCONF:
  *	This symbol, if defined, indicates that sysconf() is available
@@ -1566,6 +1566,30 @@
  *	The last two assume trailing zeros should not be kept.
  */
 #define Gconvert(x,n,t,b) my_gconvert(x,n,t,b)
+
+/* HAS_GETPGID:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the getpgid(pid) function is available to get the
+ *	process group id.
+ */
+#undef HAS_GETPGID		/**/
+
+/* HAS_GETPGRP:
+ *	This symbol, if defined, indicates that the getpgrp routine is
+ *	available to get the current process group.
+ */
+/* USE_BSD_GETPGRP:
+ *	This symbol, if defined, indicates that getpgrp needs one
+ *	arguments whereas USG one needs none.
+ */
+#undef HAS_GETPGRP		/**/
+#undef USE_BSD_GETPGRP	/**/
+
+/* HAS_GETPGRP2:
+ *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
+ *	routine is available to get the current process group.
+ */
+#undef HAS_GETPGRP2		/**/
 
 /* USE_SFIO:
  *	This symbol, if defined, indicates that sfio should

@@ -6,16 +6,18 @@
 # that went into your perl binary.  In addition, values which change from run
 # to run may be supplied on the command line as key=val pairs.
 #
-# Rev. 23-Apr-1996  Charles Bailey  bailey@genetics.upenn.edu
+# Rev.  2-Oct-1996  Charles Bailey  bailey@genetics.upenn.edu
 #
 
 #==== Locations of installed Perl components
 $prefix='perl_root';
 $builddir="$prefix:[000000]";
 $installbin="$prefix:[000000]";
+$installscript="$prefix:[000000]";
 $installman1dir="$prefix:[man.man1]";
 $installman3dir="$prefix:[man.man3]";
 $installprivlib="$prefix:[lib]";
+$installsitelib="$prefix:[lib.site_perl]";
 
 unshift(@INC,'lib');  # In case someone didn't define Perl_Root
                       # before the build
@@ -50,6 +52,8 @@ $archsufx = `Write Sys\$Output F\$GetSyi("HW_MODEL")` > 1024 ? 'AXP' : 'VAX';
 ($vers = $]) =~ tr/./_/;
 $installarchlib = VMS::Filespec::vmspath($installprivlib);
 $installarchlib =~ s#\]#.VMS_$archsufx.$vers\]#;
+$installsitearch = VMS::Filespec::vmspath($installsitelib);
+$installsitearch =~ s#\]#.VMS_$archsufx\]#;
 ($osvers = `Write Sys\$Output F\$GetSyi("VERSION")`) =~ s/^V?(\S+)\s*\n?$/$1/;
 
 print OUT <<EndOfIntro;
@@ -91,10 +95,13 @@ osvers='$osvers'
 prefix='$prefix'
 builddir='$builddir'
 installbin='$installbin'
+installscript='$installscript'
 installman1dir='$installman1dir'
 installman3dir='$installman3dir'
 installprivlib='$installprivlib'
 installarchlib='$installarchlib'
+installsitelib='$installsitelib'
+installsitearch='$installsitearch'
 EndOfIntro
 
 foreach (@ARGV) {
@@ -146,6 +153,19 @@ foreach (@ARGV) {
     print OUT "d_select=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_niin=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_neterrno=",$dosock ? "'define'\n" : "'undef'\n";
+
+    if ($cctype eq 'decc') {
+      print OUT "d_stdstdio='define'\n";
+      print OUT "d_stdio_ptr_lval='define'\n";
+      print OUT "d_stdio_cnt_lval='define'\n";
+      print OUT "d_stdiobase='define'\n";
+    }
+    else {
+      print OUT "d_stdstdio='undef'\n";
+      print OUT "d_stdio_ptr_lval='undef'\n";
+      print OUT "d_stdio_cnt_lval='undef'\n";
+      print OUT "d_stdiobase='undef'\n";
+    }
     next;
   }
   elsif ($key eq 'exe_ext') { 

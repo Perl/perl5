@@ -121,6 +121,7 @@ my_getenv(char *lnm)
     static char __my_getenv_eqv[LNM$C_NAMLENGTH+1];
     char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2;
     unsigned long int idx = 0;
+    int trnsuccess;
 
     for (cp1 = lnm, cp2= uplnm; *cp1; cp1++, cp2++) *cp2 = _toupper(*cp1);
     *cp2 = '\0';
@@ -133,9 +134,10 @@ my_getenv(char *lnm)
         *cp2 = '\0';
         idx = strtoul(cp2+1,NULL,0);
       }
-      if (my_trnlnm(uplnm,__my_getenv_eqv,idx)) {
-        return __my_getenv_eqv;
-      }
+      trnsuccess = my_trnlnm(uplnm,__my_getenv_eqv,idx);
+      /* If we had a translation index, we're only interested in lnms */
+      if (!trnsuccess && cp2 != NULL) return Nullch;
+      if (trnsuccess) return __my_getenv_eqv;
       else {
         unsigned long int retsts;
         struct dsc$descriptor_s symdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
@@ -204,7 +206,14 @@ prime_env_iter(void)
     for (end = ++start; *end && *end != '"'; end++) ;
     if (*end) *end = '\0';
     else end = Nullch;
-    if ((eqvlen = my_trnlnm(start,eqv,0)) == 0) _ckvmssts(vaxc$errno);
+    if ((eqvlen = my_trnlnm(start,eqv,0)) == 0) {
+      if (vaxc$errno == SS$_NOLOGNAM || vaxc$errno == SS$_IVLOGNAM) {
+        if (dowarn)
+          warn("Ill-formed logical name |%s| in prime_env_iter",start);
+        continue;
+      }
+      else _ckvmssts(vaxc$errno);
+    }
     else {
       eqvsv = newSVpv(eqv,eqvlen);
       hv_store(envhv,start,(end ? end - start : strlen(start)),eqvsv,0);

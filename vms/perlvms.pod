@@ -261,6 +261,15 @@ to pass uppercase switches to Perl, you need to enclose
 them in double-quotes on the command line, since the CRTL
 downcases all unquoted strings.
 
+=item -i
+
+If the C<-i> switch is present but no extension for a backup
+copy is given, then inplace editing creates a new version of
+a file; the existing copy is not deleted.  (Note that if
+an extension is given, an existing file is renamed to the backup
+file, as is the case under other operating systems, so it does
+not remain as a previous version under the original filename.)
+
 =item -S
 
 If the C<-S> switch is present I<and> the script name does
@@ -634,12 +643,19 @@ replace the logical name just deleted.  It is not possible
 at present to define a search list logical name via %ENV.
 
 At present, the first time you iterate over %ENV using
-C<keys>, C<values>, or C<each>, you will incur a time
-penalty as all logical names are read, in order to fully
-populate %ENV.  Subsequent iterations will not reread
-logical names, so they won't be as slow, but they also
-won't reflect any changes to logical name tables caused
-by other programs.
+C<keys>, or C<values>,  you will incur a time penalty as all
+logical names are read, in order to fully populate %ENV.
+Subsequent iterations will not reread logical names, so they
+won't be as slow, but they also won't reflect any changes
+to logical name tables caused by other programs.  The C<each>
+operator is special: it returns each element I<already> in
+%ENV, but doesn't go out and look for more.   Therefore, if
+you've previously used C<keys> or C<values>, you'll see all
+the logical names visible to your process, and if not, you'll
+see only the names you've looked up so far.  (This is a
+consequence of the way C<each> is implemented now, and it
+may change in the future, so it wouldn't be a good idea
+to rely on it too much.)
 
 In all operations on %ENV, the key string is treated as if it 
 were entirely uppercase, regardless of the case actually 

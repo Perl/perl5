@@ -432,12 +432,14 @@ register GV *gv;
 		}
 		else {
 #ifndef DOSISH
+#  ifndef VMS  /* Don't delete; use automatic file versioning */
 		    if (UNLINK(oldname) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
 			  oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
+#  endif
 #else
 		    croak("Can't do inplace edit without backup");
 #endif
