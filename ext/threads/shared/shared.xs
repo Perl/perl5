@@ -40,30 +40,77 @@ PerlInterpreter *PL_sharedsv_space;             /* The shared sv space */
 /*
  * Only one thread at a time is allowed to mess with shared space.
  */
-perl_mutex       PL_sharedsv_space_mutex;       /* Mutex protecting the shared sv space */
-PerlInterpreter  *PL_shared_owner;              /* For locking assertions */
 
-#define SHARED_LOCK         STMT_START { \
-			      MUTEX_LOCK(&PL_sharedsv_space_mutex);      \
-			      PL_shared_owner = aTHX;                    \
+typedef struct
+{
+ perl_mutex		 mutex;
+ perl_cond		 cond;
+ PerlInterpreter	*owner;
+ I32			 locks;
+} recursive_lock_t;
+
+recursive_lock_t PL_sharedsv_lock;       /* Mutex protecting the shared sv space */
+
+void
+recursive_lock_init(pTHX_ recursive_lock_t *lock)
+{
+    Zero(lock,1,recursive_lock_t);
+    MUTEX_INIT(&lock->mutex);
+    COND_INIT(&lock->cond);
+}
+
+void
+recursive_lock_release(pTHX_ recursive_lock_t *lock)
+{
+    MUTEX_LOCK(&lock->mutex);
+    if (lock->owner != aTHX) {
+	MUTEX_UNLOCK(&lock->mutex);
+    }
+    else {
+	if (--lock->locks == 0) {
+	    lock->owner = NULL;
+	    COND_SIGNAL(&lock->cond);
+	}
+    }
+    MUTEX_UNLOCK(&lock->mutex);
+}
+
+void
+recursive_lock_acquire(pTHX_ recursive_lock_t *lock)
+{
+    assert(aTHX);
+    MUTEX_LOCK(&lock->mutex);
+    if (lock->owner == aTHX) {
+	lock->locks++;
+    }
+    else {
+	while (lock->owner)
+	    COND_WAIT(&lock->cond,&lock->mutex);
+	lock->locks = 1;
+	lock->owner = aTHX;
+	SAVEDESTRUCTOR_X(recursive_lock_release,lock);
+    }
+    MUTEX_UNLOCK(&lock->mutex);
+}
+
+#define ENTER_LOCK         STMT_START { \
+			      ENTER; \
+			      recursive_lock_acquire(aTHX_ &PL_sharedsv_lock);   \
                             } STMT_END
 
-#define SHARED_UNLOCK       STMT_START { \
-			      PL_shared_owner = NULL;                    \
-			      MUTEX_UNLOCK(&PL_sharedsv_space_mutex);    \
-                            } STMT_END
+#define LEAVE_LOCK       LEAVE
 
 
 /* A common idiom is to acquire access and switch in ... */
 #define SHARED_EDIT	    STMT_START {	\
-				SHARED_LOCK;	\
+				ENTER_LOCK;	\
 				SHARED_CONTEXT;	\
 			    } STMT_END
 
 /* then switch out and release access. */
 #define SHARED_RELEASE     STMT_START {	\
 		                CALLER_CONTEXT;	\
-				SHARED_UNLOCK;	\
+				LEAVE_LOCK;	\
 			    } STMT_END
 			
 
@@ -81,11 +128,8 @@ PerlInterpreter  *PL_shared_owner;              /* For locking assertions */
 
 typedef struct {
     SV                 *sv;             /* The actual SV - in shared space */
-    perl_mutex          mutex;          /* Our mutex */
-    perl_cond           cond;           /* Our condition variable */
+    recursive_lock_t    lock;
     perl_cond           user_cond;      /* For user-level conditions */
-    IV                  locks;          /* Number of locks held */
-    PerlInterpreter    *owner;          /* Who owns the lock? */
 } shared_sv;
 
 /* The SV in shared-space has a back-pointer to the shared_sv
@@ -183,9 +227,9 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
     assert ( aTHX !=  PL_sharedsv_space );
 
     /* To avoid need for recursive locks require caller to hold lock */
-    if ( PL_shared_owner != aTHX )
+    assert ( PL_sharedsv_lock.owner == aTHX );
+    if ( PL_sharedsv_lock.owner != aTHX )
      abort();
-    assert ( PL_shared_owner == aTHX );
 
     /* Try shared SV as 1st choice */
     if (!data && ssv && SvTYPE(ssv) >= SVt_PVMG) {
@@ -201,11 +245,8 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
     if (!data) {
 	    data = PerlMemShared_malloc(sizeof(shared_sv));
 	    Zero(data,1,shared_sv);
-	    MUTEX_INIT(&data->mutex);
-	    COND_INIT(&data->cond);
+	    recursive_lock_init(aTHX_ &data->lock);
 	    COND_INIT(&data->user_cond);
-	    data->owner = 0;
-	    data->locks = 0;
     }
 
     if (!ssv)
@@ -266,6 +307,7 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
 	    }
 	    break;
 	}
+	assert ( Perl_sharedsv_find(aTHX_ *psv) == data );
     }
     return data;
 }
@@ -294,9 +336,9 @@ Perl_sharedsv_share(pTHX_ SV *sv)
 	break;
 	
     default:
-	SHARED_LOCK;
+	ENTER_LOCK;
 	Perl_sharedsv_associate(aTHX_ &sv, 0, 0);
-	SHARED_UNLOCK;
+	LEAVE_LOCK;
 	SvSETMAGIC(sv);
 	break;
     }
@@ -309,7 +351,7 @@ sharedsv_scalar_mg_get(pTHX_ SV *sv, MAGIC *mg)
 {
     shared_sv *shared = (shared_sv *) mg->mg_ptr;
 
-    SHARED_LOCK;
+    ENTER_LOCK;
     if (SHAREDSvPTR(shared)) {
 	if (SvROK(SHAREDSvPTR(shared))) {
 	    SV *obj = Nullsv;
@@ -322,7 +364,7 @@ sharedsv_scalar_mg_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setsv_nomg(sv, SHAREDSvPTR(shared));
 	}
     }
-    SHARED_UNLOCK;
+    LEAVE_LOCK;
     return 0;
 }
 
@@ -332,7 +374,7 @@ sharedsv_scalar_mg_set(pTHX_ SV *sv, MAGIC *mg)
     dTHXc;
     shared_sv *shared;
     bool allowed = TRUE;
-    SHARED_LOCK;
+    ENTER_LOCK;
     shared = Perl_sharedsv_associate(aTHX_ &sv, Nullsv, (shared_sv *) mg->mg_ptr);
 
     if (SvROK(sv)) {
@@ -464,7 +506,9 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
        magic such that by the time we get here it has been stored
        to its shared counterpart
      */
-    SHARED_LOCK;
+    ENTER_LOCK;
+    assert(shared);
+    assert(SHAREDSvPTR(shared));
     target = Perl_sharedsv_associate(aTHX_ &sv, Nullsv, 0);
     SHARED_CONTEXT;
     val = SHAREDSvPTR(target);
@@ -498,7 +542,6 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
     Perl_sharedsv_associate(aTHX_ &sv, ssv, 0);
     return 0;
 }
-
 
 int
 sharedsv_elem_mg_free(pTHX_ SV *sv, MAGIC *mg)
@@ -618,32 +661,7 @@ Recursively unlocks a shared sv.
 void
 Perl_sharedsv_unlock(pTHX_ shared_sv* ssv)
 {
-    MUTEX_LOCK(&ssv->mutex);
-    if (ssv->owner != aTHX) {
-	Perl_croak(aTHX_ "panic: Perl_sharedsv_unlock unlocking mutex that we don't own");
-	MUTEX_UNLOCK(&ssv->mutex);
-	return;
-    }
-
-    if (--ssv->locks == 0) {
-	ssv->owner = NULL;
-	COND_SIGNAL(&ssv->cond);
-    }
-    MUTEX_UNLOCK(&ssv->mutex);
- }
-
-void
-Perl_sharedsv_unlock_scope(pTHX_ shared_sv* ssv)
-{
-    MUTEX_LOCK(&ssv->mutex);
-    if (ssv->owner != aTHX) {
-	MUTEX_UNLOCK(&ssv->mutex);
-	return;
-    }
-    ssv->locks = 0;
-    ssv->owner = NULL;
-    COND_SIGNAL(&ssv->cond);
-    MUTEX_UNLOCK(&ssv->mutex);
+    recursive_lock_release(aTHX_ &ssv->lock);
 }
 
 =for apidoc sharedsv_lock
@@ -658,19 +676,7 @@ Perl_sharedsv_lock(pTHX_ shared_sv* ssv)
 {
     if (!ssv)
 	return;
-    MUTEX_LOCK(&ssv->mutex);
-    if (ssv->owner && ssv->owner == aTHX) {
-	ssv->locks++;
-	MUTEX_UNLOCK(&ssv->mutex);
-	return;
-    }
-    while (ssv->owner)
-      COND_WAIT(&ssv->cond,&ssv->mutex);
-    ssv->locks++;
-    ssv->owner = aTHX;
-    if (ssv->locks == 1)
-	SAVEDESTRUCTOR_X(Perl_sharedsv_unlock_scope,ssv);
-    MUTEX_UNLOCK(&ssv->mutex);
+    recursive_lock_acquire(aTHX_ &ssv->lock);
 }
 
 void
@@ -696,7 +702,7 @@ Perl_sharedsv_init(pTHX)
   PL_sharedsv_space = perl_alloc();
   perl_construct(PL_sharedsv_space);
   CALLER_CONTEXT;
-  MUTEX_INIT(&PL_sharedsv_space_mutex);
+  recursive_lock_init(aTHX_ &PL_sharedsv_lock);
   PL_lockhook = &Perl_sharedsv_locksv;
   PL_sharehook = &Perl_sharedsv_share;
 }
@@ -725,7 +731,7 @@ CODE:
 	for(i = 1; i < items; i++) {
 	    SV* tmp = newSVsv(ST(i));
 	    shared_sv *target;
-	    SHARED_LOCK;
+	    ENTER_LOCK;
 	    target = Perl_sharedsv_associate(aTHX_ &tmp, Nullsv, 0);
 	    SHARED_CONTEXT;
 	    av_push((AV*) SHAREDSvPTR(shared), SHAREDSvPTR(target));
@@ -738,7 +744,7 @@ UNSHIFT(shared_sv *shared, ...)
 CODE:
 	dTHXc;
 	int i;
-	SHARED_LOCK;
+	ENTER_LOCK;
 	SHARED_CONTEXT;
 	av_unshift((AV*)SHAREDSvPTR(shared), items - 1);
 	CALLER_CONTEXT;
@@ -750,20 +756,20 @@ CODE:
 	    CALLER_CONTEXT;
 	    SvREFCNT_dec(tmp);
 	}
-	SHARED_UNLOCK;
+	LEAVE_LOCK;
 
 void
 POP(shared_sv *shared)
 CODE:
 	dTHXc;
 	SV* sv;
-	SHARED_LOCK;
+	ENTER_LOCK;
 	SHARED_CONTEXT;
 	sv = av_pop((AV*)SHAREDSvPTR(shared));
 	CALLER_CONTEXT;
 	ST(0) = Nullsv;
 	Perl_sharedsv_associate(aTHX_ &ST(0), sv, 0);
-	SHARED_UNLOCK;
+	LEAVE_LOCK;
 	XSRETURN(1);
 
 void
@@ -771,13 +777,13 @@ SHIFT(shared_sv *shared)
 CODE:
 	dTHXc;
 	SV* sv;
-	SHARED_LOCK;
+	ENTER_LOCK;
 	SHARED_CONTEXT;
 	sv = av_shift((AV*)SHAREDSvPTR(shared));
 	CALLER_CONTEXT;
 	ST(0) = Nullsv;
 	Perl_sharedsv_associate(aTHX_ &ST(0), sv, 0);
-	SHARED_UNLOCK;
+	LEAVE_LOCK;
 	XSRETURN(1);
 
 void
@@ -819,7 +825,7 @@ CODE:
 	char* key = NULL;
 	I32 len = 0;
 	HE* entry;
-	SHARED_LOCK;
+	ENTER_LOCK;
 	SHARED_CONTEXT;
 	hv_iterinit((HV*) SHAREDSvPTR(shared));
 	entry = hv_iternext((HV*) SHAREDSvPTR(shared));
@@ -831,7 +837,7 @@ CODE:
 	     CALLER_CONTEXT;
 	     ST(0) = &PL_sv_undef;
 	}
-	SHARED_UNLOCK;
+	LEAVE_LOCK;
 	XSRETURN(1);
 
 void
@@ -841,7 +847,7 @@ CODE:
 	char* key = NULL;
 	I32 len = 0;
 	HE* entry;
-	SHARED_LOCK;
+	ENTER_LOCK;
 	SHARED_CONTEXT;
 	entry = hv_iternext((HV*) SHAREDSvPTR(shared));
 	if(entry) {
@@ -852,7 +858,7 @@ CODE:
 	     CALLER_CONTEXT;
 	     ST(0) = &PL_sv_undef;
 	}
-	SHARED_UNLOCK;
+	LEAVE_LOCK;
 	XSRETURN(1);
 
 MODULE = threads::shared                PACKAGE = threads::shared
@@ -911,15 +917,16 @@ cond_wait_enabled(SV *ref)
 	shared = Perl_sharedsv_find(aTHX_ ref);
 	if(!shared)
 	    croak("cond_wait can only be used on shared values");
-	if(shared->owner != aTHX)
+	if(shared->lock.owner != aTHX)
 	    croak("You need a lock before you can cond_wait");
-	MUTEX_LOCK(&shared->mutex);
-	shared->owner = NULL;
-	locks = shared->locks = 0;
-	COND_WAIT(&shared->user_cond, &shared->mutex);
-	shared->owner = aTHX;
-	shared->locks = locks;
-	MUTEX_UNLOCK(&shared->mutex);
+	/* Stealing the members of the lock object worries me - NI-S */
+	MUTEX_LOCK(&shared->lock.mutex);
+	shared->lock.owner = NULL;
+	locks = shared->lock.locks = 0;
+	COND_WAIT(&shared->user_cond, &shared->lock.mutex);
+	shared->lock.owner = aTHX;
+	shared->lock.locks = locks;
+	MUTEX_UNLOCK(&shared->lock.mutex);
 
 void
 cond_signal_enabled(SV *ref)

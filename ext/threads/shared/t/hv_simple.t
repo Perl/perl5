@@ -58,19 +58,19 @@ ok(12, $seen{3} == 1, "Keys..");
 ok(13, $seen{"foo"} == 1, "Keys..");
 threads->create(sub { %hash = () })->join();
 ok(14, keys %hash == 0, "Check clear");
-ok(15, threads::shared::_thrcnt(\%hash) == 1, "thrcnt");
-threads->create(sub { ok(16, threads::shared::_thrcnt(\%hash) == 2, "thrcnt is up")})->join();
-ok(17, threads::shared::_thrcnt(\%hash) == 1, "thrcnt is down");
-{ 
+ok(15, threads::shared::_thrcnt(%hash) == 1, "thrcnt");
+threads->create(sub { ok(16, threads::shared::_thrcnt(%hash) == 2, "thrcnt is up")})->join();
+ok(17, threads::shared::_thrcnt(%hash) == 1, "thrcnt is down");
+{
 	my $test;
 	my $test2;
 	share($test);
 	$test = \%hash;
 	$test2 = \%hash;
-	ok(18, threads::shared::_thrcnt(\%hash) == 2, "thrcnt is up on shared reference");
+	ok(18, threads::shared::_thrcnt(%hash) == 2, "thrcnt is up on shared reference");
 	$test = "bar";
-	ok(19 , threads::shared::_thrcnt(\%hash) == 1, "thrcnt is down when shared reference is dropped");
+	ok(19 , threads::shared::_thrcnt(%hash) == 1, "thrcnt is down when shared reference is dropped");
 	$test = $test2;
-	ok(20, threads::shared::_thrcnt(\%hash) == 2, "thrcnt is up on shared reference");
+	ok(20, threads::shared::_thrcnt(%hash) == 2, "thrcnt is up on shared reference");
 }
-ok(21 , threads::shared::_thrcnt(\%hash) == 1, "thrcnt is down when shared reference is killed");
+ok(21 , threads::shared::_thrcnt(%hash) == 1, "thrcnt is down when shared reference is killed");
