@@ -1851,7 +1851,7 @@ i_poll (i_poll.U):
 	whether a C program should include <poll.h>.
 
 i_pthread (i_pthread.U):
-	This variable conditionally defines the I_PTHREADEAD symbol,
+	This variable conditionally defines the I_PTHREAD symbol,
 	and indicates whether a C program should include <pthread.h>.
 
 i_pwd (i_pwd.U):
