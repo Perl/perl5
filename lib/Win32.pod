@@ -253,6 +253,20 @@ The function returns the menu id of the selected push button:
 
 [EXT] Loads the DLL LIBRARYNAME and calls the function DllRegisterServer.
 
+=item Win32::SetChildShowWindow(SHOWWINDOW)
+
+[CORE] Sets the I<ShowMode> of child processes started by system().
+By default system() will create a new console window for child
+processes if Perl itself is not running from a console. Calling
+SetChildShowWindow(0) will make these new console windows invisible.
+Calling SetChildShowWindow() without arguments reverts system() to the
+default behavior.  The return value of SetChildShowWindow() is the
+previous setting or C<undef>.
+
+[EXT] The following symbolic constants for SHOWWINDOW are available
+(but not exported) from the Win32 module: SW_HIDE, SW_SHOWNORMAL,
+SW_SHOWMINIMIZED, SW_SHOWMAXIMIZED and SW_SHOWNOACTIVATE.
+
 =item Win32::SetCwd(NEWDIRECTORY)
 
 [CORE] Sets the current active drive and directory. This function does not

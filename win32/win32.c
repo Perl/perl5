@@ -3667,6 +3667,10 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     else {
 	create |= CREATE_NEW_CONSOLE;
     }
+    if (w32_use_showwindow) {
+        StartupInfo.dwFlags |= STARTF_USESHOWWINDOW;
+        StartupInfo.wShowWindow = w32_showwindow;
+    }
 
     DEBUG_p(PerlIO_printf(Perl_debug_log, "Spawning [%s] with [%s]\n",
 			  cname,cmd));
@@ -4001,6 +4005,32 @@ win32_dynaload(const char* filename)
 /*
  * Extras.
  */
+
+static
+XS(w32_SetChildShowWindow)
+{
+    dXSARGS;
+    BOOL use_showwindow = w32_use_showwindow;
+    /* use "unsigned short" because Perl has redefined "WORD" */
+    unsigned short showwindow = w32_showwindow;
+
+    if (items > 1)
+	Perl_croak(aTHX_ "usage: Win32::SetChildShowWindow($showwindow)");
+
+    if (items == 0 || !SvOK(ST(0)))
+        w32_use_showwindow = FALSE;
+    else {
+        w32_use_showwindow = TRUE;
+        w32_showwindow = (unsigned short)SvIV(ST(0));
+    }
+
+    EXTEND(SP, 1);
+    if (use_showwindow)
+        ST(0) = sv_2mortal(newSViv(showwindow));
+    else
+        ST(0) = &PL_sv_undef;
+    XSRETURN(1);
+}
 
 static
 XS(w32_GetCwd)
@@ -4488,6 +4518,7 @@ Perl_init_os_extras(void)
     newXS("Win32::GetLongPathName", w32_GetLongPathName, file);
     newXS("Win32::CopyFile", w32_CopyFile, file);
     newXS("Win32::Sleep", w32_Sleep, file);
+    newXS("Win32::SetChildShowWindow", w32_SetChildShowWindow, file);
 
     /* XXX Bloat Alert! The following Activeware preloads really
      * ought to be part of Win32::Sys::*, so they're not included
