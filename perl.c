@@ -259,8 +259,8 @@ perl_construct(pTHXx)
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
     PL_errors = newSVpvn("",0);
     sv_setpvn(PERL_DEBUG_PAD(0), "", 0);	/* For regex debugging. */
-    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);
-    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);
+    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);	/* ext/re needs these */
+    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
 #ifdef USE_ITHREADS
     PL_regex_padav = newAV();
     av_push(PL_regex_padav,(SV*)newAV());    /* First entry is an array of empty elements */
