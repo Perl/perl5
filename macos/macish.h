@@ -74,7 +74,7 @@ void MacPerl_AddWriteEmulationProc(const char * command, MacPerl_EmulationProc p
 char * MacPerl_MPWFileName(char * file);
 char * GetSysErrText(short, char *);
 unsigned char * MacPerl_CopyC2P(const char * c, unsigned char * p);
-const char * MacPerl_CanonDir(const char * dir, char * buf);
+const char * MacPerl_CanonDir(const char * dir, char * buf, Boolean is_file);
 void MacPerl_WriteMsg(void * io, const char * msg, size_t len);
 void MacPerl_Exit(int status);
 
