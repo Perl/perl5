@@ -84,16 +84,12 @@ sub setcolor {
   require Term::Cap;
 
   my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
-  my $props = $ENV{PERL_RE_TC} || 'md,me,so,se'; # can use us/ue later
+  my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
   my @props = split /,/, $props;
 
 
-  $ENV{TERMCAP_COLORS} = join "\t", map {$terminal->Tputs($_,1)} @props;
+  $ENV{PERL_RE_COLORS} = join "\t", map {$terminal->Tputs($_,1)} @props;
  };
-
- not defined $ENV{TERMCAP_COLORS} or ($ENV{TERMCAP_COLORS} =~ tr/\t/\t/) >= 4
-    or not defined $ENV{PERL_RE_TC}
-    or die "Not enough fields in \$ENV{PERL_RE_TC}=`$ENV{PERL_RE_TC}'";
 }
 
 sub bits {

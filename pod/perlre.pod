@@ -485,7 +485,7 @@ the time when used on a similar string with 1000000 C<a>s.  Be aware,
 however, that this pattern currently triggers a warning message under
 B<-w> saying it C<"matches the null string many times">):
 
-On simple groups, such as the pattern C<(?> [^()]+ )>, a comparable
+On simple groups, such as the pattern C<(?E<gt> [^()]+ )>, a comparable
 effect may be achieved by negative lookahead, as in C<[^()]+ (?! [^()] )>.
 This was only 4 times slower on a string with 1000000 C<a>s.
 
