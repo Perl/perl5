@@ -97,7 +97,19 @@ case "$usemymalloc" in
 esac
 
 case "$optimize" in
-'') optimize='-O2' ;;
+'') # If we have modern enough gcc and well-supported enough CPU,
+    # crank up the optimization level.
+    case "`${cc:-gcc} -v 2>&1`" in
+    *gcc-2.95*|*gcc-3.*)
+        case "`arch 2>&1`" in
+        i?86|ppc) optimize='-O3' ;;
+        esac
+        ;;
+    esac
+    case "$optimize" in
+    '') optimize='-O2' ;;
+    esac
+    ;;
 esac
 
 # Are we using ELF?  Thanks to Kenneth Albanowski <kjahds@kjahds.com>
