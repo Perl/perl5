@@ -1737,7 +1737,7 @@ break utime() so that over NFS the timestamps do not get changed
 Starting from Perl 5.8 Perl has the beginnings of cross-compilation
 support.  What is known to work is running Configure in a
 cross-compilation environment and building the miniperl executable.
-What is known not work work is building the perl executable because
+What is known not to work is building the perl executable because
 that would require building extensions: Dynaloader statically and
 File::Glob dynamically, for extensions one needs MakeMaker and
 MakeMaker is not yet cross-compilation aware, and neither is
