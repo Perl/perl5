@@ -2657,6 +2657,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Fpos_t $fpostype		/* File position type */
 
+/* Gid_t_SIGN:
+ *	This symbol holds the signedess of a Gid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Gid_t_SIGN	$gidsign		/* GID sign */
+
+/* Gid_t_SIZE:
+ *	This symbol holds the size of a Gid_t in bytes.
+ */
+#define Gid_t_SIZE $gidsize		/* GID size */
+
 /* Gid_t:
  *	This symbol holds the return type of getgid() and the type of
  *	argument to setrgid() and related functions.  Typically,
@@ -2705,6 +2716,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	1 for unsigned, -1 for signed.
  */
 #define Uid_t_SIGN	$uidsign		/* UID sign */
+
+/* Uid_t_SIZE:
+ *	This symbol holds the size of a Uid_t in bytes.
+ */
+#define Uid_t_SIZE $uidsize		/* UID size */
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.

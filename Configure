@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Oct 27 21:32:42 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Thu Oct 28 15:06:20 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -570,6 +570,8 @@ ebcdic=''
 fflushNULL=''
 fflushall=''
 fpostype=''
+gidsign=''
+gidsize=''
 gidtype=''
 groupstype=''
 h_fcntl=''
@@ -812,6 +814,7 @@ d_strtoull=''
 sysman=''
 trnl=''
 uidsign=''
+uidsize=''
 uidtype=''
 archname64=''
 use64bits=''
@@ -11677,6 +11680,73 @@ gid_t) echo "gid_t found." ;;
 	;;
 esac
 
+echo " "
+case "$gidtype" in
+*_t) zzz="$gidtype"	;;
+*)   zzz="gid"		;;
+esac
+echo "Checking the sign of $zzz..." >&4 
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+	$gidtype foo = -1;
+	if (foo < 0)
+		printf("-1\n");
+	else
+		printf("1\n");
+}
+EOCP
+set try
+if eval $compile; then
+	yyy=`./try`
+	case "$yyy" in
+	'')	gidsign=1
+		echo "(I can't execute the test program--guessing unsigned.)" >&4
+		;;
+	*)	gidsign=$yyy
+		case "$gidsign" in
+		 1) echo "Your $zzz is unsigned." ;;
+		-1) echo "Your $zzz is signed."   ;;
+		esac
+		;;
+	esac
+else
+	gidsign=1
+	echo "(I can't compile the test program--guessing unsigned.)" >&4
+fi
+
+
+echo " "
+case "$gidtype" in
+*_t) zzz="$gidtype"	;;
+*)   zzz="gid"		;;
+esac
+echo "Checking the size of $zzz..." >&4 
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+    printf("%d\n", sizeof($gidtype));
+}
+EOCP
+set try
+if eval $compile_ok; then
+	yyy=`./try`
+	case "$yyy" in
+	'')	gidsize=4
+		echo "(I can't execute the test program--guessing $gidsize.)" >&4
+		;;
+	*)	gidsize=$yyy
+		echo "Your $zzz size is $gidsize bytes."
+		;;
+	esac
+else
+	gidsize=4
+	echo "(I can't compile the test program--guessing $gidsize.)" >&4
+fi
+
+
 : see if getgroups exists
 set getgroups d_getgrps
 eval $inlibc
@@ -12577,6 +12647,35 @@ else
 	echo "(I can't compile the test program--guessing unsigned.)" >&4
 fi
 
+
+echo " "
+case "$uidtype" in
+*_t) zzz="$uidtype"	;;
+*)   zzz="uid"		;;
+esac
+echo "Checking the size of $zzz..." >&4 
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+    printf("%d\n", sizeof($uidtype));
+}
+EOCP
+set try
+if eval $compile_ok; then
+	yyy=`./try`
+	case "$yyy" in
+	'')	uidsize=4
+		echo "(I can't execute the test program--guessing $uidsize.)" >&4
+		;;
+	*)	uidsize=$yyy
+		echo "Your $zzz size is $uidsize bytes."
+		;;
+	esac
+else
+	uidsize=4
+	echo "(I can't compile the test program--guessing $uidsize.)" >&4
+fi
 
 : see if dbm.h is available
 : see if dbmclose exists
@@ -13803,6 +13902,8 @@ full_ar='$full_ar'
 full_csh='$full_csh'
 full_sed='$full_sed'
 gccversion='$gccversion'
+gidsign='$gidsign'
+gidsize='$gidsize'
 gidtype='$gidtype'
 glibpth='$glibpth'
 grep='$grep'
@@ -14083,6 +14184,7 @@ tr='$tr'
 trnl='$trnl'
 troff='$troff'
 uidsign='$uidsign'
+uidsize='$uidsize'
 uidtype='$uidtype'
 uname='$uname'
 uniq='$uniq'

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Oct 27 21:34:17 EET DST 1999
+ * Configuration time: Thu Oct 28 15:12:04 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1411,8 +1411,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00562/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00562/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.00563/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00563/alpha-dec_osf-thread"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1441,8 +1441,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00562"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00562"		/**/
+#define PRIVLIB "/opt/perl/lib/5.00563"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00563"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1457,8 +1457,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00562/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00562/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.00563/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00563/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2461,7 +2461,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.00562/alpha-dec_osf-thread for older
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.00563/alpha-dec_osf-thread for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -2490,7 +2490,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION 5.00562 /* Change to string for tuples?*/
+#define PERL_XS_APIVERSION 5.00563 /* Change to string for tuples?*/
 #define PERL_PM_APIVERSION 5.005 /* Change to string for tuples?*/
 
 /* HAS_DRAND48_PROTO:
@@ -2643,6 +2643,17 @@
  */
 #define Fpos_t fpos_t		/* File position type */
 
+/* Gid_t_SIGN:
+ *	This symbol holds the signedess of a Gid_t.
+ *	1 for unsigned, -1 for signed.
+ */
+#define Gid_t_SIGN	1		/* GID sign */
+
+/* Gid_t_SIZE:
+ *	This symbol holds the size of a Gid_t in bytes.
+ */
+#define Gid_t_SIZE 4		/* GID size */
+
 /* Gid_t:
  *	This symbol holds the return type of getgid() and the type of
  *	argument to setrgid() and related functions.  Typically,
@@ -2691,6 +2702,11 @@
  *	1 for unsigned, -1 for signed.
  */
 #define Uid_t_SIGN	1		/* UID sign */
+
+/* Uid_t_SIZE:
+ *	This symbol holds the size of a Uid_t in bytes.
+ */
+#define Uid_t_SIZE 4		/* UID size */
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.

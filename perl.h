@@ -1950,13 +1950,106 @@ typedef I32 CHECKPOINT;
 #  define UVof PERL_PRIo64
 #  define UVxf PERL_PRIx64
 #else
-#   if LONGSIZE == 4
+#   if IVSIZE == LONGSIZE
 #       define UVuf "lu"
 #       define IVdf "ld"
 #       define UVof "lo"
 #       define UVxf "lx"
 #   else
-        /* Any good ideas? */
+#       if IVSIZE == INTSIZE
+#           define UVuf "u"
+#           define IVdf "d"
+#           define UVof "o"
+#           define UVxf "x"
+#       else
+#           if IVSIZE == SHORTSIZE /* weird */
+#               define UVuf "hu"
+#               define IVdf "hd"
+#               define UVof "ho"
+#               define UVxf "hx"
+#           else
+	        /* well, any good ideas? */
+#           endif
+#       endif
+#   endif
+#endif
+
+/* The Uid_t_f and Gid_t_f definitely look like a job for metaconfig,
+ * as do the UVuf, IVdf, UVof, and UVxf above. */
+
+#if Uid_t_SIGN == -1
+#   if Uid_t_SIZE == IVSIZE
+#       define Uid_t_f IVdf
+#   else
+#       if Uid_t_SIZE == LONGSIZE
+#           define Uid_t_f "ld"
+#       else
+#           if Uid_t_SIZE == INTSIZE
+#               define Uid_t_f "d"
+#           else
+#               if Uid_t_SIZE == SHORTSIZE
+#                   define Uid_t_f "hd"
+#               else
+	            /* You tell me. */
+#               endif
+#           endif
+#       endif
+#   endif
+#else
+#   if Uid_t_SIZE == UVSIZE
+#       define Uid_t_f UVuf
+#   else
+#       if Uid_t_SIZE == LONGSIZE
+#           define Uid_t_f "lu"
+#       else
+#           if Uid_t_SIZE == INTSIZE
+#               define Uid_t_f "u"
+#           else
+#               if Uid_t_SIZE == SHORTSIZE
+#                   define Uid_t_f "hu"
+#               else
+	            /* You tell me. */
+#               endif
+#           endif
+#       endif
+#   endif
+#endif
+
+#if Gid_t_SIGN == -1
+#   if Gid_t_SIZE == IVSIZE
+#       define Gid_t_f IVdf
+#   else
+#       if Gid_t_SIZE == LONGSIZE
+#           define Gid_t_f "ld"
+#       else
+#           if Gid_t_SIZE == INTSIZE
+#               define Gid_t_f "d"
+#           else
+#               if Gid_t_SIZE == SHORTSIZE
+#                   define Gid_t_f "hd"
+#               else
+	            /* You tell me. */
+#               endif
+#           endif
+#       endif
+#   endif
+#else
+#   if Gid_t_SIZE == UVSIZE
+#       define Gid_t_f UVuf
+#   else
+#       if Gid_t_SIZE == LONGSIZE
+#           define Gid_t_f "lu"
+#       else
+#           if Gid_t_SIZE == INTSIZE
+#               define Gid_t_f "u"
+#           else
+#               if Gid_t_SIZE == SHORTSIZE
+#                   define Gid_t_f "hu"
+#               else
+	            /* You tell me. */
+#               endif
+#           endif
+#       endif
 #   endif
 #endif
 

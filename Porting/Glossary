@@ -1668,6 +1668,13 @@ gccversion (cc.U):
 	indicate whether the compiler is version 1 or 2.  This is used in
 	setting some of the default cflags.  It is set to '' if not gcc.
 
+gidsign (gidsign.U):
+	This variable contains the signedness of a gidtype.
+	1 for unsigned, -1 for signed.
+
+gidsize (gidsize.U):
+	This variable contains the size of a gidtype in bytes.
+
 gidtype (gidtype.U):
 	This variable defines Gid_t to be something like gid_t, int,
 	ushort, or whatever type is used to declare the return type
@@ -3049,6 +3056,9 @@ troff (Loc.U):
 uidsign (uidsign.U):
 	This variable contains the signedness of a uidtype.
 	1 for unsigned, -1 for signed.
+
+uidsize (uidsize.U):
+	This variable contains the size of a uidtype in bytes.
 
 uidtype (uidtype.U):
 	This variable defines Uid_t to be something like uid_t, int, 
