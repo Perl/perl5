@@ -8,7 +8,11 @@ timethis - run a chunk of code several times
 
 timethese - run several chunks of code several times
 
+cmpthese - print results of timethese as a comparison chart
+
 timeit - run a chunk of code and see how long it goes
+
+countit - see how many times a chunk of code runs in a given time
 
 =head1 SYNOPSIS
 
@@ -26,7 +30,32 @@ timeit - run a chunk of code and see how long it goes
 	'Name2' => sub { ...code2... },
     });
 
+    # cmpthese can be used both ways as well
+    cmpthese($count, {
+	'Name1' => '...code1...',
+	'Name2' => '...code2...',
+    });
+
+    cmpthese($count, {
+	'Name1' => sub { ...code1... },
+	'Name2' => sub { ...code2... },
+    });
+
+    # ...or in two stages
+    $results = timethese($count, 
+        {
+	    'Name1' => sub { ...code1... },
+	    'Name2' => sub { ...code2... },
+        },
+	'none'
+    );
+    cmpthese( $results ) ;
+
     $t = timeit($count, '...other code...')
+    print "$count loops of other code took:",timestr($t),"\n";
+
+    $t = countit($time, '...other code...')
+    $count = $t->iters ;
     print "$count loops of other code took:",timestr($t),"\n";
 
 =head1 DESCRIPTION
@@ -57,6 +86,10 @@ Enables or disable debugging by setting the C<$Benchmark::Debug> flag:
     $t = timeit(10, ' 5 ** $Global ');
     debug Benchmark 0;
 
+=item iters
+
+Returns the number of iterations.
+
 =back
 
 =head2 Standard Exports
@@ -65,6 +98,34 @@ The following routines will be exported into your namespace
 if you use the Benchmark module:
 
 =over 10
+
+=item cmpthese ( COUT, CODEHASHREF, [ STYLE ] )
+
+=item cmpthese ( RESULTSHASHREF )
+
+Optionally calls timethese(), then outputs comparison chart.  This 
+chart is sorted from slowest to highest, and shows the percent 
+speed difference between each pair of tests.  Can also be passed 
+the data structure that timethese() returns:
+
+    $results = timethese( .... );
+    cmpthese( $results );
+
+Returns the data structure returned by timethese().
+
+=item countit(TIME, CODE)
+
+Arguments: TIME is the minimum length of time to run CODE for, and CODE is
+the code to run.  CODE may be either a code reference or a string to
+be eval'd; either way it will be run in the caller's package.
+
+TIME is I<not> negative.  countit() will run the loop many times to
+calculate the speed of CODE before running it for TIME.  The actual
+time run for will usually be greater than TIME due to system clock
+resolution, so it's best to look at the number of iterations divided
+by the times that you are concerned with, not just the iterations.
+
+Returns: a Benchmark object.
 
 =item timeit(COUNT, CODE)
 
@@ -119,6 +180,8 @@ The routines are called in string comparison order of KEY.
 
 The COUNT can be zero or negative, see timethis().
 
+Returns a hash of Benchmark objects, keyed by name.
+
 =item timediff ( T1, T2 )
 
 Returns the difference between two Benchmark times as a Benchmark
@@ -135,12 +198,13 @@ Returns a string that formats the times in the TIMEDIFF object in
 the requested STYLE. TIMEDIFF is expected to be a Benchmark object
 similar to that returned by timediff().
 
-STYLE can be any of 'all', 'noc', 'nop' or 'auto'. 'all' shows each
-of the 5 times available ('wallclock' time, user time, system time,
+STYLE can be any of 'all', 'none', 'noc', 'nop' or 'auto'. 'all' shows
+each of the 5 times available ('wallclock' time, user time, system time,
 user time of children, and system time of children). 'noc' shows all
 except the two children times. 'nop' shows only wallclock and the
 two children times. 'auto' (the default) will act as 'all' unless
 the children times are both zero, in which case it acts as 'noc'.
+'none' prevents output.
 
 FORMAT is the L<printf(3)>-style format specifier (without the
 leading '%') to use to print the times. It defaults to '5.2f'.
@@ -180,7 +244,7 @@ different COUNT used.
 The data is stored as a list of values from the time and times
 functions:
 
-      ($real, $user, $system, $children_user, $children_system)
+      ($real, $user, $system, $children_user, $children_system, $iters)
 
 in seconds for the whole loop (not divided by the number of rounds).
 
@@ -192,7 +256,7 @@ The time of the null loop (a loop with the same
 number of rounds but empty loop body) is subtracted
 from the time of the real loop.
 
-The null loop times are cached, the key being the
+The null loop times can be cached, the key being the
 number of rounds. The caching can be controlled using
 calls like these:
 
@@ -202,6 +266,9 @@ calls like these:
     disablecache();
     enablecache();
 
+Caching is off by default, as it can (usually slightly) decrease
+accuracy and does not usually noticably affect runtimes.
+
 =head1 INHERITANCE
 
 Benchmark inherits from no other class, except of course
@@ -210,7 +277,7 @@ for Exporter.
 =head1 CAVEATS
 
 Comparing eval'd strings with code references will give you
-inaccurate results: a code reference will show a slower
+inaccurate results: a code reference will show a slightly slower
 execution time than the equivalent eval'd string.
 
 The real time timing is done using time(2) and
@@ -241,6 +308,10 @@ documentation.
 April 04-07th, 1997: by Jarkko Hietaniemi, added the run-for-some-time
 functionality.
 
+September, 1999; by Barrie Slaymaker: math fixes and accuracy and 
+efficiency tweaks.  Added cmpthese().  A result is now returned from 
+timethese().  Exposed countit() (was runfor()).
+
 =cut
 
 # evaluate something in a clean lexical environment
@@ -253,7 +324,7 @@ sub _doeval { eval shift }
 use Carp;
 use Exporter;
 @ISA=(Exporter);
-@EXPORT=qw(timeit timethis timethese timediff timesum timestr);
+@EXPORT=qw(cmpthese countit timeit timethis timethese timediff timestr);
 @EXPORT_OK=qw(clearcache clearallcache disablecache enablecache);
 
 &init;
@@ -290,6 +361,7 @@ sub cpu_p { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $pu+$ps         ; }
 sub cpu_c { my($r,$pu,$ps,$cu,$cs) = @{$_[0]};         $cu+$cs ; }
 sub cpu_a { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $pu+$ps+$cu+$cs ; }
 sub real  { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $r              ; }
+sub iters { $_[0]->[5] ; }
 
 sub timediff {
     my($a, $b) = @_;
@@ -364,15 +436,16 @@ sub runloop {
     croak "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
     print STDERR "runloop $n '$subcode'\n" if $debug;
 
-    # Wait for the user timer to tick.  This makes the error range more like -0.01, +0.  If
-    # we don't wait, then it's more like -0.01, +0.01.  This may not seem important, but it
-    # significantly reduces the chances of getting too low initial $n in the initial, 'find
-    # the minimum' loop in &runfor.  This, in turn, can reduce the number of calls to
+    # Wait for the user timer to tick.  This makes the error range more like 
+    # -0.01, +0.  If we don't wait, then it's more like -0.01, +0.01.  This
+    # may not seem important, but it significantly reduces the chances of
+    # getting a too low initial $n in the initial, 'find the minimum' loop
+    # in &countit.  This, in turn, can reduce the number of calls to
     # &runloop a lot, and thus reduce additive errors.
     my $tbase = Benchmark->new(0)->[1];
     do {
        $t0 = Benchmark->new(0);
-    } while ( $t0->[1] == $tbase ) ;
+    } while ( $t0->[1] == $tbase );
     &$subref;
     $t1 = Benchmark->new($n);
     $td = &timediff($t1, $t0);
@@ -386,18 +459,20 @@ sub timeit {
     my($wn, $wc, $wd);
 
     printf STDERR "timeit $n $code\n" if $debug;
-    my $cache_key = $n . ( ref( $code ) ? 'c' : 's' ) ;
+    my $cache_key = $n . ( ref( $code ) ? 'c' : 's' );
     if ($cache && exists $cache{$cache_key} ) {
 	$wn = $cache{$cache_key};
     } else {
 	$wn = &runloop($n, ref( $code ) ? sub { undef } : '' );
+	# Can't let our baseline have any iterations, or they get subtracted
+	# out of the result.
+	$wn->[5] = 0;
 	$cache{$cache_key} = $wn;
     }
 
     $wc = &runloop($n, $code);
 
     $wd = timediff($wc, $wn);
-
     timedebug("timeit: ",$wc);
     timedebug("      - ",$wn);
     timedebug("      = ",$wd);
@@ -409,8 +484,9 @@ sub timeit {
 my $default_for = 3;
 my $min_for     = 0.1;
 
-sub runfor {
-    my ($code, $tmax) = @_;
+
+sub countit {
+    my ( $tmax, $code ) = @_;
 
     if ( not defined $tmax or $tmax == 0 ) {
 	$tmax = $default_for;
@@ -418,52 +494,61 @@ sub runfor {
 	$tmax = -$tmax;
     }
 
-    die "runfor(..., $tmax): timelimit cannot be less than $min_for.\n"
+    die "countit($tmax, ...): timelimit cannot be less than $min_for.\n"
 	if $tmax < $min_for;
 
-    my ($n, $td, $tc, $ntot, $rtot, $utot, $stot, $cutot, $cstot );
+    my ($n, $tc);
 
     # First find the minimum $n that gives a significant timing.
-    
-    my $nmin;
-
-    for ($n = 1, $tc = 0; ; $n *= 2 ) {
-	$td = timeit($n, $code);
+    for ($n = 1; ; $n *= 2 ) {
+	my $td = timeit($n, $code);
 	$tc = $td->[1] + $td->[2];
-	last if $tc > 0.1 ;
+	last if $tc > 0.1;
     }
 
-    $nmin = $n;
+    my $nmin = $n;
 
-    my $ttot = 0;
-    my $tpra = 0.05 * $tmax; # Target/time practice.
-    # Double $n until we have think we have practiced enough.
-    for ( ; $ttot < $tpra; $n *= 2 ) {
-	$td = timeit($n, $code);
-	$ntot += $n;
-	$rtot += $td->[0];
-	$utot += $td->[1];
-	$stot += $td->[2];
-	$ttot = $utot + $stot;
+    # Get $n high enough that we can guess the final $n with some accuracy.
+    my $tpra = 0.1 * $tmax; # Target/time practice.
+    while ( $tc < $tpra ) {
+	# The 5% fudge is to keep us from iterating again all
+	# that often (this speeds overall responsiveness when $tmax is big
+	# and we guess a little low).  This does not noticably affect 
+	# accuracy since we're not couting these times.
+	$n = int( $tpra * 1.05 * $n / $tc ); # Linear approximation.
+	my $td = timeit($n, $code);
+	$tc = $td->[1] + $td->[2];
+    }
+
+    # Now, do the 'for real' timing(s), repeating until we exceed
+    # the max.
+    my $ntot  = 0;
+    my $rtot  = 0;
+    my $utot  = 0.0;
+    my $stot  = 0.0;
+    my $cutot = 0.0;
+    my $cstot = 0.0;
+    my $ttot  = 0.0;
+
+    # The 5% fudge is because $n is often a few % low even for routines
+    # with stable times and avoiding extra timeit()s is nice for
+    # accuracy's sake.
+    $n = int( $n * ( 1.05 * $tmax / $tc ) );
+
+    while () {
+	my $td = timeit($n, $code);
+	$ntot  += $n;
+	$rtot  += $td->[0];
+	$utot  += $td->[1];
+	$stot  += $td->[2];
 	$cutot += $td->[3];
 	$cstot += $td->[4];
-    }
+	$ttot = $utot + $stot;
+	last if $ttot >= $tmax;
 
-    my $r;
-
-    # Then iterate towards the $tmax.
-    while ( $ttot < $tmax ) {
-	$r = $tmax / $ttot - 1; # Linear approximation.
+	my $r = $tmax / $ttot - 1; # Linear approximation.
 	$n = int( $r * $ntot );
 	$n = $nmin if $n < $nmin;
-	$td = timeit($n, $code);
-	$ntot += $n;
-	$rtot += $td->[0];
-	$utot += $td->[1];
-	$stot += $td->[2];
-	$ttot = $utot + $stot;
-	$cutot += $td->[3];
-	$cstot += $td->[4];
     }
 
     return bless [ $rtot, $utot, $stot, $cutot, $cstot, $ntot ];
@@ -486,14 +571,14 @@ sub timethis{
 	$title = "timethis $n" unless defined $title;
     } else {
 	$fort  = n_to_for( $n );
-	$t     = runfor($code, $fort);
+	$t     = countit( $fort, $code );
 	$title = "timethis for $fort" unless defined $title;
 	$forn  = $t->[-1];
     }
     local $| = 1;
     $style = "" unless defined $style;
-    printf("%10s: ", $title);
-    print timestr($t, $style, $defaultfmt),"\n";
+    printf("%10s: ", $title) unless $style eq 'none';
+    print timestr($t, $style, $defaultfmt),"\n" unless $style eq 'none';
 
     $n = $forn if defined $forn;
 
@@ -513,25 +598,163 @@ sub timethese{
 		unless ref $alt eq HASH;
     my @names = sort keys %$alt;
     $style = "" unless defined $style;
-    print "Benchmark: ";
+    print "Benchmark: " unless $style eq 'none';
     if ( $n > 0 ) {
 	croak "non-integer loopcount $n, stopped" if int($n)<$n;
-	print "timing $n iterations of";
+	print "timing $n iterations of" unless $style eq 'none';
     } else {
-	print "running";
+	print "running" unless $style eq 'none';
     }
-    print " ", join(', ',@names);
+    print " ", join(', ',@names) unless $style eq 'none';
     unless ( $n > 0 ) {
 	my $for = n_to_for( $n );
-	print ", each for at least $for CPU seconds";
+	print ", each for at least $for CPU seconds" unless $style eq 'none';
     }
-    print "...\n";
+    print "...\n" unless $style eq 'none';
 
     # we could save the results in an array and produce a summary here
     # sum, min, max, avg etc etc
+    my %results;
     foreach my $name (@names) {
-        timethis ($n, $alt -> {$name}, $name, $style);
+        $results{$name} = timethis ($n, $alt -> {$name}, $name, $style);
     }
+
+    return \%results;
 }
+
+sub cmpthese{
+    my $results = ref $_[0] ? $_[0] : timethese( @_ );
+
+    return $results
+       if defined $_[2] && $_[2] eq 'none';
+
+    # Flatten in to an array of arrays with the name as the first field
+    my @vals = map{ [ $_, @{$results->{$_}} ] } keys %$results;
+
+    for (@vals) {
+	# The epsilon fudge here is to prevent div by 0.  Since clock
+	# resolutions are much larger, it's below the noise floor.
+	my $rate = $_->[6] / ( $_->[2] + $_->[3] + 0.000000000000001 );
+	$_->[7] = $rate;
+    }
+
+    # Sort by rate
+    @vals = sort { $a->[7] <=> $b->[7] } @vals;
+
+    # If more than half of the rates are greater than one...
+    my $display_as_rate = $vals[$#vals>>1]->[7] > 1;
+
+    my @rows;
+    my @col_widths;
+
+    my @top_row = ( 
+        '', 
+	$display_as_rate ? 'Rate' : 's/iter', 
+	map { $_->[0] } @vals 
+    );
+
+    push @rows, \@top_row;
+    @col_widths = map { length( $_ ) } @top_row;
+
+    # Build the data rows
+    # We leave the last column in even though it never has any data.  Perhaps
+    # it should go away.  Also, perhaps a style for a single column of
+    # percentages might be nice.
+    for my $row_val ( @vals ) {
+	my @row;
+
+        # Column 0 = test name
+	push @row, $row_val->[0];
+	$col_widths[0] = length( $row_val->[0] )
+	    if length( $row_val->[0] ) > $col_widths[0];
+
+        # Column 1 = performance
+	my $row_rate = $row_val->[7];
+
+	# We assume that we'll never get a 0 rate.
+	my $a = $display_as_rate ? $row_rate : 1 / $row_rate;
+
+	# Only give a few decimal places before switching to sci. notation,
+	# since the results aren't usually that accurate anyway.
+	my $format = 
+	   $a >= 100 ? 
+	       "%0.0f" : 
+	   $a >= 10 ?
+	       "%0.1f" :
+	   $a >= 1 ?
+	       "%0.2f" :
+	   $a >= 0.1 ?
+	       "%0.3f" :
+	       "%0.2e";
+
+	$format .= "/s"
+	    if $display_as_rate;
+	# Using $b here due to optimizing bug in _58 through _61
+	my $b = sprintf( $format, $a );
+	push @row, $b;
+	$col_widths[1] = length( $b )
+	    if length( $b ) > $col_widths[1];
+
+        # Columns 2..N = performance ratios
+	my $skip_rest = 0;
+	for ( my $col_num = 0 ; $col_num < @vals ; ++$col_num ) {
+	    my $col_val = $vals[$col_num];
+	    my $out;
+	    if ( $skip_rest ) {
+		$out = '';
+	    }
+	    elsif ( $col_val->[0] eq $row_val->[0] ) {
+		$out = "--";
+		# $skip_rest = 1;
+	    }
+	    else {
+		my $col_rate = $col_val->[7];
+		$out = sprintf( "%.0f%%", 100*$row_rate/$col_rate - 100 );
+	    }
+	    push @row, $out;
+	    $col_widths[$col_num+2] = length( $out )
+		if length( $out ) > $col_widths[$col_num+2];
+
+	    # A little wierdness to set the first column width properly
+	    $col_widths[$col_num+2] = length( $col_val->[0] )
+		if length( $col_val->[0] ) > $col_widths[$col_num+2];
+	}
+	push @rows, \@row;
+    }
+
+    # Equalize column widths in the chart as much as possible without
+    # exceeding 80 characters.  This does not use or affect cols 0 or 1.
+    my @sorted_width_refs = 
+       sort { $$a <=> $$b } map { \$_ } @col_widths[2..$#col_widths];
+    my $max_width = ${$sorted_width_refs[-1]};
+
+    my $total = 0;
+    for ( @col_widths ) { $total += $_ }
+
+    STRETCHER:
+    while ( $total < 80 ) {
+	my $min_width = ${$sorted_width_refs[0]};
+	last
+	   if $min_width == $max_width;
+	for ( @sorted_width_refs ) {
+	    last 
+		if $$_ > $min_width;
+	    ++$$_;
+	    ++$total;
+	    last STRETCHER
+		if $total >= 80;
+	}
+    }
+
+    # Dump the output
+    my $format = join( ' ', map { "%${_}s" } @col_widths ) . "\n";
+    substr( $format, 1, 0 ) = '-';
+    for ( @rows ) {
+	printf $format, @$_;
+    }
+
+    return $results;
+}
+
 
 1;

@@ -23,7 +23,6 @@ PERLVAR(Ihintgv,	GV *)
 PERLVAR(Iorigfilename,	char *)
 PERLVAR(Idiehook,	SV *)
 PERLVAR(Iwarnhook,	SV *)
-PERLVAR(Iparsehook,	SV *)
 PERLVAR(Icddir,		char *)		/* switches */
 PERLVAR(Iminus_c,	bool)
 PERLVARA(Ipatchlevel,10,char)

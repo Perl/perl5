@@ -238,7 +238,6 @@ osname
 pad_reset_pending
 padix
 padix_floor
-parsehook
 patchlevel
 patleave
 pending_ident

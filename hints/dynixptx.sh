@@ -22,7 +22,9 @@ usenm='n'
 # for performance, apparently this makes a huge difference (~krader)
 
 d_vfork='define'
-optimize='-Wc,-O3 -W0,-xstring'
+case "$optimize" in
+'') optimize='-Wc,-O3 -W0,-xstring' ;;
+esac
 
 # We override d_socket because it's very hard for Configure to get it right
 # in Dynix/Ptx, for several reasons.
@@ -49,9 +51,9 @@ case "$osvers" in
         d_sockpair='define'
         ;;
 4.2*) # on ptx/TCP 4.2, we can use BSD sockets, but they're not the default.
-        cppflags='-Wc,+bsd-socket'
-        ccflags='-Wc,+bsd-socket'
-        ldflags='-Wc,+bsd-socket'
+        cppflags="$cppflags -Wc,+bsd-socket"
+        ccflags="$ccflags -Wc,+bsd-socket"
+        ldflags="$ldflags -Wc,+bsd-socket"
         d_socket='define'
         d_oldsock='undef'
         d_sockpair='define'

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Sep 20 12:44:36 EET DST 1999
+ * Configuration time: Thu Sep 30 19:44:33 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1469,8 +1469,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl//alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl//alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2466,7 +2466,7 @@
  *	should be used when available.  The USE_64_BITS symbol will
  *	also be turned on if necessary.
  */
-#define	USE_LARGE_FILES		/**/
+/*#define	USE_LARGE_FILES		/ **/
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should

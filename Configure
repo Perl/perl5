@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Sep 22 00:13:58 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Thu Sep 30 19:41:54 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3576,9 +3576,11 @@ echo "Getting the current patchlevel..." >&4
 if $test -r $rsrc/patchlevel.h;then
 	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
 	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	apiversion=`awk '/define[ 	]+PERL_APIVERSION/ {print $3}' $rsrc/patchlevel.h`
 else
 	patchlevel=0
 	subversion=0
+	apiversion=0
 fi
 $echo $n "(You have $package" $c
 case "$package" in
@@ -3597,15 +3599,6 @@ else
 	version=`LC_ALL=C; export LC_ALL; \
 		 echo $baserev $patchlevel $subversion | \
 		 $awk '{ printf "%.5f\n", $1 + $2/1000.0 + $3/100000.0 }'`
-fi
-: Figure out perl API version.  Perhaps this should be in patchlevel.h
-if test "$subversion" -lt 50; then
-	apiversion=`LC_ALL=C; export LC_ALL; \
-		 LANGUAGE=C; export LANGUAGE; \
-		 echo $baserev $patchlevel | \
-		 $awk '{ printf "%.3f\n", $1 + $2/1000.0 }'`
-else
-	apiversion="$version"
 fi
 
 : determine installation style

@@ -539,6 +539,8 @@ SYM  = global.sym globvar.sym perlio.sym pp.sym
 
 SYMH = perlvars.h intrpvar.h thrdvar.h
 
+CHMOD_W = chmod +w
+
 # The following files are generated automatically
 #	keywords.h:	keywords.pl
 #	opcode.h:	opcode.pl
@@ -557,6 +559,7 @@ SYMH = perlvars.h intrpvar.h thrdvar.h
 # To force them to run, type
 #	make regen_headers
 regen_headers:	FORCE
+	$(CHMOD_W) proto.h warning.h lib/warning.pm 
 	perl keywords.pl
 	perl opcode.pl
 	perl embed.pl

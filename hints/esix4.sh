@@ -3,14 +3,18 @@
 # Kevin O'Gorman ( kevin@kosman.UUCP, kevin%kosman.uucp@nrc.com )
 #
 # Use Configure -Dcc=gcc to use gcc.
+
+# Why can't we just use PATH?  It contains /usr/ccs/bin.
 case "$cc" in
 '') cc='/bin/cc'
     test -f $cc || cc='/usr/ccs/bin/cc'
     ;;
 esac
-ldflags='-L/usr/ccs/lib -L/usr/ucblib'
+
+ldflags="$ldflags -L/usr/ccs/lib -L/usr/ucblib"
 test -d /usr/local/man || mansrc='none'
-ccflags='-I/usr/include -I/usr/ucbinclude'
+# Do we really need to tell cc to look in /usr/include?
+ccflags="$ccflags -I/usr/include -I/usr/ucbinclude"
 libswanted=`echo " $libswanted " | sed -e 's/ malloc / /' `
 d_index='undef'
 d_suidsafe=define
