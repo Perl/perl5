@@ -1,11 +1,8 @@
 #! /bin/sh
 case $CONFIGDOTSH in
 '')
-	if test -f config.sh; then TOP=.;
-	elif test -f ../config.sh; then TOP=..;
-	elif test -f ../../config.sh; then TOP=../..;
-	elif test -f ../../../config.sh; then TOP=../../..;
-	elif test -f ../../../../config.sh; then TOP=../../../..;
+	if test -f config.sh
+		then TOP=.
 	else
 		echo "Can't find config.sh."; exit 1
 	fi
