@@ -30,6 +30,6 @@ my $a = "snøstorm" ;
     my $a = "snøstorm";
 }
 EXPECT
-Malformed UTF-8 character (unexpected non-continuation byte 0x73 after byte 0xf8) at - line 3.
-Malformed UTF-8 character (unexpected non-continuation byte 0x73 after byte 0xf8) at - line 8.
+Malformed UTF-8 character (unexpected non-continuation byte 0x73 after byte 0xf8) at - line 9.
+Malformed UTF-8 character (unexpected non-continuation byte 0x73 after byte 0xf8) at - line 14.
 ########
