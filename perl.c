@@ -3317,8 +3317,8 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     char *s;
     SV *sv;
     GV* tmpgv;
-    char **dup_env_base = 0;
 #ifdef NEED_ENVIRON_DUP_FOR_MODIFY
+    char **dup_env_base = 0;
     int dup_env_count = 0;
 #endif
 

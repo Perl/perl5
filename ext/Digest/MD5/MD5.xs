@@ -42,7 +42,8 @@ extern "C" {
 }
 #endif
 
-/*#define MD5_DEBUG /**/
+/* Define this to turn on verbose debugging prints */
+#undef MD5_DEBUG
 
 /* Perl does not guarantee that U32 is exactly 32 bits.  Some system
  * has no integral type with exactly 32 bits.  For instance, A Cray has
@@ -193,7 +194,9 @@ MD5Init(MD5_CTX *ctx)
 static void
 MD5Transform(MD5_CTX* ctx, const U8* buf, STRLEN blocks)
 {
+#ifdef MD5_DEBUG
     static int tcount = 0;
+#endif
 
     U32 A = ctx->A;
     U32 B = ctx->B;

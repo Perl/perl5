@@ -877,10 +877,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		int compat = 1;
 
 		if (uc >= 0x100 ||
-		    !(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
+		    (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
 		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
 		    && (!(data->start_class->flags & ANYOF_FOLD)
 			|| !ANYOF_BITMAP_TEST(data->start_class, PL_fold[uc])))
+                    )
 		    compat = 0;
 		ANYOF_CLASS_ZERO(data->start_class);
 		ANYOF_BITMAP_ZERO(data->start_class);
@@ -921,9 +922,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		int compat = 1;
 
 		if (uc >= 0x100 ||
-		    !(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
+		    (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
 		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
-		    && !ANYOF_BITMAP_TEST(data->start_class, PL_fold[uc]))
+		     && !ANYOF_BITMAP_TEST(data->start_class, PL_fold[uc])))
 		    compat = 0;
 		ANYOF_CLASS_ZERO(data->start_class);
 		ANYOF_BITMAP_ZERO(data->start_class);
@@ -2615,7 +2616,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 {
     register regnode *ret = 0;
     I32 flags;
-    char *parse_start = RExC_parse;
 
     *flagp = WORST;		/* Tentatively. */
 
@@ -3269,7 +3269,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     bool need_class = 0;
     SV *listsv;
     register char *e;
-    char *parse_start = RExC_parse; /* MJD */
     UV n;
     bool optimize_invert = TRUE;
 
@@ -3851,9 +3850,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
     if (!SIZE_ONLY &&
-	(ANYOF_FLAGS(ret) &
 	 /* If the only flag is folding (plus possibly inversion). */
-	 (ANYOF_FLAGS_ALL ^ ANYOF_INVERT) == ANYOF_FOLD)) {
+	((ANYOF_FLAGS(ret) & (ANYOF_FLAGS_ALL ^ ANYOF_INVERT)) == ANYOF_FOLD)
+       ) {
 	for (value = 0; value < 256; ++value) {
 	    if (ANYOF_BITMAP_TEST(ret, value)) {
 		IV fold = PL_fold[value];
