@@ -12,7 +12,7 @@ perlhack.pod for the details.
 
 To give due honor to those who have made Perl what is is today,
 here are some of the more common names in the Changes file, and their
-current addresses (as of August 2000):
+current addresses (as of September 2000):
 
     Gisle Aas			<gisle@aas.no>
     Abigail			<abigail@foad.org>
@@ -85,7 +85,6 @@ And, of course, the Author of Perl:
 
     Larry Wall    	 	<larry@wall.org>
 
-
 NOTE: Each change entry shows the change number; who checked it into the
 repository; when; description of the change; which branch the change
 happened in; and the affected files.  The file lists have a short symbolic
@@ -97,6 +96,9 @@ indicator:
     	    +>	    branched (from elsewhere)
     	    !>	    merged changes (from elsewhere)
 
+The Message-Ids in the change entries refer to the email messages sent
+to the perl5-porters mailing list.  You can retrieve the messages for
+example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 
 --------------
 Version v5.7.0		Development release working toward v5.8
