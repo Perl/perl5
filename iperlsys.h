@@ -272,7 +272,7 @@ struct IPerlStdIOInfo
 #define PerlIO_setlinebuf(f)						\
 	(*PL_StdIO->pSetlinebuf)(PL_StdIO, (f))
 #define PerlIO_printf		Perl_fprintf_nocontext
-#define PerlIO_stdoutf		*PL_StdIO->pPrintf
+#define PerlIO_stdoutf		Perl_printf_nocontext
 #define PerlIO_vprintf(f,fmt,a)						\
 	(*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)          
 #define PerlIO_tell(f)							\

@@ -130,6 +130,7 @@
 #define sv_catpvf_mg_nocontext	Perl_sv_catpvf_mg_nocontext
 #define sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg_nocontext
 #define fprintf_nocontext	Perl_fprintf_nocontext
+#define printf_nocontext	Perl_printf_nocontext
 #endif
 #define cv_ckproto		Perl_cv_ckproto
 #define cv_clone		Perl_cv_clone
@@ -3140,6 +3141,8 @@
 #define sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg_nocontext
 #define Perl_fprintf_nocontext	CPerlObj::Perl_fprintf_nocontext
 #define fprintf_nocontext	Perl_fprintf_nocontext
+#define Perl_printf_nocontext	CPerlObj::Perl_printf_nocontext
+#define printf_nocontext	Perl_printf_nocontext
 #endif
 #define Perl_cv_ckproto		CPerlObj::Perl_cv_ckproto
 #define cv_ckproto		Perl_cv_ckproto
