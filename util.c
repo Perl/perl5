@@ -2039,47 +2039,6 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 void
 Perl_my_setenv(pTHX_ char *nam,char *val)
 {
-
-#ifdef USE_WIN32_RTL_ENV
-
-    register char *envstr;
-    STRLEN namlen = strlen(nam);
-    STRLEN vallen;
-    char *oldstr = environ[setenv_getix(nam)];
-
-    /* putenv() has totally broken semantics in both the Borland
-     * and Microsoft CRTLs.  They either store the passed pointer in
-     * the environment without making a copy, or make a copy and don't
-     * free it. And on top of that, they dont free() old entries that
-     * are being replaced/deleted.  This means the caller must
-     * free any old entries somehow, or we end up with a memory
-     * leak every time my_setenv() is called.  One might think
-     * one could directly manipulate environ[], like the UNIX code
-     * above, but direct changes to environ are not allowed when
-     * calling putenv(), since the RTLs maintain an internal
-     * *copy* of environ[]. Bad, bad, *bad* stink.
-     * GSAR 97-06-07
-     */
-
-    if (!val) {
-	if (!oldstr)
-	    return;
-	val = "";
-	vallen = 0;
-    }
-    else
-	vallen = strlen(val);
-    envstr = (char*)safesysmalloc((namlen + vallen + 3) * sizeof(char));
-    (void)sprintf(envstr,"%s=%s",nam,val);
-    (void)PerlEnv_putenv(envstr);
-    if (oldstr)
-	safesysfree(oldstr);
-#ifdef _MSC_VER
-    safesysfree(envstr);	/* MSVCRT leaks without this */
-#endif
-
-#else /* !USE_WIN32_RTL_ENV */
-
     register char *envstr;
     STRLEN len = strlen(nam) + 3;
     if (!val) {
@@ -2090,8 +2049,6 @@ Perl_my_setenv(pTHX_ char *nam,char *val)
     (void)sprintf(envstr,"%s=%s",nam,val);
     (void)PerlEnv_putenv(envstr);
     Safefree(envstr);
-
-#endif
 }
 
 #endif /* WIN32 */

@@ -3382,15 +3382,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    sv = newSVpv(s--,0);
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';
-#if defined(__BORLANDC__) && defined(USE_WIN32_RTL_ENV)
-	    /* Sins of the RTL. See note in my_setenv(). */
-	    { 
-		STRLEN len = strlen(*env);
-		char *e = safesysmalloc(len+1);
-		(void)strcpy(e, *env);
-		(void)PerlEnv_putenv(e);  
-	    } 
-#endif
 	}
 #ifdef NEED_ENVIRON_DUP_FOR_MODIFY
 	if (dup_env_base) {
