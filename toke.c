@@ -3619,7 +3619,7 @@ Perl_yylex(pTHX)
 	tmp = keyword(PL_tokenbuf, len);
 
 	/* Is this a word before a => operator? */
-	if (strnEQ(d,"=>",2)) {
+	if (*d == '=' && d[1] == '>') {
 	    CLINE;
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf,0));
 	    yylval.opval->op_private = OPpCONST_BARE;
@@ -3774,10 +3774,18 @@ Perl_yylex(pTHX)
 		    }
 		}
 
-		/* If followed by a paren, it's certainly a subroutine. */
 
 		PL_expect = XOPERATOR;
 		s = skipspace(s);
+
+		/* Is this a word before a => operator? */
+		if (*s == '=' && s[1] == '>') {
+		    CLINE;
+		    sv_setpv(((SVOP*)yylval.opval)->op_sv, PL_tokenbuf);
+		    TERM(WORD);
+		}
+
+		/* If followed by a paren, it's certainly a subroutine. */
 		if (*s == '(') {
 		    CLINE;
 		    if (gv && GvCVu(gv)) {

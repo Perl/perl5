@@ -290,6 +290,9 @@ Can't use \1 to mean $1 in expression at - line 4.
 # toke.c
 use warnings 'reserved' ;
 $a = abc;
+$a = { def
+
+=> 1 };
 no warnings 'reserved' ;
 $a = abc;
 EXPECT
