@@ -119,10 +119,13 @@ print $@ =~ /foo bar/ ? "ok 29\n" : "not ok 29\n";
 # --- rdo
   
 my $t = 30;
+$! = 0;
 my $nosuch = '/non/existant/file.name';
 open(NOSUCH, $nosuch);
 if ($@) {
     my $errno  = $!;
+    die "Eek! Attempting to open $nosuch failed, but \$! is still 0" unless $!;
+    $! = 0;
     $cpt->rdo($nosuch);
     print $! == $errno ? "ok $t\n" : sprintf "not ok $t # \"$!\" is %d (expected %d)\n", $!, $errno; $t++;
 } else {
