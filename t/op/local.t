@@ -2,7 +2,7 @@
 
 # $RCSfile: local.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:04 $
 
-print "1..34\n";
+print "1..35\n";
 
 sub foo {
     local($a, $b) = @_;
@@ -86,3 +86,8 @@ print +($a[0].$a[1] eq "Xb") ? "" : "not ", "ok 29\n";
 print +($h{'a'} == 1) ? "" : "not ", "ok 32\n";
 print +($h{'b'} == 2) ? "" : "not ", "ok 33\n";
 print +($h{'c'} == 3) ? "" : "not ", "ok 34\n";
+
+# check for scope leakage
+$a = 'outer';
+if (1) { local $a = 'inner' }
+print +($a eq 'outer') ? "" : "not ", "ok 35\n";
