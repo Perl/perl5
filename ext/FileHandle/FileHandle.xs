@@ -7,6 +7,14 @@ typedef int SysRet;
 typedef FILE * InputStream;
 typedef FILE * OutputStream;
 
+static int
+not_here(s)
+char *s;
+{
+    croak("FileHandle::%s not implemented on this architecture", s);
+    return -1;
+}
+
 static bool
 constant(name, pval)
 char *name;
@@ -57,6 +65,7 @@ SV *
 fgetpos(handle)
 	InputStream	handle
     CODE:
+#ifdef HAS_FGETPOS
 	if (handle) {
 	    Fpos_t pos;
 	    fgetpos(handle, &pos);
@@ -66,18 +75,25 @@ fgetpos(handle)
 	    ST(0) = &sv_undef;
 	    errno = EINVAL;
 	}
+#else
+	ST(0) = (SV *) not_here("fgetpos");
+#endif
 
 SysRet
 fsetpos(handle, pos)
 	InputStream	handle
 	SV *		pos
     CODE:
+#ifdef HAS_FSETPOS
 	if (handle)
 	    RETVAL = fsetpos(handle, (Fpos_t*)SvPVX(pos));
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
 	}
+#else
+	    RETVAL = (SysRet) not_here("fsetpos");
+#endif
     OUTPUT:
 	RETVAL
 
@@ -138,7 +154,6 @@ setbuf(handle, buf)
 	    setbuf(handle, buf);
 
 
-#ifdef _IOFBF
 
 SysRet
 setvbuf(handle, buf, type, size)
@@ -147,13 +162,16 @@ setvbuf(handle, buf, type, size)
 	int		type
 	int		size
     CODE:
+#ifdef _IOFBF   /* Should be HAS_SETVBUF once Configure tests for that */
 	if (handle)
 	    RETVAL = setvbuf(handle, buf, type, size);
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
 	}
+#else
+	    RETVAL = (SysRet) not_here("setvbuf");
+#endif /* _IOFBF */
     OUTPUT:
 	RETVAL
 
-#endif /* _IOFBF */
