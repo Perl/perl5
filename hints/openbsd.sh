@@ -41,9 +41,6 @@ esac
 # around for old NetBSD binaries.
 libswanted=`echo $libswanted | sed 's/ crypt / /'`
 
-# Avoid telldir prototype conflict in pp_sys.c  (OpenBSD uses const DIR *)
-pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
-
 # Configure can't figure this out non-interactively
 d_suidsafe='define'
 

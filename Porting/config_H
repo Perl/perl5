@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed May 13 13:36:52 EDT 1998
+ * Configuration time: Thu May 14 11:18:05 EDT 1998
  * Configured by     : doughera
  * Target system     : linux fractal 2.0.33 #1 tue feb 3 10:11:46 est 1998 i686 unknown 
  */
@@ -1212,6 +1212,13 @@
  *	is available.
  */
 #define HAS_ISASCII		/**/
+
+/* HAS_LCHOWN:
+ *	This symbol, if defined, indicates that the lchown routine is
+ *	available to operate on a symbolic link (instead of following the
+ *	link).
+ */
+/*#define HAS_LCHOWN		/ **/
 
 /* HAS_OPEN3:
  *	This manifest constant lets the C program know that the three

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May 13 13:35:54 EDT 1998 [metaconfig 3.0 PL70]
+# Generated on Thu May 14 12:19:05 EDT 1998 [metaconfig 3.0 PL70]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -357,6 +357,7 @@ d_htonl=''
 d_inetaton=''
 d_isascii=''
 d_killpg=''
+d_lchown=''
 d_link=''
 d_locconv=''
 d_lockf=''
@@ -7190,6 +7191,38 @@ $rm -f isascii*
 set killpg d_killpg
 eval $inlibc
 
+: see if lchown exists
+echo " "
+$cat > try.c <<'EOCP'
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char lchown(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char lchown();
+int main() {
+    /*  The GNU C library defines this for functions which it implements
+        to always fail with ENOSYS.  Some functions are actually named
+	something starting with __ and the normal name is an alias.  */
+#if defined (__stub_lchown) || defined (__stub___lchown)
+choke me
+#else
+lchown();
+#endif
+; return 0; }
+EOCP
+set try
+if eval $compile; then
+    $echo "lchown() found." >&4
+    val="$define"
+else
+    $echo "lchown() NOT found." >&4
+    val="$undef"
+fi
+set d_lchown
+eval $setvar
+
 : see if link exists
 set link d_link
 eval $inlibc
@@ -11043,6 +11076,7 @@ d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_isascii='$d_isascii'
 d_killpg='$d_killpg'
+d_lchown='$d_lchown'
 d_link='$d_link'
 d_locconv='$d_locconv'
 d_lockf='$d_lockf'

@@ -1131,6 +1131,12 @@ apply(I32 type, register SV **mark, register SV **sp)
 	}
 	break;
 #endif
+/* 
+XXX Should we make lchown() directly available from perl?
+For now, we'll let Configure test for HAS_LCHOWN, but do
+nothing in the core.
+    --AD  5/1998
+*/
 #ifdef HAS_KILL
     case OP_KILL:
 	what = "kill";

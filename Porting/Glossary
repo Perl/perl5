@@ -540,6 +540,11 @@ d_killpg (d_killpg.U):
 	indicates to the C program that the killpg() routine is available
 	to kill process groups.
 
+d_lchown (d_lchown.U):
+	This variable conditionally defines the HAS_LCHOWN symbol, which
+	indicates to the C program that the lchown() routine is available
+	to operate on a symbolic link (instead of following the link).
+
 d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.

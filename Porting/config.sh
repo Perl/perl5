@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Wed May 13 13:36:52 EDT 1998
+# Configuration time: Thu May 14 11:18:05 EDT 1998
 # Configured by     : doughera
 # Target system     : linux fractal 2.0.33 #1 tue feb 3 10:11:46 est 1998 i686 unknown 
 
@@ -52,7 +52,7 @@ ccdlflags='-rdynamic'
 ccflags='-D_REENTRANT -Dbool=char -DHAS_BOOL -I/usr/local/include'
 cf_by='doughera'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Wed May 13 13:36:52 EDT 1998'
+cf_time='Thu May 14 11:18:05 EDT 1998'
 chgrp=''
 chmod=''
 chown=''
@@ -151,6 +151,7 @@ d_index='undef'
 d_inetaton='define'
 d_isascii='define'
 d_killpg='define'
+d_lchown='undef'
 d_link='define'
 d_locconv='define'
 d_lockf='define'

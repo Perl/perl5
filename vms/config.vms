@@ -1652,6 +1652,13 @@
  */
 #define HAS_ISASCII		/**/
 
+/* HAS_LCHOWN:
+ *	This symbol, if defined, indicates that the lchown routine is
+ *	available to operate on a symbolic link (instead of following the
+ *	link).
+ */
+/*#define HAS_LCHOWN		/ **/
+
 /* HAS_SETLOCALE:
  *	This symbol, if defined, indicates that the setlocale routine is
  *	available to handle locale-specific ctype implementations.
