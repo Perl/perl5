@@ -2737,9 +2737,9 @@ sv_clear(register SV *sv)
 	{
 	  io_close((IO*)sv);
 	}
-	if (IoDIRP((IO*)sv)) {
-	    PerlDir_close(IoDIRP((IO*)sv));
-	    IoDIRP((IO*)sv) = 0;
+	if (IoDIRP(sv)) {
+	    PerlDir_close(IoDIRP(sv));
+	    IoDIRP(sv) = 0;
 	}
 	Safefree(IoTOP_NAME(sv));
 	Safefree(IoFMT_NAME(sv));
