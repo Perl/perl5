@@ -1,38 +1,77 @@
 #ifndef ENCODE_H
 #define ENCODE_H
+
 #ifndef U8
+/* A tad devious this:
+   perl normally has a #define for U8 - if that isn't present
+   then we typedef it - leaving it #ifndef so we can do data parts without
+   getting extern references to the code parts
+ */
 typedef unsigned char U8;
 #endif
 
 typedef struct encpage_s encpage_t;
 
+
 struct encpage_s
 {
- const U8   *seq;
- encpage_t  *next;
- U8         min;
- U8         max;
- U8         dlen;
- U8         slen;
+ /* fields ordered to pack nicely on 32-bit machines */
+ const U8   *seq;       /* Packed output sequences we generate if we match */
+ encpage_t  *next;      /* Page to go to if we match */
+ U8         min;        /* Min value of octet to match this entry */
+ U8         max;        /* Max value of octet to match this entry */
+ U8         dlen;       /* destination length - size of entries in seq */
+ U8         slen;       /* source length - number of source octets needed */
 };
+
+/*
+   At any point in a translation there is a page pointer which points at an array
+   of the above structures.
+
+   Basic operation :
+   get octet from source stream.
+   if (octet >= min && octet < max) {
+      if slen is 0 then we cannot represent this character.
+      if we have less than slen octets (including this one) then we have a partial character.
+      otherwise
+       copy dlen octets from seq + dlen*(octet-min) to output
+       (dlen may be zero if we don't know yet.)
+       load page pointer with next to continue.
+       (is slen is one this is end of a character)
+       get next octet.
+   }
+   else {
+      increment the page pointer to look at next slot in the array
+   }
+
+   arrays SHALL be constructed so there is an entry which matches ..0xFF at the end,
+   and either maps it or indicates no representation.
+
+   if MSB of slen is set then mapping is an approximate "FALLBACK" entry.
+
+*/
+
 
 typedef struct encode_s encode_t;
 struct encode_s
 {
- encpage_t  *t_utf8;
- encpage_t  *f_utf8;
- const U8   *rep;
- int        replen;
- U8         min_el;
- U8         max_el;
- const char *name[2];
+ encpage_t  *t_utf8;    /* Starting table for translation from the encoding to UTF-8 form */
+ encpage_t  *f_utf8;    /* Starting table for translation from UTF-8 to the encoding */
+ const U8   *rep;       /* Replacement character in this encoding e.g. "?" */
+ int        replen;     /* Number of octets to represent replacement character */
+ U8         min_el;     /* Minimum octets to represent a character */
+ U8         max_el;     /* Maximum octets to represent a character */
+ const char *name[2];   /* name(s) of this encoding */
 };
 
 #ifdef U8
+/* See comment at top of file for deviousness */
+
 extern int do_encode(encpage_t *enc, const U8 *src, STRLEN *slen,
                      U8 *dst, STRLEN dlen, STRLEN *dout, int approx);
 
 extern void Encode_DefineEncoding(encode_t *enc);
+
 #endif
 
 #define ENCODE_NOSPACE  1

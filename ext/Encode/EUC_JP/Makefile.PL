@@ -2,7 +2,9 @@ use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
 
-my %tables = (EUC_JP  => ['euc-jp.ucm' ],
+my %tables = (EUC_JP  => ['euc-jp.ucm',
+              # 'euc-kr.ucm', 'euc-cn.ucm'
+              ],
 	      );
 
 

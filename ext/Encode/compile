@@ -117,6 +117,9 @@ else
 
 my %encoding;
 my %strings;
+my $saved = 0;
+my $subsave = 0;
+my $strings = 0;
 
 sub cmp_name
 {
@@ -156,6 +159,7 @@ foreach my $enc (sort cmp_name @encfiles)
 
 if ($doC)
  {
+  print STDERR "Writing compiled form\n";
   foreach my $name (sort cmp_name keys %encoding)
    {
     my ($e2u,$u2e,$erep,$min_el,$max_el) = @{$encoding{$name}};
@@ -214,6 +218,9 @@ END
    }
   close(D);
   close(H);
+  printf STDERR "%d bytes in string tables\n",$strings;
+  printf STDERR "%d bytes (%.3g%%) saved spotting duplicates\n",$saved,100*$saved/$strings if $saved;
+  printf STDERR "%d bytes (%.3g%%) saved using substrings\n",$subsave,100*$subsave/$strings if $subsave;
  }
 elsif ($doEnc)
  {
@@ -233,6 +240,7 @@ elsif ($doUcm)
  }
 
 close(C);
+
 
 
 sub compile_ucm
@@ -270,7 +278,7 @@ sub compile_ucm
    push(@byte,$1) while $attr{'subchar'} =~ /\G\\x([0-9a-f]+)/icg;
    $erep = join('',map(chr(hex($_)),@byte));
   }
- print "Scanning $name ($cs)\n";
+ print "Reading $name ($cs)\n";
  my $nfb = 0;
  my $hfb = 0;
  while (<$fh>)
@@ -414,11 +422,17 @@ sub enter
   }
 }
 
+
+
 sub outstring
 {
  my ($fh,$name,$s) = @_;
  my $sym = $strings{$s};
- unless ($sym)
+ if ($sym)
+  {
+   $saved += length($s);
+  }
+ else
   {
    foreach my $o (keys %strings)
     {
@@ -427,10 +441,12 @@ sub outstring
       {
        $sym = $strings{$o};
        $sym .= sprintf("+0x%02x",$i) if ($i);
+       $subsave += length($s);
        return $sym;
       }
     }
    $strings{$s} = $sym = $name;
+   $strings += length($s);
    printf $fh "\nstatic const U8 %s[%d] =\n",$name,length($s);
    # Do in chunks of 16 chars to constrain line length
    # Assumes ANSI C adjacent string litteral concatenation
