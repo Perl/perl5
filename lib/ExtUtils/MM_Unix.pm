@@ -78,11 +78,15 @@ path. On UNIX eliminated successive slashes and successive "/.".
 
 sub canonpath {
     my($self,$path) = @_;
+    my $node = '';
+    if ( $^O eq 'qnx' && $path =~ s|^(//\d+)/|/| ) {
+      $node = $1;
+    }
     $path =~ s|/+|/|g ;                            # xx////xx  -> xx/xx
     $path =~ s|(/\.)+/|/|g ;                       # xx/././xx -> xx/xx
     $path =~ s|^(\./)+|| unless $path eq "./";     # ./xx      -> xx
     $path =~ s|/$|| unless $path eq "/";           # xx/       -> xx
-    $path;
+    "$node$path";
 }
 
 =item catdir
