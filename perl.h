@@ -2116,25 +2116,52 @@ struct ptr_tbl {
 	/* otherwise default to functions in util.c */
 #endif
 
-#ifdef CASTNEGFLOAT
-#define U_S(what) ((U16)(what))
-#define U_I(what) ((unsigned int)(what))
-#define U_L(what) ((U32)(what))
-#else
-#define U_S(what) ((U16)cast_ulong((NV)(what)))
-#define U_I(what) ((unsigned int)cast_ulong((NV)(what)))
-#define U_L(what) (cast_ulong((NV)(what)))
-#endif
+/* *MAX Plus 1. A floating point value.
+   Hopefully expressed in a way that dodgy floating point can't mess up.
+   >> 2 rather than 1, so that value is safely less than I32_MAX after 1
+   is added to it
+   May find that some broken compiler will want the value cast to I32.
+   [after the shift, as signed >> may not be as secure as unsigned >>]
+*/
+#define I32_MAX_P1 (2.0 * (1 + (((U32)I32_MAX) >> 1)))
+#define U32_MAX_P1 (4.0 * (1 + ((U32_MAX) >> 2)))
+/* For compilers that can't correctly cast NVs over 0x7FFFFFFF (or
+   0x7FFFFFFFFFFFFFFF) to an unsigned integer. In the future, sizeof(UV)
+   may be greater than sizeof(IV), so don't assume that half max UV is max IV.
+*/
+#define U32_MAX_P1_HALF (2.0 * (1 + ((U32_MAX) >> 2)))
 
-#ifdef CASTI32
-#define I_32(what) ((I32)(what))
-#define I_V(what) ((IV)(what))
-#define U_V(what) ((UV)(what))
-#else
+#define UV_MAX_P1 (4.0 * (1 + ((UV_MAX) >> 2)))
+#define IV_MAX_P1 (2.0 * (1 + (((UV)IV_MAX) >> 1)))
+#define UV_MAX_P1_HALF (2.0 * (1 + ((UV_MAX) >> 2)))
+
+/* This may look like unnecessary jumping through hoops, but converting
+   out of range floating point values to integers *is* undefined behaviour,
+   and it is starting to bite.
+*/
+#ifndef CAST_INLINE
 #define I_32(what) (cast_i32((NV)(what)))
+#define U_32(what) (cast_ulong((NV)(what)))
 #define I_V(what) (cast_iv((NV)(what)))
 #define U_V(what) (cast_uv((NV)(what)))
+#else
+#define I_32(n) ((n) < I32_MAX_P1 ? ((n) < I32_MIN ? I32_MIN : (I32) (n)) \
+                  : ((n) < U32_MAX_P1 ? (I32)(U32) (n) \
+                     : ((n) > 0 ? (I32) U32_MAX : 0 /* NaN */)))
+#define U_32(n) ((n) < 0.0 ? ((n) < I32_MIN ? (UV) I32_MIN : (U32)(I32) (n)) \
+                  : ((n) < U32_MAX_P1 ? (U32) (n) \
+                     : ((n) > 0 ? U32_MAX : 0 /* NaN */)))
+#define I_V(n) ((n) < IV_MAX_P1 ? ((n) < IV_MIN ? IV_MIN : (IV) (n)) \
+                  : ((n) < UV_MAX_P1 ? (IV)(UV) (n) \
+                     : ((n) > 0 ? (IV)UV_MAX : 0 /* NaN */)))
+#define U_V(n) ((n) < 0.0 ? ((n) < IV_MIN ? (UV) IV_MIN : (UV)(IV) (n)) \
+                  : ((n) < UV_MAX_P1 ? (UV) (n) \
+                     : ((n) > 0 ? UV_MAX : 0 /* NaN */)))
 #endif
+
+#define U_S(what) ((U16)U_32(what))
+#define U_I(what) ((unsigned int)U_32(what))
+#define U_L(what) U_32(what)
 
 /* These do not care about the fractional part, only about the range. */
 #define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
