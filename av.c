@@ -153,11 +153,18 @@ I32 lval;
 	return av_store(av,key,sv);
     }
     if (AvARRAY(av)[key] == &sv_undef) {
+    emptyness:
 	if (lval) {
 	    sv = NEWSV(6,0);
 	    return av_store(av,key,sv);
 	}
 	return 0;
+    }
+    else if (AvREIFY(av)
+	     && (!AvARRAY(av)[key]	/* eg. @_ could have freed elts */
+		 || SvTYPE(AvARRAY(av)[key]) == SVTYPEMASK)) {
+	AvARRAY(av)[key] = &sv_undef;	/* 1/2 reify */
+	goto emptyness;
     }
     return &AvARRAY(av)[key];
 }
@@ -326,10 +333,6 @@ register AV *av;
 	key = AvFILL(av) + 1;
 	while (key)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
-    }
-    if (key = AvARRAY(av) - AvALLOC(av)) {
-	AvMAX(av) += key;
-	SvPVX(av) = (char*)AvALLOC(av);
     }
     Safefree(AvALLOC(av));
     AvALLOC(av) = 0;
