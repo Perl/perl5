@@ -10,7 +10,8 @@ use XSLoader ();
 require Exporter;
 @ISA = qw(Exporter);
 
-# walkoptree comes from B.pm (you are there), walkoptree comes from B.xs
+# walkoptree_slow comes from B.pm (you are there),
+# walkoptree comes from B.xs
 @EXPORT_OK = qw(minus_c ppname save_BEGINs
 		class peekop cast_I32 cstring cchar hash threadsv_names
 		main_root main_start main_cv svref_2object opnumber

@@ -90,7 +90,7 @@ ok;
 
 $a = `$^X "-I../lib" "-MO=Terse" -e 1 2>&1`;
 print "not " unless $a =~
-/\bLISTOP\b.*leave.*\bOP\b.*enter.*\bCOP\b.*nextstate.*\bOP\b.*null/s;
+/\bLISTOP\b.*leave.*\n    OP\b.*enter.*\n    COP\b.*nextstate.*\n    OP\b.*null/s;
 ok;
 
 $a = `$^X "-I../lib" "-MO=Terse" -ane "s/foo/bar/" 2>&1`;
