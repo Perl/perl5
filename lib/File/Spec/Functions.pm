@@ -5,7 +5,7 @@ use strict;
 
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION);
 
-$VERSION = '1.1';
+$VERSION = '1.3';
 
 require Exporter;
 
@@ -31,6 +31,7 @@ require Exporter;
 	catpath
 	abs2rel
 	rel2abs
+	case_tolerant
 );
 
 %EXPORT_TAGS = ( ALL => [ @EXPORT_OK, @EXPORT ] );
@@ -88,6 +89,7 @@ The following functions are exported only by request.
 	catpath
 	abs2rel
 	rel2abs
+	case_tolerant
 
 All the functions may be imported using the C<:ALL> tag.
 
