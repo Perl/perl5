@@ -315,7 +315,6 @@ usage:
 XS(XS_attributes__warn_reserved)
 {
     dXSARGS;
-    dXSTARG;
 
     if (items != 0) {
 	Perl_croak(aTHX_
@@ -323,9 +322,7 @@ XS(XS_attributes__warn_reserved)
     }
 
     EXTEND(SP,1);
-    ST(0) = TARG;
-    sv_setiv(TARG, ckWARN(WARN_RESERVED) != 0);
-    SvSETMAGIC(TARG);
+    ST(0) = boolSV(ckWARN(WARN_RESERVED));
 
     XSRETURN(1);
 }
