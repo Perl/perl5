@@ -305,9 +305,6 @@ OP*	newSLICEOP _((I32 flags, OP* subscript, OP* list));
 OP*	newSTATEOP _((I32 flags, char* label, OP* o));
 CV*	newSUB _((I32 floor, OP* o, OP* proto, OP* block));
 CV*	newXS _((char* name, void (*subaddr)(CV* cv), char* filename));
-#ifdef DEPRECATED
-CV*	newXSUB _((char* name, I32 ix, I32 (*subaddr)(int,int,int), char* filename));
-#endif
 AV*	newAV _((void));
 OP*	newAVREF _((OP* o));
 OP*	newBINOP _((I32 type, I32 flags, OP* first, OP* last));
@@ -338,6 +335,9 @@ SV*	newSVsv _((SV* old));
 OP*	newUNOP _((I32 type, I32 flags, OP* first));
 OP*	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop,
 		      I32 whileline, OP* expr, OP* block, OP* cont));
+#ifdef USE_THREADS
+struct thread *	new_struct_thread _((struct thread *t));
+#endif
 PerlIO*	nextargv _((GV* gv));
 char*	ninstr _((char* big, char* bigend, char* little, char* lend));
 OP*	oopsCV _((OP* o));

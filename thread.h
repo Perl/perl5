@@ -1,180 +1,123 @@
-#ifndef USE_THREADS
-#define MUTEX_LOCK(m)
-#define MUTEX_UNLOCK(m)
-#define MUTEX_INIT(m)
-#define MUTEX_DESTROY(m)
-#define COND_INIT(c)
-#define COND_SIGNAL(c)
-#define COND_BROADCAST(c)
-#define COND_WAIT(c, m)
-#define COND_DESTROY(c)
-
-#define THR
-/* Rats: if dTHR is just blank then the subsequent ";" throws an error */
-#define dTHR extern int errno
-#else
-
-#ifdef FAKE_THREADS
-typedef struct thread *perl_thread;
-/* With fake threads, thr is global(ish) so we don't need dTHR */
-#define dTHR extern int errno
-
-/*
- * Note that SCHEDULE() is only callable from pp code (which
- * must be expecting to be restarted). We'll have to do
- * something a bit different for XS code.
- */
-#define SCHEDULE() return schedule(), op
-
-#define MUTEX_LOCK(m)
-#define MUTEX_UNLOCK(m)
-#define MUTEX_INIT(m)
-#define MUTEX_DESTROY(m)
-#define COND_INIT(c) perl_cond_init(c)
-#define COND_SIGNAL(c) perl_cond_signal(c)
-#define COND_BROADCAST(c) perl_cond_broadcast(c)
-#define COND_WAIT(c, m) STMT_START {	\
-	perl_cond_wait(c);		\
-	SCHEDULE();			\
-    } STMT_END
-#define COND_DESTROY(c)
-#else
+#ifdef USE_THREADS
 
 #ifdef WIN32
-
-typedef HANDLE perl_thread;
-
-/* XXX Critical Sections used instead of mutexes: lightweight,
- * but can't be communicated to child processes, and can't get
- * HANDLE to it for use elsewhere
- */
-/*
-#define MUTEX_INIT(m) InitializeCriticalSection(m)
-#define MUTEX_LOCK(m) EnterCriticalSection(m)
-#define MUTEX_UNLOCK(m) LeaveCriticalSection(m)
-#define MUTEX_DESTROY(m) DeleteCriticalSection(m)
-*/
-
-#define MUTEX_INIT(m) \
-    STMT_START {						\
-	if ((*(m) = CreateMutex(NULL,FALSE,NULL)) == NULL)	\
-	    croak("panic: MUTEX_INIT");				\
-    } STMT_END
-#define MUTEX_LOCK(m) \
-    STMT_START {						\
-	if (WaitForSingleObject(*(m),INFINITE) == WAIT_FAILED)	\
-	    croak("panic: MUTEX_LOCK");				\
-    } STMT_END
-#define MUTEX_UNLOCK(m) \
-    STMT_START {						\
-	if (ReleaseMutex(*(m)) == 0)				\
-	    croak("panic: MUTEX_UNLOCK");			\
-    } STMT_END
-#define MUTEX_DESTROY(m) \
-    STMT_START {						\
-	if (CloseHandle(*(m)) == 0)				\
-	    croak("panic: MUTEX_DESTROY");			\
-    } STMT_END
-
-#define COND_INIT(c) \
-    STMT_START {						\
-	if ((*(c) = CreateEvent(NULL,TRUE,FALSE,NULL)) == NULL)	\
-	    croak("panic: COND_INIT");				\
-    } STMT_END
-#define COND_SIGNAL(c) \
-    STMT_START {						\
-	if (PulseEvent(*(c)) == 0)				\
-	    croak("panic: COND_SIGNAL (%ld)",GetLastError());	\
-    } STMT_END
-#define COND_BROADCAST(c) \
-    STMT_START {						\
-	if (PulseEvent(*(c)) == 0)				\
-	    croak("panic: COND_BROADCAST");			\
-    } STMT_END
-/* #define COND_WAIT(c, m) \
-    STMT_START {						\
-	if (WaitForSingleObject(*(c),INFINITE) == WAIT_FAILED)	\
-	    croak("panic: COND_WAIT");				\
-    } STMT_END
-*/
-#define COND_WAIT(c, m) \
-    STMT_START {						\
-	if (SignalObjectAndWait(*(m),*(c),INFINITE,FALSE) == WAIT_FAILED)\
-	    croak("panic: COND_WAIT");				\
-	else							\
-	    MUTEX_LOCK(m);					\
-    } STMT_END
-#define COND_DESTROY(c) \
-    STMT_START {						\
-	if (CloseHandle(*(c)) == 0)				\
-	    croak("panic: COND_DESTROY");			\
-    } STMT_END
-
-#define DETACH(t) \
-    STMT_START {						\
-	if (CloseHandle((t)->Tself) == 0) {			\
-	    MUTEX_UNLOCK(&(t)->mutex);				\
-	    croak("panic: DETACH");				\
-	}							\
-    } STMT_END
-
-#define THR ((struct thread *) TlsGetValue(thr_key))
-#define pthread_getspecific(k)		TlsGetValue(k)
-#define pthread_setspecific(k,v)	(TlsSetValue(k,v) == 0)
-
-#else /* !WIN32 */
+#  include "win32/win32thread.h"
+#endif
 
 /* POSIXish threads */
 typedef pthread_t perl_thread;
 #ifdef OLD_PTHREADS_API
-#define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
-#define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
-#define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
+#  define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
+#  define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
+#  define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
+#  define YIELD pthread_yield()
+#  define DETACH(t)				\
+    STMT_START {				\
+	if (pthread_detach(&(t)->self)) {	\
+	    MUTEX_UNLOCK(&(t)->mutex);		\
+	    croak("panic: DETACH");		\
+	}					\
+    } STMT_END
 #else
-#define pthread_mutexattr_default NULL
-#define pthread_condattr_default NULL
+#  define pthread_mutexattr_default NULL
+#  define pthread_condattr_default NULL
+#  define pthread_attr_default NULL
 #endif /* OLD_PTHREADS_API */
 
-#define MUTEX_INIT(m) \
-    if (pthread_mutex_init((m), pthread_mutexattr_default)) \
-	croak("panic: MUTEX_INIT"); \
-    else 1
-#define MUTEX_LOCK(m) \
-    if (pthread_mutex_lock((m))) croak("panic: MUTEX_LOCK"); else 1
-#define MUTEX_UNLOCK(m) \
-    if (pthread_mutex_unlock((m))) croak("panic: MUTEX_UNLOCK"); else 1
-#define MUTEX_DESTROY(m) \
-    if (pthread_mutex_destroy((m))) croak("panic: MUTEX_DESTROY"); else 1
-#define COND_INIT(c) \
-    if (pthread_cond_init((c), pthread_condattr_default)) \
-	croak("panic: COND_INIT"); \
-    else 1
-#define COND_SIGNAL(c) \
-    if (pthread_cond_signal((c))) croak("panic: COND_SIGNAL"); else 1
-#define COND_BROADCAST(c) \
-    if (pthread_cond_broadcast((c))) croak("panic: COND_BROADCAST"); else 1
-#define COND_WAIT(c, m) \
-    if (pthread_cond_wait((c), (m))) croak("panic: COND_WAIT"); else 1
-#define COND_DESTROY(c) \
-    if (pthread_cond_destroy((c))) croak("panic: COND_DESTROY"); else 1
+#ifndef YIELD
+#  define YIELD sched_yield()
+#endif
+
+#ifndef MUTEX_INIT
+#define MUTEX_INIT(m)						\
+    STMT_START {						\
+	if (pthread_mutex_init((m), pthread_mutexattr_default))	\
+	    croak("panic: MUTEX_INIT");				\
+    } STMT_END
+#define MUTEX_LOCK(m)				\
+    STMT_START {				\
+	if (pthread_mutex_lock((m)))		\
+	    croak("panic: MUTEX_LOCK");		\
+    } STMT_END
+#define MUTEX_UNLOCK(m)				\
+    STMT_START {				\
+	if (pthread_mutex_unlock((m)))		\
+	    croak("panic: MUTEX_UNLOCK");	\
+    } STMT_END
+#define MUTEX_DESTROY(m)			\
+    STMT_START {				\
+	if (pthread_mutex_destroy((m)))		\
+	    croak("panic: MUTEX_DESTROY");	\
+    } STMT_END
+#endif /* MUTEX_INIT */
+
+#ifndef COND_INIT
+#define COND_INIT(c)						\
+    STMT_START {						\
+	if (pthread_cond_init((c), pthread_condattr_default))	\
+	    croak("panic: COND_INIT");				\
+    } STMT_END
+#define COND_SIGNAL(c)				\
+    STMT_START {				\
+	if (pthread_cond_signal((c)))		\
+	    croak("panic: COND_SIGNAL");	\
+    } STMT_END
+#define COND_BROADCAST(c)			\
+    STMT_START {				\
+	if (pthread_cond_broadcast((c)))	\
+	    croak("panic: COND_BROADCAST");	\
+    } STMT_END
+#define COND_WAIT(c, m)				\
+    STMT_START {				\
+	if (pthread_cond_wait((c), (m)))	\
+	    croak("panic: COND_WAIT");		\
+    } STMT_END
+#define COND_DESTROY(c)				\
+    STMT_START {				\
+	if (pthread_cond_destroy((c)))		\
+	    croak("panic: COND_DESTROY");	\
+    } STMT_END
+#endif /* COND_INIT */
 
 /* DETACH(t) must only be called while holding t->mutex */
-#define DETACH(t)			\
-    if (pthread_detach((t)->Tself)) {	\
-	MUTEX_UNLOCK(&(t)->mutex);	\
-	croak("panic: DETACH");		\
-    } else 1
+#ifndef DETACH
+#define DETACH(t)				\
+    STMT_START {				\
+	if (pthread_detach((t)->self)) {	\
+	    MUTEX_UNLOCK(&(t)->mutex);		\
+	    croak("panic: DETACH");		\
+	}					\
+    } STMT_END
+#endif /* DETACH */
 
-/* XXX Add "old" (?) POSIX draft interface too */
-#ifdef OLD_PTHREADS_API
+#ifndef JOIN
+#define JOIN(t, avp) 					\
+    STMT_START {					\
+	if (pthread_join((t)->self, (void**)(avp)))	\
+	    croak("panic: pthread_join");		\
+    } STMT_END
+#endif /* JOIN */
+
+#ifndef SET_THR
+#define SET_THR(t)					\
+    STMT_START {					\
+	if (pthread_setspecific(thr_key, (void *) (t)))	\
+	    croak("panic: pthread_setspecific");	\
+    } STMT_END
+#endif /* SET_THR */
+
+#ifndef THR
+#  ifdef OLD_PTHREADS_API
 struct thread *getTHR _((void));
-#define THR getTHR()
-#else
-#define THR ((struct thread *) pthread_getspecific(thr_key))
-#endif /* OLD_PTHREADS_API */
-#endif /* WIN32 */
-#define dTHR struct thread *thr = THR
-#endif /* FAKE_THREADS */
+#    define THR getTHR()
+#  else
+#    define THR ((struct thread *) pthread_getspecific(thr_key))
+#  endif /* OLD_PTHREADS_API */
+#endif /* THR */
+
+#ifndef dTHR
+#  define dTHR struct thread *thr = THR
+#endif /* dTHR */
 
 #ifndef INIT_THREADS
 #  ifdef NEED_PTHREAD_INIT
@@ -183,6 +126,11 @@ struct thread *getTHR _((void));
 #    define INIT_THREADS NOOP
 #  endif
 #endif
+
+#ifndef THREAD_RET_TYPE
+#  define THREAD_RET_TYPE	void *
+#  define THREAD_RET_CAST(p)	((void *)(p))
+#endif /* THREAD_RET */
 
 struct thread {
     /* The fields that used to be global */
@@ -223,10 +171,25 @@ struct thread {
 
     /* Now the fields that used to be "per interpreter" (even when global) */
 
-    /* XXX What about magic variables such as $/, $? and so on? */
+    /* Fields used by magic variables such as $@, $/ and so on */
+    bool	Ttainted;
+    PMOP *	Tcurpm;
+    SV *	Tnrs;
+    SV *	Trs;
+    GV *	Tlast_in_gv;
+    char *	Tofs;
+    STRLEN	Tofslen;
+    GV *	Tdefoutgv;
+    char *	Tchopset;
+    SV *	Tformtarget;
+    SV *	Tbodytarget;
+    SV *	Ttoptarget;
+
+    /* Stashes */
     HV *	Tdefstash;
     HV *	Tcurstash;
 
+    /* Stacks */
     SV **	Ttmps_stack;
     I32		Ttmps_ix;
     I32		Ttmps_floor;
@@ -250,10 +213,12 @@ struct thread {
 
     /* XXX Sort stuff, firstgv, secongv and so on? */
 
-    perl_thread	Tself;
-    SV *	Toursv;
-    HV *	Tcvcache;
+    SV *	oursv;
+    HV *	cvcache;
+    perl_thread	self;			/* Underlying thread object */
     U32		flags;
+    AV *	magicals;		/* Per-thread magicals */
+    AV *	specific;		/* Thread-specific user data */
     perl_mutex	mutex;			/* For the fields others can change */
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
@@ -261,7 +226,7 @@ struct thread {
 #ifdef ADD_THREAD_INTERN
     struct thread_intern i;		/* Platform-dependent internals */
 #endif
-    char	trailing_nul;		/* For the sake of thrsv, t->Toursv */
+    char	trailing_nul;		/* For the sake of thrsv and oursv */
 };
 
 typedef struct thread *Thread;
@@ -329,6 +294,18 @@ typedef struct condpair {
 #undef	Xpv
 #undef	statbuf
 #undef	timesbuf
+#undef	tainted
+#undef	curpm
+#undef	nrs
+#undef	rs
+#undef	last_in_gv
+#undef	ofs
+#undef	ofslen
+#undef	defoutgv
+#undef	chopset
+#undef	formtarget
+#undef	bodytarget
+#undef	toptarget
 #undef	top_env
 #undef	runlevel
 #undef	in_eval
@@ -337,8 +314,6 @@ typedef struct condpair {
 #undef	dirty
 #undef	localizing
 
-#define self		(thr->Tself)
-#define oursv		(thr->Toursv)
 #define stack_base	(thr->Tstack_base)
 #define stack_sp	(thr->Tstack_sp)
 #define stack_max	(thr->Tstack_max)
@@ -376,6 +351,19 @@ typedef struct condpair {
 #define Xpv		(thr->TXpv)
 #define statbuf		(thr->Tstatbuf)
 #define timesbuf	(thr->Ttimesbuf)
+#define	tainted		(thr->Ttainted)
+#define	tainted		(thr->Ttainted)
+#define	curpm		(thr->Tcurpm)
+#define	nrs		(thr->Tnrs)
+#define	rs		(thr->Trs)
+#define	last_in_gv	(thr->Tlast_in_gv)
+#define	ofs		(thr->Tofs)
+#define	ofslen		(thr->Tofslen)
+#define	defoutgv	(thr->Tdefoutgv)
+#define	chopset		(thr->Tchopset)
+#define	formtarget	(thr->Tformtarget)
+#define	bodytarget	(thr->Tbodytarget)
+#define	toptarget	(thr->Ttoptarget)
 #define defstash	(thr->Tdefstash)
 #define curstash	(thr->Tcurstash)
 
@@ -393,5 +381,19 @@ typedef struct condpair {
 #define	top_env		(thr->Ttop_env)
 #define	runlevel	(thr->Trunlevel)
 
-#define	cvcache		(thr->Tcvcache)
+#else
+/* USE_THREADS is not defined */
+#define MUTEX_LOCK(m)
+#define MUTEX_UNLOCK(m)
+#define MUTEX_INIT(m)
+#define MUTEX_DESTROY(m)
+#define COND_INIT(c)
+#define COND_SIGNAL(c)
+#define COND_BROADCAST(c)
+#define COND_WAIT(c, m)
+#define COND_DESTROY(c)
+
+#define THR
+/* Rats: if dTHR is just blank then the subsequent ";" throws an error */
+#define dTHR extern int errno
 #endif /* USE_THREADS */

@@ -63,22 +63,20 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #define NOOP (void)0
 
 #define WITH_THR(s) do { dTHR; s; } while (0)
+
 #ifdef USE_THREADS
-#ifdef FAKE_THREADS
-#include "fakethr.h"
-#else
-#ifdef WIN32
-/*typedef CRITICAL_SECTION perl_mutex;*/
-typedef HANDLE perl_mutex;
-typedef HANDLE perl_cond;
-typedef DWORD perl_key;
-#else
-#include <pthread.h>
+#  ifdef FAKE_THREADS
+#    include "fakethr.h"
+#  else
+#    ifdef WIN32
+#      include "win32/win32thread.h"
+#    else
+#      include <pthread.h>
 typedef pthread_mutex_t perl_mutex;
 typedef pthread_cond_t perl_cond;
 typedef pthread_key_t perl_key;
-#endif /* WIN32 */
-#endif /* FAKE_THREADS */
+#    endif /* WIN32 */
+#  endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
 
 /*
@@ -1340,6 +1338,8 @@ int runops_standard _((void));
 int runops_debug _((void));
 #endif
 
+#define PER_THREAD_MAGICALS "123456789&`'+/.,\\\";^-%=|~:\001\005!@"
+
 /****************/
 /* Truly global */
 /****************/
@@ -1356,6 +1356,7 @@ EXT struct thread *	eval_owner;	/* Owner thread for doeval */
 EXT int			nthreads;	/* Number of threads currently */
 EXT perl_mutex		threads_mutex;	/* Mutex for nthreads and thread list */
 EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
+EXT char *		per_thread_magicals INIT(PER_THREAD_MAGICALS);
 #ifdef FAKE_THREADS
 EXT struct thread *	thr;		/* Currently executing (fake) thread */
 #endif
@@ -1858,7 +1859,8 @@ IEXT I32	Imaxscream IINIT(-1);
 IEXT SV *	Ilastscream;
 
 /* shortcuts to misc objects */
-IEXT GV *	Ierrgv;
+IEXT HV *	Ierrhv;
+IEXT SV *	Ierrsv;
 
 /* shortcuts to debugging objects */
 IEXT GV *	IDBgv;

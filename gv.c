@@ -234,7 +234,6 @@ I32 level;
 		    (cv = GvCV(gv)) &&
 		    (CvROOT(cv) || CvXSUB(cv)))
 		{
-		    dTHR;	/* just for SvREFCNT_inc */
 		    if (cv = GvCV(topgv))
 			SvREFCNT_dec(cv);
 		    GvCV(topgv) = (CV*)SvREFCNT_inc(GvCV(gv));
@@ -638,7 +637,7 @@ I32 sv_type;
         if (strEQ(name, "OVERLOAD")) {
             HV* hv = GvHVn(gv);
             GvMULTI_on(gv);
-            sv_magic((SV*)hv, (SV*)gv, 'A', 0, 0);
+            hv_magic(hv, gv, 'A');
         }
         break;
 #endif /* OVERLOAD */

@@ -1040,21 +1040,21 @@ char *message;
 	    SV **svp;
 	    STRLEN klen = strlen(message);
 	    
-	    svp = hv_fetch(GvHV(errgv), message, klen, TRUE);
+	    svp = hv_fetch(errhv, message, klen, TRUE);
 	    if (svp) {
 		if (!SvIOK(*svp)) {
 		    static char prefix[] = "\t(in cleanup) ";
 		    sv_upgrade(*svp, SVt_IV);
 		    (void)SvIOK_only(*svp);
-		    SvGROW(GvSV(errgv), SvCUR(GvSV(errgv))+sizeof(prefix)+klen);
-		    sv_catpvn(GvSV(errgv), prefix, sizeof(prefix)-1);
-		    sv_catpvn(GvSV(errgv), message, klen);
+		    SvGROW(errsv, SvCUR(errsv)+sizeof(prefix)+klen);
+		    sv_catpvn(errsv, prefix, sizeof(prefix)-1);
+		    sv_catpvn(errsv, message, klen);
 		}
 		sv_inc(*svp);
 	    }
 	}
 	else
-	    sv_setpv(GvSV(errgv), message);
+	    sv_setpv(errsv, message);
 	
 	cxix = dopoptoeval(cxstack_ix);
 	if (cxix >= 0) {
@@ -1077,7 +1077,7 @@ char *message;
 	    LEAVE;
 
 	    if (optype == OP_REQUIRE) {
-		char* msg = SvPVx(GvSV(errgv), na);
+		char* msg = SvPV(errsv, na);
 		DIE("%s", *msg ? msg : "Compilation failed in require");
 	    }
 	    return pop_return();
@@ -1117,21 +1117,6 @@ PP(pp_orassign)
 	RETURNOP(cLOGOP->op_other);
 }
 	
-#ifdef DEPRECATED
-PP(pp_entersubr)
-{
-    dSP;
-    SV** mark = (stack_base + *markstack_ptr + 1);
-    SV* cv = *mark;
-    while (mark < sp) {	/* emulate old interface */
-	*mark = mark[1];
-	mark++;
-    }
-    *sp = cv;
-    return pp_entersub(ARGS);
-}
-#endif
-
 PP(pp_caller)
 {
     dSP;
@@ -2212,7 +2197,7 @@ int gimme;
     if (saveop->op_flags & OPf_SPECIAL)
 	in_eval |= 4;
     else
-	sv_setpv(GvSV(errgv),"");
+	sv_setpv(errsv,"");
     if (yyparse() || error_count || !eval_root) {
 	SV **newsp;
 	I32 gimme;
@@ -2231,7 +2216,7 @@ int gimme;
 	lex_end();
 	LEAVE;
 	if (optype == OP_REQUIRE) {
-	    char* msg = SvPVx(GvSV(errgv), na);
+	    char* msg = SvPV(errsv, na);
 	    DIE("%s", *msg ? msg : "Compilation failed in require");
 	}
 	SvREFCNT_dec(rs);
@@ -2585,7 +2570,7 @@ PP(pp_leaveeval)
     LEAVE;
 
     if (!(save_flags & OPf_SPECIAL))
-	sv_setpv(GvSV(errgv),"");
+	sv_setpv(errsv,"");
 
     RETURNOP(retop);
 }
@@ -2605,7 +2590,7 @@ PP(pp_entertry)
     eval_root = op;		/* Only needed so that goto works right. */
 
     in_eval = 1;
-    sv_setpv(GvSV(errgv),"");
+    sv_setpv(errsv,"");
     PUTBACK;
     return DOCATCH(op->op_next);
 }
@@ -2653,7 +2638,7 @@ PP(pp_leavetry)
     curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE;
-    sv_setpv(GvSV(errgv),"");
+    sv_setpv(errsv,"");
     RETURN;
 }
 

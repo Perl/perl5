@@ -282,6 +282,7 @@
 #define inc_amg			Perl_inc_amg
 #define ingroup			Perl_ingroup
 #define init_stacks		Perl_init_stacks
+#define init_thread_intern	Perl_init_thread_intern
 #define instr			Perl_instr
 #define intro_my		Perl_intro_my
 #define intuit_more		Perl_intuit_more
@@ -458,6 +459,7 @@
 #define newWHILEOP		Perl_newWHILEOP
 #define newXS			Perl_newXS
 #define newXSUB			Perl_newXSUB
+#define new_struct_thread	Perl_new_struct_thread
 #define nextargv		Perl_nextargv
 #define nexttoke		Perl_nexttoke
 #define nexttype		Perl_nexttype
@@ -479,6 +481,7 @@
 #define nomemok			Perl_nomemok
 #define nomethod_amg		Perl_nomethod_amg
 #define not_amg			Perl_not_amg
+#define nthreads		Perl_nthreads
 #define numer_amg		Perl_numer_amg
 #define numeric_local		Perl_numeric_local
 #define numeric_name		Perl_numeric_name
@@ -510,6 +513,7 @@
 #define padix			Perl_padix
 #define patleave		Perl_patleave
 #define peep			Perl_peep
+#define per_thread_magicals	Perl_per_thread_magicals
 #define pidgone			Perl_pidgone
 #define pidstatus		Perl_pidstatus
 #define pmflag			Perl_pmflag
@@ -816,6 +820,7 @@
 #define pp_socket		Perl_pp_socket
 #define pp_sockpair		Perl_pp_sockpair
 #define pp_sort			Perl_pp_sort
+#define pp_specific		Perl_pp_specific
 #define pp_splice		Perl_pp_splice
 #define pp_split		Perl_pp_split
 #define pp_sprintf		Perl_pp_sprintf
@@ -1259,7 +1264,8 @@
 #define e_tmpname		(curinterp->Ie_tmpname)
 #define endav			(curinterp->Iendav)
 #define envgv			(curinterp->Ienvgv)
-#define errgv			(curinterp->Ierrgv)
+#define errhv			(curinterp->Ierrhv)
+#define errsv			(curinterp->Ierrsv)
 #define eval_root		(curinterp->Ieval_root)
 #define eval_start		(curinterp->Ieval_start)
 #define fdpid			(curinterp->Ifdpid)
@@ -1411,7 +1417,8 @@
 #define Ie_tmpname		e_tmpname
 #define Iendav			endav
 #define Ienvgv			envgv
-#define Ierrgv			errgv
+#define Ierrhv			errhv
+#define Ierrsv			errsv
 #define Ieval_root		eval_root
 #define Ieval_start		eval_start
 #define Ifdpid			fdpid
@@ -1572,7 +1579,8 @@
 #define e_fp			Perl_e_fp
 #define e_tmpname		Perl_e_tmpname
 #define endav			Perl_endav
-#define errgv			Perl_errgv
+#define errhv			Perl_errhv
+#define errsv			Perl_errsv
 #define eval_root		Perl_eval_root
 #define eval_start		Perl_eval_start
 #define fdpid			Perl_fdpid

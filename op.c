@@ -511,6 +511,45 @@ pad_reset()
     pad_reset_pending = FALSE;
 }
 
+#ifdef USE_THREADS
+/* find_thread_magical is not reentrant */
+PADOFFSET
+find_thread_magical(name)
+char *name;
+{
+    dTHR;
+    char *p;
+    PADOFFSET key;
+    SV **svp;
+    /* We currently only handle single character magicals */
+    p = strchr(per_thread_magicals, *name);
+    if (!p)
+	return NOT_IN_PAD;
+    key = p - per_thread_magicals;
+    svp = av_fetch(thr->magicals, key, FALSE);
+    if (!svp) {
+	SV *sv = NEWSV(0, 0);
+	av_store(thr->magicals, key, sv);
+	/*
+	 * Some magic variables used to be automagically initialised
+	 * in gv_fetchpv. Those which are now per-thread magicals get
+	 * initialised here instead.
+	 */
+	switch (*name) {
+	case ';':
+	    sv_setpv(sv, "\034");
+	    break;
+	}
+	sv_magic(sv, 0, 0, name, 1); 
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "find_thread_magical: new SV %p for $%s%c\n",
+			      sv, (*name < 32) ? "^" : "",
+			      (*name < 32) ? toCTRL(*name) : *name));
+    }
+    return key;
+}
+#endif /* USE_THREADS */
+
 /* Destructor */
 
 void
@@ -536,6 +575,11 @@ OP *o;
     case OP_ENTEREVAL:
 	o->op_targ = 0;	/* Was holding hints. */
 	break;
+#ifdef USE_THREADS
+    case OP_SPECIFIC:
+	o->op_targ = 0;	/* Was holding index into thr->magicals AV. */
+	break;
+#endif /* USE_THREADS */
     default:
 	if (!(o->op_flags & OPf_REF) || (check[o->op_type] != ck_ftst))
 	    break;
@@ -1158,6 +1202,16 @@ I32 type;
 		SvPV(*av_fetch(comppad_name, o->op_targ, 4), na));
 	break;
 
+#ifdef USE_THREADS
+    case OP_SPECIFIC:
+	modcount++;	/* XXX ??? */
+#if 0
+	if (!type) 
+	    croak("Can't localize thread-specific variable");
+#endif
+	break;
+#endif /* USE_THREADS */
+
     case OP_PUSHMARK:
 	break;
 	
@@ -1288,7 +1342,7 @@ I32 type;
 
     switch (o->op_type) {
     case OP_ENTERSUB:
-	if ((type == OP_DEFINED) &&
+	if ((type == OP_DEFINED || type == OP_LOCK) &&
 	    !(o->op_flags & OPf_STACKED)) {
 	    o->op_type = OP_RV2CV;             /* entersub => rv2cv */
 	    o->op_ppaddr = ppaddr[OP_RV2CV];
@@ -1314,6 +1368,10 @@ I32 type;
 	}
 	break;
       
+    case OP_SPECIFIC:
+	o->op_flags |= OPf_MOD;		/* XXX ??? */
+	break;
+
     case OP_RV2AV:
     case OP_RV2HV:
 	o->op_flags |= OPf_REF; 
@@ -1581,10 +1639,14 @@ jmaybe(o)
 OP *o;
 {
     if (o->op_type == OP_LIST) {
-	o = convert(OP_JOIN, 0,
-		prepend_elem(OP_LIST,
-		    newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", TRUE, SVt_PV))),
-		    o));
+	OP *o2;
+#ifdef USE_THREADS
+	o2 = newOP(OP_SPECIFIC, 0);
+	o2->op_targ = find_thread_magical(";");
+#else
+	o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", TRUE, SVt_PV))),
+#endif /* USE_THREADS */
+	o = convert(OP_JOIN, 0, prepend_elem(OP_LIST, o2, o));
     }
     return o;
 }
@@ -2127,17 +2189,32 @@ OP *repl;
 	OP *curop;
 	if (pm->op_pmflags & PMf_EVAL)
 	    curop = 0;
+#ifdef USE_THREADS
+	else if (repl->op_type == OP_SPECIFIC
+		 && strchr("&`'123456789+",
+			   per_thread_magicals[repl->op_targ]))
+	{
+	    curop = 0;
+	}
+#endif /* USE_THREADS */
 	else if (repl->op_type == OP_CONST)
 	    curop = repl;
 	else {
 	    OP *lastop = 0;
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
 		if (opargs[curop->op_type] & OA_DANGEROUS) {
+#ifdef USE_THREADS
+		    if (curop->op_type == OP_SPECIFIC
+			&& strchr("&`'123456789+", curop->op_private)) {
+			break;
+		    }
+#else
 		    if (curop->op_type == OP_GV) {
 			GV *gv = ((GVOP*)curop)->op_gv;
 			if (strchr("&`'123456789+", *GvENAME(gv)))
 			    break;
 		    }
+#endif /* USE_THREADS */
 		    else if (curop->op_type == OP_RV2CV)
 			break;
 		    else if (curop->op_type == OP_RV2SV ||
@@ -3410,8 +3487,8 @@ OP *block;
 		    croak(not_safe);
 		else {
 		    /* force display of errors found but not reported */
-		    sv_catpv(GvSV(errgv), not_safe);
-		    croak("%s", SvPVx(GvSV(errgv), na));
+		    sv_catpv(errsv, not_safe);
+		    croak("%s", SvPV(errsv, na));
 		}
 	    }
 	}
@@ -3537,21 +3614,6 @@ OP *block;
     LEAVE_SCOPE(floor);
     return cv;
 }
-
-#ifdef DEPRECATED
-CV *
-newXSUB(name, ix, subaddr, filename)
-char *name;
-I32 ix;
-I32 (*subaddr)();
-char *filename;
-{
-    CV* cv = newXS(name, (void(*)())subaddr, filename);
-    CvOLDSTYLE_on(cv);
-    CvXSUBANY(cv).any_i32 = ix;
-    return cv;
-}
-#endif
 
 CV *
 newXS(name, subaddr, filename)
@@ -3814,6 +3876,8 @@ OP *o;
 	o->op_ppaddr = ppaddr[OP_PADSV];
 	return o;
     }
+    else if (o->op_type == OP_SPECIFIC)
+	return o;
     return newUNOP(OP_RV2SV, 0, scalar(o));
 }
 
@@ -4884,6 +4948,24 @@ register OP* o;
 		}
 	    }
 	    o->op_seq = op_seqmax++;
+	    break;
+
+	case OP_PADAV:
+	    if (o->op_next->op_type == OP_RV2AV
+		&& (o->op_next->op_flags && OPf_REF))
+	    {
+		null(o->op_next);
+	       	o->op_next = o->op_next->op_next;
+	    }
+	    break;
+	    
+	case OP_PADHV:
+	    if (o->op_next->op_type == OP_RV2HV
+		&& (o->op_next->op_flags && OPf_REF))
+	    {
+		null(o->op_next);
+	       	o->op_next = o->op_next->op_next;
+	    }
 	    break;
 
 	case OP_MAPWHILE:

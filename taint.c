@@ -12,6 +12,7 @@ taint_proper(f, s)
 const char *f;
 char *s;
 {
+    dTHR;	/* just for taint */
     char *ug;
 
     DEBUG_u(PerlIO_printf(Perl_debug_log,
@@ -70,10 +71,12 @@ taint_env()
     svp = hv_fetch(GvHVn(envgv),"PATH",4,FALSE);
     if (svp && *svp) {
 	if (SvTAINTED(*svp)) {
+	    dTHR;
 	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{PATH}");
 	}
 	if ((mg = mg_find(*svp, 'e')) && MgTAINTEDDIR(mg)) {
+	    dTHR;
 	    TAINT;
 	    taint_proper("Insecure directory in %s%s", "$ENV{PATH}");
 	}
@@ -83,6 +86,7 @@ taint_env()
     /* tainted $TERM is okay if it contains no metachars */
     svp = hv_fetch(GvHVn(envgv),"TERM",4,FALSE);
     if (svp && *svp && SvTAINTED(*svp)) {
+    	dTHR;	/* just for taint */
 	bool was_tainted = tainted;
 	char *t = SvPV(*svp, na);
 	char *e = t + na;
@@ -101,6 +105,7 @@ taint_env()
     for (e = misc_env; *e; e++) {
 	svp = hv_fetch(GvHVn(envgv), *e, strlen(*e), FALSE);
 	if (svp && *svp != &sv_undef && SvTAINTED(*svp)) {
+	    dTHR;	/* just for taint */
 	    TAINT;
 	    taint_proper("Insecure $ENV{%s}%s", *e);
 	}

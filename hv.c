@@ -316,6 +316,7 @@ register U32 hash;
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
+	dTHR;
 	bool save_taint = tainted;
 	if (tainting)
 	    tainted = SvTAINTED(keysv);
@@ -925,7 +926,6 @@ HV *hv;
 	}
 	magic_nextpack((SV*) hv,mg,key);
         if (SvOK(key)) {
-	    dTHR;		/* just for SvREFCNT_inc */
 	    /* force key to stay around until next time */
 	    HeSVKEY_set(entry, SvREFCNT_inc(key));
 	    return entry;		/* beware, hent_val is not set */

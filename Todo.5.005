@@ -1,23 +1,17 @@
 Merging
-    5.004_04
     oneperl (THIS pointer)
 
 Multi-threading
-    Fix Thread->list
     $AUTOLOAD. Hmm.
     without USE_THREADS, change extern variable for dTHR
     consistent semantics for exit/die in threads
     SvREFCNT_dec(curstack) in threadstart() in Thread.xs
-    $@ and other magic globals:
-	global lexical pool with auto-binding for magicals
-	move magicals that should be per-thread into thread.h
-	sv_magic for the necessary global lexical pool entries
     Thread::Pool
-    check new condition variable word; fix cond.t
     more Configure support
 
 Miscellaneous
     rename and alter ISA.pm
+    magic_setisa should be made to update %FIELDS
 
 Compiler
     auto-produce executable
@@ -26,6 +20,8 @@ Compiler
     $^C to track compiler/checker status
     END blocks need saving in compiled output
     _AUTOLOAD prodding
+    fix comppadlist (names in comppad_name can have fake SvCUR
+	from where newASSIGNOP steals the field)
 
 Documentation
     lots

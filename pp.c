@@ -396,7 +396,6 @@ SV* sv;
     else if (SvPADTMP(sv))
 	sv = newSVsv(sv);
     else {
-	dTHR;			/* just for SvREFCNT_inc */
 	SvTEMP_off(sv);
 	(void)SvREFCNT_inc(sv);
     }
@@ -4266,8 +4265,9 @@ void *svv;
 PP(pp_lock)
 {
     dSP;
-#ifdef USE_THREADS
     dTOPss;
+    SV *retsv = sv;
+#ifdef USE_THREADS
     MAGIC *mg;
     
     if (SvROK(sv))
@@ -4284,8 +4284,32 @@ PP(pp_lock)
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: pp_lock lock 0x%lx\n",
 			      (unsigned long)thr, (unsigned long)sv);)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
+	SvREFCNT_inc(sv);	/* keep alive until magic_mutexfree */
 	save_destructor(unlock_condpair, sv);
     }
+#endif /* USE_THREADS */
+    if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV
+	|| SvTYPE(retsv) == SVt_PVCV) {
+	retsv = refto(retsv);
+    }
+    SETs(retsv);
+    RETURN;
+}
+
+PP(pp_specific)
+{
+    dSP;
+#ifdef USE_THREADS
+    SV **svp = av_fetch(thr->magicals, op->op_targ, FALSE);
+    if (!svp)
+	croak("panic: pp_specific");
+    EXTEND(sp, 1);
+    if (op->op_private & OPpLVAL_INTRO)
+	PUSHs(save_svref(svp));
+    else
+	PUSHs(*svp);
+#else
+    DIE("tried to access thread-specific data in non-threaded perl");
 #endif /* USE_THREADS */
     RETURN;
 }

@@ -429,9 +429,9 @@ beyond the scope of the compartment.
 
 =item :base_thread
 
-This op is related to multi-threading.
+These ops are related to multi-threading.
 
-    lock
+    lock specific
 
 =item :default
 

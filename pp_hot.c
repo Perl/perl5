@@ -1713,16 +1713,16 @@ PP(pp_leavesub)
 }
 
 static CV *
-get_db_sub(sv)
-SV *sv;
+get_db_sub(svp, cv)
+SV **svp;
+CV *cv;
 {
     dTHR;
-    SV *oldsv = sv;
+    SV *oldsv = *svp;
     GV *gv;
-    CV *cv;
 
-    sv = GvSV(DBsub);
-    save_item(sv);
+    *svp = GvSV(DBsub);
+    save_item(*svp);
     gv = CvGV(cv);
     if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
 	 || strEQ(GvNAME(gv), "END") 
@@ -1731,10 +1731,10 @@ SV *sv;
     		&& (gv = (GV*)oldsv) ))) {
 	/* Use GV from the stack as a fallback. */
 	/* GV is potentially non-unique, or contain different CV. */
-	sv_setsv(sv, newRV((SV*)cv));
+	sv_setsv(*svp, newRV((SV*)cv));
     }
     else {
-	gv_efullname3(sv, gv, Nullch);
+	gv_efullname3(*svp, gv, Nullch);
     }
     cv = GvCV(DBsub);
     if (CvXSUB(cv))
@@ -1827,7 +1827,7 @@ PP(pp_entersub)
 
     gimme = GIMME_V;
     if ((op->op_private & OPpENTERSUB_DB) && GvCV(DBsub) && !CvNODEBUG(cv))
-	cv = get_db_sub(sv);
+	cv = get_db_sub(&sv, cv);
     if (!cv)
 	DIE("No DBsub routine");
 
@@ -1866,6 +1866,7 @@ PP(pp_entersub)
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
 				  thr, sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
+	    SvREFCNT_inc(sv);	/* Keep alive until magic_mutexfree */
 	    save_destructor(unlock_condpair, sv);
 	}
 	MUTEX_LOCK(CvMUTEXP(cv));
@@ -1900,7 +1901,7 @@ PP(pp_entersub)
      	 * (3) instead of (2) so we'd have to clone. Would the fact
      	 * that we released the mutex more quickly make up for this?
      	 */
-	svp = hv_fetch(cvcache, (char *)cv, sizeof(cv), FALSE);
+	svp = hv_fetch(thr->cvcache, (char *)cv, sizeof(cv), FALSE);
      	if (svp) {
 	    /* We already have a clone to use */
 	    MUTEX_UNLOCK(CvMUTEXP(cv));
@@ -1940,7 +1941,7 @@ PP(pp_entersub)
 		 */
 	     	clonecv = cv_clone(cv);
     		SvREFCNT_dec(cv); /* finished with this */
-		hv_store(cvcache, (char*)cv, sizeof(cv), (SV*)clonecv,0);
+		hv_store(thr->cvcache, (char*)cv, sizeof(cv), (SV*)clonecv,0);
 		CvOWNER(clonecv) = thr;
 		cv = clonecv;
 		SvREFCNT_inc(cv);

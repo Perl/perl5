@@ -257,6 +257,7 @@ I32
 do_chomp(sv)
 register SV *sv;
 {
+    dTHR;
     register I32 count;
     STRLEN len;
     char *s;
@@ -334,6 +335,7 @@ SV *sv;
 SV *left;
 SV *right;
 {
+    dTHR;	/* just for taint */
 #ifdef LIBERAL
     register long *dl;
     register long *ll;

@@ -1105,6 +1105,7 @@ sv_setiv(sv,i)
 register SV *sv;
 IV i;
 {
+    dTHR;	/* just for taint */
     sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -1156,6 +1157,7 @@ sv_setnv(sv,num)
 register SV *sv;
 double num;
 {
+    dTHR;	/* just for taint */
     sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -2186,6 +2188,7 @@ register SV *sv;
 register const char *ptr;
 register STRLEN len;
 {
+    dTHR;	/* just for taint */
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
 			  elicit a warning, but it won't hurt. */
     sv_check_thinkfirst(sv);
@@ -2212,6 +2215,7 @@ sv_setpv(sv,ptr)
 register SV *sv;
 register const char *ptr;
 {
+    dTHR;	/* just for taint */
     register STRLEN len;
 
     sv_check_thinkfirst(sv);
@@ -2239,6 +2243,7 @@ register SV *sv;
 register char *ptr;
 register STRLEN len;
 {
+    dTHR;	/* just for taint */
     sv_check_thinkfirst(sv);
     if (!SvUPGRADE(sv, SVt_PV))
 	return;
@@ -2303,6 +2308,7 @@ register SV *sv;
 register char *ptr;
 register STRLEN len;
 {
+    dTHR;	/* just for taint */
     STRLEN tlen;
     char *junk;
 
@@ -2335,6 +2341,7 @@ sv_catpv(sv,ptr)
 register SV *sv;
 register char *ptr;
 {
+    dTHR;	/* just for taint */
     register STRLEN len;
     STRLEN tlen;
     char *junk;
@@ -3060,6 +3067,7 @@ register SV *sv;
 register PerlIO *fp;
 I32 append;
 {
+    dTHR;
     char *rsptr;
     STRLEN rslen;
     register STDCHAR rslast;
@@ -3667,6 +3675,7 @@ HV *stash;
 		sv = GvSV(gv);
 		(void)SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
+		    dTHR;	/* just for taint */
 		    SvCUR_set(sv, 0);
 		    if (SvPVX(sv) != Nullch)
 			*SvPVX(sv) = '\0';
@@ -3907,6 +3916,7 @@ STRLEN *lp;
 	    *SvEND(sv) = '\0';
 	}
 	if (!SvPOK(sv)) {
+	    dTHR;	/* just for taint */
 	    SvPOK_on(sv);		/* validate pointer */
 	    SvTAINT(sv);
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2pv(%s)\n",

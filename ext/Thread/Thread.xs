@@ -2,24 +2,11 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifdef WIN32
-#define ssize_t int
-#include <fcntl.h>
-#define THR_RET_TYPE	DWORD
-#define THR_FUNC_TYPE	THR_RET_TYPE WINAPI
-#else
-#define THR_RET_TYPE	void *
-#define THR_FUNC_TYPE	THR_RET_TYPE
-#endif
-
 /* Magic signature for Thread's mg_private is "Th" */ 
 #define Thread_MAGIC_SIGNATURE 0x5468
 
 static U32 threadnum = 0;
 static int sig_pipe[2];
-
-static void remove_thread _((Thread t));
-static THR_FUNC_TYPE threadstart _((void *));
 
 static void
 remove_thread(t)
@@ -36,8 +23,7 @@ Thread t;
     MUTEX_UNLOCK(&threads_mutex);
 }
 
-
-static THR_FUNC_TYPE
+static THREAD_RET_TYPE
 threadstart(arg)
 void *arg;
 {
@@ -95,8 +81,8 @@ void *arg;
      * Wait until our creator releases us. If we didn't do this, then
      * it would be potentially possible for out thread to carry on and
      * do stuff before our creator fills in our "self" field. For example,
-     * if we went and created another thread which tried to pthread_join
-     * with us, then we'd be in a mess.
+     * if we went and created another thread which tried to JOIN with us,
+     * then we'd be in a mess.
      */
     MUTEX_LOCK(&thr->mutex);
     MUTEX_UNLOCK(&thr->mutex);
@@ -106,12 +92,7 @@ void *arg;
      * from our pthread_t structure to our struct thread, since we're
      * the only thread who can get at it anyway.
      */
-#ifdef WIN32
-    if (TlsSetValue(thr_key, (void *) thr) == 0)
-#else
-    if (pthread_setspecific(thr_key, (void *) thr))
-#endif
-	croak("panic: pthread_setspecific");
+    SET_THR(thr);
 
     /* Only now can we use SvPEEK (which calls sv_newmortal which does dTHR) */
     DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
@@ -133,6 +114,8 @@ void *arg;
 	av_store(returnav, 0, newSViv(statusvalue));
 	goto finishoff;
     }
+
+    CATCH_SET(TRUE);
 
     /* Now duplicate most of perl_call_sv but with a few twists */
     op = (OP*)&myop;
@@ -161,13 +144,16 @@ void *arg;
     /* removed for debug */
     SvREFCNT_dec(curstack);
 #endif
-    SvREFCNT_dec(cvcache);
+    SvREFCNT_dec(thr->cvcache);
+    SvREFCNT_dec(thr->magicals);
+    SvREFCNT_dec(thr->specific);
     Safefree(markstack);
     Safefree(scopestack);
     Safefree(savestack);
     Safefree(retstack);
     Safefree(cxstack);
     Safefree(tmps_stack);
+    Safefree(ofs);
 
     MUTEX_LOCK(&thr->mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
@@ -200,9 +186,9 @@ void *arg;
 	croak("panic: illegal state %u at end of threadstart", ThrSTATE(thr));
 	/* NOTREACHED */
     }
-    return (THR_RET_TYPE) returnav;/* Available for anyone to join with us */
-				/* unless we are detached in which case */
-				/* noone will see the value anyway. */
+    return THREAD_RET_CAST(returnav);	/* Available for anyone to join with */
+					/* us unless we're detached, in which */
+					/* case noone sees the value anyway. */
 #endif    
 }
 
@@ -217,45 +203,14 @@ char *class;
     Thread savethread;
     int i;
     SV *sv;
-#ifndef WIN32
+    int err;
+#ifndef THREAD_CREATE
     sigset_t fullmask, oldmask;
-#else
-    DWORD junk;
 #endif
     
     savethread = thr;
-    sv = newSVpv("", 0);
-    SvGROW(sv, sizeof(struct thread) + 1);
-    SvCUR_set(sv, sizeof(struct thread));
-    thr = (Thread) SvPVX(sv);
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: newthread(%s) = %p)\n",
-			  savethread, SvPEEK(startsv), thr));
-    oursv = sv; 
-    /* If we don't zero these foostack pointers, init_stacks won't init them */
-    markstack = 0;
-    scopestack = 0;
-    savestack = 0;
-    retstack = 0;
-    init_stacks(ARGS);
-    curcop = savethread->Tcurcop;	/* XXX As good a guess as any? */
+    thr = new_struct_thread(thr);
     SPAGAIN;
-    defstash = savethread->Tdefstash;	/* XXX maybe these should */
-    curstash = savethread->Tcurstash;	/* always be set to main? */
-    /* top_env? */
-    /* runlevel */
-    cvcache = newHV();
-    thr->flags = THRf_R_JOINABLE;
-    MUTEX_INIT(&thr->mutex);
-    thr->tid = ++threadnum;
-    /* Insert new thread into the circular linked list and bump nthreads */
-    MUTEX_LOCK(&threads_mutex);
-    thr->next = savethread->next;
-    thr->prev = savethread;
-    savethread->next = thr;
-    thr->next->prev = thr;
-    nthreads++;
-    MUTEX_UNLOCK(&threads_mutex);
-
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: newthread, tid is %u, preparing stack\n",
 			  savethread, thr->tid));
@@ -267,32 +222,38 @@ char *class;
     XPUSHs(SvREFCNT_inc(startsv));
     PUTBACK;
 
-#ifdef FAKE_THREADS
-    threadstart(thr);
+#ifdef THREAD_CREATE
+    THREAD_CREATE(thr, threadstart);
 #else    
     /* On your marks... */
     MUTEX_LOCK(&thr->mutex);
-    /* Get set...
-     * Increment the global thread count.
-     */
-#ifndef WIN32
+    /* Get set...  */
     sigfillset(&fullmask);
     if (sigprocmask(SIG_SETMASK, &fullmask, &oldmask) == -1)
 	croak("panic: sigprocmask");
-    if (pthread_create(&self, NULL, threadstart, (void*) thr))
-#else
-    if ((self = CreateThread(NULL,0,threadstart,(void*)thr,0,&junk)) == 0)
-#endif
-	return NULL;	/* XXX should clean up first */
+    err = pthread_create(&thr->self, pthread_attr_default,
+			 threadstart, (void*) thr);
     /* Go */
     MUTEX_UNLOCK(&thr->mutex);
-#ifndef WIN32
+#endif
+    if (err) {
+	/* Thread creation failed--clean up */
+	SvREFCNT_dec(thr->cvcache);
+	remove_thread(thr);
+	MUTEX_DESTROY(&thr->mutex);
+	for (i = 0; i <= AvFILL(initargs); i++)
+	    SvREFCNT_dec(*av_fetch(initargs, i, FALSE));
+	SvREFCNT_dec(startsv);
+	return NULL;
+    }
+#ifdef THREAD_POST_CREATE
+    THREAD_POST_CREATE(thr);
+#else
     if (sigprocmask(SIG_SETMASK, &oldmask, 0))
 	croak("panic: sigprocmask");
 #endif
-#endif
     sv = newSViv(thr->tid);
-    sv_magic(sv, oursv, '~', 0, 0);
+    sv_magic(sv, thr->oursv, '~', 0, 0);
     SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
     return sv_bless(newRV_noinc(sv), gv_stashpv(class, TRUE));
 }
@@ -340,13 +301,7 @@ join(t)
 	    croak("can't join with thread");
 	    /* NOTREACHED */
 	}
-#ifdef WIN32
-	if ((WaitForSingleObject(t->Tself,INFINITE) == WAIT_FAILED)
-	    || (GetExitCodeThread(t->Tself,(LPDWORD)&av) == 0))
-#else
-	if (pthread_join(t->Tself, (void **) &av))
-#endif
-	    croak("pthread_join failed");
+	JOIN(t, &av);
 
 	/* Could easily speed up the following if necessary */
 	for (i = 0; i <= AvFILL(av); i++)
@@ -399,7 +354,7 @@ self(class)
 	SV *sv;
     PPCODE:
 	sv = newSViv(thr->tid);
-	sv_magic(sv, oursv, '~', 0, 0);
+	sv_magic(sv, thr->oursv, '~', 0, 0);
 	SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
 	PUSHs(sv_2mortal(sv_bless(newRV_noinc(sv), gv_stashpv(class, TRUE))));
 
@@ -422,17 +377,7 @@ DESTROY(t)
 void
 yield()
     CODE:
-#ifdef OLD_PTHREADS_API
-	pthread_yield();
-#else
-#ifndef NO_SCHED_YIELD
-#ifdef WIN32
-	Sleep(0);	/* same semantics as POSIX sched_yield() */
-#else
-	sched_yield();
-#endif /* WIN32 */
-#endif /* NO_SCHED_YIELD */
-#endif /* OLD_PTHREADS_API */
+	YIELD;
 
 void
 cond_wait(sv)
@@ -536,7 +481,7 @@ list(class)
 	do {
 	    SV *sv = (SV*)SvRV(*svp);
 	    sv_setiv(sv, t->tid);
-	    SvMAGIC(sv)->mg_obj = SvREFCNT_inc(t->Toursv);
+	    SvMAGIC(sv)->mg_obj = SvREFCNT_inc(t->oursv);
 	    SvMAGIC(sv)->mg_flags |= MGf_REFCOUNTED;
 	    SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
 	    t = t->next;
@@ -573,7 +518,7 @@ SV *
 await_signal()
     PREINIT:
 	char c;
-	ssize_t ret;
+	SSize_t ret;
     CODE:
 	do {
 	    ret = read(sig_pipe[1], &c, 1);

@@ -47,17 +47,44 @@ Now you can do a
     make
 
 
+O/S specific bugs
+
+Solaris qsort uses a hidden mutex for synchronisation. If you die()
+while doing a sort() then the resulting longjmp() leaves the mutex
+locked so you get a deadlock the next time you try to sort().
+
+LinuxThreads 0.5 has a bug which can cause file descriptor 0 to be
+closed after a fork() leading to many strange symptoms. The
+development version of LinuxThreads has this fixed but the following
+patch can be applied to 0.5 for now:
+
+----------------------------- cut here -----------------------------
+--- linuxthreads-0.5/pthread.c.ORI	Mon Oct  6 13:55:50 1997
++++ linuxthreads-0.5/pthread.c	Mon Oct  6 13:57:24 1997
+@@ -312,8 +312,10 @@
+   free(pthread_manager_thread_bos);
+   pthread_manager_thread_bos = pthread_manager_thread_tos = NULL;
+   /* Close the two ends of the pipe */
+-  close(pthread_manager_request);
+-  close(pthread_manager_reader);
++  if (pthread_manager_request >= 0) {
++    close(pthread_manager_request);
++    close(pthread_manager_reader);
++  }
+   pthread_manager_request = pthread_manager_reader = -1;
+   /* Update the pid of the main thread */
+   self->p_pid = getpid();
+----------------------------- cut here -----------------------------
+
+
 Building the Thread extension
 
-Build it away from the perl tree in the usual way. Set your PATH
-environment variable to have your perl build directory first and
-set PERL5LIB to be /your/perl/build/directory/lib (without those,
-I had problems where the config information from the ordinary perl
-on the system would end up in the Makefile). Then
-    perl Makefile.PL PERL_SRC=/your/perl/build/directory
-    make
+The Thread extension is now part of the main perl distribution tree.
+If you did Configure -Dusethreads then it will have been added to
+the list of extensions automatically.
 
-Then you can try some of the tests with
+You can try some of the tests with
+    cd ext/Thread
     perl -Mblib create.t
     perl -Mblib join.t
     perl -Mblib lock.t
@@ -70,11 +97,10 @@ The io one leaves a thread reading from the keyboard on stdin so
 as the ping messages appear you can type lines and see them echoed.
 
 Try running the main perl test suite too. There are known
-failures for po/misc test 45 (tries to do local(@_) but @_ is
-now lexical) and some tests involving backticks/system/fork
-may or may not work. Under Linux, many tests may appear to fail
-when run under the test harness but work fine when invoked
-manually.
+failures for op/misc test 45 (tries to do local(@_) but @_ is
+now lexical) and for some of the DBM/DB extensions (if there
+underlying libraries were not compiled to be thread-aware).
+may or may not work.
 
 
 Bugs
@@ -88,7 +114,7 @@ extension won't build with it yet.
 of each thread because it causes refcount problems that I
 haven't tracked down yet) and there are very probably others too.
 
-* There are still races where bugs show up under contention.
+* There may still be races where bugs show up under contention.
 
 * Need to document "lock", Thread.pm, Queue.pm, ...
 
@@ -111,8 +137,8 @@ Background
 
 Some old globals (e.g. stack_sp, op) and some old per-interpreter
 variables (e.g. tmps_stack, cxstack) move into struct thread.
-All fields of struct thread (apart from a few only applicable to
-FAKE_THREADS) are of the form Tfoo. For example, stack_sp becomes
+All fields of struct thread which derived from original perl
+variables have names of the form Tfoo. For example, stack_sp becomes
 the field Tstack_sp of struct thread. For those fields which moved
 from original perl, thread.h does
     #define foo (thr->Tfoo)
@@ -140,10 +166,16 @@ variables are implemented as a list of waiting threads.
 Mutexes and condition variables
 
 The API is via macros MUTEX_{INIT,LOCK,UNLOCK,DESTROY} and
-COND_{INIT,WAIT,SIGNAL,BROADCAST,DESTROY}. For POSIX threads,
-perl mutexes and condition variables correspond to POSIX ones.
-For FAKE_THREADS, mutexes are stubs and condition variables are
-implmented as lists of waiting threads. For FAKE_THREADS, a thread
+COND_{INIT,WAIT,SIGNAL,BROADCAST,DESTROY}.
+
+A mutex is only required to be a simple, fast mutex (e.g. it does not
+have to be recursive). It is only ever held across very short pieces
+of code. Condition variables are only ever signalled/broadcast while
+their associated mutex is held. (This constraint simplifies the
+implementation of condition variables in certain porting situations.)
+For POSIX threads, perl mutexes and condition variables correspond to
+POSIX ones.  For FAKE_THREADS, mutexes are stubs and condition variables
+are implmented as lists of waiting threads. For FAKE_THREADS, a thread
 waits on a condition variable by removing itself from the runnable
 list, calling SCHEDULE to change thr to the next appropriate
 runnable thread and returning op (i.e. the new threads next op).
@@ -202,4 +234,4 @@ ZOMBIE ----------------------------> DEAD
 
 Malcolm Beattie
 mbeattie@sable.ox.ac.uk
-2 October 1997
+6 November 1997
