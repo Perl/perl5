@@ -189,6 +189,15 @@ nm_opt='-p'
 d_getprior='define'
 d_setprior='define'
 
+# Make denser object files and DLL
+case "X$optimize" in
+  X)
+	optimize="-O2 -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2"
+	lddlflags="$lddlflags -s"	# Strip symbol table
+	aout_ldflags="$aout_ldflags -s"	# Strip symbol table
+	;;
+esac
+
 ####### All the rest is commented
 
 # The next two are commented. pdksh handles #!

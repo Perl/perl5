@@ -2087,11 +2087,17 @@ int flags;
 	}
     }
 #ifdef HAS_WAITPID
+#  ifdef HAS_WAITPID_RUNTIME
+    if (!HAS_WAITPID_RUNTIME)
+	goto hard_way;
+#  endif
     return waitpid(pid,statusp,flags);
-#else
-#ifdef HAS_WAIT4
+#endif
+#if !defined(HAS_WAITPID) && defined(HAS_WAIT4)
     return wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
-#else
+#endif
+#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
+  hard_way:
     {
 	I32 result;
 	if (flags)
@@ -2104,7 +2110,6 @@ int flags;
 	}
 	return result;
     }
-#endif
 #endif
 }
 #endif /* !DOSISH */

@@ -144,6 +144,12 @@ after 5.003_27:
 	returns immediately, thus Perl cannot wait for completion of
 	started programs.
 
+after 5.004_01:
+	flock emulation added (disable by setting env PERL_USE_FLOCK=0),
+		thanks to Rocco Caputo;
+	RSX bug with missing waitpid circomvented;
+	-S bug with full path with \ corrected.
+
 before 5.004_02:
 	-S switch to perl enables a search with additional extensions 
 	.cmd, .btm, .bat, .pl as well.  This means that if you have

@@ -51,7 +51,16 @@
  case "$libs" in
  '') ;;
  *)  for thislib in $libs; do
-@@ -4136,6 +4144,10 @@
+@@ -3968,6 +3976,8 @@
+ 			:
+ 		elif try=`./loc $thislib X $libpth`; $test -f "$try"; then
+ 			:
++		elif try=`./loc $thislib$lib_ext X $libpth`; $test -f "$try"; then
++			:
+ 		elif try=`./loc Slib$thislib$lib_ext X $xlibpth`; $test -f "$try"; then
+ 			:
+ 		else
+@@ -4152,6 +4162,10 @@
  	eval $xscan;\
  	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
  		eval $xrun
@@ -194,7 +203,31 @@
  		dflt=`./try`
  		case "$dflt" in
  		[1-4][1-4][1-4][1-4]|12345678|87654321)
-@@ -8692,7 +8714,7 @@
+@@ -8707,18 +8731,18 @@
+ $cc $ccflags -c bar1.c >/dev/null 2>&1
+ $cc $ccflags -c bar2.c >/dev/null 2>&1
+ $cc $ccflags -c foo.c >/dev/null 2>&1
+-ar rc bar$lib_ext bar2.o bar1.o >/dev/null 2>&1
++$ar rc bar$lib_ext bar2.o bar1.o >/dev/null 2>&1
+ if $cc $ccflags $ldflags -o foobar foo.o bar$lib_ext $libs > /dev/null 2>&1 &&
+ 	./foobar >/dev/null 2>&1; then
+-	echo "ar appears to generate random libraries itself."
++	echo "$ar appears to generate random libraries itself."
+ 	orderlib=false
+ 	ranlib=":"
+-elif ar ts bar$lib_ext >/dev/null 2>&1 &&
++elif $ar ts bar$lib_ext >/dev/null 2>&1 &&
+ 	$cc $ccflags $ldflags -o foobar foo.o bar$lib_ext $libs > /dev/null 2>&1 &&
+ 	./foobar >/dev/null 2>&1; then
+-		echo "a table of contents needs to be added with 'ar ts'."
++		echo "a table of contents needs to be added with '$ar ts'."
+ 		orderlib=false
+-		ranlib="ar ts"
++		ranlib="$ar ts"
+ else
+ 	case "$ranlib" in
+ 	:) ranlib='';;
+@@ -8790,7 +8814,7 @@
  	'') $echo $n ".$c"
  		if $cc $ccflags \
  		$i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone \

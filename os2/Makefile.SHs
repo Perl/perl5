@@ -54,6 +54,7 @@ perl5.def: perl.linkexp
 	echo '  "dlerror"'				>>$@
 	echo '  "my_tmpfile"'				>>$@
 	echo '  "my_tmpnam"'				>>$@
+	echo '  "my_flock"'				>>$@
 !NO!SUBS!
 
 if [ ! -z "$myttyname" ] ; then
