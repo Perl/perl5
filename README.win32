@@ -266,7 +266,7 @@ you will need to add two components to your PATH environment variable,
 C<$INST_TOP\$VERSION\bin>, and C<$INST_TOP\$VERSION\bin\$ARCHNAME>.
 For example:
 
-    set PATH c:\perl\5.005\bin;c:\perl\5.005\bin\MSWin32-x6;%PATH%
+    set PATH c:\perl\5.005\bin;c:\perl\5.005\bin\MSWin32-x86;%PATH%
 
 
 =head2 Usage Hints
