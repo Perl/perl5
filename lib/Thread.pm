@@ -19,7 +19,7 @@ our(@ISA, @EXPORT, @EXPORT_OK);
 
 BEGIN {
     if ($ithreads) {
-	@EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock)
+	@EXPORT = qw(cond_wait cond_broadcast cond_signal unlock)
     } elsif ($othreads) {
 	@EXPORT_OK = qw(cond_signal cond_broadcast cond_wait);
     }
@@ -318,17 +318,17 @@ BEGIN {
 	    Carp::croak("This Perl has both ithreads and 5005threads (serious malconfiguration)");
 	}
 	XSLoader::load 'threads';
-	for my $m (qw(new join detach yield self tid equal)) {
+	for my $m (qw(new join detach yield self tid equal list)) {
 	    no strict 'refs';
 	    *{"Thread::$m"} = \&{"threads::$m"};
 	}
-	XSLoader::load 'threads::shared';
-	for my $m (qw(cond_signal cond_broadcast cond_wait unlock share)) {
+	require 'threads/shared.pm';
+	for my $m (qw(cond_signal cond_broadcast cond_wait unlock)) {
 	    no strict 'refs';
 	    *{"Thread::$m"} = \&{"threads::shared::${m}_enabled"};
 	}
 	# trying to unimplement eval gives redefined warning
-	unimplement(qw(list done flags));
+	unimplement(qw(done flags));
     } elsif ($othreads) {
 	XSLoader::load 'Thread';
 	unimplement(qw(unlock));
