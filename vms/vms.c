@@ -7251,8 +7251,8 @@ Perl_sys_intern_clear(pTHX)
 void  
 Perl_sys_intern_init(pTHX)
 {
-    int ix = RAND_MAX;
-    float x;
+    unsigned int ix = RAND_MAX;
+    double x;
 
     VMSISH_HUSHED = 0;
 
