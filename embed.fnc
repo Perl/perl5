@@ -594,7 +594,7 @@ Apd	|void	|pack_cat	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist|SV
 Apd	|void	|packlist 	|SV *cat|char *pat|char *patend|SV **beglist|SV **endlist
 p	|void	|pidgone	|Pid_t pid|int status
 Ap	|void	|pmflag		|U32* pmfl|int ch
-p	|OP*	|pmruntime	|OP* pm|OP* expr|OP* repl
+p	|OP*	|pmruntime	|OP* pm|OP* expr|bool isreg
 p	|OP*	|pmtrans	|OP* o|OP* expr|OP* repl
 Ap	|void	|pop_scope
 p	|OP*	|prepend_elem	|I32 optype|OP* head|OP* tail

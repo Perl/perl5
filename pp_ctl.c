@@ -83,13 +83,40 @@ PP(pp_regcomp)
     STRLEN len;
     MAGIC *mg = Null(MAGIC*);
     
-    tmpstr = POPs;
-
     /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS)
-    if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm))
-	 RETURN;
+    if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm)) {
+	if (PL_op->op_flags & OPf_STACKED) {
+	    dMARK;
+	    SP = MARK;
+	}
+	else
+	    (void)POPs;
+	RETURN;
+    }
 #endif
+    if (PL_op->op_flags & OPf_STACKED) {
+	/* multiple args; concatentate them */
+	dMARK; dORIGMARK;
+	tmpstr = PAD_SV(ARGTARG);
+	sv_setpvn(tmpstr, "", 0);
+	while (++MARK <= SP) {
+	    if (PL_amagic_generation) {
+		SV *sv;
+		if ((SvAMAGIC(tmpstr) || SvAMAGIC(*MARK)) &&
+		    (sv = amagic_call(tmpstr, *MARK, concat_amg, AMGf_assign)))
+		{
+		   sv_setsv(tmpstr, sv);
+		   continue;
+		}
+	    }
+	    sv_catsv(tmpstr, *MARK);
+	}
+    	SvSETMAGIC(tmpstr);
+	SP = ORIGMARK;
+    }
+    else
+	tmpstr = POPs;
 
     if (SvROK(tmpstr)) {
 	SV *sv = SvRV(tmpstr);

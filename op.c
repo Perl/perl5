@@ -1761,7 +1761,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
     }
     else
 	return bind_match(type, left,
-		pmruntime(newPMOP(OP_MATCH, 0), right, Nullop));
+		pmruntime(newPMOP(OP_MATCH, 0), right, 0));
 }
 
 OP *
@@ -2660,15 +2660,56 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     return CHECKOP(type, pmop);
 }
 
+/* Given some sort of match op o, and an expression expr containing a
+ * pattern, either compile expr into a regex and attach it to o (if it's
+ * constant), or convert expr into a runtime regcomp op sequence (if it's
+ * not)
+ *
+ * isreg indicates that the pattern is part of a regex construct, eg
+ * $x =~ /pattern/ or split /pattern/, as opposed to $x =~ $pattern or
+ * split "pattern", which aren't. In the former case, expr will be a list
+ * if the pattern contains more than one term (eg /a$b/) or if it contains
+ * a replacement, ie s/// or tr///.
+ */
+
 OP *
-Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
+Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 {
     PMOP *pm;
     LOGOP *rcop;
     I32 repl_has_vars = 0;
+    OP* repl  = Nullop;
+    bool reglist;
 
-    if (o->op_type == OP_TRANS)
+    if (o->op_type == OP_SUBST || o->op_type == OP_TRANS) {
+	/* last element in list is the replacement; pop it */
+	OP* kid;
+	repl = cLISTOPx(expr)->op_last;
+	kid = cLISTOPx(expr)->op_first;
+	while (kid->op_sibling != repl)
+	    kid = kid->op_sibling;
+	kid->op_sibling = Nullop;
+	cLISTOPx(expr)->op_last = kid;
+    }
+
+    if (isreg && expr->op_type == OP_LIST &&
+	cLISTOPx(expr)->op_first->op_sibling == cLISTOPx(expr)->op_last)
+    {
+	/* convert single element list to element */
+	OP* oe = expr;
+	expr = cLISTOPx(oe)->op_first->op_sibling;
+	cLISTOPx(oe)->op_first->op_sibling = Nullop;
+	cLISTOPx(oe)->op_last = Nullop;
+	op_free(oe);
+    }
+
+    if (o->op_type == OP_TRANS) {
 	return pmtrans(o, expr, repl);
+    }
+
+    reglist = isreg && expr->op_type == OP_LIST;
+    if (reglist)
+	op_null(expr);
 
     PL_hints |= HINT_BLOCK_SCOPE;
     pm = (PMOP*)o;
@@ -2699,11 +2740,14 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	rcop->op_type = OP_REGCOMP;
 	rcop->op_ppaddr = PL_ppaddr[OP_REGCOMP];
 	rcop->op_first = scalar(expr);
-	rcop->op_flags |= ((PL_hints & HINT_RE_EVAL)
-			   ? (OPf_SPECIAL | OPf_KIDS)
-			   : OPf_KIDS);
+	rcop->op_flags |= OPf_KIDS
+			    | ((PL_hints & HINT_RE_EVAL) ? OPf_SPECIAL : 0)
+			    | (reglist ? OPf_STACKED : 0);
 	rcop->op_private = 1;
 	rcop->op_other = o;
+	if (reglist)
+	    rcop->op_targ = pad_alloc(rcop->op_type, SVs_PADTMP);
+
 	/* /$x/ may cause an eval, since $x might be qr/(?{..})/  */
 	PL_cv_has_eval = 1;
 
@@ -6019,7 +6063,7 @@ Perl_ck_split(pTHX_ OP *o)
     if (kid->op_type != OP_MATCH || kid->op_flags & OPf_STACKED) {
 	OP *sibl = kid->op_sibling;
 	kid->op_sibling = 0;
-	kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, Nullop);
+	kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, 0);
 	if (cLISTOPo->op_first == cLISTOPo->op_last)
 	    cLISTOPo->op_last = kid;
 	cLISTOPo->op_first = kid;

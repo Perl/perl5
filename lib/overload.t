@@ -1174,5 +1174,29 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	}
     }
 }
+{
+    # check that overloading works in regexes
+    {
+	package Foo493;
+	use overload
+	    '""' => sub { "^$_[0][0]\$" },
+	    '.'  => sub { 
+		    bless [
+			     $_[2]
+			    ? (ref $_[1] ? $_[1][0] : $_[1]) . ':' .$_[0][0] 
+			    : $_[0][0] . ':' . (ref $_[1] ? $_[1][0] : $_[1])
+		    ], 'Foo493'
+			};
+    }
+
+    my $a = bless [ "a" ], 'Foo493';
+    test('a' =~ /$a/);
+    test('x:a' =~ /x$a/);
+    test('x:a:=' =~ /x$a=$/);
+    test('x:a:a:=' =~ /x$a$a=$/);
+
+}
+
+
 # Last test is:
-sub last {492}
+sub last {496}

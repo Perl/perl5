@@ -675,10 +675,8 @@ term	:	termbinop
 			{ $$ = newOP($1, OPf_SPECIAL); }
 	|	FUNC1 '(' expr ')'                   /* not($foo) */
 			{ $$ = newUNOP($1, 0, $3); }
-	|	PMFUNC '(' term ')'                  /* /foo/ */
-			{ $$ = pmruntime($1, $3, Nullop); }
-	|	PMFUNC '(' term ',' term ')'         /* s/foo/bar/ (or tr) */
-			{ $$ = pmruntime($1, $3, $5); }
+	|	PMFUNC '(' argexpr ')'           /* m//, s///, tr/// */
+			{ $$ = pmruntime($1, $3, 1); }
 	|	WORD
 	|	listop
 	;

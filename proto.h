@@ -570,7 +570,7 @@ PERL_CALLCONV void	Perl_pack_cat(pTHX_ SV *cat, char *pat, char *patend, SV **be
 PERL_CALLCONV void	Perl_packlist(pTHX_ SV *cat, char *pat, char *patend, SV **beglist, SV **endlist);
 PERL_CALLCONV void	Perl_pidgone(pTHX_ Pid_t pid, int status);
 PERL_CALLCONV void	Perl_pmflag(pTHX_ U32* pmfl, int ch);
-PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP* pm, OP* expr, OP* repl);
+PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP* pm, OP* expr, bool isreg);
 PERL_CALLCONV OP*	Perl_pmtrans(pTHX_ OP* o, OP* expr, OP* repl);
 PERL_CALLCONV void	Perl_pop_scope(pTHX);
 PERL_CALLCONV OP*	Perl_prepend_elem(pTHX_ I32 optype, OP* head, OP* tail);

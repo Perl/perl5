@@ -3950,6 +3950,18 @@ sub regcomp {
     my $kid = $op->first;
     $kid = $kid->first if $kid->name eq "regcmaybe";
     $kid = $kid->first if $kid->name eq "regcreset";
+    if ($kid->name eq "null" and !null($kid->first)
+	and $kid->first->name eq 'pushmark')
+    {
+	my $str = '';
+	$kid = $kid->first->sibling;
+	while (!null($kid)) {
+	    $str .= $self->re_dq($kid, $extended);
+	    $kid = $kid->sibling;
+	}
+	return $str, 1;
+    }
+
     return ($self->re_dq($kid, $extended), 1) if $self->pure_string($kid);
     return ($self->deparse($kid, $cx), 0);
 }
