@@ -337,6 +337,10 @@ extern int		IsWin95(void);
 extern int		IsWinNT(void);
 extern void		win32_argv2utf8(int argc, char** argv);
 
+#ifdef PERL_IMPLICIT_SYS
+extern void		win32_delete_internal_host(void *h);
+#endif
+
 extern char *		staticlinkmodules[];
 
 END_EXTERN_C

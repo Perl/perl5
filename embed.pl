@@ -1445,7 +1445,7 @@ p	|bool	|do_aexec	|SV* really|SV** mark|SV** sp
 p	|bool	|do_aexec5	|SV* really|SV** mark|SV** sp|int fd|int flag
 Ap	|int	|do_binmode	|PerlIO *fp|int iotype|int flag
 p	|void	|do_chop	|SV* asv|SV* sv
-p	|bool	|do_close	|GV* gv|bool not_implicit
+Ap	|bool	|do_close	|GV* gv|bool not_implicit
 p	|bool	|do_eof		|GV* gv
 p	|bool	|do_exec	|char* cmd
 #if !defined(WIN32)

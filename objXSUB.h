@@ -297,6 +297,10 @@
 #define Perl_do_binmode		pPerl->Perl_do_binmode
 #undef  do_binmode
 #define do_binmode		Perl_do_binmode
+#undef  Perl_do_close
+#define Perl_do_close		pPerl->Perl_do_close
+#undef  do_close
+#define do_close		Perl_do_close
 #if !defined(WIN32)
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
