@@ -478,7 +478,7 @@ Here is the module.
 
 If you intend using the Filter::Call functionality, I would strongly
 recommend that you check out Damian Conway's excellent Filter::Simple
-module. This module provides a much cleaner interface than
+module. Damian's module provides a much cleaner interface than
 Filter::Util::Call. Although it doesn't allow the fine control that
 Filter::Util::Call does, it should be adequate for the majority of
 applications. It's available at
