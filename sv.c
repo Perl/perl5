@@ -10921,6 +10921,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_debug		= proto_perl->Idebug;
 
 #ifdef USE_REENTRANT_API
+#ifdef DEBUGGING
+    PERL_SET_CONTEXT(proto_perl);
+#endif
     Perl_reentrant_init(aTHX);
 #endif
 
