@@ -378,7 +378,7 @@ unless ( $versiononly && !($installprivlib =~ m/\Q$]/)) {
 	if (/^=.*\.$/m) {
 	    my ($from, $to) = ("${installprivlib}/pod/perldiag.pod",
 			       "${installprivlib}/pod/perldiag-5.003.pod");
-	    print STDERR "  rename $from $to";
+	    print "  rename $from $to";
 	    rename($from, $to)
 		or warn "Couldn't rename $from to $to: $!\n"
 		unless $nonono;
@@ -435,7 +435,7 @@ if (!$versiononly) {
 }
 
 $packlist->write() unless $nonono;
-print STDERR "  Installation complete\n";
+print "  Installation complete\n";
 
 exit 0;
 
@@ -445,7 +445,7 @@ sub yn {
     my($prompt) = @_;
     my($answer);
     my($default) = $prompt =~ m/\[([yn])\]\s*$/i;
-    print STDERR $prompt;
+    print $prompt;
     chop($answer = <STDIN>);
     $answer = $default if $answer =~ m/^\s*$/;
     ($answer =~ m/^[yY]/);
@@ -460,7 +460,7 @@ sub unlink {
     foreach my $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_Cygwin);
-	print STDERR "  unlink $name\n";
+	print "  unlink $name\n";
 	( CORE::unlink($name) and ++$cnt 
 	  or warn "Couldn't unlink $name: $!\n" ) unless $nonono;
     }
@@ -473,11 +473,11 @@ sub safe_unlink {
     foreach my $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if ($Is_OS2 || $Is_W32);
-	print STDERR "  unlink $name\n";
+	print "  unlink $name\n";
 	next if CORE::unlink($name);
 	warn "Couldn't unlink $name: $!\n";
 	if ($! =~ /busy/i) {
-	    print STDERR "  mv $name $name.old\n";
+	    print "  mv $name $name.old\n";
 	    safe_rename($name, "$name.old")
 		or warn "Couldn't rename $name: $!\n";
 	}
@@ -502,7 +502,7 @@ sub link {
     my($from,$to) = @_;
     my($success) = 0;
 
-    print STDERR "  ln $from $to\n";
+    print "  ln $from $to\n";
     eval {
 	CORE::link($from, $to)
 	    ? $success++
@@ -513,7 +513,7 @@ sub link {
         $packlist->{$to} = { from => $from, type => 'link' };
     };
     if ($@) {
-	print STDERR "  creating new version of $to\n" if $Is_VMS and -e $to;
+	print "  creating new version of $to\n" if $Is_VMS and -e $to;
 	File::Copy::copy($from, $to)
 	    ? $success++
 	    : warn "Couldn't copy $from to $to: $!\n"
@@ -527,7 +527,7 @@ sub chmod {
     my($mode,$name) = @_;
 
     return if ($^O eq 'dos');
-    printf STDERR "  chmod %o %s\n", $mode, $name;
+    printf "  chmod %o %s\n", $mode, $name;
     CORE::chmod($mode,$name)
 	|| warn sprintf("Couldn't chmod %o %s: $!\n", $mode, $name)
       unless $nonono;
@@ -536,8 +536,8 @@ sub chmod {
 sub copy {
     my($from,$to) = @_;
 
-    print STDERR "  cp $from $to\n";
-    print STDERR "  creating new version of $to\n" if $Is_VMS and -e $to;
+    print "  cp $from $to\n";
+    print "  creating new version of $to\n" if $Is_VMS and -e $to;
     File::Copy::copy($from, $to)
 	|| warn "Couldn't copy $from to $to: $!\n"
       unless $nonono;
@@ -651,10 +651,10 @@ sub strip
 
     foreach my $file (@args) {
         if (-f $file) {
-            print STDERR "  strip $file\n";
+            print "  strip $file\n";
             system("strip", @opts, $file);
         } else {
-            print STDERR "# file '$file' skipped\n";
+            print "# file '$file' skipped\n";
         }
     }
 }
