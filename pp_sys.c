@@ -2497,6 +2497,9 @@ PP(pp_stat)
 
     if (PL_op->op_flags & OPf_REF) {
 	tmpgv = cGVOP_gv;
+	if (PL_op->op_type == OP_LSTAT && ckWARN(WARN_IO))
+	    Perl_warner(aTHX_ WARN_IO,
+			"lstat() on filehandle %s", GvENAME(tmpgv));
       do_fstat:
 	if (tmpgv != PL_defgv) {
 	    PL_laststype = OP_STAT;

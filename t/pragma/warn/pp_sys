@@ -72,6 +72,9 @@
     close STDIN;
     flock STDIN, 8;
 
+  lstat() on filehandle %s			[pp_stat]
+    lstat(STDIN);
+
   warn(warn_nl, "stat");			[pp_stat]
 
   -T on unopened filehandle %s
@@ -324,6 +327,24 @@ no warnings 'newline' ;
 stat "abc\ndef";
 EXPECT
 Unsuccessful stat on filename containing newline at - line 3.
+########
+# pp_sys.c [pp_stat]
+use Config; 
+BEGIN { 
+  if ($^O eq 'd_lstat') {
+    print <<EOM ;
+SKIPPED
+# lstat not present
+EOM
+    exit ;
+  } 
+}
+use warnings 'io' ;
+lstat(STDIN) ;
+no warnings 'io' ;
+lstat(STDIN) ;
+EXPECT
+lstat() on filehandle STDIN at - line 13.
 ########
 # pp_sys.c [pp_fttext]
 use warnings 'unopened' ;

@@ -2424,8 +2424,6 @@ divided by the natural log of N.  For example:
 
 See also L</exp> for the inverse operation.
 
-=item lstat FILEHANDLE
-
 =item lstat EXPR
 
 =item lstat

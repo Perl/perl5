@@ -1767,6 +1767,12 @@ effective uids or gids failed.
 to check the return value of your socket() call?  See
 L<perlfunc/listen>.
 
+=item lstat() on filehandle %s
+
+(W io) You tried to do a lstat on a filehandle.  What did you mean
+by that?  lstat() makes sense only on filenames.  (Perl did a fstat()
+instead on the filehandle.)
+
 =item Lvalue subs returning %s not implemented yet
 
 (F) Due to limitations in the current implementation, array and hash
