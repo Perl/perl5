@@ -229,6 +229,11 @@ C<make test.taintwarn>).
 Tainting would be easier to use if it didn't take documented shortcuts and allow
 taint to "leak" everywhere within an expression.
 
+=head2 Dual life everything
+
+As part of the "dists" plan, anything that doesn't belong in the smallest perl
+distribution needs to be dual lifed. Anything else can be too.
+
 =head1 Vague things
 
 Some more nebulous ideas
