@@ -72,7 +72,7 @@ typedef HANDLE perl_thread;
 
 #define DETACH(t) \
     STMT_START {						\
-	if (CloseHandle((t)->Tself) == 0) {			\
+	if (CloseHandle((t)->self) == 0) {			\
 	    MUTEX_UNLOCK(&(t)->mutex);				\
 	    croak("panic: DETACH");				\
 	}							\
@@ -84,8 +84,8 @@ typedef HANDLE perl_thread;
 
 #define JOIN(t, avp)							\
     STMT_START {							\
-	if ((WaitForSingleObject((t)->Tself,INFINITE) == WAIT_FAILED)	\
-             || (GetExitCodeThread((t)->Tself,(LPDWORD)(avp)) == 0))	\
+	if ((WaitForSingleObject((t)->self,INFINITE) == WAIT_FAILED)	\
+             || (GetExitCodeThread((t)->self,(LPDWORD)(avp)) == 0))	\
 	    croak("panic: JOIN");					\
     } STMT_END
 

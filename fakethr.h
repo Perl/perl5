@@ -22,7 +22,7 @@ struct thread_intern {
 
 #define init_thread_intern(t) 				\
     STMT_START {					\
-	t->Tself = (t);					\
+	t->self = (t);					\
 	(t)->i.next_run = (t)->i.prev_run = (t);	\
 	(t)->i.wait_queue = 0;				\
 	(t)->i.private = 0;				\

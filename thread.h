@@ -13,7 +13,7 @@ typedef pthread_t perl_thread;
 #  define YIELD pthread_yield()
 #  define DETACH(t)				\
     STMT_START {				\
-	if (pthread_detach(&(t)->Tself)) {	\
+	if (pthread_detach(&(t)->self)) {	\
 	    MUTEX_UNLOCK(&(t)->mutex);		\
 	    croak("panic: DETACH");		\
 	}					\
@@ -83,7 +83,7 @@ typedef pthread_t perl_thread;
 #ifndef DETACH
 #define DETACH(t)				\
     STMT_START {				\
-	if (pthread_detach((t)->Tself)) {	\
+	if (pthread_detach((t)->self)) {	\
 	    MUTEX_UNLOCK(&(t)->mutex);		\
 	    croak("panic: DETACH");		\
 	}					\
@@ -93,7 +93,7 @@ typedef pthread_t perl_thread;
 #ifndef JOIN
 #define JOIN(t, avp) 					\
     STMT_START {					\
-	if (pthread_join((t)->Tself, (void**)(avp)))	\
+	if (pthread_join((t)->self, (void**)(avp)))	\
 	    croak("panic: pthread_join");		\
     } STMT_END
 #endif /* JOIN */
@@ -198,9 +198,9 @@ struct thread {
 
     /* XXX Sort stuff, firstgv, secongv and so on? */
 
-    perl_thread	Tself;
     SV *	Toursv;
     HV *	Tcvcache;
+    perl_thread	self;			/* Underlying thread object */
     U32		flags;
     perl_mutex	mutex;			/* For the fields others can change */
     U32		tid;
@@ -285,7 +285,6 @@ typedef struct condpair {
 #undef	dirty
 #undef	localizing
 
-#define self		(thr->Tself)
 #define oursv		(thr->Toursv)
 #define stack_base	(thr->Tstack_base)
 #define stack_sp	(thr->Tstack_sp)

@@ -155,7 +155,7 @@ register PerlInterpreter *sv_interp;
 #ifdef HAVE_THREAD_INTERN
 	init_thread_intern(thr);
 #else
-	self = pthread_self();
+	thr->self = pthread_self();
 	if (pthread_key_create(&thr_key, 0))
 	    croak("panic: pthread_key_create");
 #endif /* HAVE_THREAD_INTERN */

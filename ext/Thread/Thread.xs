@@ -256,7 +256,8 @@ char *class;
     sigfillset(&fullmask);
     if (sigprocmask(SIG_SETMASK, &fullmask, &oldmask) == -1)
 	croak("panic: sigprocmask");
-    err = pthread_create(&self, pthread_attr_default, threadstart, (void*) thr);
+    err = pthread_create(&thr->self, pthread_attr_default,
+			 threadstart, (void*) thr);
     /* Go */
     MUTEX_UNLOCK(&thr->mutex);
 #endif

@@ -8,7 +8,7 @@ init_thread_intern(struct thread *thr)
     DuplicateHandle(GetCurrentProcess(),
 		    GetCurrentThread(),
 		    GetCurrentProcess(),
-		    &self,
+		    &thr->self,
 		    0,
 		    FALSE,
 		    DUPLICATE_SAME_ACCESS);
@@ -24,7 +24,7 @@ thread_create(struct thread *thr, THREAD_RET_TYPE (*fn)(void *))
     DWORD junk;
 
     MUTEX_LOCK(&thr->mutex);
-    self = CreateThread(NULL, 0, fn, (void*)thr, 0, &junk);
+    thr->self = CreateThread(NULL, 0, fn, (void*)thr, 0, &junk);
     MUTEX_UNLOCK(&thr->mutex);
-    return self ? 0 : -1;
+    return thr->self ? 0 : -1;
 }
