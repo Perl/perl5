@@ -183,13 +183,15 @@ through a collection of variables.
 
 =over 4
 
-=item C<$File::Find::dir> is the current directory name, 
+=item C<$File::Find::dir> is the current directory name,
 
 =item C<$_> is the current filename within that directory
 
-=item C<$File::Find::name> is the complete pathname to the file. 
+=item C<$File::Find::name> is the complete pathname to the file.
 
 =back
+
+Don't modify these variables.
 
 For example, when examining the file /some/path/foo.ext you will have:
 
