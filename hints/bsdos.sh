@@ -33,9 +33,6 @@ libswanted="$*"
 glibpth="$glibpth /usr/X11/lib"
 ldflags="$ldflags -L/usr/X11/lib"
 
-# Avoid telldir prototype conflict in pp_sys.c
-pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
-
 case "$optimize" in
 '')     optimize='-O2' ;;
 esac

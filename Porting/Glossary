@@ -540,6 +540,11 @@ d_killpg (d_killpg.U):
 	indicates to the C program that the killpg() routine is available
 	to kill process groups.
 
+d_lchown (d_lchown.U):
+	This variable conditionally defines the HAS_LCHOWN symbol, which
+	indicates to the C program that the lchown() routine is available
+	to operate on a symbolic link (instead of following the link).
+
 d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.
@@ -786,6 +791,14 @@ d_sem (d_sem.U):
 d_semctl (d_semctl.U):
 	This variable conditionally defines the HAS_SEMCTL symbol, which
 	indicates to the C program that the semctl() routine is available.
+
+d_semctl_semid_ds (d_union_senum.U):
+	This variable conditionally defines USE_SEMCTL_SEMID_DS, which
+	indicates that struct semid_ds * is to be used for semctl IPC_STAT.
+
+d_semctl_semun (d_union_senum.U):
+	This variable conditionally defines USE_SEMCTL_SEMUN, which
+	indicates that union semun is to be used for semctl IPC_STAT.
 
 d_semget (d_semget.U):
 	This variable conditionally defines the HAS_SEMGET symbol, which
@@ -1073,6 +1086,10 @@ d_uname (d_gethname.U):
 	This variable conditionally defines the HAS_UNAME symbol, which
 	indicates to the C program that the uname() routine may be
 	used to derive the host name.
+
+d_union_semun (d_union_senum.U):
+	This variable conditionally defines HAS_UNION_SEMUN if the
+	union semun is defined by including <sys/sem.h>.
 
 d_vfork (d_vfork.U):
 	This variable conditionally defines the HAS_VFORK symbol, which
