@@ -26,11 +26,12 @@ sub unctrl    { print dumpvar::unctrl($_[0]), "\n" }
 sub uniescape { print dumpvar::uniescape($_[0]), "\n" }
 sub stringify { print dumpvar::stringify($_[0]), "\n" }
 sub dumpvalue { 
+	# Call main::dumpValue exactly as the perl5db.pl calls it.
         local $\ = '';
         local $, = '';
         local $" = ' ';
         my @params = @_;
-        &main::dumpValue(\@params, -1);
+        &main::dumpValue(\@params,-1);
 }
 
 package Foo;
@@ -173,7 +174,18 @@ EXPECT
 1  2
 2  3
 ########
+dumpValue([1..3]);
+EXPECT
+0  1
+1  2
+2  3
+########
 dumpValue({1..4},1);
+EXPECT
+1 => 2
+3 => 4
+########
+dumpValue({1..4});
 EXPECT
 1 => 2
 3 => 4
@@ -186,7 +198,23 @@ EXPECT
 3  4
 4  5
 ########
+dumpValue($foo);
+EXPECT
+0  1
+1  2
+2  3
+3  4
+4  5
+########
 dumpValue($bar,1);
+EXPECT
+0  1
+1  2
+2  3
+3  4
+4  5
+########
+dumpValue($bar);
 EXPECT
 0  1
 1  2
