@@ -25,8 +25,8 @@ struct hek {
     I32		hek_len;	/* length of hash key */
     char	hek_key[1];	/* variable-length hash key */
     /* the hash-key is \0-terminated */
-    /* after the \0 there is a byte for flags, such as whether the key is
-       UTF8 */
+    /* after the \0 there is a byte for flags, such as whether the key
+       is UTF-8 */
 };
 
 /* hash structure: */

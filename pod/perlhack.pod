@@ -875,7 +875,7 @@ C<"\0">.
 
 Line 13 manipulates the flags; since we've changed the PV, any IV or NV
 values will no longer be valid: if we have C<$a=10; $a.="6";> we don't
-want to use the old IV of 10. C<SvPOK_only_utf8> is a special UTF8-aware
+want to use the old IV of 10. C<SvPOK_only_utf8> is a special UTF-8-aware
 version of C<SvPOK_only>, a macro which turns off the IOK and NOK flags
 and turns on POK. The final C<SvTAINT> is a macro which launders tainted
 data if taint mode is turned on.
@@ -1439,7 +1439,7 @@ some things you'll need to know when fiddling with them. Let's now get
 on and create a simple patch. Here's something Larry suggested: if a
 C<U> is the first active format during a C<pack>, (for example, 
 C<pack "U3C8", @stuff>) then the resulting string should be treated as
-UTF8 encoded.
+UTF-8 encoded.
 
 How do we prepare to fix this up? First we locate the code in question -
 the C<pack> happens at runtime, so it's going to be in one of the F<pp>
@@ -1488,7 +1488,7 @@ of C<pat>:
     while (pat < patend) {
 
 Now if we see a C<U> which was at the start of the string, we turn on
-the UTF8 flag for the output SV, C<cat>:
+the C<UTF8> flag for the output SV, C<cat>:
 
  +  if (datumtype == 'U' && pat==patcopy+1)
  +      SvUTF8_on(cat);
@@ -1574,10 +1574,10 @@ this text in the description of C<pack>:
  =item *
 
  If the pattern begins with a C<U>, the resulting string will be treated
- as Unicode-encoded. You can force UTF8 encoding on in a string with an
- initial C<U0>, and the bytes that follow will be interpreted as Unicode
- characters. If you don't want this to happen, you can begin your pattern
- with C<C0> (or anything else) to force Perl not to UTF8 encode your
+ as UTF-8-encoded Unicode. You can force UTF-8 encoding on in a string
+ with an initial C<U0>, and the bytes that follow will be interpreted as
+ Unicode characters. If you don't want this to happen, you can begin your
+ pattern with C<C0> (or anything else) to force Perl not to UTF-8 encode your
  string, and then follow this with a C<U*> somewhere in your pattern.
 
 All done. Now let's create the patch. F<Porting/patching.pod> tells us
