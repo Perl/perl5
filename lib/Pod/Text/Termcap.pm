@@ -1,5 +1,5 @@
 # Pod::Text::Termcap -- Convert POD data to ASCII text with format escapes.
-# $Id: Termcap.pm,v 1.10 2002/07/15 05:46:00 eagle Exp $
+# $Id: Termcap.pm,v 1.11 2003/07/09 21:52:30 eagle Exp $
 #
 # Copyright 1999, 2001, 2002 by Russ Allbery <rra@stanford.edu>
 #
@@ -30,7 +30,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.10;
+$VERSION = 1.11;
 
 
 ##############################################################################
@@ -43,8 +43,8 @@ sub initialize {
     my $self = shift;
     my ($ospeed, $term, $termios);
 
-    # The default Term::Cap path won't work on Solaris.
-    # $ENV{HOME} is usually not set on MSWin32.
+    # $ENV{HOME} is usually not set on Windows.  The default Term::Cap path
+    # may not work on Solaris.
     my $home = exists $ENV{HOME} ? "$ENV{HOME}/.termcap:" : '';
     $ENV{TERMPATH} = $home . '/etc/termcap:/usr/share/misc/termcap'
                            . ':/usr/share/lib/termcap';
