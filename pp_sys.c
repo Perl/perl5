@@ -1158,7 +1158,8 @@ PP(pp_getc)
 	RETURN;
     }
     if (!gv || do_eof(gv)) { /* make sure we have fp with something */
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED) && IoTYPE(io) != IoTYPE_WRONLY)
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)
+		&& (!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY)))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	RETPUSHUNDEF;
     }

@@ -419,9 +419,19 @@ use warnings qw(unopened closed) ;
 getc FOO;
 close STDIN;
 getc STDIN;
+# Create an empty file
+$file = 'getcwarn.tmp';
+open FH1, ">$file" or die "# $!"; close FH1;
+open FH2, $file    or die "# $!";
+getc FH2; # Should not warn at EOF
+close FH2;
+getc FH2; # Warns, now
+unlink $file;
 no warnings qw(unopened closed) ;
 getc FOO;
 getc STDIN;
+getc FH2;
 EXPECT
 getc() on unopened filehandle FOO at - line 3.
 getc() on closed filehandle STDIN at - line 5.
+getc() on closed filehandle FH2 at - line 12.
