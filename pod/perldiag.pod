@@ -783,6 +783,16 @@ usually double the curlies to get the same effect though, because the
 inner curlies will be considered a block that loops once.  See
 L<perlfunc/last>.
 
+=item Can't load '%s' for module %s
+
+(F) The module you tried to load failed to load a dynamic extension. This
+may either mean that you upgraded your version of perl to one that is
+incompatible with your old dynamic extensions (which is known to happen
+between major versions of perl), or (more likely) that your dynamic
+extension was built against an older version of the library that is
+installed on your system. You may need to rebuild your old dynamic
+extensions.
+
 =item Can't localize lexical variable %s
 
 (F) You used local on a variable name that was previously declared as a
@@ -820,6 +830,12 @@ L<perlfunc/require> and L<lib>.
 autoload, but there is no function to autoload.  Most probable causes
 are a misprint in a function/method name or a failure to C<AutoSplit>
 the file, say, by doing C<make install>.
+
+=item Can't locate loadable object for module %s in @INC
+
+(F) The module you loaded is trying to load an external library, like
+for example, C<foo.so> or C<bar.dll>, but the L<DynaLoader> module was
+unable to locate this library.  See L<DynaLoader>.
 
 =item Can't locate object method "%s" via package "%s"
 
@@ -2608,17 +2624,17 @@ C<limit datasize n> (where C<n> is the number of kilobytes) to check
 the current limits and change them, and in ksh/bash/zsh use C<ulimit -a>
 and C<ulimit -d n>, respectively.
 
+=item Out of memory during %s extend
+
+(X) An attempt was made to extend an array, a list, or a string beyond
+the largest possible memory allocation.
+
 =item Out of memory during "large" request for %s
 
 (F) The malloc() function returned 0, indicating there was insufficient
 remaining memory (or virtual memory) to satisfy the request. However,
 the request was judged large enough (compile-time default is 64K), so a
 possibility to shut down by trapping this error is granted.
-
-=item Out of memory during %s extend
-
-(X) An attempt was made to extend an array, a list, or a string beyond
-the largest possible memory allocation.
 
 =item Out of memory during request for %s
 
@@ -3635,22 +3651,6 @@ before now.  Check your control flow.
 (F) Perl can't peek at the stdio buffer of filehandles when it doesn't
 know about your kind of stdio.  You'll have to use a filename instead.
 
-=item "-T" is on the #! line, it must also be used on the command line
-
-(X) The #! line (or local equivalent) in a Perl script contains the
-B<-T> option, but Perl was not invoked with B<-T> in its command line.
-This is an error because, by the time Perl discovers a B<-T> in a
-script, it's too late to properly taint everything from the environment.
-So Perl gives up.
-
-If the Perl script is being executed as a command using the #!
-mechanism (or its local equivalent), this error can usually be fixed by
-editing the #! line so that the B<-T> option is a part of Perl's first
-argument: e.g. change C<perl -n -T> to C<perl -T -n>.
-
-If the Perl script is being executed as C<perl scriptname>, then the
-B<-T> option must appear on the command line: C<perl -T scriptname>.
-
 =item Target of goto is too deeply nested
 
 (F) You tried to use C<goto> to reach a label that was too deeply nested
@@ -3727,6 +3727,22 @@ see L<perl58delta> for more details.
 
 (F) Your version of the C library apparently doesn't do times().  I
 suspect you're not running on Unix.
+
+=item "-T" is on the #! line, it must also be used on the command line
+
+(X) The #! line (or local equivalent) in a Perl script contains the
+B<-T> option, but Perl was not invoked with B<-T> in its command line.
+This is an error because, by the time Perl discovers a B<-T> in a
+script, it's too late to properly taint everything from the environment.
+So Perl gives up.
+
+If the Perl script is being executed as a command using the #!
+mechanism (or its local equivalent), this error can usually be fixed by
+editing the #! line so that the B<-T> option is a part of Perl's first
+argument: e.g. change C<perl -n -T> to C<perl -T -n>.
+
+If the Perl script is being executed as C<perl scriptname>, then the
+B<-T> option must appear on the command line: C<perl -T scriptname>.
 
 =item To%s: illegal mapping '%s'
 
