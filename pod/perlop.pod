@@ -127,6 +127,10 @@ character within its range, with carry:
     print ++($foo = 'Az');	# prints 'Ba'
     print ++($foo = 'zz');	# prints 'aaa'
 
+C<undef> is always treated as numeric, and in particular is changed
+to C<0> before incrementing (so that a post-increment of an undef value
+will return C<0> rather than C<undef>).
+
 The auto-decrement operator is not magical.
 
 =head2 Exponentiation

@@ -858,6 +858,7 @@ PP(pp_postinc)
     else
 	sv_inc(TOPs);
     SvSETMAGIC(TOPs);
+    /* special case for undef: see thread at 2003-03/msg00536.html in archive */
     if (!SvOK(TARG))
 	sv_setiv(TARG, 0);
     SETs(TARG);
