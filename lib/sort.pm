@@ -31,7 +31,7 @@ sub import {
 	    $^H{SORT} |=  $sort::stable_bit;
 	} else {
 	    require Carp;
-	    Carp::croak("sort: unknown subpragma '@_'");
+	    Carp::croak("sort: unknown subpragma '$_'");
 	}
     }
 }
