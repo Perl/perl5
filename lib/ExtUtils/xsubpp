@@ -6,7 +6,7 @@ xsubpp - compiler to convert Perl XS code into C code
 
 =head1 SYNOPSIS
 
-B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-noprototypes>] [B<-typemap typemap>]... file.xs
+B<xsubpp> [B<-v>] [B<-C++>] [B<-except>] [B<-s pattern>] [B<-prototypes>] [B<-noversioncheck>] [B<-typemap typemap>]... file.xs
 
 =head1 DESCRIPTION
 
@@ -44,8 +44,16 @@ typemap having the highest precedence.
 
 Prints the I<xsubpp> version number to standard output, then exits.
 
-=item B<-noprototypes>
+=item B<-prototypes>
 
+By default I<xsubpp> will not automatically generate prototype code for
+all xsubs. This flag will enable prototypes.
+
+=item B<-noversioncheck>
+
+Disables the run time test that determines if the object file (derived
+from the C<.xs> file) and the C<.pm> files have the same version
+number.
 
 =back
 
@@ -63,20 +71,27 @@ See the file F<changes.pod>.
 
 =head1 SEE ALSO
 
-perl(1), perlapi(1)
+perl(1), perlxs(1), perlxstut(1), perlapi(1)
 
 =cut
 
 # Global Constants
-$XSUBPP_version = "1.924";
+$XSUBPP_version = "1.929";
 require 5.002;
 
-$usage = "Usage: xsubpp [-v] [-C++] [-except] [-noprototypes] [-s pattern] [-typemap typemap]... file.xs\n";
+sub Q ;
+
+$FH_string = 'File0000' ;
+*FH = $FH_string ;
+
+$usage = "Usage: xsubpp [-v] [-C++] [-except] [-prototypes] [-noversioncheck] [-s pattern] [-typemap typemap]... file.xs\n";
 
 $proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
 
 $except = "";
-$WantPrototypes = 1 ;
+$WantPrototypes = -1 ;
+$WantVersionChk = 1 ;
+$ProtoUsed = 0 ;
 SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $flag = shift @ARGV;
     $flag =~ s/^-// ;
@@ -84,20 +99,31 @@ SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $cplusplus = 1,	next SWITCH	if $flag eq 'C++';
     $WantPrototypes = 0, next SWITCH	if $flag eq 'noprototypes';
     $WantPrototypes = 1, next SWITCH	if $flag eq 'prototypes';
+    $WantVersionChk = 0, next SWITCH	if $flag eq 'noversioncheck';
+    $WantVersionChk = 1, next SWITCH	if $flag eq 'versioncheck';
     $except = " TRY",	next SWITCH	if $flag eq 'except';
     push(@tm,shift),	next SWITCH	if $flag eq 'typemap';
     (print "xsubpp version $XSUBPP_version\n"), exit  	
 	if $flag eq 'v';
     die $usage;
 }
+if ($WantPrototypes == -1)
+  { $WantPrototypes = 0}
+else
+  { $ProtoUsed = 1 }
+
+
 @ARGV == 1 or die $usage;
-chomp($pwd = `pwd`);
-# Check for error message from VMS
-if ($pwd =~ /unrecognized command verb/) { $Is_VMS = 1; $pwd = $ENV{DEFAULT} }
 ($dir, $filename) = $ARGV[0] =~ m#(.*)/(.*)#
 	or ($dir, $filename) = $ARGV[0] =~ m#(.*[>\]])(.*)#
 	or ($dir, $filename) = ('.', $ARGV[0]);
 chdir($dir);
+# Check for VMS; Config.pm may not be installed yet, but this routine
+# is built into VMS perl
+if (defined(&VMS::Filespec::vmsify)) { $Is_VMS = 1; $pwd = $ENV{DEFAULT}; }
+else                                 { $Is_VMS = 0; chomp($pwd = `pwd`);   }
+
+++ $IncludedFiles{$ARGV[0]} ;
 
 sub TrimWhitespace
 {
@@ -185,7 +211,7 @@ $END = "!End!\n\n";		# "impossible" keyword (multiple newline)
 # Match an XS keyword
 $BLOCK_re= '\s*(' . join('|', qw(
 	REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE OUTPUT 
-	CLEANUP ALIAS PROTOTYPES PROTOTYPE
+	CLEANUP ALIAS PROTOTYPES PROTOTYPE VERSIONCHECK INCLUDE
 	)) . "|$END)\\s*:";
 
 # Input:  ($_, @line) == unparsed input.
@@ -202,6 +228,15 @@ sub print_section {
     for (;  defined($_) && !/^$BLOCK_re/o;  $_ = shift(@line)) {
 	print "$_\n";
     }
+}
+
+sub process_keyword($)
+{
+    my($pattern) = @_ ;
+    my $kwd ;
+
+    &{"${kwd}_handler"}() 
+        while $kwd = check_keyword($pattern) ;
 }
 
 sub CASE_handler {
@@ -243,7 +278,8 @@ sub INPUT_handler {
 	print "\t" . &map_type($var_type);
 	$var_num = $args_match{$var_name};
 
-        $proto_arg[$var_num] = ProtoString($var_type) ;
+        $proto_arg[$var_num] = ProtoString($var_type) 
+	    if $var_num ;
 	if ($var_addr) {
 	    $var_addr{$var_name} = 1;
 	    $func_args =~ s/\b($var_name)\b/&$1/;
@@ -285,6 +321,10 @@ sub OUTPUT_handler {
 	}
     }
 }
+
+sub CLEANUP_handler() { print_section() } 
+sub PREINIT_handler() { print_section() } 
+sub INIT_handler()    { print_section() } 
 
 sub GetAliases
 {
@@ -347,6 +387,22 @@ sub REQUIRE_handler ()
         unless $XSUBPP_version >= $Ver ; 
 }
 
+sub VERSIONCHECK_handler ()
+{
+    # the rest of the current line should contain either ENABLE or
+    # DISABLE
+ 
+    TrimWhitespace($_) ;
+ 
+    # check for ENABLE/DISABLE
+    death ("Error: VERSIONCHECK: ENABLE/DISABLE")
+        unless /^(ENABLE|DISABLE)/i ;
+ 
+    $WantVersionChk = 1 if $1 eq 'ENABLE' ;
+    $WantVersionChk = 0 if $1 eq 'DISABLE' ;
+ 
+}
+
 sub PROTOTYPE_handler ()
 {
     for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
@@ -366,6 +422,7 @@ sub PROTOTYPE_handler ()
             $ProtoThisXSUB = C_string($_) ;
         }
     }
+    $ProtoUsed = 1 ;
 }
 
 sub PROTOTYPES_handler ()
@@ -381,7 +438,94 @@ sub PROTOTYPES_handler ()
 
     $WantPrototypes = 1 if $1 eq 'ENABLE' ;
     $WantPrototypes = 0 if $1 eq 'DISABLE' ;
+    $ProtoUsed = 1 ;
 
+}
+
+sub INCLUDE_handler ()
+{
+    # the rest of the current line should contain a valid filename
+ 
+    TrimWhitespace($_) ;
+ 
+    # If the filename is enclosed in quotes, remove them.
+    s/^'([^']*)'$/$1/ or s/^"([^"]*)"$/$1/ ;
+
+    death("INCLUDE: filename missing")
+        unless $_ ;
+
+    death("INCLUDE: output pipe is illegal")
+        if /^\s*\|/ ;
+
+    # simple minded recursion detector
+    death("INCLUDE loop detected")
+        if $IncludedFiles{$_} ;
+
+    ++ $IncludedFiles{$_} unless /\|\s*$/ ;
+
+    # Save the current file context.
+    push(@FileStack, {
+        LastLine        => $lastline,
+        LastLineNo      => $lastline_no,
+        Line            => \@line,
+        LineNo          => \@line_no,
+        Filename        => $filename,
+        Handle          => $FH_string,
+        }) ;
+ 
+    ++ $FH_string ;
+
+    # open the new file
+    open ($FH_string, "$_") or death("Cannot open '$_': $!") ;
+ 
+    print Q<<"EOF" ;
+#
+#/* INCLUDE:  Including '$_' from '$filename' */
+#
+EOF
+
+    *FH = $FH_string ;
+    $filename = $_ ;
+
+    # Prime the pump by reading the first line
+    $lastline = <FH> ;
+    $lastline_no = $. ;
+ 
+}
+ 
+sub PopFile()
+{
+    return 0 unless @FileStack ;
+ 
+    my $data     = pop @FileStack ;
+    my $ThisFile = $filename ;
+    my $isPipe   = ($filename =~ /\|\s*$/) ;
+ 
+    -- $IncludedFiles{$filename}
+        unless $isPipe ;
+
+    close FH ;
+
+    *FH         = $data->{Handle} ;
+    $filename   = $data->{Filename} ;
+    $lastline   = $data->{LastLine} ;
+    $lastline_no = $data->{LastLineNo} ;
+    @line       = @{ $data->{Line} } ;
+    @line_no    = @{ $data->{LineNo} } ;
+ 
+    if ($isPipe and $? ) {
+        -- $lastline_no ;
+        print STDERR "Error reading from pipe '$ThisFile': $! in $filename, line $lastline_no\n"  ;
+        exit 1 ;
+    }
+
+    print Q<<"EOF" ;
+#
+#/* INCLUDE: Returning to '$filename' from '$ThisFile' */
+#
+EOF
+
+    return 1 ;
 }
 
 sub ValidProtoString ($)
@@ -437,7 +581,7 @@ sub Q {
     $text;
 }
 
-open(F, $filename) or die "cannot open $filename: $!\n";
+open(FH, $filename) or die "cannot open $filename: $!\n";
 
 # Identify the version of xsubpp used
 print <<EOM ;
@@ -452,23 +596,26 @@ print <<EOM ;
 EOM
  
 
-while (<F>) {
+while (<FH>) {
     last if ($Module, $Package, $Prefix) =
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
     print $_;
 }
 &Exit unless defined $_;
 
-my $lastline	= $_;
-my $lastline_no = $.;
+$lastline    = $_;
+$lastline_no = $.;
 
 
-# Read next xsub into @line from ($lastline, <F>).
+# Read next xsub into @line from ($lastline, <FH>).
 sub fetch_para {
     # parse paragraph
     @line = ();
     @line_no = () ;
-    return 0 unless defined $lastline;
+    if (! defined $lastline) {
+        return 1 if PopFile() ;
+        return 0 ; 
+    }
 
     if ($lastline =~
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/) {
@@ -491,11 +638,11 @@ sub fetch_para {
 	}
 
 	# Read next line and continuation lines
-	last unless defined($lastline = <F>);
+	last unless defined($lastline = <FH>);
 	$lastline_no = $.;
 	my $tmp_line;
 	$lastline .= $tmp_line
-	    while ($lastline =~ /\\$/ && defined($tmp_line = <F>));
+	    while ($lastline =~ /\\$/ && defined($tmp_line = <FH>));
 	    
 	chomp $lastline;
 	$lastline =~ s/^\s+$//;
@@ -529,11 +676,8 @@ while (fetch_para()) {
     $ProtoThisXSUB = $WantPrototypes ;
 
     $_ = shift(@line);
-    while ($kwd = check_keyword("REQUIRE|PROTOTYPES")) {
-        if ($kwd eq 'REQUIRE') 
-          { REQUIRE_handler() }
-        else
-          { PROTOTYPES_handler() }
+    while ($kwd = check_keyword("REQUIRE|PROTOTYPES|VERSIONCHECK|INCLUDE")) {
+        &{"${kwd}_handler"}() ;
         next PARAGRAPH unless @line ;
         $_ = shift(@line);
     }
@@ -573,7 +717,7 @@ while (fetch_para()) {
 
     @args = split(/\s*,\s*/, $orig_args);
     if (defined($class)) {
-	my $arg0 = (defined($static) ? "CLASS" : "THIS");
+	my $arg0 = ((defined($static) or $func_name =~ /^new/) ? "CLASS" : "THIS");
 	unshift(@args, $arg0);
 	($orig_args = "$arg0, $orig_args") =~ s/^$arg0, $/$arg0/;
     }
@@ -666,13 +810,11 @@ EOF
 	%arg_list = () ;
         $gotRETVAL = 0;
 
-	&INPUT_handler;
-	my $kwd;
-	while ($kwd = check_keyword("INPUT|PREINIT")) {
-	    if ($kwd eq 'PREINIT') { &print_section; } else { &INPUT_handler; }
-	}
+	INPUT_handler() ;
+	process_keyword("INPUT|PREINIT|ALIAS|PROTOTYPE") ;
+
 	if (!$thisdone && defined($class)) {
-	    if (defined($static)) {
+	    if (defined($static) or $func_name =~ /^new/) {
 		print "\tchar *";
 		$var_types{"CLASS"} = "char *";
 		&generate_init("char *", 1, "CLASS");
@@ -696,23 +838,15 @@ EOF
 			$var_types{"RETVAL"} = $ret_type;
 		}
 		print $deferred;
-                while ($kwd = check_keyword("INIT|ALIAS|PROTOTYPE")) {
-                    if ($kwd eq 'INIT') {
-                        &print_section
-                    }
-                    elsif ($kwd eq 'PROTOTYPE') 
-                      {  PROTOTYPE_handler() }
-                    else 
-                      {  ALIAS_handler() }
-                }
+                process_keyword("INIT|ALIAS|PROTOTYPE") ;
 
 		if (check_keyword("PPCODE")) {
-			&print_section;
+			print_section();
 			death ("PPCODE must be last thing") if @line;
 			print "\tPUTBACK;\n\treturn;\n";
 		} elsif (check_keyword("CODE")) {
-			&print_section;
-		} elsif ($func_name eq "DESTROY") {
+			print_section() ;
+		} elsif (defined($class) and $func_name eq "DESTROY") {
 			print "\n\t";
 			print "delete THIS;\n";
 		} else {
@@ -723,12 +857,16 @@ EOF
 			}
 			if (defined($static)) {
 			    if ($func_name =~ /^new/) {
-				$func_name .= " $class";
+				$func_name = "$class";
 			    } else {
 				print "${class}::";
 			    }
 			} elsif (defined($class)) {
+			    if ($func_name =~ /^new/) {
+				$func_name .= " $class";
+			    } else {
 				print "THIS->";
+			    }
 			}
 			$func_name =~ s/^($spat)//
 			    if defined($spat);
@@ -740,7 +878,7 @@ EOF
 	$gotRETVAL = 0;
 	undef $RETVAL_code ;
 	undef %outargs ;
-	&OUTPUT_handler while check_keyword("OUTPUT");
+        process_keyword("OUTPUT|ALIAS|PROTOTYPE"); 
 
 	# all OUTPUT done, so now push the return value on the stack
 	if ($gotRETVAL && $RETVAL_code) {
@@ -750,7 +888,7 @@ EOF
 	}
 
 	# do cleanup
-	&print_section while check_keyword("CLEANUP");
+	process_keyword("CLEANUP|ALIAS|PROTOTYPE") ;
 
 	# print function trailer
 	print Q<<EOF;
@@ -818,6 +956,11 @@ print Q<<"EOF";
 #
 EOF
 
+print Q<<"EOF" if $WantVersionChk ;
+#    XS_VERSION_BOOTCHECK ;
+#
+EOF
+
 print Q<<"EOF" if defined %XsubAliases ;
 #    {
 #        CV * cv ;
@@ -869,6 +1012,8 @@ print Q<<"EOF";;
 #]]
 EOF
 
+warn("Please specify prototyping behavior for $filename (see perlxs manual)\n") 
+    unless $ProtoUsed ;
 &Exit;
 
 
@@ -1002,7 +1147,7 @@ sub map_type {
 
 sub Exit {
 # If this is VMS, the exit status has meaning to the shell, so we
-# use a predictable value (SS$_Abort) rather than an arbitrary
-# number.
-    exit ($Is_VMS ? 44 : $errors) ;
+# use a predictable value (SS$_Normal or SS$_Abort) rather than an
+# arbitrary number.
+    exit ($Is_VMS ? ($errors ? 44 : 1) : $errors) ;
 }
