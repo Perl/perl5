@@ -360,7 +360,7 @@ sub init_formatter_class_list {
 
   $self->opt_M_with('Pod::Perldoc::ToPod');   # the always-there fallthru
   $self->opt_o_with('text');
-  $self->opt_o_with('man') unless IS_MSWin32 || IS_Dos
+  $self->opt_o_with('man') unless IS_MSWin32 || IS_Dos || IS_Cygwin
        || !($ENV{TERM} && (
               ($ENV{TERM} || '') !~ /dumb|emacs|none|unknown/i
            ));
@@ -485,7 +485,7 @@ sub find_good_formatter_class {
       } else {
         $^W = 0;
         # The average user just has no reason to be seeing
-        #  $^W-suppressable warnings from the the require!
+        #  $^W-suppressable warnings from the require!
       }
 
       eval "require $c";
@@ -1701,7 +1701,7 @@ __END__
 #	 it'll run faster.
 #
 # Version 1.01:	Tue May 30 14:47:34 EDT 1995
-#		Andy Dougherty  <doughera@lafcol.lafayette.edu>
+#		Andy Dougherty  <doughera@lafayette.edu>
 #   -added pod documentation.
 #   -added PATH searching.
 #   -added searching pod/ subdirectory (mainly to pick up perlfunc.pod
