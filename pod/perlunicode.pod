@@ -4,28 +4,40 @@ perlunicode - Unicode support in Perl
 
 =head1 DESCRIPTION
 
-=head2 Important Caveat
+=head2 Important Caveats
 
-WARNING: The implementation of Unicode support in Perl is incomplete.
+WARNING: While the implementation of Unicode support in Perl is now fairly
+complete it is still evolving to some extent.
 
-The following areas need further work.
+In particular the way Unicode is handled on EBCDIC platforms is still rather
+experimental. On such a platform references to UTF-8 encoding in this
+document and elsewhere should be read as meaning UTF-EBCDIC as specified
+in Unicode Technical Report 16 unless ASCII vs EBCDIC issues are specifically
+discussed. There is no C<utfebcdic> pragma or ":utfebcdic" layer, rather
+"utf8" and ":utf8" are re-used to mean platform's "natural" 8-bit encoding
+of Unicode. See L<perlebcdic> for more discussion of the issues.
+
+The following areas are still under development.
 
 =over 4
 
 =item Input and Output Disciplines
 
-There is currently no easy way to mark data read from a file or other
-external source as being utf8.  This will be one of the major areas of
-focus in the near future.
+A filehandle can be marked as containing perl's internal Unicode encoding
+(UTF-8 or UTF-EBCDIC) by opening it with the ":utf8" layer.
+Other encodings can be converted to perl's encoding on input, or from
+perl's encoding on output by use of the ":encoding()" layer.
+There is not yet a clean way to mark the perl source itself as being
+in an particular encoding.
 
 =item Regular Expressions
 
-The existing regular expression compiler does not produce polymorphic
-opcodes.  This means that the determination on whether to match Unicode
-characters is made when the pattern is compiled, based on whether the
-pattern contains Unicode characters, and not when the matching happens
-at run time.  This needs to be changed to adaptively match Unicode if
-the string to be matched is Unicode.
+The regular expression compiler does now attempt to produce polymorphic
+opcodes.  That is the pattern should now adapt to the data and
+automaticaly switch to the Unicode character scheme when presented with Unicode data,
+or a traditional byte scheme when presented with byte data.
+The implementation is still new and (particularly on EBCDIC platforms) may
+need further work.
 
 =item C<use utf8> still needed to enable a few features
 
