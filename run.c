@@ -47,7 +47,7 @@ runops() {
     do {
 	if (debug) {
 	    if (watchaddr != 0 && *watchaddr != watchok)
-		fprintf(stderr, "WARNING: %lx changed from %lx to %lx\n",
+		fprintf(Perl_debug_log, "WARNING: %lx changed from %lx to %lx\n",
 		    (long)watchaddr, (long)watchok, (long)*watchaddr);
 	    DEBUG_s(debstack());
 	    DEBUG_t(debop(op));
@@ -65,23 +65,23 @@ OP *op;
     deb("%s", op_name[op->op_type]);
     switch (op->op_type) {
     case OP_CONST:
-	fprintf(stderr, "(%s)", SvPEEK(cSVOP->op_sv));
+	fprintf(Perl_debug_log, "(%s)", SvPEEK(cSVOP->op_sv));
 	break;
     case OP_GVSV:
     case OP_GV:
 	if (cGVOP->op_gv) {
 	    sv = NEWSV(0,0);
 	    gv_fullname(sv, cGVOP->op_gv);
-	    fprintf(stderr, "(%s)", SvPV(sv, na));
+	    fprintf(Perl_debug_log, "(%s)", SvPV(sv, na));
 	    SvREFCNT_dec(sv);
 	}
 	else
-	    fprintf(stderr, "(NULL)");
+	    fprintf(Perl_debug_log, "(NULL)");
 	break;
     default:
 	break;
     }
-    fprintf(stderr, "\n");
+    fprintf(Perl_debug_log, "\n");
     return 0;
 }
 
@@ -91,7 +91,7 @@ char **addr;
 {
     watchaddr = addr;
     watchok = *addr;
-    fprintf(stderr, "WATCHING, %lx is currently %lx\n",
+    fprintf(Perl_debug_log, "WATCHING, %lx is currently %lx\n",
 	(long)watchaddr, (long)watchok);
 }
 
@@ -112,7 +112,7 @@ debprofdump()
 	return;
     for (i = 0; i < MAXO; i++) {
 	if (profiledata[i])
-	    fprintf(stderr, "%d\t%lu\n", i, profiledata[i]);
+	    fprintf(Perl_debug_log, "%d\t%lu\n", i, profiledata[i]);
     }
 }
 

@@ -244,7 +244,7 @@ PMOP* pm;
 	if (sawplus && (!sawopen || !regsawback))
 	    r->reganch |= ROPT_SKIP;	/* x+ must match 1st of run */
 
-	DEBUG_r(fprintf(stderr,"first %d next %d offset %d\n",
+	DEBUG_r(fprintf(Perl_debug_log,"first %d next %d offset %d\n",
 	   OP(first), OP(NEXTOPER(first)), first - scan));
 	/*
 	* If there's something expensive in the r.e., find the
@@ -1432,7 +1432,7 @@ register char *s;
 #ifdef DEBUGGING
 
 /*
- - regdump - dump a regexp onto stderr in vaguely comprehensible form
+ - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
 void
 regdump(r)
@@ -1450,13 +1450,13 @@ regexp *r;
 	    s++;
 #endif
 	op = OP(s);
-	fprintf(stderr,"%2d%s", s-r->program, regprop(s));	/* Where, what. */
+	fprintf(Perl_debug_log,"%2d%s", s-r->program, regprop(s));	/* Where, what. */
 	next = regnext(s);
 	s += regarglen[(U8)op];
 	if (next == NULL)		/* Next ptr. */
-	    fprintf(stderr,"(0)");
+	    fprintf(Perl_debug_log,"(0)");
 	else 
-	    fprintf(stderr,"(%d)", (s-r->program)+(next-s));
+	    fprintf(Perl_debug_log,"(%d)", (s-r->program)+(next-s));
 	s += 3;
 	if (op == ANYOF) {
 	    s += 32;
@@ -1464,34 +1464,34 @@ regexp *r;
 	if (op == EXACTLY) {
 	    /* Literal string, where present. */
 	    s++;
-	    (void)putc(' ', stderr);
-	    (void)putc('<', stderr);
+	    (void)putc(' ', Perl_debug_log);
+	    (void)putc('<', Perl_debug_log);
 	    while (*s != '\0') {
-		(void)putc(*s, stderr);
+		(void)putc(*s, Perl_debug_log);
 		s++;
 	    }
-	    (void)putc('>', stderr);
+	    (void)putc('>', Perl_debug_log);
 	    s++;
 	}
-	(void)putc('\n', stderr);
+	(void)putc('\n', Perl_debug_log);
     }
 
     /* Header fields of interest. */
     if (r->regstart)
-	fprintf(stderr,"start `%s' ", SvPVX(r->regstart));
+	fprintf(Perl_debug_log,"start `%s' ", SvPVX(r->regstart));
     if (r->regstclass)
-	fprintf(stderr,"stclass `%s' ", regprop(r->regstclass));
+	fprintf(Perl_debug_log,"stclass `%s' ", regprop(r->regstclass));
     if (r->reganch & ROPT_ANCH)
-	fprintf(stderr,"anchored ");
+	fprintf(Perl_debug_log,"anchored ");
     if (r->reganch & ROPT_SKIP)
-	fprintf(stderr,"plus ");
+	fprintf(Perl_debug_log,"plus ");
     if (r->reganch & ROPT_IMPLICIT)
-	fprintf(stderr,"implicit ");
+	fprintf(Perl_debug_log,"implicit ");
     if (r->regmust != NULL)
-	fprintf(stderr,"must have \"%s\" back %ld ", SvPVX(r->regmust),
+	fprintf(Perl_debug_log,"must have \"%s\" back %ld ", SvPVX(r->regmust),
 	 (long) r->regback);
-    fprintf(stderr, "minlen %ld ", (long) r->minlen);
-    fprintf(stderr,"\n");
+    fprintf(Perl_debug_log, "minlen %ld ", (long) r->minlen);
+    fprintf(Perl_debug_log,"\n");
 }
 
 /*
