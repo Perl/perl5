@@ -10,8 +10,11 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV=c:
-INST_TOP=$(INST_DRV)\perl
-BUILDOPT=-DUSE_THREADS
+INST_TOP=$(INST_DRV)\perl5004.5x
+#BUILDOPT=-DUSE_THREADS
+#BUILDOPT=-DMULTIPLICITY 
+#BUILDOPT=-DMULTIPLICITY -DUSE_THREADS
+BUILDOPT=-DPERL_GLOBAL_STRUCT -DMULTIPLICITY 
 CORECCOPT=
 
 #
@@ -20,7 +23,7 @@ CORECCOPT=
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
-CFG=Debug
+#CFG=Debug
 
 #
 # set the install locations of the compiler include/libraries
@@ -52,7 +55,7 @@ RUNTIME  = -MD
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
 DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT)
-LOCDEFS  = -DPERLDLL -DPERL_CORE $(CORECCOPT)
+LOCDEFS  = -DPERLDLL $(CORECCOPT)
 SUBSYS   = console
 
 !IF "$(RUNTIME)" == "-MD"
@@ -241,6 +244,9 @@ CORE_H = ..\av.h	\
 	..\XSUB.h	\
 	.\config.h	\
 	..\EXTERN.h	\
+	..\perlvars.h	\
+	..\intrpvar.h	\
+	..\thrdvar.h	\
 	.\include\dirent.h	\
 	.\include\netdb.h	\
 	.\include\sys\socket.h	\
@@ -333,9 +339,10 @@ $(MINIPERL) : ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
 	$(LINK_FLAGS) $(LIBFILES) ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
 <<
 
-$(WIN32_OBJ) : $(CORE_H)
-$(CORE_OBJ)  : $(CORE_H)
-$(DLL_OBJ)   : $(CORE_H) 
+$(WIN32_OBJ)  : $(CORE_H)
+$(CORE_OBJ)   : $(CORE_H)
+$(DLL_OBJ)    : $(CORE_H) 
+$(PERL95_OBJ) : $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) makedef.pl ..\global.sym
 	$(MINIPERL) -w makedef.pl $(DEFINES) $(CCTYPE) > perldll.def
@@ -370,13 +377,13 @@ perl95.c : runperl.c
 	copy runperl.c perl95.c
 
 perl95.obj : perl95.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -c perl95.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c perl95.c
 
 win32sckmt.obj : win32sck.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
 
 win32mt.obj : win32.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -c $(OBJOUT_FLAG)win32mt.obj win32.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32mt.obj win32.c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -out:perl95.exe $(LINK_FLAGS) $(LIBFILES) \

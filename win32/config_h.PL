@@ -54,9 +54,6 @@ while (<SH>)
   print H;
  }
 print H "#include <win32.h>
-#ifndef DEBUGGING
-#define DEBUGGING
-#endif
 ";
 close(H);
 close(SH);

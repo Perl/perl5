@@ -1,3 +1,5 @@
+START_EXTERN_C
+
 #ifndef NEXT30_NO_ATTRIBUTE
 #ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
 #ifdef  __attribute__      /* Avoid possible redefinition errors */
@@ -70,6 +72,8 @@ void	cx_dump _((PERL_CONTEXT* cs));
 SV*	filter_add _((filter_t funcp, SV* datasv));
 void	filter_del _((filter_t funcp));
 I32	filter_read _((int idx, SV* buffer, int maxlen));
+char **	get_op_descs _((void));
+char **	get_op_names _((void));
 I32	cxinc _((void));
 void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
 void	deb_growlevel _((void));
@@ -581,3 +585,9 @@ Malloc_t safexcalloc _((I32 x, MEM_SIZE elements, MEM_SIZE size));
 Malloc_t safexrealloc _((Malloc_t where, MEM_SIZE size));
 void     safexfree _((Malloc_t where));
 #endif
+
+#ifdef PERL_GLOBAL_STRUCT
+struct perl_vars *Perl_GetVars _((void));
+#endif
+
+END_EXTERN_C

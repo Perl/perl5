@@ -1,18 +1,34 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef USE_DECLSPEC_THREAD
 __declspec(thread) struct perl_thread *Perl_current_thread = NULL;
+#endif
 
 void
 Perl_setTHR(struct perl_thread *t)
 {
+#ifdef USE_THREADS
+#ifdef USE_DECLSPEC_THREAD
  Perl_current_thread = t;
+#else
+ TlsSetValue(thr_key,t);
+#endif
+#endif
 }
 
 struct perl_thread *
 Perl_getTHR(void)
 {
+#ifdef USE_THREADS
+#ifdef USE_DECLSPEC_THREAD
  return Perl_current_thread;
+#else
+ return (struct perl_thread *) TlsGetValue(thr_key);
+#endif
+#else
+ return NULL;
+#endif
 }
 
 void
@@ -25,6 +41,24 @@ Perl_alloc_thread_key(void)
 	    croak("panic: TlsAlloc");
 	key_allocated = 1;
     }
+#endif
+}
+
+void
+Perl_init_thread_intern(struct perl_thread *athr)
+{
+#ifdef USE_THREADS
+#ifndef USE_DECLSPEC_THREAD
+
+ /* 
+  * Initialize port-specific per-thread data in thr->i
+  * as only things we have there are just static areas for
+  * return values we don't _need_ to do anything but 
+  * this is good practice:
+  */
+ memset(&athr->i,0,sizeof(athr->i));
+
+#endif
 #endif
 }
 
@@ -61,3 +95,4 @@ Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
     return thr->self ? 0 : -1;
 }
 #endif
+

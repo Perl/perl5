@@ -6,7 +6,6 @@ DBsignal
 DBsingle
 DBsub
 DBtrace
-allgvs
 ampergv
 argvgv
 argvoutgv
@@ -16,10 +15,8 @@ bodytarget
 cddir
 chopset
 copline
-curblock
 curcop
 curcopdb
-curcsv
 curpm
 curstack
 curstash
@@ -64,7 +61,6 @@ initav
 inplace
 last_in_gv
 lastfd
-lastretstr
 lastscream
 lastsize
 lastspbase

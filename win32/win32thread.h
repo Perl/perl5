@@ -108,7 +108,7 @@ typedef THREAD_RET_TYPE thread_func_t(void *);
 
 START_EXTERN_C
 
-#if defined(PERLDLL) && (!defined(__BORLANDC__) || defined(_DLL))
+#if defined(PERLDLL) && defined(USE_DECLSPEC_THREAD) && (!defined(__BORLANDC__) || defined(_DLL))
 extern __declspec(thread) struct perl_thread *Perl_current_thread;
 #define SET_THR(t)   		(Perl_current_thread = t)
 #define THR			Perl_current_thread
@@ -116,17 +116,19 @@ extern __declspec(thread) struct perl_thread *Perl_current_thread;
 #define THR			Perl_getTHR()
 #define SET_THR(t)		Perl_setTHR(t)
 #endif
+struct perl_thread;
 
 void Perl_alloc_thread_key _((void));
 int Perl_thread_create _((struct perl_thread *thr, thread_func_t *fn));
 void Perl_set_thread_self _((struct perl_thread *thr));
 struct perl_thread *Perl_getTHR _((void));
 void Perl_setTHR _((struct perl_thread *t));
+void Perl_init_thread_intern _((struct perl_thread *t));
 
 END_EXTERN_C
 
 #define INIT_THREADS NOOP
-#define ALLOC_THREAD_KEY NOOP
+#define ALLOC_THREAD_KEY Perl_alloc_thread_key()
 #define SET_THREAD_SELF(thr) Perl_set_thread_self(thr)
 
 #define JOIN(t, avp)							\

@@ -2547,4 +2547,22 @@ Perl_huge(void)
 }
 #endif
 
+#ifdef PERL_GLOBAL_STRUCT
+struct perl_vars *
+Perl_GetVars(void)
+{
+ return &Perl_Vars;
+}
+#endif
 
+char **
+get_op_names(void)
+{
+ return op_name;
+}
+
+char **
+get_op_descs(void)
+{
+ return op_desc;
+}

@@ -10,9 +10,26 @@
 #define  _INC_WIN32_PERL5
 
 #ifdef __GNUC__
-#define __declspec(x)
 typedef long long __int64;
 #define Win32_Winsock
+/* GCC does not do __declspec() - render it a nop 
+ * and turn on options to avoid importing data 
+ */
+#define __declspec(x)
+#define PERL_GLOBAL_STRUCT
+#define MULTIPLICITY
+#endif
+
+/* Define DllExport akin to perl's EXT, 
+ * If we are in the DLL or mimicing the DLL for Win95 work round
+ * then Export the symbol, 
+ * otherwise import it.
+ */
+
+#if defined(PERLDLL) || defined(WIN95FIX)
+#define DllExport __declspec(dllexport)
+#else 
+#define DllExport __declspec(dllimport)
 #endif
 
 #define  WIN32_LEAN_AND_MEAN
@@ -33,6 +50,13 @@ typedef long long __int64;
 #include "EXTERN.h"
 #endif
 
+struct tms {
+	long	tms_utime;
+	long	tms_stime;
+	long	tms_cutime;
+	long	tms_cstime;
+};
+
 #ifndef START_EXTERN_C
 #ifdef __cplusplus
 #  define START_EXTERN_C extern "C" {
@@ -48,8 +72,6 @@ typedef long long __int64;
 #define  STANDARD_C	1
 #define  DOSISH		1		/* no escaping our roots */
 #define  OP_BINARY	O_BINARY	/* mistake in in pp_sys.c? */
-#define DllExport	__declspec(dllexport)
-#define DllImport	__declspec(dllimport)
 
 /* Define USE_SOCKETS_AS_HANDLES to enable emulation of windows sockets as
  * real filehandles. XXX Should always be defined (the other version is untested) */
@@ -125,8 +147,8 @@ extern  void	*sbrk(int need);
 #undef   init_os_extras
 #define  init_os_extras Perl_init_os_extras
 
-EXT void		Perl_win32_init(int *argcp, char ***argvp);
-EXT void		Perl_init_os_extras(void);
+DllExport void		Perl_win32_init(int *argcp, char ***argvp);
+DllExport void		Perl_init_os_extras(void);
 
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);
@@ -167,6 +189,22 @@ EXT void win32_strip_return(struct sv *sv);
 #else
 #define PERL_SCRIPT_MODE "r"
 #define win32_strip_return(sv) NOOP
+#endif
+
+/* 
+ * Now Win32 specific per-thread data stuff 
+ */
+
+#ifdef USE_THREADS
+#ifndef USE_DECLSPEC_THREAD
+#define HAVE_THREAD_INTERN
+
+struct thread_intern
+{
+ char		Wstrerror_buffer[512];
+ struct servent Wservent;
+};
+#endif
 #endif
 
 #endif /* _INC_WIN32_PERL5 */

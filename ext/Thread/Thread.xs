@@ -16,7 +16,6 @@ static U32 threadnum = 0;
 static int sig_pipe[2];
             
 #ifndef THREAD_RET_TYPE
-typedef struct perl_thread *Thread;
 #define THREAD_RET_TYPE void *
 #define THREAD_RET_CAST(x) ((THREAD_RET_TYPE) x)
 #endif
