@@ -80,6 +80,16 @@ EOM
 	esac
     else
 	ccflags="$ccflags -Aa"	# The add-on compiler supports ANSI C
+	# cppstdin and cpprun need the -Aa option if you use the unbundled 
+	# ANSI C compiler (*not* the bundled K&R compiler or gcc)
+	# [XXX this should be set automatically by Configure, but isn't yet.]
+	# [XXX This is reported not to work.  You may have to edit config.sh.
+	#  After running Configure, set cpprun and cppstdin in config.sh,
+	#  run "Configure -S" and then "make".]
+	cpprun="${cc:-cc} -E -Aa"
+	cppstdin="$cpprun"
+	cppminus='-'
+	cpplast='-'
     fi
     # For HP's ANSI C compiler, up to "+O3" is safe for everything
     # except shared libraries (PIC code).  Max safe for PIC is "+O2".
@@ -204,24 +214,3 @@ esac
 #     assembler of the form:
 #          (warning) Use of GR3 when frame >= 8192 may cause conflict.
 #     These warnings are harmless and can be safely ignored.
-
-#
-# cppstdin and cpprun need the -Aa option if you use the unbundled 
-# ANSI C compiler (*not* the bundled K&R compiler or gcc)
-# [XXX this should be enabled automatically by Configure, but isn't yet.]
-# [XXX This is reported not to work.  You may have to edit config.sh.
-#  After running Configure, set cpprun and cppstdin in config.sh,
-#  run "Configure -S" and then "make".]
-#
-case "$cppstdin" in
-'')
-    case "$ccflags" in
-    *-Aa*)
-	cpprun="${cc:-cc} -E -Aa"
-	cppstdin="$cpprun"
-	cppminus='-'
-	cpplast='-'
-	;;
-    esac
-    ;;
-esac
