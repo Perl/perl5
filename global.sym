@@ -611,7 +611,6 @@ utf16_to_utf8_reversed
 utf8_distance
 utf8_hop
 utf8_to_uv
-utf8skip
 utilize
 uv_to_utf8
 vivify_defelem

@@ -417,7 +417,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    if (s > startpos)
 		s--;
 	    while (s < strend) {
-		if (*s++ == '\n') {	/* don't need utf8skip here */
+		if (*s++ == '\n') {	/* don't need PL_utf8skip here */
 		    if (s < strend && regtry(prog, s))
 			goto got_it;
 		}
@@ -1185,7 +1185,7 @@ regmatch(regnode *prog)
 	    break;
 	case SANYUTF8:
 	    if (nextchr & 0x80) {
-		locinput += utf8skip[nextchr];
+		locinput += PL_utf8skip[nextchr];
 		if (locinput > PL_regeol)
 		    sayNO;
 		nextchr = UCHARAT(locinput);
@@ -1202,7 +1202,7 @@ regmatch(regnode *prog)
 	    break;
 	case ANYUTF8:
 	    if (nextchr & 0x80) {
-		locinput += utf8skip[nextchr];
+		locinput += PL_utf8skip[nextchr];
 		if (locinput > PL_regeol)
 		    sayNO;
 		nextchr = UCHARAT(locinput);
@@ -1278,7 +1278,7 @@ regmatch(regnode *prog)
 		sayNO;
 	    if (locinput >= PL_regeol)
 		sayNO;
-	    locinput += utf8skip[nextchr];
+	    locinput += PL_utf8skip[nextchr];
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case ANYOF:
@@ -1315,7 +1315,7 @@ regmatch(regnode *prog)
 		{
 		    sayNO;
 		}
-		locinput += utf8skip[nextchr];
+		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
@@ -1348,7 +1348,7 @@ regmatch(regnode *prog)
 		{
 		    sayNO;
 		}
-		locinput += utf8skip[nextchr];
+		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
@@ -1420,7 +1420,7 @@ regmatch(regnode *prog)
 		{
 		    sayNO;
 		}
-		locinput += utf8skip[nextchr];
+		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
@@ -1453,7 +1453,7 @@ regmatch(regnode *prog)
 		{
 		    sayNO;
 		}
-		locinput += utf8skip[nextchr];
+		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
@@ -1471,7 +1471,7 @@ regmatch(regnode *prog)
 	    if (nextchr & 0x80) {
 		if (!(swash_fetch(PL_utf8_digit,(U8*)locinput)))
 		    sayNO;
-		locinput += utf8skip[nextchr];
+		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
@@ -1492,7 +1492,7 @@ regmatch(regnode *prog)
 	    if (nextchr & 0x80) {
 		if (swash_fetch(PL_utf8_digit,(U8*)locinput))
 		    sayNO;
-		locinput += utf8skip[nextchr];
+		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
@@ -1503,7 +1503,7 @@ regmatch(regnode *prog)
 	case CLUMP:
 	    if (locinput >= PL_regeol || swash_fetch(PL_utf8_mark,(U8*)locinput))
 		sayNO;
-	    locinput += utf8skip[nextchr];
+	    locinput += PL_utf8skip[nextchr];
 	    while (locinput < PL_regeol && swash_fetch(PL_utf8_mark,(U8*)locinput))
 		locinput += UTF8SKIP(locinput);
 	    if (locinput > PL_regeol)

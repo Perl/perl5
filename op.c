@@ -4680,6 +4680,10 @@ ck_fun(OP *o)
 			op_free(kid);
 			kid = newop;
 		    }
+		    else if (kid->op_type == OP_READLINE) {
+			/* neophyte patrol: open(<FH>), close(<FH>) etc. */
+			bad_type(numargs, "HANDLE", PL_op_desc[o->op_type], kid);
+		    }
 		    else {
 			kid->op_sibling = 0;
 			kid = newUNOP(OP_RV2GV, 0, scalar(kid));
@@ -5049,6 +5053,8 @@ ck_sort(OP *o)
 		kid->op_next = k;
 	    o->op_flags |= OPf_SPECIAL;
 	}
+	else if (kid->op_type == OP_RV2SV || kid->op_type == OP_PADSV)
+	    null(cLISTOPo->op_first->op_sibling);
     }
 
     return o;

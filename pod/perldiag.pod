@@ -143,6 +143,18 @@ Perl yourself.
 instead of Perl.  Check the #! line, or manually feed your script
 into Perl yourself.
 
+=item         (in cleanup) %s
+
+(W) This prefix usually indicates that a DESTROY() method raised
+the indicated exception.  Since destructors are usually called by
+the system at arbitrary points during execution, and often a vast
+number of times, the warning is issued only once for any number
+of failures that would otherwise result in the same message being
+repeated.
+
+Failure of user callbacks dispatched using the C<G_KEEPERR> flag
+could also result in this warning.  See L<perlcall/G_KEEPERR>.
+
 =item         (Missing semicolon on previous line?)
 
 (S) This is an educated guess made in conjunction with the message "%s

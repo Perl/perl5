@@ -36,6 +36,7 @@ psig_name
 psig_ptr
 regkind
 simple
+utf8skip
 varies
 vtbl_sv
 vtbl_env

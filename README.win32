@@ -211,9 +211,9 @@ perl95.exe will have esoteric problems with extensions like perl/Tk that
 themselves use the C Runtime heavily, or want to free() pointers
 malloc()-ed by perl.
 
-You can avoid the perl95.exe problems completely if you use Borland
-C++ for building perl (perl95.exe is not needed and will not be built
-in that case).
+You can avoid the perl95.exe problems completely if you either enable
+USE_PERLCRT with Visual C++, or use Borland C++ for building perl.  In
+those cases, perl95.exe is not needed and will not be built.
 
 =back
 

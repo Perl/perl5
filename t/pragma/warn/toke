@@ -290,9 +290,10 @@ Misplaced _ in number at - line 4.
 ########
 # toke.c
 use warning 'unsafe' ;
+#line 25 "bar"
 $a = FRED:: ;
 EXPECT
-Bareword "FRED::" refers to nonexistent package at - line 3.
+Bareword "FRED::" refers to nonexistent package at bar line 25.
 ########
 # toke.c
 use warning 'ambiguous' ;
@@ -303,9 +304,14 @@ Ambiguous call resolved as CORE::time(), qualify as such or use & at - line 4.
 ########
 # toke.c
 use warning 'utf8' ;
-$_ = " \x{123} " ;
+eval <<'EOE';
+{
+#line 30 "foo"
+  $_ = " \x{123} " ;
+}
+EOE
 EXPECT
-Use of \x{} without utf8 declaration at - line 3.
+Use of \x{} without utf8 declaration at foo line 30.
 ########
 # toke.c
 use warning 'utf8' ;

@@ -53,6 +53,10 @@
 	 
 	goto &fred()
 
+      (in cleanup) foo bar
+	package Foo;
+	DESTROY { die "foo bar" }
+	{ bless [], 'Foo' for 1..10 }
 
 __END__
 # pp_ctl.c
@@ -86,7 +90,7 @@ Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
 use warning 'unsafe' ;
-{ eval "last" } 
+{ eval "last;" } 
 print STDERR $@ ;
 EXPECT
 Exiting eval via last at (eval 1) line 1.
@@ -119,10 +123,10 @@ Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
 use warning 'unsafe' ;
-joe: { eval "last joe" }
+joe: { eval "last joe;" }
 print STDERR $@ ;
 EXPECT
-Exiting eval via last at (eval 1) line 2.
+Exiting eval via last at (eval 1) line 1.
 ########
 # pp_ctl.c
 use warning 'unsafe' ;
@@ -143,3 +147,11 @@ sub fred
 goto &fred()
 EXPECT
 Deep recursion on subroutine "main::fred" at - line 6.
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+package Foo;
+DESTROY { die "@{$_[0]} foo bar" }
+{ bless ['A'], 'Foo' for 1..10 }
+EXPECT
+	(in cleanup) A foo bar at - line 4.
