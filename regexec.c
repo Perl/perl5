@@ -129,12 +129,11 @@
 #define LOAD_UTF8_CHARCLASS(a,b) STMT_START { if (!CAT2(PL_utf8_,a)) (void)CAT2(is_utf8_, a)((U8*)b); } STMT_END
 
 /* for use after a quantifier and before an EXACT-like node -- japhy */
-#define NEXT_IMPT(from_rn,to_rn) STMT_START { \
-    to_rn = from_rn; \
-    while (PL_regkind[(U8)OP(to_rn)] == OPEN || OP(to_rn) == EVAL) \
+#define NEXT_IMPT(to_rn) STMT_START { \
+    while (OP(to_rn) == OPEN || OP(to_rn) == CLOSE || OP(to_rn) == EVAL) \
 	to_rn += NEXT_OFF(to_rn); \
 } STMT_END 
- 
+
 static void restore_pos(pTHX_ void *arg);
 
 STATIC CHECKPOINT
@@ -3046,13 +3045,14 @@ S_regmatch(pTHX_ regnode *prog)
 		locinput = PL_reginput;
 		if (
 		    PL_regkind[(U8)OP(next)] == EXACT ||
-		    PL_regkind[(U8)OP(next)] == OPEN ||
+		    OP(next) == OPEN ||
+		    OP(next) == CLOSE ||
 		    OP(next) == EVAL
 		) {
 		    regnode *text_node = next;
 
 		    if (PL_regkind[(U8)OP(next)] != EXACT)
-			NEXT_IMPT(next, text_node);
+			NEXT_IMPT(text_node);
 
 		    if (PL_regkind[(U8)OP(text_node)] != EXACT) {
 			c1 = c2 = -1000;
@@ -3119,13 +3119,14 @@ S_regmatch(pTHX_ regnode *prog)
 		if (n >= ln) {
 		    if (
 			PL_regkind[(U8)OP(next)] == EXACT ||
-			PL_regkind[(U8)OP(next)] == OPEN ||
+			OP(next) == OPEN ||
+			OP(next) == CLOSE ||
 			OP(next) == EVAL
 		    ) {
 			regnode *text_node = next;
 
 			if (PL_regkind[(U8)OP(next)] != EXACT)
-			    NEXT_IMPT(next, text_node);
+			    NEXT_IMPT(text_node);
 
 			if (PL_regkind[(U8)OP(text_node)] != EXACT) {
 			    c1 = c2 = -1000;
@@ -3217,14 +3218,15 @@ S_regmatch(pTHX_ regnode *prog)
 
 	    if (
 		PL_regkind[(U8)OP(next)] == EXACT ||
-		PL_regkind[(U8)OP(next)] == OPEN ||
+		OP(next) == OPEN ||
+		OP(next) == CLOSE ||
 		OP(next) == EVAL
 	    ) {
 		U8 *s;
 		regnode *text_node = next;
 
 		if (PL_regkind[(U8)OP(next)] != EXACT)
-		    NEXT_IMPT(next, text_node);
+		    NEXT_IMPT(text_node);
 
 		if (PL_regkind[(U8)OP(text_node)] != EXACT) {
 		    c1 = c2 = -1000;
