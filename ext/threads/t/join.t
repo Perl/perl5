@@ -101,17 +101,24 @@ if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
   print "# mainthread: \$0 = $0\n";
   print "# pid = $$\n";
   if (open PS, "ps -f |") { # Note: must work in (all) Linux(es).
-    my $ok;
+    my ($sawpid, $sawexe);
     while (<PS>) {
       s/\s+$//; # there seems to be extra whitespace at the end by ps(1)?
       print "# $_\n";
-      if (/\b$$\b.+\bfoobar\b/) {
-	$ok++;
+      if (/^\S+\s+$$\s/) {
+	$sawpid++;
+	if (/\sfoobar\b/) {
+	  $sawexe++;
+        }
 	last;
       }
     }
     close PS;
-    ok($ok, 'altering $0 is effective');
+    if ($sawpid) {
+      ok($sawpid && $sawexe, 'altering $0 is effective');
+    } else {
+      skip("\$0 check: did not see pid $$ in 'ps -f |'");
+    }
   } else {
     skip("\$0 check: opening 'ps -f |' failed: $!");
   }
