@@ -173,7 +173,7 @@ EXTRALIBDIRS	=
 # set this to your email address (perl will guess a value from
 # from your loginname and your hostname, which may not be right)
 #
-#EMAIL		= 
+#EMAIL		=
 
 ##
 ## Build configuration ends.
@@ -291,6 +291,7 @@ INST_HTML	= $(INST_POD)\html
 CC		= cl
 LINK32		= link
 LIB32		= $(LINK32) -lib
+RSC		= rc
 
 #
 # Options
@@ -317,6 +318,9 @@ PERLCRTLIBC	= PerlCRTD.lib
 PERLCRTLIBC	= PerlCRT.lib
 !   ENDIF
 !ENDIF
+
+PERLEXE_RES	=
+PERLDLL_RES	=
 
 !IF "$(RUNTIME)" == "-MD"
 LIBC		= $(PERLCRTLIBC)
@@ -375,7 +379,7 @@ o = .obj
 # Rules
 # 
 
-.SUFFIXES : .c $(o) .dll .lib .exe
+.SUFFIXES : .c $(o) .dll .lib .exe .rc .res
 
 .c$(o):
 	$(CC) -c -I$(<D) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
@@ -386,6 +390,9 @@ o = .obj
 $(o).dll:
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
+
+.rc.res:
+	$(RSC) $<
 
 #
 # various targets
@@ -785,9 +792,9 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 	$(MINIPERL) -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) > perldll.def
 
-$(PERLDLL): perldll.def $(PERLDLL_OBJ)
+$(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 	$(LINK32) -dll -def:perldll.def -out:$@ @<<
-		$(LINK_FLAGS) $(LIBFILES) $(PERLDLL_OBJ)
+		$(LINK_FLAGS) $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
 <<
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
@@ -822,9 +829,9 @@ perlmain.c : runperl.c
 perlmain$(o) : perlmain.c
 	$(CC) $(CFLAGS_O) -UPERLDLL $(OBJOUT_FLAG)$@ -c perlmain.c
 
-$(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
+$(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
-	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) 
+	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 	copy $(PERLEXE) $(WPERLEXE)
 	editbin /subsystem:windows $(WPERLEXE)
 	copy splittree.pl .. 
