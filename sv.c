@@ -3444,6 +3444,21 @@ newSVpv(char *s, STRLEN len)
     return sv;
 }
 
+SV *
+newSVpvn(s,len)
+char *s;
+STRLEN len;
+{
+    register SV *sv;
+
+    new_SV(sv);
+    SvANY(sv) = 0;
+    SvREFCNT(sv) = 1;
+    SvFLAGS(sv) = 0;
+    sv_setpvn(sv,s,len);
+    return sv;
+}
+
 #ifdef I_STDARG
 SV *
 newSVpvf(const char* pat, ...)
