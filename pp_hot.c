@@ -140,11 +140,12 @@ PP(pp_concat)
     bool lbyte;
     STRLEN rlen;
     char* rpv = SvPV(right, rlen);	/* mg_get(right) happens here */
-    bool rbyte = !SvUTF8(right);
+    bool rbyte = !SvUTF8(right), rcopied = FALSE;
 
     if (TARG == right && right != left) {
 	right = sv_2mortal(newSVpvn(rpv, rlen));
 	rpv = SvPV(right, rlen);	/* no point setting UTF8 here */
+	rcopied = TRUE;
     }
 
     if (TARG != left) {
@@ -180,6 +181,8 @@ PP(pp_concat)
 	if (lbyte)
 	    sv_utf8_upgrade_nomg(TARG);
 	else {
+	    if (!rcopied)
+		right = sv_2mortal(newSVpvn(rpv, rlen));
 	    sv_utf8_upgrade_nomg(right);
 	    rpv = SvPV(right, rlen);
 	}
@@ -650,6 +653,9 @@ PP(pp_rv2av)
 	    SETs((SV*)av);
 	    RETURN;
 	}
+	else if (PL_op->op_flags & OPf_MOD
+		&& PL_op->op_private & OPpLVAL_INTRO)
+	    Perl_croak(aTHX_ PL_no_localize_ref);
     }
     else {
 	if (SvTYPE(sv) == SVt_PVAV) {
@@ -774,6 +780,9 @@ PP(pp_rv2hv)
 	    SETs((SV*)hv);
 	    RETURN;
 	}
+	else if (PL_op->op_flags & OPf_MOD
+		&& PL_op->op_private & OPpLVAL_INTRO)
+	    Perl_croak(aTHX_ PL_no_localize_ref);
     }
     else {
 	if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) {
@@ -1920,6 +1929,7 @@ PP(pp_subst)
     I32 oldsave = PL_savestack_ix;
     STRLEN slen;
     bool doutf8 = FALSE;
+    SV *nsv = Nullsv;
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
@@ -1995,7 +2005,7 @@ PP(pp_subst)
     if (dstr) {
 	/* replacement needing upgrading? */
 	if (DO_UTF8(TARG) && !doutf8) {
-	     SV *nsv = sv_newmortal();
+	     nsv = sv_newmortal();
 	     SvSetSV(nsv, dstr);
 	     if (PL_encoding)
 		  sv_recode_to_utf8(nsv, PL_encoding);
@@ -2016,7 +2026,8 @@ PP(pp_subst)
     
     /* can do inplace substitution? */
     if (c && (I32)clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
-	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
+	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)
+	&& (!doutf8 || SvUTF8(TARG))) {
 	if (!CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED))
 	{
@@ -2151,7 +2162,10 @@ PP(pp_subst)
 		strend = s + (strend - m);
 	    }
 	    m = rx->startp[0] + orig;
-	    sv_catpvn(dstr, s, m-s);
+	    if (doutf8 && !SvUTF8(dstr))
+		sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
+            else
+		sv_catpvn(dstr, s, m-s);
 	    s = rx->endp[0] + orig;
 	    if (clen)
 		sv_catpvn(dstr, c, clen);
@@ -2159,12 +2173,8 @@ PP(pp_subst)
 		break;
 	} while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m,
 			     TARG, NULL, r_flags));
-	if (doutf8 && !DO_UTF8(dstr)) {
-	    SV* nsv = sv_2mortal(newSVpvn(s, strend - s));
-	    
-	    sv_utf8_upgrade(nsv);
-	    sv_catpvn(dstr, SvPVX(nsv), SvCUR(nsv));
-	}
+	if (doutf8 && !DO_UTF8(TARG))
+	    sv_catpvn_utf8_upgrade(dstr, s, strend - s, nsv);
 	else
 	    sv_catpvn(dstr, s, strend - s);
 

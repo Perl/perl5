@@ -1102,6 +1102,17 @@ otherwise.
 #define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
 #define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
 
+/* Should be named SvCatPVN_utf8_upgrade? */
+#define sv_catpvn_utf8_upgrade(dsv, sstr, slen, nsv)	\
+	STMT_START {					\
+	    if (!(nsv))					\
+		nsv = sv_2mortal(newSVpvn(sstr, slen));	\
+	    else					\
+		sv_setpvn(nsv, sstr, slen);		\
+	    SvUTF8_off(nsv);				\
+	    sv_utf8_upgrade(nsv);			\
+	    sv_catsv(dsv, nsv);	\
+	} STMT_END
 
 /*
 =for apidoc Am|SV*|newRV_inc|SV* sv
@@ -1198,6 +1209,7 @@ Returns a pointer to the character buffer.
 		SvSetSV_and(dst,src,SvSETMAGIC(dst))
 #define SvSetMagicSV_nosteal(dst,src) \
 		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
+
 
 #if !defined(SKIP_DEBUGGING)
 #define SvPEEK(sv) sv_peek(sv)

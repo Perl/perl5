@@ -600,6 +600,9 @@
 #define magic_setpos		Perl_magic_setpos
 #endif
 #ifdef PERL_CORE
+#define magic_setregexp		Perl_magic_setregexp
+#endif
+#ifdef PERL_CORE
 #define magic_setsig		Perl_magic_setsig
 #endif
 #ifdef PERL_CORE
@@ -3035,6 +3038,9 @@
 #endif
 #ifdef PERL_CORE
 #define magic_setpos(a,b)	Perl_magic_setpos(aTHX_ a,b)
+#endif
+#ifdef PERL_CORE
+#define magic_setregexp(a,b)	Perl_magic_setregexp(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
 #define magic_setsig(a,b)	Perl_magic_setsig(aTHX_ a,b)

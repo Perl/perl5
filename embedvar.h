@@ -425,6 +425,7 @@
 #define PL_thrsv		(PERL_GET_INTERP->Ithrsv)
 #define PL_tokenbuf		(PERL_GET_INTERP->Itokenbuf)
 #define PL_uid			(PERL_GET_INTERP->Iuid)
+#define PL_unicode		(PERL_GET_INTERP->Iunicode)
 #define PL_unsafe		(PERL_GET_INTERP->Iunsafe)
 #define PL_utf8_alnum		(PERL_GET_INTERP->Iutf8_alnum)
 #define PL_utf8_alnumc		(PERL_GET_INTERP->Iutf8_alnumc)
@@ -446,8 +447,8 @@
 #define PL_utf8_toupper		(PERL_GET_INTERP->Iutf8_toupper)
 #define PL_utf8_upper		(PERL_GET_INTERP->Iutf8_upper)
 #define PL_utf8_xdigit		(PERL_GET_INTERP->Iutf8_xdigit)
+#define PL_utf8locale		(PERL_GET_INTERP->Iutf8locale)
 #define PL_uudmap		(PERL_GET_INTERP->Iuudmap)
-#define PL_wantutf8		(PERL_GET_INTERP->Iwantutf8)
 #define PL_warnhook		(PERL_GET_INTERP->Iwarnhook)
 #define PL_widesyscalls		(PERL_GET_INTERP->Iwidesyscalls)
 #define PL_xiv_arenaroot	(PERL_GET_INTERP->Ixiv_arenaroot)
@@ -698,6 +699,7 @@
 #define PL_sh_path		(vTHX->Ish_path)
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
+#define PL_signals		(vTHX->Isignals)
 #define PL_sort_RealCmp		(vTHX->Isort_RealCmp)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
@@ -1007,6 +1009,7 @@
 #define PL_Ish_path		PL_sh_path
 #define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp
+#define PL_Isignals		PL_signals
 #define PL_Isort_RealCmp	PL_sort_RealCmp
 #define PL_Isplitstr		PL_splitstr
 #define PL_Isrand_called	PL_srand_called

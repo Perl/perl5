@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..988\n";
+print "1..990\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3108,5 +3108,20 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
     ok ( "0" =~ /\p{N}+\z/, "[perl #19767] variant test" );
 }
 
-# last test 988
+{
+
+    $p = 1;
+    foreach (1,2,3,4) {
+	    $p++ if /(??{ $p })/
+    }
+    ok ($p == 5, "[perl #20683] (??{ }) returns stale values");
+    { package P; $a=1; sub TIESCALAR { bless[] } sub FETCH { $a++ } }
+    tie $p, P;
+    foreach (1,2,3,4) {
+	    /(??{ $p })/
+    }
+    ok ( $p == 5, "(??{ }) returns stale values");
+}
+
+# last test 990
 

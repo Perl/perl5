@@ -424,6 +424,7 @@ p	|int	|magic_setmglob	|SV* sv|MAGIC* mg
 p	|int	|magic_setnkeys	|SV* sv|MAGIC* mg
 p	|int	|magic_setpack	|SV* sv|MAGIC* mg
 p	|int	|magic_setpos	|SV* sv|MAGIC* mg
+p	|int	|magic_setregexp|SV* sv|MAGIC* mg
 p	|int	|magic_setsig	|SV* sv|MAGIC* mg
 p	|int	|magic_setsubstr|SV* sv|MAGIC* mg
 p	|int	|magic_settaint	|SV* sv|MAGIC* mg

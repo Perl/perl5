@@ -1,6 +1,5 @@
-# $Id: enc_eucjp.t,v 1.2 2003/02/06 01:52:11 dankogai Exp dankogai $
-# This is the twin of enc_utf8.t, the only difference is that
-# this has "use encoding 'euc-jp'".
+# $Id: enc_eucjp.t,v 1.3 2003/02/20 14:42:34 dankogai Exp dankogai $
+# This is the twin of enc_utf8.t .
 
 BEGIN {
     require Config; import Config;
@@ -64,6 +63,7 @@ binmode(F, ":encoding(utf-8)");
 	local $SIG{__WARN__} = sub { $a = shift };
 	eval { <F> }; # This should get caught.
 }
+close F;
 print $a =~ qr{^utf8 "\\x80" does not map to Unicode} ?
   "ok $t - illegal utf8 input\n" : "not ok $t - illegal utf8 input: a = " . unpack("H*", $a) . "\n";
 

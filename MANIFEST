@@ -2295,7 +2295,8 @@ Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/Glossary	Glossary of config.sh variables
 Porting/makerel		Release making utility
-Porting/p4genpatch	Obsoletes both p4desc and p4d2p
+Porting/p4d2p		Generate patch from p4 diff
+Porting/p4genpatch	Generate patch from p4 change in repository (obsoletes p4desc)
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
@@ -2582,6 +2583,7 @@ t/op/lex_assign.t		See if ops involving lexicals or pad temps work
 t/op/lfs.t			See if large files work for perlio
 t/op/list.t			See if array lists work
 t/op/local.t			See if local works
+t/op/localref.t			See if local ${deref} works
 t/op/loopctl.t			See if next/last/redo work
 t/op/lop.t			See if logical operators work
 t/op/magic.t			See if magic variables work
@@ -2687,6 +2689,7 @@ t/run/fresh_perl.t		Tests that require a fresh perl.
 t/run/noswitch.t		Test aliasing ARGV for other switch tests
 t/run/runenv.t			Test if perl honors its environment variables.
 t/run/switcha.t			Test the -a switch
+t/run/switchC.t			Test the -C switch
 t/run/switches.t		Tests for the other switches
 t/run/switchF.t			Test the -F switch
 t/run/switchI.t			Test the -I switch

@@ -1482,7 +1482,7 @@ exempt in these ways:
 	ENV		STDIN
 	INC		STDOUT
 	ARGV		STDERR
-	ARGVOUT
+	ARGVOUT		_
 	SIG
 
 In particular, the new special C<${^_XYZ}> variables are always taken

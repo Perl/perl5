@@ -260,7 +260,7 @@ do_test(15,
   RV = $ADDR
   SV = PVMG\\($ADDR\\) at $ADDR
     REFCNT = 1
-    FLAGS = \\(OBJECT,RMG\\)
+    FLAGS = \\(OBJECT,SMG\\)
     IV = 0
     NV = 0
     PV = 0
@@ -413,6 +413,7 @@ do_test(20,
 #
 # TAINTEDDIR is not set on: OS2, AMIGAOS, WIN32, MSDOS
 # environment variables may be invisibly case-forced, hence the (?i:PATH)
+# C<scalar(@ARGV)> is turned into an IV on VMS hence the (?:IV)?
 #
 do_test(21,
         $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
@@ -431,10 +432,11 @@ do_test(21,
       TAINTEDDIR
 )?    MG_LEN = -?\d+
     MG_PTR = $ADDR (?:"(?i:PATH)"|=> HEf_SVKEY
-    SV = PV\\($ADDR\\) at $ADDR
+    SV = PV(?:IV)?\\($ADDR\\) at $ADDR
       REFCNT = \d+
       FLAGS = \\(TEMP,POK,pPOK\\)
-      PV = $ADDR "(?i:PATH)"\\\0
+(?:      IV = 0
+)?      PV = $ADDR "(?i:PATH)"\\\0
       CUR = \d+
       LEN = \d+)
   MAGIC = $ADDR

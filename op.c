@@ -1596,8 +1596,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
 
     case OP_RV2AV:
     case OP_RV2HV:
-	if (!type && cUNOPo->op_first->op_type != OP_GV)
-	    Perl_croak(aTHX_ "Can't localize through a reference");
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
            PL_modcount = RETURN_UNLIMITED_NUMBER;
 	    return o;		/* Treat \(@foo) like ordinary list. */
@@ -1619,8 +1617,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
     case OP_RV2SV:
-	if (!type && cUNOPo->op_first->op_type != OP_GV)
-	    Perl_croak(aTHX_ "Can't localize through a reference");
 	ref(cUNOPo->op_first, o->op_type);
 	/* FALL THROUGH */
     case OP_GV:
@@ -3220,7 +3216,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 		    if (curop->op_type == OP_GV) {
 			GV *gv = cGVOPx_gv(curop);
 			repl_has_vars = 1;
-			if (strchr("&`'123456789+", *GvENAME(gv)))
+			if (strchr("&`'123456789+-\016\022", *GvENAME(gv)))
 			    break;
 		    }
 #endif /* USE_5005THREADS */
@@ -5654,8 +5650,7 @@ Perl_ck_eof(pTHX_ OP *o)
     if (o->op_flags & OPf_KIDS) {
 	if (cLISTOPo->op_first->op_type == OP_STUB) {
 	    op_free(o);
-	    o = newUNOP(type, OPf_SPECIAL,
-		newGVOP(OP_GV, 0, gv_fetchpv("main::ARGV", TRUE, SVt_PVAV)));
+	    o = newUNOP(type, OPf_SPECIAL, newGVOP(OP_GV, 0, PL_argvgv));
 	}
 	return ck_fun(o);
     }
@@ -5901,8 +5896,7 @@ Perl_ck_ftst(pTHX_ OP *o)
     else {
 	op_free(o);
 	if (type == OP_FTTTY)
-           o =  newGVOP(type, OPf_REF, gv_fetchpv("main::STDIN", TRUE,
-				SVt_PVIO));
+	    o = newGVOP(type, OPf_REF, PL_stdingv);
 	else
 	    o = newUNOP(type, 0, newDEFSVOP());
     }
@@ -6539,8 +6533,7 @@ Perl_ck_shift(pTHX_ OP *o)
 	}
 #else
 	argop = newUNOP(OP_RV2AV, 0,
-	    scalar(newGVOP(OP_GV, 0, !CvUNIQUE(PL_compcv) ?
-			   PL_defgv : gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
+	    scalar(newGVOP(OP_GV, 0, CvUNIQUE(PL_compcv) ? PL_argvgv : PL_defgv)));
 #endif /* USE_5005THREADS */
 	return newUNOP(type, 0, scalar(argop));
     }

@@ -1362,7 +1362,7 @@ still have bval default to C<"\n"> for variable length records, and
 space for fixed length records.
 
 Also note that the bval option only allows you to specify a single byte
-as a delimeter.
+as a delimiter.
 
 =head2 A Simple Example
 

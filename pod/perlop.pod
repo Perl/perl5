@@ -178,8 +178,7 @@ operator.  See L</"Regexp Quote-Like Operators"> for details.
 
 If the right argument is an expression rather than a search pattern,
 substitution, or transliteration, it is interpreted as a search pattern at run
-time.  This can be less efficient than an explicit search, because the
-pattern must be compiled every time the expression is evaluated.
+time.
 
 Binary "!~" is just like "=~" except the return value is negated in
 the logical sense.

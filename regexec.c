@@ -2853,13 +2853,17 @@ S_regmatch(pTHX_ regnode *prog)
 		    re_cc_state state;
 		    CHECKPOINT cp, lastcp;
                     int toggleutf;
+		    register SV *sv;
 
-		    if(SvROK(ret) || SvRMAGICAL(ret)) {
-			SV *sv = SvROK(ret) ? SvRV(ret) : ret;
-
-			if(SvMAGICAL(sv))
-			    mg = mg_find(sv, PERL_MAGIC_qr);
+		    if(SvROK(ret) && SvSMAGICAL(sv = SvRV(ret)))
+			mg = mg_find(sv, PERL_MAGIC_qr);
+		    else if (SvSMAGICAL(ret)) {
+			if (SvGMAGICAL(ret))
+			    sv_unmagic(ret, PERL_MAGIC_qr);
+			else
+			    mg = mg_find(ret, PERL_MAGIC_qr);
 		    }
+
 		    if (mg) {
 			re = (regexp *)mg->mg_obj;
 			(void)ReREFCNT_inc(re);
@@ -2876,7 +2880,8 @@ S_regmatch(pTHX_ regnode *prog)
                         if (DO_UTF8(ret)) pm.op_pmdynflags |= PMdf_DYN_UTF8;
 			re = CALLREGCOMP(aTHX_ t, t + len, &pm);
 			if (!(SvFLAGS(ret)
-			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)))
+			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
+				| SVs_GMG)))
 			    sv_magic(ret,(SV*)ReREFCNT_inc(re),
 					PERL_MAGIC_qr,0,0);
 			PL_regprecomp = oprecomp;

@@ -2975,6 +2975,8 @@ EXTCONST char PL_no_func[]
   INIT("The %s function is unimplemented");
 EXTCONST char PL_no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
+EXTCONST char PL_no_localize_ref[]
+  INIT("Can't localize through a reference");
 
 EXTCONST char PL_uuemap[65]
   INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
@@ -3549,7 +3551,7 @@ EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),
     					MEMBER_TO_FPTR(Perl_magic_setdefelem),
 					0,	0,	0};
 
-EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
+EXT MGVTBL PL_vtbl_regexp = {0, MEMBER_TO_FPTR(Perl_magic_setregexp),0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
 EXT MGVTBL PL_vtbl_regdata = {0, 0, MEMBER_TO_FPTR(Perl_magic_regdata_cnt), 0, 0};
 EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get),
 			       MEMBER_TO_FPTR(Perl_magic_regdatum_set), 0, 0, 0};
@@ -3935,11 +3937,9 @@ typedef struct am_table_short AMTS;
  */
 
 #ifndef PERL_MICRO
-#   ifndef PERL_OLD_SIGNALS
-#		ifndef PERL_ASYNC_CHECK
-#			define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
-#		endif
-#   endif
+#	ifndef PERL_ASYNC_CHECK
+#		define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#	endif
 #endif
 
 #ifndef PERL_ASYNC_CHECK
@@ -4267,6 +4267,38 @@ extern void moncontrol(int);
 #define PERL_UNICODE_ARGV			'A'
 #define PERL_UNICODE_LOCALE			'L'
 #define PERL_UNICODE_WIDESYSCALLS		'W'
+
+#define PERL_SIGNALS_UNSAFE_FLAG	0x0001
+
+/* From sigaction(2) (FreeBSD man page):
+ * | Signal routines normally execute with the signal that
+ * | caused their invocation blocked, but other signals may
+ * | yet occur.
+ * Emulation of this behavior (from within Perl) is enabled
+ * by defining PERL_BLOCK_SIGNALS.
+ */
+#define PERL_BLOCK_SIGNALS
+
+#if defined(HAS_SIGPROCMASK) && defined(PERL_BLOCK_SIGNALS)
+#   define PERL_BLOCKSIG_ADD(set,sig) \
+	sigset_t set; sigemptyset(&(set)); sigaddset(&(set), sig)
+#   define PERL_BLOCKSIG_BLOCK(set) \
+	sigprocmask(SIG_BLOCK, &(set), NULL)
+#   define PERL_BLOCKSIG_UNBLOCK(set) \
+	sigprocmask(SIG_UNBLOCK, &(set), NULL)
+#endif /* HAS_SIGPROCMASK && PERL_BLOCK_SIGNALS */
+
+/* How about the old style of sigblock()? */
+
+#ifndef PERL_BLOCKSIG_ADD
+#   define PERL_BLOCKSIG_ADD(set, sig)	NOOP
+#endif
+#ifndef PERL_BLOCKSIG_BLOCK
+#   define PERL_BLOCKSIG_BLOCK(set)	NOOP
+#endif
+#ifndef PERL_BLOCKSIG_ADD
+#   define PERL_BLOCKSIG_UNBLOCK(set)	NOOP
+#endif
 
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT

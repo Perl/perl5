@@ -2967,7 +2967,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		case SVt_PVMG:
 		    if ( ((SvFLAGS(sv) &
 			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
-			  == (SVs_OBJECT|SVs_RMG))
+			  == (SVs_OBJECT|SVs_SMG))
 			 && (mg = mg_find(sv, PERL_MAGIC_qr))) {
 			regexp *re = (regexp *)mg->mg_obj;
 
@@ -8012,7 +8012,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     I32 svix = 0;
     static char nullstr[] = "(null)";
     SV *argsv = Nullsv;
-    bool has_utf8 = FALSE; /* has the result utf8? */
+    bool has_utf8; /* has the result utf8? */
+    bool pat_utf8; /* the pattern is in utf8? */
+    SV *nsv = Nullsv;
+
+    has_utf8 = pat_utf8 = DO_UTF8(sv);
 
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
@@ -8113,7 +8117,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	/* echo everything up to the next format specification */
 	for (q = p; q < patend && *q != '%'; ++q) ;
 	if (q > p) {
-	    sv_catpvn(sv, p, q - p);
+	    if (has_utf8 && !pat_utf8)
+		sv_catpvn_utf8_upgrade(sv, p, q - p, nsv);
+	    else
+		sv_catpvn(sv, p, q - p);
 	    p = q;
 	}
 	if (q++ >= patend)
