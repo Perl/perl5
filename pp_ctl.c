@@ -2948,8 +2948,8 @@ PP(pp_require)
 		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required"
 			" (did you mean v%"UVuf".%03"UVuf"?)--"
 			"this is only v%d.%d.%d, stopped",
-			rev, ver, sver, PERL_REVISION, PERL_VERSION,
-			PERL_SUBVERSION, rev, ver/100);
+			rev, ver, sver, rev, ver/100,
+			PERL_REVISION, PERL_VERSION, PERL_SUBVERSION);
 		}
 		else {
 		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--"
