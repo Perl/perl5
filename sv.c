@@ -2070,6 +2070,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
                 /* The IV slot will have been set from value returned by
                    grok_number above.  The NV slot has just been set using
                    Atof.  */
+	        SvNOK_on(sv);
                 assert (SvIOKp(sv));
             } else {
                 if (((UV)1 << NV_PRESERVES_UV_BITS) >
@@ -2346,6 +2347,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
                 /* The UV slot will have been set from value returned by
                    grok_number above.  The NV slot has just been set using
                    Atof.  */
+	        SvNOK_on(sv);
                 assert (SvIOKp(sv));
             } else {
                 if (((UV)1 << NV_PRESERVES_UV_BITS) >
