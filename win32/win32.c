@@ -219,10 +219,13 @@ get_emd_part(char **prev_path, char *trailing_path, ...)
 	optr = ptr;
 	*ptr = '\0';
 	ptr = strrchr(mod_name, '/');
+	/* avoid stripping component if there is no slash,
+	 * or it doesn't match ... */
 	if (!ptr || stricmp(ptr+1, strip) != 0) {
-	    if(!(*strip == '5' && *(ptr+1) == '5'
-		 && strncmp(strip, base, 5) == 0
-		 && strncmp(ptr+1, base, 5) == 0))
+	    /* ... but not if component matches 5.00X* */
+	    if (!ptr || !(*strip == '5' && *(ptr+1) == '5'
+			  && strncmp(strip, base, 5) == 0
+			  && strncmp(ptr+1, base, 5) == 0))
 	    {
 		*optr = '/';
 		ptr = optr;
