@@ -2,6 +2,12 @@
 
 # Tests the scoping of $^H and %^H
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = qw(. ../lib);
+}
+
+
 BEGIN { print "1..15\n"; }
 BEGIN {
     print "not " if exists $^H{foo};
