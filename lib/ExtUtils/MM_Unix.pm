@@ -1008,8 +1008,8 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
        if ($^O eq 'solaris');
 
     # The IRIX linker also doesn't use LD_RUN_PATH
-    $ldrun = "-rpath $self->{LD_RUN_PATH}"
-       if ($^O eq 'irix');
+    $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
+	if ($^O eq 'irix' && $self->{LD_RUN_PATH});
 
     push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
 		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');

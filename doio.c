@@ -590,14 +590,17 @@ do_close(GV *gv, bool not_implicit)
     if (!gv)
 	gv = argvgv;
     if (!gv || SvTYPE(gv) != SVt_PVGV) {
-	SETERRNO(EBADF,SS$_IVCHAN);
+	if (not_implicit)
+	    SETERRNO(EBADF,SS$_IVCHAN);
 	return FALSE;
     }
     io = GvIO(gv);
     if (!io) {		/* never opened */
-	if (dowarn && not_implicit)
-	    warn("Close on unopened file <%s>",GvENAME(gv));
-	SETERRNO(EBADF,SS$_IVCHAN);
+	if (not_implicit) {
+	    if (dowarn)
+		warn("Close on unopened file <%s>",GvENAME(gv));
+	    SETERRNO(EBADF,SS$_IVCHAN);
+	}
 	return FALSE;
     }
     retval = io_close(io);
@@ -1119,7 +1122,7 @@ register SV **sp;
     SV **oldmark = mark;
 
 #define APPLY_TAINT_PROPER() \
-    if (!(tainting && tainted)) {} else { goto taint_proper; }
+    if (!(tainting && tainted)) {} else { goto taint_proper_label; }
 
     /* This is a first heuristic; it doesn't catch tainting magic. */
     if (tainting) {
@@ -1299,7 +1302,7 @@ register SV **sp;
     }
     return tot;
 
-  taint_proper:
+  taint_proper_label:
     TAINT_PROPER(what);
     return 0;	/* this should never happen */
 

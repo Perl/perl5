@@ -1,5 +1,5 @@
 # hints/sunos_4_1.sh
-# Last modified:  Thu Feb  8 11:46:05 EST 1996
+# Last modified:  Wed May 27 11:00:02 EDT 1998
 # Andy Dougherty  <doughera@lafcol.lafayette.edu>
 
 case "$cc" in
@@ -25,9 +25,7 @@ d_tzname='undef'
 # The gcc fix-includes script exposes those incorrect prototypes.
 # There may be other examples as well.  Volunteers are welcome to
 # track them all down :-).  In the meantime, we'll just skip unistd.h
-# for SunOS in most of the code. The POSIX extension is built with
-# unistd.h because, even though unistd.h has problems, if used with
-# care, it helps create a better POSIX extension.
+# for SunOS in most of the code.   (However, see ext/POSIX/hints/sunos_4.pl.)
 i_unistd='undef'
 
 cat << 'EOM' >&4

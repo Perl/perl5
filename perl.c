@@ -2317,9 +2317,6 @@ register char **env;
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
-#ifdef WIN32
-	    (void)strupr(*env);
-#endif
 	    sv = newSVpv(s--,0);
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';

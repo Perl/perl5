@@ -112,7 +112,7 @@ while (defined ($file = next_file())) {
 		redo;
 	    }
 	}
-	if (s/^\s*#\s*//) {
+	if (s/^\s*\#\s*//) {
 	    if (s/^define\s+(\w+)//) {
 		$name = $1;
 		$new = '';
@@ -171,37 +171,25 @@ while (defined ($file = next_file())) {
 		print OUT $t,"require '$incl';\n";
 	    } elsif(/^include_next\s*[<"](.*)[>"]/) {
 		($incl = $1) =~ s/\.h$/.ph/;
-		# should've read up on #include_next properly before attempting
-		# to implement it...
-		# 
-		#print OUT $t, "{\n";
-		#$tab += 4;
-		#$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-		#print OUT $t, "my(\$INC) = shift(\@INC);\n";
-		#print OUT $t, "require '$incl';\n";
-		#print OUT $t, "unshift(\@INC, \$INC);}\n";
-		#$tab -= 4;
-		#$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-		#print OUT $t, "}\n";
-		# 
-		# try this instead:
-		print OUT ($t, "my(\$i) = 0;\n");
-		print OUT ($t, "if(exists(\$INC{$incl})) {\n");
-		$tab += 4;
-		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-		print OUT ($t, "++\$i while (\$i <= \$#INC",
-			   " and \$INC[\$i].'/$incl' ne \$INC{'$incl'});\n");
-		print OUT ($t, "\$i = 0 if \$INC[\$i].'/$incl' ne",
-			   " \$INC{'$incl'};\n");
-		$tab -= 4;
-		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-		print OUT ($t, "}\n");
 		print OUT ($t,
-			   "eval(\"require '\" . ",
-			   "(\$i ? \$INC[\$i].'/' : '') . \"\$incl';\");");
-		# any better? require is smart enough not to try and include a
-		# file twice, i believe, so require-ing the same actual file
-		# should end up just being a null operation...
+			   "eval {\n");
+                $tab += 4;
+                $t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+		print OUT ($t,
+			   "my(\%INCD) = map { \$INC{\$_} => 1 } ",
+			   "(grep { \$_ eq \"$incl\" } keys(\%INC));\n");
+		print OUT ($t,
+			   "my(\@REM) = map { \"\$_/$incl\" } ",
+			   "(grep { not exists(\$INCD{\"\$_/$incl\"})",
+			   "and -f \"\$_/$incl\" } \@INC);\n");
+		print OUT ($t,
+			   "require \"\$REM[0]\" if \@REM;\n");
+                $tab -= 4;
+                $t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+                print OUT ($t,
+			   "};\n");
+		print OUT ($t,
+			   "warn(\$\@) if \$\@;\n");
 	    } elsif (/^ifdef\s+(\w+)/) {
 		print OUT $t,"if(defined(&$1)) {\n";
 		$tab += 4;
@@ -246,6 +234,34 @@ while (defined ($file = next_file())) {
 		print OUT $t, "warn(\"$1\");\n";
 	    } elsif(/^ident\s+(.*)/) {
 		print OUT $t, "# $1\n";
+	    }
+	} elsif(/^\s*(typedef\s*)?enum\b/) {
+	    until(/\}.*?;/) {
+		chomp($next = <IN>);
+		$_ .= $next;
+		print OUT "# $next\n" if $opt_D;
+	    }
+	    s@/\*.*?\*/@@g;
+	    s/\s+/ /g;
+	    /^\s?(typedef\s?)?enum\s?([a-zA-Z_]\w*)?\s?\{(.*)\}\s?([a-zA-Z_]\w*)?\s?;/;
+	    ($enum_subs = $3) =~ s/\s//g;
+	    @enum_subs = split(/,/, $enum_subs);
+	    $enum_val = -1;
+	    for $enum (@enum_subs) {
+		($enum_name, $enum_value) = $enum =~ /^([a-zA-Z_]\w*)(=.+)?$/;
+		$enum_value =~ s/^=//;
+		$enum_val = (length($enum_value) ? $enum_value : $enum_val + 1);
+		if ($opt_h) {
+		    print OUT ($t,
+			       "eval(\"\\n#line $eval_index $outfile\\n",
+			       "sub $enum_name () \{ $enum_val; \}\") ",
+			       "unless defined(\&$enum_name);\n");
+		    ++ $eval_index;
+		} else {
+		    print OUT ($t,
+			       "eval(\"sub $enum_name () \{ $enum_val; \}\") ",
+			       "unless defined(\&$enum_name);\n");
+		}
 	    }
 	}
     }

@@ -148,6 +148,11 @@ also work:
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
 and C<\U> is taken from the current locale.  See L<perllocale>.
 
+You cannot include a literal C<$> or C<@> within a C<\Q> sequence.
+An unescaped C<$> or C<@> interpolates the corresponding variable,
+while escaping will cause the literal string C<\$> to be matched.
+You'll need to write something like C<m/\Quser\E\@\Qhost/>.
+
 In addition, Perl defines the following:
 
     \w	Match a "word" character (alphanumeric plus "_")

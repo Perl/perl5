@@ -45,10 +45,25 @@ unless(defined(&_H2PH_H_)) {
     }
     require 'sys/socket.ph';
     require 'sys/ioctl.ph';
-    my($i) = 0;
-    if(exists($INC{sys/fcntl.ph})) {
-	++$i while ($i <= $#INC and $INC[$i].'/sys/fcntl.ph' ne $INC{'sys/fcntl.ph'});
-	$i = 0 if $INC[$i].'/sys/fcntl.ph' ne $INC{'sys/fcntl.ph'};
-    }
-    eval("require '" . ($i ? $INC[$i].'/' : '') . "$incl';");}
+    eval {
+	my(%INCD) = map { $INC{$_} => 1 } (grep { $_ eq "sys/fcntl.ph" } keys(%INC));
+	my(@REM) = map { "$_/sys/fcntl.ph" } (grep { not exists($INCD{"$_/sys/fcntl.ph"})and -f "$_/sys/fcntl.ph" } @INC);
+	require "$REM[0]" if @REM;
+    };
+    warn($@) if $@;
+    eval("sub sun () { 0; }") unless defined(&sun);
+    eval("sub mon () { 1; }") unless defined(&mon);
+    eval("sub tue () { 2; }") unless defined(&tue);
+    eval("sub wed () { 3; }") unless defined(&wed);
+    eval("sub thu () { 4; }") unless defined(&thu);
+    eval("sub fri () { 5; }") unless defined(&fri);
+    eval("sub sat () { 6; }") unless defined(&sat);
+    eval("sub Sun () { 0; }") unless defined(&Sun);
+    eval("sub Mon () { 1; }") unless defined(&Mon);
+    eval("sub Tue () { 2; }") unless defined(&Tue);
+    eval("sub Wed () { 3; }") unless defined(&Wed);
+    eval("sub Thu () { 4; }") unless defined(&Thu);
+    eval("sub Fri () { 5; }") unless defined(&Fri);
+    eval("sub Sat () { 6; }") unless defined(&Sat);
+}
 1;
