@@ -454,7 +454,7 @@ sequence(pTHX_ register OP *o)
 	case OP_COND_EXPR:
 	case OP_RANGE:
 	    hv_store(Sequence, key, len, newSVuv(++seq), 0);
-	    for (l = cLOGOPo->op_other; l->op_type == OP_NULL; l = l->op_next)
+	    for (l = cLOGOPo->op_other; l && l->op_type == OP_NULL; l = l->op_next)
 		;
 	    sequence(aTHX_ l);
 	    break;
@@ -462,13 +462,13 @@ sequence(pTHX_ register OP *o)
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
 	    hv_store(Sequence, key, len, newSVuv(++seq), 0);
-	    for (l = cLOOPo->op_redoop; l->op_type == OP_NULL; l = l->op_next)
+	    for (l = cLOOPo->op_redoop; l && l->op_type == OP_NULL; l = l->op_next)
 		;
 	    sequence(aTHX_ l);
-	    for (l = cLOOPo->op_nextop; l->op_type == OP_NULL; l = l->op_next)
+	    for (l = cLOOPo->op_nextop; l && l->op_type == OP_NULL; l = l->op_next)
 		;
 	    sequence(aTHX_ l);
-	    for (l = cLOOPo->op_lastop; l->op_type == OP_NULL; l = l->op_next)
+	    for (l = cLOOPo->op_lastop; l && l->op_type == OP_NULL; l = l->op_next)
 		;
 	    sequence(aTHX_ l);
 	    break;
@@ -477,7 +477,7 @@ sequence(pTHX_ register OP *o)
 	case OP_MATCH:
 	case OP_SUBST:
 	    hv_store(Sequence, key, len, newSVuv(++seq), 0);
-	    for (l = cPMOPo->op_pmreplstart; l->op_type == OP_NULL; l = l->op_next)
+	    for (l = cPMOPo->op_pmreplstart; l && l->op_type == OP_NULL; l = l->op_next)
 		;
 	    sequence(aTHX_ l);
 	    break;
