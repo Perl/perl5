@@ -38,8 +38,8 @@ expression enhancements, Innumerable Unbundled Modules, Compilability
 
 =item NOTES
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 1997/04/24
-22:46:06 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 1998/07/20
+23:12:17 $)
 
 =item DESCRIPTION
 
@@ -66,9 +66,7 @@ authors
 
 =over
 
-=item Noncommercial Reproduction
-
-=item Commercial Reproduction
+=item Bundled Distributions
 
 =item Disclaimer
 
@@ -79,8 +77,8 @@ authors
 24/April/97, 23/April/97, 25/March/97, 18/March/97, 17/March/97 Version,
 Initial Release: 11/March/97
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.12 $, $Date:
-1997/04/24 22:43:34 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.14 $, $Date:
+1998/06/14 22:15:25 $)
 
 =item DESCRIPTION
 
@@ -120,8 +118,8 @@ Scheme, or Tcl?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.16 $,
-$Date: 1997/04/23 18:04:09 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.24 $,
+$Date: 1998/07/20 23:40:28 $)
 
 =item DESCRIPTION
 
@@ -166,8 +164,6 @@ MacPerl, Perl5-Porters, NTPerl, Perl-Packrats
 
 =item Archives of comp.lang.perl.misc
 
-=item Perl Training
-
 =item Where can I buy a commercial version of Perl?
 
 =item Where do I send bug reports?
@@ -180,8 +176,8 @@ MacPerl, Perl5-Porters, NTPerl, Perl-Packrats
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.22 $, $Date: 1997/04/24
-22:43:42 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.28 $, $Date: 1998/07/16
+22:08:49 $)
 
 =item DESCRIPTION
 
@@ -229,7 +225,7 @@ MacPerl, Perl5-Porters, NTPerl, Perl-Packrats
 
 =item How can I compile my Perl program into byte code or C?
 
-=item How can I get '#!perl' to work on [MS-DOS,NT,...]?
+=item How can I get C<#!perl> to work on [MS-DOS,NT,...]?
 
 =item Can I write useful perl programs on the command line?
 
@@ -253,8 +249,8 @@ mean?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.19 $, $Date: 1997/04/24
-22:43:57 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.25 $, $Date: 1998/07/16
+22:49:55 $)
 
 =item DESCRIPTION
 
@@ -288,7 +284,7 @@ Trig functions?
 
 =item How do I find the week-of-the-year/day-of-the-year?
 
-=item How can I compare two date strings?
+=item How can I compare two dates and find the difference?
 
 =item How can I take a string and turn it into epoch seconds?
 
@@ -448,8 +444,8 @@ array of hashes or arrays?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.22 $, $Date: 1997/04/24
-22:44:02 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.24 $, $Date: 1998/07/05
+15:07:20 $)
 
 =item DESCRIPTION
 
@@ -530,7 +526,7 @@ protected files?  Isn't this a bug in Perl?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq6 - Regexps ($Revision: 1.17 $, $Date: 1997/04/24 22:44:10 $)
+=head2 perlfaq6 - Regexps ($Revision: 1.22 $, $Date: 1998/07/16 14:01:07 $)
 
 =item DESCRIPTION
 
@@ -591,8 +587,8 @@ file?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq7 - Perl Language Issues ($Revision: 1.18 $, $Date:
-1997/04/24 22:44:14 $)
+=head2 perlfaq7 - Perl Language Issues ($Revision: 1.21 $, $Date:
+1998/06/22 15:20:07 $)
 
 =item DESCRIPTION
 
@@ -642,7 +638,7 @@ is in scope?
 
 =item What's the difference between deep and shallow binding?
 
-=item Why doesn't "local($foo) = <FILE>;" work right?
+=item Why doesn't "my($foo) = <FILE>;" work right?
 
 =item How do I redefine a builtin function, operator, or method?
 
@@ -662,8 +658,8 @@ is in scope?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.21 $, $Date: 1997/04/24
-22:44:19 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.25 $, $Date: 1998/07/05
+15:07:20 $)
 
 =item DESCRIPTION
 
@@ -677,6 +673,16 @@ is in scope?
 
 Keyboard, Screen, Mouse
 
+=item How do I print something out in color?
+
+=item How do I read just one key without waiting for a return key?
+
+=item How do I check whether input is ready on the keyboard?
+
+=item How do I clear the screen?
+
+=item How do I get the screen size?
+
 =item How do I ask the user for a password?
 
 =item How do I read and write the serial port?
@@ -687,7 +693,7 @@ lockfiles, open mode, end of line, flushing output, non-blocking input
 
 =item How do I start a process in the background?
 
-STDIN, STDOUT and STDERR are shared, Signals, Zombies
+STDIN, STDOUT, and STDERR are shared, Signals, Zombies
 
 =item How do I trap control characters/signals?
 
@@ -738,7 +744,7 @@ does the error message "Protocol not supported" mean?
 come the change disappeared when I exited the script?  How do I get my
 changes to be visible?
 
-Unix, VMS
+Unix
 
 =item How do I close a process's filehandle without waiting for it to
 complete?
@@ -763,6 +769,8 @@ complete?
 
 =item How do I install a CPAN module?
 
+=item What's the difference between require and use?
+
 =item How do I keep my own module/library directory?
 
 =item How do I add the directory my program lives in to the module/library
@@ -772,19 +780,19 @@ search path?
 
 =back
 
-=item How do I get one key from the terminal at a time, under POSIX?
-
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq9 - Networking ($Revision: 1.17 $, $Date: 1997/04/24 22:44:29
+=head2 perlfaq9 - Networking ($Revision: 1.20 $, $Date: 1998/06/22 18:31:09
 $)
 
 =item DESCRIPTION
 
 =over
 
-=item My CGI script runs from the command line but not the browser.  Can
-you help me fix it?
+=item My CGI script runs from the command line but not the browser.   (500
+Server Error)
+
+=item How can I get better error messages from a CGI program?
 
 =item How do I remove HTML from a string?
 
@@ -797,7 +805,9 @@ file on another machine?
 
 =item How do I fetch an HTML file?
 
-=item how do I decode or create those %-encodings on the web?
+=item How do I automate an HTML form submission?
+
+=item How do I decode or create those %-encodings on the web?
 
 =item How do I redirect to another page?
 
@@ -818,7 +828,9 @@ CGI script to do bad things?
 
 =item How do I return the user's mail address?
 
-=item How do I send/read mail?
+=item How do I send mail?
+
+=item How do I read mail?
 
 =item How do I find out my hostname/domainname/IP address?
 
@@ -836,23 +848,169 @@ CGI script to do bad things?
 
 =item DESCRIPTION
 
+=item About the new versioning system
+
 =item Incompatible Changes
-
-=item Core Changes
-
-=item Modules
 
 =over
 
-=item Required Updates
+=item WARNING:  This version is not binary compatible with Perl 5.004.
+
+=item Default installation structure has changed
+
+=item Perl Source Compatibility
+
+=item C Source Compatibility
+
+Core sources now require ANSI C compiler, Enabling threads has source
+compatibility issues
+
+=item Binary Compatibility
+
+=item Security fixes may affect compatibility
+
+=item Relaxed new mandatory warnings introduced in 5.004
+
+=item Licensing
+
+=back
+
+=item Core Changes
+
+=over
+
+=item Threads
+
+=item Compiler
+
+=item Regular Expressions
+
+=item   Improved malloc()
+
+=item Quicksort is internally implemented
+
+=item Reliable signals
+
+=item Reliable stack pointers
+
+=item Behavior of local() on array and hash elements is now well-defined
+
+=item C<%!> is transparently tied to the L<Errno> module
+
+=item Pseudo-hashes are supported
+
+=item C<EXPR foreach EXPR> is supported
+
+=item Keywords can be globally overridden
+
+=item C<$^E> is meaningful on Win32
+
+=item C<foreach (1..1000000)> optimized
+
+=item C<Foo::> can be used as implicitly quoted package name
+
+=item C<exists $Foo::{Bar::}> tests existence of a package
+
+=item Better locale support
+
+=item Experimental support for 64-bit platforms
+
+=item prototype() returns useful results on builtins
+
+=item Extended support for exception handling
+
+=item Re-blessing in DESTROY() supported for chaining DESTROY() methods
+
+=item All C<printf> format conversions are handled internally
+
+=item New C<INIT> keyword
+
+=item New C<lock> keyword
+
+=item New C<qr//> operator
+
+=item C<our> is now a reserved word
+
+=item Tied arrays are now fully supported
+
+=item Tied handles support is better
+
+=item 4th argument to substr
+
+=item Negative LENGTH argument to splice
+
+=item Magic lvalues are now more magical
+
+=item E<lt>E<gt> now reads in records
+
+=back
+
+=item Supported Platforms
+
+=over
+
+=item New Platforms
+
+=item Changes in existing support
+
+=back
+
+=item Modules and Pragmata
+
+=over
+
+=item New Modules
+
+B, Data::Dumper, Errno, File::Spec, ExtUtils::Installed,
+ExtUtils::Packlist, Fatal, IPC::SysV, Test, Tie::Array, Tie::Handle,
+Thread, attrs, fields, re
+
+=item Changes in existing modules
+
+CGI, POSIX, DB_File, MakeMaker, CPAN, Cwd, Benchmark
 
 =back
 
 =item Utility Changes
 
-=item C Language API Changes
+=item API Changes
+
+=over
+
+=item Incompatible Changes
+
+=item Deprecations, Extensions
+
+=item C++ Support
+
+=back
 
 =item Documentation Changes
+
+=item New Diagnostics
+
+Ambiguous call resolved as CORE::%s(), qualify as such or use &, Bad index
+while coercing array into hash, Bareword "%s" refers to nonexistent
+package, Can't call method "%s" on an undefined value, Can't coerce array
+into hash, Can't goto subroutine from an eval-string, Can't localize
+pseudo-hash element, Can't use %%! because Errno.pm is not available,
+Cannot find an opnumber for "%s", Character class syntax [. .] is reserved
+for future extensions, Character class syntax [: :] is reserved for future
+extensions, Character class syntax [= =] is reserved for future extensions,
+%s: Eval-group in insecure regular expression, %s: Eval-group not allowed,
+use re 'eval', %s: Eval-group not allowed at run time, Explicit blessing to
+'' (assuming package main), Illegal hex digit ignored, No such array field,
+No such field "%s" in variable %s of type %s, Out of memory during
+ridiculously large request, Range iterator outside integer range, Recursive
+inheritance detected while looking for method '%s' in package '%s',
+Reference found where even-sized list expected, Undefined value assigned to
+typeglob, Use of reserved word "%s" is deprecated, perl: warning: Setting
+locale failed
+
+=item Obsolete Diagnostics
+
+Can't mktemp(), Can't write to temp file for B<-e>: %s, Cannot open
+temporary file
 
 =item BUGS
 
@@ -973,9 +1131,17 @@ unary &, unary *, (TYPE)
 =item Regexp Quote-Like Operators
 
 ?PATTERN?, m/PATTERN/cgimosx, /PATTERN/cgimosx, q/STRING/, C<'STRING'>,
-qq/STRING/, "STRING", qx/STRING/, `STRING`, qw/STRING/,
+qq/STRING/, "STRING", qr/STRING/imosx, qx/STRING/, `STRING`, qw/STRING/,
 s/PATTERN/REPLACEMENT/egimosx, tr/SEARCHLIST/REPLACEMENTLIST/cds,
 y/SEARCHLIST/REPLACEMENTLIST/cds
+
+=item Gory details of parsing quoted constructs
+
+Finding the end, Removal of backslashes before delimiters, Interpolation,
+C<<<'EOF'>, C<m''>, C<s'''>, C<tr///>, C<y///>, C<''>, C<q//>, C<"">,
+C<``>, C<qq//>, C<qx//>, C<<file*globE<gt>>, C<?RE?>, C</RE/>, C<m/RE/>,
+C<s/RE/foo/>,, Interpolation of regular expressions, Optimization of
+regular expressions
 
 =item I/O Operators
 
@@ -1001,16 +1167,20 @@ i, m, s, x
 
 =item Regular Expressions
 
-C<(?#text)>, C<(?:pattern)>, C<(?=pattern)>, C<(?!pattern)>,
-C<(?E<lt>=pattern)>, C<(?<!pattern)>, C<(?{ code })>, C<(?E<gt>pattern)>,
-C<(?(condition)yes-pattern|no-pattern)>, C<(?(condition)yes-pattern)>,
-C<(?imsx)>
+C<(?#text)>, C<(?:pattern)>, C<(?imsx-imsx:pattern)>, C<(?=pattern)>,
+C<(?!pattern)>, C<(?E<lt>=pattern)>, C<(?<!pattern)>, C<(?{ code })>,
+C<(?E<gt>pattern)>, C<(?(condition)yes-pattern|no-pattern)>,
+C<(?(condition)yes-pattern)>, C<(?imsx-imsx)>
 
 =item Backtracking
 
 =item Version 8 Regular Expressions
 
 =item WARNING on \1 vs $1
+
+=item Repeated patterns matching zero-length substring
+
+=item Creating custom RE engines
 
 =item SEE ALSO
 
@@ -1073,22 +1243,22 @@ NEWSOCKET,GENERICSOCKET, alarm SECONDS, alarm, atan2 Y,X, bind SOCKET,NAME,
 binmode FILEHANDLE, bless REF,CLASSNAME, bless REF, caller EXPR, caller,
 chdir EXPR, chmod LIST, chomp VARIABLE, chomp LIST, chomp, chop VARIABLE,
 chop LIST, chop, chown LIST, chr NUMBER, chr, chroot FILENAME, chroot,
-close FILEHANDLE, closedir DIRHANDLE, connect SOCKET,NAME, continue BLOCK,
-cos EXPR, crypt PLAINTEXT,SALT, dbmclose HASH, dbmopen HASH,DBNAME,MODE,
-defined EXPR, defined, delete EXPR, die LIST, do BLOCK, do
-SUBROUTINE(LIST), do EXPR, dump LABEL, each HASH, eof FILEHANDLE, eof (),
-eof, eval EXPR, eval BLOCK, exec LIST, exec PROGRAM LIST, exists EXPR, exit
-EXPR, exp EXPR, exp, fcntl FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE,
-flock FILEHANDLE,OPERATION, fork, format, formline PICTURE,LIST, getc
-FILEHANDLE, getc, getlogin, getpeername SOCKET, getpgrp PID, getppid,
-getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME, gethostbyname NAME,
-getnetbyname NAME, getprotobyname NAME, getpwuid UID, getgrgid GID,
-getservbyname NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE, getnetbyaddr
-ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent,
-getgrent, gethostent, getnetent, getprotoent, getservent, setpwent,
-setgrent, sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN,
-setservent STAYOPEN, endpwent, endgrent, endhostent, endnetent,
-endprotoent, endservent, getsockname SOCKET, getsockopt
+close FILEHANDLE, close, closedir DIRHANDLE, connect SOCKET,NAME, continue
+BLOCK, cos EXPR, crypt PLAINTEXT,SALT, dbmclose HASH, dbmopen
+HASH,DBNAME,MODE, defined EXPR, defined, delete EXPR, die LIST, do BLOCK,
+do SUBROUTINE(LIST), do EXPR, dump LABEL, each HASH, eof FILEHANDLE, eof
+(), eof, eval EXPR, eval BLOCK, exec LIST, exec PROGRAM LIST, exists EXPR,
+exit EXPR, exp EXPR, exp, fcntl FILEHANDLE,FUNCTION,SCALAR, fileno
+FILEHANDLE, flock FILEHANDLE,OPERATION, fork, format, formline
+PICTURE,LIST, getc FILEHANDLE, getc, getlogin, getpeername SOCKET, getpgrp
+PID, getppid, getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME,
+gethostbyname NAME, getnetbyname NAME, getprotobyname NAME, getpwuid UID,
+getgrgid GID, getservbyname NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE,
+getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport
+PORT,PROTO, getpwent, getgrent, gethostent, getnetent, getprotoent,
+getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent STAYOPEN,
+setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent, endhostent,
+endnetent, endprotoent, endservent, getsockname SOCKET, getsockopt
 SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL, goto EXPR,
 goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex, import, index
 STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
@@ -1103,21 +1273,21 @@ DIRHANDLE,EXPR, ord EXPR, ord, pack TEMPLATE,LIST, package, package
 NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos,
 print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST,
 printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/,
-qq/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR,
-rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH,
-readdir DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR,
-recv SOCKET,SCALAR,LEN,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
-OLDNAME,NEWNAME, require EXPR, require, reset EXPR, reset, return EXPR,
-return, reverse LIST, rewinddir DIRHANDLE, rindex STR,SUBSTR,POSITION,
-rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar EXPR, seek
-FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select FILEHANDLE,
-select, select RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
-KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send SOCKET,MSG,FLAGS,TO, send
-SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority WHICH,WHO,PRIORITY,
-setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY, shift, shmctl
-ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE, shmwrite
-ID,STRING,POS,SIZE, shutdown SOCKET,HOW, sin EXPR, sin, sleep EXPR, sleep,
-socket SOCKET,DOMAIN,TYPE,PROTOCOL, socketpair
+qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta,
+rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
+FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
+readlink, readpipe EXPR, recv SOCKET,SCALAR,LEN,FLAGS, redo LABEL, redo,
+ref EXPR, ref, rename OLDNAME,NEWNAME, require EXPR, require, reset EXPR,
+reset, return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
+STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
+EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
+FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
+ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
+SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
+WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
+shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
+shmwrite ID,STRING,POS,SIZE, shutdown SOCKET,HOW, sin EXPR, sin, sleep
+EXPR, sleep, socket SOCKET,DOMAIN,TYPE,PROTOCOL, socketpair
 SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort BLOCK LIST,
 sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
 splice ARRAY,OFFSET, split /PATTERN/,EXPR,LIMIT, split /PATTERN/,EXPR,
@@ -1166,9 +1336,11 @@ $EVAL_ERROR, $@, $PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<,
 $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID, $GID, $(,
 $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $PERL_VERSION, $],
 $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, $INPLACE_EDIT, $^I, $^M,
-$OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, $^S,
+$OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, $^R, $^S,
 $BASETIME, $^T, $WARNING, $^W, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC,
 @_, %INC, %ENV  $ENV{expr}, %SIG  $SIG{expr}
+
+=item Error Indicators
 
 =back
 
@@ -1180,7 +1352,7 @@ $BASETIME, $^T, $WARNING, $^W, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC,
 
 =over
 
-=item Private Variables via my()
+=item Private Variables via C<my()>
 
 =item Peristent Private Variables
 
@@ -1190,9 +1362,9 @@ $BASETIME, $^T, $WARNING, $^W, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC,
 
 =item When to Still Use local()
 
-1. You need to give a global variable a temporary value, especially $_, 2.
-You need to create a local file or directory handle or a local function, 3.
-You want to temporarily change just one element of an array or hash
+1. You need to give a global variable a temporary value, especially C<$_>,
+2. You need to create a local file or directory handle or a local function,
+3. You want to temporarily change just one element of an array or hash
 
 =item Pass by Reference
 
@@ -1239,7 +1411,7 @@ You want to temporarily change just one element of an array or hash
 =item Pragmatic Modules
 
 use autouse MODULE => qw(sub1 sub2 sub3), blib, diagnostics, integer, less,
-lib, locale, ops, overload, sigtrap, strict, subs, vmsish, vars
+lib, locale, ops, overload, re, sigtrap, strict, subs, vmsish, vars
 
 =item Standard Modules
 
@@ -1319,6 +1491,26 @@ can then be reduced to a small
 =back
 
 =item NOTE
+
+=head2 perlmodinstall - Installing CPAN Modules
+
+=item DESCRIPTION
+
+=over
+
+=item PREAMBLE
+
+B<DECOMPRESS> the file=item B<UNPACK> the file into a directory
+=item B<BUILD> the module (sometimes unnecessary)
+=item B<INSTALL> the module
+
+=back
+
+=item HEY
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =head2 perlform - Perl formats
 
@@ -1454,6 +1646,8 @@ LC_TIME, LANG
 =item Symbolic references
 
 =item Not-so-symbolic references
+
+=item Pseudo-hashes: Using an array as a hash
 
 =item Function Templates
 
@@ -1901,6 +2095,23 @@ C<!!!>, C<!!>, C<!>
 
 =back
 
+=item Debugging regular expressions
+
+=over
+
+=item Compile-time output
+
+C<anchored> I<STRING> C<at> I<POS>, C<floating> I<STRING> C<at>
+I<POS1..POS2>, C<matching floating/anchored>, C<minlen>, C<stclass>
+I<TYPE>, C<noscan>, C<isall>, C<GPOS>, C<plus>, C<implicit>, C<with eval>,
+C<anchored(TYPE)>
+
+=item Types of nodes
+
+=item Run-time output
+
+=back
+
 =head2 perldiag - various Perl diagnostics
 
 =item DESCRIPTION
@@ -1956,7 +2167,7 @@ Discontinuance, Discontinuance, Deprecation, Discontinuance
 
 =item Parsing Traps
 
-Parsing, Parsing, Parsing
+Parsing, Parsing, Parsing, Parsing
 
 =item Numerical Traps
 
@@ -1973,13 +2184,14 @@ Numerical, Numerical, Numerical
 
 =item Precedence Traps
 
-Precedence, Precedence, Precedence, Precedence, Precedence, Precedence
+Precedence, Precedence, Precedence, Precedence, Precedence, Precedence,
+Precedence
 
 =item General Regular Expression Traps using s///, etc.
 
 Regular Expression, Regular Expression, Regular Expression, Regular
 Expression, Regular Expression, Regular Expression, Regular Expression,
-Regular Expression, Regular Expression
+Regular Expression
 
 =item Subroutine, Signal, Sorting Traps
 
@@ -2004,6 +2216,115 @@ C<require>/C<do> trap using returned value, C<split> on empty string with
 LIMIT specified
 
 =back
+
+=head2 perlport - Writing portable Perl
+
+=item DESCRIPTION
+
+Not all Perl programs have to be portable, The vast majority of Perl B<is>
+portable
+
+=item ISSUES
+
+=over
+
+=item Newlines
+
+=item File Paths
+
+=item System Interaction
+
+=item Interprocess Communication (IPC)
+
+=item External Subroutines (XS)
+
+=item Standard Modules
+
+=item Time and Date
+
+=item System Resources
+
+=item Security
+
+=item Style
+
+=back
+
+=item CPAN TESTERS
+
+Mailing list: cpan-testers@perl.org, Testing results:
+C<http://www.connect.net/gbarr/cpan-test/>
+
+=item PLATFORMS
+
+=over
+
+=item Unix
+
+=item DOS and Derivatives
+
+The djgpp environment for DOS, C<http://www.delorie.com/djgpp/>, The EMX
+environment for DOS, OS/2, etc.
+C<emx@iaehv.nl>,C<http://www.juge.com/bbs/Hobb.19.html>, Build instructions
+for Win32, L<perlwin32>, The ActiveState Pages,
+C<http://www.activestate.com/>
+
+=item MacPerl
+
+The MacPerl Pages, C<http://www.ptf.com/macperl/>, The MacPerl mailing
+list, C<mac-perl-request@iis.ee.ethz.ch>
+
+=item VMS
+
+L<perlvms.pod>, vmsperl list, C<vmsperl-request@newman.upenn.edu>, vmsperl
+on the web, C<http://www.sidhe.org/vmsperl/index.html>
+
+=item EBCDIC Platforms
+
+perl-mvs list, AS/400 Perl information at C<http://as400.rochester.ibm.com>
+
+=item Other perls
+
+Atari, Guido Flohr's page C<http://stud.uni-sb.de/~gufl0000/>, HP 300
+MPE/iX  C<http://www.cccd.edu/~markb/perlix.html>, Novell Netware
+
+=back
+
+=item FUNCTION IMPLEMENTATIONS
+
+=over
+
+=item Alphabetical Listing of Perl Functions
+
+-I<X> FILEHANDLE, -I<X> EXPR, -I<X>, binmode FILEHANDLE, chmod LIST, chown
+LIST, chroot FILENAME, chroot, crypt PLAINTEXT,SALT, dbmclose HASH, dbmopen
+HASH,DBNAME,MODE, dump LABEL, exec LIST, fcntl FILEHANDLE,FUNCTION,SCALAR,
+flock FILEHANDLE,OPERATION, fork, getlogin, getpgrp PID, getppid,
+getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME, getnetbyname NAME,
+getpwuid UID, getgrgid GID, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber
+NUMBER, getservbyport PORT,PROTO, getpwent, getgrent, gethostent,
+getnetent, getprotoent, getservent, setpwent, setgrent, sethostent
+STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN,
+endpwent, endgrent, endhostent, endnetent, endprotoent, endservent,
+getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob, ioctl
+FILEHANDLE,FUNCTION,SCALAR, kill LIST, link OLDFILE,NEWFILE, lstat
+FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd
+ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR, open
+FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink EXPR, readlink, select
+RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
+KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setpgrp PID,PGRP, setpriority
+WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shmctl
+ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE, shmwrite
+ID,STRING,POS,SIZE, socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, stat
+FILEHANDLE, stat EXPR, stat, symlink OLDFILE,NEWFILE, syscall LIST, system
+LIST, times, truncate FILEHANDLE,LENGTH, truncate EXPR,LENGTH, umask EXPR,
+umask, utime LIST, wait, waitpid PID,FLAGS
+
+=back
+
+=item AUTHORS / CONTRIBUTORS
+
+=item VERSION
 
 =head2 perlstyle - Perl style guide
 
@@ -2515,6 +2836,12 @@ callback
 
 method, locked
 
+=head2 re - Perl pragma to alter regular expression behaviour
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
 =head2 autouse - postpone load of modules until a function is used
 
 =item SYNOPSIS
@@ -2533,7 +2860,7 @@ method, locked
 
 =item DESCRIPTION
 
-=item BUGS
+=item SEE ALSO
 
 =head2 blib - Use MakeMaker's uninstalled version of a package
 
@@ -2589,6 +2916,8 @@ diagnostics
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item SEE ALSO
 
 =head2 integer - Perl pragma to compute arithmetic in integer instead of
 double
@@ -2690,6 +3019,10 @@ I<Concatenation>, I<Comparison operations>, I<Copy operator>
 =item Public functions
 
 overload::StrVal(arg), overload::Overloaded(arg), overload::Method(obj,op)
+
+=item Overloading constants
+
+integer, float, binary, q, qr
 
 =item IMPLEMENTATION
 
@@ -2803,6 +3136,257 @@ $keep, $check, $modtime
 
 =item DIAGNOSTICS
 
+=head2 B - The Perl Compiler
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OVERVIEW OF CLASSES
+
+=over
+
+=item SV-RELATED CLASSES
+
+=item B::SV METHODS
+
+REFCNT, FLAGS
+
+=item B::IV METHODS
+
+IV, IVX, needs64bits, packiv
+
+=item B::NV METHODS
+
+NV, NVX
+
+=item B::RV METHODS
+
+RV
+
+=item B::PV METHODS
+
+PV
+
+=item B::PVMG METHODS
+
+MAGIC, SvSTASH
+
+=item B::MAGIC METHODS
+
+MOREMAGIC, PRIVATE, TYPE, FLAGS, OBJ, PTR
+
+=item B::PVLV METHODS
+
+TARGOFF, TARGLEN, TYPE, TARG
+
+=item B::BM METHODS
+
+USEFUL, PREVIOUS, RARE, TABLE
+
+=item B::GV METHODS
+
+NAME, STASH, SV, IO, FORM, AV, HV, EGV, CV, CVGEN, LINE, FILEGV, GvREFCNT,
+FLAGS
+
+=item B::IO METHODS
+
+LINES, PAGE, PAGE_LEN, LINES_LEFT, TOP_NAME, TOP_GV, FMT_NAME, FMT_GV,
+BOTTOM_NAME, BOTTOM_GV, SUBPROCESS, IoTYPE, IoFLAGS
+
+=item B::AV METHODS
+
+FILL, MAX, OFF, ARRAY, AvFLAGS
+
+=item B::CV METHODS
+
+STASH, START, ROOT, GV, FILEGV, DEPTH, PADLIST, OUTSIDE, XSUB, XSUBANY
+
+=item B::HV METHODS
+
+FILL, MAX, KEYS, RITER, NAME, PMROOT, ARRAY
+
+=item OP-RELATED CLASSES
+
+=item B::OP METHODS
+
+next, sibling, ppaddr, desc, targ, type, seq, flags, private
+
+=item B::UNOP METHOD
+
+first
+
+=item B::BINOP METHOD
+
+last
+
+=item B::LOGOP METHOD
+
+other
+
+=item B::CONDOP METHODS
+
+true, false
+
+=item B::LISTOP METHOD
+
+children
+
+=item B::PMOP METHODS
+
+pmreplroot, pmreplstart, pmnext, pmregexp, pmflags, pmpermflags, precomp
+
+=item B::SVOP METHOD
+
+sv
+
+=item B::GVOP METHOD
+
+gv
+
+=item B::PVOP METHOD
+
+pv
+
+=item B::LOOP METHODS
+
+redoop, nextop, lastop
+
+=item B::COP METHODS
+
+label, stash, filegv, cop_seq, arybase, line
+
+=back
+
+=item FUNCTIONS EXPORTED BY C<B>
+
+main_cv, main_root, main_start, comppadlist, sv_undef, sv_yes, sv_no,
+walkoptree(OP, METHOD), walkoptree_debug(DEBUG), walksymtable(SYMREF,
+METHOD, RECURSE), svref_2object(SV), ppname(OPNUM), hash(STR), cast_I32(I),
+minus_c, cstring(STR), class(OBJ), threadsv_names, byteload_fh(FILEHANDLE)
+
+=item AUTHOR
+
+=head2 B::Asmdata - Autogenerated data about Perl ops, used to generate
+bytecode
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=head2 B::Assembler - Assemble Perl bytecode
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=head2 B::Bblock - Walk basic blocks
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=head2 B::Bytecode - Perl compiler's bytecode backend
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
+
+B<-ofilename>, B<-->, B<-f>, B<-fcompress-nullops>,
+B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-fstrip-syntax-tree>,
+B<-On>, B<-D>, B<-Do>, B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-m>
+
+=item BUGS
+
+=item AUTHOR
+
+=head2 B::C - Perl compiler's C backend
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
+
+B<-ofilename>, B<-v>, B<-->, B<-uPackname>, B<-D>, B<-Do>, B<-Dc>, B<-DA>,
+B<-DC>, B<-DM>, B<-f>, B<-fcog>, B<-fno-cog>, B<-On>
+
+=item EXAMPLES
+
+=item BUGS
+
+=item AUTHOR
+
+=head2 B::CC - Perl compiler's optimized C translation backend
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
+
+B<-ofilename>, B<-v>, B<-->, B<-uPackname>, B<-mModulename>, B<-D>, B<-Dr>,
+B<-DO>, B<-Ds>, B<-Dp>, B<-Dq>, B<-Dl>, B<-Dt>, B<-f>,
+B<-ffreetmps-each-bblock>, B<-ffreetmps-each-loop>, B<-fomit-taint>, B<-On>
+
+=item EXAMPLES
+
+=item BUGS
+
+=item DIFFERENCES
+
+=over
+
+=item Loops
+
+=item Context of ".."
+
+=item Arithmetic
+
+=item Deprecated features
+
+=back
+
+=item AUTHOR
+
+=head2 B::Debug - Walk Perl syntax tree, printing debug info about ops
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=head2 B::Deparse - Perl compiler backend to produce perl code
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
+
+B<-p>, B<-u>I<PACKAGE>, B<-l>, B<-s>I<LETTERS>, B<C>
+
+=item BUGS
+
+=item AUTHOR
+
+=head2 B::Disassembler - Disassemble Perl bytecode
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
 =head2 B::Lint - Perl lint
 
 =item SYNOPSIS
@@ -2819,6 +3403,42 @@ B<private-names>, B<undefined-subs>, B<regexp-variables>, B<all>, B<none>
 B<-u Package>
 
 =item BUGS
+
+=item AUTHOR
+
+=head2 B::O, O - Generic interface to Perl Compiler backends
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONVENTIONS
+
+=item IMPLEMENTATION
+
+=item AUTHOR
+
+=head2 B::Showlex - Show lexical variables used in functions or files
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=head2 B::Stackobj - Helper module for CC backend
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=head2 B::Terse - Walk Perl syntax tree, printing terse info about ops
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =item AUTHOR
 
@@ -2870,29 +3490,25 @@ clearcache ( COUNT ), clearallcache ( ), disablecache ( ), enablecache ( )
 
 =item MODIFICATION HISTORY
 
-=head2 Bundle::CPAN - A bundle to play with all the other modules on CPAN
-
-=item SYNOPSIS
-
-=item CONTENTS
-
-=item DESCRIPTION
-
-=item AUTHOR
-
 =head2 CGI - Simple Common Gateway Interface Class
 
 =item SYNOPSIS
 
 =item ABSTRACT
 
-=item INSTALLATION
-
 =item DESCRIPTION
 
 =over
 
-=item CREATING A NEW QUERY OBJECT:
+=item PROGRAMMING STYLE
+
+=item CALLING CGI.PM ROUTINES
+
+1. Use another name for the argument, if one is available.  Forexample,
+-value is an alias for -values, 2. Change the capitalization, e.g. -Values,
+3. Put quotes around the argument name, e.g. '-values'
+
+=item CREATING A NEW QUERY OBJECT (OBJECT-ORIENTED STYLE):
 
 =item CREATING A NEW QUERY OBJECT FROM AN INPUT FILE
 
@@ -2912,27 +3528,59 @@ clearcache ( COUNT ), clearallcache ( ), disablecache ( ), enablecache ( )
 
 =item DELETING ALL PARAMETERS:
 
-=item SAVING THE STATE OF THE FORM TO A FILE:
+=item DIRECT ACCESS TO THE PARAMETER LIST:
 
-=item CREATING A SELF-REFERENCING URL THAT PRESERVES STATE INFORMATION:
+=item SAVING THE STATE OF THE SCRIPT TO A FILE:
 
-=item COMPATIBILITY WITH CGI-LIB.PL
+=item USING THE FUNCTION-ORIENTED INTERFACE
 
-=item CALLING CGI FUNCTIONS THAT TAKE MULTIPLE ARGUMENTS
+B<:cgi>, B<:form>, B<:html2>, B<:html3>, B<:netscape>, B<:html>,
+B<:standard>, B<:all>
 
-=item CREATING THE HTTP HEADER:
+=item PRAGMAS
 
-=item GENERATING A REDIRECTION INSTRUCTION
+-any, -compile, -nph, -autoload, -no_debug, -private_tempfiles
 
-=item CREATING THE HTML HEADER:
+=back
+
+=item GENERATING DYNAMIC DOCUMENTS
+
+=over
+
+=item CREATING A STANDARD HTTP HEADER:
+
+=item GENERATING A REDIRECTION HEADER
+
+=item CREATING THE HTML DOCUMENT HEADER
 
 B<Parameters:>, 4, 5, 6..
 
 =item ENDING THE HTML DOCUMENT:
 
+=item CREATING A SELF-REFERENCING URL THAT PRESERVES STATE INFORMATION:
+
+=item OBTAINING THE SCRIPT'S URL
+
+B<-absolute>, B<-relative>, B<-full>, B<-path> (B<-path_info>), B<-query>
+(B<-query_string>)
+
 =back
 
-=item CREATING FORMS
+=item CREATING STANDARD HTML ELEMENTS:
+
+=over
+
+=item PROVIDING ARGUMENTS TO HTML SHORTCUTS
+
+=item THE DISTRIBUTIVE PROPERTY OF HTML SHORTCUTS
+
+=item HTML SHORTCUTS AND LIST INTERPOLATION
+
+=item NON-STANDARD HTML SHORTCUTS
+
+=back
+
+=item CREATING FILL-OUT FORMS:
 
 =over
 
@@ -3024,26 +3672,22 @@ scripts, B<referer()>, B<auth_type ()>, B<server_name ()>, B<virtual_host
 ()>, B<server_software ()>, B<remote_user ()>, B<user_name ()>,
 B<request_method()>
 
-=item CREATING HTML ELEMENTS
-
-=over
-
-=item PROVIDING ARGUMENTS TO HTML SHORTCUTS
-
-=item Generating new HTML tags
-
-=back
-
-=item IMPORTING CGI METHOD CALLS INTO YOUR NAME SPACE
-
-B<cgi>, B<form>, B<html2>, B<html3>, B<netscape>, B<shortcuts>,
-B<standard>, B<all>
-
 =item USING NPH SCRIPTS
 
-In the B<use> statementSimply add ":nph" to the list of symbols to be
-imported into your script:, By calling the B<nph()> method:, By using
-B<-nph> parameters in the B<header()> and B<redirect()>  statements:
+In the B<use> statement, By calling the B<nph()> method:, By using B<-nph>
+parameters in the B<header()> and B<redirect()>  statements:
+
+=item Server Push
+
+multipart_init()     
+multipart_init(-boundary=>$boundary);, multipart_start(), multipart_end()
+
+=item Avoiding Denial of Service Attacks
+
+B<$CGI::POST_MAX>, B<$CGI::DISABLE_UPLOADS>, B<1. On a script-by-script
+basis>, B<2. Globally for all scripts>
+
+=item COMPATIBILITY WITH CGI-LIB.PL
 
 =item AUTHOR INFORMATION
 
@@ -3059,7 +3703,8 @@ Christiansen (tchrist@convex.com), Andreas Koenig
 (k@franz.ww.TU-Berlin.DE), Tim MacKenzie (Tim.MacKenzie@fulcrum.com.au),
 Kevin B. Hendricks (kbhend@dogwood.tyler.wm.edu), Stephen Dahmen
 (joyfire@inxpress.net), Ed Jordan (ed@fidalgo.net), David Alan Pisoni
-(david@cnation.com), ...and many many more..
+(david@cnation.com), Doug MacEachern (dougm@opengroup.org), Robin Houston
+(robin@oneworld.org), ...and many many more..
 
 =item A COMPLETE EXAMPLE OF A SIMPLE FORM-BASED SCRIPT
 
@@ -3092,9 +3737,45 @@ other) error log
 
 =item MAKING PERL ERRORS APPEAR IN THE BROWSER WINDOW
 
+=over
+
+=item Changing the default message
+
+=back
+
 =item CHANGE LOG
 
 =item AUTHORS
+
+=item SEE ALSO
+
+=head2 CGI::Cookie - Interface to Netscape Cookies
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USING CGI::Cookie
+
+B<1. expiration date>, B<2. domain>, B<3. path>, B<4. secure flag>
+
+=over
+
+=item Creating New Cookies
+
+=item Sending the Cookie to the Browser
+
+=item Recovering Previous Cookies
+
+=item Manipulating Cookies
+
+B<name()>, B<value()>, B<domain()>, B<path()>, B<expires()>
+
+=back
+
+=item AUTHOR INFORMATION
+
+=item BUGS
 
 =item SEE ALSO
 
@@ -3130,6 +3811,14 @@ other) error log
 
 -next_page, -last_page, -type, -delay, -cookie, -target, -expires
 
+=over
+
+=item Heterogeneous Pages
+
+=item Changing the Page Delay on the Fly
+
+=back
+
 =item INSTALLING CGI::Push SCRIPTS
 
 =item CAVEATS
@@ -3163,7 +3852,7 @@ object available
 
 Searching for authors, bundles, distribution files and modules, make, test,
 install, clean	modules or distributions, readme, look module or
-distribution
+distribution, Signals
 
 =item CPAN::Shell
 
@@ -3184,6 +3873,8 @@ expand($type,@things), Programming Examples
 =item Bundles
 
 =item Prerequisites
+
+=item Finding packages and VERSION
 
 =item Debugging
 
@@ -3376,6 +4067,57 @@ $value, $flags) ;>, B<$status = $X-E<gt>sync([$flags]) ;>
 
 =item AUTHOR
 
+=head2 Data::Dumper - stringified perl data structures, suitable for both
+printing and C<eval>
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over
+
+=item Methods
+
+I<PACKAGE>->new(I<ARRAYREF [>, I<ARRAYREF]>), I<$OBJ>->Dump  I<or>
+I<PACKAGE>->Dump(I<ARRAYREF [>, I<ARRAYREF]>), I<$OBJ>->Dumpxs	I<or>
+I<PACKAGE>->Dumpxs(I<ARRAYREF [>, I<ARRAYREF]>),
+I<$OBJ>->Seen(I<[HASHREF]>), I<$OBJ>->Values(I<[ARRAYREF]>),
+I<$OBJ>->Names(I<[ARRAYREF]>), I<$OBJ>->Reset
+
+=item Functions
+
+Dumper(I<LIST>), DumperX(I<LIST>)
+
+=item Configuration Variables or Methods
+
+$Data::Dumper::Indent  I<or>  I<$OBJ>->Indent(I<[NEWVAL]>),
+$Data::Dumper::Purity  I<or>  I<$OBJ>->Purity(I<[NEWVAL]>),
+$Data::Dumper::Pad  I<or>  I<$OBJ>->Pad(I<[NEWVAL]>),
+$Data::Dumper::Varname	I<or>  I<$OBJ>->Varname(I<[NEWVAL]>),
+$Data::Dumper::Useqq  I<or>  I<$OBJ>->Useqq(I<[NEWVAL]>),
+$Data::Dumper::Terse  I<or>  I<$OBJ>->Terse(I<[NEWVAL]>),
+$Data::Dumper::Freezer	I<or>  $I<OBJ>->Freezer(I<[NEWVAL]>),
+$Data::Dumper::Toaster	I<or>  $I<OBJ>->Toaster(I<[NEWVAL]>),
+$Data::Dumper::Deepcopy  I<or>	$I<OBJ>->Deepcopy(I<[NEWVAL]>),
+$Data::Dumper::Quotekeys  I<or>  $I<OBJ>->Quotekeys(I<[NEWVAL]>),
+$Data::Dumper::Bless  I<or>  $I<OBJ>->Bless(I<[NEWVAL]>)
+
+=item Exports
+
+Dumper
+
+=back
+
+=item EXAMPLES
+
+=item BUGS
+
+=item AUTHOR
+
+=item VERSION
+
+=item SEE ALSO
+
 =head2 Devel::SelfStubber - generate stubs for a SelfLoading module
 
 =item SYNOPSIS
@@ -3480,6 +4222,8 @@ ccopts(), xsi_header(), xsi_protos(@modules), xsi_body(@modules)
 new(), modules(), files(), directories(), directory_tree(), validate(),
 packlist(), version()
 
+=item EXAMPLE
+
 =item AUTHOR
 
 =head2 ExtUtils::Liblist - determine libraries to use and how to use them
@@ -3546,10 +4290,11 @@ extliblist, file_name_is_absolute, find_perl
 fixin, force (o), guess_name, has_link_code, init_dirscan, init_main,
 init_others, install (o), installbin (o), libscan (o), linkext (o), lsdir,
 macro (o), makeaperl (o), makefile (o), manifypods (o), maybe_command,
-maybe_command_in_dirs, needs_linking (o), nicetext, parse_version, pasthru
-(o), path, perl_script, perldepend (o), pm_to_blib, post_constants (o),
-post_initialize (o), postamble (o), prefixify, processPL (o), realclean
-(o), replace_manpage_separator, static (o), static_lib (o), staticmake (o),
+maybe_command_in_dirs, needs_linking (o), nicetext, parse_version,
+parse_abstract, pasthru (o), path, perl_script, perldepend (o), ppd,
+perm_rw (o), perm_rwx (o), pm_to_blib, post_constants (o), post_initialize
+(o), postamble (o), prefixify, processPL (o), realclean (o),
+replace_manpage_separator, static (o), static_lib (o), staticmake (o),
 subdir_x (o), subdirs (o), test (o), test_via_harness (o), test_via_script
 (o), tool_autosplit (o), tools_other (o), tool_xsubpp (o), top_targets (o),
 writedoc, xs_c (o), xs_o (o), perl_archive, export_list
@@ -3642,9 +4387,9 @@ INSTALLSITEARCH, INST_ARCHLIB, INST_BIN, INST_EXE, INST_LIB, INST_MAN1DIR,
 INST_MAN3DIR, INST_SCRIPT, LDFROM, LIBPERL_A, LIB, LIBS, LINKTYPE,
 MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
 NEEDS_LINKING, NOECHO, NORECURS, OBJECT, OPTIMIZE, PERL, PERLMAINCC,
-PERL_ARCHLIB, PERL_LIB, PERL_SRC, PL_FILES, PM, PMLIBDIRS, PREFIX,
-PREREQ_PM, SKIP, TYPEMAPS, VERSION, VERSION_FROM, XS, XSOPT, XSPROTOARG,
-XS_VERSION
+PERL_ARCHLIB, PERL_LIB, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM,
+PMLIBDIRS, PREFIX, PREREQ_PM, SKIP, TYPEMAPS, VERSION, VERSION_FROM, XS,
+XSOPT, XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -3720,6 +4465,8 @@ NAME, DL_FUNCS, DL_VARS, FILE, FUNCLIST, DLBASE
 =item FUNCTIONS
 
 new(), read(), write(), validate(), packlist_file()
+
+=item EXAMPLE
 
 =item AUTHOR
 
@@ -3826,6 +4573,71 @@ rmscopy($from,$to[,$date_flag])
 =item AUTHORS
 
 =item REVISION
+
+=head2 File::Spec - portably perform operations on file names
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=head2 File::Spec::Mac - File::Spec for MacOS
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+canonpath, catdir, catfile, curdir, rootdir, updir, file_name_is_absolute,
+path
+
+=item SEE ALSO
+
+=head2 File::Spec::OS2 - methods for OS/2 file specs
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=head2 File::Spec::Unix - methods used by File::Spec
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+canonpath, catdir, catfile, curdir, rootdir, updir, no_upwards,
+file_name_is_absolute, path, join, nativename
+
+=item SEE ALSO
+
+=head2 File::Spec::VMS - methods for VMS file specs
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over
+
+=item Methods always loaded
+
+catdir, catfile, curdir (override), rootdir (override), updir (override),
+path (override), file_name_is_absolute (override)
+
+=back
+
+=head2 File::Spec::Win32 - methods for Win32 file specs
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+catfile, canonpath
 
 =head2 File::stat - by-name interface to Perl's built-in stat() functions
 
@@ -4102,6 +4914,58 @@ handling
 
 =item WARNING
 
+=head2 IPC::SysV - SysV IPC constants
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+ftok( PATH, ID )
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
+
+=head2 IPC::SysV::Msg, IPC::Msg - SysV Msg IPC object class
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , FLAGS ), id, rcv ( BUF, LEN [, TYPE [, FLAGS ]] ), remove, set
+( STAT ), set ( NAME => VALUE [, NAME => VALUE ...] ), snd ( TYPE, MSG [,
+FLAGS ] ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=head2 IPC::SysV::Semaphore, IPC::Semaphore - SysV Semaphore IPC object
+class
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , NSEMS , FLAGS ), getall, getncnt ( SEM ), getpid ( SEM ),
+getval ( SEM ), getzcnt ( SEM ), id, op ( OPLIST ), remove, set ( STAT ),
+set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
+, VALUE ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
 =head2 Math::BigFloat - Arbitrary length float math package
 
 =item SYNOPSIS
@@ -4123,6 +4987,8 @@ number format, Error returns 'NaN', Division is computed to
 Canonical notation, Input, Output
 
 =item EXAMPLES
+
+=item Autocreating constants
 
 =item BUGS
 
@@ -4159,6 +5025,8 @@ functions
 
 =item TRIGONOMETRIC FUNCTIONS
 
+B<tan>
+
 =over
 
 =item ERRORS DUE TO DIVISION BY ZERO
@@ -4167,7 +5035,24 @@ functions
 
 =back
 
-=item ANGLE CONVERSIONS
+=item PLANE ANGLE CONVERSIONS
+
+=item RADIAL COORDINATE CONVERSIONS
+
+=over
+
+=item COORDINATE SYSTEMS
+
+=item 3-D ANGLE CONVERSIONS
+
+cartesian_to_cylindrical, cartesian_to_spherical, cylindrical_to_cartesian,
+cylindrical_to_spherical, spherical_to_cartesian, spherical_to_cylindrical
+
+=back
+
+=item GREAT CIRCLE DISTANCES
+
+=item EXAMPLES
 
 =item BUGS
 
@@ -4573,15 +5458,8 @@ interface to the UNIX syslog(3) calls
 =item DESCRIPTION
 
 openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
-setlogmask $mask_priority, setlogsock $sock_type (added in 5.004_03) 
-Sets the socket type to be used for the next call to
-C<openlog()> or C<syslog()>.
-
-A value of 'unix' will connect to the UNIX domain socket returned by
-C<_PATH_LOG> in F<syslog.ph>. If F<syslog.ph> fails to define
-C<_PATH_LOG>, C<setlogsock> returns C<undef>; otherwise a true value is
-returned. A value of 'inet' will connect to an INET socket returned by
-getservbyname().  Any other value croaks, closelog
+setlogmask $mask_priority, setlogsock $sock_type (added in 5.004_02),
+closelog
 
 =item EXAMPLES
 
@@ -4669,6 +5547,8 @@ C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
 %s\n\tFailed %d/%d tests, %.2f%% okay.>, C<Test returned status %d (wstat
 %d)>, C<Failed 1 test, %.2f%% okay. %s>, C<Failed %d/%d tests, %.2f%% okay.
 %s>
+
+=item ENVIRONMENT
 
 =item SEE ALSO
 

@@ -18,51 +18,52 @@ B<perl>	S<[ B<-sTuU> ]>
 For ease of access, the Perl manual has been split up into a number
 of sections:
 
-    perl	Perl overview (this section)
-    perldelta	Perl changes since previous version
-    perlfaq	Perl frequently asked questions
-    perltoc	Perl documentation table of contents
+    perl		Perl overview (this section)
+    perldelta		Perl changes since previous version
+    perlfaq		Perl frequently asked questions
+    perltoc		Perl documentation table of contents
 
-    perldata	Perl data structures
-    perlsyn	Perl syntax
-    perlop	Perl operators and precedence
-    perlre	Perl regular expressions
-    perlrun	Perl execution and options
-    perlfunc	Perl builtin functions
-    perlvar	Perl predefined variables
-    perlsub	Perl subroutines
-    perlmod	Perl modules: how they work
-    perlmodlib	Perl modules: how to write and use
-    perlform	Perl formats
-    perllocale	Perl locale support
+    perldata		Perl data structures
+    perlsyn		Perl syntax
+    perlop		Perl operators and precedence
+    perlre		Perl regular expressions
+    perlrun		Perl execution and options
+    perlfunc		Perl builtin functions
+    perlvar		Perl predefined variables
+    perlsub		Perl subroutines
+    perlmod		Perl modules: how they work
+    perlmodlib		Perl modules: how to write and use
+    perlmodinstall	Perl modules: how to install from CPAN
+    perlform		Perl formats
+    perllocale		Perl locale support
 
-    perlref	Perl references
-    perldsc	Perl data structures intro
-    perllol	Perl data structures: lists of lists
-    perltoot	Perl OO tutorial
-    perlobj	Perl objects
-    perltie	Perl objects hidden behind simple variables
-    perlbot	Perl OO tricks and examples
-    perlipc	Perl interprocess communication
+    perlref		Perl references
+    perldsc		Perl data structures intro
+    perllol		Perl data structures: lists of lists
+    perltoot		Perl OO tutorial
+    perlobj		Perl objects
+    perltie		Perl objects hidden behind simple variables
+    perlbot		Perl OO tricks and examples
+    perlipc		Perl interprocess communication
 
-    perldebug	Perl debugging
-    perldiag	Perl diagnostic messages
-    perlsec	Perl security
-    perltrap	Perl traps for the unwary
-    perlport	Perl portability guide
-    perlstyle	Perl style guide
+    perldebug		Perl debugging
+    perldiag		Perl diagnostic messages
+    perlsec		Perl security
+    perltrap		Perl traps for the unwary
+    perlport		Perl portability guide
+    perlstyle		Perl style guide
 
-    perlpod	Perl plain old documentation
-    perlbook	Perl book information
+    perlpod		Perl plain old documentation
+    perlbook		Perl book information
 
-    perlembed	Perl ways to embed perl in your C or C++ application
-    perlapio	Perl internal IO abstraction interface
-    perlxs	Perl XS application programming interface
-    perlxstut	Perl XS tutorial
-    perlguts	Perl internal functions for those doing extensions
-    perlcall	Perl calling conventions from C
+    perlembed		Perl ways to embed perl in your C or C++ application
+    perlapio		Perl internal IO abstraction interface
+    perlxs		Perl XS application programming interface
+    perlxstut		Perl XS tutorial
+    perlguts		Perl internal functions for those doing extensions
+    perlcall		Perl calling conventions from C
 
-    perlhist	Perl history records
+    perlhist		Perl history records
 
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)

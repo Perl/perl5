@@ -718,6 +718,7 @@ pod/perlipc.pod		IPC info
 pod/perllocale.pod	Locale support info
 pod/perllol.pod		How to use lists of lists
 pod/perlmod.pod		Module mechanism info
+pod/perlmodinstall.pod	Installing CPAN Modules
 pod/perlmodlib.pod	Module policy info
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info

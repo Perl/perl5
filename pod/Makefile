@@ -26,6 +26,7 @@ POD = \
 	perlsub.pod	\
 	perlmod.pod	\
 	perlmodlib.pod	\
+	perlmodinstall.pod	\
 	perlform.pod	\
 	perllocale.pod	\
 	perlref.pod	\
@@ -40,6 +41,7 @@ POD = \
 	perldiag.pod	\
 	perlsec.pod	\
 	perltrap.pod	\
+	perlport.pod	\
 	perlstyle.pod	\
 	perlpod.pod	\
 	perlbook.pod	\
@@ -74,6 +76,7 @@ MAN = \
 	perlsub.man	\
 	perlmod.man	\
 	perlmodlib.man	\
+	perlmodinstall.man	\
 	perlform.man	\
 	perllocale.man	\
 	perlref.man	\
@@ -88,6 +91,7 @@ MAN = \
 	perldiag.man	\
 	perlsec.man	\
 	perltrap.man	\
+	perlport.man	\
 	perlstyle.man	\
 	perlpod.man	\
 	perlbook.man	\
@@ -122,6 +126,7 @@ HTML = \
 	perlsub.html	\
 	perlmod.html	\
 	perlmodlib.html	\
+	perlmodinstall.html	\
 	perlform.html	\
 	perllocale.html	\
 	perlref.html	\
@@ -136,6 +141,7 @@ HTML = \
 	perldiag.html	\
 	perlsec.html	\
 	perltrap.html	\
+	perlport.html	\
 	perlstyle.html	\
 	perlpod.html	\
 	perlbook.html	\
@@ -170,6 +176,7 @@ TEX = \
 	perlsub.tex	\
 	perlmod.tex	\
 	perlmodlib.tex	\
+	perlmodinstall.tex	\
 	perlform.tex	\
 	perllocale.tex	\
 	perlref.tex	\
@@ -184,6 +191,7 @@ TEX = \
 	perldiag.tex	\
 	perlsec.tex	\
 	perltrap.tex	\
+	perlport.tex	\
 	perlstyle.tex	\
 	perlpod.tex	\
 	perlbook.tex	\
