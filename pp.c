@@ -1003,8 +1003,8 @@ PP(pp_modulo)
 	else {
 	    dleft = POPn;
 	    if (!use_double) {
-	      use_double = 1;
-	      dright = right;
+		use_double = 1;
+		dright = right;
 	    }
 	    left_neg = dleft < 0;
 	    if (left_neg)
@@ -1015,16 +1015,16 @@ PP(pp_modulo)
 	    double dans;
 
 #if 1
-	    /* Tried: DOUBLESIZE <= UV_SIZE = Precision of UV more than of NV.
-	     * But in fact this is an optimization - trunc may be slow */
-
 /* Somehow U_V is pessimized even if CASTFLAGS is 0 */
 #  if CASTFLAGS & 2
 #    define CAST_D2UV(d) U_V(d)
 #  else
 #    define CAST_D2UV(d) ((UV)(d))
 #  endif
-
+	    /* Tried to do this only in the case DOUBLESIZE <= UV_SIZE,
+	     * or, in other words, precision of UV more than of NV.
+	     * But in fact the approach below turned out to be an
+	     * optimization - floor() may be slow */
 	    if (dright <= UV_MAX && dleft <= UV_MAX) {
 		right = CAST_D2UV(dright);
 		left  = CAST_D2UV(dleft);
@@ -1033,13 +1033,8 @@ PP(pp_modulo)
 #endif
 
 	    /* Backward-compatibility clause: */
-#if 0
-	    dright = trunc(dright + 0.5);
-	    dleft  = trunc(dleft + 0.5);
-#else
 	    dright = floor(dright + 0.5);
 	    dleft  = floor(dleft + 0.5);
-#endif
 
 	    if (!dright)
 		DIE("Illegal modulus zero");
