@@ -359,6 +359,8 @@ typedef enum opcode {
 } opcode;
 
 #define MAXO 351
+#define OP_phoney_INPUT_ONLY -1
+#define OP_phoney_OUTPUT_ONLY -2
 
 
 #define OP_IS_SOCKET(op)	\

@@ -68,6 +68,8 @@ $MaxArgLen = 64;        # How much of each argument to print. 0 = all.
 $MaxArgNums = 8;        # How many arguments to print. 0 = all.
 $Verbose = 0;		# If true then make shortmess call longmess instead
 
+$CarpInternal{Carp}++;
+
 require Exporter;
 @ISA = ('Exporter');
 @EXPORT = qw(confess croak carp);

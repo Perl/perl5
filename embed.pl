@@ -1563,11 +1563,11 @@ Ap	|HV*	|gv_stashpvn	|const char* name|U32 namelen|I32 create
 Apd	|HV*	|gv_stashsv	|SV* sv|I32 create
 Apd	|void	|hv_clear	|HV* tb
 Ap	|void	|hv_delayfree_ent|HV* hv|HE* entry
-Apd	|SV*	|hv_delete	|HV* tb|const char* key|U32 klen|I32 flags
+Apd	|SV*	|hv_delete	|HV* tb|const char* key|I32 klen|I32 flags
 Apd	|SV*	|hv_delete_ent	|HV* tb|SV* key|I32 flags|U32 hash
-Apd	|bool	|hv_exists	|HV* tb|const char* key|U32 klen
+Apd	|bool	|hv_exists	|HV* tb|const char* key|I32 klen
 Apd	|bool	|hv_exists_ent	|HV* tb|SV* key|U32 hash
-Apd	|SV**	|hv_fetch	|HV* tb|const char* key|U32 klen|I32 lval
+Apd	|SV**	|hv_fetch	|HV* tb|const char* key|I32 klen|I32 lval
 Apd	|HE*	|hv_fetch_ent	|HV* tb|SV* key|I32 lval|U32 hash
 Ap	|void	|hv_free_ent	|HV* hv|HE* entry
 Apd	|I32	|hv_iterinit	|HV* tb
@@ -1578,7 +1578,7 @@ Apd	|SV*	|hv_iternextsv	|HV* hv|char** key|I32* retlen
 Apd	|SV*	|hv_iterval	|HV* tb|HE* entry
 Ap	|void	|hv_ksplit	|HV* hv|IV newmax
 Apd	|void	|hv_magic	|HV* hv|GV* gv|int how
-Apd	|SV**	|hv_store	|HV* tb|const char* key|U32 klen|SV* val \
+Apd	|SV**	|hv_store	|HV* tb|const char* key|I32 klen|SV* val \
 				|U32 hash
 Apd	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
 Apd	|void	|hv_undef	|HV* tb
@@ -2042,6 +2042,7 @@ Ap	|void	|sv_taint	|SV* sv
 Ap	|bool	|sv_tainted	|SV* sv
 Apd	|int	|sv_unmagic	|SV* sv|int type
 Apd	|void	|sv_unref	|SV* sv
+Apd	|void	|sv_unref_flags	|SV* sv|U32 flags
 Ap	|void	|sv_untaint	|SV* sv
 Apd	|bool	|sv_upgrade	|SV* sv|U32 mt
 Apd	|void	|sv_usepvn	|SV* sv|char* ptr|STRLEN len
@@ -2170,6 +2171,7 @@ ApdM      |bool   |sv_utf8_downgrade|SV *sv|bool fail_ok
 ApdM      |void   |sv_utf8_encode |SV *sv
 Ap      |bool   |sv_utf8_decode |SV *sv
 Ap	|void	|sv_force_normal|SV *sv
+Ap	|void	|sv_force_normal_flags|SV *sv|U32 flags
 Ap	|void	|tmps_grow	|I32 n
 Apd	|SV*	|sv_rvweaken	|SV *sv
 p	|int	|magic_killbackrefs|SV *sv|MAGIC *mg

@@ -29,7 +29,6 @@ Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 void
 Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 {
-    dTHR;
     PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
     PerlIO_vprintf(file, pat, *args);
 }
@@ -37,7 +36,6 @@ Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 void
 Perl_dump_all(pTHX)
 {
-    dTHR;
     PerlIO_setlinebuf(Perl_debug_log);
     if (PL_main_root)
 	op_dump(PL_main_root);
@@ -47,7 +45,6 @@ Perl_dump_all(pTHX)
 void
 Perl_dump_packsubs(pTHX_ HV *stash)
 {
-    dTHR;
     I32	i;
     HE	*entry;
 
@@ -275,6 +272,8 @@ Perl_sv_peek(pTHX_ SV *sv)
 	    if (SvOOK(sv))
 		Perl_sv_catpvf(aTHX_ t, "[%s]", pv_display(tmp, SvPVX(sv)-SvIVX(sv), SvIVX(sv), 0, 127));
 	    Perl_sv_catpvf(aTHX_ t, "%s)", pv_display(tmp, SvPVX(sv), SvCUR(sv), SvLEN(sv), 127));
+	    if (SvUTF8(sv))
+		Perl_sv_catpvf(aTHX_ t, " [UTF8]"); 
 	    SvREFCNT_dec(tmp);
 	}
     }
@@ -369,7 +368,6 @@ Perl_pmop_dump(pTHX_ PMOP *pm)
 void
 Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 {
-    dTHR;
     Perl_dump_indent(aTHX_ level, file, "{\n");
     level++;
     if (o->op_seq)
@@ -768,7 +766,6 @@ Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv)
 void
 Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
-    dTHR;
     SV *d;
     char *s;
     U32 flags;

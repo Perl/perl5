@@ -1792,7 +1792,6 @@ S_seed(pTHX)
 #define   SEED_C3	269
 #define   SEED_C5	26107
 
-    dTHR;
 #ifndef PERL_NO_DEV_RANDOM
     int fd;
 #endif
@@ -2321,7 +2320,7 @@ PP(pp_ucfirst)
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
 	STRLEN ulen;
-	U8 tmpbuf[UTF8_MAXLEN];
+	U8 tmpbuf[UTF8_MAXLEN+1];
 	U8 *tend;
 	UV uv = utf8_to_uv(s, slen, &ulen, 0);
 
@@ -2380,7 +2379,7 @@ PP(pp_lcfirst)
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
 	STRLEN ulen;
-	U8 tmpbuf[UTF8_MAXLEN];
+	U8 tmpbuf[UTF8_MAXLEN+1];
 	U8 *tend;
 	UV uv = utf8_to_uv(s, slen, &ulen, 0);
 
@@ -4727,7 +4726,7 @@ PP(pp_pack)
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		auint = SvUV(fromstr);
-		SvGROW(cat, SvCUR(cat) + UTF8_MAXLEN);
+		SvGROW(cat, SvCUR(cat) + UTF8_MAXLEN + 1);
 		SvCUR_set(cat, (char*)uv_to_utf8((U8*)SvEND(cat),auint)
 			       - SvPVX(cat));
 	    }
@@ -5338,7 +5337,6 @@ PP(pp_split)
 void
 Perl_unlock_condpair(pTHX_ void *svv)
 {
-    dTHR;
     MAGIC *mg = mg_find((SV*)svv, 'm');
 
     if (!mg)

@@ -344,6 +344,7 @@ DllExport void		win32_get_child_IO(child_IO_table* ptr);
 extern FILE *		my_fdopen(int, char *);
 #endif
 extern int		my_fclose(FILE *);
+extern int		my_fstat(int fd, struct stat *sbufptr);
 extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
 extern int		do_spawn_nowait(char *cmd);

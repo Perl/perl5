@@ -32,6 +32,187 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7978] By: jhi                                   on 2000/12/04  16:42:17
+        Log: Retract #7977, still too volatile (the euphemism of the day
+             for unfinished and buggy :-)
+     Branch: perl
+	   ! doop.c hv.c pp.c sv.h
+____________________________________________________________________________
+[  7977] By: jhi                                   on 2000/12/04  16:25:15
+        Log: (Retracted by #7978, too shaky yet.)
+             
+             Subject: Re: utf8 in hash keys, implementor missing
+             From: Simon Cozens <simon@cozens.net>
+             Date: Sat, 2 Dec 2000 19:49:35 +0000
+             Message-ID: <20001202194935.A25673@pembro33.pmb.ox.ac.uk>
+             
+             The first step at UTF-8 hash keys.
+     Branch: perl
+	   ! doop.c hv.c pp.c sv.h
+____________________________________________________________________________
+[  7976] By: jhi                                   on 2000/12/04  16:13:53
+        Log: Subject: [ID 20001203.001] Not OK: perl v5.7.0 +DEVEL7965 on os2-64int-ld 2.30 (UNINSTALLED)
+             From: sthoenna@efn.org
+             Date: Sun, 3 Dec 2000 19:06:53 -0800 (PST)
+             Message-Id: <200012040306.eB436rE18922@garcia.efn.org>
+     Branch: perl
+	   ! os2/os2.c perlio.c
+____________________________________________________________________________
+[  7975] By: jhi                                   on 2000/12/04  16:05:25
+        Log: Subject: Re: [ID 20001129.009] Not OK: perl v5.7.0 +DEVEL7928 on os2-64int-ld 2.30 (UNINSTALLED)
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Thu, 30 Nov 2000 20:50:37 -0800
+             Message-ID: <d4yJ6gzkgGsJ092yn@efn.org>
+     Branch: perl
+	   ! os2/os2.c
+____________________________________________________________________________
+[  7974] By: jhi                                   on 2000/12/04  16:03:57
+        Log: Subject: [PATCH] ++ 20% faster
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 4 Dec 2000 12:17:27 +0000
+             Message-ID: <20001204121726.B52976@plum.flirble.org>
+             
+             Make '$i = ""; $i++' to produce true IVs without a hint of NVs.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7973] By: jhi                                   on 2000/12/04  16:00:48
+        Log: 
+             Subject: Re: Not OK: perl v5.7.0 +DEVEL7825 on aix 4.2.1.0 (UNINSTALLED)
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 04 Dec 2000 12:30:45 +0100
+             Message-Id: <20001204122118.E85D.H.M.BRAND@hccnet.nl>
+             
+             AIX 4.2 (using latest patchlevels on 20001130) has a broken bind
+             library (getprotobyname and getprotobynumber are outversioned by
+             the same calls in libc, at least for xlc version 3.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  7972] By: jhi                                   on 2000/12/04  02:58:31
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doio.c iperlsys.h perl.c perl.h perlio.c perlio.h toke.c
+	  !> win32/makefile.mk win32/perlhost.h win32/perllib.c
+	  !> win32/win32.h win32/win32iop.h win32/win32thread.h
+____________________________________________________________________________
+[  7971] By: nick                                  on 2000/12/04  00:24:33
+        Log: Quieten some noise in Win32 builds:
+             - win32.h is included after <sys/socket.h>, so need to 
+             set Win32SCK_IS_STDSCK earlier to avoid re-defined noise in XSUB.h
+             - GCC (& MSVC?) have execv(...,const char *const *) so need a cast from char **.
+     Branch: perlio
+	   ! doio.c perl.h toke.c win32/win32.h
+____________________________________________________________________________
+[  7970] By: nick                                  on 2000/12/03  22:57:46
+        Log: PERL_IMPLICIT_SYS compiles but does not work.
+     Branch: perlio
+	   ! iperlsys.h perl.c perlio.c perlio.h win32/makefile.mk
+	   ! win32/perlhost.h win32/perllib.c win32/win32.h
+	   ! win32/win32iop.h win32/win32thread.h
+____________________________________________________________________________
+[  7969] By: jhi                                   on 2000/12/03  22:12:58
+        Log: On DEBUGGING make ANYOFUTF8 nodes store away also the SV
+             used to swash_init(), makes regprop() dumps more informative
+             (+utf8::IsAlpha, -utf8::IsDigit, for example).
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[  7968] By: jhi                                   on 2000/12/03  21:39:56
+        Log: Implement ANYOFUTF8 regprop() dumping.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  7967] By: jhi                                   on 2000/12/03  20:57:19
+        Log: Make uv_to_utf8() to zero-terminate its output buffer,
+             always use (at least) UTF8_MAXLEN + 1 U8s deep buffer.
+     Branch: perl
+	   ! op.c pp.c regcomp.c regexec.c sv.c toke.c utf8.c
+____________________________________________________________________________
+[  7966] By: nick                                  on 2000/12/03  18:41:21
+        Log: Integrate mainline (STDCHAR)
+     Branch: perlio
+	  !> Configure t/pragma/utf8.t
+____________________________________________________________________________
+[  7965] By: jhi                                   on 2000/12/03  17:58:20
+        Log: Raw zero bytes in text files confuse at least GNU patch 2.1.
+     Branch: perl
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  7964] By: jhi                                   on 2000/12/03  17:35:56
+        Log: Integrate perlio.
+     Branch: perl
+	  !> iperlsys.h perlio.c
+____________________________________________________________________________
+[  7963] By: jhi                                   on 2000/12/03  17:33:55
+        Log: Metaconfig unit change for #7962.
+     Branch: metaconfig
+	   ! U/modified/stdchar.U
+____________________________________________________________________________
+[  7962] By: jhi                                   on 2000/12/03  17:33:27
+        Log: Untangle the <stdio.h> #include nest for the stdchar test,
+             from Andy Dougherty.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  7961] By: nick                                  on 2000/12/03  16:53:00
+        Log: Make iperlsys.h vector stdio not PerlIO.
+     Branch: perlio
+	   ! iperlsys.h perlio.c
+____________________________________________________________________________
+[  7960] By: nick                                  on 2000/12/03  14:43:01
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Configure config_h.SH lib/ExtUtils/MM_Unix.pm op.c
+	  !> patchlevel.h pod/perldiag.pod t/lib/net-hostent.t toke.c
+____________________________________________________________________________
+[  7959] By: jhi                                   on 2000/12/03  08:16:36
+        Log: Use DO_UTF8().
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  7958] By: jhi                                   on 2000/12/02  18:33:05
+        Log: Subject: Re: [ID 20001130.011] expression parsing bug ?
+             From: Mike Guy <mjtg@cam.ac.uk>         
+             Date: Sat, 02 Dec 2000 17:27:13 +0000
+             Message-Id: <E142GRN-0003go-00@libra.cus.cam.ac.uk>
+             
+             An extraneous argument.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  7957] By: jhi                                   on 2000/12/02  18:22:32
+        Log: A missing hunk.
+     Branch: perl
+	   ! t/lib/net-hostent.t
+____________________________________________________________________________
+[  7956] By: jhi                                   on 2000/12/02  18:06:20
+        Log: Subject: [PATCH] Re: [ID 20001202.001] (Net::hostent)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 2 Dec 2000 14:28:27 +0000
+             Message-ID: <20001202142827.A12308@plum.flirble.org>
+             
+             Test robustness.
+     Branch: perl
+	   ! t/lib/net-hostent.t
+____________________________________________________________________________
+[  7955] By: jhi                                   on 2000/12/02  17:58:06
+        Log: Metaconfig unit change for #7954.
+     Branch: metaconfig
+	   ! U/modified/stdchar.U
+____________________________________________________________________________
+[  7954] By: jhi                                   on 2000/12/02  17:54:32
+        Log: An inconvenient hang would happen if the stdio _ptr wasn't
+             found in <stdio.h> and <stdio_impl.h> didn't exist.  (grep
+             would be grepping stdin for all eternity for the _ptr.)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  7953] By: jhi                                   on 2000/12/02  00:07:15
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7952] By: jhi                                   on 2000/12/01  23:54:47
         Log: Subject: Re: long shell lines
              From: Andy Dougherty <doughera@lafayette.edu>

@@ -27,21 +27,24 @@
 /* Unicode support */
 
 U8 *
-Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
+Perl_uv_to_utf8(pTHX_ U8 *d, UV uv) /* the d must be UTF8_MAXLEN+1 deep */
 {
     if (uv < 0x80) {
 	*d++ = uv;
+	*d   = 0;
 	return d;
     }
     if (uv < 0x800) {
 	*d++ = (( uv >>  6)         | 0xc0);
 	*d++ = (( uv        & 0x3f) | 0x80);
+	*d   = 0;
 	return d;
     }
     if (uv < 0x10000) {
 	*d++ = (( uv >> 12)         | 0xe0);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
+	*d   = 0;
 	return d;
     }
     if (uv < 0x200000) {
@@ -49,6 +52,7 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
+	*d   = 0;
 	return d;
     }
     if (uv < 0x4000000) {
@@ -57,6 +61,7 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
+	*d   = 0;
 	return d;
     }
     if (uv < 0x80000000) {
@@ -66,6 +71,7 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
+	*d   = 0;
 	return d;
     }
 #ifdef HAS_QUAD
@@ -79,6 +85,7 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
+	*d   = 0;
 	return d;
     }
 #ifdef HAS_QUAD
@@ -96,6 +103,7 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
+	*d   = 0;
 	return d;
     }
 #endif
@@ -190,7 +198,6 @@ various flags to allow deviations from the strict UTF-8 encoding
 UV
 Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 {
-    dTHR;
     UV uv = *s, ouv;
     STRLEN len = 1;
 #ifdef EBCDIC
@@ -302,19 +309,19 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 			"Malformed UTF-8 character (byte order mark 0x%04"UVxf")",
 			uv);
 	goto malformed;
-    } else if ((uv == 0xffff) &&
-	       !(flags & UTF8_ALLOW_FFFF)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (character 0x%04"UVxf")",
-			uv);
-	goto malformed;
     } else if ((expectlen > UNISKIP(uv)) &&
 	       !(flags & UTF8_ALLOW_LONG)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (%d byte%s, need %d)",
 			expectlen, expectlen == 1 ? "": "s", UNISKIP(uv));
+	goto malformed;
+    } else if ((uv == 0xffff) &&
+	       !(flags & UTF8_ALLOW_FFFF)) {
+	if (dowarn)
+	    Perl_warner(aTHX_ WARN_UTF8,
+			"Malformed UTF-8 character (character 0x%04"UVxf")",
+			uv);
 	goto malformed;
     }
 
@@ -495,7 +502,6 @@ reflect the new length.
 U8*
 Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
 {
-    dTHR;
     U8 *send;
     U8 *d;
     U8 *dst;
@@ -548,7 +554,6 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	    continue;
 	}
 	if (uv >= 0xd800 && uv < 0xdbff) {	/* surrogates */
-            dTHR;
 	    UV low = *p++;
 	    if (low < 0xdc00 || low >= 0xdfff)
 		Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
@@ -593,7 +598,7 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 bool
 Perl_is_uni_alnum(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_alnum(tmpbuf);
 }
@@ -601,7 +606,7 @@ Perl_is_uni_alnum(pTHX_ U32 c)
 bool
 Perl_is_uni_alnumc(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_alnumc(tmpbuf);
 }
@@ -609,7 +614,7 @@ Perl_is_uni_alnumc(pTHX_ U32 c)
 bool
 Perl_is_uni_idfirst(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_idfirst(tmpbuf);
 }
@@ -617,7 +622,7 @@ Perl_is_uni_idfirst(pTHX_ U32 c)
 bool
 Perl_is_uni_alpha(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_alpha(tmpbuf);
 }
@@ -625,7 +630,7 @@ Perl_is_uni_alpha(pTHX_ U32 c)
 bool
 Perl_is_uni_ascii(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_ascii(tmpbuf);
 }
@@ -633,7 +638,7 @@ Perl_is_uni_ascii(pTHX_ U32 c)
 bool
 Perl_is_uni_space(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_space(tmpbuf);
 }
@@ -641,7 +646,7 @@ Perl_is_uni_space(pTHX_ U32 c)
 bool
 Perl_is_uni_digit(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_digit(tmpbuf);
 }
@@ -649,7 +654,7 @@ Perl_is_uni_digit(pTHX_ U32 c)
 bool
 Perl_is_uni_upper(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_upper(tmpbuf);
 }
@@ -657,7 +662,7 @@ Perl_is_uni_upper(pTHX_ U32 c)
 bool
 Perl_is_uni_lower(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_lower(tmpbuf);
 }
@@ -665,7 +670,7 @@ Perl_is_uni_lower(pTHX_ U32 c)
 bool
 Perl_is_uni_cntrl(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_cntrl(tmpbuf);
 }
@@ -673,7 +678,7 @@ Perl_is_uni_cntrl(pTHX_ U32 c)
 bool
 Perl_is_uni_graph(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_graph(tmpbuf);
 }
@@ -681,7 +686,7 @@ Perl_is_uni_graph(pTHX_ U32 c)
 bool
 Perl_is_uni_print(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_print(tmpbuf);
 }
@@ -689,7 +694,7 @@ Perl_is_uni_print(pTHX_ U32 c)
 bool
 Perl_is_uni_punct(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_punct(tmpbuf);
 }
@@ -697,7 +702,7 @@ Perl_is_uni_punct(pTHX_ U32 c)
 bool
 Perl_is_uni_xdigit(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_xdigit(tmpbuf);
 }
@@ -705,7 +710,7 @@ Perl_is_uni_xdigit(pTHX_ U32 c)
 U32
 Perl_to_uni_upper(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return to_utf8_upper(tmpbuf);
 }
@@ -713,7 +718,7 @@ Perl_to_uni_upper(pTHX_ U32 c)
 U32
 Perl_to_uni_title(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return to_utf8_title(tmpbuf);
 }
@@ -721,7 +726,7 @@ Perl_to_uni_title(pTHX_ U32 c)
 U32
 Perl_to_uni_lower(pTHX_ U32 c)
 {
-    U8 tmpbuf[UTF8_MAXLEN];
+    U8 tmpbuf[UTF8_MAXLEN+1];
     uv_to_utf8(tmpbuf, (UV)c);
     return to_utf8_lower(tmpbuf);
 }

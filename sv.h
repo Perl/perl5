@@ -801,7 +801,6 @@ Taints an SV if tainting is enabled
 #define SvTAINT(sv)			\
     STMT_START {			\
 	if (PL_tainting) {		\
-	    dTHR;			\
 	    if (PL_tainted)		\
 		SvTAINTED_on(sv);	\
 	}				\
@@ -1097,3 +1096,4 @@ Returns a pointer to the character buffer.
 #define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #define Sv_Grow sv_grow
 
+#define SV_IMMEDIATE_UNREF	1

@@ -54,7 +54,6 @@ bset_obj_store(pTHXo_ struct byteloader_state *bstate, void *obj, I32 ix)
 void
 byterun(pTHXo_ register struct byteloader_state *bstate)
 {
-    dTHR;
     register int insn;
     U32 ix;
     SV *specialsv_list[6];

@@ -761,7 +761,7 @@ hash and returned to the caller.  The C<klen> is the length of the key.
 The C<flags> value will normally be zero; if set to G_DISCARD then NULL
 will be returned.
 
-	SV*	hv_delete(HV* tb, const char* key, U32 klen, I32 flags)
+	SV*	hv_delete(HV* tb, const char* key, I32 klen, I32 flags)
 
 =for hackers
 Found in file hv.c
@@ -783,7 +783,7 @@ Found in file hv.c
 Returns a boolean indicating whether the specified hash key exists.  The
 C<klen> is the length of the key.
 
-	bool	hv_exists(HV* tb, const char* key, U32 klen)
+	bool	hv_exists(HV* tb, const char* key, I32 klen)
 
 =for hackers
 Found in file hv.c
@@ -809,7 +809,7 @@ dereferencing it to a C<SV*>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_fetch(HV* tb, const char* key, U32 klen, I32 lval)
+	SV**	hv_fetch(HV* tb, const char* key, I32 klen, I32 lval)
 
 =for hackers
 Found in file hv.c
@@ -920,7 +920,7 @@ the call, and decrementing it if the function returned NULL.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_store(HV* tb, const char* key, U32 klen, SV* val, U32 hash)
+	SV**	hv_store(HV* tb, const char* key, I32 klen, SV* val, U32 hash)
 
 =for hackers
 Found in file hv.c
@@ -2368,19 +2368,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -3063,9 +3063,25 @@ Found in file sv.c
 
 Unsets the RV status of the SV, and decrements the reference count of
 whatever was being referenced by the RV.  This can almost be thought of
-as a reversal of C<newSVrv>.  See C<SvROK_off>.
+as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with C<flag>
+of zero.  See C<SvROK_off>.  
 
 	void	sv_unref(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_unref_flags
+
+Unsets the RV status of the SV, and decrements the reference count of
+whatever was being referenced by the RV.  This can almost be thought of
+as a reversal of C<newSVrv>.  The C<cflags> argument can contain
+C<SV_IMMEDIATE_UNREF> to force the reference count to be decremented
+(otherwise the decrementing is conditional on the reference count being
+different from one or the reference being a readonly SV).
+See C<SvROK_off>.  
+
+	void	sv_unref_flags(SV* sv, U32 flags)
 
 =for hackers
 Found in file sv.c

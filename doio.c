@@ -226,7 +226,6 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		len = tend-type;
 	    }
 	    if (*name == '\0') { /* command is missing 19990114 */
-		dTHR;
 		if (ckWARN(WARN_PIPE))
 		    Perl_warner(aTHX_ WARN_PIPE, "Missing command in piped open");
 		errno = EPIPE;
@@ -236,7 +235,6 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
 	    if (!num_svs && name[len-1] == '|') {
-		dTHR;
 		name[--len] = '\0' ;
 		if (ckWARN(WARN_PIPE))
 		    Perl_warner(aTHX_ WARN_PIPE, "Can't open bidirectional pipe");
@@ -390,7 +388,6 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	        len  = tend-type;
 	    }
 	    if (*name == '\0') { /* command is missing 19990114 */
-		dTHR;
 		if (ckWARN(WARN_PIPE))
 		    Perl_warner(aTHX_ WARN_PIPE, "Missing command in piped open");
 		errno = EPIPE;
@@ -429,13 +426,11 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
     }
     if (!fp) {
-	dTHR;
 	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == IoTYPE_RDONLY && strchr(name, '\n'))
 	    Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
 	goto say_false;
     }
     if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD) {
-	dTHR;
 	if (PerlLIO_fstat(PerlIO_fileno(fp),&PL_statbuf) < 0) {
 	    (void)PerlIO_close(fp);
 	    goto say_false;
@@ -533,7 +528,6 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
     IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
-	dTHR;
 	if (IoTYPE(io) == IoTYPE_SOCKET
 	    || (IoTYPE(io) == IoTYPE_WRONLY && S_ISCHR(PL_statbuf.st_mode)) )
 	{
@@ -597,7 +591,6 @@ Perl_nextargv(pTHX_ register GV *gv)
     }
     PL_filemode = 0;
     while (av_len(GvAV(gv)) >= 0) {
-	dTHR;
 	STRLEN oldlen;
 	sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
@@ -746,7 +739,6 @@ Perl_nextargv(pTHX_ register GV *gv)
 	    return IoIFP(GvIOp(gv));
 	}
 	else {
-	    dTHR;
 	    if (ckWARN_d(WARN_INPLACE)) {
 		int eno = errno;
 		if (PerlLIO_stat(PL_oldname, &PL_statbuf) >= 0
@@ -841,7 +833,6 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
     io = GvIO(gv);
     if (!io) {		/* never opened */
 	if (not_implicit) {
-	    dTHR;
 	    if (ckWARN(WARN_UNOPENED)) /* no check for closed here */
 		report_evil_fh(gv, io, PL_op->op_type);
 	    SETERRNO(EBADF,SS$_IVCHAN);
@@ -897,7 +888,6 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 bool
 Perl_do_eof(pTHX_ GV *gv)
 {
-    dTHR;
     register IO *io;
     int ch;
 
@@ -964,11 +954,8 @@ Perl_do_tell(pTHX_ GV *gv)
 #endif
 	return PerlIO_tell(fp);
     }
-    {
-	dTHR;
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
-    }
+    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,RMS$_IFI);
     return (Off_t)-1;
 }
@@ -986,11 +973,8 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 #endif
 	return PerlIO_seek(fp, pos, whence) >= 0;
     }
-    {
-	dTHR;
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
-    }
+    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
 }
@@ -1003,11 +987,8 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io)))
 	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
-    {
-	dTHR;
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
-    }
+    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	report_evil_fh(gv, io, PL_op->op_type);
     SETERRNO(EBADF,RMS$_IFI);
     return (Off_t)-1;
 }
@@ -1152,11 +1133,8 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
     }
     switch (SvTYPE(sv)) {
     case SVt_NULL:
-	{
-	    dTHR;
-	    if (ckWARN(WARN_UNINITIALIZED))
-		report_uninit();
-	}
+	if (ckWARN(WARN_UNINITIALIZED))
+	    report_uninit();
 	return TRUE;
     case SVt_IV:
 	if (SvIOK(sv)) {
@@ -1287,7 +1265,6 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
     STRLEN n_a;
 
     if (sp > mark) {
-	dTHR;
 	New(401,PL_Argv, sp - mark + 1, char*);
 	a = PL_Argv;
 	while (++mark <= sp) {
@@ -1435,7 +1412,6 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 	    goto doshell;
 	}
 	{
-	    dTHR;
 	    int e = errno;
 
 	    if (ckWARN(WARN_EXEC))
@@ -1456,7 +1432,6 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 I32
 Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 {
-    dTHR;
     register I32 val;
     register I32 val2;
     register I32 tot = 0;
@@ -1741,7 +1716,6 @@ Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
 I32
 Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
-    dTHR;
     key_t key;
     I32 n, flags;
 
@@ -1774,7 +1748,6 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 I32
 Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 {
-    dTHR;
     SV *astr;
     char *a;
     I32 id, n, cmd, infosize, getinfo;
@@ -1899,7 +1872,6 @@ I32
 Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
-    dTHR;
     SV *mstr;
     char *mbuf;
     I32 id, msize, flags;
@@ -1922,7 +1894,6 @@ I32
 Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
-    dTHR;
     SV *mstr;
     char *mbuf;
     long mtype;
@@ -1960,7 +1931,6 @@ I32
 Perl_do_semop(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_SEM
-    dTHR;
     SV *opstr;
     char *opbuf;
     I32 id;
@@ -1985,7 +1955,6 @@ I32
 Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 {
 #ifdef HAS_SHM
-    dTHR;
     SV *mstr;
     char *mbuf, *shm;
     I32 id, mpos, msize;

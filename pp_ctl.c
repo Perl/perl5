@@ -1160,7 +1160,6 @@ PP(pp_flop)
 STATIC I32
 S_dopoptolabel(pTHX_ char *label)
 {
-    dTHR;
     register I32 i;
     register PERL_CONTEXT *cx;
 
@@ -1216,7 +1215,6 @@ Perl_dowantarray(pTHX)
 I32
 Perl_block_gimme(pTHX)
 {
-    dTHR;
     I32 cxix;
 
     cxix = dopoptosub(cxstack_ix);
@@ -1240,14 +1238,12 @@ Perl_block_gimme(pTHX)
 STATIC I32
 S_dopoptosub(pTHX_ I32 startingblock)
 {
-    dTHR;
     return dopoptosub_at(cxstack, startingblock);
 }
 
 STATIC I32
 S_dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
 {
-    dTHR;
     I32 i;
     register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
@@ -1268,7 +1264,6 @@ S_dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
 STATIC I32
 S_dopoptoeval(pTHX_ I32 startingblock)
 {
-    dTHR;
     I32 i;
     register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
@@ -1287,7 +1282,6 @@ S_dopoptoeval(pTHX_ I32 startingblock)
 STATIC I32
 S_dopoptoloop(pTHX_ I32 startingblock)
 {
-    dTHR;
     I32 i;
     register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
@@ -1329,7 +1323,6 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 void
 Perl_dounwind(pTHX_ I32 cxix)
 {
-    dTHR;
     register PERL_CONTEXT *cx;
     I32 optype;
 
@@ -1375,7 +1368,6 @@ Perl_dounwind(pTHX_ I32 cxix)
 STATIC void
 S_free_closures(pTHX)
 {
-    dTHR;
     SV **svp = AvARRAY(PL_comppad_name);
     I32 ix;
     for (ix = AvFILLp(PL_comppad_name); ix >= 0; ix--) {
@@ -1768,7 +1760,6 @@ PP(pp_enteriter)
 
 #ifdef USE_THREADS
     if (PL_op->op_flags & OPf_SPECIAL) {
-	dTHR;
 	svp = &THREADSV(PL_op->op_targ);	/* per-thread variable */
 	SAVEGENERICSV(*svp);
 	*svp = NEWSV(0,0);
@@ -2158,7 +2149,6 @@ S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
     }
     *ops = 0;
     if (o->op_flags & OPf_KIDS) {
-	dTHR;
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
@@ -2669,7 +2659,6 @@ S_docatch_body(pTHX)
 STATIC OP *
 S_docatch(pTHX_ OP *o)
 {
-    dTHR;
     int ret;
     OP *oldop = PL_op;
     volatile PERL_SI *cursi = PL_curstackinfo;
@@ -4147,7 +4136,6 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 static I32
 sortcv(pTHXo_ SV *a, SV *b)
 {
-    dTHR;
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
     I32 result;
@@ -4171,7 +4159,6 @@ sortcv(pTHXo_ SV *a, SV *b)
 static I32
 sortcv_stacked(pTHXo_ SV *a, SV *b)
 {
-    dTHR;
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
     I32 result;

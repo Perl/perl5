@@ -431,7 +431,6 @@ static void clear_re(pTHXo_ void *r);
 STATIC void
 S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 {
-    dTHR;
     STRLEN l = CHR_SVLEN(data->last_found);
     STRLEN old_l = CHR_SVLEN(*data->longest);
     
@@ -596,7 +595,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			/* deltap: Write maxlen-minlen here. */
 			/* last: Stop before this one. */
 {
-    dTHR;
     I32 min = 0, pars = 0, code;
     regnode *scan = *scanp, *next;
     I32 delta = 0;
@@ -1521,7 +1519,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 STATIC I32
 S_add_data(pTHX_ RExC_state_t *pRExC_state, I32 n, char *s)
 {
-    dTHR;
     if (RExC_rx->data) {
 	Renewc(RExC_rx->data, 
 	       sizeof(*RExC_rx->data) + sizeof(void*) * (RExC_rx->data->count + n - 1), 
@@ -1542,7 +1539,6 @@ S_add_data(pTHX_ RExC_state_t *pRExC_state, I32 n, char *s)
 void
 Perl_reginitcolors(pTHX)
 {
-    dTHR;
     int i = 0;
     char *s = PerlEnv_getenv("PERL_RE_COLORS");
 	    
@@ -1583,7 +1579,6 @@ Perl_reginitcolors(pTHX)
 regexp *
 Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 {
-    dTHR;
     register regexp *r;
     regnode *scan;
     regnode *first;
@@ -1938,6 +1933,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_EVAL_SEEN;
     Newz(1002, r->startp, RExC_npar, I32);
     Newz(1002, r->endp, RExC_npar, I32);
+    PL_regdata = r->data; /* for regprop() ANYOFUTF8 */
     DEBUG_r(regdump(r));
     return(r);
 }
@@ -1955,7 +1951,6 @@ STATIC regnode *
 S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
-    dTHR;
     register regnode *ret;		/* Will be the head of the group. */
     register regnode *br;
     register regnode *lastbr;
@@ -2014,7 +2009,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		/* FALL THROUGH */
 	    case '{':
 	    {
-		dTHR;
 		I32 count = 1, n = 0;
 		char c;
 		char *s = RExC_parse;
@@ -2300,7 +2294,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 STATIC regnode *
 S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first)
 {
-    dTHR;
     register regnode *ret;
     register regnode *chain = NULL;
     register regnode *latest;
@@ -2366,7 +2359,6 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first)
 STATIC regnode *
 S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 {
-    dTHR;
     register regnode *ret;
     register char op;
     register char *next;
@@ -2534,7 +2526,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 STATIC regnode *
 S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 {
-    dTHR;
     register regnode *ret = 0;
     I32 flags;
 
@@ -3049,7 +3040,6 @@ S_regwhite(pTHX_ char *p, char *e)
 STATIC I32
 S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 {
-    dTHR;
     char *posixcc = 0;
     I32 namedclass = OOB_NAMEDCLASS;
 
@@ -3204,7 +3194,6 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state)
 {
-    dTHR;
     register U32 value;
     register I32 lastvalue = OOB_CHAR8;
     register I32 range = 0;
@@ -3681,7 +3670,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 STATIC regnode *
 S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
 {
-    dTHR;
     register char *e;
     register U32 value;
     register U32 lastvalue = OOB_UTF8;
@@ -3932,8 +3920,15 @@ S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
 
     if (!SIZE_ONLY) {
 	SV *rv = swash_init("utf8", "", listsv, 1, 0);
+#ifdef DEBUGGING
+	AV *av = newAV();
+	av_push(av, rv);
+	av_push(av, listsv);
+	rv = newRV_inc((SV*)av);
+#else
 	SvREFCNT_dec(listsv);
-	n = add_data(pRExC_state, 1,"s");
+#endif
+	n = add_data(pRExC_state, 1, "s");
 	RExC_rx->data->data[n] = (void*)rv;
 	ARG1_SET(ret, flags);
 	ARG2_SET(ret, n);
@@ -3945,7 +3940,6 @@ S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
 STATIC char*
 S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 {
-    dTHR;
     char* retval = RExC_parse++;
 
     for (;;) {
@@ -3978,7 +3972,6 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 STATIC regnode *			/* Location. */
 S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 {
-    dTHR;
     register regnode *ret;
     register regnode *ptr;
 
@@ -4003,7 +3996,6 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 STATIC regnode *			/* Location. */
 S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 {
-    dTHR;
     register regnode *ret;
     register regnode *ptr;
 
@@ -4028,14 +4020,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 STATIC void
 S_reguni(pTHX_ RExC_state_t *pRExC_state, UV uv, char* s, STRLEN* lenp)
 {
-    dTHR;
-    if (SIZE_ONLY) {
-	U8 tmpbuf[UTF8_MAXLEN];
-	*lenp = uv_to_utf8(tmpbuf, uv) - tmpbuf;
-    }
-    else
-	*lenp = uv_to_utf8((U8*)s, uv) - (U8*)s;
-
+    *lenp = SIZE_ONLY ? UNISKIP(uv) : (uv_to_utf8((U8*)s, uv) - (U8*)s);
 }
 
 /*
@@ -4046,7 +4031,6 @@ S_reguni(pTHX_ RExC_state_t *pRExC_state, UV uv, char* s, STRLEN* lenp)
 STATIC void
 S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
 {
-    dTHR;
     register regnode *src;
     register regnode *dst;
     register regnode *place;
@@ -4077,7 +4061,6 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
 STATIC void
 S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
 {
-    dTHR;
     register regnode *scan;
     register regnode *temp;
 
@@ -4107,7 +4090,6 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
 STATIC void
 S_regoptail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
 {
-    dTHR;
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
     if (p == NULL || SIZE_ONLY)
 	return;
@@ -4221,7 +4203,6 @@ void
 Perl_regdump(pTHX_ regexp *r)
 {
 #ifdef DEBUGGING
-    dTHR;
     SV *sv = sv_newmortal();
 
     (void)dumpuntil(r->program, r->program + 1, NULL, sv, 0);
@@ -4288,7 +4269,7 @@ Perl_regdump(pTHX_ regexp *r)
 STATIC void
 S_put_byte(pTHX_ SV *sv, int c)
 {
-    if (c <= ' ' || c == 127 || c == 255)
+    if (isCNTRL(c) || c == 127 || c == 255)
 	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
     else if (c == '-' || c == ']' || c == '\\' || c == '^')
 	Perl_sv_catpvf(aTHX_ sv, "\\%c", c);
@@ -4303,7 +4284,6 @@ void
 Perl_regprop(pTHX_ SV *sv, regnode *o)
 {
 #ifdef DEBUGGING
-    dTHR;
     register int k;
 
     sv_setpvn(sv, "", 0);
@@ -4331,8 +4311,10 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {
 	int i, rangestart = -1;
-	const char * const out[] = {	/* Should be syncronized with
-					   ANYOF_ #xdefines in regcomp.h */
+	bool anyofutf8 = OP(o) == ANYOFUTF8;
+	U8 flags = anyofutf8 ? ARG1(o) : o->flags;
+	const char * const anyofs[] = {	/* Should be syncronized with
+					 * ANYOF_ #xdefines in regcomp.h */
 	    "\\w",
 	    "\\W",
 	    "\\s",
@@ -4365,12 +4347,12 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	    "[:^blank:]"
 	};
 
-	if (o->flags & ANYOF_LOCALE)
+	if (flags & ANYOF_LOCALE)
 	    sv_catpv(sv, "{loc}");
-	if (o->flags & ANYOF_FOLD)
+	if (flags & ANYOF_FOLD)
 	    sv_catpv(sv, "{i}");
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
-	if (o->flags & ANYOF_INVERT)
+	if (flags & ANYOF_INVERT)
 	    sv_catpv(sv, "^");
 	if (OP(o) == ANYOF) {
 	    for (i = 0; i <= 256; i++) {
@@ -4390,12 +4372,59 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 		}
 	    }
 	    if (o->flags & ANYOF_CLASS)
-		for (i = 0; i < sizeof(out)/sizeof(char*); i++)
+		for (i = 0; i < sizeof(anyofs)/sizeof(char*); i++)
 		    if (ANYOF_CLASS_TEST(o,i))
-			sv_catpv(sv, out[i]);
+			sv_catpv(sv, anyofs[i]);
 	}
 	else {
-	    sv_catpv(sv, "{ANYOFUTF8}"); /* TODO: full decode */
+	    SV *rv = (SV*)PL_regdata->data[ARG2(o)];
+	    AV *av = (AV*)SvRV((SV*)rv);
+	    SV *sw = *av_fetch(av, 0, FALSE);
+	    SV *lv = *av_fetch(av, 1, FALSE);
+	    UV i;
+	    U8 s[UTF8_MAXLEN+1];
+	    for (i = 0; i <= 256; i++) { /* just the first 256 */
+		U8 *e = uv_to_utf8(s, i);
+		if (i < 256 && swash_fetch(sw, s)) {
+		    if (rangestart == -1)
+			rangestart = i;
+		} else if (rangestart != -1) {
+		    U8 *p;
+
+		    if (i <= rangestart + 3)
+			for (; rangestart < i; rangestart++) {
+			    for(e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
+				put_byte(sv, *p);
+			}
+		    else {
+			for (e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
+			    put_byte(sv, *p);
+			sv_catpv(sv, "-");
+			for (e = uv_to_utf8(s, i - 1), p = s; p < e; p++)
+			    put_byte(sv, *p);
+		    }
+		    rangestart = -1;
+		}
+	    }
+	    sv_catpv(sv, "...");
+	    {
+		char *s = savepv(SvPVX(lv));
+
+		while(*s && *s != '\n') s++;
+		if (*s == '\n') {
+		    char *t = ++s;
+
+		    while (*s) {
+			if (*s == '\n')
+			    *s = ' ';
+			s++;
+		    }
+		    if (s[-1] == ' ')
+			s[-1] = 0;
+
+		    sv_catpv(sv, t);
+		}
+	    }
 	}
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
@@ -4426,7 +4455,6 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
 void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
-    dTHR;
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
     if (!r || (--r->refcnt > 0))
@@ -4458,6 +4486,16 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	while (--n >= 0) {
 	    switch (r->data->what[n]) {
 	    case 's':
+#ifdef DEBUGGING
+	        {
+		    SV *rv = (SV*)r->data->data[n];
+		    AV *av = (AV*)SvRV((SV*)rv);
+		    SV *sw = *av_fetch(av, 0, FALSE);
+		    SV *lv = *av_fetch(av, 1, FALSE);
+		    SvREFCNT_dec(sw);
+		    SvREFCNT_dec(lv);
+		}
+#endif
 		SvREFCNT_dec((SV*)r->data->data[n]);
 		break;
 	    case 'f':
@@ -4507,7 +4545,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
 regnode *
 Perl_regnext(pTHX_ register regnode *p)
 {
-    dTHR;
     register I32 offset;
 
     if (p == &PL_regdummy)
@@ -4559,8 +4596,6 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 void
 Perl_save_re_context(pTHX)
 {                   
-    dTHR;
-
 #if 0
     SAVEPPTR(RExC_precomp);		/* uncompiled string. */
     SAVEI32(RExC_npar);		/* () count. */

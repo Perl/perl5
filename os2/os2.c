@@ -21,6 +21,8 @@
 #include <process.h>
 #include <fcntl.h>
 
+#define PERLIO_NOT_STDIO 0
+
 #include "EXTERN.h"
 #include "perl.h"
 
@@ -375,7 +377,6 @@ spawn_sighandler(int sig)
 static int
 result(pTHX_ int flag, int pid)
 {
-        dTHR;
 	int r, status;
 	Signal_t (*ihand)();     /* place to save signal during system() */
 	Signal_t (*qhand)();     /* place to save signal during system() */
@@ -467,7 +468,6 @@ static ULONG os2_mytype;
 int
 do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 {
-    dTHR;
 	int trueflag = flag;
 	int rc, pass = 1;
 	char *tmps;
@@ -605,8 +605,9 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 		char *scr = find_script(PL_Argv[0], TRUE, NULL, 0);
 
 		if (scr) {
-		    FILE *file;
-		    char *s = 0, *s1;
+		    PerlIO *file;
+                    SSize_t rd;
+		    char *s = 0, *s1, *s2;
 		    int l;
 
                     l = strlen(scr);
@@ -622,14 +623,18 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
                     Safefree(scr);
                     scr = scrbuf;
 
-		    file = fopen(scr, "r");
+		    file = PerlIO_open(scr, "r");
 		    PL_Argv[0] = scr;
 		    if (!file)
 			goto panic_file;
-		    if (!fgets(buf, sizeof buf, file)) { /* Empty... */
 
+		    rd = PerlIO_read(file, buf, sizeof buf-1);
+		    buf[rd]='\0';
+		    if ((s2 = strchr(buf, '\n')) != NULL) *++s2 = '\0';
+
+		    if (!rd) { /* Empty... */
 			buf[0] = 0;
-			fclose(file);
+			PerlIO_close(file);
 			/* Special case: maybe from -Zexe build, so
 			   there is an executable around (contrary to
 			   documentation, DosQueryAppType sometimes (?)
@@ -648,7 +653,7 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 			} else
 			    goto longbuf;
 		    }
-		    if (fclose(file) != 0) { /* Failure */
+		    if (PerlIO_close(file) != 0) { /* Failure */
 		      panic_file:
 			Perl_warner(aTHX_ WARN_EXEC, "Error reading \"%s\": %s", 
 			     scr, Strerror(errno));
@@ -818,7 +823,6 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 int
 do_spawn3(pTHX_ char *cmd, int execf, int flag)
 {
-    dTHR;
     register char **a;
     register char *s;
     char flags[10];
@@ -946,7 +950,6 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 int
 os2_do_aspawn(pTHX_ SV *really, register SV **mark, register SV **sp)
 {
-    dTHR;
     register char **a;
     int rc;
     int flag = P_WAIT, flag_set = 0;
@@ -984,21 +987,18 @@ os2_do_aspawn(pTHX_ SV *really, register SV **mark, register SV **sp)
 int
 os2_do_spawn(pTHX_ char *cmd)
 {
-    dTHR;
     return do_spawn3(aTHX_ cmd, EXECF_SPAWN, 0);
 }
 
 int
 do_spawn_nowait(pTHX_ char *cmd)
 {
-    dTHR;
     return do_spawn3(aTHX_ cmd, EXECF_SPAWN_NOWAIT,0);
 }
 
 bool
 Perl_do_exec(pTHX_ char *cmd)
 {
-    dTHR;
     do_spawn3(aTHX_ cmd, EXECF_EXEC, 0);
     return FALSE;
 }
@@ -1006,7 +1006,6 @@ Perl_do_exec(pTHX_ char *cmd)
 bool
 os2exec(pTHX_ char *cmd)
 {
-    dTHR;
     return do_spawn3(aTHX_ cmd, EXECF_TRUEEXEC, 0);
 }
 
@@ -1367,7 +1366,6 @@ os2error(int rc)
 char *
 os2_execname(pTHX)
 {
-  dTHR;
   char buf[300], *p;
 
   if (_execname(buf, sizeof buf) != 0)

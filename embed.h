@@ -702,6 +702,7 @@
 #define sv_tainted		Perl_sv_tainted
 #define sv_unmagic		Perl_sv_unmagic
 #define sv_unref		Perl_sv_unref
+#define sv_unref_flags		Perl_sv_unref_flags
 #define sv_untaint		Perl_sv_untaint
 #define sv_upgrade		Perl_sv_upgrade
 #define sv_usepvn		Perl_sv_usepvn
@@ -819,6 +820,7 @@
 #define sv_utf8_encode		Perl_sv_utf8_encode
 #define sv_utf8_decode		Perl_sv_utf8_decode
 #define sv_force_normal		Perl_sv_force_normal
+#define sv_force_normal_flags	Perl_sv_force_normal_flags
 #define tmps_grow		Perl_tmps_grow
 #define sv_rvweaken		Perl_sv_rvweaken
 #define magic_killbackrefs	Perl_magic_killbackrefs
@@ -2165,6 +2167,7 @@
 #define sv_tainted(a)		Perl_sv_tainted(aTHX_ a)
 #define sv_unmagic(a,b)		Perl_sv_unmagic(aTHX_ a,b)
 #define sv_unref(a)		Perl_sv_unref(aTHX_ a)
+#define sv_unref_flags(a,b)	Perl_sv_unref_flags(aTHX_ a,b)
 #define sv_untaint(a)		Perl_sv_untaint(aTHX_ a)
 #define sv_upgrade(a,b)		Perl_sv_upgrade(aTHX_ a,b)
 #define sv_usepvn(a,b,c)	Perl_sv_usepvn(aTHX_ a,b,c)
@@ -2276,6 +2279,7 @@
 #define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
 #define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)
 #define sv_force_normal(a)	Perl_sv_force_normal(aTHX_ a)
+#define sv_force_normal_flags(a,b)	Perl_sv_force_normal_flags(aTHX_ a,b)
 #define tmps_grow(a)		Perl_tmps_grow(aTHX_ a)
 #define sv_rvweaken(a)		Perl_sv_rvweaken(aTHX_ a)
 #define magic_killbackrefs(a,b)	Perl_magic_killbackrefs(aTHX_ a,b)
@@ -4246,6 +4250,8 @@
 #define sv_unmagic		Perl_sv_unmagic
 #define Perl_sv_unref		CPerlObj::Perl_sv_unref
 #define sv_unref		Perl_sv_unref
+#define Perl_sv_unref_flags	CPerlObj::Perl_sv_unref_flags
+#define sv_unref_flags		Perl_sv_unref_flags
 #define Perl_sv_untaint		CPerlObj::Perl_sv_untaint
 #define sv_untaint		Perl_sv_untaint
 #define Perl_sv_upgrade		CPerlObj::Perl_sv_upgrade
@@ -4463,6 +4469,8 @@
 #define sv_utf8_decode		Perl_sv_utf8_decode
 #define Perl_sv_force_normal	CPerlObj::Perl_sv_force_normal
 #define sv_force_normal		Perl_sv_force_normal
+#define Perl_sv_force_normal_flags	CPerlObj::Perl_sv_force_normal_flags
+#define sv_force_normal_flags	Perl_sv_force_normal_flags
 #define Perl_tmps_grow		CPerlObj::Perl_tmps_grow
 #define tmps_grow		Perl_tmps_grow
 #define Perl_sv_rvweaken	CPerlObj::Perl_sv_rvweaken

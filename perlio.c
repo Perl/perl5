@@ -28,6 +28,12 @@
 #define PERL_IN_PERLIO_C
 #include "perl.h"
 
+#undef PerlMemShared_calloc
+#define PerlMemShared_calloc(x,y) calloc(x,y)
+#undef PerlMemShared_free
+#define PerlMemShared_free(x) free(x)
+
+
 #ifndef PERLIO_LAYERS
 int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
@@ -1534,12 +1540,20 @@ IV
 PerlIOStdio_close(PerlIO *f)
 {
  dTHX;
+#ifdef HAS_SOCKET
  int optval, optlen = sizeof(int);
+#endif
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
  return(
+#ifdef HAS_SOCKET
    (getsockopt(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (char *)&optval, &optlen) < 0) ?
        PerlSIO_fclose(stdio) :
-       close(PerlIO_fileno(f)));
+       close(PerlIO_fileno(f))
+#else
+   PerlSIO_fclose(stdio)
+#endif
+     );
+
 }
 
 IV
