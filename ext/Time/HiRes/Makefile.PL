@@ -1,8 +1,3 @@
-
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-#
-
 require 5.002;
 
 use Config;
@@ -16,7 +11,8 @@ my $XSOPT;
 
 use vars qw($self); # Used in 'sourcing' the hints.
 
-my $ld_exeext = ($^O eq 'os2' and $Config{ldflags} =~ /-Zexe\b/) ? '.exe' : '';
+my $ld_exeext = ($^O eq 'cygwin' ||
+                 $^O eq 'os2' && $Config{ldflags} =~ /-Zexe\b/) ? '.exe' : '';
 
 unless($ENV{PERL_CORE}) {
     $ENV{PERL_CORE} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
@@ -206,6 +202,23 @@ EOM
     return 0;
 }
 
+sub has_include {
+    my ($inc) = @_;
+    return 1 if
+    try_compile_and_link(<<EOM);
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+
+#include <$inc>
+int main _((int argc, char** argv, char** env))
+{
+	return 0;
+}
+EOM
+    return 0;
+}
+
 sub init {
     my $hints = File::Spec->catfile("hints", "$^O.pl");
     if (-f $hints) {
@@ -276,7 +289,7 @@ EOD
     }
 
     if ($has_setitimer && $has_getitimer) {
-	print "You have interval timers (both setitimer and setitimer).\n";
+	print "You have interval timers (both setitimer and getitimer).\n";
     } else {
 	print "You do not have interval timers.\n";
     }
@@ -338,11 +351,27 @@ EOD
 
     if ($has_nanosleep) {
 	print "found.\n";
-        print "You can mix subsecond sleeps with signals.\n";
+        print "You can mix subsecond sleeps with signals, if you want to.\n";
+        print "(It's still not portable, though.)\n";
     } else {
 	print "NOT found.\n";
 	my $nt = ($^O eq 'os2' ? '' : 'not');
         print "You can$nt mix subsecond sleeps with signals.\n";
+        print "(It would not be portable anyway.)\n";
+    }
+
+    my $has_w32api_windows_h;
+    if ($^O eq 'cygwin') {
+        print "Looking for <w32api/windows.h>... ";
+        if (has_include('w32api/windows.h')) {
+	    $has_w32api_windows_h++;
+	    $DEFINE .= ' -DHAS_W32API_WINDOWS_H';
+	}
+        if ($has_w32api_windows_h) {
+	    print "found.\n";
+	} else {
+	    print "NOT found.\n";
+	}
     }
 
     if ($DEFINE) {

@@ -1,5 +1,24 @@
 Revision history for Perl extension Time::HiRes.
 
+1.61
+	- Win32: reset reading from the performance counters every
+	  five minutes to better track wall clock time (thanks to
+	  PC timers being often quite bad), should help long-running
+	  programs.
+
+1.60
+	- Win32: Patch from Steve Hay
+	  [PATCH] Re: [perl #30755] [Win32] Different results from Time::HiRes::gettimeofdayunder the debugger
+	  to [perl #30755] reported by Nigel Sandever
+
+	- Cygwin: Use the Win32 recalibration code also in Cygwin if the
+	  <w32api/windows.h> APIs are available.  Cygwin testing by
+	  Yitzchak Scott-Thoennes.
+
+	- Solaris: use -lposix4 to get nanosleep for Solaris 2.6,
+	  after that keep using -lrt, patch from Alan Burlison,
+	  bug reported in [cpan #7165]
+
 1.59
 	- Change the Win32 recalibration limit to 0.5 seconds and tweak
 	  the documentation to blather less about the gory details of the
@@ -21,7 +40,7 @@ Revision history for Perl extension Time::HiRes.
 	  perl change #22258)
 
 1.55
-	- Windows: ming32 patch from Mike Pomraning (use Perl's Const64()
+	- Windows: mingw32 patch from Mike Pomraning (use Perl's Const64()
 	  instead of VC-specific i64 suffix)
 
 1.54
