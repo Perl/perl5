@@ -13,6 +13,6 @@ use warnings FATAL => qw(deprecated) ;
 1 if 1 EQ 2 ;
 print "The End.\n" ;
 EXPECT
-Use of EQ is deprecated at - line 8.
 WARN -- Use of EQ is deprecated at - line 6.
 DIE -- Use of EQ is deprecated at - line 8.
+Use of EQ is deprecated at - line 8.

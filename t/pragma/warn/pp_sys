@@ -195,6 +195,16 @@ syswrite() on closed filehandle main::STDIN at - line 6.
 (Are you trying to call syswrite() on dirhandle main::STDIN?)
 ########
 # pp_sys.c [pp_flock]
+use Config; 
+BEGIN { 
+  if ( $^O eq 'VMS' and ! $Config{d_flock}) {
+    print <<EOM ;
+SKIPPED
+# flock not present
+EOM
+    exit ;
+  } 
+}
 use warnings 'closed' ;
 close STDIN;
 flock STDIN, 8;
