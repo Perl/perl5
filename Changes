@@ -31,6 +31,226 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12566] By: jhi                                   on 2001/10/22  12:22:29
+        Log: Subject: [PATCH pod/perlvar.pod] Undeprecating $]
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 22 Oct 2001 03:48:38 -0400
+             Message-ID: <20011022034838.B1676@blackrider>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 12565] By: jhi                                   on 2001/10/22  12:21:28
+        Log: Pod nits, as suggested by Stas Bekman.
+     Branch: perl
+	   ! ext/threads/shared/shared.pm ext/threads/threads.pm
+____________________________________________________________________________
+[ 12564] By: jhi                                   on 2001/10/22  12:17:00
+        Log: Subject: [PATCH @ ] Fix for FETCH/NEXTKEY problem in all *DB*_File modules
+             From: "Paul Marquess" <paul.marquess@openwave.com> 
+             Date: Sun, 21 Oct 2001 21:11:15 +0100
+             Message-ID: <AIEAJICLCBDNAAOLLOKLAEOMDCAA.paul.marquess@openwave.com>
+     Branch: perl
+	   ! ext/DB_File/DB_File.xs ext/DB_File/t/db-btree.t
+	   ! ext/DB_File/t/db-hash.t ext/GDBM_File/GDBM_File.xs
+	   ! ext/GDBM_File/gdbm.t ext/GDBM_File/typemap
+	   ! ext/NDBM_File/NDBM_File.xs ext/NDBM_File/ndbm.t
+	   ! ext/ODBM_File/ODBM_File.xs ext/ODBM_File/odbm.t
+	   ! ext/ODBM_File/typemap ext/SDBM_File/SDBM_File.xs
+	   ! ext/SDBM_File/sdbm.t
+____________________________________________________________________________
+[ 12563] By: jhi                                   on 2001/10/22  12:15:19
+        Log: Integrate change #12559 from maintperl;
+             various fixes for system() and backticks under windows
+     Branch: perl
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 12562] By: jhi                                   on 2001/10/22  12:05:35
+        Log: Integrate change #12560 from maintperl;
+             make pl2bat use %0 rather than "%0" (the latter fails to work
+             in a lot of common cases)
+     Branch: perl
+	  !> win32/bin/pl2bat.pl
+____________________________________________________________________________
+[ 12561] By: jhi                                   on 2001/10/22  12:00:23
+        Log: Integrate changes #12549 and #12550 from maintperl;
+             
+             readline() doesn't work with our variables; it confuses them with
+             my variables (change#4227 was incomplete)
+     Branch: perl
+	   ! t/lib/strict/vars
+	  !> t/base/rs.t toke.c
+____________________________________________________________________________
+[ 12560] By: gsar                                  on 2001/10/22  09:51:59
+        Log: make pl2bat use %0 rather than "%0" (the latter fails to work
+             in a lot of common cases)
+     Branch: maint-5.6/perl
+	   ! win32/bin/pl2bat.pl
+____________________________________________________________________________
+[ 12559] By: gsar                                  on 2001/10/22  09:49:51
+        Log: various fixes for system() and backticks under windows:
+             
+             * avoid munging whitespace that is passed within quotes
+             * work around a cmd.exe misfeature that made multi-arg
+             system() unreliable when there is more than one quoted
+             argument
+             * make multi-arg system() autoquote arguments as needed
+             before passing them to the shell (this avoids having to
+             second guess the shell quoting)
+             * perl's -Dp switch can be used to trace the innards
+     Branch: maint-5.6/perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 12558] By: nick                                  on 2001/10/22  08:58:42
+        Log: Integrate ithreads buffer flush fix from perlio
+     Branch: perl
+	  !> ext/threads/t/basic.t perl.c
+____________________________________________________________________________
+[ 12557] By: nick                                  on 2001/10/22  08:35:09
+        Log: All tests pass (legitimately) on ithreads
+     Branch: perlio
+	   ! ext/threads/t/basic.t perl.c
+____________________________________________________________________________
+[ 12556] By: nick                                  on 2001/10/22  06:51:22
+        Log: Integrate non-ithreads fix to mainline
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[ 12555] By: nick                                  on 2001/10/22  06:48:33
+        Log: Restore non-ithreads build. Interestingly binmode test passes
+             non-ithreads - so crlf layer is not damaged and ithreads fail
+             is a symptom ...
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 12554] By: jhi                                   on 2001/10/21  22:21:55
+        Log: Integrate from perlio; restructuring.
+     Branch: perl
+	  !> embed.h embedvar.h intrpvar.h perl.c perlapi.h perlio.c
+	  !> perlio.h perliol.h pod/perlapi.pod sv.c win32/makefile.mk
+	  !> win32/perlhost.h
+____________________________________________________________________________
+[ 12553] By: pudge                                 on 2001/10/21  21:51:34
+        Log: Integrate from maintperl
+             (Changes 12350, 12496, 12548, 12549, 12550)
+     Branch: maint-5.6/macperl
+	  !> ext/IO/lib/IO/Seekable.pm lib/Carp/Heavy.pm t/base/rs.t
+	  !> t/lib/filefind-taint.t t/pragma/strict-vars toke.c
+____________________________________________________________________________
+[ 12552] By: nick                                  on 2001/10/21  19:18:12
+        Log: Win32 PerlIO_cleanup special cases should no longer be required.
+     Branch: perlio
+	   ! perl.c
+____________________________________________________________________________
+[ 12551] By: nick                                  on 2001/10/21  19:16:56
+        Log: Multiple win32io.o is fatal for GCC (and noise with VC++)
+     Branch: perlio
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 12550] By: gsar                                  on 2001/10/21  19:05:54
+        Log: change#12549 wasn't aware of strictures
+     Branch: maint-5.6/perl
+	   ! t/pragma/strict-vars toke.c
+____________________________________________________________________________
+[ 12549] By: gsar                                  on 2001/10/21  18:03:19
+        Log: readline() doesn't work with our variables; it confuses them with
+             my variables (change#4227 was incomplete)
+     Branch: maint-5.6/perl
+	   ! t/base/rs.t toke.c
+____________________________________________________________________________
+[ 12548] By: gsar                                  on 2001/10/21  17:48:01
+        Log: change#12220 appears to have pulled in a mainline change that
+             isn't applicable to maint-5.6 (some platforms don't taint
+             cwd)
+     Branch: maint-5.6/perl
+	   ! t/lib/filefind-taint.t
+____________________________________________________________________________
+[ 12547] By: nick                                  on 2001/10/21  17:15:54
+        Log: Convert rest of PerlIO's memory tables to per-interp and add clone functions
+             for them. Call explicit cleanup during destruct process.
+             - one binmode test is failing
+             - also ext/threads/t/basic.t fails under make test, and is noisy under
+             harness. (Threads results are intermingled and don't match order expected.)
+     Branch: perlio
+	   ! embed.h embedvar.h intrpvar.h perl.c perlapi.h perlio.c
+	   ! perlio.h perliol.h pod/perlapi.pod sv.c
+____________________________________________________________________________
+[ 12546] By: jhi                                   on 2001/10/21  16:12:08
+        Log: Implement multicharacter case mappings where a single
+             Unicode character can be mapped into several.
+     Branch: perl
+	   - lib/unicore/To/SpecLower.pl lib/unicore/To/SpecTitle.pl
+	   - lib/unicore/To/SpecUpper.pl
+	   ! MANIFEST embed.h embed.pl global.sym lib/unicore/To/Lower.pl
+	   ! lib/unicore/To/Title.pl lib/unicore/To/Upper.pl
+	   ! lib/unicore/mktables pod/perlfunc.pod pod/perlunicode.pod pp.c
+	   ! proto.h t/op/lc.t utf8.c
+____________________________________________________________________________
+[ 12545] By: sky                                   on 2001/10/21  15:25:16
+        Log: First support of threads::shared, support shared svs and references.
+     Branch: perl
+	   + ext/threads/shared/Makefile.PL ext/threads/shared/README
+	   + ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+	   + ext/threads/shared/t/sv_refs.t
+	   + ext/threads/shared/t/sv_simple.t
+	   ! MANIFEST sharedsv.c
+____________________________________________________________________________
+[ 12544] By: nick                                  on 2001/10/21  14:52:35
+        Log: PerlIO layer table as PL_perlio (per-interpreter)
+     Branch: perlio
+	   ! embed.h embedvar.h intrpvar.h perlapi.h perlio.c perlio.h
+	   ! pod/perlapi.pod sv.c
+____________________________________________________________________________
+[ 12543] By: jhi                                   on 2001/10/21  13:36:40
+        Log: Prettyprinting.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 12542] By: ams                                   on 2001/10/21  03:50:25
+        Log: Subject: perlpodspec and perlpod rewrite, draft 3 "final"
+             From: "Sean M. Burke" <sburke@cpan.org>
+             Date: Sat, 20 Oct 2001 17:51:09 -0600
+             Message-Id: <3.0.6.32.20011020175109.007cb3d0@mail.spinn.net>
+     Branch: perl
+	   + pod/perlpodspec.pod
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perlpod.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 12541] By: nick                                  on 2001/10/20  22:23:53
+        Log: Fix typos in new locking on MemShared
+             Make buffers in PerlIOBuf_* in per-thread heap (they are cloned after all...)
+             - seems to make segfaults more deterministic - suspect they are 
+             attempt to free() after Interp and Host have gone.
+     Branch: perlio
+	   ! perlio.c win32/perlhost.h
+____________________________________________________________________________
+[ 12540] By: nick                                  on 2001/10/20  21:50:46
+        Log: Remove the MemShared re-#define (again)
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 12539] By: nick                                  on 2001/10/20  21:49:06
+        Log: Use locks on MemShared
+     Branch: perlio
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[ 12538] By: jhi                                   on 2001/10/20  17:31:07
+        Log: Subject: [REPATCH installhtml] Re: installhtml needs a good beating out
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sat, 20 Oct 2001 11:13:47 -0600
+             Message-ID: <20011020172003.60024.qmail@onion.perl.org>
+     Branch: perl
+	   ! installhtml
+____________________________________________________________________________
+[ 12537] By: nick                                  on 2001/10/20  16:44:03
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 48 files)
+____________________________________________________________________________
+[ 12536] By: jhi                                   on 2001/10/20  15:58:00
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12535] By: jhi                                   on 2001/10/20  15:18:57
         Log: Upgrade to podlators 1.11, from Russ Allbery.
      Branch: perl
