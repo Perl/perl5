@@ -1348,6 +1348,7 @@ t/io/print.t		See if print commands work
 t/io/read.t		See if read works
 t/io/tell.t		See if file seeking works
 t/io/utf8.t		See if file seeking works
+t/lib/1_compile.t	See if the various libraries and extensions compile
 t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
@@ -1368,6 +1369,7 @@ t/lib/charnames.t	See if character names work
 t/lib/checktree.t	See if File::CheckTree works
 t/lib/class-struct.t	See if Class::Struct works
 t/lib/complex.t		See if Math::Complex works
+t/lib/compmod.pl	Helper for 1_compile.t
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
