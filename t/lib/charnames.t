@@ -8,7 +8,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..10\n";
+print "1..12\n";
 
 use charnames ':full';
 
@@ -67,4 +67,8 @@ $encoded_bet = "\327\221";
     print "ok 9\n";
     print "not " unless sprintf("%vx", "\N{WHITE SMILING FACE}") eq "263a";
     print "ok 10\n";
+    print "not " unless sprintf("%vx", "\xFF\N{WHITE SMILING FACE}") eq "ff.263a";
+    print "ok 11\n";
+    print "not " unless sprintf("%vx", "\x{ff}\N{WHITE SMILING FACE}") eq "ff.263a";
+    print "ok 12\n";
 }
