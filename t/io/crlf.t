@@ -30,7 +30,9 @@ if (find PerlIO::Layer 'perlio') {
  { local $/; $text = <FOO> }
  is(count_chars($text, "\015\012"), 2000);
 
+ SKIP:
  {
+  if ($^X =~ /\bminiperl\b/) { skip(q/miniperl can't load PerlIO layers/) }
   my $fcontents = join "", map {"$_\r\n"} "a".."zzz";
   open my $fh, "<:crlf", \$fcontents;
   local $/ = "xxx";
