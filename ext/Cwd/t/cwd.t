@@ -31,7 +31,7 @@ eval { fastcwd };
 my $pwd_cmd =
     ($^O eq "MSWin32" || $^O eq "NetWare") ?
         "cd" :
-        (grep { -x && -f } map { "$_/pwd" }
+        (grep { -x && -f } map { "$_/pwd$Config{exe_ext}" }
 	                   split m/$Config{path_sep}/, $ENV{PATH})[0];
 
 $pwd_cmd = 'SHOW DEFAULT' if $IsVMS;
