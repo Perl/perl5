@@ -533,7 +533,7 @@ Ap	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|LOOP* loop \
 				|I32 whileline|OP* expr|OP* block|OP* cont
 
 Ap	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
-Apd	|char*	|scan_vstring	|char *vstr|SV *sv
+Ap	|char*	|scan_vstring	|char *vstr|SV *sv
 Apd	|char*	|scan_version	|char *vstr|SV *sv
 Apd	|SV*	|new_version	|SV *ver
 Apd	|SV*	|upg_version	|SV *ver

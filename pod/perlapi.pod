@@ -1716,6 +1716,41 @@ Fill the sv with current working directory
 =for hackers
 Found in file util.c
 
+=item new_version
+
+Returns a new version object based on the passed in SV:
+
+    SV *sv = new_version(SV *ver);
+
+Does not alter the passed in ver SV.  See "upg_version" if you
+want to upgrade the SV.
+
+	SV*	new_version(SV *ver)
+
+=for hackers
+Found in file util.c
+
+=item scan_version
+
+Returns a pointer to the next character after the parsed
+version string, as well as upgrading the passed in SV to
+an RV.
+
+Function must be called with an already existing SV like
+
+    sv = NEWSV(92,0);
+    s = scan_version(s,sv);
+
+Performs some preprocessing to the string to ensure that
+it has the correct characteristics of a version.  Flags the
+object if it contains an underscore (which denotes this
+is a beta version).
+
+	char*	scan_version(char *vstr, SV *sv)
+
+=for hackers
+Found in file util.c
+
 =item strEQ
 
 Test two strings to see if they are equal.  Returns true or false.
@@ -1796,6 +1831,92 @@ wrapper for C<strncmp>).
 
 =for hackers
 Found in file handy.h
+
+=item sv_nolocking
+
+Dummy routine which "locks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+	void	sv_nolocking(SV *)
+
+=for hackers
+Found in file util.c
+
+=item sv_nosharing
+
+Dummy routine which "shares" an SV when there is no sharing module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+	void	sv_nosharing(SV *)
+
+=for hackers
+Found in file util.c
+
+=item sv_nounlocking
+
+Dummy routine which "unlocks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+	void	sv_nounlocking(SV *)
+
+=for hackers
+Found in file util.c
+
+=item upg_version
+
+In-place upgrade of the supplied SV to a version object.
+
+    SV *sv = upg_version(SV *sv);
+
+Returns a pointer to the upgraded SV.
+
+	SV*	upg_version(SV *ver)
+
+=for hackers
+Found in file util.c
+
+=item vcmp
+
+Version object aware cmp.  Both operands must already have been 
+converted into version objects.
+
+	int	vcmp(SV *lvs, SV *rvs)
+
+=for hackers
+Found in file util.c
+
+=item vnumify
+
+Accepts a version object and returns the normalized floating
+point representation.  Call like:
+
+    sv = vnumify(rv);
+
+NOTE: you can pass either the object directly or the SV
+contained within the RV.
+
+	SV*	vnumify(SV *vs)
+
+=for hackers
+Found in file util.c
+
+=item vstringify
+
+Accepts a version object and returns the normalized string
+representation.  Call like:
+
+    sv = vstringify(rv);
+
+NOTE: you can pass either the object directly or the SV
+contained within the RV.
+
+	SV*	vstringify(SV *vs)
+
+=for hackers
+Found in file util.c
 
 
 =back
@@ -2594,59 +2715,6 @@ The reference count for the SV is set to 1.
 
 =for hackers
 Found in file sv.c
-
-=item new_version
-
-Returns a new version object based on the passed in SV:
-
-    SV *sv = new_version(SV *ver);
-
-Does not alter the passed in ver SV.  See "upg_version" if you
-want to upgrade the SV.
-
-	SV*	new_version(SV *ver)
-
-=for hackers
-Found in file util.c
-
-=item scan_version
-
-Returns a pointer to the next character after the parsed
-version string, as well as upgrading the passed in SV to
-an RV.
-
-Function must be called with an already existing SV like
-
-    sv = NEWSV(92,0);
-    s = scan_version(s,sv);
-
-Performs some preprocessing to the string to ensure that
-it has the correct characteristics of a version.  Flags the
-object if it contains an underscore (which denotes this
-is a beta version).
-
-	char*	scan_version(char *vstr, SV *sv)
-
-=for hackers
-Found in file util.c
-
-=item scan_vstring
-
-Returns a pointer to the next character after the parsed
-vstring, as well as updating the passed in sv.
-
-Function must be called like
-
-	sv = NEWSV(92,5);
-	s = scan_vstring(s,sv);
-
-The sv should already be large enough to store the vstring
-passed in, for performance reasons.
-
-	char*	scan_vstring(char *vstr, SV *sv)
-
-=for hackers
-Found in file util.c
 
 =item SvCUR
 
@@ -3986,39 +4054,6 @@ instead.
 =for hackers
 Found in file sv.c
 
-=item sv_nolocking
-
-Dummy routine which "locks" an SV when there is no locking module present.
-Exists to avoid test for a NULL function pointer and because it could potentially warn under
-some level of strict-ness.
-
-	void	sv_nolocking(SV *)
-
-=for hackers
-Found in file util.c
-
-=item sv_nosharing
-
-Dummy routine which "shares" an SV when there is no sharing module present.
-Exists to avoid test for a NULL function pointer and because it could potentially warn under
-some level of strict-ness.
-
-	void	sv_nosharing(SV *)
-
-=for hackers
-Found in file util.c
-
-=item sv_nounlocking
-
-Dummy routine which "unlocks" an SV when there is no locking module present.
-Exists to avoid test for a NULL function pointer and because it could potentially warn under
-some level of strict-ness.
-
-	void	sv_nounlocking(SV *)
-
-=for hackers
-Found in file util.c
-
 =item sv_nv
 
 A private implementation of the C<SvNVx> macro for compilers which can't
@@ -4686,59 +4721,6 @@ Usually used via one of its frontends C<sv_setpvf> and C<sv_setpvf_mg>.
 
 =for hackers
 Found in file sv.c
-
-=item upg_version
-
-In-place upgrade of the supplied SV to a version object.
-
-    SV *sv = upg_version(SV *sv);
-
-Returns a pointer to the upgraded SV.
-
-	SV*	upg_version(SV *ver)
-
-=for hackers
-Found in file util.c
-
-=item vcmp
-
-Version object aware cmp.  Both operands must already have been 
-converted into version objects.
-
-	int	vcmp(SV *lvs, SV *rvs)
-
-=for hackers
-Found in file util.c
-
-=item vnumify
-
-Accepts a version object and returns the normalized floating
-point representation.  Call like:
-
-    sv = vnumify(rv);
-
-NOTE: you can pass either the object directly or the SV
-contained within the RV.
-
-	SV*	vnumify(SV *vs)
-
-=for hackers
-Found in file util.c
-
-=item vstringify
-
-Accepts a version object and returns the normalized string
-representation.  Call like:
-
-    sv = vstringify(rv);
-
-NOTE: you can pass either the object directly or the SV
-contained within the RV.
-
-	SV*	vstringify(SV *vs)
-
-=for hackers
-Found in file util.c
 
 
 =back
