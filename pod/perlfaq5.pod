@@ -1021,7 +1021,7 @@ Or, just use the fdopen(3S) feature of open():
 	close F;
     }
 
-=head2 Why can't I use "C:\temp\foo" in DOS paths?  What doesn't `C:\temp\foo.exe` work?
+=head2 Why can't I use "C:\temp\foo" in DOS paths?  Why doesn't `C:\temp\foo.exe` work?
 
 Whoops!  You just put a tab and a formfeed into that filename!
 Remember that within double quoted strings ("like\this"), the
