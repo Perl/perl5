@@ -7,7 +7,10 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    $can_fork = $Config{d_fork} || ($^O eq 'MSWin32' && $Config{useithreads});
+    $can_fork = $Config{'d_fork'}
+		or ($^O eq 'MSWin32' and $Config{useithreads}
+		    and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/);
+
 
     if ($^O eq "hpux" or $Config{'extensions'} !~ /\bSocket\b/ &&
         !(($^O eq 'VMS') && $Config{d_socket})) {
