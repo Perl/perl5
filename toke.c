@@ -2111,6 +2111,7 @@ Perl_yylex(pTHX)
     STRLEN len;
     GV *gv = Nullgv;
     GV **gvp = 0;
+    bool bof = FALSE;
 
     /* check if there's an identifier for us to look at */
     if (PL_pending_ident) {
@@ -2531,7 +2532,7 @@ Perl_yylex(pTHX)
 	    goto retry;
 	}
 	do {
-	    bool bof = PL_rsfp ? TRUE : FALSE;
+	    bof = PL_rsfp ? TRUE : FALSE;
 	    if (bof) {
 #ifdef PERLIO_IS_STDIO
 #  ifdef __GNU_LIBRARY__
