@@ -3,9 +3,9 @@ package autouse;
 #use strict;		# debugging only
 use 5.003_90;		# ->can, for my $var
 
-$autouse::VERSION = '1.00';
+$autouse::VERSION = '1.01';
 
-my $DEBUG = $ENV{AUTOUSE_DEBUG};
+$autouse::DEBUG ||= 0;
 
 sub vet_import ($);
 
@@ -15,7 +15,8 @@ sub croak {
 }
 
 sub import {
-    shift;
+    my $class = @_ ? shift : 'autouse';
+    croak "usage: use $class MODULE [,SUBS...]" unless @_;
     my $module = shift;
 
     (my $pm = $module) =~ s{::}{/}g;
@@ -29,7 +30,7 @@ sub import {
 
     # It is not loaded: need to do real work.
     my $callpkg = caller(0);
-    print "autouse called from $callpkg\n" if $DEBUG;
+    print "autouse called from $callpkg\n" if $autouse::DEBUG;
 
     my $index;
     for my $f (@_) {
@@ -56,7 +57,7 @@ sub import {
 	    *$closure_import_func = \&{"${module}::$closure_func"};
 	    print "autousing $module; "
 		  ."imported $closure_func as $closure_import_func\n"
-		if $DEBUG;
+		if $autouse::DEBUG;
 	    goto &$closure_import_func;
 	};
 
