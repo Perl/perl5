@@ -766,8 +766,11 @@ S_mulexp10(NV value, I32 exponent)
 	if (exponent & bit) {
 	    exponent ^= bit;
 	    result *= power;
+	    /* Floating point exceptions are supposed to be turned off,
+	     *  but if we're obviously done, don't risk another iteration.  
+	     */
+	     if (exponent == 0) break;
 	}
-	/* Floating point exceptions are supposed to be turned off. */
 	power *= power;
     }
     return negative ? value / result : value * result;
