@@ -4497,14 +4497,17 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
     if (SvREADONLY(sv)) {
 	if (SvFAKE(sv)) {
 	    char *pvx = SvPVX(sv);
+	    int is_utf8 = SvUTF8(sv);
 	    STRLEN len = SvCUR(sv);
             U32 hash   = SvUVX(sv);
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
+            SvPVX(sv) = 0;
+            SvLEN(sv) = 0;
 	    SvGROW(sv, len + 1);
 	    Move(pvx,SvPVX(sv),len,char);
 	    *SvEND(sv) = '\0';
-	    unsharepvn(pvx, SvUTF8(sv) ? -(I32)len : len, hash);
+	    unsharepvn(pvx, is_utf8 ? -(I32)len : len, hash);
 	}
 	else if (IN_PERL_RUNTIME)
 	    Perl_croak(aTHX_ PL_no_modify);
