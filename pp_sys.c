@@ -749,7 +749,7 @@ PP(pp_sselect)
     }
 
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
-#if defined(__linux__) || defined(OS2)
+#if defined(__linux__) || defined(OS2) || defined(NeXT) || defined(__osf__) || defined(sun)
     growsize = sizeof(fd_set);
 #else
     growsize = maxlen;		/* little endians can use vecs directly */
@@ -1328,7 +1328,7 @@ PP(pp_sysread)
     {
 	length = PerlIO_read(IoIFP(io), buffer+offset, length);
 	/* fread() returns 0 on both error and EOF */
-	if (PerlIO_error(IoIFP(io)))
+	if (length == 0 && PerlIO_error(IoIFP(io)))
 	    length = -1;
     }
     if (length < 0)

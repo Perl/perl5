@@ -221,8 +221,13 @@
 #	include <sys/types.h>
 #   endif
 #   include <sys/param.h>
+    /* Needed for IAMSUID case in perl.c at least for NetBSD.
+     * What about FreeBSD, OpenBSD, BSDI, MachTen?
+     * XXX there should probably be a Configure variable */
+#   ifdef __NetBSD__
+#     include <sys/mount.h>
+#   endif
 #endif
-
 
 /* Use all the "standard" definitions? */
 #if defined(STANDARD_C) && defined(I_STDLIB)

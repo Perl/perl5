@@ -140,10 +140,11 @@ char *name;
 	for (off = AvFILLp(comppad_name); off > comppad_name_floor; off--) {
 	    if ((sv = svp[off])
 		&& sv != &sv_undef
-		&& SvIVX(sv) == 999999999       /* var is in open scope */
+		&& (SvIVX(sv) == 999999999 || SvIVX(sv) == 0)
 		&& strEQ(name, SvPVX(sv)))
 	    {
-		warn("\"my\" variable %s masks earlier declaration in same scope", name);
+		warn("\"my\" variable %s masks earlier declaration in same %s",
+		    name, (SvIVX(sv) == 999999999 ? "scope" : "statement"));
 		break;
 	    }
 	}

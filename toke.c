@@ -1773,6 +1773,7 @@ yylex()
 		    else
 			(void)PerlIO_close(rsfp);
 		    rsfp = Nullfp;
+		    doextract = FALSE;
 		}
 		if (!in_eval && (minus_n || minus_p)) {
 		    sv_setpv(linestr,minus_p ? ";}continue{print" : "");
@@ -2393,7 +2394,11 @@ yylex()
 	}
 	if (lex_brackets < lex_formbrack) {
 	    char *t;
+#ifdef PERL_STRICT_CR
 	    for (t = s; *t == ' ' || *t == '\t'; t++) ;
+#else
+	    for (t = s; *t == ' ' || *t == '\t' || *t == '\r'; t++) ;
+#endif
 	    if (*t == '\n' || *t == '#') {
 		s--;
 		expect = XBLOCK;
@@ -2618,8 +2623,14 @@ yylex()
 	OPERATOR(tmp);
 
     case '.':
-	if (lex_formbrack && lex_brackets == lex_formbrack && s[1] == '\n' &&
-		(s == linestart || s[-1] == '\n') ) {
+	if (lex_formbrack && lex_brackets == lex_formbrack
+#ifdef PERL_STRICT_CR
+	    && s[1] == '\n'
+#else
+	    && (s[1] == '\n' || (s[1] == '\r' && s[2] == '\n'))
+#endif
+	    && (s == linestart || s[-1] == '\n') )
+	{
 	    lex_formbrack = 0;
 	    expect = XSTATE;
 	    goto rightbracket;
@@ -5737,7 +5748,11 @@ register char *s;
     while (!needargs) {
 	if (*s == '.' || *s == '}') {
 	    /*SUPPRESS 530*/
-	    for (t = s+1; *t == ' ' || *t == '\t'; t++) ;
+#ifdef PERL_STRICT_CR
+	    for (t = s+1;*t == ' ' || *t == '\t'; t++) ;
+#else
+	    for (t = s+1;*t == ' ' || *t == '\t' || *t == '\r'; t++) ;
+#endif
 	    if (*t == '\n')
 		break;
 	}
