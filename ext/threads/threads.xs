@@ -11,10 +11,10 @@
 */
 
 #ifdef WIN32
-THREAD_RET_TYPE thread_run(LPVOID arg) {
+THREAD_RET_TYPE Perl_thread_run(LPVOID arg) {
 	ithread* thread = (ithread*) arg;
 #else
-void thread_run(ithread* thread) {
+void Perl_thread_run(ithread* thread) {
 #endif
 	SV* thread_tid_ptr;
 	SV* thread_ptr;
@@ -68,7 +68,7 @@ void thread_run(ithread* thread) {
 	perl_free(thread->interp);
 	if(thread->detached == 1) {
 		MUTEX_UNLOCK(&thread->mutex);
-		thread_destruct(thread);
+		Perl_thread_destruct(thread);
 	} else {
 	  	MUTEX_UNLOCK(&thread->mutex);
    	}
@@ -84,7 +84,7 @@ void thread_run(ithread* thread) {
 	iThread->create();
 */
 
-SV* thread_create(char* class, SV* init_function, SV* params) {
+SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 	ithread* thread = malloc(sizeof(ithread));
   	SV*      obj_ref;
   	SV*      obj;
@@ -154,7 +154,7 @@ SV* thread_create(char* class, SV* init_function, SV* params) {
 	/* lets init the thread */
 
 
-//	thread->mutex = (perl_mutex) malloc(sizeof(perl_mutex));
+
 
 
 	MUTEX_INIT(&thread->mutex);
@@ -164,11 +164,11 @@ SV* thread_create(char* class, SV* init_function, SV* params) {
 
 #ifdef WIN32
 
-	thread->handle = CreateThread(NULL, 0, thread_run,
+	thread->handle = CreateThread(NULL, 0, Perl_thread_run,
 			(LPVOID)thread, 0, &thread->thr);
 
 #else
-	pthread_create( &thread->thr, NULL, (void *) thread_run, thread);
+	pthread_create( &thread->thr, NULL, (void *) Perl_thread_run, thread);
 #endif
 	MUTEX_UNLOCK(&create_mutex);	
 
@@ -180,10 +180,10 @@ SV* thread_create(char* class, SV* init_function, SV* params) {
 /*
 	returns the id of the thread
 */
-I32 thread_tid (SV* obj) {
+I32 Perl_thread_tid (SV* obj) {
 	ithread* thread;
 	if(!SvROK(obj)) {
-		obj = thread_self(SvPV_nolen(obj));
+		obj = Perl_thread_self(SvPV_nolen(obj));
 		thread = (ithread*)SvIV(SvRV(obj));	
 		SvREFCNT_dec(obj);
 	} else {
@@ -192,7 +192,7 @@ I32 thread_tid (SV* obj) {
 	return thread->tid;
 }
 
-SV* thread_self (char* class) {
+SV* Perl_thread_self (char* class) {
 	dTHX;
 	SV*      obj_ref;
 	SV*      obj;
@@ -230,7 +230,7 @@ SV* thread_self (char* class) {
 	this code needs to take the returnvalue from the call_sv and send it back
 */
 
-void thread_join(SV* obj) {
+void Perl_thread_join(SV* obj) {
 	ithread* thread = (ithread*)SvIV(SvRV(obj));
 #ifdef WIN32
 	DWORD waitcode;
@@ -247,7 +247,7 @@ void thread_join(SV* obj) {
 	needs to better clean up memory
 */
 
-void thread_detach(SV* obj) {
+void Perl_thread_detach(SV* obj) {
 	ithread* thread = (ithread*)SvIV(SvRV(obj));
 	MUTEX_LOCK(&thread->mutex);
 	thread->detached = 1;
@@ -259,17 +259,17 @@ void thread_detach(SV* obj) {
 
 
 
-void thread_DESTROY (SV* obj) {
+void Perl_thread_DESTROY (SV* obj) {
 	ithread* thread = (ithread*)SvIV(SvRV(obj));
 	
 	MUTEX_LOCK(&thread->mutex);
 	thread->count--;
 	MUTEX_UNLOCK(&thread->mutex);
-	thread_destruct(thread);
+	Perl_thread_destruct(thread);
 
 }
 
-void thread_destruct (ithread* thread) {
+void Perl_thread_destruct (ithread* thread) {
 	return;
 	MUTEX_LOCK(&thread->mutex);
 	if(thread->count != 0) {
@@ -333,7 +333,7 @@ create (class, function_to_call, ...)
 					av_push(params, ST(i));
 				}
 			}
-			RETVAL = thread_create(class, function_to_call, newRV_noinc((SV*) params));
+			RETVAL = Perl_thread_create(class, function_to_call, newRV_noinc((SV*) params));
 			OUTPUT:
 			RETVAL
 
@@ -341,7 +341,7 @@ SV *
 self (class)
 		char* class
 	CODE:
-		RETVAL = thread_self(class);
+		RETVAL = Perl_thread_self(class);
 	OUTPUT:
 		RETVAL
 
@@ -349,7 +349,7 @@ int
 tid (obj)	
 		SV *	obj;
 	CODE:
-		RETVAL = thread_tid(obj);
+		RETVAL = Perl_thread_tid(obj);
 	OUTPUT:
 	RETVAL
 
@@ -360,7 +360,7 @@ join (obj)
         I32* temp;
         PPCODE:
         temp = PL_markstack_ptr++;
-        thread_join(obj);
+        Perl_thread_join(obj);
         if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
           PL_markstack_ptr = temp;
@@ -376,7 +376,7 @@ detach (obj)
         I32* temp;
         PPCODE:
         temp = PL_markstack_ptr++;
-        thread_detach(obj);
+        Perl_thread_detach(obj);
         if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
           PL_markstack_ptr = temp;
@@ -396,7 +396,7 @@ DESTROY (obj)
         I32* temp;
         PPCODE:
         temp = PL_markstack_ptr++;
-        thread_DESTROY(obj);
+        Perl_thread_DESTROY(obj);
         if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
           PL_markstack_ptr = temp;

@@ -45,18 +45,18 @@ shared_sv* threads;
 
 /* internal functions */
 #ifdef WIN32
-THREAD_RET_TYPE thread_run(LPVOID arg);
+THREAD_RET_TYPE Perl_thread_run(LPVOID arg);
 #else
-void thread_run(ithread* thread);
+void Perl_thread_run(ithread* thread);
 #endif
-void thread_destruct(ithread* thread);
+void Perl_thread_destruct(ithread* thread);
 
 /* Perl mapped functions to iThread:: */
-SV* thread_create(char* class, SV* function_to_call, SV* params);
-I32 thread_tid (SV* obj);
-void thread_join(SV* obj);
-void thread_detach(SV* obj);
-SV* thread_self (char* class);
+SV* Perl_thread_create(char* class, SV* function_to_call, SV* params);
+I32 Perl_thread_tid (SV* obj);
+void Perl_thread_join(SV* obj);
+void Perl_thread_detach(SV* obj);
+SV* Perl_thread_self (char* class);
 
 
 
