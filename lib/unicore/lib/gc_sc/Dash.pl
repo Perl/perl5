@@ -3,10 +3,7 @@
 # Any changes made here will be lost!
 
 #
-# This file supports:
-# 	\p{Dash} (and fuzzy permutations)
-# 
-# Meaning: Extended property 'Dash'
+# Binary property 'Dash'
 #
 return <<'END';
 002D		Dash

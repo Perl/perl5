@@ -135,7 +135,7 @@
  # InCyrillicSupplement
    cyrillicsupplement			    => 'InCyril2',
 
-   dash 				    => 'Dash',
+   dash 				    => 'Dash2',
 
  # DashPunctuation
    dashpunctuation			    => 'Pd',
@@ -219,7 +219,7 @@
    highsurrogates			    => 'InHighSu',
 
    hiragana				    => 'Hira',
-   hyphen				    => 'Hyphen',
+   hyphen				    => 'Hyphen2',
 
  # IdContinue
    idcontinue				    => 'IdContin',
@@ -809,7 +809,7 @@
  # QuotationMark
    quotationmark			    => 'Quotatio',
 
-   radical				    => 'Radical',
+   radical				    => 'Radical2',
    runic				    => 'Runr',
    separator				    => 'Z',
    shavian				    => 'Shaw',
@@ -833,7 +833,7 @@
  # InSpecials
    specials				    => 'InSpecia',
 
-   sterm				    => 'Sterm',
+   sterm				    => 'Sterm2',
 
  # InSuperscriptsAndSubscripts
    superscriptsandsubscripts		    => 'InSupers',

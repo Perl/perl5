@@ -3,10 +3,7 @@
 # Any changes made here will be lost!
 
 #
-# This file supports:
-# 	\p{Hyphen} (and fuzzy permutations)
-# 
-# Meaning: Extended property 'Hyphen'
+# Binary property 'Hyphen'
 #
 return <<'END';
 002D		Hyphen

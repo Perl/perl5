@@ -3,10 +3,7 @@
 # Any changes made here will be lost!
 
 #
-# This file supports:
-# 	\p{Radical} (and fuzzy permutations)
-# 
-# Meaning: Extended property 'Radical'
+# Binary property 'Radical'
 #
 return <<'END';
 2E80	2E99	Radical

@@ -1932,6 +1932,7 @@ lib/unicore/lib/gc_sc/Cprt.pl		Unicode character database
 lib/unicore/lib/gc_sc/Cs.pl		Unicode character database
 lib/unicore/lib/gc_sc/Cyrl.pl		Unicode character database
 lib/unicore/lib/gc_sc/Dash.pl		Unicode character database
+lib/unicore/lib/gc_sc/Dash2.pl		Unicode character database
 lib/unicore/lib/gc_sc/Dep.pl		Unicode character database
 lib/unicore/lib/gc_sc/Deprecat.pl	Unicode character database
 lib/unicore/lib/gc_sc/Deva.pl		Unicode character database
@@ -1958,6 +1959,7 @@ lib/unicore/lib/gc_sc/Hex.pl		Unicode character database
 lib/unicore/lib/gc_sc/HexDigit.pl	Unicode character database
 lib/unicore/lib/gc_sc/Hira.pl		Unicode character database
 lib/unicore/lib/gc_sc/Hyphen.pl		Unicode character database
+lib/unicore/lib/gc_sc/Hyphen2.pl	Unicode character database
 lib/unicore/lib/gc_sc/IDSB.pl		Unicode character database
 lib/unicore/lib/gc_sc/IDST.pl		Unicode character database
 lib/unicore/lib/gc_sc/IdContin.pl	Unicode character database
@@ -2158,6 +2160,7 @@ lib/unicore/lib/gc_sc/QMark.pl		Unicode character database
 lib/unicore/lib/gc_sc/Qaai.pl		Unicode character database
 lib/unicore/lib/gc_sc/Quotatio.pl	Unicode character database
 lib/unicore/lib/gc_sc/Radical.pl	Unicode character database
+lib/unicore/lib/gc_sc/Radical2.pl	Unicode character database
 lib/unicore/lib/gc_sc/Runr.pl		Unicode character database
 lib/unicore/lib/gc_sc/S.pl		Unicode character database
 lib/unicore/lib/gc_sc/SD.pl		Unicode character database
@@ -2171,7 +2174,7 @@ lib/unicore/lib/gc_sc/So.pl		Unicode character database
 lib/unicore/lib/gc_sc/SoftDott.pl	Unicode character database
 lib/unicore/lib/gc_sc/Space.pl		Unicode character database
 lib/unicore/lib/gc_sc/SpacePer.pl	Unicode character database
-lib/unicore/lib/gc_sc/Sterm.pl		Unicode character database
+lib/unicore/lib/gc_sc/Sterm2.pl		Unicode character database
 lib/unicore/lib/gc_sc/Syrc.pl		Unicode character database
 lib/unicore/lib/gc_sc/Tagb.pl		Unicode character database
 lib/unicore/lib/gc_sc/TaiLe.pl		Unicode character database

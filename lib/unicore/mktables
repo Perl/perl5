@@ -12,6 +12,10 @@ mkdir("lib", 0755);
 mkdir("lib/gc_sc", 0755);
 mkdir("To",  0755);
 
+## Base names already used in lib/gc_sc (for avoiding 8.3 conflicts)
+my %BaseNames;
+
+
 ##
 ## Process any args.
 ##
@@ -1298,6 +1302,8 @@ sub PropList_txt()
 
     for (keys %Prop) {
 	(my $file = $PA_reverse{$_}) =~ tr/_//d;
+	# XXX I'm assuming that the names from %Prop don't suffer 8.3 clashes.
+	$BaseNames{lc $file}++;
 	$Prop{$_}->Write(
 	    "lib/gc_sc/$file.pl",
 	    "Binary property '$_'"
@@ -1545,8 +1551,6 @@ sub RegisterFileForName($$$$)
 sub WriteAllMappings()
 {
     my @MAP;
-
-    my %BaseNames;  ## Base names already used (for avoiding 8.3 conflicts)
 
     ## 'Is' *MUST* come first, so its names have precidence over 'In's
     for my $Type ('Is', 'In')
