@@ -17,8 +17,8 @@ require 5.004;
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.39 2000/07/28 03:00:03 lstein Exp $';
-$CGI::VERSION='2.70';
+$CGI::revision = '$Id: CGI.pm,v 1.42 2000/08/13 16:04:43 lstein Exp $';
+$CGI::VERSION='2.71';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -362,6 +362,9 @@ sub init {
 
     $fh = to_filehandle($initializer) if $initializer;
 
+    # set charset to the safe ISO-8859-1
+    $self->charset('ISO-8859-1');
+
   METHOD: {
 
       # avoid unreasonably large postings
@@ -474,8 +477,6 @@ sub init {
     $self->delete('.submit');
     $self->delete('.cgifields');
 
-    # set charset to the safe ISO-8859-1
-    $self->charset('ISO-8859-1');
     $self->save_request unless $initializer;
 }
 
@@ -1162,7 +1163,7 @@ sub header {
     # need to fix it up a little.
     foreach (@other) {
         next unless my($header,$value) = /([^\s=]+)=\"?(.+?)\"?$/;
-	($_ = $header) =~ s/^(\w)(.*)/$1 . lc ($2) . ': '.unescapeHTML($value)/e;
+	($_ = $header) =~ s/^(\w)(.*)/$1 . lc ($2) . ': '.$self->unescapeHTML($value)/e;
     }
 
     $type ||= 'text/html' unless defined($type);
@@ -1333,14 +1334,16 @@ sub _style {
     my ($self,$style) = @_;
     my (@result);
     my $type = 'text/css';
+
+    my $cdata_start = $XHTML ? "\n<!--/* <![CDATA[ */" : "\n<!-- ";
+    my $cdata_end   = $XHTML ? "\n/* ]]> */-->\n" : " -->\n";
+
     if (ref($style)) {
      my($src,$code,$stype,@other) =
          rearrange([SRC,CODE,TYPE],
                     '-foo'=>'bar', # a trick to allow the '-' to be omitted
                     ref($style) eq 'ARRAY' ? @$style : %$style);
      $type = $stype if $stype;
-     #### Here is new code for checking for array reference in -src tag (6/20/00 -- JJN) #####
-     ####  This should be passed in like this --> -src=>{['style1.css','style2.css','style3.css']}
      if (ref($src) eq "ARRAY") # Check to see if the $src variable is an array reference
      { # If it is, push a LINK tag for each one.
        foreach $src (@$src)
@@ -1352,10 +1355,9 @@ sub _style {
      { # Otherwise, push the single -src, if it exists.
        push(@result,qq/<link rel="stylesheet" type="$type" href="$src">/) if $src;
       }
-   #### End new code ####
-     push(@result,style({'type'=>$type},"<!--\n$code\n-->")) if $code;
+     push(@result,style({'type'=>$type},"$cdata_start\n$code\n$cdata_end")) if $code;
     } else {
-     push(@result,style({'type'=>$type},"<!--\n$style\n-->"));
+     push(@result,style({'type'=>$type},"$cdata_start\n$style\n$cdata_end"));
     }
     @result;
 }
@@ -1365,6 +1367,7 @@ END_OF_FUNC
 sub _script {
     my ($self,$script) = @_;
     my (@result);
+
     my (@scripts) = ref($script) eq 'ARRAY' ? @$script : ($script);
     foreach $script (@scripts) {
 	my($src,$code,$language);
@@ -1383,18 +1386,21 @@ sub _script {
 	} else {
 	    ($src,$code,$language, $type) = ('',$script,'JavaScript', 'text/javascript');
 	}
+
+    my $comment = '//';  # javascript by default
+    $comment = '#' if $type=~/perl|tcl/i;
+    $comment = "'" if $type=~/vbscript/i;
+
+    my $cdata_start  =  "\n<!-- Hide script\n";
+    $cdata_start    .= "$comment<![CDATA[\n"  if $XHTML; 
+    my $cdata_end    = $XHTML ? "\n$comment]]>" : $comment;
+    $cdata_end      .= " End script hiding -->\n";
+
 	my(@satts);
 	push(@satts,'src'=>$src) if $src;
 	push(@satts,'language'=>$language);
         push(@satts,'type'=>$type);
-	$code = "<!-- Hide script\n$code\n// End script hiding -->"
-	    if $code && $type=~/javascript/i;
-	$code = "<!-- Hide script\n$code\n\# End script hiding -->"
-	    if $code && $type=~/perl/i;
-	$code = "<!-- Hide script\n$code\n\# End script hiding -->"
-	    if $code && $type=~/tcl/i;
-        $code = "<!-- Hide script\n$code\n' End script hiding -->"
-            if $code && $type=~/vbscript/i;
+	$code = "$cdata_start$code$cdata_end";
 	push(@result,script({@satts},$code || ''));
     }
     @result;
@@ -1448,7 +1454,8 @@ sub startform {
 
     $method = uc($method) || 'POST';
     $enctype = $enctype || &URL_ENCODED;
-    $action = $action ? qq(action="$action") : qq 'action="' . $self->script_name . '"';
+    $action = $action ? qq(action="$action") : qq 'action="' . 
+              $self->url(-absolute=>1,-path=>1,-query=>1) . '"';
     my($other) = @other ? " @other" : '';
     $self->{'.parametersToAdd'}={};
     return qq/<form method="$method" $action enctype="$enctype"$other>\n/;
@@ -1521,7 +1528,7 @@ sub _textfield {
     my $current = $override ? $default : 
 	(defined($self->param($name)) ? $self->param($name) : $default);
 
-    $current = defined($current) ? $self->escapeHTML($current) : '';
+    $current = defined($current) ? $self->escapeHTML($current,1) : '';
     $name = defined($name) ? $self->escapeHTML($name) : '';
     my($s) = defined($size) ? qq/ size=$size/ : '';
     my($m) = defined($maxlength) ? qq/ maxlength=$maxlength/ : '';
@@ -1634,7 +1641,7 @@ sub button {
 							 [ONCLICK,SCRIPT]],@p);
 
     $label=$self->escapeHTML($label);
-    $value=$self->escapeHTML($value);
+    $value=$self->escapeHTML($value,1);
     $script=$self->escapeHTML($script);
 
     my($name) = '';
@@ -1666,7 +1673,7 @@ sub submit {
     my($label,$value,@other) = rearrange([NAME,[VALUE,LABEL]],@p);
 
     $label=$self->escapeHTML($label);
-    $value=$self->escapeHTML($value);
+    $value=$self->escapeHTML($value,1);
 
     my($name) = ' name=".submit"' unless $NOSTICKY;
     $name = qq/ name="$label"/ if defined($label);
@@ -1717,7 +1724,7 @@ sub defaults {
 
     my($label,@other) = rearrange([[NAME,VALUE]],@p);
 
-    $label=$self->escapeHTML($label);
+    $label=$self->escapeHTML($label,1);
     $label = $label || "Defaults";
     my($value) = qq/ value="$label"/;
     my($other) = @other ? " @other" : '';
@@ -1766,7 +1773,7 @@ sub checkbox {
     }
     my($the_label) = defined $label ? $label : $name;
     $name = $self->escapeHTML($name);
-    $value = $self->escapeHTML($value);
+    $value = $self->escapeHTML($value,1);
     $the_label = $self->escapeHTML($the_label);
     my($other) = @other ? " @other" : '';
     $self->register_parameter($name);
@@ -1834,7 +1841,7 @@ sub checkbox_group {
 	    $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	    $label = $self->escapeHTML($label);
 	}
-	$_ = $self->escapeHTML($_);
+	$_ = $self->escapeHTML($_,1);
 	push(@elements,$XHTML ? qq(<input type="checkbox" name="$name" value="$_"$checked$other />${label}${break})
                               : qq/<input type="checkbox" name="$name" value="$_"$checked$other>${label}${break}/);
     }
@@ -1848,18 +1855,23 @@ END_OF_FUNC
 # Escape HTML -- used internally
 'escapeHTML' => <<'END_OF_FUNC',
 sub escapeHTML {
-         my ($self,$toencode) = CGI::self_or_default(@_);
+         my ($self,$toencode,$newlinestoo) = CGI::self_or_default(@_);
          return undef unless defined($toencode);
          return $toencode if ref($self) && $self->{'dontescape'};
          $toencode =~ s{&}{&amp;}gso;
          $toencode =~ s{<}{&lt;}gso;
          $toencode =~ s{>}{&gt;}gso;
          $toencode =~ s{"}{&quot;}gso;
-         if (uc $self->{'.charset'} eq 'ISO-8859-1' or
-             uc $self->{'.charset'} eq 'WINDOWS-1252') {  # bug
+         my $latin = uc $self->{'.charset'} eq 'ISO-8859-1' ||
+                     uc $self->{'.charset'} eq 'WINDOWS-1252';
+         if ($latin) {  # bug in some browsers
                 $toencode =~ s{\x8b}{&#139;}gso;
                 $toencode =~ s{\x9b}{&#155;}gso;
-          }
+                if (defined $newlinestoo && $newlinestoo) {
+                     $toencode =~ s{\012}{&#10;}gso;
+                     $toencode =~ s{\015}{&#13;}gso;
+                }
+         }
          return $toencode;
 }
 END_OF_FUNC
@@ -1869,7 +1881,8 @@ END_OF_FUNC
 sub unescapeHTML {
     my ($self,$string) = CGI::self_or_default(@_);
     return undef unless defined($string);
-    my $latin = $self->{'.charset'} =~ /^(ISO-8859-1|WINDOWS-1252)$/i;
+    my $latin = defined $self->{'.charset'} ? $self->{'.charset'} =~ /^(ISO-8859-1|WINDOWS-1252)$/i
+                                            : 1;
     # thanks to Randal Schwartz for the correct solution to this one
     $string=~ s[&(.*?);]{
 	local $_ = $1;
@@ -1978,7 +1991,7 @@ sub radio_group {
 	unless (defined($nolabels) && $nolabels) {
 	    $label = $_;
 	    $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
-	    $label = $self->escapeHTML($label);
+	    $label = $self->escapeHTML($label,1);
 	}
 	$_=$self->escapeHTML($_);
 	push(@elements,$XHTML ? qq(<input type="radio" name="$name" value="$_"$checkit$other />${label}${break})
@@ -2031,7 +2044,7 @@ sub popup_menu {
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	my($value) = $self->escapeHTML($_);
-	$label=$self->escapeHTML($label);
+	$label=$self->escapeHTML($label,1);
 	$result .= "<option $selectit value=\"$value\">$label</option>\n";
     }
 
@@ -2085,7 +2098,7 @@ sub scrolling_list {
 	my($label) = $_;
 	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
 	$label=$self->escapeHTML($label);
-	my($value)=$self->escapeHTML($_);
+	my($value)=$self->escapeHTML($_,1);
 	$result .= "<option $selectit value=\"$value\">$label</option>\n";
     }
     $result .= "</select>\n";
@@ -2130,7 +2143,7 @@ sub hidden {
 
     $name=$self->escapeHTML($name);
     foreach (@value) {
-	$_ = defined($_) ? $self->escapeHTML($_) : '';
+	$_ = defined($_) ? $self->escapeHTML($_,1) : '';
 	push(@result,$XHTMl ? qq(<input type="hidden" name="$name" value="$_" />)
                             : qq/<input type="hidden" name="$name" value="$_">/);
     }
@@ -3726,13 +3739,13 @@ the keys are the names of the CGI parameters, and the values are the
 parameters' values.  The Vars() method does this.  Called in a scalar
 context, it returns the parameter list as a tied hash reference.
 Changing a key changes the value of the parameter in the underlying
-CGI parameter list.  Called in an array context, it returns the
+CGI parameter list.  Called in a list context, it returns the
 parameter list as an ordinary hash.  This allows you to read the
 contents of the parameter list, but not to change it.
 
 When using this, the thing you must watch out for are multivalued CGI
 parameters.  Because a hash cannot distinguish between scalar and
-array context, multivalued parameters will be returned as a packed
+list context, multivalued parameters will be returned as a packed
 string, separated by the "\0" (null) character.  You must split this
 packed string in order to get at the individual values.  This is the
 convention introduced long ago by Steve Brenner in his cgi-lib.pl

@@ -384,7 +384,7 @@ Get or set the cookie's value.  Example:
 	$value = $c->value;
 	@new_value = $c->value(['a','b','c','d']);
 
-B<value()> is context sensitive.  In an array context it will return
+B<value()> is context sensitive.  In a list context it will return
 the current value of the cookie as an array.  In a scalar context it
 will return the B<first> value of a multivalued cookie.
 

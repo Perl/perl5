@@ -27,6 +27,15 @@ sub test {
 
 my $CRLF = "\015\012";
 
+# A peculiarity of sending "\n" through MBX|Socket|web-server on VMS 
+# is that a CR character gets inserted automatically in the web server 
+# case but not internal to perl's double quoted strings "\n".  This
+# test would need to be modified to use the "\015\012" on VMS if it
+# were actually run through a web server.
+# Thanks to Peter Prymmer for this
+
+if ($^O eq 'VMS') { $CRLF = "\n"; }
+
 # Set up a CGI environment
 $ENV{REQUEST_METHOD}='GET';
 $ENV{QUERY_STRING}  ='game=chess&game=checkers&weather=dull';
