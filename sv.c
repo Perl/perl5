@@ -8159,6 +8159,9 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	}
 	HvPMROOT((HV*)dstr)	= HvPMROOT((HV*)sstr);		/* XXX */
 	HvNAME((HV*)dstr)	= SAVEPV(HvNAME((HV*)sstr));
+        /* If HvNAME() is set hv _may_ be a stash 
+           - record it for possible callback 
+         */
 	if(HvNAME((HV*)dstr))
 	    av_push(PL_clone_callbacks, dstr);
 	break;
@@ -9307,21 +9310,26 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
         PL_ptr_table = NULL;
     }
     
+    /* For the (possible) stashes identified above 
+         - check that they are stashes
+         - if they are see if the ->CLONE method is defined
+         - if it is call it 
+     */
     while(av_len(PL_clone_callbacks) != -1) {
         HV* stash = (HV*) av_shift(PL_clone_callbacks);
-        CV* cloner = (CV*) gv_fetchmethod_autoload(stash,"CLONE",0);
-        if(cloner) {
-            dSP;
-            cloner = GvCV(cloner);
-            ENTER;
-            SAVETMPS;
-            PUSHMARK(SP);
-            XPUSHs(newSVpv(HvNAME(stash),0));
-            PUTBACK;
-            call_sv((SV*)cloner, G_DISCARD);
-            FREETMPS;
-            LEAVE;
-            
+        if (gv_stashpv(HvNAME(stash),0)) {
+            GV* cloner = gv_fetchmethod_autoload(stash,"CLONE",0);
+            if (cloner && GvCV(cloner)) {
+                dSP;
+                ENTER;
+                SAVETMPS;
+                PUSHMARK(SP);
+                XPUSHs(newSVpv(HvNAME(stash),0));
+                PUTBACK;
+                call_sv((SV*)GvCV(cloner), G_DISCARD);
+                FREETMPS;
+                LEAVE;
+            }
         }
     }
 
