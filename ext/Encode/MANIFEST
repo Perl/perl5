@@ -20,6 +20,7 @@ JP/Makefile.PL	Encode extension
 KR/KR.pm		Encode extension
 KR/Makefile.PL		Encode extension
 MANIFEST		Encode extension
+META.yml                                Module meta-data in YAML
 Makefile.PL		Encode extension makefile writer
 README		Encode extension
 Symbol/Makefile.PL     Encode extension

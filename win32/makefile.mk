@@ -837,6 +837,7 @@ CFG_VARS	=					\
 		_a=$(a)				~	\
 		lib_ext=$(a)			~	\
 		static_ext=$(STATIC_EXT)	~	\
+		usethreads=$(USE_ITHREADS)	~	\
 		use5005threads=$(USE_5005THREADS)	~	\
 		useithreads=$(USE_ITHREADS)	~	\
 		usethreads=$(USE_5005THREADS)	~	\

@@ -3569,11 +3569,20 @@ S_doparseform(pTHX_ SV *sv)
     U16 *linepc = 0;
     register I32 arg;
     bool ischop;
+    int maxops = 2; /* FF_LINEMARK + FF_END) */
 
     if (len == 0)
 	Perl_croak(aTHX_ "Null picture in formline");
 
-    New(804, fops, (send - s)*3+10, U16);    /* Almost certainly too long... */
+    /* estimate the buffer size needed */
+    for (base = s; s <= send; s++) {
+	if (*s == '\n' || *s == '@' || *s == '^')
+	    maxops += 10;
+    }
+    s = base;
+    base = Nullch;
+
+    New(804, fops, maxops, U16);
     fpc = fops;
 
     if (s < send) {
@@ -3736,6 +3745,7 @@ S_doparseform(pTHX_ SV *sv)
     }
     *fpc++ = FF_END;
 
+    assert (fpc <= fops + maxops); /* ensure our buffer estimate was valid */
     arg = fpc - fops;
     { /* need to jump to the next word */
         int z;

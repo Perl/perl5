@@ -541,6 +541,21 @@ PERLVAR(Istashcache,	HV *)		/* Cache to speed up S_method_common */
 
 PERLVAR(Ireentrant_retint, int)	/* Integer return value from reentrant functions */
 
+/* Hooks to shared SVs and locks. */
+PERLVARI(Isharehook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nosharing))
+PERLVARI(Ilockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nolocking))
+PERLVARI(Iunlockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nounlocking))
+PERLVARI(Ithreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
+
+/* Force inclusion of both runops options */
+PERLVARI(Irunops_std,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_standard))
+PERLVARI(Irunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
+
+/* Stores the PPID */
+#ifdef THREADS_HAVE_PIDS
+PERLVARI(Ippid,		IV,		0)
+#endif
+
 /* Don't forget to add your variable also to perl_clone()! */
 
 /* New variables must be added to the very end, before this comment,

@@ -364,9 +364,9 @@ sub _quote_args {
     }
 }
 
-sub runperl {
+sub _create_runperl { # Create the string to qx in runperl().
     my %args = @_;
-    my $runperl = $^X;
+    my $runperl = $^X =~ m/\s/ ? qq{"$^X"} : $^X;
     unless ($args{nolib}) {
 	if ($is_macos) {
 	    $runperl .= ' -I::lib';
@@ -433,6 +433,11 @@ sub runperl {
 	$runperldisplay =~ s/\n/\n\#/g;
 	print STDERR "# $runperldisplay\n";
     }
+    return $runperl;
+}
+
+sub runperl {
+    my $runperl = &_create_runperl;
     my $result = `$runperl`;
     $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
     return $result;

@@ -275,6 +275,7 @@ extern  int	mkstemp(const char *path);
 #define  init_os_extras Perl_init_os_extras
 
 DllExport void		Perl_win32_init(int *argcp, char ***argvp);
+DllExport void		Perl_win32_term(void);
 DllExport void		Perl_init_os_extras(void);
 DllExport void		win32_str_os_error(void *sv, DWORD err);
 DllExport int		RunPerl(int argc, char **argv, char **env);

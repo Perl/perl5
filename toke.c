@@ -2937,8 +2937,6 @@ Perl_yylex(pTHX)
 	PL_tokenbuf[0] = '%';
 	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, TRUE);
 	if (!PL_tokenbuf[1]) {
-	    if (s == PL_bufend)
-		yyerror("Final % should be \\% or %name");
 	    PREREF('%');
 	}
 	PL_pending_ident = '%';
@@ -3566,8 +3564,6 @@ Perl_yylex(pTHX)
 	PL_tokenbuf[0] = '@';
 	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
 	if (!PL_tokenbuf[1]) {
-	    if (s == PL_bufend)
-		yyerror("Final @ should be \\@ or @name");
 	    PREREF('@');
 	}
 	if (PL_lex_state == LEX_NORMAL)

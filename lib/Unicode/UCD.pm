@@ -126,9 +126,9 @@ you will need also the compexcl(), casefold(), and casespec() functions.
 sub _getcode {
     my $arg = shift;
 
-    if ($arg =~ /^\d+$/) {
+    if ($arg =~ /^[1-9]\d*$/) {
 	return $arg;
-    } elsif ($arg =~ /^(?:U\+|0x)?([[:xdigit:]]+)$/) {
+    } elsif ($arg =~ /^(?:[Uu]\+|0[xX])?([[:xdigit:]]+)$/) {
 	return hex($1);
     }
 
@@ -457,9 +457,12 @@ any of the 256 code points in the Tibetan block).
 
 A I<code point argument> is either a decimal or a hexadecimal scalar
 designating a Unicode character, or C<U+> followed by hexadecimals
-designating a Unicode character.  Note that Unicode is B<not> limited
-to 16 bits (the number of Unicode characters is open-ended, in theory
-unlimited): you may have more than 4 hexdigits.
+designating a Unicode character.  In other words, if you want a code
+point to be interpreted as a hexadecimal number, you must prefix it
+with either C<0x> or C<U+>, because a string like e.g. C<123> will
+be interpreted as a decimal code point.  Also note that Unicode is
+B<not> limited to 16 bits (the number of Unicode characters is
+open-ended, in theory unlimited): you may have more than 4 hexdigits.
 
 =head2 charinrange
 
@@ -522,7 +525,7 @@ sub compexcl {
 
     use Unicode::UCD 'casefold';
 
-    my %casefold = casefold("09dc");
+    my $casefold = casefold("00DF");
 
 The casefold() returns the locale-independent case folding of the
 character specified by a B<code point argument>.
@@ -595,7 +598,7 @@ sub casefold {
 
     use Unicode::UCD 'casespec';
 
-    my %casespec = casespec("09dc");
+    my $casespec = casespec("FB00");
 
 The casespec() returns the potentially locale-dependent case mapping
 of the character specified by a B<code point argument>.  The mapping
@@ -618,7 +621,7 @@ more I<locales> or I<contexts>, separated by spaces (other than as
 used to separate elements, spaces are to be ignored).  A condition
 list overrides the normal behavior if all of the listed conditions are
 true.  Case distinctions in the condition list are not significant.
-Conditions preceded by "NON_" represent the negation of the condition
+Conditions preceded by "NON_" represent the negation of the condition.
 
 Note that when there are multiple case folding definitions for a
 single code point because of different locales, the value returned by

@@ -360,6 +360,8 @@ END_EXTERN_C
 #define PL_linestr		(*Perl_Ilinestr_ptr(aTHX))
 #undef  PL_localpatches
 #define PL_localpatches		(*Perl_Ilocalpatches_ptr(aTHX))
+#undef  PL_lockhook
+#define PL_lockhook		(*Perl_Ilockhook_ptr(aTHX))
 #undef  PL_main_cv
 #define PL_main_cv		(*Perl_Imain_cv_ptr(aTHX))
 #undef  PL_main_root
@@ -472,6 +474,8 @@ END_EXTERN_C
 #define PL_perlio		(*Perl_Iperlio_ptr(aTHX))
 #undef  PL_pidstatus
 #define PL_pidstatus		(*Perl_Ipidstatus_ptr(aTHX))
+#undef  PL_ppid
+#define PL_ppid			(*Perl_Ippid_ptr(aTHX))
 #undef  PL_preambleav
 #define PL_preambleav		(*Perl_Ipreambleav_ptr(aTHX))
 #undef  PL_preambled
@@ -504,12 +508,18 @@ END_EXTERN_C
 #define PL_rsfp_filters		(*Perl_Irsfp_filters_ptr(aTHX))
 #undef  PL_runops
 #define PL_runops		(*Perl_Irunops_ptr(aTHX))
+#undef  PL_runops_dbg
+#define PL_runops_dbg		(*Perl_Irunops_dbg_ptr(aTHX))
+#undef  PL_runops_std
+#define PL_runops_std		(*Perl_Irunops_std_ptr(aTHX))
 #undef  PL_savebegin
 #define PL_savebegin		(*Perl_Isavebegin_ptr(aTHX))
 #undef  PL_sawampersand
 #define PL_sawampersand		(*Perl_Isawampersand_ptr(aTHX))
 #undef  PL_sh_path_compat
 #define PL_sh_path_compat	(*Perl_Ish_path_compat_ptr(aTHX))
+#undef  PL_sharehook
+#define PL_sharehook		(*Perl_Isharehook_ptr(aTHX))
 #undef  PL_sig_pending
 #define PL_sig_pending		(*Perl_Isig_pending_ptr(aTHX))
 #undef  PL_sighandlerp
@@ -570,6 +580,8 @@ END_EXTERN_C
 #define PL_taint_warn		(*Perl_Itaint_warn_ptr(aTHX))
 #undef  PL_tainting
 #define PL_tainting		(*Perl_Itainting_ptr(aTHX))
+#undef  PL_threadhook
+#define PL_threadhook		(*Perl_Ithreadhook_ptr(aTHX))
 #undef  PL_threadnum
 #define PL_threadnum		(*Perl_Ithreadnum_ptr(aTHX))
 #undef  PL_threads_mutex
@@ -584,6 +596,8 @@ END_EXTERN_C
 #define PL_uid			(*Perl_Iuid_ptr(aTHX))
 #undef  PL_unicode
 #define PL_unicode		(*Perl_Iunicode_ptr(aTHX))
+#undef  PL_unlockhook
+#define PL_unlockhook		(*Perl_Iunlockhook_ptr(aTHX))
 #undef  PL_unsafe
 #define PL_unsafe		(*Perl_Iunsafe_ptr(aTHX))
 #undef  PL_utf8_alnum
@@ -976,30 +990,16 @@ END_EXTERN_C
 #define PL_dollarzero_mutex	(*Perl_Gdollarzero_mutex_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
-#undef  PL_lockhook
-#define PL_lockhook		(*Perl_Glockhook_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
 #undef  PL_op_mutex
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_patleave
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
-#undef  PL_ppid
-#define PL_ppid			(*Perl_Gppid_ptr(NULL))
-#undef  PL_runops_dbg
-#define PL_runops_dbg		(*Perl_Grunops_dbg_ptr(NULL))
-#undef  PL_runops_std
-#define PL_runops_std		(*Perl_Grunops_std_ptr(NULL))
 #undef  PL_sh_path
 #define PL_sh_path		(*Perl_Gsh_path_ptr(NULL))
-#undef  PL_sharehook
-#define PL_sharehook		(*Perl_Gsharehook_ptr(NULL))
 #undef  PL_thr_key
 #define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
-#undef  PL_threadhook
-#define PL_threadhook		(*Perl_Gthreadhook_ptr(NULL))
-#undef  PL_unlockhook
-#define PL_unlockhook		(*Perl_Gunlockhook_ptr(NULL))
 
 #endif /* !PERL_CORE */
 #endif /* MULTIPLICITY */

@@ -12,7 +12,7 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 164 };
+BEGIN { plan tests => 176 };
 
 use Unicode::UCD 'charinfo';
 
@@ -287,5 +287,15 @@ ok(1, 'compexcl read-only $_: perl #7305');
 grep {compexcl $_} %{{1=>2}};
 ok(1, 'compexcl read-only hash: perl #7305');
 
-
- 
+is(Unicode::UCD::_getcode('123'),     123, "_getcode(123)");
+is(Unicode::UCD::_getcode('0123'),  0x123, "_getcode(0123)");
+is(Unicode::UCD::_getcode('0x123'), 0x123, "_getcode(0x123)");
+is(Unicode::UCD::_getcode('0X123'), 0x123, "_getcode(0X123)");
+is(Unicode::UCD::_getcode('U+123'), 0x123, "_getcode(U+123)");
+is(Unicode::UCD::_getcode('u+123'), 0x123, "_getcode(u+123)");
+is(Unicode::UCD::_getcode('U+1234'),   0x1234, "_getcode(U+1234)");
+is(Unicode::UCD::_getcode('U+12345'), 0x12345, "_getcode(U+12345)");
+is(Unicode::UCD::_getcode('123x'),    undef, "_getcode(123x)");
+is(Unicode::UCD::_getcode('x123'),    undef, "_getcode(x123)");
+is(Unicode::UCD::_getcode('0x123x'),  undef, "_getcode(x123)");
+is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");

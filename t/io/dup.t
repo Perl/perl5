@@ -5,8 +5,10 @@ BEGIN {
     @INC = '../lib';
 }
 
+use Config;
+
 my $test = 1;
-print "1..8\n";
+print "1..12\n";
 print "ok 1\n";
 
 open(DUPOUT,">&STDOUT");
@@ -33,7 +35,7 @@ print `$cmd`;
 
 # KNOWN BUG system() does not honor STDOUT redirections on VMS.
 if( $^O eq 'VMS' ) {
-    print "not ok $_ # TODO system() not honoring STDOUT redirect on VMS\n" 
+    print "not ok $_ # TODO system() not honoring STDOUT redirect on VMS\n"
       for 6..7;
 }
 else {
@@ -58,4 +60,26 @@ else                   { system 'cat Io.dup' }
 unlink 'Io.dup';
 
 print STDOUT "ok 8\n";
+
+open(F,">&",1) or die "Cannot dup to numeric 1: $!";
+print F "ok 9\n";
+close(F);
+
+open(F,">&",'1') or die "Cannot dup to string '1': $!";
+print F "ok 10\n";
+close(F);
+
+open(F,">&=",1) or die "Cannot dup to numeric 1: $!";
+print F "ok 11\n";
+close(F);
+
+if ($Config{useperlio}) {
+    open(F,">&=",'1') or die "Cannot dup to string '1': $!";
+    print F "ok 12\n";
+    close(F);
+} else {
+    open(F, ">&DUPOUT") or die "Cannot dup stdout back: $!";
+    print F "ok 12\n";
+    close(F);
+}
 

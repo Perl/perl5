@@ -546,6 +546,22 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
+	darwin*)
+		case "$ldflags" in
+		*"-flat_namespace"*) ;;
+		*) # to allow opmini.o to override stuff in libperl.dylib
+		$spitshell >>Makefile <<!NO!SUBS!
+NAMESPACEFLAGS = -force_flat_namespace
+!NO!SUBS!
+		esac
+		$spitshell >>Makefile <<'!NO!SUBS!'
+miniperl$(EXE_EXT): $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+	-@rm -f miniperl.xok
+	$(CC) $(CLDFLAGS) $(NAMESPACEFLAGS) -o miniperl \
+	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL) $(libs)
+	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+!NO!SUBS!
+		;;
 	*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
 miniperl$(EXE_EXT): $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
@@ -859,6 +875,15 @@ regen_pods:	FORCE
 	-cd pod; $(LDLIBPTH) $(MAKE) regen_pods
 
 regen_all: $(PERLYVMS) regen regen_pods
+
+.PHONY:	manisort manicheck
+
+manisort:	FORCE
+	LC_ALL=C sort -fc MANIFEST || (echo "WARNING: re-sorting MANIFEST"; \
+		LC_ALL=C sort -fo MANIFEST MANIFEST)
+
+manicheck:	FORCE
+	perl Porting/manicheck
 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will

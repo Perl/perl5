@@ -779,6 +779,8 @@ my @layer_syms = qw(
 			 PerlIOBase_read
 			 PerlIOBase_setlinebuf
 			 PerlIOBase_unread
+			 PerlIOBase_noop_ok
+			 PerlIOBase_noop_fail
 			 PerlIOBuf_bufsiz
 			 PerlIOBuf_fill
 			 PerlIOBuf_flush
@@ -1004,6 +1006,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    Perl_init_os_extras
 			    Perl_thread_create
 			    Perl_win32_init
+			    Perl_win32_term
 			    RunPerl
 			    win32_async_check
 			    win32_errno
