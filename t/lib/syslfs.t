@@ -1,6 +1,6 @@
-# NOTE: this file tests how large files (>2GB) work with perlio (stdio/sfio).
-# sysopen(), sysseek(), syswrite(), sysread() are tested in t/lib/syslfs.t.
-# If you modify/add tests here, remember to update also t/lib/syslfs.t.
+# NOTE: this file tests how large files (>2GB) work with raw system IO.
+# open(), tell(), seek(), print(), read() are tested in t/op/lfs.t.
+# If you modify/add tests here, remember to update also t/op/lfs.t.
 
 BEGIN {
 	eval { my $q = pack "q", 0 };
@@ -10,6 +10,7 @@ BEGIN {
 	}
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
+	require Fcntl; import Fcntl;
 }
 
 sub bye {
@@ -25,15 +26,13 @@ if ($^O eq 'win32' || $^O eq 'vms') {
     bye();
 }
 
-my ($SEEK_SET, $SEEK_CUR, $SEEK_END) = (0, 1, 2);
-
 # We'll start off by creating a one megabyte file which has
 # only three "true" bytes.
 
-open(BIG, ">big") or do { warn "open failed: $!\n"; bye };
-binmode BIG;
-seek(BIG, 1_000_000, $SEEK_SET);
-print BIG "big";
+sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
+	do { warn "sysopen failed: $!\n"; bye };
+sysseek(BIG, 1_000_000, SEEK_SET);
+syswrite(BIG, "big");
 close(BIG);
 
 my @s;
@@ -56,10 +55,10 @@ unless (@s == 13 &&
 
 print "1..8\n";
 
-open(BIG, ">big") or do { warn "open failed: $!\n"; bye };
-binmode BIG;
-seek(BIG, 5_000_000_000, $SEEK_SET);
-print BIG "big";
+sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
+	do { warn "sysopen failed: $!\n"; bye };
+sysseek(BIG, 5_000_000_000, SEEK_SET);
+syswrite(BIG, "big");
 close BIG;
 
 @s = stat("big");
@@ -72,32 +71,31 @@ print "ok 1\n";
 print "not " unless -s "big" == 5_000_000_003;
 print "ok 2\n";
 
-open(BIG, "big") or do { warn "open failed: $!\n"; bye };
-binmode BIG;
+sysopen(BIG, "big", O_RDONLY) or do { warn "sysopen failed: $!\n"; bye };
 
-seek(BIG, 4_500_000_000, $SEEK_SET);
+sysseek(BIG, 4_500_000_000, SEEK_SET);
 
-print "not " unless tell(BIG) == 4_500_000_000;
+print "not " unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_000;
 print "ok 3\n";
 
-seek(BIG, 1, $SEEK_CUR);
+sysseek(BIG, 1, SEEK_CUR);
 
-print "not " unless tell(BIG) == 4_500_000_001;
+print "not " unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_001;
 print "ok 4\n";
 
-seek(BIG, -1, $SEEK_CUR);
+sysseek(BIG, -1, SEEK_CUR);
 
-print "not " unless tell(BIG) == 4_500_000_000;
+print "not " unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_000;
 print "ok 5\n";
 
-seek(BIG, -3, $SEEK_END);
+sysseek(BIG, -3, SEEK_END);
 
-print "not " unless tell(BIG) == 5_000_000_000;
+print "not " unless sysseek(BIG, 0, SEEK_CUR) == 5_000_000_000;
 print "ok 6\n";
 
 my $big;
 
-print "not " unless read(BIG, $big, 3) == 3;
+print "not " unless sysread(BIG, $big, 3) == 3;
 print "ok 7\n";
 
 print "not " unless $big eq "big";

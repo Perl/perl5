@@ -4435,11 +4435,20 @@ FILENAME, MODE, PERMS.
 
 The possible values and flag bits of the MODE parameter are
 system-dependent; they are available via the standard module C<Fcntl>.
+See the documentation of your operating system's C<open> to see which
+values and flag bits are available.  You may combine several flags
+using the C<|>-operator.
+
+Some of the most common values are C<O_RDONLY> for opening the file in
+read-only mode, C<O_WRONLY> for opening the file in write-only mode,
+and C<O_RDWR> for opening the file in read-write mode, and.
+
 For historical reasons, some values work on almost every system
 supported by perl: zero means read-only, one means write-only, and two
 means read/write.  We know that these values do I<not> work under
 OS/390 & VM/ESA Unix and on the Macintosh; you probably don't want to
-use them in new code.
+se them in new code, use thhe constants discussed in the preceding
+paragraph.
 
 If the file named by FILENAME does not exist and the C<open> call creates
 it (typically because MODE includes the C<O_CREAT> flag), then the value of
@@ -4447,6 +4456,13 @@ PERMS specifies the permissions of the newly created file.  If you omit
 the PERMS argument to C<sysopen>, Perl uses the octal value C<0666>.
 These permission values need to be in octal, and are modified by your
 process's current C<umask>.
+
+In many systems the C<O_EXCL> flag is available for opening files in
+exclusive mode.  This is B<not> locking: exclusiveness means here that
+if the file already exists, sysopen() fails.  The C<O_EXCL> wins
+C<O_TRUNC>.
+
+Sometimes you may want to truncate an already-existing file: C<O_TRUNC>.
 
 You should seldom if ever use C<0644> as argument to C<sysopen>, because
 that takes away the user's option to have a more permissive umask.

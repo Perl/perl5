@@ -1,15 +1,19 @@
 BEGIN {
-	eval { pack "q", 0 };
+	eval { my $q = pack "q", 0 };
 	if ($@) {
 		print "1..0\n# no 64-bit types\n";
 		exit(0);
 	}
+	chdir 't' if -d 't';
+	unshift @INC, '../lib';
 }
 
 # This could use a lot of more tests.
 #
 # Nota bene: bit operations (&, |, ^, ~, <<, >>, vec) are not 64-bit clean.
 # See the beginning of pp.c and the explanation next to IBW/UBW.
+
+no warning 'overflow';
 
 print "1..30\n";
 

@@ -1190,6 +1190,7 @@ t/lib/selectsaver.t	See if SelectSaver works
 t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
 t/lib/symbol.t		See if Symbol works
+t/lib/syslfs.t		See if large files work for sysio
 t/lib/textfill.t	See if Text::Wrap::fill works
 t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works
@@ -1240,7 +1241,7 @@ t/op/index.t		See if index works
 t/op/int.t		See if int works
 t/op/join.t		See if join works
 t/op/lex_assign.t	See if ops involving lexicals or pad temps work
-t/op/lfs.t		See if large files work
+t/op/lfs.t		See if large files work for perlio
 t/op/list.t		See if array lists work
 t/op/local.t		See if local works
 t/op/lop.t		See if logical operators work
