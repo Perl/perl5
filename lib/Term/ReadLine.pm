@@ -160,6 +160,10 @@ sub findConsole {
       }
     }
 
+    if ($^O eq 'amigaos') {
+	$console = undef;
+    }
+
     $consoleOUT = $console;
     $console = "&STDIN" unless defined $console;
     if (!defined $consoleOUT) {
