@@ -41,7 +41,8 @@ README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
 README.bs2000		Notes about BS2000 POSIX port
 README.cygwin		Notes about Cygwin port
-README.dos		Notes about dos/djgpp port
+README.dgux		Notes about DG/UX port
+README.dos		Notes about DOS/DJGPP port
 README.epoc		Notes about EPOC port
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
