@@ -48,7 +48,10 @@ push(@cmd,ldopts());
 print "#@cmd\n";
 print "not " if system(join(' ',@cmd));
 print "ok 1\n";
-print "not " if system("embed_test");
+
+my $embed_test = File::Spec->catfile(File::Spec->curdir, "embed_test");
+
+print "not " if system($embed_test);
 print "ok 9\n";
 unlink($exe,"embed_test.c");
 
