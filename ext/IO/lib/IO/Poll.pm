@@ -1,4 +1,3 @@
-
 # IO::Poll.pm
 #
 # Copyright (c) 1997-8 Graham Barr <gbarr@pobox.com>. All rights reserved.
@@ -13,31 +12,28 @@ use Exporter ();
 our(@ISA, @EXPORT_OK, @EXPORT, $VERSION);
 
 @ISA = qw(Exporter);
-$VERSION = "0.04";
+$VERSION = "0.01";
 
-@EXPORT = qw( POLLIN
-	      POLLOUT
-	      POLLERR
-	      POLLHUP
-	      POLLNVAL
-	    );
+@EXPORT = qw(poll);
 
 @EXPORT_OK = qw(
+ POLLIN    
  POLLPRI   
+ POLLOUT   
  POLLRDNORM
  POLLWRNORM
  POLLRDBAND
  POLLWRBAND
  POLLNORM  
+ POLLERR   
+ POLLHUP   
+ POLLNVAL  
 );
 
-# [0] maps fd's to requested masks
-# [1] maps fd's to returned  masks
-# [2] maps fd's to handles
 sub new {
     my $class = shift;
 
-    my $self = bless [{},{},{}], $class;
+    my $self = bless [{},{}], $class;
 
     $self;
 }
@@ -48,19 +44,18 @@ sub mask {
     my $fd = fileno($io);
     if(@_) {
 	my $mask = shift;
+	$self->[0]{$fd} ||= {};
 	if($mask) {
-	  $self->[0]{$fd} = $mask;
-	  $self->[1]{$fd} = 0;     # no returned mask until poll() called
-	  $self->[2]{$fd} = $io;
-	} else {
-	  delete $self->[0]{$fd};
-	  delete $self->[1]{$fd};
-	  delete $self->[2]{$fd};
+	    $self->[0]{$fd}{$io} = $mask;
+	}
+	else {
+	    delete $self->[0]{$fd}{$io};
 	}
     }
-
-    return unless exists $self->[1]{$fd};
-    return $self->[1]{$fd};
+    elsif(exists $self->[0]{$fd}{$io}) {
+	return $self->[0]{$fd}{$io};
+    }
+    return;
 }
 
 
@@ -69,11 +64,13 @@ sub poll {
 
     $self->[1] = {};
 
-    my($fd,$mask);
+    my($fd,$ref);
     my @poll = ();
 
-    while(($fd,$mask) = each %{$self->[0]}) {
-	push(@poll,$fd => $mask);
+    while(($fd,$ref) = each %{$self->[0]}) {
+	my $events = 0;
+	map { $events |= $_ } values %{$ref};
+	push(@poll,$fd, $events);
     }
 
     my $ret = @poll ? _poll(defined($timeout) ? $timeout * 1000 : -1,@poll) : 0;
@@ -83,7 +80,8 @@ sub poll {
 
     while(@poll) {
 	my($fd,$got) = splice(@poll,0,2);
-	$self->[1]{$fd} = $got if $got;
+	$self->[1]{$fd} = $got
+	    if $got;
     }
 
     return $ret;  
@@ -93,7 +91,10 @@ sub events {
     my $self = shift;
     my $io = shift;
     my $fd = fileno($io);
-    exists $self->[1]{$fd} ? $self->[1]{$fd} : 0;
+
+    exists $self->[1]{$fd} && exists $self->[0]{$fd}{$io}
+	? $self->[1]{$fd} & $self->[0]{$fd}{$io}
+	: 0;
 }
 
 sub remove {
@@ -104,14 +105,21 @@ sub remove {
 
 sub handles {
     my $self = shift;
-    return values %{$self->[2]} unless @_;
+
+    return map { keys %$_ } values %{$self->[0]}
+	unless(@_);
 
     my $events = shift || 0;
     my($fd,$ev,$io,$mask);
     my @handles = ();
 
     while(($fd,$ev) = each %{$self->[1]}) {
-      push @handles,$self->[2]{$fd} if $ev & $events;
+	if($ev & $events) {
+	    while(($io,$mask) = each %{$self->[0][$fd]}) {
+		push(@handles, $io)
+		    if $events & $mask;
+	    }
+	}
     }
     return @handles;
 }
@@ -130,8 +138,8 @@ IO::Poll - Object interface to system poll call
 
     $poll = new IO::Poll;
 
-    $poll->mask($input_handle => POLLIN);
-    $poll->mask($output_handle => POLLOUT);
+    $poll->mask($input_handle => POLLRDNORM | POLLIN | POLLHUP);
+    $poll->mask($output_handle => POLLWRNORM);
 
     $poll->poll($timeout);
 
