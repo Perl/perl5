@@ -63,3 +63,8 @@ uselargefiles="n"
 # Don't use malloc that comes with perl.
 usemymalloc="n"
 
+# Make bison the default compiler-compiler.
+yacc="/system/gnu_library/bin/bison"
+
+# VOS doesn't have (or need) a pager, but perl needs one.
+pager="/system/gnu_library/bin/cat.pm"
