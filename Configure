@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Fri Aug 30 11:30:25 EDT 1996 [metaconfig 3.0 PL60]
+# Generated on Thu Sep 12 09:42:56 EDT 1996 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -292,7 +292,9 @@ d_gethname=''
 d_phostname=''
 d_uname=''
 d_getlogin=''
+d_getpgid=''
 d_getpgrp2=''
+d_bsdgetpgrp=''
 d_getpgrp=''
 d_getppid=''
 d_getprior=''
@@ -347,6 +349,7 @@ d_setlocale=''
 d_setpgid=''
 d_setpgrp2=''
 d_bsdpgrp=''
+d_bsdsetpgrp=''
 d_setpgrp=''
 d_setprior=''
 d_setregid=''
@@ -495,6 +498,7 @@ i_vfork=''
 intsize=''
 libc=''
 libperl=''
+shrpenv=''
 useshrplib=''
 glibpth=''
 libpth=''
@@ -1004,7 +1008,7 @@ done
 case "$error" in
 true)
 	cat >&2 <<EOM
-Usage: $me [-dehrEKOSV] [-f config.sh] [-D symbol] [-D symbol=value]
+Usage: $me [-dehrsEKOSV] [-f config.sh] [-D symbol] [-D symbol=value]
                  [-U symbol] [-U symbol=]
   -d : use defaults for all answers.
   -e : go on without questioning past the production of config.sh.
@@ -2033,12 +2037,20 @@ myarchname="$tarch"
 
 : is AFS running?
 echo " "
-if test -d /afs; then
+case "$afs" in
+$define|true)	afs=true ;;
+$undef|false)	afs=false ;;
+*)	if test -d /afs; then
+		afs=true
+	else
+		afs=false
+	fi
+	;;
+esac
+if $afs; then
 	echo "AFS may be running... I'll be extra cautious then..." >&4
-	afs=true
 else
 	echo "AFS does not seem to be running..." >&4
-	afs=false
 fi
 
 : decide how portable to be.  Allow command line overrides.
@@ -2878,264 +2890,6 @@ else
 	echo "Could not find manual pages in source form." >&4
 fi
 
-: determine where manual pages go
-set man1dir man1dir none
-eval $prefixit
-$cat <<EOM
-
-$spackage has manual pages available in source form.
-EOM
-case "$nroff" in
-nroff)
-	echo "However, you don't have nroff, so they're probably useless to you."
-	case "$man1dir" in
-	'') man1dir="none";;
-	esac;;
-esac
-echo "If you don't want the manual sources installed, answer 'none'."
-case "$man1dir" in
-' ') dflt=none
-	;;
-'')
-	lookpath="$prefixexp/man/man1 $prefixexp/man/l_man/man1"
-	lookpath="$lookpath $prefixexp/man/p_man/man1"
-	lookpath="$lookpath $prefixexp/man/u_man/man1"
-	lookpath="$lookpath $prefixexp/man/man.1"
-	: If prefix contains 'perl' then we want to keep the man pages
-	: under the prefix directory.  Otherwise, look in a variety of
-	: other possible places.  This is debatable, but probably a
-	: good compromise.  Well, apparently not.
-	: Experience has shown people expect man1dir to be under prefix,
-	: so we now always put it there.  Users who want other behavior
-	: can answer interactively or use a command line option.
-	: Does user have System V-style man paths.
-	case "$sysman" in
-	*/?_man*)	dflt=`./loc . $prefixexp/l_man/man1 $lookpath` ;;
-	*)	dflt=`./loc . $prefixexp/man/man1 $lookpath` ;;
-	esac
-	set dflt
-	eval $prefixup
-	;;
-*)  dflt="$man1dir"
-	;;
-esac
-echo " "
-fn=dn+~
-rp="Where do the main $spackage manual pages (source) go?"
-. ./getfile
-if $test "X$man1direxp" != "X$ansexp"; then
-	installman1dir=''
-fi
-man1dir="$ans"
-man1direxp="$ansexp"
-case "$man1dir" in
-'') man1dir=' '
-	installman1dir='';;
-esac
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-manual pages reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installman1dir" in
-	'') dflt=`echo $man1direxp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installman1dir";;
-	esac
-	fn=de~
-	rp='Where will man pages be installed?'
-	. ./getfile
-	installman1dir="$ans"
-else
-	installman1dir="$man1direxp"
-fi
-
-: What suffix to use on installed man pages
-
-case "$man1dir" in
-' ')
-	man1ext='0'
-	;;
-*)
-	rp="What suffix should be used for the main $spackage man pages?"
-	case "$man1ext" in
-	'')	case "$man1dir" in
-		*1)  dflt=1 ;;
-		*1p) dflt=1p ;;
-		*1pm) dflt=1pm ;;
-		*l) dflt=l;;
-		*n) dflt=n;;
-		*o) dflt=o;;
-		*p) dflt=p;;
-		*C) dflt=C;;
-		*L) dflt=L;;
-		*L1) dflt=L1;;
-		*) dflt=1;;
-		esac
-		;;
-	*)	dflt="$man1ext";;
-	esac
-	. ./myread
-	man1ext="$ans"
-	;;
-esac
-
-: see if we can have long filenames
-echo " "
-rmlist="$rmlist /tmp/cf$$"
-$test -d /tmp/cf$$ || mkdir /tmp/cf$$
-first=123456789abcdef
-second=/tmp/cf$$/$first
-$rm -f $first $second
-if (echo hi >$first) 2>/dev/null; then
-	if $test -f 123456789abcde; then
-		echo 'You cannot have filenames longer than 14 characters.  Sigh.' >&4
-		val="$undef"
-	else
-		if (echo hi >$second) 2>/dev/null; then
-			if $test -f /tmp/cf$$/123456789abcde; then
-				$cat <<'EOM'
-That's peculiar... You can have filenames longer than 14 characters, but only
-on some of the filesystems.  Maybe you are using NFS.  Anyway, to avoid problems
-I shall consider your system cannot support long filenames at all.
-EOM
-				val="$undef"
-			else
-				echo 'You can have filenames longer than 14 characters.' >&4
-				val="$define"
-			fi
-		else
-			$cat <<'EOM'
-How confusing! Some of your filesystems are sane enough to allow filenames
-longer than 14 characters but some others like /tmp can't even think about them.
-So, for now on, I shall assume your kernel does not allow them at all.
-EOM
-			val="$undef"
-		fi
-	fi
-else
-	$cat <<'EOM'
-You can't have filenames longer than 14 chars.  You can't even think about them!
-EOM
-	val="$undef"
-fi 
-set d_flexfnam
-eval $setvar
-$rm -rf /tmp/cf$$ 123456789abcde*
-
-: determine where library module manual pages go
-set man3dir man3dir none
-eval $prefixit
-$cat <<EOM
-
-$spackage has manual pages for many of the library modules.
-EOM
-
-case "$nroff" in
-nroff)
-	$cat <<'EOM'
-However, you don't have nroff, so they're probably useless to you.
-You can use the supplied perldoc script instead.
-EOM
-	case "$man3dir" in
-	'') man3dir="none";;
-	esac;;
-esac
-
-case "$d_flexfnam" in
-undef)
-	$cat <<'EOM'
-However, your system can't handle the long file names like File::Basename.3. 
-You can use the supplied perldoc script instead.
-EOM
-	case "$man3dir" in
-	'') man3dir="none";;
-	esac;;
-esac
-
-echo "If you don't want the manual sources installed, answer 'none'."
-: We dont use /usr/local/man/man3 because some man programs will
-: only show the /usr/local/man/man3 contents, and not the system ones,
-: thus man less will show the perl module less.pm, but not the system
-: less command.  We might also conflict with TCL man pages.
-: However, something like /opt/perl/man/man3 is fine.
-case "$man3dir" in
-'')	case "$prefix" in 
-	*perl*) dflt=`echo $man1dir | 
-			$sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'` ;;
-	*)	dflt="$privlib/man/man3" ;;
-	esac
-	;;
-' ') dflt=none;;
-*)	dflt="$man3dir" ;;
-esac
-echo " "
-
-fn=dn+~
-rp="Where do the $spackage library man pages (source) go?"
-. ./getfile
-if test "X$man3direxp" != "X$ansexp"; then
-	installman3dir=''
-fi
-
-man3dir="$ans"
-man3direxp="$ansexp"
-case "$man3dir" in
-'') man3dir=' '
-	installman3dir='';;
-esac
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-manual pages reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installman3dir" in
-	'') dflt=`echo $man3direxp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installman3dir";;
-	esac
-	fn=de~
-	rp='Where will man pages be installed?'
-	. ./getfile
-	installman3dir="$ans"
-else
-	installman3dir="$man3direxp"
-fi
-
-: What suffix to use on installed man pages
-
-case "$man3dir" in
-' ')
-	man3ext='0'
-	;;
-*)
-	rp="What suffix should be used for the $spackage library man pages?"
-	case "$man3ext" in
-	'')	case "$man3dir" in
-		*3)  dflt=3 ;;
-		*3p) dflt=3p ;;
-		*3pm) dflt=3pm ;;
-		*l) dflt=l;;
-		*n) dflt=n;;
-		*o) dflt=o;;
-		*p) dflt=p;;
-		*C) dflt=C;;
-		*L) dflt=L;;
-		*L3) dflt=L3;;
-		*) dflt=3;;
-		esac
-		;;
-	*)	dflt="$man3ext";;
-	esac
-	. ./myread
-	man3ext="$ans"
-	;;
-esac
-
 : see what memory models we can support
 case "$models" in
 '')
@@ -3404,546 +3158,6 @@ y)	fn=d/
 	;;
 esac
 
-: see if we have to deal with yellow pages, now NIS.
-if $test -d /usr/etc/yp || $test -d /etc/yp; then
-	if $test -f /usr/etc/nibindd; then
-		echo " "
-		echo "I'm fairly confident you're on a NeXT."
-		echo " "
-		rp='Do you get the hosts file via NetInfo?'
-		dflt=y
-		case "$hostcat" in
-		nidump*) ;;
-		'') ;;
-		*) dflt=n;;
-		esac
-		. ./myread
-		case "$ans" in
-		y*) hostcat='nidump hosts .';;
-		*)	case "$hostcat" in
-			nidump*) hostcat='';;
-			esac
-			;;
-		esac
-	fi
-	case "$hostcat" in
-	nidump*) ;;
-	*)
-		case "$hostcat" in
-		*ypcat*) dflt=y;;
-		'') if $contains '^\+' /etc/passwd >/dev/null 2>&1; then
-				dflt=y
-			else
-				dflt=n
-			fi;;
-		*) dflt=n;;
-		esac
-		echo " "
-		rp='Are you getting the hosts file via yellow pages?'
-		. ./myread
-		case "$ans" in
-		y*) hostcat='ypcat hosts';;
-		*) hostcat='cat /etc/hosts';;
-		esac
-		;;
-	esac
-fi
-
-: now get the host name
-echo " "
-echo "Figuring out host name..." >&4
-case "$myhostname" in
-'') cont=true
-	echo 'Maybe "hostname" will work...'
-	if tans=`sh -c hostname 2>&1` ; then
-		myhostname=$tans
-		phostname=hostname
-		cont=''
-	fi
-	;;
-*) cont='';;
-esac
-if $test "$cont"; then
-	if ./xenix; then
-		echo 'Oh, dear.  Maybe "/etc/systemid" is the key...'
-		if tans=`cat /etc/systemid 2>&1` ; then
-			myhostname=$tans
-			phostname='cat /etc/systemid'
-			echo "Whadyaknow.  Xenix always was a bit strange..."
-			cont=''
-		fi
-	elif $test -r /etc/systemid; then
-		echo "(What is a non-Xenix system doing with /etc/systemid?)"
-	fi
-fi
-if $test "$cont"; then
-	echo 'No, maybe "uuname -l" will work...'
-	if tans=`sh -c 'uuname -l' 2>&1` ; then
-		myhostname=$tans
-		phostname='uuname -l'
-	else
-		echo 'Strange.  Maybe "uname -n" will work...'
-		if tans=`sh -c 'uname -n' 2>&1` ; then
-			myhostname=$tans
-			phostname='uname -n'
-		else
-			echo 'Oh well, maybe I can mine it out of whoami.h...'
-			if tans=`sh -c $contains' sysname $usrinc/whoami.h' 2>&1` ; then
-				myhostname=`echo "$tans" | $sed 's/^.*"\(.*\)"/\1/'`
-				phostname="sed -n -e '"'/sysname/s/^.*\"\\(.*\\)\"/\1/{'"' -e p -e q -e '}' <$usrinc/whoami.h"
-			else
-				case "$myhostname" in
-				'') echo "Does this machine have an identity crisis or something?"
-					phostname='';;
-				*)
-					echo "Well, you said $myhostname before..."
-					phostname='echo $myhostname';;
-				esac
-			fi
-		fi
-	fi
-fi
-: you do not want to know about this
-set $myhostname
-myhostname=$1
-
-: verify guess
-if $test "$myhostname" ; then
-	dflt=y
-	rp='Your host name appears to be "'$myhostname'".'" Right?"
-	. ./myread
-	case "$ans" in
-	y*) ;;
-	*) myhostname='';;
-	esac
-fi
-
-: bad guess or no guess
-while $test "X$myhostname" = X ; do
-	dflt=''
-	rp="Please type the (one word) name of your host:"
-	. ./myread
-	myhostname="$ans"
-done
-
-: translate upper to lower if necessary
-case "$myhostname" in
-*[A-Z]*)
-	echo "(Normalizing case in your host name)"
-	myhostname=`echo $myhostname | ./tr '[A-Z]' '[a-z]'`
-	;;
-esac
-
-case "$myhostname" in
-*.*)
-	dflt=`expr "X$myhostname" : "X[^.]*\(\..*\)"`
-	myhostname=`expr "X$myhostname" : "X\([^.]*\)\."`
-	echo "(Trimming domain name from host name--host name is now $myhostname)"
-	;;
-*) case "$mydomain" in
-	'')
-		{
-			: If we use NIS, try ypmatch.
-			: Is there some reason why this was not done before?
-			test "X$hostcat" = "Xypcat hosts" &&
-			ypmatch "$myhostname" hosts 2>/dev/null |\
-				$sed -e 's/[	 ]*#.*//; s/$/ /' > hosts && \
-			$test -s hosts
-		} || {
-			: Extract only the relevant hosts, reducing file size,
-			: remove comments, insert trailing space for later use.
-		     	$hostcat | $sed -n -e "s/[	 ]*#.*//; s/\$/ /
-					/[	 ]$myhostname[	. ]/p" > hosts
-		}
-		tmp_re="[	. ]"
-		$test x`$awk "/[0-9].*[	 ]$myhostname$tmp_re/ { sum++ }
-			     END { print sum }" hosts` = x1 || tmp_re="[	 ]"
-		dflt=.`$awk "/[0-9].*[	 ]$myhostname$tmp_re/ {for(i=2; i<=NF;i++) print \\\$i}" \
-			hosts | $sort | $uniq | \
-			$sed -n -e "s/$myhostname\.\([-a-zA-Z0-9_.]\)/\1/p"`
-		case `$echo X$dflt` in
-		X*\ *)	echo "(Several hosts in /etc/hosts matched hostname)"
-			dflt=.
-			;;
-		X.) echo "(You do not have fully-qualified names in /etc/hosts)"
-			;;
-		esac
-		case "$dflt" in
-		.)
-			tans=`./loc resolv.conf X /etc /usr/etc`
-			if $test -f "$tans"; then
-				echo "(Attempting domain name extraction from $tans)"
-				: Why was there an Egrep here, when Sed works?
-				dflt=.`$sed -n -e 's/^domain[ 	]*\(.*\)/\1/p' $tans \
-					| ./tr '[A-Z]' '[a-z]' 2>/dev/null`
-			fi
-			;;
-		esac
-		case "$dflt" in
-		.) echo "(No help from resolv.conf either -- attempting clever guess)"
-			dflt=.`sh -c domainname 2>/dev/null`
-			case "$dflt" in
-			'') dflt='.';;
-			.nis.*|.yp.*|.main.*) dflt=`echo $dflt | $sed -e 's/^\.[^.]*//'`;;
-			esac
-			;;
-		esac
-		case "$dflt" in
-		.) echo "(Lost all hope -- silly guess then)"
-			dflt='.uucp'
-			;;
-		esac
-		$rm -f hosts
-		;;
-	*) dflt="$mydomain";;
-	esac;;
-esac
-echo " "
-rp="What is your domain name?"
-. ./myread
-tans="$ans"
-case "$ans" in
-'') ;;
-.*) ;;
-*) tans=".$tans";;
-esac
-mydomain="$tans"
-
-: translate upper to lower if necessary
-case "$mydomain" in
-*[A-Z]*)
-	echo "(Normalizing case in your domain name)"
-	mydomain=`echo $mydomain | ./tr '[A-Z]' '[a-z]'`
-	;;
-esac
-
-: a little sanity check here
-case "$phostname" in
-'') ;;
-*)
-	case `$phostname | ./tr '[A-Z]' '[a-z]'` in
-	$myhostname$mydomain|$myhostname) ;;
-	*)
-		case "$phostname" in
-		sed*)
-			echo "(That doesn't agree with your whoami.h file, by the way.)"
-			;;
-		*)
-			echo "(That doesn't agree with your $phostname command, by the way.)"
-			;;
-		esac
-	;;
-	esac
-	;;
-esac
-
-$cat <<EOM
-
-I need to get your e-mail address in Internet format if possible, i.e.
-something like user@host.domain. Please answer accurately since I have
-no easy means to double check it. The default value provided below
-is most probably close to the reality but may not be valid from outside
-your organization...
-
-EOM
-cont=x
-while test "$cont"; do
-	case "$cf_email" in
-	'') dflt="$cf_by@$myhostname$mydomain";;
-	*) dflt="$cf_email";;
-	esac
-	rp='What is your e-mail address?'
-	. ./myread
-	cf_email="$ans"
-	case "$cf_email" in
-	*@*.*) cont='' ;;
-	*)
-		rp='Address does not look like an Internet one.  Use it anyway?'
-		case "$fastread" in
-		yes) dflt=y ;;
-		*) dflt=n ;;
-		esac
-		. ./myread
-		case "$ans" in
-		y*) cont='' ;;
-		*) echo " " ;;
-		esac
-		;;
-	esac
-done
-
-$cat <<EOM
-
-If you or somebody else will be maintaining perl at your site, please
-fill in the correct e-mail address here so that they may be contacted
-if necessary. Currently, the "perlbug" program included with perl
-will send mail to this address in addition to perlbug@perl.com. You may
-enter "none" for no administrator.
-
-EOM
-case "$perladmin" in
-'') dflt="$cf_email";;
-*) dflt="$perladmin";;
-esac
-rp='Perl administrator e-mail address'
-. ./myread
-perladmin="$ans"
-
-: determine where public executable scripts go
-set scriptdir scriptdir
-eval $prefixit
-case "$scriptdir" in
-'')
-	dflt="$bin"
-	: guess some guesses
-	$test -d /usr/share/scripts && dflt=/usr/share/scripts
-	$test -d /usr/share/bin && dflt=/usr/share/bin
-	$test -d /usr/local/script && dflt=/usr/local/script
-	$test -d $prefixexp/script && dflt=$prefixexp/script
-	set dflt
-	eval $prefixup
-	;;
-*)  dflt="$scriptdir"
-	;;
-esac
-$cat <<EOM
- 
-Some installations have a separate directory just for executable scripts so
-that they can mount it across multiple architectures but keep the scripts in
-one spot.  You might, for example, have a subdirectory of /usr/share for this.
-Or you might just lump your scripts in with all your other executables.
- 
-EOM
-fn=d~
-rp='Where do you keep publicly executable scripts?'
-. ./getfile
-if $test "X$ansexp" != "X$scriptdirexp"; then
-	installscript=''
-fi
-scriptdir="$ans"
-scriptdirexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-scripts reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installscript" in
-	'') dflt=`echo $scriptdirexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installscript";;
-	esac
-	fn=de~
-	rp='Where will public scripts be installed?'
-	. ./getfile
-	installscript="$ans"
-else
-	installscript="$scriptdirexp"
-fi
-
-: determine perl absolute location
-case "$perlpath" in
-'')	perlpath=$binexp/perl ;;
-esac
-
-: figure out how to guarantee perl startup
-case "$startperl" in
-'')
-	case "$sharpbang" in
-	*!)
-		$cat <<EOH
-
-I can use the #! construct to start perl on your system. This will
-make startup of perl scripts faster, but may cause problems if you
-want to share those scripts and perl is not in a standard place
-($perlpath) on all your platforms. The alternative is to force
-a shell by starting the script with a single ':' character.
-
-EOH
-		dflt=$perlpath
-		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
-		. ./myread
-		case "$ans" in
-		none) startperl=": # use perl";;
-		*) startperl="#!$ans";;
-		esac
-		;;
-	*) startperl=": # use perl"
-		;;
-	esac
-	;;
-esac
-echo "I'll use $startperl to start perl scripts."
-
-cat <<EOM
-
-Previous version of $package used the standard IO mechanisms as defined in
-<stdio.h>.  Versions 5.003_02 and later of perl allow alternate IO
-mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
-the default and is the only supported mechanism.  This abstraction
-layer can use AT&T's sfio (if you already have sfio installed) or
-fall back on standard IO.  This PerlIO abstraction layer is
-experimental and may cause problems with some extension modules.
-
-If this doesn't make any sense to you, just accept the default 'n'.
-EOM
-case "$useperlio" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
-rp='Use the experimental PerlIO abstraction layer?'
-. ./myread
-case "$ans" in
-y|Y) 
-	val="$define"
-	;;     
-*)      
-	echo "Ok, doing things the stdio way"
-	val="$undef"
-	;;
-esac
-set useperlio
-eval $setvar 
-
-: see how we invoke the C preprocessor
-echo " "
-echo "Now, how can we feed standard input to your C preprocessor..." >&4
-cat <<'EOT' >testcpp.c
-#define ABC abc
-#define XYZ xyz
-ABC.XYZ
-EOT
-cd ..
-echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
-chmod 755 cppstdin
-wrapper=`pwd`/cppstdin
-ok='false'
-cd UU
-
-if $test "X$cppstdin" != "X" && \
-	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-then
-	echo "You used to use $cppstdin $cppminus so we'll use that again."
-	case "$cpprun" in
-	'') echo "But let's see if we can live without a wrapper..." ;;
-	*)
-		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
-			ok='true'
-		else
-			echo "(However, $cpprun $cpplast does not work, let's see...)"
-		fi
-		;;
-	esac
-else
-	case "$cppstdin" in
-	'') ;;
-	*)
-		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
-		;;
-	esac
-fi
-
-if $ok; then
-	: nothing
-elif echo 'Maybe "'"$cc"' -E" will work...'; \
-	$cc -E <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
-	$cc -E - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='-';
-elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
-	$cc -P <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yipee, that works!"
-	x_cpp="$cc -P"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
-	$cc -P - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "At long last!"
-	x_cpp="$cc -P"
-	x_minus='-';
-elif echo 'No such luck, maybe "'$cpp'" will work...'; \
-	$cpp <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "It works!"
-	x_cpp="$cpp"
-	x_minus='';
-elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
-	$cpp - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Hooray, it works!  I was beginning to wonder."
-	x_cpp="$cpp"
-	x_minus='-';
-elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
-	$wrapper <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	x_cpp="$wrapper"
-	x_minus=''
-	echo "Eureka!"
-else
-	dflt=''
-	rp="No dice.  I can't find a C preprocessor.  Name one:"
-	. ./myread
-	x_cpp="$ans"
-	x_minus=''
-	$x_cpp <testcpp.c >testcpp.out 2>&1
-	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-		echo "OK, that will do." >&4
-	else
-echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
-		exit 1
-	fi
-fi
-
-case "$ok" in
-false)
-	cppstdin="$x_cpp"
-	cppminus="$x_minus"
-	cpprun="$x_cpp"
-	cpplast="$x_minus"
-	set X $x_cpp
-	shift
-	case "$1" in
-	"$cpp")
-		echo "Perhaps can we force $cc -E using a wrapper..."
-		if $wrapper <testcpp.c >testcpp.out 2>&1; \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "Yup, we can."
-			cppstdin="$wrapper"
-			cppminus='';
-		else
-			echo "Nope, we'll have to live without it..."
-		fi
-		;;
-	esac
-	case "$cpprun" in
-	"$wrapper")
-		cpprun=''
-		cpplast=''
-		;;
-	esac
-	;;
-esac
-
-case "$cppstdin" in
-"$wrapper") ;;
-*) $rm -f $wrapper;;
-esac
-$rm -f testcpp.c testcpp.out
-
 : Set private lib path
 case "$plibpth" in
 '') if ./mips; then
@@ -3989,276 +3203,6 @@ case "$ans" in
 none) libpth=' ';;
 *) libpth="$ans";;
 esac
-
-: determine optimize, if desired, or use for debug flag also
-case "$optimize" in
-' ') dflt='none';;
-'') dflt='-O';;
-*) dflt="$optimize";;
-esac
-$cat <<EOH
-
-Some C compilers have problems with their optimizers.  By default, $package
-compiles with the -O flag to use the optimizer.  Alternately, you might want
-to use the symbolic debugger, which uses the -g flag (on traditional Unix
-systems).  Either flag can be specified here.  To use neither flag, specify
-the word "none".
-
-EOH
-rp="What optimizer/debugger flag should be used?"
-. ./myread
-optimize="$ans"
-case "$optimize" in
-'none') optimize=" ";;
-esac
-
-dflt=''
-: We will not override a previous value, but we might want to
-: augment a hint file
-case "$hint" in
-none|recommended)
-	case "$gccversion" in
-	1*) dflt='-fpcc-struct-return' ;;
-	esac
-	case "$optimize" in
-	*-g*) dflt="$dflt -DDEBUGGING";;
-	esac
-	case "$gccversion" in
-	2*) if test -d /etc/conf/kconfig.d &&
-			$contains _POSIX_VERSION $usrinc/sys/unistd.h >/dev/null 2>&1
-		then
-			dflt="$dflt -posix"
-		fi
-		;;
-	esac
-	;;
-esac
-
-case "$mips_type" in
-*BSD*|'') inclwanted="$locincpth $usrinc";;
-*) inclwanted="$locincpth $inclwanted $usrinc/bsd";;
-esac
-for thisincl in $inclwanted; do
-	if $test -d $thisincl; then
-		if $test x$thisincl != x$usrinc; then
-			case "$dflt" in
-			*$thisincl*);;
-			*) dflt="$dflt -I$thisincl";;
-			esac
-		fi
-	fi
-done
-
-inctest='if $contains $2 $usrinc/$1 >/dev/null 2>&1; then
-	xxx=true;
-elif $contains $2 $usrinc/sys/$1 >/dev/null 2>&1; then
-	xxx=true;
-else
-	xxx=false;
-fi;
-if $xxx; then
-	case "$dflt" in
-	*$2*);;
-	*) dflt="$dflt -D$2";;
-	esac;
-fi'
-
-if ./osf1; then
-	set signal.h __LANGUAGE_C__; eval $inctest
-else
-	set signal.h LANGUAGE_C; eval $inctest
-fi
-set signal.h NO_PROTOTYPE; eval $inctest
-set signal.h _NO_PROTO; eval $inctest
-
-case "$hint" in
-none|recommended) dflt="$ccflags $dflt" ;;
-*) dflt="$ccflags";;
-esac
-
-case "$dflt" in
-''|' ') dflt=none;;
-esac
-$cat <<EOH
-
-Your C compiler may want other flags.  For this question you should include
--I/whatever and -DWHATEVER flags and any other flags used by the C compiler,
-but you should NOT include libraries or ld flags like -lwhatever.  If you
-want $package to honor its debug switch, you should include -DDEBUGGING here.
-Your C compiler might also need additional flags, such as -D_POSIX_SOURCE,
--DHIDEMYMALLOC or -DCRIPPLED_CC.
-
-To use no flags, specify the word "none".
-
-EOH
-set X $dflt
-shift
-dflt=${1+"$@"}
-rp="Any additional cc flags?"
-. ./myread
-case "$ans" in
-none) ccflags='';;
-*) ccflags="$ans";;
-esac
-
-: the following weeds options from ccflags that are of no interest to cpp
-cppflags="$ccflags"
-case "$gccversion" in
-1*) cppflags="$cppflags -D__GNUC__"
-esac
-case "$mips_type" in
-'');;
-*BSD*) cppflags="$cppflags -DSYSTYPE_BSD43";;
-esac
-case "$cppflags" in
-'');;
-*)
-	echo " "
-	echo "Let me guess what the preprocessor flags are..." >&4
-	set X $cppflags
-	shift
-	cppflags=''
-	$cat >cpp.c <<'EOM'
-#define BLURFL foo
-
-BLURFL xx LFRULB
-EOM
-	previous=''
-	for flag in $*
-	do
-		case "$flag" in
-		-*) ftry="$flag";;
-		*) ftry="$previous $flag";;
-		esac
-		if $cppstdin -DLFRULB=bar $ftry $cppminus <cpp.c \
-			>cpp1.out 2>/dev/null && \
-			$cpprun -DLFRULB=bar $ftry $cpplast <cpp.c \
-			>cpp2.out 2>/dev/null && \
-			$contains 'foo.*xx.*bar' cpp1.out >/dev/null 2>&1 && \
-			$contains 'foo.*xx.*bar' cpp2.out >/dev/null 2>&1
-		then
-			cppflags="$cppflags $ftry"
-			previous=''
-		else
-			previous="$flag"
-		fi
-	done
-	set X $cppflags
-	shift
-	cppflags=${1+"$@"}
-	case "$cppflags" in
-	*-*)  echo "They appear to be: $cppflags";;
-	esac
-	$rm -f cpp.c cpp?.out
-	;;
-esac
-
-: flags used in final linking phase
-
-case "$ldflags" in
-'') if ./venix; then
-		dflt='-i -z'
-	else
-		dflt=''
-	fi
-	case "$ccflags" in
-	*-posix*) dflt="$dflt -posix" ;;
-	esac
-	;;
-*) dflt="$ldflags";;
-esac
-
-: Try to guess additional flags to pick up local libraries.
-for thislibdir in $libpth; do
-	case " $loclibpth " in
-	*" $thislibdir "*)
-		case "$dflt " in 
-		*"-L$thislibdir "*) ;;
-		*)  dflt="$dflt -L$thislibdir" ;;
-		esac
-		;;
-	esac
-done
-
-case "$dflt" in
-'') dflt='none' ;;
-esac
-
-$cat <<EOH
-
-Your C linker may need flags.  For this question you should
-include -L/whatever and any other flags used by the C linker, but you
-should NOT include libraries like -lwhatever.
-
-Make sure you include the appropriate -L/path flags if your C linker
-does not normally search all of the directories you specified above,
-namely
-	$libpth
-To use no flags, specify the word "none".
-
-EOH
-
-rp="Any additional ld flags (NOT including libraries)?"
-. ./myread
-case "$ans" in
-none) ldflags='';;
-*) ldflags="$ans";;
-esac
-rmlist="$rmlist pdp11"
-
-: coherency check
-echo " "
-echo "Checking your choice of C compiler and flags for coherency..." >&4
-set X $cc $optimize $ccflags $ldflags try.c -o try
-shift
-$cat >try.msg <<EOM
-I've tried to compile and run a simple program with:
-
-	$*
-	./try
-
-and I got the following output:
-
-EOM
-$cat > try.c <<'EOF'
-#include <stdio.h>
-main() { exit(0); }
-EOF
-dflt=y
-if sh -c "$cc $optimize $ccflags try.c -o try $ldflags" >>try.msg 2>&1; then
-	if sh -c './try' >>try.msg 2>&1; then
-		dflt=n
-	else
-		echo "The program compiled OK, but exited with status $?." >>try.msg
-		rp="You have a problem.  Shall I abort Configure"
-		dflt=y
-	fi
-else
-	echo "I can't compile the test program." >>try.msg
-	rp="You have a BIG problem.  Shall I abort Configure"
-	dflt=y
-fi
-case "$dflt" in
-y)
-	$cat try.msg
-	case "$knowitall" in
-	'')
-		echo "(The supplied flags might be incorrect with this C compiler.)"
-		;;
-	*) dflt=n;;
-	esac
-	echo " "
-	. ./myread
-	case "$ans" in
-	n*|N*) ;;
-	*)	echo "Ok.  Stopping Configure." >&4
-		exit 1
-		;;
-	esac
-	;;
-n) echo "OK, that should do.";;
-esac
-$rm -f try try.* core
 
 : compute shared library extension
 case "$so" in
@@ -4593,7 +3537,7 @@ $grep fprintf libc.tmp > libc.ptf
 xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
 xrun='eval "<libc.tmp $com >libc.list"; echo "done" >&4'
 xxx='[ADTSIW]'
-if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *_[_.]*//p' -e 's/^.* $xxx //p'";\
+if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *_[_.]*//p' -e 's/^.* $xxx  *//p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
@@ -4684,6 +3628,527 @@ fi
 esac
 $rm -f libnames libpath
 
+: Define several unixisms. Hints files or command line options
+: can be used to override them.
+case "$ar" in
+'') ar='ar';;
+esac
+case "$lib_ext" in
+'') lib_ext='.a';;
+esac
+case "$obj_ext" in
+'') obj_ext='.o';;
+esac
+case "$path_sep" in
+'') path_sep=':';;
+esac
+: Which makefile gets called first.  This is used by make depend.
+case "$firstmakefile" in
+'') firstmakefile='makefile';;
+esac
+
+: see how we invoke the C preprocessor
+echo " "
+echo "Now, how can we feed standard input to your C preprocessor..." >&4
+cat <<'EOT' >testcpp.c
+#define ABC abc
+#define XYZ xyz
+ABC.XYZ
+EOT
+cd ..
+echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+chmod 755 cppstdin
+wrapper=`pwd`/cppstdin
+ok='false'
+cd UU
+
+if $test "X$cppstdin" != "X" && \
+	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+then
+	echo "You used to use $cppstdin $cppminus so we'll use that again."
+	case "$cpprun" in
+	'') echo "But let's see if we can live without a wrapper..." ;;
+	*)
+		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
+			ok='true'
+		else
+			echo "(However, $cpprun $cpplast does not work, let's see...)"
+		fi
+		;;
+	esac
+else
+	case "$cppstdin" in
+	'') ;;
+	*)
+		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
+		;;
+	esac
+fi
+
+if $ok; then
+	: nothing
+elif echo 'Maybe "'"$cc"' -E" will work...'; \
+	$cc -E <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
+	$cc -E - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='-';
+elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
+	$cc -P <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yipee, that works!"
+	x_cpp="$cc -P"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
+	$cc -P - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "At long last!"
+	x_cpp="$cc -P"
+	x_minus='-';
+elif echo 'No such luck, maybe "'$cpp'" will work...'; \
+	$cpp <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "It works!"
+	x_cpp="$cpp"
+	x_minus='';
+elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
+	$cpp - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Hooray, it works!  I was beginning to wonder."
+	x_cpp="$cpp"
+	x_minus='-';
+elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
+	$wrapper <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	x_cpp="$wrapper"
+	x_minus=''
+	echo "Eureka!"
+else
+	dflt=''
+	rp="No dice.  I can't find a C preprocessor.  Name one:"
+	. ./myread
+	x_cpp="$ans"
+	x_minus=''
+	$x_cpp <testcpp.c >testcpp.out 2>&1
+	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+		echo "OK, that will do." >&4
+	else
+echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
+		exit 1
+	fi
+fi
+
+case "$ok" in
+false)
+	cppstdin="$x_cpp"
+	cppminus="$x_minus"
+	cpprun="$x_cpp"
+	cpplast="$x_minus"
+	set X $x_cpp
+	shift
+	case "$1" in
+	"$cpp")
+		echo "Perhaps can we force $cc -E using a wrapper..."
+		if $wrapper <testcpp.c >testcpp.out 2>&1; \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "Yup, we can."
+			cppstdin="$wrapper"
+			cppminus='';
+		else
+			echo "Nope, we'll have to live without it..."
+		fi
+		;;
+	esac
+	case "$cpprun" in
+	"$wrapper")
+		cpprun=''
+		cpplast=''
+		;;
+	esac
+	;;
+esac
+
+case "$cppstdin" in
+"$wrapper") ;;
+*) $rm -f $wrapper;;
+esac
+$rm -f testcpp.c testcpp.out
+
+: determine optimize, if desired, or use for debug flag also
+case "$optimize" in
+' ') dflt='none';;
+'') dflt='-O';;
+*) dflt="$optimize";;
+esac
+$cat <<EOH
+
+Some C compilers have problems with their optimizers.  By default, $package
+compiles with the -O flag to use the optimizer.  Alternately, you might want
+to use the symbolic debugger, which uses the -g flag (on traditional Unix
+systems).  Either flag can be specified here.  To use neither flag, specify
+the word "none".
+
+EOH
+rp="What optimizer/debugger flag should be used?"
+. ./myread
+optimize="$ans"
+case "$optimize" in
+'none') optimize=" ";;
+esac
+
+dflt=''
+: We will not override a previous value, but we might want to
+: augment a hint file
+case "$hint" in
+none|recommended)
+	case "$gccversion" in
+	1*) dflt='-fpcc-struct-return' ;;
+	esac
+	case "$optimize" in
+	*-g*) dflt="$dflt -DDEBUGGING";;
+	esac
+	case "$gccversion" in
+	2*) if test -d /etc/conf/kconfig.d &&
+			$contains _POSIX_VERSION $usrinc/sys/unistd.h >/dev/null 2>&1
+		then
+			dflt="$dflt -posix"
+		fi
+		;;
+	esac
+	;;
+esac
+
+case "$mips_type" in
+*BSD*|'') inclwanted="$locincpth $usrinc";;
+*) inclwanted="$locincpth $inclwanted $usrinc/bsd";;
+esac
+for thisincl in $inclwanted; do
+	if $test -d $thisincl; then
+		if $test x$thisincl != x$usrinc; then
+			case "$dflt" in
+			*$thisincl*);;
+			*) dflt="$dflt -I$thisincl";;
+			esac
+		fi
+	fi
+done
+
+inctest='if $contains $2 $usrinc/$1 >/dev/null 2>&1; then
+	xxx=true;
+elif $contains $2 $usrinc/sys/$1 >/dev/null 2>&1; then
+	xxx=true;
+else
+	xxx=false;
+fi;
+if $xxx; then
+	case "$dflt" in
+	*$2*);;
+	*) dflt="$dflt -D$2";;
+	esac;
+fi'
+
+if ./osf1; then
+	set signal.h __LANGUAGE_C__; eval $inctest
+else
+	set signal.h LANGUAGE_C; eval $inctest
+fi
+set signal.h NO_PROTOTYPE; eval $inctest
+set signal.h _NO_PROTO; eval $inctest
+
+case "$hint" in
+none|recommended) dflt="$ccflags $dflt" ;;
+*) dflt="$ccflags";;
+esac
+
+case "$dflt" in
+''|' ') dflt=none;;
+esac
+$cat <<EOH
+
+Your C compiler may want other flags.  For this question you should include
+-I/whatever and -DWHATEVER flags and any other flags used by the C compiler,
+but you should NOT include libraries or ld flags like -lwhatever.  If you
+want $package to honor its debug switch, you should include -DDEBUGGING here.
+Your C compiler might also need additional flags, such as -D_POSIX_SOURCE,
+-DHIDEMYMALLOC or -DCRIPPLED_CC.
+
+To use no flags, specify the word "none".
+
+EOH
+set X $dflt
+shift
+dflt=${1+"$@"}
+rp="Any additional cc flags?"
+. ./myread
+case "$ans" in
+none) ccflags='';;
+*) ccflags="$ans";;
+esac
+
+: the following weeds options from ccflags that are of no interest to cpp
+cppflags="$ccflags"
+case "$gccversion" in
+1*) cppflags="$cppflags -D__GNUC__"
+esac
+case "$mips_type" in
+'');;
+*BSD*) cppflags="$cppflags -DSYSTYPE_BSD43";;
+esac
+case "$cppflags" in
+'');;
+*)
+	echo " "
+	echo "Let me guess what the preprocessor flags are..." >&4
+	set X $cppflags
+	shift
+	cppflags=''
+	$cat >cpp.c <<'EOM'
+#define BLURFL foo
+
+BLURFL xx LFRULB
+EOM
+	previous=''
+	for flag in $*
+	do
+		case "$flag" in
+		-*) ftry="$flag";;
+		*) ftry="$previous $flag";;
+		esac
+		if $cppstdin -DLFRULB=bar $ftry $cppminus <cpp.c \
+			>cpp1.out 2>/dev/null && \
+			$cpprun -DLFRULB=bar $ftry $cpplast <cpp.c \
+			>cpp2.out 2>/dev/null && \
+			$contains 'foo.*xx.*bar' cpp1.out >/dev/null 2>&1 && \
+			$contains 'foo.*xx.*bar' cpp2.out >/dev/null 2>&1
+		then
+			cppflags="$cppflags $ftry"
+			previous=''
+		else
+			previous="$flag"
+		fi
+	done
+	set X $cppflags
+	shift
+	cppflags=${1+"$@"}
+	case "$cppflags" in
+	*-*)  echo "They appear to be: $cppflags";;
+	esac
+	$rm -f cpp.c cpp?.out
+	;;
+esac
+
+: flags used in final linking phase
+
+case "$ldflags" in
+'') if ./venix; then
+		dflt='-i -z'
+	else
+		dflt=''
+	fi
+	case "$ccflags" in
+	*-posix*) dflt="$dflt -posix" ;;
+	esac
+	;;
+*) dflt="$ldflags";;
+esac
+
+: Try to guess additional flags to pick up local libraries.
+for thislibdir in $libpth; do
+	case " $loclibpth " in
+	*" $thislibdir "*)
+		case "$dflt " in 
+		*"-L$thislibdir "*) ;;
+		*)  dflt="$dflt -L$thislibdir" ;;
+		esac
+		;;
+	esac
+done
+
+case "$dflt" in
+'') dflt='none' ;;
+esac
+
+$cat <<EOH
+
+Your C linker may need flags.  For this question you should
+include -L/whatever and any other flags used by the C linker, but you
+should NOT include libraries like -lwhatever.
+
+Make sure you include the appropriate -L/path flags if your C linker
+does not normally search all of the directories you specified above,
+namely
+	$libpth
+To use no flags, specify the word "none".
+
+EOH
+
+rp="Any additional ld flags (NOT including libraries)?"
+. ./myread
+case "$ans" in
+none) ldflags='';;
+*) ldflags="$ans";;
+esac
+rmlist="$rmlist pdp11"
+
+: coherency check
+echo " "
+echo "Checking your choice of C compiler and flags for coherency..." >&4
+set X $cc $optimize $ccflags $ldflags try.c -o try
+shift
+$cat >try.msg <<EOM
+I've tried to compile and run a simple program with:
+
+	$*
+	./try
+
+and I got the following output:
+
+EOM
+$cat > try.c <<'EOF'
+#include <stdio.h>
+main() { exit(0); }
+EOF
+dflt=y
+if sh -c "$cc $optimize $ccflags try.c -o try $ldflags" >>try.msg 2>&1; then
+	if sh -c './try' >>try.msg 2>&1; then
+		dflt=n
+	else
+		echo "The program compiled OK, but exited with status $?." >>try.msg
+		rp="You have a problem.  Shall I abort Configure"
+		dflt=y
+	fi
+else
+	echo "I can't compile the test program." >>try.msg
+	rp="You have a BIG problem.  Shall I abort Configure"
+	dflt=y
+fi
+case "$dflt" in
+y)
+	$cat try.msg
+	case "$knowitall" in
+	'')
+		echo "(The supplied flags might be incorrect with this C compiler.)"
+		;;
+	*) dflt=n;;
+	esac
+	echo " "
+	. ./myread
+	case "$ans" in
+	n*|N*) ;;
+	*)	echo "Ok.  Stopping Configure." >&4
+		exit 1
+		;;
+	esac
+	;;
+n) echo "OK, that should do.";;
+esac
+$rm -f try try.* core
+
+: determine filename position in cpp output
+echo " "
+echo "Computing filename position in cpp output for #include directives..." >&4
+echo '#include <stdio.h>' > foo.c
+$cat >fieldn <<EOF
+$startsh
+$cppstdin $cppflags $cppminus <foo.c 2>/dev/null | \
+$grep '^[ 	]*#.*stdio\.h' | \
+while read cline; do
+	pos=1
+	set \$cline
+	while $test \$# -gt 0; do
+		if $test -r \`echo \$1 | $tr -d '"'\`; then
+			echo "\$pos"
+			exit 0
+		fi
+		shift
+		pos=\`expr \$pos + 1\`
+	done
+done
+EOF
+chmod +x fieldn
+fieldn=`./fieldn`
+$rm -f foo.c fieldn
+case $fieldn in
+'') pos='???';;
+1) pos=first;;
+2) pos=second;;
+3) pos=third;;
+*) pos="${fieldn}th";;
+esac
+echo "Your cpp writes the filename in the $pos field of the line."
+
+: locate header file
+$cat >findhdr <<EOF
+$startsh
+wanted=\$1
+name=''
+if test -f $usrinc/\$wanted; then
+	echo "$usrinc/\$wanted"
+	exit 0
+fi
+awkprg='{ print \$$fieldn }'
+echo "#include <\$wanted>" > foo\$\$.c
+$cppstdin $cppminus $cppflags < foo\$\$.c 2>/dev/null | \
+$grep "^[ 	]*#.*\$wanted" | \
+while read cline; do
+	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
+	case "\$name" in
+	*/\$wanted) echo "\$name"; exit 0;;
+	*) name='';;
+	esac;
+done;
+$rm -f foo\$\$.c;
+case "\$name" in
+'') exit 1;;
+esac
+EOF
+chmod +x findhdr
+
+: define an alternate in-header-list? function
+inhdr='echo " "; td=$define; tu=$undef; yyy=$@;
+cont=true; xxf="echo \"<\$1> found.\" >&4";
+case $# in 2) xxnf="echo \"<\$1> NOT found.\" >&4";;
+*) xxnf="echo \"<\$1> NOT found, ...\" >&4";;
+esac;
+case $# in 4) instead=instead;; *) instead="at last";; esac;
+while $test "$cont"; do
+	xxx=`./findhdr $1`
+	var=$2; eval "was=\$$2";
+	if $test "$xxx" && $test -r "$xxx";
+	then eval $xxf;
+	eval "case \"\$$var\" in $undef) . ./whoa; esac"; eval "$var=\$td";
+		cont="";
+	else eval $xxnf;
+	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu"; fi;
+	set $yyy; shift; shift; yyy=$@;
+	case $# in 0) cont="";;
+	2) xxf="echo \"but I found <\$1> $instead.\" >&4";
+		xxnf="echo \"and I did not find <\$1> either.\" >&4";;
+	*) xxf="echo \"but I found <\$1\> instead.\" >&4";
+		xxnf="echo \"there is no <\$1>, ...\" >&4";;
+	esac;
+done;
+while $test "$yyy";
+do set $yyy; var=$2; eval "was=\$$2";
+	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu";
+	set $yyy; shift; shift; yyy=$@;
+done'
+
+: see if dld is available
+set dld.h i_dld
+eval $inhdr
+
 : is a C symbol defined?
 csym='tlook=$1;
 case "$3" in
@@ -4746,6 +4211,1079 @@ yes)
 	*) echo "$sym() NOT found." >&4;;
 	esac;;
 esac'
+
+: see if dlopen exists
+xxx_runnm="$runnm"
+runnm=false
+set dlopen d_dlopen
+eval $inlibc
+runnm="$xxx_runnm"
+
+: determine which dynamic loading, if any, to compile in
+echo " "
+dldir="ext/DynaLoader"
+case "$usedl" in
+$define|y|true)
+	dflt='y'
+	usedl="$define"
+	;;
+$undef|n|false)
+	dflt='n'
+	usedl="$undef"
+	;;
+*) 
+	dflt='n'
+	case "$d_dlopen" in
+	    $define) dflt='y' ;;
+	esac
+	case "$i_dld" in
+	    $define) dflt='y' ;;
+	esac
+	: Does a dl_xxx.xs file exist for this operating system
+	$test -f ../$dldir/dl_${osname}.xs && dflt='y'
+	;;
+esac
+rp="Do you wish to use dynamic loading?"
+. ./myread
+usedl="$ans"
+case "$ans" in
+y*) usedl="$define"
+	case "$dlsrc" in
+	'')
+		if $test -f ../$dldir/dl_${osname}.xs ; then
+			dflt="$dldir/dl_${osname}.xs"
+		elif $test "$d_dlopen" = "$define" ; then
+			dflt="$dldir/dl_dlopen.xs"
+		elif $test "$i_dld" = "$define" ; then
+			dflt="$dldir/dl_dld.xs"
+		else
+			dflt=''
+		fi
+		;;
+	*)	dflt="$dldir/$dlsrc"
+		;;
+	esac
+    echo "The following dynamic loading files are available:"
+	: Can not go over to $dldir because getfile has path hard-coded in.
+    cd ..; ls -C $dldir/dl*.xs; cd UU
+    rp="Source file to use for dynamic loading"
+    fn="fne"
+    . ./getfile
+	usedl="$define"
+	: emulate basename
+	dlsrc=`echo $ans | $sed -e 's@.*/\([^/]*\)$@\1@'`
+
+    $cat << EOM
+
+Some systems may require passing special flags to $cc -c to
+compile modules that will be used to create a shared library.
+To use no flags, say "none".
+
+EOM
+    case "$cccdlflags" in
+    '')	case "$gccversion" in
+		'') case "$osname" in
+			hpux)	dflt='+z' ;;
+			next)	dflt='none' ;;
+			solaris|svr4*|esix*) dflt='-Kpic' ;;
+			irix*)  dflt='-KPIC' ;;
+			sunos)	dflt='-pic' ;;
+			*)	dflt='none' ;;
+		    esac ;;
+		*)	dflt='-fpic' ;;
+	    esac ;;
+    *)	dflt="$cccdlflags" ;;
+    esac
+    rp="Any special flags to pass to $cc -c to compile shared library modules?"
+    . ./myread
+    case "$ans" in
+    none) cccdlflags=' ' ;;
+    *) cccdlflags="$ans" ;;
+    esac
+
+    cat << EOM
+
+Some systems use ld to create libraries that can be dynamically loaded,
+while other systems (such as those using ELF) use $cc.
+
+EOM
+	case "$ld" in
+	'')	$cat >try.c <<'EOM'
+/* Test for whether ELF binaries are produced */
+#include <fcntl.h>
+#include <stdlib.h>
+main() {
+	char b[4];
+	int i = open("a.out",O_RDONLY);
+	if(i == -1) 
+		exit(1); /* fail */
+	if(read(i,b,4)==4 && b[0]==127 && b[1]=='E' && b[2]=='L' && b[3]=='F')
+		exit(0); /* succeed (yes, it's ELF) */
+	else
+		exit(1); /* fail */
+}
+EOM
+		if $cc $ccflags try.c >/dev/null 2>&1 && ./a.out; then
+			cat <<EOM
+You appear to have ELF support.  I'll use $cc to build dynamic libraries.
+EOM
+			dflt="$cc"
+		else
+			echo "I'll use ld to build dynamic libraries."
+			dflt='ld'
+		fi
+		rm -f try.c a.out
+		;;
+	*)	dflt="$ld"
+		;;
+	esac
+
+    rp="What command should be used to create dynamic libraries?"
+    . ./myread
+	ld="$ans"
+
+    cat << EOM
+
+Some systems may require passing special flags to $ld to create a
+library that can be dynamically loaded.  If your ld flags include
+-L/other/path options to locate libraries outside your loader's normal
+search path, you may need to specify those -L options here as well.  To
+use no flags, say "none".
+
+EOM
+    case "$lddlflags" in
+    '') case "$osname" in
+			hpux)  dflt='-b' ;;
+			linux|irix*)	dflt='-shared' ;;
+			next)  dflt='none' ;;
+			solaris) dflt='-G' ;;
+			sunos) dflt='-assert nodefinitions' ;;
+			svr4*|esix*) dflt="-G $ldflags" ;;
+	        *)     dflt='none' ;;
+			esac
+			;;
+    *) dflt="$lddlflags" ;;
+    esac
+
+: Try to guess additional flags to pick up local libraries.
+for thisflag in $ldflags; do
+	case "$thisflag" in
+	-L*)
+		case " $dflt " in
+		*" $thisflag "*) ;;
+		*) dflt="$dflt $thisflag" ;;
+		esac
+		;;
+	esac
+done
+
+case "$dflt" in
+'') dflt='none' ;;
+esac
+
+    rp="Any special flags to pass to $ld to create a dynamically loaded library?"
+    . ./myread
+    case "$ans" in
+    none) lddlflags=' ' ;;
+    *) lddlflags="$ans" ;;
+    esac
+
+	cat <<EOM
+
+Some systems may require passing special flags to $cc to indicate that
+the resulting executable will use dynamic linking.  To use no flags,
+say "none".
+
+EOM
+    case "$ccdlflags" in
+    '') case "$osname" in
+		hpux)	dflt='-Wl,-E' ;;
+		linux)	dflt='-rdynamic' ;;
+		next)	dflt='none' ;;
+		sunos)	dflt='none' ;;
+		*)	dflt='none' ;;
+	    esac ;;
+    *)  dflt="$ccdlflags" ;;
+    esac
+    rp="Any special flags to pass to $cc to use dynamic loading?"
+    . ./myread
+    case "$ans" in
+    none) ccdlflags=' ' ;;
+    *) ccdlflags="$ans" ;;
+    esac
+    ;;
+*)  usedl="$undef"
+	ld='ld'
+    dlsrc='dl_none.xs'
+    lddlflags=''
+    ccdlflags=''
+    ;;
+esac
+
+also=''
+case "$usedl" in
+$undef)
+	# No dynamic loading being used, so don't bother even to prompt.
+	useshrplib='false'
+	;;
+*)	case "$useshrplib" in
+	'')	case "$osname" in
+		svr4|dgux|dynixptx|esix|powerux)
+			dflt='yes'
+			also='Building a shared libperl is required for dynamic loading to work on your system.'
+			;;
+		next*)
+			case "$osvers" in
+			4*)	dflt='yes'
+				also='Building a shared libperl is needed for MAB support.'
+				;;
+			*)	dflt='no'
+				;;
+			esac
+			;;
+		sunos)
+			dflt='no'
+			also='Building a shared libperl will definitely not work on SunOS 4.'
+			;;
+		*)	dflt='no'
+			;;
+		esac
+		;;
+	$define|true|[Yy]*)
+		dflt='yes'
+		;;
+	*)	dflt='no'
+		;;
+	esac
+	$cat << EOM
+
+The perl executable is normally obtained by linking perlmain.c with
+libperl${lib_ext}, any static extensions (usually just DynaLoader), and
+any other libraries needed on this system (such as -lm, etc.).  Since
+your system supports dynamic loading, it is probably possible to build
+a shared libperl.$so.  If you will have more than one executable linked
+to libperl.$so, this will significantly reduce the size of each
+executable, but it may have a noticeable affect on performance.  The
+default is probably sensible for your system.
+$also
+
+EOM
+	rp="Build a shared libperl.$so (y/n)"
+	. ./myread
+	case "$ans" in
+	true|$define|[Yy]*)
+		useshrplib='true'
+		# Why does next4 have to be so different?
+		case "${osname}${osvers}" in
+		next4*)	xxx='DYLD_LIBRARY_PATH' ;;
+		*)		xxx='LD_LIBRARY_PATH' ;;
+		esac
+		$cat <<EOM >&4
+
+To build perl, you must add the current working directory to your
+$xxx environtment variable before running make.  You can do
+this with
+   $xxx=\`pwd\`; export $xxx
+for Bourne-style shells, or
+   setenv $xxx \`pwd\`
+for Csh-style shells.  You *MUST* do this before running make.
+
+EOM
+		;;
+	*)	useshrplib='false' ;;
+	esac
+	;;
+esac
+
+case "$useshrplib" in
+true)
+	case "$libperl" in
+	'')
+		# Figure out a good name for libperl.so.  Since it gets stored in
+		# a version-specific architecture-dependent library, the version
+		# number isn't really that important, except for making cc/ld happy.
+		#
+		# A name such as libperl.so.3.1
+		majmin="libperl.$so.$patchlevel.$subversion"
+		# A name such as libperl.so.301
+		majonly=`echo $patchlevel $subversion |
+			$awk '{printf "%d%02d", $1, $2}'`
+		majonly=libperl.$so.$majonly
+		# I'd prefer to keep the os-specific stuff here to a minimum, and
+		# rely on figuring it out from the naming of libc.
+		case "${osname}${osvers}" in
+		next4*)
+			dflt=libperl.5.$so
+			# XXX How handle the --version stuff for MAB?
+			;;
+		linux*)  # ld won't link with a bare -lperl otherwise.
+			dflt=libperl.$so
+			;;
+		*)	# Try to guess based on whether libc has major.minor.
+			case "$libc" in
+			*libc.$so.[0-9]*.[0-9]*) dflt=$majmin ;;
+			*libc.$so.[0-9]*) dflt=$majonly ;;
+			*)	dflt=libperl.$so ;;
+			esac
+			;;
+		esac
+		;;
+	*)	dflt=$libperl
+		;;
+	esac
+	cat << EOM
+
+I need to select a good name for the shared libperl.  If your system uses
+library names with major and minor numbers, then you might want something
+like $majmin.  Alternatively, if your system uses a single version
+number for shared libraries, then you might want to use $majonly.
+Or, your system might be quite happy with a simple libperl.$so.
+
+Since the shared libperl will get installed into a version-specific
+architecture-dependent directory, the version number of the shared perl
+library probably isn't important, so the default should be o.k.
+
+EOM
+	rp='What name do you want to give to the shared libperl?'
+	. ./myread
+	libperl=$ans
+	echo "Ok, I'll use $libperl"
+	;;
+*)
+	libperl="libperl${lib_ext}"
+	;;
+esac
+
+# Detect old use of shrpdir via undocumented Configure -Dshrpdir
+case "$shrpdir" in
+'') ;;
+*)	$cat >&4 <<EOM
+WARNING:  Use of the shrpdir variable for the installation location of
+the shared $libperl is not supported.  It was never documented and
+will not work in this version.  Let me (doughera@lafcol.lafayette.edu)
+know of any problems this may cause.
+
+EOM
+	case "$shrpdir" in
+	"$archlibexp/CORE")
+		$cat >&4 <<EOM
+But your current setting of $shrpdir is
+the default anyway, so it's harmless.
+EOM
+		;;
+	*)
+		$cat >&4 <<EOM
+Further, your current attempted setting of $shrpdir
+conflicts with the value of $archlibexp/CORE
+that installperl will use.
+EOM
+		;;
+	esac
+	;;
+esac
+
+# How will the perl executable find the installed shared $libperl?
+# Add $xxx to ccdlflags.
+# If we can't figure out a command-line option, use $shrpenv to
+# set env LD_RUN_PATH.  The main perl makefile uses this.
+shrpdir=$archlibexp/CORE
+xxx=''
+tmp_shrpenv=''
+if "$useshrplib"; then
+    case "$osname" in 
+	solaris|netbsd)
+		xxx="-R $shrpdir"
+		;;
+	linux)
+		xxx="-Wl,-rpath,$shrpdir"
+		;;
+	*)
+		tmp_shrpenv="env LD_RUN_PATH=$shrpdir"
+		;;
+	esac
+	case "$xxx" in
+	'') ;;
+	*)	ccdlflags="$ccdlflags $xxx"
+		cat <<EOM >&4
+
+Adding $xxx to the flags
+passed to $ld so that the perl executable will find the 
+installed shared $libperl.
+
+EOM
+		;;
+	esac
+fi
+# Respect a hint or command-line value.
+case "$shrpenv" in
+'') shrpenv="$tmp_shrpenv" ;;
+esac
+
+: determine where manual pages go
+set man1dir man1dir none
+eval $prefixit
+$cat <<EOM
+
+$spackage has manual pages available in source form.
+EOM
+case "$nroff" in
+nroff)
+	echo "However, you don't have nroff, so they're probably useless to you."
+	case "$man1dir" in
+	'') man1dir="none";;
+	esac;;
+esac
+echo "If you don't want the manual sources installed, answer 'none'."
+case "$man1dir" in
+' ') dflt=none
+	;;
+'')
+	lookpath="$prefixexp/man/man1 $prefixexp/man/l_man/man1"
+	lookpath="$lookpath $prefixexp/man/p_man/man1"
+	lookpath="$lookpath $prefixexp/man/u_man/man1"
+	lookpath="$lookpath $prefixexp/man/man.1"
+	: If prefix contains 'perl' then we want to keep the man pages
+	: under the prefix directory.  Otherwise, look in a variety of
+	: other possible places.  This is debatable, but probably a
+	: good compromise.  Well, apparently not.
+	: Experience has shown people expect man1dir to be under prefix,
+	: so we now always put it there.  Users who want other behavior
+	: can answer interactively or use a command line option.
+	: Does user have System V-style man paths.
+	case "$sysman" in
+	*/?_man*)	dflt=`./loc . $prefixexp/l_man/man1 $lookpath` ;;
+	*)	dflt=`./loc . $prefixexp/man/man1 $lookpath` ;;
+	esac
+	set dflt
+	eval $prefixup
+	;;
+*)  dflt="$man1dir"
+	;;
+esac
+echo " "
+fn=dn+~
+rp="Where do the main $spackage manual pages (source) go?"
+. ./getfile
+if $test "X$man1direxp" != "X$ansexp"; then
+	installman1dir=''
+fi
+man1dir="$ans"
+man1direxp="$ansexp"
+case "$man1dir" in
+'') man1dir=' '
+	installman1dir='';;
+esac
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+manual pages reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installman1dir" in
+	'') dflt=`echo $man1direxp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installman1dir";;
+	esac
+	fn=de~
+	rp='Where will man pages be installed?'
+	. ./getfile
+	installman1dir="$ans"
+else
+	installman1dir="$man1direxp"
+fi
+
+: What suffix to use on installed man pages
+
+case "$man1dir" in
+' ')
+	man1ext='0'
+	;;
+*)
+	rp="What suffix should be used for the main $spackage man pages?"
+	case "$man1ext" in
+	'')	case "$man1dir" in
+		*1)  dflt=1 ;;
+		*1p) dflt=1p ;;
+		*1pm) dflt=1pm ;;
+		*l) dflt=l;;
+		*n) dflt=n;;
+		*o) dflt=o;;
+		*p) dflt=p;;
+		*C) dflt=C;;
+		*L) dflt=L;;
+		*L1) dflt=L1;;
+		*) dflt=1;;
+		esac
+		;;
+	*)	dflt="$man1ext";;
+	esac
+	. ./myread
+	man1ext="$ans"
+	;;
+esac
+
+: see if we can have long filenames
+echo " "
+rmlist="$rmlist /tmp/cf$$"
+$test -d /tmp/cf$$ || mkdir /tmp/cf$$
+first=123456789abcdef
+second=/tmp/cf$$/$first
+$rm -f $first $second
+if (echo hi >$first) 2>/dev/null; then
+	if $test -f 123456789abcde; then
+		echo 'You cannot have filenames longer than 14 characters.  Sigh.' >&4
+		val="$undef"
+	else
+		if (echo hi >$second) 2>/dev/null; then
+			if $test -f /tmp/cf$$/123456789abcde; then
+				$cat <<'EOM'
+That's peculiar... You can have filenames longer than 14 characters, but only
+on some of the filesystems.  Maybe you are using NFS.  Anyway, to avoid problems
+I shall consider your system cannot support long filenames at all.
+EOM
+				val="$undef"
+			else
+				echo 'You can have filenames longer than 14 characters.' >&4
+				val="$define"
+			fi
+		else
+			$cat <<'EOM'
+How confusing! Some of your filesystems are sane enough to allow filenames
+longer than 14 characters but some others like /tmp can't even think about them.
+So, for now on, I shall assume your kernel does not allow them at all.
+EOM
+			val="$undef"
+		fi
+	fi
+else
+	$cat <<'EOM'
+You can't have filenames longer than 14 chars.  You can't even think about them!
+EOM
+	val="$undef"
+fi 
+set d_flexfnam
+eval $setvar
+$rm -rf /tmp/cf$$ 123456789abcde*
+
+: determine where library module manual pages go
+set man3dir man3dir none
+eval $prefixit
+$cat <<EOM
+
+$spackage has manual pages for many of the library modules.
+EOM
+
+case "$nroff" in
+nroff)
+	$cat <<'EOM'
+However, you don't have nroff, so they're probably useless to you.
+You can use the supplied perldoc script instead.
+EOM
+	case "$man3dir" in
+	'') man3dir="none";;
+	esac;;
+esac
+
+case "$d_flexfnam" in
+undef)
+	$cat <<'EOM'
+However, your system can't handle the long file names like File::Basename.3. 
+You can use the supplied perldoc script instead.
+EOM
+	case "$man3dir" in
+	'') man3dir="none";;
+	esac;;
+esac
+
+echo "If you don't want the manual sources installed, answer 'none'."
+: We dont use /usr/local/man/man3 because some man programs will
+: only show the /usr/local/man/man3 contents, and not the system ones,
+: thus man less will show the perl module less.pm, but not the system
+: less command.  We might also conflict with TCL man pages.
+: However, something like /opt/perl/man/man3 is fine.
+case "$man3dir" in
+'')	case "$prefix" in 
+	*perl*) dflt=`echo $man1dir | 
+			$sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'` ;;
+	*)	dflt="$privlib/man/man3" ;;
+	esac
+	;;
+' ') dflt=none;;
+*)	dflt="$man3dir" ;;
+esac
+echo " "
+
+fn=dn+~
+rp="Where do the $spackage library man pages (source) go?"
+. ./getfile
+if test "X$man3direxp" != "X$ansexp"; then
+	installman3dir=''
+fi
+
+man3dir="$ans"
+man3direxp="$ansexp"
+case "$man3dir" in
+'') man3dir=' '
+	installman3dir='';;
+esac
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+manual pages reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installman3dir" in
+	'') dflt=`echo $man3direxp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installman3dir";;
+	esac
+	fn=de~
+	rp='Where will man pages be installed?'
+	. ./getfile
+	installman3dir="$ans"
+else
+	installman3dir="$man3direxp"
+fi
+
+: What suffix to use on installed man pages
+
+case "$man3dir" in
+' ')
+	man3ext='0'
+	;;
+*)
+	rp="What suffix should be used for the $spackage library man pages?"
+	case "$man3ext" in
+	'')	case "$man3dir" in
+		*3)  dflt=3 ;;
+		*3p) dflt=3p ;;
+		*3pm) dflt=3pm ;;
+		*l) dflt=l;;
+		*n) dflt=n;;
+		*o) dflt=o;;
+		*p) dflt=p;;
+		*C) dflt=C;;
+		*L) dflt=L;;
+		*L3) dflt=L3;;
+		*) dflt=3;;
+		esac
+		;;
+	*)	dflt="$man3ext";;
+	esac
+	. ./myread
+	man3ext="$ans"
+	;;
+esac
+
+: see if we have to deal with yellow pages, now NIS.
+if $test -d /usr/etc/yp || $test -d /etc/yp; then
+	if $test -f /usr/etc/nibindd; then
+		echo " "
+		echo "I'm fairly confident you're on a NeXT."
+		echo " "
+		rp='Do you get the hosts file via NetInfo?'
+		dflt=y
+		case "$hostcat" in
+		nidump*) ;;
+		'') ;;
+		*) dflt=n;;
+		esac
+		. ./myread
+		case "$ans" in
+		y*) hostcat='nidump hosts .';;
+		*)	case "$hostcat" in
+			nidump*) hostcat='';;
+			esac
+			;;
+		esac
+	fi
+	case "$hostcat" in
+	nidump*) ;;
+	*)
+		case "$hostcat" in
+		*ypcat*) dflt=y;;
+		'') if $contains '^\+' /etc/passwd >/dev/null 2>&1; then
+				dflt=y
+			else
+				dflt=n
+			fi;;
+		*) dflt=n;;
+		esac
+		echo " "
+		rp='Are you getting the hosts file via yellow pages?'
+		. ./myread
+		case "$ans" in
+		y*) hostcat='ypcat hosts';;
+		*) hostcat='cat /etc/hosts';;
+		esac
+		;;
+	esac
+fi
+
+: now get the host name
+echo " "
+echo "Figuring out host name..." >&4
+case "$myhostname" in
+'') cont=true
+	echo 'Maybe "hostname" will work...'
+	if tans=`sh -c hostname 2>&1` ; then
+		myhostname=$tans
+		phostname=hostname
+		cont=''
+	fi
+	;;
+*) cont='';;
+esac
+if $test "$cont"; then
+	if ./xenix; then
+		echo 'Oh, dear.  Maybe "/etc/systemid" is the key...'
+		if tans=`cat /etc/systemid 2>&1` ; then
+			myhostname=$tans
+			phostname='cat /etc/systemid'
+			echo "Whadyaknow.  Xenix always was a bit strange..."
+			cont=''
+		fi
+	elif $test -r /etc/systemid; then
+		echo "(What is a non-Xenix system doing with /etc/systemid?)"
+	fi
+fi
+if $test "$cont"; then
+	echo 'No, maybe "uuname -l" will work...'
+	if tans=`sh -c 'uuname -l' 2>&1` ; then
+		myhostname=$tans
+		phostname='uuname -l'
+	else
+		echo 'Strange.  Maybe "uname -n" will work...'
+		if tans=`sh -c 'uname -n' 2>&1` ; then
+			myhostname=$tans
+			phostname='uname -n'
+		else
+			echo 'Oh well, maybe I can mine it out of whoami.h...'
+			if tans=`sh -c $contains' sysname $usrinc/whoami.h' 2>&1` ; then
+				myhostname=`echo "$tans" | $sed 's/^.*"\(.*\)"/\1/'`
+				phostname="sed -n -e '"'/sysname/s/^.*\"\\(.*\\)\"/\1/{'"' -e p -e q -e '}' <$usrinc/whoami.h"
+			else
+				case "$myhostname" in
+				'') echo "Does this machine have an identity crisis or something?"
+					phostname='';;
+				*)
+					echo "Well, you said $myhostname before..."
+					phostname='echo $myhostname';;
+				esac
+			fi
+		fi
+	fi
+fi
+: you do not want to know about this
+set $myhostname
+myhostname=$1
+
+: verify guess
+if $test "$myhostname" ; then
+	dflt=y
+	rp='Your host name appears to be "'$myhostname'".'" Right?"
+	. ./myread
+	case "$ans" in
+	y*) ;;
+	*) myhostname='';;
+	esac
+fi
+
+: bad guess or no guess
+while $test "X$myhostname" = X ; do
+	dflt=''
+	rp="Please type the (one word) name of your host:"
+	. ./myread
+	myhostname="$ans"
+done
+
+: translate upper to lower if necessary
+case "$myhostname" in
+*[A-Z]*)
+	echo "(Normalizing case in your host name)"
+	myhostname=`echo $myhostname | ./tr '[A-Z]' '[a-z]'`
+	;;
+esac
+
+case "$myhostname" in
+*.*)
+	dflt=`expr "X$myhostname" : "X[^.]*\(\..*\)"`
+	myhostname=`expr "X$myhostname" : "X\([^.]*\)\."`
+	echo "(Trimming domain name from host name--host name is now $myhostname)"
+	;;
+*) case "$mydomain" in
+	'')
+		{
+			: If we use NIS, try ypmatch.
+			: Is there some reason why this was not done before?
+			test "X$hostcat" = "Xypcat hosts" &&
+			ypmatch "$myhostname" hosts 2>/dev/null |\
+				$sed -e 's/[	 ]*#.*//; s/$/ /' > hosts && \
+			$test -s hosts
+		} || {
+			: Extract only the relevant hosts, reducing file size,
+			: remove comments, insert trailing space for later use.
+		     	$hostcat | $sed -n -e "s/[	 ]*#.*//; s/\$/ /
+					/[	 ]$myhostname[	. ]/p" > hosts
+		}
+		tmp_re="[	. ]"
+		$test x`$awk "/[0-9].*[	 ]$myhostname$tmp_re/ { sum++ }
+			     END { print sum }" hosts` = x1 || tmp_re="[	 ]"
+		dflt=.`$awk "/[0-9].*[	 ]$myhostname$tmp_re/ {for(i=2; i<=NF;i++) print \\\$i}" \
+			hosts | $sort | $uniq | \
+			$sed -n -e "s/$myhostname\.\([-a-zA-Z0-9_.]\)/\1/p"`
+		case `$echo X$dflt` in
+		X*\ *)	echo "(Several hosts in /etc/hosts matched hostname)"
+			dflt=.
+			;;
+		X.) echo "(You do not have fully-qualified names in /etc/hosts)"
+			;;
+		esac
+		case "$dflt" in
+		.)
+			tans=`./loc resolv.conf X /etc /usr/etc`
+			if $test -f "$tans"; then
+				echo "(Attempting domain name extraction from $tans)"
+				: Why was there an Egrep here, when Sed works?
+				: Look for either a search or a domain directive.
+				dflt=.`$sed -n -e 's/^search[ 	]*\(.*\)/\1/p' $tans \
+					| ./tr '[A-Z]' '[a-z]' 2>/dev/null`
+				case "$dflt" in
+				.)	dflt=.`$sed -n -e 's/^domain[ 	]*\(.*\)/\1/p' $tans \
+						| ./tr '[A-Z]' '[a-z]' 2>/dev/null`
+					;;
+				esac
+			fi
+			;;
+		esac
+		case "$dflt" in
+		.) echo "(No help from resolv.conf either -- attempting clever guess)"
+			dflt=.`sh -c domainname 2>/dev/null`
+			case "$dflt" in
+			'') dflt='.';;
+			.nis.*|.yp.*|.main.*) dflt=`echo $dflt | $sed -e 's/^\.[^.]*//'`;;
+			esac
+			;;
+		esac
+		case "$dflt" in
+		.) echo "(Lost all hope -- silly guess then)"
+			dflt='.uucp'
+			;;
+		esac
+		$rm -f hosts
+		;;
+	*) dflt="$mydomain";;
+	esac;;
+esac
+echo " "
+rp="What is your domain name?"
+. ./myread
+tans="$ans"
+case "$ans" in
+'') ;;
+.*) ;;
+*) tans=".$tans";;
+esac
+mydomain="$tans"
+
+: translate upper to lower if necessary
+case "$mydomain" in
+*[A-Z]*)
+	echo "(Normalizing case in your domain name)"
+	mydomain=`echo $mydomain | ./tr '[A-Z]' '[a-z]'`
+	;;
+esac
+
+: a little sanity check here
+case "$phostname" in
+'') ;;
+*)
+	case `$phostname | ./tr '[A-Z]' '[a-z]'` in
+	$myhostname$mydomain|$myhostname) ;;
+	*)
+		case "$phostname" in
+		sed*)
+			echo "(That doesn't agree with your whoami.h file, by the way.)"
+			;;
+		*)
+			echo "(That doesn't agree with your $phostname command, by the way.)"
+			;;
+		esac
+	;;
+	esac
+	;;
+esac
+
+$cat <<EOM
+
+I need to get your e-mail address in Internet format if possible, i.e.
+something like user@host.domain. Please answer accurately since I have
+no easy means to double check it. The default value provided below
+is most probably close to the reality but may not be valid from outside
+your organization...
+
+EOM
+cont=x
+while test "$cont"; do
+	case "$cf_email" in
+	'') dflt="$cf_by@$myhostname$mydomain";;
+	*) dflt="$cf_email";;
+	esac
+	rp='What is your e-mail address?'
+	. ./myread
+	cf_email="$ans"
+	case "$cf_email" in
+	*@*.*) cont='' ;;
+	*)
+		rp='Address does not look like an Internet one.  Use it anyway?'
+		case "$fastread" in
+		yes) dflt=y ;;
+		*) dflt=n ;;
+		esac
+		. ./myread
+		case "$ans" in
+		y*) cont='' ;;
+		*) echo " " ;;
+		esac
+		;;
+	esac
+done
+
+$cat <<EOM
+
+If you or somebody else will be maintaining perl at your site, please
+fill in the correct e-mail address here so that they may be contacted
+if necessary. Currently, the "perlbug" program included with perl
+will send mail to this address in addition to perlbug@perl.com. You may
+enter "none" for no administrator.
+
+EOM
+case "$perladmin" in
+'') dflt="$cf_email";;
+*) dflt="$perladmin";;
+esac
+rp='Perl administrator e-mail address'
+. ./myread
+perladmin="$ans"
+
+: determine where public executable scripts go
+set scriptdir scriptdir
+eval $prefixit
+case "$scriptdir" in
+'')
+	dflt="$bin"
+	: guess some guesses
+	$test -d /usr/share/scripts && dflt=/usr/share/scripts
+	$test -d /usr/share/bin && dflt=/usr/share/bin
+	$test -d /usr/local/script && dflt=/usr/local/script
+	$test -d $prefixexp/script && dflt=$prefixexp/script
+	set dflt
+	eval $prefixup
+	;;
+*)  dflt="$scriptdir"
+	;;
+esac
+$cat <<EOM
+ 
+Some installations have a separate directory just for executable scripts so
+that they can mount it across multiple architectures but keep the scripts in
+one spot.  You might, for example, have a subdirectory of /usr/share for this.
+Or you might just lump your scripts in with all your other executables.
+ 
+EOM
+fn=d~
+rp='Where do you keep publicly executable scripts?'
+. ./getfile
+if $test "X$ansexp" != "X$scriptdirexp"; then
+	installscript=''
+fi
+scriptdir="$ans"
+scriptdirexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+scripts reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installscript" in
+	'') dflt=`echo $scriptdirexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installscript";;
+	esac
+	fn=de~
+	rp='Where will public scripts be installed?'
+	. ./getfile
+	installscript="$ans"
+else
+	installscript="$scriptdirexp"
+fi
+
+: determine perl absolute location
+case "$perlpath" in
+'')	perlpath=$binexp/perl ;;
+esac
+
+: figure out how to guarantee perl startup
+case "$startperl" in
+'')
+	case "$sharpbang" in
+	*!)
+		$cat <<EOH
+
+I can use the #! construct to start perl on your system. This will
+make startup of perl scripts faster, but may cause problems if you
+want to share those scripts and perl is not in a standard place
+($perlpath) on all your platforms. The alternative is to force
+a shell by starting the script with a single ':' character.
+
+EOH
+		dflt=$perlpath
+		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
+		. ./myread
+		case "$ans" in
+		none) startperl=": # use perl";;
+		*) startperl="#!$ans";;
+		esac
+		;;
+	*) startperl=": # use perl"
+		;;
+	esac
+	;;
+esac
+echo "I'll use $startperl to start perl scripts."
+
+cat <<EOM
+
+Previous version of $package used the standard IO mechanisms as defined in
+<stdio.h>.  Versions 5.003_02 and later of perl allow alternate IO
+mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
+the default and is the only supported mechanism.  This abstraction
+layer can use AT&T's sfio (if you already have sfio installed) or
+fall back on standard IO.  This PerlIO abstraction layer is
+experimental and may cause problems with some extension modules.
+
+If this doesn't make any sense to you, just accept the default 'n'.
+EOM
+case "$useperlio" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+rp='Use the experimental PerlIO abstraction layer?'
+. ./myread
+case "$ans" in
+y|Y) 
+	val="$define"
+	;;     
+*)      
+	echo "Ok, doing things the stdio way"
+	val="$undef"
+	;;
+esac
+set useperlio
+eval $setvar 
 
 : Check how to convert floats to strings.
 echo " "
@@ -4845,66 +5383,6 @@ h_fcntl=false
 : Initialize h_sysfile
 h_sysfile=false
 
-: determine filename position in cpp output
-echo " "
-echo "Computing filename position in cpp output for #include directives..." >&4
-echo '#include <stdio.h>' > foo.c
-$cat >fieldn <<EOF
-$startsh
-$cppstdin $cppflags $cppminus <foo.c 2>/dev/null | \
-$grep '^[ 	]*#.*stdio\.h' | \
-while read cline; do
-	pos=1
-	set \$cline
-	while $test \$# -gt 0; do
-		if $test -r \`echo \$1 | $tr -d '"'\`; then
-			echo "\$pos"
-			exit 0
-		fi
-		shift
-		pos=\`expr \$pos + 1\`
-	done
-done
-EOF
-chmod +x fieldn
-fieldn=`./fieldn`
-$rm -f foo.c fieldn
-case $fieldn in
-'') pos='???';;
-1) pos=first;;
-2) pos=second;;
-3) pos=third;;
-*) pos="${fieldn}th";;
-esac
-echo "Your cpp writes the filename in the $pos field of the line."
-
-: locate header file
-$cat >findhdr <<EOF
-$startsh
-wanted=\$1
-name=''
-if test -f $usrinc/\$wanted; then
-	echo "$usrinc/\$wanted"
-	exit 0
-fi
-awkprg='{ print \$$fieldn }'
-echo "#include <\$wanted>" > foo\$\$.c
-$cppstdin $cppminus $cppflags < foo\$\$.c 2>/dev/null | \
-$grep "^[ 	]*#.*\$wanted" | \
-while read cline; do
-	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
-	case "\$name" in
-	*/\$wanted) echo "\$name"; exit 0;;
-	*) name='';;
-	esac;
-done;
-$rm -f foo\$\$.c;
-case "\$name" in
-'') exit 1;;
-esac
-EOF
-chmod +x findhdr
-
 : access call always available on UNIX
 set access d_access
 eval $inlibc
@@ -4982,51 +5460,134 @@ eval $inlibc
 set bcopy d_bcopy
 eval $inlibc
 
-: see if setpgrp exists
-set setpgrp d_setpgrp
+: see if this is a unistd.h system
+set unistd.h i_unistd
+eval $inhdr
+
+: see if getpgrp exists
+set getpgrp d_getpgrp
 eval $inlibc
 
-: see which flavor of setpgrp is in use
-case "$d_setpgrp" in
+echo "Checking to see which flavor of getpgrp is in use . . . "
+case "$d_getpgrp" in
 "$define")
 	echo " "
 	$cat >set.c <<EOP
+#$i_unistd I_UNISTD
+#include <sys/types.h>
+#ifdef I_UNISTD
+#  include <unistd.h>
+#endif
 main()
 {
 	if (getuid() == 0) {
 		printf("(I see you are running Configure as super-user...)\n");
 		setuid(1);
 	}
-	if (-1 == setpgrp(1, 1))
-		exit(1);
-	exit(0);
+#ifdef TRY_BSD_PGRP
+	if (getpgrp(1) == 0)
+		exit(0);
+#else
+	if (getpgrp() > 0)
+		exit(0);
+#endif
+	exit(1);
 }
 EOP
-	if $cc $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1; then
-		./set 2>/dev/null
-		case $? in
-		0) echo "You have to use setpgrp() instead of setpgrp(pid, pgrp)." >&4
-			val="$undef";;
-		*) echo "You have to use setpgrp(pid, pgrp) instead of setpgrp()." >&4
-			val="$define";;
-		esac
+	if $cc -DTRY_BSD_PGRP $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
+		echo "You have to use getpgrp(pid) instead of getpgrp()." >&4
+		val="$define"
+	elif $cc $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
+		echo "You have to use getpgrp() instead of getpgrp(pid)." >&4
+		val="$undef"
 	else
+		echo "I can't seem to compile and run the test program."
 		if ./usg; then
-			xxx="USG one, i.e. you use setpgrp()."
-			val="$undef"
+			xxx="a USG one, i.e. you use getpgrp()."
 		else
-			xxx="BSD one, i.e. you use setpgrp(pid, pgrp)."
-			val="$define"
+			# SVR4 systems can appear rather BSD-ish.
+			case "$i_unistd" in
+			$undef)
+				xxx="a BSD one, i.e. you use getpgrp(pid)."
+				val="$define"
+				;;
+			$define)
+				xxx="probably a USG one, i.e. you use getpgrp()."
+				val="$undef"
+				;;
+			esac
 		fi
-		echo "Assuming your setpgrp is a $xxx" >&4
+		echo "Assuming your getpgrp is $xxx" >&4
 	fi
 	;;
 *) val="$undef";;
 esac
-set d_bsdpgrp
+set d_bsdgetpgrp
 eval $setvar
 $rm -f set set.c
 
+: see if setpgrp exists
+set setpgrp d_setpgrp
+eval $inlibc
+
+echo "Checking to see which flavor of setpgrp is in use . . . "
+case "$d_setpgrp" in
+"$define")
+	echo " "
+	$cat >set.c <<EOP
+#$i_unistd I_UNISTD
+#include <sys/types.h>
+#ifdef I_UNISTD
+#  include <unistd.h>
+#endif
+main()
+{
+	if (getuid() == 0) {
+		printf("(I see you are running Configure as super-user...)\n");
+		setuid(1);
+	}
+#ifdef TRY_BSD_PGRP
+	if (-1 == setpgrp(1, 1))
+		exit(0);
+#else
+	if (setpgrp() != -1)
+		exit(0);
+#endif
+	exit(1);
+}
+EOP
+	if $cc -DTRY_BSD_PGRP $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
+		echo 'You have to use setpgrp(pid,pgrp) instead of setpgrp().' >&4
+		val="$define"
+	elif $cc $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
+		echo 'You have to use setpgrp() instead of setpgrp(pid,pgrp).' >&4
+		val="$undef"
+	else
+		echo "I can't seem to compile and run the test program."
+		if ./usg; then
+			xxx="a USG one, i.e. you use setpgrp()."
+		else
+			# SVR4 systems can appear rather BSD-ish.
+			case "$i_unistd" in
+			$undef)
+				xxx="a BSD one, i.e. you use setpgrp(pid,pgrp)."
+				val="$define"
+				;;
+			$define)
+				xxx="probably a USG one, i.e. you use setpgrp()."
+				val="$undef"
+				;;
+			esac
+		fi
+		echo "Assuming your setpgrp is $xxx" >&4
+	fi
+	;;
+*) val="$undef";;
+esac
+set d_bsdsetpgrp
+eval $setvar
+d_bsdpgrp=$d_bsdsetpgrp
+$rm -f set set.c
 : see if bzero exists
 set bzero d_bzero
 eval $inlibc
@@ -5341,36 +5902,6 @@ full_csh=$csh
 set cuserid d_cuserid
 eval $inlibc
 
-: define an alternate in-header-list? function
-inhdr='echo " "; td=$define; tu=$undef; yyy=$@;
-cont=true; xxf="echo \"<\$1> found.\" >&4";
-case $# in 2) xxnf="echo \"<\$1> NOT found.\" >&4";;
-*) xxnf="echo \"<\$1> NOT found, ...\" >&4";;
-esac;
-case $# in 4) instead=instead;; *) instead="at last";; esac;
-while $test "$cont"; do
-	xxx=`./findhdr $1`
-	var=$2; eval "was=\$$2";
-	if $test "$xxx" && $test -r "$xxx";
-	then eval $xxf;
-	eval "case \"\$$var\" in $undef) . ./whoa; esac"; eval "$var=\$td";
-		cont="";
-	else eval $xxnf;
-	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu"; fi;
-	set $yyy; shift; shift; yyy=$@;
-	case $# in 0) cont="";;
-	2) xxf="echo \"but I found <\$1> $instead.\" >&4";
-		xxnf="echo \"and I did not find <\$1> either.\" >&4";;
-	*) xxf="echo \"but I found <\$1\> instead.\" >&4";
-		xxnf="echo \"there is no <\$1>, ...\" >&4";;
-	esac;
-done;
-while $test "$yyy";
-do set $yyy; var=$2; eval "was=\$$2";
-	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu";
-	set $yyy; shift; shift; yyy=$@;
-done'
-
 : see if this is a limits.h system
 set limits.h i_limits
 eval $inhdr
@@ -5485,218 +6016,6 @@ set dlerror d_dlerror
 eval $inlibc
 runnm="$xxx_runnm"
 
-: see if dld is available
-set dld.h i_dld
-eval $inhdr
-
-: see if dlopen exists
-xxx_runnm="$runnm"
-runnm=false
-set dlopen d_dlopen
-eval $inlibc
-runnm="$xxx_runnm"
-
-: determine which dynamic loading, if any, to compile in
-echo " "
-dldir="ext/DynaLoader"
-case "$usedl" in
-$define|y|true)
-	dflt='y'
-	usedl="$define"
-	;;
-$undef|n|false)
-	dflt='n'
-	usedl="$undef"
-	;;
-*) 
-	dflt='n'
-	case "$d_dlopen" in
-	    $define) dflt='y' ;;
-	esac
-	case "$i_dld" in
-	    $define) dflt='y' ;;
-	esac
-	: Does a dl_xxx.xs file exist for this operating system
-	$test -f ../$dldir/dl_${osname}.xs && dflt='y'
-	;;
-esac
-rp="Do you wish to use dynamic loading?"
-. ./myread
-usedl="$ans"
-case "$ans" in
-y*) usedl="$define"
-	case "$dlsrc" in
-	'')
-		if $test -f ../$dldir/dl_${osname}.xs ; then
-			dflt="$dldir/dl_${osname}.xs"
-		elif $test "$d_dlopen" = "$define" ; then
-			dflt="$dldir/dl_dlopen.xs"
-		elif $test "$i_dld" = "$define" ; then
-			dflt="$dldir/dl_dld.xs"
-		else
-			dflt=''
-		fi
-		;;
-	*)	dflt="$dldir/$dlsrc"
-		;;
-	esac
-    echo "The following dynamic loading files are available:"
-	: Can not go over to $dldir because getfile has path hard-coded in.
-    cd ..; ls -C $dldir/dl*.xs; cd UU
-    rp="Source file to use for dynamic loading"
-    fn="fne"
-    . ./getfile
-	usedl="$define"
-	: emulate basename
-	dlsrc=`echo $ans | $sed -e 's@.*/\([^/]*\)$@\1@'`
-
-    $cat << EOM
-
-Some systems may require passing special flags to $cc -c to
-compile modules that will be used to create a shared library.
-To use no flags, say "none".
-
-EOM
-    case "$cccdlflags" in
-    '')	case "$gccversion" in
-		'') case "$osname" in
-			hpux)	dflt='+z' ;;
-			next)	dflt='none' ;;
-			solaris|svr4*|esix*) dflt='-Kpic' ;;
-			irix*)  dflt='-KPIC' ;;
-			sunos)	dflt='-pic' ;;
-			*)	dflt='none' ;;
-		    esac ;;
-		*)	dflt='-fpic' ;;
-	    esac ;;
-    *)	dflt="$cccdlflags" ;;
-    esac
-    rp="Any special flags to pass to $cc -c to compile shared library modules?"
-    . ./myread
-    case "$ans" in
-    none) cccdlflags=' ' ;;
-    *) cccdlflags="$ans" ;;
-    esac
-
-    cat << EOM
-
-Some systems use ld to create libraries that can be dynamically loaded,
-while other systems (such as those using ELF) use $cc.
-
-EOM
-	case "$ld" in
-	'')	$cat >try.c <<'EOM'
-/* Test for whether ELF binaries are produced */
-#include <fcntl.h>
-#include <stdlib.h>
-main() {
-	char b[4];
-	int i = open("a.out",O_RDONLY);
-	if(i == -1) 
-		exit(1); /* fail */
-	if(read(i,b,4)==4 && b[0]==127 && b[1]=='E' && b[2]=='L' && b[3]=='F')
-		exit(0); /* succeed (yes, it's ELF) */
-	else
-		exit(1); /* fail */
-}
-EOM
-		if $cc $ccflags try.c >/dev/null 2>&1 && ./a.out; then
-			cat <<EOM
-You appear to have ELF support.  I'll use $cc to build dynamic libraries.
-EOM
-			dflt="$cc"
-		else
-			echo "I'll use ld to build dynamic libraries."
-			dflt='ld'
-		fi
-		rm -f try.c a.out
-		;;
-	*)	dflt="$ld"
-		;;
-	esac
-
-    rp="What command should be used to create dynamic libraries?"
-    . ./myread
-	ld="$ans"
-
-    cat << EOM
-
-Some systems may require passing special flags to $ld to create a
-library that can be dynamically loaded.  If your ld flags include
--L/other/path options to locate libraries outside your loader's normal
-search path, you may need to specify those -L options here as well.  To
-use no flags, say "none".
-
-EOM
-    case "$lddlflags" in
-    '') case "$osname" in
-			hpux)  dflt='-b' ;;
-			linux|irix*)	dflt='-shared' ;;
-			next)  dflt='none' ;;
-			solaris) dflt='-G' ;;
-			sunos) dflt='-assert nodefinitions' ;;
-			svr4*|esix*) dflt="-G $ldflags" ;;
-	        *)     dflt='none' ;;
-			esac
-			;;
-    *) dflt="$lddlflags" ;;
-    esac
-
-: Try to guess additional flags to pick up local libraries.
-for thisflag in $ldflags; do
-	case "$thisflag" in
-	-L*)
-		case " $dflt " in
-		*" $thisflag "*) ;;
-		*) dflt="$dflt $thisflag" ;;
-		esac
-		;;
-	esac
-done
-
-case "$dflt" in
-'') dflt='none' ;;
-esac
-
-    rp="Any special flags to pass to $ld to create a dynamically loaded library?"
-    . ./myread
-    case "$ans" in
-    none) lddlflags=' ' ;;
-    *) lddlflags="$ans" ;;
-    esac
-
-	cat <<EOM
-
-Some systems may require passing special flags to $cc to indicate that
-the resulting executable will use dynamic linking.  To use no flags,
-say "none".
-
-EOM
-    case "$ccdlflags" in
-    '') case "$osname" in
-		hpux)	dflt='-Wl,-E' ;;
-		linux)	dflt='-rdynamic' ;;
-		next)	dflt='none' ;;
-		sunos)	dflt='none' ;;
-		*)	dflt='none' ;;
-	    esac ;;
-    *)  dflt="$ccdlflags" ;;
-    esac
-    rp="Any special flags to pass to $cc to use dynamic loading?"
-    . ./myread
-    case "$ans" in
-    none) ccdlflags=' ' ;;
-    *) ccdlflags="$ans" ;;
-    esac
-    ;;
-*)  usedl="$undef"
-	ld='ld'
-    dlsrc='dl_none.xs'
-    lddlflags=''
-    ccdlflags=''
-    ;;
-esac
-
 : see if dlfcn is available
 set dlfcn.h i_dlfcn
 eval $inhdr
@@ -5721,25 +6040,6 @@ EOM
 *)
 	dlext="none"
 	;;
-esac
-
-: Define several unixisms. Hints files or command line options
-: can be used to override them.
-case "$ar" in
-'') ar='ar';;
-esac
-case "$lib_ext" in
-'') lib_ext='.a';;
-esac
-case "$obj_ext" in
-'') obj_ext='.o';;
-esac
-case "$path_sep" in
-'') path_sep=':';;
-esac
-: Which makefile gets called first.  This is used by make depend.
-case "$firstmakefile" in
-'') firstmakefile='makefile';;
 esac
 
 : Check if dlsym need a leading underscore
@@ -6093,8 +6393,8 @@ eval $inlibc
 set getlogin d_getlogin
 eval $inlibc
 
-: see if getpgrp exists
-set getpgrp d_getpgrp
+: see if getpgid exists
+set getpgid d_getpgid
 eval $inlibc
 
 : see if getpgrp2 exists
@@ -6535,10 +6835,6 @@ $define)
 esac
 set i_memory
 eval $setvar
-
-: see if this is a unistd.h system
-set unistd.h i_unistd
-eval $inhdr
 
 : can bcopy handle overlapping blocks?
 val="$undef"
@@ -7909,160 +8205,6 @@ EOM
 	groupstype="$ans"
 	;;
 *)  groupstype="$gidtype";;
-esac
-
-also=''
-case "$usedl" in
-$undef)
-	# No dynamic loading being used, so don't bother even to prompt.
-	useshrplib='false'
-	;;
-*)	case "$useshrplib" in
-	'')	case "$osname" in
-		svr4|dgux|dynixptx|esix|powerux)
-			dflt='yes'
-			also='Building a shared libperl is required for dynamic loading to work on your system.'
-			;;
-		next*)
-			case "$osvers" in
-			4*)	dflt='yes'
-				also='Building a shared libperl is needed for MAB support.'
-				;;
-			*)	dflt='no'
-				;;
-			esac
-			;;
-		*)	dflt='no'
-			;;
-		esac
-		;;
-	$define|true|[Yy]*)
-		dflt='yes'
-		;;
-	*)	dflt='no'
-		;;
-	esac
-	$cat << EOM
-
-The perl executable is normally obtained by linking perlmain.c with
-libperl${lib_ext}, any static extensions (usually just DynaLoader), and
-any other libraries needed on this system (such as -lm, etc.).  Since
-your system supports dynamic loading, it is probably possible to build
-a shared libperl.$so.  If you will have more than one executable linked
-to libperl.$so, this will significantly reduce the size of each
-executable, but it may have a noticeable affect on performance.  The
-default is probably sensible for your system.
-$also
-EOM
-	rp="Build a shared libperl.$so (y/n)"
-	. ./myread
-	case "$ans" in
-	true|$define|[Yy]*)
-		useshrplib='true'
-		# Why does next4 have to be so different?
-		case "${osname}${osvers}" in
-		next4*)	xxx='DYLD_LIBRARY_PATH' ;;
-		*)		xxx='LD_LIBRARY_PATH' ;;
-		esac
-		$cat <<EOM >&4
-
-To build perl, you must add the current working directory to your
-$xxx environtment variable before running make.  You can do
-this with
-   $xxx=\`pwd\`; export $xxx
-for Bourne-style shells, or
-   setenv $xxx \`pwd\`
-for Csh-style shells.  You *MUST* do this before running make.
-
-EOM
-		;;
-	*)	useshrplib='false' ;;
-	esac
-	;;
-esac
-
-case "$useshrplib" in
-true)
-	case "$libperl" in
-	'')
-		# Figure out a good name for libperl.so.  Since it gets stored in
-		# a version-specific architecture-dependent library, the version
-		# number isn't really that important, except for making cc/ld happy.
-		#
-		# A name such as libperl.so.3.1
-		majmin="libperl.$so.$patchlevel.$subversion"
-		# A name such as libperl.so.301
-		majonly=`echo $patchlevel $subversion |
-			$awk '{printf "%d%02d", $1, $2}'`
-		majonly=libperl.$so.$majonly
-		# I'd prefer to keep the os-specific stuff here to a minimum, and
-		# rely on figuring it out from the naming of libc.
-		case "${osname}${osvers}" in
-		next4*)
-			dflt=libperl.5.$so
-			# XXX How handle the --version stuff for MAB?
-			;;
-		*)	# Try to guess based on whether libc has major.minor.
-			case "$libc" in
-			*libc.$so.[0-9]*.[0-9]*) dflt=$majmin ;;
-			*libc.$so.[0-9]*) dflt=$majonly ;;
-			*)	dflt=libperl.$so ;;
-			esac
-			;;
-		esac
-		;;
-	*)	dflt=$libperl
-		;;
-	esac
-	cat << EOM
-
-I need to select a good name for the shared libperl.  If your system uses
-library names with major and minor numbers, then you might want something
-like $majmin.  Alternatively, if your system uses a single version
-number for shared libraries, then you might want to use $majonly.
-Or, your system might be quite happy with a simple libperl.$so.
-
-Since the shared libperl will get installed into a version-specific
-architecture-dependent directory, the version number of the shared perl
-library probably isn't important, so the default should be o.k.
-
-EOM
-	rp='What name do you want to give to the shared libperl?'
-	. ./myread
-	libperl=$ans
-	echo "Ok, I'll use $libperl"
-	;;
-*)
-	libperl="libperl${lib_ext}"
-	;;
-esac
-
-# Detect old use of shrpdir via undocumented Configure -Dshrpdir
-case "$shrpdir" in
-'') ;;
-*)	$cat >&4 <<EOM
-WARNING:  Use of the shrpdir variable for the installation location of
-the shared $libperl is not supported.  It was never documented and
-will not work in this version.  Let me (doughera@lafcol.lafayette.edu)
-know of any problems this may cause.
-
-EOM
-	case "$shrpdir" in
-	"$archlibexp/CORE")
-		$cat >&4 <<EOM
-But your current setting of $shrpdir is
-the default anyway, so it's harmless.
-EOM
-		;;
-	*)
-		$cat >&4 <<EOM
-Further, your current attempted setting of $shrpdir
-conflicts with the value of $archlibexp/CORE
-that installperl will use.
-EOM
-		;;
-	esac
-	;;
 esac
 
 : see what type lseek is declared as in the kernel
@@ -9537,7 +9679,9 @@ d_attribut='$d_attribut'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
 d_bsd='$d_bsd'
+d_bsdgetpgrp='$d_bsdgetpgrp'
 d_bsdpgrp='$d_bsdpgrp'
+d_bsdsetpgrp='$d_bsdsetpgrp'
 d_bzero='$d_bzero'
 d_casti32='$d_casti32'
 d_castneg='$d_castneg'
@@ -9576,6 +9720,7 @@ d_getgrps='$d_getgrps'
 d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_getlogin='$d_getlogin'
+d_getpgid='$d_getpgid'
 d_getpgrp2='$d_getpgrp2'
 d_getpgrp='$d_getpgrp'
 d_getppid='$d_getppid'
@@ -9890,6 +10035,7 @@ sh='$sh'
 shar='$shar'
 sharpbang='$sharpbang'
 shmattype='$shmattype'
+shrpenv='$shrpenv'
 shsharp='$shsharp'
 sig_name='$sig_name'
 sig_num='$sig_num'
