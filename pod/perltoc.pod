@@ -1024,19 +1024,20 @@ resolve method `%s' overloading `%s' in package `%s', Constant subroutine
 a reference, Died, Exiting pseudo-block via %s, Identifier too long,
 Illegal character %s (carriage return), Illegal switch in PERL5OPT: %s,
 Integer overflow in hex number, Integer overflow in octal number, internal
-error: glob failed, Invalid type in pack: '%s', Invalid type in unpack:
-'%s', Name "%s::%s" used only once: possible typo, Null picture in
-formline, Offset outside string, Out of memory!, Out of memory during
-request for %s, Possible attempt to put comments in qw() list, Possible
-attempt to separate words with commas, Scalar value @%s{%s} better written
-as $%s{%s}, Stub found while resolving method `%s' overloading `%s' in
-package `%s', Too late for "B<-T>" option, untie attempted while %d inner
-references still exist, Unrecognized character %s, Unsupported function
-fork, Use of "$$<digit>" to mean "${$}<digit>" is deprecated, Value of %s
-can be "0"; test with defined(), Variable "%s" may be unavailable, Variable
-"%s" will not stay shared, Warning: something's wrong, Ill-formed logical
-name |%s| in prime_env_iter, Got an error from DosAllocMem, Malformed
-PERLLIB_PREFIX, PERL_SH_DIR too long, Process terminated by SIG%s
+error: glob failed, Invalid conversion in %s: "%s", Invalid type in pack:
+'%s', Invalid type in unpack: '%s', Name "%s::%s" used only once: possible
+typo, Null picture in formline, Offset outside string, Out of memory!, Out
+of memory during request for %s, panic: frexp, Possible attempt to put
+comments in qw() list, Possible attempt to separate words with commas,
+Scalar value @%s{%s} better written as $%s{%s}, Stub found while resolving
+method `%s' overloading `%s' in package `%s', Too late for "B<-T>" option,
+untie attempted while %d inner references still exist, Unrecognized
+character %s, Unsupported function fork, Use of "$$<digit>" to mean
+"${$}<digit>" is deprecated, Value of %s can be "0"; test with defined(),
+Variable "%s" may be unavailable, Variable "%s" will not stay shared,
+Warning: something's wrong, Ill-formed logical name |%s| in prime_env_iter,
+Got an error from DosAllocMem, Malformed PERLLIB_PREFIX, PERL_SH_DIR too
+long, Process terminated by SIG%s
 
 =item BUGS
 
@@ -1417,14 +1418,14 @@ File::Basename, File::CheckTree, File::Compare, File::Copy, File::Find,
 File::Path, File::stat, FileCache, FileHandle, FindBin, GDBM_File,
 Getopt::Long, Getopt::Std, I18N::Collate, IO, IO::File, IO::Handle,
 IO::Pipe, IO::Seekable, IO::Select, IO::Socket, IPC::Open2, IPC::Open3,
-Math::BigFloat, Math::BigInt, Math::Complex, NDBM_File, Net::Ping,
-Net::hostent, Net::netent, Net::protoent, Net::servent, Opcode, Pod::Text,
-POSIX, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
-Socket, Symbol, Sys::Hostname, Sys::Syslog, Term::Cap, Term::Complete,
-Term::ReadLine, Test::Harness, Text::Abbrev, Text::ParseWords,
-Text::Soundex, Text::Tabs, Text::Wrap, Tie::Hash, Tie::RefHash,
-Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime,
-Time::tm, UNIVERSAL, User::grent, User::pwent
+Math::BigFloat, Math::BigInt, Math::Complex, Math::Trig, NDBM_File,
+Net::Ping, Net::hostent, Net::netent, Net::protoent, Net::servent, Opcode,
+Pod::Text, POSIX, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader,
+Shell, Socket, Symbol, Sys::Hostname, Sys::Syslog, Term::Cap,
+Term::Complete, Term::ReadLine, Test::Harness, Text::Abbrev,
+Text::ParseWords, Text::Soundex, Text::Tabs, Text::Wrap, Tie::Hash,
+Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime,
+Time::localtime, Time::tm, UNIVERSAL, User::grent, User::pwent
 
 =item Extension Modules
 

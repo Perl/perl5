@@ -11,7 +11,8 @@ this one.
 =head1 Supported Environments
 
 Perl5.004 builds out of the box on Unix, Plan9, LynxOS, VMS, OS/2,
-QNX, and AmigaOS.
+QNX, AmigaOS, and Windows NT; once built on Windows NT, Perl runs
+on Windows 95 as well.
 
 =head1 Core Changes
 
@@ -1174,6 +1175,11 @@ empty (except that C<d_csh> should be C<'undef'>) so that Perl will
 think csh is missing.  In either case, after editing config.sh, run
 C<./Configure -S> and rebuild Perl.
 
+=item Invalid conversion in %s: "%s"
+
+(W) Perl does not understand the given format conversion.
+See L<perlfunc/sprintf>.
+
 =item Invalid type in pack: '%s'
 
 (F) The given character is not a valid pack type.  See L<perlfunc/pack>.
@@ -1219,6 +1225,10 @@ error is trappable I<once>.
 remaining memory (or virtual memory) to satisfy the request. However,
 the request was judged large enough (compile-time default is 64K), so
 a possibility to shut down by trapping this error is granted.
+
+=item panic: frexp
+
+(P) The library function frexp() failed, making printf("%f") impossible.
 
 =item Possible attempt to put comments in qw() list
 

@@ -1,5 +1,5 @@
 #define PATCHLEVEL 3
-#define SUBVERSION 97
+#define SUBVERSION 98
 
 /*
 	local_patches -- list of locally applied less-than-subversion patches.
@@ -38,7 +38,6 @@
  */
 static	char	*local_patches[] = {
 	NULL
-	,"Dev97A-J - Ten development patches to 5.003_97"
 	,NULL
 };
 

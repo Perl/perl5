@@ -1251,7 +1251,7 @@ greater than the maximum character.  See L<perlre>.
 
 =item Invalid conversion in %s: "%s"
 
-(F) Perl does not understand the given format conversion.
+(W) Perl does not understand the given format conversion.
 See L<perlfunc/sprintf>.
 
 =item Invalid type in pack: '%s'

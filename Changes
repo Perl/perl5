@@ -45,6 +45,69 @@ And the Keepers of the Patch Pumpkin:
     Chip Salzenberg     <chip@perl.com>
 
 
+----------------
+Version 5.003_98
+----------------
+
+Here it is, the second public beta (a.k.a gamma).
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Support C< $coderef->($x,$y) >"
+   From:  Chip Salzenberg
+  Files:  perly.c perly.c.diff perly.y pod/perldelta.pod pod/perldsc.pod
+          pod/perlref.pod t/op/ref.t vms/perly_c.vms
+
+ CORE PORTABILITY
+
+   (no changes)
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix C< hex('80') * 0x1000000 >"
+   From:  Chip Salzenberg
+  Files:  opcode.pl
+
+  Title:  "Reset errno after failed piped close"
+   From:  Roderick Schertler <roderick@argon.org>
+ Msg-ID:  <28152.862264940@eeyore.ibcinc.com>
+   Date:  Mon, 28 Apr 1997 18:02:20 -0400
+  Files:  lib/Time/gmtime.pm lib/Time/localtime.pm pod/perlfunc.pod
+          t/io/pipe.t util.c
+
+  Title:  "Fix warning wrt return value of PerlIO_getname()"
+   From:  Spider Boardman <spider@Orb.Nashua.NH.US>
+ Msg-ID:  <199704300448.AAA24174@Orb.Nashua.NH.US>
+   Date:  Wed, 30 Apr 1997 00:48:13 -0400
+  Files:  perlio.c
+
+ BUILD PROCESS
+
+   (no changes)
+
+ LIBRARY AND EXTENSIONS
+
+   (no changes)
+
+ TESTS
+
+   (no other changes)
+
+ UTILITIES
+
+   (no changes)
+
+ DOCUMENTATION
+
+  Title:  "Describe Math::Trig in perlmodlib"
+   From:  Chip Salzenberg
+  Files:  pod/perlmodlib.pod
+
+  Title:  "Add new diagnostics to perldelta"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perldiag.pod
+
+
 -----------------
 Version 5.003_97j
 -----------------
@@ -240,7 +303,7 @@ crowd goes wild.  (Yeah.))  Showstoppers only between here and _98.
   Files:  lib/File/Path.pm
 
   Title:  "Math::{Complex,Trig} update"
-   From:  Gurusamy Sarathy
+   From:  Jarkko Hietaniemi
  Msg-ID:  <199704242221.BAA30363@alpha.hut.fi>
    Date:  Fri, 25 Apr 1997 01:21:44 +0300 (EET DST)
   Files:  lib/Math/Complex.pm lib/Math/Trig.pm pod/roffitall
