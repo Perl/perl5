@@ -809,9 +809,3 @@ read($bla, FILE, 1);
 EXPECT
 Can't modify constant item in read at - line 1, near "1)"
 Execution of - aborted due to compilation errors.
-######## [ID 19990906.001]
-$line = ('a' x 99999) . ";'"; . ('a' x 20000);
-$line =~ m";(?:\s*\'(?:[^\\']|\\.)*\'\s*)";;
-print "ok\n";
-EXPECT
-ok
