@@ -192,9 +192,17 @@ Translate relative path names into Mac names.
 =cut
 
 sub macify {
+    # mmm, better ... and this condition should always be satisified,
+    # as the module is now distributed with MacPerl, but leave in anyway
+    if (do 'Mac/FileSpec/Unixish.pm') {
+        return Mac::FileSpec::Unixish::nativize($_[0]);
+    }
+
     my($unix) = @_;
     my(@mac);
-    
+
+    $unix =~ s|^\./||;
+
     foreach (split(/[ \t\n]+/, $unix)) {
 	if (m|/|) {
 	    $_ = ":$_";
@@ -309,10 +317,11 @@ sub init_main {
     $self->{MAP_TARGET} ||= "perl";
 
     # make a simple check if we find Exporter
-    warn "Warning: PERL_LIB ($self->{PERL_LIB}) seems not to be a perl library directory
-        (Exporter.pm not found)"
-	unless -f $self->catfile("$self->{PERL_LIB}","Exporter.pm") ||
-        $self->{NAME} eq "ExtUtils::MakeMaker";
+    # hm ... do we really care?  at all?
+#    warn "Warning: PERL_LIB ($self->{PERL_LIB}) seems not to be a perl library directory
+#        (Exporter.pm not found)"
+#	unless -f $self->catfile("$self->{PERL_LIB}","Exporter.pm") ||
+#        $self->{NAME} eq "ExtUtils::MakeMaker";
 
     # Determine VERSION and VERSION_FROM
     ($self->{DISTNAME}=$self->{NAME}) =~ s#(::)#-#g unless $self->{DISTNAME};

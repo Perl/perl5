@@ -21,7 +21,7 @@ sub make {
 
 	undef $@;
 	unless (eval { do ":Makefile.PL" }) {
-		warn "Can't do :Makefile.PL in $cwd\n";
+		warn "Can't do :Makefile.PL in $cwd: $@\n";
 	}
 	warn $@ if $@;
 
