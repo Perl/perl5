@@ -1,6 +1,7 @@
 #!./perl -w
 
-# Tests for the command-line switches -0, -c, -l, -s, -m, -M, -V, -v, -h, -z
+# Tests for the command-line switches:
+# -0, -c, -l, -s, -m, -M, -V, -v, -h, -z, -i
 # Some switches have their own tests, see MANIFEST.
 
 BEGIN {
@@ -10,7 +11,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan(tests => 24);
+plan(tests => 26);
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
 # to emulate echo -n (ie. stdin always winds up with a newline), these 
@@ -244,4 +245,39 @@ SWTESTPM
 	  qr/\QUnrecognized switch: -z  (-h will show valid options)./,
           '-z correctly unknown' );
 
+}
+
+# Tests for -i
+
+{
+    local $TODO = '';   # these ones should work on VMS
+
+    sub do_i_unlink { 1 while unlink("file", "file.bak") }
+
+    open(FILE, ">file") or die "$0: Failed to create 'file': $!";
+    print FILE <<__EOF__;
+foo yada dada
+bada foo bing
+king kong foo
+__EOF__
+    close FILE;
+
+    END { do_i_unlink() }
+
+    runperl( switches => ['-pi.bak'], prog => 's/foo/bar/', args => ['file'] );
+
+    open(FILE, "file") or die "$0: Failed to open 'file': $!";
+    chomp(my @file = <FILE>);
+    close FILE;
+
+    open(BAK, "file.bak") or die "$0: Failed to open 'file': $!";
+    chomp(my @bak = <BAK>);
+    close BAK;
+
+    is(join(":", @file),
+       "bar yada dada:bada bar bing:king kong bar",
+       "-i new file");
+    is(join(":", @bak),
+       "foo yada dada:bada foo bing:king kong foo",
+       "-i backup file");
 }
