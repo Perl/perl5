@@ -47,6 +47,7 @@ $0 =~ s/^.*?(\w+)$/$1/;
 
 # (p)sed - a stream editor
 # History:  Aug 12 2000: Original version.
+#           Mar 25 2002: Rearrange generated Perl program.
 
 use strict;
 use integer;
@@ -186,6 +187,7 @@ literally.
 =cut
 
 my %ComTab;
+my %GenKey;
 #--------------------------------------------------------------------------
 $ComTab{'a'}=[ 1, 'txt', \&Emit,       '{ push( @Q, <<'."'TheEnd' ) }\n" ]; #ok
 
@@ -315,7 +317,7 @@ octal number for all other non-printable characters.
 #--------------------------------------------------------------------------
 $ComTab{'n'}=[ 2, '',    \&Emit,       <<'-X-'                           ]; #ok
 { print $_, "\n" if $doPrint;
-  printQ if @Q;
+  printQ() if @Q;
   $CondReg = 0;
   last CYCLE unless getsARGV();
   chomp();
@@ -332,7 +334,7 @@ there is no more input, processing is terminated.
 
 #--------------------------------------------------------------------------
 $ComTab{'N'}=[ 2, '',    \&Emit,       <<'-X-'                           ]; #ok
-{ printQ if @Q;
+{ printQ() if @Q;
   $CondReg = 0;
   last CYCLE unless getsARGV( $h );
   chomp( $h );
@@ -384,7 +386,6 @@ Branch to the end of the script and quit without starting a new cycle.
 
 #--------------------------------------------------------------------------
 $ComTab{'r'}=[ 1, 'str', \&Emit,       "{ _r( '-X-' ) }"                 ]; #ok
-### FIXME: lazy reading - big files???
 
 =item [1addr]B<r> I<file>
 
@@ -546,7 +547,8 @@ my $doGenerate  = $0 eq 's2p';
 
 # Collected and compiled script
 #
-my( @Commands, %Defined, @BlockStack, %Label, $labNum, $Code );
+my( @Commands, %Defined, @BlockStack, %Label, $labNum, $Code, $Func );
+$Code = '';
 
 ##################
 #  Compile Time
@@ -821,6 +823,7 @@ TheEnd
     if( defined( $path ) ){
         $wFiles{$path} = '';
 	$code .= " _w( '$path' ) if \$s;\n";
+        $GenKey{'w'} = 1;
     }
     $code .= "}";
 }
@@ -1277,6 +1280,7 @@ sub Parse(){
         my $key = $1;
 
 	my $tabref = $ComTab{$key};
+	$GenKey{$key} = 1;
 	if( $naddr > $tabref->[0] ){
 	    Warn( "excess address(es)", $fl );
 	    $error++;
@@ -1557,8 +1561,10 @@ print STDERR "Files: @ARGV\n" if $useDEBUG;
 
 # generate leading code
 #
-    $Code = <<'[TheEnd]';
+$Func = <<'[TheEnd]';
 
+# openARGV: open 1st input file
+#
 sub openARGV(){
     unshift( @ARGV, '-' ) unless @ARGV;
     my $file = shift( @ARGV );
@@ -1567,6 +1573,8 @@ sub openARGV(){
     $isEOF = 0;
 }
 
+# getsARGV: Read another input line into argument (default: $_).
+#           Move on to next input file, and reset EOF flag $isEOF.
 sub getsARGV(;\$){
     my $argref = @_ ? shift() : \$_; 
     while( $isEOF || ! defined( $$argref = <ARG> ) ){
@@ -1580,10 +1588,14 @@ sub getsARGV(;\$){
     1;
 }
 
+# eofARGV: end-of-file test
+#
 sub eofARGV(){
     return @ARGV == 0 && ( $isEOF = eof( ARG ) );
 }
 
+# makeHandle: Generates another file handle for some file (given by its path)
+#             to be written due to a w command or an s command's w flag.
 sub makeHandle($){
     my( $path ) = @_;
     my $handle;
@@ -1600,66 +1612,18 @@ sub makeHandle($){
     return $handle;
 }
 
-sub _r($){
-    my $path = shift();
-    push( @Q, \$path );
-}
-
-sub _l(){        
-    my $h = $_;
-    my $mcpl = 70;
-    $h =~ s/\\/\\\\/g;
-    if( $h =~ /[^[:print:]]/ ){
-	$h =~ s/\a/\\a/g;
-	$h =~ s/\f/\\f/g;
-	$h =~ s/\n/\\n/g;
-	$h =~ s/\t/\\t/g;
-	$h =~ s/\r/\\r/g;
-	$h =~ s/\e/\\e/g;
-        $h =~ s/([^[:print:]])/sprintf("\\%03o", ord($1))/ge;
-    }
-    while( length( $h ) > $mcpl ){
-	my $l = substr( $h, 0, $mcpl-1 );
-	$h = substr( $h, $mcpl );
-	# remove incomplete \-escape from end of line
-	if( $l =~ s/(?<!\\)(\\[0-7]{0,2})$// ){
-	    $h = $1 . $h;
-	}
-	print $l, "\\\n";
-    }
-    print "$h\$\n";
-}
-
-sub _w($){
-    my $path   = shift();
-    my $handle = $wFiles{$path};
-    if( ! $doOpenWrite &&
-	! defined( fileno( $handle ) ) ){
-	open( $handle, ">$path" )
-	|| die( "$0: $path: cannot open ($!)\n" );
-    }
-    print $handle $_, "\n";
-}
-
-# condition register test/reset
-#
-sub _t(){
-    my $res = $CondReg;
-    $CondReg = 0;
-    $res;
-}
-
-# printQ
-#
+# printQ: Print queued output which is either a string or a reference
+#         to a pathname.
 sub printQ(){
     for my $q ( @Q ){
 	if( ref( $q ) ){
+            # flush open w files so that reading this file gets it all
 	    if( exists( $wFiles{$$q} ) && $wFiles{$$q} ne '' ){
 		open( $wFiles{$$q}, ">>$$q" );
 	    }
+            # copy file to stdout: slow, but safe
 	    if( open( RF, "<$$q" ) ){
-		my $line;
-		while( defined( $line = <RF> ) ){
+		while( defined( my $line = <RF> ) ){
 		    print $line;
 		}
 		close( RF );
@@ -1671,6 +1635,18 @@ sub printQ(){
     undef( @Q );
 }
 
+[TheEnd]
+
+# generate the sed loop
+#
+$Code .= <<'[TheEnd]';
+sub openARGV();
+sub getsARGV(;\$);
+sub eofARGV();
+sub printQ();
+
+# Run: the sed loop reading input and applying the script
+#
 sub Run(){
     my( $h, $icnt, $s, $n );
     # hack (not unbreakable :-/) to avoid // matching an empty string
@@ -1710,16 +1686,102 @@ EOS:    if( $doPrint ){
 }
 [TheEnd]
 
+
+# append optional functions, prepend prototypes
+#
+my $Proto = "# prototypes\n";
+if( $GenKey{'l'} ){
+    $Proto .= "sub _l();\n";
+    $Func .= <<'[TheEnd]';
+# _l: l command processing
+#
+sub _l(){        
+    my $h = $_;
+    my $mcpl = 70;
+    # transform non printing chars into escape notation
+    $h =~ s/\\/\\\\/g;
+    if( $h =~ /[^[:print:]]/ ){
+	$h =~ s/\a/\\a/g;
+	$h =~ s/\f/\\f/g;
+	$h =~ s/\n/\\n/g;
+	$h =~ s/\t/\\t/g;
+	$h =~ s/\r/\\r/g;
+	$h =~ s/\e/\\e/g;
+        $h =~ s/([^[:print:]])/sprintf("\\%03o", ord($1))/ge;
+    }
+    # split into lines of length $mcpl
+    while( length( $h ) > $mcpl ){
+	my $l = substr( $h, 0, $mcpl-1 );
+	$h = substr( $h, $mcpl );
+	# remove incomplete \-escape from end of line
+	if( $l =~ s/(?<!\\)(\\[0-7]{0,2})$// ){
+	    $h = $1 . $h;
+	}
+	print $l, "\\\n";
+    }
+    print "$h\$\n";
+}
+
+[TheEnd]
+}
+
+if( $GenKey{'r'} ){
+    $Proto .= "sub _r(\$);\n";
+    $Func .= <<'[TheEnd]';
+# _r: r command processing: Save a reference to the pathname.
+#
+sub _r($){
+    my $path = shift();
+    push( @Q, \$path );
+}
+
+[TheEnd]
+}
+
+if( $GenKey{'t'} ){
+    $Proto .= "sub _t();\n";
+    $Func .= <<'[TheEnd]';
+# _t: t command - condition register test/reset
+#
+sub _t(){
+    my $res = $CondReg;
+    $CondReg = 0;
+    $res;
+}
+
+[TheEnd]
+}
+
+if( $GenKey{'w'} ){
+    $Proto .= "sub _w(\$);\n";
+    $Func .= <<'[TheEnd]';
+# _w: w command and s command's w flag - write to file 
+#
+sub _w($){
+    my $path   = shift();
+    my $handle = $wFiles{$path};
+    if( ! $doOpenWrite && ! defined( fileno( $handle ) ) ){
+	open( $handle, ">$path" )
+	|| die( "$0: $path: cannot open ($!)\n" );
+    }
+    print $handle $_, "\n";
+}
+
+[TheEnd]
+}
+
+$Code = $Proto . $Code;
+
 # magic "#n" - same as -n option
 #
 $doAutoPrint = 0 if substr( $Commands[0], 0, 2 ) eq '#n';
 
 # eval code - check for errors
 #
-print "Code:\n$Code" if $useDEBUG;
-eval $Code;
+print "Code:\n$Code$Func" if $useDEBUG;
+eval $Code . $Func;
 if( $@ ){
-    print "Code:\n$Code";
+    print "Code:\n$Code$Func";
     die( "$0: internal error - generated incorrect Perl code: $@\n" );
 }
 
@@ -1728,7 +1790,7 @@ if( $doGenerate ){
     # write full Perl program
     #
  
-    # bang line, declarations
+    # bang line, declarations, prototypes
     print <<TheEnd;
 #!$perlpath -w
 eval 'exec $perlpath -S \$0 \${1+"\$@"}'
@@ -1754,17 +1816,17 @@ TheEnd
    }
 
    print $Code;
-   print "&Run()\n";
+   print "Run();\n";
+   print $Func;
    exit( 0 );
 
 } else {
 
     # execute: make handles (and optionally open) all w files; run!
-
     for my $p ( keys( %wFiles ) ){
         exit( 1 ) unless makeHandle( $p );
     }
-    &Run();
+    Run();
 }
 
 
