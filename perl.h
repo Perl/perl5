@@ -1531,7 +1531,7 @@ typedef NVTYPE NV;
 /* eg glibc 2.2 series seems to provide modfl on ppc and arm, but has no
    prototype in <math.h> */
 #       ifndef HAS_MODFL_PROTO
-long double modfl(long double, long double *);
+EXTERN_C long double modfl(long double, long double *);
 #	endif
 #   else
 #       if defined(HAS_AINTL) && defined(HAS_COPYSIGNL)
