@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.93 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require DynaLoader;
 require Exporter;
@@ -203,7 +203,6 @@ define_alias( qr/^gbk$/i => '"cp936"');
 # TODO: Thai encoding TCVN
 # TODO: Korean encoding Johab
 # TODO: Vietnamese encodings VPS
-# TODO: Japanese encoding JIS (not the same as SJIS)
 # TODO: Mac Asian+African encodings: Arabic Armenian Bengali Burmese
 #       ChineseSimp ChineseTrad Devanagari Ethiopic ExtArabic
 #       Farsi Georgian Gujarati Gurmukhi Hebrew Japanese
@@ -340,239 +339,8 @@ Encode - character encodings
 The C<Encode> module provides the interfaces between Perl's strings
 and the rest of the system.  Perl strings are sequences of B<characters>.
 
-The repertoire of characters that Perl can represent is at least that
-defined by the Unicode Consortium. On most platforms the ordinal
-values of the characters (as returned by C<ord(ch)>) is the "Unicode
-codepoint" for the character (the exceptions are those platforms where
-the legacy encoding is some variant of EBCDIC rather than a super-set
-of ASCII - see L<perlebcdic>).
-
-Traditionaly computer data has been moved around in 8-bit chunks
-often called "bytes". These chunks are also known as "octets" in
-networking standards. Perl is widely used to manipulate data of
-many types - not only strings of characters representing human or
-computer languages but also "binary" data being the machines representation
-of numbers, pixels in an image - or just about anything.
-
-When Perl is processing "binary data" the programmer wants Perl to process
-"sequences of bytes". This is not a problem for Perl - as a byte has 256
-possible values it easily fits in Perl's much larger "logical character".
-
-Due to size concerns, each of B<CJK> (Chinese, Japanese & Korean) modules
-are not loaded in memory until the first time they're used. Although you
-don't have to C<use> the corresponding B<Encode::>(B<TW>|B<CN>|B<JP>|B<KR>)
-modules first, be aware that those encodings will not be in C<%encodings>
-until their module is loaded (either implicitly through using encodings
-contained in the same module, or via an explicit C<use>).
-
-=head2 TERMINOLOGY
-
-=over 4
-
-=item *
-
-I<character>: a character in the range 0..(2**32-1) (or more).
-(What Perl's strings are made of.)
-
-=item *
-
-I<byte>: a character in the range 0..255
-(A special case of a Perl character.)
-
-=item *
-
-I<octet>: 8 bits of data, with ordinal values 0..255
-(Term for bytes passed to or from a non-Perl context, e.g. disk file.)
-
-=back
-
-The marker [INTERNAL] marks Internal Implementation Details, in
-general meant only for those who think they know what they are doing,
-and such details may change in future releases.
-
-=head1 ENCODINGS
-
-=head2 Characteristics of an Encoding
-
-An encoding has a "repertoire" of characters that it can represent,
-and for each representable character there is at least one sequence of
-octets that represents it.
-
-=head2 Types of Encodings
-
-Encodings can be divided into the following types:
-
-=over 4
-
-=item * Fixed length 8-bit (or less) encodings.
-
-Each character is a single octet so may have a repertoire of up to
-256 characters. ASCII and iso-8859-* are typical examples.
-
-=item * Fixed length 16-bit encodings
-
-Each character is two octets so may have a repertoire of up to
-65 536 characters.  Unicode's UCS-2 is an example.  Also used for
-encodings for East Asian languages.
-
-=item * Fixed length 32-bit encodings.
-
-Not really very "encoded" encodings. The Unicode code points
-are just represented as 4-octet integers. None the less because
-different architectures use different representations of integers
-(so called "endian") there at least two disctinct encodings.
-
-=item * Multi-byte encodings
-
-The number of octets needed to represent a character varies.
-UTF-8 is a particularly complex but regular case of a multi-byte
-encoding. Several East Asian countries use a multi-byte encoding
-where 1-octet is used to cover western roman characters and Asian
-characters get 2-octets.
-(UTF-16 is strictly a multi-byte encoding taking either 2 or 4 octets
-to represent a Unicode code point.)
-
-=item * "Escape" encodings.
-
-These encodings embed "escape sequences" into the octet sequence
-which describe how the following octets are to be interpreted.
-The iso-2022-* family is typical. Following the escape sequence
-octets are encoded by an "embedded" encoding (which will be one
-of the above types) until another escape sequence switches to
-a different "embedded" encoding.
-
-These schemes are very flexible and can handle mixed languages but are
-very complex to process (and have state).  No escape encodings are
-implemented for Perl yet.
-
-=back
-
-=head2 Specifying Encodings
-
-Encodings can be specified to the API described below in two ways:
-
-=over 4
-
-=item 1. By name
-
-Encoding names are strings with characters taken from a restricted
-repertoire.  See L</"Encoding Names">.
-
-=item 2. As an object
-
-Encoding objects are returned by C<find_encoding($name, [$skip_external])>.
-If the second parameter is true, Encode will refrain from loading external
-modules for CJK encodings.
-
-=back
-
-=head2 Encoding Names
-
-Encoding names are case insensitive. White space in names is ignored.
-In addition an encoding may have aliases. Each encoding has one
-"canonical" name.  The "canonical" name is chosen from the names of
-the encoding by picking the first in the following sequence:
-
-=over 4
-
-=item * The MIME name as defined in IETF RFCs.
-
-=item * The name in the IANA registry.
-
-=item * The name used by the organization that defined it.
-
-=back
-
-Because of all the alias issues, and because in the general case
-encodings have state C<Encode> uses the encoding object internally
-once an operation is in progress.
-
-As of Perl 5.8.0, at least the following encodings are recognized
-(the => marks aliases):
-
-  ASCII
-
-  US-ASCII => ASCII
-
-The Unicode:
-
-  UTF-8
-  UTF-16
-  UCS-2
-
-  ISO 10646-1 => UCS-2
-
-The ISO 8859 and KOI:
-
-  ISO 8859-1  ISO 8859-6   ISO 8859-11         KOI8-F
-  ISO 8859-2  ISO 8859-7   (12 doesn't exist)  KOI8-R
-  ISO 8859-3  ISO 8859-8   ISO 8859-13         KOI8-U
-  ISO 8859-4  ISO 8859-9   ISO 8859-14
-  ISO 8859-5  ISO 8859-10  ISO 8859-15
-                           ISO 8859-16
-
-  Latin1  => 8859-1  Latin6  => 8859-10
-  Latin2  => 8859-2  Latin7  => 8859-13
-  Latin3  => 8859-3  Latin8  => 8859-14
-  Latin4  => 8859-4  Latin9  => 8859-15
-  Latin5  => 8859-9  Latin10 => 8859-16
-
-  Cyrillic => 8859-5
-  Arabic   => 8859-6
-  Greek    => 8859-7
-  Hebrew   => 8859-8
-  Thai     => 8859-11
-  TIS620   => 8859-11
-
-The CJKV: Chinese, Japanese, Korean, Vietnamese:
-
-  ISO 2022     ISO 2022 JP-1  JIS 0201  GB 1988   Big5       EUC-CN
-  ISO 2022 CN  ISO 2022 JP-2  JIS 0208  GB 2312   HZ         EUC-JP
-  ISO 2022 JP  ISO 2022 KR    JIS 0210  GB 12345  CNS 11643  EUC-JP-0212
-  Shift-JIS				GBK	  Big5-HKSCS EUC-KR
-  VISCII				ISO-IR-165
-
-(Due to size concerns, additional Chinese encodings including C<GB 18030>,
-C<EUC-TW> and C<BIG5PLUS> are distributed separately on CPAN, under the name
-L<Encode::HanExtra>.)
-
-The PC codepages:
-
-  CP37   CP852  CP861  CP866  CP949   CP1251  CP1256
-  CP424  CP855  CP862  CP869  CP950   CP1252  CP1257
-  CP737  CP856  CP863  CP874  CP1006  CP1253  CP1258
-  CP775  CP857  CP864  CP932  CP1047  CP1254
-  CP850  CP860  CP865  CP936  CP1250  CP1255
-
-  WinLatin1     => CP1252
-  WinLatin2     => CP1250
-  WinCyrillic   => CP1251
-  WinGreek      => CP1253
-  WinTurkiskh   => CP1254
-  WinHebrew     => CP1255
-  WinArabic     => CP1256
-  WinBaltic     => CP1257
-  WinVietnamese => CP1258
-
-(All the CPI<NNN...> are available also as IBMI<NNN...>.)
-
-The Mac codepages:
-
-  MacCentralEuropean   MacJapanese
-  MacCroatian          MacRoman
-  MacCyrillic          MacRomanian
-  MacDingbats          MacSami
-  MacGreek             MacThai
-  MacIcelandic         MacTurkish
-                       MacUkraine
-
-Miscellaneous:
-
-  7bit-greek  IR-197
-  7bit-kana   NeXTstep
-  7bit-latin1 POSIX-BC
-  DingBats    Roman8
-  GSM 0338    Symbol
+To find more about character encodings, please consult
+L<Encode::Description> . This document focuses on programming references.
 
 =head1 PERL ENCODING API
 
@@ -600,7 +368,7 @@ Decode sequence of octets assumed to be in I<ENCODING> into Perl's
 internal form and returns the resulting string.  For CHECK see
 L</"Handling Malformed Data">.
 
-For example to convert ISO 8859-1 data to UTF-8:
+For example to convert ISO-8859-1 data to UTF-8:
 
 	$utf8 = decode("latin1", $latin1);
 
@@ -613,7 +381,7 @@ in $string originally get to be in FROM_ENCODING?  Either using
 encode() or through PerlIO: See L</"Encoding and IO">.  For CHECK
 see L</"Handling Malformed Data">.
 
-For example to convert ISO 8859-1 data to UTF-8:
+For example to convert ISO-8859-1 data to UTF-8:
 
 	from_to($data, "iso-8859-1", "utf-8");
 
@@ -714,46 +482,6 @@ For CHECK see L</"Handling Malformed Data">.
 
 =back
 
-=head2 Other Encodings of Unicode
-
-UTF-16 is similar to UCS-2, 16 bit or 2-byte chunks.  UCS-2 can only
-represent 0..0xFFFF, while UTF-16 has a I<surrogate pair> scheme which
-allows it to cover the whole Unicode range.
-
-Surrogates are code points set aside to encode the 0x01000..0x10FFFF
-range of Unicode code points in pairs of 16-bit units.  The I<high
-surrogates> are the range 0xD800..0xDBFF, and the I<low surrogates>
-are the range 0xDC00..0xDFFFF.  The surrogate encoding is
-
-	$hi = ($uni - 0x10000) / 0x400 + 0xD800;
-	$lo = ($uni - 0x10000) % 0x400 + 0xDC00;
-
-and the decoding is
-
-	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
-
-Encode implements big-endian UCS-2 aliased to "iso-10646-1" as that
-happens to be the name used by that representation when used with X11
-fonts.
-
-UTF-32 or UCS-4 is 32-bit or 4-byte chunks.  Perl's logical characters
-can be considered as being in this form without encoding. An encoding
-to transfer strings in this form (e.g. to write them to a file) would
-need to
-
-     pack('L*', unpack('U*', $string));  # native
-  or
-     pack('V*', unpack('U*', $string));  # little-endian
-  or
-     pack('N*', unpack('U*', $string));  # big-endian
-
-depending on the endianness required.
-
-No UTF-32 encodings are implemented yet.
-
-Both UCS-2 and UCS-4 style encodings can have "byte order marks" by
-representing the code point 0xFFFE as the very first thing in a file.
-
 =head2 Listing available encodings
 
   use Encode qw(encodings);
@@ -782,7 +510,8 @@ Currently I<newName> can be specified in the following ways:
 In this case if I<ENCODING> is not a reference it is C<eval>-ed to
 allow C<$1> etc. to be subsituted.  The example is one way to names as
 used in X11 font names to alias the MIME names for the iso-8859-*
-family.
+family.  Note the double quote inside the single quote.  If you are
+using regex here, you have to do so or it won't work in this case.
 
 =item As a code reference, e.g.:
 
@@ -795,13 +524,13 @@ names for the iso-8859-* family.
 
 =back
 
-=head2 Defining Encodings
+=head1 Defining Encodings
 
     use Encode qw(define_alias);
     define_encoding( $object, 'canonicalName' [,alias...]);
 
 Causes I<canonicalName> to be associated with I<$object>.  The object
-should provide the interface described in L</"IMPLEMENTATION CLASSES">
+should provide the interface described in L<Encode::Encoding>
 below.  If more than two arguments are provided then additional
 arguments are taken as aliases for I<$object> as for C<define_alias>.
 
@@ -850,7 +579,7 @@ transform the bytes read from a handle into characters before doing
 "character operations" (e.g. C<lc>, C</\W+/>, ...).
 
 You can also use PerlIO to convert larger amounts of data you don't
-want to bring into memory.  For example to convert between ISO 8859-1
+want to bring into memory.  For example to convert between ISO-8859-1
 (Latin 1) and UTF-8 (or UTF-EBCDIC in EBCDIC machines):
 
     open(F, "<:encoding(iso-8859-1)", "data.txt") or die $!;
@@ -870,22 +599,6 @@ See L<PerlIO> for more information.
 
 See also L<encoding> for how to change the default encoding of the
 data in your script.
-
-=head1 Encoding How to ...
-
-To do:
-
-=over 4
-
-=item * IO with mixed content (faking iso-2020-*)
-
-=item * MIME's Content-Length:
-
-=item * UTF-8 strings in binary data.
-
-=item * Perl/Encode wrappers on non-Unicode XS modules.
-
-=back
 
 =head1 Messing with Perl's Internals
 
@@ -921,172 +634,10 @@ not a string.
 
 =back
 
-=head1 IMPLEMENTATION CLASSES
-
-As mentioned above encodings are (in the current implementation at least)
-defined by objects. The mapping of encoding name to object is via the
-C<%encodings> hash.
-
-The values of the hash can currently be either strings or objects.
-The string form may go away in the future. The string form occurs
-when C<encodings()> has scanned C<@INC> for loadable encodings but has
-not actually loaded the encoding in question. This is because the
-current "loading" process is all Perl and a bit slow.
-
-Once an encoding is loaded then value of the hash is object which
-implements the encoding. The object should provide the following
-interface:
-
-=over 4
-
-=item -E<gt>name
-
-Should return the string representing the canonical name of the encoding.
-
-=item -E<gt>new_sequence
-
-This is a placeholder for encodings with state. It should return an
-object which implements this interface, all current implementations
-return the original object.
-
-=item -E<gt>encode($string,$check)
-
-Should return the octet sequence representing I<$string>. If I<$check>
-is true it should modify I<$string> in place to remove the converted
-part (i.e.  the whole string unless there is an error).  If an error
-occurs it should return the octet sequence for the fragment of string
-that has been converted, and modify $string in-place to remove the
-converted part leaving it starting with the problem fragment.
-
-If check is is false then C<encode> should make a "best effort" to
-convert the string - for example by using a replacement character.
-
-=item -E<gt>decode($octets,$check)
-
-Should return the string that I<$octets> represents. If I<$check> is
-true it should modify I<$octets> in place to remove the converted part
-(i.e.  the whole sequence unless there is an error).  If an error
-occurs it should return the fragment of string that has been
-converted, and modify $octets in-place to remove the converted part
-leaving it starting with the problem fragment.
-
-If check is is false then C<decode> should make a "best effort" to
-convert the string - for example by using Unicode's "\x{FFFD}" as a
-replacement character.
-
-=back
-
-It should be noted that the check behaviour is different from the
-outer public API. The logic is that the "unchecked" case is useful
-when encoding is part of a stream which may be reporting errors
-(e.g. STDERR).  In such cases it is desirable to get everything
-through somehow without causing additional errors which obscure the
-original one. Also the encoding is best placed to know what the
-correct replacement character is, so if that is the desired behaviour
-then letting low level code do it is the most efficient.
-
-In contrast if check is true, the scheme above allows the encoding to
-do as much as it can and tell layer above how much that was. What is
-lacking at present is a mechanism to report what went wrong. The most
-likely interface will be an additional method call to the object, or
-perhaps (to avoid forcing per-stream objects on otherwise stateless
-encodings) and additional parameter.
-
-It is also highly desirable that encoding classes inherit from
-C<Encode::Encoding> as a base class. This allows that class to define
-additional behaviour for all encoding objects. For example built in
-Unicode, UCS-2 and UTF-8 classes use :
-
-  package Encode::MyEncoding;
-  use base qw(Encode::Encoding);
-
-  __PACKAGE__->Define(qw(myCanonical myAlias));
-
-To create an object with bless {Name => ...},$class, and call
-define_encoding.  They inherit their C<name> method from
-C<Encode::Encoding>.
-
-=head2 Compiled Encodings
-
-F<Encode.xs> provides a class C<Encode::XS> which provides the
-interface described above. It calls a generic octet-sequence to
-octet-sequence "engine" that is driven by tables (defined in
-F<encengine.c>). The same engine is used for both encode and
-decode. C<Encode:XS>'s C<encode> forces Perl's characters to their
-UTF-8 form and then treats them as just another multibyte
-encoding. C<Encode:XS>'s C<decode> transforms the sequence and then
-turns the UTF-8-ness flag as that is the form that the tables are
-defined to produce. For details of the engine see the comments in
-F<encengine.c>.
-
-The tables are produced by the Perl script F<compile> (the name needs
-to change so we can eventually install it somewhere). F<compile> can
-currently read two formats:
-
-=over 4
-
-=item *.enc
-
-This is a coined format used by Tcl. It is documented in
-Encode/EncodeFormat.pod.
-
-=item *.ucm
-
-This is the semi-standard format used by IBM's ICU package.
-
-=back
-
-F<compile> can write the following forms:
-
-=over 4
-
-=item *.ucm
-
-See above - the F<Encode/*.ucm> files provided with the distribution have
-been created from the original Tcl .enc files using this approach.
-
-=item *.c
-
-Produces tables as C data structures - this is used to build in encodings
-into F<Encode.so>/F<Encode.dll>.
-
-=item *.xs
-
-In theory this allows encodings to be stand-alone loadable Perl
-extensions.  The process has not yet been tested. The plan is to use
-this approach for large East Asian encodings.
-
-=back
-
-The set of encodings built-in to F<Encode.so>/F<Encode.dll> is
-determined by F<Makefile.PL>.  The current set is as follows:
-
-=over 4
-
-=item ascii and iso-8859-*
-
-That is all the common 8-bit "western" encodings.
-
-=item IBM-1047 and two other variants of EBCDIC.
-
-These are the same variants that are supported by EBCDIC Perl as
-"native" encodings.  They are included to prove "reversibility" of
-some constructs in EBCDIC Perl.
-
-=item symbol and dingbats as used by Tk on X11.
-
-(The reason Encode got started was to support Perl/Tk.)
-
-=back
-
-That set is rather ad hoc and has been driven by the needs of the
-tests rather than the needs of typical applications. It is likely
-to be rationalized.
-
 =head1 SEE ALSO
 
 L<perlunicode>, L<perlebcdic>, L<perlfunc/open>, L<PerlIO>, L<encoding>,
-L<utf8>, the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
+L<utf8>, L<Encode::Description>, L<Encode::Encoding> the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 
 
 =cut

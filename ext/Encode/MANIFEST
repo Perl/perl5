@@ -147,6 +147,7 @@ compile		Encode extension
 encengine.c		Encode extension
 encode.h		Encode extension
 lib/Encode/CN/HZ.pm		Encode extension
+lib/Encode/Description.pod	General topics on character encodings
 lib/Encode/Encoding.pm	Encode extension
 lib/Encode/Internal.pm	Encode extension
 lib/Encode/JP/Constants.pm	Encode extension

@@ -5,7 +5,7 @@ use base 'Encode::Encoding';
 use strict;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 0.92 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # Just for the time being, we implement jis-7bit
 # encoding via EUC
@@ -13,6 +13,8 @@ $VERSION = do { my @r = (q$Revision: 0.92 $ =~ /\d+/g); sprintf "%d."."%02d" x $
 my $canon = '7bit-jis';
 my $obj = bless {name => $canon}, __PACKAGE__;
 $obj->Define($canon);
+
+sub name { return $_[0]->{name}; }
 
 sub decode
 {

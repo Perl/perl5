@@ -5,11 +5,13 @@ use Encode::JP::H2Z;
 use base 'Encode::Encoding';
 
 use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 0.92 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 my $canon = 'iso-2022-jp';
 my $obj = bless {name => $canon}, __PACKAGE__;
 $obj->Define($canon);
+
+sub name { return $_[0]->{name}; }
 
 #
 # decode is identical to 7bit-jis

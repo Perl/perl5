@@ -1,7 +1,36 @@
 # Revision history for Perl extension Encode.
 #
-# $Id$
+# $Id: Changes,v 0.94 2002/03/20 19:59:38 dankogai Exp dankogai $
 #
+
+0.94  Thu Mar 21 2002
++ lib/Encode/Description.pod
+! lib/Encode/Encoding.pm
+  Now the pod in Encode.pm is abridged as programming references.
+  lib/Encode/Description.pod contains the original, detailed description
+  and Encode::Encoding explains how to write your own module to
+  add new encodings.  So far, lib/Encode/Description.pod contains
+  the whole pod once in Encode.pm.  This is intentional.
+! Encode.pm
+  Pod revisions by Anton Tagunov
+  Message-Id: <517178431.20020320174824@motor.ru>
+! lib/Encode/Tcl.pm
+  all occrance of Encode::Tcl::Extended removed including pod
+! t/CJKalias.t
+  test now checks $encoding->name only; $encoding->{name} are
+  no longer check to find the canonical name.
+! lib/Encode/JP/JIS.pm
+! lib/Encode/JP/ISO_2022_JP.pm
+  ->name() added to be more compliant with API  
+! CN/CN.pm
+! JP/JP.pm
+! KR/KR.pm
+! TW/TW.pm
+! t/CJKalias.t
+  Patch by Autrijus to add aliases to TW and fixes to POD
+  Message-Id: <20020320090619.GA24774@not.autrijus.org>
+! AUTHORS
+  SADAHIRO Tomoyuki added as should.  My apologies.
 
 0.93  Wed Mar 20 2002
 * First release to be uploaded to CPAN.  For prehistoric changes,

@@ -1,5 +1,5 @@
 use strict;
-#use Test::More tests => 27;
+#use Test::More tests => 29;
 use Test::More qw(no_plan);
 use Encode::CN;
 use Encode::JP;
@@ -19,11 +19,13 @@ my %a2c = qw(
 	     Shift_JIS  shiftjis
 	     x-sjis     shiftjis
 	     jis        7bit-jis
+	     big-5      big5
+	     zh_TW.Big5 big5
+	     big5-hk    big5-hkscs
 	     );
 
 foreach my $a (keys %a2c){	     
     my $e = Encode::find_encoding($a);
-    my $n =  $e->name || $e->{name};
-    is($n, $a2c{$a});
+    is($e->name, $a2c{$a});
 }
 

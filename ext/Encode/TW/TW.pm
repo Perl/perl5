@@ -1,9 +1,12 @@
 package Encode::TW;
-our $VERSION = do { my @r = (q$Revision: 0.92 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
 XSLoader::load('Encode::TW',$VERSION);
+
+Encode::define_alias( qr/big-?5$/i		=> '"big5"' );
+Encode::define_alias( qr/big5-hk(?:scs)?/i	=> '"big5-hkscs"' );
 
 1;
 __END__
@@ -13,7 +16,7 @@ Encode::TW - Taiwan-based Chinese Encodings
 
 =head1 SYNOPSIS
 
-    use Encode 'encode'; 
+    use Encode qw/encode decode/; 
     $big5 = encode("big5", $utf8); # loads Encode::TW implicitly
     $utf8 = decode("big5", $big5); # ditto
 
@@ -22,9 +25,13 @@ Encode::TW - Taiwan-based Chinese Encodings
 This module implements Taiwan-based Chinese charset encodings.
 Encodings supported are as follows.
 
-  big5		The original Big5 encoding
-  big5-hkscs	Big5 plus Cantonese characters in Hong Kong
-  cp950		Code Page 950 (Big5 + Microsoft vendor mappings)
+  Canonical   Alias		Description
+  --------------------------------------------------------------------
+  big5        /big-?5$/i	The original Big5 encoding
+  big5-hkscs  /big5-hk(scs)?$/i	Big5 plus Cantonese characters in 
+                                Hong Kong
+  cp950		                Code Page 950 
+                                (Big5 + Microsoft vendor mappings)
   
 To find how to use this module in detail, see L<Encode>.
 
