@@ -45,8 +45,8 @@
 /* PERL_IMPLICIT_SYS implies PerlMemShared != PerlMem
    so use slab allocator to avoid lots of MUTEX overhead
  */
-#  ifndef PL_SLAB_ALLOC
-#    define PL_SLAB_ALLOC
+#  ifndef PL_OP_SLAB_ALLOC
+#    define PL_OP_SLAB_ALLOC
 #  endif
 #endif
 
