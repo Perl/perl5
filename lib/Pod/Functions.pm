@@ -1,4 +1,4 @@
-package PerlDoc::Functions;
+package Pod::Functions;
 
 #:vi:set ts=20
 
