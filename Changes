@@ -79,6 +79,22 @@ Version v5.5.650        Development release working toward v5.6
 ----------------
 
 ____________________________________________________________________________
+[  5033] By: gsar                                  on 2000/02/07  19:01:08
+        Log: stringify "\x{FFF}" to utf8 correctly; set SvUTF8 on "\x{XX}"
+             only when XX > 127
+     Branch: perl
+	   ! pp_hot.c toke.c
+____________________________________________________________________________
+[  5032] By: gsar                                  on 2000/02/07  18:25:31
+        Log: add note about printf("%v",...)
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  5031] By: gsar                                  on 2000/02/07  18:18:43
+        Log: update Changes
+     Branch: perl
+	   ! Changes Todo-5.6
+____________________________________________________________________________
 [  5030] By: gsar                                  on 2000/02/07  18:17:49
         Log: thinko in change#5029
      Branch: perl
