@@ -79,6 +79,509 @@ Version v5.5.640        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4813] By: jhi                                   on 2000/01/18  19:41:33
+        Log: metaconfig todo note from Andy.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/installdirs/inc_version_list.U
+____________________________________________________________________________
+[  4812] By: jhi                                   on 2000/01/18  15:02:55
+        Log: More -V.
+     Branch: cfgperl
+	   ! perl.c
+____________________________________________________________________________
+[  4811] By: jhi                                   on 2000/01/18  10:35:30
+        Log: More compile-time options shown with -V.
+     Branch: cfgperl
+	   ! perl.c
+____________________________________________________________________________
+[  4810] By: jhi                                   on 2000/01/17  08:35:49
+        Log: Add -D_GNU_SOURCE into ccflags for gcc (for now to expose
+             the strtold() and qgcvt() prototypes for long doubles, but
+             it should be okay in any case); fix bad assumptions in the
+             test suite about string->float conversions; though the out
+             parameter of strtold() (and strtoll()) is unused, it is nicer
+             to have it in correct type.
+     Branch: cfgperl
+	   ! Configure config_h.SH perl.h t/lib/posix.t t/op/pack.t
+     Branch: metaconfig
+	   ! U/modified/cc.U
+____________________________________________________________________________
+[  4809] By: jhi                                   on 2000/01/16  19:21:18
+        Log: strtoll works better ternary.
+     Branch: cfgperl
+	   ! perl.h
+____________________________________________________________________________
+[  4808] By: jhi                                   on 2000/01/16  19:12:58
+        Log: Know strtoll.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH perl.h
+____________________________________________________________________________
+[  4807] By: jhi                                   on 2000/01/16  17:57:03
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> dump.c gv.c gv.h lib/vars.pm op.c op.h perl.h pod/perlfunc.pod
+	  !> sv.c sv.h t/pragma/strict-vars toke.c util.c
+____________________________________________________________________________
+[  4806] By: jhi                                   on 2000/01/16  16:37:47
+        Log: Continue qgcvt work; closer now but not yet there.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH doop.c utf8.c
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+     Branch: metaconfig/U/perl
+	   ! d_qgcvt.U
+____________________________________________________________________________
+[  4805] By: jhi                                   on 2000/01/15  22:26:16
+        Log: Metaconfig and Porting patches from Andy; start using the new
+             long long and long double thingies from #4804; regen Configure.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! Porting/pumpkin.pod config_h.SH patchlevel.h perl.h util.c
+     Branch: metaconfig
+	   + U/dist_patches/dist-p70a U/dist_patches/dist-p70b
+	   + U/dist_patches/dist-p70c U/installdirs/inc_version_list.U
+	   + U/modified/myhostname.U U/modified/nis.U U/nullified/fpu.U
+	   + U/nullified/lib.U
+	   ! U/README U/compline/d_gconvert.U U/installdirs/sitearch.U
+	   ! U/installdirs/sitelib.U U/installdirs/vendorarch.U
+	   ! U/installdirs/vendorlib.U U/modified/Cppsym.U U/modified/Loc.U
+	   ! U/modified/Oldconfig.U U/modified/Signal.U
+	   ! U/modified/sig_name.U U/threads/usethreads.U
+     Branch: metaconfig/U/perl
+	   ! d_qgcvt.U d_strtold.U d_strtoll.U d_strtoq.U d_strtoull.U
+	   ! d_strtouq.U dlsrc.U i_db.U libperl.U patchlevel.U
+	   ! usemultiplicity.U
+     Branch: perl
+	   ! perl.h util.c
+____________________________________________________________________________
+[  4804] By: jhi                                   on 2000/01/14  14:22:24
+        Log: Add more quad/long long/long double sciency.
+     Branch: metaconfig/U/perl
+	   + d_qgcvt.U d_strtold.U d_strtoll.U d_strtoq.U d_strtoull.U
+	   + d_strtouq.U
+____________________________________________________________________________
+[  4803] By: gsar                                  on 2000/01/14  04:40:49
+        Log: minor optimization (avoid double sv_upgrade() for "our Foo $bar;")
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  4802] By: gsar                                  on 2000/01/14  04:35:55
+        Log: add note about "our"
+     Branch: perl
+	   ! lib/vars.pm
+____________________________________________________________________________
+[  4801] By: gsar                                  on 2000/01/14  04:16:51
+        Log: nailed "our" declarations, and better warnings on duplicate
+             "our" declarations
+     Branch: perl
+	   ! dump.c gv.c gv.h op.c pod/perlfunc.pod sv.c sv.h
+	   ! t/pragma/strict-vars toke.c
+____________________________________________________________________________
+[  4800] By: gsar                                  on 2000/01/14  01:27:13
+        Log: avoid spurious "Useless use of variable" warning on C<our $foo;>
+     Branch: perl
+	   ! dump.c op.c op.h
+____________________________________________________________________________
+[  4799] By: gsar                                  on 2000/01/14  01:17:15
+        Log: doc typo
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4798] By: jhi                                   on 2000/01/13  16:31:34
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> epoc/config.sh epoc/epocish.c epoc/link.pl
+	  +> ext/DynaLoader/XSLoader_pm.PL ext/DynaLoader/hints/openbsd.pl
+	  +> ext/IPC/SysV/hints/cygwin.pl ext/NDBM_File/hints/cygwin.pl
+	  +> ext/ODBM_File/hints/cygwin.pl lib/byte.pm lib/byte_heavy.pl
+	  +> lib/unicode/Unicode.300 pod/perlfork.pod t/lib/glob-case.t
+	  +> win32/perlhost.h win32/vdir.h win32/vmem.h
+	   - epoc/Config.pm epoc/autosplit.pl epoc/config.h epoc/perl.mmp
+	   - epoc/perl.pkg ext/DynaLoader/dl_cygwin.xs
+	   - lib/unicode/UnicodeData-Latest.txt os2/POSIX.mkfifo
+	  !> (integrate 282 files)
+____________________________________________________________________________
+[  4797] By: gsar                                  on 2000/01/13  08:12:56
+        Log: clearer docs for change#4796; faster av_exists()
+     Branch: perl
+	   ! av.c pod/perldelta.pod pod/perldiag.pod pod/perlfunc.pod
+____________________________________________________________________________
+[  4796] By: gsar                                  on 2000/01/13  06:49:03
+        Log: support delete() and exists() on array, tied array, and pseudo-hash
+             elements or slices
+     Branch: perl
+	   ! av.c embed.h embed.pl global.sym lib/Tie/Array.pm
+	   ! lib/Tie/Hash.pm objXSUB.h op.c perlapi.c pod/perldelta.pod
+	   ! pod/perlfunc.pod pod/perlref.pod pod/perltie.pod pp.c proto.h
+	   ! t/op/avhv.t t/op/delete.t
+____________________________________________________________________________
+[  4795] By: gsar                                  on 2000/01/11  20:52:30
+        Log: extend site_perl changes change#4773 to vendor_perl as well
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  4794] By: gsar                                  on 2000/01/11  19:18:50
+        Log: rework INSTALL to reflect new logic for versioning sitelibs
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  4793] By: gsar                                  on 2000/01/11  01:44:00
+        Log: test for change#4792
+     Branch: perl
+	   ! t/op/fork.t
+____________________________________________________________________________
+[  4792] By: gsar                                  on 2000/01/11  01:22:36
+        Log: pseudo forked children inherit environment correctly
+     Branch: perl
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[  4791] By: gsar                                  on 2000/01/10  19:14:03
+        Log: test tweak
+     Branch: perl
+	   ! t/op/fork.t
+____________________________________________________________________________
+[  4790] By: gsar                                  on 2000/01/10  18:56:16
+        Log: check for USE_ITHREADS sanity was too restrictive
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  4789] By: gsar                                  on 2000/01/10  18:30:24
+        Log: add workaround for textmode read() bug in MSVCRT; make chdir() do
+             a real SetCurrentDirectory() in toplevel host
+     Branch: perl
+	   ! README.win32 win32/Makefile win32/makefile.mk win32/perlhost.h
+	   ! win32/vdir.h win32/win32.c
+____________________________________________________________________________
+[  4788] By: chip                                  on 2000/01/10  17:52:39
+        Log: Integrate #4779 from mainline:
+             terminate -s switch processing only on C<-->, not on C<--foo>
+     Branch: maint-5.005/perl
+	   ! perl.c
+____________________________________________________________________________
+[  4787] By: chip                                  on 2000/01/10  17:51:17
+        Log: Tweak change #4785.
+     Branch: maint-5.005/perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  4786] By: chip                                  on 2000/01/10  17:11:40
+        Log: Make automatically-generated files +w (type "text+w").
+     Branch: maint-5.005/perl
+	   ! embed.h embedvar.h ext/B/B/Asmdata.pm keywords.h objXSUB.h
+	   ! opcode.h pod/perltoc.pod pp_proto.h regnodes.h
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  4785] By: chip                                  on 2000/01/10  17:08:48
+        Log: Patch from Sarathy to integrate changes from mainline: 2751,
+             2821, 2916, 2930, 2931, 2937 2990, 3033, 3036, 3042, 3061, 3097,
+             3123, 3134, 3135, 3269, 3270, 3300, 3316, 3345 3350, 3353, 3362,
+             3363, 3396, 3419, 3423, 3445, 3446, 3447, 3449, 3450, 3451, 3487
+             3493, 3514, 3533, 3548, 3549, 3588, 3682, 3685, 3699, 3785,
+             3804, 3811, 3897, 4057 4102, 4103, 4230, 4401, 4420, 4504
+             --
+             enable better Win32::DomainName() by demand loading netapi32.dll
+             (from Jan Dubois)
+             --
+             win32_utime() on directories should use localtime() rather
+             than gmtime() (from Jan Dubois)
+             --
+             serious bug introduced by G_VOID changes in 5.003_96: scalar
+             eval"" did not pop stack correctly; C<$a = eval "(1,2)x1">
+             is one symptom of the problem
+             --
+             add $installarchlib/CORE to default linker search path on windows
+             --
+             fix memory leak in C<sub f { split ' ', "a b" } f() while 1>
+             --
+             fix memory leak in C<sub f { @_ = 1 } f() while 1>
+             --
+             avoid hiding child process window
+             --
+             optimizations could sometimes bypass bareword check
+             --
+             fix typo that caused INSTALLPRIVLIB to have doubled 'perl5'
+             --
+             Pod::Html tweak
+             From: jan.dubois@ibm.net (Jan Dubois)
+             To: perl5-porters@perl.org
+             Subject: [PATCH 5.005_58] pod2html: Missing chunk for VMS filenames
+             Date: Tue, 27 Jul 1999 22:14:12 +0200
+             Message-ID: <37a50af0.46171380@smtp1.ibm.net>
+             --
+             don't quit if =head* wasn't found (suggested by Roland Bauer
+             <roland.bauer@fff.at>)
+             --
+             avoid bug in win32_str_os_error() (from Jan Dubois)
+             --
+             applied suggested patch, along with later tweak
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Wed, 14 Jul 1999 23:53:43 +0200
+             Message-ID: <37a902e7.15977234@smtp1.ibm.net>
+             Subject: Merge ActivePerl Stylesheet support etc into Pod::Html.pm
+             --
+             use a better prefixify() heuristic than m/perl/ (prefix/lib/perl5
+             and prefix/lib/perl5/man are ass_u_med only if those directories
+             actually exist; else prefix/{lib,man} are used)
+             --
+             allow C<-foo> under C<use integer> (behavior of C<-$string>
+             is unchanged still)
+             --
+             avoid race condition in the CAPI extension bootstrap handler
+             --
+             sanity check to cover the case when perl is installed into the
+             X:\ (drive root)
+             --
+             truncate() has a peculiar exemption from strict barewords, even
+             though it has a non-filehandle prototype
+             --
+             change#3447 didn't do enough to exempt Foo->bar(qw/.../) from
+             strict 'subs'
+             --
+             change#3449 wasn't doing enough
+             --
+             make win32_spawnvp() inherit standard handles even when they
+             may be redirected
+             --
+             minor logic tweak for reserved word warning
+             --
+             oops, some files missing in change#3449
+             --
+             allow '*' prototype to autoquote even barewords that happen to be
+             function names; parens or ampersand continue to force the other
+             interpretation; makes C<sub Foo {'bar'} CORE::GLOBAL::require Foo;>
+             do the right thing, for example
+             --
+             redo change#2061 and parts of change#1169 with code in the
+             parser; PL_last_proto hackery gone, strict 'subs' in now
+             implemented in the optimizer where specifying the exceptional
+             cases is much more robust; '*' (bareword) prototype now works
+             reliably when used in second and subsequent arguments
+             --
+             remove redundant part of change#1169 superceded by change#2061;
+             avoid "future reserved word" warning on prototypical bearwords
+             --
+             s/isspace/isSPACE/g and make sure the CRT version is always
+             passed an unsigned char (fixes random occurrence of spaces in
+             arguments containing high-bit chars passed to spawned children,
+             on win32)
+             --
+             on win32, look for "site/5.XXX/lib" if "site/5.XXXYY/lib" isn't
+             found (brings sitelib intuition in line with privlib)
+             --
+             mortalize string allocations by win32_get_{priv,site}lib()
+             (fixes small memory leak in interpreter)
+             --
+             opendir(D,"x:") on win32 opens cwd() for drive rather than root;
+             stat() behaves similarly
+             --
+             documentation for Win32 builtins (somewhat modified)
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Tue, 30 Mar 1999 08:05:03 +0200
+             Message-ID: <37006783.1926460@smtp1.ibm.net>
+             Subject: Re: Issues with build 509 
+             --
+             provide File::Copy::syscopy() via Win32::CopyFile() on win32
+             --
+             more bulletproof workaround for mangled paths;
+             provide Win32::GetLongPathName()
+             --
+             normalize $^X to full pathname on win32
+             --
+             work around mangled archname on win32 while finding privlib/sitelib;
+             normalize lib paths to forward slashes internally
+             --
+             avoid negative return value from Win32::GetTickCount()
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sat, 03 Apr 1999 19:04:18 +0200
+             Message-ID: <37084742.22824479@smtp1.ibm.net>
+             Subject: Re: Win32::GetTickCount
+             --
+             adjust win32_stat() to cope with FindFirstFile() and stat() bugs
+             (makes opendir(D,"c:") work reliably)
+             --
+             fix buggy reference count on refs to SVs with autoviv magic
+             (resulted in C<my @a; $a[1] = 1; print \$_ for @a> and Data::Dumper
+             accessing free()d memory)
+             --
+             fix bug in change#3123 (off-by-one, caused C<qx[noargs]> to fail
+             on win32)
+             --
+             flip release & version in win32_uname()
+             --
+             support POSIX::uname() via win32_uname()
+             --
+             implement win32_spawnvp() internally, making it return true PIDs
+             for asynchronous spawns; fix win32_kill() to always deal with
+             PIDs
+             --
+             use yyerror() instead of croak() so that compile-time failures in
+             my(LIST) don't confuse globals with lexicals
+             --
+             allow custom comparison function in File::Compare::compare_text()
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Fri, 26 Feb 1999 21:56:09 +0100
+             Message-ID: <36db0838.8805651@smtp1.ibm.net>
+             Subject: Re: PodParser 1.07 (was: RE: C<stuff()> vs stuff()) 
+             --
+             slightly edited version of suggested patch
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Mon, 01 Mar 1999 00:32:05 +0100
+             Message-ID: <36dbcf2c.12325433@smtp1.ibm.net>
+             Subject: Re: [PATCH 5.005_55] Cleanup of File::Spec module
+             --
+             revert parts of change#2990 to preserve predictable usage of
+             Win32::Foo() as stacked list values
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sat, 27 Feb 1999 18:24:17 +0100
+             Message-ID: <36e22849.36531259@smtp1.ibm.net>
+             Subject: Re: resend [PATCH 5.005_55] Various win32/win32.c cleanup 
+             --
+             add File::Compare::compare_text()
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Fri, 26 Feb 1999 00:20:41 +0100
+             Message-ID: <36dcd8ab.20195659@smtp1.ibm.net>
+             Subject: Re: PodParser 1.07 (was: RE: C<stuff()> vs stuff()) 
+             --
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Thu, 18 Feb 1999 19:14:07 +0100
+             Message-ID: <36d15809.40853323@smtp1.ibm.net>
+             Subject: resend [PATCH 5.005_55] Various win32/win32.c cleanup
+             --
+             support Win32::GetFullPathName() and Win32::SetLastError()
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Tue, 09 Feb 1999 22:27:31 +0100
+             Message-ID: <36c1a2ed.8007554@smtp1.ibm.net>
+             Subject: [PATCH _54] Win32::GetFullPathName
+             --
+             backout change#2811 and add newer version based on File::Spec
+             From: Barrie Slaymaker <rbs@telerama.com>
+             Date: Thu, 11 Feb 1999 16:29:24 -0500
+             Message-ID: <36C34BB4.A62090E0@telerama.com>
+             Subject: (pod2html) Relative URLs using new File::Spec
+             --
+             From: Barrie Slaymaker <rbs@telerama.com>
+             Date: Thu, 11 Feb 1999 19:39:48 -0500
+             Message-ID: <36C37854.707D139@telerama.com>
+             Subject: Merging File::PathConvert in to File::Spec
+             --
+             back out change#2751, apply updated version 
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sat, 06 Feb 1999 01:06:29 +0100
+             Message-ID: <36bc844c.18763049@smtp1.ibm.net>
+             Subject: [PATCH] Cleanup of File::Spec module
+             --
+             pod2html misinterprets Foo::Bar as a URL
+             (fix suggested by Alexander Barilo
+             <Alexander.Barilo@aexp.com>)
+             --
+             devnull() support from Jan Dubois <jan.dubois@ibm.net> and others
+     Branch: maint-5.005/perl
+	   + lib/File/Spec/Functions.pm pod/Win32.pod
+	   ! MANIFEST cop.h dump.c embed.h ext/SDBM_File/sdbm/dbe.c
+	   ! global.sym iperlsys.h lib/CGI.pm lib/CGI/Carp.pm
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/xsubpp
+	   ! lib/File/Compare.pm lib/File/Copy.pm lib/File/Spec.pm
+	   ! lib/File/Spec/Mac.pm lib/File/Spec/OS2.pm
+	   ! lib/File/Spec/Unix.pm lib/File/Spec/VMS.pm
+	   ! lib/File/Spec/Win32.pm lib/Pod/Html.pm objXSUB.h objpp.h op.c
+	   ! op.h perl.h pp.c pp_ctl.c pp_hot.c proto.h t/comp/proto.t
+	   ! t/io/fs.t t/lib/fatal.t t/op/eval.t t/op/magic.t t/op/ref.t
+	   ! t/pragma/strict-subs toke.c utils/perldoc.PL win32/GenCAPI.pl
+	   ! win32/Makefile win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/makedef.pl win32/makefile.mk win32/perlhost.h
+	   ! win32/runperl.c win32/win32.c win32/win32.h win32/win32iop.h
+	   ! win32/win32sck.c
+____________________________________________________________________________
+[  4784] By: chip                                  on 2000/01/10  09:04:34
+        Log: various documentation tweaks suggested by M. J. T. Guy
+     Branch: maint-5.005/perl
+	   ! INSTALL lib/strict.pm pod/perlfunc.pod pod/perlsyn.pod
+____________________________________________________________________________
+[  4783] By: chip                                  on 2000/01/10  08:11:39
+        Log: Refresh Getopt::Long to v2.20.
+     Branch: maint-5.005/perl
+	   ! lib/Getopt/Long.pm
+____________________________________________________________________________
+[  4782] By: gsar                                  on 2000/01/10  05:27:03
+        Log: EPOC port update (from Olaf Flebbe <O.Flebbe@science-computing.de>)
+     Branch: perl
+	   + epoc/config.sh epoc/epocish.c epoc/link.pl
+	   - epoc/Config.pm epoc/autosplit.pl epoc/config.h epoc/perl.mmp
+	   - epoc/perl.pkg
+	   ! MANIFEST README.epoc epoc/createpkg.pl epoc/epoc.c
+	   ! epoc/epoc_stubs.c epoc/epocish.h ext/IO/lib/IO/Socket.pm
+	   ! lib/Sys/Hostname.pm
+____________________________________________________________________________
+[  4781] By: gsar                                  on 2000/01/10  05:11:03
+        Log: pod typos (from Abigail <abigail@delanet.com>)
+     Branch: perl
+	   ! pod/perl.pod pod/perllexwarn.pod pod/perlxstut.pod
+____________________________________________________________________________
+[  4780] By: gsar                                  on 2000/01/10  05:07:35
+        Log: failing RE test added (from Robert Cunningham <rkc@ll.mit.edu>)
+     Branch: perl
+	   ! t/lib/thread.t
+____________________________________________________________________________
+[  4779] By: gsar                                  on 2000/01/10  05:06:16
+        Log: terminate -s switch processing only on C<-->, not on C<--foo>
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  4778] By: gsar                                  on 2000/01/10  04:38:45
+        Log: useithreads needs usemultiplicity
+     Branch: perl
+	   ! Configure perl.h
+____________________________________________________________________________
+[  4777] By: gsar                                  on 2000/01/10  01:18:04
+        Log: use $Config{version} rather than $] where appropriate
+     Branch: perl
+	   ! lib/CPAN.pm lib/ExtUtils/Installed.pm lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/Mksymlists.pm lib/Pod/Man.pm lib/diagnostics.pm
+	   ! lib/lib.pm
+____________________________________________________________________________
+[  4776] By: gsar                                  on 2000/01/10  00:11:34
+        Log: enable fork.t on windows
+     Branch: perl
+	   ! t/op/fork.t
+____________________________________________________________________________
+[  4775] By: gsar                                  on 2000/01/10  00:07:29
+        Log: broken test for use5005threads
+     Branch: perl
+	   ! t/lib/safe2.t
+____________________________________________________________________________
+[  4774] By: gsar                                  on 2000/01/09  23:56:37
+        Log: more windows build tweaks
+     Branch: perl
+	   ! installperl makedef.pl win32/Makefile win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/config_sh.PL
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  4773] By: gsar                                  on 2000/01/09  22:27:19
+        Log: more changes for new-style version numbers (versions numbers on
+             the filesystem look like 5.5.640, except on DOS-DJGPP and VMS where
+             they look like 5_5_640; delete @Config{pm_apiversion,xs_apiversion};
+             split $Config{apiversion} into three, @Config{apirevision,apiversion,
+             apisubversion} for CPP friendliness; $Config{sitelib} now defaults
+             to .../site_perl/$version, just like $Config{privlib}, making sitelib
+             completely independent across versions and substantially eliminating
+             chances of breaking older installations by overwriting newly built
+             extensions; all this means compatibility inclusions for @INC will need
+             to take into account older sitelib versions (this still TODO)
+             
+             windows, vms, dos tweaks for the above
+     Branch: perl
+	   ! Changes Configure INSTALL Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com dosish.h installman installperl
+	   ! patchlevel.h perl.c perl.h vms/vmsish.h win32/Makefile
+	   ! win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/config_h.PL win32/config_sh.PL win32/makefile.mk
+	   ! win32/win32.c
+____________________________________________________________________________
 [  4772] By: gsar                                  on 2000/01/09  19:05:33
         Log: s/usethreads/use5005threads/g
      Branch: perl

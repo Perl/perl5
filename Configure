@@ -4687,7 +4687,7 @@ $echo $n " patchlevel $patchlevel" $c
 test 0 -eq "$subversion" || $echo $n " subversion $subversion" $c
 echo ".)"
 case "$osname" in
-dos|cygwin|vms|win32)
+dos|vms)
 	: XXX Should be a Configure test for double-dots in filenames.
 	version=`echo $baserev $patchlevel $subversion | \
 		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
