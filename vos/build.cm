@@ -50,8 +50,8 @@
 &then &set_string obj .8000
 &
 &if &cpu& = mc68020
-&then &set_string obj2 .68k
-&else &set_string obj2 &obj&
+&then &set_string obj2 68k
+&else &set_string obj2 (substr &obj& 2)
 &
 &if &cpu& = mc68020
 &then &set_string bindsize -size large
@@ -154,10 +154,11 @@
 & &if (command_status) ^= 0 &then &return
 &
 !&compiler& <<perl.c &diag& &cpu& &cflags& -o perl&s& &+
-     -DARCHLIB="/system/ported/perl/lib/5.7&obj2&" &+
-     -DARCHLIB_EXP="/system/ported/perl/lib/5.7&obj2&" &+
-     -DSITEARCH="/system/ported/perl/lib/site/5.7&obj2&" &+
-     -DSITEARCH_EXP="/system/ported/perl/lib/site/5.7&obj2&"
+     -DARCHLIB="/system/ported/lib/perl5/5.8.0/&obj2&" &+
+     -DARCHLIB_EXP="/system/ported/lib/perl5/5.8.0/&obj2&" &+
+     -DSITEARCH="/system/ported/lib/perl5/site_perl/5.8.0/&obj2&" &+
+     -DSITEARCH_EXP="/system/ported/lib/perl5/site_perl/5.8.0/&obj2&" &+
+     -DARCHNAME="&obj2&"
 &if (command_status) ^= 0 &then &return
 !&compiler& <<perlapi.c &diag& &cpu& &cflags& -o perlapi&s&
 &if (command_status) ^= 0 &then &return
@@ -229,24 +230,24 @@
 &if &rebind& = 0
 &then &return
 &
-&if (exists -directory (master_disk)>system>tcp_os>object_library&obj2&)
-&then &set_string tcp_objlib (master_disk)>system>tcp_os>object_library&obj2&
+&if (exists -directory (master_disk)>system>tcp_os>object_library.&obj2&)
+&then &set_string tcp_objlib (master_disk)>system>tcp_os>object_library.&obj2&
 &else &set_string tcp_objlib (master_disk)>system>tcp_os>object_library
 &
-&if (exists -directory (master_disk)>system>stcp>object_library&obj2&)
-&then &set_string stcp_objlib (master_disk)>system>stcp>object_library&obj2&
+&if (exists -directory (master_disk)>system>stcp>object_library.&obj2&)
+&then &set_string stcp_objlib (master_disk)>system>stcp>object_library.&obj2&
 &else &set_string stcp_objlib (master_disk)>system>stcp>object_library
 &
-&if (exists -directory (master_disk)>system>object_library&obj2&)
-&then &set_string objlib (master_disk)>system>object_library&obj2&
+&if (exists -directory (master_disk)>system>object_library.&obj2&)
+&then &set_string objlib (master_disk)>system>object_library.&obj2&
 &else &set_string objlib (master_disk)>system>object_library
 &
-&if (exists -directory (master_disk)>system>c_object_library&obj2&)
-&then &set_string c_objlib (master_disk)>system>c_object_library&obj2&
+&if (exists -directory (master_disk)>system>c_object_library.&obj2&)
+&then &set_string c_objlib (master_disk)>system>c_object_library.&obj2&
 &else &set_string c_objlib (master_disk)>system>c_object_library
 &
-&if (exists -directory (master_disk)>system>posix_object_library&obj2&)
-&then &set_string posix_objlib (master_disk)>system>posix_object_library&obj2&
+&if (exists -directory (master_disk)>system>posix_object_library.&obj2&)
+&then &set_string posix_objlib (master_disk)>system>posix_object_library.&obj2&
 &else &set_string posix_objlib (master_disk)>system>posix_object_library
 &
 &if &version& = alpha
