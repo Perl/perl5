@@ -1,0 +1,1186 @@
+2003-02-05  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* lib/CPAN.pm (savehist, CPAN::shell): new config variables
+	histfile and histsize control saving and retrieving of history.
+
+	* Explain the status of CPAN.pm vs. CPANPLUS.pm in the POD
+
+	* Documentation: mention FTP_PASSIVE; courtesy Peter Valdemar
+	Mørch
+
+2002-11-22  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* correct all split commands to use a regex instead of a string.
+	Thanks to Rafael Garcia-Suarez for detecting the abuse.
+
+2002-11-17  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* BUNDLE/Test/{Builder,More}.pm: Strip POD from the two bundled
+	modules.
+
+2002-11-15  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Makefile.PL: Switch to CPAN::MakeMaker for this one experimental
+	release. The implications of CPAN::MakeMaker are yet to be
+	evaluated. Here I use the "True Bundle" feature to add Test::More
+	and Test::Builder and remove the dependency on them.
+
+2002-11-12  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* lib/CPAN/FirstTime.pm (read_mirrored_by): Bill Pollock made me
+	aware about simple mistakes that can be avoided in the URL
+	selection dialogue (entering URL strings instead of numbers,
+	entering leading or trailing whitespace). With a few simple tweaks
+	these should be avoided in the future.
+
+2002-10-20  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* lib/CPAN.pm: the last few patches also fixed accidentally some
+	"redefined" warnings during "reload cpan".
+
+2002-09-30  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Roland Bauer sent me a patch that carefully appended a trailing
+	newline to a couple of "mywarn" messages that came without it.
+	
+	* CPAN::FirstTime::display_some: Change the displayed dialogue to
+	make clear that SPACE ENTER is the trick to page through results.
+	Correct some indenting and trailing whitespace. Remove some unused
+	variables.
+
+	* print_ornamented: Newline fix for various Windows systems by
+	Roland Bauer
+
+2002-09-03  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::FirstTime::init: Catch non-absolute path in cpan_home.
+
+2002-08-30  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* New version of the cpan script by brian d foy.
+
+2002-07-28  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Releasing as 1.62.
+
+	* cpan: beefed-up cpan script courtesy brian d foy.
+
+	* Makefile.PL: deactivate PREREQ_PM for File::Spec in case we are
+	running under 5.6.0, otherwise 5.6.0's CPAN.pm would download
+	5.8.0 just for File::Spec.
+
+2002-05-07  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Releasing as 1.61.
+
+	* The default WAIT server has got a new domain name:
+	ls6-www.informatik.uni-dortmund.de
+
+	* Protecting against not existing $META->{is_tested} element.
+
+2002-04-21  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Repackaging, no changes in the code. The reason is that
+	search.cpan.org could not grok the format of my ChangeLog file
+	which mixed POD and non-POD. Now ChangeLog is POD-free and old
+	Changes are in Changes.old. Going to package as 1.60b.
+
+2002-04-19  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Change the quoting in system command for Windows systems. Thanks
+	to Alessandro Forghieri <alf at orion dot it> for the report.
+
+	* merge with bleadperl 
+
+2001-06-16  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Typo Frontent->Frontend in three places. Thanks to Rich Williams
+	for spotting.
+
+2001-05-28  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* manpage_headline: fixed the NAME parsing regular expression to
+	ignore headlines that just start with NAME. Thanks to Jost Krieger
+	for spotting.
+
+2001-05-22  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Bundle::look: disable the look command on bundles. Till
+	now it meant to recursively look into all members. This could be
+	time-consuming and even hard to interrupt. As I know nothing else
+	one could expect from look(Bundle), I decided to disable it
+	completely.
+
+2001-04-xx  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Do not remember exact date: Applied a patch by Gisle Aas to
+	replace MD5 by Digest::MD5.
+
+2001-02-09  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Releasing as 1.59_54.
+
+	* CPAN::Tarzip::TIEHANDLE: Applied a patch by Robin Barker
+	<rmb1@cise.npl.co.uk> about a wrong error message ("Could pipe"
+	instead of "Could not pipe")
+
+2001-02-06  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Index::rd_modpacks: Add a stalenes warning if the index
+	file is older than 30 days. Thanks to "tanbin"
+	<tiger40490@yahoo.com> for the report.
+
+	* To improve the protection against stale mirrors, add a global
+	for $CPAN::Index::DATE_OF_02 to keep track of the currently used
+	index. This is also stored in the cache. It will be printed as a
+	reminder whenever a fetch fails and whenever the metadata are
+	retrieved from the index file or via Storable.
+
+2001-01-02  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Author::as_glimpse): added email address
+
+	* CPAN::Shell::a: uppercasing any argument broke experimental
+	advanced query. Made conditional on the existence of an equal sign
+	now.
+
+2000-12-31  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* POD: add a description of the ls command.
+
+	* Improve documentation of support for authenticated proxies.
+
+	* CPAN::Bundle::contains: Bail out if there is no inst_file and
+	cpan_file eq "N/A". Old code would have tried to download N/A.
+
+2000-12-27  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* normalize: Fix bug with "Strange distribution name" if it is
+	"Contact Author..."
+
+2000-12-26  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::LWP::UserAgent: new class to customize proxy
+	authentication. Thanks to David C Worenklein for a working
+	implementation that I could use as a basis.
+
+2000-12-19  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* manpage: Added a pointer to the Japanese translation.
+
+2000-12-13  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* FAQ: While working on the FAQ mirroring item, I discovered that
+	we need a mirror command because "get" unwraps the tarfiles as a
+	side effect, which is not nice. Mirror() will do nothing if source
+	is a "file:" URL. It will probably understand force to override
+	that. It will copy to ~/.cpan/sources but leave the file unopened
+	and untouched. Backed out the FAQ item until we have that fixed.
+
+2000-12-11  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Distribution::normalize: Did not work correctly for
+	authors that have subdirectories in their CPAN directory. Was
+	counting slashes, am now also checking against a regexp.
+
+	* cpl: make completion work with "get".
+
+	* CPAN::Shell::ls: Reject arguments not matching [A-Z\-] to
+	prevent /.../ expansion which neither worked nor is considered
+	useful.
+
+	* CPAN::Shell::h: include ls command
+
+	* variable naming: rename $date_of_03 and $last_time to uppercase
+	counterparts. Globals must stand out visually.
+
+	* FAQ: Adding "How do I set up a local CPAN mirror that does not
+	contain things I'm not interested in?". Thanks to Paul Moore for
+	asking the question (but see above, the article was removed for
+	further consideration on 2000-12-13)
+
+	* CPAN::Author::id: add a sanity check, first letter must be A-Z
+
+2000-12-10  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Distribution::look: Protect against empty $dir and use
+	safe_chdir instead of chdir.
+
+2000-12-01  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* get: finished the treatment of the NFS racing condition that
+	motivated many of the recent changes in get(). Thanks for
+	reporting and heavy testing to Steffen Beyer.
+
+	* Releasing as 1.59_51.
+
+	* normalize: protect against the case when normalize is called
+	without argument.
+
+	* Thanks to Jeremy Wadsack who read the first sketch of the
+	documentation of the programmer's interface and provided helpful
+	comments and additions.
+
+        * Declaring 1.58_93 as 1.59 and releasing as such to have a stable
+        baseline again. 1.58_93 had been integrated into the development
+        track of 5.7.0 with patch 7737 on 2000/11/18.
+
+2000-11-30  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Distribution::get: removed a special case that was never
+	documented and apparently never worked: when keep_source_where
+	matched /^no/, we tried to delete the source again after an
+	installation.
+
+	* POD: documented expandany
+
+	* CPAN::Bundle::inst_file: now takes the newest Bundle definition
+	file it finds within @INC and ~/.cpan/Bundle/. Sets INST_VERSION
+	as side effect. CPAN::Bundle::inst_version calls inst_file.
+
+	* CPAN::Distribution::uptodate: New method.
+
+	* CPAN::Bundle::uptodate: New method. Thanks to Jeremy Wadsack who
+	discovered that an uptodate method for Bundles was missing.
+
+	* POD: Wrote at least the headlines for all public methods to make
+	a second step at opening CPAN.pm for programmers.
+
+2000-11-28  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Admin (CPAN::Shell::register): opened for XML, Tk, and Apache.
+
+	* CPAN::Author::ls: include the author's ID in the listing to make
+	copy&paste easier.
+
+	* normalize: Allowed the special case "N/A ..." for bundles.
+
+	* CPAN::Complete::cpl: made completion for bundles work on install
+	et al.
+
+	* localize: Encountered a C<Can't locate object method "new" via
+	package "LWP::UserAgent"> although has_usable returned true. Could
+	not find out the reason, so I wrapped it into an eval.
+
+2000-11-23  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Sending as 1.58_94 to Steffen, no release to avoid confusion.
+
+	* Due to a bug report by Steffen Beyer I added a whole lot of
+	debugging statements to get in the hope, I can find a reason why
+	his copy misbehaves under 5.00503.
+
+	* CPAN::Distribution::get: Fixed indenting in get(). Added $! to
+	the error messages there.
+
+
+2000-11-22  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::FirstTime::conf_sites: Added the option to download a
+	MIRRORED.BY immediately even if the local one seems fresh enough.
+
+	* POD: Lots of fixes spotted by John P. Linderman
+
+2000-11-15  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Fixed an incompatibility with 5.00503 discovered by Ask B.
+	Hansen.
+
+2000-11-14  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* lib/CPAN/FirstTime.pm: MyConfig/Config buglet during
+	site-picking and more verbosity for selecting good arguments for
+	make (Thanks to Larry Virden for the report)
+
+	* print_ornamented: Made shell output ornamenting dependent on a
+	global variable $CPAN::Shell::PRINT_ORNAMENTING. It is and will
+	stay a rarely used feature, so a global to turn it on and off
+	seems appropriate. For the record: this does not do anything but
+	colorize STDOUT and STDERR differently for debugging if all
+	messages are wrapped correctly.
+
+2000-11-11  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Admin: Made the machine name of PAUSE a constant.
+
+2000-11-10  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* rematein: Enable dump of Author objects (was the useless silly
+	message)
+
+	* Two (temporary) global variables introduced:
+	$CPAN::Tarzip::BUGHUNTING enables naughty code that may help track
+	some bugs in Archive::Tar (already reported to SRZ). And
+	$CPAN::Shell::ADVANCED_QUERY turns on a form of the query like
+	    C<m userid=RFOLEY> or
+	    C<m userid=~FOL> or
+	    C<d cpan_userid=RFOLEY>
+
+	But this syntax is highly experimental and WILL change, do not
+	rely on it.
+	
+2000-11-09  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Module::userid: change to mean either CPAN_USERID from
+	02modules or userid from 03modlist. Up to now it only meant the
+	latter. As both are always identical, we could save some space by
+	renaming CPAN_USERID to userid. --> Todo
+
+2000-11-08  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Complete::cpl: Make completion work for locally installed
+	bundles on the first try, not just the second.
+
+	* CPAN::Complete::cpl: Make completion for authors work even when
+	lowercase was typed in so far.
+
+	* releasing as 1.58_90
+
+	* CPAN::Module::name: was an alias for &cpan_file. That made the m
+	command slow without any visible advantage. C<m /html-tree/> used
+	to find the modules in the distribution HTML-Tree-XXX and now
+	doesn't anymore. But this is misfeature as we have both <d
+	/html-tree/> and <i /html-tree/> for that.
+
+	* cpan_file: Fixed a bug that could instantiate an empty Author
+	object.
+
+2000-11-07  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* format_result: Add a summary line at the end how many items in
+	the set.
+
+	* print_ornamented: Moved the special-case for fullname to
+	print-ornamented to be prepared for other UTF-8 fields besides
+	fullname (Try with C<m Sub::Curry>)
+
+2000-11-06  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Released as 1.58_57
+
+	* CPAN::Shell::ls: I believe, ls is now fully functional, but it
+	still needs some work on PAUSE to be perceived as bugfree. Thu
+	left undocumented (but it's already useful as it is, even
+	completion works; if you're interested: give it only authors as
+	arguments).
+
+	* CPAN::shell: Detect parse errors when Text::ParseWords fails
+	without die()ing, like in C<d Documentum's>.
+
+	* CPAN::Distribution::normalize: Try A/AC/ACALPINI/foo when the
+	user says ACALPINI/foo. I have only tested for the C<rematein>
+	family and the C<d> command so far. Need to find all places where
+	the normalization is needed.
+
+	* CPAN::Module::as_string: improved manpage parsing on files with
+	CRLF in them.
+
+2000-11-04  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Releasing as 1.58_56.
+
+	* CPAN::Shell::local_bundles: Did not discover local bundle files
+	if they were nested. Thanks to Ask B. Hansen for the report.
+
+	* CPAN::Shell::ls: Started work on an ls command. Left
+	undocumented because not yet finished. Needs mtime in CHECKSUMS
+	file.
+
+	* localize: Improved messaging when we try to download a
+	compressed file instead of an uncompressed.
+
+	* o conf: Made C<o conf -Module> to mean remove Module debugging
+	from the current debugging settings. Handy when you turn on "all"
+	and discover that Module is too noisy.
+
+2000-10-29  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* FAQ about readline: Thanks to Joseph Kewish
+	<jkewish@thedrag.com> who knew the correct answer.
+
+2000-10-28  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* untar: again change preference to tag+gzip to hunt down a bug in
+	Archive::Tar.
+
+	* Admin's register: Forgive when URI::Escape isn't installed yet
+	and let it be installed while we're running.
+
+2000-10-27  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Releasing snapshot as 1.58_55.
+
+	* CPAN::Admin::register: do not run a get if the command line
+	already contains more than one arguments.
+
+2000-10-26  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Added documentation for CPAN::shell and term_is_latin.
+
+	* CPAN::Author::fullname: convert to latin1 if
+	$CPAN::Config->{term_is_latin} is set to true.
+
+	* CPAN::Module::as_glimpse and CPAN::Shell::_u_r_common: enabled
+	coloring of module names that are already registered in the module
+	list. This feature bloat will have to go away in a future version,
+	but for a while it might prove useful. The diffs between RCS 1.361
+	and 1.362 should then be applied reversed. The feature bloat is
+	only visible when the global $CPAN::Shell::COLOR_REGISTERED is
+	set, no visible changes are made otherwise.
+
+	* Added CPAN::Admin in an extra file. The subclass is for CPAN
+	admins only. For others it is an instructive programming example.
+	I consider the programming environment still alpha and need
+	feedback on its usefulness. E.g. I consider it ugly that
+	CPAN::Shell::expand and CPAN::instance have such a B<slightly>
+	different interface. I hate it that testing C<$m->{RO}{something}>
+	creates the RO slot. I'm unsure what one could make easier when
+	expand() returns a list of objects instead of a single object.
+
+	* cpl: made CPAN::Complete::cpl more flexible by assigning all
+	commands to the global @COMMANDS and offering a fallback for the
+	second word to modules and bundles when an unknown command is
+	entered. CPAN::Admin takes advantage of this feature.
+
+2000-10-25  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* shell: The C<$term||=> change of 2000-10-20 broke the
+	re-detection of ReadLine for fresh installations. Fixed that again
+	so that both ways are possible: disposing the Stub interface and
+	re-using an interface that is better than Stub.
+
+2000-10-21  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::shell: Now takes two arguments, one is the prompt, the
+	second is the default initial command line.
+
+	* Released this snapshot as 1.58_51
+
+	* hosthard: applied a patch by Michael Dean
+	<sysmwd@blackhole.detir.qld.gov.au> to support wget.
+
+2000-10-20  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Distribution::containsmods: Did not return a value, now
+	returns the contained modules
+
+	* CPAN::Distribution::get: chdir back to initial CWD
+
+	* CPAN::anycwd: new routine replaces all occurrences of replicated
+	two-line code
+
+	* shell: chdir-ing back to initial directory at end of CPAN::shell
+
+	* CPAN::exists: added a config loader because everything depends
+	on it. Will have to identify other places that need it.
+
+	* shell: Assignment of a readline interface to term now is a "||="
+	rather than a "=" in case somebody calls shell multiple times.
+
+	* Moved the call to read_metadata_cache from shell to
+	CPAN::Index::reload so that (1) it isn't called so early and (2)
+	programmers can enjoy its availability too.
+
+	* CPAN::Config::commit: die when you can't write the config file.
+	We did only warn, but it is more frustrating to repeatedly get the
+	same questions asked than to get at least a good error message.
+	Will have to catch some error conditions earlier.
+
+2000-10-18  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Module::as_string: up to now the MANPAGE attribute was
+	only generated for installed modules. Now we try to read the
+	manpage headline if a get has been issued so that a build_dir
+	exists. This is helpful for exploring CPAN without installing
+	anything, e.g. when you have no or only slow access to a WAIT
+	server.
+
+	* Releasing as 1.58
+
+2000-10-15  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* FAQ: two new FAQ items added: autobundle and readline
+
+2000-10-07  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Setting Version to 1.57_68RC
+
+	* POD: numbering FAQ items; rewording of FAQ item 6 about bundles;
+	introduced FAQ item 7 about CPAN::Site.
+
+	* CPAN::FirstTime::init: Making cache_metadata default to 1.
+
+	* missing_config_data: Making cache_metadata a reason to rerun
+	configuration.
+
+2000-09-29  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::DESTROY: Protected the call to $gz->gzclose with an if
+	defined $gz. Thanks to abigail for reporting the bug, apologies
+	that I'm also not sure if this fixes the cause, or just the
+	sympton.
+
+	* has_inst: 2nd warning for not having installed Net::FTP
+	silencified with a global (Thanks to Anno Siegel for the
+	suggestion)
+
+2000-09-16  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* 1.57_67 is a release candidate.
+
+	* FirstTime: rewording of the intro for the cache_metadata feature
+	from experimental to beta. Leaving default to off. As it is still
+	turned off, I do not add the feature to the "necessary" features
+	in sub missing_config_data. Will do so when default changes to on.
+
+	* untar: for running the pipe, the external programs gzip and tar
+	are OK to use but for a pure uncompress I prefer to use our own
+	method gunzip for maximum code reuse (fallback to external gzip is
+	there anyway) and less use of system().
+
+	* hosthard: after Jost has approved that the code now is much more
+	defensive against the install-an-inexistent-distribution errors,
+	now the funkyftp programs are disallowed to process C<file> URLs
+	at all.
+
+2000-09-12  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* get: userid "anon" if cpan_userid does not provide one.
+
+	* 1.57_66 for the sole purpose of testing the error provoked by
+	the old lynx version. Next version will disable lynx for file:
+	URLs and thus will doubly guard against the bug.
+
+	* untar and gtest: enabled gtest with Compress::Zlib again, now
+	with a test if the file size and buffer size are equal. In that
+	case gtest returns false. untar now also uses gtest ahead of
+	decompression to catch the error condition provoked by
+
+          DB<5> x system "echo -n | /bin/tar xvf -"
+        0  0
+
+	The fact that tar returns TRUE on zero byte input could lead us to
+	believe that we were doing a successful untar while in reality we
+	had an uncompressed file that was completely bogus.
+
+	Once again a big thank you to Jost Krieger who discovered this bug
+	by feeding an inexistent distribution name to install() while he
+	had an old version of lynx installed that did not discover the
+	mistake and created the file as textfile containing an error
+	message.
+
+2000-09-11  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* gtest: disabled Compress::Zlib because it seems to offer no
+	method to test if a file is compressed or not. If a file was not
+	compressed, it happily treats it "as expected" setting no error. I
+	was so sure that I tested this when it was introduced. We really
+	need a test harness.
+
+	* get: New instance variable had_no_makefile_pl
+
+	* get: New instance variable was_uncompressed to later use it for
+	heuristics if we're on the wrong track.
+
+	* If we write a Makefile.PL on our own, we now choose the NAME
+	parameter more carefully.
+
+	* Ask user if he wants to proceed if the CHECKSUM file does not
+	contain data about a downloded file.
+
+	* hosthard: Skip "file" URLs
+
+	* hosthardest: eliminated unused code for is_reachable
+
+2000-09-10  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Tarball 1.57_65 (63 and 64 were not uploaded because I found
+	errors during testing)
+
+	* Bundle::inst_file: cleanup
+
+	* unsat_prereq: decision to accept any installed version if
+	PREREQ_PM says 0 or "undef" or undef.
+
+	* follow_prereqs: broke this new method out of make because I want
+	to repeat it in test. Repeating the check in test has the
+	advantage that the user is reminded in time that still some prereq
+	is missing.
+
+2000-09-09  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Tarball 1.57_63.
+
+	* rd_modpacks: do not let bundles be both bundles and modules
+	anymore. Seems like memory bloat without any value.
+
+	* reload: $last_time was set too early to a new value. It seems to
+	have never manifested itself as a bug, but we now do the more
+	correct localizing of the newer timestamp until we have read all
+	three index files and then set the timestamp globally.
+
+	* reload and read_metadata_cache: extend the index protocol to
+	memory so that whenever a new protocol is introduced, the index
+	gets loaded into memory asap.
+
+	* instance vs set: moved the code that creates the RO pointer from
+	instance to set and commenting the set method to have this side
+	effect. This was the cause for a very difficult to diagnose bug.
+	Thanks to Jost Krieger for discovering wrong content in Metadata.
+
+2000-09-08  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* read_metadata_cache: More sanity checks.
+
+	* _u_r_common: Added informational message about the number of
+	matches in the database.
+
+	* checklock: Checking $fh for undef. Thanks to
+	Slaven Rezic for the report.
+
+2000-09-06  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* lib/CPAN.pm (expandany): Distributions always had the habit to
+	spring into existence, that means, people could say
+
+	    test A/AN/ANDK/CPAN-1.57_60.tar.gz
+
+	and got that thing downloaded if it existed on CPAN. Jost
+	discovered this was broken. Fixed by replacing an expand() by
+	instance() for distributions in expandany.
+
+2000-09-05  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* undelay: After a jumpqueue we must not continue because success
+	is unlikely. We set $self->{later} and the queuerunner calls
+	undelay.
+
+	* Bundle::inst_file: reviewed the code after Jost pointed out that
+	it was suspectly formatted. Re-enabled the newer, better code that
+	allows for multi-level Bundle package names.
+
+	* Distribution::install: improved wording for the case where make
+	failed (Thanks To Jost Krieger for spotting)
+
+	* Bundle::as_string: CONTAINS was rendered as ARRAY(...)
+
+	* expandany: added a scan for bundles as one could not install
+	bundles immediately after program start but only after a "b"
+	command (Thanks to Jost Krieger for the bugreport)
+
+	* color_cmd_tmps: protection against deep recursion with a panic
+	message.
+
+	* expand: temporary introduced the "=" hack to eval code on the
+	command line repeatedly. Now disabled again to prevent surprise.
+	But as a reminder, I did run this command successfully before
+	disabling:
+
+	cpan> m '=length($self->id)==16 && substr($self->id,12,2) eq "::"'
+	Module          Bundle::HTML::EP (N/A)
+	Module	        Games::Cards::Tk (A/AK/AKARGER/Games-Cards-1.45.tar.gz)
+	Module          Games::Worms::PS (S/SB/SBURKE/Games-Worms-0.61.tar.gz)
+	Module          Games::Worms::Tk (S/SB/SBURKE/Games-Worms-0.61.tar.gz)
+	Module          Lingua::Stem::En (S/SN/SNOWHARE/Lingua-Stem-0.40.tar.gz)
+
+	* color_cmd_tmps: we're now coloring all objects when they enter
+	the queue and we uncolor them when a command is finished. We just
+	need a hook now to check if we really uncolored them all. What
+	should the hook be? i ="$self->{incommandcolor}>0"
+
+2000-09-04  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* color_cmd_tmps: rename the method reset_badtestcnt to
+	color_cmd_tmps because it turns out to be the right place to reset
+	sponsored_mods and maybe install_failed too, and if we mark them
+	as dirty when used and as clean when reset, we might even succeed
+	to have a tidy kitchen.
+
+	* untar: backed out the preference towards Archive::Tar. It seems
+	from reports I get and one hiccups I witnessed myself that
+	Archive::Tar is not stable (sorry, no bugreport available). With
+	the current state of CPAN.pm we cannot afford the additional risk
+	from an external source.
+
+	* Queue: backed out the change from string based queue to object
+	based queue. I made some mistakes during transition and everything
+	stopped working. This seemed the easiest way out.
+
+	* reset_testcnt: introduced attribute badtestcnt for Modules,
+	Bundles, and Distributions and method reset_badtestcnt to get rid
+	of that counter before and after a command. During the command we
+	inc the counter on unsuccessful make test commands. But we do not
+	reset unknown dependencies. During 'make test' we up this counter
+	if test fails and consequently do not repeat the testing. This
+	should now safe much time if, say LWP tests fail and we have all
+	of WWW::RobotRules, File::Listing, LWP, HTTP::Negotiate,
+	HTML::Form, and LWP::Simple in a Bundle or reach the stuff via a
+	dependency. Former versions would have repeated the testing ad
+	nauseam. We now refuse on the second occasion and the user may be
+	required to run something to finish building.
+
+	* prereq_pm: split of method needs_prereq into unsat_prereq_pm and
+	prereq_pm and letting the prereq_pm be stored in the object
+
+	* cpl: added readme and dump to the list of supported keywords for
+	completion
+
+	* POD: documented the dump command in the debugging section of the
+	manpage. Simplified the debugging section.
+
+	* changed queue to work with objects instead of object IDs
+	making it more natural to deal with them. Having the string
+	representation there bit me several times in the past. At the same
+	time shuffled some code from the queue-running loop to the
+	queue-constructing loop thus catching errors before starting to
+	work on the queue.
+
+	* renamed dotdot_onreload to paintdots_onreload. Changed $redef
+	from global to lexical.
+
+	* lib/CPAN.pm (dump): made dump more userfriendly by adding a
+	print statement, it is now a regular command to type C<dump
+	Net::FTP>. But still left undocumented to augment comments from
+	those who read the ChangeLog (That's you:)
+
+2000-09-03  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* heavy re-structuring of Metadata in memory with high potential
+	for breakage. All metadata are now split into a readonly and a
+	read-write part and all objects have a pointer to the readonly
+	part. The Metadata cache logic stores only the readonly part, so
+	that no session-specific data will ever be found again in a future
+	session.
+
+	* AUTOLOAD: removed the autoloader support that was never used and
+	seems not very intersting anymore with today's hardware. RCS: 1.325
+
+	* removed all the %vd comments.
+
+	* shortened all lines longer than 80 characters to make future
+	patches better readable.
+
+	* read_metadata_cache: Introduced protocol version number for
+	Metadata.
+
+	* removing a 'no strict' around the shell loop I do not recall the
+	reason of.
+
+	* lib/CPAN.pm: Folding two occurrances of use vars into one.
+
+2000-09-01  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* lib/CPAN.pm (readable): After release spotted en error in the
+	FAQ about not being root. Improved it a little, added another FAQ
+	and gave it the VERSION 1.57_57.
+
+	* Releasing as 1.57_56 as candidate for 5.7.0
+
+	* missing_config_data and FirstTime: declared cache_metadata as
+	not yet stable enough to turn it on per default. The reason is
+	that I want the official external data from CPAN and the generated
+	internal data from the current session clearly separated and this
+	will take another working session that I cannot provide before
+	5.7.0.
+
+2000-08-31  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* POD: Added two FAQs about not being root and about the look
+	command.
+
+	* Replaced all backticks that were misused in documentation or
+	dialogs as pretty left quotes by single ticks. I think it was
+	Markus Kuhn who said so.
+
+	* float2vv: added conversion of float to visible v-string for
+	comparisons. Added some tests too.
+
+	* MD5_check_file: Now die instead of print when the MD5 checksum
+	mismatches.
+
+	* untar and unzip: preferring Archive::Tar now that it works
+	again. Adding extra security check by testing for absolute path
+	and updir.
+
+	* unzip_me: made it symmetrical to untar_me and added a few Signal
+	checkers to both.
+
+	* hosteasy/hard/hardest: now checking for $Signal and giving up in
+	several places within the download loop. Thanks for the suggestion
+	to Johan Vromans. I'd be ready to ask a question where to continue
+	but it turns out to need careful wording because the loop is
+	deeply nested: method, host, and within the methods LWP/Net::FTP
+	or lynx/ncftpget/ncftp. Simple wording might cause more grief than
+	just giving up.
+
+	* localize: now setting $ENV for proxies if config has values for
+	them. Thanks for the bugreport to Johan Vromans.
+
+	* checklock: changed comment in the code
+
+2000-08-30  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Applied 2 doc patches by Elaine and Jarkko.
+
+	* Call to force now wants a first argument and this was not there.
+	This was the reason why force DIST didn't work. Thanks to Jost
+	Krieger for the bugreport.
+
+	* install /xyz/ always needlessly went down the wrong path of
+	trying to download "/xyz/". We're now catching this mistake
+	earlier. Thanks to Jost Krieger for he idea.
+
+	* changed the messages on a failure of make in test and install
+	from "Oops" to something much more certifying. Thanks to Jost
+	Krieger for the idea.
+
+	* in vcmp short circuit for equality for speedup. Thanks to Jost
+	Krieger for the idea.
+
+2000-08-27  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Releasing as 1.57_53 without enough testing in the hope that I
+	can test more the next days and maybe others can test a little.
+
+	* CPAN::Distribution did not handle the force_update attribute
+	correctly: it was never reset to false. Tried to fix that at the
+	end of sub install and by limiting the scope of the force_update
+	attribute to install, not to make anymore. Thirdly, the places
+	where we leave the make, test or install by means of the signal
+	handler, we also reset force.
+
+	* Added a test for CPAN::Version::vcmp.
+
+	* lib/CPAN/FirstTime.pm (init): corrected spelling (Thanks to Ask
+	B. Hansen)
+
+2000-08-25  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* rd_modpacks: track deletes on every reread, otherwise the
+	metadatacache won't forget a thing ever.
+
+	* Fixing Distribution->clean which was broken in that it set
+	"force_update" leading to a mess when the user later tried to
+	build this dist again. Thanks to Jost Krieger for spotting this.
+
+	* Minor cleanups
+
+	* CPAN::Version::readable now picks the head of the string
+
+	* Storable::store => nstore. Thanks to Tim Jenness for the hint
+
+2000-08-21  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Detected code duplication in CPAN::Shell::o and
+	CPAN::Config::edit. Moved everything to CPAN::Config::prettyprint
+
+	* Introduced package CPAN::Version which fixed and extended the
+	support for v-strings. Old perls should not be affected at all and
+	new perls should be protected against broken displays. New perls
+	should also "do the right thing" as soon as the index files write
+	"v1.0" for the literal v1.0 . Seems now feature-complete to me.
+	Next thing to do is upgrade PAUSE and see what happens.
+
+	* Applied a patch by Slaven Rezic to allow cacheing of the
+	metadata from the index files via Storable.
+
+2000-08-16  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Fixed numerous chdir that were not checked for success.
+
+2000-08-13  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Thought about v-strings and their impact. Marked the relevant
+	places in the code with "%vd" and applied some more or less simple
+	changes to try a few things out. See Todo for a few memo
+	sentences. At least diagnostics.pm is now reported fine as 1.0
+	again.
+
+	* Added support for Archive::Zip. The less external programs
+	needed the better (?)
+
+2000-08-11  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Changed all occurrences of $ in regular expressions to (?!\n)\Z
+	which is a 5.004-save equivalent of \z. Thus patch 5406 to the
+	perl core is re-integrated after it had been thrown out on
+	2000-03-25.
+
+	* isa_perl logic was duplicated in CPAN::Distribution::isa_perl
+	and in CPAN::Shell::_binary_extensions. Made the latter use the
+	former. Also extended the Distribution object with CPAN_COMMENT
+	that can be set from the "02..." index file. If that comment
+	matches /isa_perl\(.+?\)/, then it is a perl and $1 is the
+	version.
+
+2000-08-01  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Quick bugfix release 1.56. Thanks to Bruce Barnett <barnett
+	birch.crd.ge.com> who showed me that I had forgotten debugging
+	statements in the CPAN::Module::inst_version method reminding me
+	also that unpatched 5.6.0 still produces warnings where it
+	shouldn't. A quick fix is in and I release that as 1.56
+	immediately.
+
+2000-07-30  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Made completion output for a,b,d,m sorted. I have no idea when
+	this sorting was lost or if it ever was there.
+
+	* Set version number to 1.55 and going to release today or
+	tomorrow after testing.
+
+	* o conf was not prepared for hash refs.
+
+	* Fixed propagation of error report during Bundle installation.
+	Until now recursive bundles reported each bundle's faiures
+	separately. Now callers in addition report what called bundles
+	reported. This still doesn't seem perfect because the report can
+	come too early but at least it is better now than it was and if
+	one reruns the install command on a bundle, the report will be
+	correct on the second run.
+
+2000-07-29  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Applied a patch by Daniel Muiño <dmuino@afip.gov.ar> that was
+	submitted to p5p where a my($msg) declaration was conditional.
+
+	* Applied a patch by Anno Siegel who encountered a rarely seen bug
+	in the download logic wrt. gzipped vs. not gzipped downloads. He
+	cleaned up the variable names too in that area and I cleaned some
+	more variable names after him. I believe, the variable names there
+	were really inappropriate/misleading.
+
+	* Following a suggestion by Michael G. Schwern, I made "ask" the
+	default for prerequisites_policy. The old default of "follow"
+	seemed to intimidate some new users, he said, and I agree, the
+	default should be as little intrusive as possible while still
+	being useful. "ask" seems the right choice for a first time user.
+
+2000-06-23  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Replaced the undocumented old semantics of
+	C<$CPAN::Dontload{"Compress::Zlib"} = undef;> in favor of the more
+	natural C<$CPAN::Config->{"dontload_hash"}{"Compress::Zlib"} = 1;>
+	and documented that.
+
+	* Eliminated all occurrances of E<39> in the POD because
+	pod2html has a bug that mistreats them and we do not really
+	need them. Thanks to Daniel S. Lewart for reporting his.
+
+2000-06-18  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* The "a" command now always converts its arguments to uppercase.
+
+2000-06-17  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Introduced has_usable which is pickier than has_inst. Thanks to
+	a report by Ian Phillipps who reported the Net::FTP/Net::Config
+	connection: e.g. upgrading the processor deprecates Net::Config
+	but not Net::FTP.
+
+	* Applied a patch by Ben Tilly that changed the exception of
+	isa_perl in CPAN::Distribution::make() from dying to warning so
+	that bundles can continue if they contain core modules.
+
+2000-04-15  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Thanks to "Magnus Ullberg" <mullberg@hotmail.com> who reported
+	that configuring lynx with arguments actually works, so I
+	documented it in the firewall section.
+
+2000-03-28  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Change ${DISTVNAME} to $(DISTVNAME) in the Makefile.PL because
+	nmake can't deal with the former. Thanks to David P. Mott
+	<dpmott@sep.com> for the report.
+
+2000-03-25  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Change all \z back to $ because \z is not in perl5.004_05.
+	Thanks to Paul Schinder <schinder@pobox.com> for the report.
+	Update: Later Ronald Kimball posted the better solution to P5P. He
+	said "'\z' is equivalent to '(?!\n)\Z' and '\Z(?!\n)', which
+	should work under 5.004."
+
+2000-03-22  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Both Andrew Speer <andrew.speer@isolutions.com.au> and Michael
+	G. Schwern <schwern@pobox.com> sent me a patch to the effect that
+	version numbers in PREREQ_PM are honoured. Till now we installed
+	the newest version for all PREREQ_PMs. I applied a mishmash of the
+	two patches.
+
+2000-03-20  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Found bug in the changes made on 03-14, the return value of
+	&CPAN::Config::edit must be true.
+
+2000-03-17  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* lib/CPAN.pm: no lib "."; since we do a lot of chdirs *and* do a
+	lot of demand-loading, we need to prune the current directory. I
+	wonder how everything could work so smoothely with the default
+	INC path.
+
+2000-03-14  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Editing the $CPAN::Config hashref had always tried to keep the
+	type of hash values but that was errorprone. Switched to matching
+	/list\z/ in the key instead.
+
+	* Changing the urllist now triggers resetting of Thesite and
+	Themethod. Maybe this needs a more general solution that resets
+	any cache of any variable, but for testing the effect, I start
+	with these two.
+
+2000-03-11  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Added an FAQ section to the manpage. First 2 Fs deal with
+	UNINST=1.
+
+2000-03-10  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Updated the isa_perl checks to match 5.6.0 style.
+
+	* The 02modules... file is now verified against its Line-Count
+	header. The other index files need new headers to verify them.
+
+	* Without any net access we did not make it through the
+	configuration dialog. Fixed now.
+
+	* Apply patches 4416, 4419, 5406 and 5409 from perl-5.6.0
+	candidate.
+
+2000-01-08  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Releasing 1.52 which is a pure bugfix release. New functionality
+	is there but not used or not documented. Should be very stable.
+
+2000-01-03  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Added a CPAN::Distribution::containsmods method that lists all
+	modules within a distribution.
+
+	* reload index now removes the whole old index. No, wait a minute,
+	that's stupid. We want to keep session info. This is just a
+	temporary measure to improve debugging. What we need is "wipe
+	index" or some such and we need it for debugging only. [Backed out]
+
+	* Text::Wrapping output of "o debug".
+
+	* Fixed an uninitialized warning in CPAN::Shell::expand()
+
+	* Protected call to close() in DESTROY with "if defined".
+
+	* Allow "#" comments in a bundle definition section.
+
+	* Text::Wrapping bundle install summary.
+
+2000-01-02  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Overhauled the help page that gets output on "h", documented
+	"get", undocumented "install r", it never worked (Thanks to Peder
+	Stray <pederst@ifi.uio.no> for spotting)
+
+	* ncftpget made to work again by changing directory before
+	downloading (spotted aeons ago by Jarkko Hietaniemi)
+
+1999-12-31  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Applied a patch by Paul Schinder <schinder@pobox.com> which
+	corrects the computation of disk usage on the Mac.
+
+1999-12-29  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Increased 30 to 60 in FirstTime where we "protect" against old
+	MIRRORED.BY files and protect against endless loop if MIRRORED.BY
+	remains older. Thanks for spotting the bug to James P. Goltz
+	<goltz@nfr.net>.
+	
+	* Applied patch from Doug MacEachern that implements cvs_import
+	without documentation.
+
+1999-10-26  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Joe Schell <jschell@peakss.com> sent me a fix that disabled
+	processing of bundles on NT.
+
+1999-10-15  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Fixed a typo reported by Stas Bekman <sbekman@iil.intel.com>
+
+1999-10-01  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Added a posting by Larry as a comment to rethink use of
+	$SIG{__DIE__}
+
+1999-08-01  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Applied a patch by 1999-06-13 Adrian Aichner
+	<aichner@ecf.teradyne.com>
+        (hosthardest): Initialize $netrcfile with $netrc->netrc.
+        (untar): Attempt piping gzip output to tar irregardless of
+	$OSNAME. Run commands separately in case of error.
+
+	* Applied a patch from Ilya Zakharevich <ilya@math.ohio-state.edu>
+	for unbuffering STDOUT and STDERR to get sane behavior in pipes.
+
+1999-07-30  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Fixed a floating point issue that came up with DBD::ADO. See
+	stringify comment in CPAN::Module::inst_version. Thanks to Lupe
+	Christoph <lupe@lupe-christoph.de> and Michael G. Schwern
+	<schwern@pobox.com> for the reports and Tim Bunce
+	<Tim.Bunce@ig.co.uk> for the suggestion how to fix.
+
+	* Fixed my email address in the manpage
+
+1999-07-28  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* CPAN::Nox was broken, probably since 5.005's new AUTOLOAD
+	behavior. Thanks to Marc Lehmann <pcg@goof.com> for the report.
+
+1999-05-23  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* The force pragma no longer removes its record of prerequisites
+	that it has already dealt with. This removes a potential for
+	infinite loops when force is in effect.
+
+	* Added a CPAN::InfoObj::dump method that can be used like so:
+	! print expand("Distribution","JWIED/DBD-CSV-0.1021.tar.gz")->dump
+	or
+	! print expand("Module","DBD::CSV")->dump
+	Not particularly userfriendly, thus left undocumented.
+
+	* Added a check if Makefile.PL really wrote a Makefile.
+
+1999-05-22  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Applied another patch by Ilya for return value of gzreadline
+	with regard to -1: <19990522144647.A15778@monk.mps.ohio-state.edu>
+
+	* Applied Ilya's patch for MD5_check_file for READ returning -1.
+
+1999-05-08  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Improved error message if cpan_home can't be created (bug report
+	by Jarkko Hietaniemi <jhi@iki.fi>)
+
+1999-04-19  Andreas J. Koenig  <andreas.koenig@anima.de>
+
+	* Added a note about the correct format of file URLs
+
+	* Added documentation to CPAN.pm for how to write cronjobs that
+	watch The CPAN (thanks to Brian Moseley <ix@cp.net> for asking)
+
+	* FirstTime: initialize urllist to be an empty array, because
+	otherwise it could accidentally become a string
+
+	* Renamed Changes file to ChangeLog and switched format to
+	emacsens ChangeLog format
+
+
+	Local Variables:
+	coding:utf-8
+	End:

@@ -1021,6 +1021,8 @@ lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
+lib/CPAN/ChangeLog		Changes of CPAN
+lib/CPAN/README			README of CPAN
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/t/loadme.t		See if CPAN the module works
@@ -1350,12 +1352,14 @@ lib/Net/Ping/t/120_udp_inst.t	Ping Net::Ping
 lib/Net/Ping/t/130_tcp_inst.t	Ping Net::Ping
 lib/Net/Ping/t/140_stream_inst.t	Ping Net::Ping
 lib/Net/Ping/t/150_syn_inst.t	Ping Net::Ping
+lib/Net/Ping/t/190_alarm.t	Ping Net::Ping
 lib/Net/Ping/t/200_ping_tcp.t	Ping Net::Ping
 lib/Net/Ping/t/250_ping_hires.t	Ping Net::Ping
 lib/Net/Ping/t/300_ping_stream.t	Ping Net::Ping
 lib/Net/Ping/t/400_ping_syn.t	Ping Net::Ping
 lib/Net/Ping/t/410_syn_host.t	Ping Net::Ping
 lib/Net/Ping/t/450_service.t	Ping Net::Ping
+lib/Net/Ping/t/500_ping_icmp.t	Ping Net::Ping
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works
@@ -2724,6 +2728,7 @@ utfebcdic.h			Unicode on EBCDIC (UTF-EBCDIC, tr16) header
 util.c				Utility routines
 util.h				Dummy header
 utils.lst			Lists utilities bundled with Perl
+utils/cpan			easily interact with CPAN from the command line
 utils/c2ph.PL			program to translate dbx stabs to perl
 utils/dprofpp.PL		Perl code profile post-processor
 utils/enc2xs.PL			Encode module generator

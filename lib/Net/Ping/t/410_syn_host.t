@@ -57,7 +57,13 @@ plan tests => ((keys %{ $webs }) * 2 + 3);
 # Everything loaded fine
 ok 1;
 
-alarm(50);
+my $can_alarm = eval {alarm 0; 1;};
+
+sub Alarm {
+  alarm(shift) if $can_alarm;
+}
+
+Alarm(50);
 $SIG{ALRM} = sub {
   ok 0;
   die "TIMED OUT!";
@@ -75,13 +81,13 @@ ok ($p -> {port_num} = getservbyname("http", "tcp"));
 foreach my $host (keys %{ $webs }) {
   # ping() does dns resolution and
   # only sends the SYN at this point
-  alarm(50); # (Plenty for a DNS lookup)
+  Alarm(50); # (Plenty for a DNS lookup)
   if (!ok($p -> ping($host))) {
     print STDERR "CANNOT RESOLVE $host $p->{bad}->{$host}\n";
   }
 }
 
-alarm(20);
+Alarm(20);
 foreach my $host (sort keys %{ $webs }) {
   my $on = $p->ack($host);
   if (!ok (($on && $webs->{$host}) ||
@@ -89,11 +95,11 @@ foreach my $host (sort keys %{ $webs }) {
     if ($on) {
       print STDERR "SUPPOSED TO BE DOWN: http://$host/\n";
     } else {
-      print STDERR "DOWN: http://$host/ $p->{bad}->{$host}\n";
+      print STDERR "DOWN: http://$host/ [",($p->{bad}->{$host} || ""),"]\n";
     }
   }
   delete $webs->{$host};
-  alarm(20);
+  Alarm(20);
 }
 
-alarm(0);
+Alarm(0);
