@@ -2116,6 +2116,10 @@ i_sysun (i_sysun.U):
 	to the C program that it should include <sys/un.h> to get UNIX
 	domain socket definitions.
 
+i_sysutsname (i_sysutsname.U):
+	This variable conditionally defines the I_SYSUTSNAME symbol,
+	and indicates whether a C program should include <sys/utsname.h>.
+
 i_sysvfs (i_sysvfs.U):
 	This variable conditionally defines the I_SYSVFS symbol,
 	and indicates whether a C program should include <sys/vfs.h>.

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 15 03:52:41 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Feb 16 01:07:15 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -666,6 +666,7 @@ i_systimes=''
 i_systypes=''
 i_sysuio=''
 i_sysun=''
+i_sysutsname=''
 i_sysvfs=''
 i_syswait=''
 i_sgtty=''
@@ -14125,6 +14126,11 @@ eval $inhdr
 set sys/un.h i_sysun
 eval $inhdr
 
+
+: see if this is a sys/utsname.h system
+set sys/utsname.h i_sysutsname
+eval $inhdr
+
 : see if this is a syswait system
 set sys/wait.h i_syswait
 eval $inhdr
@@ -14959,6 +14965,7 @@ i_systimes='$i_systimes'
 i_systypes='$i_systypes'
 i_sysuio='$i_sysuio'
 i_sysun='$i_sysun'
+i_sysutsname='$i_sysutsname'
 i_sysvfs='$i_sysvfs'
 i_syswait='$i_syswait'
 i_termio='$i_termio'

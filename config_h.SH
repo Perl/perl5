@@ -2975,5 +2975,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
 
+/* I_SYS_UTSNAME:
+ *	This symbol, if defined, indicates that <sys/utsname.h> exists and
+ *	should be included.
+ */
+#$i_sysutsname	I_SYS_UTSNAME		/**/
+
 #endif
 !GROK!THIS!
