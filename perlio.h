@@ -327,6 +327,8 @@ extern int	PerlIO_apply_layers	(pTHX_ PerlIO *f, const char *mode, const char *n
 extern int	PerlIO_binmode		(pTHX_ PerlIO *f, int iotype, int omode, const char *names);
 #endif
 
+extern void PerlIO_destruct(pTHX);
+
 #ifndef PERLIO_IS_STDIO
 
 extern void PerlIO_cleanup(void);
