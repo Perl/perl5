@@ -459,10 +459,6 @@ be used for installing those add-on modules and scripts.
 By default, ExtUtils::MakeMaker will install architecture-independent
 modules into $sitelib and architecture-dependent modules into $sitearch.
 
-NOTE:  As of 5.6.0, ExtUtils::MakeMaker will use $sitelib and $sitearch,
-but will not use the other site-specific directories.  Volunteers to
-fix this are needed.
-
 =item Directories for vendor-supplied add-on files
 
 Lastly, if you are building a binary distribution of perl for
@@ -514,9 +510,6 @@ This would have the effect of setting the following:
 Note how in this example, the vendor-supplied directories are in the
 /usr hierarchy, while the directories reserved for the end-user are in
 the /usr/local hierarchy.
-
-NOTE:  As of 5.6.0, ExtUtils::MakeMaker does not use these directories.
-Volunteers to fix this are needed.
 
 The entire installed library hierarchy is installed in locations with
 version numbers, keeping the installations of different versions distinct.
@@ -1027,6 +1020,9 @@ versions of perl under L<Building a shared libperl.so Perl library>.
 
 =head2 Extensions
 
+Perl ships with a number of standard extensions.  These are contained
+in the ext/ subdirectory.
+
 By default, Configure will offer to build every extension which appears
 to be supported.  For example, Configure will offer to build GDBM_File
 only if it is able to find the gdbm library.  (See examples below.)
@@ -1094,7 +1090,7 @@ adding libgdbm) Configure will still offer your old choices of extensions
 for the default answer, but it will also point out the discrepancy to
 you.
 
-Finally, if you have dynamic loading (most modern Unix systems do)
+Finally, if you have dynamic loading (most modern systems do)
 remember that these extensions do not increase the size of your perl
 executable, nor do they impact start-up time, so you probably might as
 well build all the ones that will work on your system.
@@ -1377,13 +1373,13 @@ libgdbm under HP-UX 11.
 
 =item Porting information
 
-Specific information for the OS/2, Plan9, VMS and Win32 ports is in the
+Specific information for the OS/2, Plan 9, VMS and Win32 ports is in the
 corresponding README files and subdirectories.  Additional information,
 including a glossary of all those config.sh variables, is in the Porting
 subdirectory.  Especially Porting/Glossary should come in handy.
 
 Ports for other systems may also be available.  You should check out
-http://www.perl.com/CPAN/ports for current information on ports to
+http://www.cpan.org/ports for current information on ports to
 various other operating systems.
 
 If you plan to port Perl to a new architecture study carefully the
@@ -2030,7 +2026,7 @@ you may safely do so without disturbing the 5.005 installation.
 
 See your installed copy of the perllocal.pod file for a (possibly
 incomplete) list of locally installed modules.  Note that you want
-perllocal.pod not perllocale.pod for installed module information.
+perllocal.pod, not perllocale.pod, for installed module information.
 
 =head1 Coexistence with perl4
 
