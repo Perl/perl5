@@ -713,9 +713,14 @@ int usleep(unsigned int);
 #endif
 
 /* sockatmark() is so new (2001) that many places might have it hidden
- * behind some -D_BLAH_BLAH_SOURCE guard. */
+ * behind some -D_BLAH_BLAH_SOURCE guard.  The __THROW magic is required
+ * e.g. in Gentoo, see http://bugs.gentoo.org/show_bug.cgi?id=12605 */
 #if defined(HAS_SOCKATMARK) && !defined(HAS_SOCKATMARK_PROTO)
+# if defined(__THROW) && defined(__GLIBC__)
+int sockatmark(int) __THROW;
+# else
 int sockatmark(int);
+# endif
 #endif
 
 #ifdef SETERRNO
