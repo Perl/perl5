@@ -850,6 +850,7 @@ dARGS
     }
     else {
 	SV* sv = POPs;
+	char *s;
 	PUTBACK;
 	if (SvTYPE(sv) == SVt_PVGV) {
 	    tmpgv = (GV*)sv;
@@ -860,11 +861,12 @@ dARGS
 	    goto do_fstat;
 	}
 
+	s = SvPV(sv, na);
 	statgv = Nullgv;
-	sv_setpv(statname,SvPV(sv, na));
+	sv_setpv(statname, s);
 	laststype = OP_STAT;
-	laststatval = Stat(SvPV(sv, na),&statcache);
-	if (laststatval < 0 && dowarn && strchr(SvPV(sv, na), '\n'))
+	laststatval = Stat(s, &statcache);
+	if (laststatval < 0 && dowarn && strchr(s, '\n'))
 	    warn(warn_nl, "stat");
 	return laststatval;
     }
