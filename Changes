@@ -31,6 +31,259 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11180] By: jhi                                   on 2001/07/06  13:20:08
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 11179] By: jhi                                   on 2001/07/06  12:57:13
+        Log: Nit from Abhijit.
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[ 11178] By: jhi                                   on 2001/07/06  12:53:04
+        Log: Retract #11172.
+     Branch: perl
+	   ! t/op/method.t
+____________________________________________________________________________
+[ 11177] By: jhi                                   on 2001/07/06  12:44:51
+        Log: Subject: [PATCH lib/Cwd.pm] QNX patch extended for NTO
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Fri, 6 Jul 2001 09:39:57 -0400 (edt)
+             Message-Id: <200107061339.JAA12582@bottesini.harvard.edu>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 11176] By: jhi                                   on 2001/07/06  12:42:45
+        Log: Subject: [PATCH lib/Cwd.pm] QNX patch extended for NTO
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Fri, 6 Jul 2001 09:39:57 -0400 (edt)
+             Message-Id: <200107061339.JAA12582@bottesini.harvard.edu>
+     Branch: perl
+	   ! utf8.h
+____________________________________________________________________________
+[ 11175] By: jhi                                   on 2001/07/06  12:29:56
+        Log: Retract #11165 since Sarathy pointed out it'll not
+             work properly under threads, the problem should be
+             solved using "the savestack, either via SSNEW() or
+             using a newSVpv()+SAVEFREESV() combo."
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 11174] By: jhi                                   on 2001/07/06  12:27:31
+        Log: Retract #11125 since NI-S pointed out it'll not work in
+             cases where the extension has their own handcrafted INC
+             et alia.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 11173] By: jhi                                   on 2001/07/06  12:20:50
+        Log: Subject: RE: [PATCH] -I and MakeMaker again
+             From: "Konovalov, Vadim Vladimirovich (Vadim)" <vkonovalov@lucent.com>
+             Date: Fri, 6 Jul 2001 09:18:29 +0200
+             Message-ID: <E3FB32585BF1D411B9E900805FF51A0808C221@RU0022EXCH001U>
+     Branch: perl
+	   ! lib/ExtUtils/MM_NW5.pm lib/ExtUtils/MM_VMS.pm
+	   ! lib/ExtUtils/MM_Win32.pm
+____________________________________________________________________________
+[ 11172] By: jhi                                   on 2001/07/06  12:18:39
+        Log: (Retracted by #11178)
+             Subject: [PATCH t/op/method.t] SUPER:: strangeness
+             From: Piers Cawley <pdcawley@iterative-software.com>
+             Date: 06 Jul 2001 10:49:01 +0100
+             Message-ID: <m2ith6xu9e.fsf@despairon.bofh.org.uk>
+     Branch: perl
+	   ! t/op/method.t
+____________________________________________________________________________
+[ 11171] By: jhi                                   on 2001/07/06  01:38:55
+        Log: VOS README update from Paul Green.
+     Branch: perl
+	   ! README.vos
+____________________________________________________________________________
+[ 11170] By: jhi                                   on 2001/07/06  01:19:33
+        Log: Subject: [PATCH README.qnx hints/qnx.sh]
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Message-Id: <200107051755.NAA21422@bottesini.harvard.edu>
+             Date: Thu, 5 Jul 2001 13:55:11 -0400 (edt)
+     Branch: perl
+	   ! README.qnx hints/qnx.sh
+____________________________________________________________________________
+[ 11169] By: jhi                                   on 2001/07/06  01:17:43
+        Log: Subject: [PATCH] Doc patch for Tie::Hash
+             From: Artur Bergman <artur@contiller.se>
+             Date: Thu, 05 Jul 2001 22:51:18 +0200
+             Message-ID: <B76A9FE6.1F04%artur@contiller.se>
+     Branch: perl
+	   ! lib/Tie/Hash.pm
+____________________________________________________________________________
+[ 11168] By: jhi                                   on 2001/07/06  01:16:27
+        Log: Subject: [PATCH] perlfaq4.pod
+             From: "Liney, Dave" <dave.liney@gbr.conoco.com>
+             Message-ID: <1BB544A41666D311836C00902751FF6D01FD2D07@LONEX02>
+             Date: Thu, 5 Jul 2001 18:44:10 +0100 
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 11167] By: jhi                                   on 2001/07/06  01:14:41
+        Log: Subject: [PATCH B::Deparse] Make warnings handling more robust
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 5 Jul 2001 18:33:21 +0100
+             Message-ID: <20010705183321.A27345@robin.kitsite.com>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 11166] By: jhi                                   on 2001/07/06  01:11:50
+        Log: Subject: Re: [PATCH] mkdir() mode argument is missing initial 0
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Fri, 6 Jul 2001 01:26:32 +0530
+             Message-ID: <20010706012632.A28327@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! dump.c op.c op.h opcode.h opcode.pl pod/perldiag.pod pp.sym
+	   ! pp_proto.h t/lib/warnings/op t/lib/warnings/toke toke.c
+	   ! warnings.pl
+____________________________________________________________________________
+[ 11165] By: jhi                                   on 2001/07/06  00:19:26
+        Log: (Retracted by #11175)
+             Subject: [PATCH ext/POSIX/POSIX.pm] Re: sigaction.t under QNX
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Message-Id: <200107051734.NAA13375@bottesini.harvard.edu>
+             Date: Thu, 5 Jul 2001 13:34:51 -0400 (edt)
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 11164] By: jhi                                   on 2001/07/06  00:14:57
+        Log: Unterminated C< (noticed by Richard Hatch), and few other
+             small Unicode doc tweaks.
+     Branch: perl
+	   ! pod/perlretut.pod
+____________________________________________________________________________
+[ 11163] By: jhi                                   on 2001/07/05  19:33:34
+        Log: More flexible argument understanding; add charblocks() and
+             charscripts(); make charblock() and charscript() two-way;
+             add charinrange(); separate the $Unicode::UCD::VERSION and
+             the version of the Unicode by adding UnicodeVersion().
+     Branch: perl
+	   ! lib/Unicode/UCD.pm lib/Unicode/UCD.t
+____________________________________________________________________________
+[ 11162] By: jhi                                   on 2001/07/05  13:38:36
+        Log: Update Unicode::UCD on \p{In...}.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm
+____________________________________________________________________________
+[ 11161] By: jhi                                   on 2001/07/05  13:26:00
+        Log: Subject: Re: [PATCH lib/ExtUtils.t] Extra Files for QNX
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Thu, 5 Jul 2001 09:57:14 -0400 (edt)
+             Message-Id: <200107051357.JAA06285@bottesini.harvard.edu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 11160] By: jhi                                   on 2001/07/05  13:06:53
+        Log: POSIX-BC tweaks from Thomas Dorner.
+     Branch: perl
+	   ! hints/posix-bc.sh perlio.h
+____________________________________________________________________________
+[ 11159] By: jhi                                   on 2001/07/05  04:17:18
+        Log: Module updates for the delta.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11158] By: jhi                                   on 2001/07/05  03:45:19
+        Log: Subject: [PATCH ext/IO/lib/IO/t/io_sock.t] for QNX
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Message-Id: <200107050259.WAA06843@bottesini.harvard.edu>
+             Date: Wed, 4 Jul 2001 22:59:00 -0400 (edt)
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_sock.t
+____________________________________________________________________________
+[ 11157] By: jhi                                   on 2001/07/05  03:44:19
+        Log: Subject: [PATCH perldiag.pod] Quick fixes
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Wed, 4 Jul 2001 20:22:12 +0100
+             Message-ID: <20010704202212.A3690@deep-dark-truthful-mirror>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 11156] By: jhi                                   on 2001/07/05  03:43:28
+        Log: Subject: [PATCH perl@11099]Re: [ID 20010704.003] Taint mode breaks global match
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Wed, 4 Jul 2001 22:13:31 +0300
+             Message-ID: <15171.27355.895094.128142@ix.netsoft.ro>
+     Branch: perl
+	   ! op.c sv.c t/op/pos.t
+____________________________________________________________________________
+[ 11155] By: jhi                                   on 2001/07/05  03:40:24
+        Log: Subject: [PATCH] -I and MakeMaker again
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 4 Jul 2001 15:03:07 -0400
+             Message-ID: <20010704150307.I20340@blackrider>
+             
+             (and retract #11145)
+     Branch: perl
+	   ! ext/util/make_ext lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 11154] By: jhi                                   on 2001/07/05  03:32:43
+        Log: Subject: Re: PERFORCE change 11142 for review
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Wed, 4 Jul 2001 20:46:26 +0200
+             Message-Id: <200107041841.VAA25380@taas.iki.fi>
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 11153] By: jhi                                   on 2001/07/05  03:29:21
+        Log: Subject: Re: [PATCH 2 pl2pm.PL] (was Re: [PATCH pl2pm.PL] Make pl2pm be nice with 'strict' and 'warnings')
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Mon, 2 Jul 2001 20:45:53 +0100 (BST)
+             Message-ID: <Pine.LNX.4.33.0107022042570.8640-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! utils/pl2pm.PL
+____________________________________________________________________________
+[ 11152] By: gsar                                  on 2001/07/05  00:52:57
+        Log: fix the binary compatibility issue when building with/without
+             usemymalloc by exporting Perl_malloc() et al as simple wrappers
+             around the system functions (this allows most extensions built
+             using one mode to coexist with perls built in the other mode)
+             
+             XXX the Perl_mfree() wrapper might need to do return(free()) on
+             platforms where Free_t isn't "void"
+     Branch: perl
+	   ! embed.h embed.pl makedef.pl proto.h util.c
+____________________________________________________________________________
+[ 11151] By: gsar                                  on 2001/07/05  00:42:49
+        Log: perl built with USE_ITHREADS can deadlock during fork() or backticks
+             since it doesn't ensure threads other than the one calling fork()
+             aren't holding any locks; the fix is to use pthread_atfork() to
+             hold global locks
+             
+             building perl with -Dusemymalloc exacerbates the problem since
+             Perl_malloc() holds a mutex, and perl's exec() calls New()
+             
+             XXX the code in win32thread.h may be needed on platforms that have
+             no pthread_atfork()
+     Branch: perl
+	   ! perl.c thread.h win32/win32thread.h
+____________________________________________________________________________
+[ 11150] By: pudge                                 on 2001/07/04  20:07:54
+        Log: Integrate #11009 from maintperl.
+     Branch: maint-5.6/macperl
+	  !> lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[ 11149] By: pudge                                 on 2001/07/04  19:54:46
+        Log: Flexing my Perforce muscles.
+     Branch: maint-5.6/macperl
+	   ! README.macos
+____________________________________________________________________________
+[ 11148] By: jhi                                   on 2001/07/04  17:14:51
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 11147] By: jhi                                   on 2001/07/04  16:41:25
+        Log: Metaconfig unit change for #11146.
+     Branch: metaconfig/U/perl
+	   ! d_fcntl_can_lock.U
+____________________________________________________________________________
 [ 11146] By: jhi                                   on 2001/07/04  16:36:31
         Log: Somehow the #ifdefs of the added code (in #11093) made
              HP-UX to fail the fcntl locking test, without the ifdefs
@@ -337,10 +590,7 @@ ____________________________________________________________________________
 	   ! os2/os2.c
 ____________________________________________________________________________
 [ 11105] By: jhi                                   on 2001/07/02  19:17:27
-        Log: Subject: Re: [PATCH 2 pl2pm.PL] (was Re: [PATCH pl2pm.PL] Make pl2pm be nice with 'strict' and 'warnings')
-             From: Jonathan Stowe <gellyfish@gellyfish.com>
-             Date: Mon, 2 Jul 2001 20:45:53 +0100 (BST)
-             Message-ID: <Pine.LNX.4.33.0107022042570.8640-100000@orpheus.gellyfish.com>
+        Log: (Mistaken retraction)
      Branch: perl
 	   ! utils/pl2pm.PL
 ____________________________________________________________________________
