@@ -11,7 +11,7 @@ print "1..10\n";
 
 if ($^O eq 'MSWin32') {
   map { $files{lc($_)}++ } <op/*>;
-  map { delete $files{"op/$_"} } split /[\s\n]/, `cmd /c "dir /b /l op & dir /b /l /ah op 2>nul"`,
+  map { delete $files{"op/$_"} } split /[\s\n]/, `dir /b /l op & dir /b /l /ah op 2>nul`,
 }
 else {
   map { $files{$_}++ } <op/*>;
