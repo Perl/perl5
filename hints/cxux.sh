@@ -1,7 +1,7 @@
-# Hints for the CX/UX 7.1 operating system running on Harris NightHawk
-# machines.  written by Tom.Horsley@mail.hcsc.com
+# Hints for the CX/UX 7.1 operating system running on Concurrent (formerly
+# Harris) NightHawk machines.  written by Tom.Horsley@mail.ccur.com
 #
-# This config is setup for dynamic linking and the Harris C compiler.
+# This config is setup for dynamic linking and the Concurrent C compiler.
 
 # Check some things and print warnings if this isn't going to work...
 #
@@ -31,7 +31,7 @@ case `uname -r` in
       echo '';;
 esac
 
-# Internally at Harris, we use a source management tool which winds up
+# Internally at Concurrent, we use a source management tool which winds up
 # giving us read-only copies of source trees that are mostly symbolic links.
 # That upsets the perl build process when it tries to edit opcode.h and
 # embed.h or touch perly.c or perly.h, so turn those files into "real" files
@@ -60,7 +60,7 @@ libswanted=`echo ' '$libswanted' ' | sed -e 's/ malloc / /'`
 #
 glibpth="/usr/sde/elf/usr/lib $glibpth"
 
-# Need to use Harris cc for most of these options to be meaningful (if you
+# Need to use Concurrent cc for most of these options to be meaningful (if you
 # want to get this to work with gcc, you're on your own :-). Passing
 # -Bexport to the linker when linking perl is important because it leaves
 # the interpreter internal symbols visible to the shared libs that will be
@@ -93,9 +93,11 @@ usemymalloc='n'
 
 cat <<'EOM'
 
-You will get a failure on lib/posix.t test 16 because ungetc() on
-stdin does not work if no characters have been read from stdin.
-If you type a character at the terminal where you are running
-the tests, you can fool it into thinking it worked.
+WARNING: If you are using ksh to run the Configure script, you may find it
+failing in mysterious ways (such as failing to find library routines which
+are known to exist). Configure seems to push ksh beyond its limits
+sometimes. Try using env to strip unnecessary things out of the environment
+and run Configure with /sbin/sh. That sometimes seems to produce more
+accurate results.
 
 EOM
