@@ -476,8 +476,8 @@ sub numbers_with_total {
         skip "cannot pack '$format' on this perl", 2
           if is_valid_error($@);
 
-        is($@, '');
-        is($out, $_);
+        is($@, '', "no error");
+        is($out, $_, "unpack pack $format $_");
     }
   }
 
@@ -496,8 +496,8 @@ sub numbers_with_total {
       skip "cannot pack '$format' on this perl", 3
         if is_valid_error($@);
 
-      is($@, '');
-      ok(defined $sum);
+      is($@, '', "no error");
+      ok(defined $sum, "sum bits $_, format $format defined");
 
       my $len = $_; # Copy, so that we can reassign ''
       $len = 16 unless length $len;
@@ -544,7 +544,7 @@ sub numbers_with_total {
         }
 
         if ($calc_sum == $sum) { # HAS to be ==, not eq (so no is()).
-            ok ("unpack '%$_$format' gave $sum");
+            pass ("unpack '%$_$format' gave $sum");
         } else {
             my $delta = 1.000001;
             if ($format =~ tr /dDfF//
@@ -559,7 +559,7 @@ sub numbers_with_total {
             }
         }
       }
-    }   
+    }
   }
 }
 
