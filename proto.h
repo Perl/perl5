@@ -351,20 +351,20 @@ void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 char*	rninstr _((char* big, char* bigend, char* little, char* lend));
 int	runops _((void));
 #ifndef safemalloc
-void	safefree _((char* where));
-char*	safemalloc _((MEM_SIZE size));
+void	safefree _((Malloc_t where));
+Malloc_t	safemalloc _((MEM_SIZE size));
 #ifndef MSDOS
-char*	saferealloc _((char* where, MEM_SIZE size));
+Malloc_t	saferealloc _((Malloc_t where, MEM_SIZE size));
 #else
-char*	saferealloc _((char* where, unsigned long size));
+Malloc_t	saferealloc _((Malloc_t where, unsigned long size));
 #endif
-char*	safecalloc _((MEM_SIZE cnt, MEM_SIZE size));
+Malloc_t	safecalloc _((MEM_SIZE cnt, MEM_SIZE size));
 #endif
 #ifdef LEAKTEST
-void	safexfree _((char* where));
-char*	safexmalloc _((I32 x, MEM_SIZE size));
-char*	safexrealloc _((char* where, MEM_SIZE size));
-char*	safexcalloc _((I32 x, MEM_SIZE size, MEM_SIZE size));
+void	safexfree _((Malloc_t where));
+Malloc_t	safexmalloc _((I32 x, MEM_SIZE size));
+Malloc_t	safexrealloc _((Malloc_t where, MEM_SIZE size));
+Malloc_t	safexcalloc _((I32 x, MEM_SIZE size, MEM_SIZE size));
 #endif
 #ifndef HAS_RENAME
 I32	same_dirent _((char* a, char* b));
