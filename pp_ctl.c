@@ -187,10 +187,13 @@ PP(pp_substcont)
 	{
 	    SV *targ = cx->sb_targ;
 
-	    if (DO_UTF8(dstr) && !SvUTF8(targ))
-		sv_catpvn_utf8_upgrade(dstr, s, cx->sb_strend - s, nsv);
-	    else
-		sv_catpvn(dstr, s, cx->sb_strend - s);
+	    assert(cx->sb_strend >= s);
+	    if(cx->sb_strend > s) {
+		 if (DO_UTF8(dstr) && !SvUTF8(targ))
+		      sv_catpvn_utf8_upgrade(dstr, s, cx->sb_strend - s, nsv);
+		 else
+		      sv_catpvn(dstr, s, cx->sb_strend - s);
+	    }
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
 #ifdef PERL_COPY_ON_WRITE
