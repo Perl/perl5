@@ -32,7 +32,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER = \5.8.6
+#INST_VER	= \5.8.6
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -43,7 +43,7 @@ INST_TOP	= $(INST_DRV)\perl
 # the same location.  Commenting it out gives you a simpler
 # installation that is easier to understand for beginners.
 #
-#INST_ARCH = \$(ARCHNAME)
+#INST_ARCH	= \$(ARCHNAME)
 
 #
 # Uncomment this if you want perl to run
@@ -57,21 +57,21 @@ INST_TOP	= $(INST_DRV)\perl
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation and for thread support.
 #
-USE_MULTI = define
+USE_MULTI	= define
 
 #
 # Beginnings of interpreter cloning/threads; now reasonably complete.
 # This should be enabled to get the fork() emulation.  This needs
 # USE_MULTI as well.
 #
-USE_ITHREADS = define
+USE_ITHREADS	= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This needs USE_MULTI above.  This is also needed to
 # get fork().
 #
-USE_IMP_SYS = define
+USE_IMP_SYS	= define
 
 #
 # Comment out next assign to disable perl's I/O subsystem and use compiler's 
@@ -85,7 +85,7 @@ USE_PERLIO	= define
 # Comment this out if you don't want to enable large file support for
 # some reason.  Should normally only be changed to maintain compatibility
 # with an older release of perl.
-USE_LARGE_FILES = define
+USE_LARGE_FILES	= define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -159,7 +159,7 @@ CRYPT_SRC	= fcrypt.c
 # This must be enabled to use the Devel::Peek::mstat() function.  This cannot
 # be enabled without PERL_MALLOC as well.
 #
-#DEBUG_MSTATS  = define
+#DEBUG_MSTATS	= define
 
 #
 #
@@ -177,6 +177,15 @@ CCLIBDIR	= $(CCHOME)\lib
 #
 # Additional compiler flags can be specified here.
 #
+
+# Adding -DPERL_HASH_SEED_EXPLICIT will disable randomization of Perl's
+# internal hash function unless the PERL_HASH_SEED environment variable is set.
+# Alternatively, adding -DNO_HASH_SEED will completely disable the
+# randomization feature. 
+# The latter is required to maintain binary compatibility with Perl 5.8.0.
+#
+#BUILDOPT	= $(BUILDOPT) -DPERL_HASH_SEED_EXPLICIT
+#BUILDOPT	= $(BUILDOPT) -DNO_HASH_SEED
 
 #
 #
@@ -198,6 +207,7 @@ CCLIBDIR	= $(CCHOME)\lib
 #
 # This should normally be disabled.  Enabling it causes perl to read scripts
 # in text mode (which is the 5.005 behavior) and will break ByteLoader.
+#
 #BUILDOPT	= $(BUILDOPT) -DPERL_TEXTMODE_SCRIPTS
 
 #
@@ -225,17 +235,22 @@ D_CRYPT		= define
 CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 !ENDIF
 
+!IF "$(USE_IMP_SYS)" == "define"
+PERL_MALLOC	= undef
+DEBUG_MSTATS	= undef
+!ENDIF
+
 !IF "$(PERL_MALLOC)" == ""
 PERL_MALLOC	= undef
-DEBUG_MSTATS   = undef
+DEBUG_MSTATS	= undef
 !ENDIF
 
 !IF "$(DEBUG_MSTATS)" == ""
-DEBUG_MSTATS   = undef
+DEBUG_MSTATS	= undef
 !ENDIF
 
 !IF "$(DEBUG_MSTATS)" == "define"
-BUILDOPT       = $(BUILDOPT) -DPERL_DEBUGGING_MSTATS
+BUILDOPT	= $(BUILDOPT) -DPERL_DEBUGGING_MSTATS
 !ENDIF
 
 !IF "$(USE_5005THREADS)" == ""
@@ -244,10 +259,6 @@ USE_5005THREADS	= undef
 
 !IF "$(USE_5005THREADS)" == "define"
 USE_ITHREADS	= undef
-!ENDIF
-
-!IF "$(USE_IMP_SYS)" == "define"
-PERL_MALLOC	= undef
 !ENDIF
 
 !IF "$(USE_SITECUST)" == ""
@@ -563,7 +574,7 @@ CFGH_TMPL	= config_H.vc
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
-NOOP		= @echo
+NOOP		= @rem
 NULL		=
 
 DEL		= del
@@ -664,6 +675,7 @@ CORE_NOCFG_H	=		\
 		..\perly.h	\
 		..\pp.h		\
 		..\proto.h	\
+		..\regcomp.h	\
 		..\regexp.h	\
 		..\scope.h	\
 		..\sv.h		\
@@ -1224,13 +1236,13 @@ test-prep : all utils
 
 test : test-prep
 	cd ..\t
-	$(PERLEXE) -I..\lib harness
+	$(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
 	cd ..\t
-	$(PERLEXE) -I..\lib harness
+	$(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 _test : 
@@ -1238,7 +1250,7 @@ _test :
        $(XCOPY) $(PERLDLL) ..\t\$(NULL)
        $(XCOPY) $(GLOBEXE) ..\t\$(NULL)
        cd ..\t
-       $(PERLEXE) -I..\lib harness
+       $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
        cd ..\win32
 
 # the doubled rmdir calls are needed because older cmd shells

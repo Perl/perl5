@@ -87,7 +87,7 @@ USE_PERLIO	*= define
 # Comment this out if you don't want to enable large file support for
 # some reason.  Should normally only be changed to maintain compatibility
 # with an older release of perl.
-USE_LARGE_FILES *= define
+USE_LARGE_FILES	*= define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -115,10 +115,10 @@ CCTYPE		*= GCC
 
 #
 # uncomment this if your Borland compiler is older than v5.4.
-#BCCOLD = define
+#BCCOLD		*= define
 #
 # uncomment this if you want to use Borland's VCL as your CRT
-#BCCVCL = define
+#BCCVCL		*= define
 
 #
 # uncomment this if you are compiling under Windows 95/98 and command.com
@@ -180,7 +180,7 @@ CRYPT_SRC	*= fcrypt.c
 # This must be enabled to use the Devel::Peek::mstat() function.  This cannot
 # be enabled without PERL_MALLOC as well.
 #
-#DEBUG_MSTATS  = define
+#DEBUG_MSTATS	*= define
 
 #
 # set the install locations of the compiler include/libraries
@@ -204,6 +204,16 @@ CCLIBDIR	*= $(CCHOME)\lib
 #
 
 #
+# Adding -DPERL_HASH_SEED_EXPLICIT will disable randomization of Perl's
+# internal hash function unless the PERL_HASH_SEED environment variable is set.
+# Alternatively, adding -DNO_HASH_SEED will completely disable the
+# randomization feature. 
+# The latter is required to maintain binary compatibility with Perl 5.8.0.
+#
+#BUILDOPT	+= -DPERL_HASH_SEED_EXPLICIT
+#BUILDOPT	+= -DNO_HASH_SEED
+
+#
 # This should normally be disabled.  Adding -DPERL_POLLUTE enables support
 # for old symbols by default, at the expense of extreme pollution.  You most
 # probably just want to build modules that won't compile with
@@ -222,6 +232,7 @@ CCLIBDIR	*= $(CCHOME)\lib
 #
 # This should normally be disabled.  Enabling it causes perl to read scripts
 # in text mode (which is the 5.005 behavior) and will break ByteLoader.
+#
 #BUILDOPT	+= -DPERL_TEXTMODE_SCRIPTS
 
 #
@@ -256,6 +267,7 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 .ENDIF
 
 PERL_MALLOC	*= undef
+DEBUG_MSTATS	*= undef
 
 USE_5005THREADS	*= undef
 
@@ -271,21 +283,16 @@ USE_PERLIO	*= undef
 USE_LARGE_FILES	*= undef
 USE_PERLCRT	*= undef
 
-.IF "$(PERL_MALLOC)" == "undef"
+.IF "$(USE_IMP_SYS)" == "define"
 PERL_MALLOC	= undef
-DEBUG_MSTATS   = undef
 .ENDIF
 
-.IF "$(DEBUG_MSTATS)" == "undef"
-DEBUG_MSTATS   = undef
+.IF "$(PERL_MALLOC)" == "undef"
+DEBUG_MSTATS	= undef
 .ENDIF
 
 .IF "$(DEBUG_MSTATS)" == "define"
-BUILDOPT       += -DPERL_DEBUGGING_MSTATS
-.ENDIF
-
-.IF "$(USE_IMP_SYS)" == "define"
-PERL_MALLOC	= undef
+BUILDOPT	+= -DPERL_DEBUGGING_MSTATS
 .ENDIF
 
 .IF "$(USE_IMP_SYS) $(USE_MULTI) $(USE_5005THREADS)" == "define undef undef"
@@ -725,7 +732,7 @@ PERLDLL		= ..\perl58.dll
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
-NOOP		= @echo
+NOOP		= @rem
 
 #
 # filenames given to xsubpp must have forward slashes (since it puts
@@ -823,6 +830,7 @@ CORE_NOCFG_H	=		\
 		..\perly.h	\
 		..\pp.h		\
 		..\proto.h	\
+		..\regcomp.h	\
 		..\regexp.h	\
 		..\scope.h	\
 		..\sv.h		\
@@ -920,7 +928,6 @@ CFG_VARS	=					\
 .IF "$(IS_WIN95)" == "define"
 MK2 		= .\makefile.95
 RIGHTMAKE	= __switch_makefiles
-NOOP		= @rem
 .ELSE
 MK2		= __not_needed
 RIGHTMAKE	=
@@ -1037,13 +1044,13 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(MINI_OBJ:s,\,\\),$(@:s,\,\\),,$(LIBFILES),)
+	    @$(mktmp c0x32$(o) $(MINI_OBJ:s,\,$B,),$(@:s,\,$B,),,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -v -mconsole -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(MINI_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
+	    $(mktmp $(LKPRE) $(MINI_OBJ:s,\,$B,) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
-	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(MINI_OBJ:s,\,\\))
+	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(MINI_OBJ:s,\,$B,))
 .ENDIF
 
 $(MINIDIR) :
@@ -1087,15 +1094,15 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpd -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,\\)\n \
+	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,$B,)\n \
 		$@,\n \
 		$(LIBFILES)\n \
 		perldll.def\n)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) \
-	        $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs|tr \\\\ /) \
+	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,$B,) \
+	        $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs) \
 	        $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
 		--dllname $(PERLDLL:b).dll \
@@ -1103,14 +1110,14 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 		--base-file perl.base \
 		--output-exp perl.exp
 	$(LINK32) -mdll -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) \
-	        $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs|tr \\\\ /) \
+	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,$B,) \
+	        $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs) \
 	        $(LIBFILES) perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
 	    $(shell $(MINIPERL) -I..\lib buildext.pl --list-static-libs) \
 	    @$(mktmp -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
-	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\))
+	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,$B,))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
@@ -1143,13 +1150,13 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 	$(MINIPERL) ..\x2p\s2p.PL
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(X2P_OBJ:s,\,\\),$(@:s,\,\\),,$(LIBFILES),)
+	    @$(mktmp c0x32$(o) $(X2P_OBJ:s,\,$B,),$(@:s,\,$B,),,$(LIBFILES),)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -v -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(X2P_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
+	    $(mktmp $(LKPRE) $(X2P_OBJ:s,\,$B,) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
-	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(X2P_OBJ:s,\,\\))
+	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(X2P_OBJ:s,\,$B,))
 .ENDIF
 
 perlmain.c : runperl.c
@@ -1161,8 +1168,8 @@ perlmain$(o) : perlmain.c
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,\\)\n \
-	    $(@:s,\,\\),\n \
+	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,$B,)\n \
+	    $(@:s,\,$B,),\n \
 	    $(PERLIMPLIB) $(LIBFILES)\n)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
@@ -1369,12 +1376,7 @@ inst_lib : $(CONFIGPM)
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
-# Move the rule for making $(UNIDATAFILES) into a separate target and leave the
-# actual rule here blank because dmake runs the rule here once for each of the
-# files listed in $(UNIDATAFILES)
-$(UNIDATAFILES) : make_unidatafiles
-
-make_unidatafiles : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables
+$(UNIDATAFILES) .UPDATEALL : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables
 	cd ..\lib\unicore && \
 	..\$(MINIPERL) -I.. mktables
 
@@ -1401,11 +1403,11 @@ test-prep : all utils
 .ENDIF
 
 test : $(RIGHTMAKE) test-prep
-	cd ..\t && $(PERLEXE) -I..\lib harness
+	cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1 && \
-	    cd ..\t && $(PERLEXE) -I.\lib harness
+	    cd ..\t && $(PERLEXE) -I.\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
 _test : $(RIGHTMAKE)
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
@@ -1415,7 +1417,7 @@ _test : $(RIGHTMAKE)
 .ELSE
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
-	cd ..\t && $(PERLEXE) -I..\lib harness
+	cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
 # the doubled rmdir calls are needed because older cmd shells
 # don't understand /q
