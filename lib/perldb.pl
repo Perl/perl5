@@ -1,6 +1,6 @@
 package DB;
 
-$header = '$Header: perldb.pl,v 3.0.1.4 90/10/15 17:40:38 lwall Locked $';
+$header = '$Header: perldb.pl,v 3.0.1.5 90/11/10 01:40:26 lwall Locked $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -10,6 +10,9 @@ $header = '$Header: perldb.pl,v 3.0.1.4 90/10/15 17:40:38 lwall Locked $';
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 3.0.1.5  90/11/10  01:40:26  lwall
+# patch38: the debugger wouldn't stop correctly or do action routines
+# 
 # Revision 3.0.1.4  90/10/15  17:40:38  lwall
 # patch29: added caller
 # patch29: the debugger now understands packages and evals
@@ -59,7 +62,7 @@ sub DB {
 	    $signal |= 1;
 	}
 	else {
-	    $signal |= &eval($stop);
+	    &eval("\$DB'signal |= do {$stop;}");
 	    $dbline{$line} =~ s/;9($|\0)/$1/;
 	}
     }
@@ -307,7 +310,7 @@ command		Execute as a perl statement in current package.
 		    print OUT "Line $i may not have an action.\n";
 		} else {
 		    $dbline{$i} =~ s/\0[^\0]*//;
-		    $dbline .= "\0" . do action($3);
+		    $dbline{$i} .= "\0" . do action($3);
 		}
 		next; };
 	    $cmd =~ /^n$/ && do {

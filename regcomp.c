@@ -7,9 +7,13 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 3.0.1.7 90/10/20 02:18:32 lwall Locked $
+/* $Header: regcomp.c,v 3.0.1.8 90/11/10 01:57:46 lwall Locked $
  *
  * $Log:	regcomp.c,v $
+ * Revision 3.0.1.8  90/11/10  01:57:46  lwall
+ * patch38: patterns with multiple constant strings occasionally malfed
+ * patch38: patterns like /foo.*foo/ sped up some
+ * 
  * Revision 3.0.1.7  90/10/20  02:18:32  lwall
  * patch37: /foo.*bar$/ wrongly optimized to do tail matching on "foo"
  * 
@@ -149,7 +153,8 @@ int fold;
 	register int len;
 	register char *first;
 	int flags;
-	int back;
+	int backish;
+	int backest;
 	int curback;
 	extern char *safemalloc();
 	extern char *savestr();
@@ -252,7 +257,8 @@ int fold;
 		longest = str_make("",0);
 		len = 0;
 		curback = 0;
-		back = 0;
+		backish = 0;
+		backest = 0;
 		while (OP(scan) != END) {
 			if (OP(scan) == BRANCH) {
 			    if (OP(regnext(scan)) == BRANCH) {
@@ -267,7 +273,7 @@ int fold;
 			    first = scan;
 			    while (OP(regnext(scan)) >= CLOSE)
 				scan = regnext(scan);
-			    if (curback - back == len) {
+			    if (curback - backish == len) {
 				str_ncat(longish, OPERAND(first)+1,
 				    *OPERAND(first));
 				len += *OPERAND(first);
@@ -277,7 +283,7 @@ int fold;
 			    else if (*OPERAND(first) >= len + (curback >= 0)) {
 				len = *OPERAND(first);
 				str_nset(longish, OPERAND(first)+1,len);
-				back = curback;
+				backish = curback;
 				curback += len;
 				first = regnext(scan);
 			    }
@@ -287,15 +293,19 @@ int fold;
 			else if (index(varies,OP(scan))) {
 			    curback = -30000;
 			    len = 0;
-			    if (longish->str_cur > longest->str_cur)
+			    if (longish->str_cur > longest->str_cur) {
 				str_sset(longest,longish);
+				backest = backish;
+			    }
 			    str_nset(longish,"",0);
 			}
 			else if (index(simple,OP(scan))) {
 			    curback++;
 			    len = 0;
-			    if (longish->str_cur > longest->str_cur)
+			    if (longish->str_cur > longest->str_cur) {
 				str_sset(longest,longish);
+				backest = backish;
+			    }
 			    str_nset(longish,"",0);
 			}
 			scan = regnext(scan);
@@ -303,15 +313,26 @@ int fold;
 
 		/* Prefer earlier on tie, unless we can tail match latter */
 
-		if (longish->str_cur + (OP(first) == EOL) > longest->str_cur)
+		if (longish->str_cur + (OP(first) == EOL) > longest->str_cur) {
 		    str_sset(longest,longish);
+		    backest = backish;
+		}
 		else
 		    str_nset(longish,"",0);
-		if (longest->str_cur) {
+		if (longest->str_cur
+		    &&
+		    (!r->regstart
+		     ||
+		     !fbminstr(r->regstart->str_ptr,
+			  r->regstart->str_ptr + r->regstart->str_cur,
+			  longest)
+		    )
+		   )
+		{
 			r->regmust = longest;
-			if (back < 0)
-				back = -1;
-			r->regback = back;
+			if (backest < 0)
+				backest = -1;
+			r->regback = backest;
 			if (longest->str_cur
 			  > !(sawstudy || fold || OP(first) == EOL) )
 				fbmcompile(r->regmust,fold);

@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.10 90/10/16 11:20:46 lwall Locked $
+/* $Header: toke.c,v 3.0.1.11 90/11/10 02:13:44 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.11  90/11/10  02:13:44  lwall
+ * patch38: added alarm function
+ * patch38: tr was busted in metacharacters on signed char machines
+ * 
  * Revision 3.0.1.10  90/10/16  11:20:46  lwall
  * patch29: the length of a search pattern was limited
  * patch29: added DATA filehandle to read stuff after __END__
@@ -680,6 +684,8 @@ yylex()
 	break;
     case 'a': case 'A':
 	SNARFWORD;
+	if (strEQ(d,"alarm"))
+	    UNI(O_ALARM);
 	if (strEQ(d,"accept"))
 	    FOP22(O_ACCEPT);
 	if (strEQ(d,"atan2"))
@@ -1923,7 +1929,7 @@ register char *s;
 		--j;
 	    }
 	    if (tbl[t[i] & 0377] == -1)
-		tbl[t[i] & 0377] = r[j];
+		tbl[t[i] & 0377] = r[j] & 0377;
 	}
     }
     if (r != t)

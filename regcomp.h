@@ -1,6 +1,9 @@
-/* $Header: regcomp.h,v 3.0.1.1 90/08/09 05:06:49 lwall Locked $
+/* $Header: regcomp.h,v 3.0.1.2 90/11/10 01:58:28 lwall Locked $
  *
  * $Log:	regcomp.h,v $
+ * Revision 3.0.1.2  90/11/10  01:58:28  lwall
+ * patch38: random cleanup
+ * 
  * Revision 3.0.1.1  90/08/09  05:06:49  lwall
  * patch19: sped up {m,n} on simple items
  * 
@@ -139,7 +142,9 @@ EXT char regdummy;
 
 #ifndef gould
 #ifndef cray
+#ifndef eta10
 #define REGALIGN
+#endif
 #endif
 #endif
 

@@ -1,7 +1,11 @@
 ''' Beginning of part 3
-''' $Header: perl_man.3,v 3.0.1.10 90/10/20 02:15:17 lwall Locked $
+''' $Header: perl_man.3,v 3.0.1.11 90/11/10 01:48:21 lwall Locked $
 '''
 ''' $Log:	perl.man.3,v $
+''' Revision 3.0.1.11  90/11/10  01:48:21  lwall
+''' patch38: random cleanup
+''' patch38: documented tr///cds
+''' 
 ''' Revision 3.0.1.10  90/10/20  02:15:17  lwall
 ''' patch37: patch37: fixed various typos in man page
 ''' 
@@ -298,7 +302,7 @@ The "a" and "A" types gobble just one value, but pack it as a string of length
 count,
 padding with nulls or spaces as necessary.
 (When unpacking, "A" strips trailing spaces and nulls, but "a" does not.)
-Real numbers (floats and doubles) are in the nnativeative machine format
+Real numbers (floats and doubles) are in the native machine format
 only; due to the multiplicity of floating formats around, and the lack
 of a standard \*(L"network\*(R" representation, no facility for
 interchange has been made.
@@ -308,7 +312,7 @@ use IEEE floating point arithmetic (as the endian-ness of the memory
 representation is not part of the IEEE spec).
 Note that perl uses
 doubles internally for all numeric calculation, and converting from
-double -> float -> double will loose precision (i.e. unpack("f",
+double -> float -> double will lose precision (i.e. unpack("f",
 pack("f", $foo)) will not in general equal $foo).
 .br
 Examples:
@@ -382,7 +386,7 @@ in an array context, and any subroutine that you call will have one or more
 of its expressions evaluated in an array context.
 Also be careful not to follow the print keyword with a left parenthesis
 unless you want the corresponding right parenthesis to terminate the
-arguments to the print--interpose a + or put parens around all the arguments.
+arguments to the print\*(--interpose a + or put parens around all the arguments.
 .Ip "printf(FILEHANDLE LIST)" 8 10
 .Ip "printf(LIST)" 8
 .Ip "printf FILEHANDLE LIST" 8
@@ -639,7 +643,7 @@ FILEHANDLE may be an expression whose value gives the name of the filehandle.
 Returns 1 upon success, 0 otherwise.
 .Ip "seekdir(DIRHANDLE,POS)" 8 3
 Sets the current position for the readdir() routine on DIRHANDLE.
-POS must be a value returned by seekdir().
+POS must be a value returned by telldir().
 Has the same caveats about possible directory compaction as the corresponding
 system library routine.
 .Ip "select(FILEHANDLE)" 8 3
@@ -808,7 +812,7 @@ Returns the number of seconds actually slept.
 Opens a socket of the specified kind and attaches it to filehandle SOCKET.
 DOMAIN, TYPE and PROTOCOL are specified the same as for the system call
 of the same name.
-You may need to run makelib on sys/socket.h to get the proper values handy
+You may need to run h2ph on sys/socket.h to get the proper values handy
 in a perl library file.
 Return true if successful.
 See the example in the section on Interprocess Communication.
@@ -1114,7 +1118,7 @@ in a numeric context, you may need to add 0 to them to force them to look
 like numbers.
 .nf
 
-	require 'syscall.ph';		# may need to run makelib
+	require 'syscall.ph';		# may need to run h2ph
 	syscall(&SYS_write, fileno(STDOUT), "hi there\en", 9);
 
 .fi
@@ -1162,7 +1166,7 @@ a directory.
 Has the same caveats about possible directory compaction as the corresponding
 system library routine.
 .Ip "time" 8 4
-Returns the number of non-leap seconds since January 1, 1970, UTC.
+Returns the number of non-leap seconds since 00:00:00 UTC, January 1, 1970.
 Suitable for feeding to gmtime() and localtime().
 .Ip "times" 8 4
 Returns a four-element array giving the user and system times, in seconds, for this
@@ -1170,11 +1174,11 @@ process and the children of this process.
 .Sp
     ($user,$system,$cuser,$csystem) = times;
 .Sp
-.Ip "tr/SEARCHLIST/REPLACEMENTLIST/" 8 5
-.Ip "y/SEARCHLIST/REPLACEMENTLIST/" 8
+.Ip "tr/SEARCHLIST/REPLACEMENTLIST/cds" 8 5
+.Ip "y/SEARCHLIST/REPLACEMENTLIST/cds" 8
 Translates all occurrences of the characters found in the search list with
 the corresponding character in the replacement list.
-It returns the number of characters replaced.
+It returns the number of characters replaced or deleted.
 If no string is specified via the =~ or !~ operator,
 the $_ string is translated.
 (The string specified with =~ must be a scalar variable, an array element,
@@ -1185,6 +1189,24 @@ devotees,
 .I y
 is provided as a synonym for
 .IR tr .
+.Sp
+If the c modifier is specified, the SEARCHLIST character set is complemented.
+If the d modifier is specified, any characters specified by SEARCHLIST that
+are not found in REPLACEMENTLIST are deleted.
+(Note that this is slightly more flexible than the behavior of some
+.I tr
+programs, which delete anything they find in the SEARCHLIST, period.)
+If the s modifier is specified, sequences of characters that were translated
+to the same character are squashed down to 1 instance of the character.
+.Sp
+If the d modifier was used, the REPLACEMENTLIST is always interpreted exactly
+as specified.
+Otherwise, if the REPLACEMENTLIST is shorter than the SEARCHLIST,
+the final character is replicated till it is long enough.
+If the REPLACEMENTLIST is null, the SEARCHLIST is replicated.
+This latter is useful for counting characters in a class, or for squashing
+character sequences in a class.
+.Sp
 Examples:
 .nf
 
@@ -1192,9 +1214,15 @@ Examples:
 
     $cnt = tr/*/*/;		\h'|3i'# count the stars in $_
 
+    $cnt = tr/0\-9//;		\h'|3i'# count the digits in $_
+
+    tr/a\-zA\-Z//s;	\h'|3i'# bookkeeper \-> bokeper
+
     ($HOST = $host) =~ tr/a\-z/A\-Z/;
 
-    y/\e001\-@[\-_{\-\e177/ /;	\h'|3i'# change non-alphas to space
+    y/a\-zA\-Z/ /cs;	\h'|3i'# change non-alphas to single space
+
+    tr/\e200\-\e377/\e0\-\e177/;\h'|3i'# delete 8th bit
 
 .fi
 .Ip "truncate(FILEHANDLE,LENGTH)" 8 4

@@ -1,7 +1,7 @@
-glob.c
+msdos\glob.c
 
 setargv.obj
-perlglob.def
+os2\perlglob.def
 perlglob.exe
 
 -AS -LB -S0x1000

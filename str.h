@@ -1,4 +1,4 @@
-/* $Header: str.h,v 3.0.1.3 90/10/16 10:44:04 lwall Locked $
+/* $Header: str.h,v 3.0.1.4 90/11/10 02:07:52 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.h,v $
+ * Revision 3.0.1.4  90/11/10  02:07:52  lwall
+ * patch38: temp string values are now copied less often
+ * 
  * Revision 3.0.1.3  90/10/16  10:44:04  lwall
  * patch29: added caller
  * patch29: scripts now run at almost full speed under the debugger
@@ -87,6 +90,7 @@ struct lstring {
 #define SP_INTRP	16	/* string was compiled for interping */
 #define SP_TAIL		32	/* fbm string is tail anchored: /foo$/  */
 #define SP_MULTI	64	/* symbol table entry probably isn't a typo */
+#define SP_TEMP		128	/* string slated to die, so can be plundered */
 
 #define Nullstr Null(STR*)
 

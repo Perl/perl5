@@ -7,9 +7,13 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regexec.c,v 3.0.1.5 90/10/16 10:25:36 lwall Locked $
+/* $Header: regexec.c,v 3.0.1.6 90/11/10 02:00:57 lwall Locked $
  *
  * $Log:	regexec.c,v $
+ * Revision 3.0.1.6  90/11/10  02:00:57  lwall
+ * patch38: patterns like /^foo.*bar/ sped up some
+ * patch38: /[^whatever]+/ could scan past end of string
+ * 
  * Revision 3.0.1.5  90/10/16  10:25:36  lwall
  * patch29: /^pat/ occasionally matched in middle of string when $* = 0
  * patch29: /.{n,m}$/ could match with fewer than n characters remaining
@@ -169,7 +173,8 @@ int safebase;	/* no need to remember string in subbase */
 
 	/* If there is a "must appear" string, look for it. */
 	s = string;
-	if (prog->regmust != Nullstr) {
+	if (prog->regmust != Nullstr &&
+	    (!(prog->reganch & 1) || (multiline && prog->regback >= 0)) ) {
 		if (stringarg == strbeg && screamer) {
 			if (screamfirst[prog->regmust->str_rare] >= 0)
 				s = screaminstr(screamer,prog->regmust);
@@ -590,9 +595,9 @@ char *prog;
 				nextchar = UCHARAT(locinput);
 			if (s[nextchar >> 3] & (1 << (nextchar&7)))
 				return(0);
-			nextchar = *++locinput;
-			if (!nextchar && locinput > regeol)
+			if (!nextchar && locinput >= regeol)
 				return 0;
+			nextchar = *++locinput;
 			break;
 		case ALNUM:
 			if (!nextchar)

@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perly.c,v 3.0.1.8 90/10/16 10:14:20 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$Header: perly.c,v 3.0.1.9 90/11/10 01:53:26 lwall Locked $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@ char rcsid[] = "$Header: perly.c,v 3.0.1.8 90/10/16 10:14:20 lwall Locked $\nPat
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perly.c,v $
+ * Revision 3.0.1.9  90/11/10  01:53:26  lwall
+ * patch38: random cleanup
+ * patch38: more msdos/os2 upgrades
+ * patch38: references to $0 produced core dumps
+ * patch38: added hooks for unexec()
+ * 
  * Revision 3.0.1.8  90/10/16  10:14:20  lwall
  * patch29: *foo now prints as *package'foo
  * patch29: added waitpid
@@ -245,7 +251,15 @@ setuid perl scripts securely.\n");
     /* open script */
 
     if (argv[0] == Nullch)
+#ifdef MSDOS
+    {
+	if ( isatty(fileno(stdin)) )
+	  moreswitches("v");
 	argv[0] = "-";
+    }
+#else
+	argv[0] = "-";
+#endif
     if (dosearch && !index(argv[0], '/') && (s = getenv("PATH"))) {
 	char *xfound = Nullch, *xfailed = Nullch;
 	int len;
@@ -316,7 +330,13 @@ setuid perl scripts securely.\n");
 #endif
 	  (doextract ? "-e '1,/^#/d\n'" : ""),
 	  argv[0], CPPSTDIN, str_get(str), CPPMINUS);
-	  doextract = FALSE;
+#ifdef DEBUGGING
+	if (debug & 64) {
+	    fputs(buf,stderr);
+	    fputs("\n",stderr);
+	}
+#endif
+	doextract = FALSE;
 #ifdef IAMSUID				/* actually, this is caught earlier */
 	if (euid != uid && !euid)	/* if running suidperl */
 #ifdef SETEUID
@@ -639,7 +659,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	(void)hadd(sigstab);
     }
 
-    magicalize("!#?^~=-%0123456789.+&*()<>,\\/[|`':\024");
+    magicalize("!#?^~=-%123456789.+&*()<>,\\/[|`':\024");
     userinit();		/* in case linked C routines want magical variables */
 
     amperstab = stabent("&",allstabs);
@@ -693,7 +713,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     statname = Str_new(66,0);		/* last filename we did stat on */
 
     if (do_undump)
-	abort();
+	my_unexec();
 
   just_doit:		/* come here if running an undumped a.out */
     argc--,argv++;	/* skip name of script */
@@ -710,7 +730,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     tainted = 1;
 #endif
     if (tmpstab = stabent("0",allstabs))
-	str_set(STAB_STR(tmpstab),origfilename);
+	str_set(stab_val(tmpstab),origfilename);
     if (argvstab = stabent("ARGV",allstabs)) {
 	argvstab->str_pok |= SP_MULTI;
 	(void)aadd(argvstab);
@@ -1096,3 +1116,28 @@ a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
     }
     return Nullch;
 }
+
+/* compliments of Tom Christiansen */
+
+/* unexec() can be found in the Gnu emacs distribution */
+
+my_unexec()
+{
+#ifdef UNEXEC
+    int    status;
+    extern int etext;
+    static char dumpname[BUFSIZ];
+    static char perlpath[256];
+
+    sprintf (dumpname, "%s.perldump", origfilename);
+    sprintf (perlpath, "%s/perl", BIN);
+
+    status = unexec(dumpname, perlpath, &etext, sbrk(0), 0);
+    if (status)
+	fprintf(stderr, "unexec of %s into %s failed!\n", perlpath, dumpname);
+    exit(status);
+#else
+    abort();		/* for use with undump */
+#endif
+}
+

@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.9 90/10/16 10:32:05 lwall Locked $
+/* $Header: stab.c,v 3.0.1.10 90/11/10 02:02:05 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.10  90/11/10  02:02:05  lwall
+ * patch38: random cleanup
+ * 
  * Revision 3.0.1.9  90/10/16  10:32:05  lwall
  * patch29: added -M, -A and -C
  * patch29: taintperl now checks for world writable PATH components
@@ -70,6 +73,8 @@ static char *sig_name[] = {
 #else
 #define handlertype int
 #endif
+
+static handlertype sighandler();
 
 STR *
 stab_str(str)
@@ -244,7 +249,6 @@ STR *str;
     STAB *stab = mstr->str_u.str_stab;
     char *s;
     int i;
-    static handlertype sighandler();
 
     switch (mstr->str_rare) {
     case 'E':
@@ -295,7 +299,7 @@ STR *str;
 	    CMD *cmd;
 
 	    i = str_true(str);
-	    str = afetch(stab_xarray(stab),atoi(mstr->str_ptr));
+	    str = afetch(stab_xarray(stab),atoi(mstr->str_ptr), FALSE);
 	    cmd = str->str_magic->str_u.str_cmd;
 	    cmd->c_flags &= ~CF_OPTIMIZE;
 	    cmd->c_flags |= i? CFT_D1 : CFT_D0;

@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.9 90/10/16 10:41:21 lwall Locked $
+/* $Header: str.c,v 3.0.1.10 90/11/10 02:06:29 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.10  90/11/10  02:06:29  lwall
+ * patch38: temp string values are now copied less often
+ * patch38: array slurps are now faster and take less memory
+ * patch38: fixed a memory leakage on local(*foo)
+ * 
  * Revision 3.0.1.9  90/10/16  10:41:21  lwall
  * patch29: the undefined value could get defined by devious means
  * patch29: undefined values compared inconsistently 
@@ -232,6 +237,11 @@ register STR *str;
     return str->str_u.str_nval;
 }
 
+/* Note: str_sset() should not be called with a source string that needs
+ * be reused, since it may destroy the source string if it is marked
+ * as temporary.
+ */
+
 str_sset(dstr,sstr)
 STR *dstr;
 register STR *sstr;
@@ -245,19 +255,38 @@ register STR *sstr;
     if (!sstr)
 	dstr->str_pok = dstr->str_nok = 0;
     else if (sstr->str_pok) {
-	str_nset(dstr,sstr->str_ptr,sstr->str_cur);
-	if (sstr->str_nok) {
-	    dstr->str_u.str_nval = sstr->str_u.str_nval;
-	    dstr->str_nok = 1;
-	    dstr->str_state = SS_NORM;
-	}
-	else if (sstr->str_cur == sizeof(STBP)) {
-	    char *tmps = sstr->str_ptr;
 
-	    if (*tmps == 'S' && bcmp(tmps,"StB",4) == 0) {
-		if (!dstr->str_magic) {
-		    dstr->str_magic = str_smake(sstr->str_magic);
-		    dstr->str_magic->str_rare = 'X';
+	/*
+	 * Check to see if we can just swipe the string.  If so, it's a
+	 * possible small lose on short strings, but a big win on long ones.
+	 */
+
+	if (sstr->str_pok & SP_TEMP) {		/* slated for free anyway? */
+	    if (dstr->str_ptr)
+		Safefree(dstr->str_ptr);
+#ifdef STRUCTCOPY
+	    *dstr = *sstr;
+#else
+	    Copy(sstr, dstr, 1, STR);
+#endif
+	    Zero(sstr, 1, STR);			/* (probably overkill) */
+	    dstr->str_pok &= ~SP_TEMP;
+	}
+	else {					/* have to copy piecemeal */
+	    str_nset(dstr,sstr->str_ptr,sstr->str_cur);
+	    if (sstr->str_nok) {
+		dstr->str_u.str_nval = sstr->str_u.str_nval;
+		dstr->str_nok = 1;
+		dstr->str_state = SS_NORM;
+	    }
+	    else if (sstr->str_cur == sizeof(STBP)) {
+		char *tmps = sstr->str_ptr;
+
+		if (*tmps == 'S' && bcmp(tmps,"StB",4) == 0) {
+		    if (!dstr->str_magic) {
+			dstr->str_magic = str_smake(sstr->str_magic);
+			dstr->str_magic->str_rare = 'X';
+		    }
 		}
 	    }
 	}
@@ -590,6 +619,8 @@ register STR *nstr;
 #ifdef TAINT
     str->str_tainted = nstr->str_tainted;
 #endif
+    if (nstr->str_magic)
+	str_free(nstr->str_magic);
     Safefree(nstr);
 }
 
@@ -718,6 +749,7 @@ int append;
     STRLEN obpx;
     register int get_paragraph;
     register char *oldbp;
+    int shortbuffered;
 
     if (str == &str_undef)
 	return Nullch;
@@ -729,8 +761,18 @@ int append;
     cnt = fp->_cnt;			/* get count into register */
     str->str_nok = 0;			/* invalidate number */
     str->str_pok = 1;			/* validate pointer */
-    if (str->str_len <= cnt + 1)	/* make sure we have the room */
-	STR_GROW(str, append+cnt+2);	/* (remembering cnt can be -1) */
+    if (str->str_len <= cnt + 1) {	/* make sure we have the room */
+	if (cnt > 80 && str->str_len > 0) {
+	    shortbuffered = cnt - str->str_len;
+	    cnt = str->str_len;
+	}
+	else {
+	    shortbuffered = 0;
+	    STR_GROW(str, append+cnt+2);/* (remembering cnt can be -1) */
+	}
+    }
+    else
+	shortbuffered = 0;
     bp = str->str_ptr + append;		/* move these two too to registers */
     ptr = fp->_ptr;
     for (;;) {
@@ -740,6 +782,19 @@ int append;
 		goto thats_all_folks;		/* screams */	/* sed :-) */ 
 	}
 	
+	if (shortbuffered) {			/* oh well, must extend */
+	    cnt = shortbuffered;
+	    shortbuffered = 0;
+	    if (get_paragraph && oldbp)
+		obpx = oldbp - str->str_ptr;
+	    bpx = bp - str->str_ptr;	/* prepare for possible relocation */
+	    STR_GROW(str, str->str_len + append + cnt + 2);
+	    bp = str->str_ptr + bpx;	/* reconstitute our pointer */
+	    if (get_paragraph && oldbp)
+		oldbp = str->str_ptr + obpx;
+	    continue;
+	}
+
 	fp->_cnt = cnt;			/* deregisterize cnt and ptr */
 	fp->_ptr = ptr;
 	i = _filbuf(fp);		/* get more characters */
@@ -770,6 +825,8 @@ thats_all_folks:
 	goto screamer;	/* and go back to the fray */
     }
 thats_really_all_folks:
+    if (shortbuffered)
+	cnt += shortbuffered;
     fp->_cnt = cnt;			/* put these back or we're in trouble */
     fp->_ptr = ptr;
     *bp = '\0';
@@ -1230,6 +1287,8 @@ STR *oldstr;
 	}
     }
     tmps_list[tmps_max] = str;
+    if (str->str_pok)
+	str->str_pok |= SP_TEMP;
     return str;
 }
 
@@ -1251,6 +1310,8 @@ register STR *str;
 	}
     }
     tmps_list[tmps_max] = str;
+    if (str->str_pok)
+	str->str_pok |= SP_TEMP;
     return str;
 }
 

@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.9 90/10/20 02:21:01 lwall Locked $
+/* $Header: util.c,v 3.0.1.10 90/11/10 02:19:28 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.10  90/11/10  02:19:28  lwall
+ * patch38: random cleanup
+ * patch38: sequence of s/^x//; s/x$//; could screw up malloc
+ * 
  * Revision 3.0.1.9  90/10/20  02:21:01  lwall
  * patch37: tried to take strlen of integer on systems without wait4 or waitpid
  * patch37: unreachable return eliminated
@@ -97,6 +101,10 @@ MEM_SIZE size;
 		exit(1);
 	}
 #endif /* MSDOS */
+#ifdef DEBUGGING
+    if ((long)size < 0)
+	fatal("panic: malloc");
+#endif
     ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
 #ifdef DEBUGGING
 #  ifndef I286
@@ -110,7 +118,7 @@ MEM_SIZE size;
     if (ptr != Nullch)
 	return ptr;
     else {
-	fputs(nomem,stdout) FLUSH;
+	fputs(nomem,stderr) FLUSH;
 	exit(1);
     }
     /*NOTREACHED*/
@@ -141,6 +149,10 @@ unsigned long size;
 #endif /* MSDOS */
     if (!where)
 	fatal("Null realloc");
+#ifdef DEBUGGING
+    if ((long)size < 0)
+	fatal("panic: realloc");
+#endif
     ptr = realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
 #ifdef DEBUGGING
 #  ifndef I286
@@ -158,7 +170,7 @@ unsigned long size;
     if (ptr != Nullch)
 	return ptr;
     else {
-	fputs(nomem,stdout) FLUSH;
+	fputs(nomem,stderr) FLUSH;
 	exit(1);
     }
     /*NOTREACHED*/
@@ -551,7 +563,8 @@ STR *littlestr;
 	    s = bigend - littlelen;
 	    if (*s == *little && bcmp(s,little,littlelen)==0)
 		return (char*)s;		/* how sweet it is */
-	    else if (bigend[-1] == '\n' && little[littlelen-1] != '\n') {
+	    else if (bigend[-1] == '\n' && little[littlelen-1] != '\n'
+	      && s > big) {
 		    s--;
 		if (*s == *little && bcmp(s,little,littlelen)==0)
 		    return (char*)s;
@@ -1368,7 +1381,6 @@ int flags;
     if (flags)
 	fatal("Can't do waitpid with flags");
     else {
-	int result;
 	register int count;
 	register STR *str;
 
@@ -1446,6 +1458,11 @@ double f;
 {
     long along;
 
+#ifdef mips
+#   define BIGDOUBLE 2147483648.0
+    if (f >= BIGDOUBLE)
+	return (unsigned long)(f-(long)(f/BIGDOUBLE)*BIGDOUBLE)|0x80000000;
+#endif
     if (f >= 0.0)
 	return (unsigned long)f;
     along = (long)f;

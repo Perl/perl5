@@ -1,7 +1,10 @@
 ''' Beginning of part 4
-''' $Header: perl_man.4,v 3.0.1.12 90/10/20 02:15:43 lwall Locked $
+''' $Header: perl_man.4,v 3.0.1.13 90/11/10 01:51:00 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.13  90/11/10  01:51:00  lwall
+''' patch38: random cleanup
+''' 
 ''' Revision 3.0.1.12  90/10/20  02:15:43  lwall
 ''' patch37: patch37: fixed various typos in man page
 ''' 
@@ -60,7 +63,7 @@ left\h'|1i'||
 left\h'|1i'&&
 left\h'|1i'| ^
 left\h'|1i'&
-nonassoc\h'|1i'== != eq ne
+nonassoc\h'|1i'== != <=> eq ne cmp
 nonassoc\h'|1i'< > <= >= lt gt le ge
 nonassoc\h'|1i'chdir exit eval reset sleep rand umask
 nonassoc\h'|1i'\-r \-w \-x etc.
@@ -223,7 +226,7 @@ time of the call is visible to subroutine instead.
 
 	do foo();		# pass a null list
 	&foo();			# the same
-	&foo;			# pass no arguments--more efficient
+	&foo;			# pass no arguments\*(--more efficient
 
 .fi
 .Sh "Passing By Reference"
@@ -774,6 +777,8 @@ Pattern matches on strings containing multiple newlines can produce confusing
 results when $* is 0.
 Default is 0.
 (Mnemonic: * matches multiple things.)
+Note that this variable only influences the interpretation of ^ and $.
+A literal newline can be searched for even when $* == 0.
 .Ip $0 8
 Contains the name of the file containing the
 .I perl
@@ -827,7 +832,7 @@ it really means
 
 But don't put
 
-	@foo{$a,$b,$c}		# a slice--note the @
+	@foo{$a,$b,$c}		# a slice\*(--note the @
 
 which means
 
@@ -1088,6 +1093,10 @@ omit parentheses in many places doesn't mean that you ought to:
 .fi
 When in doubt, parenthesize.
 At the very least it will let some poor schmuck bounce on the % key in vi.
+.Sp
+Even if you aren't in doubt, consider the mental welfare of the person who
+has to maintain the code after you, and who will probably put parens in
+the wrong place.
 .Ip 2. 4 4
 Don't go through silly contortions to exit a loop at the top or the
 bottom, when
