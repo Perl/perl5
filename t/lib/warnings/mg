@@ -45,7 +45,13 @@ EXPECT
 ########
 # mg.c
 use warnings 'uninitialized';
-'foo' =~ /(b)(a)(r)/;
+'foo' =~ /(foo)/;
 length $3;
 EXPECT
 Use of uninitialized value in length at - line 4.
+########
+# mg.c
+use warnings 'uninitialized';
+length $3;
+EXPECT
+Use of uninitialized value in length at - line 3.
