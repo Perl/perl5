@@ -315,7 +315,8 @@ ac10 = $(ARCHCORE)regexp.h $(ARCHCORE)regnodes.h $(ARCHCORE)scope.h
 ac11 = $(ARCHCORE)sv.h $(ARCHCORE)thrdvar.h $(ARCHCORE)opnames.h
 ac12 = $(ARCHCORE)thread.h $(ARCHCORE)utf8.h $(ARCHCORE)util.h
 ac13 = $(ARCHCORE)vmsish.h $(ARCHCORE)warnings.h $(ARCHCORE)xsub.h
-ac = $(ac0) $(ac1) $(ac2) $(ac3) $(ac4) $(ac5) $(ac6) $(ac7) $(ac8) $(ac9) $(ac10) $(ac11) $(ac12) $(ac13)
+ac14 = $(ARCHCORE)perlshr_attr.opt $(ARCHCORE)perlshr_bld.opt
+ac = $(ac0) $(ac1) $(ac2) $(ac3) $(ac4) $(ac5) $(ac6) $(ac7) $(ac8) $(ac9) $(ac10) $(ac11) $(ac12) $(ac13) $(ac14)
 
 CRTL = []crtl.opt
 CRTLOPTS =,$(CRTL)/Options
@@ -339,7 +340,7 @@ CRTLOPTS =,$(CRTL)/Options
 .endif
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib]vmsish.pm [.lib.VMS]Filespec.pm [.lib.ExtUtils]XSSymSet.pm
+LIBPREREQ = $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]vmsish.pm [.lib.VMS]Filespec.pm [.lib.ExtUtils]XSSymSet.pm
 
 utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com
 utils2 = [.lib]splain.com [.utils]pl2pm.com
@@ -457,9 +458,18 @@ $(ARCHDIR)config.pm : [.lib]config.pm
 	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]DynaLoader.pm
 
+[.lib]XSLoader.pm : [.ext.dynaloader]xsloader.pm
+	Copy/Log/NoConfirm [.ext.dynaloader]xsloader.pm [.lib]XSLoader.pm
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]XSLoader.pm
+
 [.ext.dynaloader]dynaloader.pm : [.ext.dynaloader]dynaloader_pm.pl
 	$(MINIPERL) $(MMS$SOURCE)
 	@ Rename/Log dynaloader.pm [.ext.dynaloader]
+
+[.ext.dynaloader]xsloader.pm : [.ext.dynaloader]xsloader_pm.pl
+	$(MINIPERL) $(MMS$SOURCE)
+	@ Rename/Log xsloader.pm [.ext.dynaloader]
 
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E)
 	@build_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)"
@@ -1085,6 +1095,7 @@ tidy : cleanlis
 	- If F$Search("[.Lib.Auto...]*.al;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]*.al
 	- If F$Search("[.Lib.Auto...]autosplit.ix;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]autosplit.ix
 	- If F$Search("[.Lib]DynaLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]DynaLoader.pm
+	- If F$Search("[.Lib]XSLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]XSLoader.pm
 	- If F$Search("[.Lib]Socket.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Socket.pm
 	- If F$Search("[.Lib]Config.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Config.pm
 	- If F$Search("$(ARCHDIR)Config.pm;-1").nes."" Then Purge/NoConfirm/Log $(ARCHDIR)Config.pm
@@ -1117,6 +1128,7 @@ clean : tidy
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O)").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O);*
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C;*
 	- If F$Search("[.Ext.DynaLoader]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DynaLoader.pm;*
+	- If F$Search("[.Ext.DynaLoader]XSLoader.pm").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]XSLoader.pm;*
 	- If F$Search("[.Ext.Socket]Socket$(O)").nes."" Then Delete/NoConfirm/Log [.Ext.Socket]Socket$(O);*
 	- If F$Search("[.Ext.Socket]Socket.C").nes."" Then Delete/NoConfirm/Log [.Ext.Socket]Socket.C;*
 	- If F$Search("[.VMS.Ext...]*.C").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*.C;*
@@ -1133,7 +1145,9 @@ realclean : clean
 	- If F$Search("Descrip.MMS").nes."" Then Delete/NoConfirm/Log Descrip.MMS;*
 	- If F$Search("Build_Ext.Com").nes."" Then Delete/NoConfirm/Log Build_Ext.Com;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
+	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
+	- If F$Search("[.Lib]XSLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]XSLoader.pm;*
 	- If F$Search("[.Lib]Socket.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Socket.pm;*
 	- If F$Search("[.Lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*
 	- If F$Search("[.Lib]*.com").nes."" Then Delete/NoConfirm/Log [.Lib]*.com;*
