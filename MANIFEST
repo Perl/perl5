@@ -1122,18 +1122,19 @@ lib/bigint.pl			An arbitrary precision integer arithmetic package
 lib/bigintpl.t			See if bigint.pl works
 lib/bigint.pm			bignum
 lib/bignum.pm			bignum
-lib/bignum/t/bigint.t		See if bignum works
+lib/bignum/t/bigint.t		See if bigint works
 lib/bignum/t/bignum.t		See if bignum works
-lib/bignum/t/bigrat.t		See if bignum works
+lib/bignum/t/bigrat.t		See if bigrat works
 lib/bignum/t/biinfnan.t		See if bignum works
 lib/bignum/t/bninfnan.t		See if bignum works
-lib/bignum/t/bn_lite.t		See if bignum works
+lib/bignum/t/bn_lite.t		See if bignum with Math::BigInt::Lite works
 lib/bignum/t/brinfnan.t		See if bignum works
-lib/bignum/t/br_lite.t		See if bignum works
+lib/bignum/t/br_lite.t		See if bigrat with Math::BigInt::Lite works
 lib/bignum/t/infnan.inc		See if bignum works
-lib/bignum/t/option_a.t		See if bignum works
-lib/bignum/t/option_l.t		See if bignum works
-lib/bignum/t/option_p.t		See if bignum works
+lib/bignum/t/option_a.t		See if bignum a => X works
+lib/bignum/t/option_l.t		See if bignum l => X works
+lib/bignum/t/option_p.t		See if bignum p => X works
+lib/bignum/t/ratopt_a.t		See if bigrat a => X works
 lib/bigrat.pl			An arbitrary precision rational arithmetic package
 lib/bigrat.pm			bignum
 lib/blib.pm			For "use blib"
@@ -1509,6 +1510,7 @@ lib/Math/BigInt/t/_e_math.t	Helper routine in BigFloat for _e math
 lib/Math/BigInt/t/fallback.t	Test Math::BigInt
 lib/Math/BigInt/t/inf_nan.t	Special tests for inf and NaN handling
 lib/Math/BigInt/t/isa.t		Test for Math::BigInt inheritance
+lib/Math/BigInt/t/lib_load.t	Test sane lib names
 lib/Math/BigInt/t/mbf_ali.t	Tests for BigFloat
 lib/Math/BigInt/t/mbi_ali.t	Tests for BigInt
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
