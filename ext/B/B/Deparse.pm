@@ -16,7 +16,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 OPpCONST_ARYBASE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK
          CVf_METHOD CVf_LOCKED CVf_LVALUE
-	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
+	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
 $VERSION = 0.60;
 use strict;
@@ -2992,6 +2992,15 @@ sub pp_split {
     for (; !null($kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);
     }
+
+    # handle special case of split(), and split(" ") that compiles to /\s+/
+    $kid = $op->first;
+    if ($kid->flags & OPf_SPECIAL
+	&& $exprs[0] eq '/\\s+/'
+	&& $kid->pmflags & PMf_SKIPWHITE ) {
+	    $exprs[0] = '" "';
+    }
+
     $expr = "split(" . join(", ", @exprs) . ")";
     if ($ary) {
 	return $self->maybe_parens("$ary = $expr", $cx, 7);
