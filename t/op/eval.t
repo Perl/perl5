@@ -37,7 +37,7 @@ open(try,'>Op.eval');
 print try 'print "ok 10\n"; unlink "Op.eval";',"\n";
 close try;
 
-do 'Op.eval'; print $@;
+do './Op.eval'; print $@;
 
 # Test the singlequoted eval optimizer
 
