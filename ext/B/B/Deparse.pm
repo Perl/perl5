@@ -3841,6 +3841,9 @@ particular context, where some pragmas are already in scope. In
 this case, you use the B<ambient_pragmas> method to describe the
 assumptions you wish to make.
 
+Not all of the options currently have any useful effect. See
+L</BUGS> for more details.
+
 The parameters it accepts are:
 
 =over 4
@@ -3933,7 +3936,72 @@ the main:: package, the code will include a package declaration.
 
 =head1 BUGS
 
-See the 'to do' list at the beginning of the module file.
+=over 4
+
+=item *
+
+The only pragmas to be completely supported are: C<use warnings>,
+C<use strict 'refs'>, C<use bytes>, and C<use integer>. (C<$[>, which
+behaves like a pragma, is also supported.)
+
+Excepting those listed above, we're currently unable to guarantee that
+B::Deparse will produce a pragma at the correct point in the program.
+Since the effects of pragmas are often lexically scoped, this can mean
+that the pragma holds sway over a different portion of the program
+than in the input file.
+
+=item *
+
+Lvalue method calls are not yet fully supported. (Ordinary lvalue
+subroutine calls ought to be okay though.)
+
+=item *
+
+If you have a regex which is anything other than a literal of some
+kind, B::Deparse will produce incorrect output.
+e.g. C<$foo =~ give_me_a_regex()> will come back as
+C<$foo =~ /give_me_a_regex()/>
+
+=item *
+
+  m{ #foo
+      bar }x
+
+comes out as
+
+  m/#foo\n    bar/x)
+
+which isn't right.
+
+=item *
+
+If a keyword is over-ridden, and your program explicitly calls
+the built-in version by using CORE::keyword, the output of B::Deparse
+will not reflect this.
+
+=item *
+
+tr/// doesn't correctly handle wide characters
+
+=item *
+
+C<sort foo (1, 2, 3)> comes out as C<sort (foo 1, 2, 3)>, which
+causes perl to issue a warning.
+
+The obvious fix doesn't work, because these are different:
+
+    print (FOO 1, 2, 3), 4, 5, 6;
+    print FOO (1, 2, 3), 4, 5, 6;
+
+=item *
+
+Constants (other than simple strings or numbers) don't work properly.
+Examples that fail include:
+
+    use constant E2BIG => ($!=7);
+    use constant x=>\$x; print x
+
+=back
 
 =head1 AUTHOR
 
