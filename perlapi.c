@@ -3178,13 +3178,6 @@ Perl_sv_setref_iv(pTHXo_ SV* rv, const char* classname, IV iv)
     return ((CPerlObj*)pPerl)->Perl_sv_setref_iv(rv, classname, iv);
 }
 
-#undef  Perl_sv_setref_uv
-SV*
-Perl_sv_setref_uv(pTHXo_ SV* rv, const char* classname, UV uv)
-{
-    return ((CPerlObj*)pPerl)->Perl_sv_setref_uv(rv, classname, uv);
-}
-
 #undef  Perl_sv_setref_nv
 SV*
 Perl_sv_setref_nv(pTHXo_ SV* rv, const char* classname, NV nv)

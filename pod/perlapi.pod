@@ -2368,19 +2368,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -3007,19 +3007,6 @@ a reference count of 1.
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
 
 	SV*	sv_setref_pvn(SV* rv, const char* classname, char* pv, STRLEN n)
-
-=for hackers
-Found in file sv.c
-
-=item sv_setref_uv
-
-Copies an unsigned integer into a new SV, optionally blessing the SV.  The C<rv>
-argument will be upgraded to an RV.  That RV will be modified to point to
-the new SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
-will be returned and will have a reference count of 1.
-
-	SV*	sv_setref_uv(SV* rv, const char* classname, UV uv)
 
 =for hackers
 Found in file sv.c

@@ -1753,10 +1753,6 @@
 #define Perl_sv_setref_iv	pPerl->Perl_sv_setref_iv
 #undef  sv_setref_iv
 #define sv_setref_iv		Perl_sv_setref_iv
-#undef  Perl_sv_setref_uv
-#define Perl_sv_setref_uv	pPerl->Perl_sv_setref_uv
-#undef  sv_setref_uv
-#define sv_setref_uv		Perl_sv_setref_uv
 #undef  Perl_sv_setref_nv
 #define Perl_sv_setref_nv	pPerl->Perl_sv_setref_nv
 #undef  sv_setref_nv

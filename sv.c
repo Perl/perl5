@@ -6349,25 +6349,6 @@ Perl_sv_setref_iv(pTHX_ SV *rv, const char *classname, IV iv)
 }
 
 /*
-=for apidoc sv_setref_uv
-
-Copies an unsigned integer into a new SV, optionally blessing the SV.  The C<rv>
-argument will be upgraded to an RV.  That RV will be modified to point to
-the new SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
-will be returned and will have a reference count of 1.
-
-=cut
-*/
-
-SV*
-Perl_sv_setref_uv(pTHX_ SV *rv, const char *classname, UV uv)
-{
-    sv_setuv(newSVrv(rv,classname), uv);
-    return rv;
-}
-
-/*
 =for apidoc sv_setref_nv
 
 Copies a double into a new SV, optionally blessing the SV.  The C<rv>
