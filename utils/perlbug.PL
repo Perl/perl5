@@ -213,7 +213,7 @@ EOF
 	                     
 	        if( !$domain) {
 	        	$guess = "";
-	        } elsif ($Is_VMS && !$::Config{'has_sockets'}) { 
+	        } elsif ($Is_VMS && !$::Config{'d_socket'}) { 
 	        	$guess = "$domain\:\:$me";
 	        } else {
 		    	$guess = "$me\@$domain" if $domain;
