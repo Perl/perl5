@@ -110,7 +110,7 @@ sub validate {
             $file = $cwd . '/' . $file if $cwd && $file !~ m|^/|;
 
             # put filename in after the test operator
-            $this =~ s/(-\w\b)/$1 "$file"/g;
+            $this =~ s/(-\w\b)/$1 "\$file"/g;
 
             # change the "-Z" representing a bundle with the $one test
             $this =~ s/-Z/-$one/;
@@ -130,7 +130,7 @@ sub validate {
                 # to call valmess instead of die/warn directly
                 # valmess will look up the error message from %Val_Message
                 $this =~ s/ ^ ( (\S+) \s+ \S+ ) \s* \|\| \s* (die|warn) \s* $
-                          /$1 || valmess('$3', '$2', '$file')/x;
+                          /$1 || valmess('$3', '$2', \$file)/x;
             }
 
             {
@@ -167,7 +167,7 @@ sub validate {
 
     # in case of any cd directives, return from whence we came
     if ($starting_dir ne cwd) {
-        chdir($starting_dir) || die "$starting_dir: $!";
+        chdir($starting_dir) || die "chdir $starting_dir: $!";
     }
 
     return $Warnings;
