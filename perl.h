@@ -4238,6 +4238,10 @@ extern void moncontrol(int);
 #define UNICODE_PARA_SEPA_1	0x80
 #define UNICODE_PARA_SEPA_2	0xA9
 
+#ifndef PIPESOCK_MODE
+#  define PIPESOCK_MODE
+#endif
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
