@@ -17,31 +17,29 @@ require strict;
 sub import {
     my $callpack = caller;
     my ($pack, @imports, $sym, $ch) = @_;
-    foreach $sym (@imports) {
-        ($ch, $sym) = unpack('a1a*', $sym);
+    foreach (@imports) {
+        ($ch, $sym) = unpack('a1a*', $_);
 	if ($sym =~ tr/A-Za-z_0-9//c) {
 	    # time for a more-detailed check-up
-	    if ($sym =~ /::/) {
-		require Carp;
-		Carp::croak("Can't declare another package's variables");
-	    } elsif ($sym =~ /^\w+[[{].*[]}]$/) {
+	    if ($sym =~ /^\w+[[{].*[]}]$/) {
 		require Carp;
 		Carp::croak("Can't declare individual elements of hash or array");
 	    } elsif (warnings::enabled() and length($sym) == 1 and $sym !~ tr/a-zA-Z//) {
 		warnings::warn("No need to declare built-in vars");
             } elsif  ( $^H &= strict::bits('vars') ) {
-              Carp::croak("'$ch$sym' is not a valid variable name under strict vars");
+              Carp::croak("'$_' is not a valid variable name under strict vars");
 	    }
 	}
-        *{"${callpack}::$sym"} =
-          (  $ch eq "\$" ? \$   {"${callpack}::$sym"}
-           : $ch eq "\@" ? \@   {"${callpack}::$sym"}
-           : $ch eq "\%" ? \%   {"${callpack}::$sym"}
-           : $ch eq "\*" ? \*   {"${callpack}::$sym"}
-           : $ch eq "\&" ? \&   {"${callpack}::$sym"}
+	$sym = "${callpack}::$sym" unless $sym =~ /::/;
+        *$sym =
+          (  $ch eq "\$" ? \$$sym
+           : $ch eq "\@" ? \@$sym
+           : $ch eq "\%" ? \%$sym
+           : $ch eq "\*" ? \*$sym
+           : $ch eq "\&" ? \&$sym
            : do {
 		require Carp;
-		Carp::croak("'$ch$sym' is not a valid variable name");
+		Carp::croak("'$_' is not a valid variable name");
 	     });
     }
 };
@@ -59,9 +57,9 @@ vars - Perl pragma to predeclare global variable names (obsolete)
 
 =head1 DESCRIPTION
 
-NOTE: The functionality provided by this pragma has been superseded
-by C<our> declarations, available in Perl v5.6.0 or later.  See
-L<perlfunc/our>.
+NOTE: For variables in the current package, the functionality provided
+by this pragma has been superseded by C<our> declarations, available
+in Perl v5.6.0 or later.  See L<perlfunc/our>.
 
 This will predeclare all the variables whose names are 
 in the list, allowing you to use them under "use strict", and
