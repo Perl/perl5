@@ -1152,10 +1152,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
   STRLEN n_a;
-#ifdef OVERLOAD_VIA_HASH
-  GV** gvp;
-  HV* hv;
-#endif
 
   if (mg && amtp->was_ok_am == PL_amagic_generation
       && amtp->was_ok_sub == PL_sub_generation)
@@ -1177,60 +1173,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   amt.fallback = AMGfallNO;
   amt.flags = 0;
 
-#ifdef OVERLOAD_VIA_HASH
-  gvp=(GV**)hv_fetch(stash,"OVERLOAD",8,FALSE);	/* A shortcut */
-  if (gvp && ((gv = *gvp) != (GV*)&PL_sv_undef && (hv = GvHV(gv)))) {
-    int filled=0;
-    int i;
-    char *cp;
-    SV* sv;
-    SV** svp;
-
-    /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
-
-    if (( cp = (char *)PL_AMG_names[0] ) &&
-	(svp = (SV**)hv_fetch(hv,cp,strlen(cp),FALSE)) && (sv = *svp)) {
-      if (SvTRUE(sv)) amt.fallback=AMGfallYES;
-      else if (SvOK(sv)) amt.fallback=AMGfallNEVER;
-    }
-    for (i = 1; i < NofAMmeth; i++) {
-      cv = 0;
-      cp = (char *)PL_AMG_names[i];
-
-        svp = (SV**)hv_fetch(hv, cp, strlen(cp), FALSE);
-        if (svp && ((sv = *svp) != &PL_sv_undef)) {
-          switch (SvTYPE(sv)) {
-            default:
-              if (!SvROK(sv)) {
-                if (!SvOK(sv)) break;
-		gv = gv_fetchmethod(stash, SvPV(sv, n_a));
-                if (gv) cv = GvCV(gv);
-                break;
-              }
-              cv = (CV*)SvRV(sv);
-              if (SvTYPE(cv) == SVt_PVCV)
-                  break;
-                /* FALL THROUGH */
-            case SVt_PVHV:
-            case SVt_PVAV:
-	      Perl_croak(aTHX_ "Not a subroutine reference in overload table");
-	      return FALSE;
-            case SVt_PVCV:
-              cv = (CV*)sv;
-              break;
-            case SVt_PVGV:
-              if (!(cv = GvCVu((GV*)sv)))
-                cv = sv_2cv(sv, &stash, &gv, FALSE);
-              break;
-          }
-          if (cv) filled=1;
-	  else {
-	    Perl_croak(aTHX_ "Method for operation %s not found in package %.256s during blessing\n",
-		cp,HvNAME(stash));
-	    return FALSE;
-	  }
-        }
-#else
   {
     int filled = 0;
     int i;
@@ -1239,28 +1181,29 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 
     /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
 
-    if ((cp = PL_AMG_names[0])) {
-	/* Try to find via inheritance. */
-	gv = gv_fetchmeth(stash, "()", 2, -1); /* A cookie: "()". */
-	if (gv)
-	    sv = GvSV(gv);
+    /* Try to find via inheritance. */
+    gv = gv_fetchmeth(stash, PL_AMG_names[0], 2, -1);
+    if (gv)
+	sv = GvSV(gv);
 
-	if (!gv)
-	    goto no_table;
-	else if (SvTRUE(sv))
-	    amt.fallback=AMGfallYES;
-	else if (SvOK(sv))
-	    amt.fallback=AMGfallNEVER;
-    }
+    if (!gv)
+	goto no_table;
+    else if (SvTRUE(sv))
+	amt.fallback=AMGfallYES;
+    else if (SvOK(sv))
+	amt.fallback=AMGfallNEVER;
 
     for (i = 1; i < NofAMmeth; i++) {
-	SV *cookie = sv_2mortal(Perl_newSVpvf(aTHX_ "(%s", cp = PL_AMG_names[i]));
+	char *cooky = PL_AMG_names[i];
+	char *cp = AMG_id2name(i); /* Human-readable form, for debugging */
+	STRLEN l = strlen(cooky);
+
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of `%s' in package `%.256s'\n",
 		     cp, HvNAME(stash)) );
 	/* don't fill the cache while looking up! */
-	gv = gv_fetchmeth(stash, SvPVX(cookie), SvCUR(cookie), -1);
+	gv = gv_fetchmeth(stash, cooky, l, -1);
         cv = 0;
-        if(gv && (cv = GvCV(gv))) {
+        if (gv && (cv = GvCV(gv))) {
 	    if (GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")
 		&& strEQ(HvNAME(GvSTASH(CvGV(cv))), "overload")) {
 		/* GvSV contains the name of the method. */
@@ -1289,7 +1232,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 			 GvNAME(CvGV(cv))) );
 	    filled = 1;
 	}
-#endif
 	amt.table[i]=(CV*)SvREFCNT_inc(cv);
     }
     if (filled) {
@@ -1488,7 +1430,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	if (off==-1) off=method;
 	msg = sv_2mortal(Perl_newSVpvf(aTHX_
 		      "Operation `%s': no method found,%sargument %s%s%s%s",
-		      PL_AMG_names[method + assignshift],
+		      AMG_id2name(method + assignshift),
 		      (flags & AMGf_unary ? " " : "\n\tleft "),
 		      SvAMAGIC(left)?
 		        "in overloaded package ":
@@ -1517,11 +1459,11 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   if (!notfound) {
     DEBUG_o( Perl_deb(aTHX_
   "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %s%s\n",
-		 PL_AMG_names[off],
+		 AMG_id2name(off),
 		 method+assignshift==off? "" :
 		             " (initially `",
 		 method+assignshift==off? "" :
-		             PL_AMG_names[method+assignshift],
+		             AMG_id2name(method+assignshift),
 		 method+assignshift==off? "" : "')",
 		 flags & AMGf_unary? "" :
 		   lr==1 ? " for right argument": " for left argument",
@@ -1581,7 +1523,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUSHs(lr>0? left: right);
     PUSHs( lr > 0 ? &PL_sv_yes : ( assign ? &PL_sv_undef : &PL_sv_no ));
     if (notfound) {
-      PUSHs( sv_2mortal(newSVpv((char *)PL_AMG_names[method + assignshift],0)));
+      PUSHs( sv_2mortal(newSVpv(AMG_id2name(method + assignshift),0)));
     }
     PUSHs((SV*)cv);
     PUTBACK;

@@ -3060,41 +3060,47 @@ enum {
 };
 
 #define NofAMmeth max_amg_code
+#define AMG_id2name(id) ((char*)PL_AMG_names[id]+1)
 
 #ifdef DOINIT
 EXTCONST char * PL_AMG_names[NofAMmeth] = {
-  "fallback",	"abs",			/* "fallback" should be the first. */
-  "bool",	"nomethod",
-  "\"\"",	"0+",
-  "+",		"+=",
-  "-",		"-=",
-  "*",		"*=",
-  "/",		"/=",
-  "%",		"%=",
-  "**",		"**=",
-  "<<",		"<<=",
-  ">>",		">>=",
-  "&",		"&=",
-  "|",		"|=",
-  "^",		"^=",
-  "<",		"<=",
-  ">",		">=",
-  "==",		"!=",
-  "<=>",	"cmp",
-  "lt",		"le",
-  "gt",		"ge",
-  "eq",		"ne",
-  "!",		"~",
-  "++",		"--",
-  "atan2",	"cos",
-  "sin",	"exp",
-  "log",	"sqrt",
-  "x",		"x=",
-  ".",		".=",
-  "=",		"neg",
-  "${}",	"@{}",
-  "%{}",	"*{}",
-  "&{}",	"<>",
+  /* Names kept in the symbol table.  fallback => "()", the rest has
+     "(" prepended.  The only other place in perl which knows about
+     this convention is AMG_id2name (used for debugging output and
+     'nomethod' only), the only other place which has it hardwired is
+     overload.pm.  */
+  "()",		"(abs",			/* "fallback" should be the first. */
+  "(bool",	"(nomethod",
+  "(\"\"",	"(0+",
+  "(+",		"(+=",
+  "(-",		"(-=",
+  "(*",		"(*=",
+  "(/",		"(/=",
+  "(%",		"(%=",
+  "(**",	"(**=",
+  "(<<",	"(<<=",
+  "(>>",	"(>>=",
+  "(&",		"(&=",
+  "(|",		"(|=",
+  "(^",		"(^=",
+  "(<",		"(<=",
+  "(>",		"(>=",
+  "(==",	"(!=",
+  "(<=>",	"(cmp",
+  "(lt",	"(le",
+  "(gt",	"(ge",
+  "(eq",	"(ne",
+  "(!",		"(~",
+  "(++",	"(--",
+  "(atan2",	"(cos",
+  "(sin",	"(exp",
+  "(log",	"(sqrt",
+  "(x",		"(x=",
+  "(.",		"(.=",
+  "(=",		"(neg",
+  "(${}",	"(@{}",
+  "(%{}",	"(*{}",
+  "(&{}",	"(<>",
 };
 #else
 EXTCONST char * PL_AMG_names[NofAMmeth];
