@@ -3667,9 +3667,12 @@ sub dir_listing {
 	File::Spec->catfile($CPAN::Config->{keep_source_where},
 			    "authors", "id", @$chksumfile);
 
-    my $fh = FileHandle->new;
+
+    my $fh;
+
+    # purge and refetch old (pre-PGP) CHECKSUMS; they are a security hazard
+    $fh = FileHandle->new;
     if (open($fh, $lc_want)){
-	# purge and refetch old (pre-PGP) CHECKSUMS; they are a security hazard
 	my $line = <$fh>; close $fh;
 	unlink($lc_want) unless $line =~ /PGP/;
     }
@@ -3696,7 +3699,7 @@ sub dir_listing {
     }
 
     # adapted from CPAN::Distribution::MD5_check_file ;
-    my $fh = FileHandle->new;
+    $fh = FileHandle->new;
     my($cksum);
     if (open $fh, $lc_file){
 	local($/);
