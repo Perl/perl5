@@ -223,7 +223,7 @@ do_chop(register SV *astr, register SV *sv)
         max = AvFILL(av);
         for (i = 0; i <= max; i++) {
 	    sv = (SV*)av_fetch(av, i, FALSE);
-	    if (sv && ((sv = *(SV**)sv), sv != &sv_undef))
+	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
 		do_chop(astr, sv);
 	}
         return;
@@ -260,7 +260,7 @@ do_chomp(register SV *sv)
     STRLEN len;
     char *s;
 
-    if (RsSNARF(rs))
+    if (RsSNARF(PL_rs))
 	return 0;
     count = 0;
     if (SvTYPE(sv) == SVt_PVAV) {
@@ -270,7 +270,7 @@ do_chomp(register SV *sv)
         max = AvFILL(av);
         for (i = 0; i <= max; i++) {
 	    sv = (SV*)av_fetch(av, i, FALSE);
-	    if (sv && ((sv = *(SV**)sv), sv != &sv_undef))
+	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
 		count += do_chomp(sv);
 	}
         return count;
@@ -289,7 +289,7 @@ do_chomp(register SV *sv)
 	s = SvPV_force(sv, len);
     if (s && len) {
 	s += --len;
-	if (RsPARA(rs)) {
+	if (RsPARA(PL_rs)) {
 	    if (*s != '\n')
 		goto nope;
 	    ++count;
@@ -301,7 +301,7 @@ do_chomp(register SV *sv)
 	}
 	else {
 	    STRLEN rslen;
-	    char *rsptr = SvPV(rs, rslen);
+	    char *rsptr = SvPV(PL_rs, rslen);
 	    if (rslen == 1) {
 		if (*s != *rsptr)
 		    goto nope;
@@ -352,7 +352,7 @@ do_vop(I32 optype, SV *sv, SV *left, SV *right)
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
     if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
-	dc = SvPV_force(sv, na);
+	dc = SvPV_force(sv, PL_na);
 	if (SvCUR(sv) < len) {
 	    dc = SvGROW(sv, len + 1);
 	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);

@@ -842,21 +842,21 @@ void byterun(PerlIO *fp)
 	    {
 		opindex arg;
 		BGET_opindex(arg);
-		main_start = arg;
+		PL_main_start = arg;
 		break;
 	    }
 	  case INSN_MAIN_ROOT:		/* 117 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
-		main_root = arg;
+		PL_main_root = arg;
 		break;
 	    }
 	  case INSN_CURPAD:		/* 118 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		BSET_curpad(curpad, arg);
+		BSET_curpad(PL_curpad, arg);
 		break;
 	    }
 	  default:

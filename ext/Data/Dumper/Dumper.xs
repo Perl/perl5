@@ -138,7 +138,7 @@ DD_dump(SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
     
     if (SvGMAGICAL(val))
         mg_get(val);
-    if (val == &sv_undef || !SvOK(val)) {
+    if (val == &PL_sv_undef || !SvOK(val)) {
 	sv_catpvn(retval, "undef", 5);
 	return 1;
     }
@@ -151,9 +151,9 @@ DD_dump(SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    XPUSHs(val); PUTBACK;
 	    i = perl_call_method(SvPVX(freezer), G_EVAL|G_SCALAR);
 	    SPAGAIN;
-	    if (SvTRUE(GvSV(errgv)))
+	    if (SvTRUE(GvSV(PL_errgv)))
 		warn("WARNING(Freezer method call failed): %s",
-		     SvPVX(GvSV(errgv)));
+		     SvPVX(GvSV(PL_errgv)));
 	    else if (i)
 		val = newSVsv(POPs);
 	    PUTBACK; FREETMPS; LEAVE;
@@ -302,7 +302,7 @@ DD_dump(SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		if (svp)
 		    elem = *svp;
 		else
-		    elem = &sv_undef;
+		    elem = &PL_sv_undef;
 		
 		ilen = inamelen;
 		sv_setiv(ixsv, ix);
@@ -640,7 +640,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    todumpav = namesav = Nullav;
 	    seenhv = Nullhv;
 	    val = pad = xpad = apad = sep = tmp = varname
-		= freezer = toaster = bless = &sv_undef;
+		= freezer = toaster = bless = &PL_sv_undef;
 	    name = sv_newmortal();
 	    indent = 2;
 	    terse = useqq = purity = deepcopy = 0;
@@ -699,7 +699,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    if ((svp = av_fetch(todumpav, i, FALSE)))
 			val = *svp;
 		    else
-			val = &sv_undef;
+			val = &PL_sv_undef;
 		    if ((svp = av_fetch(namesav, i, TRUE)))
 			sv_setsv(name, *svp);
 		    else

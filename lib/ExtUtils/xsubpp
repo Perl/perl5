@@ -1305,8 +1305,7 @@ if (@BootCode)
 }
 
 print Q<<"EOF";;
-#    ST(0) = &sv_yes;
-#    XSRETURN(1);
+#    XSRETURN_YES;
 #]]
 #
 EOF

@@ -15,26 +15,26 @@ isa_lookup(HV *stash, char *name, int len, int level)
     HV* hv = Nullhv;
 
     if (!stash)
-	return &sv_undef;
+	return &PL_sv_undef;
 
     if(strEQ(HvNAME(stash), name))
-	return &sv_yes;
+	return &PL_sv_yes;
 
     if (level > 100)
 	croak("Recursive inheritance detected in package '%s'", HvNAME(stash));
 
     gvp = (GV**)hv_fetch(stash, "::ISA::CACHE::", 14, FALSE);
 
-    if (gvp && (gv = *gvp) != (GV*)&sv_undef && (hv = GvHV(gv))) {
+    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (hv = GvHV(gv))) {
 	SV* sv;
 	SV** svp = (SV**)hv_fetch(hv, name, len, FALSE);
-	if (svp && (sv = *svp) != (SV*)&sv_undef)
+	if (svp && (sv = *svp) != (SV*)&PL_sv_undef)
 	    return sv;
     }
 
     gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
     
-    if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
+    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
 	if(!hv) {
 	    gvp = (GV**)hv_fetch(stash, "::ISA::CACHE::", 14, TRUE);
 
@@ -53,17 +53,17 @@ isa_lookup(HV *stash, char *name, int len, int level)
 		SV* sv = *svp++;
 		HV* basestash = gv_stashsv(sv, FALSE);
 		if (!basestash) {
-		    if (dowarn)
+		    if (PL_dowarn)
 			warn("Can't locate package %s for @%s::ISA",
 			    SvPVX(sv), HvNAME(stash));
 		    continue;
 		}
-		if(&sv_yes == isa_lookup(basestash, name, len, level + 1)) {
-		    (void)hv_store(hv,name,len,&sv_yes,0);
-		    return &sv_yes;
+		if(&PL_sv_yes == isa_lookup(basestash, name, len, level + 1)) {
+		    (void)hv_store(hv,name,len,&PL_sv_yes,0);
+		    return &PL_sv_yes;
 		}
 	    }
-	    (void)hv_store(hv,name,len,&sv_no,0);
+	    (void)hv_store(hv,name,len,&PL_sv_no,0);
 	}
     }
 
@@ -94,7 +94,7 @@ sv_derived_from(SV *sv, char *name)
     }
  
     return (type && strEQ(type,name)) ||
-            (stash && isa_lookup(stash, name, strlen(name), 0) == &sv_yes)
+            (stash && isa_lookup(stash, name, strlen(name), 0) == &PL_sv_yes)
         ? TRUE
         : FALSE ;
  
@@ -117,7 +117,7 @@ XS(XS_UNIVERSAL_isa)
 	croak("Usage: UNIVERSAL::isa(reference, kind)");
 
     sv = ST(0);
-    name = (char *)SvPV(ST(1),na);
+    name = (char *)SvPV(ST(1),PL_na);
 
     ST(0) = boolSV(sv_derived_from(sv, name));
     XSRETURN(1);
@@ -136,8 +136,8 @@ XS(XS_UNIVERSAL_can)
 	croak("Usage: UNIVERSAL::can(object-ref, method)");
 
     sv = ST(0);
-    name = (char *)SvPV(ST(1),na);
-    rv = &sv_undef;
+    name = (char *)SvPV(ST(1),PL_na);
+    rv = &PL_sv_undef;
 
     if(SvROK(sv)) {
         sv = (SV*)SvRV(sv);
@@ -181,20 +181,20 @@ XS(XS_UNIVERSAL_VERSION)
 
     gvp = pkg ? (GV**)hv_fetch(pkg,"VERSION",7,FALSE) : Null(GV**);
 
-    if (gvp && (gv = *gvp) != (GV*)&sv_undef && (sv = GvSV(gv))) {
+    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (sv = GvSV(gv))) {
         SV *nsv = sv_newmortal();
         sv_setsv(nsv, sv);
         sv = nsv;
         undef = Nullch;
     }
     else {
-        sv = (SV*)&sv_undef;
+        sv = (SV*)&PL_sv_undef;
         undef = "(undef)";
     }
 
     if (items > 1 && (undef || (req = SvNV(ST(1)), req > SvNV(sv))))
 	croak("%s version %s required--this is only version %s",
-	      HvNAME(pkg), SvPV(ST(1),na), undef ? undef : SvPV(sv,na));
+	      HvNAME(pkg), SvPV(ST(1),PL_na), undef ? undef : SvPV(sv,PL_na));
 
     ST(0) = sv;
 

@@ -110,7 +110,7 @@ struct xpvhv {
 				  HeKEY_sv(he) :			\
 				  sv_2mortal(newSVpv(HeKEY(he),		\
 						     HeKLEN(he)))) :	\
-				 &sv_undef)
+				 &PL_sv_undef)
 #define HeSVKEY_set(he,sv)	((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))
 
 #define Nullhek Null(HEK*)

@@ -86,13 +86,19 @@ sub embed ($) {
     my ($sym) = @_;
     hide($sym, "Perl_$sym");
 }
+sub embedvar ($) {
+    my ($sym) = @_;
+#   hide($sym, "Perl_$sym");
+    return '';
+}
+
 sub multon ($$$) {
     my ($sym,$pre,$ptr) = @_;
-    hide($sym, "($ptr$pre$sym)");
+    hide("PL_$sym", "($ptr$pre$sym)");
 }
 sub multoff ($$) {
     my ($sym,$pre) = @_;
-    hide("$pre$sym", $sym);
+    hide("$pre$sym", "PL_$sym");
 }
 
 unlink 'embed.h';
@@ -211,7 +217,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %intrp) {
-    print EM embed($sym);
+    print EM embedvar($sym);
 }
 
 print EM <<'END';
@@ -221,7 +227,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %thread) {
-    print EM embed($sym);
+    print EM embedvar($sym);
 }
 
 print EM <<'END';
@@ -269,7 +275,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %globvar) {
-    print EM embed($sym);
+    print EM embedvar($sym);
 }
 
 print EM <<'END';

@@ -24,7 +24,7 @@ char *	Class
 	int i;
 	CV *cv;
     PPCODE:
-	if (!compcv || !(cv = CvOUTSIDE(compcv)))
+	if (!PL_compcv || !(cv = CvOUTSIDE(PL_compcv)))
 	    croak("can't set attributes outside a subroutine scope");
 	for (i = 1; i < items; i++) {
 	    char *attr = SvPV(ST(i), na);

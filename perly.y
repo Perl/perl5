@@ -85,17 +85,17 @@ dep(void)
 prog	:	/* NULL */
 		{
 #if defined(YYDEBUG) && defined(DEBUGGING)
-		    yydebug = (debug & 1);
+		    yydebug = (PL_debug & 1);
 #endif
-		    expect = XSTATE;
+		    PL_expect = XSTATE;
 		}
 	/*CONTINUED*/	lineseq
 			{ newPROG($2); }
 	;
 
 block	:	'{' remember lineseq '}'
-			{ if (copline > (line_t)$1)
-			      copline = $1;
+			{ if (PL_copline > (line_t)$1)
+			      PL_copline = $1;
 			  $$ = block_end($2, $3); }
 	;
 
@@ -104,8 +104,8 @@ remember:	/* NULL */	/* start a full lexical scope */
 	;
 
 mblock	:	'{' mremember lineseq '}'
-			{ if (copline > (line_t)$1)
-			      copline = $1;
+			{ if (PL_copline > (line_t)$1)
+			      PL_copline = $1;
 			  $$ = block_end($2, $3); }
 	;
 
@@ -120,8 +120,8 @@ lineseq	:	/* NULL */
 	|	lineseq line
 			{   $$ = append_list(OP_LINESEQ,
 				(LISTOP*)$1, (LISTOP*)$2);
-			    pad_reset_pending = TRUE;
-			    if ($1 && $2) hints |= HINT_BLOCK_SCOPE; }
+			    PL_pad_reset_pending = TRUE;
+			    if ($1 && $2) PL_hints |= HINT_BLOCK_SCOPE; }
 	;
 
 line	:	label cond
@@ -133,12 +133,12 @@ line	:	label cond
 			    }
 			    else {
 			      $$ = Nullop;
-			      copline = NOLINE;
+			      PL_copline = NOLINE;
 			    }
-			    expect = XSTATE; }
+			    PL_expect = XSTATE; }
 	|	label sideff ';'
 			{ $$ = newSTATEOP(0, $1, $2);
-			  expect = XSTATE; }
+			  PL_expect = XSTATE; }
 	;
 
 sideff	:	error
@@ -163,18 +163,18 @@ else	:	/* NULL */
 	|	ELSE mblock
 			{ $$ = scope($2); }
 	|	ELSIF '(' mexpr ')' mblock else
-			{ copline = $1;
+			{ PL_copline = $1;
 			    $$ = newSTATEOP(0, Nullch,
 				   newCONDOP(0, $3, scope($5), $6));
-			    hints |= HINT_BLOCK_SCOPE; }
+			    PL_hints |= HINT_BLOCK_SCOPE; }
 	;
 
 cond	:	IF '(' remember mexpr ')' mblock else
-			{ copline = $1;
+			{ PL_copline = $1;
 			    $$ = block_end($3,
 				   newCONDOP(0, $4, scope($6), $7)); }
 	|	UNLESS '(' remember miexpr ')' mblock else
-			{ copline = $1;
+			{ PL_copline = $1;
 			    $$ = block_end($3,
 				   newCONDOP(0, $4, scope($6), $7)); }
 	;
@@ -186,13 +186,13 @@ cont	:	/* NULL */
 	;
 
 loop	:	label WHILE '(' remember mtexpr ')' mblock cont
-			{ copline = $2;
+			{ PL_copline = $2;
 			    $$ = block_end($4,
 				   newSTATEOP(0, $1,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
 						$2, $5, $7, $8))); }
 	|	label UNTIL '(' remember miexpr ')' mblock cont
-			{ copline = $2;
+			{ PL_copline = $2;
 			    $$ = block_end($4,
 				   newSTATEOP(0, $1,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
@@ -214,7 +214,7 @@ loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 					newWHILEOP(0, 1, (LOOP*)Nullop,
 						   $2, scalar($7),
 						   $11, scalar($9)));
-			  copline = $2;
+			  PL_copline = $2;
 			  $$ = block_end($4, newSTATEOP(0, $1, forop)); }
 	|	label block cont  /* a block is a loop that happens once */
 			{ $$ = newSTATEOP(0, $1,
@@ -291,10 +291,10 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 			{ $$ = start_subparse(TRUE, 0); }
 	;
 
-subname	:	WORD	{ char *name = SvPV(((SVOP*)$1)->op_sv, na);
+subname	:	WORD	{ char *name = SvPV(((SVOP*)$1)->op_sv, PL_na);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT"))
-			      CvUNIQUE_on(compcv);
+			      CvUNIQUE_on(PL_compcv);
 			  $$ = $1; }
 	;
 
@@ -304,7 +304,7 @@ proto	:	/* NULL */
 	;
 
 subbody	:	block	{ $$ = $1; }
-	|	';'	{ $$ = Nullop; expect = XSTATE; }
+	|	';'	{ $$ = Nullop; PL_expect = XSTATE; }
 	;
 
 package :	PACKAGE WORD ';'
@@ -314,7 +314,7 @@ package :	PACKAGE WORD ';'
 	;
 
 use	:	USE startsub
-			{ CvUNIQUE_on(compcv); /* It's a BEGIN {} */ }
+			{ CvUNIQUE_on(PL_compcv); /* It's a BEGIN {} */ }
 		    WORD WORD listexpr ';'
 			{ utilize($1, $2, $4, $5, $6); }
 	;
@@ -463,17 +463,17 @@ term	:	term ASSIGNOP term
 			{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($1, OP_AV2ARYLEN));}
 	|	scalar '{' expr ';' '}'	%prec '('
 			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($1), jmaybe($3));
-			    expect = XOPERATOR; }
+			    PL_expect = XOPERATOR; }
 	|	term ARROW '{' expr ';' '}'	%prec '('
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($1),OP_RV2HV),
 					jmaybe($4));
-			    expect = XOPERATOR; }
+			    PL_expect = XOPERATOR; }
 	|	term '{' expr ';' '}'	%prec '('
 			{ assertref($1); $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($1),OP_RV2HV),
 					jmaybe($3));
-			    expect = XOPERATOR; }
+			    PL_expect = XOPERATOR; }
 	|	'(' expr ')' '[' expr ']'	%prec '('
 			{ $$ = newSLICEOP(0, $5, $2); }
 	|	'(' ')' '[' expr ']'	%prec '('
@@ -490,7 +490,7 @@ term	:	term ASSIGNOP term
 				    newLISTOP(OP_HSLICE, 0,
 					list($3),
 					ref(oopsHV($1), OP_HSLICE)));
-			    expect = XOPERATOR; }
+			    PL_expect = XOPERATOR; }
 	|	THING	%prec '('
 			{ $$ = $1; }
 	|	amper
@@ -542,7 +542,7 @@ term	:	term ASSIGNOP term
 				       newCVREF(0, scalar($1)))); }
 	|	LOOPEX
 			{ $$ = newOP($1, OPf_SPECIAL);
-			    hints |= HINT_BLOCK_SCOPE; }
+			    PL_hints |= HINT_BLOCK_SCOPE; }
 	|	LOOPEX term
 			{ $$ = newLOOPEX($1,$2); }
 	|	NOTOP argexpr
@@ -594,7 +594,7 @@ local	:	LOCAL	{ $$ = 0; }
 	;
 
 my_scalar:	scalar
-			{ in_my = 0; $$ = my($1); }
+			{ PL_in_my = 0; $$ = my($1); }
 	;
 
 amper	:	'&' indirob

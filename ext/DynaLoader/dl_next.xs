@@ -191,7 +191,7 @@ static char *dlopen(char *path, int mode /* mode is ignored */)
     if (rld_success) {
 	result = path;
 	/* prevent multiple loads of same file into same process */
-	hv_store(dl_loaded_files, path, strlen(path), &sv_yes, 0);
+	hv_store(dl_loaded_files, path, strlen(path), &PL_sv_yes, 0);
     } else {
 	TransferError(nxerr);
 	result = (char*) 0;

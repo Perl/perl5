@@ -64,7 +64,7 @@ odbm_TIEHASH(dbtype, filename, flags, mode)
 	    New(0, tmpbuf, strlen(filename) + 5, char);
 	    SAVEFREEPV(tmpbuf);
 	    sprintf(tmpbuf,"%s.dir",filename);
-	    if (stat(tmpbuf, &statbuf) < 0) {
+	    if (stat(tmpbuf, &PL_statbuf) < 0) {
 		if (flags & O_CREAT) {
 		    if (mode < 0 || close(creat(tmpbuf,mode)) < 0)
 			croak("ODBM_File: Can't create %s", filename);

@@ -55,7 +55,7 @@ runops_debug(void)
     }
 
     do {
-	if (debug) {
+	if (PL_debug) {
 	    if (watchaddr != 0 && *watchaddr != watchok)
 		PerlIO_printf(Perl_debug_log, "WARNING: %lx changed from %lx to %lx\n",
 		    (long)watchaddr, (long)watchok, (long)*watchaddr);
@@ -87,7 +87,7 @@ debop(OP *o)
 	if (cGVOPo->op_gv) {
 	    sv = NEWSV(0,0);
 	    gv_fullname3(sv, cGVOPo->op_gv, Nullch);
-	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, na));
+	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, PL_na));
 	    SvREFCNT_dec(sv);
 	}
 	else
@@ -116,9 +116,9 @@ STATIC void
 debprof(OP *o)
 {
 #ifdef DEBUGGING
-    if (!profiledata)
-	Newz(000, profiledata, MAXO, U32);
-    ++profiledata[o->op_type];
+    if (!PL_profiledata)
+	Newz(000, PL_profiledata, MAXO, U32);
+    ++PL_profiledata[o->op_type];
 #endif /* DEBUGGING */
 }
 
@@ -127,12 +127,12 @@ debprofdump(void)
 {
 #ifdef DEBUGGING
     unsigned i;
-    if (!profiledata)
+    if (!PL_profiledata)
 	return;
     for (i = 0; i < MAXO; i++) {
-	if (profiledata[i])
+	if (PL_profiledata[i])
 	    PerlIO_printf(Perl_debug_log,
-			  "%5lu %s\n", (unsigned long)profiledata[i],
+			  "%5lu %s\n", (unsigned long)PL_profiledata[i],
                                        op_name[i]);
     }
 #endif	/* DEBUGGING */

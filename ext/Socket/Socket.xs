@@ -85,9 +85,9 @@ my_inet_aton(register const char *cp, struct in_addr *addr)
 				cp++;
 				continue;
 			}
-			if (base == 16 && (s=strchr(hexdigit,c))) {
+			if (base == 16 && (s=strchr(PL_hexdigit,c))) {
 				val = (val << 4) + 
-					((s - hexdigit) & 15);
+					((s - PL_hexdigit) & 15);
 				cp++;
 				continue;
 			}

@@ -25,9 +25,9 @@ dump_all(void)
 #ifdef DEBUGGING
     dTHR;
     PerlIO_setlinebuf(Perl_debug_log);
-    if (main_root)
-	dump_op(main_root);
-    dump_packsubs(defstash);
+    if (PL_main_root)
+	dump_op(PL_main_root);
+    dump_packsubs(PL_defstash);
 #endif	/* DEBUGGING */
 }
 
@@ -52,7 +52,7 @@ dump_packsubs(HV *stash)
 	    if (GvFORM(gv))
 		dump_form(gv);
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
-	      (hv = GvHV(gv)) && HvNAME(hv) && hv != defstash)
+	      (hv = GvHV(gv)) && HvNAME(hv) && hv != PL_defstash)
 		dump_packsubs(hv);		/* nested package */
 	}
     }
@@ -97,7 +97,7 @@ void
 dump_eval(void)
 {
 #ifdef DEBUGGING
-    dump_op(eval_root);
+    dump_op(PL_eval_root);
 #endif	/* DEBUGGING */
 }
 
@@ -119,7 +119,7 @@ dump_op(OP *o)
     }
     else
 	PerlIO_printf(Perl_debug_log, "DONE\n");
-    dumplvl++;
+    PL_dumplvl++;
     if (o->op_targ) {
 	if (o->op_type == OP_NULL)
 	    dump("  (was %s)\n", op_name[o->op_targ]);
@@ -243,7 +243,7 @@ dump_op(OP *o)
 	    ENTER;
 	    SAVEFREESV(tmpsv);
 	    gv_fullname3(tmpsv, cGVOPo->op_gv, Nullch);
-	    dump("GV = %s\n", SvPV(tmpsv, na));
+	    dump("GV = %s\n", SvPV(tmpsv, PL_na));
 	    LEAVE;
 	}
 	else
@@ -312,7 +312,7 @@ dump_op(OP *o)
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
 	    dump_op(kid);
     }
-    dumplvl--;
+    PL_dumplvl--;
     dump("}\n");
 #endif	/* DEBUGGING */
 }
@@ -328,7 +328,7 @@ dump_gv(GV *gv)
 	return;
     }
     sv = sv_newmortal();
-    dumplvl++;
+    PL_dumplvl++;
     PerlIO_printf(Perl_debug_log, "{\n");
     gv_fullname3(sv, gv, Nullch);
     dump("GV_NAME = %s", SvPVX(sv));
@@ -337,7 +337,7 @@ dump_gv(GV *gv)
 	dump("-> %s", SvPVX(sv));
     }
     dump("\n");
-    dumplvl--;
+    PL_dumplvl--;
     dump("}\n");
 #endif	/* DEBUGGING */
 }
@@ -353,7 +353,7 @@ dump_pm(PMOP *pm)
 	return;
     }
     dump("{\n");
-    dumplvl++;
+    PL_dumplvl++;
     if (pm->op_pmflags & PMf_ONCE)
 	ch = '?';
     else
@@ -400,7 +400,7 @@ dump_pm(PMOP *pm)
 	SvREFCNT_dec(tmpsv);
     }
 
-    dumplvl--;
+    PL_dumplvl--;
     dump("}\n");
 #endif	/* DEBUGGING */
 }
@@ -414,7 +414,7 @@ dump(char *pat,...)
     va_list args;
 
     va_start(args, pat);
-    for (i = dumplvl*4; i; i--)
+    for (i = PL_dumplvl*4; i; i--)
 	(void)PerlIO_putc(Perl_debug_log,' ');
     PerlIO_vprintf(Perl_debug_log,pat,args);
     va_end(args);

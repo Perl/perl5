@@ -98,8 +98,8 @@ EXT I32 obj_list_fill INIT(-1);
 
 #define BGET_pvcontents(arg)	arg = pv.xpv_pv
 #define BGET_strconst(arg) STMT_START {	\
-	for (arg = tokenbuf; (*arg = BGET_FGETC()); arg++) /* nothing */; \
-	arg = tokenbuf;			\
+	for (arg = PL_tokenbuf; (*arg = BGET_FGETC()); arg++) /* nothing */; \
+	arg = PL_tokenbuf;			\
     } STMT_END
 
 #define BGET_double(arg) STMT_START {	\
@@ -116,7 +116,7 @@ EXT I32 obj_list_fill INIT(-1);
 #define BGET_svindex(arg) BGET_objindex(arg, svindex)
 #define BGET_opindex(arg) BGET_objindex(arg, opindex)
 
-#define BSET_ldspecsv(sv, arg) sv = specialsv_list[arg]
+#define BSET_ldspecsv(sv, arg) sv = PL_specialsv_list[arg]
 				    
 #define BSET_sv_refcnt_add(svrefcnt, arg)	svrefcnt += arg
 #define BSET_gp_refcnt_add(gprefcnt, arg)	gprefcnt += arg
