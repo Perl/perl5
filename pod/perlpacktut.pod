@@ -459,16 +459,47 @@ to the data length. (But make sure to read L<"Lengths and Widths"> before
 you really code this!)
 
 
+=head2 Byte-order modifiers
+
+In the previous sections we've learned how to use C<n>, C<N>, C<v> and
+C<V> to pack and unpack integers with big- or little-endian byte-order.
+While this is nice, it's still rather limited because it leaves out all
+kinds of signed integers as well as 64-bit integers. For example, if you
+wanted to unpack a sequence of signed big-endian 16-bit integers in a
+platform-independent way, you would have to write:
+
+   my @data = unpack 's*', pack 'S*', unpack 'n*', $buf;
+
+This is ugly. As of Perl 5.8.5, there's a much nicer way to express your
+desire for a certain byte-order: the C<E<gt>> and C<E<lt>> modifiers.
+C<E<gt>> is the big-endian modifier, while C<E<lt>> is the little-endian
+modifier. Using them, we could rewrite the above code as:
+
+   my @data = unpack 's>*', $buf;
+
+As you can see, the "big end" of the arrow touches the C<s>, which is a
+nice way to remember that C<E<gt>> is the big-endian modifier. The same
+obviously works for C<E<lt>>, where the "little end" touches the code.
+
+You will probably find these modifiers even more useful if you have
+to deal with big- or little-endian C structures. Be sure to read
+L<"Packing and Unpacking C Structures"> for more on that.
+
 
 =head2 Floating point Numbers
 
 For packing floating point numbers you have the choice between the
-pack codes C<f> and C<d> which pack into (or unpack from) single-precision or
-double-precision representation as it is provided by your system. (There
+pack codes C<f>, C<d>, C<F> and C<D>. C<f> and C<d> pack into (or unpack
+from) single-precision or double-precision representation as it is provided
+by your system. If your systems supports it, C<D> can be used to pack and
+unpack extended-precision floating point values (C<long double>), which
+can offer even more resolution than C<f> or C<d>. C<F> packs an C<NV>,
+which is the floating point type used by Perl internally. (There
 is no such thing as a network representation for reals, so if you want
 to send your real numbers across computer boundaries, you'd better stick
 to ASCII representation, unless you're absolutely sure what's on the other
-end of the line.)
+end of the line. For the even more adventuresome, you can use the byte-order
+modifiers from the previous section also on floating point codes.)
 
 
 
@@ -818,6 +849,12 @@ section right away with the terse remark that C structures don't
 contain anything else, and therefore you already know all there is to it.
 Sorry, no: read on, please.
 
+If you have to deal with a lot of C structures, and don't want to
+hack all your template strings manually, you'll probably want to have
+a look at the CPAN module C<Convert::Binary::C>. Not only can it parse
+your C source directly, but it also has built-in support for all the
+odds and ends described further on in this section.
+
 =head2 The Alignment Pit
 
 In the consideration of speed against memory requirements the balance
@@ -939,6 +976,32 @@ done by enclosing the appropriate pack code in brackets: C<[s]>. So, here's
 the very best we can do:
 
   my $gappy = pack( 'c x![s] s c x![l!] l!', $c1, $s, $c2, $l );
+
+
+=head2 Dealing with Endian-ness
+
+Now, imagine that we want to pack the data for a machine with a
+different byte-order. First, we'll have to figure out how big the data
+types on the target machine really are. Let's assume that the longs are
+32 bits wide and the shorts are 16 bits wide. You can then rewrite the
+template as:
+
+  my $gappy = pack( 'c x![s] s c x![l] l', $c1, $s, $c2, $l );
+
+If the target machine is little-endian, we could write:
+
+  my $gappy = pack( 'c x![s] s< c x![l] l<', $c1, $s, $c2, $l );
+
+This forces the short and the long members to be little-endian, and is
+just fine if you don't have too many struct members. But we could also
+use the byte-order modifier on a group and write the following:
+
+  my $gappy = pack( '( c x![s] s c x![l] l )<', $c1, $s, $c2, $l );
+
+This is not as short as before, but it makes it more obvious that we
+intend to have little-endian byte-order for a whole group, not only
+for individual template codes. It can also be more readable and easier
+to maintain.
 
 
 =head2 Alignment, Take 2
