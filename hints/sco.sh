@@ -25,7 +25,9 @@ gcc)
 scocc)	;;
 
 *)
-	ccflags="$ccflags -W0 -U M_XENIX"
+	# Apparently, SCO's cc gives rather verbose warnings
+	# Set -w0 to turn them off.
+	ccflags="$ccflags -w0 -U M_XENIX"
 	;;
 esac
 i_varargs=undef
@@ -43,3 +45,32 @@ nm_opt='-p'
 # I have received one report that you can't include utime.h in
 # pp_sys.c.  Uncomment the following line if that happens to you:
 # i_utime=undef
+
+# Apparently, some versions of SCO include both .so and .a libraries,
+# but they don't mix as they do on other ELF systems.  The upshot is
+# that Configure finds -ldl (libdl.so) but 'ld' complains it can't
+# find libdl.a. 
+# I don't know which systems have this feature, so I'll just remove
+# -dl from libswanted for all SCO systems until someone can figure
+# out how to get dynamic loading working on SCO.
+#
+# The output of uname -X on one such system was
+#	System = SCO_SV
+#	Node = xxxxx
+#	Release = 3.2v5.0.0
+#	KernelID = 95/08/08
+#	Machine = Pentium  
+#	BusType = ISA
+#	Serial = xxxxx
+#	Users = 5-user
+#	OEM# = 0
+#	Origin# = 1
+#	NumCPU = 1 
+#
+# The 5.0.0 on the Release= line is probably the thing to watch.
+#	Andy Dougherty <doughera@lafcol.lafayette.edu>
+#	Thu Feb  1 15:06:56 EST 1996
+libswanted=`echo " $libswanted " | sed -e 's/ dl / /'`
+set X $libswanted
+shift
+libswanted="$*"
