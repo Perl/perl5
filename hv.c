@@ -505,6 +505,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		key = (const char*)strupr((char*)key);
 		is_utf8 = 0;
 		hash = 0;
+		keysv = 0;
 
 		if (flags & HVhek_FREEKEY) {
 		    Safefree(keysave);
@@ -547,6 +548,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    key = (const char*)strupr((char*)key);
 		    is_utf8 = 0;
 		    hash = 0;
+		    keysv = 0;
 
 		    if (flags & HVhek_FREEKEY) {
 			Safefree(keysave);
