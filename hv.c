@@ -142,10 +142,9 @@ register U32 hash;
     if (!hv)
 	return 0;
 
-    xhv = (XPVHV*)SvANY(hv);
-
     if (SvRMAGICAL(hv) && mg_find((SV*)hv,'P')) {
 	sv = sv_newmortal();
+	keysv = sv_2mortal(newSVsv(keysv));
 	mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
 	entry = &He;
 	HeVAL(entry) = sv;
@@ -154,11 +153,7 @@ register U32 hash;
 	return entry;
     }
 
-    key = SvPV(keysv, klen);
-    
-    if (!hash)
-	PERL_HASH(hash, key, klen);
-
+    xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array) {
 	if (lval 
 #ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
@@ -169,6 +164,11 @@ register U32 hash;
 	else
 	    return 0;
     }
+
+    key = SvPV(keysv, klen);
+    
+    if (!hash)
+	PERL_HASH(hash, key, klen);
 
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (; entry; entry = HeNEXT(entry)) {
@@ -287,6 +287,7 @@ register U32 hash;
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
+	keysv = sv_2mortal(newSVsv(keysv));
 	mg_copy((SV*)hv, val, (char*)keysv, HEf_SVKEY);
 #ifndef OVERLOAD
 	if (!xhv->xhv_array)
@@ -525,6 +526,7 @@ U32 hash;
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
 	    sv = sv_newmortal();
+	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY); 
 	    magic_existspack(sv, mg_find(sv, 'p'));
 	    return SvTRUE(sv);
@@ -755,6 +757,9 @@ HV *hv;
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     HE *entry = xhv->xhv_eiter;
+#ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
+    if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) prime_env_iter();
+#endif
     if (entry && HeKLEN(entry) == HEf_LAZYDEL)	/* was deleted earlier? */
 	he_free(entry, HvSHAREKEYS(hv));
     xhv->xhv_riter = -1;
