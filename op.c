@@ -5650,17 +5650,21 @@ Perl_peep(pTHX_ register OP *o)
 	    if (cSVOPo->op_private & OPpCONST_STRICT)
 		no_bareword_allowed(o);
 	    /* FALL THROUGH */
-	case OP_CONCAT:
-	case OP_JOIN:
 	case OP_UC:
 	case OP_UCFIRST:
 	case OP_LC:
 	case OP_LCFIRST:
+	    if ( o->op_next && o->op_next->op_type == OP_STRINGIFY
+		 && !(o->op_next->op_private & OPpTARGET_MY) )
+		null(o->op_next);
+	    o->op_seq = PL_op_seqmax++;
+	    break;
+	case OP_CONCAT:
+	case OP_JOIN:
 	case OP_QUOTEMETA:
 	    if (o->op_next && o->op_next->op_type == OP_STRINGIFY) {
 		if (o->op_next->op_private & OPpTARGET_MY) {
-		    if ((o->op_type == OP_CONST) /* no target */
-			|| (o->op_flags & OPf_STACKED) /* chained concats */
+		    if ((o->op_flags & OPf_STACKED) /* chained concats */
 			|| (o->op_type == OP_CONCAT
 	    /* Concat has problems if target is equal to right arg. */
 			    && (((LISTOP*)o)->op_first->op_sibling->op_type
