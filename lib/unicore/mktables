@@ -545,7 +545,7 @@ sub mapping {
 %utf8::${name} =
 (
 EOT
-        for my $i (sort keys %$map) {
+        for my $i (sort { lc $a cmp lc $b } keys %$map) {
 	    my $pat = $i;
 	    # Here is the 'fuzzification': accept any space,
 	    # dash, or underbar where in the official name
@@ -555,7 +555,7 @@ EOT
 	    # The prefix length of 2 is enough spread,
 	    # and besides, we have 'Yi' as an In category.
 	    push @{$pat{lc(substr($i, 0, 2))}}, [ $i, $pat ];
-	    print $fh "'$i' => '$map->{$i}',\n";
+	    printf $fh "%-45s => '$map->{$i}',\n", "'$i'";
 	}
         print $fh <<EOT;
 );
