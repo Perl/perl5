@@ -326,9 +326,11 @@ exp		exp			ck_fun		fstu	S?
 log		log			ck_fun		fstu	S?
 sqrt		sqrt			ck_fun		fstu	S?
 
+# Lowbrow math.
+
 int		int			ck_fun		fstu	S?
-hex		hex			ck_fun		istu	S?
-oct		oct			ck_fun		istu	S?
+hex		hex			ck_fun		fstu	S?
+oct		oct			ck_fun		fstu	S?
 abs		abs			ck_fun		fstu	S?
 
 # String stuff.
