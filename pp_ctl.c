@@ -2984,9 +2984,13 @@ PP(pp_require)
     SAVEHINTS();
     PL_hints = 0;
     SAVEPPTR(PL_compiling.cop_warnings);
-    PL_compiling.cop_warnings = ((PL_dowarn & G_WARN_ALL_ON) ? WARN_ALL 
-							     : WARN_NONE);
- 
+    if (PL_dowarn & G_WARN_ALL_ON)
+        PL_compiling.cop_warnings = WARN_ALL ;
+    else if (PL_dowarn & G_WARN_ALL_OFF)
+        PL_compiling.cop_warnings = WARN_NONE ;
+    else 
+        PL_compiling.cop_warnings = WARN_STD ;
+    
     /* switch to eval mode */
 
     push_return(PL_op->op_next);
@@ -3048,8 +3052,7 @@ PP(pp_entereval)
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
     SAVEPPTR(PL_compiling.cop_warnings);
-    if (PL_compiling.cop_warnings != WARN_ALL 
-	&& PL_compiling.cop_warnings != WARN_NONE){
+    if (!specialWARN(PL_compiling.cop_warnings)) {
         PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
         SAVEFREESV(PL_compiling.cop_warnings) ;
     }

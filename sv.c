@@ -205,7 +205,9 @@ S_del_sv(pTHX_ SV *p)
 		ok = 1;
 	}
 	if (!ok) {
-	    Perl_warn(aTHX_ "Attempt to free non-arena SV: 0x%lx", (unsigned long)p);
+	    if (ckWARN_d(WARN_INTERNAL))	
+	        Perl_warner(aTHX_ WARN_INTERNAL,
+		       "Attempt to free non-arena SV: 0x%lx", (unsigned long)p);
 	    return;
 	}
     }
@@ -2966,10 +2968,11 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
 void
 Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 {
+    dTHR;
     U32 refcnt = SvREFCNT(sv);
     SV_CHECK_THINKFIRST(sv);
-    if (SvREFCNT(nsv) != 1)
-	Perl_warn(aTHX_ "Reference miscount in sv_replace()");
+    if (SvREFCNT(nsv) != 1 && ckWARN_d(WARN_INTERNAL))
+	Perl_warner(aTHX_ WARN_INTERNAL, "Reference miscount in sv_replace()");
     if (SvMAGICAL(sv)) {
 	if (SvMAGICAL(nsv))
 	    mg_free(nsv);
@@ -3186,6 +3189,7 @@ Perl_sv_newref(pTHX_ SV *sv)
 void
 Perl_sv_free(pTHX_ SV *sv)
 {
+    dTHR;
     int refcount_is_zero;
 
     if (!sv)
@@ -3200,7 +3204,8 @@ Perl_sv_free(pTHX_ SV *sv)
 	    SvREFCNT(sv) = (~(U32)0)/2;
 	    return;
 	}
-	Perl_warn(aTHX_ "Attempt to free unreferenced scalar");
+	if (ckWARN_d(WARN_INTERNAL))
+	    Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free unreferenced scalar");
 	return;
     }
     ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
@@ -3208,7 +3213,9 @@ Perl_sv_free(pTHX_ SV *sv)
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
-	Perl_warn(aTHX_ "Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
+	if (ckWARN_d(WARN_DEBUGGING))
+	Perl_warner(aTHX_ WARN_DEBUGGING,
+	       "Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
 	return;
     }
 #endif
@@ -3314,7 +3321,9 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
 	++len;
     }
     if (s != send) {
-	Perl_warn(aTHX_ "Malformed UTF-8 character");
+        dTHR;
+	if (ckWARN_d(WARN_UTF8))    
+	    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
 	--len;
     }
     *offsetp = len;
@@ -4051,12 +4060,14 @@ Perl_newRV(pTHX_ SV *tmpRef)
 SV *
 Perl_newSVsv(pTHX_ register SV *old)
 {
+    dTHR;
     register SV *sv;
 
     if (!old)
 	return Nullsv;
     if (SvTYPE(old) == SVTYPEMASK) {
-	Perl_warn(aTHX_ "semi-panic: attempt to dup freed string");
+        if (ckWARN_d(WARN_INTERNAL))
+	    Perl_warner(aTHX_ WARN_INTERNAL, "semi-panic: attempt to dup freed string");
 	return Nullsv;
     }
     new_SV(sv);

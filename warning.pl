@@ -32,6 +32,10 @@ my $tree = {
        	 			'deprecated'	=> DEFAULT_OFF,
        	 			'printf'	=> DEFAULT_OFF,
 			   },
+       	 'severe'	=> { 	'inplace'	=> DEFAULT_ON,
+	 			'internal'	=> DEFAULT_ON,
+         			'debugging'	=> DEFAULT_ON,
+	 		   },
        	 'void'		=> DEFAULT_OFF,
        	 'recursion'	=> DEFAULT_OFF,
        	 'redefine'	=> DEFAULT_OFF,
@@ -39,7 +43,7 @@ my $tree = {
          'uninitialized'=> DEFAULT_OFF,
        	 'once'		=> DEFAULT_OFF,
        	 'misc'		=> DEFAULT_OFF,
-       	 'default'	=> DEFAULT_ON,
+       	 #'default'	=> DEFAULT_ON,
 	} ;
 
 
@@ -130,62 +134,62 @@ print WARN <<'EOM' ;
 */
 
 
-#define Off(x)                  ((x) / 8)
-#define Bit(x)                  (1 << ((x) % 8))
+#define Off(x)			((x) / 8)
+#define Bit(x)			(1 << ((x) % 8))
 #define IsSet(a, x)		((a)[Off(x)] & Bit(x))
 
+
 #define G_WARN_OFF		0 	/* $^W == 0 */
-#define G_WARN_ON		1	/* $^W != 0 */
+#define G_WARN_ON		1	/* -w flag and $^W != 0 */
 #define G_WARN_ALL_ON		2	/* -W flag */
 #define G_WARN_ALL_OFF		4	/* -X flag */
+#define G_WARN_ONCE		8	/* set if 'once' ever enabled */
 #define G_WARN_ALL_MASK		(G_WARN_ALL_ON|G_WARN_ALL_OFF)
 
-#if 1
+#define WARN_STD		Nullsv
+#define WARN_ALL		(&PL_sv_yes)	/* use warning 'all' */
+#define WARN_NONE		(&PL_sv_no)	/* no  warning 'all' */
 
-/* Part of the logic below assumes that WARN_NONE is NULL */
+#define specialWARN(x)		((x) == WARN_STD || (x) == WARN_ALL ||	\
+				 (x) == WARN_NONE)
 
 #define ckDEAD(x)							\
-	   (PL_curcop->cop_warnings != WARN_ALL &&			\
-	    PL_curcop->cop_warnings != WARN_NONE &&			\
+	   ( ! specialWARN(PL_curcop->cop_warnings) &&			\
 	    IsSet(SvPVX(PL_curcop->cop_warnings), 2*x+1))
 
 #define ckWARN(x)							\
-	( (PL_curcop->cop_warnings &&					\
+	( (PL_curcop->cop_warnings != WARN_STD &&			\
+	   PL_curcop->cop_warnings != WARN_NONE &&			\
 	      (PL_curcop->cop_warnings == WARN_ALL ||			\
 	       IsSet(SvPVX(PL_curcop->cop_warnings), 2*x) ) )		\
-	  || (PL_dowarn & G_WARN_ON) )
+	  || (PL_curcop->cop_warnings == WARN_STD && PL_dowarn & G_WARN_ON) )
 
 #define ckWARN2(x,y)							\
-	  ( (PL_curcop->cop_warnings &&					\
+	  ( (PL_curcop->cop_warnings != WARN_STD  &&			\
+	     PL_curcop->cop_warnings != WARN_NONE &&			\
 	      (PL_curcop->cop_warnings == WARN_ALL ||			\
 	        IsSet(SvPVX(PL_curcop->cop_warnings), 2*x)  ||		\
 	        IsSet(SvPVX(PL_curcop->cop_warnings), 2*y) ) ) 		\
-	    ||	(PL_dowarn & G_WARN_ON) )
+	    ||	(PL_curcop->cop_warnings == WARN_STD && PL_dowarn & G_WARN_ON) )
 
-#else
+#define ckWARN_d(x)							\
+	  (PL_curcop->cop_warnings == WARN_STD ||			\
+	   PL_curcop->cop_warnings == WARN_ALL ||			\
+	     (PL_curcop->cop_warnings != WARN_NONE &&			\
+	      IsSet(SvPVX(PL_curcop->cop_warnings), 2*x) ) )
 
-#define ckDEAD(x)							\
-	   (PL_curcop->cop_warnings != WARN_ALL &&			\
-	    PL_curcop->cop_warnings != WARN_NONE &&			\
-	    SvPVX(PL_curcop->cop_warnings)[Off(2*x+1)] & Bit(2*x+1) )
+#define ckWARN2_d(x,y)							\
+	  (PL_curcop->cop_warnings == WARN_STD ||			\
+	   PL_curcop->cop_warnings == WARN_ALL ||			\
+	     (PL_curcop->cop_warnings != WARN_NONE &&			\
+	        (IsSet(SvPVX(PL_curcop->cop_warnings), 2*x)  ||		\
+	         IsSet(SvPVX(PL_curcop->cop_warnings), 2*y) ) ) )
 
-#define ckWARN(x)							\
-	( (PL_dowarn & G_WARN_ON) || ( (PL_dowarn & G_WARN_DISABLE) && 	\
-	  PL_curcop->cop_warnings &&					\
-	  ( PL_curcop->cop_warnings == WARN_ALL ||			\
-	    SvPVX(PL_curcop->cop_warnings)[Off(2*x)] & Bit(2*x)  ) ) )
 
-#define ckWARN2(x,y)							\
-	( (PL_dowarn & G_WARN_ON) || ( (PL_dowarn & G_WARN_DISABLE) && 	\
-	  PL_curcop->cop_warnings &&					\
-	  ( PL_curcop->cop_warnings == WARN_ALL ||			\
-	    SvPVX(PL_curcop->cop_warnings)[Off(2*x)] & Bit(2*x) || 	\
-	    SvPVX(PL_curcop->cop_warnings)[Off(2*y)] & Bit(2*y) ) ) ) 
-
-#endif
-
-#define WARN_NONE		NULL
-#define WARN_ALL		(&PL_sv_yes)
+#define isLEXWARN_on 	(PL_curcop->cop_warnings != WARN_STD)
+#define isLEXWARN_off	(PL_curcop->cop_warnings == WARN_STD)
+#define isWARN_ONCE	(PL_dowarn & (G_WARN_ON|G_WARN_ONCE))
+#define isWARN_on(c,x)	(IsSet(SvPVX(c), 2*(x)))
 
 EOM
 
@@ -269,31 +273,17 @@ warning - Perl pragma to control optional warnings
 =head1 SYNOPSIS
 
     use warning;
+    no warning;
 
     use warning "all";
-    use warning "deprecated";
-
-    use warning;
-    no warning "unsafe";
+    no warning "all";
 
 =head1 DESCRIPTION
 
-If no import list is supplied, all possible restrictions are assumed.
-(This is the safest mode to operate in, but is sometimes too strict for
-casual programming.)  Currently, there are three possible things to be
-strict about:  
+If no import list is supplied, all possible warnings are either enabled
+or disabled.
 
-=over 6
-
-=item C<warning deprecated>
-
-This generates a runtime error if you use deprecated 
-
-    use warning 'deprecated';
-
-=back
-
-See L<perlmod/Pragmatic Modules>.
+See L<perlmod/Pragmatic Modules> and L<perllexwarn>.
 
 
 =cut

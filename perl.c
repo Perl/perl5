@@ -448,18 +448,20 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(hv);
 
     FREETMPS;
-    if (destruct_level >= 2) {
+    if (destruct_level >= 2 && ckWARN_d(WARN_INTERNAL)) {
 	if (PL_scopestack_ix != 0)
-	    Perl_warn(aTHX_ "Unbalanced scopes: %ld more ENTERs than LEAVEs\n",
+	    Perl_warner(aTHX_ WARN_INTERNAL,
+	         "Unbalanced scopes: %ld more ENTERs than LEAVEs\n",
 		 (long)PL_scopestack_ix);
 	if (PL_savestack_ix != 0)
-	    Perl_warn(aTHX_ "Unbalanced saves: %ld more saves than restores\n",
+	    Perl_warner(aTHX_ WARN_INTERNAL,
+		 "Unbalanced saves: %ld more saves than restores\n",
 		 (long)PL_savestack_ix);
 	if (PL_tmps_floor != -1)
-	    Perl_warn(aTHX_ "Unbalanced tmps: %ld more allocs than frees\n",
+	    Perl_warner(aTHX_ WARN_INTERNAL,"Unbalanced tmps: %ld more allocs than frees\n",
 		 (long)PL_tmps_floor + 1);
 	if (cxstack_ix != -1)
-	    Perl_warn(aTHX_ "Unbalanced context: %ld more PUSHes than POPs\n",
+	    Perl_warner(aTHX_ WARN_INTERNAL,"Unbalanced context: %ld more PUSHes than POPs\n",
 		 (long)cxstack_ix + 1);
     }
 
@@ -488,8 +490,9 @@ perl_destruct(pTHXx)
 	array = HvARRAY(PL_strtab);
 	hent = array[0];
 	for (;;) {
-	    if (hent) {
-		Perl_warn(aTHX_ "Unbalanced string table refcount: (%d) for \"%s\"",
+	    if (hent && ckWARN_d(WARN_INTERNAL)) {
+		Perl_warner(aTHX_ WARN_INTERNAL,
+		     "Unbalanced string table refcount: (%d) for \"%s\"",
 		     HeVAL(hent) - Nullsv, HeKEY(hent));
 		HeVAL(hent) = Nullsv;
 		hent = HeNEXT(hent);
@@ -503,8 +506,8 @@ perl_destruct(pTHXx)
     }
     SvREFCNT_dec(PL_strtab);
 
-    if (PL_sv_count != 0)
-	Perl_warn(aTHX_ "Scalars leaked: %ld\n", (long)PL_sv_count);
+    if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
+	Perl_warner(aTHX_ WARN_INTERNAL,"Scalars leaked: %ld\n", (long)PL_sv_count);
 
     sv_free_arenas();
 
@@ -988,7 +991,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (PL_do_undump)
 	my_unexec();
 
-    if (ckWARN(WARN_ONCE))
+    if (isWARN_ONCE)
 	gv_check(PL_defstash);
 
     LEAVE;
@@ -1582,6 +1585,7 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	return s;
     case 'D':
+    {	
 #ifdef DEBUGGING
 	forbid_setid("-D");
 	if (isALPHA(s[1])) {
@@ -1597,11 +1601,15 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	PL_debug |= 0x80000000;
 #else
-	Perl_warn(aTHX_ "Recompile perl with -DDEBUGGING to use -D switch\n");
+	dTHR;
+	if (ckWARN_d(WARN_DEBUGGING))
+	    Perl_warner(aTHX_ WARN_DEBUGGING,
+	           "Recompile perl with -DDEBUGGING to use -D switch\n");
 	for (s++; isALNUM(*s); s++) ;
 #endif
 	/*SUPPRESS 530*/
 	return s;
+    }	
     case 'h':
 	usage(PL_origargv[0]);    
 	PerlProc_exit(0);

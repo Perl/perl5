@@ -465,6 +465,7 @@ S_check_uni(pTHX)
     char *s;
     char ch;
     char *t;
+    dTHR;
 
     if (PL_oldoldbufptr != PL_last_uni)
 	return;
@@ -473,10 +474,14 @@ S_check_uni(pTHX)
     for (s = PL_last_uni; isALNUM_lazy(s) || *s == '-'; s++) ;
     if ((t = strchr(s, '(')) && t < PL_bufptr)
 	return;
-    ch = *s;
-    *s = '\0';
-    Perl_warn(aTHX_ "Warning: Use of \"%s\" without parens is ambiguous", PL_last_uni);
-    *s = ch;
+    if (ckWARN_d(WARN_AMBIGUOUS)){
+        ch = *s;
+        *s = '\0';
+        Perl_warner(aTHX_ WARN_AMBIGUOUS, 
+		   "Warning: Use of \"%s\" without parens is ambiguous", 
+		   PL_last_uni);
+        *s = ch;
+    }
 }
 
 #ifdef CRIPPLED_CC
@@ -1433,10 +1438,12 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     if (!SvUPGRADE(datasv, SVt_PVIO))
         Perl_die(aTHX_ "Can't upgrade filter_add data to SVt_PVIO");
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
+#ifdef DEBUGGING
     if (PL_filter_debug) {
 	STRLEN n_a;
 	Perl_warn(aTHX_ "filter_add func %p (%s)", funcp, SvPV(datasv, n_a));
     }
+#endif /* DEBUGGING */
     av_unshift(PL_rsfp_filters, 1);
     av_store(PL_rsfp_filters, 0, datasv) ;
     return(datasv);
@@ -1447,8 +1454,10 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 void
 Perl_filter_del(pTHX_ filter_t funcp)
 {
+#ifdef DEBUGGING
     if (PL_filter_debug)
 	Perl_warn(aTHX_ "filter_del func %p", funcp);
+#endif /* DEBUGGING */
     if (!PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
@@ -1478,8 +1487,10 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     if (idx > AvFILLp(PL_rsfp_filters)){       /* Any more filters?	*/
 	/* Provide a default input filter to make life easy.	*/
 	/* Note that we append to the line. This is handy.	*/
+#ifdef DEBUGGING
 	if (PL_filter_debug)
 	    Perl_warn(aTHX_ "filter_read %d: from rsfp\n", idx);
+#endif /* DEBUGGING */
 	if (maxlen) { 
  	    /* Want a block */
 	    int len ;
@@ -1507,17 +1518,21 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     }
     /* Skip this filter slot if filter has been deleted	*/
     if ( (datasv = FILTER_DATA(idx)) == &PL_sv_undef){
+#ifdef DEBUGGING
 	if (PL_filter_debug)
 	    Perl_warn(aTHX_ "filter_read %d: skipped (filter deleted)\n", idx);
+#endif /* DEBUGGING */
 	return FILTER_READ(idx+1, buf_sv, maxlen); /* recurse */
     }
     /* Get function pointer hidden within datasv	*/
     funcp = (filter_t)IoDIRP(datasv);
+#ifdef DEBUGGING
     if (PL_filter_debug) {
 	STRLEN n_a;
 	Perl_warn(aTHX_ "filter_read %d: via function %p (%s)\n",
 		idx, funcp, SvPV(datasv,n_a));
     }
+#endif /* DEBUGGING */
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
@@ -3188,8 +3203,9 @@ Perl_yylex(pTHX)
 
 		if (gv && GvCVu(gv)) {
 		    CV* cv;
-		    if (lastchar == '-')
-			Perl_warn(aTHX_ "Ambiguous use of -%s resolved as -&%s()",
+		    if (lastchar == '-' && ckWARN_d(WARN_AMBIGUOUS))
+			Perl_warner(aTHX_ WARN_AMBIGUOUS,
+				"Ambiguous use of -%s resolved as -&%s()",
 				PL_tokenbuf, PL_tokenbuf);
 		    /* Check for a constant sub */
 		    cv = GvCV(gv);
@@ -3243,10 +3259,13 @@ Perl_yylex(pTHX)
 		}
 
 	    safe_bareword:
-		if (lastchar && strchr("*%&", lastchar)) {
-		    Perl_warn(aTHX_ "Operator or semicolon missing before %c%s",
+		if (lastchar && strchr("*%&", lastchar) && 
+			ckWARN_d(WARN_AMBIGUOUS)) {
+		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
+		  	"Operator or semicolon missing before %c%s",
 			lastchar, PL_tokenbuf);
-		    Perl_warn(aTHX_ "Ambiguous use of %c resolved as operator %c",
+		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
+			"Ambiguous use of %c resolved as operator %c",
 			lastchar, lastchar);
 		}
 		TOKEN(WORD);
@@ -3736,9 +3755,10 @@ Perl_yylex(pTHX)
 		char *t;
 		for (d = s; isALNUM_lazy(d); d++) ;
 		t = skipspace(d);
-		if (strchr("|&*+-=!?:.", *t))
-		    Perl_warn(aTHX_ "Precedence problem: open %.*s should be open(%.*s)",
-			d-s,s, d-s,s);
+		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_AMBIGUOUS))
+		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
+			   "Precedence problem: open %.*s should be open(%.*s)",
+			    d-s,s, d-s,s);
 	    }
 	    LOP(OP_OPEN,XTERM);
 
@@ -5983,6 +6003,7 @@ Perl_scan_num(pTHX_ char *start)
 	    UV u;
 	    I32 shift;
 	    bool overflowed = FALSE;
+    	    dTHR;
 
 	    /* check for hex */
 	    if (s[1] == 'x') {
@@ -6050,8 +6071,8 @@ Perl_scan_num(pTHX_ char *start)
 		  digit:
 		    n = u << shift;	/* make room for the digit */
 		    if (!overflowed && (n >> shift) != u
-			&& !(PL_hints & HINT_NEW_BINARY)) {
-			Perl_warn(aTHX_ "Integer overflow in %s number",
+			&& !(PL_hints & HINT_NEW_BINARY) && ckWARN_d(WARN_UNSAFE)) {
+			Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in %s number",
 			     (shift == 4) ? "hex"
 			     : ((shift == 3) ? "octal" : "binary"));
 			overflowed = TRUE;

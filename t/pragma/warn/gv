@@ -14,13 +14,24 @@
 	$a = ${"#"} ;
  	$a = ${"*"} ;
 
+  Mandatory Warnings ALL TODO
+  ------------------
 
+    Had to create %s unexpectedly		[gv_fetchpv]
+    Attempt to free unreferenced glob pointers	[gp_free]
+    
 __END__
 # gv.c
 use warning 'misc' ;
 @ISA = qw(Fred); joe()
 EXPECT
 Can't locate package Fred for @main::ISA at - line 3.
+Undefined subroutine &main::joe called at - line 3.
+########
+# gv.c
+no warning 'misc' ;
+@ISA = qw(Fred); joe()
+EXPECT
 Undefined subroutine &main::joe called at - line 3.
 ########
 # gv.c
@@ -33,6 +44,9 @@ Use of inherited AUTOLOAD for non-method main::fred() is deprecated at - line 5.
 ########
 # gv.c
 use warning 'deprecated' ;
+$a = ${"#"};
+$a = ${"*"};
+no warning 'deprecated' ;
 $a = ${"#"};
 $a = ${"*"};
 EXPECT

@@ -18,6 +18,12 @@ do fred(1) ;
 $a = "fred" ; 
 do $a() ;
 do $a(1) ;
+no warning 'deprecated' ;
+do fred() ;
+do fred(1) ;
+$a = "fred" ; 
+do $a() ;
+do $a(1) ;
 EXPECT
 Use of "do" to call subroutines is deprecated at - line 4.
 Use of "do" to call subroutines is deprecated at - line 5.

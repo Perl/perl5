@@ -71,9 +71,24 @@ Not enough format arguments at - line 5.
 1
 ########
 # pp_ctl.c
+no warning 'syntax' ;
+format =
+@<<< @<<<
+1
+.
+write ;
+EXPECT
+1
+########
+# pp_ctl.c
 use warning 'unsafe' ;
 $_ = "abc" ;
  
+while ($i ++ == 0)
+{
+    s/ab/last/e ;
+}
+no warning 'unsafe' ;
 while ($i ++ == 0)
 {
     s/ab/last/e ;
@@ -85,12 +100,20 @@ Exiting substitution via last at - line 7.
 use warning 'unsafe' ;
 sub fred { last }
 { fred() }
+no warning 'unsafe' ;
+sub joe { last }
+{ joe() }
 EXPECT
 Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
-use warning 'unsafe' ;
-{ eval "last;" } 
+{
+  eval "use warning 'unsafe' ; last;" 
+}
+print STDERR $@ ;
+{
+  eval "no warning 'unsafe' ;last;" 
+} 
 print STDERR $@ ;
 EXPECT
 Exiting eval via last at (eval 1) line 1.
@@ -98,6 +121,8 @@ Exiting eval via last at (eval 1) line 1.
 # pp_ctl.c
 use warning 'unsafe' ;
 @a = (1,2) ;
+@b = sort { last } @a ;
+no warning 'unsafe' ;
 @b = sort { last } @a ;
 EXPECT
 Exiting pseudo-block via last at - line 4.
@@ -111,6 +136,11 @@ while ($i ++ == 0)
 {
     s/ab/last fred/e ;
 }
+no warning 'unsafe' ;
+while ($i ++ == 0)
+{
+    s/ab/last fred/e ;
+}
 EXPECT
 Exiting substitution via last at - line 7.
 ########
@@ -118,12 +148,18 @@ Exiting substitution via last at - line 7.
 use warning 'unsafe' ;
 sub fred { last joe }
 joe: { fred() }
+no warning 'unsafe' ;
+sub Fred { last Joe }
+Joe: { Fred() }
 EXPECT
 Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
-use warning 'unsafe' ;
-joe: { eval "last joe;" }
+joe:
+{ eval "use warning 'unsafe' ; last joe;" }
+print STDERR $@ ;
+Joe:
+{ eval "no warning 'unsafe' ; last Joe;" }
 print STDERR $@ ;
 EXPECT
 Exiting eval via last at (eval 1) line 1.
@@ -132,6 +168,8 @@ Exiting eval via last at (eval 1) line 1.
 use warning 'unsafe' ;
 @a = (1,2) ;
 fred: @b = sort { last fred } @a ;
+no warning 'unsafe' ;
+Fred: @b = sort { last Fred } @a ;
 EXPECT
 Exiting pseudo-block via last at - line 4.
 Label not found for "last fred" at - line 4.
@@ -149,6 +187,18 @@ EXPECT
 Deep recursion on subroutine "main::fred" at - line 6.
 ########
 # pp_ctl.c
+no warning 'recursion' ;
+BEGIN { warn "PREFIX\n" ;}
+sub fred
+{
+    goto &fred() if $a++ < 200
+}
+ 
+goto &fred()
+EXPECT
+Can't find label
+########
+# pp_ctl.c
 use warning 'unsafe' ;
 package Foo;
 DESTROY { die "@{$_[0]} foo bar" }
@@ -157,3 +207,12 @@ DESTROY { die "@{$_[0]} foo bar" }
 EXPECT
 	(in cleanup) A foo bar at - line 4.
 	(in cleanup) B foo bar at - line 4.
+########
+# pp_ctl.c
+no warning 'unsafe' ;
+package Foo;
+DESTROY { die "@{$_[0]} foo bar" }
+{ bless ['A'], 'Foo' for 1..10 }
+{ bless ['B'], 'Foo' for 1..10 }
+EXPECT
+

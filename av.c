@@ -25,8 +25,8 @@ Perl_av_reify(pTHX_ AV *av)
     if (AvREAL(av))
 	return;
 #ifdef DEBUGGING
-    if (SvTIED_mg((SV*)av, 'P'))
-	Perl_warn(aTHX_ "av_reify called on tied array");
+    if (SvTIED_mg((SV*)av, 'P') && ckWARN_d(WARN_DEBUGGING))
+	Perl_warner(aTHX_ WARN_DEBUGGING, "av_reify called on tied array");
 #endif
     key = AvMAX(av) + 1;
     while (key > AvFILLp(av) + 1)
@@ -325,8 +325,8 @@ Perl_av_clear(pTHX_ register AV *av)
     SV** ary;
 
 #ifdef DEBUGGING
-    if (SvREFCNT(av) <= 0) {
-	Perl_warn(aTHX_ "Attempt to clear deleted array");
+    if (SvREFCNT(av) <= 0 && ckWARN_d(WARN_DEBUGGING)) {
+	Perl_warner(aTHX_ WARN_DEBUGGING, "Attempt to clear deleted array");
     }
 #endif
     if (!av)

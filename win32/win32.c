@@ -546,8 +546,9 @@ do_aspawn(pTHX_ void *vreally, void **vmark, void **vsp)
 
     if (flag != P_NOWAIT) {
 	if (status < 0) {
-	    if (PL_dowarn)
-		Perl_warn(aTHX_ "Can't spawn \"%s\": %s", argv[0], strerror(errno));
+    	    dTHR;
+	    if (ckWARN(WARN_EXEC))
+		Perl_warner(aTHX_ WARN_EXEC, "Can't spawn \"%s\": %s", argv[0], strerror(errno));
 	    status = 255 * 256;
 	}
 	else
@@ -634,8 +635,9 @@ do_spawn2(pTHX_ char *cmd, int exectype)
     }
     if (exectype != EXECF_SPAWN_NOWAIT) {
 	if (status < 0) {
-	    if (PL_dowarn)
-		Perl_warn(aTHX_ "Can't %s \"%s\": %s",
+    	    dTHR;
+	    if (ckWARN(WARN_EXEC))
+		Perl_warner(aTHX_ WARN_EXEC, "Can't %s \"%s\": %s",
 		     (exectype == EXECF_EXEC ? "exec" : "spawn"),
 		     cmd, strerror(errno));
 	    status = 255 * 256;

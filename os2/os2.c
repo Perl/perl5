@@ -795,8 +795,8 @@ U32 addflag;
 		goto retry;
 	    }
 	}
-	if (rc < 0 && PL_dowarn)
-	    warn("Can't %s \"%s\": %s\n", 
+	if (rc < 0 && ckWARN(WARN_EXEC))
+	    Perl_warner(aTHX_ WARN_EXEC, "Can't %s \"%s\": %s\n", 
 		 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
 		  ? "spawn" : "exec"),
 		 PL_Argv[0], Strerror(errno));
@@ -903,8 +903,8 @@ do_spawn3(char *cmd, int execf, int flag)
 		/* In the ak code internal P_NOWAIT is P_WAIT ??? */
 		rc = result(P_WAIT,
 			    spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
-		if (rc < 0 && PL_dowarn)
-		    warn("Can't %s \"%s\": %s", 
+		if (rc < 0 && ckWARN(WARN_EXEC))
+		    Perl_warner(aTHX_ WARN_EXEC, "Can't %s \"%s\": %s", 
 			 (execf == EXECF_SPAWN ? "spawn" : "exec"),
 			 shell, Strerror(errno));
 		if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */

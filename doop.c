@@ -788,8 +788,8 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	    s = send - 1;
 	    while ((*s & 0xc0) == 0x80)
 		--s;
-	    if (UTF8SKIP(s) != send - s)
-		Perl_warn(aTHX_ "Malformed UTF-8 character");
+	    if (UTF8SKIP(s) != send - s && ckWARN_d(WARN_UTF8))
+		Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
 	    sv_setpvn(astr, s, send - s);
 	    *s = '\0';
 	    SvCUR_set(sv, s - start);

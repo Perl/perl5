@@ -19,6 +19,8 @@ __END__
 use warning 'unsafe' ;
 my $a = "ABC123" ; 
 $a =~ /(?=a)*/ ;
+no warning 'unsafe' ;
+$a =~ /(?=a)*/ ;
 EXPECT
 (?=a)* matches null string many times at - line 4.
 ########
@@ -26,12 +28,18 @@ EXPECT
 use warning 'unsafe' ;
 $_ = "" ;
 /(?=a)?/;
+no warning 'unsafe' ;
+/(?=a)?/;
 EXPECT
 Strange *+?{} on zero-length expression at - line 4.
 ########
 # regcomp.c
 use warning 'unsafe' ;
 $_ = "" ;
+/[a[:xyz:]b]/;
+/[a[.xyz.]b]/;
+/[a[=xyz=]b]/;
+no warning 'unsafe' ;
 /[a[:xyz:]b]/;
 /[a[.xyz.]b]/;
 /[a[=xyz=]b]/;
@@ -44,6 +52,10 @@ Character class syntax [= =] is reserved for future extensions at - line 6.
 use warning 'unsafe' ; 
 # use utf8 ; # Note this line should be uncommented when utf8 gets fixed.
 $_ = "" ;
+/[a[:xyz:]b]/;
+/[a[.xyz.]b]/;
+/[a[=xyz=]b]/;
+no warning 'unsafe' ;
 /[a[:xyz:]b]/;
 /[a[.xyz.]b]/;
 /[a[=xyz=]b]/;

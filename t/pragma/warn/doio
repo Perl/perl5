@@ -41,34 +41,61 @@
   Can't exec \"%s\": %s 
 
 
+  Mandatory Warnings ALL TODO
+  ------------------
+  Can't do inplace edit: %s is not a regular file
+     edit a directory
+
+  Can't do inplace edit: %s would not be unique
+  Can't rename %s to %s: %s, skipping file
+  Can't rename %s to %s: %s, skipping file
+  Can't remove %s: %s, skipping file
+  Can't do inplace edit on %s: %s
+  
+
 __END__
 # doio.c
 use warning 'io' ;
 open(F, '|'.($^O eq 'VMS' ? 'mcr ':'')."$^X -e 1|");
 close(F);
+no warning 'io' ;
+open(G, '|'.($^O eq 'VMS' ? 'mcr ':'')."$^X -e 1|");
+close(G);
 EXPECT
 Can't do bidirectional pipe at - line 3.
 ########
 # doio.c
 use warning 'io' ;
-open(F, "|      ")
+open(F, "|      ");
+no warning 'io' ;
+open(G, "|      ");
 EXPECT
 Missing command in piped open at - line 3.
 ########
 # doio.c
 use warning 'io' ;
-open(F, "      |")
+open(F, "      |");
+no warning 'io' ;
+open(G, "      |");
 EXPECT
 Missing command in piped open at - line 3.
 ########
 # doio.c
 use warning 'io' ;
-open(F, "<true\ncd")
+open(F, "<true\ncd");
+no warning 'io' ;
+open(G, "<true\ncd");
 EXPECT
 Unsuccessful open on filename containing newline at - line 3.
 ########
 # doio.c
 use warning 'io' ;
+close STDIN ;
+tell(STDIN);
+$a = seek(STDIN,1,1);
+$a = sysseek(STDIN,1,1);
+-x STDIN ;
+no warning 'io' ;
 close STDIN ;
 tell(STDIN);
 $a = seek(STDIN,1,1);
@@ -83,6 +110,8 @@ Stat on unopened file <STDIN> at - line 7.
 # doio.c
 use warning 'uninitialized' ;
 print $a ;
+no warning 'uninitialized' ;
+print $b ;
 EXPECT
 Use of uninitialized value at - line 3.
 ########
@@ -96,12 +125,17 @@ EXPECT
 use warning 'io' ;
 stat "ab\ncd";
 lstat "ab\ncd";
+no warning 'io' ;
+stat "ab\ncd";
+lstat "ab\ncd";
 EXPECT
 Unsuccessful stat on filename containing newline at - line 3.
 Unsuccessful stat on filename containing newline at - line 4.
 ########
 # doio.c
 use warning 'io' ;
+exec "lskdjfalksdjfdjfkls","" ;
+no warning 'io' ;
 exec "lskdjfalksdjfdjfkls","" ;
 EXPECT
 OPTION regex
@@ -110,6 +144,36 @@ Can't exec "lskdjfalksdjfdjfkls": .+
 # doio.c
 use warning 'io' ;
 exec "lskdjfalksdjfdjfkls", "abc" ;
+no warning 'io' ;
+exec "lskdjfalksdjfdjfkls", "abc" ;
 EXPECT
 OPTION regex
 Can't exec "lskdjfalksdjfdjfkls(:? abc)?": .+
+########
+# doio.c
+$^W = 0 ;
+my $filename = "./temp" ;
+mkdir $filename, 0777 
+  or die "Cannot create directory $filename: $!\n" ;
+{
+    local (@ARGV) = ($filename) ;
+    local ($^I) = "" ;
+    my $x = <> ;
+}
+{
+    no warning 'inplace' ;
+    local (@ARGV) = ($filename) ;
+    local ($^I) = "" ;
+    my $x = <> ;
+}
+{
+    use warning 'inplace' ;
+    local (@ARGV) = ($filename) ;
+    local ($^I) = "" ;
+    my $x = <> ;
+}
+rmdir $filename ;
+EXPECT
+Can't do inplace edit: ./temp is not a regular file at - line 9.
+Can't do inplace edit: ./temp is not a regular file at - line 21.
+

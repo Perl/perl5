@@ -1,4 +1,4 @@
-  sv.c	AOK
+  sv.c	
 
   warn(warn_uninit);
 
@@ -32,12 +32,27 @@
 
   Undefined value assigned to typeglob
 
+  Mandatory Warnings
+  ------------------
+  Malformed UTF-8 character [sv_pos_b2u]
+      my $a = rindex "a\xff bc ", "bc" ;
+
+  Mandatory Warnings TODO
+  ------------------
+    Attempt to free non-arena SV: 0x%lx		[del_sv]
+    Reference miscount in sv_replace()		[sv_replace]
+    Attempt to free unreferenced scalar		[sv_free]
+    Attempt to free temp prematurely: SV 0x%lx	[sv_free]
+    semi-panic: attempt to dup freed string	[newSVsv]
+    
 
 __END__
 # sv.c
 use integer ;
 use warning 'uninitialized' ;
 $x = 1 + $a[0] ; # a
+no warning 'uninitialized' ;
+$x = 1 + $b[0] ; # a
 EXPECT
 Use of uninitialized value at - line 4.
 ########
@@ -51,6 +66,8 @@ tie $A, 'fred' ;
 use integer ;
 use warning 'uninitialized' ;
 $A *= 2 ;
+no warning 'uninitialized' ;
+$A *= 2 ;
 EXPECT
 Use of uninitialized value at - line 10.
 ########
@@ -58,6 +75,8 @@ Use of uninitialized value at - line 10.
 use integer ;
 use warning 'uninitialized' ;
 my $x *= 2 ; #b 
+no warning 'uninitialized' ;
+my $y *= 2 ; #b 
 EXPECT
 Use of uninitialized value at - line 4.
 ########
@@ -71,25 +90,35 @@ tie $A, 'fred' ;
 use warning 'uninitialized' ;
 $B = 0 ;
 $B |= $A ;
+no warning 'uninitialized' ;
+$B = 0 ;
+$B |= $A ;
 EXPECT
 Use of uninitialized value at - line 10.
 ########
 # sv.c
 use warning 'uninitialized' ;
 my $Y = 1 ; 
-my $x = 1 | $a[$Y]
+my $x = 1 | $a[$Y] ;
+no warning 'uninitialized' ;
+my $Y = 1 ; 
+$x = 1 | $b[$Y] ;
 EXPECT
 Use of uninitialized value at - line 4.
 ########
 # sv.c
 use warning 'uninitialized' ;
 my $x *= 1 ; # d
+no warning 'uninitialized' ;
+my $y *= 1 ; # d
 EXPECT
 Use of uninitialized value at - line 3.
 ########
 # sv.c
 use warning 'uninitialized' ;
 $x = 1 + $a[0] ; # e
+no warning 'uninitialized' ;
+$x = 1 + $b[0] ; # e
 EXPECT
 Use of uninitialized value at - line 3.
 ########
@@ -102,17 +131,23 @@ package main ;
 tie $A, 'fred' ;
 use warning 'uninitialized' ;
 $A *= 2 ;
+no warning 'uninitialized' ;
+$A *= 2 ;
 EXPECT
 Use of uninitialized value at - line 9.
 ########
 # sv.c
 use warning 'uninitialized' ;
 $x = $y + 1 ; # f
+no warning 'uninitialized' ;
+$x = $z + 1 ; # f
 EXPECT
 Use of uninitialized value at - line 3.
 ########
 # sv.c
 use warning 'uninitialized' ;
+$x = chop undef ; # g
+no warning 'uninitialized' ;
 $x = chop undef ; # g
 EXPECT
 Modification of a read-only value attempted at - line 3.
@@ -120,6 +155,8 @@ Modification of a read-only value attempted at - line 3.
 # sv.c
 use warning 'uninitialized' ;
 $x = chop $y ; # h
+no warning 'uninitialized' ;
+$x = chop $z ; # h
 EXPECT
 Use of uninitialized value at - line 3.
 ########
@@ -133,6 +170,9 @@ tie $A, 'fred' ;
 use warning 'uninitialized' ;
 $B = "" ;
 $B .= $A ;
+no warning 'uninitialized' ;
+$C = "" ;
+$C .= $A ;
 EXPECT
 Use of uninitialized value at - line 10.
 ########
@@ -141,13 +181,17 @@ use warning 'numeric' ;
 sub TIESCALAR{bless[]} ; 
 sub FETCH {"def"} ; 
 tie $a,"main" ; 
-my $b = 1 + $a
+my $b = 1 + $a;
+no warning 'numeric' ;
+my $c = 1 + $a;
 EXPECT
 Argument "def" isn't numeric in add at - line 6.
 ########
 # sv.c
 use warning 'numeric' ;
 my $x = 1 + "def" ;
+no warning 'numeric' ;
+my $z = 1 + "def" ;
 EXPECT
 Argument "def" isn't numeric in add at - line 3.
 ########
@@ -155,6 +199,8 @@ Argument "def" isn't numeric in add at - line 3.
 use warning 'numeric' ;
 my $a = "def" ;
 my $x = 1 + $a ;
+no warning 'numeric' ;
+my $y = 1 + $a ;
 EXPECT
 Argument "def" isn't numeric in add at - line 4.
 ########
@@ -162,12 +208,16 @@ Argument "def" isn't numeric in add at - line 4.
 use warning 'numeric' ; use integer ;
 my $a = "def" ;
 my $x = 1 + $a ;
+no warning 'numeric' ;
+my $z = 1 + $a ;
 EXPECT
 Argument "def" isn't numeric in i_add at - line 4.
 ########
 # sv.c
 use warning 'numeric' ;
 my $x = 1 & "def" ;
+no warning 'numeric' ;
+my $z = 1 & "def" ;
 EXPECT
 Argument "def" isn't numeric in bit_and at - line 3.
 ########
@@ -176,6 +226,9 @@ use warning 'redefine' ;
 sub fred {}  
 sub joe {} 
 *fred = \&joe ;
+no warning 'redefine' ;
+sub jim {} 
+*jim = \&joe ;
 EXPECT
 Subroutine fred redefined at - line 5.
 ########
@@ -184,6 +237,13 @@ use warning 'printf' ;
 open F, ">".($^O eq 'VMS'? 'NL:' : '/dev/null') ;
 printf F "%q\n" ;
 my $a = sprintf "%q" ;
+printf F "%" ;
+$a = sprintf "%" ;
+printf F "%\x02" ;
+$a = sprintf "%\x02" ;
+no warning 'printf' ;
+printf F "%q\n" ;
+$a = sprintf "%q" ;
 printf F "%" ;
 $a = sprintf "%" ;
 printf F "%\x02" ;
@@ -199,5 +259,22 @@ Invalid conversion in printf: "%\002" at - line 8.
 # sv.c
 use warning 'unsafe' ;
 *a = undef ;
+no warning 'unsafe' ;
+*b = undef ;
 EXPECT
 Undefined value assigned to typeglob at - line 3.
+########
+# sv.c
+use utf8 ;
+$^W =0 ;
+{
+  use warning 'utf8' ;
+  my $a = rindex "a\xff bc ", "bc" ;
+  no warning 'utf8' ;
+  $a = rindex "a\xff bc ", "bc" ;
+}
+my $a = rindex "a\xff bc ", "bc" ;
+EXPECT
+\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 6.
+Malformed UTF-8 character at - line 6.
+Malformed UTF-8 character at - line 10.

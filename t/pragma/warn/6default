@@ -1,0 +1,34 @@
+Check default warnings
+
+__END__
+# default warning should be displayed if you don't add anything
+# optional shouldn't
+my $a = oct "7777777777777777777777777777777777779" ;
+EXPECT
+Integer overflow in octal number at - line 3.
+########
+# no warning should be displayed 
+no warning ;
+my $a = oct "7777777777777777777777777777777777779" ;
+EXPECT
+########
+# all warning should be displayed 
+use warning ;
+my $a = oct "7777777777777777777777777777777777779" ;
+EXPECT
+Integer overflow in octal number at - line 3.
+Illegal octal digit '9' ignored at - line 3.
+########
+# check scope
+use warning ;
+my $a = oct "7777777777777777777777777777777777779" ;
+{
+    no warning ;
+    my $a = oct "7777777777777777777777777777777777779" ;
+}    
+my $c = oct "7777777777777777777777777777777777779" ;
+EXPECT
+Integer overflow in octal number at - line 3.
+Illegal octal digit '9' ignored at - line 3.
+Integer overflow in octal number at - line 8.
+Illegal octal digit '9' ignored at - line 8.

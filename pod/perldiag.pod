@@ -1300,7 +1300,7 @@ the name.
 (W) You redefined a format.  To suppress this warning, say
 
     {
-	local $^W = 0;
+	no warning;
 	eval "format NAME =...";
     }
 
@@ -2552,7 +2552,7 @@ may break this.
 (W) You redefined a subroutine.  To suppress this warning, say
 
     {
-	local $^W = 0;
+	no warning;
 	eval "sub name { ... }";
     }
 
