@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Tue Feb 26 01:08:01 EET 2002
+# Configuration time: Mon Mar  4 17:51:29 EET 2002
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -63,7 +63,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Tue Feb 26 01:08:01 EET 2002'
+cf_time='Mon Mar  4 17:51:29 EET 2002'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -687,7 +687,7 @@ patchlevel='7'
 path_sep=':'
 perl5='perl'
 perl=''
-perl_patchlevel='14868'
+perl_patchlevel='14923'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -lutil'
 perlpath='/opt/perl/bin/perl5.7.2'
@@ -856,7 +856,7 @@ vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
 version='5.7.2'
-version_patchlevel_string='version 7 subversion 2 patch 14868'
+version_patchlevel_string='version 7 subversion 2 patch 14923'
 versiononly='define'
 vi=''
 voidflags='15'
@@ -886,7 +886,7 @@ PERL_SUBVERSION=2
 PERL_API_REVISION=5
 PERL_API_VERSION=5
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=14868
+PERL_PATCHLEVEL=14923
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

@@ -31,6 +31,550 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15000] By: jhi                                   on 2002/03/04  15:28:01
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 14999] By: nick                                  on 2002/03/04  15:26:43
+        Log: Win32 hack
+     Branch: perlio
+	   ! ext/Encode/compile ext/Encode/t/JP.t
+____________________________________________________________________________
+[ 14998] By: jhi                                   on 2002/03/04  15:23:35
+        Log: Encode doc tweak from Autrijus Tang.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 14997] By: jhi                                   on 2002/03/04  14:53:38
+        Log: Regen Glossary et al.  (It seems the #14875 didn't
+             quite work in removing the double-dot?)
+     Branch: perl
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 14996] By: jhi                                   on 2002/03/04  14:46:29
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 14995] By: nick                                  on 2002/03/04  14:42:09
+        Log: Remove debugging assert
+     Branch: perlio
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 14994] By: nick                                  on 2002/03/04  14:41:54
+        Log: Integrate mainline
+     Branch: perlio
+	  !> MANIFEST ext/Encode/Encode.pm lib/Tie/File/t/01_gen.t
+	  !> lib/Tie/File/t/04_splice.t lib/Tie/File/t/10_splice_rs.t
+	  !> lib/Tie/File/t/15_pushpop.t util.c
+____________________________________________________________________________
+[ 14993] By: jhi                                   on 2002/03/04  14:10:07
+        Log: Han update from Autrijus Tang. 
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 14992] By: nick                                  on 2002/03/04  14:08:38
+        Log: Integrate mainline - all tests pass - some noise from threads
+             av_simple (SuSE7.3).
+     Branch: perlio
+	  +> lib/Tie/File/t/01_gen.t lib/Tie/File/t/02_fetchsize.t
+	  +> lib/Tie/File/t/03_longfetch.t lib/Tie/File/t/04_splice.t
+	  +> lib/Tie/File/t/05_size.t lib/Tie/File/t/06_fixrec.t
+	  +> lib/Tie/File/t/07_rv_splice.t lib/Tie/File/t/08_ro.t
+	  +> lib/Tie/File/t/09_gen_rs.t lib/Tie/File/t/10_splice_rs.t
+	  +> lib/Tie/File/t/11_rv_splice_rs.t
+	  +> lib/Tie/File/t/12_longfetch_rs.t lib/Tie/File/t/13_size_rs.t
+	  +> lib/Tie/File/t/14_lock.t lib/Tie/File/t/15_pushpop.t
+	  +> lib/Tie/File/t/16_handle.t lib/Tie/File/t/17_misc_meth.t
+	   - lib/Tie/File/01_gen.t lib/Tie/File/02_fetchsize.t
+	   - lib/Tie/File/03_longfetch.t lib/Tie/File/04_splice.t
+	   - lib/Tie/File/05_size.t lib/Tie/File/06_fixrec.t
+	   - lib/Tie/File/07_rv_splice.t lib/Tie/File/08_ro.t
+	   - lib/Tie/File/09_gen_rs.t lib/Tie/File/10_splice_rs.t
+	   - lib/Tie/File/11_rv_splice_rs.t lib/Tie/File/12_longfetch_rs.t
+	   - lib/Tie/File/13_size_rs.t lib/Tie/File/14_lock.t
+	   - lib/Tie/File/15_pushpop.t
+	  !> (integrate 47 files)
+____________________________________________________________________________
+[ 14991] By: jhi                                   on 2002/03/04  13:37:52
+        Log: Missing MANIFESTations.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14990] By: jhi                                   on 2002/03/04  13:34:15
+        Log: Attempt at portability.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 14989] By: jhi                                   on 2002/03/04  13:04:06
+        Log: Needed by #14985.
+     Branch: perl
+	   ! embed.h global.sym proto.h
+____________________________________________________________________________
+[ 14988] By: ams                                   on 2002/03/04  08:59:27
+        Log: Upgrade to Tie::File 0.16.
+     Branch: perl
+	   + lib/Tie/File/t/16_handle.t lib/Tie/File/t/17_misc_meth.t
+	   ! lib/Tie/File.pm lib/Tie/File/t/01_gen.t
+	   ! lib/Tie/File/t/04_splice.t lib/Tie/File/t/10_splice_rs.t
+	   ! lib/Tie/File/t/15_pushpop.t
+____________________________________________________________________________
+[ 14987] By: ams                                   on 2002/03/04  08:48:11
+        Log: Subject: [PATCH @14577] perly-fixer
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 4 Mar 2002 02:28:51 -0500
+             Message-Id: <20020304022851.A14119@math.ohio-state.edu>
+     Branch: perl
+	   ! Makefile.SH perly.fixer
+____________________________________________________________________________
+[ 14986] By: ams                                   on 2002/03/04  08:43:37
+        Log: Subject: [PATCH @14577] xsubpp
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 4 Mar 2002 02:25:52 -0500
+             Message-Id: <20020304022552.A14106@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp pod/perlxs.pod
+____________________________________________________________________________
+[ 14985] By: ams                                   on 2002/03/04  08:40:46
+        Log: Subject: [PATCH @14577] sv_cmp and friends
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 4 Mar 2002 02:31:04 -0500
+             Message-Id: <20020304023103.A14140@math.ohio-state.edu>
+     Branch: perl
+	   ! embed.fnc sv.c util.c
+____________________________________________________________________________
+[ 14984] By: ams                                   on 2002/03/04  08:16:06
+        Log: Fix File::Path docs as suggested by Ronald Kimball.
+     Branch: perl
+	   ! lib/File/Path.pm
+____________________________________________________________________________
+[ 14983] By: ams                                   on 2002/03/04  08:11:20
+        Log: Update perldata fix as suggested by Benjamin Goldberg.
+     Branch: perl
+	   ! pod/perldata.pod
+____________________________________________________________________________
+[ 14982] By: jhi                                   on 2002/03/04  03:56:46
+        Log: Faulty skip.
+     Branch: perl
+	   ! ext/DB_File/t/db-recno.t
+____________________________________________________________________________
+[ 14981] By: jhi                                   on 2002/03/04  03:46:31
+        Log: Subject: [ID 20020303.006] [Doc][utf8::up/down grade][use encoding] application for clarification
+             From: Anton Tagunov <tagunov@motor.ru>
+             Date: Mon, 4 Mar 2002 05:41:41 +0300
+             Message-Id: <7916563907.20020304054141@motor.ru>
+             
+             Subject: [ID 20020303.005] Patch perlinicode C API description
+             From: Anton Tagunov <tagunov@motor.ru>
+             Date: Mon, 4 Mar 2002 06:08:23 +0300
+             Message-Id: <2018165510.20020304060823@motor.ru>
+     Branch: perl
+	   ! lib/utf8.pm pod/perlunicode.pod
+____________________________________________________________________________
+[ 14980] By: ams                                   on 2002/03/04  02:19:20
+        Log: Subject: Re[2]: [ID 20020227.016] Fix perldata manpage?
+             From: Anton Tagunov <tagunov@motor.ru>
+             Date: Mon, 4 Mar 2002 02:17:40 +0300
+             Message-Id: <1344322124.20020304021740@motor.ru>
+     Branch: perl
+	   ! pod/perldata.pod
+____________________________________________________________________________
+[ 14979] By: ams                                   on 2002/03/04  02:17:54
+        Log: Subject: RE: [PATCH] RE: DB_File breakage
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Sun, 3 Mar 2002 23:56:31 -0000
+             Message-Id: <AIEAJICLCBDNAAOLLOKLIEJADOAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/t/db-recno.t
+____________________________________________________________________________
+[ 14978] By: ams                                   on 2002/03/04  02:07:16
+        Log: Subject: [PATCH] docs for ExtUtils::Manifest
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 3 Mar 2002 23:29:25 +0000
+             Message-Id: <20020303232924.GG322@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[ 14977] By: jhi                                   on 2002/03/04  02:07:06
+        Log: Forgot from the M::BI 1.54 update.
+     Branch: perl
+	   ! lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/bigintpm.inc
+	   ! lib/Math/BigInt/t/upgrade.inc
+____________________________________________________________________________
+[ 14976] By: ams                                   on 2002/03/04  02:04:32
+        Log: Subject: [PATCH] attr
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Sun, 3 Mar 2002 22:09:58 -0000
+             Message-Id: <AIEAJICLCBDNAAOLLOKLOEINDOAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! lib/warnings.pm warnings.pl
+____________________________________________________________________________
+[ 14975] By: ams                                   on 2002/03/04  02:01:27
+        Log: Subject: [PATCH] File::Path documentation
+             From: Colin Meyer <cmeyer@helvella.org>
+             Date: Sun, 3 Mar 2002 14:54:24 -0800
+             Message-Id: <20020303145424.A21774@hobart.helvella.org>
+     Branch: perl
+	   ! lib/File/Path.pm
+____________________________________________________________________________
+[ 14974] By: jhi                                   on 2002/03/04  01:54:17
+        Log: Typo.
+     Branch: perl
+	   ! lib/Math/BigInt/t/upgrade.t
+____________________________________________________________________________
+[ 14973] By: jhi                                   on 2002/03/04  01:30:49
+        Log: Editing errors.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14972] By: jhi                                   on 2002/03/04  01:18:02
+        Log: Upgrade to Math::BigInt 1.54.
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbf.t
+	   ! lib/Math/BigInt/t/bare_mbi.t lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintpm.t lib/Math/BigInt/t/config.t
+	   ! lib/Math/BigInt/t/downgrade.t lib/Math/BigInt/t/sub_mbf.t
+	   ! lib/Math/BigInt/t/sub_mbi.t lib/Math/BigInt/t/upgrade.t
+____________________________________________________________________________
+[ 14971] By: jhi                                   on 2002/03/04  01:06:53
+        Log: Test tweak from Craig Berry.
+     Branch: perl
+	   ! lib/Tie/File/t/15_pushpop.t
+____________________________________________________________________________
+[ 14970] By: jhi                                   on 2002/03/04  01:05:17
+        Log: Upgrade to Tie::File 0.15.
+     Branch: perl
+	   + lib/Tie/File/t/01_gen.t lib/Tie/File/t/02_fetchsize.t
+	   + lib/Tie/File/t/03_longfetch.t lib/Tie/File/t/04_splice.t
+	   + lib/Tie/File/t/05_size.t lib/Tie/File/t/06_fixrec.t
+	   + lib/Tie/File/t/07_rv_splice.t lib/Tie/File/t/08_ro.t
+	   + lib/Tie/File/t/09_gen_rs.t lib/Tie/File/t/10_splice_rs.t
+	   + lib/Tie/File/t/11_rv_splice_rs.t
+	   + lib/Tie/File/t/12_longfetch_rs.t lib/Tie/File/t/13_size_rs.t
+	   + lib/Tie/File/t/14_lock.t lib/Tie/File/t/15_pushpop.t
+	   - lib/Tie/File/01_gen.t lib/Tie/File/02_fetchsize.t
+	   - lib/Tie/File/03_longfetch.t lib/Tie/File/04_splice.t
+	   - lib/Tie/File/05_size.t lib/Tie/File/06_fixrec.t
+	   - lib/Tie/File/07_rv_splice.t lib/Tie/File/08_ro.t
+	   - lib/Tie/File/09_gen_rs.t lib/Tie/File/10_splice_rs.t
+	   - lib/Tie/File/11_rv_splice_rs.t lib/Tie/File/12_longfetch_rs.t
+	   - lib/Tie/File/13_size_rs.t lib/Tie/File/14_lock.t
+	   - lib/Tie/File/15_pushpop.t
+	   ! MANIFEST lib/Tie/File.pm
+____________________________________________________________________________
+[ 14969] By: jhi                                   on 2002/03/04  00:25:33
+        Log: The EBCDIC gaps apply only to the real A-Z.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14968] By: jhi                                   on 2002/03/03  19:00:06
+        Log: EBCDIC: deparse \cX correctly.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14967] By: ams                                   on 2002/03/03  18:18:00
+        Log: Subject: [PATCH] nit in perlsyn.pod
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at>
+             Date: Sun, 03 Mar 2002 20:16:10 +0100
+             Message-Id: <200203032016100050.00066EE7@smtp.chello.at>
+     Branch: perl
+	   ! pod/perlsyn.pod
+____________________________________________________________________________
+[ 14966] By: ams                                   on 2002/03/03  18:06:32
+        Log: Subject: [PATCH utils/h2xs.PL] use Config; use Config; require Config;
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 3 Mar 2002 13:33:28 -0500
+             Message-Id: <20020303183328.GA3296@blackrider>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 14965] By: ams                                   on 2002/03/03  18:00:03
+        Log: Subject: [ PATCH ] HP back to default
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Sun, 03 Mar 2002 18:48:34 +0100
+             Message-Id: <20020303184627.A69C.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 14964] By: jhi                                   on 2002/03/03  16:54:55
+        Log: EBCDIC: special cases of special cases.
+     Branch: perl
+	   ! t/uni/case.pl
+____________________________________________________________________________
+[ 14963] By: jhi                                   on 2002/03/03  16:11:07
+        Log: EBCDIC: the v-string components cannot exceed 2147483647.
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlport.pod t/op/ver.t util.c
+____________________________________________________________________________
+[ 14962] By: jhi                                   on 2002/03/03  15:06:55
+        Log: Remove the bogus "incorrect case" warning completely.
+             The problem exists, but the cure, in which ever form
+             it will be, needs to be something more subtle.
+     Branch: perl
+	   ! op.c pod/perldiag.pod
+____________________________________________________________________________
+[ 14961] By: ams                                   on 2002/03/03  13:39:09
+        Log: Subject: Re: PATCH (bleadperl): Quieter handling of tied arrays
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 03 Mar 2002 09:32:16 -0500
+             Message-Id: <20020303143216.10536.qmail@plover.com>
+     Branch: perl
+	   ! t/op/tiearray.t
+____________________________________________________________________________
+[ 14960] By: nick                                  on 2002/03/03  09:59:59
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Tie/File/14_lock.t lib/Tie/File/15_pushpop.t
+	   - ext/Encode/t/table.rnd ext/Encode/t/table.utf8
+	   ! ext/Encode/compile
+	  !> (integrate 27 files)
+____________________________________________________________________________
+[ 14959] By: ams                                   on 2002/03/03  08:11:34
+        Log: Fix #14957.
+     Branch: perl
+	   ! ext/DB_File/t/db-recno.t
+____________________________________________________________________________
+[ 14958] By: ams                                   on 2002/03/03  05:51:00
+        Log: Subject: [PATCH @14577] NL in debugger
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 2 Mar 2002 05:34:12 -0500
+             Message-Id: <20020302053412.A5465@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 14957] By: ams                                   on 2002/03/03  05:00:04
+        Log: Subject: Re: DB_File breakage
+             From: Schuyler Erle <schuyler@oreilly.com>
+             Date: Sat, 02 Mar 2002 21:50:30 -0800
+             Message-Id: <3C81B9A6.A6B6C7FE@oreilly.com>
+     Branch: perl
+	   ! ext/DB_File/t/db-recno.t
+____________________________________________________________________________
+[ 14956] By: ams                                   on 2002/03/03  04:40:08
+        Log: Subject: [PATCH @14577] Debugging OPs
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 2 Mar 2002 05:49:58 -0500
+             Message-Id: <20020302054958.A5511@math.ohio-state.edu>
+     Branch: perl
+	   ! deb.c dump.c ext/Devel/Peek/Peek.pm perl.c perl.h
+	   ! pod/perlrun.pod sv.h
+____________________________________________________________________________
+[ 14955] By: ams                                   on 2002/03/03  04:34:41
+        Log: Subject: Tie::Array doc patch
+             From: Tatsuhiko Miyagawa <miyagawa@edge.co.jp>
+             Date: Sat, 02 Mar 2002 08:42:56 +0900
+             Message-Id: <863czj97nj.wl@mail.edge.co.jp>
+     Branch: perl
+	   ! lib/Tie/Array.pm
+____________________________________________________________________________
+[ 14954] By: ams                                   on 2002/03/03  04:23:33
+        Log: Subject: Re: Smoke 14870
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 2 Mar 2002 20:00:53 +0000
+             Message-Id: <20020302200053.GB384@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 14953] By: ams                                   on 2002/03/03  04:15:49
+        Log: Subject: RE: VERSION core
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Sat, 2 Mar 2002 22:50:44 -0000
+             Message-Id: <AIEAJICLCBDNAAOLLOKLEEHNDOAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! t/comp/use.t
+____________________________________________________________________________
+[ 14952] By: jhi                                   on 2002/03/02  23:41:54
+        Log: The #14949 removed this error from non-Win32.
+     Branch: perl
+	   ! t/lib/warnings/op
+____________________________________________________________________________
+[ 14951] By: jhi                                   on 2002/03/02  19:54:15
+        Log: BeOS back on track.
+     Branch: perl
+	   ! README.beos
+____________________________________________________________________________
+[ 14950] By: jhi                                   on 2002/03/02  19:52:58
+        Log: The _POSIX_OPEN_MAX values are allowed *minimums*,
+             higher is okay.
+     Branch: perl
+	   ! ext/POSIX/t/posix.t
+____________________________________________________________________________
+[ 14949] By: jhi                                   on 2002/03/02  19:33:29
+        Log: For now, make "incorrect case" a Win32-only warning.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 14948] By: jhi                                   on 2002/03/02  17:55:48
+        Log: Demand more before attempting socketpair().
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 14947] By: jhi                                   on 2002/03/02  17:35:09
+        Log: Remove obsolete hack.
+     Branch: perl
+	   ! makedepend.SH
+____________________________________________________________________________
+[ 14946] By: ams                                   on 2002/03/02  16:00:32
+        Log: Forgot to delete encode.* from MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14945] By: ams                                   on 2002/03/02  14:41:03
+        Log: Delete ex-test output.
+     Branch: perl
+	   - ext/Encode/t/table.rnd ext/Encode/t/table.utf8
+____________________________________________________________________________
+[ 14944] By: ams                                   on 2002/03/02  13:54:35
+        Log: Subject: [PATCH] DB_File 1.803
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Sat, 2 Mar 2002 14:33:32 -0000
+             Message-Id: <AIEAJICLCBDNAAOLLOKLAEHGDOAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/DB_File.xs ext/DB_File/t/db-btree.t
+____________________________________________________________________________
+[ 14943] By: ams                                   on 2002/03/02  13:43:06
+        Log: Upgrade to Tie::File 0.14.
+     Branch: perl
+	   + lib/Tie/File/14_lock.t lib/Tie/File/15_pushpop.t
+	   ! MANIFEST lib/Tie/File.pm lib/Tie/File/01_gen.t
+	   ! lib/Tie/File/04_splice.t lib/Tie/File/07_rv_splice.t
+____________________________________________________________________________
+[ 14942] By: nick                                  on 2002/03/02  11:05:53
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/Encode/big5-hkscs.enc ext/Encode/Encode/gbk.enc
+	  +> ext/Encode/Encode/iso-ir-165.enc ext/Encode/t/table.rnd
+	  +> ext/Encode/t/table.utf8
+	  !> Configure MANIFEST av.c ext/Encode/CN/CN.pm
+	  !> ext/Encode/CN/Makefile.PL ext/Encode/Encode.pm
+	  !> ext/Encode/TW/Makefile.PL ext/Encode/TW/TW.pm
+	  !> ext/Encode/lib/Encode/XS.pm pod/perldelta.pod pod/perldiag.pod
+	  !> pod/perlfaq5.pod pod/perlfunc.pod pp.c t/op/splice.t
+	  !> universal.c utils/perldoc.PL
+____________________________________________________________________________
+[ 14941] By: jhi                                   on 2002/03/02  02:40:01
+        Log: More CJK (just C, really) tables from Autrijus Tang
+             (originally from iconv, used with permission of Bruno Haible)
+     Branch: perl
+	   + ext/Encode/Encode/big5-hkscs.enc ext/Encode/Encode/gbk.enc
+	   + ext/Encode/Encode/iso-ir-165.enc
+	   ! MANIFEST ext/Encode/CN/CN.pm ext/Encode/CN/Makefile.PL
+	   ! ext/Encode/Encode.pm ext/Encode/TW/Makefile.PL
+	   ! ext/Encode/TW/TW.pm ext/Encode/lib/Encode/XS.pm
+____________________________________________________________________________
+[ 14940] By: jhi                                   on 2002/03/02  02:29:11
+        Log: Subject: [PATCH] perldoc -q outputs Author and Copyright section
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Fri, 1 Mar 2002 15:32:13 -0500
+             Message-ID: <20020301153212.E1461198@linguist.thayer.dartmouth.edu>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[ 14939] By: jhi                                   on 2002/03/02  02:27:05
+        Log: Subject: PATCH: "splice() offset past end of array" warning. (take 2)     
+             From: Schuyler Erle <schuyler@oreilly.com>
+             Date: Fri, 01 Mar 2002 14:22:19 -0800
+             Message-ID: <3C7FFF1B.E74979B1@oreilly.com>
+             
+             Subject: Re: PATCH: "splice() offset past end of array" warning.
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Fri, 01 Mar 2002 17:19:49 -0500
+             Message-ID: <20020301221949.7610.qmail@plover.com>
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlfunc.pod pp.c t/op/splice.t
+____________________________________________________________________________
+[ 14938] By: jhi                                   on 2002/03/02  02:24:25
+        Log: Subject: PATCH (bleadperl): Quieter handling of tied arrays
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Fri, 01 Mar 2002 18:35:35 -0500
+             Message-ID: <20020301233535.15969.qmail@plover.com>
+     Branch: perl
+	   ! av.c
+____________________________________________________________________________
+[ 14937] By: jhi                                   on 2002/03/01  23:00:08
+        Log: Subject: RE: VERSION core
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Fri, 1 Mar 2002 23:47:48 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLEEGMDOAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! pod/perldiag.pod universal.c
+____________________________________________________________________________
+[ 14936] By: pudge                                 on 2002/03/01  18:02:45
+        Log: Update Changes
+     Branch: maint-5.6/macperl
+	   ! macos/Changes
+____________________________________________________________________________
+[ 14935] By: pudge                                 on 2002/03/01  17:58:11
+        Log: Fix update to resources
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MacPerl.r
+____________________________________________________________________________
+[ 14934] By: jhi                                   on 2002/03/01  17:35:14
+        Log: metaconfig unit change for #14930.
+     Branch: metaconfig
+	   ! U/modified/Init.U
+____________________________________________________________________________
+[ 14933] By: pudge                                 on 2002/03/01  17:32:52
+        Log: Fix debugger to handle Mac OS psedofiles
+     Branch: maint-5.6/macperl
+	   ! lib/DB.pm lib/perl5db.pl
+____________________________________________________________________________
+[ 14932] By: pudge                                 on 2002/03/01  17:32:02
+        Log: Various fixes from Thomas Wegner
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPAppleEvents.c macos/macperl/MPPreferences.c
+____________________________________________________________________________
+[ 14931] By: pudge                                 on 2002/03/01  17:30:00
+        Log: Some resource updates
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPUtils.c macos/macperl/MacPerl.r
+	   ! macos/macperl/MacPerl.rsrc
+____________________________________________________________________________
+[ 14930] By: jhi                                   on 2002/03/01  17:29:32
+        Log: Subject: Re: [PATCH] Configure to correctly recognize Amiga OS
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Fri, 01 Mar 2002 09:38:59 -0800
+             Message-ID: <zy7f8gzkgWgY092yn@efn.org>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14928] By: pudge                                 on 2002/03/01  17:28:09
+        Log: Add some missing sfio symbols (Alan Fry)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl.sym
+____________________________________________________________________________
+[ 14927] By: pudge                                 on 2002/03/01  17:27:29
+        Log: Update version and README
+     Branch: maint-5.6/macperl
+	   ! README.macos macos/MPVersion.r
+____________________________________________________________________________
+[ 14926] By: nick                                  on 2002/03/01  15:56:41
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Math/BigInt/t/downgrade.t lib/Tie/File.pm
+	  +> lib/Tie/File/01_gen.t lib/Tie/File/02_fetchsize.t
+	  +> lib/Tie/File/03_longfetch.t lib/Tie/File/04_splice.t
+	  +> lib/Tie/File/05_size.t lib/Tie/File/06_fixrec.t
+	  +> lib/Tie/File/07_rv_splice.t lib/Tie/File/08_ro.t
+	  +> lib/Tie/File/09_gen_rs.t lib/Tie/File/10_splice_rs.t
+	  +> lib/Tie/File/11_rv_splice_rs.t lib/Tie/File/12_longfetch_rs.t
+	  +> lib/Tie/File/13_size_rs.t
+	  !> (integrate 80 files)
+____________________________________________________________________________
+[ 14925] By: jhi                                   on 2002/03/01  15:28:10
+        Log: Better advertising.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlfaq5.pod
+____________________________________________________________________________
+[ 14924] By: jhi                                   on 2002/03/01  14:32:16
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14923] By: jhi                                   on 2002/03/01  14:17:54
         Log: Lost in the shuffle.
      Branch: perl
