@@ -127,6 +127,11 @@ option is specified, the name of the header file may look like
 C<NAME1,NAME2>. In this case NAME1 is used instead of the specified string,
 but XSUBS are emited only for the declarations included from file NAME2.
 
+Note that some types of arguments/return-values for functions may
+result in XSUB-declarations/typemap-entries which need
+hand-editing. Such may be objects which cannot be converted from/to a
+pointer (like C<long long>), pointers to functions, or arrays.
+
 =item B<-F>
 
 Additional flags to specify to C preprocessor when scanning header for
@@ -172,16 +177,16 @@ function declarations. Should not be used without B<-x>.
         h2xs -n DCE::rgynbase -p sec_rgy_ \
         -s sec_rgy_wildcard_name,sec_rgy_wildcard_sid dce/rgynbase
 
-	# Make XS with defines in perl.h, and function declarations
+	# Make XS without defines in perl.h, but with function declarations
 	# visible from perl.h. Name of the extension is perl1.
 	# When scanning perl.h, define -DEXT=extern -DdEXT= -DINIT(x)=
 	# Extra backslashes below because the string is passed to shell.
-	h2xs -xn perl1 -F "-DEXT=extern -DdEXT= -DINIT\(x\)=" \
-	../perl5_003_01/perl.h
+	# Note that a directory with perl header files would 
+	#  be added automatically to include path.
+	h2xs -xAn perl1 -F "-DEXT=extern -DdEXT= -DINIT\(x\)=" perl.h
 
 	# Same with function declaration in proto.h as visible from perl.h.
-	perl H:\get\perl\perl5_003_01.try\utils\h2xs -xn perl1 \
-	../perl5_003_01/perl.h,proto.h
+	h2xs -xAn perl2 perl.h,proto.h
 
 =head1 ENVIRONMENT
 
@@ -267,33 +272,39 @@ if( $path_h ){
 	}
     }
     elsif ($^O eq 'os2') {
-	$path_h = "/usr/include/$path_h" unless $path_h =~ m#^([a-z]:)?[./]#i; 
+	$path_h = "/usr/include/$path_h" 
+	  if $path_h !~ m#^([a-z]:)?[./]#i and -r "/usr/include/$path_h"; 
     }
-    else { $path_h = "/usr/include/$path_h" unless $path_h =~ m#^[./]#; }
-    die "Can't find $path_h\n" if ( ! $opt_f && ! -f $path_h );
+    else { 
+      $path_h = "/usr/include/$path_h" 
+	if $path_h !~ m#^[./]# and -r "/usr/include/$path_h"; 
+    }
 
-    # Scan the header file (we should deal with nested header files)
-    # Record the names of simple #define constants into const_names
-    # Function prototypes are not (currently) processed.
-    open(CH, "<$path_h") || die "Can't open $path_h: $!\n";
-    while (<CH>) {
-	if (/^#[ \t]*define\s+([\$\w]+)\b\s*[^("]/) {
+    if (!$opt_c) {
+      die "Can't find $path_h\n" if ( ! $opt_f && ! -f $path_h );
+      # Scan the header file (we should deal with nested header files)
+      # Record the names of simple #define constants into const_names
+      # Function prototypes are not (currently) processed.
+      open(CH, "<$path_h") || die "Can't open $path_h: $!\n";
+      while (<CH>) {
+	if (/^			#[ \t]*define\s+([\$\w]+)\b\s*[^("]/) {
 	    print "Matched $_ ($1)\n";
 	    $_ = $1;
 	    next if /^_.*_h_*$/i; # special case, but for what?
 	    if (defined $opt_p) {
-		if (!/^$opt_p(\d)/) {
-		    ++$prefix{$_} if s/^$opt_p//;
-		}
-		else {
-		    warn "can't remove $opt_p prefix from '$_'!\n";
-		}
+	      if (!/^$opt_p(\d)/) {
+		++$prefix{$_} if s/^$opt_p//;
+	      }
+	      else {
+		warn "can't remove $opt_p prefix from '$_'!\n";
+	      }
 	    }
 	    $const_names{$_}++;
-	}
+	  }
+      }
+      close(CH);
+      @const_names = sort keys %const_names;
     }
-    close(CH);
-    @const_names = sort keys %const_names;
 }
 
 
@@ -336,9 +347,36 @@ if( $nested ){
 mkdir($modpname, 0777);
 chdir($modpname) || die "Can't chdir $ext$modpname: $!\n";
 
+my %types_seen;
+my %std_types;
+my $fdecls;
+my $fdecls_parsed;
+
 if( ! $opt_X ){  # use XS, unless it was disabled
   open(XS, ">$modfname.xs") || die "Can't create $ext$modpname/$modfname.xs: $!\n";
+  if ($opt_x) {
+    require C::Scan;		# Run-time directive
+    require Config;		# Run-time directive
+    warn "Scanning typemaps...\n";
+    get_typemap();
+    my $c;
+    my $filter;
+    my $filename = $path_h;
+    my $addflags = $opt_F || '';
+    if ($fullpath =~ /,/) {
+      $filename = $`;
+      $filter = $';
+    }
+    warn "Scanning $filename for functions...\n";
+    $c = new C::Scan 'filename' => $filename, 'filename_filter' => $filter,
+    'add_cppflags' => $addflags;
+    $c->set('includeDirs' => ["$Config::Config{archlib}/CORE"]);
+    
+    $fdecls_parsed = $c->get('parsed_fdecls');
+    $fdecls = $c->get('fdecls');
+  }
 }
+
 open(PM, ">$modfname.pm") || die "Can't create $ext$modpname/$modfname.pm: $!\n";
 
 $" = "\n\t";
@@ -476,6 +514,27 @@ END
 $author = "A. U. Thor";
 $email = 'a.u.thor@a.galaxy.far.far.away';
 
+my $const_doc = '';
+my $fdecl_doc = '';
+if (@const_names and not $opt_P) {
+  $const_doc = <<EOD;
+
+=head1 Exported constants
+
+  @{[join "\n  ", @const_names]}
+
+EOD
+}
+if (defined $fdecls and @$fdecls and not $opt_P) {
+  $fdecl_doc = <<EOD;
+
+=head1 Exported functions
+
+  @{[join "\n  ", @$fdecls]}
+
+EOD
+}
+
 $pod = <<"END" unless $opt_P;
 ## Below is the stub of documentation for your module. You better edit it!
 #
@@ -495,7 +554,7 @@ $pod = <<"END" unless $opt_P;
 #unedited.
 #
 #Blah blah blah.
-#
+#$const_doc$fdecl_doc
 #=head1 AUTHOR
 #
 #$author, $email
@@ -638,12 +697,18 @@ constant(name,arg)
 
 END
 
+my %seen_decl;
+
+
 sub print_decl {
   my $fh = shift;
   my $decl = shift;
   my ($type, $name, $args) = @$decl;
+  return if $seen_decl{$name}++; # Need to do the same for docs as well?
+
   my @argnames = map {$_->[1]} @$args;
   my @argtypes = map { normalize_type( $_->[0] ) } @$args;
+  my @argarrays = map { $_->[4] || '' } @$args;
   my $numargs = @$args;
   if ($numargs and $argtypes[-1] eq '...') {
     $numargs--;
@@ -660,46 +725,85 @@ EOP
 
   for $arg (0 .. $numargs - 1) {
     print $fh <<"EOP";
-	$argtypes[$arg]	$argnames[$arg]
+	$argtypes[$arg]	$argnames[$arg]$argarrays[$arg]
 EOP
   }
 }
 
-my $ignore_mods = '(?:\b(?:__const__|static|inline|__inline__)\b\s*)*';
+# Should be called before any actual call to normalize_type().
+sub get_typemap {
+  # We do not want to read ./typemap by obvios reasons.
+  my @tm =  qw(../../../typemap ../../typemap ../typemap);
+  my $stdtypemap =  "$Config::Config{privlib}/ExtUtils/typemap";
+  unshift @tm, $stdtypemap;
+  my $proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
+  my $image;
+  
+  foreach $typemap (@tm) {
+    next unless -e $typemap ;
+    # skip directories, binary files etc.
+    warn " Scanning $typemap\n";
+    warn("Warning: ignoring non-text typemap file '$typemap'\n"), next 
+      unless -T $typemap ;
+    open(TYPEMAP, $typemap) 
+      or warn ("Warning: could not open typemap file '$typemap': $!\n"), next;
+    my $mode = 'Typemap';
+    while (<TYPEMAP>) {
+      next if /^\s*\#/;
+      if (/^INPUT\s*$/)   { $mode = 'Input'; next; }
+      elsif (/^OUTPUT\s*$/)  { $mode = 'Output'; next; }
+      elsif (/^TYPEMAP\s*$/) { $mode = 'Typemap'; next; }
+      elsif ($mode eq 'Typemap') {
+	next if /^\s*($|\#)/ ;
+	if ( ($type, $image) = 
+	     /^\s*(.*?\S)\s+(\S+)\s*($proto_re*)\s*$/o
+	     # This may reference undefined functions:
+	     and not ($image eq 'T_PACKED' and $typemap eq $stdtypemap)) {
+	  normalize_type($type);
+	}
+      }
+    }
+    close(TYPEMAP) or die "Cannot close $typemap: $!";
+  }
+  %std_types = %types_seen;
+  %types_seen = ();
+}
+
 
 sub normalize_type {
+  my $ignore_mods = '(?:\b(?:__const__|static|inline|__inline__)\b\s*)*';
   my $type = shift;
   $type =~ s/$ignore_mods//go;
+  $type =~ s/([\]\[()])/ \1 /g;
   $type =~ s/\s+/ /g;
   $type =~ s/\s+$//;
   $type =~ s/^\s+//;
   $type =~ s/\b\*/ */g;
   $type =~ s/\*\b/* /g;
   $type =~ s/\*\s+(?=\*)/*/g;
+  $types_seen{$type}++ 
+    unless $type eq '...' or $type eq 'void' or $std_types{$type};
   $type;
 }
 
 if ($opt_x) {
-  require C::Scan;		# Run-time directive
-  require Config;		# Run-time directive
-  my $c;
-  my $filter;
-  my $filename = $path_h;
-  my $addflags = $opt_F || '';
-  if ($fullpath =~ /,/) {
-    $filename = $`;
-    $filter = $';
-  }
-  $c = new C::Scan 'filename' => $filename, 'filename_filter' => $filter,
-                   'add_cppflags' => $addflags;
-  $c->set('includeDirs' => [$Config::Config{shrpdir}]);
-  
-  my $fdec = $c->get('parsed_fdecls');
-  
-  for $decl (@$fdec) { print_decl(\*XS, $decl) }
+    for $decl (@$fdecls_parsed) { print_decl(\*XS, $decl) }
 }
 
 close XS;
+
+if (%types_seen) {
+  my $type;
+  warn "Writing $ext$modpname/typemap\n";
+  open TM, ">typemap" or die "Cannot open typemap file for write: $!";
+
+  for $type (keys %types_seen) {
+    print TM $type, "\t" x (6 - int((length $type)/8)), "T_PTROBJ\n"
+  }
+
+  close TM or die "Cannot close typemap file for write: $!";
+}
+
 } # if( ! $opt_X )
 
 warn "Writing $ext$modpname/Makefile.PL\n";
