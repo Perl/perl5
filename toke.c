@@ -1208,7 +1208,7 @@ STRLEN append;
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "TERMBLOCK" };
 #endif
 
-extern int yychar;		/* last token */
+EXT int yychar;		/* last token */
 
 int
 yylex()
@@ -2915,7 +2915,7 @@ yylex()
 
 	case KEY_if:
 	    yylval.ival = curcop->cop_line;
-	    PRETERMBLOCK(IF);
+	    OPERATOR(IF);
 
 	case KEY_index:
 	    LOP(OP_INDEX,XTERM);
@@ -3430,11 +3430,11 @@ yylex()
 
 	case KEY_until:
 	    yylval.ival = curcop->cop_line;
-	    PRETERMBLOCK(UNTIL);
+	    OPERATOR(UNTIL);
 
 	case KEY_unless:
 	    yylval.ival = curcop->cop_line;
-	    PRETERMBLOCK(UNLESS);
+	    OPERATOR(UNLESS);
 
 	case KEY_unlink:
 	    LOP(OP_UNLINK,XTERM);
@@ -3486,7 +3486,7 @@ yylex()
 
 	case KEY_while:
 	    yylval.ival = curcop->cop_line;
-	    PRETERMBLOCK(WHILE);
+	    OPERATOR(WHILE);
 
 	case KEY_warn:
 	    hints |= HINT_BLOCK_SCOPE;

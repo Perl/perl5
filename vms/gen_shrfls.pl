@@ -34,11 +34,12 @@
 #     (i.e. /Define=DEBUGGING,EMBED,MULTIPLICITY)?
 #
 # Author: Charles Bailey  bailey@genetics.upenn.edu
-# Revised:  3-Dec-1996
 
 require 5.000;
 
 $debug = $ENV{'GEN_SHRFLS_DEBUG'};
+
+print "gen_shrfls.pl Rev. 14-Dec-1996\n" if $debug;
 
 if ($ARGV[0] eq '-f') {
   open(INP,$ARGV[1]) or die "Can't read input file $ARGV[1]: $!\n";
@@ -78,7 +79,9 @@ if ($docc) {
   $isvaxc = 0;
   $isgcc = `$cc_cmd _nla0:/Version` =~ /GNU/
            or 0; # make debug output nice
-  $isvaxc = (!$isgcc && $isvax && `$cc_cmd /prefix=all _nla0:` =~ /IVQUAL/)
+  $isvaxc = (!$isgcc && $isvax &&
+             # Check exit status too, in case message is shut off
+             (`$cc_cmd /prefix=all _nla0:` =~ /IVQUAL/ || $? == 0x38240))
             or 0; # again, make debug output nice
   print "\$isgcc: $isgcc\n" if $debug;
   print "\$isvaxc: $isvaxc\n" if $debug;
@@ -139,6 +142,7 @@ sub scan_enum {
 
 sub scan_var {
   my($line) = @_;
+  my($const) = $line =~ /^EXTCONST/;
 
   print "\tchecking for global variable\n" if $debug > 1;
   $line =~ s/INIT\(.*\)//;
@@ -147,8 +151,21 @@ sub scan_var {
   $line =~ s/\W*;?\s*$//;
   print "\tfiltered to \\$line\\\n" if $debug > 1;
   if ($line =~ /(\w+)$/) {
-    print "\tvar name is \\$1\\\n" if $debug > 1;
-   $vars{$1}++;
+    print "\tvar name is \\$1\\" . ($const ? ' (const)' : '') . "\n" if $debug > 1;
+   if ($const) { $cvars{$1}++; }
+   else        { $vars{$1}++;  }
+  }
+  if ($isvaxc) {
+    my($type) = $line =~ /^EXT\w*\s+(\w+)/;
+    print "\tchecking for use of enum (type is \"$type\")\n" if $debug > 2;
+    if ($type eq 'expectation') {
+      $used_expectation_enum++;
+      print "\tsaw global use of enum \"expectation\"\n" if $debug > 1;
+    }
+    if ($type eq 'opcode') {
+      $used_opcode_enum++;
+      print "\tsaw global use of enum \"opcode\"\n" if $debug > 1;
+    }
   }
 }
 
@@ -203,20 +220,8 @@ LINE: while (<CPP>) {
     else        { &scan_func($_); }
     last LINE unless $_ = <CPP>;
   }
-  print $_ if $debug > 3;
-  if (($type) = /^EXT\s+(\w+)/) {
-    if ($isvaxc) {
-      if ($type eq 'expectation') {
-        $used_expectation_enum++;
-        print "\tsaw global use of enum \"expectation\"\n" if $debug > 1;
-      }
-      if ($type eq 'opcode') {
-        $used_opcode_enum++;
-        print "\tsaw global use of enum \"opcode\"\n" if $debug > 1;
-      }
-    }
-    &scan_var($_);
-  }
+  print $_ if $debug > 3 && ($debug > 5 || length($_));
+  if (/^EXT/) { &scan_var($_); }
 }
 close CPP;
 
@@ -277,7 +282,11 @@ if ($isvax) {
     or die "$0: Can't write to ${dir}perlshr_gbl${marord}.mar: $!\n";
   print MAR "\t.title perlshr_gbl$marord\n";
 }
-foreach $var (sort keys %vars) {
+unless ($isgcc) {
+  print OPTBLD "PSECT_ATTR=\$GLOBAL_RO_VARS,PIC,NOEXE,RD,NOWRT,SHR\n";
+  print OPTBLD "PSECT_ATTR=\$GLOBAL_RW_VARS,PIC,NOEXE,RD,WRT,NOSHR\n";
+}
+foreach $var (sort (keys %vars,keys %cvars)) {
   if ($isvax) { print OPTBLD "UNIVERSAL=$var\n"; }
   else { print OPTBLD "SYMBOL_VECTOR=($var=DATA)\n"; }
   # This hack brought to you by the lack of a globaldef in gcc.
@@ -312,9 +321,19 @@ if ($isvax) {
 
 open(OPTATTR,">${dir}perlshr_attr.opt")
   or die "$0: Can't write to ${dir}perlshr_attr.opt: $!\n";
-print OPTATTR "PSECT_ATTR=\$CHAR_STRING_CONSTANTS,PIC,SHR,NOEXE,RD,NOWRT\n";
-foreach $var (sort keys %vars) {
-  print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,WRT,NOSHR\n";
+if ($isvaxc) {
+  print OPTATTR "PSECT_ATTR=\$CHAR_STRING_CONSTANTS,PIC,SHR,NOEXE,RD,NOWRT\n";
+}
+elsif ($isgcc) {
+  foreach $var (sort keys %cvars) {
+    print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,NOWRT,SHR\n";
+  }
+  foreach $var (sort keys %vars) {
+    print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,WRT,NOSHR\n";
+  }
+}
+else {
+  print OPTATTR "! No additional linker directives are needed when using DECC\n";
 }
 close OPTATTR;
 

@@ -9,7 +9,7 @@
 
 void
 taint_proper(f, s)
-char *f;
+const char *f;
 char *s;
 {
     char *ug;

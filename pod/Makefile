@@ -17,10 +17,11 @@ POD = 	\
 	perlform.pod	\
 	perlfunc.pod	\
 	perlguts.pod	\
-	perli18n.pod	\
 	perlipc.pod	\
+	perllocale.pod	\
 	perllol.pod	\
 	perlmod.pod	\
+	perlnews.pod	\
 	perlobj.pod	\
 	perlop.pod	\
 	perlovl.pod	\
@@ -34,6 +35,7 @@ POD = 	\
 	perlsyn.pod	\
 	perltie.pod	\
 	perltoc.pod	\
+	perltoot.pod	\
 	perltrap.pod	\
 	perlvar.pod	\
 	perlxs.pod	\
@@ -53,10 +55,11 @@ MAN = 	\
 	perlform.man	\
 	perlfunc.man	\
 	perlguts.man	\
-	perli18n.man	\
 	perlipc.man	\
+	perllocale.man	\
 	perllol.man	\
 	perlmod.man	\
+	perlnews.man	\
 	perlobj.man	\
 	perlop.man	\
 	perlovl.man	\
@@ -70,6 +73,7 @@ MAN = 	\
 	perlsyn.man	\
 	perltie.man	\
 	perltoc.man	\
+	perltoot.man	\
 	perltrap.man	\
 	perlvar.man	\
 	perlxs.man	\
@@ -89,10 +93,11 @@ HTML = 	\
 	perlform.html	\
 	perlfunc.html	\
 	perlguts.html	\
-	perli18n.html	\
 	perlipc.html	\
+	perllocale.html	\
 	perllol.html	\
 	perlmod.html	\
+	perlnews.html	\
 	perlobj.html	\
 	perlop.html	\
 	perlovl.html	\
@@ -106,6 +111,7 @@ HTML = 	\
 	perlsyn.html	\
 	perltie.html	\
 	perltoc.html	\
+	perltoot.html	\
 	perltrap.html	\
 	perlvar.html	\
 	perlxs.html	\
@@ -125,10 +131,11 @@ TEX = 	\
 	perlform.tex	\
 	perlfunc.tex	\
 	perlguts.tex	\
-	perli18n.tex	\
 	perlipc.tex	\
+	perllocale.tex	\
 	perllol.tex	\
 	perlmod.tex	\
+	perlnews.tex	\
 	perlobj.tex	\
 	perlop.tex	\
 	perlovl.tex	\
@@ -142,6 +149,7 @@ TEX = 	\
 	perlsyn.tex	\
 	perltie.tex	\
 	perltoc.tex	\
+	perltoot.tex	\
 	perltrap.tex	\
 	perlvar.tex	\
 	perlxs.tex	\

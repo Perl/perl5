@@ -29,7 +29,8 @@
 typedef int IBW;
 typedef unsigned UBW;
 
-static void doencodes _((SV *sv, char *s, I32 len));
+static SV* refto _((SV* sv));
+static void doencodes _((SV* sv, char* s, I32 len));
 
 /* variations on pp_null */
 
@@ -283,47 +284,47 @@ PP(pp_anoncode)
 
 PP(pp_srefgen)
 {
-    dSP; dTOPss;
-    SV* rv;
-    rv = sv_newmortal();
-    sv_upgrade(rv, SVt_RV);
-    if (SvPADTMP(sv))
-	sv = newSVsv(sv);
-    else {
-	SvTEMP_off(sv);
-	(void)SvREFCNT_inc(sv);
-    }
-    SvRV(rv) = sv;
-    SvROK_on(rv);
-    SETs(rv);
+    dSP;
+    *SP = refto(*SP);
     RETURN;
 } 
 
 PP(pp_refgen)
 {
     dSP; dMARK;
-    SV* sv;
-    SV* rv;
     if (GIMME != G_ARRAY) {
 	MARK[1] = *SP;
 	SP = MARK + 1;
     }
     EXTEND_MORTAL(SP - MARK);
-    while (MARK < SP) {
-	sv = *++MARK;
-	rv = sv_newmortal();
-	sv_upgrade(rv, SVt_RV);
-	if (SvPADTMP(sv))
-	    sv = newSVsv(sv);
-	else {
-	    SvTEMP_off(sv);
-	    (void)SvREFCNT_inc(sv);
-	}
-	SvRV(rv) = sv;
-	SvROK_on(rv);
-	*MARK = rv;
-    }
+    while (++MARK <= SP)
+	*MARK = refto(*MARK);
     RETURN;
+}
+
+static SV*
+refto(sv)
+SV* sv;
+{
+    SV* rv;
+
+    if (SvTYPE(sv) == SVt_PVLV && LvTYPE(sv) == 'y') {
+	if (LvTARGLEN(sv))
+	    vivify_itervar(sv);
+	if (LvTARG(sv))
+	    sv = LvTARG(sv);
+    }
+    else if (SvPADTMP(sv))
+	sv = newSVsv(sv);
+    else {
+	SvTEMP_off(sv);
+	(void)SvREFCNT_inc(sv);
+    }
+    rv = sv_newmortal();
+    sv_upgrade(rv, SVt_RV);
+    SvRV(rv) = sv;
+    SvROK_on(rv);
+    return rv;
 }
 
 PP(pp_ref)

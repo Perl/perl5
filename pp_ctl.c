@@ -109,6 +109,8 @@ PP(pp_substcont)
 	if (cx->sb_iters > cx->sb_maxiters)
 	    DIE("Substitution loop");
 
+	if (!cx->sb_rxtainted)
+	    cx->sb_rxtainted = SvTAINTED(TOPs);
 	sv_catsv(dstr, POPs);
 	if (rx->subbase)
 	    Safefree(rx->subbase);
@@ -131,6 +133,8 @@ PP(pp_substcont)
 
 	    (void)SvPOK_only(targ);
 	    SvSETMAGIC(targ);
+	    if (cx->sb_rxtainted)
+		SvTAINTED_on(targ);
 	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
 	    LEAVE_SCOPE(cx->sb_oldsave);
 	    POPSUBST(cx);
@@ -148,6 +152,7 @@ PP(pp_substcont)
     sv_catpvn(dstr, s, m-s);
     cx->sb_s = rx->endp[0];
     cx->sb_subbase = rx->subbase;
+    cx->sb_rxtainted |= rx->exec_tainted;
 
     rx->subbase = Nullch;	/* so recursion works */
     RETURNOP(pm->op_pmreplstart);

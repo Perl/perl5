@@ -44,7 +44,7 @@ OBJVAL = $@
 #> .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00311#
+PERL_VERSION = 5_00313#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -248,10 +248,10 @@ utils : [.lib.pod]perldoc [.lib.ExtUtils]Miniperl.pm [.utils]c2ph [.utils]h2ph [
 podxform : [.lib.pod]pod2text [.lib.pod]pod2html [.lib.pod]pod2latex [.lib.pod]pod2man
 	@ $(NOOP)
 
-pod1 = [.lib.pod]perl.pod [.lib.pod]perlbook.pod [.lib.pod]perlbot.pod [.lib.pod]perlcall.pod
+pod1 = [.lib.pod]perl.pod [.lib.pod]perlapio.pod [.lib.pod]perlbook.pod [.lib.pod]perlbot.pod [.lib.pod]perlcall.pod
 pod2 = [.lib.pod]perldata.pod [.lib.pod]perldebug.pod [.lib.pod]perldiag.pod [.lib.pod]perldsc.pod
 pod3 = [.lib.pod]perlembed.pod [.lib.pod]perlform.pod [.lib.pod]perlfunc.pod [.lib.pod]perlguts.pod
-pod4 = [.lib.pod]perlipc.pod [.lib.pod]perllol.pod [.lib.pod]perlmod.pod [.lib.pod]perlobj.pod
+pod4 = [.lib.pod]perlipc.pod [.lib.pod]perllocale.pod [.lib.pod]perllol.pod [.lib.pod]perlmod.pod [.lib.pod]perlobj.pod
 pod5 = [.lib.pod]perlop.pod [.lib.pod]perlovl.pod [.lib.pod]perlpod.pod [.lib.pod]perlre.pod
 pod6 = [.lib.pod]perlref.pod [.lib.pod]perlrun.pod [.lib.pod]perlsec.pod [.lib.pod]perlstyle.pod
 pod7 = [.lib.pod]perlsub.pod [.lib.pod]perlsyn.pod [.lib.pod]perltie.pod [.lib.pod]perltoc.pod
@@ -488,6 +488,10 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 [.utils]pl2pm : [.utils]pl2pm.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) [.utils]pl2pm.PL
 
+[.lib]splain : [.utils]splain.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) [.utils]splain.PL
+	Rename/Log [.utils]splain $@
+
 [.lib.pod]pod2html : [.pod]pod2html.PL $(ARCHDIR)Config.pm
 	@ If f$$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) [.pod]pod2html.PL
@@ -516,6 +520,10 @@ preplibrary : $(MINIPERL_EXE) $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]
 [.lib.pod]perl.pod : [.pod]perl.pod
 	@ If f$$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	@ Copy/Log [.pod]perl.pod $@
+
+[.lib.pod]perlapio.pod : [.pod]perlapio.pod
+	@ If f$$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	@ Copy/Log [.pod]perlapio.pod $@
 
 [.lib.pod]perlbook.pod : [.pod]perlbook.pod
 	@ If f$$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
@@ -560,6 +568,10 @@ preplibrary : $(MINIPERL_EXE) $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]
 [.lib.pod]perlguts.pod : [.pod]perlguts.pod
 	@ If f$$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	@ Copy/Log [.pod]perlguts.pod $@
+
+[.lib.pod]perllocale.pod : [.pod]perllocale.pod
+	@ If f$$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	@ Copy/Log [.pod]perllocale.pod $@
 
 [.lib.pod]perlipc.pod : [.pod]perlipc.pod
 	@ If f$$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]

@@ -76,8 +76,14 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00310"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00314"  /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
+
+/* BINCOMPAT3:
+ *	This symbol, if defined, indicates that Perl 5.004 should be
+ *	binary-compatible with Perl 5.003.
+ */
+#undef BINCOMPAT3
 
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
@@ -205,6 +211,17 @@
  *	available to set the file position indicator, similar to fseek().
  */
 #define HAS_FSETPOS	/**/
+
+/* HAS_GETTIMEOFDAY:
+ *	This symbol, if defined, indicates that the gettimeofday() system
+ *	call is available for a sub-second accuracy clock. Usually, the file
+ *	<sys/resource.h> needs to be included (see I_SYS_RESOURCE).
+ *	The type "Timeval" should be used to refer to "struct timeval".    
+ */
+#undef HAS_GETTIMEOFDAY /**/
+#ifdef HAS_GETTIMEOFDAY
+#  define Timeval struct timeval /*config-skip*/
+#endif
 
 /* HAS_GETGROUPS:
  *	This symbol, if defined, indicates that the getgroups() routine is
@@ -1138,19 +1155,19 @@
 
 /* HAS_STRTOD:
  *	This symbol, if defined, indicates that the strtod routine is
- *	available to translate strings to doubles.
+ *	available to provide better numeric string conversion than atof().
  */
 #define HAS_STRTOD	/**/
 
 /* HAS_STRTOL:
- *	This symbol, if defined, indicates that the strtol routine is
- *	available to translate strings to integers.
+ *	This symbol, if defined, indicates that the strtol routine is available
+ *	to provide better numeric string conversion than atoi() and friends.
  */
 #define HAS_STRTOL	/**/
 
 /* HAS_STRTOUL:
  *	This symbol, if defined, indicates that the strtoul routine is
- *	available to translate strings to integers.
+ *	available to provide conversion of strings to unsigned long.
  */
 #define HAS_STRTOUL	/**/
 
@@ -1506,6 +1523,15 @@
 #undef SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
 #undef DOSUID		/**/
 
+/* HAS_INET_ATON:
+ *	This symbol, if defined, indicates to the C program that the
+ *	inet_aton() function is available to parse IP address "dotted-quad"
+ *	strings.
+ *	VMS: SocketShr doesn't support this, so we let the Socket extension
+ *	roll its own.
+ */
+#undef HAS_INET_ATON		/**/
+
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that the
  *	isascii is available.
@@ -1570,10 +1596,9 @@
 #define HAS_SAFE_MEMCPY	/**/
 
 /* HAS_SANE_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp() routine is
- *	available to compare memory blocks for relative magnitude. If this
- *	symbol is not defined, and if HAS_MEMCMP is defined, then memcmp()
- *	may be used only to compare memory blocks for equality.
+ *	This symbol, if defined, indicates that the memcmp routine is available
+ *	and can be used to compare relative magnitudes of chars with their high
+ *	bits set.  If it is not defined, roll your own version.
  */
 #define HAS_SANE_MEMCMP	/**/
 

@@ -380,7 +380,7 @@ manipulate @INC at compile time
 
 =item locale
 
-use or ignore current locale for built-in operations (see L<perli18n>)
+use or ignore current locale for built-in operations (see L<perllocale>)
 
 =item ops
 
@@ -431,6 +431,18 @@ split a package for autoloading
 =item Benchmark
 
 benchmark running times of code
+
+=item CPAN
+
+interface to Comprehensive Perl Archive Network
+
+=item CPAN::FirstTime
+
+create a CPAN configuration file
+
+=item CPAN::Nox
+
+run CPAN while avoiding compiled extensions
 
 =item Carp
 
@@ -519,18 +531,6 @@ write linker options files for dynamic extension
 =item ExtUtils::testlib
 
 add blib/* directories to @INC
-
-=item CPAN
-
-interface to Comprehensive Perl Archive Network
-
-=item CPAN::FirstTime
-
-create a CPAN configuration file
-
-=item CPAN::Nox
-
-run CPAN while avoiding compiled extensions
 
 =item Fatal
 
@@ -648,49 +648,9 @@ complex numbers and associated mathematical functions
 
 tied access to ndbm files
 
-=item Net::Cmd
-
-Base class for command-oriented protocols
-
-=item Net::Domain
-
-Domain Name System client
-
-=item Net::FTP
-
-File Transfer Protocol client
-
-=item Net::NNTP
-
-Network News Transfer Protocol client
-
-=item Net::Netrc
-
-.netrc lookup routines
-
 =item Net::Ping
 
 Hello, anybody home?
-
-=item Net::POP3
-
-Post Office Protocol client
-
-=item Net::SMTP
-
-Simple Mail Transfer Protocol client
-
-=item Net::SNPP
-
-Simple Network Pager Protocol client
-
-=item Net::Telnet
-
-Telnet client
-
-=item Net::Time
-
-Time and NetTime protocols
 
 =item Net::hostent
 

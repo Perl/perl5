@@ -1949,11 +1949,14 @@ register SV *sstr;
 				    (CvROOT(cv) || CvXSUB(cv)) )
 				warn("Subroutine %s redefined",
 				    GvENAME((GV*)dstr));
-			    SvFAKE_on(cv);
+			    if (SvREFCNT(cv) == 1)
+				SvFAKE_on(cv);
 			}
 		    }
+		    sub_generation++;
 		    if (GvCV(dstr) != (CV*)sref) {
 			GvCV(dstr) = (CV*)sref;
+			GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 			GvASSUMECV_on(dstr);
 		    }
 		    if (curcop->cop_stash != GvSTASH(dstr))
@@ -2077,7 +2080,7 @@ register SV *sstr;
 void
 sv_setpvn(sv,ptr,len)
 register SV *sv;
-register char *ptr;
+register const char *ptr;
 register STRLEN len;
 {
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
@@ -2109,7 +2112,7 @@ register STRLEN len;
 void
 sv_setpv(sv,ptr)
 register SV *sv;
-register char *ptr;
+register const char *ptr;
 {
     register STRLEN len;
 
@@ -2394,7 +2397,7 @@ I32 namlen;
 	mg->mg_virtual = &vtbl_substr;
 	break;
     case 'y':
-	mg->mg_virtual = &vtbl_vivary;
+	mg->mg_virtual = &vtbl_itervar;
 	break;
     case '*':
 	mg->mg_virtual = &vtbl_glob;

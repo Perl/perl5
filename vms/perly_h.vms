@@ -1,4 +1,4 @@
-/* Postprocessed by vms_yfix.pl 1.1 to add VMS declarations of globals */
+/* Postprocessed by vms_yfix.pl 1.11 to add VMS declarations of globals */
 #define WORD 257
 #define METHOD 258
 #define FUNCMETH 259

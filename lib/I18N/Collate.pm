@@ -125,7 +125,7 @@ sub new {
   migrate the old applications away from it) because its functionality was
   integrated into the Perl core language in the release 5.003_06.
 
-  See pod/perli18n.pod for further information.
+  See pod/perllocale.pod for further information.
 
 ***
 ___EOD___

@@ -180,6 +180,8 @@ class from C<IO::Handle> and inherit those methods.
 
 Derived from FileHandle.pm by Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>
 
+Version 1.1201 specialized from 1.12 for inclusion in Perl distribution
+
 =cut
 
 require 5.000;
@@ -191,7 +193,7 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.12";
+$VERSION = "1.1201";
 $RCS = sprintf("%s", q$Revision: 1.15 $ =~ /([\d\.]+)/);
 
 @EXPORT_OK = qw(

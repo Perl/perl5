@@ -2,11 +2,13 @@
 #psroff -t -man -rC1 -rD1 -rF1 > /tmp/PerlDoc.ps 2>/tmp/PerlTOC.raw \
 nroff -man -rC1 -rD1 -rF1 > /tmp/PerlDoc.txt 2>/tmp/PerlTOC.nr.raw \
     /usr/local/man/man1/perl.1	\
+    /usr/local/man/man1/perlnews.1	\
     /usr/local/man/man1/perldata.1	\
     /usr/local/man/man1/perlsyn.1	\
     /usr/local/man/man1/perlop.1	\
     /usr/local/man/man1/perlre.1	\
     /usr/local/man/man1/perlrun.1	\
+    /usr/local/man/man1/perllocale.1	\
     /usr/local/man/man1/perlfunc.1	\
     /usr/local/man/man1/perlvar.1	\
     /usr/local/man/man1/perlsub.1	\

@@ -126,7 +126,9 @@ foreach (@ARGV) {
       print OUT "gccversion='$1'\n";
     }
     elsif ($archsufx eq 'VAX' &&
-           `$val/NoObject/NoList /prefix=all _nla0:` =~ /IVQUAL/) {
+           # Check exit status too, in case message is turned off
+           ( `$val/NoObject/NoList /prefix=all _nla0:` =~ /IVQUAL/ ||
+              $? == 0x38240 )) {
       $cctype = 'vaxc';
       $d_attr = 'undef';
     }

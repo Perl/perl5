@@ -41,8 +41,9 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <fcntl.h>
+
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
-#  include <file.h>         /* == fcntl.h for DECC; no fcntl.h for VAXC */
 #  include <libdef.h>       /* LIB$_INVARG constant */
 #  include <lib$routines.h> /* prototype for lib$ediv() */
 #  include <starlet.h>      /* prototype for sys$gettim() */
@@ -51,49 +52,50 @@
 #  define mkfifo(a,b) (not_here("mkfifo"),-1)
 #  define tzset() not_here("tzset")
 
-   /* The default VMS emulation of Unix signals isn't very POSIXish */
-   typedef int sigset_t;
-#  define sigpending(a) (not_here("sigpending"),0)
+#  if __VMS_VER < 70000000
+     /* The default VMS emulation of Unix signals isn't very POSIXish */
+     typedef int sigset_t;
+#    define sigpending(a) (not_here("sigpending"),0)
 
-   /* sigset_t is atomic under VMS, so these routines are easy */
-   int sigemptyset(sigset_t *set) {
+     /* sigset_t is atomic under VMS, so these routines are easy */
+     int sigemptyset(sigset_t *set) {
 	if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
 	*set = 0; return 0;
-   }
-   int sigfillset(sigset_t *set) {
+     }
+     int sigfillset(sigset_t *set) {
 	int i;
 	if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
 	for (i = 0; i < NSIG; i++) *set |= (1 << i);
 	return 0;
-   }
-   int sigaddset(sigset_t *set, int sig) {
+     }
+     int sigaddset(sigset_t *set, int sig) {
 	if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
 	if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
 	*set |= (1 << (sig - 1));
 	return 0;
-   }
-   int sigdelset(sigset_t *set, int sig) {
+     }
+     int sigdelset(sigset_t *set, int sig) {
 	if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
 	if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
 	*set &= ~(1 << (sig - 1));
 	return 0;
-   }
-   int sigismember(sigset_t *set, int sig) {
+     }
+     int sigismember(sigset_t *set, int sig) {
 	if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
 	if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
 	*set & (1 << (sig - 1));
-   }
-   /* The tools for sigprocmask() are there, just not the routine itself */
-#  ifndef SIG_UNBLOCK
-#    define SIG_UNBLOCK 1
-#  endif
-#  ifndef SIG_BLOCK
-#    define SIG_BLOCK 2
-#  endif
-#  ifndef SIG_SETMASK
-#    define SIG_SETMASK 3
-#  endif
-   int sigprocmask(int how, sigset_t *set, sigset_t *oset) {
+     }
+     /* The tools for sigprocmask() are there, just not the routine itself */
+#    ifndef SIG_UNBLOCK
+#      define SIG_UNBLOCK 1
+#    endif
+#    ifndef SIG_BLOCK
+#      define SIG_BLOCK 2
+#    endif
+#    ifndef SIG_SETMASK
+#      define SIG_SETMASK 3
+#    endif
+     int sigprocmask(int how, sigset_t *set, sigset_t *oset) {
 	if (!set || !oset) {
 	  set_errno(EFAULT); set_vaxc_errno(SS$_ACCVIO);
 	  return -1;
@@ -114,12 +116,15 @@
 	    return -1;
 	}
 	return 0;
-    }
-#  define sigaction sigvec
-#  define sa_flags sv_onstack
-#  define sa_handler sv_handler
-#  define sa_mask sv_mask
-#  define sigsuspend(set) sigpause(*set)
+     }
+#    define sigaction sigvec
+#    define sa_flags sv_onstack
+#    define sa_handler sv_handler
+#    define sa_mask sv_mask
+#    define sigsuspend(set) sigpause(*set)
+#  else
+#    define HAS_TZNAME  /* shows up in VMS 7.0 */
+#  endif /* __VMS_VER < 70000000 */
 
    /* The POSIX notion of ttyname() is better served by getname() under VMS */
    static char ttnambuf[64];
@@ -152,7 +157,6 @@
    }
 #  define times(t) vms_times(t)
 #else
-#  include <fcntl.h>
 #  include <grp.h>
 #  include <sys/times.h>
 #  ifdef HAS_UNAME

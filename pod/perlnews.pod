@@ -162,10 +162,11 @@ this more than we have to.)
 =item use Module VERSION LIST
 
 If the VERSION argument is present between Module and LIST, then the
-C<use> will fail if the $VERSION variable in package Module is
-less than VERSION.
-
-Note that there is not a comma after the version!
+C<use> will call the VERSION method in class Module with the given
+version as an argument.  The default VERSION method, inherited from
+the Universal class, croaks if the given version is larger than the
+value of the variable $Module::VERSION.  (Note that there is not a
+comma after VERSION!)
 
 =item prototype(FUNCTION)
 
@@ -209,16 +210,16 @@ I<undef> is returned.
 
 =item VERSION( [NEED] )
 
-C<VERSION> returns the version number of the class (package). If the
-NEED argument is given then it will check that the current version is
-not less than NEED and die if this is not the case. This method is
-normally called as a class method. This method is also called when the
-C<VERSION> form of C<use> is used.
+C<VERSION> returns the version number of the class (package).  If the
+NEED argument is given then it will check that the current version (as
+defined by the $VERSION variable in the given package) not less than
+NEED; it will die if this is not the case.  This method is normally
+called as a class method.  This method is called automatically by the
+C<VERSION> form of C<use>.
 
     use A 1.2 qw(some imported subs);
-
-    A->VERSION( 1.2 );
-    $ref->is_instance();    # True
+    # implies:
+    A->VERSION(1.2);
 
 =item class()
 
@@ -425,17 +426,21 @@ new pods are included in section 1:
 
 =over 4
 
-=item L<perli18n>
+=item L<perlnews>
 
-Internationalization.
+This document.
 
-=item L<perlapio>
+=item L<perllocale>
 
-Perl internal IO abstraction interface.
+Locale support (internationalization and localization).
 
 =item L<perltoot>
 
 Tutorial on Perl OO programming.
+
+=item L<perlapio>
+
+Perl internal IO abstraction interface.
 
 =item L<perldebug>
 

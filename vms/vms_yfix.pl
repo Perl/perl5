@@ -6,10 +6,12 @@
 # If it finds that the input files are already patches for VMS,
 # it just copies the input to the output.
 #
-# Revised 29-Jan-1996 by Charles Bailey  bailey@genetics.upenn.edu
+# Revised 20-Dec-1996 by Charles Bailey  bailey@genetics.upenn.edu
 
-$VERSION = '1.1';
+$VERSION = '1.11';
 
+push(@ARGV,(qw[ perly.c perly.h vms/perly_c.vms vms/perly_h.vms])[@ARGV..4])
+    if @ARGV < 4;
 ($cinfile,$hinfile,$coutfile,$houtfile) = @ARGV;
 
 open C,$cinfile or die "Can't read $cinfile: $!\n";

@@ -304,10 +304,11 @@
 #define magic_clearpack		Perl_magic_clearpack
 #define magic_clearsig		Perl_magic_clearsig
 #define magic_existspack	Perl_magic_existspack
-#define magic_freevivary	Perl_magic_freevivary
+#define magic_freeitervar	Perl_magic_freeitervar
 #define magic_get		Perl_magic_get
 #define magic_getarylen		Perl_magic_getarylen
 #define magic_getglob		Perl_magic_getglob
+#define magic_getitervar	Perl_magic_getitervar
 #define magic_getpack		Perl_magic_getpack
 #define magic_getpos		Perl_magic_getpos
 #define magic_getsig		Perl_magic_getsig
@@ -325,6 +326,7 @@
 #define magic_setfm		Perl_magic_setfm
 #define magic_setglob		Perl_magic_setglob
 #define magic_setisa		Perl_magic_setisa
+#define magic_setitervar	Perl_magic_setitervar
 #define magic_setmglob		Perl_magic_setmglob
 #define magic_setnkeys		Perl_magic_setnkeys
 #define magic_setpack		Perl_magic_setpack
@@ -334,7 +336,6 @@
 #define magic_settaint		Perl_magic_settaint
 #define magic_setuvar		Perl_magic_setuvar
 #define magic_setvec		Perl_magic_setvec
-#define magic_setvivary		Perl_magic_setvivary
 #define magic_wipepack		Perl_magic_wipepack
 #define magicname		Perl_magicname
 #define markstack		Perl_markstack
@@ -1059,6 +1060,7 @@
 #define utilize			Perl_utilize
 #define varies			Perl_varies
 #define vert			Perl_vert
+#define vivify_itervar		Perl_vivify_itervar
 #define vtbl_amagic		Perl_vtbl_amagic
 #define vtbl_amagicelem		Perl_vtbl_amagicelem
 #define vtbl_arylen		Perl_vtbl_arylen

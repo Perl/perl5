@@ -281,7 +281,7 @@ are inherited by all other classes:
 
 =over 4
 
-=item isa ( CLASS )
+=item isa(CLASS)
 
 C<isa> returns I<true> if its object is blessed into a sub-class of C<CLASS>
 
@@ -294,29 +294,30 @@ allows the ability to check what a reference points to. Example
     	...
     }
 
-=item can ( METHOD )
+=item can(METHOD)
 
 C<can> checks to see if its object has a method called C<METHOD>,
 if it does then a reference to the sub is returned, if it does not then
 I<undef> is returned.
 
-=item VERSION ( [ VERSION ] )
+=item VERSION( [NEED] )
 
-C<VERSION> returns the VERSION number of the class (package). If
-an argument is given then it will check that the current version is not 
-less that the given argument. This method is normally called as a class
-method. This method is also called when the C<VERSION> form of C<use> is
-used.
+C<VERSION> returns the version number of the class (package).  If the
+NEED argument is given then it will check that the current version (as
+defined by the $VERSION variable in the given package) not less than
+NEED; it will die if this is not the case.  This method is normally
+called as a class method.  This method is called automatically by the
+C<VERSION> form of C<use>.
 
     use A 1.2 qw(some imported subs);
-    
-    A->VERSION( 1.2 );
+    # implies:
+    A->VERSION(1.2);
 
-=item class ()
+=item class()
 
 C<class> returns the class name of its object.
 
-=item is_instance ()
+=item is_instance()
 
 C<is_instance> returns true if its object is an instance of some
 class, false if its object is the class (package) itself. Example
@@ -336,6 +337,9 @@ C<isa> uses a very similar method and cache-ing strategy. This may cause
 strange effects if the Perl code dynamically changes @ISA in any package.
 
 You may add other methods to the UNIVERSAL class via Perl or XS code.
+You do not need to C<use UNIVERSAL> in order to make these methods
+available to your program.  This is necessary only if you wish to
+have C<isa> available as a plain subroutine in the current package.
 
 =head2 Destructors        
 

@@ -27,9 +27,11 @@
 #endif
 
 #define TAINT_FROM_REGEX(sv,rx) \
-	if ((rx)->exec_tainted)	\
-	    SvTAINTED_on(sv);	\
-	else			\
+	if ((rx)->exec_tainted)	{	\
+	    TAINT;			\
+	    SvTAINTED_on(sv);		\
+	}				\
+	else				\
 	    SvTAINTED_off(sv);
 
 /*
@@ -287,10 +289,8 @@ MAGIC *mg;
 		(t = rx->endp[paren]))
 	    {
 		i = t - s;
-		if (i >= 0) {
-		    TAINT_IF(rx->exec_tainted);
+		if (i >= 0)
 		    return i;
-		}
 	    }
 	}
 	return 0;
@@ -308,10 +308,8 @@ MAGIC *mg;
 	if (curpm && (rx = curpm->op_pmregexp)) {
 	    if ((s = rx->subbeg)) {
 		i = rx->startp[0] - s;
-		if (i >= 0) {
-		    TAINT_IF(rx->exec_tainted);
+		if (i >= 0)
 		    return i;
-		}
 	    }
 	}
 	return 0;
@@ -1005,6 +1003,7 @@ MAGIC* mg;
     else if (pos > len)
 	pos = len;
     mg->mg_len = pos;
+    mg->mg_flags &= ~MGf_MINMATCH;
 
     return 0;
 }
@@ -1101,34 +1100,62 @@ MAGIC* mg;
 }
 
 int
-magic_setvivary(sv,mg)
+magic_getitervar(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    SV *targ = Nullsv;
     if (LvTARGLEN(sv)) {
 	AV* av = (AV*)LvTARG(sv);
-	if (LvTARGOFF(sv) <= AvFILL(av)) {
-	    SV** svp = AvARRAY(av) + LvTARGOFF(sv);
-	    LvTARG(sv) = newSVsv(*svp);
-	    SvREFCNT_dec(*svp);
-	    *svp = SvREFCNT_inc(LvTARG(sv));
-	}
-	else
-	    LvTARG(sv) = Nullsv;
-	LvTARGLEN(sv) = 0;
-	SvREFCNT_dec(av);
+	if (LvTARGOFF(sv) <= AvFILL(av))
+	    targ = AvARRAY(av)[LvTARGOFF(sv)];
     }
+    else
+	targ = LvTARG(sv);
+    sv_setsv(sv, targ ? targ : &sv_undef);
+    return 0;
+}
+
+int
+magic_setitervar(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    if (LvTARGLEN(sv))
+	vivify_itervar(sv);
     if (LvTARG(sv))
 	sv_setsv(LvTARG(sv), sv);
     return 0;
 }
 
 int
-magic_freevivary(sv,mg)
+magic_freeitervar(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
     SvREFCNT_dec(LvTARG(sv));
+    return 0;
+}
+
+void
+vivify_itervar(sv)
+SV* sv;
+{
+    AV* av;
+
+    if (!LvTARGLEN(sv))
+	return;
+    av = (AV*)LvTARG(sv);
+    if (LvTARGOFF(sv) <= AvFILL(av)) {
+	SV** svp = AvARRAY(av) + LvTARGOFF(sv);
+	LvTARG(sv) = newSVsv(*svp);
+	SvREFCNT_dec(*svp);
+	*svp = SvREFCNT_inc(LvTARG(sv));
+    }
+    else
+	LvTARG(sv) = Nullsv;
+    SvREFCNT_dec(av);
+    LvTARGLEN(sv) = 0;
 }
 
 int

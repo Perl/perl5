@@ -1037,12 +1037,12 @@ register I32 len;
 
 #ifdef I_STDARG
 char *
-mess(char *pat, va_list *args)
+mess(const char *pat, va_list *args)
 #else
 /*VARARGS0*/
 char *
 mess(pat, args)
-    char *pat;
+    const char *pat;
     va_list *args;
 #endif
 {
@@ -1112,12 +1112,12 @@ mess(pat, args)
 
 #ifdef I_STDARG
 OP *
-die(char* pat, ...)
+die(const char* pat, ...)
 #else
 /*VARARGS0*/
 OP *
 die(pat, va_alist)
-    char *pat;
+    const char *pat;
     va_dcl
 #endif
 {
@@ -1167,7 +1167,7 @@ die(pat, va_alist)
 
 #ifdef I_STDARG
 void
-croak(char* pat, ...)
+croak(const char* pat, ...)
 #else
 /*VARARGS0*/
 void
@@ -1233,11 +1233,11 @@ croak(pat, va_alist)
 
 void
 #ifdef I_STDARG
-warn(char* pat,...)
+warn(const char* pat,...)
 #else
 /*VARARGS0*/
 warn(pat,va_alist)
-    char *pat;
+    const char *pat;
     va_dcl
 #endif
 {
@@ -1416,7 +1416,9 @@ char *
 int
 #endif
 vsprintf(dest, pat, args)
-char *dest, *pat, *args;
+char *dest;
+const char *pat;
+char *args;
 {
     FILE fakebuf;
 
@@ -2143,7 +2145,7 @@ I32 *retlen;
     return retval;
 }
 
-unsigned long
+UV
 scan_hex(start, len, retlen)
 char *start;
 I32 len;

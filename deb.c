@@ -42,12 +42,12 @@ deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
 
 #  ifdef I_STDARG
 void
-deb(char *pat, ...)
+deb(const char *pat, ...)
 #  else
 /*VARARGS1*/
 void
 deb(pat, va_alist)
-    char *pat;
+    const char *pat;
     va_dcl
 #  endif
 {

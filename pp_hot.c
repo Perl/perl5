@@ -894,8 +894,6 @@ play_it_again:
 		else
 		    mg->mg_flags &= ~MGf_MINMATCH;
 	    }
-	    else
-		mg->mg_len = -1;
 	}
 	LEAVE_SCOPE(oldsave);
 	RETPUSHYES;
@@ -932,13 +930,6 @@ nope:
 	++BmUSEFUL(pm->op_pmshort);
 
 ret_no:
-    if (global) {
-	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
-	    MAGIC* mg = mg_find(TARG, 'g');
-	    if (mg)
-		mg->mg_len = -1;
-	}
-    }
     LEAVE_SCOPE(oldsave);
     if (gimme == G_ARRAY)
 	RETURN;
@@ -1157,6 +1148,7 @@ do_readline()
 	    SvTAINTED_on(sv);
 	}
 	IoLINES(io)++;
+	SvSETMAGIC(sv);
 	XPUSHs(sv);
 	if (type == OP_GLOB) {
 	    char *tmps;
@@ -1314,11 +1306,9 @@ PP(pp_iter)
     cx = &cxstack[cxstack_ix];
     if (cx->cx_type != CXt_LOOP)
 	DIE("panic: pp_iter");
-    av = cx->blk_loop.iterary;
-    if (av == curstack && cx->blk_loop.iterix >= cx->blk_oldsp)
-	RETPUSHNO;
 
-    if (cx->blk_loop.iterix >= AvFILL(av))
+    av = cx->blk_loop.iterary;
+    if (cx->blk_loop.iterix >= (av == curstack ? cx->blk_oldsp : AvFILL(av)))
 	RETPUSHNO;
 
     if (sv = AvARRAY(av)[++cx->blk_loop.iterix])
@@ -1327,6 +1317,10 @@ PP(pp_iter)
 	sv = &sv_undef;
     if (av != curstack && SvIMMORTAL(sv)) {
 	SV *lv = cx->blk_loop.iterlval;
+	if (lv && SvREFCNT(lv) > 1) {
+	    SvREFCNT_dec(lv);
+	    lv = Nullsv;
+	}
 	if (lv)
 	    SvREFCNT_dec(LvTARG(lv));
 	else {
@@ -1360,6 +1354,7 @@ PP(pp_subst)
     I32 maxiters;
     register I32 i;
     bool once;
+    bool rxtainted;
     char *orig;
     I32 safebase;
     register REGEXP *rx = pm->op_pmregexp;
@@ -1427,116 +1422,105 @@ PP(pp_subst)
 	    pm->op_pmshort = Nullsv;	/* opt is being useless */
 	}
     }
+
+    /* only replace once? */
     once = !(rpm->op_pmflags & PMf_GLOBAL);
-    if (rpm->op_pmflags & PMf_CONST) {	/* known replacement string? */
-	c = SvPV(dstr, clen);
-	if (clen <= rx->minlen) {
-					/* can do inplace substitution */
-	    if (pregexec(rx, s, strend, orig, 0,
-	      SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
-		if (force_on_match) {
-		    force_on_match = 0;
-		    s = SvPV_force(TARG, len);
-		    goto force_it;
-		}
-		if (rx->subbase) 	/* oops, no we can't */
-		    goto long_way;
-		d = s;
-		curpm = pm;
-		SvSCREAM_off(TARG);	/* disable possible screamer */
-		if (once) {
-		    m = rx->startp[0];
-		    d = rx->endp[0];
-		    s = orig;
-		    if (m - s > strend - d) {	/* faster to shorten from end */
-			if (clen) {
-			    Copy(c, m, clen, char);
-			    m += clen;
-			}
-			i = strend - d;
-			if (i > 0) {
-			    Move(d, m, i, char);
-			    m += i;
-			}
-			*m = '\0';
-			SvCUR_set(TARG, m - s);
-			(void)SvPOK_only(TARG);
-			SvSETMAGIC(TARG);
-			PUSHs(&sv_yes);
-			LEAVE_SCOPE(oldsave);
-			RETURN;
-		    }
-		    /*SUPPRESS 560*/
-		    else if (i = m - s) {	/* faster from front */
-			d -= clen;
-			m = d;
-			sv_chop(TARG, d-i);
-			s += i;
-			while (i--)
-			    *--d = *--s;
-			if (clen)
-			    Copy(c, m, clen, char);
-			(void)SvPOK_only(TARG);
-			SvSETMAGIC(TARG);
-			PUSHs(&sv_yes);
-			LEAVE_SCOPE(oldsave);
-			RETURN;
-		    }
-		    else if (clen) {
-			d -= clen;
-			sv_chop(TARG, d);
-			Copy(c, d, clen, char);
-			(void)SvPOK_only(TARG);
-			SvSETMAGIC(TARG);
-			PUSHs(&sv_yes);
-			LEAVE_SCOPE(oldsave);
-			RETURN;
-		    }
-		    else {
-			sv_chop(TARG, d);
-			(void)SvPOK_only(TARG);
-			SvSETMAGIC(TARG);
-			PUSHs(&sv_yes);
-			LEAVE_SCOPE(oldsave);
-			RETURN;
-		    }
-		    /* NOTREACHED */
-		}
-		do {
-		    if (iters++ > maxiters)
-			DIE("Substitution loop");
-		    m = rx->startp[0];
-		    /*SUPPRESS 560*/
-		    if (i = m - s) {
-			if (s != d)
-			    Move(s, d, i, char);
-			d += i;
-		    }
-		    if (clen) {
-			Copy(c, d, clen, char);
-			d += clen;
-		    }
-		    s = rx->endp[0];
-		} while (pregexec(rx, s, strend, orig, s == m,
-		    Nullsv, TRUE));	/* (don't match same null twice) */
-		if (s != d) {
-		    i = strend - s;
-		    SvCUR_set(TARG, d - SvPVX(TARG) + i);
-		    Move(s, d, i+1, char);		/* include the Null */
-		}
-		(void)SvPOK_only(TARG);
-		SvSETMAGIC(TARG);
-		PUSHs(sv_2mortal(newSViv((I32)iters)));
-		LEAVE_SCOPE(oldsave);
-		RETURN;
-	    }
+
+    /* known replacement string? */
+    c = (rpm->op_pmflags & PMf_CONST) ? SvPV(dstr, clen) : Nullch;
+
+    /* can do inplace substitution? */
+    if (c && clen <= rx->minlen) {
+	if (! pregexec(rx, s, strend, orig, 0,
+		       SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
 	    PUSHs(&sv_no);
 	    LEAVE_SCOPE(oldsave);
 	    RETURN;
 	}
+	if (force_on_match) {
+	    force_on_match = 0;
+	    s = SvPV_force(TARG, len);
+	    goto force_it;
+	}
+	if (rx->subbase) 	/* oops, no we can't */
+	    goto long_way;
+	d = s;
+	curpm = pm;
+	SvSCREAM_off(TARG);	/* disable possible screamer */
+	if (once) {
+	    rxtainted = rx->exec_tainted;
+	    m = rx->startp[0];
+	    d = rx->endp[0];
+	    s = orig;
+	    if (m - s > strend - d) {  /* faster to shorten from end */
+		if (clen) {
+		    Copy(c, m, clen, char);
+		    m += clen;
+		}
+		i = strend - d;
+		if (i > 0) {
+		    Move(d, m, i, char);
+		    m += i;
+		}
+		*m = '\0';
+		SvCUR_set(TARG, m - s);
+	    }
+	    /*SUPPRESS 560*/
+	    else if (i = m - s) {	/* faster from front */
+		d -= clen;
+		m = d;
+		sv_chop(TARG, d-i);
+		s += i;
+		while (i--)
+		    *--d = *--s;
+		if (clen)
+		    Copy(c, m, clen, char);
+	    }
+	    else if (clen) {
+		d -= clen;
+		sv_chop(TARG, d);
+		Copy(c, d, clen, char);
+	    }
+	    else {
+		sv_chop(TARG, d);
+	    }
+	    PUSHs(&sv_yes);
+	}
+	else {
+	    rxtainted = 0;
+	    do {
+		if (iters++ > maxiters)
+		    DIE("Substitution loop");
+		rxtainted |= rx->exec_tainted;
+		m = rx->startp[0];
+		/*SUPPRESS 560*/
+		if (i = m - s) {
+		    if (s != d)
+			Move(s, d, i, char);
+		    d += i;
+		}
+		if (clen) {
+		    Copy(c, d, clen, char);
+		    d += clen;
+		}
+		s = rx->endp[0];
+	    } while (pregexec(rx, s, strend, orig, s == m,
+			      Nullsv, TRUE)); /* don't match same null twice */
+	    if (s != d) {
+		i = strend - s;
+		SvCUR_set(TARG, d - SvPVX(TARG) + i);
+		Move(s, d, i+1, char);		/* include the NUL */
+	    }
+	    PUSHs(sv_2mortal(newSViv((I32)iters)));
+	}
+	(void)SvPOK_only(TARG);
+	SvSETMAGIC(TARG);
+	if (rxtainted)
+	    SvTAINTED_on(TARG);
+	LEAVE_SCOPE(oldsave);
+	RETURN;
     }
-    else
-	c = Nullch;
+
     if (pregexec(rx, s, strend, orig, 0,
 		 SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
     long_way:
@@ -1545,6 +1529,7 @@ PP(pp_subst)
 	    s = SvPV_force(TARG, len);
 	    goto force_it;
 	}
+	rxtainted = rx->exec_tainted;
 	dstr = NEWSV(25, sv_len(TARG));
 	sv_setpvn(dstr, m, s-m);
 	curpm = pm;
@@ -1556,6 +1541,7 @@ PP(pp_subst)
 	do {
 	    if (iters++ > maxiters)
 		DIE("Substitution loop");
+	    rxtainted |= rx->exec_tainted;
 	    if (rx->subbase && rx->subbase != orig) {
 		m = s;
 		s = orig;
@@ -1583,6 +1569,8 @@ PP(pp_subst)
 
 	(void)SvPOK_only(TARG);
 	SvSETMAGIC(TARG);
+	if (rxtainted)
+	    SvTAINTED_on(TARG);
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
 	LEAVE_SCOPE(oldsave);
 	RETURN;
@@ -1762,12 +1750,16 @@ PP(pp_entersub)
 
     gimme = GIMME;
     if ((op->op_private & OPpENTERSUB_DB)) {
+	SV *oldsv = sv;
 	sv = GvSV(DBsub);
 	save_item(sv);
 	gv = CvGV(cv);
-	if ( CvFLAGS(cv) & (CVf_ANON | CVf_CLONED)
-	     || strEQ(GvNAME(gv), "END") ) {
-	    /* GV is potentially non-unique */
+	if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
+	     || strEQ(GvNAME(gv), "END") 
+	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
+		 !( (SvTYPE(oldsv) == SVt_PVGV) && (GvCV((GV*)oldsv) == cv)
+		    && (gv = (GV*)oldsv) ))) { /* Use GV from the stack as a fallback. */
+	    /* GV is potentially non-unique, or contain different CV. */
 	    sv_setsv(sv, newRV((SV*)cv));
 	}
 	else {

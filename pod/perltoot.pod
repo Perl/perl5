@@ -928,7 +928,7 @@ superclass's name.  This in particular is bad if you change which classes
 you inherit from, or add others.  Fortunately, the pseudoclass SUPER
 comes to the rescue here.
 
-    $class->SUPER::debug($Debugging);
+    $self->SUPER::debug($Debugging);
 
 This way it starts looking in my class's @ISA.  This only makes sense
 from I<within> a method call, though.  Don't try to access anything
@@ -1271,7 +1271,7 @@ Although this is the same function each time, it contains a different
 version of $self.
 
 When a method like C<$him-E<gt>name("Jason")> is called, its implicit
-zeroth argument is as the invoking object just as it is with all method
+zeroth argument is the invoking object just as it is with all method
 calls.  But in this case, it's our code reference (something like a
 function pointer in C++, but with deep binding of lexical variables).
 There's not a lot to be done with a code reference beyond calling it, so

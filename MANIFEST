@@ -1,18 +1,18 @@
 Artistic		The "Artistic License"
-Changes			Differences from previous versions.
-Changes5.000		Differences from perl4.
-Changes5.001		Differences from 5.000.
-Changes5.002		Differences from 5.001.
-Changes5.003		Differences from 5.002.
+Changes			Differences from previous version
+Changes5.000		Differences between 4.x and 5.000
+Changes5.001		Differences between 5.000 and 5.001
+Changes5.002		Differences between 5.001 and 5.002
+Changes5.003		Differences between 5.002 and 5.003
 Configure		Portability tool
 configure		Crude emulation of GNU configure
 Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
-INSTALL			Detailed installation instructions.
+INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
-Porting/Glossary	Glossary of config.sh variables.
+Porting/Glossary	Glossary of config.sh variables
 README			The Instructions
 README.os2		Notes about OS/2 port
 README.plan9		Notes about Plan9 port
@@ -197,8 +197,8 @@ h2pl/tcbreak2		cbreak test routine using .pl
 handy.h			Handy definitions
 hints/3b1.sh		Hints for named architecture
 hints/3b1cc		Hints for named architecture
-hints/README.NeXT	Notes about NeXT hints.
-hints/README.hints	Notes about hints.
+hints/README.NeXT	Notes about NeXT hints
+hints/README.hints	Notes about hints
 hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture
 hints/amigaos.sh	Hints for named architecture
@@ -262,15 +262,15 @@ hints/utekv.sh		Hints for named architecture
 hints/uts.sh		Hints for named architecture
 hv.c			Hash value code
 hv.h			Hash value header
-installman		Perl script to install man pages for pods.
+installman		Perl script to install man pages for pods
 installperl		Perl script to do "make install" dirty work
 interp.sym		Interpreter specific symbols to hide in a struct
 keywords.h		The keyword numbers
 keywords.pl		Program to write keywords.h
 lib/AnyDBM_File.pm	Perl module to emulate dbmopen
 lib/AutoLoader.pm	Autoloader base class
-lib/AutoSplit.pm	A module to split up autoload functions
-lib/Benchmark.pm	A module to time pieces of code and such
+lib/AutoSplit.pm	Split up autoload functions
+lib/Benchmark.pm	Measure execution time
 lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
@@ -287,7 +287,7 @@ lib/ExtUtils/Install.pm	Handles 'make install' on extensions
 lib/ExtUtils/Liblist.pm	Locates libraries
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
-lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS.
+lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
@@ -296,46 +296,35 @@ lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/Fatal.pm		Make do-or-die equivalents of functions
-lib/File/Basename.pm	A module to emulate the basename program
+lib/File/Basename.pm	Emulate the basename program
 lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 lib/File/Compare.pm	Emulation of cmp command
 lib/File/Copy.pm	Emulation of cp command
 lib/File/Find.pm	Routines to do a find
-lib/File/Path.pm	A module to do things like `mkdir -p' and `rm -r'
+lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
 lib/File/stat.pm	By-name interface to Perl's built-in stat
 lib/FileCache.pm	Keep more files open than the system permits
 lib/FileHandle.pm	Backward-compatible front end to IO extension
 lib/FindBin.pm		Find name of currently executing program
-lib/Getopt/Long.pm	A module to fetch command options (GetOptions)
-lib/Getopt/Std.pm	A module to fetch command options (getopt, getopts)
+lib/Getopt/Long.pm	Fetch command options (GetOptions)
+lib/Getopt/Std.pm	Fetch command options (getopt, getopts)
 lib/I18N/Collate.pm	Routines to do strxfrm-based collation
 lib/IPC/Open2.pm	Open a two-ended pipe
 lib/IPC/Open3.pm	Open a three-ended pipe!
 lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
-lib/Net/Cmd.pm		Base class for command-based protocols (libnet-1.01)
-lib/Net/Domain.pm	DNS Domain name lookup (libnet-1.01)
-lib/Net/DummyInetd.pm	Place holder for future Net::Inetd (libnet-1.01)
-lib/Net/FTP.pm		File Transfer Protocol client (libnet-1.01)
-lib/Net/NNTP.pm		Network News Transfer Protocol (libnet-1.01)
-lib/Net/Netrc.pm	.netrc lookup routines (libnet-1.01)
-lib/Net/POP3.pm		Post Office Protocol (libnet-1.01)
 lib/Net/Ping.pm		Hello, anybody home?
-lib/Net/SMTP.pm		Simple Mail Transfer Protocol client (libnet-1.01)
-lib/Net/SNPP.pm		Simple Network Pager Protocol client (libnet-1.01)
-lib/Net/Telnet.pm	Telnet client (libnet-1.01)
-lib/Net/Time.pm		Time & NetTime protocols (libnet-1.01)
 lib/Net/hostent.pm	By-name interface to Perl's built-in gethost*
 lib/Net/netent.pm	By-name interface to Perl's built-in getnet*
 lib/Net/protoent.pm	By-name interface to Perl's built-in getproto*
 lib/Net/servent.pm	By-name interface to Perl's built-in getserv*
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Text.pm		Convert POD data to formatted ASCII text
-lib/Search/Dict.pm	A module to do binary search on dictionaries
-lib/SelectSaver.pm	A module to enforce proper select scoping
-lib/SelfLoader.pm	A module to load functions only on demand.
-lib/Shell.pm		A module to make AUTOLOADed system() calls
+lib/Search/Dict.pm	Perform binary search on dictionaries
+lib/SelectSaver.pm	Enforce proper select scoping
+lib/SelfLoader.pm	Load functions only on demand
+lib/Shell.pm		Make AUTOLOADed system() calls
 lib/Symbol.pm		Symbol table manipulation routines
 lib/Sys/Hostname.pm	Hostname methods
 lib/Sys/Syslog.pm	Perl module supporting syslogging
@@ -356,7 +345,7 @@ lib/Time/Local.pm	Reverse translation of localtime, gmtime
 lib/Time/gmtime.pm	By-name interface to Perl's built-in gmtime
 lib/Time/localtime.pm	By-name interface to Perl's built-in localtime
 lib/Time/tm.pm		Internal oject for Time::{gm,local}time
-lib/UNIVERSAL.pm	Base class for ALL classes.
+lib/UNIVERSAL.pm	Base class for ALL classes
 lib/User/grent.pm	By-name interface to Perl's built-in getgr*
 lib/User/pwent.pm	By-name interface to Perl's built-in getpw*
 lib/abbrev.pl		An abbreviation table builder
@@ -390,9 +379,9 @@ lib/lib.pm		For "use lib"
 lib/locale.pm		For "use locale"
 lib/look.pl		A "look" equivalent
 lib/newgetopt.pl	A perl library supporting long option parsing
-lib/open2.pl		Open a two-ended pipe
-lib/open3.pl		Open a three-ended pipe
-lib/overload.pm		Module for overloading perl operators.
+lib/open2.pl		Open a two-ended pipe (uses IPC::Open2)
+lib/open3.pl		Open a three-ended pipe (uses IPC::Open3)
+lib/overload.pm		Module for overloading perl operators
 lib/perl5db.pl		Perl debugging routines
 lib/pwd.pl		Routines to keep track of PWD environment variable
 lib/shellwords.pl	Perl library to split into words with shell quoting
@@ -456,7 +445,7 @@ os2/OS2/REXX/t/rx_tievar.t	DLL access module
 os2/OS2/REXX/t/rx_tieydb.t	DLL access module
 os2/OS2/REXX/t/rx_varset.t	DLL access module
 os2/OS2/REXX/t/rx_vrexx.t	DLL access module
-os2/POSIX.mkfifo	POSIX.xs patch.
+os2/POSIX.mkfifo	POSIX.xs patch
 os2/diff.configure	Patches to Configure
 os2/dl_os2.c		Addon for dl_open
 os2/dlfcn.h		Addon for dl_open
@@ -466,9 +455,9 @@ os2/perl2cmd.pl		Corrects installed binaries under OS/2
 patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
-perl_exp.SH		Creates list of exported symbols for AIX.
-perlio.c		C code for PerlIO abstraction.
-perlio.h		Interface to PerlIO abstraction.
+perl_exp.SH		Creates list of exported symbols for AIX
+perlio.c		C code for PerlIO abstraction
+perlio.h		Interface to PerlIO abstraction
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
@@ -494,7 +483,7 @@ plan9/setup.rc		Plan9 port: script for easy build+install
 plan9/versnum		Plan9 port: script to print version number
 pod/Makefile		Make pods into something else
 pod/buildtoc		generate perltoc.pod
-pod/checkpods.PL	Tool to check for common errors in pods.
+pod/checkpods.PL	Tool to check for common errors in pods
 pod/perl.pod		Top level perl man page
 pod/perlapio.pod	IO API info
 pod/perlbook.pod	Book info
@@ -620,8 +609,8 @@ t/lib/io_xs.t		See if XSUB methods from IO work
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
-t/lib/open2.t		See if IPC::Open3 works
-t/lib/open3.t		See if IPC::Open2 works
+t/lib/open2.t		See if IPC::Open2 works
+t/lib/open3.t		See if IPC::Open3 works
 t/lib/ops.t		See if Opcode works
 t/lib/parsewords.t	See if Text::ParseWords works
 t/lib/posix.t		See if POSIX works
@@ -701,7 +690,7 @@ universal.c		The default UNIVERSAL package methods
 unixish.h		Defines that are assumed on Unix
 util.c			Utility routines
 util.h			Dummy header
-utils/Makefile		Extract the utility scripts.
+utils/Makefile		Extract the utility scripts
 utils/c2ph.PL		program to translate dbx stabs to perl
 utils/h2ph.PL		A thing to turn C .h files into perl .ph files
 utils/h2xs.PL		Program to make .xs files from C header files

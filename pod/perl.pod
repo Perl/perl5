@@ -268,7 +268,7 @@ directory.  If PERL5LIB is defined, PERLLIB is not used.
 =back
 
 Perl also has environment variables that control how Perl handles
-language-specific data. Please consult the L<perli18n> section.
+language-specific data.  Please consult L<perllocale>.
 
 Apart from these, Perl uses no other environment variables, except
 to make them available to the script being executed, and to child

@@ -24,6 +24,11 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
+#define VOIDUSED 1
+#include "config.h"
+
+#include "embed.h"
+
 /*
  * STMT_START { statements; } STMT_END;
  * can be used as a single statement, as in
@@ -46,11 +51,6 @@
 #  endif
 # endif
 #endif
-
-#include "embed.h"
-
-#define VOIDUSED 1
-#include "config.h"
 
 /*
  * SOFT_CAST can be used for args to prototyped functions to retain some
@@ -258,9 +258,9 @@
 
 #if defined(STANDARD_C) && defined(I_STDDEF)
 #   include <stddef.h>
-#   define OFFSETOF(s,m)  offsetof(s,m)
+#   define STRUCT_OFFSET(s,m)  offsetof(s,m)
 #else
-#   define OFFSETOF(s,m)  (Size_t)(&(((s *)0)->m))
+#   define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
 #endif
 
 #if defined(I_STRING) || defined(__cplusplus)
@@ -1300,43 +1300,43 @@ EXT short *	ds;
 EXT char *	dc;
 
 /* handy constants */
-EXT char *	Yes INIT("1");
-EXT char *	No INIT("");
-EXT char *	hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
-EXT char *	patleave INIT("\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
-EXT char *	vert INIT("|");
+EXTCONST char *	Yes INIT("1");
+EXTCONST char *	No INIT("");
+EXTCONST char *	hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
+EXTCONST char *	patleave INIT("\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
+EXTCONST char *	vert INIT("|");
 
-EXT char	warn_uninit[]
+EXTCONST char	warn_uninit[]
   INIT("Use of uninitialized value");
-EXT char	warn_nosemi[]
+EXTCONST char	warn_nosemi[]
   INIT("Semicolon seems to be missing");
-EXT char	warn_reserved[]
+EXTCONST char	warn_reserved[]
   INIT("Unquoted string \"%s\" may clash with future reserved word");
-EXT char	warn_nl[]
+EXTCONST char	warn_nl[]
   INIT("Unsuccessful %s on filename containing newline");
-EXT char	no_wrongref[]
+EXTCONST char	no_wrongref[]
   INIT("Can't use %s ref as %s ref");
-EXT char	no_symref[]
+EXTCONST char	no_symref[]
   INIT("Can't use string (\"%.32s\") as %s ref while \"strict refs\" in use");
-EXT char	no_usym[]
+EXTCONST char	no_usym[]
   INIT("Can't use an undefined value as %s reference");
-EXT char	no_aelem[]
+EXTCONST char	no_aelem[]
   INIT("Modification of non-creatable array value attempted, subscript %d");
-EXT char	no_helem[]
+EXTCONST char	no_helem[]
   INIT("Modification of non-creatable hash value attempted, subscript \"%s\"");
-EXT char	no_modify[]
+EXTCONST char	no_modify[]
   INIT("Modification of a read-only value attempted");
-EXT char	no_mem[]
+EXTCONST char	no_mem[]
   INIT("Out of memory!\n");
-EXT char	no_security[]
+EXTCONST char	no_security[]
   INIT("Insecure dependency in %s%s");
-EXT char	no_sock_func[]
+EXTCONST char	no_sock_func[]
   INIT("Unsupported socket function \"%s\" called");
-EXT char	no_dir_func[]
+EXTCONST char	no_dir_func[]
   INIT("Unsupported directory function \"%s\" called");
-EXT char	no_func[]
+EXTCONST char	no_func[]
   INIT("The %s function is unimplemented");
-EXT char	no_myglob[]
+EXTCONST char	no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
 
 EXT SV		sv_undef;
@@ -1397,7 +1397,7 @@ EXTCONST  unsigned char fold[] = {
 	248,	249,	250,	251,	252,	253,	254,	255
 };
 #else
-EXT unsigned char fold[];
+EXTCONST unsigned char fold[];
 #endif
 
 #ifdef DOINIT
@@ -1440,7 +1440,7 @@ EXT unsigned char fold_locale[];
 #endif
 
 #ifdef DOINIT
-EXT unsigned char freq[] = {	/* letter frequencies for mixed English/C */
+EXTCONST unsigned char freq[] = {	/* letter frequencies for mixed English/C */
 	1,	2,	84,	151,	154,	155,	156,	157,
 	165,	246,	250,	3,	158,	7,	18,	29,
 	40,	51,	62,	73,	85,	96,	107,	118,
@@ -1475,12 +1475,12 @@ EXT unsigned char freq[] = {	/* letter frequencies for mixed English/C */
 	138,	139,	141,	142,	143,	144,	145,	146
 };
 #else
-EXT unsigned char freq[];
+EXTCONST unsigned char freq[];
 #endif
 
 #ifdef DEBUGGING
 #ifdef DOINIT
-EXT char* block_type[] = {
+EXTCONST char* block_type[] = {
 	"NULL",
 	"SUB",
 	"EVAL",
@@ -1489,7 +1489,7 @@ EXT char* block_type[] = {
 	"BLOCK",
 };
 #else
-EXT char* block_type[];
+EXTCONST char* block_type[];
 #endif
 #endif
 
@@ -1885,8 +1885,6 @@ EXT MGVTBL vtbl_substr =	{0,	magic_setsubstr,
 					0,	0,	0};
 EXT MGVTBL vtbl_vec =	{0,	magic_setvec,
 					0,	0,	0};
-EXT MGVTBL vtbl_vivary = {0,	magic_setvivary,
-					0,	0,	magic_freevivary};
 EXT MGVTBL vtbl_pos =	{magic_getpos,
 				magic_setpos,
 					0,	0,	0};
@@ -1897,6 +1895,8 @@ EXT MGVTBL vtbl_fm =	{0,	magic_setfm,
 EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
+EXT MGVTBL vtbl_itervar = {magic_getitervar,magic_setitervar,
+					0,	0,	magic_freeitervar};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm = {0,
@@ -1930,11 +1930,11 @@ EXT MGVTBL vtbl_nkeys;
 EXT MGVTBL vtbl_taint;
 EXT MGVTBL vtbl_substr;
 EXT MGVTBL vtbl_vec;
-EXT MGVTBL vtbl_vivary;
 EXT MGVTBL vtbl_pos;
 EXT MGVTBL vtbl_bm;
 EXT MGVTBL vtbl_fm;
 EXT MGVTBL vtbl_uvar;
+EXT MGVTBL vtbl_itervar;
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm;
@@ -1952,7 +1952,7 @@ EXT long amagic_generation;
 
 #define NofAMmeth 29
 #ifdef DOINIT
-EXT char * AMG_names[NofAMmeth][2] = {
+EXTCONST char * AMG_names[NofAMmeth][2] = {
   {"fallback","abs"},
   {"bool", "nomethod"},
   {"\"\"", "0+"},
@@ -1984,7 +1984,7 @@ EXT char * AMG_names[NofAMmeth][2] = {
   {"=","neg"}
 };
 #else
-EXT char * AMG_names[NofAMmeth][2];
+EXTCONST char * AMG_names[NofAMmeth][2];
 #endif /* def INITAMAGIC */
 
 struct  am_table        {

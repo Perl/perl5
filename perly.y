@@ -173,15 +173,6 @@ cond	:	IF '(' remember mexpr ')' mblock else
 			{ copline = $1;
 			    $$ = block_end($3,
 				   newCONDOP(0, $4, scope($6), $7)); }
-	|	IF block block else
-			{ copline = $1;
-			    deprecate("if BLOCK BLOCK");
-			    $$ = newCONDOP(0, scope($2), scope($3), $4); }
-	|	UNLESS block block else
-			{ copline = $1;
-			    deprecate("unless BLOCK BLOCK");
-			    $$ = newCONDOP(0, invert(scalar(scope($2))),
-						scope($3), $4); }
 	;
 
 cont	:	/* NULL */
@@ -202,19 +193,6 @@ loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 				   newSTATEOP(0, $1,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
 						$5, $7, $8))); }
-	|	label WHILE block block cont
-			{ copline = $2;
-			    deprecate("while BLOCK BLOCK");
-			    $$ = newSTATEOP(0, $1,
-				   newWHILEOP(0, 1, (LOOP*)Nullop,
-					      scope($3), $4, $5)); }
-	|	label UNTIL block block cont
-			{ copline = $2;
-			    deprecate("until BLOCK BLOCK");
-			    $$ = newSTATEOP(0, $1,
-				   newWHILEOP(0, 1, (LOOP*)Nullop,
-					      invert(scalar(scope($3))),
-					      $4, $5)); }
 	|	label FOR MY remember my_scalar '(' mexpr ')' mblock cont
 			{ $$ = block_end($4,
 				 newFOROP(0, $1, $2, $5, $7, $9, $10)); }

@@ -7,6 +7,166 @@ site, in the .../src/5.0 directory for full version releases,
 or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
+
+----------------
+Version 5.003_14
+----------------
+
+We seem to have achieved "release candidate" status.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Eliminate support for {if,unless,while,until} BLOCK BLOCK"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perly.c perly.c.diff perly.y toke.c
+
+  Title:  "Taint $x after $x =~ s/pat/xyz/ if pat or xyz is tainted by locale"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  cop.h mg.c pp_ctl.c pp_hot.c
+
+  Title:  "Complete support for modifying undefined array members in foreach"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  global.sym mg.c perl.h pp.c pp_hot.c proto.h sv.c
+
+ OTHER CORE CHANGES
+
+  Title:  "patch for regex bug: (x|x){n}"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199612210259.VAA10170@aatma.engin.umich.edu>
+   Date:  Fri, 20 Dec 1996 21:59:22 -0500
+  Files:  regexec.c
+
+  Title:  "Bug in debugger with import manipulations"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612231037.FAA08617@monk.mps.ohio-state.edu>
+   Date:  Mon, 23 Dec 1996 05:37:48 -0500 (EST)
+  Files:  pp_hot.c
+
+  Title:  "Import and dynamic methods"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612230645.BAA08378@monk.mps.ohio-state.edu>
+   Date:  Mon, 23 Dec 1996 01:45:37 -0500 (EST)
+  Files:  gv.c hv.c sv.c
+
+  Title:  "malloc.c patch"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612220748.CAA07164@monk.mps.ohio-state.edu>
+   Date:  Sun, 22 Dec 1996 02:48:58 -0500 (EST)
+  Files:  malloc.c
+
+  Title:  "sv_gets patch"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612220824.DAA07235@monk.mps.ohio-state.edu>
+   Date:  Sun, 22 Dec 1996 03:24:04 -0500 (EST)
+  Files:  pp_hot.c
+
+  Title:  "pos $str patch"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612220831.DAA07247@monk.mps.ohio-state.edu>
+   Date:  Sun, 22 Dec 1996 03:31:21 -0500 (EST)
+  Files:  mg.c pp_hot.c t/op/pat.t
+
+  Title:  "Prevent warnings when STDCHAR is unsigned"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perlio.c perlio.h
+
+ PORTABILITY
+
+  Title:  "Fix bugs in bincompat3 usage"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perl.h perl_exp.SH
+
+  Title:  "Support shared libperl on SunOS"
+   From:  Ulrich Pfeifer
+  Files:  Makefile.SH
+
+  Title:  "Configure on OS/2"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612202325.SAA05505@monk.mps.ohio-state.edu>
+   Date:  Fri, 20 Dec 1996 18:25:30 -0500 (EST)
+  Files:  Configure
+
+  Title:  "Fixes for Interactive Unix"
+   From:  win@in.rhein-main.de (Winfried Koenig)
+ Msg-ID:  <m0vbeNO-00003WC@incom.rhein-main.de>
+   Date:  Sun, 22 Dec 96 05:14 EET
+  Files:  hints/isc.sh op.c pp_sys.c universal.c
+
+  Title:  "Use "proto" instead of "_" in sdbm.h"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/SDBM_File/sdbm/sdbm.h
+
+  Title:  "VMS patches to 5.003_13"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IDBYYFYPIS002ASE@hmivax.humgen.upenn.edu>
+   Date:  Mon, 23 Dec 1996 01:26:47 -0500 (EST)
+  Files:  deb.c ext/POSIX/POSIX.xs gv.c lib/File/Copy.pm mg.c perl.c
+          perl.h proto.h sv.c t/lib/filecopy.t taint.c toke.c util.c
+          vms/Makefile vms/config.vms vms/descrip.mms
+          vms/gen_shrfls.pl vms/genconfig.pl vms/genopt.com
+          vms/perly_c.vms vms/perly_h.vms vms/test.com vms/vms.c
+          vms/vms_yfix.pl
+
+ UTILITIES, LIBRARY, AND EXTENSIONS
+
+  Title:  "Remove libnet"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  MANIFEST pod/perlmod.pod
+
+  Title:  "Refresh CPAN module to 1.08"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  lib/CPAN.pm lib/CPAN/FirstTime.pm
+
+  Title:  "Refresh ExtUtils::Manifest to version 1.28"
+   From:  Andreas Koenig
+  Files:  lib/ExtUtils/Manifest.pm
+
+  Title:  "Update IO->VERSION() to 1.1201 for CPAN's sake"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/IO/lib/IO/Handle.pm lib/IO/Handle.pm
+
+  Title:  "Remodel File::Copy."
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  lib/File/Copy.pm
+
+  Title:  "dumb bug in User::pwent.pm"
+   From:  Tom Christiansen <tchrist@mox.perl.com>
+ Msg-ID:  <199612201145.EAA27860@mox.perl.com>
+   Date:  Fri, 20 Dec 1996 04:45:37 -0700
+  Files:  lib/User/pwent.pm
+
+ DOCUMENTATION
+
+  Title:  "Better support for =for"
+   From:  Kenneth Albanowski <kjahds@kjahds.com>
+ Msg-ID:  <Pine.LNX.3.93.961220163747.298T-100000@kjahds.com>
+   Date:  Fri, 20 Dec 1996 16:43:35 -0500 (EST)
+  Files:  lib/Pod/Text.pm pod/pod2latex.PL pod/pod2man.PL
+
+  Title:  "perllocale.pod -- second draft"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03007800aee1923e30a2@[194.51.248.68]>
+   Date:  Sat, 21 Dec 1996 15:00:50 +0100
+  Files:  pod/perllocale.pod
+
+  Title:  "Perlguts, version 26"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199612201943.AA048111018@hpcc123.corp.hp.com>
+   Date:  Fri, 20 Dec 1996 11:43:38 -0800
+  Files:  pod/perlguts.pod
+
+  Title:  "Update pod/Makefile; s/perli18n/perllocale/"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/POSIX/POSIX.pod lib/I18N/Collate.pm pod/Makefile
+          pod/perl.pod pod/perlmod.pod pod/perlnews.pod pod/roffitall
+
+  Title:  "obstruct pod2man doc tweaks"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <3923.851106237@eeyore.ibcinc.com>
+   Date:  Fri, 20 Dec 1996 13:23:57 -0500
+  Files:  lib/Class/Template.pm lib/Time/tm.pm
+
+
 ----------------
 Version 5.003_13
 ----------------

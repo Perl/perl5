@@ -402,7 +402,6 @@ kill_file(char *name)
           set_errno(ENOENT); break;
         case RMS$_DEV:
           set_errno(ENODEV); break;
-        case RMS$_FNM:
         case RMS$_SYN:
         case SS$_INVFILFOROP:
           set_errno(EINVAL); break;
@@ -860,6 +859,14 @@ my_gconvert(double val, int ndig, int trail, char *buf)
   char *loc;
 
   loc = buf ? buf : __gcvtbuf;
+
+#ifndef __DECC  /* VAXCRTL gcvt uses E format for numbers < 1 */
+  if (val < 1) {
+    sprintf(loc,"%.*g",ndig,val);
+    return loc;
+  }
+#endif
+
   if (val) {
     if (!buf && ndig > DBL_DIG) ndig = DBL_DIG;
     return gcvt(val,ndig,loc);
@@ -2140,6 +2147,7 @@ unsigned long int zero = 0, sts;
 		set_errno(ENOENT); break;
 	    case RMS$_DEV:
 		set_errno(ENODEV); break;
+	    case RMS$_FNM:
 	    case RMS$_SYN:
 		set_errno(EINVAL); break;
 	    case RMS$_PRV:
@@ -3424,6 +3432,7 @@ int
 flex_fstat(int fd, struct mystat *statbufp)
 {
   if (!fstat(fd,(stat_t *) statbufp)) {
+    if (statbufp == &statcache) *namecache == '\0';
     statbufp->st_dev = encode_dev(statbufp->st_devnam);
     return 0;
   }
@@ -3486,16 +3495,22 @@ my_binmode(FILE *fp, char iotype)
     fpos_t pos;
 
     if (!fgetname(fp,filespec)) return NULL;
-    if (fgetpos(fp,&pos) == -1) return NULL;
+    if (iotype != '-' && fgetpos(fp,&pos) == -1) return NULL;
     switch (iotype) {
       case '<': case 'r':           acmode = "rb";                      break;
-      case '>': case 'w':           acmode = "wb";                      break;
-      case '+': case '|': case 's': acmode = "rb+";                     break;
+      case '>': case 'w':
+        /* use 'a' instead of 'w' to avoid creating new file;
+           fsetpos below will take care of restoring file position */
       case 'a':                     acmode = "ab";                      break;
-      case '-':                     acmode = fileno(fp) ? "wb" : "rb";  break;
+      case '+': case '|': case 's': acmode = "rb+";                     break;
+      case '-':                     acmode = fileno(fp) ? "ab" : "rb";  break;
+      default:
+        warn("Unrecognized iotype %c in my_binmode",iotype);
+        acmode = "rb+";
     }
     if (freopen(filespec,acmode,fp) == NULL) return NULL;
-    if (fsetpos(fp,&pos) == -1) return NULL;
+    if (iotype != '-' && fsetpos(fp,&pos) == -1) return NULL;
+    return fp;
 }  /* end of my_binmode() */
 /*}}}*/
 

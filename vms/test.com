@@ -74,7 +74,7 @@ $
 $!  And do it
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
 $   Define/User Perlshr Sys$Disk:[-]PerlShr'exe'
-$   MCR Sys$Disk:[]Perl. "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
+$   MCR Sys$Disk:[]Perl. - "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
 # Modified for VMS 30-Sep-1994  Charles Bailey  bailey@genetics.upenn.edu
@@ -85,13 +85,22 @@ $   Deck/Dollar=$$END-OF-TEST$$
 # skip those tests we know will fail entirely or cause perl to hang bacause
 # of Unixisms in the tests.  (The Perl operators being tested may work fine,
 # but the tests may use other operators which don't.)
+use Config;
+
 @compexcl=('cpp.t','script.t');
 @ioexcl=('argv.t','dup.t','fs.t','inplace.t','pipe.t');
 @libexcl=('anydbm.t','db-btree.t','db-hash.t','db-recno.t',
           'gdbm.t','io_dup.t', 'io_pipe.t', 'io_sock.t',
-          'ndbm.t','odbm.t','posix.t','sdbm.t','soundex.t');
-          # Note: POSIX is not part of basic build, but can be built
-          # separately if you're using DECC
+          'ndbm.t','odbm.t','open2.t','open3.t','posix.t',
+          'sdbm.t','soundex.t');
+
+# Note: POSIX is not part of basic build, but can be built
+# separately if you're using DECC
+# io_xs.t tests the new_tmpfile routine, which doesn't work with the
+# VAXCRTL, since the file can't be stat()d, an Perl's do_open()
+# insists on stat()ing a file descriptor before it'll use it.
+push(@libexcl,'io_xs.t') if $Config{'vms_cc_type'} ne 'decc';
+
 @opexcl=('exec.t','fork.t','glob.t','groups.t','magic.t','misc.t','stat.t');
 @exclist=(@compexcl,@ioexcl,@libexcl,@opexcl);
 foreach $file (@exclist) { $skip{$file}++; }

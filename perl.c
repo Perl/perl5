@@ -20,7 +20,7 @@
 #include <unistd.h>
 #endif
 
-dEXT char rcsid[] = "perl.c\nPatch level: ###\n";
+dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
 
 #ifdef IAMSUID
 #ifndef DOSUID

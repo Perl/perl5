@@ -240,6 +240,7 @@ tokenbuf
 uid
 varies
 vert
+vivify_itervar
 vtbl_amagic
 vtbl_amagicelem
 vtbl_arylen
@@ -487,10 +488,11 @@ magic_clearenv
 magic_clearpack
 magic_clearsig
 magic_existspack
-magic_freevivary
+magic_freeitervar
 magic_get
 magic_getarylen
 magic_getglob
+magic_getitervar
 magic_getpack
 magic_getpos
 magic_getsig
@@ -508,6 +510,7 @@ magic_setenv
 magic_setfm
 magic_setglob
 magic_setisa
+magic_setitervar
 magic_setmglob
 magic_setnkeys
 magic_setpack
@@ -517,7 +520,6 @@ magic_setsubstr
 magic_settaint
 magic_setuvar
 magic_setvec
-magic_setvivary
 magic_wipepack
 magicname
 markstack_grow

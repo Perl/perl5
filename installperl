@@ -344,9 +344,6 @@ sub installlib {
 
     $name = "$dir/$name" if $dir ne '';
 
-    # ignore Chip-style patch backups.
-    return if grep(/^P\d+$/, split(m{/+}, $name));
-
     my $installlib = $installprivlib;
     if ($dir =~ /^auto/ || $name =~ /^(Config|FileHandle|Safe)\.pm$/) {
         $installlib = $installarchlib;

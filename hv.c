@@ -752,6 +752,8 @@ I32 shared;
 {
     if (!hent)
 	return;
+    if (SvTYPE(HeVAL(hent)) == SVt_PVGV)
+	sub_generation++;		/* May be deletion of method? */
     SvREFCNT_dec(HeVAL(hent));
     if (HeKLEN(hent) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(hent));

@@ -1,5 +1,4 @@
 #!./perl -w
-use strict;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -8,6 +7,7 @@ BEGIN {
     $SIG{__WARN__} = sub { die @_ };
 }
 
+use strict;
 use IO::Handle;
 use IPC::Open2;
 #require 'open2.pl'; use subs 'open2';

@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00311#
+PERL_VERSION = 5_00314#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -279,10 +279,10 @@ utils : [.lib.pod]perldoc [.lib.ExtUtils]Miniperl.pm [.utils]c2ph [.utils]h2ph [
 podxform : [.lib.pod]pod2text [.lib.pod]pod2html [.lib.pod]pod2latex [.lib.pod]pod2man
 	@ $(NOOP)
 
-pod1 = [.lib.pod]perl.pod [.lib.pod]perlbook.pod [.lib.pod]perlbot.pod [.lib.pod]perlcall.pod
+pod1 = [.lib.pod]perl.pod [.lib.pod]perlapio.pod [.lib.pod]perlbook.pod [.lib.pod]perlbot.pod [.lib.pod]perlcall.pod
 pod2 = [.lib.pod]perldata.pod [.lib.pod]perldebug.pod [.lib.pod]perldiag.pod [.lib.pod]perldsc.pod
 pod3 = [.lib.pod]perlembed.pod [.lib.pod]perlform.pod [.lib.pod]perlfunc.pod [.lib.pod]perlguts.pod
-pod4 = [.lib.pod]perlipc.pod [.lib.pod]perllol.pod [.lib.pod]perlmod.pod [.lib.pod]perlobj.pod
+pod4 = [.lib.pod]perlipc.pod [.lib.pod]perllocale.pod [.lib.pod]perllol.pod [.lib.pod]perlmod.pod [.lib.pod]perlobj.pod
 pod5 = [.lib.pod]perlop.pod [.lib.pod]perlovl.pod [.lib.pod]perlpod.pod [.lib.pod]perlre.pod
 pod6 = [.lib.pod]perlref.pod [.lib.pod]perlrun.pod [.lib.pod]perlsec.pod [.lib.pod]perlstyle.pod
 pod7 = [.lib.pod]perlsub.pod [.lib.pod]perlsyn.pod [.lib.pod]perltie.pod [.lib.pod]perltoc.pod
@@ -519,6 +519,10 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 [.utils]pl2pm : [.utils]pl2pm.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
+[.lib]splain : [.utils]splain.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) $(MMS$SOURCE)
+	Rename/Log [.utils]splain $(MMS$TARGET)
+
 [.lib.pod]pod2html : [.pod]pod2html.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
@@ -545,6 +549,10 @@ preplibrary : $(MINIPERL_EXE) $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm
 
 [.lib.pod]perl.pod : [.pod]perl.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+
+[.lib.pod]perlapio.pod : [.pod]perlapio.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
@@ -589,6 +597,10 @@ preplibrary : $(MINIPERL_EXE) $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
 [.lib.pod]perlguts.pod : [.pod]perlguts.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+
+[.lib.pod]perllocale.pod : [.pod]perllocale.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 

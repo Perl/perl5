@@ -16,13 +16,16 @@ $ if y .nes. "" .and. -
 $ then
 $   name = f$element(0,"/",y)
 $   tail = f$extract(f$length(name),1024,y)
-$   name = f$parse(name,"sys$share:.exe;")   ! Look where image activator will
-$   name = f$search(name)                    ! Does it really exist?
-$   if name .nes. ""
+$   if f$trnlnm(name) .eqs. ""  ! If it's a logical name, assume it's OK as is
 $   then
-$     name = name - f$parse(name,,,"version")  ! Insist on current version
-$     y = name + tail
-$   endif
+$     name = f$parse(name,"sys$share:.exe;")   ! Look where image activator will
+$     name = f$search(name)                    ! Does it really exist?
+$     if name .nes. ""
+$     then
+$       name = name - f$parse(name,,,"version")  ! Insist on current version
+$       y = name + tail
+$     endif
+$  endif
 $ endif
 $ if y .nes. "" then write file y
 $ element=element+1
