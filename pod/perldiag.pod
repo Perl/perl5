@@ -4422,11 +4422,10 @@ the version number.
 =item Version objects are deprecated outside of use/require
 
 (D deprecated) What used to be "version strings" or v-strings is
-deprecated.  What looks like those (but always without the leading
-'v') can still be used, but only when using C<use> or C<require>,
-and these are called "Version Objects".  See L<perldata/"Version
-Strings">, L<perlfunc/use>, and L<perlfunc/require> for more
-information.
+deprecated.  What looks like those can still be used, but only when
+using C<use> or C<require>, and these are called "Version Objects".
+See L<perldata/"Version Strings">, L<perlfunc/use>, and
+L<perlfunc/require> for more information.
 
 =item Warning: something's wrong
 
