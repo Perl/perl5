@@ -37,7 +37,7 @@ no utf8; # Ironic, no?
 #
 #
 
-plan tests => 94;
+plan tests => 95;
 
 {
     # bug id 20001009.001
@@ -265,3 +265,18 @@ BANG
         like ($result, $expect, $why);
     }
 }
+
+#
+# bug fixed by change #17928
+# separate perl used because we rely on 'strict' not yet loaded;
+# before the patch, the eval died with an error like:
+#   "my" variable $strict::VERSION can't be in a package
+#
+ok('' eq runperl(prog => <<'CODE'));
+    my $code = qq{ my \$\xe3\x83\x95\xe3\x83\xbc = 5; };
+    {
+	use utf8;
+	eval $code;
+	print $@ if $@;
+    }
+CODE
