@@ -2470,6 +2470,7 @@ s	|char*	|scan_trans	|char *start
 s	|char*	|scan_word	|char *s|char *dest|STRLEN destlen \
 				|int allow_package|STRLEN *slp
 s	|char*	|skipspace	|char *s
+s	|char*	|swallow_bom	|char *s
 s	|void	|checkcomma	|char *s|char *name|char *what
 s	|void	|force_ident	|char *s|int kind
 s	|void	|incline	|char *s
