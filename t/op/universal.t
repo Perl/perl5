@@ -9,7 +9,7 @@ BEGIN {
     $| = 1;
 }
 
-print "1..98\n";
+print "1..100\n";
 
 $a = {};
 bless $a, "Bob";
@@ -187,3 +187,11 @@ test ! UNIVERSAL::isa("\xff\xff\xff\0", 'HASH');
     ::test $x->isa("Human");
     ::test $x->can("eat");
 }
+
+# bugid 3284
+# a second call to isa('UNIVERSAL') when @ISA is null failed due to caching
+
+@X::ISA=();
+my $x = {}; bless $x, 'X';
+test $x->isa('UNIVERSAL');
+test $x->isa('UNIVERSAL');
