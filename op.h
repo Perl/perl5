@@ -274,6 +274,8 @@ struct loop {
 #define OA_DEFGV 128
 
 /* The next 4 bits encode op class information */
+#define OA_CLASS_MASK (15 << 8)
+
 #define OA_BASEOP (0 << 8)
 #define OA_UNOP (1 << 8)
 #define OA_BINOP (2 << 8)
