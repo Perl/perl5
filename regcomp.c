@@ -2498,7 +2498,7 @@ regclassutf8(void)
 		    e = strchr(PL_regcomp_parse++, '}');
                     if (!e)
                         FAIL("Missing right brace on \\x{}");
-		    value = scan_hex(PL_regcomp_parse + 1, e - PL_regcomp_parse, &numlen);
+		    value = scan_hex(PL_regcomp_parse, e - PL_regcomp_parse, &numlen);
 		    PL_regcomp_parse = e + 1;
 		}
 		else {
