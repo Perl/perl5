@@ -2508,6 +2508,7 @@ I32 flags;
 OP *left;
 OP *right;
 {
+    dTHR;
     CONDOP *condop;
     OP *flip;
     OP *flop;

@@ -1952,12 +1952,14 @@ int gimme;
     HV *newstash;
     AV* comppadlist;
 
+#ifdef USE_THREADS
     MUTEX_LOCK(&eval_mutex);
     if (eval_owner && eval_owner != thr)
 	while (eval_owner)
 	    COND_WAIT(&eval_cond, &eval_mutex);
     eval_owner = thr;
     MUTEX_UNLOCK(&eval_mutex);
+#endif /* USE_THREADS */
     in_eval = 1;
 
     /* set up a scratch pad */
@@ -2054,10 +2056,12 @@ int gimme;
 
     /* compiled okay, so do it */
 
+#ifdef USE_THREADS
     MUTEX_LOCK(&eval_mutex);
     eval_owner = 0;
     COND_SIGNAL(&eval_cond);
     MUTEX_UNLOCK(&eval_mutex);
+#endif /* USE_THREADS */
     RETURNOP(eval_start);
 }
 

@@ -2115,7 +2115,7 @@ yylex()
 		    if (*s == '{')
 			tokenbuf[0] = '%';
 		}
-		if (tmp = pad_findmy(tokenbuf) != NOT_IN_PAD) {
+		if ((tmp = pad_findmy(tokenbuf)) != NOT_IN_PAD) {
 		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
 		    nextval[nexttoke].opval->op_targ = tmp;
 		    force_next(PRIVATEREF);
