@@ -1,0 +1,428 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+use vars qw($Maintainers $Modules);
+
+$Maintainers =
+	{
+	'ams'		=> 'Abhijit Menon-Sen <ams@wiw.org>',
+	'andreas'	=> 'Andreas J. Koenig <andreas.koenig@anima.de>',
+	'arthur'	=> 'Arthur Bergman <sky@nanisky.com>',
+	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
+	'damian'	=> 'Damian Conway <damian@conway.org>',
+	'dankogai'	=> 'Dan Kogai <dankogai@dan.co.jp>',
+	'gbarr'		=> 'Graham Barr <gbarr@pobox.com>',
+	'gisle'		=> 'Gisle Aas <gisle@activestate.com>',
+	'ilyaz'		=> 'Ilya Zakharevich <ilyaz@cpan.org>',
+	'jhi'		=> 'Jarkko Hietaniemi <jhi@iki.fi>',
+	'jns'		=> 'Jonathan Stowe <jns@gellyfish.com>',
+	'jvromans'	=> 'Johan Vromans <jvromans@squirrel.nl>',
+	'lstein'	=> 'Lincoln D. Stein <lstein@cshl.org>',
+	'mjd'		=> 'Mark-Jason Dominus <mjd@plover.com>',
+	'muir'		=> 'David Muir Sharnoff <muir@idiom.com>',
+	'neilb'		=> 'Neil Bowers <neil@bowers.com>',
+	'rra'		=> 'Russ Allbery <rra@stanford.edu>',
+	'pmarquess'	=> 'Paul Marquess <Paul.Marquess@btinternet.com>',
+	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
+	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
+	'schwern'	=> 'Michael Schwern <schwern@pobox.com>',
+	'tels'		=> 'Tels a t bloodgate.com',
+	'tjenness'	=> 'Tim Jenness <t.jenness@jach.hawaii.edu>'
+	};
+
+$Modules = {
+
+	'Attribute::Handlers' =>
+		{
+		'MAINTAINER'	=> 'arthur',
+		'FILES'		=>
+			q[lib/Attribute/Handlers.pm lib/Attribute/Handlers],
+		},
+
+	'bignum' =>
+		{
+		'MAINTAINER'	=> 'tels',
+		'FILES'		=> q[lib/big{int,num,rat}.pm lib/bignum],
+		},
+
+	'CGI' =>
+		{
+		'MAINTAINER'	=> 'lstein',
+		'FILES'		=> q[lib/CGI.pm lib/CGI],
+		},
+
+	'Class::ISA' =>
+		{
+		'MAINTAINER'	=> 'sburke',
+		'FILES'		=> q[lib/Class/ISA.pm lib/Class/ISA],
+		},
+
+	'CPAN' =>
+		{
+		'MAINTAINER'	=> 'andreas',
+		'FILES'		=> q[lib/CPAN.pm lib/CPAN],
+		},
+
+# Data::Dumper is not here, Sarathy has given up the maintenance
+# and Data::Dumper should be considered a part of the Perl core.
+
+	'DB::File' =>
+		{
+		'MAINTAINER'	=> 'pmarquess',
+		'FILES'		=> q[ext/DB_File],
+		},
+
+	'Devel::PPPort' =>
+		{
+		'MAINTAINER'	=> 'pmarquess',
+		'FILES'		=> q[ext/Devel/PPPort],
+		},
+
+	'Digest' =>
+		{
+		'MAINTAINER'	=> 'gisle',
+		'FILES'		=> q[lib/Digest.{pm,t}],
+		},
+
+	'Digest::MD5' =>
+		{
+		'MAINTAINER'	=> 'gisle',
+		'FILES'		=> q[ext/Digest/MD5],
+		},
+
+	'Encode' =>
+		{
+		'MAINTAINER'	=> 'dankogai',
+		'FILES'		=> q[ext/Encode],
+		},
+
+# Errno is not here, Graham has given up the maintenance
+# and Errno should be considered a part of the Perl core.
+
+	'ExtUtils::MakeMaker' =>
+		{
+		'MAINTAINER'	=> 'schwern',
+		'FILES'		=> q[lib/ExtUtils/MakeMaker],
+		},
+
+	'File::Temp' =>
+		{
+		'MAINTAINER'	=> 'tjenness',
+		'FILES'		=> q[lib/File/Temp.pm lib/File/Temp],
+		},
+
+	'Filter::Simple' =>
+		{
+		'MAINTAINER'	=> 'damian',
+		'FILES'		=> q[lib/Filter/Simple.pm lib/Filter/Simple],
+		},
+
+	'Filter::Util::Call' =>
+		{
+		'MAINTAINER'	=> 'pmarquess',
+		'FILES'		=> q[ext/Filter/Util/Call],
+		},
+
+	'Getopt::Long' =>
+		{
+		'MAINTAINER'	=> 'jvromans',
+		'FILES'		=> q[lib/Getopt/Long.pm lib/Getopt/Long],
+		},
+
+	'I18N::LangTags' =>
+		{
+		'MAINTAINER'	=> 'sburke',
+		'FILES'		=> q[lib/I18N/LangTags.pm lib/I18N/LangTags],
+		},
+
+	'if' =>
+		{
+		'MAINTAINER'	=> 'ilyaz',
+		'FILES'		=> q[lib/if.{pm,t}],
+		},
+
+# IO is not here, Graham has given up the maintenance
+# and IO should be considered a part of the Perl core.
+
+	'libnet' =>
+		{
+		'MAINTAINER'	=> 'gbarr',
+		'FILES'		=>
+			q[lib/Net/{Cmd,Domain,FTP,Netrc,NNTP,POP3,SMTP,Time}.pm lib/Net/ChangeLog.libnet lib/Net/FTP lib/Net/*.eg lib/Net/libnetFAQ.pod lib/Net/README.libnet lib/Net/t],
+		},
+
+	'Scalar-List-Util' =>
+		{
+		'MAINTAINER'	=> 'gbarr',
+		'FILES'		=> q[ext/List/Util],
+		},
+
+	'Locale::Codes' =>
+		{
+		'MAINTAINER'	=> 'neilb',
+		'FILES'		=> q[lib/Locale/{Country,Currency,Language}],
+		},
+
+	'Locale::Maketext' =>
+		{
+		'MAINTAINER'	=> 'sburke',
+		'FILES'		=> q[lib/Locale/Maketext.pm lib/Locale/Maketext],
+		},
+
+	'Math::BigFloat' =>
+		{
+		'MAINTAINER'	=> 'tels',
+		'FILES'		=> q[lib/Math/BigFloat.pm lib/Math/BigFloat],
+		},
+
+	'Math::BigInt' =>
+		{
+		'MAINTAINER'	=> 'tels',
+		'FILES'		=> q[lib/Math/BigInt.pm lib/Math/BigInt],
+		},
+
+	'Math::BigRat' =>
+		{
+		'MAINTAINER'	=> 'tels',
+		'FILES'		=> q[lib/Math/BigRat.pm lib/Math/BigRat],
+		},
+
+	'Memoize' =>
+		{
+		'MAINTAINER'	=> 'mjd',
+		'FILES'		=> q[lib/Memoize.pm lib/Memoize],
+		},
+
+	'MIME::Base64' =>
+		{
+		'MAINTAINER'	=> 'gisle',
+		'FILES'		=> q[ext/MIME/Base64],
+		},
+
+	'Net::Ping' =>
+		{
+		'MAINTAINER'	=> 'bbb',
+		'FILES'		=> q[lib/Net/Ping.pm lib/Net/Ping],
+		},
+
+	'NEXT' =>
+		{
+		'MAINTAINER'	=> 'damian',
+		'FILES'		=> q[lib/NEXT.pm lib/NEXT],
+		},
+
+# The PerlIO::* are part of Perl core.
+
+	'podlators' =>
+		{
+		'MAINTAINER'	=> 'rra',
+		'FILES'		=> q[lib/Pod/{Html,Man,ParseLink,Text,Text/{Color,Overstrike,Termcap}}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{basic,man,parselink,text*}.t}],
+		},
+
+	'Storable' =>
+		{
+		'MAINTAINER'	=> 'ams',
+		'FILES'		=> q[ext/Storable],
+		},
+
+	'Switch' =>
+		{
+		'MAINTAINER'	=> 'damian',
+		'FILES'		=> q[lib/Switch.pm lib/Switch],
+		},
+
+	'TabsWrap' =>
+		{
+		'MAINTAINER'	=> 'muir',
+		'FILES'		=>
+			q[lib/Text/{Tabs,Wrap}.pm lib/Text/TabsWrap],
+		},
+
+	'Text::Balanced' =>
+		{
+		'MAINTAINER'	=> 'damian',
+		'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
+		},
+
+	'Term::ANSIColor' =>
+		{
+		'MAINTAINER'	=> 'rra',
+		'FILES'		=> q[lib/Term/ANSIColor.pm lib/Term/ANSIColor],
+		},
+
+	'Test::Builder' =>
+		{
+		'MAINTAINER'	=> 'schwern',
+		'FILES'		=> q[lib/Test/Builder.pm],
+		},
+
+	'Test::Harness' =>
+		{
+		'MAINTAINER'	=> 'schwern',
+		'FILES'		=> q[lib/Test/Harness.pm lib/Test/Harness],
+		},
+
+	'Test::More' =>
+		{
+		'MAINTAINER'	=> 'schwern',
+		'FILES'		=> q[lib/Test/More.pm],
+		},
+
+	'Test::Simple' =>
+		{
+		'MAINTAINER'	=> 'schwern',
+		'FILES'		=> q[lib/Test/Simple.pm lib/Test/Simple],
+		},
+
+	'Term::Cap' =>
+		{
+		'MAINTAINER'	=> 'jns',
+		'FILES'		=> q[lib/Term/Cap.{pm,t}],
+		},
+
+
+	'threads' =>
+		{
+		'MAINTAINER' => 'arthur',
+		'FILES'  => q[ext/threads],
+		},
+
+	'Tie::File' =>
+		{
+		'MAINTAINER'	=> 'mjd',
+		'FILES'		=> q[lib/Tie/File.pm lib/Tie/File],
+		},
+
+	'Time::HiRes' =>
+		{
+		'MAINTAINER'	=> 'jhi',
+		'FILES'		=> q[ext/Time/HiRes],
+		},
+
+	'Unicode::Collate' =>
+		{
+		'MAINTAINER'	=> 'sadahiro',
+		'FILES'		=>
+			q[lib/Unicode/Collate.pm lib/Unicode/Collate],
+		},
+
+	'Unicode::Normalize' =>
+		{
+		'MAINTAINER'	=> 'sadahiro',
+		'FILES'		=> q[ext/Unicode/Normalize],
+		},
+
+	};
+
+# Sanity check.
+
+use Getopt::Long;
+use File::Find;
+
+my $All;
+my $Maintainer;
+my $Module;
+my %ModuleByFile;
+my %FilesByModule;
+
+sub usage {
+    print <<__EOF__;
+$0: Usage: $0 [--all|--maintainer M|--module M|file ...]
+$0 --all		lists all the modules and their files
+$0 --maintainer M	lists all the modules of maintainer
+$0 --module M		lists all the files of the modules
+The matching of maintainer names is done both on the short name
+and the full name.
+__EOF__
+    exit(0);
+}
+
+usage() unless
+    GetOptions(
+	       'all'		=> \$All,
+	       'maintainer=s'	=> \$Maintainer,
+	       'module=s'	=> \$Module,
+	      );
+
+if (defined $Maintainer) {
+    unless (exists $Maintainers->{$Maintainer}) {
+	my @m;
+	for my $m (sort keys %$Maintainers) {
+	    if ($m =~ /$Maintainer/i ||
+		$Maintainers->{$m} =~ /$Maintainer/i) {
+		push @m, $m;
+	    }
+	}
+	if (@m) {
+	    if (@m == 1) {
+		$Maintainer = $m[0];
+	    } else {
+		die "$0: more than one match for '$Maintainer': @m\n";
+	    }
+	} else {
+	    die "$0: no matches for maintainer '$Maintainer'\n";
+	}
+    }
+}
+
+print "$0: maintainer '$Maintainers->{$Maintainer}'\n" if defined $Maintainer;
+
+my @Files = @ARGV;
+
+usage() unless @Files || $All || $Maintainer || $Module;
+
+for my $module (sort { lc $a cmp lc $b } keys %$Modules) {
+    next if defined $Module && $Module ne $module;
+    warn "$0: Module '$module' missing MAINTAINER\n"
+	unless exists $Modules->{$module}->{MAINTAINER};
+    my $maintainer = $Modules->{$module}->{MAINTAINER};
+    next if defined $Maintainer && $Maintainer ne $maintainer;
+    warn "$0: Module '$module' missing FILES\n"
+	unless exists $Modules->{$module}->{FILES};
+    my $files = $Modules->{$module}->{FILES};
+    warn "$0: Module '$module' maintainer '$maintainer' unknown\n"
+	unless exists $Maintainers->{$maintainer};
+    my @files =
+	sort { lc $a cmp lc $b }
+	    map { -d $_ ?
+		      do { my @files;
+			   find(sub{ push @files, $File::Find::name if -f $_ },
+				$_); @files } :
+		      -f $_ ? $_ : glob($_)
+		  } split(' ', $files);
+    $FilesByModule{$module} = [ @files ];
+    $ModuleByFile{$_} = $module for @files;
+    print "$module\n"		if $Maintainer;
+    print "$module @files\n"	if $All || $Module;
+}
+
+if (@Files) {
+    for my $file (@Files) {
+	my $module;
+	if (-f $file) {
+	    $module =
+		[ exists $ModuleByFile{$file} ? $ModuleByFile{$file} : '-' ];
+	} elsif (-d $file) {
+	    # Show the modules that have the most matches.
+	    my %m;
+	    for my $module (keys %$Modules) {
+		my @m = grep { m:^$file/:i } @{$FilesByModule{$module}};
+		$m{$module} = @m;
+	    }
+	    my @m = sort { $m{$b} <=> $m{$a} } keys %m;
+	    if ($m{$m[0]}) {
+		$module = [ shift @m ];
+		push @$module, shift @m
+		    while @m && $m{$m[0]} == $m{$module->[0]};
+	    }
+	}
+	if (defined $module) {
+	    print "$file @$module\n";
+	} else {
+	    warn "$0: no module matches for file '$file'\n";
+	}
+    }
+}
+
+exit(0);
