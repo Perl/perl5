@@ -83,7 +83,7 @@ A complete list of models at the time the OS was built is in the file
 /opt/langtools/lib/sched.models.  The first column corresponds to the
 output of the "uname -m" command (without the leading "9000/").  The
 second column is the PA-RISC version and the third column is the exact
-chip type used.
+chip type used. (Start browsing at the bottom to prevent confusion ;-)
 
 =head2 Portability Between PA-RISC Versions
 
@@ -140,13 +140,51 @@ modules are then linked into the shared library.
 Note that it is okay to create a library which contains a dependent
 library that is already linked into perl.
 
+Some extensions, like DB_File and Compress::Zlib use/require prebuilt
+libraries for the perl extensions/modules to work. If these libraries
+are built using the default configuration, it might happen that you run
+into an error like "invalid loader fixup" during load phase. HP is aware
+of this problem and address it at
+  http://devresource.hp.com/devresource/Docs/TechTips/cxxTips.html#tip13
+
+A more general approach is to intervene manually, as with an example for
+the DB_File module, which requires SleepyCat's libdb.sl:
+
+    # cd .../db-3.2.9/build_unix
+    # vi Makefile
+    ... add +Z to all cflags to create shared objects
+    CFLAGS=         -c $(CPPFLAGS) +Z -Ae +O2 +Onolimit \
+		    -I/usr/local/include -I/usr/include/X11R6
+    CXXFLAGS=       -c $(CPPFLAGS) +Z -Ae +O2 +Onolimit \
+		    -I/usr/local/include -I/usr/include/X11R6
+
+    # make clean
+    # make
+    # mkdir tmp
+    # cd tmp
+    # ar x ../libdb.a
+    # ld -b -o libdb-3.2.sl *.o
+    # mv libdb-3.2.sl /usr/local/lib
+    # rm *.o
+    # cd /usr/local/lib
+    # rm -f libdb.sl
+    # ln -s libdb-3.2.sl libdb.sl
+
+    # cd .../DB_File-1.76
+    # make distclean
+    # perl Makefile.PL
+    # make
+    # make test
+    # make install
+
 It is no longer possible to link PA-RISC 1.0 shared libraries.
 
 =head2 The HP ANSI C Compiler
 
 When using this compiler to build Perl, you should make sure that the
 flag -Aa is added to the cpprun and cppstdin variables in the config.sh
-file (though see the section on 64-bit perl below).
+file (though see the section on 64-bit perl below). If you are using a
+recent version of the Perl distribution, these flags are set automatically.
 
 =head2 Using Large Files with Perl
 
@@ -192,10 +230,9 @@ HP-UX 11.00 at least.
 To compile Perl with threads, add -Dusethreads to the arguments of
 Configure.  Verify that the -D_POSIX_C_SOURCE=199506L compiler flag is
 automatically added to the list of flags.  Also make sure that -lpthread
-is listed before -lc in the list of libraries to link Perl with.
-
-As of the date of this document, Perl threads are not fully supported on
-HP-UX.
+is listed before -lc in the list of libraries to link Perl with. The
+hints provided for HP-UX during Configure will try very hard to get
+this right for you.
 
 HP-UX versions before 10.30 require a seperate installation of a POSIX
 threads library package. Two examples are the HP DCE package, available
