@@ -1710,10 +1710,33 @@ sv_2pv(register SV *sv, STRLEN *lp)
 			regexp *re = (regexp *)mg->mg_obj;
 
 			if (!mg->mg_ptr) {
-			    mg->mg_len = re->prelen + 4;
-			    New(616, mg->mg_ptr, mg->mg_len + 1, char);
-			    Copy("(?:", mg->mg_ptr, 3, char);
-			    Copy(re->precomp, mg->mg_ptr+3, re->prelen, char);
+			    char *fptr = "msix";
+			    char reflags[6];
+			    char ch;
+			    int left = 0;
+			    int right = 4;
+ 			    U16 reganch = (re->reganch & PMf_COMPILETIME) >> 12;
+
+ 			    while(ch = *fptr++) {
+ 				if(reganch & 1) {
+ 				    reflags[left++] = ch;
+ 				}
+ 				else {
+ 				    reflags[right--] = ch;
+ 				}
+ 				reganch >>= 1;
+ 			    }
+ 			    if(left != 4) {
+ 				reflags[left] = '-';
+ 				left = 5;
+ 			    }
+
+			    mg->mg_len = re->prelen + 4 + left;
+			    New(616, mg->mg_ptr, mg->mg_len + 1 + left, char);
+			    Copy("(?", mg->mg_ptr, 2, char);
+			    Copy(reflags, mg->mg_ptr+2, left, char);
+			    Copy(":", mg->mg_ptr+left+2, 1, char);
+			    Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
 			    mg->mg_ptr[mg->mg_len - 1] = ')';
 			    mg->mg_ptr[mg->mg_len] = 0;
 			}

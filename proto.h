@@ -726,7 +726,7 @@ char *scan_formline _((char *s));
 char *scan_heredoc _((char *s));
 char *scan_ident _((char *s, char *send, char *dest, STRLEN destlen, I32 ck_uni));
 char *scan_inputsymbol _((char *start));
-char *scan_pat _((char *start));
+char *scan_pat _((char *start, I32 type));
 char *scan_str _((char *start));
 char *scan_subst _((char *start));
 char *scan_trans _((char *start));

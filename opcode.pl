@@ -277,6 +277,7 @@ regcmaybe	regexp comp once	ck_fun		s1	S
 regcreset	regexp reset interpolation flag	ck_fun		s1	S
 regcomp		regexp compilation	ck_null		s|	S
 match		pattern match		ck_match	d/
+qr		pattern quote		ck_match	s0
 subst		substitution		ck_null		dis/	S
 substcont	substitution cont	ck_null		dis|	
 trans		character translation	ck_null		is"	S

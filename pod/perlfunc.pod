@@ -95,7 +95,7 @@ C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>, C<y>///
 
 =item Regular expressions and pattern matching
 
-C<m>//, C<pos>, C<quotemeta>, C<s>///, C<split>, C<study>
+C<m>//, C<pos>, C<quotemeta>, C<s>///, C<split>, C<study>, C<qr//>
 
 =item Numeric functions
 
@@ -2617,6 +2617,8 @@ but is more efficient.  Returns the new number of elements in the array.
 =item q/STRING/
 
 =item qq/STRING/
+
+=item qr/STRING/
 
 =item qx/STRING/
 

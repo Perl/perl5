@@ -601,14 +601,6 @@ PP(pp_study)
     register I32 *snext;
     STRLEN len;
 
-    if(unop->op_first && unop->op_first->op_type == OP_PUSHRE) {
-	PMOP *pm = (PMOP *)unop->op_first;
-	SV *rv = sv_newmortal();
-	sv = newSVrv(rv, "Regexp");
-	sv_magic(sv,(SV*)ReREFCNT_inc(pm->op_pmregexp),'r',0,0);
-	RETURNX(PUSHs(rv));
-    }
-
     if (sv == lastscream) {
 	if (SvSCREAM(sv))
 	    RETPUSHYES;

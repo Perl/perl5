@@ -799,8 +799,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	return(NULL);
 
     /* Dig out information for optimizations. */
+    r->reganch = pm->op_pmflags & PMf_COMPILETIME;
     pm->op_pmflags = regflags;
-    r->reganch = 0;
     r->regstclass = NULL;
     r->naughty = regnaughty >= 10;	/* Probably an expensive pattern. */
     scan = r->program + 1;		/* First BRANCH. */

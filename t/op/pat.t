@@ -6,7 +6,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..130\n";
+print "1..135\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -450,8 +450,27 @@ print "not " unless $^R eq '79' and $x eq '12';
 print "ok $test\n";
 $test++;
 
-# This should be changed to qr/\b\v$/ ASAP
-print "not " unless study(/\b\v$/) eq '(?:\bv$)';
+print "not " unless qr/\b\v$/i eq '(?i-xsm:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/s eq '(?s-xim:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/m eq '(?m-xis:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/x eq '(?x-ism:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/xism eq '(?msix:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/ eq '(?-xism:\bv$)';
 print "ok $test\n";
 $test++;
 
@@ -487,7 +506,7 @@ print "not " unless $1 and /$1/;
 print "ok $test\n";
 $test++;
 
-$a=study/(?{++$b})/; 
+$a=qr/(?{++$b})/; 
 $b = 7;
 /$a$a/; 
 print "not " unless $b eq '9'; 

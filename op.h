@@ -196,17 +196,20 @@ struct pmop {
 #define PMf_REVERSED	0x0004		/* Should be matched right->left */
 #define PMf_MAYBE_CONST	0x0008		/* replacement contains variables */
 #define PMf_SKIPWHITE	0x0010		/* skip leading whitespace for split */
-#define PMf_FOLD	0x0020		/* case insensitivity */
+#define PMf_WHITE	0x0020		/* pattern is \s+ */
 #define PMf_CONST	0x0040		/* subst replacement is constant */
 #define PMf_KEEP	0x0080		/* keep 1st runtime pattern forever */
 #define PMf_GLOBAL	0x0100		/* pattern had a g modifier */
 #define PMf_CONTINUE	0x0200		/* don't reset pos() if //g fails */
 #define PMf_EVAL	0x0400		/* evaluating replacement as expr */
-#define PMf_WHITE	0x0800		/* pattern is \s+ */
+#define PMf_LOCALE	0x0800		/* use locale for character types */
 #define PMf_MULTILINE	0x1000		/* assume multiple lines */
 #define PMf_SINGLELINE	0x2000		/* assume single line */
-#define PMf_LOCALE	0x4000		/* use locale for character types */
+#define PMf_FOLD	0x4000		/* case insensitivity */
 #define PMf_EXTENDED	0x8000		/* chuck embedded whitespace */
+
+/* mask of bits stored in regexp->reganch */
+#define PMf_COMPILETIME	(PMf_MULTILINE|PMf_SINGLELINE|PMf_LOCALE|PMf_FOLD|PMf_EXTENDED)
 
 struct svop {
     BASEOP

@@ -66,6 +66,8 @@
 #define pp_regcomp	CPerlObj::Perl_pp_regcomp
 #undef  pp_match	
 #define pp_match	CPerlObj::Perl_pp_match
+#undef  pp_qr
+#define pp_qr		CPerlObj::Perl_pp_qr
 #undef  pp_subst	
 #define pp_subst	CPerlObj::Perl_pp_subst
 #undef  pp_substcont	
@@ -730,6 +732,7 @@ OP * (CPERLscope(*check)[]) _((OP *op)) = {
 	ck_fun,		/* regcreset */
 	ck_null,	/* regcomp */
 	ck_match,	/* match */
+	ck_match,	/* qr */
 	ck_null,	/* subst */
 	ck_null,	/* substcont */
 	ck_null,	/* trans */
@@ -1080,6 +1083,7 @@ OP * (CPERLscope(*ppaddr)[])(ARGSproto) = {
 	pp_regcreset,
 	pp_regcomp,
 	pp_match,
+	pp_qr,
 	pp_subst,
 	pp_substcont,
 	pp_trans,

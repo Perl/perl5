@@ -177,6 +177,7 @@ prototype
 push
 q
 qq
+qr
 quotemeta
 qw
 qx

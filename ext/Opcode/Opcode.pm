@@ -326,7 +326,7 @@ invert_opset function.
 
     ucfirst lcfirst uc lc quotemeta trans chop schop chomp schomp
 
-    match split
+    match split qr
 
     list lslice splice push pop shift unshift reverse
 

@@ -28,7 +28,7 @@ static char *scan_heredoc _((char *s));
 static char *scan_ident _((char *s, char *send, char *dest, STRLEN destlen,
 			   I32 ck_uni));
 static char *scan_inputsymbol _((char *start));
-static char *scan_pat _((char *start));
+static char *scan_pat _((char *start, I32 type));
 static char *scan_str _((char *start));
 static char *scan_subst _((char *start));
 static char *scan_trans _((char *start));
@@ -710,7 +710,7 @@ sublex_push(void)
     curcop->cop_line = multi_start;
 
     lex_inwhat = sublex_info.sub_inwhat;
-    if (lex_inwhat == OP_MATCH || lex_inwhat == OP_SUBST)
+    if (lex_inwhat == OP_MATCH || lex_inwhat == OP_QR || lex_inwhat == OP_SUBST)
 	lex_inpat = sublex_info.sub_op;
     else
 	lex_inpat = Nullop;
@@ -2651,7 +2651,7 @@ yylex(void)
 		&& (*last_uni != 's' || s - last_uni < 5 
 		    || memNE(last_uni, "study", 5) || isALNUM(last_uni[5])))
 		check_uni();
-	    s = scan_pat(s);
+	    s = scan_pat(s,OP_MATCH);
 	    TERM(sublex_start());
 	}
 	tmp = *s++;
@@ -2792,7 +2792,7 @@ yylex(void)
 	tmp = (len == 1 && strchr("msyq", tokenbuf[0]) ||
 	       len == 2 && ((tokenbuf[0] == 't' && tokenbuf[1] == 'r') ||
 			    (tokenbuf[0] == 'q' &&
-			     strchr("qwx", tokenbuf[1]))));
+			     strchr("qwxr", tokenbuf[1]))));
 
 	/* x::* is just a word, unless x is "CORE" */
 	if (!tmp && *s == ':' && s[1] == ':' && strNE(tokenbuf, "CORE"))
@@ -3500,7 +3500,7 @@ yylex(void)
 	    UNI(OP_LSTAT);
 
 	case KEY_m:
-	    s = scan_pat(s);
+	    s = scan_pat(s,OP_MATCH);
 	    TERM(sublex_start());
 
 	case KEY_map:
@@ -3659,6 +3659,10 @@ yylex(void)
 	    yylval.ival = OP_STRINGIFY;
 	    if (SvIVX(lex_stuff) == '\'')
 		SvIVX(lex_stuff) = 0;	/* qq'$foo' should intepolate */
+	    TERM(sublex_start());
+
+	case KEY_qr:
+	    s = scan_pat(s,OP_QR);
 	    TERM(sublex_start());
 
 	case KEY_qx:
@@ -4458,6 +4462,7 @@ keyword(register char *d, I32 len)
     case 'q':
 	if (len <= 2) {
 	    if (strEQ(d,"q"))			return KEY_q;
+	    if (strEQ(d,"qr"))			return KEY_qr;
 	    if (strEQ(d,"qq"))			return KEY_qq;
 	    if (strEQ(d,"qw"))			return KEY_qw;
 	    if (strEQ(d,"qx"))			return KEY_qx;
@@ -4967,7 +4972,7 @@ void pmflag(U16 *pmfl, int ch)
 }
 
 STATIC char *
-scan_pat(char *start)
+scan_pat(char *start, I32 type)
 {
     PMOP *pm;
     char *s;
@@ -4980,11 +4985,17 @@ scan_pat(char *start)
 	croak("Search pattern not terminated");
     }
 
-    pm = (PMOP*)newPMOP(OP_MATCH, 0);
+    pm = (PMOP*)newPMOP(type, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    while (*s && strchr("iogcmsx", *s))
-	pmflag(&pm->op_pmflags,*s++);
+    if(type == OP_QR) {
+	while (*s && strchr("iomsx", *s))
+	    pmflag(&pm->op_pmflags,*s++);
+    }
+    else {
+	while (*s && strchr("iogcmsx", *s))
+	    pmflag(&pm->op_pmflags,*s++);
+    }
     pm->op_pmpermflags = pm->op_pmflags;
 
     lex_op = (OP*)pm;
