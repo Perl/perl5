@@ -156,7 +156,7 @@ ideograph, for instance.
 
 =item *
 
-Named Unicode properties and block ranges make be used as character
+Named Unicode properties and block ranges may be used as character
 classes via the new C<\p{}> (matches property) and C<\P{}> (doesn't
 match property) constructs.  For instance, C<\p{Lu}> matches any
 character with the Unicode uppercase property, while C<\p{M}> matches
@@ -167,7 +167,7 @@ are available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.
 The C<\p{Is...}> test for "general properties" such as "letter",
 "digit", while the C<\p{In...}> test for Unicode scripts and blocks.
 
-The official Unicode script and block names have spaces and dashes and
+The official Unicode script and block names have spaces and dashes as
 separators, but for convenience you can have dashes, spaces, and
 underbars at every word division, and you need not care about correct
 casing.  It is recommended, however, that for consistency you use the
@@ -281,7 +281,7 @@ have their directionality defined:
 =head2 Scripts
 
 The scripts available for C<\p{In...}> and C<\P{In...}>, for example
-\p{InCyrillic>, are as follows, for example C<\p{InLatin}> or C<\P{InHan}>:
+C<\p{InLatin}> or \p{InCyrillic>, are as follows:
 
     Arabic
     Armenian
@@ -367,15 +367,18 @@ scripts concept is closer to natural languages, while the blocks
 concept is more an artificial grouping based on groups of 256 Unicode
 characters.  For example, the C<Latin> script contains letters from
 many blocks.  On the other hand, the C<Latin> script does not contain
-all the characters from those blocks, it does not for example contain
+all the characters from those blocks. It does not, for example, contain
 digits because digits are shared across many scripts.  Digits and
 other similar groups, like punctuation, are in a category called
 C<Common>.
 
-For more about scripts see the UTR #24:
-http://www.unicode.org/unicode/reports/tr24/
-For more about blocks see
-http://www.unicode.org/Public/UNIDATA/Blocks.txt
+For more about scripts, see the UTR #24:
+
+   http://www.unicode.org/unicode/reports/tr24/
+
+For more about blocks, see:
+
+   http://www.unicode.org/Public/UNIDATA/Blocks.txt
 
 Because there are overlaps in naming (there are, for example, both
 a script called C<Katakana> and a block called C<Katakana>, the block
@@ -836,7 +839,7 @@ is not to use UTF-8 until it's really necessary.
 =item *
 
 uvuni_to_utf8(buf, chr) writes a Unicode character code point into a
-buffer encoding the code poinqt as UTF-8, and returns a pointer
+buffer encoding the code point as UTF-8, and returns a pointer
 pointing after the UTF-8 bytes.
 
 =item *
