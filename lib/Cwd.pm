@@ -218,6 +218,54 @@ sub getcwd
     abs_path('.');
 }
 
+
+# By John Bazik
+#
+# Usage: $cwd = &fastcwd;
+#
+# This is a faster version of getcwd.  It's also more dangerous because
+# you might chdir out of a directory that you can't chdir back into.
+    
+sub fastcwd {
+    my($odev, $oino, $cdev, $cino, $tdev, $tino);
+    my(@path, $path);
+    local(*DIR);
+
+    my($orig_cdev, $orig_cino) = stat('.');
+    ($cdev, $cino) = ($orig_cdev, $orig_cino);
+    for (;;) {
+	my $direntry;
+	($odev, $oino) = ($cdev, $cino);
+	CORE::chdir('..') || return undef;
+	($cdev, $cino) = stat('.');
+	last if $odev == $cdev && $oino == $cino;
+	opendir(DIR, '.') || return undef;
+	for (;;) {
+	    $direntry = readdir(DIR);
+	    last unless defined $direntry;
+	    next if $direntry eq '.';
+	    next if $direntry eq '..';
+
+	    ($tdev, $tino) = lstat($direntry);
+	    last unless $tdev != $odev || $tino != $oino;
+	}
+	closedir(DIR);
+	return undef unless defined $direntry; # should never happen
+	unshift(@path, $direntry);
+    }
+    $path = '/' . join('/', @path);
+    if ($^O eq 'apollo') { $path = "/".$path; }
+    # At this point $path may be tainted (if tainting) and chdir would fail.
+    # To be more useful we untaint it then check that we landed where we started.
+    $path = $1 if $path =~ /^(.*)\z/s;	# untaint
+    CORE::chdir($path) || return undef;
+    ($cdev, $cino) = stat('.');
+    die "Unstable directory path, current directory changed unexpectedly"
+	if $cdev != $orig_cdev || $cino != $orig_cino;
+    $path;
+}
+
+
 # Keeps track of current working directory in PWD environment var
 # Usage:
 #	use Cwd 'chdir';
@@ -287,6 +335,63 @@ sub chdir {
     }
     1;
 }
+
+
+# In case the XS version doesn't load.
+*abs_path = \&_perl_abs_path unless defined &abs_path;
+sub _perl_abs_path
+{
+    my $start = @_ ? shift : '.';
+    my($dotdots, $cwd, @pst, @cst, $dir, @tst);
+
+    unless (@cst = stat( $start ))
+    {
+	carp "stat($start): $!";
+	return '';
+    }
+    $cwd = '';
+    $dotdots = $start;
+    do
+    {
+	$dotdots .= '/..';
+	@pst = @cst;
+	unless (opendir(PARENT, $dotdots))
+	{
+	    carp "opendir($dotdots): $!";
+	    return '';
+	}
+	unless (@cst = stat($dotdots))
+	{
+	    carp "stat($dotdots): $!";
+	    closedir(PARENT);
+	    return '';
+	}
+	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
+	{
+	    $dir = undef;
+	}
+	else
+	{
+	    do
+	    {
+		unless (defined ($dir = readdir(PARENT)))
+	        {
+		    carp "readdir($dotdots): $!";
+		    closedir(PARENT);
+		    return '';
+		}
+		$tst[0] = $pst[0]+1 unless (@tst = lstat("$dotdots/$dir"))
+	    }
+	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
+		   $tst[1] != $pst[1]);
+	}
+	$cwd = (defined $dir ? "$dir" : "" ) . "/$cwd" ;
+	closedir(PARENT);
+    } while (defined $dir);
+    chop($cwd) unless $cwd eq '/'; # drop the trailing /
+    $cwd;
+}
+
 
 # added function alias for those of us more
 # used to the libc function.  --tchrist 27-Jan-00
@@ -438,13 +543,5 @@ sub _epoc_cwd {
     }
 }
 
-# package main; eval join('',<DATA>) || die $@;	# quick test
 
 1;
-
-__END__
-BEGIN { import Cwd qw(:DEFAULT chdir); }
-print join("\n", cwd, getcwd, fastcwd, "");
-chdir('..');
-print join("\n", cwd, getcwd, fastcwd, "");
-print "$ENV{PWD}\n";
