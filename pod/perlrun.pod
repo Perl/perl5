@@ -266,11 +266,21 @@ An alternate delimiter may be specified using B<-F>.
 
 =item B<-C>
 
-enables Perl to use the native wide character APIs on the target system.
-The magic variable C<${^WIDE_SYSTEM_CALLS}> reflects the state of
-this switch.  See L<perlvar/"${^WIDE_SYSTEM_CALLS}">.
+enables Perl to use the Unicode APIs on the target system.
 
-This feature is currently only implemented on the Win32 platform.
+As of Perl 5.8.1, if C<-C> is used and the locale settings (the LC_ALL,
+LC_CTYPE, and LANG environment variables) indicate a UTF-8 locale,
+the STDIN is expected to be in UTF-8, the STDOUT and STDERR are
+expected to be in UTF-8, and C<:utf8> is the default file open layer.
+See L<perluniintro>, L<perlfunc/open>, and L<open> for more information.
+The magic variable C<${^UTF8_LOCALE}> reflects this state,
+see L<perlvar/"${^UTF8_LOCALE}">.  (Another way of setting this
+variable is to set the environment variable PERL_UTF8_LOCALE.)
+
+(In Perls earlier than 5.8.1 the C<-C> switch was a Win32-only switch
+that enabled the use of Unicode-aware "wide system call" Win32 APIs.
+This feature was practically unused, however, and the command line
+switch was therefore "recycled".)
 
 =item B<-c>
 
@@ -445,9 +455,9 @@ output filehandle after the loop.
 As shown above, Perl creates the backup file whether or not any output
 is actually changed.  So this is just a fancy way to copy files:
 
-    $ perl -p -i '/some/file/path/*' -e 1 file1 file2 file3...
+    $ perl -p -i'/some/file/path/*' -e 1 file1 file2 file3...
 or
-    $ perl -p -i '.orig' -e 1 file1 file2 file3...
+    $ perl -p -i'.orig' -e 1 file1 file2 file3...
 
 You can use C<eof> without parentheses to locate the end of each input
 file, in case you want to append to each file, or reset line numbering

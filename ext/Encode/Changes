@@ -1,9 +1,26 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.83 2002/11/18 17:28:49 dankogai Exp dankogai $
+# $Id: Changes,v 1.84 2003/01/10 12:00:16 dankogai Exp dankogai $
 #
 
-$Revision: 1.83 $ $Date: 2002/11/18 17:28:49 $
+$Revision: 1.84 $ $Date: 2003/01/10 12:00:16 $
+! encoding.pm
+  ${^ENCODING} is no longer set for utf so encoding is no longer fun :)
+  (That is to prevent duplicate encoding first by IO then ${^ENCODING})
+  Message-Id: <20030108213737.GK331043@lyta.hut.fi>
+! Unicode/Unicode.xs
+  %_ fixes saves the resulting .so .05% smaller, by NC
+  Message-Id: <20021226225709.GF284@Bagpuss.unfortu.net>
+! Encode.pm
+  Silence Encode on undef, by Andreas
+  Message-Id: <m3smwrohd1.fsf@k242.linux.bogus>
+  Message-Id: <m3of7fo7np.fsf@k242.linux.bogus>
+! Unicode/Unicode.xs
+  s/regognised/recognised/ .  British spelling left intact to pay
+  respect to two British Nicks :)
+  Message-Id: <20021203020454.GK2274@kosh.hut.fi>
+
+1.83 2002/11/18 17:28:49
 ! Encode.xs lib/Encode/JIS7.pm
   Even more patches from Inaba-san has been applied.  With this
   patch t/uni/tr_7jis.t and t/uni/t_utf8.t of bleedperl will work.

@@ -13,7 +13,7 @@ package CGI::Cookie;
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-$CGI::Cookie::VERSION='1.20';
+$CGI::Cookie::VERSION='1.21';
 
 use CGI::Util qw(rearrange unescape escape);
 use overload '""' => \&as_string,
@@ -117,6 +117,7 @@ sub new {
   $self->domain($domain) if defined $domain;
   $self->secure($secure) if defined $secure;
   $self->expires($expires) if defined $expires;
+#  $self->max_age($expires) if defined $expires;
   return $self;
 }
 
@@ -124,11 +125,12 @@ sub as_string {
     my $self = shift;
     return "" unless $self->name;
 
-    my(@constant_values,$domain,$path,$expires,$secure);
+    my(@constant_values,$domain,$path,$expires,$max_age,$secure);
 
-    push(@constant_values,"domain=$domain") if $domain = $self->domain;
-    push(@constant_values,"path=$path") if $path = $self->path;
+    push(@constant_values,"domain=$domain")   if $domain = $self->domain;
+    push(@constant_values,"path=$path")       if $path = $self->path;
     push(@constant_values,"expires=$expires") if $expires = $self->expires;
+    push(@constant_values,"max-age=$max_age") if $max_age = $self->max_age;
     push(@constant_values,"secure") if $secure = $self->secure;
 
     my($key) = escape($self->name);
@@ -188,6 +190,13 @@ sub expires {
     my $expires = shift;
     $self->{'expires'} = CGI::Util::expires($expires,'cookie') if defined $expires;
     return $self->{'expires'};
+}
+
+sub max_age {
+  my $self = shift;
+  my $expires = shift;
+  $self->{'max-age'} = CGI::Util::expire_calc($expires)-time if defined $expires;
+  return $self->{'max-age'};
 }
 
 sub path {

@@ -4,7 +4,7 @@ package diagnostics;
 
 diagnostics - Perl compiler pragma to force verbose warning diagnostics
 
-splain - standalone program to do the same thing
+splain - filter to produce verbose descriptions of perl warning diagnostics
 
 =head1 SYNOPSIS
 
@@ -16,7 +16,7 @@ As a pragma:
     enable  diagnostics;
     disable diagnostics;
 
-Aa a program:
+As a program:
 
     perl program 2>diag.out
     splain [-v] [-p] diag.out

@@ -3279,8 +3279,19 @@ PP(pp_chr)
     *tmps++ = (char)value;
     *tmps = '\0';
     (void)SvPOK_only(TARG);
-    if (PL_encoding)
+    if (PL_encoding && !IN_BYTES) {
         sv_recode_to_utf8(TARG, PL_encoding);
+	tmps = SvPVX(TARG);
+	if (SvCUR(TARG) == 0 || !is_utf8_string((U8*)tmps, SvCUR(TARG)) ||
+	    memEQ(tmps, "\xef\xbf\xbd\0", 4)) {
+	    SvGROW(TARG,3);
+	    SvCUR_set(TARG, 2);
+	    *tmps++ = (U8)UTF8_EIGHT_BIT_HI(value);
+	    *tmps++ = (U8)UTF8_EIGHT_BIT_LO(value);
+	    *tmps = '\0';
+	    SvUTF8_on(TARG);
+	}
+    }
     XPUSHs(TARG);
     RETURN;
 }

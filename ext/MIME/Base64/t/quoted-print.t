@@ -1,6 +1,8 @@
 BEGIN {
-        chdir 't' if -d 't';
-        @INC = '../lib';
+        if ($ENV{PERL_CORE}) {
+                chdir 't' if -d 't';
+                @INC = '../lib';
+        }
 }
 
 use MIME::QuotedPrint;
@@ -111,5 +113,5 @@ print "not " unless decode_qp("foo  \r\n\r\nfoo =\r\n\r\nfoo=20\r\n\r\n") eq
                                 "foo\r\n\r\nfoo \r\nfoo \r\n\r\n";
 $testno++; print "ok $testno\n";
 
-print "not " if eval { encode_qp("XXX \x{100}") } || $@ !~ /^The Quoted-Printable encoding is only defined for bytes/;
+print "not " if $] >= 5.006 && (eval 'encode_qp("XXX \x{100}")' || $@ !~ /^The Quoted-Printable encoding is only defined for bytes/);
 $testno++; print "ok $testno\n";

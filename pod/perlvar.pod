@@ -1109,6 +1109,16 @@ Reflects if taint mode is on or off.  1 for on (the program was run with
 B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
 B<-t> or B<-TU>).
 
+=item ${^UTF8_LOCALE}
+
+Reflects whether the locale settings indicated the use of UTF-8 and that
+the use of UTF-8 was enabled either by the C<-C> command line switch or
+by setting the PERL_UTF8_LOCALE environment variable to a true value.
+This variable is read-only.  If true, the STDIN is expected to be in
+UTF-8, the STDOUT and STDERR are in UTF-8, and C<:utf8> is the default
+file open layer.  See L<perluniintro>, L<perlfunc/open>, and L<open>
+for more information.
+
 =item $PERL_VERSION
 
 =item $^V
@@ -1147,21 +1157,6 @@ related to the B<-w> switch.)  See also L<warnings>.
 
 The current set of warning checks enabled by the C<use warnings> pragma.
 See the documentation of C<warnings> for more details.
-
-=item ${^WIDE_SYSTEM_CALLS}
-
-Global flag that enables system calls made by Perl to use wide character
-APIs native to the system, if available.  This is currently only implemented
-on the Windows platform.
-
-This can also be enabled from the command line using the C<-C> switch.
-
-The initial value is typically C<0> for compatibility with Perl versions
-earlier than 5.6, but may be automatically set to C<1> by Perl if the system
-provides a user-settable default (e.g., C<$ENV{LC_CTYPE}>).
-
-The C<bytes> pragma always overrides the effect of this flag in the current
-lexical scope.  See L<bytes>.
 
 =item $EXECUTABLE_NAME
 

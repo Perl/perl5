@@ -3,7 +3,7 @@ package Digest::MD5;
 use strict;
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = '2.20';  # $Date: 2002/05/06 05:15:09 $
+$VERSION = '2.21';  # $Date: 2002/12/28 05:30:03 $
 
 require Exporter;
 *import = \&Exporter::import;
@@ -213,6 +213,29 @@ the file:
     binmode(FILE);
 
     print Digest::MD5->new->addfile(*FILE)->hexdigest, " $file\n";
+
+Perl 5.8 support Unicode characters in strings.  Since the MD5
+algorithm is only defined for strings of bytes, it can not be used on
+strings that contains chars with ordinal number above 255.  The MD5
+functions and methods will croak if you try to feed them such input
+data:
+
+    use Digest::MD5 qw(md5_hex);
+
+    my $str = "abc\x{300}";
+    print md5_hex($str), "\n";  # croaks
+    # Wide character in subroutine entry
+
+What you can do is calculate the MD5 checksum of the UTF-8
+representation of such strings.  This is achieved by filtering the
+string through encode_utf8() function:
+
+    use Digest::MD5 qw(md5_hex);
+    use Encode qw(encode_utf8);
+
+    my $str = "abc\x{300}";
+    print md5_hex(encode_utf8($str)), "\n";
+    # 8c2d46911f3f5a326455f0ed7a8ed3b3
 
 =head1 SEE ALSO
 

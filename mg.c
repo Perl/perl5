@@ -657,7 +657,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		    ? (PL_taint_warn || PL_unsafe ? -1 : 1)
 		    : 0);
         break;
-    case '\027':		/* ^W  & $^WARNING_BITS & ^WIDE_SYSTEM_CALLS */
+    case '\025':		/* $^UTF8_LOCALE */
+        if (strEQ(mg->mg_ptr, "\025TF8_LOCALE"))
+	    sv_setiv(sv, (IV) (PL_wantutf8 && PL_utf8locale));
+        break;
+    case '\027':		/* ^W  & $^WARNING_BITS */
 	if (*(mg->mg_ptr+1) == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
 	else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
@@ -674,8 +678,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	    SvPOK_only(sv);
 	}
-	else if (strEQ(mg->mg_ptr+1, "IDE_SYSTEM_CALLS"))
-	    sv_setiv(sv, (IV)PL_widesyscalls);
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
@@ -1949,7 +1951,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #endif
 	break;
-    case '\027':	/* ^W & $^WARNING_BITS & ^WIDE_SYSTEM_CALLS */
+    case '\025':	/* $^UTF8_LOCALE */
+        if (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv))
+	    PL_wantutf8 = PL_utf8locale;
+	else
+	    PL_wantutf8 = FALSE;
+        break;
+    case '\027':	/* ^W & $^WARNING_BITS */
 	if (*(mg->mg_ptr+1) == '\0') {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 	        i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1991,8 +1999,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		}
 	    }
 	}
-	else if (strEQ(mg->mg_ptr+1, "IDE_SYSTEM_CALLS"))
-	    PL_widesyscalls = (bool)SvTRUE(sv);
 	break;
     case '.':
 	if (PL_localizing) {

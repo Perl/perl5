@@ -172,13 +172,15 @@ To output UTF-8, use the C<:utf8> output layer.  Prepending
 to this sample program ensures that the output is completely UTF-8,
 and removes the program's warning.
 
-If your locale environment variables (C<LANGUAGE>, C<LC_ALL>,
-C<LC_CTYPE>, C<LANG>) contain the strings 'UTF-8' or 'UTF8',
-regardless of case, then the default encoding of your STDIN, STDOUT,
-and STDERR and of B<any subsequent file open>, is UTF-8.  Note that
-this means that Perl expects other software to work, too: if Perl has
-been led to believe that STDIN should be UTF-8, but then STDIN coming
-in from another command is not UTF-8, Perl will complain about the
+If your locale environment variables (C<LC_ALL>, C<LC_CTYPE>, C<LANG>)
+contain the strings 'UTF-8' or 'UTF8' (matched case-insensitively)
+B<and> you enable using UTF-8 either by using the C<-C> command line
+switch or by setting the PERL_UTF8_LOCALE environment variable to
+a true value, then the default encoding of your STDIN, STDOUT, and
+STDERR, and of B<any subsequent file open>, is UTF-8.  Note that this
+means that Perl expects other software to work, too: if Perl has been
+led to believe that STDIN should be UTF-8, but then STDIN coming in
+from another command is not UTF-8, Perl will complain about the
 malformed UTF-8.
 
 All features that combine Unicode and I/O also require using the new

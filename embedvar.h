@@ -751,10 +751,10 @@
 #define PL_utf8_toupper		(vTHX->Iutf8_toupper)
 #define PL_utf8_upper		(vTHX->Iutf8_upper)
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
+#define PL_utf8locale		(vTHX->Iutf8locale)
 #define PL_uudmap		(vTHX->Iuudmap)
 #define PL_wantutf8		(vTHX->Iwantutf8)
 #define PL_warnhook		(vTHX->Iwarnhook)
-#define PL_widesyscalls		(vTHX->Iwidesyscalls)
 #define PL_xiv_arenaroot	(vTHX->Ixiv_arenaroot)
 #define PL_xiv_root		(vTHX->Ixiv_root)
 #define PL_xnv_arenaroot	(vTHX->Ixnv_arenaroot)
@@ -1059,10 +1059,10 @@
 #define PL_Iutf8_toupper	PL_utf8_toupper
 #define PL_Iutf8_upper		PL_utf8_upper
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
+#define PL_Iutf8locale		PL_utf8locale
 #define PL_Iuudmap		PL_uudmap
 #define PL_Iwantutf8		PL_wantutf8
 #define PL_Iwarnhook		PL_warnhook
-#define PL_Iwidesyscalls	PL_widesyscalls
 #define PL_Ixiv_arenaroot	PL_xiv_arenaroot
 #define PL_Ixiv_root		PL_xiv_root
 #define PL_Ixnv_arenaroot	PL_xnv_arenaroot

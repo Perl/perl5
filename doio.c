@@ -1266,7 +1266,8 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
     default:
 	if (PerlIO_isutf8(fp)) {
 	    if (!SvUTF8(sv))
-		sv_utf8_upgrade(sv = sv_mortalcopy(sv));
+		sv_utf8_upgrade_flags(sv = sv_mortalcopy(sv),
+				      SV_GMAGIC|SV_UTF8_NO_ENCODING);
 	}
 	else if (DO_UTF8(sv)) {
 	    if (!sv_utf8_downgrade((sv = sv_mortalcopy(sv)), TRUE)

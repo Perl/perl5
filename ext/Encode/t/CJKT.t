@@ -57,7 +57,7 @@ for my $charset (sort keys %Charset){
 
 
     open $src, "<$src_enc" or die "$src_enc : $!";
-    # binmode($src); # not needed! 
+    binmode($src); # needed if UTF-8 locales enabled!
 
     $txt = join('',<$src>);
     close($src);

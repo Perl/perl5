@@ -1068,6 +1068,8 @@ otherwise.
 /* flag values for sv_*_flags functions */
 #define SV_IMMEDIATE_UNREF	1
 #define SV_GMAGIC		2
+#define SV_COW_DROP_PV		4	/* Unused in Perl 5.8.x */
+#define SV_UTF8_NO_ENCODING	8
 
 /* all these 'functions' are now just macros */
 
