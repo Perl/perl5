@@ -19,6 +19,7 @@ my $class = "Math::BigInt";
 require 5.005;
 
 $VERSION = '1.64_01';
+$VERSION = eval $VERSION;
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
