@@ -1,12 +1,14 @@
 package utf8;
 
+$utf8::hint_bits = 0x00800000;
+
 sub import {
-    $^H |= 0x00800000;
+    $^H |= $utf8::hint_bits;
     $enc{caller()} = $_[1] if $_[1];
 }
 
 sub unimport {
-    $^H &= ~0x00800000;
+    $^H &= ~$utf8::hint_bits;
 }
 
 sub AUTOLOAD {

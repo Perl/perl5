@@ -1,5 +1,7 @@
 package overload;
 
+$overload::hint_bits = 0x20000;
+
 sub nil {}
 
 sub OVERLOAD {
@@ -129,7 +131,7 @@ sub constant {
   # Arguments: what, sub
   while (@_) {
     $^H{$_[0]} = $_[1];
-    $^H |= $constants{$_[0]} | 0x20000;
+    $^H |= $constants{$_[0]} | $overload::hint_bits;
     shift, shift;
   }
 }

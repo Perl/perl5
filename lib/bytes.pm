@@ -1,11 +1,13 @@
 package bytes;
 
+$bytes::hint_bits = 0x00000008;
+
 sub import {
-    $^H |= 0x00000008;
+    $^H |= $bytes::hint_bits;
 }
 
 sub unimport {
-    $^H &= ~0x00000008;
+    $^H &= ~$bytes::hint_bits;
 }
 
 sub AUTOLOAD {
