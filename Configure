@@ -1823,14 +1823,14 @@ ABYZ)
 *)	# There is a discontinuity in EBCDIC between 'I' and 'J'
         # (0xc9 and 0xd1), therefore that is a nice testing point.
         if test "X$up" = X -o "X$low" = X; then
-	    case "`echo IJ | tr '[I-J]' '[i-j]' 2>/dev/null`" in
+	    case "`echo IJ | $tr '[I-J]' '[i-j]' 2>/dev/null`" in
 	    ij) up='[A-Z]'
 	        low='[a-z]'
 		;;
 	    esac
         fi
 	if test "X$up" = X -o "X$low" = X; then
-	    case "`echo IJ | tr I-J i-j 2>/dev/null`" in
+	    case "`echo IJ | $tr I-J i-j 2>/dev/null`" in
 	    ij) up='A-Z'
 		low='a-z'
 		;;
@@ -1858,7 +1858,7 @@ ABYZ)
 	    esac
 	fi
 esac
-case "`echo IJ | tr \"$up\" \"$low\" 2>/dev/null`" in
+case "`echo IJ | $tr \"$up\" \"$low\" 2>/dev/null`" in
 ij)
     echo "Using $up and $low to convert case." >&4
     ;;
@@ -1887,7 +1887,7 @@ myuname=`( ($uname -a) 2>/dev/null || hostname) 2>&1`
 # tr '[A-Z]' '[a-z]' would not work in EBCDIC
 # because the A-Z/a-z are not consecutive.
 myuname=`echo $myuname | $sed -e 's/^[^=]*=//' -e 's/\///g' | \
-	./tr '[A-Z]' '[a-z]' | tr $trnl ' '`
+	./tr '[A-Z]' '[a-z]' | $tr $trnl ' '`
 newmyuname="$myuname"
 dflt=n
 case "$knowitall" in
