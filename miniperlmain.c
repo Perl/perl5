@@ -20,6 +20,36 @@ static void xs_init _((void));
 static PerlInterpreter *my_perl;
 
 int
+i18nl14n()
+{
+  char * lang = getenv("LANG");
+#if defined(HAS_SETLOCALE) && defined(LC_CTYPE)
+  {
+    char * lc_ctype = getenv("LC_CTYPE");
+    int i;
+
+    if (setlocale(LC_CTYPE, "") == NULL && (lc_ctype || lang)) {
+      fprintf(stderr,
+	      "warning: setlocale(LC_CTYPE, \"\") failed, LC_CTYPE = \"%s\", LANG = \"%s\",\n",
+	      lc_ctype ? lc_ctype : "(null)",
+	      lang     ? lang     : "(null)"
+	      );
+      fprintf(stderr,
+	      "warning: falling back to the \"C\" locale.\n");
+      setlocale(LC_CTYPE, "C");
+    }
+
+    for (i = 0; i < 256; i++) {
+      if (isUPPER(i)) fold[i] = toLOWER(i);
+      else if (isLOWER(i)) fold[i] = toUPPER(i);
+      else fold[i] = i;
+    }
+
+  }
+#endif
+}
+
+int
 #ifndef CAN_PROTOTYPE
 main(argc, argv, env)
 int argc;
@@ -40,13 +70,9 @@ main(int argc, char **argv, char **env)
     getredirection(&argc,&argv);
 #endif
 
-#if defined(HAS_SETLOCALE) && defined(LC_CTYPE)
-    if (setlocale(LC_CTYPE, "") == NULL) {
-        fprintf(stderr,
-               "setlocale(LC_CTYPE, \"\") failed (LC_CTYPE = \"%s\").\n",
-               getenv("LC_CTYPE"));
-       exit(1);
-    }
+/* here a union of the cpp #if:s inside i18nl14n() */
+#if (defined(HAS_SETLOCALE) && defined(LC_CTYPE))
+    i18nl14n();
 #endif
 
     if (!do_undump) {
@@ -56,7 +82,7 @@ main(int argc, char **argv, char **env)
 	perl_construct( my_perl );
     }
 
-    exitstatus = perl_parse( my_perl, xs_init, argc, argv, NULL );
+    exitstatus = perl_parse( my_perl, xs_init, argc, argv, (char **) NULL );
     if (exitstatus)
 	exit( exitstatus );
 
