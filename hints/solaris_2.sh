@@ -1,37 +1,3 @@
-# hints/solaris_2.sh
-# Last modified:  Tue Apr 13 13:12:49 EDT 1999
-# Andy Dougherty  <doughera@lafayette.edu>
-# Based on input from lots of folks, especially
-# Dean Roehrich <roehrich@ironwood-fddi.cray.com>
-
-# If perl fails tests that involve dynamic loading of extensions, and
-# you are using gcc, be sure that you are NOT using GNU as and ld.  One
-# way to do that is to invoke Configure with
-# 
-#     sh Configure -Dcc='gcc -B/usr/ccs/bin/'
-#
-#  (Note that the trailing slash is *required*.)
-#  gcc will occasionally emit warnings about "unused prefix", but
-#  these ought to be harmless.  See below for more details.
- 
-# See man vfork.
-usevfork=false
-
-d_suidsafe=define
-
-# Avoid all libraries in /usr/ucblib.
-set `echo $glibpth | sed -e 's@/usr/ucblib@@'`
-glibpth="$*"
-
-# Remove bad libraries.  -lucb contains incompatible routines.
-# -lld doesn't do anything useful.
-# -lmalloc can cause a problem with GNU CC & Solaris.  Specifically,
-# libmalloc.a may allocate memory that is only 4 byte aligned, but
-# GNU CC on the Sparc assumes that doubles are 8 byte aligned.
-# Thanks to  Hallvard B. Furuseth <h.b.furuseth@usit.uio.no>
-set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ malloc @ @' -e 's@ ucb @ @'`
-libswanted="$*"
-
 # Look for architecture name.  We want to suggest a useful default.
 case "$archname" in
 '')
@@ -45,8 +11,7 @@ case "$archname" in
     ;;
 esac
 
-test -z "`${cc:-cc} -V 2>&1|grep -i workshop`" || ccisworkshop="$define"
-test -z "`${cc:-cc} -v 2>&1|grep -i gcc`"      || ccisgcc="$define"
+test -z "`${cc:-cc} -V 2>&1|grep -i workshop`" || ccname=workshop
 
 cat >UU/workshoplibpth.cbu<<'EOCBU'
 case "$workshoplibpth_done" in
@@ -70,8 +35,8 @@ case "$workshoplibpth_done" in
 esac
 EOCBU
 
-case "$ccisworkshop" in
-"$define")
+case "$ccname" in
+workshop)
 	cat >try.c <<EOF
 #include <sunmath.h>
 int main() { return(0); }
@@ -478,17 +443,18 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble-$uselongdouble_done" in
 "$define-"|true-|[yY]*-)
-	case "$ccisworkshop" in
-	'')	cat >&4 <<EOM
+	case "$ccname" in
+	workshop)
+		libswanted="$libswanted sunmath"
+		loclibpth="$loclibpth /opt/SUNWspro/lib"
+		;;
+	*)	cat >&4 <<EOM
 
-I do not see the Sun Workshop compiler; therefore I do not see
+The Sun Workshop compiler is not being used; therefore I do not see
 the libsunmath; therefore I do not know how to do long doubles, sorry.
 I'm disabling the use of long doubles.
 EOM
 		uselongdouble="$undef"
-		;;
-	*)	libswanted="$libswanted sunmath"
-		loclibpth="$loclibpth /opt/SUNWspro/lib"
 		;;
 	esac
 	uselongdouble_done=yes
@@ -505,9 +471,6 @@ case "$uselongdouble" in
 esac
 
 rm -f try.c try.o try
-# keep that leading tab
-	ccisworkshop=''
-	ccisgcc=''
 
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'
