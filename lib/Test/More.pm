@@ -18,7 +18,7 @@ sub _carp {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.44';
+$VERSION = '0.45';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
              is isnt like unlike is_deeply
@@ -658,6 +658,20 @@ is like doing this:
 
    use Some::Module qw(foo bar);
 
+don't try to do this:
+
+   BEGIN {
+       use_ok('Some::Module');
+
+       ...some code that depends on the use...
+       ...happening at compile time...
+   }
+
+instead, you want:
+
+  BEGIN { use_ok('Some::Module') }
+  BEGIN { ...some code that depends on the use... }
+
 
 =cut
 
@@ -749,40 +763,34 @@ just show you...
       ...normal testing code goes here...
   }
 
-This declares a block of tests to skip, $how_many tests there are,
-$why and under what $condition to skip them.  An example is the
-easiest way to illustrate:
+This declares a block of tests that might be skipped, $how_many tests
+there are, $why and under what $condition to skip them.  An example is
+the easiest way to illustrate:
 
     SKIP: {
-        skip "Pigs don't fly here", 2 unless Pigs->can('fly');
+        eval { require HTML::Lint };
 
-        my $pig = Pigs->new;
-        $pig->takeoff;
+        skip "HTML::Lint not installed", 2 if $@;
 
-        ok( $pig->altitude > 0,         'Pig is airborne' );
-        ok( $pig->airspeed > 0,         '  and moving'    );
+        my $lint = new HTML::Lint;
+        ok( $lint, "Created object" );
+
+        $lint->parse( $html );
+        is( scalar $lint->errors, 0, "No errors found in HTML" );
     }
 
-If pigs cannot fly, the whole block of tests will be skipped
-completely.  Test::More will output special ok's which Test::Harness
-interprets as skipped tests.  It's important to include $how_many tests
-are in the block so the total number of tests comes out right (unless
-you're using C<no_plan>, in which case you can leave $how_many off if
-you like).
+If the user does not have HTML::Lint installed, the whole block of
+code I<won't be run at all>.  Test::More will output special ok's
+which Test::Harness interprets as skipped, but passing, tests.
+It's important that $how_many accurately reflects the number of tests
+in the SKIP block so the # of tests run will match up with your plan.
 
-It's perfectly safe to nest SKIP blocks.
-
-Tests are skipped when you B<never> expect them to B<ever> pass.  Like
-an optional module is not installed or the operating system doesn't
-have some feature (like fork() or symlinks) or maybe you need an
-Internet connection and one isn't available.
+It's perfectly safe to nest SKIP blocks.  Each SKIP block must have
+the label C<SKIP>, or Test::More can't work its magic.
 
 You don't skip tests which are failing because there's a bug in your
-program.  For that you use TODO.  Read on.
-
-
-=for _Future
-See L</Why are skip and todo so weird?>
+program, or for which you don't yet have code written.  For that you
+use TODO.  Read on.
 
 =cut
 
@@ -832,6 +840,8 @@ With a todo block, the tests inside are expected to fail.  Test::More
 will run the tests normally, but print out special flags indicating
 they are "todo".  Test::Harness will interpret failures as being ok.
 Should anything succeed, it will report it as an unexpected success.
+You then know the thing you had todo is done and can remove the
+TODO flag.
 
 The nice part about todo tests, as opposed to simply commenting out a
 block of tests, is it's like having a programmatic todo list.  You know
@@ -879,6 +889,17 @@ sub todo_skip {
     local $^W = 0;
     last TODO;
 }
+
+=item When do I use SKIP vs. TODO?
+
+B<If it's something the user might not be able to do>, use SKIP.
+This includes optional modules that aren't installed, running under
+an OS that doesn't have some feature (like fork() or symlinks), or maybe
+you need an Internet connection and one isn't available.
+
+B<If it's something the programmer hasn't done yet>, use TODO.  This
+is for any code you haven't written yet, or bugs you have yet to fix,
+but want to put tests in your testing script (always a good idea).
 
 
 =back
@@ -1138,6 +1159,8 @@ sub builder {
 =head1 NOTES
 
 Test::More is B<explicitly> tested all the way back to perl 5.004.
+
+Test::More is thread-safe for perl 5.8.0 and up.
 
 =head1 BUGS and CAVEATS
 

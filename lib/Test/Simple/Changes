@@ -1,5 +1,13 @@
 Revision history for Perl extension Test::Simple
 
+0.45  Wed Jun 19 18:41:12 EDT 2002
+    - Andy Lester made the SKIP & TODO docs a bit clearer.
+    - Explicitly disallowing double plans. (RT #553)
+    - Kicking up the minimum version of Test::Harness to one that's
+      fairly bug free.
+    - Made clear a common problem with use_ok and BEGIN blocks.
+    - Arthur Bergman made Test::Builder thread-safe.
+
 0.44  Thu Apr 25 00:27:27 EDT 2002
     - names containing newlines no longer produce confusing output
       (from chromatic)
