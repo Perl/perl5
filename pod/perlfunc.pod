@@ -2437,9 +2437,7 @@ strings, set up your locale environment variables appropriately
 Note that the C<%a> and C<%b>, the short forms of the day of the week
 and the month of the year, may not necessarily be three characters wide.
 
-=item lock
-
-    lock I<THING>
+=item lock THING
 
 This function places an advisory lock on a variable, subroutine,
 or referenced object contained in I<THING> until the lock goes out
@@ -4787,7 +4785,7 @@ There are also two Perl-specific flags:
     v       interpret string as a vector of integers, output as
             numbers separated either by dots, or by an arbitrary
 	    string received from the argument list when the flag
-	    is preceded by C<*>
+	    is preceded by "*"
 
 Where a number would appear in the flags, an asterisk (C<*>) may be
 used instead, in which case Perl uses the next item in the parameter

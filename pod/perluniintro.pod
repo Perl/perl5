@@ -387,8 +387,8 @@ String Equivalence
 The question of string equivalence turns somewhat complicated
 in Unicode: what do you mean by equal?
 
-    Is C<LATIN CAPITAL LETTER A WITH ACUTE> equal to
-    C<LATIN CAPITAL LETTER A>?
+(Is C<LATIN CAPITAL LETTER A WITH ACUTE> equal to
+C<LATIN CAPITAL LETTER A>?)
 
 The short answer is that by default Perl compares equivalence
 (C<eq>, C<ne>) based only on code points of the characters.
@@ -413,8 +413,8 @@ String Collation
 People like to see their strings nicely sorted, or as Unicode
 parlance goes, collated.  But again, what do you mean by collate?
 
-    Does C<LATIN CAPITAL LETTER A WITH ACUTE> come before or after
-    C<LATIN CAPITAL LETTER A WITH GRAVE>?
+(Does C<LATIN CAPITAL LETTER A WITH ACUTE> come before or after
+C<LATIN CAPITAL LETTER A WITH GRAVE>?)
 
 The short answer is that by default Perl compares strings (C<lt>,
 C<le>, C<cmp>, C<ge>, C<gt>) based only on the code points of the

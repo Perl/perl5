@@ -350,10 +350,10 @@ ASCII to EBCDIC.
 
 A. DECOMPRESS
 
-      Decompress the file with C<gzip -d yourmodule.tar.gz>
+Decompress the file with C<gzip -d yourmodule.tar.gz>
 
-      You can get gzip from
-      http://www.s390.ibm.com/products/oe/bpxqp1.html.
+You can get gzip from
+http://www.s390.ibm.com/products/oe/bpxqp1.html
 
 B. UNPACK
 

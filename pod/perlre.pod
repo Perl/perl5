@@ -183,9 +183,9 @@ In addition, Perl defines the following:
     \pP	Match P, named property.  Use \p{Prop} for longer names.
     \PP	Match non-P
     \X	Match eXtended Unicode "combining character sequence",
-        equivalent to C<(?:\PM\pM*)>
+        equivalent to (?:\PM\pM*)
     \C	Match a single C char (octet) even under Unicode.
-	B<NOTE:> breaks up characters into their UTF-8 bytes,
+	NOTE: breaks up characters into their UTF-8 bytes,
 	so you may end up with malformed pieces of UTF-8.
 
 A C<\w> matches a single alphanumeric character or C<_>, not a whole word.
@@ -219,10 +219,22 @@ equivalents (if available) are as follows:
     word        \w	[3]
     xdigit
 
-  [1] A GNU extension equivalent to C<[ \t]>, `all horizontal whitespace'.
-  [2] Not I<exactly equivalent> to C<\s> since the C<[[:space:]]> includes
-      also the (very rare) `vertical tabulator', "\ck", chr(11).
-  [3] A Perl extension. 
+=over
+
+=item [1]
+
+A GNU extension equivalent to C<[ \t]>, `all horizontal whitespace'.
+
+=item [2]
+
+Not exactly equivalent to C<\s> since the C<[[:space:]]> includes
+also the (very rare) `vertical tabulator', \ck", chr(11).
+
+=item [3]
+
+A Perl extension. 
+
+=back
 
 For example use C<[:upper:]> to match all the uppercase characters.
 Note that the C<[]> are part of the C<[::]> construct, not part of the

@@ -2059,7 +2059,7 @@ the first alternative C<[^()]+> matching a substring with no
 parentheses and the second alternative C<\([^()]*\)>  matching a
 substring delimited by parentheses.  The problem with this regexp is
 that it is pathological: it has nested indeterminate quantifiers
- of the form C<(a+|b)+>.  We discussed in Part 1 how nested quantifiers
+of the form C<(a+|b)+>.  We discussed in Part 1 how nested quantifiers
 like this could take an exponentially long time to execute if there
 was no match possible.  To prevent the exponential blowup, we need to
 prevent useless backtracking at some point.  This can be done by
