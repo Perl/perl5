@@ -1882,9 +1882,12 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	goto phooey;
     }
     else if ((c = prog->regstclass)) {
-	if (minlen && PL_regkind[(U8)OP(prog->regstclass)] != EXACT)
+	if (minlen) {
+	    I32 op = (U8)OP(prog->regstclass);
 	    /* don't bother with what can't match */
-	    strend = HOPc(strend, -(minlen - 1));
+	    if (PL_regkind[op] != EXACT && op != CANY)
+	        strend = HOPc(strend, -(minlen - 1));
+	}
 	DEBUG_r({
 	    SV *prop = sv_newmortal();
 	    char *s0;
@@ -2269,17 +2272,17 @@ S_regmatch(pTHX_ regnode *prog)
 	    regprop(prop, scan);
 	    {
 	      char *s0 =
-		do_utf8 ?
+		do_utf8 && OP(scan) != CANY ?
 		pv_uni_display(dsv0, (U8*)(locinput - pref_len),
 			       pref0_len, 60, UNI_DISPLAY_REGEX) :
 		locinput - pref_len;
 	      int len0 = do_utf8 ? strlen(s0) : pref0_len;
-	      char *s1 = do_utf8 ?
+	      char *s1 = do_utf8 && OP(scan) != CANY ?
 		pv_uni_display(dsv1, (U8*)(locinput - pref_len + pref0_len),
 			       pref_len - pref0_len, 60, UNI_DISPLAY_REGEX) :
 		locinput - pref_len + pref0_len;
 	      int len1 = do_utf8 ? strlen(s1) : pref_len - pref0_len;
-	      char *s2 = do_utf8 ?
+	      char *s2 = do_utf8 && OP(scan) != CANY ?
 		pv_uni_display(dsv2, (U8*)locinput,
 			       PL_regeol - locinput, 60, UNI_DISPLAY_REGEX) :
 		locinput;

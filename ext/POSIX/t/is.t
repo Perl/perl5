@@ -10,12 +10,14 @@ BEGIN {
     }
 }
 
-
 use POSIX;
 use strict ;
 
-$| = 1;
+# E.g. \t might or might not be isprint() depending on the locale,
+# so let's reset to the default.
+setlocale(LC_ALL, 'C') if $Config{d_setlocale};
 
+$| = 1;
 
 # List of characters (and strings) to feed to the is<xxx> functions.
 #
