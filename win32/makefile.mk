@@ -1194,8 +1194,6 @@ distclean: clean
 	-if exist $(LIBDIR)\Data rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
 	-if exist $(LIBDIR)\Filter\Util rmdir /s $(LIBDIR)\Filter\Util
-	-if exist $(LIBDIR)\Digest rmdir /s /q $(LIBDIR)\Digest
-	-if exist $(LIBDIR)\Digest rmdir /s $(LIBDIR)\Digest
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
 	-if exist $(LIBDIR)\MIME rmdir /s $(LIBDIR)\MIME
 	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List
