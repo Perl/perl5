@@ -5,9 +5,9 @@ REALPERL = ../perl
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
-pl = c2ph.PL h2ph.PL h2xs.PL perlbug.PL perldoc.PL pl2pm.PL splain.PL perlcc.PL dprofpp.PL libnetcfg.PL
-plextract  = c2ph h2ph h2xs perlbug perldoc pl2pm splain perlcc dprofpp libnetcfg
-plextractexe  = ./c2ph ./h2ph ./h2xs ./perlbug ./perldoc ./pl2pm ./splain ./perlcc ./dprofpp ./libnetcfg
+pl = c2ph.PL h2ph.PL h2xs.PL perlbug.PL perldoc.PL perlivp.PL pl2pm.PL splain.PL perlcc.PL dprofpp.PL libnetcfg.PL
+plextract  = c2ph h2ph h2xs perlbug perldoc perlivp pl2pm splain perlcc dprofpp libnetcfg
+plextractexe  = ./c2ph ./h2ph ./h2xs ./perlbug ./perldoc ./perlivp ./pl2pm ./splain ./perlcc ./dprofpp ./libnetcfg
 
 all: $(plextract) 
 
@@ -17,6 +17,7 @@ compile: all $(plextract)
 	$(REALPERL) -I../lib perlcc -I .. -L .. h2xs -o h2xs.exe -v 10 -log ../compilelog;
 	$(REALPERL) -I../lib perlcc -I .. -L .. perlbug -o perlbug.exe -v 10 -log ../compilelog;
 	$(REALPERL) -I../lib perlcc -I .. -L .. perldoc -o perldoc.exe -v 10 -log ../compilelog;
+	$(REALPERL) -I../lib perlcc -I .. -L .. perlivp -o perlivp.exe -v 10 -log ../compilelog;
 	$(REALPERL) -I../lib perlcc -I .. -L .. pl2pm -o pl2pm.exe -v 10 -log ../compilelog;
 	$(REALPERL) -I../lib perlcc -I .. -L .. splain -o splain.exe -v 10 -log ../compilelog;
 	$(REALPERL) -I../lib perlcc -I .. -L .. perlcc -I .. -L .. -o perlcc.exe -v 10 -log ../compilelog;
@@ -35,6 +36,8 @@ h2xs:		h2xs.PL ../config.sh
 perlbug:	perlbug.PL ../config.sh ../patchlevel.h
 
 perldoc:	perldoc.PL ../config.sh
+
+perlivp:	perlivp.PL ../config.sh
 
 pl2pm:		pl2pm.PL ../config.sh
 
