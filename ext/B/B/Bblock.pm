@@ -97,6 +97,12 @@ sub B::CONDOP::mark_if_leader {
     mark_leader($op->false);
 }
 
+sub B::LISTOP::mark_if_leader {
+    my $op = shift;
+    mark_leader($op->first);
+    mark_leader($op->next);
+}
+
 sub B::PMOP::mark_if_leader {
     my $op = shift;
     if ($op->ppaddr ne "pp_pushre") {
