@@ -1010,3 +1010,10 @@ void MacPerl_WriteMsg(void * io, const char * msg, size_t len)
 	/* No file/line found */
 	WriteMsg(io, msg, len, true);
 }
+
+void MacPerl_Exit(int status) 
+{
+	dTHX;
+	
+	my_exit(status);
+}

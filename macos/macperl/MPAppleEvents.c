@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPAppleEvents.c,v $
+Revision 1.3  2001/10/22 19:28:01  pudge
+Sync with perforce
+
 Revision 1.2  2001/04/03 06:51:37  neeri
 Alias code was messing up double clicks from the finder (MacPerl bug #409948)
 
@@ -237,6 +240,23 @@ pascal short CountWindows(void)
 
 	return index;
 } /*CountWindows*/
+
+/**-----------------------------------------------------------------------
+		Name: 		DoStopScript
+		Purpose:		Stop currently running script.
+	-----------------------------------------------------------------------**/
+
+#if !defined(powerc) && !defined(__powerc)
+#pragma segment Main
+#endif
+
+pascal OSErr DoStopScript(const AppleEvent *message, AppleEvent *reply, long refcon)
+{
+	if (gRunningPerl)
+		gAborting = true;
+
+	return noErr;
+}
 
 /**-----------------------------------------------------------------------
 		Name: 		DoOpenApp
@@ -5555,6 +5575,7 @@ pascal void InitAppleEvents(void)
 	AEInstallEventHandler( kCoreEventClass, kAEPrintDocuments,  NewAEEventHandlerProc(DoPrintDocuments), noRefCon, false) ;
 	AEInstallEventHandler( kCoreEventClass, kAEQuitApplication, NewAEEventHandlerProc(MyQuit), noRefCon, false) ;
 
+	AEInstallEventHandler( MPAppSig,	'STOP',			NewAEEventHandlerProc(DoStopScript),	noRefCon,	false) ;
 	AEInstallEventHandler( MPAppSig, 		  kAEOpenDocuments,   NewAEEventHandlerProc(DoOpenDocument), 	1, false) ;
 	AEInstallEventHandler( MPAppSig, 		  'DATA',   			 NewAEEventHandlerProc(Relay), 			 	0, false) ;
 	AEInstallEventHandler( MPAppSig, 		  'xEDT',   			 NewAEEventHandlerProc(DoExternalEditor), 0, false) ;

@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPMain.c,v $
+Revision 1.4  2001/10/11 05:19:31  neeri
+Fix exit code (MacPerl bug #422129)
+
 Revision 1.3  2001/04/28 23:28:01  neeri
 Need to register MPAEVTStreamDevice (MacPerl Bug #418932)
 
@@ -1278,7 +1281,7 @@ void MainEvent(Boolean busy, long sleep, RgnHandle rgn)
 		HandleEvent(&myEvent);
 		
 	if (gQuitting && gRunningPerl)
-		Perl_my_exit(-128);
+		MacPerl_Exit(-128);
 }
 
 pascal long VoodooChile(Size cbNeeded)

@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C/C++
 
 $Log: MPConsole.cp,v $
+Revision 1.4  2001/10/11 05:19:31  neeri
+Fix exit code (MacPerl bug #422129)
+
 Revision 1.3  2001/04/13 05:28:13  neeri
 Forgot to install MPConsoleSpin (MacPerl bug #230880)
 
@@ -600,22 +603,11 @@ extern "C" void Perl_my_exit(int status);
 
 bool MPConsoleSpin(bool /* wait */)
 {
-#if NOT_YET
-	if ((gAborting || (!gInBackground && GUSIConfiguration::Instance()->CheckInterrupt())) 
-		&& gRunningPerl) {
-		FlushEvents(-1, 0);
+	if (gAborting && gRunningPerl) {
+		ResetConsole();
 
-		if (spin == SP_AUTO_SPIN || spin == SP_SLEEP) {
-			ResetConsole();
-
-			Perl_my_exit(-128);
-		} else {
-			raise(SIGINT);
-			
-			return true;
-		}
-	}
-#endif
+		MacPerl_Exit(-128);
+	} 
 		
 	// 
 	// It would be nightmarish for MacPerl drawing code if a cursor spin altered the

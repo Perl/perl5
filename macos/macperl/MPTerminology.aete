@@ -95,6 +95,10 @@
 		@PARAM	"environment", 'ENVT', 'TEXT', "environment variables.", 								OPT, LIST,   NOENUM
 		@PARAM	"directory",   'DIRE', 'alis', "working directory.", 										OPT, SINGLE, NOENUM
 	
+	@EVENT "Stop Script",	"Stop the currently running Perl script",	'McPL', 'STOP'
+		@REPLY 	'null', "", 								OPT, SINGLE, NOENUM
+		@DIRECT	'null', "No direct parameter required", 	OPT, SINGLE, NOENUM, CHANGE
+
 	@EVENT "Send Data", "Send data to a remote controlled Perl script", 'McPL', 'DATA'
 		@REPLY 	'TEXT', "Standard Output", 	OPT, SINGLE, NOENUM
 		@DIRECT	'TEXT', "Standard Input", 		OPT, SINGLE, NOENUM, CHANGE
