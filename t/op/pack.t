@@ -6,6 +6,12 @@ BEGIN {
     require './test.pl';
 }
 
+# This is truth in an if statement, and could be a skip message
+my $no_endianness = $] > 5.009 ? '' :
+  "Endianness pack modifiers not available on this perl";
+my $no_signedness = $] > 5.009 ? '' :
+  "Signed/unsigned pack modifiers not available on this perl";
+
 plan tests => 13679;
 
 use strict;
@@ -18,7 +24,9 @@ my @valid_errors = (qr/^Invalid type '\w'/);
 
 my $ByteOrder = 'unknown';
 my $maybe_not_avail = '(?:hto[bl]e|[bl]etoh)';
-if ($Config{byteorder} =~ /^1234(?:5678)?$/) {
+if ($no_endianness) {
+  push @valid_errors, qr/^Invalid type '[<>]'/;
+} elsif ($Config{byteorder} =~ /^1234(?:5678)?$/) {
   $ByteOrder = 'little';
   $maybe_not_avail = '(?:htobe|betoh)';
 }
@@ -28,6 +36,10 @@ elsif ($Config{byteorder} =~ /^(?:8765)?4321$/) {
 }
 else {
   push @valid_errors, qr/^Can't (?:un)?pack (?:big|little)-endian .*? on this platform/;
+}
+
+if ($no_signedness) {
+  push @valid_errors, qr/^'!' allowed only after types sSiIlLxX in (?:un)?pack/;
 }
 
 for my $size ( 16, 32, 64 ) {
@@ -212,20 +224,23 @@ sub list_eq ($$) {
   eval { $x = pack 'w', '1'x(1 + length ~0) . 'e0' };
   like ($@, qr/^Can only compress unsigned integers/);
 
-  for my $mod (qw( ! < > )) {
-    eval { $x = pack "a$mod", 42 };
-    like ($@, qr/^'$mod' allowed only after types \S+ in pack/);
+ SKIP: {
+    skip $no_endianness, 2*3 + 2*8 if $no_endianness;
+    for my $mod (qw( ! < > )) {
+      eval { $x = pack "a$mod", 42 };
+      like ($@, qr/^'$mod' allowed only after types \S+ in pack/);
 
-    eval { $x = unpack "a$mod", 'x'x8 };
-    like ($@, qr/^'$mod' allowed only after types \S+ in unpack/);
-  }
+      eval { $x = unpack "a$mod", 'x'x8 };
+      like ($@, qr/^'$mod' allowed only after types \S+ in unpack/);
+    }
 
-  for my $mod (qw( <> >< !<> !>< <!> >!< <>! ><! )) {
-    eval { $x = pack "sI${mod}s", 42, 47, 11 };
-    like ($@, qr/^Can't use both '<' and '>' after type 'I' in pack/);
+    for my $mod (qw( <> >< !<> !>< <!> >!< <>! ><! )) {
+      eval { $x = pack "sI${mod}s", 42, 47, 11 };
+      like ($@, qr/^Can't use both '<' and '>' after type 'I' in pack/);
 
-    eval { $x = unpack "sI${mod}s", 'x'x16 };
-    like ($@, qr/^Can't use both '<' and '>' after type 'I' in unpack/);
+      eval { $x = unpack "sI${mod}s", 'x'x16 };
+      like ($@, qr/^Can't use both '<' and '>' after type 'I' in unpack/);
+    }
   }
 
  SKIP: {
@@ -289,13 +304,18 @@ print "# test the 'p' template\n";
 
 # literals
 is(unpack("p",pack("p","foo")), "foo");
-is(unpack("p<",pack("p<","foo")), "foo");
-is(unpack("p>",pack("p>","foo")), "foo");
-
+SKIP: {
+  skip $no_endianness, 2 if $no_endianness;
+  is(unpack("p<",pack("p<","foo")), "foo");
+  is(unpack("p>",pack("p>","foo")), "foo");
+}
 # scalars
 is(unpack("p",pack("p",239)), 239);
-is(unpack("p<",pack("p<",239)), 239);
-is(unpack("p>",pack("p>",239)), 239);
+SKIP: {
+  skip $no_endianness, 2 if $no_endianness;
+  is(unpack("p<",pack("p<",239)), 239);
+  is(unpack("p>",pack("p>",239)), 239);
+}
 
 # temps
 sub foo { my $a = "a"; return $a . $a++ . $a++ }
@@ -312,8 +332,11 @@ sub foo { my $a = "a"; return $a . $a++ . $a++ }
 
 # undef should give null pointer
 like(pack("p", undef), qr/^\0+$/);
-like(pack("p<", undef), qr/^\0+$/);
-like(pack("p>", undef), qr/^\0+$/);
+SKIP: {
+  skip $no_endianness, 2 if $no_endianness;
+  like(pack("p<", undef), qr/^\0+$/);
+  like(pack("p>", undef), qr/^\0+$/);
+}
 
 # Check for optimizer bug (e.g.  Digital Unix GEM cc with -O4 on DU V4.0B gives
 #                                4294967295 instead of -1)
@@ -333,13 +356,17 @@ while (my ($base, $expect) = splice @lengths, 0, 2) {
   my @formats = ($base);
   $base =~ /^[nv]/i or push @formats, "$base>", "$base<";
   for my $format (@formats) {
-    my $len = length(pack($format, 0));
-    if ($expect > 0) {
-      is($expect, $len, "format '$format'");
-    } else {
-      $expect = -$expect;
-      ok ($len >= $expect, "format '$format'") ||
-        print "# format '$format' has length $len, expected >= $expect\n";
+  SKIP: {
+      skip $no_endianness, 1 if $no_endianness && $format =~ m/[<>]/;
+      skip $no_signedness, 1 if $no_signedness && $format =~ /[nNvV]!/;
+      my $len = length(pack($format, 0));
+      if ($expect > 0) {
+	is($expect, $len, "format '$format'");
+      } else {
+	$expect = -$expect;
+	ok ($len >= $expect, "format '$format'") ||
+	  print "# format '$format' has length $len, expected >= $expect\n";
+      }
     }
   }
 }
@@ -614,10 +641,13 @@ is(pack("v", 0xdead), "\xad\xde");
 is(pack("N", 0xdeadbeef), "\xde\xad\xbe\xef");
 is(pack("V", 0xdeadbeef), "\xef\xbe\xad\xde");
 
-is(pack("n!", 0xdead), "\xde\xad");
-is(pack("v!", 0xdead), "\xad\xde");
-is(pack("N!", 0xdeadbeef), "\xde\xad\xbe\xef");
-is(pack("V!", 0xdeadbeef), "\xef\xbe\xad\xde");
+SKIP: {
+  skip $no_signedness, 4 if $no_signedness;
+  is(pack("n!", 0xdead), "\xde\xad");
+  is(pack("v!", 0xdead), "\xad\xde");
+  is(pack("N!", 0xdeadbeef), "\xde\xad\xbe\xef");
+  is(pack("V!", 0xdeadbeef), "\xef\xbe\xad\xde");
+}
 
 print "# test big-/little-endian conversion\n";
 
@@ -975,8 +1005,10 @@ foreach (
     is(scalar unpack("w/a*", "\x02abc"), "ab");
 }
 
-{
+SKIP: {
   print "# group modifiers\n";
+
+  skip $no_endianness, 3 * 2 + 3 * 2 + 1 if $no_endianness;
 
   for my $t (qw{ (s<)< (sl>s)> (s(l(sl)<l)s)< }) {
     print "# testing pattern '$t'\n";
@@ -994,6 +1026,11 @@ foreach (
     like($@, qr/Can't use '[<>]' in a group with different byte-order in pack/);
   }
 
+  is(pack('L<L>', (0x12345678)x2),
+     pack('(((L1)1)<)(((L)1)1)>1', (0x12345678)x2));
+}
+
+{
   sub compress_template {
     my $t = shift;
     for my $mod (qw( < > )) {
@@ -1002,9 +1039,6 @@ foreach (
     }
     return $t;
   }
-
-  is(pack('L<L>', (0x12345678)x2),
-     pack('(((L1)1)<)(((L)1)1)>1', (0x12345678)x2));
 
   my %templates = (
     's<'                  => [-42],
@@ -1203,16 +1237,20 @@ foreach (
   eval { my @a = unpack( "C/", "\3" ); };
   like( $@, qr{Code missing after '/'} );
 
-  # modifier warnings
-  @warning = ();
-  $x = pack "I>>s!!", 47, 11;
-  ($x) = unpack "I<<l!>!>", 'x'x20;
-  is(scalar @warning, 5);
-  like($warning[0], qr/Duplicate modifier '>' after 'I' in pack/);
-  like($warning[1], qr/Duplicate modifier '!' after 's' in pack/);
-  like($warning[2], qr/Duplicate modifier '<' after 'I' in unpack/);
-  like($warning[3], qr/Duplicate modifier '!' after 'l' in unpack/);
-  like($warning[4], qr/Duplicate modifier '>' after 'l' in unpack/);
+ SKIP: {
+    skip $no_endianness, 6 if $no_endianness;
+
+    # modifier warnings
+    @warning = ();
+    $x = pack "I>>s!!", 47, 11;
+    ($x) = unpack "I<<l!>!>", 'x'x20;
+    is(scalar @warning, 5);
+    like($warning[0], qr/Duplicate modifier '>' after 'I' in pack/);
+    like($warning[1], qr/Duplicate modifier '!' after 's' in pack/);
+    like($warning[2], qr/Duplicate modifier '<' after 'I' in unpack/);
+    like($warning[3], qr/Duplicate modifier '!' after 'l' in unpack/);
+    like($warning[4], qr/Duplicate modifier '>' after 'l' in unpack/);
+  }
 }
 
 {  # Repeat count [SUBEXPR]
