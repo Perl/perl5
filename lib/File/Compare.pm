@@ -166,8 +166,8 @@ is basically equivalent to
 
 =head1 RETURN
 
-File::Compare::compare return 0 if the files are equal, 1 if the
-files are unequal, or -1 if an error was encountered.
+File::Compare::compare and its sibling functions return 0 if the files
+are equal, 1 if the files are unequal, or -1 if an error was encountered.
 
 =head1 AUTHOR
 
