@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..44\n";
+print "1..47\n";
 
 my $CAT = ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') ? 'type'
 	: ($^O eq 'MacOS') ? 'catenate'
@@ -281,10 +281,36 @@ if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' ||
 
 use strict;	# Amazed that this hackery can be made strict ...
 
+my $test = 12;
+
 # Just a complete test for format, including top-, left- and bottom marging
 # and format detection through glob entries
 
+format EMPTY =
+.
+
+format Comment =
+ok @<<<<<
+$test
+.
+
+$= = 10;
+
+# [ID 20020227.005] format bug with undefined _TOP
+{   local $~ = "Comment";
+    write;
+    $test++;
+    print $- == 9
+	? "ok $test\n" : "not ok $test # TODO \$- = $- instead of 9\n";
+    $test++;
+    print $^ ne "Comment_TOP"
+	? "ok $test\n" : "not ok $test # TODO \$^ = $^ instead of 'STDOUT_TOP'\n";
+    $test++;
+    }
+
+   $^  = "STDOUT_TOP";
    $=  =  7;		# Page length
+   $-  =  0;		# Lines left
 my $ps = $^L; $^L = "";	# Catch the page separator
 my $tm =  1;		# Top margin (empty lines before first output)
 my $bm =  2;		# Bottom marging (empty lines between last text and footer)
@@ -293,14 +319,13 @@ my $lm =  4;		# Left margin (indent in spaces)
 select ((select (STDOUT), $| = 1)[0]);
 if ($lm > 0 and !open STDOUT, "|-") {	# Left margin (in this test ALWAYS set)
     select ((select (STDOUT), $| = 1)[0]);
-    my $i = 12;
     my $s = " " x $lm;
     while (<STDIN>) {
 	s/^/$s/;
-	print + ($_ eq <DATA> ? "" : "not "), "ok ", $i++, "\n";
+	print + ($_ eq <DATA> ? "" : "not "), "ok ", $test++, "\n";
 	}
     close STDIN;
-    print + (<DATA>?"not ":""), "ok ", $i++, "\n";
+    print + (<DATA>?"not ":""), "ok ", $test++, "\n";
     close STDOUT;
     exit;
     }
@@ -334,9 +359,6 @@ format TOP =
 $tm
 .
 
-format EmptyTOP =
-.
-
 format ENTRY =
 @ @<<<<~~
 @{(shift @E)||["",""]}
@@ -359,7 +381,7 @@ sub has_format ($)
     $@?0:1;
     } # has_format
 
-$^ = has_format ("TOP") ? "TOP" : "EmptyTOP";
+$^ = has_format ("TOP") ? "TOP" : "EMPTY";
 has_format ("ENTRY") or die "No format defined for ENTRY";
 foreach my $e ( [ map { [ $_, "Test$_"   ] } 1 .. 7 ],
 		[ map { [ $_, "${_}tseT" ] } 1 .. 5 ]) {
