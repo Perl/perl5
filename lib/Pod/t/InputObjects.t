@@ -1,4 +1,4 @@
-#!perl
+#!perl -Tw
 
 BEGIN {
 	chdir 't' if -d 't';
@@ -37,7 +37,7 @@ use_ok( 'Pod::InputObjects' );
     is( $p_p1->cmd_name(), 'head2', 'Pod::Paragraph->cmd_name()' );
     is( $p_p1->cmd_name( 'head1' ), 'head1', 
         'Pod::Paragraph->cmd_name( head1 )' );
-    is( $p_p2->cmd_name(), '',
+    cmp_ok( $p_p2->cmd_name(), 'eq', '',
         'Pod::Paragraph->cmd_name() revisited' );
 
     is( $p_p1->text(), 'NAME', 'Pod::Paragraph->text()' );
