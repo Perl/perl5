@@ -3563,7 +3563,6 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 {
     PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
     PerlIOCrlf *c = PerlIOSelf(f, PerlIOCrlf);
-    IV flags = PerlIOBase(f)->flags;
     if (!b->buf)
 	PerlIO_get_base(f);
     if (!ptr) {
@@ -3580,10 +3579,11 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 	ptr -= cnt;
     }
     else {
-#if 1
+#if 0
 	/*
 	 * Test code - delete when it works ...
 	 */
+	IV flags = PerlIOBase(f)->flags;
 	STDCHAR *chk = (c->nl) ? (c->nl+1) : b->end;
         if (ptr+cnt == c->nl && c->nl+1 == b->end && *c->nl == 0xd) {
 	  /* Defered CR at end of buffer case - we lied about count */
