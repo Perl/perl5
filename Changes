@@ -32,6 +32,311 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  9212] By: jhi                                   on 2001/03/18  20:36:59
+        Log: Looking for config.sh in parent directories isn't
+             very useful for the toplevel Makefile.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9211] By: jhi                                   on 2001/03/18  20:33:37
+        Log: On "make clean" take care of Third Degree droppings.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9210] By: jhi                                   on 2001/03/18  20:21:34
+        Log: Add a hook for running the tests under the Third Degree
+             debugging tool (set $ENV{PERL_3LOG} to non-zero)
+             
+             TODO: Document the use of Third Degree.
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[  9209] By: jhi                                   on 2001/03/18  20:19:07
+        Log: Regen toc and api pods.
+     Branch: perl
+	   ! pod/perlapi.pod pod/perltoc.pod
+____________________________________________________________________________
+[  9208] By: jhi                                   on 2001/03/18  20:12:12
+        Log: Integrate changes #8128,9132 from mainline into maintperl,
+             Tie::SubstrHash fixes.
+     Branch: maint-5.6/perl
+	  !> lib/Tie/SubstrHash.pm t/lib/tie-substrhash.t
+____________________________________________________________________________
+[  9207] By: jhi                                   on 2001/03/18  20:07:43
+        Log: podchecker relaxations from Michael Stevens.
+     Branch: perl
+	   ! lib/Pod/Checker.pm lib/Pod/ParseUtils.pm pod/perlpod.pod
+____________________________________________________________________________
+[  9206] By: jhi                                   on 2001/03/18  20:04:24
+        Log: Retract the changes made at #9176 to Neil's and Ilya's module pods.
+     Branch: perl
+	   ! lib/Locale/Constants.pm lib/Locale/Country.pm
+	   ! lib/Locale/Currency.pm lib/Locale/Language.pm lib/overload.pm
+	   ! os2/OS2/ExtAttr/ExtAttr.pm os2/OS2/Process/Process.pm
+____________________________________________________________________________
+[  9205] By: jhi                                   on 2001/03/18  19:54:45
+        Log: Integrate changes #9161,9162 from maintperl to mainline.
+             
+             clearing of $ENV{PERL_DESTRUCT_LEVEL} interferes with purify
+             results
+     Branch: perl
+	  !> t/op/magic.t
+____________________________________________________________________________
+[  9204] By: jhi                                   on 2001/03/18  19:37:46
+        Log: Make perl.third checks more understandable to the builder.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9203] By: jhi                                   on 2001/03/18  19:20:54
+        Log: Re-integrate #9138 from maintperl to mainline,
+             the squelching of the unneeded "Scalars leaked" messages.
+     Branch: perl
+	  !> t/comp/proto.t t/op/lex_assign.t t/op/local.t t/op/pat.t
+	  !> t/op/regexp.t t/pragma/strict-vars t/pragma/warn/op
+	  !> t/pragma/warn/regcomp t/pragma/warn/toke t/pragma/warnings.t
+____________________________________________________________________________
+[  9202] By: jhi                                   on 2001/03/18  18:48:36
+        Log: More robust and more paranoid perl.third target.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9201] By: jhi                                   on 2001/03/18  18:39:21
+        Log: Integrate change #9197 from maintperl to mainline.
+             
+             more thorough cleaning of arenas.
+     Branch: perl
+	  !> embed.pl perl.c proto.h sv.c t/op/sort.t
+____________________________________________________________________________
+[  9200] By: jhi                                   on 2001/03/18  18:25:17
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doop.c ext/Encode/Encode.pm ext/Encode/Encode.xs
+	  !> ext/Encode/compile lib/utf8.pm pp_ctl.c sv.c t/lib/b.t
+	  !> t/lib/encode.t toke.c universal.c utf8.c
+____________________________________________________________________________
+[  9199] By: nick                                  on 2001/03/18  15:23:51
+        Log: Prefer !UTF8_IS_INVARIANT() over UTF8_IS_CONTINUED() when that
+             is the sense of the test being done. Avoid some magical 127 and 128 values
+             by using macros.
+     Branch: perlio
+	   ! doop.c pp_ctl.c sv.c toke.c
+____________________________________________________________________________
+[  9198] By: nick                                  on 2001/03/18  14:18:12
+        Log: UTF-X encoding invariance for Encode:
+             - move Encode::utf8_encode to utf8::encode (likewise decode,upgrade,downgrade,valid)
+             - move the XS code for those to universal.c (so in miniperl)
+             - add utf8::unicode_to_native and its inverse to allow EBCDIC to work in true unicode.
+             - change ext/Encode/compile to use above.
+             - Fix t/lib/encode.t for above
+             - Teach t/lib/b.t to expect -uutf8
+             - In utf8.c look for SWASHNEW rather than just utf8:: package to see if
+             utf8.pm is needed.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs ext/Encode/compile
+	   ! lib/utf8.pm t/lib/b.t t/lib/encode.t universal.c utf8.c
+____________________________________________________________________________
+[  9197] By: gsar                                  on 2001/03/18  12:15:57
+        Log: more thorough cleaning of arenas--keep going until no more
+             SvREFCNT_dec()s occur (this fixes the problem that causes the
+             pesky "Scalars leaked" warnings)
+     Branch: maint-5.6/perl
+	   ! embed.pl perl.c proto.h sv.c t/op/sort.t
+____________________________________________________________________________
+[  9196] By: nick                                  on 2001/03/18  10:57:29
+        Log: Fix pragma/utf8.t # 15
+             - if toke.c is processing a SvUTF8 string then single quoted '...' etc.
+             are SvUTF8 as well.
+     Branch: perlio
+	   ! toke.c
+____________________________________________________________________________
+[  9195] By: nick                                  on 2001/03/18  09:27:06
+        Log: Integrate mainline
+     Branch: perlio
+	  !> MANIFEST Makefile.SH doop.c mg.c op.c op.h t/op/misc.t
+	  !> t/op/pat.t
+____________________________________________________________________________
+[  9194] By: jhi                                   on 2001/03/18  05:29:59
+        Log: Sarathy's clear_pmop patch with Radu Greab's fix,
+             Inaba-san's, Nick Clark's, and Vadim Konovalov's tests.
+     Branch: perl
+	   ! op.c op.h t/op/misc.t t/op/pat.t
+____________________________________________________________________________
+[  9193] By: jhi                                   on 2001/03/18  05:15:06
+        Log: NI-S' cunning idea of how to de-UTF8 the "\C-broken" submatches.
+     Branch: perl
+	   ! mg.c t/op/pat.t
+____________________________________________________________________________
+[  9192] By: jhi                                   on 2001/03/18  04:22:43
+        Log: tr/// UTF-8 patches from Inaba Hiroto.
+     Branch: perl
+	   ! doop.c op.c
+____________________________________________________________________________
+[  9191] By: jhi                                   on 2001/03/18  04:21:17
+        Log: Integrate perlio.
+     Branch: perl
+	  !> utf8.c utfebcdic.h
+____________________________________________________________________________
+[  9190] By: nick                                  on 2001/03/17  20:32:01
+        Log: Correct #if EBCDIC side typos.
+             Builds and passes many tests on OS390.
+     Branch: perlio
+	   ! utf8.c utfebcdic.h
+____________________________________________________________________________
+[  9189] By: jhi                                   on 2001/03/17  18:55:49
+        Log: Add prerequisites for the perl.third target.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9188] By: jhi                                   on 2001/03/17  18:46:00
+        Log: Integrate perlio.
+     Branch: perl
+	  +> utfebcdic.h
+	  !> MANIFEST doop.c perl.h pp.c utf8.c utf8.h
+____________________________________________________________________________
+[  9187] By: jhi                                   on 2001/03/17  18:38:47
+        Log: Add a make rule for perl.third (the Third Degree memory debugging
+             tool of Tru64 / Digital UNIX / DEC OSF/1, see man third or man atom)
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9186] By: nick                                  on 2001/03/17  18:34:48
+        Log: MANIFEST addition :-(
+     Branch: perlio
+	   ! MANIFEST
+____________________________________________________________________________
+[  9185] By: nick                                  on 2001/03/17  18:29:50
+        Log: Infrastructure to use UTF-EBCDIC rather than UTF-8 as the internal
+             encoding on EBCDIC platforms. This has property that U+0000..U+009F i.e.
+             a superset of ASCII are invariant under the encoding. This is EBCDIC
+             friendly as an encoded string can be looked at as being EBCDIC by lexer
+             sprintf("%d",...) etc. in same manner that a UTF-8 string be considered
+             ASCII on ASCII machines.
+             
+             - re-arrange utf8.h to get ASCII specific vs Unicode generic bits
+             seperate.
+             - Add some more macros to comprehend different shift amounts and
+             possible swizzle in UTF-EBCDIC vs UTF-8. Change utf8.c to use them.
+             - add utfebcdic.h which provides UTF-EBCDIC versions of the macros,
+             and conditionaly #include it.
+             
+             EBCDIC build as yet untested.  ASCII still fails the one test.
+     Branch: perlio
+	   + utfebcdic.h
+	   ! utf8.c utf8.h
+____________________________________________________________________________
+[  9184] By: nick                                  on 2001/03/17  17:44:16
+        Log: Minor naming change UTF8_IS_ASCII => UTF8_IS_INVARIANT
+     Branch: perlio
+	   ! doop.c perl.h pp.c utf8.h
+____________________________________________________________________________
+[  9183] By: jhi                                   on 2001/03/17  15:55:42
+        Log: Integrate perlio.
+     Branch: perl
+	   ! MANIFEST
+	  !> perl.h sv.c t/op/pat.t toke.c utf8.c utf8.h
+____________________________________________________________________________
+[  9182] By: nick                                  on 2001/03/17  09:16:06
+        Log: Allow test to pass even when \C leaves SvUTF8 set by adding 'use bytes'
+     Branch: perlio
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  9181] By: nick                                  on 2001/03/17  09:15:11
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> lib/Locale/Constants.pm lib/Locale/Country.pm
+	  +> lib/Locale/Currency.pm lib/Locale/Language.pm t/lib/lc-all.t
+	  +> t/lib/lc-constants.t t/lib/lc-country.t t/lib/lc-currency.t
+	  +> t/lib/lc-language.t t/lib/lc-uk.t win32/sncfnmcs.pl
+	  !> (integrate 83 files)
+____________________________________________________________________________
+[  9180] By: nick                                  on 2001/03/16  17:23:21
+        Log: EBCDIC Fixes.
+     Branch: perlio
+	   ! perl.h sv.c toke.c utf8.c utf8.h
+____________________________________________________________________________
+[  9179] By: jhi                                   on 2001/03/16  14:10:12
+        Log: Re-apply #9024 as the Storable 1.0.11 (#9069) overwrote
+             a change needed to work around an AIX compiler bug.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  9178] By: jhi                                   on 2001/03/16  03:19:59
+        Log: With Damian's approval synchronize damian's modules'
+             licensing with Perl's standard module licensing.
+     Branch: perl
+	   ! lib/Filter/Simple.pm lib/Switch.pm lib/Text/Balanced.pod
+____________________________________________________________________________
+[  9177] By: jhi                                   on 2001/03/16  03:15:34
+        Log: Make the Filter::Util:Call files have their own copies
+             of the Perl standard module licensing, from Paul Marquess.
+     Branch: perl
+	   ! ext/Filter/Util/Call/Call.pm ext/Filter/Util/Call/Call.xs
+____________________________________________________________________________
+[  9176] By: jhi                                   on 2001/03/16  02:56:04
+        Log: Subject: [PATCH] more pod patches
+             From: Michael Stevens <michael@etla.org>
+             Date: Thu, 15 Mar 2001 21:25:18 +0000
+             Message-ID: <20010315212518.A18870@firedrake.org>
+     Branch: perl
+	   ! configpm ext/B/B/Bytecode.pm ext/DB_File/DB_File.pm
+	   ! ext/Data/Dumper/Dumper.pm ext/Devel/Peek/Peek.pm
+	   ! ext/Filter/Util/Call/Call.pm ext/IO/lib/IO/Handle.pm
+	   ! ext/IO/lib/IO/Seekable.pm ext/IO/lib/IO/Socket/UNIX.pm
+	   ! ext/IPC/SysV/Msg.pm ext/IPC/SysV/Semaphore.pm
+	   ! ext/IPC/SysV/SysV.pm ext/NDBM_File/NDBM_File.pm
+	   ! ext/ODBM_File/ODBM_File.pm ext/Socket/Socket.pm
+	   ! ext/Storable/Storable.pm ext/Sys/Syslog/Syslog.pm
+	   ! ext/Thread/Thread.pm ext/Thread/Thread/Queue.pm
+	   ! ext/attrs/attrs.pm jpl/JNI/JNI.pm lib/CPAN.pm
+	   ! lib/Class/Struct.pm lib/Dumpvalue.pm lib/ExtUtils/Embed.pm
+	   ! lib/ExtUtils/Installed.pm lib/ExtUtils/MM_Cygwin.pm
+	   ! lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_VMS.pm
+	   ! lib/ExtUtils/MM_Win32.pm lib/ExtUtils/Manifest.pm
+	   ! lib/ExtUtils/Mksymlists.pm lib/ExtUtils/Packlist.pm
+	   ! lib/File/Basename.pm lib/File/Spec/VMS.pm
+	   ! lib/File/Spec/Win32.pm lib/FileHandle.pm lib/Filter/Simple.pm
+	   ! lib/Getopt/Long.pm lib/Locale/Constants.pm
+	   ! lib/Locale/Country.pm lib/Locale/Language.pm
+	   ! lib/Term/ANSIColor.pm lib/Test.pm lib/Test/Harness.pm
+	   ! lib/Text/Wrap.pm lib/Tie/Array.pm lib/Tie/Handle.pm
+	   ! lib/Tie/Hash.pm lib/Tie/Scalar.pm lib/User/pwent.pm
+	   ! lib/autouse.pm lib/overload.pm os2/OS2/ExtAttr/ExtAttr.pm
+	   ! os2/OS2/Process/Process.pm
+____________________________________________________________________________
+[  9175] By: jhi                                   on 2001/03/16  02:53:32
+        Log: Subject: [PATCH] the uncontroversial doc patches
+             From: Michael Stevens <michael@etla.org>
+             Date: Thu, 15 Mar 2001 20:01:12 +0000
+             Message-ID: <20010315200112.A7636@firedrake.org>
+     Branch: perl
+	   ! pod/perl5005delta.pod pod/perldebtut.pod pod/perldelta.pod
+	   ! pod/perlfunc.pod pod/perlhack.pod pod/perllexwarn.pod
+	   ! pod/perllocale.pod pod/perllol.pod pod/perlmod.pod
+	   ! pod/perlmodlib.pod pod/perlport.pod pod/perlrun.pod
+	   ! pod/perltoc.pod pod/perlxs.pod pod/perlxstut.pod
+____________________________________________________________________________
+[  9174] By: jhi                                   on 2001/03/16  02:50:49
+        Log: Subject: [PATCH 5.6.1] ext/GDBM_File GDBM_NOLOCK constant
+             From: Paul Lindner <lindner@inuus.com>
+             Date: Fri, 16 Mar 2001 11:28:03 -0800
+             Message-ID: <20010316112803.A7577@inuus.com>
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.pm ext/GDBM_File/GDBM_File.xs
+____________________________________________________________________________
+[  9173] By: nick                                  on 2001/03/15  20:21:03
+        Log: 1st day's EBCDIC fixes:
+             - toke.c's parsing of strings needed attention
+             needed to conditionally e2a if string was already UTF-8
+             - e2a/a2e tables where wrong way round.
+             - new macros in utf8.h
+     Branch: perlio
+	   ! perl.h toke.c utf8.h
+____________________________________________________________________________
+[  9172] By: jhi                                   on 2001/03/15  15:17:17
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9171] By: jhi                                   on 2001/03/15  15:09:32
         Log: Subject: Re: Another Borland C++ problem.
              From: "Vadim Konovalov" <watman@inbox.ru>
