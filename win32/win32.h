@@ -31,6 +31,10 @@
 #define _chdir chdir
 #include <sys/types.h>
 
+#ifndef DllMain
+#define DllMain DllEntryPoint
+#endif
+
 #pragma warn -ccc
 #pragma warn -rch
 #pragma warn -sig
@@ -64,6 +68,19 @@ extern  char	*staticlinkmodules[];
  * facilities for accessing the same.  See note in util.c/my_setenv().
  */
 /*#define USE_WIN32_RTL_ENV */
+
+#ifndef USE_WIN32_RTL_ENV
+#include <stdlib.h>
+#ifndef EXT
+#include "EXTERN.h"
+#endif
+#undef getenv
+#define getenv win32_getenv
+EXT char *win32_getenv(const char *name);
+#endif
+
+EXT void Perl_win32_init(int *argcp, char ***argvp);
+
 #define USE_SOCKETS_AS_HANDLES
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *myfdopen(int, char *);
@@ -99,10 +116,13 @@ struct tms {
 
 unsigned int sleep(unsigned int);
 char *win32PerlLibPath(void);
+char *win32SiteLibPath(void);
 int mytimes(struct tms *timebuf);
 unsigned int myalarm(unsigned int sec);
 int do_aspawn(void* really, void** mark, void** arglast);
 int do_spawn(char *cmd);
+char do_exec(char *cmd);
+void init_os_extras(void);
 
 typedef  char *		caddr_t;	/* In malloc.c (core address). */
 

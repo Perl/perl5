@@ -2,7 +2,7 @@
 
 # $RCSfile: lex.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:04 $
 
-print "1..26\n";
+print "1..27\n";
 
 $x = 'x';
 
@@ -103,3 +103,5 @@ print "${foo{$bar}}" eq "BAZ" ? "ok 23\n" : "not ok 23\n";
 print "FOO:" =~ /$foo[:]/ ? "ok 24\n" : "not ok 24\n";
 print "ABC" =~ /^$ary[$A]$/ ? "ok 25\n" : "not ok 25\n";
 print "FOOZ" =~ /^$foo[$A-Z]$/ ? "ok 26\n" : "not ok 26\n";
+
+print (((q{{\{\(}} . q{{\)\}}}) eq '{{\(}{\)}}') ? "ok 27\n" : "not ok 27\n");

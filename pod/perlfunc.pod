@@ -633,7 +633,7 @@ their own password:
 	print "ok\n";
     }
 
-Of course, typing in your own password to whomever asks you
+Of course, typing in your own password to whoever asks you
 for it is unwise.
 
 =item dbmclose HASH
@@ -1032,17 +1032,19 @@ in case 6.
 
 The exec() function executes a system command I<AND NEVER RETURNS>,
 unless the command does not exist and is executed directly instead of
-via C</bin/sh -c> (see below).  Use system() instead of exec() if you
-want it to return.
+via your system's command shell (see below).  Use system() instead of
+exec() if you want it to return.
 
 If there is more than one argument in LIST, or if LIST is an array with
 more than one value, calls execvp(3) with the arguments in LIST.  If
 there is only one scalar argument, the argument is checked for shell
-metacharacters.  If there are any, the entire argument is passed to
-C</bin/sh -c> for parsing.  If there are none, the argument is split
-into words and passed directly to execvp(), which is more efficient.
-Note: exec() and system() do not flush your output buffer, so you may
-need to set C<$|> to avoid lost output.  Examples:
+metacharacters, and if there are any, the entire argument is passed to
+the system's command shell for parsing (this is C</bin/sh -c> on Unix
+platforms, but varies on other platforms).  If there are no shell
+metacharacters in the argument, it is split into words and passed
+directly to execvp(), which is more efficient.  Note: exec() and
+system() do not flush your output buffer, so you may need to set C<$|>
+to avoid lost output.  Examples:
 
     exec '/bin/echo', 'Your arguments are: ', @ARGV;
     exec "sort $outfile | uniq";
@@ -1060,6 +1062,10 @@ the list.)  Example:
 or, more directly,
 
     exec {'/bin/csh'} '-sh';	# pretend it's a login shell
+
+When the arguments get executed via the system shell, results will
+be subject to its quirks and capabilities.  See L<perlop/"`STRING`">
+for details.
 
 =item exists EXPR
 
@@ -2150,8 +2156,13 @@ types gobble just one value, but pack it as a string of length count,
 padding with nulls or spaces as necessary.  (When unpacking, "A" strips
 trailing spaces and nulls, but "a" does not.)  Likewise, the "b" and "B"
 fields pack a string that many bits long.  The "h" and "H" fields pack a
-string that many nybbles long.  The "P" packs a pointer to a structure of
-the size indicated by the length.  Real numbers (floats and doubles) are
+string that many nybbles long.  The "p" type packs a pointer to a null-
+terminated string.  You are responsible for ensuring the string is not a
+temporary value (which can potentially get deallocated before you get
+around to using the packed result).  The "P" packs a pointer to a structure
+of the size indicated by the length. A NULL pointer is created if the 
+corresponding value for "p" or "P" is C<undef>.
+Real numbers (floats and doubles) are
 in the native machine format only; due to the multiplicity of floating
 formats around, and the lack of a standard "network" representation, no
 facility for interchange has been made.  This means that packed floating
@@ -2371,6 +2382,16 @@ chdir() there, it would have been testing the wrong file.
     @dots = grep { /^\./ && -f "$some_dir/$_" } readdir(DIR);
     closedir DIR;
 
+=item readline EXPR
+
+Reads from the file handle EXPR.  In scalar context, a single line
+is read and returned.  In list context, reads until end-of-file is
+reached and returns a list of lines (however you've defined lines
+with $/ or $INPUT_RECORD_SEPARATOR).
+This is the internal function implementing the C<E<lt>EXPRE<gt>>
+operator, but you can use it directly.  The C<E<lt>EXPRE<gt>>
+operator is discussed in more detail in L<perlop/"I/O Operators">.
+
 =item readlink EXPR
 
 =item readlink
@@ -2379,6 +2400,17 @@ Returns the value of a symbolic link, if symbolic links are
 implemented.  If not, gives a fatal error.  If there is some system
 error, returns the undefined value and sets C<$!> (errno).  If EXPR is
 omitted, uses $_.
+
+=item readpipe EXPR
+
+EXPR is interpolated and then executed as a system command.
+The collected standard output of the command is returned.
+In scalar context, it comes back as a single (potentially
+multi-line) string.  In list context, returns a list of lines
+(however you've defined lines with $/ or $INPUT_RECORD_SEPARATOR).
+This is the internal function implementing the C<qx/EXPR/>
+operator, but you can use it directly.  The C<qx/EXPR/>
+operator is discussed in more detail in L<perlop/"I/O Operators">.
 
 =item recv SOCKET,SCALAR,LEN,FLAGS
 
@@ -3336,10 +3368,14 @@ L<perlref> for details.
 
 Extracts a substring out of EXPR and returns it.  First character is at
 offset 0, or whatever you've set C<$[> to (but don't do that).
-If OFFSET is negative, starts
+If OFFSET is negative (or more precisely, less than C<$[>), starts
 that far from the end of the string.  If LEN is omitted, returns
 everything to the end of the string.  If LEN is negative, leaves that
 many characters off the end of the string.
+
+If you specify a substring which is partly outside the string, the part
+within the string is returned.    If the substring is totally outside
+the string a warning is produced.
 
 You can use the substr() function
 as an lvalue, in which case EXPR must be an lvalue.  If you assign
@@ -3479,6 +3515,10 @@ signals and core dumps.
 	print "signal $rc\n"
     }
     $ok = ($rc != 0);
+
+When the arguments get executed via the system shell, results will
+be subject to its quirks and capabilities.  See L<perlop/"`STRING`">
+for details.
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
 

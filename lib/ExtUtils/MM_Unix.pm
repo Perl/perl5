@@ -8,8 +8,8 @@ use strict;
 use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32
 	    $Verbose %pm %static $Xsubpp_Version);
 
-$VERSION = substr q$Revision: 1.114 $, 10;
-# $Id: MM_Unix.pm,v 1.113 1997/02/11 21:54:09 k Exp $
+$VERSION = substr q$Revision: 1.118 $, 10;
+# $Id: MM_Unix.pm,v 1.118 1997/08/01 09:42:52 k Exp $
 
 Exporter::import('ExtUtils::MakeMaker',
 	qw( $Verbose &neatvalue));
@@ -181,6 +181,7 @@ sub ExtUtils::MM_Unix::export_list ;
 sub ExtUtils::MM_Unix::extliblist ;
 sub ExtUtils::MM_Unix::file_name_is_absolute ;
 sub ExtUtils::MM_Unix::find_perl ;
+sub ExtUtils::MM_Unix::fixin ;
 sub ExtUtils::MM_Unix::force ;
 sub ExtUtils::MM_Unix::guess_name ;
 sub ExtUtils::MM_Unix::has_link_code ;
@@ -1103,6 +1104,86 @@ specified by @ExtUtils::MakeMaker::MM_Sections.
 
 =over 2
 
+=item fixin
+
+Inserts the sharpbang or equivalent magic number to a script
+
+=cut
+
+sub fixin { # stolen from the pink Camel book, more or less
+    my($self,@files) = @_;
+    my($does_shbang) = $Config::Config{'sharpbang'} =~ /^\s*\#\!/;
+    my($file,$interpreter);
+    for $file (@files) {
+	local(*FIXIN);
+	local(*FIXOUT);
+	open(FIXIN, $file) or Carp::croak "Can't process '$file': $!";
+	local $/ = "\n";
+	chomp(my $line = <FIXIN>);
+	next unless $line =~ s/^\s*\#!\s*//;     # Not a shbang file.
+	# Now figure out the interpreter name.
+	my($cmd,$arg) = split ' ', $line, 2;
+	$cmd =~ s!^.*/!!;
+
+	# Now look (in reverse) for interpreter in absolute PATH (unless perl).
+	if ($cmd eq "perl") {
+	    $interpreter = $Config{perlpath};
+	} else {
+	    my(@absdirs) = reverse grep {$self->file_name_is_absolute} $self->path;
+	    $interpreter = '';
+	    my($dir);
+	    foreach $dir (@absdirs) {
+		if ($self->maybe_command($cmd)) {
+		    warn "Ignoring $interpreter in $file\n" if $Verbose && $interpreter;
+		    $interpreter = $self->catfile($dir,$cmd);
+		}
+	    }
+	}
+	# Figure out how to invoke interpreter on this machine.
+
+	my($shb) = "";
+	if ($interpreter) {
+	    print STDOUT "Changing sharpbang in $file to $interpreter" if $Verbose;
+	    if ($does_shbang) {
+		$shb .= "$Config{'sharpbang'}$interpreter";
+		$shb .= ' ' . $arg if defined $arg;
+		$shb .= "\n";
+	    }
+	    $shb .= qq{
+eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
+    if 0; # not running under some shell
+};
+	} else {
+	    warn "Can't find $cmd in PATH, $file unchanged"
+		if $Verbose;
+	    next;
+	}
+
+	unless ( rename($file, "$file.bak") ) {	
+	    warn "Can't modify $file";
+	    next;
+	}
+	unless ( open(FIXOUT,">$file") ) {
+	    warn "Can't create new $file: $!\n";
+	    next;
+	}
+	my($dev,$ino,$mode) = stat FIXIN;
+	$mode = 0755 unless $dev;
+	chmod $mode, $file;
+	
+	# Print out the new #! line (or equivalent).
+	local $\;
+	undef $/;
+	print FIXOUT $shb, <FIXIN>;
+	close FIXIN;
+	close FIXOUT;
+	unlink "$file.bak";
+    } continue {
+	chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
+	system("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';;
+    }
+}
+
 =item force (o)
 
 Just writes FORCE:
@@ -1280,7 +1361,6 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 #		my $fh = new FileHandle;
 		local *FH;
 		my($ispod)=0;
-		# one day test, if $/ can be set to '' safely (is the bug fixed that was in 5.001m?)
 #		if ($fh->open("<$name")) {
 		if (open(FH,"<$name")) {
 #		    while (<$fh>) {
@@ -1297,7 +1377,9 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 		    $ispod = 1;
 		}
 		if( $ispod ) {
-		    $manifypods{$name} = $self->catfile('$(INST_MAN1DIR)',basename($name).'.$(MAN1EXT)');
+		    $manifypods{$name} =
+			$self->catfile('$(INST_MAN1DIR)',
+				       basename($name).'.$(MAN1EXT)');
 		}
 	    }
 	}
@@ -1901,22 +1983,27 @@ sub installbin {
 	$fromto{$from}=$to;
     }
     @to   = values %fromto;
-    push(@m, "
+    push(@m, qq{
 EXE_FILES = @{$self->{EXE_FILES}}
 
+FIXIN = \$(PERL) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) -MExtUtils::MakeMaker \\
+    -e "MY->fixin(shift)"
+
 all :: @to
+	$self->{NOECHO}\$(NOOP)
 
 realclean ::
 	$self->{RM_F} @to
-");
+});
 
     while (($from,$to) = each %fromto) {
 	last unless defined $from;
 	my $todir = dirname($to);
 	push @m, "
-$to: $from $self->{MAKEFILE} ".$self->catfile($todir,'.exists')."
+$to: $from $self->{MAKEFILE} " . $self->catdir($todir,'.exists') . "
 	$self->{NOECHO}$self->{RM_F} $to
 	$self->{CP} $from $to
+	\$(FIXIN) $to
 ";
     }
     join "", @m;
@@ -2430,18 +2517,21 @@ sub parse_version {
 	$inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
 	next if $inpod;
 	chop;
-	next unless /\$(([\w\:\']*)\bVERSION)\b.*\=/;
+	# next unless /\$(([\w\:\']*)\bVERSION)\b.*\=/;
+	next unless /([\$*])(([\w\:\']*)\bVERSION)\b.*\=/;
 	my $eval = qq{
 	    package ExtUtils::MakeMaker::_version;
 	    no strict;
 
-	    \$$1=undef; do {
+	    local $1$2;
+	    \$$2=undef; do {
 		$_
-	    }; \$$1
+	    }; \$$2
 	};
 	local($^W) = 0;
-	$result = eval($eval) || 0;
+	$result = eval($eval);
 	die "Could not eval '$eval' in $parsefile: $@" if $@;
+	$result = "undef" unless defined $result;
 	last;
     }
     close FH;
@@ -2632,6 +2722,7 @@ sub processPL {
     foreach $plfile (sort keys %{$self->{PL_FILES}}) {
 	push @m, "
 all :: $self->{PL_FILES}->{$plfile}
+	$self->{NOECHO}\$(NOOP)
 
 $self->{PL_FILES}->{$plfile} :: $plfile
 	\$(PERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) $plfile

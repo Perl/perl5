@@ -631,6 +631,7 @@ setuid perl scripts securely.\n");
 	/* my_exit() was called */
 	while (scopestack_ix > oldscope)
 	    LEAVE;
+	FREETMPS;
 	curstash = defstash;
 	if (endav)
 	    call_list(oldscope, endav);
@@ -797,12 +798,23 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		cddir = savepv(s);
 	    break;
 	case '-':
+	    if (*++s) { /* catch use of gnu style long options */
+		if (strEQ(s, "version")) {
+		    s = "v";
+		    goto reswitch;
+		}
+		if (strEQ(s, "help")) {
+		    s = "h";
+		    goto reswitch;
+		}
+		croak("Unrecognized switch: --%s  (-h will show valid options)",s);
+	    }
 	    argc--,argv++;
 	    goto switch_end;
 	case 0:
 	    break;
 	default:
-	    croak("Unrecognized switch: -%s",s);
+	    croak("Unrecognized switch: -%s  (-h will show valid options)",s);
 	}
     }
   switch_end:
@@ -883,7 +895,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     boot_core_UNIVERSAL();
     if (xsinit)
 	(*xsinit)();	/* in case linked C routines want magical variables */
-#ifdef VMS
+#if defined(VMS) || defined(WIN32)
     init_os_extras();
 #endif
 
@@ -931,7 +943,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     LEAVE;
     FREETMPS;
 
-#ifdef DEBUGGING_MSTATS
+#ifdef MYMALLOC
     if ((s=getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
 	dump_mstats("after compilation:");
 #endif
@@ -965,11 +977,11 @@ PerlInterpreter *sv_interp;
 	/* my_exit() was called */
 	while (scopestack_ix > oldscope)
 	    LEAVE;
+	FREETMPS;
 	curstash = defstash;
 	if (endav)
 	    call_list(oldscope, endav);
-	FREETMPS;
-#ifdef DEBUGGING_MSTATS
+#ifdef MYMALLOC
 	if (getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
@@ -1004,8 +1016,8 @@ PerlInterpreter *sv_interp;
 	    PerlIO_printf(PerlIO_stderr(), "%s syntax OK\n", origfilename);
 	    my_exit(0);
 	}
-	if (perldb && DBsingle)
-	    sv_setiv(DBsingle, 1); 
+	if (PERLDB_SINGLE && DBsingle)
+	   sv_setiv(DBsingle, 1); 
 	if (initav)
 	    call_list(oldscope, initav);
     }
@@ -1143,6 +1155,7 @@ I32 flags;		/* See G_* flags in cop.h */
     bool oldcatch = CATCH_GET;
     dJMPENV;
     int ret;
+    OP* oldop = op;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1164,7 +1177,7 @@ I32 flags;		/* See G_* flags in cop.h */
     oldmark = TOPMARK;
     oldscope = scopestack_ix;
 
-    if (perldb && curstash != debstash
+    if (PERLDB_SUB && curstash != debstash
 	   /* Handle first BEGIN of -d. */
 	  && (DBcv || (DBcv = GvCV(DBsub)))
 	   /* Try harder, since this may have been a sighandler, thus
@@ -1265,6 +1278,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	FREETMPS;
 	LEAVE;
     }
+    op = oldop;
     return retval;
 }
 
@@ -1283,7 +1297,8 @@ I32 flags;		/* See G_* flags in cop.h */
     I32 oldscope;
     dJMPENV;
     int ret;
-    
+    OP* oldop = op;
+
     if (flags & G_DISCARD) {
 	ENTER;
 	SAVETMPS;
@@ -1354,6 +1369,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	FREETMPS;
 	LEAVE;
     }
+    op = oldop;
     return retval;
 }
 
@@ -1420,10 +1436,10 @@ char *name;
     printf("\n  -e 'command'    one line of script. Several -e's allowed. Omit [programfile].");
     printf("\n  -F/pattern/     split() pattern for autosplit (-a). The //'s are optional.");
     printf("\n  -i[extension]   edit <> files in place (make backup if extension supplied)");
-    printf("\n  -Idirectory     specify @INC/#include directory (may be used more then once)");
-    printf("\n  -l[octal]       enable line ending processing, specifies line teminator");
+    printf("\n  -Idirectory     specify @INC/#include directory (may be used more than once)");
+    printf("\n  -l[octal]       enable line ending processing, specifies line terminator");
     printf("\n  -[mM][-]module.. executes `use/no module...' before executing your script.");
-    printf("\n  -n              assume 'while (<>) { ... }' loop arround your script");
+    printf("\n  -n              assume 'while (<>) { ... }' loop around your script");
     printf("\n  -p              assume loop like -n but print line also like sed");
     printf("\n  -P              run script through C preprocessor before compilation");
     printf("\n  -s              enable some switch parsing for switches after script name");
@@ -1433,7 +1449,7 @@ char *name;
     printf("\n  -U              allow unsafe operations");
     printf("\n  -v              print version number and patchlevel of perl");
     printf("\n  -V[:variable]   print perl configuration information");
-    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT.");
+    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.");
     printf("\n  -x[directory]   strip off text before #!perl line and perhaps cd to directory\n");
 }
 
@@ -1480,7 +1496,7 @@ char *s;
 	    s += strlen(s);
 	}
 	if (!perldb) {
-	    perldb = TRUE;
+	    perldb = PERLDB_ALL;
 	    init_debugger();
 	}
 	return s;
@@ -1725,6 +1741,8 @@ init_main_stash()
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(errgv);
+    (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
+    sv_grow(GvSV(errgv), 240);	/* Preallocate - for immediate signals. */
     sv_setpvn(GvSV(errgv), "", 0);
     curstash = defstash;
     compiling.cop_stash = defstash;
@@ -1754,6 +1772,10 @@ SV *sv;
 #  define SEARCH_EXTS ".bat", ".cmd", NULL
 #  define MAX_EXT_LEN 4
 #endif
+#ifdef OS2
+#  define SEARCH_EXTS ".cmd", ".btm", ".bat", ".pl", NULL
+#  define MAX_EXT_LEN 4
+#endif
 #ifdef VMS
 #  define SEARCH_EXTS ".pl", ".com", NULL
 #  define MAX_EXT_LEN 4
@@ -1761,14 +1783,35 @@ SV *sv;
     /* additional extensions to try in each dir if scriptname not found */
 #ifdef SEARCH_EXTS
     char *ext[] = { SEARCH_EXTS };
-    int extidx = (strchr(scriptname,'.')) ? -1 : 0; /* has ext already */
+    int extidx = 0, i = 0;
+    char *curext = Nullch;
 #else
 #  define MAX_EXT_LEN 0
 #endif
 
+    /*
+     * If dosearch is true and if scriptname does not contain path
+     * delimiters, search the PATH for scriptname.
+     *
+     * If SEARCH_EXTS is also defined, will look for each
+     * scriptname{SEARCH_EXTS} whenever scriptname is not found
+     * while searching the PATH.
+     *
+     * Assuming SEARCH_EXTS is C<".foo",".bar",NULL>, PATH search
+     * proceeds as follows:
+     *   If DOSISH:
+     *     + look for ./scriptname{,.foo,.bar}
+     *     + search the PATH for scriptname{,.foo,.bar}
+     *
+     *   If !DOSISH:
+     *     + look *only* in the PATH for scriptname{,.foo,.bar} (note
+     *       this will not look in '.' if it's not in the PATH)
+     */
+
 #ifdef VMS
     if (dosearch) {
 	int hasdir, idx = 0, deftypes = 1;
+	bool seen_dot = 1;
 
 	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
 	/* The first time through, just add SEARCH_EXTS to whatever we
@@ -1785,38 +1828,81 @@ SV *sv;
 		continue;	/* don't search dir with too-long name */
 	    strcat(tokenbuf, scriptname);
 #else  /* !VMS */
-    if (dosearch && !strchr(scriptname, '/') && (s = getenv("PATH"))) {
+
+#ifdef DOSISH
+    if (strEQ(scriptname, "-"))
+ 	dosearch = 0;
+    if (dosearch) {		/* Look in '.' first. */
+	char *cur = scriptname;
+#ifdef SEARCH_EXTS
+	if ((curext = strrchr(scriptname,'.')))	/* possible current ext */
+	    while (ext[i])
+		if (strEQ(ext[i++],curext)) {
+		    extidx = -1;		/* already has an ext */
+		    break;
+		}
+	do {
+#endif
+	    DEBUG_p(PerlIO_printf(Perl_debug_log,
+				  "Looking for %s\n",cur));
+	    if (Stat(cur,&statbuf) >= 0) {
+		dosearch = 0;
+		scriptname = cur;
+#ifdef SEARCH_EXTS
+		break;
+#endif
+	    }
+#ifdef SEARCH_EXTS
+	    if (cur == scriptname) {
+		len = strlen(scriptname);
+		if (len+MAX_EXT_LEN+1 >= sizeof(tokenbuf))
+		    break;
+		cur = strcpy(tokenbuf, scriptname);
+	    }
+	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
+		 && strcpy(tokenbuf+len, ext[extidx++]));
+#endif
+    }
+#endif
+
+    if (dosearch && !strchr(scriptname, '/')
+#ifdef DOSISH
+		 && !strchr(scriptname, '\\')
+#endif
+		 && (s = getenv("PATH"))) {
+	bool seen_dot = 0;
+	
 	bufend = s + strlen(s);
 	while (s < bufend) {
-#ifndef atarist
-	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
-#ifdef DOSISH
-			 ';',
-#else
-			 ':',
-#endif
-			 &len);
-#else  /* atarist */
-	    for (len = 0; *s && *s != ',' && *s != ';'; len++, s++) {
+#if defined(atarist) || defined(DOSISH)
+	    for (len = 0; *s
+#  ifdef atarist
+		    && *s != ','
+#  endif
+		    && *s != ';'; len++, s++) {
 		if (len < sizeof tokenbuf)
 		    tokenbuf[len] = *s;
 	    }
 	    if (len < sizeof tokenbuf)
 		tokenbuf[len] = '\0';
-#endif /* atarist */
+#else  /* ! (atarist || DOSISH) */
+	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
+			':',
+			&len);
+#endif /* ! (atarist || DOSISH) */
 	    if (s < bufend)
 		s++;
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tokenbuf)
 		continue;	/* don't search dir with too-long name */
 	    if (len
-#if defined(atarist) && !defined(DOSISH)
-		&& tokenbuf[len - 1] != '/'
-#endif
 #if defined(atarist) || defined(DOSISH)
+		&& tokenbuf[len - 1] != '/'
 		&& tokenbuf[len - 1] != '\\'
 #endif
 	       )
 		tokenbuf[len++] = '/';
+	    if (len == 2 && tokenbuf[0] == '.')
+		seen_dot = 1;
 	    (void)strcpy(tokenbuf + len, scriptname);
 #endif  /* !VMS */
 
@@ -1849,8 +1935,16 @@ SV *sv;
 	    if (!xfailed)
 		xfailed = savepv(tokenbuf);
 	}
+#ifndef DOSISH
+	if (!xfound && !seen_dot && !xfailed && (Stat(scriptname,&statbuf) < 0))
+#endif
+	    seen_dot = 1;			/* Disable message. */
 	if (!xfound)
-	    croak("Can't execute %s", xfailed ? xfailed : scriptname );
+	    croak("Can't %s %s%s%s",
+		  (xfailed ? "execute" : "find"),
+		  (xfailed ? xfailed : scriptname),
+		  (xfailed ? "" : " on PATH"),
+		  (xfailed || seen_dot) ? "" : ", '.' not in PATH");
 	if (xfailed)
 	    Safefree(xfailed);
 	scriptname = xfound;
@@ -2371,6 +2465,7 @@ static void
 init_lexer()
 {
     tmpfp = rsfp;
+    rsfp = Nullfp;
     lex_start(linestr);
     rsfp = tmpfp;
     subname = newSVpv("main",4);
@@ -2706,10 +2801,10 @@ AV* list;
 	    /* my_exit() was called */
 	    while (scopestack_ix > oldscope)
 		LEAVE;
+	    FREETMPS;
 	    curstash = defstash;
 	    if (endav)
 		call_list(oldscope, endav);
-	    FREETMPS;
 	    JMPENV_POP;
 	    curcop = &compiling;
 	    curcop->cop_line = oldline;

@@ -19,7 +19,7 @@ maximum.
 =head1 BUGS
 
 F<sys/param.h> lies with its C<NOFILE> define on some systems,
-so you may have to set $cacheout::maxopen yourself.
+so you may have to set $FileCache::cacheout_maxopen yourself.
 
 =cut
 

@@ -8,6 +8,15 @@ First of all, have you tried using the B<-w> switch?
 
 =head1 The Perl Debugger
 
+"As soon as we started programming, we found to our
+surprise that it wasn't as easy to get programs right
+as we had thought.  Debugging had to be discovered.
+I can remember the exact instant when I realized that
+a large part of my life from then on was going to be
+spent in finding mistakes in my own programs."
+
+I<  --Maurice Wilkes, 1949>
+
 If you invoke Perl with the B<-d> switch, your script runs under the
 Perl source debugger.  This works like an interactive Perl
 environment, prompting for debugger commands that let you examine
@@ -933,7 +942,7 @@ package DB, Perl sets the array @DB::args to contain the arguments the
 corresponding stack frame was called with.
 
 If perl is run with B<-d> option, the following additional features
-are enabled:
+are enabled (cf. L<perlvar/$^P>):
 
 =over
 
@@ -1008,16 +1017,13 @@ in the package C<DB>.)
 
 =back
 
-Note that no subroutine call is possible until C<&DB::sub> is defined
-(for subroutines outside of package C<DB>).  (This restriction is
-recently lifted.)
+Note that if C<&DB::sub> needs some external data to be setup for it
+to work, no subroutine call is possible until this is done.  For the
+standard debugger C<$DB::deep> (how many levels of recursion deep into
+the debugger you can go before a mandatory break) gives an example of
+such a dependency.
 
-(In fact, for the standard debugger the same is true if C<$DB::deep>
-(how many levels of recursion deep into the debugger you can go before
-a mandatory break) is not defined.)
-
-With the recent updates the minimal possible debugger consists of one
-line
+The minimal working debugger consists of one line
 
   sub DB::DB {}
 

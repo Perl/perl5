@@ -6,6 +6,7 @@ $
 $!  A little basic setup
 $   On Error Then Goto wrapup
 $   olddef = F$Environment("Default")
+$   oldmsg = F$Environment("Message")
 $   If F$Search("t.dir").nes.""
 $   Then
 $       Set Default [.t]
@@ -18,6 +19,7 @@ $           Write Sys$Error "Can't find test directory"
 $           Exit 44
 $       EndIf
 $   EndIf
+$   Set Message /Facility/Severity/Identification/Text
 $
 $  exe = ".Exe"
 $  If p1.nes."" Then exe = p1
@@ -87,12 +89,12 @@ $   Deck/Dollar=$$END-OF-TEST$$
 # but the tests may use other operators which don't.)
 use Config;
 
-@compexcl=('cpp.t','script.t');
+@compexcl=('cpp.t');
 @ioexcl=('argv.t','dup.t','fs.t','inplace.t','pipe.t');
 @libexcl=('anydbm.t','db-btree.t','db-hash.t','db-recno.t',
           'gdbm.t','io_dup.t', 'io_pipe.t', 'io_sel.t', 'io_sock.t',
           'ndbm.t','odbm.t','open2.t','open3.t','posix.t',
-          'sdbm.t','soundex.t');
+          'sdbm.t');
 
 # Note: POSIX is not part of basic build, but can be built
 # separately if you're using DECC
@@ -218,4 +220,5 @@ $$END-OF-TEST$$
 $ wrapup:
 $   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
 $   Set Default &olddef
+$   Set Message 'oldmsg'
 $   Exit

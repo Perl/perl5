@@ -136,6 +136,35 @@ regcppop()
     return input;
 }
 
+/* After a successful match in WHILEM, we want to restore paren matches
+ * that have been overwritten by a failed match attempt in the process
+ * of reaching this success. We do this by restoring regstartp[i]
+ * wherever regendp[i] has not changed; if OPEN is changed to modify
+ * regendp[], the '== endp' test below should be changed to match.
+ * This corrects the error of:
+ *	0 > length [ "foobar" =~ / ( (foo) | (bar) )* /x ]->[1]
+ */
+static void
+regcppartblow()
+{
+    dTHR;
+    I32 i = SSPOPINT;
+    U32 paren;
+    char *startp;
+    char *endp;
+    assert(i == SAVEt_REGCONTEXT);
+    i = SSPOPINT;
+    /* input, lastparen, size */
+    SSPOPPTR; SSPOPINT; SSPOPINT;
+    for (i -= 3; i > 0; i -= 3) {
+	paren = (U32)SSPOPINT;
+	startp = (char *) SSPOPPTR;
+	endp = (char *) SSPOPPTR;
+	if (paren <= *reglastparen && regendp[paren] == endp)
+	    regstartp[paren] = startp;
+    }
+}
+
 #define regcpblow(cp) leave_scope(cp)
 
 /*
@@ -947,7 +976,7 @@ char *prog;
 		    ln = regcc->cur;
 		    cp = regcppush(cc->parenfloor);
 		    if (regmatch(cc->next)) {
-			regcpblow(cp);
+			regcppartblow(cp);
 			sayYES;	/* All done. */
 		    }
 		    regcppop();
@@ -963,7 +992,7 @@ char *prog;
 		    cc->lastloc = locinput;
 		    cp = regcppush(cc->parenfloor);
 		    if (regmatch(cc->scan)) {
-			regcpblow(cp);
+			regcppartblow(cp);
 			sayYES;
 		    }
 		    regcppop();
@@ -978,7 +1007,7 @@ char *prog;
 		    cc->cur = n;
 		    cc->lastloc = locinput;
 		    if (regmatch(cc->scan)) {
-			regcpblow(cp);
+			regcppartblow(cp);
 			sayYES;
 		    }
 		    regcppop();		/* Restore some previous $<digit>s? */

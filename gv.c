@@ -80,7 +80,7 @@ char *name;
     sv_setpv(GvSV(gv), name);
     if (*name == '/' && (instr(name, "/lib/") || instr(name, ".pm")))
 	GvMULTI_on(gv);
-    if (perldb)
+    if (PERLDB_LINE)
 	hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
     return gv;
 }
@@ -834,7 +834,9 @@ newIO()
     sv_upgrade((SV *)io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
-    iogv = gv_fetchpv("IO::Handle::", TRUE, SVt_PVHV);
+    iogv = gv_fetchpv("FileHandle::", FALSE, SVt_PVHV);
+    if (!iogv)
+      iogv = gv_fetchpv("IO::Handle::", TRUE, SVt_PVHV);
     SvSTASH(io) = (HV*)SvREFCNT_inc(GvHV(iogv));
     return io;
 }
@@ -1350,7 +1352,7 @@ int flags;
     ENTER;
     SAVEOP();
     op = (OP *) &myop;
-    if (perldb && curstash != debstash)
+    if (PERLDB_SUB && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
     pp_pushmark(ARGS);

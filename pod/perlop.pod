@@ -702,7 +702,7 @@ each time it matches, and FALSE when it eventually runs out of matches.
 the search at that point.  You can actually find the current match
 position of a string or set it using the pos() function; see
 L<perlfunc/pos>.)  A failed match normally resets the search position to
-the beginning of the string, but you can avoid that by adding the "c"
+the beginning of the string, but you can avoid that by adding the C</c>
 modifier (e.g. C<m//gc>).  Modifying the target string also resets the
 search position.
 
@@ -807,6 +807,24 @@ In list context, returns a list of lines (however you've defined lines
 with $/ or $INPUT_RECORD_SEPARATOR).
 
     $today = qx{ date };
+
+Note that how the string gets evaluated is entirely subject to the
+command interpreter on your system.  On most platforms, you will have
+to protect shell metacharacters if you want them treated literally.
+On some platforms (notably DOS-like ones), the shell may not be
+capable of dealing with multiline commands, so putting newlines in
+the string may not get you what you want.  You may be able to evaluate
+multiple commands in a single line by separating them with the command
+separator character, if your shell supports that (e.g. C<;> on many Unix
+shells; C<&> on the Windows NT C<cmd> shell).
+
+Beware that some command shells may place restrictions on the length
+of the command line.  You must ensure your strings don't exceed this
+limit after any necessary interpolations.  See the platform-specific
+release notes for more details about your particular environment.
+
+Also realize that using this operator frequently leads to unportable
+programs.
 
 See L<"I/O Operators"> for more discussion.
 

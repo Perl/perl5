@@ -2,7 +2,7 @@
 
 # $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
 
-print "1..25\n";
+print "1..29\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -75,4 +75,28 @@ print $@ ne '' ? "ok $test\n" : "not ok $test\n"; $test++;
 
 eval { $x = unpack 'w', pack 'C*', 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 print $@ ne '' ? "ok $test\n" : "not ok $test\n"; $test++;
+
+#
+# test the "p" template
+
+# literals
+print((unpack("p",pack("p","foo")) eq "foo" ? "ok " : "not ok "),$test++,"\n");
+
+# scalars
+print((unpack("p",pack("p",$test)) == $test ? "ok " : "not ok "),$test++,"\n");
+
+# temps
+sub foo { my $a = "a"; return $a . $a++ . $a++ }
+{
+  local $^W = 1;
+  my $last = $test;
+  local $SIG{__WARN__} = sub {
+	print "ok ",$test++,"\n" if $_[0] =~ /temporary val/
+  };
+  my $junk = pack("p", &foo);
+  print "not ok ", $test++, "\n" if $last == $test;
+}
+
+# undef should give null pointer
+print((pack("p", undef) =~ /^\0+/ ? "ok " : "not ok "),$test++,"\n");
 

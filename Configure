@@ -740,7 +740,7 @@ loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
 loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
 
 : general looking path for locating libraries
-glibpth="/shlib /usr/shlib /lib/pa1.1 /usr/lib/large"
+glibpth="/shlib /usr/shlib /usr/lib/pa1.1 /usr/lib/large"
 glibpth="$glibpth /lib /usr/lib $xlibpth"
 glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
 glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
@@ -1781,6 +1781,10 @@ EOM
 		bsd386) osname=bsd386
 			osvers=`$uname -r`
 			;;
+		powerux | power_ux | powermax_os | powermaxos | \
+		powerunix | power_unix) osname=powerux
+			osvers="$3"
+			;;
 		next*) osname=next ;;
 		solaris) osname=solaris
 			case "$3" in
@@ -2049,7 +2053,7 @@ esac
 
 
 : who configured the system
-cf_time=`$date 2>&1`
+cf_time=`LC_ALL=C; export LC_ALL; $date 2>&1`
 cf_by=`(logname) 2>/dev/null`
 case "$cf_by" in "")
 	cf_by=`(whoami) 2>/dev/null`
@@ -3815,17 +3819,17 @@ if sh -c "$cc $optimize $ccflags -o try try.c $ldflags $libs" >>try.msg 2>&1; th
 		dflt=n
 	else
 		echo "The program compiled OK, but exited with status $?." >>try.msg
-		rp="You have a problem.  Shall I abort Configure"
+		rp="You have a problem.  Shall I abort Configure (and explain the problem)"
 		dflt=y
 	fi
 else
 	echo "I can't compile the test program." >>try.msg
-	rp="You have a BIG problem.  Shall I abort Configure"
+	rp="You have a BIG problem.  Shall I abort Configure (and explain the problem)"
 	dflt=y
 fi
 case "$dflt" in
 y)
-	$cat try.msg
+	$cat try.msg >&4
 	case "$knowitall" in
 	'')
 		echo "(The supplied flags might be incorrect with this C compiler.)"
@@ -6383,7 +6387,7 @@ main() {
 EOCP
 : check sys/file.h first to get FREAD on Sun
 if $test `./findhdr sys/file.h` && \
-		$cc $cppflags "-DI_SYS_FILE" open3.c -o open3 >/dev/null 2>&1 ; then
+        $cc $ccflags "-DI_SYS_FILE" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
 	h_sysfile=true;
 	echo "<sys/file.h> defines the O_* constants..." >&4
 	if ./open3; then
@@ -6394,7 +6398,7 @@ if $test `./findhdr sys/file.h` && \
 		val="$undef"
 	fi
 elif $test `./findhdr fcntl.h` && \
-		$cc "-DI_FCNTL" open3.c -o open3 >/dev/null 2>&1 ; then
+        $cc $ccflags "-DI_FCNTL" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
 	h_fcntl=true;
 	echo "<fcntl.h> defines the O_* constants..." >&4
 	if ./open3; then

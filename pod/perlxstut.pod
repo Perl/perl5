@@ -529,12 +529,12 @@ and a new replacement subroutine too:
 	sub MY::postamble {
 	'
 	$(MYEXTLIB): mylib/Makefile
-		cd mylib && $(MAKE)
+		cd mylib && $(MAKE) $(PASTHRU)
 	';
 	}
 
 (Note: Most makes will require that there be a tab character that indents
-the line "cd mylib && $(MAKE)", similarly for the Makefile in the
+the line C<cd mylib && $(MAKE) $(PASTHRU)>, similarly for the Makefile in the
 subdirectory.)
 
 Let's also fix the MANIFEST file so that it accurately reflects the contents

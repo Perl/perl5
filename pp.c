@@ -16,6 +16,17 @@
 #include "perl.h"
 
 /*
+ * The compiler on Concurrent CX/UX systems has a subtle bug which only
+ * seems to show up when compiling pp.c - it generates the wrong double
+ * precision constant value for (double)UV_MAX when used inline in the body
+ * of the code below, so this makes a static variable up front (which the
+ * compiler seems to get correct) and uses it in place of UV_MAX below.
+ */
+#ifdef CXUX_BROKEN_CONSTANT_CONVERT
+static double UV_MAX_cxux = ((double)UV_MAX);
+#endif
+
+/*
  * Types used in bitwise operations.
  *
  * Normally we'd just use IV and UV.  However, some hardware and
@@ -1621,37 +1632,56 @@ PP(pp_substr)
     STRLEN curlen;
     I32 pos;
     I32 rem;
+    I32 fail;
     I32 lvalue = op->op_flags & OPf_MOD;
     char *tmps;
     I32 arybase = curcop->cop_arybase;
 
     if (MAXARG > 2)
 	len = POPi;
-    pos = POPi - arybase;
+    pos = POPi;
     sv = POPs;
     tmps = SvPV(sv, curlen);
-    if (pos < 0) {
-	pos += curlen + arybase;
-	if (pos < 0 && MAXARG < 3)
-	    pos = 0;
+    if (pos >= arybase) {
+	pos -= arybase;
+	rem = curlen-pos;
+	fail = rem;
+        if (MAXARG > 2) {
+            if (len < 0) {
+	        rem += len;
+                if (rem < 0)
+                    rem = 0;
+            }
+            else if (rem > len)
+                     rem = len;
+        }
     }
-    if (pos < 0 || pos > curlen) {
-	if (dowarn || lvalue)
+    else {
+        pos += curlen;
+        if (MAXARG < 3)
+            rem = curlen;
+        else if (len >= 0) {
+            rem = pos+len;
+            if (rem > (I32)curlen)
+                rem = curlen;
+        }
+        else {
+            rem = curlen+len;
+            if (rem < pos)
+                rem = pos;
+        }
+        if (pos < 0)
+            pos = 0;
+        fail = rem;
+        rem -= pos;
+    }
+    if (fail < 0) {
+	if (dowarn || lvalue) 
 	    warn("substr outside of string");
 	RETPUSHUNDEF;
     }
     else {
-	if (MAXARG < 3)
-	    len = curlen;
-	else if (len < 0) {
-	    len += curlen - pos;
-	    if (len < 0)
-		len = 0;
-	}
 	tmps += pos;
-	rem = curlen - pos;	/* rem=how many bytes left*/
-	if (rem > len)
-	    rem = len;
 	sv_setpvn(TARG, tmps, rem);
 	if (lvalue) {			/* it's an lvalue! */
 	    if (!SvGMAGICAL(sv)) {
@@ -2343,11 +2373,13 @@ PP(pp_splice)
     SP++;
 
     if (++MARK < SP) {
-	offset = SvIVx(*MARK);
+	offset = i = SvIVx(*MARK);
 	if (offset < 0)
 	    offset += AvFILL(ary) + 1;
 	else
 	    offset -= curcop->cop_arybase;
+	if (offset < 0)
+	    DIE(no_aelem, i);
 	if (++MARK < SP) {
 	    length = SvIVx(*MARK++);
 	    if (length < 0)
@@ -2359,12 +2391,6 @@ PP(pp_splice)
     else {
 	offset = 0;
 	length = AvMAX(ary) + 1;
-    }
-    if (offset < 0) {
-	length += offset;
-	offset = 0;
-	if (length < 0)
-	    length = 0;
     }
     if (offset > AvFILL(ary) + 1)
 	offset = AvFILL(ary) + 1;
@@ -3740,7 +3766,11 @@ PP(pp_pack)
 #ifdef BW_BITS
 		    adouble <= BW_MASK
 #else
+#ifdef CXUX_BROKEN_CONSTANT_CONVERT
+		    adouble <= UV_MAX_cxux
+#else
 		    adouble <= UV_MAX
+#endif
 #endif
 		    )
 		{
@@ -3857,7 +3887,21 @@ PP(pp_pack)
 	case 'p':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aptr = SvPV_force(fromstr, na);	/* XXX Error if TEMP? */
+		if (fromstr == &sv_undef)
+		    aptr = NULL;
+		else {
+		    /* XXX better yet, could spirit away the string to
+		     * a safe spot and hang on to it until the result
+		     * of pack() (and all copies of the result) are
+		     * gone.
+		     */
+		    if (dowarn && (SvTEMP(fromstr) || SvPADTMP(fromstr)))
+			warn("Attempt to pack pointer to temporary value");
+		    if (SvPOK(fromstr) || SvNIOK(fromstr))
+			aptr = SvPV(fromstr,na);
+		    else
+			aptr = SvPV_force(fromstr,na);
+		}
 		sv_catpvn(cat, (char*)&aptr, sizeof(char*));
 	    }
 	    break;

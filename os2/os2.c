@@ -1196,3 +1196,116 @@ my_tmpfile ()
     return fopen(my_tmpnam(NULL), "w+b"); /* Race condition, but
 					     grants TMP. */
 }
+
+#undef flock
+
+/* This code was contributed by Rocco Caputo. */
+int 
+my_flock(int handle, int op)
+{
+  FILELOCK      rNull, rFull;
+  ULONG         timeout, handle_type, flag_word;
+  APIRET        rc;
+  int           blocking, shared;
+  static int	use_my = -1;
+
+  if (use_my == -1) {
+    char *s = getenv("USE_PERL_FLOCK");
+    if (s)
+	use_my = atoi(s);
+    else 
+	use_my = 1;
+  }
+  if (!(_emx_env & 0x200) || !use_my) 
+    return flock(handle, op);	/* Delegate to EMX. */
+  
+                                        // is this a file?
+  if ((DosQueryHType(handle, &handle_type, &flag_word) != 0) ||
+      (handle_type & 0xFF))
+  {
+    errno = EBADF;
+    return -1;
+  }
+                                        // set lock/unlock ranges
+  rNull.lOffset = rNull.lRange = rFull.lOffset = 0;
+  rFull.lRange = 0x7FFFFFFF;
+                                        // set timeout for blocking
+  timeout = ((blocking = !(op & LOCK_NB))) ? 100 : 1;
+                                        // shared or exclusive?
+  shared = (op & LOCK_SH) ? 1 : 0;
+                                        // do not block the unlock
+  if (op & (LOCK_UN | LOCK_SH | LOCK_EX)) {
+    rc = DosSetFileLocks(handle, &rFull, &rNull, timeout, shared);
+    switch (rc) {
+      case 0:
+        errno = 0;
+        return 0;
+      case ERROR_INVALID_HANDLE:
+        errno = EBADF;
+        return -1;
+      case ERROR_SHARING_BUFFER_EXCEEDED:
+        errno = ENOLCK;
+        return -1;
+      case ERROR_LOCK_VIOLATION:
+        break;                          // not an error
+      case ERROR_INVALID_PARAMETER:
+      case ERROR_ATOMIC_LOCK_NOT_SUPPORTED:
+      case ERROR_READ_LOCKS_NOT_SUPPORTED:
+        errno = EINVAL;
+        return -1;
+      case ERROR_INTERRUPT:
+        errno = EINTR;
+        return -1;
+      default:
+        errno = EINVAL;
+        return -1;
+    }
+  }
+                                        // lock may block
+  if (op & (LOCK_SH | LOCK_EX)) {
+                                        // for blocking operations
+    for (;;) {
+      rc =
+        DosSetFileLocks(
+                handle,
+                &rNull,
+                &rFull,
+                timeout,
+                shared
+        );
+      switch (rc) {
+        case 0:
+          errno = 0;
+          return 0;
+        case ERROR_INVALID_HANDLE:
+          errno = EBADF;
+          return -1;
+        case ERROR_SHARING_BUFFER_EXCEEDED:
+          errno = ENOLCK;
+          return -1;
+        case ERROR_LOCK_VIOLATION:
+          if (!blocking) {
+            errno = EWOULDBLOCK;
+            return -1;
+          }
+          break;
+        case ERROR_INVALID_PARAMETER:
+        case ERROR_ATOMIC_LOCK_NOT_SUPPORTED:
+        case ERROR_READ_LOCKS_NOT_SUPPORTED:
+          errno = EINVAL;
+          return -1;
+        case ERROR_INTERRUPT:
+          errno = EINTR;
+          return -1;
+        default:
+          errno = EINVAL;
+          return -1;
+      }
+                                        // give away timeslice
+      DosSleep(1);
+    }
+  }
+
+  errno = 0;
+  return 0;
+}

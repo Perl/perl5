@@ -104,14 +104,13 @@
 #  define tounixpath_ts		Perl_tounixpath_ts
 #  define tovmspath		Perl_tovmspath
 #  define tovmspath_ts		Perl_tovmspath_ts
-#  define getredirection	Perl_getredirection
+#  define vms_image_init	Perl_vms_image_init
 #  define opendir		Perl_opendir
 #  define readdir		Perl_readdir
 #  define telldir		Perl_telldir
 #  define seekdir		Perl_seekdir
 #  define closedir		Perl_closedir
 #  define vmsreaddirversions	Perl_vmsreaddirversions
-#  define getredirection	Perl_getredirection
 #  define my_gmtime		Perl_my_gmtime
 #  define my_localtime		Perl_my_localtime
 #  define my_time		Perl_my_time
@@ -226,7 +225,7 @@
 #endif
 
 #define BIT_BUCKET "_NLA0:"
-#define PERL_SYS_INIT(c,v)  getredirection((c),(v))
+#define PERL_SYS_INIT(c,v)  vms_image_init((c),(v))
 #define PERL_SYS_TERM()
 #define dXSUB_SYS
 #define HAS_KILL
@@ -500,7 +499,6 @@ typedef unsigned myino_t;
 #endif
 
 void	prime_env_iter _((void));
-void	getredirection _((int *, char ***));
 void	init_os_extras _(());
 /* prototype section start marker; `typedef' passes through cpp */
 typedef char  __VMS_PROTOTYPES__;
@@ -511,7 +509,7 @@ Pid_t	my_waitpid _((Pid_t, int *, int));
 char *	my_gconvert _((double, int, int, char *));
 int	do_rmdir _((char *));
 int	kill_file _((char *));
-int	my_mkdir _((char *, mode_t));
+int	my_mkdir _((char *, Mode_t));
 int	my_utime _((char *, struct utimbuf *));
 char *	rmsexpand _((char *, char *, char *, unsigned));
 char *	rmsexpand_ts _((char *, char *, char *, unsigned));
@@ -527,7 +525,7 @@ char *	tounixpath _((char *, char *));
 char *	tounixpath_ts _((char *, char *));
 char *	tovmspath _((char *, char *));
 char *	tovmspath_ts _((char *, char *));
-void	getredirection _(());
+void	vms_image_init _((int *, char ***));
 DIR *	opendir _((char *));
 struct dirent *	readdir _((DIR *));
 long	telldir _((DIR *));

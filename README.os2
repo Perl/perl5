@@ -290,6 +290,9 @@ There are also endless possibilities to use I<executable extensions> of
 *nixish shell (like F<sh.exe> supplied in the binary distribution),
 you need to follow the syntax specified in L<perlrun/"Switches">.
 
+Note that B<-S> switch enables a search with additional extensions 
+F<.cmd>, F<.btm>, F<.bat>, F<.pl> as well.
+
 =head2 Starting OS/2 (and DOS) programs under Perl
 
 This is what system() (see L<perlfunc/system>), C<``> (see
@@ -1082,8 +1085,13 @@ eventually).
 
 =item
 
-Since L<flock(3)> is present in EMX, but is not functional, the same is
-true for perl. Here is the list of things which may be "broken" on
+Since L<flock(3)> is present in EMX, but is not functional, it is 
+emulated by perl.  To disable the emulations, set environment variable
+C<USE_PERL_FLOCK=0>.
+
+=item
+
+Here is the list of things which may be "broken" on
 EMX (from EMX docs):
 
 =over
@@ -1099,7 +1107,7 @@ L<sock_init(3)> is not required and not implemented.
 
 =item *
 
-L<flock(3)> is not yet implemented (dummy function).
+L<flock(3)> is not yet implemented (dummy function).  (Perl has a workaround.)
 
 =item *
 
@@ -1154,6 +1162,12 @@ a dummy implementation.
 =item C<stat>
 
 C<os2_stat> special-cases F</dev/tty> and F</dev/con>.
+
+=item C<flock>
+
+Since L<flock(3)> is present in EMX, but is not functional, it is 
+emulated by perl.  To disable the emulations, set environment variable
+C<USE_PERL_FLOCK=0>.
 
 =back
 
@@ -1333,6 +1347,12 @@ memory handling code is buggy.
 
 Specific for EMX port. Gives the directory part of the location for
 F<sh.exe>.
+
+=head2 C<USE_PERL_FLOCK>
+
+Specific for EMX port. Since L<flock(3)> is present in EMX, but is not 
+functional, it is emulated by perl.  To disable the emulations, set 
+environment variable C<USE_PERL_FLOCK=0>.
 
 =head2 C<TMP> or C<TEMP>
 

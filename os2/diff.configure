@@ -1,6 +1,6 @@
---- Configure.dist	Fri Feb 28 10:45:27 1997
-+++ Configure	Fri Feb 28 10:45:31 1997
-@@ -1481,7 +1481,7 @@
+--- Configure.orig	Fri Aug  1 23:12:26 1997
++++ Configure	Fri Aug  1 23:20:24 1997
+@@ -1489,7 +1489,7 @@
  	*)
  		echo "I don't know where '$file' is, and my life depends on it." >&4
  		echo "Go find a public domain implementation or fix your PATH setting!" >&4
@@ -9,7 +9,7 @@
  		;;
  	esac
  done
-@@ -1490,7 +1490,9 @@
+@@ -1498,7 +1498,9 @@
  say=offhand
  for file in $trylist; do
  	xxx=`./loc $file $file $pth`
@@ -20,7 +20,7 @@
  	eval _$file=$xxx
  	case "$xxx" in
  	/*)
-@@ -3178,7 +3180,7 @@
+@@ -3198,7 +3200,7 @@
  	exit(0);
  }
  EOM
@@ -29,7 +29,7 @@
  	gccversion=`./gccvers`
  	case "$gccversion" in
  	'') echo "You are not using GNU cc." ;;
-@@ -3381,6 +3383,12 @@
+@@ -3401,6 +3403,12 @@
  		*"-l$thislib "*);;
  		*) dflt="$dflt -l$thislib";;
  		esac
@@ -42,7 +42,7 @@
  	else
  		echo "No -l$thislib."
  	fi
-@@ -3930,7 +3938,7 @@
+@@ -3950,7 +3958,7 @@
  	esac
  	;;
  esac
@@ -51,7 +51,16 @@
  case "$libs" in
  '') ;;
  *)  for thislib in $libs; do
-@@ -4136,6 +4144,10 @@
+@@ -3972,6 +3980,8 @@
+ 			:
+ 		elif try=`./loc $thislib X $libpth`; $test -f "$try"; then
+ 			:
++		elif try=`./loc $thislib$lib_ext X $libpth`; $test -f "$try"; then
++			:
+ 		elif try=`./loc Slib$thislib$lib_ext X $xlibpth`; $test -f "$try"; then
+ 			:
+ 		else
+@@ -4156,6 +4166,10 @@
  	eval $xscan;\
  	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
  		eval $xrun
@@ -62,7 +71,7 @@
  else
  	nm -p $* 2>/dev/null >libc.tmp
  	$grep fprintf libc.tmp > libc.ptf
-@@ -4146,23 +4158,33 @@
+@@ -4166,23 +4180,33 @@
  		eval $xrun
  	else
  		echo " "
@@ -103,7 +112,26 @@
  				done
  				echo "Ok." >&4
  			else
-@@ -5871,7 +5893,7 @@
+@@ -5611,15 +5635,15 @@
+ EOCP
+ 	: check sys/file.h first, no particular reason here
+ 	if $test `./findhdr sys/file.h` && \
+-		$cc $cppflags -DI_SYS_FILE access.c -o access >/dev/null 2>&1 ; then
++		$cc $ldflags $cppflags -DI_SYS_FILE access.c -o access >/dev/null 2>&1 ; then
+ 		h_sysfile=true;
+ 		echo "<sys/file.h> defines the *_OK access constants." >&4
+ 	elif $test `./findhdr fcntl.h` && \
+-		$cc $cppflags -DI_FCNTL access.c -o access >/dev/null 2>&1 ; then
++		$cc $ldflags $cppflags -DI_FCNTL access.c -o access >/dev/null 2>&1 ; then
+ 		h_fcntl=true;
+ 		echo "<fcntl.h> defines the *_OK access constants." >&4
+ 	elif $test `./findhdr unistd.h` && \
+-		$cc $cppflags -DI_UNISTD access.c -o access >/dev/null 2>&1 ; then
++		$cc $ldflags $cppflags -DI_UNISTD access.c -o access >/dev/null 2>&1 ; then
+ 		echo "<unistd.h> defines the *_OK access constants." >&4
+ 	else
+ 		echo "I can't find the four *_OK access constants--I'll use mine." >&4
+@@ -5913,7 +5937,7 @@
  	exit(result);
  }
  EOCP
@@ -112,7 +140,7 @@
  	./try
  	yyy=$?
  else
-@@ -5952,7 +5974,7 @@
+@@ -5994,7 +6018,7 @@
  
  }
  EOCP
@@ -121,7 +149,7 @@
  	./try
  	castflags=$?
  else
-@@ -5991,7 +6013,7 @@
+@@ -6033,7 +6057,7 @@
  	exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
  }
  EOF
@@ -130,25 +158,25 @@
  		echo "Your vsprintf() returns (int)." >&4
  		val2="$undef"
  	else
-@@ -6336,7 +6358,7 @@
+@@ -6381,7 +6405,7 @@
  EOCP
  : check sys/file.h first to get FREAD on Sun
  if $test `./findhdr sys/file.h` && \
--		$cc $cppflags "-DI_SYS_FILE" open3.c -o open3 >/dev/null 2>&1 ; then
-+		$cc $cppflags $ldflags "-DI_SYS_FILE" open3.c -o open3 >/dev/null 2>&1 ; then
+-        $cc $ccflags "-DI_SYS_FILE" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
++        $cc $ldflags $ccflags "-DI_SYS_FILE" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
  	h_sysfile=true;
  	echo "<sys/file.h> defines the O_* constants..." >&4
  	if ./open3; then
-@@ -6347,7 +6369,7 @@
+@@ -6392,7 +6416,7 @@
  		val="$undef"
  	fi
  elif $test `./findhdr fcntl.h` && \
--		$cc "-DI_FCNTL" open3.c -o open3 >/dev/null 2>&1 ; then
-+		$cc "-DI_FCNTL" $ldflags open3.c -o open3 >/dev/null 2>&1 ; then
+-        $cc $ccflags "-DI_FCNTL" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
++        $cc $ldflags $ccflags "-DI_FCNTL" -o open3 $ldflags open3.c $libs >/dev/null 2>&1 ; then
  	h_fcntl=true;
  	echo "<fcntl.h> defines the O_* constants..." >&4
  	if ./open3; then
-@@ -6853,7 +6875,7 @@
+@@ -6898,7 +6922,7 @@
  y*|true)
  	usemymalloc='y'
  	mallocsrc='malloc.c'
@@ -157,7 +185,7 @@
  	d_mymalloc="$define"
  	case "$libs" in
  	*-lmalloc*)
-@@ -8111,7 +8133,7 @@
+@@ -8156,7 +8180,7 @@
  	printf("%d\n", (char *)&try.bar - (char *)&try.foo);
  }
  EOCP
@@ -166,7 +194,7 @@
  		dflt=`./try`
  	else
  		dflt='8'
-@@ -8159,7 +8181,7 @@
+@@ -8204,7 +8228,7 @@
  }
  EOCP
  	xxx_prompt=y
@@ -175,7 +203,31 @@
  		dflt=`./try`
  		case "$dflt" in
  		[1-4][1-4][1-4][1-4]|12345678|87654321)
-@@ -8692,7 +8714,7 @@
+@@ -8711,18 +8735,18 @@
+ $cc $ccflags -c bar1.c >/dev/null 2>&1
+ $cc $ccflags -c bar2.c >/dev/null 2>&1
+ $cc $ccflags -c foo.c >/dev/null 2>&1
+-ar rc bar$lib_ext bar2.o bar1.o >/dev/null 2>&1
++$ar rc bar$lib_ext bar2.o bar1.o >/dev/null 2>&1
+ if $cc $ccflags $ldflags -o foobar foo.o bar$lib_ext $libs > /dev/null 2>&1 &&
+ 	./foobar >/dev/null 2>&1; then
+-	echo "ar appears to generate random libraries itself."
++	echo "$ar appears to generate random libraries itself."
+ 	orderlib=false
+ 	ranlib=":"
+-elif ar ts bar$lib_ext >/dev/null 2>&1 &&
++elif $ar ts bar$lib_ext >/dev/null 2>&1 &&
+ 	$cc $ccflags $ldflags -o foobar foo.o bar$lib_ext $libs > /dev/null 2>&1 &&
+ 	./foobar >/dev/null 2>&1; then
+-		echo "a table of contents needs to be added with 'ar ts'."
++		echo "a table of contents needs to be added with '$ar ts'."
+ 		orderlib=false
+-		ranlib="ar ts"
++		ranlib="$ar ts"
+ else
+ 	case "$ranlib" in
+ 	:) ranlib='';;
+@@ -8794,7 +8818,7 @@
  	'') $echo $n ".$c"
  		if $cc $ccflags \
  		$i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone \
@@ -184,7 +236,7 @@
  			set X $i_time $i_systime $i_systimek $sysselect $s_timeval
  			shift
  			flags="$*"
-@@ -8761,7 +8783,7 @@
+@@ -8863,7 +8887,7 @@
  #endif
  }
  EOCP
@@ -193,7 +245,7 @@
  	d_fds_bits="$define"
  	d_fd_set="$define"
  	echo "Well, your system knows about the normal fd_set typedef..." >&4
-@@ -8778,7 +8800,7 @@
+@@ -8880,7 +8904,7 @@
  	$cat <<'EOM'
  Hmm, your compiler has some difficulty with fd_set.  Checking further...
  EOM
@@ -202,7 +254,7 @@
  		d_fds_bits="$undef"
  		d_fd_set="$define"
  		echo "Well, your system has some sort of fd_set available..." >&4
-@@ -9525,7 +9547,7 @@
+@@ -9627,7 +9651,7 @@
  else
  	echo "false"
  fi
@@ -211,7 +263,7 @@
  EOP
  chmod +x varargs
  
-@@ -9852,7 +9874,7 @@
+@@ -9954,7 +9978,7 @@
  	echo " "
  	echo "Stripping down executable paths..." >&4
  	for file in $loclist $trylist; do

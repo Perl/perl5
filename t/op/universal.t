@@ -3,7 +3,12 @@
 # check UNIVERSAL
 #
 
-print "1..11\n";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib' if -d '../lib';
+}
+
+print "1..72\n";
 
 $a = {};
 bless $a, "Bob";
@@ -21,35 +26,71 @@ package Alice;
 sub drink {}
 sub new { bless {} }
 
+$Alice::VERSION = 2.718;
+
 package main;
+
+my $i = 2;
+sub test { print "not " unless shift; print "ok $i\n"; $i++; }
+
 $a = new Alice;
 
-print "not " unless $a->isa("Alice");
-print "ok 2\n";
+test $a->isa("Alice");
 
-print "not " unless $a->isa("Bob");
-print "ok 3\n";
+test $a->isa("Bob");
 
-print "not " unless $a->isa("Female");
-print "ok 4\n";
+test $a->isa("Female");
 
-print "not " unless $a->isa("Human");
-print "ok 5\n";
+test $a->isa("Human");
 
-print "not " if $a->isa("Male");
-print "ok 6\n";
+test ! $a->isa("Male");
 
-print "not " unless $a->can("drink");
-print "ok 7\n";
+test $a->can("drink");
 
-print "not " unless $a->can("eat");
-print "ok 8\n";
+test $a->can("eat");
 
-print "not " if $a->can("sleep");
-print "ok 9\n";
+test ! $a->can("sleep");
 
-print "not " unless UNIVERSAL::isa([], "ARRAY");
-print "ok 10\n";
+my $b = 'abc';
+my @refs = qw(SCALAR SCALAR     LVALUE      GLOB ARRAY HASH CODE);
+my @vals = (  \$b,   \3.14, \substr($b,1,1), \*b,  [],  {}, sub {} );
+for ($p=0; $p < @refs; $p++) {
+    for ($q=0; $q < @vals; $q++) {
+        test UNIVERSAL::isa($vals[$p], $refs[$q]) eq ($p==$q or $p+$q==1);
+    };
+};
 
-print "not " unless UNIVERSAL::isa({}, "HASH");
-print "ok 11\n";
+test ! UNIVERSAL::can(23, "can");
+
+test $a->can("VERSION");
+
+test $a->can("can");
+test ! $a->can("export_tags");	# a method in Exporter
+
+test (eval { $a->VERSION }) == 2.718;
+
+test ! (eval { $a->VERSION(2.719) }) &&
+         $@ =~ /^Alice version 2.719 required--this is only version 2.718 at /;
+
+test (eval { $a->VERSION(2.718) }) && ! $@;
+
+my $subs = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::;
+test $subs eq "VERSION can isa";
+
+test $a->isa("UNIVERSAL");
+
+# now use UNIVERSAL.pm and see what changes
+eval "use UNIVERSAL";
+
+test $a->isa("UNIVERSAL");
+
+my $sub2 = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::; 
+# XXX import being here is really a bug
+test $sub2 eq "VERSION can import isa";
+
+eval 'sub UNIVERSAL::sleep {}';
+test $a->can("sleep");
+
+test ! UNIVERSAL::can($b, "can");
+
+test ! $a->can("export_tags");	# a method in Exporter

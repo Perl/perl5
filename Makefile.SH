@@ -359,9 +359,18 @@ install.perl:	all installperl
 install.man:	all installman
 	./perl installman
 
-# Not implemented yet.
-#install.html:	all installhtml
-#	./perl installhtml
+# XXX Experimental. Hardwired values, but useful for testing.
+# Eventually Configure could ask for some of these values.
+install.html: all installhtml
+	./perl installhtml                   \
+      --podroot=. --podpath=. --recurse  \
+      --htmldir=$(privlib)/html     \
+      --htmlroot=$(privlib)/html    \
+      --splithead=pod/perlipc     \
+      --splititem=pod/perlfunc    \
+      --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
+      --verbose
+
 
 # I now supply perly.c with the kits, so the following section is
 # used only if you force byacc to run by saying
@@ -475,9 +484,9 @@ lint: perly.c $(c)
 
 # Need to unset during recursion to go out of loop
 
-MAKEDEPEND = makedepend
+MAKEDEPEND = Makefile makedepend
 
-$(FIRSTMAKEFILE):	Makefile $(MAKEDEPEND)
+$(FIRSTMAKEFILE):	$(MAKEDEPEND)
 	$(MAKE) depend MAKEDEPEND=
 
 config.h: config_h.SH config.sh
@@ -513,6 +522,11 @@ minitest: miniperl
 	@echo "to build lib/Config.pm."
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& ./perl TEST base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t </dev/tty
+
+# handy way to run perlbug -ok without having to install and run the
+# installed perlbug. We don't re-run the tests here - we trust the user.
+ok:
+	./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
 
 clist:	$(c)
 	echo $(c) | tr ' ' '\012' >.clist

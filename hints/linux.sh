@@ -183,6 +183,17 @@ else
     echo 'Your csh is really tcsh.  Good.'
 fi
 
+# Shimpei Yamashita <shimpei@socrates.patnet.caltech.edu>
+# Message-Id: <33EF1634.B36B6500@pobox.com>
+# 
+# MkLinux (osname=linux,archname=ppc-linux), which differs slightly from other
+# linuces, needs special flags passed in order for dynamic loading to work.
+# instead of the recommended:
+# ccdlflags='-rdynamic'
+# 
+# it should be:
+# ccdlflags='-Wl,-E'
+
 if [ "X$usethreads" != "X" ]; then
     ccflags="-D_REENTRANT -DUSE_THREADS $ccflags"
     cppflags="-D_REENTRANT -DUSE_THREADS $cppflags"

@@ -22,28 +22,33 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+#include "XSUB.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <assert.h>
 #include <string.h>
 #include <stdarg.h>
+#include <float.h>
 
 #define CROAK croak
 #define WARN warn
 
+#define EXECF_EXEC 1
+#define EXECF_SPAWN 2
+#define EXECF_SPAWN_NOWAIT 3
+
 static DWORD IdOS(void);
 
 extern WIN32_IOSUBSYSTEM	win32stdio;
-#ifndef __BORLANDC__	/* pointers cannot be declared TLS! */
-__declspec(thread)
-#endif
-PWIN32_IOSUBSYSTEM pIOSubSystem = &win32stdio;
+static PWIN32_IOSUBSYSTEM pIOSubSystem = &win32stdio;
 
 BOOL  ProbeEnv = FALSE;
 DWORD Win32System = (DWORD)-1;
 char  szShellPath[MAX_PATH+1];
 char  szPerlLibRoot[MAX_PATH+1];
 HANDLE PerlDllHandle = INVALID_HANDLE_VALUE;
+
+static int do_spawn2(char *cmd, int exectype);
 
 int 
 IsWin95(void) {
@@ -55,7 +60,7 @@ IsWinNT(void) {
     return (IdOS() == VER_PLATFORM_WIN32_NT);
 }
 
-void *
+DllExport PWIN32_IOSUBSYSTEM
 SetIOSubSystem(void *p)
 {
     PWIN32_IOSUBSYSTEM old = pIOSubSystem;
@@ -70,6 +75,12 @@ SetIOSubSystem(void *p)
 	pIOSubSystem = &win32stdio;
     }
     return old;
+}
+
+DllExport PWIN32_IOSUBSYSTEM
+GetIOSubSystem(void)
+{
+    return pIOSubSystem;
 }
 
 char *
@@ -87,6 +98,15 @@ win32PerlLibPath(void)
      end -= 4;
     strcpy(end,"\\lib");
     return (szPerlLibRoot);
+}
+
+char *
+win32SiteLibPath(void)
+{
+    static char szPerlSiteLib[MAX_PATH+1];
+    strcpy(szPerlSiteLib, win32PerlLibPath());
+    strcat(szPerlSiteLib, "\\site");
+    return (szPerlSiteLib);
 }
 
 BOOL
@@ -359,7 +379,8 @@ do_aspawn(void* really, void** mark, void** arglast)
     }
     else {
 	argv[index++] = cmd = GetShell();
-	argv[index++] = "/x";	/* always enable command extensions */
+	if (IsWinNT())
+	    argv[index++] = "/x";   /* always enable command extensions */
 	argv[index++] = "/c";
     }
 
@@ -384,7 +405,7 @@ do_aspawn(void* really, void** mark, void** arglast)
 }
 
 int
-do_spawn(char *cmd)
+do_spawn2(char *cmd, int exectype)
 {
     char **a;
     char *s;
@@ -414,7 +435,19 @@ do_spawn(char *cmd)
 	}
 	*a = Nullch;
 	if(argv[0]) {
-	    status = win32_spawnvp(P_WAIT, argv[0], (const char* const*)argv);
+	    switch (exectype) {
+	    case EXECF_SPAWN:
+		status = win32_spawnvp(P_WAIT, argv[0],
+				       (const char* const*)argv);
+		break;
+	    case EXECF_SPAWN_NOWAIT:
+		status = win32_spawnvp(P_NOWAIT, argv[0],
+				       (const char* const*)argv);
+		break;
+	    case EXECF_EXEC:
+		status = win32_execvp(argv[0], (const char* const*)argv);
+		break;
+	    }
 	    if(status != -1 || errno == 0)
 		needToTry = FALSE;
 	}
@@ -423,17 +456,47 @@ do_spawn(char *cmd)
     }
     if(needToTry) {
 	char *argv[5];
-	argv[0] = shell; argv[1] = "/x"; argv[2] = "/c";
-	argv[3] = cmd; argv[4] = Nullch;
-	status = win32_spawnvp(P_WAIT, argv[0], (const char* const*)argv);
+	int i = 0;
+	argv[i++] = shell;
+	if (IsWinNT())
+	    argv[i++] = "/x";
+	argv[i++] = "/c"; argv[i++] = cmd; argv[i] = Nullch;
+	switch (exectype) {
+	case EXECF_SPAWN:
+	    status = win32_spawnvp(P_WAIT, argv[0],
+				   (const char* const*)argv);
+	    break;
+	case EXECF_SPAWN_NOWAIT:
+	    status = win32_spawnvp(P_NOWAIT, argv[0],
+				   (const char* const*)argv);
+	    break;
+	case EXECF_EXEC:
+	    status = win32_execvp(argv[0], (const char* const*)argv);
+	    break;
+	}
     }
     if (status < 0) {
 	if (dowarn)
-	    warn("Can't spawn \"%s\": %s", needToTry ? shell : argv[0],
+	    warn("Can't %s \"%s\": %s",
+		 (exectype == EXECF_EXEC ? "exec" : "spawn"),
+		 needToTry ? shell : argv[0],
 		 strerror(errno));
 	status = 255 << 8;
     }
     return (status);
+}
+
+int
+do_spawn(char *cmd)
+{
+    return do_spawn2(cmd, EXECF_SPAWN);
+}
+
+bool
+do_exec(char *cmd)
+{
+    do_spawn2(cmd, EXECF_EXEC);
+    return FALSE;
 }
 
 
@@ -461,7 +524,7 @@ opendir(char *filename)
 /*  char           *dummy;*/
 
     /* check to see if filename is a directory */
-    if(stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
+    if (win32_stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
 	return NULL;
     }
 
@@ -711,6 +774,7 @@ win32_stat(const char *path, struct stat *buffer)
     char		t[MAX_PATH]; 
     const char	*p = path;
     int		l = strlen(path);
+    int		res;
 
     if (l > 1) {
 	switch(path[l - 1]) {
@@ -723,8 +787,51 @@ win32_stat(const char *path, struct stat *buffer)
 	    };
 	}
     }
-    return stat(p, buffer);
+    res = pIOSubSystem->pfnstat(p,buffer);
+#ifdef __BORLANDC__
+    if (res == 0) {
+	if (S_ISDIR(buffer->st_mode))
+	    buffer->st_mode |= S_IWRITE | S_IEXEC;
+	else if (S_ISREG(buffer->st_mode)) {
+	    if (l >= 4 && path[l-4] == '.') {
+		const char *e = path + l - 3;
+		if (strnicmp(e,"exe",3)
+		    && strnicmp(e,"bat",3)
+		    && strnicmp(e,"com",3)
+		    && (IsWin95() || strnicmp(e,"cmd",3)))
+		    buffer->st_mode &= ~S_IEXEC;
+		else
+		    buffer->st_mode |= S_IEXEC;
+	    }
+	    else
+		buffer->st_mode &= ~S_IEXEC;
+	}
+    }
+#endif
+    return res;
 }
+
+#ifndef USE_WIN32_RTL_ENV
+
+DllExport char *
+win32_getenv(const char *name)
+{
+    static char *curitem = Nullch;
+    static DWORD curlen = 512;
+    DWORD needlen;
+    if (!curitem)
+	New(1305,curitem,curlen,char);
+    if (!(needlen = GetEnvironmentVariable(name,curitem,curlen)))
+	return Nullch;
+    while (needlen > curlen) {
+	Renew(curitem,needlen,char);
+	curlen = needlen;
+	needlen = GetEnvironmentVariable(name,curitem,curlen);
+    }
+    return curitem;
+}
+
+#endif
 
 #undef times
 int
@@ -1101,6 +1208,108 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     return pIOSubSystem->pfnspawnvp(mode, cmdname, argv);
 }
 
+DllExport int
+win32_execvp(const char *cmdname, const char *const *argv)
+{
+    return pIOSubSystem->pfnexecvp(cmdname, argv);
+}
+
+DllExport void
+win32_perror(const char *str)
+{
+    pIOSubSystem->pfnperror(str);
+}
+
+DllExport void
+win32_setbuf(FILE *pf, char *buf)
+{
+    pIOSubSystem->pfnsetbuf(pf, buf);
+}
+
+DllExport int
+win32_setvbuf(FILE *pf, char *buf, int type, size_t size)
+{
+    return pIOSubSystem->pfnsetvbuf(pf, buf, type, size);
+}
+
+DllExport int
+win32_flushall(void)
+{
+    return pIOSubSystem->pfnflushall();
+}
+
+DllExport int
+win32_fcloseall(void)
+{
+    return pIOSubSystem->pfnfcloseall();
+}
+
+DllExport char*
+win32_fgets(char *s, int n, FILE *pf)
+{
+    return pIOSubSystem->pfnfgets(s, n, pf);
+}
+
+DllExport char*
+win32_gets(char *s)
+{
+    return pIOSubSystem->pfngets(s);
+}
+
+DllExport int
+win32_fgetc(FILE *pf)
+{
+    return pIOSubSystem->pfnfgetc(pf);
+}
+
+DllExport int
+win32_putc(int c, FILE *pf)
+{
+    return pIOSubSystem->pfnputc(c,pf);
+}
+
+DllExport int
+win32_puts(const char *s)
+{
+    return pIOSubSystem->pfnputs(s);
+}
+
+DllExport int
+win32_getchar(void)
+{
+    return pIOSubSystem->pfngetchar();
+}
+
+DllExport int
+win32_putchar(int c)
+{
+    return pIOSubSystem->pfnputchar(c);
+}
+
+DllExport void*
+win32_malloc(size_t size)
+{
+    return pIOSubSystem->pfnmalloc(size);
+}
+
+DllExport void*
+win32_calloc(size_t numitems, size_t size)
+{
+    return pIOSubSystem->pfncalloc(numitems,size);
+}
+
+DllExport void*
+win32_realloc(void *block, size_t size)
+{
+    return pIOSubSystem->pfnrealloc(block,size);
+}
+
+DllExport void
+win32_free(void *block)
+{
+    pIOSubSystem->pfnfree(block);
+}
+
 int
 stolen_open_osfhandle(long handle, int flags)
 {
@@ -1127,3 +1336,296 @@ win32_flock(int fd, int oper)
     return pIOSubSystem->pfnflock(fd, oper);
 }
 
+static
+XS(w32_GetCwd)
+{
+    dXSARGS;
+    SV *sv = sv_newmortal();
+    /* Make one call with zero size - return value is required size */
+    DWORD len = GetCurrentDirectory((DWORD)0,NULL);
+    SvUPGRADE(sv,SVt_PV);
+    SvGROW(sv,len);
+    SvCUR(sv) = GetCurrentDirectory((DWORD) SvLEN(sv), SvPVX(sv));
+    /* 
+     * If result != 0 
+     *   then it worked, set PV valid, 
+     *   else leave it 'undef' 
+     */
+    if (SvCUR(sv))
+	SvPOK_on(sv);
+    EXTEND(sp,1);
+    ST(0) = sv;
+    XSRETURN(1);
+}
+
+static
+XS(w32_SetCwd)
+{
+    dXSARGS;
+    if (items != 1)
+	croak("usage: Win32::SetCurrentDirectory($cwd)");
+    if (SetCurrentDirectory(SvPV(ST(0),na)))
+	XSRETURN_YES;
+
+    XSRETURN_NO;
+}
+
+static
+XS(w32_GetNextAvailDrive)
+{
+    dXSARGS;
+    char ix = 'C';
+    char root[] = "_:\\";
+    while (ix <= 'Z') {
+	root[0] = ix++;
+	if (GetDriveType(root) == 1) {
+	    root[2] = '\0';
+	    XSRETURN_PV(root);
+	}
+    }
+    XSRETURN_UNDEF;
+}
+
+static
+XS(w32_GetLastError)
+{
+    dXSARGS;
+    XSRETURN_IV(GetLastError());
+}
+
+static
+XS(w32_LoginName)
+{
+    dXSARGS;
+    char name[256];
+    DWORD size = sizeof(name);
+    if (GetUserName(name,&size)) {
+	/* size includes NULL */
+	ST(0) = sv_2mortal(newSVpv(name,size-1));
+	XSRETURN(1);
+    }
+    XSRETURN_UNDEF;
+}
+
+static
+XS(w32_NodeName)
+{
+    dXSARGS;
+    char name[MAX_COMPUTERNAME_LENGTH+1];
+    DWORD size = sizeof(name);
+    if (GetComputerName(name,&size)) {
+	/* size does NOT include NULL :-( */
+	ST(0) = sv_2mortal(newSVpv(name,size));
+	XSRETURN(1);
+    }
+    XSRETURN_UNDEF;
+}
+
+
+static
+XS(w32_DomainName)
+{
+    dXSARGS;
+    char name[256];
+    DWORD size = sizeof(name);
+    if (GetUserName(name,&size)) {
+	char sid[1024];
+	DWORD sidlen = sizeof(sid);
+	char dname[256];
+	DWORD dnamelen = sizeof(dname);
+	SID_NAME_USE snu;
+	if (LookupAccountName(NULL, name, &sid, &sidlen,
+			      dname, &dnamelen, &snu)) {
+	    XSRETURN_PV(dname);		/* all that for this */
+	}
+    }
+    XSRETURN_UNDEF;
+}
+
+static
+XS(w32_FsType)
+{
+    dXSARGS;
+    char fsname[256];
+    DWORD flags, filecomplen;
+    if (GetVolumeInformation(NULL, NULL, 0, NULL, &filecomplen,
+			 &flags, fsname, sizeof(fsname))) {
+	if (GIMME == G_ARRAY) {
+	    XPUSHs(sv_2mortal(newSVpv(fsname,0)));
+	    XPUSHs(sv_2mortal(newSViv(flags)));
+	    XPUSHs(sv_2mortal(newSViv(filecomplen)));
+	    PUTBACK;
+	    return;
+	}
+	XSRETURN_PV(fsname);
+    }
+    XSRETURN_UNDEF;
+}
+
+static
+XS(w32_GetOSVersion)
+{
+    dXSARGS;
+    OSVERSIONINFO osver;
+
+    osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    if (GetVersionEx(&osver)) {
+	XPUSHs(newSVpv(osver.szCSDVersion, 0));
+	XPUSHs(newSViv(osver.dwMajorVersion));
+	XPUSHs(newSViv(osver.dwMinorVersion));
+	XPUSHs(newSViv(osver.dwBuildNumber));
+	XPUSHs(newSViv(osver.dwPlatformId));
+	PUTBACK;
+	return;
+    }
+    XSRETURN_UNDEF;
+}
+
+static
+XS(w32_IsWinNT)
+{
+    dXSARGS;
+    XSRETURN_IV(IsWinNT());
+}
+
+static
+XS(w32_IsWin95)
+{
+    dXSARGS;
+    XSRETURN_IV(IsWin95());
+}
+
+static
+XS(w32_FormatMessage)
+{
+    dXSARGS;
+    DWORD source = 0;
+    char msgbuf[1024];
+
+    if (items != 1)
+	croak("usage: Win32::FormatMessage($errno)");
+
+    if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+		      &source, SvIV(ST(0)), 0,
+		      msgbuf, sizeof(msgbuf)-1, NULL))
+	XSRETURN_PV(msgbuf);
+
+    XSRETURN_UNDEF;
+}
+
+static
+XS(w32_Spawn)
+{
+    dXSARGS;
+    char *cmd, *args;
+    PROCESS_INFORMATION stProcInfo;
+    STARTUPINFO stStartInfo;
+    BOOL bSuccess = FALSE;
+
+    if(items != 3)
+	croak("usage: Win32::Spawn($cmdName, $args, $PID)");
+
+    cmd = SvPV(ST(0),na);
+    args = SvPV(ST(1), na);
+
+    memset(&stStartInfo, 0, sizeof(stStartInfo));   /* Clear the block */
+    stStartInfo.cb = sizeof(stStartInfo);	    /* Set the structure size */
+    stStartInfo.dwFlags = STARTF_USESHOWWINDOW;	    /* Enable wShowWindow control */
+    stStartInfo.wShowWindow = SW_SHOWMINNOACTIVE;   /* Start min (normal) */
+
+    if(CreateProcess(
+		cmd,			/* Image path */
+		args,	 		/* Arguments for command line */
+		NULL,			/* Default process security */
+		NULL,			/* Default thread security */
+		FALSE,			/* Must be TRUE to use std handles */
+		NORMAL_PRIORITY_CLASS,	/* No special scheduling */
+		NULL,			/* Inherit our environment block */
+		NULL,			/* Inherit our currrent directory */
+		&stStartInfo,		/* -> Startup info */
+		&stProcInfo))		/* <- Process info (if OK) */
+    {
+	CloseHandle(stProcInfo.hThread);/* library source code does this. */
+	sv_setiv(ST(2), stProcInfo.dwProcessId);
+	bSuccess = TRUE;
+    }
+    XSRETURN_IV(bSuccess);
+}
+
+static
+XS(w32_GetTickCount)
+{
+    dXSARGS;
+    XSRETURN_IV(GetTickCount());
+}
+
+static
+XS(w32_GetShortPathName)
+{
+    dXSARGS;
+    SV *shortpath;
+
+    if(items != 1)
+	croak("usage: Win32::GetShortPathName($longPathName)");
+
+    shortpath = sv_mortalcopy(ST(0));
+    SvUPGRADE(shortpath, SVt_PV);
+    /* src == target is allowed */
+    if (GetShortPathName(SvPVX(shortpath), SvPVX(shortpath), SvCUR(shortpath)))
+	ST(0) = shortpath;
+    else
+	ST(0) = &sv_undef;
+    XSRETURN(1);
+}
+
+void
+init_os_extras()
+{
+    char *file = __FILE__;
+    dXSUB_SYS;
+
+    /* XXX should be removed after checking with Nick */
+    newXS("Win32::GetCurrentDirectory", w32_GetCwd, file);
+
+    /* these names are Activeware compatible */
+    newXS("Win32::GetCwd", w32_GetCwd, file);
+    newXS("Win32::SetCwd", w32_SetCwd, file);
+    newXS("Win32::GetNextAvailDrive", w32_GetNextAvailDrive, file);
+    newXS("Win32::GetLastError", w32_GetLastError, file);
+    newXS("Win32::LoginName", w32_LoginName, file);
+    newXS("Win32::NodeName", w32_NodeName, file);
+    newXS("Win32::DomainName", w32_DomainName, file);
+    newXS("Win32::FsType", w32_FsType, file);
+    newXS("Win32::GetOSVersion", w32_GetOSVersion, file);
+    newXS("Win32::IsWinNT", w32_IsWinNT, file);
+    newXS("Win32::IsWin95", w32_IsWin95, file);
+    newXS("Win32::FormatMessage", w32_FormatMessage, file);
+    newXS("Win32::Spawn", w32_Spawn, file);
+    newXS("Win32::GetTickCount", w32_GetTickCount, file);
+    newXS("Win32::GetShortPathName", w32_GetShortPathName, file);
+
+    /* XXX Bloat Alert! The following Activeware preloads really
+     * ought to be part of Win32::Sys::*, so they're not included
+     * here.
+     */
+    /* LookupAccountName
+     * LookupAccountSID
+     * InitiateSystemShutdown
+     * AbortSystemShutdown
+     * ExpandEnvrironmentStrings
+     */
+}
+
+void
+Perl_win32_init(int *argcp, char ***argvp)
+{
+    /* Disable floating point errors, Perl will trap the ones we
+     * care about.  VC++ RTL defaults to switching these off
+     * already, but the Borland RTL doesn't.  Since we don't
+     * want to be at the vendor's whim on the default, we set
+     * it explicitly here.
+     */
+#if !defined(_ALPHA_)
+    _control87(MCW_EM, MCW_EM);
+#endif
+}

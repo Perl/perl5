@@ -765,52 +765,71 @@ the various routines for the various magical types begin with C<magic_>.
 
 The current kinds of Magic Virtual Tables are:
 
-    mg_type  MGVTBL              Type of magical
+    mg_type  MGVTBL              Type of magic
     -------  ------              ----------------------------
-    \0       vtbl_sv             Regexp???
-    A        vtbl_amagic         Operator Overloading
-    a        vtbl_amagicelem     Operator Overloading
-    c        0                   Used in Operator Overloading
-    B        vtbl_bm             Boyer-Moore???
+    \0       vtbl_sv             Special scalar variable
+    A        vtbl_amagic         %OVERLOAD hash
+    a        vtbl_amagicelem     %OVERLOAD hash element
+    c        (none)              Holds overload table (AMT) on stash
+    B        vtbl_bm             Boyer-Moore (fast string search)
     E        vtbl_env            %ENV hash
     e        vtbl_envelem        %ENV hash element
-    g        vtbl_mglob          Regexp /g flag???
+    f        vtbl_fm             Formline ('compiled' format)
+    g        vtbl_mglob          m//g target / study()ed string
     I        vtbl_isa            @ISA array
     i        vtbl_isaelem        @ISA array element
-    L        0 (but sets RMAGICAL)     Perl Module/Debugger???
-    l        vtbl_dbline         Debugger?
+    k        vtbl_nkeys          scalar(keys()) lvalue
+    L        (none)              Debugger %_<filename 
+    l        vtbl_dbline         Debugger %_<filename element
     o        vtbl_collxfrm       Locale transformation
-    P        vtbl_pack           Tied Array or Hash
-    p        vtbl_packelem       Tied Array or Hash element
-    q        vtbl_packelem       Tied Scalar or Handle
-    S        vtbl_sig            Signal Hash
-    s        vtbl_sigelem        Signal Hash element
+    P        vtbl_pack           Tied array or hash
+    p        vtbl_packelem       Tied array or hash element
+    q        vtbl_packelem       Tied scalar or handle
+    S        vtbl_sig            %SIG hash
+    s        vtbl_sigelem        %SIG hash element
     t        vtbl_taint          Taintedness
-    U        vtbl_uvar	         ???
-    v        vtbl_vec	         Vector
-    x        vtbl_substr         Substring???
-    y        vtbl_itervar        Shadow "foreach" iterator variable
-    *        vtbl_glob           GV???
-    #        vtbl_arylen         Array Length
-    .        vtbl_pos	         $. scalar variable
-    ~        None                Used by certain extensions
+    U        vtbl_uvar           Available for use by extensions
+    v        vtbl_vec            vec() lvalue
+    x        vtbl_substr         substr() lvalue
+    y        vtbl_defelem        Shadow "foreach" iterator variable /
+                                  smart parameter vivification
+    *        vtbl_glob           GV (typeglob)
+    #        vtbl_arylen         Array length ($#ary)
+    .        vtbl_pos            pos() lvalue
+    ~        (none)              Available for use by extensions
 
 When an uppercase and lowercase letter both exist in the table, then the
 uppercase letter is used to represent some kind of composite type (a list
 or a hash), and the lowercase letter is used to represent an element of
 that composite type.
 
-The '~' magic type is defined specifically for use by extensions and
-will not be used by perl itself. Extensions can use ~ magic to 'attach'
-private information to variables (typically objects).  This is especially
-useful because there is no way for normal perl code to corrupt this
-private information (unlike using extra elements of a hash object).
+The '~' and 'U' magic types are defined specifically for use by
+extensions and will not be used by perl itself.  Extensions can use
+'~' magic to 'attach' private information to variables (typically
+objects).  This is especially useful because there is no way for
+normal perl code to corrupt this private information (unlike using
+extra elements of a hash object).
 
-Note that because multiple extensions may be using ~ magic it is
-important for extensions to take extra care with it.  Typically only
-using it on objects blessed into the same class as the extension
-is sufficient.  It may also be appropriate to add an I32 'signature'
-at the top of the private data area and check that.
+Similarly, 'U' magic can be used much like tie() to call a C function
+any time a scalar's value is used or changed.  The C<MAGIC>'s
+C<mg_ptr> field points to a C<ufuncs> structure:
+
+    struct ufuncs {
+        I32 (*uf_val)(IV, SV*);
+        I32 (*uf_set)(IV, SV*);
+        IV uf_index;
+    };
+
+When the SV is read from or written to, the C<uf_val> or C<uf_set>
+function will be called with C<uf_index> as the first arg and a
+pointer to the SV as the second.
+
+Note that because multiple extensions may be using '~' or 'U' magic,
+it is important for extensions to take extra care to avoid conflict.
+Typically only using the magic on objects blessed into the same class
+as the extension is sufficient.  For '~' magic, it may also be
+appropriate to add an I32 'signature' at the top of the private data
+area and check that.
 
 =head2 Finding Magic
 
@@ -884,6 +903,150 @@ the creation of all the mortal variables required to invoke the methods).
 This overhead will be comparatively small if the TIE methods are themselves
 substantial, but if they are only a few statements long, the overhead
 will not be insignificant.
+
+=head2 Localizing changes
+
+Perl has a very handy construction
+
+  {
+    local $var = 2;
+    ...
+  }
+
+This construction is I<approximately> equivalent to
+
+  {
+    my $oldvar = $var;
+    $var = 2;
+    ...
+    $var = $oldvar;
+  }
+
+The biggest difference is that the first construction would
+reinstate the initial value of $var, irrespective of how control exits
+the block: C<goto>, C<return>, C<die>/C<eval> etc. It is a little bit
+more efficient as well.
+
+There is a way to achieve a similar task from C via Perl API: create a
+I<pseudo-block>, and arrange for some changes to be automatically
+undone at the end of it, either explicit, or via a non-local exit (via
+die()). A I<block>-like construct is created by a pair of
+C<ENTER>/C<LEAVE> macros (see L<perlcall/EXAMPLE/"Returning a
+Scalar">).  Such a construct may be created specially for some
+important localized task, or an existing one (like boundaries of
+enclosing Perl subroutine/block, or an existing pair for freeing TMPs)
+may be used. (In the second case the overhead of additional
+localization must be almost negligible.) Note that any XSUB is
+automatically enclosed in an C<ENTER>/C<LEAVE> pair.
+
+Inside such a I<pseudo-block> the following service is available:
+
+=over
+
+=item C<SAVEINT(int i)>
+
+=item C<SAVEIV(IV i)>
+
+=item C<SAVEI32(I32 i)>
+
+=item C<SAVELONG(long i)>
+
+These macros arrange things to restore the value of integer variable
+C<i> at the end of enclosing I<pseudo-block>.
+
+=item C<SAVESPTR(s)>
+
+=item C<SAVEPPTR(p)>
+
+These macros arrange things to restore the value of pointers C<s> and
+C<p>. C<s> must be a pointer of a type which survives conversion to
+C<SV*> and back, C<p> should be able to survive conversion to C<char*>
+and back.
+
+=item C<SAVEFREESV(SV *sv)>
+
+The refcount of C<sv> would be decremented at the end of
+I<pseudo-block>. This is similar to C<sv_2mortal>, which should (?) be
+used instead.
+
+=item C<SAVEFREEOP(OP *op)>
+
+The C<OP *> is op_free()ed at the end of I<pseudo-block>.
+
+=item C<SAVEFREEPV(p)>
+
+The chunk of memory which is pointed to by C<p> is Safefree()ed at the
+end of I<pseudo-block>.
+
+=item C<SAVECLEARSV(SV *sv)>
+
+Clears a slot in the current scratchpad which corresponds to C<sv> at
+the end of I<pseudo-block>.
+
+=item C<SAVEDELETE(HV *hv, char *key, I32 length)>
+
+The key C<key> of C<hv> is deleted at the end of I<pseudo-block>. The
+string pointed to by C<key> is Safefree()ed.  If one has a I<key> in
+short-lived storage, the corresponding string may be reallocated like
+this:
+
+  SAVEDELETE(defstash, savepv(tmpbuf), strlen(tmpbuf));
+
+=item C<SAVEDESTRUCTOR(f,p)>
+
+At the end of I<pseudo-block> the function C<f> is called with the
+only argument (of type C<void*>) C<p>.
+
+=item C<SAVESTACK_POS()>
+
+The current offset on the Perl internal stack (cf. C<SP>) is restored
+at the end of I<pseudo-block>.
+
+=back
+
+The following API list contains functions, thus one needs to
+provide pointers to the modifiable data explicitly (either C pointers,
+or Perlish C<GV *>s).  Where the above macros take C<int>, a similar 
+function takes C<int *>.
+
+=over
+
+=item C<SV* save_scalar(GV *gv)>
+
+Equivalent to Perl code C<local $gv>.
+
+=item C<AV* save_ary(GV *gv)>
+
+=item C<HV* save_hash(GV *gv)>
+
+Similar to C<save_scalar>, but localize C<@gv> and C<%gv>.
+
+=item C<void save_item(SV *item)>
+
+Duplicates the current value of C<SV>, on the exit from the current
+C<ENTER>/C<LEAVE> I<pseudo-block> will restore the value of C<SV>
+using the stored value.
+
+=item C<void save_list(SV **sarg, I32 maxsarg)>
+
+A variant of C<save_item> which takes multiple arguments via an array
+C<sarg> of C<SV*> of length C<maxsarg>.
+
+=item C<SV* save_svref(SV **sptr)>
+
+Similar to C<save_scalar>, but will reinstate a C<SV *>.
+
+=item C<void save_aptr(AV **aptr)>
+
+=item C<void save_hptr(HV **hptr)>
+
+Similar to C<save_svref>, but localize C<AV *> and C<HV *>.
+
+=back
+
+The C<Alias> module implements localization of the basic types within the
+I<caller's scope>.  People who are interested in how to localize things in
+the containing scope should take a look there too.
 
 =head1 Subroutines
 
@@ -1399,11 +1562,6 @@ Declares a stack pointer variable, C<sp>, for the XSUB.  See C<SP>.
 Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.  This is
 usually handled automatically by C<xsubpp>.  Declares the C<items> variable
 to indicate the number of items on the stack.
-
-=item dXSI32
-
-Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
-handled automatically by C<xsubpp>.
 
 =item dXSI32
 
@@ -2364,14 +2522,6 @@ C<sv2>.
 
 	I32	sv_cmp _((SV* sv1, SV* sv2));
 
-=item sv_cmp
-
-Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
-string in C<sv1> is less than, equal to, or greater than the string in
-C<sv2>.
-
-	I32	sv_cmp _((SV* sv1, SV* sv2));
-
 =item SvCUR
 
 Returns the length of the string which is in the SV.  See C<SvLEN>.
@@ -2383,12 +2533,6 @@ Returns the length of the string which is in the SV.  See C<SvLEN>.
 Set the length of the string which is in the SV.  See C<SvCUR>.
 
 	SvCUR_set (SV* sv, int val )
-
-=item sv_dec
-
-Auto-decrement of the value in the SV.
-
-	void	sv_dec _((SV* sv));
 
 =item sv_dec
 
@@ -2453,12 +2597,6 @@ Tells an SV that it is an integer and disables all other OK bits.
 
 	SvIOK_on (SV* sv)
 
-=item SvIOK_only
-
-Tells an SV that it is an integer and disables all other OK bits.
-
-	SvIOK_on (SV* sv)
-
 =item SvIOKp
 
 Returns a boolean indicating whether the SV contains an integer.  Checks the
@@ -2499,12 +2637,6 @@ Returns the integer which is stored in the SV.
 Returns the size of the string buffer in the SV.  See C<SvCUR>.
 
 	int SvLEN (SV* sv)
-
-=item sv_len
-
-Returns the length of the string in the SV.  Use C<SvCUR>.
-
-	STRLEN	sv_len _((SV* sv));
 
 =item sv_len
 
@@ -2585,12 +2717,6 @@ Tells an SV that it is a double and disables all other OK bits.
 
 	SvNOK_on (SV* sv)
 
-=item SvNOK_only
-
-Tells an SV that it is a double and disables all other OK bits.
-
-	SvNOK_on (SV* sv)
-
 =item SvNOKp
 
 Returns a boolean indicating whether the SV contains a double.  Checks the
@@ -2625,12 +2751,6 @@ Unsets the PV status of an SV.
 =item SvPOK_on
 
 Tells an SV that it is a string.
-
-	SvPOK_on (SV* sv)
-
-=item SvPOK_only
-
-Tells an SV that it is a string and disables all other OK bits.
 
 	SvPOK_on (SV* sv)
 
@@ -3050,7 +3170,8 @@ Jeff Okamoto <F<okamoto@corp.hp.com>>
 
 With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
-Bowers, Matthew Green, Tim Bunce, Spider Boardman, and Ulrich Pfeifer.
+Bowers, Matthew Green, Tim Bunce, Spider Boardman, Ulrich Pfeifer, and
+Stephen McCamant.
 
 API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 

@@ -67,6 +67,7 @@ icc)# Apparently, SCO's cc gives rather verbose warnings
 	3) ccflags="$ccflags -W0 -quiet -U M_XENIX" ;;
 	5) ccflags="$ccflags -belf -w0 -U M_XENIX"
 	   optimize="-O1" # -g -O1 will not work
+	 # optimize="-O0" may be needed for pack test to pass.
        lddlflags='-G -L/usr/local/lib'
        ldflags=' -W l,-Bexport -L/usr/local/lib'
        dlext='so'

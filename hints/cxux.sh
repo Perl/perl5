@@ -61,16 +61,18 @@ libswanted=`echo ' '$libswanted' ' | sed -e 's/ malloc / /'`
 #
 glibpth="/usr/sde/elf/usr/lib $glibpth"
 
-# Need to use Concurrent cc for most of these options to be meaningful (if you
-# want to get this to work with gcc, you're on your own :-). Passing
+# Need to use Concurrent cc for most of these options to be meaningful (if
+# you want to get this to work with gcc, you're on your own :-). Passing
 # -Bexport to the linker when linking perl is important because it leaves
 # the interpreter internal symbols visible to the shared libs that will be
-# loaded on demand (and will try to reference those symbols). The -u
-# option to drag 'sigaction' into the perl main program is to make sure
-# it gets defined for the posix shared library (for some reason sigaction
-# is static, rather than being defined in libc.so.1).
+# loaded on demand (and will try to reference those symbols). The -u option
+# to drag 'sigaction' into the perl main program is to make sure it gets
+# defined for the posix shared library (for some reason sigaction is static,
+# rather than being defined in libc.so.1). The 88110compat option makes sure
+# the code will run on both 88100 and 88110 machines. The define is added to
+# trigger a work around for a compiler bug which shows up in pp.c.
 #
-cc='/bin/cc -Xa'
+cc='/bin/cc -Xa -Qtarget=M88110compat -DCXUX_BROKEN_CONSTANT_CONVERT'
 cccdlflags='-Zelf -Zpic'
 ccdlflags='-Zelf -Zlink=dynamic -Wl,-Bexport -u sigaction'
 lddlflags='-Zlink=so'

@@ -28,7 +28,28 @@ startsh="#!$sh"
 sysman=`../UU/loc . /man/man1 c:/man/man1 c:/usr/man/man1 d:/man/man1 d:/usr/man/man1 e:/man/man1 e:/usr/man/man1 f:/man/man1 f:/usr/man/man1 g:/man/man1 g:/usr/man/man1 /usr/man/man1`
 cc='gcc'
 usrinc='/emx/include'
-libemx="`../UU/loc . X c:/emx/lib d:/emx/lib e:/emx/lib f:/emx/lib g:/emx/lib h:/emx/lib /emx/lib`"
+emxpath="`../UU/loc . /emx c:/emx d:/emx e:/emx f:/emx g:/emx h:/emx /emx`"
+
+libemx="$emxpath/lib"
+if test ! -d "$libemx"; then 
+  if test -d "$LIBRARY_PATH"; then
+    usrinc="$LIBRARY_PATH"
+  else
+    libemx="`../UU/loc . X c:/emx/lib d:/emx/lib e:/emx/lib f:/emx/lib g:/emx/lib h:/emx/lib /emx/lib`"
+  fi
+fi
+
+if test -d "$emxpath/include"; then 
+  usrinc="$emxpath/include"
+else
+  if test -d "$C_INCLUDE_PATH"; then
+    usrinc="$C_INCLUDE_PATH"
+  else
+    usrinc="`../UU/loc . X c:/emx/include d:/emx/include e:/emx/include f:/emx/include g:/emx/include h:/emx/include /emx/include`"
+  fi
+fi
+
+rsx="`../UU/loc rsx.exe undef $pth`"
 
 if test "$libemx" = "X"; then echo "Cannot find C library!" >&2; fi
 
@@ -66,8 +87,8 @@ fi
 aout_ldflags="$aout_ldflags"
 
 aout_d_fork='define'
-aout_ccflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK'
-aout_cppflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK'
+aout_ccflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK'
+aout_cppflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK'
 aout_use_clib='c'
 aout_usedl='undef'
 aout_archobjs="os2.o dl_os2.o"
@@ -189,9 +210,14 @@ nm_opt='-p'
 d_getprior='define'
 d_setprior='define'
 
-####### All the rest is commented
+# Make denser object files and DLL
+case "X$optimize" in
+  X)
+	optimize="-O2 -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2 -s"
+	;;
+esac
 
-# The next two are commented. pdksh handles #!
+# The next two are commented. pdksh handles #!, extproc gives no path part.
 # sharpbang='extproc '
 # shsharp='false'
 

@@ -1066,6 +1066,7 @@
 #define sv_setptrobj		Perl_sv_setptrobj
 #define sv_setpv		Perl_sv_setpv
 #define sv_setpvf		Perl_sv_setpvf
+#define sv_setpviv		Perl_sv_setpviv
 #define sv_setpvn		Perl_sv_setpvn
 #define sv_setref_iv		Perl_sv_setref_iv
 #define sv_setref_nv		Perl_sv_setref_nv

@@ -7,7 +7,7 @@ use Exporter;
 use vars qw( @ISA @EXPORT $VERSION );
 @ISA = 'Exporter';
 @EXPORT = '&Mksymlists';
-$VERSION = substr q$Revision: 1.13 $, 10;
+$VERSION = substr q$Revision: 1.16 $, 10;
 
 sub Mksymlists {
     my(%spec) = @_;
@@ -106,16 +106,28 @@ sub _write_win32 {
 
     open(DEF,">$data->{FILE}.def")
         or croak("Can't create $data->{FILE}.def: $!\n");
-    print DEF "LIBRARY $data->{DLBASE}\n";
+    # put library name in quotes (it could be a keyword, like 'Alias')
+    print DEF "LIBRARY \"$data->{DLBASE}\"\n";
     print DEF "CODE LOADONCALL\n";
     print DEF "DATA LOADONCALL NONSHARED MULTIPLE\n";
     print DEF "EXPORTS\n  ";
+    my @syms;
+    # Export public symbols both with and without underscores to
+    # ensure compatibility between DLLs from different compilers
+    # NOTE: DynaLoader itself only uses the names without underscores,
+    # so this is only to cover the case when the extension DLL may be
+    # linked to directly from C. GSAR 97-07-10
     if ($Config::Config{'cc'} =~ /^bcc/i) {
-	for (@{$data->{DL_VARS}}) { $_ = "$_ = _$_" }
-	for (@{$data->{FUNCLIST}}) { $_ = "$_ = _$_" }
+	for (@{$data->{DL_VARS}}, @{$data->{FUNCLIST}}) {
+	    push @syms, "_$_", "$_ = _$_";
+	}
     }
-    print DEF join("\n  ",@{$data->{DL_VARS}}, "\n") if @{$data->{DL_VARS}};
-    print DEF join("\n  ",@{$data->{FUNCLIST}}, "\n") if @{$data->{FUNCLIST}};
+    else {
+	for (@{$data->{DL_VARS}}, @{$data->{FUNCLIST}}) {
+	    push @syms, "$_", "_$_ = $_";
+	}
+    }
+    print DEF join("\n  ",@syms, "\n") if @syms;
     if (%{$data->{IMPORTS}}) {
         print DEF "IMPORTS\n";
         my ($name, $exp);

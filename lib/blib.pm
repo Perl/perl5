@@ -38,6 +38,8 @@ Nick Ing-Simmons nik@tiuk.ti.com
 
 use Cwd;
 
+use vars qw($VERSION);
+$VERSION = '1.00';
 
 sub import
 {

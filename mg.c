@@ -1371,14 +1371,7 @@ MAGIC* mg;
 	    osname = Nullch;
 	break;
     case '\020':	/* ^P */
-	i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
-	if (i != perldb) {
-	    if (perldb)
-		oldlastpm = curpm;
-	    else
-		curpm = oldlastpm;
-	}
-	perldb = i;
+	perldb = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME
@@ -1699,6 +1692,21 @@ char *sig;
     return 0;
 }
 
+static SV* sig_sv;
+
+static void
+unwind_handler_stack(p)
+    void *p;
+{
+    U32 flags = *(U32*)p;
+
+    if (flags & 1)
+	savestack_ix -= 5; /* Unprotect save in progress. */
+    /* cxstack_ix-- Not needed, die already unwound it. */
+    if (flags & 64)
+	SvREFCNT_dec(sig_sv);
+}
+
 Signal_t
 sighandler(sig)
 int sig;
@@ -1707,15 +1715,56 @@ int sig;
     dSP;
     GV *gv;
     HV *st;
-    SV *sv;
+    SV *sv, *tSv = Sv;
     CV *cv;
     AV *oldstack;
+    OP *myop = op;
+    U32 flags = 0;
+    I32 o_save_i = savestack_ix, type;
+    CONTEXT *cx;
+    XPV *tXpv = Xpv;
+    
+    if (savestack_ix + 15 <= savestack_max)
+	flags |= 1;
+    if (cxstack_ix < cxstack_max - 2)
+	flags |= 2;
+    if (markstack_ptr < markstack_max - 2)
+	flags |= 4;
+    if (retstack_ix < retstack_max - 2)
+	flags |= 8;
+    if (scopestack_ix < scopestack_max - 3)
+	flags |= 16;
 
+    if (flags & 2) {		/* POPBLOCK may decrease cxstack too early. */
+	cxstack_ix++;		/* Protect from overwrite. */
+	cx = &cxstack[cxstack_ix];
+	type = cx->cx_type;		/* Can be during partial write. */
+	cx->cx_type = CXt_NULL;		/* Make it safe for unwind. */
+    }
     if (!psig_ptr[sig])
 	die("Signal SIG%s received, but no signal handler set.\n",
 	    sig_name[sig]);
 
-    cv = sv_2cv(psig_ptr[sig],&st,&gv,TRUE);
+    /* Max number of items pushed there is 3*n or 4. We cannot fix
+       infinity, so we fix 4 (in fact 5): */
+    if (flags & 1) {
+	savestack_ix += 5;		/* Protect save in progress. */
+	o_save_i = savestack_ix;
+	SAVEDESTRUCTOR(unwind_handler_stack, (void*)&flags);
+    }
+    if (flags & 4) 
+	markstack_ptr++;		/* Protect mark. */
+    if (flags & 8) {
+	retstack_ix++;
+	retstack[retstack_ix] = NULL;
+    }
+    if (flags & 16)
+	scopestack_ix += 1;
+    /* sv_2cv is too complicated, try a simpler variant first: */
+    if (!SvROK(psig_ptr[sig]) || !(cv = (CV*)SvRV(psig_ptr[sig])) 
+	|| SvTYPE(cv) != SVt_PVCV)
+	cv = sv_2cv(psig_ptr[sig],&st,&gv,TRUE);
+
     if (!cv || !CvROOT(cv)) {
 	if (dowarn)
 	    warn("SIG%s handler \"%s\" not defined.\n",
@@ -1728,9 +1777,11 @@ int sig;
 	AvFILL(signalstack) = 0;
     SWITCHSTACK(curstack, signalstack);
 
-    if(psig_name[sig])
+    if(psig_name[sig]) {
     	sv = SvREFCNT_inc(psig_name[sig]);
-    else {
+	flags |= 64;
+	sig_sv = sv;
+    } else {
 	sv = sv_newmortal();
 	sv_setpv(sv,sig_name[sig]);
     }
@@ -1741,6 +1792,23 @@ int sig;
     perl_call_sv((SV*)cv, G_DISCARD);
 
     SWITCHSTACK(signalstack, oldstack);
-
+    if (flags & 1)
+	savestack_ix -= 8; /* Unprotect save in progress. */
+    if (flags & 2) {
+	cxstack[cxstack_ix].cx_type = type;
+	cxstack_ix -= 1;
+    }
+    if (flags & 4) 
+	markstack_ptr--;
+    if (flags & 8) 
+	retstack_ix--;
+    if (flags & 16)
+	scopestack_ix -= 1;
+    if (flags & 64)
+	SvREFCNT_dec(sv);
+    op = myop;			/* Apparently not needed... */
+    
+    Sv = tSv;			/* Restore global temporaries. */
+    Xpv = tXpv;
     return;
 }

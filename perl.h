@@ -383,8 +383,14 @@ typedef pthread_key_t perl_key;
 #   include <netinet/in.h>
 #endif
 
+#if defined(SF_APPEND) && defined(USE_SFIO) && defined(I_SFIO)
+/* <sfio.h> defines SF_APPEND and <sys/stat.h> might define SF_APPEND
+ * (the neo-BSD seem to do this).  */
+#   undef SF_APPEND
+#endif
+
 #ifdef I_SYS_STAT
-#include <sys/stat.h>
+#   include <sys/stat.h>
 #endif
 
 /* The stat macros for Amdahl UTS, Unisoft System V/88 (and derivatives
@@ -1310,11 +1316,6 @@ typedef Sighandler_t Sigsave_t;
 # ifndef register
 #  define register
 # endif
-# ifdef MYMALLOC
-#  ifndef DEBUGGING_MSTATS
-#   define DEBUGGING_MSTATS
-#  endif
-# endif
 # define PAD_SV(po) pad_sv(po)
 # define RUNOPS_DEFAULT runops_debug
 #else
@@ -2236,6 +2237,22 @@ enum {
 #endif /* _FASTMATH */
 
 #endif /* OVERLOAD */
+
+#define PERLDB_ALL	0xff
+#define PERLDBf_SUB	0x01		/* Debug sub enter/exit. */
+#define PERLDBf_LINE	0x02		/* Keep line #. */
+#define PERLDBf_NOOPT	0x04		/* Switch off optimizations. */
+#define PERLDBf_INTER	0x08		/* Preserve more data for
+					   later inspections.  */
+#define PERLDBf_SUBLINE	0x10		/* Keep subr source lines. */
+#define PERLDBf_SINGLE	0x20		/* Start with single-step on. */
+
+#define PERLDB_SUB	(perldb && (perldb & PERLDBf_SUB))
+#define PERLDB_LINE	(perldb && (perldb & PERLDBf_LINE))
+#define PERLDB_NOOPT	(perldb && (perldb & PERLDBf_NOOPT))
+#define PERLDB_INTER	(perldb && (perldb & PERLDBf_INTER))
+#define PERLDB_SUBLINE	(perldb && (perldb & PERLDBf_SUBLINE))
+#define PERLDB_SINGLE	(perldb && (perldb & PERLDBf_SINGLE))
 
 #ifdef USE_LOCALE_COLLATE
 EXT U32		collation_ix;		/* Collation generation index */

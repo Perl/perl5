@@ -48,6 +48,1036 @@ And the Keepers of the Patch Pumpkin:
 
 
 ----------------
+Version 5.004_03        Maintenance release 3 for 5.004
+----------------
+
+"To err is human, to forgive divine."
+  -- Alexander Pope
+
+
+  HEADLINES FOR THIS MAINTENANCE RELEASE
+
+    Fixed 5.004_02 compilation failure on VMS.
+    Fixed Configure (non)errors being displayed to user.
+    Better support for Windows 95.
+    Assorted documentation and hint file improvements.
+    perl --foo no longer silently ignored.
+
+
+  ------  BUILD PROCESS  ------
+
+  Title:  "Show Configure failure reason even with -s"
+   From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>
+ Msg-ID:  <Pine.SUN.3.96.970812141623.14256K-100000@newton.phys>
+  Files:  Configure
+
+  Title:  "Configure can stop without fully explaining itself"
+   From:  Jim Anderson <jander@ml.com>
+ Msg-ID:  <199708111328.JAA28976@nsd15.ny-swaps-develop.ml.com>,
+          <199708111952.PAA29346@nsd15.ny-swaps-develop.ml.com>
+  Files:  Configure
+
+  ------  CORE LANGUAGE  ------
+
+  Title:  "typos in perl -h output"
+   From:  "Richard A. Wells" <Rwells@uhs.harvard.edu>
+ Msg-ID:  <6D0BF914BC@gateuhs.harvard.edu>
+  Files:  perl.c
+
+  Title:  "Some perldb -> PERLDB_* macro changes were missed"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199708100323.XAA27155@monk.mps.ohio-state.edu>
+  Files:  pp_ctl.c
+
+  Title:  "Further fix to lseek's in lockf_emulate_flock"
+   From:  Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
+ Msg-ID:  <199708060031.CAA07387@bombur2.uio.no>,
+          <199708102225.AAA16970@bombur2.uio.no>
+  Files:  pp_sys.c
+
+  Title:  "GNU style perl --version (or any other --foo) ignored"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Kenneth Albanowski
+          <kjahds@kjahds.com>, Stephen McCamant <alias@mcs.com>
+ Msg-ID:  <E0wx8MO-0007BS-00@ursa.cus.cam.ac.uk>,
+          <Pine.LNX.3.93.970813122557.9443C-100000@kjahds.com>,
+          <m0wy8nl-000EYgC@alias-2.pr.mcs.net>
+  Files:  pod/perldiag.pod perl.c
+
+  Title:  "seen_dot declaration in perl.c needed for VMS"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708072033.QAA09167@aatma.engin.umich.edu>
+  Files:  perl.c
+
+  ------  DOCUMENTATION  ------
+
+  Title:  "[PATCH] -D info in perlrun", "[PATCH] Re: -D info in perlrun"
+   From:  Stephen McCamant <alias@mcs.com>, ilya@math.ohio-state.edu (Ilya
+          Zakharevich)
+ Msg-ID:  <1997Aug10.195832.2224477@hmivax.humgen.upenn.edu>,
+          <m0wxNNL-000EYgC@alias-2.pr.mcs.net>,
+          <m0wxz6l-000EYgC@alias-2.pr.mcs.net>
+  Files:  pod/perlrun.pod
+
+  Title:  "perlop pod inconsistent in presentation of regexp options"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Hans Mulder <hansm@icgned.nl>,
+          jmr@whirlwind.fmr.com
+ Msg-ID:  <199708061404.KAA06717@whirlwind.fmr.com>,
+          <199708081505.LAA09810@whirlwind.fmr.com>,
+          <1997Aug7.160530.2196011@hmivax.humgen.upenn.edu>,
+          <E0wwnqc-00057s-00@ursa.cus.cam.ac.uk>,
+          <E0wwswg-00017x-00@ursa.cus.cam.ac.uk>
+  Files:  pod/perlop.pod
+
+  Title:  "pod2man generated .IX lines upset whatis on Solaris"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, jmr@whirlwind.fmr.com (John
+          Redford)
+ Msg-ID:  <E0wxoUZ-0006Ee-00@ursa.cus.cam.ac.uk>
+  Files:  pod/pod2man.PL
+
+  Title:  "The description of the \Q metacharacter is confusing to novices"
+   From:  aml@world.std.com (Andrew M. Langmead)
+ Msg-ID:  <199708101946.AA06339@world.std.com>
+  Files:  pod/perlre.pod
+
+  Title:  "doc patch for pack("p",undef) packing a NULL pointer"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9708102159.AA11726@claudius.bfsec.bt.co.uk>
+  Files:  pod/perldelta.pod pod/perlfunc.pod
+
+  Title:  "perlfunc.pod error"
+   From:  Tom Christiansen <tchrist@jhereg.perl.com>
+ Msg-ID:  <199708102235.QAA18420@jhereg.perl.com>
+  Files:  pod/perlfunc.pod
+
+  ------  LIBRARY AND EXTENSIONS  ------
+
+  Title:  "patch for documentation error in FileCache.pm"
+   From:  Mike Stok <mike@stok.co.uk>, mikebo@tellabs.com
+ Msg-ID:  <Pine.LNX.3.95.970810143321.437C-100000@stok.co.uk>
+  Files:  lib/FileCache.pm
+
+  Title:  "[PATCH] 5.004_02: Complex/Trig: update"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199708081842.VAA31214@alpha.hut.fi>
+  Files:  lib/Math/Complex.pm lib/Math/Trig.pm t/lib/complex.t
+
+  Title:  "CPAN Use of uninitialized value in newest perl"
+   From:  tom@amber.ssd.hcsc.com (Tom Horsley)
+ Msg-ID:  <9708091738.AA16435@amber.ssd.hcsc.com>
+  Files:  lib/CPAN.pm
+
+  ------  PORTABILITY - WIN32  ------
+
+  Title:  "[PATCH] /x is not a valid shell switch on Win95"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708121720.NAA14760@aatma.engin.umich.edu>
+  Files:  win32/win32.c
+
+  Title:  "[PATCH] Win95-proofing pl2bat"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708121733.NAA14888@aatma.engin.umich.edu>
+  Files:  MANIFEST win32/Makefile win32/makefile.mk win32/bin/pl2bat.pl
+          win32/bin/runperl.pl win32/bin/search.pl
+          win32/bin/webget.pl
+
+  Title:  "[PATCH] [OK] Perl5.004_02 on Alpha NT"
+   From:  wmiddlet@adobe.com (William Middleton)
+ Msg-ID:  <199708072100.OAA13141@ducks>
+  Files:  win32/win32.c
+
+  ------  PORTABILITY - OTHER  ------
+
+  Title:  "Improve dual-universe comments in hints/sunos_4_1.sh"
+   From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>
+ Msg-ID:  <Pine.SUN.3.96.970812170358.14488E-100000@newton.phys>
+  Files:  hints/sunos_4_1.sh
+
+  Title:  "Dynamic Loading on MkLinux (osname=linux,archname=ppc-linux)"
+   From:  Chris Nandor <pudge@pobox.com>, Shimpei Yamashita
+          <shimpei@socrates.patnet.caltech.edu>
+ Msg-ID:  <33EF1634.B36B6500@pobox.com>
+  Files:  hints/linux.sh
+
+  Title:  "5.004_02 Configure - worrying but normal errors displayed to user"
+   From:  Paul Marquess <pmarquess@bfsec.bt.co.uk>, pmarquess@bfsec.bt.co.uk
+          (Paul Marquess)
+ Msg-ID:  <01BCA3DE.E257BFC0.pmarquess@bfsec.bt.co.uk>,
+          <9708102159.AA11726@claudius.bfsec.bt.co.uk>
+  Files:  Configure os2/diff.configure
+
+  Title:  "Minor glitch with Perl 5.004_01 on SunOS 4.1.3 (groupstype)"
+   From:  thad@thadlabs.com (Thad Floryan)
+ Msg-ID:  <9708111415.AA03808@thadlabs.com>
+  Files:  hints/sunos_4_1.sh
+
+  Title:  "SCO Openserver 5.0.4 - add comment to hint file re compiler bug"
+   From:  Bill Glicker <billg@burrelles.com>
+ Msg-ID:  <Pine.SCO.3.96.970811153021.18457A-100000@laura.burrelles.com>
+  Files:  hints/sco.sh
+
+  ------  UTILITIES  ------
+
+  Title:  "perlbug -d non-interactive (with patch)"
+   From:  Ted Ashton <ashted@southern.edu>
+ Msg-ID:  <199708071418.KAA15711@ns.southern.edu>
+  Files:  utils/perlbug.PL
+
+
+
+----------------
+Version 5.004_02        Maintenance release 2 for 5.004
+----------------
+
+"When you work you are a flute through whose
+ heart the whispering of the hours turns to music."
+  -- from The Prophet by Kahlil Gibran
+
+
+  HEADLINES FOR THIS MAINTENANCE RELEASE
+
+    Major memory growth bug fixed.
+    Object destruction is more timely and orderly.
+    Further major enhancements to Win32 support, including:
+    Win32 binary compatibility between Visual C++ and Borland C++.
+    The -S option is now more useful on dos/Win32 (see perlrun).
+    Implicit -p print now checks for write errors.
+    DB_File now sub-classable (and other fixes).
+    Memory usage stats available with perl's malloc (see perldelta).
+    'use UNIVERSAL;' deprecated (see perldelta).
+    Internal integer to string conversions are faster.
+    Carp can be forced to give stack traces (see perldoc Carp).
+    Many other bug fixes and enhancements. 
+
+
+  ------  BUILD PROCESS  ------
+
+  Title:  "[PATCH] m2t3: Configure: cf_time always in C locale"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199708061827.VAA09623@alpha.hut.fi>
+  Files:  Configure
+
+  Title:  "Configure can't find open3 on NeXTstep"
+   From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>, hans@icgned.nl
+          (Hans Mulder)
+ Msg-ID:  <9706271816.AA10551@ icgned.icgned.nl >
+  Files:  Configure
+
+  Title:  "Don't use undef value in Config::myconfig"
+   From:  "Andreas J. Koenig" <k@sissy.in-berlin.de>, Chip Salzenberg
+          <salzench@nielsenmedia.com>
+ Msg-ID:  <199706271525.RAA13517@sissy.in-berlin.de>
+  Files:  configpm
+
+  Title:  "make Configure recognize powerux hint (perl5.004_01)"
+   From:  tom@amber.ssd.hcsc.com (Tom Horsley)
+ Msg-ID:  <9707301938.AA08352@amber.ssd.hcsc.com>
+  Files:  Configure
+
+  Title:  "[PATCH]: HP-UX 10 w/o transition links"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199706181851.AA093329906@hpcc123.corp.hp.com>,
+          <199706231650.AA070364627@hpcc123.corp.hp.com>
+  Files:  Configure
+
+  Title:  "INSTALL updates for GNU ld and __inet_* errors"
+   From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>
+  Files:  INSTALL
+
+  ------  CORE LANGUAGE  ------
+
+  Title:  "[PATCH] Additional patch for "Can't execute ...""
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707191651.MAA04897@monk.mps.ohio-state.edu>
+  Files:  pod/perldiag.pod perl.c
+
+  Title:  "[PATCH] Band-aid fix for local([@%]$x)"
+   From:  Stephen McCamant <alias@mcs.com>
+ Msg-ID:  <m0wsb7J-000EYPC@alias-2.pr.mcs.net>
+  Files:  pod/perldiag.pod op.c pp_hot.c t/op/local.t
+
+  Title:  "[PATCH] Re: Bug in Regular Expressions when using colon as
+          delimiter"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0wtbhv-0005Mm-00@ursa.cus.cam.ac.uk>
+  Files:  pod/perldiag.pod regcomp.c t/op/re_tests t/op/regexp.t
+
+  Title:  "[PATCH] Re: Can't pack literals as pointers"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708012250.SAA20278@aatma.engin.umich.edu>
+  Files:  pod/perldiag.pod pod/perlfunc.pod pp.c t/op/pack.t
+
+  Title:  "[PATCH] Do not constant-fold ops that depend on locale if C<use
+          locale>"
+   From:  Chip Salzenberg <salzench@nielsenmedia.com>
+ Msg-ID:  <199707210519.BAA13785@nielsenmedia.com>
+  Files:  op.c
+
+  Title:  "Eval fails in certain situations (eval "{'...")"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707211753.NAA14940@aatma.engin.umich.edu>
+  Files:  t/comp/term.t toke.c
+
+  Title:  "Fix memory leak on eval 'sub {}'"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>
+  Files:  pp_ctl.c
+
+  Title:  "stringify looses integerness"
+   From:  Gisle Aas <aas@bergen.sn.no>
+ Msg-ID:  <hbu4l96z2.fsf@bergen.sn.no>
+  Files:  sv.c
+
+  Title:  "Fix intolerance of a space between "print" and opening paren"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707011421.KAA15836@aatma.engin.umich.edu>
+  Files:  toke.c
+
+  Title:  "[PATCH] Re: Calling Perl from within C from within Perl"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199706301842.OAA05569@aatma.engin.umich.edu>
+  Files:  perl.c
+
+  Title:  "UNIVERSAL.pm and import methods (tests)"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0whfHh-0007bW-00@ursa.cus.cam.ac.uk>
+  Files:  t/op/universal.t universal.c
+
+  Title:  "Avoid core dump on some paren'd regexp matches", "One-liner regex
+          causes SEGV on 5.003 under HP-UX and Linux"
+   From:  Hugo van der Sanden <hv@crypt.compulink.co.uk>
+ Msg-ID:  <199706261236.NAA03472@crypt.compulink.co.uk>,
+          <199707061144.MAA04443@crypt.compulink.co.uk>
+  Files:  regexec.c t/op/re_tests
+
+  Title:  "Forbid negative splice offset beyond array start"
+   From:  "John L. Allen" <allen@gateway.grumman.com>, Chip Salzenberg
+          <chip@rio.atlantic.net>
+ Msg-ID:  <Pine.SOL.3.91.970625111744.19300A-100000@gateway>
+  Files:  pp.c
+
+  Title:  "Forbid "goto" into middle of foreach loop"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>
+  Files:  pod/perldiag.pod pp_ctl.c
+
+  Title:  "Fix C<qq #hi#>"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>
+  Files:  toke.c
+
+  Title:  "bless file handles as FileHandle if loaded else IO::Handle"
+   From:  Gisle Aas <aas@bergen.sn.no>
+ Msg-ID:  <hyb80drrz.fsf@bergen.sn.no>
+  Files:  gv.c lib/FileHandle.pm
+
+  Title:  "infinite recursion in malloc() with some compile flags"
+   From:  Hans Mulder <hansmu@xs4all.nl>
+ Msg-ID:  <199706240050.CAA10550@xs2.xs4all.nl>
+  Files:  malloc.c
+
+  Title:  "sv_vcatpvfn hogs memory [Patch included]"
+   From:  Matthias Neeracher <neeri@iis.ee.ethz.ch>
+ Msg-ID:  <199706211521.RAA12778@solar.ethz.ch>
+  Files:  sv.c
+
+  Title:  "Fix '-' flag on sprintf() of floats"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>, Jarkko Hietaniemi
+          <jhi@iki.fi>
+ Msg-ID:  <199705270646.JAA02510@alpha.hut.fi>
+  Files:  sv.c
+
+  Title:  "Free temps before calling END blocks", "Too late destruction"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>
+ Msg-ID:  <m33erfv5hx.fsf@chany-p100.emwp.com>
+  Files:  perl.c
+
+  Title:  "Fix C<print $foo x 2> parsing"
+   From:  "Chuck D. Phillips (NON-HP Employee)" <cdp@hpescdp.fc.hp.com>, Chip
+          Salzenberg <chip@rio.atlantic.net>
+ Msg-ID:  <199706121737.KAA00503@palrel3.hp.com>
+  Files:  toke.c
+
+  Title:  "Fix lockf_emulate_flock() positioning"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>, gen@atd.rdc.ricoh.co.jp
+ Msg-ID:  <199706091132.UAA00895@wampa.atd.rdc.ricoh.co.jp>
+  Files:  pp_sys.c
+
+  Title:  "Don't use atol() for unsigned values", "signedness problem in
+          pack("N", "value");"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>, Roger Espel Llima
+          <espel@llaic.univ-bpclermont.fr>
+ Msg-ID:  <19970531200007.40218@llaic.univ-bpclermont.fr>
+  Files:  sv.c
+
+  Title:  "Don't warn about "${foo}" in string, even if &foo exists"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>
+  Files:  toke.c
+
+  Title:  "[PATCH] -p does not check for failure of implicit print"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v0311070aafea3fa83061@[194.51.248.75]>
+  Files:  pod/perldiag.pod pod/perlrun.pod toke.c
+
+  Title:  "Fix double form() in XS version check"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707150010.UAA00816@monk.mps.ohio-state.edu>
+  Files:  XSUB.h
+
+  Title:  "Constant-fold sprintf()"
+   From:  Chip Salzenberg <salzench@nielsenmedia.com>
+  Files:  opcode.pl
+
+  Title:  "[PATCH] Fix double form() in XS version check"
+   From:  Chip Salzenberg <salzench@nielsenmedia.com>
+ Msg-ID:  <199707210518.BAA13771@nielsenmedia.com>
+  Files:  XSUB.h
+
+  Title:  "[PATCH] Make DEBUGGING_MSTATS info consistent"
+   From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>
+ Msg-ID:  <Pine.SUN.3.96.970731131529.3740A-100000@newton.phys>
+  Files:  INSTALL pod/perldelta.pod perl.h
+
+  Title:  "Minor Win32 glitch with -S flag"
+   From:  Warren Jones <wjones@tc.fluke.com>
+ Msg-ID:  <97Jun19.150511pdt.35717-2@gateway.fluke.com>
+  Files:  perl.c
+
+  Title:  "Slightly safer signals"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+  Files:  mg.c perl.c
+
+  Title:  "Time::Local patch (plus perl.c and filehand.t)"
+   From:  ilya@math.ohio-state.edu (Ilya Zakharevich)
+  Files:  lib/Time/Local.pm perl.c t/lib/filehand.t
+
+  Title:  "[PATCH] Weirdness in sv_peek()"
+   From:  Stephen McCamant <alias@mcs.com>
+ Msg-ID:  <m0wsEMU-000EYLC@alias-2.pr.mcs.net>,
+          <m0wsf7Y-000EYPC@alias-2.pr.mcs.net>
+  Files:  sv.c
+
+  Title:  "Win32 UNC path causes autoload to fail"
+   From:  Warren Jones <wjones@tc.fluke.com>
+ Msg-ID:  <97Jun18.163826pdt.35714-1@gateway.fluke.com>
+  Files:  pp_ctl.c
+
+  Title:  "[PATCH]: reduced malloc patch"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707150829.EAA01291@monk.mps.ohio-state.edu>
+  Files:  av.c
+
+  Title:  "[PATCH] $\1 and serious bug in evalling"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707262127.RAA12883@monk.mps.ohio-state.edu>
+  Files:  pp_ctl.c
+
+  Title:  "Faster int to string conversion", "[PATCH} Re: memory leak in buffer
+          safety code"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>, Hugo van der Sanden
+          <hv@crypt.compulink.co.uk>, Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <199707140912.KAA09935@crypt.compulink.co.uk>,
+          <199707142050.QAA20976@rio.atlantic.net>,
+          <199707182035.VAA20990@crypt.compulink.co.uk>,
+          <9707151040.AA02883@toad.ig.co.uk>
+  Files:  global.sym sv.c
+
+  Title:  "object never destructs"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707131955.PAA29655@aatma.engin.umich.edu>
+  Files:  scope.c t/op/ref.t
+
+  Title:  "[PATCH] -S flag fixes for DOSISH platforms", "[RESEND] [PATCH] -S
+          flag fixes for DOSISH platforms"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707250043.UAA02385@aatma.engin.umich.edu>,
+          <199707301828.OAA19508@aatma.engin.umich.edu>
+  Files:  pod/perldiag.pod pod/perlrun.pod perl.c
+
+  Title:  "Perldb internal flag rehaul"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+  Files:  pod/perldebug.pod pod/perlvar.pod perl.h gv.c mg.c op.c perl.c
+          pp_ctl.c pp_hot.c pp_sys.c sv.c toke.c
+
+  Title:  "[PATCH] Re: q and escaping paired delimiters"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>, Kenneth Albanowski
+          <kjahds@kjahds.com>
+ Msg-ID:  <199707280516.BAA14055@aatma.engin.umich.edu>,
+          <Pine.LNX.3.93.970727172201.350K-100000@kjahds.com>,
+          <Pine.LNX.3.93.970728013540.350U-100000@kjahds.com>
+  Files:  t/base/lex.t toke.c
+
+  Title:  "Enable PERL_DEBUG_MSTATS without -DDEBUGGING_MSTATS"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707150829.EAA01291@monk.mps.ohio-state.edu>
+  Files:  malloc.c perl.c
+
+  Title:  "semctl broken under Linux"
+   From:  Andreas Schwab <schwab@LS5.informatik.uni-dortmund.de>, Andreas
+          Schwab <schwab@issan.informatik.uni-dortmund.de>, Graham
+          Barr <gbarr@ti.com>, Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <33C38291.2D9302DA@ti.com>,
+          <9707040912.AA03470@issan.informatik.uni-dortmund.de>,
+          <9707041538.AA08946@toad.ig.co.uk>,
+          <9707070924.AA11774@issan.informatik.uni-dortmund.de>,
+          <9707090933.AA19012@issan.informatik.uni-dortmund.de>
+  Files:  doio.c
+
+  Title:  "[PATCH] m2t2: problem in NetBSD 1.2D with sfio"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+  Files:  perl.h
+
+  Title:  "fix substr fix (tests 27 etc)", "perl5.004_02 trial 1 available
+          (with substr bug and still some"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Hugo van der Sanden
+          <hv@crypt.compulink.co.uk>, Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199707301759.SAA02899@crypt.compulink.co.uk>,
+          <199707302228.BAA18032@alpha.hut.fi>,
+          <199707310929.KAA06515@crypt.compulink.co.uk>,
+          <E0wtruH-0002JM-00@ursa.cus.cam.ac.uk>
+  Files:  pp.c
+
+  Title:  "Fwd: substr("foo", -1000)", "substr: warn if substring doesn't
+          intersect original at all"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199707100655.JAA14924@alpha.hut.fi>,
+          <E0wm1JG-0000UY-00@taurus.cus.cam.ac.uk>
+  Files:  pod/perlfunc.pod pp.c t/op/substr.t
+
+  Title:  "[PATCH] work around compiler bug on CX/UX (perl5.004_01)"
+   From:  tom@amber.ssd.hcsc.com (Tom Horsley)
+ Msg-ID:  <9707301934.AA18594@amber.ssd.hcsc.com>
+  Files:  hints/cxux.sh pp.c
+
+  ------  DOCUMENTATION  ------
+
+  Title:  "Duplicates in perlguts.pod"
+   From:  hans@icgned.nl (Hans Mulder)
+ Msg-ID:  <9707082346.AA13231@ icgned.icgned.nl >
+  Files:  pod/perlguts.pod
+
+  Title:  "Better "Can't locate auto/%s.al in @INC" error documentation"
+   From:  ilya@math.ohio-state.edu (Ilya Zakharevich)
+ Msg-ID:  <1997Jun24.195847.2091744@hmivax.humgen.upenn.edu>
+  Files:  pod/perldiag.pod
+
+  Title:  "new perlembed.pod:match.c"
+   From:  Doug MacEachern <dougm@opengroup.org>
+ Msg-ID:  <199707170355.XAA21370@postman.opengroup.org>
+  Files:  pod/perlembed.pod
+
+  Title:  "Document bug fix in localization of $1 etc."
+   From:  Chip Salzenberg <salzench@nielsenmedia.com>
+  Files:  pod/perldelta.pod
+
+  Title:  "[PATCH] Major goof in XS Tutorial regarding subdirs"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707260920.FAA12453@monk.mps.ohio-state.edu>
+  Files:  pod/perlxstut.pod
+
+  Title:  "[PATCH] Magic info in perlguts, take 2"
+   From:  Stephen McCamant <alias@mcs.com>
+ Msg-ID:  <m0wr6P8-000EYLC@alias-2.pr.mcs.net>
+  Files:  pod/perlguts.pod
+
+  Title:  "[BUG:PATCH] Missing semicolon message wrong in perldiag"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0welEn-0002vT-00@taurus.cus.cam.ac.uk>,
+          <E0wfRJU-0006Aw-00@taurus.cus.cam.ac.uk>
+  Files:  pod/perldiag.pod
+
+  Title:  "[PATCH] Updates to perlguts (repost)"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707152223.SAA00776@monk.mps.ohio-state.edu>
+  Files:  pod/perlguts.pod
+
+  Title:  "[BUG:47:LOG] Dropped "and" in pod2man"
+   From:  hans@icgned.nl (Hans Mulder)
+ Msg-ID:  <9707082355.AA13254@ icgned.icgned.nl >
+  Files:  pod/pod2man.PL
+
+  Title:  "[BUG] perlembed.pod:power.c example"
+   From:  Doug MacEachern <dougm@opengroup.org>
+ Msg-ID:  <199707181344.JAA10565@postman.opengroup.org>
+  Files:  pod/perlembed.pod
+
+  Title:  "[PATCH] arguments swapped in perlapio.pod"
+   From:  Hans Mulder <hansmu@xs4all.nl>
+ Msg-ID:  <199706240049.CAA10534@xs2.xs4all.nl>
+  Files:  pod/perlapio.pod
+
+  Title:  "[PATCH] cool quote for perldebug"
+   From:  Greg Bacon <gbacon@adtrn-srv4.adtran.com>
+ Msg-ID:  <199707292140.QAA28579@adtrn-srv4.adtran.com>
+  Files:  pod/perldebug.pod
+
+  Title:  "[PATCH] multiline commands in qx//"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707212350.TAA18496@aatma.engin.umich.edu>
+  Files:  pod/perlfunc.pod pod/perlop.pod
+
+  Title:  "patch to 5.004_01 perltrap.pod"
+   From:  jmm@revenge.elegant.com (John Macdonald)
+ Msg-ID:  <9706231525.AA22790@revenge.elegant.com>
+  Files:  pod/perltrap.pod
+
+  Title:  "perl4 to perl5.004 converion with debugger problem"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0wdKJY-00010w-00@taurus.cus.cam.ac.uk>
+  Files:  pod/perltrap.pod
+
+  Title:  "done3/perlbook.pod"
+   From:  Randal Schwartz <merlyn@gadget.cscaper.com>
+  Files:  pod/perlbook.pod
+
+  Title:  "[PATCH] readline and readpipe are undocumented"
+   From:  Hans Mulder <hansmu@xs4all.nl>
+  Files:  pod/perlfunc.pod
+
+  Title:  "Document use of - in a regex char class."
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03102804afd578bcef2c@[194.51.248.88]>
+  Files:  pod/perlre.pod
+
+  Title:  "[PATCH] splitpod broken in 5.004_01"
+   From:  Hans Mulder <hansmu@xs4all.nl>, Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <199706240048.CAA10515@xs2.xs4all.nl>,
+          <9706241612.AA09119@toad.ig.co.uk>
+  Files:  pod/splitpod
+
+  ------  LIBRARY AND EXTENSIONS  ------
+
+  Title:  "Carp::cluck() and -MCarp=verbose"
+   From:  Tim.Bunce@ig.co.uk, epeschko@elmer.tci.com (Ed Peschko)
+ Msg-ID:  <199708060607.AAA16681@den-mdev1.tci.com>,
+          <199708062105.PAA09878@den-mdev1.tci.com>
+  Files:  lib/Carp.pm
+
+  Title:  "Warning from calls using "use Shell""
+   From:  Andrew Pimlott <pimlott@abel.math.harvard.edu>
+ Msg-ID:  <Pine.SOL.3.91.970806173903.7320H-100000@abel>
+  Files:  lib/Shell.pm
+
+  Title:  "confessing a carp"
+   From:  Chip Salzenberg <chip@rio.atlantic.net>, Hugo van der Sanden
+          <hv@crypt.compulink.co.uk>, Nick Ing-Simmons
+          <nick@ni-s.u-net.com>, Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <199708052155.WAA25393@crypt.compulink.co.uk>,
+          <199708060721.IAA30894@crypt.compulink.co.uk>,
+          <199708061533.LAA01313@rio.atlantic.net>,
+          <33E79BE2.4E6F@ni-s.u-net.com>,
+          <33E8E3C5.62C@ni-s.u-net.com>,
+          <9708051619.AA13764@toad.ig.co.uk>
+  Files:  lib/Carp.pm
+
+  Title:  "[BUG:PATCH] dumpvar.pl parses some references incorrectly"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0wwAjQ-0004l6-00@ursa.cus.cam.ac.uk>
+  Files:  lib/dumpvar.pl
+
+  Title:  "[PATCH] m2t3: minor doc patch (to obsolete I18N::Collate)"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199708060732.KAA02675@alpha.hut.fi>
+  Files:  lib/I18N/Collate.pm
+
+  Title:  "[PATCH] Binary installers for Perl modules"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707210006.UAA06165@monk.mps.ohio-state.edu>
+  Files:  lib/ExtUtils/Install.pm
+
+  Title:  "m2t2 broke CPAN.pm :-("
+   From:  a.koenig@kulturbox.de (Andreas J. Koenig)
+  Files:  lib/CPAN.pm lib/Bundle/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+
+  Title:  "[PATCH] CPAN.pm on OS/2"
+   From:  "Andreas J. Koenig" <k@anna.in-berlin.de>, Ilya Zakharevich
+          <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707180415.AAA03180@monk.mps.ohio-state.edu>,
+          <199707181407.QAA12920@anna.in-berlin.de>
+  Files:  lib/CPAN.pm
+
+  Title:  "Docs of IO::Handle [PATCH]"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707222307.TAA08380@monk.mps.ohio-state.edu>
+  Files:  ext/IO/lib/IO/Handle.pm
+
+  Title:  "Exporter errors give wrong location"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0wdJra-0000n8-00@taurus.cus.cam.ac.uk>
+  Files:  lib/Exporter.pm
+
+  Title:  "[PATCH] Exporter new export_to_level method"
+   From:  epeschko@elmer.tci.com (Ed Peschko)
+  Files:  lib/Exporter.pm
+
+  Title:  "DB_File produces spurious output when trapping __DIE__"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9706302125.AA28254@claudius.bfsec.bt.co.uk>
+  Files:  ext/DB_File/DB_File.pm
+
+  Title:  "Remove 'use UNIVERSAL;', switch to UNIVERSAL::isa()"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0whaZJ-0007BA-00@ursa.cus.cam.ac.uk>
+  Files:  lib/Class/Struct.pm lib/File/Compare.pm lib/File/Copy.pm
+
+  Title:  "perl5.004 Time::Local still broken"
+   From:  Mathias Koerber <mathias@dnssec1.singnet.com.sg>
+ Msg-ID:  <199706260452.MAA22647@dnssec1.singnet.com.sg>
+  Files:  lib/Time/Local.pm
+
+  Title:  "Sys::Hostname should localize $SIG{__DIE__}"
+   From:  Ken Shan <ken@digitas.harvard.edu>
+ Msg-ID:  <199707070357.XAA18065@digitas.harvard.edu>
+  Files:  lib/Sys/Hostname.pm
+
+  Title:  "xsubpp patch"
+   From:  John Tobey <jtobey@user1.channel1.com>
+ Msg-ID:  <199707010221.CAA01234@remote133>
+  Files:  lib/ExtUtils/xsubpp
+
+  Title:  "DB_File 1.15 patch"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9707192117.AA01973@claudius.bfsec.bt.co.uk>
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs ext/DB_File/typemap
+          t/lib/db-btree.t t/lib/db-hash.t t/lib/db-recno.t
+
+  Title:  "Problems with setvbuf"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707250040.UAA11000@monk.mps.ohio-state.edu>
+  Files:  ext/IO/IO.xs
+
+  Title:  "[PATCH] Repost of fork() debugger patch"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707252101.RAA11846@monk.mps.ohio-state.edu>
+  Files:  lib/perl5db.pl lib/Term/ReadLine.pm
+
+  Title:  "IO::File and DB_File pollutes namespace with Fcntl constants"
+   From:  Gisle Aas <aas@bergen.sn.no>
+ Msg-ID:  <h205qyijy.fsf@bergen.sn.no>
+  Files:  ext/IO/lib/IO/File.pm
+
+  Title:  "[MM] [PATCH] Re: Liblist problems for MSWin32"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199706182152.RAA20273@aatma.engin.umich.edu>
+  Files:  lib/ExtUtils/Liblist.pm
+
+  Title:  "Net::hostent documentation error"
+   From:  gnat@frii.com
+ Msg-ID:  <199707082222.QAA24728@elara.frii.com>
+  Files:  lib/Net/hostent.pm
+
+  Title:  "PATCH: make DBM*_File modules sub-classable"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9707121854.AA19472@claudius.bfsec.bt.co.uk>
+  Files:  ext/GDBM_File/typemap ext/NDBM_File/typemap
+          ext/ODBM_File/ODBM_File.xs ext/SDBM_File/typemap
+          t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t t/lib/sdbm.t
+
+  Title:  "Sys::Syslog patch to allow unix domain sockets"
+   From:  Sean Robinson <robinson_s@sc.maricopa.edu>
+ Msg-ID:  <33B31342.7EB16A44@sc.maricopa.edu>
+  Files:  lib/Sys/Syslog.pm
+
+  Title:  "'use UNIVERSAL;' deprecated, do C<UNIVERSAL::isa()> instead",
+          "UNIVERSAL.pm and import methods"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Gisle Aas <aas@bergen.sn.no>,
+          Graham Barr <gbarr@ti.com>, Gurusamy Sarathy
+          <gsar@engin.umich.edu>, Hugo van der Sanden
+          <hv@crypt.compulink.co.uk>
+ Msg-ID:  <199706271701.NAA25664@aatma.engin.umich.edu>,
+          <199706271904.UAA00120@crypt.compulink.co.uk>,
+          <199706272054.QAA28913@aatma.engin.umich.edu>,
+          <199706301554.LAA03763@aatma.engin.umich.edu>,
+          <33B22248.7D7C1985@ti.com>,
+          <E0wf5TN-0006ps-00@taurus.cus.cam.ac.uk>,
+          <E0wguTR-0005bs-00@ursa.cus.cam.ac.uk>,
+          <E0whaZJ-0007BA-00@ursa.cus.cam.ac.uk>,
+          <E0whfHh-0007bW-00@ursa.cus.cam.ac.uk>,
+          <E0wiyUG-00073j-00@taurus.cus.cam.ac.uk>,
+          <hiuyv6q9k.fsf@bergen.sn.no>
+  Files:  lib/Class/Struct.pm lib/File/Compare.pm lib/File/Copy.pm
+          t/op/universal.t universal.c
+
+  Title:  "[MM] Small patch to MakeMaker, new release"
+   From:  "Andreas J. Koenig" <k@anna.in-berlin.de>
+ Msg-ID:  <199706281603.SAA10869@anna.in-berlin.de>
+  Files:  lib/ExtUtils/Command.pm lib/ExtUtils/Install.pm
+          lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_Unix.pm
+          lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Mksymlists.pm
+
+  Title:  "ExtUtils-Embed upgrade"
+   From:  Doug MacEachern <dougm@opengroup.org>
+  Files:  lib/ExtUtils/Embed.pm
+
+  Title:  "[PATCH] icmp tweak for IO::Socket"
+   From:  Nick.Ing-Simmons@tiuk.ti.com
+ Msg-ID:  <199707041240.NAA21484@pluto.tiuk.ti.com>
+  Files:  ext/IO/lib/IO/Socket.pm
+
+  Title:  "Allow concurrent mkdir in File::Path::mkpath"
+   From:  schattev@imb-jena.de (Ruben Schattevoy)
+ Msg-ID:  <199707300943.LAA21574@kant.imb-jena.de>
+  Files:  lib/File/Path.pm
+
+  Title:  "CPAN.pm, $VERSION and nested (bundled) modules."
+   From:  a.koenig@kulturbox.de (Andreas J. Koenig)
+  Files:  lib/ExtUtils/Install.pm lib/ExtUtils/Liblist.pm
+          lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MakeMaker.pm
+          lib/ExtUtils/Mksymlists.pm
+
+  Title:  "[PATCH] perl debugger, win32, and emacs"
+   From:  Jay Rogers <jay@rgrs.com>
+ Msg-ID:  <199707311759.NAA13276@crooked-i.mitre.org>
+  Files:  lib/perl5db.pl
+
+  Title:  "[PATCH] pod2html mangles C<&foo(42);>"
+   From:  Hans Mulder <hansmu@xs4all.nl>
+ Msg-ID:  <199706250057.CAA10162@xs1.xs4all.nl>
+  Files:  lib/Pod/Html.pm
+
+  Title:  "[PATCH] posix.xs broken on VMS 7.1"
+   From:  Dan Sugalski <sugalsd@lbcc.cc.or.us>
+ Msg-ID:  <3.0.2.32.19970718095755.00875ba0@stargate.lbcc.cc.or.us>
+  Files:  ext/POSIX/POSIX.xs
+
+  Title:  "MM_Unix.pm nits for Win32 DMAKE"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708032051.QAA14248@aatma.engin.umich.edu>
+  Files:  lib/ExtUtils/MM_Unix.pm
+
+  Title:  "Sys::Hostname -w unclean in trial 2"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708032055.QAA14278@aatma.engin.umich.edu>
+  Files:  lib/Sys/Hostname.pm
+
+  Title:  "(3) File::Find::find()/finddepth() bugs with toplevel paths"
+   From:  "Conrad E. Kimball" <cek@tblv021.ca.boeing.com>
+ Msg-ID:  <199707040045.RAA24459@mailgate2.boeing.com>
+  Files:  lib/File/Find.pm
+
+  ------  OTHER CHANGES  ------
+
+  Title:  "EMERGENCY_SBRK or PERL_EMERGENCY_SBRK ?"
+   From:  Andy Dougherty <doughera@newton.phys.lafayette.edu>,
+          ilya@math.ohio-state.edu (Ilya Zakharevich)
+ Msg-ID:  <1997Aug1.191631.2167470@hmivax.humgen.upenn.edu>,
+          <Pine.SUN.3.96.970801134400.4393F-100000@newton.phys>
+  Files:  
+  Files:  
+
+  ------  PORTABILITY - WIN32  ------
+
+  Title:  "[PATCH] Embedding threaded apps in perl.dll"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707261518.LAA24346@aatma.engin.umich.edu>,
+          <199707301833.OAA19570@aatma.engin.umich.edu>
+  Files:  win32/win32.c
+
+  Title:  "Minor fix for pl2bat.bat", "[PATCH] Re: Minor fix for pl2bat.bat"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>, Warren Jones
+          <wjones@tc.fluke.com>
+ Msg-ID:  <199707061843.OAA23874@aatma.engin.umich.edu>,
+          <97Jun24.115804pdt.35752-2@gateway.fluke.com>
+  Files:  win32/bin/pl2bat.bat
+
+  Title:  "WIN32 Build - pod2xxx.bat Missing?", "[PATCH] Re: WIN32 Build -
+          pod2xxx.bat Missing?"
+   From:  Chris Williams <chrisw@netinfo.com.au>, Gurusamy Sarathy
+          <gsar@engin.umich.edu>
+ Msg-ID:  <199707011423.KAA15855@aatma.engin.umich.edu>,
+          <33B8B962.D96FA1F5@netinfo.com.au>
+  Files:  win32/Makefile win32/makefile.mk
+
+  Title:  "[PATCH] Win32 sitelib intuition from DLL location"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199706231647.MAA23260@aatma.engin.umich.edu>
+  Files:  win32/win32.h win32/config_h.PL win32/win32.c
+
+  Title:  "[PATCH] binary coexistence on win32", "[RESEND] [PATCH] binary
+          coexistence on win32"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707250109.VAA02666@aatma.engin.umich.edu>,
+          <199707301829.OAA19516@aatma.engin.umich.edu>
+  Files:  lib/ExtUtils/Mksymlists.pm win32/win32.h win32/win32io.h
+          win32/win32iop.h win32/makedef.pl win32/win32.c
+          win32/win32io.c
+
+  Title:  "[PATCH] docs for win32 utilities"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707250045.UAA02510@aatma.engin.umich.edu>
+  Files:  win32/bin/pl2bat.bat win32/bin/runperl.bat
+
+  Title:  "[PATCH] exec() fixed on win32"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199706241525.LAA06554@aatma.engin.umich.edu>
+  Files:  win32/win32.h win32/win32io.h win32/win32iop.h README.win32 doio.c
+          win32/config_H.bc win32/config_H.vc win32/makedef.pl
+          win32/win32.c win32/win32io.c
+
+  Title:  "[PATCH] getenv() after my_setenv() gets old entry on Win32"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199706231700.NAA23400@aatma.engin.umich.edu>
+  Files:  win32/win32.h win32/win32.c
+
+  Title:  "[PATCH] getservby*() calls fail on Windows NT"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199706231654.MAA23276@aatma.engin.umich.edu>
+  Files:  win32/win32sck.c
+
+  Title:  "[PATCH] minor win32 scribbles"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>, Hugo van der Sanden
+          <hv@crypt.compulink.co.uk>
+ Msg-ID:  <199707262307.TAA28410@aatma.engin.umich.edu>,
+          <199707270832.JAA19399@crypt.compulink.co.uk>
+  Files:  pod/perldelta.pod README.win32 win32/Makefile win32/config.bc
+          win32/config.vc win32/makefile.mk
+
+  Title:  "[PATCH] trial2: some batch files won't run"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708040226.WAA17301@aatma.engin.umich.edu>
+  Files:  win32/bin/pl2bat.bat win32/bin/runperl.bat
+
+  Title:  "[PATCH] win32 docs and runperl.bat"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707070446.AAA29560@aatma.engin.umich.edu>
+  Files:  MANIFEST README.win32 win32/bin/pl2bat.bat win32/bin/runperl.bat
+
+  Title:  "[PATCH] win32 extras and embedding"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707250232.WAA03421@aatma.engin.umich.edu>,
+          <199707301831.OAA19528@aatma.engin.umich.edu>
+  Files:  dosish.h win32/win32.h perl.c win32/config.bc win32/config_H.bc
+          win32/makedef.pl win32/perllib.c win32/win32.c
+
+  Title:  "[PATCH] win32 tweaks"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707042150.RAA01065@aatma.engin.umich.edu>
+  Files:  win32/win32.h win32/win32.c
+
+  Title:  "[PATCH] win32_stat() fixes (2nd try)"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708040137.VAA16810@aatma.engin.umich.edu>
+  Files:  t/op/stat.t win32/win32iop.h win32/win32.c
+
+  ------  PORTABILITY - OTHER  ------
+
+  Title:  "Additional OS/2 patches"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>, Ilya Zakharevich
+          <ilya@math.ohio-state.edu>
+ Msg-ID:  <199708020823.EAA19521@monk.mps.ohio-state.edu>,
+          <199708021424.KAA28561@aatma.engin.umich.edu>,
+          <199708042108.RAA27671@aatma.engin.umich.edu>
+  Files:  README.os2 os2/Changes perl.c
+
+  Title:  "Additional patch is needed for os2/diff.configure"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199708020745.DAA19483@monk.mps.ohio-state.edu>
+  Files:  os2/diff.configure
+
+  Title:  "Assorted OS/2 fixes"
+   From:  ilya@math.ohio-state.edu (Ilya Zakharevich)
+ Msg-ID:  <1997Jun16.163234.2091727@hmivax.humgen.upenn.edu>
+  Files:  hints/os2.sh os2/diff.configure os2/os2ish.h README.os2 os2/Changes
+          os2/Makefile.SHs os2/os2.c util.c
+
+  Title:  "[PATCH] Changes for VMS 7.1 support"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>, Dan Sugalski
+          <sugalsd@lbcc.cc.or.us>
+ Msg-ID:  <01ILDXUH0J1W00026U@hmivax.humgen.upenn.edu>,
+          <3.0.2.32.19970718095935.0087a2d0@stargate.lbcc.cc.or.us>
+  Files:  vms/sockadapt.h vms/config.vms vms/sockadapt.c
+
+  Title:  "[PATCH] Easier TCP stack selection for VMS"
+   From:  Dan Sugalski <sugalsd@lbcc.cc.or.us>
+ Msg-ID:  <3.0.1.32.19970624151939.00994490@stargate.lbcc.cc.or.us>
+  Files:  vms/descrip.mms
+
+  Title:  "Minor VMS patches"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01ILCUO6XXTE000WFK@hmivax.humgen.upenn.edu>
+  Files:  lib/ExtUtils/MM_VMS.pm vms/vmsish.h vms/descrip.mms vms/test.com
+          vms/vms.c vms/ext/filespec.t
+
+  Title:  "[PATCH] Two un-disabled tests for VMS"
+   From:  Dan Sugalski <sugalsd@lbcc.cc.or.us>
+ Msg-ID:  <3.0.2.32.19970718095842.00879220@stargate.lbcc.cc.or.us>
+  Files:  vms/test.com
+
+  Title:  "fixes for hints/svr4 for UnixWare >= 2.1.1"
+   From:  John Hughes <john@titanic.atlantech.com>
+ Msg-ID:  <199707021230.OAA24230@titanic.AtlanTech.COM>
+  Files:  hints/svr4.sh
+
+  Title:  "make depend loop fix and minor OS/2 improvements to build process"
+   From:  ilya@math.ohio-state.edu (Ilya Zakharevich)
+  Files:  Makefile.SH hints/os2.sh os2/Makefile.SHs
+
+  ------  TESTS  ------
+
+  Title:  "Add xor tests to test suite"
+   From:  Hugo van der Sanden <hv@crypt.compulink.co.uk>
+ Msg-ID:  <199706250730.IAA06097@crypt.compulink.co.uk>
+  Files:  t/comp/cmdopt.t
+
+  Title:  "[PATCH] enable some tests on Win32"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199707250029.UAA02351@aatma.engin.umich.edu>
+  Files:  t/op/magic.t
+
+  Title:  "Fix up problems with *DBM tests"
+   From:  Paul Marquess <pmarquess@bfsec.bt.co.uk>
+  Files:  t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t t/lib/sdbm.t
+
+  ------  UTILITIES  ------
+
+  Title:  "[PATCH] m2t3: utils/perlbug.PL: -ok report is not a bug"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199708071022.NAA13008@alpha.hut.fi>
+  Files:  utils/perlbug.PL
+
+  Title:  "perlbug - check sendmail and fix win32 tmp path"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199708060349.XAA15895@aatma.engin.umich.edu>
+  Files:  utils/perlbug.PL
+
+  Title:  "OK: perl <some_version> on <some_system> (corrected)", "enhancements
+          to perlbug -ok"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Stephen McCamant <alias@mcs.com>
+ Msg-ID:  <E0wukVt-0006Da-00@ursa.cus.cam.ac.uk>,
+          <E0wvMQl-00055y-00@ursa.cus.cam.ac.uk>,
+          <m0wv81x-000EYPC@alias-2.pr.mcs.net>
+  Files:  utils/Makefile utils/perlbug.PL
+
+  Title:  "perlbug -ok [PATCH]"
+   From:  "Charles F. Randall" <crandall@free.click-n-call.com>
+ Msg-ID:  <199706181824.MAA04082@free.click-n-call.com>
+  Files:  utils/perlbug.PL
+
+  Title:  "perlbug broken"
+   From:  Andreas Schwab <schwab@issan.informatik.uni-dortmund.de>
+ Msg-ID:  <9707040912.AA03466@issan.informatik.uni-dortmund.de>
+  Files:  utils/perlbug.PL
+
+  Title:  "[PATCH] perlbug under OS/2"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707180333.XAA03102@monk.mps.ohio-state.edu>
+  Files:  utils/perlbug.PL
+
+  Title:  "perldoc doesn't grok Win32 UNC paths"
+   From:  Warren Jones <wjones@tc.fluke.com>
+ Msg-ID:  <97Jun17.184420pdt.35728-1@gateway.fluke.com>,
+          <97Jun18.165618pdt.35713-1@gateway.fluke.com>
+  Files:  utils/perldoc.PL
+
+  Title:  "[PATCH] perldoc under OS/2"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199707180340.XAA03114@monk.mps.ohio-state.edu>
+  Files:  utils/perldoc.PL
+
+  Title:  "h2ph corrections to avoid redefined sub warnings"
+   From:  wdconsta <wdconsta@cs.adelaide.edu.au>
+ Msg-ID:  <Pine.SV4.3.93.970708143446.23808A-100000@florence.teaching.cs.adelaide.edu.au>
+  Files:  utils/h2ph.PL
+
+
+
+----------------
 Version 5.004_01        Maintenance release 1 for 5.004
 ----------------
 

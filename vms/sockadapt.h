@@ -24,6 +24,8 @@
 #  include <inet.h>
 #  include <in.h>
 #  include <netdb.h>
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#else
    void sethostent(int);
    void endhostent(void);
    void setnetent(int);
@@ -32,6 +34,7 @@
    void endprotoent(void);
    void setservent(int);
    void endservent(void);
+#endif
 #  if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 50200000)
 #    define Sock_size_t unsigned int
 #  endif

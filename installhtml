@@ -1,4 +1,6 @@
-#!/usr/bin/perl -w
+#!./perl -w
+
+# This file should really be a extracted from a .PL
 
 use lib 'lib';		# use source library if present
 
@@ -93,14 +95,14 @@ The following command-line is an example of the one we use to convert
 perl documentation:
 
     ./installhtml --podpath=lib:ext:pod:vms   \
-		  --podroot=/usr/src/perl     \
-                  --htmldir=/perl/nmanual     \
-		  --htmlroot=/perl/nmanual    \
-		  --splithead=pod/perlipc     \
-		  --splititem=pod/perlfunc    \
-		  --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
-                  --recurse \
-		  --verbose
+			--podroot=/usr/src/perl     \
+			--htmldir=/perl/nmanual     \
+			--htmlroot=/perl/nmanual    \
+			--splithead=pod/perlipc     \
+			--splititem=pod/perlfunc    \
+			--libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
+			--recurse \
+			--verbose
 
 =head1 AUTHOR
 

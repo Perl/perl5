@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # hints/hpux.sh
-# Perl Configure hints file for Hewlett Packard HP-UX 9.x and 10.x
+# Perl Configure hints file for Hewlett-Packard's HP-UX 9.x and 10.x
 # (Hopefully, 7.x through 11.x.)
 #
 # This file is based on hints/hpux_9.sh, Perl Configure hints file for
@@ -21,7 +21,7 @@
 # Don't assume every OS != 10 is < 10, (e.g., 11).
 # From: Chuck Phillips <cdp@fc.hp.com>
 
-# This version: April 27, 1997
+# This version: August 15, 1997
 # Current maintainer: Jeff Okamoto <okamoto@corp.hp.com>
 
 #--------------------------------------------------------------------
@@ -121,6 +121,7 @@ else
 	# ASSUMPTION: Only CPU identifiers contain no lowercase letters.
 	archname=`getcontext | tr ' ' '\012' | grep -v '[a-z]' | grep -v MC688 |
 	    sed -e 's/HP-//' -e 1q`;
+	selecttype='int *'
 fi
 
 
@@ -151,7 +152,6 @@ ccdlflags="-Wl,-E -Wl,-B,deferred $ccdlflags"
 
 usemymalloc='y'
 alignbytes=8
-selecttype='int *'
 # For native nm, you need "-p" to produce BSD format output.
 nm_opt='-p'
 

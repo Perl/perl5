@@ -19,6 +19,8 @@ AOUT_LIBPERL_DLL	= libperl_dll$aout_lib_ext
 AOUT_CCCMD_DLL	= \$(CC) -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK
 AOUT_CLDFLAGS_DLL	= -Zexe -Zmt -Zcrtdll
 
+LD_OPT		= $optimize
+
 !GROK!THIS!
 
 $spitshell >>Makefile <<'!NO!SUBS!'
@@ -36,7 +38,7 @@ perl.imp: perl5.def
 	echo	'emx_realloc		emxlibcm	403	?' >> $@
 
 perl.dll: $(obj) perl5.def perl$(OBJ_EXT)
-	$(LD) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj) $(libs) perl5.def
+	$(LD) $(LD_OPT) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj) $(libs) perl5.def
 
 perl5.def: perl.linkexp
 	echo "LIBRARY 'Perl' INITINSTANCE TERMINSTANCE"	> $@
@@ -54,6 +56,7 @@ perl5.def: perl.linkexp
 	echo '  "dlerror"'				>>$@
 	echo '  "my_tmpfile"'				>>$@
 	echo '  "my_tmpnam"'				>>$@
+	echo '  "my_flock"'				>>$@
 !NO!SUBS!
 
 if [ ! -z "$myttyname" ] ; then
@@ -77,10 +80,13 @@ perl.exports: perl.exp EXTERN.h perl.h
 perl.linkexp: perl.exports perl.map
 	cat perl.exports perl.map | sort | uniq -d | sed -e 's/\w\+/  "\0"/' > perl.linkexp
 
-perl.map: $(obj) perl$(OBJ_EXT) miniperlmain$(OBJ_EXT)
-	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o dummy.exe miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) $(obj) $(libs) -Zmap -Zlinker /map
-	awk '{if ($$3 == "") print $$2}' <dummy.map | sort | uniq > perl.map
-	rm dummy.exe dummy.map
+# We link miniperl statically, since .DLL depends on $(DYNALOADER) 
+
+perl.map miniperl: $(obj) perl$(OBJ_EXT) miniperlmain$(OBJ_EXT)
+	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) $(obj) $(libs) -Zmap -Zlinker /map
+	awk '{if ($$3 == "") print $$2}' <miniperl.map | sort | uniq > perl.map
+	rm miniperl.map
+	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
 
 depend: os2ish.h dlfcn.h 
 
@@ -98,12 +104,6 @@ os2ish.h: os2/os2ish.h
 
 dlfcn.h: os2/dlfcn.h
 	cp $< $@
-
-# We link miniperl statically, since .DLL depends on $(DYNALOADER) 
-
-miniperl: $& miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) $(obj) 
-	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) $(obj) $(libs)
-	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
 
 # This one is compiled OMF, so cannot fork():
 

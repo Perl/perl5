@@ -2,6 +2,10 @@
  *
  */
 
+#if defined(PERL_CORE) && !defined(DEBUGGING_MSTATS)
+#  define DEBUGGING_MSTATS
+#endif 
+
 #ifndef lint
 #  if defined(DEBUGGING) && !defined(NO_RCHECK)
 #    define RCHECK
@@ -789,6 +793,9 @@ int size;
 #ifdef PERL_CORE
     reqsize = size; /* just for the DEBUG_m statement */
 #endif
+#ifdef PACK_MALLOC
+    size = (size + 0x7ff) & ~0x7ff;
+#endif
     if (size <= Perl_sbrk_oldsize) {
 	got = Perl_sbrk_oldchunk;
 	Perl_sbrk_oldchunk += size;
@@ -804,6 +811,9 @@ int size;
 	small = 1;
       }
       got = (IV)SYSTEM_ALLOC(size);
+#ifdef PACK_MALLOC
+      got = (got + 0x7ff) & ~0x7ff;
+#endif
       if (small) {
 	/* Chunk is small, register the rest for future allocs. */
 	Perl_sbrk_oldchunk = got + reqsize;

@@ -224,33 +224,33 @@ runs the script under the control of a debugging or tracing module
 installed as Devel::foo. E.g., B<-d:DProf> executes the script using the
 Devel::DProf profiler.  See L<perldebug>.
 
+=item B<-D>I<letters>
+
 =item B<-D>I<number>
 
-=item B<-D>I<list>
-
 sets debugging flags.  To watch how it executes your script, use
-B<-D14>.  (This works only if debugging is compiled into your
-Perl.)  Another nice value is B<-D1024>, which lists your compiled
-syntax tree.  And B<-D512> displays compiled regular expressions. As an
-alternative specify a list of letters instead of numbers (e.g., B<-D14> is
+B<-Dtls>.  (This works only if debugging is compiled into your
+Perl.)  Another nice value is B<-Dx>, which lists your compiled
+syntax tree.  And B<-Dr> displays compiled regular expressions. As an
+alternative, specify a number instead of list of letters (e.g., B<-D14> is
 equivalent to B<-Dtls>):
 
-        1  p  Tokenizing and Parsing
-        2  s  Stack Snapshots
-        4  l  Label Stack Processing
-        8  t  Trace Execution
-       16  o  Operator Node Construction
-       32  c  String/Numeric Conversions
-       64  P  Print Preprocessor Command for -P
-      128  m  Memory Allocation
-      256  f  Format Processing
-      512  r  Regular Expression Parsing
-     1024  x  Syntax Tree Dump
-     2048  u  Tainting Checks
-     4096  L  Memory Leaks (not supported anymore)
-     8192  H  Hash Dump -- usurps values()
-    16384  X  Scratchpad Allocation
-    32768  D  Cleaning Up
+        1  p  Tokenizing and parsing
+        2  s  Stack snapshots
+        4  l  Context (loop) stack processing
+        8  t  Trace execution
+       16  o  Method and overloading resolution
+       32  c  String/numeric conversions
+       64  P  Print preprocessor command for -P
+      128  m  Memory allocation
+      256  f  Format processing
+      512  r  Regular expression parsing and execution
+     1024  x  Syntax tree dump
+     2048  u  Tainting checks
+     4096  L  Memory leaks (not supported anymore)
+     8192  H  Hash dump -- usurps values()
+    16384  X  Scratchpad allocation
+    32768  D  Cleaning up
 
 =item B<-e> I<commandline>
 
@@ -376,8 +376,10 @@ B<awk>:
     }
 
 Note that the lines are not printed by default.  See B<-p> to have
-lines printed.  Here is an efficient way to delete all files older than
-a week:
+lines printed.  If a file named by an argument cannot be opened for
+some reason, Perl warns you about it, and moves on to the next file.
+
+Here is an efficient way to delete all files older than a week:
 
     find . -mtime +7 -print | perl -nle 'unlink;'
 
@@ -396,11 +398,14 @@ makes it iterate over filename arguments somewhat like B<sed>:
     while (<>) {
 	...		# your script goes here
     } continue {
-	print;
+	print or die "-p destination: $!\n";
     }
 
-Note that the lines are printed automatically.  To suppress printing
-use the B<-n> switch.  A B<-p> overrides a B<-n> switch.
+If a file named by an argument cannot be opened for some reason, Perl
+warns you about it, and moves on to the next file.  Note that the
+lines are printed automatically.  An error occuring during printing is
+treated as fatal.  To suppress printing use the B<-n> switch.  A B<-p>
+overrides a B<-n> switch.
 
 C<BEGIN> and C<END> blocks may be used to capture control before or after
 the implicit loop, just as in awk.
@@ -426,9 +431,27 @@ prints "true" if and only if the script is invoked with a B<-xyz> switch.
 =item B<-S>
 
 makes Perl use the PATH environment variable to search for the
-script (unless the name of the script starts with a slash).  Typically
-this is used to emulate #! startup on machines that don't support #!,
-in the following manner:
+script (unless the name of the script contains directory separators).
+On some platforms, this also makes Perl append suffixes to the
+filename while searching for it.  For example, on Win32 platforms,
+the ".bat" and ".cmd" suffixes are appended if a lookup for the
+original name fails, and if the name does not already end in one
+of those suffixes.  If your Perl was compiled with DEBUGGING turned
+on, using the -Dp switch to Perl shows how the search progresses.
+
+If the file supplied contains directory separators (i.e. it is an
+absolute or relative pathname), and if the file is not found,
+platforms that append file extensions will do so and try to look
+for the file with those extensions added, one by one.
+
+On DOS-like platforms, if the script does not contain directory
+separators, it will first be searched for in the current directory
+before being searched for on the PATH.  On Unix platforms, the
+script will be searched for strictly on the PATH.
+
+Typically this is used to emulate #! startup on platforms that
+don't support #!.  This example works on many platforms that
+have a shell compatible with Bourne shell:
 
     #!/usr/bin/perl
     eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'

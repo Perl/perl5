@@ -1110,6 +1110,8 @@ I32 type;
 
     case OP_RV2AV:
     case OP_RV2HV:
+	if (!type && cUNOPo->op_first->op_type != OP_GV)
+	    croak("Can't localize through a reference");
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
 	    modcount = 10000;
 	    return o;		/* Treat \(@foo) like ordinary list. */
@@ -1131,7 +1133,7 @@ I32 type;
 	break;
     case OP_RV2SV:
 	if (!type && cUNOPo->op_first->op_type != OP_GV)
-	    croak("Can't localize a reference");
+	    croak("Can't localize through a reference");
 	ref(cUNOPo->op_first, o->op_type); 
 	/* FALL THROUGH */
     case OP_GV:
@@ -1450,7 +1452,7 @@ scope(o)
 OP *o;
 {
     if (o) {
-	if (o->op_flags & OPf_PARENS || perldb || tainting) {
+	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || tainting) {
 	    o = prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
 	    o->op_type = OP_LEAVE;
 	    o->op_ppaddr = ppaddr[OP_LEAVE];
@@ -1537,7 +1539,7 @@ OP *o;
 	compcv = 0;
 
 	/* Register with debugger */
-	if (perldb) {
+	if (PERLDB_INTER) {
 	    CV *cv = perl_get_cv("DB::postponed", FALSE);
 	    if (cv) {
 		dSP;
@@ -1606,6 +1608,16 @@ register OP *o;
 
     if (!(opargs[type] & OA_FOLDCONST))
 	goto nope;
+
+    switch (type) {
+    case OP_SPRINTF:
+    case OP_UCFIRST:
+    case OP_LCFIRST:
+    case OP_UC:
+    case OP_LC:
+	if (o->op_private & OPpLOCALE)
+	    goto nope;
+    }
 
     if (error_count)
 	goto nope;		/* Don't try to run w/ errors */
@@ -2532,7 +2544,7 @@ OP *o;
     register COP *cop;
 
     Newz(1101, cop, 1, COP);
-    if (perldb && curcop->cop_line && curstash != debstash) {
+    if (PERLDB_LINE && curcop->cop_line && curstash != debstash) {
 	cop->op_type = OP_DBSTATE;
 	cop->op_ppaddr = ppaddr[ OP_DBSTATE ];
     }
@@ -2563,7 +2575,7 @@ OP *o;
     cop->cop_filegv = (GV*)SvREFCNT_inc(curcop->cop_filegv);
     cop->cop_stash = curstash;
 
-    if (perldb && curstash != debstash) {
+    if (PERLDB_LINE && curstash != debstash) {
 	SV **svp = av_fetch(GvAV(curcop->cop_filegv),(I32)cop->cop_line, FALSE);
 	if (svp && *svp != &sv_undef && !SvIOK(*svp)) {
 	    (void)SvIOK_on(*svp);
@@ -3447,7 +3459,7 @@ OP *block;
     if (name) {
 	char *s;
 
-	if (perldb && curstash != debstash) {
+	if (PERLDB_SUBLINE && curstash != debstash) {
 	    SV *sv = NEWSV(0,0);
 	    SV *tmpstr = sv_newmortal();
 	    static GV *db_postponed;
@@ -4642,7 +4654,7 @@ OP *o;
 	}
     }
     o->op_private |= (hints & HINT_STRICT_REFS);
-    if (perldb && curstash != debstash)
+    if (PERLDB_SUB && curstash != debstash)
 	o->op_private |= OPpENTERSUB_DB;
     while (o2 != cvop) {
 	if (proto) {

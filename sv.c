@@ -1513,8 +1513,10 @@ SV *sv;
 {
     I32 numtype = looks_like_number(sv);
 
+#ifdef HAS_STRTOUL
     if (numtype == 1)
-	return atol(SvPVX(sv));
+	return strtoul(SvPVX(sv), Null(char**), 10);
+#endif
     if (!numtype && dowarn)
 	not_a_number(sv);
     SET_NUMERIC_STANDARD();
@@ -1728,12 +1730,17 @@ STRLEN *lp;
 #endif
     }
     else if (SvIOKp(sv)) {
+	U32 oldIOK = SvIOK(sv);
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
-	sv_setpvf(sv, "%Vd", SvIVX(sv));
+	sv_setpviv(sv, SvIVX(sv));
 	errno = olderrno;
 	s = SvEND(sv);
+	if (oldIOK)
+	    SvIOK_on(sv);
+	else
+	    SvIOKp_on(sv);
     }
     else {
 	dTHR;
@@ -2720,21 +2727,10 @@ register SV *sv;
 		--sv_objcount;	/* XXX Might want something more general */
 	}
 	if (SvREFCNT(sv)) {
-	    SV *ret;
-	    if ( perldb
-		 && (ret = perl_get_sv("DB::ret", FALSE))
-		 && SvROK(ret) && SvRV(ret) == sv && SvREFCNT(sv) == 1) {
-		/* Debugger is prone to dangling references. */
-		SvRV(ret) = 0;
-		SvROK_off(ret);
-		SvREFCNT(sv) = 0;
-	    }
-	    else {
 		if (in_clean_objs)
 		    croak("DESTROY created new reference to dead object");
 		/* DESTROY gave object new lease on life */
 		return;
-	    }
 	}
     }
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
@@ -4148,6 +4144,42 @@ SV *sv;
     return FALSE;
 }
 
+void
+sv_setpviv(sv, iv)
+SV *sv;
+IV iv;
+{
+    STRLEN len;
+    char buf[TYPE_DIGITS(UV)];
+    char *ptr = buf + sizeof(buf);
+    int sign;
+    UV uv;
+    char *p;
+    int i;
+
+    sv_setpvn(sv, "", 0);
+    if (iv >= 0) {
+	uv = iv;
+	sign = 0;
+    } else {
+	uv = -iv;
+	sign = 1;
+    }
+    do {
+	*--ptr = '0' + (uv % 10);
+    } while (uv /= 10);
+    len = (buf + sizeof(buf)) - ptr;
+    /* taking advantage of SvCUR(sv) == 0 */
+    SvGROW(sv, sign + len + 1);
+    p = SvPVX(sv);
+    if (sign)
+	*p++ = '-';
+    memcpy(p, ptr, len);
+    p += len;
+    *p = '\0';
+    SvCUR(sv) = p - SvPVX(sv);
+}
+
 #ifdef I_STDARG
 void
 sv_setpvf(SV *sv, const char* pat, ...)
@@ -4594,6 +4626,8 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	    }
 	    if (fill == '0')
 		*--eptr = fill;
+	    if (left)
+		*--eptr = '-';
 	    if (plus)
 		*--eptr = plus;
 	    if (alt)
@@ -4659,7 +4693,7 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	need = (have > width ? have : width);
 	gap = need - have;
 
-	SvGROW(sv, SvLEN(sv) + need);
+	SvGROW(sv, SvCUR(sv) + need + 1);
 	p = SvEND(sv);
 	if (esignlen && fill == '0') {
 	    for (i = 0; i < esignlen; i++)

@@ -271,6 +271,8 @@ setvbuf(handle, buf, type, size)
     CODE:
 /* Should check HAS_SETVBUF once Configure tests for that */
 #if defined(PERLIO_IS_STDIO) && defined(_IOFBF)
+	if (!handle)			/* Try input stream. */
+	    handle = IoIFP(sv_2io(ST(0)));
 	if (handle)
 	    RETVAL = setvbuf(handle, buf, type, size);
 	else {

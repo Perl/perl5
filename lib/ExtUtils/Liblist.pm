@@ -2,7 +2,7 @@ package ExtUtils::Liblist;
 use vars qw($VERSION);
 # Broken out of MakeMaker from version 4.11
 
-$VERSION = substr q$Revision: 1.2201 $, 10;
+$VERSION = substr q$Revision: 1.25 $, 10;
 
 use Config;
 use Cwd 'cwd';
@@ -15,7 +15,7 @@ sub ext {
 }
 
 sub _unix_os2_ext {
-    my($self,$potential_libs, $Verbose) = @_;
+    my($self,$potential_libs, $verbose) = @_;
     if ($^O =~ 'os2' and $Config{libs}) { 
 	# Dynamic libraries are not transitive, so we may need including
 	# the libraries linked against perl.dll again.
@@ -24,7 +24,7 @@ sub _unix_os2_ext {
 	$potential_libs .= $Config{libs};
     }
     return ("", "", "", "") unless $potential_libs;
-    print STDOUT "Potential libraries are '$potential_libs':\n" if $Verbose;
+    print STDOUT "Potential libraries are '$potential_libs':\n" if $verbose;
 
     my($so)   = $Config{'so'};
     my($libs) = $Config{'libs'};
@@ -50,7 +50,7 @@ sub _unix_os2_ext {
 	    my($ptype) = $1;
 	    unless (-d $thislib){
 		print STDOUT "$ptype$thislib ignored, directory does not exist\n"
-			if $Verbose;
+			if $verbose;
 		next;
 	    }
 	    unless ($self->file_name_is_absolute($thislib)) {
@@ -125,10 +125,10 @@ sub _unix_os2_ext {
 		 #
 		 # , the compilation tools expand the environment variables.)
 	    } else {
-		print STDOUT "$thislib not found in $thispth\n" if $Verbose;
+		print STDOUT "$thislib not found in $thispth\n" if $verbose;
 		next;
 	    }
-	    print STDOUT "'-l$thislib' found at $fullname\n" if $Verbose;
+	    print STDOUT "'-l$thislib' found at $fullname\n" if $verbose;
 	    my($fullnamedir) = dirname($fullname);
 	    push @ld_run_path, $fullnamedir unless $ld_run_path_seen{$fullnamedir}++;
 	    $found++;
@@ -183,7 +183,7 @@ sub _unix_os2_ext {
 }
 
 sub _win32_ext {
-    my($self, $potential_libs, $Verbose) = @_;
+    my($self, $potential_libs, $verbose) = @_;
 
     # If user did not supply a list, we punt.
     # (caller should probably use the list in $Config{libs})
@@ -202,7 +202,7 @@ sub _win32_ext {
 	$potential_libs .= " " if $potential_libs;
 	$potential_libs .= $libs;
     }
-    print STDOUT "Potential libraries are '$potential_libs':\n" if $Verbose;
+    print STDOUT "Potential libraries are '$potential_libs':\n" if $verbose;
 
     # compute $extralibs from $potential_libs
 
@@ -219,7 +219,7 @@ sub _win32_ext {
 	# Handle possible linker path arguments.
 	if ($thislib =~ s/^-L// and not -d $thislib) {
 	    print STDOUT "-L$thislib ignored, directory does not exist\n"
-		if $Verbose;
+		if $verbose;
 	    next;
 	}
 	elsif (-d $thislib) {
@@ -238,10 +238,10 @@ sub _win32_ext {
 	my($found_lib)=0;
 	foreach $thispth (@searchpath, @libpath){
 	    unless (-f ($fullname="$thispth\\$thislib")) {
-		print STDOUT "$thislib not found in $thispth\n" if $Verbose;
+		print STDOUT "$thislib not found in $thispth\n" if $verbose;
 		next;
 	    }
-	    print STDOUT "'$thislib' found at $fullname\n" if $Verbose;
+	    print STDOUT "'$thislib' found at $fullname\n" if $verbose;
 	    $found++;
 	    $found_lib++;
 	    push(@extralibs, $fullname);
@@ -370,7 +370,7 @@ sub _vms_ext {
       if ($ctype) { 
         eval '$' . $ctype . "{'$cand'}++";
         die "Error recording library: $@" if $@;
-        print STDOUT "\tFound as $cand (really $ctest), type $ctype\n" if $verbose > 1;
+        print STDOUT "\tFound as $cand (really $test), type $ctype\n" if $verbose > 1;
         next LIB;
       }
     }
@@ -403,7 +403,7 @@ ExtUtils::Liblist - determine libraries to use and how to use them
 
 C<require ExtUtils::Liblist;>
 
-C<ExtUtils::Liblist::ext($self, $potential_libs, $Verbose);>
+C<ExtUtils::Liblist::ext($self, $potential_libs, $verbose);>
 
 =head1 DESCRIPTION
 

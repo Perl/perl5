@@ -147,6 +147,13 @@ because at least two widely-used modules depend on the old meaning of
 old (broken) way inside strings; but it generates this message as a
 warning.  And in Perl 5.005, this special treatment will cease.
 
+=head2 Fixed localization of $<digit>, $&, etc.
+
+Perl versions before 5.004 did not always properly localize the
+regex-related special variables.  Perl 5.004 does localize them, as
+the documentation has always said it should.  This may result in $1,
+$2, etc. no longer being set where existing programs use them.
+
 =head2 No resetting of $. on implicit close
 
 The documentation for Perl 5.0 has always stated that C<$.> is I<not>
@@ -285,7 +292,7 @@ there is no C<use English> long name for this variable.
 By default, running out of memory it is not trappable.  However, if
 compiled for this, Perl may use the contents of C<$^M> as an emergency
 pool after die()ing with this message.  Suppose that your Perl were
-compiled with -DEMERGENCY_SBRK and used Perl's malloc.  Then
+compiled with -DPERL_EMERGENCY_SBRK and used Perl's malloc.  Then
 
     $^M = 'a' x (1<<16);
 
@@ -395,6 +402,9 @@ provides seven bits of the total value, with the most significant
 first.  Bit eight of each byte is set, except for the last byte, in
 which bit eight is clear.
 
+If 'p' or 'P' are given undef as values, they now generate a NULL
+pointer.
+
 Both pack() and unpack() now fail when their templates contain invalid
 types.  (Invalid types used to be ignored.)
 
@@ -490,6 +500,21 @@ before (printed only zeros), but is fine now:
     foreach $i ( 1 .. 10 ) {
 	write;
     }
+    format =
+	my i is @#
+	$i
+    .
+
+However, it still fails (without a warning) if the foreach is within a
+subroutine:
+
+    my $i;
+    sub foo {
+      foreach $i ( 1 .. 10 ) {
+	write;
+      }
+    }
+    foo;
     format =
 	my i is @#
 	$i
@@ -631,24 +656,23 @@ possibly for cleaning up.
 
 =head2 Malloc enhancements
 
-Four new compilation flags are recognized by malloc.c.  (They have no
-effect if perl is compiled with system malloc().)
-
-=over
-
-=item -DDEBUGGING_MSTATS
-
-If perl is compiled with C<DEBUGGING_MSTATS> defined, you can print
+If perl is compiled with the malloc included with the perl distribution
+(that is, if C<perl -V:d_mymalloc> is 'define') then you can print
 memory statistics at runtime by running Perl thusly:
 
   env PERL_DEBUG_MSTATS=2 perl your_script_here
 
 The value of 2 means to print statistics after compilation and on
-exit; with a value of 1, the statistics ares printed only on exit.
+exit; with a value of 1, the statistics are printed only on exit.
 (If you want the statistics at an arbitrary time, you'll need to
 install the optional module Devel::Peek.)
 
-=item -DEMERGENCY_SBRK
+Three new compilation flags are recognized by malloc.c.  (They have no
+effect if perl is compiled with system malloc().)
+
+=over
+
+=item -DPERL_EMERGENCY_SBRK
 
 If this macro is defined, running out of memory need not be a fatal
 error: a memory pool can allocated by assigning to the special
@@ -705,7 +729,8 @@ Support for the following operating systems is new in Perl 5.004.
 
 Perl 5.004 now includes support for building a "native" perl under
 Windows NT, using the Microsoft Visual C++ compiler (versions 2.0
-and above).  The resulting perl can be used under Windows 95 (if it
+and above) or the Borland C++ compiler (versions 5.02 and above).
+The resulting perl can be used under Windows 95 (if it
 is installed in the same directory locations as it got installed
 in Windows NT).  This port includes support for perl extension
 building tools like L<MakeMaker> and L<h2xs>, so that many extensions
@@ -719,8 +744,6 @@ Cygwin32 is a set of GNU tools that make it possible to compile and run
 many UNIX programs under Windows NT by providing a mostly UNIX-like 
 interface for compilation and execution.  See L<README.cygwin32> for
 more details on this port, and how to obtain the Cygwin32 toolkit.
-This port has not been as well tested as the "native" port described
-above (which is not as well tested as we'd like either :)
 
 =head2 Plan 9
 

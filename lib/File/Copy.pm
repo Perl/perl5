@@ -9,7 +9,6 @@ package File::Copy;
 
 use strict;
 use Carp;
-use UNIVERSAL qw(isa);
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION $Too_Big
 	    &copy &syscopy &cp &mv);
 
@@ -48,11 +47,13 @@ sub copy {
 
     my $from_a_handle = (ref($from)
 			 ? (ref($from) eq 'GLOB'
-			    || isa($from, 'GLOB') || isa($from, 'IO::Handle'))
+			    || UNIVERSAL::isa($from, 'GLOB')
+                            || UNIVERSAL::isa($from, 'IO::Handle'))
 			 : (ref(\$from) eq 'GLOB'));
     my $to_a_handle =   (ref($to)
 			 ? (ref($to) eq 'GLOB'
-			    || isa($to, 'GLOB') || isa($to, 'IO::Handle'))
+			    || UNIVERSAL::isa($to, 'GLOB')
+                            || UNIVERSAL::isa($to, 'IO::Handle'))
 			 : (ref(\$to) eq 'GLOB'));
 
     if (!$from_a_handle && !$to_a_handle && -d $to && ! -d $from) {

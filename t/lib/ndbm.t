@@ -16,7 +16,7 @@ require NDBM_File;
 #If Fcntl is not available, try 0x202 or 0x102 for O_RDWR|O_CREAT
 use Fcntl;
 
-print "1..12\n";
+print "1..18\n";
 
 unlink <Op.dbmx*>;
 
@@ -124,3 +124,82 @@ print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
 
 untie %h;
 unlink 'Op.dbmx.dir', $Dfile;
+
+sub ok
+{
+    my $no = shift ;
+    my $result = shift ;
+
+    print "not " unless $result ;
+    print "ok $no\n" ;
+}
+
+{
+   # sub-class test
+
+   package Another ;
+
+   use strict ;
+
+   open(FILE, ">SubDB.pm") or die "Cannot open SubDB.pm: $!\n" ;
+   print FILE <<'EOM' ;
+
+   package SubDB ;
+
+   use strict ;
+   use vars qw(@ISA @EXPORT) ;
+
+   require Exporter ;
+   use NDBM_File;
+   @ISA=qw(NDBM_File);
+   @EXPORT = @NDBM_File::EXPORT if defined @NDBM_File::EXPORT ;
+
+   sub STORE { 
+	my $self = shift ;
+        my $key = shift ;
+        my $value = shift ;
+        $self->SUPER::STORE($key, $value * 2) ;
+   }
+
+   sub FETCH { 
+	my $self = shift ;
+        my $key = shift ;
+        $self->SUPER::FETCH($key) - 1 ;
+   }
+
+   sub A_new_method
+   {
+	my $self = shift ;
+        my $key = shift ;
+        my $value = $self->FETCH($key) ;
+	return "[[$value]]" ;
+   }
+
+   1 ;
+EOM
+
+    close FILE ;
+
+    BEGIN { push @INC, '.'; }
+
+    eval 'use SubDB ; use Fcntl ; ';
+    main::ok(13, $@ eq "") ;
+    my %h ;
+    my $X ;
+    eval '
+	$X = tie(%h, "SubDB","dbhash.tmp", O_RDWR|O_CREAT, 0640 );
+	' ;
+
+    main::ok(14, $@ eq "") ;
+
+    my $ret = eval '$h{"fred"} = 3 ; return $h{"fred"} ' ;
+    main::ok(15, $@ eq "") ;
+    main::ok(16, $ret == 5) ;
+
+    $ret = eval '$X->A_new_method("fred") ' ;
+    main::ok(17, $@ eq "") ;
+    main::ok(18, $ret eq "[[5]]") ;
+
+    unlink "SubDB.pm", <dbhash.tmp*> ;
+
+}

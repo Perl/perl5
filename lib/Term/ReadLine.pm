@@ -105,14 +105,33 @@ support reacher set of commands.
 All these commands are callable via method interface and have names
 which conform to standard conventions with the leading C<rl_> stripped.
 
-The stub package included with the perl distribution allows two
-additional methods: C<tkRunning> and C<ornaments>.  The first one
+The stub package included with the perl distribution allows some
+additional methods: 
+
+=over 12
+
+=item C<tkRunning>
+
 makes Tk event loop run when waiting for user input (i.e., during
-C<readline> method), the second one makes the command line stand out
-by using termcap data.  The argument to C<ornaments> should be 0, 1,
-or a string of a form "aa,bb,cc,dd".  Four components of this string
-should be names of I<terminal capacities>, first two will be issued to
-make the prompt standout, last two to make the input line standout.
+C<readline> method).
+
+=item C<ornaments>
+
+makes the command line stand out by using termcap data.  The argument
+to C<ornaments> should be 0, 1, or a string of a form
+C<"aa,bb,cc,dd">.  Four components of this string should be names of
+I<terminal capacities>, first two will be issued to make the prompt
+standout, last two to make the input line standout.
+
+=item C<newTTY>
+
+takes two arguments which are input filehandle and output filehandle.
+Switches to use these filehandles.
+
+=back
+
+One can check whether the currently loaded ReadLine package supports
+these methods by checking for corresponding C<Features>.
 
 =head1 EXPORTS
 
@@ -206,12 +225,22 @@ sub new {
     bless [$FIN, $FOUT];
   }
 }
+
+sub newTTY {
+  my ($self, $in, $out) = @_;
+  $self->[0] = $in;
+  $self->[1] = $out;
+  my $sel = select($out);
+  $| = 1;				# for DB::OUT
+  select($sel);
+}
+
 sub IN { shift->[0] }
 sub OUT { shift->[1] }
 sub MinLine { undef }
 sub Attribs { {} }
 
-my %features = (tkRunning => 1, ornaments => 1);
+my %features = (tkRunning => 1, ornaments => 1, 'newTTY' => 1);
 sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?
