@@ -1223,6 +1223,12 @@ suffixes.  C<-S> is meaningless.  (Win32)
 C<-x> (or C<-X>) determine if a file has an executable file type.
 (S<RISC OS>)
 
+=item alarm SECONDS
+
+=item alarm
+
+Not implemented. (Win32)
+
 =item binmode FILEHANDLE
 
 Meaningless.  (S<Mac OS>, S<RISC OS>)
@@ -1444,14 +1450,8 @@ Not implemented. (S<Mac OS>, Plan9)
 Globbing built-in, but only C<*> and C<?> metacharacters are supported.
 (S<Mac OS>)
 
-Features depend on external perlglob.exe or perlglob.bat.  May be
-overridden with something like File::DosGlob, which is recommended.
-(Win32)
-
-Globbing built-in, but only C<*> and C<?> metacharacters are supported.
-Globbing relies on operating system calls, which may return filenames
-in any order.  As most filesystems are case-insensitive, even "sorted"
-filenames will not be in case-sensitive order. (S<RISC OS>)
+This operator is implemented via the File::Glob extension on most
+platforms.  See L<File::Glob> for portability information.
 
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
 
@@ -1467,9 +1467,12 @@ Available only for socket handles. (S<RISC OS>)
 Not implemented, hence not useful for taint checking. (S<Mac OS>,
 S<RISC OS>)
 
-C<kill($sig, $pid)> makes the process exit immediately with exit
-status $sig.  As in Unix, if $sig is 0 and the specified process exists,
-it returns true without actually terminating it. (Win32)
+C<kill()> doesn't have the semantics of C<raise()>, i.e. it doesn't send
+a signal to the identified process like it does on Unix platforms.
+Instead C<kill($sig, $pid)> terminates the process identified by $pid,
+and makes it exit immediately with exit status $sig.  As in Unix, if
+$sig is 0 and the specified process exists, it returns true without
+actually terminating it. (Win32)
 
 =item link OLDFILE,NEWFILE
 
@@ -1489,7 +1492,7 @@ under NTFS only.
 
 Not implemented. (VMS, S<RISC OS>)
 
-Return values may be bogus. (Win32)
+Return values (especially for device and inode) may be bogus. (Win32)
 
 =item msgctl ID,CMD,ARG
 
@@ -1530,6 +1533,8 @@ Not implemented. (Win32, VMS, S<RISC OS>)
 Only implemented on sockets. (Win32)
 
 Only reliable on sockets. (S<RISC OS>)
+
+Note that the C<socket FILEHANDLE> form is generally portable.
 
 =item semctl ID,SEMNUM,CMD,ARG
 
@@ -1612,7 +1617,10 @@ As an optimization, may not call the command shell specified in
 C<$ENV{PERL5SHELL}>.  C<system(1, @args)> spawns an external
 process and immediately returns its process designator, without
 waiting for it to terminate.  Return value may be used subsequently
-in C<wait> or C<waitpid>.  (Win32)
+in C<wait> or C<waitpid>.  Failure to spawn() a subprocess is indicated
+by setting $? to "255 << 8".  C<$?> is set in a way compatible with
+Unix (i.e. the exitstatus of the subprocess is obtained by "$? >> 8",
+as described in the documentation).  (Win32)
 
 There is no shell to process metacharacters, and the native standard is
 to pass a command line terminated by "\n" "\r" or "\0" to the spawned
@@ -1636,9 +1644,10 @@ Does not automatically flush output handles on some platforms.
 
 Only the first entry returned is nonzero. (S<Mac OS>)
 
-"cumulative" times will be bogus.  On anything other than Windows NT,
-"system" time will be bogus, and "user" time is actually the time
-returned by the clock() function in the C runtime library. (Win32)
+"cumulative" times will be bogus.  On anything other than Windows NT
+or Windows 2000, "system" time will be bogus, and "user" time is
+actually the time returned by the clock() function in the C runtime
+library. (Win32)
 
 Not useful. (S<RISC OS>)
 
