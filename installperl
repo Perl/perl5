@@ -375,7 +375,7 @@ if (! $versiononly) {
 
 if (! $versiononly) {
     safe_unlink("$installscript/pstruct$scr_ext");
-    if ($^O eq 'dos' or $Is_VMS) {
+    if ($^O eq 'dos' or $Is_VMS or $^O eq 'transit') {
         copy("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext"); 
     } else {
         link("$installscript/c2ph$scr_ext", "$installscript/pstruct$scr_ext");

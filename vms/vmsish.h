@@ -717,4 +717,9 @@ typedef char __VMS_SEPYTOTORP__;
 #undef HAS_NTOHL
 #endif
 
+/* The C RTL manual says to undef the macro for DEC C 5.2 and lower. */
+#if defined(fileno) && defined(__DECC_VER) && __DECC_VER < 50300000
+#  undef fileno 
+#endif 
+
 #endif  /* __vmsish_h_included */
