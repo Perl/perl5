@@ -572,6 +572,8 @@ extra.pods: miniperl
 	done
 	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
 
+.PHONY: install
+
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install
 
