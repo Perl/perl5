@@ -10939,6 +10939,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* internal state */
     PL_tainting		= proto_perl->Itainting;
+    PL_taint_warn       = proto_perl->Itaint_warn;
     PL_maxo		= proto_perl->Imaxo;
     if (proto_perl->Iop_mask)
 	PL_op_mask	= SAVEPVN(proto_perl->Iop_mask, PL_maxo);
