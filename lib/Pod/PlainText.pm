@@ -29,7 +29,7 @@ use vars qw(@ISA %ESCAPES $VERSION);
 # by Pod::Usage.
 @ISA = qw(Pod::Select);
 
-($VERSION = (split (' ', q$Revision: 2.1 $ ))[1]) =~ s/\.(\d)$/.0$1/;
+$VERSION = '2.02';
 
 
 ############################################################################
@@ -396,7 +396,10 @@ sub seq_l {
     # something looking like L<manpage(section)>.  The latter is an
     # enhancement over the original Pod::Text.
     my ($manpage, $section) = ('', $_);
-    if (/^"\s*(.*?)\s*"$/) {
+    if (/^(?:https?|ftp|news):/) {
+        # a URL
+        return $_;
+    } elsif (/^"\s*(.*?)\s*"$/) {
         $section = '"' . $1 . '"';
     } elsif (m/^[-:.\w]+(?:\(\S+\))?$/) {
         ($manpage, $section) = ($_, '');
@@ -404,8 +407,8 @@ sub seq_l {
         ($manpage, $section) = split (/\s*\/\s*/, $_, 2);
     }
 
-    # Now build the actual output text.
     my $text = '';
+    # Now build the actual output text.
     if (!length $section) {
         $text = "the $manpage manpage" if length $manpage;
     } elsif ($section =~ /^[:\w]+(?:\(\))?/) {
@@ -691,6 +694,8 @@ L<Pod::Parser|Pod::Parser>, L<Pod::Text::Termcap|Pod::Text::Termcap>,
 pod2text(1)
 
 =head1 AUTHOR
+
+Please report bugs using L<http://rt.cpan.org>.
 
 Russ Allbery E<lt>rra@stanford.eduE<gt>, based I<very> heavily on the
 original Pod::Text by Tom Christiansen E<lt>tchrist@mox.perl.comE<gt> and
