@@ -1554,6 +1554,7 @@ utils/splain.PL		Stand-alone version of diagnostics.pm
 vmesa/Makefile		VM/ESA Makefile
 vmesa/vmesa.c		VM/ESA-specific C code for Perl core
 vmesa/vmesaish.h	VM/ESA-specific C header for Perl core
+vms/configure.com	performs compiler checks and writes config.sh, config.h, and descrip.mms
 vms/descrip_mms.template		Template MM[SK] description file for build
 vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 vms/ext/DCLsym/DCLsym.pm	Perl access to CLI symbols
@@ -1582,7 +1583,6 @@ vms/perly_c.vms		perly.c with fixed declarations for global syms
 vms/perly_h.vms		perly.h with fixed declarations for global syms
 vms/sockadapt.c		glue for SockshShr socket support
 vms/sockadapt.h		glue for SockshShr socket support
-vms/subconfigure.com    performs compiler checks and writes config.sh, config.h, and descrip.mms
 vms/test.com		DCL driver for regression tests
 vms/vms.c		VMS-specific C code for Perl core
 vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms
