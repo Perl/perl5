@@ -1045,7 +1045,10 @@ has been added.
 
 Scripts are read in binary mode by default to allow ByteLoader (and
 the filter mechanism in general) to work properly.  For compatibility,
-the DATA filehandle continues to be set to text mode.
+the DATA filehandle will be set to text mode if a carriage return is
+detected at the end of the line containing the __END__ or __DATA__
+token; if not, the DATA filehandle will be left open in binary mode.
+Earlier versions always opened the DATA filehandle in text mode.
 
 [TODO - GSAR]
 

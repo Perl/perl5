@@ -3808,8 +3808,10 @@ Perl_yylex(pTHX)
 		    IoTYPE(GvIOp(gv)) = '<';
 #if defined(WIN32) && !defined(PERL_TEXTMODE_SCRIPTS)
 		/* if the script was opened in binmode, we need to revert
-		 * it to text mode for compatibility.
+		 * it to text mode for compatibility; but only iff it has CRs
 		 * XXX this is a questionable hack at best. */
+		if (PL_bufend-PL_bufptr > 2
+		    && PL_bufend[-1] == '\n' && PL_bufend[-2] == '\r')
 		{
 		    Off_t loc = 0;
 		    if (IoTYPE(GvIOp(gv)) == '<') {
