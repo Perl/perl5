@@ -1856,7 +1856,7 @@ PP(pp_subst)
 	DIE(aTHX_ "panic: pp_subst");
 
     strend = s + len;
-    slen = do_utf8 ? utf8_length(s, strend) : len;
+    slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
     maxiters = 2 * slen + 10;	/* We can match twice at each
 				   position, once with zero-length,
 				   second time with non-zero. */
