@@ -2067,17 +2067,32 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	} else {
 #ifdef HAS_STRTOUL
 	    UV u;
+	    char *num_begin = SvPVX(sv);
 	    int save_errno = errno;
+	    
+	    /* seems that strtoul taking numbers that start with - is
+	       implementation dependant, and can't be relied upon.  */
+	    if (numtype & IS_NUMBER_NEG) {
+		/* Not totally defensive. assumine that looks_like_num
+		   didn't lie about a - sign */
+		while (isSPACE(*num_begin))
+		    num_begin++;
+		if (*num_begin == '-')
+		    num_begin++;
+	    }
+    
 	    /* Is it an integer that we could convert with strtoul?
 	       So try it, and if it doesn't set errno then it's pukka.
 	       This should be faster than going atof and then thinking.  */
 	    if (((numtype & (IS_NUMBER_TO_INT_BY_STRTOL | IS_NUMBER_NOT_INT))
 		 == IS_NUMBER_TO_INT_BY_STRTOL)
 		&& ((errno = 0), 1) /* always true */
-		&& ((u = Strtoul(SvPVX(sv), Null(char**), 10)), 1) /* ditto */
+		&& ((u = Strtoul(num_begin, Null(char**), 10)), 1) /* ditto */
 		&& (errno == 0)
-		/* If known to be negative, check it didn't undeflow IV */
-		&& ((numtype & IS_NUMBER_NEG) ? ((IV)u <= 0) : 1)) {
+		/* If known to be negative, check it didn't undeflow IV 
+		   XXX possibly we should put more negative values as NVs
+		   direct rather than go via atof below */
+		&& ((numtype & IS_NUMBER_NEG) ? (u <= (UV)IV_MIN) : 1)) {
 		errno = save_errno;
 
 		if (SvTYPE(sv) < SVt_PVIV)
@@ -2086,14 +2101,9 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 
 		/* If it's negative must use IV.
 		   IV-over-UV optimisation */
-		if (numtype & IS_NUMBER_NEG || u <= (UV) IV_MAX) {
-		    /* strtoul is defined to return negated value if the
-		       number starts with a minus sign. Assuming 2s
-		       complement, this value will be in range for a negative
-		       IV if casting the bit pattern to IV doesn't produce
-		       a positive value. Allow -0 by checking it's <= 0
-		       hence (numtype & IS_NUMBER_NEG) test above
-		    */
+		if (numtype & IS_NUMBER_NEG) {
+		    SvIVX(sv) = -(IV)u;
+		} else if (u <= (UV) IV_MAX) {
 		    SvIVX(sv) = (IV)u;
 		} else {
 		    /* it didn't overflow, and it was positive. */
