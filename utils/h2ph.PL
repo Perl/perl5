@@ -132,7 +132,7 @@ foreach $file (@ARGV) {
 		    }
 		}
 	    }
-	    elsif (/^include\s+<(.*)>/) {
+	    elsif (/^include\s*<(.*)>/) {
 		($incl = $1) =~ s/\.h$/.ph/;
 		print OUT $t,"require '$incl';\n";
 	    }
@@ -198,7 +198,7 @@ sub expr {
 	    }
 	    next;
 	};
-	s/^sizeof\s*\(([^)]+)\)/{$1}/ && do {
+	s/^sizeof\s*\(([^)]+\))\)/{$1}/ && do {
 	    $new .= '$sizeof';
 	    next;
 	};
@@ -239,13 +239,17 @@ sub expr {
 	    else {
 		if ($inif && $new !~ /defined\($/) {
 		    $new .= '(defined(&' . $id . ') ? &' . $id . ' : 0)';
-		} else { 
+		} 
+		elsif (/^\[/) { 
+		    $new .= ' $' . $id;
+		}
+		else {
 		    $new .= ' &' . $id;
 		}
 	    }
 	    next;
 	};
-	s/^(.)//			&& do {$new .= $1; next;};
+	s/^(.)// && do { if ($1 ne '#') { $new .= $1; } next;};
     }
 }
 ##############################################################################
