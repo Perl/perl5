@@ -2912,7 +2912,7 @@ tryagain:
 				RExC_parse = p + 1;
 				vFAIL("Missing right brace on \\x{}");
 			    }
-			    else if (UTF) {
+			    else {
 				numlen = 1;	/* allow underscores */
 				ender = (UV)scan_hex(p + 1, e - p - 1, &numlen);
 				/* numlen is generous */
@@ -2922,12 +2922,6 @@ tryagain:
 				}
 				p = e + 1;
 			    }
-			    else
-			    {
-				RExC_parse = e + 1;
-				vFAIL("Can't use \\x{} without 'use utf8' declaration");
-			    }
-
 			}
 			else {
 			    numlen = 0;		/* disallow underscores */
@@ -3711,7 +3705,7 @@ S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
 	    flags |= ANYOF_FOLD;
 	if (LOC)
 	    flags |= ANYOF_LOCALE;
-	listsv = newSVpvn("# comment\n",10);
+	listsv = newSVpvn("# comment\n", 10);
     }
 
     if (!SIZE_ONLY && ckWARN(WARN_REGEXP))
@@ -3874,15 +3868,16 @@ S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
 		case ANYOF_NPUNCT:
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsPunct\n");	break;
 		case ANYOF_SPACE:
-		case ANYOF_PSXSPC:
-		case ANYOF_BLANK:
-		    /* Not very true for PSXSPC and BLANK
-		     * but not feeling like creating IsPOSIXSpace and
-		     * IsBlank right now. --jhi */
-		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");	break;
+		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpacePerl\n");break;
 		case ANYOF_NSPACE:
-		case ANYOF_NPSXSPC:
+		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpacePerl\n");break;
+		case ANYOF_BLANK:
+		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsBlank\n");	break;
 		case ANYOF_NBLANK:
+		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsBlank\n");	break;
+		case ANYOF_PSXSPC:
+		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");	break;
+		case ANYOF_NPSXSPC:
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpace\n");	break;
 		case ANYOF_UPPER:
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsUpper\n");	break;
@@ -4610,6 +4605,7 @@ Perl_save_re_context(pTHX)
     SAVEI32(PL_reg_oldpos);			/* from regexec.c */
     SAVEVPTR(PL_reg_oldcurpm);		/* from regexec.c */
     SAVEVPTR(PL_reg_curpm);		/* from regexec.c */
+    SAVEI32(PL_regnpar);		/* () count. */
 #ifdef DEBUGGING
     SAVEPPTR(PL_reg_starttry);		/* from regexec.c */    
 #endif

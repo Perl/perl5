@@ -823,6 +823,15 @@ this area.)
 
 No known fix.
 
+=head2 sprintf tests 129 and 130
+
+The op/sprintf tests 129 and 130 are known to fail in some platforms.
+Examples include any platform using sfio, and Tandem's NonStop-UX.
+The failing platforms do not comply with the ANSI C Standard, line
+19ff on page 134 of ANSI X3.159 1989 to be exact.  (They produce
+something else than "1" and "-1" when formatting 0.6 and -0.6 using
+the printf format "%.0f", most often they produce "0" and "-0".)
+
 =head2 Storable tests fail in some platforms
 
 If any Storable tests fail the use of Storable is not advisable.

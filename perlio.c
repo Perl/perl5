@@ -325,7 +325,7 @@ perlio_mg_set(pTHX_ SV *sv, MAGIC *mg)
    PerlIO *ifp = IoIFP(io);
    PerlIO *ofp = IoOFP(io);
    AV *av = (AV *) mg->mg_obj;
-   Perl_warn(aTHX_ "set %_ %p %p %p",sv,io,ifp,ofp);
+   Perl_warn(aTHX_ "set %"SVf" %p %p %p",sv,io,ifp,ofp);
   }
  return 0;
 }
@@ -339,7 +339,7 @@ perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
    PerlIO *ifp = IoIFP(io);
    PerlIO *ofp = IoOFP(io);
    AV *av = (AV *) mg->mg_obj;
-   Perl_warn(aTHX_ "get %_ %p %p %p",sv,io,ifp,ofp);
+   Perl_warn(aTHX_ "get %"SVf" %p %p %p",sv,io,ifp,ofp);
   }
  return 0;
 }
@@ -347,14 +347,14 @@ perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
 static int
 perlio_mg_clear(pTHX_ SV *sv, MAGIC *mg)
 {
- Perl_warn(aTHX_ "clear %_",sv);
+ Perl_warn(aTHX_ "clear %"SVf,sv);
  return 0;
 }
 
 static int
 perlio_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
- Perl_warn(aTHX_ "free %_",sv);
+ Perl_warn(aTHX_ "free %"SVf,sv);
  return 0;
 }
 
@@ -379,7 +379,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
  mg = mg_find(sv,'~');
  mg->mg_virtual = &perlio_vtab;
  mg_magical(sv);
- Perl_warn(aTHX_ "attrib %_",sv);
+ Perl_warn(aTHX_ "attrib %"SVf,sv);
  for (i=2; i < items; i++)
   {
    STRLEN len;
@@ -966,7 +966,7 @@ PerlIOBase_pushed(PerlIO *f, const char *mode)
     }
   }
 #if 0
- PerlIO_debug("PerlIOBase_pushed f=%p %s %s fl=%08x (%s)\n",
+ PerlIO_debug("PerlIOBase_pushed f=%p %s %s fl=%08"UVxf" (%s)\n",
               f,PerlIOBase(f)->tab->name,(omode) ? omode : "(Null)",
               l->flags,PerlIO_modestr(f,temp));
 #endif
@@ -1724,7 +1724,7 @@ PerlIOBuf_fdopen(PerlIO_funcs *self, int fd, const char *mode)
      PerlIOBase(f)->flags |= PERLIO_F_UNBUF;
     }
 #if 0
-   PerlIO_debug("PerlIOBuf_fdopen %s f=%p fd=%d m=%s fl=%08x\n",
+   PerlIO_debug("PerlIOBuf_fdopen %s f=%p fd=%d m=%s fl=%08"UVxf"\n",
                 self->name,f,fd,mode,PerlIOBase(f)->flags);
 #endif
   }
@@ -2275,7 +2275,7 @@ PerlIOCrlf_pushed(PerlIO *f, const char *mode)
  PerlIOBase(f)->flags |= PERLIO_F_CRLF;
  code = PerlIOBuf_pushed(f,mode);
 #if 0
- PerlIO_debug("PerlIOCrlf_pushed f=%p %s %s fl=%08x\n",
+ PerlIO_debug("PerlIOCrlf_pushed f=%p %s %s fl=%08"UVxf"\n",
               f,PerlIOBase(f)->tab->name,(mode) ? mode : "(Null)",
               PerlIOBase(f)->flags);
 #endif
@@ -2443,7 +2443,7 @@ PerlIOCrlf_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
    if (ptr != chk)
     {
      dTHX;
-     Perl_croak(aTHX_ "ptr wrong %p != %p fl=%08x nl=%p e=%p for %d",
+     Perl_croak(aTHX_ "ptr wrong %p != %p fl=%08"UVxf" nl=%p e=%p for %d",
                 ptr, chk, flags, c->nl, b->end, cnt);
     }
   }

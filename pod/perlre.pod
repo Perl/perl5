@@ -225,19 +225,21 @@ whole character class.  For example:
 matches zero, one, any alphabetic character, and the percentage sign.
 
 If the C<utf8> pragma is used, the following equivalences to Unicode
-\p{} constructs hold:
+\p{} constructs and equivalent backslash character classes (if available),
+will hold:
 
     alpha       IsAlpha
     alnum       IsAlnum
     ascii       IsASCII
     blank	IsSpace
     cntrl       IsCntrl
-    digit       IsDigit
+    digit       IsDigit        \d
     graph       IsGraph
     lower       IsLower
     print       IsPrint
     punct       IsPunct
     space       IsSpace
+                IsSpacePerl    \s
     upper       IsUpper
     word        IsWord
     xdigit      IsXDigit

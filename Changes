@@ -32,6 +32,679 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7928] By: jhi                                   on 2000/11/29  17:50:43
+        Log: Subject: [ID 20001128.003] Not OK: perl v5.7.0 +DEVEL7891 on ppc-linux 2.2.17  
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Tue, 28 Nov 2000 16:41:57 +0100
+             Message-Id: <p04320400b649771b9797@[192.168.1.4]>
+             
+             Patch to catch a core dump in the Configure va_copy test.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7927] By: jhi                                   on 2000/11/29  17:31:59
+        Log: Retract #7921, the patch shouldn't be needed.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7926] By: jhi                                   on 2000/11/29  17:01:41
+        Log: Make the Class::Struct import() wiser.
+     Branch: perl
+	   ! lib/Class/Struct.pm t/lib/class-struct.t
+____________________________________________________________________________
+[  7925] By: jhi                                   on 2000/11/29  16:36:33
+        Log: All the core library users of Class::Struct seem to be
+             using "use Class::Struct 'struct';" instead of the bare
+             "use Class::Struct;", which isn't documented in Class::Struct.
+             This can't be right.
+     Branch: perl
+	   ! lib/File/stat.pm
+____________________________________________________________________________
+[  7924] By: jhi                                   on 2000/11/29  16:32:15
+        Log: A test works better is it has the right 1..$n output.
+     Branch: perl
+	   ! t/lib/class-struct.t
+____________________________________________________________________________
+[  7923] By: jhi                                   on 2000/11/29  16:29:11
+        Log: Forgot to MANIFEST the new Net::hostent test.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  7922] By: jhi                                   on 2000/11/29  16:27:49
+        Log: Integrate perlio.
+     Branch: perl
+	  !> iperlsys.h perlio.c
+____________________________________________________________________________
+[  7921] By: jhi                                   on 2000/11/29  16:27:10
+        Log: (Retracted by #7927.)
+             
+             Subject: [PATCH] Is infinity a number?
+             From: Simon Cozens <simon@cozens.net>
+             Date: Wed, 29 Nov 2000 14:48:20 +0000
+             Message-ID: <20001129144820.A31339@pembro33.pmb.ox.ac.uk>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7920] By: jhi                                   on 2000/11/29  16:23:02
+        Log: Subject: net_hostent.t (was Re: [ID 20001128.002] what's the point of example code if it is buggy?)
+             From: rspier@pobox.com (Robert Spier)
+             Date: Wed, 29 Nov 2000 02:17:49 -0500
+             Message-ID: <14884.44445.760322.278647@localhost.localdomain>
+             
+             Add a test for Net::hostent.
+     Branch: perl
+	   + t/lib/net-hostent.t
+____________________________________________________________________________
+[  7919] By: jhi                                   on 2000/11/29  16:21:31
+        Log: Make "use Class::Struct 'struct';" work again (broken by #7617);
+             add a test for Class::Struct.
+     Branch: perl
+	   + t/lib/class-struct.t
+	   ! MANIFEST lib/Class/Struct.pm
+____________________________________________________________________________
+[  7918] By: jhi                                   on 2000/11/29  15:48:40
+        Log: Subject: Re: Minor suggestion for Sys::Syslog  [PATCH]
+             From: rspier@pobox.com (Robert Spier)
+             Date: Wed, 29 Nov 2000 02:25:39 -0500
+             Message-ID: <14884.44915.86028.422238@localhost.localdomain>
+             
+             More checking in case someone has broken their services or
+             protocol databases.
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.pm
+____________________________________________________________________________
+[  7917] By: jhi                                   on 2000/11/29  15:46:25
+        Log: Subject: [PATCH] $^O  win32 -> MSWin32
+             From: rspier@pobox.com (Robert Spier)
+             Date: Wed, 29 Nov 2000 02:17:38 -0500
+             Message-ID: <14884.44434.340627.126145@localhost.localdomain>
+             
+             plus similar nits for vms, err, VMS, and UNICOS.
+     Branch: perl
+	   ! t/lib/syslfs.t t/op/lfs.t
+____________________________________________________________________________
+[  7916] By: jhi                                   on 2000/11/29  15:42:51
+        Log: Subject: [PATCH] Tokeniser debugging
+             From: Simon Cozens <simon@cozens.net>
+             Date: Wed, 29 Nov 2000 14:15:45 +0000
+             Message-ID: <20001129141545.A30864@pembro33.pmb.ox.ac.uk>
+     Branch: perl
+	   ! perl.c perl.h pod/perlrun.pod toke.c
+____________________________________________________________________________
+[  7915] By: jhi                                   on 2000/11/29  15:41:36
+        Log: Subject: Re: [PATCH 5.7.0] OUT keyword for xsubpp
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 29 Nov 2000 02:13:14 -0500
+             Message-ID: <20001129021314.A2532@monk.mps.ohio-state.edu>
+             
+             OUT keyword nits.
+             
+             Subject: Re: [PATCH 5.7.0] OUT keyword for xsubpp
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 29 Nov 2000 03:09:04 -0500
+             Message-ID: <20001129030904.A2754@monk.mps.ohio-state.edu>
+             
+             OUT and IN_OUT documentation.
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp pod/perlxs.pod
+____________________________________________________________________________
+[  7914] By: jhi                                   on 2000/11/29  03:35:01
+        Log: Subject: Re: [ID 20001127.002] const subs hurt under debugger
+             From: John Tobey <jtobey@john-edwin-tobey.org>
+             Date: Tue, 28 Nov 2000 01:13:41 -0500 (EST)
+             Message-Id: <m140e1N-000FOoC@feynman.localnet>
+             
+             plus a performance speedup noticed by Sarathy.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  7913] By: jhi                                   on 2000/11/29  03:16:59
+        Log: Use "1 while unlink" so that VMS gets clean, too.
+     Branch: perl
+	   ! t/lib/filter-util.t
+____________________________________________________________________________
+[  7912] By: jhi                                   on 2000/11/29  03:09:08
+        Log: Subject: [PATCH 5.7.0] OUT keyword for xsubpp
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 28 Nov 2000 03:27:09 -0500
+             Message-ID: <20001128032709.A23401@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[  7911] By: jhi                                   on 2000/11/29  03:06:30
+        Log: This should have been part of #7872: no need to scan UTF-8
+             until eternity.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7910] By: jhi                                   on 2000/11/29  02:50:04
+        Log: One more perltie.pod nit from Casey R. Tweten.
+     Branch: perl
+	   ! pod/perltie.pod
+____________________________________________________________________________
+[  7909] By: jhi                                   on 2000/11/29  02:44:23
+        Log: Document the known sprintf test failures, exact standard
+             reference from Dominic Dunlop, NonStop-UX testing from Tom Bates.
+     Branch: perl
+	   ! pod/perldelta.pod t/op/sprintf.t
+____________________________________________________________________________
+[  7908] By: jhi                                   on 2000/11/29  02:36:23
+        Log: Add the Encoding table format documentation.
+     Branch: perl
+	   + ext/Encode/Encode/EncodeFormat.pod
+	   ! MANIFEST
+____________________________________________________________________________
+[  7907] By: jhi                                   on 2000/11/29  02:07:24
+        Log: Subject: Re: [PATCH] Updating perltie.pod for arrays
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Tue, 28 Nov 2000 12:11:41 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0011281209050.25178-100000@home.kiski.net>
+             
+             Subject: Re: [PATCH] Updating perltie.pod for arrays
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Tue, 28 Nov 2000 15:03:50 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0011281458500.10331-100000@home.kiski.net>
+     Branch: perl
+	   ! pod/perltie.pod
+____________________________________________________________________________
+[  7906] By: nick                                  on 2000/11/28  22:40:59
+        Log: Initial tidy of setmode() muddle (UNIX does not have, nor need it).
+     Branch: perlio
+	   ! iperlsys.h perlio.c
+____________________________________________________________________________
+[  7905] By: nick                                  on 2000/11/28  22:04:34
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 39 files)
+____________________________________________________________________________
+[  7904] By: jhi                                   on 2000/11/28  16:44:43
+        Log: Subject: [ID 20001128.002] what's the point of example code if it is buggy?
+             From: Nicholas Clark <nick@babyhippo.co.uk>
+             Date: Tue, 28 Nov 2000 11:16:57 +0000
+             Message-Id: <E140ikr-00076N-00@fruitbat.babyhippo.co.uk>
+     Branch: perl
+	   ! pod/perlipc.pod
+____________________________________________________________________________
+[  7903] By: jhi                                   on 2000/11/28  16:40:31
+        Log: Subject: [PATCH] Updating perltie.pod for arrays
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Mon, 27 Nov 2000 17:47:20 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0011271746360.11659-100000@home.kiski.net>
+     Branch: perl
+	   ! pod/perltie.pod
+____________________________________________________________________________
+[  7902] By: jhi                                   on 2000/11/28  16:39:37
+        Log: Subject: [PATCH] Re: 5.6 bug: split /^/ implies /m modifier (from CLPM)
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Mon, 27 Nov 2000 17:56:44 GMT
+             Message-Id: <200011271756.RAA22706@tempest.npl.co.uk>
+     Branch: perl
+	   ! pod/perlfunc.pod t/op/split.t
+____________________________________________________________________________
+[  7901] By: jhi                                   on 2000/11/28  16:28:04
+        Log: setmode() is a DOSish-only thing.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7900] By: jhi                                   on 2000/11/28  16:21:46
+        Log: Subject: [PATCH] perlcc.PL cleanups
+             From: Simon Cozens <simon@cozens.net>
+             Date: Tue, 28 Nov 2000 12:44:35 +0000
+             Message-ID: <20001128124435.A5500@pembro33.pmb.ox.ac.uk>
+     Branch: perl
+	   ! utils/perlcc.PL
+____________________________________________________________________________
+[  7899] By: gsar                                  on 2000/11/28  06:32:55
+        Log: reintegrate files missed by change#7895
+     Branch: maint-5.6/perl
+	  +> ext/ByteLoader/bytecode.h utils/Makefile
+	   - utils/perlbc.PL
+____________________________________________________________________________
+[  7897] By: gsar                                  on 2000/11/27  18:22:47
+        Log: can't integrate these two files, for some reason
+     Branch: maint-5.6/perl
+	   - ext/ByteLoader/bytecode.h utils/Makefile
+____________________________________________________________________________
+[  7895] By: gsar                                  on 2000/11/27  18:11:21
+        Log: integrate changes#6763..6766,6770,6773,6775..6776,6778,6780,
+             6782..6791,6793..6814,6816,6818..6822,6824..6830,6838..6849,
+             6757..6890,6892..6901 from mainline
+             
+             Bytecompiler patches from Benjamin Stuhl.
+             
+             More bytecompiler.
+             
+             Subject: [PATCH blead] B:: missing dependency
+             
+             Subject: [PATCH: 6757] configure.com updates and syslog build
+             
+             Long double Gconvert fixes from Yitzchak Scott-Thoennes
+             and Spider Boardman.
+             
+             Subject: [PATCH blead] nextchar() abuse misses an optimisation
+             
+             Long double fixes from Spider Boardman.
+             
+             Make the selection of NVff et al stricter.
+             
+             cSVOPo_*v things index into the current PL_curpad
+             under ithreads, which is different from the curpad
+             used by the XSUB.  (In other words, the code as-is
+             before this patch wouldn't work under ithreads.)
+             
+             Be portable.
+             
+             VMS MMS (make) wants null action.
+             
+             Mac and other portability updates from Chris Nandor.
+             
+             Storable support, v-version fixes.
+             Subject: CPAN.pm beta for testing available
+             
+             Portability fix from Hugo van der Sanden.
+             
+             Bad makefile.
+             
+             Subject: [ID 20000823.004] [PATCH 5.6.0+] Pod::Html is too self-contained
+             
+             Subject: [PATCH] (Mac OS X): Don't #define environ unless PERL_CORE
+             
+             Subject: [PATCH] Re: [ID 20000821.008] Negitive numbers with vec dumps core
+             
+             Replace #6705 with a minimal doc patch.
+             Subject: [PATCH 5.6.0] replace change #6705
+             
+             Drop the separate perlbc, perlcc -b should be enough.
+             
+             installperl couldn't tell whether it had run tests or not.
+             Subject: [PATCH] Re: installperl and t/TEST
+             
+             Add silencer flags to installperl.
+             Subject: [PATCH] Making installperl silent.
+             
+             Make "make install" by default silent.  A new "install-verbose"
+             target is verbose.
+             
+             More liberal parsing of version numbers.
+             Subject: Re: CPAN.pm beta for testing available
+             
+             Create directories in silence.
+             Subject: [PATCH] Another silencer for MakeMaker
+             
+             DOS patches and portability/porting notes, from Tim Jenness.
+             
+             Make installman to recognize the silence flag -S.
+             
+             Actually do something with the silencer option.
+             
+             Continue silencing.
+             
+             Show the doc file, not the temp file.
+             
+             Regen perltoc.
+             
+             Subject: [PATCH] More silencing of installman.
+             
+             Better wording for the vec lvalue diagnostic.
+             Subject: Re: [PATCH] Re: [ID 20000821.008] Negitive numbers with vec dumps core
+             
+             Subject: [PATCH: 6805] several more tweaks to configure.com
+             
+             Subject: [PATCH perl@6805, 5.6.0, 5.005_03] prevent rare Perl hang on VMS
+             
+             Missing parts of 
+             Subject: [PATCH: 6789] some endl fixes for VMS wackiness
+             
+             Subject: [ID 20000824.029] MakeMaker manifypods fails on DJGPP systems
+             (applied slightly modified)
+             
+             installperl --verbose and --silent.
+             Subject: Re: [PATCH] More silencing of installman.
+             
+             Add install-silent target.
+             
+             AIX 4.3.3 has SOCKS in libc with a differently named init routine,
+             the problem reported in
+             Subject: [ID 20000825.007] Building stable 5.6.0 on AIX 4.3.3 using SOCKS
+             
+             Tweak the sfio/useperlio logic, hopefully as wished in
+             Subject: [ID 20000825.004] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6804 on i586-linux 2.2.12 (UNINSTALLED)
+             
+             One forgotten file from #6816.
+             
+             Subject: [PATCH @6820] installman under -w and strict (was Re: [PATCH] More silencing of installman.)
+             
+             Remove duplicately applied patch shards.
+             Subject: [ID 20000825.012] [PATCH@6822] t/lib/cgi-html.t produces ugly cruft during 'make test'
+             
+             Support preserving extremely big/small angles.
+             
+             Subject: Re: [ID 20000825.019] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6820 on alpha-dec_osf 5.1 (UNINSTALLED) 
+             
+             Subject: [PATCH] installation not quite silent yet.
+             
+             Update the test count.
+             
+             Use UVxf, PTR2UV, NVff.
+             
+             Document PTR2XX and INT2PTR.
+             
+             no-install target a la make -n.
+             Subject: [PATCH] make no-install (was Re: [PATCH] installation not quite silent yet.)
+             
+             grep -e isn't portable.
+             Subject: [ID 20000825.027] let me (perlbug@perl.com) know how I blew it
+             
+             Can't get the test to reliably work thanks to the
+             inaccurateness of floating point.  "Resolves" bug ids
+             20000826.003, 20000826.009, 20000826.010,
+             
+             Subject: installman buglet
+             
+             DJGPP update from Laszlo Molnar.
+             
+             Subject: MM_Unix.pm LD_RUN_PATH niggles on Solaris
+             
+             Passing -R in ldflags makes now it to appear in the default
+             for lddlflags, just like with -L.
+             Subject: Re: MM_Unix.pm LD_RUN_PATH niggles on Solaris
+             
+             Test nit.
+             
+             Use the actual thread type, not the pointer-to-struct.
+             
+             Provice virtual $Config{ccflags_nolargefiles} etc. 
+             
+             display_format used as a class method without arguments was broken,
+             reported in
+             Subject: Math::Complex->display_format() sets style to 'Math::Complex'
+             
+             Subject: [ID 20000828.006] dir name "0" not safe with Cwd.pm
+             
+             Subject: [ID 20000828.009] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6855 on i586-linux 2.2.12 (UNINSTALLED)
+             
+             Subject: [PATCH@6855] _Minor_ change to overload.pm pod
+             
+             opmini.o may be left around if a build is interrupted.
+             
+             Typo in #6858.
+             
+             Fix for ID 20000828.001, long doubles were not formatted
+             correctly (showed up in $], which stopped installing perl).
+             
+             An attempt to fix the problem reported in
+             Subject: Building perl@6856 using gcc/AIX 4.3.3 
+             I can't test this properly since the gcc installation I have
+             access to seems to be botched (gcc is calling the AIX cpp,
+             a losing proposition...)
+             
+             Add -ld to archname on long tr...double platforms.
+             
+             Subject: hv.h Doc Patch
+             
+             Potential cruft.
+             
+             Subject: [PATCH bleedperl@6856] warnings fixes
+             
+             -S is the silent flag, -s is the strip flag.
+             Subject: [PATCH] Re: [PATCH] make no-install          
+             
+             Take out the SUIDMAIL thing, that will not be
+             a problem in 5.7.*.
+             
+             Subject: [PATCH bleedperl@6866] spellings
+             
+             Subject: [PATCH] Re: files not cleaned even by veryclean
+             
+             Use minimal @INC in tests, most of the time just '../lib',
+             so that we simply can't pick up stuff from other Perls than
+             the one we are testing.  Pointed out by
+             Subject: Re: [PATCH: 6757] make new Storable tests forgiving of places where not built   
+             
+             Update to Getopt::Long 2.24, from Johan Vromans.
+             
+             Fix for thinko in #6848.
+             Subject: Compiler error in ext/Thread/Thread.c (bleadperl@6866)
+             
+             Patches all over for people and the files they (hopefully) care about.
+             
+             Subject: Net::protoent does not export 'getproto'
+             
+             Missed a change in #6869.
+             
+             Subject: [PATCH] Warnings in B::Deparse
+             
+             Subject: [PATCH] Glob dumping
+             
+             Disable one of the tests for now.
+             
+             Disabling the one test is a bit tricky.
+             
+             Don't forget to tidy up.
+             
+             The #6881 removed one dump line.
+             
+             Subject: Re: [ID 20000525.003] perldoc fails when Makefile.PL is in cwd
+             
+             Under usethreads the dumped variable is IN_PAD.
+             Subject: Re: [PATCH] Glob dumping
+             
+             Subject: [ID 20000829.026] [PATCH 6868] File::Temp
+             
+             Subject: [ID 20000829.022] [PATCH 6868] Minor nit in installhtml
+             
+             Subject: [ID 20000829.023] [PATCH 6868] perlbug@perl.com --> perlbug@perl.org
+             
+             Regen Configure for #6894.
+             
+             Subject: [PATCH: 6889] updates to perlebcdic.pod
+             
+             Undo namespace pollution of #6878.
+             Subject: Re: Net::protoent does not export 'getproto'
+             
+             Admit that we are leaking scalars.
+             
+             Subject: [PATCH 5.6.0] [ID 20000608.006] panic: magic_killbackrefs with blessed global weakrefs
+     Branch: maint-5.6/perl
+	  !> (integrate 271 files)
+____________________________________________________________________________
+[  7894] By: gsar                                  on 2000/11/27  16:00:34
+        Log: a couple of nits
+     Branch: maint-5.6/perl
+	   ! MANIFEST pp_sys.c
+____________________________________________________________________________
+[  7893] By: gsar                                  on 2000/11/27  15:10:56
+        Log: integrate changes#6666..6678,6680..6682,6684..6691,6699..6733,
+             6740..6745,6747..6757,6760
+             
+             Subject: Re: [ID 20000816.006] [PATCH @6655] Shell.pm, bug fix, strict and OO Interface
+             
+             Subject: [PATCH(2) @6655] Re: perldebut.pod - spelling
+             
+             Doc nits spotted by Richard Soderberg.
+             
+             move WNOHANG definition to where other such things are
+             
+             Make $Config{byteorder} more magical so that it is
+             dynamically computed: nice for 'fat binaries'.
+             Subject: [PATCH]: default byteorder
+             
+             Subject: [PATCH] Cwd.pm now uses strict
+             
+             Subject: Re: [PATCH]Re: Questions about Math::BigFloat
+             
+             Get -DLEAKTEST to compile (not necessarily to work, mind)
+             Subject: [ID 20000724.006] -DLEAKTEST problem
+             
+             perldebtut 1.10 from Richard Foley, plus Celsius and Fahrenheit.
+             
+             Add perlebcdic from Peter Prymmer, regen toc.
+             
+             Don't propose using modules built for 5.005 if no binary
+             compatibility with 5.005 is attempted.
+             
+             Do not use prototyping here.
+             Subject: [ID 20000817.016] [PATCH] Peek.xs
+             
+             Document what the backtick returns if the command fails.
+             
+             Add byteorder to the myconfig output.
+             
+             Introduce NVef, NVff, and NVgf, use the middle one.
+             (helps for lib/peek + Linux + long doubles)  Reported in
+             Subject: [ID 20000814.005] Not OK: perl v5.6.0 on i686-linux-64int 2.2.13       
+             Use NVs in POSIX math, not doubles.
+             Subject: [ID 20000817.014] POSIX & modfl
+             
+             Subject: [PATCH 5.6.0+] newSVrv() memory leak
+             
+             The byteorder code in #6671 was wrong.
+             
+             Fix the lib/complex failure of
+             Subject: [ID 20000814.005] Not OK: perl v5.6.0 on i686-linux-64int 2.2.13       
+             Linux long double accuracy issue: something that
+             when printed with %g looks like "2" but int() of it is 1.
+             
+             Propagate new Configure vars.
+             
+             Unbuffer the output.
+             
+             Subject: [PATCH] perltrap.pod spring cleaning
+             
+             Subject: [PATCH] perlfunc.pod -- clarifying sprintf array argument issues
+             Subject: [ID 20000817.018] behaviour change 5.5.3 -> 5.6.0 re "Modification of a read-only value"
+             
+             Tiny Getopt::Long patch from Johan Vromans.
+             
+             Document code point which makes if (defined %stash::) to work
+             (noted by Spider Boardman).
+             
+             Subject: [PATCH perl@6698] cygwin port
+             
+             Document the NDBM_File and ODBM_File as SDBM_File
+             was documented in #6417.
+             
+             The new tests were missing from #6415.
+             
+             Add [[:blank:]] as suggested in
+             Subject: [ID 20000716.024] [=cc=] / [:blank:]
+             (the [=cc=] has already been taken care of by #6439
+             so the whole bug report can be closed)
+             and make [[:space:]] to be equivalent to isspace(3)
+             (as opposed to \s, which is isSPACE()).  The difference
+             is that now [[:space:]] matches the mythical vertical tab,
+             while \s doesn't.
+             
+             Don't eat leading os from index entries.
+             Subject: Re: [ID 20000810.006] Pod::Man Ate My 'O'!
+             
+             Subject: [PATCH 5.6.0+] fix for Win32::DomainName
+             
+             Typo in pp_complement().
+             Subject: [PATCH perl-current] Deparse
+             
+             Add warnif(), check warnings further up the stack,
+             all the warnings functions now can take an optional object reference.
+             Subject: [PATCH bleedperl@6691] warnings pragma update
+             
+             Fix a core dump in lib/selfloader under -DDEBUGGING.
+             Subject: PATCH @6698 for [ID 20000817.007] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6676 on alpha-dec_osf 4.0f (UNINSTALLED) 
+             
+             Subject: [PATCH 5.6.0+] fix for Win32::GetFullPathName and Win32::GetShortPathName
+             
+             Subject: [PATCH: 6698] tidy up the temp files left by peek tests on VMS
+             
+             Subject: [PATCH: 6698] was Re: [PATCH: 6640] VMS Makefile.SH update (fwd)
+             Put back the long double avoidance code to POSIX.xs
+             because VMS seems to need it still.
+             
+             Introduce a 'veryclean' target that is like 'distclean'
+             but also removes *~ and *.orig.
+             
+             Subject: [ID 20000817.023] endianness description in perlfunc.pod
+             
+             Subject: [PATCH perl@6698] File::Temp fix-ups for OpenVMS
+             
+             Let's try #6717 again.
+             
+             UTF8 concat fixes.
+             Subject: [PATCH @6713] Re: [ID 20000815.006] latest patched perl core dumps
+             
+             pp_open() could pass an uninitialized filename down to do_open9().
+             
+             Subject: Re: [ID 20000819.002] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6707 on i686-linux 2.2.5-16 (UNINSTALLED)
+             
+             Update to CGI 2.72, from Lincoln Stein.
+             
+             Subject: [PATCH] Silence MakeMaker (Was: installman)
+             
+             Use temporary directory instead of current directory.
+             Subject: Re: [ID 20000816.011] Test failure in lib/ftmp-security.t
+             
+             Document odd vs even subreleases and -Dusedevel.
+             
+             The veryclean target needs to clobber.
+             
+             Use File::Spec->tmpdir().
+             
+             Document the number of exponent digits.
+             
+             Mention perlebcdic and perlposix-bc.
+             
+             s/this one/the 5.6.0 release/
+             
+             The #6724 is here.
+             
+             The correct cleaning order is an art.
+             
+             small tweaks for change#6705: avoid C++ style comments in C code;
+             use Perl's malloc API rather than the low level system one
+             
+             Array context keeps slithering in.
+             
+             Subject: Re: 5.7.0 getting really close, new snapshot: perldelta, Storable
+             
+             Subject: [PATCH] os2.c fix for use64bitint
+             
+             Update to Pod::LaTeX 0.53.
+             Subject: [PATCH] lib/Pod/LaTeX.pm updates
+             
+             Document the endianness of Alpha more precisely.
+             
+             Subject: RE: [PATCH perl@6736] t/pragma/warn/9enabled assumes stdout buffered
+             
+             Rename the macro argument because some preprocessors
+             can't tell the difference and expand arguments also inside
+             double quoted strings.
+             
+             free TLS slot properly on Windows
+             
+             use Cwd 'chdir' didn't set $ENV{PWD} correctly on Windows
+             
+             Unicos/mk requires elaborate paranoia.
+             
+             Tweak the floating point output routine preferences.
+             
+             Also under djgpp the timestamps are funky.
+             
+             Apply some PodParser 1.18 patches; the Pod/Find.pm
+             patches cannot be applied since #6712 conflicts.
+             
+             Use PodParser 1.18 new test.
+             
+             A pod nit.
+             Subject: [PATCH] pod/perlre.pod (was Re: [ID 20000821.007] $&, $1, etc. disappear when sub returns)
+             
+             Be verydeepclean.
+     Branch: maint-5.6/perl
+	  +> pod/perlebcdic.pod
+	  !> (integrate 106 files)
+____________________________________________________________________________
+[  7892] By: jhi                                   on 2000/11/27  15:02:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7891] By: jhi                                   on 2000/11/27  14:57:23
         Log: Subject: Re: perlfaq style changes
              From: sthoenna@efn.org (Yitzchak Scott-Thoennes)

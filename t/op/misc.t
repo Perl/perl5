@@ -595,3 +595,7 @@ for (@locales) {
     print "$_ $s\n";
 }
 EXPECT
+########
+sub m {}
+EXPECT
+Subroutine name "m" reserved for string operators at - line 1.

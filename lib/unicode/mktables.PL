@@ -25,8 +25,13 @@ mkdir "To", 0755;
     # 000B: VERTICAL TABULATION
     # 000C: FORM FEED
     # 000D: CARRIAGE RETURN
+    # 0020: SPACE
     ['IsSpace',  '$cat  =~ /^Z/ ||
                   $code =~ /^(0009|000A|000B|000C|000D)$/',	''],
+    ['IsSpacePerl',
+                 '$cat  =~ /^Z/ ||
+                  $code =~ /^(0009|000A|000C|000D)$/',		''],
+    ['IsBlank',  '$cat  =~ /^Z[^lp]$/ ||  $code eq "0009"',	''],
     ['IsDigit',  '$cat =~ /^Nd$/',	''],
     ['IsUpper',  '$cat =~ /^L[ut]$/',	''],
     ['IsLower',  '$cat =~ /^Ll$/',	''],

@@ -3773,7 +3773,7 @@ S_reginclass(pTHX_ register regnode *p, register I32 c)
 	    (ANYOF_CLASS_TEST(p, ANYOF_NXDIGIT) && !isXDIGIT(c))    ||
 	    (ANYOF_CLASS_TEST(p, ANYOF_PSXSPC)  &&  isPSXSPC(c))    ||
 	    (ANYOF_CLASS_TEST(p, ANYOF_NPSXSPC) && !isPSXSPC(c))    ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_BLANK)   &&  isBLANK(c))    ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_BLANK)   &&  isBLANK(c))     ||
 	    (ANYOF_CLASS_TEST(p, ANYOF_NBLANK)  && !isBLANK(c))
 	    ) /* How's that for a conditional? */
 	{

@@ -71,8 +71,6 @@ my @death =
 
  'use utf8; /[\x{X]/' => 'Missing right brace on \x{} before {#} mark in regex m/[\x{{#}X]/',
 
- '/\x{x}/' => 'Can\'t use \x{} without \'use utf8\' declaration before {#} mark in regex m/\x{x}{#}/',
-
  '/[[:barf:]]/' => 'POSIX class [:barf:] unknown before {#} mark in regex m/[[:barf:]{#}]/',
 
  '/[[=barf=]]/' => 'POSIX syntax [= =] is reserved for future extensions before {#} mark in regex m/[[=barf=]{#}]/',

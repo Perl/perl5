@@ -311,15 +311,19 @@ deleted.
 In our example, 'undef' is really an element containing
 C<$self-E<gt>{ELEMSIZE}> number of spaces.  Observe:
 
-sub STORESIZE {
-  my $self  = shift;
-  my $count = shift;
-  if ( $count > $self->FETCHSIZE() ) {
-    $self->STORE( $_, '' ) foreach $count - $self->FETCHSIZE() + 1 .. $count;
-  } elsif ( $count < $self->FETCHSIZE() ) {
-    $self->POP() foreach 0 .. $self->FETCHSIZE() - $count + 1;
-  }
-}
+    sub STORESIZE {
+      my $self  = shift;
+      my $count = shift;
+      if ( $count > $self->FETCHSIZE() ) {
+        foreach ( $count - $self->FETCHSIZE() .. $count ) {
+          $self->STORE( $_, '' );
+        }
+      } elsif ( $count < $self->FETCHSIZE() ) {
+        foreach ( 0 .. $self->FETCHSIZE() - $count - 2 ) {
+          $self->POP();
+        }
+      }
+    }
 
 =item EXTEND this, count
 
@@ -346,7 +350,9 @@ C<$self-E<gt>{ELEMSIZE}> spaces only, it does not exist:
     sub EXISTS {
       my $self  = shift;
       my $index = shift;
-      return $self->{ARRAY}->[$index] eq ' ' x $self->{ELEMSIZE} ? 0 : 1;
+      return 0 if ! defined $self->{ARRAY}->[$index] ||
+                  $self->{ARRAY}->[$index] eq ' ' x $self->{ELEMSIZE};
+      return 1;
     }
 
 =item DELETE this, key
@@ -456,17 +462,6 @@ language that does its own garbage collection, so this time we'll
 just leave it out.
 
 =back
-
-The code we presented at the top of the tied array class accesses many
-elements of the array, far more than we've set the bounds to.  Therefore,
-it will blow up once they try to access beyond the 2nd element of @ary, as
-the following output demonstrates:
-
-    setting index 0: value of elt 0 now 0
-    setting index 1: value of elt 1 now 10
-    setting index 2: value of elt 2 now 20
-    setting index 3: Array OOB: 3 > 2 at Bounded_Array.pm line 39
-            Bounded_Array::FETCH called at testba line 12
 
 =head2 Tying Hashes
 

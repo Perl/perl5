@@ -754,29 +754,37 @@ thus C<host> is initialized on the declaration line, and our assignment
 C<h = host> is not performed too early.  Otherwise one would need to have the
 assignment C<h = host> in a CODE: or INIT: section.)
 
-=head2 The IN/OUTLIST/IN_OUTLIST Keywords
+=head2 The IN/OUTLIST/IN_OUTLIST/OUT/IN_OUT Keywords
 
 In the list of parameters for an XSUB, one can precede parameter names
-by the C<IN>/C<OUTLIST>/C<IN_OUTLIST> keywords.  C<IN> keyword is a default,
-the other two keywords indicate how the Perl interface should differ from
-the C interface.
+by the C<IN>/C<OUTLIST>/C<IN_OUTLIST>/C<OUT>/C<IN_OUT> keywords.
+C<IN> keyword is the default, the other keywords indicate how the Perl
+interface should differ from the C interface.
 
-Parameters preceded by C<OUTLIST>/C<IN_OUTLIST> keywords are considered to
-be used by the C subroutine I<via pointers>.  C<OUTLIST> keyword indicates
-that the C subroutine does not inspect the memory pointed by this parameter,
-but will write through this pointer to provide additional return values.
-Such parameters do not appear in the usage signature of the generated Perl
-function.
+Parameters preceded by C<OUTLIST>/C<IN_OUTLIST>/C<OUT>/C<IN_OUT>
+keywords are considered to be used by the C subroutine I<via
+pointers>.  C<OUTLIST>/C<OUT> keywords indicate that the C subroutine
+does not inspect the memory pointed by this parameter, but will write
+through this pointer to provide additional return values.
 
-Parameters preceded by C<IN_OUTLIST> I<do> appear as parameters to the
-Perl function.  These parameters are converted to the corresponding C type,
-then pointers to these data are given as arguments to the C function.  It
-is expected that the C function will write through these pointers 
+Parameters preceded by C<OUTLIST> keyword do not appear in the usage
+signature of the generated Perl function.
+
+Parameters preceded by C<IN_OUTLIST>/C<IN_OUT>/C<OUT> I<do> appear as
+parameters to the Perl function.  With the exception of
+C<OUT>-parameters, these parameters are converted to the corresponding
+C type, then pointers to these data are given as arguments to the C
+function.  It is expected that the C function will write through these
+pointers.
 
 The return list of the generated Perl function consists of the C return value
 from the function (unless the XSUB is of C<void> return type or
-C<The NO_INIT Keyword> was used) followed by all the C<OUTLIST>
-and C<IN_OUTLIST> parameters (in the order of appearance).  Say, an XSUB
+C<The NO_OUTPUT Keyword> was used) followed by all the C<OUTLIST>
+and C<IN_OUTLIST> parameters (in the order of appearance).  On the
+return from the XSUB the C<IN_OUT>/C<OUT> Perl parameter will be
+modified to have the values written by the C function.
+
+For example, an XSUB
 
   void
   day_month(OUTLIST day, IN unix_time, OUTLIST month)
@@ -792,17 +800,30 @@ The C signature of the corresponding function should be
 
   void day_month(int *day, int unix_time, int *month);
 
-The C<in>/C<OUTLIST>/C<IN_OUTLIST> keywords can be mixed with ANSI-style
-declarations, as in
+The C<IN>/C<OUTLIST>/C<IN_OUTLIST>/C<IN_OUT>/C<OUT> keywords can be
+mixed with ANSI-style declarations, as in
 
   void
   day_month(OUTLIST int day, int unix_time, OUTLIST int month)
 
 (here the optional C<IN> keyword is omitted).
 
-The C<IN_OUTLIST> parameters are somewhat similar to parameters introduced
-with L<The & Unary Operator> and put into the C<OUTPUT:> section (see
-L<The OUTPUT: Keyword>).  Say, the same C function can be interfaced with as
+The C<IN_OUT> parameters are identical with parameters introduced with
+L<The & Unary Operator> and put into the C<OUTPUT:> section (see L<The
+OUTPUT: Keyword>).  The C<IN_OUTLIST> parameters are very similar, the
+only difference being that the value C function writes through the
+pointer would not modify the Perl parameter, but is put in the output
+list.
+
+The C<OUTLIST>/C<OUT> parameter differ from C<IN_OUTLIST>/C<IN_OUT>
+parameters only by the the initial value of the Perl parameter not
+being read (and not being given to the C function - which gets some
+garbage instead).  For example, the same C function as above can be
+interfaced with as
+
+  void day_month(OUT int day, int unix_time, OUT int month);
+
+or
 
   void
   day_month(day, unix_time, month)

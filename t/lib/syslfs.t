@@ -46,15 +46,15 @@ EOM
 print "# checking whether we have sparse files...\n";
 
 # Known have-nots.
-if ($^O eq 'win32' || $^O eq 'vms') {
-    print "1..0 # Skip: no sparse files (because this is $^O) \n";
+if ($^O eq 'MSWin32' || $^O eq 'VMS') {
+    print "1..0 # Skip: no sparse files in $^O\n";
     bye();
 }
 
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
-    print "1..0 # Skip: large files known to work but unable to test them here ($^O)\n";
+    print "1..0 # Skip: no sparse files in $^0, unable to test large files\n";
     bye();
 }
 

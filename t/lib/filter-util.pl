@@ -38,7 +38,7 @@ sub ok
 
 $Inc = '' ;
 foreach (@INC)
- { $Inc .= "-I$_ " }
+ { $Inc .= "\"-I$_\" " }
 
 $Perl = '' ;
 $Perl = ($ENV{'FULLPERL'} or $^X or 'perl') ;
