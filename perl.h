@@ -604,7 +604,7 @@ Free_t   Perl_free _((Malloc_t where));
 	    set_vaxc_errno(vmserrcode);	\
 	} STMT_END
 #else
-#   define SETERRNO(errcode,vmserrcode) errno = (errcode)
+#   define SETERRNO(errcode,vmserrcode) (errno = (errcode))
 #endif
 
 #ifdef USE_THREADS
