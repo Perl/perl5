@@ -1200,7 +1200,7 @@ ssv. May evaluate arguments more than once.
 Like C<SvSetSV>, but does any set magic required afterwards.
 
 =for apidoc Am|void|SvSetMagicSV_nosteal|SV* dsv|SV* ssv
-Like C<SvSetMagicSV>, but does any set magic required afterwards.
+Like C<SvSetSV_nosteal>, but does any set magic required afterwards.
 
 =for apidoc Am|void|SvSHARE|SV* sv
 Arranges for sv to be shared between threads if a suitable module

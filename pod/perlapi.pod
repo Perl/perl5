@@ -1489,7 +1489,7 @@ Found in file sv.h
 
 =item SvSetMagicSV_nosteal
 
-Like C<SvSetMagicSV>, but does any set magic required afterwards.
+Like C<SvSetSV_nosteal>, but does any set magic required afterwards.
 
 	void	SvSetMagicSV_nosteal(SV* dsv, SV* ssv)
 
