@@ -688,7 +688,7 @@ print EM <<'END';
 
 #endif /* PERL_GLOBAL_STRUCT */
 
-#ifdef PERL_POLLUTE		/* disabled by default in 5.006 */
+#ifdef PERL_POLLUTE		/* disabled by default in 5.6.0 */
 
 END
 

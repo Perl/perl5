@@ -269,7 +269,7 @@ way to gain a precise understanding of the overall architecture of
 the language.
 
 If you build a version of the Perl interpreter with C<-DDEBUGGING>,
-Perl's B<-D> commandline flag will cause copious debugging information
+Perl's B<-D> command line flag will cause copious debugging information
 to be emitted (see the C<perlrun> manpage).  If you build a version of
 Perl with compiler debugging information (e.g. with the C compiler's
 C<-g> option instead of C<-O>) then you can step through the execution
