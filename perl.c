@@ -445,8 +445,9 @@ perl_destruct(pTHXx)
 	I32 i;
 
 	for (i = 0; environ[i]; i++)
-	    Safefree(environ[i]);
-	Safefree(environ);
+	    safesysfree(environ[i]);
+	/* Must use safesysfree() when working with environ. */
+	safesysfree(environ);		
 
 	environ = PL_origenviron;
     }
