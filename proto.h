@@ -796,6 +796,7 @@ PERL_CALLCONV void	Perl_vivify_defelem(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_vivify_ref(pTHX_ SV* sv, U32 to_what);
 PERL_CALLCONV I32	Perl_wait4pid(pTHX_ Pid_t pid, int* statusp, int flags);
 PERL_CALLCONV U32	Perl_parse_unicode_opts(pTHX_ char **popt);
+PERL_CALLCONV U32	Perl_seed(pTHX);
 PERL_CALLCONV void	Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op);
 PERL_CALLCONV void	Perl_report_uninit(pTHX);
 PERL_CALLCONV void	Perl_warn(pTHX_ const char* pat, ...)
@@ -1016,7 +1017,6 @@ STATIC void*	S_vcall_list_body(pTHX_ va_list args);
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_refto(pTHX_ SV* sv);
-STATIC U32	S_seed(pTHX);
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)

@@ -836,6 +836,7 @@ p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
 p	|U32	|parse_unicode_opts|char **popt
+p	|U32	|seed
 p	|void	|report_evil_fh	|GV *gv|IO *io|I32 op
 pd	|void	|report_uninit
 Afpd	|void	|warn		|const char* pat|...
@@ -1060,7 +1061,6 @@ s	|void*	|vcall_list_body|va_list args
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
 s	|SV*	|refto		|SV* sv
-s	|U32	|seed
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
