@@ -834,6 +834,45 @@ newHV(void)
     return hv;
 }
 
+HV *
+newHVhv(HV *ohv)
+{
+    register HV *hv;
+    register XPVHV* xhv;
+    STRLEN hv_max = ohv ? HvMAX(ohv) : 0;
+    STRLEN hv_fill = ohv ? HvFILL(ohv) : 0;
+
+    hv = newHV();
+    while (hv_max && hv_max + 1 >= hv_fill * 2)
+	hv_max = hv_max / 2;	/* Is always 2^n-1 */
+    ((XPVHV*)SvANY(hv))->xhv_max = hv_max;
+    if (!hv_fill)
+	return hv;
+
+#if 0
+    if (!SvRMAGICAL(ohv) || !mg_find((SV*)ohv,'P')) {
+	/* Quick way ???*/
+    } 
+    else 
+#endif
+    {
+	HE *entry;
+	I32 hv_riter = HvRITER(ohv);	/* current root of iterator */
+	HE *hv_eiter = HvEITER(ohv);	/* current entry of iterator */
+	
+	/* Slow way */
+	hv_iterinit(hv);
+	while (entry = hv_iternext(ohv)) {
+	    hv_store(hv, HeKEY(entry), HeKLEN(entry), 
+		     SvREFCNT_inc(HeVAL(entry)), HeHASH(entry));
+	}
+	HvRITER(ohv) = hv_riter;
+	HvEITER(ohv) = hv_eiter;
+    }
+    
+    return hv;
+}
+
 void
 hv_free_ent(HV *hv, register HE *entry)
 {

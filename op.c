@@ -1518,11 +1518,21 @@ scope(OP *o)
     return o;
 }
 
+void
+save_hints(void)
+{
+    SAVEI32(hints);
+    SAVESPTR(GvHV(hintgv));
+    GvHV(hintgv) = newHVhv(GvHV(hintgv));
+    SAVEFREESV(GvHV(hintgv));
+}
+
 int
 block_start(int full)
 {
     dTHR;
     int retval = savestack_ix;
+
     SAVEI32(comppad_name_floor);
     if (full) {
 	if ((comppad_name_fill = AvFILLp(comppad_name)) > 0)
@@ -1537,7 +1547,7 @@ block_start(int full)
     SAVEI32(padix_floor);
     padix_floor = padix;
     pad_reset_pending = FALSE;
-    SAVEI32(hints);
+    SAVEHINTS();
     hints &= ~HINT_BLOCK_SCOPE;
     return retval;
 }

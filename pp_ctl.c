@@ -2224,7 +2224,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
        introduced within evals. See force_ident(). GSAR 96-10-12 */
     safestr = savepv(tmpbuf);
     SAVEDELETE(defstash, safestr, strlen(safestr));
-    SAVEI32(hints);
+    SAVEHINTS();
 #ifdef OP_IN_REGISTER
     opsave = op;
 #else
@@ -2552,7 +2552,7 @@ PP(pp_require)
     rsfp = tryrsfp;
     name = savepv(name);
     SAVEFREEPV(name);
-    SAVEI32(hints);
+    SAVEHINTS();
     hints = 0;
  
     /* switch to eval mode */
@@ -2612,7 +2612,7 @@ PP(pp_entereval)
        introduced within evals. See force_ident(). GSAR 96-10-12 */
     safestr = savepv(tmpbuf);
     SAVEDELETE(defstash, safestr, strlen(safestr));
-    SAVEI32(hints);
+    SAVEHINTS();
     hints = op->op_targ;
 
     push_return(op->op_next);

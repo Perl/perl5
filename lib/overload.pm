@@ -100,6 +100,32 @@ sub mycan {				# Real can would leave stubs.
   return undef;
 }
 
+%constants = (
+	      'integer'	  =>  0x1000, 
+	      'float'	  =>  0x2000,
+	      'binary'	  =>  0x4000,
+	      'q'	  =>  0x8000,
+	      'qr'	  => 0x10000,
+	     );
+
+sub constant {
+  # Arguments: what, sub
+  while (@_) {
+    $^H{$_[0]} = $_[1];
+    $^H |= $constants{$_[0]} | 0x20000;
+    shift, shift;
+  }
+}
+
+sub remove_constant {
+  # Arguments: what, sub
+  while (@_) {
+    delete $^H{$_[0]};
+    $^H &= ~ $constants{$_[0]};
+    shift, shift;
+  }
+}
+
 1;
 
 __END__
@@ -522,6 +548,72 @@ Returns C<undef> or a reference to the method that implements C<op>.
 
 =back
 
+=head1 Overloading constants
+
+For some application Perl parser mangles constants too much.  It is possible
+to hook into this process via overload::constant() and overload::remove_constant()
+functions.
+
+These functions take a hash as an argument.  The recognized keys of this hash
+are
+
+=over 8
+
+=item integer
+
+to overload integer constants,
+
+=item float
+
+to overload floating point constants,
+
+=item binary
+
+to overload octal and hexadecimal constants,
+
+=item q
+
+to overload C<q>-quoted strings, constant pieces of C<qq>- and C<qx>-quoted
+strings and here-documents,
+
+=item qr
+
+to overload constant pieces of regular expressions.
+
+=back
+
+The corresponding values are references to functions which take three arguments:
+the first one is the I<initial> string form of the constant, the second one
+is how Perl interprets this constant, the third one is how the constant is used.  
+Note that the initial string form does not
+contain string delimiters, and has backslashes in backslash-delimiter 
+combinations stripped (thus the value of delimiter is not relevant for
+processing of this string).  The return value of this function is how this 
+constant is going to be interpreted by Perl.  The third argument is undefined
+unless for overloaded C<q>- and C<qr>- constants, it is C<q> in single-quote
+context (comes from strings, regular expressions, and single-quote HERE
+documents), it is C<tr> for arguments of C<tr>/C<y> operators, 
+it is C<s> for right-hand side of C<s>-operator, and it is C<qq> otherwise.
+
+Since an expression C<"ab$cd,,"> is just a shortcut for C<'ab' . $cd . ',,'>,
+it is expected that overloaded constant strings are equipped with reasonable
+overloaded catenation operator, otherwise absurd results will result.  
+Similarly, negative numbers are considered as negations of positive constants.
+
+Note that it is probably meaningless to call the functions overload::constant()
+and overload::remove_constant() from anywhere but import() and unimport() methods.
+From these methods they may be called as
+
+	sub import {
+	  shift;
+	  return unless @_;
+	  die "unknown import: @_" unless @_ == 1 and $_[0] eq ':constant';
+	  overload::constant integer => sub {Math::BigInt->new(shift)};
+	}
+
+B<BUGS> Currently overloaded-ness of constants does not propagate 
+into C<eval '...'>.
+
 =head1 IMPLEMENTATION
 
 What follows is subject to change RSN.
@@ -596,6 +688,8 @@ For the purpose of inheritance every overloaded package behaves as if
 C<fallback> is present (possibly undefined). This may create
 interesting effects if some package is not overloaded, but inherits
 from two overloaded packages.
+
+Barewords are not covered by overloaded string constants.
 
 This document is confusing.
 

@@ -137,6 +137,7 @@
 #define generation		(curinterp->Igeneration)
 #define gensym			(curinterp->Igensym)
 #define globalstash		(curinterp->Iglobalstash)
+#define hintgv			(curinterp->Ihintgv)
 #define in_clean_all		(curinterp->Iin_clean_all)
 #define in_clean_objs		(curinterp->Iin_clean_objs)
 #define incgv			(curinterp->Iincgv)
@@ -311,6 +312,7 @@
 #define Igeneration		generation
 #define Igensym			gensym
 #define Iglobalstash		globalstash
+#define Ihintgv			hintgv
 #define Iin_clean_all		in_clean_all
 #define Iin_clean_objs		in_clean_objs
 #define Iincgv			incgv
@@ -547,6 +549,7 @@
 #define generation		Perl_generation
 #define gensym			Perl_gensym
 #define globalstash		Perl_globalstash
+#define hintgv			Perl_hintgv
 #define in_clean_all		Perl_in_clean_all
 #define in_clean_objs		Perl_in_clean_objs
 #define incgv			Perl_incgv

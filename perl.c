@@ -453,6 +453,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
     envgv = Nullgv;
     siggv = Nullgv;
     incgv = Nullgv;
+    hintgv = Nullgv;
     errgv = Nullgv;
     argvgv = Nullgv;
     argvoutgv = Nullgv;
@@ -1870,6 +1871,8 @@ init_main_stash(void)
     HvNAME(defstash) = savepv("main");
     incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
     GvMULTI_on(incgv);
+    hintgv = gv_fetchpv("\010",TRUE, SVt_PV); /* ^H */
+    GvMULTI_on(hintgv);
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(errgv);

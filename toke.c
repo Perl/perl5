@@ -50,6 +50,7 @@ static int uni _((I32 f, char *s));
 #endif
 static char * filter_gets _((SV *sv, PerlIO *fp, STRLEN append));
 static void restore_rsfp _((void *f));
+static SV *new_constant _((char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type));
 static void restore_expect _((void *e));
 static void restore_lex_expect _((void *e));
 #endif /* PERL_OBJECT */
@@ -586,20 +587,23 @@ tokeq(SV *sv)
     register char *s;
     register char *send;
     register char *d;
-    STRLEN len;
+    STRLEN len = 0;
+    SV *pv = sv;
 
     if (!SvLEN(sv))
-	return sv;
+	goto finish;
 
     s = SvPV_force(sv, len);
     if (SvIVX(sv) == -1)
-	return sv;
+	goto finish;
     send = s + len;
     while (s < send && *s != '\\')
 	s++;
     if (s == send)
-	return sv;
+	goto finish;
     d = s;
+    if ( hints & HINT_NEW_STRING )
+	pv = sv_2mortal(newSVpv(SvPVX(pv), len));
     while (s < send) {
 	if (*s == '\\') {
 	    if (s + 1 < send && (s[1] == '\\'))
@@ -609,7 +613,9 @@ tokeq(SV *sv)
     }
     *d = '\0';
     SvCUR_set(sv, d - SvPVX(sv));
-
+  finish:
+    if ( hints & HINT_NEW_STRING )
+       return new_constant(NULL, 0, "q", sv, pv, "q");
     return sv;
 }
 
@@ -625,10 +631,19 @@ sublex_start(void)
     }
     if (op_type == OP_CONST || op_type == OP_READLINE) {
 	SV *sv = tokeq(lex_stuff);
-	STRLEN len;
-	char *p = SvPV(sv, len);
-	yylval.opval = (OP*)newSVOP(op_type, 0, newSVpv(p, len));
-	SvREFCNT_dec(sv);
+
+	if (SvTYPE(sv) == SVt_PVIV) {
+	    /* Overloaded constants, nothing fancy: Convert to SVt_PV: */
+	    STRLEN len;
+	    char *p;
+	    SV *nsv;
+
+	    p = SvPV(sv, len);
+	    nsv = newSVpv(p, len);
+	    SvREFCNT_dec(sv);
+	    sv = nsv;
+	} 
+	yylval.opval = (OP*)newSVOP(op_type, 0, sv);
 	lex_stuff = Nullsv;
 	return THING;
     }
@@ -1021,9 +1036,17 @@ scan_const(char *start)
     }
 
     /* return the substring (via yylval) only if we parsed anything */
-    if (s > bufptr)
+    if (s > bufptr) {
+	if ( hints & ( lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) )
+	    sv = new_constant(start, s - start, (lex_inpat ? "qr" : "q"), 
+			      sv, Nullsv,
+			      ( lex_inwhat == OP_TRANS 
+				? "tr"
+				: ( (lex_inwhat == OP_SUBST && !lex_inpat)
+				    ? "s"
+				    : "qq")));
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
-    else
+    } else
 	SvREFCNT_dec(sv);
     return s;
 }
@@ -1657,6 +1680,8 @@ yylex(void)
 	    SV *sv = newSVsv(linestr);
 	    if (!lex_inpat)
 		sv = tokeq(sv);
+	    else if ( hints & HINT_NEW_RE )
+		sv = new_constant(NULL, 0, "qr", sv, sv, "q");
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 	    s = bufend;
 	}
@@ -4687,6 +4712,76 @@ checkcomma(register char *s, char *name, char *what)
     }
 }
 
+STATIC SV *
+new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type) 
+{
+    HV *table = perl_get_hv("\10", FALSE); /* ^H */
+    dTHR;
+    dSP;
+    BINOP myop;
+    SV *res;
+    bool oldcatch = CATCH_GET;
+    SV **cvp;
+    SV *cv, *typesv;
+    char buf[128];
+	    
+    if (!table) {
+	yyerror("%^H is not defined");
+	return sv;
+    }
+    cvp = hv_fetch(table, key, strlen(key), FALSE);
+    if (!cvp || !SvOK(*cvp)) {
+	sprintf(buf,"$^H{%s} is not defined", key);
+	yyerror(buf);
+	return sv;
+    }
+    sv_2mortal(sv);			/* Parent created it permanently */
+    cv = *cvp;
+    if (!pv)
+	pv = sv_2mortal(newSVpv(s, len));
+    if (type)
+	typesv = sv_2mortal(newSVpv(type, 0));
+    else
+	typesv = &sv_undef;
+    CATCH_SET(TRUE);
+    Zero(&myop, 1, BINOP);
+    myop.op_last = (OP *) &myop;
+    myop.op_next = Nullop;
+    myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
+
+    PUSHSTACKi(SI_OVERLOAD);
+    ENTER;
+    SAVEOP();
+    op = (OP *) &myop;
+    if (PERLDB_SUB && curstash != debstash)
+	op->op_private |= OPpENTERSUB_DB;
+    PUTBACK;
+    pp_pushmark(ARGS);
+
+    EXTEND(sp, 3);
+    PUSHs(pv);
+    PUSHs(sv);
+    PUSHs(typesv);
+    PUSHs(cv);
+    PUTBACK;
+
+    if (op = pp_entersub(ARGS))
+      CALLRUNOPS();
+    LEAVE;
+    SPAGAIN;
+
+    res = POPs;
+    PUTBACK;
+    CATCH_SET(oldcatch);
+    POPSTACK;
+
+    if (!SvOK(res)) {
+	sprintf(buf,"Call to &{$^H{%s}} did not return a defined value", key);
+	yyerror(buf);
+    }
+    return SvREFCNT_inc(res);
+}
+
 STATIC char *
 scan_word(register char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
@@ -5539,7 +5634,8 @@ scan_num(char *start)
 
 		  digit:
 		    n = u << shift;	/* make room for the digit */
-		    if (!overflowed && (n >> shift) != u) {
+		    if (!overflowed && (n >> shift) != u
+			&& !(hints & HINT_NEW_BINARY)) {
 			warn("Integer overflow in %s number",
 			     (shift == 4) ? "hex" : "octal");
 			overflowed = TRUE;
@@ -5555,6 +5651,8 @@ scan_num(char *start)
 	  out:
 	    sv = NEWSV(92,0);
 	    sv_setuv(sv, u);
+	    if ( hints & HINT_NEW_BINARY)
+		sv = new_constant(start, s - start, "binary", sv, Nullsv, NULL);
 	}
 	break;
 
@@ -5656,6 +5754,9 @@ scan_num(char *start)
 	    sv_setiv(sv, tryiv);
 	else
 	    sv_setnv(sv, value);
+	if ( floatit ? (hints & HINT_NEW_FLOAT) : (hints & HINT_NEW_INTEGER) )
+	    sv = new_constant(tokenbuf, d - tokenbuf, 
+			      (floatit ? "float" : "integer"), sv, Nullsv, NULL);
 	break;
     }
 

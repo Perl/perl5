@@ -25,6 +25,7 @@
 #define SAVEt_AELEM     24
 #define SAVEt_HELEM     25
 #define SAVEt_OP	26
+#define SAVEt_NOHINTS	27
 
 #define SSCHECK(need) if (savestack_ix + need > savestack_max) savestack_grow()
 #define SSPUSHINT(i) (savestack[savestack_ix++].any_i32 = (I32)(i))
@@ -94,7 +95,14 @@
     SSPUSHINT(SAVEt_STACK_POS);		\
  } STMT_END
 #define SAVEOP()	save_op()
-
+#define SAVEHINTS() STMT_START {	\
+    if (hints & HINT_LOCALIZE_HH)	\
+	save_hints();			\
+    else {				\
+	SSPUSHINT(hints);		\
+	SSPUSHINT(SAVEt_NOHINTS);	\
+    }					\
+ } STMT_END
 /* A jmpenv packages the state required to perform a proper non-local jump.
  * Note that there is a start_env initialized when perl starts, and top_env
  * points to this initially, so top_env should always be non-null.

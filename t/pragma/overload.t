@@ -48,7 +48,20 @@ $| = 1;
 print "1..",&last,"\n";
 
 sub test {
-  $test++; if (shift) {print "ok $test\n";1} else {print "not ok $test\n";0}
+  $test++; 
+  if (@_ > 1) {
+    if ($_[0] eq $_[1]) {
+      print "ok $test\n";
+    } else {
+      print "not ok $test: '$_[0]' ne '$_[1]'\n";
+    }
+  } else {
+    if (shift) {
+      print "ok $test\n";
+    } else {
+      print "not ok $test\n";
+    } 
+  }
 }
 
 $a = new Oscalar "087";
@@ -359,5 +372,70 @@ test(($aI | 3) eq '_<<_xx_<<_');	# 114
 # warn $aII << 3;
 test(($aII << 3) eq '_<<_087_<<_');	# 115
 
+{
+  BEGIN { $int = 7; overload::constant 'integer' => sub {$int++; shift}; }
+  $out = 2**10;
+}
+test($int, 9);		# 116
+test($out, 1024);		# 117
+
+$foo = 'foo';
+$foo1 = 'f\'o\\o';
+{
+  BEGIN { $q = $qr = 7; 
+	  overload::constant 'q' => sub {$q++; push @q, shift, ($_[1] || 'none'); shift},
+			     'qr' => sub {$qr++; push @qr, shift, ($_[1] || 'none'); shift}; }
+  $out = 'foo';
+  $out1 = 'f\'o\\o';
+  $out2 = "a\a$foo,\,";
+  /b\b$foo.\./;
+}
+
+test($out, 'foo');		# 118
+test($out, $foo);		# 119
+test($out1, 'f\'o\\o');		# 120
+test($out1, $foo1);		# 121
+test($out2, "a\afoo,\,");	# 122
+test("@q", "foo q f'o\\\\o q a\\a qq ,\\, qq");	# 123
+test($q, 11);			# 124
+test("@qr", "b\\b qq .\\. qq");	# 125
+test($qr, 9);			# 126
+
+{
+  $_ = '!<b>!foo!<-.>!';
+  BEGIN { overload::constant 'q' => sub {push @q1, shift, ($_[1] || 'none'); "_<" . (shift) . ">_"},
+			     'qr' => sub {push @qr1, shift, ($_[1] || 'none'); "!<" . (shift) . ">!"}; }
+  $out = 'foo';
+  $out1 = 'f\'o\\o';
+  $out2 = "a\a$foo,\,";
+  $res = /b\b$foo.\./;
+  $a = <<EOF;
+oups
+EOF
+  $b = <<'EOF';
+oups1
+EOF
+  $c = bareword;
+  m'try it';
+  s'first part'second part';
+  s/yet another/tail here/;
+  tr/z-Z/z-Z/;
+}
+
+test($out, '_<foo>_');		# 117
+test($out1, '_<f\'o\\o>_');		# 128
+test($out2, "_<a\a>_foo_<,\,>_");	# 129
+test("@q1", "foo q f'o\\\\o q a\\a qq ,\\, qq oups
+ qq oups1
+ q second part q tail here s z-Z tr z-Z tr");	# 130
+test("@qr1", "b\\b qq .\\. qq try it q first part q yet another qq");	# 131
+test($res, 1);			# 132
+test($a, "_<oups
+>_");	# 133
+test($b, "_<oups1
+>_");	# 134
+test($c, "bareword");	# 135
+
+
 # Last test is:
-sub last {115}
+sub last {135}
