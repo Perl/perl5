@@ -15,6 +15,7 @@ Thread t;
     DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
 				   "%p: remove_thread %p\n", thr, t)));
     MUTEX_LOCK(&threads_mutex);
+    MUTEX_DESTROY(&t->mutex);
     nthreads--;
     t->prev->next = t->next;
     t->next->prev = t->prev;
@@ -181,7 +182,6 @@ void *arg;
 	croak("panic: illegal state %u at end of threadstart", ThrSTATE(thr));
 	/* NOTREACHED */
     }
-    MUTEX_DESTROY(&thr->mutex);
     return (void *) returnav;	/* Available for anyone to join with us */
 				/* unless we are detached in which case */
 				/* noone will see the value anyway. */
@@ -474,7 +474,6 @@ list(class)
 	do {
 	    n = nthreads;
 	    MUTEX_UNLOCK(&threads_mutex);
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "list: n = %d\n", n));
 	    if (AvFILL(av) < n - 1) {
 		int i = AvFILL(av);
 		for (i = AvFILL(av); i < n - 1; i++) {
@@ -498,14 +497,13 @@ list(class)
 	t = thr;
 	svp = AvARRAY(av);
 	do {
-	    SV *sv = SvRV(*svp++);
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-  				  "list: filling in thread %p\n", t));
+	    SV *sv = (SV*)SvRV(*svp);
 	    sv_setiv(sv, t->tid);
 	    SvMAGIC(sv)->mg_obj = SvREFCNT_inc(t->Toursv);
 	    SvMAGIC(sv)->mg_flags |= MGf_REFCOUNTED;
 	    SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
 	    t = t->next;
+	    svp++;
 	} while (t != thr);
 	/*  */
 	MUTEX_UNLOCK(&threads_mutex);
