@@ -412,6 +412,21 @@ sub abs2rel {
         $base = $self->canonpath( $base ) ;
     }
 
+    # Are we even starting $path on the same (node::)device as $base?  Note that
+    # logical paths or nodename differences may be on the "same device" 
+    # but the comparison that ignores device differences so as to concatenate 
+    # [---] up directory specs is not even a good idea in cases where there is 
+    # a logical path difference between $path and $base nodename and/or device.
+    # Hence we fall back to returning the absolute $path spec
+    # if there is a case blind device (or node) difference of any sort
+    # and we do not even try to call $parse() or consult %ENV for $trnlnm()
+    # (this module needs to run on non VMS platforms after all).
+    my $path_device = ($self->splitpath( $path, 1 ))[0];
+    my $base_device = ($self->splitpath( $base, 1 ))[0];
+    if ( lc( $path_device ) ne lc( $base_device ) ) {
+        return ( $path ) ;
+    }
+
     # Split up paths
     my ( $path_directories, $path_file ) =
         ($self->splitpath( $path, 1 ))[1,2] ;

@@ -3221,7 +3221,7 @@ Found in file sv.h
 
 =item SvTAINT
 
-Taints an SV if tainting is enabled
+Taints an SV if tainting is enabled.
 
 	void	SvTAINT(SV* sv)
 
@@ -3254,7 +3254,7 @@ Found in file sv.h
 
 =item SvTAINTED_on
 
-Marks an SV as tainted.
+Marks an SV as tainted if tainting is enabled.
 
 	void	SvTAINTED_on(SV* sv)
 

@@ -822,7 +822,7 @@ Checks to see if an SV is tainted. Returns TRUE if it is, FALSE if
 not.
 
 =for apidoc Am|void|SvTAINTED_on|SV* sv
-Marks an SV as tainted.
+Marks an SV as tainted if tainting is enabled.
 
 =for apidoc Am|void|SvTAINTED_off|SV* sv
 Untaints an SV. Be I<very> careful with this routine, as it short-circuits
@@ -833,7 +833,7 @@ standard perl fashion, via a carefully crafted regexp, rather than directly
 untainting variables.
 
 =for apidoc Am|void|SvTAINT|SV* sv
-Taints an SV if tainting is enabled
+Taints an SV if tainting is enabled.
 
 =cut
 */
