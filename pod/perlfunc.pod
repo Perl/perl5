@@ -1206,8 +1206,7 @@ A deprecated form of subroutine call.  See L<perlsub>.
 =item do EXPR
 
 Uses the value of EXPR as a filename and executes the contents of the
-file as a Perl script.  Its primary use is to include subroutines
-from a Perl subroutine library.
+file as a Perl script.
 
     do 'stat.pl';
 
@@ -1216,7 +1215,7 @@ is just like
     eval `cat stat.pl`;
 
 except that it's more efficient and concise, keeps track of the current
-filename for error messages, searches the @INC libraries, and updates
+filename for error messages, searches the @INC directories, and updates
 C<%INC> if the file is found.  See L<perlvar/Predefined Names> for these
 variables.  It also differs in that code evaluated with C<do FILENAME>
 cannot see lexicals in the enclosing scope; C<eval STRING> does.  It's the
