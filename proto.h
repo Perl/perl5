@@ -898,12 +898,6 @@ PERL_CALLCONV Malloc_t	Perl_safesysmalloc(MEM_SIZE nbytes);
 PERL_CALLCONV Malloc_t	Perl_safesyscalloc(MEM_SIZE elements, MEM_SIZE size);
 PERL_CALLCONV Malloc_t	Perl_safesysrealloc(Malloc_t where, MEM_SIZE nbytes);
 PERL_CALLCONV Free_t	Perl_safesysfree(Malloc_t where);
-#if defined(LEAKTEST)
-PERL_CALLCONV Malloc_t	Perl_safexmalloc(I32 x, MEM_SIZE size);
-PERL_CALLCONV Malloc_t	Perl_safexcalloc(I32 x, MEM_SIZE elements, MEM_SIZE size);
-PERL_CALLCONV Malloc_t	Perl_safexrealloc(Malloc_t where, MEM_SIZE size);
-PERL_CALLCONV void	Perl_safexfree(Malloc_t where);
-#endif
 #if defined(PERL_GLOBAL_STRUCT)
 PERL_CALLCONV struct perl_vars *	Perl_GetVars(pTHX);
 #endif
@@ -1346,9 +1340,6 @@ STATIC char*	S_stdize_locale(pTHX_ char* locs);
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 STATIC COP*	S_closest_cop(pTHX_ COP *cop, OP *o);
 STATIC SV*	S_mess_alloc(pTHX);
-#  if defined(LEAKTEST)
-STATIC void	S_xstat(pTHX_ int);
-#  endif
 #endif
 
 START_EXTERN_C

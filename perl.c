@@ -2373,7 +2373,7 @@ Perl_moreswitches(pTHX_ char *s)
 	forbid_setid("-D");
 	if (isALPHA(s[1])) {
 	    /* if adding extra options, remember to update DEBUG_MASK */
-	    static char debopts[] = "psltocPmfrxuLHXDSTRJ";
+	    static char debopts[] = "psltocPmfrxu HXDSTRJ";
 	    char *d;
 
 	    for (s++; *s && (d = strchr(debopts,*s)); s++)

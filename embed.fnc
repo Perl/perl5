@@ -859,12 +859,6 @@ Anp	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 Anp	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
 Anp	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
 Anp	|Free_t	|safesysfree	|Malloc_t where
-#if defined(LEAKTEST)
-Anp	|Malloc_t|safexmalloc	|I32 x|MEM_SIZE size
-Anp	|Malloc_t|safexcalloc	|I32 x|MEM_SIZE elements|MEM_SIZE size
-Anp	|Malloc_t|safexrealloc	|Malloc_t where|MEM_SIZE size
-Anp	|void	|safexfree	|Malloc_t where
-#endif
 #if defined(PERL_GLOBAL_STRUCT)
 Ap	|struct perl_vars *|GetVars
 #endif
@@ -1315,9 +1309,6 @@ s	|char*	|stdize_locale	|char* locs
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|COP*	|closest_cop	|COP *cop|OP *o
 s	|SV*	|mess_alloc
-#  if defined(LEAKTEST)
-s	|void	|xstat		|int
-#  endif
 #endif
 
 START_EXTERN_C
