@@ -42,19 +42,10 @@ For ease of access, the Perl manual has been split up into several sections:
     perlopentut		Perl open() tutorial
     perlretut		Perl regular expressions tutorial
 
-    perlref		Perl references, the rest of the story
     perlre		Perl regular expressions, the rest of the story
+    perlref		Perl references, the rest of the story
+
     perlform		Perl formats
-    perllocale		Perl locale support
-    perlunicode		Perl unicode support
-
-    perlipc		Perl interprocess communication
-    perlfork		Perl fork() information
-    perlnumber		Perl number semantics
-    perlthrtut		Perl threads tutorial
-
-    perlport		Perl portability guide
-    perlsec		Perl security
 
     perlboot		Perl OO tutorial for beginners
     perltoot		Perl OO tutorial, part 1
@@ -62,6 +53,18 @@ For ease of access, the Perl manual has been split up into several sections:
     perlobj		Perl objects
     perlbot		Perl OO tricks and examples
     perltie		Perl objects hidden behind simple variables
+
+    perlipc		Perl interprocess communication
+    perlfork		Perl fork() information
+    perlnumber		Perl number semantics
+    perlthrtut		Perl threads tutorial
+
+    perlport		Perl portability guide
+    perllocale		Perl locale support
+    perlunicode		Perl unicode support
+    perlebcdic		Considerations for running Perl on EBCDIC platforms
+
+    perlsec		Perl security
 
     perlmod		Perl modules: how they work
     perlmodlib		Perl modules: how to write and use

@@ -372,6 +372,10 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	 */
     case DLL_PROCESS_DETACH:
 	EndSockets();
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+	if (PL_curinterp)
+	    FREE_THREAD_KEY;
+#endif
 	break;
 
 	/* The attached process creates a new thread. */

@@ -158,14 +158,11 @@ PP(pp_concat)
             /* Set TARG to PV(left), then add right */
             U8 *l, *c, *olds = NULL;
             STRLEN targlen;
+	    s = (U8*)SvPV(right,len);
             if (TARG == right) {
-                /* Need a safe copy elsewhere since we're just about to
-                   write onto TARG */
-		olds = (U8*)SvPV(right,len);
-                s = (U8*)savepv((char*)olds);
+		/* Take a copy since we're about to overwrite TARG */
+		olds = s = (U8*)savepvn((char*)s, len);
 	    }
-            else
-                s = (U8*)SvPV(right,len);
             l = (U8*)SvPV(left, targlen);
             if (TARG != left)
                 sv_setpvn(TARG, (char*)l, targlen);
@@ -175,14 +172,14 @@ PP(pp_concat)
             targlen = SvCUR(TARG) + len;
             if (!right_utf) {
                 /* plus one for each hi-byte char if we have to upgrade */
-                for (c = s; *c; c++)  {
+                for (c = s; c < s + len; c++)  {
                     if (*c & 0x80)
                         targlen++;
                 }
             }
             SvGROW(TARG, targlen+1);
             /* And now copy, maybe upgrading right to UTF8 on the fly */
-            for (c = (U8*)SvEND(TARG); *s; s++) {
+            for (c = (U8*)SvEND(TARG); len--; s++) {
                  if (*s & 0x80 && !right_utf)
                      c = uv_to_utf8(c, *s);
                  else

@@ -103,8 +103,6 @@ This warning is emmitted when you try to store a key or a value that
 is too long.  It means that the change was not recorded in the
 database.  See BUGS AND WARNINGS below.
 
-
-
 =head1 BUGS AND WARNINGS
 
 There are a number of limits on the size of the data that you can

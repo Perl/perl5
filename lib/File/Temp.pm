@@ -384,7 +384,8 @@ sub _gettemp {
 
       # Attempt to open the file
       my $open_success = undef;
-      if ( $^O eq 'VMS' ) { # make it auto delete on close
+      if ( $^O eq 'VMS' and $options{"unlink_on_close"} ) {
+        # make it auto delete on close by setting FAB$V_DLT bit
 	$fh = VMS::Stdio::vmssysopen($path, $OPENFLAGS, 0600, 'fop=dlt');
 	$open_success = $fh;
       } else {
@@ -739,10 +740,6 @@ sub _can_do_level {
       # probably a better way to do this
       close($file->[0]);  # file handle is [0]
 
-      # On VMS, the file will be automatically deleted on close,
-      # so we are through with the file already.
-      next if $^O eq 'VMS';
-
       if (-f $file->[1]) {  # file name is [1]
 	unlink $file->[1] or warn "Error removing ".$file->[1];
       }
@@ -885,9 +882,9 @@ sub tempfile {
   # Default options
   my %options = (
 		 "DIR"    => undef,  # Directory prefix
-		 "SUFFIX" => '',      # Template suffix
-		 "UNLINK" => 0,      # Unlink file on exit
-		 "OPEN"   => 1,      # Do not open file
+                "SUFFIX" => '',     # Template suffix
+                "UNLINK" => 0,      # Do not unlink file on exit
+                "OPEN"   => 1,      # Open file
 		);
 
   # Check to see whether we have an odd or even number of arguments
@@ -902,6 +899,12 @@ sub tempfile {
     warn "tempfile(): temporary filename requested but not opened.\nPossibly unsafe, consider using tempfile() with OPEN set to true\n"
       if $^W;
 
+  }
+
+  if ($options{"DIR"} and $^O eq 'VMS') {
+
+      # on VMS turn []foo into [.foo] for concatenation
+      $options{"DIR"} = VMS::Filespec::vmspath($options{"DIR"});
   }
 
   # Construct the template
@@ -942,6 +945,7 @@ sub tempfile {
     unless (($fh, $path) = _gettemp($template,
 				    "open" => $options{'OPEN'},
 				    "mkdir"=> 0 ,
+                                   "unlink_on_close" => $options{'UNLINK'},
 				    "suffixlen" => length($options{'SUFFIX'}),
 				   ) );
 
@@ -1517,7 +1521,9 @@ sub unlink0 {
     print "Link count = $fh[3] \n" if $DEBUG;
 
     # Make sure that the link count is zero
-    return ( $fh[3] == 0 ? 1 : 0);
+    # - Cygwin provides deferred unlinking, however,
+    #   on Win9x the link count remains 1
+    return ( $fh[3] == 0 or $^O eq 'cygwin' ? 1 : 0);
 
   } else {
     _deferred_unlink($fh, $path, 0);

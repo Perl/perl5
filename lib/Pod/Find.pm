@@ -160,7 +160,9 @@ sub pod_find
             $try = File::Spec->catfile($pwd,$try);
         }
         # simplify path
-        $try = File::Spec->canonpath($try);
+        # on VMS canonpath will vmsify:[the.path], but File::Find::find
+        # wants /unixy/paths
+        $try = File::Spec->canonpath($try) if ($^O ne 'VMS');
         my $name;
         if(-f $try) {
             if($name = _check_and_extract_name($try, $opts{-verbose})) {

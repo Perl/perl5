@@ -4,6 +4,7 @@ use Math::BigInt;
 
 use Exporter;  # just for use to be happy
 @ISA = (Exporter);
+$VERSION = '0.01';	# never had version before
 
 use overload
 '+'	=>	sub {new Math::BigFloat &fadd},
@@ -85,6 +86,7 @@ sub fnorm { #(string) return fnum_str
 # normalize number -- for internal use
 sub norm { #(mantissa, exponent) return fnum_str
     local($_, $exp) = @_;
+	$exp = 0 unless defined $exp;
     if ($_ eq 'NaN') {
 	'NaN';
     } else {
@@ -174,12 +176,14 @@ sub round { #(int_str, int_str, int_str) return int_str
     } else {
 	local($cmp) = Math::BigInt::bcmp(Math::BigInt::bmul($r,'+2'),$base);
 	if ( $cmp < 0 ||
-		 ($cmp == 0 &&
-		  ( $rnd_mode eq 'zero'                             ||
+		 ($cmp == 0 &&                                          (
+		   ($rnd_mode eq 'zero'                            ) ||
 		   ($rnd_mode eq '-inf' && (substr($q,$[,1) eq '+')) ||
 		   ($rnd_mode eq '+inf' && (substr($q,$[,1) eq '-')) ||
-		   ($rnd_mode eq 'even' && $q =~ /[24680]$/)        ||
-		   ($rnd_mode eq 'odd'  && $q =~ /[13579]$/)        )) ) {
+		   ($rnd_mode eq 'even' && $q =~ /[13579]$/        ) ||
+		   ($rnd_mode eq 'odd'  && $q =~ /[24680]$/        )    )
+		  ) 
+		) {
 	    $q;                     # round down
 	} else {
 	    Math::BigInt::badd($q, ((substr($q,$[,1) eq '-') ? '-1' : '+1'));
@@ -244,9 +248,17 @@ sub fcmp #(fnum_str, fnum_str) return cond_code
 	if ($xm eq '+0' || $ym eq '+0') {
 	    return $xm <=> $ym;
 	}
-	ord($y) <=> ord($x)
-	|| ($xe <=> $ye) * (substr($x,$[,1).'1')
-	|| Math::BigInt::cmp($xm,$ym);
+	if ( $xe < $ye )	# adjust the exponents to be equal
+	{
+		$ym .= '0' x ($ye - $xe);
+		$ye = $xe;
+	}
+	elsif ( $ye < $xe )	# same here
+	{
+		$xm .= '0' x ($xe - $ye);
+		$xe = $ye;
+	}
+	return Math::BigInt::cmp($xm,$ym);
     }
 }
 

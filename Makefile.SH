@@ -664,13 +664,19 @@ n_dummy $(nonxs_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 
 clean:		_tidy _mopup
 
-realclean:	_cleaner _mopup
+realclean:	_realcleaner _mopup
 	@echo "Note that make realclean does not delete config.sh or Policy.sh"
 
-clobber:	_cleaner _mopup
+_clobber:
 	rm -f config.sh cppstdin Policy.sh
 
+clobber:	_realcleaner _mopup _clobber
+
 distclean:	clobber
+
+# Like distclean but also removes emacs backups and *.orig.
+veryclean:	_verycleaner _mopup _clobber
+	-@rm -f Obsolete Wanted
 
 # Do not 'make _mopup' directly.
 _mopup:
@@ -692,15 +698,16 @@ _tidy:
 	done
 	rm -f testcompile compilelog
 
-# Do not 'make _cleaner' directly.
-_cleaner:
+_cleaner1:
 	-cd os2; rm -f Makefile
-	-cd pod; $(LDLIBPTH) $(MAKE) realclean
-	-cd utils; $(LDLIBPTH) $(MAKE) realclean
-	-cd x2p; $(LDLIBPTH) $(MAKE) realclean
+	-cd pod; $(LDLIBPTH) $(MAKE) $(CLEAN)
+	-cd utils; $(LDLIBPTH) $(MAKE) $(CLEAN)
+	-cd x2p; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
-	$(LDLIBPTH) sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
+	$(LDLIBPTH) sh ext/util/make_ext $(CLEAN) $$x MAKE=$(MAKE) ; \
 	done
+
+_cleaner2:
 	rm -f core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/forktmp* t/tmp* t/c t/perl .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
@@ -711,6 +718,15 @@ _cleaner:
 	rm -rf .config
 	rm -f testcompile compilelog
 	-rmdir lib/B lib/Data lib/IO/Socket lib/IO lib/Sys
+
+_realcleaner: 
+	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean
+	@$(LDLIBPTH) $(MAKE) _cleaner2
+
+_verycleaner: 
+	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=veryclean
+	@$(LDLIBPTH) $(MAKE) _cleaner2
+	-rm -f *~ *.orig */*~ */*.orig */*/*~ */*/*.orig
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.

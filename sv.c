@@ -5524,8 +5524,23 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
     SV_CHECK_THINKFIRST(rv);
     SvAMAGIC_off(rv);
 
+    if (SvTYPE(rv) >= SVt_PVMG) {
+	U32 refcnt = SvREFCNT(rv);
+	SvREFCNT(rv) = 0;
+	sv_clear(rv);
+	SvFLAGS(rv) = 0;
+	SvREFCNT(rv) = refcnt;
+    }
+
     if (SvTYPE(rv) < SVt_RV)
-      sv_upgrade(rv, SVt_RV);
+	sv_upgrade(rv, SVt_RV);
+    else if (SvTYPE(rv) > SVt_RV) {
+	(void)SvOOK_off(rv);
+	if (SvPVX(rv) && SvLEN(rv))
+	    Safefree(SvPVX(rv));
+	SvCUR_set(rv, 0);
+	SvLEN_set(rv, 0);
+    }
 
     (void)SvOK_off(rv);
     SvRV(rv) = sv;
@@ -6546,8 +6561,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	    {
 		STORE_NUMERIC_STANDARD_SET_LOCAL();
+#ifdef USE_LOCALE_NUMERIC
 		if (!was_standard && maybe_tainted)
 		    *maybe_tainted = TRUE;
+#endif
 		(void)sprintf(PL_efloatbuf, eptr, nv);
 		RESTORE_NUMERIC_STANDARD();
 	    }

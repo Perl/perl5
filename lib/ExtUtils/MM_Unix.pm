@@ -812,7 +812,7 @@ DIST_DEFAULT = $dist_default
 
 =item dist_basics (o)
 
-Defines the targets distclean, distcheck, skipcheck, manifest.
+Defines the targets distclean, distcheck, skipcheck, manifest, veryclean.
 
 =cut
 
@@ -839,6 +839,11 @@ skipcheck :
 manifest :
 	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Manifest=mkmanifest \\
 		-e mkmanifest
+};
+
+    push @m, q{
+veryclean : realclean
+	$(RM_F) *~ *.orig */*~ */*.orig
 };
     join "", @m;
 }
@@ -3494,7 +3499,7 @@ WARN_IF_OLD_PACKLIST = $(PERL) -we 'exit unless -f $$ARGV[0];' \\
 -e 'print "Please make sure the two installations are not conflicting\n";'
 
 UNINST=0
-VERBINST=1
+VERBINST=0
 
 MOD_INSTALL = $(PERL) -I$(INST_LIB) -I$(PERL_LIB) -MExtUtils::Install \
 -e "install({@ARGV},'$(VERBINST)',0,'$(UNINST)');"

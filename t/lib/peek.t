@@ -308,5 +308,5 @@ do_test(17,
     EGV = $ADDR\\t"a"');
 
 END {
-  unlink("peek$$");
+  1 while unlink("peek$$");
 }

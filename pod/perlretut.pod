@@ -1672,15 +1672,17 @@ i.e., a non-mark followed by one or more marks.
 
 As if all those classes weren't enough, Perl also defines POSIX style
 character classes.  These have the form C<[:name:]>, with C<name> the
-name of the POSIX class.  The POSIX classes are alpha, alnum, ascii,
-cntrl, digit, graph, lower, print, punct, space, upper, word, and
-xdigit.  If C<utf8> is being used, then these classes are defined the
-same as their corresponding perl Unicode classes: C<[:upper:]> is the
-same as C<\p{IsUpper}>, etc.  The POSIX character classes, however,
-don't require using C<utf8>.  The C<[:digit:]>, C<[:word:]>, and
+name of the POSIX class.  The POSIX classes are C<alpha>, C<alnum>,
+C<ascii>, C<cntrl>, C<digit>, C<graph>, C<lower>, C<print>, C<punct>,
+C<space>, C<upper>, and C<xdigit>, and two extensions, C<word> (a Perl
+extension to match C<\w>), and C<blank> (a GNU extension).  If C<utf8>
+is being used, then these classes are defined the same as their
+corresponding perl Unicode classes: C<[:upper:]> is the same as
+C<\p{IsUpper}>, etc.  The POSIX character classes, however, don't
+require using C<utf8>.  The C<[:digit:]>, C<[:word:]>, and
 C<[:space:]> correspond to the familiar C<\d>, C<\w>, and C<\s>
-character classes.  To negate a POSIX class, put a C<^> in front of the
-name, so that, e.g., C<[:^digit:]> corresponds to C<\D> and under
+character classes.  To negate a POSIX class, put a C<^> in front of
+the name, so that, e.g., C<[:^digit:]> corresponds to C<\D> and under
 C<utf8>, C<\P{IsDigit}>.  The Unicode and POSIX character classes can
 be used just like C<\d>, both inside and outside of character classes:
 

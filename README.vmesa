@@ -62,7 +62,7 @@ have perl run your scripts for you.
 If you are interested in the VM and OS/390 ports of perl then see the
 perl-mvs mailing list: The Perl Institute (http://www.perl.org/)
 maintains a mailing list of interest to all folks building and/or
-using perl on EBCDIC platforms.  To subscibe, send a message of:
+using perl on EBCDIC platforms.  To subscribe, send a message of:
 
     subscribe perl-mvs
 

@@ -341,7 +341,7 @@ fatal error.
 
 The C<warnings> pragma provides a number of functions that are useful for
 module authors. These are used when you want to report a module-specific
-warning when the calling module has enabled warnings via the C<warnings>
+warning to a calling module has enabled warnings via the C<warnings>
 pragma.
 
 Consider the module C<MyMod::Abc> below.
@@ -361,11 +361,11 @@ Consider the module C<MyMod::Abc> below.
     1 ;
 
 The call to C<warnings::register> will create a new warnings category
-called "MyMod::abc", i.e. the new category name matches the module
-name. The C<open> function in the module will display a warning message
-if it gets given a relative path as a parameter. This warnings will only
-be displayed if the code that uses C<MyMod::Abc> has actually enabled
-them with the C<warnings> pragma like below.
+called "MyMod::abc", i.e. the new category name matches the current
+package name. The C<open> function in the module will display a warning
+message if it gets given a relative path as a parameter. This warnings
+will only be displayed if the code that uses C<MyMod::Abc> has actually
+enabled them with the C<warnings> pragma like below.
 
     use MyMod::Abc;
     use warnings 'MyMod::Abc';
@@ -379,10 +379,8 @@ this snippet of code:
     package MyMod::Abc;
 
     sub open {
-        if (warnings::enabled("deprecated")) {
-            warnings::warn("deprecated", 
-                           "open is deprecated, use new instead") ;
-        }
+        warnings::warnif("deprecated", 
+                         "open is deprecated, use new instead") ;
         new(@_) ;
     }
 
@@ -399,17 +397,88 @@ display a warning message whenever the calling module has (at least) the
     ...
     MyMod::Abc::open($filename) ;
 
-The C<warnings::warn> function should be used to actually display the
-warnings message. This is because they can make use of the feature that
-allows warnings to be escalated into fatal errors. So in this case
+Either the C<warnings::warn> or C<warnings::warnif> function should be
+used to actually display the warnings message. This is because they can
+make use of the feature that allows warnings to be escalated into fatal
+errors. So in this case
 
     use MyMod::Abc;
     use warnings FATAL => 'MyMod::Abc';
     ...
     MyMod::Abc::open('../fred.txt');
 
-the C<warnings::warn> function will detect this and die after
+the C<warnings::warnif> function will detect this and die after
 displaying the warning message.
+
+The three warnings functions, C<warnings::warn>, C<warnings::warnif>
+and C<warnings::enabled> can optionally take an object reference in place
+of a category name. In this case the functions will use the class name
+of the object as the warnings category.
+
+Consider this example:
+
+    package Original ;
+
+    no warnings ;
+    use warnings::register ;
+
+    sub new
+    {
+        my $class = shift ;
+        bless [], $class ;
+    }
+
+    sub check
+    {
+        my $self = shift ;
+        my $value = shift ;
+
+        if ($value % 2 && warnings::enabled($self))
+          { warnings::warn($self, "Odd numbers are unsafe") }
+    }
+
+    sub doit
+    {
+        my $self = shift ;
+        my $value = shift ;
+        $self->check($value) ;
+        # ...
+    }
+
+    1 ;
+
+    package Derived ;
+
+    use warnings::register ;
+    use Original ;
+    our @ISA = qw( Original ) ;
+    sub new
+    {
+        my $class = shift ;
+        bless [], $class ;
+    }
+
+   
+    1 ;
+
+The code below makes use of both modules, but it only enables warnings from 
+C<Derived>.
+
+    use Original ;
+    use Derived ;
+    use warnings 'Derived';
+    my $a = new Original ;
+    $a->doit(1) ;
+    my $b = new Derived ;
+    $a->doit(1) ;
+
+When this code is run only the C<Derived> object, C<$b>, will generate
+a warning. 
+
+    Odd numbers are unsafe at main.pl line 7
+
+Notice also that the warning is reported at the line where the object is first
+used.
 
 =head1 TODO
 
@@ -423,6 +492,8 @@ displaying the warning message.
     patch, but there were design decisions made in diagnostics to work
     around the limitations of C<$^W>. Now that those limitations are gone,
     the module should be revisited.
+
+  document calling the warnings::* functions from XS
 
 =head1 SEE ALSO
 

@@ -564,7 +564,7 @@ binmode FILEHANDLE, DISCIPLINE, binmode FILEHANDLE, bless REF,CLASSNAME,
 bless REF, caller EXPR, caller, chdir EXPR, chmod LIST, chomp VARIABLE,
 chomp LIST, chomp, chop VARIABLE, chop LIST, chop, chown LIST, chr NUMBER,
 chr, chroot FILENAME, chroot, close FILEHANDLE, close, closedir DIRHANDLE,
-connect SOCKET,NAME, continue BLOCK, cos EXPR, crypt PLAINTEXT,SALT,
+connect SOCKET,NAME, continue BLOCK, cos EXPR, cos, crypt PLAINTEXT,SALT,
 dbmclose HASH, dbmopen HASH,DBNAME,MASK, defined EXPR, defined, delete
 EXPR, die LIST, do BLOCK, do SUBROUTINE(LIST), do EXPR, dump LABEL, dump,
 each HASH, eof FILEHANDLE, eof (), eof, eval EXPR, eval BLOCK, exec LIST,
@@ -590,12 +590,12 @@ mkdir FILENAME,MASK, mkdir FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS,
 msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my EXPR :
 ATTRIBUTES, next LABEL, next, no Module LIST, oct EXPR, oct, open
 FILEHANDLE,MODE,LIST, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
-DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack TEMPLATE,LIST, package,
-package NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR,
-pos, print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE FORMAT,
-LIST, printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/,
-qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta,
-rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
+DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack TEMPLATE,LIST, package
+NAMESPACE, package, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos
+SCALAR, pos, print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE
+FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST,
+q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR,
+quotemeta, rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
 FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
 readlink, readpipe EXPR, recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo,
 ref EXPR, ref, rename OLDNAME,NEWNAME, require VERSION, require EXPR,
@@ -1027,21 +1027,23 @@ B<-w>, B<-W>, B<-X>
 
 =item use strict
 
-=item Looking at data and -w
+=item Looking at data and -w and w
+
+=item help
 
 =item Stepping through code
 
 =item Placeholder for a, w, t, T
 
-=item Regular expressions
+=item REGULAR EXPRESSIONS
 
-=item Some ideas for output
+=item OUTPUT TIPS
 
 =item CGI
 
 =item GUIs
 
-=item Summary
+=item SUMMARY
 
 =item SEE ALSO
 
@@ -1385,36 +1387,6 @@ and optimizing the final combined regexp
 
 =back
 
-=head2 perlref - Perl references and nested data structures
-
-=over
-
-=item NOTE
-
-=item DESCRIPTION
-
-=over
-
-=item Making References
-
-=item Using References
-
-=item Symbolic references
-
-=item Not-so-symbolic references
-
-=item Pseudo-hashes: Using an array as a hash
-
-=item Function Templates
-
-=back
-
-=item WARNING
-
-=item SEE ALSO
-
-=back
-
 =head2 perlre - Perl regular expressions
 
 =over
@@ -1461,6 +1433,36 @@ C<(?(condition)yes-pattern|no-pattern)>
 
 =back
 
+=head2 perlref - Perl references and nested data structures
+
+=over
+
+=item NOTE
+
+=item DESCRIPTION
+
+=over
+
+=item Making References
+
+=item Using References
+
+=item Symbolic references
+
+=item Not-so-symbolic references
+
+=item Pseudo-hashes: Using an array as a hash
+
+=item Function Templates
+
+=back
+
+=item WARNING
+
+=item SEE ALSO
+
+=back
+
 =head2 perlform - Perl formats
 
 =over
@@ -1487,108 +1489,217 @@ C<(?(condition)yes-pattern|no-pattern)>
 
 =back
 
-=head2 perllocale - Perl locale handling (internationalization and
-localization)
+=head2 perlboot - Beginner's Object-Oriented Tutorial
 
 =over
 
 =item DESCRIPTION
 
-=item PREPARING TO USE LOCALES
-
-=item USING LOCALES
-
 =over
 
-=item The use locale pragma
+=item If we could talk to the animals...
 
-=item The setlocale function
+=item Introducing the method invocation arrow
 
-=item Finding locales
+=item Invoking a barnyard
 
-=item LOCALE PROBLEMS
+=item The extra parameter of method invocation
 
-=item Temporarily fixing locale problems
+=item Calling a second method to simplify things
 
-=item Permanently fixing locale problems
+=item Inheriting the windpipes
 
-=item Permanently fixing your system's locale configuration
+=item A few notes about @ISA
 
-=item Fixing system locale configuration
+=item Overriding the methods
 
-=item The localeconv function
+=item Starting the search from a different place
 
-=back
+=item The SUPER way of doing things
 
-=item LOCALE CATEGORIES
+=item Where we're at so far...
 
-=over
+=item A horse is a horse, of course of course -- or is it?
 
-=item Category LC_COLLATE: Collation
+=item Invoking an instance method
 
-=item Category LC_CTYPE: Character Types
+=item Accessing the instance data
 
-=item Category LC_NUMERIC: Numeric Formatting
+=item How to build a horse
 
-=item Category LC_MONETARY: Formatting of monetary amounts
+=item Inheriting the constructor
 
-=item LC_TIME
+=item Making a method work with either classes or instances
 
-=item Other categories
+=item Adding parameters to a method
 
-=back
+=item More interesting instances
 
-=item SECURITY
+=item A horse of a different color
 
-B<Comparison operators> (C<lt>, C<le>, C<ge>, C<gt> and C<cmp>):,
-B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or C<\U>),
-B<Matching operator> (C<m//>):, B<Substitution operator> (C<s///>):,
-B<Output formatting functions> (printf() and write()):, B<Case-mapping
-functions> (lc(), lcfirst(), uc(), ucfirst()):, B<POSIX locale-dependent
-functions> (localeconv(), strcoll(), strftime(), strxfrm()):, B<POSIX
-character class tests> (isalnum(), isalpha(), isdigit(), isgraph(),
-islower(), isprint(), ispunct(), isspace(), isupper(), isxdigit()):
-
-=item ENVIRONMENT
-
-PERL_BADLANG, LC_ALL, LANGUAGE, LC_CTYPE, LC_COLLATE, LC_MONETARY,
-LC_NUMERIC, LC_TIME, LANG
-
-=item NOTES
-
-=over
-
-=item Backward compatibility
-
-=item I18N:Collate obsolete
-
-=item Sort speed and memory use impacts
-
-=item write() and LC_NUMERIC
-
-=item Freely available locale definitions
-
-=item I18n and l10n
-
-=item An imperfect standard
-
-=back
-
-=item BUGS
-
-=over
-
-=item Broken systems
+=item Summary
 
 =back
 
 =item SEE ALSO
+
+=item COPYRIGHT
+
+=back
+
+=head2 perltoot - Tom's object-oriented tutorial for perl
+
+=over
+
+=item DESCRIPTION
+
+=item Creating a Class
+
+=over
+
+=item Object Representation
+
+=item Class Interface
+
+=item Constructors and Instance Methods
+
+=item Planning for the Future: Better Constructors
+
+=item Destructors
+
+=item Other Object Methods
+
+=back
+
+=item Class Data
+
+=over
+
+=item Accessing Class Data
+
+=item Debugging Methods
+
+=item Class Destructors
+
+=item Documenting the Interface
+
+=back
+
+=item Aggregation
+
+=item Inheritance
+
+=over
+
+=item Overridden Methods
+
+=item Multiple Inheritance
+
+=item UNIVERSAL: The Root of All Objects
+
+=back
+
+=item Alternate Object Representations
+
+=over
+
+=item Arrays as Objects
+
+=item Closures as Objects
+
+=back
+
+=item AUTOLOAD: Proxy Methods
+
+=over
+
+=item Autoloaded Data Methods
+
+=item Inherited Autoloaded Data Methods
+
+=back
+
+=item Metaclassical Tools
+
+=over
+
+=item Class::Struct
+
+=item Data Members as Variables
+
+=item NOTES
+
+=item Object Terminology
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR AND COPYRIGHT
+
+=item COPYRIGHT
+
+=over
+
+=item Acknowledgments
+
+=back
+
+=back
+
+=head2 perltootc - Tom's OO Tutorial for Class Data in Perl
+
+=over
+
+=item DESCRIPTION
+
+=item Class Data as Package Variables
+
+=over
+
+=item Putting All Your Eggs in One Basket
+
+=item Inheritance Concerns
+
+=item The Eponymous Meta-Object
+
+=item Indirect References to Class Data
+
+=item Monadic Classes
+
+=item Translucent Attributes
+
+=back
+
+=item Class Data as Lexical Variables
+
+=over
+
+=item Privacy and Responsibility 
+
+=item File-Scoped Lexicals
+
+=item More Inheritance Concerns
+
+=item Locking the Door and Throwing Away the Key
+
+=item Translucency Revisited
+
+=back
+
+=item NOTES
+
+=item SEE ALSO
+
+=item AUTHOR AND COPYRIGHT
+
+=item ACKNOWLEDGEMENTS
 
 =item HISTORY
 
 =back
 
-=head2 perlunicode - Unicode support in Perl
+=head2 perlobj - Perl objects
 
 =over
 
@@ -1596,22 +1707,101 @@ LC_NUMERIC, LC_TIME, LANG
 
 =over
 
-=item Important Caveat
+=item An Object is Simply a Reference
 
-Input and Output Disciplines, Regular Expressions, C<use utf8> still needed
-to enable a few features
+=item A Class is Simply a Package
 
-=item Byte and Character semantics
+=item A Method is Simply a Subroutine
 
-=item Effects of character semantics
+=item Method Invocation
 
-=item Character encodings for input and output
+=item WARNING
+
+=item Default UNIVERSAL methods
+
+isa(CLASS), can(METHOD), VERSION( [NEED] )
+
+=item Destructors
+
+=item Summary
+
+=item Two-Phased Garbage Collection
 
 =back
 
-=item CAVEATS
+=item SEE ALSO
+
+=back
+
+=head2 perlbot - Bag'o Object Tricks (the BOT)
+
+=over
+
+=item DESCRIPTION
+
+=item OO SCALING TIPS
+
+=item INSTANCE VARIABLES
+
+=item SCALAR INSTANCE VARIABLES
+
+=item INSTANCE VARIABLE INHERITANCE
+
+=item OBJECT RELATIONSHIPS
+
+=item OVERRIDING SUPERCLASS METHODS
+
+=item USING RELATIONSHIP WITH SDBM
+
+=item THINKING OF CODE REUSE
+
+=item CLASS CONTEXT AND THE OBJECT
+
+=item INHERITING A CONSTRUCTOR
+
+=item DELEGATION
+
+=back
+
+=head2 perltie - how to hide an object class in a simple variable
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over
+
+=item Tying Scalars
+
+TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
+
+=item Tying Arrays
+
+TIEARRAY classname, LIST, FETCH this, index, STORE this, index, value,
+DESTROY this
+
+=item Tying Hashes
+
+USER, HOME, CLOBBER, LIST, TIEHASH classname, LIST, FETCH this, key, STORE
+this, key, value, DELETE this, key, CLEAR this, EXISTS this, key, FIRSTKEY
+this, NEXTKEY this, lastkey, DESTROY this
+
+=item Tying FileHandles
+
+TIEHANDLE classname, LIST, WRITE this, LIST, PRINT this, LIST, PRINTF this,
+LIST, READ this, LIST, READLINE this, GETC this, CLOSE this, DESTROY this
+
+=item The C<untie> Gotcha
+
+=back
 
 =item SEE ALSO
+
+=item BUGS
+
+=item AUTHOR
 
 =back
 
@@ -1996,6 +2186,224 @@ v1.23, 10 July 1998
 
 =back
 
+=head2 perllocale - Perl locale handling (internationalization and
+localization)
+
+=over
+
+=item DESCRIPTION
+
+=item PREPARING TO USE LOCALES
+
+=item USING LOCALES
+
+=over
+
+=item The use locale pragma
+
+=item The setlocale function
+
+=item Finding locales
+
+=item LOCALE PROBLEMS
+
+=item Temporarily fixing locale problems
+
+=item Permanently fixing locale problems
+
+=item Permanently fixing your system's locale configuration
+
+=item Fixing system locale configuration
+
+=item The localeconv function
+
+=back
+
+=item LOCALE CATEGORIES
+
+=over
+
+=item Category LC_COLLATE: Collation
+
+=item Category LC_CTYPE: Character Types
+
+=item Category LC_NUMERIC: Numeric Formatting
+
+=item Category LC_MONETARY: Formatting of monetary amounts
+
+=item LC_TIME
+
+=item Other categories
+
+=back
+
+=item SECURITY
+
+B<Comparison operators> (C<lt>, C<le>, C<ge>, C<gt> and C<cmp>):,
+B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or C<\U>),
+B<Matching operator> (C<m//>):, B<Substitution operator> (C<s///>):,
+B<Output formatting functions> (printf() and write()):, B<Case-mapping
+functions> (lc(), lcfirst(), uc(), ucfirst()):, B<POSIX locale-dependent
+functions> (localeconv(), strcoll(), strftime(), strxfrm()):, B<POSIX
+character class tests> (isalnum(), isalpha(), isdigit(), isgraph(),
+islower(), isprint(), ispunct(), isspace(), isupper(), isxdigit()):
+
+=item ENVIRONMENT
+
+PERL_BADLANG, LC_ALL, LANGUAGE, LC_CTYPE, LC_COLLATE, LC_MONETARY,
+LC_NUMERIC, LC_TIME, LANG
+
+=item NOTES
+
+=over
+
+=item Backward compatibility
+
+=item I18N:Collate obsolete
+
+=item Sort speed and memory use impacts
+
+=item write() and LC_NUMERIC
+
+=item Freely available locale definitions
+
+=item I18n and l10n
+
+=item An imperfect standard
+
+=back
+
+=item BUGS
+
+=over
+
+=item Broken systems
+
+=back
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 perlunicode - Unicode support in Perl
+
+=over
+
+=item DESCRIPTION
+
+=over
+
+=item Important Caveat
+
+Input and Output Disciplines, Regular Expressions, C<use utf8> still needed
+to enable a few features
+
+=item Byte and Character semantics
+
+=item Effects of character semantics
+
+=item Character encodings for input and output
+
+=back
+
+=item CAVEATS
+
+=item SEE ALSO
+
+=back
+
+=head2 perlebcdic - Considerations for running Perl on EBCDIC platforms
+
+=over
+
+=item DESCRIPTION
+
+=item COMMON CHARACTER CODE SETS
+
+=over
+
+=item ASCII
+
+=item ISO 8859
+
+=item Latin 1 (ISO 8859-1)
+
+=item EBCDIC
+
+=item 13 variant characters
+
+=item 0037
+
+=item 1047
+
+=item POSIX-BC
+
+=back
+
+=item SINGLE OCTET TABLES
+
+recipe 0, recipe 1, recipe 2, recipe 3, recipe 4
+
+=item IDENTIFYING CHARACTER CODE SETS
+
+=item CONVERSIONS
+
+=item OPERATOR DIFFERENCES
+
+=item FUNCTION DIFFERENCES
+
+chr(), ord(), pack(), print(), printf(), sort(), sprintf(), unpack()
+
+=item REGULAR EXPRESSION DIFFERENCES
+
+=item SOCKETS
+
+=item SORTING
+
+=over
+
+=item Ignore ASCII vs EBCDIC sort differences.
+
+=item MONOCASE then sort data.
+
+=item Convert, sort data, then reconvert.
+
+=item Perform sorting on one type of machine only.
+
+=back
+
+=item URL ENCODING and DECODING
+
+=item I18N AND L10N
+
+=item MULTI OCTET CHARACTER SETS
+
+=item OS ISSUES
+
+=over
+
+=item OS/400 
+
+IFS access
+
+=item OS/390 
+
+dataset access, locales
+
+=item VM/ESA?
+
+=item POSIX-BC?
+
+=back
+
+=item REFERENCES
+
+=item AUTHOR
+
+=back
+
 =head2 perlsec - Perl security
 
 =over
@@ -2017,322 +2425,6 @@ v1.23, 10 July 1998
 =back
 
 =item SEE ALSO
-
-=back
-
-=head2 perlboot - Beginner's Object-Oriented Tutorial
-
-=over
-
-=item DESCRIPTION
-
-=over
-
-=item If we could talk to the animals...
-
-=item Introducing the method invocation arrow
-
-=item Invoking a barnyard
-
-=item The extra parameter of method invocation
-
-=item Calling a second method to simplify things
-
-=item Inheriting the windpipes
-
-=item A few notes about @ISA
-
-=item Overriding the methods
-
-=item Starting the search from a different place
-
-=item The SUPER way of doing things
-
-=item Where we're at so far...
-
-=item A horse is a horse, of course of course -- or is it?
-
-=item Invoking an instance method
-
-=item Accessing the instance data
-
-=item How to build a horse
-
-=item Inheriting the constructor
-
-=item Making a method work with either classes or instances
-
-=item Adding parameters to a method
-
-=item More interesting instances
-
-=item A horse of a different color
-
-=item Summary
-
-=back
-
-=item SEE ALSO
-
-=item COPYRIGHT
-
-=back
-
-=head2 perltoot - Tom's object-oriented tutorial for perl
-
-=over
-
-=item DESCRIPTION
-
-=item Creating a Class
-
-=over
-
-=item Object Representation
-
-=item Class Interface
-
-=item Constructors and Instance Methods
-
-=item Planning for the Future: Better Constructors
-
-=item Destructors
-
-=item Other Object Methods
-
-=back
-
-=item Class Data
-
-=over
-
-=item Accessing Class Data
-
-=item Debugging Methods
-
-=item Class Destructors
-
-=item Documenting the Interface
-
-=back
-
-=item Aggregation
-
-=item Inheritance
-
-=over
-
-=item Overridden Methods
-
-=item Multiple Inheritance
-
-=item UNIVERSAL: The Root of All Objects
-
-=back
-
-=item Alternate Object Representations
-
-=over
-
-=item Arrays as Objects
-
-=item Closures as Objects
-
-=back
-
-=item AUTOLOAD: Proxy Methods
-
-=over
-
-=item Autoloaded Data Methods
-
-=item Inherited Autoloaded Data Methods
-
-=back
-
-=item Metaclassical Tools
-
-=over
-
-=item Class::Struct
-
-=item Data Members as Variables
-
-=item NOTES
-
-=item Object Terminology
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR AND COPYRIGHT
-
-=item COPYRIGHT
-
-=over
-
-=item Acknowledgments
-
-=back
-
-=back
-
-=head2 perltootc - Tom's OO Tutorial for Class Data in Perl
-
-=over
-
-=item DESCRIPTION
-
-=item Class Data as Package Variables
-
-=over
-
-=item Putting All Your Eggs in One Basket
-
-=item Inheritance Concerns
-
-=item The Eponymous Meta-Object
-
-=item Indirect References to Class Data
-
-=item Monadic Classes
-
-=item Translucent Attributes
-
-=back
-
-=item Class Data as Lexical Variables
-
-=over
-
-=item Privacy and Responsibility 
-
-=item File-Scoped Lexicals
-
-=item More Inheritance Concerns
-
-=item Locking the Door and Throwing Away the Key
-
-=item Translucency Revisited
-
-=back
-
-=item NOTES
-
-=item SEE ALSO
-
-=item AUTHOR AND COPYRIGHT
-
-=item ACKNOWLEDGEMENTS
-
-=item HISTORY
-
-=back
-
-=head2 perlobj - Perl objects
-
-=over
-
-=item DESCRIPTION
-
-=over
-
-=item An Object is Simply a Reference
-
-=item A Class is Simply a Package
-
-=item A Method is Simply a Subroutine
-
-=item Method Invocation
-
-=item WARNING
-
-=item Default UNIVERSAL methods
-
-isa(CLASS), can(METHOD), VERSION( [NEED] )
-
-=item Destructors
-
-=item Summary
-
-=item Two-Phased Garbage Collection
-
-=back
-
-=item SEE ALSO
-
-=back
-
-=head2 perlbot - Bag'o Object Tricks (the BOT)
-
-=over
-
-=item DESCRIPTION
-
-=item OO SCALING TIPS
-
-=item INSTANCE VARIABLES
-
-=item SCALAR INSTANCE VARIABLES
-
-=item INSTANCE VARIABLE INHERITANCE
-
-=item OBJECT RELATIONSHIPS
-
-=item OVERRIDING SUPERCLASS METHODS
-
-=item USING RELATIONSHIP WITH SDBM
-
-=item THINKING OF CODE REUSE
-
-=item CLASS CONTEXT AND THE OBJECT
-
-=item INHERITING A CONSTRUCTOR
-
-=item DELEGATION
-
-=back
-
-=head2 perltie - how to hide an object class in a simple variable
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over
-
-=item Tying Scalars
-
-TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
-
-=item Tying Arrays
-
-TIEARRAY classname, LIST, FETCH this, index, STORE this, index, value,
-DESTROY this
-
-=item Tying Hashes
-
-USER, HOME, CLOBBER, LIST, TIEHASH classname, LIST, FETCH this, key, STORE
-this, key, value, DELETE this, key, CLEAR this, EXISTS this, key, FIRSTKEY
-this, NEXTKEY this, lastkey, DESTROY this
-
-=item Tying FileHandles
-
-TIEHANDLE classname, LIST, WRITE this, LIST, PRINT this, LIST, PRINTF this,
-LIST, READ this, LIST, READLINE this, GETC this, CLOSE this, DESTROY this
-
-=item The C<untie> Gotcha
-
-=back
-
-=item SEE ALSO
-
-=item BUGS
-
-=item AUTHOR
 
 =back
 
@@ -3250,8 +3342,6 @@ Unix
 complete?
 
 =item How do I fork a daemon process?
-
-=item How do I make my program run with sh and csh?
 
 =item How do I find out if I'm running interactively or not?
 
@@ -5702,6 +5792,8 @@ F<lib/io_pipe.t>, F<lib/io_sock.t>, F<op/stat.t>, F<lib/io_udp.t>
 
 =item Segfault in make
 
+=item op/sprintf test failure
+
 =back
 
 =item Specific (mis)features of OS/2 port
@@ -7694,8 +7786,9 @@ C<byacc>, C<byteorder>
 =item c
 
 C<c>, C<castflags>, C<cat>, C<cc>, C<cccdlflags>, C<ccdlflags>, C<ccflags>,
-C<ccsymbols>, C<cf_by>, C<cf_email>, C<cf_time>, C<charsize>, C<chgrp>,
-C<chmod>, C<chown>, C<clocktype>, C<comm>, C<compress>
+C<ccflags_uselargefiles>, C<ccsymbols>, C<cf_by>, C<cf_email>, C<cf_time>,
+C<charsize>, C<chgrp>, C<chmod>, C<chown>, C<clocktype>, C<comm>,
+C<compress>
 
 =item C
 
@@ -7751,9 +7844,9 @@ C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
 C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_setegid>, C<d_seteuid>,
 C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>,
 C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>,
-C<d_setprior>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
-C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
-C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
+C<d_setprior>, C<d_setproctitle>, C<d_setpwent>, C<d_setregid>,
+C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>,
+C<d_setsent>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
 C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
 C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_sqrtl>,
 C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
@@ -7783,8 +7876,8 @@ C<fpossize>, C<fpostype>, C<freetype>, C<full_ar>, C<full_csh>, C<full_sed>
 
 =item g
 
-C<gccversion>, C<gidformat>, C<gidsign>, C<gidsize>, C<gidtype>,
-C<glibpth>, C<grep>, C<groupcat>, C<groupstype>, C<gzip>
+C<gccosandvers>, C<gccversion>, C<gidformat>, C<gidsign>, C<gidsize>,
+C<gidtype>, C<glibpth>, C<grep>, C<groupcat>, C<groupstype>, C<gzip>
 
 =item h
 
@@ -7795,26 +7888,26 @@ C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>, C<huge>
 C<i16size>, C<i16type>, C<i32size>, C<i32type>, C<i64size>, C<i64type>,
 C<i8size>, C<i8type>, C<i_arpainet>, C<i_bsdioctl>, C<i_db>, C<i_dbm>,
 C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>, C<i_gdbm>,
-C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>, C<i_limits>, C<i_locale>,
-C<i_machcthr>, C<i_malloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>,
-C<i_netdb>, C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>,
-C<i_prot>, C<i_pthread>, C<i_pwd>, C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>,
-C<i_shadow>, C<i_socks>, C<i_stdarg>, C<i_stddef>, C<i_stdlib>,
-C<i_string>, C<i_sunmath>, C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>,
-C<i_sysfilio>, C<i_sysin>, C<i_sysioctl>, C<i_syslog>, C<i_sysmman>,
-C<i_sysmode>, C<i_sysmount>, C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>,
-C<i_syssecrt>, C<i_sysselct>, C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>,
-C<i_sysstatvfs>, C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>,
-C<i_sysuio>, C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>,
-C<i_termio>, C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>,
-C<i_values>, C<i_varargs>, C<i_varhdr>, C<i_vfork>,
-C<ignore_versioned_solibs>, C<inc_version_list>, C<inc_version_list_init>,
-C<incpath>, C<inews>, C<installarchlib>, C<installbin>, C<installman1dir>,
-C<installman3dir>, C<installprefix>, C<installprefixexp>,
-C<installprivlib>, C<installscript>, C<installsitearch>, C<installsitebin>,
-C<installsitelib>, C<installstyle>, C<installusrbinperl>,
-C<installvendorarch>, C<installvendorbin>, C<installvendorlib>, C<intsize>,
-C<ivdformat>, C<ivsize>, C<ivtype>
+C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>, C<i_libutil>,
+C<i_limits>, C<i_locale>, C<i_machcthr>, C<i_malloc>, C<i_math>,
+C<i_memory>, C<i_mntent>, C<i_ndbm>, C<i_netdb>, C<i_neterrno>,
+C<i_netinettcp>, C<i_niin>, C<i_poll>, C<i_prot>, C<i_pthread>, C<i_pwd>,
+C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>, C<i_shadow>, C<i_socks>,
+C<i_stdarg>, C<i_stddef>, C<i_stdlib>, C<i_string>, C<i_sunmath>,
+C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>, C<i_sysfilio>, C<i_sysin>,
+C<i_sysioctl>, C<i_syslog>, C<i_sysmman>, C<i_sysmode>, C<i_sysmount>,
+C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>, C<i_syssecrt>, C<i_sysselct>,
+C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>, C<i_sysstatvfs>,
+C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>, C<i_sysuio>,
+C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>, C<i_termio>,
+C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>, C<i_values>,
+C<i_varargs>, C<i_varhdr>, C<i_vfork>, C<ignore_versioned_solibs>,
+C<inc_version_list>, C<inc_version_list_init>, C<incpath>, C<inews>,
+C<installarchlib>, C<installbin>, C<installman1dir>, C<installman3dir>,
+C<installprefix>, C<installprefixexp>, C<installprivlib>, C<installscript>,
+C<installsitearch>, C<installsitebin>, C<installsitelib>, C<installstyle>,
+C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
+C<installvendorlib>, C<intsize>, C<ivdformat>, C<ivsize>, C<ivtype>
 
 =item k
 
@@ -7822,12 +7915,12 @@ C<known_extensions>, C<ksh>
 
 =item l
 
-C<large>, C<ld>, C<lddlflags>, C<ldflags>, C<ldlibpthname>, C<less>,
-C<lib_ext>, C<libc>, C<libperl>, C<libpth>, C<libs>, C<libsdirs>,
-C<libsfiles>, C<libsfound>, C<libspath>, C<libswanted>, C<line>, C<lint>,
-C<lkflags>, C<ln>, C<lns>, C<locincpth>, C<loclibpth>, C<longdblsize>,
-C<longlongsize>, C<longsize>, C<lp>, C<lpr>, C<ls>, C<lseeksize>,
-C<lseektype>
+C<large>, C<ld>, C<lddlflags>, C<ldflags>, C<ldflags_uselargefiles>,
+C<ldlibpthname>, C<less>, C<lib_ext>, C<libc>, C<libperl>, C<libpth>,
+C<libs>, C<libsdirs>, C<libsfiles>, C<libsfound>, C<libspath>,
+C<libswanted>, C<libswanted_uselargefiles>, C<line>, C<lint>, C<lkflags>,
+C<ln>, C<lns>, C<locincpth>, C<loclibpth>, C<longdblsize>, C<longlongsize>,
+C<longsize>, C<lp>, C<lpr>, C<ls>, C<lseeksize>, C<lseektype>
 
 =item m
 
@@ -11689,31 +11782,6 @@ I<code-ref>|I<method-name>
 
 =back
 
-=head2 Pod::PlainText - Convert POD data to formatted ASCII text
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-alt, indent, loose, sentence, width
-
-=item DIAGNOSTICS
-
-Bizarre space in item, Can't open %s for reading: %s, Unknown escape: %s,
-Unknown sequence: %s, Unmatched =back
-
-=item RESTRICTIONS
-
-=item NOTES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=back
-
 =head2 Pod::Plainer - Perl extension for converting Pod to old style Pod.
 
 =over
@@ -12037,6 +12105,12 @@ Memory, CPU, Snooping, Signals, State Changes
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=over
+
+=item OBJECT ORIENTED SYNTAX
+
+=back
 
 =item AUTHOR
 

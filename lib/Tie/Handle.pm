@@ -120,8 +120,7 @@ sub new {
 sub TIEHANDLE {
     my $pkg = shift;
     if (defined &{"{$pkg}::new"}) {
-	warnings::warn "WARNING: calling ${pkg}->new since ${pkg}->TIEHANDLE is missing"
-	    if warnings::enabled();
+	warnings::warnif("WARNING: calling ${pkg}->new since ${pkg}->TIEHANDLE is missing");
 	$pkg->new(@_);
     }
     else {

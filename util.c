@@ -1891,7 +1891,12 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	    PerlIO *serr = Perl_error_log;
 	    PerlIO_write(serr, message, msglen);
 #ifdef LEAKTEST
-	    DEBUG_L(xstat());
+	    DEBUG_L(*message == '!' 
+		? (xstat(message[1]=='!'
+			 ? (message[2]=='!' ? 2 : 1)
+			 : 0)
+		   , 0)
+		: 0);
 #endif
 	    (void)PerlIO_flush(serr);
 	}

@@ -3155,13 +3155,13 @@ because they obey the native byteorder and endianness.  For example a
 4-byte integer 0x12345678 (305419896 decimal) be ordered natively
 (arranged in and handled by the CPU registers) into bytes as
 
- 	0x12 0x34 0x56 0x78	# little-endian
- 	0x78 0x56 0x34 0x12	# big-endian
+ 	0x12 0x34 0x56 0x78	# big-endian
+ 	0x78 0x56 0x34 0x12	# little-endian
 
-Basically, the Intel, Alpha, and VAX CPUs are little-endian, while
-everybody else, for example Motorola m68k/88k, PPC, Sparc, HP PA,
-Power, and Cray are big-endian.  MIPS can be either: Digital used it
-in little-endian mode; SGI uses it in big-endian mode.
+Basically, the Intel and VAX CPUs are little-endian, while everybody
+else, for example Motorola m68k/88k, PPC, Sparc, HP PA, Power, and
+Cray are big-endian.  Alpha and MIPS can be either: Digital/Compaq
+used/uses them in little-endian mode; SGI/Cray uses them in big-endian mode.
 
 The names `big-endian' and `little-endian' are comic references to
 the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
@@ -4416,6 +4416,12 @@ numbers, and even then only the standard modifiers are allowed).  As a
 result, any non-standard extensions in your local C<sprintf> are not
 available from Perl.
 
+Unlike C<printf>, C<sprintf> does not do what you probably mean when you
+pass it an array as your first argument. The array is given scalar context,
+and instead of using the 0th element of the array as the format, Perl will
+use the count of elements in the array as the format, which is almost never
+useful.
+
 Perl's C<sprintf> permits the following universally-known conversions:
 
    %%	a percent sign
@@ -4448,9 +4454,11 @@ permits these unnecessary but widely-supported conversions:
    %O	a synonym for %lo
    %F	a synonym for %f
 
-Conversions to scientific notation by C<%e>, C<%E>, C<%g> and C<%G>
-always have a two-digit exponent unless the modulus of the exponent is
-greater than 99.
+Note that the number of exponent digits in the scientific notation by
+C<%e>, C<%E>, C<%g> and C<%G> for numbers with the modulus of the
+exponent less than 100 is system-dependent: it may be three or less
+(zero-padded as necessary).  In other words, 1.23 times ten to the
+99th may be either "1.23e99" or "1.23e099".
 
 Perl permits the following universally-known flags between the C<%>
 and the conversion letter:

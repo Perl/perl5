@@ -544,7 +544,7 @@ mini_mktime(struct tm *ptm)
 #  endif
 #endif
 
-#ifndef HAS_LONG_DOUBLE 
+#ifndef HAS_LONG_DOUBLE
 #ifdef LDBL_MAX
 #undef LDBL_MAX
 #endif
@@ -564,11 +564,7 @@ not_here(char *s)
 }
 
 static
-#if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
-long double
-#else
-double
-#endif
+NV
 constant(char *name, int arg)
 {
     errno = 0;
@@ -1528,7 +1524,7 @@ constant(char *name, int arg)
     case 'H':
 	if (strEQ(name, "HUGE_VAL"))
 #if defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)
-	  /* HUGE_VALL is admittedly non-POSIX but if are using long doubles
+	  /* HUGE_VALL is admittedly non-POSIX but if we are using long doubles
 	   * we might as well use long doubles. --jhi */
 	    return HUGE_VALL;
 #endif
@@ -3020,7 +3016,7 @@ setcc(termios_ref, ccix, cc)
 
 MODULE = POSIX		PACKAGE = POSIX
 
-double
+NV
 constant(name,arg)
 	char *		name
 	int		arg
@@ -3309,73 +3305,73 @@ setlocale(category, locale = 0)
 	RETVAL
 
 
-double
+NV
 acos(x)
-	double		x
+	NV		x
 
-double
+NV
 asin(x)
-	double		x
+	NV		x
 
-double
+NV
 atan(x)
-	double		x
+	NV		x
 
-double
+NV
 ceil(x)
-	double		x
+	NV		x
 
-double
+NV
 cosh(x)
-	double		x
+	NV		x
 
-double
+NV
 floor(x)
-	double		x
+	NV		x
 
-double
+NV
 fmod(x,y)
-	double		x
-	double		y
+	NV		x
+	NV		y
 
 void
 frexp(x)
-	double		x
+	NV		x
     PPCODE:
 	int expvar;
 	/* (We already know stack is long enough.) */
 	PUSHs(sv_2mortal(newSVnv(frexp(x,&expvar))));
 	PUSHs(sv_2mortal(newSViv(expvar)));
 
-double
+NV
 ldexp(x,exp)
-	double		x
+	NV		x
 	int		exp
 
-double
+NV
 log10(x)
-	double		x
+	NV		x
 
 void
 modf(x)
-	double		x
+	NV		x
     PPCODE:
-	double intvar;
+	NV intvar;
 	/* (We already know stack is long enough.) */
 	PUSHs(sv_2mortal(newSVnv(Perl_modf(x,&intvar))));
 	PUSHs(sv_2mortal(newSVnv(intvar)));
 
-double
+NV
 sinh(x)
-	double		x
+	NV		x
 
-double
+NV
 tan(x)
-	double		x
+	NV		x
 
-double
+NV
 tanh(x)
-	double		x
+	NV		x
 
 SysRet
 sigaction(sig, action, oldaction = 0)

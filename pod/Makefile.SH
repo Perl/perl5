@@ -118,6 +118,9 @@ realclean:	clean
 
 distclean:	realclean
 
+veryclean:	distclean
+	-rm -f *~ *.orig
+
 check:	checkpods
 	@echo "checking..."; \
 	$(PERL) -I../lib checkpods $(POD)

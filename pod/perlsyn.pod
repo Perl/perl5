@@ -309,9 +309,12 @@ The C<foreach> keyword is actually a synonym for the C<for> keyword, so
 you can use C<foreach> for readability or C<for> for brevity.  (Or because
 the Bourne shell is more familiar to you than I<csh>, so writing C<for>
 comes more naturally.)  If VAR is omitted, C<$_> is set to each value.
-If any element of LIST is an lvalue, you can modify it by modifying VAR
-inside the loop.  That's because the C<foreach> loop index variable is
-an implicit alias for each item in the list that you're looping over.
+
+If any element of LIST is an lvalue, you can modify it by modifying
+VAR inside the loop.  Conversely, if any element of LIST is NOT an
+lvalue, any attempt to modify that element will fail.  In other words,
+the C<foreach> loop index variable is an implicit alias for each item
+in the list that you're looping over.
 
 If any part of LIST is an array, C<foreach> will get very confused if
 you add or remove elements within the loop body, for example with

@@ -1,4 +1,5 @@
 package Math::BigInt;
+$VERSION='0.01';
 
 use overload
 '+'	=>	sub {new Math::BigInt &badd},

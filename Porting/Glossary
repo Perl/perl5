@@ -2749,6 +2749,30 @@ nroff (Loc.U):
 	full pathname (if any) of the nroff program.  After Configure runs,
 	the value is reset to a plain "nroff" and is not useful.
 
+nveformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl NV using %e-ish floating point format.
+
+nvEformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl NV using %E-ish floating point format.
+
+nvfformat (perlxvf.U):
+	This variable confains the format string used for printing
+	a Perl NV using %f-ish floating point format.
+
+nvFformat (perlxvf.U):
+	This variable confains the format string used for printing
+	a Perl NV using %F-ish floating point format.
+
+nvgformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl NV using %g-ish floating point format.
+
+nvGformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl NV using %G-ish floating point format.
+
 nvsize (perlxv.U):
 	This variable is the size of an NV in bytes.
 
@@ -3585,7 +3609,11 @@ uvuformat (perlxvf.U):
 
 uvxformat (perlxvf.U):
 	This variable contains the format string used for printing
-	a Perl UV as an unsigned hexadecimal integer. 
+	a Perl UV as an unsigned hexadecimal integer in lowercase abcdef.
+
+uvXformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl UV as an unsigned hexadecimal integer in uppercase ABCDEF.
 
 vendorarch (vendorarch.U):
 	This variable contains the value of the PERL_VENDORARCH symbol.

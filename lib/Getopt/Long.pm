@@ -36,7 +36,7 @@ BEGIN {
     require 5.004;
     use Exporter ();
     use vars     qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = "2.23_05";
+    $VERSION     = 2.23_05;
 
     @ISA         = qw(Exporter);
     @EXPORT      = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);

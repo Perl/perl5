@@ -2746,12 +2746,27 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 /* UVxf:
  *	This symbol defines the format string used for printing a Perl UV
- *	as an unsigned hexadecimal integer.
+ *	as an unsigned hexadecimal integer in lowercase abcdef.
+ */
+/* NVef:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %e-ish floating point format.
+ */
+/* NVff:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %f-ish floating point format.
+ */
+/* NVgf:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %g-ish floating point format.
  */
 #define	IVdf		$ivdformat		/**/
 #define	UVuf		$uvuformat		/**/
 #define	UVof		$uvoformat		/**/
 #define	UVxf		$uvxformat		/**/
+#define	NVef		$nveformat		/**/
+#define	NVff		$nvfformat		/**/
+#define	NVgf		$nvgformat		/**/
 
 /* Pid_t:
  *	This symbol holds the type used to declare process ids in the kernel.

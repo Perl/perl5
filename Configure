@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Aug 17 02:52:39 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Mon Aug 21 20:22:11 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -823,6 +823,13 @@ u8type=''
 uvsize=''
 uvtype=''
 ivdformat=''
+nvEformat=''
+nvFformat=''
+nvGformat=''
+nveformat=''
+nvfformat=''
+nvgformat=''
+uvXformat=''
 uvoformat=''
 uvuformat=''
 uvxformat=''
@@ -5798,6 +5805,13 @@ esac
 case "$dflt" in
 ''|' ') dflt=none ;;
 esac
+case "$dflt" in
+5.005) case "$bincompat5005" in
+       $define|true|[yY]*) ;;
+       *) dflt=none ;;
+       esac
+       ;;
+esac
 $cat <<'EOM'
 
 In order to ease the process of upgrading, this version of perl 
@@ -7688,20 +7702,19 @@ case "$sPRIfldbl" in
 esac
 
 : Check how to convert floats to strings.
-if test "X$d_Gconvert" = X; then
-	echo " "
-	echo "Checking for an efficient way to convert floats to strings."
-	echo " " > try.c
-	case "$uselongdouble" in
-	"$define") echo "#define USE_LONG_DOUBLE" >>try.c ;;
-	esac
-	case "$d_longdbl" in
-	"$define") echo "#define HAS_LONG_DOUBLE" >>try.c ;;
-	esac
-	case "$d_PRIgldbl" in
-	"$define") echo "#define HAS_PRIgldbl"    >>try.c ;;
-	esac
-	$cat >>try.c <<EOP
+echo " "
+echo "Checking for an efficient way to convert floats to strings."
+echo " " > try.c
+case "$uselongdouble" in
+"$define") echo "#define USE_LONG_DOUBLE" >>try.c ;;
+esac
+case "$d_longdbl" in
+"$define") echo "#define HAS_LONG_DOUBLE" >>try.c ;;
+esac
+case "$d_PRIgldbl" in
+"$define") echo "#define HAS_PRIgldbl"    >>try.c ;;
+esac
+$cat >>try.c <<EOP
 #ifdef TRY_gconvert
 #define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
 char *myname = "gconvert";
@@ -7799,46 +7812,50 @@ int main()
 	exit(0);
 }
 EOP
-	case "$d_Gconvert" in
-	gconvert*) xxx_list='gconvert gcvt sprintf' ;;
-	gcvt*) xxx_list='gcvt gconvert sprintf' ;;
-	sprintf*) xxx_list='sprintf gconvert gcvt' ;;
-	*) xxx_list='gconvert gcvt sprintf' ;;
-	esac
+case "$d_Gconvert" in
+gconvert*) xxx_list='gconvert gcvt sprintf' ;;
+gcvt*) xxx_list='gcvt gconvert sprintf' ;;
+*) xxx_list='sprintf gconvert gcvt' ;;
+esac
 
-        case "$d_longdbl$uselongdouble$d_qgcvt" in
-        "$define$define$define") xxx_list="`echo $xxx_list|sed 's/gcvt/qgcvt gcvt/'`" ;;
-	esac
+case "$d_longdbl$uselongdouble" in
+"$define$define")
+    xxx_list="`echo $xxx_list|sed s/sprintf//`" 
+    xxx_list="sprintf $xxx_list"
+    case "$d_qgcvt" in
+    "$define") xxx_list="qgcvt $xxx_list" ;;
+    esac
+    ;;
+esac
 
-	for xxx_convert in $xxx_list; do
-		echo "Trying $xxx_convert..."
-		$rm -f try try$_o
-		set try -DTRY_$xxx_convert
-		if eval $compile; then
-			echo "$xxx_convert() found." >&4
-			if ./try; then
-				echo "I'll use $xxx_convert to convert floats into a string." >&4
-				break;
-			else
-				echo "...But $xxx_convert didn't work as I expected."
-			fi
+for xxx_convert in $xxx_list; do
+	echo "Trying $xxx_convert..."
+	$rm -f try try$_o
+	set try -DTRY_$xxx_convert
+	if eval $compile; then
+		echo "$xxx_convert() found." >&4
+		if ./try; then
+			echo "I'll use $xxx_convert to convert floats into a string." >&4
+			break;
 		else
-			echo "$xxx_convert NOT found." >&4
+			echo "...But $xxx_convert didn't work as I expected."
 		fi
-	done
-		
-	case "$xxx_convert" in
-	gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
-	gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
-	qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
-	*) case "$uselongdouble$d_longdbl$d_PRIgldbl" in
-	   "$define$define$define")
-	      d_Gconvert="sprintf((b),\"%.*$sPRIgldbl\",(n),(x))" ;;
-	   *) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
-	   esac
-	   ;;  
-	esac
-fi
+	else
+		echo "$xxx_convert NOT found." >&4
+	fi
+done
+	
+case "$xxx_convert" in
+gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
+gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
+qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
+*) case "$uselongdouble$d_longdbl$d_PRIgldbl" in
+   "$define$define$define")
+      d_Gconvert="sprintf((b),\"%.*$sPRIgldbl\",(n),(x))" ;;
+   *) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
+   esac
+   ;;  
+esac
 
 : Initialize h_fcntl
 h_fcntl=false
@@ -13207,18 +13224,21 @@ if $test X"$ivsize" = X8; then
 	uvuformat="$sPRIu64"
 	uvoformat="$sPRIo64"
 	uvxformat="$sPRIx64"
+	uvXformat="$sPRIX64"
 else
 	if $test X"$ivsize" = X"$longsize"; then
 		ivdformat='"ld"'
 		uvuformat='"lu"'
 		uvoformat='"lo"'
 		uvxformat='"lx"'
+		uvXformat='"lX"'
 	else
 		if $test X"$ivsize" = X"$intsize"; then
 			ivdformat='"d"'
 			uvuformat='"u"'
 			uvoformat='"o"'
 			uvxformat='"x"'
+			uvXformat='"X"'
 		else
 			: far out
 			if $test X"$ivsize" = X"$shortsize"; then
@@ -13226,9 +13246,26 @@ else
 				uvuformat='"hu"'
 				uvoformat='"ho"'
 				uvxformat='"hx"'
+				uvXformat='"hX"'
 			fi
 		fi
 	fi
+fi
+
+if $test X"$nvsize" = X"$longdblsize" -a "$longdblsize" -gt "$doublesize"; then
+	nveformat="$sPRIeldbl"
+	nvfformat="$sPRIfldbl"
+	nvgformat="$sPRIgldbl"
+	nvEformat="$sPRIEldbl"
+	nvFformat="$sPRIFldbl"
+	nvGformat="$sPRIGldbl"
+else
+	nveformat='"e"'
+	nvfformat='"f"'
+	nvgformat='"g"'
+	nvEformat='"E"'
+	nvFformat='"F"'
+	nvGformat='"G"'
 fi
 
 case "$ivdformat" in
@@ -15888,6 +15925,12 @@ nm_opt='$nm_opt'
 nm_so_opt='$nm_so_opt'
 nonxs_ext='$nonxs_ext'
 nroff='$nroff'
+nvEformat='$nvEformat'
+nvFformat='$nvFformat'
+nvGformat='$nvGformat'
+nveformat='$nveformat'
+nvfformat='$nvfformat'
+nvgformat='$nvgformat'
 nvsize='$nvsize'
 nvtype='$nvtype'
 o_nonblock='$o_nonblock'
@@ -16050,6 +16093,7 @@ usevendorprefix='$usevendorprefix'
 usevfork='$usevfork'
 usrinc='$usrinc'
 uuname='$uuname'
+uvXformat='$uvXformat'
 uvoformat='$uvoformat'
 uvsize='$uvsize'
 uvtype='$uvtype'

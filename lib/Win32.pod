@@ -43,7 +43,9 @@ yourself.
 =item Win32::DomainName()
 
 [CORE] Returns the name of the Microsoft Network domain that the
-owner of the current perl process is logged into.
+owner of the current perl process is logged into.  This information
+is not available to 32 bit programs on Win 9X.  Therefore this function
+will return C<undef> on these systems.
 
 =item Win32::ExpandEnvironmentStrings(STRING)
 

@@ -508,7 +508,7 @@ PP(pp_open)
     djSP; dTARGET;
     GV *gv;
     SV *sv;
-    SV *name;
+    SV *name = Nullsv;
     I32 have_name = 0;
     char *tmps;
     STRLEN len;

@@ -181,10 +181,12 @@ numbers to secondary storage such as a disk file or tape.
 
 Conflicting storage orders make utter mess out of the numbers.  If a
 little-endian host (Intel, VAX) stores 0x12345678 (305419896 in
-decimal), a big-endian host (Motorola, MIPS, Sparc, PA) reads it as
-0x78563412 (2018915346 in decimal).  To avoid this problem in network
-(socket) connections use the C<pack> and C<unpack> formats C<n>
-and C<N>, the "network" orders.  These are guaranteed to be portable.
+decimal), a big-endian host (Motorola, Sparc, PA) reads it as
+0x78563412 (2018915346 in decimal).  Alpha and MIPS can be either:
+Digital/Compaq used/uses them in little-endian mode; SGI/Cray uses
+them in big-endian mode.  To avoid this problem in network (socket)
+connections use the C<pack> and C<unpack> formats C<n> and C<N>, the
+"network" orders.  These are guaranteed to be portable.
 
 You can explore the endianness of your platform by unpacking a
 data structure packed in native format such as:
@@ -1042,7 +1044,8 @@ Also see:
 
 *
 
-L<perlos390>, F<README.os390>, F<README.posix-bc>, F<README.vmesa>
+L<perlos390>, F<README.os390>, F<perlposix-bc>, F<README.vmesa>,
+L<perlebcdic>.
 
 =item *
 

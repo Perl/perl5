@@ -1834,6 +1834,14 @@ catches that.  But an easy way to do the same thing is:
 
 Another way is to assign to a substr() that's off the end of the string.
 
+Yet another way is to assign to a C<foreach> loop I<VAR> when I<VAR>
+is aliased to a constant in the look I<LIST>:
+
+        $x = 1;
+        foreach my $n ($x, 2) {
+            $n *= 2; # modifies the $x, but fails on attempt to modify the 2
+        } 
+
 =item Modification of non-creatable array value attempted, %s
 
 (F) You tried to make an array value spring into existence, and the

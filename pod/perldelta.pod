@@ -4,7 +4,8 @@ perldelta - what's new for perl v5.6.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.005 release and this one.
+This document describes differences between the 5.005 release and the 5.6.0
+release.
 
 =head1 Core Enhancements
 

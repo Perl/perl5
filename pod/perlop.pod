@@ -299,7 +299,9 @@ to the right argument.
 
 Binary "<=>" returns -1, 0, or 1 depending on whether the left
 argument is numerically less than, equal to, or greater than the right
-argument.
+argument.  If your platform supports NaNs (not-a-numbers) as numeric
+values, using them with "<=>" (or any other numeric comparison)
+returns undef.
 
 Binary "eq" returns true if the left argument is stringwise equal to
 the right argument.
@@ -307,8 +309,9 @@ the right argument.
 Binary "ne" returns true if the left argument is stringwise not equal
 to the right argument.
 
-Binary "cmp" returns -1, 0, or 1 depending on whether the left argument is stringwise
-less than, equal to, or greater than the right argument.
+Binary "cmp" returns -1, 0, or 1 depending on whether the left
+argument is stringwise less than, equal to, or greater than the right
+argument.
 
 "lt", "le", "ge", "gt" and "cmp" use the collation (sort) order specified
 by the current locale if C<use locale> is in effect.  See L<perllocale>.
@@ -997,13 +1000,14 @@ for a detailed look at the semantics of regular expressions.
 
 =item `STRING`
 
-A string which is (possibly) interpolated and then executed as a system
-command with C</bin/sh> or its equivalent.  Shell wildcards, pipes,
-and redirections will be honored.  The collected standard output of the
-command is returned; standard error is unaffected.  In scalar context,
-it comes back as a single (potentially multi-line) string.  In list
-context, returns a list of lines (however you've defined lines with $/
-or $INPUT_RECORD_SEPARATOR).
+A string which is (possibly) interpolated and then executed as a
+system command with C</bin/sh> or its equivalent.  Shell wildcards,
+pipes, and redirections will be honored.  The collected standard
+output of the command is returned; standard error is unaffected.  In
+scalar context, it comes back as a single (potentially multi-line)
+string, or undef if the command failed.  In list context, returns a
+list of lines (however you've defined lines with $/ or
+$INPUT_RECORD_SEPARATOR), or an empty list if the command failed.
 
 Because backticks do not affect standard error, use shell file descriptor
 syntax (assuming the shell supports this) if you care to address this.

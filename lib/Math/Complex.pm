@@ -12,10 +12,13 @@ $VERSION = "1.30";
 our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $Inf);
 
 BEGIN {
-    my $e = $!;
-    $Inf = CORE::exp(CORE::exp(30)); # We do want an arithmetic overflow.
-    $! = $e; # Clear ERANGE.
-    undef $Inf unless $Inf =~ /^inf(?:inity)?$/i; # Inf INF inf Infinity
+    unless ($^O eq 'unicosmk') {
+        my $e = $!;
+	# We do want an arithmetic overflow.
+        eval '$Inf = CORE::exp(CORE::exp(30))';
+        $! = $e; # Clear ERANGE.
+        undef $Inf unless $Inf =~ /^inf(?:inity)?$/i; # Inf INF inf Infinity
+    }
     $Inf = "Inf" if !defined $Inf || !($Inf > 0); # Desperation.
 }
 
@@ -1393,11 +1396,11 @@ sub stringify_polar {
 
 	$t -= int(CORE::abs($t) / pit2) * pit2;
 
-	if ($format{polar_pretty_print}) {
+	if ($format{polar_pretty_print} && $t) {
 	    my ($a, $b);
 	    for $a (2..9) {
 		$b = $t * $a / pi;
-		if (int($b) == $b) {
+		if ($b =~ /^-?\d+$/) {
 		    $b = $b < 0 ? "-" : "" if CORE::abs($b) == 1;
 		    $theta = "${b}pi/$a";
 		    last;

@@ -1877,18 +1877,26 @@ This function isn't exported out of the Perl core.
 If you edit F<embed.pl>, you will need to run C<make regen_headers> to
 force a rebuild of F<embed.h> and other auto-generated files.
 
-=head2 Formatted Printing of IVs and UVs
+=head2 Formatted Printing of IVs, UVs, and NVs
 
-If you are printing IVs or UVs instead of the stdio(3) style formatting
-codes like C<%d> you should use the following macros for portability
+If you are printing IVs, UVs, or NVS instead of the stdio(3) style
+formatting codes like C<%d>, C<%ld>, C<%f>, you should use the
+following macros for portability
 
 	IVdf		IV in decimal
 	UVuf		UV in decimal
 	UVof		UV in octal
 	UVxf		UV in hexadecimal
+	NVef		NV %e-like
+	NVff		NV %f-like
+	NVgf		NV %g-like
 
-For example: printf("IV is %"IVdf"\n", iv);  That will expand
-to whatever is the correct format for the IVs.
+These will take care of 64-bit integers and long doubles.
+For example:
+
+	printf("IV is %"IVdf"\n", iv);
+
+The IVdf will expand to whatever is the correct format for the IVs.
 
 =head2 Source Documentation
 

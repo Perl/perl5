@@ -4476,6 +4476,10 @@ $ ivdformat="""ld"""
 $ uvuformat="""lu"""
 $ uvoformat="""lo"""
 $ uvxformat="""lx"""
+$! uselongdouble?
+$ nveformat="""e"""
+$ nvfformat="""f"""
+$ nvgformat="""g"""
 $! 
 $! Finally the composite ones. All config
 $!
@@ -4982,6 +4986,9 @@ $ WC "netdb_hlen_type='" + netdb_hlen_type + "'"
 $ WC "netdb_host_type='" + netdb_host_type + "'"
 $ WC "netdb_name_type='" + netdb_name_type + "'"
 $ WC "netdb_net_type='" + netdb_net_type + "'"
+$ WC "nveformat='" + nveformat + "'"
+$ WC "nvfformat='" + nvfformat + "'"
+$ WC "nvgformat='" + nvgformat + "'"
 $ WC "nvsize='" + nvsize + "'"
 $ WC "nvtype='" + nvtype + "'"
 $ WC "o_nonblock=' '"

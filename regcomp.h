@@ -194,7 +194,7 @@ struct regnode_charclass_class {
 
 #define ANYOF_ALNUM	 0	/* \w, utf8::IsWord, isALNUM() */
 #define ANYOF_NALNUM	 1
-#define ANYOF_SPACE	 2
+#define ANYOF_SPACE	 2	/* \s */
 #define ANYOF_NSPACE	 3
 #define ANYOF_DIGIT	 4
 #define ANYOF_NDIGIT	 5
@@ -218,8 +218,12 @@ struct regnode_charclass_class {
 #define ANYOF_NUPPER	23
 #define ANYOF_XDIGIT	24
 #define ANYOF_NXDIGIT	25
+#define ANYOF_PSXSPC	26	/* POSIX space: \s plus the vertical tab */
+#define ANYOF_NPSXSPC	27
+#define ANYOF_BLANK	28
+#define ANYOF_NBLANK	29	/* GNU extension: space and tab */
 
-#define ANYOF_MAX	31
+#define ANYOF_MAX	32
 
 /* Backward source code compatibility. */
 

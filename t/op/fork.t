@@ -375,6 +375,7 @@ EXPECT
 pipe_from_fork
 pipe_to_fork
 ########
+$|=1;
 if ($pid = fork()) {
     print "forked first kid\n";
     print "waitpid() returned ok\n" if waitpid($pid,0) == $pid;

@@ -1137,6 +1137,7 @@ pod/perldebug.pod	Debugger info
 pod/perldelta.pod	Changes since last version
 pod/perldiag.pod	Diagnostic info
 pod/perldsc.pod		Data Structures Cookbook
+pod/perlebcdic.pod	Considerations for running Perl on EBCDIC platforms
 pod/perlembed.pod	Embedding info
 pod/perlfaq.pod		Frequently Asked Questions, Top Level
 pod/perlfaq1.pod	Frequently Asked Questions, Part 1

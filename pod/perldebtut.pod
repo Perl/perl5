@@ -168,7 +168,7 @@ break/watch/actions
  |[|]db_cmd  Send output to pager        ![!] syscmd Run cmd in a subprocess
  q or ^D     Quit                        R           Attempt a restart
  Data Examination:       expr     Execute perl code, also see: s,n,t expr
- x|m expr      Evals expr in array context, dumps the result or lists methods.
+ x|m expr      Evals expr in list context, dumps the result or lists methods.
  p expr        Print expression (uses script's current package).
  S [[!]pat]    List subroutine names [not] matching pattern
  V [Pk [Vars]] List Variables in Package.  Vars can be ~pattern or !pattern.
@@ -402,7 +402,7 @@ For more on references see L<perlref> and L<perlreftut>
 
 =head1 Stepping through code
 
-Here's a simple program which converts between celsius and farenheit, it too
+Here's a simple program which converts between Celsius and Fahrenheit, it too
 has a problem:
 
 	#!/usr/bin/perl -w
@@ -441,7 +441,7 @@ has a problem:
 	}
 
 
-For some reason, the farenheit to celsius conversion fails to return the
+For some reason, the Fahrenheit to Celsius conversion fails to return the
 expected output.  This is what it does:
 
 	> temp -c0.72
@@ -717,5 +717,5 @@ Ronald J Kimball <rjk@linguist.dartmouth.edu>
 
 Hugo van der Sanden <hv@crypt0.demon.co.uk>
 
-Peter Scott <Peter.J.Scott@jpl.nasa.gov>
+Peter Scott <Peter@PSDT.com>
 

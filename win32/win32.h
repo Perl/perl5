@@ -159,6 +159,11 @@ struct utsname {
 #  define	F_OK	0
 #endif
 
+/* for waitpid() */
+#ifndef WNOHANG
+#  define WNOHANG	1
+#endif
+
 #define PERL_GET_CONTEXT_DEFINED
 
 /* Compiler-specific stuff. */
@@ -491,10 +496,6 @@ struct interp_intern {
  * get to use the same RTL functions as the core.
  */
 #include "win32iop.h"
-
-#ifndef WNOHANG
-#  define WNOHANG 1
-#endif
 
 #endif /* _INC_WIN32_PERL5 */
 
