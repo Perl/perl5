@@ -36,9 +36,11 @@ my $ref = File::Spec->catfile($dir,"table.ref");
 my $rnd = File::Spec->catfile($dir,"$$.rnd");
 print "# Basic decode test\n";
 open($src,"<",$euc) || die "Cannot open $euc:$!";
+binmode($src);
 ok(defined($src) && fileno($src));
 $txt = join('',<$src>);
 open($dst,">:utf8",$utf) || die "Cannot open $utf:$!";
+binmode($dst);
 ok(defined($dst) && fileno($dst));
 $uni = $enc->decode($txt,1);
 ok(defined($uni));
@@ -50,9 +52,11 @@ ok(compare($utf,$ref) == 0);
 
 print "# Basic encode test\n";
 open($src,"<:utf8",$ref) || die "Cannot open $ref:$!";
+binmode($src);
 ok(defined($src) && fileno($src));
 $uni = join('',<$src>);
 open($dst,">",$rnd) || die "Cannot open $rnd:$!";
+binmode($dst);
 ok(defined($dst) && fileno($dst));
 $txt = $enc->encode($uni,1);
 ok(defined($txt));
@@ -66,8 +70,10 @@ is($enc->name,'euc-jp');
 
 print "# src :encoding test\n";
 open($src,"<encoding(euc-jp)",$euc) || die "Cannot open $euc:$!";
+binmode($src);
 ok(defined($src) && fileno($src));
 open($dst,">:utf8",$utf) || die "Cannot open $utf:$!";
+binmode($dst);
 ok(defined($dst) || fileno($dst));
 my $out = select($dst);
 while (<$src>)
@@ -88,8 +94,10 @@ SKIP:
  #skip "Multi-byte write is broken",3;
  print "# dst :encoding test\n";
  open($src,"<:utf8",$ref) || die "Cannot open $ref:$!";
+ binmode($src);
  ok(defined($src) || fileno($src));
  open($dst,">encoding(euc-jp)",$rnd) || die "Cannot open $rnd:$!";
+ binmode($dst);
  ok(defined($dst) || fileno($dst));
  my $out = select($dst);
  while (<$src>)
