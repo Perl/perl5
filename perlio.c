@@ -365,26 +365,6 @@ PerlIO_pop(pTHX_ PerlIO *f)
 /*--------------------------------------------------------------------------------------*/
 /* XS Interface for perl code */
 
-XS(XS_perlio_import)
-{
- dXSARGS;
- GV *gv = CvGV(cv);
- char *s = GvNAME(gv);
- STRLEN l = GvNAMELEN(gv);
- PerlIO_debug("%.*s\n",(int) l,s);
- XSRETURN_EMPTY;
-}
-
-XS(XS_perlio_unimport)
-{
- dXSARGS;
- GV *gv = CvGV(cv);
- char *s = GvNAME(gv);
- STRLEN l = GvNAMELEN(gv);
- PerlIO_debug("%.*s\n",(int) l,s);
- XSRETURN_EMPTY;
-}
-
 SV *
 PerlIO_find_layer(pTHX_ const char *name, STRLEN len)
 {
@@ -499,7 +479,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
 SV *
 PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
 {
- HV *stash = gv_stashpv("perlio::Layer", TRUE);
+ HV *stash = gv_stashpv("PerlIO::Layer", TRUE);
  SV *sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))),stash);
  return sv;
 }
@@ -648,8 +628,6 @@ PerlIO_default_layers(pTHX)
   {
    const char *s  = (PL_tainting) ? Nullch : PerlEnv_getenv("PERLIO");
    PerlIO_layer_av = get_av("open::layers",GV_ADD|GV_ADDMULTI);
-   newXS("perlio::import",XS_perlio_import,__FILE__);
-   newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
 #if 0
    newXS("io::MODIFY_SCALAR_ATTRIBUTES",XS_io_MODIFY_SCALAR_ATTRIBUTES,__FILE__);
 #endif
