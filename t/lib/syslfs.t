@@ -49,6 +49,13 @@ if ($^O eq 'win32' || $^O eq 'vms') {
     bye();
 }
 
+# Known haves that have problems running this test
+# (for example because they do not support sparse files, like UNICOS)
+if ($^O eq 'unicos') {
+    print "1..0\n# large files known to work but unable to test them here\n";
+    bye();
+}
+
 # Then try to deduce whether we have sparse files.
 
 # We'll start off by creating a one megabyte file which has
