@@ -499,18 +499,18 @@ Found in file gv.h
 
 Returns the glob with the given C<name> and a defined subroutine or
 C<NULL>.  The glob lives in the given C<stash>, or in the stashes
-accessible via @ISA and @UNIVERSAL. 
+accessible via @ISA and @UNIVERSAL.
 
 The argument C<level> should be either 0 or -1.  If C<level==0>, as a
 side-effect creates a glob with the given C<name> in the given C<stash>
 which in the case of success contains an alias for the subroutine, and sets
-up caching info for this glob.  Similarly for all the searched stashes. 
+up caching info for this glob.  Similarly for all the searched stashes.
 
 This function grants C<"SUPER"> token as a postfix of the stash name. The
 GV returned from C<gv_fetchmeth> may be a method cache entry, which is not
 visible to Perl code.  So when calling C<call_sv>, you should not use
 the GV directly; instead, you should use the method's CV, which can be
-obtained from the GV with the C<GvCV> macro. 
+obtained from the GV with the C<GvCV> macro.
 
 	GV*	gv_fetchmeth(HV* stash, const char* name, STRLEN len, I32 level)
 
@@ -531,24 +531,24 @@ Found in file gv.c
 Returns the glob which contains the subroutine to call to invoke the method
 on the C<stash>.  In fact in the presence of autoloading this may be the
 glob for "AUTOLOAD".  In this case the corresponding variable $AUTOLOAD is
-already setup. 
+already setup.
 
 The third parameter of C<gv_fetchmethod_autoload> determines whether
 AUTOLOAD lookup is performed if the given method is not present: non-zero
-means yes, look for AUTOLOAD; zero means no, don't look for AUTOLOAD. 
+means yes, look for AUTOLOAD; zero means no, don't look for AUTOLOAD.
 Calling C<gv_fetchmethod> is equivalent to calling C<gv_fetchmethod_autoload>
-with a non-zero C<autoload> parameter. 
+with a non-zero C<autoload> parameter.
 
 These functions grant C<"SUPER"> token as a prefix of the method name. Note
 that if you want to keep the returned glob for a long time, you need to
 check for it being "AUTOLOAD", since at the later time the call may load a
 different subroutine due to $AUTOLOAD changing its value. Use the glob
-created via a side effect to do this. 
+created via a side effect to do this.
 
 These functions have the same side-effects and as C<gv_fetchmeth> with
 C<level==0>.  C<name> should be writable if contains C<':'> or C<'
 ''>. The warning against passing the GV returned by C<gv_fetchmeth> to
-C<call_sv> apply equally to these functions. 
+C<call_sv> apply equally to these functions.
 
 	GV*	gv_fetchmethod_autoload(HV* stash, const char* name, I32 autoload)
 
@@ -1601,7 +1601,7 @@ Found in file pp.h
 
 =item PUSHs
 
-Push an SV onto the stack.  The stack must have room for this element. 
+Push an SV onto the stack.  The stack must have room for this element.
 Does not handle 'set' magic.  See C<XPUSHs>.
 
 	void	PUSHs(SV* sv)
@@ -2342,19 +2342,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -3197,10 +3197,10 @@ C<retlen> will be set to the length, in bytes, of that character,
 and the pointer C<s> will be advanced to the end of the character.
 
 If C<s> does not point to a well-formed UTF8 character, the behaviour
-is dependent on the value of C<checking>: if this is true, it is
-assumed that the caller will raise a warning, and this function will
-set C<retlen> to C<-1> and return. If C<checking> is not true, an optional UTF8
-warning is produced.
+is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
+it is assumed that the caller will raise a warning, and this function
+will set C<retlen> to C<-1> and return.  The C<flags> can also contain
+various flags to allow deviations from the strict UTF-8 encoding.
 
 	U8* s	utf8_to_uv(STRLEN curlen, I32 *retlen, U32 flags)
 
@@ -3276,7 +3276,7 @@ Found in file pp.h
 
 =item XPUSHu
 
-Push an unsigned integer onto the stack, extending the stack if necessary. 
+Push an unsigned integer onto the stack, extending the stack if necessary.
 See C<PUSHu>.
 
 	void	XPUSHu(UV uv)

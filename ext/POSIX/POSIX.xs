@@ -142,6 +142,8 @@
 #  define sigdelset(a,b)	not_here("sigdelset")
 #  define sigfillset(a)		not_here("sigfillset")
 #  define sigismember(a,b)	not_here("sigismember")
+#  define setuid(a)		not_here("setuid")
+#  define setgid(a)		not_here("setgid")
 #else
 
 #  ifndef HAS_MKFIFO
