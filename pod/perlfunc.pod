@@ -4436,11 +4436,19 @@ loop control operators described in L<perlsyn> or with C<goto>.
 When C<use locale> is in effect, C<sort LIST> sorts LIST according to the
 current collation locale.  See L<perllocale>.
 
-Perl does B<not> guarantee that sort is stable.  (A I<stable> sort
-preserves the input order of elements that compare equal.)  5.7 and
-5.8 happen to use a stable mergesort, but 5.6 and earlier used quicksort,
-which is not stable.  Do not assume that future perls will continue to
-use a stable sort.
+Perl 5.6 and earlier used a quicksort algorithm to implement sort.
+That algorithm was not stable, and I<could> go quadratic.  (A I<stable> sort
+preserves the input order of elements that compare equal.  Although
+quicksort's run time is O(NlogN) when averaged over all arrays of
+length N, the time can be O(N**2), I<quadratic> behavior, for some
+inputs.)  In 5.7, the quicksort implementation was replaced with
+a stable mergesort algorithm whose worst case behavior is O(NlogN).
+But benchmarks indicated that for some inputs, on some platforms,
+the original quicksort was faster.  5.8 has a sort pragma for
+limited control of the sort.  Its rather blunt control of the
+underlying algorithm may not persist into future perls, but the
+ability to characterize the input or output in implementation
+independent ways quite probably will.  See L</use>.
 
 Examples:
 
@@ -4522,6 +4530,18 @@ Examples:
 
     package main;
     @new = sort other::backwards @old;
+
+    # guarantee stability, regardless of algorithm
+    use sort 'stable';
+    @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
+
+    # force use of quicksort (not portable outside Perl 5.8)
+    use sort '_quicksort';  # note discouraging _
+    @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
+
+    # similar to the previous example, but demand stability as well
+    use sort qw( _mergesort stable );
+    @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
 
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means
@@ -5804,6 +5824,7 @@ are also implemented this way.  Currently implemented pragmas are:
     use strict   qw(subs vars refs);
     use subs     qw(afunc blurfl);
     use warnings qw(all);
+    use sort     qw(stable _quicksort _mergesort);
 
 Some of these pseudo-modules import semantics into the current
 block scope (like C<strict> or C<integer>, unlike ordinary modules,
