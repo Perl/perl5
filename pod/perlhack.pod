@@ -1249,7 +1249,6 @@ important ones are explained in L<perlxs> as well. Pay special attention
 to L<perlguts/Background and PERL_IMPLICIT_CONTEXT> for information on
 the C<[pad]THX_?> macros.
 
-
 =head2 Poking at Perl
 
 To really poke around with Perl, you'll probably want to build Perl for
@@ -2191,6 +2190,47 @@ Unexecuted procedures.
 =back
 
 For further information, see your system's manual pages for pixie and prof.
+
+=head2 Miscellaneous tricks
+
+=over 4
+
+=item *
+
+hose debugging perl with the DDD frontend over gdb may find the
+following useful:
+
+You can extend the data conversion shortcuts menu, so for example you
+can display an SV's IV value with one click, without doing any typing.
+To do that simply edit ~/.ddd/init file and add after:
+
+  ! Display shortcuts.
+  Ddd*gdbDisplayShortcuts: \
+  /t ()   // Convert to Bin\n\
+  /d ()   // Convert to Dec\n\
+  /x ()   // Convert to Hex\n\
+  /o ()   // Convert to Oct(\n\
+
+the following two lines:
+
+  ((XPV*) (())->sv_any )->xpv_pv  // 2pvx\n\
+  ((XPVIV*) (())->sv_any )->xiv_iv // 2ivx
+
+so now you can do ivx and pvx lookups or you can plug there the
+sv_peek "conversion":
+
+  Perl_sv_peek(my_perl, (SV*)()) // sv_peek
+
+(The my_perl is for threaded builds.)
+Just remember that every line, but the last one, should end with \n\
+
+Alternatively edit the init file interactively via:
+3rd mouse button -> New Display -> Edit Menu
+
+Note: you can define up to 20 conversion shortcuts in the gdb
+section.
+
+=back
 
 =head2 CONCLUSION
 
