@@ -64,10 +64,7 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 		  ((uv >= 0xFDD0 && uv <= 0xFDEF &&
 		    !(flags & UNICODE_ALLOW_FDD0))
 		   ||
-		   (UNICODE_IS_BYTE_ORDER_MARK(uv) &&
-		    !(flags & UNICODE_ALLOW_BOM))
-		   ||
-		   ((uv & 0xFFFF) == 0xFFFF &&
+		   ((uv & 0xFFFE) == 0xFFFE && /* Either FFFE or FFFF. */
 		    !(flags & UNICODE_ALLOW_FFFF))) &&
 		  /* UNICODE_ALLOW_SUPER includes
 		   * FFFFs beyond 0x10FFFF. */
@@ -296,9 +293,8 @@ Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 #define UTF8_WARN_SHORT				 5
 #define UTF8_WARN_OVERFLOW			 6
 #define UTF8_WARN_SURROGATE			 7
-#define UTF8_WARN_BOM				 8
-#define UTF8_WARN_LONG				 9
-#define UTF8_WARN_FFFF				10
+#define UTF8_WARN_LONG				 8
+#define UTF8_WARN_FFFF				 9 /* Also FFFE. */
 
     if (curlen == 0 &&
 	!(flags & UTF8_ALLOW_EMPTY)) {
@@ -393,10 +389,6 @@ Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	!(flags & UTF8_ALLOW_SURROGATE)) {
 	warning = UTF8_WARN_SURROGATE;
 	goto malformed;
-    } else if (UNICODE_IS_BYTE_ORDER_MARK(uv) &&
-	       !(flags & UTF8_ALLOW_BOM)) {
-	warning = UTF8_WARN_BOM;
-	goto malformed;
     } else if ((expectlen > UNISKIP(uv)) &&
 	       !(flags & UTF8_ALLOW_LONG)) {
 	warning = UTF8_WARN_LONG;
@@ -451,9 +443,6 @@ malformed:
 	    break;
 	case UTF8_WARN_SURROGATE:
 	    Perl_sv_catpvf(aTHX_ sv, "(UTF-16 surrogate 0x%04"UVxf")", uv);
-	    break;
-	case UTF8_WARN_BOM:
-	    Perl_sv_catpvf(aTHX_ sv, "(byte order mark 0x%04"UVxf")", uv);
 	    break;
 	case UTF8_WARN_LONG:
 	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d, after start byte 0x%02"UVxf")",
