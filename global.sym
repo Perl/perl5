@@ -140,6 +140,7 @@ op_seqmax
 opargs
 origalen
 origenviron
+osname
 padix
 patleave
 pow_amg
@@ -158,6 +159,7 @@ regendp
 regeol
 regfold
 reginput
+regkind
 reglastparen
 regmyendp
 regmyp_size
@@ -301,6 +303,7 @@ checkcomma
 chsize
 ck_aelem
 ck_concat
+ck_delete
 ck_eof
 ck_eval
 ck_exec
@@ -317,7 +320,9 @@ ck_listiob
 ck_match
 ck_null
 ck_repeat
+ck_require
 ck_retarget
+ck_rfun
 ck_rvconst
 ck_select
 ck_shift
@@ -325,6 +330,7 @@ ck_sort
 ck_spair
 ck_split
 ck_subr
+ck_svconst
 ck_trunc
 convert
 cpytill
@@ -569,6 +575,7 @@ pmtrans
 pop_return
 pop_scope
 pp_aassign
+pp_abs
 pp_accept
 pp_add
 pp_aelem
@@ -576,6 +583,7 @@ pp_aelemfast
 pp_alarm
 pp_and
 pp_andassign
+pp_anoncode
 pp_anonhash
 pp_anonlist
 pp_aslice
@@ -586,6 +594,7 @@ pp_bind
 pp_binmode
 pp_bit_and
 pp_bit_or
+pp_bit_xor
 pp_bless
 pp_caller
 pp_chdir
@@ -593,6 +602,7 @@ pp_chmod
 pp_chomp
 pp_chop
 pp_chown
+pp_chr
 pp_chroot
 pp_close
 pp_closedir
@@ -670,6 +680,7 @@ pp_fttext
 pp_fttty
 pp_ftzero
 pp_ge
+pp_gelem
 pp_getc
 pp_getlogin
 pp_getpeername
@@ -707,6 +718,19 @@ pp_gvsv
 pp_helem
 pp_hex
 pp_hslice
+pp_i_add
+pp_i_divide
+pp_i_eq
+pp_i_ge
+pp_i_gt
+pp_i_le
+pp_i_lt
+pp_i_modulo
+pp_i_multiply
+pp_i_ncmp
+pp_i_ne
+pp_i_negate
+pp_i_subtract
 pp_index
 pp_indread
 pp_int
@@ -738,6 +762,8 @@ pp_lslice
 pp_lstat
 pp_lt
 pp_map
+pp_mapstart
+pp_mapwhile
 pp_match
 pp_method
 pp_mkdir
@@ -762,6 +788,7 @@ pp_or
 pp_orassign
 pp_ord
 pp_pack
+pp_padany
 pp_padav
 pp_padhv
 pp_padsv
@@ -779,6 +806,7 @@ pp_prtf
 pp_push
 pp_pushmark
 pp_pushre
+pp_quotemeta
 pp_rand
 pp_range
 pp_rcatline
@@ -854,6 +882,7 @@ pp_sselect
 pp_sservent
 pp_ssockopt
 pp_stat
+pp_stringify
 pp_stub
 pp_study
 pp_subst
@@ -862,6 +891,7 @@ pp_substr
 pp_subtract
 pp_symlink
 pp_syscall
+pp_sysopen
 pp_sysread
 pp_system
 pp_syswrite
@@ -904,7 +934,7 @@ regnext
 regprop
 repeatcpy
 rninstr
-run
+runops
 same_dirent
 save_I32
 save_aptr
