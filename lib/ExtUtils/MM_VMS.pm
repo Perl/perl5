@@ -15,7 +15,7 @@ require Exporter;
 use VMS::Filespec;
 use File::Basename;
 use File::Spec;
-our($Revision, @ISA, $VERSION);
+our($Revision, @ISA, $VERSION, $Verbose);
 # All on one line so MakeMaker can see it.
 ($VERSION) = ($Revision = '5.56 (27-Apr-1999)') =~ /^([\d.]+)/;
 
@@ -577,7 +577,8 @@ MM_VMS_REVISION = $ExtUtils::MM_VMS::Revision
     }
 
     for my $tmp (qw/ XS MAN1PODS MAN3PODS PM /) {
-	next unless defined $self->{$tmp};
+	# Where is the space coming from? --jhi
+	next unless $self ne " " && defined $self->{$tmp};
 	my(%tmp,$key);
 	for $key (keys %{$self->{$tmp}}) {
 	    $tmp{$self->fixpath($key,0)} = $self->fixpath($self->{$tmp}{$key},0);
