@@ -4526,7 +4526,7 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
     SV* sv;
     if (prog->float_substr && !prog->float_utf8) {
 	prog->float_utf8 = sv = NEWSV(117, 0);
-	SvSetMagicSV(sv, prog->float_substr);
+	SvSetSV(sv, prog->float_substr);
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->float_substr))
 	    SvTAIL_on(sv);
@@ -4535,7 +4535,7 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
     }
     if (prog->anchored_substr && !prog->anchored_utf8) {
 	prog->anchored_utf8 = sv = NEWSV(118, 0);
-	SvSetMagicSV(sv, prog->anchored_substr);
+	SvSetSV(sv, prog->anchored_substr);
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->anchored_substr))
 	    SvTAIL_on(sv);
@@ -4550,7 +4550,7 @@ S_to_byte_substr(pTHX_ register regexp *prog)
     SV* sv;
     if (prog->float_utf8 && !prog->float_substr) {
 	prog->float_substr = sv = NEWSV(117, 0);
-	SvSetMagicSV(sv, prog->float_utf8);
+	SvSetSV(sv, prog->float_utf8);
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->float_utf8))
 		SvTAIL_on(sv);
@@ -4563,7 +4563,7 @@ S_to_byte_substr(pTHX_ register regexp *prog)
     }
     if (prog->anchored_utf8 && !prog->anchored_substr) {
 	prog->anchored_substr = sv = NEWSV(118, 0);
-	SvSetMagicSV(sv, prog->anchored_utf8);
+	SvSetSV(sv, prog->anchored_utf8);
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->anchored_utf8))
 		SvTAIL_on(sv);
