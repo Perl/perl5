@@ -1,6 +1,11 @@
 #!./perl
 
-print "1..47\n";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+print "1..50\n";
 
 eval 'print "ok 1\n";';
 
@@ -247,4 +252,45 @@ print $@;
    $eval = eval 'sub { eval "sub { %S }" }';
    $eval->({});
    print "ok 47\n";
+}
+
+
+my $test = 48;
+require './test.pl';
+$NO_ENDING = 1;
+# [perl #19022] used to end up with shared hash warnings
+# The program should generate no output, so anything we see is on stderr
+my $got = runperl (prog => '$h{a}=1; foreach my $k (keys %h) {eval qq{\$k}}',
+		   stderr => 1);
+
+if ($got eq '') {
+  print "ok $test\n";
+} else {
+  print "not ok $test\n";
+  _diag ("# Got '$got'\n");
+}
+$test++;
+
+# And a buggy way of fixing #19022 made this fail - $k became undef after the
+# eval for a build with copy on write
+{
+  my %h;
+  $h{a}=1;
+  foreach my $k (keys %h) {
+    if (defined $k and $k eq 'a') {
+      print "ok $test\n";
+    } else {
+      print "not $test # got ", _q ($k), "\n";
+    }
+    $test++;
+
+    eval "\$k";
+
+    if (defined $k and $k eq 'a') {
+      print "ok $test\n";
+    } else {
+      print "not $test # got ", _q ($k), "\n";
+    }
+    $test++;
+  }
 }

@@ -610,7 +610,9 @@ Perl_pad_free(pTHX_ PADOFFSET po)
     if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef) {
 	SvPADTMP_off(PL_curpad[po]);
 #ifdef USE_ITHREADS
-	SvREADONLY_off(PL_curpad[po]);	/* could be a freed constant */
+	/* SV could be a shared hash key (eg bugid #19022) */
+	if (!SvFAKE(PL_curpad[po]))
+	    SvREADONLY_off(PL_curpad[po]); /* could be a freed constant */
 #endif
     }
     if ((I32)po < PL_padix)
