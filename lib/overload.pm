@@ -2,7 +2,7 @@ package overload;
 
 our $VERSION = '1.00';
 
-$overload::hint_bits = 0x20000;
+$overload::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
 sub nil {}
 
@@ -108,11 +108,11 @@ sub mycan {				# Real can would leave stubs.
 }
 
 %constants = (
-	      'integer'	  =>  0x1000,
-	      'float'	  =>  0x2000,
-	      'binary'	  =>  0x4000,
-	      'q'	  =>  0x8000,
-	      'qr'	  => 0x10000,
+	      'integer'	  =>  0x1000, # HINT_NEW_INTEGER
+	      'float'	  =>  0x2000, # HINT_NEW_FLOAT
+	      'binary'	  =>  0x4000, # HINT_NEW_BINARY
+	      'q'	  =>  0x8000, # HINT_NEW_STRING
+	      'qr'	  => 0x10000, # HINT_NEW_RE
 	     );
 
 %ops = ( with_assign	  => "+ - * / % ** << >> x .",
