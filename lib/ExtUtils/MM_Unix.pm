@@ -3499,7 +3499,7 @@ WARN_IF_OLD_PACKLIST = $(PERL) -we 'exit unless -f $$ARGV[0];' \\
 -e 'print "Please make sure the two installations are not conflicting\n";'
 
 UNINST=0
-VERBINST=1
+VERBINST=0
 
 MOD_INSTALL = $(PERL) -I$(INST_LIB) -I$(PERL_LIB) -MExtUtils::Install \
 -e "install({@ARGV},'$(VERBINST)',0,'$(UNINST)');"
