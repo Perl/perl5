@@ -106,7 +106,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
-    sv_magic((SV*)gv, (SV*)gv, '*', name, len);
+    sv_magic((SV*)gv, (SV*)gv, '*', Nullch, 0);
     GvSTASH(gv) = (HV*)SvREFCNT_inc(stash);
     GvNAME(gv) = savepvn(name, len);
     GvNAMELEN(gv) = len;

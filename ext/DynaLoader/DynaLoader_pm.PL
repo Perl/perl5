@@ -21,7 +21,7 @@ package DynaLoader;
 #   feast like to keep their secret; for wonder makes the words of
 #   praise louder.'
 
-#   (Quote from Tolkien sugested by Anno Siegel.)
+#   (Quote from Tolkien suggested by Anno Siegel.)
 #
 # See pod text at end of file for documentation.
 # See also ext/DynaLoader/README in source tree for other information.
@@ -170,8 +170,8 @@ sub bootstrap {
 
     print STDERR "DynaLoader::bootstrap for $module ",
 		($Is_MacOS
-                      ? "(auto/$modpname/$modfname.$dl_dlext)\n" :
-		 	"(:auto:$modpname:$modfname.$dl_dlext)\n")
+		       ? "(:auto:$modpname:$modfname.$dl_dlext)\n" :
+		       "(auto/$modpname/$modfname.$dl_dlext)\n")
 	if $dl_debug;
 
     foreach (@INC) {

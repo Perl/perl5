@@ -4379,9 +4379,18 @@ L</chomp>, and L</join>.)
 
 =item sprintf FORMAT, LIST
 
-Returns a string formatted by the usual C<printf> conventions of the
-C library function C<sprintf>.  See L<sprintf(3)> or L<printf(3)>
-on your system for an explanation of the general principles.
+Returns a string formatted by the usual C<printf> conventions of the C
+library function C<sprintf>.  See below for more details
+and see L<sprintf(3)> or L<printf(3)> on your system for an explanation of
+the general principles.
+
+For example:
+
+        # Format number with up to 8 leading zeroes
+        $result = sprintf("%08d", $number);
+
+        # Round number to 3 digits after decimal point
+        $rounded = sprintf("%.3f", $number);
 
 Perl does its own C<sprintf> formatting--it emulates the C
 function C<sprintf>, but it doesn't use it (except for floating-point
