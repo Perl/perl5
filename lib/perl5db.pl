@@ -827,7 +827,10 @@ EOP
 			    local $frame = 0;
 			    local $doret = -2;
 			    # must detect sigpipe failures
-			    eval { &main::dumpvar($packname,@vars) };
+                           eval { &main::dumpvar($packname,
+                                                 defined $option{dumpDepth}
+                                                  ? $option{dumpDepth} : -1,
+                                                 @vars) };
 			    if ($@) {
 				die unless $@ =~ /dumpvar print failed/;
 			    } 
