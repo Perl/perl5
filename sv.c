@@ -7149,6 +7149,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
 	    break;
+	case SAVEt_COMPPAD:
+	    av = (AV*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = av_dup(av);
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");
 	}
