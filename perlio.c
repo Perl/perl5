@@ -7,7 +7,6 @@
  *
  */
 
-
 #define VOIDUSED 1
 #ifdef PERL_MICRO
 #   include "uconfig.h"
@@ -90,6 +89,10 @@ PerlIO_init(void)
 
 /* Implement all the PerlIO interface ourselves.
 */
+
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
 
 #undef printf
 void PerlIO_debug(char *fmt,...) __attribute__((format(printf,1,2)));
