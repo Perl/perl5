@@ -28,7 +28,7 @@ $b1 = bless [], "B";
 print expected($b1, "B", "ARRAY"), "ok 2\n";
 $c1 = bless \(map "$_", "test"), "C";
 print expected($c1, "C", "SCALAR"), "ok 3\n";
-$d1 = bless \*test, "D";
+$test = "foo"; $d1 = bless \*test, "D";
 print expected($d1, "D", "GLOB"), "ok 4\n";
 $e1 = bless sub { 1 }, "E";
 print expected($e1, "E", "CODE"), "ok 5\n";
@@ -44,7 +44,7 @@ print expected($a1, "A", "HASH"), "ok 9\n";
 
 # reblessing does modify object
 
-$a2 = bless $a1, "A2";
+my $a2 = bless $a1, "A2";
 print expected($a1, "A2", "HASH"), "ok 10\n";
 
 # local and my
@@ -52,7 +52,7 @@ print expected($a1, "A2", "HASH"), "ok 10\n";
     local $a1 = bless $a1, "A3";	# should rebless outer $a1
     local $b1 = bless [], "B3";
     my $c1 = bless $c1, "C3";		# should rebless outer $c1
-    my $d1 = bless \*test2, "D3";
+    $test2 = ""; my $d1 = bless \*test2, "D3";
     print expected($a1, "A3", "HASH"), "ok 11\n";
     print expected($b1, "B3", "ARRAY"), "ok 12\n";
     print expected($c1, "C3", "SCALAR"), "ok 13\n";
