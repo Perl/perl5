@@ -2,6 +2,7 @@ use strict;
 package Tie::Memoize;
 use Tie::Hash;
 our @ISA = 'Tie::ExtraHash';
+our $VERSION = '1.0';
 
 our $exists_token = \undef;
 
