@@ -2931,6 +2931,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
     PL_expect = XSTATE;
+    PL_cop_seqmax++; /* Purely for B::*'s benefit */
 }
 
 /*
