@@ -122,7 +122,7 @@ sub AUTOLOAD {
     our $AUTOLOAD;
     ($constname = $AUTOLOAD) =~ s/.*:://;
     croak "& not defined" if $constname eq 'constant';
-    my $val = constant($constname, @_ ? $_[0] : 0);
+    my $val = constant($constname);
     if ($! != 0) {
 	croak "Your vendor has not defined Sys::Syslog macro $constname";
     }

@@ -7,7 +7,7 @@
 #endif
 
 static double
-constant_LOG_NO(char *name, int len, int arg)
+constant_LOG_NO(char *name, int len)
 {
     switch (name[6 + 0]) {
     case 'T':
@@ -36,7 +36,7 @@ not_there:
 }
 
 static double
-constant_LOG_N(char *name, int len, int arg)
+constant_LOG_N(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'D':
@@ -64,7 +64,7 @@ constant_LOG_N(char *name, int len, int arg)
 #endif
 	}
     case 'O':
-	return constant_LOG_NO(name, len, arg);
+	return constant_LOG_NO(name, len);
     }
     errno = EINVAL;
     return 0;
@@ -75,7 +75,7 @@ not_there:
 }
 
 static double
-constant_LOG_P(char *name, int len, int arg)
+constant_LOG_P(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'I':
@@ -104,7 +104,7 @@ not_there:
 }
 
 static double
-constant_LOG_AU(char *name, int len, int arg)
+constant_LOG_AU(char *name, int len)
 {
     if (6 + 2 >= len ) {
 	errno = EINVAL;
@@ -137,7 +137,7 @@ not_there:
 }
 
 static double
-constant_LOG_A(char *name, int len, int arg)
+constant_LOG_A(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'L':
@@ -149,7 +149,7 @@ constant_LOG_A(char *name, int len, int arg)
 #endif
 	}
     case 'U':
-	return constant_LOG_AU(name, len, arg);
+	return constant_LOG_AU(name, len);
     }
     errno = EINVAL;
     return 0;
@@ -160,7 +160,7 @@ not_there:
 }
 
 static double
-constant_LOG_CR(char *name, int len, int arg)
+constant_LOG_CR(char *name, int len)
 {
     switch (name[6 + 0]) {
     case 'I':
@@ -189,7 +189,7 @@ not_there:
 }
 
 static double
-constant_LOG_C(char *name, int len, int arg)
+constant_LOG_C(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'O':
@@ -201,7 +201,7 @@ constant_LOG_C(char *name, int len, int arg)
 #endif
 	}
     case 'R':
-	return constant_LOG_CR(name, len, arg);
+	return constant_LOG_CR(name, len);
     }
     errno = EINVAL;
     return 0;
@@ -212,7 +212,7 @@ not_there:
 }
 
 static double
-constant_LOG_D(char *name, int len, int arg)
+constant_LOG_D(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'A':
@@ -241,7 +241,7 @@ not_there:
 }
 
 static double
-constant_LOG_U(char *name, int len, int arg)
+constant_LOG_U(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'S':
@@ -270,7 +270,7 @@ not_there:
 }
 
 static double
-constant_LOG_E(char *name, int len, int arg)
+constant_LOG_E(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'M':
@@ -299,7 +299,7 @@ not_there:
 }
 
 static double
-constant_LOG_F(char *name, int len, int arg)
+constant_LOG_F(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'A':
@@ -328,7 +328,7 @@ not_there:
 }
 
 static double
-constant_LOG_LO(char *name, int len, int arg)
+constant_LOG_LO(char *name, int len)
 {
     if (6 + 3 >= len ) {
 	errno = EINVAL;
@@ -409,7 +409,7 @@ not_there:
 }
 
 static double
-constant_LOG_L(char *name, int len, int arg)
+constant_LOG_L(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'F':
@@ -421,7 +421,7 @@ constant_LOG_L(char *name, int len, int arg)
 #endif
 	}
     case 'O':
-	return constant_LOG_LO(name, len, arg);
+	return constant_LOG_LO(name, len);
     case 'P':
 	if (strEQ(name + 5, "PR")) {	/* LOG_L removed */
 #ifdef LOG_LPR
@@ -440,7 +440,7 @@ not_there:
 }
 
 static double
-constant(char *name, int len, int arg)
+constant(char *name, int len)
 {
     errno = 0;
     if (0 + 4 >= len ) {
@@ -451,23 +451,23 @@ constant(char *name, int len, int arg)
     case 'A':
 	if (!strnEQ(name + 0,"LOG_", 4))
 	    break;
-	return constant_LOG_A(name, len, arg);
+	return constant_LOG_A(name, len);
     case 'C':
 	if (!strnEQ(name + 0,"LOG_", 4))
 	    break;
-	return constant_LOG_C(name, len, arg);
+	return constant_LOG_C(name, len);
     case 'D':
 	if (!strnEQ(name + 0,"LOG_", 4))
 	    break;
-	return constant_LOG_D(name, len, arg);
+	return constant_LOG_D(name, len);
     case 'E':
 	if (!strnEQ(name + 0,"LOG_", 4))
 	    break;
-	return constant_LOG_E(name, len, arg);
+	return constant_LOG_E(name, len);
     case 'F':
 	if (!strnEQ(name + 0,"LOG_", 4))
 	    break;
-	return constant_LOG_F(name, len, arg);
+	return constant_LOG_F(name, len);
     case 'I':
 	if (strEQ(name + 0, "LOG_INFO")) {	/*  removed */
 #ifdef LOG_INFO
@@ -487,7 +487,7 @@ constant(char *name, int len, int arg)
     case 'L':
 	if (!strnEQ(name + 0,"LOG_", 4))
 	    break;
-	return constant_LOG_L(name, len, arg);
+	return constant_LOG_L(name, len);
     case 'M':
 	if (strEQ(name + 0, "LOG_MAIL")) {	/*  removed */
 #ifdef LOG_MAIL
@@ -499,7 +499,7 @@ constant(char *name, int len, int arg)
     case 'N':
 	if (!strnEQ(name + 0,"LOG_", 4))
 	    break;
-	return constant_LOG_N(name, len, arg);
+	return constant_LOG_N(name, len);
     case 'O':
 	if (strEQ(name + 0, "LOG_ODELAY")) {	/*  removed */
 #ifdef LOG_ODELAY
@@ -511,7 +511,7 @@ constant(char *name, int len, int arg)
     case 'P':
 	if (!strnEQ(name + 0,"LOG_", 4))
 	    break;
-	return constant_LOG_P(name, len, arg);
+	return constant_LOG_P(name, len);
     case 'S':
 	if (strEQ(name + 0, "LOG_SYSLOG")) {	/*  removed */
 #ifdef LOG_SYSLOG
@@ -523,7 +523,7 @@ constant(char *name, int len, int arg)
     case 'U':
 	if (!strnEQ(name + 0,"LOG_", 4))
 	    break;
-	return constant_LOG_U(name, len, arg);
+	return constant_LOG_U(name, len);
     case 'W':
 	if (strEQ(name + 0, "LOG_WARNING")) {	/*  removed */
 #ifdef LOG_WARNING
@@ -629,15 +629,14 @@ LOG_UPTO(pri)
 
 
 double
-constant(sv,arg)
+constant(sv)
     PREINIT:
 	STRLEN		len;
     INPUT:
 	SV *		sv
 	char *		s = SvPV(sv, len);
-	int		arg
     CODE:
-	RETVAL = constant(s,len,arg);
+	RETVAL = constant(s,len);
     OUTPUT:
 	RETVAL
 
