@@ -29,10 +29,11 @@ cmdline args in 'standard' way across all clients of OptreeCheck.
 
 =cut
 
-plan tests => 5 + 15 + 16 * $gOpts{selftest};	# pass()s + $#tests
+my $tests = 5 + 15 + 16 * $gOpts{selftest};	# pass()s + $#tests
+plan tests => $tests;
 
 SKIP: {
-    skip "no perlio in this build", 5 + 17 + 14 * $gOpts{selftest}
+    skip "no perlio in this build", $tests
     unless $Config::Config{useperlio};
 
 
