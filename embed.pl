@@ -2222,17 +2222,17 @@ Ap	|void	|newMYSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
 p	|OP *	|my_attrs	|OP *o|OP *attrs
 p	|void	|boot_core_xsutils
 #if defined(USE_ITHREADS)
-Ap	|PERL_CONTEXT*|cx_dup	|PERL_CONTEXT* cx|I32 ix|I32 max
-Ap	|PERL_SI*|si_dup	|PERL_SI* si
-Ap	|ANY*	|ss_dup		|PerlInterpreter* proto_perl
+Ap	|PERL_CONTEXT*|cx_dup	|PERL_CONTEXT* cx|I32 ix|I32 max|clone_params* param
+Ap	|PERL_SI*|si_dup	|PERL_SI* si|clone_params* param
+Ap	|ANY*	|ss_dup		|PerlInterpreter* proto_perl|clone_params* param
 Ap	|void*	|any_dup	|void* v|PerlInterpreter* proto_perl
-Ap	|HE*	|he_dup		|HE* e|bool shared
+Ap	|HE*	|he_dup		|HE* e|bool shared|clone_params* param
 Ap	|REGEXP*|re_dup		|REGEXP* r
 Ap	|PerlIO*|fp_dup		|PerlIO* fp|char type
 Ap	|DIR*	|dirp_dup	|DIR* dp
-Ap	|GP*	|gp_dup		|GP* gp
-Ap	|MAGIC*	|mg_dup		|MAGIC* mg
-Ap	|SV*	|sv_dup		|SV* sstr
+Ap	|GP*	|gp_dup		|GP* gp|clone_params* param
+Ap	|MAGIC*	|mg_dup		|MAGIC* mg|clone_params* param
+Ap	|SV*	|sv_dup		|SV* sstr|clone_params* param
 #if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_dup	|struct interp_intern* src \
 				|struct interp_intern* dst

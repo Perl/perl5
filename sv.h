@@ -1216,3 +1216,7 @@ Returns a pointer to the character buffer.
 #define CLONEf_COPY_STACKS 1
 #define CLONEf_KEEP_PTR_TABLE 2
 
+typedef struct {
+  AV* stashes;
+  UV  flags;
+} clone_params;
