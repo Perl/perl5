@@ -71,7 +71,9 @@ release) see two warnings like this
         return HUGE_VAL;
     -----------^
 
-    cc: Warning: POSIX.xs, line 1304: In this statement, floating-point overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
+and when compiling the POSIX extension
+
+    cc: Warning: const-c.inc, line 2007: In this statement, floating-point overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
                 return HUGE_VAL;
     -------------------^
 
