@@ -972,7 +972,7 @@ my_tmpfile(void)
 /*}}}*/
 
 /* default piping mailbox size */
-#define PERL_BUFSIZ        256
+#define PERL_BUFSIZ        512
 
 
 static void
