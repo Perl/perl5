@@ -1696,7 +1696,21 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    if (!sv)
 		s = "NULLREF";
 	    else {
+		MAGIC *mg;
+		
 		switch (SvTYPE(sv)) {
+		case SVt_PVMG:
+		    if ( ((SvFLAGS(sv) &
+			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG)) 
+			  == (SVs_OBJECT|SVs_RMG))
+			 && strEQ(s=HvNAME(SvSTASH(sv)), "Regexp")
+			 && (mg = mg_find(sv, 'r'))) {
+			regexp *re = (regexp *)mg->mg_obj;
+
+			*lp = re->prelen;
+			return re->precomp;
+		    }
+					/* Fall through */
 		case SVt_NULL:
 		case SVt_IV:
 		case SVt_NV:
@@ -1704,8 +1718,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		case SVt_PV:
 		case SVt_PVIV:
 		case SVt_PVNV:
-		case SVt_PVBM:
-		case SVt_PVMG:	s = "SCALAR";			break;
+		case SVt_PVBM:	s = "SCALAR";			break;
 		case SVt_PVLV:	s = "LVALUE";			break;
 		case SVt_PVAV:	s = "ARRAY";			break;
 		case SVt_PVHV:	s = "HASH";			break;
