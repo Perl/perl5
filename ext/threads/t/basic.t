@@ -11,6 +11,16 @@
 #########################
 
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require Config; import Config;
+    unless ($Config{'useithreads'}) {
+	print "1..0 # Skip: no useithreads\n";
+ 	exit 0;	
+    }
+}
+
 use ExtUtils::testlib;
 use strict;
 BEGIN { print "1..12\n" };
