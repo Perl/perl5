@@ -441,44 +441,101 @@ sub star2 (**&) { &{$_[2]} }
 sub BAR { "quux" }
 sub Bar::BAZ { "quuz" }
 my $star = 'FOO';
-star FOO, sub { print "ok $i\n" if $_[0] eq 'FOO' }; $i++;
-star(FOO, sub { print "ok $i\n" if $_[0] eq 'FOO' }); $i++;
-star "FOO", sub { print "ok $i\n" if $_[0] eq 'FOO' }; $i++;
-star("FOO", sub { print "ok $i\n" if $_[0] eq 'FOO' }); $i++;
-star $star, sub { print "ok $i\n" if $_[0] eq 'FOO' }; $i++;
-star($star, sub { print "ok $i\n" if $_[0] eq 'FOO' }); $i++;
-star *FOO, sub { print "ok $i\n" if $_[0] eq \*FOO }; $i++;
-star(*FOO, sub { print "ok $i\n" if $_[0] eq \*FOO }); $i++;
-star \*FOO, sub { print "ok $i\n" if $_[0] eq \*FOO }; $i++;
-star(\*FOO, sub { print "ok $i\n" if $_[0] eq \*FOO }); $i++;
-star2 FOO, BAR, sub { print "ok $i\n"
-			if $_[0] eq 'FOO' and $_[1] eq 'BAR' }; $i++;
-star2(Bar::BAZ, FOO, sub { print "ok $i\n"
-			if $_[0] eq 'Bar::BAZ' and $_[1] eq 'FOO' }); $i++;
-star2 BAR(), FOO, sub { print "ok $i\n"
-			if $_[0] eq 'quux' and $_[1] eq 'FOO' }; $i++;
-star2(FOO, BAR(), sub { print "ok $i\n"
-			if $_[0] eq 'FOO' and $_[1] eq 'quux' }); $i++;
-star2 "FOO", "BAR", sub { print "ok $i\n"
-			if $_[0] eq 'FOO' and $_[1] eq 'BAR' }; $i++;
-star2("FOO", "BAR", sub { print "ok $i\n"
-			if $_[0] eq 'FOO' and $_[1] eq 'BAR' }); $i++;
-star2 $star, $star, sub { print "ok $i\n"
-			if $_[0] eq 'FOO' and $_[1] eq 'FOO' }; $i++;
-star2($star, $star, sub { print "ok $i\n"
-			if $_[0] eq 'FOO' and $_[1] eq 'FOO' }); $i++;
-star2 *FOO, *BAR, sub { print "ok $i\n"
-			if $_[0] eq \*FOO and $_[1] eq \*BAR }; $i++;
-star2(*FOO, *BAR, sub { print "ok $i\n"
-			if $_[0] eq \*FOO and $_[1] eq \*BAR }); $i++;
-star2 \*FOO, \*BAR, sub { no strict 'refs'; print "ok $i\n"
-			if $_[0] eq \*{'FOO'} and $_[1] eq \*{'BAR'} }; $i++;
-star2(\*FOO, \*BAR, sub { no strict 'refs'; print "ok $i\n"
-			if $_[0] eq \*{'FOO'} and $_[1] eq \*{'BAR'} }); $i++;
+star FOO, sub {
+    print "not " unless $_[0] eq 'FOO';
+    print "ok $i - star FOO\n";
+}; $i++;
+star(FOO, sub {
+	print "not " unless $_[0] eq 'FOO';
+	print "ok $i - star(FOO)\n";
+    }); $i++;
+star "FOO", sub {
+    print "not " unless $_[0] eq 'FOO';
+    print qq/ok $i - star "FOO"\n/;
+}; $i++;
+star("FOO", sub {
+	print "not " unless $_[0] eq 'FOO';
+	print qq/ok $i - star("FOO")\n/;
+    }); $i++;
+star $star, sub {
+    print "not " unless $_[0] eq 'FOO';
+    print "ok $i - star \$star\n";
+}; $i++;
+star($star, sub {
+	print "not " unless $_[0] eq 'FOO';
+	print "ok $i - star(\$star)\n";
+    }); $i++;
+star *FOO, sub {
+    print "not " unless $_[0] eq \*FOO;
+    print "ok $i - star *FOO\n";
+}; $i++;
+star(*FOO, sub {
+	print "not " unless $_[0] eq \*FOO;
+	print "ok $i - star(*FOO)\n";
+    }); $i++;
+star \*FOO, sub {
+    print "not " unless $_[0] eq \*FOO;
+    print "ok $i - star \\*FOO\n";
+}; $i++;
+star(\*FOO, sub {
+	print "not " unless $_[0] eq \*FOO;
+	print "ok $i - star(\\*FOO)\n";
+    }); $i++;
+star2 FOO, BAR, sub {
+    print "not " unless $_[0] eq 'FOO' and $_[1] eq 'BAR';
+    print "ok $i - star2 FOO, BAR\n";
+}; $i++;
+star2(Bar::BAZ, FOO, sub {
+	print "not " unless $_[0] eq 'Bar::BAZ' and $_[1] eq 'FOO';
+	print "ok $i - star2(Bar::BAZ, FOO)\n"
+    }); $i++;
+star2 BAR(), FOO, sub {
+    print "not " unless $_[0] eq 'quux' and $_[1] eq 'FOO';
+    print "ok $i - star2 BAR(), FOO\n"
+}; $i++;
+star2(FOO, BAR(), sub {
+	print "not " unless $_[0] eq 'FOO' and $_[1] eq 'quux';
+	print "ok $i - star2(FOO, BAR())\n";
+    }); $i++;
+star2 "FOO", "BAR", sub {
+    print "not " unless $_[0] eq 'FOO' and $_[1] eq 'BAR';
+    print qq/ok $i - star2 "FOO", "BAR"\n/;
+}; $i++;
+star2("FOO", "BAR", sub {
+	print "not " unless $_[0] eq 'FOO' and $_[1] eq 'BAR';
+	print qq/ok $i - star2("FOO", "BAR")\n/;
+    }); $i++;
+star2 $star, $star, sub {
+    print "not " unless $_[0] eq 'FOO' and $_[1] eq 'FOO';
+    print "ok $i - star2 \$star, \$star\n";
+}; $i++;
+star2($star, $star, sub {
+	print "not " unless $_[0] eq 'FOO' and $_[1] eq 'FOO';
+	print "ok $i - star2(\$star, \$star)\n";
+    }); $i++;
+star2 *FOO, *BAR, sub {
+    print "not " unless $_[0] eq \*FOO and $_[1] eq \*BAR;
+    print "ok $i - star2 *FOO, *BAR\n";
+}; $i++;
+star2(*FOO, *BAR, sub {
+	print "not " unless $_[0] eq \*FOO and $_[1] eq \*BAR;
+	print "ok $i - star2(*FOO, *BAR)\n";
+    }); $i++;
+star2 \*FOO, \*BAR, sub {
+    no strict 'refs';
+    print "not " unless $_[0] eq \*{'FOO'} and $_[1] eq \*{'BAR'};
+    print "ok $i - star2 \*FOO, \*BAR\n";
+}; $i++;
+star2(\*FOO, \*BAR, sub {
+	no strict 'refs';
+	print "not " unless $_[0] eq \*{'FOO'} and $_[1] eq \*{'BAR'};
+	print "ok $i - star2(\*FOO, \*BAR)\n";
+    }); $i++;
 
 # test scalarref prototype
 sub sreftest (\$$) {
-    print "ok $_[1]\n" if ref $_[0];
+    print "not " unless ref $_[0];
+    print "ok $_[1] - sreftest\n";
 }
 {
     no strict 'vars';
