@@ -2262,6 +2262,9 @@ PP(pp_require)
 #ifdef DOSISH
       || (name[0] && name[1] == ':')
 #endif
+#ifdef WIN32
+      || (name[0] == '\\' && name[1] == '\\')	/* UNC path */
+#endif
 #ifdef VMS
 	|| (strchr(name,':')  || ((*name == '[' || *name == '<') &&
 	    (isALNUM(name[1]) || strchr("$-_]>",name[1]))))
