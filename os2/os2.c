@@ -434,7 +434,7 @@ char *inicmd;
 	int trueflag = flag;
 	int rc, pass = 1;
 	char *tmps;
-	char buf[256], *s = 0;
+	char buf[256], *s = 0, scrbuf[280];
 	char *args[4];
 	static char * fargs[4] 
 	    = { "/bin/sh", "-c", "\"$@\"", "spawn-via-shell", };
@@ -546,6 +546,16 @@ char *inicmd;
 		/* Try adding script extensions to the file name, and
 		   search on PATH. */
 		char *scr = find_script(PL_Argv[0], TRUE, NULL, 0);
+		int l = strlen(scr);
+		
+		if (l >= sizeof scrbuf) {
+		   Safefree(scr);
+		 longbuf:
+		   croak("Size of scriptname too big: %d", l);
+		}
+		strcpy(scrbuf, scr);
+		Safefree(scr);
+		scr = scrbuf;
 
 		if (scr) {
 		    FILE *file = fopen(scr, "r");
@@ -555,7 +565,6 @@ char *inicmd;
 		    if (!file)
 			goto panic_file;
 		    if (!fgets(buf, sizeof buf, file)) { /* Empty... */
-			int l = strlen(scr);
 
 			buf[0] = 0;
 			fclose(file);
@@ -564,18 +573,18 @@ char *inicmd;
 			   documentation, DosQueryAppType sometimes (?)
 			   does not append ".exe", so we could have
 			   reached this place). */
-			if (l + 5 < 512) { /* size of buffer in find_script */
-			    strcpy(scr + l, ".exe");
-			    if (PerlLIO_stat(scr,&PL_statbuf) >= 0
+			if (l + 5 < sizeof scrbuf) {
+			    strcpy(scrbuf + l, ".exe");
+			    if (PerlLIO_stat(scrbuf,&PL_statbuf) >= 0
 				&& !S_ISDIR(PL_statbuf.st_mode)) {
 				/* Found */
 				tmps = scr;
 				pass++;
 				goto reread;
-			    } else {
-				scr[l] = 0;
-			    }
-			}
+			    } else
+				scrbuf[l] = 0;
+			} else
+			    goto longbuf;
 		    }
 		    if (fclose(file) != 0) { /* Failure */
 		      panic_file:
