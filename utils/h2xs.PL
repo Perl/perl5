@@ -39,19 +39,19 @@ h2xs - convert .h C header files to Perl extensions
 
 =head1 SYNOPSIS
 
-B<h2xs> [B<-AOPXcdf>] [B<-v> version] [B<-n> module_name] [B<-p> prefix] [B<-s> sub] [headerfile [extra_libraries]]
+B<h2xs> [B<-AOPXcdf>] [B<-v> version] [B<-n> module_name] [B<-p> prefix] [B<-s> sub] [headerfile ... [extra_libraries]]
 
 B<h2xs> B<-h>
 
 =head1 DESCRIPTION
 
-I<h2xs> builds a Perl extension from any C header file.  The extension will
-include functions which can be used to retrieve the value of any #define
-statement which was in the C header.
+I<h2xs> builds a Perl extension from C header files.  The extension
+will include functions which can be used to retrieve the value of any
+#define statement which was in the C header files.
 
 The I<module_name> will be used for the name of the extension.  If
-module_name is not supplied then the name of the header file will be used,
-with the first character capitalized.
+module_name is not supplied then the name of the first header file
+will be used, with the first character capitalized.
 
 If the extension might need extra libraries, they should be included
 here.  The extension Makefile.PL will take care of checking whether
@@ -249,15 +249,21 @@ if( $opt_v ){
 $opt_c = 1 if $opt_A;
 %const_xsub = map { $_,1 } split(/,+/, $opt_s) if $opt_s;
 
-$path_h    = shift;
-$extralibs = "@ARGV";
+while (my $arg = shift) {
+    if ($arg =~ /^-l/i) {
+        $extralibs = "$arg @ARGV";
+        last;
+    }
+    push(@path_h, $arg);
+}
 
 usage "Must supply header file or module name\n"
-	unless ($path_h or $opt_n);
+        unless (@path_h or $opt_n);
 
 
-if( $path_h ){
-    $name = $path_h;
+if( @path_h ){
+    foreach my $path_h (@path_h) {
+        $name ||= $path_h;
     if( $path_h =~ s#::#/#g && $opt_n ){
 	warn "Nesting of headerfile ignored with -n\n";
     }
@@ -288,7 +294,7 @@ if( $path_h ){
       die "Can't find $path_h\n" if ( ! $opt_f && ! -f $path_h );
       # Scan the header file (we should deal with nested header files)
       # Record the names of simple #define constants into const_names
-      # Function prototypes are not (currently) processed.
+            # Function prototypes are processed below.
       open(CH, "<$path_h") || die "Can't open $path_h: $!\n";
       while (<CH>) {
 	if (/^#[ \t]*define\s+([\$\w]+)\b\s*[^("]/) {
@@ -307,8 +313,9 @@ if( $path_h ){
 	  }
       }
       close(CH);
-      @const_names = sort keys %const_names;
     }
+    }
+    @const_names = sort keys %const_names;
 }
 
 
@@ -365,7 +372,8 @@ if( ! $opt_X ){  # use XS, unless it was disabled
     get_typemap();
     my $c;
     my $filter;
-    my $filename = $path_h;
+        my @fdecls;
+        foreach my $filename (@path_h) {
     my $addflags = $opt_F || '';
     if ($fullpath =~ /,/) {
       $filename = $`;
@@ -377,7 +385,9 @@ if( ! $opt_X ){  # use XS, unless it was disabled
     $c->set('includeDirs' => ["$Config::Config{archlib}/CORE"]);
     
     $fdecls_parsed = $c->get('parsed_fdecls');
-    $fdecls = $c->get('fdecls');
+            push(@fdecls, @{$c->get('fdecls')});
+        }
+        $fdecls = [ @fdecls ];
   }
 }
 
@@ -589,14 +599,14 @@ extern "C" {
 #endif
 
 END
-if( $path_h ){
+if( @path_h ){
+    foreach my $path_h (@path_h) {
 	my($h) = $path_h;
 	$h =~ s#^/usr/include/##;
 	if ($^O eq 'VMS') { $h =~ s#.*vms\]#sys/# or $h =~ s#.*[:>\]]##; }
-print XS <<"END";
-#include <$h>
-
-END
+        print XS qq{#include <$h>\n};
+    }
+    print XS "\n";
 }
 
 if( ! $opt_c ){
