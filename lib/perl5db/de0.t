@@ -2,10 +2,7 @@
 
 BEGIN {
     require Config; import Config;
-    if (!$Config{'d_fork'}
-       # open2/3 supported on win32 (but not Borland due to CRT bugs)
-       && (($^O ne 'MSWin32' && $^O ne 'NetWare') || $Config{'cc'} =~ /^bcc/i))
-    {
+    unless ($Config{d_fork}) {
 	print "1..0\n";
 	exit 0;
     }
