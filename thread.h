@@ -126,8 +126,6 @@ struct thread {
     /* XXX What about magic variables such as $/, $? and so on? */
     HV *	Tdefstash;
     HV *	Tcurstash;
-    AV *	Tpad;
-    AV *	Tpadname;
 
     SV **	Ttmps_stack;
     I32		Ttmps_ix;
@@ -263,8 +261,6 @@ typedef struct condpair {
 #define Xpv		(thr->TXpv)
 #define defstash	(thr->Tdefstash)
 #define curstash	(thr->Tcurstash)
-#define pad		(thr->Tpad)
-#define padname		(thr->Tpadname)
 
 #define tmps_stack	(thr->Ttmps_stack)
 #define tmps_ix		(thr->Ttmps_ix)
