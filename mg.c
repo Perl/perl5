@@ -531,6 +531,49 @@ MAGIC* mg;
     return 0;
 }
 
+#ifdef HAS_SIGACTION
+/* set up reliable signal() clone */
+
+typedef void (*Sigfunc) _((int));
+
+static
+Sigfunc rsignal(signo,handler)
+int signo;
+Sigfunc handler;
+{
+    struct sigaction act,oact;
+    
+    act.sa_handler = handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+#ifdef SIGALRM    
+    if (signo == SIGALRM) {
+#else
+    if (0) {
+#endif        
+#ifdef SA_INTERRUPT
+	act.sa_flags |= SA_INTERRUPT;	/* SunOS */
+#endif	
+    } else {
+#ifdef SA_RESTART
+	act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
+    }
+    if (sigaction(signo, &act, &oact) < 0)
+    	return(SIG_ERR);
+    else
+    	return(oact.sa_handler);
+}
+
+#else
+
+/* ah well, so much for reliability */
+
+#define rsignal(x,y) signal(x,y)
+
+#endif
+
+
 int
 magic_setsig(sv,mg)
 SV* sv;
@@ -566,7 +609,7 @@ MAGIC* mg;
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
 	if (i)
-	    (void)signal(i,sighandler);
+	    (void)rsignal(i,sighandler);
 	else
 	    *svp = SvREFCNT_inc(sv);
 	return 0;
@@ -574,13 +617,13 @@ MAGIC* mg;
     s = SvPV_force(sv,na);
     if (strEQ(s,"IGNORE")) {
 	if (i)
-	    (void)signal(i,SIG_IGN);
+	    (void)rsignal(i,SIG_IGN);
 	else
 	    *svp = 0;
     }
     else if (strEQ(s,"DEFAULT") || !*s) {
 	if (i)
-	    (void)signal(i,SIG_DFL);
+	    (void)rsignal(i,SIG_DFL);
 	else
 	    *svp = 0;
     }
@@ -590,7 +633,7 @@ MAGIC* mg;
 	    sv_setpv(sv,tokenbuf);
 	}
 	if (i)
-	    (void)signal(i,sighandler);
+	    (void)rsignal(i,sighandler);
 	else
 	    *svp = SvREFCNT_inc(sv);
     }
