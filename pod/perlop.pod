@@ -1667,9 +1667,10 @@ Bitstrings of any size may be manipulated by the bitwise operators
 (C<~ | & ^>).
 
 If the operands to a binary bitwise op are strings of different sizes,
-B<or> and B<xor> ops will act as if the shorter operand had additional
-zero bits on the right, while the B<and> op will act as if the longer
-operand were truncated to the length of the shorter.
+B<|> and B<^> ops will act as if the shorter operand had additional
+zero bits on the right, while the B<&> op will act as if the longer
+operand were truncated to the length of the shorter.  Note that the
+granularity for such extension or truncation is one or more I<bytes>.
 
     # ASCII-based examples 
     print "j p \n" ^ " a h";        	# prints "JAPH\n"
@@ -1689,6 +1690,9 @@ operation you intend by using C<""> or C<0+>, as in the examples below.
 
     $baz = 0+$foo & 0+$bar;	# both ops explicitly numeric
     $biz = "$foo" ^ "$bar";	# both ops explicitly stringy
+
+See L<perlfunc/vec> for information on how to manipulate individual bits
+in a bit vector.
 
 =head2 Integer Arithmetic
 
