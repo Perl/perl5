@@ -649,7 +649,7 @@ pack_sockaddr_un(pathname)
 void
 unpack_sockaddr_un(sun_sv)
 	SV *	sun_sv
-	PPCODE:
+	CODE:
 	{
 #ifdef I_SYS_UN
 	STRLEN sockaddrlen;
