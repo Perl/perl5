@@ -36,12 +36,14 @@ print OUT <<'!NO!SUBS!';
 
 use Config;
 use File::Path qw(mkpath);
+use Getopt::Std;
+
+getopts('d:rlh');
+
 
 my $Exit = 0;
 
-my $Dest_dir = (@ARGV && $ARGV[0] =~ s/^-d//)
-		    ? shift || shift
-		    : $Config{installsitearch};
+my $Dest_dir = $opt_d || $Config{installsitearch};
 die "Destination directory $Dest_dir doesn't exist or isn't a directory\n"
     unless -d $Dest_dir;
 
@@ -58,10 +60,18 @@ $inif = 0;
 
 @ARGV = ('-') unless @ARGV;
 
-foreach $file (@ARGV) {
+while (defined ($file = next_file())) {
+    if (-l $file and -d $file) {
+        link_if_possible($file) if ($opt_l);
+        next;
+    }
+
     # Recover from header files with unbalanced cpp directives
     $t = '';
     $tab = 0;
+
+    # $eval_index goes into ``#line'' directives, to help locate syntax errors:
+    $eval_index = 1;
 
     if ($file eq '-') {
 	open(IN, "-");
@@ -115,8 +125,14 @@ foreach $file (@ARGV) {
 		    $new =~ s/(["\\])/\\$1/g;
 		    if ($t ne '') {
 			$new =~ s/(['\\])/\\$1/g;
-			print OUT $t,
-                        "eval 'sub $name $proto\{\n$t    ${args}eval \"$new\";\n$t}' unless defined(\&$name);\n";
+			if ($opt_h) {
+			    print OUT $t,
+                            "eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name $proto\{\n$t    ${args}eval \"$new\";\n$t}' unless defined(\&$name);\n";
+                            $eval_index++;
+			} else {
+			    print OUT $t,
+                            "eval 'sub $name $proto\{\n$t    ${args}eval \"$new\";\n$t}' unless defined(\&$name);\n";
+			}
 		    }
 		    else {
                       print OUT "unless defined(\&$name) {\nsub $name $proto\{\n    ${args}eval \"$new\";\n}\n}\n";
@@ -129,7 +145,12 @@ foreach $file (@ARGV) {
 		    $new = 1 if $new eq '';
 		    if ($t ne '') {
 			$new =~ s/(['\\])/\\$1/g;
-                      print OUT $t,"eval 'sub $name () {",$new,";}' unless defined(\&$name);\n";
+			if ($opt_h) {
+			    print OUT $t,"eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name () {",$new,";}' unless defined(\&$name);\n";
+			    $eval_index++;
+			} else {
+			    print OUT $t,"eval 'sub $name () {",$new,";}' unless defined(\&$name);\n";
+			}
 		    }
 		    else {
                       print OUT $t,"unless(defined(\&$name)) {\nsub $name () {",$new,";}\n}\n";
@@ -191,10 +212,12 @@ exit $Exit;
 
 sub expr {
     while ($_ ne '') {
+	s/^\&\&// && do { $new .= "&&"; next;}; # handle && operator
 	s/^\&//;		# hack for things that take the address of
 	s/^(\s+)//		&& do {$new .= ' '; next;};
-	s/^(0x[0-9a-fA-F]+)//	&& do {$new .= $1; next;};
-	s/^(\d+)\s*[LlUu]*//	&& do {$new .= $1; next;};
+	s/^(0X[0-9A-F]+)[UL]*//i	&& do {$new .= lc($1); next;};
+	s/^(-?\d+\.\d+E[-+]\d+)F?//i	&& do {$new .= $1; next;};
+	s/^(\d+)\s*[LU]*//i	&& do {$new .= $1; next;};
 	s/^("(\\"|[^"])*")//	&& do {$new .= $1; next;};
 	s/^'((\\"|[^"])*)'//	&& do {
 	    if ($curargs{$1}) {
@@ -230,6 +253,19 @@ sub expr {
             substr($_, 0, $index - 1) =~ s/\*//g;
             next;
         };
+	# Eliminate typedefs
+	/\(([\w\s]+)[\*\s]*\)\s*[\w\(]/ && do {
+	    foreach (split /\s+/, $1) {  # Make sure all the words are types,
+		last unless ($isatype{$_} or $_ eq 'struct');
+	    }
+	    s/\([\w\s]+[\*\s]*\)// && next;      # then eliminate them.
+	};
+	# struct/union member:
+	s/^([_A-Z]\w*((\.|->)[_A-Z]\w*)+)//i && do {
+	    $id = $1;
+	    $id =~ s/(\.|(->))([^\.-]*)/->\{$3\}/g;
+	    $new .= ' ($' . $id . ')';
+	};
 	s/^([_a-zA-Z]\w*)//	&& do {
 	    $id = $1;
 	    if ($id eq 'struct') {
@@ -237,9 +273,8 @@ sub expr {
 		$id .= ' ' . $1;
 		$isatype{$id} = 1;
 	    }
-	    elsif ($id eq 'unsigned' || $id eq 'long') {
-		s/^\s+(\w+)//;
-		$id .= ' ' . $1;
+	    elsif ($id =~ /^((un)?signed)|(long)|(short)$/) {
+		while (s/^\s+(\w+)//) { $id .= ' ' . $1; }
 		$isatype{$id} = 1;
 	    }
 	    if ($curargs{$id}) {
@@ -280,6 +315,91 @@ sub expr {
 	s/^(.)// && do { if ($1 ne '#') { $new .= $1; } next;};
     }
 }
+
+
+# Handle recursive subdirectories without getting a grotesquely big stack.
+# Could this be implemented using File::Find?
+sub next_file
+{
+    my $file;
+
+    while (@ARGV) {
+        $file = shift @ARGV;
+
+        if ($file eq '-' or -f $file or -l $file) {
+            return $file;
+        } elsif (-d $file) {
+            if ($opt_r) {
+                expand_glob($file);
+            } else {
+                print STDERR "Skipping directory `$file'\n";
+            }
+        } else {
+            print STDERR "Skipping `$file':  not a file or directory\n";
+        }
+    }
+
+    return undef;
+}
+
+
+# Put all the files in $directory into @ARGV for processing.
+sub expand_glob
+{
+    my ($directory)  = @_;
+
+    $directory =~ s:/$::;
+
+    opendir DIR, $directory;
+        foreach (readdir DIR) {
+            next if ($_ eq '.' or $_ eq '..');
+
+            # expand_glob() is going to be called until $ARGV[0] isn't a
+            # directory; so push directories, and unshift everything else.
+            if (-d "$directory/$_") { push    @ARGV, "$directory/$_" }
+            else                    { unshift @ARGV, "$directory/$_" }
+        }
+    closedir DIR;
+}
+
+
+# Given $file, a symbolic link to a directory in the C include directory,
+# make an equivalent symbolic link in $Dest_dir, if we can figure out how.
+# Otherwise, just duplicate the file or directory.
+sub link_if_possible
+{
+    my ($dirlink)  = @_;
+    my $target  = eval 'readlink($dirlink)';
+
+    if ($target =~ m:^\.\./: or $target =~ m:^/:) {
+        # The target of a parent or absolute link could leave the $Dest_dir
+        # hierarchy, so let's put all of the contents of $dirlink (actually,
+        # the contents of $target) into @ARGV; as a side effect down the
+        # line, $dirlink will get created as an _actual_ directory.
+        expand_glob($dirlink);
+    } else {
+        if (-l "$Dest_dir/$dirlink") {
+            unlink "$Dest_dir/$dirlink" or
+                print STDERR "Could not remove link $Dest_dir/$dirlink:  $!\n";
+        }
+
+        if (eval 'symlink($target, "$Dest_dir/$dirlink")') {
+            print "Linking $target -> $Dest_dir/$dirlink\n";
+
+            # Make sure that the link _links_ to something:
+            if (! -e "$Dest_dir/$target") {
+                mkdir("$Dest_dir/$target", 0755) or
+                    print STDERR "Could not create $Dest_dir/$target/\n";
+            }
+        } else {
+            print STDERR "Could not symlink $target -> $Dest_dir/$dirlink:  $!\n";
+        }
+    }
+}
+
+
+1;
+
 ##############################################################################
 __END__
 
@@ -289,7 +409,7 @@ h2ph - convert .h C header files to .ph Perl header files
 
 =head1 SYNOPSIS
 
-B<h2ph [headerfiles]>
+B<h2ph [-d destination directory] [-r] [-l] [headerfiles]>
 
 =head1 DESCRIPTION
 
@@ -300,11 +420,50 @@ It is most easily run while in /usr/include:
 
 	cd /usr/include; h2ph * sys/*
 
+or
+
+	cd /usr/include; h2ph -r -l .
+
 The output files are placed in the hierarchy rooted at Perl's
 architecture dependent library directory.  You can specify a different
 hierarchy with a B<-d> switch.
 
 If run with no arguments, filters standard input to standard output.
+
+=head1 OPTIONS
+
+=over 4
+
+=item -d destination_dir
+
+Put the resulting B<.ph> files beneath B<destination_dir>, instead of
+beneath the default Perl library location (C<$Config{'installsitsearch'}>).
+
+=item -r
+
+Run recursively; if any of B<headerfiles> are directories, then run I<h2ph>
+on all files in those directories (and their subdirectories, etc.).
+
+=item -l
+
+Symbolic links will be replicated in the destination directory.  If B<-l>
+is not specified, then links are skipped over.
+
+=item -h
+
+Put ``hints'' in the .ph files which will help in locating problems with
+I<h2ph>.  In those cases when you B<require> a B<.ph> file containing syntax
+errors, instead of the cryptic
+
+	[ some error condition ] at (eval mmm) line nnn
+
+you will see the slightly more helpful
+
+	[ some error condition ] at filename.ph line nnn
+
+However, the B<.ph> files almost double in size when built using B<-h>.
+
+=back
 
 =head1 ENVIRONMENT
 
