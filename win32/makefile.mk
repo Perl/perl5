@@ -1119,6 +1119,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.irix	..\pod\perlirix.pod
 	copy ..\README.machten	..\pod\perlmachten.pod
 	copy ..\README.macos	..\pod\perlmacos.pod
+	copy ..\README.macosx	..\pod\perlmacosx.pod
 	copy ..\README.mint	..\pod\perlmint.pod
 	copy ..\README.mpeix	..\pod\perlmpeix.pod
 	copy ..\README.netware	..\pod\perlnetware.pod
