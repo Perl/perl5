@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Nov  8 01:38:53 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Nov  8 18:33:32 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -10096,6 +10096,37 @@ rp="What is the size of a character (in bytes)?"
 charsize="$ans"
 $rm -f try.c try
 
+: check for volatile keyword
+echo " "
+echo 'Checking to see if your C compiler knows about "volatile"...' >&4
+$cat >try.c <<'EOCP'
+int main()
+{
+	typedef struct _goo_struct goo_struct;
+	goo_struct * volatile goo = ((goo_struct *)0);
+	struct _goo_struct {
+		long long_int;
+		int reg_int;
+		char char_var;
+	};
+	typedef unsigned short foo_t;
+	char *volatile foo;
+	volatile int bar;
+	volatile foo_t blech;
+	foo = foo;
+}
+EOCP
+if $cc -c $ccflags try.c >/dev/null 2>&1 ; then
+	val="$define"
+	echo "Yup, it does."
+else
+	val="$undef"
+	echo "Nope, it doesn't."
+fi
+set d_volatile
+eval $setvar
+$rm -f try.*
+
 
 echo " "
 $echo "Choosing the C types to be used for Perl's internal types..." >&4
@@ -10274,66 +10305,67 @@ case "$i64type" in
 	;;
 esac
 
-$echo "Checking whether your NVs can preserve your UVs..." >&4
+$echo "Checking how many bits of your UVs your NVs can preserve..." >&4
+: volatile so that the compiler has to store it out to memory.
+if test X"$d_volatile" = X"$define"; then
+	volatile=volatile
+fi
 $cat <<EOP >try.c
 #include <stdio.h>
+#include <sys/types.h>
+#include <signal.h>
+#ifdef SIGFPE
+$volatile int bletched = 0;
+$signal_t blech(s) int s; { bletched = 1; }
+#endif
 int main() {
-    $uvtype k = ($uvtype)~0, l;
+    $uvtype u = 0;
     $nvtype d;
-    l = k;
-    d = ($nvtype)l;
-    l = ($uvtype)d;
-    if (l == k)
-       printf("preserve\n");
+    int     n = 8 * $uvsize;
+    int     i;
+#ifdef SIGFPE
+    signal(SIGFPE, blech);
+#endif
+
+    for (i = 0; i < n; i++) {
+      u = u << 1 | ($uvtype)1;
+      d = ($nvtype)u;
+      if (($uvtype)d != u)
+        break;
+      if (d <= 0)
+	break;
+      d = ($nvtype)(u - 1);
+      if (($uvtype)d != (u - 1))
+        break;
+#ifdef SIGFPE
+      if (bletched) {
+	break;
+#endif
+      }	
+    }
+    printf("%d\n", ((i == n) ? -n : i), u);
     exit(0);
 }
 EOP
 set try
+
+d_nv_preserves_uv="$undef"
 if eval $compile; then
-	case "`./try$exe_ext`" in
-	preserve) d_nv_preserves_uv="$define" ;;
-	esac
-fi	
-case "$d_nv_preserves_uv" in
-$define) $echo "Yes, they can."  2>&1 ;;
-*)	 $echo "No, they can't." 2>&1
-	 d_nv_preserves_uv="$undef"
-	 ;;
+	d_nv_preserves_uv_bits="`./try$exe_ext`"
+fi
+case "$d_nv_preserves_uv_bits" in
+\-[1-9]*)	
+	d_nv_preserves_uv_bits=`expr 0 - $d_nv_preserves_uv_bits`
+	$echo "Your NVs can preserve all $d_nv_preserves_uv_bits bits of your UVs."  2>&1
+	d_nv_preserves_uv="$define"
+	;;
+[1-9]*)	$echo "Your NVs can preserve only $d_nv_preserves_uv_bits bits of your UVs."  2>&1
+	d_nv_preserves_uv="$undef" ;;
+*)	$echo "Can't figure out how many bits your NVs preserve." 2>&1
+	d_nv_preserves_uv_bits="$undef" ;;
 esac
 
 $rm -f try.* try
-
-case "$d_nv_preserves_uv" in
-"$define") d_nv_preserves_uv_bits=`expr $uvsize \* 8` ;;
-*)	$echo "Checking how many bits of your UVs your NVs can preserve..." >&4
-	$cat <<EOP >try.c
-#include <stdio.h>
-int main() {
-    $uvtype u = 0;
-    int     n = 8 * $uvsize;
-    int     i;
-    for (i = 0; i < n; i++) {
-      u = u << 1 | ($uvtype)1;
-      if (($uvtype)($nvtype)u != u)
-        break;
-    }
-    printf("%d\n", i);
-    exit(0);
-}
-EOP
-	set try
-	if eval $compile; then
-		d_nv_preserves_uv_bits="`./try$exe_ext`"
-	fi
-	case "$d_nv_preserves_uv_bits" in
-	[1-9]*)	$echo "Your NVs can preserve $d_nv_preserves_uv_bits bits of your UVs."  2>&1 ;;
-	*)	$echo "Can't figure out how many bits your NVs preserve." 2>&1
-		d_nv_preserves_uv_bits="$undef"
-		;;
-	esac
-	$rm -f try.* try
-	;;
-esac
 
 
 : check for off64_t
@@ -12077,37 +12109,6 @@ esac
 set d_void_closedir
 eval $setvar
 $rm -f closedir*
-: check for volatile keyword
-echo " "
-echo 'Checking to see if your C compiler knows about "volatile"...' >&4
-$cat >try.c <<'EOCP'
-int main()
-{
-	typedef struct _goo_struct goo_struct;
-	goo_struct * volatile goo = ((goo_struct *)0);
-	struct _goo_struct {
-		long long_int;
-		int reg_int;
-		char char_var;
-	};
-	typedef unsigned short foo_t;
-	char *volatile foo;
-	volatile int bar;
-	volatile foo_t blech;
-	foo = foo;
-}
-EOCP
-if $cc -c $ccflags try.c >/dev/null 2>&1 ; then
-	val="$define"
-	echo "Yup, it does."
-else
-	val="$undef"
-	echo "Nope, it doesn't."
-fi
-set d_volatile
-eval $setvar
-$rm -f try.*
-
 : see if there is a wait4
 set wait4 d_wait4
 eval $inlibc
