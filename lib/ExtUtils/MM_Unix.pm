@@ -1149,6 +1149,7 @@ sub fixin { # stolen from the pink Camel book, more or less
 	my($shb) = "";
 	if ($interpreter) {
 	    print STDOUT "Changing sharpbang in $file to $interpreter" if $Verbose;
+	    # this is probably value-free on DOSISH platforms
 	    if ($does_shbang) {
 		$shb .= "$Config{'sharpbang'}$interpreter";
 		$shb .= ' ' . $arg if defined $arg;
@@ -1157,18 +1158,14 @@ sub fixin { # stolen from the pink Camel book, more or less
 	    $shb .= qq{
 eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
     if 0; # not running under some shell
-};
+} unless $Is_Win32; # this won't work on win32, so don't
 	} else {
 	    warn "Can't find $cmd in PATH, $file unchanged"
 		if $Verbose;
 	    next;
 	}
 
-	unless ( rename($file, "$file.bak") ) {	
-	    warn "Can't modify $file";
-	    next;
-	}
-	unless ( open(FIXOUT,">$file") ) {
+	unless ( open(FIXOUT,">$file.new") ) {
 	    warn "Can't create new $file: $!\n";
 	    next;
 	}
@@ -1182,6 +1179,19 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	print FIXOUT $shb, <FIXIN>;
 	close FIXIN;
 	close FIXOUT;
+	# can't rename open files on some DOSISH platforms
+	unless ( rename($file, "$file.bak") ) {	
+	    warn "Can't rename $file to $file.bak: $!";
+	    next;
+	}
+	unless ( rename("$file.new", $file) ) {	
+	    warn "Can't rename $file.new to $file: $!";
+	    unless ( rename("$file.bak", $file) ) {
+	        warn "Can't rename $file.bak back to $file either: $!";
+		warn "Leaving $file renamed as $file.bak\n";
+	    }
+	    next;
+	}
 	unlink "$file.bak";
     } continue {
 	chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
@@ -1991,9 +2001,12 @@ sub installbin {
     push(@m, qq{
 EXE_FILES = @{$self->{EXE_FILES}}
 
-FIXIN = \$(PERL) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) -MExtUtils::MakeMaker \\
+} . ($Is_Win32
+  ? q{FIXIN = $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) \
+    -e "system qq[pl2bat.bat ].shift"
+} : q{FIXIN = $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::MakeMaker \
     -e "MY->fixin(shift)"
-
+}).qq{
 all :: @to
 	$self->{NOECHO}\$(NOOP)
 
