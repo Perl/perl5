@@ -20,7 +20,7 @@ sub n {
   $_[0]+1;
 }
 
-eval {require Memoize:SDBM_File};
+eval {require Memoize::SDBM_File};
 if ($@) {
   print "1..0\n";
   exit 0;
