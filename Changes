@@ -28,6 +28,149 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21362] By: jhi                                   on 2003/09/24  19:37:08
+        Log: Integrate:
+             [ 21360]
+             Subject: [perl #24032] Perl 5.8.1-RC5 build problems on LynxOS 
+             From: Olli Savia (via RT) <perlbug-followup@perl.org>
+             Date: 24 Sep 2003 15:42:41 -0000
+             Message-ID: <rt-24032-65280.10.6144413163834@rt.perl.org>
+             
+             [ 21361]
+             Even though undefing SPACE and FORMAT should be safe,
+             at this point I'm choosing to be paranoid and using
+             #ifdef __Lynx__.
+     Branch: maint-5.8/perl
+	  !> mg.c perl.h perlio.c pp_sys.c
+____________________________________________________________________________
+[ 21359] By: jhi                                   on 2003/09/24  14:03:52
+        Log: Integrate:
+             [ 21353]
+             Someone actually reads the Makefile.PL messages, it seems.
+             (from Jonathan Leffler)
+             
+             [ 21354]
+             A fix from Graham for
+             [perl #24012] Weird conversion issue with List::Util::sum on Linux/AMD 850MHz
+             (seemingly a NV casting issue)
+             
+             [ 21356]
+             Subject: [DOCPATCH] attributes.pm
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Date: Wed, 24 Sep 2003 11:00:42 +0200
+             Message-Id: <p05111b02bb970d5eec89@[192.168.56.4]>
+             
+             (reformatted a bit)
+     Branch: maint-5.8/perl
+	  !> ext/List/Util/Util.xs ext/Time/HiRes/Makefile.PL
+	  !> lib/attributes.pm
+____________________________________________________________________________
+[ 21358] By: jhi                                   on 2003/09/24  10:20:13
+        Log: perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21357] By: jhi                                   on 2003/09/24  09:26:45
+        Log: perldelta tweaks.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21355] By: jhi                                   on 2003/09/24  08:24:02
+        Log: Subject: [PATCH pod/perldelta.pod] map in void context.
+             From: Abigail <abigail@abigail.nl>
+             Date: Wed, 24 Sep 2003 10:55:45 +0200
+             Message-ID: <20030924085545.GA2374@abigail.nl>
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21352] By: jhi                                   on 2003/09/24  05:00:37
+        Log: Integrate:
+             [ 21342]
+             Minor nit in a debug message of the tokenizer.
+             
+             [ 21343]
+             Subject: [PATCH] Re: OK: 5.8.1 RC5 on SuSE 8.2 32bit AMD (gcc 3.3 prerelease)
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Tue, 23 Sep 2003 09:13:55 -0700
+             Message-ID: <20030923161354.GA2432@efn.org>
+             
+             [ 21344]
+             Subject: Re: NCR MP-RAS perl problems [perl #23791]
+             From: grommel@sears.com
+             Date: Tue, 23 Sep 2003 13:40:33 -0500
+             Message-ID: <OF17BD5036.3CA48F9B-ON86256DAA.00483620-86256DAA.0066A1AA@LocalDomain>
+             
+             [ 21345]
+             v-promises from John Peaock.
+             
+             [ 21346]
+             M::BI news from Tels.
+             
+             [ 21348]
+             Subject: [PATCH] perlvar
+             From: Juerd <juerd@convolution.nl>
+             Date: Sun, 21 Sep 2003 21:40:54 +0200
+             Message-ID: <20030921194054.GD14702@c3.convolution.nl>
+             
+             [ 21349]
+             The FAQ answer about POD comments was incorrect. [perl #23893]
+             (plus a few typos.)
+             
+             [ 21350]
+             Subject: [PATCH 5.8.x] small perldelta patch
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Tue, 23 Sep 2003 14:55:24 -0700
+             Message-ID: <20030923215524.GA3440@efn.org>
+             
+             [ 21351]
+             perliol tweaks.
+     Branch: maint-5.8/perl
+	  !> INSTALL hints/svr4.sh pod/perlfaq7.pod pod/perliol.pod
+	  !> pod/perlpodspec.pod pod/perlvar.pod t/op/stat.t toke.c
+____________________________________________________________________________
+[ 21350] By: jhi                                   on 2003/09/24  04:26:29
+        Log: Subject: [PATCH 5.8.x] small perldelta patch
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Tue, 23 Sep 2003 14:55:24 -0700
+             Message-ID: <20030923215524.GA3440@efn.org>
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21346] By: jhi                                   on 2003/09/23  19:44:52
+        Log: M::BI news from Tels.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21345] By: jhi                                   on 2003/09/23  19:41:21
+        Log: v-promises from John Peaock.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21341] By: jhi                                   on 2003/09/23  12:46:04
+        Log: Integrate:
+             [ 21338]
+             Bump the Encode version to 1.9801 since we are no more identical
+             to the CPAN version.
+             
+             [ 21339]
+             Subject: Re: [PATCH] RC5 and Intel's ICC
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Tue, 23 Sep 2003 15:04:35 +0200
+             Message-ID: <00d101c381d3$3d761fe0$0c2f1fac@R2D2>
+             
+             (add -we147 to ccflags if cc = ICC so that prototype
+             detection works right)
+             
+             [ 21340]
+             Let's call it 2.34, already (from Johan).
+     Branch: maint-5.8/perl
+	  !> ext/Encode/Encode.pm hints/linux.sh lib/Getopt/Long.pm
+____________________________________________________________________________
+[ 21337] By: jhi                                   on 2003/09/23  11:12:27
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21336] By: jhi                                   on 2003/09/23  10:07:41
         Log: perldelta.
      Branch: maint-5.8/perl
