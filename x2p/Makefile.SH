@@ -105,7 +105,7 @@ compile: all
 	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' $(plextract) -prog -verbose dcf -log ../compilelog;  
 
 a2p: $(obj) a2p$(OBJ_EXT)
-	$(CC) $(LDFLAGS) -o a2p $(obj) a2p$(OBJ_EXT) $(libs)
+	$(CC) -o a2p $(LDFLAGS) $(obj) a2p$(OBJ_EXT) $(libs)
 
 # I now supply a2p.c with the kits, so the following section is
 # used only if you force byacc to run by saying
