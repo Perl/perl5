@@ -1359,7 +1359,10 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     PL_regsize = 0L;
     PL_regcode = &PL_regdummy;
     PL_reg_whilem_seen = 0;
+#if 0 /* REGC() is (currently) a NOP at the first pass.
+       * Clever compilers notice this and complain. --jhi */
     REGC((U8)REG_MAGIC, (char*)PL_regcode);
+#endif
     if (reg(0, &flags) == NULL) {
 	Safefree(PL_regprecomp);
 	PL_regprecomp = Nullch;
