@@ -5465,9 +5465,26 @@ PP(pp_pack)
 	case 'c':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aint = SvIV(fromstr);
-		achar = aint;
-		sv_catpvn(cat, &achar, sizeof(char));
+		switch (datumtype) {
+		case 'C':
+		    aint = SvIV(fromstr);
+		    if ((aint < 0 || aint > 255) &&
+			ckWARN(WARN_PACK))
+		        Perl_warner(aTHX_ WARN_PACK,
+				    "Character in \"C\" format wrapped");
+		    achar = aint & 255;
+		    sv_catpvn(cat, &achar, sizeof(char));
+		    break;
+		case 'c':
+		    aint = SvIV(fromstr);
+		    if ((aint < -128 || aint > 127) &&
+			ckWARN(WARN_PACK))
+		        Perl_warner(aTHX_ WARN_PACK,
+				    "Character in \"c\" format wrapped");
+		    achar = aint & 255;
+		    sv_catpvn(cat, &achar, sizeof(char));
+		    break;
+		}
 	    }
 	    break;
 	case 'U':
