@@ -596,9 +596,21 @@ string are necessary UTF-8 encoded, or that any of the characters have
 code points greater than 0xFF (255) or even 0x80 (128), or that the
 string has any characters at all.  All the C<is_utf8()> does is to
 return the value of the internal "utf8ness" flag attached to the
-$string.  If the flag is on, characters added to that string will be
-automatically upgraded to UTF-8 (and even then only if they really
-need to be upgraded, that is, if their code point is greater than 0xFF).
+$string.  If the flag is off, the bytes in the scalar are interpreted
+as a single byte encoding.  If the flag is on, the bytes in the scalar
+are interpreted as the (multibyte, variable-length) UTF-8 encoded code
+points of the characters.  Bytes added to an UTF-8 encoded string are
+automatically upgraded to UTF-8.  If mixed non-UTF8 and UTF-8 scalars
+are merged (doublequoted interpolation, explicit concatenation, and
+printf/sprintf parameter substitution), the result will be UTF-8 encoded
+as if copies of the byte strings were upgraded to UTF-8: for example,
+
+    $a = "ab\x80c";
+    $b = "\x{100}";
+    print "$a = $b\n";
+
+the output string will be UTF-8-encoded "ab\x80c\x{100}\n", but note
+that C<$a> will stay single byte encoded.
 
 Sometimes you might really need to know the byte length of a string
 instead of the character length.  For that use the C<bytes> pragma
