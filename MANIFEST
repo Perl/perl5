@@ -38,6 +38,7 @@ README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
+README.posix-bc		Notes about BC2000 POSIX port
 README.qnx		Notes about QNX port
 README.threads		Notes about multithreading
 README.vms		Notes about VMS port
@@ -412,6 +413,7 @@ hints/openbsd.sh	Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
 hints/os390.sh		Hints for named architecture
+hints/posix-bc.sh	Hints for named architecture
 hints/powerux.sh	Hints for named architecture
 hints/qnx.sh		Hints for named architecture
 hints/sco.sh		Hints for named architecture
@@ -435,6 +437,7 @@ hints/unisysdynix.sh	Hints for named architecture
 hints/utekv.sh		Hints for named architecture
 hints/uts.sh		Hints for named architecture
 hints/uwin.sh		Hints for named architecture
+hints/vmesa.sh		Hints for named architecture
 hv.c			Hash value code
 hv.h			Hash value header
 installhtml		Perl script to install html files for pods
@@ -1178,6 +1181,9 @@ utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
 utils/splain.PL		Stand-alone version of diagnostics.pm
+vmesa/Makefile		VM/ESA Makefile
+vmesa/vmesa.c		VM/ESA-specific C code for Perl core
+vmesa/vmesaish.h	VM/ESA-specific C header for Perl core
 vms/descrip_mms.template		Template MM[SK] description file for build
 vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 vms/ext/DCLsym/DCLsym.pm	Perl access to CLI symbols

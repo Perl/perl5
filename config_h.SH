@@ -2267,25 +2267,30 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define ARCHNAME "$archname"		/**/
 
+/* HAS_PTHREAD_YIELD:
+ *	This symbol, if defined, indicates that the pthread_yield 
+ *	routine is available to yield the execution of the current
+ *	thread.	 sched_yield is preferable to pthread_yield.
+ */
 /* SCHED_YIELD:
  *	This symbol defines the way to yield the execution of
  *	the current thread.  Known ways are sched_yield,
  *	pthread_yield, and pthread_yield with NULL.
  */
+/* HAS_SCHED_YIELD:
+ *	This symbol, if defined, indicates that the sched_yield
+ *	routine is available to yield the execution of the current
+ *	thread.	 sched_yield is preferable to pthread_yield.
+ */
+#$d_pthread_yield HAS_PTHREAD_YIELD	/**/
 #define SCHED_YIELD	$sched_yield	/**/
+#$d_sched_yield HAS_SCHED_YIELD	/**/
 
 /* PTHREADS_CREATED_JOINABLE:
  *	This symbol, if defined, indicates that pthreads are created
  *	in the joinable (aka undetached) state.
  */
 #$d_pthreads_created_joinable PTHREADS_CREATED_JOINABLE /**/
-
-/* PTHREAD_SETDETACHSTATE_POINTER:
- *	This symbol, if defined, indicates that the second argument of
- *	pthread_attr_setdetachstate is a pointer to an int, as opposed
- *	to an int.
- */
-#$pthread_setdetachstate_pointer	PTHREAD_SETDETACHSTATE_POINTER	/**/
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
@@ -2339,7 +2344,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	It can be int, long, off_t, etc... It may be necessary to include
  *	<sys/types.h> to get any typedef'ed information.
  */
+/* LSEEKSIZE:
+ *	This symbol holds the number of bytes used by the Off_t.
+ */
 #define Off_t $lseektype		/* <offset> type */
+#define LSEEKSIZE $lseeksize		/* <offset> size */
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 

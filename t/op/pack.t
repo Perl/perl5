@@ -2,6 +2,12 @@
 
 # $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib' if -d '../lib';
+    require Config; import Config;
+}
+
 print "1..60\n";
 
 $format = "c2 x5 C C x s d i l a6";
@@ -31,7 +37,7 @@ print +($x = unpack("%32B69", "\001\002\004\010\020\040\100\200\017")) == 9
 	? "ok 6\n" : "not ok 6 $x\n";
 
 my $sum = 129; # ASCII
-$sum = 103 if ($^O eq 'os390'); # An EBCDIC variant.
+$sum = 103 if ($Config{ebcdic} eq 'define');
 
 print +($x = unpack("%32B*", "Now is the time for all good blurfl")) == $sum
 	? "ok 7\n" : "not ok 7 $x\n";

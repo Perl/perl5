@@ -535,7 +535,7 @@ _cleaner:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
-	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl
+	rm -f *.orig */*.orig *~ */*~ core core.perl.*.? core.miniperl.*.? perl.core miniperl.core t/core t/core.perl.*.? t/perl.core t/tmp???? t/c t/perl
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)
@@ -658,6 +658,8 @@ case "$ebcdic" in
 $define)
     xxx=''
     echo "This is an EBCDIC system, checking if any parser files need regenerating." >&4
+case "$osname" in
+os390)
     rm -f y.tab.c y.tab.h
     yacc -d perly.y >/dev/null 2>&1
     if cmp -s y.tab.c perly.c; then
@@ -713,6 +715,11 @@ $define)
         xxx="$xxx a2p.h"
     fi
     cd ..
+    ;;
+vmesa)
+    # Do nothing in VM/ESA.
+    ;;
+esac
     case "$xxx" in
     '') echo "No parser files were regenerated.  That's okay." >&2 ;;
     esac

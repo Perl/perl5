@@ -58,6 +58,9 @@ sub get_files {
     } elsif ($^O eq 'os390') {
 	# OS/390 C compiler doesn't generate #file or #line directives
 	$file{'/usr/include/errno.h'} = 1;
+    } elsif ($^O eq 'vmesa') {
+	# OS/390 C compiler doesn't generate #file or #line directives
+	$file{'../../vmesa/errno.h'} = 1;
     } else {
 	open(CPPI,"> errno.c") or
 	    die "Cannot open errno.c";

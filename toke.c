@@ -109,6 +109,20 @@ static char ident_too_long[] = "Identifier too long";
 #undef ff_next
 #endif
 
+#ifdef USE_PURE_BISON
+YYSTYPE* yylval_pointer = NULL;
+int* yychar_pointer = NULL;
+#ifdef EMBED
+#undef yylval
+#undef yychar
+#endif
+#define yylval (*yylval_pointer)
+#define yychar (*yychar_pointer)
+#define YYLEXPARAM yylval_pointer,yychar_pointer
+#else
+#define YYLEXPARAM
+#endif
+
 #include "keywords.h"
 
 #ifdef CLINE
@@ -784,7 +798,7 @@ sublex_done(void)
 
     if (PL_lex_casemods) {		/* oops, we've got some unbalanced parens */
 	PL_lex_state = LEX_INTERPCASEMOD;
-	return yylex();
+	return yylex(YYLEXPARAM);
     }
 
     /* Is there a right-hand side to take care of? */
@@ -1571,8 +1585,12 @@ filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
       if we already built the token before, use it.
 */
 
-int
-yylex(void)
+int yylex
+#ifdef USE_PURE_BISON
+(YYSTYPE* lvalp, int* lcharp)
+#else
+(void)
+#endif
 {
     dTHR;
     register char *s;
@@ -1581,6 +1599,11 @@ yylex(void)
     STRLEN len;
     GV *gv = Nullgv;
     GV **gvp = 0;
+
+#ifdef USE_PURE_BISON
+    yylval_pointer = lvalp;
+    yychar_pointer = lcharp;
+#endif
 
     /* check if there's an identifier for us to look at */
     if (PL_pending_ident) {
@@ -1719,7 +1742,7 @@ yylex(void)
 	    if (PL_bufptr != PL_bufend)
 		PL_bufptr += 2;
 	    PL_lex_state = LEX_INTERPCONCAT;
-	    return yylex();
+	    return yylex(YYLEXPARAM);
 	}
 	else {
 	    s = PL_bufptr + 1;
@@ -1763,7 +1786,7 @@ yylex(void)
 		Aop(OP_CONCAT);
 	    }
 	    else
-		return yylex();
+		return yylex(YYLEXPARAM);
 	}
 
     case LEX_INTERPPUSH:
@@ -1796,7 +1819,7 @@ yylex(void)
 	    s = PL_bufptr;
 	    Aop(OP_CONCAT);
 	}
-	return yylex();
+	return yylex(YYLEXPARAM);
 
     case LEX_INTERPENDMAYBE:
 	if (intuit_more(PL_bufptr)) {
@@ -1845,11 +1868,11 @@ yylex(void)
 		Aop(OP_CONCAT);
 	    else {
 		PL_bufptr = s;
-		return yylex();
+		return yylex(YYLEXPARAM);
 	    }
 	}
 
-	return yylex();
+	return yylex(YYLEXPARAM);
     case LEX_FORMLINE:
 	PL_lex_state = LEX_NORMAL;
 	s = scan_formline(PL_bufptr);
@@ -2129,7 +2152,7 @@ yylex(void)
 	if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 	    PL_bufptr = s;
 	    PL_lex_state = LEX_FORMLINE;
-	    return yylex();
+	    return yylex(YYLEXPARAM);
 	}
 	goto retry;
     case '\r':
@@ -2153,7 +2176,7 @@ yylex(void)
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 		PL_bufptr = s;
 		PL_lex_state = LEX_FORMLINE;
-		return yylex();
+		return yylex(YYLEXPARAM);
 	    }
 	}
 	else {
@@ -2490,7 +2513,7 @@ yylex(void)
 		if (PL_lex_fakebrack) {
 		    PL_lex_state = LEX_INTERPEND;
 		    PL_bufptr = s;
-		    return yylex();		/* ignore fake brackets */
+		    return yylex(YYLEXPARAM);	/* ignore fake brackets */
 		}
 		if (*s == '-' && s[1] == '>')
 		    PL_lex_state = LEX_INTERPENDMAYBE;
@@ -2501,7 +2524,7 @@ yylex(void)
 	if (PL_lex_brackets < PL_lex_fakebrack) {
 	    PL_bufptr = s;
 	    PL_lex_fakebrack = 0;
-	    return yylex();		/* ignore fake brackets */
+	    return yylex(YYLEXPARAM);		/* ignore fake brackets */
 	}
 	force_next('}');
 	TOKEN(';');

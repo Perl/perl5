@@ -3,11 +3,7 @@
 #ifdef WIN32
 #  include <win32thread.h>
 #else
-#  if defined(OLD_PTHREADS_API) && !defined(DJGPP)
-     /* POSIXish threads */
-#    define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
-#    define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
-#    define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
+#  ifdef OLD_PTHREADS_API /* Here be dragons. */
 #    define DETACH(t)				\
     STMT_START {				\
 	if (pthread_detach(&(t)->self)) {	\
@@ -15,17 +11,62 @@
 	    croak("panic: DETACH");		\
 	}					\
     } STMT_END
-#  else
+#    define THR getTHR()
+struct perl_thread *getTHR _((void));
+#    define PTHREAD_GETSPECIFIC_INT
+#    ifdef DJGPP
+#      define pthread_addr_t any_t
+#      define NEED_PTHREAD_INIT
+#      define PTHREAD_CREATE_JOINABLE (1)
+#    endif
+#    ifdef __OPEN_VM
+#      define pthread_addr_t void *
+#    endif
+#    ifdef VMS
+#      define pthread_attr_init(a) pthread_attr_create(a)
+#      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_setdetach_np(a,s)
+#      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
+#      define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
+#      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
+#      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
+#    endif
+#    if defined(DJGPP) || defined(__OPEN_VM)
+#      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,&(s))
+#      define YIELD pthread_yield(NULL)
+#    endif
+#  endif
+#  ifndef VMS
 #    define pthread_mutexattr_default NULL
-#    define pthread_condattr_default NULL
-#  endif /* OLD_PTHREADS_API */
+#    define pthread_condattr_default  NULL
+#  endif
+#endif
+
+#ifndef PTHREAD_CREATE
+/* You are not supposed to pass NULL as the 2nd arg of PTHREAD_CREATE(). */
+#  define PTHREAD_CREATE(t,a,s,d) pthread_create(t,&(a),s,d)
+#endif
+
+#ifndef PTHREAD_ATTR_SETDETACHSTATE
+#  define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,s)
 #endif
 
 #ifndef YIELD
-#  define YIELD SCHED_YIELD
+#  ifdef SCHED_YIELD
+#    define YIELD SCHED_YIELD
+#  else
+#    ifdef HAS_SCHED_YIELD
+#      define YIELD sched_yield()
+#    else
+#      ifdef HAS_PTHREAD_YIELD
+    /* pthread_yield(NULL) platforms are expected
+     * to have #defined YIELD for themselves. */
+#        define YIELD pthread_yield()
+#      endif
+#    endif
+#  endif
 #endif
 
-#ifdef PTHREAD_CREATE_JOINABLE
+#ifdef PTHREADS_CREATED_JOINABLE
 #  define ATTR_JOINABLE PTHREAD_CREATE_JOINABLE
 #else
 #  ifdef PTHREAD_CREATE_UNDETACHED
@@ -116,13 +157,8 @@
 #endif /* SET_THR */
 
 #ifndef THR
-#  ifdef OLD_PTHREADS_API
-struct perl_thread *getTHR _((void));
-#    define THR getTHR()
-#  else
-#    define THR ((struct perl_thread *) pthread_getspecific(PL_thr_key))
-#  endif /* OLD_PTHREADS_API */
-#endif /* THR */
+#define THR ((struct perl_thread *) pthread_getspecific(PL_thr_key))
+#endif
 
 /*
  * dTHR is performance-critical. Here, we only do the pthread_get_specific

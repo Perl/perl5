@@ -1613,7 +1613,7 @@ int
 magic_setcollxfrm(SV *sv, MAGIC *mg)
 {
     /*
-     * René Descartes said "I think not."
+     * RenE<eacute> Descartes said "I think not."
      * and vanished with a faint plop.
      */
     if (mg->mg_ptr) {

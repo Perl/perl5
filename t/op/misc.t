@@ -36,7 +36,9 @@ for (@prgs){
     $status = $?;
     $results = `$CAT $tmpfile`;
     $results =~ s/\n+$//;
-    $results =~ s/syntax error/syntax error/i;
+# bison says 'parser error' instead of 'syntax error',
+# various yaccs may or may not capitalize 'syntax'.
+    $results =~ s/^(syntax|parser) error/\L$1 error/i;
     $expected =~ s/\n+$//;
     if ( $results ne $expected){
 	print STDERR "PROG: $switch\n$prog\n";

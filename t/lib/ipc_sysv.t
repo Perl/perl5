@@ -18,7 +18,7 @@ BEGIN {
 # Later the sem* tests will import more for themselves.
 
 use IPC::SysV qw(IPC_PRIVATE IPC_NOWAIT IPC_STAT IPC_RMID
-		 S_IRWXU S_IRWXG S_IRWXO);
+		 S_IRWXU S_IRWXG S_IRWXO S_IWGRP S_IROTH S_IWOTH);
 use strict;
 
 print "1..16\n";
@@ -49,11 +49,19 @@ EOM
     exit(1);
 };
 
+my $perm;
+
+$perm = S_IRWXU | S_IRWXG | S_IRWXO | S_IWGRP | S_IROTH | S_IWOTH
+    if $^O eq 'vmesa';
+
+$perm = S_IRWXU | S_IRWXG | S_IRWXO unless defined $perm;
+
 if ($Config{'d_msgget'} eq 'define' &&
     $Config{'d_msgctl'} eq 'define' &&
     $Config{'d_msgsnd'} eq 'define' &&
     $Config{'d_msgrcv'} eq 'define') {
-    $msg = msgget(IPC_PRIVATE, S_IRWXU | S_IRWXG | S_IRWXO);
+
+    $msg = msgget(IPC_PRIVATE, $perm);
     # Very first time called after machine is booted value may be 0 
     die "msgget failed: $!\n" unless defined($msg) && $msg >= 0;
 
@@ -92,7 +100,7 @@ if($Config{'d_semget'} eq 'define' &&
 
     use IPC::SysV qw(IPC_CREAT GETALL SETALL);
 
-    $sem = semget(IPC_PRIVATE, 10, S_IRWXU | S_IRWXG | S_IRWXO | IPC_CREAT);
+    $sem = semget(IPC_PRIVATE, 10, $perm | IPC_CREAT);
     # Very first time called after machine is booted value may be 0 
     die "semget: $!\n" unless defined($sem) && $sem >= 0;
 

@@ -1749,6 +1749,12 @@ moreswitches(char *s)
 #ifdef __VOS__
 	printf("Stratus VOS port by Paul_Green@stratus.com, 1997-1998\n");
 #endif
+#ifdef __OPEN_VM
+	printf("VM/ESA port by Neale Ferguson, 1998\n");
+#endif
+#ifdef POSIX_BC
+	printf("BS2000 (POSIX) port by Start Amadeus GmbH, 1998\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
@@ -2008,6 +2014,21 @@ sed %s -e \"/^[^#]/b\" \
  %s | %_ -C %_ %s",
 	  (PL_doextract ? "-e \"1,/^#/d\n\"" : ""),
 #else
+#  ifdef __OPEN_VM
+	sv_setpvf(cmd, "\
+%s %s -e '/^[^#]/b' \
+ -e '/^#[ 	]*include[ 	]/b' \
+ -e '/^#[ 	]*define[ 	]/b' \
+ -e '/^#[ 	]*if[ 	]/b' \
+ -e '/^#[ 	]*ifdef[ 	]/b' \
+ -e '/^#[ 	]*ifndef[ 	]/b' \
+ -e '/^#[ 	]*else/b' \
+ -e '/^#[ 	]*elif[ 	]/b' \
+ -e '/^#[ 	]*undef[ 	]/b' \
+ -e '/^#[ 	]*endif/b' \
+ -e 's/^[ 	]*#.*//' \
+ %s | %_ %_ %s",
+#  else
 	sv_setpvf(cmd, "\
 %s %s -e '/^[^#]/b' \
  -e '/^#[ 	]*include[ 	]/b' \
@@ -2021,6 +2042,7 @@ sed %s -e \"/^[^#]/b\" \
  -e '/^#[ 	]*endif/b' \
  -e 's/^[ 	]*#.*//' \
  %s | %_ -C %_ %s",
+#  endif
 #ifdef LOC_SED
 	  LOC_SED,
 #else

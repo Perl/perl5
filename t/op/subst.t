@@ -1,6 +1,10 @@
 #!./perl
 
-BEGIN { @INC = ('../lib') }
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib' if -d '../lib';
+    require Config; import Config;
+}
 
 print "1..71\n";
 
@@ -183,7 +187,7 @@ tr/a-z/A-Z/;
 print $_ eq 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' ? "ok 52\n" : "not ok 52\n";
 
 # same as tr/A-Z/a-z/;
-if ($^O eq 'os390') {	# An EBCDIC variant.
+if ($Config{ebcdic} eq 'define') {	# EBCDIC.
     no utf8;
     y[\301-\351][\201-\251];
 } else {		# Ye Olde ASCII.  Or something like it.

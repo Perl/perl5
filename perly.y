@@ -27,7 +27,8 @@ dep(void)
 %start prog
 
 %{
-#ifndef OEMVS
+/* I sense a Big Blue pattern here... */
+#if !defined(OEMVS) && !defined(__OPEN_VM) && !defined(POSIX_BC)
 %}
 
 %union {
@@ -38,7 +39,11 @@ dep(void)
 }
 
 %{
-#endif /* OEMVS */
+#endif /* !OEMVS && !__OPEN_VM && !POSIX_BC */
+
+#ifdef USE_PURE_BISON
+#define YYLEX_PARAM (&yychar)
+#endif
 %}
 
 %token <ival> '{' ')'

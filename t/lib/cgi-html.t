@@ -6,11 +6,13 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib' if -d '../lib';
+    require Config; import Config;
 }
 
 BEGIN {$| = 1; print "1..17\n"; }
-BEGIN {$eol = $^O eq 'VMS' ? "\n" : "\cM\cJ";
-       $eol = "\r\n" if $^O eq 'os390'; }
+BEGIN {$eol = "\n"   if $^O eq 'VMS';
+       $eol = "\r\n" if $Config{ebcdic} eq 'define';
+       $eol = "\cM\cJ" unless defined $eol; }
 END {print "not ok 1\n" unless $loaded;}
 use CGI (':standard','-no_debug');
 $loaded = 1;

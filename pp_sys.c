@@ -3455,7 +3455,14 @@ PP(pp_exec)
 #ifdef VMS
 	value = (I32)vms_do_aexec(Nullsv, MARK, SP);
 #else
+#  ifdef __OPEN_VM
+	{
+	   (void ) do_aspawn(Nullsv, MARK, SP);
+	   value = 0;
+	}
+#  else
 	value = (I32)do_aexec(Nullsv, MARK, SP);
+#  endif
 #endif
     else {
 	if (PL_tainting) {
@@ -3466,7 +3473,12 @@ PP(pp_exec)
 #ifdef VMS
 	value = (I32)vms_do_exec(SvPVx(sv_mortalcopy(*SP), PL_na));
 #else
+#  ifdef __OPEN_VM
+	(void) do_spawn(SvPVx(sv_mortalcopy(*SP), PL_na));
+	value = 0;
+#  else
 	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), PL_na));
+#  endif
 #endif
     }
     SP = ORIGMARK;

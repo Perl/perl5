@@ -1878,7 +1878,7 @@ VTOH(vtohl,long)
 #endif
 
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM)
 PerlIO *
 my_popen(char *cmd, char *mode)
 {
@@ -2130,7 +2130,7 @@ rsignal_restore(int signo, Sigsave_t *save)
 #endif /* !HAS_SIGACTION */
 
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM)
 I32
 my_pclose(PerlIO *ptr)
 {
@@ -2767,7 +2767,7 @@ perl_cond *cp;
 }
 #endif /* FAKE_THREADS */
 
-#ifdef OLD_PTHREADS_API
+#ifdef PTHREAD_GETSPECIFIC_INT
 struct perl_thread *
 getTHR _((void))
 {
@@ -2777,7 +2777,7 @@ getTHR _((void))
 	croak("panic: pthread_getspecific");
     return (struct perl_thread *) t;
 }
-#endif /* OLD_PTHREADS_API */
+#endif
 
 MAGIC *
 condpair_magic(SV *sv)

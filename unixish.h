@@ -114,12 +114,16 @@
 #define Fflush(fp)         fflush(fp)
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
+/* these should be set in a hint file, not here */
 #ifndef PERL_SYS_INIT
 #ifdef PERL_SCO5
-/* this should be set in a hint file, not here */
 #  define PERL_SYS_INIT(c,v)	fpsetmask(0); MALLOC_INIT
 #else
-#  define PERL_SYS_INIT(c,v)	MALLOC_INIT
+#  ifdef POSIX_BC
+#    define PERL_SYS_INIT(c,v)	sigignore(SIGFPE); MALLOC_INIT
+#  else
+#    define PERL_SYS_INIT(c,v)	MALLOC_INIT
+#  endif
 #endif
 #endif
 

@@ -863,37 +863,66 @@ Free_t   Perl_free _((Malloc_t where));
 #   endif
 #endif
 
-#ifdef HAS_INT64_T
-#   define Quad_t int64_t
-#   define PERL_QUAD_IS_INT64_T
-#else
-#   if LONGSIZE == 8
-#       define Quad_t long
+#ifndef Quad_t
+#    if LONGSIZE == 8
+#       define Quad_t  long
 #       define PERL_QUAD_IS_LONG
-#   else
-#       ifdef USE_LONG_LONG /* See above note about LP32. --jhi */
-#           if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
-#	         define Quad_t long long
-#                define PERL_QUAD_IS_LONG_LONG
-#           endif
+#    endif
+#endif
+
+#ifndef Quad_t
+#    if INTSIZE == 8
+#       define Quad_t  int
+#       define PERL_QUAD_IS_INT
+#    endif
+#endif
+
+#ifndef Quad_t
+#    ifdef USE_LONG_LONG /* See above note about LP32. --jhi */
+#       if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
+#	    define Quad_t  long long
+#           define PERL_QUAD_IS_LONG_LONG
 #       endif
-#       ifndef Quad_t
-#	    if INTSIZE == 8
-#	        define Quad_t int
-#               define PERL_QUAD_IS_INT
-#	    endif
-#       endif
-#   endif
+#    endif
+#endif
+
+#ifndef Quad_t
+#    ifdef HAS_INT64_T
+#        define Quad_t  int64_t
+#        define Uquad_t uint64_t
+#        define PERL_QUAD_IS_INT64_T
+#    endif
 #endif
 
 #ifdef Quad_t
 #   define HAS_QUAD
+#   ifndef Uquad_t
+    /* Note that if your Quad_t is a typedef you *must* have defined
+     * also Uquad_t yourself because 'unsigned type' is illegal. */
+#       define Uquad_t unsigned Quad_t
+#   endif
 #endif
 
-/* See above note on LP32 about the PTRSIZE test. --jhi */
-#if defined(HAS_QUAD) && (PTRSIZE > 4 || defined(USE_LONG_LONG))
-   typedef          Quad_t IV;
-   typedef unsigned Quad_t UV;
+#if defined(USE_64_BITS) && defined(HAS_QUAD)
+#  ifdef PERL_QUAD_IS_LONG			/* LP64 */
+   typedef          long               IV;
+   typedef	    unsigned long      UV;
+#  else
+#      ifdef PERL_QUAD_IS_INT			/* ILP64 */
+   typedef          int                IV;
+   typedef	    unsigned int       UV;
+#      else
+#          ifdef PERL_QUAD_IS_LONG_LONG		/* LL64 */
+   typedef          long long          IV;
+   typedef	    unsigned long long UV;
+#          else
+#              ifdef PERL_QUAD_IS_INT64_T	/* C9X */
+   typedef          int64_t            IV;
+   typedef	    uint64_t           UV;
+#              endif
+#          endif
+#      endif
+#  endif     
 #  if defined(PERL_QUAD_IS_INT64_T) && defined(INT64_MAX)
 #    define IV_MAX INT64_MAX
 #    define IV_MIN INT64_MIN
@@ -906,8 +935,8 @@ Free_t   Perl_free _((Malloc_t where));
 #    define UV_MIN PERL_UQUAD_MIN
 #  endif
 #else
-   typedef          long IV;
-   typedef unsigned long UV;
+   typedef          long               IV;
+   typedef	    unsigned long      UV;
 #  if defined(INT32_MAX) && LONGSIZE == 4
 #    define IV_MAX INT32_MAX
 #    define IV_MIN INT32_MIN
@@ -1165,10 +1194,14 @@ typedef union any ANY;
 
 #include "handy.h"
 
+/* Some day when we have more 64-bit experience under our belts we may
+ * be able to merge some of the USE_64_BIT_{FILES,OFFSETS,STDIO,DBM}. At
+ * the moment (Oct 1998), though, keep them separate. --jhi
+ */
 #ifdef USE_64_BITS
 #   ifdef USE_64_BIT_FILES
-#       ifndef USE_64_BIT_IO
-#          define USE_64_BIT_IO
+#       ifndef USE_64_BIT_OFFSETS
+#          define USE_64_BIT_OFFSETS
 #       endif
 #       ifndef USE_64_BIT_STDIO
 #           define USE_64_BIT_STDIO
@@ -1177,7 +1210,8 @@ typedef union any ANY;
 #           define USE_64_BIT_DBM
 #       endif
 #   endif
-#   ifdef USE_64_BIT_IO
+/* Mention LSEEKSIZE here to get it included in %Config. */
+#   ifdef USE_64_BIT_OFFSETS
 #       ifdef HAS_FSTAT64
 #           define fstat fstat64
 #       endif
@@ -1291,6 +1325,10 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
+
+#if defined(__OPEN_VM)
+# include "vmesa/vmesaish.h"
+#endif
 
 #ifdef DOSISH
 # if defined(OS2)
@@ -1697,7 +1735,7 @@ double atof _((const char*));
 /* All of these are in stdlib.h or time.h for ANSI C */
 Time_t time();
 struct tm *gmtime(), *localtime();
-#ifdef OEMVS
+#if defined(OEMVS) || defined(__OPEN_VM)
 char *(strchr)(), *(strrchr)();
 char *(strcpy)(), *(strcat)();
 #else
