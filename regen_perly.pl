@@ -2,7 +2,7 @@
 #
 # regen_perly.pl, DAPM 12-Feb-04
 #
-# Copyright (c) 2004 Larry Wall
+# Copyright (c) 2004, 2005 Larry Wall
 #
 # Given an input file perly.y, run bison on it and produce
 # the following output files:
@@ -170,10 +170,6 @@ sub extract {
 
     return $actlines. "\n", $tablines. "\n";
 }
-
-	
-	    
-
 
 sub my_system {
     system(@_);
