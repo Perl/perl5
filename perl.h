@@ -2175,7 +2175,7 @@ typedef pthread_key_t	perl_key;
  *   that a file is in "binary" mode -- that is, that no translation
  *   of bytes occurs on read or write operations.
  */
-#  define USEMYBINMODE / **/
+#  define USEMYBINMODE /**/
 #  include <io.h> /* for setmode() prototype */
 #  define my_binmode(fp, iotype, mode) \
             (PerlLIO_setmode(fileno(fp), mode) != -1 ? TRUE : FALSE)
