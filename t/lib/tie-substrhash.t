@@ -7,7 +7,7 @@ BEGIN {
     push @INC, '../lib';
 }    
 
-print "1..16\n";
+print "1..20\n";
 
 use strict;
 
@@ -96,4 +96,16 @@ print "ok 15\n";
 
 print "not " unless Tie::SubstrHash::findgteprime(13.000001) == 17;
 print "ok 16\n";
+
+print "not " unless Tie::SubstrHash::findgteprime(114) == 127;
+print "ok 17\n";
+
+print "not " unless Tie::SubstrHash::findgteprime(1000) == 1009;
+print "ok 18\n";
+
+print "not " unless Tie::SubstrHash::findgteprime(1024) == 1031;
+print "ok 19\n";
+
+print "not " unless Tie::SubstrHash::findgteprime(10000) == 10007;
+print "ok 20\n";
 

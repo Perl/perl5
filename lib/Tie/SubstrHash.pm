@@ -186,19 +186,21 @@ sub ceil {
 sub findgteprime { # find the smallest prime integer greater than or equal to
     use integer;
 
+# It may be sufficient (and more efficient, IF IT IS CORRECT) to use
+# $max = 1 + int sqrt $num and calculate it once only, but is it correct?
+
     my $num = ceil(shift);
     return 2 if $num <= 2;
 
     $num++ unless $num % 2;
 
-    my $max = int sqrt $num;
-
   NUM:
     for (;; $num += 2) {
-	for ($i = 3; $i <= $max; $i += 2) {
-	    next NUM unless $num % $i;
-	}
-	return $num;
+        my $max = int sqrt $num;
+        for ($i = 3; $i <= $max; $i += 2) {
+            next NUM unless $num % $i;
+        }
+        return $num;
     }
 }
 
