@@ -435,7 +435,6 @@ lib/AnyDBM_File.pm	Perl module to emulate dbmopen
 lib/AutoLoader.pm	Autoloader base class
 lib/AutoSplit.pm	Split up autoload functions
 lib/Benchmark.pm	Measure execution time
-lib/Bundle/CPAN.pm	The CPAN bundle
 lib/CGI.pm		Web server interface ("Common Gateway Interface")
 lib/CGI/Apache.pm	Support for Apache's Perl module
 lib/CGI/Carp.pm		Log server errors with helpful context
