@@ -403,8 +403,8 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #    define setbuf		PerlSIO_setbuf
 #    define setvbuf		PerlSIO_setvbuf
 #    define setlinebuf		PerlSIO_setlinebuf
-#    define stdoutf		PerlIO_stdoutf
-#    define vfprintf		PerlIO_vprintf
+#    define stdoutf		PerlSIO_stdoutf
+#    define vfprintf		PerlSIO_vprintf
 #    define ftell		PerlIO_tell
 #    define fseek		PerlIO_seek
 #    define fgetpos		PerlIO_getpos
