@@ -3184,7 +3184,7 @@ sub single_delim {
 sub const {
     my $sv = shift;
     if (class($sv) eq "SPECIAL") {
-	return ('undef', '1', '0')[$$sv-1]; # sv_undef, sv_yes, sv_no
+	return ('undef', '1', '(!1)')[$$sv-1]; # sv_undef, sv_yes, sv_no
     } elsif (class($sv) eq "NULL") {
        return 'undef';
     } elsif ($sv->FLAGS & SVf_IOK) {
