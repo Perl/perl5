@@ -701,6 +701,7 @@ I32 dopoptoeval _((I32 startingblock));
 I32 dopoptolabel _((char *label));
 I32 dopoptoloop _((I32 startingblock));
 I32 dopoptosub _((I32 startingblock));
+I32 dopoptosub_at _((PERL_CONTEXT* cxstk, I32 startingblock));
 void save_lines _((AV *array, SV *sv));
 OP *doeval _((int gimme, OP** startop));
 SV *mul128 _((SV *sv, U8 m));

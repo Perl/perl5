@@ -36,6 +36,7 @@ static I32 dopoptoeval _((I32 startingblock));
 static I32 dopoptolabel _((char *label));
 static I32 dopoptoloop _((I32 startingblock));
 static I32 dopoptosub _((I32 startingblock));
+static I32 dopoptosub_at _((PERL_CONTEXT *cxstk, I32 startingblock));
 static void save_lines _((AV *array, SV *sv));
 static I32 sortcv _((SV *a, SV *b));
 static void qsortsv _((SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b)));
@@ -957,10 +958,17 @@ STATIC I32
 dopoptosub(I32 startingblock)
 {
     dTHR;
+    return dopoptosub_at(cxstack, startingblock);
+}
+
+STATIC I32
+dopoptosub_at(PERL_CONTEXT *cxstk, I32 startingblock)
+{
+    dTHR;
     I32 i;
     register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
-	cx = &cxstack[i];
+	cx = &cxstk[i];
 	switch (cx->cx_type) {
 	default:
 	    continue;
@@ -1165,6 +1173,8 @@ PP(pp_caller)
     djSP;
     register I32 cxix = dopoptosub(cxstack_ix);
     register PERL_CONTEXT *cx;
+    register PERL_CONTEXT *ccstack = cxstack;
+    PERL_SI *top_si = curstackinfo;
     I32 dbcxix;
     I32 gimme;
     HV *hv;
@@ -1175,25 +1185,32 @@ PP(pp_caller)
 	count = POPi;
     EXTEND(SP, 6);
     for (;;) {
+	/* we may be in a higher stacklevel, so dig down deeper */
+	while (cxix < 0 && top_si->si_type != PERLSI_MAIN) {
+	    top_si = top_si->si_prev;
+	    ccstack = top_si->si_cxstack;
+	    cxix = dopoptosub_at(ccstack, top_si->si_cxix);
+	}
 	if (cxix < 0) {
 	    if (GIMME != G_ARRAY)
 		RETPUSHUNDEF;
 	    RETURN;
 	}
 	if (DBsub && cxix >= 0 &&
-		cxstack[cxix].blk_sub.cv == GvCV(DBsub))
+		ccstack[cxix].blk_sub.cv == GvCV(DBsub))
 	    count++;
 	if (!count--)
 	    break;
-	cxix = dopoptosub(cxix - 1);
+	cxix = dopoptosub_at(ccstack, cxix - 1);
     }
-    cx = &cxstack[cxix];
-    if (cxstack[cxix].cx_type == CXt_SUB) {
-        dbcxix = dopoptosub(cxix - 1);
-	/* We expect that cxstack[dbcxix] is CXt_SUB, anyway, the
+
+    cx = &ccstack[cxix];
+    if (ccstack[cxix].cx_type == CXt_SUB) {
+        dbcxix = dopoptosub_at(ccstack, cxix - 1);
+	/* We expect that ccstack[dbcxix] is CXt_SUB, anyway, the
 	   field below is defined for any cx. */
-	if (DBsub && dbcxix >= 0 && cxstack[dbcxix].blk_sub.cv == GvCV(DBsub))
-	    cx = &cxstack[dbcxix];
+	if (DBsub && dbcxix >= 0 && ccstack[dbcxix].blk_sub.cv == GvCV(DBsub))
+	    cx = &ccstack[dbcxix];
     }
 
     if (GIMME != G_ARRAY) {
@@ -1217,9 +1234,9 @@ PP(pp_caller)
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
     if (!MAXARG)
 	RETURN;
-    if (cx->cx_type == CXt_SUB) { /* So is cxstack[dbcxix]. */
+    if (cx->cx_type == CXt_SUB) { /* So is ccstack[dbcxix]. */
 	sv = NEWSV(49, 0);
-	gv_efullname3(sv, CvGV(cxstack[cxix].blk_sub.cv), Nullch);
+	gv_efullname3(sv, CvGV(ccstack[cxix].blk_sub.cv), Nullch);
 	PUSHs(sv_2mortal(sv));
 	PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
     }
