@@ -83,7 +83,8 @@ sub runtests {
 	$fh->open($test) or print "can't open $test. $!\n";
 	my $first = <$fh>;
 	my $s = $switches;
-	$s .= q[ "-T"] if $first =~ /^#!.*\bperl.*-\w*T/;
+	$s .= join " ", q[ "-T"], map {qq["-I$_"]} @INC
+	    if $first =~ /^#!.*\bperl.*-\w*T/;
 	$fh->close or print "can't close $test. $!\n";
 	my $cmd = ($ENV{'COMPILE_TEST'})? 
 "./perl -I../lib ../utils/perlcc $test -run 2>> ./compilelog |" 
