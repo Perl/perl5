@@ -458,7 +458,7 @@ sub perl_archive
             return '$(PERL_INC)\perlcore$(LIB_EXT)';
         }
     }
-    return '$(PERL_INC)\perl$(LIB_EXT)';
+    return '$(PERL_INC)\\'.$Config{'libperl'};
 }
 
 sub export_list

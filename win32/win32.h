@@ -31,9 +31,6 @@ typedef long long __int64;
 #define __declspec(x)
 #define PERL_GLOBAL_STRUCT
 #define MULTIPLICITY
-#ifndef TLS_OUT_OF_INDEXES
-#define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
-#endif
 #endif
 
 /* Define DllExport akin to perl's EXT, 
@@ -59,6 +56,10 @@ typedef long long __int64;
 #ifdef   WIN32_LEAN_AND_MEAN		/* C file is NOT a Perl5 original. */
 #define  CONTEXT	PERL_CONTEXT	/* Avoid conflict of CONTEXT defs. */
 #endif /*WIN32_LEAN_AND_MEAN */
+
+#ifndef TLS_OUT_OF_INDEXES
+#define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
+#endif
 
 #include <dirent.h>
 #include <io.h>

@@ -162,12 +162,13 @@ LIBOUT_FLAG	=
 
 .ELIF "$(CCTYPE)" == "GCC"
 
-CC		= gcc -pipe
-LINK32		= gcc -pipe
+CC		= gcc 
+LINK32		= gcc 
 LIB32		= ar rc
 IMPLIB		= dlltool
 
 o = .o
+a = .a
 
 #
 # Options
@@ -262,6 +263,7 @@ CFLAGS_O	= $(CFLAGS) $(OBJECT)
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
 
 o *= .obj
+a *= .lib
 
 LKPRE		= INPUT (
 LKPOST		= )
@@ -270,7 +272,7 @@ LKPOST		= )
 # Rules
 # 
 
-.SUFFIXES : .c $(o) .dll .lib .exe .a
+.SUFFIXES : .c $(o) .dll $(a) .exe 
 
 .c$(o):
 	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
@@ -284,7 +286,7 @@ $(o).dll:
 	$(IMPLIB) $(*B).lib $@
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -o $@ $(LINK_FLAGS) $< $(LIBFILES)
-	$(IMPLIB) -def $(*B).def $(*B).lib $@
+	$(IMPLIB) -def $(*B).def $(*B).a $@
 .ELSE
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
@@ -303,16 +305,6 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 
 #
 # various targets
-.IF "$(OBJECT)" == "-DPERL_OBJECT"
-PERLIMPLIB	= ..\perlcore.lib
-PERLDLL		= ..\perlcore.dll
-CAPILIB		= $(COREDIR)\PerlCAPI.lib
-.ELSE
-PERLIMPLIB	= ..\perl.lib
-PERLDLL		= ..\perl.dll
-CAPILIB		=
-.ENDIF
-
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
@@ -356,6 +348,7 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
+PERLIMPLIB	*= ..\libperl$(a)
 
 .ELSE
 
@@ -363,6 +356,16 @@ CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
 PERL95EXE	= ..\perl95.exe
 
+.ENDIF
+
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+PERLIMPLIB	*= ..\perlcore$(a)
+PERLDLL		= ..\perlcore.dll
+CAPILIB		= $(COREDIR)\PerlCAPI$(a)
+.ELSE
+PERLIMPLIB	*= ..\perl$(a)
+PERLDLL		= ..\perl.dll
+CAPILIB		=
 .ENDIF
 
 XCOPY		= xcopy /f /r /i /d
@@ -490,7 +493,7 @@ CORE_H		= $(CORE_NOCFG_H) .\config.h
 MICROCORE_OBJ	= $(MICROCORE_SRC:db:+$(o))
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:db:+$(o))
 WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
-MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) perlio$(o)}
+MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) $(EXTRACORE_SRC:db:+$(o))}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 PERL95_OBJ	= $(PERL95_SRC:db:+$(o))
@@ -574,10 +577,12 @@ CFG_VARS	=					\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES:f)"			\
 		"incpath=$(CCINCDIR)"			\
-		"libperl=$(PERLIMPLIB)"			\
+		"libperl=$(PERLIMPLIB:f)"		\
 		"libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
 		"libc=$(LIBC)"				\
 		"make=dmake"				\
+		"_o=$(o)" "obj_ext=$(o)"		\
+		"_a=$(a)" "lib_ext=$(a)"		\
 		"static_ext=$(STATIC_EXT)"		\
 		"dynamic_ext=$(DYNAMIC_EXT)"		\
 		"usethreads=$(USE_THREADS)"		\
@@ -877,7 +882,7 @@ utils: $(PERLEXE) $(X2P)
 
 distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERL95EXE) $(PERLDLL) $(GLOBEXE) \
-		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
+		$(PERLIMPLIB) ..\miniperl$(a) $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(EXTENSION_DLL)
 	-del /f $(EXTENSION_C) $(DYNALOADER).c
@@ -900,7 +905,7 @@ distclean: clean
 	-del /f perl95.c
 .ENDIF
 	-del /f bin\*.bat
-	-cd $(EXTDIR) && del /s *.lib *.def *.map *.bs Makefile *$(o) pm_to_blib
+	-cd $(EXTDIR) && del /s *$(a) *.def *.map *.bs Makefile *$(o) pm_to_blib
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 
@@ -967,7 +972,7 @@ clean :
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
 	-@erase $(X2P_OBJ)
-	-@erase ..\*$(o) ..\*.lib ..\*.exp *$(o) *.lib *.exp
+	-@erase ..\*$(o) ..\*$(a) ..\*.exp *$(o) *$(a) *.exp
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk

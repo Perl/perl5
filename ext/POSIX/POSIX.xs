@@ -275,7 +275,9 @@ unsigned long strtoul _((const char *, char **, int));
 extern char *tzname[];
 #  endif
 #else
+#if !defined(__GNUC__) && !defined(tzname)
 char *tzname[] = { "" , "" };
+#endif
 #endif
 
 /* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)

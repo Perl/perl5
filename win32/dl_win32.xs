@@ -26,12 +26,26 @@ calls.
 
 #include "EXTERN.h"
 #include "perl.h"
+#include "win32.h"
 
 #ifdef PERL_OBJECT
 #define NO_XSLOCKS
 #endif  /* PERL_OBJECT */
 
 #include "XSUB.h"
+
+static SV *error_sv;
+
+static char *
+OS_Error_String(void)
+{
+ DWORD err = GetLastError();
+ STRLEN len;
+ if (!error_sv)
+  error_sv = newSVpv("",0);
+ win32_str_os_error(error_sv,err);
+ return SvPV(error_sv,len);
+}
 
 #include "dlutils.c"	/* SaveError() etc	*/
 
@@ -96,7 +110,7 @@ dl_load_file(filename,flags=0)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr()," libref=%x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError(PERL_OBJECT_THIS_ "%d",GetLastError()) ;
+	SaveError(PERL_OBJECT_THIS_ "load_file:%s",OS_Error_String()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 
@@ -112,7 +126,7 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"  symbolref = %x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError(PERL_OBJECT_THIS_ "%d",GetLastError()) ;
+	SaveError(PERL_OBJECT_THIS_ "find_symbol:%s",OS_Error_String()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 
