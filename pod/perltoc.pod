@@ -2545,6 +2545,24 @@ C<(?(condition)yes-pattern|no-pattern)>
 
 =over 4
 
+=item Text Fields
+
+=item Numeric Fields
+
+=item The Field @* for Variable Width Multi-Line Text
+
+=item The Field ^* for Variable Width One-line-at-a-time Text
+
+=item Specifying Values
+
+=item Using Fill Mode
+
+=item Suppressing Lines Where All Fields Are Void
+
+=item Repeating Format Lines
+
+=item Top of Form Processing
+
 =item Format Variables
 
 =back
@@ -4221,6 +4239,8 @@ C<!!!>, C<!!>, C<!>
 
 =item The RETVAL Variable
 
+=item Returning SVs, AVs and HVs through RETVAL
+
 =item The MODULE Keyword
 
 =item The PACKAGE Keyword
@@ -4708,15 +4728,15 @@ newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv,
 SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off,
 SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIsCOW,
 SvIsCOW_shared_hash, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp,
-SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX,
-SvNVx, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
+SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx,
+SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
 SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
-SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX, SvPV_force, SvPV_force_nomg,
+SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on,
 SvTRUE, SvTYPE, SvUNLOCK, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on,
-SvUV, SvUVX, SvUVx, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv,
+SvUV, SvUVx, SvUVX, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv,
 sv_2pvbyte, sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags,
 sv_2pv_nolen, sv_2uv, sv_backoff, sv_bless, sv_catpv, sv_catpvf,
 sv_catpvf_mg, sv_catpvn, sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg,
@@ -5482,7 +5502,7 @@ B<-V>
 
 =back
 
-=head2 perldelta, perl583delta - what is new for perl v5.8.3
+=head2 perldelta - what is new for perl v5.8.4
 
 =over 4
 
@@ -5492,15 +5512,33 @@ B<-V>
 
 =item Core Enhancements
 
+=over 4
+
+=item Malloc wrapping
+
+=item Unicode Character Database 4.0.1
+
+=item suidperl less insecure
+
+=item format
+
+=back
+
 =item Modules and Pragmata
 
-CGI, Cwd, Digest, Digest::MD5, Encode, File::Spec, FindBin, List::Util,
-Math::BigInt, PodParser, Pod::Perldoc, POSIX, Unicode::Collate,
-Unicode::Normalize, Test::Harness, threads::shared
+=over 4
 
-=item Utility Changes
+=item Updated modules
 
-=item New Documentation
+Attribute::Handlers, B, Benchmark, CGI, Carp, Cwd, Exporter, File::Find,
+IO, IPC::Open3, Local::Maketext, Math::BigFloat, Math::BigInt,
+Math::BigRat, MIME::Base64, ODBM_File, POSIX, Shell, Socket, Storable,
+Switch, Sys::Syslog, Term::ANSIColor, Term::Unicode, Time::HiRes,
+Unicode::UCD, Win32, base, open, threads, utf8
+
+=back
+
+=item Performance Enhancements
 
 =item Installation and Configuration Improvements
 
@@ -5510,15 +5548,7 @@ Unicode::Normalize, Test::Harness, threads::shared
 
 =item Changed Internals
 
-=item Configuration and Building
-
-=item Platform Specific Problems
-
-=item Known Problems
-
 =item Future Directions
-
-=item Obituary
 
 =item Reporting Bugs
 
@@ -5536,11 +5566,31 @@ Unicode::Normalize, Test::Harness, threads::shared
 
 =item Core Enhancements
 
+=over 4
+
+=item Malloc wrapping
+
+=item Unicode Character Database 4.0.1
+
+=item suidperl less insecure
+
+=item format
+
+=back
+
 =item Modules and Pragmata
 
-=item Utility Changes
+=over 4
 
-=item New Documentation
+=item Updated modules
+
+Attribute::Handlers, B, Benchmark, CGI, Carp, Cwd, Exporter, File::Find,
+IO, IPC::Open3, Local::Maketext, Math::BigFloat, Math::BigInt,
+Math::BigRat, MIME::Base64, ODBM_File, POSIX, Shell, Socket, Storable,
+Switch, Sys::Syslog, Term::ANSIColor, Term::Unicode, Time::HiRes,
+Unicode::UCD, Win32, base, open, threads, utf8
+
+=back
 
 =item Performance Enhancements
 
@@ -5552,11 +5602,7 @@ Unicode::Normalize, Test::Harness, threads::shared
 
 =item Changed Internals
 
-=item New Tests
-
-=item Known Problems
-
-=item Platform Specific Problems
+=item Future Directions
 
 =item Reporting Bugs
 
@@ -8131,7 +8177,9 @@ systems
 
 =over 4
 
-=item Compiling Perl 5 on MachTen
+=item Perl version 5.8.x and greater not supported
+
+=item Compiling Perl 5.6.x on MachTen
 
 =item Failures during C<make test> on MachTen
 
@@ -9023,6 +9071,8 @@ Miscellaneous Things
 
 =item BUGS AND CAVEATS
 
+=item ACKNOWLEDGEMENTS
+
 =item AUTHORS
 
 Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
@@ -9108,8 +9158,7 @@ A thread exited while %d other threads were still running
 =item BUGS
 
 Parent-Child threads, Returning objects, Creating threads inside BEGIN
-blocks, PERL_OLD_SIGNALS are not threadsafe, will not be, Detached threads
-on Windows
+blocks, PERL_OLD_SIGNALS are not threadsafe, will not be
 
 =item AUTHOR and COPYRIGHT
 
@@ -10323,6 +10372,26 @@ B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
 
 =item Using B::Concise outside of the O framework
 
+=over 4
+
+=item example: Altering Concise Output
+
+=item set_style()
+
+=item add_style()
+
+=item set_style_standard($name)
+
+=item add_callback()
+
+=item running B::Concise::compile()
+
+=item B::Concise::reset_sequence()
+
+=item Errors
+
+=back
+
 =item AUTHOR
 
 =back
@@ -11189,7 +11258,7 @@ module
 
 =back
 
-=head2 Carp::Heavy, Carp heavy machinery - no user serviceable parts inside
+=head2 Carp::Heavy - heavy machinery, no user serviceable parts inside
 
 =head2 Class::ISA -- report the search path for a class's ISA tree
 
@@ -11493,8 +11562,8 @@ C<perl>, C<perl_patchlevel>
 
 C<PERL_REVISION>, C<PERL_SUBVERSION>, C<PERL_VERSION>, C<perladmin>,
 C<perllibs>, C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>,
-C<pm_apiversion>, C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>,
-C<privlibexp>, C<procselfexe>, C<prototype>, C<ptrsize>
+C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>, C<privlibexp>,
+C<procselfexe>, C<prototype>, C<ptrsize>
 
 =item q
 
@@ -11560,7 +11629,7 @@ C<versiononly>, C<vi>, C<voidflags>
 
 =item x
 
-C<xlibpth>, C<xs_apiversion>
+C<xlibpth>
 
 =item y
 
@@ -11600,6 +11669,8 @@ abs_path, realpath, fast_abs_path
 
 =item NOTES
 
+=item AUTHOR
+
 =item SEE ALSO
 
 =back
@@ -11636,6 +11707,74 @@ CLIENT->output(LIST)
 =back
 
 =item BUGS
+
+=item AUTHOR
+
+=back
+
+=head2 DBM_Filter -- Filter DBM keys/values 
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item What is a DBM Filter?
+
+=over 4
+
+=item So what's new?
+
+=back
+
+=item METHODS
+
+=over 4
+
+=item $db->Filter_Push()
+
+=item $db->Filter_Key_Push()
+
+=item $db->Filter_Value_Push()
+
+Filter_Push, Filter_Key_Push, Filter_Value_Push
+
+=item $db->Filter_Pop()
+
+=item $db->Filtered()
+
+=back
+
+=item Writing a Filter
+
+=over 4
+
+=item Immediate Filters
+
+=item Canned Filters
+
+"name", params
+
+=back
+
+=item Filters Included
+
+utf8, encode, compress, int32, null
+
+=item NOTES
+
+=over 4
+
+=item Maintain Round Trip Integrity
+
+=item Don't mix filtered & non-filtered data in the same database file. 
+
+=back
+
+=item EXAMPLE
+
+=item SEE ALSO
 
 =item AUTHOR
 
@@ -12040,10 +12179,10 @@ compactDump, veryCompact, set, get
 =item DESCRIPTION
 
 @dl_library_path, @dl_resolve_using, @dl_require_symbols, @dl_librefs,
-@dl_modules, dl_error(), $dl_debug, dl_findfile(), dl_expandspec(),
-dl_load_file(), dl_unload_file(), dl_load_flags(), dl_find_symbol(),
-dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(),
-bootstrap()
+@dl_modules, @dl_shared_objects, dl_error(), $dl_debug, dl_findfile(),
+dl_expandspec(), dl_load_file(), dl_unload_file(), dl_load_flags(),
+dl_find_symbol(), dl_find_symbol_anywhere(), dl_undef_symbols(),
+dl_install_xsub(), bootstrap()
 
 =item AUTHOR
 
@@ -14376,6 +14515,8 @@ $dont_use_nlink, symlinks
 
 =item NOTES
 
+=item BUGS AND CAVEATS
+
 =item HISTORY
 
 =back
@@ -16670,7 +16811,7 @@ the same terms as Perl itself.
 
 =back
 
-=head2 Math::BigRat - arbitrarily big rationals
+=head2 Math::BigRat - arbitrarily big rational numbers
 
 =over 4
 
@@ -16728,6 +16869,10 @@ the same terms as Perl itself.
 
 	$x->bfloor();
 
+=item bsqrt()
+
+	$x->bsqrt();
+
 =item config
 
 =back
@@ -16735,7 +16880,8 @@ the same terms as Perl itself.
 =item BUGS
 
 inf handling (partial), NaN handling (partial), rounding (not implemented
-except for bceil/bfloor), $x ** $y where $y is not an integer
+except for bceil/bfloor), $x ** $y where $y is not an integer, bmod(),
+blog(), bmodinv() and bmodpow() (partial)
 
 =item LICENSE
 
@@ -19404,7 +19550,7 @@ C<Storable::is_retrieving>
 
 =item BUGS
 
-=item LIMITATION
+=item LIMITATIONS
 
 =item COPYRIGHT
 
@@ -20992,39 +21138,6 @@ functions
 =item HISTORY
 
 March 18th, 2000
-
-=back
-
-=head2 Win32 - Interfaces to some Win32 API Functions
-
-=over 4
-
-=item DESCRIPTION
-
-=over 4
-
-=item Alphabetical Listing of Win32 Functions
-
-Win32::AbortSystemShutdown(MACHINE), Win32::BuildNumber(),
-Win32::CopyFile(FROM, TO, OVERWRITE), Win32::DomainName(),
-Win32::ExpandEnvironmentStrings(STRING), Win32::FormatMessage(ERRORCODE),
-Win32::FsType(), Win32::FreeLibrary(HANDLE), Win32::GetArchName(),
-Win32::GetChipName(), Win32::GetCwd(), Win32::GetFolderPath(FOLDER [,
-CREATE]), Win32::GetFullPathName(FILENAME), Win32::GetLastError(),
-Win32::GetLongPathName(PATHNAME), Win32::GetNextAvailDrive(),
-Win32::GetOSVersion(), Win32::GetOSName(),
-Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
-PROCNAME), Win32::GetTickCount(), Win32::InitiateSystemShutdown,
-Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
-Win32::LoginName(), Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID,
-SIDTYPE), Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE),
-Win32::MsgBox(MESSAGE [, FLAGS [, TITLE]]), Win32::NodeName(),
-Win32::RegisterServer(LIBRARYNAME), Win32::SetChildShowWindow(SHOWWINDOW),
-Win32::SetCwd(NEWDIRECTORY), Win32::SetLastError(ERROR),
-Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
-Win32::UnregisterServer(LIBRARYNAME)
-
-=back
 
 =back
 
