@@ -107,15 +107,6 @@ usemymalloc='y'
 alignbytes=8
 selecttype='int *' 
 
-# There are some lingering issues about handling g/setpgrp
-# in the perl core.  The best thing is to use the g/setpgrp in the POSIX
-# module.
-# We've given up trying to guess which setting will cause perl to
-# conform to the Principle of Least Astonishment.  If you want to use
-# BSD-style g/setpgrp, you'll have to uncomment the next two lines.
-# i_unistd='undef'
-# d_bsdpgrp='define'
-
 # If your compile complains about FLT_MIN, uncomment the next line
 # POSIX_cflags='ccflags="$ccflags -DFLT_MIN=1.17549435E-38"'
 
@@ -124,3 +115,11 @@ selecttype='int *'
 case "$prefix" in
 '') prefix='/opt/perl5' ;;
 esac
+
+# Date: Fri, 6 Sep 96 23:15:31 CDT
+# From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
+# I looked through the gcc.info and found this:
+#   * GNU CC compiled code sometimes emits warnings from the HP-UX
+#     assembler of the form:
+#          (warning) Use of GR3 when frame >= 8192 may cause conflict.
+#     These warnings are harmless and can be safely ignored.
