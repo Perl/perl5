@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jun 29 17:44:53 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Jul  2 19:35:08 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9860,10 +9860,16 @@ eval $inlibc
 
 echo " "
 : See if fcntl-based locking works.
-$cat >try.c <<'EOCP'
+$cat >try.c <<EOCP
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
+#ifdef SIGALRM
+$signal_t blech(x) int x; { exit(3); }
+#endif
+EOCP
+$cat >try.c <<'EOCP'
 int main() {
 #if defined(F_SETLK) && defined(F_SETLKW)
      struct flock flock;
@@ -9872,6 +9878,10 @@ int main() {
      flock.l_type = F_RDLCK;
      flock.l_whence = SEEK_SET;
      flock.l_start = flock.l_len = 0;
+#ifdef SIGALRM
+     signal(SIGALRM, blech);
+     alarm(10);
+#endif
      retval = fcntl(fd, F_SETLK, &flock);
      close(fd);
      (retval < 0 ? exit(2) : exit(0));
@@ -9891,6 +9901,18 @@ case "$d_fcntl" in
 		else
 			echo "Nope, it didn't work."
 			val="$undef"
+			case "$?" in
+			3) $cat >&4 <<EOM
+***
+*** I had to forcibly timeout from fcntl(..., F_SETLK, ...).
+*** This is (almost) impossible.
+*** If your NFS lock daemons are not feeling well, something like
+*** this may happen, please investigate.  Cannot continue, aborting.
+***
+EOM
+				exit 1
+				;;
+			esac
 		fi
 	else
 		echo "I'm unable to compile the test program, so I'll assume not."
