@@ -480,7 +480,6 @@ void	save_destructor _((void (*f)(void*), void* p));
 VIRTUAL void	save_freesv _((SV* sv));
 VIRTUAL void	save_freeop _((OP* o));
 VIRTUAL void	save_freepv _((char* pv));
-VIRTUAL void	save_generic_svref _((SV** sptr));
 VIRTUAL void	save_gp _((GV* gv, I32 empty));
 VIRTUAL HV*	save_hash _((GV* gv));
 VIRTUAL void	save_helem _((HV* hv, SV *key, SV **sptr));
@@ -899,6 +898,7 @@ VIRTUAL void	sv_usepvn_mg _((SV *sv, char *ptr, STRLEN len));
 
 VIRTUAL MGVTBL*	get_vtbl _((int vtbl_id));
 
+VIRTUAL void	save_generic_svref _((SV** sptr));
 /* New virtual functions must be added here to maintain binary
  * compatablity with PERL_OBJECT
  */
