@@ -45,5 +45,3 @@ print "ok 12\n";
 print "not " unless close($f);
 print "ok 13\n";
 unlink("afile");     
-
-

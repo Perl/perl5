@@ -1562,9 +1562,9 @@ PP(pp_caller)
     {
 	SV * mask ;
 	SV * old_warnings = cx->blk_oldcop->cop_warnings ;
-	if  (old_warnings == WARN_NONE || old_warnings == WARN_STD)
+	if  (old_warnings == pWARN_NONE || old_warnings == pWARN_STD)
             mask = newSVpvn(WARN_NONEstring, WARNsize) ;
-        else if (old_warnings == WARN_ALL)
+        else if (old_warnings == pWARN_ALL)
             mask = newSVpvn(WARN_ALLstring, WARNsize) ;
         else
             mask = newSVsv(old_warnings);
@@ -1848,15 +1848,21 @@ PP(pp_return)
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
 			sv_2mortal(*newsp);
-		    } else {
-			FREETMPS;
-			*++newsp = sv_mortalcopy(*SP);
 		    }
-		} else
+		    else {
+			sv = SvREFCNT_inc(*SP);	/* FREETMPS could clobber it */
+			FREETMPS;
+			*++newsp = sv_mortalcopy(sv);
+			SvREFCNT_dec(sv);
+		    }
+		}
+		else
 		    *++newsp = (SvTEMP(*SP)) ? *SP : sv_mortalcopy(*SP);
-	    } else
+	    }
+	    else
 		*++newsp = sv_mortalcopy(*SP);
-	} else
+	}
+	else
 	    *++newsp = &PL_sv_undef;
     }
     else if (gimme == G_ARRAY) {
@@ -3161,11 +3167,11 @@ PP(pp_require)
     PL_hints = 0;
     SAVESPTR(PL_compiling.cop_warnings);
     if (PL_dowarn & G_WARN_ALL_ON)
-        PL_compiling.cop_warnings = WARN_ALL ;
+        PL_compiling.cop_warnings = pWARN_ALL ;
     else if (PL_dowarn & G_WARN_ALL_OFF)
-        PL_compiling.cop_warnings = WARN_NONE ;
+        PL_compiling.cop_warnings = pWARN_NONE ;
     else 
-        PL_compiling.cop_warnings = WARN_STD ;
+        PL_compiling.cop_warnings = pWARN_STD ;
 
     if (filter_sub || filter_child_proc) {
 	SV *datasv = filter_add(run_user_filter, Nullsv);

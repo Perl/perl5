@@ -565,17 +565,18 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	if (*(mg->mg_ptr+1) == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
 	else if (strEQ(mg->mg_ptr, "\027ARNING_BITS")) {
-	    if (PL_compiling.cop_warnings == WARN_NONE ||
-	        PL_compiling.cop_warnings == WARN_STD)
+	    if (PL_compiling.cop_warnings == pWARN_NONE ||
+	        PL_compiling.cop_warnings == pWARN_STD)
 	    {
 	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
             }
-            else if (PL_compiling.cop_warnings == WARN_ALL) {
+            else if (PL_compiling.cop_warnings == pWARN_ALL) {
 	        sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
 	    }    
             else {
 	        sv_setsv(sv, PL_compiling.cop_warnings);
 	    }    
+	    SvPOK_only(sv);
 	}
 	else if (strEQ(mg->mg_ptr, "\027IDE_SYSTEM_CALLS"))
 	    sv_setiv(sv, (IV)PL_widesyscalls);
@@ -1715,23 +1716,31 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 		if (!SvPOK(sv) && PL_localizing) {
 	            sv_setpvn(sv, WARN_NONEstring, WARNsize);
-	            PL_compiling.cop_warnings = WARN_NONE;
+	            PL_compiling.cop_warnings = pWARN_NONE;
 		    break;
 		}
-                if (memEQ(SvPVX(sv), WARN_ALLstring, WARNsize)) {
-	            PL_compiling.cop_warnings = WARN_ALL;
+                if (isWARN_on(sv, WARN_ALL)) {
+	            PL_compiling.cop_warnings = pWARN_ALL;
 	            PL_dowarn |= G_WARN_ONCE ;
 	        }	
-	        else if (memEQ(SvPVX(sv), WARN_NONEstring, WARNsize))
-	            PL_compiling.cop_warnings = WARN_NONE;
-                else {
-	            if (specialWARN(PL_compiling.cop_warnings))
-		        PL_compiling.cop_warnings = newSVsv(sv) ;
-	            else
-	                sv_setsv(PL_compiling.cop_warnings, sv);
-	            if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
-	                PL_dowarn |= G_WARN_ONCE ;
-	        }
+		else {
+		    int i ;
+		    int accumulate = 0 ;
+		    int len ;
+		    char * ptr = (char*)SvPV(sv, len) ;
+		    for (i = 0 ; i < len ; ++i) 
+		        accumulate += ptr[i] ;
+		    if (!accumulate)
+	                PL_compiling.cop_warnings = pWARN_NONE;
+                    else {
+	                if (specialWARN(PL_compiling.cop_warnings))
+		            PL_compiling.cop_warnings = newSVsv(sv) ;
+	                else
+	                    sv_setsv(PL_compiling.cop_warnings, sv);
+	                if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
+	                    PL_dowarn |= G_WARN_ONCE ;
+	            }
+		}
 	    }
 	}
 	else if (strEQ(mg->mg_ptr, "\027IDE_SYSTEM_CALLS"))

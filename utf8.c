@@ -101,6 +101,39 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 #endif
 }
 
+/* Tests if some arbitrary number of bytes begins in a valid UTF-8 character.
+ * The actual number of bytes in the UTF-8 character will be returned if it
+ * is valid, otherwise 0. */
+int
+Perl_is_utf8_char(pTHX_ U8 *s)
+{
+    U8 u = *s;
+    int slen, len;
+
+    if (!(u & 0x80))
+	return 1;
+
+    if (!(u & 0x40))
+	return 0;
+
+    if      (!(u & 0x20))	{ len = 2; }
+    else if (!(u & 0x10))	{ len = 3; }
+    else if (!(u & 0x08))	{ len = 4; }
+    else if (!(u & 0x04))	{ len = 5; }
+    else if (!(u & 0x02))	{ len = 6; }
+    else if (!(u & 0x01))	{ len = 7; }
+    else 			{ len = 13; } /* whoa! */
+
+    slen = len - 1;
+    s++;
+    while (slen--) {
+	if ((*s & 0xc0) != 0x80)
+	    return 0;
+	s++;
+    }
+    return len;
+}
+
 UV
 Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
 {
@@ -500,6 +533,8 @@ Perl_to_uni_lower_lc(pTHX_ U32 c)
 bool
 Perl_is_utf8_alnum(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_alnum)
 	PL_utf8_alnum = swash_init("utf8", "IsAlnum", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_alnum, p);
@@ -515,6 +550,8 @@ Perl_is_utf8_alnum(pTHX_ U8 *p)
 bool
 Perl_is_utf8_alnumc(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_alnum)
 	PL_utf8_alnum = swash_init("utf8", "IsAlnumC", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_alnum, p);
@@ -536,6 +573,8 @@ Perl_is_utf8_idfirst(pTHX_ U8 *p)
 bool
 Perl_is_utf8_alpha(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_alpha)
 	PL_utf8_alpha = swash_init("utf8", "IsAlpha", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_alpha, p);
@@ -544,6 +583,8 @@ Perl_is_utf8_alpha(pTHX_ U8 *p)
 bool
 Perl_is_utf8_ascii(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_ascii)
 	PL_utf8_ascii = swash_init("utf8", "IsAscii", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_ascii, p);
@@ -552,6 +593,8 @@ Perl_is_utf8_ascii(pTHX_ U8 *p)
 bool
 Perl_is_utf8_space(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_space)
 	PL_utf8_space = swash_init("utf8", "IsSpace", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_space, p);
@@ -560,6 +603,8 @@ Perl_is_utf8_space(pTHX_ U8 *p)
 bool
 Perl_is_utf8_digit(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_digit)
 	PL_utf8_digit = swash_init("utf8", "IsDigit", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_digit, p);
@@ -568,6 +613,8 @@ Perl_is_utf8_digit(pTHX_ U8 *p)
 bool
 Perl_is_utf8_upper(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_upper)
 	PL_utf8_upper = swash_init("utf8", "IsUpper", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_upper, p);
@@ -576,6 +623,8 @@ Perl_is_utf8_upper(pTHX_ U8 *p)
 bool
 Perl_is_utf8_lower(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_lower)
 	PL_utf8_lower = swash_init("utf8", "IsLower", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_lower, p);
@@ -584,6 +633,8 @@ Perl_is_utf8_lower(pTHX_ U8 *p)
 bool
 Perl_is_utf8_cntrl(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_cntrl)
 	PL_utf8_cntrl = swash_init("utf8", "IsCntrl", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_cntrl, p);
@@ -592,6 +643,8 @@ Perl_is_utf8_cntrl(pTHX_ U8 *p)
 bool
 Perl_is_utf8_graph(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_graph)
 	PL_utf8_graph = swash_init("utf8", "IsGraph", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_graph, p);
@@ -600,6 +653,8 @@ Perl_is_utf8_graph(pTHX_ U8 *p)
 bool
 Perl_is_utf8_print(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_print)
 	PL_utf8_print = swash_init("utf8", "IsPrint", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_print, p);
@@ -608,6 +663,8 @@ Perl_is_utf8_print(pTHX_ U8 *p)
 bool
 Perl_is_utf8_punct(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_punct)
 	PL_utf8_punct = swash_init("utf8", "IsPunct", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_punct, p);
@@ -616,6 +673,8 @@ Perl_is_utf8_punct(pTHX_ U8 *p)
 bool
 Perl_is_utf8_xdigit(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_xdigit)
 	PL_utf8_xdigit = swash_init("utf8", "IsXDigit", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_xdigit, p);
@@ -624,6 +683,8 @@ Perl_is_utf8_xdigit(pTHX_ U8 *p)
 bool
 Perl_is_utf8_mark(pTHX_ U8 *p)
 {
+    if (!is_utf8_char(p))
+	return FALSE;
     if (!PL_utf8_mark)
 	PL_utf8_mark = swash_init("utf8", "IsM", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_mark, p);

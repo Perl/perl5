@@ -448,10 +448,10 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 /*
 =for apidoc gv_stashpv
 
-Returns a pointer to the stash for a specified package.  If C<create> is
-set then the package will be created if it does not already exist.  If
-C<create> is not set and the package does not exist then NULL is
-returned.
+Returns a pointer to the stash for a specified package.  C<name> should
+be a valid UTF-8 string.  If C<create> is set then the package will be
+created if it does not already exist.  If C<create> is not set and the
+package does not exist then NULL is returned.
 
 =cut
 */
@@ -494,8 +494,8 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
 /*
 =for apidoc gv_stashsv
 
-Returns a pointer to the stash for a specified package.  See
-C<gv_stashpv>.
+Returns a pointer to the stash for a specified package, which must be a
+valid UTF-8 string.  See C<gv_stashpv>.
 
 =cut
 */

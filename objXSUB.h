@@ -687,6 +687,10 @@
 #define Perl_to_uni_lower_lc	pPerl->Perl_to_uni_lower_lc
 #undef  to_uni_lower_lc
 #define to_uni_lower_lc		Perl_to_uni_lower_lc
+#undef  Perl_is_utf8_char
+#define Perl_is_utf8_char	pPerl->Perl_is_utf8_char
+#undef  is_utf8_char
+#define is_utf8_char		Perl_is_utf8_char
 #undef  Perl_is_utf8_alnum
 #define Perl_is_utf8_alnum	pPerl->Perl_is_utf8_alnum
 #undef  is_utf8_alnum

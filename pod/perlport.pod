@@ -1287,6 +1287,9 @@ Not implemented. (S<Mac OS>)
 
 Implemented via Spawn. (VM/ESA)
 
+Does not automatically flush output handles on some platforms.
+(SunOS, Solaris, HP-UX)
+
 =item fcntl FILEHANDLE,FUNCTION,SCALAR
 
 Not implemented. (Win32, VMS)
@@ -1299,7 +1302,12 @@ Available only on Windows NT (not on Windows 95). (Win32)
 
 =item fork
 
-Not implemented. (S<Mac OS>, Win32, AmigaOS, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (S<Mac OS>, AmigaOS, S<RISC OS>, VOS, VM/ESA)
+
+Emulated using multiple interpreters.  See L<perlfork>.  (Win32)
+
+Does not automatically flush output handles on some platforms.
+(SunOS, Solaris, HP-UX)
 
 =item getlogin
 
@@ -1502,6 +1510,9 @@ The C<|> variants are supported only if ToolServer is installed.
 
 open to C<|-> and C<-|> are unsupported. (S<Mac OS>, Win32, S<RISC OS>)
 
+Opening a process does not automatically flush output handles on some
+platforms.  (SunOS, Solaris, HP-UX)
+
 =item pipe READHANDLE,WRITEHANDLE
 
 Not implemented. (S<Mac OS>)
@@ -1617,6 +1628,9 @@ Far from being POSIX compliant.  Because there may be no underlying
 /bin/sh tries to work around the problem by forking and execing the
 first token in its argument string.  Handles basic redirection
 ("<" or ">") on its own behalf. (MiNT)
+
+Does not automatically flush output handles on some platforms.
+(SunOS, Solaris, HP-UX)
 
 =item times
 

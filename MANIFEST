@@ -939,6 +939,7 @@ lib/utf8_heavy.pl				Support routines for utf8 pragma
 lib/validate.pl		Perl library supporting wholesale file mode validation
 lib/vars.pm		Declare pseudo-imported global variables
 lib/warnings.pm		For "use warnings"
+lib/warnings/register.pm	For "use warnings::register"
 makeaperl.SH		perl script that produces a new perl binary
 makedef.pl		Create symbol export lists for linking
 makedepend.SH		Precursor to makedepend
