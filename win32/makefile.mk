@@ -188,7 +188,7 @@ CCLIBDIR	*= $(CCHOME)\lib
 #
 # This should normally be disabled.  Enabling it causes perl to read scripts
 # in text mode (which is the 5.005 behavior) and will break ByteLoader.
-#BUILDOPT	+= -DUSE_TEXTMODE_SCRIPTS
+#BUILDOPT	+= -DPERL_TEXTMODE_SCRIPTS
 
 #
 # This should normally be disabled.  Enabling it runs a cloned toplevel

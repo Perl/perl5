@@ -330,7 +330,7 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 #define PERL_CORE
 #endif
 
-#ifdef USE_TEXTMODE_SCRIPTS
+#ifdef PERL_TEXTMODE_SCRIPTS
 #  define PERL_SCRIPT_MODE		"r"
 #else
 #  define PERL_SCRIPT_MODE		"rb"
