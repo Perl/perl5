@@ -88,7 +88,7 @@ int	w32_popen_pids[FOPEN_MAX];
 
 char	strerror_buffer[512];
 char	getlogin_buffer[128];
-#ifdef HAVE_DES_CRYPT
+#ifdef HAVE_DES_FCRYPT
 char	crypt_buffer[30];
 #endif
 
