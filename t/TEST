@@ -9,6 +9,7 @@ $| = 1;
 if ($#ARGV >= 0) {
     foreach my $idx (0..$#ARGV) {
 	next unless $ARGV[$idx] =~ /^-(\S+)$/;
+	$core    = 1 if $1 eq 'core';
 	$verbose = 1 if $1 eq 'v';
 	$with_utf= 1 if $1 eq 'utf8';
 	if ($1 =~ /^deparse(,.+)?$/) {
@@ -64,15 +65,20 @@ sub _find_tests {
 }
 
 unless (@ARGV) {
-    foreach my $dir (qw(base comp cmd run io op lib)) {
+    foreach my $dir (qw(base comp cmd run io op)) {
         _find_tests($dir);
     }
+    _find_tests("lib") unless $core;
     my $mani = File::Spec->catdir($updir, "MANIFEST");
     if (open(MANI, $mani)) {
         while (<MANI>) { # similar code in t/harness
 	    if (m!^(ext/\S+/([^/]+\.t|test\.pl)|lib/\S+?(\.t|test\.pl))\s!) {
-		push @ARGV, $1;
-		$OVER{$1} = File::Spec->catdir($updir, $1);
+		$t = $1;
+		if (!$core || $t =~ m!^lib/[a-z]!)
+		{
+		    push @ARGV, $t;
+		    $OVER{$t} = File::Spec->catdir($updir, $t);
+		}
 	    }
 	}
     } else {

@@ -941,7 +941,7 @@ makedepend: makedepend.SH config.sh
 	utest ucheck test.utf8 check.utf8 \
 	test.third check.third utest.third ucheck.third test_notty.third \
 	test.deparse test_notty.deparse \
-	minitest
+	minitest coretest
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
@@ -985,6 +985,9 @@ test_notty: test_prep
 
 utest ucheck test.utf8 check.utf8: test_prep
 	PERL=./perl TEST_ARGS=-utf8 $(MAKE) _test
+
+coretest: test_prep
+	PERL=./perl TEST_ARGS=-core $(MAKE) _test
 
 test-prep:	test_prep
 
