@@ -365,6 +365,8 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item PV
 
+=item PVX
+
 =back
 
 =head2 B::PVMG METHODS

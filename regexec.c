@@ -3245,9 +3245,15 @@ S_regmatch(pTHX_ regnode *prog)
 			    c = utf8_to_uvchr((U8*)PL_reginput, NULL);
 			else
 			    c = UCHARAT(PL_reginput);
+			/* If it could work, try it. */
+		        if (c == c1 || c == c2)
+		        {
+			    TRYPAREN(paren, n, PL_reginput);
+			    REGCP_UNWIND(lastcp);
+		        }
 		    }
 		    /* If it could work, try it. */
-		    if (c1 == -1000 || c == c1 || c == c2)
+		    else if (c1 == -1000)
 		    {
 			TRYPAREN(paren, n, PL_reginput);
 			REGCP_UNWIND(lastcp);

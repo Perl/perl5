@@ -356,8 +356,8 @@ RSC		= rc
 # Options
 #
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
-#PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch
-DEFINES		= -DWIN32 -D_MT $(CRYPT_FLAG)
+#PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
+DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -P
@@ -381,6 +381,7 @@ EXEOUT_FLAG	= -e
 LIBOUT_FLAG	=
 .IF "$(BCCOLD)" != "define"
 LINK_FLAGS	+= -Gn
+DEFINES		+= -D_MT
 .END
 .IF "$(BCCVCL)" == "define"
 LIBC		= cp32mti.lib vcl.lib vcl50.lib vclx50.lib vcle50.lib

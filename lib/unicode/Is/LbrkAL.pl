@@ -254,7 +254,6 @@ return <<'END';
 1fdd	1fef
 1ff2	1ff4
 1ff6	1ffe
-2015	
 2017	
 2022	2023
 2038	
@@ -327,7 +326,7 @@ return <<'END';
 25b8	25bb
 25be	25bf
 25c2	25c5
-25c8	25ca
+25c9	25ca
 25cc	25cd
 25d2	25e1
 25e6	25ee
@@ -372,7 +371,6 @@ fbd3	fd3d
 fd50	fd8f
 fd92	fdc7
 fdf0	fdfb
-fe6b	
 fe70	fe72
 fe74	
 fe76	fefc

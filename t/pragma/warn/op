@@ -884,3 +884,15 @@ in begin
 in mainline
 in end
 in end
+########
+# op.c
+my @x;
+use warnings 'syntax' ;
+push(@x);
+unshift(@x);
+no warnings 'syntax' ;
+push(@x);
+unshift(@x);
+EXPECT
+Useless use of push with no values at - line 4.
+Useless use of unshift with no values at - line 5.

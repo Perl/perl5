@@ -29,7 +29,9 @@ print OUT <<"!GROK!THIS!";
 $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
       if \$running_under_some_shell;
-my \$perlpath = "$Config{perlpath}";
+(my \$perlpath = <<'/../') =~ s/\\s*\\z//;
+$Config{perlpath}
+/../
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
@@ -334,10 +336,8 @@ END
 if (exists $init{doexec}) {
     print <<'END';
 
-BEGIN {
-    require Cwd;
-    my $cwd = Cwd::cwd();
-}
+use Cwd ();
+my $cwd = Cwd::cwd();
 
 sub doexec {
     my $ok = shift;

@@ -58,7 +58,7 @@ struct xpvhv {
 	} \
 	hash_PeRlHaSh += (hash_PeRlHaSh << 3); \
 	hash_PeRlHaSh ^= (hash_PeRlHaSh >> 11); \
-	(hash) = (hash_PeRlHaSh += (hash_PeRlHaSh << 15)); \
+	(hash) = (hash_PeRlHaSh + (hash_PeRlHaSh << 15)); \
     } STMT_END
 
 /*

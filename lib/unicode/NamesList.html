@@ -1,17 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+
+       "http://www.w3.org/TR/REC-html40/loose.dtd"> 
+
 <html>
 
 <head>
-<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
-<title>Unicode 3.0 NamesList File Structure</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta name="keywords"
+content="unicode, normalization, composition, decomposition">
+<meta name="description" content="Specifies the Unicode Normalization Formats">
+<title>UCD: Unicode NamesList File Format</title>
+<link rel="stylesheet" type="text/css" href="http://www.unicode.org/unicode.css">
+<style type="text/css">
+
+<!--
+
+.foo         {  }
+-->
+
+</style>
 </head>
 
-<body>
+<body bgcolor="#ffffff">
 
-<h3>Unicode NamesList File Format</h3>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td>
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td class="icon"><a href="http://www.unicode.org"><img border="0"
+            src="http://www.unicode.org/webscripts/logo60s2.gif" align="middle"
+            alt="[Unicode]" width="34" height="33"></a>&nbsp;&nbsp;<a
+            class="bar" href="UnicodeCharacterDatabase-3.1.0.html">Unicode Character     
+            Database</a></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="gray">&nbsp;</td>
+  </tr>
+</table>
+          <h1>Unicode NamesList File Format</h1>       
+<table height="87" cellSpacing="2" cellPadding="0" width="100%" border="1">  
+  <tbody>  
+    <tr>  
+      <td vAlign="top" width="144">Revision</td>  
+      <td vAlign="top">3.1</td>  
+    </tr>  
+    <tr>  
+      <td vAlign="top" width="144">Authors</td>  
+      <td vAlign="top">Asmus Freytag</td>  
+    </tr>  
+    <tr>  
+      <td vAlign="top" width="144">Date</td>  
+      <td vAlign="top">2001-02-26</td> 
+    </tr> 
+    <tr> 
+      <td vAlign="top" width="144">This Version</td> 
+      <td vAlign="top"><a href="http://http://www.unicode.org/Public/3.1-Update/NamesList-2.html">http://www.unicode.org/Public/3.1-Update/NamesList-2.html</a></td>
+    </tr>
+    <tr>
+      <td vAlign="top" width="144">Previous Version</td>
+      <td vAlign="top"><a href="http://http://www.unicode.org/Public/3.0-Update/NamesList-1.html">http://www.unicode.org/Public/3.0-Update/NamesList-1.html</a></td>
+    </tr>
+    <tr>
+      <td vAlign="top" width="144">Latest Version</td>
+      <td vAlign="top"><a href="http://www.unicode.org/Public/UNIDATA/NamesList.html">http://www.unicode.org/Public/UNIDATA/NamesList.html</a></td>
+    </tr>
+  </tbody>
+</table>
+<h3>
+<br>
+<i>Summary</i></h3>
+<blockquote>
+  <p>This file describes the format and contents of NamesList.txt</p>
+</blockquote>
+<h3><i>Status</i></h3>
+<blockquote>
+<p>
+<i>The file and the files described herein are part of the <a href="UnicodeCharacterDatabase-3.1.0.html"> Unicode Character Database</a> 
+(UCD)   
+and are governed by the <a href="#Terms of Use">UCD Terms of Use</a> stated at the end.</i></p>  
+</blockquote>
+          <hr width="50%">  
 
-<p>Last updated: 1999-07-06</p>
-
-<h3>1.0 Introduction</h3>
+<h2>1.0 Introduction</h2>
 
 <p>The Unicode name list file NamesList.txt (also NamesList.lst) is a plain text file used
 to drive the layout of the character code charts in the Unicode Standard. The information
@@ -85,12 +162,12 @@ CHAR_ENTRY:   NAME_LINE | RESERVED_LINE
 		| CHAR_ENTRY NOTICE
 </strong></pre>
 
-<p>In other words:<br>
+<p>In other words:<br>    
 <br>
-Neither TITLE nor&nbsp; SUBTITLE may occur after the first BLOCKHEADER. </p>
+Neither TITLE nor&nbsp; SUBTITLE may occur after the first BLOCKHEADER. </p>    
 
-<p>Only TITLE, SUBTITLE, SUBHEADER, PAGEBREAK, COMMENT_LINE,&nbsp; and IGNORED_LINE may
-occur before the first BLOCKHEADER.</p>
+<p>Only TITLE, SUBTITLE, SUBHEADER, PAGEBREAK, COMMENT_LINE,&nbsp; and IGNORED_LINE may    
+occur before the first BLOCKHEADER.</p>    
 
 <p>Directly following either a NAME_LINE or a RESERVED_LINE an uninterrupted sequence of
 the following lines may occur (in any order and repeated as often as needed): ALIAS_LINE,
@@ -168,7 +245,7 @@ EMPTY_LINE:	LF
 			// blank page, then output one or more charts
 			// followed by the list of character names. 
 			// use BLOCKSTART and BLOCKEND to define the 
-			// what characters belong to a block
+			// characters belonging to a block
 			// use blockname in page and table headers
 	<strong>	&quot;@@&quot; &lt;tab&gt; BLOCKSTART &lt;tab&gt; BLOCKNAME COMMENT &lt;tab&gt; BLOCKEND
 			</strong>// if a comment is present it replaces the blockname
@@ -188,21 +265,37 @@ EMPTY_LINE:	LF
 			// character corresponding to char
 			// If character is combining, it is replaced with
 			// CHAR NBSP &lt;circ&gt; x NBSP where &lt;circ&gt; is the 
-			// dotted circle</small>
-</pre>
+			// dotted circle</small></pre>
+
+<p><strong>Notes:</strong> 
+
+</p>
+
+<ul>
+  <li>Blocks must be aligned on 16-code point boundary and contain an integer
+    multiple of code points. The exception to that rule is for blocks of
+    ideographs etc. for which no names are listed in the file. Such blocks must
+    end on the actual last character.</li>
+  <li>Blocks must be non-overlapping and in ascending order.&nbsp; Namelines    
+    must be in ascending order and following the block header for the block to    
+    which they belong.</li>    
+  <li>Reserved entries are optional, and will be supplied automatically. They 
+    are required whenever followed by ALIAS_LINE, COMMENT_LINE or CROSS_REF</li>
+</ul>
 
 <h3><strong>1.4 NamesList File Primitives</strong></h3>
 
 <p>The following are the primitives and terminals for the NamesList syntax.</p>
 
-<pre><small><strong>LINE:		STRING LF
-COMMENT:	&quot;(&quot; NAME &quot;)&quot;
-		&quot;(&quot; NAME &quot;)&quot; &quot;*&quot;
-</strong>
-<strong>NAME</strong>:	  	&lt;sequence of ASCII characters, except &quot;(&quot; or &quot;)&quot; &gt; 
+<pre><strong><small>LINE:		STRING LF
+COMMENT:		&quot;(&quot; NAME &quot;)&quot;
+		&quot;(&quot; NAME &quot;)&quot; &quot;*&quot; </small></strong><small>
+<strong>BLOCKNAME:</strong>	&lt;sequence of Latin-1 characters, except &quot;(&quot; and &quot;)&quot;&gt; 
+<strong>NAME</strong>:	  	&lt;sequence of uppercase ASCII letters, digit and hyphen&gt; 
 <strong>STRING</strong>:	  	&lt;sequence of Latin-1 characters&gt; 
 <strong>CHAR</strong>:		<strong>X X X X</strong>
-		<strong>| X X X X X X X X X</strong></small>
+		<strong>| X X X X X</strong>
+		<strong>| X X X X X X</strong></small>
 <small><strong>X:	  	&quot;0&quot;|&quot;1&quot;|&quot;2&quot;|&quot;3&quot;|&quot;4&quot;|&quot;5&quot;|&quot;6&quot;|&quot;7&quot;|&quot;8&quot;|&quot;9&quot;|&quot;A&quot;|&quot;B&quot;|&quot;C&quot;|&quot;D&quot;|&quot;E&quot;|&quot;F&quot; 
 &lt;tab&gt;:</strong>	  	&lt;sequence of one or more ASCII tab characters 0x09&gt;	
 <strong>SP</strong>:	  	&lt;ASCII 0x20&gt;
@@ -213,14 +306,67 @@ COMMENT:	&quot;(&quot; NAME &quot;)&quot;
 
 <ul>
   <li>Special lookahead logic prevents a mention of a 4 digit standard, such as ISO 9999 from
-    being misinterpreted as ISO CHAR.</li>
+    being misinterpreted as ISO CHAR. The - in a character range CHAR-CHAR is
+    replaced by an EN DASH.</li>
   <li>Use of Latin-1 is supported in unibook.exe, but not portably, unless the file is encoded as
     UTF-16LE.</li>
   <li>The final LF in the file must be present</li>
-  <li>A CHAR inside ' or &quot; is expanded, but only its glyph image is printed,&nbsp; the
-    code value is not echoed</li>
-  <li>Straight quotes in an EXPAND_LINE are replaced by curly quotes using English rules.
-    Apostrophes are supported, but nested quotes are not.</li>
+  <li>A CHAR inside ' or &quot; is expanded, but only its glyph image is printed,&nbsp;   
+    the   
+    code value is not echoed.</li>   
+  <li>Straight quotes in an EXPAND_LINE are replaced by curly quotes using English rules. 
+    Apostrophes are supported, but nested quotes are not.</li> 
 </ul>
-</body>
-</html>
+<h2>Modifications</h2>
+<p>Use of 4-6 digit hex notation is now supported.</p>
+          <hr width="50%">  
+<h2>
+UCD <a name="Terms of Use">Terms of Use</a></h2> 
+<h3>
+<i>Disclaimer</i></h3>
+<blockquote>
+  <p><i>The Unicode Character Database is provided as is by Unicode, Inc. No 
+  claims are made as to fitness for any particular purpose. No warranties of any 
+  kind are expressed or implied. The recipient agrees to determine applicability 
+  of information provided. If this file has been purchased on magnetic or 
+  optical media from Unicode, Inc., the sole remedy for any claim will be 
+  exchange of defective media within 90 days of receipt.</i></p>
+  <p><i>This disclaimer is applicable for all other data files accompanying the 
+  Unicode Character Database, some of which have been compiled by the Unicode 
+  Consortium, and some of which have been supplied by other sources.</i></p>
+</blockquote>
+<h3><i>Limitations on Rights to Redistribute This Data</i></h3>
+<blockquote>
+  <p><i>Recipient is granted the right to make copies in any form for internal 
+  distribution and to freely use the information supplied in the creation of 
+  products supporting the Unicode<sup>TM</sup> Standard. The files in the 
+  Unicode Character Database can be redistributed to third parties or other 
+  organizations (whether for profit or not) as long as this notice and the 
+  disclaimer notice are retained. Information can be extracted from these files 
+  and used in documentation or programs, as long as there is an accompanying 
+  notice indicating the source.</i></p>
+</blockquote>
+         <hr width="50%">  
+          <div align="center">  
+            <center>  
+            <table cellspacing="0" cellpadding="0" border="0">  
+              <tr>  
+                <td><a href="../../../../../../index.html"><img  
+                  src="http://www.unicode.org/img/hb_home.gif" border="0"  
+                  alt="Home" width="40" height="49"></a><a  
+                  href="../copyright.html"><img  
+                  src="http://www.unicode.org/img/hb_mid.gif" border="0"  
+                  alt="Terms of Use" width="152" height="49"></a><a  
+                  href="mailto:info@unicode.org"><img  
+                  src="http://www.unicode.org/img/hb_mail.gif" border="0"  
+                  alt="E-mail" width="46" height="49"></a></td>  
+              </tr>  
+            </table>  
+            <script language="Javascript" src="http://www.unicode.org/webscripts/lastModified.js"></script>                
+            </center>  
+          </div>  
+</form>  
+  
+</body>  
+  
+</html> 

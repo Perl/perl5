@@ -36,9 +36,15 @@ use strict;
 # make sure creat()s are neither too much nor too little
 INIT { eval { umask(0077) } }   # doubtless someone has no mask
 
+(my \$pager = <<'/../') =~ s/\\s*\\z//;
+$Config{pager}
+/../
 my \@pagers = ();
-push \@pagers, "$Config{'pager'}" if -x "$Config{'pager'}";
-my \$bindir = '$Config{scriptdir}';
+push \@pagers, \$pager if -x \$pager;
+
+(my \$bindir = <<'/../') =~ s/\\s*\\z//;
+$Config{scriptdir}
+/../
 
 !GROK!THIS!
 

@@ -1902,7 +1902,7 @@ need yourself.
 
 The standard Math::BigInt and Math::BigFloat modules provide
 variable-precision arithmetic and overloaded operators, although
-they're currently pretty slow.  At the cost of some space and
+they're currently pretty slow. At the cost of some space and
 considerable speed, they avoid the normal pitfalls associated with
 limited-precision representations.
 
@@ -1912,8 +1912,25 @@ limited-precision representations.
 
     # prints +15241578780673678515622620750190521
 
-The non-standard modules SSLeay::BN and Math::Pari provide
-equivalent functionality (and much more) with a substantial
-performance savings.
+There are several modules that let you calculate with (bound only by
+memory and cpu-time) unlimited or fixed precision. There are also
+some non-standard modules that provide faster implementations via
+external C libraries.
+
+Here is a short, but incomplete summary:
+
+	Math::Fraction		big, unlimited fractions like 9973 / 12967
+	Math::String		treat string sequences like numbers
+	Math::FixedPrecision	calculate with a fixed precision
+	Math::Currency		for currency calculations
+	Bit::Vector		manipulate bit vectors fast (uses C)
+	Math::BigIntFast	Bit::Vector wrapper for big numbers
+	Math::Pari		provides access to the Pari C library
+	Math::BigInteger	uses an external C library
+	Math::Cephes		uses external Cephes C library (no big numbers)
+	Math::Cephes::Fraction	fractions via the Cephes library
+	Math::GMP		another one using an external C library
+
+Choose wisely.
 
 =cut

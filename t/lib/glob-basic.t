@@ -2,7 +2,12 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    if ($^O eq 'MacOS') { 
+	@INC = qw(: ::lib ::macos:lib); 
+    } else { 
+	@INC = '.'; 
+	push @INC, '../lib'; 
+    }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bFile\/Glob\b/i) {
         print "1..0\n";
@@ -26,7 +31,7 @@ sub array {
 $ENV{PATH} = "/bin";
 delete @ENV{BASH_ENV, CDPATH, ENV, IFS};
 @correct = ();
-if (opendir(D, ".")) {
+if (opendir(D, $^O eq "MacOS" ? ":" : ".")) {
    @correct = grep { !/^\./ } sort readdir(D);
    closedir D;
 }
@@ -120,7 +125,7 @@ print "ok 8\n";
 # "~" should expand to $ENV{HOME}
 $ENV{HOME} = "sweet home";
 @a = bsd_glob('~', GLOB_TILDE | GLOB_NOMAGIC);
-unless (@a == 1 and $a[0] eq $ENV{HOME}) {
+unless ($^O eq "MacOS" || (@a == 1 and $a[0] eq $ENV{HOME})) {
     print "not ";
 }
 print "ok 9\n";
@@ -128,37 +133,43 @@ print "ok 9\n";
 # GLOB_ALPHASORT (default) should sort alphabetically regardless of case
 mkdir "pteerslt", 0777;
 chdir "pteerslt";
-@f_ascii = qw(A.test B.test C.test a.test b.test c.test);
-@f_alpha = qw(A.test a.test B.test b.test C.test c.test);
-if (ord('A') == 193) { # EBCDIC char sets sort lower case before UPPER
-    @f_ascii = sort(@f_ascii);
-    @f_alpha = qw(a.test A.test b.test B.test c.test C.test);
+
+@f_names = qw(Ax.pl Bx.pl Cx.pl aY.pl bY.pl cY.pl);
+@f_alpha = qw(Ax.pl aY.pl Bx.pl bY.pl Cx.pl cY.pl);
+if ('a' lt 'A') { # EBCDIC char sets sort lower case before UPPER
+    @f_names = sort(@f_names);
+    @f_alpha = qw(aY.pl Ax.pl bY.pl Bx.pl cY.pl Cx.pl);
 }
-for (@f_ascii) {
+if ($^O eq 'VMS') {
+    @f_alpha = qw(ax.pl ay.pl bx.pl by.pl cx.pl cy.pl);
+    @f_names = @f_alpha;
+}
+
+for (@f_names) {
     open T, "> $_";
     close T;
 }
-$pat = "*.test";
+
+$pat = "*.pl";
+
 $ok = 1;
-@g_ascii = bsd_glob($pat, 0);
-print "# f_ascii = @f_ascii\n";
-print "# g_ascii = @g_ascii\n";
-if (@g_ascii == 6) {
-    for (@f_ascii) {
-        $ok = 0 unless $_ eq shift @g_ascii;
-    }
+@g_names = bsd_glob($pat, 0);
+print "# f_names = @f_names\n";
+print "# g_names = @g_names\n";
+for (@f_names) {
+    $ok = 0 unless $_ eq shift @g_names;
 }
 print $ok ? "ok 10\n" : "not ok 10\n";
+
 $ok = 1;
 @g_alpha = bsd_glob($pat);
 print "# f_alpha = @f_alpha\n";
 print "# g_alpha = @g_alpha\n";
-if (@g_ascii == 6) {
-    for (@f_alpha) {
-        $ok = 0 unless $_ eq shift @g_alpha;
-    }
+for (@f_alpha) {
+    $ok = 0 unless $_ eq shift @g_alpha;
 }
 print $ok ? "ok 11\n" : "not ok 11\n";
-unlink @f_ascii;
+
+unlink @f_names;
 chdir "..";
 rmdir "pteerslt";

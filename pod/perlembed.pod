@@ -815,9 +815,11 @@ during a session.  Such an application might sporadically decide to
 release any resources associated with the interpreter.
 
 The program must take care to ensure that this takes place I<before>
-the next interpreter is constructed.  By default, the global variable
+the next interpreter is constructed.  By default, when perl is not
+built with any special options, the global variable
 C<PL_perl_destruct_level> is set to C<0>, since extra cleaning isn't
-needed when a program has only one interpreter.
+usually needed when a program only ever creates a single interpreter
+in its entire lifetime.
 
 Setting C<PL_perl_destruct_level> to C<1> makes everything squeaky clean:
 
@@ -839,9 +841,16 @@ When I<perl_destruct()> is called, the interpreter's syntax parse tree
 and symbol tables are cleaned up, and global variables are reset.
 
 Now suppose we have more than one interpreter instance running at the
-same time.  This is feasible, but only if you used the
-C<-DMULTIPLICITY> flag when building Perl.  By default, that sets
-C<PL_perl_destruct_level> to C<1>.
+same time.  This is feasible, but only if you used the Configure option
+C<-Dusemultiplicity> or the options C<-Dusethreads -Duseithreads> when
+building Perl.  By default, enabling one of these Configure options
+sets the per-interpreter global variable C<PL_perl_destruct_level> to
+C<1>, so that thorough cleaning is automatic.
+
+Using C<-Dusethreads -Duseithreads> rather than C<-Dusemultiplicity>
+is more appropriate if you intend to run multiple interpreters
+concurrently in different threads, because it enables support for
+linking in the thread libraries of your system with the interpreter.
 
 Let's give it a try:
 
@@ -862,22 +871,41 @@ Let's give it a try:
      char *one_args[] = { "one_perl", SAY_HELLO };
      char *two_args[] = { "two_perl", SAY_HELLO };
 
+     PERL_SET_CONTEXT(one_perl);
      perl_construct(one_perl);
+     PERL_SET_CONTEXT(two_perl);
      perl_construct(two_perl);
 
+     PERL_SET_CONTEXT(one_perl);
      perl_parse(one_perl, NULL, 3, one_args, (char **)NULL);
+     PERL_SET_CONTEXT(two_perl);
      perl_parse(two_perl, NULL, 3, two_args, (char **)NULL);
 
+     PERL_SET_CONTEXT(one_perl);
      perl_run(one_perl);
+     PERL_SET_CONTEXT(two_perl);
      perl_run(two_perl);
 
+     PERL_SET_CONTEXT(one_perl);
      perl_destruct(one_perl);
+     PERL_SET_CONTEXT(two_perl);
      perl_destruct(two_perl);
 
+     PERL_SET_CONTEXT(one_perl);
      perl_free(one_perl);
+     PERL_SET_CONTEXT(two_perl);
      perl_free(two_perl);
  }
 
+Note the calls to PERL_SET_CONTEXT().  These are necessary to initialize
+the global state that tracks which interpreter is the "current" one on
+the particular process or thread that may be running it.  It should
+always be used if you have more than one interpreter and are making
+perl API calls on both interpreters in an interleaved fashion.
+
+PERL_SET_CONTEXT(interp) should also be called whenever C<interp> is
+used by a thread that did not create it (using either perl_alloc(), or
+the more esoteric perl_clone()).
 
 Compile as usual:
 

@@ -189,7 +189,8 @@ sub walk_topdown {
 	    walk_topdown($kid, $sub, $level + 1);
 	}
     }
-    if (class($op) eq "PMOP" and $ {$op->pmreplroot}) {
+    if (class($op) eq "PMOP" and $ {$op->pmreplroot}
+	and $op->pmreplroot->isa("B::OP")) {
 	walk_topdown($op->pmreplroot, $sub, $level + 1);
     }
 }
@@ -325,7 +326,7 @@ sub concise_op {
     } elsif ($h{targ}) {
 	my $padname = (($curcv->PADLIST->ARRAY)[0]->ARRAY)[$h{targ}];
 	if (defined $padname and class($padname) ne "SPECIAL") {
-	    $h{targarg}  = $padname->PV;
+	    $h{targarg}  = $padname->PVX;
 	    my $intro = $padname->NVX - $cop_seq_base;
 	    my $finish = int($padname->IVX) - $cop_seq_base;
 	    $finish = "end" if $finish == 999999999 - $cop_seq_base;
@@ -339,8 +340,13 @@ sub concise_op {
     if ($h{class} eq "PMOP") {
 	my $precomp = $op->precomp;
 	$precomp = defined($precomp) ? "/$precomp/" : "";
-	my $pmreplstart;
-	if ($ {$op->pmreplstart}) {
+	my $pmreplroot = $op->pmreplroot;
+	my ($pmreplroot, $pmreplstart);
+	if ($ {$pmreplroot = $op->pmreplroot} && $pmreplroot->isa("B::GV")) {
+	    # with C<@stash_array = split(/pat/, str);>,
+	    #  *stash_array is stored in pmreplroot.
+	    $h{arg} = "($precomp => \@" . $pmreplroot->NAME . ")";
+	} elsif ($ {$op->pmreplstart}) {
 	    undef $lastnext;
 	    $pmreplstart = "replstart->" . seq($op->pmreplstart);
 	    $h{arg} = "(" . join(" ", $precomp, $pmreplstart) . ")";

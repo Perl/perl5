@@ -410,7 +410,7 @@ the current source tree (i.e. perl@7582.tar.gz), which will be an
 excellent point to start with when choosing to use the 'rsync the
 patches' scheme. Starting with perl@7582, which means a set of source
 files on which the latest applied patch is number 7582, you apply all
-succeeding patches available from than on (7583, 7584, ...).
+succeeding patches available from then on (7583, 7584, ...).
 
 You can use the patches later as a kind of search archive.
 
@@ -486,7 +486,7 @@ Your patch should update the documentation and test suite.
 
 To report a bug in Perl, use the program I<perlbug> which comes with
 Perl (if you can't get Perl to work, send mail to the address
-I<perlbug@perl.com> or I<perlbug@perl.org>).  Reporting bugs through
+I<perlbug@perl.org> or I<perlbug@perl.com>).  Reporting bugs through
 I<perlbug> feeds into the automated bug-tracking system, access to
 which is provided through the web at I<http://bugs.perl.org/>.  It
 often pays to check the archives of the perl5-porters mailing list to
