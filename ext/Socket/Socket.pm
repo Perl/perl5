@@ -139,7 +139,6 @@ have AF_UNIX in the right place.
 use Carp;
 
 require Exporter;
-use AutoLoader;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(
@@ -256,14 +255,8 @@ sub AUTOLOAD {
     ($constname = $AUTOLOAD) =~ s/.*:://;
     my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
-	if ($! =~ /Invalid/) {
-	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
-	    goto &AutoLoader::AUTOLOAD;
-	}
-	else {
-	    my ($pack,$file,$line) = caller;
-	    croak "Your vendor has not defined Socket macro $constname, used";
-	}
+	my ($pack,$file,$line) = caller;
+	croak "Your vendor has not defined Socket macro $constname, used";
     }
     eval "sub $AUTOLOAD { $val }";
     goto &$AUTOLOAD;
@@ -271,8 +264,4 @@ sub AUTOLOAD {
 
 bootstrap Socket $VERSION;
 
-# Preloaded methods go here.  Autoload methods go after __END__, and are
-# processed by the autosplit program.
-
 1;
-__END__
