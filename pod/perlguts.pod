@@ -832,6 +832,8 @@ The current kinds of Magic Virtual Tables are:
     a        vtbl_amagicelem     %OVERLOAD hash element
     c        (none)              Holds overload table (AMT) on stash
     B        vtbl_bm             Boyer-Moore (fast string search)
+    D        vtbl_regdata        Regex match position data (@+ and @- vars)
+    d        vtbl_regdatum       Regex match position data element
     E        vtbl_env            %ENV hash
     e        vtbl_envelem        %ENV hash element
     f        vtbl_fm             Formline ('compiled' format)

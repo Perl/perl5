@@ -614,6 +614,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    {
 		i = t1 - s1;
 		s = rx->subbeg + s1;
+                if (!rx->subbeg)
+		    break;
+
 	      getrx:
 		if (i >= 0) {
 		    bool was_tainted;

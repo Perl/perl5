@@ -1917,6 +1917,9 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 
     id = SvIVx(*++mark);
     mstr = *++mark;
+    /* suppress warning when reading into undef var --jhi */
+    if (! SvOK(mstr))
+	sv_setpvn(mstr, "", 0);
     msize = SvIVx(*++mark);
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);

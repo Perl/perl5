@@ -60,58 +60,59 @@ if (-d "pod") {
 }
 
 @pods = qw(
-    perl                
-    perlfaq             
-    perltoc             
-    perlbook            
+    perl
+    perlfaq
+    perltoc
+    perlbook
 
-    perlsyn            
-    perldata            
-    perlop              
-    perlreftut          
-    perldsc             
-    perllol             
-    perlrequick         
-    perlretut           
+    perlsyn
+    perldata
+    perlop
+    perlsub
+    perlfunc
+    perlreftut
+    perldsc
+    perlrequick
+    perlpod
+    perlstyle
+    perltrap
 
-    perllexwarn         
-    perldebug           
+    perlrun
+    perldiag
+    perllexwarn
+    perldebug
 
-    perlrun             
-    perlfunc            
-    perlopentut         
-    perlvar             
-    perlsub             
-    perlmod             
-    perlpod             
+    perlvar
+    perllol
+    perlopentut
+    perlretut
 
-    perlstyle           
-    perlmodlib          
-    perlmodinstall      
-    perlnewmod          
-    perltrap            
-    perlport            
-    perlsec             
+    perlref
+    perlre
+    perlform
+    perllocale
+    perlunicode
 
-    perlref             
-    perlre              
-    perlform            
-    perllocale          
-    perlunicode         
+    perlipc
+    perlfork
+    perlnumber
+    perlthrtut
 
-    perlboot            
-    perltoot            
-    perltootc           
-    perlobj             
-    perlbot             
-    perltie             
+    perlport
+    perlsec
 
-    perlipc             
-    perlnumber          
-    perlfork            
-    perlthrtut          
+    perlboot
+    perltoot
+    perltootc
+    perlobj
+    perlbot
+    perltie
 
-    perldiag            
+    perlmod
+    perlmodlib
+    perlmodinstall
+    perlnewmod
+
     perlfaq1            
     perlfaq2            
     perlfaq3            
@@ -152,6 +153,7 @@ if (-d "pod") {
     perlmachten         
     perlos2             
     perlos390           
+    perlposix-bc
     perlvms             
     perlwin32           
 	  );
@@ -164,6 +166,7 @@ if (-d "pod") {
     perlmachten         
     perlos2             
     perlos390           
+    perlposix-bc
     perlvms             
     perlwin32           
           );
@@ -186,7 +189,7 @@ close(MANI);
 open(PERLPOD, "perl.pod") || die "$0: opening perl.pod failed: $!\n";
 while (<PERLPOD>) {
   if (/^For ease of access, /../^\(If you're intending /) {
-	if (/^\s+(perl\w*)\s+\w/) {
+	if (/^\s+(perl\S*)\s+\w/) {
 		push @PERLPODS, "$1.pod";
 	}
   }

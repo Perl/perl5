@@ -93,6 +93,198 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6371] By: jhi                                   on 2000/07/11  20:08:56
+        Log: Minor cleanups on the booklist.
+     Branch: cfgperl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[  6370] By: jhi                                   on 2000/07/11  19:31:13
+        Log: mjd's tr patches "broke" tr/z-Z/z-Z/
+     Branch: cfgperl
+	   ! t/pragma/overload.t
+____________________________________________________________________________
+[  6369] By: gsar                                  on 2000/07/11  19:27:48
+        Log: integrate cfgperl changes#6293..6324 into mainline
+     Branch: perl
+	  +> lib/Win32.pod lib/lib_pm.PL pod/Makefile.SH pod/buildtoc.PL
+	   - lib/lib.pm.PL pod/Makefile pod/Win32.pod pod/buildtoc
+	  !> (integrate 30 files)
+____________________________________________________________________________
+[  6368] By: gsar                                  on 2000/07/11  19:18:57
+        Log: skip integrate of problematic change#6292 from cfgperl into mainline
+     Branch: perl
+	  !> pp_hot.c
+____________________________________________________________________________
+[  6367] By: gsar                                  on 2000/07/11  19:17:21
+        Log: integrate cfgperl changes#6288..6290 into mainline
+     Branch: perl
+	  !> lib/File/Spec/Functions.pm lib/File/Spec/OS2.pm
+____________________________________________________________________________
+[  6366] By: gsar                                  on 2000/07/11  19:11:18
+        Log: integrate cfgperl changes#6268..6282 into mainline
+     Branch: perl
+	  !> (integrate 30 files)
+____________________________________________________________________________
+[  6365] By: gsar                                  on 2000/07/11  18:57:00
+        Log: delete new accidentally branched file
+     Branch: perl
+	   - t/op/method2entersub.t
+____________________________________________________________________________
+[  6364] By: gsar                                  on 2000/07/11  18:55:13
+        Log: skip integrate of change#6267 from cfgperl into mainline (the
+             method call optimization is flawed without additional hints
+             from user about immutableness of @ISA and no runtime method
+             definitions)
+     Branch: perl
+	  +> t/op/method2entersub.t
+	  !> MANIFEST embed.pl lib/ExtUtils/Install.pm lib/base.pm op.c
+	  !> perl.h t/op/sprintf.t xsutils.c
+____________________________________________________________________________
+[  6363] By: gsar                                  on 2000/07/11  18:49:43
+        Log: integrate cfgperl changes#6261..6266 into mainline
+     Branch: perl
+	  !> README.epoc cygwin/Makefile.SHs doop.c epoc/config.sh
+	  !> epoc/createpkg.pl epoc/epocish.c epoc/epocish.h
+	  !> ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs
+	  !> hints/bsdos.sh pod/perldiag.pod t/comp/require.t toke.c
+____________________________________________________________________________
+[  6362] By: gsar                                  on 2000/07/11  18:43:26
+        Log: integrate cfgperl changes#6252..6260 into mainline
+     Branch: perl
+	  !> MANIFEST doop.c embed.h embed.pl embedvar.h lib/Exporter.pm
+	  !> lib/IPC/Open3.pm objXSUB.h op.c pod/perlfunc.pod pp.c
+	  !> pp_proto.h proto.h sv.c t/op/my_stash.t t/op/pack.t t/op/tr.t
+	  !> t/pragma/constant.t t/pragma/warn/op t/pragma/warn/regcomp
+____________________________________________________________________________
+[  6361] By: gsar                                  on 2000/07/11  18:37:12
+        Log: skip integrate of problematic change#6251 from cfgperl into mainline
+     Branch: perl
+	  !> lib/Exporter.pm
+____________________________________________________________________________
+[  6360] By: gsar                                  on 2000/07/11  18:34:56
+        Log: integrate cfgperl change#6250 into mainline
+     Branch: perl
+	  +> t/op/my_stash.t
+	  !> MANIFEST embed.pl proto.h toke.c
+____________________________________________________________________________
+[  6359] By: gsar                                  on 2000/07/11  18:21:19
+        Log: integrate cfgperl changes#6242..6249 into mainline
+     Branch: perl
+	  !> embed.h embed.pl embedvar.h ext/DynaLoader/DynaLoader_pm.PL
+	  !> gv.c lib/File/Spec.pm lib/IPC/Open3.pm objXSUB.h perlapi.c
+	  !> perlapi.h pod/perlapi.pod pod/perlfunc.pod pod/perlintern.pod
+	  !> pp_proto.h proto.h sv.c t/lib/filefunc.t t/lib/filespec.t
+	  !> t/lib/peek.t utf8.c
+____________________________________________________________________________
+[  6358] By: gsar                                  on 2000/07/11  18:15:45
+        Log: skip integrate of problematic change#6241 from cfgperl into mainline
+     Branch: perl
+	  !> regcomp.c t/pragma/warn/regcomp t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[  6357] By: jhi                                   on 2000/07/11  18:15:16
+        Log: Fix for
+             Subject: [ID 20000711.005] spurious uninit warning with msgrcv()
+             From: Roderick Schertler <roderick@argon.org> 
+             Date: Tue, 11 Jul 2000 13:55:05 -0400 
+             Message-Id: <200007111755.NAA05077@jones.argon.org> 
+     Branch: cfgperl
+	   ! doio.c
+____________________________________________________________________________
+[  6356] By: jhi                                   on 2000/07/11  18:12:51
+        Log: Typo in #6341.
+     Branch: cfgperl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  6355] By: gsar                                  on 2000/07/11  18:12:10
+        Log: integrate cfgperl changes#6231..6240 into mainline
+     Branch: perl
+	  +> pod/perlutil.pod
+	  !> (integrate 35 files)
+____________________________________________________________________________
+[  6354] By: jhi                                   on 2000/07/11  18:04:34
+        Log: Subject: [PATCH perl-current] Make op/sprintf.t more comprehensive, take 2
+             From: Dominic Dunlop <domo@computer.org> 
+             Date: Tue, 11 Jul 2000 12:27:33 +0200 
+             Message-Id: <p04320405b590a14d4650@[192.168.1.4]> 
+             
+             Replaces change #6268.
+     Branch: cfgperl
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[  6353] By: gsar                                  on 2000/07/11  17:59:51
+        Log: skip integrate of problematic change#6230 from cfgperl into mainline
+             (a later version of File::Spec is already in mainline)
+     Branch: perl
+	  !> lib/File/Spec.pm lib/File/Spec/Functions.pm
+	  !> lib/File/Spec/OS2.pm t/lib/filefunc.t t/lib/filespec.t
+____________________________________________________________________________
+[  6352] By: gsar                                  on 2000/07/11  17:57:48
+        Log: integrate cfgperl changes#6224..6229 into mainline
+     Branch: perl
+	  +> lib/lib.pm.PL
+	   - lib/lib.pm
+	  !> MANIFEST Makefile.SH README.hpux embed.pl ext/Socket/Socket.pm
+	  !> lib/English.pm op.c t/lib/english.t
+____________________________________________________________________________
+[  6351] By: gsar                                  on 2000/07/11  17:50:10
+        Log: skip integrate of problematic change#6223 from cfgperl into mainline
+     Branch: perl
+	  !> doio.c
+____________________________________________________________________________
+[  6350] By: gsar                                  on 2000/07/11  17:48:28
+        Log: integrate cfgperl changes#6220..6222 into mainline
+     Branch: perl
+	  !> doop.c embed.pl lib/Pod/Usage.pm makedef.pl pod/perlop.pod
+	  !> toke.c utf8.c win32/win32.h
+____________________________________________________________________________
+[  6349] By: gsar                                  on 2000/07/11  17:46:13
+        Log: skip integrate of problematic changes#6218..6219 from cfgperl into
+             mainline
+     Branch: perl
+	  !> bytecode.pl ext/B/B/Assembler.pm ext/B/B/Bytecode.pm
+	  !> ext/B/O.pm ext/B/defsubs_h.PL ext/ByteLoader/ByteLoader.pm
+	  !> ext/ByteLoader/ByteLoader.xs ext/ByteLoader/bytecode.h
+____________________________________________________________________________
+[  6348] By: jhi                                   on 2000/07/11  17:45:49
+        Log: README.posix-bc podified from Thomas Dorner.
+     Branch: cfgperl
+	   ! README.posix-bc
+____________________________________________________________________________
+[  6347] By: gsar                                  on 2000/07/11  17:42:04
+        Log: integrate cfgperl change#6217 into mainline
+     Branch: perl
+	  !> Configure config_h.SH doio.c embed.h embed.pl embedvar.h gv.c
+	  !> intrpvar.h objXSUB.h perl.c perlapi.h pp.c pp_ctl.c proto.h
+	  !> sv.h util.c util.h vmesa/vmesa.c win32/win32.c
+____________________________________________________________________________
+[  6346] By: gsar                                  on 2000/07/11  17:39:37
+        Log: skip integrate of problematic changes#6211..6212 from cfgperl into
+             mainline
+     Branch: perl
+	  !> embedvar.h ext/B/B.xs ext/B/B/Asmdata.pm ext/B/defsubs_h.PL
+	  !> ext/ByteLoader/ByteLoader.xs ext/ByteLoader/bytecode.h
+	  !> ext/ByteLoader/byterun.c ext/ByteLoader/byterun.h perlapi.c
+	  !> perlapi.h pod/perlapi.pod
+____________________________________________________________________________
+[  6345] By: gsar                                  on 2000/07/11  17:36:42
+        Log: integrate cfgperl changes#6207..6210 into mainline
+     Branch: perl
+	  !> doio.c embed.h embed.pl gv.c intrpvar.h objXSUB.h perl.c pp.c
+	  !> pp_ctl.c proto.h sv.h util.c vmesa/vmesa.c win32/win32.c
+____________________________________________________________________________
+[  6344] By: gsar                                  on 2000/07/11  17:31:20
+        Log: skip integrate of problematic changes#6204..6206 from cfgperl into
+             mainline
+     Branch: perl
+	  !> (integrate 40 files)
+____________________________________________________________________________
+[  6343] By: gsar                                  on 2000/07/11  17:19:08
+        Log: integrate cfgperl changes#6174..6203 into mainline (first of several)
+     Branch: perl
+	  +> Makefile.micro README.micro Todo.micro uconfig.h uconfig.sh
+	   ! Changes
+	  !> (integrate 34 files)
+____________________________________________________________________________
 [  6342] By: jhi                                   on 2000/07/11  16:05:48
         Log: Subject: [ID 20000710.002] fatal error or memory loss when deleting symbols in evaled code with syntax errors
              To: perl5-porters@perl.org
