@@ -359,6 +359,11 @@ ext/IPC/SysV/hints/cygwin.pl	Hint for IPC::SysV for named architecture
 ext/IPC/SysV/hints/next_3.pl	Hint for IPC::SysV for named architecture
 ext/IPC/SysV/t/msg.t		IPC::SysV extension Perl module
 ext/IPC/SysV/t/sem.t		IPC::SysV extension Perl module
+ext/MIME/Base64/Base64.pm	MIME::Base64 extension
+ext/MIME/Base64/Base64.xs	MIME::Base64 extension
+ext/MIME/Base64/Changes		MIME::Base64 extension
+ext/MIME/Base64/Makefile.PL	MIME::Base64 extension
+ext/MIME/Base64/QuotedPrint.pm	MIME::Base64 extension
 ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
@@ -1501,6 +1506,9 @@ t/lib/lc-uk.t	See if Locale::Codes work
 t/lib/md5-aaa.t	See if Digest::MD5 extension works
 t/lib/md5-badf.t	See if Digest::MD5 extension works
 t/lib/md5-file.t	See if Digest::MD5 extension works
+t/lib/mimeb64.t			see whether MIME::Base64 works
+t/lib/mimeb64u.t		see whether MIME::Base64 works
+t/lib/mimeqp.t		see whether MIME::QuotedPrint works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/net-hostent.t	See if Net::hostent works
 t/lib/odbm.t		See if ODBM_File works
