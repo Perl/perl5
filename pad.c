@@ -437,8 +437,8 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 #ifdef DEBUG_LEAKING_SCALARS
     sv->sv_debug_optype = optype;
     sv->sv_debug_inpad = 1;
-    return (PADOFFSET)retval;
 #endif
+    return (PADOFFSET)retval;
 }
 
 /*
