@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..580\n";
+print "1..581\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1238,8 +1238,6 @@ print "ok 247\n";
 {
     # bug id 20001008.001
 
-    use utf8; # BUG - should not be needed, but is, otherwise core dump
-
     my $test = 248;
     my @x = ("stra\337e 138","stra\337e 138");
     for (@x) {
@@ -1536,4 +1534,14 @@ print "ok 247\n";
     } else {
 	for (576..580) { print "not ok $_\n" }
     }
+}
+
+{
+    # bug id 20010306.008
+
+    $a = "a\x{1234}";
+    # The original bug report had 'no utf8' here but that was irrelevant.
+    $a =~ m/\w/; # used to core dump
+
+    print "ok 581\n";
 }

@@ -123,8 +123,9 @@
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
 #define HOPMAYBE3c(pos,off,lim) ((char*)HOPMAYBE3(pos,off,lim))
 
-static void restore_pos(pTHXo_ void *arg);
+#define LOAD_UTF8_CHARCLASS(a,b) STMT_START { if (!CAT2(PL_utf8_,a)) (void)CAT2(is_utf8_, a)((U8*)b); } STMT_END
 
+static void restore_pos(pTHXo_ void *arg);
 
 STATIC CHECKPOINT
 S_regcppush(pTHX_ I32 parenfloor)
@@ -953,6 +954,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		}
 		tmp = ((OP(c) == BOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
+		LOAD_UTF8_CHARCLASS(alnum,"a");
 		while (s < strend) {
 		    if (tmp == !(OP(c) == BOUND ?
 				 swash_fetch(PL_utf8_alnum, (U8*)s) :
@@ -995,6 +997,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		}
 		tmp = ((OP(c) == NBOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
+		LOAD_UTF8_CHARCLASS(alnum,"a");
 		while (s < strend) {
 		    if (tmp == !(OP(c) == NBOUND ?
 				 swash_fetch(PL_utf8_alnum, (U8*)s) :
@@ -1023,6 +1026,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    break;
 	case ALNUM:
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(alnum,"a");
 		while (s < strend) {
 		    if (swash_fetch(PL_utf8_alnum, (U8*)s)) {
 			if (tmp && (norun || regtry(prog, s)))
@@ -1080,6 +1084,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    break;
 	case NALNUM:
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(alnum,"a");
 		while (s < strend) {
 		    if (!swash_fetch(PL_utf8_alnum, (U8*)s)) {
 			if (tmp && (norun || regtry(prog, s)))
@@ -1137,6 +1142,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    break;
 	case SPACE:
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(space," ");
 		while (s < strend) {
 		    if (*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s)) {
 			if (tmp && (norun || regtry(prog, s)))
@@ -1194,6 +1200,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    break;
 	case NSPACE:
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(space," ");
 		while (s < strend) {
 		    if (!(*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s))) {
 			if (tmp && (norun || regtry(prog, s)))
@@ -1251,6 +1258,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    break;
 	case DIGIT:
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(digit,"0");
 		while (s < strend) {
 		    if (swash_fetch(PL_utf8_digit,(U8*)s)) {
 			if (tmp && (norun || regtry(prog, s)))
@@ -1308,6 +1316,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    break;
 	case NDIGIT:
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(digit,"0");
 		while (s < strend) {
 		    if (!swash_fetch(PL_utf8_digit,(U8*)s)) {
 			if (tmp && (norun || regtry(prog, s)))
@@ -2225,6 +2234,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(alnum,"a");
 		if (OP(scan) == NALNUM
 		    ? swash_fetch(PL_utf8_alnum, (U8*)locinput)
 		    : isALNUM_LC_utf8((U8*)locinput))
@@ -2257,6 +2267,7 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
 		    ln = isALNUM_uni(ln);
+		    LOAD_UTF8_CHARCLASS(alnum,"a");
 		    n = swash_fetch(PL_utf8_alnum, (U8*)locinput);
 		}
 		else {
@@ -2288,6 +2299,7 @@ S_regmatch(pTHX_ regnode *prog)
 		sayNO;
 	    if (do_utf8) {
 		if (UTF8_IS_CONTINUED(nextchr)) {
+		    LOAD_UTF8_CHARCLASS(space," ");
 		    if (!(OP(scan) == SPACE
 			  ? swash_fetch(PL_utf8_space, (U8*)locinput)
 			  : isSPACE_LC_utf8((U8*)locinput)))
@@ -2317,6 +2329,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(space," ");
 		if (OP(scan) == NSPACE
 		    ? swash_fetch(PL_utf8_space, (U8*)locinput)
 		    : isSPACE_LC_utf8((U8*)locinput))
@@ -2339,6 +2352,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr)
 		sayNO;
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(digit,"0");
 		if (!(OP(scan) == DIGIT
 		      ? swash_fetch(PL_utf8_digit, (U8*)locinput)
 		      : isDIGIT_LC_utf8((U8*)locinput)))
@@ -2361,6 +2375,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(digit,"0");
 		if (OP(scan) == NDIGIT
 		    ? swash_fetch(PL_utf8_digit, (U8*)locinput)
 		    : isDIGIT_LC_utf8((U8*)locinput))
@@ -2377,6 +2392,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case CLUMP:
+	    LOAD_UTF8_CHARCLASS(mark,"~");
 	    if (locinput >= PL_regeol || swash_fetch(PL_utf8_mark,(U8*)locinput))
 		sayNO;
 	    locinput += PL_utf8skip[nextchr];
@@ -3598,6 +3614,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case ALNUM:
 	if (do_utf8) {
 	    loceol = PL_regeol;
+	    LOAD_UTF8_CHARCLASS(alnum,"a");
 	    while (hardcount < max && scan < loceol &&
 		   swash_fetch(PL_utf8_alnum, (U8*)scan)) {
 		scan += UTF8SKIP(scan);
@@ -3625,6 +3642,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case NALNUM:
 	if (do_utf8) {
 	    loceol = PL_regeol;
+	    LOAD_UTF8_CHARCLASS(alnum,"a");
 	    while (hardcount < max && scan < loceol &&
 		   !swash_fetch(PL_utf8_alnum, (U8*)scan)) {
 		scan += UTF8SKIP(scan);
@@ -3652,6 +3670,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case SPACE:
 	if (do_utf8) {
 	    loceol = PL_regeol;
+	    LOAD_UTF8_CHARCLASS(space," ");
 	    while (hardcount < max && scan < loceol &&
 		   (*scan == ' ' || swash_fetch(PL_utf8_space,(U8*)scan))) {
 		scan += UTF8SKIP(scan);
@@ -3679,6 +3698,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case NSPACE:
 	if (do_utf8) {
 	    loceol = PL_regeol;
+	    LOAD_UTF8_CHARCLASS(space," ");
 	    while (hardcount < max && scan < loceol &&
 		   !(*scan == ' ' || swash_fetch(PL_utf8_space,(U8*)scan))) {
 		scan += UTF8SKIP(scan);
@@ -3706,6 +3726,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case DIGIT:
 	if (do_utf8) {
 	    loceol = PL_regeol;
+	    LOAD_UTF8_CHARCLASS(digit,"0");
 	    while (hardcount < max && scan < loceol &&
 		   swash_fetch(PL_utf8_digit,(U8*)scan)) {
 		scan += UTF8SKIP(scan);
@@ -3719,6 +3740,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case NDIGIT:
 	if (do_utf8) {
 	    loceol = PL_regeol;
+	    LOAD_UTF8_CHARCLASS(digit,"0");
 	    while (hardcount < max && scan < loceol &&
 		   !swash_fetch(PL_utf8_digit,(U8*)scan)) {
 		scan += UTF8SKIP(scan);

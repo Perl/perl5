@@ -2648,22 +2648,16 @@ tryagain:
 	    ret = reg_node(pRExC_state, CLUMP);
 	    *flagp |= HASWIDTH;
 	    nextchar(pRExC_state);
-	    if (UTF && !PL_utf8_mark)
-		is_utf8_mark((U8*)"~");		/* preload table */
 	    break;
 	case 'w':
 	    ret = reg_node(pRExC_state, LOC ? ALNUML     : ALNUM);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
-	    if (UTF && !PL_utf8_alnum)
-		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'W':
 	    ret = reg_node(pRExC_state, LOC ? NALNUML     : NALNUM);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
-	    if (UTF && !PL_utf8_alnum)
-		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'b':
 	    RExC_seen_zerolen++;
@@ -2671,8 +2665,6 @@ tryagain:
 	    ret = reg_node(pRExC_state, LOC ? BOUNDL     : BOUND);
 	    *flagp |= SIMPLE;
 	    nextchar(pRExC_state);
-	    if (UTF && !PL_utf8_alnum)
-		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'B':
 	    RExC_seen_zerolen++;
@@ -2680,36 +2672,26 @@ tryagain:
 	    ret = reg_node(pRExC_state, LOC ? NBOUNDL     : NBOUND);
 	    *flagp |= SIMPLE;
 	    nextchar(pRExC_state);
-	    if (UTF && !PL_utf8_alnum)
-		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 's':
 	    ret = reg_node(pRExC_state, LOC ? SPACEL     : SPACE);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
-	    if (UTF && !PL_utf8_space)
-		is_utf8_space((U8*)" ");	/* preload table */
 	    break;
 	case 'S':
 	    ret = reg_node(pRExC_state, LOC ? NSPACEL     : NSPACE);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
-	    if (UTF && !PL_utf8_space)
-		is_utf8_space((U8*)" ");	/* preload table */
 	    break;
 	case 'd':
 	    ret = reg_node(pRExC_state, DIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
-	    if (UTF && !PL_utf8_digit)
-		is_utf8_digit((U8*)"1");	/* preload table */
 	    break;
 	case 'D':
 	    ret = reg_node(pRExC_state, NDIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar(pRExC_state);
-	    if (UTF && !PL_utf8_digit)
-		is_utf8_digit((U8*)"1");	/* preload table */
 	    break;
 	case 'p':
 	case 'P':
