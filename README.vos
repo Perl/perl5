@@ -8,13 +8,18 @@ README.vos - Perl for Stratus VOS
 
 =head1 SYNOPSIS
 
-This is a port of Perl version 5 to VOS.  Perl is a scripting or macro
-language that is popular on many systems.  See L<perlbook> for a
-number of good books on Perl.
+This is a port of Perl version 5 to VOS.  Perl is a scripting or
+macro language that is popular on many systems.  See L<perlbook>
+for a number of good books on Perl.
 
-This is instructions for compiling Perl from source.  For most people,
-you can simply download a pre-compiled distribution from
-ftp://ftp.stratus.com/pub/vos/posix/ga/ga.html
+These are instructions for building Perl from source.  Most people can
+simply download a pre-compiled distribution from the VOS anonymous FTP
+site.  If you are running VOS Release 14.2.0 or earlier, download Perl
+from ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html.  If you are
+running VOS Release 14.3.0 or later, download Perl from
+ftp://ftp.stratus.com/pub/vos/posix/ga/ga.html.  Instructions for
+unbundling the Perl distribution file are at
+ftp://ftp.stratus.com/pub/vos/utility/utility.html.
 
 =head2 Stratus POSIX Support
 
@@ -237,10 +242,10 @@ seller.
 
 =head1 AUTHOR
 
-Paul Green (Paul_Green@stratus.com)
+Paul Green (Paul.Green@stratus.com)
 
 =head1 LAST UPDATE
 
-July 4, 2001
+November 29, 2001
 
 =cut
