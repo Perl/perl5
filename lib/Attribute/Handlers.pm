@@ -2,7 +2,7 @@ package Attribute::Handlers;
 use 5.006;
 use Carp;
 use warnings;
-$VERSION = '0.77';
+$VERSION = '0.78';
 # $DB::single=1;
 
 my %symcache;
@@ -108,7 +108,7 @@ sub AUTOLOAD {
 
 sub DESTROY {}
 
-my $builtin = qr/lvalue|method|locked/;
+my $builtin = qr/lvalue|method|locked|unique|shared/;
 
 sub _gen_handler_AH_() {
 	return sub {
