@@ -3126,14 +3126,13 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		default:	s = "UNKNOWN";			break;
 		}
 		tsv = NEWSV(0,0);
-		if (SvOBJECT(sv))
-		    if (HvNAME(SvSTASH(sv)))
-			Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
-		    else
-			Perl_sv_setpvf(aTHX_ tsv, "__ANON__=%s", s);
+		if (SvOBJECT(sv)) {
+		    const char *name = HvNAME(SvSTASH(sv));
+		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s(0x%"UVxf")",
+				   name ? name : "__ANON__" , s, PTR2UV(sv));
+		}
 		else
-		    sv_setpv(tsv, s);
-		Perl_sv_catpvf(aTHX_ tsv, "(0x%"UVxf")", PTR2UV(sv));
+		    Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", s, PTR2UV(sv));
 		goto tokensaveref;
 	    }
 	    *lp = strlen(s);
@@ -7613,10 +7612,8 @@ char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-	if (HvNAME(SvSTASH(sv)))
-	    return HvNAME(SvSTASH(sv));
-	else
-	    return "__ANON__";
+	char *name = HvNAME(SvSTASH(sv));
+	return name ? name : "__ANON__";
     }
     else {
 	switch (SvTYPE(sv)) {

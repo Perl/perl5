@@ -3560,7 +3560,8 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname)
 	/* Sanity check on buffer end */
 	while ((*s) && !isSPACE(*s)) s++;
 	for (s2 = s;  (s2 > SvPV(PL_linestr,n_a)+2 &&
-		       (isDIGIT(s2[-1]) || strchr("._-", s2[-1])));  s2--) ;
+		       (isDIGIT(s2[-1]) || s2[-1] == '.' || s2[-1] == '_'
+			|| s2[-1] == '-'));  s2--) ;
 	/* Sanity check on buffer start */
 	if ( (s2-4 < SvPV(PL_linestr,n_a)+2 || strnNE(s2-4,"perl",4)) &&
 	      (s-9 < SvPV(PL_linestr,n_a)+2 || strnNE(s-9,"perl",4)) )
@@ -3847,7 +3848,8 @@ S_find_beginning(pTHX)
 	    s2 = s;
 	    while (*s == ' ' || *s == '\t') s++;
 	    if (*s++ == '-') {
-		while (isDIGIT(s2[-1]) || strchr("-._", s2[-1])) s2--;
+		while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
+		       || s2[-1] == '_') s2--;
 		if (strnEQ(s2-4,"perl",4))
 		    /*SUPPRESS 530*/
 		    while ((s = moreswitches(s)))
@@ -4185,6 +4187,22 @@ S_procself_val(pTHX_ SV *sv, char *arg0)
 #endif /* HAS_PROCSELFEXE */
 
 STATIC void
+S_set_caret_X(pTHX) {
+    GV* tmpgv = gv_fetchpv("\030",TRUE, SVt_PV); /* $^X */
+    if (tmpgv) {
+#ifdef HAS_PROCSELFEXE
+	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
+#else
+#ifdef OS2
+	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
+#else
+	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
+#endif
+#endif
+    }
+}
+
+STATIC void
 S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
 {
     char *s;
@@ -4212,17 +4230,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	magicname("0", "0", 1);
 #endif
     }
-    if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))) {/* $^X */
-#ifdef HAS_PROCSELFEXE
-	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
-#else
-#ifdef OS2
-	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
-#else
-	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
-#endif
-#endif
-    }
+    S_set_caret_X(aTHX);
     if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
 	HV *hv;
 	GvMULTI_on(PL_envgv);
@@ -4420,6 +4428,21 @@ S_init_perllib(pTHX)
 #  define PERLLIB_MANGLE(s,n) (s)
 #endif
 
+/* Push a directory onto @INC if it exists.
+   Generate a new SV if we do this, to save needing to copy the SV we push
+   onto @INC  */
+STATIC SV *
+S_incpush_if_exists(pTHX_ SV *dir)
+{
+    Stat_t tmpstatbuf;
+    if (PerlLIO_stat(SvPVX(dir), &tmpstatbuf) >= 0 &&
+	S_ISDIR(tmpstatbuf.st_mode)) {
+	av_push(GvAVn(PL_incgv), dir);
+	dir = NEWSV(0,0);
+    }
+    return dir;
+}
+
 STATIC void
 S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
 {
@@ -4429,7 +4452,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
 	return;
 
     if (addsubdirs || addoldvers) {
-	subdir = sv_newmortal();
+	subdir = NEWSV(0,0);
     }
 
     /* Break at all separators */
@@ -4475,7 +4498,6 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
 	    const char *incverlist[] = { PERL_INC_VERSION_LIST };
 	    const char **incver;
 #endif
-	    Stat_t tmpstatbuf;
 #ifdef VMS
 	    char *unix;
 	    STRLEN len;
@@ -4505,23 +4527,18 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
 				libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION, ARCHNAME);
-		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
-		      S_ISDIR(tmpstatbuf.st_mode))
-		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
+		subdir = S_incpush_if_exists(aTHX_ subdir);
 
 		/* .../version if -d .../version */
 		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH, libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION);
-		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
-		      S_ISDIR(tmpstatbuf.st_mode))
-		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
+		subdir = S_incpush_if_exists(aTHX_ subdir);
 
 		/* .../archname if -d .../archname */
 		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT, libdir, ARCHNAME);
-		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
-		      S_ISDIR(tmpstatbuf.st_mode))
-		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
+		subdir = S_incpush_if_exists(aTHX_ subdir);
+
 	    }
 
 #ifdef PERL_INC_VERSION_LIST
@@ -4529,9 +4546,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
 		for (incver = incverlist; *incver; incver++) {
 		    /* .../xxx if -d .../xxx */
 		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT, libdir, *incver);
-		    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
-			  S_ISDIR(tmpstatbuf.st_mode))
-			av_push(GvAVn(PL_incgv), newSVsv(subdir));
+		    subdir = S_incpush_if_exists(aTHX_ subdir);
 		}
 	    }
 #endif
@@ -4539,6 +4554,10 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
 
 	/* finally push this lib directory on the end of @INC */
 	av_push(GvAVn(PL_incgv), libdir);
+    }
+    if (subdir) {
+	assert (SvREFCNT(subdir) == 1);
+	SvREFCNT_dec(subdir);
     }
 }
 

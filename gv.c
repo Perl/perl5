@@ -751,7 +751,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		    sv_type != SVt_PVGV &&
 		    sv_type != SVt_PVFM &&
 		    sv_type != SVt_PVIO &&
-		    !(len == 1 && sv_type == SVt_PV && strchr("ab",*name)) )
+		    !(len == 1 && sv_type == SVt_PV &&
+		      (*name == 'a' || *name == 'b')) )
 		{
 		    gvp = (GV**)hv_fetch(stash,name,len,0);
 		    if (!gvp ||
@@ -1103,10 +1104,10 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
     }
     sv_setpv(sv, prefix ? prefix : "");
     
-    if (!HvNAME(hv))
+    name = HvNAME(hv);
+    if (!name)
 	name = "__ANON__";
-    else 
-	name = HvNAME(hv);
+	
     if (keepmain || strNE(name, "main")) {
 	sv_catpv(sv,name);
 	sv_catpvn(sv,"::", 2);
