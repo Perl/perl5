@@ -51,4 +51,4 @@ $a = ${"#"};
 $a = ${"*"};
 EXPECT
 Use of $# is deprecated at - line 3.
-$* has been removed at - line 4.
+The variable "$*" is no longer supported at - line 4.
