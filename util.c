@@ -1159,7 +1159,7 @@ die(pat, va_alist)
 {
     va_list args;
     char *message;
-    int oldrunlevel = runlevel;
+    I32 oldrunlevel = runlevel;
     int was_in_eval = in_eval;
     HV *stash;
     GV *gv;

@@ -1963,14 +1963,14 @@ docatch(o)
 OP *o;
 {
     int ret;
-    int oldrunlevel = runlevel;
+    I32 oldrunlevel = runlevel;
     OP *oldop = op;
     dJMPENV;
 
     op = o;
 #ifdef DEBUGGING
     assert(CATCH_GET == TRUE);
-    DEBUG_l(deb("(Setting up local jumplevel, runlevel = %d)\n", runlevel+1));
+    DEBUG_l(deb("(Setting up local jumplevel, runlevel = %ld)\n", (long)runlevel+1));
 #endif
     JMPENV_PUSH(ret);
     switch (ret) {
