@@ -1484,10 +1484,14 @@ Perl_do_readline(pTHX)
 	tmplen = SvLEN(sv);	/* remember if already alloced */
 	if (!tmplen)
 	    Sv_Grow(sv, 80);	/* try short-buffering it */
-	if (type == OP_RCATLINE)
+	offset = 0;
+	if (type == OP_RCATLINE && SvOK(sv)) {
+	    if (!SvPOK(sv)) {
+		STRLEN n_a;
+		(void)SvPV_force(sv, n_a);
+	    }
 	    offset = SvCUR(sv);
-	else
-	    offset = 0;
+	}
     }
     else {
 	sv = sv_2mortal(NEWSV(57, 80));
