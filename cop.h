@@ -297,6 +297,7 @@ struct context {
 #define G_NOARGS	8	/* Don't construct a @_ array. */
 #define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */
 #define G_NODEBUG      32	/* Disable debugging at toplevel.  */
+#define G_NOCATCH      64       /* Don't do CATCH_SET() */
 
 /* flag bits for PL_in_eval */
 #define EVAL_NULL	0	/* not in an eval */

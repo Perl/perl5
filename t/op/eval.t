@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..36\n";
+print "1..37\n";
 
 eval 'print "ok 1\n";';
 
@@ -170,4 +170,9 @@ sub terminal { eval 'print $r' }
    eval 'terminal($r)';
 }
 $x++;
+
+# Have we cured panic which occurred with require/eval in die handler ?
+$SIG{__DIE__} = sub { eval {1}; die shift }; 
+eval { die "ok ".$x++,"\n" }; 
+print $@;
 
