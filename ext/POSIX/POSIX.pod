@@ -1008,12 +1008,9 @@ see L<perlre>.
 
 =item setgid
 
-Sets the real group identifier and the effective group identifier for
-this process.  Similar to assigning a value to the Perl's builtin
-C<$)> variable, see L<perlvar/$GID>, except that the latter
-will change only the real user identifier, and that the setgid()
-uses only a single numeric argument, as opposed to a space-separated
-list of numbers.
+Sets the real group identifier for this process.
+Identical to assigning a value to the Perl's builtin C<$)> variable,
+see L<perlvar/$UID>.
 
 =item setjmp
 
@@ -1066,10 +1063,9 @@ setting the session identifier of the current process.
 
 =item setuid
 
-Sets the real user identifier and the effective user identifier for
-this process.  Similar to assigning a value to the Perl's builtin
-C<$E<lt>> variable, see L<perlvar/$UID>, except that the latter
-will change only the real user identifier.
+Sets the real user identifier for this process.
+Identical to assigning a value to the Perl's builtin C<$E<lt>> variable,
+see L<perlvar/$UID>.
 
 =item sigaction
 
