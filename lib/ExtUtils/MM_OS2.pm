@@ -8,7 +8,6 @@ require Exporter;
 Exporter::import('ExtUtils::MakeMaker',
        qw( $Verbose &neatvalue));
 
-$ENV{EMXSHELL} = 'sh'; # to run `commands`
 unshift @MM::ISA, 'ExtUtils::MM_OS2';
 
 sub dlsyms {

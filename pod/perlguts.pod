@@ -1619,6 +1619,13 @@ to indicate the number of items on the stack.
 Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
 handled automatically by C<xsubpp>.
 
+=item do_binmode
+
+Switches filehandle to binmode.  C<iotype> is what C<IoTYPE(io)> would
+contain.
+
+	do_binmode(fp, iotype, TRUE);
+
 =item ENTER
 
 Opening bracket on a callback.  See C<LEAVE> and L<perlcall>.
