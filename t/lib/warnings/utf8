@@ -30,8 +30,8 @@ my $a = "snøstorm" ;
     my $a = "snøstorm";
 }
 EXPECT
-Malformed UTF-8 character (unexpected non-continuation byte 0x73 after start byte 0xf8) at - line 9.
-Malformed UTF-8 character (unexpected non-continuation byte 0x73 after start byte 0xf8) at - line 14.
+Malformed UTF-8 character (unexpected non-continuation byte 0x73, immediately after start byte 0xf8) at - line 9.
+Malformed UTF-8 character (unexpected non-continuation byte 0x73, immediately after start byte 0xf8) at - line 14.
 ########
 use warnings 'utf8';
 my $surr = chr(0xD800);
