@@ -11,6 +11,12 @@ BEGIN {
 	}
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
+	# Don't bother if there are no quad offsets.
+	require Config; import Config;
+	if ($Config{lseeksize} < 8) {
+		print "1..0\n# no 64-bit offsets\n";
+		bye();
+	}
 }
 
 sub bye {
