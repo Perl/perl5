@@ -124,6 +124,12 @@ constant(char *name, int arg)
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "GDBM_NOLOCK"))
+#ifdef GDBM_NOLOCK
+	    return GDBM_NOLOCK;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "GDBM_READER"))
 #ifdef GDBM_READER
 	    return GDBM_READER;
