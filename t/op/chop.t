@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 47;
+plan tests => 51;
 
 $_ = 'abc';
 $c = do foo();
@@ -172,3 +172,14 @@ foreach (keys %chop) {
     is ($_, $chop{$key}, "chop hash key");
   }
 }
+
+# chop and chomp can't be lvalues
+eval 'chop($x) = 1;';
+print $@ =~ /Can\'t modify.*chop.*in.*assignment/ ? "ok 48\n" : "not ok 48\n";
+eval 'chomp($x) = 1;';
+print $@ =~ /Can\'t modify.*chom?p.*in.*assignment/ ? "ok 49\n" : "not ok 49\n";
+eval 'chop($x, $y) = (1, 2);';
+print $@ =~ /Can\'t modify.*chop.*in.*assignment/ ? "ok 50\n" : "not ok 50\n";
+eval 'chomp($x, $y) = (1, 2);';
+print $@ =~ /Can\'t modify.*chom?p.*in.*assignment/ ? "ok 51\n" : "not ok 51\n";
+
