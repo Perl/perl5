@@ -174,10 +174,18 @@ sub offset ($$) {
     unless ($offset_is == $offset_want) {
         print "# bad offset $offset_is, want $offset_want\n";
 	if (unpack("L", pack("L", $offset_want)) == $offset_is) {
-	    my $offset_func = ($offset_will_be =~ /^(\w+)/);
+	    my($offset_func) = ($offset_will_be =~ /^(\w+)/);
 	    print "# 32-bit wraparound suspected in $offset_func() since\n";
 	    print "# $offset_want cast into 32 bits is $offset_is.\n";
-	}
+	} elsif ($offset_want - unpack("L", pack("L", $offset_want)) - 1
+	         == $offset_is){
+	    my($offset_func) = ($offset_will_be =~ /^(\w+)/);
+	    print "# 32-bit wraparound suspected in $offset_func() since\n";
+	    printf "# %s - unpack('L', pack('L', %s)) - 1 equals %s.\n",
+	        $offset_want,
+	        $offset_want,
+	        $offset_is;
+        }
         fail;
     }
 }
