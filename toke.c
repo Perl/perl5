@@ -3186,13 +3186,9 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		s = skipspace(s);
 		if (*s == '(') {
 		    CLINE;
-		    PL_last_proto = Nullch;
 		    if (gv && GvCVu(gv)) {
-			CV *cv;
-			if ((cv = GvCV(gv)) && SvPOK(cv))
-			    PL_last_proto = SvPV((SV*)cv, n_a);
 			for (d = s + 1; *d == ' ' || *d == '\t'; d++) ;
-			if (*d == ')' && (sv = cv_const_sv(cv))) {
+			if (*d == ')' && (sv = cv_const_sv(GvCV(gv)))) {
 			    s = d + 1;
 			    goto its_constant;
 			}
@@ -3201,7 +3197,6 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    PL_expect = XOPERATOR;
 		    force_next(WORD);
 		    yylval.ival = 0;
-		    PL_last_lop_op = OP_ENTERSUB;
 		    TOKEN('&');
 		}
 
@@ -3225,9 +3220,6 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    if (lastchar == '-')
 			warn("Ambiguous use of -%s resolved as -&%s()",
 				PL_tokenbuf, PL_tokenbuf);
-		    PL_last_lop = PL_oldbufptr;
-		    PL_last_lop_op = OP_ENTERSUB;
-		    PL_last_proto = Nullch;
 		    /* Check for a constant sub */
 		    cv = GvCV(gv);
 		    if ((sv = cv_const_sv(cv))) {
@@ -3241,16 +3233,17 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    /* Resolve to GV now. */
 		    op_free(yylval.opval);
 		    yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
+		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
 		    /* Is there a prototype? */
 		    if (SvPOK(cv)) {
 			STRLEN len;
-			PL_last_proto = SvPV((SV*)cv, len);
+			char *proto = SvPV((SV*)cv, len);
 			if (!len)
 			    TERM(FUNC0SUB);
-			if (strEQ(PL_last_proto, "$"))
+			if (strEQ(proto, "$"))
 			    OPERATOR(UNIOPSUB);
-			if (*PL_last_proto == '&' && *s == '{') {
+			if (*proto == '&' && *s == '{') {
 			    sv_setpv(PL_subname,"__ANON__");
 			    PREBLOCK(LSTOPSUB);
 			}
@@ -3261,27 +3254,8 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    TOKEN(NOAMP);
 		}
 
-		/* It could be a prototypical bearword. */
-		if (PL_last_lop_op == OP_ENTERSUB && PL_last_proto &&
-		    PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*')
-		{
-		    PL_last_proto = Nullch;
-		    TOKEN(WORD);
-		}
-
-		if (PL_hints & HINT_STRICT_SUBS &&
-		    lastchar != '-' &&
-		    strnNE(s,"->",2) &&
-		    PL_last_lop_op != OP_TRUNCATE &&  /* S/F prototype in opcode.pl */
-		    PL_last_lop_op != OP_ACCEPT &&
-		    PL_last_lop_op != OP_PIPE_OP &&
-		    PL_last_lop_op != OP_SOCKPAIR)
-		{
-		    warn(
-		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
-			PL_tokenbuf);
-		    ++PL_error_count;
-		}
+		if (PL_hints & HINT_STRICT_SUBS)
+		    yylval.opval->op_private |= OPpCONST_STRICT;
 
 		/* Call it a bare word */
 

@@ -1765,6 +1765,8 @@
 #define nextchar		pPerl->Perl_nextchar
 #undef  ninstr
 #define ninstr			pPerl->Perl_ninstr
+#undef  no_bareword_allowed
+#define no_bareword_allowed	pPerl->Perl_no_bareword_allowed
 #undef  no_fh_allowed
 #define no_fh_allowed		pPerl->Perl_no_fh_allowed
 #undef  no_op

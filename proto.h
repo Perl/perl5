@@ -821,6 +821,7 @@ CV *get_db_sub _((SV **svp, CV *cv));
 I32 list_assignment _((OP *o));
 void bad_type _((I32 n, char *t, char *name, OP *kid));
 OP *modkids _((OP *o, I32 type));
+void no_bareword_allowed _((OP *o));
 OP *no_fh_allowed _((OP *o));
 OP *scalarboolean _((OP *o));
 OP *too_few_arguments _((OP *o, char* name));

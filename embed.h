@@ -1452,6 +1452,7 @@
 #define nextargv		CPerlObj::Perl_nextargv
 #define nextchar		CPerlObj::Perl_nextchar
 #define ninstr			CPerlObj::Perl_ninstr
+#define no_bareword_allowed	CPerlObj::Perl_no_bareword_allowed
 #define no_fh_allowed		CPerlObj::Perl_no_fh_allowed
 #define no_op			CPerlObj::Perl_no_op
 #define not_a_number		CPerlObj::Perl_not_a_number

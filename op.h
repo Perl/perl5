@@ -123,12 +123,14 @@ typedef U32 PADOFFSET;
 #define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
   /* OP_ENTERSUB only */
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
+  /* OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
   /* OP_?ELEM only */
 #define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
   /* for OP_RV2?V, lower bits carry hints */
 
 /* Private for OP_CONST */
+#define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_ARYBASE	32	/* Was a $[ translated to constant. */
 #define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
