@@ -724,6 +724,7 @@ pp.c			Push/Pop code
 pp.h			Push/Pop code defs
 pp_ctl.c		Push/Pop code for control flow
 pp_hot.c		Push/Pop code for heavily used opcodes
+pp_proto.h		C++ definitions for Push/Pop code
 pp_sys.c		Push/Pop code for system interaction
 proto.h			Prototypes
 qnx/ar			QNX implementation of "ar" utility
