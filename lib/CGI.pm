@@ -29,7 +29,7 @@ $AUTOLOAD_DEBUG=0;
 $NPH=0;
 
 $CGI::revision = '$Id: CGI.pm,v 2.34 1997/4/7 7:23 lstein Exp $';
-$CGI::VERSION='2.3401';
+$CGI::VERSION='2.3402';
 
 # OVERRIDE THE OS HERE IF CGI.pm GUESSES WRONG
 # $OS = 'UNIX';
@@ -174,6 +174,7 @@ sub new {
     my($class,$initializer) = @_;
     my $self = {};
     bless $self,ref $class || $class || $DefaultClass;
+    $CGI::DefaultClass->_reset_globals() if $MOD_PERL;
     $initializer = to_filehandle($initializer) if $initializer;
     $self->init($initializer);
     return $self;
