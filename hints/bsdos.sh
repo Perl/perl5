@@ -95,5 +95,15 @@ case "$osvers" in
 	d_setreuid='undef'
 	d_setrgid='undef'
 	d_setruid='undef'
+
+	# based on the 5.001m hints file from BSD/OS source disk
+	# (this is needed for pTk to work)
+
+	# BSD/OS 2.1 doesn't (yet) support true dynamic linking.
+	# So we "preload' the shared libraries by linking against
+	# them, even though we don't pull in any symbols thereby.
+	libswanted="Xpm Xaw Xmu Xt SM ICE Xext X11 $libswanted"
+	libswanted="rpc curses termcap $libswanted"
+
 	;;
 esac
