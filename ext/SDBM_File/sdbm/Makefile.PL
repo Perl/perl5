@@ -4,7 +4,7 @@ $define = '-DSDBM -DDUFF';
 $define .= ' -DWIN32' if ($^O eq 'MSWin32');
 
 WriteMakefile(
-    NAME      => 'SDBM_File/sdbm', # doesn't matter what the name is here
+    NAME      => 'sdbm', # (doesn't matter what the name is here) oh yes it does
     LINKTYPE  => 'static',
     DEFINE    => $define,
     SKIP      => [qw(dynamic dynamic_lib)],
