@@ -55,13 +55,22 @@ bool
 Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	     int rawmode, int rawperm, PerlIO *supplied_fp)
 {
-    return do_open9(gv, name, len, as_raw, rawmode, rawperm,
-		    supplied_fp, Nullsv, 0);
+    return do_openn(gv, name, len, as_raw, rawmode, rawperm,
+		    supplied_fp, (SV **) NULL, 0);
 }
 
 bool
 Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs,
+	      I32 num_svs)
+{
+    return do_openn(gv, name, len, as_raw, rawmode, rawperm,
+		    supplied_fp, &svs, 1);
+}
+
+bool
+Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
+	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
 	      I32 num_svs)
 {
     register IO *io = GvIOn(gv);
@@ -77,6 +86,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     char *type  = NULL;
     char *deftype = NULL;
     char mode[4];		/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
+    SV *svs = (num_svs) ? *svp : Nullsv;
 
     Zero(mode,sizeof(mode),char);
     PL_forkprocess = 1;		/* assume true if no fork */
@@ -529,6 +539,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     if (type) {
 	while (isSPACE(*type)) type++;
 	if (*type) {
+	   errno = 0;
 	   if (PerlIO_apply_layers(aTHX_ IoIFP(io),mode,type) != 0) {
 		goto say_false;
 	   }

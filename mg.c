@@ -313,11 +313,12 @@ Perl_mg_free(pTHX_ SV *sv)
 	moremagic = mg->mg_moremagic;
 	if (vtbl && vtbl->svt_free)
 	    CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
-	if (mg->mg_ptr && mg->mg_type != 'g')
+	if (mg->mg_ptr && mg->mg_type != 'g') {
 	    if (mg->mg_len >= 0)
 		Safefree(mg->mg_ptr);
 	    else if (mg->mg_len == HEf_SVKEY)
 		SvREFCNT_dec((SV*)mg->mg_ptr);
+	}
 	if (mg->mg_flags & MGf_REFCOUNTED)
 	    SvREFCNT_dec(mg->mg_obj);
 	Safefree(mg);
@@ -325,6 +326,7 @@ Perl_mg_free(pTHX_ SV *sv)
     SvMAGIC(sv) = 0;
     return 0;
 }
+
 
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
@@ -413,7 +415,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		    i = Perl_utf8_length(aTHX_ (U8*)s, (U8*)send);
 		}
 		if (i < 0)
-		    Perl_croak(aTHX_ "panic: magic_len: %d", i);
+		    Perl_croak(aTHX_ "panic: magic_len: %"IVdf, (IV)i);
 		return i;
 	    }
 	}
@@ -994,6 +996,40 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+void
+Perl_raise_signal(pTHX_ int sig)
+{
+    /* Set a flag to say this signal is pending */
+    PL_psig_pend[sig]++;
+    /* And one to say _a_ signal is pending */
+    PL_sig_pending = 1;
+}
+
+Signal_t
+Perl_csighandler(int sig)
+{
+#ifdef PERL_OLD_SIGNALS
+    /* Call the perl level handler now with risk we may be in malloc() etc. */
+    (*PL_sighandlerp)(sig);
+#else
+    dTHX;
+    Perl_raise_signal(aTHX_ sig);
+#endif
+}
+
+void
+Perl_despatch_signals(pTHX)
+{
+    int sig;
+    PL_sig_pending = 0;
+    for (sig = 1; sig < SIG_SIZE; sig++) {
+	if (PL_psig_pend[sig]) {
+	    PL_psig_pend[sig] = 0;
+	    (*PL_sighandlerp)(sig);
+	}
+    }
+}
+
 int
 Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -1032,7 +1068,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
 	if (i)
-	    (void)rsignal(i, PL_sighandlerp);
+	    (void)rsignal(i, &Perl_csighandler);
 	else
 	    *svp = SvREFCNT_inc(sv);
 	return 0;
@@ -1059,7 +1095,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	if (!strchr(s,':') && !strchr(s,'\''))
 	    sv_insert(sv, 0, 0, "main::", 6);
 	if (i)
-	    (void)rsignal(i, PL_sighandlerp);
+	    (void)rsignal(i, &Perl_csighandler);
 	else
 	    *svp = SvREFCNT_inc(sv);
     }
@@ -1402,12 +1438,14 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     I32 offs = LvTARGOFF(sv);
     I32 rem = LvTARGLEN(sv);
 
+    if (SvUTF8(lsv))
+	sv_pos_u2b(lsv, &offs, &rem);
     if (offs > len)
 	offs = len;
     if (rem + offs > len)
 	rem = len - offs;
     sv_setpvn(sv, tmps + offs, (STRLEN)rem);
-    if (DO_UTF8(lsv))
+    if (SvUTF8(lsv))
         SvUTF8_on(sv);
     return 0;
 }
@@ -1416,14 +1454,25 @@ int
 Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
-    char *tmps = SvPV(sv,len);
+    char *tmps = SvPV(sv, len);
+    SV *lsv = LvTARG(sv);
+    I32 lvoff = LvTARGOFF(sv);
+    I32 lvlen = LvTARGLEN(sv);
+
     if (DO_UTF8(sv)) {
-	sv_utf8_upgrade(LvTARG(sv));
-	sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
-	SvUTF8_on(LvTARG(sv));
+	sv_utf8_upgrade(lsv);
+ 	sv_pos_u2b(lsv, &lvoff, &lvlen);
+	sv_insert(lsv, lvoff, lvlen, tmps, len);
+	SvUTF8_on(lsv);
+    }
+    else if (SvUTF8(lsv)) {
+	sv_pos_u2b(lsv, &lvoff, &lvlen);
+	tmps = (char*)bytes_to_utf8((U8*)tmps, &len);
+	sv_insert(lsv, lvoff, lvlen, tmps, len);
+	Safefree(tmps);
     }
     else
-        sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
+        sv_insert(lsv, lvoff, lvlen, tmps, len);
 
     return 0;
 }
@@ -2211,9 +2260,26 @@ Perl_sighandler(int sig)
     PUSHs(sv);
     PUTBACK;
 
-    call_sv((SV*)cv, G_DISCARD);
+    call_sv((SV*)cv, G_DISCARD|G_EVAL);
 
     POPSTACK;
+    if (SvTRUE(ERRSV)) {
+#ifdef HAS_SIGPROCMASK
+	/* Handler "died", for example to get out of a restart-able read().
+	 * Before we re-do that on its behalf re-enable the signal which was
+	 * blocked by the system when we entered.
+	 */
+	sigset_t set;
+	sigemptyset(&set);
+	sigaddset(&set,sig);
+	sigprocmask(SIG_UNBLOCK, &set, NULL);
+#else
+	/* Not clear if this will work */
+	(void)rsignal(sig, SIG_IGN);
+	(void)rsignal(sig, &Perl_csighandler);
+#endif
+	Perl_die(aTHX_ Nullch);
+    }
 cleanup:
     if (flags & 1)
 	PL_savestack_ix -= 8; /* Unprotect save in progress. */

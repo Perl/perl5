@@ -15,8 +15,18 @@ use strict;
 
 my $debug = 1;
 
+use Dumpvalue;
+
+my $dumper = Dumpvalue->new(
+                            tick => qq{"},
+                            quoteHighBit => 0,
+                            unctrl => "quote"
+                           );
 sub debug {
-    print @_ if $debug;
+  return unless $debug;
+  my($mess) = join "", @_;
+  chop $mess;
+  print $dumper->stringify($mess,1), "\n";
 }
 
 sub debugf {
@@ -428,8 +438,6 @@ my %Neoalpha;
 
 sub tryneoalpha {
     my ($Locale, $i, $test) = @_;
-    debug "# testing $i with locale '$Locale'\n"
-	unless $Testing{$i}{$Locale}++;
     unless ($test) {
 	$Problem{$i}{$Locale} = 1;
 	debug "# failed $i with locale '$Locale'\n";
@@ -441,7 +449,7 @@ sub tryneoalpha {
 foreach $Locale (@Locale) {
     debug "# Locale = $Locale\n";
     @Alnum_ = getalnum_();
-    debug "# \\w = @Alnum_\n";
+    debug "# w = ", join("",@Alnum_), "\n";
 
     unless (setlocale(LC_ALL, $Locale)) {
 	foreach (99..103) {
@@ -476,9 +484,9 @@ foreach $Locale (@Locale) {
 	delete $lower{$_};
     }
 
-    debug "# UPPER    = ", join(" ", sort keys %UPPER   ), "\n";
-    debug "# lower    = ", join(" ", sort keys %lower   ), "\n";
-    debug "# BoThCaSe = ", join(" ", sort keys %BoThCaSe), "\n";
+    debug "# UPPER    = ", join("", sort keys %UPPER   ), "\n";
+    debug "# lower    = ", join("", sort keys %lower   ), "\n";
+    debug "# BoThCaSe = ", join("", sort keys %BoThCaSe), "\n";
 
     # Find the alphabets that are not alphabets in the default locale.
 
@@ -494,7 +502,7 @@ foreach $Locale (@Locale) {
 
     @Neoalpha = sort @Neoalpha;
 
-    debug "# Neoalpha = @Neoalpha\n";
+    debug "# Neoalpha = ", join("",@Neoalpha), "\n";
 
     if (@Neoalpha == 0) {
 	# If we have no Neoalphas the remaining tests are no-ops.
@@ -661,7 +669,6 @@ foreach $Locale (@Locale) {
 	tryneoalpha($Locale, 114, $f == $c);
     }
 
-    debug "# testing 115 with locale '$Locale'\n";
     # Does taking lc separately differ from taking
     # the lc "in-line"?  (This was the bug 19990704.002, change #3568.)
     # The bug was in the caching of the 'o'-magic.
@@ -687,7 +694,6 @@ foreach $Locale (@Locale) {
 		    lcA($x, $z) == 0 && lcB($x, $z) == 0);
     }
 
-    debug "# testing 116 with locale '$Locale'\n";
     # Does lc of an UPPER (if different from the UPPER) match
     # case-insensitively the UPPER, and does the UPPER match
     # case-insensitively the lc of the UPPER.  And vice versa.

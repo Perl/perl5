@@ -1,7 +1,7 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.12 2000/12/25 12:56:12 eagle Exp $
+# $Id: Man.pm,v 1.14 2001/01/16 13:39:45 eagle Exp $
 #
-# Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.12;
+$VERSION = 1.14;
 
 
 ############################################################################
@@ -410,6 +410,10 @@ sub begin_pod {
         }
     }
 
+    # If $name contains spaces, quote it; this mostly comes up in the case
+    # of input from stdin.
+    $name = '"' . $name . '"' if ($name =~ /\s/);
+
     # Modification date header.  Try to use the modification time of our
     # input.
     if (!defined $$self{date}) {
@@ -630,6 +634,7 @@ sub cmd_head1 {
     local $_ = $self->parse (@_);
     s/\s+$//;
     s/\\s-?\d//g;
+    s/\s*\n\s*/ /g;
     if ($$self{ITEMS} > 1) {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");
@@ -644,6 +649,7 @@ sub cmd_head2 {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    s/\s*\n\s*/ /g;
     if ($$self{ITEMS} > 1) {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");
@@ -658,6 +664,7 @@ sub cmd_head3 {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    s/\s*\n\s*/ /g;
     if ($$self{ITEMS} > 1) {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");
@@ -673,6 +680,7 @@ sub cmd_head4 {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    s/\s*\n\s*/ /g;
     if ($$self{ITEMS} > 1) {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");

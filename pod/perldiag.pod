@@ -929,6 +929,14 @@ suidperl.
 temporary or readonly values) from a subroutine used as an lvalue.  This
 is not allowed.
 
+=item Can't return %s to lvalue scalar context
+
+(F) You tried to return a complete array or hash from an lvalue subroutine,
+but you called the subroutine in a way that made Perl think you meant
+to return only one value. You probably meant to write parentheses around
+the call to the subroutine, which tell Perl that the call should be in
+list context.
+
 =item Can't return outside a subroutine
 
 (F) The return statement was executed in mainline code, that is, where

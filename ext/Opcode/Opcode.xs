@@ -233,6 +233,26 @@ BOOT:
 	warn("opset_len %ld\n", (long)opset_len);
     op_names_init(aTHX);
 
+void
+_safe_pkg_prep(Package)
+    char *	Package
+PPCODE:
+    HV *hv; 
+    ENTER;
+   
+    hv = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
+
+    if (strNE(HvNAME(hv),"main")) {
+        Safefree(HvNAME(hv));         
+        HvNAME(hv) = savepv("main"); /* make it think it's in main:: */
+        hv_store(hv,"_",1,(SV *)PL_defgv,0);  /* connect _ to global */
+        SvREFCNT_inc((SV *)PL_defgv);  /* want to keep _ around! */
+    }
+    LEAVE;
+
+
+
+
 
 void
 _safe_call_sv(Package, mask, codesv)
@@ -253,12 +273,7 @@ PPCODE:
     save_hptr(&PL_defstash);		/* save current default stash	*/
     /* the assignment to global defstash changes our sense of 'main'	*/
     PL_defstash = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
-    if (strNE(HvNAME(PL_defstash),"main")) {
-        Safefree(HvNAME(PL_defstash));         
-        HvNAME(PL_defstash) = savepv("main"); /* make it think it's in main:: */
-        hv_store(PL_defstash,"_",1,(SV *)PL_defgv,0);  /* connect _ to global */
-        SvREFCNT_inc((SV *)PL_defgv);  /* want to keep _ around! */
-    }
+
     save_hptr(&PL_curstash);
     PL_curstash = PL_defstash;
 
@@ -271,6 +286,7 @@ PPCODE:
 
     /* %INC must be clean for use/require in compartment */
     save_hash(PL_incgv);
+    sv_free((SV*)GvHV(PL_incgv));  /* get rid of what save_hash gave us*/
     GvHV(PL_incgv) = (HV*)SvREFCNT_inc(GvHV(gv_HVadd(gv_fetchpv("INC",TRUE,SVt_PVHV))));
 
     PUSHMARK(SP);

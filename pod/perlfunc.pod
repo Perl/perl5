@@ -96,8 +96,9 @@ than one place.
 =item Functions for SCALARs or strings
 
 C<chomp>, C<chop>, C<chr>, C<crypt>, C<hex>, C<index>, C<lc>, C<lcfirst>,
-C<length>, C<oct>, C<ord>, C<pack>, C<q/STRING/>, C<qq/STRING/>, C<reverse>,
-C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>, C<y///>
+C<length>, C<oct>, C<ord>, C<pack>, C<q/STRING/>, C<qq/STRING/>, C<qu/STRING/>,
+C<reverse>, C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>,
+C<y///>
 
 =item Regular expressions and pattern matching
 
@@ -2528,6 +2529,11 @@ The exceptions to this rule are when the file or directory should be
 kept private (mail files, for instance).  The perlfunc(1) entry on
 C<umask> discusses the choice of MASK in more detail.
 
+Note that according to the POSIX 1003.1-1996 the FILENAME may have any
+number of trailing slashes.  Some operating and filesystems do not get
+this right, so Perl automatically removes all trailing slashes to keep
+everyone happy.
+
 =item msgctl ID,CMD,ARG
 
 Calls the System V IPC function msgctl(2).  You'll probably have to say
@@ -3469,9 +3475,11 @@ but is more efficient.  Returns the new number of elements in the array.
 
 =item qr/STRING/
 
-=item qx/STRING/
+=item qu/STRING/
 
 =item qw/STRING/
+
+=item qx/STRING/
 
 Generalized quotes.  See L<perlop/"Regexp Quote-Like Operators">.
 

@@ -2810,6 +2810,10 @@
  *	This symbol defines the format string used for printing a Perl UV
  *	as an unsigned hexadecimal integer in lowercase abcdef.
  */
+/* UVXf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned hexadecimal integer in uppercase ABCDEF.
+ */
 /* NVef:
  *	This symbol defines the format string used for printing a Perl NV
  *	using %e-ish floating point format.
@@ -2826,6 +2830,7 @@
 #define	UVuf		"lu"		/**/
 #define	UVof		"lo"		/**/
 #define	UVxf		"lx"		/**/
+#define	UVXf		"lX"		/**/
 #define	NVef		"e"		/**/
 #define	NVff		"f"		/**/
 #define	NVgf		"g"		/**/
@@ -2928,8 +2933,13 @@
  *	The last element is 0, corresponding to the 0 at the end of
  *	the sig_name list.
  */
+/* SIG_SIZE:
+ *	This variable contains the number of elements of the sig_name
+ *	and sig_num arrays, excluding the final NULL entry.
+ */
 #define SIG_NAME 0		/**/
 #define SIG_NUM  0		/**/
+#define SIG_SIZE 1			/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -3232,5 +3242,12 @@
  */
 #define PERL_XS_APIVERSION "5.005"
 #define PERL_PM_APIVERSION "5.005"
+
+/* HAS_SIGPROCMASK:
+ *	This symbol, if defined, indicates that the sigprocmask
+ *	system call is available to examine or change the signal mask
+ *	of the calling process.
+ */
+/*#define HAS_SIGPROCMASK		/ **/
 
 #endif

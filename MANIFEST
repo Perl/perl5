@@ -111,6 +111,7 @@ ext/B/B/Bblock.pm	Compiler basic block analysis support
 ext/B/B/Bytecode.pm	Compiler Bytecode backend
 ext/B/B/C.pm		Compiler C backend
 ext/B/B/CC.pm		Compiler CC backend
+ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
 ext/B/B/Disassembler.pm	Compiler Disassembler backend
@@ -175,6 +176,7 @@ ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
+ext/DynaLoader/dl_dllload.xs	S/390 dllload() style implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_dyld.xs	NeXT/Apple dyld implementation
@@ -194,10 +196,13 @@ ext/Encode/Encode.pm		Encode extension
 ext/Encode/Encode.xs		Encode extension
 ext/Encode/Encode/EncodeFormat.pod	Encoding table format
 ext/Encode/Encode/ascii.enc	Encoding tables
+ext/Encode/Encode/ascii.ucm	Encoding tables
 ext/Encode/Encode/big5.enc	Encoding tables
 ext/Encode/Encode/cp1006.enc	Encoding tables
 ext/Encode/Encode/cp1047.enc	Encoding tables
+ext/Encode/Encode/cp1047.ucm	Encoding tables
 ext/Encode/Encode/cp1250.enc	Encoding tables
+ext/Encode/Encode/cp1250.ucm	Encoding tables
 ext/Encode/Encode/cp1251.enc	Encoding tables
 ext/Encode/Encode/cp1252.enc	Encoding tables
 ext/Encode/Encode/cp1253.enc	Encoding tables
@@ -207,6 +212,7 @@ ext/Encode/Encode/cp1256.enc	Encoding tables
 ext/Encode/Encode/cp1257.enc	Encoding tables
 ext/Encode/Encode/cp1258.enc	Encoding tables
 ext/Encode/Encode/cp37.enc	Encoding tables
+ext/Encode/Encode/cp37.ucm	Encoding tables
 ext/Encode/Encode/cp424.enc	Encoding tables
 ext/Encode/Encode/cp437.enc	Encoding tables
 ext/Encode/Encode/cp737.enc	Encoding tables
@@ -230,6 +236,7 @@ ext/Encode/Encode/cp936.enc	Encoding tables
 ext/Encode/Encode/cp949.enc	Encoding tables
 ext/Encode/Encode/cp950.enc	Encoding tables
 ext/Encode/Encode/dingbats.enc	Encoding tables
+ext/Encode/Encode/dingbats.ucm	Encoding tables
 ext/Encode/Encode/euc-cn.enc	Encoding tables
 ext/Encode/Encode/euc-jp.enc	Encoding tables
 ext/Encode/Encode/euc-kr.enc	Encoding tables
@@ -241,19 +248,33 @@ ext/Encode/Encode/iso2022-jp.enc	Encoding tables
 ext/Encode/Encode/iso2022-kr.enc	Encoding tables
 ext/Encode/Encode/iso2022.enc		Encoding tables
 ext/Encode/Encode/iso8859-1.enc		Encoding tables
+ext/Encode/Encode/iso8859-1.ucm		Encoding tables
 ext/Encode/Encode/iso8859-10.enc	Encoding tables
+ext/Encode/Encode/iso8859-10.ucm	Encoding tables
 ext/Encode/Encode/iso8859-13.enc	Encoding tables
+ext/Encode/Encode/iso8859-13.ucm	Encoding tables
 ext/Encode/Encode/iso8859-14.enc	Encoding tables
+ext/Encode/Encode/iso8859-14.ucm	Encoding tables
 ext/Encode/Encode/iso8859-15.enc	Encoding tables
+ext/Encode/Encode/iso8859-15.ucm	Encoding tables
 ext/Encode/Encode/iso8859-16.enc	Encoding tables
+ext/Encode/Encode/iso8859-16.ucm	Encoding tables
 ext/Encode/Encode/iso8859-2.enc		Encoding tables
+ext/Encode/Encode/iso8859-2.ucm		Encoding tables
 ext/Encode/Encode/iso8859-3.enc		Encoding tables
+ext/Encode/Encode/iso8859-3.ucm		Encoding tables
 ext/Encode/Encode/iso8859-4.enc		Encoding tables
+ext/Encode/Encode/iso8859-4.ucm		Encoding tables
 ext/Encode/Encode/iso8859-5.enc		Encoding tables
+ext/Encode/Encode/iso8859-5.ucm		Encoding tables
 ext/Encode/Encode/iso8859-6.enc		Encoding tables
+ext/Encode/Encode/iso8859-6.ucm		Encoding tables
 ext/Encode/Encode/iso8859-7.enc		Encoding tables
+ext/Encode/Encode/iso8859-7.ucm		Encoding tables
 ext/Encode/Encode/iso8859-8.enc		Encoding tables
+ext/Encode/Encode/iso8859-8.ucm		Encoding tables
 ext/Encode/Encode/iso8859-9.enc		Encoding tables
+ext/Encode/Encode/iso8859-9.ucm		Encoding tables
 ext/Encode/Encode/jis0201.enc		Encoding tables
 ext/Encode/Encode/jis0208.enc		Encoding tables
 ext/Encode/Encode/jis0212.enc		Encoding tables
@@ -272,8 +293,10 @@ ext/Encode/Encode/macThai.enc		Encoding tables
 ext/Encode/Encode/macTurkish.enc	Encoding tables
 ext/Encode/Encode/macUkraine.enc	Encoding tables
 ext/Encode/Encode/posix-bc.enc		Encoding tables
+ext/Encode/Encode/posix-bc.ucm		Encoding tables
 ext/Encode/Encode/shiftjis.enc		Encoding tables
 ext/Encode/Encode/symbol.enc		Encoding tables
+ext/Encode/Encode/symbol.ucm	Encoding tables
 ext/Encode/Makefile.PL		Encode extension
 ext/Encode/Todo			Encode extension
 ext/Encode/compile		Encode extension
@@ -1347,6 +1370,7 @@ t/io/print.t		See if print commands work
 t/io/read.t		See if read works
 t/io/tell.t		See if file seeking works
 t/io/utf8.t		See if file seeking works
+t/lib/1_compile.t	See if the various libraries and extensions compile
 t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
@@ -1367,6 +1391,7 @@ t/lib/charnames.t	See if character names work
 t/lib/checktree.t	See if File::CheckTree works
 t/lib/class-struct.t	See if Class::Struct works
 t/lib/complex.t		See if Math::Complex works
+t/lib/compmod.pl	Helper for 1_compile.t
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
@@ -1554,6 +1579,7 @@ t/op/pat.t		See if esoteric patterns work
 t/op/pos.t		See if pos works
 t/op/push.t		See if push and pop work
 t/op/pwent.t		See if getpw*() functions work
+t/op/qu.t		See if qu works
 t/op/quotemeta.t	See if quotemeta works
 t/op/rand.t		See if rand works
 t/op/range.t		See if .. works

@@ -130,21 +130,25 @@ STATIC CHECKPOINT
 S_regcppush(pTHX_ I32 parenfloor)
 {
     int retval = PL_savestack_ix;
-    int i = (PL_regsize - parenfloor) * 4;
+#define REGCP_PAREN_ELEMS 4
+    int paren_elems_to_push = (PL_regsize - parenfloor) * REGCP_PAREN_ELEMS;
     int p;
 
-    SSCHECK(i + 5);
+#define REGCP_OTHER_ELEMS 5
+    SSCHECK(paren_elems_to_push + REGCP_OTHER_ELEMS);
     for (p = PL_regsize; p > parenfloor; p--) {
+/* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
 	SSPUSHINT(PL_regendp[p]);
 	SSPUSHINT(PL_regstartp[p]);
 	SSPUSHPTR(PL_reg_start_tmp[p]);
 	SSPUSHINT(p);
     }
+/* REGCP_OTHER_ELEMS are pushed in any case, parentheses or no. */
     SSPUSHINT(PL_regsize);
     SSPUSHINT(*PL_reglastparen);
     SSPUSHPTR(PL_reginput);
-    SSPUSHINT(i + 3);
-    SSPUSHINT(SAVEt_REGCONTEXT);
+    SSPUSHINT(paren_elems_to_push + (REGCP_PAREN_ELEMS - 1));
+    SSPUSHINT(SAVEt_REGCONTEXT); /* Magic cookie. */
     return retval;
 }
 
@@ -161,16 +165,21 @@ S_regcppush(pTHX_ I32 parenfloor)
 STATIC char *
 S_regcppop(pTHX)
 {
-    I32 i = SSPOPINT;
+    I32 i;
     U32 paren = 0;
     char *input;
     I32 tmps;
-    assert(i == SAVEt_REGCONTEXT);
+
+    /* Pop REGCP_OTHER_ELEMS before the parentheses loop starts. */
     i = SSPOPINT;
+    assert(i == SAVEt_REGCONTEXT); /* Check that the magic cookie is there. */
+    i = SSPOPINT; /* Parentheses elements to pop. */
     input = (char *) SSPOPPTR;
     *PL_reglastparen = SSPOPINT;
     PL_regsize = SSPOPINT;
-    for (i -= 3; i > 0; i -= 4) {
+
+    /* Now restore the parentheses context. */
+    for (i -= (REGCP_PAREN_ELEMS - 1); i > 0; i -= REGCP_PAREN_ELEMS) {
 	paren = (U32)SSPOPINT;
 	PL_reg_start_tmp[paren] = (char *) SSPOPPTR;
 	PL_regstartp[paren] = SSPOPINT;
@@ -595,14 +604,14 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    DEBUG_r(PerlIO_printf(Perl_debug_log,
 			", trying anchored starting at offset %ld...\n",
 			(long)(s1 + 1 - i_strpos)));
-		    other_last = last + 1;
+		    other_last = last;
 		    s = HOP3c(t, 1, strend);
 		    goto restart;
 		}
 		else {
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
 			  (long)(s - i_strpos)));
-		    other_last = s + 1;
+		    other_last = s; /* Fix this later. --Hugo */
 		    s = s1;
 		    if (t == strpos)
 			goto try_at_start;
@@ -1460,7 +1469,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    PL_reg_ganch = strbeg;
     }
 
-    if (!(flags & REXEC_CHECKED) && prog->check_substr != Nullsv) {
+    if (do_utf8 == (UTF!=0) &&
+	!(flags & REXEC_CHECKED) && prog->check_substr != Nullsv) {
 	re_scream_pos_data d;
 
 	d.scream_olds = &scream_olds;

@@ -114,6 +114,11 @@ PP(pp_padav)
     if (PL_op->op_flags & OPf_REF) {
 	PUSHs(TARG);
 	RETURN;
+    } else if (LVRET) {
+	if (GIMME == G_SCALAR)
+	    Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
+	PUSHs(TARG);
+	RETURN;
     }
     if (GIMME == G_ARRAY) {
 	I32 maxarg = AvFILL((AV*)TARG) + 1;
@@ -149,6 +154,11 @@ PP(pp_padhv)
 	SAVECLEARSV(PL_curpad[PL_op->op_targ]);
     if (PL_op->op_flags & OPf_REF)
 	RETURN;
+    else if (LVRET) {
+	if (GIMME == G_SCALAR)
+	    Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
+	RETURN;
+    }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
 	RETURNOP(do_kv());
@@ -341,7 +351,7 @@ PP(pp_pos)
 {
     djSP; dTARGET; dPOPss;
 
-    if (PL_op->op_flags & OPf_MOD) {
+    if (PL_op->op_flags & OPf_MOD || LVRET) {
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
 	    sv_magic(TARG, Nullsv, '.', Nullch, 0);
@@ -1202,10 +1212,11 @@ PP(pp_repeat)
     else {	/* Note: mark already snarfed by pp_list */
 	SV *tmpstr = POPs;
 	STRLEN len;
-	bool isutf = DO_UTF8(tmpstr);
+	bool isutf;
 
 	SvSetSV(TARG, tmpstr);
 	SvPV_force(TARG, len);
+	isutf = DO_UTF8(TARG);
 	if (count != 1) {
 	    if (count < 1)
 		SvCUR_set(TARG, 0);
@@ -2593,6 +2604,7 @@ PP(pp_int)
 		  (void)Perl_modf(tmp, &tmp);
 		  value = (NV)tmp;
 #endif
+		  SETn(value);
 	      }
 	  }
 	  else {
@@ -2710,16 +2722,17 @@ PP(pp_substr)
     I32 pos;
     I32 rem;
     I32 fail;
-    I32 lvalue = PL_op->op_flags & OPf_MOD;
+    I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     char *tmps;
     I32 arybase = PL_curcop->cop_arybase;
     char *repl = 0;
     STRLEN repl_len;
+    int num_args = PL_op->op_private & 7;
 
     SvTAINTED_off(TARG);			/* decontaminate */
     SvUTF8_off(TARG);				/* decontaminate */
-    if (MAXARG > 2) {
-	if (MAXARG > 3) {
+    if (num_args > 2) {
+	if (num_args > 3) {
 	    sv = POPs;
 	    repl = SvPV(sv, repl_len);
 	}
@@ -2743,7 +2756,7 @@ PP(pp_substr)
 	pos -= arybase;
 	rem = curlen-pos;
 	fail = rem;
-	if (MAXARG > 2) {
+	if (num_args > 2) {
 	    if (len < 0) {
 		rem += len;
 		if (rem < 0)
@@ -2755,7 +2768,7 @@ PP(pp_substr)
     }
     else {
 	pos += curlen;
-	if (MAXARG < 3)
+	if (num_args < 3)
 	    rem = curlen;
 	else if (len >= 0) {
 	    rem = pos+len;
@@ -2780,6 +2793,8 @@ PP(pp_substr)
 	RETPUSHUNDEF;
     }
     else {
+	I32 upos = pos;
+	I32 urem = rem;
 	if (utfcurlen)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
@@ -2814,8 +2829,8 @@ PP(pp_substr)
 		    SvREFCNT_dec(LvTARG(TARG));
 		LvTARG(TARG) = SvREFCNT_inc(sv);
 	    }
-	    LvTARGOFF(TARG) = pos;
-	    LvTARGLEN(TARG) = rem;
+	    LvTARGOFF(TARG) = upos;
+	    LvTARGLEN(TARG) = urem;
 	}
     }
     SPAGAIN;
@@ -2829,7 +2844,7 @@ PP(pp_vec)
     register IV size   = POPi;
     register IV offset = POPi;
     register SV *src = POPs;
-    I32 lvalue = PL_op->op_flags & OPf_MOD;
+    I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
 
     SvTAINTED_off(TARG);		/* decontaminate */
     if (lvalue) {			/* it's an lvalue! */
@@ -2958,20 +2973,15 @@ PP(pp_chr)
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
-    if ((value > 255 && !IN_BYTE) ||
-	(UTF8_IS_CONTINUED(value) && (PL_hints & HINT_UTF8)) ) {
-	SvGROW(TARG, UTF8_MAXLEN+1);
-	tmps = SvPVX(TARG);
-	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);
+    if (value > 255 && !IN_BYTE) {
+	SvGROW(TARG, UNISKIP(value)+1);
+	tmps = (char*)uv_to_utf8((U8*)SvPVX(TARG), value);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));
 	*tmps = '\0';
 	(void)SvPOK_only(TARG);
 	SvUTF8_on(TARG);
 	XPUSHs(TARG);
 	RETURN;
-    }
-    else {
-	SvUTF8_off(TARG);
     }
 
     SvGROW(TARG,2);
@@ -3328,7 +3338,7 @@ PP(pp_aslice)
     djSP; dMARK; dORIGMARK;
     register SV** svp;
     register AV* av = (AV*)POPs;
-    register I32 lval = PL_op->op_flags & OPf_MOD;
+    register I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     I32 arybase = PL_curcop->cop_arybase;
     I32 elem;
 
@@ -3515,7 +3525,7 @@ PP(pp_hslice)
 {
     djSP; dMARK; dORIGMARK;
     register HV *hv = (HV*)POPs;
-    register I32 lval = PL_op->op_flags & OPf_MOD;
+    register I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     I32 realhv = (SvTYPE(hv) == SVt_PVHV);
 
     if (!realhv && PL_op->op_private & OPpLVAL_INTRO)
@@ -3544,7 +3554,7 @@ PP(pp_hslice)
 		    else {
 			STRLEN keylen;
 			char *key = SvPV(keysv, keylen);
-			save_delete(hv, key, keylen);
+			SAVEDELETE(hv, savepvn(key,keylen), keylen);
 		    }
                 }
 	    }
@@ -5872,7 +5882,8 @@ PP(pp_split)
 	    s = m;
 	}
     }
-    else if ((rx->reganch & RE_USE_INTUIT) && !rx->nparens
+    else if (do_utf8 == ((rx->reganch & ROPT_UTF8) != 0) &&
+	     (rx->reganch & RE_USE_INTUIT) && !rx->nparens
 	     && (rx->reganch & ROPT_CHECK_ALL)
 	     && !(rx->reganch & ROPT_ANCH)) {
 	int tail = (rx->reganch & RE_INTUIT_TAIL);

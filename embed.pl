@@ -1494,6 +1494,9 @@ Ap	|bool	|do_open	|GV* gv|char* name|I32 len|int as_raw \
 Ap	|bool	|do_open9	|GV *gv|char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|PerlIO *supplied_fp \
 				|SV *svs|I32 num
+Ap	|bool	|do_openn	|GV *gv|char *name|I32 len|int as_raw \
+				|int rawmode|int rawperm|PerlIO *supplied_fp \
+				|SV **svp|I32 num
 p	|void	|do_pipe	|SV* sv|GV* rgv|GV* wgv
 p	|bool	|do_print	|SV* sv|PerlIO* fp
 p	|OP*	|do_readline
@@ -1593,6 +1596,7 @@ Ap	|char*	|instr		|const char* big|const char* little
 p	|bool	|io_close	|IO* io|bool not_implicit
 p	|OP*	|invert		|OP* cmd
 dp	|bool	|is_gv_magical	|char *name|STRLEN len|U32 flags
+p	|I32	|is_lvalue_sub
 Ap	|bool	|is_uni_alnum	|U32 c
 Ap	|bool	|is_uni_alnumc	|U32 c
 Ap	|bool	|is_uni_idfirst	|U32 c
@@ -1627,8 +1631,8 @@ Ap	|bool	|is_uni_xdigit_lc|U32 c
 Ap	|U32	|to_uni_upper_lc|U32 c
 Ap	|U32	|to_uni_title_lc|U32 c
 Ap	|U32	|to_uni_lower_lc|U32 c
-Ap	|STRLEN	|is_utf8_char	|U8 *p
-Ap	|bool	|is_utf8_string	|U8 *s|STRLEN len
+Apd	|STRLEN	|is_utf8_char	|U8 *p
+Apd	|bool	|is_utf8_string	|U8 *s|STRLEN len
 Ap	|bool	|is_utf8_alnum	|U8 *p
 Ap	|bool	|is_utf8_alnumc	|U8 *p
 Ap	|bool	|is_utf8_idfirst|U8 *p
@@ -1662,6 +1666,7 @@ p	|int	|magic_clearpack|SV* sv|MAGIC* mg
 p	|int	|magic_clearsig	|SV* sv|MAGIC* mg
 p	|int	|magic_existspack|SV* sv|MAGIC* mg
 p	|int	|magic_freeregexp|SV* sv|MAGIC* mg
+p	|int	|magic_freeovrld|SV* sv|MAGIC* mg
 p	|int	|magic_get	|SV* sv|MAGIC* mg
 p	|int	|magic_getarylen|SV* sv|MAGIC* mg
 p	|int	|magic_getdefelem|SV* sv|MAGIC* mg
@@ -1846,6 +1851,7 @@ Apd	|I32	|call_argv	|const char* sub_name|I32 flags|char** argv
 Apd	|I32	|call_method	|const char* methname|I32 flags
 Apd	|I32	|call_pv	|const char* sub_name|I32 flags
 Apd	|I32	|call_sv	|SV* sv|I32 flags
+p	|void	|despatch_signals
 Apd	|SV*	|eval_pv	|const char* p|I32 croak_on_error
 Apd	|I32	|eval_sv	|SV* sv|I32 flags
 Apd	|SV*	|get_sv		|const char* name|I32 create
@@ -2075,14 +2081,14 @@ p	|void	|unshare_hek	|HEK* hek
 p	|void	|utilize	|int aver|I32 floor|OP* version|OP* id|OP* arg
 Ap	|U8*	|utf16_to_utf8	|U8* p|U8 *d|I32 bytelen|I32 *newlen
 Ap	|U8*	|utf16_to_utf8_reversed|U8* p|U8 *d|I32 bytelen|I32 *newlen
-Ap	|STRLEN	|utf8_length	|U8* s|U8 *e
-Ap	|IV	|utf8_distance	|U8 *a|U8 *b
-Ap	|U8*	|utf8_hop	|U8 *s|I32 off
-ApM	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
-ApM	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
-Ap	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
-Ap	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
-Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
+Adp	|STRLEN	|utf8_length	|U8* s|U8 *e
+Apd	|IV	|utf8_distance	|U8 *a|U8 *b
+Apd	|U8*	|utf8_hop	|U8 *s|I32 off
+ApMd	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
+ApMd	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
+Apd	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
+Adp	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
+Apd	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
@@ -2097,10 +2103,8 @@ Ap	|I32	|whichsig	|char* sig
 p	|int	|yyerror	|char* s
 #ifdef USE_PURE_BISON
 p	|int	|yylex_r	|YYSTYPE *lvalp|int *lcharp
-p	|int	|yylex		|YYSTYPE *lvalp|int *lcharp
-#else
-p	|int	|yylex
 #endif
+p	|int	|yylex
 p	|int	|yyparse
 p	|int	|yywarn		|char* s
 #if defined(MYMALLOC)
@@ -2260,6 +2264,7 @@ s	|OP*	|no_fh_allowed	|OP *o
 s	|OP*	|scalarboolean	|OP *o
 s	|OP*	|too_few_arguments|OP *o|char* name
 s	|OP*	|too_many_arguments|OP *o|char* name
+s	|U8*	|trlist_upgrade	|U8** sp|U8** ep
 s	|void	|op_clear	|OP* o
 s	|void	|null		|OP* o
 s	|PADOFFSET|pad_addlex	|SV* name
@@ -2473,6 +2478,7 @@ s	|void	|del_sv	|SV *p
 s      |int    |sv_2inuv_non_preserve  |SV *sv|I32 numtype
 s      |int    |sv_2iuv_non_preserve   |SV *sv|I32 numtype
 #  endif
+s	|I32	|expect_number	|char** pattern
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

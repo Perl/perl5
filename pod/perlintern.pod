@@ -39,6 +39,13 @@ allow selecting particular classes of magical variable.
 =for hackers
 Found in file gv.c
 
+=item LVRET
+
+True if this op will be the return value of an lvalue subroutine
+
+=for hackers
+Found in file pp.h
+
 =item start_glob
 
 Function called by C<do_readline> to spawn a glob (or do the glob inside

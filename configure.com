@@ -1224,12 +1224,20 @@ $     line = F$EDIT(line,"COMPRESS, TRIM")
 $     api_subversion = F$ELEMENT(2," ",line)
 $     got_api_subversion = "true"
 $   ENDIF
-$   IF (.NOT.got_patch).OR.(.NOT.got_sub) THEN GOTO Patchlevel_h_loop
+$   IF (.NOT. got_patch) .OR. -
+       (.NOT. got_sub) .OR. - 
+       (.NOT. got_api_revision) .OR. -
+       (.NOT. got_api_version) .OR. -
+       (.NOT. got_api_subversion) -
+      THEN GOTO Patchlevel_h_loop
 $Close_patch:
 $   CLOSE CONFIG
 $ ELSE
 $   patchlevel="0"
 $   subversion="0"
+$   api_revision="0"
+$   api_version="0"
+$   api_subversion="0"
 $ ENDIF
 $ IF (F$STRING(subversion) .NES. "0")
 $ THEN
@@ -2029,7 +2037,7 @@ $!: compute shared library extension
 $!: Looking for optional libraries
 $!: see if nm is to be used to determine whether a symbol is defined or not
 $!: get list of predefined functions in a handy place
-$!: see if we have sigaction
+$!: see if we have sigaction or sigprocmask
 $!: see whether socketshr exists
 $ IF (F$SEARCH(F$PARSE("SocketShr","Sys$Share:.Exe")).NES."")
 $ THEN
@@ -4494,6 +4502,7 @@ $   d_bcmp="define"
 $   d_gettimeod="define"
 $   d_uname="define"
 $   d_sigaction="define"
+$   d_sigprocmask="define"
 $   d_truncate="define"
 $   d_wait4="define"
 $   d_index="define"
@@ -4506,6 +4515,7 @@ $   sig_name_init = psnwc1 + psnwc2 + psnwc3
 $   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 64"",0"
 $   sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,64,0"
 $!   perl_sig_num_with_commas=sig_num_init
+$   sig_size="36"
 $   uidtype="uid_t"
 $   d_pathconf="define"
 $   d_fpathconf="define"
@@ -4517,6 +4527,7 @@ $   d_gettimeod="undef"
 $   d_bcmp="undef"
 $   d_uname="undef"
 $   d_sigaction="undef"
+$   d_sigprocmask="undef"
 $   d_truncate="undef"
 $   d_wait4="undef"
 $   d_index="undef"
@@ -4527,6 +4538,7 @@ $   sig_name_init = psnwc1 + psnwc2
 $   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"",0"
 $   sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
 $!   perl_sig_num_with_commas=sig_num_init
+$   sig_size="19"
 $   uidtype="unsigned int"
 $   d_pathconf="undef"
 $   d_fpathconf="undef"
@@ -4783,6 +4795,7 @@ $ ivdformat="""ld"""
 $ uvuformat="""lu"""
 $ uvoformat="""lo"""
 $ uvxformat="""lx"""
+$ uvxuformat="""lX"""
 $! uselongdouble?
 $ nveformat="""e"""
 $ nvfformat="""f"""
@@ -4805,9 +4818,11 @@ $ ENDIF
 $ IF use_vmsdebug_perl
 $ THEN
 $   optimize="/Debug/NoOpt"
+$   ldflags="/Debug/Trace/Map"
 $   dbgprefix = "DBG"
 $ ELSE
 $   optimize= ""
+$   ldflags="/NoTrace/NoMap"
 $   dbgprefix = ""
 $ ENDIF
 $!
@@ -4832,8 +4847,11 @@ $ WC ""
 $ WC "CONFIG='true'"
 $ WC "Makefile_SH='" + Makefile_SH + "'"
 $ WC "Mcc='" + Mcc + "'"
-$! WC "PERL_SUBVERSION='" + subversion + "'" ! VMS specific to descrip_mms.template
-$ WC "PERL_VERSION='" + patchlevel + "'" ! VMS specific to descrip_mms.template
+$ WC "PERL_REVISION=" + revision
+$ WC "PERL_VERSION=" + patchlevel
+$ WC "PERL_SUBVERSION=" + subversion
+$ WC "PERL_API_VERSION=" + api_version
+$ WC "PERL_API_SUBVERSION=" + api_subversion
 $ WC "alignbytes='" + alignbytes + "'"
 $ WC "aphostname='" + "'"
 $ WC "ar='" + "'"
@@ -5098,6 +5116,7 @@ $ WC "d_sfio='undef'"
 $ WC "d_shm='undef'"
 $ WC "d_shmatprototype='undef'"
 $ WC "d_sigaction='" + d_sigaction + "'"
+$ WC "d_sigprocmask='" + d_sigprocmask + "'"
 $ WC "d_sigsetjmp='" + d_sigsetjmp + "'"
 $ WC "d_socket='" + d_socket + "'"
 $ WC "d_socklen_t='" + d_socklen_t + "'"
@@ -5290,7 +5309,7 @@ $ WC "ivtype='" + ivtype + "'"
 $ WC "known_extensions='" + known_extensions + "'"
 $ WC "ld='" + ld + "'"
 $ WC "lddlflags='/Share'"
-$ WC "ldflags='/NoTrace/NoMap'"
+$ WC "ldflags='" + ldflags + "'"
 $ WC "lib_ext='" + lib_ext + "'"
 $ WC "libc='" + libc + "'"
 $ WC "libpth='/sys$share /sys$library'"
@@ -5380,6 +5399,7 @@ $ WC/symbol tmp
 $ DELETE/SYMBOL tmp
 $ WC "sig_num='" + sig_num + "'"
 $ WC "sig_num_init='" + sig_num_init + "'"
+$ WC "sig_size='" + sig_size + "'"
 $ WC "signal_t='" + signal_t + "'"
 $ WC "sitearch='" + sitearch + "'"
 $ WC "sitearchexp='" + sitearchexp + "'"
@@ -5437,6 +5457,7 @@ $ WC "uvsize='" + uvsize + "'"
 $ WC "uvtype='" + uvtype + "'"
 $ WC "uvuformat='" + uvuformat + "'"
 $ WC "uvxformat='" + uvxformat + "'"
+$ WC "uvxuformat='" + uvxuformat + "'"
 $ WC "vendorarchexp='" + "'"
 $ WC "vendorlib_stem='" + "'"
 $ WC "vendorlibexp='" + "'"

@@ -781,3 +781,4 @@ tt+$	xxxtt	y	-	-
 ^([0-9a-fA-F]+)(?:x([0-9a-fA-F]+)?)(?:x([0-9a-fA-F]+))?	012cxx0190	y	-	-
 ^(b+?|a){1,2}c	bbbac	y	$1	a
 ^(b+?|a){1,2}c	bbbbac	y	$1	a
+\((\w\. \w+)\)	cd. (A. Tw)	y	-$1-	-A. Tw-

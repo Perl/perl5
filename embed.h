@@ -182,6 +182,7 @@
 #define do_kv			Perl_do_kv
 #define do_open			Perl_do_open
 #define do_open9		Perl_do_open9
+#define do_openn		Perl_do_openn
 #define do_pipe			Perl_do_pipe
 #define do_print		Perl_do_print
 #define do_readline		Perl_do_readline
@@ -274,6 +275,7 @@
 #define io_close		Perl_io_close
 #define invert			Perl_invert
 #define is_gv_magical		Perl_is_gv_magical
+#define is_lvalue_sub		Perl_is_lvalue_sub
 #define is_uni_alnum		Perl_is_uni_alnum
 #define is_uni_alnumc		Perl_is_uni_alnumc
 #define is_uni_idfirst		Perl_is_uni_idfirst
@@ -343,6 +345,7 @@
 #define magic_clearsig		Perl_magic_clearsig
 #define magic_existspack	Perl_magic_existspack
 #define magic_freeregexp	Perl_magic_freeregexp
+#define magic_freeovrld		Perl_magic_freeovrld
 #define magic_get		Perl_magic_get
 #define magic_getarylen		Perl_magic_getarylen
 #define magic_getdefelem	Perl_magic_getdefelem
@@ -516,6 +519,7 @@
 #define call_method		Perl_call_method
 #define call_pv			Perl_call_pv
 #define call_sv			Perl_call_sv
+#define despatch_signals	Perl_despatch_signals
 #define eval_pv			Perl_eval_pv
 #define eval_sv			Perl_eval_sv
 #define get_sv			Perl_get_sv
@@ -751,10 +755,8 @@
 #define yyerror			Perl_yyerror
 #ifdef USE_PURE_BISON
 #define yylex_r			Perl_yylex_r
-#define yylex			Perl_yylex
-#else
-#define yylex			Perl_yylex
 #endif
+#define yylex			Perl_yylex
 #define yyparse			Perl_yyparse
 #define yywarn			Perl_yywarn
 #if defined(MYMALLOC)
@@ -897,6 +899,7 @@
 #define scalarboolean		S_scalarboolean
 #define too_few_arguments	S_too_few_arguments
 #define too_many_arguments	S_too_many_arguments
+#define trlist_upgrade		S_trlist_upgrade
 #define op_clear		S_op_clear
 #define null			S_null
 #define pad_addlex		S_pad_addlex
@@ -1093,6 +1096,7 @@
 #define sv_2inuv_non_preserve	S_sv_2inuv_non_preserve
 #define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
 #  endif
+#define expect_number		S_expect_number
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni		S_check_uni
@@ -1179,6 +1183,7 @@
 #define ck_open			Perl_ck_open
 #define ck_repeat		Perl_ck_repeat
 #define ck_require		Perl_ck_require
+#define ck_return		Perl_ck_return
 #define ck_rfun			Perl_ck_rfun
 #define ck_rvconst		Perl_ck_rvconst
 #define ck_sassign		Perl_ck_sassign
@@ -1659,6 +1664,7 @@
 #define do_kv()			Perl_do_kv(aTHX)
 #define do_open(a,b,c,d,e,f,g)	Perl_do_open(aTHX_ a,b,c,d,e,f,g)
 #define do_open9(a,b,c,d,e,f,g,h,i)	Perl_do_open9(aTHX_ a,b,c,d,e,f,g,h,i)
+#define do_openn(a,b,c,d,e,f,g,h,i)	Perl_do_openn(aTHX_ a,b,c,d,e,f,g,h,i)
 #define do_pipe(a,b,c)		Perl_do_pipe(aTHX_ a,b,c)
 #define do_print(a,b)		Perl_do_print(aTHX_ a,b)
 #define do_readline()		Perl_do_readline(aTHX)
@@ -1750,6 +1756,7 @@
 #define io_close(a,b)		Perl_io_close(aTHX_ a,b)
 #define invert(a)		Perl_invert(aTHX_ a)
 #define is_gv_magical(a,b,c)	Perl_is_gv_magical(aTHX_ a,b,c)
+#define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
 #define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)
 #define is_uni_idfirst(a)	Perl_is_uni_idfirst(aTHX_ a)
@@ -1818,6 +1825,7 @@
 #define magic_clearsig(a,b)	Perl_magic_clearsig(aTHX_ a,b)
 #define magic_existspack(a,b)	Perl_magic_existspack(aTHX_ a,b)
 #define magic_freeregexp(a,b)	Perl_magic_freeregexp(aTHX_ a,b)
+#define magic_freeovrld(a,b)	Perl_magic_freeovrld(aTHX_ a,b)
 #define magic_get(a,b)		Perl_magic_get(aTHX_ a,b)
 #define magic_getarylen(a,b)	Perl_magic_getarylen(aTHX_ a,b)
 #define magic_getdefelem(a,b)	Perl_magic_getdefelem(aTHX_ a,b)
@@ -1989,6 +1997,7 @@
 #define call_method(a,b)	Perl_call_method(aTHX_ a,b)
 #define call_pv(a,b)		Perl_call_pv(aTHX_ a,b)
 #define call_sv(a,b)		Perl_call_sv(aTHX_ a,b)
+#define despatch_signals()	Perl_despatch_signals(aTHX)
 #define eval_pv(a,b)		Perl_eval_pv(aTHX_ a,b)
 #define eval_sv(a,b)		Perl_eval_sv(aTHX_ a,b)
 #define get_sv(a,b)		Perl_get_sv(aTHX_ a,b)
@@ -2220,10 +2229,8 @@
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
 #ifdef USE_PURE_BISON
 #define yylex_r(a,b)		Perl_yylex_r(aTHX_ a,b)
-#define yylex(a,b)		Perl_yylex(aTHX_ a,b)
-#else
-#define yylex()			Perl_yylex(aTHX)
 #endif
+#define yylex()			Perl_yylex(aTHX)
 #define yyparse()		Perl_yyparse(aTHX)
 #define yywarn(a)		Perl_yywarn(aTHX_ a)
 #if defined(MYMALLOC)
@@ -2362,6 +2369,7 @@
 #define scalarboolean(a)	S_scalarboolean(aTHX_ a)
 #define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
+#define trlist_upgrade(a,b)	S_trlist_upgrade(aTHX_ a,b)
 #define op_clear(a)		S_op_clear(aTHX_ a)
 #define null(a)			S_null(aTHX_ a)
 #define pad_addlex(a)		S_pad_addlex(aTHX_ a)
@@ -2557,6 +2565,7 @@
 #define sv_2inuv_non_preserve(a,b)	S_sv_2inuv_non_preserve(aTHX_ a,b)
 #define sv_2iuv_non_preserve(a,b)	S_sv_2iuv_non_preserve(aTHX_ a,b)
 #  endif
+#define expect_number(a)	S_expect_number(aTHX_ a)
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni()		S_check_uni(aTHX)
@@ -2643,6 +2652,7 @@
 #define ck_open(a)		Perl_ck_open(aTHX_ a)
 #define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
 #define ck_require(a)		Perl_ck_require(aTHX_ a)
+#define ck_return(a)		Perl_ck_return(aTHX_ a)
 #define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
 #define ck_rvconst(a)		Perl_ck_rvconst(aTHX_ a)
 #define ck_sassign(a)		Perl_ck_sassign(aTHX_ a)
@@ -3251,6 +3261,8 @@
 #define do_open			Perl_do_open
 #define Perl_do_open9		CPerlObj::Perl_do_open9
 #define do_open9		Perl_do_open9
+#define Perl_do_openn		CPerlObj::Perl_do_openn
+#define do_openn		Perl_do_openn
 #define Perl_do_pipe		CPerlObj::Perl_do_pipe
 #define do_pipe			Perl_do_pipe
 #define Perl_do_print		CPerlObj::Perl_do_print
@@ -3429,6 +3441,8 @@
 #define invert			Perl_invert
 #define Perl_is_gv_magical	CPerlObj::Perl_is_gv_magical
 #define is_gv_magical		Perl_is_gv_magical
+#define Perl_is_lvalue_sub	CPerlObj::Perl_is_lvalue_sub
+#define is_lvalue_sub		Perl_is_lvalue_sub
 #define Perl_is_uni_alnum	CPerlObj::Perl_is_uni_alnum
 #define is_uni_alnum		Perl_is_uni_alnum
 #define Perl_is_uni_alnumc	CPerlObj::Perl_is_uni_alnumc
@@ -3567,6 +3581,8 @@
 #define magic_existspack	Perl_magic_existspack
 #define Perl_magic_freeregexp	CPerlObj::Perl_magic_freeregexp
 #define magic_freeregexp	Perl_magic_freeregexp
+#define Perl_magic_freeovrld	CPerlObj::Perl_magic_freeovrld
+#define magic_freeovrld		Perl_magic_freeovrld
 #define Perl_magic_get		CPerlObj::Perl_magic_get
 #define magic_get		Perl_magic_get
 #define Perl_magic_getarylen	CPerlObj::Perl_magic_getarylen
@@ -3898,6 +3914,8 @@
 #define call_pv			Perl_call_pv
 #define Perl_call_sv		CPerlObj::Perl_call_sv
 #define call_sv			Perl_call_sv
+#define Perl_despatch_signals	CPerlObj::Perl_despatch_signals
+#define despatch_signals	Perl_despatch_signals
 #define Perl_eval_pv		CPerlObj::Perl_eval_pv
 #define eval_pv			Perl_eval_pv
 #define Perl_eval_sv		CPerlObj::Perl_eval_sv
@@ -4357,12 +4375,9 @@
 #ifdef USE_PURE_BISON
 #define Perl_yylex_r		CPerlObj::Perl_yylex_r
 #define yylex_r			Perl_yylex_r
-#define Perl_yylex		CPerlObj::Perl_yylex
-#define yylex			Perl_yylex
-#else
-#define Perl_yylex		CPerlObj::Perl_yylex
-#define yylex			Perl_yylex
 #endif
+#define Perl_yylex		CPerlObj::Perl_yylex
+#define yylex			Perl_yylex
 #define Perl_yyparse		CPerlObj::Perl_yyparse
 #define yyparse			Perl_yyparse
 #define Perl_yywarn		CPerlObj::Perl_yywarn
@@ -4617,6 +4632,8 @@
 #define too_few_arguments	S_too_few_arguments
 #define S_too_many_arguments	CPerlObj::S_too_many_arguments
 #define too_many_arguments	S_too_many_arguments
+#define S_trlist_upgrade	CPerlObj::S_trlist_upgrade
+#define trlist_upgrade		S_trlist_upgrade
 #define S_op_clear		CPerlObj::S_op_clear
 #define op_clear		S_op_clear
 #define S_null			CPerlObj::S_null
@@ -4973,6 +4990,8 @@
 #define S_sv_2iuv_non_preserve	CPerlObj::S_sv_2iuv_non_preserve
 #define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
 #  endif
+#define S_expect_number		CPerlObj::S_expect_number
+#define expect_number		S_expect_number
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define S_check_uni		CPerlObj::S_check_uni
@@ -5128,6 +5147,8 @@
 #define ck_repeat		Perl_ck_repeat
 #define Perl_ck_require		CPerlObj::Perl_ck_require
 #define ck_require		Perl_ck_require
+#define Perl_ck_return		CPerlObj::Perl_ck_return
+#define ck_return		Perl_ck_return
 #define Perl_ck_rfun		CPerlObj::Perl_ck_rfun
 #define ck_rfun			Perl_ck_rfun
 #define Perl_ck_rvconst		CPerlObj::Perl_ck_rvconst

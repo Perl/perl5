@@ -450,6 +450,8 @@ START_EXTERN_C
 #define PL_profiledata		(*Perl_Iprofiledata_ptr(aTHXo))
 #undef  PL_psig_name
 #define PL_psig_name		(*Perl_Ipsig_name_ptr(aTHXo))
+#undef  PL_psig_pend
+#define PL_psig_pend		(*Perl_Ipsig_pend_ptr(aTHXo))
 #undef  PL_psig_ptr
 #define PL_psig_ptr		(*Perl_Ipsig_ptr_ptr(aTHXo))
 #undef  PL_ptr_table
@@ -466,6 +468,8 @@ START_EXTERN_C
 #define PL_sawampersand		(*Perl_Isawampersand_ptr(aTHXo))
 #undef  PL_sh_path
 #define PL_sh_path		(*Perl_Ish_path_ptr(aTHXo))
+#undef  PL_sig_pending
+#define PL_sig_pending		(*Perl_Isig_pending_ptr(aTHXo))
 #undef  PL_sighandlerp
 #define PL_sighandlerp		(*Perl_Isighandlerp_ptr(aTHXo))
 #undef  PL_splitstr

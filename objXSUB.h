@@ -325,6 +325,10 @@
 #define Perl_do_open9		pPerl->Perl_do_open9
 #undef  do_open9
 #define do_open9		Perl_do_open9
+#undef  Perl_do_openn
+#define Perl_do_openn		pPerl->Perl_do_openn
+#undef  do_openn
+#define do_openn		Perl_do_openn
 #undef  Perl_dowantarray
 #define Perl_dowantarray	pPerl->Perl_dowantarray
 #undef  dowantarray
@@ -1922,7 +1926,6 @@
 #undef  whichsig
 #define whichsig		Perl_whichsig
 #ifdef USE_PURE_BISON
-#else
 #endif
 #if defined(MYMALLOC)
 #undef  Perl_dump_mstats

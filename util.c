@@ -2548,7 +2548,9 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART
+#if !defined(USE_PERLIO) || defined(PERL_OLD_SIGNALS)
     act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
 #endif
 #ifdef SA_NOCLDWAIT
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
@@ -2580,7 +2582,9 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART
+#if !defined(USE_PERLIO) || defined(PERL_OLD_SIGNALS)
     act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
 #endif
 #ifdef SA_NOCLDWAIT
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
@@ -2663,7 +2667,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     LOCK_FDPID_MUTEX;
     svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
     UNLOCK_FDPID_MUTEX;
-    pid = SvIVX(*svp);
+    pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;
 #ifdef OS2
@@ -3645,9 +3649,9 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_tainted = t->Ttainted;
     PL_curpm = t->Tcurpm;         /* XXX No PMOP ref count */
     PL_nrs = newSVsv(t->Tnrs);
-    PL_rs = SvREFCNT_inc(PL_nrs);
+    PL_rs = t->Tnrs ? SvREFCNT_inc(PL_nrs) : Nullsv;
     PL_last_in_gv = Nullgv;
-    PL_ofs_sv = SvREFCNT_inc(PL_ofs_sv);
+    PL_ofs_sv = t->Tofs_sv ? SvREFCNT_inc(PL_ofs_sv) : Nullsv;
     PL_defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
     PL_chopset = t->Tchopset;
     PL_bodytarget = newSVsv(t->Tbodytarget);

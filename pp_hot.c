@@ -76,7 +76,7 @@ PP(pp_stringify)
     char *s;
     s = SvPV(TOPs,len);
     sv_setpvn(TARG,s,len);
-    if (SvUTF8(TOPs) && !IN_BYTE)
+    if (SvUTF8(TOPs))
 	SvUTF8_on(TARG);
     else
 	SvUTF8_off(TARG);
@@ -611,11 +611,24 @@ PP(pp_rv2av)
 	    SETs((SV*)av);
 	    RETURN;
 	}
+	else if (LVRET) {
+	    if (GIMME == G_SCALAR)
+		Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
+	    SETs((SV*)av);
+	    RETURN;
+	}
     }
     else {
 	if (SvTYPE(sv) == SVt_PVAV) {
 	    av = (AV*)sv;
 	    if (PL_op->op_flags & OPf_REF) {
+		SETs((SV*)av);
+		RETURN;
+	    }
+	    else if (LVRET) {
+		if (GIMME == G_SCALAR)
+		    Perl_croak(aTHX_ "Can't return array to lvalue"
+			       " scalar context");
 		SETs((SV*)av);
 		RETURN;
 	    }
@@ -672,6 +685,13 @@ PP(pp_rv2av)
 		SETs((SV*)av);
 		RETURN;
 	    }
+	    else if (LVRET) {
+		if (GIMME == G_SCALAR)
+		    Perl_croak(aTHX_ "Can't return array to lvalue"
+			       " scalar context");
+		SETs((SV*)av);
+		RETURN;
+	    }
 	}
     }
 
@@ -715,11 +735,24 @@ PP(pp_rv2hv)
 	    SETs((SV*)hv);
 	    RETURN;
 	}
+	else if (LVRET) {
+	    if (GIMME == G_SCALAR)
+		Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
+	    SETs((SV*)hv);
+	    RETURN;
+	}
     }
     else {
 	if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) {
 	    hv = (HV*)sv;
 	    if (PL_op->op_flags & OPf_REF) {
+		SETs((SV*)hv);
+		RETURN;
+	    }
+	    else if (LVRET) {
+		if (GIMME == G_SCALAR)
+		    Perl_croak(aTHX_ "Can't return hash to lvalue"
+			       " scalar context");
 		SETs((SV*)hv);
 		RETURN;
 	    }
@@ -773,6 +806,13 @@ PP(pp_rv2hv)
 	    if (PL_op->op_private & OPpLVAL_INTRO)
 		hv = save_hash(gv);
 	    if (PL_op->op_flags & OPf_REF) {
+		SETs((SV*)hv);
+		RETURN;
+	    }
+	    else if (LVRET) {
+		if (GIMME == G_SCALAR)
+		    Perl_croak(aTHX_ "Can't return hash to lvalue"
+			       " scalar context");
 		SETs((SV*)hv);
 		RETURN;
 	    }
@@ -1532,7 +1572,7 @@ PP(pp_helem)
     SV **svp;
     SV *keysv = POPs;
     HV *hv = (HV*)POPs;
-    U32 lval = PL_op->op_flags & OPf_MOD;
+    U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
     U32 hash = (SvFAKE(keysv) && SvREADONLY(keysv)) ? SvUVX(keysv) : 0;
@@ -1577,7 +1617,7 @@ PP(pp_helem)
 		if (!preeminent) {
 		    STRLEN keylen;
 		    char *key = SvPV(keysv, keylen);
-		    save_delete(hv, key, keylen);
+		    SAVEDELETE(hv, savepvn(key,keylen), keylen);
 		} else
 		    save_helem(hv, keysv, svp);
             }
@@ -2785,7 +2825,7 @@ PP(pp_aelem)
     SV* elemsv = POPs;
     IV elem = SvIV(elemsv);
     AV* av = (AV*)POPs;
-    U32 lval = PL_op->op_flags & OPf_MOD;
+    U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
     SV *sv;
 

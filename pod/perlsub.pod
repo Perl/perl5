@@ -645,10 +645,6 @@ and in:
 
 all the subroutines are called in a list context.
 
-The current implementation does not allow arrays and hashes to be
-returned from lvalue subroutines directly.  You may return a
-reference instead.  This restriction may be lifted in future.
-
 =head2 Passing Symbol Table Entries (typeglobs)
 
 B<WARNING>: The mechanism described in this section was originally

@@ -750,20 +750,21 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    HV *hv;
 	    I32 i;
 	    if (!PL_psig_ptr) {
-		int sig_num[] = { SIG_NUM };
-		New(73, PL_psig_ptr, sizeof(sig_num)/sizeof(*sig_num), SV*);
-		New(73, PL_psig_name, sizeof(sig_num)/sizeof(*sig_num), SV*);
+		Newz(73, PL_psig_ptr,  SIG_SIZE, SV*);
+		Newz(73, PL_psig_name, SIG_SIZE, SV*);
+		Newz(73, PL_psig_pend, SIG_SIZE, int);
 	    }
 	    GvMULTI_on(gv);
 	    hv = GvHVn(gv);
 	    hv_magic(hv, Nullgv, 'S');
-	    for (i = 1; PL_sig_name[i]; i++) {
+	    for (i = 1; i < SIG_SIZE; i++) {
 	    	SV ** init;
 	    	init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
 	    	if (init)
 		    sv_setsv(*init, &PL_sv_undef);
 	    	PL_psig_ptr[i] = 0;
 	    	PL_psig_name[i] = 0;
+	    	PL_psig_pend[i] = 0;
 	    }
 	}
 	break;
@@ -1155,6 +1156,23 @@ register GV *gv;
 }
 #endif			/* Microport 2.4 hack */
 
+int
+Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
+{
+    AMT *amtp = (AMT*)mg->mg_ptr;
+    if (amtp && AMT_AMAGIC(amtp)) {
+	int i;
+	for (i = 1; i < NofAMmeth; i++) {
+	    CV *cv = amtp->table[i];
+	    if (cv != Nullcv) {
+		SvREFCNT_dec((SV *) cv);
+		amtp->table[i] = Nullcv;
+	    }
+	}
+    }
+ return 0;
+}
+
 /* Updates and caches the CV's */
 
 bool
@@ -1170,18 +1188,11 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   if (mg && amtp->was_ok_am == PL_amagic_generation
       && amtp->was_ok_sub == PL_sub_generation)
       return AMT_OVERLOADED(amtp);
-  if (amtp && AMT_AMAGIC(amtp)) {	/* Have table. */
-    int i;
-    for (i=1; i<NofAMmeth; i++) {
-      if (amtp->table[i]) {
-	SvREFCNT_dec(amtp->table[i]);
-      }
-    }
-  }
   sv_unmagic((SV*)stash, 'c');
 
   DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME(stash)) );
 
+  Zero(&amt,1,AMT);
   amt.was_ok_am = PL_amagic_generation;
   amt.was_ok_sub = PL_sub_generation;
   amt.fallback = AMGfallNO;

@@ -116,10 +116,15 @@ PP(pp_regcomp)
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
 	    if (DO_UTF8(tmpstr))
 		pm->op_pmdynflags |= PMdf_DYN_UTF8;
-	    else
+	    else {
 		pm->op_pmdynflags &= ~PMdf_DYN_UTF8;
+		if (pm->op_pmdynflags & PMdf_UTF8)
+		    t = (char*)bytes_to_utf8((U8*)t, &len);
+	    }
 	    pm->op_pmregexp = CALLREGCOMP(aTHX_ t, t + len, pm);
-	    PL_reginterp_cnt = 0;		/* XXXX Be extra paranoid - needed
+	    if (!DO_UTF8(tmpstr) && (pm->op_pmdynflags & PMdf_UTF8))
+		Safefree(t);
+	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
 					   inside tie/overload accessors.  */
 	}
     }
@@ -1238,6 +1243,20 @@ Perl_block_gimme(pTHX)
 	/* NOTREACHED */
 	return 0;
     }
+}
+
+I32
+Perl_is_lvalue_sub(pTHX)
+{
+    I32 cxix;
+
+    cxix = dopoptosub(cxstack_ix);
+    assert(cxix >= 0);  /* We should only be called from inside subs */
+
+    if (cxstack[cxix].blk_sub.lval && CvLVALUE(cxstack[cxix].blk_sub.cv))
+	return cxstack[cxix].blk_sub.lval;
+    else
+	return 0;
 }
 
 STATIC I32

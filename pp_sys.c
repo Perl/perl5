@@ -492,7 +492,9 @@ PP(pp_die)
 
 PP(pp_open)
 {
-    djSP; dTARGET;
+    djSP;
+    dMARK; dORIGMARK;
+    dTARGET;
     GV *gv;
     SV *sv;
     SV *name = Nullsv;
@@ -500,29 +502,19 @@ PP(pp_open)
     char *tmps;
     STRLEN len;
     MAGIC *mg;
+    bool  ok;
 
-    if (MAXARG > 2) {
-	name = POPs;
-	have_name = 1;
-    }
-    if (MAXARG > 1)
-	sv = POPs;
-    if (!isGV(TOPs))
-	DIE(aTHX_ PL_no_usym, "filehandle");
-    if (MAXARG <= 1)
-	sv = GvSV(TOPs);
-    gv = (GV*)POPs;
+    gv = (GV *)*++MARK;
     if (!isGV(gv))
 	DIE(aTHX_ PL_no_usym, "filehandle");
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
     if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)gv, mg));
-	XPUSHs(sv);
-	if (have_name)
-	    XPUSHs(name);
+	/* Method's args are same as ours ... */
+	/* ... except handle is replaced by the object */
+	*MARK-- = SvTIED_obj((SV*)gv, mg);
+	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
 	call_method("OPEN", G_SCALAR);
@@ -531,8 +523,17 @@ PP(pp_open)
 	RETURN;
     }
 
+    if (MARK < SP) {
+	sv = *++MARK;
+    }
+    else {
+	sv = GvSV(gv);
+    }
+
     tmps = SvPV(sv, len);
-    if (do_open9(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp, name, have_name))
+    ok = do_openn(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp, MARK+1, (SP-MARK));
+    SP = ORIGMARK;
+    if (ok)
 	PUSHi( (I32)PL_forkprocess );
     else if (PL_forkprocess == 0)		/* we are a new child */
 	PUSHi(0);
@@ -3588,15 +3589,31 @@ PP(pp_mkdir)
 #ifndef HAS_MKDIR
     int oldumask;
 #endif
-    STRLEN n_a;
+    STRLEN len;
     char *tmps;
+    bool copy = FALSE;
 
     if (MAXARG > 1)
 	mode = POPi;
     else
 	mode = 0777;
 
-    tmps = SvPV(TOPs, n_a);
+    tmps = SvPV(TOPs, len);
+    /* Different operating and file systems take differently to
+     * trailing slashes.  According to POSIX 1003.1 1996 Edition
+     * any number of trailing slashes should be allowed.
+     * Thusly we snip them away so that even non-conforming
+     * systems are happy. */
+    /* We should probably do this "filtering" for all
+     * the functions that expect (potentially) directory names:
+     * -d, chdir(), chmod(), chown(), chroot(), fcntl()?,
+     * (mkdir()), opendir(), rename(), rmdir(), stat(). --jhi */
+    if (len > 1 && tmps[len-1] == '/') {
+	while (tmps[len] == '/' && len > 1)
+	    len--;
+	tmps = savepvn(tmps, len);
+	copy = TRUE;
+    }
 
     TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR
@@ -3607,6 +3624,8 @@ PP(pp_mkdir)
     PerlLIO_umask(oldumask);
     PerlLIO_chmod(tmps, (mode & ~oldumask) & 0777);
 #endif
+    if (copy)
+	Safefree(tmps);
     RETURN;
 }
 

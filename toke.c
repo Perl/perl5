@@ -1045,8 +1045,11 @@ STATIC I32
 S_sublex_done(pTHX)
 {
     if (!PL_lex_starts++) {
+	SV *sv = newSVpvn("",0);
+	if (SvUTF8(PL_linestr))
+	    SvUTF8_on(sv);
 	PL_expect = XOPERATOR;
-	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn("",0));
+	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 	return THING;
     }
 
@@ -1173,7 +1176,8 @@ S_scan_const(pTHX_ char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
-    bool has_utf8 = FALSE;			/* embedded \x{} */
+    bool has_utf8 = (PL_linestr && SvUTF8(PL_linestr));
+						/* the constant is UTF8 */
     UV uv;
 
     I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
@@ -1313,8 +1317,6 @@ S_scan_const(pTHX_ char *start)
 
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
-	    bool to_be_utf8 = FALSE;
-
 	    s++;
 
 	    /* some backslashes we leave behind */
@@ -1383,7 +1385,6 @@ S_scan_const(pTHX_ char *start)
 		    else {
 			STRLEN len = 1;		/* allow underscores */
 			uv = (UV)scan_hex(s + 1, e - s - 1, &len);
-			to_be_utf8 = TRUE;
 		    }
 		    s = e + 1;
 		}
@@ -1407,7 +1408,7 @@ S_scan_const(pTHX_ char *start)
 		 * repertoire.   --jhi */
 		
 		if (uv > 127) {
-		    if (!has_utf8 && (to_be_utf8 || uv > 255)) {
+		    if (!has_utf8 && uv > 255) {
 		        /* Might need to recode whatever we have
 			 * accumulated so far if it contains any
 			 * hibit chars.
@@ -1425,8 +1426,6 @@ S_scan_const(pTHX_ char *start)
 			if (hicount) {
 			    char *old_pvx = SvPVX(sv);
 			    char *src, *dst;
-			    U8 tmpbuf[UTF8_MAXLEN+1];
-			    U8 *tmpend;
 			  
 			    d = SvGROW(sv,
 				       SvCUR(sv) + hicount + 1) +
@@ -1438,10 +1437,8 @@ S_scan_const(pTHX_ char *start)
 
 			    while (src < dst) {
 			        if (UTF8_IS_CONTINUED(*src)) {
-				    tmpend = uv_to_utf8(tmpbuf, (U8)*src--);
-				    dst -= tmpend - tmpbuf;
-				    Copy((char *)tmpbuf, dst+1,
-					 tmpend - tmpbuf, char);
+ 				    *dst-- = UTF8_EIGHT_BIT_LO(*src);
+ 				    *dst-- = UTF8_EIGHT_BIT_HI(*src--);
 			        }
 			        else {
 				    *dst-- = *src--;
@@ -1450,7 +1447,7 @@ S_scan_const(pTHX_ char *start)
                         }
                     }
 
-                    if (to_be_utf8 || (has_utf8 && uv > 127) || uv > 255) {
+                    if (has_utf8 || uv > 255) {
 		        d = (char*)uv_to_utf8((U8*)d, uv);
 			has_utf8 = TRUE;
                     }
@@ -2093,7 +2090,8 @@ Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
 
     r = Perl_yylex(aTHX);
 
-    yyactlevel--;
+    if (yyactlevel > 0)
+       yyactlevel--;
 
     return r;
 }
@@ -2863,7 +2861,7 @@ Perl_yylex(pTHX)
 	    if (ftst) {
 		PL_last_lop_op = ftst;
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### Saw file test %c\n", ftst);
+                        "### Saw file test %c\n", (int)ftst);
 		} )
 		FTST(ftst);
 	    }
@@ -2871,7 +2869,8 @@ Perl_yylex(pTHX)
 		/* Assume it was a minus followed by a one-letter named
 		 * subroutine call (or a -bareword), then. */
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### %c looked like a file test but was not\n", ftst);
+			"### %c looked like a file test but was not\n",
+			(int)ftst);
 		} )
 		s -= 2;
 	    }
@@ -3026,9 +3025,21 @@ Perl_yylex(pTHX)
 		    PL_lex_stuff = Nullsv;
 		}
 		else {
-		    attrs = append_elem(OP_LIST, attrs,
-					newSVOP(OP_CONST, 0,
-						newSVpvn(s, len)));
+		    if (!PL_in_my && len == 6 && strnEQ(s, "lvalue", len))
+			CvLVALUE_on(PL_compcv);
+		    else if (!PL_in_my && len == 6 && strnEQ(s, "locked", len))
+			CvLOCKED_on(PL_compcv);
+		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
+			CvMETHOD_on(PL_compcv);
+		    /* After we've set the flags, it could be argued that
+		       we don't need to do the attributes.pm-based setting
+		       process, and shouldn't bother appending recognized
+		       flags. To experiment with that, uncomment the
+		       following "else": */
+		    /* else */
+		        attrs = append_elem(OP_LIST, attrs,
+					    newSVOP(OP_CONST, 0,
+					      	    newSVpvn(s, len)));
 		}
 		s = skipspace(d);
 		if (*s == ':' && s[1] != ':')
@@ -4700,7 +4711,10 @@ Perl_yylex(pTHX)
 	    TOKEN('(');
 
 	case KEY_qq:
+	case KEY_qu:
 	    s = scan_str(s,FALSE,FALSE);
+	    if (tmp == KEY_qu && is_utf8_string((U8*)s, SvCUR(PL_lex_stuff)))
+		SvUTF8_on(PL_lex_stuff);
 	    if (!s)
 		missingterm((char*)0);
 	    yylval.ival = OP_STRINGIFY;
@@ -5537,6 +5551,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"q"))			return KEY_q;
 	    if (strEQ(d,"qr"))			return KEY_qr;
 	    if (strEQ(d,"qq"))			return KEY_qq;
+	    if (strEQ(d,"qu"))			return KEY_qu;
 	    if (strEQ(d,"qw"))			return KEY_qw;
 	    if (strEQ(d,"qx"))			return KEY_qx;
 	}
@@ -7193,10 +7208,9 @@ vstring:
 	    while (isDIGIT(*pos) || *pos == '_')
 		pos++;
 	    if (!isALPHA(*pos)) {
-		UV rev;
+		UV rev, revmax = 0;
 		U8 tmpbuf[UTF8_MAXLEN+1];
 		U8 *tmpend;
-		bool utf8 = FALSE;
 		s++;				/* get past 'v' */
 
 		sv = NEWSV(92,5);
@@ -7223,7 +7237,8 @@ vstring:
 			}
 		    }
 		    tmpend = uv_to_utf8(tmpbuf, rev);
-		    utf8 = utf8 || rev > 127;
+		    if (rev > revmax)
+			revmax = rev;
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		    if (*pos == '.' && isDIGIT(pos[1]))
 			s = ++pos;
@@ -7237,9 +7252,9 @@ vstring:
 
 		SvPOK_on(sv);
 		SvREADONLY_on(sv);
-		if (utf8) {
+		if (revmax > 127) {
 		    SvUTF8_on(sv);
-		    if (!UTF||IN_BYTE)
+		    if (revmax < 256)
 		      sv_utf8_downgrade(sv, TRUE);
 		}
 	    }

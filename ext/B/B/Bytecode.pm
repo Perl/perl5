@@ -312,15 +312,6 @@ sub B::BINOP::bytecode {
     }
 }
 
-sub B::LISTOP::bytecode {
-    my $op = shift;
-    my $children = $op->children unless $strip_syntree;
-    $op->B::BINOP::bytecode;
-    if (($op->type || !$compress_nullops) && !$strip_syntree) {
-	asm "op_children $children\n";
-    }
-}
-
 sub B::LOOP::bytecode {
     my $op = shift;
     my $redoopix = $op->redoop->objix;

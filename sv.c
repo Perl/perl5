@@ -1322,10 +1322,10 @@ Perl_sv_setuv(pTHX_ register SV *sv, UV u)
 {
     /* With these two if statements:
        u=1.49  s=0.52  cu=72.49  cs=10.64  scripts=270  tests=20865
-       
+
        without
        u=1.35  s=0.47  cu=73.45  cs=11.43  scripts=270  tests=20865
-       
+
        If you wish to remove them, please benchmark to see what the effect is
     */
     if (u <= (UV)IV_MAX) {
@@ -1350,10 +1350,10 @@ Perl_sv_setuv_mg(pTHX_ register SV *sv, UV u)
 {
     /* With these two if statements:
        u=1.49  s=0.52  cu=72.49  cs=10.64  scripts=270  tests=20865
-       
+
        without
        u=1.35  s=0.47  cu=73.45  cs=11.43  scripts=270  tests=20865
-       
+
        If you wish to remove them, please benchmark to see what the effect is
     */
     if (u <= (UV)IV_MAX) {
@@ -1527,7 +1527,7 @@ S_not_a_number(pTHX_ SV *sv)
    Now, "3.2" will become NV=3.2 IV=3 NOK, IOKp, because the flags meaning
    changes - now IV and NV together means that the two are interchangeable
    SvIVX == (IV) SvNVX && SvNVX == (NV) SvIVX;
-   
+
    The benefit of this is operations such as pp_add know that if SvIOK is
    true for both left and right operands, then integer addition can be
    used instead of floating point. (for cases where the result won't
@@ -1567,7 +1567,7 @@ STATIC int
 S_sv_2inuv_non_preserve (pTHX_ register SV *sv, I32 numtype) {
     NV nv = SvNVX(sv);		/* Code simpler and had compiler problems if */
     UV nv_as_uv = U_V(nv);	/*  these are not in simple variables.   */
-    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2inuv_non '%s', IV=0x%"UVxf" NV=%g inttype=%X\n", SvPVX(sv), SvIVX(sv), nv, numtype));
+    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2inuv_non '%s', IV=0x%"UVxf" NV=%g inttype=%"UVXf"\n", SvPVX(sv), SvIVX(sv), nv, (UV)numtype));
     if (nv_as_uv <= (UV)IV_MAX) {
 	(void)SvIOKp_on(sv);
 	(void)SvNOKp_on(sv);
@@ -1625,7 +1625,7 @@ S_sv_2inuv_non_preserve (pTHX_ register SV *sv, I32 numtype) {
 #else
     /* We've just lost integer precision, nothing we could do. */
     SvUVX(sv) = nv_as_uv;
-    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2niuv_non UV? '%s', UV=0x%"UVxf" NV=%g U_V(NV)=0x%"UVxf" inttype=%X\n", SvPVX(sv), SvIVX(sv), nv, nv_as_uv, numtype));
+    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2niuv_non UV? '%s', UV=0x%"UVxf" NV=%g U_V(NV)=0x%"UVxf" inttype=%"UVXf"\n", SvPVX(sv), SvIVX(sv), nv, nv_as_uv, (UV)numtype));
     /* UV and NV slots equally valid only if we have casting symmetry. */
     if (numtype & IS_NUMBER_NOT_INT) {
 	SvIsUV_on(sv);
@@ -1648,7 +1648,7 @@ S_sv_2inuv_non_preserve (pTHX_ register SV *sv, I32 numtype) {
 STATIC int
 S_sv_2iuv_non_preserve (pTHX_ register SV *sv, I32 numtype)
 {
-    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%"UVxf" NV=%g inttype=%X\n", SvPVX(sv), SvIVX(sv), SvNVX(sv), numtype));
+    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%"UVxf" NV=%g inttype=%"UVXf"\n", SvPVX(sv), SvIVX(sv), SvNVX(sv), (UV)numtype));
     if (SvNVX(sv) < (NV)IV_MIN) {
 	(void)SvIOKp_on(sv);
 	(void)SvNOK_on(sv);
@@ -1792,7 +1792,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	       (NV)UVX == NVX are both true, but the values differ. :-(
 	       Hopefully for 2s complement IV_MIN is something like
 	       0x8000000000000000 which will be exact. NWC */
-	} 
+	}
 	else {
 	    SvUVX(sv) = U_V(SvNVX(sv));
 	    if (
@@ -2043,7 +2043,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	       (NV)UVX == NVX are both true, but the values differ. :-(
 	       Hopefully for 2s complement IV_MIN is something like
 	       0x8000000000000000 which will be exact. NWC */
-	} 
+	}
 	else {
 	    SvUVX(sv) = U_V(SvNVX(sv));
 	    if (
@@ -2090,7 +2090,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    UV u;
 	    char *num_begin = SvPVX(sv);
 	    int save_errno = errno;
-	    
+	
 	    /* seems that strtoul taking numbers that start with - is
 	       implementation dependant, and can't be relied upon.  */
 	    if (numtype & IS_NUMBER_NEG) {
@@ -2101,7 +2101,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 		if (*num_begin == '-')
 		    num_begin++;
 	    }
-    
+
 	    /* Is it an integer that we could convert with strtoul?
 	       So try it, and if it doesn't set errno then it's pukka.
 	       This should be faster than going atof and then thinking.  */
@@ -2110,7 +2110,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 		&& ((errno = 0), 1) /* always true */
 		&& ((u = Strtoul(num_begin, Null(char**), 10)), 1) /* ditto */
 		&& (errno == 0)
-		/* If known to be negative, check it didn't undeflow IV 
+		/* If known to be negative, check it didn't undeflow IV
 		   XXX possibly we should put more negative values as NVs
 		   direct rather than go via atof below */
 		&& ((numtype & IS_NUMBER_NEG) ? (u <= (UV)IV_MIN) : 1)) {
@@ -2417,7 +2417,7 @@ S_asUV(pTHX_ SV *sv)
  * LONG_MAX and LONG_MIN when given out of range values. ANSI says they should
  * do this, and vendors have had 11 years to get it right.
  * However, will try to make it still work with only atol
- *  
+ *
  * IS_NUMBER_TO_INT_BY_ATOL	123456789 or 123456789.3  definitely < IV_MAX
  * IS_NUMBER_TO_INT_BY_STRTOL	123456789 or 123456789.3  if digits = IV_MAX
  * IS_NUMBER_TO_INT_BY_ATOF	123456789e0               or >> IV_MAX
@@ -2471,7 +2471,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 
     nbegin = s;
     /*
-     * we return IS_NUMBER_TO_INT_BY_ATOL if the number can converted to 
+     * we return IS_NUMBER_TO_INT_BY_ATOL if the number can converted to
      * integer with atol() without overflow, IS_NUMBER_TO_INT_BY_STRTOL if
      * possibly slightly larger than max int, IS_NUMBER_TO_INT_BY_ATOF if you
      * will need (int)atof().
@@ -2957,6 +2957,7 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 
     if (hibit) {
 	STRLEN len;
+
 	if (SvREADONLY(sv) && SvFAKE(sv)) {
 	    sv_force_normal(sv);
 	    s = SvPVX(sv);
@@ -2987,10 +2988,13 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 {
     if (SvPOK(sv) && SvUTF8(sv)) {
         if (SvCUR(sv)) {
-	    char *c = SvPVX(sv);
-	    STRLEN len = SvCUR(sv);
+	    char *s;
+	    STRLEN len;
 
-	    if (!utf8_to_bytes((U8*)c, &len)) {
+	    if (SvREADONLY(sv) && SvFAKE(sv))
+		sv_force_normal(sv);
+	    s = SvPV(sv, len);
+	    if (!utf8_to_bytes((U8*)s, &len)) {
 	        if (fail_ok)
 		    return FALSE;
 		else {
@@ -3378,14 +3382,19 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	SvRV(dstr) = SvREFCNT_inc(SvRV(sstr));
 	SvROK_on(dstr);
 	if (sflags & SVp_NOK) {
-	    SvNOK_on(dstr);
+	    SvNOKp_on(dstr);
+	    /* Only set the public OK flag if the source has public OK.  */
+	    if (sflags & SVf_NOK)
+		SvFLAGS(dstr) |= SVf_NOK;
 	    SvNVX(dstr) = SvNVX(sstr);
 	}
 	if (sflags & SVp_IOK) {
-	    (void)SvIOK_on(dstr);
-	    SvIVX(dstr) = SvIVX(sstr);
+	    (void)SvIOKp_on(dstr);
+	    if (sflags & SVf_IOK)
+		SvFLAGS(dstr) |= SVf_IOK;
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
+	    SvIVX(dstr) = SvIVX(sstr);
 	}
 	if (SvAMAGIC(sstr)) {
 	    SvAMAGIC_on(dstr);
@@ -3435,36 +3444,51 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    *SvEND(dstr) = '\0';
 	    (void)SvPOK_only(dstr);
 	}
-	if ((sflags & SVf_UTF8) && !IN_BYTE)
+	if (sflags & SVf_UTF8)
 	    SvUTF8_on(dstr);
 	/*SUPPRESS 560*/
 	if (sflags & SVp_NOK) {
-	    SvNOK_on(dstr);
+	    SvNOKp_on(dstr);
+	    if (sflags & SVf_NOK)
+		SvFLAGS(dstr) |= SVf_NOK;
 	    SvNVX(dstr) = SvNVX(sstr);
 	}
 	if (sflags & SVp_IOK) {
-	    (void)SvIOK_on(dstr);
-	    SvIVX(dstr) = SvIVX(sstr);
+	    (void)SvIOKp_on(dstr);
+	    if (sflags & SVf_IOK)
+		SvFLAGS(dstr) |= SVf_IOK;
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
-	}
-    }
-    else if (sflags & SVp_NOK) {
-	SvNVX(dstr) = SvNVX(sstr);
-	(void)SvNOK_only(dstr);
-	if (sflags & SVf_IOK) {
-	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
-	    /* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
-	    if (sflags & SVf_IVisUV)
-		SvIsUV_on(dstr);
 	}
     }
     else if (sflags & SVp_IOK) {
-	(void)SvIOK_only(dstr);
-	SvIVX(dstr) = SvIVX(sstr);
+	if (sflags & SVf_IOK)
+	    (void)SvIOK_only(dstr);
+	else {
+	    SvOK_off(dstr);
+	    SvIOKp_on(dstr);
+	}
+	/* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
 	if (sflags & SVf_IVisUV)
 	    SvIsUV_on(dstr);
+	SvIVX(dstr) = SvIVX(sstr);
+	if (sflags & SVp_NOK) {
+	    if (sflags & SVf_NOK)
+		(void)SvNOK_on(dstr);
+	    else
+		(void)SvNOKp_on(dstr);
+	    SvNVX(dstr) = SvNVX(sstr);
+	}
+    }
+    else if (sflags & SVp_NOK) {
+	if (sflags & SVf_NOK)
+	    (void)SvNOK_only(dstr);
+	else {
+	    SvOK_off(dstr);
+	    SvNOKp_on(dstr);
+	}
+	SvNVX(dstr) = SvNVX(sstr);
     }
     else {
 	if (dtype == SVt_PVGV) {
@@ -3923,7 +3947,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
         mg->mg_virtual = &PL_vtbl_amagicelem;
         break;
     case 'c':
-        mg->mg_virtual = 0;
+        mg->mg_virtual = &PL_vtbl_ovrld;
         break;
     case 'B':
 	mg->mg_virtual = &PL_vtbl_bm;
@@ -4292,7 +4316,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    SvREADONLY_on(&tmpref);	/* DESTROY() could be naughty */
 	    SvREFCNT(&tmpref) = 1;
 
-	    do {	    
+	    do {	
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor) {
@@ -5220,7 +5244,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
     if ((flags & (SVp_NOK|SVp_IOK)) == SVp_NOK) {
 	/* It's (privately or publicly) a float, but not tested as an
 	   integer, so test it to see. */
-	(void) SvIV(sv); 
+	(void) SvIV(sv);
 	flags = SvFLAGS(sv);
     }
     if ((flags & SVf_IOK) || ((flags & (SVp_IOK | SVp_NOK)) == SVp_IOK)) {
@@ -5271,7 +5295,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	       so $a="9.22337203685478e+18"; $a+0; $a++
 	       needs to be the same as $a="9.22337203685478e+18"; $a++
 	       or we go insane. */
-	    
+	
 	    (void) sv_2iv(sv);
 	    if (SvIOK(sv))
 		goto oops_its_int;
@@ -5414,7 +5438,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	       so $a="9.22337203685478e+18"; $a+0; $a--
 	       needs to be the same as $a="9.22337203685478e+18"; $a--
 	       or we go insane. */
-	    
+	
 	    (void) sv_2iv(sv);
 	    if (SvIOK(sv))
 		goto oops_its_int;
@@ -6684,6 +6708,21 @@ Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
+I32
+S_expect_number(pTHX_ char** pattern)
+{
+    I32 var = 0;
+    switch (**pattern) {
+    case '1': case '2': case '3':
+    case '4': case '5': case '6':
+    case '7': case '8': case '9':
+	while (isDIGIT(**pattern))
+	    var = var * 10 + (*(*pattern)++ - '0');
+    }
+    return var;
+}
+#define EXPECT_NUMBER(pattern, var) (var = S_expect_number(aTHX_ &pattern))
+
 /*
 =for apidoc sv_vcatpvfn
 
@@ -6744,7 +6783,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	bool alt = FALSE;
 	bool left = FALSE;
 	bool vectorize = FALSE;
-	bool utf = FALSE;
+	bool vectorarg = FALSE;
+	bool vec_utf = FALSE;
 	char fill = ' ';
 	char plus = 0;
 	char intsize = 0;
@@ -6781,10 +6821,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN gap;
 	char *dotstr = ".";
 	STRLEN dotstrlen = 1;
-	I32 epix = 0; /* explicit parameter index */
+	I32 efix = 0; /* explicit format parameter index */
 	I32 ewix = 0; /* explicit width index */
+	I32 epix = 0; /* explicit precision index */
+	I32 evix = 0; /* explicit vector index */
 	bool asterisk = FALSE;
 
+	/* echo everything up to the next format specification */
 	for (q = p; q < patend && *q != '%'; ++q) ;
 	if (q > p) {
 	    sv_catpvn(sv, p, q - p);
@@ -6792,6 +6835,25 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 	if (q++ >= patend)
 	    break;
+
+/*
+    We allow format specification elements in this order:
+	\d+\$              explicit format parameter index
+	[-+ 0#]+           flags
+	\*?(\d+\$)?v       vector with optional (optionally specified) arg
+	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
+	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
+	[hlqLV]            size
+    [%bcdefginopsux_DFOUX] format (mandatory)
+*/
+	if (EXPECT_NUMBER(q, width)) {
+	    if (*q == '$') {
+		++q;
+		efix = width;
+	    } else {
+		goto gotwidth;
+	    }
+	}
 
 	/* FLAGS */
 
@@ -6816,63 +6878,60 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		q++;
 		continue;
 
-	    case '*':			/* printf("%*vX",":",$ipv6addr) */
-		if (q[1] != 'v')
-		    break;
-		q++;
-		if (args)
-		    vecsv = va_arg(*args, SV*);
-		else if (svix < svmax)
-		    vecsv = svargs[svix++];
-		else
-		    continue;
-		dotstr = SvPVx(vecsv,dotstrlen);
-		if (DO_UTF8(vecsv))
-		    is_utf = TRUE;
-		/* FALL THROUGH */
-
-	    case 'v':
-		vectorize = TRUE;
-		q++;
-		continue;
-
 	    default:
 		break;
 	    }
 	    break;
 	}
 
-	/* WIDTH */
-
-    scanwidth:
-
+      tryasterisk:
 	if (*q == '*') {
-	    if (asterisk)
-		goto unknown;
-	    asterisk = TRUE;
 	    q++;
+	    if (EXPECT_NUMBER(q, ewix))
+		if (*q++ != '$')
+		    goto unknown;
+	    asterisk = TRUE;
+	}
+	if (*q == 'v') {
+	    q++;
+	    if (vectorize)
+		goto unknown;
+	    if (vectorarg = asterisk) {
+		evix = ewix;
+		ewix = 0;
+		asterisk = FALSE;
+	    }
+	    vectorize = TRUE;
+	    goto tryasterisk;
 	}
 
-	switch (*q) {
-	case '1': case '2': case '3':
-	case '4': case '5': case '6':
-	case '7': case '8': case '9':
-	    width = 0;
-	    while (isDIGIT(*q))
-		width = width * 10 + (*q++ - '0');
-	    if (*q == '$') {
-		if (asterisk && ewix == 0) {
-		    ewix  = width;
-		    width = 0;
-		    q++;
-		    goto scanwidth;
-		} else if (epix == 0) {
-		    epix  = width;
-		    width = 0;
-		    q++;
-		    goto scanwidth;
-		} else
-		    goto unknown;
+	if (!asterisk)
+	    EXPECT_NUMBER(q, width);
+
+	if (vectorize) {
+	    if (vectorarg) {
+		if (args)
+		    vecsv = va_arg(*args, SV*);
+		else
+		    vecsv = (evix ? evix <= svmax : svix < svmax) ?
+			svargs[ewix ? ewix-1 : svix++] : &PL_sv_undef;
+		dotstr = SvPVx(vecsv, dotstrlen);
+		if (DO_UTF8(vecsv))
+		    is_utf = TRUE;
+	    }
+	    if (args) {
+		vecsv = va_arg(*args, SV*);
+		vecstr = (U8*)SvPVx(vecsv,veclen);
+		vec_utf = DO_UTF8(vecsv);
+	    }
+	    else if (efix ? efix <= svmax : svix < svmax) {
+		vecsv = svargs[efix ? efix-1 : svix++];
+		vecstr = (U8*)SvPVx(vecsv,veclen);
+		vec_utf = DO_UTF8(vecsv);
+	    }
+	    else {
+		vecstr = (U8*)"";
+		veclen = 0;
 	    }
 	}
 
@@ -6885,19 +6944,22 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;
 	}
+      gotwidth:
 
 	/* PRECISION */
 
 	if (*q == '.') {
 	    q++;
 	    if (*q == '*') {
+		q++;
+		if (EXPECT_NUMBER(q, epix) && *q++ != '$')
+		    goto unknown;
 		if (args)
 		    i = va_arg(*args, int);
 		else
 		    i = (ewix ? ewix <= svmax : svix < svmax)
 			? SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
 		precis = (i < 0) ? 0 : i;
-		q++;
 	    }
 	    else {
 		precis = 0;
@@ -6905,23 +6967,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    precis = precis * 10 + (*q++ - '0');
 	    }
 	    has_precis = TRUE;
-	}
-
-	if (vectorize) {
-	    if (args) {
-		vecsv = va_arg(*args, SV*);
-		vecstr = (U8*)SvPVx(vecsv,veclen);
-		utf = DO_UTF8(vecsv);
-	    }
-	    else if (epix ? epix <= svmax : svix < svmax) {
-		vecsv = svargs[epix ? epix-1 : svix++];
-		vecstr = (U8*)SvPVx(vecsv,veclen);
-		utf = DO_UTF8(vecsv);
-	    }
-	    else {
-		vecstr = (U8*)"";
-		veclen = 0;
-	    }
 	}
 
 	/* SIZE */
@@ -6955,21 +7000,22 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	/* CONVERSION */
 
+	if (*q == '%') {
+	    eptr = q++;
+	    elen = 1;
+	    goto string;
+	}
+
+	if (!args)
+	    argsv = (efix ? efix <= svmax : svix < svmax) ?
+		    svargs[efix ? efix-1 : svix++] : &PL_sv_undef;
+
 	switch (c = *q++) {
 
 	    /* STRINGS */
 
-	case '%':
-	    eptr = q - 1;
-	    elen = 1;
-	    goto string;
-
 	case 'c':
-	    if (args)
-		uv = va_arg(*args, int);
-	    else
-		uv = (epix ? epix <= svmax : svix < svmax) ?
-		    SvIVx(svargs[epix ? epix-1 : svix++]) : 0;
+	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
 	    if ((uv > 255 || (uv > 127 && SvUTF8(sv))) && !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
@@ -6998,8 +7044,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    elen = sizeof nullstr - 1;
 		}
 	    }
-	    else if (epix ? epix <= svmax : svix < svmax) {
-		argsv = svargs[epix ? epix-1 : svix++];
+	    else {
 		eptr = SvPVx(argsv, elen);
 		if (DO_UTF8(argsv)) {
 		    if (has_precis && precis < elen) {
@@ -7023,7 +7068,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     */
 	    if (!args)
 		goto unknown;
-	    argsv = va_arg(*args,SV*);
+	    argsv = va_arg(*args, SV*);
 	    eptr = SvPVx(argsv, elen);
 	    if (DO_UTF8(argsv))
 		is_utf = TRUE;
@@ -7039,11 +7084,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	case 'p':
 	    if (alt)
 		goto unknown;
-	    if (args)
-		uv = PTR2UV(va_arg(*args, void*));
-	    else
-		uv = (epix ? epix <= svmax : svix < svmax) ?
-		    PTR2UV(svargs[epix ? epix-1 : svix++]) : 0;
+	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
 	    base = 16;
 	    goto integer;
 
@@ -7058,11 +7099,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	case 'i':
 	    if (vectorize) {
 		STRLEN ulen;
-		if (!veclen) {
-		    vectorize = FALSE;
-		    break;
-		}
-		if (utf)
+		if (!veclen)
+		    continue;
+		if (vec_utf)
 		    iv = (IV)utf8_to_uv(vecstr, veclen, &ulen, 0);
 		else {
 		    iv = *vecstr;
@@ -7083,8 +7122,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		iv = (epix ? epix <= svmax : svix < svmax) ?
-		    SvIVx(svargs[epix ? epix-1 : svix++]) : 0;
+		iv = SvIVx(argsv);
 		switch (intsize) {
 		case 'h':	iv = (short)iv; break;
 		default:	break;
@@ -7141,11 +7179,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (vectorize) {
 		STRLEN ulen;
 	vector:
-		if (!veclen) {
-		    vectorize = FALSE;
-		    break;
-		}
-		if (utf)
+		if (!veclen)
+		    continue;
+		if (vec_utf)
 		    uv = utf8_to_uv(vecstr, veclen, &ulen, 0);
 		else {
 		    uv = *vecstr;
@@ -7166,8 +7202,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		uv = (epix ? epix <= svmax : svix < svmax) ?
-		    SvUVx(svargs[epix ? epix-1 : svix++]) : 0;
+		uv = SvUVx(argsv);
 		switch (intsize) {
 		case 'h':	uv = (unsigned short)uv; break;
 		default:	break;
@@ -7256,11 +7291,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* This is evil, but floating point is even more evil */
 
 	    vectorize = FALSE;
-	    if (args)
-		nv = va_arg(*args, NV);
-	    else
-		nv = (epix ? epix <= svmax : svix < svmax) ?
-		    SvNVx(svargs[epix ? epix-1 : svix++]) : 0.0;
+	    nv = args ? va_arg(*args, NV) : SvNVx(argsv);
 
 	    need = 0;
 	    if (c != 'e' && c != 'E') {
@@ -7340,8 +7371,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 		}
 	    }
-	    else if (epix ? epix <= svmax : svix < svmax)
-		sv_setuv_mg(svargs[epix ? epix-1 : svix++], (UV)i);
+	    else
+		sv_setuv_mg(argsv, (UV)i);
 	    continue;	/* not "break" */
 
 	    /* UNKNOWN */
@@ -7376,7 +7407,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* ... right here, because formatting flags should not apply */
 	    SvGROW(sv, SvCUR(sv) + elen + 1);
 	    p = SvEND(sv);
-	    memcpy(p, eptr, elen);
+	    Copy(eptr, p, elen, char);
 	    p += elen;
 	    *p = '\0';
 	    SvCUR(sv) = p - SvPVX(sv);
@@ -7406,7 +7437,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		*p++ = '0';
 	}
 	if (elen) {
-	    memcpy(p, eptr, elen);
+	    Copy(eptr, p, elen, char);
 	    p += elen;
 	}
 	if (gap && left) {
@@ -7415,7 +7446,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 	if (vectorize) {
 	    if (veclen) {
-		memcpy(p, dotstr, dotstrlen);
+		Copy(dotstr, p, dotstrlen, char);
 		p += dotstrlen;
 	    }
 	    else
@@ -8420,6 +8451,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_scopestack = 0;
     PL_savestack = 0;
     PL_retstack = 0;
+    PL_sig_pending = 0;
 #    else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
 #    endif	/* DEBUGGING */
@@ -8446,6 +8478,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_scopestack = 0;
     PL_savestack = 0;
     PL_retstack = 0;
+    PL_sig_pending = 0;
 #    else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
 #    endif	/* DEBUGGING */
@@ -8845,12 +8878,18 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_uudmap['M']	= 0;		/* reinits on demand */
     PL_bitcount		= Nullch;	/* reinits on demand */
 
+    if (proto_perl->Ipsig_pend) {
+	Newz(0, PL_psig_pend, SIG_SIZE, int);
+    }
+    else {
+	PL_psig_pend	= (int*)NULL;
+    }
+
     if (proto_perl->Ipsig_ptr) {
-	int sig_num[] = { SIG_NUM };
-	Newz(0, PL_psig_ptr, sizeof(sig_num)/sizeof(*sig_num), SV*);
-	Newz(0, PL_psig_name, sizeof(sig_num)/sizeof(*sig_num), SV*);
-	for (i = 1; PL_sig_name[i]; i++) {
-	    PL_psig_ptr[i] = sv_dup_inc(proto_perl->Ipsig_ptr[i]);
+	Newz(0, PL_psig_ptr,  SIG_SIZE, SV*);
+	Newz(0, PL_psig_name, SIG_SIZE, SV*);
+	for (i = 1; i < SIG_SIZE; i++) {
+	    PL_psig_ptr[i]  = sv_dup_inc(proto_perl->Ipsig_ptr[i]);
 	    PL_psig_name[i] = sv_dup_inc(proto_perl->Ipsig_name[i]);
 	}
     }

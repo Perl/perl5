@@ -305,7 +305,7 @@ static void caterr(char *s)
 		p++;
 	switch(atoi(s)) {
 	case L_ERROR_TOOMANY:
-		strcat(errbuf, "to many errors");
+		strcat(errbuf, "too many errors");
 		break;
 	case L_ERROR_NOLIB:
 		strcat(errbuf, "can't load library");

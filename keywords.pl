@@ -181,6 +181,7 @@ q
 qq
 qr
 quotemeta
+qu
 qw
 qx
 rand
