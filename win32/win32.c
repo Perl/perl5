@@ -1690,6 +1690,76 @@ win32_uname(struct utsname *name)
     return 0;
 }
 
+int
+win32_internal_wait(int *status, DWORD timeout)
+{
+    /* XXX this wait emulation only knows about processes
+     * spawned via win32_spawnvp(P_NOWAIT, ...).
+     */
+    dTHX;
+    int i, retval;
+    DWORD exitcode, waitcode;
+
+#ifdef USE_ITHREADS
+    if (w32_num_pseudo_children) {
+	waitcode = WaitForMultipleObjects(w32_num_pseudo_children,
+					  w32_pseudo_child_handles,
+					  FALSE,
+					  timeout);
+        /* Time out here if there are no other children to wait for. */
+	if (waitcode == WAIT_TIMEOUT) {
+	    if (!w32_num_children) {
+		return 0;
+	    }
+	}
+	else if (waitcode != WAIT_FAILED) {
+	    if (waitcode >= WAIT_ABANDONED_0
+		&& waitcode < WAIT_ABANDONED_0 + w32_num_pseudo_children)
+		i = waitcode - WAIT_ABANDONED_0;
+	    else
+		i = waitcode - WAIT_OBJECT_0;
+	    if (GetExitCodeThread(w32_pseudo_child_handles[i], &exitcode)) {
+		*status = (int)((exitcode & 0xff) << 8);
+		retval = (int)w32_pseudo_child_pids[i];
+		remove_dead_pseudo_process(i);
+		return -retval;
+	    }
+	}
+    }
+#endif
+
+    if (!w32_num_children) {
+	errno = ECHILD;
+	return -1;
+    }
+
+    /* if a child exists, wait for it to die */
+    waitcode = WaitForMultipleObjects(w32_num_children,
+				      w32_child_handles,
+				      FALSE,
+				      timeout);
+    if (waitcode == WAIT_TIMEOUT) {
+	return 0;
+    }
+    if (waitcode != WAIT_FAILED) {
+	if (waitcode >= WAIT_ABANDONED_0
+	    && waitcode < WAIT_ABANDONED_0 + w32_num_children)
+	    i = waitcode - WAIT_ABANDONED_0;
+	else
+	    i = waitcode - WAIT_OBJECT_0;
+	if (GetExitCodeProcess(w32_child_handles[i], &exitcode) ) {
+	    *status = (int)((exitcode & 0xff) << 8);
+	    retval = (int)w32_child_pids[i];
+	    remove_dead_process(i);
+	    return retval;
+	}
+    }
+
+FAILED:
+    errno = GetLastError();
+    return -1;
+}
+
 DllExport int
 win32_waitpid(int pid, int *status, int flags)
 {
@@ -1698,7 +1768,7 @@ win32_waitpid(int pid, int *status, int flags)
     int retval = -1;
     long child;
     if (pid == -1)				/* XXX threadid == 1 ? */
-	return win32_wait(status);
+	return win32_internal_wait(status, timeout);
 #ifdef USE_ITHREADS
     else if (pid < 0) {
 	child = find_pseudo_pid(-pid);
@@ -1774,62 +1844,7 @@ alien_process:
 DllExport int
 win32_wait(int *status)
 {
-    /* XXX this wait emulation only knows about processes
-     * spawned via win32_spawnvp(P_NOWAIT, ...).
-     */
-    dTHX;
-    int i, retval;
-    DWORD exitcode, waitcode;
-
-#ifdef USE_ITHREADS
-    if (w32_num_pseudo_children) {
-	waitcode = WaitForMultipleObjects(w32_num_pseudo_children,
-					  w32_pseudo_child_handles,
-					  FALSE,
-					  INFINITE);
-	if (waitcode != WAIT_FAILED) {
-	    if (waitcode >= WAIT_ABANDONED_0
-		&& waitcode < WAIT_ABANDONED_0 + w32_num_pseudo_children)
-		i = waitcode - WAIT_ABANDONED_0;
-	    else
-		i = waitcode - WAIT_OBJECT_0;
-	    if (GetExitCodeThread(w32_pseudo_child_handles[i], &exitcode)) {
-		*status = (int)((exitcode & 0xff) << 8);
-		retval = (int)w32_pseudo_child_pids[i];
-		remove_dead_pseudo_process(i);
-		return -retval;
-	    }
-	}
-    }
-#endif
-
-    if (!w32_num_children) {
-	errno = ECHILD;
-	return -1;
-    }
-
-    /* if a child exists, wait for it to die */
-    waitcode = WaitForMultipleObjects(w32_num_children,
-				      w32_child_handles,
-				      FALSE,
-				      INFINITE);
-    if (waitcode != WAIT_FAILED) {
-	if (waitcode >= WAIT_ABANDONED_0
-	    && waitcode < WAIT_ABANDONED_0 + w32_num_children)
-	    i = waitcode - WAIT_ABANDONED_0;
-	else
-	    i = waitcode - WAIT_OBJECT_0;
-	if (GetExitCodeProcess(w32_child_handles[i], &exitcode) ) {
-	    *status = (int)((exitcode & 0xff) << 8);
-	    retval = (int)w32_child_pids[i];
-	    remove_dead_process(i);
-	    return retval;
-	}
-    }
-
-FAILED:
-    errno = GetLastError();
-    return -1;
+    return win32_internal_wait(status, INFINITE);
 }
 
 #ifndef PERL_IMPLICIT_CONTEXT
