@@ -3808,7 +3808,7 @@ PP(pp_setpgrp)
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
     if ((pgrp != 0 && pgrp != getpid()) || (pid != 0 && pid != getpid()))
-	DIE(aTHX_ "setpgrp can't take an argument");
+	DIE(aTHX_ "setpgrp can't take arguments");
     SETi( setpgrp() >= 0 );
 #endif /* USE_BSDPGRP */
     RETURN;
