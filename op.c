@@ -4431,9 +4431,15 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (!name || GvCVGEN(gv))
 	cv = Nullcv;
     else if ((cv = GvCV(gv))) {
-	cv_ckproto(cv, gv, ps);
+        bool exists = CvROOT(cv) || CvXSUB(cv);
+        /* if the subroutine doesn't exist and wasn't pre-declared
+         * with a prototype, assume it will be AUTOLOADed,
+         * skipping the prototype check
+         */
+        if (exists || SvPOK(cv))
+            cv_ckproto(cv, gv, ps);
 	/* already defined (or promised)? */
-	if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
+	if (exists || GvASSUMECV(gv)) {
 	    SV* const_sv;
 	    bool const_changed = TRUE;
 	    if (!block && !attrs) {
@@ -4448,7 +4454,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		goto withattrs;
 	    if ((const_sv = cv_const_sv(cv)))
 		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
-	    if ((const_sv || const_changed) && ckWARN(WARN_REDEFINE))
+            if ((const_sv && const_changed) || ckWARN(WARN_REDEFINE))
 	    {
 		line_t oldline = CopLINE(PL_curcop);
 		CopLINE_set(PL_curcop, PL_copline);

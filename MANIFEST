@@ -720,7 +720,7 @@ lib/hostname.pl		Old hostname code
 lib/importenv.pl	Perl routine to get environment into variables
 lib/integer.pm		For "use integer"
 lib/less.pm		For "use less"
-lib/lib.pm		For "use lib"
+lib/lib.pm.PL		For "use lib"
 lib/locale.pm		For "use locale"
 lib/look.pl		A "look" equivalent
 lib/newgetopt.pl	A perl library supporting long option parsing
