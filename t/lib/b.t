@@ -10,7 +10,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..13\n";
+print "1..15\n";
 
 my $test = 1;
 
@@ -53,6 +53,20 @@ print "not " if $deparse->coderef2text(sub{$test = sub : method locked { 1 }})
 ok;
 }
 
+print "not " if (eval "sub ".$deparse->coderef2text(sub () { 42 }))->() != 42;
+ok;
+
+use constant 'c', 'stuff';
+print "not " if (eval "sub ".$deparse->coderef2text(\&c))->() ne 'stuff';
+ok;
+
+# XXX ToDo - constsub that returns a reference
+#use constant cr => ['hello'];
+#my $string = "sub " . $deparse->coderef2text(\&cr);
+#my $val = (eval $string)->();
+#print "not " if ref($val) ne 'ARRAY' || $val->[0] ne 'hello';
+#ok;
+
 my $a;
 my $Is_VMS = $^O eq 'VMS';
 $a = `$^X "-I../lib" "-MO=Deparse" -anle 1 2>&1`;
@@ -72,13 +86,11 @@ EOF
 print "# [$a]\n\# vs\n# [$b]\nnot " if $a ne $b;
 ok;
 
-#6
 $a = `$^X "-I../lib" "-MO=Debug" -e 1 2>&1`;
 print "not " unless $a =~
 /\bLISTOP\b.*\bOP\b.*\bCOP\b.*\bOP\b/s;
 ok;
 
-#7
 $a = `$^X "-I../lib" "-MO=Terse" -e 1 2>&1`;
 print "not " unless $a =~
 /\bLISTOP\b.*leave.*\bOP\b.*enter.*\bCOP\b.*nextstate.*\bOP\b.*null/s;

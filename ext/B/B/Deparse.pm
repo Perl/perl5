@@ -446,6 +446,11 @@ sub deparse_sub {
 	# skip leavesub
 	return $proto . "{\n\t" . 
 	    $self->deparse($cv->ROOT->first, 0) . "\n\b}\n"; 
+    }
+    my $sv = $cv->const_sv;
+    if ($$sv) {
+	# uh-oh. inlinable sub... format it differently
+	return $proto . "{ " . const($sv) . " }\n";
     } else { # XSUB?
 	return $proto  . "{}\n";
     }

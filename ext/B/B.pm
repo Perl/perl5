@@ -531,6 +531,8 @@ This method returns TRUE if the GP field of the GV is NULL.
 
 =item CvFLAGS
 
+=item const_sv
+
 =back
 
 =head2 B::HV METHODS
