@@ -1,3 +1,4 @@
+//depot/perl/pod/perldiag.pod#272 - edit change 14824 (text)
 =head1 NAME
 
 perldiag - various Perl diagnostics
@@ -181,11 +182,6 @@ spots.  This is now heavily deprecated.
 (F) If you assign to a conditional operator, the 2nd and 3rd arguments
 must either both be scalars or both be lists.  Otherwise Perl won't
 know which context to supply to the right side.
-
-=item Negative offset to vec in lvalue context
-
-(F) When C<vec> is called in an lvalue context, the second argument must be
-greater than or equal to zero.
 
 =item Attempt to access key '%_' in fixed hash
 
@@ -1351,6 +1347,10 @@ Perl identifier.  If you're just trying to glob a long list of
 filenames, try using the glob() operator, or put the filenames into a
 variable and glob that.
 
+=item exec? I'm not *that* kind of operating system
+
+(F) The C<exec> function is not implemented in MacPerl. See L<perlport>.
+
 =item Execution of %s aborted due to compilation errors
 
 (F) The final summary message when a Perl compilation fails.
@@ -2030,6 +2030,13 @@ couldn't be created for some peculiar reason.
 you omitted the name of the module.  Consult L<perlrun> for full details
 about C<-M> and C<-m>.
 
+=item More than one argument to open
+
+(F) The C<open> function has been asked to open multiple files. This
+can happen if you are trying to open a pipe to a command that takes a
+list of arguments, but have forgotten to specify a piped open mode.
+See L<perlfunc/open> for details.
+
 =item msg%s not implemented
 
 (F) You don't have System V message IPC on your system.
@@ -2078,6 +2085,11 @@ provided for this purpose.
 
 (F) You tried to do a read/write/send/recv operation with a buffer
 length that is less than 0.  This is difficult to imagine.
+
+=item Negative offset to vec in lvalue context
+
+(F) When C<vec> is called in an lvalue context, the second argument must be
+greater than or equal to zero.
 
 =item Nested quantifiers in regex; marked by <-- HERE in m/%s/
 
@@ -2925,6 +2937,11 @@ in L<perlos2>.
 
 (S prototype) The subroutine being declared or defined had previously been
 declared or defined with a different function prototype.
+
+=item Prototype not terminated
+
+(F) You've omitted the closing parenthesis in a function prototype 
+definition.
 
 =item Quantifier in {,} bigger than %d in regex;
 
