@@ -275,6 +275,16 @@ contain a header file called "patchlevel.h".  The latest Borland compiler
 option -VI- for backward (bugward) compatibility for using the old Borland
 search algorithm  to locate header files.
 
+If you run the tests on a FAT partition, you may see some failures for
+C<link()> related tests (I<op/write.t>, I<op/stat.t> ...). Testing on
+NTFS avoids these errors.
+
+Furthermore, you should make sure that during C<make test> you do not
+have any GNU tool packages in your path: some toolkits like Unixutils
+include some tools (C<type> for instance) which override the Windows
+ones and makes tests fail. Remove them from your path while testing to
+avoid these errors.
+
 Please report any other failures as described under L<BUGS AND CAVEATS>.
 
 =head2 Installation of Perl on Win32
