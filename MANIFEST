@@ -310,7 +310,6 @@ ext/Socket/Socket.xs	Socket extension external subroutines
 ext/Storable/ChangeLog		Storable extension
 ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
-ext/Storable/patchlevel.h	Storable extension
 ext/Storable/README		Storable extension
 ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
