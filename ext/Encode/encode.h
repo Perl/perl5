@@ -28,12 +28,13 @@ struct encode_s
 
 #ifdef U8
 extern int do_encode(encpage_t *enc, const U8 *src, STRLEN *slen,
-                     U8 *dst, STRLEN dlen, STRLEN *dout);
+                     U8 *dst, STRLEN dlen, STRLEN *dout, int approx);
 
 extern void Encode_DefineEncoding(encode_t *enc);
 #endif
 
-#define ENCODE_NOSPACE 1
-#define ENCODE_PARTIAL 2
-#define ENCODE_NOREP   3
+#define ENCODE_NOSPACE  1
+#define ENCODE_PARTIAL  2
+#define ENCODE_NOREP    3
+#define ENCODE_FALLBACK 4
 #endif

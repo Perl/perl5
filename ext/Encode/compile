@@ -4,7 +4,7 @@ use strict;
 
 sub encode_U
 {
- # UTF-8 encocde long hand - only covers part of perl's range
+ # UTF-8 encode long hand - only covers part of perl's range
  my $uv = shift;
  if ($uv < 0x80)
   {
@@ -96,10 +96,17 @@ sub cmp_name
 
 foreach my $enc (sort cmp_name @ARGV)
  {
-  my ($name) = $enc =~ /^.*?([\w-]+)(\.enc)$/;
+  my ($name,$sfx) = $enc =~ /^.*?([\w-]+)\.(enc|ucm)$/;
   if (open(E,$enc))
    {
-    compile_enc(\*E,lc($name),\*C);
+    if ($sfx eq 'enc')
+     {
+      compile_enc(\*E,lc($name),\*C);
+     }
+    else
+     {
+      compile_ucm(\*E,lc($name),\*C);
+     }
    }
   else
    {
@@ -134,6 +141,86 @@ if ($cname =~ /(\w+)\.xs$/)
 close(C);
 close(D);
 close(H);
+
+
+sub compile_ucm
+{
+ my ($fh,$name,$ch) = @_;
+ my $e2u = {};
+ my $u2e = {};
+ my $cs;
+ my %attr;
+ while (<$fh>)
+  {
+   s/#.*$//;
+   last if /^\s*CHARMAP\s*$/i;
+   if (/^\s*<(\w+)>\s+"?([^"]*)"?\s*$/i)
+    {
+     $attr{$1} = $2;
+    }
+  }
+ if (!defined($cs =  $attr{'code_set_name'}))
+  {
+   warn "No <code_set_name> in $name\n";
+  }
+ else
+  {
+   $name = lc($cs);
+  }
+ my $erep;
+ my $urep;
+ if (exists $attr{'subchar'})
+  {
+   my @byte = $attr{'subchar'} =~ /^\s*(?:\\x([0-9a-f]+))+\s*$/;
+   $erep = join('',map(hex($_),@byte));
+  }
+ warn "Scanning $cs\n";
+ my $nfb = 0;
+ my $hfb = 0;
+ while (<$fh>)
+  {
+   s/#.*$//;
+   last if /^\s*END\s+CHARMAP\s*$/i;
+   next if /^\s*$/;
+   my ($u,@byte) = /^<U([0-9a-f]+)>\s+(?:\\x([0-9a-f]+))+\s*(\|[0-3]|)\s*$/i;
+   my $fb = pop(@byte);
+   if (defined($u))
+    {
+     my $uch = encode_U(hex($u));
+     my $ech = join('',map(hex($_),@byte));
+     if (length($fb))
+      {
+       $fb = substr($fb,1);
+       $hfb++;
+      }
+     else
+      {
+       $nfb++;
+       $fb = '0';
+      }
+     # $fb is fallback flag
+     # 0 - round trip safe
+     # 1 - fallback for unicode -> enc
+     # 2 - skip sub-char mapping
+     # 3 - fallback enc -> unicode
+     enter($u2e,$uch,$ech,$u2e,$fb+0) if ($fb =~ /[01]/);
+     enter($e2u,$ech,$uch,$e2u,$fb+0) if ($fb =~ /[03]/);
+    }
+   else
+    {
+     warn $_;
+    }
+
+  }
+ if ($nfb && $hfb)
+  {
+   die "$nfb entries without fallback, $hfb entries with\n";
+  }
+ output($ch,$name.'_utf8',$e2u);
+ output($ch,'utf8_'.$name,$u2e);
+ $encoding{$name} = [$e2u->{Cname},$u2e->{Cname},
+                     outstring($ch,$e2u->{Cname}.'_def',$erep),length($erep)];
+}
 
 sub compile_enc
 {
@@ -173,8 +260,8 @@ sub compile_enc
        if ($val || (!$ch && !$page))
         {
          my $uch = encode_U($val);
-         enter($e2u,$ech,$uch,$e2u);
-         enter($u2e,$uch,$ech,$u2e);
+         enter($e2u,$ech,$uch,$e2u,0);
+         enter($u2e,$uch,$ech,$u2e,0);
         }
        else
         {
@@ -193,18 +280,18 @@ sub compile_enc
 
 sub enter
 {
- my ($a,$s,$d,$t) = @_;
+ my ($a,$s,$d,$t,$fb) = @_;
  $t = $a if @_ < 4;
  my $b = substr($s,0,1);
  my $e = $a->{$b};
  unless ($e)
   {     # 0  1  2  3         4  5
-   $e = [$b,$b,'',{},length($s),0];
+   $e = [$b,$b,'',{},length($s),0,$fb];
    $a->{$b} = $e;
   }
  if (length($s) > 1)
   {
-   enter($e->[3],substr($s,1),$d,$t);
+   enter($e->[3],substr($s,1),$d,$t,$fb);
   }
  else
   {
@@ -260,7 +347,8 @@ sub process
        ord($b) == ord($a->{$l}[1])+1 &&
        $a->{$l}[3] == $a->{$b}[3] &&
        $a->{$l}[4] == $a->{$b}[4] &&
-       $a->{$l}[5] == $a->{$b}[5]
+       $a->{$l}[5] == $a->{$b}[5] &&
+       $a->{$l}[6] == $a->{$b}[6]
        # && length($a->{$l}[2]) < 16
       )
     {
@@ -316,7 +404,7 @@ sub outtable
  print $fh "\nstatic encpage_t $name\[",scalar(@{$a->{'Entries'}}),"] = {\n";
  foreach my $b (@{$a->{'Entries'}})
   {
-   my ($s,$e,$out,$t,$end,$l) = @{$a->{$b}};
+   my ($s,$e,$out,$t,$end,$l,$fb) = @{$a->{$b}};
    my $sc = ord($s);
    my $ec = ord($e);
    print  $fh "{";
