@@ -224,9 +224,15 @@ for my $num_chain (1..$max_chain) {
 		     and $ans[0] == $ans[1] and $ans[0] <= ~0
                      # First must be in E notation (ie not just digits) and
                      # second must still be an integer.
+		     # eg 1.84467440737095516e+19
+		     # 1.84467440737095516e+19 for 64 bit mantissa is in the
+		     # integer range, so 1.84467440737095516e+19 + 0 is treated
+		     # as integer addition. [should it be?]
+		     # and 18446744073709551600 + 0 is 18446744073709551600
+		     # Which isn't the string you first thought of.
                      # I can't remember why there isn't symmetry in this
                      # exception, ie why only the first ops are tested for 'N'
-                     and $ans[0] !~ /^-?\d+$/ and $ans[0] !~ /^-?\d+$/) {
+                     and $ans[0] != /^-?\d+$/ and $ans[1] !~ /^-?\d+$/) {
 	      print "# ok, numerically equal - notation changed due to adding zero\n";
 	    } else {
 	      $nok++,
