@@ -1078,7 +1078,7 @@ PP(pp_prtf)
     GV *gv;
     IO *io;
     PerlIO *fp;
-    SV *sv = NEWSV(0,0);
+    SV *sv;
     MAGIC *mg;
 
     if (op->op_flags & OPf_STACKED)
@@ -1106,6 +1106,7 @@ PP(pp_prtf)
 	RETURN;
     }
 
+    sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
 	if (dowarn) {
 	    gv_fullname3(sv, gv, Nullch);
