@@ -48,6 +48,7 @@ $ unlink_all_versions = "n"
 $ use_vmsdebug_perl = "n"
 $ use64bitall = "n"
 $ use64bitint = "n"
+$ uselargefiles = "n"
 $ C_Compiler_Replace = "CC="
 $ Thread_Live_Dangerously = "MT="
 $ use_two_pot_malloc = "N"
@@ -2335,12 +2336,7 @@ $   echo ""
 $   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
 $   rp = "Try to understand large files, if available? [''bool_dflt'] "
 $   GOSUB myread
-$   IF ans
-$   THEN
-$     uselargefiles="define"
-$   ELSE
-$     uselargefiles="undef"
-$   ENDIF
+$   uselargefiles=ans
 $!
 $ ENDIF ! not VAX && >= 7.1
 $!
@@ -3011,6 +3007,12 @@ $ THEN
 $   use64bitall = "define"
 $ ELSE
 $   use64bitall = "undef"
+$ ENDIF
+$ IF uselargefiles .OR. uselargefiles .EQS. "define"
+$ THEN
+$   uselargefiles = "define"
+$ ELSE
+$   uselargefiles = "undef"
 $ ENDIF
 $!
 $ usemymalloc = "undef"
