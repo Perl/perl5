@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.sleep,v 3.0 89/10/18 15:31:15 lwall Locked $
+# $Header: op.sleep,v 3.0.1.1 90/03/14 12:31:39 lwall Locked $
 
 print "1..1\n";
 
 $x = sleep 2;
-if ($x == 2) {print "ok 1\n";} else {print "not ok 1\n";}
+if ($x >= 2 && $x <= 10) {print "ok 1\n";} else {print "not ok 1 $x\n";}

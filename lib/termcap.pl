@@ -1,4 +1,4 @@
-;# $Header: termcap.pl,v 3.0.1.1 90/02/28 17:46:44 lwall Locked $
+;# $Header: termcap.pl,v 3.0.1.2 90/03/14 12:28:28 lwall Locked $
 ;#
 ;# Usage:
 ;#	do 'ioctl.pl';
@@ -70,7 +70,7 @@ sub Tgetent {
 	    s/\\f/\f/g;
 	    s/\\\^/\377/g;
 	    s/\^\?/\177/g;
-	    s/\^(.)/pack('c',$1 & 31)/eg;
+	    s/\^(.)/pack('c',ord($1) & 31)/eg;
 	    s/\\(.)/$1/g;
 	    s/\377/^/g;
 	    $TC{$entry} = $_ if $TC{$entry} eq '';

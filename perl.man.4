@@ -1,7 +1,10 @@
 ''' Beginning of part 4
-''' $Header: perl.man.4,v 3.0.1.6 90/03/12 16:54:04 lwall Locked $
+''' $Header: perl.man.4,v 3.0.1.7 90/03/14 12:29:50 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.7  90/03/14  12:29:50  lwall
+''' patch15: man page falsely states that you can't subscript array values
+''' 
 ''' Revision 3.0.1.6  90/03/12  16:54:04  lwall
 ''' patch13: improved documentation of *name
 ''' 
@@ -1458,8 +1461,6 @@ ARGV must be capitalized.
 The \*(L"system\*(R" calls link, unlink, rename, etc. return nonzero for success, not 0.
 .Ip * 4 2
 Signal handlers deal with signal names, not numbers.
-.Ip * 4 2
-You can't subscript array values, only arrays (no $x = (1,2,3)[2];).
 .PP
 Seasoned
 .I sed

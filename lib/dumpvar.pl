@@ -26,3 +26,5 @@ sub main'dumpvar {
 	}
     }
 }
+
+1;
