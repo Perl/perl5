@@ -432,7 +432,7 @@ PerlIO_findFILE(PerlIO *pio)
 
 /*
  * Why is this here - not in perlio.h?  RMB
- */ 
+ */
 void PerlIO_debug(const char *fmt, ...)
 #ifdef CHECK_FORMAT
     __attribute__ ((__format__(__printf__, 1, 2)))
@@ -2946,7 +2946,7 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	}
 	if (dupfd) {
 	    PerlLIO_dup2(dupfd,fd);
-	    close(dupfd);
+	    PerlLIO_close(dupfd);
 	}
 	return result;
     }
