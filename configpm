@@ -213,7 +213,7 @@ close CONFIG_SH;
 print CONFIG @non_v, "\n";
 
 # copy config summary format from the myconfig.SH script
-print CONFIG "my \$summary = <<'!END!';\n";
+print CONFIG "our \$summary : unique = <<'!END!';\n";
 open(MYCONFIG,"<myconfig.SH") || die "open myconfig.SH failed: $!";
 1 while defined($_ = <MYCONFIG>) && !/^Summary of/;
 do { print CONFIG $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
