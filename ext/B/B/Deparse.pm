@@ -3158,10 +3158,11 @@ sub balanced_delim {
 sub single_delim {
     my($q, $default, $str) = @_;
     return "$default$str$default" if $default and index($str, $default) == -1;
-    my($succeed, $delim);
-    ($succeed, $str) = balanced_delim($str);
-    return "$q$str" if $succeed;
-    for $delim ('/', '"', '#') {
+    if ($q ne 'qr') {
+	(my $succeed, $str) = balanced_delim($str);
+	return "$q$str" if $succeed;
+    }
+    for my $delim ('/', '"', '#') {
 	return "$q$delim" . $str . $delim if index($str, $delim) == -1;
     }
     if ($default) {
