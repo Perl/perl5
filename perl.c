@@ -1478,10 +1478,15 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (!PL_do_undump)
 	init_postdump_symbols(argc,argv,env);
 
+    /* PL_wantutf8 is conditionally turned on by
+     * locale.c:Perl_init_i18nl10n() if the environment
+     * look like the user wants to use UTF-8. */
     if (PL_wantutf8) { /* Requires init_predump_symbols(). */
 	 IO* io;
 	 PerlIO* fp;
 	 SV* sv;
+	 /* Turn on UTF-8-ness on STDIN, STDOUT, STDERR
+	  *  _and_ the default open discipline. */
 	 if (PL_stdingv  && (io = GvIO(PL_stdingv))  && (fp = IoIFP(io)))
 	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
 	 if (PL_defoutgv && (io = GvIO(PL_defoutgv)) && (fp = IoOFP(io)))

@@ -74,32 +74,27 @@ sub new {
 sub dequeue  {
     my $q = shift;
     lock(@$q);
-    until(@$q) {
-	cond_wait(@$q);
-    }
+    cond_wait @$q until @$q;
+    cond_signal @$q if @$q > 1;
     return shift @$q;
 }
 
 sub dequeue_nb {
-  my $q = shift;
-  lock(@$q);
-  if (@$q) {
+    my $q = shift;
+    lock(@$q);
     return shift @$q;
-  } else {
-    return undef;
-  }
 }
 
 sub enqueue {
     my $q = shift;
     lock(@$q);
-    push(@$q, @_) and cond_broadcast @$q;
+    push @$q, @_  and cond_signal @$q;
 }
 
 sub pending  {
-  my $q = shift;
-  lock(@$q);
-  return scalar(@$q);
+    my $q = shift;
+    lock(@$q);
+    return scalar(@$q);
 }
 
 1;
