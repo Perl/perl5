@@ -6297,6 +6297,7 @@ $ EXIT
 $ ENDSUBROUTINE ! Bad_environment
 $ echo ""
 $ echo4 "Checking for dangerous pre-existing global symbols and logical names."
+$ CALL Bad_environment "COMP"
 $ CALL Bad_environment "EXT"
 $ CALL Bad_environment "FOO"
 $ CALL Bad_environment "LIB"
