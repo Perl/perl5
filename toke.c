@@ -4115,7 +4115,7 @@ Perl_yylex(pTHX)
 #endif
 #ifdef PERLIO_LAYERS
 		if (UTF && !IN_BYTE)
-		    PerlIO_apply_layers(PL_rsfp, NULL, ":utf8");
+		    PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, ":utf8");
 #endif
 		PL_rsfp = Nullfp;
 	    }
