@@ -2522,6 +2522,7 @@ s	|I32	|expect_number	|char** pattern
 #  if defined(USE_ITHREADS)
 s	|SV*	|gv_share	|SV *sv
 #  endif
+s	|int	|grok_number	|const char *pv|STRLEN len|UV *valuep
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

@@ -477,7 +477,7 @@ PERL_CALLCONV int	Perl_mg_get(pTHX_ SV* sv);
 PERL_CALLCONV U32	Perl_mg_length(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_mg_magical(pTHX_ SV* sv);
 PERL_CALLCONV int	Perl_mg_set(pTHX_ SV* sv);
-PERL_CALLCONV I32	Perl_mg_size(pTHX_ SV* sv);
+PERL_CALLCONV IV	Perl_mg_size(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_mini_mktime(pTHX_ struct tm *pm);
 PERL_CALLCONV OP*	Perl_mod(pTHX_ OP* o, I32 type);
 PERL_CALLCONV int	Perl_mode_from_discipline(pTHX_ SV* discp);
@@ -1016,7 +1016,7 @@ STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store);
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
-STATIC void	S_save_magic(pTHX_ I32 mgs_ix, SV *sv);
+STATIC void	S_save_magic(pTHX_ IV mgs_ix, SV *sv);
 STATIC int	S_magic_methpack(pTHX_ SV *sv, MAGIC *mg, char *meth);
 STATIC int	S_magic_methcall(pTHX_ SV *sv, MAGIC *mg, char *meth, I32 f, int n, SV *val);
 #endif
@@ -1246,6 +1246,7 @@ STATIC I32	S_expect_number(pTHX_ char** pattern);
 #  if defined(USE_ITHREADS)
 STATIC SV*	S_gv_share(pTHX_ SV *sv);
 #  endif
+STATIC int	S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep);
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

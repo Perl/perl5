@@ -1495,7 +1495,7 @@ S_not_a_number(pTHX_ SV *sv)
 #define IS_NUMBER_INFINITY	      0x10 /* this is big */
 
 static int
-grok_number(const char *pv, STRLEN len, UV *valuep)
+S_grok_number(const char *pv, STRLEN len, UV *valuep)
 {
     const char *s = pv;
     const char *send = pv + len;

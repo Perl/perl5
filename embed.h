@@ -1115,6 +1115,7 @@
 #  if defined(USE_ITHREADS)
 #define gv_share		S_gv_share
 #  endif
+#define grok_number		S_grok_number
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni		S_check_uni
@@ -2609,6 +2610,7 @@
 #  if defined(USE_ITHREADS)
 #define gv_share(a)		S_gv_share(aTHX_ a)
 #  endif
+#define grok_number(a,b,c)	S_grok_number(aTHX_ a,b,c)
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni()		S_check_uni(aTHX)
@@ -5083,6 +5085,8 @@
 #define S_gv_share		CPerlObj::S_gv_share
 #define gv_share		S_gv_share
 #  endif
+#define S_grok_number		CPerlObj::S_grok_number
+#define grok_number		S_grok_number
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define S_check_uni		CPerlObj::S_check_uni
