@@ -2114,6 +2114,33 @@ Perl consistently handles such strings as zero in numeric contexts.
 
 =item *
 
+Several debugger fixes: exit code now reflects the script exit code,
+condition C<"0"> now treated correctly, the C<d> command now checks
+line number, C<$.> no longer gets corrupted, and all debugger output
+now goes correctly to the socket if RemotePort is set. [561]
+
+=item *
+
+The debugger (perl5db.pl) has been modified to present a more
+consistent commands interface, via (CommandSet=580).  perl5db.t was
+also added to test the changes, and as a placeholder for further tests.
+
+See L<perldebug>.
+
+=item *
+
+The debugger has a new C<dumpDepth> option to control the maximum
+depth to which nested structures are dumped.  The C<x> command has
+been extended so that C<x N EXPR> dumps out the value of I<EXPR> to a
+depth of at most I<N> levels.
+
+=item *
+
+The debugger can now show lexical variables if you have the CPAN
+module PadWalker installed.
+
+=item *
+
 The order of DESTROYs has been made more predictable.
 
 =item *
@@ -2814,33 +2841,6 @@ Two new debugging options have been added: if you have compiled your
 Perl with debugging, you can use the -DT [561] and -DR options to trace
 tokenising and to add reference counts to displaying variables,
 respectively.
-
-=item *
-
-Several debugger fixes: exit code now reflects the script exit code,
-condition C<"0"> now treated correctly, the C<d> command now checks
-line number, C<$.> no longer gets corrupted, and all debugger output
-now goes correctly to the socket if RemotePort is set. [561]
-
-=item *
-
-The debugger (perl5db.pl) has been modified to present a more
-consistent commands interface, via (CommandSet=580).  perl5db.t was
-also added to test the changes, and as a placeholder for further tests.
-
-See L<perldebug>.
-
-=item *
-
-The debugger has a new C<dumpDepth> option to control the maximum
-depth to which nested structures are dumped.  The C<x> command has
-been extended so that C<x N EXPR> dumps out the value of I<EXPR> to a
-depth of at most I<N> levels.
-
-=item *
-
-The debugger can now show lexical variables if you have the CPAN
-module PadWalker installed.
 
 =item *
 
