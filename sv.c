@@ -5754,7 +5754,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	/* what about long double NVs? --jhi */
 
 	SV *vecsv;
-	char *vecstr = Nullch;
+	U8 *vecstr = Null(U8*);
 	STRLEN veclen = 0;
 	char c;
 	int i;
@@ -5819,7 +5819,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    vecsv = va_arg(*args, SV*);
 		else if (svix < svmax)
 		    vecsv = svargs[svix++];
-		vecstr = SvPVx(vecsv,veclen);
+		vecstr = (U8*)SvPVx(vecsv,veclen);
 		utf = DO_UTF8(vecsv);
 		continue;
 
@@ -6005,7 +6005,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (utf)
 		    iv = (IV)utf8_to_uv(vecstr, &ulen);
 		else {
-		    iv = (U8)*vecstr;
+		    iv = *vecstr;
 		    ulen = 1;
 		}
 		vecstr += ulen;
@@ -6087,7 +6087,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (utf)
 		    uv = utf8_to_uv(vecstr, &ulen);
 		else {
-		    uv = (U8)*vecstr;
+		    uv = *vecstr;
 		    ulen = 1;
 		}
 		vecstr += ulen;
