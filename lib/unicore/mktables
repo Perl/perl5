@@ -31,6 +31,8 @@ my %BaseNames;
 my $Verbose        = 0;
 my $MakeTestScript = 0;
 my $AlwaysWrite    = 0;
+my $UseDir         = "";
+my $FileList       = "$0.lst";
 
 while (@ARGV)
 {
@@ -41,21 +43,23 @@ while (@ARGV)
         $Verbose = 0;
     } elsif ($arg eq '-w') {
         $AlwaysWrite = 1;	# update the files even if they havent changed
+        $FileList = "";
     } elsif ($arg eq '-maketest') {
         $MakeTestScript = 1;
-    } elsif ($arg eq '-C' && defined (my $dir = shift)) {
-	chdir $dir or die "chdir $_: $!";
+    } elsif ($arg eq '-C' && defined ($UseDir = shift)) {
+	-d $UseDir or die "Unknown directory '$UseDir'";
+    } elsif ($arg eq '-L' && defined ($FileList = shift)) {
+        -e $FileList or die "Filelist '$FileList' doesn't appear to exist!";
     } else {
-        die "usage: $0 [-v|-q|-C dir] [-maketest]";
+        die "usage: $0 [-v|-q|-C dir|-L filelist] [-maketest]\n";
     }
 }
 
-if (!$AlwaysWrite) {
-    print "Reading file list...\n"
+if ($FileList) {
+    print "Reading file list '$FileList'\n"
         if $Verbose;
-    open my $fh,"<","mktables.lst"
-        or die "Failed to read mktables.lst:$!";
-    my @input =( $0 );
+    open my $fh,"<",$FileList or die "Failed to read '$FileList':$!";
+    my @input;
     my @output;
     for my $list ( \@input, \@output ) {
         while (<$fh>) {
@@ -69,19 +73,25 @@ if (!$AlwaysWrite) {
         @$list = grep !$dupe{ $_ }++, @$list;
     }
     close $fh;
-    die "No input or output files in mktables.lst!"
+    die "No input or output files in '$FileList'!"
         if !@input or !@output;
     if ( $Verbose ) {
         print "Expecting ".scalar( @input )." input files. ",
               "Checking ".scalar( @output )." output files.\n";
     }
-    my $maxtime = 0;
+    # we set maxtime to be the youngest input file, including $0 itself.
+    my $maxtime = -M $0; # do this before the chdir!
+    if ($UseDir) {
+        chdir $UseDir or die "Failed to chdir to '$UseDir':$!";
+    }
     foreach my $in (@input) {
         my $time = -M $in;
         die "Missing input file '$in'" unless defined $time;
         $maxtime = $time if $maxtime < $time;
     }
 
+    # now we check to see if any output files are older than maxtime, if
+    # they are we need to continue on, otherwise we can presumably bail.
     my $ok = 1;
     foreach my $out (@output) {
         if ( ! -e $out ) {
@@ -103,8 +113,13 @@ if (!$AlwaysWrite) {
     }
     print "Must rebuild tables.\n"
         if $Verbose;
-} elsif ($Verbose) {
-    print "Not checking file list as -w option set.\n";
+} else {
+    if ($Verbose) {
+        print "Not checking filelist.\n";
+    }
+    if ($UseDir) {
+        chdir $UseDir or die "Failed to chdir to '$UseDir':$!";
+    }
 }
 
 foreach my $lib ('To', 'lib',
