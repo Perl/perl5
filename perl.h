@@ -3247,6 +3247,14 @@ END_EXTERN_C
 /*****************************************************************************/
 /* XXX This needs to be revisited, since BEGIN makes yacc re-enter... */
 
+/* LynxOS defines these in scsi.h which is included via ioctl.h */
+#ifdef FORMAT
+#undef FORMAT
+#endif
+#ifdef SPACE
+#undef SPACE
+#endif
+
 #include "perly.h"
 
 #define LEX_NOTPARSING		11	/* borrowed from toke.c */
@@ -4129,6 +4137,10 @@ typedef struct am_table_short AMTS;
 #endif /* !defined(USE_ITHREADS) */
 
 #ifdef I_FCNTL
+#  include <fcntl.h>
+#endif
+
+#ifdef __Lynx__
 #  include <fcntl.h>
 #endif
 

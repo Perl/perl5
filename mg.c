@@ -48,6 +48,14 @@ Signal_t Perl_csighandler(int sig);
 static void restore_magic(pTHX_ void *p);
 static void unwind_handler_stack(pTHX_ void *p);
 
+#ifdef __Lynx__
+/* Missing protos on LynxOS */
+void setruid(uid_t id);
+void seteuid(uid_t id);
+void setrgid(uid_t id);
+void setegid(uid_t id);
+#endif
+
 /*
  * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
  */
