@@ -1180,16 +1180,16 @@ Perl_newHV(pTHX)
 HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {
-    register HV *hv;
-    STRLEN hv_max = ohv ? HvMAX(ohv) : 0;
-    STRLEN hv_fill = ohv ? HvFILL(ohv) : 0;
+    STRLEN hv_max, hv_fill;
+    register HV *hv = newHV();
 
-    hv = newHV();
+    if (!ohv || (hv_fill = HvFILL(ohv)) == 0)
+	return hv;
+
+    hv_max = HvMAX(ohv);
     while (hv_max && hv_max + 1 >= hv_fill * 2)
 	hv_max = hv_max / 2;	/* Is always 2^n-1 */
     HvMAX(hv) = hv_max;
-    if (!hv_fill)
-	return hv;
 
 #if 0
     if (! SvTIED_mg((SV*)ohv, PERL_MAGIC_tied)) {
