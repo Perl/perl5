@@ -26,8 +26,7 @@ BEGIN {
 }
 
 use strict;
-# 2 * (@char ** 3) * (keys %mbchars)
-use Test::More tests => 2 * (4 * 4 * 4) * (3);
+use Test::More;
 
 # %mbchars = (encoding => { bytes => utf8, ... }, ...);
 # * pack('C*') is expected to return bytes even if ${^ENCODING} is true.
@@ -45,6 +44,10 @@ our %mbchars = (
 	pack('C*', 0x82, 0xA9) => "\x{304B}", # hiragana KA
     },
 );
+
+# 4 == @char; paired tests inside 3 nested loops,
+# plus extra pair of tests in a loop, plus extra pair of tests.
+plan tests => 2 * (4 ** 3 + 4 + 1) * (keys %mbchars);
 
 for my $enc (sort keys %mbchars) {
     local ${^ENCODING} = find_encoding($enc);
@@ -70,5 +73,16 @@ for my $enc (sort keys %mbchars) {
 		is ($string, $expect); # "$enc \$/=$rs $start $end"
 	    }
 	}
+	# chomp should not stringify references unless it decides to modify
+	# them
+	$_ = [];
+	my $got = chomp();
+	is ($got, 0);
+	is (ref($_), "ARRAY", "chomp ref (no modify)");
     }
+
+    $/ = ")";  # the last char of something like "ARRAY(0x80ff6e4)"
+    my $got = chomp();
+    is ($got, 1);
+    ok (!ref($_), "chomp ref (modify)");
 }
