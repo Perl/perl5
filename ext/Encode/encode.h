@@ -19,11 +19,13 @@ struct encpage_s
 typedef struct encode_s encode_t;
 struct encode_s
 {
- const char *name;
  encpage_t  *t_utf8;
  encpage_t  *f_utf8;
  const U8   *rep;
  int        replen;
+ U8         min_el;
+ U8         max_el;
+ const char *name[2];
 };
 
 #ifdef U8
