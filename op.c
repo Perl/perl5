@@ -6732,17 +6732,18 @@ Perl_peep(pTHX_ register OP *o)
 		if (!enter)
 		    break;
 	    }
-	    /* for $a (...) will have OP_GV then OP_RV2GV here.  */
+	    /* for $a (...) will have OP_GV then OP_RV2GV here.
+	       for (...) just has an OP_GV.  */
 	    if (enter->op_type == OP_GV) {
 		gvop = (OP *) enter;
 		enter = (LISTOP *) enter->op_next;
 		if (!enter)
 		    break;
-		if (enter->op_type != OP_RV2GV)
+		if (enter->op_type == OP_RV2GV) {
+		  enter = (LISTOP *) enter->op_next;
+		  if (!enter)
 		    break;
-		enter = (LISTOP *) enter->op_next;
-		if (!enter)
-		    break;
+		}
 	    }
 
 	    if (enter->op_type != OP_ENTERITER)
