@@ -259,7 +259,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define	FAIL(msg)                                                             \
     STMT_START {                                                             \
         char *ellipses = "";                                                 \
-        unsigned len = strlen(RExC_precomp);                                \
+        IV len = RExC_end - RExC_precomp;                                \
                                                                              \
 	if (!SIZE_ONLY)                                                      \
 	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
@@ -281,7 +281,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define	FAIL2(pat,msg)                                                        \
     STMT_START {                                                             \
         char *ellipses = "";                                                 \
-        unsigned len = strlen(RExC_precomp);                                \
+        IV len = RExC_end - RExC_precomp;                                \
                                                                              \
 	if (!SIZE_ONLY)                                                      \
 	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
@@ -301,7 +301,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL(m)                                                      \
     STMT_START {                                                             \
-      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
+      IV offset = RExC_parse - RExC_precomp; \
                                                                              \
       Perl_croak(aTHX_ "%s" REPORT_LOCATION,               \
 		 m, (int)offset, RExC_precomp, RExC_precomp + offset);     \
@@ -322,7 +322,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL2(m,a1)                                                  \
     STMT_START {                                                             \
-      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
+      IV offset = RExC_parse - RExC_precomp; \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1,       \
 		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
@@ -344,7 +344,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL3(m, a1, a2)                                             \
     STMT_START {                                                             \
-      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
+      IV offset = RExC_parse - RExC_precomp; \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2,   \
 		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
@@ -365,7 +365,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL4(m, a1, a2, a3)                                         \
     STMT_START {                                                             \
-      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
+      IV offset = RExC_parse - RExC_precomp; \
                                                                              \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3,\
 		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
@@ -376,7 +376,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 #define	Simple_vFAIL5(m, a1, a2, a3, a4)                                     \
     STMT_START {                                                             \
-      unsigned offset = strlen(RExC_precomp)-(RExC_end-RExC_parse); \
+      IV offset = RExC_parse - RExC_precomp; \
       S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3, a4,\
 		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
     } STMT_END
@@ -384,14 +384,14 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 #define	vWARN(loc,m)                                                         \
     STMT_START {                                                             \
-        unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));          \
+        IV offset = loc - RExC_precomp;          \
 	Perl_warner(aTHX_ WARN_REGEXP, "%s" REPORT_LOCATION,\
 		 m, (int)offset, RExC_precomp, RExC_precomp + offset);          \
     } STMT_END                                                               \
 
 #define	vWARNdep(loc,m)                                                         \
     STMT_START {                                                             \
-        unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));          \
+        IV offset = loc - RExC_precomp;          \
         int warn_cat = ckWARN(WARN_REGEXP) ? WARN_REGEXP : WARN_DEPRECATED;  \
 	Perl_warner(aTHX_ warn_cat, "%s" REPORT_LOCATION,\
 		 m, (int)offset, RExC_precomp, RExC_precomp + offset);          \
@@ -400,7 +400,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 #define	vWARN2(loc, m, a1)                                                   \
     STMT_START {                                                             \
-        unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));          \
+        IV offset = loc - RExC_precomp;          \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,\
                  a1,                                                         \
 		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
@@ -408,7 +408,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 #define	vWARN3(loc, m, a1, a2)                                               \
     STMT_START {                                                             \
-      unsigned offset = strlen(RExC_precomp) - (RExC_end - (loc));        \
+      IV offset = loc - RExC_precomp;        \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,                    \
                  a1, a2,                                                     \
 		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
@@ -416,7 +416,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 #define	vWARN4(loc, m, a1, a2, a3)                                           \
     STMT_START {                                                             \
-      unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));            \
+      IV offset = loc - RExC_precomp;            \
 	Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,\
                  a1, a2, a3,                                                 \
 		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
@@ -425,7 +425,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 /* used for the parse_flags section for (?c) -- japhy */
 #define	vWARN5(loc, m, a1, a2, a3, a4)                                       \
   STMT_START {                                                   \
-      unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));   \
+      IV offset = loc - RExC_precomp;   \
         Perl_warner(aTHX_ WARN_REGEXP, m REPORT_LOCATION,      \
                  a1, a2, a3, a4,                                 \
                  (int)offset, RExC_precomp, RExC_precomp + offset);  \
