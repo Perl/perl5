@@ -486,9 +486,20 @@ information on how to use this function on tied hashes.
 */
 
 SV**
-Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash)
+Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
 {
-    HE *hek = hv_store_common (hv, NULL, key, klen, 0, val, hash);
+    HE *hek;
+    STRLEN klen;
+    int flags;
+
+    if (klen_i32 < 0) {
+	klen = -klen_i32;
+	flags = HVhek_UTF8;
+    } else {
+	klen = klen_i32;
+	flags = 0;
+    }
+    hek = hv_store_common (hv, NULL, key, klen, flags, val, 0);
     return hek ? &HeVAL(hek) : NULL;
 }
 
@@ -536,32 +547,26 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
 }
 
 HE *
-S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
+S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		  int flags, SV *val, U32 hash)
 {
     XPVHV* xhv;
-    STRLEN klen;
     U32 n_links;
     HE *entry;
     HE **oentry;
     bool is_utf8;
     const char *keysave;
+    int masked_flags;
 
     if (!hv)
 	return 0;
 
     if (keysv) {
 	key = SvPV(keysv, klen);
+	flags = 0;
 	is_utf8 = (SvUTF8(keysv) != 0);
     } else {
-	if (klen_i32 < 0) {
-	    klen = -klen_i32;
-	    is_utf8 = TRUE;
-	} else {
-	    klen = klen_i32;
-	    /* XXX Need to fix this one level out.  */
-	    is_utf8 = (flags & HVhek_UTF8) ? TRUE : FALSE;
-	}
+	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
     }
     keysave = key;
 
@@ -622,7 +627,9 @@ S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 	}
 
         if (is_utf8)
-            flags |= HVhek_UTF8;
+	    flags |= HVhek_UTF8;
+	else
+	    flags &= ~HVhek_UTF8;
         if (key != keysave)
             flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
         HvHASKFLAGS_on((SV*)hv);
@@ -641,6 +648,8 @@ S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
         }
     }
 
+    masked_flags = (flags & HVhek_MASK);
+
     if (!xhv->xhv_array /* !HvARRAY(hv) */)
 	Newz(505, xhv->xhv_array /* HvARRAY(hv) */,
 	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
@@ -657,7 +666,7 @@ S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if ((HeKFLAGS(entry) ^ flags) & HVhek_UTF8)
+	if ((HeKFLAGS(entry) ^ masked_flags) & HVhek_UTF8)
 	    continue;
 	if (HeVAL(entry) == &PL_sv_placeholder)
 	    xhv->xhv_placeholders--; /* yes, can store into placeholder slot */
@@ -667,7 +676,7 @@ S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 	if (val == &PL_sv_placeholder)
 	    xhv->xhv_placeholders++;
 
-        if (HeKFLAGS(entry) != flags) {
+        if (HeKFLAGS(entry) != masked_flags) {
             /* We match if HVhek_UTF8 bit in our flags and hash key's match.
                But if entry was set previously with HVhek_WASUTF8 and key now
                doesn't (or vice versa) then we should change the key's flag,
@@ -676,13 +685,12 @@ S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
                 /* Need to swap the key we have for a key with the flags we
                    need. As keys are shared we can't just write to the flag,
                    so we share the new one, unshare the old one.  */
-                int flags_nofree = flags & ~HVhek_FREEKEY;
-                HEK *new_hek = share_hek_flags(key, klen, hash, flags_nofree);
+                HEK *new_hek = share_hek_flags(key, klen, hash, masked_flags);
                 unshare_hek (HeKEY_hek(entry));
                 HeKEY_hek(entry) = new_hek;
             }
             else
-                HeKFLAGS(entry) = flags;
+                HeKFLAGS(entry) = masked_flags;
         }
         if (flags & HVhek_FREEKEY)
 	    Safefree(key);
