@@ -352,18 +352,18 @@ CODE:
     (void)SvUPGRADE(ST(0),SVt_PVNV);
     sv_setpvn(ST(0),ptr,len);
     if(SvNOK(num) || SvPOK(num) || SvMAGICAL(num)) {
-	SvNVX(ST(0)) = SvNV(num);
+	SvNV_set(ST(0), SvNV(num));
 	SvNOK_on(ST(0));
     }
 #ifdef SVf_IVisUV
     else if (SvUOK(num)) {
-	SvUVX(ST(0)) = SvUV(num);
+	SvUV_set(ST(0), SvUV(num));
 	SvIOK_on(ST(0));
 	SvIsUV_on(ST(0));
     }
 #endif
     else {
-	SvIVX(ST(0)) = SvIV(num);
+	SvIV_set(ST(0), SvIV(num));
 	SvIOK_on(ST(0));
     }
     if(PL_tainting && (SvTAINTED(num) || SvTAINTED(str)))

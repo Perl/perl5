@@ -321,7 +321,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	       use = e->base.bufsiz;
 	    }
 	    }
-	    SvPVX(e->dataSV) = (char *) ptr;
+	    SvPV_set(e->dataSV, (char *) ptr);
 	    SvLEN(e->dataSV) = 0;  /* Hands off sv.c - it isn't yours */
 	    SvCUR_set(e->dataSV,use);
 	    SvPOK_only(e->dataSV);
@@ -462,7 +462,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		SAVETMPS;
 		str = sv_newmortal();
 		sv_upgrade(str, SVt_PV);
-		SvPVX(str) = (char*)e->base.ptr;
+		SvPV_set(str, (char*)e->base.ptr);
 		SvLEN(str) = 0;
 		SvCUR_set(str, e->base.end - e->base.ptr);
 		SvPOK_only(str);

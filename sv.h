@@ -763,13 +763,16 @@ and leaves the UTF-8 status as it was.
 		(void) SvIV(sv); } STMT_END
 #define SvIV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
-		(SvIVX(sv) = (val)); } STMT_END
+		(((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
 #define SvNV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
 		(SvNVX(sv) = (val)); } STMT_END
 #define SvPV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		(SvPVX(sv) = (val)); } STMT_END
+		(((XPV*)  SvANY(sv))->xpv_pv = (val)); } STMT_END
+#define SvUV_set(sv, val) \
+	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
+		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		(SvCUR(sv) = (val)); } STMT_END

@@ -1175,7 +1175,7 @@ perl_get_emergency_buffer(IV *size)
     }
 
     SvPOK_off(sv);
-    SvPVX(sv) = Nullch;
+    SvPV_set(sv, Nullch);
     SvCUR(sv) = SvLEN(sv) = 0;
     *size = malloced_size(pv) + M_OVERHEAD;
     return pv - sizeof(union overhead);

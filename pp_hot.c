@@ -319,7 +319,7 @@ PP(pp_preinc)
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MAX)
     {
-	++SvIVX(TOPs);
+	SvIV_set(TOPs, SvIVX(TOPs) + 1);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
     else /* Do all the PERL_PRESERVE_IVUV conditionals in sv_inc */
@@ -2265,11 +2265,11 @@ PP(pp_subst)
 	SvOOK_off(TARG);
 	if (SvLEN(TARG))
 	    Safefree(SvPVX(TARG));
-	SvPVX(TARG) = SvPVX(dstr);
+	SvPV_set(TARG, SvPVX(dstr));
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));
 	doutf8 |= DO_UTF8(dstr);
-	SvPVX(dstr) = 0;
+	SvPV_set(dstr, (char*)0);
 	sv_free(dstr);
 
 	TAINT_IF(rxtainted & 1);
@@ -2582,7 +2582,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	if (type < SVt_PVIV && type != SVt_IV)
 	    sv_upgrade(dbsv, SVt_PVIV);
 	(void)SvIOK_on(dbsv);
-	SvIVX(dbsv) = PTR2IV(cv);	/* Do it the quickest way  */
+	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
     }
 
     if (CvXSUB(cv))

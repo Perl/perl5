@@ -359,8 +359,8 @@ Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
 	SvFAKE_on(namesv);
     else {
 	/* not yet introduced */
-	SvNVX(namesv) = (NV)PAD_MAX;	/* min */
-	SvIVX(namesv) = 0;		/* max */
+	SvNV_set(namesv, (NV)PAD_MAX);	/* min */
+	SvIV_set(namesv, 0);		/* max */
 
 	if (!PL_min_intro_pending)
 	    PL_min_intro_pending = offset;
@@ -459,8 +459,8 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
     name = NEWSV(1106, 0);
     sv_upgrade(name, SVt_PVNV);
     sv_setpvn(name, "&", 1);
-    SvIVX(name) = -1;
-    SvNVX(name) = 1;
+    SvIV_set(name, -1);
+    SvNV_set(name, 1);
     ix = pad_alloc(op_type, SVs_PADMY);
     av_store(PL_comppad_name, ix, name);
     /* XXX DAPM use PL_curpad[] ? */
@@ -925,8 +925,8 @@ Perl_intro_my(pTHX)
 	if ((sv = svp[i]) && sv != &PL_sv_undef
 		&& !SvFAKE(sv) && !SvIVX(sv))
 	{
-	    SvIVX(sv) = PAD_MAX;	/* Don't know scope end yet. */
-	    SvNVX(sv) = (NV)PL_cop_seqmax;
+	    SvIV_set(sv, PAD_MAX);	/* Don't know scope end yet. */
+	    SvNV_set(sv, (NV)PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad intromy: %ld \"%s\", (%lu,%lu)\n",
 		(long)i, SvPVX(sv),
@@ -974,7 +974,7 @@ Perl_pad_leavemy(pTHX)
 	if ((sv = svp[off]) && sv != &PL_sv_undef
 		&& !SvFAKE(sv) && SvIVX(sv) == PAD_MAX)
 	{
-	    SvIVX(sv) = PL_cop_seqmax;
+	    SvIV_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad leavemy: %ld \"%s\", (%lu,%lu)\n",
 		(long)off, SvPVX(sv),

@@ -97,8 +97,7 @@ static void TranslateError
 		     path, number, type);
 	break;
     }
-    safefree(dl_last_error);
-    dl_last_error = savepv(error);
+    sv_setpv(MY_CXT.x_dl_last_error, error);
 }
 
 static char *dlopen(char *path, int mode /* mode is ignored */)

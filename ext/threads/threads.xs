@@ -205,7 +205,7 @@ int
 ithread_mg_get(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *) mg->mg_ptr;
-    SvIVX(sv) = PTR2IV(thread);
+    SvIV_set(sv, PTR2IV(thread));
     SvIOK_on(sv);
     return 0;
 }

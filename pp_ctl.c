@@ -210,12 +210,12 @@ PP(pp_substcont)
 	    SvOOK_off(targ);
 	    if (SvLEN(targ))
 		Safefree(SvPVX(targ));
-	    SvPVX(targ) = SvPVX(dstr);
+	    SvPV_set(targ, SvPVX(dstr));
 	    SvCUR_set(targ, SvCUR(dstr));
 	    SvLEN_set(targ, SvLEN(dstr));
 	    if (DO_UTF8(dstr))
 		SvUTF8_on(targ);
-	    SvPVX(dstr) = 0;
+	    SvPV_set(dstr, (char*)0);
 	    sv_free(dstr);
 
 	    TAINT_IF(cx->sb_rxtainted & 1);
@@ -2322,13 +2322,13 @@ PP(pp_goto)
 			ary = AvALLOC(av);
 			if (AvARRAY(av) != ary) {
 			    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
-			    SvPVX(av) = (char*)ary;
+			    SvPV_set(av, (char*)ary);
 			}
 			if (items >= AvMAX(av) + 1) {
 			    AvMAX(av) = items - 1;
 			    Renew(ary,items+1,SV*);
 			    AvALLOC(av) = ary;
-			    SvPVX(av) = (char*)ary;
+			    SvPV_set(av, (char*)ary);
 			}
 		    }
 		    ++mark;
@@ -2360,7 +2360,7 @@ PP(pp_goto)
 			if (type < SVt_PVIV && type != SVt_IV)
 			    sv_upgrade(sv, SVt_PVIV);
 			(void)SvIOK_on(sv);
-			SvIVX(sv) = PTR2IV(cv); /* Do it the quickest way */
+			SvIV_set(sv, PTR2IV(cv)); /* Do it the quickest way */
 		    } else {
 			gv_efullname3(sv, CvGV(cv), Nullch);
 		    }

@@ -674,10 +674,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
                 sv = *av_fetch(PL_fdpid,fd,TRUE);
                 (void)SvUPGRADE(sv, SVt_IV);
                 pid = SvIVX(sv);
-                SvIVX(sv) = 0;
+                SvIV_set(sv, 0);
                 sv = *av_fetch(PL_fdpid,savefd,TRUE);
                 (void)SvUPGRADE(sv, SVt_IV);
-                SvIVX(sv) = pid;
+                SvIV_set(sv, pid);
                 UNLOCK_FDPID_MUTEX;
             }
 #endif

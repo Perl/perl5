@@ -850,7 +850,7 @@ PP(pp_predec)
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MIN)
     {
-	--SvIVX(TOPs);
+	SvIV_set(TOPs, SvIVX(TOPs) - 1);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
     else
@@ -868,7 +868,7 @@ PP(pp_postinc)
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MAX)
     {
-	++SvIVX(TOPs);
+	SvIV_set(TOPs, SvIVX(TOPs) + 1);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
     else
@@ -890,7 +890,7 @@ PP(pp_postdec)
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MIN)
     {
-	--SvIVX(TOPs);
+	SvIV_set(TOPs, SvIVX(TOPs) - 1);
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
     else
@@ -4276,7 +4276,7 @@ PP(pp_splice)
 		    *dst-- = *src--;
 	    }
 	    dst = AvARRAY(ary);
-	    SvPVX(ary) = (char*)(AvARRAY(ary) - diff); /* diff is negative */
+	    SvPV_set(ary, (char*)(AvARRAY(ary) - diff)); /* diff is negative */
 	    AvMAX(ary) += diff;
 	}
 	else {
@@ -4313,7 +4313,7 @@ PP(pp_splice)
 		    dst = src - diff;
 		    Move(src, dst, offset, SV*);
 		}
-		SvPVX(ary) = (char*)(AvARRAY(ary) - diff);/* diff is positive */
+		SvPV_set(ary, (char*)(AvARRAY(ary) - diff));/* diff is positive */
 		AvMAX(ary) += diff;
 		AvFILLp(ary) += diff;
 	    }
