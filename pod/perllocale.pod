@@ -276,10 +276,10 @@ The two quickest fixes are either to render Perl silent about any
 locale inconsistencies or to run Perl under the default locale "C".
 
 Perl's moaning about locale problems can be silenced by setting the
-environment variable PERL_BADLANG to a non-zero value, for example
-"1".  This method really just sweeps the problem under the carpet: you
-tell Perl to shut up even when Perl sees that something is wrong.  Do
-not be surprised if later something locale-dependent misbehaves.
+environment variable PERL_BADLANG to a zero value, for example "0".
+This method really just sweeps the problem under the carpet: you tell
+Perl to shut up even when Perl sees that something is wrong.  Do not
+be surprised if later something locale-dependent misbehaves.
 
 Perl can be run under the "C" locale by setting the environment
 variable LC_ALL to "C".  This method is perhaps a bit more civilized
@@ -785,9 +785,10 @@ of a match involving C<\w> while C<use locale> is in effect.
 A string that can suppress Perl's warning about failed locale settings
 at startup.  Failure can occur if the locale support in the operating
 system is lacking (broken) in some way--or if you mistyped the name of
-a locale when you set up your environment.  If this environment variable
-is absent, or has a value that does not evaluate to integer zero--that
-is, "0" or ""--Perl will complain about locale setting failures.
+a locale when you set up your environment.  If this environment
+variable is absent, or has a value that does not evaluate to integer
+zero--that is, "0" or ""-- Perl will complain about locale setting
+failures.
 
 B<NOTE>: PERL_BADLANG only gives you a way to hide the warning message.
 The message tells about some problem in your system's locale support,
