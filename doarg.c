@@ -1,4 +1,4 @@
-/* $RCSfile: doarg.c,v $$Revision: 4.0.1.6 $$Date: 92/06/08 12:34:30 $
+/* $RCSfile: doarg.c,v $$Revision: 4.0.1.7 $$Date: 92/06/11 21:07:11 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doarg.c,v $
+ * Revision 4.0.1.7  92/06/11  21:07:11  lwall
+ * patch34: join with null list attempted negative allocation
+ * patch34: sprintf("%6.4s", "abcdefg") didn't print "abcd  "
+ * 
  * Revision 4.0.1.6  92/06/08  12:34:30  lwall
  * patch20: removed implicit int declarations on funcions
  * patch20: pattern modifiers i and o didn't interact right
@@ -406,7 +410,7 @@ int *arglast;
 
     st += sp + 1;
 
-    len = delimlen * (items - 1);
+    len = (items > 0 ? (delimlen * (items - 1) ) : 0);
     if (str->str_len < len + items) {	/* current length is way too short */
 	while (items-- > 0) {
 	    if (*st)
@@ -982,28 +986,28 @@ register STR **sarg;
 		    char *mp = index(f, '.');
 		    int min = atoi(f+2);
 
-		    if (xlen < min)
-			post = min - xlen;
-		    else if (mp) {
+		    if (mp) {
 			int max = atoi(mp+1);
 
 			if (xlen > max)
 			    xlen = max;
 		    }
+		    if (xlen < min)
+			post = min - xlen;
 		    break;
 		}
 		else if (isDIGIT(f[1])) {
 		    char *mp = index(f, '.');
 		    int min = atoi(f+1);
 
-		    if (xlen < min)
-			pre = min - xlen;
-		    else if (mp) {
+		    if (mp) {
 			int max = atoi(mp+1);
 
 			if (xlen > max)
 			    xlen = max;
 		    }
+		    if (xlen < min)
+			pre = min - xlen;
 		    break;
 		}
 		strcpy(tokenbuf+64,f);	/* sprintf($s,...$s...) */

@@ -150,6 +150,7 @@ if (chdir "lib") {
 	    if ($?) {
 		&unlink("$installprivlib/$file");
 		&cmd("cp $file $installprivlib");
+		&chmod(0644, "$installprivlib/$file");
 	    }
 	}
     }

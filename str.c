@@ -1,4 +1,4 @@
-/* $RCSfile: str.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 15:40:43 $
+/* $RCSfile: str.c,v $$Revision: 4.0.1.6 $$Date: 92/06/11 21:14:21 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.c,v $
+ * Revision 4.0.1.6  92/06/11  21:14:21  lwall
+ * patch34: quotes containing subscripts containing variables didn't parse right
+ * 
  * Revision 4.0.1.5  92/06/08  15:40:43  lwall
  * patch20: removed implicit int declarations on functions
  * patch20: Perl now distinguishes overlapped copies from non-overlapped
@@ -1048,7 +1051,7 @@ STR *src;
 		    case '&':
 		    case '*':
 			s = scanident(s,send,tokenbuf);
-			break;
+			continue;
 		    case '\'':
 		    case '"':
 			/*SUPPRESS 68*/

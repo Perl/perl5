@@ -1,4 +1,4 @@
-/* $RCSfile: perly.y,v $$Revision: 4.0.1.4 $$Date: 92/06/08 17:33:25 $
+/* $RCSfile: perly.y,v $$Revision: 4.0.1.5 $$Date: 92/06/11 21:12:50 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perly.y,v $
+ * Revision 4.0.1.5  92/06/11  21:12:50  lwall
+ * patch34: expectterm incorrectly set to indicate start of program or block
+ * 
  * Revision 4.0.1.4  92/06/08  17:33:25  lwall
  * patch20: one of the backdoors to expectterm was on the wrong reduction
  * 
@@ -106,8 +109,8 @@ prog	:	/* NULL */
 		{
 #if defined(YYDEBUG) && defined(DEBUGGING)
 		    yydebug = (debug & 1);
-		    expectterm = 2;
 #endif
+		    expectterm = 2;
 		}
 	/*CONTINUED*/	lineseq
 			{ if (in_eval)

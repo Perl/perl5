@@ -1,4 +1,4 @@
-/* $RCSfile: util.h,v $$Revision: 4.0.1.3 $$Date: 92/06/08 16:09:20 $
+/* $RCSfile: util.h,v $$Revision: 4.0.1.4 $$Date: 92/06/11 21:19:36 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.h,v $
+ * Revision 4.0.1.4  92/06/11  21:19:36  lwall
+ * patch34: pidgone() wasn't declared right
+ * 
  * Revision 4.0.1.3  92/06/08  16:09:20  lwall
  * patch20: bcopy() and memcpy() now tested for overlap safety
  * 
@@ -52,3 +55,4 @@ int	my_memcmp();
 #endif
 unsigned long scanoct();
 unsigned long scanhex();
+void pidgone();

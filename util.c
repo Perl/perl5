@@ -1,4 +1,4 @@
-/* $RCSfile: util.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 16:08:37 $
+/* $RCSfile: util.c,v $$Revision: 4.0.1.6 $$Date: 92/06/11 21:18:47 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.c,v $
+ * Revision 4.0.1.6  92/06/11  21:18:47  lwall
+ * patch34: boneheaded typo in my_bcopy()
+ * 
  * Revision 4.0.1.5  92/06/08  16:08:37  lwall
  * patch20: removed implicit int declarations on functions
  * patch20: Perl now distinguishes overlapped copies from non-overlapped
@@ -1185,7 +1188,7 @@ register int len;
 	to += len;
 	from += len;
 	while (len--)
-	    --*to = --*from;
+	    *(--to) = *(--from);
     }
     return retval;
 }

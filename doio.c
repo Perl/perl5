@@ -1,4 +1,4 @@
-/* $RCSfile: doio.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 13:00:21 $
+/* $RCSfile: doio.c,v $$Revision: 4.0.1.6 $$Date: 92/06/11 21:08:16 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doio.c,v $
+ * Revision 4.0.1.6  92/06/11  21:08:16  lwall
+ * patch34: some systems don't declare h_errno extern in header files
+ * 
  * Revision 4.0.1.5  92/06/08  13:00:21  lwall
  * patch20: some machines don't define ENOTSOCK in errno.h
  * patch20: new warnings for failed use of stat operators on filenames with \n
@@ -62,6 +65,10 @@
 #include <sys/select.h>
 #endif
 #endif
+#endif
+
+#ifdef HOST_NOT_FOUND
+extern int h_errno;
 #endif
 
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)

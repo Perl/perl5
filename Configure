@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $RCSfile: Configure,v $$Revision: 4.0.1.7 $$Date: 92/06/08 11:38:16 $
+# $RCSfile: Configure,v $$Revision: 4.0.1.8 $$Date: 92/06/11 21:04:45 $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -2080,7 +2080,7 @@ main()
     exit(0);
 }
 EOCP
-	if $cc safebcpy.c -o safebcpy $ccflags >/dev/null 2>&1 ; then
+	if $cc safebcpy.c -o safebcpy $ccflags $libs >/dev/null 2>&1 ; then
 	    if ./safebcpy; then
 		echo "It can."
 		d_safebcpy=define
@@ -2465,7 +2465,7 @@ main()
     exit(0);
 }
 EOCP
-	if $cc safemcpy.c -o safemcpy $ccflags >/dev/null 2>&1 ; then
+	if $cc safemcpy.c -o safemcpy $ccflags $libs >/dev/null 2>&1 ; then
 	    if ./safemcpy; then
 		echo "It can."
 		d_safemcpy=define

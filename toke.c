@@ -1,4 +1,4 @@
-/* $RCSfile: toke.c,v $$Revision: 4.0.1.6 $$Date: 92/06/08 16:03:49 $
+/* $RCSfile: toke.c,v $$Revision: 4.0.1.7 $$Date: 92/06/11 21:16:30 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	toke.c,v $
+ * Revision 4.0.1.7  92/06/11  21:16:30  lwall
+ * patch34: expectterm incorrectly set to indicate start of program or block
+ * 
  * Revision 4.0.1.6  92/06/08  16:03:49  lwall
  * patch20: an EXPR may now start with a bareword
  * patch20: print $fh EXPR can now expect term rather than operator in EXPR
@@ -532,7 +535,8 @@ yylex()
 	yylval.ival = curcmd->c_line;
 	if (isSPACE(*s) || *s == '#')
 	    cmdline = NOLINE;   /* invalidate current command line number */
-	OPERATOR(tmp);
+	expectterm = 2;
+	RETURN(tmp);
     case ';':
 	if (curcmd->c_line < cmdline)
 	    cmdline = curcmd->c_line;
