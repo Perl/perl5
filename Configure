@@ -5920,7 +5920,7 @@ $define)
 	echo "Long doubles selected." >&4
 	case "$longdblsize" in
 	$doublesize)
-		"...but long doubles are equal to doubles, not changing architecture name." >&4
+		echo "...but long doubles are equal to doubles, not changing architecture name." >&4
 		;;
 	*)
 		case "$archname" in
