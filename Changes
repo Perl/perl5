@@ -31,6 +31,193 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13942] By: jhi                                   on 2001/12/29  21:12:02
+        Log: Subject: [PATCH] cleaner close on tests, take 2
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 29 Dec 2001 21:42:37 +0100
+             Message-ID: <m33d1tvjuq.fsf@anima.de>
+             
+             (the DB_File patches)
+     Branch: perl
+	   ! ext/DB_File/t/db-btree.t ext/DB_File/t/db-hash.t
+	   ! ext/DB_File/t/db-recno.t
+____________________________________________________________________________
+[ 13941] By: jhi                                   on 2001/12/29  20:25:22
+        Log: Integrate perlio; regen'ed config_H.?c
+     Branch: perl
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 13940] By: jhi                                   on 2001/12/29  20:22:57
+        Log: Subject: [PATCH] cleaner close on tests, take 2             
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 29 Dec 2001 21:42:37 +0100
+             Message-ID: <m33d1tvjuq.fsf@anima.de>
+             
+             (except for the three DB_File patch fragments)
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.t ext/PerlIO/t/encoding.t
+	   ! ext/SDBM_File/sdbm.t ext/Storable/t/store.t lib/strict.t
+	   ! t/cmd/while.t t/comp/cpp.aux t/comp/multiline.t
+	   ! t/comp/require.t t/comp/script.t t/io/argv.t t/io/dup.t
+	   ! t/lib/filter-util.pl t/op/anonsub.t t/op/do.t t/op/inccode.t
+	   ! t/op/runlevel.t t/op/write.t t/run/switches.t
+____________________________________________________________________________
+[ 13939] By: jhi                                   on 2001/12/29  20:17:55
+        Log: Subject: [PATCH] from the non-ANSI comment police (was: it won't compile on win32)  
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Sat, 29 Dec 2001 20:38:59 +0100
+             Message-Id: <20011229203646.24CF.H.M.BRAND@hccnet.nl>      
+             
+             (NetWare tree not touched because it's very //)
+     Branch: perl
+	   ! XSUB.h os2/os2.c perl.h win32/include/netdb.h
+	   ! win32/include/sys/socket.h win32/perlhost.h win32/vmem.h
+	   ! wince/include/errno.h wince/include/netdb.h
+	   ! wince/include/sys/socket.h wince/include/sys/stat.h
+	   ! wince/perllib.c wince/perlmain.c wince/win32.h
+	   ! wince/win32iop.h wince/win32thread.c wince/win32thread.h
+	   ! wince/wince.c wince/wince.h wince/wincesck.c x2p/a2py.c
+____________________________________________________________________________
+[ 13937] By: jhi                                   on 2001/12/29  18:28:36
+        Log: Give up on serious testing of langinfo().  Leave the old
+             code in place, though.
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.t
+____________________________________________________________________________
+[ 13935] By: jhi                                   on 2001/12/29  17:36:08
+        Log: Integrate perlio;
+             
+             Define the two socket error numbers in terms of WSAEXXXXX equivalents
+             
+             Fudge Config.pm so File::Spec does not croak.
+     Branch: perl
+	  !> win32/FindExt.pm win32/win32.h
+____________________________________________________________________________
+[ 13932] By: jhi                                   on 2001/12/29  17:24:24
+        Log: VOS tweaks from Paul Green.
+             
+             The Configure tweaks: the _exe needs to be
+             set after the init; VOS has fd 3 hardwired to /dev/tty;
+             the grep/ln/make substitutions really need to stick.
+     Branch: perl
+	   ! Configure hints/vos.sh perl.h util.c vos/build.cm
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h vos/vosish.h
+____________________________________________________________________________
+[ 13930] By: jhi                                   on 2001/12/29  15:35:00
+        Log: Subject: [PATCH] Pod whitespace cleanup, round 0.                
+             From: coral@eekeek.org
+             Date: Fri, 28 Dec 2001 19:58:22 -0500      
+             Message-Id: <200112290058.fBT0wMD26750@eekeek.org>
+     Branch: perl
+	   ! pod/perl561delta.pod pod/perl572delta.pod pod/perlapi.pod
+	   ! pod/perldelta.pod pod/perlfaq4.pod pod/perlfaq6.pod
+	   ! pod/perlfaq7.pod pod/perlfunc.pod pod/perlpacktut.pod
+	   ! pod/perlunicode.pod pod/perlxs.pod util.c
+____________________________________________________________________________
+[ 13929] By: jhi                                   on 2001/12/29  15:31:20
+        Log: op/exec Win32 patch from Schwern via Abe Timmerman.
+     Branch: perl
+	   ! t/op/exec.t
+____________________________________________________________________________
+[ 13928] By: jhi                                   on 2001/12/29  15:30:14
+        Log: Subject: [PATCH lib/Pod/t/InputObjects.t] 
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Sat, 29 Dec 2001 13:10:06 +0100
+             Message-ID: <cibr2u4f2ksggo4bgt8ijdkfn783avvvj4@4ax.com>           
+     Branch: perl
+	   + lib/Pod/t/InputObjects.t
+____________________________________________________________________________
+[ 13927] By: jhi                                   on 2001/12/29  15:27:39
+        Log: Integrate perlio;
+             
+             Quick fix (after couple of clever fixes failed) for
+             "accept leaks memory" fail [ID 20011223.001]
+             
+             Nick Clark's embed.pl fix for my_socketpair
+     Branch: perl
+	  !> embed.h embed.pl global.sym pod/perlapi.pod pp_sys.c proto.h
+____________________________________________________________________________
+[ 13925] By: jhi                                   on 2001/12/29  15:21:53
+        Log: Slight tweaks on the MM_Win32.t.
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Win32.t
+____________________________________________________________________________
+[ 13924] By: jhi                                   on 2001/12/29  15:16:47
+        Log: Subject: [PATCH lib/ExtUtils/t/MM_Win32.t]
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Sat, 29 Dec 2001 12:51:36 +0100
+             Message-ID: <bmar2u8jdib45442jh1ht3e3i1qhlaek59@4ax.com>
+     Branch: perl
+	   + lib/ExtUtils/t/MM_Win32.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13922] By: jhi                                   on 2001/12/29  15:09:00
+        Log: Subject: [PATCH] Module names and other nits
+             From: Autrijus Tang <autrijus@autrijus.org>                 
+             Date: Sat, 29 Dec 2001 01:59:28 +0800
+             Message-ID: <20011229015928.A29712@geb.elixus.org>              
+     Branch: perl
+	   ! lib/Exporter/Heavy.pm pod/perl561delta.pod pod/perl56delta.pod
+	   ! pod/perldebguts.pod pod/perldebug.pod pod/perlfaq4.pod
+	   ! pod/perlfaq6.pod pod/perlfunc.pod pod/perlguts.pod
+	   ! pod/perlpacktut.pod pod/perlsub.pod pod/perltodo.pod
+	   ! pod/perlunicode.pod pod/perlutil.pod pod/perlxs.pod
+____________________________________________________________________________
+[ 13921] By: jhi                                   on 2001/12/29  15:05:08
+        Log: socketpair tweaks from Nicholas Clark.
+     Branch: perl
+	   ! ext/Socket/socketpair.t util.c
+____________________________________________________________________________
+[ 13919] By: jhi                                   on 2001/12/28  17:01:39
+        Log: Retract #13917.
+     Branch: perl
+	   ! doop.c
+____________________________________________________________________________
+[ 13918] By: jhi                                   on 2001/12/28  17:00:53
+        Log: Subject: provisional MakeMaker patch for VMS
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Thu, 27 Dec 2001 22:29:37 -0600
+             Message-Id: <a05101004b8515264aa3a@[172.16.52.1]>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_VMS.pm
+____________________________________________________________________________
+[ 13917] By: jhi                                   on 2001/12/28  16:57:19
+        Log: (retracted by #13919)
+     Branch: perl
+	   ! doop.c
+____________________________________________________________________________
+[ 13915] By: jhi                                   on 2001/12/28  01:16:45
+        Log: Remove debris in any case.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13914] By: jhi                                   on 2001/12/28  00:22:10
+        Log: Subject: [PATCH] Re: B::walksymtable oddness
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Thu, 27 Dec 2001 19:14:24 +0100
+             Message-ID: <3C2B7310.861.18820D0@localhost>
+     Branch: perl
+	   ! ext/B/B.pm
+____________________________________________________________________________
+[ 13913] By: jhi                                   on 2001/12/27  23:57:34
+        Log: Subject: [PATCH] because (sys)?read doesn't reset buffers
+             From: Nicholas Clark <nick@unfortu.net> 
+             Date: Fri, 28 Dec 2001 00:43:02 +0000
+             Message-ID: <20011228004301.B23373@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 13912] By: jhi                                   on 2001/12/27  23:56:20
+        Log: Fast Latin1<->UTF-8 conversion for older Perls.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13911] By: jhi                                   on 2001/12/27  14:52:45
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13910] By: jhi                                   on 2001/12/27  14:32:23
         Log: More wait status trickery for BeOS.
      Branch: perl
