@@ -917,8 +917,8 @@ they really should be fixed.
 
 =head2 Cygwin 1.5 problems
 
-In Cygwin 1.5 the F<io/tell> and F<op/sysio> test have failures for
-some yet unknown reason.  Also, the threads tests stress_cv,
+In Cygwin 1.5 the F<io/tell> and F<op/sysio> tests have failures for
+some yet unknown reason.  In 1.5.5 the threads tests stress_cv,
 stress_re, and stress_string are failing unless the environment
 variable PERLIO is set to "perlio" (which makes also the io/tell
 failure go away).
@@ -958,9 +958,9 @@ fine.
 
 =head2 Tru64: No threaded builds with GNU cc (gcc)
 
-In the latest Tru64 releases (e.g. v5.1B) the gcc (3.3) cannot be
-used to compile a threaded Perl (-Duseithreads) because the system
-<pthread.h> file doesn't know about gcc.
+In the latest Tru64 releases (e.g. v5.1B or later) gcc cannot be used
+to compile a threaded Perl (-Duseithreads) because the system
+C<< <pthread.h> >> file doesn't know about gcc.
 
 =head2 Win32: sysopen, sysread, syswrite
 
