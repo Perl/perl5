@@ -28,6 +28,21 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.5		Maintenance release working toward v5.8.5
 --------------
 ____________________________________________________________________________
+[ 23139] By: nicholas                              on 2004/07/19  13:43:44
+        Log: Oops. Forgot to mention the threads fix.
+     Branch: maint-5.8/perl
+	   ! pod/perl585delta.pod
+____________________________________________________________________________
+[ 23138] By: nicholas                              on 2004/07/19  13:01:47
+        Log: Update the perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perl585delta.pod
+____________________________________________________________________________
+[ 23137] By: nicholas                              on 2004/07/19  12:43:07
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 23136] By: nicholas                              on 2004/07/19  12:27:41
         Log: Integrate:
              [ 23042]
