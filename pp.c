@@ -4812,8 +4812,9 @@ PP(pp_pack)
 		    do {
 			double next = floor(adouble / 128);
 			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;
-			if (--in < buf)  /* this cannot happen ;-) */
+			if (in <= buf)  /* this cannot happen ;-) */
 			    DIE(aTHX_ "Cannot compress integer");
+			in--;
 			adouble = next;
 		    } while (adouble > 0);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
