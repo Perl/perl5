@@ -32,6 +32,206 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8403] By: jhi                                   on 2001/01/11  04:38:24
+        Log: Subject: Re: [ID 20001029.005] Regex error: "cd. (A. Tw)" !~ /\((\w\. \w+)\)/
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Mon, 30 Oct 2000 01:33:26 +0000
+             Message-Id: <200010300133.BAA10390@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[  8402] By: jhi                                   on 2001/01/11  04:26:12
+        Log: Integrate perlio.
+     Branch: perl
+	  !> scope.h util.c
+____________________________________________________________________________
+[  8401] By: nick                                  on 2001/01/10  22:52:55
+        Log: Allow control of 2nd arg to segsetjmp() via -DSCOPE_SAVES_SIGNAL_MASK.
+             (So Alan and Ilya can try setting via hints.)
+             Verified Linux "works" with it true and fails to re-enable SIGINT if false.
+             Restoring sigmask in Perl_sighandler() if handler dies is not equivalent;
+             doing the save everywhere seems to restart read() correctly, but just
+             doing it once "round" the handler does not.
+     Branch: perlio
+	   ! scope.h
+____________________________________________________________________________
+[  8400] By: jhi                                   on 2001/01/10  21:57:54
+        Log: Not defining PERL_PRESERVE_IVUV fixes only the op/inc problem
+             of IRIX, HP-UX is unaffected.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  8399] By: nick                                  on 2001/01/10  21:29:19
+        Log: Safe fix for Simon's pclose() doing SvIVX of undef -> core bug.
+     Branch: perlio
+	   ! util.c
+____________________________________________________________________________
+[  8398] By: jhi                                   on 2001/01/10  20:55:31
+        Log: Add ReuseAddr as a (preferred) alias for Reuse as we know
+             also have ReusePort.
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[  8397] By: jhi                                   on 2001/01/10  20:50:57
+        Log: Subject: [PATCH] add ReusePort option to IO::Socket::INET for better multicast support (resend)
+             From: "Jeremy D. Zawodny" <jzawodn@yahoo-inc.com>
+             Date: Wed, 10 Jan 2001 01:38:13 -0800
+             Message-ID: <20010110013813.B41744@yahoo-inc.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[  8396] By: jhi                                   on 2001/01/10  20:49:30
+        Log: Subject: [PATCH] add SO_REUSEPORT to export list in Socket.pm for better multicast support (resend)
+             From: "Jeremy D. Zawodny" <jzawodn@yahoo-inc.com>
+             Date: Wed, 10 Jan 2001 01:37:32 -0800
+             Message-ID: <20010110013732.A41744@yahoo-inc.com>
+     Branch: perl
+	   ! ext/Socket/Socket.pm
+____________________________________________________________________________
+[  8395] By: jhi                                   on 2001/01/10  20:41:37
+        Log: Test for bug id 20010105.016 (fixed by #8378).
+     Branch: perl
+	   ! t/op/split.t
+____________________________________________________________________________
+[  8394] By: jhi                                   on 2001/01/10  20:26:32
+        Log: Integrate perlio.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  8393] By: nick                                  on 2001/01/10  19:34:30
+        Log: Back out Simon's pid hackery for now.
+     Branch: perlio
+	   ! util.c
+____________________________________________________________________________
+[  8392] By: nick                                  on 2001/01/10  19:23:13
+        Log: Integrate mainline. (Builds but does not work - something broke pipes...)
+     Branch: perlio
+	  !> (integrate 29 files)
+____________________________________________________________________________
+[  8391] By: jhi                                   on 2001/01/10  18:43:15
+        Log: Subject: [PATCH] Fix my_pclose segfault
+             From: Simon Cozens <simon@cozens.net>
+             Date: Wed, 10 Jan 2001 18:39:35 +0000
+             Message-ID: <20010110183934.A25640@pembro26.pmb.ox.ac.uk>
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  8390] By: jhi                                   on 2001/01/10  18:42:08
+        Log: Subject:  [PATCH perl@8269] Opcode.XS, fix memory leak
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Wed, 10 Jan 2001 13:23:02 EST
+             Message-Id: <010110132245.8129a@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! ext/Opcode/Opcode.xs
+____________________________________________________________________________
+[  8389] By: jhi                                   on 2001/01/10  15:16:07
+        Log: Turn off the integer preservation for now.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  8388] By: jhi                                   on 2001/01/10  15:01:25
+        Log: Few more IDE/editor nits from p5p.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[  8387] By: jhi                                   on 2001/01/10  06:53:16
+        Log: Subject: Re: [ID 20010109.003] Patch 8138 broke a test in libwww
+             To: "Andreas J. Koenig" <andreas.koenig@anima.de>
+             Date: Tue, 9 Jan 2001 23:16:02 +0000
+             Message-ID: <20010109231602.A81101@plum.flirble.org>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8386] By: jhi                                   on 2001/01/10  03:17:54
+        Log: Test cases for #8385 (from Simon's "torture.pl")
+     Branch: perl
+	   ! t/op/tr.t
+____________________________________________________________________________
+[  8385] By: jhi                                   on 2001/01/10  03:17:11
+        Log: Subject: Re: more UTF8 test suites and an UTF8 patch
+             From: Inaba Hiroto <inaba@sdd.tokyo-sc.toshiba.co.jp>
+             Date: Wed, 10 Jan 2001 11:39:39 +0900
+             Message-Id: <10101100239.AA10002@tux0017.sdd.tokyo-sc.toshiba.co.jp>
+             
+             Some more UTF-8 tr cases fixed.
+     Branch: perl
+	   ! doop.c
+____________________________________________________________________________
+[  8384] By: jhi                                   on 2001/01/09  22:45:40
+        Log: Allow the locale test needing POSIX and the taint test
+             needing IPC::SysV to run under 'minitest' (basically,
+             bail out if loading the extension fails)
+     Branch: perl
+	   ! t/op/misc.t t/op/taint.t
+____________________________________________________________________________
+[  8383] By: jhi                                   on 2001/01/09  21:36:04
+        Log: Subject: [PATCH @8382] Remove FileHandle/IO dependence in t/io/openpid.t
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Tue,  9 Jan 2001 13:33:22 -0800 (PST)
+             Message-ID: <14939.33475.474459.147429@soda.csua.berkeley.edu>
+     Branch: perl
+	   ! t/io/openpid.t
+____________________________________________________________________________
+[  8382] By: jhi                                   on 2001/01/09  21:06:08
+        Log: save_delete(), err, SAVEDELETE() fixes from Charles Lane.
+             Should finish up the bug id 20001205.022.
+     Branch: perl
+	   ! pp.c pp_hot.c scope.c
+____________________________________________________________________________
+[  8381] By: jhi                                   on 2001/01/09  18:27:43
+        Log: Subject: Re: [PATCH: perl@8342] comp/proto..........FAILED tests 112-123
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 9 Jan 2001 12:11:16 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10101091144440.13124-100000@maxwell.phys.lafayette.edu>
+             
+             More robust yacc/bison error detection.
+     Branch: perl
+	   ! t/comp/proto.t
+____________________________________________________________________________
+[  8380] By: jhi                                   on 2001/01/09  15:21:38
+        Log: Subject:  [PATCH] make t/op/misc.t work on VMS
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Tue, 9 Jan 2001 07:53:55 EST
+             Message-Id: <010109075323.91c8f@DUPHY4.Physics.Drexel.Edu> 
+     Branch: perl
+	   ! t/op/misc.t vms/test.com
+____________________________________________________________________________
+[  8379] By: jhi                                   on 2001/01/09  15:20:38
+        Log: Subject: [ID 20001230.003] UTF-8 tr still hurts
+             From: jhi@cc.hut.fi
+             Date: Sat, 30 Dec 2000 22:57:32 +0200 (EET)
+             Message-Id: <200012302057.WAA31168@alpha.hut.fi>
+             
+             The #8378 fixed this.
+     Branch: perl
+	   ! t/op/tr.t
+____________________________________________________________________________
+[  8378] By: jhi                                   on 2001/01/09  15:05:32
+        Log: Subject: One more patch for UTF8 
+             From: Inaba Hiroto <inaba@st.rim.or.jp>
+             Date: Tue, 09 Jan 2001 01:04:32 +0900
+             Message-ID: <3A59E510.52BAB5B9@st.rim.or.jp>
+             
+             UTF-8 fixes for 'x' and tr///.
+     Branch: perl
+	   ! doop.c embed.h embed.pl op.c pod/perlapi.pod pp.c proto.h
+	   ! regcomp.c regexec.c toke.c utf8.c
+____________________________________________________________________________
+[  8377] By: jhi                                   on 2001/01/09  14:32:17
+        Log: Make explicit our assumption that (for now) "\x{80}" produces UTF-8.
+     Branch: perl
+	   ! t/op/length.t
+____________________________________________________________________________
+[  8376] By: jhi                                   on 2001/01/09  04:32:32
+        Log: integrate changes #7775, #8316, #8316 from mainline
+     Branch: maint-5.6/perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  8375] By: jhi                                   on 2001/01/09  04:26:43
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8374] By: jhi                                   on 2001/01/09  04:14:32
         Log: IDE/editor section tweaking.
      Branch: perl
@@ -175,7 +375,7 @@ ____________________________________________________________________________
 	   ! lib/ExtUtils/typemap perlio.c perlio.h
 ____________________________________________________________________________
 [  8355] By: jhi                                   on 2001/01/06  20:27:15
-        Log: integrate change #8836 from mainline
+        Log: integrate change #8336 from mainline
              
              Scoping of %^H still broken in both perl@8269 and perl-5.6.1-TRIAL1
      Branch: maint-5.6/perl
