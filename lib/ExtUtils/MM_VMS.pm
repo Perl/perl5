@@ -832,7 +832,7 @@ pm_to_blib.ts : $(TO_INST_PM)
     }
     push(@m,"\t\$(NOECHO) \$(PERL) -e \"print '$line'\" >>.MM_tmp\n") if $line;
 
-    push(@m,q[	$(PERL) "-I$(PERL_LIB)" "-MExtUtils::Install" -e "pm_to_blib({split(' ',<STDIN>)},'].$autodir.q[')" <.MM_tmp]);
+    push(@m,q[	$(PERL) "-I$(PERL_LIB)" "-MExtUtils::Install" -e "pm_to_blib({split(' ',<STDIN>)},'].$autodir.q[','$(PM_FILTER)')" <.MM_tmp]);
     push(@m,qq[
 	\$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;
 	\$(NOECHO) \$(TOUCH) pm_to_blib.ts
