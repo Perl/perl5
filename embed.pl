@@ -1860,7 +1860,7 @@ s	|void	|open_script	|char *|bool|SV *|int *fd
 s	|void	|usage		|char *
 s	|void	|validate_suid	|char *|char*|int
 #  if defined(IAMSUID)
-s	|int	|fd_on_nosuid_fs|int fd
+s	|int	|file_on_nosuid_fs|int fd|char *path
 #  endif
 s	|void*	|parse_body	|va_list args
 s	|void*	|run_body	|va_list args

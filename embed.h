@@ -841,7 +841,7 @@
 #define usage			S_usage
 #define validate_suid		S_validate_suid
 #  if defined(IAMSUID)
-#define fd_on_nosuid_fs		S_fd_on_nosuid_fs
+#define file_on_nosuid_fs	S_file_on_nosuid_fs
 #  endif
 #define parse_body		S_parse_body
 #define run_body		S_run_body
@@ -2193,7 +2193,7 @@
 #define usage(a)		S_usage(aTHX_ a)
 #define validate_suid(a,b,c)	S_validate_suid(aTHX_ a,b,c)
 #  if defined(IAMSUID)
-#define fd_on_nosuid_fs(a)	S_fd_on_nosuid_fs(aTHX_ a)
+#define file_on_nosuid_fs(a,b)	S_file_on_nosuid_fs(aTHX_ a,b)
 #  endif
 #define parse_body(a)		S_parse_body(aTHX_ a)
 #define run_body(a)		S_run_body(aTHX_ a)
@@ -4307,8 +4307,8 @@
 #define S_validate_suid		CPerlObj::S_validate_suid
 #define validate_suid		S_validate_suid
 #  if defined(IAMSUID)
-#define S_fd_on_nosuid_fs	CPerlObj::S_fd_on_nosuid_fs
-#define fd_on_nosuid_fs		S_fd_on_nosuid_fs
+#define S_file_on_nosuid_fs	CPerlObj::S_file_on_nosuid_fs
+#define file_on_nosuid_fs	S_file_on_nosuid_fs
 #  endif
 #define S_parse_body		CPerlObj::S_parse_body
 #define parse_body		S_parse_body

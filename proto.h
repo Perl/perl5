@@ -817,7 +817,7 @@ STATIC void	S_open_script(pTHX_ char *, bool, SV *, int *fd);
 STATIC void	S_usage(pTHX_ char *);
 STATIC void	S_validate_suid(pTHX_ char *, char*, int);
 #  if defined(IAMSUID)
-STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);
+STATIC int	S_file_on_nosuid_fs(pTHX_ int fd, char *path);
 #  endif
 STATIC void*	S_parse_body(pTHX_ va_list args);
 STATIC void*	S_run_body(pTHX_ va_list args);

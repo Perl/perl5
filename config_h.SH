@@ -2204,6 +2204,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_ftello HAS_FTELLO		/**/
 
+/* HAS_GETMNT:
+ *	This symbol, if defined, indicates that the getmnt routine is
+ *	available.
+ */
+#$d_getmnt HAS_GETMNT		/**/
+
 /* HAS_GETMNTENT:
  *	This symbol, if defined, indicates that the getmntent routine is
  *	available to iterate through mounted file systems.
