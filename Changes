@@ -31,6 +31,273 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9662] By: jhi                                   on 2001/04/09  13:24:46
+        Log: tweak tweak.
+     Branch: perl
+	   ! AUTHORS pod/perl571delta.pod
+____________________________________________________________________________
+[  9661] By: jhi                                   on 2001/04/09  13:15:13
+        Log: Thinko in manual patch applying.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  9660] By: jhi                                   on 2001/04/09  13:07:53
+        Log: Subject: Re: [PATCH perl@9424] isn't numeric warning 
+             From: Robin Barker <rmb1@cise.npl.co.uk> 
+             Date: Mon, 9 Apr 2001 14:58:04 +0100 (BST)
+             Message-Id: <200104091358.OAA24811@tempest.npl.co.uk>
+             
+             (This corrects the case where the "isn't numeric" string contains \0s
+             and is longer than the temporary buffer, and contains \0 at the point
+             the string would be truncated by "...".) 
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  9659] By: jhi                                   on 2001/04/09  12:57:41
+        Log: Upgrade to CGI.pm 2.753, from Lincoln Stein.
+     Branch: perl
+	   ! lib/CGI.pm lib/CGI/Cookie.pm t/lib/cgi-esc.t
+	   ! t/lib/cgi-function.t t/lib/cgi-html.t
+____________________________________________________________________________
+[  9658] By: jhi                                   on 2001/04/09  12:48:47
+        Log: Subject: [PATCH] Partial rewrite of perlobj.pod
+             From: Ilmari Karonen <iltzu@sci.fi>
+             Date: Sun, 8 Apr 2001 23:14:29 +0300 (EET DST)
+             Message-ID: <Pine.SOL.3.96.1010408224105.425E-100000@simpukka>
+             
+             Rearrange and rewrite the Method Invocation section
+             to explain the concepts in nicer order.
+     Branch: perl
+	   ! pod/perlobj.pod
+____________________________________________________________________________
+[  9657] By: jhi                                   on 2001/04/09  12:35:58
+        Log: Upgrade to podlators 1.09, from Russ Allbery.
+     Branch: perl
+	   ! lib/Pod/Man.pm lib/Pod/Text.pm
+____________________________________________________________________________
+[  9656] By: jhi                                   on 2001/04/09  12:31:53
+        Log: perl571delta.
+     Branch: perl
+	   ! Todo-5.6 pod/perl571delta.pod pod/perlunicode.pod
+____________________________________________________________________________
+[  9655] By: jhi                                   on 2001/04/09  12:20:09
+        Log: Subject: [PATCH: perl@9622] documentation tweaks for UTF-EBCDIC support
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Mon, 9 Apr 2001 00:08:58 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0104090006190.21071-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! lib/utf8.pm pod/perlunicode.pod
+____________________________________________________________________________
+[  9654] By: gsar                                  on 2001/04/09  03:38:33
+        Log: here lies 5.6.1
+     Branch: maint-5.6/perl
+	   ! Changes
+____________________________________________________________________________
+[  9653] By: jhi                                   on 2001/04/09  03:25:24
+        Log: Update perlhist.
+     Branch: perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[  9652] By: jhi                                   on 2001/04/09  03:18:49
+        Log: perl571delta tweaking continues.
+     Branch: perl
+	   ! pod/perl571delta.pod
+____________________________________________________________________________
+[  9651] By: gsar                                  on 2001/04/09  03:11:19
+        Log: update Changes, patchlevel.h &c.
+     Branch: maint-5.6/perl
+	   ! Changes patchlevel.h pod/perldelta.pod pod/perlhist.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9650] By: jhi                                   on 2001/04/09  02:40:24
+        Log: Integrate the perlfork half of #9513 from maintperl into mainline
+             (the perlunicode half is obsolete)
+     Branch: perl
+	   ! pod/perlfork.pod
+____________________________________________________________________________
+[  9649] By: gsar                                  on 2001/04/09  02:35:43
+        Log: tweak perldelta as suggested by Jarkko
+     Branch: maint-5.6/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  9648] By: jhi                                   on 2001/04/09  02:13:04
+        Log: Integrate change #9646 from maintperl into mainline.
+             
+             add note about ithreads and Thread.pm
+     Branch: perl
+	  !> ext/Thread/Thread.pm ext/Thread/Thread.xs
+____________________________________________________________________________
+[  9647] By: jhi                                   on 2001/04/09  02:10:18
+        Log: Bad assumption that shortsize == 2.
+     Branch: perl
+	   ! t/lib/xs-typemap.t
+____________________________________________________________________________
+[  9646] By: gsar                                  on 2001/04/09  00:48:04
+        Log: add note about ithreads and Thread.pm (too many people are
+             confused by the fact that Thread.pm is built and installed
+             under non-5005threads but doesn't work)
+     Branch: maint-5.6/perl
+	   ! ext/Thread/Thread.pm ext/Thread/Thread.xs
+____________________________________________________________________________
+[  9645] By: gsar                                  on 2001/04/09  00:19:03
+        Log: update perldelta.pod for changes in 5.6.1
+     Branch: maint-5.6/perl
+	   ! Changes pod/perldelta.pod
+____________________________________________________________________________
+[  9644] By: jhi                                   on 2001/04/08  20:37:00
+        Log: Integrate change #9639 from maintperl into mainline:
+             on windows, many of the README.* pods were being copied to
+             the wrong location
+     Branch: perl
+	  !> win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9643] By: jhi                                   on 2001/04/08  20:07:11
+        Log: Integrate change #9624 from maintperl into mainline:
+             the pod tests were not okay.  (t/pod/find.t changes ignored)
+     Branch: perl
+	  !> lib/Pod/Find.pm t/pod/emptycmd.t t/pod/for.t t/pod/headings.t
+	  !> t/pod/include.t t/pod/included.t t/pod/lref.t
+	  !> t/pod/multiline_items.t t/pod/nested_items.t
+	  !> t/pod/nested_seqs.t t/pod/oneline_cmds.t t/pod/pod2usage.t
+	  !> t/pod/poderrs.t t/pod/podselect.t t/pod/special_seqs.t
+____________________________________________________________________________
+[  9642] By: jhi                                   on 2001/04/08  19:57:17
+        Log: Integrate change #9638 from maintperl into mainline:
+             update to latest JPL from the anoncvs repository
+     Branch: perl
+	  +> jpl/ChangeLog jpl/README.JUST-JNI jpl/docs/Tutorial.pod
+	  !> MANIFEST jpl/JNI/JNI.pm jpl/JNI/JNI.xs jpl/JNI/Makefile.PL
+	  !> jpl/PerlInterpreter/PerlInterpreter.h jpl/README
+____________________________________________________________________________
+[  9641] By: jhi                                   on 2001/04/08  19:53:30
+        Log: perl571delta updates.
+     Branch: perl
+	   ! lib/Filter/Simple.pm pod/perl571delta.pod
+____________________________________________________________________________
+[  9640] By: gsar                                  on 2001/04/08  19:20:46
+        Log: integrate change#9634 from mainline
+             
+             Fix the perlmodlib generation (didn't understand separate .pod
+             files; didn't understand -- as the name-thing separator).
+             Update the CPAN mirrors list.
+     Branch: maint-5.6/perl
+	   ! pod/perlmodlib.pod
+	  !> pod/perlmodlib.PL
+____________________________________________________________________________
+[  9639] By: gsar                                  on 2001/04/08  18:57:31
+        Log: on windows, many of the README.* pods were being copied to the wrong
+             location
+     Branch: maint-5.6/perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9638] By: gsar                                  on 2001/04/08  18:38:25
+        Log: update to latest JPL from the anoncvs repository
+     Branch: maint-5.6/perl
+	   + jpl/ChangeLog jpl/README.JUST-JNI jpl/docs/Tutorial.pod
+	   ! MANIFEST jpl/JNI/JNI.pm jpl/JNI/JNI.xs jpl/JNI/Makefile.PL
+	   ! jpl/PerlInterpreter/PerlInterpreter.h jpl/README
+____________________________________________________________________________
+[  9637] By: jhi                                   on 2001/04/08  17:53:53
+        Log: Britishify spellings; s/\b(front|back) (end)\b/\1\2/g;
+     Branch: perl
+	   ! pod/perl571delta.pod
+____________________________________________________________________________
+[  9636] By: jhi                                   on 2001/04/08  17:18:32
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9635] By: jhi                                   on 2001/04/08  17:16:33
+        Log: Subject: [PATCH perl@9622] fix IO.xs compile failure on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 08 Apr 2001 12:30:16 -0500
+             Message-Id: <5.0.2.1.0.20010408120154.02675eb8@exchi01>
+     Branch: perl
+	   ! ext/IO/IO.xs lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[  9634] By: jhi                                   on 2001/04/08  17:09:19
+        Log: Fix the perlmodlib generation (didn't understand separate .pod
+             files; didn't understand -- as the name-thing separator).
+             
+             Update the CPAN mirrors list.
+     Branch: perl
+	   ! pod/perlmodlib.PL pod/perlmodlib.pod
+____________________________________________________________________________
+[  9633] By: jhi                                   on 2001/04/08  16:49:17
+        Log: Sort MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  9632] By: gsar                                  on 2001/04/08  16:36:06
+        Log: add $Tie::RefHash::VERSION
+     Branch: maint-5.6/perl
+	   ! lib/Tie/RefHash.pm
+____________________________________________________________________________
+[  9631] By: jhi                                   on 2001/04/08  16:10:15
+        Log: perl571delta updates based on p5p feedback; still needs
+             lots of examples.
+     Branch: perl
+	   ! pod/perl571delta.pod
+____________________________________________________________________________
+[  9630] By: jhi                                   on 2001/04/08  15:59:13
+        Log: Update the list of supported platforms to talk about 5.7.1
+             (and 5.6.1)
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  9629] By: jhi                                   on 2001/04/08  15:55:41
+        Log: Integrate changes #8677,8680,8681,8725,8732,8776,8782,9290
+             from maintperl into mainline: perlport updates.
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  9628] By: jhi                                   on 2001/04/08  15:53:17
+        Log: perlsolaris.pod copied to wrong directory.
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9627] By: jhi                                   on 2001/04/08  14:48:18
+        Log: Subject: Typos in perl571delta.pod
+             From: "Stephen P. Potter" <spp@spotter.yi.org>
+             Date: Sat, 07 Apr 2001 20:37:05 -0400
+             Message-Id: <20010408003710.2A8FC729DD@belgarath.spotter.yi.org>
+     Branch: perl
+	   ! pod/perl571delta.pod
+____________________________________________________________________________
+[  9626] By: jhi                                   on 2001/04/08  14:39:04
+        Log: Smoke out dTHR, spotted by by Stephen P. Potter.
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[  9625] By: nick                                  on 2001/04/08  10:14:23
+        Log: Integrate mainline
+     Branch: perlio
+	  +> pod/perl570delta.pod pod/perl571delta.pod
+	  !> (integrate 27 files)
+____________________________________________________________________________
+[  9624] By: gsar                                  on 2001/04/08  06:08:17
+        Log: test in t/pod/* were busted
+             
+             these tests are still not enabled in t/{harness,TEST}
+     Branch: maint-5.6/perl
+	   ! lib/Pod/Find.pm t/pod/emptycmd.t t/pod/find.t t/pod/for.t
+	   ! t/pod/headings.t t/pod/include.t t/pod/included.t t/pod/lref.t
+	   ! t/pod/multiline_items.t t/pod/nested_items.t
+	   ! t/pod/nested_seqs.t t/pod/oneline_cmds.t t/pod/pod2usage.t
+	   ! t/pod/poderrs.t t/pod/podselect.t t/pod/special_seqs.t
+____________________________________________________________________________
+[  9623] By: gsar                                  on 2001/04/08  03:37:01
+        Log: integrate change#9470 from mainline
+             
+             Subject: Re: [ID 20010215.006] Bad arg length for Socket::unpack_sockaddr_un, length is 14 ... 
+     Branch: maint-5.6/perl
+	  !> ext/Socket/Socket.xs
+____________________________________________________________________________
+[  9622] By: jhi                                   on 2001/04/07  22:40:47
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9621] By: jhi                                   on 2001/04/07  22:34:16
         Log: Update AUTHORS.
      Branch: perl
