@@ -2,17 +2,17 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pl,v 2.25 2000-08-28 21:45:17+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pl,v 2.26 2001-01-31 10:20:29+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Jul 31 21:21:13 2000
-# Update Count    : 739
+# Last Modified On: Sat Jan  6 17:12:27 2001
+# Update Count    : 748
 # Status          : Released
 
 ################ Copyright ################
 
-# This program is Copyright 1990,2000 by Johan Vromans.
+# This program is Copyright 1990,2001 by Johan Vromans.
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Perl Artistic License or the
 # GNU General Public License as published by the Free Software
@@ -30,19 +30,24 @@ package Getopt::Long;
 
 ################ Module Preamble ################
 
+use 5.004;
+
 use strict;
 
-BEGIN {
-    require 5.004;
-    use Exporter ();
-    use vars     qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = 2.24;
+use vars qw($VERSION $VERSION_STRING);
+$VERSION        =  2.25;
+$VERSION_STRING = "2.25";
 
-    @ISA         = qw(Exporter);
+use Exporter;
+use AutoLoader qw(AUTOLOAD);
+
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+@ISA = qw(Exporter);
+%EXPORT_TAGS = qw();
+BEGIN {
+    # Init immediately so their contents can be used in the 'use vars' below.
     @EXPORT      = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-    %EXPORT_TAGS = qw();
     @EXPORT_OK   = qw();
-    use AutoLoader qw(AUTOLOAD);
 }
 
 # User visible variables.
@@ -143,7 +148,7 @@ sub new {
     my %atts = @_;
 
     # Register the callers package.
-    my $self = { caller => (caller)[0] };
+    my $self = { caller_pkg => (caller)[0] };
 
     bless ($self, $class);
 
@@ -189,7 +194,7 @@ sub getoptions {
 
     # Call main routine.
     my $ret = 0;
-    $Getopt::Long::caller = $self->{caller};
+    $Getopt::Long::caller = $self->{caller_pkg};
     eval { $ret = Getopt::Long::GetOptions (@_); };
 
     # Restore saved settings.
@@ -210,12 +215,12 @@ __END__
 
 ################ AutoLoading subroutines ################
 
-# RCS Status      : $Id: GetoptLongAl.pl,v 2.29 2000-08-28 21:56:18+02 jv Exp $
+# RCS Status      : $Id: GetoptLongAl.pl,v 2.30 2001-01-31 10:21:11+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Fri Mar 27 11:50:30 1998
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Jul 28 19:12:29 2000
-# Update Count    : 97
+# Last Modified On: Tue Dec 26 18:01:16 2000
+# Update Count    : 98
 # Status          : Released
 
 sub GetOptions {
@@ -239,7 +244,7 @@ sub GetOptions {
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
-		  'GetOptionsAl $Revision: 2.29 $ ',
+		  'GetOptionsAl $Revision: 2.30 $ ',
 		  "\n  ",
 		  "ARGV: (@ARGV)",
 		  "\n  ",
@@ -321,7 +326,9 @@ sub GetOptions {
 
 	if ( ! defined $o ) {
 	    # empty -> '-' option
-	    $opctl{$linko = $o = ''} = $c;
+	    $linko = $o = '';
+	    $opctl{''} = $c;
+	    $bopctl{''} = $c if $bundling;
 	}
 	else {
 	    # Handle alias names
@@ -658,7 +665,8 @@ sub FindOption ($$$$$$$) {
 
     print STDERR ("=> find \"$opt\", prefix=\"$prefix\"\n") if $debug;
 
-    return (0) unless $opt =~ /^$prefix(.*)$/s;
+    return 0 unless $opt =~ /^$prefix(.*)$/s;
+    return 0 if $opt eq "-" && !defined $opctl->{""};
 
     $opt = $+;
     my ($starter) = $1;
@@ -687,7 +695,7 @@ sub FindOption ($$$$$$$) {
 
     if ( $bundling && $starter eq '-' ) {
 	# Unbundle single letter option.
-	$rest = substr ($tryopt, 1);
+	$rest = length ($tryopt) > 0 ? substr ($tryopt, 1) : "";
 	$tryopt = substr ($tryopt, 0, 1);
 	$tryopt = lc ($tryopt) if $ignorecase > 1;
 	print STDERR ("=> $starter$tryopt unbundled from ",
@@ -1553,13 +1561,18 @@ It goes without saying that bundling can be quite confusing.
 
 =head2 The lonesome dash
 
-Some applications require the option C<-> (that's a lone dash). This
-can be achieved by adding an option specification with an empty name:
+Normally, a lone dash C<-> on the command line will not be considered
+an option. Option processing will terminate (unless "permute" is
+configured) and the dash will be left in C<@ARGV>.
+
+It is possible to get special treatment for a lone dash. This can be
+achieved by adding an option specification with an empty name, for
+example:
 
     GetOptions ('' => \$stdio);
 
-A lone dash on the command line will now be legal, and set options
-variable C<$stdio>.
+A lone dash on the command line will now be a legal option, and using
+it will set variable C<$stdio>.
 
 =head2 Argument call-back
 
@@ -1681,6 +1694,10 @@ is equivalent to
 
     --foo -- arg1 --bar arg2 arg3
 
+If C<pass_through> is also enabled, options processing will terminate
+at the first unrecognized option, or non-option, whichever comes
+first.
+
 =item bundling (default: disabled)
 
 Enabling this option will allow single-character options to be bundled.
@@ -1722,7 +1739,9 @@ errors. This makes it possible to write wrapper scripts that process
 only part of the user supplied command line arguments, and pass the
 remaining options to some other program.
 
-This can be very confusing, especially when C<permute> is also enabled.
+If C<require_order> is enabled, options processing will terminate at
+the first unrecognized option, or non-option, whichever comes first.
+However, if C<permute> is enabled instead, results can become confusing.
 
 =item prefix
 
@@ -1867,6 +1886,5 @@ MA 02139, USA.
 =cut
 
 # Local Variables:
-# mode: perl
 # eval: (load-file "pod.el")
 # End:
