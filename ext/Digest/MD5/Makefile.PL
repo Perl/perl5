@@ -10,6 +10,14 @@ unless ($Config{d_u32align}) {
 	if !($Config{'byteorder'} eq '1234' ||
 	     $Config{'byteorder'} eq '4321');
 }
+my @optimize = ();
+if ($^O eq 'VMS') {
+    if (defined($Config{ccname})) {
+        if ($Config{ccversion} <= 50390006 && grep(/VMS_VAX/, @INC) && ($Config{ccname} eq 'DEC')) {
+            @optimize = ("OPTIMIZE","/Optimize=(NODISJOINT)");
+        }
+    }
+}
 
 WriteMakefile(
     'NAME'	   => 'Digest::MD5',
@@ -17,6 +25,7 @@ WriteMakefile(
     MAN3PODS    => {},  # Pods will be built by installman.
     @extra,
     'dist'         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    @optimize
 );
 exit;
 

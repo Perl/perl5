@@ -1076,6 +1076,9 @@ $!: determine the architecture name
 $! genconfig.pl has either archname='VMS_AXP' or 'VMS_VAX'
 $! Note that DCL in VMS V5.4 does not have F$GETSYI("ARCH_NAME")
 $! but does have F$GETSYI("HW_MODEL").
+$! Please try to use either archname .EQS. "VMS_VAX" or archname .EQS. 
+$! "VMS_AXP" from here on to allow cross-platform configuration (e.g.
+$! configure a VAX build on an Alpha).
 $!
 $ IF (F$GETSYI("HW_MODEL") .LT. 1024)
 $ THEN 
@@ -1104,11 +1107,8 @@ $ vms_prefix = "perl_root"
 $ vms_prefixup = F$EDIT(vms_prefix,"UPCASE")
 $ rp = "Will you be sharing your ''vms_prefixup' with ''otherarch'? [''dflt'] "
 $ GOSUB myread
-$ if ans.NES.""
-$ THEN
-$   ans = F$EXTRACT(0,1,F$EDIT(ans,"COLLAPSE, UPCASE"))
-$ ENDIF
-$ IF (ans.NES."Y")
+$ if ans .EQS. "" THEN ans = dflt
+$ IF .NOT. ans
 $ THEN
 $   sharedperl = "N"
 $ ELSE
@@ -1953,7 +1953,7 @@ $!
 $List_Parse:
 $ OPEN/READ CONFIG ccvms.lis
 $ READ CONFIG line
-$ IF (F$GETSYI("HW_MODEL") .LT. 1024)
+$ IF archname .EQS. "VMS_VAX"
 $ THEN
 $   read CONFIG line
 $   archsufx = "VAX"
@@ -2462,9 +2462,6 @@ $   IF F$EXTRACT(0,4,line) .EQS. "ext/" THEN -
       xxx = F$EXTRACT(4,line_len - 16,line)
 $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
 $   IF xxx .EQS. "SDBM_File/sdbm" THEN goto ext_loop ! sub extension - omit
-$   IF xxx .EQS. "Digest/MD5" .AND. -
-       F$GETSYI("HW_MODEL") .LT. 1024 .AND. ccversion .LE. 50390006 -
-       THEN goto ext_loop ! cannot compile MD5.c on VAX
 $   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
       xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
 $   known_extensions = known_extensions + " ''xxx'"
@@ -2825,7 +2822,7 @@ $ usemymalloc=mymalloc
 $!
 $ perl_cc=Mcc
 $!
-$ IF (sharedperl .AND. F$GETSYI("HW_MODEL") .GE. 1024)
+$ IF (sharedperl .AND. archname .EQS. "VMS_AXP")
 $ THEN
 $   obj_ext=".abj"
 $   so="axe"
@@ -5695,6 +5692,13 @@ $ IF be_case_sensitive THEN WC "#define VMS_WE_ARE_CASE_SENSITIVE"
 $ IF d_herrno .EQS. "undef" THEN WC "#define NEED_AN_H_ERRNO"
 $ WC "#define HAS_ENVGETENV"
 $ WC "#define PERL_EXTERNAL_GLOB"
+$ IF archname .EQS. "VMS_VAX" .AND. -
+     ccname .EQS. "DEC" .AND. -
+     ccversion .LE. 50390006
+$ THEN
+$! Alas this does not help to build Fcntl
+$!   WC "#define PERL_IGNORE_FPUSIG SIGFPE"
+$ ENDIF
 $ CLOSE CONFIG
 $!
 $ echo4 "Doing variable substitutions on .SH files..."
@@ -5946,7 +5950,7 @@ $   echo ""
 $   echo4 "The perl.cld file is now being written..."
 $   OPEN/WRITE CONFIG 'file_2_find'
 $   ext = ".exe"
-$   IF ((sharedperl) .AND. (F$GETSYI("HW_MODEL") .GE. 1024)) THEN ext := .AXE
+$   IF (sharedperl .AND. archname .EQS. "VMS_AXP") THEN ext := .AXE
 $   IF (use_vmsdebug_perl)
 $   THEN
 $     WRITE CONFIG "define verb dbgperl"
