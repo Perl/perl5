@@ -660,3 +660,15 @@ new_pmop "abcdef"; reset;
 # coredump in 5.7.1
 close STDERR; die;
 EXPECT
+########
+# Bug 20010515.004
+my @h = 1 .. 10;
+bad(@h);
+sub bad {
+   undef @h;
+   print "O";
+   print for @_;
+   print "K";
+}
+EXPECT
+OK
