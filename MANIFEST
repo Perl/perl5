@@ -638,6 +638,7 @@ ext/Socket/Socket.xs		Socket extension external subroutines
 ext/Socket/t/socketpair.t	See if socketpair works
 ext/Socket/t/Socket.t		See if Socket works
 ext/Storable/ChangeLog		Storable extension
+ext/Storable/hints/linux.pl	Hint for Storable for named architecture
 ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
 ext/Storable/README		Storable extension
