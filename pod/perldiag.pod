@@ -543,7 +543,7 @@ quotas or other plumbing problems.
 
 =item Can't declare class for non-scalar %s in "%s"
 
-(S) Currently, only scalar variables can declared with a specific class
+(F) Currently, only scalar variables can declared with a specific class
 qualifier in a "my" or "our" declaration.  The semantics may be extended
 for other types of variables in future.
 
@@ -2201,6 +2201,11 @@ immediately after the switch, without intervening spaces.
 
 (F) The indicated command line switch needs a mandatory argument, but
 you haven't specified one.
+
+=item No such class %s
+
+(F) You provided a class qualifier in a "my" or "our" declaration, but
+this class doesn't exist at this point in your program.
 
 =item No such pipe open
 
