@@ -186,6 +186,12 @@ case "$d_dosuid" in
 '') d_dosuid="$undef" ;;
 esac
 
+# HP-UX 11 groks also LD_LIBRARY_PATH but SHLIB_PATH
+# is recommended for compatibility.
+case "$ldlibpthname" in
+'') ldlibpthname=SHLIB_PATH ;;
+esac
+
 # Date: Fri, 6 Sep 96 23:15:31 CDT
 # From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
 # I looked through the gcc.info and found this:

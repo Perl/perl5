@@ -527,9 +527,11 @@ EOF
 ---
 Environment for perl $]:
 EOF
-    for my $env (sort
-	(qw(PATH LD_LIBRARY_PATH LANG PERL_BADLANG SHELL HOME LOGDIR LANGUAGE),
-	grep /^(?:PERL|LC_)/, keys %ENV)
+    my @env =
+        qw(PATH LD_LIBRARY_PATH LANG PERL_BADLANG SHELL HOME LOGDIR LANGUAGE);
+    push @env, $Config{ldlibpthname} if $Config{ldlibpthname} ne '';
+    for my $env (sort @env,
+	              grep /^(?:PERL|LC_)/, keys %ENV)
     ) {
 	print OUT "    $env",
 		exists $ENV{$env} ? "=$ENV{$env}" : ' (unset)',

@@ -52,3 +52,8 @@ usevfork='true';
 
 # malloc works
 usemymalloc='n';
+
+case "$ldlibpthname" in
+'') ldlibpthname=DYLD_LIBRARY_PATH ;;
+esac
+

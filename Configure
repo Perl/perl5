@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jul 22 22:55:08 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Jul 23 13:08:17 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -693,6 +693,7 @@ d_stat64=''
 d_telldir64=''
 d_truncate64=''
 libc=''
+ldlibpthname=''
 libperl=''
 shrpenv=''
 useshrplib=''
@@ -5370,16 +5371,7 @@ EOM
 	. ./myread
 	case "$ans" in
 	true|$define|[Yy]*)
-		useshrplib='true'
-		# Why does next4 have to be so different?
-		case "${osname}${osvers}" in
-		next4*|rhapsody*)
-			xxx='DYLD_LIBRARY_PATH' ;;
-		os2*)	xxx='' ;; # Nothing special needed.
-		beos*)  xxx='' ;;
-		*)		xxx='LD_LIBRARY_PATH' ;;
-		esac
-		;;
+		useshrplib='true'  ;;
 	*)	useshrplib='false' ;;
 	esac
 	;;
@@ -5526,12 +5518,19 @@ EOM
 		;;
 	esac
 fi
+# Fix ccdlflags in AIX for building external extensions.
+# (For building Perl itself bare -bE:perl.exp is needed,
+#  Makefile.SH takes care of this.)
 case "$osname" in
-aix*) ccdlflags="$ccdlflags -bE:$installarchlib/CORE/perl.exp" ;;
+aix) ccdlflags="$ccdlflags -bE:$installarchlib/CORE/perl.exp" ;;
 esac
 # Respect a hint or command-line value.
 case "$shrpenv" in
 '') shrpenv="$tmp_shrpenv" ;;
+esac
+case "$ldlibpthname" in
+'')	ldlibpthname=LD_LIBRARY_PATH ;;
+none)	ldlibpthname='' ;;
 esac
 
 : determine where manual pages go
@@ -11012,7 +11011,7 @@ if eval $compile_ok; then
 		echo "You have EBCDIC." >&4
 		val="$define"
 	else
-		echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin." >&4
+		echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin, or UTF." >&4
 	fi
 else
 	echo "I'm unable to compile the test program." >&4
@@ -13433,6 +13432,7 @@ large='$large'
 ld='$ld'
 lddlflags='$lddlflags'
 ldflags='$ldflags'
+ldlibpthname='$ldlibpthname'
 less='$less'
 lib_ext='$lib_ext'
 libc='$libc'

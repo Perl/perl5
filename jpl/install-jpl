@@ -187,8 +187,14 @@ archname=`$JPLPERL -MConfig -e 'print $Config{archname}'`
 CLASSPATH=".:$JPL_HOME/lib${CLASSPATH:+:$CLASSPATH}"
 export CLASSPATH
 
-LD_LIBRARY_PATH=".:$JPL_HOME/lib/$archname:$archlib/CORE${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-export LD_LIBRARY_PATH
+ldlibpthname=`$JPLPERL -MConfig -e 'print $Config{ldlibpthname}'`
+case "$ldlibpthname" in
+'') ldlibpthname=LD_LIBRARY_PATH ;;
+esac
+eval "ldlibpth=\$$ldlibpthname"
+
+$ldlibpthname=".:$JPL_HOME/lib/$archname:$archlib/CORE$ldlibpth"
+export $ldlibpthname
 
 PERL5LIB="$JPL_HOME/perl${PERL5LIB:+:$PERL5LIB}"
 export PERL5LIB
@@ -205,13 +211,13 @@ case "$1" in
 \$ENV{JPL_HOME} = '$JPL_HOME';
 \$ENV{JPLPERL} = '$JPLPERL';
 \$ENV{CLASSPATH} = '$CLASSPATH';
-\$ENV{LD_LIBRARY_PATH} = '$LD_LIBRARY_PATH';
+\$ENV{$ldlibpthname} = '$ldlibpth';
 \$ENV{PERL5LIB} = '$PERL5LIB';
 END
     ;;
 -sh)
     cat <<END
- PATH='$PATH';export PATH;JAVA_HOME='$JAVA_HOME';export JAVA_HOME;JPL_HOME='$JPL_HOME';export JPL_HOME;JPLPERL='$JPLPERL';export JPLPERL;CLASSPATH='$CLASSPATH';export CLASSPATH;LD_LIBRARY_PATH='$LD_LIBRARY_PATH';export LD_LIBRARY_PATH;PERL5LIB='$PERL5LIB';export PERL5LIB
+ PATH='$PATH';export PATH;JAVA_HOME='$JAVA_HOME';export JAVA_HOME;JPL_HOME='$JPL_HOME';export JPL_HOME;JPLPERL='$JPLPERL';export JPLPERL;CLASSPATH='$CLASSPATH';export CLASSPATH;$ldlibpthname='$ldlibpth';export $ldlibpthname;PERL5LIB='$PERL5LIB';export PERL5LIB
 END
     ;;
 -csh)
@@ -221,7 +227,7 @@ setenv JAVA_HOME '$JAVA_HOME';
 setenv JPL_HOME '$JPL_HOME';
 setenv JPLPERL '$JPLPERL';
 setenv CLASSPATH '$CLASSPATH';
-setenv LD_LIBRARY_PATH '$LD_LIBRARY_PATH';
+setenv $ldlibpthname '$ldlibpth';
 setenv PERL5LIB '$PERL5LIB';
 END
     ;;

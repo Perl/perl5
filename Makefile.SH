@@ -29,28 +29,19 @@ ldlibpth=''
 case "$useshrplib" in
 true)
 	# Prefix all runs of 'miniperl' and 'perl' with 
-	# $ldlibpth so that ./perl finds *this* libperl.so.
+	# $ldlibpth so that ./perl finds *this* shared libperl.
 	ldlibpth="LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH"
 
 	pldlflags="$cccdlflags"
-	# NeXT-4 specific stuff.  Can't we do this in the hint file?
 	case "${osname}${osvers}" in
 	next4*)
 		ld=libtool
 		lddlflags="-dynamic -undefined warning -framework System \
 		-compatibility_version 1 -current_version $patchlevel \
 		-prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@"
-		# NeXT uses a different name.
-		ldlibpth="DYLD_LIBRARY_PATH=`pwd`:$DYLD_LIBRARY_PATH"
 		;;
-	rhapsody*)
-		ldlibpth="DYLD_LIBRARY_PATH=`pwd`/Perl:$DYLD_LIBRARY_PATH"
-		;;
-	cygwin*)	ldlibpth="PATH='`pwd`:$PATH'"
+	cygwin*)
 		linklibperl="-lperl"
-		;;
-	os2*)	# OS/2 doesn't need anything special for LD_LIBRARY_PATH.
-		ldlibpth=''
 		;;
 	sunos*)
 		linklibperl="-lperl"
@@ -68,15 +59,27 @@ true)
 		esac
 	        shrpldflags="$shrpldflags $ldflags $libs $cryptlib"
 		linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
-		ldlibpth="LIBPATH=`pwd`:${LIBPATH}"
 		;;
 	hpux*)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
-		ldlibpth="SHLIB_PATH=`pwd`:${SHLIB_PATH}"
-		;;
-	beos*)	ldlibpth="LIBRARY_PATH=`pwd`:$LIBRARY_PATH"
 		;;
 	esac
+	case "$ldlibpthname" in
+	'') ;;
+	*)
+	    case "$osname" in
+	    os2)
+	        ldlibpth=''
+	        ;;
+	    rhapsody)
+		eval "ldlibpth=\"$ldlibpthname=`pwd`/Perl:\$$ldlibpthname\""
+		;;
+	    *)
+		eval "ldlibpth=\"$ldlibpthname=`pwd`:\$$ldlibpthname\""
+		;;
+	    esac
+	    ;;
+        esac
 	;;
 *)	pldlflags=''
 	;;
@@ -152,7 +155,7 @@ LLIBPERL= $linklibperl
 SHRPENV = $shrpenv
 
 # The following is used to include the current directory in
-# LD_LIBRARY_PATH if you are building a shared libperl.so.
+# the dynamic loader path you are building a shared libperl.
 LDLIBPTH = $ldlibpth
 
 dynamic_ext = $dynamic_list

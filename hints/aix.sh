@@ -100,6 +100,10 @@ esac
 # the required -bE:$installarchlib/CORE/perl.exp is added by
 # libperl.U (Configure) later.
 
+case "$ldlibpthname" in
+'') ldlibpthname=LIBPATH ;;
+esac
+
 # The first 3 options would not be needed if dynamic libs. could be linked
 # with the compiler instead of ld.
 # -bI:$(PERL_INC)/perl.exp  Read the exported symbols from the perl binary

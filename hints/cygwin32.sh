@@ -30,3 +30,7 @@ dlext='dll'
 man1dir=/usr/local/man/man1
 man3dir=/usr/local/man/man3
 sitelib=/usr/local/lib/perl5/site_perl
+
+case "$ldlibpthname" in
+'') ldlibpthname=PATH ;;
+esac
