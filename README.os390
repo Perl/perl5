@@ -46,7 +46,7 @@ The IBM document that described such USS system setup issues was
 SC28-1890-07 "OS/390 UNIX System Services Planning", in particular
 Chapter 6 on customizing the OE shell.
 
-GNU make for OS/390, which is required for the build of perl (as well as
+GNU make for OS/390, which is recommended for the build of perl (as well as
 building CPAN modules and extensions), is available from:
 
   http://www.mks.com/s390/gnu/index.htm
@@ -57,6 +57,18 @@ trouble then try to download the source code kit and build GNU make
 from source to eliminate any such trouble.  You might also find GNU make 
 (as well as Perl and Apache) in the red-piece/book "Open Source Software 
 for OS/390 UNIX", SG24-5944-00 from IBM.
+
+If instead of the recommended GNU make you would like to use the system 
+supplied make program then be sure to install the default rules file 
+properly via the shell command:
+
+    cp /samples/startup.mk /etc
+
+and be sure to also set the environment variable _C89_CCMODE=1 (exporting
+_C89_CCMODE=1 is also a good idea for users of GNU make).
+
+You might also want to have GNU groff for OS/390 installed before
+running the `make install` step for Perl.
 
 There is a syntax error in the /usr/include/sys/socket.h header file
 that IBM supplies with USS V2R7, V2R8, and possibly V2R9.  The problem with
@@ -143,22 +155,13 @@ re extraction of the source tar ball.
 
 =item *
 
-This port doesn't support dynamic loading.  Although OS/390 has support 
-for DLLs via dllload(), there are some differences that cause problems 
-for Perl.  (We need a volunteer to write a ext/DynaLoader/dl_dllload.xs 
-file).
-
-=item *
-
-A message of the form:
-
- shmat() found.
- and it returns (void *).
- *** WHOA THERE!!! ***
-     The recommended value for $d_shmatprototype on this machine was "define"!
-     Keep the recommended value? [y]
-
-is nothing to worry about at all.
+This port will support dynamic loading, but it is not selected by
+default.  If you would like to experiment with dynamic loading then
+be sure to specify -Dusedl in the arguments to the Configure script.
+See the comments in hints/os390.sh for more information on dynamic loading.
+If you build with dynamic loading then you will need to add the
+$archlibexp/CORE directory to your LIBPATH environment variable in order
+for perl to work.  See the config.sh file for the value of $archlibexp.
 
 =item *
 
@@ -272,6 +275,12 @@ from an account with write access to the directory entry for /tmp.
 
 =back
 
+=head2 installation anomalies
+
+The installman script will try to run on OS/390.  There will be fewer errors
+if you have a roff utility installed.  You can obtain GNU groff from the 
+Redbook SG24-5944-00 ftp site.
+
 =head2 Usage Hints
 
 When using perl on OS/390 please keep in mind that the EBCDIC and ASCII
@@ -290,6 +299,40 @@ If you are running V2R6 or earlier then see:
 for an example of how to use the "eval exec" trick to ask the shell to
 have Perl run your scripts on those older releases of Unix System Services.
 
+=head2 Floating point anomalies
+
+There appears to be a bug in the floating point implementation on S/390 
+systems such that calling int() on the product of a number and a small 
+magnitude number is not the same as calling int() on the quotient of 
+that number and a large magnitude number.  For example, in the following 
+Perl code:
+
+    my $x = 100000.0;
+    my $y = int($x * 1e-5) * 1e5; # '0'
+    my $z = int($x / 1e+5) * 1e5;  # '100000'
+    print "\$y is $y and \$z is $z\n"; # $y is 0 and $z is 100000
+
+Although one would expect the quantities $y and $z to be the same and equal 
+to 100000 they will differ and instead will be 0 and 100000 respectively.
+
+The problem can be further examined in a roughly equivalent C program:
+
+    #include <stdio.h>
+    #include <math.h>
+    main()
+    {
+    double r1,r2;
+    double x = 100000.0;
+    double y = 0.0;
+    double z = 0.0;
+    x = 100000.0 * 1e-5;
+    r1 = modf (x,&y);
+    x = 100000.0 / 1e+5;
+    r2 = modf (x,&z);
+    printf("y is %e and z is %e\n",y*1e5,z*1e5);
+    /* y is 0.000000e+00 and z is 1.000000e+05 (with c89) */
+    }
+
 =head2 Modules and Extensions
 
 Pure pure (that is non xs) modules may be installed via the usual:
@@ -299,8 +342,10 @@ Pure pure (that is non xs) modules may be installed via the usual:
     make test
     make install
 
-You can also build xs based extensions to Perl for OS/390 but will need 
-to follow the instructions in ExtUtils::MakeMaker for building 
+If you built perl with dynamic loading capability then that would also
+be the way to build xs based extensions.  However, if you built perl with
+the default static linking you can still build xs based extensions for OS/390 
+but you will need to follow the instructions in ExtUtils::MakeMaker for building 
 statically linked perl binaries.  In the simplest configurations building
 a static perl + xs extension boils down to:
 
@@ -315,11 +360,21 @@ In most cases people have reported better results with GNU make rather
 than the system's /bin/make program, whether for plain modules or for
 xs based extensions.
 
+If the make process encounters trouble with either compilation or
+linking then try setting the _C89_CCMODE to 1.  Assuming sh is your
+login shell then run:
+
+    export _C89_CCMODE=1
+
+If tcsh is your login shell then use the setenv command.
+
 =head1 AUTHORS
 
 David Fiander and Peter Prymmer with thanks to Dennis Longnecker
 and William Raffloer for valuable reports, LPAR and PTF feedback.
 Thanks to Mike MacIsaac and Egon Terwedow for SG24-5944-00.
+Thanks to Ignasi Roca for pointing out the floating point problems.
+Thanks to John Goodyear for dynamic loading help.
 
 =head1 SEE ALSO
 
@@ -344,9 +399,14 @@ To subscribe, send a message of:
 
     subscribe perl-mvs
 
-to majordomo@perl.org.  There is a web archive of the mailing list at:
+to majordomo@perl.org.   See also:
+
+    http://lists.perl.org/showlist.cgi?name=perl-mvs
+
+There are web archives of the mailing list at:
 
     http://www.xray.mpe.mpg.de/mailing-lists/perl-mvs/
+    http://archive.develooper.com/perl-mvs@perl.org/
 
 =head1 HISTORY
 
@@ -356,6 +416,10 @@ release of Perl.
 This document was podified for the 5.005_03 release of Perl 11 March 1999.
 
 Updated 12 November 2000 for the 5.7.1 release of Perl.
+
+Updated 15 January 2001 for the 5.7.1 release of Perl.
+
+Updated 24 January 2001 to mention dynamic loading.
 
 =cut
 
