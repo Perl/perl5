@@ -1,7 +1,7 @@
 package Encode;
 use strict;
 
-our $VERSION = 0.02;
+our $VERSION = '0.02';
 
 require DynaLoader;
 require Exporter;
