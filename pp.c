@@ -4439,7 +4439,6 @@ PP(pp_split)
     I32 origlimit = limit;
     I32 realarray = 0;
     I32 base;
-    AV *oldstack = PL_curstack;
     I32 gimme = GIMME_V;
     I32 oldsave = PL_savestack_ix;
     I32 make_mortal = 1;
@@ -4488,8 +4487,7 @@ PP(pp_split)
 		    AvARRAY(ary)[i] = &PL_sv_undef;	/* don't free mere refs */
 	    }
 	    /* temporarily switch stacks */
-	    SWITCHSTACK(PL_curstack, ary);
-	    PL_curstackinfo->si_stack = ary;
+	    SAVESWITCHSTACK(PL_curstack, ary);
 	    make_mortal = 0;
 	}
     }
@@ -4658,7 +4656,6 @@ PP(pp_split)
 	}
     }
 
-    LEAVE_SCOPE(oldsave);
     iters = (SP - PL_stack_base) - base;
     if (iters > maxiters)
 	DIE(aTHX_ "Split loop");
@@ -4684,10 +4681,11 @@ PP(pp_split)
 	}
     }
 
+    PUTBACK;
+    LEAVE_SCOPE(oldsave); /* may undo an earlier SWITCHSTACK */
+    SPAGAIN;
     if (realarray) {
 	if (!mg) {
-	    SWITCHSTACK(ary, oldstack);
-	    PL_curstackinfo->si_stack = oldstack;
 	    if (SvSMAGICAL(ary)) {
 		PUTBACK;
 		mg_set((SV*)ary);

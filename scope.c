@@ -1063,6 +1063,15 @@ Perl_leave_scope(pTHX_ I32 base)
 		    AvARRAY((PAD*)ptr)[off] = (SV*)SSPOPPTR;
 	    }
 	    break;
+	case SAVEt_SAVESWITCHSTACK:
+	    {
+		dSP;
+		AV* t = (AV*)SSPOPPTR;
+		AV* f = (AV*)SSPOPPTR;
+		SWITCHSTACK(t,f);
+		PL_curstackinfo->si_stack = f;
+	    }
+	    break;
 	case SAVEt_SET_SVFLAGS:
 	    {
 		U32 val  = (U32)SSPOPINT;
