@@ -121,8 +121,8 @@ $seen{$pwgid}++;
 print "# pwgid = $pwgid, pwgnam = $pwgnam\n";
 
 for (split(' ', $()) {
-    next if $seen{$_}++;
     ($group) = getgrgid($_);
+    next if (! defined $group or ! grep { $_ eq $group } @gr) and $seen{$_}++;
     if (defined $group) {
 	push(@gr, $group);
     }
@@ -133,7 +133,7 @@ for (split(' ', $()) {
 
 print "# gr = @gr\n";
 
-if ($^O =~ /^(?:uwin|solaris)$/) {
+if ($^O =~ /^(?:uwin|cygwin|solaris)$/) {
 	# Or anybody else who can have spaces in group names.
 	$gr1 = join(' ', grep(!$did{$_}++, sort split(' ', join(' ', @gr))));
 } else {
