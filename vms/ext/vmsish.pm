@@ -67,9 +67,8 @@ sub bits {
     my $bits = 0;
     my $sememe;
     foreach $sememe (@_) {
-        $bits |= 0x10000000, next if $sememe eq 'hushed';
-	$bits |= 0x20000000, next if $sememe eq 'status' || $sememe eq '$?';
-	$bits |= 0x40000000, next if $sememe eq 'exit';
+        $bits |= 0x20000000, next if $sememe eq 'hushed';
+        $bits |= 0x40000000, next if $sememe eq 'status' || $sememe eq '$?';
 	$bits |= 0x80000000, next if $sememe eq 'time';
     }
     $bits;
@@ -77,12 +76,22 @@ sub bits {
 
 sub import {
     shift;
-    $^H |= bits(@_ ? @_ : qw(status exit time hushed));
+    $^H |= bits(@_ ? @_ : qw(status time hushed));
+    my $sememe;
+
+    foreach $sememe (@_ ? @_ : qw(exit)) {
+        $^H{'vmsish_exit'}   = 1 if $sememe eq 'exit';
+    }
 }
 
 sub unimport {
     shift;
-    $^H &= ~ bits(@_ ? @_ : qw(status exit time hushed));
+    $^H &= ~ bits(@_ ? @_ : qw(status time hushed));
+    my $sememe;
+
+    foreach $sememe (@_ ? @_ : qw(exit)) {
+        $^H{'vmsish_exit'}   = 0 if $sememe eq 'exit';
+    }
 }
 
 1;
