@@ -542,7 +542,7 @@ Here are a few notes on the C function I<call_LeftString>.
 
 Parameters are passed to the Perl subroutine using the Perl stack.
 This is the purpose of the code beginning with the line C<dSP> and
-ending with the line C<PUTBACK>.  The <dSP> declares a local copy
+ending with the line C<PUTBACK>.  The C<dSP> declares a local copy
 of the stack pointer.  This local copy should B<always> be accessed
 as C<SP>.
 
