@@ -697,6 +697,10 @@ I32 *flagp;
 	*flagp = flags;
 	return(ret);
     }
+
+    if (!(flags&HASWIDTH) && op != '?')
+      FAIL("regexp *+ operand could be empty");
+
     nextchar();
 
     *flagp = (op != '+') ? (WORST|SPSTART) : (WORST|HASWIDTH);
