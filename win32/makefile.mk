@@ -99,9 +99,9 @@ USE_PERLIO	= define
 # Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
 # Visual C++ >= 6.x
-#CCTYPE		*= MSVC60
+CCTYPE		*= MSVC60
 # Borland 5.02 or later
-CCTYPE		*= BORLAND
+#CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
 #CCTYPE		*= GCC
 
@@ -174,8 +174,8 @@ CFG		*= Debug
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-CCHOME		*= F:\borland\bc5
-#CCHOME		*= $(MSVCDIR)
+#CCHOME		*= F:\borland\bc5
+CCHOME		*= $(MSVCDIR)
 #CCHOME		*= c:\gcc-2.95.2
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
