@@ -72,9 +72,8 @@ void *arg;
     I32 oldscope = scopestack_ix;
     I32 retval;
     AV *returnav = newAV();
-    int i;
+    int i, ret;
     dJMPENV;
-    int ret;
 
     /* Don't call *anything* requiring dTHR until after pthread_setspecific */
     /*
@@ -84,10 +83,8 @@ void *arg;
      * if we went and created another thread which tried to pthread_join
      * with us, then we'd be in a mess.
      */
-    MUTEX_LOCK(threadstart_mutexp);
-    MUTEX_UNLOCK(threadstart_mutexp);
-    MUTEX_DESTROY(threadstart_mutexp);	/* don't need it any more */
-    Safefree(threadstart_mutexp);
+    MUTEX_LOCK(thr->mutex);
+    MUTEX_UNLOCK(thr->mutex);
 
     /*
      * It's safe to wait until now to set the thread-specific pointer
@@ -152,13 +149,34 @@ void *arg;
     Safefree(cxstack);
     Safefree(tmps_stack);
 
-    if (ThrSTATE(thr) == THRf_DETACHED) {
+    MUTEX_LOCK(&thr->mutex);
+    switch (ThrSTATE(thr)) {
+    case THRf_R_JOINABLE:
+	ThrSETSTATE(thr, THRf_ZOMBIE);
+	MUTEX_UNLOCK(&thr->mutex);
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			      "%p detached...zapping returnav\n", thr));
-	SvREFCNT_dec(returnav);
+			      "%p: R_JOINABLE thread finished\n", thr));
+	break;
+    case THRf_R_JOINED:
 	ThrSETSTATE(thr, THRf_DEAD);
+	MUTEX_UNLOCK(&thr->mutex);
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "%p: R_JOINED thread finished\n", thr));
+	break;
+    case THRf_DETACHED:
+	ThrSETSTATE(thr, THRf_DEAD);
+	MUTEX_UNLOCK(&thr->mutex);
 	remove_thread(thr);
+	SvREFCNT_dec(returnav);
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "%p: DETACHED thread finished\n", thr));
+	break;
+    default:
+	MUTEX_UNLOCK(&thr->mutex);
+	croak("panic: illegal state %u at end of threadstart", ThrSTATE(thr));
+	/* NOTREACHED */
     }
+    MUTEX_DESTROY(&thr->mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p returning\n", thr));	
     return (void *) returnav;	/* Available for anyone to join with us */
 				/* unless we are detached in which case */
@@ -200,7 +218,8 @@ char *class;
     /* top_env? */
     /* runlevel */
     cvcache = newHV();
-    thr->flags = THRf_NORMAL;
+    thr->flags = THRf_R_JOINABLE;
+    MUTEX_INIT(&thr->mutex);
     thr->tid = ++threadnum;
     /* Insert new thread into the circular linked list and bump nthreads */
     MUTEX_LOCK(&threads_mutex);
@@ -224,10 +243,8 @@ char *class;
 #ifdef FAKE_THREADS
     threadstart(thr);
 #else    
-    New(53, threadstart_mutexp, 1, perl_mutex);
     /* On your marks... */
-    MUTEX_INIT(threadstart_mutexp);
-    MUTEX_LOCK(threadstart_mutexp);
+    MUTEX_LOCK(&thr->mutex);
     /* Get set...
      * Increment the global thread count. It is decremented
      * by the destructor for the thread specific key thr_key.
@@ -238,7 +255,7 @@ char *class;
     if (pthread_create(&self, NULL, threadstart, (void*) thr))
 	return NULL;	/* XXX should clean up first */
     /* Go */
-    MUTEX_UNLOCK(threadstart_mutexp);
+    MUTEX_UNLOCK(&thr->mutex);
     if (sigprocmask(SIG_SETMASK, &oldmask, 0))
 	croak("panic: sigprocmask");
 #endif
@@ -274,17 +291,25 @@ join(t)
     PPCODE:
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: joining %p (state %u)\n",
 			      thr, t, ThrSTATE(t)););
-	if (ThrSTATE(t) == THRf_DETACHED)
-	    croak("tried to join a detached thread");
-	else if (ThrSTATE(t) == THRf_JOINED)
-	    croak("tried to rejoin an already joined thread");
-	else if (ThrSTATE(t) == THRf_DEAD)
-	    croak("tried to join a dead thread");
-
+    	MUTEX_LOCK(&thr->mutex);
+	switch (ThrSTATE(thr)) {
+	case THRf_R_JOINABLE:
+	case THRf_R_JOINED:
+	    ThrSETSTATE(thr, THRf_R_JOINED);
+	    MUTEX_UNLOCK(&thr->mutex);
+	    break;
+	case THRf_ZOMBIE:
+	    ThrSETSTATE(thr, THRf_DEAD);
+	    MUTEX_UNLOCK(&thr->mutex);
+	    remove_thread(thr);
+	    break;
+	default:
+	    MUTEX_UNLOCK(&thr->mutex);
+	    croak("can't join with thread");
+	    /* NOTREACHED */
+	}
 	if (pthread_join(t->Tself, (void **) &av))
 	    croak("pthread_join failed");
-	ThrSETSTATE(t, THRf_JOINED);
-	remove_thread(t);
 
 	/* Could easily speed up the following if necessary */
 	for (i = 0; i <= AvFILL(av); i++)
@@ -296,27 +321,24 @@ detach(t)
     CODE:
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: detaching %p (state %u)\n",
 			      thr, t, ThrSTATE(t)););
-	if (ThrSTATE(t) == THRf_DETACHED)
-	    croak("tried to detach an already detached thread");
-	else if (ThrSTATE(t) == THRf_JOINED)
-	    croak("tried to detach an already joined thread");
-	else if (ThrSTATE(t) == THRf_DEAD)
-	    croak("tried to detach a dead thread");
-	DETACH(t);
-	ThrSETSTATE(t, THRf_DETACHED);
-
-void
-DESTROY(t)
-	Thread	t
-    CODE:
-	DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
-				       "%p: DESTROY(%p), state %u\n",
-				       thr, t, ThrSTATE(t))));
-			      
-	if (ThrSTATE(t) == THRf_NORMAL) {
+	switch (ThrSTATE(thr)) {
+	case THRf_R_JOINABLE:
+	    ThrSETSTATE(thr, THRf_DETACHED);
+	    /* fall through */
+	case THRf_DETACHED:
+	    MUTEX_UNLOCK(&thr->mutex);
 	    DETACH(t);
-	    ThrSETSTATE(t, THRf_DETACHED);
-	    t->flags |= THRf_DIE_FATAL;
+	    break;
+	case THRf_ZOMBIE:
+	    ThrSETSTATE(thr, THRf_DEAD);
+	    MUTEX_UNLOCK(&thr->mutex);
+	    remove_thread(thr);
+	    DETACH(t);
+	    break;
+	default:
+	    MUTEX_UNLOCK(&thr->mutex);
+	    croak("can't detach thread");
+	    /* NOTREACHED */
 	}
 
 void
