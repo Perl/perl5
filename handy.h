@@ -633,10 +633,12 @@ extern long lastxycount[MAXXCOUNT][MAXYCOUNT];
 #ifdef NEED_VA_COPY
 # ifdef va_copy
 #  define Perl_va_copy(s, d) va_copy(d, s)
-# elif defined(__va_copy)
-#  define Perl_va_copy(s, d) __va_copy(d, s)
 # else
-#  define Perl_va_copy(s, d) Copy(s, d, 1, va_list)
+#  if defined(__va_copy)
+#   define Perl_va_copy(s, d) __va_copy(d, s)
+#  else
+#   define Perl_va_copy(s, d) Copy(s, d, 1, va_list)
+#  endif
 # endif
 #endif
 
