@@ -3585,6 +3585,9 @@ typedef struct am_table_short AMTS;
 #ifdef IAMSUID
 
 #ifdef I_SYS_STATVFS
+#   if defined(PERL_SCO) && !defined(_SVID3)
+#       define _SVID3
+#   endif
 #   include <sys/statvfs.h>     /* for f?statvfs() */
 #endif
 #ifdef I_SYS_MOUNT
