@@ -1,5 +1,5 @@
-#define PATCHLEVEL 3
-#define SUBVERSION 99
+#define PATCHLEVEL 4
+#define SUBVERSION 0
 
 /*
 	local_patches -- list of locally applied less-than-subversion patches.
@@ -38,7 +38,6 @@
  */
 static	char	*local_patches[] = {
 	NULL
-	,"Dev99A - First post-gamma development patch"
 	,NULL
 };
 

@@ -210,7 +210,7 @@ struct subst {
     char *	sbu_s;
     char *	sbu_m;
     char *	sbu_strend;
-    char *	sbu_subbase;
+    void *	sbu_rxres;
     REGEXP *	sbu_rx;
 };
 #define sb_iters	cx_u.cx_subst.sbu_iters
@@ -225,7 +225,7 @@ struct subst {
 #define sb_s		cx_u.cx_subst.sbu_s
 #define sb_m		cx_u.cx_subst.sbu_m
 #define sb_strend	cx_u.cx_subst.sbu_strend
-#define sb_subbase	cx_u.cx_subst.sbu_subbase
+#define sb_rxres	cx_u.cx_subst.sbu_rxres
 #define sb_rx		cx_u.cx_subst.sbu_rx
 
 #define PUSHSUBST(cx) CXINC, cx = &cxstack[cxstack_ix],			\
@@ -241,11 +241,13 @@ struct subst {
 	cx->sb_s		= s,					\
 	cx->sb_m		= m,					\
 	cx->sb_strend		= strend,				\
-	cx->sb_subbase		= Nullch,				\
+	cx->sb_rxres		= Null(void*),				\
 	cx->sb_rx		= rx,					\
-	cx->cx_type		= CXt_SUBST
+	cx->cx_type		= CXt_SUBST;				\
+	rxres_save(&cx->sb_rxres, rx)
 
-#define POPSUBST(cx) cxstack_ix--
+#define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
+	rxres_free(&cx->sb_rxres)
 
 struct context {
     I32		cx_type;	/* what kind of context this is */

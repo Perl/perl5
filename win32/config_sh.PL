@@ -5,7 +5,11 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
   shift(@ARGV);
  }
 
-@opt{'PATCHLEVEL','SUBVERSION'} = ($] =~ /\.0*([1-9]+)(\d\d)$/);
+if ($] =~ /\.(\d\d\d)?(\d\d)?$/) { # should always be true
+  $opt{PATCHLEVEL} = int($1 || 0);
+  $opt{SUBVERSION} = $2 || '00';
+}
+
 while (<>)
  {
   s/~([\w_]+)~/$opt{$1}/g;

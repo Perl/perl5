@@ -964,6 +964,13 @@ nope:
 	++BmUSEFUL(pm->op_pmshort);
 
 ret_no:
+    if (global && !(pm->op_pmflags & PMf_CONTINUE)) {
+	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
+	    MAGIC* mg = mg_find(TARG, 'g');
+	    if (mg)
+		mg->mg_len = -1;
+	}
+    }
     LEAVE_SCOPE(oldsave);
     if (gimme == G_ARRAY)
 	RETURN;

@@ -55,6 +55,7 @@ int	(*pfnspawnvpe)(int mode, const char *cmdname, const char *const *argv, const
 int	(*pfnmkdir)(const char *path);
 int	(*pfnrmdir)(const char *path);
 int	(*pfnchdir)(const char *path);
+int	(*pfnflock)(int fd, int oper);
 int		signature_end;
 } WIN32_IOSUBSYSTEM; 
 

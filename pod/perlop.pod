@@ -697,18 +697,22 @@ If there are no parentheses, it returns a list of all the matched
 strings, as if there were parentheses around the whole pattern.
 
 In a scalar context, C<m//g> iterates through the string, returning TRUE
-each time it matches, and FALSE when it eventually runs out of
-matches.  (In other words, it remembers where it left off last time and
-restarts the search at that point.  You can actually find the current
-match position of a string or set it using the pos() function--see
-L<perlfunc/pos>.)  Note that you can use this feature to stack C<m//g>
-matches or intermix C<m//g> matches with C<m/\G.../g>.  Note that
-the C<\G> zero-width assertion is not supported without the C</g>
-modifier; currently, without C</g>, C<\G> behaves just like C<\A>, but
-that's accidental and may change in the future.
+each time it matches, and FALSE when it eventually runs out of matches.
+(In other words, it remembers where it left off last time and restarts
+the search at that point.  You can actually find the current match
+position of a string or set it using the pos() function; see
+L<perlfunc/pos>.)  A failed match normally resets the search position to
+the beginning of the string, but you can avoid that by adding the "c"
+modifier (e.g. C<m//gc>).  Modifying the target string also resets the
+search position.
 
-If you modify the string in any way, the match position is reset to the
-beginning.  Examples:
+You can intermix C<m//g> matches with C<m/\G.../g>, where C<\G> is a
+zero-width assertion that matches the exact position where the previous
+C<m//g>, if any, left off.  The C<\G> assertion is not supported without
+the C</g> modifier; currently, without C</g>, C<\G> behaves just like
+C<\A>, but that's accidental and may change in the future.
+
+Examples:
 
     # list context
     ($one,$five,$fifteen) = (`uptime` =~ /(\d+\.\d+)/g);
@@ -722,15 +726,15 @@ beginning.  Examples:
     }
     print "$sentences\n";
 
-    # using m//g with \G
+    # using m//gc with \G
     $_ = "ppooqppqq";
     while ($i++ < 2) {
         print "1: '";
-        print $1 while /(o)/g; print "', pos=", pos, "\n";
+        print $1 while /(o)/gc; print "', pos=", pos, "\n";
         print "2: '";
-        print $1 if /\G(q)/g;  print "', pos=", pos, "\n";
+        print $1 if /\G(q)/gc;  print "', pos=", pos, "\n";
         print "3: '";
-        print $1 while /(p)/g; print "', pos=", pos, "\n";
+        print $1 while /(p)/gc; print "', pos=", pos, "\n";
     }
 
 The last example should print:
@@ -742,23 +746,23 @@ The last example should print:
     2: 'q', pos=8
     3: '', pos=8
 
-A useful idiom for C<lex>-like scanners is C</\G.../g>. You can
+A useful idiom for C<lex>-like scanners is C</\G.../gc>.  You can
 combine several regexps like this to process a string part-by-part,
-doing different actions depending on which regexp matched.  The next
-regexp would step in at the place the previous one left off.
+doing different actions depending on which regexp matched.  Each
+regexp tries to match where the previous one leaves off.
 
  $_ = <<'EOL';
       $url = new URI::URL "http://www/";   die if $url eq "xXx";
  EOL
  LOOP:
     {
-      print(" digits"),		redo LOOP if /\G\d+\b[,.;]?\s*/g;
-      print(" lowercase"),	redo LOOP if /\G[a-z]+\b[,.;]?\s*/g;
-      print(" UPPERCASE"),	redo LOOP if /\G[A-Z]+\b[,.;]?\s*/g;
-      print(" Capitalized"),	redo LOOP if /\G[A-Z][a-z]+\b[,.;]?\s*/g;
-      print(" MiXeD"),		redo LOOP if /\G[A-Za-z]+\b[,.;]?\s*/g;
-      print(" alphanumeric"),	redo LOOP if /\G[A-Za-z0-9]+\b[,.;]?\s*/g;
-      print(" line-noise"),	redo LOOP if /\G[^A-Za-z0-9]+/g;
+      print(" digits"),		redo LOOP if /\G\d+\b[,.;]?\s*/gc;
+      print(" lowercase"),	redo LOOP if /\G[a-z]+\b[,.;]?\s*/gc;
+      print(" UPPERCASE"),	redo LOOP if /\G[A-Z]+\b[,.;]?\s*/gc;
+      print(" Capitalized"),	redo LOOP if /\G[A-Z][a-z]+\b[,.;]?\s*/gc;
+      print(" MiXeD"),		redo LOOP if /\G[A-Za-z]+\b[,.;]?\s*/gc;
+      print(" alphanumeric"),	redo LOOP if /\G[A-Za-z0-9]+\b[,.;]?\s*/gc;
+      print(" line-noise"),	redo LOOP if /\G[^A-Za-z0-9]+/gc;
       print ". That's all!\n";
     }
 

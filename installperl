@@ -1,7 +1,7 @@
 #!./perl
 
 BEGIN {
-    require 5.003_90;
+    require 5.004;
     @INC = 'lib';
     $ENV{PERL5LIB} = 'lib';
 }

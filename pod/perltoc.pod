@@ -898,7 +898,7 @@ CGI script to do bad things?
 
 =item $PERL5OPT environment variable
 
-=item Limitations on B<-M>, and C<-m>, and B<-T> options
+=item Limitations on B<-M>, B<-m>, and B<-T> options
 
 =item More precise warnings
 
@@ -915,6 +915,9 @@ CGI script to do bad things?
 =item C<wantarray> may return undef
 
 =item Changes to tainting checks
+
+No glob() or <*>, No spawning if tainted $CDPATH, $ENV, $BASH_ENV, No
+spawning if tainted $TERM doesn't look like a terminal name
 
 =item New Opcode module and revised Safe module
 
@@ -940,7 +943,7 @@ $^E, $^H, $^M
 
 delete on slices, flock, printf and sprintf, keys as an lvalue, my() in
 Control Structures, pack() and unpack(), sysseek(), use VERSION, use Module
-VERSION LIST, prototype(FUNCTION), srand, $_ as Default, C<m//g> does not
+VERSION LIST, prototype(FUNCTION), srand, $_ as Default, C<m//gc> does not
 reset search position on failure, C<m//x> ignores whitespace before ?*+{},
 nested C<sub{}> closures work now, formats work right on changing lexicals
 
@@ -1027,8 +1030,8 @@ manipulating hashes
 
 =item Documentation Changes
 
-L<perldelta>, L<perllocale>, L<perltoot>, L<perlapio>, L<perldebug>,
-L<perlsec>
+L<perldelta>, L<perlfaq>, L<perllocale>, L<perltoot>, L<perlapio>,
+L<perlmodlib>, L<perldebug>, L<perlsec>
 
 =item New Diagnostics
 
@@ -1941,7 +1944,7 @@ safe subprocesses, sockets, and semaphores)
 
 =item Safe Pipe Opens
 
-=item Bidirectional Communication
+=item Bidirectional Communication with Another Process
 
 =back
 
@@ -1953,13 +1956,29 @@ safe subprocesses, sockets, and semaphores)
 
 =item Unix-Domain TCP Clients and Servers
 
-=item UDP: Message Passing
+=back
+
+=item TCP Clients with IO::Socket
+
+=over
+
+=item A Simple Client
+
+C<Proto>, C<PeerAddr>, C<PeerPort>
+
+=item A Webget Client
+
+=item Interactive Client with IO::Socket
 
 =back
 
-=item SysV IPC
+=item TCP Servers with IO::Socket
 
-=item WARNING
+Proto, LocalPort, Listen, Reuse
+
+=item UDP: Message Passing
+
+=item SysV IPC
 
 =item NOTES
 
@@ -3004,6 +3023,8 @@ B<-name>, B<-value>, B<-path>, B<-domain>, B<-expires>, B<-secure>
 1. Create a <Frameset> document, 2. Specify the destination for the
 document in the HTTP header, 3. Specify the destination for the document in
 the <FORM> tag
+
+=item LIMITED SUPPORT FOR CASCADING STYLE SHEETS
 
 =item DEBUGGING
 

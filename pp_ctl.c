@@ -94,7 +94,7 @@ PP(pp_regcomp) {
 	pm->op_pmflags |= PMf_WHITE;
 
     if (pm->op_pmflags & PMf_KEEP) {
-	pm->op_pmflags &= ~PMf_RUNTIME;	/* no point compiling again */
+	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
 	hoistmust(pm);
 	cLOGOP->op_first->op_next = op->op_next;
     }
@@ -111,6 +111,8 @@ PP(pp_substcont)
     register char *m = cx->sb_m;
     char *orig = cx->sb_orig;
     register REGEXP *rx = cx->sb_rx;
+
+    rxres_restore(&cx->sb_rxres, rx);
 
     if (cx->sb_iters++) {
 	if (cx->sb_iters > cx->sb_maxiters)
@@ -157,7 +159,73 @@ PP(pp_substcont)
     sv_catpvn(dstr, s, m-s);
     cx->sb_s = rx->endp[0];
     cx->sb_rxtainted |= rx->exec_tainted;
+    rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmreplstart);
+}
+
+void
+rxres_save(rsp, rx)
+void **rsp;
+REGEXP *rx;
+{
+    UV *p = (UV*)*rsp;
+    U32 i;
+
+    if (!p || p[1] < rx->nparens) {
+	i = 6 + rx->nparens * 2;
+	if (!p)
+	    New(501, p, i, UV);
+	else
+	    Renew(p, i, UV);
+	*rsp = (void*)p;
+    }
+
+    *p++ = (UV)rx->subbase;
+    rx->subbase = Nullch;
+
+    *p++ = rx->nparens;
+
+    *p++ = (UV)rx->subbeg;
+    *p++ = (UV)rx->subend;
+    for (i = 0; i <= rx->nparens; ++i) {
+	*p++ = (UV)rx->startp[i];
+	*p++ = (UV)rx->endp[i];
+    }
+}
+
+void
+rxres_restore(rsp, rx)
+void **rsp;
+REGEXP *rx;
+{
+    UV *p = (UV*)*rsp;
+    U32 i;
+
+    Safefree(rx->subbase);
+    rx->subbase = (char*)(*p);
+    *p++ = 0;
+
+    rx->nparens = *p++;
+
+    rx->subbeg = (char*)(*p++);
+    rx->subend = (char*)(*p++);
+    for (i = 0; i <= rx->nparens; ++i) {
+	rx->startp[i] = (char*)(*p++);
+	rx->endp[i] = (char*)(*p++);
+    }
+}
+
+void
+rxres_free(rsp)
+void **rsp;
+{
+    UV *p = (UV*)*rsp;
+
+    if (p) {
+	Safefree((char*)(*p));
+	Safefree(p);
+	*rsp = Null(void*);
+    }
 }
 
 PP(pp_formline)
@@ -926,11 +994,14 @@ I32 cxix;
     I32 optype;
 
     while (cxstack_ix > cxix) {
-	cx = &cxstack[cxstack_ix--];
-	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n", (long) cxstack_ix+1,
-		    block_type[cx->cx_type]));
+	cx = &cxstack[cxstack_ix];
+	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n",
+			      (long) cxstack_ix+1, block_type[cx->cx_type]));
 	/* Note: we don't need to restore the base context info till the end. */
 	switch (cx->cx_type) {
+	case CXt_SUBST:
+	    POPSUBST(cx);
+	    continue;  /* not break */
 	case CXt_SUB:
 	    POPSUB(cx);
 	    break;
@@ -941,9 +1012,9 @@ I32 cxix;
 	    POPLOOP(cx);
 	    break;
 	case CXt_NULL:
-	case CXt_SUBST:
 	    break;
 	}
+	cxstack_ix--;
     }
 }
 

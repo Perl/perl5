@@ -831,8 +831,11 @@ OP *op;
 	for (kid = cLISTOP->op_first; kid; kid = kid->op_sibling)
 	    scalarvoid(kid);
 	break;
+    case OP_ENTEREVAL:
+	scalarkids(op);
+	break;
     case OP_REQUIRE:
-	/* since all requires must return a value, they're never void */
+	/* all requires must return a boolean value */
 	op->op_flags &= ~OPf_WANT;
 	return scalar(op);
     case OP_SPLIT:
@@ -918,6 +921,10 @@ OP *op;
 	}
 	curcop = &compiling;
 	break;
+    case OP_REQUIRE:
+	/* all requires must return a boolean value */
+	op->op_flags &= ~OPf_WANT;
+	return scalar(op);
     }
     return op;
 }
@@ -4276,8 +4283,7 @@ OP *
 ck_match(op)
 OP *op;
 {
-    cPMOP->op_pmflags |= PMf_RUNTIME;
-    cPMOP->op_pmpermflags |= PMf_RUNTIME;
+    op->op_private |= OPpRUNTIME;
     return op;
 }
 

@@ -9,11 +9,20 @@
 #
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
-#
-
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl
 
+#
+# uncomment next line if you wish perl to run on Windows95 also
+#RUNTIME=-MT
+
+#
+# uncomment next line if you are using Visual C++ 2.x
+#CCTYPE=MSVC20
+
+#
+# uncomment next line if you want debug version of perl (big,slow)
+#CFG=Debug
 
 ##################### CHANGE THESE ONLY IF YOU MUST #####################
 
@@ -28,7 +37,9 @@ LIB32=$(LINK32) -lib
 # Options
 #
 PERLDLL  = -D "PERLDLL"
+!IF "$(RUNTIME)" == ""
 RUNTIME  = -MD
+!ENDIF
 INCLUDES = -I ".\include" -I "." -I ".."
 #PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
 DEFINES  = -D "WIN32" -D "_CONSOLE" -D "PERLDLL"
@@ -98,7 +109,8 @@ MINIMOD=..\lib\ExtUtils\Miniperl.pm
 
 PL2BAT=bin\PL2BAT.BAT
 MAKE=nmake -nologo
-XCOPY=xcopy /i /d /f /r
+XCOPY=xcopy /f /r /i /d
+RCOPY=xcopy /f /r /i /e /d
 NULL=
 
 #
@@ -256,11 +268,11 @@ perlglob.obj  : perlglob.c
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && miniperl configpm
-	if exist lib\* $(XCOPY) /e lib\*.* ..\lib\$(NULL)
+	if exist lib\* $(RCOPY) lib\*.* ..\lib\$(NULL)
 	$(XCOPY) ..\*.h ..\lib\CORE\*.*
 	$(XCOPY) *.h ..\lib\CORE\*.*
-	$(XCOPY) /S include ..\lib\CORE\*.*
-	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) RUNTIME=$(RUNTIME) CFG=$(CFG) $(CONFIGPM)
+	$(RCOPY) include ..\lib\CORE\*.*
+	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) CCTYPE=$(CCTYPE) RUNTIME=$(RUNTIME) CFG=$(CFG) $(CONFIGPM)
 
 $(MINIPERL) : ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
@@ -374,7 +386,7 @@ install : ALL doc utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) $(PERLDLL) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.* $(INST_BIN)\*.*
-	$(XCOPY) /e ..\lib $(INST_LIB)\*.*
+	$(RCOPY) ..\lib $(INST_LIB)\*.*
 	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
 	$(XCOPY) ..\pod\*.pod $(INST_POD)\*.*
 	$(XCOPY) ..\pod\*.html $(INST_HTML)\*.*
@@ -382,7 +394,7 @@ install : ALL doc utils
 inst_lib : $(CONFIGPM)
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
-	$(XCOPY) /e ..\lib $(INST_LIB)\*.*
+	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM)
 	$(XCOPY) $(MINIPERL) ..\t\perl.exe

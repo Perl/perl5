@@ -89,6 +89,9 @@ typedef U32 PADOFFSET;
 /* Private for OP_SASSIGN */
 #define OPpASSIGN_BACKWARDS	64	/* Left & right switched. */
 
+/* Private for OP_MATCH and OP_SUBST{,CONST} */
+#define OPpRUNTIME		64	/* Pattern coming in on the stack */
+
 /* Private for OP_TRANS */
 #define OPpTRANS_SQUASH		16
 #define OPpTRANS_DELETE		32
@@ -185,7 +188,7 @@ struct pmop {
 #define PMf_CONST	0x0040		/* subst replacement is constant */
 #define PMf_KEEP	0x0080		/* keep 1st runtime pattern forever */
 #define PMf_GLOBAL	0x0100		/* pattern had a g modifier */
-#define PMf_RUNTIME	0x0200		/* pattern coming in on the stack */
+#define PMf_CONTINUE	0x0200		/* don't reset pos() if //g fails */
 #define PMf_EVAL	0x0400		/* evaluating replacement as expr */
 #define PMf_WHITE	0x0800		/* pattern is \s+ */
 #define PMf_MULTILINE	0x1000		/* assume multiple lines */

@@ -50,12 +50,12 @@ users the informal support will more than suffice.  See the answer to
 =head2 Which version of Perl should I use?
 
 You should definitely use version 5.  Version 4 is old, limited, and
-no longer maintained.  Its last patch (4.036) was in 1992.  The last
-production release was 5.003, and the current experimental release for
-those at the bleeding edge (as of 27/03/97) is 5.003_92, considered a beta
-for production release 5.004, which will probably be out by the time
-you read this.  Further references to the Perl language in this document
-refer to the current production release unless otherwise specified.
+no longer maintained; its last patch (4.036) was in 1992.  The most
+recent production release is 5.004.  Further references to the Perl
+language in this document refer to this production release unless
+otherwise specified.  There may be one or more official bug fixes for
+5.004 by the time you read this, and also perhaps some experimental
+versions on the way to the next release.
 
 =head2 What are perl4 and perl5?
 

@@ -697,8 +697,8 @@ CONTEXT* cx;
 		(long)cx->sb_m);
 	PerlIO_printf(Perl_debug_log, "SB_STREND = 0x%lx\n",
 		(long)cx->sb_strend);
-	PerlIO_printf(Perl_debug_log, "SB_SUBBASE = 0x%lx\n",
-		(long)cx->sb_subbase);
+	PerlIO_printf(Perl_debug_log, "SB_RXRES = 0x%lx\n",
+		(long)cx->sb_rxres);
 	break;
     }
 }

@@ -4482,6 +4482,8 @@ int ch;
 	*pmfl |= PMf_FOLD;
     else if (ch == 'g')
 	*pmfl |= PMf_GLOBAL;
+    else if (ch == 'c')
+	*pmfl |= PMf_CONTINUE;
     else if (ch == 'o')
 	*pmfl |= PMf_KEEP;
     else if (ch == 'm')
@@ -4510,7 +4512,7 @@ char *start;
     pm = (PMOP*)newPMOP(OP_MATCH, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    while (*s && strchr("iogmsx", *s))
+    while (*s && strchr("iogcmsx", *s))
 	pmflag(&pm->op_pmflags,*s++);
     pm->op_pmpermflags = pm->op_pmflags;
 
@@ -4556,7 +4558,7 @@ char *start;
     multi_start = first_start;	/* so whole substitution is taken together */
 
     pm = (PMOP*)newPMOP(OP_SUBST, 0);
-    while (*s && strchr("iogmsex", *s)) {
+    while (*s && strchr("iogcmsex", *s)) {
 	if (*s == 'e') {
 	    s++;
 	    es++;

@@ -16,8 +16,8 @@ cannot be built there, for lack of a reasonable command interpreter.
 
 =head1 Core Changes
 
-Most importantly, many bugs were fixed.  See the F<Changes>
-file in the distribution for details.
+Most importantly, many bugs were fixed, including several security
+problems.  See the F<Changes> file in the distribution for details.
 
 =head2 Compilation option: Binary compatibility with 5.003
 
@@ -36,7 +36,7 @@ variable as if its contents had appeared on a "#!perl" line at the
 beginning of your script, except that hyphens are optional.  PERL5OPT
 may only be used to set the following switches: B<-[DIMUdmw]>.
 
-=head2 Limitations on B<-M>, and C<-m>, and B<-T> options
+=head2 Limitations on B<-M>, B<-m>, and B<-T> options
 
 The C<-M> and C<-m> options are no longer allowed on the C<#!> line of
 a script.  If a script needs a module, it should invoke it with the
@@ -158,6 +158,33 @@ previously-working script to now fail -- which should be construed
 as a blessing, since that indicates a potentially-serious security
 hole was just plugged.
 
+The new restrictions when tainting include:
+
+=over
+
+=item No glob() or <*>
+
+These operators may spawn the C shell (csh), which cannot be made
+safe.  This restriction will be lifted in a future version of Perl
+when globbing is implemented without the use of an external program.
+
+=item No spawning if tainted $CDPATH, $ENV, $BASH_ENV
+
+These environment variables may alter the behavior of spawned programs
+(especially shells) in ways that subvert security.  So now they are
+treated as dangerous, in the manner of $IFS and $PATH.
+
+=item No spawning if tainted $TERM doesn't look like a terminal name
+
+Some termcap libraries do unsafe things with $TERM.  However, it would be
+unnecessarily harsh to treat all $TERM values as unsafe, since only shell
+metacharacters can cause trouble in $TERM.  So a tainted $TERM is
+considered to be safe if it contains only alphanumerics, underscores,
+dashes, and colons, and unsafe if it contains other characters (including
+whitespace).
+
+=back
+
 =head2 New Opcode module and revised Safe module
 
 A new Opcode module supports the creation, manipulation and
@@ -182,8 +209,8 @@ it is now merely a front end to the IO::* modules -- specifically,
 IO::Handle, IO::Seekable, and IO::File.  We suggest, but do not
 require, that you use the IO::* modules in new code.
 
-In harmony with this change, C<*GLOB{FILEHANDLE}> is now a
-backward-compatible synonym for C<*STDOUT{IO}>.
+In harmony with this change, C<*GLOB{FILEHANDLE}> is now just a
+backward-compatible synonym for C<*GLOB{IO}>.
 
 =head2 Internal change: PerlIO abstraction interface
 
@@ -415,25 +442,16 @@ of course, or if you want a seed other than the default.
 Functions documented in the Camel to default to $_ now in
 fact do, and all those that do are so documented in L<perlfunc>.
 
-=item C<m//g> does not reset search position on failure
+=item C<m//gc> does not reset search position on failure
 
-The C<m//g> match iteration construct used to reset its target string's
-search position (which is visible through the C<pos> operator) when a
-match failed; as a result, the next C<m//g> match would start at the
-beginning of the string).  With Perl 5.004, the search position must be
-reset explicitly, as with C<pos $str = 0;>, or by modifying the target
-string.  This change in Perl makes it possible to chain matches together
-in conjunction with the C<\G> zero-width assertion.  See L<perlop> and
-L<perlre>.
-
-Here is an illustration of what it takes to get the old behavior:
-
-    for ( qw(this and that are not what you think you got) ) {
-        while ( /(\w*t\w*)/g ) { print "t word is: $1\n" }
-        pos = 0;  # REQUIRED FOR 5.004
-        while ( /(\w*a\w*)/g ) { print "a word is: $1\n" }
-        print "\n";
-    }
+The C<m//g> match iteration construct has always reset its target
+string's search position (which is visible through the C<pos> operator)
+when a match fails; as a result, the next C<m//g> match after a failure
+starts again at the beginning of the string.  With Perl 5.004, this
+reset may be disabled by adding the "c" (for "continue") modifier,
+i.e. C<m//gc>.  This feature, in conjunction with the C<\G> zero-width
+assertion, makes it possible to chain matches together.  See L<perlop>
+and L<perlre>.
 
 =item C<m//x> ignores whitespace before ?*+{}
 
@@ -452,16 +470,16 @@ right.  They do now.
 Just like anonymous functions that contain lexical variables
 that change (like a lexical index variable for a C<foreach> loop),
 formats now work properly.  For example, this silently failed
-before, and is fine now:
+before (printed only zeros), but is fine now:
 
     my $i;
     foreach $i ( 1 .. 10 ) {
-	format =
+	write;
+    }
+    format =
 	my i is @#
 	$i
     .
-	write;
-    }
 
 =back
 
@@ -1057,6 +1075,10 @@ new pods are included in section 1:
 
 This document.
 
+=item L<perlfaq>
+
+Frequently asked questions.
+
 =item L<perllocale>
 
 Locale support (internationalization and localization).
@@ -1068,6 +1090,11 @@ Tutorial on Perl OO programming.
 =item L<perlapio>
 
 Perl internal IO abstraction interface.
+
+=item L<perlmodlib>
+
+Perl module library and recommended practice for module creation.
+Extracted from L<perlmod> (which is much smaller as a result).
 
 =item L<perldebug>
 
@@ -1519,4 +1546,4 @@ Constructed by Tom Christiansen, grabbing material with permission
 from innumerable contributors, with kibitzing by more than a few Perl
 porters.
 
-Last update: Sat Mar  8 19:51:26 EST 1997
+Last update: Wed May 14 11:14:09 EDT 1997

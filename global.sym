@@ -997,6 +997,9 @@ rsignal_save
 rsignal_state
 rsignal_restore
 runops
+rxres_free
+rxres_restore
+rxres_save
 safecalloc
 safemalloc
 safefree

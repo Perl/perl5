@@ -19,7 +19,7 @@ my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Invoke_Perl = $Is_VMS ? 'MCR Sys$Disk:[]Perl.' :
                   $Is_MSWin32 ? '.\perl' : './perl';
-my @MoreEnv = qw/IFS ENV CDPATH TERM/;
+my @MoreEnv = qw/IFS CDPATH ENV BASH_ENV/;
 
 if ($Is_VMS) {
     my (%old, $x);
@@ -82,7 +82,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..132\n";
+print "1..135\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -91,16 +91,14 @@ print "1..132\n";
     $ENV{'DCL$PATH'} = '' if $Is_VMS;
 
     $ENV{PATH} = '';
-    delete $ENV{IFS};
-    delete $ENV{ENV};
-    delete $ENV{CDPATH};
+    delete @ENV{@MoreEnv};
     $ENV{TERM} = 'dumb';
 
     test 1, eval { `$echo 1` } eq "1\n";
 
     if ($Is_MSWin32) {
 	print "# Environment tainting tests skipped\n";
-	for (2) { print "ok $_\n" }
+	for (2..5) { print "ok $_\n" }
     }
     else {
 	my @vars = ('PATH', @MoreEnv);
@@ -111,6 +109,14 @@ print "1..132\n";
 	    shift @vars;
 	}
 	test 2, !@vars, "\$$vars[0]";
+
+	# tainted $TERM is unsafe only if it contains metachars
+	local $ENV{TERM};
+	$ENV{TERM} = 'e=mc2';
+	test 3, eval { `$echo 1` } eq "1\n";
+	$ENV{TERM} = 'e=mc2' . $TAINT;
+	test 4, eval { `$echo 1` } eq '';
+	test 5, $@ =~ /^Insecure \$ENV{TERM}/, $@;
     }
 
     my $tmp;
@@ -126,68 +132,68 @@ print "1..132\n";
 
     if ($tmp) {
 	local $ENV{PATH} = $tmp;
-	test 3, eval { `$echo 1` } eq '';
-	test 4, $@ =~ /^Insecure directory in \$ENV{PATH}/, $@;
+	test 6, eval { `$echo 1` } eq '';
+	test 7, $@ =~ /^Insecure directory in \$ENV{PATH}/, $@;
     }
     else {
-	for (3..4) { print "ok $_\n" }
+	for (6..7) { print "ok $_\n" }
     }
 
     if ($Is_VMS) {
 	$ENV{'DCL$PATH'} = $TAINT;
-	test 5,  eval { `$echo 1` } eq '';
-	test 6, $@ =~ /^Insecure \$ENV{DCL\$PATH}/, $@;
+	test 8,  eval { `$echo 1` } eq '';
+	test 9, $@ =~ /^Insecure \$ENV{DCL\$PATH}/, $@;
 	if ($tmp) {
 	    $ENV{'DCL$PATH'} = $tmp;
-	    test 7, eval { `$echo 1` } eq '';
-	    test 8, $@ =~ /^Insecure directory in \$ENV{DCL\$PATH}/, $@;
+	    test 10, eval { `$echo 1` } eq '';
+	    test 11, $@ =~ /^Insecure directory in \$ENV{DCL\$PATH}/, $@;
 	}
 	else {
 	    print "# can't find world-writeable directory to test DCL\$PATH\n";
-	    for (7..8) { print "ok $_\n" }
+	    for (10..11) { print "ok $_\n" }
 	}
 	$ENV{'DCL$PATH'} = '';
     }
     else {
 	print "# This is not VMS\n";
-	for (5..8) { print "ok $_\n"; }
+	for (8..11) { print "ok $_\n"; }
     }
 }
 
 # Let's see that we can taint and untaint as needed.
 {
     my $foo = $TAINT;
-    test 9, tainted $foo;
+    test 12, tainted $foo;
 
     # That was a sanity check. If it failed, stop the insanity!
     die "Taint checks don't seem to be enabled" unless tainted $foo;
 
     $foo = "foo";
-    test 10, not tainted $foo;
+    test 13, not tainted $foo;
 
     taint_these($foo);
-    test 11, tainted $foo;
+    test 14, tainted $foo;
 
     my @list = 1..10;
-    test 12, not any_tainted @list;
+    test 15, not any_tainted @list;
     taint_these @list[1,3,5,7,9];
-    test 13, any_tainted @list;
-    test 14, all_tainted @list[1,3,5,7,9];
-    test 15, not any_tainted @list[0,2,4,6,8];
+    test 16, any_tainted @list;
+    test 17, all_tainted @list[1,3,5,7,9];
+    test 18, not any_tainted @list[0,2,4,6,8];
 
     ($foo) = $foo =~ /(.+)/;
-    test 16, not tainted $foo;
+    test 19, not tainted $foo;
 
     $foo = $1 if ('bar' . $TAINT) =~ /(.+)/;
-    test 17, not tainted $foo;
-    test 18, $foo eq 'bar';
+    test 20, not tainted $foo;
+    test 21, $foo eq 'bar';
 
     my $pi = 4 * atan2(1,1) + $TAINT0;
-    test 19, tainted $pi;
+    test 22, tainted $pi;
 
     ($pi) = $pi =~ /(\d+\.\d+)/;
-    test 20, not tainted $pi;
-    test 21, sprintf("%.5f", $pi) eq '3.14159';
+    test 23, not tainted $pi;
+    test 24, sprintf("%.5f", $pi) eq '3.14159';
 }
 
 # How about command-line arguments? The problem is that we don't
@@ -203,150 +209,150 @@ print "1..132\n";
     };
     close PROG;
     print `$Invoke_Perl "-T" $arg and some suspect arguments`;
-    test 22, !$?, "Exited with status $?";
+    test 25, !$?, "Exited with status $?";
     unlink $arg;
 }
 
 # Reading from a file should be tainted
 {
     my $file = './TEST';
-    test 23, open(FILE, $file), "Couldn't open '$file': $!";
+    test 26, open(FILE, $file), "Couldn't open '$file': $!";
 
     my $block;
     sysread(FILE, $block, 100);
     my $line = <FILE>;
     close FILE;
-    test 24, tainted $block;
-    test 25, tainted $line;
+    test 27, tainted $block;
+    test 28, tainted $line;
 }
 
-# Globs should be forbidden.
-{
-    # Some glob implementations need to spawn system programs.
-    local $ENV{PATH} = '';
-    $ENV{PATH} = (-l '/bin' ? '' : '/bin:') . '/usr/bin' unless $Is_VMS;
-
+# Globs should be forbidden, except under VMS,
+#   which doesn't spawn an external program.
+if ($Is_VMS) {
+    for (29..30) { print "ok $_\n"; }
+}
+else {
     my @globs = eval { <*> };
-    test 26, @globs == 0 && $@ =~ /^Insecure dependency/;
+    test 29, @globs == 0 && $@ =~ /^Insecure dependency/;
 
     @globs = eval { glob '*' };
-    test 27, @globs == 0 && $@ =~ /^Insecure dependency/;
+    test 30, @globs == 0 && $@ =~ /^Insecure dependency/;
 }
 
 # Output of commands should be tainted
 {
     my $foo = `$echo abc`;
-    test 28, tainted $foo;
+    test 31, tainted $foo;
 }
 
 # Certain system variables should be tainted
 {
-    test 29, all_tainted $^X, $0;
+    test 32, all_tainted $^X, $0;
 }
 
 # Results of matching should all be untainted
 {
     my $foo = "abcdefghi" . $TAINT;
-    test 30, tainted $foo;
+    test 33, tainted $foo;
 
     $foo =~ /def/;
-    test 31, not any_tainted $`, $&, $';
+    test 34, not any_tainted $`, $&, $';
 
     $foo =~ /(...)(...)(...)/;
-    test 32, not any_tainted $1, $2, $3, $+;
+    test 35, not any_tainted $1, $2, $3, $+;
 
     my @bar = $foo =~ /(...)(...)(...)/;
-    test 33, not any_tainted @bar;
+    test 36, not any_tainted @bar;
 
-    test 34, tainted $foo;	# $foo should still be tainted!
-    test 35, $foo eq "abcdefghi";
+    test 37, tainted $foo;	# $foo should still be tainted!
+    test 38, $foo eq "abcdefghi";
 }
 
 # Operations which affect files can't use tainted data.
 {
-    test 36, eval { chmod 0, $TAINT } eq '', 'chmod';
-    test 37, $@ =~ /^Insecure dependency/, $@;
+    test 39, eval { chmod 0, $TAINT } eq '', 'chmod';
+    test 40, $@ =~ /^Insecure dependency/, $@;
 
     # There is no feature test in $Config{} for truncate,
     #   so we allow for the possibility that it's missing.
-    test 38, eval { truncate 'NoSuChFiLe', $TAINT0 } eq '', 'truncate';
-    test 39, $@ =~ /^(?:Insecure dependency|truncate not implemented)/, $@;
+    test 41, eval { truncate 'NoSuChFiLe', $TAINT0 } eq '', 'truncate';
+    test 42, $@ =~ /^(?:Insecure dependency|truncate not implemented)/, $@;
 
-    test 40, eval { rename '', $TAINT } eq '', 'rename';
-    test 41, $@ =~ /^Insecure dependency/, $@;
+    test 43, eval { rename '', $TAINT } eq '', 'rename';
+    test 44, $@ =~ /^Insecure dependency/, $@;
 
-    test 42, eval { unlink $TAINT } eq '', 'unlink';
-    test 43, $@ =~ /^Insecure dependency/, $@;
+    test 45, eval { unlink $TAINT } eq '', 'unlink';
+    test 46, $@ =~ /^Insecure dependency/, $@;
 
-    test 44, eval { utime $TAINT } eq '', 'utime';
-    test 45, $@ =~ /^Insecure dependency/, $@;
+    test 47, eval { utime $TAINT } eq '', 'utime';
+    test 48, $@ =~ /^Insecure dependency/, $@;
 
     if ($Config{d_chown}) {
-	test 46, eval { chown -1, -1, $TAINT } eq '', 'chown';
-	test 47, $@ =~ /^Insecure dependency/, $@;
+	test 49, eval { chown -1, -1, $TAINT } eq '', 'chown';
+	test 50, $@ =~ /^Insecure dependency/, $@;
     }
     else {
 	print "# chown() is not available\n";
-	for (46..47) { print "ok $_\n" }
+	for (49..50) { print "ok $_\n" }
     }
 
     if ($Config{d_link}) {
-	test 48, eval { link $TAINT, '' } eq '', 'link';
-	test 49, $@ =~ /^Insecure dependency/, $@;
+	test 51, eval { link $TAINT, '' } eq '', 'link';
+	test 52, $@ =~ /^Insecure dependency/, $@;
     }
     else {
 	print "# link() is not available\n";
-	for (48..49) { print "ok $_\n" }
+	for (51..52) { print "ok $_\n" }
     }
 
     if ($Config{d_symlink}) {
-	test 50, eval { symlink $TAINT, '' } eq '', 'symlink';
-	test 51, $@ =~ /^Insecure dependency/, $@;
+	test 53, eval { symlink $TAINT, '' } eq '', 'symlink';
+	test 54, $@ =~ /^Insecure dependency/, $@;
     }
     else {
 	print "# symlink() is not available\n";
-	for (50..51) { print "ok $_\n" }
+	for (53..54) { print "ok $_\n" }
     }
 }
 
 # Operations which affect directories can't use tainted data.
 {
-    test 52, eval { mkdir $TAINT0, $TAINT } eq '', 'mkdir';
-    test 53, $@ =~ /^Insecure dependency/, $@;
+    test 55, eval { mkdir $TAINT0, $TAINT } eq '', 'mkdir';
+    test 56, $@ =~ /^Insecure dependency/, $@;
 
-    test 54, eval { rmdir $TAINT } eq '', 'rmdir';
-    test 55, $@ =~ /^Insecure dependency/, $@;
+    test 57, eval { rmdir $TAINT } eq '', 'rmdir';
+    test 58, $@ =~ /^Insecure dependency/, $@;
 
-    test 56, eval { chdir $TAINT } eq '', 'chdir';
-    test 57, $@ =~ /^Insecure dependency/, $@;
+    test 59, eval { chdir $TAINT } eq '', 'chdir';
+    test 60, $@ =~ /^Insecure dependency/, $@;
 
     if ($Config{d_chroot}) {
-	test 58, eval { chroot $TAINT } eq '', 'chroot';
-	test 59, $@ =~ /^Insecure dependency/, $@;
+	test 61, eval { chroot $TAINT } eq '', 'chroot';
+	test 62, $@ =~ /^Insecure dependency/, $@;
     }
     else {
 	print "# chroot() is not available\n";
-	for (58..59) { print "ok $_\n" }
+	for (61..62) { print "ok $_\n" }
     }
 }
 
 # Some operations using files can't use tainted data.
 {
     my $foo = "imaginary library" . $TAINT;
-    test 60, eval { require $foo } eq '', 'require';
-    test 61, $@ =~ /^Insecure dependency/, $@;
+    test 63, eval { require $foo } eq '', 'require';
+    test 64, $@ =~ /^Insecure dependency/, $@;
 
     my $filename = "./taintB$$";	# NB: $filename isn't tainted!
     END { unlink $filename if defined $filename }
     $foo = $filename . $TAINT;
     unlink $filename;	# in any case
 
-    test 62, eval { open FOO, $foo } eq '', 'open for read';
-    test 63, $@ eq '', $@;		# NB: This should be allowed
-    test 64, $! == 2;			# File not found
+    test 65, eval { open FOO, $foo } eq '', 'open for read';
+    test 66, $@ eq '', $@;		# NB: This should be allowed
+    test 67, $! == 2;			# File not found
 
-    test 65, eval { open FOO, "> $foo" } eq '', 'open for write';
-    test 66, $@ =~ /^Insecure dependency/, $@;
+    test 68, eval { open FOO, "> $foo" } eq '', 'open for write';
+    test 69, $@ =~ /^Insecure dependency/, $@;
 }
 
 # Commands to the system can't use tainted data
@@ -355,71 +361,70 @@ print "1..132\n";
 
     if ($^O eq 'amigaos') {
 	print "# open(\"|\") is not available\n";
-	for (67..70) { print "ok $_\n" }
+	for (70..73) { print "ok $_\n" }
     }
     else {
-	test 67, eval { open FOO, "| $foo" } eq '', 'popen to';
-	test 68, $@ =~ /^Insecure dependency/, $@;
+	test 70, eval { open FOO, "| $foo" } eq '', 'popen to';
+	test 71, $@ =~ /^Insecure dependency/, $@;
 
-	test 69, eval { open FOO, "$foo |" } eq '', 'popen from';
-	test 70, $@ =~ /^Insecure dependency/, $@;
+	test 72, eval { open FOO, "$foo |" } eq '', 'popen from';
+	test 73, $@ =~ /^Insecure dependency/, $@;
     }
 
-    test 71, eval { exec $TAINT } eq '', 'exec';
-    test 72, $@ =~ /^Insecure dependency/, $@;
+    test 74, eval { exec $TAINT } eq '', 'exec';
+    test 75, $@ =~ /^Insecure dependency/, $@;
 
-    test 73, eval { system $TAINT } eq '', 'system';
-    test 74, $@ =~ /^Insecure dependency/, $@;
+    test 76, eval { system $TAINT } eq '', 'system';
+    test 77, $@ =~ /^Insecure dependency/, $@;
 
     $foo = "*";
     taint_these $foo;
 
-    test 75, eval { `$echo 1$foo` } eq '', 'backticks';
-    test 76, $@ =~ /^Insecure dependency/, $@;
+    test 78, eval { `$echo 1$foo` } eq '', 'backticks';
+    test 79, $@ =~ /^Insecure dependency/, $@;
 
     if ($Is_VMS) { # wildcard expansion doesn't invoke shell, so is safe
-	test 77, join('', eval { glob $foo } ) ne '', 'globbing';
-	test 78, $@ eq '', $@;
+	test 80, join('', eval { glob $foo } ) ne '', 'globbing';
+	test 81, $@ eq '', $@;
     }
     else {
-	test 77, join('', eval { glob $foo } ) eq '', 'globbing';
-	test 78, $@ =~ /^Insecure dependency/, $@;
+	for (80..81) { print "ok $_\n"; }
     }
 }
 
 # Operations which affect processes can't use tainted data.
 {
-    test 79, eval { kill 0, $TAINT } eq '', 'kill';
-    test 80, $@ =~ /^Insecure dependency/, $@;
+    test 82, eval { kill 0, $TAINT } eq '', 'kill';
+    test 83, $@ =~ /^Insecure dependency/, $@;
 
     if ($Config{d_setpgrp}) {
-	test 81, eval { setpgrp 0, $TAINT } eq '', 'setpgrp';
-	test 82, $@ =~ /^Insecure dependency/, $@;
+	test 84, eval { setpgrp 0, $TAINT } eq '', 'setpgrp';
+	test 85, $@ =~ /^Insecure dependency/, $@;
     }
     else {
 	print "# setpgrp() is not available\n";
-	for (81..82) { print "ok $_\n" }
+	for (84..85) { print "ok $_\n" }
     }
 
     if ($Config{d_setprior}) {
-	test 83, eval { setpriority 0, $TAINT, $TAINT } eq '', 'setpriority';
-	test 84, $@ =~ /^Insecure dependency/, $@;
+	test 86, eval { setpriority 0, $TAINT, $TAINT } eq '', 'setpriority';
+	test 87, $@ =~ /^Insecure dependency/, $@;
     }
     else {
 	print "# setpriority() is not available\n";
-	for (83..84) { print "ok $_\n" }
+	for (86..87) { print "ok $_\n" }
     }
 }
 
 # Some miscellaneous operations can't use tainted data.
 {
     if ($Config{d_syscall}) {
-	test 85, eval { syscall $TAINT } eq '', 'syscall';
-	test 86, $@ =~ /^Insecure dependency/, $@;
+	test 88, eval { syscall $TAINT } eq '', 'syscall';
+	test 89, $@ =~ /^Insecure dependency/, $@;
     }
     else {
 	print "# syscall() is not available\n";
-	for (85..86) { print "ok $_\n" }
+	for (88..89) { print "ok $_\n" }
     }
 
     {
@@ -428,18 +433,18 @@ print "1..132\n";
 	local *FOO;
 	my $temp = "./taintC$$";
 	END { unlink $temp }
-	test 87, open(FOO, "> $temp"), "Couldn't open $temp for write: $!";
+	test 90, open(FOO, "> $temp"), "Couldn't open $temp for write: $!";
 
-	test 88, eval { ioctl FOO, $TAINT, $foo } eq '', 'ioctl';
-	test 89, $@ =~ /^Insecure dependency/, $@;
+	test 91, eval { ioctl FOO, $TAINT, $foo } eq '', 'ioctl';
+	test 92, $@ =~ /^Insecure dependency/, $@;
 
 	if ($Config{d_fcntl}) {
-	    test 90, eval { fcntl FOO, $TAINT, $foo } eq '', 'fcntl';
-	    test 91, $@ =~ /^Insecure dependency/, $@;
+	    test 93, eval { fcntl FOO, $TAINT, $foo } eq '', 'fcntl';
+	    test 94, $@ =~ /^Insecure dependency/, $@;
 	}
 	else {
 	    print "# fcntl() is not available\n";
-	    for (90..91) { print "ok $_\n" }
+	    for (93..94) { print "ok $_\n" }
 	}
 
 	close FOO;
@@ -450,63 +455,63 @@ print "1..132\n";
 {
     my $foo = 'abc' . $TAINT;
     my $fooref = \$foo;
-    test 92, not tainted $fooref;
-    test 93, tainted $$fooref;
-    test 94, tainted $foo;
+    test 95, not tainted $fooref;
+    test 96, tainted $$fooref;
+    test 97, tainted $foo;
 }
 
 # Some tests involving assignment
 {
     my $foo = $TAINT0;
     my $bar = $foo;
-    test 95, all_tainted $foo, $bar;
-    test 96, tainted($foo = $bar);
-    test 97, tainted($bar = $bar);
-    test 98, tainted($bar += $bar);
-    test 99, tainted($bar -= $bar);
-    test 100, tainted($bar *= $bar);
-    test 101, tainted($bar++);
-    test 102, tainted($bar /= $bar);
-    test 103, tainted($bar += 0);
-    test 104, tainted($bar -= 2);
-    test 105, tainted($bar *= -1);
-    test 106, tainted($bar /= 1);
-    test 107, tainted($bar--);
-    test 108, $bar == 0;
+    test 98, all_tainted $foo, $bar;
+    test 99, tainted($foo = $bar);
+    test 100, tainted($bar = $bar);
+    test 101, tainted($bar += $bar);
+    test 102, tainted($bar -= $bar);
+    test 103, tainted($bar *= $bar);
+    test 104, tainted($bar++);
+    test 105, tainted($bar /= $bar);
+    test 106, tainted($bar += 0);
+    test 107, tainted($bar -= 2);
+    test 108, tainted($bar *= -1);
+    test 109, tainted($bar /= 1);
+    test 110, tainted($bar--);
+    test 111, $bar == 0;
 }
 
 # Test assignment and return of lists
 {
     my @foo = ("A", "tainted" . $TAINT, "B");
-    test 109, not tainted $foo[0];
-    test 110,     tainted $foo[1];
-    test 111, not tainted $foo[2];
+    test 112, not tainted $foo[0];
+    test 113,     tainted $foo[1];
+    test 114, not tainted $foo[2];
     my @bar = @foo;
-    test 112, not tainted $bar[0];
-    test 113,     tainted $bar[1];
-    test 114, not tainted $bar[2];
+    test 115, not tainted $bar[0];
+    test 116,     tainted $bar[1];
+    test 117, not tainted $bar[2];
     my @baz = eval { "A", "tainted" . $TAINT, "B" };
-    test 115, not tainted $baz[0];
-    test 116,     tainted $baz[1];
-    test 117, not tainted $baz[2];
+    test 118, not tainted $baz[0];
+    test 119,     tainted $baz[1];
+    test 120, not tainted $baz[2];
     my @plugh = eval q[ "A", "tainted" . $TAINT, "B" ];
-    test 118, not tainted $plugh[0];
-    test 119,     tainted $plugh[1];
-    test 120, not tainted $plugh[2];
+    test 121, not tainted $plugh[0];
+    test 122,     tainted $plugh[1];
+    test 123, not tainted $plugh[2];
     my $nautilus = sub { "A", "tainted" . $TAINT, "B" };
-    test 121, not tainted ((&$nautilus)[0]);
-    test 122,     tainted ((&$nautilus)[1]);
-    test 123, not tainted ((&$nautilus)[2]);
+    test 124, not tainted ((&$nautilus)[0]);
+    test 125,     tainted ((&$nautilus)[1]);
+    test 126, not tainted ((&$nautilus)[2]);
     my @xyzzy = &$nautilus;
-    test 124, not tainted $xyzzy[0];
-    test 125,     tainted $xyzzy[1];
-    test 126, not tainted $xyzzy[2];
+    test 127, not tainted $xyzzy[0];
+    test 128,     tainted $xyzzy[1];
+    test 129, not tainted $xyzzy[2];
     my $red_october = sub { return "A", "tainted" . $TAINT, "B" };
-    test 127, not tainted ((&$red_october)[0]);
-    test 128,     tainted ((&$red_october)[1]);
-    test 129, not tainted ((&$red_october)[2]);
+    test 130, not tainted ((&$red_october)[0]);
+    test 131,     tainted ((&$red_october)[1]);
+    test 132, not tainted ((&$red_october)[2]);
     my @corge = &$red_october;
-    test 130, not tainted $corge[0];
-    test 131,     tainted $corge[1];
-    test 132, not tainted $corge[2];
+    test 133, not tainted $corge[0];
+    test 134,     tainted $corge[1];
+    test 135, not tainted $corge[2];
 }

@@ -469,7 +469,7 @@ I32 *flagp;
 		return NULL;
 	    default:
 		--regparse;
-		while (*regparse && strchr("iogmsx", *regparse))
+		while (*regparse && strchr("iogcmsx", *regparse))
 		    pmflag(&regflags, *regparse++);
 		if (*regparse != ')')
 		    croak("Sequence (?%c...) not recognized", *regparse);

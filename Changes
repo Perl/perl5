@@ -45,6 +45,182 @@ And the Keepers of the Patch Pumpkin:
     Chip Salzenberg     <chip@perl.com>
 
 
+-------------
+Version 5.004
+-------------
+
+"Hey, Rocky!  Watch me pull a release out of my hat!"
+"Aww, that trick never works..."
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Make C<m//g> reset pos on failure; make C<m//gc> not reset"
+   From:  Chip Salzenberg
+  Files:  dump.c op.c op.h pod/perldelta.pod pod/perlfaq6.pod
+          pod/perlop.pod pod/perlre.pod pp_ctl.c pp_hot.c regcomp.c
+          t/op/pat.t toke.c
+
+  Title:  "SECURITY: Forbid exec() if $ENV{BASH_ENV} is tainted"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perlrun.pod pod/perlsec.pod t/op/taint.t
+          taint.c
+
+  Title:  "Allow exec() if $ENV{TERM} is tainted but innocuous"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perlrun.pod pod/perlsec.pod t/op/taint.t
+          taint.c
+
+  Title:  "Allow globbing when tainted under VMS (no external program)"
+   From:  Chip Salzenberg
+  Files:  pp_sys.c t/op/taint.t
+
+ CORE PORTABILITY
+
+  Title:  "Make Irix hints adapt when n32 libm.so is missing"
+   From:  Chip Salzenberg
+  Files:  hints/irix_6.sh
+
+  Title:  "Fix default HP-UX installation path"
+   From:  Jeff Okamoto
+ Msg-ID:  <199705132228.AA227042483@hpcc123.corp.hp.com>
+   Date:  Tue, 13 May 1997 15:28:04 -0700
+  Files:  hints/hpux.sh
+
+  Title:  "VMS update, including socket support (four patches)"
+   From:  Jonathan Hudson <Jonathan.Hudson@jrhudson.demon.co.uk>,
+          Peter Prymmer <pvhp@forte.com>,
+          Dan Sugalski <sugalsd@lbcc.cc.or.us>
+  Files:  vms/config.vms vms/descrip.mms vms/sockadapt.h vms/vms.c
+          vms/vmsish.h
+
+  Title:  "Win32 update (three patches)"
+   From:  Gurusamy Sarathy
+  Files:  README.win32 perl.c win32/Makefile win32/config.H
+          win32/config_h.PL win32/config_sh.PL win32/makedef.pl
+          win32/win32.c win32/win32.h win32/win32io.c win32/win32io.h
+          win32/win32iop.h
+
+  Title:  "Don't require executable bit on perl -S if DOSISH"
+   From:  Danny Sadinoff <sadinoff@olf.com>
+ Msg-ID:  <337351CE.79B28DE3@olf.com>
+   Date:  Fri, 09 May 1997 12:33:18 -0400
+  Files:  perl.c
+
+ OTHER CORE CHANGES
+
+  Title:  "In C<eval &func>, always call &func in scalar context"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Fix recursive substitution"
+   From:  Chip Salzenberg; test from Tim Bunce
+  Files:  cop.h global.sym pp_ctl.c proto.h scope.c t/op/subst.t
+
+  Title:  "Make read with <> from a TTY notice EOF"
+   From:  Jonathan I. Kamens <jik@kamens.brookline.ma.us>
+ Msg-ID:  <199705121147.HAA03845@jik.saturn.net>
+   Date:  Mon, 12 May 1997 07:47:13 -0400
+  Files:  sv.c
+
+  Title:  "Fix core dump from get*() functions returning no alias array"
+   From:  Chip Salzenberg
+  Files:  pp_sys.c
+
+  Title:  "Fix typo"
+   From:  Mark K Trettin <mkt@lucent.com>
+ Msg-ID:  <199705102228.RAA11163@gv18c.ih.lucent.com>
+   Date:  Sat, 10 May 1997 17:28:35 -0500
+  Files:  pp_sys.c
+
+ BUILD PROCESS
+
+  Title:  "Don't use 'unset' in Configure"
+   From:  Chip Salzenberg
+  Files:  Configure
+
+  Title:  "Protect against having no such command as 'cc'"
+   From:  Hans Mulder <hansm@icgned.nl>
+ Msg-ID:  <1997May12.163534.2006434@hmivax.humgen.upenn.edu>
+   Date:  Mon, 12 May 1997 16:35:34 -0400 (EDT)
+  Files:  Configure
+
+  Title:  "minor wording enhancement for Configure"
+   From:  Jarkko Hietaniemi
+ Msg-ID:  <199705101038.NAA00471@alpha.hut.fi>
+   Date:  Sat, 10 May 1997 13:38:31 +0300 (EET DST)
+  Files:  Configure
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Refresh CGI.pm to 2.36"
+   From:  Lincoln Stein <lstein@genome.wi.mit.edu>
+  Files:  eg/cgi/frameset.cgi eg/cgi/javascript.cgi lib/CGI.pm
+
+  Title:  "In IO::File::open, prepend './' less often (for Win32 et al)"
+   From:  Chip Salzenberg
+  Files:  ext/IO/lib/IO/File.pm
+
+  Title:  "Fix core dump on IO::Seekable::setpos($fh, undef)"
+   From:  Chip Salzenberg
+  Files:  ext/IO/IO.xs t/lib/io_xs.t
+
+ TESTS
+
+  Title:  "Make rand.t vanishingly unlikely to give false failure"
+   From:  Tom Phoenix
+ Msg-ID:  <Pine.GSO.3.96.970510190846.23340K-100000@kelly.teleport.com>
+   Date:  Sat, 10 May 1997 19:57:30 -0700 (PDT)
+  Files:  t/op/rand.t
+
+  Title:  "Fix sleep test: sleep(N) is defined to allow sleeping N-1"
+   From:  Chuck D. Phillips <cdp@hpescdp.fc.hp.com>
+ Msg-ID:  <199705151735.KAA01143@palrel1.hp.com>
+   Date:  Thu, 15 May 1997 11:35:41 -0600
+  Files:  t/op/sleep.t
+
+ UTILITIES
+
+  Title:  "h2xs and @EXPORT_OK"
+   From:  Jeff Okamoto
+ Msg-ID:  <199705092348.AA057881699@hpcc123.corp.hp.com>
+   Date:  Fri, 9 May 1997 16:48:20 -0700
+  Files:  utils/h2xs.PL
+
+ DOCUMENTATION
+
+  Title:  "Tweaks for perldelta"
+   From:  hansm@euronet.nl
+ Msg-ID:  <199705102346.BAA17300@mail.euronet.nl>
+   Date:  Sun, 11 May 97 01:46:00 +0200
+  Files:  pod/perldelta.pod
+
+  Title:  "Mention perlfaq.pod and perlmodlib.pod in perldelta.pod"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "Fix example of use of lexicals with formats"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "Explain that destruction order is not defined"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199705150600.CAA13550@aatma.engin.umich.edu>
+   Date:  Thu, 15 May 1997 02:00:23 -0400
+  Files:  pod/perltoot.pod
+
+  Title:  "Note that DATA filehandle is unavailable during BEGIN {}"
+   From:  neilb@cre.canon.co.uk (Neil Bowers)
+ Msg-ID:  <199705121227.NAA29718@tardis.cre.canon.co.uk>
+   Date:  Mon, 12 May 1997 13:27:43 +0100
+  Files:  pod/perldata.pod
+
+  Title:  "More detailed IO::Socket documentation"
+   From:  Tom Christiansen
+ Msg-ID:  <199705141456.IAA19061@jhereg.perl.com>
+   Date:  Wed, 14 May 1997 08:56:30 -0600
+  Files:  pod/perlipc.pod
+
+
 -----------------
 Version 5.003_99a
 -----------------

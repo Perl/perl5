@@ -224,6 +224,7 @@ PP(pp_glob)
     OP *result;
     ENTER;
 
+#ifndef VMS
     if (tainting) {
 	/*
 	 * The external globbing program may use things we can't control,
@@ -232,6 +233,7 @@ PP(pp_glob)
 	TAINT;
 	taint_proper(no_security, "glob");
     }
+#endif /* !VMS */
 
     SAVESPTR(last_in_gv);	/* We don't want this to be permanent. */
     last_in_gv = (GV*)*stack_sp--;
@@ -3213,7 +3215,7 @@ PP(pp_setpgrp)
 #ifdef BSD_SETPGRP
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
-    if ((pgrp != 0 && pgrp != getpid())) || (pid != 0 && pid != getpid()))
+    if ((pgrp != 0 && pgrp != getpid()) || (pid != 0 && pid != getpid()))
 	DIE("POSIX setpgrp can't take an argument");
     SETi( setpgrp() >= 0 );
 #endif /* USE_BSDPGRP */
@@ -3684,7 +3686,7 @@ PP(pp_gnetent)
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, nent->n_name);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	for (elem = nent->n_aliases; *elem; elem++) {
+	for (elem = nent->n_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
 		sv_catpvn(sv, " ", 1);
@@ -3754,7 +3756,7 @@ PP(pp_gprotoent)
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pent->p_name);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	for (elem = pent->p_aliases; *elem; elem++) {
+	for (elem = pent->p_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
 		sv_catpvn(sv, " ", 1);
@@ -3841,7 +3843,7 @@ PP(pp_gservent)
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, sent->s_name);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	for (elem = sent->s_aliases; *elem; elem++) {
+	for (elem = sent->s_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
 		sv_catpvn(sv, " ", 1);
@@ -4121,7 +4123,7 @@ PP(pp_ggrent)
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)grent->gr_gid);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	for (elem = grent->gr_mem; *elem; elem++) {
+	for (elem = grent->gr_mem; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
 		sv_catpvn(sv, " ", 1);

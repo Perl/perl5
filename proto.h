@@ -381,6 +381,9 @@ int	rsignal_restore _((int, Sigsave_t*));
 int	rsignal_save _((int, Sighandler_t, Sigsave_t*));
 Sighandler_t rsignal_state _((int));
 int	runops _((void));
+void	rxres_free _((void** rsp));
+void	rxres_restore _((void** rsp, REGEXP* rx));
+void	rxres_save _((void** rsp, REGEXP* rx));
 #ifndef HAS_RENAME
 I32	same_dirent _((char* a, char* b));
 #endif

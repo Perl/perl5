@@ -1414,7 +1414,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define ARCHLIB "c:\\perl\\lib"		/**/
-#define ARCHLIB_EXP "c:\\perl\\lib"		/**/
+#define ARCHLIB_EXP (win32PerlLibPath())	/**/
 
 /* BINCOMPAT3:
  *	This symbol, if defined, indicates that Perl 5.004 should be
@@ -1776,5 +1776,6 @@
 
 #endif
 #include <win32.h>
-#define ARCHLIBEXP (win32PerlLibPath())
+#ifndef DEBUGGING
 #define DEBUGGING
+#endif

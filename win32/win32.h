@@ -65,20 +65,13 @@ extern FILE *myfdopen(int, char *);
 #undef	 alarm
 #define  alarm	myalarm
 
-#undef	flock
-#define	flock(fd,o)	win32_flock(fd,o)
-#define LOCK_SH 1
-#define LOCK_EX 2
-#define LOCK_NB 4
-#define LOCK_UN 8
-
 struct tms {
 	long	tms_utime;
 	long	tms_stime;
 	long	tms_cutime;
 	long	tms_cstime;
 };
-	
+
 unsigned int sleep(unsigned int);
 char *win32PerlLibPath();
 int mytimes(struct tms *timebuf);

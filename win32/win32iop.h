@@ -63,12 +63,21 @@ EXT int		win32_spawnle(int mode, const char *cmdname, const char *,...);
 EXT int		win32_mkdir(const char *dir, int mode);
 EXT int		win32_rmdir(const char *dir);
 EXT int		win32_chdir(const char *dir);
+EXT int		win32_flock(int fd, int oper);
 
 /*
  * these two are win32 specific but still io related
  */
 int		stolen_open_osfhandle(long handle, int flags);
 long		stolen_get_osfhandle(int fd);
+
+/*
+ * defines for flock emulation
+ */
+#define LOCK_SH 1
+#define LOCK_EX 2
+#define LOCK_NB 4
+#define LOCK_UN 8
 
 #include <win32io.h>	/* pull in the io sub system structure */
 
@@ -140,6 +149,7 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #define mkdir			win32_mkdir
 #define rmdir			win32_rmdir
 #define chdir			win32_chdir
+#define flock(fd,o)		win32_flock(fd,o)
 #endif /* WIN32IO_IS_STDIO */
 
 #endif /* WIN32IOP_H */

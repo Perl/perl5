@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..61\n";
+print "1..62\n";
 
 $x = "abc\ndef\n";
 
@@ -211,6 +211,9 @@ print scalar @x == 2 ? "ok 60\n" : "not ok 60\n";
 
 $_ = "abdc";
 pos $_ = 2;
-/\Gc/g;
+/\Gc/gc;
 print "not " if (pos $_) != 2;
 print "ok 61\n";
+/\Gc/g;
+print "not " if defined pos $_;
+print "ok 62\n";

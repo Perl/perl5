@@ -85,8 +85,11 @@ done
 PATH=.$p_$PATH
 export PATH
 
-: This should not matter in a script, but apparently it does sometimes
-unset CDPATH
+: This should not matter in scripts, but apparently it does, sometimes
+case "$CDPATH" in
+'')	;;
+*)	CDPATH='' ;;
+esac
 
 : Sanity checks
 if test ! -t 0; then
@@ -115,6 +118,7 @@ EOM
 especially on older exotic systems.  If yours does, try the Bourne 
 shell instead.)
 EOM
+		unset ENV
         fi
     fi
 else
@@ -2997,8 +3001,8 @@ main() {
 #endif
 }
 EOP
-	cc -o pdp11 pdp11.c >/dev/null 2>&1
-	if ./pdp11 2>/dev/null; then
+	(cc -o pdp11 pdp11.c) >/dev/null 2>&1
+	if $test -f pdp11 && ./pdp11 2>/dev/null; then
 		dflt='unsplit split'
 	else
 		tans=`./loc . X /lib/small /lib/large /usr/lib/small /usr/lib/large /lib/medium /usr/lib/medium /lib/huge`
@@ -8285,7 +8289,7 @@ EOCP
 	if $cc $optimize $ccflags $ldflags -o try try.c $libs && ./try; then
 		echo 'Looks OK.  (Perl supports up to version 1.86).' >&4
 	else
-		echo "I can't use your Berkeley DB.  I'll disable it." >&4
+		echo "I can't use Berkeley DB with your <db.h>.  I'll disable Berkeley DB." >&4
 		i_db=$undef
 		case " $libs " in
 		*"-ldb "*)

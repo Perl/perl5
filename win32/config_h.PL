@@ -35,14 +35,16 @@ while (<SH>)
   munge();
   s/\\\$/\$/g;
   s#/[ *\*]*\*/#/**/#;
-  if (/#define\s+ARCHLIBEXP/)
+  if (/^\s*#define\s+ARCHLIB_EXP/)
    {
+     $_ = "#define ARCHLIB_EXP (win32PerlLibPath())\t/**/\n";
    }
   print H;
  }
 print H "#include <win32.h>
-#define ARCHLIBEXP (win32PerlLibPath())
+#ifndef DEBUGGING
 #define DEBUGGING
+#endif
 ";
 close(H);
 close(SH);

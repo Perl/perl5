@@ -479,15 +479,17 @@ Or, using C<\G>, the much simpler (and faster):
 
 A more sophisticated use might involve a tokenizer.  The following
 lex-like example is courtesy of Jeffrey Friedl.  It did not work in
-5.003 due to bugs in that release, but does work in 5.004 or better:
+5.003 due to bugs in that release, but does work in 5.004 or better.
+(Note the use of C</c>, which prevents a failed match with C</g> from
+resetting the search position back to the beginning of the string.)
 
     while (<>) {
       chomp;
       PARSER: {
-           m/ \G( \d+\b    )/gx     && do { print "number: $1\n";  redo; };
-           m/ \G( \w+      )/gx     && do { print "word:   $1\n";  redo; };
-           m/ \G( \s+      )/gx     && do { print "space:  $1\n";  redo; };
-           m/ \G( [^\w\d]+ )/gx     && do { print "other:  $1\n";  redo; };
+           m/ \G( \d+\b    )/gcx    && do { print "number: $1\n";  redo; };
+           m/ \G( \w+      )/gcx    && do { print "word:   $1\n";  redo; };
+           m/ \G( \s+      )/gcx    && do { print "space:  $1\n";  redo; };
+           m/ \G( [^\w\d]+ )/gcx    && do { print "other:  $1\n";  redo; };
       }
     }
 
@@ -496,19 +498,19 @@ Of course, that could have been written as
     while (<>) {
       chomp;
       PARSER: {
-	   if ( /\G( \d+\b    )/gx  {
+	   if ( /\G( \d+\b    )/gcx  {
 		print "number: $1\n";
 		redo PARSER;
 	   }
-	   if ( /\G( \w+      )/gx  {
+	   if ( /\G( \w+      )/gcx  {
 		print "word: $1\n";
 		redo PARSER;
 	   }
-	   if ( /\G( \s+      )/gx  {
+	   if ( /\G( \s+      )/gcx  {
 		print "space: $1\n";
 		redo PARSER;
 	   }
-	   if ( /\G( [^\w\d]+ )/gx  {
+	   if ( /\G( [^\w\d]+ )/gcx  {
 		print "other: $1\n";
 		redo PARSER;
 	   }

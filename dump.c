@@ -354,7 +354,11 @@ register PMOP *pm;
     else
 	ch = '/';
     if (pm->op_pmregexp)
-	dump("PMf_PRE %c%s%c\n",ch,pm->op_pmregexp->precomp,ch);
+	dump("PMf_PRE %c%s%c%s\n",
+	     ch, pm->op_pmregexp->precomp, ch,
+	     (pm->op_private & OPpRUNTIME) ? " (RUNTIME)" : "");
+    else
+	dump("PMf_PRE (RUNTIME)\n");
     if (pm->op_type != OP_PUSHRE && pm->op_pmreplroot) {
 	dump("PMf_REPL = ");
 	dump_op(pm->op_pmreplroot);
@@ -380,8 +384,8 @@ register PMOP *pm;
 	    sv_catpv(tmpsv, ",KEEP");
 	if (pm->op_pmflags & PMf_GLOBAL)
 	    sv_catpv(tmpsv, ",GLOBAL");
-	if (pm->op_pmflags & PMf_RUNTIME)
-	    sv_catpv(tmpsv, ",RUNTIME");
+	if (pm->op_pmflags & PMf_CONTINUE)
+	    sv_catpv(tmpsv, ",CONTINUE");
 	if (pm->op_pmflags & PMf_EVAL)
 	    sv_catpv(tmpsv, ",EVAL");
 	dump("PMFLAGS = (%s)\n", SvCUR(tmpsv) ? SvPVX(tmpsv) + 1 : "");

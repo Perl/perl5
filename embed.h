@@ -903,6 +903,9 @@
 #define rsignal_save		Perl_rsignal_save
 #define rsignal_state		Perl_rsignal_state
 #define runops			Perl_runops
+#define rxres_free		Perl_rxres_free
+#define rxres_restore		Perl_rxres_restore
+#define rxres_save		Perl_rxres_save
 #define same_dirent		Perl_same_dirent
 #define save_I16		Perl_save_I16
 #define save_I32		Perl_save_I32
