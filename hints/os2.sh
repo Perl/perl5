@@ -283,8 +283,14 @@ case "$0$running_c_cmd" in
 	# Not patched!
 	if test -f ./Configure.cmd ; then
 	    echo "!!!" >&2
-	    echo "!!! ./Configure not patched, but ./Configure.cmd exits" >&2
-	    echo "!!! Do not know what to do!" >&2
+	    echo "!!! I see that what is running is ./Configure." >&2
+	    echo "!!! ./Configure is not patched, but ./Configure.cmd exists." >&2
+	    echo "!!!" >&2
+	    echo "!!! You are supposed to run Configure.cmd, not Configure" >&2
+	    echo "!!!  after an automagic patching." >&2
+	    echo "!!!" >&2
+	    echo "!!! If you insist on running Configure, please" >&2
+	    echo "!!!  patch it manually from ./os2/diff.configure." >&2
 	    echo "!!!" >&2
 	    exit 2
 	fi
