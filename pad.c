@@ -258,15 +258,9 @@ Perl_pad_undef(pTHX_ CV* cv)
 		{
 		    assert(CvWEAKOUTSIDE(innercv));
 		    CvWEAKOUTSIDE_off(innercv);
+		    CvOUTSIDE(innercv) = outercv;
 		    CvOUTSIDE_SEQ(innercv) = seq;
-		    /* don't relink to grandfather if he's being freed */
-		    if (SvREFCNT(outercv)) {
-			CvOUTSIDE(innercv) = outercv;
-			SvREFCNT_inc(outercv);
-		    }
-		    else {
-			CvOUTSIDE(innercv) = Nullcv;
-		    }
+		    SvREFCNT_inc(outercv);
 		}
 	    }
 	}

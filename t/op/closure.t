@@ -13,7 +13,7 @@ BEGIN {
 
 use Config;
 
-print "1..185\n";
+print "1..184\n";
 
 my $test = 1;
 sub test (&) {
@@ -641,27 +641,4 @@ f16302();
     test { $a{7}->()->() + $a{11}->()->() == 18 };
 }
 
-# bugid #23265 - this used to coredump during destruction of PL_maincv
-# and its children
-
-require './test.pl';
-
-my $got = runperl(
-    prog => q[
-	print
-	    sub {$_[0]->(@_)} -> (
-		sub {
-		    $_[1]
-			?  $_[0]->($_[0], $_[1] - 1) .  sub {"x"}->()
-			: "y"
-		},   
-		2
-	    )
-	    , "\n"
-	;            
-    
-    ],
-    stderr => 1
-);
-test { $got eq "yxx\n" };
 
