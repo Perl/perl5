@@ -809,7 +809,7 @@ OP *scalarboolean _((OP *o));
 OP *too_few_arguments _((OP *o, char* name));
 OP *too_many_arguments _((OP *o, char* name));
 void null _((OP* o));
-PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix));
+PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval));
 OP *newDEFSVOP _((void));
 char* gv_ename _((GV *gv));
 CV *cv_clone2 _((CV *proto, CV *outside));
