@@ -103,6 +103,12 @@ here and in commands:
     F<file>	Used for filenames
     X<index>	An index entry
     Z<>         A zero-width character
+    E<escape>   An HTML escape
+		    E<lt>		A literal <
+		    E<gt>		A literal >
+		    (these are optional except in other interior
+		     sequences and when preceded by a capital letter)
+		    E<nnn>		Character number nnn.
 
 =back
 
@@ -151,6 +157,36 @@ the first pod directive.
 
 If you had not had that blank line there, then the translators wouldn't
 have seen it.
+
+=head1 Common Pod Pitfalls
+
+=over 4
+
+=item *
+
+Pod translators usually will require paragraphs to be separated by
+completely empty lines.  If you have an apparently blank line with
+some spaces on it, this can cause odd formatting.
+
+=item *
+
+Translators will mostly add wording around a LE<lt>E<gt> link, so that
+C<LE<lt>foo(1)E<gt>> becomes "the I<foo>(1) manpage", for example (see
+B<pod2man> for details).  Thus, you shouldn't write things like C<the
+LE<lt>fooE<gt> manpage>, if you want the translated document to read
+sensibly.
+
+=item *
+
+The script F<pod/checkpods.PL> in the Perl source distribution
+provides skeletal checking for lines that look blank but aren't
+B<only>, but is there as a placeholder until someone writes
+Pod::Checker.  The best way to check your pod is to pass it through
+one or more translators and proofread the result, or print out the
+result and proofread that.  Some of the problems found may be bugs in
+the translators, which you may or may not wish to work around.
+
+=back
 
 =head1 SEE ALSO
 
