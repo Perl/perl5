@@ -15,7 +15,11 @@
 
 #define dXSI32 I32 ix = XSANY.any_i32
 
-#define XSRETURN(off) stack_sp = stack_base + ax + ((off) - 1); return
+#define XSRETURN(off)					\
+    STMT_START {					\
+	stack_sp = stack_base + ax + ((off) - 1);	\
+	return;						\
+    } STMT_END
 
 /* Simple macros to put new mortal values onto the stack.   */
 /* Typically used to return values from XS functions.       */
