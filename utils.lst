@@ -7,7 +7,7 @@ pod/pod2usage
 pod/podchecker
 pod/podselect
 utils/c2ph      # link = utils/pstruct
-utils/dproffpp
+utils/dprofpp
 utils/h2ph
 utils/h2xs
 utils/perlbug
@@ -16,5 +16,5 @@ utils/perldoc
 utils/pl2pm
 utils/splain
 x2p/a2p         # pod = x2p/a2p.pod
-x2p/findperl
+x2p/find2perl
 x2p/s2p         # link = x2p/psed
