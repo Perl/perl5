@@ -15,7 +15,8 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
+/* XXX Configure test needed */
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX) || defined(__NetBSD__)
 #include <signal.h>
 #endif
 
