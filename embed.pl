@@ -107,6 +107,7 @@ sub walk_table (&@) {
 	    $_ .= <IN>;
 	    chomp;
 	}
+	s/\s+$//;
 	my @args;
 	if (/^\s*(#|$)/) {
 	    @args = $_;
