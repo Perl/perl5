@@ -294,8 +294,6 @@ past where $2 ends, and so on.  You can use C<$#+> to determine
 how many subgroups were in the last successful match.  See the
 examples given for the C<@-> variable.
 
-=item $MULTILINE_MATCHING
-
 =item $*
 
 Set to a non-zero integer value to do multi-line matching within a
@@ -490,8 +488,6 @@ taken for something more important.)
 
 Consider using "real" multidimensional arrays as described
 in L<perllol>.
-
-=item $OFMT
 
 =item $#
 
