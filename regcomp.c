@@ -3895,7 +3895,7 @@ S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
 	}
         if (range) {
 	    if (lastvalue > value) { /* b-a */
-		Simple_vFAIL4("invalid [] range \"%*.*s\"",
+		Simple_vFAIL4("Invalid [] range \"%*.*s\"",
 			      RExC_parse - rangebegin,
 			      RExC_parse - rangebegin,
 			      rangebegin);
