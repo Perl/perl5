@@ -10,6 +10,7 @@ Changes5.005		Differences between 5.004 and 5.005
 Changes5.6		Differences between 5.005 and 5.6
 Configure		Portability tool
 Copying			The GNU General Public License
+Cross/README		Cross-compilation.
 EXTERN.h		Included before foreign .h files
 INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
@@ -1595,7 +1596,6 @@ t/lib/lc-currency.t	See if Locale::Codes work
 t/lib/lc-language.t	See if Locale::Codes work
 t/lib/lc-maketext.t	See if Locale::Maketext works
 t/lib/lc-uk.t	See if Locale::Codes work
-t/lib/mbimbf.t	Test accuracy/precision settings in MBI/MBF
 t/lib/md5-aaa.t	See if Digest::MD5 extension works
 t/lib/md5-align.t	See if Digest::MD5 extension works
 t/lib/md5-badf.t	See if Digest::MD5 extension works
