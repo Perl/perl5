@@ -418,7 +418,7 @@ EXPECT:   6
 SWITCHES
 -Mstrict='}); print "Just another Perl Hacker"; ({'
 -l
-SKIP_OS: VMS
+SKIP: No longer works in 5.8.2 and beyond.
 MSWin32
 NetWare
 
