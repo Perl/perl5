@@ -543,9 +543,9 @@ quotas or other plumbing problems.
 
 =item Can't declare class for non-scalar %s in "%s"
 
-(F) Currently, only scalar variables can declared with a specific class
-qualifier in a "my" or "our" declaration.  The semantics may be extended
-for other types of variables in future.
+(F) Currently, only scalar variables can be declared with a specific
+class qualifier in a "my" or "our" declaration.  The semantics may be
+extended for other types of variables in future.
 
 =item Can't declare %s in "%s"
 
