@@ -2092,9 +2092,10 @@ with 5.004_04, simply replace the '#!/usr/local/bin/perl' line at the
 top of the script with the particular version you want to run, e.g.
 #!/usr/local/bin/perl5.00404.
 
-Most extensions will probably not need to be recompiled to use
-with a newer version of perl.   Here is how it is supposed to work.
-(These examples assume you accept all the Configure defaults.)
+Usually, most extensions will probably not need to be recompiled to
+use with a newer version of Perl (the Perl 5.6 to Perl 5.8 transition
+being an exception).  Here is how it is supposed to work.  (These
+examples assume you accept all the Configure defaults.)
 
 Suppose you already have version 5.005_03 installed.  The directories
 searched by 5.005_03 are
@@ -2187,13 +2188,15 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.005 or 5.6.0 to 5.8.0
+=head2 Upgrading from 5.005 or 5.6 to 5.8.0
 
-Most extensions built and installed with versions of perl prior to
-5.005_50 and 5.6.0 will not need to be recompiled to be used with 5.8.0.
-If you find you do need to rebuild an extension with 5.8.0, you may 
-safely do so without disturbing the 5.005 or 5.6.0 installations.  
-(See L<"Coexistence with earlier versions of perl5"> above.)
+B<Perl 5.8.0 is binary incompatible with Perl 5.6.1, 5.6.0, 5.005,
+and any earlier Perl release.>  Perl modules having binary parts
+(meaning that a C compiler is used) will have to be recompiled to be
+used with 5.8.0.  If you find you do need to rebuild an extension with
+5.8.0, you may safely do so without disturbing the 5.005 or 5.6.0
+installations.  (See L<"Coexistence with earlier versions of perl5">
+above.)
 
 See your installed copy of the perllocal.pod file for a (possibly
 incomplete) list of locally installed modules.  Note that you want
