@@ -138,9 +138,8 @@ chdir "pteerslt";
 @f_alpha = qw(Ax.pl aY.pl Bx.pl bY.pl Cx.pl cY.pl);
 if ('a' lt 'A') { # EBCDIC char sets sort lower case before UPPER
     @f_names = sort(@f_names);
-    @f_alpha = qw(aY.pl Ax.pl bY.pl Bx.pl cY.pl Cx.pl);
 }
-if ($^O eq 'VMS') {
+if ($^O eq 'VMS') { # VMS is happily caseignorant
     @f_alpha = qw(ax.pl ay.pl bx.pl by.pl cx.pl cy.pl);
     @f_names = @f_alpha;
 }

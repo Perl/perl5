@@ -1673,6 +1673,8 @@ p	|I32	|keyword	|char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
 p	|void	|lex_end
 p	|void	|lex_start	|SV* line
+p	|void	|op_null	|OP* o
+p	|void	|op_clear	|OP* o
 p	|OP*	|linklist	|OP* o
 p	|OP*	|list		|OP* o
 p	|OP*	|listkids	|OP* o
@@ -2296,8 +2298,6 @@ s	|OP*	|no_fh_allowed	|OP *o
 s	|OP*	|scalarboolean	|OP *o
 s	|OP*	|too_few_arguments|OP *o|char* name
 s	|OP*	|too_many_arguments|OP *o|char* name
-s	|void	|op_clear	|OP* o
-s	|void	|null		|OP* o
 s	|PADOFFSET|pad_addlex	|SV* name
 s	|PADOFFSET|pad_findlex	|char* name|PADOFFSET newoff|U32 seq \
 				|CV* startcv|I32 cx_ix|I32 saweval|U32 flags

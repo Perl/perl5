@@ -10,7 +10,7 @@ package B::Deparse;
 use Carp 'cluck', 'croak';
 use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
-	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL
+	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
@@ -94,6 +94,8 @@ use warnings ();
 # - added more control of expanding control structures
 
 # Todo:
+#  (See also BUGS section at the end of this file)
+#
 # - finish tr/// changes
 # - add option for even more parens (generalize \&foo change)
 # - left/right context
@@ -113,7 +115,7 @@ use warnings ();
 # - here-docs?
 
 # Tests that will always fail:
-# comp/redef.t -- all (redefinition happens at compile time)
+# (see t/TEST for the short list)
 
 # Object fields (were globals):
 #
@@ -956,6 +958,11 @@ sub pp_grepstart { # see also grepwhile
 
 sub pp_mapstart { # see also mapwhile
     cluck "unexpected OP_MAPSTART";
+    return "XXX";
+}
+
+sub pp_method_named {
+    cluck "unexpected OP_METHOD_NAMED";
     return "XXX";
 }
 
@@ -1818,7 +1825,8 @@ sub binop {
 	($left, $right) = ($right, $left);
     }
     $left = $self->deparse_binop_left($op, $left, $prec);
-    $left = "($left)" if $flags & LIST_CONTEXT && $left =~ /^\$/;
+    $left = "($left)" if $flags & LIST_CONTEXT
+		&& $left !~ /^(my|our|local|)[\@\(]/;
     $right = $self->deparse_binop_right($op, $right, $prec);
     return $self->maybe_parens("$left $opname$eq $right", $cx, $prec);
 }
@@ -2206,8 +2214,15 @@ sub pp_list {
 	# This assumes that no other private flags equal 128, and that
 	# OPs that store things other than flags in their op_private,
 	# like OP_AELEMFAST, won't be immediate children of a list.
-	unless ($lop->private & OPpLVAL_INTRO
+	#
+	# OP_ENTERSUB can break this logic, so check for it.
+	# I suspect that open and exit can too.
+
+	if (!($lop->private & (OPpLVAL_INTRO|OPpOUR_INTRO)
 		or $lop->name eq "undef")
+	    or $lop->name eq "entersub"
+	    or $lop->name eq "exit"
+	    or $lop->name eq "open")
 	{
 	    $local = ""; # or not
 	    last;
@@ -2215,8 +2230,10 @@ sub pp_list {
 	if ($lop->name =~ /^pad[ash]v$/) { # my()
 	    ($local = "", last) if $local eq "local" || $local eq "our";
 	    $local = "my";
-	} elsif ($op->name =~ /^(gv|rv2)[ash]v$/
-			&& $op->private & OPpOUR_INTRO) { # our()
+	} elsif ($lop->name =~ /^(gv|rv2)[ash]v$/
+			&& $lop->private & OPpOUR_INTRO
+		or $lop->name eq "null" && $lop->first->name eq "gvsv"
+			&& $lop->first->private & OPpOUR_INTRO) { # our()
 	    ($local = "", last) if $local eq "my" || $local eq "local";
 	    $local = "our";
 	} elsif ($lop->name ne "undef") { # local()
@@ -2412,6 +2429,8 @@ sub pp_leavetry {
 
 BEGIN { eval "sub OP_CONST () {" . opnumber("const") . "}" }
 BEGIN { eval "sub OP_STRINGIFY () {" . opnumber("stringify") . "}" }
+BEGIN { eval "sub OP_RV2SV () {" . opnumber("rv2sv") . "}" }
+BEGIN { eval "sub OP_LIST () {" . opnumber("list") . "}" }
 
 sub pp_null {
     my $self = shift;
@@ -2520,6 +2539,11 @@ sub pp_aelemfast {
 sub rv2x {
     my $self = shift;
     my($op, $cx, $type) = @_;
+
+    if (class($op) eq 'NULL' || !$op->can("first")) {
+	Carp::cluck("Unexpected op in pp_rv2x");
+	return 'XXX';
+    }
     my $kid = $op->first;
     my $str = $self->deparse($kid, 0);
     return $self->stash_variable($type, $str) if is_scalar($kid);
@@ -2543,7 +2567,17 @@ sub pp_av2arylen {
 }
 
 # skip down to the old, ex-rv2cv
-sub pp_rv2cv { $_[0]->rv2x($_[1]->first->first->sibling, $_[2], "&") }
+sub pp_rv2cv {
+    my ($self, $op, $cx) = @_;
+    if (!null($op->first) && $op->first->name eq 'null' &&
+	$op->first->targ eq OP_LIST)
+    {
+	return $self->rv2x($op->first->first->sibling, $cx, "&")
+    }
+    else {
+	return $self->rv2x($op, $cx, "")
+    }
+}
 
 sub pp_rv2av {
     my $self = shift;
@@ -2725,7 +2759,8 @@ sub method {
     } else {
 	$obj = $kid;
 	$kid = $kid->sibling;
-	for (; not null $kid->sibling; $kid = $kid->sibling) {
+	for (; !null ($kid->sibling) && $kid->name ne "method_named";
+	      $kid = $kid->sibling) {
 	    push @exprs, $self->deparse($kid, 6);
 	}
 	$meth = $kid;
@@ -2745,7 +2780,7 @@ sub method {
     }
     my $args = join(", ", @exprs);	
     $kid = $obj . "->" . $meth;
-    if ($args) {
+    if (length $args) {
 	return $kid . "(" . $args . ")"; # parens mandatory
     } else {
 	return $kid;
@@ -2835,7 +2870,7 @@ sub pp_entersub {
     my $prefix = "";
     my $amper = "";
     my($kid, @exprs);
-    if ($op->flags & OPf_SPECIAL) {
+    if ($op->flags & OPf_SPECIAL && !($op->flags & OPf_MOD)) {
 	$prefix = "do ";
     } elsif ($op->private & OPpENTERSUB_AMPER) {
 	$amper = "&";
@@ -2857,7 +2892,7 @@ sub pp_entersub {
 	}
 	$simple = 1; # only calls of named functions can be prototyped
 	$kid = $self->deparse($kid, 24);
-    } elsif (is_scalar $kid->first) {
+    } elsif (is_scalar ($kid->first) && $kid->first->name ne 'rv2cv') {
 	$amper = "&";
 	$kid = $self->deparse($kid, 24);
     } else {
@@ -2963,6 +2998,12 @@ sub re_uninterp {
     return $str;
 }
 
+sub re_uninterp_extended {
+    my ($str) = @_;
+    $str =~ s/^([^#]*)/re_uninterp($1)/emg;
+    return $str;
+}
+
 # character escapes, but not delimiters that might need to be escaped
 sub escape_str { # ASCII, UTF8
     my($str) = @_;
@@ -2976,6 +3017,14 @@ sub escape_str { # ASCII, UTF8
     $str =~ s/\r/\\r/g;
     $str =~ s/([\cA-\cZ])/'\\c' . chr(ord('@') + ord($1))/ge;
     $str =~ s/([\0\033-\037\177-\377])/'\\' . sprintf("%03o", ord($1))/ge;
+    return $str;
+}
+
+sub escape_extended_re {
+    my($str) = @_;
+    $str =~ s/(.)/ord($1)>255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
+    $str =~ s/([\0\033-\037\177-\377])/'\\' . sprintf("%03o", ord($1))/ge;
+    $str =~ s/\n/\n\f/g;
     return $str;
 }
 
@@ -3048,7 +3097,13 @@ sub const {
     } elsif ($sv->FLAGS & SVf_IOK) {
 	return $sv->int_value;
     } elsif ($sv->FLAGS & SVf_NOK) {
-	return $sv->NV;
+	# try the default stringification
+	my $r = "".$sv->NV;
+	if ($r =~ /e/) {
+	    # If it's in scientific notation, we might have lost information
+	    return sprintf("%.20e", $sv->NV);
+	}
+	return $r;
     } elsif ($sv->FLAGS & SVf_ROK && $sv->can("RV")) {
 	return "\\(" . const($sv->RV) . ")"; # constant folded
     } elsif ($sv->FLAGS & SVf_POK) {
@@ -3097,13 +3152,13 @@ sub dq {
     } elsif ($type eq "concat") {
 	my $first = $self->dq($op->first);
 	my $last  = $self->dq($op->last);
-	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
-	if ($last =~ /^[A-Z\\\^\[\]_?]/) {
-	    $first =~ s/([\$@])\^$/${1}{^}/;  # "${^}W" etc
-        }
-	elsif ($last =~ /^[{\[\w]/) {
-	    $first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/;
-	}
+
+  	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
+	($last =~ /^[A-Z\\\^\[\]_?]/ &&
+	    $first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
+	    || ($last =~ /^[{\[\w_]/ &&
+		$first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/);
+
 	return $first . $last;
     } elsif ($type eq "uc") {
 	return '\U' . $self->dq($op->first->sibling) . '\E';
@@ -3169,10 +3224,13 @@ sub double_delim {
     }
 }
 
+# Only used by tr///, so backslashes hyphens
 sub pchr { # ASCII
     my($n) = @_;
     if ($n == ord '\\') {
 	return '\\\\';
+    } elsif ($n == ord "-") {
+	return "\\-";
     } elsif ($n >= ord(' ') and $n <= ord('~')) {
 	return chr($n);
     } elsif ($n == ord "\a") {
@@ -3215,12 +3273,10 @@ sub collapse {
     return $str;
 }
 
-# XXX This has trouble with hyphens in the replacement (tr/bac/-AC/),
-# and backslashes.
-
 sub tr_decode_byte {
     my($table, $flags) = @_;
-    my(@table) = unpack("s256", $table);
+    my(@table) = unpack("s*", $table);
+    splice @table, 0x100, 1;   # Number of subsequent elements
     my($c, $tr, @from, @to, @delfrom, $delhyphen);
     if ($table[ord "-"] != -1 and 
 	$table[ord("-") - 1] == -1 || $table[ord("-") + 1] == -1)
@@ -3234,7 +3290,7 @@ sub tr_decode_byte {
 	    $delhyphen = 1;
 	}
     }
-    for ($c = 0; $c < 256; $c++) {
+    for ($c = 0; $c < @table; $c++) {
 	$tr = $table[$c];
 	if ($tr >= 0) {
 	    push @from, $c; push @to, $tr;
@@ -3266,6 +3322,8 @@ sub tr_chr {
     my $x = shift;
     if ($x == ord "-") {
 	return "\\-";
+    } elsif ($x == ord "\\") {
+	return "\\\\";
     } else {
 	return chr $x;
     }
@@ -3388,14 +3446,18 @@ sub pp_trans {
 # Like dq(), but different
 sub re_dq {
     my $self = shift;
-    my $op = shift;
+    my ($op, $extended) = @_;
+
     my $type = $op->name;
     if ($type eq "const") {
 	return '$[' if $op->private & OPpCONST_ARYBASE;
-	return re_uninterp(escape_str(re_unback($self->const_sv($op)->as_string)));
+	my $unbacked = re_unback($self->const_sv($op)->as_string);
+	return re_uninterp_extended(escape_extended_re($unbacked))
+	    if $extended;
+	return re_uninterp(escape_str($unbacked));
     } elsif ($type eq "concat") {
-	my $first = $self->re_dq($op->first);
-	my $last  = $self->re_dq($op->last);
+	my $first = $self->re_dq($op->first, $extended);
+	my $last  = $self->re_dq($op->last,  $extended);
 	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
 	if ($last =~ /^[A-Z\\\^\[\]_?]/) {
 	    $first =~ s/([\$@])\^$/${1}{^}/;
@@ -3405,15 +3467,15 @@ sub re_dq {
 	}
 	return $first . $last;
     } elsif ($type eq "uc") {
-	return '\U' . $self->re_dq($op->first->sibling) . '\E';
+	return '\U' . $self->re_dq($op->first->sibling, $extended) . '\E';
     } elsif ($type eq "lc") {
-	return '\L' . $self->re_dq($op->first->sibling) . '\E';
+	return '\L' . $self->re_dq($op->first->sibling, $extended) . '\E';
     } elsif ($type eq "ucfirst") {
-	return '\u' . $self->re_dq($op->first->sibling);
+	return '\u' . $self->re_dq($op->first->sibling, $extended);
     } elsif ($type eq "lcfirst") {
-	return '\l' . $self->re_dq($op->first->sibling);
+	return '\l' . $self->re_dq($op->first->sibling, $extended);
     } elsif ($type eq "quotemeta") {
-	return '\Q' . $self->re_dq($op->first->sibling) . '\E';
+	return '\Q' . $self->re_dq($op->first->sibling, $extended) . '\E';
     } elsif ($type eq "join") {
 	return $self->deparse($op->last, 26); # was join($", @ary)
     } else {
@@ -3421,13 +3483,54 @@ sub re_dq {
     }
 }
 
-sub pp_regcomp {
+sub pure_string {
+    my ($self, $op) = @_;
+    my $type = $op->name;
+
+    if ($type eq 'const') {
+	return 1;
+    }
+    elsif ($type =~ /^[ul]c(first)?$/ || $type eq 'quotemeta') {
+	return $self->pure_string($op->first->sibling);
+    }
+    elsif ($type eq 'join') {
+	my $join_op = $op->first->sibling;  # Skip pushmark
+	return 0 unless $join_op->name eq 'null' && $join_op->targ eq OP_RV2SV;
+
+	my $gvop = $join_op->first;
+	return 0 unless $gvop->name eq 'gvsv';
+        return 0 unless '"' eq $self->gv_name($self->gv_or_padgv($gvop));
+
+	return 0 unless ${$join_op->sibling} eq ${$op->last};
+	return 0 unless $op->last->name =~ /^(rv2|pad)av$/;
+    }
+    elsif ($type eq 'concat') {
+	return $self->pure_string($op->first)
+            && $self->pure_string($op->last);
+    }
+    elsif (is_scalar($op) || $type =~ /^[ah]elem(fast)?$/) {
+	return 1;
+    }
+    else {
+	return 0;
+    }
+
+    return 1;
+}
+
+sub regcomp {
     my $self = shift;
-    my($op, $cx) = @_;
+    my($op, $cx, $extended) = @_;
     my $kid = $op->first;
     $kid = $kid->first if $kid->name eq "regcmaybe";
     $kid = $kid->first if $kid->name eq "regcreset";
-    return $self->re_dq($kid);
+    return ($self->re_dq($kid, $extended), 1) if $self->pure_string($kid);
+    return ($self->deparse($kid, $cx), 0);
+}
+
+sub pp_regcomp {
+    my ($self, $op, $cx) = @_;
+    return (($self->regcomp($op, $cx, 0))[0]);
 }
 
 # osmic acid -- see osmium tetroxide
@@ -3447,10 +3550,19 @@ sub matchop {
 	$var = $self->deparse($kid, 20);
 	$kid = $kid->sibling;
     }
+    my $quote = 1;
+    my $extended = ($op->pmflags & PMf_EXTENDED);
     if (null $kid) {
-	$re = re_uninterp(escape_str(re_unback($op->precomp)));
+	my $unbacked = re_unback($op->precomp);
+	if ($extended) {
+	    $re = re_uninterp_extended(escape_extended_re($unbacked));
+	} else {
+	    $re = re_uninterp(escape_str(re_unback($op->precomp)));
+	}
+    } elsif ($kid->name ne 'regcomp') {
+	Carp::cluck("found ".$kid->name." where regcomp expected");
     } else {
-	$re = $self->deparse($kid, 1);
+	($re, $quote) = $self->regcomp($kid, 1, $extended);
     }
     my $flags = "";
     $flags .= "c" if $op->pmflags & PMf_CONTINUE;
@@ -3464,10 +3576,10 @@ sub matchop {
     if ($op->pmflags & PMf_ONCE) { # only one kind of delimiter works here
 	$re =~ s/\?/\\?/g;
 	$re = "?$re?";
-    } else {
+    } elsif ($quote) {
 	$re = single_delim($name, $delim, $re);
     }
-    $re = $re . $flags;
+    $re = $re . $flags if $quote;
     if ($binop) {
 	return $self->maybe_parens("$var =~ $re", $cx, 20);
     } else {
@@ -3952,36 +4064,9 @@ than in the input file.
 
 =item *
 
-Lvalue method calls are not yet fully supported. (Ordinary lvalue
-subroutine calls ought to be okay though.)
-
-=item *
-
-If you have a regex which is anything other than a literal of some
-kind, B::Deparse will produce incorrect output.
-e.g. C<$foo =~ give_me_a_regex()> will come back as
-C<$foo =~ /give_me_a_regex()/>
-
-=item *
-
-  m{ #foo
-      bar }x
-
-comes out as
-
-  m/#foo\n    bar/x)
-
-which isn't right.
-
-=item *
-
 If a keyword is over-ridden, and your program explicitly calls
 the built-in version by using CORE::keyword, the output of B::Deparse
 will not reflect this.
-
-=item *
-
-tr/// doesn't correctly handle wide characters
 
 =item *
 
@@ -4001,13 +4086,24 @@ Examples that fail include:
     use constant E2BIG => ($!=7);
     use constant x=>\$x; print x
 
+=item *
+
+An input file that uses source filtering probably won't be deparsed into
+runnable code, because it will still include the B<use> declaration
+for the source filtering module, even though the code that is
+produced is already ordinary Perl which shouldn't be filtered again.
+
+=item *
+
+There are probably many more bugs on non-ASCII platforms (EBCDIC).
+
 =back
 
 =head1 AUTHOR
 
 Stephen McCamant <smcc@CSUA.Berkeley.EDU>, based on an earlier
 version by Malcolm Beattie <mbeattie@sable.ox.ac.uk>, with
-contributions from Gisle Aas, James Duncan, Albert Dvornik, Hugo van
-der Sanden, Gurusamy Sarathy, and Nick Ing-Simmons.
+contributions from Gisle Aas, James Duncan, Albert Dvornik, Robin
+Houston, Hugo van der Sanden, Gurusamy Sarathy, and Nick Ing-Simmons.
 
 =cut

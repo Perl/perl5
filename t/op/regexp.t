@@ -36,8 +36,6 @@ BEGIN {
     @INC = '../lib';
 }
 
-use re 'asciirange'; # ranges are computed in ASCII
-
 $iters = shift || 1;		# Poor man performance suite, 10000 is OK.
 
 open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests') ||

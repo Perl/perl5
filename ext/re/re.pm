@@ -79,7 +79,6 @@ See L<perlmodlib/Pragmatic Modules>.
 my %bitmask = (
 taint		=> 0x00100000,
 eval		=> 0x00200000,
-asciirange	=> 0x02000000,
 );
 
 sub setcolor {

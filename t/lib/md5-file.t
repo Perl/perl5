@@ -16,7 +16,7 @@ my $EXPECT;
 if (ord('A') == 193) { # EBCDIC
 $EXPECT = <<EOT;
 95a81f17a8e6c2273aecac12d8c4cb90  ext/Digest/MD5/MD5.pm
-c1eb144eccdad16fc34399cb4ab2e136  ext/Digest/MD5/MD5.xs
+e9e70adad1215b8fa43b52508f425ae9  ext/Digest/MD5/MD5.xs
 EOT
 } else { # ASCII
 $EXPECT = <<EOT;

@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..54\n";
+print "1..56\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -45,6 +45,9 @@ test($obj->method("a","b","c"), "method,a,b,c");
 test($obj->$mname("a","b","c"), "method,a,b,c");
 test((method $obj ("a","b","c")), "method,a,b,c");
 test((method $obj "a","b","c"), "method,a,b,c");
+
+test($obj->method(0), "method,0");
+test($obj->method(1), "method,1");
 
 test($obj->method(), "method");
 test($obj->$mname(), "method");

@@ -1028,6 +1028,13 @@ typedef struct perl_mstats perl_mstats_t;
 #undef UV
 #endif
 
+/* Configure gets this right but the UTS compiler gets it wrong.
+   -- Hal Morris <hom00@utsglobal.com> */
+#ifdef UTS
+#  undef  UVTYPE
+#  define UVTYPE unsigned
+#endif
+
 /*
     The IV type is supposed to be long enough to hold any integral
     value or a pointer.
@@ -2833,7 +2840,6 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_FILETEST_ACCESS	0x00400000
 #define HINT_UTF8		0x00800000
 #define HINT_UTF8_DISTINCT	0x01000000
-#define HINT_RE_ASCIIR		0x02000000
 
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))
@@ -3579,6 +3585,9 @@ typedef struct am_table_short AMTS;
 #ifdef IAMSUID
 
 #ifdef I_SYS_STATVFS
+#   if defined(PERL_SCO) && !defined(_SVID3)
+#       define _SVID3
+#   endif
 #   include <sys/statvfs.h>     /* for f?statvfs() */
 #endif
 #ifdef I_SYS_MOUNT

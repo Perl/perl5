@@ -313,7 +313,7 @@ sub clean_data($){
 	${$dataref}[$i] =~ s/\s+\Z//;
 
         # have a look for all-space lines
-	if( ${$dataref}[$i] =~ /^\s+$/m ){
+      if( ${$dataref}[$i] =~ /^\s+$/m and $dataref->[$i] !~ /^\s/ ){
 	    my @chunks = split( /^\s+$/m, ${$dataref}[$i] );
 	    splice( @$dataref, $i, 1, @chunks );
 	}

@@ -5,7 +5,7 @@ BEGIN {
 	@INC = '../lib';
 }
 
-print "1..8\n";
+print "1..10\n";
 
 package aClass;
 
@@ -63,4 +63,14 @@ $obk->SomeElem(123);
 
 print "not " unless $obk->SomeElem() == 123;
 print "ok 8\n";
+
+$obj->a([4,5,6]);
+
+print "not " unless $obj->a(1) == 5;
+print "ok 9\n";
+
+$obj->h({h=>7,r=>8,f=>9});
+
+print "not " unless $obj->h('r') == 8;
+print "ok 10\n";
 

@@ -1978,12 +1978,6 @@ PP(pp_sne)
 PP(pp_scmp)
 {
     dSP; dTARGET;  tryAMAGICbin(scmp,0);
-#ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && SvROK(TOPm1s)) {
-	SETi(PTR2UV(SvRV(TOPs)) - PTR2UV(SvRV(TOPm1s)));
-	RETURN;
-    }
-#endif
     {
       dPOPTOPssrl;
       int cmp = ((PL_op->op_private & OPpLOCALE)
@@ -2814,6 +2808,9 @@ PP(pp_substr)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
 	sv_setpvn(TARG, tmps, rem);
+#ifdef USE_LOCALE_COLLATE
+	sv_unmagic(TARG, 'o');
+#endif
 	if (utf8_curlen)
 	    SvUTF8_on(TARG);
 	if (repl) {

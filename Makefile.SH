@@ -878,18 +878,18 @@ test_prep: miniperl ./perl$(EXE_EXT) preplibrary utilities $(dynamic_ext) $(nonx
 	PERL=./perl $(MAKE) _test_prep
 
 _test_tty:
-	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) TEST $(UTF8) </dev/tty
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) TEST $(TEST_ARGS) </dev/tty
 
 _test_notty:
-	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) TEST $(UTF8)
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) TEST $(TEST_ARGS)
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
 _test:
 	if (true </dev/tty) >/dev/null 2>&1; then \
-	  $(MAKE) _test_tty; \
+	  $(MAKE) TEST_ARGS=$(TEST_ARGS) _test_tty   ; \
 	else \
-	  $(MAKE) _test_notty; \
+	  $(MAKE) TEST_ARGS=$(TEST_ARGS) _test_notty ; \
 	fi
 	@echo "Ran tests" > t/rantests
 
@@ -903,7 +903,7 @@ test_notty: test_prep
 	PERL=./perl $(MAKE) _test_notty
 
 utest ucheck: test_prep
-	PERL=./perl UTF8=-utf8 $(MAKE) _test
+	PERL=./perl TEST_ARGS=-utf8 $(MAKE) _test
 
 test-prep:	test_prep
 
@@ -920,10 +920,18 @@ test.third check.third:	test_prep.third perl.third
 	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1 $(MAKE) _test
 
 utest.third ucheck.third: test_prep.third perl.third
-	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1UTF=-utf8 $(MAKE) _test
+	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1 TEST_ARGS=-utf8 $(MAKE) _test
 
 test_notty.third: test_prep.third perl.third
 	PERL=./perl.third $(MAKE) PERL_DEBUG=PERL_3LOG=1 _test_notty
+
+# Targets for Deparse testing.
+
+test.deparse:	test_prep
+	PERL=./perl TEST_ARGS=-deparse $(MAKE) _test
+
+test_notty.deparse:	test_prep
+	PERL=./perl TEST_ARGS=-deparse $(MAKE) _test_notty
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.

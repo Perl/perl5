@@ -3515,14 +3515,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    ANYOF_BITMAP_SET(ret, value);
 #else  /* EBCDIC */
 			for (value = 0; value < 256; value++) {
-			    if (PL_hints & HINT_RE_ASCIIR) {
-				if (NATIVE_TO_ASCII(value) < 128)
-				    ANYOF_BITMAP_SET(ret, value);
-			    }
-			    else {
-				if (isASCII(value))
-				    ANYOF_BITMAP_SET(ret, value);
-			    }
+			    if (isASCII(value))
+			        ANYOF_BITMAP_SET(ret, value);
 			}
 #endif /* EBCDIC */
 		    }
@@ -3537,14 +3531,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    ANYOF_BITMAP_SET(ret, value);
 #else  /* EBCDIC */
 			for (value = 0; value < 256; value++) {
-			    if (PL_hints & HINT_RE_ASCIIR) {
-				if (NATIVE_TO_ASCII(value) >= 128)
-				    ANYOF_BITMAP_SET(ret, value);
-			    }
-			    else {
-				if (!isASCII(value))
-				    ANYOF_BITMAP_SET(ret, value);
-			    }
+			    if (!isASCII(value))
+			        ANYOF_BITMAP_SET(ret, value);
 			}
 #endif /* EBCDIC */
 		    }
@@ -3783,9 +3771,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	} /* end of namedclass \blah */
 
 	if (range) {
-	    if (((prevvalue > value) && !(PL_hints & HINT_RE_ASCIIR)) ||
-                ((NATIVE_TO_UNI(prevvalue) > NATIVE_TO_UNI(value)) &&
-		 (PL_hints & HINT_RE_ASCIIR))) /* b-a */ {
+	    if (prevvalue > value) /* b-a */ {
 		Simple_vFAIL4("Invalid [] range \"%*.*s\"",
 			      RExC_parse - rangebegin,
 			      RExC_parse - rangebegin,
@@ -3823,18 +3809,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	        IV ceilvalue = value < 256 ? value : 255;
 
 #ifdef EBCDIC
-		if (PL_hints & HINT_RE_ASCIIR) {
-		    /* New style scheme for ranges:
-		     * use re 'asciir';
-		     * do ranges in ASCII/Unicode space
-		     */
-		    for (i  = NATIVE_TO_ASCII(prevvalue);
-			 i <= NATIVE_TO_ASCII(ceilvalue);
-			 i++)
-		      ANYOF_BITMAP_SET(ret, ASCII_TO_NATIVE(i));
-		}
-		else if ((isLOWER(prevvalue) && isLOWER(ceilvalue)) ||
-			 (isUPPER(prevvalue) && isUPPER(ceilvalue)))
+		if ((isLOWER(prevvalue) && isLOWER(ceilvalue)) ||
+		    (isUPPER(prevvalue) && isUPPER(ceilvalue)))
 		{
 		    if (isLOWER(prevvalue)) {
 			for (i = prevvalue; i <= ceilvalue; i++)

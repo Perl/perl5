@@ -54,7 +54,7 @@ $keep defaults to 0.
 
 The
 fourth argument, I<$check>, instructs C<autosplit> to check the module
-currently being split to ensure that it does include a C<use>
+currently being split to ensure that it includes a C<use>
 specification for the AutoLoader module, and skips the module if
 AutoLoader is not detected.
 $check defaults to 1.
@@ -199,6 +199,8 @@ sub autosplit_lib_modules{
 
 # private functions
 
+my $self_mod_time = (stat __FILE__)[9];
+
 sub autosplit_file {
     my($filename, $autodir, $keep, $check_for_autoloader, $check_mod_time)
 	= @_;
@@ -268,7 +270,8 @@ sub autosplit_file {
 
     if ($check_mod_time){
 	my($al_ts_time) = (stat("$al_idx_file"))[9] || 1;
-	if ($al_ts_time >= $pm_mod_time){
+	if ($al_ts_time >= $pm_mod_time and
+	    $al_ts_time >= $self_mod_time){
 	    print "AutoSplit skipped ($al_idx_file newer than $filename)\n"
 		if ($Verbose >= 2);
 	    return undef;	# one undef, not a list
@@ -338,13 +341,14 @@ sub autosplit_file {
 			if ($Verbose>=1);
 	    }
 	    push(@outfiles, $path);
+	    my $lineno = $fnr - @cache;
 	    print OUT <<EOT;
 # NOTE: Derived from $filename.
-# Changes made here will be lost when autosplit again.
+# Changes made here will be lost when autosplit is run again.
 # See AutoSplit.pm.
 package $this_package;
 
-#line $fnr "$filename (autosplit into $path)"
+#line $lineno "$filename (autosplit into $path)"
 EOT
 	    print OUT @cache;
 	    @cache = ();
