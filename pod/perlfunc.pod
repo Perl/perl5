@@ -5524,7 +5524,7 @@ by C<use>, i.e., it calls C<unimport Module LIST> instead of C<import>.
 
 If no C<unimport> method can be found the call fails with a fatal error.
 
-See L<perlmod> for a list of standard modules and pragmas.  See L<perlrun>
+See L<perlmodlib> for a list of standard modules and pragmas.  See L<perlrun>
 for the C<-M> and C<-m> command-line options to perl that give C<use>
 functionality from the command-line.
 

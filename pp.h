@@ -55,6 +55,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
 =cut */
 
+#undef SP /* Solaris 2.7 i386 has this in /usr/include/sys/reg.h */
 #define SP sp
 #define MARK mark
 #define TARG targ

@@ -8846,7 +8846,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_numeric_name	= SAVEPV(proto_perl->Inumeric_name);
     PL_numeric_standard	= proto_perl->Inumeric_standard;
     PL_numeric_local	= proto_perl->Inumeric_local;
-    PL_numeric_radix	= proto_perl->Inumeric_radix;
+    PL_numeric_radix	= sv_dup_inc(proto_perl->Inumeric_radix);
 #endif /* !USE_LOCALE_NUMERIC */
 
     /* utf8 character classes */
