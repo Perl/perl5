@@ -31,6 +31,168 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14709] By: jhi                                   on 2002/02/15  15:01:54
+        Log: Subject: [PATCH hints/solaris_2.sh]; was Re: [PATCH Configure] Interaction of cc.cbu and checkcc
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 14 Feb 2002 19:07:40 GMT
+             Message-Id: <200202141907.TAA21516@tempest.npl.co.uk>
+             
+             (the hints part only)
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 14707] By: jhi                                   on 2002/02/15  15:00:01
+        Log: Subject: Re: [PATCH hints/solaris_2.sh]; was Re: [PATCH Configure] Interaction  of cc.cbu and checkcc
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 15 Feb 2002 12:14:39 GMT
+             Message-Id: <200202151214.MAA26466@tempest.npl.co.uk>
+             
+             Split checking-for-gcc and checking-for-cc.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14706] By: ams                                   on 2002/02/15  13:57:15
+        Log: Subject: Re: [ID 20020213.015] Pod::Html XHTML update for 5.7.2
+             From: Ville =?ISO-8859-1?Q?Skytt=E4?= <ville.skytta@iki.fi>
+             Date: 15 Feb 2002 10:53:06 +0200
+             Message-Id: <1013763186.28457.6.camel@cs78130147.pp.htv.fi>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 14705] By: ams                                   on 2002/02/15  08:42:55
+        Log: Subject: [PATCH @14577] OS/2 tests and more
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 15 Feb 2002 03:56:24 -0500
+             Message-Id: <20020215035624.A16467@math.ohio-state.edu>
+     Branch: perl
+	   + os2/OS2/Process/t/os2_process.t
+	   + os2/OS2/Process/t/os2_process_kid.t
+	   + os2/OS2/Process/t/os2_process_text.t
+	   ! MANIFEST configpm hints/os2.sh makedef.pl
+	   ! os2/OS2/Process/Makefile.PL os2/OS2/Process/Process.pm
+	   ! os2/OS2/Process/Process.xs os2/os2.c os2/os2_base.t
+	   ! os2/os2ish.h
+____________________________________________________________________________
+[ 14700] By: jhi                                   on 2002/02/15  02:51:13
+        Log: Subject: [ID 20020213.015] Pod::Html XHTML update for 5.7.2
+             From: Ville "Skyttä" <ville.skytta@iki.fi>
+             Date: Wed, 13 Feb 2002 22:29:39 +0200
+             Message-Id: <20020213222939.5321b5ce.ville.skytta@iki.fi>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 14699] By: jhi                                   on 2002/02/14  23:47:43
+        Log: Document and test the C0 and C1.
+     Branch: perl
+	   ! lib/charnames.pm lib/charnames.t
+____________________________________________________________________________
+[ 14697] By: jhi                                   on 2002/02/14  22:21:20
+        Log: Also OS/2 seems to need exe set early.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14696] By: jhi                                   on 2002/02/14  22:13:18
+        Log: Document pack U0U.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 14695] By: jhi                                   on 2002/02/14  21:56:52
+        Log: Subject: [PATCH] Re: bug? no warning from getc BOLLOCKS
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 14 Feb 2002 23:58:00 +0100
+             Message-ID: <20020214235800.A12901@rafael>
+     Branch: perl
+	   ! pp_sys.c t/lib/warnings/pp_sys
+____________________________________________________________________________
+[ 14694] By: jhi                                   on 2002/02/14  21:54:43
+        Log: Subject: [PATCH @13746] conditional pragmas
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 31 Dec 2001 18:18:09 -0500
+             Message-ID: <20011231181809.A29528@math.ohio-state.edu>
+     Branch: perl
+	   + lib/if.pm lib/if.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14693] By: jhi                                   on 2002/02/14  21:47:08
+        Log: Deparse bug introduced by #14615: the fix is just a workaround,
+             I suspect there to be another deeper bug, must distill simpler
+             test case.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm ext/B/t/deparse.t
+____________________________________________________________________________
+[ 14692] By: jhi                                   on 2002/02/14  19:52:26
+        Log: Integrate perlio; 
+             
+             Make dependencies more precise (for nmake)
+     Branch: perl
+	  !> ext/Encode/EUC_JP/Makefile.PL
+____________________________________________________________________________
+[ 14691] By: jhi                                   on 2002/02/14  18:08:58
+        Log: Just a guess.
+     Branch: perl
+	   ! lib/Tie/Handle.pm
+____________________________________________________________________________
+[ 14689] By: jhi                                   on 2002/02/14  16:03:50
+        Log: Upgrade to Net::Ping 2.11.
+     Branch: perl
+	   ! lib/Net/Ping.pm lib/Net/Ping/CHANGES lib/Net/Ping/README
+	   ! lib/Net/Ping/t/110_icmp_inst.t lib/Net/Ping/t/120_udp_inst.t
+	   ! lib/Net/Ping/t/130_tcp_inst.t lib/Net/Ping/t/140_stream_inst.t
+	   ! lib/Net/Ping/t/200_ping_tcp.t lib/Net/Ping/t/300_ping_stream.t
+____________________________________________________________________________
+[ 14688] By: jhi                                   on 2002/02/14  15:15:17
+        Log: Subject: [PATCH ExtUtils/Installed.pm ExtUtils/t/Installed.t]
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Wed, 13 Feb 2002 17:37:07 GMT
+             Message-Id: <200202131737.RAA29010@tempest.npl.co.uk>
+             
+             (updated version of the above)
+     Branch: perl
+	   ! lib/ExtUtils/Installed.pm lib/ExtUtils/t/Installed.t
+____________________________________________________________________________
+[ 14687] By: jhi                                   on 2002/02/14  14:44:02
+        Log: Excise inexact blather.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14686] By: jhi                                   on 2002/02/14  14:30:35
+        Log: Subject: Re: [PATCH @13746] tied hashes: memoization
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 31 Dec 2001 20:28:46 -0500
+             Message-ID: <20011231202845.A1323@math.ohio-state.edu>
+     Branch: perl
+	   + lib/Tie/Memoize.pm lib/Tie/Memoize.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14684] By: jhi                                   on 2002/02/14  14:09:10
+        Log: Subject: [PATCH @13746] tied hashes
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>             
+             Date: Mon, 31 Dec 2001 19:15:39 -0500
+             Message-ID: <20011231191539.A46@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/Tie/Hash.pm pod/perltie.pod
+____________________________________________________________________________
+[ 14683] By: jhi                                   on 2002/02/13  22:30:55
+        Log: Subject: Re: [PATCH] Configure followed by make minitest
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Sun, 10 Feb 2002 23:22:05 -0800
+             Message-ID: <dE3Z8gzkgyBD092yn@efn.org>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 14682] By: jhi                                   on 2002/02/13  15:50:37
+        Log: Subject: Re: perl@14647
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 11 Feb 2002 19:30:36 +0100
+             Message-Id: <20020211192820.C199.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! t/op/groups.t
+____________________________________________________________________________
+[ 14681] By: jhi                                   on 2002/02/13  15:14:25
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14680] By: jhi                                   on 2002/02/13  13:41:50
         Log: Integrate perlio;
              
