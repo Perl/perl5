@@ -1,7 +1,7 @@
 package ExtUtils::Install;
 
-$VERSION = substr q$Revision: 1.19 $, 10;
-# $Date: 1997/08/01 08:39:37 $
+$VERSION = substr q$Revision: 1.28 $, 10;
+# $Date: 1998/01/25 07:08:24 $
 
 use Exporter;
 use Carp ();
@@ -52,10 +52,12 @@ sub install {
 	opendir DIR, $source_dir_or_file or next;
 	for (readdir DIR) {
 	    next if $_ eq "." || $_ eq ".." || $_ eq ".exists";
-	    if (-w $hash{$source_dir_or_file} || mkpath($hash{$source_dir_or_file})) {
+	    if (-w $hash{$source_dir_or_file} ||
+		mkpath($hash{$source_dir_or_file})) {
 		last;
 	    } else {
-		warn "Warning: You do not have permissions to install into $hash{$source_dir_or_file}"
+		warn "Warning: You do not have permissions to " .
+		    "install into $hash{$source_dir_or_file}"
 		    unless $warn_permissions++;
 	    }
 	}
@@ -73,11 +75,6 @@ sub install {
     my $cwd = cwd();
     my $umask = umask 0 unless $Is_VMS;
 
-    # This silly reference is just here to be able to call MY->catdir
-    # without a warning (Waiting for a proper path/directory module,
-    # Charles!)
-    my $MY = {};
-    bless $MY, 'MY';
     my($source);
     MOD_INSTALL: foreach $source (sort keys %hash) {
 	#copy the tree to the target directory without altering
@@ -85,14 +82,24 @@ sub install {
 	#file. The packlist file contains the absolute paths of the
 	#install locations. AFS users may call this a bug. We'll have
 	#to reconsider how to add the means to satisfy AFS users also.
+
+	#October 1997: we want to install .pm files into archlib if
+	#there are any files in arch. So we depend on having ./blib/arch
+	#hardcoded here.
+	my $targetroot = $hash{$source};
+	if ($source eq "./blib/lib" and
+	    exists $hash{"./blib/arch"} and
+	    directory_not_empty("./blib/arch")) {
+	    $targetroot = $hash{"./blib/arch"};
+	}
 	chdir($source) or next;
 	find(sub {
 	    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
                          $atime,$mtime,$ctime,$blksize,$blocks) = stat;
 	    return unless -f _;
 	    return if $_ eq ".exists";
-	    my $targetdir = $MY->catdir($hash{$source},$File::Find::dir);
-	    my $targetfile = $MY->catfile($targetdir,$_);
+	    my $targetdir = MY->catdir($targetroot,$File::Find::dir);
+	    my $targetfile = MY->catfile($targetdir,$_);
 
 	    my $diff = 0;
 	    if ( -f $targetfile && -s _ == $size) {
@@ -145,6 +152,19 @@ sub install {
     }
 }
 
+sub directory_not_empty ($) {
+  my($dir) = @_;
+  my $files = 0;
+  find(sub {
+	   return if $_ eq ".exists";
+	   if (-f) {
+	     $File::Find::prune++;
+	     $files = 1;
+	   }
+       }, $dir);
+  return $files;
+}
+
 sub install_default {
   @_ < 2 or die "install_default should be called with 0 or 1 argument";
   my $FULLEXT = @_ ? shift : $ARGV[0];
@@ -158,7 +178,9 @@ sub install_default {
   install({
 	   read => "$Config{sitearchexp}/auto/$FULLEXT/.packlist",
 	   write => "$Config{installsitearch}/auto/$FULLEXT/.packlist",
-	   $INST_LIB => $Config{installsitelib},
+	   $INST_LIB => (directory_not_empty($INST_ARCHLIB)) ?
+			 $Config{installsitearch} :
+			 $Config{installsitelib},
 	   $INST_ARCHLIB => $Config{installsitearch},
 	   $INST_BIN => $Config{installbin} ,
 	   $INST_SCRIPT => $Config{installscript},
@@ -173,26 +195,29 @@ sub uninstall {
     # my $my_req = $self->catfile(qw(auto ExtUtils Install forceunlink.al));
     # require $my_req; # Hairy, but for the first
     local *P;
-    open P, $fil or Carp::croak("uninstall: Could not read packlist file $fil: $!");
+    open P, $fil or Carp::croak("uninstall: Could not read packlist " .
+				"file $fil: $!");
     while (<P>) {
 	chomp;
 	print "unlink $_\n" if $verbose;
 	forceunlink($_) unless $nonono;
     }
     print "unlink $fil\n" if $verbose;
+    close P;
     forceunlink($fil) unless $nonono;
 }
 
 sub inc_uninstall {
     my($file,$libdir,$verbose,$nonono) = @_;
     my($dir);
-    my $MY = {};
-    bless $MY, 'MY';
     my %seen_dir = ();
-    foreach $dir (@INC, @PERL_ENV_LIB, @Config{qw/archlibexp privlibexp sitearchexp sitelibexp/}) {
+    foreach $dir (@INC, @PERL_ENV_LIB, @Config{qw(archlibexp
+						  privlibexp
+						  sitearchexp
+						  sitelibexp)}) {
 	next if $dir eq ".";
 	next if $seen_dir{$dir}++;
-	my($targetfile) = $MY->catfile($dir,$libdir,$file);
+	my($targetfile) = MY->catfile($dir,$libdir,$file);
 	next unless -f $targetfile;
 
 	# The reason why we compare file's contents is, that we cannot
