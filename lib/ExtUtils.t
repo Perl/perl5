@@ -12,8 +12,7 @@ use strict;
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant qw (constant_types C_constant XS_constant autoload);
 use Config;
-use File::Spec::Functions;
-use File::Spec;
+use File::Spec::Functions qw(catfile rel2abs);
 # Because were are going to be changing directory before running Makefile.PL
 my $perl;
 $perl = rel2abs( $^X ) unless $] < 5.006; # Hack. Until 5.00503 has rel2abs
