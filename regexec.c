@@ -3282,12 +3282,13 @@ S_regmatch(pTHX_ regnode *prog)
 			/* Find place 'next' could work */
 			if (!do_utf8) {
 			    if (c1 == c2) {
-				while (locinput <= e && (U8) *locinput != (U8) c1)
+				while (locinput <= e &&
+				       UCHARAT(locinput) != c1)
 				    locinput++;
 			    } else {
 				while (locinput <= e
-				       && (U8) *locinput != (U8) c1
-				       && (U8) *locinput != (U8) c2)
+				       && UCHARAT(locinput) != c1
+				       && UCHARAT(locinput) != c2)
 				    locinput++;
 			    }
 			    count = locinput - old;
