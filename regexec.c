@@ -639,7 +639,10 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	/* Even in this situation we may use MBOL flag if strpos is offset
 	   wrt the start of the string. */
 	if (ml_anch && sv
-	    && (strpos + SvCUR(sv) != strend) && strpos[-1] != '\n') {
+	    && (strpos + SvCUR(sv) != strend) && strpos[-1] != '\n'
+	    /* May be due to an implicit anchor of m{.*foo}  */
+	    && !(prog->reganch & ROPT_IMPLICIT))
+	{
 	    t = strpos;
 	    goto find_anchor;
 	}
