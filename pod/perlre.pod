@@ -277,6 +277,8 @@ C<)> in the comment.
 
 =item C<(?:pattern)>
 
+=item C<(?imsx-imsx:pattern)>
+
 This is for clustering, not capturing; it groups subexpressions like
 "()", but doesn't make backreferences as "()" does.  So
 
@@ -287,6 +289,15 @@ is like
     @fields = split(/\b(a|b|c)\b/)
 
 but doesn't spit out extra fields.
+
+The letters between C<?> and C<:> act as flags modifiers, see
+L<C<(?imsx-imsx)>>.  In particular,
+
+    /(?s-i:more.*than).*million/i
+
+is equivalent to more verbose
+
+    /(?:(?s-i)more.*than).*million/i
 
 =item C<(?=pattern)>
 
@@ -448,7 +459,7 @@ Say,
 matches a chunk of non-parentheses, possibly included in parentheses
 themselves.
 
-=item C<(?imsx)>
+=item C<(?imsx-imsx)>
 
 One or more embedded pattern-match modifiers.  This is particularly
 useful for patterns that are specified in a table somewhere, some of
@@ -463,6 +474,8 @@ pattern.  For example:
 
     $pattern = "(?i)foobar";
     if ( /$pattern/ ) { } 
+
+Letters after C<-> switch modifiers off.
 
 These modifiers are localized inside an enclosing group (if any).  Say,
 

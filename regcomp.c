@@ -982,6 +982,9 @@ reg(I32 paren, I32 *flagp)
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
 	if (*regcomp_parse == '?') {
+	    U16 posflags = 0, negflags = 0;
+	    U16 *flagsp = &posflags;
+
 	    regcomp_parse++;
 	    paren = *regcomp_parse++;
 	    ret = NULL;			/* For look-ahead/behind. */
@@ -1117,11 +1120,24 @@ reg(I32 paren, I32 *flagp)
                 break;
 	    default:
 		--regcomp_parse;
+	      parse_flags:
 		while (*regcomp_parse && strchr("iogcmsx", *regcomp_parse)) {
 		    if (*regcomp_parse != 'o')
-			pmflag(&regflags, *regcomp_parse);
+			pmflag(flagsp, *regcomp_parse);
 		    ++regcomp_parse;
 		}
+		if (*regcomp_parse == '-') {
+		    flagsp = &negflags;
+		    ++regcomp_parse;
+		    goto parse_flags;
+		}
+		regflags |= posflags;
+		regflags &= ~negflags;
+		if (*regcomp_parse == ':') {
+		    regcomp_parse++;
+		    paren = ':';
+		    break;
+		}		
 	      unknown:
 		if (*regcomp_parse != ')')
 		    FAIL2("Sequence (?%c...) not recognized", *regcomp_parse);
