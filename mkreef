@@ -1,0 +1,242 @@
+#!/bin/sh
+
+#
+# mkreef - build/tear down symbolic link farm for building perl
+#
+trap "echo $0: cleaning up temporary files f$$ d$$ $$...; rm -rf f$$ d$$ l$$; exit 1" 1 2 3 15
+
+# Process our arguments
+while test $# -gt 0; do
+	case "$1" in
+	-v*)	verbosity=`echo "$1"|sed 's:^-v::'`
+		case "$verbosity" in
+		'')	verbosity=shift ;;
+		esac
+		;;
+	-l)	mkreef=true
+		;;
+	-R)	rmreef=true
+		;;
+	*)	echo "$0: bad option '$1'"
+		exit 1
+		;;
+	esac
+	shift
+done
+
+# If neither symlinking nor removing those, abort.
+case "$mkreef$rmreef" in
+true)	;;
+*)	echo "$0: Usage: $0 [-vverbosity] -l|-R"
+	echo "$0: -l: create symlinks, -R: remove symlinks"
+	echo "$0: verbosity"
+	echo "$0: 0 = silent (default), 1 = dots, 2 = added/removed symlinks,"
+	echo "$0: 3 = filenames, 4 = commands"
+	exit 1
+	;;
+esac
+
+# Default verbosity.
+case "$verbosity" in
+[01234])	;;
+*)	verbosity=0 ;;
+esac
+
+# Prepare for sanity checks.
+case "$0" in
+*/*)	myself=`basename $0`
+	# not all places have dirname(1)
+	dirname=`echo $0|sed 's:/'$myself'$::'`
+	;;
+*)	echo "$0: bad script $0"
+	exit 1
+	;;	
+esac
+
+case "$dirname" in
+'.'|'')
+	echo "$0: bad directory $dirname"
+	exit 1
+	;;
+esac
+
+MANIFEST="$dirname/MANIFEST"
+
+# Sanity checks
+if test ! -f "$MANIFEST"; then
+	echo "$0: bad reef $dirname (no MANIFEST)"
+	exit 1
+fi
+
+if test ! -f "$dirname/perl.c"; then
+	echo "$0: bad reef $dirname (no perl.c)"
+	exit 1
+fi
+
+# Check whether we have symbolic links
+echo $$ > f$$
+rm -f l$$
+ln -s f$$ l$$ 2>/dev/null
+case "`cat l$$ 2>/dev/null`" in
+$$)	;;
+*)	echo "$0: no symbolic links"
+	rm -f l$$ f$$
+	exit 1
+	;;
+esac
+rm -f f$$
+
+# Check whether we can test for symbolic links
+case "$issymlink" in
+'')	case "`test -L l$$ 2>/dev/null && echo L`" in
+	L)	issymlink=-L	;;
+	esac
+	;;
+esac
+case "$issymlink" in
+'')	case "`test -h l$$ 2>/dev/null && echo h`" in
+	h)	issymlink=-h	;;
+	esac
+	;;
+esac
+rm -f l$$
+case "$issymlink" in
+'')	echo "$0: no symbolic links testing"
+	exit 1
+	;;
+esac
+
+# Very Basic Sanity Check
+if test ! "$issymlink" perl.c -a -f perl.c; then
+	echo "$0: this looks like the actual source directory"
+	exit 1
+fi
+
+# Check whether we can create directory hierarchies
+rm -rf d$$
+case "$mkdirhier" in
+'')	mkdir -p d$$/d$$ 2>/dev/null
+	if test -d d$$/d$$; then
+		mkdirhier='mkdir -p'
+	fi
+	;;
+esac
+case "$mkdirhier" in
+'')	mkdirhier d$$/d$$ 2>/dev/null
+	if test -d d$$/d$$; then
+		mkdirhier='mkdirhier'
+	fi
+	;;
+esac
+case "$mkdirhier" in
+'')	echo "$0: no directory hierarchy creating"
+	exit 1
+	;;
+esac
+
+# Check our echo flavour
+case `echo "ab\c"` in
+*c*)	n=;   c='\c'	;; 
+*)	n=-n; c=''	;; 
+esac
+
+files=`wc -l < $MANIFEST`
+files=`echo $files`
+
+case "$verbosity" in
+[1234])	echo $n "$files files, $c"
+	case "$rmreef" in
+	true)	echo $n "removing$c"	;;
+	*)	echo $n "creating$c"	;;
+	esac
+	echo " symlinks and directories..."
+	;;
+esac
+
+# Where are we?
+case "$PWD" in
+'')	PWD=`pwd`
+	;;
+esac
+case "$PWD" in
+'')	echo "$0: cannot find current directory"
+	;;
+esac
+
+# Final sanity checks
+if test $issymlink src; then
+	rm -f src 2>/dev/null
+fi
+if test -d src; then
+	echo "$0: src is a directory"
+	exit 1
+fi
+ln -s $dirname src || exit 1
+
+rm -rf d$$
+
+for i in `awk '{print $1}' $MANIFEST`
+do
+	case "$verbosity" in
+	1)	echo $n .$c	;; 
+	3)	echo $i		;;
+	esac
+	case "$i" in
+	*/*)
+		d=`echo $i|sed 's:/[^/]*$::'`
+		case "$rmreef" in
+		true)	echo $d | awk -F/ '{for(i=$1 ne "" ? 1 : 2;i<=NF;i++){for(j=1;j<i;j++){printf("%s/", $j)}print $j}}' >> d$$
+			;;
+		*)	if test ! -d $d; then
+				test "$verbosity" = 3 && echo $mkdirhier $d
+				$mkdirhier $d
+			fi
+			;;
+		esac
+	esac
+	case "$verbosity" in
+	2)	case "$rmreef" in
+		true)	if test -f $i; then
+				echo $i
+			fi
+			;;
+		
+		*)	if test ! -f $i; then
+				echo $i
+			fi
+			;;
+		esac
+		;;
+	3)	echo $i
+		;;
+	esac
+	if test $issymlink $i; then
+		test "$verbosity" = 4 && echo rm -f $i
+		rm -f $i
+	fi
+	case "$rmreef" in
+	true)	;;
+	*)	test "$verbosity" = 4 && echo ln -s $PWD/src/$i $i
+		ln -s $PWD/src/$i $i
+		;;
+	esac
+done
+
+case "$verbosity" in
+1)	echo	;;
+esac
+
+case "$rmreef" in
+true)	for d in `sort -ur d$$`
+	do
+		if test -d $d; then
+			test "$verbosity" = 4 && echo rmdir $d
+			rmdir $d
+		fi
+	done
+	rm -f d$$
+	rm -f src
+	;;
+esac
+
+exit 0
