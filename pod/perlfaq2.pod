@@ -200,9 +200,9 @@ the creator of Perl, is now (July 2000) in its third edition:
 
     Programming Perl (the "Camel Book"):
 	by Larry Wall, Tom Christiansen, and Jon Orwant
-        0-596-00027-8		(English)
+        0-596-00027-8  [3rd edition July 2000]
 	http://www.oreilly.com/catalog/pperl3/
-    (translations to several languages are also available)
+    (English, translations to several languages are also available)
 
 The companion volume to the Camel containing thousands
 of real-world examples, mini-tutorials, and complete programs
@@ -211,7 +211,7 @@ of real-world examples, mini-tutorials, and complete programs
     The Perl Cookbook (the "Ram Book"):
 	by Tom Christiansen and Nathan Torkington, 
 	    with Foreword by Larry Wall
-	ISBN 1-56592-243-3
+	ISBN 1-56592-243-3 [1st Edition August 1998]
 	http://perl.oreilly.com/cookbook/
 
 If you're already a hard-core systems programmer, then the Camel Book
@@ -221,7 +221,7 @@ out:
     Learning Perl (the "Llama Book"):
 	by Randal Schwartz and Tom Christiansen 
 		    with Foreword by Larry Wall
-	ISBN 1-56592-284-0
+	ISBN 1-56592-284-0 [2nd Edition July 1997]
 	http://www.oreilly.com/catalog/lperl2/
 
 Despite the picture at the URL above, the second edition of "Llama
@@ -251,7 +251,7 @@ Recommended books on (or mostly on) Perl follow.
 
     Programming Perl
 	by Larry Wall, Tom Christiansen, and Jon Orwant
-	ISBN 0-596-00027-8[3rd edition July 2000]
+	ISBN 0-596-00027-8 [3rd edition July 2000]
 	http://www.oreilly.com/catalog/pperl3/
 
     Perl 5 Pocket Reference
@@ -328,7 +328,7 @@ Recommended books on (or mostly on) Perl follow.
 	ISBN 1-56592-257-3 [1st edition January 1997]
 	http://www.oreilly.com/catalog/regex/
 
-    How to Set up and Maintain a World Wide Web Site [2nd edition]
+    How to Set up and Maintain a World Wide Web Site
 	by Lincoln Stein
 	ISBN 0-201-63389-2 [1st edition 1995]
 	http://www.awl.com/
