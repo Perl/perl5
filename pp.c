@@ -1780,6 +1780,7 @@ PP(pp_substr)
 	len = POPi;
     pos = POPi;
     sv = POPs;
+    PUTBACK;
     tmps = SvPV(sv, curlen);
     if (pos >= arybase) {
 	pos -= arybase;
@@ -1846,6 +1847,7 @@ PP(pp_substr)
 	    LvTARGLEN(TARG) = rem;
 	}
     }
+    SPAGAIN;
     PUSHs(TARG);		/* avoid SvSETMAGIC here */
     RETURN;
 }
