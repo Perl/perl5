@@ -4,7 +4,7 @@
 $|  = 1;
 $^W = 1;
 
-print "1..8\n";   
+print "1..9\n";   
 
 # my $file tests
 

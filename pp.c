@@ -245,16 +245,19 @@ PP(pp_rv2gv)
 		/* If this is a 'my' scalar and flag is set then vivify 
 		 * NI-S 1999/05/07
 		 */ 
-		if ( (PL_op->op_private & OPpDEREF) && 
-		      cUNOP->op_first->op_type == OP_PADSV ) {
-		    STRLEN len;
-		    SV *padname = *av_fetch(PL_comppad_name, cUNOP->op_first->op_targ, 4);
-		    char *name = SvPV(padname,len); 
+		if (PL_op->op_private & OPpDEREF) {
 		    GV *gv = (GV *) newSV(0);
+		    STRLEN len = 0;
+		    char *name = "";
+		    if (cUNOP->op_first->op_type == OP_PADSV) {
+			SV *padname = *av_fetch(PL_comppad_name, cUNOP->op_first->op_targ, 4);
+			name = SvPV(padname,len);                                                    
+		    }
 		    gv_init(gv, PL_curcop->cop_stash, name, len, 0);
 		    sv_upgrade(sv, SVt_RV);
 		    SvRV(sv) = (SV *) gv;
 		    SvROK_on(sv);
+		    SvSETMAGIC(sv);
 		    goto wasref;
 		}  
 		if (PL_op->op_flags & OPf_REF ||
