@@ -4362,7 +4362,7 @@ and the conversion letter:
    h       interpret integer as C type "short" or "unsigned short"
            If no flags, interpret integer as C type "int" or "unsigned"
 
-There is also two Perl-specific flags:
+There are also two Perl-specific flags:
 
    V       interpret integer as Perl's standard integer type
    v       interpret string as a vector of integers, output as
