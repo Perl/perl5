@@ -1788,7 +1788,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_euid == PL_uid)		/* special case $> = $< */
 	    PerlProc_setuid(PL_euid);
 	else {
-	    PL_euid = rlProc_geteuid();
+	    PL_euid = PerlProc_geteuid();
 	    Perl_croak(aTHX_ "seteuid() not implemented");
 	}
 #endif

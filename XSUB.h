@@ -115,7 +115,7 @@
 #  include "objXSUB.h"
 #endif	/* PERL_OBJECT || PERL_CAPI */
 
-#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_GET_CONTEXT)
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
 #  undef aTHX
 #  undef aTHX_
 #  undef _aTHX

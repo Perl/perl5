@@ -62,7 +62,7 @@ perl_alloc(void)
     PerlInterpreter *my_perl;
 
     /* New() needs interpreter, so call malloc() instead */
-    my_perl = PerlMem_malloc(sizeof(PerlInterpreter));
+    my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
     PERL_SET_INTERP(my_perl);
     return my_perl;
 }
