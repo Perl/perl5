@@ -6,11 +6,17 @@
 use Config;
 
 if ($^O eq 'aix' && defined($Config{'ccversion'}) && 
-       $Config{'ccversion'} =~ /^3\.\d/ # needed for at least these versions:
-                                        # $Config{'ccversion'} eq '3.6.6.0' 
-                                        # $Config{'ccversion'} eq '3.6.4.0' 
-                                        # $Config{'ccversion'} eq '3.1.3.3' 
-    ) {
+    ( $Config{'ccversion'} =~ /^3\.\d/
+      # needed for at least these versions:
+      # $Config{'ccversion'} eq '3.6.6.0' 
+      # $Config{'ccversion'} eq '3.6.4.0' 
+      # $Config{'ccversion'} eq '3.1.4.0'  AIX 4.2
+      # $Config{'ccversion'} eq '3.1.4.10' AIX 4.2
+      # $Config{'ccversion'} eq '3.1.3.3' 
+      ||
+      $Config{'ccversion'} =~ /^4\.4\.0\.[0-3]/
+    )
+   ) {
     $self->{OBJECT} .= ' ../../deb$(OBJ_EXT)';
 }
 
