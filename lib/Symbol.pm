@@ -61,6 +61,7 @@ while (<DATA>) {
     chomp;
     $global{$_} = 1;
 }
+close DATA;
 
 sub gensym () {
     my $name = "GEN" . $genseq++;
