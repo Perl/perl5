@@ -106,6 +106,27 @@ my @exe = qw(
 );
 system("chmod +x @exe");
 
+my @writables = qw(
+    embed.h
+    embedvar.h
+    ext/B/B/Asmdata.pm
+    ext/ByteLoader/byterun.c
+    ext/ByteLoader/byterun.h
+    global.sym
+    keywords.h
+    lib/warning.pm
+    objXSUB.h
+    opcode.h
+    pp.sym
+    pp_proto.h
+    regnodes.h
+    warning.h
+    win32/config_H.bc
+    win32/config_h.gc
+    win32/config_H.vc
+);
+system("chmod +w @writables");
+
 print "Adding CRs to DOSish files...\n";
 my @crlf = qw(
     djgpp/configure.bat

@@ -1405,7 +1405,6 @@ win32/makefile.mk	Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/makemain.pl	Win32 port
 win32/makeperldef.pl	Win32 port
 win32/perlglob.c	Win32 port
-win32/perlhost.h	Perl host implementation
 win32/perllib.c		Win32 port
 win32/pod.mak		Win32 port
 win32/runperl.c		Win32 port
