@@ -1793,10 +1793,11 @@ $     echo "
 $     echo "If you're a casual user, you probably don't want
 $     echo "interpreter-threads at this time.  There doesn't yet exist
 $     echo "a way to create threads from within Perl in this model,
-$     echo "i.e., "use Thread;" will NOT work.
+$     echo "i.e., ""use Thread;"" will NOT work.
 $     echo "
 $     dflt = "n"
 $     rp = "Build with Interpreter threads? [''dflt']
+$     GOSUB myread
 $     if ans.eqs."" then ans = dflt
 $     if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
 $     THEN
