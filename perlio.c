@@ -1587,7 +1587,39 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 SSize_t
 Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
-    Perl_PerlIO_or_Base(f, Read, read, -1, (aTHX_ f, vbuf, count));
+    if (PerlIOValid(f)) {
+	if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD)) {
+	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	}
+	else {
+	    PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	    if (PerlIO_eof(f) || PerlIO_error(f)) {
+		return 0;
+	    }
+	    while (1) {
+		SSize_t len;
+		if (tab && tab->Read)
+		    len = (*tab->Read) (aTHX_ f, vbuf, count);
+		else
+		    len = PerlIOBase_read(aTHX_ f, vbuf, count);
+		if (len >= 0 || errno != EINTR) {
+		    if (len < 0) {
+			if (errno != EAGAIN) {
+			    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+			}
+		    }
+		    else if (len == 0 && count != 0) {
+			PerlIOBase(f)->flags |= PERLIO_F_EOF;
+			SETERRNO(0, 0);
+		    }
+		    return len;
+		}
+		PERL_ASYNC_CHECK();
+	    }
+	}
+    }
+    SETERRNO(EBADF, SS_IVCHAN);
+    return -1;
 }
 
 SSize_t
@@ -1599,7 +1631,33 @@ Perl_PerlIO_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 SSize_t
 Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-    Perl_PerlIO_or_fail(f, Write, -1, (aTHX_ f, vbuf, count));
+    if (PerlIOValid(f)) {
+	PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	if (!(PerlIOBase(f)->flags & PERLIO_F_CANWRITE) || !tab
+	    || !tab->Write) {
+	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	}
+	else {
+	    while (1) {
+		SSize_t len = (*tab->Write) (aTHX_ f, vbuf, count);
+		if (len >= 0 || errno != EINTR) {
+		    if (len < 0) {
+			if (errno != EAGAIN) {
+			    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+			}
+		    }
+		    else if (len == 0 && count != 0) {
+			PerlIOBase(f)->flags |= PERLIO_F_EOF;
+			SETERRNO(0, 0);
+		    }
+		    return len;
+		}
+		PERL_ASYNC_CHECK();
+	    }
+	}
+    }
+    SETERRNO(EBADF, SS_IVCHAN);
+    return -1;
 }
 
 int
@@ -1686,9 +1744,7 @@ PerlIO_isutf8(PerlIO *f)
     if (PerlIOValid(f))
 	return (PerlIOBase(f)->flags & PERLIO_F_UTF8) != 0;
     else
-	SETERRNO(EBADF, SS_IVCHAN);
-
-    return -1;
+	return 0;
 }
 
 int
@@ -2517,38 +2573,17 @@ SSize_t
 PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
-    if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD)) {
-	SETERRNO(EBADF, SS_IVCHAN);
-	PerlIOBase(f)->flags |= PERLIO_F_ERROR;
-	return -1;
-    }
     if (PerlIOBase(f)->flags & (PERLIO_F_EOF | PERLIO_F_ERROR)) {
 	return 0;
     }
-    while (1) {
-	SSize_t len;
 #ifdef PERL_SOCK_SYSREAD_IS_RECV
-	if (PerlIOBase(f)->flags & PERLIO_F_SOCKET) {
-	    len = PerlSock_recv(fd, vbuf, count, 0);
-	}
-	else
+    if (PerlIOBase(f)->flags & PERLIO_F_SOCKET) {
+	return PerlSock_recv(fd, vbuf, count, 0);
+    }
+    else
 #endif
-	{
-	    len = PerlLIO_read(fd, vbuf, count);
-	}
-	if (len >= 0 || errno != EINTR) {
-	    if (len < 0) {
-		if (errno != EAGAIN) {
-		    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
-		}
-	    }
-	    else if (len == 0 && count != 0) {
-		PerlIOBase(f)->flags |= PERLIO_F_EOF;
-		SETERRNO(0, 0);
-	    }
-	    return len;
-	}
-	PERL_ASYNC_CHECK();
+    {
+	return PerlLIO_read(fd, vbuf, count);
     }
 }
 
@@ -2556,18 +2591,7 @@ SSize_t
 PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
-    while (1) {
-	SSize_t len = PerlLIO_write(fd, vbuf, count);
-	if (len >= 0 || errno != EINTR) {
-	    if (len < 0) {
-		if (errno != EAGAIN) {
-		    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
-		}
-	    }
-	    return len;
-	}
-	PERL_ASYNC_CHECK();
-    }
+    return PerlLIO_write(fd, vbuf, count);
 }
 
 IV
@@ -3059,26 +3083,22 @@ PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     FILE *s = PerlIOSelf(f, PerlIOStdio)->stdio;
     SSize_t got = 0;
-    for (;;) {
-	if (count == 1) {
-	    STDCHAR *buf = (STDCHAR *) vbuf;
-	    /*
-	     * Perl is expecting PerlIO_getc() to fill the buffer Linux's
-	     * stdio does not do that for fread()
-	     */
-	    int ch = PerlSIO_fgetc(s);
-	    if (ch != EOF) {
-		*buf = ch;
-		got = 1;
-	    }
+    if (count == 1) {
+	STDCHAR *buf = (STDCHAR *) vbuf;
+	/*
+	 * Perl is expecting PerlIO_getc() to fill the buffer Linux's
+	 * stdio does not do that for fread()
+	 */
+	int ch = PerlSIO_fgetc(s);
+	if (ch != EOF) {
+	    *buf = ch;
+	    got = 1;
 	}
-	else
-	    got = PerlSIO_fread(vbuf, 1, count, s);
-	if (got >= 0 || errno != EINTR)
-	    break;
-	PERL_ASYNC_CHECK();
-	SETERRNO(0, 0);		/* just in case */
     }
+    else
+	got = PerlSIO_fread(vbuf, 1, count, s);
+    if (got == 0 && PerlSIO_ferror(s))
+	got = -1;
     return got;
 }
 
@@ -3144,15 +3164,10 @@ PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 SSize_t
 PerlIOStdio_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-    SSize_t got;
-    for (;;) {
-	got = PerlSIO_fwrite(vbuf, 1, count,
-			     PerlIOSelf(f, PerlIOStdio)->stdio);
-	if (got >= 0 || errno != EINTR)
-	    break;
-	PERL_ASYNC_CHECK();
-	SETERRNO(0, 0);		/* just in case */
-    }
+    FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
+    SSize_t got = PerlSIO_fwrite(vbuf, 1, count, stdio);
+    if (got == 0 && PerlSIO_ferror(stdio))
+	got = -1;
     return got;
 }
 
