@@ -71,7 +71,7 @@ A port of dmake for Windows is available from:
     http://www.cpan.org/authors/id/GSAR/dmake-4.1pl1-win32.zip
 
 (This is a fixed version of the original dmake sources obtained from
-http://www.wticorp.com/dmake/.  As of version 4.1PL1, the original
+http://www.wticorp.com/.  As of version 4.1PL1, the original
 sources did not build as shipped and had various other problems.
 A patch is included in the above fixed version.)
 
@@ -449,9 +449,9 @@ old version of nmake reportedly available from:
     ftp://ftp.microsoft.com/Softlib/MSLFILES/nmake15.exe
 
 Another option is to use the make written in Perl, available from
-CPAN:
+CPAN.
 
-    http://www.cpan.org/authors/id/NI-S/Make-0.03.tar.gz
+    http://www.cpan.org/modules/by-module/Make/
 
 You may also use dmake.  See L</"Make"> above on how to get it.
 

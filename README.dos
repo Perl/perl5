@@ -51,18 +51,18 @@ the world. Like:
 You need the following files to build perl (or add new modules):
 
         v2/djdev203.zip
-        v2/bnu2951b.zip
-        v2gnu/gcc2952b.zip
+        v2gnu/bnu2112b.zip
+        v2gnu/gcc2953b.zip
         v2gnu/bsh204b.zip
         v2gnu/mak3791b.zip
-        v2gnu/fil316b.zip
-        v2gnu/sed302b.zip
+        v2gnu/fil40b.zip
+        v2gnu/sed3028b.zip
         v2gnu/txt20b.zip
         v2gnu/dif272b.zip
         v2gnu/grep24b.zip
-        v2gnu/shl112b.zip
-        v2gnu/gawk303b.zip
-        v2misc/csdpmi4b.zip
+        v2gnu/shl20jb.zip
+        v2gnu/gwk306b.zip
+        v2misc/csdpmi5b.zip
 
 or possibly any newer version.
 
