@@ -196,7 +196,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		    if (!check) { /* fallback char */
 			sdone += slen + clen;
 		        ddone += dlen + enc->replen; 
-		        sv_catpvn(dst, enc->rep, enc->replen); 
+		        sv_catpvn(dst, (char*)enc->rep, enc->replen); 
 		    }
                     else if (check == -1){ /* perlqq */
 		        SV* perlqq = 
@@ -235,8 +235,8 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		}
 	    }
 	    dlen = SvCUR(dst); 
-	    d   = SvPVX(dst) + dlen; 
-	    s   = SvPVX(src) + sdone; 
+	    d   = (U8*)SvPVX(dst) + dlen; 
+	    s   = (U8*)SvPVX(src) + sdone; 
 	    slen = tlen - sdone;
 	    break;
 
