@@ -597,7 +597,7 @@ sub do_perlpod {
 sub do_podmak {
   my $name = shift;
   my $body = join '', @_;
-  foreach my $variable qw(pod man html tex) {
+  foreach my $variable (qw(pod man html tex)) {
     die "$0: could not find $variable in $name"
       unless $body =~ s{\n\U$variable\E = (?:[^\n]*\\\n)*[^\n]*}
 	{"\n" . generate_pod_mak ($variable)}se;
