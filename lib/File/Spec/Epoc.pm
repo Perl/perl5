@@ -1,10 +1,11 @@
 package File::Spec::Epoc;
 
-our $VERSION = '1.00';
-
 use strict;
 use Cwd;
-use vars qw(@ISA);
+use vars qw($VERSION @ISA);
+
+$VERSION = '1.1';
+
 require File::Spec::Unix;
 @ISA = qw(File::Spec::Unix);
 

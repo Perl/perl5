@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.3';
+$VERSION = '1.4';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -360,18 +360,18 @@ sub rootdir {
 
 =item tmpdir
 
-Returns the contents of $ENV{TMPDIR}, if that directory exits or the current working
-directory otherwise. Under MacPerl, $ENV{TMPDIR} will contain a path like
-"MacintoshHD:Temporary Items:", which is a hidden directory on your startup volume.
+Returns the contents of $ENV{TMPDIR}, if that directory exits or the
+current working directory otherwise. Under MacPerl, $ENV{TMPDIR} will
+contain a path like "MacintoshHD:Temporary Items:", which is a hidden
+directory on your startup volume.
 
 =cut
 
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    $tmpdir = $ENV{TMPDIR} if -d $ENV{TMPDIR};
-    $tmpdir = File::Spec->curdir unless defined $tmpdir;
-    return $tmpdir;
+    my $self = shift;
+    $tmpdir = $self->_tmpdir( $ENV{TMPDIR} );
 }
 
 =item updir
