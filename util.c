@@ -1755,14 +1755,14 @@ char	*mode;
 	return my_syspopen(cmd,mode);
     }
 #endif 
-    if (pipe(p) < 0)
-	return Nullfp;
     this = (*mode == 'w');
     that = !this;
     if (doexec && tainting) {
 	taint_env();
 	taint_proper("Insecure %s%s", "EXEC");
     }
+    if (pipe(p) < 0)
+	return Nullfp;
     while ((pid = (doexec?vfork():fork())) < 0) {
 	if (errno != EAGAIN) {
 	    close(p[this]);
