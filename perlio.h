@@ -1,12 +1,21 @@
 #ifndef H_PERLIO
 #define H_PERLIO 1
 
-/* Allow -DUSE_STDIO to force the issue for x2p directory */
-#ifdef USE_STDIO
-#ifdef PERLIO_IS_STDIO
-#undef PERLIO_IS_STDIO
+/* Clean up (or at least document) the various possible #defines.
+   This section attempts to match the 5.003_03 Configure variables
+   onto the 5.003_02 header file values.
+   I can't figure out where USE_STDIO was supposed to be set.
+   --AD
+*/
+#ifndef USE_PERLIO
+# define PERLIO_IS_STDIO
 #endif
-#define PERLIO_IS_STDIO
+
+/* Below is the 5.003_02 stuff. */
+#ifdef USE_STDIO
+#  ifndef PERLIO_IS_STDIO
+#      define PERLIO_IS_STDIO
+#  endif
 #else
 extern void PerlIO_init _((void));
 #endif
@@ -55,7 +64,7 @@ struct _PerlIO;
 #undef  __attribute__
 #endif
 #define __attribute__(attr)
-#endif 
+#endif
 #endif
 
 #ifndef PerlIO_stdoutf
@@ -111,24 +120,24 @@ extern FILE *	PerlIO_findFILE		_((PerlIO *));
 extern void	PerlIO_releaseFILE	_((PerlIO *,FILE *));
 #endif
 #ifndef PerlIO_read
-extern int	PerlIO_read		_((PerlIO *,void *,size_t)); 
+extern int	PerlIO_read		_((PerlIO *,void *,size_t));
 #endif
 #ifndef PerlIO_write
-extern int	PerlIO_write		_((PerlIO *,const void *,size_t)); 
+extern int	PerlIO_write		_((PerlIO *,const void *,size_t));
 #endif
 #ifndef PerlIO_setlinebuf
-extern void	PerlIO_setlinebuf	_((PerlIO *)); 
+extern void	PerlIO_setlinebuf	_((PerlIO *));
 #endif
 #ifndef PerlIO_printf
 extern int	PerlIO_printf		_((PerlIO *, const char *,...))
-					__attribute__((format (printf, 2, 3))); 
+					__attribute__((format (printf, 2, 3)));
 #endif
 #ifndef PerlIO_sprintf
 extern int	PerlIO_sprintf		_((char *, int, const char *,...))
-					__attribute__((format (printf, 3, 4))); 
+					__attribute__((format (printf, 3, 4)));
 #endif
 #ifndef PerlIO_vprintf
-extern int	PerlIO_vprintf		_((PerlIO *, const char *, va_list)); 
+extern int	PerlIO_vprintf		_((PerlIO *, const char *, va_list));
 #endif
 #ifndef PerlIO_tell
 extern long	PerlIO_tell		_((PerlIO *));
@@ -140,34 +149,34 @@ extern int	PerlIO_seek		_((PerlIO *,off_t,int));
 extern void	PerlIO_rewind		_((PerlIO *));
 #endif
 #ifndef PerlIO_has_base
-extern int	PerlIO_has_base		_((PerlIO *)); 
+extern int	PerlIO_has_base		_((PerlIO *));
 #endif
 #ifndef PerlIO_has_cntptr
-extern int	PerlIO_has_cntptr	_((PerlIO *)); 
+extern int	PerlIO_has_cntptr	_((PerlIO *));
 #endif
 #ifndef PerlIO_fast_gets
-extern int	PerlIO_fast_gets	_((PerlIO *)); 
+extern int	PerlIO_fast_gets	_((PerlIO *));
 #endif
 #ifndef PerlIO_canset_cnt
-extern int	PerlIO_canset_cnt	_((PerlIO *)); 
+extern int	PerlIO_canset_cnt	_((PerlIO *));
 #endif
 #ifndef PerlIO_get_ptr
-extern char *	PerlIO_get_ptr		_((PerlIO *)); 
+extern char *	PerlIO_get_ptr		_((PerlIO *));
 #endif
 #ifndef PerlIO_get_cnt
-extern int	PerlIO_get_cnt		_((PerlIO *)); 
+extern int	PerlIO_get_cnt		_((PerlIO *));
 #endif
 #ifndef PerlIO_set_cnt
-extern void	PerlIO_set_cnt		_((PerlIO *,int)); 
+extern void	PerlIO_set_cnt		_((PerlIO *,int));
 #endif
 #ifndef PerlIO_set_ptrcnt
-extern void	PerlIO_set_ptrcnt	_((PerlIO *,char *,int)); 
+extern void	PerlIO_set_ptrcnt	_((PerlIO *,char *,int));
 #endif
 #ifndef PerlIO_get_base
-extern char *	PerlIO_get_base		_((PerlIO *)); 
+extern char *	PerlIO_get_base		_((PerlIO *));
 #endif
 #ifndef PerlIO_get_bufsiz
-extern int	PerlIO_get_bufsiz	_((PerlIO *)); 
+extern int	PerlIO_get_bufsiz	_((PerlIO *));
 #endif
 #ifndef PerlIO_tmpfile
 extern PerlIO *	PerlIO_tmpfile		_((void));
@@ -186,8 +195,5 @@ extern int	PerlIO_getpos		_((PerlIO *,Fpos_t *));
 #endif
 #ifndef PerlIO_setpos
 extern int	PerlIO_setpos		_((PerlIO *,const Fpos_t *));
-#endif 
+#endif
 #endif /* Include guard */
-
-
-
