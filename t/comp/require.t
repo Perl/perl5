@@ -7,7 +7,7 @@ BEGIN {
 
 # don't make this lexical
 $i = 1;
-print "1..18\n";
+print "1..19\n";
 
 sub do_require {
     %INC = ();
@@ -65,10 +65,10 @@ print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
 
 # check inaccurate fp
-#$ver = 10.2;
-#eval { require $ver; };
-#print "# $@\nnot " unless $@ =~ /^Perl v10\.200\.0 required/;
-#print "ok ",$i++,"\n";
+$ver = 10.2;
+eval { require $ver; };
+print "# $@\nnot " unless $@ =~ /^Perl v10\.200\.0 required/;
+print "ok ",$i++,"\n";
 
 $ver = 10.000_02;
 eval { require $ver; };

@@ -2931,15 +2931,17 @@ PP(pp_require)
 	    }
 	}
 	else if (!SvPOKp(sv)) {			/* require 5.005_03 */
-	    NV n = SvNV(sv);
-	    rev = (UV)n;
-	    ver = (UV)((n-rev)*1000);
-	    sver = (UV)((((n-rev)*1000 - ver) + 0.0009) * 1000);
-
 	    if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
 		+ ((NV)PERL_SUBVERSION/(NV)1000000)
 		+ 0.00000099 < SvNV(sv))
 	    {
+		NV nrev = SvNV(sv);
+		UV rev = (UV)nrev;
+		NV nver = (nrev - rev) * 1000;
+		UV ver = (UV)(nver + 0.0009);
+		NV nsver = (nver - ver) * 1000;
+		UV sver = (UV)(nsver + 0.0009);
+
 		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
 		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
 		    PERL_VERSION, PERL_SUBVERSION);
