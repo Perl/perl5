@@ -1290,7 +1290,12 @@ inst_lib : $(CONFIGPM)
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
-$(UNIDATAFILES) : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables
+# Move the rule for making $(UNIDATAFILES) into a separate target and leave the
+# actual rule here blank because dmake runs the rule here once for each of the
+# files listed in $(UNIDATAFILES)
+$(UNIDATAFILES) : make_unidatafiles
+
+make_unidatafiles : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables
 	cd ..\lib\unicore && \
 	..\$(MINIPERL) -I.. mktables
 
