@@ -554,10 +554,13 @@ install-strip:
 	$(MAKE) STRIPFLAGS=-s install
 
 install: all
-	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-S
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS)
 
 install-verbose: all
-	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=--verbose
+
+install-silent: all
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=--silent
 
 install.perl:	all installperl
 	if [ -n "$(COMPILE)" ]; \
