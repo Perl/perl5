@@ -14,9 +14,12 @@ Multi-threading
     SvREFCNT_dec(curstack) in threadstart() in Thread.xs
     per-thread GV -> [SAH]V dereference for $@ etc.
     Thread::Pool
+    check new condition variable word; fix cond.t
+    more Configure support
 
 Miscellaneous
     sv_bless3 and '~'-magic to give choice on reblessing
+    rename and alter ISA.pm
 
 Compiler
     auto-produce executable
