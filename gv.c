@@ -1086,7 +1086,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
     char *name;
     HV *hv = GvSTASH(gv);
     if (!hv) {
-	(void)SvOK_off(sv);
+	SvOK_off(sv);
 	return;
     }
     sv_setpv(sv, prefix ? prefix : "");

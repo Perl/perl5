@@ -911,7 +911,7 @@ perl_destruct(pTHXx)
 	    }
 	}
 	/* we know that type >= SVt_PV */
-	(void)SvOOK_off(PL_mess_sv);
+	SvOOK_off(PL_mess_sv);
 	Safefree(SvPVX(PL_mess_sv));
 	Safefree(SvANY(PL_mess_sv));
 	Safefree(PL_mess_sv);

@@ -213,7 +213,7 @@ PP(pp_substcont)
 	    } else
 #endif
 	    {
-		(void)SvOOK_off(targ);
+		SvOOK_off(targ);
 		if (SvLEN(targ))
 		    Safefree(SvPVX(targ));
 	    }

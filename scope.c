@@ -934,7 +934,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		case SVt_PVCV:
 		    Perl_croak(aTHX_ "panic: leave_scope pad code");
 		default:
-		    (void)SvOK_off(sv);
+		    SvOK_off(sv);
 		    break;
 		}
 		SvPADSTALE_on(sv); /* mark as no longer live */

@@ -4952,7 +4952,8 @@ Perl_sv_release_IVX(pTHX_ register SV *sv)
 {
     if (SvIsCOW(sv))
         sv_force_normal_flags(sv, 0);
-    return SvOOK_off(sv);
+    SvOOK_off(sv);
+    return 0;
 }
 #endif
 /*
@@ -5975,7 +5976,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     case SVt_PVNV:
     case SVt_PVIV:
       freescalar:
-	(void)SvOOK_off(sv);
+	SvOOK_off(sv);
 	/* FALL THROUGH */
     case SVt_PV:
     case SVt_RV:
@@ -7917,7 +7918,7 @@ Perl_sv_reset(pTHX_ register char *s, HV *stash)
 			sv_unref(sv);
 		    continue;
 		}
-		(void)SvOK_off(sv);
+		SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
 		    SvCUR_set(sv, 0);
 		    if (SvPVX(sv) != Nullch)
@@ -8521,14 +8522,14 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
     if (SvTYPE(rv) < SVt_RV)
 	sv_upgrade(rv, SVt_RV);
     else if (SvTYPE(rv) > SVt_RV) {
-	(void)SvOOK_off(rv);
+	SvOOK_off(rv);
 	if (SvPVX(rv) && SvLEN(rv))
 	    Safefree(SvPVX(rv));
 	SvCUR_set(rv, 0);
 	SvLEN_set(rv, 0);
     }
 
-    (void)SvOK_off(rv);
+    SvOK_off(rv);
     SvRV(rv) = sv;
     SvROK_on(rv);
 
