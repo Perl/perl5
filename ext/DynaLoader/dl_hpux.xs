@@ -48,6 +48,10 @@ dl_load_file(filename)
 	bind_type = BIND_IMMEDIATE;
     else
 	bind_type = BIND_DEFERRED;
+#ifdef DEBUGGING
+    if (dl_debug)
+	bind_type |= BIND_VERBOSE;
+#endif /* DEBUGGING */
 
     max = AvFILL(dl_resolve_using);
     for (i = 0; i <= max; i++) {
