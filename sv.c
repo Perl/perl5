@@ -8657,7 +8657,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    else
 		return;
 	    if (*pp == 'g') {
-		if (digits < sizeof(ebuf) - NV_DIG - 10) { /* 0, point, slack */
+		/* Add check for digits != 0 because it seems that some
+		   gconverts are buggy in this case, and we don't yet have
+		   a Configure test for this.  */
+		if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
+		     /* 0, point, slack */
 		    Gconvert(nv, (int)digits, 0, ebuf);
 		    sv_catpv(sv, ebuf);
 		    if (*ebuf)	/* May return an empty string for digits==0 */
@@ -9367,7 +9371,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	    if ( !(width || left || plus || alt) && fill != '0'
 		 && has_precis && intsize != 'q' ) {	/* Shortcuts */
-		if ( c == 'g') {
+		/* See earlier comment about buggy Gconvert when digits,
+		   aka precis is 0  */
+		if ( c == 'g' && precis) {
 		    Gconvert((NV)nv, (int)precis, 0, PL_efloatbuf);
 		    if (*PL_efloatbuf)	/* May return an empty string for digits==0 */
 			goto float_converted;
