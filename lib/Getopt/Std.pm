@@ -145,7 +145,7 @@ sub getopts ($;$) {
 	    }
 	}
 	else {
-	    print STDERR "Unknown option: $first\n";
+	    warn "Unknown option: $first\n";
 	    ++$errs;
 	    if($rest ne '') {
 		$ARGV[0] = "-$rest";
