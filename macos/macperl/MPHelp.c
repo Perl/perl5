@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C
 
 $Log: MPHelp.c,v $
+Revision 1.3  2002/01/23 21:56:53  pudge
+Don't crash if very long word selected for help (bug #506672)
+
 Revision 1.2  2002/01/04 03:34:45  pudge
 Modifications for universal headers 3.4
 
@@ -316,6 +319,10 @@ symbolic_variable:
 	} else 
 		pos = 0;
 		
+	// Maximum is 255 characters
+	if (pos > 255)
+		pos = 255;
+
 	if (!pos) {
 		MetaHelp("\pYou didn't select any text to look up.",
 					(StringPtr) "\p", (StringPtr) "\p", (StringPtr) "\p");
