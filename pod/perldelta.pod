@@ -449,6 +449,16 @@ pop(), push(), shift(), splice(), unshift().
 
 =item *
 
+C<pack() / unpack()> now can group template letters with C<()> and then
+apply repetition/count modifiers on the groups.
+
+=item *
+
+C<pack() / unpack()> can now process the Perl internal numeric types:
+IVs, UVs, NVs-- and also long doubles, if supported by the platform.
+
+=item *
+
 C<pack('U0a*', ...)> can now be used to force a string to UTF8.
 
 =item *
