@@ -120,7 +120,7 @@ DYNALOADER = lib/auto/DynaLoader/DynaLoader.a
 
 libs = $libs $cryptlib
 
-public = perl $suidperl
+public = perl $suidperl utilities translators
 
 shellflags = $shellflags
 
@@ -160,11 +160,9 @@ shextract = Makefile cflags config.h makeaperl makedepend \
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
-pl = c2ph.PL h2ph.PL h2xs.PL perldoc.PL \
-	pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL
+pl = pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL
 
-plextract = c2ph h2ph h2xs perldoc \
-	pod/pod2html pod/pod2latex pod/pod2man
+plextract = pod/pod2html pod/pod2latex pod/pod2man pod/pod2text
 
 addedbyconf = UU $(shextract) $(plextract) pstruct
 
@@ -207,7 +205,14 @@ SHELL = /bin/sh
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 all: makefile miniperl $(private) $(plextract) $(public) $(dynamic_ext)
+	@echo " "; echo "	Everything is up to date."
+
+translators:	miniperl lib/Config.pm FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(MAKE) all
+
+utilities:	miniperl lib/Config.pm FORCE
+	@echo " "; echo "	Making utilities"; cd utils; $(MAKE) all
+
 
 # This is now done by installman only if you actually want the man pages.
 #	@echo " "; echo "	Making docs"; cd pod; $(MAKE) all;
@@ -373,17 +378,19 @@ s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 clean:
 	rm -f *.o *.a all perlmain.c
 	rm -f perl.exp ext.libs
-	-cd x2p; $(MAKE) clean
 	-cd pod; $(MAKE) clean
+	-cd utils; $(MAKE) clean
+	-cd x2p; $(MAKE) clean
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext clean $$x ; \
 	done
 	rm -f perl suidperl miniperl $(perllib)
 
 realclean: clean
-	-cd x2p; $(MAKE) realclean
-	-cd pod; $(MAKE) realclean
 	-cd os2; rm -f Makefile
+	-cd pod; $(MAKE) realclean
+	-cd utils; $(MAKE) realclean
+	-cd x2p; $(MAKE) realclean
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext realclean $$x ; \
 	done
