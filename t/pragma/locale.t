@@ -367,6 +367,15 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
 	trylocale($_);
     }
     close(LOCALES);
+} elsif ($^O eq 'VMS' && defined($ENV{'SYS$I18N_LOCALE'}) && -d 'SYS$I18N_LOCALE') {
+# The SYS$I18N_LOCALE logical name search list was not present on 
+# VAX VMS V5.5-12, but was on AXP && VAX VMS V6.2 as well as later versions.
+    opendir(LOCALES, "SYS\$I18N_LOCALE:");
+    while ($_ = readdir(LOCALES)) {
+        chomp;
+        trylocale($_);
+    }
+    close(LOCALES);
 } else {
 
     # This is going to be slow.

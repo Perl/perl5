@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..224\n";
+print "1..230\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -496,7 +496,7 @@ $test++;
 $_ = 'xabcx';
 foreach $ans ('', 'c') {
   /(?<=(?=a)..)((?=c)|.)/g;
-  print "not " unless $1 eq $ans;
+  print "# \$1  ='$1'\n# \$ans='$ans'\nnot " unless $1 eq $ans;
   print "ok $test\n";
   $test++;
 }
@@ -504,7 +504,7 @@ foreach $ans ('', 'c') {
 $_ = 'a';
 foreach $ans ('', 'a', '') {
   /^|a|$/g;
-  print "not " unless $& eq $ans;
+  print "# \$&  ='$&'\n# \$ans='$ans'\nnot " unless $& eq $ans;
   print "ok $test\n";
   $test++;
 }
@@ -545,10 +545,43 @@ $test++;
   print "ok $test\n";
   $test++;
 
+  local $lex_a = 2;
+  my $lex_a = 43;
+  my $lex_b = 17;
+  my $lex_c = 27;
+  my $lex_res = ($lex_b =~ qr/$lex_b(?{ $lex_c = $lex_a++ })/);
+  print "not " unless $lex_res eq '1';
+  print "ok $test\n";
+  $test++;
+  print "not " unless $lex_a eq '44';
+  print "ok $test\n";
+  $test++;
+  print "not " unless $lex_c eq '43';
+  print "ok $test\n";
+  $test++;
+
+
   no re "eval"; 
   $match = eval { /$a$c$a/ };
   print "not " 
     unless $b eq '14' and $@ =~ /Eval-group not allowed/ and not $match;
+  print "ok $test\n";
+  $test++;
+}
+
+{
+  local $lex_a = 2;
+  my $lex_a = 43;
+  my $lex_b = 17;
+  my $lex_c = 27;
+  my $lex_res = ($lex_b =~ qr/17(?{ $lex_c = $lex_a++ })/);
+  print "not " unless $lex_res eq '1';
+  print "ok $test\n";
+  $test++;
+  print "not " unless $lex_a eq '44';
+  print "ok $test\n";
+  $test++;
+  print "not " unless $lex_c eq '43';
   print "ok $test\n";
   $test++;
 }
@@ -1064,7 +1097,8 @@ my %space = ( spc   => " ",
 	      cr    => "\r",
 	      lf    => "\n",
 	      ff    => "\f",
-# The vertical tabulator seems miraculously be 12 both in ASCII and EBCDIC.
+# There's no \v but the vertical tabulator seems miraculously
+# be 11 both in ASCII and EBCDIC.
 	      vt    => chr(11),
 	      false => "space" );
 

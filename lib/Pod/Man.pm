@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.8 2000/10/10 02:14:31 eagle Exp $
+# $Id: Man.pm,v 1.10 2000/11/19 05:46:19 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.08;
+$VERSION = 1.10;
 
 
 ############################################################################
@@ -277,33 +277,6 @@ sub protect {
     local $_ = shift;
     s/^([.\'\\])/\\&$1/mg;
     $_;
-}
-
-# Given a command and a single argument that may or may not contain double
-# quotes, handle double-quote formatting for it.  If there are no double
-# quotes, just return the command followed by the argument in double quotes.
-# If there are double quotes, use an if statement to test for nroff, and for
-# nroff output the command followed by the argument in double quotes with
-# embedded double quotes doubled.  For other formatters, remap paired double
-# quotes to `` and ''.
-sub switchquotes {
-    my $command = shift;
-    local $_ = shift;
-    my $extra = shift;
-    s/\\\*\([LR]\"/\"/g;
-    if (/\"/) {
-        s/\"/\"\"/g;
-        my $troff = $_;
-        $troff =~ s/\"\"([^\"]*)\"\"/\`\`$1\'\'/g;
-        s/\"/\"\"/g if $extra;
-        $troff =~ s/\"/\"\"/g if $extra;
-        $_ = qq("$_") . ($extra ? " $extra" : '');
-        $troff = qq("$troff") . ($extra ? " $extra" : '');
-        return ".if n $command $_\n.el $command $troff\n";
-    } else {
-        $_ = qq("$_") . ($extra ? " $extra" : '');
-        return "$command $_\n";
-    }
 }
 
 # Translate a font string into an escape.
@@ -568,7 +541,7 @@ sub textblock {
     $text = $self->parse ($text, @_);
     $text =~ s/\n\s*$/\n/;
     $self->makespace;
-    $self->output (protect $self->mapfonts ($text));
+    $self->output (protect $self->textmapfonts ($text));
     $self->outindex;
     $$self{NEEDSPACE} = 1;
 }
@@ -661,7 +634,7 @@ sub cmd_head1 {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");
     }
-    $self->output (switchquotes ('.SH', $self->mapfonts ($_)));
+    $self->output ($self->switchquotes ('.SH', $self->mapfonts ($_)));
     $self->outindex (($_ eq 'NAME') ? () : ('Header', $_));
     $$self{NEEDSPACE} = 0;
 }
@@ -675,9 +648,39 @@ sub cmd_head2 {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");
     }
-    $self->output (switchquotes ('.Sh', $self->mapfonts ($_)));
+    $self->output ($self->switchquotes ('.Sh', $self->mapfonts ($_)));
     $self->outindex ('Subsection', $_);
     $$self{NEEDSPACE} = 0;
+}
+
+# Third level heading.
+sub cmd_head3 {
+    my $self = shift;
+    local $_ = $self->parse (@_);
+    s/\s+$//;
+    if ($$self{ITEMS} > 1) {
+        $$self{ITEMS} = 0;
+        $self->output (".PD\n");
+    }
+    $self->makespace;
+    $self->output ($self->switchquotes ('.I', $self->mapfonts ($_)));
+    $self->outindex ('Subsection', $_);
+    $$self{NEEDSPACE} = 1;
+}
+
+# Fourth level heading.
+sub cmd_head4 {
+    my $self = shift;
+    local $_ = $self->parse (@_);
+    s/\s+$//;
+    if ($$self{ITEMS} > 1) {
+        $$self{ITEMS} = 0;
+        $self->output (".PD\n");
+    }
+    $self->makespace;
+    $self->output ($self->textmapfonts ($_) . "\n");
+    $self->outindex ('Subsection', $_);
+    $$self{NEEDSPACE} = 1;
 }
 
 # Start a list.  For indents after the first, wrap the outside indent in .RS
@@ -736,9 +739,9 @@ sub cmd_item {
         $self->output (".RE\n");
         $$self{WEIRDINDENT} = 0;
     }
-    $_ = $self->mapfonts ($_);
+    $_ = $self->textmapfonts ($_);
     $self->output (".PD 0\n") if ($$self{ITEMS} == 1);
-    $self->output (switchquotes ('.Ip', $_, $$self{INDENT}));
+    $self->output ($self->switchquotes ('.Ip', $_, $$self{INDENT}));
     $self->outindex ($index ? ('Item', $index) : ());
     $$self{NEEDSPACE} = 0;
     $$self{ITEMS}++;
@@ -844,13 +847,47 @@ sub buildlink {
 
 # At this point, we'll have embedded font codes of the form \f(<font>[SE]
 # where <font> is one of B, I, or F.  Turn those into the right font start
-# or end codes.  B<someI<thing> else> should map to \fBsome\f(BIthing\fB
-# else\fR.  The old pod2man didn't get this right; the second \fB was \fR,
-# so nested sequences didn't work right.  We take care of this by using
-# variables as a combined pointer to our current font sequence, and set each
-# to the number of current nestings of start tags for that font.  Use them
-# as a vector to look up what font sequence to use.
+# or end codes.  The old pod2man didn't get B<someI<thing> else> right;
+# after I<> it switched back to normal text rather than bold.  We take care
+# of this by using variables as a combined pointer to our current font
+# sequence, and set each to the number of current nestings of start tags for
+# that font.  Use them as a vector to look up what font sequence to use.
+#
+# \fP changes to the previous font, but only one previous font is kept.  We
+# don't know what the outside level font is; normally it's R, but if we're
+# inside a heading it could be something else.  So arrange things so that
+# the outside font is always the "previous" font and end with \fP instead of
+# \fR.  Idea from Zack Weinberg.
 sub mapfonts {
+    my $self = shift;
+    local $_ = shift;
+
+    my ($fixed, $bold, $italic) = (0, 0, 0);
+    my %magic = (F => \$fixed, B => \$bold, I => \$italic);
+    my $last = '\fR';
+    s { \\f\((.)(.) } {
+        my $sequence = '';
+        my $f;
+        if ($last ne '\fR') { $sequence = '\fP' }
+        ${ $magic{$1} } += ($2 eq 'S') ? 1 : -1;
+        $f = $$self{FONTS}{($fixed && 1) . ($bold && 1) . ($italic && 1)};
+        if ($f eq $last) {
+            '';
+        } else {
+            if ($f ne '\fR') { $sequence .= $f }
+            $last = $f;
+            $sequence;
+        }
+    }gxe;
+    $_;
+}
+
+# Unfortunately, there is a bug in Solaris 2.6 nroff (not present in GNU
+# groff) where the sequence \fB\fP\f(CW\fP leaves the font set to B rather
+# than R, presumably because \f(CW doesn't actually do a font change.  To
+# work around this, use a separate textmapfonts for text blocks where the
+# default font is always R and only use the smart mapfonts for headings.
+sub textmapfonts {
     my $self = shift;
     local $_ = shift;
 
@@ -1019,6 +1056,42 @@ sub outindex {
 
 # Output text to the output device.
 sub output { print { $_[0]->output_handle } $_[1] }
+
+# Given a command and a single argument that may or may not contain double
+# quotes, handle double-quote formatting for it.  If there are no double
+# quotes, just return the command followed by the argument in double quotes.
+# If there are double quotes, use an if statement to test for nroff, and for
+# nroff output the command followed by the argument in double quotes with
+# embedded double quotes doubled.  For other formatters, remap paired double
+# quotes to `` and ''.
+sub switchquotes {
+    my $self = shift;
+    my $command = shift;
+    local $_ = shift;
+    my $extra = shift;
+    s/\\\*\([LR]\"/\"/g;
+
+    # We also have to deal with \*C` and \*C', which are used to add the
+    # quotes around C<> text, since they may expand to " and if they do this
+    # confuses the .SH macros and the like no end.
+    my $c_is_quote = ($$self{LQUOTE} =~ /\"/) || ($$self{RQUOTE} =~ /\"/);
+    if (/\"/ || ($c_is_quote && /\\\*\(C[\'\`]/)) {
+        s/\"/\"\"/g;
+        my $troff = $_;
+        $troff =~ s/\"\"([^\"]*)\"\"/\`\`$1\'\'/g;
+        s/\"/\"\"/g if $extra;
+        $troff =~ s/\"/\"\"/g if $extra;
+        s/\\\*\(C\`/$$self{LQUOTE}/g;
+        s/\\\*\(C\'/$$self{RQUOTE}/g;
+        $troff =~ s/\\\*\(C[\'\`]//g;
+        $_ = qq("$_") . ($extra ? " $extra" : '');
+        $troff = qq("$troff") . ($extra ? " $extra" : '');
+        return ".if n $command $_\n.el $command $troff\n";
+    } else {
+        $_ = qq("$_") . ($extra ? " $extra" : '');
+        return "$command $_\n";
+    }
+}
 
 __END__
 

@@ -119,6 +119,8 @@ if ($OS=~/Win/i) {
     $OS = 'MACINTOSH';
 } elsif ($OS=~/os2/i) {
     $OS = 'OS2';
+} elsif ($OS=~/epoc/) {
+    $OS = 'EPOC';
 } else {
     $OS = 'UNIX';
 }
@@ -135,7 +137,7 @@ $AutoloadClass = $DefaultClass unless defined $CGI::AutoloadClass;
 # The path separator is a slash, backslash or semicolon, depending
 # on the paltform.
 $SL = {
-    UNIX=>'/', OS2=>'\\', WINDOWS=>'\\', DOS=>'\\', MACINTOSH=>':', VMS=>'/'
+    UNIX=>'/', EPOC=>'/', OS2=>'\\', WINDOWS=>'\\', DOS=>'\\', MACINTOSH=>':', VMS=>'/'
     }->{$OS};
 
 # This no longer seems to be necessary
@@ -3274,7 +3276,7 @@ unless ($TMPDIRECTORY) {
     @TEMP=("${SL}usr${SL}tmp","${SL}var${SL}tmp",
 	   "C:${SL}temp","${SL}tmp","${SL}temp",
 	   "${vol}${SL}Temporary Items",
-           "${SL}WWW_ROOT", "${SL}SYS\$SCRATCH");
+           "${SL}WWW_ROOT", "${SL}SYS\$SCRATCH", "C:${SL}system${SL}temp");
     unshift(@TEMP,$ENV{'TMPDIR'}) if exists $ENV{'TMPDIR'};
 
     # this feature was supposed to provide per-user tmpfiles, but

@@ -1074,6 +1074,14 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"}
 	if ($^O eq 'irix' && $self->{LD_RUN_PATH});
 
+    # For example in AIX the shared objects/libraries from previous builds
+    # linger quite a while in the shared dynalinker cache even when nobody
+    # is using them.  This is painful if one for instance tries to restart
+    # a failed build because the link command will fail unnecessarily 'cos
+    # the shared object/library is 'busy'.
+    push(@m,'	$(RM_F) $@
+');
+
     push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
 		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
     push @m, '

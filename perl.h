@@ -733,6 +733,9 @@ typedef struct perl_mstats perl_mstats_t;
 #       undef INCLUDE_PROTOTYPES
 #       undef PERL_SOCKS_NEED_PROTOTYPES
 #   endif
+#   ifdef USE_64_BIT_ALL
+#       define SOCKS_64BIT_BUG /* until proven otherwise */
+#   endif
 # endif 
 # ifdef I_NETDB
 #  include <netdb.h>
@@ -1663,6 +1666,9 @@ typedef struct ptr_tbl PTR_TBL_t;
 #         else
 #           if defined(MACOS_TRADITIONAL)
 #             include "macos/macish.h"
+#	      ifndef NO_ENVIRON_ARRAY
+#               define NO_ENVIRON_ARRAY
+#             endif
 #           else
 #             include "unixish.h"
 #           endif

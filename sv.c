@@ -5134,7 +5134,7 @@ Perl_sv_reset(pTHX_ register char *s, HV *stash)
 		}
 		if (GvHV(gv) && !HvNAME(GvHV(gv))) {
 		    hv_clear(GvHV(gv));
-#if !defined( VMS) && !defined(EPOC)  /* VMS has no environ array */
+#ifdef USE_ENVIRON_ARRAY
 		    if (gv == PL_envgv)
 			environ[0] = Nullch;
 #endif

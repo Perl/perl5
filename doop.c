@@ -144,6 +144,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
     U8 *s;
     U8 *send;
     U8 *d;
+    U8 *dstart;
     I32 hasutf = SvUTF8(sv);
     I32 matches = 0;
     STRLEN len;
@@ -157,7 +158,9 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
     s = (U8*)SvPV(sv, len);
     send = s + len;
 
-    d = s;
+    Newz(0, d, len*2+1, U8);
+    dstart = d;
+
     if (PL_op->op_private & OPpTRANS_SQUASH) {
 	U8* p = send;
 
@@ -168,9 +171,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 	        if ((ch = tbl[*s]) >= 0) {
 		    *d = ch;
 		    matches++;
-		    if (p == d - 1 && *p == *d)
-		        matches--;
-	            else
+           if (p != d - 1 || *p != *d)
 		        p = d++;
 	        }
 	        else if (ch == -1)	/* -1 is unmapped character */
@@ -181,26 +182,41 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
     }
     else {
 	while (s < send) {
+           UV comp;
             if (hasutf && *s & 0x80)
-                s += UTF8SKIP(s);
-            else {
-	        if ((ch = tbl[*s]) >= 0) {
-		    *d = ch;
-		    matches++;
-		    d++;
-	        }
-	        else if (ch == -1)	/* -1 is unmapped character */
-		    *d++ = *s;		/* -2 is delete character */
-	        s++;
-            }
+                comp = utf8_to_uv_simple(s, NULL);
+           else
+                comp = *s;
+           
+           ch = tbl[comp];
+           
+           if (ch == -1) { /* -1 is unmapped character */
+                ch = comp;
+               matches--;
+           }
+
+           if (ch >= 0) {
+               if (hasutf)
+                 d = uv_to_utf8(d, ch);
+               else 
+                 *d++ = ch;
+           }
+           matches++;
+
+           s += hasutf && *s & 0x80 ? UNISKIP(*s) : 1;
+            
 	}
     }
-    matches += send - d;		/* account for disappeared chars */
-    *d = '\0';
-    SvCUR_set(sv, d - (U8*)SvPVX(sv));
-    SvSETMAGIC(sv);
 
+    *d = '\0';
+
+    sv_setpvn(sv, (const char*)dstart, d - dstart);
+    Safefree(dstart);
+    if (hasutf)
+        SvUTF8_on(sv);
+    SvSETMAGIC(sv);
     return matches;
+
 }
 
 STATIC I32

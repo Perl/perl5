@@ -209,7 +209,7 @@ fail unless $big eq "big";
 print "ok 14\n";
 
 # 705_032_704 = (I32)5_000_000_000
-fail unless seek(BIG, 705_032_704, SEEK_SET);
+fail unless sysseek(BIG, 705_032_704, SEEK_SET);
 print "ok 15\n";
 
 my $zero;
