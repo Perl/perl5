@@ -3058,7 +3058,7 @@ PerlIOBuf_close(PerlIO *f)
     IV code = PerlIOBase_close(f);
     PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
     if (b->buf && b->buf != (STDCHAR *) & b->oneword) {
-	PerlMemShared_free(b->buf);
+	safefree(b->buf);
     }
     b->buf = NULL;
     b->ptr = b->end = b->buf;
@@ -3093,7 +3093,8 @@ PerlIOBuf_get_base(PerlIO *f)
     if (!b->buf) {
 	if (!b->bufsiz)
 	    b->bufsiz = 4096;
-	b->buf = PerlMemShared_calloc(b->bufsiz, sizeof(STDCHAR));
+	b->buf = 
+	Newz('B',b->buf,b->bufsiz, STDCHAR);
 	if (!b->buf) {
 	    b->buf = (STDCHAR *) & b->oneword;
 	    b->bufsiz = sizeof(b->oneword);
@@ -4222,3 +4223,4 @@ PerlIO_sprintf(char *s, int n, const char *fmt, ...)
     return result;
 }
 #endif
+

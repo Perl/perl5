@@ -78,7 +78,7 @@ public:
 	void *result;
 	GetLockShared();
 	result = m_pVMemShared->Malloc(size);
-	FreeLockShared()
+	FreeLockShared();
 	return result;
     };
     inline void* ReallocShared(void* ptr, size_t size)
@@ -86,14 +86,14 @@ public:
 	void *result;
 	GetLockShared();
 	result = m_pVMemShared->Realloc(ptr, size);
-	FreeLockShared()
+	FreeLockShared();
 	return result;
     };
     inline void FreeShared(void* ptr)
     {
 	GetLockShared();
 	m_pVMemShared->Free(ptr);
-	FreeLockShared()
+	FreeLockShared();
     };
     inline void* CallocShared(size_t num, size_t size)
     {
