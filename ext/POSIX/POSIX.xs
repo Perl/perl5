@@ -65,7 +65,6 @@
 
 #  undef mkfifo
 #  define mkfifo(a,b) (not_here("mkfifo"),-1)
-#  define mknod(a,b,c) (not_here("mknod"),-1)
 #  define tzset() not_here("tzset")
 
 #if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
@@ -107,7 +106,6 @@
 #if defined (WIN32)
 #  undef mkfifo
 #  define mkfifo(a,b) not_here("mkfifo")
-#  define mknod(a,b,c) not_here("mknod")
 #  define ttyname(a) (char*)not_here("ttyname")
 #  define sigset_t long
 #  define pid_t long
@@ -3479,17 +3477,6 @@ mkfifo(filename, mode)
     CODE:
 	TAINT_PROPER("mkfifo");
 	RETVAL = mkfifo(filename, mode);
-    OUTPUT:
-	RETVAL
-
-SysRet
-mknod(filename, mode, device)
-	char *		filename
-	Mode_t		mode
-	Dev_t		device
-    CODE:
-	TAINT_PROPER("mknod");
-	RETVAL = mknod(filename, mode, device);
     OUTPUT:
 	RETVAL
 

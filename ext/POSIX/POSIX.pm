@@ -115,7 +115,7 @@ $VERSION = "1.02" ;
     sys_stat_h => [qw(S_IRGRP S_IROTH S_IRUSR S_IRWXG S_IRWXO S_IRWXU
 		S_ISBLK S_ISCHR S_ISDIR S_ISFIFO S_ISGID S_ISREG
 		S_ISUID S_IWGRP S_IWOTH S_IWUSR S_IXGRP S_IXOTH S_IXUSR
-		fstat mkfifo mknod)],
+		fstat mkfifo)],
 
     sys_times_h => [qw()],
 
