@@ -1,4 +1,13 @@
-2002-03-04   Gisle Aas <gisle@ActiveState.com>
+2003-01-18   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.23
+
+   Override INSTALLDIRS for 5.8 as suggested by
+   Guido Ostkamp <Guido.Ostkamp@t-online.de>.
+
+
+
+2003-01-04   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.22.
 

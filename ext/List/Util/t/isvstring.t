@@ -11,15 +11,16 @@ BEGIN {
 	    exit 0;
 	}
     }
-    $|=1;
-    require Scalar::Util;
-    if (grep { /isvstring/ } @Scalar::Util::EXPORT_FAIL) {
-	print("1..0\n");
-	exit 0;
-    }
 }
 
-use Scalar::Util qw(isvstring);
+$|=1;
+require Scalar::Util;
+if (grep { /isvstring/ } @Scalar::Util::EXPORT_FAIL) {
+    print("1..0\n");
+    exit 0;
+}
+
+Scalar::Util->import(qw[isvstring]);
 
 print "1..4\n";
 

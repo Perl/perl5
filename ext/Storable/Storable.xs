@@ -10,11 +10,14 @@
 
 #include <EXTERN.h>
 #include <perl.h>
-#include <patchlevel.h>		/* Perl's one, needed since 5.6 */
-#ifndef PERL_VERSION
-#    include <could_not_find_Perl_patchlevel.h>
-#endif
 #include <XSUB.h>
+
+#ifndef PATCHLEVEL
+#    include <patchlevel.h>		/* Perl's one, needed since 5.6 */
+#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
+#        include <could_not_find_Perl_patchlevel.h>
+#    endif
+#endif
 
 #ifndef NETWARE
 #if 0
