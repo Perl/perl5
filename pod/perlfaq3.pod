@@ -73,10 +73,11 @@ why what it's doing isn't what it should be doing.
 
 =head2 How do I profile my Perl programs?
 
-You should get the Devel::DProf module from CPAN and also use
-Benchmark.pm from the standard distribution.  Benchmark lets you time
-specific portions of your code, while Devel::DProf gives detailed
-breakdowns of where your code spends its time.
+You should get the Devel::DProf module from the standard distribution
+(and separately on CPAN) or also use Benchmark.pm from the standard
+distribution.  The Benchmark module lets you time specific portions of
+your code, while Devel::DProf gives detailed breakdowns of where your
+code spends its time.
 
 Here's a sample use of Benchmark:
 
@@ -180,12 +181,38 @@ your hard-earned cash for.
 
 PerlBuilder (http://www.solutionsoft.com/perl.htm) is an integrated
 development environment for Windows that supports Perl development.
+VisualPerl (http://www.activestate.com/IDE) is also an integrated
+development environment for Windows, Unix, and several Open Source OSes
+that supports Perl development.  Perl code magic is another IDE 
+(http://www.petes-place.com/codemagic.html).  CodeMagicCD
+(http://www.codemagiccd.com/) is a commercial IDE.
+
 Perl programs are just plain text, though, so you could download emacs
 for Windows (http://www.gnu.org/software/emacs/windows/ntemacs.html)
-or a vi clone (vim) which runs on for win32
-(http://www.cs.vu.nl/%7Etmgil/vi.html).  If you're transferring
-Windows files to Unix be sure to transfer them in ASCII mode so the ends
-of lines are appropriately mangled.
+or a vi clone such as nvi (available from CPAN in src/misc/) or vim
+(http://www.vim.org/).  Vim runs on win32
+(http://www.cs.vu.nl/%7Etmgil/vi.html).  Vile is another widely ported
+vi clone that has a Perl language sensitivity module 
+(http://www.clark.net/pub/dickey/vile/vile.html).  SlickEdit 
+(http://www.slickedit.com/) is a full featured commercial editor that 
+has a modular architecture: it can emulate several other common 
+editors and it can help with programming language sensitivity modules 
+for a variety of programming languages including Perl.  If you're 
+transferring Windows text files to Unix be sure to transfer them in 
+ASCII mode so the ends of lines are appropriately mangled.  There is 
+also a toyedit Text widget based editor written in Perl that is 
+distributed with the Tk module on CPAN.  The ptkdb 
+(http://world.std.com/~aep/ptkdb/) is a Perl/tk based debugger that 
+acts as a development environment of sorts.  Perl Composer 
+(http://perlcomposer.sourceforge.net/vperl.html) is an IDE for Perl/Tk
+GUI creation.
+
+On Mac OS the MacPerl Application comes with a simple 32k text editor
+that behaves like a rudimentary IDE.  In contrast to the MacPerl Application
+the MPW Perl tool can make use of MPW itself as an editor (with
+no 32k limit).  BBEdit and BBEdit Lite are text editors for Mac OS 
+that have a Perl sensitivity mode (http://web.barebones.com/),
+as does the Alpha editor (http://www.bcity.com/alphatext).
 
 =head2 Where can I get Perl macros for vi?
 
