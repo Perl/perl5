@@ -795,6 +795,10 @@ this support (if it is available).
 You can "Configure -Dusemorebits" to turn on both the 64-bit support
 and the long double support.
 
+Note that on some platforms the gcc 3.1 compiler has been reported
+to refuse to compile the Time::Hires module when using -Dusemorebits
+or an equivalent setting.
+
 =head2 Selecting File IO mechanisms
 
 Executive summary: in Perl 5.8, you should use the default "PerlIO"
