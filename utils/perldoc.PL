@@ -118,7 +118,6 @@ Options:
     -v	 Verbosely describe what's going on
     -X	 use index if present (looks for pod.idx at $Config{archlib})
     -q   Search the text of questions (not answers) in perlfaq[1-9]
-    -U	 Run in insecure mode (superuser only)
 
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You
@@ -147,7 +146,7 @@ if (defined $ENV{"PERLDOC"}) {
 }
 !NO!SUBS!
 
-my $getopts = "mhtluvriFf:Xq:n:U";
+my $getopts = "mhtluvriFf:Xq:n:";
 print OUT <<"!GET!OPTS!";
 
 use vars qw( @{[map "\$opt_$_", ($getopts =~ /\w/g)]} );
@@ -159,15 +158,13 @@ print OUT <<'!NO!SUBS!';
 
 usage if $opt_h;
 
-# refuse to run if we should be tainting and aren't
-# (but regular users deserve protection too, though!)
+# attempt to drop privs if we should be tainting and aren't
 if (!($Is_VMS || $Is_MSWin32 || $Is_Dos || $Is_OS2) && ($> == 0 || $< == 0)
      && !am_taint_checking()) 
-{{
-    if ($opt_U) {
-        my $id = eval { getpwnam("nobody") };
-           $id = eval { getpwnam("nouser") } unless defined $id;
-           $id = -2 unless defined $id;
+{
+    my $id = eval { getpwnam("nobody") };
+    $id = eval { getpwnam("nouser") } unless defined $id;
+    $id = -2 unless defined $id;
 	#
 	# According to Stevens' APUE and various
 	# (BSD, Solaris, HP-UX) man pages setting
@@ -186,16 +183,15 @@ if (!($Is_VMS || $Is_MSWin32 || $Is_Dos || $Is_OS2) && ($> == 0 || $< == 0)
 	# in HP-UX to change saved uid is to call setuid()
 	# when the effective uid is zero).
 	#
-        eval {
-            $< = $id; # real uid
-            $> = $id; # effective uid
-            $< = $id; # real uid
-            $> = $id; # effective uid
-        };
-        last if !$@ && $< && $>;
-    }
-    die "Superuser must not run $0 without security audit and taint checks.\n";
-}}
+    eval {
+	$< = $id; # real uid
+	$> = $id; # effective uid
+	$< = $id; # real uid
+	$> = $id; # effective uid
+    };
+    die "Superuser must not run $0 without security audit and taint checks.\n"
+	    unless !$@ && $< && $>;
+}
 
 my $podidx;
 if ($opt_X) {
@@ -746,15 +742,6 @@ The B<-X> option looks for an entry whose basename matches the name given on the
 command line in the file C<$Config{archlib}/pod.idx>.  The pod.idx file should
 contain fully qualified filenames, one per line.
 
-=item B<-U> run insecurely
-
-Because B<perldoc> does not run properly tainted, and is known to
-have security issues, it will not normally execute as the superuser.
-If you use the B<-U> flag, it will do so, but only after setting
-the effective and real IDs to nobody's or nouser's account, or -2
-if unavailable.  If it cannot relinquish its privileges, it will not
-run.  
-
 =item B<PageName|ModuleName|ProgramName>
 
 The item you want to look up.  Nested modules (such as C<File::Basename>)
@@ -762,6 +749,14 @@ are specified either as C<File::Basename> or C<File/Basename>.  You may also
 give a descriptive name of a page, such as C<perlfunc>.
 
 =back
+
+=head1 SECURITY
+
+Because B<perldoc> does not run properly tainted, and is known to
+have security issues, when run as the superuser it will attempt to
+drop privileges by setting the effective and real IDs to nobody's
+or nouser's account, or -2 if unavailable.  If it cannot relinquish
+its privileges, it will not run.  
 
 =head1 ENVIRONMENT
 
@@ -779,7 +774,7 @@ One useful value for C<PERLDOC_PAGER> is C<less -+C -E>.
 
 =head1 VERSION
 
-This is perldoc v2.04.
+This is perldoc v2.05.
 
 =head1 AUTHOR
 
@@ -791,11 +786,14 @@ and others.
 =cut
 
 #
+# Version 2.05: Sat Oct 12 16:09:00 CEST 2002
+#	Hugo van der Sanden <hv@crypt.org>
+#	Made -U the default, based on patch from Simon Cozens
 # Version 2.04: Sun Aug 18 13:27:12 BST 2002
-#   Randy W. Sims <RandyS@ThePierianSpring.org>
-#   allow -n to enable nroff under Win32
+#	Randy W. Sims <RandyS@ThePierianSpring.org>
+#	allow -n to enable nroff under Win32
 # Version 2.03: Sun Apr 23 16:56:34 BST 2000
-#	Hugo van der Sanden <hv@crypt0.demon.co.uk>
+#	Hugo van der Sanden <hv@crypt.org>
 #	don't die when 'use blib' fails
 # Version 2.02: Mon Mar 13 18:03:04 MST 2000
 #       Tom Christiansen <tchrist@perl.com>
