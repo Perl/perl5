@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Nov  1 16:00:01 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Nov  1 16:26:50 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -7268,6 +7268,25 @@ rp='Perl administrator e-mail address'
 . ./myread
 perladmin="$ans"
 
+: determine whether to only install version-specific parts.
+echo " "
+$cat <<EOM
+Do you want to install only the version-specific parts of the perl
+distribution?  Usually you do *not* want to do this.
+EOM
+case "$versiononly" in
+"$define"|[Yy]*|true) dflt='y' ;;
+*) dflt='n';
+esac
+rp="Do you want to install only the version-specific parts of perl?"
+. ./myread
+case "$ans" in
+[yY]*)	val="$define";;
+*)	val="$undef" ;;
+esac
+set versiononly
+eval $setvar
+
 : figure out how to guarantee perl startup
 case "$startperl" in
 '')
@@ -7282,7 +7301,10 @@ want to share those scripts and perl is not in a standard place
 a shell by starting the script with a single ':' character.
 
 EOH
-		dflt="$binexp/perl"
+		case "$versiononly" in
+		"$define")      dflt="$binexp/perl$version";;  
+		*)              dflt="$binexp/perl";;
+		esac
 		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
 		. ./myread
 		case "$ans" in
@@ -7446,25 +7468,6 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installvendorbin="$vendorbinexp"
 fi
-
-: determine whether to only install version-specific parts.
-echo " "
-$cat <<EOM
-Do you want to install only the version-specific parts of the perl
-distribution?  Usually you do *not* want to do this.
-EOM
-case "$versiononly" in
-"$define"|[Yy]*|true) dflt='y' ;;
-*) dflt='n';
-esac
-rp="Do you want to install only the version-specific parts of perl?"
-. ./myread
-case "$ans" in
-[yY]*)	val="$define";;
-*)	val="$undef" ;;
-esac
-set versiononly
-eval $setvar
 
 : see if qgcvt exists
 set qgcvt d_qgcvt
