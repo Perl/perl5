@@ -31,6 +31,134 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11883] By: gbarr                                 on 2001/09/05  12:51:35
+        Log: Update to Scalar-List-Utils 1.04
+     Branch: perl
+	   ! ext/List/Util/ChangeLog ext/List/Util/Util.xs
+	   ! ext/List/Util/lib/List/Util.pm
+	   ! ext/List/Util/lib/Scalar/Util.pm
+____________________________________________________________________________
+[ 11882] By: jhi                                   on 2001/09/05  12:29:44
+        Log: Metaconfigify #11724.
+     Branch: metaconfig
+	   ! U/threads/archname.U
+____________________________________________________________________________
+[ 11881] By: jhi                                   on 2001/09/05  12:21:44
+        Log: The MacOS reference is okay, no reason to hide it.
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 11880] By: jhi                                   on 2001/09/05  12:20:49
+        Log: Subject: [PATCH lib/Cwd.pm ext/Cwd/Makefile.PL] Full doc cleanup (was  Re: [PATCH lib/Cwd.pm]  Try this again.)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 4 Sep 2001 15:30:10 -0400
+             Message-ID: <20010904153010.H26466@blackrider> 
+             
+             (We'll see whether the ../../lib/Cwd.pm works in alien lands)
+     Branch: perl
+	   ! ext/Cwd/Makefile.PL lib/Cwd.pm
+____________________________________________________________________________
+[ 11879] By: jhi                                   on 2001/09/05  12:12:18
+        Log: Subject: [PATCH lib/Cwd.pm] cwd() taint safe  (was Re: [PATCH lib/Cwd.pm ext/Cwd/Makefile.PL] Full doc cleanup (was  Re: [PATCH lib/Cwd.pm]  Try this again.))
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 4 Sep 2001 17:39:13 -0400
+             Message-ID: <20010904173913.C626@blackrider>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 11878] By: jhi                                   on 2001/09/05  12:10:50
+        Log: Subject: Re: Perl_pp_* in public API?
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 4 Sep 2001 21:51:29 -0500
+             Message-Id: <a05101000b7bb3f558c8a@[172.16.52.1]>
+     Branch: perl
+	   ! ext/List/Util/Util.xs
+____________________________________________________________________________
+[ 11877] By: jhi                                   on 2001/09/05  12:07:53
+        Log: From Damian: Class::Struct was unable to define
+             recursive classes.  After the patch an object reference
+             (rather than a hash) is required to initialize
+             an object attribute.  If no such initializer is given to
+             the constructor, object attributes are now default
+             initialized to C<undef>.
+     Branch: perl
+	   ! lib/Class/Struct.pm lib/Class/Struct.t
+____________________________________________________________________________
+[ 11876] By: jhi                                   on 2001/09/05  11:51:24
+        Log: Subject: Re: sv_catpvfn and sv_setpvfn
+             From: Richard Soderberg <rs@oregonnet.com>
+             Date: Tue, 4 Sep 2001 15:16:47 -0700
+             Message-Id: <200109042216.PAA17858@oregonnet.com>
+     Branch: perl
+	   ! pod/perlclib.pod pod/perlguts.pod
+____________________________________________________________________________
+[ 11875] By: jhi                                   on 2001/09/05  11:48:14
+        Log: NetWare updates from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/config.wc NetWare/netware.h NetWare/nw5.c
+	   ! NetWare/nw5thread.h
+____________________________________________________________________________
+[ 11874] By: jhi                                   on 2001/09/05  11:30:59
+        Log: Subject: [PATCH] oct and hex in glorious 64 bit (with less bugs) (was Re: hex and oct again (was Re: FreeBSD MD5 crypt? Re: crypt/hex/oct and Unicode?))
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 4 Sep 2001 22:42:50 +0100
+             Message-ID: <20010904224250.P25120@plum.flirble.org>
+     Branch: perl
+	   ! embed.h embed.pl numeric.c perl.c perl.h pod/perlclib.pod
+	   ! pod/perlfunc.pod pp.c proto.h regcomp.c t/op/64bitint.t
+	   ! t/op/oct.t toke.c
+____________________________________________________________________________
+[ 11873] By: jhi                                   on 2001/09/04  21:03:17
+        Log: Fix Cwd::getcwd() not being tainted, as noticed
+             by Schwern.
+     Branch: perl
+	   + ext/Cwd/t/cwd.t ext/Cwd/t/taint.t
+	   - ext/Cwd/Cwd.t
+	   ! MANIFEST ext/Cwd/Cwd.xs util.c
+____________________________________________________________________________
+[ 11872] By: jhi                                   on 2001/09/04  20:00:50
+        Log: Retract #11870 and volatilize the right destruct_level.
+             Silly thinko pointed out by Sarathy.
+     Branch: perl
+	   ! intrpvar.h perl.c
+____________________________________________________________________________
+[ 11871] By: jhi                                   on 2001/09/04  19:45:59
+        Log: At least a temporary fix for the mysterious scope core dumps
+             in Tru64 from Graham.
+     Branch: perl
+	   ! ext/List/Util/Util.xs
+____________________________________________________________________________
+[ 11870] By: jhi                                   on 2001/09/04  19:01:48
+        Log: (Retracted by #11872)
+     Branch: perl
+	   ! intrpvar.h
+____________________________________________________________________________
+[ 11869] By: jhi                                   on 2001/09/04  17:43:31
+        Log: Quench a -Wall gripe noticed by Robin Houston.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11868] By: jhi                                   on 2001/09/04  16:38:07
+        Log: Subject: [PATCH perl@11834] Unicode::UCD rewritten using Lingua::KO::Hangul::Util
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Wed, 05 Sep 2001 02:01:32 +0900
+             Message-Id: <20010905015059.E684.BQW10602@nifty.com>
+     Branch: perl
+	   ! lib/Unicode/UCD.pm
+____________________________________________________________________________
+[ 11867] By: jhi                                   on 2001/09/04  16:35:27
+        Log: Subject: Re: [PATCH gv.c] @& sets PL_sawampersand
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Tue, 4 Sep 2001 12:51:02 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0109041250420.7601-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[ 11866] By: jhi                                   on 2001/09/04  13:52:28
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11865] By: jhi                                   on 2001/09/04  13:36:58
         Log: Add the \[$@%&*] prototype support.
      Branch: perl
