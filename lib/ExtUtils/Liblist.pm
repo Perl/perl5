@@ -231,7 +231,9 @@ sub _win32_ext {
 	}
 
 	# Handle possible library arguments.
-	$thislib =~ s/^-l//;
+	if ($thislib =~ s/^-l// and $thislib !~ /^lib/i) {
+	    $thislib = "lib$thislib";
+	}
 	$thislib .= $libext if $thislib !~ /\Q$libext\E$/i;
 
 	my($found_lib)=0;
@@ -522,14 +524,14 @@ Unix-OS/2 version in several respects:
 
 Input library and path specifications are accepted with or without the
 C<-l> and C<-L> prefices used by Unix linkers.  C<-lfoo> specifies the
-library C<foo.lib> and C<-Ls:ome\dir> specifies a directory to look for
-the libraries that follow.  If neither prefix is present, a token is
-considered a directory to search if it is in fact a directory, and a
-library to search for otherwise.  The C<$Config{lib_ext}> suffix will
-be appended to any entries that are not directories and don't already
-have the suffix.  Authors who wish their extensions to be portable to
-Unix or OS/2 should use the Unix prefixes, since the Unix-OS/2 version
-of ext() requires them.
+library C<libfoo.lib> (unless C<foo> already starts with C<lib>), and
+C<-Ls:ome\dir> specifies a directory to look for the libraries that follow.
+If neither prefix is present, a token is considered a directory to search
+if it is in fact a directory, and a library to search for otherwise.  The
+C<$Config{lib_ext}> suffix will be appended to any entries that are not
+directories and don't already have the suffix.  Authors who wish their
+extensions to be portable to Unix or OS/2 should use the Unix prefixes,
+since the Unix-OS/2 version of ext() requires them.
 
 =item *
 

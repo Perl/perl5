@@ -37,15 +37,23 @@ while (<SH>)
   s#/[ *\*]*\*/#/**/#;
   if (/^\s*#define\s+ARCHLIB_EXP/)
    {
-     $_ = "#define ARCHLIB_EXP (win32PerlLibPath())\t/**/\n"
-        . "#define APPLLIB_EXP (win32SiteLibPath())\t/**/\n";
+     $_ = "#define ARCHLIB_EXP (win32_perllib_path(ARCHNAME,NULL))\t/**/\n";
+   }
+  if (/^\s*#define\s+PRIVLIB_EXP/)
+   {
+     $_ = "#define PRIVLIB_EXP (win32_perllib_path(NULL))\t/**/\n"
+   }
+  if (/^\s*#define\s+SITEARCH_EXP/)
+   {
+     $_ = "#define SITEARCH_EXP (win32_perllib_path(\"site\",ARCHNAME,NULL))\t/**/\n";
+   }
+  if (/^\s*#define\s+SITELIB_EXP/)
+   {
+     $_ = "#define SITELIB_EXP (win32_perllib_path(\"site\",NULL))\t/**/\n";
    }
   print H;
  }
 print H "#include <win32.h>
-#ifndef DEBUGGING
-#define DEBUGGING
-#endif
 ";
 close(H);
 close(SH);
@@ -61,7 +69,7 @@ if (compare("$file.new",$file))
   chmod(0666,$file);
   unlink($file);
   rename("$file.new",$file);
-  chmod(0444,$file);
+  #chmod(0444,$file);
   exit(1);
  }
 

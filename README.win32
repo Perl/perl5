@@ -10,9 +10,9 @@ perlwin32 - Perl under Win32
 
 These are instructions for building Perl under Windows NT (versions
 3.51 or 4.0), using Visual C++ (versions 2.0 through 5.0) or Borland
-C++ (version 5.x).  Currently, this port may also build under Windows95,
-but you can expect problems stemming from the unmentionable command
-shell that infests that platform.  Note this caveat is only about
+C++ (version 5.02 or later).  Currently, this port is reported to build
+under Windows95 using the 4DOS shell--the default shell that infests
+Windows95 will not work (see below).  Note this caveat is only about
 B<building> perl.  Once built, you should be able to B<use> it on
 either Win32 platform (modulo the problems arising from the inferior
 command shell).
@@ -59,27 +59,30 @@ See L<Usage Hints> below for general hints about this.
 
 =item Command Shell
 
-Use the default "cmd" shell that comes with NT.  In particular, do
-*not* use the 4DOS/NT shell.  The Makefile has commands that are not
-compatible with that shell.  The Makefile also has known
-incompatibilites with the default shell that comes with Windows95,
-so building under Windows95 should be considered "unsupported".
+Use the default "cmd" shell that comes with NT.  Some versions of the
+popular 4DOS/NT shell have incompatibilities that may cause you trouble.
+If the build fails under that shell, try building again with the cmd
+shell.  The Makefile also has known incompatibilites with the "command.com"
+shell that comes with Windows95, so building under Windows95 should
+be considered "unsupported".  However, there have been reports of successful
+build attempts using 4DOS/NT version 3.00 under Windows95, using dmake, but
+your mileage may vary.
+
+The surest way to build it is on WindowsNT, using the cmd shell.
 
 =item Borland C++
 
 If you are using the Borland compiler, you will need dmake, a freely
 available make that has very nice macro features and parallelability.
 (The make that Borland supplies is seriously crippled, and will not
-work for MakeMaker builds--if you *have* to bug someone about this,
-I suggest you bug Borland to fix their make :)
+work for MakeMaker builds.)
 
-A port of dmake for win32 platforms is available from
-"http://www-personal.umich.edu/~gsar/dmake-4.0-win32.tar.gz".
-Fetch and install dmake somewhere on your path.  Also make sure you
-copy the Borland dmake.ini file to some location where you keep
-*.ini files.  If you use the binary that comes with the above port, you
-will need to set INIT in your environment to the directory where you
-put the dmake.ini file.
+A port of dmake for win32 platforms is available from:
+
+    http://www-personal.umich.edu/~gsar/dmake-4.1-win32.zip
+
+Fetch and install dmake somewhere on your path (follow the instructions
+in the README.NOW file).
 
 =item Microsoft Visual C++
 
@@ -89,12 +92,12 @@ environment variables when you installed Visual C++ on your system, you
 will need to run the VCVARS32.BAT file usually found somewhere like
 C:\MSDEV4.2\BIN.  This will set your build environment.
 
-You can also use dmake to build using Visual C++, provided: you
-copied the dmake.ini for Visual C++; set INIT to point to the
-directory where you put it, as above; and edit win32/config.vc
-and change "make=nmake" to "make=dmake".  The last step is only
-essential if you want to use dmake to be your default make for
-building extensions using MakeMaker.
+You can also use dmake to build using Visual C++, provided:
+you set OSRELEASE to "microsft" (or whatever the directory name
+under which the Visual C dmake configuration lives) in your environment,
+and edit win32/config.vc to change "make=nmake" into "make=dmake".  The
+latter step is only essential if you want to use dmake as your default
+make for building extensions using MakeMaker.
 
 =item Permissions
 
@@ -126,9 +129,23 @@ Borland compiler.
 =item *
 
 Edit the Makefile (or makefile.mk, if using dmake) and change the values
-of INST_DRV and INST_TOP if you want perl to be installed in a location
-other than "C:\PERL".  If you are using Visual C++ ver. 2.0, uncomment
-the line that sets "CCTYPE=MSVC20".
+of INST_DRV and INST_TOP.  If you are using Visual C++ ver. 2.0, uncomment
+the line that sets "CCTYPE=MSVC20".  You can also enable various build
+flags.
+
+If you have either the source or a library that contains des_fcrypt(),
+enable the appropriate option in the makefile.  des_fcrypt() is not
+bundled with the distribution due to US Government restrictions
+on the export of cryptographic software.  Nevertheless, this routine
+is part of the "libdes" library (written by Ed Young) which is widely
+available worldwide, usually along with SSLeay (for example:
+"ftp://fractal.mta.ca/pub/crypto/SSLeay/DES/").  Set CRYPT_SRC to the
+name of the file that implements des_fcrypt().  Alternatively, if
+you have built a library that contains des_fcrypt(), you can set
+CRYPT_LIB to point to the library name.
+
+Perl will also build without des_fcrypt(), but the crypt() builtin will
+fail at run time.
 
 You will also have to make sure CCHOME points to wherever you installed
 your compiler.
@@ -150,12 +167,12 @@ When building using Visual C++, a perl95.exe will also get built.  This
 executable is only needed on Windows95, and should be used instead of
 perl.exe, and then only if you want sockets to work properly on Windows95.
 This is necessitated by a bug in the Microsoft C Runtime that cannot be
-worked around in the "normal" perl.exe.  Again, if this bugs you, please
-bug Microsoft :). perl95.exe gets built with its own private copy of the
-C Runtime that is not accessible to extensions (which see the DLL version
-of the CRT).  Be aware, therefore, that this perl95.exe will have
-esoteric problems with extensions like perl/Tk that themselves use the C
-Runtime heavily, or want to free() pointers malloc()-ed by perl.
+worked around in the "normal" perl.exe.  perl95.exe gets built with its
+own private copy of the C Runtime that is not accessible to extensions
+(which see the DLL version of the CRT).  Be aware, therefore, that this
+perl95.exe will have esoteric problems with extensions like perl/Tk that
+themselves use the C Runtime heavily, or want to free() pointers
+malloc()-ed by perl.
 
 You can avoid the perl95.exe problems completely if you use Borland
 C++ for building perl (perl95.exe is not needed and will not be built
@@ -182,12 +199,11 @@ Please report any other failures as described under L<BUGS AND CAVEATS>.
 =head2 Installation
 
 Type "nmake install" (or "dmake install").  This will put the newly
-built perl and the libraries under "C:\perl" (actually whatever you set
-C<INST_TOP> to in the Makefile).  It will also install the pod
-documentation under C<$INST_TOP\lib\pod> and HTML versions of the same
-under C<$INST_TOP\lib\pod\html>.  To use the Perl you just installed,
-set your PATH environment variable to "C:\perl\bin" (or C<$INST_TOP\bin>,
-if you changed the default as above).
+built perl and the libraries under whatever C<INST_TOP> points to in the
+Makefile.  It will also install the pod documentation under
+C<$INST_TOP\lib\pod> and HTML versions of the same under
+C<$INST_TOP\lib\pod\html>.  To use the Perl you just installed,
+set your PATH environment variable to C<$INST_TOP\bin>.
 
 =head2 Usage Hints
 
@@ -202,7 +218,10 @@ using that perl (except add its location to your PATH variable).
 If you put extensions in unusual places, you can set PERL5LIB
 to a list of paths separated by semicolons where you want perl
 to look for libraries.  Look for descriptions of other environment
-variables you can set in the perlrun podpage.
+variables you can set in L<perlrun>.
+
+You can also control the shell that perl uses to run system() and
+backtick commands via PERL5SHELL.  See L<perlrun>.
 
 Sometime in the future, some of the configuration information
 for perl will be moved into the Windows registry.
@@ -218,16 +237,17 @@ perlglob.bat.
 perlglob.exe relies on the argv expansion done by the C Runtime of
 the particular compiler you used, and therefore behaves very
 differently depending on the Runtime used to build it.  To preserve
-compatiblity, perlglob.bat (a perl script/module that can be
-used portably) is installed.  Besides being portable, perlglob.bat
-also offers enhanced globbing functionality.
+compatiblity, perlglob.bat (a perl script that can be used portably)
+is installed.  Besides being portable, perlglob.bat also offers
+enhanced globbing functionality.
 
 If you want perl to use perlglob.bat instead of perlglob.exe, just
 delete perlglob.exe from the install location (or move it somewhere
-perl cannot find).  Using File::DosGlob.pm (which is the same
-as perlglob.bat) to override the internal CORE::glob() works about 10
-times faster than spawing perlglob.exe, and you should take this
-approach when writing new modules.  See File::DosGlob for details.
+perl cannot find).  Using File::DosGlob.pm (which implements the core
+functionality of perlglob.bat) to override the internal CORE::glob()
+works about 10 times faster than spawing perlglob.exe, and you should
+take this approach when writing new modules.  See File::DosGlob for
+details.
 
 =item Using perl from the command line
 
@@ -341,7 +361,7 @@ all of the Activeware extensions and most other Win32 extensions from
 CPAN in source form, along with many added bugfixes, and with MakeMaker
 support.  This bundle is available at:
 
-   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.08.tar.gz
+   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.09.tar.gz
 
 See the README in that distribution for building and installation
 instructions.  Look for later versions that may be available at the
@@ -482,14 +502,12 @@ bogus.
 
 The following functions are currently unavailable: C<fork()>,
 C<dump()>, C<chown()>, C<link()>, C<symlink()>, C<chroot()>,
-C<setpgrp()>, C<getpgrp()>, C<setpriority()>, C<getpriority()>,
-C<syscall()>, C<fcntl()>.  This list is possibly very incomplete.
-
-=item *
-
-crypt() is not available due to silly export restrictions.  It may
-become available when the laws change.  Meanwhile, look in CPAN for
-extensions that provide it.
+C<setpgrp()> and related security functions, C<setpriority()>,
+C<getpriority()>, C<syscall()>, C<fcntl()>, C<getpw*()>,
+C<msg*()>, C<shm*()>, C<sem*()>, C<alarm()>, C<socketpair()>,
+C<*netent()>, C<*protoent()>, C<*servent()>, C<*hostent()>,
+C<getnetby*()>.
+This list is possibly incomplete.
 
 =item *
 
@@ -502,16 +520,20 @@ The four-argument C<select()> call is only supported on sockets.
 
 =item *
 
-C<$?> ends up with the exitstatus of the subprocess (this is different
-from Unix, where the exitstatus is actually given by "$? >> 8").
-Failure to spawn() the subprocess is indicated by setting $? to 
-"255<<8".  This is subject to change.
+The C<ioctl()> call is only supported on sockets (where it provides the
+functionality of ioctlsocket() in the Winsock API).
 
 =item *
 
-Building modules available on CPAN is mostly supported, but this
-hasn't been tested much yet.  Expect strange problems, and be
-prepared to deal with the consequences.
+Failure to spawn() a subprocess is indicated by setting $? to "255 << 8".
+C<$?> is set in a way compatible with Unix (i.e. the exitstatus of the
+subprocess is obtained by "$? >> 8", as described in the documentation).
+
+=item *
+
+You can expect problems building modules available on CPAN if you
+build perl itself with -DUSE_THREADS.  These problems should be resolved
+as we get closer to 5.005.
 
 =item *
 
@@ -577,7 +599,7 @@ sundry hacks since then.
 
 Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
-Last updated: 25 July 1997
+Last updated: 3 January 1998
 
 =cut
 

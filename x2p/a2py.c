@@ -8,7 +8,7 @@
  * $Log:	a2py.c,v $
  */
 
-#ifdef OS2
+#if defined(OS2) || defined(WIN32)
 #include "../patchlevel.h"
 #endif
 #include "util.h"
@@ -26,7 +26,7 @@ int oper4();
 int oper5();
 STR *walk();
 
-#ifdef OS2
+#if defined(OS2) || defined(WIN32)
 static void
 usage()
 {
@@ -89,9 +89,11 @@ register char **env;
 	case 0:
 	    break;
 	default:
-	    fatal("Unrecognized switch: %s\n",argv[0]);
-#ifdef OS2
+#if defined(OS2) || defined(WIN32)
+	    fprintf(stderr, "Unrecognized switch: %s\n",argv[0]);
             usage();
+#else
+	    fatal("Unrecognized switch: %s\n",argv[0]);
 #endif
 	}
     }
@@ -100,7 +102,7 @@ register char **env;
     /* open script */
 
     if (argv[0] == Nullch) {
-#ifdef OS2
+#if defined(OS2) || defined(WIN32)
 	if ( isatty(fileno(stdin)) )
 	    usage();
 #endif

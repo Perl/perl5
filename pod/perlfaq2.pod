@@ -15,21 +15,22 @@ development team) is distributed only in source code form.  You can
 find this at http://www.perl.com/CPAN/src/latest.tar.gz, which is a
 gzipped archive in POSIX tar format.  This source builds with no
 porting whatsoever on most Unix systems (Perl's native environment),
-as well as Plan 9, VMS, QNX, OS/2, and the Amiga.
+as well as Windows NT, Plan 9, VMS, QNX, OS/2, and the Amiga.
 
-Although it's rumored that the (imminent) 5.004 release may build
-on Windows NT, this is yet to be proven.  Binary distributions
-for 32-bit Microsoft systems and for Apple systems can be found
-http://www.perl.com/CPAN/ports/ directory.  Because these are not part of
-the standard distribution, they may and in fact do differ from the base
-Perl port in a variety of ways.  You'll have to check their respective
-release notes to see just what the differences are.  These differences
-can be either positive (e.g. extensions for the features of the particular
-platform that are not supported in the source release of perl) or negative
-(e.g. might be based upon a less current source release of perl).
+Binary distributions for various platforms can be found
+http://www.perl.com/CPAN/ports/ directory.  Some of these ports (especially
+the ones that are not part of the standard sources) may behave differently
+than what is documented in the standard source documentation.  These
+differences can be either positive (e.g. extensions for the features of the
+particular platform that are not supported in the source release of perl)
+or negative (e.g. might be based upon a less current source release of perl).
 
-A useful FAQ for Win32 Perl users is
+A useful FAQ for Win32 Perl users is:
 http://www.endcontsw.com/people/evangelo/Perl_for_Win32_FAQ.html
+[This FAQ is seriously outdated as of Jan 1998--it is only relevant to
+the perl that ActiveState distributes, especially where it describes
+various inadequacies and differences with the standard perl extension
+build support.]
 
 =head2 How can I get a binary version of Perl?
 

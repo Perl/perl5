@@ -107,11 +107,13 @@ Makes files exist, with current timestamp
 sub touch
 {
  expand_wildcards();
+ my $t    = time;
  while (@ARGV)
   {
    my $file = shift(@ARGV);               
    open(FILE,">>$file") || die "Cannot write $file:$!";
    close(FILE);
+   utime($t,$t,$file);
   }
 }
 
