@@ -452,6 +452,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 #endif
     IoIFP(io) = fp;
+    IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	dTHR;
 	if (IoTYPE(io) == 's'

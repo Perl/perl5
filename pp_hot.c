@@ -1283,12 +1283,11 @@ Perl_do_readline(pTHX)
 	offset = 0;
     }
 
-/* flip-flop EOF state for a snarfed empty file */
+/* delay EOF state for a snarfed empty file */
 #define SNARF_EOF(gimme,rs,io,sv) \
-    ((gimme != G_SCALAR || SvCUR(sv)					\
-      || (IoFLAGS(io) & IOf_NOLINE) || IoLINES(io) || !RsSNARF(rs))	\
-	? ((IoFLAGS(io) &= ~IOf_NOLINE), TRUE)				\
-	: ((IoFLAGS(io) |= IOf_NOLINE), FALSE))
+    (gimme != G_SCALAR || SvCUR(sv)					\
+     || !RsSNARF(rs) || (IoFLAGS(io) & IOf_NOLINE)			\
+     || ((IoFLAGS(io) |= IOf_NOLINE), FALSE))
 
     for (;;) {
 	if (!sv_gets(sv, fp, offset)
