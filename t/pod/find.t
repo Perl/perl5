@@ -38,7 +38,7 @@ my $compare = join(',', qw(
 ));
 if ($^O eq 'VMS') {
     $compare = lc($compare);
-    $result = join(',', sort grep {pod::} values %pods);
+    $result = join(',', sort grep(/pod::/, values %pods));
     $result =~ s/$Qlib_dir/pod::/g;
     my $count = 0;
     my @result = split(/,/,$result);
