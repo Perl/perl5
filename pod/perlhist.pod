@@ -24,7 +24,8 @@ Perl history in brief, by Larry Wall:
 
 Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
 Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
-Sarathy, Graham Barr, Jarkko Hietaniemi.
+Sarathy, Graham Barr, Jarkko Hietaniemi, Hugo van der Sanden,
+Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark.
 
 =head2 PUMPKIN?
 
