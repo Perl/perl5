@@ -4975,7 +4975,7 @@ PP(pp_split)
     AV *ary;
     register I32 limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
-    bool isutf = DO_UTF8(sv);
+    bool doutf8 = DO_UTF8(sv);
     STRLEN len;
     register char *s = SvPV(sv, len);
     char *strend = s + len;
@@ -5078,7 +5078,7 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (isutf)
+	    if (doutf8)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 
@@ -5100,7 +5100,7 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (isutf)
+	    if (doutf8)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    s = m;
@@ -5111,11 +5111,11 @@ PP(pp_split)
 	     && !(rx->reganch & ROPT_ANCH)) {
 	int tail = (rx->reganch & RE_INTUIT_TAIL);
 	SV *csv = CALLREG_INTUIT_STRING(aTHX_ rx);
-	char c;
 
 	len = rx->minlen;
 	if (len == 1 && !tail) {
-	    c = *SvPV(csv,len);
+	    STRLEN n_a;
+	    char c = *SvPV(csv, n_a);
 	    while (--limit) {
 		/*SUPPRESS 530*/
 		for (m = s; m < strend && *m != c; m++) ;
@@ -5125,10 +5125,12 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
-		if (isutf)
+		if (doutf8)
 		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
-		s = m + 1;
+		/* The rx->minlen is in characters but we want to step
+		 * s ahead by bytes. */
+		s = m + (doutf8 ? SvCUR(csv) : len);
 	    }
 	}
 	else {
@@ -5142,10 +5144,12 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
-		if (isutf)
+		if (doutf8)
 		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
-		s = m + len;		/* Fake \n at the end */
+		/* The rx->minlen is in characters but we want to step
+		 * s ahead by bytes. */
+		s = m + (doutf8 ? SvCUR(csv) : len); /* Fake \n at the end */
 	    }
 	}
     }
@@ -5171,7 +5175,7 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (isutf)
+	    if (doutf8)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    if (rx->nparens) {
@@ -5186,7 +5190,7 @@ PP(pp_split)
 			dstr = NEWSV(33, 0);
 		    if (make_mortal)
 			sv_2mortal(dstr);
-		    if (isutf)
+		    if (doutf8)
 			(void)SvUTF8_on(dstr);
 		    XPUSHs(dstr);
 		}
@@ -5202,11 +5206,12 @@ PP(pp_split)
 
     /* keep field after final delim? */
     if (s < strend || (iters && origlimit)) {
-	dstr = NEWSV(34, strend-s);
-	sv_setpvn(dstr, s, strend-s);
+        STRLEN l = strend - s;
+	dstr = NEWSV(34, l);
+	sv_setpvn(dstr, s, l);
 	if (make_mortal)
 	    sv_2mortal(dstr);
-	if (isutf)
+	if (doutf8)
 	    (void)SvUTF8_on(dstr);
 	XPUSHs(dstr);
 	iters++;

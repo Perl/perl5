@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..82\n";
+print "1..87\n";
 
 my $test = 1;
 
@@ -434,6 +434,40 @@ sub nok_bytes {
     my $a;
     $a .= "\x{1ff}";
     print "not " unless $a eq "\x{1ff}";
+    print "ok $test\n";
+    $test++;
+}
+
+{
+    # bug id 20000426.003
+
+    use utf8;
+
+    my $s = "\x20\x40\x{80}\x{100}\x{80}\x40\x20";
+
+    my ($a, $b, $c) = split(/\x40/, $s);
+    print "not "
+	unless $a eq "\x20" && $b eq "\x{80}\x{100}\x{80}" && $c eq $a;
+    print "ok $test\n";
+    $test++;
+
+    my ($a, $b) = split(/\x{100}/, $s);
+    print "not " unless $a eq "\x20\x40\x{80}" && $b eq "\x{80}\x40\x20";
+    print "ok $test\n";
+    $test++;
+
+    my ($a, $b) = split(/\x{80}\x{100}\x{80}/, $s);
+    print "not " unless $a eq "\x20\x40" && $b eq "\x40\x20";
+    print "ok $test\n";
+    $test++;
+
+    my ($a, $b) = split(/\x40\x{80}/, $s);
+    print "not " unless $a eq "\x20" && $b eq "\x{100}\x{80}\x40\x20";
+    print "ok $test\n";
+    $test++;
+
+    my ($a, $b, $c) = split(/[\x40\x{80}]+/, $s);
+    print "not " unless $a eq "\x20" && $b eq "\x{100}" && $c eq "\x20";
     print "ok $test\n";
     $test++;
 }
