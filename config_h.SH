@@ -3441,18 +3441,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	If defined, this macro indicates that the C compiler can handle
  *	function prototypes.
  */
-/* PROTO_:
+/* _:
  *	This macro is used to declare function parameters for folks who want
  *	to make declarations with prototypes using a different style than
  *	the above macros.  Use double parentheses.  For example:
  *
- *		int main PROTO_((int argc, char *argv[]));
+ *		int main _((int argc, char *argv[]));
  */
 #$prototype	CAN_PROTOTYPE	/**/
 #ifdef CAN_PROTOTYPE
-#define	PROTO_(args) args
+#define	_(args) args
 #else
-#define	PROTO_(args) ()
+#define	_(args) ()
 #endif
 
 /* SH_PATH:

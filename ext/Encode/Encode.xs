@@ -409,10 +409,12 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
       {
        case ENCODE_NOSPACE:
         {
-         STRLEN need = (slen) ? (SvLEN(dst)*SvCUR(src)/slen) : (dlen + UTF8_MAXLEN);
-         if (need <= SvLEN(dst))
-          need += UTF8_MAXLEN;
+         STRLEN need = dlen + UTF8_MAXLEN * 128; /* 128 is too big or small? */
          d = (U8 *) SvGROW(dst, need);
+         if (dlen >= SvLEN(dst))
+          {
+           Perl_croak(aTHX_ "Destination couldn't be grown (the need may be miscalculated).");
+          }
          dlen = SvLEN(dst);
          slen = SvCUR(src);
          break;
