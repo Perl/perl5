@@ -373,6 +373,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		    i = t;
 		else			/* @- */
 		    i = s;
+                SvREADONLY_on(sv);
 		sv_setiv(sv,i);
 	    }
     }

@@ -819,6 +819,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	else {
             AV* av = GvAVn(gv);
             sv_magic((SV*)av, Nullsv, 'D', Nullch, 0);
+	    SvREADONLY_on(av);
         }
 	goto magicalize;
     case '#':
@@ -869,6 +870,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	else {
             AV* av = GvAVn(gv);
             sv_magic((SV*)av, (SV*)av, 'D', Nullch, 0);
+	    SvREADONLY_on(av);
         }
 	/* FALL THROUGH */
     case '1':
