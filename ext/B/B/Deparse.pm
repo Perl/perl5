@@ -1513,7 +1513,14 @@ sub pp_leaveloop {
     } elsif ($enter->ppaddr eq "pp_enteriter") { # foreach
 	my $ary = $enter->first->sibling; # first was pushmark
 	my $var = $ary->sibling;
-	$ary = $self->deparse($ary, 1);
+	if ($enter->flags & OPf_STACKED) {
+	    my $from = $ary->first->sibling;
+	    my $to = $from->sibling;
+	    $ary = join("", "(", $self->deparse($from,1), " .. ",
+                                 $self->deparse($to,1), ")");
+	} else {
+	    $ary = $self->deparse($ary, 1);
+	}
 	if (null $var) {
 	    if ($enter->flags & OPf_SPECIAL) { # thread special var
 		$var = $self->pp_threadsv($enter, 1);
