@@ -86,28 +86,8 @@ PP(pp_regcomp)
     SV *tmpstr;
     STRLEN len;
     MAGIC *mg = Null(MAGIC*);
-
-Change 10771 by jhi@alpha on 2001/06/21 12:10:29
-
-        Subject: [PATCH] Make /o work under i?threads
-        From: Richard Soderberg <rs@crystalflame.net>
-        Date: Thu, 21 Jun 2001 05:21:43 -0700 (PDT)
-        Message-ID: <Pine.LNX.4.21.0106210518210.2479-100000@oregonnet.com>
-
-Affected files ...
-
-  ... //depot/perl/pp_ctl.c#267 edit
-
-Differences ...
-
-  ==== //depot/perl/pp_ctl.c#267 (text) ====
-Index: perl/pp_ctl.c
---- perl/pp_ctl.c.~1~   Sun Jun 24 22:31:38 2001
-+++ perl/pp_ctl.c       Sun Jun 24 22:31:38 2001
-@@ -88,6 +88,13 @@
-     MAGIC *mg = Null(MAGIC*);
- 
-     tmpstr = POPs;
+    
+    tmpstr = POPs;
 
      /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS) || defined(USE_THREADS)
