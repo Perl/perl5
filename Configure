@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May 12 13:22:22 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Wed May 12 14:07:09 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -10936,7 +10936,8 @@ EOCP
 	set try
 	$rm -f try.out
 	if eval $compile_ok; then
-	    	./try$exe_ext
+	    	./try$exe_ext 2>/dev/null
+		$rm -f core try.core core.try.*
 		if $test -s try.out; then
 			fflushNULL="`$cat try.out`"
 		fi
