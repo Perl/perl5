@@ -959,6 +959,14 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 
 	    if (do_utf8) {
 		STRLEN len;
+		/* The ibcmp_utf8() uses to_uni_fold() which is more
+		 * correct folding for Unicode than using lowercase.
+		 * However, it doesn't work quite fully since the folding
+		 * is a one-to-many mapping and the regex optimizer is
+		 * unaware of this, so it may throw out good matches.
+		 * Fortunately, not getting this right is allowed
+		 * for Unicode Regular Expression Support level 1,
+		 * only one-to-one matching is required. --jhi */
 		if (c1 == c2)
 		    while (s <= e) {
 			if ( utf8_to_uvchr((U8*)s, &len) == c1
