@@ -1,3 +1,22 @@
+ext/List/Util/ChangeLog	Util extension
+ext/List/Util/Makefile.PL	Util extension
+ext/List/Util/README		Util extension
+ext/List/Util/Util.xs	Util extension
+ext/List/Util/lib/List/Util.pm	List::Util
+ext/List/Util/lib/Scalar/Util.pm	Scalar::Util
+t/lib/u-blessed.t	Scalar::Util
+t/lib/u-dualvar.t	Scalar::Util
+t/lib/u-first.t		List::Util
+t/lib/u-max.t		List::Util
+t/lib/u-maxstr.t	List::Util
+t/lib/u-min.t		List::Util
+t/lib/u-minstr.t	List::Util
+t/lib/u-readonly.t	Scalar::Util
+t/lib/u-reduce.t	List::Util
+t/lib/u-reftype.t	Scalar::Util
+t/lib/u-sum.t		List::Util
+t/lib/u-tainted.t	Scalar::Util
+t/lib/u-weak.t		Scalar::Util
 AUTHORS			Contact info for contributors
 Artistic		The "Artistic License"
 Changes			Differences from previous version
