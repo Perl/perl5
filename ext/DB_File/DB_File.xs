@@ -584,13 +584,19 @@ const DBT * key2 ;
     return (retval) ;
 }
 
+#ifdef BERKELEY_DB_1_OR_2
+#    define HASH_CB_SIZE_TYPE size_t
+#else
+#    define HASH_CB_SIZE_TYPE u_int32_t
+#endif
+
 static DB_Hash_t
 #ifdef CAN_PROTOTYPE
-hash_cb(const void *data, u_int32_t size)
+hash_cb(const void *data, HASH_CB_SIZE_TYPE size)
 #else
 hash_cb(data, size)
 const void * data ;
-u_int32_t size ;
+HASH_CB_SIZE_TYPE size ;
 #endif
 {
 #ifdef dTHX
