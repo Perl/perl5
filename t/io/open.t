@@ -12,7 +12,7 @@ use Config;
 $Is_VMS = $^O eq 'VMS';
 $Is_MacOS = $^O eq 'MacOS';
 
-plan tests => 105;
+plan tests => 106;
 
 my $Perl = which_perl();
 
@@ -305,4 +305,9 @@ SKIP: {
     like($@, qr/Unknown open\(\) mode ':c'/,
 	 'bad layer ":c" failure');
 }
+
+# [perl #28986] "open m" crashes Perl
+
+fresh_perl_like('open m', qr/^Search pattern not terminated at/,
+	{ stderr => 1 }, 'open m test');
 
