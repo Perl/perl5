@@ -615,6 +615,86 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 =back
 
+=head2 Defining your own character properties
+
+You can define your own character properties by defining subroutines
+that have names beginning with "In" or "Is".  The subroutines must be
+visible in the package that uses the properties.  The user-defined
+properties can be used in the regular expression C<\p> and C<\P>
+constructs.
+
+The subroutines must return a specially formatted string: one or more
+newline-separated lines.  Each line must be one of the following:
+
+=over 4
+
+=item *
+
+Two hexadecimal numbers separated by a tabulator denoting a range
+of Unicode codepoints.
+
+=item *
+
+An existing character property prefixed by "+utf8::" to include
+all the characters in that property.
+
+=item *
+
+An existing character property prefixed by "-utf8::" to exclude
+all the characters in that property.
+
+=item *
+
+An existing character property prefixed by "!utf8::" to include
+all except the characters in that property.
+
+=back
+
+For example, to define a property that covers both the Japanese
+syllabaries (hiragana and katakana), you can define
+
+    sub InKana {
+	return <<'END';
+    3040    309F
+    30A0    30FF
+    END
+    }
+
+Imagine that the here-doc end marker is at the beginning of the line,
+and that the hexadecimal numbers are separated by a tabulator.
+Now you can use C<\p{InKana}> and C<\P{IsKana}>.
+
+You could also have used the existing block property names:
+
+    sub InKana {
+	return <<'END';
+    +utf8::InHiragana
+    +utf8::InKatakana
+    END
+    }
+
+Suppose you wanted to match only the allocated characters,
+not the by raw block ranges: in other words, you want to remove
+the non-characters:
+
+    sub InKana {
+	return <<'END';
+    +utf8::InHiragana
+    +utf8::InKatakana
+    -utf8::IsCn
+    END
+    }
+
+The negation is useful for defining (surprise!) negated classes.
+
+    sub InNotKana {
+	return <<'END';
+    !utf8::InHiragana
+    -utf8::InKatakana
+    +utf8::IsCn
+    END
+    }
+
 =head2 Character encodings for input and output
 
 See L<Encode>.
