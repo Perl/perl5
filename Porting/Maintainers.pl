@@ -31,6 +31,7 @@ package Maintainers;
 	'laun'		=> 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
 	'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
 	'marekr'	=> 'Marek Rouchal <marekr@cpan.org>',
+	'mhx'		=> 'Marcus Holland-Moritz <mhx@cpan.org>',
 	'mjd'		=> 'Mark-Jason Dominus <mjd@cpan.org>',
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
@@ -123,7 +124,7 @@ package Maintainers;
 
 	'Devel::PPPort' =>
 		{
-		'MAINTAINER'	=> 'pmqs',
+		'MAINTAINER'	=> 'mhx',
 		'FILES'		=> q[ext/Devel/PPPort],
 		'CPAN'		=> 1,
 		},
@@ -319,7 +320,7 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'p5p',
 		'FILES'		=> q[ext/PerlIO],
-		'CPAN'		=> 1,
+		'CPAN'		=> 0,
 		},
 
 	'perlio-doc' =>
@@ -492,7 +493,7 @@ package Maintainers;
 		{
 		'MAINTAINER' => 'abergman',
 		'FILES'	 => q[ext/threads],
-		'CPAN'		=> 1,
+		'CPAN'		=> 0,
 		},
 
 	'Tie::File' =>
