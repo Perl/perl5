@@ -278,14 +278,14 @@ sub find_perl {
 	print "Checking $name\n" if ($trace >= 2);
 	# If it looks like a potential command, try it without the MCR
 	if ($name =~ /^[\w\-\$]+$/ &&
-           `$name -e "require $ver; print ""VER_OK\\n"""` =~ /VER_OK/) {
+            `$name -e "require $ver; print ""VER_OK\\n"""` =~ /VER_OK/) {
 	    print "Using PERL=$name\n" if $trace;
 	    return $name;
 	}
 	next unless $vmsfile = $self->maybe_command($name);
 	$vmsfile =~ s/;[\d\-]*$//;  # Clip off version number; we can use a newer version as well
 	print "Executing $vmsfile\n" if ($trace >= 2);
-       if (`MCR $vmsfile -e "require $ver; print ""VER_OK\\n"""` =~ /VER_OK/) {
+        if (`MCR $vmsfile -e "require $ver; print ""VER_OK\\n"""` =~ /VER_OK/) {
 	    print "Using PERL=MCR $vmsfile\n" if $trace;
 	    return "MCR $vmsfile";
 	}

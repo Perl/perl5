@@ -38,6 +38,7 @@ POD = \
 	perlreftut.pod	\
 	perldsc.pod	\
 	perllol.pod	\
+	perlboot.pod	\
 	perltoot.pod	\
 	perltootc.pod	\
 	perlobj.pod	\
@@ -47,6 +48,7 @@ POD = \
 	perlthrtut.pod	\
 	perldbmfilter.pod	\
 	perldebug.pod	\
+	perlnumber.pod	\
 	perldiag.pod	\
 	perlsec.pod	\
 	perltrap.pod	\
@@ -102,6 +104,7 @@ MAN = \
 	perlreftut.man	\
 	perldsc.man	\
 	perllol.man	\
+	perlboot.man	\
 	perltoot.man	\
 	perltootc.man	\
 	perlobj.man	\
@@ -111,6 +114,7 @@ MAN = \
 	perlthrtut.man	\
 	perldbmfilter.man	\
 	perldebug.man	\
+	perlnumber.man	\
 	perldiag.man	\
 	perlsec.man	\
 	perltrap.man	\
@@ -166,6 +170,7 @@ HTML = \
 	perlreftut.html	\
 	perldsc.html	\
 	perllol.html	\
+	perlboot.html	\
 	perltoot.html	\
 	perltootc.html	\
 	perlobj.html	\
@@ -175,6 +180,7 @@ HTML = \
 	perlthrtut.html	\
 	perldbmfilter.html	\
 	perldebug.html	\
+	perlnumber.html	\
 	perldiag.html	\
 	perlsec.html	\
 	perltrap.html	\
@@ -230,6 +236,7 @@ TEX = \
 	perlreftut.tex	\
 	perldsc.tex	\
 	perllol.tex	\
+	perlboot.tex	\
 	perltoot.tex	\
 	perltootc.tex	\
 	perlobj.tex	\
@@ -239,6 +246,7 @@ TEX = \
 	perlthrtut.tex	\
 	perldbmfilter.tex	\
 	perldebug.tex	\
+	perlnumber.tex	\
 	perldiag.tex	\
 	perlsec.tex	\
 	perltrap.tex	\

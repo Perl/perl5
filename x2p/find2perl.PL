@@ -842,12 +842,9 @@ a distinct argument, so it may need to be surrounded by whitespace and/or
 quoted from interpretation by the shell using a backslash (just as with
 using C<find(1)>).
 
-=item C<-eval EXPR ;>
+=item C<-eval EXPR>
 
-Has the perl script eval() the EXPR.  The C<;> must be passed as
-a distinct argument, so it may need to be surrounded by whitespace and/or
-quoted from interpretation by the shell using a backslash (just as with
-using C<find(1)>).
+Has the perl script eval() the EXPR.  
 
 =item C<-ls>
 

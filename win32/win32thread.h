@@ -24,32 +24,37 @@ typedef CRITICAL_SECTION perl_mutex;
 #else
 
 typedef HANDLE perl_mutex;
-#define MUTEX_INIT(m) \
+#  define MUTEX_INIT(m) \
     STMT_START {						\
 	if ((*(m) = CreateMutex(NULL,FALSE,NULL)) == NULL)	\
-	    Perl_croak(aTHX_ "panic: MUTEX_INIT");				\
+	    Perl_croak(aTHX_ "panic: MUTEX_INIT");		\
     } STMT_END
-#define MUTEX_LOCK(m) \
+
+#  define MUTEX_LOCK(m) \
     STMT_START {						\
 	if (WaitForSingleObject(*(m),INFINITE) == WAIT_FAILED)	\
 	    Perl_croak(aTHX_ "panic: MUTEX_LOCK");		\
     } STMT_END
-#define MUTEX_UNLOCK(m) \
+
+#  define MUTEX_UNLOCK(m) \
     STMT_START {						\
 	if (ReleaseMutex(*(m)) == 0)				\
 	    Perl_croak(aTHX_ "panic: MUTEX_UNLOCK");		\
     } STMT_END
-#define MUTEX_LOCK_NOCONTEXT(m) \
+
+#  define MUTEX_LOCK_NOCONTEXT(m) \
     STMT_START {						\
 	if (WaitForSingleObject(*(m),INFINITE) == WAIT_FAILED)	\
 	    Perl_croak_nocontext("panic: MUTEX_LOCK");		\
     } STMT_END
-#define MUTEX_UNLOCK_NOCONTEXT(m) \
+
+#  define MUTEX_UNLOCK_NOCONTEXT(m) \
     STMT_START {						\
 	if (ReleaseMutex(*(m)) == 0)				\
 	    Perl_croak_nocontext("panic: MUTEX_UNLOCK");	\
     } STMT_END
-#define MUTEX_DESTROY(m) \
+
+#  define MUTEX_DESTROY(m) \
     STMT_START {						\
 	if (CloseHandle(*(m)) == 0)				\
 	    Perl_croak(aTHX_ "panic: MUTEX_DESTROY");		\
@@ -155,27 +160,34 @@ typedef THREAD_RET_TYPE thread_func_t(void *);
 START_EXTERN_C
 
 #if defined(PERLDLL) && defined(USE_DECLSPEC_THREAD) && (!defined(__BORLANDC__) || defined(_DLL))
-extern __declspec(thread) struct perl_thread *Perl_current_thread;
-#define SET_THR(t)   		(Perl_current_thread = t)
-#define THR			Perl_current_thread
+extern __declspec(thread) void *PL_current_context;
+#define PERL_SET_CONTEXT(t)   		(PL_current_context = t)
+#define PERL_GET_CONTEXT		PL_current_context
 #else
-#define THR			Perl_getTHR()
-#define SET_THR(t)		Perl_setTHR(t)
+#define PERL_GET_CONTEXT		Perl_get_context()
+#define PERL_SET_CONTEXT(t)		Perl_set_context(t)
 #endif
-struct perl_thread;
 
-void Perl_alloc_thread_key (void);
+#if defined(USE_THREADS)
+struct perl_thread;
 int Perl_thread_create (struct perl_thread *thr, thread_func_t *fn);
 void Perl_set_thread_self (struct perl_thread *thr);
-struct perl_thread *Perl_getTHR (void);
-void Perl_setTHR (struct perl_thread *t);
 void Perl_init_thread_intern (struct perl_thread *t);
+
+#define SET_THREAD_SELF(thr) Perl_set_thread_self(thr)
+
+#endif /* USE_THREADS */
 
 END_EXTERN_C
 
-#define INIT_THREADS NOOP
-#define ALLOC_THREAD_KEY Perl_alloc_thread_key()
-#define SET_THREAD_SELF(thr) Perl_set_thread_self(thr)
+#define INIT_THREADS		NOOP
+#define ALLOC_THREAD_KEY \
+    STMT_START {							\
+	if ((PL_thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES) {		\
+	    fprintf(stderr,"panic: TlsAlloc");				\
+	    exit(1);							\
+	}								\
+    } STMT_END
 
 #if defined(USE_RTL_THREAD_API) && !defined(_MSC_VER)
 #define JOIN(t, avp)							\

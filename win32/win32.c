@@ -15,6 +15,7 @@
 #define Win32_Winsock
 #endif
 #include <windows.h>
+#include <shellapi.h>
 #include <winnt.h>
 #include <io.h>
 
@@ -123,6 +124,30 @@ IsWinNT(void)
     return (win32_os_id() == VER_PLATFORM_WIN32_NT);
 }
 
+EXTERN_C void
+set_w32_module_name(void)
+{
+    char* ptr;
+    GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
+				? GetModuleHandle(NULL)
+				: w32_perldll_handle),
+		      w32_module_name, sizeof(w32_module_name));
+
+    /* try to get full path to binary (which may be mangled when perl is
+     * run from a 16-bit app) */
+    /*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
+    (void)win32_longpath(w32_module_name);
+    /*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
+
+    /* normalize to forward slashes */
+    ptr = w32_module_name;
+    while (*ptr) {
+	if (*ptr == '\\')
+	    *ptr = '/';
+	++ptr;
+    }
+}
+
 /* *svp (if non-NULL) is expected to be POK (valid allocated SvPVX(*svp)) */
 static char*
 get_regstr_from(HKEY hkey, const char *valuename, SV **svp)
@@ -185,24 +210,7 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
     baselen = strlen(base);
 
     if (!*w32_module_name) {
-	GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
-				    ? GetModuleHandle(NULL)
-				    : w32_perldll_handle),
-			  w32_module_name, sizeof(w32_module_name));
-
-	/* try to get full path to binary (which may be mangled when perl is
-	 * run from a 16-bit app) */
-	/*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
-	(void)win32_longpath(w32_module_name);
-	/*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
-
-	/* normalize to forward slashes */
-	ptr = w32_module_name;
-	while (*ptr) {
-	    if (*ptr == '\\')
-		*ptr = '/';
-	    ++ptr;
-	}
+	set_w32_module_name();
     }
     strcpy(mod_name, w32_module_name);
     ptr = strrchr(mod_name, '/');
@@ -988,6 +996,8 @@ win32_kill(int pid, int sig)
 	/* it is a pseudo-forked child */
 	long child = find_pseudo_pid(-pid);
 	if (child >= 0) {
+	    if (!sig)
+		return 0;
 	    hProcess = w32_pseudo_child_handles[child];
 	    if (TerminateThread(hProcess, sig)) {
 		remove_dead_pseudo_process(child);
@@ -1000,6 +1010,8 @@ win32_kill(int pid, int sig)
     {
 	long child = find_pid(pid);
 	if (child >= 0) {
+	    if (!sig)
+		return 0;
 	    hProcess = w32_child_handles[child];
 	    if (TerminateProcess(hProcess, sig)) {
 		remove_dead_process(child);
@@ -1008,9 +1020,13 @@ win32_kill(int pid, int sig)
 	}
 	else {
 	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
-	    if (hProcess && TerminateProcess(hProcess, sig)) {
-		CloseHandle(hProcess);
-		return 0;
+	    if (hProcess) {
+		if (!sig)
+		    return 0;
+		if (TerminateProcess(hProcess, sig)) {
+		    CloseHandle(hProcess);
+		    return 0;
+		}
 	    }
 	}
     }
@@ -4003,4 +4019,38 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->thr_intern.Winit_socktype = src->thr_intern.Winit_socktype;
 }
 #endif
+
+#ifdef PERL_OBJECT
+#  undef this
+#  define this pPerl
+#endif
+
+static void
+win32_free_argvw(pTHXo_ void *ptr)
+{
+    char** argv = (char**)ptr;
+    while(*argv) {
+	Safefree(*argv);
+	*argv++ = Nullch;
+    }
+}
+
+void
+win32_argv2utf8(int argc, char** argv)
+{
+    dTHXo;
+    char* psz;
+    int length, wargc;
+    LPWSTR* lpwStr = CommandLineToArgvW(GetCommandLineW(), &wargc);
+    if (lpwStr && argc) {
+	while (argc--) {
+	    length = WideCharToMultiByte(CP_UTF8, 0, lpwStr[--wargc], -1, NULL, 0, NULL, NULL);
+	    Newz(0, psz, length, char);
+	    WideCharToMultiByte(CP_UTF8, 0, lpwStr[wargc], -1, psz, length, NULL, NULL);
+	    argv[argc] = psz;
+	}
+	call_atexit(win32_free_argvw, argv);
+    }
+    GlobalFree((HGLOBAL)lpwStr);
+}
 

@@ -528,7 +528,7 @@ a given module works on a given platform.
 
 =item Mailing list: cpan-testers@perl.org
 
-=item Testing results: C<http://www.perl.org/cpan-testers/>
+=item Testing results: C<http://testers.cpan.org/>
 
 =back
 
@@ -1459,8 +1459,9 @@ Available only for socket handles. (S<RISC OS>)
 Not implemented, hence not useful for taint checking. (S<Mac OS>,
 S<RISC OS>)
 
-Unlike Unix platforms, C<kill(0, $pid)> will actually terminate
-the process.  (Win32)
+C<kill($sig, $pid)> makes the process exit immediately with exit
+status $sig.  As in Unix, if $sig is 0 and the specified process exists,
+it returns true without actually terminating it. (Win32)
 
 =item link OLDFILE,NEWFILE
 

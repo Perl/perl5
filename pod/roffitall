@@ -49,6 +49,7 @@ toroff=`
     $mandir/perlreftut.1	\
     $mandir/perldsc.1	\
     $mandir/perllol.1	\
+    $mandir/perlboot.1	\
     $mandir/perltoot.1	\
     $mandir/perlobj.1	\
     $mandir/perltie.1	\
@@ -56,6 +57,7 @@ toroff=`
     $mandir/perlipc.1	\
     $mandir/perlthrtut.1	\
     $mandir/perldebug.1	\
+    $mandir/perlnumber.1	\
     $mandir/perldiag.1	\
     $mandir/perlsec.1	\
     $mandir/perltrap.1	\

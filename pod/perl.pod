@@ -41,6 +41,7 @@ sections:
     perlref		Perl references, the rest of the story
     perldsc		Perl data structures intro
     perllol		Perl data structures: arrays of arrays
+    perlboot		Perl OO tutorial for beginners
     perltoot		Perl OO tutorial, part 1
     perltootc		Perl OO tutorial, part 2
     perlobj		Perl objects
@@ -54,6 +55,7 @@ sections:
     perlcompile		Perl compiler suite intro
     perldebug		Perl debugging
     perldiag		Perl diagnostic messages
+    perlnumber		Perl number semantics
     perlsec		Perl security
     perltrap		Perl traps for the unwary
     perlport		Perl portability guide

@@ -109,8 +109,8 @@ if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos|MacOS)$/) {
 # Autoload methods go after =cut, and are processed by the autosplit program.
 
 sub glob {
-    my $pat = shift;
-    my $flags = shift;
+    my ($pat,$flags) = @_;
+    $flags = $DEFAULT_FLAGS if @_ < 2;
     if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos|MacOS)$/) {
         $flags |= GLOB_NOCASE();
     }

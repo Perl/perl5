@@ -363,6 +363,11 @@ if ($define{'MYMALLOC'}) {
 			PL_malloc_mutex
 			)];
     }
+    else {
+	skip_symbols [qw(
+			PL_malloc_mutex
+			)];
+    }
 }
 else {
     skip_symbols [qw(
@@ -394,8 +399,6 @@ unless ($define{'USE_5005THREADS'}) {
 		    PL_threadsv_names
 		    PL_thrsv
 		    PL_vtbl_mutex
-		    Perl_getTHR
-		    Perl_setTHR
 		    Perl_condpair_magic
 		    Perl_new_struct_thread
 		    Perl_per_thread_magicals
@@ -552,14 +555,10 @@ while (<DATA>) {
 if ($PLATFORM eq 'win32') {
     foreach my $symbol (qw(
 			    boot_DynaLoader
-			    Perl_getTHR
 			    Perl_init_os_extras
-			    Perl_setTHR
 			    Perl_thread_create
 			    Perl_win32_init
 			    RunPerl
-			    GetPerlInterpreter
-			    SetPerlInterpreter
 			    win32_errno
 			    win32_environ
 			    win32_stdin

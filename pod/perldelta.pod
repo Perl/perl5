@@ -4,10 +4,11 @@ perldelta - what's new for perl v5.6 (as of v5.005_64)
 
 =head1 DESCRIPTION
 
-This is an unsupported alpha release, meant for intrepid Perl developers
-only.  The included sources may not even build correctly on some platforms.
-Subscribing to perl5-porters is the best way to monitor and contribute
-to the progress of development releases (see www.perl.org for info).
+This is an unsupported alpha release, meant for intrepid Perl
+developers only.  The included sources may not even build correctly on
+some platforms.  Subscribing to perl5-porters is the best way to
+monitor and contribute to the progress of development releases (see
+http://www.hut.fi/~jhi/perl5-porters.html for info).
 
 This document describes differences between the 5.005 release and this one.
 
@@ -198,6 +199,18 @@ always coerced simple scalar arguments to a typeglob, which wasn't useful
 in situations where the subroutine must distinguish between a simple
 scalar and a typeglob.  See L<perlsub/Prototypes>.
 
+=head2 On 64-bit platforms the semantics of bit operators have changed
+
+If your platform is either natively 64-bit or your Perl has been
+configured to used 64-bit integers (say C<perl -V> and see what is
+your ivsize: if it is 8, you are 64-bit) , be warned that the
+semantics of all the bitwise numeric operators (& | ^ ~ << >>) have
+been changed.  They used to be forced to be 32 bits wide, but now in
+the aforementioned platforms they are 64 bits wide.  Most dramatically
+this affects the unary ~: what used to be 32 bits wide, is now 64 bits
+wide.  If you depend on your integers being 32 bits wide, mask off the
+excess bits with C<& 0xffffffff>.
+
 =back
 
 =head2 C Source Incompatibilities
@@ -318,12 +331,12 @@ Interfaces and implementation are subject to sudden and drastic changes.
 
 The -Dusethreads flag now enables the experimental interpreter-based thread
 support by default.  To get the flavor of experimental threads that was in
-5.005 instead, you need to ask for -Duse5005threads.
+5.005 instead, you need to run Configure with "-Dusethreads -Duse5005threads".
 
 As of v5.5.640, interpreter-threads support is still lacking a way to
 create new threads from Perl (i.e., C<use Thread;> will not work with
 interpreter threads).  C<use Thread;> continues to be available when you
-ask for -Duse5005threads, bugs and all.
+ask for use5005threads, bugs and all.
 
 =head2 New Configure flags
 
@@ -331,15 +344,16 @@ The following new flags may be enabled on the Configure command line
 by running Configure with C<-Dflag>.
 
     usemultiplicity
-    use5005threads
+    usethreads useithreads	(new interpreter threads: no Perl API yet)
+    usethreads use5005threads	(threads as they were in 5.005)
 
-    use64bitint		(equal to now deprecated 'use64bits')
+    use64bitint			(equal to now deprecated 'use64bits')
     use64bitall
 
     uselongdouble
     usemorebits
     uselargefiles
-    usesocks		(only SOCKS v5 supported)
+    usesocks			(only SOCKS v5 supported)
 
 =head2 Threadedness and 64-bitness now more daring
 
@@ -669,23 +683,22 @@ pack() and unpack() "q" and "Q" formats
 
 =item *
 
-in basic arithmetics: + - * / %
+in basic arithmetics: + - * / % (NOTE: operating close to the limits
+of the integer values may produce surprising results)
 
 =item *
 
-vec() (but see the below note about bit arithmetics)
+in bit arithmetics: & | ^ ~ << >> (NOTE: these used to be forced 
+to be 32 bits wide.)
+
+=item *
+
+vec()
 
 =back
 
 Note that unless you have the case (a) you will have to configure
 and compile Perl using the -Duse64bitint Configure flag.
-
-Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) for numbers are not
-64-bit clean, they are explictly forced to be 32-bit because of
-tangled backward compatibility issues.  This limitation is subject to
-change.  Bit arithmetics for bit vector scalars (created by vec()) are
-not limited in their width, you can use the & | ^ ~ operators on such
-scalars.
 
 There are actually two modes of 64-bitness: the first one is achieved
 using Configure -Duse64bitint and the second one using Configure
@@ -1274,6 +1287,9 @@ system(1,...) now returns true process IDs rather than process
 handles.  kill() accepts any real process id, rather than strictly
 return values from system(1,...).
 
+For better compatibility with Unix, C<kill(0, $pid)> can now be used to
+test whether a process exists.
+
 The C<Shell> module is supported.
 
 Rudimentary support for building under command.com in Windows 95
@@ -1303,6 +1319,14 @@ information, see L<File::Glob>.
 =item	lib/attrs
 
 Compatibility tests for C<sub : attrs> vs the older C<use attrs>.
+
+=item	lib/env
+
+Tests for new environment scalar capability (e.g., C<use Env qw($BAR);>).
+
+=item	lib/env-array
+
+Tests for new environment array capability (e.g., C<use Env qw(@PATH);>).
 
 =item	lib/io_const
 
@@ -1461,6 +1485,11 @@ of Perl variables and data.  It is a data debugging tool for the XS programmer.
 
 $PERL_VERSION now stands for C<$^V> (a string value) rather than for C<$]>
 (a numeric value).
+
+=item Env
+
+Env now supports accessing environment variables like PATH as array
+variables.
 
 =item ExtUtils::MakeMaker
 
@@ -1826,6 +1855,10 @@ A tutorial on using open() effectively.
 =item perlreftut.pod
 
 A tutorial that introduces the essentials of references.
+
+=item perlboot.pod
+
+A tutorial for beginners on object-oriented Perl.
 
 =item perltootc.pod
 

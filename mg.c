@@ -1719,6 +1719,11 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	else if (strEQ(mg->mg_ptr, "\027ARNING_BITS")) {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
+		if (!SvPOK(sv) && PL_localizing) {
+	            sv_setpvn(sv, WARN_NONEstring, WARNsize);
+	            PL_compiling.cop_warnings = WARN_NONE;
+		    break;
+		}
                 if (memEQ(SvPVX(sv), WARN_ALLstring, WARNsize)) {
 	            PL_compiling.cop_warnings = WARN_ALL;
 	            PL_dowarn |= G_WARN_ONCE ;
@@ -2175,7 +2180,7 @@ static void
 restore_magic(pTHXo_ void *p)
 {
     dTHR;
-    MGS* mgs = SSPTR((I32)p, MGS*);
+    MGS* mgs = SSPTR(PTR2IV(p), MGS*);
     SV* sv = mgs->mgs_sv;
 
     if (!sv)

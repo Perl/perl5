@@ -1676,6 +1676,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define LONGLONGSIZE $longlongsize		/**/
 #endif
 
+/* HAS_MADVISE:
+ *	This symbol, if defined, indicates that the madvise system call is
+ *	available to map a file into memory.
+ */
+#$d_madvise HAS_MADVISE		/**/
+
 /* HAS_MEMCHR:
  *	This symbol, if defined, indicates that the memchr routine is available
  *	to locate characters within a C string.
@@ -2363,6 +2369,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	should be included.
  */
 #$i_socks	I_SOCKS		/**/
+
+/* I_SUNMATH:
+ *	This symbol, if defined, indicates that <sunmath.h> exists and
+ *	should be included.
+ */
+#$i_sunmath	I_SUNMATH		/**/
 
 /* I_SYSLOG:
  *	This symbol, if defined, indicates that <syslog.h> exists and

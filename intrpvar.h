@@ -406,7 +406,6 @@ PERLVARA(Iuudmap,256,	char)
 PERLVAR(Ibitcount,	char *)
 
 #ifdef USE_THREADS
-PERLVAR(Ithr_key,	perl_key)	/* For per-thread struct perl_thread* */
 PERLVAR(Isv_mutex,	perl_mutex)	/* Mutex for allocating SVs in sv.c */
 PERLVAR(Ieval_mutex,	perl_mutex)	/* Mutex for doeval */
 PERLVAR(Ieval_cond,	perl_cond)	/* Condition variable for doeval */

@@ -385,7 +385,6 @@
 #define PL_svref_mutex		(PERL_GET_INTERP->Isvref_mutex)
 #define PL_sys_intern		(PERL_GET_INTERP->Isys_intern)
 #define PL_tainting		(PERL_GET_INTERP->Itainting)
-#define PL_thr_key		(PERL_GET_INTERP->Ithr_key)
 #define PL_threadnum		(PERL_GET_INTERP->Ithreadnum)
 #define PL_threads_mutex	(PERL_GET_INTERP->Ithreads_mutex)
 #define PL_threadsv_names	(PERL_GET_INTERP->Ithreadsv_names)
@@ -650,7 +649,6 @@
 #define PL_svref_mutex		(vTHX->Isvref_mutex)
 #define PL_sys_intern		(vTHX->Isys_intern)
 #define PL_tainting		(vTHX->Itainting)
-#define PL_thr_key		(vTHX->Ithr_key)
 #define PL_threadnum		(vTHX->Ithreadnum)
 #define PL_threads_mutex	(vTHX->Ithreads_mutex)
 #define PL_threadsv_names	(vTHX->Ithreadsv_names)
@@ -1052,7 +1050,6 @@
 #define PL_svref_mutex		(aTHXo->interp.Isvref_mutex)
 #define PL_sys_intern		(aTHXo->interp.Isys_intern)
 #define PL_tainting		(aTHXo->interp.Itainting)
-#define PL_thr_key		(aTHXo->interp.Ithr_key)
 #define PL_threadnum		(aTHXo->interp.Ithreadnum)
 #define PL_threads_mutex	(aTHXo->interp.Ithreads_mutex)
 #define PL_threadsv_names	(aTHXo->interp.Ithreadsv_names)
@@ -1318,7 +1315,6 @@
 #define PL_Isvref_mutex		PL_svref_mutex
 #define PL_Isys_intern		PL_sys_intern
 #define PL_Itainting		PL_tainting
-#define PL_Ithr_key		PL_thr_key
 #define PL_Ithreadnum		PL_threadnum
 #define PL_Ithreads_mutex	PL_threads_mutex
 #define PL_Ithreadsv_names	PL_threadsv_names
@@ -1653,6 +1649,7 @@
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
+#define PL_thr_key		(PL_Vars.Gthr_key)
 
 #else /* !PERL_GLOBAL_STRUCT */
 
@@ -1663,6 +1660,7 @@
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gpatleave		PL_patleave
+#define PL_Gthr_key		PL_thr_key
 
 #endif /* PERL_GLOBAL_STRUCT */
 

@@ -25,7 +25,7 @@ sub main'initpwd {
     if ($ENV{'PWD'}) {
 	local($dd,$di) = stat('.');
 	local($pd,$pi) = stat($ENV{'PWD'});
-	if ($di != $pi || $dd != $pd) {
+	if (!defined $dd or !defined $pd or $di != $pi or $dd != $pd) {
 	    chop($ENV{'PWD'} = `pwd`);
 	}
     }
@@ -35,7 +35,7 @@ sub main'initpwd {
     if ($ENV{'PWD'} =~ m|(/[^/]+(/[^/]+/[^/]+))(.*)|) {
 	local($pd,$pi) = stat($2);
 	local($dd,$di) = stat($1);
-	if ($di == $pi && $dd == $pd) {
+	if (defined $pd and defined $dd and $di == $pi and $dd == $pd) {
 	    $ENV{'PWD'}="$2$3";
 	}
     }

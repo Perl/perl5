@@ -17,6 +17,8 @@ Perl_malloc
 Perl_calloc
 Perl_realloc
 Perl_mfree
+Perl_get_context
+Perl_set_context
 Perl_amagic_call
 Perl_Gv_AMupdate
 Perl_avhv_delete_ent

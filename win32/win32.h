@@ -27,11 +27,6 @@
 #  define win32_get_sitelib PerlEnv_sitelib_path
 #endif
 
-#if defined(PERL_IMPLICIT_CONTEXT)
-#  define PERL_GET_INTERP	((PerlInterpreter*)GetPerlInterpreter())
-#  define PERL_SET_INTERP(i)	(SetPerlInterpreter(i))
-#endif
-
 #ifdef __GNUC__
 #  ifndef __int64		/* some versions seem to #define it already */
 #    define __int64 long long
@@ -156,6 +151,8 @@ struct utsname {
 #  define	X_OK	1
 #  define	F_OK	0
 #endif
+
+#define PERL_GET_CONTEXT_DEFINED
 
 /* Compiler-specific stuff. */
 
@@ -298,8 +295,6 @@ DllExport void		Perl_win32_init(int *argcp, char ***argvp);
 DllExport void		Perl_init_os_extras();
 DllExport void		win32_str_os_error(void *sv, DWORD err);
 DllExport int		RunPerl(int argc, char **argv, char **env);
-DllExport bool		SetPerlInterpreter(void* interp);
-DllExport void*		GetPerlInterpreter(void);
 
 typedef struct {
     HANDLE	childStdIn;
@@ -320,6 +315,7 @@ extern char *		win32_get_privlib(char *pl);
 extern char *		win32_get_sitelib(char *pl);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
+extern void		win32_argv2utf8(int argc, char** argv);
 
 extern char *		staticlinkmodules[];
 

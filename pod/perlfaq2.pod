@@ -42,7 +42,7 @@ get free compilers for, not for Unix systems.
 Some URLs that might help you are:
 
     http://language.perl.com/info/software.html
-    http://www.perl.com/latest/
+    http://www.perl.com/pub/language/info/software.html#binary
     http://www.perl.com/CPAN/ports/
 
 Someone looking for a Perl for Win16 might look to Laszlo Molnar's djgpp
@@ -335,7 +335,7 @@ following list is I<not> the complete list of CPAN mirrors.
 
   http://www.perl.com/CPAN-local
   http://www.perl.com/CPAN	(redirects to an ftp mirror)
-  http://www.perl.org/CPAN
+  ftp://cpan.valueclick.com/pub/CPAN/
   ftp://ftp.funet.fi/pub/languages/perl/CPAN/
   http://www.cs.ruu.nl/pub/PERL/CPAN/
   ftp://ftp.cs.colorado.edu/pub/perl/CPAN/

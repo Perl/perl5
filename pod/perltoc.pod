@@ -1145,15 +1145,20 @@ CGI script to do bad things?
 
 =item Perl Source Incompatibilities
 
-CHECK is a new keyword, Treatment of list slices of undef has changed,
-Possibly changed pseudo-random number generator, Hashing function for hash
-keys has changed, C<undef> fails on read only values, Close-on-exec bit may
-be set on pipe() handles, Writing C<"$$1"> to mean C<"${$}1"> is
-unsupported, delete(), values() and C<\(%h)> operate on aliases to values,
-not copies, vec(EXPR,OFFSET,BITS) enforces powers-of-two BITS, Text of some
-diagnostic output has changed, C<%@> has been removed, Parenthesized not()
-behaves like a list operator, Semantics of bareword prototype C<(*)> have
-changed
+CHECK is a new keyword, Treatment of list slices of undef has changed
+
+=item Perl's version numbering has changed
+
+Literals of the form C<1.2.3> parse differently, Possibly changed
+pseudo-random number generator, Hashing function for hash keys has changed,
+C<undef> fails on read only values, Close-on-exec bit may be set on pipe
+and socket handles, Writing C<"$$1"> to mean C<"${$}1"> is unsupported,
+delete(), values() and C<\(%h)> operate on aliases to values, not copies,
+vec(EXPR,OFFSET,BITS) enforces powers-of-two BITS, Text of some diagnostic
+output has changed, C<%@> has been removed, Parenthesized not() behaves
+like a list operator, Semantics of bareword prototype C<(*)> have changed
+
+=item On 64-bit platforms the semantics of bit operators have changed
 
 =item C Source Incompatibilities
 
@@ -1171,9 +1176,11 @@ C<PATCHLEVEL> is now C<PERL_VERSION>, Support for C++ exceptions
 
 =over
 
+=item -Dusethreads means something different
+
 =item New Configure flags
 
-=item -Dusethreads and -Duse64bits now more daring
+=item Threadedness and 64-bitness now more daring
 
 =item Long Doubles
 
@@ -1197,13 +1204,15 @@ C<PATCHLEVEL> is now C<PERL_VERSION>, Support for C++ exceptions
 
 =item Unicode and UTF-8 support
 
-=item Interpreter threads
+=item Interpreter cloning, threads, and concurrency
 
 =item Lexically scoped warning categories
 
 =item Lvalue subroutines
 
 =item "our" declarations
+
+=item Support for strings represented as a vector of ordinals
 
 =item Weak references
 
@@ -1262,6 +1271,8 @@ C<PATCHLEVEL> is now C<PERL_VERSION>, Support for C++ exceptions
 =item C<require> and C<do> may be overridden
 
 =item New variable $^C reflects C<-c> switch
+
+=item New variable $^V contains Perl version in v5.6.0 format
 
 =item Optional Y2K warnings
 
@@ -1366,11 +1377,13 @@ C<PATCHLEVEL> is now C<PERL_VERSION>, Support for C++ exceptions
 =item Modules
 
 attributes, B, ByteLoader, constant, charnames, Data::Dumper, DB, DB_File,
-Devel::DProf, Dumpvalue, Benchmark, Devel::Peek, ExtUtils::MakeMaker,
-Fcntl, File::Compare, File::Find, File::Glob, File::Spec,
-File::Spec::Functions, Getopt::Long, IO, JPL, lib, Math::BigInt,
-Math::Complex, Math::Trig, Pod::Parser, Pod::Text and Pod::Man, SDBM_File,
-Time::Local, Win32, DBM Filters
+Devel::DProf, Dumpvalue, Benchmark, Devel::Peek, English,
+ExtUtils::MakeMaker, Fcntl, File::Compare, File::Find, File::Glob,
+File::Spec, File::Spec::Functions, Getopt::Long, IO, JPL, lib,
+Math::BigInt, Math::Complex, Math::Trig, Pod::Parser, Pod::InputObjects,
+Pod::Checker, podchecker, Pod::ParseUtils, Pod::Find, Pod::Select,
+podselect, Pod::Usage, pod2usage, Pod::Text and Pod::Man, SDBM_File,
+Sys::Syslog, Sys::Hostname, Time::Local, Win32, DBM Filters
 
 =item Pragmata
 
@@ -1391,7 +1404,8 @@ Time::Local, Win32, DBM Filters
 =item Documentation Changes
 
 perlapi.pod, perlcompile.pod, perlfilter.pod, perlhack.pod, perlintern.pod,
-perlopentut.pod, perlreftut.pod, perltootc.pod
+perlopentut.pod, perlreftut.pod, perlboot.pod, perltootc.pod,
+perlunicode.pod
 
 =item New or Changed Diagnostics
 
@@ -1405,32 +1419,32 @@ early to check prototype, %s argument is not a HASH or ARRAY element, %s
 argument is not a HASH or ARRAY element or slice, %s argument is not a
 subroutine name, %s package attribute may clash with future reserved word:
 %s,	    (in cleanup) %s, <> should be quotes, Attempt to join self, Bad
-evalled substitution pattern, Bad realloc() ignored, Binary number >
-0b11111111111111111111111111111111 non-portable, Bit vector size > 32
-non-portable, Buffer overflow in prime_env_iter: %s, Can't check filesystem
-of script "%s", Can't declare class for non-scalar %s in "%s", Can't
-declare %s in "%s", Can't ignore signal CHLD, forcing to default, Can't
-modify non-lvalue subroutine call, Can't read CRTL environ, Can't remove
-%s: %s, skipping file, Can't return %s from lvalue subroutine, Can't weaken
-a nonreference, Character class [:%s:] unknown, Character class syntax [%s]
-belongs inside character classes, Constant is not %s reference,
-constant(%s): %%^H is not localized, constant(%s): %s, defined(@array) is
-deprecated, defined(%hash) is deprecated, Did not produce a valid header,
-Did you mean "local" instead of "our"?, Document contains no data, entering
-effective %s failed, false [] range "%s" in regexp, Filehandle %s opened
-only for output, flock() on closed filehandle %s, Global symbol "%s"
-requires explicit package name, Hexadecimal number > 0xffffffff
-non-portable, Ill-formed CRTL environ value "%s", Ill-formed message in
-prime_env_iter: |%s|, Illegal binary digit %s, Illegal binary digit %s
-ignored, Illegal number of bits in vec, Integer overflow in %s number,
-Invalid %s attribute: %s, Invalid %s attributes: %s, invalid [] range "%s"
-in regexp, Invalid separator character %s in attribute list, Invalid
-separator character %s in subroutine attribute list, leaving effective %s
-failed, Lvalue subs returning %s not implemented yet, Method %s not
-permitted, Missing %sbrace%s on \N{}, Missing command in piped open,
-Missing name in "my sub", No %s specified for -%c, No package name allowed
-for variable %s in "our", No space allowed after -%c, no UTC offset
-information; assuming local time is UTC, Octal number > 037777777777
+evalled substitution pattern, Bad realloc() ignored, Bareword found in
+conditional, Binary number > 0b11111111111111111111111111111111
+non-portable, Bit vector size > 32 non-portable, Buffer overflow in
+prime_env_iter: %s, Can't check filesystem of script "%s", Can't declare
+class for non-scalar %s in "%s", Can't declare %s in "%s", Can't ignore
+signal CHLD, forcing to default, Can't modify non-lvalue subroutine call,
+Can't read CRTL environ, Can't remove %s: %s, skipping file, Can't return
+%s from lvalue subroutine, Can't weaken a nonreference, Character class
+[:%s:] unknown, Character class syntax [%s] belongs inside character
+classes, Constant is not %s reference, constant(%s): %%^H is not localized,
+constant(%s): %s, defined(@array) is deprecated, defined(%hash) is
+deprecated, Did not produce a valid header, Did you mean "local" instead of
+"our"?, Document contains no data, entering effective %s failed, false []
+range "%s" in regexp, Filehandle %s opened only for output, flock() on
+closed filehandle %s, Global symbol "%s" requires explicit package name,
+Hexadecimal number > 0xffffffff non-portable, Ill-formed CRTL environ value
+"%s", Ill-formed message in prime_env_iter: |%s|, Illegal binary digit %s,
+Illegal binary digit %s ignored, Illegal number of bits in vec, Integer
+overflow in %s number, Invalid %s attribute: %s, Invalid %s attributes: %s,
+invalid [] range "%s" in regexp, Invalid separator character %s in
+attribute list, Invalid separator character %s in subroutine attribute
+list, leaving effective %s failed, Lvalue subs returning %s not implemented
+yet, Method %s not permitted, Missing %sbrace%s on \N{}, Missing command in
+piped open, Missing name in "my sub", No %s specified for -%c, No package
+name allowed for variable %s in "our", No space allowed after -%c, no UTC
+offset information; assuming local time is UTC, Octal number > 037777777777
 non-portable, panic: del_backref, panic: kid popen errno read, panic:
 magic_killbackrefs, Parentheses missing around "%s" list, Possible Y2K bug:
 %s, Premature end of script headers, Repeat count in pack overflows, Repeat
@@ -1448,8 +1462,8 @@ number must be a constant number
 =item Obsolete Diagnostics
 
 Character class syntax [: :] is reserved for future extensions, Ill-formed
-logical name |%s| in prime_env_iter, regexp too big, Use of "$$<digit>" to
-mean "${$}<digit>" is deprecated
+logical name |%s| in prime_env_iter, Probable precedence problem on %s,
+regexp too big, Use of "$$<digit>" to mean "${$}<digit>" is deprecated
 
 =item BUGS
 
@@ -1594,7 +1608,7 @@ y/SEARCHLIST/REPLACEMENTLIST/cdsUC
 
 Finding the end, Removal of backslashes before delimiters, Interpolation,
 C<<<'EOF'>, C<m''>, C<s'''>, C<tr///>, C<y///>, C<''>, C<q//>, C<"">,
-C<``>, C<qq//>, C<qx//>, C<<file*globE<gt>>, C<?RE?>, C</RE/>, C<m/RE/>,
+C<``>, C<qq//>, C<qx//>, C<< <file*glob> >>, C<?RE?>, C</RE/>, C<m/RE/>,
 C<s/RE/foo/>,, Interpolation of regular expressions, Optimization of
 regular expressions
 
@@ -1603,6 +1617,8 @@ regular expressions
 =item Constant Folding
 
 =item Bitwise String Operators
+
+=item Strings of Character
 
 =item Integer Arithmetic
 
@@ -1678,9 +1694,9 @@ OS/2, MS-DOS, Win95/NT, Macintosh, VMS
 
 =item Command Switches
 
-B<-0>[I<digits>], B<-a>, B<-c>, B<-d>, B<-d:>I<foo>, B<-D>I<letters>,
-B<-D>I<number>, B<-e> I<commandline>, B<-F>I<pattern>, B<-h>,
-B<-i>[I<extension>], B<-I>I<directory>, B<-l>[I<octnum>],
+B<-0>[I<digits>], B<-a>, B<-C>, B<-c>, B<-d>, B<-d:>I<foo>,
+B<-D>I<letters>, B<-D>I<number>, B<-e> I<commandline>, B<-F>I<pattern>,
+B<-h>, B<-i>[I<extension>], B<-I>I<directory>, B<-l>[I<octnum>],
 B<-m>[B<->]I<module>, B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
 B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
 B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-W>, B<-X>,
@@ -1749,20 +1765,21 @@ FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill SIGNAL, LIST,
 last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
 link OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR,
 lock, log EXPR, log, lstat FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK
-LIST, map EXPR,LIST, mkdir FILENAME,MASK, msgctl ID,CMD,ARG, msgget
-KEY,FLAGS, msgsnd ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, my EXPR, my
-EXPR : ATTRIBUTES, next LABEL, next, no Module LIST, oct EXPR, oct, open
-FILEHANDLE,MODE,EXPR, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
-DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack TEMPLATE,LIST, package,
-package NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR,
-pos, print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE FORMAT,
-LIST, printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/,
-qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta,
-rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
-FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
-readlink, readpipe EXPR, recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo,
-ref EXPR, ref, rename OLDNAME,NEWNAME, require EXPR, require, reset EXPR,
-reset, return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
+LIST, map EXPR,LIST, mkdir FILENAME,MASK, mkdir FILENAME, msgctl
+ID,CMD,ARG, msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS, msgrcv
+ID,VAR,SIZE,TYPE,FLAGS, my EXPR, my EXPR : ATTRIBUTES, next LABEL, next, no
+Module LIST, oct EXPR, oct, open FILEHANDLE,MODE,EXPR, open
+FILEHANDLE,EXPR, open FILEHANDLE, opendir DIRHANDLE,EXPR, ord EXPR, ord,
+our EXPR, pack TEMPLATE,LIST, package, package NAMESPACE, pipe
+READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
+LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
+LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/, qq/STRING/,
+qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR,
+rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH,
+readdir DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR,
+recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
+OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
+return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
 STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
 EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
 FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
@@ -1774,23 +1791,24 @@ shmwrite ID,STRING,POS,SIZE, shutdown SOCKET,HOW, sin EXPR, sin, sleep
 EXPR, sleep, socket SOCKET,DOMAIN,TYPE,PROTOCOL, socketpair
 SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort BLOCK LIST,
 sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
-splice ARRAY,OFFSET, split /PATTERN/,EXPR,LIMIT, split /PATTERN/,EXPR,
-split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR, sqrt, srand EXPR,
-srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR, study, sub BLOCK,
-sub NAME, sub NAME BLOCK, substr EXPR,OFFSET,LENGTH,REPLACEMENT, substr
-EXPR,OFFSET,LENGTH, substr EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall
-LIST, sysopen FILEHANDLE,FILENAME,MODE, sysopen
-FILEHANDLE,FILENAME,MODE,PERMS, sysread FILEHANDLE,SCALAR,LENGTH,OFFSET,
-sysread FILEHANDLE,SCALAR,LENGTH, sysseek FILEHANDLE,POSITION,WHENCE,
-system LIST, system PROGRAM LIST, syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET,
-syswrite FILEHANDLE,SCALAR,LENGTH, syswrite FILEHANDLE,SCALAR, tell
-FILEHANDLE, tell, telldir DIRHANDLE, tie VARIABLE,CLASSNAME,LIST, tied
-VARIABLE, time, times, tr///, truncate FILEHANDLE,LENGTH, truncate
-EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR, ucfirst, umask EXPR, umask, undef
-EXPR, undef, unlink LIST, unlink, unpack TEMPLATE,EXPR, untie VARIABLE,
-unshift ARRAY,LIST, use Module LIST, use Module, use Module VERSION LIST,
-use VERSION, utime LIST, values HASH, vec EXPR,OFFSET,BITS, wait, waitpid
-PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR, write, y///
+splice ARRAY,OFFSET, splice ARRAY, split /PATTERN/,EXPR,LIMIT, split
+/PATTERN/,EXPR, split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR,
+sqrt, srand EXPR, srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR,
+study, sub BLOCK, sub NAME, sub NAME BLOCK, substr
+EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
+EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
+FILEHANDLE,FILENAME,MODE, sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
+FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
+FILEHANDLE,POSITION,WHENCE, system LIST, system PROGRAM LIST, syswrite
+FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH,
+syswrite FILEHANDLE,SCALAR, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
+VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
+FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
+ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
+TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module VERSION LIST,
+use Module VERSION, use Module LIST, use Module, use VERSION, utime LIST,
+values HASH, vec EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn
+LIST, write FILEHANDLE, write EXPR, write, y///
 
 =back
 
@@ -1816,19 +1834,24 @@ $OUTPUT_RECORD_SEPARATOR, $ORS, $\, $LIST_SEPARATOR, $",
 $SUBSCRIPT_SEPARATOR, $SUBSEP, $;, $OFMT, $#, format_page_number HANDLE
 EXPR, $FORMAT_PAGE_NUMBER, $%, format_lines_per_page HANDLE EXPR,
 $FORMAT_LINES_PER_PAGE, $=, format_lines_left HANDLE EXPR,
-$FORMAT_LINES_LEFT, $-, @-, format_name HANDLE EXPR, $FORMAT_NAME, $~,
-format_top_name HANDLE EXPR, $FORMAT_TOP_NAME, $^,
-format_line_break_characters HANDLE EXPR, $FORMAT_LINE_BREAK_CHARACTERS,
-$:, format_formfeed HANDLE EXPR, $FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A,
-$CHILD_ERROR, $?, $OS_ERROR, $ERRNO, $!, $EXTENDED_OS_ERROR, $^E,
-$EVAL_ERROR, $@, $PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<,
-$EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID, $GID, $(,
-$EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $PERL_VERSION, $],
+$FORMAT_LINES_LEFT, $-, @-, C<$`> is the same as C<substr($var, 0, $-[0]>),
+C<$&> is the same as C<substr($var, $-[0], $+[0] - $-[0]>), C<$'> is the
+same as C<substr($var, $+[0]>), C<$1> is the same as C<substr($var, $-[1],
+$+[1] - $-[1])>, C<$2> is the same as C<substr($var, $-[2], $+[2] -
+$-[2])>, C<$3> is the same as C<substr $var, $-[3], $+[3] - $-[3]>),
+format_name HANDLE EXPR, $FORMAT_NAME, $~, format_top_name HANDLE EXPR,
+$FORMAT_TOP_NAME, $^, format_line_break_characters HANDLE EXPR,
+$FORMAT_LINE_BREAK_CHARACTERS, $:, format_formfeed HANDLE EXPR,
+$FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A, $CHILD_ERROR, $?, $OS_ERROR,
+$ERRNO, $!, $EXTENDED_OS_ERROR, $^E, $EVAL_ERROR, $@, $PROCESS_ID, $PID,
+$$, $REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID,
+$GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $],
 $COMPILING, $^C, $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H,
 $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04,
-0x08, 0x10, 0x20, $^R, $^S, $BASETIME, $^T, $WARNING, $^W, ${^WARNING_BITS},
-$EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, @_, %INC, %ENV, $ENV{expr},
-%SIG, $SIG{expr}
+0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R,
+$EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, $PERL_VERSION, $^V,
+$WARNING, $^W, ${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME,
+$^X, $ARGV, @ARGV, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item Error Indicators
 
@@ -2385,6 +2408,64 @@ more elaborate constructs
 
 =back
 
+=head2 perlboot - Beginner's Object-Oriented Tutorial
+
+=over
+
+=item DESCRIPTION
+
+=over
+
+=item If we could talk to the animals...
+
+=item Introducing the method invocation arrow
+
+=item Invoking a barnyard
+
+=item The extra parameter of method invocation
+
+=item Calling a second method to simplify things
+
+=item Inheriting the windpipes
+
+=item A few notes about @ISA
+
+=item Overriding the methods
+
+=item Starting the search from a different place
+
+=item The SUPER way of doing things
+
+=item Where we're at so far...
+
+=item A horse is a horse, of course of course -- or is it?
+
+=item Invoking an instance method
+
+=item Accessing the instance data
+
+=item How to build a horse
+
+=item Inheriting the constructor
+
+=item Making a method work with either classes or instances
+
+=item Adding parameters to a method
+
+=item More interesting instances
+
+=item A horse of a different color
+
+=item Summary
+
+=back
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=back
+
 =head2 perltoot - Tom's object-oriented tutorial for perl
 
 =over
@@ -2842,6 +2923,31 @@ C<anchored(TYPE)>
 
 =back
 
+=head2 perlnumber - semantics of numbers and numeric operations in Perl
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Storing numbers
+
+=item Numeric operators and numeric conversions
+
+=item Flavors of Perl numeric operations
+
+Arithmetic operators except, C<no integer>, Arithmetic operators except,
+C<use integer>, Bitwise operators, C<no integer>, Bitwise operators, C<use
+integer>, Operators which expect an integer, Operators which expect a
+string
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 perldiag - various Perl diagnostics
 
 =over
@@ -3003,7 +3109,7 @@ portable
 =item CPAN Testers
 
 Mailing list: cpan-testers@perl.org, Testing results:
-C<http://www.perl.org/cpan-testers/>
+C<http://testers.cpan.org/>
 
 =item PLATFORMS
 
@@ -3019,8 +3125,8 @@ C<emx@iaehv.nl>,C<http://www.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/index.
 html> or
 C<ftp://hobbes.nmsu.edu/pub/os2/dev/emx>, Build instructions for Win32,
 L<perlwin32>, The ActiveState Pages, C<http://www.activestate.com/>, The
-Cygwin environment for Win32;
-L<README.cygwin>,C<http://sourceware.cygnus.com/cygwin/>, The U/WIN
+Cygwin environment for Win32; F<README.cygwin> (installed as
+L<perlcygwin>), C<http://sourceware.cygnus.com/cygwin/>, The U/WIN
 environment for Win32,C<http://www.research.att.com/sw/tools/uwin/>
 
 =item S<Mac OS>
@@ -3031,17 +3137,18 @@ C<http://pudge.net/mmp/>
 
 =item VMS
 
-L<README.vms>, L<perlvms.pod>, vmsperl list, C<majordomo@perl.org>, vmsperl
-on the web, C<http://www.sidhe.org/vmsperl/index.html>
+F<README.vms> (installed as L<README_vms>), L<perlvms>, vmsperl list,
+C<majordomo@perl.org>, vmsperl on the web,
+C<http://www.sidhe.org/vmsperl/index.html>
 
 =item VOS
 
-L<README.vos>, VOS mailing list, VOS Perl on the web at
+F<README.vos>, VOS mailing list, VOS Perl on the web at
 C<http://ftp.stratus.com/pub/vos/vos.html>
 
 =item EBCDIC Platforms
 
-L<README.os390>, L<README.posix-bc>, L<README.vmesa>, perl-mvs list, AS/400
+F<README.os390>, F<README.posix-bc>, F<README.vmesa>, perl-mvs list, AS/400
 Perl information at C<http://as400.rochester.ibm.com/>as well as on CPAN in
 the F<ports/> directory
 
@@ -3049,11 +3156,11 @@ the F<ports/> directory
 
 =item Other perls
 
-Amiga, L<README.amiga>, Atari, L<README.mint> and Guido Flohr's web
-pageC<http://stud.uni-sb.de/~gufl0000/>, Be OS, L<README.beos>, HP 300
-MPE/iX, L<README.mpeix> and Mark Bixby's web
+Amiga, F<README.amiga> (installed as L<perlamiga>), Atari, F<README.mint>
+and Guido Flohr's web pageC<http://stud.uni-sb.de/~gufl0000/>, Be OS,
+F<README.beos>, HP 300 MPE/iX, F<README.mpeix> and Mark Bixby's web
 pageC<http://www.cccd.edu/~markb/perlix.html>, Novell Netware, Plan 9,
-L<README.plan9>
+F<README.plan9>
 
 =back
 
@@ -3079,11 +3186,12 @@ FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd
 ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR, open
 FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink EXPR, readlink, select
 RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
-KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setpgrp PID,PGRP, setpriority
-WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shmctl
-ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE, shmwrite
-ID,STRING,POS,SIZE, socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, stat
-FILEHANDLE, stat EXPR, stat, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
+KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
+setpriority WHICH,WHO,PRIORITY, setpwent, setsockopt
+SOCKET,LEVEL,OPTNAME,OPTVAL, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS,
+shmread ID,VAR,POS,SIZE, shmwrite ID,STRING,POS,SIZE, socketpair
+SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, stat FILEHANDLE, stat EXPR, stat,
+symlink OLDFILE,NEWFILE, syscall LIST, sysopen
 FILEHANDLE,FILENAME,MODE,PERMS, system LIST, times, truncate
 FILEHANDLE,LENGTH, truncate EXPR,LENGTH, umask EXPR, umask, utime LIST,
 wait, waitpid PID,FLAGS
@@ -3092,11 +3200,11 @@ wait, waitpid PID,FLAGS
 
 =item CHANGES
 
-v1.45, 20 December 1999, v1.44, 19 July 1999, v1.43, 24 May 1999, v1.42, 22
-May 1999, v1.41, 19 May 1999, v1.40, 11 April 1999, v1.39, 11 February
-1999, v1.38, 31 December 1998, v1.37, 19 December 1998, v1.36, 9 September
-1998, v1.35, 13 August 1998, v1.33, 06 August 1998, v1.32, 05 August 1998,
-v1.30, 03 August 1998, v1.23, 10 July 1998
+v1.46, 12 February 2000, v1.45, 20 December 1999, v1.44, 19 July 1999,
+v1.43, 24 May 1999, v1.42, 22 May 1999, v1.41, 19 May 1999, v1.40, 11 April
+1999, v1.39, 11 February 1999, v1.38, 31 December 1998, v1.37, 19 December
+1998, v1.36, 9 September 1998, v1.35, 13 August 1998, v1.33, 06 August
+1998, v1.32, 05 August 1998, v1.30, 03 August 1998, v1.23, 10 July 1998
 
 =item AUTHORS / CONTRIBUTORS
 
@@ -3534,9 +3642,9 @@ C<void save_hptr(HV **hptr)>
 
 An Error Handler, An Event Driven Program
 
-=item THE PERL_CALL FUNCTIONS
+=item THE CALL_ FUNCTIONS
 
-perl_call_sv, perl_call_pv, perl_call_method, perl_call_argv
+call_sv, call_pv, call_method, call_argv
 
 =item FLAG VALUES
 
@@ -3582,11 +3690,11 @@ perl_call_sv, perl_call_pv, perl_call_method, perl_call_argv
 
 =item Using G_KEEPERR
 
-=item Using perl_call_sv
+=item Using call_sv
 
-=item Using perl_call_argv
+=item Using call_argv
 
-=item Using perl_call_method
+=item Using call_method
 
 =item Using GIMME_V
 
@@ -3790,7 +3898,7 @@ method, locked
 
 =item Built-in Attributes
 
-locked, method
+locked, method, lvalue
 
 =item Available Subroutines
 
@@ -3878,8 +3986,8 @@ method, locked
 
 =back
 
-=head2 bytes - Perl pragma to turn force treating strings as bytes not
-UNICODE
+=head2 bytes - Perl pragma to force byte semantics rather than character
+semantics
 
 =over
 
@@ -3887,17 +3995,7 @@ UNICODE
 
 =item DESCRIPTION
 
-=back
-
-=head2 caller - inherit pragmatic attributes from the context of the caller
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-encoding
+=item SEE ALSO
 
 =back
 
@@ -3970,6 +4068,8 @@ diagnostics
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+new, phash
 
 =item SEE ALSO
 
@@ -4224,7 +4324,7 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =back
 
-=head2 utf8 - Perl pragma to turn on UTF-8 and Unicode support
+=head2 utf8 - Perl pragma to enable/disable UTF-8 in source code
 
 =over
 
@@ -4232,7 +4332,7 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =item DESCRIPTION
 
-=item CAVEATS
+=item SEE ALSO
 
 =back
 
@@ -4253,6 +4353,8 @@ C<strict refs>, C<strict vars>, C<strict subs>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+warnings::enabled($category), warnings::warn($category, $message)
 
 =back
 
@@ -4378,8 +4480,8 @@ USEFUL, PREVIOUS, RARE, TABLE
 
 =item B::GV METHODS
 
-NAME, STASH, SV, IO, FORM, AV, HV, EGV, CV, CVGEN, LINE, FILE, FILEGV,
-GvREFCNT, FLAGS
+is_empty, NAME, STASH, SV, IO, FORM, AV, HV, EGV, CV, CVGEN, LINE, FILE,
+FILEGV, GvREFCNT, FLAGS
 
 =item B::IO METHODS
 
@@ -4528,7 +4630,7 @@ B<-On>, B<-D>, B<-Do>, B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-m>
 =item OPTIONS
 
 B<-ofilename>, B<-v>, B<-->, B<-uPackname>, B<-D>, B<-Do>, B<-Dc>, B<-DA>,
-B<-DC>, B<-DM>, B<-f>, B<-fcog>, B<-fno-cog>, B<-On>
+B<-DC>, B<-DM>, B<-f>, B<-fcog>, B<-fno-cog>, B<-On>, B<-llimit>
 
 =item EXAMPLES
 
@@ -5247,7 +5349,7 @@ B<name()>, B<value()>, B<domain()>, B<path()>, B<expires()>
 =item Interactive Mode
 
 Searching for authors, bundles, distribution files and modules, make, test,
-install, clean	modules or distributions, readme, look module or
+install, clean	modules or distributions, get, readme, look module or
 distribution, Signals
 
 =item CPAN::Shell
@@ -5280,10 +5382,10 @@ expand($type,@things), Programming Examples
 
 =item CONFIGURATION
 
-o conf E<lt>scalar optionE<gt>, o conf E<lt>scalar optionE<gt>
-E<lt>valueE<gt>, o conf E<lt>list optionE<gt>, o conf E<lt>list optionE<gt>
-[shift|pop], o conf E<lt>list optionE<gt> [unshift|push|splice]
-E<lt>listE<gt>
+C<o conf E<lt>scalar optionE<gt>>, C<o conf E<lt>scalar optionE<gt>
+E<lt>valueE<gt>>, C<o conf E<lt>list optionE<gt>>, C<o conf E<lt>list
+optionE<gt> [shift|pop]>, C<o conf E<lt>list optionE<gt>
+[unshift|push|splice] E<lt>listE<gt>>
 
 =over
 
@@ -5450,23 +5552,25 @@ C<d_endsent>, C<d_endspent>, C<d_eofnblk>, C<d_eunice>, C<d_fchmod>,
 C<d_fchown>, C<d_fcntl>, C<d_fd_macros>, C<d_fd_set>, C<d_fds_bits>,
 C<d_fgetpos>, C<d_flexfnam>, C<d_flock>, C<d_fork>, C<d_fpathconf>,
 C<d_fpos64_t>, C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>,
-C<d_fstatvfs>, C<d_ftello>, C<d_ftime>, C<d_Gconvert>, C<d_getgrent>,
-C<d_getgrps>, C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>,
-C<d_gethname>, C<d_gethostprotos>, C<d_getlogin>, C<d_getmnt>,
-C<d_getmntent>, C<d_getnbyaddr>, C<d_getnbyname>, C<d_getnent>,
-C<d_getnetprotos>, C<d_getpbyname>, C<d_getpbynumber>, C<d_getpent>,
-C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>, C<d_getprior>,
-C<d_getprotoprotos>, C<d_getpwent>, C<d_getsbyname>, C<d_getsbyport>,
-C<d_getsent>, C<d_getservprotos>, C<d_getspent>, C<d_getspnam>,
-C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>,
-C<d_index>, C<d_inetaton>, C<d_int64t>, C<d_isascii>, C<d_killpg>,
-C<d_lchown>, C<d_ldbl_dig>, C<d_link>, C<d_locconv>, C<d_lockf>,
-C<d_longdbl>, C<d_longlong>, C<d_lstat>, C<d_mblen>, C<d_mbstowcs>,
-C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>,
-C<d_memset>, C<d_mkdir>, C<d_mkfifo>, C<d_mktime>, C<d_msg>,
-C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
-C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msgrcv>, C<d_msgsnd>,
-C<d_mymalloc>, C<d_nice>, C<d_nvpresuv>, C<d_off64_t>,
+C<d_fstatvfs>, C<d_ftello>, C<d_ftime>, C<d_Gconvert>, C<d_getcwd>,
+C<d_getfsstat>, C<d_getgrent>, C<d_getgrps>, C<d_gethbyaddr>,
+C<d_gethbyname>, C<d_gethent>, C<d_gethname>, C<d_gethostprotos>,
+C<d_getlogin>, C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>,
+C<d_getnbyname>, C<d_getnent>, C<d_getnetprotos>, C<d_getpbyname>,
+C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>,
+C<d_getppid>, C<d_getprior>, C<d_getprotoprotos>, C<d_getpwent>,
+C<d_getsbyname>, C<d_getsbyport>, C<d_getsent>, C<d_getservprotos>,
+C<d_getspent>, C<d_getspnam>, C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>,
+C<d_hasmntopt>, C<d_htonl>, C<d_iconv>, C<d_index>, C<d_inetaton>,
+C<d_int64_t>, C<d_isascii>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
+C<d_link>, C<d_locconv>, C<d_lockf>, C<d_longdbl>, C<d_longlong>,
+C<d_lseekproto>, C<d_lstat>, C<d_mblen>, C<d_mbstowcs>, C<d_mbtowc>,
+C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>, C<d_memset>,
+C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>, C<d_mkstemps>,
+C<d_mktime>, C<d_mmap>, C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>,
+C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>, C<d_msg_proxy>,
+C<d_msgctl>, C<d_msgget>, C<d_msgrcv>, C<d_msgsnd>, C<d_msync>,
+C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>, C<d_off64_t>,
 C<d_old_pthread_create_joinable>, C<d_oldpthreads>, C<d_oldsock>,
 C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_phostname>, C<d_pipe>,
 C<d_poll>, C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEldbl>,
@@ -5484,14 +5588,14 @@ C<d_setprior>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
 C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
 C<d_setsid>, C<d_setspent>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
 C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigsetjmp>, C<d_socket>, C<d_sockpair>, C<d_sqrtl>, C<d_statblks>,
-C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
-C<d_stdio_ptr_lval>, C<d_stdio_stream_array>, C<d_stdiobase>,
-C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
-C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
-C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
-C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
-C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_sqrtl>,
+C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_stream_array>,
+C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>,
+C<d_strerrm>, C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
+C<d_strtoll>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
+C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
+C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
 C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
 C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorbin>,
 C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>,
@@ -5524,16 +5628,17 @@ C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>, C<huge>
 C<i16size>, C<i16type>, C<i32size>, C<i32type>, C<i64size>, C<i64type>,
 C<i8size>, C<i8type>, C<i_arpainet>, C<i_bsdioctl>, C<i_db>, C<i_dbm>,
 C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>, C<i_gdbm>,
-C<i_grp>, C<i_inttypes>, C<i_limits>, C<i_locale>, C<i_machcthr>,
-C<i_malloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>, C<i_netdb>,
-C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>, C<i_pthread>,
-C<i_pwd>, C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>, C<i_shadow>, C<i_socks>,
-C<i_stdarg>, C<i_stddef>, C<i_stdlib>, C<i_string>, C<i_sysaccess>,
-C<i_sysdir>, C<i_sysfile>, C<i_sysfilio>, C<i_sysin>, C<i_sysioctl>,
-C<i_sysmount>, C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>, C<i_syssecrt>,
-C<i_sysselct>, C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>,
-C<i_sysstatvfs>, C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>,
-C<i_sysuio>, C<i_sysun>, C<i_sysvfs>, C<i_syswait>, C<i_termio>,
+C<i_grp>, C<i_iconv>, C<i_inttypes>, C<i_limits>, C<i_locale>,
+C<i_machcthr>, C<i_malloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>,
+C<i_netdb>, C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>,
+C<i_pthread>, C<i_pwd>, C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>, C<i_shadow>,
+C<i_socks>, C<i_stdarg>, C<i_stddef>, C<i_stdlib>, C<i_string>,
+C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>, C<i_sysfilio>, C<i_sysin>,
+C<i_sysioctl>, C<i_syslog>, C<i_sysmman>, C<i_sysmode>, C<i_sysmount>,
+C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>, C<i_syssecrt>, C<i_sysselct>,
+C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>, C<i_sysstatvfs>,
+C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>, C<i_sysuio>,
+C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>, C<i_termio>,
 C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>, C<i_values>,
 C<i_varargs>, C<i_varhdr>, C<i_vfork>, C<ignore_versioned_solibs>,
 C<inc_version_list>, C<inc_version_list_init>, C<incpath>, C<inews>,
@@ -5550,10 +5655,11 @@ C<known_extensions>, C<ksh>
 =item l
 
 C<large>, C<ld>, C<lddlflags>, C<ldflags>, C<ldlibpthname>, C<less>,
-C<lib_ext>, C<libc>, C<libperl>, C<libpth>, C<libs>, C<libswanted>,
-C<line>, C<lint>, C<lkflags>, C<ln>, C<lns>, C<locincpth>, C<loclibpth>,
-C<longdblsize>, C<longlongsize>, C<longsize>, C<lp>, C<lpr>, C<ls>,
-C<lseeksize>, C<lseektype>
+C<lib_ext>, C<libc>, C<libperl>, C<libpth>, C<libs>, C<libsdirs>,
+C<libsfiles>, C<libsfound>, C<libspath>, C<libswanted>, C<line>, C<lint>,
+C<lkflags>, C<ln>, C<lns>, C<locincpth>, C<loclibpth>, C<longdblsize>,
+C<longlongsize>, C<longsize>, C<lp>, C<lpr>, C<ls>, C<lseeksize>,
+C<lseektype>
 
 =item m
 
@@ -5563,8 +5669,9 @@ C<man3direxp>, C<man3ext>
 
 =item M
 
-C<Mcc>, C<medium>, C<mips_type>, C<mkdir>, C<models>, C<modetype>, C<more>,
-C<multiarch>, C<mv>, C<myarchname>, C<mydomain>, C<myhostname>, C<myuname>
+C<Mcc>, C<medium>, C<mips_type>, C<mkdir>, C<mmaptype>, C<models>,
+C<modetype>, C<more>, C<multiarch>, C<mv>, C<myarchname>, C<mydomain>,
+C<myhostname>, C<myuname>
 
 =item n
 
@@ -5579,14 +5686,15 @@ C<orderlib>, C<osname>, C<osvers>
 
 =item p
 
-C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl>
+C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
+C<perl>
 
 =item P
 
 C<PERL_REVISION>, C<PERL_SUBVERSION>, C<PERL_VERSION>, C<perladmin>,
-C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>, C<pmake>, C<pr>,
-C<prefix>, C<prefixexp>, C<privlib>, C<privlibexp>, C<prototype>,
-C<ptrsize>
+C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>, C<pm_apiversion>,
+C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>, C<privlibexp>,
+C<prototype>, C<ptrsize>
 
 =item q
 
@@ -5594,8 +5702,8 @@ C<quadkind>, C<quadtype>
 
 =item r
 
-C<randbits>, C<randfunc>, C<randseedtype>, C<ranlib>, C<rd_nodata>, C<rm>,
-C<rmail>, C<runnm>
+C<randbits>, C<randfunc>, C<randseedtype>, C<ranlib>, C<rd_nodata>,
+C<revision>, C<rm>, C<rmail>, C<runnm>
 
 =item s
 
@@ -5605,8 +5713,8 @@ C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>, C<sig_count>,
 C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<signal_t>,
 C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>, C<sitelib>,
 C<sitelibexp>, C<siteprefix>, C<siteprefixexp>, C<sizetype>, C<sleep>,
-C<smail>, C<small>, C<so>, C<sockethdr>, C<socketlib>, C<sort>,
-C<spackage>, C<spitshell>, C<split>, C<sPRId64>, C<sPRIeldbl>,
+C<smail>, C<small>, C<so>, C<sockethdr>, C<socketlib>, C<socksizetype>,
+C<sort>, C<spackage>, C<spitshell>, C<split>, C<sPRId64>, C<sPRIeldbl>,
 C<sPRIEldbl>, C<sPRIfldbl>, C<sPRIFldbl>, C<sPRIgldbl>, C<sPRIGldbl>,
 C<sPRIi64>, C<sPRIo64>, C<sPRIu64>, C<sPRIx64>, C<sPRIX64>, C<src>,
 C<ssizetype>, C<startperl>, C<startsh>, C<static_ext>, C<stdchar>,
@@ -5623,12 +5731,13 @@ C<touch>, C<tr>, C<trnl>, C<troff>
 
 C<u16size>, C<u16type>, C<u32size>, C<u32type>, C<u64size>, C<u64type>,
 C<u8size>, C<u8type>, C<uidformat>, C<uidsign>, C<uidsize>, C<uidtype>,
-C<uname>, C<uniq>, C<uquadtype>, C<use5005threads>, C<use64bits>, C<usedl>,
-C<useithreads>, C<uselargefiles>, C<uselongdouble>, C<uselonglong>,
-C<usemorebits>, C<usemultiplicity>, C<usemymalloc>, C<usenm>, C<useopcode>,
-C<useperlio>, C<useposix>, C<usesfio>, C<useshrplib>, C<usesocks>,
-C<usethreads>, C<usevendorprefix>, C<usevfork>, C<usrinc>, C<uuname>,
-C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>, C<uvxformat>
+C<uname>, C<uniq>, C<uquadtype>, C<use5005threads>, C<use64bitall>,
+C<use64bitint>, C<usedl>, C<useithreads>, C<uselargefiles>,
+C<uselongdouble>, C<usemorebits>, C<usemultiplicity>, C<usemymalloc>,
+C<usenm>, C<useopcode>, C<useperlio>, C<useposix>, C<usesfio>,
+C<useshrplib>, C<usesocks>, C<usethreads>, C<usevendorprefix>, C<usevfork>,
+C<usrinc>, C<uuname>, C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>,
+C<uvxformat>
 
 =item v
 
@@ -5637,7 +5746,7 @@ C<vendorprefix>, C<vendorprefixexp>, C<version>, C<vi>, C<voidflags>
 
 =item x
 
-C<xlibpth>
+C<xlibpth>, C<xs_apiversion>
 
 =item z
 
@@ -6035,6 +6144,8 @@ variables
 
 =item DESCRIPTION
 
+=item BUGS
+
 =back
 
 =head2 Env - perl module that imports environment variables
@@ -6056,6 +6167,8 @@ variables
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item CAVEATS
 
 =item AUTHOR
 
@@ -7013,6 +7126,16 @@ file_name_is_absolute
 
 path
 
+splitpath
+
+splitdir
+
+catpath
+
+abs2rel
+
+rel2abs
+
 =over
 
 =item SEE ALSO
@@ -7059,6 +7182,8 @@ updir
 
 no_upwards
 
+case_tolerant
+
 file_name_is_absolute
 
 path
@@ -7099,9 +7224,11 @@ fixpath
 
 =item Methods always loaded
 
-catdir
+canonpath (override)
 
 =back
+
+catdir
 
 catfile
 
@@ -7115,9 +7242,21 @@ tmpdir (override)
 
 updir (override)
 
+case_tolerant (override)
+
 path (override)
 
 file_name_is_absolute (override)
+
+splitpath (override)
+
+splitdir (override)
+
+catpath (override)
+
+splitpath
+
+splitdir
 
 =over
 
@@ -8387,7 +8526,7 @@ Constants, Macros
 
 =over
 
-=item Options
+=item podchecker()
 
 B<-warnings> =E<gt> I<val>
 
@@ -8395,24 +8534,62 @@ B<-warnings> =E<gt> I<val>
 
 =item DESCRIPTION
 
+=item DIAGNOSTICS
+
 =over
+
+=item Errors
+
+empty =headn, =over on line I<N> without closing =back, =item without
+previous =over, =back without previous =over, No argument for =begin, =end
+without =begin, Nested =begin's, =for without formatter specification,
+unresolved internal link I<NAME>, Unknown command "I<CMD>", Unknown
+interior-sequence "I<SEQ>", nested commands
+I<CMD>E<lt>...I<CMD>E<lt>...E<gt>...E<gt>, garbled entity I<STRING>, Entity
+number out of range, malformed link LE<lt>E<gt>, nonempty ZE<lt>E<gt>,
+empty XE<lt>E<gt>, Spurious text after =pod / =cut, Spurious character(s)
+after =back
 
 =item Warnings
 
-=back
+multiple occurence of link target I<name>, line containing nothing but
+whitespace in paragraph, file does not start with =head, No numeric
+argument for =over, previous =item has no contents, preceding non-item
+paragraph(s), =item type mismatch (I<one> vs. I<two>), I<N> unescaped
+C<E<lt>E<gt>> in paragraph, Unknown entity, No items in =over, No argument
+for =item, empty section in previous paragraph, Verbatim paragraph in NAME
+section, Hyperlinks
 
-=item DIAGNOSTICS
+=back
 
 =item RETURN VALUE
 
 =item EXAMPLES
 
+=item INTERFACE
+
+=back
+
+C<$checker-E<gt>poderror( @args )>, C<$checker-E<gt>poderror( {%opts},
+@args )>
+
+C<$checker-E<gt>num_errors()>
+
+C<$checker-E<gt>name()>
+
+C<$checker-E<gt>node()>
+
+C<$checker-E<gt>idx()>
+
+C<$checker-E<gt>hyperlink()>
+
+=over
+
 =item AUTHOR
 
 =back
 
-=head2 Pod::Checker, Pod::Hyperlink - class for manipulation of POD
-hyperlinks
+=head2 Pod::Find - find POD documents in directory trees
 
 =over
 
@@ -8420,12 +8597,13 @@ hyperlinks
 
 =item DESCRIPTION
 
-=item METHODS
+=item OPTIONS
 
-new(), parse(), markup($on,$off,$pageon,$pageoff), text(), warning(),
-page(), node(), type(), alttext(), line(), file()
+B<-verbose>, B<-perl>, B<-script>, B<-inc>
 
 =item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -8708,6 +8886,110 @@ EE<lt>%sE<gt>, Unknown sequence %s, Unmatched =back
 =item SEE ALSO
 
 =item AUTHOR
+
+=back
+
+=head2 Pod::ParseUtils - helpers for POD parsing and conversion
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=over
+
+=item Pod::List
+
+new()
+
+=back
+
+file()
+
+start()
+
+indent()
+
+type()
+
+rx()
+
+item()
+
+parent()
+
+tag()
+
+=over
+
+=item Pod::Hyperlink
+
+new()
+
+=back
+
+parse($string)
+
+markup($string)
+
+text()
+
+warning()
+
+line(), file()
+
+page()
+
+node()
+
+alttext()
+
+type()
+
+link()
+
+=over
+
+=item Pod::Cache
+
+new()
+
+=back
+
+item()
+
+find_page($name)
+
+=over
+
+=item Pod::Cache::Item
+
+new()
+
+=back
+
+page()
+
+description()
+
+path()
+
+file()
+
+nodes()
+
+find_node($name)
+
+idx()
+
+=over
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -9299,7 +9581,26 @@ closelog
 
 =item EXAMPLES
 
-=item DEPENDENCIES
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Syslog::Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog -
+Perl interface to the UNIX syslog(3) calls
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
+setlogmask $mask_priority, setlogsock $sock_type (added in 5.004_02),
+closelog
+
+=item EXAMPLES
 
 =item SEE ALSO
 
@@ -9495,7 +9796,8 @@ unexpand(1)
 
 =back
 
-=head2 Thread - multithreading
+=head2 Thread - manipulate threads in Perl (EXPERIMENTAL, subject to
+change)
 
 =over
 

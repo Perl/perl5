@@ -1135,7 +1135,11 @@ typedef UVTYPE UV;
 
 typedef NVTYPE NV;
 
+
 #ifdef USE_LONG_DOUBLE
+#   ifdef I_SUNMATH
+#       include <sunmath.h>
+#   endif
 #   define NV_DIG LDBL_DIG
 #   ifdef HAS_SQRTL
 #       define Perl_modf modfl
@@ -1418,12 +1422,7 @@ typedef struct ptr_tbl PTR_TBL_t;
 
 #include "handy.h"
 
-#ifndef NO_LARGE_FILES
-#   define USE_LARGE_FILES	/* If available. */
-#endif
-
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
-#   define USE_64_BIT_RAWIO	/* explicit */
 #   if LSEEKSIZE == 8 && !defined(USE_64_BIT_RAWIO)
 #       define USE_64_BIT_RAWIO	/* implicit */
 #   endif
@@ -1441,7 +1440,6 @@ typedef struct ptr_tbl PTR_TBL_t;
 #endif
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_STDIO)
-#   define USE_64_BIT_STDIO	/* explicit */
 #   if FSEEKSIZE == 8 && !defined(USE_64_BIT_STDIO)
 #       define USE_64_BIT_STDIO /* implicit */
 #   endif
@@ -1722,10 +1720,7 @@ typedef pthread_key_t	perl_key;
 #  define PERL_WAIT_FOR_CHILDREN	NOOP
 #endif
 
-/* the traditional thread-unsafe notion of "current interpreter".
- * XXX todo: a thread-safe version that fetches it from TLS (akin to THR)
- * needs to be defined elsewhere (conditional on pthread_getspecific()
- * availability). */
+/* the traditional thread-unsafe notion of "current interpreter". */
 #ifndef PERL_SET_INTERP
 #  define PERL_SET_INTERP(i)		(PL_curinterp = (PerlInterpreter*)(i))
 #endif
@@ -1736,18 +1731,17 @@ typedef pthread_key_t	perl_key;
 
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
 #  ifdef USE_THREADS
-#    define PERL_GET_THX		THR
+#    define PERL_GET_THX		((struct perl_thread *)PERL_GET_CONTEXT)
 #  else
 #  ifdef MULTIPLICITY
-#    define PERL_GET_THX		PERL_GET_INTERP
+#    define PERL_GET_THX		((PerlInterpreter *)PERL_GET_CONTEXT)
 #  else
 #  ifdef PERL_OBJECT
-#    define PERL_GET_THX		((CPerlObj*)PERL_GET_INTERP)
-#  else
-#    define PERL_GET_THX		((void*)0)
+#    define PERL_GET_THX		((CPerlObj *)PERL_GET_CONTEXT)
 #  endif
 #  endif
 #  endif
+#  define PERL_SET_THX(t)		PERL_SET_CONTEXT(t)
 #endif
 
 #ifndef SVf
@@ -3113,6 +3107,23 @@ typedef struct am_table_short AMTS;
 #define printf PerlIO_stdoutf
 #endif
 
+/* if these never got defined, they need defaults */
+#ifndef PERL_SET_CONTEXT
+#  define PERL_SET_CONTEXT(i)		PERL_SET_INTERP(i)
+#endif
+
+#ifndef PERL_GET_CONTEXT
+#  define PERL_GET_CONTEXT		PERL_GET_INTERP
+#endif
+
+#ifndef PERL_GET_THX
+#  define PERL_GET_THX			((void*)NULL)
+#endif
+
+#ifndef PERL_SET_THX
+#  define PERL_SET_THX(t)		NOOP
+#endif
+
 #ifndef PERL_SCRIPT_MODE
 #define PERL_SCRIPT_MODE "r"
 #endif
@@ -3268,7 +3279,7 @@ typedef struct am_table_short AMTS;
    HAS_MMAP
    HAS_MPROTECT
    HAS_MSYNC
-   HAS_MADVSISE
+   HAS_MADVISE
    HAS_MUNMAP
    I_SYSMMAN
    Mmap_t

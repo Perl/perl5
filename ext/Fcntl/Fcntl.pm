@@ -192,8 +192,8 @@ sub S_ISSOCK   { ( $_[0] & _S_IFMT() ) == S_IFSOCK()  }
 sub S_ISBLK    { ( $_[0] & _S_IFMT() ) == S_IFBLK()   }
 sub S_ISCHR    { ( $_[0] & _S_IFMT() ) == S_IFCHR()   }
 sub S_ISFIFO   { ( $_[0] & _S_IFMT() ) == S_IFIFO()   }
-sub S_ISWHT    { ( $_[0] & _S_IFMT() ) == S_ISWHT()   }
-sub S_ISENFMT  { ( $_[0] & _S_IFMT() ) == S_ISENFMT() }
+sub S_ISWHT    { ( $_[0] & _S_IFMT() ) == S_IFWHT()   }
+sub S_ISENFMT  { ( $_[0] & _S_IFMT() ) == S_IFENFMT() }
 
 sub AUTOLOAD {
     (my $constname = $AUTOLOAD) =~ s/.*:://;

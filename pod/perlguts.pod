@@ -176,7 +176,7 @@ have "magic".  See L<Magic Virtual Tables> later in this document.
 If you know the name of a scalar variable, you can get a pointer to its SV
 by using the following:
 
-    SV*  perl_get_sv("package::varname", FALSE);
+    SV*  get_sv("package::varname", FALSE);
 
 This returns NULL if the variable does not exist.
 
@@ -287,7 +287,7 @@ then nothing is done.
 If you know the name of an array variable, you can get a pointer to its AV
 by using the following:
 
-    AV*  perl_get_av("package::varname", FALSE);
+    AV*  get_av("package::varname", FALSE);
 
 This returns NULL if the variable does not exist.
 
@@ -362,7 +362,7 @@ specified below.
 If you know the name of a hash variable, you can get a pointer to its HV
 by using the following:
 
-    HV*  perl_get_hv("package::varname", FALSE);
+    HV*  get_hv("package::varname", FALSE);
 
 This returns NULL if the variable does not exist.
 
@@ -535,9 +535,9 @@ to write:
 To create a new Perl variable with an undef value which can be accessed from
 your Perl script, use the following routines, depending on the variable type.
 
-    SV*  perl_get_sv("package::varname", TRUE);
-    AV*  perl_get_av("package::varname", TRUE);
-    HV*  perl_get_hv("package::varname", TRUE);
+    SV*  get_sv("package::varname", TRUE);
+    AV*  get_av("package::varname", TRUE);
+    HV*  get_hv("package::varname", TRUE);
 
 Notice the use of TRUE as the second parameter.  The new variable can now
 be set, using the routines appropriate to the data type.
@@ -710,7 +710,7 @@ following code:
     extern int  dberror;
     extern char *dberror_list;
 
-    SV* sv = perl_get_sv("dberror", TRUE);
+    SV* sv = get_sv("dberror", TRUE);
     sv_setiv(sv, (IV) dberror);
     sv_setpv(sv, dberror_list[dberror]);
     SvIOK_on(sv);
@@ -1672,14 +1672,14 @@ Thus, something like:
 in your extesion will translate to this when PERL_IMPLICIT_CONTEXT is
 in effect:
 
-        Perl_sv_setsv(GetPerlInterpreter(), asv, bsv);
+        Perl_sv_setsv(Perl_get_context(), asv, bsv);
 
 or to this otherwise:
 
         Perl_sv_setsv(asv, bsv);
 
 You have to do nothing new in your extension to get this; since
-the Perl library provides GetPerlInterpreter(), it will all just
+the Perl library provides Perl_get_context(), it will all just
 work.
 
 The second, more efficient way is to use the following template for

@@ -341,7 +341,7 @@ up caching info for this glob.  Similarly for all the searched stashes.
 
 This function grants C<"SUPER"> token as a postfix of the stash name. The
 GV returned from C<gv_fetchmeth> may be a method cache entry, which is not
-visible to Perl code.  So when calling C<perl_call_sv>, you should not use
+visible to Perl code.  So when calling C<call_sv>, you should not use
 the GV directly; instead, you should use the method's CV, which can be
 obtained from the GV with the C<GvCV> macro. 
 
@@ -375,7 +375,7 @@ created via a side effect to do this.
 These functions have the same side-effects and as C<gv_fetchmeth> with
 C<level==0>.  C<name> should be writable if contains C<':'> or C<'
 ''>. The warning against passing the GV returned by C<gv_fetchmeth> to
-C<perl_call_sv> apply equally to these functions. 
+C<call_sv> apply equally to these functions. 
 
 	GV*	gv_fetchmethod_autoload(HV* stash, const char* name, I32 autoload)
 

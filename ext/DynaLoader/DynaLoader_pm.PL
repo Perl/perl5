@@ -28,7 +28,7 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
-$VERSION = "1.03";	# avoid typo warning
+$VERSION = "1.04";	# avoid typo warning
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
@@ -411,7 +411,7 @@ sub dl_find_symbol_anywhere
 
 DynaLoader - Dynamically load C libraries into Perl code
 
-dl_error(), dl_findfile(), dl_expandspec(), dl_load_file(), dl_find_symbol(), dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(), dl_load_flags(), bootstrap() - routines used by DynaLoader modules
+dl_error(), dl_findfile(), dl_expandspec(), dl_load_file(), dl_unload_file(), dl_find_symbol(), dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(), dl_load_flags(), bootstrap() - routines used by DynaLoader modules
 
 =head1 SYNOPSIS
 
@@ -463,6 +463,7 @@ DynaLoader Interface Summary
   $symref  = dl_find_symbol_anywhere($symbol)          Perl
 
   $libref  = dl_load_file($filename, $flags)           C
+  $status  = dl_unload_file($libref)                   C
   $symref  = dl_find_symbol($libref, $symbol)          C
   @symbols = dl_undef_symbols()                        C
   dl_install_xsub($name, $symref [, $filename])        C
@@ -637,6 +638,42 @@ current values of @dl_require_symbols and @dl_resolve_using if required.
     VMS:   lib$find_image_symbol($filename,$dl_require_symbols[0])
 
 (The dlopen() function is also used by Solaris and some versions of
+Linux, and is a common choice when providing a "wrapper" on other
+mechanisms as is done in the OS/2 port.)
+
+=item dl_unload_file()
+
+Syntax:
+
+    $status = dl_unload_file($libref)
+
+Dynamically unload $libref, which must be an opaque 'library reference' as
+returned from dl_load_file.  Returns one on success and zero on failure.
+
+This function is optional and may not necessarily be provided on all platforms.
+If it is defined, it is called automatically when the interpreter exits for
+every shared object or library loaded by DynaLoader::bootstrap.  All such
+library references are stored in @dl_librefs by DynaLoader::Bootstrap as it
+loads the libraries.  The files are unloaded in last-in, first-out order.
+
+This unloading is usually necessary when embedding a shared-object perl (e.g.
+one configured with -Duseshrplib) within a larger application, and the perl
+interpreter is created and destroyed several times within the lifetime of the
+application.  In this case it is possible that the system dynamic linker will
+unload and then subsequently reload the shared libperl without relocating any
+references to it from any files DynaLoaded by the previous incarnation of the
+interpreter.  As a result, any shared objects opened by DynaLoader may point to
+a now invalid 'ghost' of the libperl shared object, causing apparently random
+memory corruption and crashes.  This behaviour is most commonly seen when using
+Apache and mod_perl built with the APXS mechanism.
+
+    SunOS: dlclose($libref)
+    HP-UX: ???
+    Linux: ???
+    NeXT:  ???
+    VMS:   ???
+
+(The dlclose() function is also used by Solaris and some versions of
 Linux, and is a common choice when providing a "wrapper" on other
 mechanisms as is done in the OS/2 port.)
 

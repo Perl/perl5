@@ -140,9 +140,8 @@ You can use the shareware B<WinZip> program ( http://www.winzip.com ) to
 decompress and unpack modules.
 
 Or, you can use InfoZip's C<unzip> utility (
-http://www.cdrom.com/pub/infozip/Info-Zip.html ) to uncompress
-C<.zip> files; type C<unzip yourmodule.zip> in
-your shell.
+http://www.cdrom.com/pub/infozip/ ) to uncompress C<.zip> files; type
+C<unzip yourmodule.zip> in your shell.
 
 Or, if you have a working C<tar> and C<gzip>, you can
 type
@@ -189,9 +188,9 @@ Specificly the "Commpress & Translate" listing
 
 
 You can either use the shareware B<StuffIt Expander> program
-( http://hyperarchive.lcs.mit.edu/HyperArchive/Archive/cmp/stuffit-expander-401.hqx ) 
+( http://www.aladdinsys.com/expander/ ) 
 in combination with I<DropStuff with Expander Enhancer>
-( http://hyperarchive.lcs.mit.edu/HyperArchive/Archive/cmp/drop-stuff-with-ee-40.hqx ) 
+( http://www.aladdinsys.com/dropstuff/ ) 
 or the freeware B<MacGzip> program (
 http://persephone.cps.unizar.es/general/gente/spd/gzip/gzip.html ).
 
@@ -199,9 +198,8 @@ http://persephone.cps.unizar.es/general/gente/spd/gzip/gzip.html ).
 B. UNPACK
 
 If you're using DropStuff or Stuffit, you can just extract the tar
-archive.  Otherwise, you can use the freeware B<suntar> 
-( http://hyperarchive.lcs.mit.edu/HyperArchive/Archive/cmp/suntar-221.hqx )
-or I<Tar> ( http://hyperarchive.lcs.mit.edu/HyperArchive/Archive/cmp/tar-40b.hqx ).
+archive.  Otherwise, you can use the freeware B<suntar> or I<Tar> (
+http://hyperarchive.lcs.mit.edu/HyperArchive/Archive/cmp/ ).
 
 C. BUILD
 
@@ -319,8 +317,8 @@ or, for zipped modules, type
     unzip Your-Module.zip
 
 Executables for gzip, zip, and VMStar ( Alphas:
-http://www.openvms.digital.com/cd/000TOOLS/ALPHA/ and Vaxen:
-http://www.openvms.digital.com/cd/000TOOLS/VAX/ ).  
+http://www.openvms.digital.com/freeware/000TOOLS/ALPHA/ and Vaxen:
+http://www.openvms.digital.com/freeware/000TOOLS/VAX/ ).  
 
 gzip and tar
 are also available at ftp://ftp.digital.com/pub/VMS.

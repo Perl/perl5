@@ -1322,6 +1322,9 @@ Ajnop	|Free_t	|mfree		|Malloc_t where
 jnp	|MEM_SIZE|malloced_size	|void *p
 #endif
 
+Ajnp	|void*	|get_context
+Ajnp	|void	|set_context	|void *thx
+
 END_EXTERN_C
 
 /* functions with flag 'n' should come before here */

@@ -47,6 +47,37 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 #define perl_free	Perl_free
 #endif
 
+#if defined(USE_THREADS)
+#  define INIT_TLS_AND_INTERP \
+    STMT_START {				\
+	if (!PL_curinterp) {			\
+	    PERL_SET_INTERP(my_perl);		\
+	    INIT_THREADS;			\
+	    ALLOC_THREAD_KEY;			\
+	}					\
+    } STMT_END
+#else
+#  if defined(USE_ITHREADS)
+#  define INIT_TLS_AND_INTERP \
+    STMT_START {				\
+	if (!PL_curinterp) {			\
+	    PERL_SET_INTERP(my_perl);		\
+	    INIT_THREADS;			\
+	    ALLOC_THREAD_KEY;			\
+	}					\
+	PERL_SET_THX(my_perl);			\
+    } STMT_END
+#  else
+#  define INIT_TLS_AND_INTERP \
+    STMT_START {				\
+	if (!PL_curinterp) {			\
+	    PERL_SET_INTERP(my_perl);		\
+	}					\
+	PERL_SET_THX(my_perl);			\
+    } STMT_END
+#  endif
+#endif
+
 #ifdef PERL_IMPLICIT_SYS
 PerlInterpreter *
 perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
@@ -59,11 +90,11 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 #ifdef PERL_OBJECT
     my_perl = (PerlInterpreter*)new(ipM) CPerlObj(ipM, ipMS, ipMP, ipE, ipStd,
 						  ipLIO, ipD, ipS, ipP);
-    PERL_SET_INTERP(my_perl);
+    INIT_TLS_AND_INTERP;
 #else
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
-    PERL_SET_INTERP(my_perl);
+    INIT_TLS_AND_INTERP;
     Zero(my_perl, 1, PerlInterpreter);
     PL_Mem = ipM;
     PL_MemShared = ipMS;
@@ -95,7 +126,8 @@ perl_alloc(void)
 
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
-    PERL_SET_INTERP(my_perl);
+
+    INIT_TLS_AND_INTERP;
     Zero(my_perl, 1, PerlInterpreter);
     return my_perl;
 }
@@ -118,7 +150,7 @@ perl_construct(pTHXx)
     struct perl_thread *thr = NULL;
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
-    
+
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1; 
@@ -129,14 +161,7 @@ perl_construct(pTHXx)
 
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
-    	INIT_THREADS;
 #ifdef USE_THREADS
-#ifdef ALLOC_THREAD_KEY
-        ALLOC_THREAD_KEY;
-#else
-	if (pthread_key_create(&PL_thr_key, 0))
-	    Perl_croak(aTHX_ "panic: pthread_key_create");
-#endif
 	MUTEX_INIT(&PL_sv_mutex);
 	/*
 	 * Safe to use basic SV functions from now on (though
@@ -146,9 +171,9 @@ perl_construct(pTHXx)
 	COND_INIT(&PL_eval_cond);
 	MUTEX_INIT(&PL_threads_mutex);
 	COND_INIT(&PL_nthreads_cond);
-#ifdef EMULATE_ATOMIC_REFCOUNTS
+#  ifdef EMULATE_ATOMIC_REFCOUNTS
 	MUTEX_INIT(&PL_svref_mutex);
-#endif /* EMULATE_ATOMIC_REFCOUNTS */
+#  endif /* EMULATE_ATOMIC_REFCOUNTS */
 	
 	MUTEX_INIT(&PL_cred_mutex);
 
@@ -881,12 +906,16 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	s = argv[0]+1;
       reswitch:
 	switch (*s) {
+	case 'C':
+#ifdef	WIN32
+	    win32_argv2utf8(argc-1, argv+1);
+	    /* FALL THROUGH */
+#endif
 #ifndef PERL_STRICT_CR
 	case '\r':
 #endif
 	case ' ':
 	case '0':
-	case 'C':
 	case 'F':
 	case 'a':
 	case 'c':
@@ -3128,7 +3157,10 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	(void)gv_AVadd(PL_argvgv);
 	av_clear(GvAVn(PL_argvgv));
 	for (; argc > 0; argc--,argv++) {
-	    av_push(GvAVn(PL_argvgv),newSVpv(argv[0],0));
+	    SV *sv = newSVpv(argv[0],0);
+	    av_push(GvAVn(PL_argvgv),sv);
+	    if (PL_widesyscalls)
+		sv_utf8_upgrade(sv);
 	}
     }
     if (PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV)) {
@@ -3401,7 +3433,7 @@ S_init_main_thread(pTHX)
 #else
     thr->self = pthread_self();
 #endif /* SET_THREAD_SELF */
-    SET_THR(thr);
+    PERL_SET_THX(thr);
 
     /*
      * These must come after the SET_THR because sv_setpvn does

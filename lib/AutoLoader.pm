@@ -36,7 +36,7 @@ AUTOLOAD {
 	my ($pkg,$func) = ($sub =~ /(.*)::([^:]+)$/);
 	$pkg =~ s#::#/#g;
 	if (defined($filename = $INC{"$pkg.pm"})) {
-	    $filename =~ s#^(.*)$pkg\.pm$#$1auto/$pkg/$func.al#;
+	    $filename =~ s#^(.*)$pkg\.pm\z#$1auto/$pkg/$func.al#s;
 
 	    # if the file exists, then make sure that it is a
 	    # a fully anchored path (i.e either '/usr/lib/auto/foo/bar.al',
@@ -45,9 +45,9 @@ AUTOLOAD {
 	    # looked for 'lib/lib/auto/foo/bar.al', given @INC = ('lib').
 
 	    if (-r $filename) {
-		unless ($filename =~ m|^/|) {
+		unless ($filename =~ m|^/|s) {
 		    if ($is_dosish) {
-			unless ($filename =~ m{^([a-z]:)?[\\/]}i) {
+			unless ($filename =~ m{^([a-z]:)?[\\/]}is) {
 			     $filename = "./$filename";
 			}
 		    }

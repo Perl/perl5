@@ -282,8 +282,8 @@ and Date::Manip modules from CPAN.
 
 =head2 How can I find the Julian Day?
 
-You could use Date::Calc's Delta_Days function and calculate the number
-of days from there.  Assuming that's what you really want, that is.
+Use the Time::JulianDay module (part of the Time-modules bundle
+available from CPAN.)
 
 Before you immerse yourself too deeply in this, be sure to verify that it
 is the I<Julian> Day you really want.  Are they really just interested in
@@ -300,9 +300,6 @@ since a particular starting time or `epoch', usually 1970 in the Unix
 world and 1980 in the MS-DOS/Windows world.  If you find that it is not
 the first meaning that you really want, then check out the Date::Manip
 and Date::Calc modules.  (Thanks to David Cassell for most of this text.)
-
-There is also an example of Julian date calculation that should help you in
-http://www.perl.com/CPAN/authors/David_Muir_Sharnoff/modules/Time/JulianDay.pm.gz
 
 =head2 How do I find yesterday's date?
 
@@ -1748,11 +1745,10 @@ if you just want to say, ``Is this a float?''
 
     sub is_numeric { defined getnum($_[0]) } 
 
-Or you could check out
-http://www.perl.com/CPAN/modules/by-module/String/String-Scanf-1.1.tar.gz
-instead.  The POSIX module (part of the standard Perl distribution)
-provides the C<strtol> and C<strtod> for converting strings to double
-and longs, respectively.
+Or you could check out the String::Scanf module on CPAN instead.  The
+POSIX module (part of the standard Perl distribution) provides the
+C<strtol> and C<strtod> for converting strings to double and longs,
+respectively.
 
 =head2 How do I keep persistent data across program calls?
 

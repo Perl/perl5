@@ -118,7 +118,7 @@ sub mkpath {
     $paths = [$paths] unless ref $paths;
     my(@created,$path);
     foreach $path (@$paths) {
-	$path .= '/' if $^O eq 'os2' and $path =~ /^\w:$/; # feature of CRT 
+	$path .= '/' if $^O eq 'os2' and $path =~ /^\w:\z/s; # feature of CRT 
 	next if -d $path;
 	# Logic wants Unix paths, so go with the flow.
 	$path = VMS::Filespec::unixify($path) if $Is_VMS;
@@ -157,7 +157,7 @@ sub rmtree {
 
     my($root);
     foreach $root (@{$roots}) {
-	$root =~ s#/$##;
+	$root =~ s#/\z##;
 	(undef, undef, my $rp) = lstat $root or next;
 	$rp &= 07777;	# don't forget setuid, setgid, sticky bits
 	if ( -d _ ) {
@@ -181,8 +181,8 @@ sub rmtree {
 	    # Deleting large numbers of files from VMS Files-11 filesystems
 	    # is faster if done in reverse ASCIIbetical order 
 	    @files = reverse @files if $Is_VMS;
-	    ($root = VMS::Filespec::unixify($root)) =~ s#\.dir$## if $Is_VMS;
-	    @files = map("$root/$_", grep $_!~/^\.{1,2}$/,@files);
+	    ($root = VMS::Filespec::unixify($root)) =~ s#\.dir\z## if $Is_VMS;
+	    @files = map("$root/$_", grep $_!~/^\.{1,2}\z/s,@files);
 	    $count += rmtree(\@files,$verbose,$safe);
 	    if ($safe &&
 		($Is_VMS ? !&VMS::Filespec::candelete($root) : !-w $root)) {

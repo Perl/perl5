@@ -5,11 +5,13 @@
  * Created:	10th July 1994
  *
  * Modified:
- * 15th July 1994   - Added code to explicitly save any error messages.
- * 3rd August 1994  - Upgraded to v3 spec.
- * 9th August 1994  - Changed to use IV
- * 10th August 1994 - Tim Bunce: Added RTLD_LAZY, switchable debugging,
- *                    basic FreeBSD support, removed ClearError
+ * 15th July 1994     - Added code to explicitly save any error messages.
+ * 3rd August 1994    - Upgraded to v3 spec.
+ * 9th August 1994    - Changed to use IV
+ * 10th August 1994   - Tim Bunce: Added RTLD_LAZY, switchable debugging,
+ *                      basic FreeBSD support, removed ClearError
+ * 29th Feburary 2000 - Alan Burlison: Added functionality to close dlopen'd
+ *                      files when the interpreter exits
  *
  */
 
@@ -37,6 +39,17 @@
      RTLD_LAZY (==2) on Solaris 2.
 
 
+   dlclose
+   -------
+     int
+     dlclose(handle)
+     void * handle;
+
+     This function takes the handle returned by a previous invocation of
+     dlopen and closes the associated dynamic object file.  It returns zero
+     on success, and non-zero on failure.
+
+
    dlsym
    ------
      void *
@@ -57,7 +70,7 @@
      Returns a null-terminated string which describes the last error
      that occurred with either dlopen or dlsym. After each call to
      dlerror the error message will be reset to a null pointer. The
-     SaveError function is used to save the error as soo as it happens.
+     SaveError function is used to save the error as soon as it happens.
 
 
    Return Types
@@ -179,6 +192,20 @@ dl_load_file(filename, flags=0)
     else
 	sv_setiv( ST(0), PTR2IV(RETVAL));
 }
+
+
+int
+dl_unload_file(libref)
+    void *	libref
+  CODE:
+    DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_unload_file(%lx):\n", libref));
+    RETVAL = (dlclose(libref) == 0 ? 1 : 0);
+    if (!RETVAL)
+        SaveError(aTHX_ "%s", dlerror()) ;
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, " retval = %d\n", RETVAL));
+  OUTPUT:
+    RETVAL
+
 
 void *
 dl_find_symbol(libhandle, symbolname)

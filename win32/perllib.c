@@ -160,7 +160,7 @@ perl_construct(PerlInterpreter* my_perl)
 	CPerlHost* pHost = (CPerlHost*)w32_internal_host;
 	Perl_free();
 	delete pHost;
-	SetPerlInterpreter(NULL);
+	PERL_SET_THX(NULL);
     }
 }
 
@@ -200,7 +200,7 @@ perl_free(PerlInterpreter* my_perl)
     {
     }
 #endif
-    SetPerlInterpreter(NULL);
+    PERL_SET_THX(NULL);
 }
 
 EXTERN_C int
@@ -253,26 +253,6 @@ perl_parse(PerlInterpreter* my_perl, void (*xsinit)(CPerlObj*), int argc, char**
 #endif /* PERL_IMPLICIT_SYS */
 
 EXTERN_C HANDLE w32_perldll_handle;
-
-static DWORD g_TlsAllocIndex;
-
-EXTERN_C DllExport bool
-SetPerlInterpreter(void *interp)
-{
-    DWORD dwErr = GetLastError();
-    bool bResult = TlsSetValue(g_TlsAllocIndex, interp);
-    SetLastError(dwErr);
-    return bResult;
-}
-
-EXTERN_C DllExport void*
-GetPerlInterpreter(void)
-{
-    DWORD dwErr = GetLastError();
-    LPVOID pResult = TlsGetValue(g_TlsAllocIndex);
-    SetLastError(dwErr);
-    return pResult;
-}
 
 EXTERN_C DllExport int
 RunPerl(int argc, char **argv, char **env)
@@ -333,7 +313,7 @@ RunPerl(int argc, char **argv, char **env)
 	new_perl = perl_clone(my_perl, 1);
 #  endif
 	exitstatus = perl_run( new_perl );
-	SetPerlInterpreter(my_perl);
+	PERL_SET_THX(my_perl);
 #else
 	exitstatus = perl_run( my_perl );
 #endif
@@ -343,7 +323,7 @@ RunPerl(int argc, char **argv, char **env)
     perl_free( my_perl );
 #ifdef USE_ITHREADS
     if (new_perl) {
-	SetPerlInterpreter(new_perl);
+	PERL_SET_THX(new_perl);
 	perl_destruct(new_perl);
 	perl_free(new_perl);
     }
@@ -353,6 +333,9 @@ RunPerl(int argc, char **argv, char **env)
 
     return (exitstatus);
 }
+
+EXTERN_C void
+set_w32_module_name(void);
 
 BOOL APIENTRY
 DllMain(HANDLE hModule,		/* DLL module handle */
@@ -371,16 +354,15 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	setmode( fileno( stderr ), O_BINARY );
 	_fmode = O_BINARY;
 #endif
-	g_TlsAllocIndex = TlsAlloc();
 	DisableThreadLibraryCalls((HMODULE)hModule);
 	w32_perldll_handle = hModule;
+	set_w32_module_name();
 	break;
 
 	/* The DLL is detaching from a process due to
 	 * process termination or call to FreeLibrary.
 	 */
     case DLL_PROCESS_DETACH:
-	TlsFree(g_TlsAllocIndex);
 	break;
 
 	/* The attached process creates a new thread. */
