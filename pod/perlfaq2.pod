@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.11 $, $Date: 2002/04/08 15:39:59 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.12 $, $Date: 2002/04/09 17:16:05 $)
 
 =head1 DESCRIPTION
 
@@ -184,8 +184,8 @@ following groups:
     comp.infosystems.www.authoring.cgi 	Writing CGI scripts for the Web.
 
 There is also a Usenet gateway to Perl mailing lists sponsored by perl.org at 
-nntp://nntp.perl.org, or a web interface to the same lists at
-http://nntp.perl.org/group/.  Other groups are listed at 
+nntp://nntp.perl.org , or a web interface to the same lists at
+http://nntp.perl.org/group/ .  Other groups are listed at 
 http://lists.perl.org/ .
 
 =head2 Where should I post source code?
