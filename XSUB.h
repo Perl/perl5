@@ -267,6 +267,8 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 	    SAVEINT(db->filtering) ;				\
 	    db->filtering = TRUE ;				\
 	    SAVESPTR(DEFSV) ;					\
+            if (name[7] == 's')                                 \
+                arg = newSVsv(arg);                             \
 	    DEFSV = arg ;					\
 	    SvTEMP_off(arg) ;					\
 	    PUSHMARK(SP) ;					\
@@ -276,6 +278,10 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 	    PUTBACK ;						\
 	    FREETMPS ;						\
 	    LEAVE ;						\
+            if (name[7] == 's'){                                \
+                arg = sv_2mortal(arg);                          \
+            }                                                   \
+            SvOKp(arg);                                         \
 	}
 
 #if 1		/* for compatibility */
