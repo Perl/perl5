@@ -519,7 +519,7 @@ this, one can control perl's idea of filenames and line numbers in
 error or warning messages (especially for strings that are processed
 with eval()).  The syntax for this mechanism is the same as for most
 C preprocessors: it matches the regular expression
-C</^#\s*line\s+(\d+)\s*(?:\s"([^"])*")?/> with C<$1> being the line
+C</^#\s*line\s+(\d+)\s*(?:\s"([^"]*)")?/> with C<$1> being the line
 number for the next line, and C<$2> being the optional filename
 (specified within quotes).
 
