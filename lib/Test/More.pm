@@ -18,7 +18,7 @@ sub _carp {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.53';
+$VERSION = '0.54';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 @ISA    = qw(Exporter);
@@ -855,8 +855,10 @@ the easiest way to illustrate:
 If the user does not have HTML::Lint installed, the whole block of
 code I<won't be run at all>.  Test::More will output special ok's
 which Test::Harness interprets as skipped, but passing, tests.
+
 It's important that $how_many accurately reflects the number of tests
 in the SKIP block so the # of tests run will match up with your plan.
+If your plan is C<no_plan> $how_many is optional and will default to 1.
 
 It's perfectly safe to nest SKIP blocks.  Each SKIP block must have
 the label C<SKIP>, or Test::More can't work its magic.
@@ -874,7 +876,7 @@ sub skip {
     unless( defined $how_many ) {
         # $how_many can only be avoided when no_plan is in use.
         _carp "skip() needs to know \$how_many tests are in the block"
-          unless $Test::Builder::No_Plan;
+          unless $Test->has_plan eq 'no_plan';
         $how_many = 1;
     }
 
@@ -954,7 +956,7 @@ sub todo_skip {
     unless( defined $how_many ) {
         # $how_many can only be avoided when no_plan is in use.
         _carp "todo_skip() needs to know \$how_many tests are in the block"
-          unless $Test::Builder::No_Plan;
+          unless $Test->has_plan eq 'no_plan';
         $how_many = 1;
     }
 
@@ -1084,6 +1086,19 @@ sub _format_stack {
 }
 
 
+sub _type {
+    my $thing = shift;
+
+    return '' if !ref $thing;
+
+    for my $type (qw(ARRAY HASH REF SCALAR GLOB Regexp)) {
+        return $type if UNIVERSAL::isa($thing, $type);
+    }
+
+    return '';
+}
+
+
 =item B<eq_array>
 
   eq_array(\@this, \@that);
@@ -1103,7 +1118,7 @@ sub eq_array {
 sub _eq_array  {
     my($a1, $a2) = @_;
 
-    if( grep !UNIVERSAL::isa($_, 'ARRAY'), $a1, $a2 ) {
+    if( grep !_type($_) eq 'ARRAY', $a1, $a2 ) {
         warn "eq_array passed a non-array ref";
         return 0;
     }
@@ -1156,33 +1171,28 @@ sub _deep_check {
             $ok = 1;
         }
         else {
-            if( UNIVERSAL::isa($e1, 'ARRAY') and
-                UNIVERSAL::isa($e2, 'ARRAY') )
-            {
-                $ok = _eq_array($e1, $e2);
-            }
-            elsif( UNIVERSAL::isa($e1, 'HASH') and
-                   UNIVERSAL::isa($e2, 'HASH') )
-            {
-                $ok = _eq_hash($e1, $e2);
-            }
-            elsif( UNIVERSAL::isa($e1, 'REF') and
-                   UNIVERSAL::isa($e2, 'REF') )
-            {
-                push @Data_Stack, { type => 'REF', vals => [$e1, $e2] };
-                $ok = _deep_check($$e1, $$e2);
-                pop @Data_Stack if $ok;
-            }
-            elsif( UNIVERSAL::isa($e1, 'SCALAR') and
-                   UNIVERSAL::isa($e2, 'SCALAR') )
-            {
-                push @Data_Stack, { type => 'REF', vals => [$e1, $e2] };
-                $ok = _deep_check($$e1, $$e2);
-                pop @Data_Stack if $ok;
-            }
-            else {
+            my $type = _type($e1);
+            $type = '' unless _type($e2) eq $type;
+
+            if( !$type ) {
                 push @Data_Stack, { vals => [$e1, $e2] };
                 $ok = 0;
+            }
+            elsif( $type eq 'ARRAY' ) {
+                $ok = _eq_array($e1, $e2);
+            }
+            elsif( $type eq 'HASH' ) {
+                $ok = _eq_hash($e1, $e2);
+            }
+            elsif( $type eq 'REF' ) {
+                push @Data_Stack, { type => 'REF', vals => [$e1, $e2] };
+                $ok = _deep_check($$e1, $$e2);
+                pop @Data_Stack if $ok;
+            }
+            elsif( $type eq 'SCALAR' ) {
+                push @Data_Stack, { type => 'REF', vals => [$e1, $e2] };
+                $ok = _deep_check($$e1, $$e2);
+                pop @Data_Stack if $ok;
             }
         }
     }
@@ -1209,7 +1219,7 @@ sub eq_hash {
 sub _eq_hash {
     my($a1, $a2) = @_;
 
-    if( grep !UNIVERSAL::isa($_, 'HASH'), $a1, $a2 ) {
+    if( grep !_type($_) eq 'HASH', $a1, $a2 ) {
         warn "eq_hash passed a non-hash ref";
         return 0;
     }

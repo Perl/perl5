@@ -17,21 +17,21 @@ use strict;
 use Config;
 
 BEGIN {
-    require threads if $Config{useithreads};
+    unless ( $] >= 5.008 && $Config{'useithreads'} && 
+             eval { require threads; 'threads'->import; 1; }) 
+    {
+        print "1..0 # Skip: no threads\n";
+        exit 0;
+    }
 }
 use Test::More;
 
 # Passes with $nthreads = 1 and with eq_set().
 # Passes with $nthreads = 2 and with eq_array().
 # Fails  with $nthreads = 2 and with eq_set().
-my $nthreads = 2;
+my $Num_Threads = 2;
 
-if( $Config{useithreads} ) {
-    plan tests => $nthreads;
-}
-else {
-    plan skip_all => 'no threads';
-}
+plan tests => $Num_Threads;
 
 
 sub do_one_thread {
@@ -52,7 +52,7 @@ sub do_one_thread {
 }
 
 my @kids = ();
-for my $i (1..$nthreads) {
+for my $i (1..$Num_Threads) {
     my $t = threads->new(\&do_one_thread, $i);
     print "# parent $$: continue\n";
     push(@kids, $t);

@@ -11,7 +11,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 14;
+use Test::More tests => 16;
 use TieOut;
 
 BEGIN { $^W = 1; }
@@ -58,3 +58,8 @@ $tb->failure_output($old_fail);
 
 is( $caught->read, "# undef\n" );
 is( $warnings, '',          'diag(undef)  no warnings' );
+
+
+$tb->maybe_regex(undef);
+is( $caught->read, '' );
+is( $warnings, '',          'maybe_regex(undef) no warnings' );

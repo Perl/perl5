@@ -38,7 +38,7 @@ sub ok ($;$) {
 }
 
 
-sub main::err ($) {
+sub main::err_ok ($) {
     my($expect) = @_;
     my $got = $err->read;
 
@@ -65,7 +65,7 @@ $tb->use_numbers(0);
 # Preserve the line numbers.
 #line 38
 ok( 0, 'failing' );
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 38)
 ERR
 
@@ -74,7 +74,7 @@ is( "foo", "bar", 'foo is bar?');
 is( undef, '',    'undef is empty string?');
 is( undef, 0,     'undef is 0?');
 is( '',    0,     'empty string is 0?' );
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 40)
 #          got: 'foo'
 #     expected: 'bar'
@@ -93,7 +93,7 @@ ERR
 isnt("foo", "foo", 'foo isnt foo?' );
 isn't("foo", "foo",'foo isn\'t foo?' );
 isnt(undef, undef, 'undef isnt undef?');
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 45)
 #     'foo'
 #         ne
@@ -111,7 +111,7 @@ ERR
 #line 48
 like( "foo", '/that/',  'is foo like that' );
 unlike( "foo", '/foo/', 'is foo unlike foo' );
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 48)
 #                   'foo'
 #     doesn't match '/that/'
@@ -122,21 +122,21 @@ ERR
 
 # Nick Clark found this was a bug.  Fixed in 0.40.
 like( "bug", '/(%)/',   'regex with % in it' );
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 60)
 #                   'bug'
 #     doesn't match '/(%)/'
 ERR
 
 fail('fail()');
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 67)
 ERR
 
 #line 52
 can_ok('Mooble::Hooble::Yooble', qw(this that));
 can_ok('Mooble::Hooble::Yooble', ());
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 52)
 #     Mooble::Hooble::Yooble->can('this') failed
 #     Mooble::Hooble::Yooble->can('that') failed
@@ -149,7 +149,7 @@ isa_ok(bless([], "Foo"), "Wibble");
 isa_ok(42,    "Wibble", "My Wibble");
 isa_ok(undef, "Wibble", "Another Wibble");
 isa_ok([],    "HASH");
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 55)
 #     The object isn't a 'Wibble' it's a 'Foo'
 #     Failed test ($0 at line 56)
@@ -168,7 +168,7 @@ cmp_ok( 1,     '&&', 0    , '       &&' );
 cmp_ok( 42,    '==', "foo", '       == with strings' );
 cmp_ok( 42,    'eq', "foo", '       eq with numbers' );
 cmp_ok( undef, 'eq', 'foo', '       eq with undef' );
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 68)
 #          got: 'foo'
 #     expected: 'bar'
@@ -201,7 +201,7 @@ my $Errno_String = $!.'';
 #line 80
 cmp_ok( $!,    'eq', '',    '       eq with stringified errno' );
 cmp_ok( $!,    '==', -1,    '       eq with numerified errno' );
-err( <<ERR );
+err_ok( <<ERR );
 #     Failed test ($0 at line 80)
 #          got: '$Errno_String'
 #     expected: ''
@@ -264,6 +264,8 @@ ERR
     unless( My::Test::ok($$err =~ /^$more_err_re$/, 
                          'failing errors') ) {
         print $$err;
+        print "regex:\n";
+        print $more_err_re;
     }
 
     exit(0);

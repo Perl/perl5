@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.21';
+$VERSION = '0.22';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.
@@ -145,7 +145,6 @@ my $Curr_Test;     share($Curr_Test);
 use vars qw($Level);
 my $Original_Pid;
 my @Test_Results;  share(@Test_Results);
-my @Test_Details;  share(@Test_Details);
 
 my $Exported_To;
 my $Expected_Tests;
@@ -168,7 +167,6 @@ sub reset {
     $Level     = 1;
     $Original_Pid = $$;
     @Test_Results = ();
-    @Test_Details = ();
 
     $Exported_To    = undef;
     $Expected_Tests = 0;
@@ -639,16 +637,26 @@ could be written as:
 
 
 sub maybe_regex {
-	my ($self, $regex) = @_;
+    my ($self, $regex) = @_;
     my $usable_regex = undef;
+
+    return $usable_regex unless defined $regex;
+
+    my($re, $opts);
+
+    # Check for qr/foo/
     if( ref $regex eq 'Regexp' ) {
         $usable_regex = $regex;
     }
-    # Check if it looks like '/foo/'
-    elsif( my($re, $opts) = $regex =~ m{^ /(.*)/ (\w*) $ }sx ) {
+    # Check for '/foo/' or 'm,foo,'
+    elsif( ($re, $opts)        = $regex =~ m{^ /(.*)/ (\w*) $ }sx           or
+           (undef, $re, $opts) = $regex =~ m,^ m([^\w\s]) (.+) \1 (\w*) $,sx
+         )
+    {
         $usable_regex = length $opts ? "(?$opts)$re" : $re;
-    };
-    return($usable_regex)
+    }
+
+    return $usable_regex;
 };
 
 sub _regex_ok {
@@ -781,7 +789,9 @@ sub skip {
 
     my $out = "ok";
     $out   .= " $Curr_Test" if $self->use_numbers;
-    $out   .= " # skip $why\n";
+    $out   .= " # skip";
+    $out   .= " $why"       if length $why;
+    $out   .= "\n";
 
     $Test->_print($out);
 
@@ -1120,21 +1130,36 @@ sub todo_output {
     return $Todo_FH;
 }
 
+
 sub _new_fh {
     my($file_or_fh) = shift;
 
     my $fh;
-    unless( UNIVERSAL::isa($file_or_fh, 'GLOB') ) {
+    if( _is_fh($file_or_fh) ) {
+        $fh = $file_or_fh;
+    }
+    else {
         $fh = do { local *FH };
         open $fh, ">$file_or_fh" or 
             die "Can't open test output log $file_or_fh: $!";
     }
-    else {
-        $fh = $file_or_fh;
-    }
 
     return $fh;
 }
+
+
+sub _is_fh {
+    my $maybe_fh = shift;
+
+    return 1 if ref \$maybe_fh eq 'GLOB'; # its a glob
+
+    return UNIVERSAL::isa($maybe_fh,               'GLOB')       ||
+           UNIVERSAL::isa($maybe_fh,               'IO::Handle') ||
+
+           # 5.5.4's tied() and can() doesn't like getting undef
+           UNIVERSAL::can((tied($maybe_fh) || ''), 'TIEHANDLE');
+}
+
 
 sub _autoflush {
     my($fh) = shift;
@@ -1183,9 +1208,12 @@ sub _open_testhandles {
     my $curr_test = $Test->current_test;
     $Test->current_test($num);
 
-Gets/sets the current test # we're on.
+Gets/sets the current test number we're on.  You usually shouldn't
+have to set this.
 
-You usually shouldn't have to set this.
+If set forward, the details of the missing tests are filled in as 'unknown'.
+if set backward, the details of the intervening tests are deleted.  You
+can erase history if you really want to.
 
 =cut
 
@@ -1200,6 +1228,8 @@ sub current_test {
         }
 
         $Curr_Test = $num;
+
+        # If the test counter is being pushed forward fill in the details.
         if( $num > @Test_Results ) {
             my $start = @Test_Results ? $#Test_Results + 1 : 0;
             for ($start..$num-1) {
@@ -1211,6 +1241,10 @@ sub current_test {
                     name      => undef 
                 });
             }
+        }
+        # If backward, wipe history.  Its their funeral.
+        elsif( $num < @Test_Results ) {
+            $#Test_Results = $num - 1;
         }
     }
     return $Curr_Test;

@@ -37,7 +37,7 @@ sub ok ($;$) {
 }
 
 
-sub main::err ($) {
+sub main::err_ok ($) {
     my($expect) = @_;
     my $got = $err->read;
 
@@ -63,13 +63,13 @@ Test::More->builder->no_ending(1);
 
 #line 62
     fail( "this fails" );
-    err( <<ERR );
+    err_ok( <<ERR );
 #     Failed test ($0 at line 62)
 ERR
 
 #line 72
     is( 1, 0 );
-    err( <<ERR );
+    err_ok( <<ERR );
 #     Failed test ($0 at line 72)
 #          got: '1'
 #     expected: '0'
@@ -81,7 +81,7 @@ ERR
                    
 #line 71
     fail( "this fails" );
-    err( <<ERR );
+    err_ok( <<ERR );
 
 #     Failed test ($0 at line 71)
 ERR
@@ -89,7 +89,7 @@ ERR
 
 #line 84
     is( 1, 0 );
-    err( <<ERR );
+    err_ok( <<ERR );
 
 #     Failed test ($0 at line 84)
 #          got: '1'

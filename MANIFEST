@@ -1805,6 +1805,7 @@ lib/Test/Simple/t/has_plan2.t	Test::More->plan tests
 lib/Test/Simple/t/has_plan.t	Test::Builder->plan tests
 lib/Test/Simple/t/import.t	Test::More test, importing functions
 lib/Test/Simple/t/is_deeply.t	Test::More test, is_deeply()
+lib/Test/Simple/t/is_fh.t	Test::Builder test, _is_fh()
 lib/Test/Simple/t/maybe_regex.t	Test::Builder->maybe_regex() tests
 lib/Test/Simple/t/missing.t	Test::Simple test, missing tests
 lib/Test/Simple/t/More.t	Test::More test, basic stuff

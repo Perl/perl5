@@ -23,7 +23,7 @@ local $ENV{HARNESS_ACTIVE} = 0;
 # Can't use Test.pm, that's a 5.005 thing.
 package main;
 
-print "1..34\n";
+print "1..38\n";
 
 my $test_num = 1;
 # Utility testing functions.
@@ -278,4 +278,26 @@ is( $err, <<ERR,        '    right diagnostic' );
 #     Structures begin differing at:
 #          \$got->[1] = 'b'
 #     \$expected->[1] = 'c'
+ERR
+
+
+#line 285
+my $ref = \23;
+is_deeply( 23, $ref );
+is( $out, "not ok 21\n", 'scalar vs ref' );
+is( $err, <<ERR,        '  right diagnostic');
+#     Failed test ($0 at line 286)
+#     Structures begin differing at:
+#          \$got = '23'
+#     \$expected = '$ref'
+ERR
+
+#line 296
+is_deeply( $ref, 23 );
+is( $out, "not ok 22\n", 'ref vs scalar' );
+is( $err, <<ERR,        '  right diagnostic');
+#     Failed test ($0 at line 296)
+#     Structures begin differing at:
+#          \$got = '$ref'
+#     \$expected = '23'
 ERR
