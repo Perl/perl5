@@ -41,6 +41,8 @@ sub _ok {
     # VMS will avenge.
     my $out;
     if ($name) {
+        # escape out '#' or it will interfere with '# skip' and such
+        $name =~ s/#/\\#/g;
 	$out = $pass ? "ok $test - $name" : "not ok $test - $name";
     } else {
 	$out = $pass ? "ok $test" : "not ok $test";
