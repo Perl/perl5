@@ -146,6 +146,7 @@ S_group_end(pTHX_ register char *pat, register char *patend, char ender)
 	    pat = group_end(pat, patend, ']') + 1;
     }
     Perl_croak(aTHX_ "No group ending character `%c' found", ender);
+    return 0;
 }
 
 #define TYPE_IS_SHRIEKING	0x100
