@@ -5005,9 +5005,9 @@ PP(pp_split)
 	SV *csv = CALLREG_INTUIT_STRING(aTHX_ rx);
 	char c;
 
-	i = rx->minlen;
-	if (i == 1 && !tail) {
-	    c = *SvPV(csv,i);
+	len = rx->minlen;
+	if (len == 1 && !tail) {
+	    c = *SvPV(csv,len);
 	    while (--limit) {
 		/*SUPPRESS 530*/
 		for (m = s; m < strend && *m != c; m++) ;
@@ -5033,7 +5033,7 @@ PP(pp_split)
 		if (make_mortal)
 		    sv_2mortal(dstr);
 		XPUSHs(dstr);
-		s = m + i;		/* Fake \n at the end */
+		s = m + len;		/* Fake \n at the end */
 	    }
 	}
     }
