@@ -791,6 +791,24 @@ lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
 lib/assert.pl			assertion and panic with stack trace
+lib/Attribute/Handlers.pm		Attribute::Handlers
+lib/Attribute/Handlers/Changes	Attribute::Handlers
+lib/Attribute/Handlers/demo/demo.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo3.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo4.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_call.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_chain.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_cycle.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_hashdir.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_phases.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/README		Attribute::Handlers
+lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works

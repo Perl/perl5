@@ -842,8 +842,8 @@ B<-D>I<letters>, B<-D>I<number>, B<-e> I<commandline>, B<-F>I<pattern>,
 B<-h>, B<-i>[I<extension>], B<-I>I<directory>, B<-l>[I<octnum>],
 B<-m>[B<->]I<module>, B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
 B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
-B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-W>, B<-X>,
-B<-x> I<directory>
+B<-t>, B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-W>,
+B<-X>, B<-x> I<directory>
 
 =back
 
@@ -8563,6 +8563,49 @@ warnings::warnif($object, $message)
 =back
 
 =item SEE ALSO
+
+=back
+
+=head2 Attribute::Handlers - Simpler definition of attribute handlers
+
+=over 4
+
+=item VERSION
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+[0], [1], [2], [3], [4], [5]
+
+=over 4
+
+=item Typed lexicals
+
+=item Type-specific attribute handlers
+
+=item Non-interpretive attribute handlers
+
+=item Phase-specific attribute handlers
+
+=item Attributes as C<tie> interfaces
+
+=back
+
+=item EXAMPLES
+
+=item DIAGNOSTICS
+
+C<Bad attribute type: ATTR(%s)>, C<Attribute handler %s doesn't handle %s
+attributes>, C<Declaration of %s attribute in package %s may clash with
+future reserved word>, C<Can't have two ATTR specifiers on one subroutine>,
+C<Can't autotie a %s>, C<Internal error: %s symbol went missing>
+
+=item AUTHOR
+
+=item BUGS
+
+=item COPYRIGHT
 
 =back
 
