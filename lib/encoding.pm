@@ -52,10 +52,15 @@ encoding - pragma to control the conversion of legacy data into Unicode
 
     print "tera\n" if ord(pack("C", 0xdf)) == 0x3af;
 
-    # but pack/unpack are not affected, in case you still
+    # ... as are eq and cmp ...
+
+    print "peta\n" if "\x{3af}" eq  pack("C", 0xdf);
+    print "exa\n"  if "\x{3af}" cmp pack("C", 0xdf) == 0;
+
+    # ... but pack/unpack C are not affected, in case you still
     # want back to your native encoding
 
-    print "peta\n" if unpack("C", (pack("C", 0xdf))) == 0xdf;
+    print "zetta\n" if unpack("C", (pack("C", 0xdf))) == 0xdf;
 
 =head1 DESCRIPTION
 

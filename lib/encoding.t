@@ -1,11 +1,11 @@
-print "1..19\n";
-
 BEGIN {
     if (ord("A") == 193) {
 	print "1..0 # encoding pragma does not support EBCDIC platforms\n";
 	exit(0);
     }
 }
+
+print "1..23\n";
 
 use encoding "latin1"; # ignored (overwritten by the next line)
 use encoding "greek";  # iso 8859-7 (no "latin" alias, surprise...)
@@ -89,3 +89,21 @@ print "ok 18\n";
 print "not " unless "\x{3AF}" =~ /\x{3AF}/;
 print "ok 19\n";
 
+# eq, cmp
+
+my $byte=pack("C*", 0xDF);
+
+print "not " unless pack("U*", 0x3AF) eq $byte;
+print "ok 20\n";
+
+print "not " if chr(0xDF) cmp $byte;
+print "ok 21\n";
+
+print "not " unless ((pack("U*", 0x3B0)       cmp $byte) ==  1) &&
+                    ((pack("U*", 0x3AE)       cmp $byte) == -1) &&
+                    ((pack("U*", 0x3AF, 0x20) cmp $byte) ==  1) &&
+	            ((pack("U*", 0x3AF) cmp pack("C*",0xDF,0x20))==-1);
+print "ok 22\n";
+
+# Used to core dump in 5.7.3
+print ord undef == 0 ? "ok 23\n" : "not ok 23\n";

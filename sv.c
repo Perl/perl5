@@ -3359,7 +3359,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
     }
 
     if (PL_encoding)
-        Perl_sv_recode_to_utf8(aTHX_ sv, PL_encoding);
+        sv_recode_to_utf8(sv, PL_encoding);
     else { /* Assume Latin-1/EBCDIC */
 	 /* This function could be much more efficient if we
 	  * had a FLAG in SVs to signal if there are any hibit
@@ -5349,7 +5349,10 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     char *pv2;
     STRLEN cur2;
     I32  eq     = 0;
-    char *tpv   = Nullch;
+    char *tpv1  = Nullch;
+    char *tpv2  = Nullch;
+    SV* sv1recode = Nullsv;
+    SV* sv2recode = Nullsv;
 
     if (!sv1) {
 	pv1 = "";
@@ -5365,34 +5368,62 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     else
 	pv2 = SvPV(sv2, cur2);
 
-    /* do not utf8ize the comparands as a side-effect */
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
-	bool is_utf8 = TRUE;
-        /* UTF-8ness differs */
+        /* Differing utf8ness.
+	 * Do not UTF8size the comparands as a side-effect. */
+	 if (PL_encoding) {
+	      if (SvUTF8(sv1)) {
+		   sv2recode = newSVpvn(pv2, cur2);
+		   sv_recode_to_utf8(sv2recode, PL_encoding);
+		   pv2 = SvPV(sv2recode, cur2);
+	      }
+	      else {
+		   sv1recode = newSVpvn(pv1, cur1);
+		   sv_recode_to_utf8(sv1recode, PL_encoding);
+		   pv2 = SvPV(sv1recode, cur1);
+	      }
+	      /* Now both are in UTF-8. */
+	      if (cur1 != cur2)
+		   return FALSE;
+	 }
+	 else {
+	      bool is_utf8 = TRUE;
 
-	if (SvUTF8(sv1)) {
-	    /* sv1 is the UTF-8 one , If is equal it must be downgrade-able */
-	    char *pv = (char*)bytes_from_utf8((U8*)pv1, &cur1, &is_utf8);
-	    if (pv != pv1)
-		pv1 = tpv = pv;
-	}
-	else {
-	    /* sv2 is the UTF-8 one , If is equal it must be downgrade-able */
-	    char *pv = (char *)bytes_from_utf8((U8*)pv2, &cur2, &is_utf8);
-	    if (pv != pv2)
-		pv2 = tpv = pv;
-	}
-	if (is_utf8) {
-	    /* Downgrade not possible - cannot be eq */
-	    return FALSE;
-	}
+	      if (SvUTF8(sv1)) {
+		   /* sv1 is the UTF-8 one,
+		    * if is equal it must be downgrade-able */
+		   char *pv = (char*)bytes_from_utf8((U8*)pv1,
+						     &cur1, &is_utf8);
+		   if (pv != pv1)
+			pv1 = tpv1 = pv;
+	      }
+	      else {
+		   /* sv2 is the UTF-8 one,
+		    * if is equal it must be downgrade-able */
+		   char *pv = (char *)bytes_from_utf8((U8*)pv2,
+						      &cur2, &is_utf8);
+		   if (pv != pv2)
+			pv2 = tpv2 = pv;
+	      }
+	      if (is_utf8) {
+		   /* Downgrade not possible - cannot be eq */
+		   return FALSE;
+	      }
+	 }
     }
 
     if (cur1 == cur2)
 	eq = memEQ(pv1, pv2, cur1);
 	
-    if (tpv != Nullch)
-	Safefree(tpv);
+    if (sv1recode)
+	 SvREFCNT_dec(sv1recode);
+    if (sv2recode)
+	 SvREFCNT_dec(sv2recode);
+
+    if (tpv1)
+	Safefree(tpv1);
+    if (tpv2)
+	Safefree(tpv2);
 
     return eq;
 }
@@ -5416,6 +5447,8 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
     I32  cmp;
     bool pv1tmp = FALSE;
     bool pv2tmp = FALSE;
+    SV *sv1recode = Nullsv;
+    SV *sv2recode = Nullsv;
 
     if (!sv1) {
 	pv1 = "";
@@ -5431,15 +5464,30 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
     else
 	pv2 = SvPV(sv2, cur2);
 
-    /* do not utf8ize the comparands as a side-effect */
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
+        /* Differing utf8ness.
+	 * Do not UTF8size the comparands as a side-effect. */
 	if (SvUTF8(sv1)) {
-	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
-	    pv2tmp = TRUE;
+	    if (PL_encoding) {
+		 sv2recode = newSVpvn(pv2, cur2);
+		 sv_recode_to_utf8(sv2recode, PL_encoding);
+		 pv2 = SvPV(sv2recode, cur2);
+	    }
+	    else {
+		 pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
+		 pv2tmp = TRUE;
+	    }
 	}
 	else {
-	    pv1 = (char*)bytes_to_utf8((U8*)pv1, &cur1);
-	    pv1tmp = TRUE;
+	    if (PL_encoding) {
+		 sv1recode = newSVpvn(pv1, cur1);
+		 sv_recode_to_utf8(sv1recode, PL_encoding);
+		 pv1 = SvPV(sv1recode, cur1);
+	    }
+	    else {
+		 pv1 = (char*)bytes_to_utf8((U8*)pv1, &cur1);
+		 pv1tmp = TRUE;
+	    }
 	}
     }
 
@@ -5458,6 +5506,11 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 	    cmp = cur1 < cur2 ? -1 : 1;
 	}
     }
+
+    if (sv1recode)
+	 SvREFCNT_dec(sv1recode);
+    if (sv2recode)
+	 SvREFCNT_dec(sv2recode);
 
     if (pv1tmp)
 	Safefree(pv1);

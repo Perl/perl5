@@ -3285,7 +3285,7 @@ tryagain:
 	 if (RExC_utf8)
 	      SvUTF8_on(sv);
 	 if (sv_utf8_downgrade(sv, TRUE)) {
-	      char *s       = Perl_sv_recode_to_utf8(aTHX_ sv, PL_encoding);
+	      char *s       = sv_recode_to_utf8(sv, PL_encoding);
 	      STRLEN newlen = SvCUR(sv);
 	 
 	      if (!SIZE_ONLY) {
