@@ -1569,6 +1569,11 @@ register OP *o;
     case OP_LCFIRST:
     case OP_UC:
     case OP_LC:
+    case OP_SLT:
+    case OP_SGT:
+    case OP_SLE:
+    case OP_SGE:
+    case OP_SCMP:
 	if (o->op_private & OPpLOCALE)
 	    goto nope;
     }
