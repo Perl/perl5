@@ -62,7 +62,7 @@ T_OP_OBJ
 	sv_setiv(newSVrv($arg, cc_opclassname((OP*)$var)), (IV)$var);
 
 T_SV_OBJ
-	make_sv_object(($arg), ($var));
+	make_sv_object(($arg), (SV*)($var));
 
 
 T_MG_OBJ

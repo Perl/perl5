@@ -1,6 +1,6 @@
 #      Bytecode.pm
 #
-#      Copyright (c) 1996 Malcolm Beattie
+#      Copyright (c) 1996-1998 Malcolm Beattie
 #
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
@@ -8,6 +8,7 @@
 package B::Bytecode;
 use strict;
 use Carp;
+use IO::File;
 
 use B qw(minus_c main_cv main_root main_start comppadlist
 	 class peekop walkoptree svref_2object cstring walksymtable);
@@ -28,7 +29,7 @@ sub POK () { 0x04040000 }
 # XXX Shouldn't be hardwired
 sub IOK () { 0x01010000 }
 
-my ($verbose, $module_only, $no_assemble, $debug_cv);
+my ($verbose, $module_only, $no_assemble, $debug_bc, $debug_cv);
 my $assembler_pid;
 
 # Optimisation options. On the command line, use hyphens instead of
@@ -101,8 +102,7 @@ sub saved { $saved{${$_[0]}} }
 sub mark_saved { $saved{${$_[0]}} = 1 }
 sub unmark_saved { $saved{${$_[0]}} = 0 }
 
-my $debug = 0;
-sub debug { $debug = shift }
+sub debug { $debug_bc = shift }
 
 sub B::OBJECT::nyi {
     my $obj = shift;
@@ -169,6 +169,11 @@ sub B::OP::newix {
     stop($ix);
 }
 
+sub B::OP::walkoptree_debug {
+    my $op = shift;
+    warn(sprintf("walkoptree: %s\n", peekop($op)));
+}
+
 sub B::OP::bytecode {
     my $op = shift;
     my $next = $op->next;
@@ -182,7 +187,7 @@ sub B::OP::bytecode {
     }
     $nextix = $next->objix;
 
-    printf "# %s\n", peekop($op) if $debug;
+    printf "# %s\n", peekop($op) if $debug_bc;
     ldop($ix);
     print "op_next $nextix\n";
     print "op_sibling $sibix\n" unless $strip_syntree;
@@ -286,7 +291,7 @@ sub B::COP::bytecode {
     my $filegv = $op->filegv;
     my $filegvix = $filegv->objix;
     my $line = $op->line;
-    if ($debug) {
+    if ($debug_bc) {
 	printf "# line %s:%d\n", $filegv->SV->PV, $line;
     }
     $op->B::OP::bytecode;
@@ -305,8 +310,6 @@ EOT
 
 sub B::PMOP::bytecode {
     my $op = shift;
-    my $short = $op->pmshort;
-    my $shortix = $short->objix;
     my $replroot = $op->pmreplroot;
     my $replrootix = $replroot->objix;
     my $replstartix = $op->pmreplstart->objix;
@@ -314,7 +317,6 @@ sub B::PMOP::bytecode {
     # pmnext is corrupt in some PMOPs (see misc.t for example)
     #my $pmnextix = $op->pmnext->objix;
 
-    $short->bytecode;
     if ($$replroot) {
 	# OP_PUSHRE (a mutated version of OP_MATCH for the regexp
 	# argument to a split) stores a GV in op_pmreplroot instead
@@ -333,11 +335,9 @@ sub B::PMOP::bytecode {
     }
     my $re = pvstring($op->precomp);
     # op_pmnext omitted since a perl bug means it's sometime corrupt
-    printf <<"EOT", $op->pmflags, $op->pmpermflags, $op->pmslen;
-op_pmshort $shortix
+    printf <<"EOT", $op->pmflags, $op->pmpermflags;
 op_pmflags 0x%x
 op_pmpermflags 0x%x
-op_pmslen %d
 newpv $re
 pregcomp
 EOT
@@ -651,13 +651,19 @@ sub bytecompile_main {
     my $curpadix = $curpad->objix;
     $curpad->bytecode;
     walkoptree(main_root, "bytecode");
+    warn "done main program, now walking symbol table\n" if $debug_bc;
     my ($pack, %exclude);
-    foreach $pack (qw(B O AutoLoader DynaLoader Config DB VMS
-		      strict vars FileHandle Exporter Carp)) {
+    foreach $pack (qw(B O AutoLoader DynaLoader Config DB VMS strict vars
+		      FileHandle Exporter Carp UNIVERSAL IO Fcntl Symbol
+		      SelectSaver blib Cwd))
+    {
 	$exclude{$pack."::"} = 1;
     }
     no strict qw(vars refs);
-    walksymtable(\%{"main::"}, "bytecodecv",sub { !defined($exclude{$_[0]}) });
+    walksymtable(\%{"main::"}, "bytecodecv", sub {
+	warn "considering $_[0]\n" if $debug_bc;
+	return !defined($exclude{$_[0]});
+    });
     if (!$module_only) {
 	printf "main_root %d\n", main_root->objix;
 	printf "main_start %d\n", main_start->objix;
@@ -666,28 +672,23 @@ sub bytecompile_main {
     }
 }
 
-sub prepare_output {
-    # Plumbing for output
-    if (!$no_assemble) {
-	pipe(READER, WRITER) or die "pipe: $!\n";
-	$assembler_pid = fork();
-	die "fork: $!\n" unless defined($assembler_pid);
-	if ($assembler_pid) {
-	    # parent
-	    close WRITER;
-	    assemble_fh(\*READER, sub { print @_ });
-	    exit(0);
-	} else {
-	    # child
-	    close READER;
-	    open(STDOUT, ">&WRITER") or die "dup: $!\n";
-	}
-    }
+sub prepare_assemble {
+    my $newfh = IO::File->new_tmpfile;
+    select($newfh);
+    return $newfh;
+}
+
+sub do_assemble {
+    my $fh = shift;
+    seek($fh, 0, 0); # rewind the temporary file
+    assemble_fh($fh, sub { print OUT @_ });
 }
 
 sub compile {
     my @options = @_;
     my ($option, $opt, $arg);
+    open(OUT, ">&STDOUT");
+    select(OUT);
   OPTION:
     while ($option = shift @options) {
 	if ($option =~ /^-(.)(.*)/) {
@@ -702,11 +703,14 @@ sub compile {
 	    last OPTION;
 	} elsif ($opt eq "o") {
 	    $arg ||= shift @options;
-	    open(STDOUT, ">$arg") or return "$arg: $!\n";
+	    open(OUT, ">$arg") or return "$arg: $!\n";
 	} elsif ($opt eq "D") {
 	    $arg ||= shift @options;
 	    foreach $arg (split(//, $arg)) {
-		if ($arg eq "o") {
+		if ($arg eq "b") {
+		    $| = 1;
+		    debug(1);
+		} elsif ($arg eq "o") {
 		    B->debug(1);
 		} elsif ($arg eq "a") {
 		    B::Assembler::debug(1);
@@ -751,17 +755,19 @@ sub compile {
     if (@options) {
 	return sub {
 	    my $objname;
-	    prepare_output();
+	    my $newfh; 
+	    $newfh = prepare_assemble() unless $no_assemble;
 	    foreach $objname (@options) {
 		eval "bytecompile_object(\\$objname)";
 	    }
-	    waitpid($assembler_pid, 0) if defined($assembler_pid);
+	    do_assemble($newfh) unless $no_assemble;
 	}
     } else {
 	return sub {
-	    prepare_output();
+	    my $newfh; 
+	    $newfh = prepare_assemble() unless $no_assemble;
 	    bytecompile_main();
-	    waitpid($assembler_pid, 0) if defined($assembler_pid);
+	    do_assemble($newfh) unless $no_assemble;
 	}
     }
 }

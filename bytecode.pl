@@ -310,7 +310,7 @@ xcv_outside	*(SV**)&CvOUTSIDE(sv)	svindex
 xcv_flags	CvFLAGS(sv)		U8
 av_extend	sv			SSize_t		x
 av_push		sv			svindex		x
-xav_fill	AvFILL(sv)		SSize_t
+xav_fill	AvFILLp(sv)		SSize_t
 xav_max		AvMAX(sv)		SSize_t
 xav_flags	AvFLAGS(sv)		U8
 xhv_riter	HvRITER(sv)		I32

@@ -405,7 +405,7 @@ FILE *fp;
 	    {
 		SSize_t arg;
 		BGET_I32(arg);
-		AvFILL(sv) = arg;
+		AvFILLp(sv) = arg;
 		break;
 	    }
 	  case INSN_XAV_MAX:		/* 56 */

@@ -126,6 +126,7 @@ Bytecode backend invocation
 			-O6 adds -fstrip-syntax-tree.
 	-D		Debug options (concat or separate flags like perl -D)
 		o	OPs, prints each OP as it's processed.
+		b	print debugging information about bytecompiler progress
 		a	tells the assembler to include source assembler lines
 			in its output as bytecode comments.
 		C	prints each CV taken from the final symbol tree walk.

@@ -746,7 +746,7 @@ sub B::AV::save {
 		   "\tav_extend(av, $fill);",
 		   "\tsvp = AvARRAY(av);",
 	       map("\t*svp++ = (SV*)$_;", @names),
-		   "\tAvFILL(av) = $fill;",
+		   "\tAvFILLp(av) = $fill;",
 		   "}");
     } else {
 	my $max = $av->MAX;

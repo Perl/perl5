@@ -59,9 +59,7 @@ sub B::PMOP::debug {
     printf "\top_pmreplstart\t0x%x\n", ${$op->pmreplstart};
     printf "\top_pmnext\t0x%x\n", ${$op->pmnext};
     printf "\top_pmregexp->precomp\t%s\n", cstring($op->precomp);
-    printf "\top_pmshort\t0x%x\n", ${$op->pmshort};
     printf "\top_pmflags\t0x%x\n", $op->pmflags;
-    printf "\top_pmslen\t%d\n", $op->pmslen;
     $op->pmshort->debug;
     $op->pmreplroot->debug;
 }

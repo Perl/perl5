@@ -67,9 +67,10 @@ static char *opclassnames[] = {
     "B::COP"	
 };
 
+static int walkoptree_debug = 0;	/* Flag for walkoptree debug hook */
+
 static opclass
-cc_opclass(o)
-OP *	o;
+cc_opclass(OP *o)
 {
     if (!o)
 	return OPc_NULL;
@@ -163,16 +164,13 @@ OP *	o;
 }
 
 static char *
-cc_opclassname(o)
-OP *	o;
+cc_opclassname(OP *o)
 {
     return opclassnames[cc_opclass(o)];
 }
 
 static SV *
-make_sv_object(arg, sv)
-SV *arg;
-SV *sv;
+make_sv_object(SV *arg, SV *sv)
 {
     char *type = 0;
     IV iv;
@@ -192,17 +190,14 @@ SV *sv;
 }
 
 static SV *
-make_mg_object(arg, mg)
-SV *arg;
-MAGIC *mg;
+make_mg_object(SV *arg, MAGIC *mg)
 {
     sv_setiv(newSVrv(arg, "B::MAGIC"), (IV)mg);
     return arg;
 }
 
 static SV *
-cstring(sv)
-SV *sv;
+cstring(SV *sv)
 {
     SV *sstr = newSVpv("", 0);
     STRLEN len;
@@ -255,8 +250,7 @@ SV *sv;
 }
 
 static SV *
-cchar(sv)
-SV *sv;
+cchar(SV *sv)
 {
     SV *sstr = newSVpv("'", 0);
     char *s = SvPV(sv, na);
@@ -295,9 +289,7 @@ SV *sv;
 }
 
 void *
-bset_obj_store(obj, ix)
-void *obj;
-I32 ix;
+bset_obj_store(void *obj, I32 ix)
 {
     if (ix > obj_list_fill) {
 	if (obj_list_fill == -1)
@@ -311,9 +303,7 @@ I32 ix;
 }
 
 #ifdef INDIRECT_BGET_MACROS
-void freadpv(len, data)
-U32 len;
-void *data;
+void freadpv(U32 len, void *data)
 {
     New(666, pv.xpv_pv, len, char);
     fread(pv.xpv_pv, 1, len, (FILE*)data);
@@ -321,8 +311,7 @@ void *data;
     pv.xpv_cur = len - 1;
 }
 
-void byteload_fh(fp)
-FILE *fp;
+void byteload_fh(FILE *fp)
 {
     struct bytestream bs;
     bs.data = fp;
@@ -332,18 +321,14 @@ FILE *fp;
     byterun(bs);
 }
 
-static int fgetc_fromstring(data)
-void *data;
+static int fgetc_fromstring(void *data)
 {
     char **strp = (char **)data;
     return *(*strp)++;
 }
 
-static int fread_fromstring(argp, elemsize, nelem, data)
-char *argp;
-size_t elemsize;
-size_t nelem;
-void *data;
+static int fread_fromstring(char *argp, size_t elemsize, size_t nelem,
+			    void *data)
 {
     char **strp = (char **)data;
     size_t len = elemsize * nelem;
@@ -353,9 +338,7 @@ void *data;
     return (int)len;
 }
 
-static void freadpv_fromstring(len, data)
-U32 len;
-void *data;
+static void freadpv_fromstring(U32 len, void *data)
 {
     char **strp = (char **)data;
     
@@ -366,8 +349,7 @@ void *data;
     *strp += len;
 }    
 
-void byteload_string(str)
-char *str;
+void byteload_string(char *str)
 {
     struct bytestream bs;
     bs.data = &str;
@@ -377,23 +359,19 @@ char *str;
     byterun(bs);
 }
 #else
-void byteload_fh(fp)
-FILE *fp;
+void byteload_fh(FILE *fp)
 {
     byterun(fp);
 }
 
-void byteload_string(str)
-char *str;
+void byteload_string(char *str)
 {
     croak("Must compile with -DINDIRECT_BGET_MACROS for byteload_string");
 }    
 #endif /* INDIRECT_BGET_MACROS */
 
 void
-walkoptree(opsv, method)
-SV *opsv;
-char *method;
+walkoptree(SV *opsv, char *method)
 {
     dSP;
     OP *o;
@@ -402,6 +380,12 @@ char *method;
 	croak("opsv is not a reference");
     opsv = sv_mortalcopy(opsv);
     o = (OP*)SvIV((SV*)SvRV(opsv));
+    if (walkoptree_debug) {
+	PUSHMARK(sp);
+	XPUSHs(opsv);
+	PUTBACK;
+	perl_call_method("walkoptree_debug", G_DISCARD);
+    }
     PUSHMARK(sp);
     XPUSHs(opsv);
     PUTBACK;
@@ -485,6 +469,15 @@ void
 walkoptree(opsv, method)
 	SV *	opsv
 	char *	method
+
+int
+walkoptree_debug(...)
+    CODE:
+	RETVAL = walkoptree_debug;
+	if (items > 0 && SvTRUE(ST(1)))
+	    walkoptree_debug = 1;
+    OUTPUT:
+	RETVAL
 
 int
 byteload_fh(fp)

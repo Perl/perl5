@@ -61,6 +61,7 @@ my @parents = ();
 sub debug {
     my ($class, $value) = @_;
     $debug = $value;
+    walkoptree_debug($value);
 }
 
 # sub OPf_KIDS;
