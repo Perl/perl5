@@ -981,7 +981,7 @@ scan_const(char *start)
 
 	/* (now in tr/// code again) */
 
-	if (*s & 0x80 && dowarn && thisutf) {
+	if (*s & 0x80 && PL_dowarn && thisutf) {
 	    (void)utf8_to_uv(s, &len);	/* could cvt latin-1 to utf8 here... */
 	    if (len) {
 		while (len--)
@@ -1047,10 +1047,10 @@ scan_const(char *start)
 
 		    if (!e)
 			yyerror("Missing right brace on \\x{}");
-		    if (dowarn && !utf)
+		    if (PL_dowarn && !utf)
 			warn("Use of \\x{} without utf8 declaration");
 		    /* note: utf always shorter than hex */
-		    d = uv_to_utf8(d, scan_hex(s + 1, e - s, &len));
+		    d = uv_to_utf8(d, scan_hex(s + 1, e - s - 1, &len));
 		    s = e + 1;
 			
 		}
@@ -1062,7 +1062,7 @@ scan_const(char *start)
 			d = uv_to_utf8(d, uv);		/* doing a CU or UC */
 		    }
 		    else {
-			if (dowarn && uv >= 127 && UTF)
+			if (PL_dowarn && uv >= 127 && UTF)
 			    warn(
 				"\\x%.*s will produce malformed UTF-8 character; use \\x{%.*s} for that",
 				len,s,len,s);

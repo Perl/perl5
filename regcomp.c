@@ -2115,7 +2115,7 @@ regclass(void)
 		     * (POSIX Extended Character Classes, that is)
 		     * The text between e.g. [: and :] would start
 		     * at posixccs + 1 and stop at regcomp_parse - 2. */
-		    if (dowarn && !SIZE_ONLY)
+		    if (PL_dowarn && !SIZE_ONLY)
 			warn("Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
 		    PL_regcomp_parse++; /* skip over the ending ] */
 		}
@@ -2317,7 +2317,7 @@ regclassutf8(void)
 		     * (POSIX Extended Character Classes, that is)
 		     * The text between e.g. [: and :] would start
 		     * at posixccs + 1 and stop at regcomp_parse - 2. */
-		    if (dowarn && !SIZE_ONLY)
+		    if (PL_dowarn && !SIZE_ONLY)
 			warn("Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
 		    PL_regcomp_parse++; /* skip over the ending ] */
 		}
