@@ -505,10 +505,11 @@ pack('C0', ...).
 =item *
 
 Case translation operators use the Unicode case translation tables
-when provided character input.  Note that C<uc()> translates to
-uppercase, while C<ucfirst> translates to titlecase (for languages
-that make the distinction).  Naturally the corresponding backslash
-sequences have the same semantics.
+when provided character input.  Note that C<uc()> (also known as C<\U>
+in doublequoted strings) translates to uppercase, while C<ucfirst>
+(also known as C<\u> in doublequoted strings) translates to titlecase
+(for languages that make the distinction).  Naturally the
+corresponding backslash sequences have the same semantics.
 
 =item *
 

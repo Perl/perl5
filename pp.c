@@ -3149,27 +3149,27 @@ PP(pp_ucfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && UTF8_IS_START(*s)) {
-	STRLEN ulen;
+    if (DO_UTF8(sv)) {
 	U8 tmpbuf[UTF8_MAXLEN*2+1];
-	U8 *tend;
-	UV uv;
+	STRLEN ulen;
+	STRLEN tculen;
 
-	toTITLE_utf8(s, tmpbuf, &ulen); /* XXX --jhi */
-	uv = utf8_to_uvchr(tmpbuf, 0);
-	
-	tend = uvchr_to_utf8(tmpbuf, uv);
+	s = (U8*)SvPV(sv, slen);
+	utf8_to_uvchr(s, &ulen);
 
-	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
+	toTITLE_utf8(s, tmpbuf, &tculen);
+	utf8_to_uvchr(tmpbuf, 0);
+
+	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
-	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
+	    sv_setpvn(TARG, (char*)tmpbuf, tculen);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
 	    SvUTF8_on(TARG);
 	    SETs(TARG);
 	}
 	else {
 	    s = (U8*)SvPV_force(sv, slen);
-	    Copy(tmpbuf, s, ulen, U8);
+	    Copy(tmpbuf, s, tculen, U8);
 	}
     }
     else {
@@ -3209,7 +3209,7 @@ PP(pp_lcfirst)
 	U8 *tend;
 	UV uv;
 
-	toLOWER_utf8(s, tmpbuf, &ulen); /* XXX --jhi */
+	toLOWER_utf8(s, tmpbuf, &ulen);
 	uv = utf8_to_uvchr(tmpbuf, 0);
 	
 	tend = uvchr_to_utf8(tmpbuf, uv);
@@ -3277,7 +3277,7 @@ PP(pp_uc)
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
 	    while (s < send) {
-	        toUPPER_utf8(s, tmpbuf, &ulen); /* XXX --jhi */
+	        toUPPER_utf8(s, tmpbuf, &ulen);
 		Copy(tmpbuf, d, ulen, U8);
 		d += ulen;
 		s += UTF8SKIP(s);
@@ -3344,7 +3344,7 @@ PP(pp_lc)
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
 	    while (s < send) {
-	        toLOWER_utf8(s, tmpbuf, &ulen); /* XXX --jhi */
+	        toLOWER_utf8(s, tmpbuf, &ulen);
 		Copy(tmpbuf, d, ulen, U8);
 		d += ulen;
 		s += UTF8SKIP(s);

@@ -91,3 +91,18 @@ ok("\U\x{DF}ab\x{149}cd" eq "\x{53}\x{53}AB\x{2BC}\x{4E}CD",
 ok("\L\x{DF}AB\x{149}CD" eq "\x{DF}ab\x{149}cd",
    "multicharacter lowercase");
 
+# titlecase is used for \u / ucfirst.
+
+# \x{587} is ARMENIAN SMALL LIGATURE ECH YIWN and its titlecase is
+# \x{535}\x{582} ARMENIAN CAPITAL LETTER ECH + ARMENIAN SMALL LETTER YIWN
+# while its lowercase is 
+# \x{587} itself
+# and its uppercase is
+# \x{535}\x{552} ARMENIAN CAPITAL LETTER ECH + ARMENIAN CAPITAL LETTER YIWN
+
+$a = "\x{587}";
+
+ok("\L\x{587}" eq "\x{587}",        "ligature lowercase");
+ok("\u\x{587}" eq "\x{535}\x{582}", "ligature titlecase");
+ok("\U\x{587}" eq "\x{535}\x{552}", "ligature uppercase");
+
