@@ -24,18 +24,26 @@ case "$d_dosuid" in
 esac
 
 linklibperl='$(LIBPERL)'
+shrpldflags='$(LDDLFLAGS)'
 case "$useshrplib" in
 true)
 	pldlflags="$cccdlflags"
 	# NeXT-4 specific stuff.  Can't we do this in the hint file?
 	case "${osname}${osvers}" in
 	next4*)
-		ld='libtool -dynamic -undefined warning -framework System \
-		-compatibility_version 1 -current_version $(PATCHLEVEL) \
-		-prebind -seg1addr 0x27000000 -install_name $(SHRPDIR)/$@'
+		ld=libtool
+		lddlflags="-dynamic -undefined warning -framework System \
+		-compatibility_version 1 -current_version $patchlevel \
+		-prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@"
 		;;
 	sunos*|freebsd[23]*|netbsd*)
 		linklibperl="-lperl"
+		;;
+	aix*)
+		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
+		shrpldflags="$shrpldflags -b noentry $ldflags $libs $cryptlib"
+		aixinstdir=`pwd | sed 's/\/UU$//'`
+		linklibperl="-L $archlibexp/CORE -L $aixinstdir -lperl"
 		;;
 	esac
 	;;
@@ -98,6 +106,7 @@ man3ext = $man3ext
 # The following are used to build and install shared libraries for
 # dynamic loading.
 LDDLFLAGS = $lddlflags
+SHRPLDFLAGS = $shrpldflags
 CCDLFLAGS = $ccdlflags
 DLSUFFIX = .$dlext
 PLDLFLAGS = $pldlflags
@@ -248,8 +257,16 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 	case "$useshrplib" in
 	true)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-	$(LD) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj)
+	$(LD) $(SHRPLDFLAGS) -o $@ perl$(OBJ_EXT) $(obj)
 !NO!SUBS!
+		case "$osname" in
+		aix)
+			$spitshell >>Makefile <<'!NO!SUBS!'
+	mv $@ libperl$(OBJ_EXT)
+	$(AR) qv $(LIBPERL) libperl$(OBJ_EXT)
+!NO!SUBS!
+			;;
+		esac
 		;;
 	*)
 		$spitshell >>Makefile <<'!NO!SUBS!'

@@ -17,6 +17,9 @@ alignbytes=8
 
 usemymalloc='n'
 
+so="a"
+dlext="so"
+
 # Make setsockopt work correctly.  See man page.
 # ccflags='-D_BSD=44'
 

@@ -24,7 +24,7 @@ ld='cc'
 #optimize='-g -O'
 
 #
-# Change the lines below if you do not want to build 'quad-fat'
+# Change the lines below if you do not want to build 'triple-fat'
 # binaries
 #
 archs=`/bin/lipo -info /usr/lib/libm.a | sed 's/^[^:]*:[^:]*: //'`
@@ -33,9 +33,17 @@ do
        mab="$mab -arch $d"
 done
 
-ccflags="$ccflags $mab"
-ccdlflags="$mab"
-# Can we also set ld='libtool -xxx' ?
+#
+# Unfortunately, "cc -E - $mab" doesn't work.  Since that's what
+# Configure will try if we add $mab to $ccflags, we won't.  If you want
+# to build a fat binary, try changing $ccflags and $ccdlflags to look
+# like this when Configure invites you to edit config.h manually:
+#
+#   ccflags="$ccflags $mab"
+#   ccdlflags="$mab"
+#
+# (I wonder: Can we also set ld='libtool -xxx' ?)
+#
 
 useshprlib='true'
 dlext='bundle'

@@ -46,6 +46,100 @@ And the Keepers of the Patch Pumpkin:
 
 
 ----------------
+Version 5.003_99
+----------------
+
+"Oops."  Now this _has_ to be the gamma; we're out of numbers.
+
+ CORE LANGUAGE CHANGES
+
+   (no changes)
+
+ CORE PORTABILITY
+
+  Title:  "NeXT hints update"
+   From:  hansm@euronet.nl
+ Msg-ID:  <199704302229.AAA02690@mail.euronet.nl>
+   Date:  Thu, 1 May 97 00:28:41 +0200
+  Files:  Configure Makefile.SH hints/next_4.sh
+
+  Title:  "Support shared libperl on AIX"
+   From:  Eric Bartley <bartley@icd.cc.purdue.edu>
+ Msg-ID:  <199704270131.UAA51426@icd.cc.purdue.edu>
+   Date:  Sat, 26 Apr 1997 20:31:37 -0500
+  Files:  Configure Makefile.SH hints/aix.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix NUL-termination bug in delimcpy()"
+   From:  Chip Salzenberg
+  Files:  util.c
+
+  Title:  "Forget prototype of subroutine after C<undef &subr>"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Handle tainted values in lists returned from subs, evals"
+   From:  Chip Salzenberg
+  Files:  pp_ctl.c pp_hot.c t/op/taint.t
+
+  Title:  "Fix sysread() on tied handle"
+   From:  Spider Boardman
+ Msg-ID:  <199705010601.CAA04926@Orb.Nashua.NH.US>
+   Date:  Thu, 1 May 1997 02:01:20 -0400
+  Files:  pp_sys.c
+
+  Title:  "Fix OS/2-specific buffer overflow"
+   From:  Ilya Zakharevich
+ Msg-ID:  <199704301920.PAA09681@monk.mps.ohio-state.edu>
+   Date:  Wed, 30 Apr 1997 15:20:01 -0400 (EDT)
+  Files:  os2/os2.c
+
+ BUILD PROCESS
+
+  Title:  "Add new globals to perl.exp"
+   From:  Chip Salzenberg
+  Files:  perl_exp.SH
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Refresh DB_File to 1.14"
+   From:  Paul Marquess
+ Msg-ID:  <9704302045.AA05484@claudius.bfsec.bt.co.uk>
+   Date:  Wed, 30 Apr 1997 21:45:09 +0100 (BST)
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs t/lib/db-btree.t
+          t/lib/db-hash.t t/lib/db-recno.t
+
+ TESTS
+
+  Title:  "Disable op/pipe.t test under Machten"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03102801af8e160d3879@[194.51.248.68]>
+   Date:  Thu, 1 May 1997 12:48:26 +0200
+  Files:  t/io/pipe.t
+
+ UTILITIES
+
+  Title:  "typo fixes to installhtml"
+   From:  lvirden@cas.org (Larry W. Virden)
+ Msg-ID:  <199705011114.HAA26968@cas.org>
+   Date:  Thu, 1 May 1997 07:14:31 -0400
+  Files:  installhtml
+
+ DOCUMENTATION
+
+  Title:  "Fix description of av_undef() in perlguts"
+   From:  Gisle Aas
+ Msg-ID:  <199705011042.MAA09897@bergen.sn.no>
+   Date:  Thu, 1 May 1997 12:42:46 +0200
+  Files:  pod/perlguts.pod
+
+  Title:  "Fix typo in perldelta"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+
+----------------
 Version 5.003_98
 ----------------
 
@@ -69,14 +163,14 @@ Here it is, the second public beta (a.k.a gamma).
   Files:  opcode.pl
 
   Title:  "Reset errno after failed piped close"
-   From:  Roderick Schertler <roderick@argon.org>
+   From:  Roderick Schertler
  Msg-ID:  <28152.862264940@eeyore.ibcinc.com>
    Date:  Mon, 28 Apr 1997 18:02:20 -0400
   Files:  lib/Time/gmtime.pm lib/Time/localtime.pm pod/perlfunc.pod
           t/io/pipe.t util.c
 
   Title:  "Fix warning wrt return value of PerlIO_getname()"
-   From:  Spider Boardman <spider@Orb.Nashua.NH.US>
+   From:  Spider Boardman
  Msg-ID:  <199704300448.AAA24174@Orb.Nashua.NH.US>
    Date:  Wed, 30 Apr 1997 00:48:13 -0400
   Files:  perlio.c

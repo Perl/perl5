@@ -85,6 +85,9 @@ done
 PATH=.$p_$PATH
 export PATH
 
+: This should not matter in a script, but apparently it does sometimes
+unset CDPATH
+
 : Sanity checks
 if test ! -t 0; then
 	echo "Say 'sh $me', not 'sh <$me'"
@@ -4726,6 +4729,9 @@ xxx=''
 tmp_shrpenv=''
 if "$useshrplib"; then
     case "$osname" in 
+	aix)
+		# We'll set it in Makefile.SH...
+		;;
 	solaris|netbsd)
 		xxx="-R $shrpdir"
 		;;
