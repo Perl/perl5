@@ -3,6 +3,25 @@ use Thread qw(cond_wait cond_broadcast);
 
 our $VERSION = '1.00';
 
+BEGIN {
+    use Config;
+    $ithreads = $Config{useithreads};
+    $othreads = $Config{use5005threads};
+    if($ithreads) {
+	require 'threads/shared/semaphore.pm';
+	for my $m (qw(new up down)) {
+	    no strict 'refs';
+	    *{"Thread::Semaphore::$m"} = \&{"threads::shared::semaphore::${m}"};
+	}
+    } else {
+	for my $m (qw(new up down)) {
+	    no strict 'refs';
+	    *{"Thread::Semaphore::$m"} = \&{"Thread::Semaphore::${m}_othread"};
+	}
+    }
+}
+
+
 =head1 NAME
 
 Thread::Semaphore - thread-safe semaphores
@@ -65,20 +84,20 @@ above what the C<down>s are trying to decrement it by.
 
 =cut
 
-sub new {
+sub new_othread {
     my $class = shift;
     my $val = @_ ? shift : 1;
     bless \$val, $class;
 }
 
-sub down : locked : method {
+sub down_othread : locked : method {
     my $s = shift;
     my $inc = @_ ? shift : 1;
     cond_wait $s until $$s >= $inc;
     $$s -= $inc;
 }
 
-sub up : locked : method {
+sub up_othread : locked : method {
     my $s = shift;
     my $inc = @_ ? shift : 1;
     ($$s += $inc) > 0 and cond_broadcast $s;
