@@ -1470,6 +1470,7 @@ nroff
 perl
 pg
 sendmail
+tee
 test
 uname
 zip
@@ -4625,19 +4626,22 @@ EOM
 		# Why does next4 have to be so different?
 		case "${osname}${osvers}" in
 		next4*)	xxx='DYLD_LIBRARY_PATH' ;;
-		*)		xxx='LD_LIBRARY_PATH' ;;
+		os2*)	xxx='' ;; # Nothing special needed.
+		*)	xxx='LD_LIBRARY_PATH' ;;
 		esac
-		$cat <<EOM >&4
+		if test X"$xxx" != "X"; then
+			$cat <<EOM  | $tee -a ../config.msg >&4
 
 To build perl, you must add the current working directory to your
 $xxx environment variable before running make.  You can do
 this with
-   $xxx=\`pwd\`; export $xxx
+   $xxx=\`pwd\`:\$$xxx; export $xxx
 for Bourne-style shells, or
    setenv $xxx \`pwd\`
 for Csh-style shells.  You *MUST* do this before running make.
 
 EOM
+		fi
 		;;
 	*)	useshrplib='false' ;;
 	esac
@@ -10730,6 +10734,12 @@ else
 	echo "Done."
 fi
 
+if $test -f config.msg; then
+    echo "Hmm.  I also noted the following information while running:"
+    echo " "
+    $cat config.msg >&4
+    $rm -f config.msg
+fi
 $rm -f kit*isdone ark*isdone
 $rm -rf UU
 
