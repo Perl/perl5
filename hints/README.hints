@@ -20,6 +20,8 @@ irix_6.sh
 irix_6_2.sh
 isc.sh
 linux.sh
+machten_2.sh
+machten.sh
 ncr_tower.sh
 netbsd.sh
 next_3_2.sh
