@@ -1,7 +1,7 @@
 package Socket;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.71";
+$VERSION = "1.72";
 
 =head1 NAME
 
@@ -160,6 +160,7 @@ have AF_UNIX in the right place.
 =cut
 
 use Carp;
+use warnings::register;
 
 require Exporter;
 use XSLoader ();
@@ -302,7 +303,8 @@ BEGIN {
 sub sockaddr_in {
     if (@_ == 6 && !wantarray) { # perl5.001m compat; use this && die
 	my($af, $port, @quad) = @_;
-	carp "6-ARG sockaddr_in call is deprecated" if $^W;
+	warnings::warn "6-ARG sockaddr_in call is deprecated" 
+	    if warnings::enabled();
 	pack_sockaddr_in($port, inet_aton(join('.', @quad)));
     } elsif (wantarray) {
 	croak "usage:   (port,iaddr) = sockaddr_in(sin_sv)" unless @_ == 1;

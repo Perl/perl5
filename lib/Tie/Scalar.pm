@@ -79,6 +79,7 @@ process IDs with priority.
 =cut
 
 use Carp;
+use warnings::register;
 
 sub new {
     my $pkg = shift;
@@ -90,8 +91,8 @@ sub new {
 sub TIESCALAR {
     my $pkg = shift;
     if (defined &{"{$pkg}::new"}) {
-	carp "WARNING: calling ${pkg}->new since ${pkg}->TIESCALAR is missing"
-	    if $^W;
+	warnings::warn "WARNING: calling ${pkg}->new since ${pkg}->TIESCALAR is missing"
+	    if warnings::enabled();
 	$pkg->new(@_);
     }
     else {

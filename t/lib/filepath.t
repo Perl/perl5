@@ -9,7 +9,7 @@ use File::Path;
 use strict;
 
 my $count = 0;
-$^W = 1;
+use warnings;
 
 print "1..4\n";
 

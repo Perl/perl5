@@ -7,10 +7,11 @@
 package IO::Select;
 
 use     strict;
+use warnings::register;
 use     vars qw($VERSION @ISA);
 require Exporter;
 
-$VERSION = "1.13";
+$VERSION = "1.14";
 
 @ISA = qw(Exporter); # This is only so we can do version checking
 
@@ -129,9 +130,8 @@ sub has_exception
 
 sub has_error
 {
- require Carp;
- Carp::carp("Call to depreciated method 'has_error', use 'has_exception'")
-	if $^W;
+ warnings::warn("Call to depreciated method 'has_error', use 'has_exception'")
+	if warnings::enabled();
  goto &has_exception;
 }
 

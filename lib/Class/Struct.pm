@@ -5,6 +5,7 @@ package Class::Struct;
 use 5.005_64;
 
 use strict;
+use warnings::register;
 our(@ISA, @EXPORT, $VERSION);
 
 use Carp;
@@ -167,8 +168,8 @@ sub struct {
     $cnt = 0;
     foreach $name (@methods){
         if ( do { no strict 'refs'; defined &{$class . "::$name"} } ) {
-            carp "function '$name' already defined, overrides struct accessor method"
-                if $^W;
+            warnings::warn "function '$name' already defined, overrides struct accessor method"
+                if warnings::enabled();
         }
         else {
             $pre = $pst = $cmt = $sel = '';

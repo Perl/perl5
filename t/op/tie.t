@@ -78,7 +78,6 @@ EXPECT
 
 # strict behaviour, without any extra references
 use warnings 'untie';
-#local $^W = 1 ;
 use Tie::Hash ;
 tie %h, Tie::StdHash;
 untie %h;
@@ -87,7 +86,6 @@ EXPECT
 
 # strict behaviour, with 1 extra references generating an error
 use warnings 'untie';
-#local $^W = 1 ;
 use Tie::Hash ;
 $a = tie %h, Tie::StdHash;
 untie %h;
@@ -97,7 +95,6 @@ untie attempted while 1 inner references still exist
 
 # strict behaviour, with 1 extra references via tied generating an error
 use warnings 'untie';
-#local $^W = 1 ;
 use Tie::Hash ;
 tie %h, Tie::StdHash;
 $a = tied %h;
@@ -108,7 +105,6 @@ untie attempted while 1 inner references still exist
 
 # strict behaviour, with 1 extra references which are destroyed
 use warnings 'untie';
-#local $^W = 1 ;
 use Tie::Hash ;
 $a = tie %h, Tie::StdHash;
 $a = 0 ;
@@ -118,7 +114,6 @@ EXPECT
 
 # strict behaviour, with extra 1 references via tied which are destroyed
 use warnings 'untie';
-#local $^W = 1 ;
 use Tie::Hash ;
 tie %h, Tie::StdHash;
 $a = tied %h;
@@ -129,7 +124,6 @@ EXPECT
 
 # strict error behaviour, with 2 extra references 
 use warnings 'untie';
-#local $^W = 1 ;
 use Tie::Hash ;
 $a = tie %h, Tie::StdHash;
 $b = tied %h ;
@@ -140,13 +134,11 @@ untie attempted while 2 inner references still exist
 
 # strict behaviour, check scope of strictness.
 no warnings 'untie';
-#local $^W = 0 ;
 use Tie::Hash ;
 $A = tie %H, Tie::StdHash;
 $C = $B = tied %H ;
 {
     use warnings 'untie';
-    #local $^W = 1 ;
     use Tie::Hash ;
     tie %h, Tie::StdHash;
     untie %h;

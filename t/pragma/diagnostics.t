@@ -11,11 +11,12 @@ BEGIN {
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 use strict;
+use warnings;
 
 use vars qw($Test_Num $Total_tests);
 
 my $loaded;
-BEGIN { $| = 1; $^W = 1; $Test_Num = 1 }
+BEGIN { $| = 1; $Test_Num = 1 }
 END {print "not ok $Test_Num\n" unless $loaded;}
 print "1..$Total_tests\n";
 BEGIN { require diagnostics; } # Don't want diagnostics' noise yet.
