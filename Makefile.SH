@@ -764,8 +764,11 @@ lib/lib.pm:	miniperl$(EXE_EXT) $(CONFIGPM)
 	@-rm -f $@
 	$(LDLIBPTH) ./miniperl -Ilib lib/lib_pm.PL
 
-$(unidatafiles): miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
+unidatafiles $(unidatafiles): uni.data
+
+uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 	cd lib/unicore && $(LDLIBPTH) ../../miniperl -I../../lib mktables -w
+	touch uni.data
 
 extra.pods: miniperl$(EXE_EXT)
 	-@test -f extra.pods && rm -f `cat extra.pods`
@@ -964,7 +967,7 @@ _mopup:
 	-rmdir .depending
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
-	-rm -f perl.exp ext.libs extra.pods opmini.o
+	-rm -f perl.exp ext.libs extra.pods uni.data opmini.o
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
 	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.third t/perl.3log
