@@ -2718,7 +2718,7 @@ PP(pp_ftmtime)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( ((I32)PL_basetime - (I32)PL_statcache.st_mtime) / 86400.0 );
+    PUSHn( (PL_basetime - PL_statcache.st_mtime) / 86400.0 );
     RETURN;
 }
 
@@ -2728,7 +2728,7 @@ PP(pp_ftatime)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( ((I32)PL_basetime - (I32)PL_statcache.st_atime) / 86400.0 );
+    PUSHn( (PL_basetime - PL_statcache.st_atime) / 86400.0 );
     RETURN;
 }
 
@@ -2738,7 +2738,7 @@ PP(pp_ftctime)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( ((I32)PL_basetime - (I32)PL_statcache.st_ctime) / 86400.0 );
+    PUSHn( (PL_basetime - PL_statcache.st_ctime) / 86400.0 );
     RETURN;
 }
 
@@ -3949,15 +3949,15 @@ PP(pp_gmtime)
 	PUSHs(sv_2mortal(tsv));
     }
     else if (tmbuf) {
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_sec)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_min)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_hour)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_mday)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_mon)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_year)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_wday)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_yday)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_isdst)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_sec)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_min)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_hour)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_mday)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_mon)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_year)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_wday)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_yday)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_isdst)));
     }
     RETURN;
 }
@@ -3972,7 +3972,7 @@ PP(pp_alarm)
     EXTEND(SP, 1);
     if (anum < 0)
 	RETPUSHUNDEF;
-    PUSHi((I32)anum);
+    PUSHi(anum);
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "Unsupported function alarm");
