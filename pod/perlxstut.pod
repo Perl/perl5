@@ -1229,15 +1229,20 @@ The real work is done in the standard typemap.
 B<But> you loose all the fine stuff done by the perlio layers. This
 calls the stdio function C<fputs()>, which knows nothing about them.
 
-For PerlIO *'s, there considered to be three kinds in the
-standard typemap C<InputStream> (T_IN), C<InOutStream> (T_INOUT) and
-C<OutputStream> (T_OUT), a bare C<PerlIO *> is considered a T_INOUT.
-If it matters in your code (see below for why it might) #define or typedef
-one of the specific names and use that as the type in your XS file.
+The standard typemap offers three variants of PerlIO *:
+C<InputStream> (T_IN), C<InOutStream> (T_INOUT) and C<OutputStream>
+(T_OUT). A bare C<PerlIO *> is considered a T_INOUT. If it matters
+in your code (see below for why it might) #define or typedef
+one of the specific names and use that as the argument or result
+type in your XS file.
+
+The standard typemap does not contain PerlIO * before perl 5.7,
+but it has the three stream variants. Using a PerlIO * directly
+is not backwards compatible unless you provide your own typemap.
 
 For streams coming I<from> perl the main difference is that
 C<OutputStream> will get the output PerlIO * - which may make
-a difference on a socket.
+a difference on a socket. Like in our example...
 
 For streams being handed I<to> perl a new file handle is created
 (i.e. a reference to a new glob) and associated with the PerlIO *
@@ -1272,13 +1277,13 @@ We have to use a C<CODE> section because C<PerlIO_puts()> has the arguments
 reversed compared to C<fputs()>, and we want to keep the arguments the same.
 
 Wanting to explore this thoroughly, we want to use the stdio C<fputs()>
-on an explicit PerlIO *. This means we have to ask the perlio system
-for a stdio C<FILE *>:
+on a PerlIO *. This means we have to ask the perlio system for a stdio
+C<FILE *>:
 
 	int
 	perliofputs(s, stream)
 		char *          s
-		PerlIO *	stream
+		OutputStream	stream
 	PREINIT:
 		FILE *fp = PerlIO_findFILE(stream);
 	CODE:
@@ -1289,10 +1294,6 @@ for a stdio C<FILE *>:
 		}
 	OUTPUT:
 		RETVAL
-
-(We also using bare PerlIO * as the type - so we get the I<input>
-PerlIO * of a socket - if this is undesirable use typedef or #define
-as above.)
 
 Note: C<PerlIO_findFILE()> will search the layers for a stdio
 layer. If it can't find one, it will call C<PerlIO_exportFILE()> to
