@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..730\n";
+print "1..738\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2153,30 +2153,55 @@ print "# some Unicode properties\n";
     print "not " if     "a" =~ /\p{IsLu}/;
     print "ok 721\n";
 
-    print "not " unless "A" =~ /\pL/;
+    print "not " unless "a" =~ /\p{Ll}/;
     print "ok 722\n";
 
-    print "not " unless "A" =~ /\p{IsLu}/;
+    print "not " if     "a" =~ /\p{Lu}/;
     print "ok 723\n";
 
-    print "not " if     "A" =~ /\p{IsLl}/;
+    print "not " unless "A" =~ /\pL/;
     print "ok 724\n";
 
-    print "not " if     "a" =~ /\PL/;
+    print "not " unless "A" =~ /\p{IsLu}/;
     print "ok 725\n";
 
-    print "not " if     "a" =~ /\P{IsLl}/;
+    print "not " if     "A" =~ /\p{IsLl}/;
     print "ok 726\n";
 
-    print "not " unless "a" =~ /\P{IsLu}/;
+    print "not " unless "A" =~ /\p{Lu}/;
     print "ok 727\n";
 
-    print "not " if     "A" =~ /\PL/;
+    print "not " if     "A" =~ /\p{Ll}/;
     print "ok 728\n";
 
-    print "not " if     "A" =~ /\P{IsLu}/;
+    print "not " if     "a" =~ /\PL/;
     print "ok 729\n";
 
-    print "not " unless "A" =~ /\P{IsLl}/;
+    print "not " if     "a" =~ /\P{IsLl}/;
     print "ok 730\n";
+
+    print "not " unless "a" =~ /\P{IsLu}/;
+    print "ok 731\n";
+
+    print "not " if     "a" =~ /\P{Ll}/;
+    print "ok 732\n";
+
+    print "not " unless "a" =~ /\P{Lu}/;
+    print "ok 733\n";
+
+    print "not " if     "A" =~ /\PL/;
+    print "ok 734\n";
+
+    print "not " if     "A" =~ /\P{IsLu}/;
+    print "ok 735\n";
+
+    print "not " unless "A" =~ /\P{IsLl}/;
+    print "ok 736\n";
+
+    print "not " if     "A" =~ /\P{Lu}/;
+    print "ok 737\n";
+
+    print "not " unless "A" =~ /\P{Ll}/;
+    print "ok 738\n";
+
 }
