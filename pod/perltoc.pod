@@ -7321,9 +7321,9 @@ DJGPP, Pthreads
 
 =over 4
 
-=item core dumps from readdir_r with ithreads
+=item FreeBSD core dumps from readdir_r with ithreads
 
-=item $^X doesn't always contain a full path
+=item $^X doesn't always contain a full path in FreeBSD
 
 =item Perl will no more be part of "base FreeBSD"
 
@@ -7416,15 +7416,15 @@ DJGPP, Pthreads
 
 =over 4
 
-=item Building 32-bit
+=item Building 32-bit Perl in Irix
 
-=item Building 64-bot
+=item Building 64-bit Perl in Irix
 
-=item About Compiler Versions
+=item About Compiler Versions of Irix
 
-=item Linker Problems
+=item Linker Problems in Irix
 
-=item Malloc
+=item Malloc in Irix
 
 =item Building with threads
 

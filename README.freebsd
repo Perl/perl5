@@ -11,7 +11,7 @@ README.freebsd - Perl version 5 on FreeBSD systems
 This document describes various features of FreeBSD that will affect how Perl
 version 5 (hereafter just Perl) is compiled and/or runs.
 
-=head2 core dumps from readdir_r with ithreads
+=head2 FreeBSD core dumps from readdir_r with ithreads
 
 When perl is configured to use ithreads, it will use re-entrant library calls
 in preference to non-re-entrant versions.  There is a bug in FreeBSD's
@@ -20,7 +20,7 @@ A patch is available
 (see http://www.freebsd.org/cgi/query-pr.cgi?pr=misc/30631 )
 and will hopefully be integrated into FreeBSD 4.6.
 
-=head2 $^X doesn't always contain a full path
+=head2 $^X doesn't always contain a full path in FreeBSD
 
 perl 5.8.0 sets C<$^X> where possible to a full path by asking the operating
 system. On FreeBSD the full path of the perl interpreter is found by reading
