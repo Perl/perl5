@@ -57,3 +57,4 @@ else
   ok(@files,'Quoted arguments');
 
 }
+open(STDERR,">&SAVERR") ;

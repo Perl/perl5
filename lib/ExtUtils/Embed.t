@@ -17,7 +17,7 @@ print "1..9\n";
 my $cc = $Config{'cc'};
 my $cl  = ($^O eq 'MSWin32' && $cc eq 'cl');
 my $exe = 'embed_test' . $Config{'exe_ext'};
-my $obj = 'embed_test' . $Config{'obj_ext'} if $^O eq 'VMS';
+my $obj = 'embed_test' . $Config{'obj_ext'};
 my $inc = File::Spec->catdir($INC[0],"..");
 my $lib = File::Spec->catdir($INC[0],"..");
 my @cmd;
@@ -95,8 +95,8 @@ $embed_test = "run/nodebug $exe" if $^O eq 'VMS';
 
 $status = system($embed_test);
 print (($status? 'not ':'')."ok 9\n");
-unlink($exe,"embed_test.c");
-unlink($obj,"embed_test.map","embed_test.lis") if $^O eq 'VMS'
+unlink($exe,"embed_test.c",$obj);
+unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
 
 # gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccopts -e ldopts`
 

@@ -140,6 +140,8 @@ SKIP: {
 	like( $file, qr/Wall\n1;\n/ms, 'should write $DynaLoader::bscode if set' );
 }
 
+close IN;
+close OUT;
 
 END {
 	# clean things up, even on VMS
