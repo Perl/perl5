@@ -65,8 +65,10 @@ int _CRT_glob = 0;
 #define EXECF_SPAWN_NOWAIT 3
 
 #if defined(PERL_OBJECT)
-#undef win32_perllib_path
-#define win32_perllib_path g_win32_perllib_path
+#undef win32_get_stdlib
+#define win32_get_stdlib g_win32_get_stdlib
+#undef win32_get_sitelib
+#define win32_get_sitelib g_win32_get_sitelib
 #undef do_aspawn
 #define do_aspawn g_do_aspawn
 #undef do_spawn
@@ -153,29 +155,213 @@ IsWinNT(void) {
     return (os_id() == VER_PLATFORM_WIN32_NT);
 }
 
-char *
-win32_perllib_path(char *sfx,...)
+char*
+GetRegStrFromKey(HKEY hkey, const char *lpszValueName, char** ptr, DWORD* lpDataLen)
+{   /* Retrieve a REG_SZ or REG_EXPAND_SZ from the registry */
+    HKEY handle;
+    DWORD type;
+    const char *subkey = "Software\\Perl";
+    long retval;
+
+    retval = RegOpenKeyEx(hkey, subkey, 0, KEY_READ, &handle);
+    if(retval == ERROR_SUCCESS){
+	retval = RegQueryValueEx(handle, lpszValueName, 0, &type, NULL, lpDataLen);
+	if(retval == ERROR_SUCCESS && type == REG_SZ) {
+	    if(*ptr != NULL) {
+		Renew(*ptr, *lpDataLen, char);
+	    }
+	    else {
+		New(1312, *ptr, *lpDataLen, char);
+	    }
+	    retval = RegQueryValueEx(handle, lpszValueName, 0, NULL, (PBYTE)*ptr, lpDataLen);
+	    if(retval != ERROR_SUCCESS) {
+		Safefree(ptr);
+		ptr = NULL;
+	    }
+	}
+	RegCloseKey(handle);
+    }
+    return *ptr;
+}
+
+char*
+GetRegStr(const char *lpszValueName, char** ptr, DWORD* lpDataLen)
 {
-    va_list ap;
-    char *end;
-    va_start(ap,sfx);
-    GetModuleFileName((w32_perldll_handle == INVALID_HANDLE_VALUE) 
-		      ? GetModuleHandle(NULL)
-		      : w32_perldll_handle,
-		      w32_perllib_root, 
-		      sizeof(w32_perllib_root));
-    *(end = strrchr(w32_perllib_root, '\\')) = '\0';
-    if (stricmp(end-4,"\\bin") == 0)
-     end -= 4;
-    strcpy(end,"\\lib");
-    while (sfx)
-     {
-      strcat(end,"\\");
-      strcat(end,sfx);
-      sfx = va_arg(ap,char *);
-     }
-    va_end(ap); 
-    return (w32_perllib_root);
+    *ptr = GetRegStrFromKey(HKEY_CURRENT_USER, lpszValueName, ptr, lpDataLen);
+    if(*ptr == NULL)
+    {
+	*ptr = GetRegStrFromKey(HKEY_LOCAL_MACHINE, lpszValueName, ptr, lpDataLen);
+    }
+    return *ptr;
+}
+
+char *
+win32_get_stdlib(char *pl)
+{
+    static char szStdLib[] = "lib";
+    int len = 0, newSize;
+    char szBuffer[MAX_PATH+1];
+    char szModuleName[MAX_PATH];
+    int result;
+    DWORD dwDataLen;
+    char *lpPath = NULL;
+    char *ptr;
+
+    /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
+    sprintf(szBuffer, "%s-%s", szStdLib, pl);
+    lpPath = GetRegStr(szBuffer, &lpPath, &dwDataLen);
+    if(lpPath == NULL)
+	lpPath = GetRegStr(szStdLib, &lpPath, &dwDataLen);
+
+    /* $stdlib .= ";$EMD/../../lib" */
+    GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
+    ptr = strrchr(szModuleName, '\\');
+    if(ptr != NULL)
+    {
+	*ptr = '\0';
+	ptr = strrchr(szModuleName, '\\');
+	if(ptr != NULL)
+	{
+	    *ptr = '\0';
+	    ptr = strrchr(szModuleName, '\\');
+	}
+    }
+    if(ptr == NULL)
+    {
+	ptr = szModuleName;
+	*ptr = '\\';
+    }
+    strcpy(++ptr, szStdLib);
+
+    /* check that this path exists */
+    GetCurrentDirectory(sizeof(szBuffer), szBuffer);
+    result = SetCurrentDirectory(szModuleName);
+    SetCurrentDirectory(szBuffer);
+    if(result == 0)
+    {
+	GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
+	ptr = strrchr(szModuleName, '\\');
+	if(ptr != NULL)
+	    strcpy(++ptr, szStdLib);
+    }
+
+    newSize = strlen(szModuleName) + 1;
+    if(lpPath != NULL)
+    {
+	len = strlen(lpPath);
+	newSize += len + 1; /* plus 1 for ';' */
+	lpPath = Renew(lpPath, newSize, char);
+    }
+    else
+	New(1310, lpPath, newSize, char);
+
+    if(lpPath != NULL)
+    {
+	if(len != 0)
+	    lpPath[len++] = ';';
+	strcpy(&lpPath[len], szModuleName);
+    }
+    return lpPath;
+}
+
+char *
+get_sitelib_part(char* lpRegStr, char* lpPathStr)
+{
+    char szBuffer[MAX_PATH+1];
+    char szModuleName[MAX_PATH];
+    DWORD dwDataLen;
+    int len = 0;
+    int result;
+    char *lpPath = NULL;
+    char *ptr;
+
+    lpPath = GetRegStr(lpRegStr, &lpPath, &dwDataLen);
+
+    /* $sitelib .= ";$EMD/../../../<lpPathStr>" */
+    GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
+    ptr = strrchr(szModuleName, '\\');
+    if(ptr != NULL)
+    {
+	*ptr = '\0';
+	ptr = strrchr(szModuleName, '\\');
+	if(ptr != NULL)
+	{
+	    *ptr = '\0';
+	    ptr = strrchr(szModuleName, '\\');
+	    if(ptr != NULL)
+	    {
+		*ptr = '\0';
+		ptr = strrchr(szModuleName, '\\');
+	    }
+	}
+    }
+    if(ptr == NULL)
+    {
+	ptr = szModuleName;
+	*ptr = '\\';
+    }
+    strcpy(++ptr, lpPathStr);
+
+    /* check that this path exists */
+    GetCurrentDirectory(sizeof(szBuffer), szBuffer);
+    result = SetCurrentDirectory(szModuleName);
+    SetCurrentDirectory(szBuffer);
+
+    if(result)
+    {
+	int newSize = strlen(szModuleName) + 1;
+	if(lpPath != NULL)
+	{
+	    len = strlen(lpPath);
+	    newSize += len + 1; /* plus 1 for ';' */
+	    lpPath = Renew(lpPath, newSize, char);
+	}
+	else
+	    New(1311, lpPath, newSize, char);
+
+	if(lpPath != NULL)
+	{
+	    if(len != 0)
+		lpPath[len++] = ';';
+	    strcpy(&lpPath[len], szModuleName);
+	}
+    }
+    return lpPath;
+}
+
+char *
+win32_get_sitelib(char *pl)
+{
+    static char szSiteLib[] = "sitelib";
+    char szRegStr[40];
+    char szPathStr[MAX_PATH];
+    char *lpPath1;
+    char *lpPath2;
+
+    /* $HKCU{"sitelib-$]"} || $HKLM{"sitelib-$]"} . ---; */
+    sprintf(szRegStr, "%s-%s", szSiteLib, pl);
+    sprintf(szPathStr, "site\\%s\\lib", pl);
+    lpPath1 = get_sitelib_part(szRegStr, szPathStr);
+
+    /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
+    lpPath2 = get_sitelib_part(szSiteLib, "site\\lib");
+    if(lpPath1 == NULL)
+	return lpPath2;
+
+    if(lpPath2 == NULL)
+	return lpPath1;
+
+    int len = strlen(lpPath1);
+    int newSize = len + strlen(lpPath2) + 2; /* plus one for ';' */
+
+    lpPath1 = Renew(lpPath1, newSize, char);
+    if(lpPath1 != NULL)
+    {
+	lpPath1[len++] = ';';
+	strcpy(&lpPath1[len], lpPath2);
+    }
+    Safefree(lpPath2);
+    return lpPath1;
 }
 
 
@@ -817,51 +1003,6 @@ win32_stat(const char *path, struct stat *buffer)
 
 #ifndef USE_WIN32_RTL_ENV
 
-BOOL GetRegStr(HKEY hkey, const char *lpszValueName, char *lpszDefault, char *lpszData, unsigned long *lpdwDataLen)
-{	// Retrieve a REG_SZ or REG_EXPAND_SZ from the registry
-    HKEY handle;
-    DWORD type, dwDataLen = *lpdwDataLen;
-    const char *subkey = "Software\\Perl";
-    char szBuffer[MAX_PATH+1];
-    long retval;
-
-    retval = RegOpenKeyEx(hkey, subkey, 0, KEY_READ, &handle);
-    if(retval == ERROR_SUCCESS) 
-    {
-	retval = RegQueryValueEx(handle, lpszValueName, 0, &type, (LPBYTE)lpszData, &dwDataLen);
-	RegCloseKey(handle);
-	if(retval == ERROR_SUCCESS && (type == REG_SZ || type == REG_EXPAND_SZ))
-	{
-	    if(type != REG_EXPAND_SZ)
-	    {
-		*lpdwDataLen = dwDataLen;
-		return TRUE;
-	    }
-	    strcpy(szBuffer, lpszData);
-	    dwDataLen = ExpandEnvironmentStrings(szBuffer, lpszData, *lpdwDataLen);
-	    if(dwDataLen < *lpdwDataLen)
-	    {
-		*lpdwDataLen = dwDataLen;
-		return TRUE;
-	    }
-	}
-    }
-
-    strcpy(lpszData, lpszDefault);
-    return FALSE;
-}
-
-char* GetRegStr(const char *lpszValueName, char *lpszDefault, char *lpszData, unsigned long *lpdwDataLen)
-{
-    if(!GetRegStr(HKEY_CURRENT_USER, lpszValueName, lpszDefault, lpszData, lpdwDataLen))
-    {
-	GetRegStr(HKEY_LOCAL_MACHINE, lpszValueName, lpszDefault, lpszData, lpdwDataLen);
-    }
-    if(*lpszData == '\0')
-	lpszData = NULL;
-    return lpszData;
-}
-
 DllExport char *
 win32_getenv(const char *name)
 {
@@ -879,9 +1020,8 @@ win32_getenv(const char *name)
     }
     if(curitem == NULL)
     {
-	unsigned long dwDataLen = curlen;
 	if(strcmp("PERL5DB", name) == 0)
-	    curitem = GetRegStr(name, "", curitem, &dwDataLen);
+	    curitem = GetRegStr(name, &curitem, &curlen);
     }
     return curitem;
 }

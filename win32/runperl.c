@@ -79,7 +79,8 @@ public:
 };
 
 
-extern char * g_win32_perllib_path(char *sfx,...);
+extern char * g_win32_get_stdlib(char *pl);
+extern char * g_win32_get_sitelib(char *pl);
 class CPerlEnv : public IPerlEnv
 {
 public:
@@ -92,17 +93,13 @@ public:
     {
 	return putenv(envstring);
     };
-    virtual char* LibPath(char *sfx, ...)
+    virtual char* LibPath(char *pl)
     {
-	LPSTR ptr1, ptr2, ptr3, ptr4, ptr5;
-	va_list ap;
-	va_start(ap,sfx);
-	ptr1 = va_arg(ap,char *);
-	ptr2 = va_arg(ap,char *);
-	ptr3 = va_arg(ap,char *);
-	ptr4 = va_arg(ap,char *);
-	ptr5 = va_arg(ap,char *);
-	return g_win32_perllib_path(sfx, ptr1, ptr2, ptr3, ptr4, ptr5);
+	return g_win32_get_stdlib(pl);
+    };
+    virtual char* SiteLibPath(char *pl)
+    {
+	return g_win32_get_sitelib(pl);
     };
 };
 

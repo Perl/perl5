@@ -2723,7 +2723,10 @@ sub ppd {
     push(@m, "ppd:\n");
     push(@m, "\t\@\$(PERL) -e \"print qq{<SOFTPKG NAME=\\\"$self->{DISTNAME}\\\" VERSION=\\\"$pack_ver\\\">\\n}");
     push(@m, ". qq{\\t<TITLE>$self->{DISTNAME}</TITLE>\\n}");
-    push(@m, ". qq{\\t<ABSTRACT>$self->{ABSTRACT}</ABSTRACT>\\n}");
+    my $abstract = $self->{ABSTRACT};
+    $abstract =~ s/</&lt;/g;
+    $abstract =~ s/>/&gt;/g;
+    push(@m, ". qq{\\t<ABSTRACT>$abstract</ABSTRACT>\\n}");
     my ($author) = $self->{AUTHOR};
     $author =~ s/@/\\@/g;
     push(@m, ". qq{\\t<AUTHOR>$author</AUTHOR>\\n}");

@@ -21,13 +21,6 @@
 #ifndef _config_h_
 #define _config_h_
 
-#ifdef PERL_OBJECT
-#ifdef PERL_GLOBAL_STRUCT
-#error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
-#endif
-#define win32_perllib_path PerlEnv_lib_path
-#endif
-
 /* LOC_SED:
  *	This symbol holds the complete pathname to the sed program.
  */
@@ -1577,8 +1570,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "c:\\perl5004.5x\\lib\\MSWin32-x86"		/**/
-#define ARCHLIB_EXP (win32_perllib_path(ARCHNAME,NULL))	/**/
+/* #define ARCHLIB "c:\\perl5004.5x\\lib\\MSWin32-x86"	/**/
+/* #define ARCHLIB_EXP (win32_perllib_path(ARCHNAME,NULL))	/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -1709,7 +1702,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define PRIVLIB "c:\\perl5004.5x\\lib"		/**/
-#define PRIVLIB_EXP (win32_perllib_path(NULL))	/**/
+#define PRIVLIB_EXP (win32_get_stdlib(patchlevel))	/**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
@@ -1755,8 +1748,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "c:\\perl5004.5x\\lib\\site\\MSWin32-x86"		/**/
-#define SITEARCH_EXP (win32_perllib_path("site",ARCHNAME,NULL))	/**/
+/* #define SITEARCH "c:\\perl5004.5x\\lib\\site\\MSWin32-x86"		/**/
+/* #define SITEARCH_EXP (win32_perllib_path("site",ARCHNAME,NULL))	/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1772,7 +1765,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITELIB "c:\\perl5004.5x\\lib\\site"		/**/
-#define SITELIB_EXP (win32_perllib_path("site",NULL))	/**/
+#define SITELIB_EXP (win32_get_sitelib(patchlevel))	/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
