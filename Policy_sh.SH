@@ -63,16 +63,6 @@ esac
 
 !GROK!THIS!
 
-if test 0 -eq "$subversion"; then
-    version=`LC_ALL=C; export LC_ALL; \
-    echo $baserev $patchlevel |
-	$awk '{ printf "%.3f\n", $1 + $2/1000.0 }'`
-else
-    version=`LC_ALL=C; export LC_ALL; \
-	echo $baserev $patchlevel $subversion | \
-	$awk '{ printf "%.5f\n", $1 + $2/1000.0 + $3/100000.0 }'`
-fi
-
 for var in bin scriptdir privlib archlib \
 	man1dir man3dir sitelib sitearch \
 	installbin installscript installprivlib installarchlib \
@@ -91,13 +81,28 @@ for var in bin scriptdir privlib archlib \
 	;;
     privlib)
 	case "$prefix" in
-	*perl*)	dflt=$prefix/lib ;;
-	*)	dflt=$prefix/lib/$package ;;
+	*perl*)	dflt=$prefix/lib/$version/share ;;
+	*)	dflt=$prefix/lib/$package/$version/share ;;
 	esac
 	;;
-    archlib)	dflt="$privlib/$archname/$version" ;;
-    sitelib)	dflt="$privlib/site_perl" ;;
-    sitearch)	dflt="$sitelib/$archname" ;;
+    archlib)	
+	case "$prefix" in
+	*perl*)	dflt=$prefix/lib/$version/$archname ;;
+	*)	dflt=$prefix/lib/$package/$version/$archname ;;
+	esac
+	;;
+    sitelib)
+	case "$prefix" in
+	*perl*)	dflt=$prefix/lib/site_perl/$apiversion/share ;;
+	*)	dflt=$prefix/lib/$package/site_perl/$apiversion/share ;;
+	esac
+	;;
+    sitearch)	
+	case "$prefix" in
+	*perl*)	dflt=$prefix/lib/site_perl/$apiversion/$archname ;;
+	*)	dflt=$prefix/lib/$package/site_perl/$apiversion/$archname ;;
+	esac
+	;;
     man1dir)	dflt="$prefix/man/man1" ;;
     man3dir)
 	case "$prefix" in

@@ -299,17 +299,7 @@ program for this.  You can also use
 Both commands will also list extra files in the directory that are not
 listed in MANIFEST.
 
-The MANIFEST is normally sorted, with one exception.  Perl includes
-both a F<Configure> script and a F<configure> script.  The
-F<configure> script is a front-end to the main F<Configure>, but
-is there to aid folks who use autoconf-generated F<configure> files
-for other software.  The problem is that F<Configure> and F<configure>
-are the same on case-insensitive file systems, so I deliberately put
-F<configure> first in the MANIFEST so that the extraction of
-F<Configure> will overwrite F<configure> and leave you with the
-correct script.  (The F<configure> script must also have write
-permission for this to work, so it's the only file in the distribution
-I normally have with write permission.)
+The MANIFEST is normally sorted.
 
 If you are using metaconfig to regenerate Configure, then you should note
 that metaconfig actually uses MANIFEST.new, so you want to be sure
@@ -1312,4 +1302,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.15 1998/04/23 17:03:48 doughera Released $
+$Id: pumpkin.pod,v 1.17 1998/06/30 17:00:06 doughera Released $

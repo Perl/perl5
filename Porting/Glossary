@@ -35,6 +35,15 @@ aphostname (d_gethname.U):
 	host name. The command is fully qualified by its absolute path, to make
 	it safe when used by a process with super-user privileges.
 
+apiversion (patchlevel.U):
+	This is a number which identifies the lowest version of perl
+	to have an API (for XS extensions) compatible with the present
+	version.  For example, for 5.005_01, the apiversion should be
+	5.005, since 5.005_01 should be binary compatible with 5.005.
+	This should probably be incremented manually somehow, perhaps
+	from patchlevel.h.  For now, we'll guess maintenance subversions
+	will retain binary compatibility.
+
 archlib (archlib.U):
 	This variable holds the name of the directory in which the user wants
 	to put architecture-dependent public library files for $package.
@@ -1165,7 +1174,7 @@ doublesize (doublesize.U):
 	indicates to the C program how many bytes there are in a double.
 
 dynamic_ext (Extensions.U):
-	This variable holds a list of extension files we want to
+	This variable holds a list of XS extension files we want to
 	link dynamically into the package.  It is used by Makefile.
 
 eagain (nblock_io.U):
@@ -1182,8 +1191,8 @@ exe_ext (Unix.U):
 	This is an old synonym for _exe.
 
 extensions (Extensions.U):
-	This variable holds a list of all extension files
-	linked into the package.  It is propagated to Config.pm
+	This variable holds a list of all extension files (both XS and
+	non-xs linked into the package.  It is propagated to Config.pm
 	and is typically used to test whether a particular extesion 
 	is available.
 
@@ -1548,7 +1557,7 @@ intsize (intsize.U):
 	indicates to the C program how many bytes there are in an int.
 
 known_extensions (Extensions.U):
-	This variable holds a list of all extensions included in 
+	This variable holds a list of all XS extensions included in 
 	the package.
 
 large (models.U):
@@ -1773,6 +1782,10 @@ nm_so_opt (usenm.U):
 	nm --dynamic is *required* to get symbols from an ELF library which
 	has been stripped, but nm --dynamic is *fatal* on an archive library.
 	Maybe Linux should just always set usenm=false.
+
+nonxs_ext (Extensions.U):
+	This variable holds a list of all non-xs extensions included
+	in the package.  All of them will be built.
 
 o_nonblock (nblock_io.U):
 	This variable bears the symbol value to be used during open() or fcntl()
@@ -2065,7 +2078,7 @@ startsh (startsh.U):
 	other shell.
 
 static_ext (Extensions.U):
-	This variable holds a list of extension files we want to
+	This variable holds a list of XS extension files we want to
 	link statically into the package.  It is used by Makefile.
 
 stdchar (stdchar.U):
@@ -2182,6 +2195,13 @@ usevfork (d_vfork.U):
 usrinc (usrinc.U):
 	This variable holds the path of the include files, which is
 	usually /usr/include. It is mainly used by other Configure units.
+
+version (patchlevel.U):
+	The full version number of this package.  This combines
+	baserev, patchlevel, and subversion to get the full
+	version number, including any possible subversions.  Care
+	is taken to use the C locale in order to get something
+	like 5.004 instead of 5,004.  This is unique to perl.
 
 voidflags (voidflags.U):
 	This variable contains the eventual value of the VOIDFLAGS symbol,

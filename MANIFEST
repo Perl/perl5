@@ -50,8 +50,8 @@ cflags.SH		A script that emits C compilation flags per file
 compat3.sym		List of symbols for binary-compatibility with 5.003
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
+configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
-configure.com   Configure-equivalent for VMS
 cop.h			Control operator header
 cv.h			Code value header
 cygwin32/cw32imp.h	Cygwin32 port
