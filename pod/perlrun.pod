@@ -832,6 +832,11 @@ Relevant only if your perl executable was built with B<-DDEBUGGING>,
 this controls the behavior of global destruction of objects and other
 references.  See L<perlhack/PERL_DESTRUCT_LEVEL> for more information.
 
+=item PERL_ENCODING
+
+If using the C<encoding> pragma without an explicit encoding name, the
+PERL_ENCODING environment variable is consulted for an encoding name.
+
 =item PERL_ROOT (specific to the VMS port)
 
 A translation concealed rooted logical name that contains perl and the

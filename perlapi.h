@@ -199,6 +199,8 @@ END_EXTERN_C
 #define PL_e_script		(*Perl_Ie_script_ptr(aTHX))
 #undef  PL_egid
 #define PL_egid			(*Perl_Iegid_ptr(aTHX))
+#undef  PL_encoding
+#define PL_encoding		(*Perl_Iencoding_ptr(aTHX))
 #undef  PL_endav
 #define PL_endav		(*Perl_Iendav_ptr(aTHX))
 #undef  PL_envgv

@@ -88,7 +88,7 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 	MUTEX_LOCK(&create_mutex);  
 	obj_ref = newSViv(0);
 	obj = newSVrv(obj_ref, class);
-	sv_setiv(obj, (IV)thread);
+	sv_setiv(obj, PTR2IV(thread));
 	SvREADONLY_on(obj);
 	PerlIO_flush((PerlIO*)NULL);
 	current_perl = PERL_GET_CONTEXT;	
@@ -111,6 +111,11 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 	init_function = NULL;
 	temp_store = NULL;
 
+	temp_store = Perl_get_sv(current_perl, "threads::origthread", TRUE | GV_ADDMULTI);
+	sv_setiv(temp_store,PTR2IV(current_perl));
+	temp_store = NULL;	
+
+	
 #ifdef WIN32
 	thread->interp = perl_clone(current_perl, 4);
 #else
@@ -121,6 +126,8 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 						    "threads::calltempstore",FALSE));
 	thread->params = newSVsv(Perl_get_sv(thread->interp,
 					     "threads::paramtempstore",FALSE));
+
+
 
 	/*
 	 * And here we make sure we clean up the data we put in the
@@ -191,10 +198,10 @@ I32 Perl_thread_tid (SV* obj) {
 	ithread* thread;
 	if(!SvROK(obj)) {
 		obj = Perl_thread_self(SvPV_nolen(obj));
-		thread = (ithread*)SvIV(SvRV(obj));	
+		thread = INT2PTR(ithread*, SvIV(SvRV(obj)));
 		SvREFCNT_dec(obj);
 	} else {
-		thread = (ithread*)SvIV(SvRV(obj));	
+		thread = INT2PTR(ithread*, SvIV(SvRV(obj)));
 	}
 	return thread->tid;
 }
@@ -233,7 +240,7 @@ SV* Perl_thread_self (char* class) {
  * call_sv and send it back */
 
 void Perl_thread_join(SV* obj) {
-	ithread* thread = (ithread*)SvIV(SvRV(obj));
+	ithread* thread = INT2PTR(ithread*, SvIV(SvRV(obj)));
 #ifdef WIN32
 	DWORD waitcode;
 	waitcode = WaitForSingleObject(thread->handle, INFINITE);
@@ -247,7 +254,7 @@ void Perl_thread_join(SV* obj) {
  * needs to better clean up memory */
 
 void Perl_thread_detach(SV* obj) {
-	ithread* thread = (ithread*)SvIV(SvRV(obj));
+	ithread* thread = INT2PTR(ithread*, SvIV(SvRV(obj)));
 	MUTEX_LOCK(&thread->mutex);
 	thread->detached = 1;
 	PERL_THREAD_DETACH(thread->thr);
@@ -255,7 +262,7 @@ void Perl_thread_detach(SV* obj) {
 }
 
 void Perl_thread_DESTROY (SV* obj) {
-	ithread* thread = (ithread*)SvIV(SvRV(obj));
+	ithread* thread = INT2PTR(ithread*, SvIV(SvRV(obj)));
 	
 	MUTEX_LOCK(&thread->mutex);
 	thread->count--;
@@ -288,7 +295,7 @@ BOOT:
 	    
 	
 	    SV* temp = get_sv("threads::sharedsv_space", TRUE | GV_ADDMULTI);
-	    SV* temp2 = newSViv((IV)PL_sharedsv_space );
+	    SV* temp2 = newSViv(PTR2IV(PL_sharedsv_space));
 	    sv_setsv( temp , temp2 );
 	}
 	{

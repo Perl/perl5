@@ -180,7 +180,7 @@ unless (defined &Time::HiRes::gettimeofday
 	$i--;
 	print "# Tick! $i ", Time::HiRes::tv_interval ($r), "\n";
     }
-    $SIG{ALRM} = 'DEFAULT';
+    alarm(0); # can't cancel usig %SIG
 
     print "ok 17\n";
 }
@@ -188,7 +188,8 @@ unless (defined &Time::HiRes::gettimeofday
 unless (defined &Time::HiRes::setitimer
 	&& defined &Time::HiRes::getitimer
 	&& exists &Time::HiRes::ITIMER_VIRTUAL
-	&& $Config{d_select}) {
+	&& $Config{d_select}
+	&& $Config{sig_name} =~ m/\bVTALRM\b/) {
     for (18..19) {
 	print "ok $_ # Skip: no virtual interval timers\n";
     }

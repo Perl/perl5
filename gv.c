@@ -887,7 +887,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\001':	/* $^A */
     case '\003':	/* $^C */
     case '\004':	/* $^D */
-    case '\005':	/* $^E */
     case '\006':	/* $^F */
     case '\010':	/* $^H */
     case '\011':	/* $^I, NOT \t in EBCDIC */
@@ -901,6 +900,11 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    break;
 	sv_setiv(GvSV(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
 	goto magicalize;
+    case '\005':	/* $^E && $^ENCODING */
+	if (len > 1 && strNE(name, "\005NCODING"))
+	    break;
+	goto magicalize;
+
     case '\017':	/* $^O & $^OPEN */
 	if (len > 1 && strNE(name, "\017PEN"))
 	    break;

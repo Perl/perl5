@@ -1,19 +1,28 @@
 #!./perl -w
 
+use warnings;
+use strict ;
+
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bDB_File\b/) {
-	print "1..0 # Skip: DB_File was not built\n";
-	exit 0;
+    unless(grep /blib/, @INC) {
+        chdir 't' if -d 't';
+        @INC = '../lib' if -d '../lib';
+    }
+}
+ 
+use Config;
+ 
+BEGIN {
+    if(-d "lib" && -f "TEST") {
+        if ($Config{'extensions'} !~ /\bDB_File\b/ ) {
+            print "1..138\n";
+            exit 0;
+        }
     }
 }
 
 use DB_File; 
 use Fcntl;
-use strict ;
-use warnings;
 use vars qw($dbh $Dfile $bad_ones $FA) ;
 
 # full tied array support started in Perl 5.004_57
@@ -69,16 +78,14 @@ sub docat
     open(CAT,$file) || die "Cannot open $file:$!";
     my $result = <CAT>;
     close(CAT);
+    normalise($result) ;
     return $result;
 }
 
 sub docat_del
 { 
     my $file = shift;
-    local $/ = undef;
-    open(CAT,$file) || die "Cannot open $file: $!";
-    my $result = <CAT>;
-    close(CAT);
+    my $result = docat($file);
     unlink $file ;
     return $result;
 }   
@@ -99,6 +106,25 @@ sub bad_one
 # being updated -- Check out http://www.sleepycat.com/ for more details.
 #
 EOM
+}
+
+sub normalise
+{
+    return unless $^O eq 'cygwin' ;
+    foreach (@_)
+      { s#\r\n#\n#g }     
+}
+
+BEGIN 
+{ 
+    { 
+        local $SIG{__DIE__} ; 
+        eval { require Data::Dumper ; import Data::Dumper } ; 
+    }
+ 
+    if ($@) {
+        *Dumper = sub { my $a = shift; return "[ @{ $a } ]" } ;
+    }          
 }
 
 my $splice_tests = 10 + 1; # ten regressions, plus the randoms
@@ -156,8 +182,10 @@ my $X  ;
 my @h ;
 ok(17, $X = tie @h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $DB_RECNO ) ;
 
+my %noMode = map { $_, 1} qw( amigaos MSWin32 NetWare cygwin ) ;
+
 ok(18, ((stat($Dfile))[2] & 0777) == (($^O eq 'os2' || $^O eq 'MacOS') ? 0666 : 0640)
-	||  $^O eq 'MSWin32' ||  $^O eq 'NetWare' || $^O eq 'cygwin' || $^O eq 'amigaos') ;
+	||  $noMode{$^O} );
 
 #my $l = @h ;
 my $l = $X->length ;
@@ -288,8 +316,7 @@ unlink $Dfile;
     untie @h ;
     my $x = docat($Dfile) ;
     unlink $Dfile;
-    ok(59, $x eq "abc\ndef\n\nghi\n" ||
-           $x eq "abc\r\ndef\r\n\r\nghi\r\n") ;
+    ok(59, $x eq "abc\ndef\n\nghi\n") ;
 }
 
 {
@@ -976,9 +1003,8 @@ require POSIX; my $tmp = POSIX::tmpnam();
 foreach my $test (@tests) {
     my $err = test_splice(@$test);
     if (defined $err) {
-	require Data::Dumper;
-	print STDERR "failed: ", Data::Dumper::Dumper($test);
-	print STDERR "error: $err\n";
+	print STDERR "# failed: ", Dumper($test);
+	print STDERR "# error: $err\n";
 	$failed = 1;
 	ok($testnum++, 0);
     }
@@ -987,7 +1013,7 @@ foreach my $test (@tests) {
 
 if ($failed) {
     # Not worth running the random ones
-    print STDERR 'skipping ', $testnum++, "\n";
+    print STDERR '# skipping ', $testnum++, "\n";
 }
 else {
     # A thousand randomly-generated tests
@@ -997,11 +1023,10 @@ else {
 	my $test = rand_test();
 	my $err = test_splice(@$test);
 	if (defined $err) {
-	    require Data::Dumper;
-	    print STDERR "failed: ", Data::Dumper::Dumper($test);
-	    print STDERR "error: $err\n";
+	    print STDERR "# failed: ", Dumper($test);
+	    print STDERR "# error: $err\n";
 	    $failed = 1;
-	    print STDERR "skipping any remaining random tests\n";
+	    print STDERR "# skipping any remaining random tests\n";
 	    last;
 	}
     }
@@ -1161,7 +1186,7 @@ sub test_splice {
     untie @h;
     
     open(TEXT, $tmp) or die "cannot open $tmp: $!";
-    @h = <TEXT>; chomp @h;
+    @h = <TEXT>; normalise @h; chomp @h;
     close TEXT or die "cannot close $tmp: $!";
     return('list is different when re-read from disk: '
 	   . Dumper(\@array) . ' vs ' . Dumper(\@h))

@@ -1653,6 +1653,10 @@ S_scan_const(pTHX_ char *start)
       Perl_croak(aTHX_ "panic: constant overflowed allocated space");
 
     SvPOK_on(sv);
+    if (PL_encoding && !has_utf8) {
+        Perl_sv_recode_to_utf8(aTHX_ sv, PL_encoding);
+        has_utf8 = TRUE;
+    }
     if (has_utf8) {
 	SvUTF8_on(sv);
 	if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
@@ -7734,3 +7738,4 @@ utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     return count;
 }
 #endif
+

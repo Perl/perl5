@@ -1404,17 +1404,6 @@ SV is B<not> incremented.
 =for hackers
 Found in file sv.c
 
-=item newSV
-
-Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
-with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
-macro.
-
-	SV*	newSV(STRLEN len)
-
-=for hackers
-Found in file sv.c
-
 =item NEWSV
 
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
@@ -1427,6 +1416,17 @@ C<id> is an integer id between 0 and 1299 (used to identify leaks).
 
 =for hackers
 Found in file handy.h
+
+=item newSV
+
+Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
+with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
+macro.
+
+	SV*	newSV(STRLEN len)
+
+=for hackers
+Found in file sv.c
 
 =item newSViv
 
@@ -2282,22 +2282,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVX
-
-Returns the raw value in the SV's IV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvIV()>.
-
-	IV	SvIVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVx
 
 Coerces the given SV to an integer and returns it. Guarantees to evaluate
 sv only once. Use the more efficent C<SvIV> otherwise.
 
 	IV	SvIVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVX
+
+Returns the raw value in the SV's IV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvIV()>.
+
+	IV	SvIVX(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2950,22 +2950,22 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvUVX
-
-Returns the raw value in the SV's UV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvUV()>.
-
-	UV	SvUVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvUVx
 
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
 evaluate sv only once. Use the more efficent C<SvUV> otherwise.
 
 	UV	SvUVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUVX
+
+Returns the raw value in the SV's UV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvUV()>.
+
+	UV	SvUVX(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3658,6 +3658,24 @@ which can't cope with complex macro expressions. Always use the macro
 instead.
 
 	char*	sv_pvutf8n_force(SV* sv, STRLEN* lp)
+
+=for hackers
+Found in file sv.c
+
+=item sv_recode_to_utf8
+
+The encoding is assumed to be an Encode object, on entry the PV
+of the sv is assumed to be octets in that encoding, and the sv
+will be converted into Unicode (and UTF-8).
+
+If the sv already is UTF-8 (or if it is not POK), or if the encoding
+is not a reference, nothing is done to the sv.  If the encoding is not
+an C<Encode::XS> Encoding object, bad things will happen.
+(See F<lib/encoding.pm> and L<Encode>).
+
+The PV of the sv is returned.
+
+	char*	sv_recode_to_utf8(SV* sv, SV *encoding)
 
 =for hackers
 Found in file sv.c

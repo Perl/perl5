@@ -31,6 +31,332 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12767] By: jhi                                   on 2001/10/29  14:49:28
+        Log: AIX needs an explicit symbol export list.
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12766] By: jhi                                   on 2001/10/29  14:08:21
+        Log: The test (and the module) would require some
+             quality hacking time to work on EBCDIC.  Based n
+             the test results nothing seems to be majorly broken,
+             the module just seems to have strange assumptions:
+             got: ''\226\225\205'
+             expected: ''one'
+             The \226\225\205 being, of course, 'one', in EBCDIC.
+     Branch: perl
+	   ! lib/Dumpvalue.t
+____________________________________________________________________________
+[ 12765] By: jhi                                   on 2001/10/29  13:58:48
+        Log: Mark the test known to be failing in EBCDIC.
+     Branch: perl
+	   ! t/op/tr.t
+____________________________________________________________________________
+[ 12764] By: jhi                                   on 2001/10/29  13:51:51
+        Log: None of the libnet modules are going to work in
+             EBCDIC without the Convert::EBCDIC.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 12763] By: jhi                                   on 2001/10/29  13:45:39
+        Log: Neither is 0xff illegal UTF-EBCDIC since it's the last C1.
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 12762] By: jhi                                   on 2001/10/29  13:40:17
+        Log: UTF-EBCDIC ain't UTF-8.
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 12761] By: jhi                                   on 2001/10/29  13:35:35
+        Log: In EBCDIC cannot test compile Net::Cmd without Convert::EBCDIC.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 12760] By: jhi                                   on 2001/10/29  13:32:20
+        Log: Let's not assume ASCII.
+     Branch: perl
+	   ! t/op/lc.t
+____________________________________________________________________________
+[ 12759] By: jhi                                   on 2001/10/29  13:24:54
+        Log: Call the new perlio symbols differently.
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 12758] By: jhi                                   on 2001/10/29  13:23:11
+        Log: Don't expect ASCII ordering.
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.t
+____________________________________________________________________________
+[ 12757] By: jhi                                   on 2001/10/29  13:13:09
+        Log: Forgot from #12756.
+     Branch: perl
+	   ! perlio.h
+____________________________________________________________________________
+[ 12756] By: jhi                                   on 2001/10/29  13:12:41
+        Log: BeOS tweaks:
+             - fseeko and ftello can be found by Configure but
+             we do not seem to have prototypes for them so
+             let's make up some
+             - BeOS didn't use to have real sockets (sockets as
+             filedescriptors) but the BONE package is supposed
+             to fix this.  I do not know how to detect BONEness,
+             see hints/beos.sh for a spot that needs to fixed.
+             - BeOS has O_TEXT != O_BINARY but has no setmode()
+     Branch: perl
+	   ! hints/beos.sh perlio.c
+____________________________________________________________________________
+[ 12755] By: sky                                   on 2001/10/29  12:56:12
+        Log: Ugly fix to not die when a thread creator is holding locks.
+     Branch: perl
+	   ! ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12754] By: jhi                                   on 2001/10/29  12:31:34
+        Log: Integrate change #12752 from maintperl;
+             
+             croak(Nullch) wasn't printing the contents of ERRSV if there was
+             no outer eval (bug in change#6125)
+     Branch: perl
+	  !> util.c
+____________________________________________________________________________
+[ 12753] By: jhi                                   on 2001/10/29  12:28:41
+        Log: Subject: [PATCH h2xs] Use of static data in XS modules
+             From: "Paul Marquess" <Paul_Marquess@yahoo.co.uk>
+             Date: Sun, 28 Oct 2001 21:19:07 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLIEHNDDAA.Paul_Marquess@Yahoo.co.uk>
+             
+             with nits from Sarathy.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 12752] By: gsar                                  on 2001/10/29  03:07:15
+        Log: croak(Nullch) wasn't printing the contents of ERRSV if there was
+             no outer eval (bug in change#6125)
+     Branch: maint-5.6/perl
+	   ! util.c
+____________________________________________________________________________
+[ 12751] By: jhi                                   on 2001/10/28  23:11:15
+        Log: More todo for the encoding pragma.
+     Branch: perl
+	   ! lib/encoding.pm
+____________________________________________________________________________
+[ 12750] By: jhi                                   on 2001/10/28  22:55:24
+        Log: Add the encoding pragma to control the "upgrade"
+             from the native eight bit data to Unicode.
+             
+             TODO: \x.. and \0... literals.  \N{}.  chr()? ord()?
+     Branch: perl
+	   + lib/encoding.pm lib/encoding.t
+	   ! MANIFEST embedvar.h gv.c intrpvar.h mg.c perlapi.h
+	   ! pod/perlunicode.pod pod/perlvar.pod sv.c
+____________________________________________________________________________
+[ 12749] By: sky                                   on 2001/10/28  21:02:33
+        Log: Update documentation.
+     Branch: perl
+	   ! ext/threads/shared/shared.pm
+____________________________________________________________________________
+[ 12748] By: jhi                                   on 2001/10/28  20:55:57
+        Log: Integrate change #12747 from maintperl;
+             
+             finishing touches to system() fixes on windows:
+             * detect cmd shell correctly even if it had full path in it
+             * more quoting needed for single-arg system if the argument
+             really had multiple quoted arguments within it
+             * be smarter about not calling the shell when the executable
+             has spaces, but otherwise does not need shell involvement
+             * add a testsuite (windows-specific currently)
+     Branch: perl
+	  +> t/op/system.t t/op/system_tests
+	   ! MANIFEST pod/perltodo.pod
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 12747] By: gsar                                  on 2001/10/28  18:33:23
+        Log: finishing touches to system() fixes on windows:
+             * detect cmd shell correctly even if it had full path in it
+             * more quoting needed for single-arg system if the argument
+             really had multiple quoted arguments within it
+             * be smarter about not calling the shell when the executable
+             has spaces, but otherwise does not need shell involvement
+             * add a testsuite (windows-specific currently)
+     Branch: maint-5.6/perl
+	   + t/op/system.t t/op/system_tests
+	   ! MANIFEST Todo-5.6 pod/perltodo.pod win32/win32.c
+____________________________________________________________________________
+[ 12746] By: jhi                                   on 2001/10/28  16:34:35
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Time/HiRes/HiRes.xs lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12745] By: nick                                  on 2001/10/28  16:08:14
+        Log: Mingw32 fixup for Embed.t
+     Branch: perlio
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12744] By: nick                                  on 2001/10/28  15:54:14
+        Log: GCC vs MS 64-bit constant syntax
+     Branch: perlio
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12743] By: nick                                  on 2001/10/28  15:42:55
+        Log: Integrate mainline
+     Branch: perlio
+	  !> ext/threads/threads.pm lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12742] By: sky                                   on 2001/10/28  14:47:10
+        Log: Manpage updates.
+     Branch: perl
+	   ! ext/threads/threads.pm
+____________________________________________________________________________
+[ 12741] By: jhi                                   on 2001/10/28  14:39:55
+        Log: Newline confusion: t/TEST sees an extra newline and gets huffy.
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12740] By: nick                                  on 2001/10/28  14:14:24
+        Log: Integrate mainline
+     Branch: perlio
+	  !> lib/ExtUtils/Embed.t win32/win32.c
+____________________________________________________________________________
+[ 12739] By: jhi                                   on 2001/10/28  14:06:58
+        Log: Need to be ./executed.
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12738] By: jhi                                   on 2001/10/28  14:03:58
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c win32/win32.h
+____________________________________________________________________________
+[ 12737] By: nick                                  on 2001/10/28  13:53:45
+        Log: Tweak for build with Mingw32 - __attribute__((unused)) is not liked
+             by gcc -xc++.
+     Branch: perlio
+	   ! win32/win32.h
+____________________________________________________________________________
+[ 12736] By: nick                                  on 2001/10/28  13:50:50
+        Log: Have :stdio layer update an honour the fd refcnt table.
+             Embed.t now passes with PERLIO=stdio as well (tested under ithreads)
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 12735] By: jhi                                   on 2001/10/28  13:34:37
+        Log: Integrate changes #12724 and #12725 from maintperl;
+             multiarg system now works.
+     Branch: perl
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 12734] By: jhi                                   on 2001/10/28  13:31:54
+        Log: Integrate perlio.
+     Branch: perl
+	  +> lib/ExtUtils/Embed.t
+	  !> MANIFEST perlio.c
+____________________________________________________________________________
+[ 12733] By: nick                                  on 2001/10/28  13:07:16
+        Log: Use fd refcounts to solve the problem highlighted by new Embed.t, at
+             least for PERLIO=perlio unthreaded case
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 12732] By: nick                                  on 2001/10/28  11:10:24
+        Log: Typo in exe name
+     Branch: perlio
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12731] By: nick                                  on 2001/10/28  11:09:59
+        Log: Integrate Mainline
+     Branch: perlio
+	  !> Changes configure.com ext/DB_File/DB_File.pm
+	  !> ext/ODBM_File/ODBM_File.xs ext/Time/HiRes/HiRes.xs
+	  !> ext/threads/shared/shared.xs lib/ExtUtils/xsubpp
+	  !> lib/unicore/Is.pl lib/unicore/mktables makedef.pl op.h
+	  !> patchlevel.h perlio.c pod/perlapi.pod pod/perlfaq4.pod
+	  !> pod/perlhack.pod pod/perltoc.pod pod/perlunicode.pod sv.h
+	  !> t/TEST t/op/regexp.t win32/buildext.pl
+____________________________________________________________________________
+[ 12730] By: nick                                  on 2001/10/28  11:05:35
+        Log: Fixup Embed.t for Win32/VC++
+     Branch: perlio
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12729] By: nick                                  on 2001/10/28  09:36:20
+        Log: Adapt testcase from Doug Maceachern <dougm@covalent.net> for perlio_destruct
+             bug as lib/ExtUtils/Embed.t which tests that and some aspects of
+             ExtUtils::Embed.
+     Branch: perlio
+	   + lib/ExtUtils/Embed.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12728] By: sky                                   on 2001/10/28  08:12:53
+        Log: Change #12726 changed require 5.002 to 5.0 somehow, I know I never changed that
+             line manually!
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[ 12727] By: sky                                   on 2001/10/28  08:02:09
+        Log: And here we use the prototypes.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12726] By: sky                                   on 2001/10/28  08:00:48
+        Log: Support [] style prototypes.
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[ 12725] By: gsar                                  on 2001/10/28  04:49:15
+        Log: yet another multi-arg system() fix on windows: batch files as the
+             first argument (i.e. directly executed by CreateProcess()) need
+             extra quoting to escape shell-shock
+     Branch: maint-5.6/perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 12724] By: gsar                                  on 2001/10/28  03:49:31
+        Log: another multi-arg system() fix on windows: passing empty arguments
+             now works
+     Branch: maint-5.6/perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 12723] By: jhi                                   on 2001/10/28  03:32:32
+        Log: Explicitly expect only 4 or 8 bytes of PTRSIZE.
+             No final #else #error because we do not seem to
+             be using #error?
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 12722] By: jhi                                   on 2001/10/28  02:41:04
+        Log: Subject: [PATCH Perl@12647] Time::HiRes ualarm for VMS without one
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)        
+             Date: Sat, 27 Oct 2001 23:28:44 EST 
+             Message-Id: <011027232650.19ae30@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12721] By: jhi                                   on 2001/10/28  01:53:34
+        Log: Regen perlapi, perltoc.
+     Branch: perl
+	   ! pod/perlapi.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 12720] By: jhi                                   on 2001/10/28  01:30:04
+        Log: Subject: [PATCH] sv.h documentation
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>              
+             Date: Sat, 27 Oct 2001 15:27:41 -1000 (HST) 
+             Message-ID: <Pine.LNX.4.33.0110271526270.24647-100000@lapaki>
+     Branch: perl
+	   ! sv.h
+____________________________________________________________________________
+[ 12719] By: gsar                                  on 2001/10/27  23:42:51
+        Log: "nmake clean" fails to clean ext/... because buildext.pl calls
+             system("nmake -nologo", "clean") and there is no executable
+             called "nmake -nologo"; this used to "work" pre-change#12559 due
+             to bugs in multiarg system() that have since been fixed
+     Branch: perl
+	   ! win32/buildext.pl
+____________________________________________________________________________
+[ 12718] By: jhi                                   on 2001/10/27  21:58:35
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12717] By: jhi                                   on 2001/10/27  21:54:11
         Log: Subject: perlhack.pod addendum for consideration (perlbug mail interface)
              From: Richard.Foley@t-online.de (Richard Foley)            

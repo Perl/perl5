@@ -879,6 +879,8 @@ lib/dotsh.pl			Code to "dot" in a shell script
 lib/Dumpvalue.pm		Screen dump of perl values
 lib/Dumpvalue.t			See if Dumpvalue works
 lib/dumpvar.pl			A variable dumper
+lib/encoding.pm			Encoding of legacy data into Unicode
+lib/encoding.t			Test for the encoding pragma
 lib/English.pm			Readable aliases for short variables
 lib/English.t			See if English works
 lib/Env.pm			Map environment into ordinary variables
@@ -2202,6 +2204,8 @@ t/op/subst_amp.t		See if $&-related substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/sysio.t			See if sysread and syswrite work
+t/op/system.t			See if system works
+t/op/system_tests		Test runner for system.t
 t/op/taint.t			See if tainting works
 t/op/tie.t			See if tie/untie functions work
 t/op/tiearray.t			See if tie for arrays works
