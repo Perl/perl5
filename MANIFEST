@@ -577,6 +577,7 @@ ext/threads/t/basic.t		ithreads
 ext/threads/threads.h		ithreads
 ext/threads/threads.pm          ithreads
 ext/threads/threads.xs		ithreads
+ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 ext/Time/HiRes/Changes		Time::HiRes extension
 ext/Time/HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
 ext/Time/HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
