@@ -126,17 +126,17 @@ Tie::Array - base class for tied arrays
     package NewArray;
     use Tie::Array;
     @ISA = ('Tie::Array');
-                       
+
     # mandatory methods
     sub TIEARRAY { ... }  
     sub FETCH { ... }     
     sub FETCHSIZE { ... } 
-        
+
     sub STORE { ... }        # mandatory if elements writeable
     sub STORESIZE { ... }    # mandatory if elements can be added/deleted
     sub EXISTS { ... }       # mandatory if exists() expected to work
     sub DELETE { ... }       # mandatory if delete() expected to work
-                               
+
     # optional methods - for efficiency
     sub CLEAR { ... }  
     sub PUSH { ... } 
@@ -149,7 +149,7 @@ Tie::Array - base class for tied arrays
 
     package NewStdArray;
     use Tie::Array;
-    
+
     @ISA = ('Tie::StdArray');
 
     # all methods provided by default

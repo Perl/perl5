@@ -325,7 +325,7 @@ the socket will be in. All other arguments will be passed to the
 configuration method of the package for that domain, See below.
 
  NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
- 
+
 As of VERSION 1.18 all IO::Socket objects have autoflush turned on
 by default. This was not the case with earlier releases.
 

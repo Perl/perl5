@@ -5,7 +5,7 @@ package filetest;
 filetest - Perl pragma to control the filetest permission operators
 
 =head1 SYNOPSIS
-    
+
     $can_perhaps_read = -r "file";	# use the mode bits
     {
         use filetest 'access';		# intuit harder

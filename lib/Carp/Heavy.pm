@@ -11,7 +11,7 @@ Carp::Heavy - Carp guts
 =head1 DESCRIPTION
 
 No user-serviceable parts inside.
- 
+
 =cut
 
 # This package is heavily used. Be small. Be fast. Be good.
