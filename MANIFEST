@@ -610,6 +610,7 @@ installman		Perl script to install man pages for pods
 installperl		Perl script to do "make install" dirty work
 intrpvar.h		Variables held in each interpreter instance
 iperlsys.h		Perl's interface to the system
+jpl/ChangeLog		Java/Perl Lingo change log
 jpl/JNI/Changes		Java Native Interface changes
 jpl/JNI/Closer.java	Java Native Interface example
 jpl/JNI/JNI.pm		Java Native Interface module
@@ -637,12 +638,14 @@ jpl/PerlInterpreter/PerlInterpreter.c		Perl interpreter abstraction
 jpl/PerlInterpreter/PerlInterpreter.h		Perl interpreter abstraction
 jpl/PerlInterpreter/PerlInterpreter.java	Perl interpreter abstraction
 jpl/README					JPL instructions
+jpl/README.JUST-JNI				JPL instructions
 jpl/SETVARS.PL					JPL setup
 jpl/Sample/Makefile.PL				JPL sample makefile generator
 jpl/Sample/Sample.jpl				JPL sample
 jpl/Test/Makefile.PL				JPL tests makefile generator
 jpl/Test/Test.jpl				JPL tests
 jpl/bin/jpl					JPL compiler
+jpl/docs/Tutorial.pod				Perl and Java Tutorial
 jpl/get_jdk/README	Instructions for using get_jdk.pl
 jpl/get_jdk/get_jdk.pl	JDK download tool
 jpl/get_jdk/jdk_hosts	JDK availability list
