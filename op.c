@@ -2930,6 +2930,7 @@ CV *cv;
 	CvROOT(cv) = Nullop;
 	LEAVE;
     }
+    SvPOK_off((SV*)cv);		/* forget prototype */
     CvFLAGS(cv) = 0;
     SvREFCNT_dec(CvGV(cv));
     CvGV(cv) = Nullgv;
