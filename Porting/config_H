@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu May 14 11:18:05 EDT 1998
+ * Configuration time: Thu May 28 12:44:36 EDT 1998
  * Configured by     : doughera
  * Target system     : linux fractal 2.0.33 #1 tue feb 3 10:11:46 est 1998 i686 unknown 
  */
@@ -982,6 +982,12 @@
  */
 #define	I_SYS_TIMES		/**/
 
+/* I_SYS_TYPES:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/types.h>.
+ */
+#define	I_SYS_TYPES		/**/
+
 /* I_SYS_UN:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/un.h> to get UNIX domain socket definitions.
@@ -1461,8 +1467,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/i686-linux-thread/5.00464"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/i686-linux-thread/5.00464"		/**/
+#define ARCHLIB "/opt/perl/lib/i686-linux-thread/5.00465"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/i686-linux-thread/5.00465"		/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -1669,6 +1675,28 @@
 #define HAS_SOCKET		/**/
 #define HAS_SOCKETPAIR	/**/
 
+/* HAS_UNION_SEMUN:
+ *	This symbol, if defined, indicates that the union semun is
+ *	defined by including <sys/sem.h>.  If not, the user code
+ *	probably needs to define it as:
+ *	union semun {
+ *	    int val;
+ *	    struct semid_ds *buf;
+ *	    unsigned short *array;
+ *	}
+ */
+/* USE_SEMCTL_SEMUN:
+ *	This symbol, if defined, indicates that union semun is
+ *	used for semctl IPC_STAT.
+ */
+/* USE_SEMCTL_SEMID_DS:
+ *	This symbol, if defined, indicates that struct semid_ds * is
+ *	used for semctl IPC_STAT.
+ */
+#define HAS_UNION_SEMUN	/**/
+#define USE_SEMCTL_SEMUN	/**/
+#define USE_SEMCTL_SEMID_DS	/**/
+
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
  *	appropriate return type of a signal handler.  Thus, you can declare
@@ -1736,12 +1764,6 @@
 /*#define PWEXPIRE	/ **/
 /*#define PWCOMMENT	/ **/
 #define PWGECOS	/**/
-
-/* I_SYS_TYPES:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sys/types.h>.
- */
-#define	I_SYS_TYPES		/**/
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.

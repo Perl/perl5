@@ -996,6 +996,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_systimes	I_SYS_TIMES		/**/
 
+/* I_SYS_TYPES:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/types.h>.
+ */
+#$i_systypes	I_SYS_TYPES		/**/
+
 /* I_SYS_UN:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/un.h> to get UNIX domain socket definitions.
@@ -1683,6 +1689,28 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_socket HAS_SOCKET		/**/
 #$d_sockpair HAS_SOCKETPAIR	/**/
 
+/* HAS_UNION_SEMUN:
+ *	This symbol, if defined, indicates that the union semun is
+ *	defined by including <sys/sem.h>.  If not, the user code
+ *	probably needs to define it as:
+ *	union semun {
+ *	    int val;
+ *	    struct semid_ds *buf;
+ *	    unsigned short *array;
+ *	}
+ */
+/* USE_SEMCTL_SEMUN:
+ *	This symbol, if defined, indicates that union semun is
+ *	used for semctl IPC_STAT.
+ */
+/* USE_SEMCTL_SEMID_DS:
+ *	This symbol, if defined, indicates that struct semid_ds * is
+ *	used for semctl IPC_STAT.
+ */
+#$d_union_semun HAS_UNION_SEMUN	/**/
+#$d_semctl_semun USE_SEMCTL_SEMUN	/**/
+#$d_semctl_semid_ds USE_SEMCTL_SEMID_DS	/**/
+
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
  *	appropriate return type of a signal handler.  Thus, you can declare
@@ -1750,12 +1778,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_pwexpire PWEXPIRE	/**/
 #$d_pwcomment PWCOMMENT	/**/
 #$d_pwgecos PWGECOS	/**/
-
-/* I_SYS_TYPES:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sys/types.h>.
- */
-#$i_systypes	I_SYS_TYPES		/**/
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
