@@ -3,7 +3,7 @@
  */
 
 /*
- * $Id: Storable.xs,v 1.0.1.4 2000/10/26 17:11:04 ram Exp $
+ * $Id: Storable.xs,v 1.0.1.6 2001/01/03 09:40:40 ram Exp $
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  
@@ -11,6 +11,11 @@
  *  in the README file that comes with the distribution.
  *
  * $Log: Storable.xs,v $
+ * Revision 1.0.1.6  2001/01/03 09:40:40  ram
+ * patch7: prototype and casting cleanup
+ * patch7: trace offending package when overloading cannot be restored
+ * patch7: made context cleanup safer to avoid dup freeing
+ *
  * Revision 1.0.1.5  2000/11/05 17:21:24  ram
  * patch6: fixed severe "object lost" bug for STORABLE_freeze returns
  *
@@ -670,7 +675,7 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 #define GETMARK(x) do {							\
 	if (!cxt->fio)								\
 		MBUF_GETC(x);							\
-	else if ((int)(x = PerlIO_getc(cxt->fio)) == EOF)	\
+! 	else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)	\
 		return (SV *) 0;						\
 } while (0)
 
@@ -758,14 +763,14 @@ static int store_tied_item(stcxt_t *cxt, SV *sv);
 static int store_other(stcxt_t *cxt, SV *sv);
 static int store_blessed(stcxt_t *cxt, SV *sv, int type, HV *pkg);
 
-static int (*sv_store[])() = {
-	store_ref,			/* svis_REF */
-	store_scalar,		/* svis_SCALAR */
-	store_array,		/* svis_ARRAY */
-	store_hash,			/* svis_HASH */
-	store_tied,			/* svis_TIED */
-	store_tied_item,	/* svis_TIED_ITEM */
-	store_other,		/* svis_OTHER */
+static int (*sv_store[])(stcxt_t *cxt, SV *sv) = {
+	store_ref,										/* svis_REF */
+	store_scalar,									/* svis_SCALAR */
+	(int (*)(stcxt_t *cxt, SV *sv)) store_array,	/* svis_ARRAY */
+	(int (*)(stcxt_t *cxt, SV *sv)) store_hash,		/* svis_HASH */
+	store_tied,										/* svis_TIED */
+	store_tied_item,								/* svis_TIED_ITEM */
+	store_other,									/* svis_OTHER */
 };
 
 #define SV_STORE(x)	(*sv_store[x])
@@ -791,7 +796,7 @@ static SV *retrieve_tied_hash(stcxt_t *cxt);
 static SV *retrieve_tied_scalar(stcxt_t *cxt);
 static SV *retrieve_other(stcxt_t *cxt);
 
-static SV *(*sv_old_retrieve[])() = {
+static SV *(*sv_old_retrieve[])(stcxt_t *cxt) = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
 	retrieve_lscalar,		/* SX_LSCALAR */
 	old_retrieve_array,		/* SX_ARRAY -- for pre-0.6 binaries */
@@ -832,7 +837,7 @@ static SV *retrieve_overloaded(stcxt_t *cxt);
 static SV *retrieve_tied_key(stcxt_t *cxt);
 static SV *retrieve_tied_idx(stcxt_t *cxt);
 
-static SV *(*sv_retrieve[])() = {
+static SV *(*sv_retrieve[])(stcxt_t *cxt) = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
 	retrieve_lscalar,		/* SX_LSCALAR */
 	retrieve_array,			/* SX_ARRAY */
@@ -1002,19 +1007,41 @@ static void clean_store_context(stcxt_t *cxt)
 
 	/*
 	 * And now dispose of them...
+	 *
+	 * The surrounding if() protection has been added because there might be
+	 * some cases where this routine is called more than once, during
+	 * exceptionnal events.  This was reported by Marc Lehmann when Storable
+	 * is executed from mod_perl, and the fix was suggested by him.
+	 * 		-- RAM, 20/12/2000
 	 */
 
-	hv_undef(cxt->hseen);
-	sv_free((SV *) cxt->hseen);
+	if (cxt->hseen) {
+		HV *hseen = cxt->hseen;
+		cxt->hseen = 0;
+		hv_undef(hseen);
+		sv_free((SV *) hseen);
+	}
 
-	hv_undef(cxt->hclass);
-	sv_free((SV *) cxt->hclass);
+	if (cxt->hclass) {
+		HV *hclass = cxt->hclass;
+		cxt->hclass = 0;
+		hv_undef(hclass);
+		sv_free((SV *) hclass);
+	}
 
-	hv_undef(cxt->hook);
-	sv_free((SV *) cxt->hook);
+	if (cxt->hook) {
+		HV *hook = cxt->hook;
+		cxt->hook = 0;
+		hv_undef(hook);
+		sv_free((SV *) hook);
+	}
 
-	av_undef(cxt->hook_seen);
-	sv_free((SV *) cxt->hook_seen);
+	if (cxt->hook_seen) {
+		AV *hook_seen = cxt->hook_seen;
+		cxt->hook_seen = 0;
+		av_undef(hook_seen);
+		sv_free((SV *) hook_seen);
+	}
 
 	cxt->entry = 0;
 	cxt->s_dirty = 0;
@@ -1069,17 +1096,33 @@ static void clean_retrieve_context(stcxt_t *cxt)
 
 	ASSERT(cxt->optype & ST_RETRIEVE, ("was performing a retrieve()"));
 
-	av_undef(cxt->aseen);
-	sv_free((SV *) cxt->aseen);
+	if (cxt->aseen) {
+		AV *aseen = cxt->aseen;
+		cxt->aseen = 0;
+		av_undef(aseen);
+		sv_free((SV *) aseen);
+	}
 
-	av_undef(cxt->aclass);
-	sv_free((SV *) cxt->aclass);
+	if (cxt->aclass) {
+		AV *aclass = cxt->aclass;
+		cxt->aclass = 0;
+		av_undef(aclass);
+		sv_free((SV *) aclass);
+	}
 
-	hv_undef(cxt->hook);
-	sv_free((SV *) cxt->hook);
+	if (cxt->hook) {
+		HV *hook = cxt->hook;
+		cxt->hook = 0;
+		hv_undef(hook);
+		sv_free((SV *) hook);
+	}
 
-	if (cxt->hseen)
-		sv_free((SV *) cxt->hseen);		/* optional HV, for backward compat. */
+	if (cxt->hseen) {
+		HV *hseen = cxt->hseen;
+		cxt->hseen = 0;
+		hv_undef(hseen);
+		sv_free((SV *) hseen);		/* optional HV, for backward compat. */
+	}
 
 	cxt->entry = 0;
 	cxt->s_dirty = 0;
@@ -1101,6 +1144,8 @@ stcxt_t *cxt;
 		clean_retrieve_context(cxt);
 	else
 		clean_store_context(cxt);
+
+	ASSERT(!cxt->s_dirty, ("context is clean"));
 }
 
 /*
@@ -3371,9 +3416,10 @@ static SV *retrieve_overloaded(stcxt_t *cxt)
 
 	stash = (HV *) SvSTASH (sv);
 	if (!stash || !Gv_AMG(stash))
-		CROAK(("Cannot restore overloading on %s(0x%"UVxf")",
+		CROAK(("Cannot restore overloading on %s(0x%"UVxf") (package %s)",
 		       sv_reftype(sv, FALSE),
-		       PTR2UV(sv)));
+		       PTR2UV(sv),
+			   stash ? HvNAME(stash) : "<unknown>"));
 
 	SvAMAGIC_on(rv);
 

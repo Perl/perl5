@@ -1,4 +1,4 @@
-;# $Id: Storable.pm,v 1.0.1.5 2000/10/26 17:10:18 ram Exp $
+;# $Id: Storable.pm,v 1.0.1.7 2001/01/03 09:39:02 ram Exp $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
@@ -6,6 +6,9 @@
 ;#  in the README file that comes with the distribution.
 ;#
 ;# $Log: Storable.pm,v $
+;# Revision 1.0.1.7  2001/01/03 09:39:02  ram
+;# patch7: added CAN_FLOCK to determine whether we can flock() or not
+;#
 ;# Revision 1.0.1.6  2000/11/05 17:20:25  ram
 ;# patch6: increased version number
 ;#
@@ -38,7 +41,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.006';
+$VERSION = '1.007';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -80,6 +83,21 @@ sub logcroak;
 sub logcarp;
 
 sub retrieve_fd { &fd_retrieve }		# Backward compatibility
+
+#
+# Determine whether locking is possible, but only when needed.
+#
+
+my $CAN_FLOCK;
+
+sub CAN_FLOCK {
+	return $CAN_FLOCK if defined $CAN_FLOCK;
+	require Config; import Config;
+	return $CAN_FLOCK =
+		$Config{'d_flock'} ||
+		$Config{'d_fcntl_can_lock'} ||
+		$Config{'d_lockf'};
+}
 
 bootstrap Storable;
 1;
@@ -135,10 +153,7 @@ sub _store {
 	open(FILE, ">$file") || logcroak "can't create $file: $!";
 	binmode FILE;				# Archaic systems...
 	if ($use_locking) {
-		require Config; import Config;
-		if (!$Config{'d_flock'} &&
-		    !$Config{'d_fcntl_can_lock'} &&
-		    !$Config{'d_lockf'}) {
+		unless (&CAN_FLOCK) {
 			logcarp "Storable::lock_store: fcntl/flock emulation broken on $^O";
 			return undef;
 		}
@@ -258,10 +273,7 @@ sub _retrieve {
 	my $self;
 	my $da = $@;							# Could be from exception handler
 	if ($use_locking) {
-		require Config; import Config;
-		if (!$Config{'d_flock'} &&
-		    !$Config{'d_fcntl_can_lock'} &&
-		    !$Config{'d_lockf'}) {
+		unless (&CAN_FLOCK) {
 			logcarp "Storable::lock_retrieve: fcntl/flock emulation broken on $^O";
 			return undef;
 		}

@@ -1,10 +1,13 @@
 #!./perl
 
-# $Id: lock.t,v 1.0.1.3 2000/10/26 17:11:27 ram Exp ram $
+# $Id: lock.t,v 1.0.1.4 2001/01/03 09:41:00 ram Exp $
 #
 #  @COPYRIGHT@
 #
 # $Log: lock.t,v $
+# Revision 1.0.1.4  2001/01/03 09:41:00  ram
+# patch7: use new CAN_FLOCK routine to determine whether to run tests
+#
 # Revision 1.0.1.3  2000/10/26 17:11:27  ram
 # patch5: just check $^O, there's no need for the whole Config
 #
@@ -25,22 +28,18 @@ sub BEGIN {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
     }
-    if (!$Config{'d_flock'} &&
-	!$Config{'d_fcntl_can_lock'} &&
-	!$Config{'d_lockf'}) {
-        print "1..0 # Skip: no flock or flock emulation on this platform\n";
-        exit 0;
-    }
-    if ($^O eq 'dos') {
+
+    use Storable qw(lock_store lock_retrieve);
+
+    unless (&Storable::CAN_FLOCK) {
 	print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
 	exit 0;
     }
+
     require 'lib/st-dump.pl';
 }
 
 sub ok;
-
-use Storable qw(lock_store lock_retrieve);
 
 print "1..5\n";
 
