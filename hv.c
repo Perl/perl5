@@ -17,6 +17,44 @@
 static void hsplit _((HV *hv));
 static void hfreeentries _((HV *hv));
 
+static HE* more_he();
+
+static HE*
+new_he()
+{
+    HE* he;
+    if (he_root) {
+        he = he_root;
+        he_root = (HE*)he->hent_next;
+        return he;
+    }
+    return more_he();
+}
+
+static void
+del_he(p)
+HE* p;
+{
+    p->hent_next = (HE*)he_root;
+    he_root = p;
+}
+
+static HE*
+more_he()
+{
+    register HE* he;
+    register HE* heend;
+    he_root = (HE*)safemalloc(1008);
+    he = he_root;
+    heend = &he[1008 / sizeof(HE) - 1];
+    while (he < heend) {
+        he->hent_next = (HE*)(he + 1);
+        he++;
+    }
+    he->hent_next = 0;
+    return new_he();
+}
+
 SV**
 hv_fetch(hv,key,klen,lval)
 HV *hv;
@@ -142,8 +180,8 @@ register U32 hash;
 	entry->hent_val = val;
 	return &entry->hent_val;
     }
-    New(501,entry, 1, HE);
 
+    entry = new_he();
     entry->hent_klen = klen;
     entry->hent_key = savepvn(key,klen);
     entry->hent_val = val;
@@ -282,10 +320,33 @@ HV *hv;
     register HE **b;
     register HE *entry;
     register HE **oentry;
+    I32 tmp;
 
     a = (HE**)xhv->xhv_array;
     nomemok = TRUE;
+#ifdef STRANGE_MALLOC
     Renew(a, newsize, HE*);
+#else
+    i = newsize * sizeof(HE*);
+#define MALLOC_OVERHEAD 16
+    tmp = MALLOC_OVERHEAD;
+    while (tmp - MALLOC_OVERHEAD < i)
+	tmp += tmp;
+    tmp -= MALLOC_OVERHEAD;
+    tmp /= sizeof(HE*);
+    assert(tmp >= newsize);
+    New(2,a, tmp, HE*);
+    Copy(xhv->xhv_array, a, oldsize, HE*);
+    if (oldsize >= 64 && *(char*)&xhv->xnv_nv == 0) {
+	sv_add_arena((char*)xhv->xhv_array, oldsize * sizeof(HE*), 0);
+	sv_add_arena(((char*)a) + newsize * sizeof(HE*),
+		     newsize * sizeof(HE*) - MALLOC_OVERHEAD,
+		     SVf_FAKE);
+    }
+    else
+	Safefree(xhv->xhv_array);
+#endif
+
     nomemok = FALSE;
     Zero(&a[oldsize], oldsize, HE*);		/* zero 2nd half*/
     xhv->xhv_max = --newsize;
@@ -326,6 +387,7 @@ newHV()
     xhv->xhv_max = 7;		/* start with 8 buckets */
     xhv->xhv_fill = 0;
     xhv->xhv_pmroot = 0;
+    *(char*)&xhv->xnv_nv = 0;
     (void)hv_iterinit(hv);	/* so each() will start off right */
     return hv;
 }
@@ -338,7 +400,7 @@ register HE *hent;
 	return;
     SvREFCNT_dec(hent->hent_val);
     Safefree(hent->hent_key);
-    Safefree(hent);
+    del_he(hent);
 }
 
 void
@@ -349,7 +411,7 @@ register HE *hent;
 	return;
     sv_2mortal(hent->hent_val);	/* free between statements */
     Safefree(hent->hent_key);
-    Safefree(hent);
+    del_he(hent);
 }
 
 void
@@ -413,7 +475,14 @@ HV *hv;
 	return;
     xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
+#ifdef STRANGE_MALLOC
     Safefree(xhv->xhv_array);
+#else
+    if (xhv->xhv_max < 127 || *(char*)&xhv->xnv_nv)
+	Safefree(xhv->xhv_array);
+    else  /* We used last half, so use first half for SV arena too. */
+	sv_add_arena((char*)xhv->xhv_array, (xhv->xhv_max + 1) * sizeof(HE*),0);
+#endif
     if (HvNAME(hv)) {
 	Safefree(HvNAME(hv));
 	HvNAME(hv) = 0;
@@ -422,6 +491,7 @@ HV *hv;
     xhv->xhv_max = 7;		/* it's a normal associative array */
     xhv->xhv_fill = 0;
     xhv->xhv_keys = 0;
+    *(char*)&xhv->xnv_nv = 1;
 
     if (SvRMAGICAL(hv))
 	mg_clear((SV*)hv); 
@@ -461,8 +531,8 @@ HV *hv;
 	    entry->hent_key = 0;
 	}
 	else {
-	    Newz(504,entry, 1, HE);
-	    xhv->xhv_eiter = entry;
+	    xhv->xhv_eiter = entry = new_he();
+	    Zero(entry, 1, HE);
 	}
 	magic_nextpack((SV*) hv,mg,key);
         if (SvOK(key)) {
@@ -475,14 +545,13 @@ HV *hv;
         }
 	if (entry->hent_val)
 	    SvREFCNT_dec(entry->hent_val);
-	Safefree(entry);
+	del_he(entry);
 	xhv->xhv_eiter = Null(HE*);
 	return Null(HE*);
     }
 
     if (!xhv->xhv_array)
-	entry = Null(HE*);
-    else
+	Newz(506,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
     do {
 	if (entry)
 	    entry = entry->hent_next;

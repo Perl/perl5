@@ -25,7 +25,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  * that running config_h.SH again will wipe out any changes you've made.
  * For a more permanent change edit config.sh and rerun config_h.SH.
  *
- * \$Id: Config_h.U,v 3.0.1.3 1995/01/30 14:25:39 ram Exp $
+ * \$Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
  */
 
 /* Configuration time: $cf_time
@@ -42,12 +42,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define MEM_ALIGNBYTES $alignbytes	/**/
 
-/* ARCHLIB_EXP:
- *	This symbol contains the ~name expanded version of ARCHLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
-
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
  *	be installed. Program must be prepared to deal with ~name substitution.
@@ -56,9 +50,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
- */
-/* STRINGIFY:
- *	This macro surrounds its token with double quotes.
  */
 #if $cpp_stuff == 1
 #define CAT2(a,b)a/**/b
@@ -1299,12 +1290,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #define RD_NODATA $rd_nodata
 #$d_eofnblk EOF_NONBLOCK
 
-/* PRIVLIB_EXP:
- *	This symbol contains the ~name expanded version of PRIVLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define PRIVLIB_EXP "$privlibexp"		/**/
-
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
  *	function prototypes.
@@ -1387,6 +1372,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define LOC_SED 	"$full_sed"	/**/
 
+/* ARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of ARCHLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
+
 /* BYTEORDER:
  *	This symbol hold the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
@@ -1441,6 +1432,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #$i_dbm I_DBM	/**/
 #$i_rpcsvcdbm I_RPCSVC_DBM	/**/
 
+/* I_LOCALE:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <locale.h>.
+ */
+#$i_locale	I_LOCALE		/**/
+
 /* I_SYS_STAT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/stat.h>.
@@ -1468,40 +1465,55 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$d_mymalloc MYMALLOC			/**/
 
+/* OLDARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of OLDARCHLIB, to be
+ *	used in programs that are not prepared to deal with ~ expansion at 
+ *	run-time.
+ */
+#$d_oldarchlib OLDARCHLIB_EXP "$oldarchlibexp"		/**/
+
+/* PRIVLIB_EXP:
+ *	This symbol contains the ~name expanded version of PRIVLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define PRIVLIB_EXP "$privlibexp"		/**/
+
 /* SIG_NAME:
- *	This symbol contains a list of signal names in order. This is intended
+ *	This symbol contains a list of signal names in order of
+ *	signal number. This is intended
  *	to be used as a static array initialization, like this:
  *		char *sig_name[] = { SIG_NAME };
  *	The signals in the list are separated with commas, and each signal
  *	is surrounded by double quotes. There is no leading SIG in the signal
- *	name, i.e. SIGQUIT is known as "QUIT". Duplicates are allowed.
+ *	name, i.e. SIGQUIT is known as "QUIT".
+ *	Gaps in the signal numbers (up to NSIG) are filled in with NUMnn,
+ *	etc., where nn is the actual signal number (e.g. NUM37).
  *	The signal number for sig_name[i] is stored in sig_num[i].
  *	The last element is 0 to terminate the list with a NULL.  This
  *	corresponds to the 0 at the end of the sig_num list.
- *	See SIG_NUM and SIG_MAX.
  */
-#define SIG_NAME "`echo $sig_name | sed 's/ /","/g'`",0	/**/
-
 /* SIG_NUM:
- *	This symbol contains a list of signal number, in the same order as the
+ *	This symbol contains a list of signal numbers, in the same order as the
  *	SIG_NAME list. It is suitable for static array initialization, as in:
  *		int sig_num[] = { SIG_NUM };
  *	The signals in the list are separated with commas, and the indices
  *	within that list and the SIG_NAME list match, so it's easy to compute
  *	the signal name from a number or vice versa at the price of a small
- *	dynamic linear lookup. Duplicates are allowed, so you can't assume
- *	sig_num[i] == i.  Instead, the signal number corresponding to
- * sig_name[i] is sig_number[i].
- * The last element is 0, corresponding to the 0 at the end of
- * the sig_name list.
+ *	dynamic linear lookup. 
+ *	Duplicates are allowed, but are moved to the end of the list.
+ *	The signal number corresponding to sig_name[i] is sig_number[i].
+ *	if (i < NSIG) then sig_number[i] == i.  
+ *	The last element is 0, corresponding to the 0 at the end of
+ *	the sig_name list.
  */
+#define SIG_NAME "`echo $sig_name | sed 's/ /","/g'`",0	/**/
 #define SIG_NUM `echo $sig_num 0 | sed 's/ /,/g'`	/**/
 
-/* SITELIB_EXP:
- *	This symbol contains the ~name expanded version of SITELIB, to be used
+/* SITEARCH_EXP:
+ *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#$d_sitelib SITELIB_EXP "$sitelibexp"		/**/
+#define SITEARCH_EXP "$sitearchexp"		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this

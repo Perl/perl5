@@ -34,6 +34,8 @@ if (($mtime && $mtime != $ctime) || $cwd =~ m#/afs/#) {
 }
 else {
     print "not ok 4\n";
+    print '#4 If test op/stat.t fails test 4, check if you are on a tmpfs';
+    print '#4 of some sort.  Building in /tmp sometimes has this problem.';
 }
 print "#4	:$mtime: != :$ctime:\n";
 

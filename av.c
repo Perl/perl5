@@ -64,9 +64,30 @@ I32 key;
 	}
 	else {
 	    if (AvALLOC(av)) {
+		U32 bytes;
+
 		newmax = key + AvMAX(av) / 5;
 	      resize:
+#ifdef STRANGE_MALLOC
 		Renew(AvALLOC(av),newmax+1, SV*);
+#else
+		bytes = (newmax + 1) * sizeof(SV*);
+#define MALLOC_OVERHEAD 16
+		tmp = MALLOC_OVERHEAD;
+		while (tmp - MALLOC_OVERHEAD < bytes)
+		    tmp += tmp;
+		tmp -= MALLOC_OVERHEAD;
+		tmp /= sizeof(SV*);
+		assert(tmp > newmax);
+		newmax = tmp - 1;
+		New(2,ary, newmax+1, SV*);
+		Copy(AvALLOC(av), ary, AvMAX(av)+1, SV*);
+		if (AvMAX(av) > 64 && !AvREUSED(av))
+		    sv_add_arena((char*)AvALLOC(av), AvMAX(av) * sizeof(SV*),0);
+		else
+		    Safefree(AvALLOC(av));
+		AvALLOC(av) = ary;
+#endif
 		ary = AvALLOC(av) + AvMAX(av) + 1;
 		tmp = newmax - AvMAX(av);
 		if (av == stack) {	/* Oops, grew stack (via av_store()?) */
@@ -305,6 +326,7 @@ register AV *av;
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
     AvMAX(av) = AvFILL(av) = -1;
+    AvREUSED_on(av);	/* Avoid leak of making SVs out of old memory again. */
     if (AvARYLEN(av)) {
 	SvREFCNT_dec(AvARYLEN(av));
 	AvARYLEN(av) = 0;

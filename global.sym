@@ -23,7 +23,6 @@ bufend
 bufptr
 bxor_amg
 check
-coeff
 compiling
 compl_amg
 compcv
@@ -392,6 +391,7 @@ gv_stashpv
 gv_stashsv
 he_delayfree
 he_free
+he_root
 hoistmust
 hv_clear
 hv_delete
@@ -913,6 +913,7 @@ scan_trans
 scan_word
 scope
 screaminstr
+setdefout
 setenv_getix
 skipspace
 stack_grow
@@ -926,6 +927,7 @@ sv_2iv
 sv_2mortal
 sv_2nv
 sv_2pv
+sv_add_arena
 sv_backoff
 sv_bless
 sv_catpv
@@ -975,7 +977,6 @@ wait4pid
 warn
 watch
 whichsig
-whichsigname
 xiv_arenaroot
 xiv_root
 xnv_root

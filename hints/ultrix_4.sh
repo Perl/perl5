@@ -9,6 +9,12 @@ case "$optimize" in
 '') optimize=-g ;;
 esac
 
+# Some users have reported Configure runs *much* faster if you 
+# replace all occurences of /bin/sh by /bin/sh5
+# Something like:
+#   sed 's!/bin/sh!/bin/sh5!g' Configure > Configure.sh5
+# Then run "sh5 Configure.sh5 [your options]"
+
 case "$myuname" in
 *risc*) cat <<EOF
 Note that there is a bug in some versions of NFS on the DECStation that

@@ -126,6 +126,20 @@ shellflags = $shellflags
 
 ## To use an alternate make, set \$altmake in config.sh.
 MAKE = ${altmake-make}
+
+# These variables will be used in a future version to make
+# the make file more portable to non-unix systems.
+AR = $ar
+EXE_EXT = $exe_ext
+LIB_EXT = $lib_ext
+OBJ_EXT = $obj_ext
+PATH_SEP = $path_sep
+
+FIRSTMAKEFILE = $firstmakefile
+
+# Any special object files needed by this architecture, e.g. os2/os2.obj
+ARCHOBJS = $archobjs
+
 !GROK!THIS!
 
 ## In the following dollars and backticks do not need the extra backslash.
@@ -135,11 +149,24 @@ CCCMD = `sh $(shellflags) cflags $(perllib) $@`
 
 private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 
-sh = Makefile.SH c2ph.SH cflags.SH config_h.SH h2ph.SH h2xs.SH makeaperl.SH \
-	makedepend.SH makedir.SH perl_exp.SH perldoc.SH writemain.SH
+# Files to be built with variable substitution before miniperl
+# is available.
+sh = Makefile.SH cflags.SH config_h.SH makeaperl.SH makedepend.SH \
+	makedir.SH perl_exp.SH writemain.SH
 
-addedbyconf = UU Makefile c2ph cflags config.h h2ph h2xs makeaperl \
-	makedepend makedir perl_exp perldoc writemain
+shextract = Makefile cflags config.h makeaperl makedepend \
+	makedir perl_exp writemain
+
+# Files to be built with variable substitution after miniperl is
+# available.  Dependencies handled manually below (for now).
+
+pl = c2ph.PL h2ph.PL h2xs.PL perldoc.PL \
+	pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL
+
+plextract = c2ph h2ph h2xs perldoc \
+	pod/pod2html pod/pod2latex pod/pod2man
+
+addedbyconf = UU $(shextract) $(plextract) pstruct
 
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
@@ -157,7 +184,8 @@ obj1 = $(mallocobj) gv.o toke.o perly.o op.o regcomp.o dump.o util.o mg.o
 obj2 = hv.o av.o run.o pp_hot.o sv.o pp.o scope.o pp_ctl.o pp_sys.o
 obj3 = doop.o doio.o regexec.o taint.o deb.o globals.o
 
-obj = $(obj1) $(obj2) $(obj3)
+
+obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 
 # Once perl has been Configure'd and built ok you build different
 # perl variants (Debugging, Embedded, Multiplicity etc) by saying:
@@ -178,7 +206,7 @@ SHELL = /bin/sh
 .c.o:
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-all: makefile miniperl $(private) $(public) $(dynamic_ext)
+all: makefile miniperl $(private) $(plextract) $(public) $(dynamic_ext)
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(MAKE) all
 
 # This is now done by installman only if you actually want the man pages.
@@ -187,7 +215,7 @@ all: makefile miniperl $(private) $(public) $(dynamic_ext)
 # Phony target to force checking subdirectories.
 # Apparently some makes require an action for the FORCE target.
 FORCE:
-	@true
+	@sh -c true
 
 # The $& notation tells Sequent machines that it can do a parallel make,
 # and is harmless otherwise.
@@ -232,7 +260,7 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 *)
 $spitshell >>Makefile <<'!NO!SUBS!'
 	rm -f $(perllib)
-	ar rcu $(perllib) perl.o $(obj)
+	$(AR) rcu $(perllib) perl.o $(obj)
 	@$(ranlib) $(perllib)
 !NO!SUBS!
 ;;
@@ -257,7 +285,7 @@ sperl.o: perl.c perly.h patchlevel.h $(h)
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
 #
-preplibrary: miniperl lib/Config.pm
+preplibrary: miniperl lib/Config.pm $(plextract)
 	@./makedir lib/auto
 	@echo "	AutoSplitting perl library"
 	@./miniperl -Ilib -e 'use AutoSplit; \
@@ -270,6 +298,9 @@ lib/Config.pm: config.sh miniperl
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.PL lib/Config.pm
 	./miniperl minimod.PL > tmp && mv tmp $@
+
+$(plextract):	miniperl lib/Config.pm
+	./miniperl -Ilib $@.PL
 
 install: all install.perl install.man
 
@@ -291,11 +322,12 @@ install.man:	all
 # normally shouldn't remake perly.[ch].
 
 run_byacc:	FORCE
-	@ echo 'Expect' 109 shift/reduce and 1 reduce/reduce conflict
+	@ echo 'Expect' 129 shift/reduce and 1 reduce/reduce conflict
 	$(BYACC) -d perly.y
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
 	mv y.tab.h perly.h
 	echo 'extern YYSTYPE yylval;' >>perly.h
+	- perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
 
 # We don't want to regenerate perly.c and perly.h, but they might
 # appear out-of-date after a patch is applied or a new distribution is
@@ -351,6 +383,7 @@ clean:
 realclean: clean
 	-cd x2p; $(MAKE) realclean
 	-cd pod; $(MAKE) realclean
+	-cd os2; rm -f Makefile
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext realclean $$x ; \
 	done
@@ -406,6 +439,9 @@ hlist:  $(h)
 
 shlist: $(sh)
 	echo $(sh) | tr ' ' '\012' >.shlist
+
+pllist: $(pl)
+	echo $(pl) | tr ' ' '\012' >.pllist
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.

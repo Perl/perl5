@@ -7,6 +7,7 @@
 #  include <sys/types.h>
 # endif
 #include <sys/socket.h>
+#include <sys/un.h>
 # ifdef I_NETINET_IN
 #  include <netinet/in.h>
 # endif
@@ -627,8 +628,45 @@ inet_ntoa(ip_address_sv)
 	}
 
 void
-pack_sockaddr_in(family,port,ip_address)
-	short	family
+pack_sockaddr_un(pathname)
+	char *	pathname
+	CODE:
+	{
+	struct sockaddr_un sun_ad; /* fear using sun */
+	Zero( &sun_ad, sizeof sun_ad, char );
+	sun_ad.sun_family = AF_UNIX;
+	Copy( pathname, sun_ad.sun_path, sizeof sun_ad.sun_path, char );
+	ST(0) = sv_2mortal(newSVpv((char *)&sun_ad, sizeof sun_ad));
+	}
+
+void
+unpack_sockaddr_un(sun_sv)
+	SV *	sun_sv
+	PPCODE:
+	{
+	STRLEN sockaddrlen;
+	struct sockaddr_un addr;
+	char *	sun_ad = SvPV(sun_sv,sockaddrlen);
+
+	if (sockaddrlen != sizeof(addr)) {
+	    croak("Bad arg length for %s, length is %d, should be %d",
+			"Socket::unpack_sockaddr_un",
+			sockaddrlen, sizeof(addr));
+	}
+
+	Copy( sun_ad, &addr, sizeof addr, char );
+
+	if ( addr.sun_family != AF_UNIX ) {
+	    croak("Bad address family for %s, got %d, should be %d",
+			"Socket::unpack_sockaddr_un",
+			addr.sun_family,
+			AF_UNIX);
+	} 
+	ST(0) = sv_2mortal(newSVpv(addr.sun_path, strlen(addr.sun_path)));
+	}
+
+void
+pack_sockaddr_in(port,ip_address)
 	short	port
 	char *	ip_address
 	CODE:
@@ -636,7 +674,7 @@ pack_sockaddr_in(family,port,ip_address)
 	struct sockaddr_in sin;
 
 	Zero( &sin, sizeof sin, char );
-	sin.sin_family = family;
+	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 	Copy( ip_address, &sin.sin_addr, sizeof sin.sin_addr, char );
 
@@ -650,7 +688,6 @@ unpack_sockaddr_in(sin_sv)
 	{
 	STRLEN sockaddrlen;
 	struct sockaddr_in addr;
-	short	family;
 	short	port;
 	struct in_addr	ip_address;
 	char *	sin = SvPV(sin_sv,sockaddrlen);
@@ -659,14 +696,17 @@ unpack_sockaddr_in(sin_sv)
 			"Socket::unpack_sockaddr_in",
 			sockaddrlen, sizeof(addr));
 	}
-
 	Copy( sin, &addr,sizeof addr, char );
-	family = addr.sin_family;
+	if ( addr.sin_family != AF_INET ) {
+	    croak("Bad address family for %s, got %d, should be %d",
+			"Socket::unpack_sockaddr_in",
+			addr.sin_family,
+			AF_INET);
+	} 
 	port = ntohs(addr.sin_port);
 	ip_address = addr.sin_addr;
 
-	EXTEND(sp, 3);
-	PUSHs(sv_2mortal(newSViv(family)));
+	EXTEND(sp, 2);
 	PUSHs(sv_2mortal(newSViv(port)));
 	PUSHs(sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address)));
 	}

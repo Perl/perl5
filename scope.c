@@ -152,7 +152,7 @@ GV *gv;
     GP *ogp = GvGP(gv);
 
     SSCHECK(3);
-    SSPUSHPTR(gv);
+    SSPUSHPTR(SvREFCNT_inc(gv));
     SSPUSHPTR(ogp);
     SSPUSHINT(SAVEt_GP);
 
@@ -525,6 +525,7 @@ I32 base;
 	    gv = (GV*)SSPOPPTR;
             gp_free(gv);
             GvGP(gv) = (GP*)ptr;
+	    SvREFCNT_dec(gv);
             break;
 	case SAVEt_FREESV:
 	    ptr = SSPOPPTR;

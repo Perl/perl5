@@ -65,7 +65,7 @@ perl(1), perlapi(1)
 =cut
 
 # Global Constants
-$XSUBPP_version = "1.922";
+$XSUBPP_version = "1.923";
 require 5.001;
 
 $usage = "Usage: xsubpp [-v] [-C++] [-except] [-s pattern] [-typemap typemap]... file.xs\n";
@@ -349,7 +349,7 @@ sub check_cpp {
 
 sub Q {
     my($text) = @_;
-    $text =~ tr/#//d;
+    $text =~ s/^#//gm;
     $text =~ s/\[\[/{/g;
     $text =~ s/\]\]/}/g;
     $text;
@@ -598,7 +598,8 @@ EOF
 
 	# do code
 	if (/^\s*NOT_IMPLEMENTED_YET/) {
-		print "\ncroak(\"$pname: not implemented yet\");\n";
+		print "\n\tcroak(\"$pname: not implemented yet\");\n";
+		$_ = '' ;
 	} else {
 		if ($ret_type ne "void") {
 			print "\t" . &map_type($ret_type) . "\tRETVAL;\n"
@@ -698,8 +699,10 @@ EOF
 }
 
 # print initialization routine
-print qq/extern "C"\n/ if $cplusplus;
 print Q<<"EOF";
+##ifdef __cplusplus
+#extern "C"
+##endif
 #XS(boot_$Module_cname)
 #[[
 #    dXSARGS;

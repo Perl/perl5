@@ -59,7 +59,7 @@ sub dotsh {
    close (_SH_ENV);
    system "rm -f /tmp/_sh_env$$";
 
-   foreach $key (keys(ENV)) {
+   foreach $key (keys(%ENV)) {
        $tmp .= "\$$key = \$ENV{'$key'};" if $key =~ /^[A-Za-z]\w*$/;
    }
    eval $tmp;

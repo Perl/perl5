@@ -8,9 +8,10 @@
  * GenConfig.pl when producing Config.pm.
  *
  * config.h for VMS
+ * Version: 5.1.5
  */                 
 
-/* Configuration time: 18-Apr-1995 17:00
+/* Configuration time:  8-Jun-1995 17:00
  * Configured by: Charles Bailey  bailey@genetics.upenn.edu
  * Target system: VMS
  */
@@ -39,7 +40,7 @@
  *	same as PRIVLIB_EXP, it is not defined, since presumably the
  *	program already searches PRIVLIB_EXP.
  */
-#ifndef __ALPHA
+#ifdef __ALPHA
 #define ARCHLIB_EXP "/perl_root/lib/VMS_AXP"  /* config-skip */
 #else
 #define ARCHLIB_EXP "/perl_root/lib/VMS_VAX" /* config-skip */
@@ -485,6 +486,10 @@
  *	to determine the number of bytes in the buffer.  USE_STDIO_BASE
  *	will never be defined unless USE_STDIO_PTR is.
  */
+/* VMS:
+ * Regular FILE * are pretty close to meeting these criteria, but socket
+ * I/O uses a summy FILE *, and Perl doesn't distinguish between socket
+ * and non-socket filehandles. */
 #undef USE_STDIO_PTR 	/**/
 #undef USE_STDIO_BASE 	/**/
 
@@ -493,13 +498,23 @@
  *	FILE structure pointed to by its argument. This macro will always be
  *	defined if USE_STDIO_PTR is defined.
  */
+/* STDIO_PTR_LVALUE:
+ *	This symbol is defined if the FILE_ptr macro can be used as an
+ *	lvalue.
+ */
 /* FILE_cnt:
  *	This macro is used to access the _cnt field (or equivalent) of the
  *	FILE structure pointed to by its argument. This macro will always be
  *	defined if USE_STDIO_PTR is defined.
  */
-#ifdef USE_STDIO_PTR
-#endif
+/* STDIO_CNT_LVALUE:
+ *	This symbol is defined if the FILE_cnt macro can be used as an
+ *	lvalue.
+ */
+#undef FILE_ptr
+#undef STDIO_PTR_LVALUE
+#undef FILE_cnt
+#undef STDIO_CNT_LVALUE
 
 /* FILE_base:
  *	This macro is used to access the _base field (or equivalent) of the
@@ -512,8 +527,8 @@
  *	structure pointed to its argument. This macro will always be defined
  *	if USE_STDIO_BASE is defined.
  */
-#ifdef USE_STDIO_BASE
-#endif
+#undef FILE_base
+#undef FILE_bufsiz
 
 /* USE_STRUCT_COPY:
  *	This symbol, if defined, indicates that this C compiler knows how
@@ -940,7 +955,7 @@
 
 /* VMS:
  *	This symbol, if defined, indicates that the program is running under
- *	VMS.  It's symbol automagically defined by all VMS C compilers I've seen.
+ *	VMS.  It's a symbol automagically defined by all VMS C compilers I've seen.
  * Just in case, however . . . */
 #ifndef VMS
 #define VMS		/**/

@@ -1,7 +1,7 @@
 /*  sockadapt.c
  *
  *  Author: Charles Bailey  bailey@genetics.upenn.edu
- *  Last Revised: 08-Feb-1995
+ *  Last Revised: 17-Mar-1995
  *
  *  This file should contain stubs for any of the TCP/IP functions perl5
  *  requires which are not supported by your TCP/IP stack.  These stubs
@@ -11,22 +11,24 @@
  *  This version is set up for perl5 with socketshr 0.9D TCP/IP support.
  */
 
-#include "sockadapt.h"
+#include "EXTERN.h"
+#include "perl.h"
 
-#ifdef __STDC__
-#define STRINGIFY(a) #a	 /* config-skip */
-#else
-#define STRINGIFY(a) "a"	 /* config-skip */
-#endif
-
-#define FATALSTUB(func) \
-  void func() {\
-    croak("Function %s not implemented in this version of perl",\
-    STRINGIFY(func));\
-  }
-
-FATALSTUB(endnetent);
-FATALSTUB(getnetbyaddr);
-FATALSTUB(getnetbyname);
-FATALSTUB(getnetent);
-FATALSTUB(setnetent);
+void endnetent() {
+  croak("Function \"endnetent\" not implemented in this version of perl");
+}
+struct netent *getnetbyaddr( long net, int type) {
+  croak("Function \"getnetbyaddr\" not implemented in this version of perl");
+  return (struct netent *)NULL; /* Avoid MISSINGRETURN warning, not reached */
+}
+struct netent *getnetbyname( char *name) {
+  croak("Function \"getnetbyname\" not implemented in this version of perl");
+  return (struct netent *)NULL; /* Avoid MISSINGRETURN warning, not reached */
+}
+struct netent *getnetent() {
+  croak("Function \"getnetent\" not implemented in this version of perl");
+  return (struct netent *)NULL; /* Avoid MISSINGRETURN warning, not reached */
+}
+void setnetent() {
+  croak("Function \"setnetent\" not implemented in this version of perl");
+}

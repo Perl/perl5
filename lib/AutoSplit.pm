@@ -56,6 +56,7 @@ sub autosplit_lib_modules{
 
     foreach(@modules){
 	s#::#/#g;	# incase specified as ABC::XYZ
+	s|\\|/|g;		# bug in ksh OS/2
 	s#^lib/##; # incase specified as lib/*.pm
 	if ($vms && /[:>\]]/) { # may need to convert VMS-style filespecs
 	    my ($dir,$name) = (/(.*])(.*)/);
@@ -77,6 +78,9 @@ sub autosplit_file{
 
     # where to write output files
     $autodir = "lib/auto" unless $autodir;
+    if ($Config{'osname'} eq 'VMS') {
+	($autodir = VMS::Filespec::unixpath($autodir)) =~ s#/$##;
+    }
     unless (-d $autodir){
 	local($", @p)="/";
 	foreach(split(/\//,$autodir)){
@@ -107,7 +111,6 @@ sub autosplit_file{
 	$package = $1 if (m/^\s*package\s+([\w:]+)\s*;/);
 	++$autoloader_seen if m/^\s*(use|require)\s+AutoLoader\b/;
 	++$autoloader_seen if m/\bISA\s*=.*\bAutoLoader\b/;
-	++$autoloader_seen if m/^\s*sub\s+AUTOLOAD\b/;
 	last if /^__END__/;
     }
     if ($check_for_autoloader && !$autoloader_seen){
@@ -174,14 +177,15 @@ sub autosplit_file{
     # For now both of these produce warnings.
 
     open(OUT,">/dev/null") || open(OUT,">nla0:"); # avoid 'not opened' warning
-    my(@subnames);
+    my(@subnames, %proto);
     while (<IN>) {
 	if (/^package ([\w:]+)\s*;/) {
 	    warn "package $1; in AutoSplit section ignored. Not currently supported.";
 	}
-	if (/^sub ([\w:]+)/) {
+	if (/^sub\s+([\w:]+)(\s*\(.*?\))?/) {
 	    print OUT "1;\n";
-	    my($subname) = $1;
+	    my $subname = $1;
+	    $proto{$1} = $2 or '';
 	    if ($subname =~ m/::/){
 		warn "subs with package names not currently supported in AutoSplit section";
 	    }
@@ -229,7 +233,7 @@ sub autosplit_file{
 	carp "AutoSplit: unable to create timestamp file ($al_idx_file): $!";
     print TS "# Index created by AutoSplit for $filename (file acts as timestamp)\n";
     print TS "package $package;\n";
-    print TS map("sub $_ ;\n", @subnames);
+    print TS map("sub $_$proto{$_} ;\n", @subnames);
     print TS "1;\n";
     close(TS);
 

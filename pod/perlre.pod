@@ -19,12 +19,13 @@ in question might not actually be a slash.  In fact, any of these
 modifiers may also be embedded within the regular expression itself using
 the new C<(?...)> construct.  See below.
 
-The C</x> modifier itself needs a little more explanation.  It tells the
-regular expression parser to ignore whitespace that is not backslashed
-or within a character class.  You can use this to break up your regular
-expression into (slightly) more readable parts.  Together with the
-capability of embedding comments described later, this goes a long
-way towards making Perl 5 a readable language.  See the C comment
+The C</x> modifier itself needs a little more explanation.  It tells
+the regular expression parser to ignore whitespace that is not
+backslashed or within a character class.  You can use this to break up
+your regular expression into (slightly) more readable parts.  The C<#>
+character is also treated as a metacharacter introducing a comment,
+just as in ordinary Perl code.  Taken together, these features go a
+long way towards making Perl 5 a readable language.  See the C comment
 deletion code in L<perlop>.
 
 =head2 Regular Expressions
@@ -147,7 +148,7 @@ When the bracketing construct C<( ... )> is used, \<digit> matches the
 digit'th substring.  (Outside of the pattern, always use "$" instead of
 "\" in front of the digit.  The scope of $<digit> (and C<$`>, C<$&>, and C<$')>
 extends to the end of the enclosing BLOCK or eval string, or to the
-next pattern match with subexpressions.  
+next successful pattern match, whichever comes first.
 If you want to
 use parentheses to delimit subpattern (e.g. a set of alternatives) without
 saving it as a subpattern, follow the ( with a ?.

@@ -73,7 +73,7 @@ sub bootstrap {
     local($module) = $args[0];
     local(@dirs, $file);
 
-    Carp::confess "Usage: DynaLoader::bootstrap(module)" unless $module;
+    Carp::confess("Usage: DynaLoader::bootstrap(module)") unless $module;
 
     # A common error on platforms which don't support dynamic loading.
     # Since it's fatal and potentially confusing we give a detailed message.
@@ -108,7 +108,7 @@ sub bootstrap {
     # last resort, let dl_findfile have a go in all known locations
     $file = dl_findfile(@dirs, map("-L$_",@INC), $modfname) unless $file;
 
-    Carp::croak "Can't find loadable object for module $module in \@INC (@INC)"
+    Carp::croak("Can't find loadable object for module $module in \@INC (@INC)")
 	unless $file;
 
     my $bootname = "boot_$module";
@@ -134,14 +134,14 @@ sub bootstrap {
     # it executed.
 
     my $libref = dl_load_file($file) or
-	Carp::croak "Can't load '$file' for module $module: ".dl_error()."\n";
+	Carp::croak("Can't load '$file' for module $module: ".dl_error()."\n");
 
     my @unresolved = dl_undef_symbols();
-    Carp::carp "Undefined symbols present after loading $file: @unresolved\n"
+    Carp::carp("Undefined symbols present after loading $file: @unresolved\n")
         if @unresolved;
 
     my $boot_symbol_ref = dl_find_symbol($libref, $bootname) or
-         Carp::croak "Can't find '$bootname' symbol in $file\n";
+         Carp::croak("Can't find '$bootname' symbol in $file\n");
 
     my $xs = dl_install_xsub("${module}::bootstrap", $boot_symbol_ref, $file);
 
@@ -250,7 +250,7 @@ sub dl_expandspec {
     my $file = $spec; # default output to input
 
     if ($osname eq 'VMS') { # dl_expandspec should be defined in dl_vms.xs
-	Carp::croak "dl_expandspec: should be defined in XS file!\n";
+	Carp::croak("dl_expandspec: should be defined in XS file!\n");
     } else {
 	return undef unless -f $file;
     }

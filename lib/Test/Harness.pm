@@ -2,6 +2,13 @@ package Test::Harness;
 
 use Exporter;
 use Benchmark;
+use Config;
+
+$Is_OS2 = $Config{'osname'} =~ m|^os/?2$|i ;
+
+$ENV{EMXSHELL} = 'sh' if $Is_OS2; # to run commands
+$path_s = $Is_OS2 ? ';' : ':' ;
+
 @ISA=(Exporter);
 @EXPORT= qw(&runtests &test_lib);
 @EXPORT_OK= qw($verbose $switches);
@@ -16,7 +23,7 @@ sub runtests {
     my $bad = 0;
     my $good = 0;
     my $total = @tests;
-    local($ENV{'PERL5LIB'}) = join(':', @INC); # pass -I flags to children
+    local($ENV{'PERL5LIB'}) = join($path_s, @INC); # pass -I flags to children
 
     my $t_start = new Benchmark;
     while ($test = shift(@tests)) {
@@ -69,7 +76,7 @@ sub runtests {
     } else {
       $pct = sprintf("%.2f", $good / $total * 100);
       if ($bad == 1) {
-          warn "Failed 1 test, $pct% okay.\n";
+          die "Failed 1 test, $pct% okay.\n";
       } else {
           die "Failed $bad/$total tests, $pct% okay.\n";
       }

@@ -1923,7 +1923,7 @@ EXT U32 opargs[] = {
 	0x00000000,	/* and */
 	0x00000000,	/* or */
 	0x00001106,	/* xor */
-	0x00000000,	/* cond_expr */
+	0x00000040,	/* cond_expr */
 	0x00000004,	/* andassign */
 	0x00000004,	/* orassign */
 	0x00000040,	/* method */

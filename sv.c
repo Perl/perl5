@@ -51,6 +51,16 @@ static void sv_unglob _((SV* sv));
 #define new_SV() sv = (SV*)safemalloc(sizeof(SV))
 #define del_SV(p) free((char*)p)
 
+void
+sv_add_arena(ptr, size, flags)
+char* ptr;
+U32 size;
+U32 flags;
+{
+    if (!(flags & SVf_FAKE))
+	free(ptr);
+}
+
 #else
 
 #define new_SV()			\
@@ -90,11 +100,13 @@ del_sv(p)
 SV* p;
 {
     if (debug & 32768) {
+	SV* sva;
 	SV* sv;
 	SV* svend;
 	int ok = 0;
-	for (sv = sv_arenaroot; sv; sv = (SV *) SvANY(svend)) {
-	    svend = &sv[1008 / sizeof(SV)];
+	for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
+	    sv = sva + 1;
+	    svend = &sva[SvREFCNT(sva)];
 	    if (p >= sv && p < svend)
 		ok = 1;
 	}
@@ -115,24 +127,40 @@ SV* p;
 
 #endif
 
-static SV*
-more_sv()
+void
+sv_add_arena(ptr, size, flags)
+char* ptr;
+U32 size;
+U32 flags;
 {
+    SV* sva = (SV*)ptr;
     register SV* sv;
     register SV* svend;
-    sv_root = (SV*)safemalloc(1012);
-    sv = sv_root;
-    Zero(sv, 1012, char);
-    svend = &sv[1008 / sizeof(SV) - 1];
+    Zero(sva, size, char);
+
+    /* The first SV in an arena isn't an SV. */
+    SvANY(sva) = (void *) sv_arenaroot;		/* ptr to next arena */
+    SvREFCNT(sva) = size / sizeof(SV);		/* number of SV slots */
+    SvFLAGS(sva) = flags;			/* FAKE if not to be freed */
+
+    sv_arenaroot = sva;
+    sv_root = sva + 1;
+
+    svend = &sva[SvREFCNT(sva) - 1];
+    sv = sva + 1;
     while (sv < svend) {
 	SvANY(sv) = (void *)(SV*)(sv + 1);
 	SvFLAGS(sv) = SVTYPEMASK;
 	sv++;
     }
     SvANY(sv) = 0;
-    sv++;
-    SvANY(sv) = (void *) sv_arenaroot;
-    sv_arenaroot = sv_root;
+    SvFLAGS(sv) = SVTYPEMASK;
+}
+
+static SV*
+more_sv()
+{
+    sv_add_arena(safemalloc(1008), 1008, 0);
     return new_sv();
 }
 #endif
@@ -140,11 +168,13 @@ more_sv()
 void
 sv_report_used()
 {
+    SV* sva;
     SV* sv;
     register SV* svend;
 
-    for (sv = sv_arenaroot; sv; sv = (SV *) SvANY(sv)) {
-	svend = &sv[1008 / sizeof(SV)];
+    for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
+	sv = sva + 1;
+	svend = &sva[SvREFCNT(sva)];
 	while (sv < svend) {
 	    if (SvTYPE(sv) != SVTYPEMASK) {
 		fprintf(stderr, "****\n");
@@ -158,12 +188,14 @@ sv_report_used()
 void
 sv_clean_objs()
 {
+    SV* sva;
     register SV* sv;
     register SV* svend;
     SV* rv;
 
-    for (sv = sv_arenaroot; sv; sv = (SV *) SvANY(sv)) {
-	svend = &sv[1008 / sizeof(SV)];
+    for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
+	sv = sva + 1;
+	svend = &sva[SvREFCNT(sva)];
 	while (sv < svend) {
 	    if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
 		DEBUG_D((fprintf(stderr, "Cleaning object ref:\n "),
@@ -181,11 +213,13 @@ sv_clean_objs()
 void
 sv_clean_all()
 {
+    SV* sva;
     register SV* sv;
     register SV* svend;
 
-    for (sv = sv_arenaroot; sv; sv = (SV *) SvANY(sv)) {
-	svend = &sv[1008 / sizeof(SV)];
+    for (sva = sv_arenaroot; sva; sva = (SV*) SvANY(sva)) {
+	sv = sva + 1;
+	svend = &sva[SvREFCNT(sva)];
 	while (sv < svend) {
 	    if (SvTYPE(sv) != SVTYPEMASK) {
 		DEBUG_D((fprintf(stderr, "Cleaning loops:\n "), sv_dump(sv));)
@@ -194,6 +228,25 @@ sv_clean_all()
 	    }
 	    ++sv;
 	}
+    }
+}
+
+void
+sv_free_arenas()
+{
+    SV* sva;
+    SV* svanext;
+
+    /* Free arenas here, but be careful about fake ones.  (We assume
+       contiguity of the fake ones with the corresponding real ones.) */
+
+    for (sva = sv_arenaroot; sva; sva = svanext) {
+	svanext = (SV*) SvANY(sva);
+	while (svanext && SvFAKE(svanext))
+	    svanext = (SV*) SvANY(svanext);
+
+	if (!SvFAKE(sva))
+	    Safefree(sva);
     }
 }
 
@@ -1412,7 +1465,8 @@ register SV *sstr;
 
     if (dtype == SVt_PVGV && (SvFLAGS(dstr) & SVf_FAKE)) {
         sv_unglob(dstr);     /* so fake GLOB won't perpetuate */
-        SvPOK_only(dstr);
+	sv_setpvn(dstr, "", 0);
+        (void)SvPOK_only(dstr);
         dtype = SvTYPE(dstr);
     }
 
@@ -1461,9 +1515,28 @@ register SV *sstr;
 	if (dtype < SVt_PVNV)
 	    sv_upgrade(dstr, SVt_PVNV);
 	break;
+
+    case SVt_PVLV:
+	sv_upgrade(dstr, SVt_PVNV);
+	break;
+
+    case SVt_PVAV:
+    case SVt_PVHV:
+    case SVt_PVCV:
+    case SVt_PVFM:
+    case SVt_PVIO:
+	if (op)
+	    croak("Bizarre copy of %s in %s", sv_reftype(sstr, 0),
+		op_name[op->op_type]);
+	else
+	    croak("Bizarre copy of %s", sv_reftype(sstr, 0));
+	break;
+
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
-	    if (dtype < SVt_PVGV) {
+	    if (dtype == SVt_PVGV)
+		GvFLAGS(sstr) |= GVf_IMPORTED;
+	    else {
 		char *name = GvNAME(sstr);
 		STRLEN len = GvNAMELEN(sstr);
 		sv_upgrade(dstr, SVt_PVGV);
@@ -1474,12 +1547,6 @@ register SV *sstr;
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
 	    }
 	    (void)SvOK_off(dstr);
-	    if (!GvAV(sstr))
-		gv_AVadd(sstr);
-	    if (!GvHV(sstr))
-		gv_HVadd(sstr);
-	    if (!GvIO(sstr))
-		gv_IOadd(sstr);
 	    if (GvGP(dstr))
 		gp_free(dstr);
 	    GvGP(dstr) = gp_ref(GvGP(sstr));
@@ -1538,13 +1605,16 @@ register SV *sstr;
 			SAVESPTR(GvCV(dstr));
 		    else {
 			CV* cv = GvCV(dstr);
-			dref = (SV*)cv;
-			if (dowarn && cv && sref != dref &&
-				!GvCVGEN((GV*)dstr) &&
-				(CvROOT(cv) || CvXSUB(cv)) )
-			    warn("Subroutine %s redefined", GvENAME((GV*)dstr));
+			if (cv) {
+			    dref = (SV*)cv;
+			    if (dowarn && sref != dref &&
+				    !GvCVGEN((GV*)dstr) &&
+				    (CvROOT(cv) || CvXSUB(cv)) )
+				warn("Subroutine %s redefined",
+				    GvENAME((GV*)dstr));
+			    SvFAKE_on(cv);
+			}
 		    }
-		    GvFLAGS(dstr) |= GVf_IMPORTED;
 		    GvCV(dstr) = (CV*)sref;
 		    break;
 		default:
@@ -1555,6 +1625,8 @@ register SV *sstr;
 		    GvSV(dstr) = sref;
 		    break;
 		}
+		if (dref != sref)
+		    GvFLAGS(dstr) |= GVf_IMPORTED;	/* crude */
 		if (dref)
 		    SvREFCNT_dec(dref);
 		if (intro)
@@ -1769,6 +1841,8 @@ register STRLEN len;
 
     junk = SvPV_force(sv, tlen);
     SvGROW(sv, tlen + len + 1);
+    if (ptr == junk)
+	ptr = SvPVX(sv);
     Move(ptr,SvPVX(sv)+tlen,len,char);
     SvCUR(sv) += len;
     *SvEND(sv) = '\0';
@@ -1803,6 +1877,8 @@ register char *ptr;
     junk = SvPV_force(sv, tlen);
     len = strlen(ptr);
     SvGROW(sv, tlen + len + 1);
+    if (ptr == junk)
+	ptr = SvPVX(sv);
     Move(ptr,SvPVX(sv)+tlen,len+1,char);
     SvCUR(sv) += len;
     (void)SvPOK_only(sv);		/* validate pointer */
@@ -1843,7 +1919,7 @@ I32 namlen;
     
     if (SvREADONLY(sv) && curcop != &compiling && !strchr("gB", how))
 	croak(no_modify);
-    if (SvMAGICAL(sv)) {
+    if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
 	    if (how == 't')
 		mg->mg_len |= 1;
@@ -1943,7 +2019,11 @@ I32 namlen;
     case '.':
 	mg->mg_virtual = &vtbl_pos;
 	break;
-    case '~':	/* reserved for extensions but multiple extensions may clash */
+    case '~':	/* Reserved for use by extensions not perl internals.	*/
+	/* Useful for attaching extension internal data to perl vars.	*/
+	/* Note that multiple extensions may clash if magical scalars	*/
+	/* etc holding private data from one are passed to another.	*/
+	SvRMAGICAL_on(sv);
 	break;
     default:
 	croak("Don't know how to handle magic of type '%c'", how);
@@ -2129,11 +2209,13 @@ register SV *sv;
 		PUSHMARK(SP);
 		PUSHs(&ref);
 		PUTBACK;
-		perl_call_sv((SV*)destructor, G_DISCARD|G_EVAL);
+		perl_call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR);
 		del_XRV(SvANY(&ref));
 	    }
 	    LEAVE;
 	}
+	else
+	    SvREFCNT_dec(SvSTASH(sv));
 	if (SvOBJECT(sv)) {
 	    SvOBJECT_off(sv);	/* Curse the object. */
 	    if (SvTYPE(sv) != SVt_PVIO)
@@ -2553,7 +2635,8 @@ register SV *sv;
 	return;
     }
     if (!(flags & SVp_POK) || !*SvPVX(sv)) {
-	sv_upgrade(sv, SVt_NV);
+	if ((flags & SVTYPEMASK) < SVt_PVNV)
+	    sv_upgrade(sv, SVt_NV);
 	SvNVX(sv) = 1.0;
 	(void)SvNOK_only(sv);
 	return;
@@ -2622,7 +2705,8 @@ register SV *sv;
 	return;
     }
     if (!(flags & SVp_POK)) {
-	sv_upgrade(sv, SVt_NV);
+	if ((flags & SVTYPEMASK) < SVt_PVNV)
+	    sv_upgrade(sv, SVt_NV);
 	SvNVX(sv) = -1.0;
 	(void)SvNOK_only(sv);
 	return;
@@ -2897,13 +2981,17 @@ I32 lref;
 	*st = GvESTASH(gv);
     fix_gv:
 	if (lref && !GvCV(gv)) {
+	    SV *tmpsv;
 	    ENTER;
-	    sv = NEWSV(704,0);
-	    gv_efullname(sv, gv);
+	    tmpsv = NEWSV(704,0);
+	    gv_efullname(tmpsv, gv);
 	    newSUB(start_subparse(),
-		   newSVOP(OP_CONST, 0, sv),
+		   newSVOP(OP_CONST, 0, tmpsv),
+		   Nullop,
 		   Nullop);
 	    LEAVE;
+	    if (!GvCV(gv))
+		croak("Unable to create sub named \"%s\"", SvPV(sv,na));
 	}
 	return GvCV(gv);
     }
@@ -2993,17 +3081,17 @@ STRLEN *lp;
     }
     else {
 	if (SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM) {
-	    if (SvTYPE(sv) == SVt_PVGV && SvFAKE(sv)) {
+	    if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV) {
 		sv_unglob(sv);
-                s = SvPVX(sv);
-                *lp = SvCUR(sv);
-            }
+		s = SvPVX(sv);
+		*lp = SvCUR(sv);
+	    }
 	    else
 		croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
 		    op_name[op->op_type]);
 	}
-        else 
-            s = sv_2pv(sv, lp);
+	else
+	    s = sv_2pv(sv, lp);
 	if (s != SvPVX(sv)) {	/* Almost, but not quite, sv_setpvn() */
 	    STRLEN len = *lp;
 	    
@@ -3203,10 +3291,10 @@ SV* sv;
     
     SvRV(sv) = 0;
     SvROK_off(sv);
-    if (SvREFCNT(rv) == 1)
-        sv_2mortal(rv);
+    if (SvREFCNT(rv) != 1 || SvREADONLY(rv))
+	SvREFCNT_dec(rv);
     else
-        SvREFCNT_dec(rv);
+	sv_2mortal(rv);		/* Schedule for freeing later */
 }
 
 #ifdef DEBUGGING
@@ -3352,10 +3440,14 @@ SV* sv;
 	fprintf(stderr, "  FILL = %ld\n", (long)AvFILL(sv));
 	fprintf(stderr, "  MAX = %ld\n", (long)AvMAX(sv));
 	fprintf(stderr, "  ARYLEN = 0x%lx\n", (long)AvARYLEN(sv));
-	if (AvREAL(sv))
-	    fprintf(stderr, "  FLAGS = (REAL)\n");
-	else
-	    fprintf(stderr, "  FLAGS = ()\n");
+	flags = AvFLAGS(sv);
+	d = tmpbuf;
+	if (flags & AVf_REAL)	strcat(d, "REAL,");
+	if (flags & AVf_REIFY)	strcat(d, "REIFY,");
+	if (flags & AVf_REUSED)	strcat(d, "REUSED,");
+	if (*d)
+	    d[strlen(d)-1] = '\0';
+	fprintf(stderr, "  FLAGS = (%s)\n", d);
 	break;
     case SVt_PVHV:
 	fprintf(stderr, "  ARRAY = 0x%lx\n",(long)HvARRAY(sv));

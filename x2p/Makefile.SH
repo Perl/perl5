@@ -48,9 +48,13 @@ manpages = a2p.man s2p.man
 
 util =
 
-sh = Makefile.SH cflags.SH find2perl.SH s2p.SH
+sh = Makefile.SH cflags.SH
+shextract = Makefile cflags
 
-addedbyconf = Makefile cflags find2perl s2p
+pl = find2perl.PL s2p.PL
+plextract = find2perl s2p
+
+addedbyconf = $(shextract) $(plextract)
 
 h = EXTERN.h INTERN.h ../config.h handy.h hash.h a2p.h str.h util.h
 
@@ -115,6 +119,11 @@ hlist:
 
 shlist:
 	echo $(sh) | tr ' ' '\012' >.shlist
+
+# These should be automatically generated
+
+$(plextract):
+	../miniperl -I../lib $@.PL
 
 malloc.c: ../malloc.c
 	rm -f malloc.c

@@ -139,12 +139,13 @@ Use of "C<$*>" is deprecated in Perl 5.
 
 =item $.
 
-The current input line number of the last filehandle that was read.
-This variable should be considered read-only.  
-Remember that only an explicit close on the filehandle
-resets the line number.  Since "C<E<lt>E<gt>>" never does an explicit close, line
-numbers increase across ARGV files (but see examples under eof()).
-(Mnemonic: many programs use "." to mean the current line number.)
+The current input line number of the last filehandle that was read.  An
+explicit close on the filehandle resets the line number.  Since
+"C<E<lt>E<gt>>" never does an explicit close, line numbers increase
+across ARGV files (but see examples under eof()).  Localizing C<$.> has
+the effect of also localizing Perl's notion of "the last read
+filehandle".  (Mnemonic: many programs use "." to mean the current line
+number.)
 
 =item input_record_separator HANDLE EXPR
 

@@ -2,27 +2,27 @@ package TieHash;
 use Carp;
 
 sub new {
-    my $pack = shift;
-    $pack->TIEHASH(@_);
+    my $pkg = shift;
+    $pkg->TIEHASH(@_);
 }
 
 # Grandfather "new"
 
 sub TIEHASH {
-    my $pack = shift;
-    if (defined &{"$pack\::new"}) {
-	carp "WARNING: calling $pack\->new since $pack\->TIEHASH is missing"
+    my $pkg = shift;
+    if (defined &{"{$pkg}::new"}) {
+	carp "WARNING: calling ${pkg}->new since ${pkg}->TIEHASH is missing"
 	    if $^W;
-	$pack->new(@_);
+	$pkg->new(@_);
     }
     else {
-	croak "$pack doesn't define a TIEHASH method";
+	croak "$pkg doesn't define a TIEHASH method";
     }
 }
 
 sub EXISTS {
-    my $pack = ref $_[0];
-    croak "$pack doesn't define an EXISTS method";
+    my $pkg = ref $_[0];
+    croak "$pkg doesn't define an EXISTS method";
 }
 
 sub CLEAR {

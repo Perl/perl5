@@ -1,4 +1,4 @@
-Last revised: 08-Feb-1995 by Charles Bailey  bailey@genetics.upenn.edu
+Last revised: 12-Jun-1995 by Charles Bailey  bailey@genetics.upenn.edu
 
 The VMS port of Perl is still under development.  At this time, the Perl
 binaries built under VMS handle internal operations properly, for the most
@@ -20,12 +20,15 @@ which affect Perl performance:
     - Newlines are lost on I/O through pipes, causing lines to run together.
       This shows up as RMS RTB errors when reading from a pipe.  You can
       work around this by having one process write data to a file, and
-      then having the other read the file, instead of the pipe.
+      then having the other read the file, instead of the pipe.  This is
+      fixed in version 4 of DECC.
     - The modf() routine returns a non-integral value for some values above
       INT_MAX; the Perl "int" operator will return a non-integral value in
-      these cases.
-Both of these bugs have been fixed in later releases of the DECCRTL, but some
-systems running AXP/VMS 1.5 still have the old RTLs.  
+      these cases.  This is fixed in version 4 of DECC.
+    - On the AXP, if SYSNAM privilege is enabled, the CRTL chdir() routine 
+      changes the process default device and directory permanently, even
+      though the call specified that the change should not persist after
+      Perl exited.  This is fixed by DEC CSC patch AXPACRT04_061.
 
 * Other software required
 
@@ -50,26 +53,32 @@ SOCKET when invoking MMS, however, socket support will be included.  As
 distributed, Perl for VMS includes support for the SOCKETSHR socket library,
 which is layered on MadGoat software's vendor-independent NETLIB interface. 
 This provides support for all socket calls used by Perl except the
-[g|s]et*ent() routines, which are replaced for the moment by stubs which
+[g|s]etnet*() routines, which are replaced for the moment by stubs which
 generate a fatal error if a Perl script attempts to call one of these routines. 
-If you'd like to link Perl directly to your IP stack to take advantage of these
-routines or to eliminate the intermediate NETLIB, then make the following
-changes:
+You can link Perl directly to your TCP/IP stack's library, *as long as* it
+supplies shims for stdio routines which will properly handle both sockets and
+normal file descriptors.  This is necessary because Perl does not distinguish
+between the two, and will try to make normal stdio calls such as read() and
+getc() on socket file descriptors.  If you'd like to link Perl directly to
+your IP stack, then make the following changes:
   - In Descrip.MMS, locate the section beginning with .ifdef SOCKET, and
     change the SOCKLIB macro so that it translates to  the filespec of your
     IP stack's socket library.  This will be added to the RTL options file.
   - Edit the file SockAdapt.H in the [.VMS] subdirectory so that it
-    includes the In.H, NetDb.H, and, if necessary, Errno.H header files
-    for your IP stack, or so that it declares the standard TCP/IP data
-    structures appropriately (see the distributed copy of SockAdapt.H
-    for a collection of the structures needed by Perl.)  You should also
-    define any logical names necessary to find these files before invoking
-    MMS to build Perl.
+    includes the Socket.h, In.H, Inet.H, NetDb.H, and, if necessary,
+    Errno.H header files for your IP stack, or so that it declares the
+    standard TCP/IP constants and data structures appropriately.  (See
+    the distributed copy of SockAdapt.H for a collection of the structures
+    needed by Perl itself, and [.ext.Socket]Socket.xs for a list of the
+    constants used by the Socket extension, if you elect to built it.)
+    You should also define any logical names necessary for your C compiler
+    to find these files before invoking MM[KS] to build Perl.
   - Edit the file SockAdapt.C in the [.VMS] subdirectory so that it
     contains routines which substitute for any IP library routines
     required by Perl which your IP stack does not provide.  This may
     require a little trial and error; we'll try to compile a complete
     list soon of socket routines required by Perl.
+
 
 * Building Perl under VMS
 
@@ -189,8 +198,9 @@ Once the build is complete, you'll need to do the following:
   - Define the logical name PERLSHR as the full file specification of
     PERLSHR.EXE, so executable images linked to it can find it.  Alternatively,
     you can justput PERLSHR.EXE int SYS$SHARE.
-  - Place the files from the [.lib] subdirectory in the distribution package
-    into a [.lib] subdirectory off the root directory described above.
+  - Place the files from the [.lib...] directory tree in the distribution
+    package into a [.lib...] directory tree off the root directory described
+    above.
   - Most of the Perl documentation lives in the [.pod] subdirectory, and
     is written in a simple markup format which can be easily read.  In this
     directory as well are pod2man and pod2html translators to reformat the
@@ -214,12 +224,23 @@ the single line
 subscribe perl5-porters
 This is a moderately high-volume list at the moment (25-50 messages/day).
 
-Finally, if you're interested in ongoing information about the VMS port, you
-can subscribe to the VMSperl mailing list by sending a request to
+If you're interested in ongoing information about the VMS port, you can
+subscribe to the VMSperl mailing list by sending a request to
 bailey@genetics.upenn.edu (it's to a human, not a list server - this is a small
 operation at the moment).  And, as always, we welcome any help or code you'd
 like to offer - you can send mail to bailey@genetics.upenn.edu or directly to
 the VMSperl list at vmsperl@genetics.upenn.edu.
+
+Finally, if you'd like to try out the latest changes to VMS Perl, you can
+retrieve a test distribution kit by anonymous ftp from genetics.upenn.edu, in
+the file [.perl5]perl5_ppp_yymmddx.zip, where "ppp" is the current Perl
+patchlevel, and "yymmddx" is a sequence number indicating the date that
+particular kit was assembled.  These test kits contain "unofficial" patches
+from the perl5-porters group, test patches for important bugs, and VMS-specific
+fixes and improvements which have occurred since the last Perl release.  Most
+of these changes will be incorporated in the next release of Perl, but until
+Larry Wall's looked at them and said they're OK, none of them should be
+considered official.
 
 Good luck using Perl.  Please let us know how it works for you - we can't
 guarantee that we'll be able to fix bugs quickly, but we'll try, and we'd

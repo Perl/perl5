@@ -32,22 +32,6 @@
  * code can be a lot prettier.  Well, so much for theory.  Sorry, Henry...
  */
 
-#ifdef MYMALLOC
-#   ifdef HIDEMYMALLOC
-#	define malloc Mymalloc
-#	define realloc Myremalloc
-#	define free Myfree
-#   endif
-#   define safemalloc malloc
-#   define saferealloc realloc
-#   define safefree free
-#endif
-
-/* work around some libPW problems */
-#ifdef DOINIT
-EXT char Error[1];
-#endif
-
 /* define this once if either system, instead of cluttering up the src */
 #if defined(MSDOS) || defined(atarist)
 #define DOSISH 1
@@ -85,10 +69,14 @@ EXT char Error[1];
 #endif
 
 #include <stdio.h>
-#ifdef USE_NEXT_CTYPE 
+#ifdef USE_NEXT_CTYPE
 #include <appkit/NXCType.h>
 #else
 #include <ctype.h>
+#endif
+
+#ifdef I_LOCALE
+#include <locale.h>
 #endif
 
 #ifdef METHOD 	/* Defined by OSF/1 v3.0 by ctype.h */
@@ -109,6 +97,21 @@ EXT char Error[1];
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
 #endif /* STANDARD_C */
+
+/* Maybe this comes after <stdlib.h> so we don't try to change 
+   the standard library prototypes?.  We'll use our own in 
+   proto.h instead.  I guess.  The patch had no explanation.
+*/
+#ifdef MYMALLOC
+#   ifdef HIDEMYMALLOC
+#	define malloc Mymalloc
+#	define realloc Myremalloc
+#	define free Myfree
+#   endif
+#   define safemalloc malloc
+#   define saferealloc realloc
+#   define safefree free
+#endif
 
 #define MEM_SIZE Size_t
 
@@ -340,7 +343,7 @@ EXT char Error[1];
 #	    endif
 #	endif
 #   endif
-#endif 
+#endif
 
 #ifdef FPUTS_BOTCH
 /* work around botch in SunOS 4.0.1 and 4.0.2 */
@@ -537,7 +540,11 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #define FILTER_ISREADER(idx)	   (idx >= AvFILL(rsfp_filters))
 
 #ifdef DOSISH
+# if defined(OS2)
+#   include "os2ish.h"
+# else
 #   include "dosish.h"
+# endif
 #else
 # if defined(VMS)
 #   include "vmsish.h"
@@ -581,6 +588,11 @@ union any {
 #include "hv.h"
 #include "mg.h"
 #include "scope.h"
+
+/* work around some libPW problems */
+#ifdef DOINIT
+EXT char Error[1];
+#endif
 
 #if defined(iAPX286) || defined(M_I286) || defined(I80286)
 #   define I286
@@ -812,7 +824,7 @@ I32 unlnk _((char*));
 #define SCAN_REPL 2
 
 #ifdef DEBUGGING
-# ifndef register 
+# ifndef register
 #  define register
 # endif
 # define PAD_SV(po) pad_sv(po)
@@ -848,6 +860,7 @@ EXT IV **	xiv_root;	/* free xiv list--shared by interpreters */
 EXT double *	xnv_root;	/* free xnv list--shared by interpreters */
 EXT XRV *	xrv_root;	/* free xrv list--shared by interpreters */
 EXT XPV *	xpv_root;	/* free xpv list--shared by interpreters */
+EXT HE *	he_root;	/* free he list--shared by interpreters */
 
 /* Stack for currently executing thread--context switch must handle this.     */
 EXT SV **	stack_base;	/* stack->array_ary */
@@ -1247,6 +1260,9 @@ IEXT I32 *	Iscreamnext;
 IEXT I32	Imaxscream IINIT(-1);
 IEXT SV *	Ilastscream;
 
+/* shortcuts to misc objects */
+IEXT GV *	Ierrgv;
+
 /* shortcuts to debugging objects */
 IEXT GV *	IDBgv;
 IEXT GV *	IDBline;
@@ -1399,56 +1415,56 @@ extern "C" {
 /* The following must follow proto.h */
 
 #ifdef DOINIT
-MGVTBL vtbl_sv =	{magic_get,
+EXT MGVTBL vtbl_sv =	{magic_get,
 				magic_set,
 					magic_len,
 						0,	0};
-MGVTBL vtbl_env =	{0,	0,	0,	0,	0};
-MGVTBL vtbl_envelem =	{0,	magic_setenv,
+EXT MGVTBL vtbl_env =	{0,	0,	0,	0,	0};
+EXT MGVTBL vtbl_envelem =	{0,	magic_setenv,
 					0,	magic_clearenv,
 							0};
-MGVTBL vtbl_sig =	{0,	0,		 0, 0, 0};
-MGVTBL vtbl_sigelem =	{0,	magic_setsig,
+EXT MGVTBL vtbl_sig =	{0,	0,		 0, 0, 0};
+EXT MGVTBL vtbl_sigelem =	{0,	magic_setsig,
 					0,	0,	0};
-MGVTBL vtbl_pack =	{0,	0,	0,	magic_wipepack,
+EXT MGVTBL vtbl_pack =	{0,	0,	0,	magic_wipepack,
 							0};
-MGVTBL vtbl_packelem =	{magic_getpack,
+EXT MGVTBL vtbl_packelem =	{magic_getpack,
 				magic_setpack,
 					0,	magic_clearpack,
 							0};
-MGVTBL vtbl_dbline =	{0,	magic_setdbline,
+EXT MGVTBL vtbl_dbline =	{0,	magic_setdbline,
 					0,	0,	0};
-MGVTBL vtbl_isa =	{0,	magic_setisa,
+EXT MGVTBL vtbl_isa =	{0,	magic_setisa,
 					0,	0,	0};
-MGVTBL vtbl_isaelem =	{0,	magic_setisa,
+EXT MGVTBL vtbl_isaelem =	{0,	magic_setisa,
 					0,	0,	0};
-MGVTBL vtbl_arylen =	{magic_getarylen,
+EXT MGVTBL vtbl_arylen =	{magic_getarylen,
 				magic_setarylen,
 					0,	0,	0};
-MGVTBL vtbl_glob =	{magic_getglob,
+EXT MGVTBL vtbl_glob =	{magic_getglob,
 				magic_setglob,
 					0,	0,	0};
-MGVTBL vtbl_mglob =	{0,	magic_setmglob,
+EXT MGVTBL vtbl_mglob =	{0,	magic_setmglob,
 					0,	0,	0};
-MGVTBL vtbl_taint =	{magic_gettaint,magic_settaint,
+EXT MGVTBL vtbl_taint =	{magic_gettaint,magic_settaint,
 					0,	0,	0};
-MGVTBL vtbl_substr =	{0,	magic_setsubstr,
+EXT MGVTBL vtbl_substr =	{0,	magic_setsubstr,
 					0,	0,	0};
-MGVTBL vtbl_vec =	{0,	magic_setvec,
+EXT MGVTBL vtbl_vec =	{0,	magic_setvec,
 					0,	0,	0};
-MGVTBL vtbl_pos =	{magic_getpos,
+EXT MGVTBL vtbl_pos =	{magic_getpos,
 				magic_setpos,
 					0,	0,	0};
-MGVTBL vtbl_bm =	{0,	magic_setbm,
+EXT MGVTBL vtbl_bm =	{0,	magic_setbm,
 					0,	0,	0};
-MGVTBL vtbl_uvar =	{magic_getuvar,
+EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
 
 #ifdef OVERLOAD
-MGVTBL vtbl_amagic =       {0,     magic_setamagic,
+EXT MGVTBL vtbl_amagic =       {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
-MGVTBL vtbl_amagicelem =   {0,     magic_setamagic,
+EXT MGVTBL vtbl_amagicelem =   {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
 #endif /* OVERLOAD */
 

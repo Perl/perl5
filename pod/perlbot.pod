@@ -199,11 +199,10 @@ relationships between objects.
 
 =head1 OVERRIDING SUPERCLASS METHODS
 
-The following example demonstrates how one might override a superclass
-method and then call the method after it has been overridden.  The
-Foo::Inherit class allows the programmer to call an overridden superclass
-method without actually knowing where that method is defined.
-
+The following example demonstrates how to override a superclass method and
+then call the overridden method.  The B<SUPER> pseudo-class allows the
+programmer to call an overridden superclass method without actually knowing
+where that method is defined.
 
 	package Buz;
 	sub goo { print "here's the goo\n" }
@@ -216,7 +215,6 @@ method without actually knowing where that method is defined.
 
 	package Foo;
 	@ISA = qw( Bar Baz );
-	@Foo::Inherit::ISA = @ISA;  # Access to overridden methods.
 
 	sub new {
 		my $type = shift;
@@ -225,15 +223,15 @@ method without actually knowing where that method is defined.
 	sub grr { print "grumble\n" }
 	sub goo {
 		my $self = shift;
-		$self->Foo::Inherit::goo();
+		$self->SUPER::goo();
 	}
 	sub mumble {
 		my $self = shift;
-		$self->Foo::Inherit::mumble();
+		$self->SUPER::mumble();
 	}
 	sub google {
 		my $self = shift;
-		$self->Foo::Inherit::google();
+		$self->SUPER::google();
 	}
 
 	package main;

@@ -4,7 +4,6 @@ Changes.Conf		Recent changes in the Configure & build process
 configure		Crude emulation of GNU configure
 Configure		Portability tool
 Copying			The GNU General Public License
-Doc/perl5-notes		Samples of new functionality
 EXTERN.h		Included before foreign .h files
 INSTALL			Detailed installation instructions.
 INTERN.h		Included before domestic .h files
@@ -16,7 +15,7 @@ Todo			The Wishlist
 XSUB.h			Include file for extension subroutines
 av.c			Array value code
 av.h			Array value header
-c2ph.SH			program to translate dbx stabs to perl
+c2ph.PL			program to translate dbx stabs to perl
 c2ph.doc		documentation for c2ph
 cflags.SH		A script that emits C compilation flags per file
 config_H		Sample config.h
@@ -73,12 +72,7 @@ eg/van/vanexp		A program to expire vanished files
 eg/van/vanish		A program to put files in a trashcan
 eg/who			A sample who program
 eg/wrapsuid		A setuid script wrapper generator
-emacs/cperl-mode	An alternate perl-mode
-emacs/emacs19		Notes about emacs 19
-emacs/perl-mode.el	Emacs major mode for perl
-emacs/perldb.el		Emacs debugging
-emacs/perldb.pl		Emacs debugging
-emacs/tedstuff		Some optional patches
+emacs/cperl-mode.el	An alternate perl-mode
 embed.h			Maps symbols to safer names
 embed.pl		Produces embed.h
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
@@ -86,12 +80,6 @@ ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/typemap		Berkeley DB extension interface types
-ext/Devel/DProf/DProf.pm	Perl Profiler extension Perl module
-ext/Devel/DProf/DProf.xs	Perl Profiler extension external subroutines
-ext/Devel/DProf/Makefile.PL	Perl Profiler extension makefile writer
-ext/Devel/DProf/README		Perl Profiler extension info
-ext/Devel/DProf/dprofpp		Perl Profiler extension utility
-ext/Devel/DProf/test.pl		Perl Profiler extension test
 ext/DynaLoader/DynaLoader.pm	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
@@ -101,6 +89,7 @@ ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
 ext/DynaLoader/dl_next.xs	Next implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
+ext/DynaLoader/dl_os2.xs	OS/2 implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
@@ -167,7 +156,7 @@ global.sym		Symbols that need hiding when embedded
 globals.c		File to declare global symbols (for shared library)
 gv.c			Glob value code
 gv.h			Glob value header
-h2ph.SH			A thing to turn C .h files into perl .ph files
+h2ph.PL			A thing to turn C .h files into perl .ph files
 h2pl/README		How to turn .ph files into .pl files
 h2pl/cbreak.pl		cbreak routines using .ph
 h2pl/cbreak2.pl		cbreak routines using .pl
@@ -180,7 +169,7 @@ h2pl/mksizes		Program to make %sizeof array
 h2pl/mkvars		Program to make .pl from .ph files
 h2pl/tcbreak		cbreak test routine using .ph
 h2pl/tcbreak2		cbreak test routine using .pl
-h2xs.SH			Program to make .xs files from C header files
+h2xs.PL			Program to make .xs files from C header files
 handy.h			Handy definitions
 hints/3b1.sh		Hints for named architecture
 hints/3b1cc		Hints for named architecture
@@ -207,6 +196,7 @@ hints/i386.sh		Hints for named architecture
 hints/irix_4.sh		Hints for named architecture
 hints/irix_5.sh		Hints for named architecture
 hints/irix_6.sh		Hints for named architecture
+hints/irix_6_2.sh	Hints for named architecture
 hints/isc.sh		Hints for named architecture
 hints/isc_2.sh		Hints for named architecture
 hints/linux.sh		Hints for named architecture
@@ -219,13 +209,14 @@ hints/netbsd.sh		Hints for named architecture
 hints/next_3.sh		Hints for named architecture
 hints/next_3_0.sh	Hints for named architecture
 hints/opus.sh		Hints for named architecture
+hints/os2.sh		Hints for named architecture
 hints/powerunix.sh	Hints for named architecture
+hints/sco.sh		Hints for named architecture
 hints/sco_2_3_0.sh	Hints for named architecture
 hints/sco_2_3_1.sh	Hints for named architecture
 hints/sco_2_3_2.sh	Hints for named architecture
 hints/sco_2_3_3.sh	Hints for named architecture
 hints/sco_2_3_4.sh	Hints for named architecture
-hints/sco_3.sh		Hints for named architecture
 hints/solaris_2.sh	Hints for named architecture
 hints/stellar.sh	Hints for named architecture
 hints/sunos_4_0.sh	Hints for named architecture
@@ -243,7 +234,6 @@ hv.h			Hash value header
 installman		Perl script to install man pages for pods.
 installperl		Perl script to do "make install" dirty work
 interp.sym		Interpreter specific symbols to hide in a struct
-ioctl.pl		Sample ioctl.pl
 keywords.h		The keyword numbers
 keywords.pl		Program to write keywords.h
 lib/AnyDBM_File.pm	Perl module to emulate dbmopen
@@ -287,6 +277,7 @@ lib/Text/Abbrev.pm	An abbreviation table builder
 lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 lib/Text/Soundex.pm	Perl module to implement Soundex
 lib/Text/Tabs.pm	Do expand and unexpand
+lib/Text/Wrap.pm	Paragraph formatter
 lib/TieHash.pm		Base class for tied hashes
 lib/Time/Local.pm	Reverse translation of localtime, gmtime
 lib/abbrev.pl		An abbreviation table builder
@@ -299,6 +290,7 @@ lib/chat2.inter		A chat2 with interaction
 lib/chat2.pl		Randal's famous expect-ish routines
 lib/complete.pl		A command completion subroutine
 lib/ctime.pl		A ctime workalike
+lib/diagnostics.pm	Print verbose diagnostics
 lib/dotsh.pl		Code to "dot" in a shell script
 lib/dumpvar.pl		A variable dumper
 lib/exceptions.pl	catch and throw routines
@@ -319,10 +311,12 @@ lib/look.pl		A "look" equivalent
 lib/newgetopt.pl	A perl library supporting long option parsing
 lib/open2.pl		Open a two-ended pipe
 lib/open3.pl		Open a three-ended pipe
+lib/overload.pm		Module for overloading perl operators.
 lib/perl5db.pl		Perl debugging routines
 lib/pwd.pl		Routines to keep track of PWD environment variable
 lib/shellwords.pl	Perl library to split into words with shell quoting
 lib/sigtrap.pm		For trapping an abort and giving traceback
+lib/splain		Standalone program to print verbose diagnostics.
 lib/stat.pl		Perl library supporting stat function
 lib/strict.pm		For "use strict"
 lib/subs.pm		Declare overriding subs
@@ -345,11 +339,21 @@ op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
 opcode.pl		Opcode header generatore
+os2/Makefile.SH		Shared library generation for OS/2
+os2/POSIX.mkfifo	POSIX.xs patch.
+os2/README		OS/2 info.
+os2/diff.Makefile	Patches to Makefile.SH
+os2/diff.configure	Patches to Makefile.SH
+os2/diff.installperl	Patches to installperl
+os2/diff.mkdep		Patches to makedepend.SH
+os2/diff.x2pMakefile	Patches to x2p/Makefile.SH
+os2/os2.c		Missing code for OS/2
+os2/os2ish.h		Header for OS/2
 patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX.
-perldoc.SH		A simple tool to find & display perl's documentation
+perldoc.PL		A simple tool to find & display perl's documentation
 perlsh			A poor man's perl shell
 perly.c			A byacc'ed perly.y
 perly.c.diff		Fixup perly.c to allow recursion
@@ -365,11 +369,13 @@ pod/perlcall.pod	Callback info
 pod/perldata.pod	Data structure info
 pod/perldebug.pod	Debugger info
 pod/perldiag.pod	Diagnostic info
+pod/perldsc.pod		Data Structures Cookbook
 pod/perlembed.pod	Embedding info
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
 pod/perlipc.pod		IPC info
+pod/perllol.pod		How to use lists of lists.
 pod/perlmod.pod		Module info
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
@@ -385,9 +391,10 @@ pod/perlsyn.pod		Syntax info
 pod/perltrap.pod	Trap info
 pod/perlvar.pod		Variable info
 pod/perlxs.pod		XS api info
-pod/pod2html.SH		Precursor for translator to turn pod into HTML
-pod/pod2latex.SH	Precursor for translator to turn pod into LaTeX
-pod/pod2man.SH		Precursor for translator to turn pod into manpage
+pod/perlxstut.pod	XS tutorial
+pod/pod2html.PL		Precursor for translator to turn pod into HTML
+pod/pod2latex.PL	Precursor for translator to turn pod into LaTeX
+pod/pod2man.PL		Precursor for translator to turn pod into manpage
 pod/splitman		Splits perlfunc into multiple man pages
 pp.c			Push/Pop code
 pp.h			Push/Pop code defs
@@ -444,7 +451,6 @@ t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/posix.t		See if POSIX works
 t/lib/sdbm.t		See if SDBM_File works
-t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
 t/op/append.t		See if . works
 t/op/array.t		See if array operations work
@@ -506,25 +512,27 @@ unixish.h		Defines that are assumed on Unix
 util.c			Utility routines
 util.h			Public declarations for the above
 vms/Makefile		VMS port
-vms/config.vms		VMS port
-vms/descrip.mms		VMS port
+vms/config.vms		default config.h for VMS
+vms/descrip.mms		MM[SK] description file for build
 vms/ext/Filespec.pm	VMS-Unix file syntax interconversion
 vms/ext/MM_VMS.pm	VMS-specific methods for MakeMaker
 vms/ext/VMS/stdio/Makefile.PL	MakeMaker driver for VMS::stdio
 vms/ext/VMS/stdio/stdio.pm	VMS options to stdio routines
 vms/ext/VMS/stdio/stdio.xs	VMS options to stdio routines
-vms/gen_shrfls.pl	VMS port
-vms/genconfig.pl	VMS port
-vms/genopt.com		VMS port
-vms/mms2make.pl		VMS port
-vms/perlshr.c		VMS port
-vms/perlvms.pod		VMS port
-vms/sockadapt.c		VMS port
-vms/sockadapt.h		VMS port
-vms/test.com		VMS port
-vms/vms.c		VMS port
-vms/vmsish.h		VMS port
-vms/writemain.pl	VMS port
+vms/gen_shrfls.pl	generate options files and glue for shareable image
+vms/genconfig.pl	retcon config.sh from config.h
+vms/genopt.com		hack to write options files in case of broken makes
+vms/mms2make.pl		convert descrip.mms to make syntax
+vms/perlvms.pod		VMS-specific additions to Perl documentation
+vms/perly_c.vms		perly.c with fixed declarations for global syms
+vms/perly_h.vms		perly.h with fixed declarations for global syms
+vms/sockadapt.c		glue for SockshShr socket support
+vms/sockadapt.h		glue for SockshShr socket support
+vms/test.com		DCL driver for regression tests
+vms/vms.c		VMS-specific C code for Perl core
+vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms
+vms/vmsish.h		VMS-specific C header for Perl core
+vms/writemain.pl	Generate perlmain.c from miniperlmain.c+extensions
 writemain.SH		Generate perlmain.c from miniperlmain.c+extensions
 x2p/EXTERN.h		Same as above
 x2p/INTERN.h		Same as above
@@ -535,11 +543,11 @@ x2p/a2p.man		Manual page for awk to perl translator
 x2p/a2p.y		A yacc grammer for awk
 x2p/a2py.c		Awk compiler, sort of
 x2p/cflags.SH		A script that emits C compilation flags per file
-x2p/find2perl.SH	A find to perl translator
+x2p/find2perl.PL	A find to perl translator
 x2p/handy.h		Handy definitions
 x2p/hash.c		Associative arrays again
 x2p/hash.h		Public declarations for the above
-x2p/s2p.SH		Sed to perl translator
+x2p/s2p.PL		Sed to perl translator
 x2p/s2p.man		Manual page for sed to perl translator
 x2p/str.c		String handling package
 x2p/str.h		Public declarations for the above

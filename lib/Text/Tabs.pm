@@ -2,11 +2,13 @@
 # expand and unexpand tabs as per the unix expand and 
 # unexpand programs.
 #
-# expand and unexpand operate on arrays of lines.  
+# expand and unexpand operate on arrays of lines.  Do not
+# feed strings that contain newlines to them.
 #
 # David Muir Sharnoff <muir@idiom.com>
-# Version: 4/19/95
 # 
+# Version: 9/21/95
+#
 
 package Text::Tabs;
 
@@ -19,45 +21,31 @@ $tabstop = 8;
 
 sub expand
 {
-	my (@l) = @_;
-	my $l, @k;
-	my $nl;
-	for $l (@l) {
-		$nl = $/ if chomp($l);
-		@k = split($/,$l);
-		for $_ (@k) {
-			1 while s/^([^\t]*)(\t+)/
-				$1 . (" " x 
-					($tabstop * length($2)
-					- (length($1) % $tabstop)))
-				/e;
-		}
-		$l = join("\n",@k).$nl;
+	my @l = @_;
+	for $_ (@l) {
+		1 while s/^([^\t]*)(\t+)/
+			$1 . (" " x 
+				($tabstop * length($2)
+				- (length($1) % $tabstop)))
+			/e;
 	}
-	return @l if $#l > 0;
-	return $l[0];
+	return @l if wantarray;
+	return @l[0];
 }
 
 sub unexpand
 {
-	my (@l) = &expand(@_);
+	my @l = &expand(@_);
 	my @e;
-	my $k, @k;
-	my $nl;
-	for $k (@l) {
-		$nl = $/ if chomp($k);
-		@k = split($/,$k);
-		for $x (@k) {
-			@e = split(/(.{$tabstop})/,$x);
-			for $_ (@e) {
-				s/  +$/\t/;
-			}
-			$x = join('',@e);
+	for $x (@l) {
+		@e = split(/(.{$tabstop})/,$x);
+		for $_ (@e) {
+			s/  +$/\t/;
 		}
-		$k = join("\n",@k).$nl;
+		$x = join('',@e);
 	}
-	return @l if $#l > 0;
-	return $l[0];
+	return @l if wantarray;
+	return @l[0];
 }
 
 1;

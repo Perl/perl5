@@ -3,17 +3,20 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 7th October 1995
- version 1.0
+ last modified 14th November 1995
+ version 1.01
 
  All comments/suggestions/problems are welcome
 
  Changes:
-	0.1 - Initial Release
-	0.2 - No longer bombs out if dbopen returns an error.
-	0.3 - Added some support for multiple btree compares
-	1.0 - Complete support for multiple callbacks added.
-	      Fixed a problem with pushing a value onto an empty list.
+	0.1 - 	Initial Release
+	0.2 - 	No longer bombs out if dbopen returns an error.
+	0.3 - 	Added some support for multiple btree compares
+	1.0 - 	Complete support for multiple callbacks added.
+	      	Fixed a problem with pushing a value onto an empty list.
+	1.01 - 	Fixed a SunOS core dump problem.
+		The return value from TIEHASH wasn't set to NULL when
+		dbopen returned an error.
 */
 
 #include "EXTERN.h"  
@@ -44,18 +47,18 @@ union INFO {
 
 /* #define TRACE  */
 
-#define db_DESTROY(db)                  (db->dbp->close)(db->dbp)
-#define db_DELETE(db, key, flags)       (db->dbp->del)(db->dbp, &key, flags)
-#define db_STORE(db, key, value, flags) (db->dbp->put)(db->dbp, &key, &value, flags)
-#define db_FETCH(db, key, flags)        (db->dbp->get)(db->dbp, &key, &value, flags)
+#define db_DESTROY(db)                  ((db->dbp)->close)(db->dbp)
+#define db_DELETE(db, key, flags)       ((db->dbp)->del)(db->dbp, &key, flags)
+#define db_STORE(db, key, value, flags) ((db->dbp)->put)(db->dbp, &key, &value, flags)
+#define db_FETCH(db, key, flags)        ((db->dbp)->get)(db->dbp, &key, &value, flags)
 
-#define db_close(db)			(db->dbp->close)(db->dbp)
-#define db_del(db, key, flags)          (db->dbp->del)(db->dbp, &key, flags)
-#define db_fd(db)                       (db->dbp->fd)(db->dbp) 
-#define db_put(db, key, value, flags)   (db->dbp->put)(db->dbp, &key, &value, flags)
-#define db_get(db, key, value, flags)   (db->dbp->get)(db->dbp, &key, &value, flags)
-#define db_seq(db, key, value, flags)   (db->dbp->seq)(db->dbp, &key, &value, flags)
-#define db_sync(db, flags)              (db->dbp->sync)(db->dbp, flags)
+#define db_close(db)			((db->dbp)->close)(db->dbp)
+#define db_del(db, key, flags)          ((db->dbp)->del)(db->dbp, &key, flags)
+#define db_fd(db)                       ((db->dbp)->fd)(db->dbp) 
+#define db_put(db, key, value, flags)   ((db->dbp)->put)(db->dbp, &key, &value, flags)
+#define db_get(db, key, value, flags)   ((db->dbp)->get)(db->dbp, &key, &value, flags)
+#define db_seq(db, key, value, flags)   ((db->dbp)->seq)(db->dbp, &key, &value, flags)
+#define db_sync(db, flags)              ((db->dbp)->sync)(db->dbp, flags)
 
 
 #define OutputValue(arg, name)  \
@@ -708,6 +711,8 @@ db_TIEHASH(dbtype, name=undef, flags=O_RDWR, mode=0640, type=DB_HASH)
 	        sv = ST(4) ;
 
 	    RETVAL = ParseOpenInfo(name, flags, mode, sv, "new") ;
+	    if (RETVAL->dbp == NULL)
+	        RETVAL = NULL ;
 	}
 	OUTPUT:	
 	    RETVAL
@@ -748,7 +753,7 @@ db_FETCH(db, key, flags=0)
 	    DBT		value  ;
 
 	    CurrentDB = db ;
-	    RETVAL = (db->dbp->get)(db->dbp, &key, &value, flags) ;
+	    RETVAL = ((db->dbp)->get)(db->dbp, &key, &value, flags) ;
 	    ST(0) = sv_newmortal();
 	    if (RETVAL == 0)
 	        sv_setpvn(ST(0), value.data, value.size);
@@ -771,13 +776,14 @@ db_FIRSTKEY(db)
 	{
 	    DBTKEY		key ;
 	    DBT		value ;
+	    DB *	Db = db->dbp ;
 
 	    CurrentDB = db ;
-	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_FIRST) ;
+	    RETVAL = (Db->seq)(Db, &key, &value, R_FIRST) ;
 	    ST(0) = sv_newmortal();
 	    if (RETVAL == 0)
 	    {
-	        if (db->dbp->type != DB_RECNO)
+	        if (Db->type != DB_RECNO)
 	            sv_setpvn(ST(0), key.data, key.size);
 	        else
 	            sv_setiv(ST(0), (I32)*(I32*)key.data - 1);
@@ -791,13 +797,14 @@ db_NEXTKEY(db, key)
 	CODE:
 	{
 	    DBT		value ;
+	    DB *	Db = db->dbp ;
 
 	    CurrentDB = db ;
-	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_NEXT) ;
+	    RETVAL = (Db->seq)(Db, &key, &value, R_NEXT) ;
 	    ST(0) = sv_newmortal();
 	    if (RETVAL == 0)
 	    {
-	        if (db->dbp->type != DB_RECNO)
+	        if (Db->type != DB_RECNO)
 	            sv_setpvn(ST(0), key.data, key.size);
 	        else
 	            sv_setiv(ST(0), (I32)*(I32*)key.data - 1);
@@ -817,6 +824,7 @@ unshift(db, ...)
 	    DBT		value ;
 	    int		i ;
 	    int		One ;
+	    DB *	Db = db->dbp ;
 
 	    CurrentDB = db ;
 	    RETVAL = -1 ;
@@ -827,7 +835,7 @@ unshift(db, ...)
 	        One = 1 ;
 	        key.data = &One ;
 	        key.size = sizeof(int) ;
-	        RETVAL = (db->dbp->put)(db->dbp, &key, &value, R_IBEFORE) ;
+	        RETVAL = (Db->put)(Db, &key, &value, R_IBEFORE) ;
 	        if (RETVAL != 0)
 	            break;
 	    }
@@ -842,15 +850,16 @@ pop(db)
 	{
 	    DBTKEY	key ;
 	    DBT		value ;
+	    DB *	Db = db->dbp ;
 
 	    CurrentDB = db ;
 	    /* First get the final value */
-	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_LAST) ;	
+	    RETVAL = (Db->seq)(Db, &key, &value, R_LAST) ;	
 	    ST(0) = sv_newmortal();
 	    /* Now delete it */
 	    if (RETVAL == 0)
 	    {
-	        RETVAL = (db->dbp->del)(db->dbp, &key, R_CURSOR) ;
+	        RETVAL = (Db->del)(Db, &key, R_CURSOR) ;
 	        if (RETVAL == 0)
 	            sv_setpvn(ST(0), value.data, value.size);
 	    }
@@ -863,15 +872,16 @@ shift(db)
 	{
 	    DBTKEY	key ;
 	    DBT		value ;
+	    DB *	Db = db->dbp ;
 
 	    CurrentDB = db ;
 	    /* get the first value */
-	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_FIRST) ;	
+	    RETVAL = (Db->seq)(Db, &key, &value, R_FIRST) ;	
 	    ST(0) = sv_newmortal();
 	    /* Now delete it */
 	    if (RETVAL == 0)
 	    {
-	        RETVAL = (db->dbp->del)(db->dbp, &key, R_CURSOR) ;
+	        RETVAL = (Db->del)(Db, &key, R_CURSOR) ;
 	        if (RETVAL == 0)
 	            sv_setpvn(ST(0), value.data, value.size);
 	    }
@@ -886,11 +896,12 @@ push(db, ...)
 	    DBTKEY	key ;
 	    DBTKEY *	keyptr = &key ; 
 	    DBT		value ;
+	    DB *	Db = db->dbp ;
 	    int		i ;
 
 	    CurrentDB = db ;
 	    /* Set the Cursor to the Last element */
-	    RETVAL = (db->dbp->seq)(db->dbp, &key, &value, R_LAST) ;
+	    RETVAL = (Db->seq)(Db, &key, &value, R_LAST) ;
 	    if (RETVAL >= 0)
 	    {
 		if (RETVAL == 1)
@@ -899,7 +910,7 @@ push(db, ...)
 	        {
 	            value.data = SvPV(ST(i), na) ;
 	            value.size = na ;
-	            RETVAL = (db->dbp->put)(db->dbp, keyptr, &value, R_IAFTER) ;
+	            RETVAL = (Db->put)(Db, keyptr, &value, R_IAFTER) ;
 	            if (RETVAL != 0)
 	                break;
 	        }

@@ -8,4 +8,4 @@ case "$optimize" in
     ;;
 esac
 ccflags="$ccflags -DSTANDARD_C"
-lddlflags='-shared -expect_unresolved "*" -s'
+lddlflags='-shared -expect_unresolved "*" -s -hidden'

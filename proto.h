@@ -190,8 +190,13 @@ int	magic_setvec	_((SV* sv, MAGIC* mg));
 int	magic_wipepack	_((SV* sv, MAGIC* mg));
 void	magicname _((char* sym, char* name, I32 namlen));
 int	main _((int argc, char** argv, char** env));
-#ifndef STANDARD_C
+#if !defined(STANDARD_C)
 Malloc_t	malloc _((MEM_SIZE nbytes));
+#endif
+#if defined(MYMALLOC) && defined(HIDEMYMALLOC)
+extern Malloc_t malloc _((MEM_SIZE nbytes));
+extern Malloc_t realloc _((Malloc_t, MEM_SIZE));
+extern Free_t   free _((Malloc_t));
 #endif
 void	markstack_grow _((void));
 char*	mess _((char* pat, va_list* args));
@@ -230,7 +235,7 @@ long	my_ntohl _((long l));
 void	my_unexec _((void));
 OP*	newANONLIST _((OP* op));
 OP*	newANONHASH _((OP* op));
-OP*	newANONSUB _((I32 floor, OP* block));
+OP*	newANONSUB _((I32 floor, OP* proto, OP* block));
 OP*	newASSIGNOP _((I32 flags, OP* left, I32 optype, OP* right));
 OP*	newCONDOP _((I32 flags, OP* expr, OP* trueop, OP* falseop));
 void	newFORM _((I32 floor, OP* op, OP* block));
@@ -245,7 +250,7 @@ void	newPROG _((OP* op));
 OP*	newRANGE _((I32 flags, OP* left, OP* right));
 OP*	newSLICEOP _((I32 flags, OP* subscript, OP* list));
 OP*	newSTATEOP _((I32 flags, char* label, OP* o));
-CV*	newSUB _((I32 floor, OP* op, OP* block));
+CV*	newSUB _((I32 floor, OP* op, OP* proto, OP* block));
 CV*	newXS _((char *name, void (*subaddr)(CV* cv), char *filename));
 #ifdef DEPRECATED
 CV*	newXSUB _((char *name, I32 ix, I32 (*subaddr)(int,int,int), char *filename));
@@ -300,20 +305,17 @@ I32	perl_call_argv _((char* subname, I32 flags, char** argv));
 I32	perl_call_method _((char* methname, I32 flags));
 I32	perl_call_pv _((char* subname, I32 flags));
 I32	perl_call_sv _((SV* sv, I32 flags));
-#ifdef DEPRECATED
-I32	perl_callargv _((char* subname, I32 sp, I32 gimme, char** argv));
-I32	perl_callpv _((char* subname, I32 sp, I32 gimme, I32 hasargs, I32 numargs));
-I32	perl_callsv _((SV* sv, I32 sp, I32 gimme, I32 hasargs, I32 numargs));
-#endif
 void	perl_construct _((PerlInterpreter* sv_interp));
 void	perl_destruct _((PerlInterpreter* sv_interp));
+I32	perl_eval_sv _((SV* sv, I32 flags));
 void	perl_free _((PerlInterpreter* sv_interp));
 SV*	perl_get_sv _((char* name, I32 create));
 AV*	perl_get_av _((char* name, I32 create));
 HV*	perl_get_hv _((char* name, I32 create));
 CV*	perl_get_cv _((char* name, I32 create));
 int	perl_parse _((PerlInterpreter* sv_interp, void(*xsinit)(void), int argc, char** argv, char** env));
-void	perl_requirepv _((char* pv));
+void	perl_require_pv _((char* pv));
+#define perl_requirepv perl_require_pv
 int	perl_run _((PerlInterpreter* sv_interp));
 void	pidgone _((int pid, int status));
 void	pmflag _((U16* pmfl, int ch));
@@ -390,6 +392,7 @@ char*	screaminstr _((SV* bigsv, SV* littlesv));
 #ifndef VMS
 I32	setenv_getix _((char* nam));
 #endif
+void	setdefout _((GV *gv));
 Signal_t sighandler _((int sig));
 SV**	stack_grow _((SV** sp, SV**p, int n));
 int	start_subparse _((void));
@@ -400,6 +403,7 @@ IV	sv_2iv _((SV* sv));
 SV*	sv_2mortal _((SV* sv));
 double	sv_2nv _((SV* sv));
 char*	sv_2pv _((SV* sv, STRLEN* lp));
+void	sv_add_arena _((char* ptr, U32 size, U32 flags));
 int	sv_backoff _((SV* sv));
 SV*	sv_bless _((SV* sv, HV* stash));
 void	sv_catpv _((SV* sv, char* ptr));
@@ -414,6 +418,7 @@ void	sv_dec _((SV* sv));
 void	sv_dump _((SV* sv));
 I32	sv_eq _((SV* sv1, SV* sv2));
 void	sv_free _((SV* sv));
+void	sv_free_arenas _((void));
 char*	sv_gets _((SV* sv, FILE* fp, I32 append));
 #ifndef DOSISH
 char*	sv_grow _((SV* sv, I32 newlen));
@@ -459,7 +464,6 @@ I32	wait4pid _((int pid, int* statusp, int flags));
 void	warn _((char* pat,...)) __attribute__((format(printf,1,2)));
 void	watch _((char **addr));
 I32	whichsig _((char* sig));
-char* 	whichsigname _((int sig));
 int	yyerror _((char* s));
 int	yylex _((void));
 int	yyparse _((void));

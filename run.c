@@ -16,8 +16,8 @@
  * know.  Run now!  Hope is in speed!"  --Gandalf
  */
 
-char **watchaddr = 0;
-char *watchok;
+dEXT char **watchaddr = 0;
+dEXT char *watchok;
 
 #ifndef DEBUGGING
 

@@ -1,3 +1,6 @@
+(Don't
+convert references into strings though, or you'll break their referenceness.)
+
 =head1 NAME
 
 perlref - Perl references and nested data structures

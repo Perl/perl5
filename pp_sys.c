@@ -130,7 +130,7 @@ PP(pp_backtick)
 		}
 	    }
 	}
-	statusvalue = my_pclose(fp);
+	statusvalue = FIXSTATUS(my_pclose(fp));
     }
     else {
 	statusvalue = -1;
@@ -192,7 +192,7 @@ PP(pp_warn)
 	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
-	SV *error = GvSV(gv_fetchpv("@", TRUE, SVt_PV));
+	SV *error = GvSV(errgv);
 	(void)SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...caught");
@@ -218,7 +218,7 @@ PP(pp_die)
 	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
-	SV *error = GvSV(gv_fetchpv("@", TRUE, SVt_PV));
+	SV *error = GvSV(errgv);
 	(void)SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...propagated");
@@ -241,8 +241,10 @@ PP(pp_open)
 
     if (MAXARG > 1)
 	sv = POPs;
-    else
+    else if (SvTYPE(TOPs) == SVt_PVGV)
 	sv = GvSV(TOPs);
+    else
+	DIE(no_usym, "filehandle");
     gv = (GV*)POPs;
     tmps = SvPV(sv, len);
     if (do_open(gv, tmps, len,Nullfp)) {
@@ -286,6 +288,8 @@ PP(pp_pipe_op)
     if (!rgv || !wgv)
 	goto badexit;
 
+    if (SvTYPE(rgv) != SVt_PVGV || SvTYPE(wgv) != SVt_PVGV)
+	DIE(no_usym, "filehandle");
     rstio = GvIOn(rgv);
     wstio = GvIOn(wgv);
 
@@ -475,7 +479,7 @@ PP(pp_dbmopen)
     stash = gv_stashsv(sv, FALSE);
     if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH")) || !GvCV(gv)) {
 	PUTBACK;
-	perl_requirepv("AnyDBM_File.pm");
+	perl_require_pv("AnyDBM_File.pm");
 	SPAGAIN;
 	if (!(gv = gv_fetchmethod(stash, "TIEHASH")) || !GvCV(gv))
 	    DIE("No dbm on this machine");
@@ -574,7 +578,11 @@ PP(pp_sselect)
     }
 
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+#ifdef __linux__
+    growsize = sizeof(fd_set);
+#else
     growsize = maxlen;		/* little endians can use vecs directly */
+#endif
 #else
 #ifdef NFDBITS
 
@@ -664,17 +672,46 @@ PP(pp_sselect)
 #endif
 }
 
+void
+setdefout(gv)
+GV *gv;
+{
+    if (gv)
+	(void)SvREFCNT_inc(gv);
+    if (defoutgv)
+	SvREFCNT_dec(defoutgv);
+    defoutgv = gv;
+}
+
 PP(pp_select)
 {
     dSP; dTARGET;
-    GV *oldgv = defoutgv;
-    if (op->op_private > 0) {
-	defoutgv = (GV*)POPs;
-	if (!GvIO(defoutgv))
-	    gv_IOadd(defoutgv);
+    GV *newdefout, *egv;
+    HV *hv;
+
+    newdefout = (op->op_private > 0) ? ((GV *) POPs) : NULL;
+
+    egv = GvEGV(defoutgv);
+    if (!egv)
+	egv = defoutgv;
+    hv = GvSTASH(egv);
+    if (! hv)
+	XPUSHs(&sv_undef);
+    else {
+	GV **gvp = hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
+	if (gvp && *gvp == egv)
+	    gv_efullname(TARG, defoutgv);
+	else
+	    sv_setsv(TARG, sv_2mortal(newRV(egv)));
+	XPUSHTARG;
     }
-    gv_efullname(TARG, oldgv);
-    XPUSHTARG;
+
+    if (newdefout) {
+	if (!GvIO(newdefout))
+	    gv_IOadd(newdefout);
+	setdefout(newdefout);
+    }
+
     RETURN;
 }
 
@@ -723,7 +760,7 @@ OP *retop;
     SAVESPTR(curpad);
     curpad = AvARRAY((AV*)svp[1]);
 
-    defoutgv = gv;		/* locally select filehandle so $% et al work */
+    setdefout(gv);	    /* locally select filehandle so $% et al work */
     return CvSTART(cv);
 }
 
@@ -783,6 +820,8 @@ PP(pp_leavewrite)
     if (IoLINES_LEFT(io) < FmLINES(formtarget) &&
 	formtarget != toptarget)
     {
+	GV *fgv;
+	CV *cv;
 	if (!IoTOP_GV(io)) {
 	    GV *topgv;
 	    char tmpbuf[256];
@@ -828,7 +867,16 @@ PP(pp_leavewrite)
 	IoPAGE(io)++;
 	formtarget = toptarget;
 	IoFLAGS(io) |= IOf_DIDTOP;
-	return doform(GvFORM(IoTOP_GV(io)),gv,op);
+	fgv = IoTOP_GV(io);
+	if (!fgv)
+	    DIE("bad top format reference");
+	cv = GvFORM(fgv);
+	if (!cv) {
+	    SV *tmpsv = sv_newmortal();
+	    gv_efullname(tmpsv, fgv);
+	    DIE("Undefined top format \"%s\" called",SvPVX(tmpsv));
+	}
+	return doform(cv,gv,op);
     }
 
   forget_top:
@@ -1212,11 +1260,15 @@ PP(pp_ioctl)
 	DIE("ioctl is not implemented");
 #endif
     else
-#ifdef DOSISH
+#if defined(DOSISH) && !defined(OS2)
 	DIE("fcntl is not implemented");
 #else
 #   ifdef HAS_FCNTL
+#     if defined(OS2) && defined(__EMX__)
+	retval = fcntl(fileno(IoIFP(io)), func, (int)s);
+#     else
 	retval = fcntl(fileno(IoIFP(io)), func, s);
+#     endif 
 #   else
 	DIE("fcntl is not implemented");
 #   endif
@@ -1459,11 +1511,11 @@ PP(pp_accept)
 {
     dSP; dTARGET;
 #ifdef HAS_SOCKET
-    struct sockaddr_in saddr;	/* use a struct to avoid alignment problems */
     GV *ngv;
     GV *ggv;
     register IO *nstio;
     register IO *gstio;
+    struct sockaddr saddr;	/* use a struct to avoid alignment problems */
     int len = sizeof saddr;
     int fd;
 
@@ -2129,6 +2181,7 @@ PP(pp_fttext)
     }
 
     /* now scan s to look for textiness */
+    /*   XXX ASCII dependent code */
 
     for (i = 0; i < len; i++, s++) {
 	if (!*s) {			/* null never allowed in text */
@@ -2143,7 +2196,7 @@ PP(pp_fttext)
 	    odd++;
     }
 
-    if ((odd * 30 > len) == (op->op_type == OP_FTTEXT)) /* allow 30% odd */
+    if ((odd * 3 > len) == (op->op_type == OP_FTTEXT)) /* allow 1/3 odd */
 	RETPUSHNO;
     else
 	RETPUSHYES;
@@ -2181,7 +2234,7 @@ PP(pp_chdir)
 #ifdef VMS
     /* Clear the DEFAULT element of ENV so we'll get the new value
      * in the future. */
-    hv_delete(GvHVn(envgv),"DEFAULT",7);
+    hv_delete(GvHVn(envgv),"DEFAULT",7,G_DISCARD);
 #endif
     RETURN;
 }
@@ -2733,6 +2786,7 @@ PP(pp_system)
     else {
 	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), na));
     }
+    statusvalue = FIXSTATUS(value);
     do_execfree();
     SP = ORIGMARK;
     PUSHi(value);
@@ -2913,6 +2967,8 @@ PP(pp_tms)
     (void)times((tbuffer_t *)&timesbuf);  /* time.h uses different name for */
                                           /* struct tms, though same data   */
                                           /* is returned.                   */
+#undef HZ
+#define HZ CLK_TCK
 #endif
 
     PUSHs(sv_2mortal(newSVnv(((double)timesbuf.tms_utime)/HZ)));

@@ -27,6 +27,7 @@ $usage =
 
 GetOptions( qw( man1dir=s man1ext=s man3dir=s man3ext=s notify help)) 
 	|| die $usage;
+die $usage if $opt_help;
 
 # These are written funny to avoid -w typo warnings.
 $man1dir = defined($opt_man1dir) ? $opt_man1dir : $Config{'installman1dir'};

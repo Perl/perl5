@@ -1,0 +1,529 @@
+=head1 NAME
+
+perlXStut - Tutorial for XSUB's
+
+=head1 DESCRIPTION
+
+This tutorial will educate the reader on the steps involved in creating
+a Perl 5 extension.  The reader is assumed to have access to L<perlguts> and
+L<perlxs>.
+
+This tutorial starts with very simple examples and becomes more complex,
+bringing in more features that are available.  Thus, certain statements
+towards the beginning may be incomplete.  The reader is encouraged to
+read the entire document before lambasting the author about apparent
+mistakes.
+
+This tutorial is still under construction.  Constructive comments
+are welcome.
+
+=head1 EXAMPLE 1
+
+Our first extension will be very simple.  When we call the routine in the
+extension, it will print out a well-known message and terminate.
+
+Run "h2xs -A -n Test1".  This creates a directory named Test1, possibly under
+ext/ if it exists in the current working directory.  Four files will be
+created in the Test1 dir: MANIFEST, Makefile.PL, Test1.pm, Test1.xs.
+
+The MANIFEST file should contain the names of the four files created.
+
+The file Makefile.PL should look something like this:
+
+	use ExtUtils::MakeMaker;
+	# See lib/ExtUtils/MakeMaker.pm for details of how to influence
+	# the contents of the Makefile that is written.
+	WriteMakefile(
+	    'NAME'      => 'Test1',
+	    'VERSION'   => '0.1',
+	    'LIBS'      => [''],   # e.g., '-lm'
+	    'DEFINE'    => '',     # e.g., '-DHAVE_SOMETHING'
+	    'INC'       => '',     # e.g., '-I/usr/include/other'
+	);
+
+The file Test1.pm should look something like this:
+
+	package Test1;
+	
+	require Exporter;
+	require DynaLoader;
+	
+	@ISA = qw(Exporter DynaLoader);
+	# Items to export into callers namespace by default. Note: do not export
+	# names by default without a very good reason. Use EXPORT_OK instead.
+	# Do not simply export all your public functions/methods/constants.
+	@EXPORT = qw(
+	
+	);
+	bootstrap Test1;
+	
+	# Preloaded methods go here.
+	
+	# Autoload methods go after __END__, and are processed by the autosplit program.
+	
+	1;
+	__END__
+
+And the Test1.xs file should look something like this:
+
+	#include "EXTERN.h"
+	#include "perl.h"
+	#include "XSUB.h"
+	
+	MODULE = Test1		PACKAGE = Test1
+
+Let's edit the .xs file by adding this to the end of the file:
+
+	void
+	hello()
+	
+		CODE:
+		printf("Hello, world!\n");
+
+Now we'll run "perl Makefile.PL".  This will create a real Makefile,
+which make needs.  It's output looks something like:
+
+	% perl Makefile.PL
+	Checking if your kit is complete...
+	Looks good
+	Writing Makefile for Test1
+	%
+
+Now, running make will produce output that looks something like this:
+
+	% make
+	mkdir ./blib
+	mkdir ./blib/auto
+	mkdir ./blib/auto/Test1
+		perl xsubpp -typemap typemap Test1.xs >Test1.tc && mv Test1.tc Test1.c
+		cc -c Test1.c
+	Running Mkbootstrap for Test1 ()
+		chmod 644 Test1.bs
+		LD_RUN_PATH="" ld -o ./blib/auto/Test1/Test1.sl -b Test1.o
+		chmod 755 ./blib/auto/Test1/Test1.sl
+		cp Test1.bs ./blib/auto/Test1/Test1.bs
+		chmod 644 ./blib/auto/Test1/Test1.bs
+		cp Test1.pm ./blib/Test1.pm
+		chmod 644 ./blib/Test1.pm
+
+Now we'll create a test script, test1.pl in the Test1 directory.  It should
+look like this:
+
+	#! /usr/local/bin/perl
+	
+	BEGIN { unshift(@INC, "./blib") }
+	
+	use Test1;
+	
+	Test1::hello();
+
+Now we run the script and we should see the following output:
+
+	% perl test1.pl
+	Hello, world!
+	%
+
+=head1 EXAMPLE 2
+
+Now let's create a simple extension that will take a single argument and
+return 0 if the argument is even, 1 if the argument is odd.
+
+Run "h2xs -A -n Test2".  This will create a Test2 directory with a file
+Test2.xs underneath it.  Add the following to the end of the XS file:
+
+	int
+	is_even(input)
+		int	input
+	
+		CODE:
+		RETVAL = input % 2;
+	
+		OUTPUT:
+		RETVAL
+
+(Note that the line after the declaration of is_even is indented one tab
+stop.  Although there is a tab between "int" and "input", this can be any
+amount of white space.  Also notice that there is no semi-colon following
+the "declaration" of the variable input)
+
+Now perform the same steps before, generating a Makefile from the
+Makefile.PL file, and running make.
+
+Our test file test2.pl will now look like:
+
+	BEGIN { unshift(@INC, "./blib"); }
+	
+	use Test2;
+	
+	$a = &Test2::is_even(2);
+	$b = &Test2::is_even(3);
+	
+	print "\$a is $a, \$b is $b\n";
+
+The output should look like:
+
+	% perl test2.pl
+	$a is 0, $b is 1
+	%
+
+=head1 WHAT HAS GONE ON?
+
+The program h2xs is the starting point for creating extensions.  In later
+examples, we'll see how we can use h2xs to read header files and generate
+templates to connect to C routines.
+
+h2xs creates a number of files in the extension directory.  The file
+Makefile.PL is a perl script which will generate a true Makefile to build
+the extension.  We'll take a closer look at it later.
+
+The files <extension>.pm and <extension>.xs contain the meat of the extension.
+The .xs file holds the C routines that make up the extension.  The .pm file
+contains routines that tells Perl how to load your extension.
+
+Generating the invoking the Makefile created a directory blib in the current
+working directory.  This directory will contain the shared library that we
+will build.  Once we have tested it, we can install it into its final location.
+
+Finally, our test scripts do two important things.  First of all, they place
+the directory "blib" at the head of the @INC array.  Placing this inside a
+BEGIN block assures us that Perl will look in the blib directory hierarchy
+before looking in the system directories.  This could be important if you are
+upgrading an already-existing extension and do not want to disturb the system
+version until you are ready to install it.
+
+Second, the test scripts tell Perl to C<use extension;>.  When Perl sees this,
+it searches for a .pm file of the same name in the various directories kept
+in the @INC array.  If it cannot be found, perl will die with an error that
+will look something like:
+
+	Can't locate Test2.pm in @INC at ./test2.pl line 5.
+	BEGIN failed--compilation aborted at ./test2.pl line 5.
+
+The .pm file tells perl that it will need the Exporter and Dynamic Loader
+extensions.  It then sets the @ISA array, which is used for looking up
+methods that might not exist in the current package, and finally tells perl
+to bootstrap the module.  Perl will call its dynamic loader routine and load
+the shared library.
+
+The @EXPORT array in the .pm file tells Perl which of the extension's
+routines should be placed into the calling package's namespace.  In our two
+examples so far, we have not modified the @EXPORT array, so our test
+scripts must call the routines by their complete name (e.g., Test1::hello).
+If we placed the name of the routine in the @EXPORT array, so that the
+.pm file looked like:
+
+	@EXPORT = qw( hello );
+
+Then the hello routine would also be callable from the "main" package.
+We could therefore change test1.pl to look like:
+
+	#! /usr/local/bin/perl
+	
+	BEGIN { unshift(@INC, "./blib") }
+	
+	use Test1;
+	
+	hello();
+
+And we would get the same output, "Hello, world!".
+
+Most of the time you do not want to export the names of your extension's
+subroutines, because they might accidentally clash with other subroutines
+from other extensions or from the calling program itself.
+
+=head1 EXAMPLE 3
+
+Our third extension will take one argument as its input, round off that
+value, and set the argument to the rounded value.
+
+Run "h2xs -A -n Test3".  This will create a Test3 directory with a file
+Test3.xs underneath it.  Add the following to the end of the XS file:
+
+	void
+	round(arg)
+		double  arg
+	
+		CODE:
+		if (arg > 0.0) {
+			arg = floor(arg + 0.5);
+		} else if (arg < 0.0) {
+			arg = ceil(arg - 0.5);
+		} else {
+			arg = 0.0;
+		}
+		OUTPUT:
+		arg
+
+Edit the file Makefile.PL so that the corresponding line looks like this:
+
+	'LIBS'      => ['-lm'],   # e.g., '-lm'
+
+Generate the Makefile and run make.  The test script test3.pl looks like:
+
+	#! /usr/local/bin/perl
+	
+	BEGIN { unshift(@INC, "./blib"); }
+	
+	use Test3;
+	
+	foreach $i (-1.4, -0.5, 0.0, 0.4, 0.5) {
+		$j = $i;
+		&Test3::round($j);
+		print "Rounding $i results in $j\n";
+	}
+	
+	print STDERR "Trying to round a constant -- ";
+	&Test3::round(2.0);
+
+Notice the output from trying to send a constant in to the routine.  Perl
+reports:
+
+	Modification of a read-only value attempted at ./test3.pl line 15.
+
+Perl won't let you change the value of two to, say, three, unlike a FORTRAN
+compiler from long, long ago!
+
+=head1 WHAT'S NEW HERE?
+
+Two things are new here.  First, we've made some changes to Makefile.PL.
+In this case, we've specified an extra library to link in, in this case the
+math library, libm.  We'll talk later about how to write XSUBs that can call
+every routine in a library.
+
+Second, the value of the function is being passed back not as the function's
+return value, but through the same variable that was passed into the function.
+
+=head1 INPUT AND OUTPUT PARAMETERS
+
+You specify the parameters that will be passed into the XSUB just after you
+declare the function return value and name.  The list of parameters looks
+very C-like, but the lines must be indented by a tab stop, and each line
+may not have an ending semi-colon.
+
+The list of output parameters occurs after the OUTPUT: directive.  The use
+of RETVAL tells Perl that you wish to send this value back as the return
+value of the XSUB function.  Otherwise, you specify which variables used
+in the XSUB function should be placed into the respective Perl variables
+passed in.
+
+=head1 THE XSUBPP COMPILER
+
+The compiler xsubpp takes the XS code in the .xs file and converts it into
+C code, placing it in a file whose suffix is .c.  The C code created makes
+heavy use of the C functions within Perl.
+
+=head1 THE TYPEMAP FILE
+
+The xsubpp compiler uses rules to convert from Perl's data types (scalar,
+array, etc.) to C's data types (int, char *, etc.).  These rules are stored
+in the typemap file ($PERLLIB/ExtUtils/typemap).  This file is split into
+three parts.
+
+The first part attempts to map various C data types to a coded flag, which
+has some correspondence with the various Perl types.  The second part contains
+C code which xsubpp uses for input parameters.  The third part contains C
+code which xsubpp uses for output parameters.  We'll talk more about the
+C code later.
+
+Let's now take a look at the .c file created for the Test3 extension.
+
+	/*
+	 * This file was generated automatically by xsubpp version 1.9 from the 
+	 * contents of Test3.xs. Don't edit this file, edit Test3.xs instead.
+	 *
+	 *	ANY CHANGES MADE HERE WILL BE LOST! 
+	 *
+	 */
+
+	#include "EXTERN.h"
+	#include "perl.h"
+	#include "XSUB.h"
+	
+	
+	XS(XS_Test3_round)
+	{
+	    dXSARGS;
+	    if (items != 1) {
+		croak("Usage: Test3::round(arg)");
+	    }
+	    {
+		double	arg = (double)SvNV(ST(0)); /* XXXXX */
+
+		if (arg > 0.0) {
+			arg = floor(arg + 0.5);
+		} else if (arg < 0.0) {
+			arg = ceil(arg - 0.5);
+		}
+	
+		sv_setnv(ST(0), (double)arg); /* XXXXX */
+	    }
+	    XSRETURN(1);
+	}
+	
+	XS(boot_Test3)
+	{
+	    dXSARGS;
+	    char* file = __FILE__;
+	
+	    newXS("Test3::round", XS_Test3_round, file);
+	    ST(0) = &sv_yes;
+	    XSRETURN(1);
+	}
+
+Notice the two lines marked with "XXXXX".  If you check the first section of
+the typemap file, you'll see that doubles are of type T_DOUBLE.  In the
+INPUT section, an argument that is T_DOUBLE is assigned to the variable
+arg by calling the routine SvNV on something, then casting it to double,
+then assigned to the variable arg.  Similarly, in the OUTPUT section,
+once arg has its final value, it is passed to the sv_setnv function to
+be passed back to the calling subroutine.  These two functions are explained
+in perlguts; we'll talk more later about what that "ST(0)" means in the
+section on the argument stack.
+
+=head1 WARNING
+
+In general, it's not agood idea to write extensions that modify their input
+parameters, as in Example 3.  However, in order to better accomodate calling
+pre-existing C routines, which often do modify their input parameters,
+this behavior is tolerated.  The next example will show to do this.
+
+=head1 EXAMPLE 4
+
+We'll now show how we can call routines in libraries, such as the curses
+screen handling package, or a DBM module like GDBM.  Each of these libraries
+has a header file from which we will generate an XS template that we'll then
+fine-tune.
+
+Rather than attempt to find a library that exists on all systems, we'll
+first create our own C library, then create an XSUB to it.
+
+Let's create the files libtest4.h and libtest4.c as follows:
+
+	/* libtest4.h */
+
+	#define TESTVAL	4
+
+	extern int	test4(int, long, const char*);
+
+	/* libtest4.c */
+	
+	#include <stdlib.h>
+	#include "./libtest4.h"
+	
+	int
+	test4(a, b, c)
+	int		a;
+	long		b;
+	const char *	c;
+	{
+		return (a + b + atof(c) + TESTVAL);
+	}
+
+Now let's compile it into a library.  Since we'll be eventually using this
+archive to create a shared library, be sure to use the correct flags to
+generate position-independent code.  In HP-UX, that's:
+
+	% cc -Aa -D_HPUX_SOURCE -c +z libtest4.c
+	% ar cr libtest4.a libtest4.o
+
+Now let's move the libtest4.h and libtest.a files into a sub-directory under
+/tmp, so we don't interfere with anything.
+
+	% mkdir /tmp/test4
+	% mkdir /tmp/test4/include
+	% mkdir /tmp/test4/lib
+	% cp libtest4.h /tmp/test4/include
+	% cp libtest4.a /tmp/test4/lib
+
+Okay, now that we have a header file and a library, let's begin actually
+writing the extension.
+
+Run "h2xs -n Test4 /tmp/test4/include/libtest4.h" (notice we are no longer
+specifying -A as an argument).  This will create a Test4 directory with a file
+Test4.xs underneath it.  If we look at it now, we'll see some interesting
+things have been added to the various files.
+
+=over 2
+
+=item *
+
+In the .xs file, there's now a #include declaration with the full path to
+the libtest4.h header file.
+
+=item *
+
+There's now some new C code that's been added to the .xs file.  The purpose
+of the C<constant> routine is to make the values that are #define'd in the
+header file available to the Perl script by calling C<&main::TESTVAL>.
+There's also some XS code to allow calls to the C<constant> routine.
+
+=item *
+
+The .pm file has exported the name TESTVAL in the @EXPORT array.  This
+could lead to name clashes.  A good rule of thumb is that if the #define
+is only going to be used by the C routines themselves, and not by the user,
+they should be removed from the @EXPORT array.  Alternately, if you don't
+mind using the "fully qualified name" of a variable, you could remove most
+or all of the items in the @EXPORT array.
+
+=back
+
+Let's now add a definition for the routine in our library.  Add the following
+code to the end of the .xs file:
+
+	int
+	test4(a,b,c)
+	int             a
+	long            b
+	const char *    c
+
+Now we also need to create a typemap file because the default Perl doesn't
+currently support the const char * type.  Create a file called typemap and
+place the following in it:
+
+	const char *	T_PV
+
+Now we must tell our Makefile template where our new library is.  Edit the
+Makefile.PL and change the following line:
+
+	'LIBS'      => ['-ltest4 -L/tmp/test4'],   # e.g., '-lm'
+
+This specifies that we want the library test4 linked into our XSUB, and that
+it should also look in the directory /tmp/test4.
+
+Let's also change the following line in the Makefile.PL to this:
+
+	'INC'       => '-I/tmp/test/include',     # e.g., '-I/usr/include/other'
+
+and also change the #include in test4.xs to be:
+
+	#include <libtest4.h>
+
+Now we don't have to specify the absolute path of the header file in the
+.xs file, relying on the Makefile to tell the compiler where to find the
+header files.  This is generally considered a Good Thing.
+
+Okay, let's create the Makefile, and run make.  You can ignore a message that
+may look like:
+
+	Warning (non-fatal): No library found for -ltest4
+
+If you forgot to create the typemap file, you might see output that looks
+like this:
+
+	Error: 'const char *' not in typemap in test4.xs, line 102
+
+This error means that you have used a C datatype that xsubpp doesn't know
+how to convert between Perl and C.  You'll have to create a typemap file to 
+tell xsubpp how to do the conversions.
+
+=head1 Author
+
+Jeff Okamoto
+
+=head1 Last Changed
+
+1995/11/20
+
+Jeff Okamoto 
+F<E<lt>okamoto@hpcc123.corp.hp.comE<gt>>

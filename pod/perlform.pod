@@ -310,4 +310,5 @@ is to printf(), do this:
 
 Lexical variables (declared with "my") are not visible within a
 format unless the format is declared within the scope of the lexical
-variable.  (They weren't visiblie at all before version 5.001.)
+variable.  (They weren't visible at all before version 5.001.)  See
+L<perlfunc/my> for other issues.

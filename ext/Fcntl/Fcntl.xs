@@ -173,6 +173,12 @@ int arg;
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "O_BINARY"))
+#ifdef O_BINARY
+	        return O_BINARY;
+#else
+	        goto not_there;
+#endif
 	} else
 	  goto not_there;
 	break;

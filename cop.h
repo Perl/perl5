@@ -42,8 +42,9 @@ struct block_sub {
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.gv = gv;						\
+	cx->blk_sub.hasargs = 0;					\
 	cx->blk_sub.dfoutgv = defoutgv;					\
-	cx->blk_sub.hasargs = 0;
+	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
 #define POPSUB(cx)							\
 	if (cx->blk_sub.hasargs) {   /* put back old @_ */		\
@@ -56,7 +57,8 @@ struct block_sub {
 	}
 
 #define POPFORMAT(cx)							\
-	defoutgv = cx->blk_sub.dfoutgv;
+	setdefout(cx->blk_sub.dfoutgv);					\
+	SvREFCNT_dec(cx->blk_sub.dfoutgv);
 
 /* eval context */
 struct block_eval {
@@ -103,9 +105,7 @@ struct block_loop {
 	    cx->blk_loop.itersave = *cx->blk_loop.itervar;
 
 #define POPLOOP(cx)							\
-	newsp		= stack_base + cx->blk_loop.resetsp;		\
-	if (cx->blk_loop.itervar)					\
-	    *cx->blk_loop.itervar = cx->blk_loop.itersave;
+	newsp		= stack_base + cx->blk_loop.resetsp;
 
 /* context common to subroutines, evals and loops */
 struct block {
@@ -172,6 +172,7 @@ struct subst {
     I32		sbu_maxiters;
     I32		sbu_safebase;
     I32		sbu_once;
+    I32		sbu_oldsave;
     char *	sbu_orig;
     SV *	sbu_dstr;
     SV *	sbu_targ;
@@ -184,6 +185,7 @@ struct subst {
 #define sb_maxiters	cx_u.cx_subst.sbu_maxiters
 #define sb_safebase	cx_u.cx_subst.sbu_safebase
 #define sb_once		cx_u.cx_subst.sbu_once
+#define sb_oldsave	cx_u.cx_subst.sbu_oldsave
 #define sb_orig		cx_u.cx_subst.sbu_orig
 #define sb_dstr		cx_u.cx_subst.sbu_dstr
 #define sb_targ		cx_u.cx_subst.sbu_targ
@@ -197,6 +199,7 @@ struct subst {
 	cx->sb_maxiters		= maxiters,				\
 	cx->sb_safebase		= safebase,				\
 	cx->sb_once		= once,					\
+	cx->sb_oldsave		= oldsave,				\
 	cx->sb_orig		= orig,					\
 	cx->sb_dstr		= dstr,					\
 	cx->sb_targ		= targ,					\
@@ -231,3 +234,4 @@ struct context {
 #define G_DISCARD	2	/* Call FREETMPS. */
 #define G_EVAL		4	/* Assume eval {} around subroutine call. */
 #define G_NOARGS	8	/* Don't construct a @_ array. */
+#define G_KEEPERR      16	/* Append errors to $@ rather than overwriting it */

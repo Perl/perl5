@@ -16,6 +16,7 @@ typedef GDBM_FILE GDBM_File;
 #define gdbm_DELETE(db,key)			gdbm_delete(db,key)
 #define gdbm_FIRSTKEY(db)			gdbm_firstkey(db)
 #define gdbm_NEXTKEY(db,key)			gdbm_nextkey(db,key)
+#define gdbm_EXISTS(db,key)			gdbm_exists(db,key)
 
 typedef datum gdatum;
 

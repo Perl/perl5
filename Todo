@@ -34,7 +34,7 @@ Possible pragmas
 Optimizations
 	constant function cache
 	switch structures
-	foreach(@array)
+	eval qw() at compile time
 	foreach (1..1000000)
 	foreach(reverse...)
 	Set KEEP on constant split
@@ -51,7 +51,6 @@ Optimizations
 Vague possibilities
 	ref function in list context
 	Populate %SIG at startup if appropriate
-	sub mysplice(@, $, $, ...)
 	data prettyprint function?  (or is it, as I suspect, a lib routine?)
 	make tr/// return histogram in list context?
 	undef wantarray in void context

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Thu Oct 19 10:47:09 EDT 1995 [metaconfig 3.0 PL58]
+# Generated on Mon Nov 20 09:55:37 EST 1995 [metaconfig 3.0 PL58]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -206,6 +206,13 @@ RCSfile=''
 Revision=''
 Source=''
 State=''
+ar=''
+archobjs=''
+exe_ext=''
+firstmakefile=''
+lib_ext=''
+obj_ext=''
+path_sep=''
 afs=''
 alignbytes=''
 archlib=''
@@ -430,6 +437,7 @@ i_float=''
 i_gdbm=''
 i_grp=''
 i_limits=''
+i_locale=''
 i_malloc=''
 i_math=''
 i_memory=''
@@ -517,12 +525,16 @@ rd_nodata=''
 groupcat=''
 hostcat=''
 passcat=''
+d_oldarchlib=''
+oldarchlib=''
+oldarchlibexp=''
 orderlib=''
 ranlib=''
 package=''
 spackage=''
 patchlevel=''
 perladmin=''
+perlpath=''
 prefix=''
 prefixexp=''
 installprivlib=''
@@ -535,18 +547,17 @@ scriptdir=''
 scriptdirexp=''
 selecttype=''
 sig_name=''
-sig_max=''
 sig_num=''
-d_sitelib=''
-installsitelib=''
-sitelib=''
-sitelibexp=''
+installsitearch=''
+sitearch=''
+sitearchexp=''
 sizetype=''
 so=''
 sharpbang=''
 shsharp=''
 spitshell=''
 ssizetype=''
+startperl=''
 startsh=''
 stdchar=''
 sysman=''
@@ -778,7 +789,8 @@ END {
 EOF
 
 : process the command line options
-set X `for arg in "$@"; do echo $arg; done | awk -f options.awk`
+set X `for arg in "$@"; do echo "X$arg"; done |
+	sed -e s/X// | awk -f options.awk`
 eval "set $*"
 shift
 rm -f options.awk
@@ -1291,7 +1303,7 @@ for dir in \$*; do
 	for thisthing in \$dir/\$thing; do
 		: just loop through to pick last item
 	done
-	if test -f \$thisthing; then
+	if test -f \$thisthing -a -r \$thisthing; then
 		echo \$thisthing
 		exit 0
 	elif test -f \$dir/\$thing.exe; then
@@ -1354,7 +1366,9 @@ for file in $loclist; do
 		echo $file is in $xxx.
 		;;
 	*)
-		echo "I don't know where $file is.  I hope it's in everyone's PATH."
+		echo "I don't know where '$file' is, and my life depends on it."
+		echo "Go find a public domain implementation or fix your PATH setting!"
+		exit 1
 		;;
 	esac
 done
@@ -1530,9 +1544,18 @@ EOM
 	$test -d /usr/apollo/bin && osname=apollo
 	$test -f /etc/saf/_sactab && osname=svr4
 	$test -d /usr/include/minix && osname=minix
-	$test -d /MachTen && osname=machten && \
-		osvers=`/usr/etc/version | $awk '{print $2}' | \
-		$sed -e 's/[A-Za-z]$//'`
+	if $test -d /MachTen; then
+		osname=machten 
+		if $test -x /sbin/version; then
+			osvers=`/sbin/version | $awk '{print $2}' | 
+			$sed -e 's/[A-Za-z]$//'`
+		elif $test -x /usr/etc/version; then
+			osvers=`/usr/etc/version | $awk '{print $2}' | 
+			$sed -e 's/[A-Za-z]$//'`
+		else
+			osvers="$2.$3"
+		fi
+	fi
 	if $test -f $uname; then
 		set X $myuname
 		shift
@@ -1858,6 +1881,611 @@ $test -s .temp || echo unknown > .temp
 cf_by=`$cat .temp`
 $rm -f .temp
 
+: determine the architecture name
+echo " "
+if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
+	tarch=`arch`"-$osname"
+elif xxx=`./loc uname blurfl $pth`; $test -f "$xxx" ; then
+	if uname -m > tmparch 2>&1 ; then
+		tarch=`$sed -e 's/ /_/g' -e 's/$/'"-$osname/" tmparch`
+	else
+		tarch="$osname"
+	fi
+	$rm -f tmparch
+else
+	tarch="$osname"
+fi
+case "$myarchname" in
+''|"$tarch") ;;
+*)
+	echo "(Your architecture name used to be $myarchname.)"
+	archname=''
+	;;
+esac
+case "$archname" in
+'') dflt="$tarch";;
+*) dflt="$archname";;
+esac
+rp='What is your architecture name'
+. ./myread
+archname="$ans"
+myarchname="$tarch"
+
+: is AFS running?
+echo " "
+if test -d /afs; then
+	echo "AFS may be running... I'll be extra cautious then..." >&4
+	afs=true
+else
+	echo "AFS does not seem to be running..." >&4
+	afs=false
+fi
+
+: decide how portable to be.  Allow command line overrides.
+case "$d_portable" in
+"$undef") ;;
+*)	d_portable="$define" ;;
+esac
+
+: set up shell script to do ~ expansion
+cat >filexp <<EOSS
+$startsh
+: expand filename
+case "\$1" in
+ ~/*|~)
+	echo \$1 | $sed "s|~|\${HOME-\$LOGDIR}|"
+	;;
+ ~*)
+	if $test -f /bin/csh; then
+		/bin/csh -f -c "glob \$1"
+		failed=\$?
+		echo ""
+		exit \$failed
+	else
+		name=\`$expr x\$1 : '..\([^/]*\)'\`
+		dir=\`$sed -n -e "/^\${name}:/{s/^[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\([^:]*\).*"'\$'"/\1/" -e p -e q -e '}' </etc/passwd\`
+		if $test ! -d "\$dir"; then
+			me=\`basename \$0\`
+			echo "\$me: can't locate home directory for: \$name" >&2
+			exit 1
+		fi
+		case "\$1" in
+		*/*)
+			echo \$dir/\`$expr x\$1 : '..[^/]*/\(.*\)'\`
+			;;
+		*)
+			echo \$dir
+			;;
+		esac
+	fi
+	;;
+*)
+	echo \$1
+	;;
+esac
+EOSS
+chmod +x filexp
+$eunicefix filexp
+
+: now set up to get a file name
+cat <<'EOSC' >getfile
+tilde=''
+fullpath=''
+already=''
+skip=''
+none_ok=''
+exp_file=''
+nopath_ok=''
+orig_rp="$rp"
+orig_dflt="$dflt"
+
+case "$fn" in
+*\(*)
+	expr $fn : '.*(\(.*\)).*' | tr ',' '\012' >getfile.ok
+	fn=`echo $fn | sed 's/(.*)//'`
+	;;
+esac
+
+case "$fn" in
+*:*)
+	loc_file=`expr $fn : '.*:\(.*\)'`
+	fn=`expr $fn : '\(.*\):.*'`
+	;;
+esac
+
+case "$fn" in
+*~*) tilde=true;;
+esac
+case "$fn" in
+*/*) fullpath=true;;
+esac
+case "$fn" in
+*+*) skip=true;;
+esac
+case "$fn" in
+*n*) none_ok=true;;
+esac
+case "$fn" in
+*e*) exp_file=true;;
+esac
+case "$fn" in
+*p*) nopath_ok=true;;
+esac
+
+case "$fn" in
+*f*) type='File';;
+*d*) type='Directory';;
+*l*) type='Locate';;
+esac
+
+what="$type"
+case "$what" in
+Locate) what='File';;
+esac
+
+case "$exp_file" in
+'')
+	case "$d_portable" in
+	"$define") ;;
+	*) exp_file=true;;
+	esac
+	;;
+esac
+
+cd ..
+while test "$type"; do
+	redo=''
+	rp="$orig_rp"
+	dflt="$orig_dflt"
+	case "$tilde" in
+	true) rp="$rp (~name ok)";;
+	esac
+	. UU/myread
+	if test -f UU/getfile.ok && \
+		$contains "^$ans\$" UU/getfile.ok >/dev/null 2>&1
+	then
+		value="$ans"
+		ansexp="$ans"
+		break
+	fi
+	case "$ans" in
+	none)
+		value=''
+		ansexp=''
+		case "$none_ok" in
+		true) type='';;
+		esac
+		;;
+	*)
+		case "$tilde" in
+		'') value="$ans"
+			ansexp="$ans";;
+		*)
+			value=`UU/filexp $ans`
+			case $? in
+			0)
+				if test "$ans" != "$value"; then
+					echo "(That expands to $value on this system.)"
+				fi
+				;;
+			*) value="$ans";;
+			esac
+			ansexp="$value"
+			case "$exp_file" in
+			'') value="$ans";;
+			esac
+			;;
+		esac
+		case "$fullpath" in
+		true)
+			case "$ansexp" in
+			/*) value="$ansexp" ;;
+			*)
+				redo=true
+				case "$already" in
+				true)
+				echo "I shall only accept a full path name, as in /bin/ls." >&4
+				echo "Use a ! shell escape if you wish to check pathnames." >&4
+					;;
+				*)
+				echo "Please give a full path name, starting with slash." >&4
+					case "$tilde" in
+					true)
+				echo "Note that using ~name is ok provided it expands well." >&4
+						already=true
+						;;
+					esac
+				esac
+				;;
+			esac
+			;;
+		esac
+		case "$redo" in
+		'')
+			case "$type" in
+			File)
+				if test -f "$ansexp"; then
+					type=''
+				elif test -r "$ansexp" || (test -h "$ansexp") >/dev/null 2>&1
+				then
+					echo "($value is not a plain file, but that's ok.)"
+					type=''
+				fi
+				;;
+			Directory)
+				if test -d "$ansexp"; then
+					type=''
+				fi
+				;;
+			Locate)
+				if test -d "$ansexp"; then
+					echo "(Looking for $loc_file in directory $value.)"
+					value="$value/$loc_file"
+					ansexp="$ansexp/$loc_file"
+				fi
+				if test -f "$ansexp"; then
+					type=''
+				fi
+				case "$nopath_ok" in
+				true)	case "$value" in
+					*/*) ;;
+					*)	echo "Assuming $value will be in people's path."
+						type=''
+						;;
+					esac
+					;;
+				esac
+				;;
+			esac
+
+			case "$skip" in
+			true) type='';
+			esac
+
+			case "$type" in
+			'') ;;
+			*)
+				if test "$fastread" = yes; then
+					dflt=y
+				else
+					dflt=n
+				fi
+				rp="$what $value doesn't exist.  Use that name anyway?"
+				. UU/myread
+				dflt=''
+				case "$ans" in
+				y*) type='';;
+				*) echo " ";;
+				esac
+				;;
+			esac
+			;;
+		esac
+		;;
+	esac
+done
+cd UU
+ans="$value"
+rp="$orig_rp"
+dflt="$orig_dflt"
+rm -f getfile.ok
+EOSC
+
+: determine root of directory hierarchy where package will be installed.
+case "$prefix" in
+'')
+	dflt=`./loc . /usr/local /usr/local /local /opt /usr`
+	;;
+*)
+	dflt="$prefix"
+	;;
+esac
+$cat <<EOM
+
+By default, $package will be installed in $dflt/bin, manual
+pages under $dflt/man, etc..., i.e. with $dflt as prefix for
+all installation directories. Typically set to /usr/local, but you
+may choose /usr if you wish to install $package among your system
+binaries. If you wish to have binaries under /bin but manual pages
+under /usr/local/man, that's ok: you will be prompted separately
+for each of the installation directories, the prefix being only used
+to set the defaults.
+
+EOM
+fn=d~
+rp='Installation prefix to use?'
+. ./getfile
+oldprefix=''
+case "$prefix" in
+'') ;;
+*)
+	case "$ans" in
+	"$prefix") ;;
+	*) oldprefix="$prefix";;
+	esac
+	;;
+esac
+prefix="$ans"
+prefixexp="$ansexp"
+
+: set the prefixit variable, to compute a suitable default value
+prefixit='case "$3" in
+""|none)
+	case "$oldprefix" in
+	"") eval "$1=\"\$$2\"";;
+	*)
+		case "$3" in
+		"") eval "$1=";;
+		none)
+			eval "tp=\"\$$2\"";
+			case "$tp" in
+			""|" ") eval "$1=\"\$$2\"";;
+			*) eval "$1=";;
+			esac;;
+		esac;;
+	esac;;
+*)
+	eval "tp=\"$oldprefix-\$$2-\""; eval "tp=\"$tp\"";
+	case "$tp" in
+	--|/*--|\~*--) eval "$1=\"$prefix/$3\"";;
+	/*-$oldprefix/*|\~*-$oldprefix/*)
+		eval "$1=\`echo \$$2 | sed \"s,^$oldprefix,$prefix,\"\`";;
+	*) eval "$1=\"\$$2\"";;
+	esac;;
+esac'
+
+: determine where private library files go
+: Usual default is /usr/local/lib/perl5.  Also allow things like 
+: /opt/perl/lib, since /opt/perl/lib/perl5 would be redundant.
+case "$prefix" in
+*perl*) set dflt privlib lib ;;
+*)	 set dflt privlib lib/$package ;;
+esac
+eval $prefixit
+$cat <<EOM
+
+There are some auxiliary files for $package that need to be put into a
+private library directory that is accessible by everyone.
+
+EOM
+fn=d~+
+rp='Pathname where the private library files will reside?'
+. ./getfile
+if $test "X$privlibexp" != "X$ansexp"; then
+	installprivlib=''
+fi
+privlib="$ans"
+privlibexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+private files reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installprivlib" in
+	'') dflt=`echo $privlibexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installprivlib";;
+	esac
+	fn=de~
+	rp='Where will private files be installed?'
+	. ./getfile
+	installprivlib="$ans"
+else
+	installprivlib="$privlibexp"
+fi
+
+: set the base revision
+baserev=5.0
+
+: get the patchlevel
+echo " "
+echo "Getting the current patchlevel..." >&4
+if $test -r ../patchlevel.h;then
+	patchlevel=`awk '/PATCHLEVEL/ {print $3}' < ../patchlevel.h`
+else
+	patchlevel=0
+fi
+echo "(You have $package $baserev PL$patchlevel.)"
+
+: set the prefixup variable, to restore leading tilda escape
+prefixup='case "$prefixexp" in
+"$prefix") ;;
+*) eval "$1=\`echo \$$1 | sed \"s,^$prefixexp,$prefix,\"\`";;
+esac'
+
+: determine where public architecture dependent libraries go
+set archlib archlib
+eval $prefixit
+case "$archlib" in
+'')
+	case "$privlib" in
+	'')
+		dflt=`./loc . "." $prefixexp/lib /usr/local/lib /usr/lib /lib`
+		set dflt
+		eval $prefixup
+		;;
+	*)	version=`echo $baserev $patchlevel | $awk '{print $1 + $2/1000.0}'`
+		dflt="$privlib/$archname/$version"
+		;;
+	esac
+	;;
+*) dflt="$archlib";;
+esac
+cat <<EOM
+
+$spackage contains architecture-dependent library files.  If you are
+sharing libraries in a heterogeneous environment, you might store
+these files in a separate location.  Otherwise, you can just include
+them with the rest of the public library files.
+
+EOM
+fn=d+~
+rp='Where do you want to put the public architecture-dependent libraries?'
+. ./getfile
+archlib="$ans"
+archlibexp="$ansexp"
+
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+private files reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installarchlib" in
+	'') dflt=`echo $archlibexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installarchlib";;
+	esac
+	fn=de~
+	rp='Where will architecture-dependent library files be installed?'
+	. ./getfile
+	installarchlib="$ans"
+else
+	installarchlib="$archlibexp"
+fi
+if $test X"$archlib" = X"$privlib"; then
+	d_archlib="$undef"
+else
+	d_archlib="$define"
+fi
+
+: determine where site specific architecture-dependent libraries go.
+
+set dflt sitearch lib/site_perl/$archname
+eval $prefixit
+$cat <<EOM
+
+The installation process will also create a directory for
+architecture-dependent site-specific extensions and modules.
+
+EOM
+fn=nd~+
+rp='Pathname for the site-specific architecture-dependent library files?'
+. ./getfile
+if $test "X$sitearchexp" != "X$ansexp"; then
+	installsitearch=''
+fi
+sitearch="$ans"
+sitearchexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+private files reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installsitearch" in
+	'') dflt=`echo $sitearchexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installsitearch";;
+	esac
+	fn=de~
+	rp='Where will private files be installed?'
+	. ./getfile
+	installsitearch="$ans"
+else
+	installsitearch="$sitearchexp"
+fi
+
+: set up the script used to warn in case of inconsistency
+cat <<'EOSC' >whoa
+dflt=y
+echo " "
+echo "*** WHOA THERE!!! ***" >&4
+echo "    The $hint value for \$$var on this machine was \"$was\"!" >&4
+rp="    Keep the $hint value?"
+. ./myread
+case "$ans" in
+y) td=$was; tu=$was;;
+esac
+EOSC
+
+: function used to set $1 to $val
+setvar='var=$1; eval "was=\$$1"; td=$define; tu=$undef;
+case "$val$was" in
+$define$undef) . ./whoa; eval "$var=\$td";;
+$undef$define) . ./whoa; eval "$var=\$tu";;
+*) eval "$var=$val";;
+esac'
+
+: determine where old public architecture dependent libraries might be
+case "$oldarchlib" in
+'')	case "$privlib" in
+	'') ;;
+	*)	dflt="$privlib/$archname"
+		;;
+	esac
+	;;
+*)	dflt="$oldarchlib" 
+	;;
+esac
+if $test ! -d "$dflt/auto"; then
+	dflt=none
+fi
+cat <<EOM
+
+In 5.001, Perl stored architecutre-dependent library files in a library
+with a name such as $privlib/$archname, 
+and this directory contained files from the standard extensions and 
+files from any additional extensions you might have added.  Starting 
+with version 5.002, all the architecture-dependent standard extensions 
+will go into $archlib, 
+while locally-added extensions will go into
+$sitearch.
+
+If you wish Perl to continue to search the old architecture-dependent
+library for your local extensions, give the path to that directory.
+If you do not wish to use your old architecture-dependent library
+files, answer 'none'.
+
+EOM
+fn=dn~
+rp='Directory for your old 5.001 architecture-dependent libraries?'
+. ./getfile
+oldarchlib="$ans"
+oldarchlibexp="$ansexp"
+case "$oldarchlib" in
+''|' ') val="$undef" ;;
+*) val="$define" ;;
+esac
+set d_oldarchlib
+eval $setvar
+
+: determine where public executables go
+echo " "
+set dflt bin bin
+eval $prefixit
+fn=d~
+rp='Pathname where the public executables will reside?'
+. ./getfile
+if $test "X$ansexp" != "X$binexp"; then
+	installbin=''
+fi
+bin="$ans"
+binexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+executables reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installbin" in
+	'') dflt=`echo $binexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installbin";;
+	esac
+	fn=de~
+	rp='Where will public executables be installed?'
+	. ./getfile
+	installbin="$ans"
+else
+	installbin="$binexp"
+fi
+
 : determine where manual pages are on this system
 echo " "
 case "$sysman" in
@@ -1875,6 +2503,337 @@ if $test -d "$sysman"; then
 else
 	echo "Could not find manual pages in source form." >&4
 fi
+
+: determine where manual pages go
+set man1dir man1dir none
+eval $prefixit
+$cat <<EOM
+
+$spackage has manual pages available in source form.
+EOM
+case "$nroff" in
+nroff)
+	echo "However, you don't have nroff, so they're probably useless to you."
+	case "$man1dir" in
+	'') man1dir="none";;
+	esac;;
+esac
+echo "If you don't want the manual sources installed, answer 'none'."
+case "$man1dir" in
+'')
+	lookpath="$prefixexp/man/man1 $prefixexp/man/u_man/man1"
+	lookpath="$lookpath $prefixexp/man/l_man/man1"
+	lookpath="$lookpath /usr/local/man/man1 /opt/man/man1 /usr/man/manl"
+	lookpath="$lookpath /usr/man/local/man1 /usr/man/l_man/man1"
+	lookpath="$lookpath /usr/local/man/u_man/man1 /usr/local/man/l_man/man1"
+	lookpath="$lookpath /usr/man/man.L"
+	man1dir=`./loc . $prefixexp/man/man1 $lookpath`
+	if $test -d "$man1dir"; then
+		dflt="$man1dir"
+	else
+		dflt="$sysman"
+	fi
+	set dflt
+	eval $prefixup
+	;;
+' ') dflt=none;;
+*)  dflt="$man1dir"
+	;;
+esac
+echo " "
+fn=dn+~
+rp="Where do the main $spackage manual pages (source) go?"
+. ./getfile
+if test "X$man1direxp" != "X$ansexp"; then
+	installman1dir=''
+fi
+man1dir="$ans"
+man1direxp="$ansexp"
+case "$man1dir" in
+'') man1dir=' '
+	installman1dir='';;
+esac
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+manual pages reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installman1dir" in
+	'') dflt=`echo $man1direxp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installman1dir";;
+	esac
+	fn=de~
+	rp='Where will man pages be installed?'
+	. ./getfile
+	installman1dir="$ans"
+else
+	installman1dir="$man1direxp"
+fi
+
+: What suffix to use on installed man pages
+
+case "$man1dir" in
+' ')
+	man1ext='0'
+	;;
+*)
+	rp="What suffix should be used for the main $spackage man pages?"
+	case "$man1dir" in
+	*1)  dflt=1 ;;
+	*1p) dflt=1p ;;
+	*1pm) dflt=1pm ;;
+	*l) dflt=l;;
+	*n) dflt=n;;
+	*o) dflt=o;;
+	*p) dflt=p;;
+	*C) dflt=C;;
+	*L) dflt=L;;
+	*L1) dflt=L1;;
+	*) dflt=1;;
+	esac
+	. ./myread
+	man1ext="$ans"
+	;;
+esac
+
+: see if we can have long filenames
+echo " "
+rmlist="$rmlist /tmp/cf$$"
+$test -d /tmp/cf$$ || mkdir /tmp/cf$$
+first=123456789abcdef
+second=/tmp/cf$$/$first
+$rm -f $first $second
+if (echo hi >$first) 2>/dev/null; then
+	if $test -f 123456789abcde; then
+		echo 'You cannot have filenames longer than 14 characters.  Sigh.' >&4
+		val="$undef"
+	else
+		if (echo hi >$second) 2>/dev/null; then
+			if $test -f /tmp/cf$$/123456789abcde; then
+				$cat <<'EOM'
+That's peculiar... You can have filenames longer than 14 characters, but only
+on some of the filesystems.  Maybe you are using NFS.  Anyway, to avoid problems
+I shall consider your system cannot support long filenames at all.
+EOM
+				val="$undef"
+			else
+				echo 'You can have filenames longer than 14 characters.' >&4
+				val="$define"
+			fi
+		else
+			$cat <<'EOM'
+How confusing! Some of your filesystems are sane enough to allow filenames
+longer than 14 characters but some others like /tmp can't even think about them.
+So, for now on, I shall assume your kernel does not allow them at all.
+EOM
+			val="$undef"
+		fi
+	fi
+else
+	$cat <<'EOM'
+You can't have filenames longer than 14 chars.  You can't even think about them!
+EOM
+	val="$undef"
+fi 
+set d_flexfnam
+eval $setvar
+$rm -rf /tmp/cf$$ 123456789abcde*
+
+: determine where library module manual pages go
+set man3dir man3dir none
+eval $prefixit
+$cat <<EOM
+
+$spackage has manual pages for many of the library modules.
+EOM
+
+case "$nroff" in
+nroff)
+	$cat <<'EOM'
+However, you don't have nroff, so they're probably useless to you.
+You can use the supplied perldoc script instead.
+EOM
+	case "$man3dir" in
+	'') man3dir="none";;
+	esac;;
+esac
+
+case "$d_flexfnam" in
+undef)
+	$cat <<'EOM'
+However, your system can't handle the long file names like File::Basename.3. 
+You can use the supplied perldoc script instead.
+EOM
+	case "$man3dir" in
+	'') man3dir="none";;
+	esac;;
+esac
+
+echo "If you don't want the manual sources installed, answer 'none'."
+: We dont use /usr/local/man/man3 because some man programs will
+: only show the /usr/local/man/man3 contents, and not the system ones,
+: thus man less will show the perl module less.pm, but not the system
+: less command.  We might also conflict with TCL man pages.
+: However, something like /opt/perl/man/man3 is fine.
+case "$man3dir" in
+'')	case "$prefix" in 
+	*perl*) dflt=`echo $man1dir | $sed 's/man1/man3/g'` ;;
+	*)	dflt="$privlib/man/man3" ;;
+	esac
+	;;
+' ') dflt=none;;
+*)	dflt="$man3dir" ;;
+esac
+echo " "
+
+fn=dn+~
+rp="Where do the $spackage library man pages (source) go?"
+. ./getfile
+if test "X$man3direxp" != "X$ansexp"; then
+	installman3dir=''
+fi
+
+man3dir="$ans"
+man3direxp="$ansexp"
+case "$man3dir" in
+'') man3dir=' '
+	installman3dir='';;
+esac
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+manual pages reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installman3dir" in
+	'') dflt=`echo $man3direxp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installman3dir";;
+	esac
+	fn=de~
+	rp='Where will man pages be installed?'
+	. ./getfile
+	installman3dir="$ans"
+else
+	installman3dir="$man3direxp"
+fi
+
+: What suffix to use on installed man pages
+
+case "$man3dir" in
+' ')
+	man3ext='0'
+	;;
+*)
+	rp="What suffix should be used for the $spackage library man pages?"
+	case "$man3dir" in
+	*3)  dflt=3 ;;
+	*3p) dflt=3p ;;
+	*3pm) dflt=3pm ;;
+	*l) dflt=l;;
+	*n) dflt=n;;
+	*o) dflt=o;;
+	*p) dflt=p;;
+	*C) dflt=C;;
+	*L) dflt=L;;
+	*L3) dflt=L3;;
+	*) dflt=3;;
+	esac
+	. ./myread
+	man3ext="$ans"
+	;;
+esac
+
+: determine where public executable scripts go
+set scriptdir scriptdir
+eval $prefixit
+case "$scriptdir" in
+'')
+	dflt="$bin"
+	: guess some guesses
+	$test -d /usr/share/scripts && dflt=/usr/share/scripts
+	$test -d /usr/share/bin && dflt=/usr/share/bin
+	$test -d /usr/local/script && dflt=/usr/local/script
+	$test -d $prefixexp/script && dflt=$prefixexp/script
+	set dflt
+	eval $prefixup
+	;;
+*)  dflt="$scriptdir"
+	;;
+esac
+$cat <<EOM
+ 
+Some installations have a separate directory just for executable scripts so
+that they can mount it across multiple architectures but keep the scripts in
+one spot.  You might, for example, have a subdirectory of /usr/share for this.
+Or you might just lump your scripts in with all your other executables.
+ 
+EOM
+fn=d~
+rp='Where do you keep publicly executable scripts?'
+. ./getfile
+if $test "X$ansexp" != "X$scriptdirexp"; then
+	installscript=''
+fi
+scriptdir="$ans"
+scriptdirexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+scripts reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installscript" in
+	'') dflt=`echo $scriptdirexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installscript";;
+	esac
+	fn=de~
+	rp='Where will public scripts be installed?'
+	. ./getfile
+	installscript="$ans"
+else
+	installscript="$scriptdirexp"
+fi
+
+: determine perl absolute location
+case "$perlpath" in
+'')	perlpath=$binexp/perl ;;
+esac
+
+: figure out how to guarantee perl startup
+case "$startperl" in
+'')
+	case "$sharpbang" in
+	*!)
+		$cat <<EOH
+
+I can use the #! construct to start perl on your system. This will
+make startup of perl scripts faster, but may cause problems if you
+want to share those scripts and perl is not in a standard place
+($perlpath) on all your platforms. The alternative is to force
+a shell by starting the script with a single ':' character.
+
+EOH
+		dflt=y
+		rp='Shall I use #! to start up perl?'
+		. ./myread
+		case "$ans" in
+		y*|Y*) startperl="#!$perlpath";;
+		*) startperl=": # use perl";;
+		esac
+		;;
+	*) startperl=": # use perl"
+		;;
+	esac
+	;;
+esac
+echo "I'll use $startperl to start perl scripts."
 
 : see what memory models we can support
 case "$models" in
@@ -2178,256 +3137,6 @@ case "$gccversion" in
 1*) cpp=`./loc gcc-cpp $cpp $pth` ;;
 esac
 
-: decide how portable to be.  Allow command line overrides.
-case "$d_portable" in
-"$undef") ;;
-*)	d_portable="$define" ;;
-esac
-
-: set up shell script to do ~ expansion
-cat >filexp <<EOSS
-$startsh
-: expand filename
-case "\$1" in
- ~/*|~)
-	echo \$1 | $sed "s|~|\${HOME-\$LOGDIR}|"
-	;;
- ~*)
-	if $test -f /bin/csh; then
-		/bin/csh -f -c "glob \$1"
-		failed=\$?
-		echo ""
-		exit \$failed
-	else
-		name=\`$expr x\$1 : '..\([^/]*\)'\`
-		dir=\`$sed -n -e "/^\${name}:/{s/^[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\([^:]*\).*"'\$'"/\1/" -e p -e q -e '}' </etc/passwd\`
-		if $test ! -d "\$dir"; then
-			me=\`basename \$0\`
-			echo "\$me: can't locate home directory for: \$name" >&2
-			exit 1
-		fi
-		case "\$1" in
-		*/*)
-			echo \$dir/\`$expr x\$1 : '..[^/]*/\(.*\)'\`
-			;;
-		*)
-			echo \$dir
-			;;
-		esac
-	fi
-	;;
-*)
-	echo \$1
-	;;
-esac
-EOSS
-chmod +x filexp
-$eunicefix filexp
-
-: now set up to get a file name
-cat <<'EOSC' >getfile
-tilde=''
-fullpath=''
-already=''
-skip=''
-none_ok=''
-exp_file=''
-nopath_ok=''
-orig_rp="$rp"
-orig_dflt="$dflt"
-
-case "$fn" in
-*\(*)
-	expr $fn : '.*(\(.*\)).*' | tr ',' '\012' >getfile.ok
-	fn=`echo $fn | sed 's/(.*)//'`
-	;;
-esac
-
-case "$fn" in
-*:*)
-	loc_file=`expr $fn : '.*:\(.*\)'`
-	fn=`expr $fn : '\(.*\):.*'`
-	;;
-esac
-
-case "$fn" in
-*~*) tilde=true;;
-esac
-case "$fn" in
-*/*) fullpath=true;;
-esac
-case "$fn" in
-*+*) skip=true;;
-esac
-case "$fn" in
-*n*) none_ok=true;;
-esac
-case "$fn" in
-*e*) exp_file=true;;
-esac
-case "$fn" in
-*p*) nopath_ok=true;;
-esac
-
-case "$fn" in
-*f*) type='File';;
-*d*) type='Directory';;
-*l*) type='Locate';;
-esac
-
-what="$type"
-case "$what" in
-Locate) what='File';;
-esac
-
-case "$exp_file" in
-'')
-	case "$d_portable" in
-	"$define") ;;
-	*) exp_file=true;;
-	esac
-	;;
-esac
-
-cd ..
-while test "$type"; do
-	redo=''
-	rp="$orig_rp"
-	dflt="$orig_dflt"
-	case "$tilde" in
-	true) rp="$rp (~name ok)";;
-	esac
-	. UU/myread
-	if test -f UU/getfile.ok && \
-		$contains "^$ans\$" UU/getfile.ok >/dev/null 2>&1
-	then
-		value="$ans"
-		ansexp="$ans"
-		break
-	fi
-	case "$ans" in
-	none)
-		value=''
-		ansexp=''
-		case "$none_ok" in
-		true) type='';;
-		esac
-		;;
-	*)
-		case "$tilde" in
-		'') value="$ans"
-			ansexp="$ans";;
-		*)
-			value=`UU/filexp $ans`
-			case $? in
-			0)
-				if test "$ans" != "$value"; then
-					echo "(That expands to $value on this system.)"
-				fi
-				;;
-			*) value="$ans";;
-			esac
-			ansexp="$value"
-			case "$exp_file" in
-			'') value="$ans";;
-			esac
-			;;
-		esac
-		case "$fullpath" in
-		true)
-			case "$ansexp" in
-			/*) value="$ansexp" ;;
-			*)
-				redo=true
-				case "$already" in
-				true)
-				echo "I shall only accept a full path name, as in /bin/ls." >&4
-				echo "Use a ! shell escape if you wish to check pathnames." >&4
-					;;
-				*)
-				echo "Please give a full path name, starting with slash." >&4
-					case "$tilde" in
-					true)
-				echo "Note that using ~name is ok provided it expands well." >&4
-						already=true
-						;;
-					esac
-				esac
-				;;
-			esac
-			;;
-		esac
-		case "$redo" in
-		'')
-			case "$type" in
-			File)
-				if test -f "$ansexp"; then
-					type=''
-				elif test -r "$ansexp" || (test -h "$ansexp") >/dev/null 2>&1
-				then
-					echo "($value is not a plain file, but that's ok.)"
-					type=''
-				fi
-				;;
-			Directory)
-				if test -d "$ansexp"; then
-					type=''
-				fi
-				;;
-			Locate)
-				if test -d "$ansexp"; then
-					echo "(Looking for $loc_file in directory $value.)"
-					value="$value/$loc_file"
-					ansexp="$ansexp/$loc_file"
-				fi
-				if test -f "$ansexp"; then
-					type=''
-				fi
-				case "$nopath_ok" in
-				true)	case "$value" in
-					*/*) ;;
-					*)	echo "Assuming $value will be in people's path."
-						type=''
-						;;
-					esac
-					;;
-				esac
-				;;
-			esac
-
-			case "$skip" in
-			true) type='';
-			esac
-
-			case "$type" in
-			'') ;;
-			*)
-				if test "$fastread" = yes; then
-					dflt=y
-				else
-					dflt=n
-				fi
-				rp="$what $value doesn't exist.  Use that name anyway?"
-				. UU/myread
-				dflt=''
-				case "$ans" in
-				y*) type='';;
-				*) echo " ";;
-				esac
-				;;
-			esac
-			;;
-		esac
-		;;
-	esac
-done
-cd UU
-ans="$value"
-rp="$orig_rp"
-dflt="$orig_dflt"
-rm -f getfile.ok
-EOSC
-
 : What should the include directory be ?
 echo " "
 $echo $n "Hmm...  $c"
@@ -2657,862 +3366,6 @@ case "$ans" in
 none) libpth=' ';;
 *) libpth="$ans";;
 esac
-
-: determine root of directory hierarchy where package will be installed.
-case "$prefix" in
-'')
-	dflt=`./loc . /usr/local /usr/local /local /opt /usr`
-	;;
-*)
-	dflt="$prefix"
-	;;
-esac
-$cat <<EOM
-
-By default, $package will be installed in $dflt/bin, manual
-pages under $dflt/man, etc..., i.e. with $dflt as prefix for
-all installation directories. Typically set to /usr/local, but you
-may choose /usr if you wish to install $package among your system
-binaries. If you wish to have binaries under /bin but manual pages
-under /usr/local/man, that's ok: you will be prompted separately
-for each of the installation directories, the prefix being only used
-to set the defaults.
-
-EOM
-fn=d~
-rp='Installation prefix to use?'
-. ./getfile
-oldprefix=''
-case "$prefix" in
-'') ;;
-*)
-	case "$ans" in
-	"$prefix") ;;
-	*) oldprefix="$prefix";;
-	esac
-	;;
-esac
-prefix="$ans"
-prefixexp="$ansexp"
-
-: set the prefixit variable, to compute a suitable default value
-prefixit='case "$3" in
-""|none)
-	case "$oldprefix" in
-	"") eval "$1=\"\$$2\"";;
-	*)
-		case "$3" in
-		"") eval "$1=";;
-		none)
-			eval "tp=\"\$$2\"";
-			case "$tp" in
-			""|" ") eval "$1=\"\$$2\"";;
-			*) eval "$1=";;
-			esac;;
-		esac;;
-	esac;;
-*)
-	eval "tp=\"$oldprefix-\$$2-\""; eval "tp=\"$tp\"";
-	case "$tp" in
-	--|/*--|\~*--) eval "$1=\"$prefix/$3\"";;
-	/*-$oldprefix/*|\~*-$oldprefix/*)
-		eval "$1=\`echo \$$2 | sed \"s,^$oldprefix,$prefix,\"\`";;
-	*) eval "$1=\"\$$2\"";;
-	esac;;
-esac'
-
-: is AFS running?
-echo " "
-if test -d /afs; then
-	echo "AFS may be running... I'll be extra cautious then..." >&4
-	afs=true
-else
-	echo "AFS does not seem to be running..." >&4
-	afs=false
-fi
-
-: determine where public executables go
-echo " "
-set dflt bin bin
-eval $prefixit
-fn=d~
-rp='Pathname where the public executables will reside?'
-. ./getfile
-if $test "X$ansexp" != "X$binexp"; then
-	installbin=''
-fi
-bin="$ans"
-binexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-executables reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installbin" in
-	'') dflt=`echo $binexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installbin";;
-	esac
-	fn=de~
-	rp='Where will public executables be installed?'
-	. ./getfile
-	installbin="$ans"
-else
-	installbin="$binexp"
-fi
-
-: set the prefixup variable, to restore leading tilda escape
-prefixup='case "$prefixexp" in
-"$prefix") ;;
-*) eval "$1=\`echo \$$1 | sed \"s,^$prefixexp,$prefix,\"\`";;
-esac'
-
-: determine where public executable scripts go
-set scriptdir scriptdir
-eval $prefixit
-case "$scriptdir" in
-'')
-	dflt="$bin"
-	: guess some guesses
-	$test -d /usr/share/scripts && dflt=/usr/share/scripts
-	$test -d /usr/share/bin && dflt=/usr/share/bin
-	$test -d /usr/local/script && dflt=/usr/local/script
-	$test -d $prefixexp/script && dflt=$prefixexp/script
-	set dflt
-	eval $prefixup
-	;;
-*)  dflt="$scriptdir"
-	;;
-esac
-$cat <<EOM
- 
-Some installations have a separate directory just for executable scripts so
-that they can mount it across multiple architectures but keep the scripts in
-one spot.  You might, for example, have a subdirectory of /usr/share for this.
-Or you might just lump your scripts in with all your other executables.
- 
-EOM
-fn=d~
-rp='Where do you keep publicly executable scripts?'
-. ./getfile
-if $test "X$ansexp" != "X$scriptdirexp"; then
-	installscript=''
-fi
-scriptdir="$ans"
-scriptdirexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-scripts reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installscript" in
-	'') dflt=`echo $scriptdirexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installscript";;
-	esac
-	fn=de~
-	rp='Where will public scripts be installed?'
-	. ./getfile
-	installscript="$ans"
-else
-	installscript="$scriptdirexp"
-fi
-
-: determine where private executables go
-set dflt privlib lib/$package
-eval $prefixit
-$cat <<EOM
-
-There are some auxiliary files for $package that need to be put into a
-private library directory that is accessible by everyone.
-
-EOM
-fn=d~+
-rp='Pathname where the private library files will reside?'
-. ./getfile
-if $test "X$privlibexp" != "X$ansexp"; then
-	installprivlib=''
-fi
-privlib="$ans"
-privlibexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-private files reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installprivlib" in
-	'') dflt=`echo $privlibexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installprivlib";;
-	esac
-	fn=de~
-	rp='Where will private files be installed?'
-	. ./getfile
-	installprivlib="$ans"
-else
-	installprivlib="$privlibexp"
-fi
-
-: determine the architecture name
-echo " "
-if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
-	tarch=`arch`"-$osname"
-elif xxx=`./loc uname blurfl $pth`; $test -f "$xxx" ; then
-	if uname -m > tmparch 2>&1 ; then
-		tarch=`$sed -e 's/ /_/g' -e 's/$/'"-$osname/" tmparch`
-	else
-		tarch="$osname"
-	fi
-	$rm -f tmparch
-else
-	tarch="$osname"
-fi
-case "$myarchname" in
-''|"$tarch") ;;
-*)
-	echo "(Your architecture name used to be $myarchname.)"
-	archname=''
-	;;
-esac
-case "$archname" in
-'') dflt="$tarch";;
-*) dflt="$archname";;
-esac
-rp='What is your architecture name'
-. ./myread
-archname="$ans"
-myarchname="$tarch"
-
-: determine where public architecture dependent libraries go
-set archlib archlib
-eval $prefixit
-case "$archlib" in
-'')
-	case "$privlib" in
-	'')
-		dflt=`./loc . "." $prefixexp/lib /usr/local/lib /usr/lib /lib`
-		set dflt
-		eval $prefixup
-		;;
-	*)  dflt="$privlib/$archname";;
-	esac
-	;;
-*) dflt="$archlib";;
-esac
-cat <<EOM
-
-$spackage contains architecture-dependent library files.  If you are
-sharing libraries in a heterogeneous environment, you might store
-these files in a separate location.  Otherwise, you can just include
-them with the rest of the public library files.
-
-EOM
-fn=d~
-rp='Where do you want to put the public architecture-dependent libraries?'
-. ./getfile
-archlib="$ans"
-archlibexp="$ansexp"
-
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-private files reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installarchlib" in
-	'') dflt=`echo $archlibexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installarchlib";;
-	esac
-	fn=de~
-	rp='Where will architecture-dependent library files be installed?'
-	. ./getfile
-	installarchlib="$ans"
-else
-	installarchlib="$archlibexp"
-fi
-if $test X"$archlib" = X"$privlib"; then
-	d_archlib="$undef"
-else
-	d_archlib="$define"
-fi
-
-: determine whether the user wants to include a site-specific library
-: in addition to privlib.
-$cat <<EOM
-
-Some sites may wish to specify a local directory for $package
-to search by default in addition to $privlib.
-If you don't want to use such an additional directory, answer 'none'.
-
-EOM
-case "$sitelib" in
-'') dflt=none ;;
-*) dflt="$sitelib" ;;
-esac
-fn=d~+n
-rp='Local directory for additional library files?'
-. ./getfile
-if $test "X$sitelibexp" != "X$ansexp"; then
-	installsitelib=''
-fi
-sitelib="$ans"
-sitelibexp="$ansexp"
-if $afs; then
-    case "$sitelib" in
-	'') installsitelib="$sitelibexp"
-		;;
-	*)	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-private files reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-		case "$installsitelib" in
-		'') dflt=`echo $sitelibexp | sed 's#^/afs/#/afs/.#'`;;
-		*) dflt="$installsitelib";;
-		esac
-		fn=de~
-		rp='Where will additional local files be installed?'
-		. ./getfile
-		installsitelib="$ans"
-		;;
-	esac
-else
-	installsitelib="$sitelibexp"
-fi
-
-case "$sitelibexp" in
-'') d_sitelib=undef ;;
-*) d_sitelib=define ;;
-esac
-
-: determine where manual pages go
-set man1dir man1dir none
-eval $prefixit
-$cat <<EOM
-
-$spackage has manual pages available in source form.
-EOM
-case "$nroff" in
-nroff)
-	echo "However, you don't have nroff, so they're probably useless to you."
-	case "$man1dir" in
-	'') man1dir="none";;
-	esac;;
-esac
-echo "If you don't want the manual sources installed, answer 'none'."
-case "$man1dir" in
-'')
-	lookpath="$prefixexp/man/man1 $prefixexp/man/u_man/man1"
-	lookpath="$lookpath $prefixexp/man/l_man/man1"
-	lookpath="$lookpath /usr/local/man/man1 /opt/man/man1 /usr/man/manl"
-	lookpath="$lookpath /usr/man/local/man1 /usr/man/l_man/man1"
-	lookpath="$lookpath /usr/local/man/u_man/man1 /usr/local/man/l_man/man1"
-	lookpath="$lookpath /usr/man/man.L"
-	man1dir=`./loc . $prefixexp/man/man1 $lookpath`
-	if $test -d "$man1dir"; then
-		dflt="$man1dir"
-	else
-		dflt="$sysman"
-	fi
-	set dflt
-	eval $prefixup
-	;;
-' ') dflt=none;;
-*)  dflt="$man1dir"
-	;;
-esac
-echo " "
-fn=dn~
-rp="Where do the main $spackage manual pages (source) go?"
-. ./getfile
-if test "X$man1direxp" != "X$ansexp"; then
-	installman1dir=''
-fi
-man1dir="$ans"
-man1direxp="$ansexp"
-case "$man1dir" in
-'') man1dir=' '
-	installman1dir='';;
-esac
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-manual pages reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installman1dir" in
-	'') dflt=`echo $man1direxp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installman1dir";;
-	esac
-	fn=de~
-	rp='Where will man pages be installed?'
-	. ./getfile
-	installman1dir="$ans"
-else
-	installman1dir="$man1direxp"
-fi
-
-: What suffix to use on installed man pages
-
-case "$man1dir" in
-' ')
-	man1ext='0'
-	;;
-*)
-	rp="What suffix should be used for the main $spackage man pages?"
-	case "$man1dir" in
-	*1)  dflt=1 ;;
-	*1p) dflt=1p ;;
-	*1pm) dflt=1pm ;;
-	*l) dflt=l;;
-	*n) dflt=n;;
-	*o) dflt=o;;
-	*p) dflt=p;;
-	*C) dflt=C;;
-	*L) dflt=L;;
-	*L1) dflt=L1;;
-	*) dflt=1;;
-	esac
-	. ./myread
-	man1ext="$ans"
-	;;
-esac
-
-: set up the script used to warn in case of inconsistency
-cat <<'EOSC' >whoa
-dflt=y
-echo " "
-echo "*** WHOA THERE!!! ***" >&4
-echo "    The $hint value for \$$var on this machine was \"$was\"!" >&4
-rp="    Keep the $hint value?"
-. ./myread
-case "$ans" in
-y) td=$was; tu=$was;;
-esac
-EOSC
-
-: function used to set $1 to $val
-setvar='var=$1; eval "was=\$$1"; td=$define; tu=$undef;
-case "$val$was" in
-$define$undef) . ./whoa; eval "$var=\$td";;
-$undef$define) . ./whoa; eval "$var=\$tu";;
-*) eval "$var=$val";;
-esac'
-
-: see if we can have long filenames
-echo " "
-rmlist="$rmlist /tmp/cf$$"
-$test -d /tmp/cf$$ || mkdir /tmp/cf$$
-first=123456789abcdef
-second=/tmp/cf$$/$first
-$rm -f $first $second
-if (echo hi >$first) 2>/dev/null; then
-	if $test -f 123456789abcde; then
-		echo 'You cannot have filenames longer than 14 characters.  Sigh.' >&4
-		val="$undef"
-	else
-		if (echo hi >$second) 2>/dev/null; then
-			if $test -f /tmp/cf$$/123456789abcde; then
-				$cat <<'EOM'
-That's peculiar... You can have filenames longer than 14 characters, but only
-on some of the filesystems.  Maybe you are using NFS.  Anyway, to avoid problems
-I shall consider your system cannot support long filenames at all.
-EOM
-				val="$undef"
-			else
-				echo 'You can have filenames longer than 14 characters.' >&4
-				val="$define"
-			fi
-		else
-			$cat <<'EOM'
-How confusing! Some of your filesystems are sane enough to allow filenames
-longer than 14 characters but some others like /tmp can't even think about them.
-So, for now on, I shall assume your kernel does not allow them at all.
-EOM
-			val="$undef"
-		fi
-	fi
-else
-	$cat <<'EOM'
-You can't have filenames longer than 14 chars.  You can't even think about them!
-EOM
-	val="$undef"
-fi 
-set d_flexfnam
-eval $setvar
-$rm -rf /tmp/cf$$ 123456789abcde*
-
-: determine where library module manual pages go
-set man3dir man3dir none
-eval $prefixit
-$cat <<EOM
-
-$spackage has manual pages for many of the library modules.
-EOM
-
-case "$nroff" in
-nroff)
-	$cat <<'EOM'
-However, you don't have nroff, so they're probably useless to you.
-You can use the supplied perldoc script instead.
-EOM
-	case "$man3dir" in
-	'') man3dir="none";;
-	esac;;
-esac
-
-case "$d_flexfnam" in
-undef)
-	$cat <<'EOM'
-However, your system can't handle the long file names like File::Basename.3. 
-You can use the supplied perldoc script instead.
-EOM
-	case "$man3dir" in
-	'') man3dir="none";;
-	esac;;
-esac
-
-echo "If you don't want the manual sources installed, answer 'none'."
-case "$man3dir" in
-'')	dflt="$privlib/man/man3" ;;
-' ') dflt=none;;
-*)	dflt="$man3dir" ;;
-esac
-echo " "
-
-fn=dn~
-rp="Where do the $spackage library man pages (source) go?"
-. ./getfile
-if test "X$man3direxp" != "X$ansexp"; then
-	installman3dir=''
-fi
-
-man3dir="$ans"
-man3direxp="$ansexp"
-case "$man3dir" in
-'') man3dir=' '
-	installman3dir='';;
-esac
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-manual pages reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installman3dir" in
-	'') dflt=`echo $man3direxp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installman3dir";;
-	esac
-	fn=de~
-	rp='Where will man pages be installed?'
-	. ./getfile
-	installman3dir="$ans"
-else
-	installman3dir="$man3direxp"
-fi
-
-: What suffix to use on installed man pages
-
-case "$man3dir" in
-' ')
-	man3ext='0'
-	;;
-*)
-	rp="What suffix should be used for the $spackage library man pages?"
-	case "$man3dir" in
-	*3)  dflt=3 ;;
-	*3p) dflt=3p ;;
-	*3pm) dflt=3pm ;;
-	*l) dflt=l;;
-	*n) dflt=n;;
-	*o) dflt=o;;
-	*p) dflt=p;;
-	*C) dflt=C;;
-	*L) dflt=L;;
-	*L3) dflt=L3;;
-	*) dflt=3;;
-	esac
-	. ./myread
-	man3ext="$ans"
-	;;
-esac
-
-: see if we have to deal with yellow pages, now NIS.
-if $test -d /usr/etc/yp || $test -d /etc/yp; then
-	if $test -f /usr/etc/nibindd; then
-		echo " "
-		echo "I'm fairly confident you're on a NeXT."
-		echo " "
-		rp='Do you get the hosts file via NetInfo?'
-		dflt=y
-		case "$hostcat" in
-		nidump*) ;;
-		'') ;;
-		*) dflt=n;;
-		esac
-		. ./myread
-		case "$ans" in
-		y*) hostcat='nidump hosts .';;
-		*)	case "$hostcat" in
-			nidump*) hostcat='';;
-			esac
-			;;
-		esac
-	fi
-	case "$hostcat" in
-	nidump*) ;;
-	*)
-		case "$hostcat" in
-		*ypcat*) dflt=y;;
-		'') if $contains '^\+' /etc/passwd >/dev/null 2>&1; then
-				dflt=y
-			else
-				dflt=n
-			fi;;
-		*) dflt=n;;
-		esac
-		echo " "
-		rp='Are you getting the hosts file via yellow pages?'
-		. ./myread
-		case "$ans" in
-		y*) hostcat='ypcat hosts';;
-		*) hostcat='cat /etc/hosts';;
-		esac
-		;;
-	esac
-fi
-
-: now get the host name
-echo " "
-echo "Figuring out host name..." >&4
-case "$myhostname" in
-'') cont=true
-	echo 'Maybe "hostname" will work...'
-	if tans=`sh -c hostname 2>&1` ; then
-		myhostname=$tans
-		phostname=hostname
-		cont=''
-	fi
-	;;
-*) cont='';;
-esac
-if $test "$cont"; then
-	if ./xenix; then
-		echo 'Oh, dear.  Maybe "/etc/systemid" is the key...'
-		if tans=`cat /etc/systemid 2>&1` ; then
-			myhostname=$tans
-			phostname='cat /etc/systemid'
-			echo "Whadyaknow.  Xenix always was a bit strange..."
-			cont=''
-		fi
-	elif $test -r /etc/systemid; then
-		echo "(What is a non-Xenix system doing with /etc/systemid?)"
-	fi
-fi
-if $test "$cont"; then
-	echo 'No, maybe "uuname -l" will work...'
-	if tans=`sh -c 'uuname -l' 2>&1` ; then
-		myhostname=$tans
-		phostname='uuname -l'
-	else
-		echo 'Strange.  Maybe "uname -n" will work...'
-		if tans=`sh -c 'uname -n' 2>&1` ; then
-			myhostname=$tans
-			phostname='uname -n'
-		else
-			echo 'Oh well, maybe I can mine it out of whoami.h...'
-			if tans=`sh -c $contains' sysname $usrinc/whoami.h' 2>&1` ; then
-				myhostname=`echo "$tans" | $sed 's/^.*"\(.*\)"/\1/'`
-				phostname="sed -n -e '"'/sysname/s/^.*\"\\(.*\\)\"/\1/{'"' -e p -e q -e '}' <$usrinc/whoami.h"
-			else
-				case "$myhostname" in
-				'') echo "Does this machine have an identity crisis or something?"
-					phostname='';;
-				*)
-					echo "Well, you said $myhostname before..."
-					phostname='echo $myhostname';;
-				esac
-			fi
-		fi
-	fi
-fi
-: you do not want to know about this
-set $myhostname
-myhostname=$1
-
-: verify guess
-if $test "$myhostname" ; then
-	dflt=y
-	rp='Your host name appears to be "'$myhostname'".'" Right?"
-	. ./myread
-	case "$ans" in
-	y*) ;;
-	*) myhostname='';;
-	esac
-fi
-
-: bad guess or no guess
-while $test "X$myhostname" = X ; do
-	dflt=''
-	rp="Please type the (one word) name of your host:"
-	. ./myread
-	myhostname="$ans"
-done
-
-: translate upper to lower if necessary
-case "$myhostname" in
-*[A-Z]*)
-	echo "(Normalizing case in your host name)"
-	myhostname=`echo $myhostname | ./tr '[A-Z]' '[a-z]'`
-	;;
-esac
-
-case "$myhostname" in
-*.*)
-	dflt=`expr "X$myhostname" : "X[^.]*\(\..*\)"`
-	myhostname=`expr "X$myhostname" : "X\([^.]*\)\."`
-	echo "(Trimming domain name from host name--host name is now $myhostname)"
-	;;
-*) case "$mydomain" in
-	'')
-		$hostcat >hosts
-		dflt=.`$awk "/[0-9].*$myhostname/ {for(i=2; i<=NF;i++) print \\\$i}" \
-			hosts | $sort | $uniq | \
-			$sed -n -e "s/$myhostname\.\([a-zA-Z_.]\)/\1/p"`
-		case "$dflt" in
-		.) echo "(You do not have fully-qualified names in /etc/hosts)"
-			tans=`./loc resolv.conf X /etc /usr/etc`
-			if $test -f "$tans"; then
-				echo "(Attempting domain name extraction from $tans)"
-				dflt=.`egrep '^domain' $tans | $sed 's/domain[ 	]*\(.*\)/\1/' \
-					| ./tr '[A-Z]' '[a-z]' 2>/dev/null`
-			fi
-			;;
-		esac
-		case "$dflt" in
-		.) echo "(No help from resolv.conf either -- attempting clever guess)"
-			dflt=.`sh -c domainname 2>/dev/null`
-			case "$dflt" in
-			'') dflt='.';;
-			.nis.*|.yp.*|.main.*) dflt=`echo $dflt | $sed -e 's/^\.[^.]*//'`;;
-			esac
-			;;
-		esac
-		case "$dflt" in
-		.) echo "(Lost all hope -- silly guess then)"
-			dflt='.uucp'
-			;;
-		esac
-		$rm -f hosts
-		;;
-	*) dflt="$mydomain";;
-	esac;;
-esac
-echo " "
-rp="What is your domain name?"
-. ./myread
-tans="$ans"
-case "$ans" in
-'') ;;
-.*) ;;
-*) tans=".$tans";;
-esac
-mydomain="$tans"
-
-: translate upper to lower if necessary
-case "$mydomain" in
-*[A-Z]*)
-	echo "(Normalizing case in your domain name)"
-	mydomain=`echo $mydomain | ./tr '[A-Z]' '[a-z]'`
-	;;
-esac
-
-: a little sanity check here
-case "$phostname" in
-'') ;;
-*)
-	case `$phostname | ./tr '[A-Z]' '[a-z]'` in
-	$myhostname$mydomain|$myhostname) ;;
-	*)
-		case "$phostname" in
-		sed*)
-			echo "(That doesn't agree with your whoami.h file, by the way.)"
-			;;
-		*)
-			echo "(That doesn't agree with your $phostname command, by the way.)"
-			;;
-		esac
-	;;
-	esac
-	;;
-esac
-
-$cat <<EOM
-
-I need to get your e-mail address in Internet format if possible, i.e.
-something like user@host.domain. Please answer accurately since I have
-no easy means to double check it. The default value provided below
-is most probably close to the reality but may not be valid from outside
-your organization...
-
-EOM
-cont=x
-while test "$cont"; do
-	case "$cf_email" in
-	'') dflt="$cf_by@$myhostname$mydomain";;
-	*) dflt="$cf_email";;
-	esac
-	rp='What is your e-mail address?'
-	. ./myread
-	cf_email="$ans"
-	case "$cf_email" in
-	*@*.*) cont='' ;;
-	*)
-		rp='Address does not look like an Internet one.  Use it anyway?'
-		case "$fastread" in
-		yes) dflt=y ;;
-		*) dflt=n ;;
-		esac
-		. ./myread
-		case "$ans" in
-		y*) cont='' ;;
-		*) echo " " ;;
-		esac
-		;;
-	esac
-done
-
-$cat <<EOM
-
-If you or somebody else will be maintaining perl at your site, please
-fill in the correct e-mail address here so that they may be contacted
-if necessary. Currently, the "perlbug" program included with perl
-will send mail to this address in addition to perlbug@perl.com. You may
-enter "none" for no administrator.
-
-EOM
-case "$perladmin" in
-'') dflt="$cf_email";;
-*) dflt="$perladmin";;
-esac
-rp='Perl administrator e-mail address'
-. ./myread
-perladmin="$ans"
-
 
 : determine optimize, if desired, or use for debug flag also
 case "$optimize" in
@@ -5525,8 +5378,11 @@ case "$eagain" in
 #include <errno.h>
 #include <sys/types.h>
 #include <signal.h>
+#define MY_O_NONBLOCK $o_nonblock
 extern int errno;
 $signal_t blech(x) int x; { exit(3); }
+EOCP
+	$cat >> try.c <<'EOCP'
 main()
 {
 	int pd[2];
@@ -5540,7 +5396,7 @@ main()
 		int ret;
 		close(pd[1]);	/* Parent reads from pd[0] */
 		close(pu[0]);	/* Parent writes (blocking) to pu[1] */
-		if (-1 == fcntl(pd[0], F_SETFL, $o_nonblock))
+		if (-1 == fcntl(pd[0], F_SETFL, MY_O_NONBLOCK))
 			exit(1);
 		signal(SIGALRM, blech);
 		alarm(5);
@@ -6702,6 +6558,216 @@ eval $setvar
 set umask d_umask
 eval $inlibc
 
+: see if we have to deal with yellow pages, now NIS.
+if $test -d /usr/etc/yp || $test -d /etc/yp; then
+	if $test -f /usr/etc/nibindd; then
+		echo " "
+		echo "I'm fairly confident you're on a NeXT."
+		echo " "
+		rp='Do you get the hosts file via NetInfo?'
+		dflt=y
+		case "$hostcat" in
+		nidump*) ;;
+		'') ;;
+		*) dflt=n;;
+		esac
+		. ./myread
+		case "$ans" in
+		y*) hostcat='nidump hosts .';;
+		*)	case "$hostcat" in
+			nidump*) hostcat='';;
+			esac
+			;;
+		esac
+	fi
+	case "$hostcat" in
+	nidump*) ;;
+	*)
+		case "$hostcat" in
+		*ypcat*) dflt=y;;
+		'') if $contains '^\+' /etc/passwd >/dev/null 2>&1; then
+				dflt=y
+			else
+				dflt=n
+			fi;;
+		*) dflt=n;;
+		esac
+		echo " "
+		rp='Are you getting the hosts file via yellow pages?'
+		. ./myread
+		case "$ans" in
+		y*) hostcat='ypcat hosts';;
+		*) hostcat='cat /etc/hosts';;
+		esac
+		;;
+	esac
+fi
+
+: now get the host name
+echo " "
+echo "Figuring out host name..." >&4
+case "$myhostname" in
+'') cont=true
+	echo 'Maybe "hostname" will work...'
+	if tans=`sh -c hostname 2>&1` ; then
+		myhostname=$tans
+		phostname=hostname
+		cont=''
+	fi
+	;;
+*) cont='';;
+esac
+if $test "$cont"; then
+	if ./xenix; then
+		echo 'Oh, dear.  Maybe "/etc/systemid" is the key...'
+		if tans=`cat /etc/systemid 2>&1` ; then
+			myhostname=$tans
+			phostname='cat /etc/systemid'
+			echo "Whadyaknow.  Xenix always was a bit strange..."
+			cont=''
+		fi
+	elif $test -r /etc/systemid; then
+		echo "(What is a non-Xenix system doing with /etc/systemid?)"
+	fi
+fi
+if $test "$cont"; then
+	echo 'No, maybe "uuname -l" will work...'
+	if tans=`sh -c 'uuname -l' 2>&1` ; then
+		myhostname=$tans
+		phostname='uuname -l'
+	else
+		echo 'Strange.  Maybe "uname -n" will work...'
+		if tans=`sh -c 'uname -n' 2>&1` ; then
+			myhostname=$tans
+			phostname='uname -n'
+		else
+			echo 'Oh well, maybe I can mine it out of whoami.h...'
+			if tans=`sh -c $contains' sysname $usrinc/whoami.h' 2>&1` ; then
+				myhostname=`echo "$tans" | $sed 's/^.*"\(.*\)"/\1/'`
+				phostname="sed -n -e '"'/sysname/s/^.*\"\\(.*\\)\"/\1/{'"' -e p -e q -e '}' <$usrinc/whoami.h"
+			else
+				case "$myhostname" in
+				'') echo "Does this machine have an identity crisis or something?"
+					phostname='';;
+				*)
+					echo "Well, you said $myhostname before..."
+					phostname='echo $myhostname';;
+				esac
+			fi
+		fi
+	fi
+fi
+: you do not want to know about this
+set $myhostname
+myhostname=$1
+
+: verify guess
+if $test "$myhostname" ; then
+	dflt=y
+	rp='Your host name appears to be "'$myhostname'".'" Right?"
+	. ./myread
+	case "$ans" in
+	y*) ;;
+	*) myhostname='';;
+	esac
+fi
+
+: bad guess or no guess
+while $test "X$myhostname" = X ; do
+	dflt=''
+	rp="Please type the (one word) name of your host:"
+	. ./myread
+	myhostname="$ans"
+done
+
+: translate upper to lower if necessary
+case "$myhostname" in
+*[A-Z]*)
+	echo "(Normalizing case in your host name)"
+	myhostname=`echo $myhostname | ./tr '[A-Z]' '[a-z]'`
+	;;
+esac
+
+case "$myhostname" in
+*.*)
+	dflt=`expr "X$myhostname" : "X[^.]*\(\..*\)"`
+	myhostname=`expr "X$myhostname" : "X\([^.]*\)\."`
+	echo "(Trimming domain name from host name--host name is now $myhostname)"
+	;;
+*) case "$mydomain" in
+	'')
+		$hostcat >hosts
+		dflt=.`$awk "/[0-9].*$myhostname/ {for(i=2; i<=NF;i++) print \\\$i}" \
+			hosts | $sort | $uniq | \
+			$sed -n -e "s/$myhostname\.\([a-zA-Z_.]\)/\1/p"`
+		case "$dflt" in
+		.) echo "(You do not have fully-qualified names in /etc/hosts)"
+			tans=`./loc resolv.conf X /etc /usr/etc`
+			if $test -f "$tans"; then
+				echo "(Attempting domain name extraction from $tans)"
+				dflt=.`egrep '^domain' $tans | $sed 's/domain[ 	]*\(.*\)/\1/' \
+					| ./tr '[A-Z]' '[a-z]' 2>/dev/null`
+			fi
+			;;
+		esac
+		case "$dflt" in
+		.) echo "(No help from resolv.conf either -- attempting clever guess)"
+			dflt=.`sh -c domainname 2>/dev/null`
+			case "$dflt" in
+			'') dflt='.';;
+			.nis.*|.yp.*|.main.*) dflt=`echo $dflt | $sed -e 's/^\.[^.]*//'`;;
+			esac
+			;;
+		esac
+		case "$dflt" in
+		.) echo "(Lost all hope -- silly guess then)"
+			dflt='.uucp'
+			;;
+		esac
+		$rm -f hosts
+		;;
+	*) dflt="$mydomain";;
+	esac;;
+esac
+echo " "
+rp="What is your domain name?"
+. ./myread
+tans="$ans"
+case "$ans" in
+'') ;;
+.*) ;;
+*) tans=".$tans";;
+esac
+mydomain="$tans"
+
+: translate upper to lower if necessary
+case "$mydomain" in
+*[A-Z]*)
+	echo "(Normalizing case in your domain name)"
+	mydomain=`echo $mydomain | ./tr '[A-Z]' '[a-z]'`
+	;;
+esac
+
+: a little sanity check here
+case "$phostname" in
+'') ;;
+*)
+	case `$phostname | ./tr '[A-Z]' '[a-z]'` in
+	$myhostname$mydomain|$myhostname) ;;
+	*)
+		case "$phostname" in
+		sed*)
+			echo "(That doesn't agree with your whoami.h file, by the way.)"
+			;;
+		*)
+			echo "(That doesn't agree with your $phostname command, by the way.)"
+			;;
+		esac
+	;;
+	esac
+	;;
+esac
+
 : see how we will look up host name
 echo " "
 if false; then
@@ -6919,6 +6985,17 @@ rp="Doubles must be aligned on a how-many-byte boundary?"
 . ./myread
 alignbytes="$ans"
 $rm -f try.c try
+
+: Define several unixisms.  These can be overridden in hint files.
+ar='ar'
+exe_ext=''
+lib_ext='.a'
+obj_ext='.o'
+path_sep='/'
+: Extra object files needed on this platform.
+archobjs=''
+: Which makefile gets called first.  This is used by make depend.
+firstmakefile='makefile'
 
 : check for ordering of bytes in a long
 case "$byteorder" in
@@ -7190,221 +7267,6 @@ case "$voidflags" in
 esac
 $rm -f try.* .out
 
-: see if dbm.h is available
-: see if dbmclose exists
-set dbmclose d_dbmclose
-eval $inlibc
-
-case "$d_dbmclose" in
-$define)
-	set dbm.h i_dbm
-	eval $inhdr
-	case "$i_dbm" in
-	$define)
-		val="$undef"
-		set i_rpcsvcdbm
-		eval $setvar
-		;;
-	*)	set rpcsvc/dbm.h i_rpcsvcdbm
-		eval $inhdr
-		;;
-	esac
-	;;
-*)	echo "We won't be including <dbm.h>"
-	val="$undef"
-	set i_dbm
-	eval $setvar
-	val="$undef"
-	set i_rpcsvcdbm
-	eval $setvar
-	;;
-esac
-
-: see if ndbm.h is available
-set ndbm.h t_ndbm
-eval $inhdr
-case "$t_ndbm" in
-$define)
-	: see if dbm_open exists
-	set dbm_open d_dbm_open
-	eval $inlibc
-	case "$d_dbm_open" in
-	$undef)
-		t_ndbm="$undef"
-		echo "We won't be including <ndbm.h>"
-		;;
-	esac
-	;;
-esac
-val="$t_ndbm"
-set i_ndbm
-eval $setvar
-
-: see if gdbm.h is available
-set gdbm.h t_gdbm
-eval $inhdr
-case "$t_gdbm" in
-$define)
-	: see if gdbm_open exists
-	set gdbm_open d_gdbm_open
-	eval $inlibc
-	case "$d_gdbm_open" in
-	$undef)
-		t_gdbm="$undef"
-		echo "We won't be including <gdbm.h>"
-		;;
-	esac
-	;;
-esac
-val="$t_gdbm"
-set i_gdbm
-eval $setvar
-
-echo " "
-echo "Looking for extensions..." >&4
-cd ../ext
-: If we are using the old config.sh, known_extensions may contain
-: old or inaccurate or duplicate values.
-known_extensions=''
-: We do not use find because it might not be available.
-: We do not just use MANIFEST because the user may have dropped
-: some additional extensions into the source tree and expect them
-: to be built.
-for xxx in * ; do
-	if $test -f $xxx/$xxx.xs; then
-		known_extensions="$known_extensions $xxx"
-	else
-		if $test -d $xxx; then
-			cd $xxx
-			for yyy in * ; do
-				if $test -f $yyy/$yyy.xs; then
-					known_extensions="$known_extensions $xxx/$yyy"
-				fi
-			done
-			cd ..
-		fi
-	fi
-done
-set X $known_extensions
-shift
-known_extensions="$*"
-cd ../UU
-
-: Now see which are supported on this system.
-avail_ext=''
-for xxx in $known_extensions ; do
-    case "$xxx" in
-    DB_File) case "$i_db" in 
-	    $define) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    GDBM_File) case "$i_gdbm" in 
-	    $define) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    NDBM_File) case "$i_ndbm" in 
-	    $define) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    ODBM_File) case "${i_dbm}${i_rpcsvcdbm}" in 
-	    *"${define}"*) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    POSIX) case "$useposix" in 
-	    true|define|y) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    Socket) case "$d_socket" in 
-	    $define) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    *)      avail_ext="$avail_ext $xxx"
-	    ;;
-    esac
-done
-
-set X $avail_ext
-shift
-avail_ext="$*"
-
-case $usedl in
-$define)
-	$cat <<EOM
-A number of extensions are supplied with $package.  You may choose to
-compile these extensions for dynamic loading (the default), compile
-them into the $package executable (static loading), or not include
-them at all.  Answer "none" to include no extensions.
-
-EOM
-	case "$dynamic_ext" in
-	'') dflt="$avail_ext" ;;
-	*)	dflt="$dynamic_ext" ;;
-	esac
-	case "$dflt" in
-	'')	dflt=none;;
-	esac
-	rp="What extensions do you wish to load dynamically?"
-	. ./myread
-	case "$ans" in
-	none) dynamic_ext=' ' ;;
-	*) dynamic_ext="$ans" ;;
-	esac
-
-	case "$static_ext" in
-	'')
-		: Exclude those already listed in dynamic linking
-		dflt=''
-		for xxx in $avail_ext; do
-			case " $dynamic_ext " in
-			*" $xxx "*) ;;
-			*) dflt="$dflt $xxx" ;;
-			esac
-		done
-		set X $dflt
-		shift
-		dflt="$*"
-		;;
-	*)  dflt="$static_ext" 
-		;;
-	esac
-
-	case "$dflt" in
-	'')	dflt=none;;
-	esac
-	rp="What extensions do you wish to load statically?"
-	. ./myread
-	case "$ans" in
-	none) static_ext=' ' ;;
-	*) static_ext="$ans" ;;
-	esac
-	;;
-*)
-	$cat <<EOM
-A number of extensions are supplied with $package.  Answer "none" 
-to include no extensions. 
-
-EOM
-	case "$static_ext" in
-	'') dflt="$avail_ext" ;;
-	*)	dflt="$static_ext" ;;
-	esac
-
-	case "$dflt" in
-	'')	dflt=none;;
-	esac
-	rp="What extensions do you wish to include?"
-	. ./myread
-	case "$ans" in
-	none) static_ext=' ' ;;
-	*) static_ext="$ans" ;;
-	esac
-	;;
-esac
-
-set X $dynamic_ext $static_ext
-shift
-extensions="$*"
-
 : see what type file positions are declared as in the library
 set fpos_t fpostype long stdio.h sys/types.h
 eval $typedef
@@ -7477,19 +7339,6 @@ echo " "
 rp="What type is used for file modes?"
 . ./myread
 modetype="$ans"
-
-: set the base revision
-baserev=5.0
-
-: get the patchlevel
-echo " "
-echo "Getting the current patchlevel..." >&4
-if $test -r ../patchlevel.h;then
-	patchlevel=`awk '/PATCHLEVEL/ {print $3}' < ../patchlevel.h`
-else
-	patchlevel=0
-fi
-echo "(You have $package $baserev PL$patchlevel.)"
 
 : Cruising for prototypes
 echo " "
@@ -7822,6 +7671,7 @@ esac
 
 : Trace out the files included by signal.h, then look for SIGxxx names.
 : Remove SIGARRAYSIZE used by HPUX.
+: Remove SIGTYP void lines used by OS2.
 xxx=`echo '#include <signal.h>' |
 	$cppstdin $cppminus $cppflags 2>/dev/null |
 	$grep '^[ 	]*#.*include' | 
@@ -7838,10 +7688,10 @@ case "$xxxfiles" in
 '')	xxxfiles=`./findhdr signal.h` ;;
 esac
 xxx=`awk '
-$1 ~ /^#define$/ && $2 ~ /^SIG[A-Z0-9]*$/ && $2 !~ /SIGARRAYSIZE/ {
+$1 ~ /^#define$/ && $2 ~ /^SIG[A-Z0-9]*$/ && $2 !~ /SIGARRAYSIZE/ && $3 !~ /void/ {
 	print substr($2, 4, 20)
 }
-$1 == "#" && $2 ~ /^define$/ && $3 ~ /^SIG[A-Z0-9]*$/ && $3 !~ /SIGARRAYSIZE/ {
+$1 == "#" && $2 ~ /^define$/ && $3 ~ /^SIG[A-Z0-9]*$/ && $3 !~ /SIGARRAYSIZE/ && $4 !~ /void/ {
 	print substr($3, 4, 20)
 }' $xxxfiles`
 : Append some common names just in case the awk scan failed.
@@ -7850,11 +7700,19 @@ xxx="$xxx LOST PHONE PIPE POLL PROF PWR QUIT SEGV STKFLT STOP SYS TERM TRAP"
 xxx="$xxx TSTP TTIN TTOU URG USR1 USR2 USR3 USR4 VTALRM"
 xxx="$xxx WINCH WIND WINDOW XCPU XFSZ"
 : generate a few handy files for later
-echo $xxx | $tr ' ' '\012' | $awk '
-BEGIN {
-	printf "#include <signal.h>\n";
-	printf "main() {\n";
-}
+$cat > signal.c <<'EOP'
+#include <sys/types.h>
+#include <signal.h>
+int main() {
+#ifdef NSIG
+printf("NSIG %d\n", NSIG);
+#else
+#ifdef _NSIG
+printf("NSIG %d\n", _NSIG);
+#endif
+#endif
+EOP
+echo $xxx | $tr ' ' '\012' | $sort | $uniq | $awk '
 {
 	printf "#ifdef SIG"; printf $1; printf "\n"
 	printf "printf(\""; printf $1; printf " %%d\\n\",SIG";
@@ -7864,12 +7722,43 @@ BEGIN {
 END {
 	printf "}\n";
 }
-' >signal.c
-$cat >signal.cmd <<EOS
+' >>signal.c
+$cat >signal.awk <<'EOP'
+BEGIN { ndups = 0 }
+$1 ~ /^NSIG$/ { nsig = $2 }
+($1 !~ /^NSIG$/) && (NF == 2) {
+    if ($2 > maxsig) { maxsig = $2 }
+    if (sig_name[$2]) {
+	dup_name[ndups] = $1
+	dup_num[ndups] = $2
+	ndups++ 
+    }
+    else {
+	sig_name[$2] = $1
+	sig_num[$2] = $2
+    }
+
+}
+END { 
+    if (nsig == 0) { nsig = maxsig + 1 }
+	for (n = 1; n < nsig; n++) {
+		if (sig_name[n]) {
+			printf("%s %d\n", sig_name[n], sig_num[n])
+		}
+		else {
+			printf("NUM%d %d\n", n, n) 
+		}
+	}
+    for (n = 0; n < ndups; n++) {
+		printf("%s %d\n", dup_name[n], dup_num[n])
+    }
+}
+EOP
+$cat >signal_cmd <<EOS
 $startsh
 $test -s signal.lst && exit 0
 if $cc $ccflags signal.c -o signal $ldflags >/dev/null 2>&1; then
-	./signal | $sort -n +1 | $uniq >signal.lst
+	./signal | $sort -n +1 | $uniq | $awk -f signal.awk >signal.lst
 else
 	echo "(I can't seem be able to compile the test program -- Guessing)"
 	echo 'kill -l' >signal
@@ -7884,17 +7773,25 @@ else
 fi
 $rm -f signal.c signal signal.o
 EOS
-chmod a+x signal.cmd
-$eunicefix signal.cmd
+chmod a+x signal_cmd
+$eunicefix signal_cmd
 
 : generate list of signal names
 echo " "
 case "$sig_name" in
+'')	sig_num='' ;;
+esac
+case "$sig_num" in
+'')	sig_name='' ;;
+esac
+case "$sig_name" in
 '')
-	echo "Generating a list of signal names..." >&4
-	./signal.cmd
+	echo "Generating a list of signal names and numbers..." >&4
+	./signal_cmd
 	sig_name=`$awk '{printf "%s ", $1}' signal.lst`
 	sig_name="ZERO $sig_name"
+	sig_num=`$awk '{printf "%d ", $2}' signal.lst`
+	sig_num="0 $sig_num"
 	;;
 esac
 echo "The following signals are available:"
@@ -7913,21 +7810,7 @@ echo $sig_name | $awk \
 	}
 	printf "\n"
 }'
-
-: generate list of signal numbers
-echo " "
-case "$sig_num" in
-'')
-	echo "Generating a list of signal numbers..." >&4
-	./signal.cmd
-	sig_num=`$awk '{printf "%d ", $2}' signal.lst`
-	sig_num="0 $sig_num"
-	;;
-esac
-case "$sig_max" in
-'')	sig_max=`$tail -1 signal.lst | $awk '{print $2}'` ;;
-esac
-echo "The maximum signal number defined is $sig_max."
+$rm -f signal signal.c signal.awk signal.lst signal_cmd 
 
 : see what type is used for size_t
 set size_t sizetype 'unsigned int' stdio.h sys/types.h
@@ -8024,6 +7907,36 @@ rp="What is the type for user ids returned by getuid()?"
 . ./myread
 uidtype="$ans"
 
+: see if dbm.h is available
+: see if dbmclose exists
+set dbmclose d_dbmclose
+eval $inlibc
+
+case "$d_dbmclose" in
+$define)
+	set dbm.h i_dbm
+	eval $inhdr
+	case "$i_dbm" in
+	$define)
+		val="$undef"
+		set i_rpcsvcdbm
+		eval $setvar
+		;;
+	*)	set rpcsvc/dbm.h i_rpcsvcdbm
+		eval $inhdr
+		;;
+	esac
+	;;
+*)	echo "We won't be including <dbm.h>"
+	val="$undef"
+	set i_dbm
+	eval $setvar
+	val="$undef"
+	set i_rpcsvcdbm
+	eval $setvar
+	;;
+esac
+
 : see if this is a sys/file.h system
 val=''
 set sys/file.h val
@@ -8081,6 +7994,10 @@ eval $setvar
 set grp.h i_grp
 eval $inhdr
 
+: see if locale.h is available
+set locale.h i_locale
+eval $inhdr
+
 : see if this is a math.h system
 set math.h i_math
 eval $inhdr
@@ -8107,6 +8024,26 @@ $define)
 	esac
 esac
 set i_memory
+eval $setvar
+
+: see if ndbm.h is available
+set ndbm.h t_ndbm
+eval $inhdr
+case "$t_ndbm" in
+$define)
+	: see if dbm_open exists
+	set dbm_open d_dbm_open
+	eval $inlibc
+	case "$d_dbm_open" in
+	$undef)
+		t_ndbm="$undef"
+		echo "We won't be including <ndbm.h>"
+		;;
+	esac
+	;;
+esac
+val="$t_ndbm"
+set i_ndbm
 eval $setvar
 
 : see if net/errno.h is available
@@ -8453,6 +8390,223 @@ case "$d_vfork" in
 	;;
 esac
 
+: see if gdbm.h is available
+set gdbm.h t_gdbm
+eval $inhdr
+case "$t_gdbm" in
+$define)
+	: see if gdbm_open exists
+	set gdbm_open d_gdbm_open
+	eval $inlibc
+	case "$d_gdbm_open" in
+	$undef)
+		t_gdbm="$undef"
+		echo "We won't be including <gdbm.h>"
+		;;
+	esac
+	;;
+esac
+val="$t_gdbm"
+set i_gdbm
+eval $setvar
+
+echo " "
+echo "Looking for extensions..." >&4
+cd ../ext
+: If we are using the old config.sh, known_extensions may contain
+: old or inaccurate or duplicate values.
+known_extensions=''
+: We do not use find because it might not be available.
+: We do not just use MANIFEST because the user may have dropped
+: some additional extensions into the source tree and expect them
+: to be built.
+for xxx in * ; do
+	if $test -f $xxx/$xxx.xs; then
+		known_extensions="$known_extensions $xxx"
+	else
+		if $test -d $xxx; then
+			cd $xxx
+			for yyy in * ; do
+				if $test -f $yyy/$yyy.xs; then
+					known_extensions="$known_extensions $xxx/$yyy"
+				fi
+			done
+			cd ..
+		fi
+	fi
+done
+set X $known_extensions
+shift
+known_extensions="$*"
+cd ../UU
+
+: Now see which are supported on this system.
+avail_ext=''
+for xxx in $known_extensions ; do
+    case "$xxx" in
+    DB_File) case "$i_db" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    GDBM_File) case "$i_gdbm" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    NDBM_File) case "$i_ndbm" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    ODBM_File) case "${i_dbm}${i_rpcsvcdbm}" in 
+	    *"${define}"*) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    POSIX) case "$useposix" in 
+	    true|define|y) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    Socket) case "$d_socket" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    *)      avail_ext="$avail_ext $xxx"
+	    ;;
+    esac
+done
+
+set X $avail_ext
+shift
+avail_ext="$*"
+
+case $usedl in
+$define)
+	$cat <<EOM
+A number of extensions are supplied with $package.  You may choose to
+compile these extensions for dynamic loading (the default), compile
+them into the $package executable (static loading), or not include
+them at all.  Answer "none" to include no extensions.
+
+EOM
+	case "$dynamic_ext" in
+	'') dflt="$avail_ext" ;;
+	*)	dflt="$dynamic_ext" ;;
+	esac
+	case "$dflt" in
+	'')	dflt=none;;
+	esac
+	rp="What extensions do you wish to load dynamically?"
+	. ./myread
+	case "$ans" in
+	none) dynamic_ext=' ' ;;
+	*) dynamic_ext="$ans" ;;
+	esac
+
+	case "$static_ext" in
+	'')
+		: Exclude those already listed in dynamic linking
+		dflt=''
+		for xxx in $avail_ext; do
+			case " $dynamic_ext " in
+			*" $xxx "*) ;;
+			*) dflt="$dflt $xxx" ;;
+			esac
+		done
+		set X $dflt
+		shift
+		dflt="$*"
+		;;
+	*)  dflt="$static_ext" 
+		;;
+	esac
+
+	case "$dflt" in
+	'')	dflt=none;;
+	esac
+	rp="What extensions do you wish to load statically?"
+	. ./myread
+	case "$ans" in
+	none) static_ext=' ' ;;
+	*) static_ext="$ans" ;;
+	esac
+	;;
+*)
+	$cat <<EOM
+A number of extensions are supplied with $package.  Answer "none" 
+to include no extensions. 
+
+EOM
+	case "$static_ext" in
+	'') dflt="$avail_ext" ;;
+	*)	dflt="$static_ext" ;;
+	esac
+
+	case "$dflt" in
+	'')	dflt=none;;
+	esac
+	rp="What extensions do you wish to include?"
+	. ./myread
+	case "$ans" in
+	none) static_ext=' ' ;;
+	*) static_ext="$ans" ;;
+	esac
+	;;
+esac
+
+set X $dynamic_ext $static_ext
+shift
+extensions="$*"
+
+$cat <<EOM
+
+I need to get your e-mail address in Internet format if possible, i.e.
+something like user@host.domain. Please answer accurately since I have
+no easy means to double check it. The default value provided below
+is most probably close to the reality but may not be valid from outside
+your organization...
+
+EOM
+cont=x
+while test "$cont"; do
+	case "$cf_email" in
+	'') dflt="$cf_by@$myhostname$mydomain";;
+	*) dflt="$cf_email";;
+	esac
+	rp='What is your e-mail address?'
+	. ./myread
+	cf_email="$ans"
+	case "$cf_email" in
+	*@*.*) cont='' ;;
+	*)
+		rp='Address does not look like an Internet one.  Use it anyway?'
+		case "$fastread" in
+		yes) dflt=y ;;
+		*) dflt=n ;;
+		esac
+		. ./myread
+		case "$ans" in
+		y*) cont='' ;;
+		*) echo " " ;;
+		esac
+		;;
+	esac
+done
+
+$cat <<EOM
+
+If you or somebody else will be maintaining perl at your site, please
+fill in the correct e-mail address here so that they may be contacted
+if necessary. Currently, the "perlbug" program included with perl
+will send mail to this address in addition to perlbug@perl.com. You may
+enter "none" for no administrator.
+
+EOM
+case "$perladmin" in
+'') dflt="$cf_email";;
+*) dflt="$perladmin";;
+esac
+rp='Perl administrator e-mail address'
+. ./myread
+perladmin="$ans"
+
 : Remove build directory name from cppstdin so it can be used from
 : either the present location or the final installed location.
 echo " "
@@ -8531,9 +8685,11 @@ State='$State'
 afs='$afs'
 alignbytes='$alignbytes'
 aphostname='$aphostname'
+ar='$ar'
 archlib='$archlib'
 archlibexp='$archlibexp'
 archname='$archname'
+archobjs='$archobjs'
 awk='$awk'
 baserev='$baserev'
 bash='$bash'
@@ -8646,6 +8802,7 @@ d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
+d_oldarchlib='$d_oldarchlib'
 d_oldsock='$d_oldsock'
 d_open3='$d_open3'
 d_pathconf='$d_pathconf'
@@ -8695,7 +8852,6 @@ d_shmctl='$d_shmctl'
 d_shmdt='$d_shmdt'
 d_shmget='$d_shmget'
 d_shrplib='$d_shrplib'
-d_sitelib='$d_sitelib'
 d_socket='$d_socket'
 d_sockpair='$d_sockpair'
 d_statblks='$d_statblks'
@@ -8749,9 +8905,11 @@ echo='$echo'
 egrep='$egrep'
 emacs='$emacs'
 eunicefix='$eunicefix'
+exe_ext='$exe_ext'
 expr='$expr'
 extensions='$extensions'
 find='$find'
+firstmakefile='$firstmakefile'
 flex='$flex'
 fpostype='$fpostype'
 freetype='$freetype'
@@ -8780,6 +8938,7 @@ i_float='$i_float'
 i_gdbm='$i_gdbm'
 i_grp='$i_grp'
 i_limits='$i_limits'
+i_locale='$i_locale'
 i_malloc='$i_malloc'
 i_math='$i_math'
 i_memory='$i_memory'
@@ -8823,7 +8982,7 @@ installman1dir='$installman1dir'
 installman3dir='$installman3dir'
 installprivlib='$installprivlib'
 installscript='$installscript'
-installsitelib='$installsitelib'
+installsitearch='$installsitearch'
 intsize='$intsize'
 known_extensions='$known_extensions'
 ksh='$ksh'
@@ -8832,6 +8991,7 @@ ld='$ld'
 lddlflags='$lddlflags'
 ldflags='$ldflags'
 less='$less'
+lib_ext='$lib_ext'
 libc='$libc'
 libpth='$libpth'
 libs='$libs'
@@ -8875,6 +9035,9 @@ n='$n'
 nm_opt='$nm_opt'
 nroff='$nroff'
 o_nonblock='$o_nonblock'
+obj_ext='$obj_ext'
+oldarchlib='$oldarchlib'
+oldarchlibexp='$oldarchlibexp'
 optimize='$optimize'
 orderlib='$orderlib'
 osname='$osname'
@@ -8882,8 +9045,10 @@ osvers='$osvers'
 package='$package'
 passcat='$passcat'
 patchlevel='$patchlevel'
+path_sep='$path_sep'
 perl='$perl'
 perladmin='$perladmin'
+perlpath='$perlpath'
 pg='$pg'
 phostname='$phostname'
 plibpth='$plibpth'
@@ -8911,12 +9076,11 @@ sharpbang='$sharpbang'
 shmattype='$shmattype'
 shrpdir='$shrpdir'
 shsharp='$shsharp'
-sig_max='$sig_max'
 sig_name='$sig_name'
 sig_num='$sig_num'
 signal_t='$signal_t'
-sitelib='$sitelib'
-sitelibexp='$sitelibexp'
+sitearch='$sitearch'
+sitearchexp='$sitearchexp'
 sizetype='$sizetype'
 sleep='$sleep'
 smail='$smail'
@@ -8929,6 +9093,7 @@ spackage='$spackage'
 spitshell='$spitshell'
 split='$split'
 ssizetype='$ssizetype'
+startperl='$startperl'
 startsh='$startsh'
 static_ext='$static_ext'
 stdchar='$stdchar'

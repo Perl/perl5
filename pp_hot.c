@@ -150,8 +150,10 @@ PP(pp_concat)
 	s = SvPV(left,len);
 	sv_setpvn(TARG,s,len);
     }
-    else if (!SvOK(TARG))
+    else if (!SvOK(TARG)) {
+	s = SvPV_force(TARG, len);
 	sv_setpv(TARG, "");	/* Suppress warning. */
+    }
     s = SvPV(right,len);
     sv_catpvn(TARG,s,len);
     SETTARG;
@@ -163,8 +165,24 @@ PP(pp_padsv)
 {
     dSP; dTARGET;
     XPUSHs(TARG);
-    if (op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(curpad[op->op_targ]);
+    if (op->op_flags & OPf_MOD) {
+	if (op->op_private & OPpLVAL_INTRO)
+	    SAVECLEARSV(curpad[op->op_targ]);
+        else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV)) {
+	    SV* sv = curpad[op->op_targ];
+            if (SvGMAGICAL(sv))
+                mg_get(sv);
+            if (!SvOK(sv)) {
+                if (SvREADONLY(sv))
+                    croak(no_modify);
+                (void)SvUPGRADE(sv, SVt_RV);
+                SvRV(sv) = (op->op_private & OPpDEREF_HV ?
+                            (SV*)newHV() : (SV*)newAV());
+                SvROK_on(sv);
+                SvSETMAGIC(sv);
+            }
+        }
+    }
     RETURN;
 }
 
@@ -362,6 +380,8 @@ PP(pp_rv2av)
 		    if (op->op_flags & OPf_REF ||
 		      op->op_private & HINT_STRICT_REFS)
 			DIE(no_usym, "an ARRAY");
+		    if (GIMME == G_ARRAY)
+			RETURN;
 		    RETPUSHUNDEF;
 		}
 		sym = SvPV(sv,na);
@@ -433,6 +453,10 @@ PP(pp_rv2hv)
 		    if (op->op_flags & OPf_REF ||
 		      op->op_private & HINT_STRICT_REFS)
 			DIE(no_usym, "a HASH");
+		    if (GIMME == G_ARRAY) {
+			SP--;
+			RETURN;
+		    }
 		    RETSETUNDEF;
 		}
 		sym = SvPV(sv,na);
@@ -504,6 +528,7 @@ PP(pp_aassign)
     ary = Null(AV*);
     hash = Null(HV*);
     while (lelem <= lastlelem) {
+	tainted = 0;		/* Each item stands on its own, taintwise. */
 	sv = *lelem++;
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
@@ -520,9 +545,8 @@ PP(pp_aassign)
 		(void)av_store(ary,i++,sv);
 		if (magic)
 		    mg_set(sv);
+		tainted = 0;
 	    }
-	    if (!i)
-		av_extend(ary, 0);
 	    break;
 	case SVt_PVHV: {
 		char *tmps;
@@ -534,12 +558,9 @@ PP(pp_aassign)
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
 		    STRLEN len;
-		    if (*relem) {
+		    if (*relem)
 			sv = *(relem++);
-                        if (dowarn && SvROK(sv))  /* Tom's gripe */
-                            warn("Attempt to use reference as hash key");
-                    }
-		    else 
+		    else
 			sv = &sv_no, relem++;
 		    tmps = SvPV(sv, len);
 		    tmpstr = NEWSV(29,0);
@@ -549,25 +570,7 @@ PP(pp_aassign)
 		    (void)hv_store(hash,tmps,len,tmpstr,0);
 		    if (magic)
 			mg_set(tmpstr);
-		}
-		if (relem == lastrelem) {
-                    warn("Odd number of elements in hash list");
-		    if (*relem) {
-			STRLEN len;
-			sv = *relem;
-                        if (dowarn && SvROK(sv))  /* Tom's gripe */
-                            warn("Attempt to use reference as hash key");
-			tmps = SvPV(sv, len);
-			tmpstr = NEWSV(29,0);
-			(void) hv_store(hash, tmps, len, tmpstr, 0);
-			if (magic)
-			    mg_set(tmpstr);
-		    }
-		    relem++;	/* allow for (%a,%b) = 1; */
-		}
-		if (!HvARRAY(hash) && !magic) {
-		    Newz(42, hash->sv_any->xhv_array,
-			 sizeof(HE*) * (HvMAX(hash)+1), char);
+		    tainted = 0;
 		}
 	    }
 	    break;
@@ -652,7 +655,7 @@ PP(pp_aassign)
 	    gid = (int)getgid();
 	    egid = (int)getegid();
 	}
-	tainting |= (euid != uid || egid != gid);
+	tainting |= (uid && (euid != uid || egid != gid));
     }
     delaymagic = 0;
     if (GIMME == G_ARRAY) {
@@ -663,16 +666,11 @@ PP(pp_aassign)
 	RETURN;
     }
     else {
+	dTARGET;
 	SP = firstrelem;
-	for (relem = firstrelem; relem <= lastrelem; ++relem) {
-	    if (SvOK(*relem)) {
-		dTARGET;
 		
-		SETi(lastrelem - firstrelem + 1);
-		RETURN;
-	    }
-	}
-	RETSETUNDEF;
+	SETi(lastrelem - firstrelem + 1);
+	RETURN;
     }
 }
 
@@ -690,6 +688,7 @@ PP(pp_match)
     I32 gimme = GIMME;
     STRLEN len;
     I32 minmatch = 0;
+    I32 oldsave = savestack_ix;
 
     if (op->op_flags & OPf_STACKED)
 	TARG = POPs;
@@ -814,6 +813,7 @@ play_it_again:
 		++rx->endp[0];
 	    goto play_it_again;
 	}
+	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
     else {
@@ -835,6 +835,7 @@ play_it_again:
 	    else
 		mg->mg_len = -1;
 	}
+	LEAVE_SCOPE(oldsave);
 	RETPUSHYES;
     }
 
@@ -861,6 +862,7 @@ yup:
 	tmps = rx->startp[0] = tmps + (s - t);
 	rx->endp[0] = tmps + SvCUR(pm->op_pmshort);
     }
+    LEAVE_SCOPE(oldsave);
     RETPUSHYES;
 
 nope:
@@ -875,6 +877,7 @@ ret_no:
 		mg->mg_len = -1;
 	}
     }
+    LEAVE_SCOPE(oldsave);
     if (gimme == G_ARRAY)
 	RETURN;
     RETPUSHNO;
@@ -1021,7 +1024,7 @@ do_readline()
 	    SP--;
     }
     if (!fp) {
-	if (dowarn && !(IoFLAGS(io) & IOf_START))
+	if (dowarn && io && !(IoFLAGS(io) & IOf_START))
 	    warn("Read on closed filehandle <%s>", GvENAME(last_in_gv));
 	if (GIMME == G_SCALAR) {
 	    (void)SvOK_off(TARG);
@@ -1226,16 +1229,20 @@ PP(pp_iter)
     dSP;
     register CONTEXT *cx;
     SV *sv;
+    AV* av;
 
     EXTEND(sp, 1);
     cx = &cxstack[cxstack_ix];
     if (cx->cx_type != CXt_LOOP)
 	DIE("panic: pp_iter");
-
-    if (cx->blk_loop.iterix >= cx->blk_oldsp)
+    av = cx->blk_loop.iterary;
+    if (av == stack && cx->blk_loop.iterix >= cx->blk_oldsp)
 	RETPUSHNO;
 
-    if (sv = AvARRAY(cx->blk_loop.iterary)[++cx->blk_loop.iterix]) {
+    if (cx->blk_loop.iterix >= AvFILL(av))
+	RETPUSHNO;
+
+    if (sv = AvARRAY(av)[++cx->blk_loop.iterix]) {
 	SvTEMP_off(sv);
 	*cx->blk_loop.itervar = sv;
     }
@@ -1266,6 +1273,7 @@ PP(pp_subst)
     register REGEXP *rx = pm->op_pmregexp;
     STRLEN len;
     int force_on_match = 0;
+    I32 oldsave = savestack_ix;
 
     if (pm->op_pmflags & PMf_CONST)	/* known replacement string? */
 	dstr = POPs;
@@ -1368,6 +1376,7 @@ PP(pp_subst)
 			(void)SvPOK_only(TARG);
 			SvSETMAGIC(TARG);
 			PUSHs(&sv_yes);
+			LEAVE_SCOPE(oldsave);
 			RETURN;
 		    }
 		    /*SUPPRESS 560*/
@@ -1383,6 +1392,7 @@ PP(pp_subst)
 			(void)SvPOK_only(TARG);
 			SvSETMAGIC(TARG);
 			PUSHs(&sv_yes);
+			LEAVE_SCOPE(oldsave);
 			RETURN;
 		    }
 		    else if (clen) {
@@ -1392,6 +1402,7 @@ PP(pp_subst)
 			(void)SvPOK_only(TARG);
 			SvSETMAGIC(TARG);
 			PUSHs(&sv_yes);
+			LEAVE_SCOPE(oldsave);
 			RETURN;
 		    }
 		    else {
@@ -1399,6 +1410,7 @@ PP(pp_subst)
 			(void)SvPOK_only(TARG);
 			SvSETMAGIC(TARG);
 			PUSHs(&sv_yes);
+			LEAVE_SCOPE(oldsave);
 			RETURN;
 		    }
 		    /* NOTREACHED */
@@ -1428,9 +1440,11 @@ PP(pp_subst)
 		(void)SvPOK_only(TARG);
 		SvSETMAGIC(TARG);
 		PUSHs(sv_2mortal(newSViv((I32)iters)));
+		LEAVE_SCOPE(oldsave);
 		RETURN;
 	    }
 	    PUSHs(&sv_no);
+	    LEAVE_SCOPE(oldsave);
 	    RETURN;
 	}
     }
@@ -1473,7 +1487,7 @@ PP(pp_subst)
 	    safebase));
 	sv_catpvn(dstr, s, strend - s);
 
-	SvOOK_off(TARG);
+	(void)SvOOK_off(TARG);
 	Safefree(SvPVX(TARG));
 	SvPVX(TARG) = SvPVX(dstr);
 	SvCUR_set(TARG, SvCUR(dstr));
@@ -1484,14 +1498,17 @@ PP(pp_subst)
 	(void)SvPOK_only(TARG);
 	SvSETMAGIC(TARG);
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
+	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
     PUSHs(&sv_no);
+    LEAVE_SCOPE(oldsave);
     RETURN;
 
 nope:
     ++BmUSEFUL(pm->op_pmshort);
     PUSHs(&sv_no);
+    LEAVE_SCOPE(oldsave);
     RETURN;
 }
 
@@ -1631,8 +1648,17 @@ PP(pp_entersub)
 
     if (!CvROOT(cv) && !CvXSUB(cv)) {
 	if (gv = CvGV(cv)) {
-	    SV *tmpstr = sv_newmortal();
+	    SV *tmpstr;
 	    GV *ngv;
+	    if (SvFAKE(cv) && GvCV(gv) != cv) {	/* autoloaded stub? */
+		cv = GvCV(gv);
+		if (SvTYPE(sv) == SVt_PVGV) {
+		    SvREFCNT_dec(GvCV((GV*)sv));
+		    GvCV((GV*)sv) = (CV*)SvREFCNT_inc((SV*)cv);
+		}
+		goto retry;
+	    }
+	    tmpstr = sv_newmortal();
 	    gv_efullname(tmpstr, gv);
 	    ngv = gv_fetchmethod(GvESTASH(gv), "AUTOLOAD");
 	    if (ngv && ngv != gv && (cv = GvCV(ngv))) {	/* One more chance... */
@@ -1646,6 +1672,7 @@ PP(pp_entersub)
 	DIE("Undefined subroutine called");
     }
 
+    gimme = GIMME;
     if ((op->op_private & OPpDEREF_DB) && !CvXSUB(cv)) {
 	sv = GvSV(DBsub);
 	save_item(sv);
@@ -1659,8 +1686,6 @@ PP(pp_entersub)
 	if (!cv)
 	    DIE("No DBsub routine");
     }
-
-    gimme = GIMME;
 
     if (CvXSUB(cv)) {
 	if (CvOLDSTYLE(cv)) {

@@ -128,6 +128,7 @@ case "`${cc:-cc} -v 2>&1`" in
 	# Get gcc to share its secrets.
 	echo 'main() { return 0; }' > try.c
 	verbose=`${cc:-cc} -v -o try try.c 2>&1`
+	rm -f try try.c
 	tmp=`echo "$verbose" | grep '^Reading' |
 		awk '{print $NF}'  | sed 's/specs$/include/'`
 

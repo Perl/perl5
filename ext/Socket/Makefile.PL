@@ -1,2 +1,2 @@
 use ExtUtils::MakeMaker;
-WriteMakefile();
+WriteMakefile(VERSION => 1.3);

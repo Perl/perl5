@@ -223,10 +223,55 @@ char* name;
 	if (*nsplit == ':')
 	    --nsplit;
 	*nsplit = '\0';
-	stash = gv_stashpv(origname,TRUE);
-	*nsplit = ch;
+	if (strEQ(origname,"SUPER")) {
+	    /* Degenerate case ->SUPER::method should really lookup in original stash */
+	    SV *tmpstr = sv_2mortal(newSVpv(HvNAME(stash),0));
+	    sv_catpvn(tmpstr, "::SUPER", 7);
+	    stash = gv_stashpv(SvPV(tmpstr,na),TRUE);
+	    *nsplit = ch;
+	    DEBUG_o( deb("Treating %s as %s::%s\n",origname,HvNAME(stash),name) );
+	} else {
+	    stash = gv_stashpv(origname,TRUE);
+	    *nsplit = ch;
+	}
     }
     gv = gv_fetchmeth(stash, name, nend - name, 0);
+
+    if (!gv) {
+	/* Failed obvious case - look for SUPER as last element of stash's name */
+	char *packname = HvNAME(stash);
+	STRLEN len     = strlen(packname);
+	if (len >= 7 && strEQ(packname+len-7,"::SUPER")) {
+	    /* Now look for @.*::SUPER::ISA */
+	    GV** gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
+	    if (!gvp || (gv = *gvp) == (GV*)&sv_undef || !GvAV(gv)) {
+		/* No @ISA in package ending in ::SUPER - drop suffix
+		   and see if there is an @ISA there
+		 */
+		HV *basestash;
+		char ch = packname[len-7];
+		AV *av;
+		packname[len-7] = '\0';
+		basestash = gv_stashpv(packname, TRUE);
+		packname[len-7] = ch;
+		gvp = (GV**)hv_fetch(basestash,"ISA",3,FALSE);
+		if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
+		     /* Okay found @ISA after dropping the SUPER, alias it */
+	             SV *tmpstr = sv_2mortal(newSVpv(HvNAME(stash),0));
+	             sv_catpvn(tmpstr, "::ISA", 5);
+		     gv  = gv_fetchpv(SvPV(tmpstr,na),TRUE,SVt_PVGV);
+                     if (gv) {
+			GvAV(gv) = (AV*)SvREFCNT_inc(av);
+			/* ... and re-try lookup */
+			gv = gv_fetchmeth(stash, name, nend - name, 0);
+		     } else {
+			croak("Cannot create %s::ISA",HvNAME(stash));
+		     }
+		}
+	    }
+	}     
+    }
+
     if (!gv) {
 	CV* cv;
 
@@ -372,9 +417,30 @@ I32 sv_type;
 		if (add && (hints & HINT_STRICT_VARS) &&
 		    sv_type != SVt_PVCV &&
 		    sv_type != SVt_PVGV &&
+		    sv_type != SVt_PVFM &&
 		    sv_type != SVt_PVIO)
 		{
+		    gvp = (GV**)hv_fetch(stash,name,len,0);
+		    if (!gvp ||
+			    *gvp == (GV*)&sv_undef ||
+			    SvTYPE(*gvp) != SVt_PVGV ||
+			    !(GvFLAGS(*gvp) & GVf_IMPORTED))
 			stash = 0;
+		    else if (sv_type == SVt_PVAV && !GvAV(*gvp) ||
+			     sv_type == SVt_PVHV && !GvHV(*gvp) ||
+			     sv_type == SVt_PV &&
+				 (!GvSV(*gvp) ||
+				    (!SvTYPE(GvSV(*gvp)) &&
+				     SvREFCNT(GvSV(*gvp)) == 1) ))
+		    {
+			warn("Variable \"%c%s\" is not exported",
+			    sv_type == SVt_PVAV ? '@' :
+			    sv_type == SVt_PVHV ? '%' : '$',
+			    name);
+			if (GvCV(*gvp))
+			    warn("(Did you mean &%s instead?)\n", name);
+			stash = 0;
+		    }
 		}
 	    }
 	    else
@@ -964,7 +1030,7 @@ int flags;
 					     * argument found */
       lr=1;
     } else if (((ocvp && oamtp->fallback > AMGfallNEVER 
-		 && (cvp=ocvp) && (lr=-1)) 
+		 && (cvp=ocvp) && (lr = -1)) 
 		|| (cvp && amtp->fallback > AMGfallNEVER && (lr=1)))
 	       && !(flags & AMGf_unary)) {
 				/* We look for substitution for

@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-1994 Larry Wall
+ *    Copyright (c) 1987-1995 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -21,7 +21,7 @@
 #endif
 */
 
-char rcsid[] = "perl.c\nPatch level: ###\n";
+dEXT char rcsid[] = "perl.c\nPatch level: ###\n";
 
 #ifdef IAMSUID
 #ifndef DOSUID
@@ -137,6 +137,14 @@ register PerlInterpreter *sv_interp;
 	return;
 
     destruct_level = perl_destruct_level;
+#ifdef DEBUGGING
+    {
+	char *s;
+	if (s = getenv("PERL_DESTRUCT_LEVEL"))
+	    destruct_level = atoi(s);
+    }
+#endif
+
     LEAVE;
     FREETMPS;
 
@@ -192,6 +200,7 @@ register PerlInterpreter *sv_interp;
     }
     if (sv_count != 0)
 	warn("Scalars leaked: %d\n", sv_count);
+    sv_free_arenas();
     
     DEBUG_P(debprofdump());
 }
@@ -295,6 +304,7 @@ setuid perl scripts securely.\n");
 	case 'c':
 	case 'd':
 	case 'D':
+	case 'h':
 	case 'i':
 	case 'l':
 	case 'n':
@@ -584,6 +594,7 @@ I32 create;
     if (create && !GvCV(gv))
     	return newSUB(start_subparse(),
 		      newSVOP(OP_CONST, 0, newSVpv(name,0)),
+		      Nullop,
 		      Nullop);
     if (gv)
 	return GvCV(gv);
@@ -671,7 +682,25 @@ I32 flags;		/* See G_* flags in cop.h */
 
 	cLOGOP->op_other = op;
 	markstack_ptr--;
-	pp_entertry();
+	/* we're trying to emulate pp_entertry() here */
+	{
+	    register CONTEXT *cx;
+	    I32 gimme = GIMME;
+	    
+	    ENTER;
+	    SAVETMPS;
+	    
+	    push_return(op->op_next);
+	    PUSHBLOCK(cx, CXt_EVAL, stack_sp);
+	    PUSHEVAL(cx, 0, 0);
+	    eval_root = op;             /* Only needed so that goto works right. */
+	    
+	    in_eval = 1;
+	    if (flags & G_KEEPERR)
+		in_eval |= 4;
+	    else
+		sv_setpv(GvSV(errgv),"");
+	}
 	markstack_ptr++;
 
     restart:
@@ -716,8 +745,8 @@ I32 flags;		/* See G_* flags in cop.h */
     if (op)
 	run();
     retval = stack_sp - (stack_base + oldmark);
-    if (flags & G_EVAL)
-	sv_setpv(GvSV(gv_fetchpv("@",TRUE, SVt_PV)),"");
+    if ((flags & G_EVAL) && !(flags & G_KEEPERR))
+	sv_setpv(GvSV(errgv),"");
 
   cleanup:
     if (flags & G_EVAL) {
@@ -745,78 +774,107 @@ I32 flags;		/* See G_* flags in cop.h */
     return retval;
 }
 
-/* Older forms, here grandfathered. */
-
-#ifdef DEPRECATED
-I32
-perl_callargv(subname, spix, gimme, argv)
-char *subname;
-register I32 spix;	/* current stack pointer index */
-I32 gimme;		/* See G_* flags in cop.h */
-register char **argv;	/* null terminated arg list, NULL for no arglist */
-{
-    stack_sp = stack_base + spix;
-    return spix + perl_call_argv(subname, gimme, argv);
-}
+/* Eval a string. */
 
 I32
-perl_callpv(subname, spix, gimme, hasargs, numargs)
-char *subname;
-I32 spix;		/* stack pointer index after args are pushed */
-I32 gimme;		/* See G_* flags in cop.h */
-I32 hasargs;		/* whether to create a @_ array for routine */
-I32 numargs;		/* how many args are pushed on the stack */
-{
-    stack_sp = stack_base + spix;
-    PUSHMARK(stack_sp - numargs);
-    return spix - numargs + perl_call_sv((SV*)perl_get_cv(subname, TRUE),
-				gimme, hasargs, numargs);
-}
-
-I32
-perl_callsv(sv, spix, gimme, hasargs, numargs)
+perl_eval_sv(sv, flags)
 SV* sv;
-I32 spix;		/* stack pointer index after args are pushed */
-I32 gimme;		/* See G_* flags in cop.h */
-I32 hasargs;		/* whether to create a @_ array for routine */
-I32 numargs;		/* how many args are pushed on the stack */
+I32 flags;		/* See G_* flags in cop.h */
 {
-    stack_sp = stack_base + spix;
-    PUSHMARK(stack_sp - numargs);
-    return spix - numargs + perl_call_sv(sv, gimme, hasargs, numargs);
-}
+    UNOP myop;		/* fake syntax tree node */
+    SV** sp = stack_sp;
+    I32 oldmark = sp - stack_base;
+    I32 retval;
+    jmp_buf oldtop;
+    I32 oldscope;
+    
+    if (flags & G_DISCARD) {
+	ENTER;
+	SAVETMPS;
+    }
+
+    SAVESPTR(op);
+    op = (OP*)&myop;
+    Zero(op, 1, UNOP);
+    EXTEND(stack_sp, 1);
+    *++stack_sp = sv;
+    oldscope = scopestack_ix;
+
+    if (!(flags & G_NOARGS))
+	myop.op_flags = OPf_STACKED;
+    myop.op_next = Nullop;
+    myop.op_flags |= OPf_KNOW;
+    if (flags & G_ARRAY)
+      myop.op_flags |= OPf_LIST;
+
+    Copy(top_env, oldtop, 1, jmp_buf);
+
+restart:
+    switch (setjmp(top_env)) {
+    case 0:
+	break;
+    case 1:
+#ifdef VMS
+	statusvalue = 255;	/* XXX I don't think we use 1 anymore. */
+#else
+    statusvalue = 1;
 #endif
+	/* FALL THROUGH */
+    case 2:
+	/* my_exit() was called */
+	curstash = defstash;
+	FREETMPS;
+	Copy(oldtop, top_env, 1, jmp_buf);
+	if (statusvalue)
+	    croak("Callback called exit");
+	my_exit(statusvalue);
+	/* NOTREACHED */
+    case 3:
+	if (restartop) {
+	    op = restartop;
+	    restartop = 0;
+	    goto restart;
+	}
+	stack_sp = stack_base + oldmark;
+	if (flags & G_ARRAY)
+	    retval = 0;
+	else {
+	    retval = 1;
+	    *++stack_sp = &sv_undef;
+	}
+	goto cleanup;
+    }
+
+    if (op == (OP*)&myop)
+	op = pp_entereval();
+    if (op)
+	run();
+    retval = stack_sp - (stack_base + oldmark);
+    if ((flags & G_EVAL) && !(flags & G_KEEPERR))
+	sv_setpv(GvSV(errgv),"");
+
+  cleanup:
+    Copy(oldtop, top_env, 1, jmp_buf);
+    if (flags & G_DISCARD) {
+	stack_sp = stack_base + oldmark;
+	retval = 0;
+	FREETMPS;
+	LEAVE;
+    }
+    return retval;
+}
 
 /* Require a module. */
 
 void
-perl_requirepv(pv)
+perl_require_pv(pv)
 char* pv;
 {
-    UNOP myop;		/* fake syntax tree node */
-    SV* sv;
-    dSP;
-    
-    ENTER;
-    SAVETMPS;
-    SAVESPTR(op);
-    sv = sv_newmortal();
-    sv_setpv(sv, pv);
-    op = (OP*)&myop;
-    Zero(op, 1, UNOP);
-    XPUSHs(sv);
-
-    myop.op_type = OP_REQUIRE;
-    myop.op_next = Nullop;
-    myop.op_private = 1;
-    myop.op_flags = OPf_KNOW;
-
-    PUTBACK;
-    if (op = pp_require())
-	run();
-    stack_sp--;
-    FREETMPS;
-    LEAVE;
+    SV* sv = sv_newmortal();
+    sv_setpv(sv, "require '");
+    sv_catpv(sv, pv);
+    sv_catpv(sv, "'");
+    perl_eval_sv(sv, G_DISCARD);
 }
 
 void
@@ -868,6 +926,38 @@ char *p;
     }
 }
 
+void
+usage(name)
+char *name;
+{
+    printf("\nUsage: %s [switches] [filename] [arguments]\n",name);
+    printf("\n  -0[octal]       specify record separator (\\0, if no argument)");
+    printf("\n  -a              autosplit mode with -n or -p");
+    printf("\n  -c              check syntax only (runs BEGIN and END blocks)");
+    printf("\n  -d              run scripts under debugger");
+    printf("\n  -D[number/list] set debugging flags (argument is a bit mask or flags)");
+    printf("\n  -e command      one line of script, multiple -e options are allowed");
+    printf("\n                  [filename] can be ommitted when -e is used");
+    printf("\n  -F regexp       regular expression for autosplit (-a)");
+    printf("\n  -i[extension]   edit <> files in place (make backup if extension supplied)");
+    printf("\n  -Idirectory     specify include directory (may be used more then once)");
+    printf("\n  -l[octal]       enable line ending processing, specifies line teminator");
+    printf("\n  -n              assume 'while (<>) { ... }' loop arround your script");
+    printf("\n  -p              assume loop like -n but print line also like sed");
+    printf("\n  -P              run script through C preprocessor before compilation");
+#ifdef OS2
+    printf("\n  -R              enable REXX variable pool");
+#endif      
+    printf("\n  -s              enable some switch parsing for switches after script name");
+    printf("\n  -S              look for the script using PATH environment variable");
+    printf("\n  -T              turn on tainting checks");
+    printf("\n  -u              dump core after parsing script");
+    printf("\n  -U              allow unsafe operations");
+    printf("\n  -v              print version number and patchlevel of perl");
+    printf("\n  -w              turn warnings on for compilation of your script");
+    printf("\n  -x[directory]   strip off text before #!perl line and perhaps cd to directory\n");
+}
+
 /* This routine handles any switches that can be given during run */
 
 char *
@@ -906,11 +996,16 @@ char *s;
 	return s;
     case 'd':
 	taint_not("-d");
+	s++;
+	if (*s == ':')  {
+	    sprintf(buf, "use Devel::%s;", ++s);
+	    s += strlen(s);
+	    my_setenv("PERL5DB",buf);
+	}
 	if (!perldb) {
 	    perldb = TRUE;
 	    init_debugger();
 	}
-	s++;
 	return s;
     case 'D':
 #ifdef DEBUGGING
@@ -933,6 +1028,9 @@ char *s;
 #endif
 	/*SUPPRESS 530*/
 	return s;
+    case 'h':
+	usage(origargv[0]);    
+	exit(0);
     case 'i':
 	if (inplace)
 	    Safefree(inplace);
@@ -995,16 +1093,16 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	printf("\nThis is perl, version %s\n\n",patchlevel);
-	fputs("\tUnofficial patchlevel 1n.\n",stdout);
-	fputs("\nCopyright 1987-1994, Larry Wall\n",stdout);
+	printf("\nThis is perl, version %s beta\n\n",patchlevel);
+	fputs("\nCopyright 1987-1995, Larry Wall\n",stdout);
 #ifdef MSDOS
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
 	stdout);
-#ifdef OS2
-        fputs("OS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n",
-        stdout);
 #endif
+#ifdef OS2
+        fputs("OS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
+        	"Version 5 port Copyright (c) 1994-1995, Andreas Kaiser\n",
+        stdout);
 #endif
 #ifdef atarist
         fputs("atariST series port, ++jrb  bammi@cadence.com\n", stdout);
@@ -1077,9 +1175,13 @@ init_main_stash()
     incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
     SvMULTI_on(incgv);
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
+    errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
+    SvMULTI_on(errgv);
     curstash = defstash;
     compiling.cop_stash = defstash;
     debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
+    /* We must init $/ before switches are processed. */
+    sv_setpvn(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), "\n", 1);
 }
 
 #ifdef CAN_PROTOTYPE
@@ -1491,7 +1593,7 @@ init_ids()
     uid |= gid << 16;
     euid |= egid << 16;
 #endif
-    tainting |= (euid != uid || egid != gid);
+    tainting |= (uid && (euid != uid || egid != gid));
 }
 
 static void
@@ -1580,7 +1682,7 @@ init_predump_symbols()
     tmpgv = gv_fetchpv("STDOUT",TRUE, SVt_PVIO);
     SvMULTI_on(tmpgv);
     IoOFP(GvIOp(tmpgv)) = IoIFP(GvIOp(tmpgv)) = stdout;
-    defoutgv = tmpgv;
+    setdefout(tmpgv);
     tmpgv = gv_fetchpv("stdout",TRUE, SVt_PV);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(defoutgv));
     SvMULTI_on(tmpgv);
@@ -1653,6 +1755,13 @@ register char **env;
 	hv = GvHVn(envgv);
 	hv_clear(hv);
 #ifndef VMS  /* VMS doesn't have environ array */
+	/* Note that if the supplied env parameter is actually a copy
+	   of the global environ then it may now point to free'd memory
+	   if the environment has been modified since. To avoid this
+	   problem we treat env==NULL as meaning 'use the default'
+	*/
+	if (!env)
+	    env = environ;
 	if (env != environ) {
 	    environ[0] = Nullch;
 	    hv_magic(hv, envgv, 'E');
@@ -1690,9 +1799,10 @@ init_perllib()
 	    incpush(getenv("PERLLIB"));
     }
 
-#ifdef SITELIB_EXP
-    incpush(SITELIB_EXP);
+#ifdef APPLLIB_EXP
+    incpush(APPLLIB_EXP);
 #endif
+
 #ifdef ARCHLIB_EXP
     incpush(ARCHLIB_EXP);
 #endif
@@ -1700,8 +1810,19 @@ init_perllib()
 #define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
     incpush(PRIVLIB_EXP);
+
+#ifdef SITEARCH_EXP
+    incpush(SITEARCH_EXP);
+#endif
+#ifdef SITELIB_EXP
+    incpush(SITELIB_EXP);
+#endif
+#ifdef OLDARCHLIB_EXP  /* 5.00[01] compatibility */
+    incpush(OLDARCHLIB_EXP);
+#endif
     
-    av_push(GvAVn(incgv),newSVpv(".",1));
+    if (!tainting)
+	incpush(".");
 }
 
 void
@@ -1721,7 +1842,7 @@ AV* list;
 
 	switch (setjmp(top_env)) {
 	case 0: {
-		SV* atsv = GvSV(gv_fetchpv("@",TRUE, SVt_PV));
+		SV* atsv = GvSV(errgv);
 		PUSHMARK(stack_sp);
 		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
 		(void)SvPV(atsv, len);

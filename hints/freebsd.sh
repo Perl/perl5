@@ -70,3 +70,14 @@ esac
 # Avoid telldir prototype conflict in pp_sys.c  (FreeBSD uses const DIR *)
 # Configure should test for this.  Volunteers?
 pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
+
+cat <<'EOM'
+
+Some users have reported that Configure halts when testing for
+the O_NONBLOCK symbol with a syntax error.  This is apparently a
+sh error.  Rerunning Configure with ksh apparently fixes the
+problem.  Try
+	ksh Configure [your options]
+
+EOM
+

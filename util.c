@@ -1097,7 +1097,7 @@ register I32 len;
 }
 #endif /* HAS_MEMCMP */
 
-#ifdef I_VARARGS
+#if defined(I_STDARG) || defined(I_VARARGS)
 #ifndef HAS_VPRINTF
 
 #ifdef USE_CHAR_VSPRINTF
@@ -1134,7 +1134,7 @@ char *pat, *args;
     return 0;		/* wrong, but perl doesn't use the return value */
 }
 #endif /* HAS_VPRINTF */
-#endif /* I_VARARGS */
+#endif /* I_VARARGS || I_STDARGS */
 
 #ifdef MYSWAP
 #if BYTEORDER != 0x4321
@@ -1363,7 +1363,7 @@ char	*mode;
     return fdopen(p[this], mode);
 }
 #else
-#ifdef atarist
+#if defined(atarist) || defined(OS2)
 FILE *popen();
 FILE *
 my_popen(cmd,mode)
@@ -1420,8 +1420,7 @@ int newfd;
 }
 #endif
 
-#ifndef DOSISH
-#ifndef VMS /* VMS' my_pclose() is in VMS.c */
+#if  !defined(DOSISH) && !defined(VMS)  /* VMS' my_popen() is in VMS.c */
 I32
 my_pclose(ptr)
 FILE *ptr;
@@ -1450,7 +1449,9 @@ FILE *ptr;
     signal(SIGQUIT, qstat);
     return(pid < 0 ? pid : status);
 }
-#endif /* !VMS */
+#endif /* !DOSISH */
+
+#if  !defined(DOSISH) || defined(OS2)
 I32
 wait4pid(pid,statusp,flags)
 int pid;
@@ -1524,7 +1525,7 @@ int status;
     return;
 }
 
-#ifdef atarist
+#if defined(atarist) || defined(OS2)
 int pclose();
 I32
 my_pclose(ptr)

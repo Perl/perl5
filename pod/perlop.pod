@@ -414,7 +414,7 @@ can assign to them):
 Note that this is not guaranteed to contribute to the readability of
 your program.
 
-=head2 Assigment Operators
+=head2 Assignment Operators
 
 "=" is the ordinary assignment operator.
 
@@ -463,8 +463,9 @@ argument and returns that value.  This is just like C's comma operator.
 In a list context, it's just the list argument separator, and inserts
 both its arguments into the list.
 
-The => digraph is simply a synonym for the comma operator.  It's useful
-for documenting arguments that come in pairs.
+The => digraph is mostly just a synonym for the comma operator.  It's useful for
+documenting arguments that come in pairs.  As of 5.001, it also forces
+any word to the left of it to be interpreted as a string.
 
 =head2 List Operators (Rightward)
 
@@ -622,8 +623,8 @@ interpolating won't change over the life of the script.  However, mentioning
 C</o> constitutes a promise that you won't change the variables in the pattern.
 If you change them, Perl won't even notice.
 
-If the PATTERN evaluates to a null string, the most recently executed 
-(and successfully compiled) regular expression is used instead.
+If the PATTERN evaluates to a null string, the last
+successfully executed regular expression is used instead.
 
 If used in a context that requires a list value, a pattern match returns a
 list consisting of the subexpressions matched by the parentheses in the
@@ -745,7 +746,7 @@ PATTERN contains a $ that looks like a variable rather than an
 end-of-string test, the variable will be interpolated into the pattern
 at run-time.  If you only want the pattern compiled once the first time
 the variable is interpolated, use the C</o> option.  If the pattern
-evaluates to a null string, the most recently executed (and successfully compiled) regular
+evaluates to a null string, the last successfully executed regular
 expression is used instead.  See L<perlre> for further explanation on these.
 
 Options are:
@@ -797,9 +798,9 @@ Examples:
 
     # Delete C comments.
     $program =~ s {
-	/\*	(?# Match the opening delimiter.)
-	.*?	(?# Match a minimal number of characters.)
-	\*/	(?# Match the closing delimiter.)
+	/\*	# Match the opening delimiter.
+	.*?	# Match a minimal number of characters.
+	\*/	# Match the closing delimiter.
     } []gsx;
 
     s/^\s*(.*?)\s*$/$1/;	# trim white space
@@ -997,15 +998,16 @@ If the string inside the angle brackets is a reference to a scalar
 variable (e.g. <$foo>), then that variable contains the name of the
 filehandle to input from.
 
-If the string inside angle brackets is not a filehandle, it is
-interpreted as a filename pattern to be globbed, and either a list of
-filenames or the next filename in the list is returned, depending on
-context.  One level of $ interpretation is done first, but you can't
-say C<E<lt>$fooE<gt>> because that's an indirect filehandle as explained in the
-previous paragraph.  You could insert curly brackets to force
-interpretation as a filename glob: C<E<lt>${foo}E<gt>>.  (Alternately, you can
-call the internal function directly as C<glob($foo)>, which is probably
-the right way to have done it in the first place.)  Example:
+If the string inside angle brackets is not a filehandle, it is interpreted
+as a filename pattern to be globbed, and either a list of filenames or the
+next filename in the list is returned, depending on context.  One level of
+$ interpretation is done first, but you can't say C<E<lt>$fooE<gt>>
+because that's an indirect filehandle as explained in the previous
+paragraph.  In older version of Perl, programmers would insert curly
+brackets to force interpretation as a filename glob: C<E<lt>${foo}E<gt>>.
+These days, it's consdired cleaner to call the internal function directly
+as C<glob($foo)>, which is probably the right way to have done it in the
+first place.)  Example:
 
     while (<*.c>) {
 	chmod 0644, $_;
@@ -1029,6 +1031,30 @@ Because globbing invokes a shell, it's often faster to call readdir() yourself
 and just do your own grep() on the filenames.  Furthermore, due to its current
 implementation of using a shell, the glob() routine may get "Arg list too 
 long" errors (unless you've installed tcsh(1L) as F</bin/csh>).
+
+A glob only evaluates its (embedded) argument when it is starting a new
+list.  All values must be read before it will start over.  In a list
+context this isn't important, because you automatically get them all
+anyway.  In a scalar context, however, the operator returns the next value
+each time it is called, or a FALSE value if you've just run out.  Again,
+FALSE is returned only once.  So if you're expecting a single value from
+a glob, it is much better to say
+
+    ($file) = <blurch*>;
+
+than
+
+    $file = <blurch*>;
+
+because the latter will alternate between returning a filename and
+returning FALSE.  
+
+It you're trying to do variable interpolation, it's definitely better
+to use the glob() function, because the older notation can cause people
+to become confused with the indirect filehandle notatin.
+
+    @files = glob("$dir/*.[ch]");
+    @files = glob($files[$i]);
 
 =head2 Constant Folding
 

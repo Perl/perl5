@@ -13,6 +13,15 @@
 #include <rmsdef.h>  /* at which errno and vaxc$errno are */
 #include <ssdef.h>   /* explicitly set in the perl source code */
 
+/* Suppress compiler warnings from DECC for VMS-specific extensions:
+ * GLOBALEXT, NOSHAREEXT: global[dr]ef declarations
+ * ADDRCONSTEXT: initialization of data with non-constant values
+ *               (e.g. pointer fields of descriptors)
+ */
+#ifdef __DECC
+#  pragma message disable (GLOBALEXT,NOSHAREEXT,ADDRCONSTEXT)
+#endif
+
 /* DEC's C compilers and gcc use incompatible definitions of _to(upp|low)er() */
 #ifdef _toupper
 #  undef _toupper
@@ -22,6 +31,14 @@
 #  undef _tolower
 #endif
 #define _tolower(c) (((c) < 'A' || (c) > 'Z') ? (c) : (c) | 040)
+/* DECC 1.3 has a funny definition of abs; it's fixed in DECC 4.0, so this
+ * can go away once DECC 1.3 isn't in use any more. */
+#if defined(__ALPHA) && defined(__DECC)
+#undef abs
+#define abs(__x)        __ABS(__x)
+#undef labs
+#define labs(__x)        __LABS(__x)
+#endif /* __ALPHA && __DECC */
 
 /* Assorted things to look like Unix */
 #ifdef __GNUC__

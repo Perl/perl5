@@ -319,6 +319,10 @@ register SV **sarg;
 	    }
 	    /* end of switch, copy results */
 	    *t = ch;
+	    if (xs == buf && xlen >= sizeof(buf)) {	/* Ooops! */
+		fputs("panic: sprintf overflow - memory corrupted!\n",stderr);
+		my_exit(1);
+	    }
 	    SvGROW(sv, SvCUR(sv) + (f - s) + xlen + 1 + pre + post);
 	    sv_catpvn(sv, s, f - s);
 	    if (pre) {
@@ -530,7 +534,6 @@ SV *right;
 	(void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
     }
     SvCUR_set(sv, len);
-    *SvEND(sv) = '\0';
     (void)SvPOK_only(sv);
 #ifdef LIBERAL
     if (len >= sizeof(long)*4 &&
@@ -600,6 +603,8 @@ SV *right;
 		sv_catpvn(sv, rsave + len, rightlen - len);
 	    else if (leftlen > len)
 		sv_catpvn(sv, lsave + len, leftlen - len);
+	    else
+		*SvEND(sv) = '\0';
 	    break;
 	}
     }

@@ -230,31 +230,36 @@ sub import {
     Exporter::import($this,@list);
 }
 
+
+bootstrap POSIX;
+
+my $EINVAL = constant("EINVAL", 0);
+my $EAGAIN = constant("EAGAIN", 0);
+
 sub AUTOLOAD {
     if ($AUTOLOAD =~ /::(_?[a-z])/) {
 	$AutoLoader::AUTOLOAD = $AUTOLOAD;
 	goto &AutoLoader::AUTOLOAD
     }
-    local $constname = $AUTOLOAD;
+    local $! = 0;
+    my $constname = $AUTOLOAD;
     $constname =~ s/.*:://;
-    $val = constant($constname, $_[0]);
-    if ($! != 0) {
-	if ($! =~ /Invalid/) {
-	    croak "$constname is not a valid POSIX macro";
-	}
-	else {
-	    croak "Your vendor has not defined POSIX macro $constname, used";
-	}
+    my $val = constant($constname, $_[0]);
+    if ($! == 0) {
+	*$AUTOLOAD = sub { $val };
     }
-    eval "sub $AUTOLOAD { $val }";
+    elsif ($! == $EAGAIN) {	# Not really a constant, so always call.
+	*$AUTOLOAD = sub { constant($constname, $_[0]) };
+    }
+    elsif ($! == $EINVAL) {
+	croak "$constname is not a valid POSIX macro";
+    }
+    else {
+	croak "Your vendor has not defined POSIX macro $constname, used";
+    }
+
     goto &$AUTOLOAD;
 }
-
-
-@liblist = ();
-@liblist = split ' ', $Config::Config{"POSIX_loadlibs"} 
-    if defined $Config::Config{"POSIX_loadlibs"};
-bootstrap POSIX @liblist;
 
 sub usage { 
     local ($mess) = @_;
@@ -272,16 +277,13 @@ sub unimpl {
     croak "Unimplemented: POSIX::$mess";
 }
 
-$gensym = "SYM000";
-
 sub gensym {
-    *{"POSIX::" . $gensym++};
+    my $pkg = @_ ? ref($_[0]) || $_[0] : "";
+    local *{$pkg . "::GLOB" . ++$seq};
+    \delete ${$pkg . "::"}{'GLOB' . $seq};
 }
 
 sub ungensym {
-    local($x) = shift;
-    $x =~ s/.*:://;
-    delete $POSIX::{$x};
 }
 
 ############################
@@ -297,23 +299,23 @@ package FileHandle;
 sub new {
     POSIX::usage "FileHandle->new(filename, posixmode)" if @_ != 3;
     local($class,$filename,$mode) = @_;
-    local($glob) = &POSIX::gensym;
+    local($sym) = $class->POSIX::gensym;
     $mode =~ s/a.*/>>/ ||
     $mode =~ s/w.*/>/ ||
     ($mode = '<');
-    open($glob, "$mode $filename") and
-    bless \$glob;
+    open($sym, "$mode $filename") and
+    bless $sym => $class;
 }
 
 sub new_from_fd {
     POSIX::usage "FileHandle->new_from_fd(fd,mode)" if @_ != 3;
     local($class,$fd,$mode) = @_;
-    local($glob) = &POSIX::gensym;
+    local($sym) = $class->POSIX::gensym;
     $mode =~ s/a.*/>>/ ||
     $mode =~ s/w.*/>/ ||
     ($mode = '<');
-    open($glob, "$mode&=$fd") and
-    bless \$glob;
+    open($sym, "$mode&=$fd") and
+    bless $sym => $class;
 }
 
 sub clearerr {
@@ -328,7 +330,6 @@ sub close {
 
 sub DESTROY {
     close($_[0]);
-    ungensym($_[0]);
 }
 
 sub eof {
@@ -386,15 +387,14 @@ sub toupper {
 sub closedir {
     usage "closedir(dirhandle)" if @_ != 1;
     closedir($_[0]);
-    ungensym($_[0]);
 }
 
 sub opendir {
     usage "opendir(directory)" if @_ != 1;
-    local($dirhandle) = &gensym;
+    local($dirhandle) = POSIX->gensym;
     opendir($dirhandle, $_[0])
 	? $dirhandle
-	: (ungensym($dirhandle), undef);
+	: undef;
 }
 
 sub readdir {

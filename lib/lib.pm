@@ -1,12 +1,21 @@
 package lib;
 
+use Config;
+
+my $archname = $Config{'archname'};
+
 @ORIG_INC = ();		# (avoid typo warning)
 @ORIG_INC = @INC;	# take a handy copy of 'original' value
 
 
 sub import {
     shift;
-    unshift(@INC, @_);
+    foreach (@_) {
+	unshift(@INC, $_);
+	# Put a corresponding archlib directory infront of $_ if it
+	# looks like $_ has an archlib directory below it.
+	unshift(@INC, "$_/$archname") if -d "$_/$archname/auto";
+    }
 }
 
 
@@ -15,7 +24,10 @@ sub unimport {
     my $mode = shift if $_[0] =~ m/^:[A-Z]+/;
 
     my %names;
-    foreach(@_) { ++$names{$_} };
+    foreach(@_) {
+	++$names{$_};
+	++$names{"$_/$archname"} if -d "$_/$archname/auto";
+    }
 
     if ($mode and $mode eq ':ALL') {
 	# Remove ALL instances of each named directory.
@@ -26,6 +38,7 @@ sub unimport {
     }
 }
 
+1;
 __END__
 
 =head1 NAME
@@ -55,9 +68,17 @@ path. Saying
 
     use lib LIST;
 
-is the same as saying
+is I<almost> the same as saying
 
     BEGIN { unshift(@INC, LIST) }
+
+For each directory in LIST (called $dir here) the lib module also
+checks to see if a directory called $dir/$archname/auto exists.
+If so the $dir/$archname directory is assumed to be a corresponding
+architecture specific directory and is added to @INC in front of $dir.
+
+If LIST includes both $dir and $dir/$archname then $dir/$archname will
+be added to @INC twice (if $dir/$archname/auto exists).
 
 
 =head2 DELETING DIRECTORIES FROM @INC
@@ -77,19 +98,23 @@ specify ':ALL' as the first parameter of C<no lib>. For example:
 
     no lib qw(:ALL .);
 
+For each directory in LIST (called $dir here) the lib module also
+checks to see if a directory called $dir/$archname/auto exists.
+If so the $dir/$archname directory is assumed to be a corresponding
+architecture specific directory and is also deleted from @INC.
+
+If LIST includes both $dir and $dir/$archname then $dir/$archname will
+be deleted from @INC twice (if $dir/$archname/auto exists).
+
 
 =head2 RESTORING ORIGINAL @INC
 
 When the lib module is first loaded it records the current value of @INC
 in an array C<@lib::ORIG_INC>. To restore @INC to that value you
-can say either
+can say
 
     @INC = @lib::ORIG_INC;
 
-or
-
-    no  lib @INC;
-    use lib @lib::ORIG_INC;
 
 =head1 SEE ALSO
 

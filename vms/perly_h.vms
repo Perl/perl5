@@ -1,0 +1,68 @@
+#define WORD 257
+#define METHOD 258
+#define FUNCMETH 259
+#define THING 260
+#define PMFUNC 261
+#define PRIVATEREF 262
+#define LABEL 263
+#define FORMAT 264
+#define SUB 265
+#define ANONSUB 266
+#define PACKAGE 267
+#define USE 268
+#define WHILE 269
+#define UNTIL 270
+#define IF 271
+#define UNLESS 272
+#define ELSE 273
+#define ELSIF 274
+#define CONTINUE 275
+#define FOR 276
+#define LOOPEX 277
+#define DOTDOT 278
+#define FUNC0 279
+#define FUNC1 280
+#define FUNC 281
+#define FUNC0SUB 282
+#define RELOP 283
+#define EQOP 284
+#define MULOP 285
+#define ADDOP 286
+#define DOLSHARP 287
+#define DO 288
+#define LOCAL 289
+#define HASHBRACK 290
+#define NOAMP 291
+#define OROP 292
+#define ANDOP 293
+#define NOTOP 294
+#define LSTOP 295
+#define LSTOPSUB 296
+#define ASSIGNOP 297
+#define OROR 298
+#define ANDAND 299
+#define BITOROP 300
+#define BITANDOP 301
+#define UNIOP 302
+#define UNIOPSUB 303
+#define SHIFTOP 304
+#define MATCHOP 305
+#define UMINUS 306
+#define REFGEN 307
+#define POWOP 308
+#define PREINC 309
+#define PREDEC 310
+#define POSTINC 311
+#define POSTDEC 312
+#define ARROW 313
+typedef union {
+    I32	ival;
+    char *pval;
+    OP *opval;
+    GV *gvval;
+} YYSTYPE;
+#ifndef vax11c
+  extern YYSTYPE yylval;
+#else
+  globalref YYSTYPE yylval;
+#endif

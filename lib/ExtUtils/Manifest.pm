@@ -16,6 +16,10 @@ C<ExtUtils::Manifest::filecheck;>
 
 C<ExtUtils::Manifest::fullcheck;>
 
+C<ExtUtils::Manifest::skipcheck;>
+
+C<ExtUtild::Manifest::manifind();>
+
 C<ExtUtils::Manifest::maniread($file);>
 
 C<ExtUtils::Manifest::manicopy($read,$target,$how);>
@@ -45,6 +49,12 @@ file will not be reported as missing in the C<MANIFEST> file.
 
 Fullcheck() does both a manicheck() and a filecheck().
 
+Skipcheck() lists all the files that are skipped due to your
+C<MANIFEST.SKIP> file.
+
+Manifind() retruns a hash reference. The keys of the hash are the
+files found below the current directory.
+
 Maniread($file) reads a named C<MANIFEST> file (defaults to
 C<MANIFEST> in the current directory) and returns a HASH reference
 with files being the keys and comments being the values of the HASH.
@@ -54,8 +64,10 @@ the HASH I<%$read> to the named target directory. The HASH reference
 I<$read> is typically returned by the maniread() function. This
 function is useful for producing a directory tree identical to the
 intended distribution tree. The third parameter $how can be used to
-specify a different system call to do the copying (eg. C<ln> instead
-of C<cp>, which is the default).
+specify a different methods of "copying". Valid values are C<cp>,
+which actually copies the files, C<ln> which creates hard links, and
+C<best> which mostly links the files but copies any symbolic link to
+make a tree without any symbolic link. Best is the default.
 
 =head1 MANIFEST.SKIP
 
@@ -124,8 +136,7 @@ $Debug = 0;
 $Verbose = 1;
 $Is_VMS = $Config{'osname'} eq 'VMS';
 
-($Version) = sprintf("%d.%02d", q$Revision: 1.11 $ =~ /(\d+)\.(\d+)/);
-$Version = $Version; #avoid warning
+$VERSION = $VERSION = substr(q$Revision: 1.15 $,10,4);
 
 $Quiet = 0;
 
@@ -157,7 +168,7 @@ sub mkmanifest {
 
 sub manifind {
     local $found = {};
-    find(sub {return if -d $File::Find::name;
+    find(sub {return if -d $_;
 	      (my $name = $File::Find::name) =~ s|./||;
 	      warn "Debug: diskfile $name\n" if $Debug;
 	      $name  =~ s#(.*)\.$#\L$1# if $Is_VMS;
@@ -337,6 +348,15 @@ sub ln {
     local($_) = $dstFile; # chmod a+r,go-w+X (except "X" only applies to u=x)
     my $mode= 0444 | (stat)[2] & 0700;
     chmod(  $mode | ( $mode & 0100 ? 0111 : 0 ),  $_  );
+}
+
+sub best {
+    my ($srcFile, $dstFile) = @_;
+    if (-l $srcFile) {
+	cp($srcFile, $dstFile);
+    } else {
+	ln($srcFile, $dstFile);
+    }
 }
 
 1;

@@ -17,7 +17,9 @@ of sections:
     perlvar	Perl predefined variables
     perlsub	Perl subroutines
     perlmod	Perl modules
-    perlref	Perl references and nested data structures
+    perlref	Perl references 
+    perldsc	Perl data structures intro
+    perllol	Perl data structures: lists of lists
     perlobj	Perl objects
     perlbot	Perl OO tricks and examples
     perldebug	Perl debugging
@@ -28,6 +30,7 @@ of sections:
     perltrap	Perl traps for the unwary
     perlstyle	Perl style guide
     perlxs	Perl XS application programming interface
+    perlxstut	Perl XS tutorial
     perlguts	Perl internal functions for those doing extensions 
     perlcall	Perl calling conventions from C
     perlovl	Perl overloading semantics
@@ -38,21 +41,21 @@ of sections:
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)
 
-Additional documentation for perl modules is available in
-the F</usr/local/lib/perl5/man/man3> directory.  You can view this
-with a man(1) program by including the following in the
-appropriate start-up files.  (You may have to adjust the path to
-match $Config{'man3dir'}.)
+Additional documentation for Perl modules is available in the
+F</usr/local/man/> directory.  Some of this is distributed standard with
+Perl, but you'll also find third-party modules there.  You should be able
+to view this with your man(1) program by including the proper directories
+in the appropriate start-up files.  To find out where these are, type:
 
-    .profile (for sh, bash or ksh users):
-	MANPATH=$MANPATH:/usr/local/lib/perl5/man
-	export MANPATH
+    perl -le 'use Config; print "@Config{man1dir,man3dir}"'
 
-    .login (for csh or tcsh users):
-	setenv MANPATH $MANPATH:/usr/local/lib/perl5/man
+If the directories were F</usr/local/man/man1> and F</usr/local/man/man3>,
+you would only need to add F</usr/local/man> to your MANPATH.  If 
+they are different, you'll have to add both stems.
 
 If that doesn't work for some reason, you can still use the
-supplied perldoc script to view module information.
+supplied F<perldoc> script to view module information.  You might
+also look into getting a replacement man program.
 
 If something strange has gone wrong with your program and you're not
 sure where you should look for help, try the B<-w> switch first.  It
@@ -202,7 +205,12 @@ used.
 
 A colon-separated list of directories in which to look for Perl library
 files before looking in the standard library and the current
-directory.  If PERL5LIB is not defined, PERLLIB is used.
+directory.  If PERL5LIB is not defined, PERLLIB is used.  When running
+taint checks (because the script was running setuid or setgid, or the
+B<-T> switch was used), neither variable is used.  The script should
+instead say
+
+    use lib "/my/directory";
 
 =item PERL5DB
 
@@ -215,7 +223,6 @@ The command used to get the debugger code.  If unset, uses
 A colon-separated list of directories in which to look for Perl library
 files before looking in the standard library and the current
 directory.  If PERL5LIB is defined, PERLLIB is not used.
-
 
 =back
 
@@ -231,7 +238,7 @@ honest:
 
 =head1 AUTHOR
 
-Larry Wall <F<lwall@netlabs.com.>, with the help of oodles of other folks.
+Larry Wall E<lt><F<lwall@netlabs.com>E<gt>, with the help of oodles of other folks.
 
 =head1 FILES
 
@@ -241,6 +248,7 @@ Larry Wall <F<lwall@netlabs.com.>, with the help of oodles of other folks.
 =head1 SEE ALSO
 
  a2p	awk to perl translator
+
  s2p	sed to perl translator
 
 =head1 DIAGNOSTICS
@@ -265,7 +273,8 @@ switch?
 The B<-w> switch is not mandatory.
 
 Perl is at the mercy of your machine's definitions of various
-operations such as type casting, atof() and sprintf().
+operations such as type casting, atof() and sprintf().  The latter
+can even trigger a coredump when passed ludicrous input values.
 
 If your stdio requires a seek or eof between reads and writes on a
 particular stream, so does Perl.  (This doesn't apply to sysread()
@@ -277,6 +286,8 @@ given identifier may not be longer than 255 characters, and no
 component of your PATH may be longer than 255 if you use B<-S>.  A regular
 expression may not compile to more than 32767 bytes internally.
 
+See the perl bugs database at L<http://perl.com/perl/bugs/>.
+
 Perl actually stands for Pathologically Eclectic Rubbish Lister, but
 don't tell anyone I said that.
 
@@ -285,6 +296,6 @@ don't tell anyone I said that.
 The Perl motto is "There's more than one way to do it."  Divining
 how many more is left as an exercise to the reader.
 
-The three principle virtues of a programmer are Laziness,
+The three principal virtues of a programmer are Laziness,
 Impatience, and Hubris.  See the Camel Book for why.
 

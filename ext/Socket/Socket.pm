@@ -1,20 +1,39 @@
 package Socket;
+$VERSION = 1.3;
 
 =head1 NAME
 
-Socket - load the C socket.h defines and structure manipulators
+Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa - load the C
+    socket.h defines and structure manipulators 
 
 =head1 SYNOPSIS
 
     use Socket;
 
-    $proto = (getprotobyname('udp'))[2];         
+    $proto = getprotobyname('udp');
     socket(Socket_Handle, PF_INET, SOCK_DGRAM, $proto);
-    $sockaddr_in = pack_sockaddr_in(AF_INET,7,inet_aton("localhost"));
-    $sockaddr_in = pack_sockaddr_in(AF_INET,7,INADDR_LOOPBACK);
-    connect(Socket_Handle,$sockaddr_in);
-    $peer = inet_ntoa((unpack_sockaddr_in(getpeername(Socket_Handle)))[2]);
+    $iaddr = gethostbyname('hishost.com');
+    $port = getservbyname('time', 'udp');
+    $sin = sockaddr_in($port, $iaddr);
+    send(Socket_Handle, 0, 0, $sin);
 
+    $proto = getprotobyname('tcp');
+    socket(Socket_Handle, PF_INET, SOCK_STREAM, $proto);
+    $port = getservbyname('smtp');
+    $sin = sockaddr_in($port,inet_aton("127.1"));
+    $sin = sockaddr_in(7,inet_aton("localhost"));
+    $sin = sockaddr_in(7,INADDR_LOOPBACK);
+    connect(Socket_Handle,$sin);
+
+    ($port, $iaddr) = sockaddr_in(getpeername(Socket_Handle));
+    $peer_host = gethostbyaddr($iaddr, AF_INET);
+    $peer_addr = inet_ntoa($iaddr);
+
+    $proto = getprotobyname('tcp');
+    socket(Socket_Handle, PF_UNIX, SOCK_STREAM, $proto);
+    unlink('/tmp/usock');
+    $sun = sockaddr_un('/tmp/usock');
+    connect(Socket_Handle,$sun);
 
 =head1 DESCRIPTION
 
@@ -22,7 +41,8 @@ This module is just a translation of the C F<socket.h> file.
 Unlike the old mechanism of requiring a translated F<socket.ph>
 file, this uses the B<h2xs> program (see the Perl source distribution)
 and your native C compiler.  This means that it has a 
-far more likely chance of getting the numbers right.
+far more likely chance of getting the numbers right.  This includes
+all of the commonly used pound-defines like AF_INET, SOCK_STREAM, etc.
 
 In addition, some structure manipulation functions are available:
 
@@ -42,7 +62,7 @@ readable four dotted number notation for internet addresses).
 
 =item INADDR_ANY
 
-Note - does not return a number.
+Note: does not return a number, but a packed string.
 
 Returns the 4-byte wildcard ip address which specifies any
 of the hosts ip addresses. (A particular machine can have
@@ -65,21 +85,52 @@ Note - does not return a number.
 Returns the 4-byte invalid ip address. Normally equivalent
 to inet_aton('255.255.255.255').
 
-=item pack_sockaddr_in FAMILY, PORT, IP_ADDRESS
+=item sockaddr_in PORT, ADDRESS
 
-Takes three arguments, an address family (normally AF_INET),
-a port number, and a 4 byte IP_ADDRESS (as returned by
-inet_aton()). Returns the sockaddr_in structure with those
-arguments packed in. For internet domain sockets, this structure
-is normally what you need for the arguments in bind(), connect(),
-and send(), and is also returned by getpeername(), getsockname()
-and recv().
+=item sockaddr_in SOCKADDR_IN
+
+In an array context, unpacks its SOCKADDR_IN argument and returns an array
+consisting of (PORT, ADDRESS).  In a scalar context, packs its (PORT,
+ADDRESS) arguments as a SOCKADDR_IN and returns it.  If this is confusing,
+use pack_sockaddr_in() and unpack_sockaddr_in() explicitly.
+
+=item pack_sockaddr_in PORT, IP_ADDRESS
+
+Takes two arguments, a port number and a 4 byte IP_ADDRESS (as returned by
+inet_aton()). Returns the sockaddr_in structure with those arguments
+packed in with AF_INET filled in.  For internet domain sockets, this
+structure is normally what you need for the arguments in bind(),
+connect(), and send(), and is also returned by getpeername(),
+getsockname() and recv().
 
 =item unpack_sockaddr_in SOCKADDR_IN
 
-Takes a sockaddr_in structure (as returned by pack_sockaddr_in())
-and returns an array of three elements: the address family,
-the port, and the 4-byte ip-address.
+Takes a sockaddr_in structure (as returned by pack_sockaddr_in()) and
+returns an array of two elements: the port and the 4-byte ip-address.
+Will croak if the structure does not have AF_INET in the right place.
+
+=item sockaddr_un PATHNAME
+
+=item sockaddr_un SOCKADDR_UN
+
+In an array context, unpacks its SOCKADDR_UN argument and returns an array
+consisting of (PATHNAME).  In a scalar context, packs its PATHANE
+arguments as a SOCKADDR_UN and returns it.  If this is confusing, use
+pack_sockaddr_un() and unpack_sockaddr_un() explicitly.
+
+=item pack_sockaddr_un PATH
+
+Takes one argument, a pathname. Returns the sockaddr_un structure with
+that path packed in with AF_UNIX filled in. For unix domain sockets, this
+structure is normally what you need for the arguments in bind(),
+connect(), and send(), and is also returned by getpeername(),
+getsockname() and recv().
+
+=item unpack_sockaddr_un SOCKADDR_UN
+
+Takes a sockaddr_un structure (as returned by pack_sockaddr_un())
+and returns the pathname.  Will croak if the structure does not
+have AF_UNIX in the right place.
 
 =cut
 
@@ -91,6 +142,8 @@ require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(
 	inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in
+	pack_sockaddr_un unpack_sockaddr_un
+	sockaddr_in sockaddr_un
 	INADDR_ANY INADDR_LOOPBACK INADDR_NONE
 	AF_802
 	AF_APPLETALK
@@ -170,6 +223,31 @@ require DynaLoader;
 	SO_TYPE
 	SO_USELOOPBACK
 );
+
+sub sockaddr_in {
+    if (@_ == 6 && !wantarray) { # perl5.001m compat; use this && die
+	my($af, $port, @quad) = @_;
+	carp "6-ARG sockaddr_in call is deprecated" if $^W;
+	pack_sockaddr_in($port, inet_aton(join('.', @quad)));
+    } elsif (wantarray) {
+	croak "usage:   (port,iaddr) = sockaddr_in(sin_sv)" unless @_ == 1;
+        unpack_sockaddr_in(@_);
+    } else {
+	croak "usage:   sin_sv = sockaddr_in(port,iaddr))" unless @_ == 2;
+        pack_sockaddr_in(@_);
+    }
+}
+
+sub sockaddr_un {
+    if (wantarray) {
+	croak "usage:   (filename) = sockaddr_un(sun_sv)" unless @_ == 1;
+        unpack_sockaddr_un(@_);
+    } else {
+	croak "usage:   sun_sv = sockaddr_un(filename))" unless @_ == 1;
+        pack_sockaddr_in(@_);
+    }
+}
+
 
 sub AUTOLOAD {
     local($constname);

@@ -12,9 +12,11 @@ I<Learning Perl> is a tutorial that covers the most frequently used subset
 of the language.
 
     Programming Perl (the Camel Book):
-	ISBN 0-937175-64-1	(English)
-	ISBN 4-89052-384-7	(Japanese)
+	ISBN 0-937175-64-1      (English)
+	ISBN 4-89052-384-7      (Japanese)
 
     Learning Perl (the Llama Book):
-	ISBN 1-56592-042-2	(English)
-
+	ISBN 1-56592-042-2      (English)
+	ISBN 4-89502-678-1      (Japanese)
+	ISBN 2-84177-005-2      (French)
+	ISBN 3-930673-08-8      (German)

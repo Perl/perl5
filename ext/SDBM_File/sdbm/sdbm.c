@@ -135,6 +135,9 @@ int mode;
  * open the files in sequence, and stat the dirfile.
  * If we fail anywhere, undo everything, return NULL.
  */
+#	ifdef OS2
+	flags |= O_BINARY;
+#	endif
 	if ((db->pagf = open(pagname, flags, mode)) > -1) {
 		if ((db->dirf = open(dirname, flags, mode)) > -1) {
 /*

@@ -34,14 +34,19 @@
 #     (i.e. /Define=DEBUGGING,EMBED,MULTIPLICITY)?
 #
 # Author: Charles Bailey  bailey@genetics.upenn.edu
-# Revised: 01-Mar-1995
+# Revised: 28-May-1995
 
 require 5.000;
 
 $debug = $ENV{'GEN_SHRFLS_DEBUG'};
 $cc_cmd = shift @ARGV;
+
+# Someday, we'll have $GetSyI built into perl . . .
+$isvax = `\$ Write Sys\$Output F\$GetSyI(\"HW_MODEL\")` <= 1024;
+print "\$isvax: \\$isvax\\\n" if $debug;
+
 print "Input \$cc_cmd: \\$cc_cmd\\\n" if $debug;
-$docc = ($cc_cmd !~ /~~NOCC~~/);
+$docc = ($cc_cmd !~ /^~~/);
 print "\$docc = $docc\n" if $debug;
 
 if ($docc) {
@@ -55,11 +60,30 @@ if ($docc) {
   }
   print "Filtered \$cc_cmd: \\$cc_cmd\\\n" if $debug;
 
+  # check for gcc - if present, we'll need to use MACRO hack to
+  # define global symbols for shared variables
+  $isvaxc = 0;
+  $isgcc = `$cc_cmd _nla0:/Version` =~ /GNU/
+           or 0; # make debug output nice
+  $isvaxc = (!$isgcc && $isvax && `$cc_cmd /ansi_alias _nla0:` =~ /IVQUAL/)
+            or 0; # again, make debug output nice
+  print "\$isgcc: $isgcc\n" if $debug;
+  print "\$isvaxc: $isvaxc\n" if $debug;
+
   if (-f 'perl.h') { $dir = '[]'; }
   elsif (-f '[-]perl.h') { $dir = '[-]'; }
   else { die "$0: Can't find perl.h\n"; }
 }
-else { ($cpp_file) = ($cc_cmd =~ /~~NOCC~~(.*)/) }
+else { 
+  ($ccvers,$cpp_file) = ($cc_cmd =~ /^~~(\w+)~~(.*)/);
+  $isgcc = $ccvers =~ /GCC/
+           or 0;  # for nice debug output
+  $isvaxc = (!$isgcc && $ccvers =~ /VAXC/)
+            or 0;  # again, for nice debug output
+  print "\$isgcc: \\$isgcc\\\n" if $debug;
+  print "\$isvaxc: \\$isvaxc\\\n" if $debug;
+  print "Not running cc, preprocesor output in \\$cpp_file\\\n" if $debug;
+}
 
 $objsuffix = shift @ARGV;
 print "\$objsuffix: \\$objsuffix\\\n" if $debug;
@@ -73,9 +97,32 @@ print "\$extnames: \\$extnames\\\n" if $debug;
 $rtlopt = shift @ARGV;
 print "\$rtlopt: \\$rtlopt\\\n" if $debug;
 
-# Someday, we'll have $GetSyI built into perl . . .
-$isvax = `\$ Write Sys\$Output F\$GetSyI(\"HW_MODEL\")` <= 1024;
-print "\$isvax: \\$isvax\\\n" if $debug;
+# This part gets tricky.  VAXC creates creating global symbols for the
+# constants in an enum if that enum is ever used as the data type of a
+# global[dr]ef.  We have to detect enums which are used in this way, so we
+# can set up the constants as universal symbols, since anything which
+# #includes perl.h will want to resolve these global symbols.
+# We're using a weak test here - we basically know that the only enums
+# we need to handle now are the big one in opcode.h, and the
+# "typedef enum { ... } expectation" in perl.h, so we hard code
+# appropriate tests below. Since we can't know in general whether a given
+# enum will be used elsewhere in a globaldef, it's hard to decide a
+# priori whether its constants need to be treated as global symbols.
+sub scan_enum {
+  my($line) = @_;
+
+  return unless $isvaxc;
+
+  return unless /^\s+(OP|X)/;  # we only want opcode and expectation enums
+  print "\tchecking for enum constant\n" if $debug > 1;
+  $line =~ s#/\*.+##;
+  $line =~ s/,?\s*\n?$//;
+  print "\tfiltered to \\$line\\\n" if $debug > 1;
+  if ($line =~ /(\w+)$/) {
+    print "\tvar name is \\$1\\\n" if $debug > 1;
+    $vars{$1}++;
+  }
+}
 
 sub scan_var {
   my($line) = @_;
@@ -101,7 +148,7 @@ sub scan_func {
     if ($1 eq 'main' || $1 eq 'perl_init_ext') {
       print "\tskipped\n" if $debug > 1;
     }
-    else { $funcs{$1}++ }
+    else { $fcns{$1}++ }
   }
 }
 
@@ -128,6 +175,12 @@ LINE: while (<CPP>) {
     print "opcode.h>> $_" if $debug > 2;
     if (/^OP \*\s/) { &scan_func($_); }
     if (/^EXT/) { &scan_var($_); }
+    if (/^\s+OP_/) { &scan_enum($_); }
+    last LINE unless $_ = <CPP>;
+  }
+  while (/^typedef enum/ .. /^\}/) {
+    print "global enum>> $_" if $debug > 2;
+    &scan_enum($_);
     last LINE unless $_ = <CPP>;
   }
   while (/^#.*proto\.h/i .. /^#.*perl\.h/i) {
@@ -143,6 +196,7 @@ close CPP;
 while (<DATA>) {
   next if /^#/;
   s/\s+#.*\n//;
+  next if /^\s*$/;
   ($key,$array) = split('=',$_);
   print "Adding $key to \%$array list\n" if $debug > 1;
   ${$array}{$key}++;
@@ -150,8 +204,8 @@ while (<DATA>) {
 foreach (split /\s+/, $extnames) {
   my($pkgname) = $_;
   $pkgname =~ s/::/__/g;
-  $funcs{"boot_$pkgname"}++;
-  print "Adding boot_$pkgname to \%funcs (for extension $_)\n" if $debug;
+  $fcns{"boot_$pkgname"}++;
+  print "Adding boot_$pkgname to \%fcns (for extension $_)\n" if $debug;
 }
 
 # Eventually, we'll check against existing copies here, so we can add new
@@ -160,19 +214,16 @@ foreach (split /\s+/, $extnames) {
 $marord++;
 open(OPTBLD,">${dir}${dbgprefix}perlshr_bld.opt")
   or die "$0: Can't write to ${dir}${dbgprefix}perlshr_bld.opt: $!\n";
-open(OPTATTR,">${dir}perlshr_attr.opt")
-  or die "$0: Can't write to ${dir}perlshr_attr.opt: $!\n";
 if ($isvax) {
   open(MAR,">${dir}perlshr_gbl${marord}.mar")
     or die "$0: Can't write to ${dir}perlshr_gbl${marord}.mar: $!\n";
   print MAR "\t.title perlshr_gbl$marord\n";
 }
-print OPTATTR "PSECT_ATTR=\$CHAR_STRING_CONSTANTS,PIC,SHR,NOEXE,RD,NOWRT\n";
 foreach $var (sort keys %vars) {
-  print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,WRT,NOSHR\n";
   if ($isvax) { print OPTBLD "UNIVERSAL=$var\n"; }
   else { print OPTBLD "SYMBOL_VECTOR=($var=DATA)\n"; }
-  if ($isvax) {
+  # This hack brought to you by the lack of a globaldef in gcc.
+  if ($isgcc) {
     if ($count++ > 200) {  # max 254 psects/file
       print MAR "\t.end\n";
       close MAR;
@@ -182,27 +233,35 @@ foreach $var (sort keys %vars) {
       print MAR "\t.title perlshr_gbl$marord\n";
       $count = 0;
     }
-    # This hack brought to you by the lack of a globaldef in gcc.
     print MAR "\t.psect ${var},long,pic,ovr,rd,wrt,noexe,noshr\n";
     print MAR "\t${var}::	.blkl 1\n";
   }
 }
 
 print MAR "\t.psect \$transfer_vec,pic,rd,nowrt,exe,shr\n" if ($isvax);
-foreach $func (sort keys %funcs) {
+foreach $func (sort keys %fcns) {
   if ($isvax) {
     print MAR "\t.transfer $func\n";
     print MAR "\t.mask $func\n";
-    print MAR "\tjmp L\^${func}+2\n";
+    print MAR "\tjmp G\^${func}+2\n";
   }
   else { print OPTBLD "SYMBOL_VECTOR=($func=PROCEDURE)\n"; }
 }
-
-close OPTATTR;
-$incstr = 'perl,globals';
 if ($isvax) {
   print MAR "\t.end\n";
   close MAR;
+}
+
+open(OPTATTR,">${dir}perlshr_attr.opt")
+  or die "$0: Can't write to ${dir}perlshr_attr.opt: $!\n";
+print OPTATTR "PSECT_ATTR=\$CHAR_STRING_CONSTANTS,PIC,SHR,NOEXE,RD,NOWRT\n";
+foreach $var (sort keys %vars) {
+  print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,WRT,NOSHR\n";
+}
+close OPTATTR;
+
+$incstr = 'perl,globals';
+if ($isvax) {
   $drvrname = "Compile_shrmars.tmp_".time;
   open (DRVR,">$drvrname") or die "$0: Can't write to $drvrname: $!\n";
   print DRVR "\$ Set NoOn\n";  

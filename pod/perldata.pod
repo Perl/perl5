@@ -108,17 +108,27 @@ lists.  See L<perlfunc/wantarray>.
 
 =head2 Scalar values
 
+All data in Perl is a scalar or an array of scalars or a hash of scalars.
 Scalar variables may contain various kinds of singular data, such as
-numbers, strings and references.  In general, conversion from one form
-to another is transparent.  (A scalar may not contain multiple values,
-but may contain a reference to an array or hash containing multiple
-values.)  Because of the automatic conversion of scalars, operations and
-functions that return scalars don't need to care (and, in fact, can't
-care) whether the context is looking for a string or a number.
+numbers, strings, and references.  In general, conversion from one form to
+another is transparent.  (A scalar may not contain multiple values, but
+may contain a reference to an array or hash containing multiple values.)
+Because of the automatic conversion of scalars, operations and functions
+that return scalars don't need to care (and, in fact, can't care) whether
+the context is looking for a string or a number.
+
+Scalars aren't necessarily one thing or another.  There's no place to
+declare a scalar variable to be of type "string", or of type "number", or
+type "filehandle", or anything else.  Perl is a contextually polymorphic
+language whose scalars can be strings, numbers, or references (which
+includes objects).  While strings and numbers are considered the pretty
+much same thing for nearly all purposes, but references are strongly-typed
+uncastable pointers with built-in reference-counting and destructor
+invocation.
 
 A scalar value is interpreted as TRUE in the Boolean sense if it is not
 the null string or the number 0 (or its string equivalent, "0").  The
-Boolean context is just a special kind of scalar context.
+Boolean context is just a special kind of scalar context.  
 
 There are actually two varieties of null scalars: defined and
 undefined.  Undefined null scalars are returned when there is no real
@@ -127,6 +137,15 @@ file, or when you refer to an uninitialized variable or element of an
 array.  An undefined null scalar may become defined the first time you
 use it as if it were defined, but prior to that you can use the
 defined() operator to determine whether the value is defined or not.
+
+To find out whether a given string is a valid non-zero number, it's usally
+enough to test it against both numeric 0 and also lexical "0" (although
+this will cause B<-w> noises).  That's because strings that aren't
+numbers count as 0, just as the do in I<awk>:
+
+    if ($str == 0 && $str ne "0")  {
+	warn "That doesn't look like a number";
+    } 
 
 The length of an array is a scalar value.  You may find the length of
 array @days by evaluating C<$#days>, as in B<csh>.  (Actually, it's not
@@ -158,6 +177,11 @@ So in general you can just assume that
 
     scalar(@whatever) == $#whatever + 1;
 
+Some programmer choose to use an explcit conversion so nothing's
+left to doubt:
+
+    $element_count = scalar(@whatever);
+
 If you evaluate a hash in a scalar context, it returns a value which is
 true if and only if the hash contains any key/value pairs.  (If there
 are any key/value pairs, the value returned is a string consisting of
@@ -174,7 +198,6 @@ isn't supposed to happen.)
 Numeric literals are specified in any of the customary floating point or
 integer formats:
 
-
     12345
     12345.67
     .23E-10
@@ -182,7 +205,7 @@ integer formats:
     0377		# octal
     4_294_967_296	# underline for legibility
 
-String literals are delimited by either single or double quotes.  They
+String literals are usually delimited by either single or double quotes.  They
 work much like shell quotes:  double-quoted string literals are subject
 to backslash and variable substitution; single-quoted strings are not
 (except for "C<\'>" and "C<\\>").  The usual Unix backslash rules apply for making
@@ -229,7 +252,7 @@ logical end of the script before the actual end of file.  Any following
 text is ignored, but may be read via the DATA filehandle.  (The DATA
 filehandle may read data only from the main script, but not from any
 required file or evaluated string.)  The two control characters ^D and
-^Z are synonyms for __END__.
+^Z are synonyms for __END__ (or __DATA__ in a module).
 
 A word that has no other interpretation in the grammar will
 be treated as if it were a quoted string.  These are known as
@@ -248,7 +271,8 @@ by saying C<no strict 'subs'>.
 
 Array variables are interpolated into double-quoted strings by joining all
 the elements of the array with the delimiter specified in the C<$">
-variable, space by default.  The following are equivalent:
+variable ($LIST_SEPARATOR in English), space by default.  The following
+are equivalent:
 
     $temp = join($",@ARGV);
     system "echo $temp";
@@ -285,9 +309,6 @@ whitespace) on the terminating line.
 	print <<"EOF";	# same as above
     The price is $Price.
     EOF
-
-	print << x 10;	# Legal but discouraged.  Use <<"".
-    Merry Christmas!
 
 	print <<`EOC`;	# execute commands
     echo hi there
@@ -359,7 +380,8 @@ identity in a LIST--the list
     (@foo,@bar,&SomeSub)
 
 contains all the elements of @foo followed by all the elements of @bar,
-followed by all the elements returned by the subroutine named SomeSub.
+followed by all the elements returned by the subroutine named SomeSub when
+it's called in a list context.
 To make a list reference that does I<NOT> interpolate, see L<perlref>.
 
 The null list is represented by ().  Interpolating it in a list
@@ -372,6 +394,9 @@ put the list in parentheses to avoid ambiguity.  Examples:
 
     # Stat returns list value.
     $time = (stat($file))[8];
+
+    # SYNTAX ERROR HERE.
+    $time = stat($file)[8];  # OOPS, FORGOT PARENS
 
     # Find a hex digit.
     $hexdigit = ('a','b','c','d','e','f')[$digit-10];
@@ -386,12 +411,22 @@ is legal to assign to:
 
     ($map{'red'}, $map{'blue'}, $map{'green'}) = (0x00f, 0x0f0, 0xf00);
 
+Array assignment in a scalar context returns the number of elements
+produced by the expression on the right side of the assignment:
+
+    $x = (($foo,$bar) = (3,2,1));	# set $x to 3, not 2
+    $x = (($foo,$bar) = f());	        # set $x to f()'s return count
+
+This is very handy when you want to do a list assignment in a Boolean
+context, since most list functions return a null list when finished,
+which when assigned produces a 0, which is interpreted as FALSE.
+
 The final element may be an array or a hash:
 
     ($a, $b, @rest) = split;
     local($a, $b, %rest) = @_;
 
-You can actually put an array anywhere in the list, but the first array
+You can actually put an array or hash anywhere in the list, but the first one
 in the list will soak up all the values, and anything after it will get
 a null value.  This may be useful in a local() or my().
 
@@ -401,21 +436,38 @@ as a key and a value:
     # same as map assignment above
     %map = ('red',0x00f,'blue',0x0f0,'green',0xf00);
 
-It is often more readable to use the C<=E<gt>> operator between key/value pairs
-(the C<=E<gt>> operator is actually nothing more than a more visually 
-distinctive synonym for a comma):
+While literal lists and named arrays are usually interchangeable, that's
+not the case for hashes.  Just because you can subscript a list value like
+a normal array does not mean that you can subscript a list value as a
+hash.  Likewise, hashes included as parts of other lists (including
+parameters lists and return lists from functions) always flatten out into
+key/value pairs.  That's why it's good to use references sometimes.
+
+It is often more readable to use the C<=E<gt>> operator between key/value
+pairs.  The C<=E<gt>> operator is mostly just a more visually distinctive
+synonym for a comma, but it also quotes its left-hand operand, which makes
+it nice for initializing hashes:
 
     %map = (
-	     'red'   => 0x00f,
-	     'blue'  => 0x0f0,
-	     'green' => 0xf00,
-	   );
+		 red   => 0x00f,
+		 blue  => 0x0f0,
+		 green => 0xf00,
+   );
 
-Array assignment in a scalar context returns the number of elements
-produced by the expression on the right side of the assignment:
+or for initializing hash references to be used as records:
 
-    $x = (($foo,$bar) = (3,2,1));	# set $x to 3, not 2
+    $rec = {
+		witch => 'Mable the Merciless',
+		cat   => 'Fluffy the Ferocious',
+		date  => '10/31/1776',
+    };
 
-This is very handy when you want to do a list assignment in a Boolean
-context, since most list functions return a null list when finished,
-which when assigned produces a 0, which is interpreted as FALSE.
+or for using call-by-named-parameter to complicated functions:
+
+   $field = $query->radio_group( 
+	       name      => 'group_name',
+               values    => ['eenie','meenie','minie'],
+               default   => 'meenie',
+               linebreak => 'true',
+               labels    => \%labels
+   );

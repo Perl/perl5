@@ -1,5 +1,5 @@
 package IPC::Open3;
-require 5.000;
+require 5.001;
 require Exporter;
 use Carp;
 
@@ -19,8 +19,8 @@ connects RDRFH for reading, WTRFH for writing, and ERRFH for errors.  If
 ERRFH is '', or the same as RDRFH, then STDOUT and STDERR of the child are
 on the same file handle.
 
-If WTRFH begins with ">&", then WTRFH will be closed in the parent, and
-the child will read from it directly.  if RDRFH or ERRFH begins with
+If WTRFH begins with "<&", then WTRFH will be closed in the parent, and
+the child will read from it directly.  If RDRFH or ERRFH begins with
 ">&", then the child will send output directly to that file handle.  In both
 cases, there will be a dup(2) instead of a pipe(2) made.
 
@@ -33,6 +33,7 @@ All caveats from open2() continue to apply.  See L<open2> for details.
 
 # &open3: Marc Horowitz <marc@mit.edu>
 # derived mostly from &open2 by tom christiansen, <tchrist@convex.com>
+# fixed for 5.001 by Ulrich Kunitz <kunitz@mai-koeln.com>
 #
 # $Id: open3.pl,v 1.1 1993/11/23 06:26:15 marc Exp $
 #
@@ -45,7 +46,7 @@ All caveats from open2() continue to apply.  See L<open2> for details.
 # of child, or 0 on failure.
 
 
-# if wtr begins with '>&', then wtr will be closed in the parent, and
+# if wtr begins with '<&', then wtr will be closed in the parent, and
 # the child will read from it directly.  if rdr or err begins with
 # '>&', then the child will send output directly to that fd.  In both
 # cases, there will be a dup() instead of a pipe() made.
@@ -63,27 +64,27 @@ All caveats from open2() continue to apply.  See L<open2> for details.
 $fh = 'FHOPEN000';  # package static in case called more than once
 
 sub open3 {
-    local($kidpid);
-    local($dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
-    local($dup_wtr, $dup_rdr, $dup_err);
+    my($kidpid);
+    my($dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
+    my($dup_wtr, $dup_rdr, $dup_err);
 
     $dad_wtr			|| croak "open3: wtr should not be null";
     $dad_rdr			|| croak "open3: rdr should not be null";
     $dad_err = $dad_rdr if ($dad_err eq '');
 
-    $dup_wtr = ($dad_wtr =~ s/^\>\&//);
-    $dup_rdr = ($dad_rdr =~ s/^\>\&//);
-    $dup_err = ($dad_err =~ s/^\>\&//);
+    $dup_wtr = ($dad_wtr =~ s/^[<>]&//);
+    $dup_rdr = ($dad_rdr =~ s/^[<>]&//);
+    $dup_err = ($dad_err =~ s/^[<>]&//);
 
     # force unqualified filehandles into callers' package
-    local($package) = caller;
-    $dad_wtr =~ s/^[^']+$/$package'$&/;
-    $dad_rdr =~ s/^[^']+$/$package'$&/;
-    $dad_err =~ s/^[^']+$/$package'$&/;
+    my($package) = caller;
+    $dad_wtr =~ s/^[^:]+$/$package\:\:$&/;
+    $dad_rdr =~ s/^[^:]+$/$package\:\:$&/;
+    $dad_err =~ s/^[^:]+$/$package\:\:$&/;
 
-    local($kid_rdr) = ++$fh;
-    local($kid_wtr) = ++$fh;
-    local($kid_err) = ++$fh;
+    my($kid_rdr) = ++$fh;
+    my($kid_wtr) = ++$fh;
+    my($kid_err) = ++$fh;
 
     if (!$dup_wtr) {
 	pipe($kid_rdr, $dad_wtr)    || croak "open3: pipe 1 (stdin) failed: $!";
@@ -99,10 +100,10 @@ sub open3 {
         croak "open2: fork failed: $!";
     } elsif ($kidpid == 0) {
 	if ($dup_wtr) {
-	    open(STDIN,  ">&$dad_wtr") if (fileno(STDIN) != fileno($dad_wtr));
+	    open(STDIN,  "<&$dad_wtr") if (fileno(STDIN) != fileno($dad_wtr));
 	} else {
 	    close($dad_wtr);
-	    open(STDIN,  ">&$kid_rdr");
+	    open(STDIN,  "<&$kid_rdr");
 	}
 	if ($dup_rdr) {
 	    open(STDOUT, ">&$dad_rdr") if (fileno(STDOUT) != fileno($dad_rdr));

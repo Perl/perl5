@@ -422,8 +422,10 @@ order to delete all versions, you need to say
 You may need to make this change to scripts written for a
 Unix system which expect that after a call to C<unlink>,
 no files with the names passed to C<unlink> will exist.
-(Note: This can be changed at compile time by including
-C<#define UNLINK_ALL_VERSIONS> in config.h.
+(Note: This can be changed at compile time; if you
+C<use Config> and C<$Config{'d_unlink_all_versions'}> is
+C<define>, then C<unlink> will delete all versions of a
+file on the first call.)
 
 C<unlink> will delete a file if at all possible, even if it
 requires changing file protection (though it won't try to

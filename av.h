@@ -23,6 +23,7 @@ struct xpvav {
 
 #define AVf_REAL 1	/* free old entries */
 #define AVf_REIFY 2	/* can become real */
+#define AVf_REUSED 4	/* got undeffed--don't turn old memory into SVs now */
 
 #define Nullav Null(AV*)
 
@@ -39,6 +40,9 @@ struct xpvav {
 #define AvREIFY(av)	(AvFLAGS(av) & AVf_REIFY)
 #define AvREIFY_on(av)	(AvFLAGS(av) |= AVf_REIFY)
 #define AvREIFY_off(av)	(AvFLAGS(av) &= ~AVf_REIFY)
+#define AvREUSED(av)	(AvFLAGS(av) & AVf_REUSED)
+#define AvREUSED_on(av)	(AvFLAGS(av) |= AVf_REUSED)
+#define AvREUSED_off(av) (AvFLAGS(av) &= ~AVf_REUSED)
 
 #define AvREALISH(av)	AvFLAGS(av)	/* REAL or REIFY -- shortcut */
 

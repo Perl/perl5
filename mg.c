@@ -80,6 +80,7 @@ SV* sv;
     U32 savemagic = SvMAGICAL(sv);
 
     SvMAGICAL_off(sv);
+    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 
     for (mg = SvMAGIC(sv); mg; mg = nextmg) {
 	MGVTBL* vtbl = mg->mg_virtual;
@@ -550,6 +551,10 @@ MAGIC* mg;
 	else
 	    croak("No such hook: %s", s);
 	i = 0;
+	if (*svp) {
+	    SvREFCNT_dec(*svp);
+	    *svp = 0;
+	}
     }
     else {
 	i = whichsig(s);	/* ...no, a brick */
@@ -1093,7 +1098,7 @@ MAGIC* mg;
 #endif
 #endif
 	uid = (I32)getuid();
-	tainting |= (euid != uid || egid != gid);
+	tainting |= (uid && (euid != uid || egid != gid));
 	break;
     case '>':
 	euid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1120,7 +1125,7 @@ MAGIC* mg;
 #endif
 #endif
 	euid = (I32)geteuid();
-	tainting |= (euid != uid || egid != gid);
+	tainting |= (uid && (euid != uid || egid != gid));
 	break;
     case '(':
 	gid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1147,7 +1152,7 @@ MAGIC* mg;
 #endif
 #endif
 	gid = (I32)getgid();
-	tainting |= (euid != uid || egid != gid);
+	tainting |= (uid && (euid != uid || egid != gid));
 	break;
     case ')':
 	egid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1174,7 +1179,7 @@ MAGIC* mg;
 #endif
 #endif
 	egid = (I32)getegid();
-	tainting |= (euid != uid || egid != gid);
+	tainting |= (uid && (euid != uid || egid != gid));
 	break;
     case ':':
 	chopset = SvPV_force(sv,na);
@@ -1240,17 +1245,6 @@ char *sig;
     return 0;
 }
 
-char *
-whichsigname(sig)
-int sig;
-{
-    register int i;
-    for (i = 1; sig_num[i]; i++)  /* sig_num[] is a 0-terminated list */
-	if (sig_num[i] == sig)
-	    return sig_name[i];
-    return Nullch;
-}
-
 Signal_t
 sighandler(sig)
 int sig;
@@ -1267,7 +1261,7 @@ int sig;
     signal(sig, SIG_ACK);
 #endif
 
-    signame = whichsigname(sig);
+    signame = sig_name[sig];
     cv = sv_2cv(*hv_fetch(GvHVn(siggv),signame,strlen(signame),
 			  TRUE),
 		&st, &gv, TRUE);

@@ -53,13 +53,25 @@ sub writemain{
     my($pname);
     my($dl) = canon('/','DynaLoader');
     print $head;
+
+    foreach $_ (@exts){
+	my($pname) = canon('/', $_);
+	my($mname, $cname);
+	($mname = $pname) =~ s!/!::!g;
+	($cname = $pname) =~ s!/!__!g;
+	print "EXTERN_C void boot_${cname} _((CV* cv));\n";
+    }
+
+    my ($tail1,$tail2) = ( $tail =~ /\A(.*\n)(\s*\}.*)\Z/s );
+    print $tail1;
+
     print "	char *file = __FILE__;\n";
     foreach $_ (@exts){
 	my($pname) = canon('/', $_);
 	my($mname, $cname, $ccode);
 	($mname = $pname) =~ s!/!::!g;
 	($cname = $pname) =~ s!/!__!g;
-	print "\t{   extern void boot_${cname} _((CV* cv));\n";
+	print "\t{\n";
 	if ($pname eq $dl){
 	    # Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
 	    # boot_DynaLoader is called directly in DynaLoader.pm
@@ -72,7 +84,7 @@ sub writemain{
 	}
 	print "\t}\n";
     }
-    print $tail;
+    print $tail2;
 }
 
 sub canon{

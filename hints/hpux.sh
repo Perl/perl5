@@ -13,6 +13,9 @@
 # Use Configure -Dcc=gcc to use gcc.
 # Use Configure -Dprefix=/usr/local to install in /usr/local.
 
+# Some users have reported problems with dynamic loading if the 
+# environment variable LDOPTS='-a archive' .
+
 # Turn on the _HPUX_SOURCE flag to get many of the HP add-ons
 ccflags="$ccflags -D_HPUX_SOURCE"
 ldflags="$ldflags"
@@ -39,6 +42,45 @@ EOM
     optimize='-O'
     ;;
 esac
+
+# Determine the architecture type of this system.
+xxuname=`uname -r`
+if echo $xxuname | $contains '10'
+then
+	# This system is running 10.0
+	xxcontext=`grep $(printf %#x $(getconf CPU_VERSION)) /usr/include/sys/unistd.h`
+	if echo "$xxcontext" | $contains 'PA-RISC1.1'
+	then
+		archname='PA-RISC1.1'
+	elif echo "$xxcontext" | $contains 'PA-RISC1.0'
+	then
+		archname='PA-RISC1.0'
+	elif echo "$xxcontext" | $contains 'PA-RISC2'
+	then
+		archname='PA-RISC2'
+	else
+		echo "This 10.0 system is of a PA-RISC type I don't recognize."
+		echo "Debugging output: $xxcontext"
+		archname=''
+	fi
+else
+	# This system is not running 10.0
+	xxcontext=`/bin/getcontext`
+	if echo "$xxcontext" | $contains 'PA-RISC1.1'
+	then
+		archname='PA-RISC1.1'
+	elif echo "$xxcontext" | $contains 'PA-RISC1.0'
+	then
+		archname='PA-RISC1.0'
+	elif echo "$xxcontext" | $contains 'HP-MC'
+	then
+		archname='HP-MC68K'
+	else
+		echo "I cannot recognize what chip set this system is using."
+		echo "Debugging output: $xxcontext"
+		archname=''
+	fi
+fi
 
 # Remove bad libraries that will cause problems
 # (This doesn't remove libraries that don't actually exist)
@@ -71,13 +113,8 @@ d_bsdpgrp='define'
 # If your compile complains about FLT_MIN, uncomment the next line
 # POSIX_cflags='ccflags="$ccflags -DFLT_MIN=1.17549435E-38"'
 
-# Comment these out if you don't want to follow the SVR4 filesystem layout
+# Comment this out if you don't want to follow the SVR4 filesystem layout
 # that HP-UX 10.0 uses
 case "$prefix" in
-'') prefix='/opt/perl5'
-    privlib='/opt/perl5/lib'
-    archlib='/opt/perl5/lib/hpux'
-    man3dir='/opt/perl5/man/man3'
-    ;;
+'') prefix='/opt/perl5' ;;
 esac
-

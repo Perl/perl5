@@ -2,7 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 09-Mar-1995 by Charles Bailey  bailey@genetics.upenn.edu
+ * Last revised:  5-Jun-1995 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.1.5
  */
 
 #include <acedef.h>
@@ -279,8 +280,21 @@ int my_utime(char *file, struct utimbuf *utimes)
   char vmsspec[NAM$C_MAXRSS+1], rsa[NAM$C_MAXRSS], esa[NAM$C_MAXRSS];
   struct FAB myfab = cc$rms_fab;
   struct NAM mynam = cc$rms_nam;
+#if defined (__DECC) && defined (__VAX)
+  /* VAX DEC C atrdef.h has unsigned type for pointer member atr$l_addr,
+   * at least through VMS V6.1, which causes a type-conversion warning.
+   */
+#  pragma message save
+#  pragma message disable cvtdiftypes
+#endif
   struct atrdef myatr[2] = {{sizeof bintime, ATR$C_REVDATE, bintime}, {0,0,0}};
   struct fibdef myfib;
+#if defined (__DECC) && defined (__VAX)
+  /* This should be right after the declaration of myatr, but due
+   * to a bug in VAX DEC C, this takes effect a statement early.
+   */
+#  pragma message restore
+#endif
   struct dsc$descriptor fibdsc = {sizeof(myfib), DSC$K_DTYPE_Z, DSC$K_CLASS_S,(char *) &myfib},
                         devdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0},
                         fnmdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0};
@@ -686,12 +700,22 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         dirlen -= 1;                 /* to last element */
         lastdir = strrchr(dir,'/');
       }
-      else if (strstr(trndir,"..") != NULL) {
-        /* If we have a relative path, let do_tovmsspec figure it out,
-         * rather than repeating the code here */
-        if (do_tovmsspec(trndir,vmsdir,0) == NULL) return NULL;
-        if (do_fileify_dirspec(vmsdir,trndir,0) == NULL) return NULL;
-        return do_tounixspec(trndir,buf,ts);
+      else if ((cp1 = strstr(trndir,"/.")) != NULL) {
+        do {
+          if (*(cp1+2) == '.') cp1++;
+          if (*(cp1+2) == '/' || *(cp1+2) == '\0') {
+            addmfd = 1;
+            break;
+          }
+          cp1++;
+        } while ((cp1 = strstr(cp1,"/.")) != NULL);
+        /* If we have a relative path, VMSify it and let the VMS code
+         * below expand it, rather than repeating the code here */
+        if (addmfd) {
+          if (do_tovmsspec(trndir,vmsdir,0) == NULL) return NULL;
+          if (do_fileify_dirspec(vmsdir,trndir,0) == NULL) return NULL;
+          return do_tounixspec(trndir,buf,ts);
+        }
       }
       else {
         if (!(lastdir = cp1 = strrchr(dir,'/'))) cp1 = dir;
@@ -726,7 +750,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           }
         }
       }
-      retlen = dirlen + addmfd ? 13 : 6;
+      retlen = dirlen + (addmfd ? 13 : 6);
       if (buf) retspec = buf;
       else if (ts) New(7009,retspec,retlen+6,char);
       else retspec = __fileify_retbuf;
@@ -827,22 +851,30 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           }
           retlen = dirnam.nam$b_esl - 9; /* esa - '][' - '].DIR;1' */
           if (buf) retspec = buf;
-          else if (ts) New(7012,retspec,retlen+7,char);
+          else if (ts) New(7012,retspec,retlen+14,char);
           else retspec = __fileify_retbuf;
           cp1 = strstr(esa,"][");
           dirlen = cp1 - esa;
           memcpy(retspec,esa,dirlen);
           if (!strncmp(cp1+2,"000000]",7)) {
             retspec[dirlen-1] = '\0';
-            for (cp1 = retspec+dirlen-1; *cp1 != '.'; cp1--) ;
-            *cp1 = ']';
+            for (cp1 = retspec+dirlen-1; *cp1 != '.' && *cp1 != '['; cp1--) ;
+            if (*cp1 == '.') *cp1 = ']';
+            else {
+              memmove(cp1+8,cp1+1,retspec+dirlen-cp1);
+              memcpy(cp1+1,"000000]",7);
+            }
           }
           else {
             memcpy(retspec+dirlen,cp1+2,retlen-dirlen);
             retspec[retlen] = '\0';
             /* Convert last '.' to ']' */
-            for (cp1 = retspec+retlen-1; *cp1 != '.'; cp1--) ;
-            *cp1 = ']';
+            for (cp1 = retspec+retlen-1; *cp1 != '.' && *cp1 != '['; cp1--) ;
+            if (*cp1 == '.') *cp1 = ']';
+            else {
+              memmove(cp1+8,cp1+1,retspec+dirlen-cp1);
+              memcpy(cp1+1,"000000]",7);
+            }
           }
         }
         else {  /* This is a top-level dir.  Add the MFD to the path. */
@@ -1146,13 +1178,18 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
       infront = 0;
     }
     else if (!infront && *cp2 == '.') {
-      if (*(cp2+1) == '/') cp2++;     /* skip over "./" - it's redundant */
+      if (*(cp2+1) == '/') cp2++;   /* skip over "./" - it's redundant */
+      else if (*(cp2+1) == '\0') { cp2++; break; }
       else if (*(cp2+1) == '.' && (*(cp2+2) == '/' || *(cp2+2) == '\0')) {
         if (*(cp1-1) == '-' || *(cp1-1) == '[') *(cp1++) = '-'; /* handle "../" */
         else if (*(cp1-2) == '[') *(cp1-1) = '-';
         else {  /* back up over previous directory name */
           cp1--;
           while (*(cp1-1) != '.' && *(cp1-1) != '[') cp1--;
+          if (*(cp1-1) == '[') {
+            memcpy(cp1,"000000.",7);
+            cp1 += 7;
+          }
         }
         cp2 += 2;
         if (cp2 == dirend) {
@@ -1922,11 +1959,29 @@ readdir(DIR *dd)
     res.dsc$w_length = sizeof buff - 2;
     res.dsc$b_dtype = DSC$K_DTYPE_T;
     res.dsc$b_class = DSC$K_CLASS_S;
-    dd->count++;
     tmpsts = lib$find_file(&dd->pat, &res, &dd->context);
-    if ( tmpsts == RMS$_NMF || tmpsts == RMS$_FNF ||
-         dd->context == 0) return NULL;  /* None left. */
-
+    if ( tmpsts == RMS$_NMF || dd->context == 0) return NULL;  /* None left. */
+    if (!(tmpsts & 1)) {
+      set_vaxc_errno(tmpsts);
+      switch (tmpsts) {
+        case RMS$_PRV:
+          set_errno(EACCES);
+          break;
+        case RMS$_DEV:
+          set_errno(ENODEV);
+          break;
+        case RMS$_DIR:
+          set_errno(ENOTDIR);
+          break;
+        case RMS$_FNF:
+          set_errno(ENOENT);
+          break;
+        default:
+          set_errno(EVMSERR);
+      }
+      return NULL;
+    }
+    dd->count++;
     /* Force the buffer to end with a NUL, and downcase name to match C convention. */
     buff[sizeof buff - 1] = '\0';
     for (p = buff; !isspace(*p); p++) *p = _tolower(*p);
@@ -2027,19 +2082,37 @@ my_vfork()
 }
 /*}}}*/
 
+
+static struct dsc$descriptor_s VMScmd = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,Nullch};
+
 static void
-setup_argstr(SV *really, SV **mark, SV **sp, char **argstr)
+vms_execfree() {
+  if (Cmd) {
+    safefree(Cmd);
+    Cmd = Nullch;
+  }
+  if (VMScmd.dsc$a_pointer) {
+    Safefree(VMScmd.dsc$a_pointer);
+    VMScmd.dsc$w_length = 0;
+    VMScmd.dsc$a_pointer = Nullch;
+  }
+}
+
+static char *
+setup_argstr(SV *really, SV **mark, SV **sp)
 {
-  char *tmps, *junk;
+  char *junk, *tmps = Nullch;
   register size_t cmdlen = 0;
   size_t rlen;
   register SV **idx;
 
   idx = mark;
-  tmps = SvPV(really,rlen);
-  if (really && *tmps) {
-    cmdlen += rlen + 1;
-    idx++;
+  if (really) {
+    tmps = SvPV(really,rlen);
+    if (*tmps) {
+      cmdlen += rlen + 1;
+      idx++;
+    }
   }
   
   for (idx++; idx <= sp; idx++) {
@@ -2048,24 +2121,26 @@ setup_argstr(SV *really, SV **mark, SV **sp, char **argstr)
       cmdlen += rlen ? rlen + 1 : 0;
     }
   }
-  New(401,*argstr,cmdlen, char);
+  New(401,Cmd,cmdlen,char);
 
-  if (*tmps) {
-    strcpy(*argstr,tmps);
+  if (tmps && *tmps) {
+    strcpy(Cmd,tmps);
     mark++;
   }
-  else **argstr = '\0';
+  else *Cmd = '\0';
   while (++mark <= sp) {
     if (*mark) {
-      strcat(*argstr," ");
-      strcat(*argstr,SvPVx(*mark,na));
+      strcat(Cmd," ");
+      strcat(Cmd,SvPVx(*mark,na));
     }
   }
+  return Cmd;
 
 }  /* end of setup_argstr() */
 
+
 static unsigned long int
-setup_cmddsc(char *cmd, struct dsc$descriptor_s *cmddsc, int check_img)
+setup_cmddsc(char *cmd, int check_img)
 {
   char resspec[NAM$C_MAXRSS+1];
   $DESCRIPTOR(defdsc,".EXE");
@@ -2090,8 +2165,9 @@ setup_cmddsc(char *cmd, struct dsc$descriptor_s *cmddsc, int check_img)
   }
   else isdcl = 1;
   if (isdcl) {  /* It's a DCL command, just do it. */
-    cmddsc->dsc$a_pointer = cmd;
-    cmddsc->dsc$w_length = strlen(cmd);
+    VMScmd.dsc$a_pointer = cmd;
+    VMScmd.dsc$w_length = strlen(cmd);
+    if (cmd == Cmd) Cmd = Nullch; /* clear Cmd so vms_execfree isok */
   }
   else {                           /* assume first token is an image spec */
     cmd = s;
@@ -2100,19 +2176,23 @@ setup_cmddsc(char *cmd, struct dsc$descriptor_s *cmddsc, int check_img)
     imgdsc.dsc$a_pointer = cmd;
     imgdsc.dsc$w_length = s - cmd;
     retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,0,&flags);
-    if ((retsts & STS$M_CODE) == (SHR$_NOWILD & STS$M_CODE)) return retsts;
+    if (!(retsts & 1)) {
+      /* just hand off status values likely to be due to user error */
+      if (retsts == RMS$_FNF || retsts == RMS$_DNF ||
+          retsts == RMS$_DEV || retsts == RMS$_DIR || retsts == RMS$_SYN ||
+         (retsts & STS$M_CODE) == (SHR$_NOWILD & STS$M_CODE)) return retsts;
+      else { _ckvmssts(retsts); }
+    }
     else {
-      _ckvmssts(retsts);
       _ckvmssts(lib$find_file_end(&cxt));
       s = resspec;
       while (*s && !isspace(*s)) s++;
       *s = '\0';
-      New(402,Cmd,6 + s - resspec + (rest ? strlen(rest) : 0),char);
-      strcpy(Cmd,"$ MCR ");
-      strcat(Cmd,resspec);
-      if (rest) strcat(Cmd,rest);
-      cmddsc->dsc$a_pointer = Cmd;
-      cmddsc->dsc$w_length = strlen(Cmd);
+      New(402,VMScmd.dsc$a_pointer,6 + s - resspec + (rest ? strlen(rest) : 0),char);
+      strcpy(VMScmd.dsc$a_pointer,"$ MCR ");
+      strcat(VMScmd.dsc$a_pointer,resspec);
+      if (rest) strcat(VMScmd.dsc$a_pointer,rest);
+      VMScmd.dsc$w_length = strlen(VMScmd.dsc$a_pointer);
     }
   }
 
@@ -2123,7 +2203,6 @@ setup_cmddsc(char *cmd, struct dsc$descriptor_s *cmddsc, int check_img)
 bool
 vms_do_aexec(SV *really,SV **mark,SV **sp)
 {
-
   if (sp > mark) {
     if (vfork_called) {           /* this follows a vfork - act Unixish */
       vfork_called--;
@@ -2133,10 +2212,9 @@ vms_do_aexec(SV *really,SV **mark,SV **sp)
       }
       else return do_aexec(really,mark,sp);
     }
+                                           /* no vfork - act VMSish */
+    return vms_do_exec(setup_argstr(really,mark,sp));
 
-                                  /* no vfork - act VMSish */
-    setup_argstr(really,mark,sp,Argv);
-    return vms_do_exec(*Argv);
   }
 
   return FALSE;
@@ -2158,17 +2236,16 @@ vms_do_exec(char *cmd)
   }
 
   {                               /* no vfork - act VMSish */
-    struct dsc$descriptor_s cmddsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
     unsigned long int retsts;
 
-    if ((retsts = setup_cmddsc(cmd,&cmddsc,1)) & 1)
-      retsts = lib$do_command(&cmddsc);
+    if ((retsts = setup_cmddsc(cmd,1)) & 1)
+      retsts = lib$do_command(&VMScmd);
 
     set_errno(EVMSERR);
     set_vaxc_errno(retsts);
     if (dowarn)
-      warn("Can't exec \"%s\": %s", cmddsc.dsc$a_pointer, Strerror(errno));
-    do_execfree();
+      warn("Can't exec \"%s\": %s", VMScmd.dsc$a_pointer, Strerror(errno));
+    vms_execfree();
   }
 
   return FALSE;
@@ -2182,11 +2259,7 @@ unsigned long int do_spawn(char *);
 unsigned long int
 do_aspawn(SV *really,SV **mark,SV **sp)
 {
-
-  if (sp > mark) {
-    setup_argstr(really,mark,sp,Argv);
-    return do_spawn(*Argv);
-  }
+  if (sp > mark) return do_spawn(setup_argstr(really,mark,sp));
 
   return SS$_ABORT;
 }  /* end of do_aspawn() */
@@ -2196,14 +2269,14 @@ do_aspawn(SV *really,SV **mark,SV **sp)
 unsigned long int
 do_spawn(char *cmd)
 {
-  struct dsc$descriptor_s cmddsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
-  unsigned long int substs;
+  unsigned long int substs, hadcmd = 1;
 
   if (!cmd || !*cmd) {
-    _ckvmssts(lib$spawn(0,0,0,0,0,&substs,0,0,0,0,0));
+    hadcmd = 0;
+    _ckvmssts(lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0));
   }
-  else if ((substs = setup_cmddsc(cmd,&cmddsc,0)) & 1) {
-    _ckvmssts(lib$spawn(&cmddsc,0,0,0,0,&substs,0,0,0,0,0));
+  else if ((substs = setup_cmddsc(cmd,0)) & 1) {
+    _ckvmssts(lib$spawn(&VMScmd,0,0,0,0,0,&substs,0,0,0,0,0,0));
   }
   
   if (!(substs&1)) {
@@ -2211,8 +2284,9 @@ do_spawn(char *cmd)
     set_vaxc_errno(substs);
     if (dowarn)
       warn("Can't exec \"%s\": %s",
-           (cmd && *cmd) ? cmddsc.dsc$a_pointer : "", Strerror(errno));
+           hadcmd ? VMScmd.dsc$a_pointer : "", Strerror(errno));
   }
+  vms_execfree();
   return substs;
 
 }  /* end of do_spawn() */
@@ -2292,8 +2366,8 @@ my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)
                         (uic).uic$v_member != UIC$K_WILD_MEMBER && \
                         (uic).uic$v_group  != UIC$K_WILD_GROUP)
 
-static const char __empty[]= "";
-static const struct passwd __passwd_empty=
+static char __empty[]= "";
+static struct passwd __passwd_empty=
     {(char *) __empty, (char *) __empty, 0, 0,
      (char *) __empty, (char *) __empty, (char *) __empty, (char *) __empty};
 static int contxt= 0;
@@ -2334,7 +2408,7 @@ static int fillpasswd (const char *name, struct passwd *pwd)
     struct dsc$descriptor_s name_desc;
     int status;
 
-    static const struct itmlst_3 itmlst[]= {
+    static struct itmlst_3 itmlst[]= {
         {UAI$S_OWNER+1,    UAI$_OWNER,  &owner,    &lowner},
         {sizeof(uic),      UAI$_UIC,    &uic,      &luic},
         {UAI$S_DEFDEV+1,   UAI$_DEFDEV, &defdev,   &ldefdev},

@@ -33,7 +33,8 @@ AUTOLOAD {
 	    eval {require $name};
 	}
 	elsif ($AUTOLOAD =~ /::DESTROY$/) {
-	    eval "sub $AUTOLOAD {}";
+	    # eval "sub $AUTOLOAD {}";
+	    *$AUTOLOAD = sub {};
 	}
 	if ($@){
 	    $@ =~ s/ at .*\n//;

@@ -51,6 +51,26 @@ done
 
 
 sed '/Do not delete this line--writemain depends on it/q' miniperlmain.c
+
+
+if test X"$args" != "X" ; then
+    for ext in $args ; do
+: $ext will either be 'Name' or 'Name1/Name2' etc
+: convert ext into cname and mname
+mname=`echo $ext   | sed 's!/!::!g'`
+cname=`echo $mname | sed 's!:!_!g'`
+
+echo "EXTERN_C void boot_${cname} _((CV* cv));"
+    done
+fi
+
+cat << 'EOP'
+
+static void
+xs_init()
+{
+EOP
+
 if test X"$args" != "X" ; then
     echo "    char *file = __FILE__;"
     ai=''
@@ -62,7 +82,7 @@ if test X"$args" != "X" ; then
 	mname=`echo $ext   | sed 's!/!::!g'`
 	cname=`echo $mname | sed 's!:!_!g'`
 
-	echo "    {   extern void boot_${cname} _((CV* cv));"
+	echo "    {"
 	if test "$ext" = "DynaLoader"; then
 	    : Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
 	    : boot_DynaLoader is called directly in DynaLoader.pm

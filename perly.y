@@ -36,6 +36,7 @@ dep()
 %token <ival> '{' ')'
 
 %token <opval> WORD METHOD FUNCMETH THING PMFUNC PRIVATEREF
+%token <opval> FUNC0SUB UNIOPSUB LSTOPSUB
 %token <pval> LABEL
 %token <ival> FORMAT SUB ANONSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
@@ -48,7 +49,7 @@ dep()
 %type <opval> block lineseq line loop cond nexpr else argexpr
 %type <opval> expr term scalar ary hsh arylen star amper sideff
 %type <opval> listexpr listexprcom indirob
-%type <opval> texpr listop method
+%type <opval> texpr listop method proto
 %type <pval> label
 %type <opval> cont
 
@@ -147,7 +148,8 @@ else	:	/* NULL */
 	|	ELSIF '(' expr ')' block else
 			{ copline = $1;
 			    $$ = newSTATEOP(0, 0,
-				newCONDOP(0, $3, scope($5), $6)); }
+				newCONDOP(0, $3, scope($5), $6));
+			    hints |= HINT_BLOCK_SCOPE; }
 	;
 
 cond	:	IF '(' expr ')' block else
@@ -244,12 +246,17 @@ format	:	FORMAT startsub WORD block
 			{ newFORM($2, Nullop, $3); }
 	;
 
-subrout	:	SUB startsub WORD block
-			{ newSUB($2, $3, $4); }
-	|	SUB startsub WORD ';'
-			{ newSUB($2, $3, Nullop); expect = XSTATE; }
+subrout	:	SUB startsub WORD proto block
+			{ newSUB($2, $3, $4, $5); }
+	|	SUB startsub WORD proto ';'
+			{ newSUB($2, $3, $4, Nullop); expect = XSTATE; }
 	;
 
+proto	:	/* NULL */
+			{ $$ = Nullop; }
+	|	THING
+	;
+		
 startsub:	/* NULL */	/* start a subroutine scope */
 			{ $$ = start_subparse(); }
 	;
@@ -287,24 +294,29 @@ listop	:	LSTOP indirob argexpr
 			{ $$ = convert($1, OPf_STACKED,
 				prepend_elem(OP_LIST, newGVREF($1,$3), $4) ); }
 	|	term ARROW method '(' listexprcom ')'
-			{ $$ = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST,
-				    prepend_elem(OP_LIST, $1, list($5)),
+				    prepend_elem(OP_LIST, $1, $5),
 				    newUNOP(OP_METHOD, 0, $3))); }
 	|	METHOD indirob listexpr
-			{ $$ = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST,
-				    prepend_elem(OP_LIST, $2, list($3)),
+				    prepend_elem(OP_LIST, $2, $3),
 				    newUNOP(OP_METHOD, 0, $1))); }
 	|	FUNCMETH indirob '(' listexprcom ')'
-			{ $$ = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST,
-				    prepend_elem(OP_LIST, $2, list($4)),
+				    prepend_elem(OP_LIST, $2, $4),
 				    newUNOP(OP_METHOD, 0, $1))); }
 	|	LSTOP listexpr
 			{ $$ = convert($1, 0, $2); }
 	|	FUNC '(' listexprcom ')'
 			{ $$ = convert($1, 0, $3); }
+	|	LSTOPSUB startsub block listexpr	%prec LSTOP
+			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			    append_elem(OP_LIST,
+			      prepend_elem(OP_LIST, newANONSUB($2, 0, $3), $4),
+			      $1)); }
 	;
 
 method	:	METHOD
@@ -378,8 +390,8 @@ term	:	term ASSIGNOP term
 			{ $$ = newANONHASH($2); }
 	|	HASHBRACK ';' '}'				%prec '('
 			{ $$ = newANONHASH(Nullop); }
-	|	ANONSUB startsub block				%prec '('
-			{ $$ = newANONSUB($2, $3); }
+	|	ANONSUB startsub proto block			%prec '('
+			{ $$ = newANONSUB($2, $3, $4); }
 	|	scalar	%prec '('
 			{ $$ = $1; }
 	|	star	%prec '('
@@ -439,33 +451,33 @@ term	:	term ASSIGNOP term
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1)); }
 	|	amper '(' expr ')'
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			    list(append_elem(OP_LIST, $3, scalar($1)))); }
+			    append_elem(OP_LIST, $3, scalar($1))); }
 	|	NOAMP WORD listexpr
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			    list(append_elem(OP_LIST,
-				$3, newCVREF(scalar($2))))); }
+			    append_elem(OP_LIST,
+				$3, newCVREF(scalar($2)))); }
 	|	DO term	%prec UNIOP
 			{ $$ = newUNOP(OP_DOFILE, 0, scalar($2)); }
 	|	DO block	%prec '('
 			{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, scope($2)); }
 	|	DO WORD '(' ')'
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
-			    list(prepend_elem(OP_LIST,
-				scalar(newCVREF(scalar($2))), Nullop))); dep();}
+			    prepend_elem(OP_LIST,
+				scalar(newCVREF(scalar($2))), Nullop)); dep();}
 	|	DO WORD '(' expr ')'
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
-			    list(append_elem(OP_LIST,
+			    append_elem(OP_LIST,
 				$4,
-				scalar(newCVREF(scalar($2)))))); dep();}
+				scalar(newCVREF(scalar($2))))); dep();}
 	|	DO scalar '(' ')'
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
-			    list(prepend_elem(OP_LIST,
-				scalar(newCVREF(scalar($2))), Nullop))); dep();}
+			    prepend_elem(OP_LIST,
+				scalar(newCVREF(scalar($2))), Nullop)); dep();}
 	|	DO scalar '(' expr ')'
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
-			    list(prepend_elem(OP_LIST,
+			    prepend_elem(OP_LIST,
 				$4,
-				scalar(newCVREF(scalar($2)))))); dep();}
+				scalar(newCVREF(scalar($2))))); dep();}
 	|	LOOPEX
 			{ $$ = newOP($1, OPf_SPECIAL);
 			    hints |= HINT_BLOCK_SCOPE; }
@@ -477,10 +489,16 @@ term	:	term ASSIGNOP term
 			{ $$ = newUNOP($1, 0, $2); }
 	|	UNIOP term
 			{ $$ = newUNOP($1, 0, $2); }
+	|	UNIOPSUB term
+			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			    append_elem(OP_LIST, $2, scalar($1))); }
 	|	FUNC0
 			{ $$ = newOP($1, 0); }
 	|	FUNC0 '(' ')'
 			{ $$ = newOP($1, 0); }
+	|	FUNC0SUB
+			{ $$ = newUNOP(OP_ENTERSUB, 0,
+				scalar($1)); }
 	|	FUNC1 '(' ')'
 			{ $$ = newOP($1, OPf_SPECIAL); }
 	|	FUNC1 '(' expr ')'

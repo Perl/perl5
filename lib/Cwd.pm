@@ -1,7 +1,11 @@
 package Cwd;
 require 5.000;
 require Exporter;
-use Config;
+require Config;
+
+# Use osname for portability switches (doubled to cheaply avoid -w warning)
+my $osname = $Config::Config{'osname'} || $Config::Config{'osname'};
+
 
 =head1 NAME
 
@@ -9,11 +13,14 @@ getcwd - get pathname of current working directory
 
 =head1 SYNOPSIS
 
-    require Cwd;
-    $dir = Cwd::getcwd();
+    use Cwd;
+    $dir = cwd;
 
     use Cwd;
-    $dir = getcwd();
+    $dir = getcwd;
+
+    use Cwd;
+    $dir = fastgetcwd;
 
     use Cwd 'chdir';
     chdir "/tmp";
@@ -22,29 +29,42 @@ getcwd - get pathname of current working directory
 =head1 DESCRIPTION
 
 The getcwd() function re-implements the getcwd(3) (or getwd(3)) functions
-in Perl.  If you ask to override your chdir() built-in function, then your
-PWD environment variable will be kept up to date.  (See
-L<perlsub/Overriding builtin functions>.)
+in Perl.
 
 The fastgetcwd() function looks the same as getcwd(), but runs faster.
 It's also more dangerous because you might conceivably chdir() out of a
 directory that you can't chdir() back into.
 
+The cwd() function looks the same as getcwd and fastgetcwd but is
+implemented using the most natural and safe form for the current
+architecture. For most systems it is identical to `pwd` (but without
+the trailing line terminator). It is recommended that cwd (or another
+*cwd() function) is used in I<all> code to ensure portability.
+
+If you ask to override your chdir() built-in function, then your PWD
+environment variable will be kept up to date.  (See
+L<perlsub/Overriding builtin functions>.) Note that it will only be
+kept up to date it all packages which use chdir import it from Cwd.
+
 =cut
 
 @ISA = qw(Exporter);
-@EXPORT = qw(getcwd fastcwd);
+@EXPORT = qw(cwd getcwd fastcwd);
 @EXPORT_OK = qw(chdir);
 
+# use strict;
 
-# VMS: $ENV{'DEFAULT'} points to default directory at all times
-# 08-Dec-1994  Charles Bailey  bailey@genetics.upenn.edu
-# Note: Use of Cwd::getcwd() or Cwd::chdir() (but not Cwd::fastcwd())
-#   causes the logical name PWD to be defined in the process 
-#   logical name table as the default device and directory 
-#   seen by Perl. This may not be the same as the default device 
-#   and directory seen by DCL after Perl exits, since the effects
-#   the CRTL chdir() function persist only until Perl exits.
+sub _backtick_pwd {  # The 'natural and safe form' for UNIX (pwd may be setuid root)
+    my $cwd;
+    chop($cwd = `pwd`);
+    $cwd;
+} 
+
+# Since some ports may predefine cwd internally (e.g., NT)
+# we take care not to override an existing definition for cwd().
+
+*cwd = \&_backtick_pwd unless defined &cwd;
+
 
 # By Brandon S. Allbery
 #
@@ -52,8 +72,6 @@ directory that you can't chdir() back into.
 
 sub getcwd
 {
-    if($Config{'osname'} eq 'VMS') { return $ENV{'PWD'} = $ENV{'DEFAULT'} }
-
     my($dotdots, $cwd, @pst, @cst, $dir, @tst);
 
     unless (@cst = stat('.'))
@@ -120,8 +138,6 @@ sub getcwd
 # you might chdir out of a directory that you can't chdir back into.
 
 sub fastcwd {
-    if($Config{'osname'} eq 'VMS') { return $ENV{'DEFAULT'} }
-
     my($odev, $oino, $cdev, $cino, $tdev, $tino);
     my(@path, $path);
     local(*DIR);
@@ -151,29 +167,25 @@ sub fastcwd {
 }
 
 
-# keeps track of current working directory in PWD environment var
-#
-# $RCSfile: pwd.pl,v $$Revision: 4.1 $$Date: 92/08/07 18:24:11 $
-#
-# $Log:	pwd.pl,v $
-#
+# Keeps track of current working directory in PWD environment var
 # Usage:
 #	use Cwd 'chdir';
 #	chdir $newdir;
 
-$chdir_init = 0;
+my $chdir_init = 0;
 
-sub chdir_init{
-    if ($ENV{'PWD'}) {
+sub chdir_init {
+    if ($ENV{'PWD'} and $osname ne 'os2') {
 	my($dd,$di) = stat('.');
 	my($pd,$pi) = stat($ENV{'PWD'});
 	if (!defined $dd or !defined $pd or $di != $pi or $dd != $pd) {
-	    chop($ENV{'PWD'} = `pwd`);
+	    $ENV{'PWD'} = cwd();
 	}
     }
     else {
-	chop($ENV{'PWD'} = `pwd`);
+	$ENV{'PWD'} = cwd();
     }
+    # Strip an automounter prefix (where /tmp_mnt/foo/bar == /foo/bar)
     if ($ENV{'PWD'} =~ m|(/[^/]+(/[^/]+/[^/]+))(.*)|) {
 	my($pd,$pi) = stat($2);
 	my($dd,$di) = stat($1);
@@ -185,17 +197,18 @@ sub chdir_init{
 }
 
 sub chdir {
-    my($newdir) = shift;
-    $newdir =~ s|/{2,}|/|g;
+    my $newdir = shift || '';	# allow for no arg (chdir to HOME dir)
+    $newdir =~ s|///*|/|g;
     chdir_init() unless $chdir_init;
-    return 0 unless (CORE::chdir $newdir);
-    if ($Config{'osname'} eq 'VMS') { return $ENV{PWD} = $ENV{DEFAULT} }
+    return 0 unless CORE::chdir $newdir;
+    if ($osname eq 'VMS') { return $ENV{'PWD'} = $ENV{'DEFAULT'} }
 
     if ($newdir =~ m#^/#) {
 	$ENV{'PWD'} = $newdir;
-    }else{
-	my(@curdir) = split(m#/#,$ENV{'PWD'});
-	@curdir = '' unless @curdir;
+    } else {
+	my @curdir = split(m#/#,$ENV{'PWD'});
+	@curdir = ('') unless @curdir;
+	my $component;
 	foreach $component (split(m#/#, $newdir)) {
 	    next if $component eq '.';
 	    pop(@curdir),next if $component eq '..';
@@ -203,7 +216,60 @@ sub chdir {
 	}
 	$ENV{'PWD'} = join('/',@curdir) || '/';
     }
+    1;
 }
+
+
+# --- PORTING SECTION ---
+
+# VMS: $ENV{'DEFAULT'} points to default directory at all times
+# 08-Dec-1994  Charles Bailey  bailey@genetics.upenn.edu
+# Note: Use of Cwd::getcwd() or Cwd::chdir() (but not Cwd::fastcwd())
+#   causes the logical name PWD to be defined in the process 
+#   logical name table as the default device and directory 
+#   seen by Perl. This may not be the same as the default device 
+#   and directory seen by DCL after Perl exits, since the effects
+#   the CRTL chdir() function persist only until Perl exits.
+# This does not apply to other systems (where only chdir() sets PWD).
+
+sub _vms_cwd {
+    return $ENV{'DEFAULT'}
+}
+sub _vms_pwd {
+    return $ENV{'PWD'} = $ENV{'DEFAULT'}
+}
+sub _os2_cwd {
+    $ENV{'PWD'} = `cmd /c cd`;
+    chop $ENV{'PWD'};
+    $ENV{'PWD'} =~ s:\\:/:g ;
+    return $ENV{'PWD'};
+}
+
+if ($osname eq 'VMS') {
+
+    *cwd        = \&_vms_pwd;
+    *getcwd     = \&_vms_pwd;
+    *fastgetcwd = \&_vms_cwd;
+}
+elsif ($osname eq 'NT') {
+
+    *getcwd     = \&cwd;
+    *fastgetcwd = \&cwd;
+}
+elsif ($osname eq 'os2') {
+    *cwd     = \&_os2_cwd;
+    *getcwd     = \&_os2_cwd;
+    *fastgetcwd = \&_os2_cwd;
+    *fastcwd = \&_os2_cwd;
+}
+
+# package main; eval join('',<DATA>) || die $@;	# quick test
 
 1;
 
+__END__
+BEGIN { import Cwd qw(:DEFAULT chdir); }
+print join("\n", cwd, getcwd, fastcwd, "");
+chdir('..');
+print join("\n", cwd, getcwd, fastcwd, "");
+print "$ENV{PWD}\n";

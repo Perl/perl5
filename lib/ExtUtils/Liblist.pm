@@ -4,11 +4,15 @@ package ExtUtils::Liblist;
 
 use Config;
 use Cwd;
+use File::Basename;
+
+my $Config_libext = $Config{lib_ext} || ".a";
+
 # --- Determine libraries to use and how to use them ---
 
 sub ext {
     my($potential_libs, $Verbose) = @_;
-    return ("", "", "") unless $potential_libs;
+    return ("", "", "", "") unless $potential_libs;
     print STDOUT "Potential libraries are '$potential_libs':\n" if $Verbose;
 
     my($so)   = $Config{'so'};
@@ -21,7 +25,7 @@ sub ext {
 
     my(@searchpath); # from "-L/path" entries in $potential_libs
     my(@libpath) = split " ", $Config{'libpth'};
-    my(@ldloadlibs, @bsloadlibs, @extralibs);
+    my(@ldloadlibs, @bsloadlibs, @extralibs, @ld_run_path, %ld_run_path_seen);
     my($fullname, $thislib, $thispth, @fullname);
     my($pwd) = fastcwd(); # from Cwd.pm
     my($found) = 0;
@@ -90,22 +94,24 @@ sub ext {
 			$mb cmp $ma;} @fullname)[0];
 	    } elsif (-f ($fullname="$thispth/lib$thislib.$so")
 		 && (($Config{'dlsrc'} ne "dl_dld.xs") || ($thislib eq "m"))){
-	    } elsif (-f ($fullname="$thispth/lib${thislib}_s.a")
+	    } elsif (-f ($fullname="$thispth/lib${thislib}_s$Config_libext")
 		 && ($thislib .= "_s") ){ # we must explicitly use _s version
-	    } elsif (-f ($fullname="$thispth/lib$thislib.a")){
-	    } elsif (-f ($fullname="$thispth/Slib$thislib.a")){
+	    } elsif (-f ($fullname="$thispth/lib$thislib$Config_libext")){
+	    } elsif (-f ($fullname="$thispth/Slib$thislib$Config_libext")){
 	    } else {
 		print STDOUT "$thislib not found in $thispth\n" if $Verbose;
 		next;
 	    }
 	    print STDOUT "'-l$thislib' found at $fullname\n" if $Verbose;
+	    my($fullnamedir) = dirname($fullname);
+	    push @ld_run_path, $fullnamedir unless $ld_run_path_seen{$fullnamedir}++;
 	    $found++;
 	    $found_lib++;
 
 	    # Now update library lists
 
 	    # what do we know about this library...
-	    my $is_dyna = ($fullname !~ /\.a$/);
+	    my $is_dyna = ($fullname !~ /\Q$Config_libext\E$/);
 	    my $in_perl = ($libs =~ /\B-l${thislib}\b/s);
 
 	    # Do not add it into the list if it is already linked in
@@ -142,8 +148,8 @@ sub ext {
 	print STDOUT "Warning (non-fatal): No library found for -l$thislib\n"
 	    unless $found_lib>0;
     }
-    return ('','','') unless $found;
-    ("@extralibs", "@bsloadlibs", "@ldloadlibs");
+    return ('','','','') unless $found;
+    ("@extralibs", "@bsloadlibs", "@ldloadlibs",join(":",@ld_run_path));
 }
 
 sub lsdir { #yes, duplicate code seems less hassle than having an

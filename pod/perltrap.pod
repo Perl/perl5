@@ -191,7 +191,8 @@ in Perl 5 is the backslash, which creates a reference.
 
 =item *
 
-C<ARGV> must be capitalized.
+C<ARGV> must be capitalized.  C<$ARGV[0]> is C's C<argv[1]>, and C<argv[0]>
+ends up in C<$0>.
 
 =item *
 
@@ -378,6 +379,28 @@ These are now semantic errors because of precedence:
 Because if that were to work, then this couldn't:
 
     sleep $dormancy + 20;
+
+=item *
+
+The precedence of assignment operators is now the same as the precedence
+of assignment.  Perl 4 mistakenly gave them the precedence of the associated
+operator.  So you now must parenthesize them in expressions like
+
+    /foo/ ? ($a += 2) : ($a -= 2);
+
+Otherwise
+
+    /foo/ ? $a += 2 : $a -= 2;
+
+would be erroneously parsed as
+
+    (/foo/ ? $a += 2 : $a) -= 2;
+
+On the other hand,
+
+    $a += /foo/ ? 1 : 2;
+
+now works as a C programmer would expect.
 
 =item *
 

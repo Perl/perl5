@@ -66,7 +66,7 @@ name is thus C<%main::>, or C<%::> for short.  Likewise the nested package
 mentioned earlier is named C<%OUTER::INNER::>.
 
 The value in each entry of the associative array is what you are
-referring to when you use the C<*name> notation.  In fact, the following
+referring to when you use the C<*name> typeglob notation.  In fact, the following
 have the same effect, though the first is more efficient because it
 does the symbol table lookups at compile time:
 
@@ -108,7 +108,7 @@ Note that even though the subroutine is compiled in package C<dumpvar>,
 the name of the subroutine is qualified so that its name is inserted
 into package C<main>.
 
-Assignment to a symbol table entry performs an aliasing operation,
+Assignment to a typeglob performs an aliasing operation,
 i.e.,
 
     *dick = *richard;
@@ -149,16 +149,16 @@ and C<END> work just as they do in B<awk>, as a degenerate case.
 
 =head2 Perl Classes
 
-There is no special class syntax in Perl 5, but a package may function
+There is no special class syntax in Perl, but a package may function
 as a class if it provides subroutines that function as methods.  Such a
 package may also derive some of its methods from another class package
-by listing the other package name in its @ISA array.  For more on
-this, see L<perlobj>.
+by listing the other package name in its @ISA array.  
+
+For more on this, see L<perlobj>.
 
 =head2 Perl Modules
 
-In Perl 5, the notion of packages has been extended into the notion of
-modules.  A module is a package that is defined in a library file of
+A module is a just package that is defined in a library file of
 the same name, and is designed to be reusable.  It may do this by
 providing a mechanism for exporting some of its symbols into the symbol
 table of any package using it.  Or it may function as a class
@@ -166,7 +166,21 @@ definition and make its semantics available implicitly through method
 calls on the class and its objects, without explicit exportation of any
 symbols.  Or it can do a little of both.
 
-Perl modules are included by saying
+For example, to start a normal module called Fred, create
+a file called Fred.pm and put this at the start of it:
+
+    package 	 Fred;
+    require 	 Exporter;
+    @ISA       = qw(Exporter);
+    @EXPORT    = qw(func1 func2);
+    @EXPORT_OK = qw($sally @listabob %harry func3);
+
+Then go on to declare and use your variables in functions
+without any qualifications.
+See L<Exporter> and the I<Perl Modules File> for details on 
+mechanics and style issues in module creation.
+
+Perl modules are included into your program by saying
 
     use Module;
 
@@ -269,142 +283,44 @@ The following programs are defined (and have their own documentation).
 
 =over 12
 
+=item C<diagnostics>
+
+Pragma to produce enhanced diagnostics
+
 =item C<integer>
 
-Perl pragma to compute arithmetic in integer instead of double
+Pragma to compute arithmetic in integer instead of double
 
 =item C<less>
 
-Perl pragma to request less of something from the compiler
+Pragma to request less of something from the compiler
 
 =item C<sigtrap>
 
-Perl pragma to enable stack backtrace on unexpected signals
+Pragma to enable stack backtrace on unexpected signals
 
 =item C<strict>
 
-Perl pragma to restrict unsafe constructs
+Pragma to restrict unsafe constructs
 
 =item C<subs>
 
-Perl pragma to predeclare sub names
+Pragma to predeclare sub names
 
 =back
 
 =head2 Standard Modules
 
-The following modules are all expected to behave in a well-defined
+Standard, bundled modules are all expected to behave in a well-defined
 manner with respect to namespace pollution because they use the
-Exporter module.
-See their own documentation for details.
+Exporter module.  See their own documentation for details.
 
-=over 12
+To find out all the modules installed on your system, do this:
 
-=item C<Abbrev>
+    find `perl -e 'print "@INC"'` -name '*.pm' -print
 
-create an abbreviation table from a list
-
-=item C<AnyDBM_File>
-
-provide framework for multiple DBMs 
-
-=item C<AutoLoader>
-
-load functions only on demand
-
-=item C<AutoSplit>
-
-split a package for autoloading
-
-=item C<Basename>
-
-parse file name and path from a specification
-
-=item C<Benchmark>
-
-benchmark running times of code 
-
-=item C<Carp>
-
-warn or die of errors (from perspective of caller)
-
-=item C<CheckTree>
-
-run many filetest checks on a tree
-
-=item C<Collate>
-
-compare 8-bit scalar data according to the current locale
-
-=item C<Config>
-
-access Perl configuration option
-
-=item C<Cwd>
-
-get pathname of current working directory
-
-=item C<DynaLoader>
-
-Dynamically load C libraries into Perl code 
-
-=item C<English>
-
-use nice English (or B<awk>) names for ugly punctuation variables
-
-=item C<Env>
-
-Perl module that imports environment variables
-
-=item C<Exporter>
-
-module to control namespace manipulations 
-
-=item C<Fcntl>
-
-load the C Fcntl.h defines
-
-=item C<FileHandle>
-
-supply object methods for filehandles 
-
-=item C<Find>
-
-traverse a file tree
-
-=item C<Finddepth>
-
-traverse a directory structure depth-first
-
-=item C<Getopt>
-
-basic and extended getopt(3) processing
-
-=item C<MakeMaker>
-
-generate a Makefile for Perl extension
-
-=item C<Open2>
-
-open a process for both reading and writing
-
-=item C<Open3>
-
-open a process for reading, writing, and error handling
-
-=item C<POSIX>
-
-Perl interface to IEEE 1003.1 namespace
-
-=item C<Ping>
-
-check a host for upness
-
-=item C<Socket>
-
-load the C socket.h defines
-
-=back
+They should all have their own documentation installed and accessible via
+your system man(1) command.  If that fails, try the I<perldoc> program.
 
 =head2 Extension Modules
 
@@ -412,63 +328,159 @@ Extension modules are written in C (or a mix of Perl and C) and get
 dynamically loaded into Perl if and when you need them.  Supported
 extension modules include the Socket, Fcntl, and POSIX modules.
 
-The following are popular C extension modules, which while available at
-Perl 5.0 release time, do not come bundled (at least, not completely)
+Many popular C extension modules
+do not come bundled (at least, not completely)
 due to their size, volatility, or simply lack of time for adequate testing
 and configuration across the multitude of platforms on which Perl was
 beta-tested.  You are encouraged to look for them in archie(1L), the Perl
 FAQ or Meta-FAQ, the WWW page, and even with their authors before randomly
-posting asking for their present condition and disposition.  There's no
-guarantee that the names or addresses below have not changed since printing,
-and in fact, they probably have!
+posting asking for their present condition and disposition.  
 
-=over 12
+=head2 CPAN
 
-=item C<Curses>
+CPAN stands for the Comprehensive Perl Archive Network.  This is a globally
+replicated collection of all known Perl materials, including hundreds 
+of unbunded modules.  Here are the major categories of modules:
 
-Written by William Setzer <F<William_Setzer@ncsu.edu>>, while not
-included with the standard distribution, this extension module ports to
-most systems.  FTP from your nearest Perl archive site, or try
+=over
 
-        ftp://ftp.ncsu.edu/pub/math/wsetzer/cursperl5??.tar.gz
+=item *
+Language Extensions and Documentation Tools 
 
-It is currently in alpha test, so the name and ftp location may
-change.
+=item *
+Development Support
 
+=item *
+Operating System Interfaces
 
-=item C<DBI>
+=item *
+Networking, Device Control (modems) and InterProcess Communication
 
-This is the portable database interface written by
-<F<Tim.Bunce@ig.co.uk>>.  This supersedes the many perl4 ports for
-database extensions.  The official archive for DBperl extensions is
-F<ftp.demon.co.uk:/pub/perl/db>.  This archive contains copies of perl4
-ports for Ingres, Oracle, Sybase, Informix, Unify, Postgres, and
-Interbase, as well as rdb and shql and other non-SQL systems.
+=item *
+Data Types and Data Type Utilities
 
-=item C<DB_File>
+=item *
+Database Interfaces
 
-Fastest and most restriction-free of the DBM bindings, this extension module 
-uses the popular Berkeley DB to tie() into your hashes.  This has a
-standardly-distributed man page and dynamic loading extension module, but
-you'll have to fetch the Berkeley code yourself.  See L<DB_File> for
-where.
+=item *
+User Interfaces
 
-=item C<Sx>
+=item *
+Interfaces to / Emulations of Other Programming Languages
 
-This extension module is a front to the Athena and Xlib libraries for Perl
-GUI programming, originally written by by Dominic Giampaolo
-<F<dbg@sgi.com>>, then and rewritten for Sx by FrE<eacute>dE<eacute>ric
-Chauveau <F<fmc@pasteur.fr>>.  It's available for FTP from
+=item *
+File Names, File Systems and File Locking (see also File Handles)
 
-    ftp.pasteur.fr:/pub/Perl/Sx.tar.gz
+=item *
+String Processing, Language Text Processing, Parsing and Searching
 
-=item C<Tk>
+=item *
+Option, Argument, Parameter and Configuration File Processing
 
-This extension module is an object-oriented Perl5 binding to the popular
-tcl/tk X11 package.  However, you need know no TCL to use it!
-It was written by Malcolm Beattie <F<mbeattie@sable.ox.ac.uk>>.
-If you are unable to locate it using archie(1L) or a similar
-tool, you may try retrieving it from F</private/Tk-october.tar.gz>
-from Malcolm's machine listed above.
+=item *
+Internationalization and Locale
+
+=item *
+Authentication, Security and Encryption
+
+=item *
+World Wide Web, HTML, HTTP, CGI, MIME
+
+=item *
+Server and Daemon Utilities
+
+=item *
+Archiving and Compression
+
+=item *
+Images, Pixmap and Bitmap Manipulation, Drawing and Graphing
+
+=item *
+Mail and Usenet News
+
+=item *
+Control Flow Utilities (callbacks and exceptions etc)
+
+=item *
+File Handle and Input/Output Stream Utilities
+
+=item *
+Miscellaneous Modules
 
 =back
+
+Some of the reguster CPAN sites as of this writing include the following.
+You should try to choose one close to you:
+
+=over
+
+=item *
+ftp://ftp.sterling.com/programming/languages/perl/
+
+=item *
+ftp://ftp.sedl.org/pub/mirrors/CPAN/
+
+=item *
+ftp://ftp.uoknor.edu/mirrors/CPAN/
+
+=item *
+ftp://ftp.delphi.com/pub/mirrors/packages/perl/CPAN/
+
+=item *
+ftp://uiarchive.cso.uiuc.edu/pub/lang/perl/CPAN/
+
+=item *
+ftp://ftp.cis.ufl.edu/pub/perl/CPAN/
+
+=item *
+ftp://ftp.switch.ch/mirror/CPAN/
+
+=item *
+ftp://ftp.sunet.se/pub/lang/perl/CPAN/
+
+=item *
+ftp://ftp.ci.uminho.pt/pub/lang/perl/
+
+=item *
+ftp://ftp.cs.ruu.nl/pub/PERL/CPAN/
+
+=item *
+ftp://ftp.demon.co.uk/pub/mirrors/perl/CPAN/
+
+=item *
+ftp://ftp.rz.ruhr-uni-bochum.de/pub/programming/languages/perl/CPAN/
+
+=item *
+ftp://ftp.leo.org/pub/comp/programming/languages/perl/CPAN/
+
+=item *
+ftp://ftp.pasteur.fr/pub/computing/unix/perl/CPAN/
+
+=item *
+ftp://ftp.ibp.fr/pub/perl/CPAN/
+
+=item *
+ftp://ftp.funet.fi/pub/languages/perl/CPAN/
+
+=item *
+ftp://ftp.tekotago.ac.nz/pub/perl/CPAN/
+
+=item *
+ftp://ftp.mame.mu.oz.au/pub/perl/CPAN/
+
+=item *
+ftp://coombs.anu.edu.au/pub/perl/
+
+=item *
+ftp://dongpo.math.ncu.edu.tw/perl/CPAN/
+
+=item *
+ftp://ftp.lab.kdd.co.jp/lang/perl/CPAN/
+
+=item *
+ftp://ftp.is.co.za/programming/perl/CPAN/
+
+=back
+
+For an up-to-date listing of CPAN sites, 
+see http://www.perl.com/perl/ or ftp://ftp.perl.com/perl/.

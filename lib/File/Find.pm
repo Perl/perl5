@@ -63,6 +63,8 @@ that don't resolve:
 @ISA = qw(Exporter);
 @EXPORT = qw(find finddepth $name $dir);
 
+$dont_use_nlink = 1 if $Config{osname} =~ m:^os/?2$:i ;
+
 # Usage:
 #	use File::Find;
 #
@@ -236,7 +238,7 @@ sub finddepth {
 sub finddepthdir {
     my($wanted,$dir,$nlink) = @_;
     my($dev,$ino,$mode,$subcount);
-    my($name);
+    local($name); # so &wanted sees current value
 
     # Get the list of files in the current directory.
 

@@ -79,6 +79,18 @@
 #  endif
 #endif
 
+#ifdef DOSISH
+# if defined(OS2)
+#   include "../os2ish.h"
+# else
+#   include "../dosish.h"
+# endif
+#else
+# if defined(VMS)
+#   include "../vmsish.h"
+# endif
+#endif
+
 #ifndef STANDARD_C
 /* All of these are in stdlib.h or time.h for ANSI C */
 Time_t time();

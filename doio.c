@@ -344,7 +344,7 @@ register GV *gv;
 	    if (inplace) {
 		TAINT_PROPER("inplace open");
 		if (strEQ(oldname,"-")) {
-		    defoutgv = gv_fetchpv("STDOUT",TRUE,SVt_PVIO);
+		    setdefout(gv_fetchpv("STDOUT",TRUE,SVt_PVIO));
 		    return IoIFP(GvIOp(gv));
 		}
 #ifndef FLEXFILENAMES
@@ -423,7 +423,7 @@ register GV *gv;
 		    do_close(gv,FALSE);
 		    continue;
 		}
-		defoutgv = argvoutgv;
+		setdefout(argvoutgv);
 		lastfd = fileno(IoIFP(GvIOp(argvoutgv)));
 		(void)Fstat(lastfd,&statbuf);
 #ifdef HAS_FCHMOD
@@ -448,7 +448,7 @@ register GV *gv;
     }
     if (inplace) {
 	(void)do_close(argvoutgv,FALSE);
-	defoutgv = gv_fetchpv("STDOUT",TRUE,SVt_PVIO);
+	setdefout(gv_fetchpv("STDOUT",TRUE,SVt_PVIO));
     }
     return Nullfp;
 }

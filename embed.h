@@ -26,7 +26,6 @@
 #define bufptr		Perl_bufptr
 #define bxor_amg	Perl_bxor_amg
 #define check		Perl_check
-#define coeff		Perl_coeff
 #define compiling	Perl_compiling
 #define compl_amg	Perl_compl_amg
 #define compcv		Perl_compcv
@@ -392,6 +391,7 @@
 #define gv_stashsv	Perl_gv_stashsv
 #define he_delayfree	Perl_he_delayfree
 #define he_free		Perl_he_free
+#define he_root		Perl_he_root
 #define hoistmust	Perl_hoistmust
 #define hv_clear	Perl_hv_clear
 #define hv_delete	Perl_hv_delete
@@ -913,6 +913,7 @@
 #define scan_word	Perl_scan_word
 #define scope		Perl_scope
 #define screaminstr	Perl_screaminstr
+#define setdefout	Perl_setdefout
 #define setenv_getix	Perl_setenv_getix
 #define skipspace	Perl_skipspace
 #define stack_grow	Perl_stack_grow
@@ -926,6 +927,7 @@
 #define sv_2mortal	Perl_sv_2mortal
 #define sv_2nv		Perl_sv_2nv
 #define sv_2pv		Perl_sv_2pv
+#define sv_add_arena	Perl_sv_add_arena
 #define sv_backoff	Perl_sv_backoff
 #define sv_bless	Perl_sv_bless
 #define sv_catpv	Perl_sv_catpv
@@ -975,7 +977,6 @@
 #define warn		Perl_warn
 #define watch		Perl_watch
 #define whichsig	Perl_whichsig
-#define whichsigname	Perl_whichsigname
 #define xiv_arenaroot	Perl_xiv_arenaroot
 #define xiv_root	Perl_xiv_root
 #define xnv_root	Perl_xnv_root
@@ -1042,6 +1043,7 @@
 #define e_tmpname	(curinterp->Ie_tmpname)
 #define endav		(curinterp->Iendav)
 #define envgv		(curinterp->Ienvgv)
+#define errgv		(curinterp->Ierrgv)
 #define eval_root	(curinterp->Ieval_root)
 #define eval_start	(curinterp->Ieval_start)
 #define fdpid		(curinterp->Ifdpid)
@@ -1199,6 +1201,7 @@
 #define Ie_tmpname	e_tmpname
 #define Iendav		endav
 #define Ienvgv		envgv
+#define Ierrgv		errgv
 #define Ieval_root	eval_root
 #define Ieval_start	eval_start
 #define Ifdpid		fdpid

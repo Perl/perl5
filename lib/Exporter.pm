@@ -64,6 +64,10 @@ sub export {
 	local $Carp::CarpLevel = 1;	# ignore package calling us too.
 	Carp::carp($text);
     };
+    local $SIG{__DIE__} = sub {
+	Carp::croak("$_[0]Illegal null symbol in \@${1}::EXPORT")
+	    if $_[0] =~ /^Unable to create sub named "(.*?)::"/;
+    };
 
     my $pkg = shift;
     my $callpkg = shift;

@@ -29,6 +29,7 @@ use however it pleases.  Currently recognized commands are
     =item text
     =over N
     =back
+    =cut
 
 =item *
 
@@ -74,6 +75,13 @@ Note that I'm not at all claiming this to be sufficient for producing a
 book.  I'm just trying to make an idiot-proof common source for nroff,
 TeX, and other markup languages, as used for online documentation.
 Both B<pod2html> and B<pod2man> translators exist.
+
+=head1 Embedding Pods in Perl Modules
+
+You can embed pod documentation in your Perl scripts.  Start your
+documentation with a =head1 command at the beg, and end it with 
+an =cut command.  Perl will ignore the pod text.  See any of the
+supplied library modules for examples.
 
 =head1 Author
 

@@ -6,7 +6,7 @@ use ExtUtils::MakeMaker;
 # which perform the corresponding actions in the subdirectory.
 
 WriteMakefile(
-    'MYEXTLIB' => 'sdbm/libsdbm.a',
+    'MYEXTLIB' => 'sdbm/libsdbm$(LIB_EXT)',
 );
 
 

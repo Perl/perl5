@@ -171,6 +171,7 @@ I32 safebase;	/* no need to remember string in subbase */
     CURCUR cc;
 
     cc.cur = 0;
+    cc.oldcc = 0;
     regcc = &cc;
 
 #ifdef DEBUGGING
@@ -576,14 +577,26 @@ char *prog;
     register char *s;		/* operand or save */
     register char *locinput = reginput;
     int minmod = 0;
+#ifdef DEBUGGING
+    static int regindent = 0;
+    regindent++;
+#endif
 
     nextchar = *locinput;
     scan = prog;
     while (scan != NULL) {
 #ifdef DEBUGGING
-	if (regnarrate)
-	    fprintf(stderr, "%2d%-8.8s\t<%.10s>\n",
+#define sayYES goto yes
+#define sayNO goto no
+#define saySAME(x) if (x) goto yes; else goto no
+	if (regnarrate) {
+	    fprintf(stderr, "%*s%2d%-8.8s\t<%.10s>\n", regindent*2, "",
 		scan - regprogram, regprop(scan), locinput);
+	}
+#else
+#define sayYES return 1
+#define sayNO return 0
+#define saySAME(x) return x
 #endif
 
 #ifdef REGALIGN
@@ -603,7 +616,7 @@ char *prog;
 		/* regtill = regbol; */
 		break;
 	    }
-	    return 0;
+	    sayNO;
 	case MBOL:
 	    if (locinput == regbol
 		? regprev == '\n'
@@ -611,15 +624,15 @@ char *prog;
 	    {
 		break;
 	    }
-	    return 0;
+	    sayNO;
 	case SBOL:
 	    if (locinput == regbol && regprev == '\n')
 		break;
-	    return 0;
+	    sayNO;
 	case GBOL:
 	    if (locinput == regbol)
 		break;
-	    return 0;
+	    sayNO;
 	case EOL:
 	    if (multiline)
 		goto meol;
@@ -628,23 +641,23 @@ char *prog;
 	case MEOL:
 	  meol:
 	    if ((nextchar || locinput < regeol) && nextchar != '\n')
-		return 0;
+		sayNO;
 	    break;
 	case SEOL:
 	  seol:
 	    if ((nextchar || locinput < regeol) && nextchar != '\n')
-		return 0;
+		sayNO;
 	    if (regeol - locinput > 1)
-		return 0;
+		sayNO;
 	    break;
 	case SANY:
 	    if (!nextchar && locinput >= regeol)
-		return 0;
+		sayNO;
 	    nextchar = *++locinput;
 	    break;
 	case ANY:
 	    if (!nextchar && locinput >= regeol || nextchar == '\n')
-		return 0;
+		sayNO;
 	    nextchar = *++locinput;
 	    break;
 	case EXACTLY:
@@ -652,11 +665,11 @@ char *prog;
 	    ln = *s++;
 	    /* Inline the first character, for speed. */
 	    if (*s != nextchar)
-		return 0;
+		sayNO;
 	    if (regeol - locinput < ln)
-		return 0;
+		sayNO;
 	    if (ln > 1 && bcmp(s, locinput, ln) != 0)
-		return 0;
+		sayNO;
 	    locinput += ln;
 	    nextchar = *locinput;
 	    break;
@@ -665,23 +678,23 @@ char *prog;
 	    if (nextchar < 0)
 		nextchar = UCHARAT(locinput);
 	    if (s[nextchar >> 3] & (1 << (nextchar&7)))
-		return 0;
+		sayNO;
 	    if (!nextchar && locinput >= regeol)
-		return 0;
+		sayNO;
 	    nextchar = *++locinput;
 	    break;
 	case ALNUM:
 	    if (!nextchar)
-		return 0;
+		sayNO;
 	    if (!isALNUM(nextchar))
-		return 0;
+		sayNO;
 	    nextchar = *++locinput;
 	    break;
 	case NALNUM:
 	    if (!nextchar && locinput >= regeol)
-		return 0;
+		sayNO;
 	    if (isALNUM(nextchar))
-		return 0;
+		sayNO;
 	    nextchar = *++locinput;
 	    break;
 	case NBOUND:
@@ -692,51 +705,51 @@ char *prog;
 		ln = isALNUM(locinput[-1]);
 	    n = isALNUM(nextchar); /* is next char in word? */
 	    if ((ln == n) == (OP(scan) == BOUND))
-		return 0;
+		sayNO;
 	    break;
 	case SPACE:
 	    if (!nextchar && locinput >= regeol)
-		return 0;
+		sayNO;
 	    if (!isSPACE(nextchar))
-		return 0;
+		sayNO;
 	    nextchar = *++locinput;
 	    break;
 	case NSPACE:
 	    if (!nextchar)
-		return 0;
+		sayNO;
 	    if (isSPACE(nextchar))
-		return 0;
+		sayNO;
 	    nextchar = *++locinput;
 	    break;
 	case DIGIT:
 	    if (!isDIGIT(nextchar))
-		return 0;
+		sayNO;
 	    nextchar = *++locinput;
 	    break;
 	case NDIGIT:
 	    if (!nextchar && locinput >= regeol)
-		return 0;
+		sayNO;
 	    if (isDIGIT(nextchar))
-		return 0;
+		sayNO;
 	    nextchar = *++locinput;
 	    break;
 	case REF:
 	    n = ARG1(scan);  /* which paren pair */
 	    s = regstartp[n];
 	    if (!s)
-		return 0;
+		sayNO;
 	    if (!regendp[n])
-		return 0;
+		sayNO;
 	    if (s == regendp[n])
 		break;
 	    /* Inline the first character, for speed. */
 	    if (*s != nextchar)
-		return 0;
+		sayNO;
 	    ln = regendp[n] - s;
 	    if (locinput + ln > regeol)
-		return 0;
+		sayNO;
 	    if (ln > 1 && bcmp(s, locinput, ln) != 0)
-		return 0;
+		sayNO;
 	    locinput += ln;
 	    nextchar = *locinput;
 	    break;
@@ -774,7 +787,7 @@ char *prog;
 		n = regmatch(PREVOPER(next));	/* start on the WHILEM */
 		regcpblow(cp);
 		regcc = cc.oldcc;
-		return n;
+		saySAME(n);
 	    }
 	    /* NOT REACHED */
 	case WHILEM: {
@@ -788,8 +801,14 @@ char *prog;
 		 */
 
 		CURCUR* cc = regcc;
-		n = cc->cur + 1;
+		n = cc->cur + 1;	/* how many we know we matched */
 		reginput = locinput;
+
+#ifdef DEBUGGING
+		if (regnarrate)
+		    fprintf(stderr, "%*s  %d  %lx\n", regindent*2, "",
+			n, (long)cc);
+#endif
 
 		/* If degenerate scan matches "", assume scan done. */
 
@@ -797,10 +816,10 @@ char *prog;
 		    regcc = cc->oldcc;
 		    ln = regcc->cur;
 		    if (regmatch(cc->next))
-			return TRUE;
+			sayYES;
 		    regcc->cur = ln;
 		    regcc = cc;
-		    return FALSE;
+		    sayNO;
 		}
 
 		/* First just match a string of min scans. */
@@ -808,7 +827,10 @@ char *prog;
 		if (n < cc->min) {
 		    cc->cur = n;
 		    cc->lastloc = locinput;
-		    return regmatch(cc->scan);
+		    if (regmatch(cc->scan))
+			sayYES;
+		    cc->cur = n - 1;
+		    sayNO;
 		}
 
 		/* Prefer next over scan for minimal matching. */
@@ -817,18 +839,21 @@ char *prog;
 		    regcc = cc->oldcc;
 		    ln = regcc->cur;
 		    if (regmatch(cc->next))
-			return TRUE;	/* All done. */
+			sayYES;	/* All done. */
 		    regcc->cur = ln;
 		    regcc = cc;
 
 		    if (n >= cc->max)	/* Maximum greed exceeded? */
-			return FALSE;
+			sayNO;
 
 		    /* Try scanning more and see if it helps. */
 		    reginput = locinput;
 		    cc->cur = n;
 		    cc->lastloc = locinput;
-		    return regmatch(cc->scan);
+		    if (regmatch(cc->scan))
+			sayYES;
+		    cc->cur = n - 1;
+		    sayNO;
 		}
 
 		/* Prefer scan over next for maximal matching. */
@@ -838,7 +863,7 @@ char *prog;
 		    cc->cur = n;
 		    cc->lastloc = locinput;
 		    if (regmatch(cc->scan))
-			return TRUE;
+			sayYES;
 		    regcppop();		/* Restore some previous $<digit>s? */
 		    reginput = locinput;
 		}
@@ -847,10 +872,11 @@ char *prog;
 		regcc = cc->oldcc;
 		ln = regcc->cur;
 		if (regmatch(cc->next))
-		    return TRUE;
+		    sayYES;
 		regcc->cur = ln;
 		regcc = cc;
-		return FALSE;
+		cc->cur = n - 1;
+		sayNO;
 	    }
 	    /* NOT REACHED */
 	case BRANCH: {
@@ -861,7 +887,7 @@ char *prog;
 		    do {
 			reginput = locinput;
 			if (regmatch(NEXTOPER(scan)))
-			    return 1;
+			    sayYES;
 			for (n = *reglastparen; n > lastparen; n--)
 			    regendp[n] = 0;
 			*reglastparen = n;
@@ -876,7 +902,7 @@ char *prog;
 			scan = regnext(scan);
 #endif
 		    } while (scan != NULL && OP(scan) == BRANCH);
-		    return 0;
+		    sayNO;
 		    /* NOTREACHED */
 		}
 	    }
@@ -911,12 +937,12 @@ char *prog;
 	    if (minmod) {
 		minmod = 0;
 		if (ln && regrepeat(scan, ln) < ln)
-		    return 0;
+		    sayNO;
 		while (n >= ln || (n == 32767 && ln > 0)) { /* ln overflow ? */
 		    /* If it could work, try it. */
 		    if (nextchar == -1000 || *reginput == nextchar)
 			if (regmatch(next))
-			    return 1;
+			    sayYES;
 		    /* Couldn't or didn't -- back up. */
 		    reginput = locinput + ln;
 		    if (regrepeat(scan, 1)) {
@@ -924,7 +950,7 @@ char *prog;
 			reginput = locinput + ln;
 		    }
 		    else
-			return 0;
+			sayNO;
 		}
 	    }
 	    else {
@@ -936,28 +962,28 @@ char *prog;
 		    /* If it could work, try it. */
 		    if (nextchar == -1000 || *reginput == nextchar)
 			if (regmatch(next))
-			    return 1;
+			    sayYES;
 		    /* Couldn't or didn't -- back up. */
 		    n--;
 		    reginput = locinput + n;
 		}
 	    }
-	    return 0;
+	    sayNO;
 	case SUCCEED:
 	case END:
 	    reginput = locinput;	/* put where regtry can find it */
-	    return 1;			/* Success! */
+	    sayYES;			/* Success! */
 	case IFMATCH:
 	    reginput = locinput;
 	    scan = NEXTOPER(scan);
 	    if (!regmatch(scan))
-		return 0;
+		sayNO;
 	    break;
 	case UNLESSM:
 	    reginput = locinput;
 	    scan = NEXTOPER(scan);
 	    if (regmatch(scan))
-		return 0;
+		sayNO;
 	    break;
 	default:
 	    fprintf(stderr, "%x %d\n",(unsigned)scan,scan[1]);
@@ -972,6 +998,18 @@ char *prog;
     */
     FAIL("corrupted regexp pointers");
     /*NOTREACHED*/
+    sayNO;
+
+yes:
+#ifdef DEBUGGING
+    regindent--;
+#endif
+    return 1;
+
+no:
+#ifdef DEBUGGING
+    regindent--;
+#endif
     return 0;
 }
 

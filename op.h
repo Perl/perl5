@@ -23,9 +23,9 @@
  *			which may or may not check number of children).
  */
 
-typedef U16 PADOFFSET;
+typedef U32 PADOFFSET;
 
-#ifdef DEBUGGING
+#ifdef DEBUGGING_OPS
 #define OPCODE opcode
 #else
 #define OPCODE U16
@@ -147,6 +147,7 @@ struct pmop {
     REGEXP *	op_pmregexp;		/* compiled expression */
     SV *	op_pmshort;		/* for a fast bypass of execute() */
     U16		op_pmflags;
+    U16		op_pmpermflags;
     char	op_pmslen;
 };
 

@@ -194,13 +194,6 @@ could indicate that SvREFCNT_dec() was called too many times, or that
 SvREFCNT_inc() was called too few times, or that the SV was mortalized
 when it shouldn't have been, or that memory has been corrupted.
 
-=item Attempt to use reference as hash key
-
-(W) References as not very meaningful as hash keys.  You probably forgot to 
-dereference the reference before using it in a hash list, or got mixed up 
-and used C<{}> or C<[]> instead of C<()>.  Or perhaps a missing key in the
-hash list is causing values to be treated as keys.
-
 =item Bad arg length for %s, is %d, should be %d
 
 (F) You passed a buffer of the wrong size to one of msgctl(), semctl() or
@@ -261,6 +254,10 @@ Compilation stops immediately and the interpreter is exited.
 
 (W) You tried to do a bind on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/bind>.
+
+=item Bizarre copy of %s in %s
+
+(P) Perl detected an attempt to copy an internal value that is not copiable.
 
 =item Callback called exit
 
@@ -489,6 +486,13 @@ mailbox buffers to be, and didn't get an answer.
 call for another.  It can't manufacture one out of whole cloth.  In general
 you should only be calling it out of an AUTOLOAD routine anyway.  See
 L<perlfunc/goto>.
+
+=item Can't localize a reference
+
+(F) You said something like C<local $$ref>, which is not allowed because
+the compiler can't determine whether $ref will end up pointing to anything
+with a symbol table entry, and a symbol table entry is necessary to
+do a local.
 
 =item Can't localize lexical variable %s
 
@@ -740,6 +744,10 @@ times than it has returned.  This probably indicates an infinite
 recursion, unless you're writing strange benchmark programs, in which
 case it indicates something else.
 
+=item Did you mean &%s instead?
+
+(W) You probably referred to an imported subroutine &FOO as $FOO or some such.
+
 =item Did you mean $ or @ instead of %?
 
 (W) You probably said %hash{$key} when you meant $hash{$key} or @hash{@keys}.
@@ -769,6 +777,13 @@ declaration.
 
 (S) An internal routine called free() on something that had already
 been freed.
+
+=item elseif should be elsif
+
+(S) There is no keyword "elseif" in Perl because Larry thinks it's
+ugly.  Your code will be interpreted as an attempt to call a method
+named "elseif" for the class returned by the following block.  This is
+unlikely to be what you want.
 
 =item END failed--cleanup aborted
 
@@ -1570,6 +1585,11 @@ last argument of the previous construct, for example:
 
     open FOO || die;
 
+=item Prototype mismatch: (%s) vs (%s)
+
+(S) The subroutine being defined had a predeclared (forward) declaration
+with a different function prototype.
+
 =item Read on closed filehandle <%s>
 
 (W) The filehandle you're reading from got itself closed sometime before now.
@@ -1742,7 +1762,7 @@ But before sort was a keyword, people sometimes used it as a filehandle.
 =item Sort subroutine didn't return a numeric value
 
 (F) A sort comparison routine must return a number.  You probably blew
-it by not using C<E<lt>=E<gt> or C<cmp>, or by not using them correctly.
+it by not using C<E<lt>=E<gt>> or C<cmp>, or by not using them correctly.
 See L<perlfunc/sort>.
 
 =item Sort subroutine didn't return single value
@@ -1931,6 +1951,10 @@ certain type.  Arrays must be @NAME or @{EXPR}.  Hashes must be
 (W) A umask of 222 is incorrect.  It should be 0222, since octal literals
 always start with 0 in Perl, as in C.
 
+=item Unable to create sub named "%s"
+
+(F) You attempted to create or access a subroutine with an illegal name.
+
 =item Unbalanced context: %d more PUSHes than POPs
 
 (W) The exit code detected an internal inconsistency in how many execution
@@ -1975,6 +1999,11 @@ or if it was, it has since been undefined.
 
 (F) The sort comparison routine specified is declared but doesn't seem to
 have been defined yet.  See L<perlfunc/sort>.
+
+=item Undefined top format "%s" called
+
+(F) The format indicated doesn't seem to exist.  Perhaps it's really in
+another package?  See L<perlform>.
 
 =item unexec of %s into %s failed!
 
@@ -2076,6 +2105,11 @@ from C.  This usually means there's a better way to do it in Perl.
 because there's a better way to do it, and also because the old way has
 bad side effects.
 
+=item Use of bare << to mean <<"" is deprecated
+
+(D) You are now encouraged to use the explicitly quoted form if you
+wish to use a blank line as the terminator of the here-document.
+
 =item Use of implicit split to @_ is deprecated
 
 (D) It makes a lot of work for the compiler when you clobber a
@@ -2118,6 +2152,14 @@ while parentheses do not.  So when a parenthesized list is evaluated in
 a scalar context, the comma is treated like C's comma operator, which
 throws away the left argument, which is not what you want.  See
 L<perlref> for more on this.
+
+=item Variable "%s" is not exported
+
+(F) While "use strict" in effect, you referred to a global variable
+that you apparently thought was imported from another module, because
+something else of the same name (usually a subroutine) is exported
+by that module.  It usually means you put the wrong funny character
+on the front of your variable.
 
 =item Warning: unable to close filehandle %s properly.
 

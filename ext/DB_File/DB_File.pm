@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 7th October 1995
-# version 1.0
+# last modified 14th November 1995
+# version 1.01
 
 package DB_File::HASHINFO ;
 use Carp;
@@ -170,7 +170,7 @@ sub CLEAR { croak "DB_File::BTREEINFO::CLEAR is not implemented" }
 package DB_File ;
 use Carp;
 
-$VERSION = 1.0 ;
+$VERSION = 1.01 ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = TIEHASH DB_File::BTREEINFO ;
@@ -546,7 +546,7 @@ errors to be caught at run time. Thanks to Judith Grass
 
 Added prototype support for multiple btree compare callbacks.
 
-=head 1.0
+=head2 1.0
 
 B<DB_File> has been in use for over a year. To reflect that, the
 version number has been incremented to 1.0.
@@ -555,6 +555,13 @@ Added complete support for multiple concurrent callbacks.
 
 Using the I<push> method on an empty list didn't work properly. This
 has been fixed.
+
+=head2 1.01
+
+Fixed a core dump problem with SunOS.
+
+The return value from TIEHASH wasn't set to NULL when dbopen returned
+an error.
 
 =head1 WARNINGS
 

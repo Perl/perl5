@@ -15,6 +15,12 @@ $header = '$RCSfile: perl5db.pl,v $$Revision: 4.1 $$Date: 92/08/07 18:24:07 $';
 #
 # $Log:	perldb.pl,v $
 
+# Is Perl being run from Emacs?
+$emacs = ((defined $main::ARGV[0]) and ($main::ARGV[0] eq '-emacs'));
+shift(@main::ARGV) if $emacs;
+
+#require Term::ReadLine;
+
 local($^W) = 0;
 
 if (-e "/dev/tty") {
@@ -30,6 +36,15 @@ else {
     $rcfile="perldb.ini";
 }
 
+# Around a bug:
+if (defined $ENV{'OS2_SHELL'}) { # In OS/2
+  if ($DB::emacs) {
+    $console = undef;
+  } else {
+    $console = "/dev/con";
+  }
+}
+
 open(IN, "<$console") || open(IN,  "<&STDIN");	# so we don't dingle stdin
 open(OUT,">$console") || open(OUT, ">&STDERR")
     || open(OUT, ">&STDOUT");	# so we don't dongle stdout
@@ -38,10 +53,6 @@ $| = 1;				# for DB::OUT
 select(STDOUT);
 $| = 1;				# for real STDOUT
 $sub = '';
-
-# Is Perl being run from Emacs?
-$emacs = $main::ARGV[0] eq '-emacs';
-shift(@main::ARGV) if $emacs;
 
 $header =~ s/.Header: ([^,]+),v(\s+\S+\s+\S+).*$/$1$2/;
 print OUT "\nLoading DB routines from $header\n";

@@ -5,13 +5,7 @@ $!  Charles Bailey  bailey@genetics.upenn.edu
 $
 $!  A little basic setup
 $   On Error Then Goto wrapup
-$   olddef = F$Environment("Default")
-$   If F$TrnLNm("Perl_Root").nes.""
-$   Then
-$       Set Default Perl_Root:[t]
-$   Else
-$       Set Default [.t]
-$   EndIf
+$   Set Default [.t]
 $
 $!  Pick up a copy of perl to use for the tests
 $   Delete/Log/NoConfirm Perl.;*
@@ -185,5 +179,5 @@ print sprintf("u=%g  s=%g  cu=%g  cs=%g  files=%d  tests=%d\n",
 $$END-OF-TEST$$
 $ wrapup:
 $   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
-$   Set Default &olddef
+$   Set Default [-]
 $   Exit

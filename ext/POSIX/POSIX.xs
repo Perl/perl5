@@ -1483,21 +1483,6 @@ int arg;
 	    break;
 	}
 	if (name[1] == '_') {
-#ifdef S_ISBLK
-	    if (strEQ(name, "S_ISBLK")) return S_ISBLK(arg);
-#endif
-#ifdef S_ISCHR
-	    if (strEQ(name, "S_ISCHR")) return S_ISCHR(arg);
-#endif
-#ifdef S_ISDIR
-	    if (strEQ(name, "S_ISDIR")) return S_ISDIR(arg);
-#endif
-#ifdef S_ISFIFO
-	    if (strEQ(name, "S_ISFIFO")) return S_ISFIFO(arg);
-#endif
-#ifdef S_ISREG
-	    if (strEQ(name, "S_ISREG")) return S_ISREG(arg);
-#endif
 	    if (strEQ(name, "S_ISGID"))
 #ifdef S_ISGID
 		return S_ISGID;
@@ -1581,6 +1566,22 @@ int arg;
 		return S_IXUSR;
 #else
 		goto not_there;
+#endif
+	    errno = EAGAIN;		/* the following aren't constants */
+#ifdef S_ISBLK
+	    if (strEQ(name, "S_ISBLK")) return S_ISBLK(arg);
+#endif
+#ifdef S_ISCHR
+	    if (strEQ(name, "S_ISCHR")) return S_ISCHR(arg);
+#endif
+#ifdef S_ISDIR
+	    if (strEQ(name, "S_ISDIR")) return S_ISDIR(arg);
+#endif
+#ifdef S_ISFIFO
+	    if (strEQ(name, "S_ISFIFO")) return S_ISFIFO(arg);
+#endif
+#ifdef S_ISREG
+	    if (strEQ(name, "S_ISREG")) return S_ISREG(arg);
 #endif
 	    break;
 	}
@@ -1844,6 +1845,19 @@ int arg;
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "WNOHANG"))
+#ifdef WNOHANG
+	    return WNOHANG;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "WUNTRACED"))
+#ifdef WUNTRACED
+	    return WUNTRACED;
+#else
+	    goto not_there;
+#endif
+	errno = EAGAIN;		/* the following aren't constants */
 #ifdef WEXITSTATUS
 	if (strEQ(name, "WEXITSTATUS")) return WEXITSTATUS(arg);
 #endif
@@ -1856,23 +1870,11 @@ int arg;
 #ifdef WIFSTOPPED
 	if (strEQ(name, "WIFSTOPPED")) return WIFSTOPPED(arg);
 #endif
-	if (strEQ(name, "WNOHANG"))
-#ifdef WNOHANG
-	    return WNOHANG;
-#else
-	    goto not_there;
-#endif
 #ifdef WSTOPSIG
 	if (strEQ(name, "WSTOPSIG")) return WSTOPSIG(arg);
 #endif
 #ifdef WTERMSIG
 	if (strEQ(name, "WTERMSIG")) return WTERMSIG(arg);
-#endif
-	if (strEQ(name, "WUNTRACED"))
-#ifdef WUNTRACED
-	    return WUNTRACED;
-#else
-	    goto not_there;
 #endif
 	break;
     case 'X':
@@ -2753,8 +2755,8 @@ sigaction(sig, action, oldaction = 0)
 	    POSIX__SigSet sigset;
 	    SV** svp;
 	    SV** sigsvp = hv_fetch(GvHVn(siggv),
-				 whichsigname(sig),
-				 strlen(whichsigname(sig)),
+				 sig_name[sig],
+				 strlen(sig_name[sig]),
 				 TRUE);
 
 	    /* Remember old handler name if desired. */

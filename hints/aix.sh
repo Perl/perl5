@@ -43,7 +43,10 @@ scope_cflags='case "$osvers" in 4.1*) optimize=" ";; esac'
 # Changes for dynamic linking by Wayne Scott <wscott@ichips.intel.com>
 #
 # Tell perl which symbols to export for dynamic linking.
-ccdlflags='-bE:perl.exp'
+case "$cc" in
+*gcc*) ccdlflags='-Xlinker -bE:perl.exp' ;;
+*) ccdlflags='-bE:perl.exp' ;;
+esac
 
 # The first 3 options would not be needed if dynamic libs. could be linked
 # with the compiler instead of ld.

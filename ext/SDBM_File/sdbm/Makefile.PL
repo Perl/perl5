@@ -14,13 +14,13 @@ sub MY::top_targets {
 	'
 all :: static
 
-static ::	libsdbm.a
+static ::	libsdbm$(LIB_EXT)
 
 config ::
 
-libsdbm.a: $(O_FILES)
-	ar cr libsdbm.a $(O_FILES)
-	$(RANLIB) libsdbm.a
+libsdbm$(LIB_EXT): $(O_FILES)
+	$(AR) cr libsdbm$(LIB_EXT) $(O_FILES)
+	$(RANLIB) libsdbm$(LIB_EXT)
 
 lint:
 	lint -abchx $(LIBSRCS)

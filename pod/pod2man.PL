@@ -1,0 +1,665 @@
+#!/usr/local/bin/perl
+
+use Config;
+use File::Basename qw(&basename &dirname);
+
+# List explicitly here the variables you want Configure to
+# generate.  Metaconfig only looks for shell variables, so you
+# have to mention them as if they were shell variables, not
+# %Config entries.  Thus you write
+#  $startperl
+# to ensure Configure will look for $Config{startperl}.
+
+# This forces PL files to create target in same directory as PL file.
+# This is so that make depend always knows where to find PL derivatives.
+chdir(dirname($0));
+($file = basename($0)) =~ s/\.PL$//;
+$file =~ s/\.pl$//
+	if ($Config{'osname'} eq 'VMS' or
+	    $Config{'osname'} eq 'OS2');  # "case-forgiving"
+
+open OUT,">$file" or die "Can't create $file: $!";
+
+print "Extracting $file (with variable substitutions)\n";
+
+# In this section, perl variables will be expanded during extraction.
+# You can use $Config{...} to use Configure variables.
+
+print OUT <<"!GROK!THIS!";
+$Config{'startperl'}
+    eval 'exec perl -S \$0 "\$@"'
+	if 0;
+!GROK!THIS!
+
+# In the following, perl variables are not expanded during extraction.
+
+print OUT <<'!NO!SUBS!';
+
+$/ = "";
+$cutting = 1;
+
+$CFont = 'CW';
+if ($ARGV[0] =~ s/-fc(.*)//) {
+    shift;
+    $CFont = $1 || shift;
+}
+
+if (length($CFont) == 2) {
+    $CFont_embed = "\\f($CFont";
+} 
+elsif (length($CFont) == 1) {
+    $CFont_embed = "\\f$CFont";
+} 
+else {
+    die "Roff font should be 1 or 2 chars, not `$CFont_embed'";
+} 
+
+$name = @ARGV ? $ARGV[0] : "something";
+$name =~ s/\..*//;
+
+print <<"END";
+.rn '' }`
+''' \$RCSfile\$\$Revision\$\$Date\$
+''' 
+''' \$Log\$
+''' 
+.de Sh
+.br
+.if t .Sp
+.ne 5
+.PP
+\\fB\\\\\$1\\fR
+.PP
+..
+.de Sp
+.if t .sp .5v
+.if n .sp
+..
+.de Ip
+.br
+.ie \\\\n(.\$>=3 .ne \\\\\$3
+.el .ne 3
+.IP "\\\\\$1" \\\\\$2
+..
+.de Vb
+.ft $CFont
+.nf
+.ne \\\\\$1
+..
+.de Ve
+.ft R
+
+.fi
+..
+'''
+'''
+'''     Set up \\*(-- to give an unbreakable dash;
+'''     string Tr holds user defined translation string.
+'''     Bell System Logo is used as a dummy character.
+'''
+.tr \\(*W-|\\(bv\\*(Tr
+.ie n \\{\\
+.ds -- \\(*W-
+.if (\\n(.H=4u)&(1m=24u) .ds -- \\(*W\\h'-12u'\\(*W\\h'-12u'-\\" diablo 10 pitch
+.if (\\n(.H=4u)&(1m=20u) .ds -- \\(*W\\h'-12u'\\(*W\\h'-8u'-\\" diablo 12 pitch
+.ds L" ""
+.ds R" ""
+.ds L' '
+.ds R' '
+'br\\}
+.el\\{\\
+.ds -- \\(em\\|
+.tr \\*(Tr
+.ds L" ``
+.ds R" ''
+.ds L' `
+.ds R' '
+.if t .ds PI \\(*p
+.if n .ds PI PI
+'br\\}
+.TH \U$name\E 1 "\\*(RP"
+.UC
+END
+
+print <<'END';
+.if n .hy 0 
+.if n .na
+.ds C+ C\v'-.1v'\h'-1p'\s-2+\h'-1p'+\s0\v'.1v'\h'-1p'
+.de CQ          \" put $1 in typewriter font
+END
+print ".ft $CFont\n";
+print <<'END';
+'if n "\c
+'if t \\&\\$1\c
+'if n \\&\\$1\c
+'if n \&"
+\\&\\$2 \\$3 \\$4 \\$5 \\$6 \\$7
+'.ft R
+..
+.\" @(#)ms.acc 1.5 88/02/08 SMI; from UCB 4.2
+.	\" AM - accent mark definitions
+.bd S B 3
+.	\" fudge factors for nroff and troff
+.if n \{\
+.	ds #H 0
+.	ds #V .8m
+.	ds #F .3m
+.	ds #[ \f1
+.	ds #] \fP
+.\}
+.if t \{\
+.	ds #H ((1u-(\\\\n(.fu%2u))*.13m)
+.	ds #V .6m
+.	ds #F 0
+.	ds #[ \&
+.	ds #] \&
+.\}
+.	\" simple accents for nroff and troff
+.if n \{\
+.	ds ' \&
+.	ds ` \&
+.	ds ^ \&
+.	ds , \&
+.	ds ~ ~
+.	ds ? ?
+.	ds ! !
+.	ds / 
+.	ds q 
+.\}
+.if t \{\
+.	ds ' \\k:\h'-(\\n(.wu*8/10-\*(#H)'\'\h"|\\n:u"
+.	ds ` \\k:\h'-(\\n(.wu*8/10-\*(#H)'\`\h'|\\n:u'
+.	ds ^ \\k:\h'-(\\n(.wu*10/11-\*(#H)'^\h'|\\n:u'
+.	ds , \\k:\h'-(\\n(.wu*8/10)',\h'|\\n:u'
+.	ds ~ \\k:\h'-(\\n(.wu-\*(#H-.1m)'~\h'|\\n:u'
+.	ds ? \s-2c\h'-\w'c'u*7/10'\u\h'\*(#H'\zi\d\s+2\h'\w'c'u*8/10'
+.	ds ! \s-2\(or\s+2\h'-\w'\(or'u'\v'-.8m'.\v'.8m'
+.	ds / \\k:\h'-(\\n(.wu*8/10-\*(#H)'\z\(sl\h'|\\n:u'
+.	ds q o\h'-\w'o'u*8/10'\s-4\v'.4m'\z\(*i\v'-.4m'\s+4\h'\w'o'u*8/10'
+.\}
+.	\" troff and (daisy-wheel) nroff accents
+.ds : \\k:\h'-(\\n(.wu*8/10-\*(#H+.1m+\*(#F)'\v'-\*(#V'\z.\h'.2m+\*(#F'.\h'|\\n:u'\v'\*(#V'
+.ds 8 \h'\*(#H'\(*b\h'-\*(#H'
+.ds v \\k:\h'-(\\n(.wu*9/10-\*(#H)'\v'-\*(#V'\*(#[\s-4v\s0\v'\*(#V'\h'|\\n:u'\*(#]
+.ds _ \\k:\h'-(\\n(.wu*9/10-\*(#H+(\*(#F*2/3))'\v'-.4m'\z\(hy\v'.4m'\h'|\\n:u'
+.ds . \\k:\h'-(\\n(.wu*8/10)'\v'\*(#V*4/10'\z.\v'-\*(#V*4/10'\h'|\\n:u'
+.ds 3 \*(#[\v'.2m'\s-2\&3\s0\v'-.2m'\*(#]
+.ds o \\k:\h'-(\\n(.wu+\w'\(de'u-\*(#H)/2u'\v'-.3n'\*(#[\z\(de\v'.3n'\h'|\\n:u'\*(#]
+.ds d- \h'\*(#H'\(pd\h'-\w'~'u'\v'-.25m'\f2\(hy\fP\v'.25m'\h'-\*(#H'
+.ds D- D\\k:\h'-\w'D'u'\v'-.11m'\z\(hy\v'.11m'\h'|\\n:u'
+.ds th \*(#[\v'.3m'\s+1I\s-1\v'-.3m'\h'-(\w'I'u*2/3)'\s-1o\s+1\*(#]
+.ds Th \*(#[\s+2I\s-2\h'-\w'I'u*3/5'\v'-.3m'o\v'.3m'\*(#]
+.ds ae a\h'-(\w'a'u*4/10)'e
+.ds Ae A\h'-(\w'A'u*4/10)'E
+.ds oe o\h'-(\w'o'u*4/10)'e
+.ds Oe O\h'-(\w'O'u*4/10)'E
+.	\" corrections for vroff
+.if v .ds ~ \\k:\h'-(\\n(.wu*9/10-\*(#H)'\s-2\u~\d\s+2\h'|\\n:u'
+.if v .ds ^ \\k:\h'-(\\n(.wu*10/11-\*(#H)'\v'-.4m'^\v'.4m'\h'|\\n:u'
+.	\" for low resolution devices (crt and lpr)
+.if \n(.H>23 .if \n(.V>19 \
+\{\
+.	ds : e
+.	ds 8 ss
+.	ds v \h'-1'\o'\(aa\(ga'
+.	ds _ \h'-1'^
+.	ds . \h'-1'.
+.	ds 3 3
+.	ds o a
+.	ds d- d\h'-1'\(ga
+.	ds D- D\h'-1'\(hy
+.	ds th \o'bp'
+.	ds Th \o'LP'
+.	ds ae ae
+.	ds Ae AE
+.	ds oe oe
+.	ds Oe OE
+.\}
+.rm #[ #] #H #V #F C
+END
+
+$indent = 0;
+
+while (<>) {
+    if ($cutting) {
+	next unless /^=/;
+	$cutting = 0;
+    }
+    chomp;
+
+    # Translate verbatim paragraph
+
+    if (/^\s/) {
+	@lines = split(/\n/);
+	for (@lines) {
+	    1 while s
+		{^( [^\t]* ) \t ( \t* ) }
+		{ $1 . ' ' x (8 - (length($1)%8) + 8 * (length($2))) }ex;
+	    s/\\/\\e/g;
+	    s/\A/\\&/s;
+	}
+	$lines = @lines;
+	makespace() unless $verbatim++;
+	print ".Vb $lines\n";
+	print join("\n", @lines), "\n";
+	print ".Ve\n";
+	$needspace = 0;
+	next;
+    }
+
+    $verbatim = 0;
+
+    # check for things that'll hosed our noremap scheme; affects $_
+    init_noremap();
+
+    if (!/^=item/) {
+
+	# trofficate backslashes; must do it before what happens below
+	s/\\/noremap('\\e')/ge;
+
+	# first hide the escapes in case we need to 
+	# intuit something and get it wrong due to fmting
+
+	s/([A-Z]<[^<>]*>)/noremap($1)/ge;
+
+	# func() is a reference to a perl function
+	s{
+	    \b
+	    (
+		[:\w]+ \(\)
+	    )
+	} {I<$1>}gx;
+
+	# func(n) is a reference to a man page
+	s{
+	    (\w+)
+	    (
+		\(
+		    [^\s,\051]+
+		\)
+	    )
+	} {I<$1>\\|$2}gx;
+
+	# convert simple variable references
+	s/(\s+)([\$\@%][\w:]+)/${1}C<$2>/g;
+
+	if (m{ (
+		    [\-\w]+
+		    \(
+			[^\051]*?
+			[\@\$,]
+			[^\051]*?
+		    \)
+		)
+	    }x && $` !~ /([LCI]<[^<>]*|-)$/ && !/^=\w/) 
+	{
+	    warn "``$1'' should be a [LCI]<$1> ref";
+	} 
+
+	while (/(-[a-zA-Z])\b/g && $` !~ /[\w\-]$/) {
+	    warn "``$1'' should be [CB]<$1> ref";
+	} 
+
+	# put it back so we get the <> processed again;
+	clear_noremap(0); # 0 means leave the E's
+
+    } else {
+	# trofficate backslashes
+	s/\\/noremap('\\e')/ge;
+
+    } 
+
+    # need to hide E<> first; they're processed in clear_noremap
+    s/(E<[^<>]+>)/noremap($1)/ge;
+
+
+    $maxnest = 10;
+    while ($maxnest-- && /[A-Z]</) {
+
+	# can't do C font here
+	s/([BI])<([^<>]*)>/font($1) . $2 . font('R')/eg;
+
+	# files and filelike refs in italics
+	s/F<([^<>]*)>/I<$1>/g;
+
+	# no break -- usually we want C<> for this
+	s/S<([^<>]*)>/nobreak($1)/eg;
+
+	# LREF: a manpage(3f) 
+	s:L<([a-zA-Z][^\s\/]+)(\([^\)]+\))?>:the I<$1>$2 manpage:g;
+
+	# LREF: an =item on another manpage
+	s{
+	    L<
+		([^/]+)
+		/
+		(
+		    [:\w]+
+		    (\(\))?
+		)
+	    >
+	} {the C<$2> entry in the I<$1> manpage}gx;
+
+	# LREF: an =item on this manpage
+	s{
+	   ((?:
+	    L<
+		/
+		(
+		    [:\w]+
+		    (\(\))?
+		)
+	    >
+	    (,?\s+(and\s+)?)?
+	  )+)
+	} { internal_lrefs($1) }gex;
+
+	# LREF: a =head2 (head1?), maybe on a manpage, maybe right here
+	# the "func" can disambiguate
+	s{
+	    L<
+		(?:
+		    ([a-zA-Z]\S+?) / 
+		)?
+		"?(.*?)"?
+	    >
+	}{
+	    do {
+		$1 	# if no $1, assume it means on this page.
+		    ?  "the section on I<$2> in the I<$1> manpage"
+		    :  "the section on I<$2>"
+	    } 
+	}gex;
+
+	s/Z<>/\\&/g;
+
+	# comes last because not subject to reprocessing
+	s/C<([^<>]*)>/noremap("${CFont_embed}${1}\\fR")/eg;
+    }
+
+    if (s/^=//) {
+	$needspace = 0;		# Assume this.
+
+	s/\n/ /g;
+
+	($Cmd, $_) = split(' ', $_, 2);
+
+	if (defined $_) {
+	    &escapes;
+	    s/"/""/g;
+	}
+
+	clear_noremap(1);
+
+	if ($Cmd eq 'cut') {
+	    $cutting = 1;
+	}
+	elsif ($Cmd eq 'head1') {
+	    print qq{.SH "$_"\n}
+	}
+	elsif ($Cmd eq 'head2') {
+	    print qq{.Sh "$_"\n}
+	}
+	elsif ($Cmd eq 'over') {
+	    push(@indent,$indent);
+	    $indent = $_ + 0;
+	}
+	elsif ($Cmd eq 'back') {
+	    $indent = pop(@indent);
+	    warn "Unmatched =back\n" unless defined $indent;
+	    $needspace = 1;
+	}
+	elsif ($Cmd eq 'item') {
+	    s/^\*( |$)/\\(bu$1/g;
+	    print STDOUT qq{.Ip "$_" $indent\n};
+	}
+	else {
+	    warn "Unrecognized directive: $Cmd\n";
+	}
+    }
+    else {
+	if ($needspace) {
+	    &makespace;
+	}
+	&escapes;
+	clear_noremap(1);
+	print $_, "\n";
+	$needspace = 1;
+    }
+}
+
+print <<"END";
+
+.rn }` ''
+END
+
+#########################################################################
+
+sub nobreak {
+    my $string = shift;
+    $string =~ s/ /\\ /g;
+    $string;
+}
+
+sub escapes {
+
+    # translate the minus in foo-bar into foo\-bar for roff
+    s/([^0-9a-z-])-([^-])/$1\\-$2/g;
+
+    # make -- into the string version \*(-- (defined above)
+    s/\b--\b/\\*(--/g;
+    s/"--([^"])/"\\*(--$1/g;  # should be a better way
+    s/([^"])--"/$1\\*(--"/g;
+
+    # fix up quotes; this is somewhat tricky
+    if (!/""/) {
+	s/(^|\s)(['"])/noremap("$1\\*(L$2")/ge;
+	s/(['"])($|[\-\s,;\\!?.])/noremap("\\*(R$1$2")/ge;
+    }
+
+    #s/(?!")(?:.)--(?!")(?:.)/\\*(--/g;
+    #s/(?:(?!")(?:.)--(?:"))|(?:(?:")--(?!")(?:.))/\\*(--/g;
+    
+
+    # make sure that func() keeps a bit a space tween the parens
+    ### s/\b\(\)/\\|()/g;
+    ### s/\b\(\)/(\\|)/g;
+
+    # make C++ into \*C+, which is a squinched version (defined above)
+    s/\bC\+\+/\\*(C+/g;
+
+    # make double underbars have a little tiny space between them
+    s/__/_\\|_/g;
+
+    # PI goes to \*(-- (defined above)
+    s/\bPI\b/noremap('\\*(PI')/ge;
+
+    # make all caps a teeny bit smaller, but don't muck with embedded code literals
+    my $hidCFont = font('C');
+    if ($Cmd !~ /^head1/) { # SH already makes smaller
+	# /g isn't enough; 1 while or we'll be off
+
+#	1 while s{
+#	    (?!$hidCFont)(..|^.|^)
+#	    \b
+#	    (
+#		[A-Z][\/A-Z+:\-\d_$.]+
+#	    )
+#	    (s?) 		
+#	    \b
+#	} {$1\\s-1$2\\s0}gmox;
+
+	1 while s{
+	    (?!$hidCFont)(..|^.|^)
+	    (
+		\b[A-Z]{2,}[\/A-Z+:\-\d_\$]*\b
+	    )
+	} { 
+	    $1 . noremap( '\\s-1' .  $2 . '\\s0' )
+	}egmox;
+
+    }
+}
+
+# make troff just be normal, but make small nroff get quoted
+# decided to just put the quotes in the text; sigh;
+sub ccvt {
+     local($_,$prev) = @_;
+     if ( /^\W+$/ && !/^\$./ ) {
+ 	($prev && "\n") . noremap(qq{.CQ $_ \n\\&});
+ 	# what about $" ?
+     } else {
+ 	noremap(qq{${CFont_embed}$_\\fR});
+     } 
+    noremap(qq{.CQ "$_" \n\\&});
+} 
+
+sub makespace {
+    if ($indent) {
+	print ".Sp\n";
+    }
+    else {
+	print ".PP\n";
+    }
+}
+
+sub font {
+    local($font) = shift;
+    return '\\f' . noremap($font);
+} 
+
+sub noremap {
+    local($thing_to_hide) = shift;
+    $thing_to_hide =~ tr/\000-\177/\200-\377/;
+    return $thing_to_hide;
+} 
+
+sub init_noremap {
+    if ( /[\200-\377]/ ) {
+	warn "hit bit char in input stream";
+    } 
+} 
+
+sub clear_noremap {
+    my $ready_to_print = $_[0];
+
+    tr/\200-\377/\000-\177/;
+
+    # trofficate backslashes
+    # s/(?!\\e)(?:..|^.|^)\\/\\e/g;
+
+    # now for the E<>s, which have been hidden until now
+    # otherwise the interative \w<> processing would have
+    # been hosed by the E<gt>
+    s {
+	    E<	
+	    ( [A-Za-z]+ )	
+	    >	
+    } { 
+	 do {	
+	     exists $HTML_Escapes{$1}
+		? do { $HTML_Escapes{$1} }
+		: do {
+		    warn "Unknown escape: $& in $_";
+		    "E<$1>";
+		} 
+	 } 
+    }egx if $ready_to_print;
+} 
+
+sub internal_lrefs {
+    local($_) = shift;
+
+    s{L</([^>]+)>}{$1}g;
+    my(@items) = split( /(?:,?\s+(?:and\s+)?)/ );
+    my $retstr = "the ";
+    my $i;
+    for ($i = 0; $i <= $#items; $i++) {
+	$retstr .= "C<$items[$i]>";
+	$retstr .= ", " if @items > 2 && $i != $#items;
+	$retstr .= " and " if $i+2 == @items;
+    } 
+
+    $retstr .= " entr" . ( @items > 1  ? "ies" : "y" )
+	    .  " elsewhere in this document";
+
+    return $retstr;
+
+} 
+
+BEGIN {
+%HTML_Escapes = (
+    'amp'	=>	'&',	#   ampersand
+    'lt'	=>	'<',	#   left chevron, less-than
+    'gt'	=>	'>',	#   right chevron, greater-than
+    'quot'	=>	'"',	#   double quote
+
+    "Aacute"	=>	"A\\*'",	#   capital A, acute accent
+    "aacute"	=>	"a\\*'",	#   small a, acute accent
+    "Acirc"	=>	"A\\*^",	#   capital A, circumflex accent
+    "acirc"	=>	"a\\*^",	#   small a, circumflex accent
+    "AElig"	=>	'\*(AE',	#   capital AE diphthong (ligature)
+    "aelig"	=>	'\*(ae',	#   small ae diphthong (ligature)
+    "Agrave"	=>	"A\\*`",	#   capital A, grave accent
+    "agrave"	=>	"A\\*`",	#   small a, grave accent
+    "Aring"	=>	'A\\*o',	#   capital A, ring
+    "aring"	=>	'a\\*o',	#   small a, ring
+    "Atilde"	=>	'A\\*~',	#   capital A, tilde
+    "atilde"	=>	'a\\*~',	#   small a, tilde
+    "Auml"	=>	'A\\*:',	#   capital A, dieresis or umlaut mark
+    "auml"	=>	'a\\*:',	#   small a, dieresis or umlaut mark
+    "Ccedil"	=>	'C\\*,',	#   capital C, cedilla
+    "ccedil"	=>	'c\\*,',	#   small c, cedilla
+    "Eacute"	=>	"E\\*'",	#   capital E, acute accent
+    "eacute"	=>	"e\\*'",	#   small e, acute accent
+    "Ecirc"	=>	"E\\*^",	#   capital E, circumflex accent
+    "ecirc"	=>	"e\\*^",	#   small e, circumflex accent
+    "Egrave"	=>	"E\\*`",	#   capital E, grave accent
+    "egrave"	=>	"e\\*`",	#   small e, grave accent
+    "ETH"	=>	'\\*(D-',	#   capital Eth, Icelandic
+    "eth"	=>	'\\*(d-',	#   small eth, Icelandic
+    "Euml"	=>	"E\\*:",	#   capital E, dieresis or umlaut mark
+    "euml"	=>	"e\\*:",	#   small e, dieresis or umlaut mark
+    "Iacute"	=>	"I\\*'",	#   capital I, acute accent
+    "iacute"	=>	"i\\*'",	#   small i, acute accent
+    "Icirc"	=>	"I\\*^",	#   capital I, circumflex accent
+    "icirc"	=>	"i\\*^",	#   small i, circumflex accent
+    "Igrave"	=>	"I\\*`",	#   capital I, grave accent
+    "igrave"	=>	"i\\*`",	#   small i, grave accent
+    "Iuml"	=>	"I\\*:",	#   capital I, dieresis or umlaut mark
+    "iuml"	=>	"i\\*:",	#   small i, dieresis or umlaut mark
+    "Ntilde"	=>	'N\*~',		#   capital N, tilde
+    "ntilde"	=>	'n\*~',		#   small n, tilde
+    "Oacute"	=>	"O\\*'",	#   capital O, acute accent
+    "oacute"	=>	"o\\*'",	#   small o, acute accent
+    "Ocirc"	=>	"O\\*^",	#   capital O, circumflex accent
+    "ocirc"	=>	"o\\*^",	#   small o, circumflex accent
+    "Ograve"	=>	"O\\*`",	#   capital O, grave accent
+    "ograve"	=>	"o\\*`",	#   small o, grave accent
+    "Oslash"	=>	"O\\*/",	#   capital O, slash
+    "oslash"	=>	"o\\*/",	#   small o, slash
+    "Otilde"	=>	"O\\*~",	#   capital O, tilde
+    "otilde"	=>	"o\\*~",	#   small o, tilde
+    "Ouml"	=>	"O\\*:",	#   capital O, dieresis or umlaut mark
+    "ouml"	=>	"o\\*:",	#   small o, dieresis or umlaut mark
+    "szlig"	=>	'\*8',		#   small sharp s, German (sz ligature)
+    "THORN"	=>	'\\*(Th',	#   capital THORN, Icelandic
+    "thorn"	=>	'\\*(th',,	#   small thorn, Icelandic
+    "Uacute"	=>	"U\\*'",	#   capital U, acute accent
+    "uacute"	=>	"u\\*'",	#   small u, acute accent
+    "Ucirc"	=>	"U\\*^",	#   capital U, circumflex accent
+    "ucirc"	=>	"u\\*^",	#   small u, circumflex accent
+    "Ugrave"	=>	"U\\*`",	#   capital U, grave accent
+    "ugrave"	=>	"u\\*`",	#   small u, grave accent
+    "Uuml"	=>	"U\\*:",	#   capital U, dieresis or umlaut mark
+    "uuml"	=>	"u\\*:",	#   small u, dieresis or umlaut mark
+    "Yacute"	=>	"Y\\*'",	#   capital Y, acute accent
+    "yacute"	=>	"y\\*'",	#   small y, acute accent
+    "yuml"	=>	"y\\*:",	#   small y, dieresis or umlaut mark
+);
+}
+!NO!SUBS!
+
+close OUT or die "Can't close $file: $!";
+chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
+exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';

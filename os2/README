@@ -1,0 +1,155 @@
+# This message contains the description of the patch.
+# The actual patch will be posted to p5-p later, the parts that
+# are relevant to other lists will be posted there separately
+#
+# This is needed _before_ application of the patch:
+
+mkdir os2
+touch os2/Makefile.SH hints/os2.sh os2/os2.c os2/os2ish.h
+touch ext/DynaLoader/dl_os2.xs
+exit 0
+
+========================================================
+
+The OS/2 patchkit was submitted by ilya@math.ohio-state.edu.  I have
+applied some parts that I suspect won't cause any problems.
+Others do things that I haven't had time to fully consider.
+
+Still other patches included here should perhaps be integrated with the
+metaconfig package that generates Configure.
+
+	Andy Dougherty		<doughera@lafcol.lafayette.edu>
+
+========================================================
+
+Notes on the patch:
+~~~~~~~~~~~~~~~~~~~
+1) run the above commands
+2)  patches should be applied as
+	patch -p0 <.....
+
+Patches are relative to perl5.001n.
+It is tested under Solaris and OS/2.
+The complete distribution of this patch is available on
+	ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2
+The file diff.for.o.Configure should be applied last. It will repatch
+Configure.
+
+Target:
+~~~~~~~
+
+This is not supposed to make a perfect Perl on OS/2. This patch is
+concerned only with perfect _build_ of Perl on OS/2. A lot of good
+features from Andreas Kaiser port missed this patch.
+
+Annotations of changes:
+~~~~~~~~~~~~~~~~~~~~~~~
+1) C files
+2) Configure
+3) MakeMaker
+4) Build tools
+
+1) C files
+	a) mkfifo macro added to Posix.c
+	b) Copyright notice for OS/2 port changed
+	c) MYMALLOC section in perl.h moved (why?)
+	d) setgrent grent and getgrent wrapped in ifdef
+	e) declarations for #if defined(MYMALLOC) && defined(HIDEMYMALLOC)
+		added
+	f) some diagnostics added to tests
+
+2) Configure 
+	0) Differences are provided with plain 5.001m + andys.
+	a) New vars exe_ext obj_ext lib_ext ar plibext 
+		firstmakefile archobjs cldlibs path_sep
+		I think they should be set by the hints files only
+	b) Support for extraction from NE style libraries.
+	c) a lot of 
+			cc -o whatever
+		lines did not have $ldopts.
+	d) The above variables are used throughout the file for checks
+
+3) Build tools and libraries
+
+	Since Configure can go out of sync with the other tools,
+		all the added configuration variables are checked for
+		existence, if not, set to reasonable values. Thus the
+		changes are independent of Configure patch.
+	
+	a) ln changed to $ln in some places
+	b) Makefiles and related scripts made to use $(O), $(A), $(AR)
+		using the vars found by Configure or defaulted to
+		some reasonable value.
+	c) $firstmakefile is the file make looks onto before Makefile
+	d) $plibext is the extension for the perl library
+	e) $archobjs is the list of additional object files needed for
+		local build.
+	   $cldlibs are libs to use when linking miniperl.
+	f) Sanity checks look for perl$Config{exe_ext}.
+	g) installperl was looping through config.sh in a wrong way
+	h) installperl needs to change permission to 0777 before
+		unlink on OS/2.
+	i) Cwd.pm updated for OS/2.                                   
+	j) Find.pm updated for OS/2.                                  
+	k) Shell.pm updated for OS/2.                                 
+	l) Makefile.SH : added sh in front of some commands           
+	   if $d_shrplib is 'custom', looks into                      
+	        $osname/Makefile.$osname.SH to construct the section  
+	        on shared Perl library.                               
+	m) clean target extended to delete some intermediate files    
+	n) Test::Harness works.
+
+
+Notes on build on OS/2:
+~~~~~~~~~~~~~~~~~~~~~~~
+The change of C code in this patch is based on the ak port of 5.001+.
+
+a) Make sure your sort is not the broken OS/2 one.
+
+b) when extraction perl5.001m.tar.gz you need to extract perl5.001m/Configure
+separately, since by default perl5.001m/configure overwrites it;
+
+c) Necessary manual intervention when compiling on OS/2:
+
+	Need to put perl.dll on LIBPATH after it is created.
+
+d) Compile summary:
+
+# Look for hints/os2.sh and correct what is different on your system
+# I have rather spartan configuration.
+
+	# Prefix means where to install:
+sh Configure -des -D prefix=f:/perl5m
+make
+	# Will probably die after build of miniperl (unless you have DLL
+	# from previous compile). Need to move DLL where it belongs
+make
+	# some warnings in POSIX.c
+make test
+	# some tests fail, 10 on my system
+	#
+	# before this you should create subdirs bin and lib in the 
+	# prefix directory (f:/perl5m above):
+make install
+	# man pages are not installed
+
+e) At the end of August GNU make and pdksh were too buggy for compile.
+Both maintainers have patches that make it possible to compile perl.
+They are included into distribution of this patch on 
+	ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2
+
+!!!!!!!!!!!!!!!!!
+If you see that some '/' became '\' in pdksh 5.2.3, you did not apply
+my patches!
+Same with segfaults in Make 3.74.
+!!!!!!!!!!!!!!!!!
+
+Problems reported: 
+
+a) one of the latest tr is broken, get an old one :-(
+	1.11 works. (On compuserver?)
+b) You need a perlglob.exe and link386.
+c) Get rid of invalid perl.dll on your LIBPATH.
+
+
+Send comments to ilya@math.ohio-state.edu.

@@ -499,7 +499,7 @@ I32 *flagp;
     }
 
     /* Check for proper termination. */
-    if (paren && *nextchar() != ')') {
+    if (paren && (regparse >= regxend || *nextchar() != ')')) {
 	FAIL("unmatched () in regexp");
     } else if (!paren && regparse < regxend) {
 	if (*regparse == ')') {
@@ -868,6 +868,15 @@ tryagain:
 	    goto defchar;
 	}
 	break;
+
+    case '#':
+	if (regflags & PMf_EXTENDED) {
+	    while (regparse < regxend && *regparse != '\n') regparse++;
+	    if (regparse < regxend)
+		goto tryagain;
+	}
+	/* FALL THROUGH */
+
     default: {
 	    register I32 len;
 	    register char ender;
@@ -965,6 +974,11 @@ tryagain:
 			break;
 		    }
 		    break;
+		case '#':
+		    if (regflags & PMf_EXTENDED) {
+			while (p < regxend && *p != '\n') p++;
+		    }
+		    /* FALL THROUGH */
 		case ' ': case '\t': case '\n': case '\r': case '\f': case '\v':
 		    if (regflags & PMf_EXTENDED) {
 			p++;
@@ -1159,16 +1173,16 @@ nextchar()
 {
     char* retval = regparse++;
 
-    if (regflags & PMf_EXTENDED) {
-	for (;;) {
-	    if (isSPACE(*regparse)) {
+    for (;;) {
+	if (*regparse == '(' && regparse[1] == '?' &&
+		regparse[2] == '#') {
+	    while (*regparse && *regparse != ')')
 		regparse++;
-		continue;
-	    }
-	    else if (*regparse == '(' && regparse[1] == '?' &&
-		    regparse[2] == '#') {
-		while (*regparse && *regparse != ')')
-		    regparse++;
+	    regparse++;
+	    continue;
+	}
+	if (regflags & PMf_EXTENDED) {
+	    if (isSPACE(*regparse)) {
 		regparse++;
 		continue;
 	    }
@@ -1178,10 +1192,9 @@ nextchar()
 		regparse++;
 		continue;
 	    }
-	    break;
 	}
+	return retval;
     }
-    return retval;
 }
 
 /*

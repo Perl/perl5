@@ -126,7 +126,7 @@ PP(pp_rv2gv)
 	GP *ogp = GvGP(sv);
 
 	SSCHECK(3);
-	SSPUSHPTR(sv);
+	SSPUSHPTR(SvREFCNT_inc(sv));
 	SSPUSHPTR(ogp);
 	SSPUSHINT(SAVEt_GP);
 
@@ -200,6 +200,8 @@ PP(pp_rv2sv)
 	    if (SvGMAGICAL(sv))
 		mg_get(sv);
 	    if (!SvOK(sv)) {
+		if (SvREADONLY(sv))
+		    croak(no_modify);
 		(void)SvUPGRADE(sv, SVt_RV);
 		SvRV(sv) = (op->op_private & OPpDEREF_HV ?
 			    (SV*)newHV() : (SV*)newAV());
@@ -256,9 +258,12 @@ PP(pp_rv2cv)
     GV *gv;
     HV *stash;
 
-    /* We always try to add a non-existent subroutine in case of AUTOLOAD. */
-    CV *cv = sv_2cv(TOPs, &stash, &gv, TRUE);
+    /* We usually try to add a non-existent subroutine in case of AUTOLOAD. */
+    /* (But not in defined().) */
+    CV *cv = sv_2cv(TOPs, &stash, &gv, !(op->op_flags & OPf_SPECIAL));
 
+    if (!cv)
+	cv = (CV*)&sv_undef;
     SETs((SV*)cv);
     RETURN;
 }
@@ -329,7 +334,7 @@ PP(pp_ref)
 
     sv = POPs;
     if (!sv || !SvROK(sv))
-	RETPUSHUNDEF;
+	RETPUSHNO;
 
     sv = SvRV(sv);
     pv = sv_reftype(sv,TRUE);
@@ -539,16 +544,14 @@ PP(pp_undef)
             break;
         }
     default:
-	if (sv != GvSV(defgv)) {
-	    if (SvPOK(sv) && SvLEN(sv)) {
-		(void)SvOOK_off(sv);
-		Safefree(SvPVX(sv));
-		SvPV_set(sv, Nullch);
-		SvLEN_set(sv, 0);
-	    }
-	    (void)SvOK_off(sv);
-	    SvSETMAGIC(sv);
+	if (SvPOK(sv) && SvLEN(sv)) {
+	    (void)SvOOK_off(sv);
+	    Safefree(SvPVX(sv));
+	    SvPV_set(sv, Nullch);
+	    SvLEN_set(sv, 0);
 	}
+	(void)SvOK_off(sv);
+	SvSETMAGIC(sv);
     }
 
     RETPUSHUNDEF;
@@ -890,7 +893,7 @@ PP(pp_bit_and) {
     dSP; dATARGET; tryAMAGICbin(band,opASSIGN); 
     {
       dPOPTOPssrl;
-      if (SvNIOK(left) || SvNIOK(right)) {
+      if (SvNIOKp(left) || SvNIOKp(right)) {
 	unsigned long value = U_L(SvNV(left));
 	value = value & U_L(SvNV(right));
 	SETn((double)value);
@@ -908,7 +911,7 @@ PP(pp_bit_xor)
     dSP; dATARGET; tryAMAGICbin(bxor,opASSIGN); 
     {
       dPOPTOPssrl;
-      if (SvNIOK(left) || SvNIOK(right)) {
+      if (SvNIOKp(left) || SvNIOKp(right)) {
 	unsigned long value = U_L(SvNV(left));
 	value = value ^ U_L(SvNV(right));
 	SETn((double)value);
@@ -926,7 +929,7 @@ PP(pp_bit_or)
     dSP; dATARGET; tryAMAGICbin(bor,opASSIGN); 
     {
       dPOPTOPssrl;
-      if (SvNIOK(left) || SvNIOK(right)) {
+      if (SvNIOKp(left) || SvNIOKp(right)) {
 	unsigned long value = U_L(SvNV(left));
 	value = value | U_L(SvNV(right));
 	SETn((double)value);
@@ -944,9 +947,11 @@ PP(pp_negate)
     dSP; dTARGET; tryAMAGICun(neg);
     {
 	dTOPss;
-	if (SvNIOK(sv))
+	if (SvGMAGICAL(sv))
+	    mg_get(sv);
+	if (SvNIOKp(sv))
 	    SETn(-SvNV(sv));
-	else if (SvPOK(sv)) {
+	else if (SvPOKp(sv)) {
 	    STRLEN len;
 	    char *s = SvPV(sv, len);
 	    if (isALPHA(*s) || *s == '_') {
@@ -961,6 +966,8 @@ PP(pp_negate)
 		sv_setnv(TARG, -SvNV(sv));
 	    SETTARG;
 	}
+	else
+	    SETn(-SvNV(sv));
     }
     RETURN;
 }
@@ -981,7 +988,7 @@ PP(pp_complement)
       dTOPss;
       register I32 anum;
 
-      if (SvNIOK(sv)) {
+      if (SvNIOKp(sv)) {
 	IV iv = ~SvIV(sv);
 	if (iv < 0)
 	    SETn( (double) ~U_L(SvNV(sv)) );
@@ -1885,6 +1892,8 @@ PP(pp_lslice)
     SV **firstlelem = stack_base + POPMARK + 1;
     register SV **firstrelem = lastlelem + 1;
     I32 arybase = curcop->cop_arybase;
+    I32 lval = op->op_flags & OPf_MOD;
+    I32 is_something_there = lval;
 
     register I32 max = lastrelem - lastlelem;
     register SV **lelem;
@@ -1923,8 +1932,13 @@ PP(pp_lslice)
 	    if (ix >= max || !(*lelem = firstrelem[ix]))
 		*lelem = &sv_undef;
 	}
+	if (!is_something_there && (SvOKp(*lelem) || SvGMAGICAL(*lelem)))
+	    is_something_there = TRUE;
     }
-    SP = lastlelem;
+    if (is_something_there)
+	SP = lastlelem;
+    else
+	SP = firstlelem - 1;
     RETURN;
 }
 
@@ -1947,8 +1961,6 @@ PP(pp_anonhash)
 	SV* key = *++MARK;
 	char *tmps;
 	SV *val = NEWSV(46, 0);
-        if (dowarn && key && SvROK(key))  /* Tom's gripe */
-            warn("Attempt to use reference as hash key");
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else

@@ -1,0 +1,128 @@
+diff -cr ..\perl5os2.patch\perl5.001m.andy/makedepend.SH ./makedepend.SH
+*** ../perl5os2.patch/perl5.001m.andy/makedepend.SH	Mon Oct 09 21:41:04 1995
+--- ./makedepend.SH	Thu Sep 28 00:00:28 1995
+***************
+*** 43,48 ****
+--- 43,51 ----
+  	;;
+  esac
+  
++ # In case Configure is not patched:
++ : ${firstmakefile=makefile}
++ 
+  # We need .. when we are in the x2p directory if we are using the
+  # cppstdin wrapper script.
+  # Put .. and . first so that we pick up the present cppstdin, not
+***************
+*** 53,69 ****
+  $cat /dev/null >.deptmp
+  $rm -f *.c.c c/*.c.c
+  if test -f Makefile; then
+!     cp Makefile makefile
+  fi
+! mf=makefile
+  if test -f $mf; then
+      defrule=`<$mf sed -n		\
+! 	-e '/^\.c\.o:.*;/{'		\
+  	-e    's/\$\*\.c//'		\
+  	-e    's/^[^;]*;[	 ]*//p'	\
+  	-e    q				\
+  	-e '}'				\
+! 	-e '/^\.c\.o: *$/{'		\
+  	-e    N				\
+  	-e    's/\$\*\.c//'		\
+  	-e    's/^.*\n[	 ]*//p'		\
+--- 56,72 ----
+  $cat /dev/null >.deptmp
+  $rm -f *.c.c c/*.c.c
+  if test -f Makefile; then
+!     cp Makefile $firstmakefile
+  fi
+! mf=$firstmakefile
+  if test -f $mf; then
+      defrule=`<$mf sed -n		\
+! 	-e '/^\.c\$(O_REGEXP):.*;/{'		\
+  	-e    's/\$\*\.c//'		\
+  	-e    's/^[^;]*;[	 ]*//p'	\
+  	-e    q				\
+  	-e '}'				\
+! 	-e '/^\.c\$(O_REGEXP): *$/{'		\
+  	-e    N				\
+  	-e    's/\$\*\.c//'		\
+  	-e    's/^.*\n[	 ]*//p'		\
+***************
+*** 91,97 ****
+      */*) finc="-I`echo $file | sed 's#/[^/]*$##`" ;;
+      *)   finc= ;;
+      esac
+!     $echo "Finding dependencies for $filebase.o."
+      ( $echo "#line 1 \"$file\""; \
+        $sed -n <$file \
+  	-e "/^${filebase}_init(/q" \
+--- 94,100 ----
+      */*) finc="-I`echo $file | sed 's#/[^/]*$##`" ;;
+      *)   finc= ;;
+      esac
+!     $echo "Finding dependencies for $filebase$obj_ext."
+      ( $echo "#line 1 \"$file\""; \
+        $sed -n <$file \
+  	-e "/^${filebase}_init(/q" \
+***************
+*** 107,114 ****
+  	-e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
+  	-e 's/^[	 ]*#[	 ]*line/#/' \
+  	-e '/^# *[0-9][0-9]* *[".\/]/!d' \
+! 	-e 's/^.*"\(.*\)".*$/'$filebase'.o: \1/' \
+! 	-e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'.o: \1/' \
+  	-e 's|: \./|: |' \
+  	-e 's|\.c\.c|.c|' | \
+      $uniq | $sort | $uniq >> .deptmp
+--- 110,117 ----
+  	-e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
+  	-e 's/^[	 ]*#[	 ]*line/#/' \
+  	-e '/^# *[0-9][0-9]* *[".\/]/!d' \
+! 	-e 's/^.*"\(.*\)".*$/'$filebase'\$(O): \1/' \
+! 	-e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(O): \1/' \
+  	-e 's|: \./|: |' \
+  	-e 's|\.c\.c|.c|' | \
+      $uniq | $sort | $uniq >> .deptmp
+***************
+*** 126,132 ****
+      $echo "Updating $mf..."
+      $echo "# If this runs make out of memory, delete /usr/include lines." \
+  	>> $mf.new
+!     $sed 's|^\(.*\.o:\) *\(.*/.*\.c\) *$|\1 \2; '"$defrule \2|" .deptmp \
+         >>$mf.new
+  else
+      $MAKE hlist || ($echo "Searching for .h files..."; \
+--- 129,135 ----
+      $echo "Updating $mf..."
+      $echo "# If this runs make out of memory, delete /usr/include lines." \
+  	>> $mf.new
+!     $sed 's|^\(.*\$(O_REGEXP):\) *\(.*/.*\.c\) *$|\1 \2; '"$defrule \2|" .deptmp \
+         >>$mf.new
+  else
+      $MAKE hlist || ($echo "Searching for .h files..."; \
+***************
+*** 136,145 ****
+      $echo "Updating $mf..."
+      <.clist $sed -n							\
+  	-e '/\//{'							\
+! 	-e   's|^\(.*\)/\(.*\)\.c|\2.o: \1/\2.c; '"$defrule \1/\2.c|p"	\
+  	-e   d								\
+  	-e '}'								\
+! 	-e 's|^\(.*\)\.c|\1.o: \1.c|p' >> $mf.new
+      <.hlist $sed -n 's|\(.*/\)\(.*\)|s= \2= \1\2=|p' >.hsed
+      <.deptmp $sed -n 's|c:#include "\(.*\)".*$|o: \1|p' | \
+         $sed 's|^[^;]*/||' | \
+--- 139,148 ----
+      $echo "Updating $mf..."
+      <.clist $sed -n							\
+  	-e '/\//{'							\
+! 	-e   's|^\(.*\)/\(.*\)\.c|\2\$(O): \1/\2.c; '"$defrule \1/\2.c|p"	\
+  	-e   d								\
+  	-e '}'								\
+! 	-e 's|^\(.*\)\.c|\1\$(O): \1.c|p' >> $mf.new
+      <.hlist $sed -n 's|\(.*/\)\(.*\)|s= \2= \1\2=|p' >.hsed
+      <.deptmp $sed -n 's|c:#include "\(.*\)".*$|o: \1|p' | \
+         $sed 's|^[^;]*/||' | \

@@ -151,16 +151,6 @@ the variable, as is demonstrated in the rpcb_gettime() function above.  See
 the section on typemaps for more about handling qualifiers and unary
 operators in C types.
 
-The parameter list of a function must not have whitespace after the
-open-parenthesis or before the close-parenthesis.  (This restriction will be
-relaxed in later versions of B<xsubpp>.)
-
-   INCORRECT                      CORRECT
-
-   double                         double
-   sin( x )                       sin(x)
-     double x                      double x
-
 The function name and the return type must be placed on
 separate lines.
 
@@ -551,6 +541,15 @@ then not push return values on the stack.
           /* list is implicitly returned. */
           }
           }
+
+=head2 The REQUIRE: Keyword
+
+The REQUIRE: keyword is used to indicate the minimum version of the
+B<xsubpp> compiler needed to compile the XS module.  An XS module which
+contains the following statement will only compile with B<xsubpp> version
+1.922 or greater:
+
+	REQUIRE: 1.922
 
 =head2 The CLEANUP: Keyword
 

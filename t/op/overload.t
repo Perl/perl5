@@ -5,10 +5,9 @@ BEGIN { unshift @INC, './lib', '../lib';
 }
 
 package Oscalar;
-
-%OVERLOAD = ( 
+use overload ( 
 				# Anonymous subroutines:
-'+'	=>	sub {new Oscalar ${$_[0]}+$_[1]},
+'+'	=>	sub {new Oscalar $ {$_[0]}+$_[1]},
 '-'	=>	sub {new Oscalar
 		       $_[2]? $_[1]-${$_[0]} : ${$_[0]}-$_[1]},
 '<=>'	=>	sub {new Oscalar
@@ -52,7 +51,8 @@ sub test {
 $a = new Oscalar "087";
 $b= "$a";
 
-test (!defined ref $b);		# 1
+# All test numbers in comments are off by 1.
+# So much for hard-wiring them in :-)
 test ($b eq $a);		# 2
 test ($b eq "087");		# 3
 test (ref $a eq "Oscalar");	# 4
@@ -92,7 +92,7 @@ test ( $a eq "087");		# 20
 test ( $b eq "88");		# 21
 test (ref $a eq "Oscalar");	# 22
 
-$Oscalar::OVERLOAD{'++'} = sub {${$_[0]}++;$_[0]};
+eval q[ package Oscalar; use overload ('++' => sub { $ {$_[0]}++;$_[0] } ) ];
 
 $b=$a;
 
@@ -118,7 +118,7 @@ test ( $b eq "88");		# 30
 test (ref $a eq "Oscalar");	# 31
 
 
-$Oscalar::OVERLOAD{'++'} = sub {${$_[0]}+=2;$_[0]};
+eval q[package Oscalar; use overload ('++' => sub { $ {$_[0]} += 2; $_[0] } ) ];
 
 $b=$a;
 
@@ -153,7 +153,10 @@ test (ref $a eq "Oscalar");	# 44
 
 test ($b? 1:0);			# 45
 
-$Oscalar::OVERLOAD{'='} = sub {$copies++; package Oscalar; local $new=${$_[0]};bless \$new};
+eval q[ package Oscalar; use overload ('=' => sub {$main::copies++; 
+						   package Oscalar;
+						   local $new=$ {$_[0]};
+						   bless \$new } ) ];
 
 $b=new Oscalar "$a";
 
@@ -196,7 +199,8 @@ test ( $b eq "89");		# 67
 test (ref $a eq "Oscalar");	# 68
 test ($copies == 1);		# 69
 
-$Oscalar::OVERLOAD{'+='} = sub {${$_[0]}+=3*$_[1];$_[0]};
+eval q[package Oscalar; use overload ('+=' => sub {$ {$_[0]} += 3*$_[1];
+						   $_[0] } ) ];
 $c=new Oscalar;			# Cause rehash
 
 $b=$a;
@@ -231,15 +235,18 @@ test (ref $b eq "Oscalar");	# 84
 test ( $b eq "360");		# 85
 test ($copies == 2);		# 86
 
-$Oscalar::OVERLOAD{'x'} = sub {new Oscalar ($_[2]? "_.$_[1]._" x ${$_[0]}:
-			       "_.${$_[0]}._" x $_[1])};
+eval q[package Oscalar; 
+       use overload ('x' => sub {new Oscalar ( $_[2] ? "_.$_[1]._" x $ {$_[0]}
+					      : "_.${$_[0]}._" x $_[1])}) ];
 
 $a=new Oscalar "yy";
 $a x= 3;
 test ($a eq "_.yy.__.yy.__.yy._"); # 87
 
-$Oscalar::OVERLOAD{'.'} = sub {new Oscalar ($_[2]? "_.$_[1].__.${$_[0]}._":
-			       "_.${$_[0]}.__.$_[1]._")};
+eval q[package Oscalar; 
+       use overload ('.' => sub {new Oscalar ( $_[2] ? 
+					      "_.$_[1].__.$ {$_[0]}._"
+					      : "_.$ {$_[0]}.__.$_[1]._")}) ];
 
 $a=new Oscalar "xx";
 
@@ -247,13 +254,14 @@ test ("b${a}c" eq "_._.b.__.xx._.__.c._"); # 88
 
 # Here we test blessing to a package updates hash
 
-delete $Oscalar::OVERLOAD{'.'};
+eval "package Oscalar; no overload '.'";
 
 test ("b${a}" eq "_.b.__.xx._"); # 89
 $x="1";
 bless \$x, Oscalar;
-test ("b${a}c" eq "bxxc"); # 90
+test ("b${a}c" eq "bxxc");	# 90
 new Oscalar 1;
-test ("b${a}c" eq "bxxc"); # 91
+test ("b${a}c" eq "bxxc");	# 91
 
-sub last {91}
+# Last test is number 90.
+sub last {90}
