@@ -243,15 +243,15 @@ sub walk_sub {
     return if !$op or null $op;
     walk_tree($op, sub {
 	my $op = shift;
-	if ($op->ppaddr eq "pp_gv") {
-	    if ($op->next->ppaddr eq "pp_entersub") {
+	if ($op->name eq "gv") {
+	    if ($op->next->name eq "entersub") {
 		next if $self->{'subs_done'}{$ {$op->gv}}++;
 		next if class($op->gv->CV) eq "SPECIAL";
 		$self->todo($op->gv, $op->gv->CV, 0);
 		$self->walk_sub($op->gv->CV);
-	    } elsif ($op->next->ppaddr eq "pp_enterwrite"
-		     or ($op->next->ppaddr eq "pp_rv2gv"
-			 and $op->next->next->ppaddr eq "pp_enterwrite")) {
+	    } elsif ($op->next->name eq "enterwrite"
+		     or ($op->next->name eq "rv2gv"
+			 and $op->next->next->name eq "enterwrite")) {
 		next if $self->{'forms_done'}{$ {$op->gv}}++;
 		next if class($op->gv->FORM) eq "SPECIAL";
 		$self->todo($op->gv, $op->gv->FORM, 1);
@@ -384,8 +384,8 @@ sub deparse {
     my $self = shift;
     my($op, $cx) = @_;
 #    cluck if class($op) eq "NULL";
-#    return $self->$ {\$op->ppaddr}($op, $cx);
-    my $meth = $op->ppaddr;
+#    return $self->$ {\("pp_" . $op->name)}($op, $cx);
+    my $meth = "pp_" . $op->name;
     return $self->$meth($op, $cx);
 }
 
@@ -461,36 +461,36 @@ sub deparse_format {
 
 sub is_scope {
     my $op = shift;
-    return $op->ppaddr eq "pp_leave" || $op->ppaddr eq "pp_scope"
-      || $op->ppaddr eq "pp_lineseq"
-	|| ($op->ppaddr eq "pp_null" && class($op) eq "UNOP" 
-	    && (is_scope($op->first) || $op->first->ppaddr eq "pp_enter"));
+    return $op->name eq "leave" || $op->name eq "scope"
+      || $op->name eq "lineseq"
+	|| ($op->name eq "null" && class($op) eq "UNOP" 
+	    && (is_scope($op->first) || $op->first->name eq "enter"));
 }
 
 sub is_state {
-    my $name = $_[0]->ppaddr;
-    return $name eq "pp_nextstate" || $name eq "pp_dbstate";
+    my $name = $_[0]->name;
+    return $name eq "nextstate" || $name eq "dbstate" || $name eq "setstate";
 }
 
 sub is_miniwhile { # check for one-line loop (`foo() while $y--')
     my $op = shift;
     return (!null($op) and null($op->sibling) 
-	    and $op->ppaddr eq "pp_null" and class($op) eq "UNOP"
-	    and (($op->first->ppaddr =~ /^pp_(and|or)$/
-		  and $op->first->first->sibling->ppaddr eq "pp_lineseq")
-		 or ($op->first->ppaddr eq "pp_lineseq"
+	    and $op->name eq "null" and class($op) eq "UNOP"
+	    and (($op->first->name =~ /^(and|or)$/
+		  and $op->first->first->sibling->name eq "lineseq")
+		 or ($op->first->name eq "lineseq"
 		     and not null $op->first->first->sibling
-		     and $op->first->first->sibling->ppaddr eq "pp_unstack")
+		     and $op->first->first->sibling->name eq "unstack")
 		 ));
 }
 
 sub is_scalar {
     my $op = shift;
-    return ($op->ppaddr eq "pp_rv2sv" or
-	    $op->ppaddr eq "pp_padsv" or
-	    $op->ppaddr eq "pp_gv" or # only in array/hash constructs
+    return ($op->name eq "rv2sv" or
+	    $op->name eq "padsv" or
+	    $op->name eq "gv" or # only in array/hash constructs
 	    $op->flags & OPf_KIDS && !null($op->first)
-	      && $op->first->ppaddr eq "pp_gvsv");
+	      && $op->first->name eq "gvsv");
 }
 
 sub maybe_parens {
@@ -661,10 +661,10 @@ sub pp_leave {
     $kid = $op->first->sibling; # skip enter
     if (is_miniwhile($kid)) {
 	my $top = $kid->first;
-	my $name = $top->ppaddr;
-	if ($name eq "pp_and") {
+	my $name = $top->name;
+	if ($name eq "and") {
 	    $name = "while";
-	} elsif ($name eq "pp_or") {
+	} elsif ($name eq "or") {
 	    $name = "until";
 	} else { # no conditional -> while 1 or until 0
 	    return $self->deparse($top->first, 1) . " while 1";
@@ -764,6 +764,7 @@ sub pp_nextstate {
 }
 
 sub pp_dbstate { pp_nextstate(@_) }
+sub pp_setstate { pp_nextstate(@_) }
 
 sub pp_unstack { return "" } # see also leaveloop
 
@@ -823,7 +824,7 @@ sub pp_complement { pfixop(@_, "~", 21) }
 sub pp_negate {
     my $self = shift;
     my($op, $cx) = @_;
-    if ($op->first->ppaddr =~ /^pp_(i_)?negate$/) {
+    if ($op->first->name =~ /^(i_)?negate$/) {
 	# avoid --$x
 	$self->pfixop($op, $cx, "-", 21.5);
     } else {
@@ -960,7 +961,7 @@ sub pp_delete {
 sub pp_require {
     my $self = shift;
     my($op, $cx) = @_;
-    if (class($op) eq "UNOP" and $op->first->ppaddr eq "pp_const"
+    if (class($op) eq "UNOP" and $op->first->name eq "const"
 	and $op->first->private & OPpCONST_BARE)
     {
 	my $name = $op->first->sv->PV;
@@ -994,11 +995,11 @@ sub pp_refgen {
     my $self = shift;	
     my($op, $cx) = @_;
     my $kid = $op->first;
-    if ($kid->ppaddr eq "pp_null") {
+    if ($kid->name eq "null") {
 	$kid = $kid->first;
-	if ($kid->ppaddr eq "pp_anonlist" || $kid->ppaddr eq "pp_anonhash") {
-	    my($pre, $post) = @{{"pp_anonlist" => ["[","]"],
-				 "pp_anonhash" => ["{","}"]}->{$kid->ppaddr}};
+	if ($kid->name eq "anonlist" || $kid->name eq "anonhash") {
+	    my($pre, $post) = @{{"anonlist" => ["[","]"],
+				 "anonhash" => ["{","}"]}->{$kid->name}};
 	    my($expr, @exprs);
 	    $kid = $kid->first->sibling; # skip pushmark
 	    for (; !null($kid); $kid = $kid->sibling) {
@@ -1007,18 +1008,18 @@ sub pp_refgen {
 	    }
 	    return $pre . join(", ", @exprs) . $post;
 	} elsif (!null($kid->sibling) and 
-		 $kid->sibling->ppaddr eq "pp_anoncode") {
+		 $kid->sibling->name eq "anoncode") {
 	    return "sub " .
 		$self->deparse_sub($self->padval($kid->sibling->targ));
-	} elsif ($kid->ppaddr eq "pp_pushmark") {
-            my $sib_ppaddr = $kid->sibling->ppaddr;
-            if ($sib_ppaddr =~ /^pp_(pad|rv2)[ah]v$/
+	} elsif ($kid->name eq "pushmark") {
+            my $sib_name = $kid->sibling->name;
+            if ($sib_name =~ /^(pad|rv2)[ah]v$/
                 and not $kid->sibling->flags & OPf_REF)
             {
                 # The @a in \(@a) isn't in ref context, but only when the
                 # parens are there.
                 return "\\(" . $self->deparse($kid->sibling, 1) . ")";
-            } elsif ($sib_ppaddr eq 'pp_entersub') {
+            } elsif ($sib_name eq 'entersub') {
                 my $text = $self->deparse($kid->sibling, 1);
                 # Always show parens for \(&func()), but only with -p otherwise
                 $text = "($text)" if $self->{'parens'}
@@ -1036,7 +1037,7 @@ sub pp_readline {
     my $self = shift;
     my($op, $cx) = @_;
     my $kid = $op->first;
-    $kid = $kid->first if $kid->ppaddr eq "pp_rv2gv"; # <$fh>
+    $kid = $kid->first if $kid->name eq "rv2gv"; # <$fh>
     return "<" . $self->deparse($kid, 1) . ">";
 }
 
@@ -1132,13 +1133,13 @@ my(%left, %right);
 
 sub assoc_class {
     my $op = shift;
-    my $name = $op->ppaddr;
-    if ($name eq "pp_concat" and $op->first->ppaddr eq "pp_concat") {
+    my $name = $op->name;
+    if ($name eq "concat" and $op->first->name eq "concat") {
 	# avoid spurious `=' -- see comment in pp_concat
-	return "pp_concat";
+	return "concat";
     }
-    if ($name eq "pp_null" and class($op) eq "UNOP"
-	and $op->first->ppaddr =~ /^pp_(and|x?or)$/
+    if ($name eq "null" and class($op) eq "UNOP"
+	and $op->first->name =~ /^(and|x?or)$/
 	and null $op->first->sibling)
     {
 	# Like all conditional constructs, OP_ANDs and OP_ORs are topped
@@ -1155,18 +1156,18 @@ sub assoc_class {
 # $a + $b + $c is equivalent to ($a + $b) + $c
 
 BEGIN {
-    %left = ('pp_multiply' => 19, 'pp_i_multiply' => 19,
-	     'pp_divide' => 19, 'pp_i_divide' => 19,
-	     'pp_modulo' => 19, 'pp_i_modulo' => 19,
-	     'pp_repeat' => 19,
-	     'pp_add' => 18, 'pp_i_add' => 18,
-	     'pp_subtract' => 18, 'pp_i_subtract' => 18,
-	     'pp_concat' => 18,
-	     'pp_left_shift' => 17, 'pp_right_shift' => 17,
-	     'pp_bit_and' => 13,
-	     'pp_bit_or' => 12, 'pp_bit_xor' => 12,
-	     'pp_and' => 3,
-	     'pp_or' => 2, 'pp_xor' => 2,
+    %left = ('multiply' => 19, 'i_multiply' => 19,
+	     'divide' => 19, 'i_divide' => 19,
+	     'modulo' => 19, 'i_modulo' => 19,
+	     'repeat' => 19,
+	     'add' => 18, 'i_add' => 18,
+	     'subtract' => 18, 'i_subtract' => 18,
+	     'concat' => 18,
+	     'left_shift' => 17, 'right_shift' => 17,
+	     'bit_and' => 13,
+	     'bit_or' => 12, 'bit_xor' => 12,
+	     'and' => 3,
+	     'or' => 2, 'xor' => 2,
 	    );
 }
 
@@ -1186,20 +1187,20 @@ sub deparse_binop_left {
 # $a = $b = $c is equivalent to $a = ($b = $c)
 
 BEGIN {
-    %right = ('pp_pow' => 22,
-	      'pp_sassign=' => 7, 'pp_aassign=' => 7,
-	      'pp_multiply=' => 7, 'pp_i_multiply=' => 7,
-	      'pp_divide=' => 7, 'pp_i_divide=' => 7,
-	      'pp_modulo=' => 7, 'pp_i_modulo=' => 7,
-	      'pp_repeat=' => 7,
-	      'pp_add=' => 7, 'pp_i_add=' => 7,
-	      'pp_subtract=' => 7, 'pp_i_subtract=' => 7,
-	      'pp_concat=' => 7,
-	      'pp_left_shift=' => 7, 'pp_right_shift=' => 7,
-	      'pp_bit_and=' => 7,
-	      'pp_bit_or=' => 7, 'pp_bit_xor=' => 7,
-	      'pp_andassign' => 7,
-	      'pp_orassign' => 7,
+    %right = ('pow' => 22,
+	      'sassign=' => 7, 'aassign=' => 7,
+	      'multiply=' => 7, 'i_multiply=' => 7,
+	      'divide=' => 7, 'i_divide=' => 7,
+	      'modulo=' => 7, 'i_modulo=' => 7,
+	      'repeat=' => 7,
+	      'add=' => 7, 'i_add=' => 7,
+	      'subtract=' => 7, 'i_subtract=' => 7,
+	      'concat=' => 7,
+	      'left_shift=' => 7, 'right_shift=' => 7,
+	      'bit_and=' => 7,
+	      'bit_or=' => 7, 'bit_xor=' => 7,
+	      'andassign' => 7,
+	      'orassign' => 7,
 	     );
 }
 
@@ -1287,7 +1288,7 @@ sub pp_concat {
     my $right = $op->last;
     my $eq = "";
     my $prec = 18;
-    if ($op->flags & OPf_STACKED and $op->first->ppaddr ne "pp_concat") {
+    if ($op->flags & OPf_STACKED and $op->first->name ne "concat") {
 	$eq = "=";
 	$prec = 7;
     }
@@ -1589,15 +1590,15 @@ sub pp_list {
 	# This assumes that no other private flags equal 128, and that
 	# OPs that store things other than flags in their op_private,
 	# like OP_AELEMFAST, won't be immediate children of a list.
-	unless ($lop->private & OPpLVAL_INTRO or $lop->ppaddr eq "pp_undef")
+	unless ($lop->private & OPpLVAL_INTRO or $lop->name eq "undef")
 	{
 	    $local = ""; # or not
 	    last;
 	}
-	if ($lop->ppaddr =~ /^pp_pad[ash]v$/) { # my()
+	if ($lop->name =~ /^pad[ash]v$/) { # my()
 	    ($local = "", last) if $local eq "local";
 	    $local = "my";
-	} elsif ($lop->ppaddr ne "pp_undef") { # local()
+	} elsif ($lop->name ne "undef") { # local()
 	    ($local = "", last) if $local eq "my";
 	    $local = "local";
 	}
@@ -1606,7 +1607,7 @@ sub pp_list {
     return $self->deparse($kid, $cx) if null $kid->sibling and not $local;
     for (; !null($kid); $kid = $kid->sibling) {
 	if ($local) {
-	    if (class($kid) eq "UNOP" and $kid->first->ppaddr eq "pp_gvsv") {
+	    if (class($kid) eq "UNOP" and $kid->first->name eq "gvsv") {
 		$lop = $kid->first;
 	    } else {
 		$lop = $kid;
@@ -1641,10 +1642,10 @@ sub pp_cond_expr {
     } 
     $cond = $self->deparse($cond, 1);
     $true = $self->deparse($true, 0);    
-    if ($false->ppaddr eq "pp_lineseq") { # braces w/o scope => elsif
+    if ($false->name eq "lineseq") { # braces w/o scope => elsif
 	my $head = "if ($cond) {\n\t$true\n\b}";
 	my @elsifs;
-	while (!null($false) and $false->ppaddr eq "pp_lineseq") {
+	while (!null($false) and $false->name eq "lineseq") {
 	    my $newop = $false->first->sibling->first;
 	    my $newcond = $newop->first;
 	    my $newtrue = $newcond->sibling;
@@ -1673,13 +1674,13 @@ sub pp_leaveloop {
     local($self->{'curstash'}) = $self->{'curstash'};
     my $head = "";
     my $bare = 0;
-    if ($kid->ppaddr eq "pp_lineseq") { # bare or infinite loop 
+    if ($kid->name eq "lineseq") { # bare or infinite loop 
 	if (is_state $kid->last) { # infinite
 	    $head = "for (;;) "; # shorter than while (1)
 	} else {
 	    $bare = 1;
 	}
-    } elsif ($enter->ppaddr eq "pp_enteriter") { # foreach
+    } elsif ($enter->name eq "enteriter") { # foreach
 	my $ary = $enter->first->sibling; # first was pushmark
 	my $var = $ary->sibling;
 	if ($enter->flags & OPf_STACKED
@@ -1704,20 +1705,20 @@ sub pp_leaveloop {
 		    $var = "my " . $var;
 		}
 	    }
-	} elsif ($var->ppaddr eq "pp_rv2gv") {
+	} elsif ($var->name eq "rv2gv") {
 	    $var = $self->pp_rv2sv($var, 1);
-	} elsif ($var->ppaddr eq "pp_gv") {
+	} elsif ($var->name eq "gv") {
 	    $var = "\$" . $self->deparse($var, 1);
 	}
 	$head = "foreach $var ($ary) ";
 	$kid = $kid->first->first->sibling; # skip OP_AND and OP_ITER
-    } elsif ($kid->ppaddr eq "pp_null") { # while/until
+    } elsif ($kid->name eq "null") { # while/until
 	$kid = $kid->first;
-	my $name = {"pp_and" => "while", "pp_or" => "until"}
-	            ->{$kid->ppaddr};
+	my $name = {"and" => "while", "or" => "until"}
+	            ->{$kid->name};
 	$head = "$name (" . $self->deparse($kid->first, 1) . ") ";
 	$kid = $kid->first->sibling;
-    } elsif ($kid->ppaddr eq "pp_stub") { # bare and empty
+    } elsif ($kid->name eq "stub") { # bare and empty
 	return "{;}"; # {} could be a hashref
     }
     # The third-to-last kid is the continue block if the pointer used
@@ -1782,20 +1783,20 @@ sub pp_null {
     if (class($op) eq "OP") {
 	# old value is lost
 	return $self->{'ex_const'} if $op->targ == OP_CONST;
-    } elsif ($op->first->ppaddr eq "pp_pushmark") {
+    } elsif ($op->first->name eq "pushmark") {
 	return $self->pp_list($op, $cx);
-    } elsif ($op->first->ppaddr eq "pp_enter") {
+    } elsif ($op->first->name eq "enter") {
 	return $self->pp_leave($op, $cx);
     } elsif ($op->targ == OP_STRINGIFY) {
 	return $self->dquote($op);
     } elsif (!null($op->first->sibling) and
-	     $op->first->sibling->ppaddr eq "pp_readline" and
+	     $op->first->sibling->name eq "readline" and
 	     $op->first->sibling->flags & OPf_STACKED) {
 	return $self->maybe_parens($self->deparse($op->first, 7) . " = "
 				   . $self->deparse($op->first->sibling, 7),
 				   $cx, 7);
     } elsif (!null($op->first->sibling) and
-	     $op->first->sibling->ppaddr eq "pp_trans" and
+	     $op->first->sibling->name eq "trans" and
 	     $op->first->sibling->flags & OPf_STACKED) {
 	return $self->maybe_parens($self->deparse($op->first, 20) . " =~ "
 				   . $self->deparse($op->first->sibling, 20),
@@ -1887,7 +1888,7 @@ sub pp_rv2gv { maybe_local(@_, rv2x(@_, "*")) }
 sub pp_av2arylen {
     my $self = shift;
     my($op, $cx) = @_;
-    if ($op->first->ppaddr eq "pp_padav") {
+    if ($op->first->name eq "padav") {
 	return $self->maybe_local($op, $cx, '$#' . $self->padany($op->first));
     } else {
 	return $self->maybe_local($op, $cx,
@@ -1902,7 +1903,7 @@ sub pp_rv2av {
     my $self = shift;
     my($op, $cx) = @_;
     my $kid = $op->first;
-    if ($kid->ppaddr eq "pp_const") { # constant list
+    if ($kid->name eq "const") { # constant list
 	my $av = $kid->sv;
 	return "(" . join(", ", map(const($_), $av->ARRAY)) . ")";
     } else {
@@ -1915,10 +1916,10 @@ sub elem {
     my $self = shift;
     my ($op, $cx, $left, $right, $padname) = @_;
     my($array, $idx) = ($op->first, $op->first->sibling);
-    unless ($array->ppaddr eq $padname) { # Maybe this has been fixed	
+    unless ($array->name eq $padname) { # Maybe this has been fixed	
 	$array = $array->first; # skip rv2av (or ex-rv2av in _53+)
     }
-    if ($array->ppaddr eq $padname) {
+    if ($array->name eq $padname) {
 	$array = $self->padany($array);
     } elsif (is_scope($array)) { # ${expr}[0]
 	$array = "{" . $self->deparse($array, 0) . "}";
@@ -1927,7 +1928,7 @@ sub elem {
     } else {
 	# $x[20][3]{hi} or expr->[20]
 	my $arrow;
-	$arrow = "->" if $array->ppaddr !~ /^pp_[ah]elem$/;
+	$arrow = "->" if $array->name !~ /^[ah]elem$/;
 	return $self->deparse($array, 24) . $arrow .
 	    $left . $self->deparse($idx, 1) . $right;
     }
@@ -1935,15 +1936,15 @@ sub elem {
     return "\$" . $array . $left . $idx . $right;
 }
 
-sub pp_aelem { maybe_local(@_, elem(@_, "[", "]", "pp_padav")) }
-sub pp_helem { maybe_local(@_, elem(@_, "{", "}", "pp_padhv")) }
+sub pp_aelem { maybe_local(@_, elem(@_, "[", "]", "padav")) }
+sub pp_helem { maybe_local(@_, elem(@_, "{", "}", "padhv")) }
 
 sub pp_gelem {
     my $self = shift;
     my($op, $cx) = @_;
     my($glob, $part) = ($op->first, $op->last);
     $glob = $glob->first; # skip rv2gv
-    $glob = $glob->first if $glob->ppaddr eq "pp_rv2gv"; # this one's a bug
+    $glob = $glob->first if $glob->name eq "rv2gv"; # this one's a bug
     my $scope = is_scope($glob);
     $glob = $self->deparse($glob, 0);
     $part = $self->deparse($part, 1);
@@ -1963,16 +1964,16 @@ sub slice {
     }
     $array = $last;
     $array = $array->first
-	if $array->ppaddr eq $regname or $array->ppaddr eq "pp_null";
+	if $array->name eq $regname or $array->name eq "null";
     if (is_scope($array)) {
 	$array = "{" . $self->deparse($array, 0) . "}";
-    } elsif ($array->ppaddr eq $padname) {
+    } elsif ($array->name eq $padname) {
 	$array = $self->padany($array);
     } else {
 	$array = $self->deparse($array, 24);
     }
     $kid = $op->first->sibling; # skip pushmark
-    if ($kid->ppaddr eq "pp_list") {
+    if ($kid->name eq "list") {
 	$kid = $kid->first->sibling; # skip list, pushmark
 	for (; !null $kid; $kid = $kid->sibling) {
 	    push @elems, $self->deparse($kid, 6);
@@ -1985,9 +1986,9 @@ sub slice {
 }
 
 sub pp_aslice { maybe_local(@_, slice(@_, "[", "]", 
-				      "pp_rv2av", "pp_padav")) }
+				      "rv2av", "padav")) }
 sub pp_hslice { maybe_local(@_, slice(@_, "{", "}",
-				      "pp_rv2hv", "pp_padhv")) }
+				      "rv2hv", "padhv")) }
 
 sub pp_lslice {
     my $self = shift;
@@ -2015,7 +2016,7 @@ sub method {
     my($op, $cx) = @_;
     my $kid = $op->first->sibling; # skip pushmark
     my($meth, $obj, @exprs);
-    if ($kid->ppaddr eq "pp_list" and want_list $kid) {
+    if ($kid->name eq "list" and want_list $kid) {
 	# When an indirect object isn't a bareword but the args are in
 	# parens, the parens aren't part of the method syntax (the LLAFR
 	# doesn't apply), but they make a list with OPf_PARENS set that
@@ -2043,7 +2044,7 @@ sub method {
 	$meth = $kid->first;
     }
     $obj = $self->deparse($obj, 24);
-    if ($meth->ppaddr eq "pp_const") {
+    if ($meth->name eq "const") {
 	$meth = $meth->sv->PV; # needs to be bare
     } else {
 	$meth = $self->deparse($meth, 1);
@@ -2087,17 +2088,17 @@ sub check_proto {
 		    return "&";
 		}
 	    } elsif ($chr eq "&") {
-		if ($arg->ppaddr =~ /pp_(s?refgen|undef)/) {
+		if ($arg->name =~ /^(s?refgen|undef)$/) {
 		    push @reals, $self->deparse($arg, 6);
 		} else {
 		    return "&";
 		}
 	    } elsif ($chr eq "*") {
-		if ($arg->ppaddr =~ /^pp_s?refgen$/
-		    and $arg->first->first->ppaddr eq "pp_rv2gv")
+		if ($arg->name =~ /^s?refgen$/
+		    and $arg->first->first->name eq "rv2gv")
 		  {
 		      $real = $arg->first->first; # skip refgen, null
-		      if ($real->first->ppaddr eq "pp_gv") {
+		      if ($real->first->name eq "gv") {
 			  push @reals, $self->deparse($real, 6);
 		      } else {
 			  push @reals, $self->deparse($real->first, 6);
@@ -2107,19 +2108,19 @@ sub check_proto {
 		  }
 	    } elsif (substr($chr, 0, 1) eq "\\") {
 		$chr = substr($chr, 1);
-		if ($arg->ppaddr =~ /^pp_s?refgen$/ and
+		if ($arg->name =~ /^s?refgen$/ and
 		    !null($real = $arg->first) and
 		    ($chr eq "\$" && is_scalar($real->first)
 		     or ($chr eq "\@"
-			 && $real->first->sibling->ppaddr
-			 =~ /^pp_(rv2|pad)av$/)
+			 && $real->first->sibling->name
+			 =~ /^(rv2|pad)av$/)
 		     or ($chr eq "%"
-			 && $real->first->sibling->ppaddr
-			 =~ /^pp_(rv2|pad)hv$/)
+			 && $real->first->sibling->name
+			 =~ /^(rv2|pad)hv$/)
 		     #or ($chr eq "&" # This doesn't work
-		     #   && $real->first->ppaddr eq "pp_rv2cv")
+		     #   && $real->first->name eq "rv2cv")
 		     or ($chr eq "*"
-			 && $real->first->ppaddr eq "pp_rv2gv")))
+			 && $real->first->name eq "rv2gv")))
 		  {
 		      push @reals, $self->deparse($real, 6);
 		  } else {
@@ -2155,7 +2156,7 @@ sub pp_entersub {
     if (is_scope($kid)) {
 	$amper = "&";
 	$kid = "{" . $self->deparse($kid, 0) . "}";
-    } elsif ($kid->first->ppaddr eq "pp_gv") {
+    } elsif ($kid->first->name eq "gv") {
 	my $gv = $kid->first->gv;
 	if (class($gv->CV) ne "SPECIAL") {
 	    $proto = $gv->CV->PV if $gv->CV->FLAGS & SVf_POK;
@@ -2312,22 +2313,22 @@ sub pp_const {
 sub dq {
     my $self = shift;
     my $op = shift;
-    my $type = $op->ppaddr;
-    if ($type eq "pp_const") {
+    my $type = $op->name;
+    if ($type eq "const") {
 	return uninterp(escape_str(unback($op->sv->PV)));
-    } elsif ($type eq "pp_concat") {
+    } elsif ($type eq "concat") {
 	return $self->dq($op->first) . $self->dq($op->last);
-    } elsif ($type eq "pp_uc") {
+    } elsif ($type eq "uc") {
 	return '\U' . $self->dq($op->first->sibling) . '\E';
-    } elsif ($type eq "pp_lc") {
+    } elsif ($type eq "lc") {
 	return '\L' . $self->dq($op->first->sibling) . '\E';
-    } elsif ($type eq "pp_ucfirst") {
+    } elsif ($type eq "ucfirst") {
 	return '\u' . $self->dq($op->first->sibling);
-    } elsif ($type eq "pp_lcfirst") {
+    } elsif ($type eq "lcfirst") {
 	return '\l' . $self->dq($op->first->sibling);
-    } elsif ($type eq "pp_quotemeta") {
+    } elsif ($type eq "quotemeta") {
 	return '\Q' . $self->dq($op->first->sibling) . '\E';
-    } elsif ($type eq "pp_join") {
+    } elsif ($type eq "join") {
 	return $self->deparse($op->last, 26); # was join($", @ary)
     } else {
 	return $self->deparse($op, 26);
@@ -2600,22 +2601,22 @@ sub pp_trans {
 sub re_dq {
     my $self = shift;
     my $op = shift;
-    my $type = $op->ppaddr;
-    if ($type eq "pp_const") {
+    my $type = $op->name;
+    if ($type eq "const") {
 	return uninterp($op->sv->PV);
-    } elsif ($type eq "pp_concat") {
+    } elsif ($type eq "concat") {
 	return $self->re_dq($op->first) . $self->re_dq($op->last);
-    } elsif ($type eq "pp_uc") {
+    } elsif ($type eq "uc") {
 	return '\U' . $self->re_dq($op->first->sibling) . '\E';
-    } elsif ($type eq "pp_lc") {
+    } elsif ($type eq "lc") {
 	return '\L' . $self->re_dq($op->first->sibling) . '\E';
-    } elsif ($type eq "pp_ucfirst") {
+    } elsif ($type eq "ucfirst") {
 	return '\u' . $self->re_dq($op->first->sibling);
-    } elsif ($type eq "pp_lcfirst") {
+    } elsif ($type eq "lcfirst") {
 	return '\l' . $self->re_dq($op->first->sibling);
-    } elsif ($type eq "pp_quotemeta") {
+    } elsif ($type eq "quotemeta") {
 	return '\Q' . $self->re_dq($op->first->sibling) . '\E';
-    } elsif ($type eq "pp_join") {
+    } elsif ($type eq "join") {
 	return $self->deparse($op->last, 26); # was join($", @ary)
     } else {
 	return $self->deparse($op, 26);
@@ -2626,8 +2627,8 @@ sub pp_regcomp {
     my $self = shift;
     my($op, $cx) = @_;
     my $kid = $op->first;
-    $kid = $kid->first if $kid->ppaddr eq "pp_regcmaybe";
-    $kid = $kid->first if $kid->ppaddr eq "pp_regcreset";
+    $kid = $kid->first if $kid->name eq "regcmaybe";
+    $kid = $kid->first if $kid->name eq "regcreset";
     return $self->re_dq($kid);
 }
 
@@ -2725,7 +2726,7 @@ sub pp_subst {
 	$kid = $kid->sibling;
     } else {
 	$repl = $op->pmreplroot->first; # skip substcont
-	while ($repl->ppaddr eq "pp_entereval") {
+	while ($repl->name eq "entereval") {
 	    $repl = $repl->first;
 	    $flags .= "e";
 	}

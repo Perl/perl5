@@ -153,23 +153,24 @@ sub xref {
 	last if $done{$$op}++;
 	warn sprintf("top = [%s, %s, %s]\n", @$top) if $debug_top;
 	warn peekop($op), "\n" if $debug_op;
-	my $ppname = $op->ppaddr;
-	if ($ppname =~ /^pp_(or|and|mapwhile|grepwhile|range|cond_expr)$/) {
+	my $opname = $op->name;
+	if ($opname =~ /^(or|and|mapwhile|grepwhile|range|cond_expr)$/) {
 	    xref($op->other);
-	} elsif ($ppname eq "pp_match" || $ppname eq "pp_subst") {
+	} elsif ($opname eq "match" || $opname eq "subst") {
 	    xref($op->pmreplstart);
-	} elsif ($ppname eq "pp_substcont") {
+	} elsif ($opname eq "substcont") {
 	    xref($op->other->pmreplstart);
 	    $op = $op->other;
 	    redo;
-	} elsif ($ppname eq "pp_enterloop") {
+	} elsif ($opname eq "enterloop") {
 	    xref($op->redoop);
 	    xref($op->nextop);
 	    xref($op->lastop);
-	} elsif ($ppname eq "pp_subst") {
+	} elsif ($opname eq "subst") {
 	    xref($op->pmreplstart);
 	} else {
 	    no strict 'refs';
+	    my $ppname = "pp_$opname";
 	    &$ppname($op) if defined(&$ppname);
 	}
     }

@@ -90,9 +90,9 @@ sub B::LOOP::mark_if_leader {
 
 sub B::LOGOP::mark_if_leader {
     my $op = shift;
-    my $ppaddr = $op->ppaddr;
+    my $opname = $op->name;
     mark_leader($op->next);
-    if ($ppaddr eq "pp_entertry") {
+    if ($opname eq "entertry") {
 	mark_leader($op->other->next);
     } else {
 	mark_leader($op->other);
@@ -102,10 +102,10 @@ sub B::LOGOP::mark_if_leader {
 sub B::LISTOP::mark_if_leader {
     my $op = shift;
     my $first=$op->first;
-    $first=$first->next while ($first->ppaddr eq "pp_null");
+    $first=$first->next while ($first->name eq "null");
     mark_leader($op->first) unless (exists( $bblock->{$$first}));
     mark_leader($op->next);
-    if ($op->ppaddr eq "pp_sort" and $op->flags & OPf_SPECIAL
+    if ($op->name eq "sort" and $op->flags & OPf_SPECIAL
 	and $op->flags & OPf_STACKED){
         my $root=$op->first->sibling->first;
         my $leader=$root->first;
@@ -115,7 +115,7 @@ sub B::LISTOP::mark_if_leader {
 
 sub B::PMOP::mark_if_leader {
     my $op = shift;
-    if ($op->ppaddr ne "pp_pushre") {
+    if ($op->name ne "pushre") {
 	my $replroot = $op->pmreplroot;
 	if ($$replroot) {
 	    mark_leader($replroot);

@@ -193,7 +193,7 @@ sub B::OP::bytecode {
     ldop($ix);
     print "op_next $nextix\n";
     print "op_sibling $sibix\n" unless $strip_syntree;
-    printf "op_type %s\t# %d\n", $op->ppaddr, $type;
+    printf "op_type %s\t# %d\n", "pp_" . $op->name, $type;
     printf("op_seq %d\n", $op->seq) unless $omit_seq;
     if ($type || !$compress_nullops) {
 	printf "op_targ %d\nop_flags 0x%x\nop_private 0x%x\n",
@@ -243,7 +243,7 @@ sub B::PVOP::bytecode {
     # This would be easy except that OP_TRANS uses a PVOP to store an
     # endian-dependent array of 256 shorts instead of a plain string.
     #
-    if ($op->ppaddr eq "pp_trans") {
+    if ($op->name eq "trans") {
 	my @shorts = unpack("s256", $pv); # assembler handles endianness
 	print "op_pv_tr ", join(",", @shorts), "\n";
     } else {
@@ -310,7 +310,7 @@ sub B::PMOP::bytecode {
     my $replroot = $op->pmreplroot;
     my $replrootix = $replroot->objix;
     my $replstartix = $op->pmreplstart->objix;
-    my $ppaddr = $op->ppaddr;
+    my $opname = $op->name;
     # pmnext is corrupt in some PMOPs (see misc.t for example)
     #my $pmnextix = $op->pmnext->objix;
 
@@ -318,14 +318,14 @@ sub B::PMOP::bytecode {
 	# OP_PUSHRE (a mutated version of OP_MATCH for the regexp
 	# argument to a split) stores a GV in op_pmreplroot instead
 	# of a substitution syntax tree. We don't want to walk that...
-	if ($ppaddr eq "pp_pushre") {
+	if ($opname eq "pushre") {
 	    $replroot->bytecode;
 	} else {
 	    walkoptree($replroot, "bytecode");
 	}
     }
     $op->B::LISTOP::bytecode;
-    if ($ppaddr eq "pp_pushre") {
+    if ($opname eq "pushre") {
 	printf "op_pmreplrootgv $replrootix\n";
     } else {
 	print "op_pmreplroot $replrootix\nop_pmreplstart $replstartix\n";

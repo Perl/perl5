@@ -780,4 +780,4 @@ lock		lock			ck_rfun		s%	S
 threadsv	per-thread variable	ck_null		ds0
 
 # Control (contd.)
-setstate	set statement info	ck_null		0
+setstate	set statement info	ck_null		s;

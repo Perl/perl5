@@ -319,7 +319,7 @@ sub B::PMOP::save {
 	# OP_PUSHRE (a mutated version of OP_MATCH for the regexp
 	# argument to a split) stores a GV in op_pmreplroot instead
 	# of a substitution syntax tree. We don't want to walk that...
-	if ($ppaddr eq "pp_pushre") {
+	if ($op->name eq "pushre") {
 	    $gvsym = $replroot->save;
 #	    warn "PMOP::save saving a pp_pushre with GV $gvsym\n"; # debug
 	    $replrootfield = 0;
@@ -1031,8 +1031,8 @@ sub output_boilerplate {
 #include "perl.h"
 
 /* Workaround for mapstart: the only op which needs a different ppaddr */
-#undef pp_mapstart
-#define pp_mapstart pp_grepstart
+#undef Perl_pp_mapstart
+#define Perl_pp_mapstart Perl_pp_grepstart
 #define XS_DynaLoader_boot_DynaLoader boot_DynaLoader
 EXTERN_C void boot_DynaLoader (CV* cv);
 

@@ -556,11 +556,19 @@ OP_sibling(o)
 	B::OP		o
 
 char *
+OP_name(o)
+	B::OP		o
+    CODE:
+	ST(0) = sv_newmortal();
+	sv_setpv(ST(0), PL_op_name[o->op_type]);
+
+
+char *
 OP_ppaddr(o)
 	B::OP		o
     CODE:
 	ST(0) = sv_newmortal();
-	sv_setpvn(ST(0), "pp_", 3);
+	sv_setpvn(ST(0), "Perl_pp_", 8);
 	sv_catpv(ST(0), PL_op_name[o->op_type]);
 
 char *

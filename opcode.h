@@ -2147,7 +2147,7 @@ EXT U32 PL_opargs[] = {
 	0x0004281d,	/* syscall */
 	0x00003604,	/* lock */
 	0x00000044,	/* threadsv */
-	0x00000000,	/* setstate */
+	0x00001404,	/* setstate */
 };
 #endif
 
