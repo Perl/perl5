@@ -715,12 +715,14 @@ S_skipspace(pTHX_ register char *s)
 			     (prevlen = SvCUR(PL_linestr)))) == Nullch)
 	{
 	    /* end of file.  Add on the -p or -n magic */
-	    if (PL_minus_n || PL_minus_p) {
-		sv_setpv(PL_linestr,PL_minus_p ?
-			 ";}continue{print or die qq(-p destination: $!\\n)" :
-			 "");
-		sv_catpv(PL_linestr,";}");
+	    if (PL_minus_p) {
+		sv_setpv(PL_linestr,
+			 ";}continue{print or die qq(-p destination: $!\\n);}");
 		PL_minus_n = PL_minus_p = 0;
+	    }
+	    else if (PL_minus_n) {
+		sv_setpvn(PL_linestr, ";}", 2);
+		PL_minus_n = 0;
 	    }
 	    else
 		sv_setpvn(PL_linestr,";", 1);
