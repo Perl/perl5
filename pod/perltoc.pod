@@ -1989,9 +1989,9 @@ You want to temporarily change just one element of an array or hash
 
 =item Pragmatic Modules
 
-attributes, attrs, autouse, base, blib, caller, charnames, constant,
-diagnostics, fields, filetest, integer, less, lib, locale, ops, overload,
-re, sigtrap, strict, subs, utf8, vars, warnings
+attributes, attrs, autouse, base, blib, bytes, charnames, constant,
+diagnostics, fields, filetest, integer, less, lib, locale, open, ops,
+overload, re, sigtrap, strict, subs, utf8, vars, warnings
 
 =item Standard Modules
 
@@ -2000,31 +2000,28 @@ B::Bytecode, B::C, B::CC, B::Debug, B::Deparse, B::Disassembler, B::Lint,
 B::Showlex, B::Stackobj, B::Terse, B::Xref, Benchmark, ByteLoader, CGI,
 CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push,
 CGI::Switch, CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy,
-Class::Struct, Config, Cwd, DB, DB_File, Data::Dumper, Devel::DProf,
-Devel::Peek, Devel::SelfStubber, DirHandle, Dumpvalue, DynaLoader, English,
-Env, Errno, Exporter, Exporter::Heavy, ExtUtils::Command, ExtUtils::Embed,
-ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
+Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, DirHandle, Dumpvalue,
+English, Env, Exporter, Exporter::Heavy, ExtUtils::Command,
+ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
 ExtUtils::MM_Cygwin, ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS,
 ExtUtils::MM_Win32, ExtUtils::MakeMaker, ExtUtils::Manifest,
 ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
 ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
-File::Compare, File::Copy, File::DosGlob, File::Find, File::Glob,
-File::Path, File::Spec, File::Spec::Functions, File::Spec::Mac,
-File::Spec::OS2, File::Spec::Unix, File::Spec::VMS, File::Spec::Win32,
-File::stat, FileCache, FileHandle, FindBin, GDBM_File, Getopt::Long,
-Getopt::Std, I18N::Collate, IO, IO::Dir, IO::File, IO::Handle, IO::Pipe,
-IO::Poll, IO::Seekable, IO::Select, IO::Socket, IO::Socket::INET,
-IO::Socket::UNIX, IPC::Msg, IPC::Open2, IPC::Open3, IPC::Semaphore,
-IPC::SysV, Math::BigFloat, Math::BigInt, Math::Complex, Math::Trig,
-Net::Ping, Net::hostent, Net::netent, Net::protoent, Net::servent, O,
-Opcode, POSIX, Pod::Checker, Pod::Html, Pod::InputObjects, Pod::Man,
-Pod::Parser, Pod::Select, Pod::Text, Pod::Text::Color, Pod::Usage,
-SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell, Socket,
-Symbol, Sys::Hostname, Sys::Syslog, Term::Cap, Term::Complete,
-Term::ReadLine, Test, Test::Harness, Text::Abbrev, Text::ParseWords,
-Text::Soundex, Text::Wrap, Tie::Array, Tie::Handle, Tie::Hash,
-Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime,
-Time::localtime, Time::tm, UNIVERSAL, User::grent, User::pwent
+File::Compare, File::Copy, File::DosGlob, File::Find, File::Path,
+File::Spec, File::Spec::Functions, File::Spec::Mac, File::Spec::OS2,
+File::Spec::Unix, File::Spec::VMS, File::Spec::Win32, File::Temp,
+File::stat, FileCache, FileHandle, FindBin, Getopt::Long, Getopt::Std,
+I18N::Collate, IO, IPC::Open2, IPC::Open3, Math::BigFloat, Math::BigInt,
+Math::Complex, Math::Trig, NDBM_File, Net::Ping, Net::hostent, Net::netent,
+Net::protoent, Net::servent, O, ODBM_File, Opcode, Pod::Checker, Pod::Find,
+Pod::Html, Pod::InputObjects, Pod::Man, Pod::ParseUtils, Pod::Parser,
+Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color, Pod::Text::Termcap,
+Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
+Socket, Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine,
+Test, Test::Harness, Text::Abbrev, Text::ParseWords, Text::Soundex,
+Text::Wrap, Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar,
+Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
+UNIVERSAL, User::grent, User::pwent
 
 =item Extension Modules
 
@@ -3539,7 +3536,9 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item New Things in this Example
 
-=item EXAMPLE 6 (Coming Soon)
+=item EXAMPLE 6
+
+=item New Things in this Example
 
 =item EXAMPLE 7 (Coming Soon)
 
@@ -3871,6 +3870,8 @@ Zero
 =over
 
 =item DESCRIPTION
+
+is_gv_magical
 
 =item AUTHORS
 
@@ -5628,39 +5629,40 @@ C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>,
 C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>,
 C<d_msg_peek>, C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msgrcv>,
 C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>,
-C<d_nv_preserves_uv>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
-C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
-C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
-C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEldbl>, C<d_PRIfldbl>,
-C<d_PRIFldbl>, C<d_PRIgldbl>, C<d_PRIGldbl>, C<d_PRIi64>, C<d_PRIo64>,
-C<d_PRIu64>, C<d_PRIx64>, C<d_PRIX64>, C<d_pthread_yield>, C<d_pwage>,
-C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
-C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
-C<d_readlink>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
-C<d_safemcpy>, C<d_sanemcmp>, C<d_sched_yield>, C<d_scm_rights>,
-C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
-C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_setegid>, C<d_seteuid>,
-C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>,
-C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>,
-C<d_setprior>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
-C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
-C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
-C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_sqrtl>,
-C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_stream_array>,
-C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>,
-C<d_strerrm>, C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
-C<d_strtoll>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
-C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
-C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
-C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
-C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
-C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
-C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
-C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
-C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
-C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
+C<d_nv_preserved_bits>, C<d_nv_preserves_uv>, C<d_off64_t>,
+C<d_old_pthread_create_joinable>, C<d_oldpthreads>, C<d_oldsock>,
+C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_perl_otherlibdirs>,
+C<d_phostname>, C<d_pipe>, C<d_poll>, C<d_portable>, C<d_PRId64>,
+C<d_PRIeldbl>, C<d_PRIEldbl>, C<d_PRIfldbl>, C<d_PRIFldbl>, C<d_PRIgldbl>,
+C<d_PRIGldbl>, C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>, C<d_PRIx64>,
+C<d_PRIX64>, C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>, C<d_pwclass>,
+C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>,
+C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>, C<d_rename>,
+C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>,
+C<d_sched_yield>, C<d_scm_rights>, C<d_seekdir>, C<d_select>, C<d_sem>,
+C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
+C<d_semop>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>, C<d_setgrps>,
+C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>,
+C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>, C<d_setpwent>,
+C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
+C<d_setruid>, C<d_setsent>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>,
+C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>,
+C<d_sigaction>, C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
+C<d_sqrtl>, C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>,
+C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
+C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
+C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strtod>,
+C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoul>, C<d_strtoull>,
+C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
+C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
+C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
+C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>, C<d_union_semun>,
+C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>,
+C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
+C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
+C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>, C<defvoidused>,
+C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>,
+C<dynamic_ext>
 
 =item e
 

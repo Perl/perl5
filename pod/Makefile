@@ -31,6 +31,7 @@ POD = \
 	perlmod.pod	\
 	perlmodlib.pod	\
 	perlmodinstall.pod	\
+	perlnewmod.pod	\
 	perlfork.pod	\
 	perlform.pod	\
 	perllocale.pod	\
@@ -98,6 +99,7 @@ MAN = \
 	perlmod.man	\
 	perlmodlib.man	\
 	perlmodinstall.man	\
+	perlnewmod.man	\
 	perlfork.man	\
 	perlform.man	\
 	perllocale.man	\
@@ -165,6 +167,7 @@ HTML = \
 	perlmod.html	\
 	perlmodlib.html	\
 	perlmodinstall.html	\
+	perlnewmod.html	\
 	perlfork.html	\
 	perlform.html	\
 	perllocale.html	\
@@ -232,6 +235,7 @@ TEX = \
 	perlmod.tex	\
 	perlmodlib.tex	\
 	perlmodinstall.tex	\
+	perlnewmod.tex	\
 	perlfork.tex	\
 	perlform.tex	\
 	perllocale.tex	\
@@ -358,7 +362,11 @@ podchecker:	podchecker.PL ../lib/Config.pm
 podselect:	podselect.PL ../lib/Config.pm
 	$(PERL) -I ../lib podselect.PL
 
+perlmodlib.pod:	$(PERL) perlmodlib.PL ../mv-if-diff
+	rm -f perlmodlib.tmp
+	$(PERL) -I ../lib perlmodlib.PL
+	sh ../mv-if-diff perlmodlib.tmp perlmodlib.pod
+
 compile: all
 	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' pod2latex pod2man pod2text checkpods -prog -verbose dcf -log ../compilelog;
 
-	
