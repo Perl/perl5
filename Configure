@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Mar 27 07:51:37 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Tue Apr  3 04:12:27 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -4533,6 +4533,384 @@ case "$usemorebits" in
 	;;
 esac
 
+: check for void type
+echo " "
+echo "Checking to see how well your C compiler groks the void type..." >&4
+case "$voidflags" in
+'')
+	$cat >try.c <<'EOCP'
+#if TRY & 1
+void sub() {
+#else
+sub() {
+#endif
+	extern void moo();	/* function returning void */
+	void (*goo)();		/* ptr to func returning void */
+#if TRY & 8
+	void *hue;		/* generic ptr */
+#endif
+#if TRY & 2
+	void (*foo[10])();
+#endif
+
+#if TRY & 4
+	if(goo == moo) {
+		exit(0);
+	}
+#endif
+	exit(0);
+}
+int main() { sub(); }
+EOCP
+	if $cc $ccflags -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
+		voidflags=$defvoidused
+	echo "Good.  It appears to support void to the level $package wants.">&4
+		if $contains warning .out >/dev/null 2>&1; then
+			echo "However, you might get some warnings that look like this:"
+			$cat .out
+		fi
+	else
+echo "Hmm, your compiler has some difficulty with void. Checking further..." >&4
+		if $cc $ccflags -c -DTRY=1 try.c >/dev/null 2>&1; then
+			echo "It supports 1..."
+			if $cc $ccflags -c -DTRY=3 try.c >/dev/null 2>&1; then
+				echo "It also supports 2..."
+				if $cc $ccflags -c -DTRY=7 try.c >/dev/null 2>&1; then
+					voidflags=7
+					echo "And it supports 4 but not 8 definitely."
+				else
+					echo "It doesn't support 4..."
+					if $cc $ccflags -c -DTRY=11 try.c >/dev/null 2>&1; then
+						voidflags=11
+						echo "But it supports 8."
+					else
+						voidflags=3
+						echo "Neither does it support 8."
+					fi
+				fi
+			else
+				echo "It does not support 2..."
+				if $cc $ccflags -c -DTRY=13 try.c >/dev/null 2>&1; then
+					voidflags=13
+					echo "But it supports 4 and 8."
+				else
+					if $cc $ccflags -c -DTRY=5 try.c >/dev/null 2>&1; then
+						voidflags=5
+						echo "And it supports 4 but has not heard about 8."
+					else
+						echo "However it supports 8 but not 4."
+					fi
+				fi
+			fi
+		else
+			echo "There is no support at all for void."
+			voidflags=0
+		fi
+	fi
+esac
+case "$voidflags" in
+"$defvoidused") ;;
+*)	$cat >&4 <<'EOM'
+  Support flag bits are:
+    1: basic void declarations.
+    2: arrays of pointers to functions returning void.
+    4: operations between pointers to and addresses of void functions.
+    8: generic void pointers.
+EOM
+	dflt="$voidflags";
+	rp="Your void support flags add up to what?"
+	. ./myread
+	voidflags="$ans"
+	;;
+esac
+$rm -f try.* .out
+
+: check for length of pointer
+echo " "
+case "$ptrsize" in
+'')
+	echo "Checking to see how big your pointers are..." >&4
+	if test "$voidflags" -gt 7; then
+		echo '#define VOID_PTR char *' > try.c
+	else
+		echo '#define VOID_PTR void *' > try.c
+	fi
+	$cat >>try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof(VOID_PTR));
+    exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		ptrsize=`./try`
+		echo "Your pointers are $ptrsize bytes long."
+	else
+		dflt='4'
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
+		rp="What is the size of a pointer (in bytes)?"
+		. ./myread
+		ptrsize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
+
+: check for long long
+echo " "
+echo "Checking to see if you have long long..." >&4
+echo 'int main() { long long x = 7; return 0; }' > try.c
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have long long."
+else
+	val="$undef"
+	echo "You do not have long long."
+fi
+$rm try.*
+set d_longlong
+eval $setvar
+
+: check for length of long long
+case "${d_longlong}${longlongsize}" in
+$define)
+	echo " "
+	echo "Checking to see how big your long longs are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof(long long));
+    return(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		longlongsize=`./try$exe_ext`
+		echo "Your long longs are $longlongsize bytes long."
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a long long (in bytes)?"
+		. ./myread
+		longlongsize="$ans"
+	fi
+	if $test "X$longsize" = "X$longlongsize"; then
+		echo "(That isn't any different from an ordinary long.)"
+	fi	
+	;;
+esac
+$rm -f try.* try
+
+: determine filename position in cpp output
+echo " "
+echo "Computing filename position in cpp output for #include directives..." >&4
+echo '#include <stdio.h>' > foo.c
+$cat >fieldn <<EOF
+$startsh
+$cppstdin $cppflags $cppminus <foo.c 2>/dev/null | \
+$grep '^[ 	]*#.*stdio\.h' | \
+while read cline; do
+	pos=1
+	set \$cline
+	while $test \$# -gt 0; do
+		if $test -r \`echo \$1 | $tr -d '"'\`; then
+			echo "\$pos"
+			exit 0
+		fi
+		shift
+		pos=\`expr \$pos + 1\`
+	done
+done
+EOF
+chmod +x fieldn
+fieldn=`./fieldn`
+$rm -f foo.c fieldn
+case $fieldn in
+'') pos='???';;
+1) pos=first;;
+2) pos=second;;
+3) pos=third;;
+*) pos="${fieldn}th";;
+esac
+echo "Your cpp writes the filename in the $pos field of the line."
+
+: locate header file
+$cat >findhdr <<EOF
+$startsh
+wanted=\$1
+name=''
+for usrincdir in $usrinc
+do
+	if test -f \$usrincdir/\$wanted; then
+		echo "\$usrincdir/\$wanted"
+		exit 0
+	fi
+done
+awkprg='{ print \$$fieldn }'
+echo "#include <\$wanted>" > foo\$\$.c
+$cppstdin $cppminus $cppflags < foo\$\$.c 2>/dev/null | \
+$grep "^[ 	]*#.*\$wanted" | \
+while read cline; do
+	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
+	case "\$name" in
+	*[/\\\\]\$wanted) echo "\$name"; exit 1;;
+	*[\\\\/]\$wanted) echo "\$name"; exit 1;;
+	*) exit 2;;
+	esac;
+done;
+#
+# status = 0: grep returned 0 lines, case statement not executed
+# status = 1: headerfile found
+# status = 2: while loop executed, no headerfile found
+#
+status=\$?
+$rm -f foo\$\$.c;
+if test \$status -eq 1; then
+	exit 0;
+fi
+exit 1
+EOF
+chmod +x findhdr
+
+: define an alternate in-header-list? function
+inhdr='echo " "; td=$define; tu=$undef; yyy=$@;
+cont=true; xxf="echo \"<\$1> found.\" >&4";
+case $# in 2) xxnf="echo \"<\$1> NOT found.\" >&4";;
+*) xxnf="echo \"<\$1> NOT found, ...\" >&4";;
+esac;
+case $# in 4) instead=instead;; *) instead="at last";; esac;
+while $test "$cont"; do
+	xxx=`./findhdr $1`
+	var=$2; eval "was=\$$2";
+	if $test "$xxx" && $test -r "$xxx";
+	then eval $xxf;
+	eval "case \"\$$var\" in $undef) . ./whoa; esac"; eval "$var=\$td";
+		cont="";
+	else eval $xxnf;
+	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu"; fi;
+	set $yyy; shift; shift; yyy=$@;
+	case $# in 0) cont="";;
+	2) xxf="echo \"but I found <\$1> $instead.\" >&4";
+		xxnf="echo \"and I did not find <\$1> either.\" >&4";;
+	*) xxf="echo \"but I found <\$1\> instead.\" >&4";
+		xxnf="echo \"there is no <\$1>, ...\" >&4";;
+	esac;
+done;
+while $test "$yyy";
+do set $yyy; var=$2; eval "was=\$$2";
+	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu";
+	set $yyy; shift; shift; yyy=$@;
+done'
+
+: see if inttypes.h is available
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+echo " "
+$cat >try.c <<EOCP
+#include <inttypes.h>
+int main() {
+	static int32_t foo32 = 0x12345678;
+}
+EOCP
+set try
+if eval $compile; then
+	echo "<inttypes.h> found." >&4
+	val="$define"
+else
+	echo "<inttypes.h> NOT found." >&4
+	val="$undef"
+fi
+$rm -f try.c try
+set i_inttypes
+eval $setvar
+
+: check for int64_t
+echo " "
+echo "Checking to see if you have int64_t..." >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+int main() { int64_t x = 7; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have int64_t."
+else
+	val="$undef"
+	echo "You do not have int64_t."
+fi
+$rm -f try try.*
+set d_int64_t
+eval $setvar
+
+
+echo " "
+echo "Checking which 64-bit integer type we could use..." >&4
+
+case "$intsize" in
+8) val=int
+   set quadtype
+   eval $setvar
+   val='"unsigned int"'
+   set uquadtype
+   eval $setvar
+   quadkind=1
+   ;;
+*) case "$longsize" in
+   8) val=long
+      set quadtype
+      eval $setvar
+      val='"unsigned long"'
+      set uquadtype
+      eval $setvar
+      quadkind=2
+      ;;
+   *) case "$d_longlong:$longlongsize" in
+      define:8)
+        val='"long long"'
+        set quadtype
+        eval $setvar
+        val='"unsigned long long"'
+        set uquadtype
+        eval $setvar
+        quadkind=3
+        ;;
+      *) case "$d_int64_t" in
+         define)
+           val=int64_t
+           set quadtype
+           eval $setvar
+           val=uint64_t
+           set uquadtype
+           eval $setvar
+           quadkind=4
+           ;;
+         esac
+         ;;
+      esac
+      ;;
+   esac
+   ;;
+esac
+
+case "$quadtype" in
+'')	echo "Alas, no 64-bit integer types in sight." >&4
+	d_quad="$undef"
+	;;
+*)	echo "We could use '$quadtype' for 64-bit integers." >&4
+	d_quad="$define"
+	;;
+esac
+
 
 case "$uselonglong" in
 "$define"|true|[yY]*)
@@ -4607,6 +4985,10 @@ EOM
    "$define"|true|[yY]*) dflt='y';;
    *) dflt='n';;
    esac
+   case "$d_quad" in
+   "$define") ;;
+   *) dflt='n' ;;
+   esac
    cat <<EOM
 
 Perl can be built to take advantage of 64-bit integer types
@@ -4614,6 +4996,7 @@ on some systems.  To do so, Configure can be run with -Duse64bitint.
 Choosing this option will most probably introduce binary incompatibilities.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
+(The default has been chosen based on your configuration.)
 EOM
    rp='Try to use 64-bit integers, if available?'
    . ./myread
@@ -4642,6 +5025,7 @@ binary incompatibilities.  On the other hand, your platform may not
 have any more 64-bitness available than what you already have chosen.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
+(The default has been chosen based on your configuration.)
 EOM
 rp='Try to use maximal 64-bit support, if available?'
 . ./myread
@@ -4661,6 +5045,31 @@ Since you have chosen a maximally 64-bit build, I'm also turning on
 the use of 64-bit integers.
 EOM
 		use64bitint="$define" ;;
+	esac
+	;;
+esac
+
+case "$use64bitall" in
+"$define"|true|[yY]*)
+	case "$ptrsize" in
+	4)	cat <<EOM >&4
+
+*** You have chosen a maximally 64-bit build, but your pointers
+*** are only 4 bytes wide, disabling maximal 64-bitness.
+
+EOM
+		use64bitall="$undef"
+		case "$use64bitint" in
+		"$define"|true|[yY]*) ;;
+		*)	cat <<EOM >&4
+
+*** Downgrading from maximal 64-bitness to using 64-bit integers.
+
+EOM
+			use64bitint="$define"
+			;;
+		esac
+		;;
 	esac
 	;;
 esac
@@ -5845,107 +6254,6 @@ esac
 set d_dosuid
 eval $setvar
 
-: determine filename position in cpp output
-echo " "
-echo "Computing filename position in cpp output for #include directives..." >&4
-echo '#include <stdio.h>' > foo.c
-$cat >fieldn <<EOF
-$startsh
-$cppstdin $cppflags $cppminus <foo.c 2>/dev/null | \
-$grep '^[ 	]*#.*stdio\.h' | \
-while read cline; do
-	pos=1
-	set \$cline
-	while $test \$# -gt 0; do
-		if $test -r \`echo \$1 | $tr -d '"'\`; then
-			echo "\$pos"
-			exit 0
-		fi
-		shift
-		pos=\`expr \$pos + 1\`
-	done
-done
-EOF
-chmod +x fieldn
-fieldn=`./fieldn`
-$rm -f foo.c fieldn
-case $fieldn in
-'') pos='???';;
-1) pos=first;;
-2) pos=second;;
-3) pos=third;;
-*) pos="${fieldn}th";;
-esac
-echo "Your cpp writes the filename in the $pos field of the line."
-
-: locate header file
-$cat >findhdr <<EOF
-$startsh
-wanted=\$1
-name=''
-for usrincdir in $usrinc
-do
-	if test -f \$usrincdir/\$wanted; then
-		echo "\$usrincdir/\$wanted"
-		exit 0
-	fi
-done
-awkprg='{ print \$$fieldn }'
-echo "#include <\$wanted>" > foo\$\$.c
-$cppstdin $cppminus $cppflags < foo\$\$.c 2>/dev/null | \
-$grep "^[ 	]*#.*\$wanted" | \
-while read cline; do
-	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
-	case "\$name" in
-	*[/\\\\]\$wanted) echo "\$name"; exit 1;;
-	*[\\\\/]\$wanted) echo "\$name"; exit 1;;
-	*) exit 2;;
-	esac;
-done;
-#
-# status = 0: grep returned 0 lines, case statement not executed
-# status = 1: headerfile found
-# status = 2: while loop executed, no headerfile found
-#
-status=\$?
-$rm -f foo\$\$.c;
-if test \$status -eq 1; then
-	exit 0;
-fi
-exit 1
-EOF
-chmod +x findhdr
-
-: define an alternate in-header-list? function
-inhdr='echo " "; td=$define; tu=$undef; yyy=$@;
-cont=true; xxf="echo \"<\$1> found.\" >&4";
-case $# in 2) xxnf="echo \"<\$1> NOT found.\" >&4";;
-*) xxnf="echo \"<\$1> NOT found, ...\" >&4";;
-esac;
-case $# in 4) instead=instead;; *) instead="at last";; esac;
-while $test "$cont"; do
-	xxx=`./findhdr $1`
-	var=$2; eval "was=\$$2";
-	if $test "$xxx" && $test -r "$xxx";
-	then eval $xxf;
-	eval "case \"\$$var\" in $undef) . ./whoa; esac"; eval "$var=\$td";
-		cont="";
-	else eval $xxnf;
-	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu"; fi;
-	set $yyy; shift; shift; yyy=$@;
-	case $# in 0) cont="";;
-	2) xxf="echo \"but I found <\$1> $instead.\" >&4";
-		xxnf="echo \"and I did not find <\$1> either.\" >&4";;
-	*) xxf="echo \"but I found <\$1\> instead.\" >&4";
-		xxnf="echo \"there is no <\$1>, ...\" >&4";;
-	esac;
-done;
-while $test "$yyy";
-do set $yyy; var=$2; eval "was=\$$2";
-	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu";
-	set $yyy; shift; shift; yyy=$@;
-done'
-
 : see if this is a malloc.h system
 set malloc.h i_malloc
 eval $inhdr
@@ -5959,6 +6267,10 @@ echo " "
 case "$usemymalloc" in
 ''|[yY]*|true|$define)	dflt='y' ;;
 *)	dflt='n' ;;
+esac
+case "$ptrsize" in
+4) ;;
+*) dflt='n' ;;
 esac
 rp="Do you wish to attempt to use the malloc that comes with $package?"
 . ./myread
@@ -9818,51 +10130,6 @@ set d_index; eval $setvar
 set inet_aton d_inetaton
 eval $inlibc
 
-: see if inttypes.h is available
-: we want a real compile instead of Inhdr because some systems
-: have an inttypes.h which includes non-existent headers
-echo " "
-$cat >try.c <<EOCP
-#include <inttypes.h>
-int main() {
-	static int32_t foo32 = 0x12345678;
-}
-EOCP
-set try
-if eval $compile; then
-	echo "<inttypes.h> found." >&4
-	val="$define"
-else
-	echo "<inttypes.h> NOT found." >&4
-	val="$undef"
-fi
-$rm -f try.c try
-set i_inttypes
-eval $setvar
-
-: check for int64_t
-echo " "
-echo "Checking to see if you have int64_t..." >&4
-$cat >try.c <<EOCP
-#include <sys/types.h>
-#$i_inttypes I_INTTYPES
-#ifdef I_INTTYPES
-#include <inttypes.h>
-#endif
-int main() { int64_t x = 7; }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have int64_t."
-else
-	val="$undef"
-	echo "You do not have int64_t."
-fi
-$rm -f try try.*
-set d_int64_t
-eval $setvar
-
 : Look for isascii
 echo " "
 $cat >isascii.c <<'EOCP'
@@ -9970,54 +10237,6 @@ eval $inlibc
 : see if lockf exists
 set lockf d_lockf
 eval $inlibc
-
-: check for long long
-echo " "
-echo "Checking to see if you have long long..." >&4
-echo 'int main() { long long x = 7; return 0; }' > try.c
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have long long."
-else
-	val="$undef"
-	echo "You do not have long long."
-fi
-$rm try.*
-set d_longlong
-eval $setvar
-
-: check for length of long long
-case "${d_longlong}${longlongsize}" in
-$define)
-	echo " "
-	echo "Checking to see how big your long longs are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof(long long));
-    return(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		longlongsize=`./try$exe_ext`
-		echo "Your long longs are $longlongsize bytes long."
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a long long (in bytes)?"
-		. ./myread
-		longlongsize="$ans"
-	fi
-	if $test "X$longsize" = "X$longlongsize"; then
-		echo "(That isn't any different from an ordinary long.)"
-	fi	
-	;;
-esac
-$rm -f try.* try
 
 : see if prototype for lseek is available
 echo " "
@@ -10186,70 +10405,6 @@ eval $inlibc
 : see if nice exists
 set nice d_nice
 eval $inlibc
-
-
-echo " "
-echo "Checking which 64-bit integer type we could use..." >&4
-
-case "$intsize" in
-8) val=int
-   set quadtype
-   eval $setvar
-   val='"unsigned int"'
-   set uquadtype
-   eval $setvar
-   quadkind=1
-   ;;
-*) case "$longsize" in
-   8) val=long
-      set quadtype
-      eval $setvar
-      val='"unsigned long"'
-      set uquadtype
-      eval $setvar
-      quadkind=2
-      ;;
-   *) case "$d_longlong:$longlongsize" in
-      define:8)
-        val='"long long"'
-        set quadtype
-        eval $setvar
-        val='"unsigned long long"'
-        set uquadtype
-        eval $setvar
-        quadkind=3
-        ;;
-      *) case "$d_int64_t" in
-         define)
-           val=int64_t
-           set quadtype
-           eval $setvar
-           val=uint64_t
-           set uquadtype
-           eval $setvar
-           quadkind=4
-           ;;
-         esac
-         ;;
-      esac
-      ;;
-   esac
-   ;;
-esac
-
-case "$quadtype" in
-'')	echo "Alas, no 64-bit integer types in sight." >&4
-	d_quad="$undef"
-	;;
-*)	if test X"$use64bitint" = Xdefine -o X"$longsize" = X8; then
-	    verb="will"
-	else
-	    verb="could"
-	fi
-	echo "We $verb use '$quadtype' for 64-bit integers." >&4
-	d_quad="$define"
-	;;
-esac
 
 : check for length of character
 echo " "
@@ -12836,98 +12991,6 @@ EOCP
 	;;
 esac
 
-: check for void type
-echo " "
-echo "Checking to see how well your C compiler groks the void type..." >&4
-case "$voidflags" in
-'')
-	$cat >try.c <<'EOCP'
-#if TRY & 1
-void sub() {
-#else
-sub() {
-#endif
-	extern void moo();	/* function returning void */
-	void (*goo)();		/* ptr to func returning void */
-#if TRY & 8
-	void *hue;		/* generic ptr */
-#endif
-#if TRY & 2
-	void (*foo[10])();
-#endif
-
-#if TRY & 4
-	if(goo == moo) {
-		exit(0);
-	}
-#endif
-	exit(0);
-}
-int main() { sub(); }
-EOCP
-	if $cc $ccflags -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
-		voidflags=$defvoidused
-	echo "Good.  It appears to support void to the level $package wants.">&4
-		if $contains warning .out >/dev/null 2>&1; then
-			echo "However, you might get some warnings that look like this:"
-			$cat .out
-		fi
-	else
-echo "Hmm, your compiler has some difficulty with void. Checking further..." >&4
-		if $cc $ccflags -c -DTRY=1 try.c >/dev/null 2>&1; then
-			echo "It supports 1..."
-			if $cc $ccflags -c -DTRY=3 try.c >/dev/null 2>&1; then
-				echo "It also supports 2..."
-				if $cc $ccflags -c -DTRY=7 try.c >/dev/null 2>&1; then
-					voidflags=7
-					echo "And it supports 4 but not 8 definitely."
-				else
-					echo "It doesn't support 4..."
-					if $cc $ccflags -c -DTRY=11 try.c >/dev/null 2>&1; then
-						voidflags=11
-						echo "But it supports 8."
-					else
-						voidflags=3
-						echo "Neither does it support 8."
-					fi
-				fi
-			else
-				echo "It does not support 2..."
-				if $cc $ccflags -c -DTRY=13 try.c >/dev/null 2>&1; then
-					voidflags=13
-					echo "But it supports 4 and 8."
-				else
-					if $cc $ccflags -c -DTRY=5 try.c >/dev/null 2>&1; then
-						voidflags=5
-						echo "And it supports 4 but has not heard about 8."
-					else
-						echo "However it supports 8 but not 4."
-					fi
-				fi
-			fi
-		else
-			echo "There is no support at all for void."
-			voidflags=0
-		fi
-	fi
-esac
-case "$voidflags" in
-"$defvoidused") ;;
-*)	$cat >&4 <<'EOM'
-  Support flag bits are:
-    1: basic void declarations.
-    2: arrays of pointers to functions returning void.
-    4: operations between pointers to and addresses of void functions.
-    8: generic void pointers.
-EOM
-	dflt="$voidflags";
-	rp="Your void support flags add up to what?"
-	. ./myread
-	voidflags="$ans"
-	;;
-esac
-$rm -f try.* .out
-
 
 : How can we generate normalized random numbers ?
 echo " "
@@ -14151,39 +14214,6 @@ esac
 : Find earliest pure perl site_perl subdirectory perl can use.
 : The versioned directories started at 5.005.
 pm_apiversion='5.005'
-
-: check for length of pointer
-echo " "
-case "$ptrsize" in
-'')
-	echo "Checking to see how big your pointers are..." >&4
-	if test "$voidflags" -gt 7; then
-		echo '#define VOID_PTR char *' > try.c
-	else
-		echo '#define VOID_PTR void *' > try.c
-	fi
-	$cat >>try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof(VOID_PTR));
-    exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		ptrsize=`./try`
-		echo "Your pointers are $ptrsize bytes long."
-	else
-		dflt='4'
-		echo "(I can't seem to compile the test program.  Guessing...)" >&4
-		rp="What is the size of a pointer (in bytes)?"
-		. ./myread
-		ptrsize="$ans"
-	fi
-	;;
-esac
-$rm -f try.c try
 
 : see if ar generates random libraries by itself
 echo " "
