@@ -284,7 +284,9 @@ perl_construct(pTHXx)
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
     PL_errors = newSVpvn("",0);
 #ifdef USE_ITHREADS
-        PL_regex_padav = newAV();
+    PL_regex_padav = newAV();
+    av_push(PL_regex_padav,(SV*)newAV());    /* First entry is an array of empty elements */
+    PL_regex_pad = AvARRAY(PL_regex_padav);
 #endif
 #ifdef USE_REENTRANT_API
     New(31337, PL_reentrant_buffer,1, REBUF);

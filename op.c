@@ -747,6 +747,7 @@ Perl_op_free(pTHX_ OP *o)
 void
 Perl_op_clear(pTHX_ OP *o)
 {
+
     switch (o->op_type) {
     case OP_NULL:	/* Was holding old type, if any. */
     case OP_ENTEREVAL:	/* Was holding hints. */
@@ -860,6 +861,13 @@ clear_pmop:
          */
 	ReREFCNT_dec(PM_GETRE_SAFE(cPMOPo));
 	PM_SETRE_SAFE(cPMOPo, (REGEXP*)NULL);
+#ifdef USE_ITHREADS
+	if(PL_regex_pad) {        /* We could be in destruction */
+            av_push((AV*) PL_regex_pad[0],(SV*) PL_regex_pad[(cPMOPo)->op_pmoffset]);
+            PM_SETRE(cPMOPo, (cPMOPo)->op_pmoffset);
+        }
+#endif 
+
 	break;
     }
 
@@ -2962,12 +2970,19 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     pmop->op_pmflags = pmop->op_pmpermflags;
 
 #ifdef USE_ITHREADS
-        {
-                SV* repointer = newSViv(0);
-                av_push(PL_regex_padav,SvREFCNT_inc(repointer));
-                pmop->op_pmoffset = av_len(PL_regex_padav);
-                PL_regex_pad = AvARRAY(PL_regex_padav);
+    {
+        SV* repointer;
+        if(av_len((AV*) PL_regex_pad[0]) > -1) {
+	    repointer = av_pop((AV*)PL_regex_pad[0]);
+            pmop->op_pmoffset = SvIV(repointer);
+	    sv_setiv(repointer,0);
+        } else { 
+            repointer = newSViv(0);
+            av_push(PL_regex_padav,SvREFCNT_inc(repointer));
+            pmop->op_pmoffset = av_len(PL_regex_padav);
+            PL_regex_pad = AvARRAY(PL_regex_padav);
         }
+    }
 #endif
         
         /* link into pm list */
