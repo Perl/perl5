@@ -2950,14 +2950,14 @@ Examples:
     }
 
 You may also, in the Bourne shell tradition, specify an EXPR beginning
-with C<< '>&' >>, in which case the rest of the string is interpreted as the
-name of a filehandle (or file descriptor, if numeric) to be
-duped and opened.  You may use C<&> after C<< > >>, C<<< >> >>>,
-C<< < >>, C<< +> >>, C<<< +>> >>>, and C<< +< >>.  The
-mode you specify should match the mode of the original filehandle.
-(Duping a filehandle does not take into account any existing contents of
-IO buffers.) If you use the 3 arg form then you can pass either a number,
-the name of a filehandle or the normal "reference to a glob".
+with C<< '>&' >>, in which case the rest of the string is interpreted
+as the name of a filehandle (or file descriptor, if numeric) to be
+duped (as L<dup(2)>) and opened.  You may use C<&> after C<< > >>,
+C<<< >> >>>, C<< < >>, C<< +> >>, C<<< +>> >>>, and C<< +< >>.
+The mode you specify should match the mode of the original filehandle.
+(Duping a filehandle does not take into account any existing contents
+of IO buffers.) If you use the 3 arg form then you can pass either a
+number, the name of a filehandle or the normal "reference to a glob".
 
 Here is a script that saves, redirects, and restores C<STDOUT> and
 C<STDERR> using various methods:
@@ -2984,15 +2984,34 @@ C<STDERR> using various methods:
     print STDOUT "stdout 2\n";
     print STDERR "stderr 2\n";
 
-If you specify C<< '<&=N' >>, where C<N> is a number, then Perl will
-do an equivalent of C's C<fdopen> of that file descriptor; this is
-more parsimonious of file descriptors.  For example:
+If you specify C<< '<&=X' >>, where C<X> is a number or a filehandle,
+then Perl will do an equivalent of C's C<fdopen> of that file
+descriptor (and not call L<dup(2)>); this is more parsimonious
+of file descriptors.  For example:
 
+    # open for input, reusing the fileno of $fd
     open(FILEHANDLE, "<&=$fd")
 
 or
 
     open(FILEHANDLE, "<&=", $fd)
+
+or
+
+    # open for append, using the fileno of OLDFH
+    open(FH, ">>&=", OLDFH)
+
+or
+
+    open(FH, ">>&=OLDFH")
+
+Being parsimonious on filehandles is useful (besides being
+parsimonious) also for example when something is dependent
+on the file descriptors, like for example locking using flock().
+If you do just a C<< open(A, '>>&B') >>, the filehandle A will not
+have the file descriptor as B has, and therefore flock(A) will
+not flock(B), and vice versa.  But with C<< open(A, '>>&=B') >>
+the filehandles will share the same file descriptor.
 
 Note that if Perl is using the standard C libraries' fdopen() then on
 many UNIX systems, fdopen() is known to fail when file descriptors
