@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 9 $
+#  $Revision: 10 $
 #  $Author: mhx $
-#  $Date: 2004/08/13 12:49:50 +0200 $
+#  $Date: 2004/08/17 20:56:15 +0200 $
 #
 ################################################################################
 #
@@ -150,6 +150,12 @@ print OUT <<HEAD;
 #define NEED_newRV_noinc
 #define NEED_sv_2pv_nolen
 #define NEED_sv_2pvbyte
+#define NEED_sv_catpvf_mg
+#define NEED_sv_catpvf_mg_nocontext
+#define NEED_sv_setpvf_mg
+#define NEED_sv_setpvf_mg_nocontext
+#define NEED_vnewSVpvf
+
 
 #include "ppport.h"
 

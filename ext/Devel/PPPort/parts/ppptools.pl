@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 11 $
+#  $Revision: 12 $
 #  $Author: mhx $
-#  $Date: 2004/08/13 12:50:05 +0200 $
+#  $Date: 2004/08/17 14:00:34 +0200 $
 #
 ################################################################################
 #
@@ -43,6 +43,17 @@ sub parse_todo
   }
 
   return \%todo;
+}
+
+sub expand_version
+{
+  my($op, $ver) = @_;
+  my($r, $v, $s) = parse_version($ver);
+  $r == 5 or die "only Perl revision 5 is supported\n";
+  $op eq '=='     and return "((PERL_VERSION == $v) && (PERL_SUBVERSION == $s))";
+  $op eq '!='     and return "((PERL_VERSION != $v) || (PERL_SUBVERSION != $s))";
+  $op =~ /([<>])/ and return "((PERL_VERSION $1 $v) || ((PERL_VERSION == $v) && (PERL_SUBVERSION $op $s)))";
+  die "cannot expand version expression ($op $ver)\n";
 }
 
 sub parse_partspec
@@ -136,6 +147,12 @@ sub parse_partspec
 
       exists $proto{$_} and warn "$file: duplicate prototype for $_\n";
       $proto{$_} = $proto;
+    }
+  }
+
+  for $section (qw( implementation xsubs xsinit xsmisc xshead xsboot )) {
+    if (exists $data{$section}) {
+      $data{$section} =~ s/\{\s*version\s*(<|>|==|!=|>=|<=)\s*([\d._]+)\s*\}/expand_version($1, $2)/gei;
     }
   }
 

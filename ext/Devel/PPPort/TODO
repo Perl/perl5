@@ -1,7 +1,5 @@
 TODO:
 
-* add support for sv_vcatpvf / sv_vsetpvf / ...
-
 * more documentation, more tests
 
 * Resolve dependencies in Makefile.PL and remind of

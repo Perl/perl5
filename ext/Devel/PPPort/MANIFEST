@@ -57,6 +57,7 @@ parts/inc/newRV
 parts/inc/ppphbin
 parts/inc/ppphdoc
 parts/inc/ppphtest
+parts/inc/sv_xpvf
 parts/inc/SvPV
 parts/inc/threads
 parts/inc/uv
@@ -97,6 +98,7 @@ PPPort_xs.PL
 README
 soak
 t/call.t
+t/cop.t
 t/grok.t
 t/limits.t
 t/magic.t
@@ -106,6 +108,7 @@ t/MY_CXT.t
 t/newCONSTSUB.t
 t/newRV.t
 t/ppphtest.t
+t/sv_xpvf.t
 t/SvPV.t
 t/testutil.pl
 t/threads.t

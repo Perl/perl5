@@ -51,6 +51,13 @@
 /* ---- from parts/inc/newRV ---- */
 #define NEED_newRV_noinc
 
+/* ---- from parts/inc/sv_xpvf ---- */
+#define NEED_vnewSVpvf
+#define NEED_sv_catpvf_mg
+#define NEED_sv_catpvf_mg_nocontext
+#define NEED_sv_setpvf_mg
+#define NEED_sv_setpvf_mg_nocontext
+
 /* ---- from parts/inc/SvPV ---- */
 #define NEED_sv_2pv_nolen
 #define NEED_sv_2pvbyte
@@ -82,6 +89,45 @@ void call_newCONSTSUB_1(void)
 
 extern void call_newCONSTSUB_2(void);
 extern void call_newCONSTSUB_3(void);
+
+/* ---- from parts/inc/sv_xpvf ---- */
+static SV * test_vnewSVpvf(pTHX_ const char *pat, ...)
+{
+  SV *sv;
+  va_list args;
+  va_start(args, pat);
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+  sv = vnewSVpvf(pat, &args);
+#else
+  sv = newSVpv(pat, 0);
+#endif
+  va_end(args);
+  return sv;
+}
+
+static void test_sv_vcatpvf(pTHX_ SV *sv, const char *pat, ...)
+{
+  va_list args;
+  va_start(args, pat);
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+  sv_vcatpvf(sv, pat, &args);
+#else
+  sv_catpv(sv, pat);
+#endif
+  va_end(args);
+}
+
+static void test_sv_vsetpvf(pTHX_ SV *sv, const char *pat, ...)
+{
+  va_list args;
+  va_start(args, pat);
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+  sv_vsetpvf(sv, pat, &args);
+#else
+  sv_setpv(sv, pat);
+#endif
+  va_end(args);
+}
 
 /* =========== END XSMISC =================================================== */
 
@@ -718,6 +764,91 @@ newRV_noinc_REFCNT()
 		RETVAL
 
 ##----------------------------------------------------------------------
+##  XSUBs from parts/inc/sv_xpvf
+##----------------------------------------------------------------------
+
+SV *
+vnewSVpvf()
+	CODE:
+		RETVAL = test_vnewSVpvf(aTHX_ "%s-%d", "Perl", 42);
+	OUTPUT:
+		RETVAL
+
+SV *
+sv_vcatpvf(sv)
+	SV *sv
+	CODE:
+		RETVAL = newSVsv(sv);
+		test_sv_vcatpvf(aTHX_ RETVAL, "%s-%d", "Perl", 42);
+	OUTPUT:
+		RETVAL
+
+SV *
+sv_vsetpvf(sv)
+	SV *sv
+	CODE:
+		RETVAL = newSVsv(sv);
+		test_sv_vsetpvf(aTHX_ RETVAL, "%s-%d", "Perl", 42);
+	OUTPUT:
+		RETVAL
+
+void
+sv_catpvf_mg(sv)
+	SV *sv
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+		sv_catpvf_mg(sv, "%s-%d", "Perl", 42);
+#endif
+
+void
+Perl_sv_catpvf_mg(sv)
+	SV *sv
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+		Perl_sv_catpvf_mg(aTHX_ sv, "%s-%d", "-Perl", 43);
+#endif
+
+void
+sv_catpvf_mg_nocontext(sv)
+	SV *sv
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+#ifdef PERL_IMPLICIT_CONTEXT
+		sv_catpvf_mg_nocontext(sv, "%s-%d", "-Perl", 44);
+#else
+		sv_catpvf_mg(sv, "%s-%d", "-Perl", 44);
+#endif
+#endif
+
+void
+sv_setpvf_mg(sv)
+	SV *sv
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+		sv_setpvf_mg(sv, "%s-%d", "mhx", 42);
+#endif
+
+void
+Perl_sv_setpvf_mg(sv)
+	SV *sv
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+		Perl_sv_setpvf_mg(aTHX_ sv, "%s-%d", "foo", 43);
+#endif
+
+void
+sv_setpvf_mg_nocontext(sv)
+	SV *sv
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+#ifdef PERL_IMPLICIT_CONTEXT
+		sv_setpvf_mg_nocontext(sv, "%s-%d", "bar", 44);
+#else
+		sv_setpvf_mg(sv, "%s-%d", "bar", 44);
+#endif
+#endif
+
+##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/SvPV
 ##----------------------------------------------------------------------
 
@@ -804,3 +935,22 @@ void
 XSRETURN_UV()
 	PPCODE:
 		XSRETURN_UV(42);
+
+void
+PUSHu()
+	PREINIT:
+		dTARG;
+	PPCODE:
+		TARG = sv_newmortal();
+		EXTEND(SP, 1);
+		PUSHu(42);
+		XSRETURN(1);
+
+void
+XPUSHu()
+	PREINIT:
+		dTARG;
+	PPCODE:
+		TARG = sv_newmortal();
+		XPUSHu(43);
+		XSRETURN(1);

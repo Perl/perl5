@@ -2,5 +2,3 @@
 do_binmode                     # U
 save_aelem                     # U
 save_helem                     # U
-sv_catpvf_mg                   # U
-sv_setpvf_mg                   # U
