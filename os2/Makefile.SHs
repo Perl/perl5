@@ -231,18 +231,52 @@ sys_harness: perl_sys
 
 !NO!SUBS!
 
-# Now we need to find directories in ./ext/ which are two level deep
+# Now we need to find directories in ./ext/ which are up to 3 level deep
+# Currently (2001/06) there is no directories 4 levels deep.
+# (Only directories so that there is no Makefile.PL some levels up matter.)
 
 dirs=''
+ddirs=''
 preci='ext/%/Makefile.aout '
 for d in ext/*
 do
-	# echo "Checking '$d'..."
-	f="`echo $d/*/Makefile.PL`"
-	# SDBFile/sdbm, skip kid makefile
-	if test ! -e "$d/Makefile.PL" -a ! "$f" = ""; then
-	    dirs="$dirs $d"
-	    preci="$preci $d/%/Makefile.aout"
+	# echo "...Checking '$d'..."
+	# skip the kid if the parent exists: cmp SDBFile/sdbm, done by MakeMaker
+	if test ! -e "$d/Makefile.PL"; then
+	    # Need to treat subdirectories manually
+	    # echo "...Checking subdirs of '$d'..."
+	    d_treated=''
+	    for dd in $d/*
+	    do
+		if test ! -d $dd; then
+		    continue
+		fi
+		if test -e "$dd/Makefile.PL"; then
+		    if test "X$d_treated" = "X"; then
+			d_treated=1
+			# echo "...Found parentless 2-level deep Makefile.PL's in $d/*/:" $d/*/Makefile.PL
+			dirs="$dirs $d"
+			preci="$preci $d/%/Makefile.aout"
+		    fi
+		else
+		    # Need to treat subsubdirectories manually
+		    dd_treated=''
+		    for ddd in $dd/*
+		    do
+			if test ! -d $ddd; then
+			    continue
+			fi
+			if test -e "$ddd/Makefile.PL"; then
+			    if test "X$dd_treated" = "X"; then
+				dd_treated=1
+				# echo "...Found parentless 3-level deep Makefile.PL's in $dd/*/:" $dd/*/Makefile.PL
+				ddirs="$ddirs $dd"
+				preci="$preci $dd/%/Makefile.aout"
+			    fi
+			fi
+		    done
+		fi
+	   done
 	fi
 done
 
@@ -251,13 +285,31 @@ $spitshell >>Makefile <<!GROK!THIS!
 
 !GROK!THIS!
 
+for d in $ddirs
+do
+    # Remove the leading component ext/
+    dd=`dirname $d`
+    pp=`basename $dd`
+    p=$pp/`basename $d`
+    $spitshell >>Makefile <<!GROK!THIS!
+lib/auto/$p/*/%.a : $d/%/Makefile.aout
+	@cd $d/\$(basename \$(notdir \$@)) ; make -f Makefile.aout config || echo "\$(MAKE) config failed, continuing anyway..."
+	cd $d/\$(basename \$(notdir \$@)) ; make -f Makefile.aout LINKTYPE=static CCCDLFLAGS=
+
+$d/%/Makefile.aout : miniperl_
+	cd \$(dir \$@) ; ../../../../miniperl_ -I ../../../../lib Makefile.PL MAKEFILE=Makefile.aout INSTALLDIRS=perl 
+
+!GROK!THIS!
+
+done
+
 for d in $dirs
 do
     p=`basename $d`
     $spitshell >>Makefile <<!GROK!THIS!
-lib/auto/$p/*/%.a : ext/$p/%/Makefile.aout
-	@cd ext/$p/\$(basename \$(notdir \$@)) ; make -f Makefile.aout config || echo "\$(MAKE) config failed, continuing anyway..."
-	cd ext/$p/\$(basename \$(notdir \$@)) ; make -f Makefile.aout LINKTYPE=static CCCDLFLAGS=
+lib/auto/$p/*/%.a : $d/%/Makefile.aout
+	@cd $d/\$(basename \$(notdir \$@)) ; make -f Makefile.aout config || echo "\$(MAKE) config failed, continuing anyway..."
+	cd $d/\$(basename \$(notdir \$@)) ; make -f Makefile.aout LINKTYPE=static CCCDLFLAGS=
 
 $d/%/Makefile.aout : miniperl_
 	cd \$(dir \$@) ; ../../../miniperl_ -I ../../../lib Makefile.PL MAKEFILE=Makefile.aout INSTALLDIRS=perl 

@@ -466,7 +466,7 @@ EOT
     push(@otherfiles, qw[./blib $(MAKE_APERL_FILE) $(INST_ARCHAUTODIR)/extralibs.all
 			 perlmain.c tmon.out mon.out core core.*perl.*.?
 			 *perl.core so_locations pm_to_blib
-			 *$(OBJ_EXT) *$(LIB_EXT) perl.exe
+			 *$(OBJ_EXT) *$(LIB_EXT) perl.exe perl perl$(EXE_EXT)
 			 $(BOOTSTRAP) $(BASEEXT).bso
 			 $(BASEEXT).def lib$(BASEEXT).def
 			 $(BASEEXT).exp
