@@ -41,6 +41,7 @@ static void null _((OP* o));
 static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix));
 static OP *newDEFSVOP _((void));
+static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 
 static char*
 gv_ename(GV *gv)
@@ -2598,9 +2599,17 @@ intro_my(void)
 OP *
 newLOGOP(I32 type, I32 flags, OP *first, OP *other)
 {
+    return new_logop(type, flags, &first, &other);
+}
+
+static OP *
+new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
+{
     dTHR;
     LOGOP *logop;
     OP *o;
+    OP *first = *firstp;
+    OP *other = *otherp;
 
     if (type == OP_XOR)		/* Not short circuit, but here by precedence. */
 	return newBINOP(type, flags, scalar(first), scalar(other));
@@ -2614,7 +2623,7 @@ newLOGOP(I32 type, I32 flags, OP *first, OP *other)
 	    else
 		type = OP_AND;
 	    o = first;
-	    first = cUNOPo->op_first;
+	    first = *firstp = cUNOPo->op_first;
 	    if (o->op_next)
 		first->op_next = o->op_next;
 	    cUNOPo->op_first = Nullop;
@@ -2626,10 +2635,12 @@ newLOGOP(I32 type, I32 flags, OP *first, OP *other)
 	    warn("Probable precedence problem on %s", op_desc[type]);
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
+	    *firstp = Nullop;
 	    return other;
 	}
 	else {
 	    op_free(other);
+	    *otherp = Nullop;
 	    return first;
 	}
     }
@@ -2814,9 +2825,10 @@ newLOOPOP(I32 flags, I32 debuggable, OP *expr, OP *block)
     }
 
     listop = append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
-    o = newLOGOP(OP_AND, 0, expr, listop);
+    o = new_logop(OP_AND, 0, &expr, &listop);
 
-    ((LISTOP*)listop)->op_last->op_next = LINKLIST(o);
+    if (listop)
+	((LISTOP*)listop)->op_last->op_next = LINKLIST(o);
 
     if (once && o != listop)
 	o->op_next = ((LOGOP*)cUNOPo->op_first)->op_other;
@@ -2864,14 +2876,17 @@ newWHILEOP(I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *b
     redo = LINKLIST(listop);
 
     if (expr) {
-	o = newLOGOP(OP_AND, 0, expr, scalar(listop));
+	copline = whileline;
+	scalar(listop);
+	o = new_logop(OP_AND, 0, &expr, &listop);
 	if (o == expr && o->op_type == OP_CONST && !SvTRUE(cSVOPo->op_sv)) {
 	    op_free(expr);		/* oops, it's a while (0) */
 	    op_free((OP*)loop);
-	    return Nullop;		/* (listop already freed by newLOGOP) */
+	    return Nullop;		/* listop already freed by new_logop */
 	}
-	((LISTOP*)listop)->op_last->op_next = condop =
-	    (o == listop ? redo : LINKLIST(o));
+	if (listop)
+	    ((LISTOP*)listop)->op_last->op_next = condop =
+		(o == listop ? redo : LINKLIST(o));
 	if (!next)
 	    next = condop;
     }
