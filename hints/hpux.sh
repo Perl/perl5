@@ -60,10 +60,6 @@
 # reading from a NULL pointer causes a SEGV.
 ccflags="$ccflags -D_HPUX_SOURCE"
 
-# If you plan to use gcc, then you should uncomment the following line
-# so you get the HP math library and not the GCC math library.
-# ccflags="$ccflags -L/lib/pa1.1"
-
 # Check if you're using the bundled C compiler.  This compiler doesn't support
 # ANSI C (the -Aa flag) nor can it produce shared libraries.  Thus we have
 # to turn off dynamic loading.
@@ -90,6 +86,12 @@ EOM
     #cccdlflags='+z +O2'
     optimize='-O'
     ;;
+esac
+
+# Even if you use gcc, prefer the HP math library over the GNU one.
+
+case "`$cc -v 2>&1`" in
+"*gcc*" ) test -d /lib/pa1.1 && ccflags="$ccflags -L/lib/pa1.1" ;;
 esac
 
 # Determine the architecture type of this system.

@@ -390,9 +390,9 @@ sub DB {
 	if ($val ne $old_watch[$n]) {
 	  $signal = 1;
 	  print $OUT <<EOP;
-Watchpoint $n: $to_watch[$n] changed:
-old value: $old_watch[$n]
-new value: $val
+Watchpoint $n:\t$to_watch[$n] changed:
+    old value:\t$old_watch[$n]
+    new value:\t$val
 EOP
 	  $old_watch[$n] = $val;
 	}
@@ -409,6 +409,15 @@ EOP
 	if ($emacs) {
 	    $position = "\032\032$filename:$line:0\n";
 	    print $LINEINFO $position;
+	} elsif ($package eq 'DB::fake') {
+	  print_help(<<EOP);
+Debugged program terminated.  Use B<q> to quit or B<R> to restart,
+  use B<O> I<inhibit_exit> to avoid stopping after program termination,
+  B<h q>, B<h R> or B<h O> to get additional info.  
+EOP
+	  $package = 'main';
+	  $usercontext = '($@, $!, $,, $/, $\, $^W) = @saved;' .
+	    "package $package;";	# this won't let them modify, alas
 	} else {
 	    $sub =~ s/\'/::/;
 	    $prefix = $sub =~ /::/ ? "" : "${'package'}::";
@@ -1461,8 +1470,14 @@ sub resetterm {			# We forked, so we need a different TTY
       TTY($fork_TTY);
       undef $fork_TTY;
     } else {
-      print $OUT "Forked, but do not know how to change a TTY.\n",
-          "Define \$DB::fork_TTY or get_fork_TTY().\n";
+      print_help(<<EOP);
+I<#########> Forked, but do not know how to change a B<TTY>. I<#########>
+  Define B<\$DB::fork_TTY> 
+       - or a function B<DB::get_fork_TTY()> which will set B<\$DB::fork_TTY>.
+  The value of B<\$DB::fork_TTY> should be the name of I<TTY> to use.
+  On I<UNIX>-like systems one can get the name of a I<TTY> for the given window
+  by typing B<tty>, and disconnect the I<shell> from I<TTY> by B<sleep 1000000>.
+EOP
     }
 }
 
@@ -1824,7 +1839,7 @@ B<R>		Pure-man-restart of debugger, some of debugger state
 		and the following command-line options: I<-w>, I<-I>, I<-e>.
 B<h> [I<db_command>]	Get help [on a specific debugger command], enter B<|h> to page.
 B<h h>		Summary of debugger commands.
-B<q> or B<^D>		Quit. Set \$DB::finished to 0 to debug global destruction.
+B<q> or B<^D>		Quit. Set B<\$DB::finished = 0> to debug global destruction.
 
 ";
     $summary = <<"END_SUM";

@@ -14,11 +14,7 @@
 #define ARGS
 #define dARGS
 #endif /* USE_THREADS */
-#ifdef CAN_PROTOTYPE
 #define PP(s) OP * s(ARGSproto)
-#else /* CAN_PROTOTYPE */
-#define PP(s) OP* s(ARGS) dARGS
-#endif /* CAN_PROTOTYPE */
 
 #define SP sp
 #define MARK mark

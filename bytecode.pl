@@ -34,12 +34,12 @@ EOT
 my $perl_header;
 ($perl_header = $c_header) =~ s{[/ ]?\*/?}{#}g;
 
-unlink "byterun.c", "byterun.h", "ext/B/Asmdata.pm";
+unlink "byterun.c", "byterun.h", "ext/B/B/Asmdata.pm";
 
 #
 # Start with boilerplate for Asmdata.pm
 #
-open(ASMDATA_PM, ">ext/B/Asmdata.pm") or die "Asmdata.pm: $!";
+open(ASMDATA_PM, ">ext/B/B/Asmdata.pm") or die "ext/B/B/Asmdata.pm: $!";
 print ASMDATA_PM $perl_header, <<'EOT';
 package B::Asmdata;
 use Exporter;
@@ -69,11 +69,9 @@ print BYTERUN_C $c_header, <<'EOT';
 #include "byterun.h"
 
 #ifdef INDIRECT_BGET_MACROS
-void byterun(bs)
-struct bytestream bs;
+void byterun(struct bytestream bs)
 #else
-void byterun(fp)
-FILE *fp;
+void byterun(FILE *fp)
 #endif /* INDIRECT_BGET_MACROS */
 {
     dTHR;
@@ -216,10 +214,10 @@ EXT SV * specialsv_list[%d];
 #define INIT_SPECIALSV_LIST STMT_START { \
 EOT
 for ($i = 0; $i < @specialsv; $i++) {
-    print BYTERUN_H "specialsv_list[$i] = $specialsv[$i]; \\\n";
+    print BYTERUN_H "\tspecialsv_list[$i] = $specialsv[$i]; \\\n";
 }
 print BYTERUN_H <<'EOT';
-} STMT_END
+    } STMT_END
 EOT
 
 #

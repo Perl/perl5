@@ -478,15 +478,7 @@ uni(I32 f, char *s)
 #define LOP(f,x) return lop(f,x,s)
 
 static I32
-lop
-#ifdef CAN_PROTOTYPE
-   (I32 f, expectation x, char *s)
-#else
-   (f,x,s)
-I32 f;
-expectation x;
-char *s;
-#endif /* CAN_PROTOTYPE */
+lop(I32 f, expectation x, char *s)
 {
     dTHR;
     yylval.ival = f;

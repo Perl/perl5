@@ -1722,8 +1722,11 @@ PP(pp_goto)
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
 	    TOPBLOCK(cx);
+	    if (cx->cx_type == CXt_EVAL && cx->blk_eval.old_op_type == OP_ENTEREVAL) 
+		DIE("Can't goto subroutine from an eval-string");
 	    mark = stack_sp;
-	    if (cx->blk_sub.hasargs) {   /* put @_ back onto stack */
+	    if (cx->cx_type == CXt_SUB &&
+		cx->blk_sub.hasargs) {   /* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 		
 		items = AvFILLp(av) + 1;
@@ -1738,7 +1741,8 @@ PP(pp_goto)
 		AvREAL_off(av);
 		av_clear(av);
 	    }
-	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
+	    if (cx->cx_type == CXt_SUB &&
+		!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
 		SvREFCNT_dec(cx->blk_sub.cv);
 	    oldsave = scopestack[scopestack_ix - 1];
 	    LEAVE_SCOPE(oldsave);
@@ -1768,6 +1772,12 @@ PP(pp_goto)
 	    else {
 		AV* padlist = CvPADLIST(cv);
 		SV** svp = AvARRAY(padlist);
+		if (cx->cx_type == CXt_EVAL) {
+		    in_eval = cx->blk_eval.old_in_eval;
+		    eval_root = cx->blk_eval.old_eval_root;
+		    cx->cx_type = CXt_SUB;
+		    cx->blk_sub.hasargs = 0;
+		}
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
 		CvDEPTH(cv)++;

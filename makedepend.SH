@@ -105,7 +105,7 @@ for file in `$cat .clist`; do
     */*) finc="-I`echo $file | sed 's#/[^/]*$##`" ;;
     *)   finc= ;;
     esac
-    $echo "Finding dependencies for $filebase$obj_ext."
+    $echo "Finding dependencies for $filebase$_o."
     ( $echo "#line 1 \"$file\""; \
       $sed -n <$file \
 	-e "/^${filebase}_init(/q" \

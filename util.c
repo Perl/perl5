@@ -1707,12 +1707,7 @@ char *args;
 #ifdef MYSWAP
 #if BYTEORDER != 0x4321
 short
-#ifndef CAN_PROTOTYPE
-my_swap(s)
-short s;
-#else
 my_swap(short s)
-#endif
 {
 #if (BYTEORDER & 1) == 0
     short result;
@@ -1725,12 +1720,7 @@ my_swap(short s)
 }
 
 long
-#ifndef CAN_PROTOTYPE
-my_htonl(l)
-register long l;
-#else
 my_htonl(long l)
-#endif
 {
     union {
 	long result;
@@ -1759,12 +1749,7 @@ my_htonl(long l)
 }
 
 long
-#ifndef CAN_PROTOTYPE
-my_ntohl(l)
-register long l;
-#else
 my_ntohl(long l)
-#endif
 {
     union {
 	long l;

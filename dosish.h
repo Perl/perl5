@@ -29,6 +29,7 @@
 #    define pthread_mutexattr_default NULL
 #    define pthread_condattr_default NULL
 #    define pthread_addr_t any_t
+#    define PTHREAD_CREATE_JOINABLE (&err)
 #  endif
 #else	/* DJGPP */
 #  ifdef WIN32

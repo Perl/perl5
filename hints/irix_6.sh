@@ -84,9 +84,6 @@ case "$cc" in
 	;;
 esac
 
-# This should be a Configure thing, but not for now...
-pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
-
 # We don't want these libraries.  Anyone know why?
 set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
 shift
@@ -160,8 +157,6 @@ EOF
 	esac
 	unset uname_r
     fi
-    ccflags="-DUSE_THREADS $ccflags"
-    cppflags="-DUSE_THREADS $cppflags"
     # -lpthread needs to come before -lc but after other libraries such
     # as -lgdbm and such like. We assume here that -lc is present in
     # libswanted. If that fails to be true in future, then this can be

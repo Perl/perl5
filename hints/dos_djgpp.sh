@@ -2,6 +2,7 @@
 # Original by Laszlo Molnar <molnarl@cdata.tvnet.hu>
 
 # 971015 - archname changed from 'djgpp' to 'dos-djgpp'
+# 971210 - threads support
 
 archname='dos-djgpp'
 archobjs='djgpp.o'
@@ -38,7 +39,7 @@ startperl='#!perl'
 
 case "X$optimize" in
   X)
-	optimize="-O2 -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2"
+	optimize="-O2 -malign-loops=2 -malign-jumps=2 -malign-functions=2"
 	;;
 esac
 ldflags='-s'
@@ -61,3 +62,11 @@ case "\$1\$2" in
 esac
 exec tr.exe "\$@"
 EOSC
+
+if [ "X$usethreads" != "X" ]; then
+    ccflags="-DUSE_THREADS $ccflags"
+    cppflags="-DUSE_THREADS $cppflags"
+    set `echo X "$libswanted "| sed -e 's/ c / gthreads c /'`
+    shift
+    libswanted="$*"
+fi

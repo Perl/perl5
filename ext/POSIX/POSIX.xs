@@ -247,6 +247,12 @@ char *tzname[] = { "" , "" };
  * support is added and NETaa14816 is considered in full.
  * It does not address tzname aspects of NETaa14816.
  */
+#ifdef HAS_GNULIBC
+# ifndef STRUCT_TM_HASZONE
+#    define STRUCT_TM_HAS_ZONE
+# endif
+#endif
+
 #ifdef STRUCT_TM_HASZONE
 static void
 init_tm(ptm)		/* see mktime, strftime and asctime	*/

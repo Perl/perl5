@@ -13,6 +13,8 @@ INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 Porting/Glossary	Glossary of config.sh variables
+Porting/config_H	Sample config.h
+Porting/config.sh	Sample config.sh
 Porting/makerel		Release making utility
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
@@ -38,7 +40,6 @@ byterun.h		Header for byterun.c
 cc_runtime.h		Macros need by runtime of compiler-generated code
 cflags.SH		A script that emits C compilation flags per file
 compat3.sym		List of symbols for binary-compatibility with 5.003
-config_H		Sample config.h
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
 cop.h			Control operator header

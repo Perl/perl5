@@ -184,10 +184,10 @@ if [ "X$usethreads" != "X" ]; then
     # Threads interfaces changed with V4.0.
     case "$_DEC_uname_r" in
     *[123].*)	libswanted="$libswanted pthreads mach exc c_r"
-		ccflags="-DUSE_THREADS -threads $ccflags"
+		ccflags="-threads $ccflags"
 		;;
     *)		libswanted="$libswanted pthread exc"
-    		ccflags="-DUSE_THREADS -pthread $ccflags"
+    		ccflags="-pthread $ccflags"
 		;;
     esac
     usemymalloc='n'

@@ -94,10 +94,6 @@ case "$osvers" in
 	;;
 esac
 
-# Avoid telldir prototype conflict in pp_sys.c  (FreeBSD uses const DIR *)
-# Configure should test for this.  Volunteers?
-pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
-
 cat <<'EOM' >&4
 
 Some users have reported that Configure halts when testing for
@@ -120,5 +116,4 @@ EOM
         exit 1
     fi
     libswanted="$libswanted c_r"
-    ccflags="-DUSE_THREADS $ccflags"
 fi

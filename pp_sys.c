@@ -2915,9 +2915,9 @@ PP(pp_telldir)
 {
     djSP; dTARGET;
 #if defined(HAS_TELLDIR) || defined(telldir)
-#if !defined(telldir) && !defined(HAS_TELLDIR_PROTOTYPE) && !defined(DONT_DECLARE_STD)
+# ifdef NEED_TELLDIR_PROTO /* XXX does _anyone_ need this? --AD 2/20/1998 */
     long telldir _((DIR *));
-#endif
+# endif
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 

@@ -99,8 +99,6 @@ ld='cc'
 i_utime='undef'
 groupstype='int'
 direntrytype='struct direct'
-netdb_host_type='char *'
-netdb_hlen_type='int'
 d_strcoll='undef'
 d_uname='define'
 #

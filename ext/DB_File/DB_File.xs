@@ -533,14 +533,6 @@ DB_File db ;
     DBT_flags(key) ;
     DBT_flags(value) ;
     RETVAL = do_SEQ(db, key, value, R_LAST) ;
-    if (RETVAL < 0 && errno == EBADF)
-     {                
-      recno_t oops = -1;
-      key.data = &oops; 
-      key.size = sizeof(oops);
-      db_get(db, key, value, 0);
-      RETVAL = do_SEQ(db, key, value, R_LAST) ;
-     }
     if (RETVAL == 0)
         RETVAL = *(I32 *)key.data ;
     else /* No key means empty file */

@@ -638,6 +638,11 @@ call for another.  It can't manufacture one out of whole cloth.  In general
 you should be calling it out of only an AUTOLOAD routine anyway.  See
 L<perlfunc/goto>.
 
+=item Can't goto subroutine from an eval-string
+
+(F) The "goto subroutine" call can't be used to jump out of an eval "string".
+(You can use it to jump out of an eval {BLOCK}, but you probably don't want to.)
+
 =item Can't localize through a reference
 
 (F) You said something like C<local $$ref>, which Perl can't currently
