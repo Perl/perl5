@@ -3267,7 +3267,7 @@ needed.  If you really wanted to do so, however, you could use
 the construction C<@{[ (some expression) ]}>, but usually a simple
 C<(some expression)> suffices.
 
-Wince C<scalar> is unary operator, if you accidentally use for EXPR a
+Since C<scalar> is a unary operator, if you accidentally use for EXPR a
 parenthesized list, this behaves as a scalar comma expression, evaluating
 all but the last element in void context and returning the final element
 evaluated in scalar context.  This is seldom what you want.

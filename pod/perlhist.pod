@@ -5,9 +5,11 @@
 perlhist - the Perl history records
 
 =for RCS
+
 #
 # $Id: perlhist.pod,v 1.57 1999/01/26 17:38:07 jhi Exp $
 #
+
 =end RCS
 
 =head1 DESCRIPTION
