@@ -957,7 +957,7 @@ play_it_again:
 	    goto play_it_again;
 	}
 	else if (!iters)
-	    XPUSHs(&sv_yes);
+	    XPUSHs(&PL_sv_yes);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
