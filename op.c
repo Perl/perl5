@@ -204,6 +204,31 @@ Perl_pad_allocmy(pTHX_ char *name)
     return off;
 }
 
+STATIC PADOFFSET
+S_pad_addlex(pTHX_ SV *proto_namesv)
+{
+    SV *namesv = NEWSV(1103,0);
+    PADOFFSET newoff = pad_alloc(OP_PADSV, SVs_PADMY);
+    sv_upgrade(namesv, SVt_PVNV);
+    sv_setpv(namesv, SvPVX(proto_namesv));
+    av_store(PL_comppad_name, newoff, namesv);
+    SvNVX(namesv) = (NV)PL_curcop->cop_seq;
+    SvIVX(namesv) = PAD_MAX;			/* A ref, intro immediately */
+    SvFAKE_on(namesv);				/* A ref, not a real var */
+    if (SvFLAGS(proto_namesv) & SVpad_OUR) {	/* An "our" variable */
+	SvFLAGS(namesv) |= SVpad_OUR;
+	(void)SvUPGRADE(namesv, SVt_PVGV);
+	GvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)GvSTASH(proto_namesv));
+    }
+    if (SvOBJECT(proto_namesv)) {		/* A typed var */
+	SvOBJECT_on(namesv);
+	(void)SvUPGRADE(namesv, SVt_PVMG);
+	SvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)SvSTASH(proto_namesv));
+	PL_sv_objcount++;
+    }
+    return newoff;
+}
+
 #define FINDLEX_NOSEARCH	1		/* don't search outer contexts */
 
 STATIC PADOFFSET
@@ -246,28 +271,10 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		    }
 		    depth = 1;
 		}
-		oldpad = (AV*)*av_fetch(curlist, depth, FALSE);
+		oldpad = (AV*)AvARRAY(curlist)[depth];
 		oldsv = *av_fetch(oldpad, off, TRUE);
 		if (!newoff) {		/* Not a mere clone operation. */
-		    SV *namesv = NEWSV(1103,0);
-		    newoff = pad_alloc(OP_PADSV, SVs_PADMY);
-		    sv_upgrade(namesv, SVt_PVNV);
-		    sv_setpv(namesv, name);
-		    av_store(PL_comppad_name, newoff, namesv);
-		    SvNVX(namesv) = (NV)PL_curcop->cop_seq;
-		    SvIVX(namesv) = PAD_MAX;	/* A ref, intro immediately */
-		    SvFAKE_on(namesv);		/* A ref, not a real var */
-		    if (SvFLAGS(sv) & SVpad_OUR) { /* An "our" variable */
-			SvFLAGS(namesv) |= SVpad_OUR;
-			(void)SvUPGRADE(namesv, SVt_PVGV);
-			GvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)GvSTASH(sv));
-		    }
-		    if (SvOBJECT(sv)) {		/* A typed var */
-			SvOBJECT_on(namesv);
-			(void)SvUPGRADE(namesv, SVt_PVMG);
-			SvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)SvSTASH(sv));
-			PL_sv_objcount++;
-		    }
+		    newoff = pad_addlex(sv);
 		    if (CvANON(PL_compcv) || SvTYPE(PL_compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
 			CvCLONE_on(PL_compcv);
@@ -281,8 +288,23 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 				 bcv && bcv != cv && !CvCLONE(bcv);
 				 bcv = CvOUTSIDE(bcv))
 			    {
-				if (CvANON(bcv))
+				if (CvANON(bcv)) {
+				    /* install the missing pad entry in intervening
+				     * nested subs and mark them cloneable.
+				     * XXX fix pad_foo() to not use globals */
+				    AV *ocomppad_name = PL_comppad_name;
+				    AV *ocomppad = PL_comppad;
+				    SV **ocurpad = PL_curpad;
+				    AV *padlist = CvPADLIST(bcv);
+				    PL_comppad_name = (AV*)AvARRAY(padlist)[0];
+				    PL_comppad = (AV*)AvARRAY(padlist)[1];
+				    PL_curpad = AvARRAY(PL_comppad);
+				    pad_addlex(sv);
+				    PL_comppad_name = ocomppad_name;
+				    PL_comppad = ocomppad;
+				    PL_curpad = ocurpad;
 				    CvCLONE_on(bcv);
+				}
 				else {
 				    if (ckWARN(WARN_CLOSURE)
 					&& !CvUNIQUE(bcv) && !CvUNIQUE(cv))

@@ -865,6 +865,7 @@ STATIC OP*	S_too_few_arguments(pTHX_ OP *o, char* name);
 STATIC OP*	S_too_many_arguments(pTHX_ OP *o, char* name);
 STATIC void	S_op_clear(pTHX_ OP* o);
 STATIC void	S_null(pTHX_ OP* o);
+STATIC PADOFFSET	S_pad_addlex(pTHX_ SV* name);
 STATIC PADOFFSET	S_pad_findlex(pTHX_ char* name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval, U32 flags);
 STATIC OP*	S_newDEFSVOP(pTHX);
 STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp);
