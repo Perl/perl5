@@ -688,3 +688,9 @@ ok
 EXPECT
 syntax error at - line 2, near "${}"
 Execution of - aborted due to compilation errors.
+########
+# Bug 20010528.007
+"\x{"
+EXPECT
+Missing right brace on \x{} at - line 2, within string
+Execution of - aborted due to compilation errors.

@@ -1635,7 +1635,7 @@ S_scan_const(pTHX_ char *start)
     *d = '\0';
     SvCUR_set(sv, d - SvPVX(sv));
     if (SvCUR(sv) >= SvLEN(sv))
-      Perl_croak(aTHX_ "panic:constant overflowed allocated space");
+      Perl_croak(aTHX_ "panic: constant overflowed allocated space");
 
     SvPOK_on(sv);
     if (has_utf8) {
