@@ -602,7 +602,7 @@ sub OVERLOAD_handler()
     for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
 	next unless /\S/;
 	TrimWhitespace($_) ;
-        while ( s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}]+)\s*//) {
+        while ( s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
 	    $Overload = 1 unless $Overload;
 	    my $overload = "$Package\::(".$1 ;
             push(@InitFileCode,
