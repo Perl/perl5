@@ -1280,13 +1280,33 @@ UV
 Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 {
     HV* hv = (HV*)SvRV(sv);
+    /* Given a UTF-X encoded char 0xAA..0xYY,0xZZ
+       then the "swatch" is a vec() for al the chars which start
+       with 0xAA..0xYY
+       So the key in the hash is length of encoded char -1
+     */
     U32 klen = UTF8SKIP(ptr) - 1;
-    U32 off = ptr[klen] & 127;  /* NB: 64 bit always 0 when len > 1 */
+    U32 off = ptr[klen];
     STRLEN slen;
-    STRLEN needents = (klen ? 64 : 128);
+    STRLEN needents;
     U8 *tmps;
     U32 bit;
     SV *retval;
+
+    if (klen == 0)
+     {
+      /* If char in invariant then swatch is for all the invariant chars
+       * In both UTF-8 and UTF8-MOD that happens to be UTF_CONTINUATION_MARK
+       */
+      needents = UTF_CONTINUATION_MARK;
+      off      = NATIVE_TO_UTF(ptr[klen]);
+     }
+    else
+     {
+      /* If char is encoded then swatch is for the prefix */
+      needents = (1 << UTF_ACCUMULATION_SHIFT);
+      off      = NATIVE_TO_UTF(ptr[klen]) & UTF_CONTINUATION_MASK;
+     }
 
     /*
      * This single-entry cache saves about 1/3 of the utf8 overhead in test
@@ -1337,7 +1357,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 
 	    svp = hv_store(hv, (char*)ptr, klen, retval, 0);
 
-	    if (!svp || !(tmps = (U8*)SvPV(*svp, slen)) || slen < 8)
+	    if (!svp || !(tmps = (U8*)SvPV(*svp, slen)) || (slen << 3) < needents)
 		Perl_croak(aTHX_ "SWASHGET didn't return result of proper length");
 	}
 

@@ -9,6 +9,16 @@ print "1..282\n";
 
 print "# Testing MIME::Base64-", $MIME::Base64::VERSION, "\n";
 
+BEGIN {
+ if (ord('A') != 193) {
+  *ASCII = sub { return $_[0] };
+ }
+ else {
+  require Encode;
+  *ASCII = sub { Encode::encode('ascii',$_[0]) };
+ }
+}
+
 $testno = 1;
 
 encodeTest();
@@ -23,27 +33,6 @@ sub encodeTest
     print "# encode test\n";
 
     my @encode_tests = (
-        [''    => ''],
-	['a'   => 'YQ=='],
-	['aa'  => 'YWE='],
-	['aaa' => 'YWFh'],
-
-	['aaa' => 'YWFh'],
-	['aaa' => 'YWFh'],
-	['aaa' => 'YWFh'],
-
-	["\000\377" => "AP8="],
-	["\377\000" => "/wA="],
-	["\000\000\000" => "AAAA"],
-
-	# from HTTP spec
-	['Aladdin:open sesame' => 'QWxhZGRpbjpvcGVuIHNlc2FtZQ=='],
-
-	['a' x 100 => 'YWFh' x 33 . 'YQ=='],
-
-	['Multipurpose Internet Mail Extensions: The Base64 Content-Transfer-Encoding is designed to represent sequences of octets in a form that is not humanly readable. '
-	=> "TXVsdGlwdXJwb3NlIEludGVybmV0IE1haWwgRXh0ZW5zaW9uczogVGhlIEJhc2U2NCBDb250ZW50LVRyYW5zZmVyLUVuY29kaW5nIGlzIGRlc2lnbmVkIHRvIHJlcHJlc2VudCBzZXF1ZW5jZXMgb2Ygb2N0ZXRzIGluIGEgZm9ybSB0aGF0IGlzIG5vdCBodW1hbmx5IHJlYWRhYmxlLiA="],
-
 	# All values
 	["\000" => "AA=="],
 	["\001" => "AQ=="],
@@ -301,6 +290,29 @@ sub encodeTest
 	["\375" => "/Q=="],
 	["\376" => "/g=="],
 	["\377" => "/w=="],
+
+	["\000\377" => "AP8="],
+	["\377\000" => "/wA="],
+	["\000\000\000" => "AAAA"],
+
+        [''    => ''],
+	[ASCII('a')   => 'YQ=='],
+	[ASCII('aa')  => 'YWE='],
+	[ASCII('aaa') => 'YWFh'],
+
+	[ASCII('aaa') => 'YWFh'],
+	[ASCII('aaa') => 'YWFh'],
+	[ASCII('aaa') => 'YWFh'],
+
+
+	# from HTTP spec
+	[ASCII('Aladdin:open sesame') => 'QWxhZGRpbjpvcGVuIHNlc2FtZQ=='],
+
+	[ASCII('a') x 100 => 'YWFh' x 33 . 'YQ=='],
+
+	[ASCII('Multipurpose Internet Mail Extensions: The Base64 Content-Transfer-Encoding is designed to represent sequences of octets in a form that is not humanly readable. ')
+	=> "TXVsdGlwdXJwb3NlIEludGVybmV0IE1haWwgRXh0ZW5zaW9uczogVGhlIEJhc2U2NCBDb250ZW50LVRyYW5zZmVyLUVuY29kaW5nIGlzIGRlc2lnbmVkIHRvIHJlcHJlc2VudCBzZXF1ZW5jZXMgb2Ygb2N0ZXRzIGluIGEgZm9ybSB0aGF0IGlzIG5vdCBodW1hbmx5IHJlYWRhYmxlLiA="],
+
     );
 
     for $test (@encode_tests) {
@@ -313,11 +325,12 @@ sub encodeTest
 	}
 	my $decoded = decode_base64($encoded);
 	if ($decoded ne $plain) {
-	    print "test $testno ($plain): expected $expected, got $encoded\n";
+	    print "test $testno ($encoded): expected $plain, got $decoded\n";
             print "not ";
 	}
 
-	# Try the old C versions too
+	if (ord('A') != 193) { # perl versions broken on EBCDIC
+	# Try the old Perl versions too
 	if ($encoded ne MIME::Base64::old_encode_base64($plain, '')) {
 	    print "old_encode_base64 give different result.\n";
 	    print "not ";
@@ -326,6 +339,7 @@ sub encodeTest
 	    print "old_decode_base64 give different result.\n";
 	    print "not ";
         }
+	}
 		
 	print "ok $testno\n";
 	$testno++;
@@ -339,17 +353,17 @@ sub decodeTest
     local $SIG{__WARN__} = sub { print $_[0] };  # avoid warnings on stderr
 
     my @decode_tests = (
-	['YWE='   => 'aa'],
-	[' YWE='  => 'aa'],
-	['Y WE='  => 'aa'],
-	['YWE= '  => 'aa'],
-	["Y\nW\r\nE=" => 'aa'],
+	['YWE='   => ASCII('aa')],
+	[' YWE='  =>  ASCII('aa')],
+	['Y WE='  =>  ASCII('aa')],
+	['YWE= '  =>  ASCII('aa')],
+	["Y\nW\r\nE=" =>  ASCII('aa')],
 
 	# These will generate some warnings
-        ['YWE=====' => 'aa'],    # extra padding
-	['YWE'      => 'aa'],    # missing padding
-        ['YWFh====' => 'aaa'],
-        ['YQ'       => 'a'],
+        ['YWE=====' =>  ASCII('aa')],    # extra padding
+	['YWE'      =>  ASCII('aa')],    # missing padding
+        ['YWFh====' =>  ASCII('aaa')],
+        ['YQ'       =>  ASCII('a')],
         ['Y'        => ''],
         [''         => ''],
         [undef()    => ''],
