@@ -291,7 +291,7 @@ When you are going to use the GNU C compiler (gcc), and you don't have
 gcc yet, you can either build it yourself from the sources (available
 from e.g. http://www.gnu.ai.mit.edu/software/gcc/releases.html) or fetch
 a prebuilt binary from the HP porting center. There are two places where
-gcc prebuilds can be fetched the first and best (for HP-UX 11 only) is
+gcc prebuilds can be fetched; the first and best (for HP-UX 11 only) is
 http://h21007.www2.hp.com/dspp/tech/tech_TechSoftwareDetailPage_IDX/1,1703,547,00.html
 the second is http://hpux.cs.utah.edu/hppd/hpux/Gnu/ where you can also
 find the GNU binutils package. (Browse through the list, because there
@@ -504,7 +504,7 @@ bug seems to be to create add to the file F</etc/nsswitch.conf>
   passwd: files
 
 Whether you are using NIS does not matter.  Amazingly enough,
-the same bug affects also Solaris.
+the same bug also affects Solaris.
 
 =head1 AUTHOR
 
