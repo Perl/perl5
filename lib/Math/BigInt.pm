@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.53';
+$VERSION = '1.54';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -164,7 +164,8 @@ sub upgrade
   # make Class->upgrade() work
   my $self = shift;
   my $class = ref($self) || $self || __PACKAGE__;
-  if (defined $_[0])
+  # need to set new value?
+  if (@_ > 0)
     {
     my $u = shift;
     return ${"${class}::upgrade"} = $u;
@@ -178,7 +179,8 @@ sub downgrade
   # make Class->downgrade() work
   my $self = shift;
   my $class = ref($self) || $self || __PACKAGE__;
-  if (defined $_[0])
+  # need to set new value?
+  if (@_ > 0)
     {
     my $u = shift;
     return ${"${class}::downgrade"} = $u;
@@ -396,11 +398,35 @@ sub new
  
   # avoid numify-calls by not using || on $wanted!
   return $class->bzero($a,$p) if !defined $wanted;	# default to 0
-  return $class->copy($wanted,$a,$p,$r) if ref($wanted);
+  return $class->copy($wanted,$a,$p,$r)
+   if ref($wanted) && $wanted->isa($class);		# MBI or subclass
 
   $class->import() if $IMPORT == 0;		# make require work
   
-  my $self = {}; bless $self, $class;
+  my $self = bless {}, $class;
+
+  # shortcut for "normal" numbers
+  if ((!ref $wanted) && ($wanted =~ /^([+-]?)[1-9][0-9]*$/))
+    {
+    $self->{sign} = $1 || '+';
+    my $ref = \$wanted;
+    if ($wanted =~ /^[+-]/)
+     {
+      # remove sign without touching wanted
+      my $t = $wanted; $t =~ s/^[+-]//; $ref = \$t;
+      }
+    $self->{value} = $CALC->_new($ref);
+    no strict 'refs';
+    if ( (defined $a) || (defined $p) 
+        || (defined ${"${class}::precision"})
+        || (defined ${"${class}::accuracy"}) 
+       )
+      {
+      $self->round($a,$p,$r) unless (@_ == 4 && !defined $a && !defined $p);
+      }
+    return $self;
+    }
+
   # handle '+inf', '-inf' first
   if ($wanted =~ /^[+-]?inf$/)
     {
@@ -473,8 +499,7 @@ sub new
   # do not round for new($x,undef,undef) since that is used by MBF to signal
   # no rounding
   $self->round($a,$p,$r) unless @_ == 4 && !defined $a && !defined $p;
-  # print "mbi new $self\n";
-  return $self;
+  $self;
   }
 
 sub bnan
@@ -649,7 +674,7 @@ sub numify
   return $x->{sign} if $x->{sign} !~ /^[+-]$/;
   my $num = $CALC->_num($x->{value});
   return -$num if $x->{sign} eq '-';
-  return $num;
+  $num;
   }
 
 ##############################################################################
@@ -657,10 +682,10 @@ sub numify
 
 sub sign
   {
-  # return the sign of the number: +/-/NaN
+  # return the sign of the number: +/-/-inf/+inf/NaN
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_); 
   
-  return $x->{sign};
+  $x->{sign};
   }
 
 sub _find_round_parameters
@@ -1102,6 +1127,7 @@ sub is_inf
   my ($self,$x,$sign) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
   $sign = '' if !defined $sign;
+  return 1 if $sign eq $x->{sign};		# match ("+inf" eq "+inf")
   return 0 if $sign !~ /^([+-]|)$/;
 
   if ($sign eq '')
@@ -1187,8 +1213,6 @@ sub bmul
   
   return $x if $x->modify('bmul');
 
-  $r[3] = $y;				# no push here
- 
   return $x->bnan() if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
 
   # inf handling
@@ -1202,6 +1226,11 @@ sub bmul
     return $x->binf() if ($x->{sign} =~ /^-/ && $y->{sign} =~ /^-/); 
     return $x->binf('-');
     }
+  
+  return $upgrade->bmul($x,$y,@r)
+   if defined $upgrade && $y->isa($upgrade);
+  
+  $r[3] = $y;				# no push here
 
   $x->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-'; # +1 * +1 or -1 * -1 => +
 
@@ -1266,6 +1295,9 @@ sub bdiv
   return $self->_div_inf($x,$y)
    if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
 
+  return $upgrade->bdiv($upgrade->new($x),$y,@r)
+   if defined $upgrade && $y->isa($upgrade);
+
   $r[3] = $y;					# no push!
 
   # 0 / something
@@ -1276,7 +1308,8 @@ sub bdiv
   my $cmp = $CALC->_acmp($x->{value},$y->{value});
   if (($cmp < 0) and (($x->{sign} eq $y->{sign}) or !wantarray))
     {
-    return $upgrade->bdiv($x,$y,@r) if defined $upgrade;
+    return $upgrade->bdiv($upgrade->new($x),$upgrade->new($y),@r)
+     if defined $upgrade;
 
     return $x->bzero()->round(@r) unless wantarray;
     my $t = $x->copy();      # make copy first, because $x->bzero() clobbers $x
@@ -1289,6 +1322,8 @@ sub bdiv
     return $x unless wantarray;
     return ($x->round(@r),$self->bzero(@r));
     }
+  return $upgrade->bdiv($upgrade->new($x),$upgrade->new($y),@r)
+   if defined $upgrade;
    
   # calc new sign and in case $y == +/- 1, return $x
   my $xsign = $x->{sign};				# keep
@@ -1399,7 +1434,10 @@ sub bpow
   my ($self,$x,$y,@r) = objectify(2,@_);
 
   return $x if $x->modify('bpow');
- 
+
+  return $upgrade->bpow($upgrade->new($x),$y,@r)
+   if defined $upgrade && $y->isa($upgrade);
+
   $r[3] = $y;					# no push!
   return $x if $x->{sign} =~ /^[+-]inf$/;	# -inf/+inf ** x
   return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
@@ -2038,13 +2076,10 @@ sub objectify
 
   # $x->unary_op();
   return (ref($_[1]),$_[1]) if (@_ == 2) && ($_[0]||0 == 1) && ref($_[1]);
-  # $x->binary_op($y);
-  #return (ref($_[1]),$_[1],$_[2]) if (@_ == 3) && ($_[0]||0 == 2)
-  # && ref($_[1]) && ref($_[2]);
 
   my $count = abs(shift || 0);
   
-  my @a;			# resulting array 
+  my (@a,$k,$d);		# resulting array, temp, and downgrade 
   if (ref $_[0])
     {
     # okay, got object as first
@@ -2056,8 +2091,15 @@ sub objectify
     $a[0] = $class;
     $a[0] = shift if $_[0] =~ /^[A-Z].*::/;	# classname as first?
     }
+  no strict 'refs';
+  # disable downgrading, because Math::BigFLoat->foo('1.0','2.0') needs floats
+  if (defined ${"$a[0]::downgrade"})
+    {
+    $d = ${"$a[0]::downgrade"};
+    ${"$a[0]::downgrade"} = undef;
+    }
+
   # print "Now in objectify, my class is today $a[0]\n";
-  my $k; 
   if ($count == 0)
     {
     while (@_)
@@ -2095,6 +2137,7 @@ sub objectify
     push @a,@_;		# return other params, too
     }
   die "$class objectify needs list context" unless wantarray;
+  ${"$a[0]::downgrade"} = $d;
   @a;
   }
 

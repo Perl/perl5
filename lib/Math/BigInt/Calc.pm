@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.24';
+$VERSION = '0.25';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -234,8 +234,8 @@ sub _to_small
 sub _new
   {
   # (ref to string) return ref to num_array
-  # Convert a number from string format to internal base 100000 format.
-  # Assumes normalized value as input.
+  # Convert a number from string format (without sign) to internal base
+  # 1ex format. Assumes normalized value as input.
   my $d = $_[1];
   my $il = length($$d)-1;
   # this leaves '00000' instead of int 0 and will be corrected after any op
@@ -390,7 +390,7 @@ sub _dec
 
 sub _sub
   {
-  # (ref to int_num_array, ref to int_num_array)
+  # (ref to int_num_array, ref to int_num_array, swap)
   # subtract base 1eX numbers -- stolen from Knuth Vol 2 pg 232, $x > $y
   # subtract Y from X (X is always greater/equal!) by modifying x in place
   my ($c,$sx,$sy,$s) = @_;
@@ -419,9 +419,46 @@ sub _sub
   __strip_zeros($sy);
   }                                                                             
 
+sub _square_use_mul
+  {
+  # compute $x ** 2 or $x * $x in-place and return $x
+  my ($c,$x) = @_;
+
+  # From: Handbook of Applied Cryptography by A. Menezes, P. van Oorschot and
+  #       S. Vanstone., Chapter 14
+
+  #14.16 Algorithm Multiple-precision squaring
+  #INPUT: positive integer x = (xt 1 xt 2 ... x1 x0)b.
+  #OUTPUT: x * x = x ** 2 in radix b representation. 
+  #1. For i from 0 to (2t - 1) do: wi <- 0. 
+  #2.  For i from 0 to (t - 1) do the following: 
+  # 2.1 (uv)b w2i + xi * xi, w2i v, c u. 
+  # 2.2 For j from (i + 1)to (t - 1) do the following: 
+  #      (uv)b <- wi+j + 2*xj * xi + c, wi+j <- v, c <- u. 
+  # 2.3 wi+t <- u. 
+  #3. Return((w2t-1 w2t-2 ... w1 w0)b).
+
+#  # Note: That description is crap. Half of the symbols are not explained or
+#  # used with out beeing set.
+#  my $t = scalar @$x;		# count
+#  my ($c,$i,$j);
+#  for ($i = 0; $i < $t; $i++)
+#    {
+#    $x->[$i] = $x->[$i*2] + $x[$i]*$x[$i];
+#    $x->[$i*2] = $x[$i]; $c = $x[$i];
+#    for ($j = $i+1; $j < $t; $j++)
+#      {
+#      $x->[$i] = $x->[$i+$j] + 2 * $x->[$i] * $x->[$j];
+#      $x->[$i+$j] = $x[$j]; $c = $x[$i];
+#      }
+#    $x->[$i+$t] = $x[$i];
+#    }
+  $x;
+  }
+
 sub _mul_use_mul
   {
-  # (BINT, BINT) return nothing
+  # (ref to int_num_array, ref to int_num_array)
   # multiply two numbers in internal representation
   # modifies first arg, second need not be different from first
   my ($c,$xv,$yv) = @_;
@@ -446,6 +483,9 @@ sub _mul_use_mul
 
   # since multiplying $x with $x fails, make copy in this case
   $yv = [@$xv] if "$xv" eq "$yv";	# same references?
+  # since multiplying $x with $x would fail here, use the faster squaring
+#  return _square($c,$xv) if "$xv" eq "$yv";	# same reference?
+
   if ($LEN_CONVERT != 0)
     {
     $c->_to_small($xv); $c->_to_small($yv);
@@ -496,7 +536,7 @@ sub _mul_use_mul
 
 sub _mul_use_div
   {
-  # (BINT, BINT) return nothing
+  # (ref to int_num_array, ref to int_num_array)
   # multiply two numbers in internal representation
   # modifies first arg, second need not be different from first
   my ($c,$xv,$yv) = @_;
@@ -523,6 +563,9 @@ sub _mul_use_div
  
   # since multiplying $x with $x fails, make copy in this case
   $yv = [@$xv] if "$xv" eq "$yv";	# same references?
+  # since multiplying $x with $x would fail here, use the faster squaring
+#  return _square($c,$xv) if "$xv" eq "$yv";	# same reference?
+
   if ($LEN_CONVERT != 0)
     {
     $c->_to_small($xv); $c->_to_small($yv);
@@ -865,9 +908,14 @@ sub _acmp
   # manual way (abort if unequal, good for early ne)
   my $j = scalar @$cx - 1;
   while ($j >= 0)
-   {
-   last if ($a = $cx->[$j] - $cy->[$j]); $j--;
-   }
+    {
+    last if ($a = $cx->[$j] - $cy->[$j]); $j--;
+    }
+#  my $j = scalar @$cx;
+#  while (--$j >= 0)
+#    {
+#    last if ($a = $cx->[$j] - $cy->[$j]);
+#    }
   return 1 if $a > 0;
   return -1 if $a < 0;
   0;					# equal

@@ -26,8 +26,8 @@ BEGIN
     }
   print "# INC = @INC\n"; 
   
-  plan tests => 1586
-    + 4;	# + 4 own tests
+  plan tests => 1592
+    + 6;	# + our own tests
   }
 
 use Math::BigFloat::Subclass;
@@ -38,9 +38,14 @@ $CL = "Math::BigInt::Calc";
 
 require 'bigfltpm.inc';	# perform same tests as bigfltpm
 
+###############################################################################
 # Now do custom tests for Subclass itself
 my $ms = $class->new(23);
 print "# Missing custom attribute \$ms->{_custom}" if !ok (1, $ms->{_custom});
+
+# Check that subclass is a Math::BigFloat, but not a Math::Bigint
+ok ($ms->isa('Math::BigFloat'),1);
+ok ($ms->isa('Math::BigInt') || 0,0);
 
 use Math::BigFloat;
 

@@ -6,27 +6,12 @@ use strict;
 BEGIN
   {
   $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/upgrade.t//i;
-  if ($ENV{PERL_CORE})
-    {
-    @INC = qw(../t/lib);                # testing with the core distribution
-    }
-  unshift @INC, '../lib';       # for testing manually
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
-   plan tests => 1990
-    + 2;			# our own tests
+  unshift @INC, '../lib'; # for running manually
+  my $location = $0; $location =~ s/bigintpm.t//;
+  unshift @INC, $location; # to locate the testing files
+  chdir 't' if -d 't';
+  plan tests => 2056
+   + 2;			# our own tests
   }
 
 use Math::BigInt upgrade => 'Math::BigFloat';
