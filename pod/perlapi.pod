@@ -5418,6 +5418,16 @@ This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
 =for hackers
 Found in file XSUB.h
 
+=item dUNDERBAR
+
+Sets up the C<padoff_du> variable for an XSUB that wishes to use
+C<UNDERBAR>.
+
+		dUNDERBAR;
+
+=for hackers
+Found in file XSUB.h
+
 =item dXSARGS
 
 Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.
@@ -5494,6 +5504,14 @@ XSUB.  This is always the proper type for the C++ object.  See C<CLASS> and
 L<perlxs/"Using XS With C++">.
 
 	(whatever)	THIS
+
+=for hackers
+Found in file XSUB.h
+
+=item UNDERBAR
+
+The SV* corresponding to the $_ variable. Works even if there
+is a lexical $_ in scope.
 
 =for hackers
 Found in file XSUB.h

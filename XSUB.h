@@ -67,6 +67,14 @@ This is usually handled automatically by C<xsubpp>.
 Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
 handled automatically by C<xsubpp>.
 
+=for apidoc Ams||dUNDERBAR
+Sets up the C<padoff_du> variable for an XSUB that wishes to use
+C<UNDERBAR>.
+
+=for apidoc AmU||UNDERBAR
+The SV* corresponding to the $_ variable. Works even if there
+is a lexical $_ in scope.
+
 =cut
 */
 
@@ -105,6 +113,11 @@ handled automatically by C<xsubpp>.
 #define XSINTERFACE_FUNC(ret,cv,f)     ((XSINTERFACE_CVT(ret,))(f))
 #define XSINTERFACE_FUNC_SET(cv,f)	\
 		CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
+
+#define dUNDERBAR I32 padoff_du = pad_findmy("$_")
+#define UNDERBAR ((padoff_du == NOT_IN_PAD \
+	    || PAD_COMPNAME_FLAGS(padoff_du) & SVpad_OUR) \
+	? DEFSV : PAD_SVl(padoff_du))
 
 /* Simple macros to put new mortal values onto the stack.   */
 /* Typically used to return values from XS functions.       */
