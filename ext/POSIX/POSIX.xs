@@ -303,7 +303,7 @@ char *tzname[] = { "" , "" };
  */
 #ifdef HAS_GNULIBC
 # ifndef STRUCT_TM_HASZONE
-#    define STRUCT_TM_HAS_ZONE
+#    define STRUCT_TM_HASZONE
 # endif
 #endif
 
