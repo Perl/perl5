@@ -12,7 +12,7 @@ use vars qw(@ISA @EXPORT $VERSION);
 $Is_VMS = $^O eq 'VMS';
 
 my $splitchar = $^O eq 'VMS' ? '|' : $^O eq 'os2' ? ';' : ':';
-my @PERL_ENV_LIB = split $splitchar, defined $ENV{'PERL5LIB'} ? $ENV{'PERL5LIB'} : $ENV{'PERLLIB'};
+my @PERL_ENV_LIB = split $splitchar, defined $ENV{'PERL5LIB'} ? $ENV{'PERL5LIB'} : $ENV{'PERLLIB'} || '';
 my $Inc_uninstall_warn_handler;
 
 #use vars qw( @EXPORT @ISA $Is_VMS );
