@@ -3,7 +3,7 @@
 use lib qw(. ..);
 use Memoize 0.45 qw(memoize unmemoize);
 use Fcntl;
-use Memoize::SDBM_File;
+# use Memoize::SDBM_File;
 # $Memoize::GDBM_File::Verbose = 0;
 
 sub i {
@@ -20,7 +20,7 @@ sub n {
   $_[0]+1;
 }
 
-eval {require SDBM_File};
+eval {require Memoize:SDBM_File};
 if ($@) {
   print "1..0\n";
   exit 0;
@@ -29,10 +29,10 @@ if ($@) {
 print "1..4\n";
 
 if (eval {require File::Spec::Functions}) {
- File::Spec::Functions->import(qw(catfile tmpdir));
- $tmpdir = tmpdir();
+  File::Spec::Functions->import('tmpdir', 'catfile');
+  $tmpdir = tmpdir();
 } else {
- *catfile = sub { join '/', @_ };
+  *catfile = sub { join '/', @_ };
   $tmpdir = $ENV{TMP} || $ENV{TMPDIR} || '/tmp';
 }
 $file = catfile($tmpdir, "md$$");
