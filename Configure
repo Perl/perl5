@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Feb 15 01:22:14 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Fri Feb 15 17:48:38 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2246,10 +2246,10 @@ FOO
 	;;
 esac
 
-cat <<EOS >checkcc
+cat <<EOS >trygcc
 $startsh
 EOS
-cat <<'EOSC' >>checkcc
+cat <<'EOSC' >>trygcc
 case "$cc" in
 '') ;;
 *)  $rm -f try try.*
@@ -2291,15 +2291,37 @@ EOM
                 esac
             fi
         fi
+    fi
+    $rm -f try try.*
+    ;;
+esac
+EOSC
+
+cat <<EOS >checkcc
+$startsh
+EOS
+cat <<'EOSC' >>checkcc
+case "$cc" in        
+'') ;;
+*)  $rm -f try try.*              
+    $cat >try.c <<EOM
+int main(int argc, char *argv[]) {
+  return 0;
+}
+EOM
+    if $cc -o try $ccflags $ldflags try.c; then
+       :
+    else
         if $test X"$despair" = Xyes; then
-	    $cat >&4 <<EOM
+           echo "Uh-oh, the C compiler '$cc' doesn't seem to be working." >&4
+        fi
+        $cat >&4 <<EOM         
 You need to find a working C compiler.
 Either (purchase and) install the C compiler supplied by your OS vendor,
 or for a free C compiler try http://gcc.gnu.org/
 I cannot continue any further, aborting.
 EOM
-            exit 1
-        fi
+        exit 1
     fi
     $rm -f try try.*
     ;;
@@ -3542,6 +3564,9 @@ esac
 rp="Use which C compiler?"
 . ./myread
 cc="$ans"
+
+: See if they have not cc but they do have gcc
+. ./trygcc
 : Look for a hint-file generated 'call-back-unit'.  Now that the
 : user has specified the compiler, we may need to set or change some
 : other defaults.
