@@ -205,7 +205,7 @@ Returns the values of the semaphore set as an array.
 
 =item getncnt ( SEM )
 
-Returns the number of processed waiting for the semaphore C<SEM> to
+Returns the number of processes waiting for the semaphore C<SEM> to
 become greater than its current value
 
 =item getpid ( SEM )
@@ -219,7 +219,7 @@ Returns the current value of the semaphore C<SEM>.
 
 =item getzcnt ( SEM )
 
-Returns the number of processed waiting for the semaphore C<SEM> to
+Returns the number of processes waiting for the semaphore C<SEM> to
 become zero.
 
 =item id
@@ -251,7 +251,7 @@ with the semaphore set.
 
     uid
     gid
-    mode (oly the permission bits)
+    mode (only the permission bits)
 
 C<set> accepts either a stat object, as returned by the C<stat> method,
 or a list of I<name>-I<value> pairs.
@@ -269,7 +269,7 @@ Set the C<N>th value in the semaphore set to C<VALUE>
 
 Returns an object of type C<IPC::Semaphore::stat> which is a sub-class of
 C<Class::Struct>. It provides the following fields. For a description
-of these fields see you system documentation.
+of these fields see your system documentation.
 
     uid
     gid
