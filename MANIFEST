@@ -618,6 +618,7 @@ lib/File/Spec/OS2.pm	portable operations on OS2 file names
 lib/File/Spec/Unix.pm	portable operations on Unix file names
 lib/File/Spec/VMS.pm	portable operations on VMS file names
 lib/File/Spec/Win32.pm	portable operations on Win32 file names
+lib/File/Temp.pm	create safe temporary files and file handles
 lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/FileCache.pm	Keep more files open than the system permits
 lib/FileHandle.pm	Backward-compatible front end to IO extension
@@ -1285,6 +1286,10 @@ t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
 t/lib/filespec.t	See if File::Spec works
 t/lib/findbin.t		See if FindBin works
+t/lib/ftmp-mktemp.t	See if File::Temp works
+t/lib/ftmp-posix.t	See if File::Temp works
+t/lib/ftmp-security.t	See if File::Temp works
+t/lib/ftmp-tempfile.t	See if File::Temp works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/getopt.t		See if Getopt::Std and Getopt::Long work
 t/lib/glob-basic.t	See if File::Glob works
