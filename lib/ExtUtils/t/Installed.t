@@ -26,6 +26,8 @@ use Test::More tests => 43;
 
 BEGIN { use_ok( 'ExtUtils::Installed' ) }
 
+my $noman = ! ($Config{installman1dir} && $Config{installman3dir});
+
 # saves having to qualify package name for class methods
 my $ei = bless( {}, 'ExtUtils::Installed' );
 
@@ -46,8 +48,13 @@ foreach my $path (qw( installman1dir installman3dir )) {
 
 is( $ei->_is_type($Config{prefix} . '/bar', 'prog'), 1, 
 	"... should find prog file under $Config{prefix}" );
-is( $ei->_is_type('bar', 'doc'), 0, 
-	'... should not find doc file outside path' );
+
+SKIP: {
+	skip('no man directories on this system', 1) if $noman;
+	is( $ei->_is_type('bar', 'doc'), 0, 
+		'... should not find doc file outside path' );
+}
+
 is( $ei->_is_type('bar', 'prog'), 0, 
 	'... nor prog file outside path' );
 is( $ei->_is_type('whocares', 'someother'), 0, '... nor other type anywhere' );
@@ -136,11 +143,18 @@ eval { $ei->files('badmod') };
 like( $@, qr/badmod is not installed/,'files() should croak given bad modname');
 eval { $ei->files('goodmod', 'badtype' ) };
 like( $@, qr/type must be/,'files() should croak given bad type' );
-my @files = $ei->files('goodmod', 'doc', $Config{installman1dir});
-is( scalar @files, 1, '... should find doc file under given dir' );
-like( $files[0], qr/foo$/, '... checking file name' );
-@files = $ei->files('goodmod', 'doc');
-is( scalar @files, 2, '... should find all doc files with no dir' );
+
+my @files;
+SKIP: {
+	skip('no man directories on this system', 3) if $noman;
+	
+	@files = $ei->files('goodmod', 'doc', $Config{installman1dir});
+	is( scalar @files, 1, '... should find doc file under given dir' );
+	is( grep({ /foo$/ } @files), 1, '... checking file name' );
+	@files = $ei->files('goodmod', 'doc');
+	is( scalar @files, 2, '... should find all doc files with no dir' );
+}
+
 @files = $ei->files('goodmod', 'prog', 'fake', 'fake2');
 is( scalar @files, 0, '... should find no doc files given wrong dirs' );
 @files = $ei->files('goodmod', 'prog');
@@ -148,25 +162,32 @@ is( scalar @files, 1, '... should find doc file in correct dir' );
 like( $files[0], qr/foobar$/, '... checking file name' );
 @files = $ei->files('goodmod');
 is( scalar @files, 4, '... should find all files with no type specified' );
-my %dirnames = map { $_ => dirname($_) } @files;
+my %dirnames = map { lc($_) => dirname(lc($_)) } @files;
 
 # directories
 my @dirs = $ei->directories('goodmod', 'prog', 'fake');
 is( scalar @dirs, 0, 'directories() should return no dirs if no files found' );
-@dirs = $ei->directories('goodmod', 'doc');
-is( scalar @dirs, 2, '... should find all files files() would' );
-@dirs = $ei->directories('goodmod');
-is( scalar @dirs, 4, '... should find all files files() would, again' );
-@files = sort map { exists $dirnames{$_} ? $dirnames{$_} : '' } @files;
-is( join(' ', @files), join(' ', @dirs), '... should sort output' );
 
-# directory_tree
-my $expectdirs = 
-	dirname($Config{installman1dir}) eq dirname($Config{installman3dir}) ? 3 :2;
+SKIP: {
+	skip('no man directories on this system', 4) if $noman;
 
-@dirs = $ei->directory_tree('goodmod', 'doc', dirname($Config{installman1dir}));
-is( scalar @dirs, $expectdirs, 
-	'directory_tree() should report intermediate dirs to those requested' );
+	@dirs = $ei->directories('goodmod', 'doc');
+	is( scalar @dirs, 2, '... should find all files files() would' );
+	@dirs = $ei->directories('goodmod');
+	is( scalar @dirs, 4, '... should find all files files() would, again' );
+	@files = sort map { exists $dirnames{lc($_)} ? $dirnames{lc($_)} : '' } 
+		@files;
+	is( join(' ', @files), join(' ', @dirs), '... should sort output' );
+
+	# directory_tree
+	my $expectdirs = dirname($Config{installman1dir}) eq 
+		dirname($Config{installman3dir}) ? 3 :2;
+
+	@dirs = $ei->directory_tree('goodmod', 'doc', 
+		dirname($Config{installman1dir}));
+	is( scalar @dirs, $expectdirs, 
+		'directory_tree() should report intermediate dirs to those requested' );
+}
 
 my $fakepak = Fakepak->new(102);
 
