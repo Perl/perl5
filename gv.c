@@ -1071,9 +1071,9 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\026':	/* $^V */
 	if (len == 1) {
 	    SV *sv = GvSV(gv);
-	    sv = new_version(PL_patchlevel);
-	    SvREADONLY_on(sv);
-	    GvSV(gv) = sv;
+	    GvSV(gv) = new_version(PL_patchlevel);
+	    SvREADONLY_on(GvSV(gv));
+	    SvREFCNT_dec(sv);
 	}
 	break;
     }

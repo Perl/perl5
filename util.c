@@ -3887,6 +3887,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv, bool qv)
     bool saw_under = 0;
     SV* sv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
     (void)sv_upgrade(sv, SVt_PVAV); /* needs to be an AV type */
+    AvREAL_on((AV*)sv);
 
     /* pre-scan the imput string to check for decimals */
     while ( *pos == '.' || *pos == '_' || isDIGIT(*pos) )
@@ -4010,6 +4011,7 @@ Perl_new_version(pTHX_ SV *ver)
 	AV *av = (AV *)SvRV(ver);
 	SV* sv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
 	(void)sv_upgrade(sv, SVt_PVAV); /* needs to be an AV type */
+	AvREAL_on((AV*)sv);
 	for ( key = 0; key <= av_len(av); key++ )
 	{
 	    I32 rev = SvIV(*av_fetch(av, key, FALSE));
