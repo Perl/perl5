@@ -219,7 +219,7 @@ sub send {
 	? send($sock, $_[1], $flags)
 	: send($sock, $_[1], $flags, $peer);
 
-    # remember who we send to, if it was sucessful
+    # remember who we send to, if it was successful
     ${*$sock}{'io_socket_peername'} = $peer
 	if(@_ == 4 && defined $r);
 
@@ -421,7 +421,7 @@ C<use> declaration will fail at compile time.
 
 =item connected
 
-If the socket is in a connected state the the peer address is returned.
+If the socket is in a connected state the peer address is returned.
 If the socket is not in a connected state then undef will be returned.
 
 =item protocol

@@ -124,6 +124,7 @@ END
     }
 END
     close CMDPIPE;
+    $? >>= 8 if $^O eq 'VMS'; # POSIX status hiding in 2nd byte
     print $? & 0xFF ? "ok 6\n" : "not ok 6\n";
 
     $test += 4;

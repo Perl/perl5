@@ -851,7 +851,7 @@ extirpated as a potential munition).  This can prove useful for checking
 the password file for lousy passwords, amongst other things.  Only the
 guys wearing white hats should do this.
 
-Note that C<crypt> is intended to be a one-way function, much like
+Note that L<crypt|/crypt> is intended to be a one-way function, much like
 breaking eggs to make an omelette.  There is no (known) corresponding
 decrypt function (in other words, the crypt() is a one-way hash
 function).  As a result, this function isn't all that useful for
@@ -859,7 +859,7 @@ cryptography.  (For that, see your nearby CPAN mirror.)
 
 When verifying an existing encrypted string you should use the
 encrypted text as the salt (like C<crypt($plain, $crypted) eq
-$crypted>).  This allows your code to work with the standard C<crypt>
+$crypted>).  This allows your code to work with the standard L<crypt|\crypt>
 and with more exotic implementations.  In other words, do not assume
 anything about the returned string itself, or how many bytes in
 the encrypted string matter.
@@ -895,7 +895,7 @@ their own password:
 Of course, typing in your own password to whoever asks you
 for it is unwise.
 
-The L<crypt> function is unsuitable for encrypting large quantities
+The L<crypt|\crypt> function is unsuitable for encrypting large quantities
 of data, not least of all because you can't get the information
 back.  Look at the F<by-module/Crypt> and F<by-module/PGP> directories
 on your favorite CPAN mirror for a slew of potentially useful
@@ -2720,7 +2720,7 @@ C<redo> work.
 
 =item no Module
 
-See the L</use> function, which C<no> is the opposite of.
+See the C<use> function, which C<no> is the opposite of.
 
 =item oct EXPR
 

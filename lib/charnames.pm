@@ -107,7 +107,7 @@ sub charnames
     ## @off will hold the index into the code/name string of the start and
     ## end of the name as we find it.
 
-    ## If :full, look for the the name exactly
+    ## If :full, look for the name exactly
     if ($^H{charnames_full} and $txt =~ /\t\t\Q$name\E$/m) {
       @off = ($-[0], $+[0]);
     }
