@@ -64,13 +64,13 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 		  ((uv >= 0xFDD0 && uv <= 0xFDEF &&
 		    !(flags & UNICODE_ALLOW_FDD0))
 		   ||
-		   ((uv & 0xFFFF) == 0xFFFE &&
-		    !(flags & UNICODE_ALLOW_FFFE))
+		   (UNICODE_IS_BYTE_ORDER_MARK(uv) &&
+		    !(flags & UNICODE_ALLOW_BOM))
 		   ||
 		   ((uv & 0xFFFF) == 0xFFFF &&
 		    !(flags & UNICODE_ALLOW_FFFF))) &&
 		  /* UNICODE_ALLOW_SUPER includes
-		   * FFFEs and FFFFs beyond 0x10FFFF. */
+		   * FFFFs beyond 0x10FFFF. */
 		  ((uv <= PERL_UNICODE_MAX) ||
 		   !(flags & UNICODE_ALLOW_SUPER))
 		  )
@@ -500,7 +500,8 @@ returned and retlen is set, if possible, to -1.
 UV
 Perl_utf8_to_uvchr(pTHX_ U8 *s, STRLEN *retlen)
 {
-    return Perl_utf8n_to_uvchr(aTHX_ s, UTF8_MAXLEN, retlen, 0);
+    return Perl_utf8n_to_uvchr(aTHX_ s, UTF8_MAXLEN, retlen,
+			       ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
 /*
@@ -523,7 +524,8 @@ UV
 Perl_utf8_to_uvuni(pTHX_ U8 *s, STRLEN *retlen)
 {
     /* Call the low level routine asking for checks */
-    return Perl_utf8n_to_uvuni(aTHX_ s, UTF8_MAXLEN, retlen, 0);
+    return Perl_utf8n_to_uvuni(aTHX_ s, UTF8_MAXLEN, retlen,
+			       ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
 /*
@@ -1626,7 +1628,9 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
 	    /* We use utf8n_to_uvuni() as we want an index into
 	       Unicode tables, not a native character number.
 	     */
-	    UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXLEN, NULL, 0);
+	    UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXLEN, 0,
+					   ckWARN(WARN_UTF8) ?
+					   0 : UTF8_ALLOW_ANY);
 	    SV *errsv_save;
 	    ENTER;
 	    SAVETMPS;
