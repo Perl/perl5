@@ -129,11 +129,11 @@ print $foo;
   print "ok 31\n";
  
 # Does the syntax where we use the literal control character still work?
-  if ($ {} != 17) { print "not "  }
+  if (eval "\$ {\cX}" != 17 or $@) { print "not "  }
   print "ok 32\n";
 
-  $ = 24;                          # Literal control character
-  if ($ != 24) {  print "not "  }  # Literal control character
+  eval "\$\cN = 24";                 # Literal control character
+  if ($@ or ${"\cN"} != 24) {  print "not "  }
   print "ok 33\n";
   if ($^N != 24) {  print "not "  }  # Control character escape sequence
   print "ok 34\n";
