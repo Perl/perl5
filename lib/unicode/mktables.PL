@@ -11,9 +11,10 @@ mkdir "To", 0777;
 @todo = (
 # typical
 
-    ['IsWord',  '$cat =~ /^L[ulo]|^Nd/ or $code eq "005F"',	''],
-    ['IsAlnum', '$cat =~ /^L[ulo]|^Nd/',	''],
-    ['IsAlpha',  '$cat =~ /^L[ulo]/',	''],
+    ['IsWord',  '$cat =~ /^L[ulot]|^Nd/ or $code eq "005F"',	''],
+    ['IsAlnum', '$cat =~ /^L[ulot]|^Nd/',	''],
+    ['IsAlpha',  '$cat =~ /^L[ulot]/',	''],
+    # XXX broken: recursive definition (/\s/ will look up IsSpace in future)
     ['IsSpace',  '$cat =~ /^Z/ or $code lt "0020" and chr(hex $code) =~ /^\s/',	''],
     ['IsDigit',  '$cat =~ /^Nd$/',	''],
     ['IsUpper',  '$cat =~ /^Lu$/',	''],

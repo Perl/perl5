@@ -197,9 +197,9 @@ sure you have done the previous steps correctly.
 Type "dmake test" (or "nmake test").  This will run most of the tests from
 the testsuite (many tests will be skipped).
 
-No tests should typically fail when running Windows NT 4.0.  Under Windows
-2000, test 22 in lib/open3.t is known to fail (cause still unknown).  Many
-tests will fail under Windows 9x due to the inferior command shell.
+There should be no test failures when running under Windows NT 4.0 or
+Windows 2000.  Many tests I<will> fail under Windows 9x due to the inferior
+command shell.
 
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains

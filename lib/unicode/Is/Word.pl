@@ -11,11 +11,7 @@ return <<'END';
 00ba	
 00c0	00d6
 00d8	00f6
-00f8	01c4
-01c6	01c7
-01c9	01ca
-01cc	01f1
-01f3	021f
+00f8	021f
 0222	0233
 0250	02ad
 0386	
@@ -211,19 +207,16 @@ return <<'END';
 1f5b	
 1f5d	
 1f5f	1f7d
-1f80	1f87
-1f90	1f97
-1fa0	1fa7
-1fb0	1fb4
-1fb6	1fbb
+1f80	1fb4
+1fb6	1fbc
 1fbe	
 1fc2	1fc4
-1fc6	1fcb
+1fc6	1fcc
 1fd0	1fd3
 1fd6	1fdb
 1fe0	1fec
 1ff2	1ff4
-1ff6	1ffb
+1ff6	1ffc
 207f	
 2102	
 2107	
