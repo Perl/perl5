@@ -671,7 +671,7 @@ win32_opendir(char *filename)
     WIN32_FIND_DATAW	wFindData;
     HANDLE		fh;
     char		buffer[MAX_PATH*2];
-    WCHAR		wbuffer[MAX_PATH];
+    WCHAR		wbuffer[MAX_PATH+1];
     char*		ptr;
 
     len = strlen(filename);
@@ -1036,7 +1036,7 @@ win32_stat(const char *path, struct stat *buffer)
     char	t[MAX_PATH+1]; 
     int		l = strlen(path);
     int		res;
-    WCHAR	wbuffer[MAX_PATH];
+    WCHAR	wbuffer[MAX_PATH+1];
     HANDLE      handle;
     int         nlink = 1;
 
@@ -1228,7 +1228,7 @@ DllExport char *
 win32_getenv(const char *name)
 {
     dTHXo;
-    WCHAR wBuffer[MAX_PATH];
+    WCHAR wBuffer[MAX_PATH+1];
     DWORD needlen;
     SV *curitem = Nullsv;
 
@@ -1392,7 +1392,7 @@ win32_unlink(const char *filename)
     DWORD attrs;
 
     if (USING_WIDE()) {
-	WCHAR wBuffer[MAX_PATH];
+	WCHAR wBuffer[MAX_PATH+1];
 
 	A2WHELPER(filename, wBuffer, sizeof(wBuffer));
 	wcscpy(wBuffer, PerlDir_mapW(wBuffer));
@@ -1437,7 +1437,7 @@ win32_utime(const char *filename, struct utimbuf *times)
     FILETIME ftAccess;
     FILETIME ftWrite;
     struct utimbuf TimeBuffer;
-    WCHAR wbuffer[MAX_PATH];
+    WCHAR wbuffer[MAX_PATH+1];
 
     int rc;
     if (USING_WIDE()) {
@@ -2055,7 +2055,7 @@ DllExport FILE *
 win32_fopen(const char *filename, const char *mode)
 {
     dTHXo;
-    WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH];
+    WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH+1];
     FILE *f;
     
     if (!*filename)
@@ -2104,7 +2104,7 @@ DllExport FILE *
 win32_freopen(const char *path, const char *mode, FILE *stream)
 {
     dTHXo;
-    WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH];
+    WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH+1];
     if (stricmp(path, "/dev/null")==0)
 	path = "NUL";
 
@@ -2410,8 +2410,8 @@ win32_link(const char *oldname, const char *newname)
 {
     dTHXo;
     BOOL (__stdcall *pfnCreateHardLinkW)(LPCWSTR,LPCWSTR,LPSECURITY_ATTRIBUTES);
-    WCHAR wOldName[MAX_PATH];
-    WCHAR wNewName[MAX_PATH];
+    WCHAR wOldName[MAX_PATH+1];
+    WCHAR wNewName[MAX_PATH+1];
 
     if (IsWin95())
 	Perl_die(aTHX_ PL_no_func, "link");
@@ -2582,7 +2582,7 @@ win32_open(const char *path, int flag, ...)
     dTHXo;
     va_list ap;
     int pmode;
-    WCHAR wBuffer[MAX_PATH];
+    WCHAR wBuffer[MAX_PATH+1];
 
     va_start(ap, flag);
     pmode = va_arg(ap, int);
@@ -2869,7 +2869,7 @@ win32_mkdir(const char *dir, int mode)
 {
     dTHXo;
     if (USING_WIDE()) {
-	WCHAR wBuffer[MAX_PATH];
+	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(dir, wBuffer, sizeof(wBuffer));
 	return _wmkdir(PerlDir_mapW(wBuffer));
     }
@@ -2881,7 +2881,7 @@ win32_rmdir(const char *dir)
 {
     dTHXo;
     if (USING_WIDE()) {
-	WCHAR wBuffer[MAX_PATH];
+	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(dir, wBuffer, sizeof(wBuffer));
 	return _wrmdir(PerlDir_mapW(wBuffer));
     }
@@ -2893,7 +2893,7 @@ win32_chdir(const char *dir)
 {
     dTHXo;
     if (USING_WIDE()) {
-	WCHAR wBuffer[MAX_PATH];
+	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(dir, wBuffer, sizeof(wBuffer));
 	return _wchdir(wBuffer);
     }
@@ -2905,7 +2905,7 @@ win32_access(const char *path, int mode)
 {
     dTHXo;
     if (USING_WIDE()) {
-	WCHAR wBuffer[MAX_PATH];
+	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(path, wBuffer, sizeof(wBuffer));
 	return _waccess(PerlDir_mapW(wBuffer), mode);
     }
@@ -2917,7 +2917,7 @@ win32_chmod(const char *path, int mode)
 {
     dTHXo;
     if (USING_WIDE()) {
-	WCHAR wBuffer[MAX_PATH];
+	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(path, wBuffer, sizeof(wBuffer));
 	return _wchmod(PerlDir_mapW(wBuffer), mode);
     }
@@ -3420,7 +3420,7 @@ win32_dynaload(const char* filename)
     dTHXo;
     HMODULE hModule;
     if (USING_WIDE()) {
-	WCHAR wfilename[MAX_PATH];
+	WCHAR wfilename[MAX_PATH+1];
 	A2WHELPER(filename, wfilename, sizeof(wfilename));
 	hModule = LoadLibraryExW(PerlDir_mapW(wfilename), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     }
@@ -3854,15 +3854,15 @@ XS(w32_CopyFile)
     if (items != 3)
 	Perl_croak(aTHX_ "usage: Win32::CopyFile($from, $to, $overwrite)");
     if (USING_WIDE()) {
-	WCHAR wSourceFile[MAX_PATH];
-	WCHAR wDestFile[MAX_PATH];
+	WCHAR wSourceFile[MAX_PATH+1];
+	WCHAR wDestFile[MAX_PATH+1];
 	A2WHELPER(SvPV_nolen(ST(0)), wSourceFile, sizeof(wSourceFile));
 	wcscpy(wSourceFile, PerlDir_mapW(wSourceFile));
 	A2WHELPER(SvPV_nolen(ST(1)), wDestFile, sizeof(wDestFile));
 	bResult = CopyFileW(wSourceFile, PerlDir_mapW(wDestFile), !SvTRUE(ST(2)));
     }
     else {
-	char szSourceFile[MAX_PATH];
+	char szSourceFile[MAX_PATH+1];
 	strcpy(szSourceFile, PerlDir_mapA(SvPV_nolen(ST(0))));
 	bResult = CopyFileA(szSourceFile, PerlDir_mapA(SvPV_nolen(ST(1))), !SvTRUE(ST(2)));
     }
