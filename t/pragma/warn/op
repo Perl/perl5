@@ -230,6 +230,12 @@ Useless use of getpwuid in void context at - line 53.
 ########
 # op.c
 use warning 'void' ;
+for (@{[0]}) { "$_" }		# check warning isn't duplicated
+EXPECT
+Useless use of string in void context at - line 3.
+########
+# op.c
+use warning 'void' ;
 use Config ;
 BEGIN {
     if ( ! $Config{d_telldir}) {

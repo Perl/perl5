@@ -827,7 +827,8 @@ scalarvoid(OP *o)
     SV* sv;
 
     /* assumes no premature commitment */
-    if (!o || (o->op_flags & OPf_WANT) == OPf_WANT_LIST || PL_error_count
+    U8 want = o->op_flags & OPf_WANT;
+    if (!o || (want && want != OPf_WANT_SCALAR) || PL_error_count
 	 || o->op_type == OP_RETURN)
 	return o;
 
