@@ -6378,13 +6378,13 @@ if $test -d /usr/etc/yp || $test -d /etc/yp; then
 	esac
 fi
 case "$hostcat" in
-'') hostcat='cat /etc/hosts';;
+'') test -f /etc/hosts && hostcat='cat /etc/hosts';;
 esac
 case "$groupcat" in
-'') groupcat='cat /etc/group';;
+'') test -f /etc/group && groupcat='cat /etc/group';;
 esac
 case "$passcat" in
-'') passcat='cat /etc/passwd';;
+'') test -f /etc/passwd && passcat='cat /etc/passwd';;
 esac
 
 : now get the host name
@@ -6486,6 +6486,7 @@ case "$myhostname" in
 				$sed -e 's/[	 ]*#.*//; s/$/ /' > hosts && \
 			$test -s hosts
 		} || {
+			test "X$hostcat" != "X" &&
 		     	$hostcat | $sed -n -e "s/[	 ]*#.*//; s/\$/ /
 					/[	 ]$myhostname[	. ]/p" > hosts
 		}
