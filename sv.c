@@ -3378,14 +3378,19 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	SvRV(dstr) = SvREFCNT_inc(SvRV(sstr));
 	SvROK_on(dstr);
 	if (sflags & SVp_NOK) {
-	    SvNOK_on(dstr);
+	    SvNOKp_on(dstr);
+	    /* Only set the public OK flag if the source has public OK.  */
+	    if (sflags & SVf_NOK)
+		SvFLAGS(dstr) |= SVf_NOK;
 	    SvNVX(dstr) = SvNVX(sstr);
 	}
 	if (sflags & SVp_IOK) {
-	    (void)SvIOK_on(dstr);
-	    SvIVX(dstr) = SvIVX(sstr);
+	    (void)SvIOKp_on(dstr);
+	    if (sflags & SVf_IOK)
+		SvFLAGS(dstr) |= SVf_IOK;
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
+	    SvIVX(dstr) = SvIVX(sstr);
 	}
 	if (SvAMAGIC(sstr)) {
 	    SvAMAGIC_on(dstr);
@@ -3439,32 +3444,47 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    SvUTF8_on(dstr);
 	/*SUPPRESS 560*/
 	if (sflags & SVp_NOK) {
-	    SvNOK_on(dstr);
+	    SvNOKp_on(dstr);
+	    if (sflags & SVf_NOK)
+		SvFLAGS(dstr) |= SVf_NOK;
 	    SvNVX(dstr) = SvNVX(sstr);
 	}
 	if (sflags & SVp_IOK) {
-	    (void)SvIOK_on(dstr);
-	    SvIVX(dstr) = SvIVX(sstr);
+	    (void)SvIOKp_on(dstr);
+	    if (sflags & SVf_IOK)
+		SvFLAGS(dstr) |= SVf_IOK;
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
-	}
-    }
-    else if (sflags & SVp_NOK) {
-	SvNVX(dstr) = SvNVX(sstr);
-	(void)SvNOK_only(dstr);
-	if (sflags & SVf_IOK) {
-	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
-	    /* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
-	    if (sflags & SVf_IVisUV)
-		SvIsUV_on(dstr);
 	}
     }
     else if (sflags & SVp_IOK) {
-	(void)SvIOK_only(dstr);
-	SvIVX(dstr) = SvIVX(sstr);
+	if (sflags & SVf_IOK)
+	    (void)SvIOK_only(dstr);
+	else {
+	    SvOK_off(dstr);
+	    SvIOKp_on(dstr);
+	}
+	/* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
 	if (sflags & SVf_IVisUV)
 	    SvIsUV_on(dstr);
+	SvIVX(dstr) = SvIVX(sstr);
+	if (sflags & SVp_NOK) {
+	    if (sflags & SVf_NOK)
+		(void)SvNOK_on(dstr);
+	    else
+		(void)SvNOKp_on(dstr);
+	    SvNVX(dstr) = SvNVX(sstr);
+	}
+    }
+    else if (sflags & SVp_NOK) {
+	if (sflags & SVf_NOK)
+	    (void)SvNOK_only(dstr);
+	else {
+	    SvOK_off(dstr);
+	    SvNOKp_on(dstr);
+	}
+	SvNVX(dstr) = SvNVX(sstr);
     }
     else {
 	if (dtype == SVt_PVGV) {
