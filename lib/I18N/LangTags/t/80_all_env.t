@@ -37,8 +37,10 @@ $ENV{'IGNORE_WIN32_LOCALE'} = 1; # a hack, just for testing's sake.
 
 print "# Test LANG...\n";
 $ENV{'REQUEST_METHOD'} = '';
-$ENV{'LANG'}     = 'Eu_MT';
-$ENV{'LANGUAGE'} = '';
+$ENV{'LANG'}        = 'Eu_MT';
+$ENV{'LC_ALL'}      = '';
+$ENV{'LANGUAGE'}    = '';
+$ENV{'LC_MESSAGES'} = '';
 ok show( scalar I18N::LangTags::Detect::detect()),    "eu-mt";
 ok show( j      I18N::LangTags::Detect::detect()), q{["eu-mt"]};
 
