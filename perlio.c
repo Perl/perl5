@@ -372,7 +372,7 @@ PerlIO_default_layer(I32 n)
            av_push(PerlIO_layer_av,SvREFCNT_inc(layer));
           }
          else
-          Perl_croak(aTHX_ "Unknown layer %.*s",(e-s),s);
+          Perl_warn(aTHX_ "Unknown layer %.*s",(e-s),s);
          s = e;
         }
       }
@@ -513,14 +513,11 @@ PerlIO_read(PerlIO *f, void *vbuf, Size_t count)
  return (*PerlIOBase(f)->tab->Read)(f,vbuf,count);
 }
 
-#undef PerlIO_ungetc
-int
-PerlIO_ungetc(PerlIO *f, int ch)
+#undef PerlIO_unread
+SSize_t
+PerlIO_unread(PerlIO *f, const void *vbuf, Size_t count)
 {
- STDCHAR buf = ch;
- if ((*PerlIOBase(f)->tab->Unread)(f,&buf,1) == 1)
-  return ch;
- return -1;
+ return (*PerlIOBase(f)->tab->Unread)(f,vbuf,count);
 }
 
 #undef PerlIO_write
@@ -912,6 +909,8 @@ SSize_t
 PerlIOUnix_read(PerlIO *f, void *vbuf, Size_t count)
 {
  int fd = PerlIOSelf(f,PerlIOUnix)->fd;
+ if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD))
+  return 0;
  while (1)
   {
    SSize_t len = read(fd,vbuf,count);
@@ -1775,11 +1774,26 @@ PerlIO_getname(PerlIO *f, char *buf)
 int
 PerlIO_getc(PerlIO *f)
 {
- STDCHAR buf;
- int count = PerlIO_read(f,&buf,1);
+ STDCHAR buf[1];
+ SSize_t count = PerlIO_read(f,buf,1);
  if (count == 1)
-  return (unsigned char) buf;
- return -1;
+  {
+   return (unsigned char) buf[0];
+  }
+ return EOF;
+}
+
+#undef PerlIO_ungetc
+int
+PerlIO_ungetc(PerlIO *f, int ch)
+{
+ if (ch != EOF)
+  {
+   STDCHAR buf = ch;
+   if (PerlIO_unread(f,&buf,1) == 1)
+    return ch;
+  }
+ return EOF;
 }
 
 #undef PerlIO_putc
