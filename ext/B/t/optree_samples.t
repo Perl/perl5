@@ -6,8 +6,10 @@ BEGIN {
     require './test.pl';
 }
 use OptreeCheck;
-
+use Config;
 plan tests	=> 13;
+SKIP: {
+    skip "no perlio in this build", 13 unless $Config::Config{useperlio};
 
 pass("GENERAL OPTREE EXAMPLES");
 
@@ -453,6 +455,8 @@ EOT_EOT
 # 5  <@> print vK
 # 6  <@> leave[1 ref] vKP/REFC
 EONT_EONT
+
+} # skip
 
 __END__
 

@@ -6,8 +6,11 @@ BEGIN {
     require './test.pl';
 }
 use OptreeCheck;
-
+use Config;
 plan tests	=> 22;
+SKIP: {
+skip "no perlio in this build", 22 unless $Config::Config{useperlio};
+
 pass("OPTIMIZER TESTS - VAR INITIALIZATION");
 
 checkOptree ( name	=> 'sub {my $a}',
@@ -377,6 +380,8 @@ EOT_EOT
 # 7  <2> aassign[t3] vKS
 # 8  <@> leave[1 ref] vKP/REFC
 EONT_EONT
+
+} #skip
 
 __END__
 
