@@ -208,14 +208,11 @@ tty_test:
 # can be set to skip the tests that need a tty.
 unless($ENV{PERL_SKIP_TTY_TEST}) {
     if ($Is_MSWin32 || $Is_NetWare) {
-	print "ok 36\n";
-	print "ok 37\n";
+	print "ok 36 # Skip: $^O\n";
+	print "ok 37 # Skip: $^O\n";
     }
     else {
-	my $TTY = "/dev/tty";
-
-	$TTY = "/dev/ttyp0" if $^O eq 'rhapsody';
-
+	my $TTY = $^O eq 'rhapsody' ? "/dev/ttyp0" : "/dev/tty";
 	if (defined $TTY) {
 	    unless (open(TTY, $TTY)) {
 		print STDERR "Can't open $TTY--run t/TEST outside of make.\n";
@@ -232,10 +229,7 @@ unless($ENV{PERL_SKIP_TTY_TEST}) {
     if (-t)       {print "ok 39\n";} else {print "not ok 39\n";}
 }
 else {
-    print "ok 36\n";
-    print "ok 37\n";
-    print "ok 38\n";
-    print "ok 39\n";
+    for (36..39) { print "ok $_ # Skip: PERL_SKIP_TTY_TEST\n" }
 }
 open(null,"/dev/null");
 if (! -t null || -e '/xenix' || $^O eq 'machten' || $Is_MSWin32 || $Is_NetWare)

@@ -1,7 +1,6 @@
 #!./perl
 
 BEGIN {
-	print "1..0 # Skip: not a tty\n" unless -t STDOUT;
 	chdir 't' unless -d 't';
 	@INC = '../lib';
 }
@@ -9,6 +8,17 @@ BEGIN {
 use warnings;
 use Test::More tests => 8;
 use vars qw( $Term::Complete::complete $complete );
+
+SKIP: {
+    skip('PERL_SKIP_TTY_TEST', 8) if $ENV{PERL_SKIP_TTY_TEST};
+    
+    my $TTY;
+    if ($^O eq 'rhapsody' && -c "/dev/ttyp0") { $TTY = "/dev/ttyp0" }
+    elsif (-c "/dev/tty")                     { $TTY = "/dev/tty"   }
+    if (defined $TTY) {
+	open(TTY, $TTY)               or die "open $TTY failed: $!";
+	skip("$TTY not a tty", 8)     if defined $TTY && ! -t TTY;
+    }
 
 use_ok( 'Term::Complete' );
 
@@ -100,3 +110,6 @@ sub PRINT {
 	my $self = shift;
 	($$self .= join('', @_)) =~ s/\s+/./gm;
 }
+
+} # end of SKIP, end of tests
+
