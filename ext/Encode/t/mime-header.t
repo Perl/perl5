@@ -12,8 +12,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More qw(no_plan);
-#use Test::More tests => 19;
+use Test::More tests => 1;
 use_ok("Encode::MIME::Header");
 
 
