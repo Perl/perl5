@@ -437,13 +437,14 @@ Ambiguous call resolved as CORE::time(), qualify as such or use & at - line 4.
 # toke.c
 use warnings ;
 eval <<'EOE';
+#  line 30 "foo"
+warn "yelp";
 {
-#line 30 "foo"
   $_ = " \x{123} " ;
 }
 EOE
 EXPECT
-
+yelp at foo line 30.
 ########
 # toke.c
 my $a = rand + 4 ;
