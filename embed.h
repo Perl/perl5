@@ -1313,9 +1313,6 @@
 #define share_hek_flags		S_share_hek_flags
 #endif
 #ifdef PERL_CORE
-#define hv_fetch_flags		S_hv_fetch_flags
-#endif
-#ifdef PERL_CORE
 #define hv_notallowed		S_hv_notallowed
 #endif
 #endif
@@ -2152,6 +2149,9 @@
 #endif
 #ifdef PERL_CORE
 #define hv_exists_common	S_hv_exists_common
+#endif
+#ifdef PERL_CORE
+#define hv_fetch_common		S_hv_fetch_common
 #endif
 #endif
 #define ck_anoncode		Perl_ck_anoncode
@@ -3804,9 +3804,6 @@
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
 #endif
 #ifdef PERL_CORE
-#define hv_fetch_flags(a,b,c,d,e)	S_hv_fetch_flags(aTHX_ a,b,c,d,e)
-#endif
-#ifdef PERL_CORE
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
 #endif
 #endif
@@ -4642,6 +4639,9 @@
 #endif
 #ifdef PERL_CORE
 #define hv_exists_common(a,b,c,d,e)	S_hv_exists_common(aTHX_ a,b,c,d,e)
+#endif
+#ifdef PERL_CORE
+#define hv_fetch_common(a,b,c,d,e,f,g)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g)
 #endif
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)

@@ -994,8 +994,6 @@ s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
 s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
 s	|void	|unshare_hek_or_pvn|HEK* hek|const char* sv|I32 len|U32 hash
 s	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
-s	|SV**	|hv_fetch_flags	|HV* tb|const char* key|I32 klen|I32 lval \
-                                |int flags
 s	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg
 #endif
 
@@ -1398,6 +1396,7 @@ Apod	|void	|hv_assert	|HV* tb
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 sM	|SV*	|hv_delete_common|HV* tb|SV* key_sv|const char* key|I32 klen|I32 flags|U32 hash
 sM	|bool	|hv_exists_common|HV* tb|SV* key_sv|const char* key|I32 klen|U32 hash
+sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|I32 klen|int flags|int action|U32 hash
 #endif
 END_EXTERN_C
 
