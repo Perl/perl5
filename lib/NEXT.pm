@@ -1,5 +1,5 @@
 package NEXT;
-$VERSION = '0.52';
+$VERSION = '0.60';
 use Carp;
 use strict;
 
@@ -13,6 +13,20 @@ sub NEXT::ELSEWHERE::ancestors
 		unshift @inlist, @{"$outlist[-1]::ISA"};
 	}
 	return @outlist;
+}
+
+sub NEXT::ELSEWHERE::ordered_ancestors
+{
+	my @inlist = shift;
+	my @outlist = ();
+	while (my $next = shift @inlist) {
+		push @outlist, $next;
+		no strict 'refs';
+		push @inlist, @{"$outlist[-1]::ISA"};
+	}
+	return sort { $a->isa($b) ? -1
+	            : $b->isa($a) ? +1
+	            :                0 } @outlist;
 }
 
 sub AUTOLOAD
@@ -47,7 +61,8 @@ sub AUTOLOAD
 		$NEXT::SEEN->{$self,*{$caller}{CODE}}++;
 	}
 	my $call_method = shift @{$NEXT::NEXT{$self,$wanted_method}};
-	while ($wanted_class =~ /^NEXT:.*:(UNSEEN|DISTINCT):/ && defined $call_method
+	while ($wanted_class =~ /^NEXT\b.*\b(UNSEEN|DISTINCT)\b/
+	       && defined $call_method
 	       && $NEXT::SEEN->{$self,$call_method}++) {
 		$call_method = shift @{$NEXT::NEXT{$self,$wanted_method}};
 	}
@@ -73,7 +88,71 @@ package NEXT::ACTUAL::UNSEEN;	@ISA = 'NEXT';
 package NEXT::ACTUAL::DISTINCT;	@ISA = 'NEXT';
 package NEXT::UNSEEN::ACTUAL;	@ISA = 'NEXT';
 package NEXT::DISTINCT::ACTUAL;	@ISA = 'NEXT';
+
+package EVERY::LAST;		@ISA = 'EVERY';
 package EVERY;			@ISA = 'NEXT';
+sub AUTOLOAD
+{
+	my ($self) = @_;
+	my $caller = (caller(1))[3]; 
+	my $wanted = $EVERY::AUTOLOAD || 'EVERY::AUTOLOAD';
+	undef $EVERY::AUTOLOAD;
+	my ($wanted_class, $wanted_method) = $wanted =~ m{(.*)::(.*)}g;
+
+	local $NEXT::ALREADY_IN_EVERY{$self,$wanted_method} =
+	      $NEXT::ALREADY_IN_EVERY{$self,$wanted_method};
+
+	return if $NEXT::ALREADY_IN_EVERY{$self,$wanted_method}++;
+	
+	my @forebears = NEXT::ELSEWHERE::ordered_ancestors ref $self || $self,
+					                   $wanted_class;
+	@forebears = reverse @forebears if $wanted_class =~ /\bLAST\b/;
+	no strict 'refs';
+	my %seen;
+	my @every = map { my $sub = "${_}::$wanted_method";
+		          !*{$sub}{CODE} || $seen{$sub}++ ? () : $sub
+		        } @forebears
+				unless $wanted_method eq 'AUTOLOAD';
+
+	my $want = wantarray;
+	if (@every) {
+		if ($want) {
+			return map {($_, [$self->$_(@_[1..$#_])])} @every;
+		}
+		elsif (defined $want) {
+			return { map {($_, scalar($self->$_(@_[1..$#_])))}
+				     @every
+			       };
+		}
+		else {
+			$self->$_(@_[1..$#_]) for @every;
+			return;
+		}
+	}
+
+	@every = map { my $sub = "${_}::AUTOLOAD";
+		       !*{$sub}{CODE} || $seen{$sub}++ ? () : "${_}::AUTOLOAD"
+		     } @forebears;
+	if ($want) {
+		return map { $$_ = ref($self)."::EVERY::".$wanted_method;
+			     ($_, [$self->$_(@_[1..$#_])]);
+			   } @every;
+	}
+	elsif (defined $want) {
+		return { map { $$_ = ref($self)."::EVERY::".$wanted_method;
+			       ($_, scalar($self->$_(@_[1..$#_])))
+			     } @every
+		       };
+	}
+	else {
+		for (@every) {
+			$$_ = ref($self)."::EVERY::".$wanted_method;
+			$self->$_(@_[1..$#_]);
+		}
+		return;
+	}
+}
+
 
 1;
 
@@ -81,7 +160,7 @@ __END__
 
 =head1 NAME
 
-NEXT.pm - Provide a pseudo-class NEXT that allows method redispatch
+NEXT.pm - Provide a pseudo-class NEXT (et al) that allows method redispatch
 
 
 =head1 SYNOPSIS
@@ -116,6 +195,7 @@ NEXT.pm - Provide a pseudo-class NEXT that allows method redispatch
     $obj->missing_method(); # Calls D::AUTOLOAD, B::AUTOLOAD, C::AUTOLOAD
 
     # Clean-up calls D::DESTROY, B::DESTROY, A::DESTROY, C::DESTROY
+
 
 
 =head1 DESCRIPTION
@@ -296,6 +376,140 @@ to get both unique invocation I<and> exception-on-failure.
 
 Note that, for historical compatibility, you can also use
 C<NEXT::UNSEEN> instead of C<NEXT::DISTINCT>.
+
+
+=head2 Invoking all versions of a method with a single call
+
+Yet another pseudo-class that NEXT.pm provides is C<EVERY>.
+Its behaviour is considerably simpler than that of the C<NEXT> family.
+A call to:
+
+	$obj->EVERY::foo();
+
+calls I<every> method named C<foo> that the object in C<$obj> has inherited.
+That is:
+
+	use NEXT;
+
+	package A; @ISA = qw(B D X);
+	sub foo { print "A::foo " }
+
+	package B; @ISA = qw(D X);
+	sub foo { print "B::foo " }
+
+	package X; @ISA = qw(D);
+	sub foo { print "X::foo " }
+
+	package D;
+	sub foo { print "D::foo " }
+
+	package main;
+
+	my $obj = bless {}, 'A';
+	$obj->EVERY::foo();        # prints" A::foo B::foo X::foo D::foo
+
+Prefixing a method call with C<EVERY::> causes every method in the
+object's hierarchy with that name to be invoked. As the above example
+illustrates, they are not called in Perl's usual "left-most-depth-first"
+order. Instead, they are called "breadth-first-dependency-wise".
+
+That means that the inheritance tree of the object is traversed breadth-first
+and the resulting order of classes is used as the sequence in which methods
+are called. However, that sequence is modified by imposing a rule that the
+appropritae method of a derived class must be called before the same method of
+any ancestral class. That's why, in the above example, C<X::foo> is called
+before C<D::foo>, even though C<D> comes before C<X> in C<@B::ISA>.
+
+In general, there's no need to worry about the order of calls. They will be
+left-to-right, breadth-first, most-derived-first. This works perfectly for
+most inherited methods (including destructors), but is inappropriate for
+some kinds of methods (such as constructors, cloners, debuggers, and
+initializers) where it's more appropriate that the least-derived methods be
+called first (as more-derived methods may rely on the behaviour of their
+"ancestors"). In that case, instead of using the C<EVERY> pseudo-class:
+
+	$obj->EVERY::foo();        # prints" A::foo B::foo X::foo D::foo      
+
+you can use the C<EVERY::LAST> pseudo-class:
+
+	$obj->EVERY::LAST::foo();  # prints" D::foo X::foo B::foo A::foo      
+
+which reverses the order of method call.
+
+Whichever version is used, the actual methods are called in the same
+context (list, scalar, or void) as the original call via C<EVERY>, and return:
+
+=over
+
+=item *
+
+A hash of array references in list context. Each entry of the hash has the
+fully qualified method name as its key and a reference to an array containing
+the method's list-context return values as its value.
+
+=item *
+
+A reference to a hash of scalar values in scalar context. Each entry of the hash has the
+fully qualified method name as its key and the method's scalar-context return values as its value.
+
+=item *
+
+Nothing in void context (obviously).
+
+=back
+
+=head2 Using C<EVERY> methods
+
+The typical way to use an C<EVERY> call is to wrap it in another base
+method, that all classes inherit. For example, to ensure that every
+destructor an object inherits is actually called (as opposed to just the
+left-most-depth-first-est one):
+
+        package Base;
+        sub DESTROY { $_[0]->EVERY::Destroy }
+
+        package Derived1; 
+        use base 'Base';
+        sub Destroy {...}
+
+        package Derived2; 
+        use base 'Base', 'Derived1';
+        sub Destroy {...}
+
+et cetera. Every derived class than needs its own clean-up
+behaviour simply adds its own C<Destroy> method (I<not> a C<DESTROY> method),
+which the call to C<EVERY::LAST::Destroy> in the inherited destructor
+then correctly picks up.
+
+Likewise, to create a class hierarchy in which every initializer inherited by
+a new object is invoked:
+
+        package Base;
+        sub new {
+		my ($class, %args) = @_;
+		my $obj = bless {}, $class;
+		$obj->EVERY::LAST::Init(\%args);
+	}
+
+        package Derived1; 
+        use base 'Base';
+        sub Init {
+		my ($argsref) = @_;
+		...
+	}
+
+        package Derived2; 
+        use base 'Base', 'Derived1';
+        sub Init {
+		my ($argsref) = @_;
+		...
+	}
+
+et cetera. Every derived class than needs some additional initialization
+behaviour simply adds its own C<Init> method (I<not> a C<new> method),
+which the call to C<EVERY::LAST::Init> in the inherited constructor
+then correctly picks up.
+
 
 =head1 AUTHOR
 
