@@ -1108,7 +1108,17 @@ Perl bytecode.  See L<ByteLoader>.
 
 =item constant
 
-References can now be used.  See L<constant>.
+References can now be used.
+
+The new version also allows a leading underscore in constant names, but
+disallows a double leading underscore (as in "__LINE__").  Some other names
+are disallowed or warned against, including BEGIN, END, etc.  Some names
+which were forced into main:: used to fail silently in some cases; now they're
+fatal (outside of main::) and an optional warning (inside of main::).
+The ability to detect whether a constant had been set with a given name has
+been added.
+
+See L<constant>.
 
 =item charnames
 

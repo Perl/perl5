@@ -270,7 +270,7 @@ set, you'll get the record back in pieces.
 On VMS, record reads are done with the equivalent of C<sysread>,
 so it's best not to mix record and non-record reads on the same
 file.  (This is unlikely to be a problem, because any file you'd
-want to read in record mode is probably usable in line mode.)
+want to read in record mode is probably unusable in line mode.)
 Non-VMS systems do normal I/O, so it's safe to mix record and
 non-record reads of a file.
 
