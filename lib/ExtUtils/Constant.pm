@@ -260,7 +260,7 @@ sub assign {
     $clause .= "$post";
     $clause .= ";" unless $post =~ /;$/;
     $clause .= "\n";
-  }    
+  }
   $clause .= "${indent}return PERL_constant_IS$type;\n";
   $clause .= $close if $close;
   return $clause;
@@ -308,7 +308,7 @@ sub return_clause ($$$$$$$$$) {
 
   ##else
   $clause .= "#else\n";
-  
+
   #      return PERL_constant_NOTDEF;
   if (!defined $default) {
     $clause .= "${indent}return PERL_constant_NOTDEF;\n";
@@ -342,7 +342,7 @@ are not in the list of I<ITEM>s without causing problems).
 sub switch_clause {
   my ($indent, $comment, $namelen, $items, @items) = @_;
   $indent = ' ' x ($indent || 2);
-  
+
   my @names = sort map {$_->{name}} @items;
   my $leader = $indent . '/* ';
   my $follower = ' ' x length $leader;
@@ -361,7 +361,7 @@ sub switch_clause {
     foreach (@names) {
       my $char = substr $_, $i, 1;
       my $ord = ord $char;
-      $max = $ord if $ord > $max; 
+      $max = $ord if $ord > $max;
       $min = $ord if $ord < $min;
       push @{$spread{$char}}, $_;
       # warn "$_ $char";
@@ -434,7 +434,7 @@ sub params {
   return ($use_iv, $use_nv, $use_pv, $use_sv);
 }
 
-=item dump_names  
+=item dump_names
 
 dump_names  PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, BREAKOUT, ITEM...
 
@@ -532,11 +532,11 @@ __END__
    */
 
 ';
-  
+
   $result;
 }
 
-=item C_constant 
+=item C_constant
 
 C_constant PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, BREAKOUT, ITEM...
 
@@ -695,7 +695,7 @@ sub C_constant {
   }
   my ($use_iv, $use_nv, $use_pv, $use_sv) = params ($what);
 
-  my ($body, @subs) = "static int\n$subname (const char *name";
+  my ($body, @subs) = "static int\n$subname (pTHX_ const char *name";
   $body .= ", STRLEN len" unless defined $namelen;
   $body .= ", IV *iv_return" if $use_iv;
   $body .= ", NV *nv_return" if $use_nv;
@@ -739,7 +739,7 @@ sub C_constant {
       } else {
         push @subs, C_constant ($package, "${subname}_$i", $default_type,
                                 $what, $indent, \$i, @{$by_length[$i]});
-        $body .= "    return ${subname}_$i (name";
+        $body .= "    return ${subname}_$i (aTHX_ name";
         $body .= ", iv_return" if $use_iv;
         $body .= ", nv_return" if $use_nv;
         $body .= ", pv_return" if $use_pv;
@@ -828,11 +828,11 @@ EOT
 
   if ($use_iv xor $use_nv) {
     $xs .= << "EOT";
-        /* Change this to $C_subname(s, len, &iv, &nv);
+        /* Change this to $C_subname(aTHX_ s, len, &iv, &nv);
            if you need to return both NVs and IVs */
 EOT
   }
-  $xs .= "	type = $C_subname(s, len";
+  $xs .= "	type = $C_subname(aTHX_ s, len";
   $xs .= ', &iv' if $use_iv;
   $xs .= ', &nv' if $use_nv;
   $xs .= ', &pv' if $use_pv;
@@ -913,7 +913,7 @@ sub autoload {
 
   $func .= "\n\n"
   . "    my \$constname;\n";
-  $func .= 
+  $func .=
     "    our \$AUTOLOAD;\n"  if ($compat_version >= 5.006);
 
   $func .= <<"EOT";
