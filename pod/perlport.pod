@@ -2129,7 +2129,7 @@ First public release with perl5.005.
 
 =head1 Supported Platforms
 
-As of July 2002 (the Perl release 5.8.0), the following platforms are
+As of July 2003 (the Perl release 5.8.1), the following platforms are
 able to build Perl from the standard source code distribution
 available at http://www.cpan.org/src/index.html
 
@@ -2179,10 +2179,9 @@ available at http://www.cpan.org/src/index.html
 
 The following platforms worked with the previous releases (5.6 and
 5.7), but we did not manage either to fix or to test these in time
-for the 5.8.0 release.  There is a very good chance that many of these
-will work fine with the 5.8.0.
+for the 5.8.1 release.  There is a very good chance that many of these
+will work fine with the 5.8.1.
 
-        BSD/OS
         DomainOS
         Hurd
         LynxOS
@@ -2193,7 +2192,7 @@ will work fine with the 5.8.0.
         Unixware
         Windows 3.1
 
-Known to be broken for 5.8.0 (but 5.6.1 and 5.7.2 can be used):
+Known to be broken for 5.8.0 and 5.8.1 (but 5.6.1 and 5.7.2 can be used):
 
 	AmigaOS
 
