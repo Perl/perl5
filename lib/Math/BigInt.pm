@@ -258,9 +258,9 @@ sub bdiv { #(dividend: num_str, divisor: num_str) return num_str
     else {
 	push(@x, 0);
     }
-    @q = (); ($v2,$v1) = @y[-2,-1];
+    @q = (); ($v2,$v1) = ($y[-2] || 0, $y[-1]);
     while ($#x > $#y) {
-	($u2,$u1,$u0) = @x[-3..-1];
+	($u2,$u1,$u0) = ($x[-3] || 0, $x[-2] || 0, $x[-1]);
 	$q = (($u0 == $v1) ? 99999 : int(($u0*1e5+$u1)/$v1));
 	--$q while ($v2*$q > ($u0*1e5+$u1-$q*$v1)*1e5+$u2);
 	if ($q) {
