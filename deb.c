@@ -88,7 +88,7 @@ Perl_debstack(pTHX)
     dTHR;
     I32 top = PL_stack_sp - PL_stack_base;
     register I32 i = top - 30;
-    I32 *markscan = PL_curstackinfo->si_markbase;
+    I32 *markscan = PL_markstack + PL_curstackinfo->si_markoff;
 
     if (i < 0)
 	i = 0;

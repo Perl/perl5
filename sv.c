@@ -5842,8 +5842,6 @@ Perl_sv_dup(pTHX_ SV *sstr)
     if (dstr)
 	return dstr;
 
-    /* XXX TODO: sanity-check sv_dup() vs sv_dup_inc() appropriateness */
-
     /* create anew and remember what it is */
     new_SV(dstr);
     ptr_table_store(PL_ptr_table, sstr, dstr);
@@ -6149,6 +6147,65 @@ dup_pvcv:
 	++PL_sv_objcount;
 
     return dstr;
+}
+
+PERL_CONTEXT *
+Perl_cx_dup(pTHX_ PERL_CONTEXT *cx, I32 ix, I32 max)
+{
+    PERL_CONTEXT *ncx;
+
+    if (!cx)
+	return (PERL_CONTEXT*)NULL;
+
+    /* look for it in the table first */
+    ncx = ptr_table_fetch(PL_ptr_table, cx);
+    if (ncx)
+	return ncx;
+
+    /* create anew and remember what it is */
+    Newz(56, ncx, max + 1, PERL_CONTEXT);
+    ptr_table_store(PL_ptr_table, cx, ncx);
+
+    /* XXX todo */
+    /* ... */
+
+    return ncx;
+}
+
+PERL_SI *
+Perl_si_dup(pTHX_ PERL_SI *si)
+{
+    PERL_SI *nsi;
+
+    if (!si)
+	return (PERL_SI*)NULL;
+
+    /* look for it in the table first */
+    nsi = ptr_table_fetch(PL_ptr_table, si);
+    if (nsi)
+	return nsi;
+
+    /* create anew and remember what it is */
+    Newz(56, nsi, 1, PERL_SI);
+    ptr_table_store(PL_ptr_table, si, nsi);
+
+    nsi->si_stack	= av_dup_inc(si->si_stack);
+    nsi->si_cxix	= si->si_cxix;
+    nsi->si_cxmax	= si->si_cxmax;
+    nsi->si_cxstack	= cx_dup(si->si_cxstack, si->si_cxix, si->si_cxmax);
+    nsi->si_type	= si->si_type;
+    nsi->si_prev	= si_dup(si->si_prev);
+    nsi->si_next	= si_dup(si->si_next);
+    nsi->si_markoff	= si->si_markoff;
+
+    return nsi;
+}
+
+ANY *
+Perl_ss_dup(pTHX_ ANY *ss, I32 ix, I32 max)
+{
+    /* XXX todo */
+    return NULL;
 }
 
 PerlInterpreter *
@@ -6572,37 +6629,67 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* thrdvar.h stuff */
 
-/*    PL_curstackinfo	= clone_stackinfo(proto_perl->Tcurstackinfo);
-    clone_stacks();
-    PL_mainstack	= av_dup(proto_perl->Tmainstack);
-    PL_curstack		= av_dup(proto_perl->Tcurstack);
+    if (flags & 1) {
+	/* next allocation will be PL_tmps_stack[PL_tmps_ix+1] */
+	PL_tmps_ix		= proto_perl->Ttmps_ix;
+	PL_tmps_max		= proto_perl->Ttmps_max;
+	PL_tmps_floor		= proto_perl->Ttmps_floor;
+	Newz(50, PL_tmps_stack, PL_tmps_max, SV*);
+	i = 0;
+	while (i <= PL_tmps_ix) {
+	    PL_tmps_stack[i]	= sv_dup_inc(proto_perl->Ttmps_stack[i]);
+	    ++i;
+	}
 
-    PL_stack_max	= (SV**)0;
-    PL_stack_base	= (SV**)0;
-    PL_stack_sp		= (SV**)0;
+	/* next PUSHMARK() sets *(PL_markstack_ptr+1) */
+	i = proto_perl->Tmarkstack_max - proto_perl->Tmarkstack;
+	Newz(54, PL_markstack, i, I32);
+	PL_markstack_max	= PL_markstack + (proto_perl->Tmarkstack_max
+						  - proto_perl->Tmarkstack);
+	PL_markstack_ptr	= PL_markstack + (proto_perl->Tmarkstack_ptr
+						  - proto_perl->Tmarkstack);
+	Copy(proto_perl->Tmarkstack, PL_markstack,
+	     PL_markstack_ptr - PL_markstack + 1, I32);
 
-    PL_scopestack	= (I32*)0;
-    PL_scopestack_ix	= (I32)0;
-    PL_scopestack_max	= (I32)0;
+	/* next push_scope()/ENTER sets PL_scopestack[PL_scopestack_ix]
+	 * NOTE: unlike the others! */
+	PL_scopestack_ix	= proto_perl->Tscopestack_ix;
+	PL_scopestack_max	= proto_perl->Tscopestack_max;
+	Newz(54, PL_scopestack, PL_scopestack_max, I32);
+	Copy(proto_perl->Tscopestack, PL_scopestack, PL_scopestack_ix, I32);
 
-    PL_savestack	= (ANY*)0;
-    PL_savestack_ix	= (I32)0;
-    PL_savestack_max	= (I32)0;
+	/* next SSPUSHFOO() sets PL_savestack[PL_savestack_ix]
+	 * NOTE: unlike the others! */
+	PL_savestack_ix		= proto_perl->Tsavestack_ix;
+	PL_savestack_max	= proto_perl->Tsavestack_max;
+	/*Newz(54, PL_savestack, PL_savestack_max, ANY);*/
+	PL_savestack		= ss_dup(proto_perl->Tsavestack,
+					 PL_savestack_ix,
+					 PL_savestack_max);
 
-    PL_tmps_stack	= (SV**)0;
-    PL_tmps_ix		= (I32)-1;
-    PL_tmps_floor	= (I32)-1;
-    PL_tmps_max		= (I32)0;
+	/* next push_return() sets PL_retstack[PL_retstack_ix]
+	 * NOTE: unlike the others! */
+	PL_retstack_ix		= proto_perl->Tretstack_ix;
+	PL_retstack_max		= proto_perl->Tretstack_max;
+	Newz(54, PL_retstack, PL_retstack_max, OP*);
+	Copy(proto_perl->Tretstack, PL_retstack, PL_retstack_ix, I32);
 
-    PL_markstack	= (I32*)0;
-    PL_markstack_ptr	= (I32*)0;
-    PL_markstack_max	= (I32*)0;
+	/* NOTE: si_dup() looks at PL_markstack */
+	PL_curstackinfo		= si_dup(proto_perl->Tcurstackinfo);
 
-    PL_retstack		= (OP**)0;
-    PL_retstack_ix	= (I32)0;
-    PL_retstack_max	= (I32)0;
-*/	/* XXXXXX */
-    init_stacks();
+	/* PL_curstack		= PL_curstackinfo->si_stack; */
+	PL_curstack		= av_dup(proto_perl->Tcurstack);
+	PL_mainstack		= av_dup(proto_perl->Tmainstack);
+
+	/* next PUSHs() etc. set *(PL_stack_sp+1) */
+	PL_stack_base		= AvARRAY(PL_curstack);
+	PL_stack_sp		= PL_stack_base + (proto_perl->Tstack_sp
+						   - proto_perl->Tstack_base);
+	PL_stack_max		= PL_stack_base + AvMAX(PL_curstack);
+    }
+    else {
+	init_stacks();
+    }
 
     PL_start_env	= proto_perl->Tstart_env;	/* XXXXXX */
     PL_top_env		= &PL_start_env;

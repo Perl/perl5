@@ -3582,7 +3582,22 @@ PP(pp_fork)
     PUSHi(childpid);
     RETURN;
 #else
+#  ifdef USE_ITHREADS
+    /* XXXXXX testing */
+    djSP; dTARGET;
+    /* XXX this just an approximation of what will eventually be run
+     * in a different thread */
+    PerlInterpreter *new_perl = perl_clone(my_perl, 0);
+    Perl_pp_enter(new_perl);
+    new_perl->Top = new_perl->Top->op_next; /* continue from next op */
+    CALLRUNOPS(new_perl);
+
+    /* parent returns with negative pseudo-pid */
+    PUSHi(-1);
+    RETURN;
+#  else
     DIE(aTHX_ PL_no_func, "Unsupported function fork");
+#  endif
 #endif
 }
 

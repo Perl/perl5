@@ -3534,6 +3534,18 @@
 #undef  boot_core_xsutils
 #define boot_core_xsutils	Perl_boot_core_xsutils
 #if defined(USE_ITHREADS)
+#undef  Perl_cx_dup
+#define Perl_cx_dup		pPerl->Perl_cx_dup
+#undef  cx_dup
+#define cx_dup			Perl_cx_dup
+#undef  Perl_si_dup
+#define Perl_si_dup		pPerl->Perl_si_dup
+#undef  si_dup
+#define si_dup			Perl_si_dup
+#undef  Perl_ss_dup
+#define Perl_ss_dup		pPerl->Perl_ss_dup
+#undef  ss_dup
+#define ss_dup			Perl_ss_dup
 #undef  Perl_he_dup
 #define Perl_he_dup		pPerl->Perl_he_dup
 #undef  he_dup

@@ -370,7 +370,7 @@ struct stackinfo {
     I32			si_type;	/* type of runlevel */
     struct stackinfo *	si_prev;
     struct stackinfo *	si_next;
-    I32 *		si_markbase;	/* where markstack begins for us.
+    I32			si_markoff;	/* offset where markstack begins for us.
 					 * currently used only with DEBUGGING,
 					 * but not #ifdef-ed for bincompat */
 };
@@ -382,9 +382,10 @@ typedef struct stackinfo PERL_SI;
 #define cxstack_max	(PL_curstackinfo->si_cxmax)
 
 #ifdef DEBUGGING
-#  define	SET_MARKBASE PL_curstackinfo->si_markbase = PL_markstack_ptr
+#  define	SET_MARK_OFFSET \
+    PL_curstackinfo->si_markoff = PL_markstack_ptr - PL_markstack
 #else
-#  define	SET_MARKBASE NOOP
+#  define	SET_MARK_OFFSET NOOP
 #endif
 
 #define PUSHSTACKi(type) \
@@ -400,7 +401,7 @@ typedef struct stackinfo PERL_SI;
 	AvFILLp(next->si_stack) = 0;					\
 	SWITCHSTACK(PL_curstack,next->si_stack);			\
 	PL_curstackinfo = next;						\
-	SET_MARKBASE;							\
+	SET_MARK_OFFSET;						\
     } STMT_END
 
 #define PUSHSTACK PUSHSTACKi(PERLSI_UNKNOWN)

@@ -4857,6 +4857,27 @@ Perl_boot_core_xsutils(pTHXo)
 }
 #if defined(USE_ITHREADS)
 
+#undef  Perl_cx_dup
+PERL_CONTEXT*
+Perl_cx_dup(pTHXo_ PERL_CONTEXT* cx, I32 ix, I32 max)
+{
+    return ((CPerlObj*)pPerl)->Perl_cx_dup(cx, ix, max);
+}
+
+#undef  Perl_si_dup
+PERL_SI*
+Perl_si_dup(pTHXo_ PERL_SI* si)
+{
+    return ((CPerlObj*)pPerl)->Perl_si_dup(si);
+}
+
+#undef  Perl_ss_dup
+ANY*
+Perl_ss_dup(pTHXo_ ANY* ss, I32 ix, I32 max)
+{
+    return ((CPerlObj*)pPerl)->Perl_ss_dup(ss, ix, max);
+}
+
 #undef  Perl_he_dup
 HE*
 Perl_he_dup(pTHXo_ HE* e, bool shared)

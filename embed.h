@@ -764,6 +764,9 @@
 #define my_attrs		Perl_my_attrs
 #define boot_core_xsutils	Perl_boot_core_xsutils
 #if defined(USE_ITHREADS)
+#define cx_dup			Perl_cx_dup
+#define si_dup			Perl_si_dup
+#define ss_dup			Perl_ss_dup
 #define he_dup			Perl_he_dup
 #define re_dup			Perl_re_dup
 #define fp_dup			Perl_fp_dup
@@ -2134,6 +2137,9 @@
 #define my_attrs(a,b)		Perl_my_attrs(aTHX_ a,b)
 #define boot_core_xsutils()	Perl_boot_core_xsutils(aTHX)
 #if defined(USE_ITHREADS)
+#define cx_dup(a,b,c)		Perl_cx_dup(aTHX_ a,b,c)
+#define si_dup(a)		Perl_si_dup(aTHX_ a)
+#define ss_dup(a,b,c)		Perl_ss_dup(aTHX_ a,b,c)
 #define he_dup(a,b)		Perl_he_dup(aTHX_ a,b)
 #define re_dup(a)		Perl_re_dup(aTHX_ a)
 #define fp_dup(a,b)		Perl_fp_dup(aTHX_ a,b)
@@ -4206,6 +4212,12 @@
 #define Perl_boot_core_xsutils	CPerlObj::Perl_boot_core_xsutils
 #define boot_core_xsutils	Perl_boot_core_xsutils
 #if defined(USE_ITHREADS)
+#define Perl_cx_dup		CPerlObj::Perl_cx_dup
+#define cx_dup			Perl_cx_dup
+#define Perl_si_dup		CPerlObj::Perl_si_dup
+#define si_dup			Perl_si_dup
+#define Perl_ss_dup		CPerlObj::Perl_ss_dup
+#define ss_dup			Perl_ss_dup
 #define Perl_he_dup		CPerlObj::Perl_he_dup
 #define he_dup			Perl_he_dup
 #define Perl_re_dup		CPerlObj::Perl_re_dup
