@@ -23,7 +23,7 @@ BEGIN {
 
 use Config;
 use File::Spec;
-require ExtUtils::MM;
+use ExtUtils::MM;
 
 use_ok( 'ExtUtils::MM_Cygwin' );
 
@@ -52,12 +52,15 @@ delete $args->{CFLAGS};
 
 # respects the config setting, should ignore whitespace around equal sign
 my $ccflags = $Config{useshrplib} eq 'true' ? ' -DUSEIMPORTLIB' : '';
-$args->cflags(<<FLAGS);
+{
+    local $args->{NEEDS_LINKING} = 1;
+    $args->cflags(<<FLAGS);
 OPTIMIZE = opt
 PERLTYPE  =pt
 LARGE= lg
 SPLIT=split
 FLAGS
+}
 
 like( $args->{CFLAGS}, qr/OPTIMIZE = opt/, '... should set OPTIMIZE' );
 like( $args->{CFLAGS}, qr/PERLTYPE = pt/, '... should set PERLTYPE' );

@@ -521,7 +521,7 @@ XS(XS_DB_sub)
     /* profile only the interpreter that loaded us */
     if (g_THX != aTHX) {
         PUSHMARK(ORIGMARK);
-        perl_call_sv(INT2PTR(SV*,SvIV(Sub)), GIMME | G_NODEBUG);
+        perl_call_sv(INT2PTR(SV*,SvIV(Sub)), GIMME_V | G_NODEBUG);
     }
     else
 #endif
@@ -535,7 +535,7 @@ XS(XS_DB_sub)
 
         prof_mark(aTHX_ OP_ENTERSUB);
         PUSHMARK(ORIGMARK);
-        perl_call_sv(INT2PTR(SV*,SvIV(Sub)), GIMME | G_NODEBUG);
+        perl_call_sv(INT2PTR(SV*,SvIV(Sub)), GIMME_V | G_NODEBUG);
         PL_curstash = oldstash;
         prof_mark(aTHX_ OP_LEAVESUB);
 	g_depth--;
@@ -576,7 +576,7 @@ XS(XS_DB_goto)
                 PUSHMARK(ORIGMARK);
 
                 PL_curstash = PL_debstash;	/* To disable debugging of perl_call_sv */
-                perl_call_sv(Sub, GIMME);
+                perl_call_sv(Sub, GIMME_V);
                 PL_curstash = oldstash;
 
                 prof_mark(aTHX_ OP_LEAVESUB);

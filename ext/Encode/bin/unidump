@@ -32,8 +32,7 @@ sub do_perl{
 	    use utf8;
 	    $linebuf .=  Encode::decode($Opt{f}, $_);
 	    while($linebuf){
-		my $chr =  render_p(substr($linebuf, 0, 1));
-		substr($linebuf, 0, 1) = '';
+		my $chr =  render_p(substr($linebuf, 0, 1, ''));
 		length($outbuf) + length($chr) > $CPL and print_P();
 		$outbuf .= $chr;
 	    }
@@ -41,8 +40,7 @@ sub do_perl{
 	$outbuf and print print_P(";");
     }else{
 	while($string){
-	    my $chr =  render_p(substr($string, 0, 1));
-	    substr($string, 0, 1) = '';
+	    my $chr =  render_p(substr($string, 0, 1, ''));
 	    length($outbuf) + length($chr) > $CPL and print_P();
 	    $outbuf .= $chr;
 	}
@@ -78,18 +76,16 @@ sub do_dump{
 	    use utf8;
 	    $linebuf .=  Encode::decode($Opt{f}, $_);
 	    while (length($linebuf) > $CPL){
-		my $chunk = substr($linebuf, 0, $CPL);
+		my $chunk = substr($linebuf, 0, $CPL, '');
 		print_C($chunk, $linenum++);
-		substr($linebuf, 0, $CPL) = '';
 		$Opt{H} and $linenum % $Opt{H} == $CPL-1 and print_S();
 	    }
 	}
 	$linebuf and print_C($linebuf);
     }else{
 	while ($string){
-	    my $chunk = substr($string, 0, $CPL);
+	    my $chunk = substr($string, 0, $CPL, '');
 	    print_C($chunk, $linenum++);
-	    substr($string,0, $CPL) = '';
 	    $Opt{H} and $linenum % $Opt{H} == $CPL-1 and print_S();
 	}
     }

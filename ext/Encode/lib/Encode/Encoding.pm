@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 sub Define
 {
@@ -9,7 +9,7 @@ sub Define
     my $canonical = shift;
     $obj = bless { Name => $canonical },$obj unless ref $obj;
     # warn "$canonical => $obj\n";
-  Encode::define_encoding($obj, $canonical, @_);
+    Encode::define_encoding($obj, $canonical, @_);
 }
 
 sub name { shift->{'Name'} }
@@ -131,5 +131,52 @@ L<enc2xs> for more details.
 =head1 SEE ALSO
 
 L<perlmod>, L<enc2xs>
+
+=for future
+
+
+=over 4
+
+=item Scheme 1
+
+Passed remaining fragment of string being processed.
+Modifies it in place to remove bytes/characters it can understand
+and returns a string used to represent them.
+e.g.
+
+ sub fixup {
+   my $ch = substr($_[0],0,1,'');
+   return sprintf("\x{%02X}",ord($ch);
+ }
+
+This scheme is close to how underlying C code for Encode works, but gives
+the fixup routine very little context.
+
+=item Scheme 2
+
+Passed original string, and an index into it of the problem area, and
+output string so far.  Appends what it will to output string and
+returns new index into original string.  For example:
+
+ sub fixup {
+   # my ($s,$i,$d) = @_;
+   my $ch = substr($_[0],$_[1],1);
+   $_[2] .= sprintf("\x{%02X}",ord($ch);
+   return $_[1]+1;
+ }
+
+This scheme gives maximal control to the fixup routine but is more
+complicated to code, and may need internals of Encode to be tweaked to
+keep original string intact.
+
+=item Other Schemes
+
+Hybrids of above.
+
+Multiple return values rather than in-place modifications.
+
+Index into the string could be C<pos($str)> allowing C<s/\G...//>.
+
+=back
 
 =cut

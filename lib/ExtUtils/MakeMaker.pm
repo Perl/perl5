@@ -2,10 +2,10 @@ BEGIN {require 5.004;}
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.54_01";
+$VERSION = "5.55_02";
 $Version_OK = "5.49";   # Makefiles older than $Version_OK will die
                         # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.23 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.33 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
@@ -14,7 +14,7 @@ use Carp ();
 use vars qw(
             @ISA @EXPORT @EXPORT_OK
             $ISA_TTY $Revision $VERSION $Verbose $Version_OK %Config 
-            %Keep_after_flush %MM_Sections @Prepend_dot_dot 
+            %Keep_after_flush %MM_Sections @Prepend_parent
             %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable 
             @Parent $PACKNAME
            );
@@ -34,26 +34,23 @@ full_setup();
 require ExtUtils::MM;  # Things like CPAN assume loading ExtUtils::MakeMaker
                        # will give them MM.
 
-sub warnhandler {
-    $_[0] =~ /^Use of uninitialized value/ && return;
-    $_[0] =~ /used only once/ && return;
-    $_[0] =~ /^Subroutine\s+[\w:]+\s+redefined/ && return;
-    warn @_;
-}
 
 sub WriteMakefile {
     Carp::croak "WriteMakefile: Need even number of args" if @_ % 2;
-    local $SIG{__WARN__} = \&warnhandler;
 
     require ExtUtils::MY;
     my %att = @_;
-    MM->new(\%att)->flush;
+    my $mm = MM->new(\%att);
+    $mm->flush;
+
+    return $mm;
 }
 
 sub prompt ($;$) {
     my($mess,$def)=@_;
     $ISA_TTY = -t STDIN && (-t STDOUT || !(-f STDOUT || -c STDOUT)) ;   # Pipe?
-    Carp::confess("prompt function called without an argument") unless defined $mess;
+    Carp::confess("prompt function called without an argument") 
+        unless defined $mess;
     my $dispdef = defined $def ? "[$def] " : " ";
     $def = defined $def ? $def : "";
     my $ans;
@@ -123,7 +120,7 @@ sub full_setup {
     INC INCLUDE_EXT INSTALLARCHLIB INSTALLBIN INSTALLDIRS
     INSTALLMAN1DIR
     INSTALLMAN3DIR INSTALLPRIVLIB INSTALLSCRIPT INSTALLSITEARCH
-    INSTALLSITELIB INST_ARCHLIB INST_BIN INST_EXE INST_LIB
+    INSTALLSITELIB INST_ARCHLIB INST_BIN INST_LIB
     INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIB LIBPERL_A LIBS
     LINKTYPE MAKEAPERL MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
     PERL_MALLOC_OK
@@ -133,7 +130,7 @@ sub full_setup {
     PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
     PPM_INSTALL_SCRIPT PREFIX
     PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
-    SKIP TEST_LIBS TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
+    SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
     MACPERL_SRC MACPERL_LIB MACLIBS_68K MACLIBS_PPC MACLIBS_SC MACLIBS_MRC
@@ -210,8 +207,8 @@ sub full_setup {
     # us (the parent) for the values and will prepend "..", so that
     # all files to be installed end up below OUR ./blib
     #
-    @Prepend_dot_dot = qw(
-           INST_BIN INST_EXE INST_LIB INST_ARCHLIB INST_SCRIPT
+    @Prepend_parent = qw(
+           INST_BIN INST_LIB INST_ARCHLIB INST_SCRIPT
            MAP_TARGET INST_MAN1DIR INST_MAN3DIR PERL_SRC
            PERL FULLPERL
     );
@@ -273,15 +270,17 @@ sub new {
     foreach my $prereq (sort keys %{$self->{PREREQ_PM}}) {
         eval "require $prereq";
 
+        my $pr_version = $prereq->VERSION || 0;
+
         if ($@) {
             warn sprintf "Warning: prerequisite %s %s not found.\n", 
               $prereq, $self->{PREREQ_PM}{$prereq} 
                    unless $self->{PREREQ_FATAL};
             $unsatisfied{$prereq} = 'not installed';
-        } elsif ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
+        } elsif ($pr_version < $self->{PREREQ_PM}->{$prereq} ){
             warn "Warning: prerequisite %s %s not found. We have %s.\n",
               $prereq, $self->{PREREQ_PM}{$prereq}, 
-                ($prereq->VERSION || 'unknown version') 
+                ($pr_version || 'unknown version') 
                   unless $self->{PREREQ_FATAL};
             $unsatisfied{$prereq} = $self->{PREREQ_PM}->{$prereq} ? 
               $self->{PREREQ_PM}->{$prereq} : 'unknown version' ;
@@ -323,7 +322,7 @@ sub new {
     if (defined $Parent[-2]){
         $self->{PARENT} = $Parent[-2];
         my $key;
-        for $key (@Prepend_dot_dot) {
+        for $key (@Prepend_parent) {
             next unless defined $self->{PARENT}{$key};
             $self->{$key} = $self->{PARENT}{$key};
             unless ($^O eq 'VMS' && $key =~ /PERL$/) {
@@ -391,6 +390,7 @@ END
 
     $self->init_dirscan();
     $self->init_others();
+    $self->init_PERM();
     my($argv) = neatvalue(\@ARGV);
     $argv =~ s/^\[/(/;
     $argv =~ s/\]$/)/;
@@ -476,7 +476,6 @@ END
 
 sub WriteEmptyMakefile {
     Carp::croak "WriteEmptyMakefile: Need even number of args" if @_ % 2;
-    local $SIG{__WARN__} = \&warnhandler;
 
     my %att = @_;
     my $self = MM->new(\%att);
@@ -635,6 +634,7 @@ sub mv_all_methods {
     # still trying to reduce the list to some reasonable minimum --
     # because I want to make it easier for the user. A.K.
 
+    no warnings 'redefine';
     foreach my $method (@Overridable) {
 
         # We cannot say "next" here. Nick might call MY->makeaperl
@@ -729,7 +729,7 @@ sub flush {
     rename("MakeMaker.tmp", $finalname);
     chmod 0644, $finalname unless $Is_VMS;
 
-    if ($self->{PARENT}) {
+    if ($self->{PARENT} && !$self->{_KEEP_AFTER_FLUSH}) {
         foreach (keys %$self) { # safe memory
             delete $self->{$_} unless $Keep_after_flush{$_};
         }
@@ -808,13 +808,9 @@ ExtUtils::MakeMaker - create an extension Makefile
 
 =head1 SYNOPSIS
 
-C<use ExtUtils::MakeMaker;>
+  use ExtUtils::MakeMaker;
 
-C<WriteMakefile( ATTRIBUTE =E<gt> VALUE [, ...] );>
-
-which is really
-
-C<MM-E<gt>new(\%att)-E<gt>flush;>
+  WriteMakefile( ATTRIBUTE => VALUE [, ...] );
 
 =head1 DESCRIPTION
 
@@ -827,7 +823,7 @@ that can be individually overridden.  Each subroutine returns the text
 it wishes to have written to the Makefile.
 
 MakeMaker is object oriented. Each directory below the current
-directory that contains a Makefile.PL. Is treated as a separate
+directory that contains a Makefile.PL is treated as a separate
 object. This makes it possible to write an unlimited number of
 Makefiles with a single invocation of WriteMakefile().
 
@@ -987,7 +983,9 @@ relatives, then the defaults for INSTALLPRIVLIB, INSTALLARCHLIB,
 INSTALLSCRIPT, etc. will be appropriate, and this incantation will be
 the best:
 
-    perl Makefile.PL; make; make test
+    perl Makefile.PL; 
+    make; 
+    make test
     make install
 
 make install per default writes some documentation of what has been
@@ -1322,10 +1320,14 @@ second with INSTALLDIRS=site. Default is site.
 This directory gets the man pages at 'make install' time. Defaults to
 $Config{installman1dir}.
 
+If set to 'none', no man 1 pages will be installed.
+
 =item INSTALLMAN3DIR
 
 This directory gets the man pages at 'make install' time. Defaults to
 $Config{installman3dir}.
+
+If set to 'none', no man 3 pages will be installed.
 
 =item INSTALLPRIVLIB
 
@@ -1355,11 +1357,6 @@ Same as INST_LIB for architecture dependent files.
 
 Directory to put real binary files during 'make'. These will be copied
 to INSTALLBIN during 'make install'
-
-=item INST_EXE
-
-Old name for INST_SCRIPT. Deprecated. Please use INST_SCRIPT if you
-need to use it.
 
 =item INST_LIB
 
@@ -1724,13 +1721,6 @@ Makefile. Caution! Do not use the SKIP attribute for the negligible
 speedup. It may seriously damage the resulting Makefile. Only use it
 if you really need it.
 
-=item TEST_LIBS
-
-The set of -I's necessary to run a "make test".  Use as:
-$(PERL) $(TEST_LIBS) -e '...' for example.
-
-The paths will be absolute.
-
 =item TYPEMAPS
 
 Ref to array of typemap file names.  Use this when the typemaps are
@@ -1761,7 +1751,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.23 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.33 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -1881,7 +1871,7 @@ be linked.
 
 If you cannot achieve the desired Makefile behaviour by specifying
 attributes you may define private subroutines in the Makefile.PL.
-Each subroutines returns the text it wishes to have written to
+Each subroutine returns the text it wishes to have written to
 the Makefile. To override a section of the Makefile you can
 either say:
 
@@ -1889,8 +1879,8 @@ either say:
 
 or you can edit the default by saying something like:
 
-        sub MY::c_o {
-            package MY; # so that "SUPER" works right
+        package MY; # so that "SUPER" works right
+        sub c_o {
             my $inherited = shift->SUPER::c_o(@_);
             $inherited =~ s/old text/new text/;
             $inherited;
@@ -1903,18 +1893,20 @@ for embedding.
 
 If you still need a different solution, try to develop another
 subroutine that fits your needs and submit the diffs to
-F<perl5-porters@perl.org> or F<comp.lang.perl.moderated> as appropriate.
+F<makemaker@perl.org>
 
-For a complete description of all MakeMaker methods see L<ExtUtils::MM_Unix>.
+For a complete description of all MakeMaker methods see
+L<ExtUtils::MM_Unix>.
 
 Here is a simple example of how to add a new target to the generated
 Makefile:
 
     sub MY::postamble {
-        '
+        return <<'MAKE_FRAG';
     $(MYEXTLIB): sdbm/Makefile
             cd sdbm && $(MAKE) all
-    ';
+
+    MAKE_FRAG
     }
 
 
@@ -2078,8 +2070,8 @@ ExtUtils::Embed
 
 =head1 AUTHORS
 
-Andy Dougherty <F<doughera@lafcol.lafayette.edu>>, Andreas KE<ouml>nig
-<F<andreas.koenig@mind.de>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>.  VMS
+Andy Dougherty <F<doughera@lafayette.edu>>, Andreas KE<ouml>nig
+<F<andreas.koenig@mind.de>>, Tim Bunce <F<timb@cpan.org>>.  VMS
 support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2 support
 by Ilya Zakharevich <F<ilya@math.ohio-state.edu>>.
 
@@ -2087,6 +2079,9 @@ Currently maintained by Michael G Schwern <F<schwern@pobox.com>>
 
 Send patches and ideas to <F<makemaker@perl.org>>.
 
-Send bug reports via http://rt.cpan.org/.
+Send bug reports via http://rt.cpan.org/.  Please send your
+generated Makefile along with your report.
+
+For more up-to-date information, see http://www.makemaker.org.
 
 =cut

@@ -127,16 +127,16 @@ DeadCode(pTHX)
 #endif /* !PURIFY */
 }
 
-#if defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS) \
-	|| (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
+#if (defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS)) \
+	&& (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
 #   define mstat(str) dump_mstats(str)
 #else
 #   define mstat(str) \
 	PerlIO_printf(Perl_debug_log, "%s: perl not compiled with DEBUGGING_MSTATS\n",str);
 #endif
 
-#if defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS) \
-	|| (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
+#if (defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS)) \
+	&& (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
 
 /* Very coarse overestimate, 2-per-power-of-2, one more to determine NBUCKETS. */
 #  define _NBUCKETS (2*8*IVSIZE+1)

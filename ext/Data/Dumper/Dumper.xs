@@ -100,45 +100,79 @@ esc_q(register char *d, register char *s, register STRLEN slen)
 static I32
 esc_q_utf8(pTHX_ SV* sv, register char *src, register STRLEN slen)
 {
-    char *s, *send, *r;
-    STRLEN grow = 0, j = 1, l;
-    bool dquote = FALSE;
+    char *s, *send, *r, *rstart;
+    STRLEN j, cur = SvCUR(sv);
+    /* Could count 128-255 and 256+ in two variables, if we want to
+       be like &qquote and make a distinction.  */
+    STRLEN grow = 0;	/* bytes needed to represent chars 128+ */
+    /* STRLEN topbit_grow = 0;	bytes needed to represent chars 128-255 */
+    STRLEN backslashes = 0;
+    STRLEN single_quotes = 0;
+    STRLEN qq_escapables = 0;	/* " $ @ will need a \ in "" strings.  */
+    STRLEN normal = 0;
 
     /* this will need EBCDICification */
     for (s = src, send = src + slen; s < send; s += UTF8SKIP(s)) {
-        UV k = utf8_to_uvchr((U8*)s, &l);
+        UV k = utf8_to_uvchr((U8*)s, NULL);
 
-	grow +=
-	  (*s == '"' || *s == '\\') ? 2 :
-	  (k < 0x80 ? 1 : UNISKIP(k) + 1 + 4); /* 4: \x{} */
+        if (k > 127) {
+            /* 4: \x{} then count the number of hex digits.  */
+            grow += 4 + (k <= 0xFF ? 2 : k <= 0xFFF ? 3 : k <= 0xFFFF ? 4 :
+#if UVSIZE == 4
+                8 /* We may allocate a bit more than the minimum here.  */
+#else
+                k <= 0xFFFFFFFF ? 8 : UVSIZE * 4
+#endif
+                );
+        } else if (k == '\\') {
+            backslashes++;
+        } else if (k == '\'') {
+            single_quotes++;
+        } else if (k == '"' || k == '$' || k == '@') {
+            qq_escapables++;
+        } else {
+            normal++;
+        }
     }
-    sv_grow(sv, SvCUR(sv)+3+grow); /* 3: ""\0 */
-    r = SvPVX(sv) + SvCUR(sv);
+    if (grow) {
+        /* We have something needing hex. 3 is ""\0 */
+        sv_grow(sv, cur + 3 + grow + 2*backslashes + single_quotes
+		+ 2*qq_escapables + normal);
+        rstart = r = SvPVX(sv) + cur;
 
-    for (s = src; s < send; s += UTF8SKIP(s)) {
-        UV k = utf8_to_uvchr((U8*)s, &l);
+        *r++ = '"';
 
-	if (*s == '"' || *s == '\\') {
-	    r[j++] = '\\';
-	    r[j++] = *s;
-	}
-	else if (k < 0x80)
-	    r[j++] = k;
-	else {
-	    r[j++] = '\\';
-	    r[j++] = 'x';
-	    r[j++] = '{';
-	    j += sprintf(r + j, "%"UVxf, k);
-	    r[j++] = '}';
-	    dquote = TRUE;
-	}
+        for (s = src; s < send; s += UTF8SKIP(s)) {
+            UV k = utf8_to_uvchr((U8*)s, NULL);
+
+            if (k == '"' || k == '\\' || k == '$' || k == '@') {
+                *r++ = '\\';
+                *r++ = k;
+            }
+            else if (k < 0x80)
+                *r++ = k;
+            else {
+                r += sprintf(r, "\\x{%"UVxf"}", k);
+            }
+        }
+        *r++ = '"';
+    } else {
+        /* Single quotes.  */
+        sv_grow(sv, cur + 3 + 2*backslashes + 2*single_quotes
+		+ qq_escapables + normal);
+        rstart = r = SvPVX(sv) + cur;
+        *r++ = '\'';
+        for (s = src; s < send; s ++) {
+            char k = *s;
+            if (k == '\'' || k == '\\')
+                *r++ = '\\';
+            *r++ = k;
+        }
+        *r++ = '\'';
     }
-    if (dquote)
-      r[0] = r[j++] = '"';
-    else
-      r[0] = r[j++] = '\'';
-    r[j] = '\0';
-    SvCUR_set(sv, SvCUR(sv) + j);
+    *r = '\0';
+    j = r - rstart;
+    SvCUR_set(sv, cur + j);
 
     return j;
 }

@@ -18,6 +18,17 @@ BEGIN {
             exit 0;
         }
     }
+    if ($^O eq 'darwin'
+	&& $Config{db_version_major} == 1
+	&& $Config{db_version_minor} == 0
+	&& $Config{db_version_patch} == 0) {
+	warn <<EOM;
+#
+# This test is known to crash in Mac OS X versions 10.1.3 (or earlier)
+# because of the buggy Berkeley DB version included with the OS.
+#
+EOM
+    }
 }
 
 use DB_File; 

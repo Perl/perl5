@@ -1,8 +1,80 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.20 2002/04/04 19:50:52 dankogai Exp dankogai $
+# $Id: Changes,v 1.26 2002/04/07 15:22:04 dankogai Exp $
 #
-1.20  $Date: 2002/04/04 19:50:52 $
+
+1.26 $Date: 2002/04/07 15:22:04 $
+! JP/Makefile.PL
+! t/Aliases.PL
+  Schwarn's patches against Makefile.PL has zapped jis*.ucm.  Restored.
+  And t/Aliases.t fixed to make sure they all exist.
+
+1.25 2002/04/07 15:01:25 (Unreleased)
+! Encode.pm
+! lib/Encode/Unicode.pm
+  More POD fixes....
+! Encode.pm
+- lib/Encode/UTF_EBCDIC.pm
+- lib/Encode/Internal.pm
+- lib/Encode/utf8.pm
+  Integrated into Encode.pm as closures.  That way "one package, one file" 
+  rule is preserved yet less files to require.
+! encoding.pm
+  commented out binmode(STDERR ...
+! Makefile.PL
+! Byte/Makefile.PL
+! CN/Makefile.PL
+! EBCDIC/Makefile.PL
+! JP/Makefile.PL
+! KR/Makefile.PL
+! Symbol/Makefile.PL
+! TW/Makefile.PL
+! Encode/Makefile_PL.e2x
+  Schwarn's MM-compliance patch merged
+  Message-Id: <20020406082609.GA28758@blackrider>
+! Encode.pm
+! lib/Encode/Unicode.pm
++ lib/Encode/UTF_EBCDIC.pm
++ t/Unicode.t
+- lib/Encode/10646_1.pm
+- lib/Encode/ucs2_le.pm
+  (UCS-2|UTF-(16|32))(LE|BE)? implementation and cleanups.  Instead of
+  per-module based (en|de)code,  I saved a number of .pm by
+  reorganizing it as per-object base (Well, this is what Encode::XS
+  does under the hood).  See Encode::Unicode for details.
+  The original Unicode.pm is now correctly renamed to UTF_EBCDIC.pm.
+  This module is used only on EBCDIC environments.
+
+1.21 2002/04/05 14:46:34 (Not Released)
+! JP/JP.pm
+! Encode.pm
++ ucm/jis0201.ucm
++ ucm/jis0208.ucm
++ ucm/jis0212.ucm
+  Are back to make Perl/Tk happy  Smile, NI-S.
+! t/Alias.pm
+! lib/Encode/Alias.pm
+! lib/Encode/Supported.pm
+! lib/Encode/10646_1.pm
+! lib/Encode/ucs2_le.pm
+  UCS-16BE is now canonical for UCS-2/ISO-10646-1.
+  Leftover implicit aliases in ucs2_le.pm removed.  Tests and documents 
+  updated to reflect changes.
+  essage-Id: <20020405114024.1290.17@bactrian.ni-s.u-net.com>
+! lib/Encode/Alias.pm
+! lib/Encode/Supported.pm
+  Anton's revision commited.  Added Dan's own fixes as well.
+  Message-Id: <159103166906.20020405161134@motor.ru>
+! lib/Encode/Alias.pm
+    134c134
+  <                 qr/^UCS2-le$/i    => '"UCS-2"', );
+  ---
+  >                 qr/^UCS2-LE$/i    => '"UTF-16LE"');
+  Sigh.  Thank you, Anton.
+  Message-Id: <14567692196.20020405062020@motor.ru>
+  Message-Id: <69FEC0B4-483E-11D6-A045-00039301D480@dan.co.jp>
+
+1.20  2002/04/04 19:50:52
 + bin/unidump
   the last minute addtion.  Just give it a try.  Docs remains to be done.  
   Not installed by default.
@@ -75,7 +147,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/04 19:50:52 $
+1.11  $Date: 2002/04/07 15:22:04 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

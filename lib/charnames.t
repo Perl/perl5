@@ -138,7 +138,7 @@ sub to_bytes {
     print "ok 17\n";
 
     # Unused Hebrew.
-    print "not " unless charnames::viacode(0x0590) eq chr(0xFFFD);
+    print "not " if defined charnames::viacode(0x0590);
     print "ok 18\n";
 }
 

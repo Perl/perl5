@@ -229,12 +229,10 @@ ext/Encode/bin/ucm2table	Table Generator for testing
 ext/Encode/bin/unidump	Unicode Dump like hexdump(1)
 ext/Encode/encengine.c		Encode extension
 ext/Encode/encoding.pm	Perl Pragmactic Module
-ext/Encode/lib/Encode/10646_1.pm	Encode extension
 ext/Encode/lib/Encode/Alias.pm	        Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
-ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/JP/2022_JP.pm	Encode extension
 ext/Encode/lib/Encode/JP/2022_JP1.pm	Encode extension
 ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
@@ -243,17 +241,17 @@ ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/Supported.pod	Documents supported encodings
 ext/Encode/lib/Encode/Unicode.pm	Encode extension
 ext/Encode/lib/Encode/XS.pm		Encode extension
-ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
-ext/Encode/lib/Encode/utf8.pm		Encode extension
 ext/Encode/t/Aliases.t	Encode extension test
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/JP.t		Encode extension test
 ext/Encode/t/KR.t		Encode extension test
 ext/Encode/t/TW.t		Encode extension test
+ext/Encode/t/Unicode.t		Encode extension test
 ext/Encode/t/encoding.t	encoding extension test
 ext/Encode/t/gb2312.euc	test data
 ext/Encode/t/gb2312.ref	test data
+ext/Encode/t/grow.t		Encode extension test
 ext/Encode/t/jisx0208.euc	test data
 ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data
@@ -261,6 +259,7 @@ ext/Encode/t/jisx0212.ref	test data
 ext/Encode/t/jperl.t	encoding extension test
 ext/Encode/t/ksc5601.euc	test data
 ext/Encode/t/ksc5601.ref	test data
+ext/Encode/t/unibench.pl	Unicode benchmark
 ext/Encode/ucm/8859-1.ucm	Unicode Character Map
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
 ext/Encode/ucm/8859-11.ucm	Unicode Character Map
@@ -329,6 +328,8 @@ ext/Encode/ucm/gsm0338.ucm	Unicode Character Map
 ext/Encode/ucm/hp-roman8.ucm	Unicode Character Map
 ext/Encode/ucm/ir-165.ucm	Unicode Character Map
 ext/Encode/ucm/jis0201.ucm	Unicode Character Map
+ext/Encode/ucm/jis0208.ucm	Unicode Character Map
+ext/Encode/ucm/jis0212.ucm	Unicode Character Map
 ext/Encode/ucm/johab.ucm	Unicode Character Map
 ext/Encode/ucm/koi8-f.ucm	Unicode Character Map
 ext/Encode/ucm/koi8-r.ucm	Unicode Character Map
@@ -382,6 +383,7 @@ ext/File/Glob/t/basic.t		See if File::Glob works
 ext/File/Glob/t/case.t		See if File::Glob works
 ext/File/Glob/t/global.t	See if File::Glob works
 ext/File/Glob/t/taint.t		See if File::Glob works
+ext/File/Glob/t/utf8.t		See if File::Glob works
 ext/File/Glob/TODO		File::Glob extension todo list
 ext/Filter/t/call.t		See if Filter::Util::Call works
 ext/Filter/Util/Call/Call.pm	Filter::Util::Call extension module
@@ -1003,6 +1005,8 @@ lib/ExtUtils/MM_Win95.pm        MakeMaker methods for Win95
 lib/ExtUtils/MY.pm              MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
+lib/ExtUtils/t/Big-Fat-Dummy/Liar/Makefile.PL         MakeMaker dummy module
+lib/ExtUtils/t/Big-Fat-Dummy/Liar/lib/Big/Fat/Liar.pm MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/lib/Big/Fat/Dummy.pm     MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
@@ -1010,6 +1014,7 @@ lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/t/hints.t          See if hint files are honored.
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
+lib/ExtUtils/t/INST.t           Check MakeMaker INST_* macros 
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_BeOS.t	See if ExtUtils::MM_BeOS works
@@ -1019,6 +1024,7 @@ lib/ExtUtils/t/MM_Unix.t	See if ExtUtils::MM_UNIX works
 lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
 lib/ExtUtils/t/MM_Win32.t	See if ExtUtils::MM_Win32 works
 lib/ExtUtils/t/Packlist.t	See if Packlist works
+lib/ExtUtils/t/prefixify.t      See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/Problem-Module/Makefile.PL           MakeMaker dummy module
 lib/ExtUtils/t/Problem-Module/subdir/Makefile.PL    MakeMaker dummy module
 lib/ExtUtils/t/problems.t       How MakeMaker reacts to build problems

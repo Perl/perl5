@@ -622,9 +622,9 @@ p	|void	|rxres_save	|void** rsp|REGEXP* prx
 #if !defined(HAS_RENAME)
 p	|I32	|same_dirent	|char* a|char* b
 #endif
-Apd	|char*	|savepv		|const char* sv
-Apd	|char*	|savesharedpv	|const char* sv
-Apd	|char*	|savepvn	|const char* sv|I32 len
+Apd	|char*	|savepv		|const char* pv
+Apd	|char*	|savesharedpv	|const char* pv
+Apd	|char*	|savepvn	|const char* pv|I32 len
 Ap	|void	|savestack_grow
 Ap	|void	|save_aelem	|AV* av|I32 idx|SV **sptr
 Ap	|I32	|save_alloc	|I32 size|I32 pad
@@ -986,8 +986,15 @@ s	|void	|hfreeentries	|HV *hv
 s	|void	|more_he
 s	|HE*	|new_he
 s	|void	|del_he		|HE *p
-s	|HEK*	|save_hek	|const char *str|I32 len|U32 hash
+s	|HEK*	|save_hek_flags	|const char *str|I32 len|U32 hash|int flags
 s	|void	|hv_magic_check	|HV *hv|bool *needs_copy|bool *needs_store
+s	|void	|unshare_hek_or_pvn|HEK* hek|const char* sv|I32 len|U32 hash
+s	|HEK*	|share_hek_flags|const char* sv|I32 len|U32 hash|int flags
+s	|SV**	|hv_store_flags	|HV* tb|const char* key|I32 klen|SV* val \
+				|U32 hash|int flags
+s	|SV**	|hv_fetch_flags	|HV* tb|const char* key|I32 klen|I32 lval \
+                                |int flags
+s	|void	|hv_notallowed	|int flags|const char *key|I32 klen|const char *msg
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)

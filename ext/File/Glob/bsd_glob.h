@@ -76,6 +76,7 @@ typedef struct {
 #define	GLOB_ALPHASORT	0x2000	/* Alphabetic, not ASCII sort, like csh. */
 #define	GLOB_LIMIT	0x4000	/* Limit pattern match output to ARG_MAX
 				   (usually from limits.h). */
+#define GLOB_UTF8	0x8000	/* Return UTF-8. (Perl extension.) */
 
 #define	GLOB_NOSPACE	(-1)	/* Malloc call failed. */
 #define	GLOB_ABEND	(-2)	/* Unignored error. */

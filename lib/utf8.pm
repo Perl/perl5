@@ -77,15 +77,22 @@ The following functions are defined in the C<utf8::> package by the perl core.
 
 =item * $num_octets = utf8::upgrade($string);
 
-Converts internal representation of string to the Perl's internal
+Converts (in-place) internal representation of string to Perl's internal
 I<UTF-X> form.  Returns the number of octets necessary to represent
-the string as I<UTF-X>.  Note that this should not be used to convert
+the string as I<UTF-X>.  Can be used to make sure that the
+UTF-8 flag is on, so that C<\w> or C<lc()> work as expected on strings
+containing characters in the range 0x80-0xFF.  Note that this should
+not be used to convert
 a legacy byte encoding to Unicode: use Encode for that.  Affected
 by the encoding pragma.
 
-=item * utf8::downgrade($string[, CHECK])
+=item * utf8::downgrade($string[, FAIL_OK])
 
-Converts internal representation of string to be un-encoded bytes.
+Converts (in-place) internal representation of string to be un-encoded
+bytes.  Returns true on success. On failure dies or, if the value of
+FAIL_OK is true, returns false.  Can be used to make sure that the
+UTF-8 flag is off, e.g. when you want to make sure that the substr()
+or length() function works with the usually faster byte algorithm.
 Note that this should not be used to convert Unicode back to a legacy
 byte encoding: use Encode for that.  B<Not> affected by the encoding
 pragma.
@@ -93,15 +100,16 @@ pragma.
 =item * utf8::encode($string)
 
 Converts (in-place) I<$string> from logical characters to octet
-sequence representing it in Perl's I<UTF-X> encoding.  Note that this
-should not be used to convert a legacy byte encoding to Unicode: use
-Encode for that.
+sequence representing it in Perl's I<UTF-X> encoding. Same as
+Encode::encode_utf8(). Note that this should not be used to convert
+a legacy byte encoding to Unicode: use Encode for that.
 
 =item * $flag = utf8::decode($string)
 
 Attempts to convert I<$string> in-place from Perl's I<UTF-X> encoding
-into logical characters.  Note that this should not be used to convert
-Unicode back to a legacy byte encoding: use Encode for that.
+into logical characters. Same as Encode::decode_utf8(). Note that this
+should not be used to convert Unicode back to a legacy byte encoding:
+use Encode for that.
 
 =item * $flag = utf8::valid(STRING)
 
@@ -113,12 +121,15 @@ state.
 
 =back
 
-C<utf8::encode> is like C<utf8::upgrade>, but the UTF8 flag is cleared.
-See L<perlunicode> for more on the UTF8 flag and the C API functions
-C<sv_utf8_upgrade>, C<sv_utf8_downgrade>, C<sv_utf8_encode>,
+C<utf8::encode> is like C<utf8::upgrade>, but the UTF8 flag is
+cleared.  See L<perlunicode> for more on the UTF8 flag and the C API
+functions C<sv_utf8_upgrade>, C<sv_utf8_downgrade>, C<sv_utf8_encode>,
 and C<sv_utf8_decode>, which are wrapped by the Perl functions
 C<utf8::upgrade>, C<utf8::downgrade>, C<utf8::encode> and
-C<utf8::decode>.
+C<utf8::decode>.  Note that in the Perl 5.8.0 implementation the
+functions utf8::valid, utf8::encode, utf8::decode, utf8::upgrade,
+and utf8::downgrade are always available, without a C<require utf8>
+statement-- this may change in future releases.
 
 =head1 SEE ALSO
 

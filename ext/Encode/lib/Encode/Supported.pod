@@ -63,9 +63,18 @@ The following encodings are always available.
   ascii         US-ascii				    [ECMA]
   iso-8859-1	latin1					     [ISO]
   utf8          UTF-8					 [RFC2279]
-  UCS-2		ucs2, iso-10646-1, UTF-16LE             [IANA, UC]
-  UTF-16LE      UCS-2LE                                       [UC]
+  UCS-2BE       UCS-2, iso-10646-1                      [IANA, UC]
+  UCS-2LE                                                     [UC]
+  UTF-16                                                      [UC]
+  UTF-16BE                                                    [UC]
+  UTF-16LE                                                    [UC]
+  UTF-32                                                      [UC]
+  UTF-32BE                                                    [UC]
+  UTF-32LE                                                    [UC]
   ----------------------------------------------------------------
+
+To find how those (UCS-2|UTF-(16|32))(LE|BE)? differ to one another,
+see L<Encode::Unicode>. 
 
 =head2 Encode::Byte -- Extended ASCII
 
@@ -146,8 +155,9 @@ details.
 
 GSM0338 is for GSM handsets. Though it shares alpanumerals with ASCII,
 control character ranges and other parts are mapped very differently,
-presumablly to store Cyrillics.  This one is also covered in
-Encode::Byte even thought this one does not comply extended ASCII.
+presumablly to store Greek and Cyrillic alphabets.  This one is also 
+covered in Encode::Byte even thought this one does not comply extended
+ASCII.
 
 =back
 
@@ -162,41 +172,52 @@ respective document pages.
 
 =item Encode::CN -- Continental China
 
-  Standard	DOS/Win	Macintosh	Comment
+  Standard	DOS/Win	Macintosh	         Comment/Reference
   ----------------------------------------------------------------
-  euc-cn		MacChineseSimp  GB2312 is aliased to this 
-  (gbk)         cp936			GBK is aliased to to this
-  gb12345-raw				GB12345 as is
-  gb2312-raw				GB2312 as is
+  euc-cn(*1)		MacChineseSimp
+  (gbk)         cp936 (*2)
+  gb12345-raw			   { GB12345 without CES }
+  gb2312-raw			   { GB2312  without CES }
   hz
   iso-ir-165
   ----------------------------------------------------------------
 
+  (*1) GB2312 is aliased to this.  see L<Microsoft-related naming mess>
+  (*2) gbk is aliased to this. see L<Microsoft-related naming mess>
+
 =item Encode::JP -- Japan
 
-  Standard	DOS/Win	Macintosh	Comment/Reference
+  Standard	DOS/Win	Macintosh 	         Comment/Reference
   ----------------------------------------------------------------
   euc-jp
   shiftjis	cp932	macJapanese
-  7bit-jis	  jis
-  euc-jp	  ujis
-  iso-2022-jp				[RFC1468]
-  iso-2022-jp-1				[RFC2237]
+  7bit-jis
+  euc-jp
+  iso-2022-jp				                 [RFC1468]
+  iso-2022-jp-1				                 [RFC2237]
+  jis0201-raw  { JIS X 0201 (roman + halfwidth kana) without CES }
+  jis0208-raw  { JIS X 0208 (Kanji + fullwidth kana) without CES }
+  jis0212-raw  { JIS X 0212 (Extended Kanji)         without CES }
   ----------------------------------------------------------------
 
 =item Encode::KR -- Korea
 
+  Standard	DOS/Win	Macintosh 	         Comment/Reference
   ----------------------------------------------------------------
   euc-kr		MacKorean                        [RFC1557]
-		cp949			ks_c_5601-1987 is an alias
-					thereof.
+		cp949 (*)                    
   iso-2022-kr				                 [RFC1557]
   johab                                  [KS X 1001:1998, Annex 3]
-  ksc5601-raw				KSC5601 as is
+  ksc5601-raw                              { KSC5601 without CES }
   ----------------------------------------------------------------
 
+  (*) ks_c_5601-1987, (x-)?windows-949, and uhc are aliased to
+  this.  See below.
+  
+                         
 =item Encode::TW -- Taiwan
 
+  Standard	DOS/Win	Macintosh 	         Comment/Reference
   ----------------------------------------------------------------
   big5		cp950	MacChineseTrad
   big5-hkscs
@@ -207,6 +228,7 @@ respective document pages.
 Due to size concerns, additional Chinese encodings below are
 distributed separately on CPAN, under the name Encode::HanExtra.
 
+  Standard	DOS/Win	Macintosh 	         Comment/Reference
   ----------------------------------------------------------------
   gb18030
   euc-tw
@@ -336,7 +358,7 @@ interchangeably.  But just as using the term byte and character is
 dangerous and should be differenciated when needed, we need to
 differenciate I<encoding> and I<character set>.
 
-To understand that, it's follow how we make computers grok our character.
+To understand that, it's follow how we make computers grok our characters.
 
 =over 4
 
@@ -418,16 +440,16 @@ such communication.
 
 =item * 
 
-To (en|de) code Encodings marked as C<(*)>, You need 
+To (en|de) code Encodings marked as C<(**)>, You need 
 C<Encode::HanExtra>, available from CPAN.
 
 =back
 
 Encoding names
 
-  US-ASCII    UTF-8     ISO-8859-*  KOI8-R
-  Shift_JIS   EUC-JP  ISO-2022-JP ISO-2022-JP-1
-  EUC-KR      Big5      GB2312
+  US-ASCII    UTF-8    ISO-8859-*  KOI8-R
+  Shift_JIS   EUC-JP   ISO-2022-JP ISO-2022-JP-1
+  EUC-KR      Big5     GB2312
 
 are registered to IANA as preferred MIME names and may probably 
 be used over the Internet.
@@ -439,10 +461,10 @@ C<GB2312> is the IANA name for C<EUC-CN>.
 See L<Microsoft-related naming mess> for details.
 
 C<GB_2312-80> I<raw> encoding is available as C<gb2312-raw>
-with Encode. See L<Encode::CN -- Continental China> for details.
+with Encode. See L<Encode::CN> for details.
 
   EUC-CN
-  KOI8-U        (http://www.faqs.org/rfcs/rfc2319.html)
+  KOI8-U        [RFC2319]
 
 have not been registered with IANA (as of March 2002) but
 seem to be supported by major web browsers. 
@@ -454,30 +476,58 @@ is heavily misused.
 See L<Microsoft-related naming mess> for details.
 
 C<KS_C_5601-1987> I<raw> encoding is available as C<kcs5601-raw>
-with Encode. See L<Encode::KR -- Korea> for details.
+with Encode. See L<Encode::KR> for details.
 
-  UTF-16 
+  UTF-16 UTF-16BE UTF-16LE
 
-=for comment
-waiting for comments from Jungshik Shin to soften this - Anton
+are a IANA-registered C<charset>s. See [RFC 2781] for details.
+Jungshik Shin reports that UTF-16 with a BOM is well accepted
+by MS IE 5/6 and NS 4/6. Beware however that
 
-is a IANA-registered preferred MIME name
-but probably should be avoided as encoding for web pages due to 
-the lack of browser support.
+=over 2
 
-  ISO-IR-165    (http://www.faqs.org/rfcs/rfc1345.html)
+=item *
+
+C<UTF-16> support in any software you're going to be
+using/interoperating with has probably been less tested
+then C<UTF-8> support
+
+=item *
+
+data coded with C<UTF-8> seamlessly passes traditional
+command piping (C<cat>, C<more>, etc.) while UTF-16 coded
+data is likely to cause confusion (with it's zero bytes,
+for example)
+
+=item *
+
+it is beyond the power of words to describe the way HTML browsers
+encode non-C<ASCII> form data. To get a general impression refer to
+L<http://ppewww.ph.gla.ac.uk/~flavell/charset/form-i18n.html>.
+While encoding of form data has stabilzed for C<UTF-8> coded pages
+(at least IE 5/6, NS 6, Opera 6 behave consitently), be sure to
+expect fun (and cross-browser discrepancies) with C<UTF-16> coded
+pages!
+
+=back
+
+The rule of thumb is to use C<UTF-8> unless you know what
+you're doing and unless you really need from using C<UTF-16>.
+
+
+  ISO-IR-165    [RFC1345]
   GBK
   VISCII
   GB 12345
-  GB 18030 (*)  (see links bellow)
-  EUC-TW   (*)
+  GB 18030 (**)  (see links bellow)
+  EUC-TW   (**)
 
 are totally valid encodings but not registered at IANA.
 The names under which they are listed here are probably the
 most widely-known names for these encodings and are recommended
 names.
 
-  BIG5PLUS (*)
+  BIG5PLUS (**)
 
 is a bit proprietary name. 
 
@@ -493,15 +543,14 @@ Microsoft extension to C<EUC-KR>.
 
 Proper name: C<CP949>.
 
-See
-http://lists.w3.org/Archives/Public/ietf-charsets/2001AprJun/0033.html
+See L<http://lists.w3.org/Archives/Public/ietf-charsets/2001AprJun/0033.html>
 for details.
 
-Encode aliases C<KS_C_5601-1987> to C<cp949> to reflect
-this common misusage. 
-I<Raw> C<KS_C_5601-1987> encoding is available as C<kcs5601-raw>.
+Encode aliases C<KS_C_5601-1987> to C<cp949> to reflect this common
+misusage. I<Raw> C<KS_C_5601-1987> encoding is available as
+C<kcs5601-raw>.
 
-See L<Encode::KR -- Korea> for details.
+See L<Encode::KR> for details.
 
 =item GB2312
 
@@ -515,9 +564,9 @@ C<GB2312> has become a superset of the official C<GB2312>.
 
 Encode aliases C<GB2312> to C<euc-cn> in full agreement with
 IANA registration. C<cp936> is supported separately.
-I<Raw> C<GB_2312-80> encoding is available as C<kcs5601-raw>.
+I<Raw> C<GB_2312-80> encoding is available as C<gb2312-raw>.
 
-See L<Encode::CN -- Continental China> for details.
+See L<Encode::CN> for details.
 
 =item Big5
 
@@ -568,6 +617,23 @@ have to be able to tell which character set a given byte sequence
 belongs.  7-bit ISO-2022 is a CES but it cannot be a CCS.  EUC is an
 example of being both a CCS and CES.
 
+=item charset (in MIME context)
+
+has long been used in the meaning of C<encoding>, CES.
+
+While C<character set> word combination has lost this meaning
+in MIME context since [RFC 2130], C<charset> abbreviation has
+retained it. This is how [RFC 2277], [RFC 2278] bless C<charset>:
+
+
+ This document uses the term "charset" to mean a set of rules for
+ mapping from a sequence of octets to a sequence of characters, such
+ as the combination of a coded character set and a character encoding
+ scheme; this is also what is used as an identifier in MIME "charset="
+ parameters, and registered in the IANA charset registry ...  (Note
+ that this is NOT a term used by other standards bodies, such as ISO).
+                                               [RFC 2277]
+
 =item EUC
 
 Extended Unix Character.  See ISO-2022
@@ -575,8 +641,15 @@ Extended Unix Character.  See ISO-2022
 =item ISO-2022
 
 A CES that was carefully designed to coexist with ASCII.  There are 7
-bit version and 8 bit version.  8 bit version can conform a CCS.  EUC
-and ISO-8859 are two examples thereof.
+bit version and 8 bit version.  
+
+7 bit version switches character set via escape sequence so this
+cannot form a CCS.  Since this is more difficult to handle in programs
+than the 8 bit version, 7 bit version is not very popular except for
+iso-2022-jp, the de facto standard CES for e-mails.
+
+8 bit version can conform a CCS.  EUC and ISO-8859 are two examples
+thereof.  pre-5.6 perl could use them as string literals.
 
 =item UCS
 
@@ -590,20 +663,20 @@ octets.
 
 =item Unicode
 
-A Character Set that aims to include all character character
-repertoire of the world.  Many character sets in various national as
-well as industorial standards are therefore a subset thereof.
+A Character Set that aims to include all character repertoire of the
+world.  Many character sets in various national as well as industorial
+standards have become, in a way, just subsets of Unicode.
 
 =item UTF
 
-Short for I<Unicode Transformation Format>.  Determinse how to map a
+Short for I<Unicode Transformation Format>.  Determines how to map a
 unicode character into byte sequnece.
 
 =item UTF-16
 
 A UTF in 16-bit encoding.  Can either be in big endian or little
-endian.  Big endian version is called UTF-16BE and little endian
-version is UTF-16LE.
+endian.  Big endian version is called UTF-16BE (equals to UCS-2 + 
+Surrogate Support) and little endian version is UTF-16LE.
 
 =back
 
@@ -658,7 +731,7 @@ L<http://www.iso.ch/>
 =item RFC
 
 Request For Comment -- need I say more?
-L<http://www.rfc.net/>
+L<http://www.rfc.net/>, L<http://www.faqs.org/rfcs/>
 
 =item UC
 
@@ -683,7 +756,7 @@ The glossary of this document is based opon this site.
 
 =item czyborra.com
 
-<http://czyborra.com/>
+L<http://czyborra.com/>
 
 Contains a a lot of useful information, especially gory details of ISO
 vs. vendor mappings.
@@ -697,6 +770,37 @@ Somewhat obsolete (last update in 1996), but still useful.  Also try
 L<ftp://ftp.oreilly.com/pub/examples/nutshell/cjkv/pdf/GB18030_Summary.pdf>
 
 You will find brief info on C<EUC-CN>, C<GBK> and mostly on C<GB 18030>
+
+=item Jungshik Shin's Hangul FAQ
+
+L<http://jshin.net/faq>
+
+And especially it's subject 8
+
+L<http://jshin.net/faq/qa8.html>
+
+a comprehensive overview of the Korean (C<KS *>) standards.
+
+=back
+
+=head2 Offline sources
+
+=over 2
+
+=item C<CJKV Information Processing> by Ken Lunde
+
+CJKV Information Processing
+1999 O'Reilly & Associates, ISBN : 1-56592-224-7
+
+The modern successor of the C<CJK.inf>.
+
+Features a comprehensive coverage on CJKV character sets and
+encodings along with many other issues faced by anyone trying
+to better support CJKV languages/scripts in all the areas of
+information processing.
+
+To purchase this book visit
+L<http://www.oreilly.com/catalog/cjkvinfo/>
 
 =back
 

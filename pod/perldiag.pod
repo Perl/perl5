@@ -1,4 +1,3 @@
-//depot/perl/pod/perldiag.pod#272 - edit change 14824 (text)
 =head1 NAME
 
 perldiag - various Perl diagnostics
@@ -183,26 +182,26 @@ spots.  This is now heavily deprecated.
 must either both be scalars or both be lists.  Otherwise Perl won't
 know which context to supply to the right side.
 
-=item Attempt to access disallowed key '%s' in a fixed hash
+=item Attempt to access disallowed key '%s' in a restricted hash
 
 (F) The failing code has attempted to get or set a key which is not in
-the current set of allowed keys of a fixed hash.
+the current set of allowed keys of a restricted hash.
 
-=item Attempt to clear a fixed hash
+=item Attempt to clear a restricted hash
 
-(F) It is currently not allowed to clear a fixed hash, even if the
+(F) It is currently not allowed to clear a restricted hash, even if the
 new hash would contain the same keys as before.  This may change in
 the future.
 
-=item Attempt to delete readonly key '%s' from a fixed hash
+=item Attempt to delete readonly key '%s' from a restricted hash
 
 (F) The failing code attempted to delete a key whose value has been
-declared readonly from a fixed hash.
+declared readonly from a restricted hash.
 
-=item Attempt to delete disallowed key '%s' from a fixed hash
+=item Attempt to delete disallowed key '%s' from a restricted hash
 
-(F) The failing code attempted to delete from a fixed hash a key which
-is not in its key set.
+(F) The failing code attempted to delete from a restricted hash a key
+which is not in its key set.
 
 =item Attempt to bless into a reference
 
@@ -3716,6 +3715,12 @@ what you are doing you can turn off this warning by C<no warnings 'utf8';>.
 
 (F) There are no byte-swapping functions for a machine with this byte
 order.
+
+=item Unknown discipline '%s'
+
+(F) You specified an unknown I/O discipline.  See L<open> for valid
+filehandle disciplines and L<perlfunc/opendir> for valid directory
+handle disciplines.
 
 =item Unknown "re" subpragma '%s' (known ones are: %s)
 

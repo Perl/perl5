@@ -14,16 +14,18 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 15;
+use Test::More tests => 17;
 use MakeMaker::Test::Utils;
 use File::Spec;
 use TieOut;
 
-my $perl = which_perl;
+my $perl = which_perl();
 
 $ENV{PERL_CORE} ? chdir '../lib/ExtUtils/t' : chdir 't';
 
 perl_lib;
+
+my $Touch_Time = calibrate_mtime();
 
 $| = 1;
 
@@ -33,12 +35,28 @@ ok( chdir 'Big-Fat-Dummy', "chdir'd to Big-Fat-Dummy" ) ||
 
 # The perl core test suite will run any .t file in the MANIFEST.
 # So we have to generate this on the fly.
-mkdir 't';
+mkdir 't' || die "Can't create test dir: $!";
 open(TEST, ">t/compile.t") or die "Can't open t/compile.t: $!";
-print TEST <DATA>;
+print TEST <<'COMPILE_T';
+print "1..2\n";
+
+print eval "use Big::Fat::Dummy; 1;" ? "ok 1\n" : "not ok 1\n";
+print "ok 2 - TEST_VERBOSE\n";
+COMPILE_T
 close TEST;
 
-END { unlink 't/compile.t' }
+mkdir 'Liar/t' || die "Can't create test dir: $!";
+open(TEST, ">Liar/t/sanity.t") or die "Can't open Liar/t/sanity.t: $!";
+print TEST <<'SANITY_T';
+print "1..3\n";
+
+print eval "use Big::Fat::Dummy; 1;" ? "ok 1\n" : "not ok 1\n";
+print eval "use Big::Fat::Liar; 1;" ? "ok 2\n" : "not ok 2\n";
+print "ok 3 - TEST_VERBOSE\n";
+SANITY_T
+close TEST;
+
+END { unlink 't/compile.t', 'Liar/t/sanity.t' }
 
 my @mpl_out = `$perl Makefile.PL PREFIX=dummy-install`;
 
@@ -56,14 +74,9 @@ ok( grep(/^Current package is: main$/,
 
 ok( -e $makefile,       'Makefile exists' );
 
-# -M is flakey on VMS, flat out broken on Tru64 5.6.0
-SKIP: {
-    skip "stat a/mtime broken on Tru64 5.6.0", 1 if $^O eq 'dec_osf' and
-                                                    $] >= 5.006;
-
-    my $mtime = (stat($makefile))[9];
-    cmp_ok( $^T, '<=', $mtime,  '  its been touched' );
-}
+# -M is flakey on VMS
+my $mtime = (stat($makefile))[9];
+cmp_ok( $Touch_Time, '<=', $mtime,  '  its been touched' );
 
 END { unlink makefile_name(), makefile_backup() }
 
@@ -93,11 +106,25 @@ is( $?, 0 );
 my $dist_test_out = `$make disttest`;
 is( $?, 0, 'disttest' ) || diag($dist_test_out);
 
+
+# Make sure init_dirscan doesn't go into the distdir
+@mpl_out = `$perl Makefile.PL "PREFIX=dummy-install"`;
+
+cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) ||
+  diag(@mpl_out);
+
+ok( grep(/^Writing $makefile for Big::Fat::Dummy/, 
+         @mpl_out) == 1,
+                                'init_dirscan skipped distdir') || 
+  diag(@mpl_out);
+
+# I know we'll get ignored errors from make here, that's ok.
+# Send STDERR off to oblivion.
+open(SAVERR, ">&STDERR") or die $!;
+open(STDERR, ">".File::Spec->devnull) or die $!;
+
 my $realclean_out = `$make realclean`;
 is( $?, 0, 'realclean' ) || diag($realclean_out);
 
-__DATA__
-print "1..2\n";
-
-print eval "use Big::Fat::Dummy; 1;" ? "ok 1\n" : "not ok 1\n";
-print "ok 2 - TEST_VERBOSE\n";
+open(STDERR, ">&SAVERR") or die $!;
+close SAVERR;

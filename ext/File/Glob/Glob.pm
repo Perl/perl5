@@ -31,6 +31,7 @@ use XSLoader ();
     GLOB_NOSPACE
     GLOB_QUOTE
     GLOB_TILDE
+    GLOB_UTF8
 );
 
 %EXPORT_TAGS = (
@@ -51,6 +52,7 @@ use XSLoader ();
         GLOB_NOSPACE
         GLOB_QUOTE
         GLOB_TILDE
+        GLOB_UTF8
         glob
         bsd_glob
     ) ],
@@ -62,10 +64,11 @@ sub import {
     require Exporter;
     my $i = 1;
     while ($i < @_) {
-	if ($_[$i] =~ /^:(case|nocase|globally)$/) {
+	if ($_[$i] =~ /^:(case|nocase|globally|utf8)$/) {
 	    splice(@_, $i, 1);
 	    $DEFAULT_FLAGS &= ~GLOB_NOCASE() if $1 eq 'case';
 	    $DEFAULT_FLAGS |= GLOB_NOCASE() if $1 eq 'nocase';
+	    $DEFAULT_FLAGS |= GLOB_UTF8() if $1 eq 'utf8';
 	    if ($1 eq 'globally') {
 		local $^W;
 		*CORE::GLOBAL::glob = \&File::Glob::csh_glob;
@@ -203,15 +206,19 @@ File::Glob - Perl extension for BSD glob routine
   ## override the core glob (CORE::glob() does this automatically
   ## by default anyway, since v5.6.0)
   use File::Glob ':globally';
-  my @sources = <*.{c,h,y}>
+  my @sources = <*.{c,h,y}>;
 
   ## override the core glob, forcing case sensitivity
   use File::Glob qw(:globally :case);
-  my @sources = <*.{c,h,y}>
+  my @sources = <*.{c,h,y}>;
 
   ## override the core glob forcing case insensitivity
   use File::Glob qw(:globally :nocase);
-  my @sources = <*.{c,h,y}>
+  my @sources = <*.{c,h,y}>;
+
+  ## override the core glob forcing UTF-8 names
+  use File::Glob qw(:globally :utf8);
+  my @sources = <*.{c,h,y}>;
 
 =head1 DESCRIPTION
 
@@ -320,6 +327,17 @@ If C<GLOB_NOSORT> is not in effect, sort filenames is alphabetical
 order (case does not matter) rather than in ASCII order.
 
 =back
+
+The following flag has been added in the Perl implementation for
+Unicode compatibility:
+
+=over 4
+
+=item C<GLOB_UTF8>
+
+The filenames returned will be marked as being in UTF-8 encoding of
+Unicode.  Note that it is your responsibility to ascertain that the
+filesystem you are globbing in returns valid UTF-8 filenames.
 
 =head1 DIAGNOSTICS
 

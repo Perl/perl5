@@ -1033,8 +1033,13 @@ STATIC void	S_hfreeentries(pTHX_ HV *hv);
 STATIC void	S_more_he(pTHX);
 STATIC HE*	S_new_he(pTHX);
 STATIC void	S_del_he(pTHX_ HE *p);
-STATIC HEK*	S_save_hek(pTHX_ const char *str, I32 len, U32 hash);
+STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags);
 STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store);
+STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* sv, I32 len, U32 hash);
+STATIC HEK*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags);
+STATIC SV**	S_hv_store_flags(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash, int flags);
+STATIC SV**	S_hv_fetch_flags(pTHX_ HV* tb, const char* key, I32 klen, I32 lval, int flags);
+STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *msg);
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)

@@ -63,6 +63,8 @@ PPCODE:
 				      strlen(pglob.gl_pathv[i])));
 	    TAINT;
 	    SvTAINT(tmp);
+	    if (pglob.gl_flags & GLOB_UTF8 && !IN_BYTES)
+	        SvUTF8_on(tmp);
 	    PUSHs(tmp);
 	}
 

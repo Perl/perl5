@@ -319,6 +319,12 @@ contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
 the default encoding of your STDIN, STDOUT, and STDERR, and of
 B<any subsequent file open>, is UTF-8.
 
+=item *
+
+If your filesystem supports returning UTF-8 encoded filenames,
+it is possible to make Perl to understand that the filenames
+returned by readdir() and glob() are in Unicode.
+
 =back
 
 =head2 Safe Signals
@@ -1264,7 +1270,7 @@ C<pod2html> now produces XHTML 1.0.
 
 =item *
 
-C<pod2html> now understands POD written using different line endings\
+C<pod2html> now understands POD written using different line endings
 (PC-like CRLF versus UNIX-like LF versus MacClassic-like CR).
 
 =item *

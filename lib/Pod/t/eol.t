@@ -1,5 +1,12 @@
 #!./perl -w
 
+BEGIN {
+    if (ord("A") == 193) {
+	print "1..0 \# Skip: EBCDIC\n";
+	exit(0);
+    }
+}
+
 use Test::More tests => 3;
 
 open(POD, ">$$.pod") or die "$$.pod: $!";
@@ -12,19 +19,19 @@ crlf
 
 =head1 DESCRIPTION
 
-clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf
-clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf
-clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf
-clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf
+crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
+crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
+crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
+crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
 
-    clrf clrf clrf clrf
-    clrf clrf clrf clrf
-    clrf clrf clrf clrf
+    crlf crlf crlf crlf
+    crlf crlf crlf crlf
+    crlf crlf crlf crlf
 
-clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf
-clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf
-clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf
-clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf clrf
+crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
+crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
+crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
+crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
 
 =cut
 __EOF__

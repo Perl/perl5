@@ -1338,15 +1338,6 @@ Perl_do_kv(pTHX)
 	SPAGAIN;
 	if (dokeys) {
 	    SV* sv = hv_iterkeysv(entry);
-	    if (HvUTF8KEYS((SV*)hv) && !DO_UTF8(sv)) {
-	        STRLEN len, i;
-	        char* s = SvPV(sv, len);
-		for (i = 0; i < len && NATIVE_IS_INVARIANT(s[i]); i++);
-		if (i < len) {
-		    sv = newSVsv(sv);
-		    sv_utf8_upgrade(sv);
-		}
-	    }
 	    XPUSHs(sv);	/* won't clobber stack_sp */
 	}
 	if (dovalues) {

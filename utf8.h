@@ -80,6 +80,10 @@ END_EXTERN_C
 
 Note the A0..BF in U+0800..U+0FFF, the 80..9F in U+D000...U+D7FF,
 the 90..BF in U+10000..U+3FFFF, and the 80...8F in U+100000..U+10FFFF.
+The "gaps" are caused by legal UTF-8 avoiding non-shortest encodings:
+it is technically possible to UTF-8-encode a single code point in different
+ways, but that is explicitly forbidden, and the shortest possible encoding
+should always be used (and that is what Perl does).
 
  */
 
@@ -176,20 +180,19 @@ encoded character.
 #define UTF8_ALLOW_FE_FF		0x0008
 #define UTF8_ALLOW_SHORT		0x0010
 #define UTF8_ALLOW_SURROGATE		0x0020
-#define UTF8_ALLOW_BOM			0x0040
-#define UTF8_ALLOW_FFFF			0x0080
-#define UTF8_ALLOW_LONG			0x0100
+#define UTF8_ALLOW_FFFF			0x0040 /* Allows also FFFE. */
+#define UTF8_ALLOW_LONG			0x0080
 #define UTF8_ALLOW_ANYUV		(UTF8_ALLOW_EMPTY|UTF8_ALLOW_FE_FF|\
-					 UTF8_ALLOW_SURROGATE|UTF8_ALLOW_BOM|\
+					 UTF8_ALLOW_SURROGATE|\
 					 UTF8_ALLOW_FFFF|UTF8_ALLOW_LONG)
-#define UTF8_ALLOW_ANY			0x00ff
+#define UTF8_ALLOW_ANY			0x00FF
 #define UTF8_CHECK_ONLY			0x0200
 
-#define UNICODE_SURROGATE_FIRST		0xd800
-#define UNICODE_SURROGATE_LAST		0xdfff
-#define UNICODE_REPLACEMENT		0xfffd
-#define UNICODE_BYTE_ORDER_MARK		0xfeff
-#define UNICODE_ILLEGAL			0xffff
+#define UNICODE_SURROGATE_FIRST		0xD800
+#define UNICODE_SURROGATE_LAST		0xDFFF
+#define UNICODE_REPLACEMENT		0xFFFD
+#define UNICODE_BYTE_ORDER_MARK		0xFEFF
+#define UNICODE_ILLEGAL			0xFFFF
 
 /* Though our UTF-8 encoding can go beyond this,
  * let's be conservative and do as Unicode 3.2 says. */
@@ -197,10 +200,9 @@ encoded character.
 
 #define UNICODE_ALLOW_SURROGATE 0x0001	/* Allow UTF-16 surrogates (EVIL) */
 #define UNICODE_ALLOW_FDD0	0x0002	/* Allow the U+FDD0...U+FDEF */
-#define UNICODE_ALLOW_BOM	0x0004	/* Allow 0xFEFF */
-#define UNICODE_ALLOW_FFFF	0x0008	/* Allow 0xFFFF, 0x1FFFF, ... */
-#define UNICODE_ALLOW_SUPER	0x0010	/* Allow past 10xFFFF */
-#define UNICODE_ALLOW_ANY	0xFFFF
+#define UNICODE_ALLOW_FFFF	0x0004	/* Allow 0xFFF[EF], 0x1FFF[EF], ... */
+#define UNICODE_ALLOW_SUPER	0x0008	/* Allow past 10xFFFF */
+#define UNICODE_ALLOW_ANY	0x000F
 
 #define UNICODE_IS_SURROGATE(c)		((c) >= UNICODE_SURROGATE_FIRST && \
 					 (c) <= UNICODE_SURROGATE_LAST)

@@ -23,7 +23,7 @@ foreach my $func (@Exported_Funcs) {
 my %hash = (foo => 42, bar => 23, locked => 'yep');
 lock_keys(%hash);
 eval { $hash{baz} = 99; };
-like( $@, qr/^Attempt to access disallowed key 'baz' in a fixed hash/,
+like( $@, qr/^Attempt to access disallowed key 'baz' in a restricted hash/,
                                                        'lock_keys()');
 is( $hash{bar}, 23 );
 ok( !exists $hash{baz} );
@@ -34,18 +34,18 @@ $hash{bar} = 69;
 is( $hash{bar}, 69 );
 
 eval { () = $hash{i_dont_exist} };
-like( $@, qr/^Attempt to access disallowed key 'i_dont_exist' in a fixed hash/ );
+like( $@, qr/^Attempt to access disallowed key 'i_dont_exist' in a restricted hash/ );
 
 lock_value(%hash, 'locked');
 eval { print "# oops" if $hash{four} };
-like( $@, qr/^Attempt to access disallowed key 'four' in a fixed hash/ );
+like( $@, qr/^Attempt to access disallowed key 'four' in a restricted hash/ );
 
 eval { $hash{"\x{2323}"} = 3 };
-like( $@, qr/^Attempt to access disallowed key '(.*)' in a fixed hash/,
+like( $@, qr/^Attempt to access disallowed key '(.*)' in a restricted hash/,
                                                'wide hex key' );
 
 eval { delete $hash{locked} };
-like( $@, qr/^Attempt to delete readonly key 'locked' from a fixed hash/,
+like( $@, qr/^Attempt to delete readonly key 'locked' from a restricted hash/,
                                            'trying to delete a locked key' );
 eval { $hash{locked} = 42; };
 like( $@, qr/^Modification of a read-only value attempted/,
@@ -53,7 +53,7 @@ like( $@, qr/^Modification of a read-only value attempted/,
 is( $hash{locked}, 'yep' );
 
 eval { delete $hash{I_dont_exist} };
-like( $@, qr/^Attempt to delete disallowed key 'I_dont_exist' from a fixed hash/,
+like( $@, qr/^Attempt to delete disallowed key 'I_dont_exist' from a restricted hash/,
                              'trying to delete a key that doesnt exist' );
 
 ok( !exists $hash{I_dont_exist} );
@@ -81,7 +81,7 @@ TODO: {
     lock_keys(%hash);
     lock_value(%hash, 'locked');
     eval { %hash = ( wubble => 42 ) };  # we know this will bomb
-    like( $@, qr/^Attempt to clear a fixed hash/ );
+    like( $@, qr/^Attempt to clear a restricted hash/ );
 
     eval { unlock_value(%hash, 'locked') }; # but this shouldn't
     is( $@, '', 'unlock_value() after denied assignment' );
@@ -97,7 +97,7 @@ TODO: {
     lock_value(%hash, 'RO');
 
     eval { %hash = (KEY => 1) };
-    like( $@, qr/^Attempt to clear a fixed hash/ );
+    like( $@, qr/^Attempt to clear a restricted hash/ );
 }
 
 # TODO:  This should be allowed but it might require putting extra
@@ -106,7 +106,7 @@ TODO: {
     my %hash = (KEY => 1, RO => 2);
     lock_keys(%hash);
     eval { %hash = (KEY => 1, RO => 2) };
-    like( $@, qr/^Attempt to clear a fixed hash/ );
+    like( $@, qr/^Attempt to clear a restricted hash/ );
 }
 
 
@@ -118,7 +118,7 @@ TODO: {
     $hash{foo} = 42;
     is( keys %hash, 1 );
     eval { $hash{wibble} = 42 };
-    like( $@, qr/^Attempt to access disallowed key 'wibble' in a fixed hash/,
+    like( $@, qr/^Attempt to access disallowed key 'wibble' in a restricted hash/,
                         '  locked');
 
     unlock_keys(%hash);
@@ -137,7 +137,7 @@ TODO: {
     is( $@, '' );
 
     eval { $hash{wibble} = 23 };
-    like( $@, qr/^Attempt to access disallowed key 'wibble' in a fixed hash/, '  locked' );
+    like( $@, qr/^Attempt to access disallowed key 'wibble' in a restricted hash/, '  locked' );
 }
 
 
@@ -167,4 +167,4 @@ TODO: {
 
 lock_keys(%ENV);
 eval { () = $ENV{I_DONT_EXIST} };
-like( $@, qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a fixed hash/,   'locked %ENV');
+like( $@, qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a restricted hash/,   'locked %ENV');

@@ -1,3 +1,58 @@
+5.55_02 Sat Apr  6 03:09:15 EST 2002
+    [[ Bug Fixes ]]
+    - Craig Berry fixed install on VMS (again, I munged the last patch)
+    - MakeMaker might not be recognizing it's in PERL_SRC on Win32.
+      Made safer.
+    - For some reason MM_VMS was using $Config{arch} instead of
+      $Config{archname}
+    - Fix (well, hack) for creating ABSPERL on VMS.
+
+    [[ Test Fixes ]]
+    - INST.t has to tell MakeMaker it's in the PERL_CORE
+    - INST_LIB doesn't change if it's in the core
+
+5.55_01 Thu Apr  4 23:58:06 EST 2002
+    [[ API Changes ]]
+    * Long deprecated INST_EXE completely removed.
+    - Removing TEST_LIBS constant (never seen in a stable MM anyway)
+    - Added $default argument to prefixify() for safer prefixification.
+
+    [[ Bug Fixes ]]
+    - $mm->{PERM_*} were not being set
+    - fixin() redundantly chmod'ing scripts.  Let the Makefile do that.
+    - The above means MM_Unix will now compile cleanly under strict
+    * init_dirscan's search for Makefile.PL's will no longer look
+      inside a distdir.
+    * Fixed running tests when there are t/'s in subdirs.
+    - MM_DOS inheriting from MM_Unix instead of MM_Win32.  DJGPP
+      appears to be unix-like (bleadperl@15650)
+    - Escaping constants with # in them so they're not confused as
+      make comments (bleadperl)
+    * ExtUtils::MM_Win95 didn't return a true value
+    - Fixing disttest when perl is a relative path.
+    * Fixed disttest & tests in subdirs on Win95
+    - Fixed recursive Makefile.PL scan on VMS so it skips the distdir
+    - Fixed a bug when an alternative MAKEFILE is specified and you're
+      using something other than a Makefile.PL (RT 444)
+    - Quieting uninit warning when there are no tests.
+
+    [[ Doc Fixes ]]
+    - Documented INSTALLMAN*DIR == 'none' feature.
+
+    [[ Test Fixes ]]
+    - Paul Green's which_perl patch to build a proper Perl on systems
+      that use command extensions.
+    - basic.t's Makefile.PL PREFIX call wasn't properly quoted for VMS
+      (Craig Berry)
+    - little initialization glitch in MM_Win32.t
+
+    [[ Internals ]]
+    - INST_* constants moved to init_INST
+    - INSTALL* constants moved to inst_INSTALL
+    * Internal warning supression removed.
+    - Temporarily turning off SelfLoader in MM_Unix so warnings
+      have the right line numbers.
+
 5.54_01 Sat Mar 30 02:32:44 EST 2002
     [[ New Features ]]
     * Added FULLPERLRUN and FULLPERLRUNINST
@@ -6,8 +61,11 @@
     - hint files were made a little too noisy in 5.53_01
 
     [[ Test Fixes ]]
-    - mtime appears to be broken on Tru64 5.6.0
+    - adjusting for NFS time drift
     - basic.t was finding the wrong perl in the core
+
+    [[ Internals ]]
+    - FULLPERL* PERL* setup moved to init_PERL
 
 5.53_02 Fri Mar 29 04:47:44 EST 2002
     - Adjusted for Perl core.  Synced into bleadperl.
@@ -161,7 +219,7 @@
 5.48_04 Mon Jan 21 19:28:38 EST 2002
     - No longer requiring Test::More
     - Now tested to work with a clean 5.6.1
-    - Stripped out $Revision: 1.27 $ based $VERSIONs.
+    - Stripped out $Revision: 1.48 $ based $VERSIONs.
     - Rolled in patches from p5p, vmsperl & VOS (14325, 14338, 14360, 14364)
     * hint files now run in a safer context.  Only $self is available.
     - ExtUtils::testlib now provides absolute paths into @INC.
@@ -182,7 +240,7 @@
 5.48_02 Wed Jan 16 19:11:26 EST 2002
     - Fixed some Win32 warnings.  Needs more work.
 
-5.48_01 Wed Jan 16 15:10:28 EST 200
+5.48_01 Wed Jan 16 15:10:28 EST 2002
     * Adapted from bleadperl@14303
     * Backported to 5.6.1
     - inst and xsubpp moved out of lib/ and into bin/

@@ -67,11 +67,11 @@ sub TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 321; $XS = 1;
+  $TMAX = 339; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 162; $XS = 0;
+  $TMAX = 171; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -1193,9 +1193,6 @@ EOT
 	if $XS;
 }
 
-#XXX}
-
-
 {
   @a = (
         999999999,
@@ -1268,3 +1265,48 @@ EOT
   }
 }
 
+#XXX}
+{
+  $b = "Bad. XS didn't escape dollar sign";
+############# 322
+  $WANT = <<"EOT"; # Careful. This is '' string written inside '' here doc
+#\$VAR1 = '\$b\"\@\\\\\xA3';
+EOT
+
+  $a = "\$b\"\@\\\xA3\x{100}";
+  chop $a;
+  TEST q(Data::Dumper->Dump([$a])), "utf8 flag with \" and \$";
+  if ($XS) {
+    $WANT = <<'EOT'; # While this is "" string written inside "" here doc
+#$VAR1 = "\$b\"\@\\\x{a3}";
+EOT
+    TEST q(Data::Dumper->Dumpxs([$a])), "XS utf8 flag with \" and \$";
+  }
+  # XS used to produce "$b\"' which is 4 chars, not 3. [ie wrongly qq(\$b\\\")]
+############# 328
+  $WANT = <<'EOT';
+#$VAR1 = '$b"';
+EOT
+
+  $a = "\$b\"\x{100}";
+  chop $a;
+  TEST q(Data::Dumper->Dump([$a])), "utf8 flag with \" and \$";
+  if ($XS) {
+    TEST q(Data::Dumper->Dumpxs([$a])), "XS utf8 flag with \" and \$";
+  }
+
+
+  # XS used to produce 'D'oh!' which is well, D'oh!
+  # Andreas found this one, which in turn discovered the previous two.
+############# 334
+  $WANT = <<'EOT';
+#$VAR1 = 'D\'oh!';
+EOT
+
+  $a = "D'oh!\x{100}";
+  chop $a;
+  TEST q(Data::Dumper->Dump([$a])), "utf8 flag with '";
+  if ($XS) {
+    TEST q(Data::Dumper->Dumpxs([$a])), "XS utf8 flag with '";
+  }
+}

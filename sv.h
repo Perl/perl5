@@ -235,7 +235,7 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
-#define SVphv_UTF8KEYS 	0x80000000	/* keys when fetched are UTF8 */
+#define SVphv_HASKFLAGS	0x80000000	/* keys have flag byte after hash */
 
 #define SVprv_WEAKREF   0x80000000      /* Weak reference */
 
@@ -407,6 +407,7 @@ struct xpvio {
 #define IOf_UNTAINT	16	/* consider this fp (and its data) "safe" */
 #define IOf_NOLINE	32	/* slurped a pseudo-line from empty file */
 #define IOf_FAKE_DIRP	64	/* xio_dirp is fake (source filters kludge) */
+#define IOf_DIR_UTF8	128	/* readdir tries to return utf8 */
 
 /* The following macros define implementation-independent predicates on SVs. */
 

@@ -33,7 +33,7 @@ require_ok( 'ExtUtils::MM_Win32' );
 my $MM = bless {
                 DIR     => [],
                 NOECHO  => '@',
-                XS      => '',
+                XS      => {},
                 MAKEFILE => 'Makefile',
                 RM_RF   => 'rm -rf',
                 MV      => 'mv',

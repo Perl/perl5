@@ -883,18 +883,21 @@ Perl_ibcmp_locale(pTHX_ const char *s1, const char *s2, register I32 len)
 
 =for apidoc savepv
 
-Copy a string to a safe spot.  This does not use an SV.
+Perl's version of C<strdup()>. Returns a pointer to a newly allocated
+string which is a duplicate of C<pv>. The size of the string is
+determined by C<strlen()>. The memory allocated for the new string can
+be freed with the C<Safefree()> function.
 
 =cut
 */
 
 char *
-Perl_savepv(pTHX_ const char *sv)
+Perl_savepv(pTHX_ const char *pv)
 {
     register char *newaddr = Nullch;
-    if (sv) {
-	New(902,newaddr,strlen(sv)+1,char);
-	(void)strcpy(newaddr,sv);
+    if (pv) {
+	New(902,newaddr,strlen(pv)+1,char);
+	(void)strcpy(newaddr,pv);
     }
     return newaddr;
 }
@@ -904,22 +907,23 @@ Perl_savepv(pTHX_ const char *sv)
 /*
 =for apidoc savepvn
 
-Copy a string to a safe spot.  The C<len> indicates number of bytes to
-copy. If pointer is NULL allocate space for a string of size specified.
-This does not use an SV.
+Perl's version of what C<strndup()> would be if it existed. Returns a
+pointer to a newly allocated string which is a duplicate of the first
+C<len> bytes from C<pv>. The memory allocated for the new string can be
+freed with the C<Safefree()> function.
 
 =cut
 */
 
 char *
-Perl_savepvn(pTHX_ const char *sv, register I32 len)
+Perl_savepvn(pTHX_ const char *pv, register I32 len)
 {
     register char *newaddr;
 
     New(903,newaddr,len+1,char);
     /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
-    if (sv) {
-    	Copy(sv,newaddr,len,char);	/* might not be null terminated */
+    if (pv) {
+    	Copy(pv,newaddr,len,char);	/* might not be null terminated */
     	newaddr[len] = '\0';		/* is now */
     }
     else {
@@ -931,18 +935,18 @@ Perl_savepvn(pTHX_ const char *sv, register I32 len)
 /*
 =for apidoc savesharedpv
 
-Copy a string to a safe spot in memory shared between threads.
-This does not use an SV.
+A version of C<savepv()> which allocates the duplicate string in memory
+which is shared between threads.
 
 =cut
 */
 char *
-Perl_savesharedpv(pTHX_ const char *sv)
+Perl_savesharedpv(pTHX_ const char *pv)
 {
     register char *newaddr = Nullch;
-    if (sv) {
-	newaddr = (char*)PerlMemShared_malloc(strlen(sv)+1);
-    	(void)strcpy(newaddr,sv);
+    if (pv) {
+	newaddr = (char*)PerlMemShared_malloc(strlen(pv)+1);
+    	(void)strcpy(newaddr,pv);
     }
     return newaddr;
 }

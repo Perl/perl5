@@ -20,6 +20,11 @@ Other encodings can be converted to perl's encoding on input, or from
 perl's encoding on output by use of the ":encoding(...)" layer.
 See L<open>.
 
+In some filesystems (for example Microsoft NTFS and Apple HFS+) the
+filenames are in UTF-8 .  By using opendir() and File::Glob you can
+make readdir() and glob() to return the filenames as Unicode, see
+L<perlfunc/opendir> and L<File::Glob> for details.
+
 To mark the Perl source itself as being in a particular encoding,
 see L<encoding>.
 
@@ -134,19 +139,6 @@ Additionally, if you
 you can use the C<\N{...}> notation, putting the official Unicode character
 name within the curlies. For example, C<\N{WHITE SMILING FACE}>.
 This works for all characters that have names.
-
-=item *
-
-If Unicode is used in hash keys, there is a subtle effect on the hashes.
-The hash becomes "Unicode-sticky" so that keys retrieved from the hash
-(either by %hash, each %hash, or keys %hash) will be in Unicode, not
-in bytes, even when the keys were bytes went they "went in".  This
-"stickiness" persists unless the hash is completely emptied, either by
-using delete() or clearing the with undef() or assigning an empty list
-to the hash.  Most of the time this difference is negligible, but
-there are few places where it matters: for example the regular
-expression character classes like C<\w> behave differently for
-bytes and characters.
 
 =item *
 
@@ -750,6 +742,11 @@ The following table is from Unicode 3.2.
 
 Note the A0..BF in U+0800..U+0FFF, the 80..9F in U+D000...U+D7FF,
 the 90..BF in U+10000..U+3FFFF, and the 80...8F in U+100000..U+10FFFF.
+The "gaps" are caused by legal UTF-8 avoiding non-shortest encodings:
+it is technically possible to UTF-8-encode a single code point in different
+ways, but that is explicitly forbidden, and the shortest possible encoding
+should always be used (and that is what Perl does).
+
 Or, another way to look at it, as bits:
 
  Code Points                    1st Byte   2nd Byte  3rd Byte  4th Byte
@@ -792,7 +789,7 @@ are the range 0xDC00..0xDFFFF.  The surrogate encoding is
 
 and the decoding is
 
-	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
+	$uni = 0x10000 + ($hi - 0xD800) * 0x400 + ($lo - 0xDC00);
 
 If you try to generate surrogates (for example by using chr()), you
 will get a warning if warnings are turned on (C<-w> or C<use

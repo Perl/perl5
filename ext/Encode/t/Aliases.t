@@ -22,9 +22,16 @@ sub init_a2c{
     %a2c = (
 	    'US-ascii' => 'ascii',
 	    'UTF-8'    => 'utf8',
-	    'UTF-16BE' => 'UCS-2',
-	    'ucs-2le'  => 'UTF-16LE',
-	    'ucs2-le'  => 'UTF-16LE',
+	    'UCS-2'    => 'UCS-2BE',
+	    'UCS2'     => 'UCS-2BE',
+	    'iso-10646-1' => 'UCS-2BE',
+	    'ucs2-le'  => 'UCS-2LE',
+	    'utf16'    => 'UTF-16',
+	    'utf32'    => 'UTF-32',
+	    'utf16-be'  => 'UTF-16BE',
+	    'utf32-be'  => 'UTF-32BE',
+	    'utf16-le'  => 'UTF-16LE',
+	    'utf32-le'  => 'UTF-32LE',
 	    'cyrillic' => 'iso-8859-5',
 	    'arabic'   => 'iso-8859-6',
 	    'greek'    => 'iso-8859-7',
@@ -54,11 +61,15 @@ sub init_a2c{
 	    'zh_TW.Big5'    => $ON_EBCDIC ? '' : 'big5',
 	    'big5-hk'	    => $ON_EBCDIC ? '' : 'big5-hkscs',
 	    'GB_2312-80'    => $ON_EBCDIC ? '' : 'euc-cn',
-	    'gb2312-raw'    => $ON_EBCDIC ? '' : 'gb2312-raw',
-	    'gb12345-raw'   => $ON_EBCDIC ? '' : 'gb12345-raw',
 	    'KS_C_5601-1987'    => $ON_EBCDIC ? '' : 'cp949',
-	    'ksc5601-raw'       => $ON_EBCDIC ? '' : 'ksc5601-raw',
-	    );
+	    #
+	    'gb12345-raw'   => $ON_EBCDIC ? '' : 'gb12345-raw',
+	    'gb2312-raw'    => $ON_EBCDIC ? '' : 'gb2312-raw',
+	    'jis0201-raw'   => $ON_EBCDIC ? '' : 'jis0201-raw',
+	    'jis0208-raw'   => $ON_EBCDIC ? '' : 'jis0208-raw',
+	    'jis0212-raw'   => $ON_EBCDIC ? '' : 'jis0212-raw',
+	    'ksc5601-raw'   => $ON_EBCDIC ? '' : 'ksc5601-raw',
+	   );
 
     for my $i (1..11,13..16){
 	$a2c{"ISO 8859 $i"} = "iso-8859-$i";
