@@ -1704,7 +1704,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
     }
 
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2uv(%"UVuf")\n",
-	(UV)sv,SvUVX(sv)));
+			  PTR2UV(sv),SvUVX(sv)));
     return SvIsUV(sv) ? SvUVX(sv) : (UV)SvIVX(sv);
 }
 
