@@ -85,11 +85,11 @@ HANDLE	w32_child_pids[MAXIMUM_WAIT_OBJECTS];
 #endif
 
 #ifndef FOPEN_MAX
-#  ifdef _NSTREAM_
+#  if defined(_NSTREAM_)
 #    define FOPEN_MAX _NSTREAM_
-#  elsif _NFILE_
+#  elsif defined(_NFILE_)
 #    define FOPEN_MAX _NFILE_
-#  elsif _NFILE
+#  elsif defined(_NFILE)
 #    define FOPEN_MAX _NFILE
 #  endif
 #endif

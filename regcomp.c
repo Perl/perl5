@@ -2574,12 +2574,13 @@ pregfree(struct regexp *r)
 	Safefree(r->precomp);
     if (r->subbase)
 	Safefree(r->subbase);
-    if (r->substrs)
+    if (r->substrs) {
+	if (r->anchored_substr)
+	    SvREFCNT_dec(r->anchored_substr);
+	if (r->float_substr)
+	    SvREFCNT_dec(r->float_substr);
 	Safefree(r->substrs);
-    if (r->anchored_substr)
-	SvREFCNT_dec(r->anchored_substr);
-    if (r->float_substr)
-	SvREFCNT_dec(r->float_substr);
+    }
     if (r->data) {
 	int n = r->data->count;
 	while (--n >= 0) {
