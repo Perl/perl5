@@ -301,3 +301,6 @@ a(?:b|c|d)*(.)	ace	y	$1	e
 a(?:b|c|d)+?(.)	ace	y	$1	e
 a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 ^(.+)?B	AB	y	$1	A
+'([a-z]+)\s\1'i	Aa aa 	y	$&-$1	Aa aa-Aa
+'([a-z]+)\s\1'i	Ab ab 	y	$&-$1	Ab ab-Ab
+foo\w*\d{4}baz	foobar1234baz	y	$&	foobar1234baz
