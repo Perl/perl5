@@ -442,7 +442,11 @@ hosts on a network.  A ping object is first created with optional
 parameters, a variable number of hosts may be pinged multiple
 times and then the connection is closed.
 
-You may choose one of three different protocols to use for the ping.
+You may choose one of three different protocols to use for the
+ping. The "udp" protocol is the default. Note that a live remote host
+may still fail to be pingable by one or more of these protocols. For
+example, www.microsoft.com is generally alive but not pingable.
+
 With the "tcp" protocol the ping() method attempts to establish a
 connection to the remote host's echo port.  If the connection is
 successfully established, the remote host is considered reachable.  No

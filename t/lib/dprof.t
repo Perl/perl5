@@ -3,6 +3,11 @@
 BEGIN {
     chdir( 't' ) if -d 't';
     unshift @INC, '../lib';
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bDevel\/DProf\b/){
+      print "1..0 # Skip: Devel::DProf was not built\n";
+      exit 0;
+    }
 }
 
 END {
@@ -11,7 +16,6 @@ END {
 
 use Benchmark qw( timediff timestr );
 use Getopt::Std 'getopts';
-use Config '%Config';
 getopts('vI:p:');
 
 # -v   Verbose

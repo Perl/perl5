@@ -1850,6 +1850,37 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
     LEAVE;
 }
 
+void
+Perl_apply_attrs_string(pTHX_ char *stashpv, CV *cv,
+                        char *attrstr, STRLEN len)
+{
+    OP *attrs = Nullop;
+
+    if (!len) {
+        len = strlen(attrstr);
+    }
+
+    while (len) {
+        for (; isSPACE(*attrstr) && len; --len, ++attrstr) ;
+        if (len) {
+            char *sstr = attrstr;
+            for (; !isSPACE(*attrstr) && len; --len, ++attrstr) ;
+            attrs = append_elem(OP_LIST, attrs,
+                                newSVOP(OP_CONST, 0,
+                                        newSVpvn(sstr, attrstr-sstr)));
+        }
+    }
+
+    Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
+                     newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
+                     Nullsv, prepend_elem(OP_LIST,
+				  newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
+				  prepend_elem(OP_LIST,
+					       newSVOP(OP_CONST, 0,
+						       newRV((SV*)cv)),
+                                               attrs)));
+}
+
 STATIC OP *
 S_my_kid(pTHX_ OP *o, OP *attrs)
 {

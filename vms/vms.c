@@ -394,7 +394,7 @@ prime_env_iter(void)
   $DESCRIPTOR(clidsc,"DCL");  $DESCRIPTOR(clitabdsc,"DCLTABLES");
   $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
   $DESCRIPTOR(local,"_LOCAL"); $DESCRIPTOR(mbxdsc,mbxnam); 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
   static perl_mutex primenv_mutex;
   MUTEX_INIT(&primenv_mutex);
 #endif

@@ -310,14 +310,14 @@ the following output demonstrates:
 
 =head2 Tying Hashes
 
-As the first Perl data type to be tied (see dbmopen()), hashes have the
-most complete and useful tie() implementation.  A class implementing a
-tied hash should define the following methods: TIEHASH is the constructor.
-FETCH and STORE access the key and value pairs.  EXISTS reports whether a
-key is present in the hash, and DELETE deletes one.  CLEAR empties the
-hash by deleting all the key and value pairs.  FIRSTKEY and NEXTKEY
-implement the keys() and each() functions to iterate over all the keys.
-And DESTROY is called when the tied variable is garbage collected.
+Hashes were the first Perl data type to be tied (see dbmopen()).  A class
+implementing a tied hash should define the following methods: TIEHASH is
+the constructor.  FETCH and STORE access the key and value pairs.  EXISTS
+reports whether a key is present in the hash, and DELETE deletes one.
+CLEAR empties the hash by deleting all the key and value pairs.  FIRSTKEY
+and NEXTKEY implement the keys() and each() functions to iterate over all
+the keys.  And DESTROY is called when the tied variable is garbage
+collected.
 
 If this seems like a lot, then feel free to inherit from merely the
 standard Tie::Hash module for most of your methods, redefining only the

@@ -87,7 +87,7 @@ S_do_trans_simple(pTHX_ SV *sv)
         }
     }
     *d='\0';
-    sv_setpvn(sv, dstart, d - dstart);
+    sv_setpvn(sv, (const char*)dstart, d - dstart);
     SvUTF8_on(sv);
     SvLEN_set(sv, 2*len+1);
     SvSETMAGIC(sv);
@@ -261,7 +261,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 	    s += UTF8SKIP(s);
     }
     *d = '\0';
-    sv_setpvn(sv, dstart, d - dstart);
+    sv_setpvn(sv, (const char*)dstart, d - dstart);
     SvSETMAGIC(sv);
     if (isutf)
         SvUTF8_on(sv);

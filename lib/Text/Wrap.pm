@@ -6,7 +6,7 @@ require Exporter;
 @EXPORT = qw(wrap fill);
 @EXPORT_OK = qw($columns $break $huge);
 
-$VERSION = 98.112902;
+$VERSION = 2000.06292219; #GMT
 
 use vars qw($VERSION $columns $debug $break $huge);
 use strict;
@@ -33,7 +33,7 @@ sub wrap
 	my $remainder = "";
 
 	while ($t !~ /^\s*$/) {
-		if ($t =~ s/^([^\n]{0,$ll})($break|\Z(?!\n))//xm) {
+		if ($t =~ s/^([^\n]{0,$ll})($break|\Z(?!\n))//x) {
 			$r .= unexpand($nl . $lead . $1);
 			$remainder = $2;
 		} elsif ($huge eq 'wrap' && $t =~ s/^([^\n]{$ll})//) {

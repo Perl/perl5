@@ -53,6 +53,8 @@ $VERSION = 2.04;
     'lt'        =>    '<',      # left chevron, less-than
     'gt'        =>    '>',      # right chevron, greater-than
     'quot'      =>    '"',      # double quote
+    'sol'       =>    '/',      # solidus
+    'verbar'    =>    '|',      # vertical bar
                                  
     "Aacute"    =>    "\xC1",   # capital A, acute accent
     "aacute"    =>    "\xE1",   # small a, acute accent

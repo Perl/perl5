@@ -39,7 +39,7 @@ To call subroutines:
 Like many languages, Perl provides for user-defined subroutines.
 These may be located anywhere in the main program, loaded in from
 other files via the C<do>, C<require>, or C<use> keywords, or
-generated on the fly using C<eval> or anonymous subroutines (closures).
+generated on the fly using C<eval> or anonymous subroutines.
 You can even call a function indirectly using a variable containing
 its name or a CODE reference.
 
