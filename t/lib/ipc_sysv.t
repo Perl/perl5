@@ -113,43 +113,19 @@ if($Config{'d_semget'} eq 'define' &&
     print "not " unless length($data);
     print "ok 9\n";
 
-    my $template;
-
-    # Find the pack/unpack template capable of handling native C shorts.
-
-    if      ($Config{shortsize} == 2) {
-	$template = "s";
-    } elsif ($Config{shortsize} == 4) {
-	$template = "l";
-    } elsif ($Config{shortsize} == 8) {
-	# Try quad last because not supported everywhere.
-	foreach my $t (qw(i q)) {
-	    # We could trap the unsupported quad template with eval
-	    # but if we get this far we should have quad support anyway.
-	    if (length(pack($t, 0)) == 8) {
-		$template = $t;
-		last;
-	    }
-	}
-    }
-
-    die "$0: cannot pack native shorts\n" unless defined $template;
-
-    $template .= "*";
-
     my $nsem = 10;
 
-    semctl($sem,0,SETALL,pack($template,(0) x $nsem)) or print "not ";
+    semctl($sem,0,SETALL,pack("s_*",(0) x $nsem)) or print "not ";
     print "ok 10\n";
 
     $data = "";
     semctl($sem,0,GETALL,$data) or print "not ";
     print "ok 11\n";
 
-    print "not " unless length($data) == length(pack($template,(0) x $nsem));
+    print "not " unless length($data) == length(pack("s_*",(0) x $nsem));
     print "ok 12\n";
 
-    my @data = unpack($template,$data);
+    my @data = unpack("s_*",$data);
 
     my $adata = "0" x $nsem;
 
@@ -159,14 +135,14 @@ if($Config{'d_semget'} eq 'define' &&
     my $poke = 2;
 
     $data[$poke] = 1;
-    semctl($sem,0,SETALL,pack($template,@data)) or print "not ";
+    semctl($sem,0,SETALL,pack("s_*",@data)) or print "not ";
     print "ok 14\n";
     
     $data = "";
     semctl($sem,0,GETALL,$data) or print "not ";
     print "ok 15\n";
 
-    @data = unpack($template,$data);
+    @data = unpack("s_*",$data);
 
     my $bdata = "0" x $poke . "1" . "0" x ($nsem-$poke-1);
 

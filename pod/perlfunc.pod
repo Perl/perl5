@@ -2591,6 +2591,58 @@ C<"P"> is C<undef>.
 
 =item *
 
+The integer types C<"s">, C<"S">, C<"l">, and C<"L"> may be
+immediately followed by a C<"_"> to signify a native short or long--as
+you can see from above for example a bare C<"l"> does mean exactly 32
+bits, the native C<long> (as seen by the local C compiler) may be
+larger.  This is an issue mainly in 64-bit platforms.
+
+C<"i_"> and C<"I_"> also work but only because of completeness;
+they are identical to C<"i"> and C<"I">.
+
+The actual size (in bytes) of native shorts, ints, and longs on
+the platform where Perl was built are available from L<Config>:
+
+	use Config;
+	print $Config{shortsize}, "\n";
+
+=item *
+
+The integer formats C<"s">, C<"S">, C<"i">, C<"I">, C<"l">, and C<"L">
+are inherently non-portable between processors and operating systems
+because they obey the native byteorder and endianness.  For example a
+4-byte integer 0x12345678 (305419896 decimal) be ordered natively
+(arranged in and handled by the CPU registers) into bytes as
+ 
+ 	0x12 0x34 0x56 0x78	# big-endian
+ 	0x78 0x56 0x34 0x12	# little-endian
+ 
+The names `big-endian' and `little-endian' are joking references to
+the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
+Plea for Peace" by Danny Cohen, USC/ISI IEN 137, April 1, 1980) and
+the egg-eating habits of the lilliputs.
+ 
+Some systems may even have weird byte orders such as
+ 
+ 	0x56 0x78 0x12 0x34
+ 	0x34 0x12 0x78 0x56
+ 
+You can see your system's preference with
+
+ 	print join(" ", map { sprintf "%#02x", $_ }
+                            unpack("C*",pack("L",0x12345678))), "\n";
+
+The actual byteorder on the platform where Perl was built are available
+from L<Config>:
+
+	use Config;
+	print $Config{byteorder}, "\n";
+
+If you want portable integers use the formats C<"n">, C<"N">, C<"v">, and
+"V", their byte endianness and size is known.
+
+=item *
+
 Real numbers (floats and doubles) are in the native machine format only;
 due to the multiplicity of floating formats around, and the lack of a
 standard "network" representation, no facility for interchange has been

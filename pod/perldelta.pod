@@ -144,6 +144,11 @@ Note that the behavior of:
 
 is unchanged (it continues to leave the file empty).
 
+=head2 pack() format modifier '_' supported
+
+The new format type modifer '_' is useful for packing and unpacking
+native shorts, ints, and longs.  See L<perlfunc/"pack">.
+
 =head1 Supported Platforms
 
 =over 4
