@@ -17,6 +17,7 @@ IV
 PerlIOScalar_pushed(PerlIO *f, const char *mode, SV *arg)
 {
  dTHX;
+ IV code;
  PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
  /* If called (normally) via open() then arg is ref to scalar we are
     using, otherwise arg (from binmode presumably) is either NULL
@@ -38,11 +39,12 @@ PerlIOScalar_pushed(PerlIO *f, const char *mode, SV *arg)
    s->var = newSVpvn("",0);
   }
  sv_upgrade(s->var,SVt_PV);
- if (strnEQ(mode,"a",1))
+ code = PerlIOBase_pushed(f,mode,Nullsv);
+ if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
    s->posn = SvCUR(SvRV(arg));
  else
    s->posn = 0;
- return PerlIOBase_pushed(f,mode,Nullsv);
+ return code;
 }
 
 IV
@@ -123,9 +125,34 @@ PerlIOScalar_write(PerlIO *f, const void *vbuf, Size_t count)
 {
  if (PerlIOBase(f)->flags & PERLIO_F_CANWRITE)
   {
-   return PerlIOScalar_unread(f,vbuf,count);
+   dTHX;
+   Off_t offset;
+   PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
+   SV *sv = s->var;
+   char *dst;
+   if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
+    {
+     dst = SvGROW(sv,SvCUR(sv)+count);
+     offset = SvCUR(sv);
+     s->posn = offset+count;
+    }
+   else
+    {
+     if ((s->posn+count) > SvCUR(sv))
+      dst = SvGROW(sv,s->posn+count);
+     else
+      dst = SvPV_nolen(sv);
+     offset = s->posn;
+     s->posn += count;
+    }
+   Move(vbuf,dst+offset,count,char);
+   if (s->posn > SvCUR(sv))
+    SvCUR_set(sv,s->posn);
+   SvPOK_on(s->var);
+   return count;
   }
- return 0;
+ else
+  return 0;
 }
 
 IV
