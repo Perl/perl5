@@ -5050,34 +5050,37 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	if (PL_defstash) {		/* Still have a symbol table? */
 	    dSP;
 	    CV* destructor;
-	    SV tmpref;
 
-	    Zero(&tmpref, 1, SV);
-	    sv_upgrade(&tmpref, SVt_RV);
-	    SvROK_on(&tmpref);
-	    SvREADONLY_on(&tmpref);	/* DESTROY() could be naughty */
-	    SvREFCNT(&tmpref) = 1;
+
 
 	    do {	
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor) {
+		    SV* tmpref = newRV(sv);
+	            SvREADONLY_on(tmpref);   /* DESTROY() could be naughty */
 		    ENTER;
 		    PUSHSTACKi(PERLSI_DESTROY);
-		    SvRV(&tmpref) = SvREFCNT_inc(sv);
 		    EXTEND(SP, 2);
 		    PUSHMARK(SP);
-		    PUSHs(&tmpref);
+		    PUSHs(tmpref);
 		    PUTBACK;
 		    call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR|G_VOID);
-		    SvREFCNT(sv)--;
+		   
+		    
 		    POPSTACK;
 		    SPAGAIN;
 		    LEAVE;
+		    if(SvREFCNT(tmpref) < 2) {
+		        /* tmpref is not kept alive! */
+		        SvREFCNT(sv)--;
+			SvRV(tmpref) = 0;
+			SvROK_off(tmpref);
+		    }
+		    SvREFCNT_dec(tmpref);
 		}
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
-	    del_XRV(SvANY(&tmpref));
 
 	    if (SvREFCNT(sv)) {
 		if (PL_in_clean_objs)
@@ -9573,14 +9576,20 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 	    /* Special case - not normally malloced for some reason */
 	    if (SvREADONLY(sstr) && SvFAKE(sstr)) {
 		/* A "shared" PV - clone it as unshared string */
-                if(!SvPADTMP(sstr)) {
+                if(SvPADTMP(sstr)) {
                     /* However, some of them live in the pad
                        and they should not have these flags
                        turned off */
-	            SvFAKE_off(dstr);
-	            SvREADONLY_off(dstr);
+
+                    SvPVX(dstr) = sharepvn(SvPVX(sstr), SvCUR(sstr),
+                                           SvUVX(sstr));
+                    SvUVX(dstr) = SvUVX(sstr);
+                } else {
+
+                    SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvCUR(sstr));
+                    SvFAKE_off(dstr);
+                    SvREADONLY_off(dstr);
                 }
-		SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvCUR(sstr));
 	    }
 	    else {
 		/* Some other special case - random pointer */
