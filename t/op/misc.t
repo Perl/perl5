@@ -682,3 +682,10 @@ OK
 "abcd\x{1234}" =~ /(a)(b[c])(d+)?/i and print "ok\n";
 EXPECT
 ok
+########
+# Bug 20010422.005
+{s//${}/; //}
+EXPECT
+syntax error at - line 2, near "${"
+syntax error at - line 2, near "//}"
+Execution of - aborted due to compilation errors.
