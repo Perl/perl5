@@ -1,6 +1,7 @@
 #!./perl
 
 BEGIN {
+	print "1..0 # Skip: not a tty\n" unless -t STDOUT;
 	chdir 't' unless -d 't';
 	@INC = '../lib';
 }
