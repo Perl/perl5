@@ -653,8 +653,10 @@ editor will have a way to help you find these characters.
 
 =item Can't find %s property definition %s 
 
-(F) You may have tried to use \p which means a Unicode property
-for example \p{Lu} is all uppercase letters.
+(F) You may have tried to use C<\p> which means a Unicode property for
+example \p{Lu} is all uppercase letters.  Escape the C<\p>, either
+C<\\p> (just the C<\p>) or by C<\Q\p> (the rest of the string, until
+possible C<\E>).
 
 =item Can't fork
 
