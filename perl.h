@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.4 89/12/21 20:07:35 lwall Locked $
+/* $Header: perl.h,v 3.0.1.5 90/02/28 17:52:28 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,14 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.5  90/02/28  17:52:28  lwall
+ * patch9: Configure now determines whether volatile is supported
+ * patch9: volatilized some more variables for super-optimizing compilers
+ * patch9: unused VREG symbol deleted
+ * patch9: perl can now start up other interpreters scripts  
+ * patch9: you may now undef $/ to have no input record separator
+ * patch9: nested evals clobbered their longjmp environment
+ * 
  * Revision 3.0.1.4  89/12/21  20:07:35  lwall
  * patch7: arranged for certain registers to be restored after longjmp()
  * patch7: Configure now compiles a test program to figure out time.h fiasco
@@ -35,16 +43,14 @@
  * 
  */
 
-#ifdef __STDC__
-#define VOLATILE volatile
-#define VREG
-#else
-#define VOLATILE
-#define VREG register
-#endif
-
 #define VOIDUSED 1
 #include "config.h"
+
+#if defined(HASVOLATILE) || defined(__STDC__)
+#define VOLATILE volatile
+#else
+#define VOLATILE
+#endif
 
 #ifdef IAMSUID
 #   ifndef TAINT
@@ -420,6 +426,7 @@ void stab_clear();
 void do_join();
 void do_sprintf();
 void do_accept();
+void do_pipe();
 void do_vecset();
 void savelist();
 void saveitem();
@@ -428,9 +435,12 @@ void savelong();
 void savesptr();
 void savehptr();
 void restorelist();
+void repeatcpy();
 HASH *savehash();
 ARRAY *saveary();
 
+EXT char **origargv;
+EXT int origargc;
 EXT line_t line INIT(0);
 EXT line_t subline INIT(0);
 EXT STR *subname INIT(Nullstr);
@@ -476,7 +486,7 @@ EXT int lastsize;
 
 EXT char *filename;
 EXT char *origfilename;
-EXT FILE *rsfp;
+EXT FILE * VOLATILE rsfp;
 EXT char buf[1024];
 EXT char *bufptr;
 EXT char *oldbufptr;
@@ -485,7 +495,7 @@ EXT char *bufend;
 
 EXT STR *linestr INIT(Nullstr);
 
-EXT char record_separator INIT('\n');
+EXT int record_separator INIT('\n');
 EXT int rslen INIT(1);
 EXT char *ofs INIT(Nullch);
 EXT int ofslen INIT(0);
@@ -506,6 +516,7 @@ EXT bool sawampersand INIT(FALSE);	/* must save all match strings */
 EXT bool sawstudy INIT(FALSE);		/* do fbminstr on all strings */
 EXT bool sawi INIT(FALSE);		/* study must assume case insensitive */
 EXT bool sawvec INIT(FALSE);
+EXT bool localizing INIT(FALSE);	/* are we processing a local() list? */
 
 #ifdef CSH
 char *cshname INIT(CSH);
@@ -522,7 +533,7 @@ EXT FILE *e_fp INIT(Nullfp);
 
 EXT char tokenbuf[256];
 EXT int expectterm INIT(TRUE);		/* how to interpret ambiguous tokens */
-EXT int in_eval INIT(FALSE);		/* trap fatal errors? */
+EXT VOLATILE int in_eval INIT(FALSE);	/* trap fatal errors? */
 EXT int multiline INIT(0);		/* $*--do strings hold >1 line? */
 EXT int forkprocess;			/* so do_open |- can return proc# */
 EXT int do_undump INIT(0);		/* -u or dump seen? */
@@ -554,7 +565,7 @@ GIDTYPE getegid();
 EXT int unsafe;
 
 #ifdef DEBUGGING
-EXT int debug INIT(0);
+EXT VOLATILE int debug INIT(0);
 EXT int dlevel INIT(0);
 EXT int dlmax INIT(128);
 EXT char *debname;
@@ -581,19 +592,22 @@ EXT int loop_ptr INIT(-1);
 EXT int loop_max INIT(128);
 
 EXT jmp_buf top_env;
-EXT jmp_buf eval_env;
 
-EXT char *goto_targ INIT(Nullch);	/* cmd_exec gets strange when set */
+EXT char * VOLATILE goto_targ INIT(Nullch); /* cmd_exec gets strange when set */
 
 EXT ARRAY *stack;		/* THE STACK */
 
-EXT ARRAY *savestack;		/* to save non-local values on */
+EXT ARRAY * VOLATILE savestack;		/* to save non-local values on */
 
 EXT ARRAY *tosave;		/* strings to save on recursive subroutine */
 
 EXT ARRAY *lineary;		/* lines of script for debugger */
 
 EXT ARRAY *pidstatary;		/* keep pids and statuses by fd for mypopen */
+
+EXT int *di;			/* for tmp use in debuggers */
+EXT char *dc;
+EXT short *ds;
 
 double atof();
 long time();

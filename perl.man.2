@@ -1,7 +1,11 @@
 ''' Beginning of part 2
-''' $Header: perl.man.2,v 3.0.1.2 89/11/17 15:30:16 lwall Locked $
+''' $Header: perl.man.2,v 3.0.1.3 90/02/28 17:55:58 lwall Locked $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 3.0.1.3  90/02/28  17:55:58  lwall
+''' patch9: grep now returns number of items matched in scalar context
+''' patch9: documented in-place modification capabilites of grep
+''' 
 ''' Revision 3.0.1.2  89/11/17  15:30:16  lwall
 ''' patch5: fixed some manual typos and indent problems
 ''' 
@@ -777,11 +781,16 @@ Better yet, don't use it at all.
 Evaluates EXPR for each element of LIST (locally setting $_ to each element)
 and returns the array value consisting of those elements for which the
 expression evaluated to true.
+In a scalar context, returns the number of times the expression was true.
 .nf
 
 	@foo = grep(!/^#/, @bar);    # weed out comments
 
 .fi
+Note that, since $_ is a reference into the array value, it can be
+used to modify the elements of the array.
+While this is useful and supported, it can cause bizarre results if
+the LIST contains literal values.
 .Ip "hex(EXPR)" 8 4
 .Ip "hex EXPR" 8
 Returns the decimal value of EXPR interpreted as an hex string.

@@ -1,7 +1,10 @@
 ''' Beginning of part 4
-''' $Header: perl.man.4,v 3.0.1.4 89/12/21 20:12:39 lwall Locked $
+''' $Header: perl.man.4,v 3.0.1.5 90/02/28 18:01:52 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.5  90/02/28  18:01:52  lwall
+''' patch9: $0 is now always the command name
+''' 
 ''' Revision 3.0.1.4  89/12/21  20:12:39  lwall
 ''' patch7: documented that package'filehandle works as well as $package'variable
 ''' patch7: documented which identifiers are always in package main
@@ -263,7 +266,7 @@ The \e<digit> notation sometimes works outside the current pattern, but should
 not be relied upon.)
 $+ returns whatever the last bracket match matched.
 $& returns the entire matched string.
-($0 normally returns the same thing, but don't depend on it.)
+($0 used to return the same thing, but not any more.)
 $\` returns everything before the matched string.
 $\' returns everything after the matched string.
 Examples:
@@ -746,8 +749,6 @@ Default is 0.
 Contains the name of the file containing the
 .I perl
 script being executed.
-The value should be copied elsewhere before any pattern matching happens, which
-clobbers $0.
 (Mnemonic: same as sh and ksh.)
 .Ip $<digit> 8
 Contains the subpattern from the corresponding set of parentheses in the last
@@ -1168,10 +1169,10 @@ initialization code.
 For instance, you could make aliases like these:
 .nf
 
-    $DBalias{'len'} = 's/^len(.*)/p length(\e$1)/';
-    $DBalias{'stop'} = 's/^stop (at|in)/b/';
-    $DBalias{'.'} =
-      's/^./p "\e$DBsub(\e$DBline):\et\e$DBline[\e$DBline]"/';
+    $DB'alias{'len'} = 's/^len(.*)/p length($1)/';
+    $DB'alias{'stop'} = 's/^stop (at|in)/b/';
+    $DB'alias{'.'} =
+      's/^\e./p "\e$DB\e'sub(\e$DB\e'line):\et",\e$DB\e'line[\e$DB\e'line]/';
 
 .fi
 .Sh "Setuid Scripts"
@@ -1360,8 +1361,7 @@ operator has different arguments.
 .Ip * 4 2
 The current input line is normally in $_, not $0.
 It generally does not have the newline stripped.
-($0 is initially the name of the program executed, then the last matched
-string.)
+($0 is the name of the program executed.)
 .Ip * 4 2
 $<digit> does not refer to fields\*(--it refers to substrings matched by the last
 match pattern.
@@ -1409,7 +1409,7 @@ The following variables work differently
 	  OFS	\h'|2.5i'$,
 	  ORS	\h'|2.5i'$\e
 	  RLENGTH	\h'|2.5i'length($&)
-	  RS	\h'|2.5i'$\/
+	  RS	\h'|2.5i'$/
 	  RSTART	\h'|2.5i'length($\`)
 	  SUBSEP	\h'|2.5i'$;
 

@@ -1,4 +1,4 @@
-;# $Header: getopt.pl,v 3.0 89/10/18 15:19:26 lwall Locked $
+;# $Header: getopt.pl,v 3.0.1.1 90/02/28 17:41:59 lwall Locked $
 
 ;# Process single-character switches with switch clustering.  Pass one argument
 ;# which is a string containing all switches that take an argument.  For each
@@ -12,6 +12,7 @@
 sub Getopt {
     local($argumentative) = @_;
     local($_,$first,$rest);
+    local($[) = 0;
 
     while (($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
 	($first,$rest) = ($1,$2);

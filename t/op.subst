@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.subst,v 3.0 89/10/18 15:31:43 lwall Locked $
+# $Header: op.subst,v 3.0.1.1 90/02/28 18:37:30 lwall Locked $
 
 print "1..42\n";
 
@@ -42,7 +42,7 @@ if (/a/i && s///gi && $_ eq 'BCD') {print "ok 8\n";} else {print "not ok 8 $_\n"
 $_ = '\\' x 4;
 if (length($_) == 4) {print "ok 9\n";} else {print "not ok 9\n";}
 s/\\/\\\\/g;
-if ($_ eq '\\' x 8) {print "ok 10\n";} else {print "not ok 10\n";}
+if ($_ eq '\\' x 8) {print "ok 10\n";} else {print "not ok 10 $_\n";}
 
 $_ = '\/' x 4;
 if (length($_) == 8) {print "ok 11\n";} else {print "not ok 11\n";}

@@ -1,7 +1,11 @@
 .rn '' }`
-''' $Header: perl.man.1,v 3.0.1.2 89/11/17 15:30:03 lwall Locked $
+''' $Header: perl.man.1,v 3.0.1.3 90/02/28 17:54:32 lwall Locked $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 3.0.1.3  90/02/28  17:54:32  lwall
+''' patch9: @array in scalar context now returns length of array
+''' patch9: in manual, example of open and ?: was backwards
+''' 
 ''' Revision 3.0.1.2  89/11/17  15:30:03  lwall
 ''' patch5: fixed some manual typos and indent problems
 ''' 
@@ -481,9 +485,20 @@ The following are exactly equivalent
 
 .fi
 .PP
+If you evaluate an array in a scalar context, it returns the length of
+the array.
+The following is always true:
+.nf
+
+	@whatever == $#whatever \- $[ + 1;
+
+.fi
+.PP
 Multi-dimensional arrays are not directly supported, but see the discussion
 of the $; variable later for a means of emulating multiple subscripts with
 an associative array.
+You could also write a subroutine to turn multiple subscripts into a single
+subscript.
 .PP
 Every data type has its own namespace.
 You can, without fear of conflict, use the same name for a scalar variable,
@@ -684,7 +699,7 @@ Evaluating a filehandle in angle brackets yields the next line
 from that file (newline included, so it's never false until EOF, at
 which time an undefined value is returned).
 Ordinarily you must assign that value to a variable,
-but there is one situation where in which an automatic assignment happens.
+but there is one situation where an automatic assignment happens.
 If (and only if) the input symbol is the only thing inside the conditional of a
 .I while
 loop, the value is
@@ -896,7 +911,7 @@ The following all do the same thing:
 	if (!open(foo)) { die "Can't open $foo: $!"; }
 	die "Can't open $foo: $!" unless open(foo);
 	open(foo) || die "Can't open $foo: $!";	# foo or bust!
-	open(foo) ? die "Can't open $foo: $!" : \'hi mom\';
+	open(foo) ? \'hi mom\' : die "Can't open $foo: $!";
 				# a bit exotic, that last one
 
 .fi

@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perly.c,v 3.0.1.3 89/12/21 20:15:41 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$Header: perly.c,v 3.0.1.4 90/02/28 18:06:41 lwall Locked $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@ char rcsid[] = "$Header: perly.c,v 3.0.1.3 89/12/21 20:15:41 lwall Locked $\nPat
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perly.c,v $
+ * Revision 3.0.1.4  90/02/28  18:06:41  lwall
+ * patch9: perl can now start up other interpreters scripts
+ * patch9: nested evals clobbered their longjmp environment
+ * patch9: eval could mistakenly return undef in array context
+ * 
  * Revision 3.0.1.3  89/12/21  20:15:41  lwall
  * patch7: ANSI strerror() is now supported
  * patch7: errno may now be a macro with an lvalue
@@ -48,7 +53,6 @@ register char **env;
     register char *s;
     char *index(), *strcpy(), *getenv();
     bool dosearch = FALSE;
-    char **origargv = argv;
 #ifdef DOSUID
     char *validarg = "";
 #endif
@@ -61,13 +65,15 @@ setuid perl scripts securely.\n");
 #endif
 #endif
 
+    origargv = argv;
+    origargc = argc;
     uid = (int)getuid();
     euid = (int)geteuid();
     gid = (int)getgid();
     egid = (int)getegid();
     if (do_undump) {
 	do_undump = 0;
-	loop_ptr = 0;		/* start label stack again */
+	loop_ptr = -1;		/* start label stack again */
 	goto just_doit;
     }
     (void)sprintf(index(rcsid,'#'), "%d\n", PATCHLEVEL);
@@ -670,7 +676,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	str_numset(STAB_STR(tmpstab),(double)getpid());
 
     if (setjmp(top_env))	/* sets goto_targ on longjump */
-	loop_ptr = 0;		/* start label stack again */
+	loop_ptr = -1;		/* start label stack again */
 
 #ifdef DEBUGGING
     if (debug & 1024)
@@ -719,14 +725,15 @@ int *arglast;
     CMD *myroot;
     ARRAY *ar;
     int i;
-    char *oldfile = filename;
-    line_t oldline = line;
-    int oldtmps_base = tmps_base;
-    int oldsave = savestack->ary_fill;
-    SPAT *oldspat = curspat;
+    char * VOLATILE oldfile = filename;
+    VOLATILE line_t oldline = line;
+    VOLATILE int oldtmps_base = tmps_base;
+    VOLATILE int oldsave = savestack->ary_fill;
+    SPAT * VOLATILE oldspat = curspat;
     static char *last_eval = Nullch;
     static CMD *last_root = Nullcmd;
     VOLATILE int sp = arglast[0];
+    char *tmps;
 
     tmps_base = tmps_max;
     if (curstash != stash) {
@@ -772,7 +779,18 @@ int *arglast;
     in_eval++;
     oldoldbufptr = oldbufptr = bufptr = str_get(linestr);
     bufend = bufptr + linestr->str_cur;
-    if (setjmp(eval_env)) {
+    if (++loop_ptr >= loop_max) {
+	loop_max += 128;
+	Renew(loop_stack, loop_max, struct loop);
+    }
+    loop_stack[loop_ptr].loop_label = "_EVAL_";
+    loop_stack[loop_ptr].loop_sp = sp;
+#ifdef DEBUGGING
+    if (debug & 4) {
+	deb("(Pushing label #%d _EVAL_)\n", loop_ptr);
+    }
+#endif
+    if (setjmp(loop_stack[loop_ptr].loop_env)) {
 	retval = 1;
 	last_root = Nullcmd;
     }
@@ -800,7 +818,10 @@ int *arglast;
     }
     myroot = eval_root;		/* in case cmd_exec does another eval! */
     if (retval || error_count) {
-	str = &str_undef;
+	st = stack->ary_array;
+	sp = arglast[0];
+	if (gimme != G_ARRAY)
+	    st[++sp] = &str_undef;
 	last_root = Nullcmd;	/* can't free on error, for some reason */
 	if (rsfp) {
 	    fclose(rsfp);
@@ -817,6 +838,14 @@ int *arglast;
 	    cmd_free(myroot);
     }
     in_eval--;
+#ifdef DEBUGGING
+	if (debug & 4) {
+	    tmps = loop_stack[loop_ptr].loop_label;
+	    deb("(Popping label #%d %s)\n",loop_ptr,
+		tmps ? tmps : "" );
+	}
+#endif
+    loop_ptr--;
     filename = oldfile;
     line = oldline;
     tmps_base = oldtmps_base;

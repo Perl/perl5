@@ -11,13 +11,11 @@ sub look {
     $blksize = 8192 unless $blksize;
     $key =~ s/[^\w\s]//g if $dict;
     $key =~ y/A-Z/a-z/ if $fold;
-    $max = $size + $blksize - 1;
-    $max -= $size % $blksize;
-    while ($max - $min > $blksize) {
-	$mid = ($max + $min) / 2;
-	die "look: internal error"  if $mid % $blksize;
-	seek(FH,$mid,0);
-	$_ = <FH>;		# probably a partial line
+    $max = int($size / $blksize);
+    while ($max - $min > 1) {
+	$mid = int(($max + $min) / 2);
+	seek(FH,$mid * $blksize,0);
+	$_ = <FH> if $mid;		# probably a partial line
 	$_ = <FH>;
 	chop;
 	s/[^\w\s]//g if $dict;
@@ -29,7 +27,9 @@ sub look {
 	    $max = $mid;
 	}
     }
+    $min *= $blksize;
     seek(FH,$min,0);
+    <FH> if $min;
     while (<FH>) {
 	chop;
 	s/[^\w\s]//g if $dict;

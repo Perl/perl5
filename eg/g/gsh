@@ -1,6 +1,6 @@
-#!/bin/perl
+#! /usr/bin/perl
 
-# $Header: gsh,v 3.0 89/10/18 15:14:36 lwall Locked $
+# $Header: gsh,v 3.0.1.1 90/02/28 17:14:10 lwall Locked $
 
 # Do rsh globally--see man page
 
@@ -8,11 +8,12 @@ $SIG{'QUIT'} = 'quit';			# install signal handler for SIGQUIT
 
 sub getswitches {
     while ($ARGV[0] =~ /^-/) {		# parse switches
-	$ARGV[0] =~ /^-h/ && ($showhost++,$silent++,shift,next);
-	$ARGV[0] =~ /^-s/ && ($silent++,shift,next);
-	$ARGV[0] =~ /^-d/ && ($dodist++,shift,next);
-	$ARGV[0] =~ /^-n/ && ($n=' -n',shift,next);
-	$ARGV[0] =~ /^-l/ && ($l=' -l ' . $ARGV[1],shift,shift,next);
+	$ARGV[0] =~ /^-h/ && ($showhost++,$silent++,shift(@ARGV),next);
+	$ARGV[0] =~ /^-s/ && ($silent++,shift(@ARGV),next);
+	$ARGV[0] =~ /^-d/ && ($dodist++,shift(@ARGV),next);
+	$ARGV[0] =~ /^-n/ && ($n=' -n',shift(@ARGV),next);
+	$ARGV[0] =~ /^-l/ && ($l=' -l ' . $ARGV[1],shift(@ARGV),shift(@ARGV),
+				next);
 	last;
     }
 }

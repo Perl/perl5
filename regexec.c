@@ -7,9 +7,14 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regexec.c,v 3.0.1.2 89/12/21 20:16:27 lwall Locked $
+/* $Header: regexec.c,v 3.0.1.3 90/02/28 18:14:39 lwall Locked $
  *
  * $Log:	regexec.c,v $
+ * Revision 3.0.1.3  90/02/28  18:14:39  lwall
+ * patch9: /[\200-\377]/ didn't work on machines with signed chars
+ * patch9: \d, \w, and \s could misfire on characters with high bit set
+ * patch9: /\bfoo/i didn't work
+ * 
  * Revision 3.0.1.2  89/12/21  20:16:27  lwall
  * patch7: certain patterns didn't match correctly at end of string
  * 
@@ -64,6 +69,11 @@
 int regnarrate = 0;
 #endif
 
+#define isALNUM(c) (isascii(c) && (isalpha(c) || isdigit(c) || c == '_'))
+#define isSPACE(c) (isascii(c) && isspace(c))
+#define isDIGIT(c) (isascii(c) && isdigit(c))
+#define isUPPER(c) (isascii(c) && isupper(c))
+
 /*
  * regexec and friends
  */
@@ -73,6 +83,7 @@ int regnarrate = 0;
  */
 static char *regprecomp;
 static char *reginput;		/* String-input pointer. */
+static char regprev;		/* char before regbol, \n if none */
 static char *regbol;		/* Beginning of input, for ^ check. */
 static char *regeol;		/* End of input, for $ check. */
 static char **regstartp;	/* Pointer to startp array. */
@@ -112,7 +123,6 @@ int safebase;	/* no need to remember string in subbase */
 	register int tmp;
 	int minlen = 0;		/* must match at least this many chars */
 	int dontbother = 0;	/* how many characters not to try at end */
-	int beginning = (string == strbeg);	/* is ^ valid at stringarg? */
 
 	/* Be paranoid... */
 	if (prog == NULL || string == NULL) {
@@ -120,6 +130,10 @@ int safebase;	/* no need to remember string in subbase */
 		return(0);
 	}
 
+	if (string == strbeg)	/* is ^ valid at stringarg? */
+	    regprev = '\n';
+	else
+	    regprev = stringarg[-1];
 	regprecomp = prog->precomp;
 	/* Check validity of program. */
 	if (UCHARAT(prog->program) != MAGIC) {
@@ -134,14 +148,14 @@ int safebase;	/* no need to remember string in subbase */
 		string = c;
 		strend = string + i;
 		for (s = string; s < strend; s++)
-			if (isupper(*s))
+			if (isUPPER(*s))
 				*s = tolower(*s);
 	}
 
 	/* If there is a "must appear" string, look for it. */
 	s = string;
 	if (prog->regmust != Nullstr) {
-		if (beginning && screamer) {
+		if (stringarg == strbeg && screamer) {
 			if (screamfirst[prog->regmust->str_rare] >= 0)
 				s = screaminstr(screamer,prog->regmust);
 			else
@@ -174,10 +188,7 @@ int safebase;	/* no need to remember string in subbase */
 	}
 
 	/* Mark beginning of line for ^ . */
-	if (beginning)
-		regbol = string;
-	else
-		regbol = NULL;
+	regbol = string;
 
 	/* Mark end of line for $ (and such) */
 	regeol = strend;
@@ -243,7 +254,7 @@ int safebase;	/* no need to remember string in subbase */
 		case ANYOF: case ANYBUT:
 		    c = OPERAND(c);
 		    while (s < strend) {
-			    i = *s;
+			    i = UCHARAT(s);
 			    if (!(c[i >> 3] & (1 << (i&7))))
 				    if (regtry(prog, s))
 					    goto got_it;
@@ -255,13 +266,13 @@ int safebase;	/* no need to remember string in subbase */
 			dontbother++,strend--;
 		    if (s != string) {
 			i = s[-1];
-			tmp = (isalpha(i) || isdigit(i) || i == '_');
+			tmp = isALNUM(i);
 		    }
 		    else
-			tmp = 0;	/* assume not alphanumeric */
+			tmp = isALNUM(regprev);	/* assume not alphanumeric */
 		    while (s < strend) {
 			    i = *s;
-			    if (tmp != (isalpha(i) || isdigit(i) || i == '_')) {
+			    if (tmp != isALNUM(i)) {
 				    tmp = !tmp;
 				    if (regtry(prog, s))
 					    goto got_it;
@@ -276,13 +287,13 @@ int safebase;	/* no need to remember string in subbase */
 			dontbother++,strend--;
 		    if (s != string) {
 			i = s[-1];
-			tmp = (isalpha(i) || isdigit(i) || i == '_');
+			tmp = isALNUM(i);
 		    }
 		    else
-			tmp = 0;	/* assume not alphanumeric */
+			tmp = isALNUM(regprev);	/* assume not alphanumeric */
 		    while (s < strend) {
 			    i = *s;
-			    if (tmp != (isalpha(i) || isdigit(i) || i == '_'))
+			    if (tmp != isALNUM(i))
 				    tmp = !tmp;
 			    else if (regtry(prog, s))
 				    goto got_it;
@@ -294,7 +305,7 @@ int safebase;	/* no need to remember string in subbase */
 		case ALNUM:
 		    while (s < strend) {
 			    i = *s;
-			    if (isalpha(i) || isdigit(i) || i == '_')
+			    if (isALNUM(i))
 				    if (regtry(prog, s))
 					    goto got_it;
 			    s++;
@@ -303,7 +314,7 @@ int safebase;	/* no need to remember string in subbase */
 		case NALNUM:
 		    while (s < strend) {
 			    i = *s;
-			    if (!isalpha(i) && !isdigit(i) && i != '_')
+			    if (!isALNUM(i))
 				    if (regtry(prog, s))
 					    goto got_it;
 			    s++;
@@ -311,7 +322,7 @@ int safebase;	/* no need to remember string in subbase */
 		    break;
 		case SPACE:
 		    while (s < strend) {
-			    if (isspace(*s))
+			    if (isSPACE(*s))
 				    if (regtry(prog, s))
 					    goto got_it;
 			    s++;
@@ -319,7 +330,7 @@ int safebase;	/* no need to remember string in subbase */
 		    break;
 		case NSPACE:
 		    while (s < strend) {
-			    if (!isspace(*s))
+			    if (!isSPACE(*s))
 				    if (regtry(prog, s))
 					    goto got_it;
 			    s++;
@@ -327,7 +338,7 @@ int safebase;	/* no need to remember string in subbase */
 		    break;
 		case DIGIT:
 		    while (s < strend) {
-			    if (isdigit(*s))
+			    if (isDIGIT(*s))
 				    if (regtry(prog, s))
 					    goto got_it;
 			    s++;
@@ -335,7 +346,7 @@ int safebase;	/* no need to remember string in subbase */
 		    break;
 		case NDIGIT:
 		    while (s < strend) {
-			    if (!isdigit(*s))
+			    if (!isDIGIT(*s))
 				    if (regtry(prog, s))
 					    goto got_it;
 			    s++;
@@ -471,7 +482,7 @@ char *prog;
 
 		switch (OP(scan)) {
 		case BOL:
-			if (locinput == regbol ||
+			if (locinput == regbol ? regprev == '\n' :
 			    ((nextchar || locinput < regeol) &&
 			      locinput[-1] == '\n') )
 			{
@@ -517,55 +528,50 @@ char *prog;
 		case ALNUM:
 			if (!nextchar)
 				return(0);
-			if (!isalpha(nextchar) && !isdigit(nextchar) &&
-			  nextchar != '_')
+			if (!isALNUM(nextchar))
 				return(0);
 			nextchar = *++locinput;
 			break;
 		case NALNUM:
 			if (!nextchar && locinput >= regeol)
 				return(0);
-			if (isalpha(nextchar) || isdigit(nextchar) ||
-			  nextchar == '_')
+			if (isALNUM(nextchar))
 				return(0);
 			nextchar = *++locinput;
 			break;
 		case NBOUND:
 		case BOUND:
 			if (locinput == regbol)	/* was last char in word? */
-				ln = 0;
+				ln = isALNUM(regprev);
 			else 
-				ln = (isalpha(locinput[-1]) ||
-				     isdigit(locinput[-1]) ||
-				     locinput[-1] == '_' );
-			n = (isalpha(nextchar) || isdigit(nextchar) ||
-			    nextchar == '_' );	/* is next char in word? */
+				ln = isALNUM(locinput[-1]);
+			n = isALNUM(nextchar); /* is next char in word? */
 			if ((ln == n) == (OP(scan) == BOUND))
 				return(0);
 			break;
 		case SPACE:
 			if (!nextchar && locinput >= regeol)
 				return(0);
-			if (!isspace(nextchar))
+			if (!isSPACE(nextchar))
 				return(0);
 			nextchar = *++locinput;
 			break;
 		case NSPACE:
 			if (!nextchar)
 				return(0);
-			if (isspace(nextchar))
+			if (isSPACE(nextchar))
 				return(0);
 			nextchar = *++locinput;
 			break;
 		case DIGIT:
-			if (!isdigit(nextchar))
+			if (!isDIGIT(nextchar))
 				return(0);
 			nextchar = *++locinput;
 			break;
 		case NDIGIT:
 			if (!nextchar && locinput >= regeol)
 				return(0);
-			if (isdigit(nextchar))
+			if (isDIGIT(nextchar))
 				return(0);
 			nextchar = *++locinput;
 			break;
@@ -762,28 +768,27 @@ char *p;
 		}
 		break;
 	case ALNUM:
-		while (isalpha(*scan) || isdigit(*scan) || *scan == '_')
+		while (isALNUM(*scan))
 			scan++;
 		break;
 	case NALNUM:
-		while (scan < loceol && (!isalpha(*scan) && !isdigit(*scan) &&
-		  *scan != '_'))
+		while (scan < loceol && !isALNUM(*scan))
 			scan++;
 		break;
 	case SPACE:
-		while (scan < loceol && isspace(*scan))
+		while (scan < loceol && isSPACE(*scan))
 			scan++;
 		break;
 	case NSPACE:
-		while (scan < loceol && !isspace(*scan))
+		while (scan < loceol && !isSPACE(*scan))
 			scan++;
 		break;
 	case DIGIT:
-		while (isdigit(*scan))
+		while (isDIGIT(*scan))
 			scan++;
 		break;
 	case NDIGIT:
-		while (scan < loceol && !isdigit(*scan))
+		while (scan < loceol && !isDIGIT(*scan))
 			scan++;
 		break;
 	default:		/* Oh dear.  Called inappropriately. */

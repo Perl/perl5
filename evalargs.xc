@@ -2,9 +2,12 @@
  * kit sizes from getting too big.
  */
 
-/* $Header: evalargs.xc,v 3.0.1.3 89/11/17 15:25:07 lwall Locked $
+/* $Header: evalargs.xc,v 3.0.1.4 90/02/28 17:38:37 lwall Locked $
  *
  * $Log:	evalargs.xc,v $
+ * Revision 3.0.1.4  90/02/28  17:38:37  lwall
+ * patch9: $#foo -= 2 didn't work
+ * 
  * Revision 3.0.1.3  89/11/17  15:25:07  lwall
  * patch5: constant numeric subscripts disappeared in ?:
  * 
@@ -176,7 +179,7 @@
 	    ++sp;
 	    stab = argptr.arg_stab;
 	    str = stab_array(argptr.arg_stab)->ary_magic;
-	    if (argflags & (AF_PRE|AF_POST))
+	    if (optype != O_SASSIGN || argflags & (AF_PRE|AF_POST))
 		str_numset(str,(double)(stab_array(stab)->ary_fill+arybase));
 #ifdef DEBUGGING
 	    tmps = "LARYLEN";
@@ -229,8 +232,6 @@
 	    break;
 	case A_WANTARRAY:
 	    {
-		extern int wantarray;
-
 		if (wantarray == G_ARRAY)
 		    st[++sp] = &str_yes;
 		else
@@ -295,7 +296,8 @@
 			str_cat(tmpstr,
 			  "|tr -s ' \t\f\r' '\\012\\012\\012\\012'|");
 #endif
-			(void)do_open(last_in_stab,tmpstr->str_ptr);
+			(void)do_open(last_in_stab,tmpstr->str_ptr,
+			  tmpstr->str_cur);
 			fp = stab_io(last_in_stab)->ifp;
 			str_free(tmpstr);
 		    }

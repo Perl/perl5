@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 3.0.1.1 89/11/11 04:51:04 lwall Locked $
+/* $Header: regcomp.c,v 3.0.1.2 90/02/28 18:08:35 lwall Locked $
  *
  * $Log:	regcomp.c,v $
+ * Revision 3.0.1.2  90/02/28  18:08:35  lwall
+ * patch9: /[\200-\377]/ didn't work on machines with signed chars
+ * 
  * Revision 3.0.1.1  89/11/11  04:51:04  lwall
  * patch2: /[\000]/ didn't work
  * 
@@ -770,6 +773,7 @@ register int c;
 {
 	if (regcode == &regdummy)
 	    return;
+	c &= 255;
 	if (def)
 		bits[c >> 3] &= ~(1 << (c & 7));
 	else

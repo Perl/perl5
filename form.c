@@ -1,4 +1,4 @@
-/* $Header: form.c,v 3.0 89/10/18 15:17:26 lwall Locked $
+/* $Header: form.c,v 3.0.1.1 90/02/28 17:39:34 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	form.c,v $
+ * Revision 3.0.1.1  90/02/28  17:39:34  lwall
+ * patch9: ... in format threw off subsequent field
+ * 
  * Revision 3.0  89/10/18  15:17:26  lwall
  * 3.0 baseline
  * 
@@ -157,6 +160,7 @@ int sp;
 		    *d++ = '.';
 		    *d++ = '.';
 		    *d++ = '.';
+		    size -= 3;
 		}
 		while (*chophere && index(chopset,*chophere))
 		    chophere++;

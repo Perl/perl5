@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.3 89/12/21 20:13:41 lwall Locked $
+/* $Header: perl.y,v 3.0.1.4 90/02/28 18:03:23 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.4  90/02/28  18:03:23  lwall
+ * patch9: line numbers were bogus during certain portions of foreach evaluation
+ * 
  * Revision 3.0.1.3  89/12/21  20:13:41  lwall
  * patch7: send() didn't allow a TO argument
  * 
@@ -229,6 +232,8 @@ loop	:	label WHILE '(' texpr ')' compblock
 					  stab2arg(A_STAB,scrstab),
 					  Nullarg,Nullarg ),
 					$7)))));
+				$$->c_line = $2;
+				$$->c_head->c_line = $2;
 			    }
 			    else {
 				$$ = wopt(over($3,add_label($1,
@@ -254,6 +259,8 @@ loop	:	label WHILE '(' texpr ')' compblock
 					  stab2arg(A_STAB,scrstab),
 					  Nullarg,Nullarg ),
 					$6)))));
+				$$->c_line = $2;
+				$$->c_head->c_line = $2;
 			    }
 			    else {	/* lisp, anyone? */
 				$$ = wopt(over(defstab,add_label($1,

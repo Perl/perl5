@@ -6,7 +6,8 @@
 
 sub Getopts {
     local($argumentative) = @_;
-    local(@args,$_,$first,$rest);
+    local(@args,$_,$first,$rest,$errs);
+    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -31,7 +32,8 @@ sub Getopts {
 	    }
 	}
 	else {
-	    print stderr "Unknown option: $first\n";
+	    print STDERR "Unknown option: $first\n";
+	    ++$errs;
 	    if($rest ne '') {
 		$ARGV[0] = "-$rest";
 	    }
@@ -40,6 +42,7 @@ sub Getopts {
 	    }
 	}
     }
+    $errs == 0;
 }
 
 1;
