@@ -86,10 +86,10 @@ ok(lc($b)         eq "\x{101}\x{101}aa",  'lc');
 # and it's uppercase is \x{178}, LATIN CAPITAL LETTER Y WITH DIAERESIS.
 
 if (ord("A") == 193) { # EBCDIC
-    ok(uc("\x{DF}aB\x{149}cD") eq "\x{178}AB\x{2BC}NCD",
+    ok("\U\x{DF}aB\x{149}cD" eq "\x{178}AB\x{2BC}NCD",
        "multicharacter uppercase");
 } elsif (ord("A") == 65) {
-    ok(uc("\x{DF}aB\x{149}cD") eq "SSAB\x{2BC}NCD",
+    ok("\U\x{DF}aB\x{149}cD" eq "SSAB\x{2BC}NCD",
        "multicharacter uppercase");
 } else {
     ok(0, "what is your encoding?");
@@ -99,10 +99,10 @@ if (ord("A") == 193) { # EBCDIC
 # There are no single character -> multiple characters lowercase mappings.
 
 if (ord("A") == 193) { # EBCDIC
-    ok(lc("aB\x{149}cD") eq "ab\x{149}cd",
+    ok("\LaB\x{149}cD" eq "ab\x{149}cd",
        "multicharacter lowercase");
 } elsif (ord("A") == 65) {
-    ok(lc("\x{DF}aB\x{149}cD") eq "\x{DF}ab\x{149}cd",
+    ok("\L\x{DF}aB\x{149}cD" eq "\x{DF}ab\x{149}cd",
        "multicharacter lowercase");
 } else {
     ok(0, "what is your encoding?");
