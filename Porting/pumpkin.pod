@@ -43,7 +43,7 @@ to perl5-porters-request@perl.org .
 
 Archives of the list are held at:
 
-    http://www.rosat.mpe-garching.mpg.de/mailing-lists/perl-porters/
+    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 
 =head1 How are Perl Releases Numbered?
 
