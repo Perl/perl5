@@ -3158,8 +3158,11 @@ int yylex
 		if (*s == '(') {
 		    CLINE;
 		    if (gv && GvCVu(gv)) {
+			CV *cv;
+			if ((cv = GvCV(gv)) && SvPOK(cv))
+			    PL_last_proto = SvPV((SV*)cv, PL_na);
 			for (d = s + 1; *d == ' ' || *d == '\t'; d++) ;
-			if (*d == ')' && (sv = cv_const_sv(GvCV(gv)))) {
+			if (*d == ')' && (sv = cv_const_sv(cv))) {
 			    s = d + 1;
 			    goto its_constant;
 			}
@@ -3168,6 +3171,7 @@ int yylex
 		    PL_expect = XOPERATOR;
 		    force_next(WORD);
 		    yylval.ival = 0;
+		    PL_last_lop_op = OP_ENTERSUB;
 		    TOKEN('&');
 		}
 
@@ -3206,6 +3210,7 @@ int yylex
 		    /* Resolve to GV now. */
 		    op_free(yylval.opval);
 		    yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
+		    PL_last_lop_op = OP_ENTERSUB;
 		    /* Is there a prototype? */
 		    if (SvPOK(cv)) {
 			STRLEN len;
@@ -3232,7 +3237,10 @@ int yylex
 		    PL_last_lop_op != OP_TRUNCATE &&  /* S/F prototype in opcode.pl */
 		    PL_last_lop_op != OP_ACCEPT &&
 		    PL_last_lop_op != OP_PIPE_OP &&
-		    PL_last_lop_op != OP_SOCKPAIR)
+		    PL_last_lop_op != OP_SOCKPAIR &&
+		    !(PL_last_lop_op == OP_ENTERSUB 
+			 && PL_last_proto 
+			 && PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*'))
 		{
 		    warn(
 		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
