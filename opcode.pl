@@ -420,7 +420,7 @@ __END__
 # logop       - |            listop   - @            pmop       - /
 # padop/svop  - $            padop    - # (unused)   loop       - {
 # baseop/unop - %            loopexop - }            filestatop - -
-# pvop/svop   - "
+# pvop/svop   - "            cop      - ;
 
 # Other options are:
 #   needs stack mark                    - m
@@ -923,6 +923,9 @@ threadsv	per-thread value	ck_null		ds0
 # Control (contd.)
 setstate	set statement info	ck_null		s;
 method_named	method with known name	ck_null		d$
+
+dor		defined or (//)			ck_null		|
+dorassign	defined or assignment (//=)	ck_null		s|
 
 # Add new ops before this, the custom operator.
 

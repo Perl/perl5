@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jul 19 01:54:37 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Thu Aug  1 18:53:48 CEST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1150,17 +1150,6 @@ elif test -d c:/. ; then
 fi
 
 i_whoami=''
-ccname=''
-ccversion=''
-perllibs=''
-: set useposix=false in your hint file to disable the POSIX extension.
-useposix=true
-: set useopcode=false in your hint file to disable the Opcode extension.
-useopcode=true
-: Trailing extension.  Override this in a hint file, if needed.
-: Extra object files, if any, needed on this platform.
-archobjs=''
-archname=''
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
 locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
@@ -1169,6 +1158,9 @@ locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
 : no include file wanted by default
 inclwanted=''
 
+: Trailing extension.  Override this in a hint file, if needed.
+: Extra object files, if any, needed on this platform.
+archobjs=''
 groupstype=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
@@ -1192,17 +1184,25 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
+: full support for void wanted by default
+defvoidused=15
+
+ccname=''
+ccversion=''
+perllibs=''
+: set useposix=false in your hint file to disable the POSIX extension.
+useposix=true
+: set useopcode=false in your hint file to disable the Opcode extension.
+useopcode=true
 archname64=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
 libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
+archname=''
 : set usethreads on the Configure command line to enable threads.
 usereentrant='undef'
-: full support for void wanted by default
-defvoidused=15
-
 : List of libraries we want.
 : If anyone needs -lnet, put it in a hint file.
 libswanted='sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl'
@@ -9915,7 +9915,7 @@ echo " "
 echo 'Checking to see if your C compiler knows about "const"...' >&4
 $cat >const.c <<'EOCP'
 typedef struct spug { int drokk; } spug;
-int main()
+main()
 {
 	const char *foo;
 	const spug y;
@@ -13381,7 +13381,7 @@ $rm -f try.c try
 echo " "
 echo 'Checking to see if your C compiler knows about "volatile"...' >&4
 $cat >try.c <<'EOCP'
-int main()
+main()
 {
 	typedef struct _goo_struct goo_struct;
 	goo_struct * volatile goo = ((goo_struct *)0);
@@ -15596,7 +15596,7 @@ eval $inlibc
 echo " "
 echo "Checking to see if your C compiler can copy structs..." >&4
 $cat >try.c <<'EOCP'
-int main()
+main()
 {
 	struct blurfl {
 		int dyick;
@@ -19424,7 +19424,19 @@ Note that DynaLoader is always built and need not be mentioned here.
 
 EOM
 	case "$dynamic_ext" in
-	'') dflt="$avail_ext" ;;
+	'')
+		: Exclude those listed in static_ext
+		dflt=''
+		for xxx in $avail_ext; do
+			case " $static_ext " in
+			*" $xxx "*) ;;
+			*) dflt="$dflt $xxx" ;;
+			esac
+		done
+		set X $dflt
+		shift
+		dflt="$*"
+		;;
 	*)	dflt="$dynamic_ext"
 		# Perhaps we are reusing an old out-of-date config.sh.
 		case "$hint" in

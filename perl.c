@@ -1158,7 +1158,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef MACOS_TRADITIONAL
 	    /* ignore -e for Dev:Pseudo argument */
 	    if (argv[1] && !strcmp(argv[1], "Dev:Pseudo"))
-	    	break;
+		break;
 #endif
 	    if (PL_euid != PL_uid || PL_egid != PL_gid)
 		Perl_croak(aTHX_ "No -e allowed in setuid scripts");
@@ -3274,6 +3274,9 @@ STATIC void
 S_find_beginning(pTHX)
 {
     register char *s, *s2;
+#ifdef MACOS_TRADITIONAL
+    int maclines = 0;
+#endif
 
     /* skip forward in input to the real script? */
 
@@ -3285,16 +3288,16 @@ S_find_beginning(pTHX)
 	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
 	    if (!gMacPerl_AlwaysExtract)
 		Perl_croak(aTHX_ "No Perl script found in input\n");
-		
+
 	    if (PL_doextract)			/* require explicit override ? */
 		if (!OverrideExtract(PL_origfilename))
 		    Perl_croak(aTHX_ "User aborted script\n");
 		else
 		    PL_doextract = FALSE;
-		
+
 	    /* Pater peccavi, file does not have #! */
 	    PerlIO_rewind(PL_rsfp);
-	
+
 	    break;
 	}
 #else
@@ -3317,7 +3320,18 @@ S_find_beginning(pTHX)
 			;
 	    }
 #ifdef MACOS_TRADITIONAL
+	    /* We are always searching for the #!perl line in MacPerl,
+	     * so if we find it, still keep the line count correct
+	     * by counting lines we already skipped over
+	     */
+	    for (; maclines > 0 ; maclines--)
+		PerlIO_ungetc(PL_rsfp, '\n');
+
 	    break;
+
+	/* gMacPerl_AlwaysExtract is false in MPW tool */
+	} else if (gMacPerl_AlwaysExtract) {
+	    ++maclines;
 #endif
 	}
     }

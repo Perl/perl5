@@ -4611,8 +4611,12 @@ PP(pp_split)
 	iters++;
     }
     else if (!origlimit) {
-	while (iters > 0 && (!TOPs || !SvANY(TOPs) || SvCUR(TOPs) == 0))
-	    iters--, SP--;
+	while (iters > 0 && (!TOPs || !SvANY(TOPs) || SvCUR(TOPs) == 0)) {
+	    if (TOPs && !make_mortal)
+		sv_2mortal(TOPs);
+	    iters--;
+	    SP--;
+	}
     }
 
     if (realarray) {

@@ -1,5 +1,13 @@
 Revision history for Perl extension Unicode::Collate.
 
+0.20  Fri Jul 26 02:15:25 2002
+    - now UCA Version 9.
+    - U+FDD0..U+FDEF are new non-characters.
+    - fix: whitespace characters before @backwards etc. in a table file.
+    - now values for 'alternate', 'backwards', etc.,
+      which are explicitly specified via new(),
+      are preferred to those specified in a table file.
+
 0.12  Sun May 05 09:43:10 2002
     - add new methods, ->UCA_Version and ->Base_Unicode_Version.
     - test fix: removed the needless requirement of Unicode::Normalize.

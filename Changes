@@ -27,3 +27,431 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 --------------
 Version v5.9.X		Development release working toward v5.10
 --------------
+____________________________________________________________________________
+[ 17702] By: hv                                    on 2002/08/08  15:08:57
+        Log: Subject: Re: README.aix
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 30 Jul 2002 13:30:29 +0200
+             Message-id: <20020730130812.48B9.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.aix
+____________________________________________________________________________
+[ 17701] By: hv                                    on 2002/08/08  15:06:01
+        Log: Subject: [PATCH] Re: pp_sys.c compile failed..
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 6 Aug 2002 10:42:07 -0400 (EDT) (15:42 BST)
+             Message-id: <Pine.SOL.4.10.10208061024250.5315-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 17700] By: hv                                    on 2002/08/08  15:02:57
+        Log: Subject: [DOC PATCH] perlipc.pod
+             From: Arjen Laarhoven <arjen@nl.demon.net>
+             Date: Tue, 6 Aug 2002 14:16:01 +0200
+             Message-id: <20020806121601.GK40785@aragorn.noc.nl.demon.net>
+     Branch: perl
+	   ! pod/perlipc.pod
+____________________________________________________________________________
+[ 17699] By: hv                                    on 2002/08/08  14:56:56
+        Log: Subject: [PATCH] Re: [perl #15898] coredump with variable our
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 2 Aug 2002 23:44:21 +0200
+             Message-id: <20020802234421.11c62fe6.rgarciasuarez@free.fr>
+     Branch: perl
+	   ! op.c t/op/attrs.t
+____________________________________________________________________________
+[ 17698] By: hv                                    on 2002/08/08  14:52:45
+        Log: Subject: [perl #16000] Configure -Dstatic_ext=foo builds foo as both static and dynamic
+             From: Yitzchak Scott-Thoennes (via RT) <perlbug@perl.org>
+             Date: 6 Aug 2002 04:28:15 -0000 (Tue 05:28 BST)
+             Message-id: <rt-16000-32913.8.41582281961522@bugs6.perl.org>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 17697] By: hv                                    on 2002/08/08  14:49:00
+        Log: Subject: Doc patch for Class::Struct under 5.8.0
+             From: Damian Conway <damian@conway.org>
+             Date: Tue, 30 Jul 2002 23:03:14 +1000
+             Message-id: <3D471FCF.1C7C6E6B@conway.org>
+     Branch: perl
+	   ! lib/Class/Struct.pm
+____________________________________________________________________________
+[ 17696] By: hv                                    on 2002/08/08  14:44:21
+        Log: Subject: Re: [perl #15523] Memory Leak in split with trailing empty elements
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 31 Jul 2002 09:50:06 +0200
+             Message-id: <87ado85ob5.fsf@vran.herceg.de>
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 17695] By: hv                                    on 2002/08/08  14:40:41
+        Log: Subject: [PATCH] Re: [perl #15479] perl 5.8.0 segfault
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 2 Aug 2002 00:13:10 +0200
+             Message-id: <20020802001310.7e1dc694.rgarciasuarez@free.fr>
+     Branch: perl
+	   + t/op/stash.t
+	   ! MANIFEST perl.h
+____________________________________________________________________________
+[ 17694] By: hv                                    on 2002/08/08  14:31:55
+        Log: Subject: Re: [RE-PATCH] Not OK: perl v5.8.0 on PA-RISC2.0 11.00
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 31 Jul 2002 16:04:02 +0200
+             Message-id: <20020731155005.4915.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 17693] By: hv                                    on 2002/08/08  14:25:16
+        Log: Subject: [PATCH: lib/ExtUtils/MM_Unix.pm] Be less strict about what's POD.
+             From: Abigail <abigail@foad.org>
+             Date: Thu, 25 Jul 2002 08:52:52 -0700 (16:52 BST)
+             Message-id: <20020725085252.A2703@ucan.foad.org>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 17692] By: hv                                    on 2002/08/08  14:20:05
+        Log: Subject: [PATCH] README.jp and README.cn
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Thu, 25 Jul 2002 07:05:11 +0800
+             Message-id: <20020724230511.GA1327@not.autrijus.org>
+     Branch: perl
+	   ! README.cn README.jp
+____________________________________________________________________________
+[ 17691] By: hv                                    on 2002/08/08  14:01:50
+        Log: Subject: [perl #15398] Usage::pod2usage looks for perldoc in $Config{bin} and not in $Config{scriptdir}
+             From: Henrik Tougaard (via RT) <perlbug@perl.org>
+             Date: 23 Jul 2002 13:45:49 -0000 (Tue 14:45 BST)
+             Message-id: <rt-15398-31095.6.30466042998663@perl>
+     Branch: perl
+	   ! lib/Pod/Usage.pm
+____________________________________________________________________________
+[ 17690] By: rgs                                   on 2002/08/07  19:56:42
+        Log: Doc fix : the symbol for COPs wasn't documented.
+     Branch: perl
+	   ! opcode.pl
+____________________________________________________________________________
+[ 17689] By: rgs                                   on 2002/08/06  20:45:30
+        Log: Subject: Re: no warnings 'io';
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 27 Jul 2002 21:49:55 +0100
+             Message-ID: <20020727204954.GB5117@Bagpuss.unfortu.net>
+             
+             Plus a little bit of regression tests.
+     Branch: perl
+	   ! t/lib/warnings/pp_hot util.c
+____________________________________________________________________________
+[ 17688] By: rgs                                   on 2002/08/06  20:04:19
+        Log: Subject: [PATCH] XS build fix for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 4 Aug 2002 12:13:06 -0500
+             Message-ID: <a05111b07b97256e1c335@[172.16.52.1]>
+     Branch: perl
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[ 17687] By: rgs                                   on 2002/08/06  19:50:12
+        Log: PerlIO::scalar wasn't able to read from non-string
+             scalar ; now stringifies its argument.
+     Branch: perl
+	   ! ext/PerlIO/scalar/scalar.xs ext/PerlIO/t/scalar.t
+____________________________________________________________________________
+[ 17686] By: rgs                                   on 2002/08/06  19:10:51
+        Log: More regression tests for $^H and %^H.
+             Add a TODO test for eval "" preserving %^H.
+     Branch: perl
+	   ! t/comp/hints.t
+____________________________________________________________________________
+[ 17685] By: hv                                    on 2002/08/05  22:42:09
+        Log: Subject: Re: mention of "use sort" botched in perlfunc? + PATCH
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Sun, 21 Jul 2002 12:13:32 -0400 (17:13 BST)
+             Message-id: <200207211613.MAA69505@raptor.research.att.com>
+     Branch: perl
+	   ! lib/sort.pm lib/sort.t
+____________________________________________________________________________
+[ 17684] By: hv                                    on 2002/08/05  22:35:22
+        Log: Integrate from perlio: change #17653 fixes bug RT15283
+     Branch: perl
+	  !> ext/PerlIO/via/via.xs
+____________________________________________________________________________
+[ 17683] By: hv                                    on 2002/08/05  22:26:45
+        Log: Integrate from maint-5.6/macperl via macperl
+             Changes 17660, 17661, 17662, 17663, 17664
+     Branch: perl
+	  !> perl.c
+____________________________________________________________________________
+[ 17682] By: hv                                    on 2002/08/05  15:04:54
+        Log: Subject: Defined-or patch (cleaned up)
+             From: "Brent Dax" <brentdax@cpan.org>
+             Date: Fri, 26 Jul 2002 05:41:52 -0700 (13:41 BST)
+             Message-id: <000001c234a1$d1ca72c0$6501a8c0@deepblue>
+     Branch: perl
+	   + t/op/dor.t
+	   ! MANIFEST embed.h ext/B/B/Deparse.pm ext/Opcode/Opcode.pm
+	   ! keywords.h keywords.pl op.c opcode.h opcode.pl opnames.h
+	   ! perly.c perly.h perly.y perly_c.diff pod/perlop.pod pp.sym
+	   ! pp_ctl.c pp_hot.c pp_proto.h toke.c vms/perly_c.vms
+	   ! vms/perly_h.vms
+____________________________________________________________________________
+[ 17681] By: hv                                    on 2002/08/05  14:41:23
+        Log: typo
+     Branch: perl
+	   ! keywords.h keywords.pl
+____________________________________________________________________________
+[ 17680] By: hv                                    on 2002/08/05  14:33:39
+        Log: warn that keywords.h is generated
+     Branch: perl
+	   ! keywords.h keywords.pl
+____________________________________________________________________________
+[ 17679] By: hv                                    on 2002/08/04  23:40:22
+        Log: again: #17678 caused test failures in pod2html,
+             in which $1 could leak from previous regexp
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 17678] By: hv                                    on 2002/08/04  15:34:19
+        Log: Subject: Re: [ID 20020704.001] my $foo = $1 won't taint $foo (with use re 'taint')
+             From: hv@crypt.org
+             Date: Sun, 04 Aug 2002 17:40:30 +0100
+             Message-id: <200208041640.g74GeUU25061@crypt.compulink.co.uk>
+     Branch: perl
+	   ! mg.c t/op/taint.t
+____________________________________________________________________________
+[ 17677] By: hv                                    on 2002/08/04  15:25:25
+        Log: Main branch no longer needs op/taint.t version check.
+     Branch: perl
+	   ! t/op/taint.t
+____________________________________________________________________________
+[ 17676] By: hv                                    on 2002/08/04  15:14:09
+        Log: Subject: Re: [PATCH] Re: taint news
+             From: Rick Delaney <rick.delaney@rogers.com>
+             Date: 04 Aug 2002 00:28:58 EDT
+             Message-ID: <m3heibs0vp.fsf@cs839290-a.mtth.phub.net.cable.rogers.com>
+             Ref: 20020208.005
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 17675] By: hv                                    on 2002/08/04  01:48:36
+        Log: Fix email address for Kragen Sitaker <kragen@pobox.com>.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 17674] By: hv                                    on 2002/08/04  01:30:11
+        Log: Subject: [PATCH] AUTHORS
+             From: Colin Watson <colinw@zeus.com>
+             Date: Thu, 25 Jul 2002 15:54:37 +0100
+             Message-id: <20020725145437.GC4921@zeus.com>
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 17673] By: hv                                    on 2002/08/04  01:27:36
+        Log: Subject: [PATCH] AUTHORS
+             From: Walt Mankowski <waltman@pobox.com>
+             Date: Sat, 20 Jul 2002 22:56:12 -0400 (Sun 03:56 BST)
+             Message-id: <20020721025612.GB15958@pobox.com>
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 17672] By: hv                                    on 2002/08/04  01:25:14
+        Log: Subject: Re: mention of "use sort" botched in perlfunc?
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 20 Jul 2002 13:49:58 -0400 (18:49 BST)
+             Message-id: <20020720174958.GL362@ool-18b93024.dyn.optonline.net>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 17671] By: hv                                    on 2002/08/04  01:11:32
+        Log: Change version from 5.8.0 to 5.9.0.
+     Branch: perl
+	   ! Configure NetWare/Makefile NetWare/config_H.wc
+	   ! Porting/config.sh Porting/config_H README.win32 config_h.SH
+	   ! cygwin/perlld.in epoc/config.sh epoc/createpkg.pl
+	   ! hints/dgux.sh installperl lib/ExtUtils/MM_NW5.pm makedef.pl
+	   ! patchlevel.h win32/Makefile win32/makefile.mk
+	   ! wince/Makefile.ce
+____________________________________________________________________________
+[ 17670] By: pudge                                 on 2002/07/30  03:19:03
+        Log: Silent warnings in MM_MacOS
+     Branch: maint-5.8/macperl
+	   ! lib/ExtUtils/MM_MacOS.pm
+____________________________________________________________________________
+[ 17669] By: pudge                                 on 2002/07/30  03:18:47
+        Log: Silent warnings in MM_MacOS
+     Branch: macperl
+	   ! lib/ExtUtils/MM_MacOS.pm
+____________________________________________________________________________
+[ 17668] By: pudge                                 on 2002/07/30  03:16:52
+        Log: Help fixes from Thomas Wegner
+     Branch: macperl
+	   ! macos/macperl/BuildHelpIndex macos/macperl/MacPerl.podhelp
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/BuildHelpIndex macos/macperl/MacPerl.podhelp
+     Branch: maint-5.8/macperl
+	   ! macos/macperl/BuildHelpIndex macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 17667] By: pudge                                 on 2002/07/29  20:42:43
+        Log: Integrate perl
+     Branch: macperl
+	  +> Changes5.8 pod/perl58delta.pod
+	  !> (integrate 36 files)
+____________________________________________________________________________
+[ 17666] By: pudge                                 on 2002/07/29  20:04:54
+        Log: Integrate from maint-5.6/macperl
+             
+             Changes 17660, 17661, 17662, 17663, 17664
+     Branch: macperl
+	   ! macos/ext/Mac/Dialogs/Dialogs.pm macos/lib/Mac/AETE/App.pm
+	   ! macos/lib/Mac/AETE/Format/Glue.pm macos/lib/Mac/OSA/Simple.pm
+	   ! macos/macperl/Droplets/gluemac.plx perl.c
+____________________________________________________________________________
+[ 17665] By: pudge                                 on 2002/07/29  19:39:58
+        Log: Integrate from maint-5.6/macperl
+             
+             Changes 17660, 17661, 17662, 17663, 17664
+     Branch: maint-5.8/macperl
+	   ! macos/ext/Mac/Dialogs/Dialogs.pm macos/lib/Mac/AETE/App.pm
+	   ! macos/lib/Mac/AETE/Format/Glue.pm macos/lib/Mac/OSA/Simple.pm
+	   ! macos/macperl/Droplets/gluemac.plx perl.c
+____________________________________________________________________________
+[ 17664] By: pudge                                 on 2002/07/29  19:20:51
+        Log: Neglected to include old bugfix from main branch
+     Branch: maint-5.6/macperl
+	   ! perl.c
+____________________________________________________________________________
+[ 17663] By: pudge                                 on 2002/07/29  18:25:57
+        Log: Count line numbers properly in MacPerl app
+     Branch: maint-5.6/macperl
+	   ! perl.c
+____________________________________________________________________________
+[ 17662] By: pudge                                 on 2002/07/29  18:21:16
+        Log: Make Mac::Glue work to glue Mac OS X apps under Classic
+     Branch: maint-5.6/macperl
+	   ! macos/lib/Mac/AETE/App.pm macos/lib/Mac/AETE/Format/Glue.pm
+____________________________________________________________________________
+[ 17661] By: pudge                                 on 2002/07/29  18:20:46
+        Log: gluemac failed with some paths
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/Droplets/gluemac.plx
+____________________________________________________________________________
+[ 17660] By: pudge                                 on 2002/07/29  18:20:12
+        Log: Fix long-standing bug with popup menus not working in dialogs
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Dialogs/Dialogs.pm
+____________________________________________________________________________
+[ 17659] By: pudge                                 on 2002/07/29  18:19:00
+        Log: Update test script
+     Branch: maint-5.6/macperl
+	   ! macos/MacPerlTests.cmd
+____________________________________________________________________________
+[ 17658] By: pudge                                 on 2002/07/29  18:18:35
+        Log: Portability fixes for blib
+             (already in 5.8/5.9)
+     Branch: maint-5.6/macperl
+	   ! lib/blib.pm
+____________________________________________________________________________
+[ 17657] By: pudge                                 on 2002/07/29  18:17:54
+        Log: Minor test fixes
+     Branch: maint-5.6/macperl
+	   ! t/lib/filespec.t t/op/magic.t
+____________________________________________________________________________
+[ 17656] By: ams                                   on 2002/07/28  06:12:33
+        Log: Subject: [PATCH] Typo in regcomp.c
+             From: Chris Ball <chris@cpan.org>
+             Date: 26 Jul 2002 17:49:35 +0100
+             Message-Id: <868z3yzb6o.fsf@void.printf.net>
+             (With additional tweak to s_reginclasslen.)
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 17655] By: jhi                                   on 2002/07/25  20:37:16
+        Log: Upgrade to Unicode::Collate 0.20.
+     Branch: perl
+	   ! lib/Unicode/Collate.pm lib/Unicode/Collate/Changes
+	   ! lib/Unicode/Collate/README lib/Unicode/Collate/t/test.t
+____________________________________________________________________________
+[ 17654] By: jhi                                   on 2002/07/23  16:33:52
+        Log: Commas, schcommas.
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 17653] By: nick                                  on 2002/07/23  07:56:25
+        Log: Fix #15283 - binmode() was not passing mode
+             to PUSHED method called from PerlIO::via.
+     Branch: perlio
+	   ! ext/PerlIO/via/via.xs
+____________________________________________________________________________
+[ 17652] By: nick                                  on 2002/07/23  07:55:03
+        Log: Integrate mainline to just past perl5.8.0
+     Branch: perlio
+	  +> Changes5.8
+	  !> Changes MANIFEST
+____________________________________________________________________________
+[ 17651] By: pudge                                 on 2002/07/23  03:24:35
+        Log: Integrate maint-5.6/perl
+     Branch: maint-5.6/macperl
+	  +> t/win32/longpath.t
+	  !> (integrate 35 files)
+____________________________________________________________________________
+[ 17650] By: gsar                                  on 2002/07/22  15:27:48
+        Log: create macperl-5.8 branch
+     Branch: maint-5.8/macperl
+	  +> (branch 3480 files)
+____________________________________________________________________________
+[ 17649] By: jhi                                   on 2002/07/21  08:44:34
+        Log: Because of #17429.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 17648] By: chip                                  on 2002/07/19  22:51:19
+        Log: Update Changes.  (Including incorrect change #.)
+     Branch: maint-5.005/perl
+	   ! Changes
+____________________________________________________________________________
+[ 17647] By: chip                                  on 2002/07/19  22:47:57
+        Log: ensure that hashes never attempt to malloc with a negative size
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Subject: Re: [ID 20000421.002] Math::BigInt out of memory?
+     Branch: maint-5.005/perl
+	   ! hv.c
+____________________________________________________________________________
+[ 17646] By: chip                                  on 2002/07/19  20:15:23
+        Log: Update Changes in preparation for 5.005_04.
+     Branch: maint-5.005/perl
+	   ! Changes
+____________________________________________________________________________
+[ 17645] By: gsar                                  on 2002/07/19  19:29:57
+        Log: create maint-5.8 branch from perl/...@17638
+     Branch: maint-5.8/perl
+	  +> (branch 2829 files)
+____________________________________________________________________________
+[ 17644] By: jhi                                   on 2002/07/19  18:55:18
+        Log: Copy perldelta as perl58delta, purge the perldelta.
+     Branch: perl
+	   + pod/perl58delta.pod
+	   ! MANIFEST pod/perldelta.pod
+____________________________________________________________________________
+[ 17642] By: jhi                                   on 2002/07/19  16:37:39
+        Log: Update Changes; mainly to get the DEVELNNNNN stamp back in business.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 17641] By: jhi                                   on 2002/07/19  16:31:08
+        Log: Integrate perlio (no changes, but that's fine).
+     Branch: perl
+	  !> embed.fnc perl.h
+____________________________________________________________________________
+[ 17640] By: nick                                  on 2002/07/19  07:09:37
+        Log: Integrate mainline@17638, apply couple
+             of whitespace edits so matches perl5.8.0 exactly.
+     Branch: perlio
+	   ! embed.fnc perl.h
+	  !> AUTHORS Changes Configure INSTALL NetWare/Makefile
+	  !> NetWare/t/NWScripts.pl Porting/config.sh Porting/config_H
+	  !> lib/File/stat.pm patchlevel.h pod/perldelta.pod
+	  !> pod/perlfunc.pod pod/perlhist.pod pod/perlthrtut.pod
+	  !> pod/perltoc.pod pod/perlvar.pod util.c
+____________________________________________________________________________
+[ 17639] By: jhi                                   on 2002/07/19  00:47:18
+        Log: It's all yours, Hugo.
+     Branch: perl
+	   + Changes5.8
+	   ! Changes MANIFEST

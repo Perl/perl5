@@ -4224,11 +4224,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	SV *rv;
 
 	/* The 0th element stores the character class description
-	 * in its textual form: used later (regexec.c:Perl_regclass_swatch())
+	 * in its textual form: used later (regexec.c:Perl_regclass_swash())
 	 * to initialize the appropriate swash (which gets stored in
 	 * the 1st element), and also useful for dumping the regnode.
 	 * The 2nd element stores the multicharacter foldings,
-	 * used later (regexec.c:s_reginclasslen()). */
+	 * used later (regexec.c:S_reginclass()). */
 	av_store(av, 0, listsv);
 	av_store(av, 1, NULL);
 	av_store(av, 2, (SV*)unicode_alternate);
