@@ -195,19 +195,28 @@
 #define AMG_CALLbinL(left,right,meth) \
             amagic_call(left,right,CAT2(meth,_amg),AMGf_noright)
 
-#define tryAMAGICunW(meth,set) STMT_START { \
+#define tryAMAGICunW(meth,set,shift) STMT_START { \
           if (PL_amagic_generation) { \
 	    SV* tmpsv; \
-	    SV* arg= *(sp); \
+	    SV* arg= sp[shift]; \
+	  am_again: \
 	    if ((SvAMAGIC(arg))&&\
 		(tmpsv=AMG_CALLun(arg,meth))) {\
-	       SPAGAIN;	\
+	       SPAGAIN; if (shift) sp += shift; \
 	       set(tmpsv); RETURN; } \
 	  } \
 	} STMT_END
 
+#define FORCE_SETs(sv) STMT_START { sv_setsv(TARG, (sv)); SETTARG; } STMT_END
+
 #define tryAMAGICun	tryAMAGICunSET
-#define tryAMAGICunSET(meth) tryAMAGICunW(meth,SETs)
+#define tryAMAGICunSET(meth) tryAMAGICunW(meth,SETs,0)
+#define tryAMAGICunTARGET(meth, shift)					\
+	{ dSP; sp--; 	/* get TARGET from below PL_stack_sp */		\
+	    { dTARGETSTACKED; 						\
+		{ dSP; tryAMAGICunW(meth,FORCE_SETs,shift);}}}
+#define setAGAIN(ref) sv = arg = ref; goto am_again;
+#define tryAMAGICunDEREF(meth) tryAMAGICunW(meth,setAGAIN,0)
 
 #define opASSIGN (PL_op->op_flags & OPf_STACKED)
 #define SETsv(sv)	STMT_START {					\

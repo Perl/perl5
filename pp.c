@@ -211,6 +211,8 @@ PP(pp_rv2gv)
 
     if (SvROK(sv)) {
       wasref:
+	tryAMAGICunDEREF(to_gv);
+
 	sv = SvRV(sv);
 	if (SvTYPE(sv) == SVt_PVIO) {
 	    GV *gv = (GV*) sv_newmortal();
@@ -256,6 +258,8 @@ PP(pp_rv2sv)
 
     if (SvROK(sv)) {
       wasref:
+	tryAMAGICunDEREF(to_sv);
+
 	sv = SvRV(sv);
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
