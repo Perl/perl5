@@ -426,6 +426,7 @@ ext/I18N/Langinfo/Makefile.PL	I18N::Langinfo
 ext/IO/ChangeLog		IO perl module change log
 ext/IO/hints/sco.pl		Hint for IO for named architecture
 ext/IO/IO.pm			Top-level interface to IO::* classes
+ext/IO/lib/IO/t/IO.t	See if IO works
 ext/IO/IO.xs			IO extension external subroutines
 ext/IO/lib/IO/Dir.pm		IO directory reading package
 ext/IO/lib/IO/File.pm		IO file handle package

@@ -17,6 +17,9 @@ sub BEGIN {
     if ($ENV{PERL_CORE}){
 	chdir('t') if -d 't';
 	@INC = ('.', '../lib');
+    } else {
+	# This lets us distribute Test::More in t/
+	unshift @INC, 't';
     }
     require Config; import Config;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
@@ -84,7 +87,11 @@ sub test_header {
     is ($header->{byteorder}, $byteorder, "byte order");
     is ($header->{intsize}, $Config{intsize}, "int size");
     is ($header->{longsize}, $Config{longsize}, "long size");
-    is ($header->{ptrsize}, $Config{ptrsize}, "long size");
+ SKIP: {
+	skip ("No \$Config{prtsize} on this perl version ($])", 1)
+	    unless defined $Config{ptrsize};
+	is ($header->{ptrsize}, $Config{ptrsize}, "long size");
+    }
     is ($header->{nvsize}, $Config{nvsize} || $Config{doublesize} || 8,
         "nv size"); # 5.00405 doesn't even have doublesize in config.
   }
@@ -111,6 +118,7 @@ sub test_truncated {
   for my $i (0 .. length ($data) - 1) {
     my $short = substr $data, 0, $i;
 
+    # local $Storable::DEBUGME = 1;
     my $clone = &$sub($short);
     is (defined ($clone), '', "truncated $what to $i should fail");
     if ($i < $magic_len) {
@@ -209,7 +217,7 @@ sub test_things {
     $where = $file_magic + 3 + length $header->{byteorder};
     foreach (['intsize', "Integer"],
              ['longsize', "Long integer"],
-             ['ptrsize', "Pointer integer"],
+             ['ptrsize', "Pointer"],
              ['nvsize', "Double"]) {
       my ($key, $name) = @$_;
       $copy = $contents;

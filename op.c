@@ -2142,7 +2142,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
     int maybe_scalar = 0;
 
 /* [perl #17376]: this appears to be premature, and results in code such as
-   C< my(%x); > executing in list mode rather than void mode */
+   C< our(%x); > executing in list mode rather than void mode */
 #if 0
     if (o->op_flags & OPf_PARENS)
 	list(o);

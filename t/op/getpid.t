@@ -5,10 +5,13 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(../lib);
+    require './test.pl';
 }
 
 use strict;
 use Config;
+
+plan tests => 2;
 
 BEGIN {
     if (!$Config{useithreads}) {
@@ -30,6 +33,5 @@ my $ppid2 : shared = 0;
 
 new threads( sub { ($pid2, $ppid2) = ($$, getppid()); } ) -> join();
 
-print "1..2\n";
-print "not " if $pid  != $pid2;  print "ok 1 - pids\n";
-print "not " if $ppid != $ppid2; print "ok 2 - ppids\n";
+is($pid,  $pid2,  'pids');
+is($ppid, $ppid2, 'ppids');

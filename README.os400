@@ -69,6 +69,30 @@ PASE_EXEC_QOPENSYS="N".  If you have V5R1, you'll need to get the
 latest PTFs to have this feature.  Scripts starting with
 #!/QOpenSys/perl/bin/perl should always work.
 
+=head2 Known Problems
+
+When compiling in PASE, there is no "oslevel" command.  Therefore,
+you may want to create a script called "oslevel" that echoes the
+level of AIX that your version of PASE runtime supports.  If you're
+unsure, consult your documentation or use "4.3.3.0".
+
+If you have test cases that fail, check for the existence of spool files.
+The test case may be trying to use a syscall that is not implemented
+in PASE.  To avoid the SIGILL, try setting the PASE_SYSCALL_NOSIGILL
+environment variable or have a handler for the SIGILL.  If you can
+compile programs for PASE, run the config script and edit config.sh
+when it gives you the option.  If you want to remove fchdir(), which
+isn't implement in V5R1, simply change the line that says:
+
+d_fchdir='define'
+
+to
+
+d_fchdir='undef'
+
+and then compile Perl.  The places where fchdir() is used have
+alternatives for systems that do not have fchdir() available.
+
 =head2 Perl on ILE
 
 There exists a port of Perl to the ILE environment.  This port, however,

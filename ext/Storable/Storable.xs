@@ -4962,7 +4962,7 @@ static SV *retrieve_code(stcxt_t *cxt, char *cname)
 	 */
 
 	sub = newSVpvn("sub ", 4);
-	sv_catpv(sub, SvPV(text, PL_na)); //XXX no sv_catsv!
+	sv_catpv(sub, SvPV(text, PL_na)); /* XXX no sv_catsv! */
 	SvREFCNT_dec(text);
 
 	/*
@@ -5348,7 +5348,7 @@ static SV *magic_check(stcxt_t *cxt)
 
     /* sizeof(char *) */
     if ((int) *current != sizeof(char *))
-        CROAK(("Pointer integer size is not compatible"));
+        CROAK(("Pointer size is not compatible"));
 
     if (use_NV_size) {
         /* sizeof(NV) */
@@ -5642,7 +5642,22 @@ static SV *do_retrieve(
 
 	if (!sv) {
 		TRACEME(("retrieve ERROR"));
+#if (PATCHLEVEL <= 4) 
+		/* perl 5.00405 seems to screw up at this point with an
+		   'attempt to modify a read only value' error reported in the
+		   eval { $self = pretrieve(*FILE) } in _retrieve.
+		   I can't see what the cause of this error is, but I suspect a
+		   bug in 5.004, as it seems to be capable of issuing spurious
+		   errors or core dumping with matches on $@. I'm not going to
+		   spend time on what could be a fruitless search for the cause,
+		   so here's a bodge. If you're running 5.004 and don't like
+		   this inefficiency, either upgrade to a newer perl, or you are
+		   welcome to find the problem and send in a patch.
+		 */
+		return newSV(0);
+#else
 		return &PL_sv_undef;		/* Something went wrong, return undef */
+#endif
 	}
 
 	TRACEME(("retrieve got %s(0x%"UVxf")",

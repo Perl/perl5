@@ -38,7 +38,7 @@ BEGIN {
     }
 }
 
-BEGIN { plan tests => 47 }
+BEGIN { plan tests => 49 }
 
 use Storable qw(retrieve store nstore freeze nfreeze thaw dclone);
 use Safe;
@@ -47,9 +47,13 @@ use Safe;
 
 use vars qw($freezed $thawed @obj @res $blessed_code);
 
-sub code { "JAPH" }
 $blessed_code = bless sub { "blessed" }, "Some::Package";
 { package Another::Package; sub foo { __PACKAGE__ } }
+
+{
+    no strict; # to make the life for Safe->reval easier
+    sub code { "JAPH" }
+}
 
 @obj =
     ([\&code,                   # code reference
@@ -147,7 +151,6 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 ######################################################################
 # Security with
 #   $Storable::Eval
-#   $Storable::Safe
 #   $Storable::Deparse
 
 {
@@ -203,20 +206,13 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
 {
     my $safe = new Safe;
-    $safe->permit(qw(:default require));
     local $Storable::Eval = sub { $safe->reval(shift) };
 
-    for my $def ([0 => "JAPH",
-		  1 => 42,
-		 ]
-		) {
-	my($i, $res) = @$def;
-	$freezed = freeze $obj[0]->[$i];
-	$@ = "";
-	eval { $thawed = thaw $freezed };
-	ok($@, "");
-	ok($thawed->(), $res);
-    }
+    $freezed = freeze $obj[0]->[0];
+    $@ = "";
+    eval { $thawed = thaw $freezed };
+    ok($@, "");
+    ok($thawed->(), "JAPH");
 
     $freezed = freeze $obj[0]->[6];
     eval { $thawed = thaw $freezed };
@@ -238,6 +234,19 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	eval { $thawed = thaw $freezed };
 	ok($@ =~ /trapped/);
     }
+}
+
+{
+    my $safe = new Safe;
+    # because of opcodes used in "use strict":
+    $safe->permit(qw(:default require));
+    local $Storable::Eval = sub { $safe->reval(shift) };
+
+    $freezed = freeze $obj[0]->[1];
+    $@ = "";
+    eval { $thawed = thaw $freezed };
+    ok($@, "");
+    ok($thawed->(), 42);
 }
 
 {
