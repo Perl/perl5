@@ -5163,7 +5163,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	/* SIZE */
 
 	switch (*q) {
-#ifdef Quad_t
+#ifdef HAS_QUAD
 	case 'L':			/* Ld */
 	case 'q':			/* qd */
 	    intsize = 'q';
@@ -5171,7 +5171,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    break;
 #endif
 	case 'l':
-#ifdef Quad_t
+#ifdef HAS_QUAD
              if (*(q + 1) == 'l') {	/* lld */
 		intsize = 'q';
 		q += 2;
@@ -5287,7 +5287,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		default:	iv = va_arg(*args, int); break;
 		case 'l':	iv = va_arg(*args, long); break;
 		case 'V':	iv = va_arg(*args, IV); break;
-#ifdef Quad_t
+#ifdef HAS_QUAD
 		case 'q':	iv = va_arg(*args, Quad_t); break;
 #endif
 		}
@@ -5299,7 +5299,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		default:	iv = (int)iv; break;
 		case 'l':	iv = (long)iv; break;
 		case 'V':	break;
-#ifdef Quad_t
+#ifdef HAS_QUAD
 		case 'q':	iv = (Quad_t)iv; break;
 #endif
 		}
@@ -5353,7 +5353,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		default:   uv = va_arg(*args, unsigned); break;
 		case 'l':  uv = va_arg(*args, unsigned long); break;
 		case 'V':  uv = va_arg(*args, UV); break;
-#ifdef Quad_t
+#ifdef HAS_QUAD
 		case 'q':  uv = va_arg(*args, Quad_t); break;
 #endif
 		}
@@ -5365,7 +5365,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		default:	uv = (unsigned)uv; break;
 		case 'l':	uv = (unsigned long)uv; break;
 		case 'V':	break;
-#ifdef Quad_t
+#ifdef HAS_QUAD
 		case 'q':	uv = (Quad_t)uv; break;
 #endif
 		}
@@ -5521,7 +5521,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		default:	*(va_arg(*args, int*)) = i; break;
 		case 'l':	*(va_arg(*args, long*)) = i; break;
 		case 'V':	*(va_arg(*args, IV*)) = i; break;
-#ifdef Quad_t
+#ifdef HAS_QUAD
 		case 'q':	*(va_arg(*args, Quad_t*)) = i; break;
 #endif
 		}

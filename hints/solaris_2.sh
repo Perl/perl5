@@ -333,6 +333,21 @@ EOM
 esac
 EOCBU
 
+# Turn on largefileness if available.
+	lfcflags="`getconf LFS_CFLAGS 2>/dev/null`"
+	lfldflags="`getconf LFS_LDFLAGS 2>/dev/null`"
+	lflibs="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+case "$lfcflags$lfldflags$lflibs" in
+'');;
+*) ccflags="$ccflags $lfcflags"
+   ldflags="$ldflags $ldldflags"
+   libswanted="$libswanted $lflibs"
+   ;;
+esac
+	lfcflags=''
+	lfldflags=''
+	lflibs=''
+
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bits.cbu <<'EOCBU'
@@ -347,9 +362,6 @@ EOM
 		exit 1
 		;;
 	    esac
-	    ccflags="$ccflags `getconf LFS_CFLAGS`"
-	    ldflags="$ldflags `getconf LFS_LDFLAGS`"
-	    libswanted="$libswanted `getconf LFS_LIBS`"
 	    case "$ccflags" in
 	    *-DUSE_LONG_LONG*) ;;
 	    *) ccflags="$ccflags -DUSE_LONG_LONG" ;;

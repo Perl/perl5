@@ -290,6 +290,21 @@ EOM
 esac
 EOCBU
 
+# Turn on largefileness if available.
+	lfcflags="`getconf _CS_XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
+	lfldflags="`getconf _CS_XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
+	lflibs="`getconf _CS_XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+case "$lfcflags$lfldflags$lflibs" in
+'');;
+*) ccflags="$ccflags $lfcflags"
+   ldflags="$ldflags $ldldflags"
+   libswanted="$libswanted $lflibs"
+   ;;
+esac
+	lfcflags=''
+	lfldflags=''
+	lflibs=''
+
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bits.cbu <<'EOCBU'
@@ -311,7 +326,7 @@ Cannot continue, aborting.
 EOM
 		exit 1
 	    fi
-	    ccflags="$ccflags +DD64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+	    ccflags="$ccflags +DD64"
 	    ldflags="$ldflags +DD64"
 	    ld=/usr/bin/ld
 	    set `echo " $libswanted " | sed -e 's@ dl @ @'`
@@ -319,3 +334,6 @@ EOM
 	    glibpth="/lib/pa20_64"
 esac
 EOCBU
+
+
+

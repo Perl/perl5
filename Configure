@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Nov 11 21:36:00 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Nov 12 01:02:11 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -400,6 +400,7 @@ d_gnulibc=''
 d_hasmntopt=''
 d_htonl=''
 d_inetaton=''
+d_int64t=''
 d_isascii=''
 d_killpg=''
 d_lchown=''
@@ -595,7 +596,6 @@ i_float=''
 i_gdbm=''
 d_grpasswd=''
 i_grp=''
-d_int64t=''
 i_inttypes=''
 i_limits=''
 i_locale=''
@@ -799,7 +799,7 @@ sPRIo64=''
 sPRIu64=''
 sPRIx64=''
 d_quad=''
-quadcase=''
+quadkind=''
 quadtype=''
 uquadtype=''
 drand01=''
@@ -8604,7 +8604,7 @@ else
 	val="$undef"
 	echo "No, it doesn't."
 	case "$fpossize" in
-	8) echo "(This is okay because your fpos_t is 64 bits wide.)" ;;
+	8) echo "(This is okay because your fpos_t is 64 bits wide.)" >&4 ;;
 	esac
 fi
 $rm -f try.* try
@@ -9035,11 +9035,9 @@ set i_inttypes
 eval $setvar
 
 : check for int64_t
-case "$use64bits" in
-"$define" )
-	echo " "
-	$echo $n "Checking to see if your system supports int64_t...$c" >&4
-	$cat >try.c <<EOCP
+echo " "
+$echo $n "Checking to see if your system supports int64_t...$c" >&4
+$cat >try.c <<EOCP
 #include <sys/types.h>
 #$i_inttypes I_INTTYPES
 #ifdef I_INTTYPES
@@ -9047,22 +9045,17 @@ case "$use64bits" in
 #endif
 int main() { int64_t x = 7; }
 EOCP
-	set try
-	if eval $compile; then
-		val="$define"
-		echo " Yes, it does." >&4
-	else
-		val="$undef"
-		echo " No, it doesn't." >&4
-	fi
-	$rm -f try try.*
-	;;
-*)	val="$undef"
-	;;
-esac
+set try
+if eval $compile; then
+	val="$define"
+	echo " Yes, it does." >&4
+else
+	val="$undef"
+	echo " No, it doesn't." >&4
+fi
+$rm -f try try.*
 set d_int64t
 eval $setvar
-
 
 : Look for isascii
 echo " "
@@ -9553,7 +9546,7 @@ esac
 
 
 echo " "
-echo "Checking which 64-bit integer type to use..." >&4
+echo "Checking which 64-bit integer type we could use..." >&4
 
 case "$intsize" in
 8) val=int
@@ -9562,7 +9555,7 @@ case "$intsize" in
    val='"unsigned int"'
    set uquadtype
    eval $setvar
-   quadcase=1
+   quadkind=1
    ;;
 *) case "$longsize" in
    8) val=long
@@ -9571,7 +9564,7 @@ case "$intsize" in
       val='"unsigned long"'
       set uquadtype
       eval $setvar
-      quadcase=2
+      quadkind=2
       ;;
    *) case "$uselonglong:$d_longlong:$longlongsize" in
       define:define:8)
@@ -9581,7 +9574,7 @@ case "$intsize" in
         val='"unsigned long long"'
         set uquadtype
         eval $setvar
-        quadcase=3
+        quadkind=3
         ;;
       *) case "$d_int64t" in
          define)
@@ -9591,7 +9584,7 @@ case "$intsize" in
            val=uint64_t
            set uquadtype
            eval $setvar
-           quadcase=4
+           quadkind=4
            ;;
          esac
          ;;
@@ -9602,10 +9595,14 @@ case "$intsize" in
 esac
 
 case "$quadtype" in
-'')	echo "Alas, no 64-bit integer types in sight." >&4
+'')	case "$uselonglong:$d_longlong:$longlongsize" in
+	undef:define:8)
+	   echo "(You would have 'long long', but you are not using it.)" >&4 ;;
+	*) echo "Alas, no 64-bit integer types in sight." >&4 ;;
+	esac
 	d_quad="$undef"
 	;;
-*)	echo "Using '$quadtype' for 64-bit integers." >&4
+*)	echo "We could use '$quadtype' for 64-bit integers." >&4
 	d_quad="$define"
 	;;
 esac
@@ -14660,7 +14657,7 @@ privlib='$privlib'
 privlibexp='$privlibexp'
 prototype='$prototype'
 ptrsize='$ptrsize'
-quadcase='$quadcase'
+quadkind='$quadkind'
 quadtype='$quadtype'
 randbits='$randbits'
 randfunc='$randfunc'

@@ -68,7 +68,7 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 	*d++ = (( uv        & 0x3f) | 0x80);
 	return d;
     }
-#ifdef Quad_t
+#ifdef HAS_QUAD
     if (uv < 0x2000000000)
 #endif
     {
@@ -81,7 +81,7 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 	*d++ = (( uv        & 0x3f) | 0x80);
 	return d;
     }
-#ifdef Quad_t
+#ifdef HAS_QUAD
     {
 	*d++ =                        0xff;	/* Can't match U+FFFE! */
 	*d++ = (((uv >> 36) & 0x3f) | 0x80);

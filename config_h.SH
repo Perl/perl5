@@ -1006,10 +1006,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol holds the type used for 64-bit integers.
  *	It can be int, long, long long, int64_t etc...
  */
-/* QUADCASE:
- *	This symbol, if defined, encodes the type of a quad:
- *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
- */
 /* Uquad_t:
  *	This symbol holds the type used for unsigned 64-bit integers.
  *	It can be unsigned int, unsigned long, unsigned long long,
@@ -1018,7 +1014,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_quad HAS_QUAD	/**/
 #$d_quad Quad_t $quadtype	/**/
 #$d_quad Uquad_t $uquadtype	/**/
-#$d_quad QUADCASE $quadcase	/**/
+#ifdef HAS_QUAD
+#   define QUADKIND $quadkind	/**/
+#   define QUAD_IS_INT	1
+#   define QUAD_IS_LONG	2
+#   define QUAD_IS_LONG_LONG	3
+#   define QUAD_IS_INT64_T	4
+#endif
 
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
@@ -2220,6 +2222,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_hasmntopt HAS_HASMNTOPT		/**/
 
+/* HAS_INT64_T:
+ *     This symbol will defined if the C compiler supports int64_t.
+ *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	<sys/types.h> is enough.
+ */
+#$d_int64t     HAS_INT64_T               /**/
+
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
  *	or <limits.h> defines the symbol LDBL_DIG, which is the number
@@ -2320,13 +2329,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *     This symbol, if defined, indicates to the C program that it should
  *     include <inttypes.h>.
  */
-/* HAS_INT64_T:
- *     This symbol will defined if the C compiler supports int64_t.
- *     Usually the <inttypes.h> needs to be included, but sometimes
- *	<sys/types.h> is enough.
- */
 #$i_inttypes   I_INTTYPES                /**/
-#$d_int64t     HAS_INT64_T               /**/
 
 /* I_MNTENT:
  *	This symbol, if defined, indicates that <mntent.h> exists and
