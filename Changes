@@ -28,6 +28,109 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19922] By: jhi                                   on 2003/07/02  05:43:27
+        Log: Integrate:
+             [ 19920]
+             Move the libgcc.a hack into a section for pre-1.6 NetBSD releases.
+             The latest releases of NetBSD don't require the hack.  From
+             Johnny Lam.            
+             
+             [ 19921]
+             VMS: with this, 100% make test in Compaq C V6.5-001
+             on OpenVMS Alpha V7.3-1, from Craig Berry.
+     Branch: maint-5.8/perl
+	  !> configure.com ext/Devel/DProf/DProf.t hints/netbsd.sh
+	  !> t/op/magic.t
+____________________________________________________________________________
+[ 19919] By: jhi                                   on 2003/07/01  21:28:15
+        Log: Integrate:
+             [ 19896]
+             Integrate #19892, #19895 from perlio to compile and avoid
+             crashing on Win32.
+             
+             [ 19897]
+             Subject: Re: Subject: Problems: 5.8.1, Solaris, Configure, sched_yield(), -lrt & -lposix4
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Tue, 01 Jul 2003 00:03:24 +0100
+             Message-ID: <3F00C1BC.3020103@sun.com>
+             
+             [ 19898]
+             Rework Time::HiRes not to need HAS_NANOSLEEP from Configure.
+             
+             [ 19899]
+             More nanosleep removal.
+             
+             [ 19900]
+             Regen Configure.
+             
+             [ 19902]
+             Regen Glossary et al.
+             
+             [ 19903]
+             Switch on PERL_IMPLICIT_SYS, not on Win32.
+             
+             [ 19906]
+             Do the "aligned contiguous" check only if the arguments
+             look like aligned; re-introduce the "traditional contiguous"
+             checks with OS/2 special quirks and all.
+             
+             [ 19910]
+             Integrate from perlio:
+             [ 19909]
+             binmode() should affect IoOFP() as well as IoIFP() if it is
+             distinct (e.g. sockets).
+             
+             [ 19911]
+             Tweak an existing IO test to test also the change #19910.
+             
+             [ 19912]
+             One more test (does binmode()ing a socket succeed)
+             and add -w.
+             
+             [ 19913]
+             Even more :utf8 socket testing, now in both directions.
+             
+             [ 19914]
+             A naked values() caused shuffling of lib/Config.pm,
+             which in turn caused unnecessary rebuilds.
+             
+             [ 19915]
+             Upgrade to Unicode::Normalize 0.23.
+             
+             [ 19916]
+             Subject: [PATCH] B:: fixes + 'When were CVOPs gone ?'
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Tue, 1 Jul 2003 19:51:25 +0300
+             Message-ID: <20030701165125.GA1521@ratsnest.hole>
+             
+             [ 19917]
+             Subject: [PATCH] long C<=item>s in pod/perlunicode.pod 
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Tue, 1 Jul 2003 18:21:34 +0100 
+             Message-ID: <533D273D4014D411AB1D00062938C4D9040465A9@hotel.npl.co.uk>
+             
+             Subject:  [PATCH] long C<=item>s in lib/CGI.pm
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Message-ID: <533D273D4014D411AB1D00062938C4D9040465AA@hotel.npl.co.uk>
+             Date: Tue, 1 Jul 2003 18:25:17 +0100 
+             
+             Subject: [PATCH] long <=item>s  in lib/ExtUtils/MakeMaker/FAQ.pod
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Tue, 1 Jul 2003 18:29:09 +0100 
+             Message-ID: <533D273D4014D411AB1D00062938C4D9040465AB@hotel.npl.co.uk>
+             
+             [ 19918]
+             Add a new utility, Porting/Modules.
+     Branch: maint-5.8/perl
+	  +> Porting/Modules ext/Time/HiRes/hints/dec_osf.pl
+	   ! Configure config_h.SH
+	  !> (integrate 39 files)
+____________________________________________________________________________
+[ 19893] By: jhi                                   on 2003/06/30  09:46:21
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19891] By: jhi                                   on 2003/06/30  09:39:29
         Log: Integrate:
              [ 19857]
