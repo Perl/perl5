@@ -144,6 +144,17 @@ value.
     print $i++;  # prints 0
     print ++$j;  # prints 1
 
+Note that just as in C, Perl doesn't define B<when> the variable is
+incremented or decremented. You just know it will be done sometime 
+before or after the value is returned. This also means that modifying
+a variable twice in the same statement will lead to undefined behaviour.
+Avoid statements like:
+
+    $i = $i ++;
+    print ++ $i + $i ++;
+
+Perl will not guarantee what the result of the above statements is.
+
 The auto-increment operator has a little extra builtin magic to it.  If
 you increment a variable that is numeric, or that has ever been used in
 a numeric context, you get a normal increment.  If, however, the

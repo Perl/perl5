@@ -4583,6 +4583,15 @@ produced is already ordinary Perl which shouldn't be filtered again.
 
 =item *
 
+Optimised away statements are rendered as '???'. This includes statements that
+have a compile-time side-effect, such as the obscure
+
+    my $x if 0;
+
+which is not, consequently, deparsed correctly.
+
+=item *
+
 There are probably many more bugs on non-ASCII platforms (EBCDIC).
 
 =back
