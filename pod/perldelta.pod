@@ -491,6 +491,25 @@ If C<$/> is a referenence to an integer, or a scalar that holds an integer,
 E<lt>E<gt> will read in records instead of lines. For more info, see
 L<perlvar/$/>.
 
+=head1 Significant bug fixes
+
+=head2 E<lt>HANDLEE<gt> on empty files
+
+With C<$/> set to C<undef>, slurping an empty file returns a string of
+zero length (instead of C<undef>, as it used to) for the first time the
+HANDLE is read.  Subsequent reads yield C<undef>.
+
+This means that the following will append "foo" to an empty file (it used
+to not do anything before):
+
+    perl -0777 -pi -e 's/^/foo/' empty_file
+
+Note that the behavior of:
+
+    perl -pi -e 's/^/foo/' empty_file
+
+is unchanged (it continues to leave the file empty).
+
 =head1 Supported Platforms
 
 Configure has many incremental improvements.  Site-wide policy for building
