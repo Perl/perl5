@@ -11,7 +11,7 @@ use vars qw(
 	    $Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime
 	   );
 
-$VERSION = "1.0302";
+$VERSION = "1.0303";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
@@ -188,7 +188,7 @@ sub autosplit_lib_modules{
 sub autosplit_file {
     my($filename, $autodir, $keep, $check_for_autoloader, $check_mod_time)
 	= @_;
-    my(@outfiles);
+    my(%outfiles);
     local($_);
     local($/) = "\n";
 
@@ -311,14 +311,24 @@ sub autosplit_file {
 	    my $path;
 	    if (!$Is83 and open(OUT, ">$lpath")){
 	        $path=$lpath;
+		# perl downcases all filenames on VMS (which upcases all filenames) so
+		# we'd better downcase the sub name list too, or subs with upper case
+		# letters in them will get their .al files deleted right after they're
+		# created. (The mixed case sub name won't match the all-lowercase
+		# filename, and so be cleaned up as a scrap file)
+		my $opath = ($Is_VMS or $Is83) ? lc($path) : $path;
+		$outfiles{$opath} = $path;
 		print "  writing $lpath\n" if ($Verbose>=2);
 	    } else {
-		open(OUT, ">$spath") or die "Can't create $spath: $!\n";
 		$path=$spath;
+		# same as above comment
+		my $opath = ($Is_VMS or $Is83) ? lc($path) : $path;
+		my $mode = exists $outfiles{$opath} ? ">>" : ">";
+		open(OUT, "$mode$spath") or die "Can't create $spath: $!\n";
+		$outfiles{$opath} = $path;
 		print "  writing $spath (with truncated name)\n"
 			if ($Verbose>=1);
 	    }
-	    push(@outfiles, $path);
 	    print OUT <<EOT;
 # NOTE: Derived from $filename.
 # Changes made here will be lost when autosplit again.
@@ -351,20 +361,8 @@ EOT
     close(IN);
     
     if (!$keep){  # don't keep any obsolete *.al files in the directory
-	my(%outfiles);
-	# @outfiles{@outfiles} = @outfiles;
-	# perl downcases all filenames on VMS (which upcases all filenames) so
-	# we'd better downcase the sub name list too, or subs with upper case
-	# letters in them will get their .al files deleted right after they're
-	# created. (The mixed case sub name won't match the all-lowercase
-	# filename, and so be cleaned up as a scrap file)
-	if ($Is_VMS or $Is83) {
-	    %outfiles = map {lc($_) => lc($_) } @outfiles;
-	} else {
-	    @outfiles{@outfiles} = @outfiles;
-	}  
 	my(%outdirs,@outdirs);
-	for (@outfiles) {
+	for (values %outfiles) {
 	    $outdirs{File::Basename::dirname($_)}||=1;
 	}
 	for my $dir (keys %outdirs) {
@@ -399,9 +397,7 @@ EOT
     print TS "1;\n";
     close(TS);
 
-    _check_unique($filename, $Maxlen, 1, @outfiles);
-
-    @outfiles;
+    values %outfiles;
 }
 
 sub _modpname ($) {
@@ -413,36 +409,6 @@ sub _modpname ($) {
 	$modpname =~ s#::#/#g;
     }
     $modpname;
-}
-
-sub _check_unique {
-    my($filename, $maxlen, $warn, @outfiles) = @_;
-    my(%notuniq) = ();
-    my(%shorts)  = ();
-    my(@toolong) = grep(
-			length(File::Basename::basename($_))
-			> $maxlen,
-			@outfiles
-		       );
-
-    foreach (@toolong){
-	my($dir) = File::Basename::dirname($_);
-	my($file) = File::Basename::basename($_);
-	my($trunc) = substr($file,0,$maxlen);
-	$notuniq{$dir}{$trunc} = 1 if $shorts{$dir}{$trunc};
-	$shorts{$dir}{$trunc} = $shorts{$dir}{$trunc} ?
-	    "$shorts{$dir}{$trunc}, $file" : $file;
-    }
-    if (%notuniq && $warn){
-	print "$filename: some names are not unique when " .
-	    "truncated to $maxlen characters:\n";
-	foreach my $dir (sort keys %notuniq){
-	    print " directory $dir:\n";
-	    foreach my $trunc (sort keys %{$notuniq{$dir}}) {
-		print "  $shorts{$dir}{$trunc} truncate to $trunc\n";
-	    }
-	}
-    }
 }
 
 1;
