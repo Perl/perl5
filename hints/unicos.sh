@@ -30,3 +30,14 @@ d_setitimer='undef'
 # These exist but do not really work.
 d_setregid='undef'
 d_setreuid='undef'
+cat > UU/usethreads.cbu <<'EOCBU'
+# This script UU/usethreads.cbu will get 'called-back' by Configure
+# after it has prompted the user for whether to use threads.
+case "$usethreads" in
+$define|true|[yY]*)
+        set `echo X "$libswanted "| sed -e "s/ c / pthread c /"`
+        shift
+        libswanted="$*"
+	;;
+esac
+EOCBU
