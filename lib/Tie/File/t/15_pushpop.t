@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Check PUSH, POP, SHIF, and UNSHIFT 
+# Check PUSH, POP, SHIFT, and UNSHIFT 
 #
 # Each call to 'check_contents' actually performs two tests.
 # First, it calls the tied object's own 'check_integrity' method,
@@ -9,7 +9,8 @@
 # Then, it checks the actual contents of the file against the expected
 # contents.
 
-use lib '/home/mjd/src/perl/Tie-File2/lib';
+use POSIX 'SEEK_SET';
+
 my $file = "tf$$.txt";
 1 while unlink $file;
 my $data = "rec0$/rec1$/rec2$/";
@@ -39,7 +40,7 @@ print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
 
 # Trivial push
-$n = push @a;
+$n = push(@a, ());
 check_contents("$ {data}rec3$/rec4$/");
 print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
@@ -75,7 +76,7 @@ print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
 
 # Trivial unshift
-$n = unshift @a;
+$n = unshift(@a, ());
 check_contents("rec3$/rec4$/$data");
 print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
@@ -99,29 +100,29 @@ print ! defined $n ? "ok $N\n" : "not ok $N # last rec should be undef, is $n\n"
 $N++;
 
 
-sub init_file {
-  my $data = shift;
-  open F, "> $file" or die $!;
-  binmode F;
-  print F $data;
-  close F;
-}
-
 sub check_contents {
   my $x = shift;
-  local *FH;
   my $integrity = $o->_check_integrity($file, $ENV{INTEGRITY});
   print $integrity ? "ok $N\n" : "not ok $N\n";
   $N++;
-  my $open = open FH, "< $file";
-  binmode FH;
+
+  local *FH = $o->{fh};
+  seek FH, 0, SEEK_SET;
   my $a;
   { local $/; $a = <FH> }
-  print (($open && $a eq $x) ? "ok $N\n" : "not ok $N\n");
+  $a = "" unless defined $a;
+  if ($a eq $x) {
+    print "ok $N\n";
+  } else {
+    s{$/}{\\n}g for $a, $x;
+    print "not ok $N\n# expected <$x>, got <$a>\n";
+  }
   $N++;
 }
 
 END {
+  undef $o;
+  untie @a;
   1 while unlink $file;
 }
 

@@ -10,14 +10,18 @@
 # Then, it checks the actual contents of the file against the expected
 # contents.
 
+use POSIX 'SEEK_SET';
+
 my $file = "tf$$.txt";
 my $data = "rec0blahrec1blahrec2blah";
 
-print "1..88\n";
+print "1..101\n";
 
 my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;  # partial credit just for showing up
+
+init_file($data);
 
 my $o = tie @a, 'Tie::File', $file, recsep => 'blah';
 print $o ? "ok $N\n" : "not ok $N\n";
@@ -26,8 +30,6 @@ $N++;
 my $n;
 
 # (3-22) splicing at the beginning
-init_file($data);
-
 splice(@a, 0, 0, "rec4");
 check_contents("rec4blah$data");
 splice(@a, 0, 1, "rec5");       # same length
@@ -136,6 +138,40 @@ check_contents("rec0blahrec1blah");
 splice(@a, 0, 17);
 check_contents("");
 
+# (89-92) In the past, splicing past the end was not correctly detected
+# (1.14)
+splice(@a, 89, 3);
+check_contents("");
+splice(@a, @a, 3);
+check_contents("");
+
+# (93-96) Also we did not emulate splice's freaky behavior when inserting
+# past the end of the array (1.14)
+splice(@a, 89, 0, "I", "like", "pie");
+check_contents("Iblahlikeblahpieblah");
+splice(@a, 89, 0, "pie pie pie");
+check_contents("Iblahlikeblahpieblahpie pie pieblah");
+
+# (97) Splicing with too large a negative number should be fatal
+# This test ignored because it causes 5.6.1 and 5.7.2 to dump core
+# NOT MY FAULT
+if ($] < 5.006 || $] > 5.007002) {
+  eval { splice(@a, -7, 0) };
+  print $@ =~ /^Modification of non-creatable array value attempted, subscript -7/
+      ? "ok $N\n" : "not ok $N \# \$\@ was '$@'\n";
+} else { 
+  print "ok $N \# skipped (5.6.0 through 5.7.2 dump core here.)\n";
+}
+$N++;
+       
+# (98-101) Test default arguments
+splice @a, 0, 0, (0..11);
+splice @a, 4;
+check_contents("0blah1blah2blah3blah");
+splice @a;
+check_contents("");
+
+
 sub init_file {
   my $data = shift;
   open F, "> $file" or die $!;
@@ -146,18 +182,26 @@ sub init_file {
 
 sub check_contents {
   my $x = shift;
-  local *FH;
   my $integrity = $o->_check_integrity($file, $ENV{INTEGRITY});
   print $integrity ? "ok $N\n" : "not ok $N\n";
   $N++;
-  my $open = open FH, "< $file";
+  local *FH = $o->{fh};
+  seek FH, 0, SEEK_SET;
   my $a;
   { local $/; $a = <FH> }
-  print (($open && $a eq $x) ? "ok $N\n" : "not ok $N\n");
+  $a = "" unless defined $a;
+  if ($a eq $x) {
+    print "ok $N\n";
+  } else {
+    s{$/}{\\n}g for $a, $x;
+    print "not ok $N\n# expected <$x>, got <$a>\n";
+  }
   $N++;
 }
 
 END {
+  undef $o;
+  untie @a;
   1 while unlink $file;
 }
 

@@ -770,7 +770,7 @@ run_byacc:	FORCE check_byacc
 	    -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
 	sed -e '/^extern YYSTYPE yy/D' y.tab.h >yh.tmp && mv yh.tmp y.tab.h
 	cmp -s y.tab.h perly.h && rm -f y.tab.h || mv y.tab.h perly.h
-	perl -i perlyline.pl perly.c
+	perl -i.old perlyline.pl perly.c
 	chmod 664 vms/perly_c.vms vms/perly_h.vms
 	perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
 

@@ -237,6 +237,7 @@
 #define gv_efullname4		Perl_gv_efullname4
 #define gv_fetchfile		Perl_gv_fetchfile
 #define gv_fetchmeth		Perl_gv_fetchmeth
+#define gv_fetchmeth_autoload	Perl_gv_fetchmeth_autoload
 #define gv_fetchmethod		Perl_gv_fetchmethod
 #define gv_fetchmethod_autoload	Perl_gv_fetchmethod_autoload
 #define gv_fetchpv		Perl_gv_fetchpv
@@ -409,6 +410,7 @@
 #if defined(USE_LOCALE_COLLATE)
 #define mem_collxfrm		Perl_mem_collxfrm
 #endif
+#define memcmp_byte_utf8	Perl_memcmp_byte_utf8
 #define mess			Perl_mess
 #define vmess			Perl_vmess
 #define qerror			Perl_qerror
@@ -1794,6 +1796,7 @@
 #define gv_efullname4(a,b,c,d)	Perl_gv_efullname4(aTHX_ a,b,c,d)
 #define gv_fetchfile(a)		Perl_gv_fetchfile(aTHX_ a)
 #define gv_fetchmeth(a,b,c,d)	Perl_gv_fetchmeth(aTHX_ a,b,c,d)
+#define gv_fetchmeth_autoload(a,b,c,d)	Perl_gv_fetchmeth_autoload(aTHX_ a,b,c,d)
 #define gv_fetchmethod(a,b)	Perl_gv_fetchmethod(aTHX_ a,b)
 #define gv_fetchmethod_autoload(a,b,c)	Perl_gv_fetchmethod_autoload(aTHX_ a,b,c)
 #define gv_fetchpv(a,b,c)	Perl_gv_fetchpv(aTHX_ a,b,c)
@@ -1965,6 +1968,7 @@
 #if defined(USE_LOCALE_COLLATE)
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)
 #endif
+#define memcmp_byte_utf8(a,b,c,d)	Perl_memcmp_byte_utf8(aTHX_ a,b,c,d)
 #define vmess(a,b)		Perl_vmess(aTHX_ a,b)
 #define qerror(a)		Perl_qerror(aTHX_ a)
 #define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)

@@ -4012,35 +4012,39 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 	for (;;) {
 	    rev = 0;
 	    {
-	    /* this is atoi() that tolerates underscores */
-	    char *end = pos;
-	    UV mult = 1;
-	    if ( *(s-1) == '_') {
-	    	mult = 10;
+		 /* this is atoi() that tolerates underscores */
+		 char *end = pos;
+		 UV mult = 1;
+		 if ( *(s-1) == '_') {
+		      mult = 10;
+		 }
+		 while (--end >= s) {
+		      UV orev;
+		      orev = rev;
+		      rev += (*end - '0') * mult;
+		      mult *= 10;
+		      if (orev > rev && ckWARN_d(WARN_OVERFLOW))
+			   Perl_warner(aTHX_ WARN_OVERFLOW,
+				       "Integer overflow in decimal number");
+		 }
 	    }
-	    while (--end >= s) {
-		UV orev;
-		orev = rev;
-		rev += (*end - '0') * mult;
-		mult *= 10;
-		if (orev > rev && ckWARN_d(WARN_OVERFLOW))
-		Perl_warner(aTHX_ WARN_OVERFLOW,
-			"Integer overflow in decimal number");
-	    }
-	    }
+#ifdef EBCDIC
+	    if (rev > 0x7FFFFFFF)
+		 Perl_croak(aTHX "In EBCDIC the v-string components cannot exceed 2147483647");
+#endif
 	    /* Append native character for the rev point */
 	    tmpend = uvchr_to_utf8(tmpbuf, rev);
 	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
-	    SvUTF8_on(sv);
+		 SvUTF8_on(sv);
 	    if ( (*pos == '.' || *pos == '_') && isDIGIT(pos[1]))
-	    s = ++pos;
+		 s = ++pos;
 	    else {
-	    s = pos;
-	    break;
+		 s = pos;
+		 break;
 	    }
 	    while (isDIGIT(*pos) )
-	    pos++;
+		 pos++;
 	}
 	SvPOK_on(sv);
 	SvREADONLY_on(sv);
@@ -4342,5 +4346,38 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
 {
 }
 
+/*
+=for apidoc memcmp_byte_utf8
 
+Similar to memcmp(), but the first string is with bytes, the second
+with utf8.  Takes into account that the lengths may be different.
 
+=cut
+*/
+
+int
+Perl_memcmp_byte_utf8(pTHX_ char *sb, STRLEN lbyte, char *su, STRLEN lutf)
+{
+    U8 *sbyte = (U8*)sb;
+    U8 *sutf  = (U8*)su;
+    U8 *ebyte = sbyte + lbyte;
+    U8 *eutf  = sutf  + lutf;
+
+    while (sbyte < ebyte) {
+	if (sutf >= eutf)
+	    return 1;			/* utf one shorter */
+	if (*sbyte < 128) {
+	    if (*sbyte != *sutf)
+		return *sbyte - *sutf;
+	    sbyte++; sutf++;	/* CONTINUE */
+	} else if ((*sutf & 0x3F) == (*sbyte >> 6)) { /* byte 0xFF: 0xC3 BF */
+	    if ((sutf[1] & 0x3F) != (*sbyte & 0x3F))
+		return (*sbyte & 0x3F) - (*sutf & 0x3F);
+	    sbyte++, sutf += 2;	/* CONTINUE */
+	} else
+	    return (*sbyte >> 6) - (*sutf & 0x3F);
+    }
+    if (sutf >= eutf)
+	return 0;
+    return -1;				/* byte one shorter */
+}

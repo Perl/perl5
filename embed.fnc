@@ -426,6 +426,7 @@ Ap	|void	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 p	|char*	|mem_collxfrm	|const char* s|STRLEN len|STRLEN* xlen
 #endif
+Apd	|int	|memcmp_byte_utf8	|char *sbyte|STRLEN lbyte|char *sutf|STRLEN lutf
 Afp	|SV*	|mess		|const char* pat|...
 Ap	|SV*	|vmess		|const char* pat|va_list* args
 p	|void	|qerror		|SV* err

@@ -13,7 +13,9 @@
 my $file = "tf$$.txt";
 my $data = "rec0$/rec1$/rec2$/";
 
-print "1..97\n";
+print "1..101\n";
+
+init_file($data);
 
 my $N = 1;
 use Tie::File;
@@ -26,8 +28,6 @@ $N++;
 my $n;
 
 # (3-22) splicing at the beginning
-init_file($data);
-
 splice(@a, 0, 0, "rec4");
 check_contents("rec4$/$data");
 splice(@a, 0, 1, "rec5");       # same length
@@ -162,6 +162,12 @@ if ($] < 5.006 || $] > 5.007002) {
 }
 $N++;
        
+# (98-101) Test default arguments
+splice @a, 0, 0, (0..11);
+splice @a, 4;
+check_contents("0$/1$/2$/3$/");
+splice @a;
+check_contents("");
     
 
 sub init_file {
@@ -172,21 +178,29 @@ sub init_file {
   close F;
 }
 
+use POSIX 'SEEK_SET';
 sub check_contents {
   my $x = shift;
-  local *FH;
   my $integrity = $o->_check_integrity($file, $ENV{INTEGRITY});
+  local *FH = $o->{fh};
+  seek FH, 0, SEEK_SET;
   print $integrity ? "ok $N\n" : "not ok $N\n";
   $N++;
-  my $open = open FH, "< $file";
-  binmode FH;
   my $a;
   { local $/; $a = <FH> }
-  print (($open && $a eq $x) ? "ok $N\n" : "not ok $N\n");
+  $a = "" unless defined $a;
+  if ($a eq $x) {
+    print "ok $N\n";
+  } else {
+    s{$/}{\\n}g for $a, $x;
+    print "not ok $N\n# expected <$x>, got <$a>\n";
+  }
   $N++;
 }
 
 END {
+  undef $o;
+  untie @a;
   1 while unlink $file;
 }
 

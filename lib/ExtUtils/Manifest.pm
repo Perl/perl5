@@ -361,17 +361,22 @@ comments are separated by one or more TAB characters in the
 output. All files that match any regular expression in a file
 C<MANIFEST.SKIP> (if such a file exists) are ignored.
 
-manicheck() checks if all the files within a C<MANIFEST> in the
-current directory really do exist. It only reports discrepancies and
-exits silently if MANIFEST and the tree below the current directory
-are in sync.
+manicheck() checks if all the files within a C<MANIFEST> in the current
+directory really do exist. If C<MANIFEST> and the tree below the current
+directory are in sync it exits silently, returning an empty list.  Otherwise
+it returns a list of files which are listed in the C<MANIFEST> but missing
+from the directory, and by default also outputs these names to STDERR.
 
 filecheck() finds files below the current directory that are not
 mentioned in the C<MANIFEST> file. An optional file C<MANIFEST.SKIP>
 will be consulted. Any file matching a regular expression in such a
-file will not be reported as missing in the C<MANIFEST> file.
+file will not be reported as missing in the C<MANIFEST> file. The list of
+any extraneous files found is returned, and by default also reported to
+STDERR.
 
-fullcheck() does both a manicheck() and a filecheck().
+fullcheck() does both a manicheck() and a filecheck(), returning references
+to two arrays, the first for files manicheck() found to be missing, the
+seond for unexpeced files found by filecheck().
 
 skipcheck() lists all the files that are skipped due to your
 C<MANIFEST.SKIP> file.

@@ -26,7 +26,7 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 1586;
+  plan tests => 1592;
   }
 
 use Math::BigInt;

@@ -37,6 +37,8 @@ sub init_file {
 
 
 END {
+  undef $o;
+  untie @a;
   1 while unlink $file;
 }
 

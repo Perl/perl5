@@ -839,6 +839,31 @@ However, the generated Perl function is called in very C-ish style:
   my ($day, $month);
   day_month($day, time, $month);
 
+=head2 The C<length(NAME)> Keyword
+
+If one of the input arguments to the C function is the length of a string
+argument C<NAME>, one can substitute the name of the length-argument by
+C<length(NAME)> in the XSUB declaration.  This argument must be omited when
+the generated Perl function is called.  E.g.,
+
+  void
+  dump_chars(char *s, short l)
+  {
+    short n = 0;
+    while (n < l) {
+        printf("s[%d] = \"\\%#03o\"\n", n, (int)s[n]);
+        n++;
+    }
+  }
+
+  MODULE = x		PACKAGE = x
+
+  void dump_chars(char *s, short length(s))
+
+should be called as C<dump_chars($string)>.
+
+This directive is supported with ANSI-type function declarations only.
+
 =head2 Variable-length Parameter Lists
 
 XSUBs can have variable-length parameter lists by specifying an ellipsis

@@ -26,8 +26,8 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 2143
-    + 4;	# +4 own tests
+  plan tests => 2147
+    + 5;	# +4 own tests
   }
 
 use Math::BigInt::Subclass;
@@ -40,9 +40,14 @@ my $version = '0.02';   # for $VERSION tests, match current release (by hand!)
 
 require 'bigintpm.inc';	# perform same tests as bigintpm
 
+###############################################################################
 # Now do custom tests for Subclass itself
+ 
 my $ms = $class->new(23);
 print "# Missing custom attribute \$ms->{_custom}" if !ok (1, $ms->{_custom});
+
+# Check that a subclass is still considered a BigInt
+ok ($ms->isa('Math::BigInt'),1);
 
 use Math::BigInt;
 

@@ -97,6 +97,13 @@ into logical characters.
 
 =back
 
+C<utf8::encode> is like C<utf8::upgrade> but the UTF8 flag does not
+get turned on. See L<perlunicode> for more on the UTF8 flag and the C
+API functions C<sv_utf8_upgrade>, C<sv_utf8_downgrade>,
+C<sv_utf8_encode>, C<sv_utf8_decode> that are wrapped by the Perl
+functions C<utf8::upgrade>, C<utf8::downgrade>, C<utf8::encode> and
+C<utf8::decode>.
+
 =head1 SEE ALSO
 
 L<perlunicode>, L<bytes>

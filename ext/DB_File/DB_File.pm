@@ -2,7 +2,7 @@
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
 # last modified 1st March 2002
-# version 1.803
+# version 1.804
 #
 #     Copyright (c) 1995-2002 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -146,11 +146,18 @@ package DB_File ;
 use warnings;
 use strict;
 our ($VERSION, @ISA, @EXPORT, $AUTOLOAD, $DB_BTREE, $DB_HASH, $DB_RECNO);
-our ($db_version, $use_XSLoader);
+our ($db_version, $use_XSLoader, $splice_end_array);
 use Carp;
 
 
-$VERSION = "1.803" ;
+$VERSION = "1.804" ;
+
+{
+    local $SIG{__WARN__} = sub {$splice_end_array = "@_";};
+    my @a =(1); splice(@a, 3);
+    $splice_end_array = 
+        ($splice_end_array =~ /^splice\(\) offset past end of array at /);
+}      
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -303,7 +310,7 @@ sub SPLICE
     my $self = shift;
     my $offset = shift;
     if (not defined $offset) {
-	carp 'Use of uninitialized value in splice';
+	warnings::warnif('uninitialized', 'Use of uninitialized value in splice');
 	$offset = 0;
     }
 
@@ -328,13 +335,15 @@ sub SPLICE
 	$offset = $new_offset;
     }
 
-    if ($offset > $size) {
- 	$offset = $size;
+    if (not defined $length) {
+	warnings::warnif('uninitialized', 'Use of uninitialized value in splice');
+	$length = 0;
     }
 
-    if (not defined $length) {
-	carp 'Use of uninitialized value in splice';
-	$length = 0;
+    if ($offset > $size) {
+ 	$offset = $size;
+	warnings::warnif('misc', 'splice() offset past end of array')
+            if $splice_end_array;
     }
 
     # 'If LENGTH is omitted, removes everything from OFFSET onward.'

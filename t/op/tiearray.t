@@ -101,7 +101,7 @@ sub SPLICE
 
 package main;
 
-print "1..31\n";                   
+print "1..35\n";                   
 my $test = 1;
 
 {my @ary;
@@ -187,6 +187,7 @@ print "ok ", $test++,"\n";
 @ary = split(/:/,'1:2:3');
 print "not " unless join(':',@ary) eq '1:2:3';
 print "ok ", $test++,"\n";         
+
   
 my $t = 0;
 foreach $n (@ary)
@@ -194,6 +195,25 @@ foreach $n (@ary)
   print "not " unless $n == ++$t;
   print "ok ", $test++,"\n";         
  }
+
+# (30-33) 20020303 MJD
+@ary = ();
+$seen{POP} = 0;
+pop @ary;                       # this didn't used to call POP at all
+print "not " unless $seen{POP} == 1;
+print "ok ", $test++,"\n";         
+$seen{SHIFT} = 0;
+shift @ary;                     # this didn't used to call SHIFT at  all
+print "not " unless $seen{SHIFT} == 1;
+print "ok ", $test++,"\n";         
+$seen{PUSH} = 0;
+push @ary;                       # this didn't used to call PUSH at all
+print "not " unless $seen{PUSH} == 1;
+print "ok ", $test++,"\n";         
+$seen{UNSHIFT} = 0;
+unshift @ary;                   # this didn't used to call UNSHIFT at all
+print "not " unless $seen{UNSHIFT} == 1;
+print "ok ", $test++,"\n";         
 
 @ary = qw(3 2 1);
 print "not " unless join(':',@ary) eq '3:2:1';

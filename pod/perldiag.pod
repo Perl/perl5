@@ -1690,6 +1690,12 @@ would otherwise result in the same message being repeated.
 Failure of user callbacks dispatched using the C<G_KEEPERR> flag could
 also result in this warning.  See L<perlcall/G_KEEPERR>.
 
+=item In EBCDIC the v-string components cannot exceed 2147483647
+
+(F) An error peculiar to EBCDIC.  Internally, v-strings are stored as
+Unicode code points, and encoded in EBCDIC as UTF-EBCDIC.  The UTF-EBCDIC
+encoding is limited to code points no larger than 2147483647 (0x7FFFFFFF).
+
 =item Insecure dependency in %s
 
 (F) You tried to do something that the tainting mechanism didn't like.
@@ -2509,12 +2515,6 @@ the string being unpacked.  See L<perlfunc/pack>.
 package-specific handler.  That name might have a meaning to Perl itself
 some day, even though it doesn't yet.  Perhaps you should use a
 mixed-case attribute name, instead.  See L<attributes>.
-
-=item Package '%s' not found (did you use the incorrect case?)
-
-(W misc) You included a package file via C<use>, but the package name
-did not match the file name. It's possible that you misspelled the
-package name.
 
 =item page overflow
 

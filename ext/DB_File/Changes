@@ -410,3 +410,8 @@
    * FETCH, STORE & DELETE don't map the flags parameter into the
      equivalent Berkeley DB function anymore.
 
+1.804 2nd March 2002
+
+   * Perl core patch 14939 added a new warning to "splice". This broke the
+     db-recno test harness. Fixed.
+
