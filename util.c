@@ -871,8 +871,10 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr)
 					   substr => we can ignore SvVALID */
 		if (multiline) {
 		    char *t = "\n";
-		    if ((s = ninstr((char*)big,(char*)bigend, t, t + len)))
-			return s;
+		    if ((s = (unsigned char*)ninstr((char*)big, (char*)bigend,
+			 			    t, t + len))) {
+			return (char*)s;
+		    }
 		}
 		if (bigend > big && bigend[-1] == '\n')
 		    return (char *)(bigend - 1);
@@ -912,7 +914,9 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr)
 		&& (!SvTAIL(littlestr)
 		    || s == bigend
 		    || s[littlelen] == '\n')) /* Automatically multiline */
-		return s;		
+	    {
+		return (char*)s;
+	    }
 	    s++;
 	}
 	return Nullch;
