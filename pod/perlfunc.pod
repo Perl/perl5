@@ -4438,7 +4438,8 @@ You can effect a sleep of 250 milliseconds this way:
     select(undef, undef, undef, 0.25);
 
 Note that whether C<select> gets restarted after signals (say, SIGALRM)
-is implementation-dependent.
+is implementation-dependent.  See also L<perlport> for notes on the
+portability of C<select>.
 
 B<WARNING>: One should not attempt to mix buffered I/O (like C<read>
 or <FH>) with C<select>, except as permitted by POSIX, and even

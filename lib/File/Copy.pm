@@ -274,11 +274,10 @@ File::Copy - Copy files or filehandles
 	copy("Copy.pm",\*STDOUT);
 	move("/dev1/fileA","/dev2/fileB");
 
-	use POSIX;
-	use File::Copy cp;
+	use File::Copy "cp";
 
 	$n = FileHandle->new("/a/file","r");
-	cp($n,"x");'
+	cp($n,"x");
 
 =head1 DESCRIPTION
 
