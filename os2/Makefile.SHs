@@ -16,7 +16,7 @@ AOUT_LIBPERL	= libperl$aout_lib_ext
 AOUT_CLDFLAGS	= $aout_ldflags
 
 AOUT_LIBPERL_DLL	= libperl_dll$aout_lib_ext
-AOUT_CCCMD_DLL	= \$(CC) -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -g
+AOUT_CCCMD_DLL	= \$(CC) -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK
 AOUT_CLDFLAGS_DLL	= -Zexe -Zmt -Zcrtdll
 
 !GROK!THIS!
@@ -48,7 +48,6 @@ perl5.def: perl.linkexp
 	echo '  "dlopen"'				>>$@
 	echo '  "dlsym"'				>>$@
 	echo '  "dlerror"'				>>$@
-	echo '  "perl_init_i18nl10n"'			>>$@
 	echo '  "my_tmpfile"'				>>$@
 	echo '  "my_tmpnam"'				>>$@
 !NO!SUBS!

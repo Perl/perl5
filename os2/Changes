@@ -112,3 +112,9 @@ after 5.003_07:
 	Tested that popen works under DOS with modified PDKSH and RSX.
 	File::Copy works under DOS.
 	MakeMaker modified to work under DOS (perlmain.c.tmp and sh -c true).
+
+after 5.003_08:
+	OS2::PrfDB exports symbols as documented;
+	should work on OS/2 2.1 again.
+	uses reliable signals when spawing.
+	do not use popen() any more - no intermediate shell unless needed.

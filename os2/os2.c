@@ -13,11 +13,37 @@
 #include <errno.h>
 #include <limits.h>
 #include <process.h>
+#include <fcntl.h>
 
 #include "EXTERN.h"
 #include "perl.h"
 
 /*****************************************************************************/
+/* 2.1 would not resolve symbols on demand, and has no ExtLIBPATH. */
+static PFN ExtFCN[2];			/* Labeled by ord below. */
+static USHORT loadOrd[2] = { 874, 873 }; /* Query=874, Set=873. */
+#define ORD_QUERY_ELP	0
+#define ORD_SET_ELP	1
+
+APIRET
+loadByOrd(ULONG ord)
+{
+    if (ExtFCN[ord] == NULL) {
+	static HMODULE hdosc = 0;
+	BYTE buf[20];
+	PFN fcn;
+	APIRET rc;
+
+	if ((!hdosc && CheckOSError(DosLoadModule(buf, sizeof buf, 
+						  "doscalls", &hdosc)))
+	    || CheckOSError(DosQueryProcAddr(hdosc, loadOrd[ord], NULL, &fcn)))
+	    die("This version of OS/2 does not support doscalls.%i", 
+		loadOrd[ord]);
+	ExtFCN[ord] = fcn;
+    } 
+    if ((long)ExtFCN[ord] == -1) die("panic queryaddr");
+}
+
 /* priorities */
 static signed char priors[] = {0, 1, 3, 2}; /* Last two interchanged,
 					       self inverse. */
@@ -130,6 +156,23 @@ getpriority(int which /* ignored */, int pid)
 
 /*****************************************************************************/
 /* spawn */
+typedef void (*Sigfunc) _((int));
+
+static
+Sigfunc rsignal(signo,handler)
+int signo;
+Sigfunc handler;
+{
+    struct sigaction act,oact;
+    
+    act.sa_handler = handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    if (sigaction(signo, &act, &oact) < 0)
+    	return(SIG_ERR);
+    else
+    	return(oact.sa_handler);
+}
 
 static int
 result(int flag, int pid)
@@ -146,22 +189,22 @@ result(int flag, int pid)
 		return pid;
 
 #ifdef __EMX__
-	ihand = signal(SIGINT, SIG_IGN);
-	qhand = signal(SIGQUIT, SIG_IGN);
+	ihand = rsignal(SIGINT, SIG_IGN);
+	qhand = rsignal(SIGQUIT, SIG_IGN);
 	do {
 	    r = wait4pid(pid, &status, 0);
 	} while (r == -1 && errno == EINTR);
-	signal(SIGINT, ihand);
-	signal(SIGQUIT, qhand);
+	rsignal(SIGINT, ihand);
+	rsignal(SIGQUIT, qhand);
 
 	statusvalue = (U16)status;
 	if (r < 0)
 		return -1;
 	return status & 0xFFFF;
 #else
-	ihand = signal(SIGINT, SIG_IGN);
+	ihand = rsignal(SIGINT, SIG_IGN);
 	r = DosWaitChild(DCWA_PROCESS, DCWW_WAIT, &res, &rpid, pid);
-	signal(SIGINT, ihand);
+	rsignal(SIGINT, ihand);
 	statusvalue = res.codeResult << 8 | res.codeTerminate;
 	if (r)
 		return -1;
@@ -226,6 +269,7 @@ register SV **sp;
 #define EXECF_SPAWN 0
 #define EXECF_EXEC 1
 #define EXECF_TRUEEXEC 2
+#define EXECF_SPAWN_NOWAIT 3
 
 int
 do_spawn2(cmd, execf)
@@ -292,6 +336,8 @@ int execf;
                 return execl(shell,shell,copt,cmd,(char*)0);
 	    else if (execf == EXECF_EXEC)
                 return spawnl(P_OVERLAY,shell,shell,copt,cmd,(char*)0);
+	    else if (execf == EXECF_SPAWN_NOWAIT)
+                return spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0);
 	    /* In the ak code internal P_NOWAIT is P_WAIT ??? */
 	    rc = result(P_WAIT,
 			spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
@@ -322,6 +368,8 @@ int execf;
 	    rc = execvp(Argv[0],Argv);
 	else if (execf == EXECF_EXEC)
 	    rc = spawnvp(P_OVERLAY,Argv[0],Argv);
+	else if (execf == EXECF_SPAWN_NOWAIT)
+	    rc = spawnvp(P_NOWAIT,Argv[0],Argv);
         else
 	    rc = result(P_WAIT, spawnvp(P_NOWAIT,Argv[0],Argv));
 	if (rc < 0 && dowarn)
@@ -343,6 +391,13 @@ char *cmd;
     return do_spawn2(cmd, EXECF_SPAWN);
 }
 
+int
+do_spawn_nowait(cmd)
+char *cmd;
+{
+    return do_spawn2(cmd, EXECF_SPAWN_NOWAIT);
+}
+
 bool
 do_exec(cmd)
 char *cmd;
@@ -362,22 +417,74 @@ my_syspopen(cmd,mode)
 char	*cmd;
 char	*mode;
 {
+#ifndef USE_POPEN
+
+    int p[2];
+    register I32 this, that, newfd;
+    register I32 pid, rc;
+    PerlIO *res;
+    SV *sv;
+    
+    if (pipe(p) < 0)
+	return Nullfp;
+    /* `this' is what we use in the parent, `that' in the child. */
+    this = (*mode == 'w');
+    that = !this;
+    if (tainting) {
+	taint_env();
+	taint_proper("Insecure %s%s", "EXEC");
+    }
+    /* Now we need to spawn the child. */
+    newfd = dup(*mode == 'r');		/* Preserve std* */
+    if (p[that] != (*mode == 'r')) {
+	dup2(p[that], *mode == 'r');
+	close(p[that]);
+    }
+    /* Where is `this' and newfd now? */
+    fcntl(p[this], F_SETFD, FD_CLOEXEC);
+    fcntl(newfd, F_SETFD, FD_CLOEXEC);
+    pid = do_spawn_nowait(cmd);
+    if (newfd != (*mode == 'r')) {
+	dup2(newfd, *mode == 'r');	/* Return std* back. */
+	close(newfd);
+    }
+    close(p[that]);
+    if (pid == -1) {
+	close(p[this]);
+	return NULL;
+    }
+    if (p[that] < p[this]) {
+	dup2(p[this], p[that]);
+	close(p[this]);
+	p[this] = p[that];
+    }
+    sv = *av_fetch(fdpid,p[this],TRUE);
+    (void)SvUPGRADE(sv,SVt_IV);
+    SvIVX(sv) = pid;
+    forkprocess = pid;
+    return PerlIO_fdopen(p[this], mode);
+
+#else  /* USE_POPEN */
+
     PerlIO *res;
     SV *sv;
 
-#ifdef TRYSHELL
+#  ifdef TRYSHELL
     res = popen(cmd, mode);
-#else
+#  else
     char *shell = getenv("EMXSHELL");
 
     my_setenv("EMXSHELL", SH_PATH);
     res = popen(cmd, mode);
     my_setenv("EMXSHELL", shell);
-#endif 
+#  endif 
     sv = *av_fetch(fdpid, PerlIO_fileno(res), TRUE);
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = -1;			/* A cooky. */
     return res;
+
+#endif /* USE_POPEN */
+
 }
 
 /******************************************************************/
@@ -890,15 +997,23 @@ XS(XS_Cwd_sys_abspath)
     }
     XSRETURN(1);
 }
+typedef APIRET (*PELP)(PSZ path, ULONG type);
 
-#define extLibpath(type) 					\
-    (CheckOSError(DosQueryExtLIBPATH(to, ((type) ? END_LIBPATH	\
-					  : BEGIN_LIBPATH)))	\
+APIRET
+ExtLIBPATH(ULONG ord, PSZ path, ULONG type)
+{
+    loadByOrd(ord);			/* Guarantied to load or die! */
+    return (*(PELP)ExtFCN[ord])(path, type);
+}
+
+#define extLibpath(type) 						\
+    (CheckOSError(ExtLIBPATH(ORD_QUERY_ELP, to, ((type) ? END_LIBPATH	\
+						 : BEGIN_LIBPATH)))	\
      ? NULL : to )
 
 #define extLibpath_set(p,type) 					\
-    (!CheckOSError(DosSetExtLIBPATH((p), ((type) ? END_LIBPATH	\
-					  : BEGIN_LIBPATH))))
+    (!CheckOSError(ExtLIBPATH(ORD_SET_ELP, (p), ((type) ? END_LIBPATH	\
+						 : BEGIN_LIBPATH))))
 
 XS(XS_Cwd_extLibpath)
 {

@@ -34,7 +34,7 @@ sub SystemIni {
 
 use vars qw{$debug @ISA};
 use Tie::Hash;
-@ISA = qw{Tie::Hash};
+push @ISA, qw{Tie::Hash};
 
 # Internal structure 0 => HINI, 1 => array of entries, 2 => iterator.
 

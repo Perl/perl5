@@ -64,8 +64,8 @@ fi
 aout_ldflags="$aout_ldflags"
 
 aout_d_fork='define'
-aout_ccflags='-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS'
-aout_cppflags='-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS'
+aout_ccflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK'
+aout_cppflags='-DPERL_CORE -DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK'
 aout_use_clib='c'
 aout_usedl='undef'
 aout_archobjs="os2.o dl_os2.o"
@@ -105,7 +105,7 @@ else
     # Recursive regmatch may eat 2.5M of stack alone.
     ldflags='-Zexe -Zomf -Zmt -Zcrtdll -Zstack 32000'
     if [ $emxcrtrev -ge 50 ]; then 
-	ccflags='-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS'
+	ccflags='-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DTWO_POT_OPTIMIZE -DPERL_EMERGENCY_SBRK'
     else
 	ccflags='-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DEMX_BAD_SBRK'
     fi
