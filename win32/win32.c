@@ -2566,11 +2566,6 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 	create |= CREATE_NEW_CONSOLE;
     }
 
-#ifndef DEBUGGING
-    StartupInfo.dwFlags |= STARTF_USESHOWWINDOW;
-    StartupInfo.wShowWindow = SW_HIDE;
-#endif
-
 RETRY:
     if (!CreateProcess(cmdname,		/* search PATH to find executable */
 		       cmd,		/* executable, and its arguments */
