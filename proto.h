@@ -399,10 +399,6 @@ Sighandler_t rsignal _((int, Sighandler_t));
 int	rsignal_restore _((int, Sigsave_t*));
 int	rsignal_save _((int, Sighandler_t, Sigsave_t*));
 Sighandler_t rsignal_state _((int));
-int	runops_standard _((void));
-#ifdef DEBUGGING
-int	runops_debug _((void));
-#endif
 void	rxres_free _((void** rsp));
 void	rxres_restore _((void** rsp, REGEXP* rx));
 void	rxres_save _((void** rsp, REGEXP* rx));

@@ -1322,6 +1322,16 @@ typedef Sighandler_t Sigsave_t;
 # define RUNOPS_DEFAULT runops_standard
 #endif
 
+/*
+ * These need prototyping here because <proto.h> isn't
+ * included until after runops is initialised.
+ */
+
+int runops_standard _((void));
+#ifdef DEBUGGING
+int runops_debug _((void));
+#endif
+
 /****************/
 /* Truly global */
 /****************/
