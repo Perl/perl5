@@ -1,0 +1,51 @@
+?RCS: $Id: i_ndbm.U,v 3.0 1993/08/18 12:08:19 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: i_ndbm.U,v $
+?RCS: Revision 3.0  1993/08/18  12:08:19  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:i_ndbm: Inhdr Inlibc Setvar
+?MAKE:	-pick add $@ %<
+?S:i_ndbm (d_ndbm):
+?S:	This variable conditionally defines the I_NDBM symbol, which
+?S:	indicates to the C program that ndbm.h exists and should
+?S:	be included.
+?S:.
+?C:I_NDBM (HAS_NDBM NDBM):
+?C:	This symbol, if defined, indicates that ndbm.h exists and should
+?C:	be included.
+?C:.
+?H:#$i_ndbm I_NDBM	/**/
+?H:.
+?T: t_ndbm d_dbm_open
+?LINT:set i_ndbm
+: see if ndbm.h is available
+?X: t_ndbm is a tentative check.  We might just have the header, not
+?X: the library.
+set ndbm.h t_ndbm
+eval $inhdr
+case "$t_ndbm" in
+$define)
+	: see if dbm_open exists
+	set dbm_open d_dbm_open
+	eval $inlibc
+	case "$d_dbm_open" in
+	$undef)
+		t_ndbm="$undef"
+		echo "We won't be including <ndbm.h>"
+		;;
+	esac
+	;;
+esac
+val="$t_ndbm"
+set i_ndbm
+eval $setvar
+

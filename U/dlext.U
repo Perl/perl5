@@ -1,0 +1,48 @@
+?RCS: $Id: dlsrc.U,v$
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: dlsrc.U,v $
+?RCS:
+?X:  hpux support thanks to Jeff Okamoto <okamoto@hpcc101.corp.hp.com>
+?X: 
+?X:  To create a shared library, you must compile ALL source files in the
+?X:  library with +z (or possibly +Z if the library is whopping huge),
+?X:  then link the library with -b.  Example:
+?X:	  cc -c +z module_a.c
+?X:	  cc -c +z module_b.c
+?X:	  ld -b module_a.o module_b.o -o module.sl
+?X:  
+?MAKE:dlext: \
+	Getfile Myread cat usedl so
+?MAKE:	-pick add $@ %<
+?S:dlext:
+?S:	This variable contains the extension that is to be used for the
+?S:	dynamically loaded modules that perl generaties.
+?S:.
+case "$usedl" in
+$define|y|true)
+	$cat << EOM
+
+On a few systems, the dynamically loaded modules that perl generates and uses
+will need a different extension then shared libs. The default will probably
+be appropriate.
+
+EOM
+	case "$dlext" in
+	'')	dflt="$so" ;;
+	*)	dflt="$dlext" ;;
+	esac
+	rp='What is the extension of dynamically loaded modules'
+	. ./myread
+	dlext="$ans"
+	;;
+*)
+	dlext="none"
+	;;
+esac
+

@@ -1,0 +1,172 @@
+?RCS: $Id: Extensions.U,v$
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: Extensions.U,v $
+?RCS:
+?MAKE:known_extensions extensions dynamic_ext static_ext useposix : \
+	Myread usedl d_socket i_db i_dbm i_ndbm i_gdbm package test cat
+?MAKE:	-pick add $@ %<
+?S:known_extensions:
+?S:	This variable holds a list of all extensions included in 
+?S:	the package.
+?S:.
+?S:dynamic_ext:
+?S:	This variable holds a list of extension files we want to
+?S:	link dynamically into the package.  It is used by Makefile.
+?S:.
+?S:static_ext:
+?S:	This variable holds a list of extension files we want to
+?S:	link statically into the package.  It is used by Makefile.
+?S:.
+?S:extensions:
+?S:	This variable holds a list of all extension files
+?S:	linked into the package.  It is propagated to Config.pm
+?S:	and is typically used to test whether a particular extesion 
+?S:	is available.
+?S:.
+?S:useposix:
+?S:	This variable holds either 'true' or 'false' to indicate
+?S:	whether the POSIX extension should be used.  The sole
+?S:	use for this currently is to allow an easy mechanism
+?S:	for hints files to indicate that POSIX will not compile
+?S:	on a particular system.
+?S:.
+?T:xxx avail_ext
+?INIT:: set useposix=false in your hint file to disable the POSIX extension.
+?INIT:useposix=true
+echo " "
+echo "Looking for extensions..." >&4
+cd ../ext
+?X: If we're using the old config.sh, known_extensions may contain
+?X: old or inaccurate (or duplicate) values.
+known_extensions=''
+for xxx in * ; do
+	if $test -f $xxx/$xxx.xs; then
+		known_extensions="$known_extensions $xxx"
+	fi
+done
+set X $known_extensions
+shift
+known_extensions="$*"
+cd ../UU
+
+: Now see which are supported on this system.
+avail_ext=''
+for xxx in $known_extensions ; do
+    case "$xxx" in
+    DB_File) case "$i_db" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    GDBM_File) case "$i_gdbm" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    NDBM_File) case "$i_ndbm" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    ODBM_File) case "$i_dbm" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    POSIX) case "$useposix" in 
+	    true|define|y) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    Socket) case "$d_socket" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
+    *)      avail_ext="$avail_ext $xxx"
+	    ;;
+    esac
+done
+
+set X $avail_ext
+shift
+avail_ext="$*"
+
+case $usedl in
+$define)
+	$cat <<EOM
+A number of extensions are supplied with $package.  You may choose to
+compile these extensions for dynamic loading (the default), compile
+them into the $package executable (static loading), or not include
+them at all.  Answer "none" to include no extensions.
+
+EOM
+	case "$dynamic_ext" in
+	''|' ') dflt="$avail_ext" ;;
+	*)	dflt="$dynamic_ext" ;;
+	esac
+	case "$dflt" in
+	'')	dflt=none;;
+	esac
+	rp="What extensions do you wish to load dynamically?"
+	. ./myread
+	case "$ans" in
+	none) dynamic_ext='' ;;
+	*) dynamic_ext="$ans" ;;
+	esac
+
+	case "$static_ext" in
+	''|' ')
+		: Exclude those already listed in dynamic linking
+		dflt=''
+		for xxx in $avail_ext; do
+			case " $dynamic_ext " in
+			*" $xxx "*) ;;
+			*) dflt="$dflt $xxx" ;;
+			esac
+		done
+		set X $dflt
+		shift
+		dflt="$*"
+		;;
+	*)  dflt="$static_ext" 
+		;;
+	esac
+
+	case "$dflt" in
+	'')	dflt=none;;
+	esac
+	rp="What extensions do you wish to load statically?"
+	. ./myread
+	case "$ans" in
+	none) static_ext='' ;;
+	*) static_ext="$ans" ;;
+	esac
+	;;
+*)
+	$cat <<EOM
+A number of extensions are supplied with $package.  Answer "none" 
+to include no extensions. 
+
+EOM
+	case "$static_ext" in
+	''|' ') dflt="$avail_ext" ;;
+	*)	dflt="$static_ext" ;;
+	esac
+
+	case "$dflt" in
+	'')	dflt=none;;
+	esac
+	rp="What extensions do you wish to include?"
+	. ./myread
+	case "$ans" in
+	none) static_ext='' ;;
+	*) static_ext="$ans" ;;
+	esac
+	;;
+esac
+
+set X $dynamic_ext $static_ext
+shift
+extensions="$*"
+

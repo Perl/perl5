@@ -1,0 +1,132 @@
+?RCS: $Id: i_db.U,v 3.0.1.1 1994/08/29 16:21:50 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: Original Author: Andy Dougherty <doughera@lafcol.lafayette.edu>
+?RCS:
+?RCS: $Log: i_db.U,v $
+?RCS: Revision 3.0.1.1  1994/08/29  16:21:50  ram
+?RCS: patch32: created by ADO
+?RCS:
+?MAKE:i_db db_hashtype db_prefixtype: Inhdr +cc +ccflags rm contains
+?MAKE:	-pick add $@ %<
+?S:i_db:
+?S:	This variable conditionally defines the I_DB symbol, and indicates
+?S:	whether a C program may include Berkeley's DB include file <db.h>.
+?S:.
+?S:db_hashtype:
+?S:	This variable contains the type of the hash structure element
+?S:	in the <db.h> header file.  In older versions of DB, it was
+?S:	int, while in newer ones it is u_int32_t.
+?S:.
+?S:db_prefixtype:
+?S:	This variable contains the type of the prefix structure element
+?S:	in the <db.h> header file.  In older versions of DB, it was
+?S:	int, while in newer ones it is size_t.
+?S:.
+?C:I_DB:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include Berkeley's DB include file <db.h>.
+?C:.
+?C:DB_Prefix_t:
+?C:	This symbol contains the type of the prefix structure element
+?C:	in the <db.h> header file.  In older versions of DB, it was
+?C:	int, while in newer ones it is u_int32_t.
+?C:.
+?C:DB_Hash_t:
+?C:	This symbol contains the type of the prefix structure element
+?C:	in the <db.h> header file.  In older versions of DB, it was
+?C:	int, while in newer ones it is size_t.
+?C:.
+?H:#$i_db I_DB		/**/
+?H:#define DB_Hash_t	"$db_hashtype"		/**/
+?H:#define DB_Prefix_t	"$db_prefixtype"  	/**/
+?H:.
+?F:!try.c !try.o
+?LINT:set i_db
+: see if this is a db.h system
+set db.h i_db
+eval $inhdr
+
+@if DB_Hash_t
+case "$i_db" in
+define)
+	: Check the return type needed for hash 
+	echo "Checking return type needed for hash for Berkeley DB ..." >&4
+	cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <db.h>
+u_int32_t 
+hash_cb (ptr, size)
+const void * ptr ;
+size_t size ;
+{
+}
+HASHINFO info ;
+main()
+{
+    info.hash = hash_cb ;
+}
+EOCP
+	if $cc $ccflags -c try.c >try.out 2>&1 ; then
+		if $contains warning try.out >>/dev/null 2>&1 ; then
+			db_hashtype='int'
+		else
+			db_hashtype='u_int32_t'
+		fi
+	else
+		echo "I can't seem to compile the test program." >&4
+		db_hashtype=int
+	fi
+	$rm -f try.[co]
+	echo "Your version of Berkeley DB uses $db_hashtype for hash."
+	;;
+*)	db_hashtype=int
+	;;
+esac
+@end
+
+@if DB_Prefix_t
+case "$i_db" in
+define)
+	: Check the return type needed for prefix 
+	echo "Checking return type needed for prefix for Berkeley DB ..." >&4
+	cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <db.h>
+size_t 
+prefix_cb (key1, key2)
+const DBT * key1 ;
+const DBT * key2 ;
+{
+}
+BTREEINFO info ;
+main()
+{
+    info.prefix = prefix_cb ;
+}
+EOCP
+	if $cc $ccflags -c try.c  >try.out 2>&1 ; then
+		if $contains warning try.out >>/dev/null 2>&1 ; then
+			db_prefixtype='int'
+		else
+			db_prefixtype='size_t'
+		fi
+	else
+		echo "I can't seem to compile the test program." >&4
+		db_prefixtype='int'
+	fi
+	$rm -f try.[co]
+	echo "Your version of Berkeley DB uses $db_prefixtype for prefix."
+	;;
+*)	db_prefixtype='int'
+	;;
+esac
+@end
+

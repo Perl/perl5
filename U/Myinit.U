@@ -1,0 +1,42 @@
+?RCS: $Id: Myinit.U,v 3.0 1993/08/18 12:05:07 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: Myinit.U,v $
+?RCS: Revision 3.0  1993/08/18  12:05:07  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?X:
+?X: If you want to initialize any default values, copy this unit to your
+?X: personal U directory and add the assignments to the end.  This file
+?X: is included after variables are initialized but before any old
+?X: config.sh file is read in.
+?X:
+?MAKE:Myinit libswanted : Init
+?MAKE:	-pick add $@ %<
+?S:libswanted:
+?S:	This variable holds a list of all the libraries we want to
+?S:	search.  The order is chosen to pick up the c library
+?S:	ahead of ucb or bsd libraries for SVR4.
+?S:.
+?LINT:extern usevfork glibpth
+?LINT:change usevfork glibpth
+: List of libraries we want.
+?X: Put crypt here, even though I should really fix d_crypt.U to look
+?X: for it correctly, including possible shared library versions.
+libswanted='net socket inet nsl nm ndbm gdbm dbm db malloc dl'
+libswanted="$libswanted dld ld sun m c cposix posix ndir dir crypt"
+libswanted="$libswanted ucb bsd BSD PW x"
+: We want to search /usr/shlib before most other libraries.
+: This is only used by ext/util/extliblist
+glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
+glibpth="/usr/shlib $glibpth"
+: Do not use vfork unless overridden by a hint file.
+usevfork=false
+

@@ -1,0 +1,14 @@
+?RCS: $Id: Loc_sed.U,v $
+?RCS:
+?X: This is used in perl.c.
+?MAKE:Loc_sed: sed
+?MAKE:	-pick add $@ %<
+?X: Fool metalint:
+?LINT:use sed
+?LINT:extern sed
+?C:LOC_SED:
+?C:	This symbol holds the complete pathname to the sed program.
+?C:.
+?H:#define LOC_SED 	"$sed"	/**/
+?H:.
+

@@ -1,0 +1,288 @@
+?RCS: $Id: ccflags.U,v 3.0.1.6 1994/10/29 16:07:02 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: This is the same as dist's ccflags unit except that perl uses
+?RCS: -DDEBUGGING rather than -DDEBUG, and I also suggest a few other
+?RCS: flags the user might set, such as -DCRIPPLED_CC and -D_POSIX_SOURCE.
+?RCS:
+?RCS: $Log: ccflags.U,v $
+?RCS: Revision 3.0.1.6  1994/10/29  16:07:02  ram
+?RCS: patch36: gcc versionning no longer relies on the C compiler's name
+?RCS: patch36: simplified check for gcc version checking (ADO)
+?RCS:
+?RCS: Revision 3.0.1.5  1994/08/29  16:06:35  ram
+?RCS: patch32: propagate -posix flag from ccflags to ldflags
+?RCS:
+?RCS: Revision 3.0.1.4  1994/05/06  14:28:45  ram
+?RCS: patch23: -fpcc-struct-return only needed in gcc 1.x (ADO)
+?RCS: patch23: cppflags now computed on an option-by-option basis
+?RCS: patch23: magically added cc flags now only done the first time
+?RCS:
+?RCS: Revision 3.0.1.3  1993/09/13  15:58:29  ram
+?RCS: patch10: explicitely mention -DDEBUG just in case they need it (WAD)
+?RCS: patch10: removed all the "tans" variable usage (WAD)
+?RCS:
+?RCS: Revision 3.0.1.2  1993/08/27  14:39:38  ram
+?RCS: patch7: added support for OSF/1 machines
+?RCS:
+?RCS: Revision 3.0.1.1  1993/08/25  14:00:24  ram
+?RCS: patch6: added defaults for cppflags, ccflags and ldflags
+?RCS:
+?RCS: Revision 3.0  1993/08/18  12:05:31  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:ccflags ldflags lkflags cppflags optimize: test cat Myread Guess \
+	Oldconfig +gccversion mips_type +usrinc package contains rm \
+	cppstdin cppminus cpprun cpplast
+?MAKE:	-pick add $@ %<
+?S:ccflags:
+?S:	This variable contains any additional C compiler flags desired by
+?S:	the user.  It is up to the Makefile to use this.
+?S:.
+?S:cppflags:
+?S:	This variable holds the flags that will be passed to the C pre-
+?S:	processor. It is up to the Makefile to use it.
+?S:.
+?S:optimize:
+?S:	This variable contains any optimizer/debugger flag that should be used.
+?S:	It is up to the Makefile to use it.
+?S:.
+?S:ldflags:
+?S:	This variable contains any additional C loader flags desired by
+?S:	the user.  It is up to the Makefile to use this.
+?S:.
+?S:lkflags:
+?S:	This variable contains any additional C partial linker flags desired by
+?S:	the user.  It is up to the Makefile to use this.
+?S:.
+?T:inctest thisincl xxx flag inclwanted ftry previous
+?D:cppflags=''
+?D:ccflags=''
+?D:ldflags=''
+?INIT:: no include file wanted by default
+?INIT:inclwanted=''
+?INIT:
+: determine optimize, if desired, or use for debug flag also
+case "$optimize" in
+' ') dflt='none';;
+'') dflt='-O';;
+*) dflt="$optimize";;
+esac
+$cat <<EOH
+
+Some C compilers have problems with their optimizers, by default, $package
+compiles with the -O flag to use the optimizer.  Alternately, you might want
+to use the symbolic debugger, which uses the -g flag (on traditional Unix
+systems).  Either flag can be specified here.  To use neither flag, specify
+the word "none".
+
+EOH
+rp="What optimizer/debugger flag should be used?"
+. ./myread
+optimize="$ans"
+case "$optimize" in
+'none') optimize=" ";;
+esac
+
+dflt=''
+case "$ccflags" in
+'')	
+	case "$gccversion" in
+	1*) dflt='-fpcc-struct-return' ;;
+	esac
+	case "$optimize" in
+	*-g*) dflt="$dflt -DDEBUGGING";;
+	esac
+?X: check for POSIXized ISC
+	case "$gccversion" in
+	2*) if test -d /etc/conf/kconfig.d &&
+			$contains _POSIX_VERSION $usrinc/sys/unistd.h >/dev/null 2>&1
+		then
+			dflt="$dflt -posix"
+		fi
+		;;
+	esac
+	;;
+esac
+
+?X: In USG mode, a MIPS system may need some BSD includes
+case "$mips_type" in
+*BSD*) ;;
+'') ;;
+*) inclwanted="$inclwanted $usrinc/bsd";;
+esac
+for thisincl in $inclwanted; do
+	if $test -d $thisincl; then
+		if $test x$thisincl != x$usrinc; then
+			case "$dflt" in
+			*$thisincl*);;
+			*) dflt="$dflt -I$thisincl";;
+			esac
+		fi
+	fi
+done
+
+?X: Include test function (header, symbol)
+inctest='if $contains $2 $usrinc/$1 >/dev/null 2>&1; then
+	xxx=true;
+elif $contains $2 $usrinc/sys/$1 >/dev/null 2>&1; then
+	xxx=true;
+else
+	xxx=false;
+fi;
+if $xxx; then
+	case "$dflt" in
+	*$2*);;
+	*) dflt="$dflt -D$2";;
+	esac;
+fi'
+
+?X:
+?X: SCO unix uses NO_PROTOTYPE instead of _NO_PROTO
+?X: OSF/1 uses __LANGUAGE_C__ instead of LANGUAGE_C
+?X:
+if ./osf1; then
+	set signal.h __LANGUAGE_C__; eval $inctest
+else
+	set signal.h LANGUAGE_C; eval $inctest
+fi
+set signal.h NO_PROTOTYPE; eval $inctest
+set signal.h _NO_PROTO; eval $inctest
+
+case "$dflt" in
+'') dflt=none;;
+esac
+case "$ccflags" in
+'') ;;
+*) dflt="$ccflags";;
+esac
+$cat <<EOH
+
+Your C compiler may want other flags.  For this question you should include
+-I/whatever and -DWHATEVER flags and any other flags used by the C compiler,
+but you should NOT include libraries or ld flags like -lwhatever.  If you
+want $package to honor its debug switch, you should include -DDEBUGGING here.
+Your C compiler might also need additional flags, such as -D_POSIX_SOURCE,
+-DHIDEMYMALLOC or -DCRIPPLED_CC.
+
+To use no flags, specify the word "none".
+
+EOH
+?X: strip leading space
+set X $dflt
+shift
+dflt=${1+"$@"}
+rp="Any additional cc flags?"
+. ./myread
+case "$ans" in
+none) ccflags='';;
+*) ccflags="$ans";;
+esac
+
+: the following weeds options from ccflags that are of no interest to cpp
+cppflags="$ccflags"
+case "$gccversion" in
+1*) cppflags="$cppflags -D__GNUC__"
+esac
+case "$mips_type" in
+'');;
+*BSD*) cppflags="$cppflags -DSYSTYPE_BSD43";;
+esac
+case "$cppflags" in
+'');;
+*)
+	echo " "
+	echo "Let me guess what the preprocessor flags are..." >&4
+	set X $cppflags
+	shift
+	cppflags=''
+	$cat >cpp.c <<'EOM'
+#define BLURFL foo
+
+BLURFL xx LFRULB
+EOM
+?X:
+?X: For each cc flag, try it out with both cppstdin and cpprun, since the
+?X: first is almost surely a cc wrapper. We have to try both in case
+?X: of cc flags like '-Olimit 2900' that are actually two words...
+?X:
+	previous=''
+	for flag in $*
+	do
+		case "$flag" in
+		-*) ftry="$flag";;
+		*) ftry="$previous $flag";;
+		esac
+		if $cppstdin -DLFRULB=bar $ftry $cppminus <cpp.c \
+			>cpp1.out 2>/dev/null && \
+			$cpprun -DLFRULB=bar $ftry $cpplast <cpp.c \
+			>cpp2.out 2>/dev/null && \
+			$contains 'foo.*xx.*bar' cpp1.out >/dev/null 2>&1 && \
+			$contains 'foo.*xx.*bar' cpp2.out >/dev/null 2>&1
+		then
+			cppflags="$cppflags $ftry"
+			previous=''
+		else
+			previous="$flag"
+		fi
+	done
+	set X $cppflags
+	shift
+	cppflags=${1+"$@"}
+	case "$cppflags" in
+	*-*)  echo "They appear to be: $cppflags";;
+	esac
+	$rm -f cpp.c cpp?.out
+	;;
+esac
+
+: flags used in final linking phase
+case "$ldflags" in
+'') if ./venix; then
+		dflt='-i -z'
+	else
+		dflt=''
+	fi
+	case "$ccflags" in
+	*-posix*) dflt="$dflt -posix" ;;
+	esac
+	case "$dflt" in
+	'') dflt='none' ;;
+	esac
+	;;
+*) dflt="$ldflags";;
+esac
+echo " "
+rp="Any additional ld flags (NOT including libraries)?"
+. ./myread
+case "$ans" in
+none) ldflags='';;
+*) ldflags="$ans";;
+esac
+rmlist="$rmlist pdp11"
+
+@if lkflags
+: partial linking may need other flags
+case "$lkflags" in
+'') case "$ldflags" in
+	'') dflt='none';;
+	*) dflt="$ldflags";;
+	esac;;
+*) dflt="$lkflags";;
+esac
+echo " "
+rp="Partial linking flags to be used (NOT including -r)?"
+. ./myread
+case "$ans" in
+none) lkflags='';;
+*) lkflags="$ans";;
+esac
+
+@end

@@ -1,0 +1,159 @@
+?RCS: $Id: Guess.U,v 3.0.1.4 1994/10/29 15:53:55 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: Guess.U,v $
+?RCS: Revision 3.0.1.4  1994/10/29  15:53:55  ram
+?RCS: patch36: added ?F: line for metalint file checking
+?RCS: patch36: call ./xenix explicitely instead of relying on PATH
+?RCS:
+?RCS: Revision 3.0.1.3  1993/12/15  08:14:35  ram
+?RCS: patch15: variable d_bsd was not always set properly
+?RCS:
+?RCS: Revision 3.0.1.2  1993/08/30  08:57:14  ram
+?RCS: patch8: fixed comment which wrongly attributed the usrinc symbol
+?RCS: patch8: no more ugly messages when no /usr/include/ctype.h
+?RCS:
+?RCS: Revision 3.0.1.1  1993/08/27  14:37:37  ram
+?RCS: patch7: added support for OSF/1 machines
+?RCS:
+?RCS: Revision 3.0  1993/08/18  12:04:57  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?X: 
+?X: This unit hazards some guesses as to what the general nature of the system
+?X: is.  The information it collects here is used primarily to establish default
+?X: answers to other questions.
+?X: 
+?MAKE:Guess d_eunice d_xenix d_bsd: cat test echo n c contains rm Loc eunicefix
+?MAKE:	-pick add $@ %<
+?S:d_eunice:
+?S:	This variable conditionally defines the symbols EUNICE and VAX, which
+?S:	alerts the C program that it must deal with ideosyncracies of VMS.
+?S:.
+?S:d_xenix:
+?S:	This variable conditionally defines the symbol XENIX, which alerts
+?S:	the C program that it runs under Xenix.
+?S:.
+?S:d_bsd:
+?S:	This symbol conditionally defines the symbol BSD when running on a
+?S:	BSD system.
+?S:.
+?C:EUNICE:
+?C:	This symbol, if defined, indicates that the program is being compiled
+?C:	under the EUNICE package under VMS.  The program will need to handle
+?C:	things like files that don't go away the first time you unlink them,
+?C:	due to version numbering.  It will also need to compensate for lack
+?C:	of a respectable link() command.
+?C:.
+?C:VMS:
+?C:	This symbol, if defined, indicates that the program is running under
+?C:	VMS.  It is currently only set in conjunction with the EUNICE symbol.
+?C:.
+?C:XENIX:
+?C:	This symbol, if defined, indicates thet the program is running under
+?C:	Xenix (at least 3.0 ?).
+?C:.
+?X:We don't use BSD in the perl source.  It's too vague, and already 
+?X:defined in some header files anyway (e.g. NetBSD).
+?X:?C:BSD:
+?X:?C:	This symbol, if defined, indicates that the program is running under
+?X:?C:	a BSD system.
+?X:?C:.
+?H:#$d_eunice EUNICE		/**/
+?H:#$d_eunice VMS		/**/
+?H:#$d_xenix XENIX		/**/
+?X:?H:#$d_bsd BSD		/**/
+?H:.
+?F:./bsd ./usg ./v7 ./osf1 ./eunice ./xenix ./venix
+?T:xxx
+: make some quick guesses about what we are up against
+echo " "
+$echo $n "Hmm...  $c"
+echo exit 1 >bsd
+echo exit 1 >usg
+echo exit 1 >v7
+echo exit 1 >osf1
+echo exit 1 >eunice
+echo exit 1 >xenix
+echo exit 1 >venix
+d_bsd="$undef"
+?X:
+?X: Do not use 'usrinc', or we get a circular dependency. because
+?X: usrinc is defined in usrinc.U, which relies on us...
+?X:
+$cat /usr/include/signal.h /usr/include/sys/signal.h >foo 2>/dev/null
+if test -f /osf_boot || $contains 'OSF/1' /usr/include/ctype.h >/dev/null 2>&1
+then
+	echo "Looks kind of like an OSF/1 system, but we'll see..."
+	echo exit 0 >osf1
+elif test `echo abc | tr a-z A-Z` = Abc ; then
+	xxx=`./loc addbib blurfl $pth`
+	if $test -f $xxx; then
+	echo "Looks kind of like a USG system with BSD features, but we'll see..."
+		echo exit 0 >bsd
+		echo exit 0 >usg
+	else
+		if $contains SIGTSTP foo >/dev/null 2>&1 ; then
+			echo "Looks kind of like an extended USG system, but we'll see..."
+		else
+			echo "Looks kind of like a USG system, but we'll see..."
+		fi
+		echo exit 0 >usg
+	fi
+elif $contains SIGTSTP foo >/dev/null 2>&1 ; then
+	echo "Looks kind of like a BSD system, but we'll see..."
+	d_bsd="$define"
+	echo exit 0 >bsd
+else
+	echo "Looks kind of like a Version 7 system, but we'll see..."
+	echo exit 0 >v7
+fi
+case "$eunicefix" in
+*unixtovms*)
+	$cat <<'EOI'
+There is, however, a strange, musty smell in the air that reminds me of
+something...hmm...yes...I've got it...there's a VMS nearby, or I'm a Blit.
+EOI
+	echo exit 0 >eunice
+	d_eunice="$define"
+: it so happens the Eunice I know will not run shell scripts in Unix format
+	;;
+*)
+	echo " "
+	echo "Congratulations.  You aren't running Eunice."
+	d_eunice="$undef"
+	;;
+esac
+if test -f /xenix; then
+	echo "Actually, this looks more like a XENIX system..."
+	echo exit 0 >xenix
+	d_xenix="$define"
+else
+	echo " "
+	echo "It's not Xenix..."
+	d_xenix="$undef"
+fi
+chmod +x xenix
+$eunicefix xenix
+if test -f /venix; then
+	echo "Actually, this looks more like a VENIX system..."
+	echo exit 0 >venix
+else
+	echo " "
+	if ./xenix; then
+		: null
+	else
+		echo "Nor is it Venix..."
+	fi
+fi
+chmod +x bsd usg v7 osf1 eunice xenix venix
+$eunicefix bsd usg v7 osf1 eunice xenix venix
+$rm -f foo
+

@@ -1,0 +1,102 @@
+?RCS: $Id: d_dlsymun.U,v $
+?RCS:
+?RCS: $Log: d_dlsymun.U,v $
+?RCS:
+?MAKE:d_dlsymun: cat cc ccflags ldflags rm Setvar dlsrc i_dlfcn \
+	cccdlflags ccdlflags lddlflags libs dlext
+?MAKE:	-pick add $@ %<
+?X: This is specific to perl5.
+?S:d_dlsymun:
+?S:	This variable conditionally defines DLSYM_NEEDS_UNDERSCORE, which
+?S:	indicates that we need to prepend an underscore to the symbol
+?S:	name before calling dlsym().
+?S:.
+?C:DLSYM_NEEDS_UNDERSCORE:
+?C:	This symbol, if defined, indicates that we need to prepend an
+?C:	underscore to the symbol name before calling dlsym().  This only
+?C:	makes sense if you *have* dlsym, which we will presume is the
+?C:	case if you're using dl_dlopen.xs.
+?C:.
+?H:#$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/* */
+?H:.
+?F: !fred
+?LINT:set d_dlsymun
+?T: xxx
+: Check if dlsym need a leading underscore
+echo " "
+val="$undef"
+
+case "$dlsrc" in
+dl_dlopen.xs)
+	echo "Checking whether your dlsym() needs a leading underscore ..." >&4
+	$cat >dyna.c <<'EOM'
+fred () { }
+EOM
+
+$cat >fred.c<<EOM
+
+#include <stdio.h>
+#$i_dlfcn I_DLFCN
+#ifdef I_DLFCN
+#include <dlfcn.h>      /* the dynamic linker include file for Sunos/Solaris */
+#else
+#include <sys/types.h>
+#include <nlist.h>
+#include <link.h>
+#endif
+
+extern int fred() ;
+
+main()
+{
+    void * handle ;
+    void * symbol ;
+#ifndef RTLD_LAZY
+    int mode = 1 ;
+#else
+    int mode = RTLD_LAZY ;
+#endif
+    handle = dlopen("./dyna.$dlext", mode) ;
+    if (handle == NULL) {
+        printf ("1\n") ;
+	    exit(0);
+    }
+    symbol = dlsym(handle, "fred") ;
+    if (symbol == NULL) {
+		/* try putting a leading underscore */
+        symbol = dlsym(handle, "_fred") ;
+        if (symbol == NULL) {
+            printf ("2\n") ;
+	    	exit(0);
+		}
+        printf ("3\n") ;
+    }
+    else
+        printf ("4\n") ;
+	exit(0);
+}
+EOM
+	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
+		ld $lddlflags -o dyna.$dlext dyna.o > /dev/null 2>&1 && 
+		$cc $ccflags $ldflags $cccdlflags $ccdlflags fred.c -o fred $libs > /dev/null 2>&1; then
+		xxx=`./fred`
+		case $xxx in
+		1)	echo "Test program failed using dlopen." >&4
+			echo "Perhaps you should not use dynamic loading." >&4;;
+		2)	echo "Test program failed using dlsym." >&4
+			echo "Perhaps you should not use dynamic loading." >&4;;
+		3)	echo "dlsym needs a leading underscore" >&4
+			val="$define" ;;
+		4)	echo "dlsym doesn't need a leading underscore." >&4;;
+		esac
+	else
+		echo "I can't compile and run the test program." >&4
+	fi
+	;;
+esac
+		
+$rm -f fred fred.? dyna.$dlext dyna.?
+
+set d_dlsymun
+eval $setvar
+
