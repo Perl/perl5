@@ -189,6 +189,7 @@ $pwd_cmd ||= 'pwd';
 sub _backtick_pwd {
     my $cwd = `$pwd_cmd`;
     # `pwd` may fail e.g. if the disk is full
+    local $/ = "\n";
     chomp($cwd) if defined $cwd;
     $cwd;
 }
