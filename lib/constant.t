@@ -244,7 +244,7 @@ test 74, @{+FAMILY} == THREE;
 test 75, @{+FAMILY} == @{RFAM->[0]};
 test 76, FAMILY->[2] eq RFAM->[0]->[2];
 test 77, AGES->{FAMILY->[1]} == 28;
-test 78, PHFAM->{John} == AGES->{John};
+{ no warnings 'deprecated'; test 78, PHFAM->{John} == AGES->{John}; }
 test 79, PHFAM->[3] == AGES->{FAMILY->[2]};
 test 80, @{+PHFAM} == SPIT->(THREE+1);
 test 81, THREE**3 eq SPIT->(@{+FAMILY}**3);
