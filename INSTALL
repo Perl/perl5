@@ -118,6 +118,7 @@ to turn off each extension:
     Fcntl		(Always included by default)
     FileHandle		(Always included by default)
     GDBM_File		i_gdbm
+    IO			(Always included by default)
     NDBM_File		i_ndbm
     ODBM_File		i_dbm
     POSIX		useposix
@@ -354,33 +355,33 @@ installed on multiple systems.  Here's one way to do that:
     cd /usr/local  # Or wherever you specified as $prefix
     tar xvf perl5-archive.tar
 
-=head2 Building a shared libperl5.so Perl library.
+=head2 Building a shared libperl.so Perl library.
 
 Currently, for most systems, the main perl executable is built by
 linking the "perl library" libperl.a with perlmain.o, your static
 extensions (usually just DynaLoader.a) and various extra libraries,
 such as -lm.
 
-On systems that support dynamic loading, it may be possible to replace
-libperl.a with a shared libperl5.so.  If you anticipate building
+On some systems that support dynamic loading, it may be possible to
+replace libperl.a with a shared libperl.so.  If you anticipate building
 several different perl binaries (e.g. by embedding libperl into
 different programs, or by using the optional compiler extension), then
-you might wish to build a shared libperl5.so so that all your binaries
+you might wish to build a shared libperl.so so that all your binaries
 can share the same library.
 
 The disadvantages are that there may be a significant performance
-penalty associated with the shared libperl5.so, and that the overall
+penalty associated with the shared libperl.so, and that the overall
 meachanism is still rather fragile with respect to different versions
 and upgrades.
 
 In terms of performance, on my test system (Solaris 2.5_x86) the perl
-test suite took roughly 15% longer to run with the shared libperl5.so.
+test suite took roughly 15% longer to run with the shared libperl.so.
 Your system and typical applications may well give quite different
 results.
 
 The default name for the shared library is typically something like
-libperl5.so.3.2 (for perl5.003_02) or libperl5.so.302 or simply
-libperl5.so.  Configure tries to guess a sensible naming convention
+libperl.so.3.2 (for perl5.003_02) or libperl.so.302 or simply
+libperl.so.  Configure tries to guess a sensible naming convention
 based on your C library name.  Since the library gets installed in a
 version-specific architecture-dependent directory, the exact name
 isn't very important anyway, as long as your linker is happy.
@@ -406,9 +407,28 @@ for Csh-style shells.  You *MUST* do this before running make.
 Folks running NeXT OPENSTEP must substitute DYLD_LIBRARY_PATH for
 LD_LIBRARY_PATH above.
 
+There is also an potential problem with the shared perl library if you
+want to have more than one "flavor" of the same version of perl (e.g.
+with and without -DDEBUGGING).  For example, suppose you build and
+install a standard perl5.004 with a shared library.  Then, suppose you
+try to build perl5.004 with -DDEBUGGING enabled, but everything else
+the same, including all the installation directories.  How can you
+ensure that your newly built perl will link with your newly built
+libperl5.so.4 rather with the installed libperl5.so.4?  The answer is
+that you might not be able to.  The installation directory is encoded
+in the perl binary with the LD_RUN_PATH environment variable.  On
+Solaris, you can override that with LD_LIBRARY_PATH; on Linux you
+can't.
+
+The only reliable answer is that you should specify a different
+directory for the architecture-dependent library for your -DDEBUGGING
+version of perl.  You can do this with by changing all the *archlib*
+variables in config.sh, namely archlib, archlib_exp, and
+installarchlib, to point to your new architecture-dependent library.
+
 =head2 Selecting File IO mechanisms
 
-Previous version of perl used the standard IO mechanisms as defined in
+Previous versions of perl used the standard IO mechanisms as defined in
 <stdio.h>.  Versions 5.003_02 and later of perl allow alternate IO
 mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
 the default and is the only supported mechanism.
@@ -542,7 +562,11 @@ B<gcc>, you should almost always remove your old config.sh.
 =item Propagating your changes to config.sh
 
 If you later make any changes to F<config.sh>, you should propagate
-them to all the .SH files by running  B<sh Configure -S>.
+them to all the .SH files by running  B<sh Configure -S>.  You will
+then have to rebuild by running
+
+	make depend
+	make
 
 =item config.over
 
@@ -652,7 +676,7 @@ numbers will vary in different versions of perl):
 it might well be a symptom of the gcc "varargs problem".  See the
 previous item.
 
-=item *
+=item Solaris and SunOS dynamic loading
 
 If you have problems with dynamic loading using gcc on SunOS or
 Solaris, and you are using GNU as and GNU ld, you may need to add
@@ -662,6 +686,11 @@ and ld are used.  Alternatively, you can use the GCC_EXEC_PREFIX
 environment variable to ensure that Sun's as and ld are used.  Consult
 your gcc documentation for further information on the B<-B> option and
 the GCC_EXEC_PREFIX variable.
+
+=item ld.so.1: ./perl: fatal: relocation error:
+
+If you get this message on SunOS or Solaris, and you're using gcc,
+it's probably the GNU as or GNU ld problem in the previous item.
 
 =item *
 
@@ -710,13 +739,31 @@ re-running Configure without using nm extraction (see previous item).
 
 =item *
 
+If you can't compile successfully, try turning off your compiler's
+optimizier.  Edit config.sh and change the line
+
+	optimize='-O'
+
+to something like
+
+	optimize=' '
+
+then propagate your changes with B<sh Configure -S> and rebuild
+with B<make depend; make>.
+
+=item *
+
 If you can't compile successfully, try adding a C<-DCRIPPLED_CC> flag.
 (Just because you get no errors doesn't mean it compiled right!)
 This simplifies some complicated expressions for compilers that
-get indigestion easily.  If that has no effect, try turning off
-optimization.  If you have missing routines, you probably need to
-add some library or other, or you need to undefine some feature that
-Configure thought was there but is defective or incomplete.
+get indigestion easily.
+
+=item Missing functions
+
+If you have missing routines, you probably need to add some library or
+other, or you need to undefine some feature that Configure thought was
+there but is defective or incomplete.  Look through config.h for
+likely suspects.
 
 =item *
 
@@ -955,4 +1002,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-21 August 1996
+30 August 1996
