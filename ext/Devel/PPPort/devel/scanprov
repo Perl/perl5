@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 3 $
+#  $Revision: 4 $
 #  $Author: mhx $
-#  $Date: 2004/08/13 12:50:11 +0200 $
+#  $Date: 2004/09/08 21:08:46 +0200 $
 #
 ################################################################################
 #
@@ -23,7 +23,8 @@
 use strict;
 require 'parts/ppptools.pl';
 
-my $file = 'provided.c';
+die "Usage: $0 [check|write]\n" unless @ARGV && $ARGV[0] =~ /^(check|write)$/;
+my $mode = $1;
 
 my %embed = map { ( $_->{name} => 1 ) }
             parse_embed(qw(parts/embed.fnc parts/apidoc.fnc));
@@ -47,6 +48,7 @@ shift @perls;
 my %v;
 
 for my $p (@perls) {
+  print "checking perl $p->{version}...\n";
   my $archlib = `$p->{path} -MConfig -l -e 'print \$Config{archlib}'`;
   chomp $archlib;
   local @ARGV = glob "$archlib/CORE/*.h";
@@ -56,13 +58,20 @@ for my $p (@perls) {
 }
 
 my $out = 'parts/base';
+my $todo = parse_todo($out);
 
 for my $v (keys %v) {
+  my @new = sort grep { !exists $todo->{$_} } keys %{$v{$v}};
+  @new or next;
   my $file = $v;
   $file =~ s/\.//g;
   $file = "$out/$file";
   -e $file or die "non-existent: $file\n";
-  open F, ">>$file" or die "$file: $!\n";
-  printf F "%-30s # added by $0\n", $_ for sort keys %{$v{$v}};
-  close F;
+  print "-- $file --\n";
+  $mode eq 'write' and (open F, ">>$file" or die "$file: $!\n");
+  for (@new) {
+    print "adding $_\n";
+    $mode eq 'write' and printf F "%-30s # added by $0\n", $_;
+  }
+  $mode eq 'write' and close F;
 }

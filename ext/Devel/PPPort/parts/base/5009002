@@ -18,3 +18,4 @@ mXPUSHp                        # U
 mXPUSHu                        # U
 vnormal                        # E
 PERL_BCDVERSION                # added by devel/scanprov
+MY_CXT_CLONE                   # added by devel/scanprov

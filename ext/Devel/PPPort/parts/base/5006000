@@ -500,3 +500,5 @@ dTHXa                          # added by devel/scanprov
 dTHXoa                         # added by devel/scanprov
 pTHX                           # added by devel/scanprov
 pTHX_                          # added by devel/scanprov
+PL_no_modify                   # added by devel/scanprov
+PL_ppaddr                      # added by devel/scanprov
