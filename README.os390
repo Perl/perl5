@@ -31,6 +31,8 @@ http://www-1.ibm.com/servers/eserver/zseries/zos/unix/bpxa1toy.html
 
 =head2 Unpacking Perl distribution on OS/390
 
+If using ftp remember to transfer the distribution in binary format.
+
 Gunzip/gzip for OS/390 is discussed at:
 
   http://www-1.ibm.com/servers/eserver/zseries/zos/unix/faq/bpxqp1.html
@@ -39,12 +41,17 @@ to extract an ASCII tar archive on OS/390, try this:
 
    pax -o to=IBM-1047,from=ISO8859-1 -r < latest.tar
 
-If you get errors of the form
+If you get lots of errors of the form
 
   tar: FSUM7171 ...: cannot set uid/gid: EDC5139I Operation not permitted.
   tar: FSUM7148 cannot create file "...": EDC5111I Permission denied.
 
-you didn't read the above and tried to use tar instead of pax.
+you didn't read the above and tried to use tar instead of pax, you'll
+first have to remove the (now corrupt) perl directory
+
+   rm -rf perl-...
+
+and then use pax.
 
 =head2 Setup and utilities for Perl on OS/390
 
