@@ -11,7 +11,7 @@ use File::Compare;
 use File::Copy ();
 use File::Path ();
 use Config;
-use subs qw(unlink rename link chmod);
+use subs qw(unlink link chmod);
 
 # override the ones in the rest of the script
 sub mkpath {
@@ -217,9 +217,33 @@ if (! $versiononly) {
 
 if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
     mkpath("${installprivlib}/pod", 1, 0777);
+
+    # If Perl 5.003's perldiag.pod is there, rename it.
+    if (open POD, "${installprivlib}/pod/perldiag.pod") {
+	read POD, $_, 4000;
+	close POD;
+	# Some of Perl 5.003's diagnostic messages ended with periods.
+	if (/^=.*\.$/m) {
+	    my ($from, $to) = ("${installprivlib}/pod/perldiag.pod",
+			       "${installprivlib}/pod/perldiag-5.003.pod");
+	    print STDERR "  rename $from $to";
+	    rename($from, $to)
+		or warn "Couldn't rename $from to $to: $!\n"
+		unless $nonono;
+	}
+    }
+
     foreach $file (@pods) {
 	# $file is a name like  pod/perl.pod
 	copy_if_diff($file, "${installprivlib}/${file}");
+    }
+
+    # Link perldiag.pod into archlib
+    my ($from, $to) = ("${installprivlib}/pod/perldiag.pod",
+		       "${installarchlib}/pod/perldiag.pod");
+    if (compare($from, $to) || $nonono) {
+	mkpath("${installarchlib}/pod", 1, 0777);
+	link($from, $to);
     }
 }
 
@@ -307,7 +331,7 @@ sub safe_rename {
     if (-f $to and not unlink($to)) {
 	my($i);
 	for ($i = 1; $i < 50; $i++) {
-	    last if CORE::rename($to, "$to.$i");
+	    last if rename($to, "$to.$i");
 	}
 	warn("Cannot rename to `$to.$i': $!"), return 0 
 	   if $i >= 50;	# Give up!
