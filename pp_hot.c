@@ -226,20 +226,8 @@ PP(pp_padsv)
     if (op->op_flags & OPf_MOD) {
 	if (op->op_private & OPpLVAL_INTRO)
 	    SAVECLEARSV(curpad[op->op_targ]);
-        else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV)) {
-	    SV* sv = curpad[op->op_targ];
-            if (SvGMAGICAL(sv))
-                mg_get(sv);
-            if (!SvOK(sv)) {
-                if (SvREADONLY(sv))
-                    croak(no_modify);
-                (void)SvUPGRADE(sv, SVt_RV);
-                SvRV(sv) = (op->op_private & OPpDEREF_HV ?
-                            (SV*)newHV() : (SV*)newAV());
-                SvROK_on(sv);
-                SvSETMAGIC(sv);
-            }
-        }
+        else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV))
+	    provide_ref(op, curpad[op->op_targ]);
     }
     RETURN;
 }
@@ -1218,18 +1206,8 @@ PP(pp_helem)
 	    DIE(no_helem, key);
 	if (op->op_private & OPpLVAL_INTRO)
 	    save_svref(svp);
-	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV)) {
-	    SV* sv = *svp;
-	    if (SvGMAGICAL(sv))
-		mg_get(sv);
-	    if (!SvOK(sv)) {
-		(void)SvUPGRADE(sv, SVt_RV);
-		SvRV(sv) = (op->op_private & OPpDEREF_HV ?
-			    (SV*)newHV() : (SV*)newAV());
-		SvROK_on(sv);
-		SvSETMAGIC(sv);
-	    }
-	}
+	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV))
+	    provide_ref(op, *svp);
     }
     PUSHs(svp ? *svp : &sv_undef);
     RETURN;
@@ -1898,21 +1876,29 @@ PP(pp_aelem)
 	    DIE(no_aelem, elem);
 	if (op->op_private & OPpLVAL_INTRO)
 	    save_svref(svp);
-	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV)) {
-	    SV* sv = *svp;
-	    if (SvGMAGICAL(sv))
-		mg_get(sv);
-	    if (!SvOK(sv)) {
-		(void)SvUPGRADE(sv, SVt_RV);
-		SvRV(sv) = (op->op_private & OPpDEREF_HV ?
-			    (SV*)newHV() : (SV*)newAV());
-		SvROK_on(sv);
-		SvSETMAGIC(sv);
-	    }
-	}
+	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV))
+	    provide_ref(op, *svp);
     }
     PUSHs(svp ? *svp : &sv_undef);
     RETURN;
+}
+
+void
+provide_ref(op, sv)
+OP* op;
+SV* sv;
+{
+    if (SvGMAGICAL(sv))
+	mg_get(sv);
+    if (!SvOK(sv)) {
+	if (SvREADONLY(sv))
+	    croak(no_modify);
+	(void)SvUPGRADE(sv, SVt_RV);
+	SvRV(sv) = (op->op_private & OPpDEREF_HV ?
+		    (SV*)newHV() : (SV*)newAV());
+	SvROK_on(sv);
+	SvSETMAGIC(sv);
+    }
 }
 
 PP(pp_method)
