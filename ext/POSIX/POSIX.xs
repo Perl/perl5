@@ -1250,11 +1250,9 @@ sigaction(sig, optaction, oldaction = 0)
 	     * in between. We use sigprocmask() to make it so.
 	     */
 	    sigfillset(&sset);
-#if 0
 	    RETVAL=sigprocmask(SIG_BLOCK, &sset, &osset);
 	    if(RETVAL == -1)
                XSRETURN_UNDEF;
-#endif
 	    ENTER;
 	    /* Restore signal mask no matter how we exit this block. */
 	    osset_sv = newSVpv((char *)(&osset), sizeof(sigset_t));
