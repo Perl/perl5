@@ -3721,7 +3721,14 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
     }
     else {
-	sv = newGVOP(OP_GV, 0, PL_defgv);
+	I32 offset = pad_findmy("$_");
+	if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS(offset) & SVpad_OUR) {
+	    sv = newGVOP(OP_GV, 0, PL_defgv);
+	}
+	else {
+	    padoff = offset;
+	    iterpflags = OPpLVAL_INTRO; /* my $_; for () */
+	}
     }
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
 	expr = mod(force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);
