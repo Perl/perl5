@@ -4522,7 +4522,6 @@ PP(pp_lock)
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: pp_lock lock 0x%lx\n",
 			      (unsigned long)thr, (unsigned long)sv);)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
-	SvREFCNT_inc(sv);	/* keep alive until magic_mutexfree */
 	save_destructor(unlock_condpair, sv);
     }
 #endif /* USE_THREADS */
