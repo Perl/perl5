@@ -1281,6 +1281,13 @@ details discussed in this section is hairy regular expressions.  However, the
 first steps of parsing are the same for all Perl quoting operators, so here
 they are discussed together.
 
+The most important detail of Perl parsing rules is the first one
+discussed below; when processing a quoted construct, Perl I<first>
+finds the end of the construct, then it interprets the contents of the
+construct.  If you understand this rule, you may skip the rest of this
+section on the first reading.  The other rules would
+contradict user's expectations much less frequently than the first one.
+
 Some of the passes discussed below are performed concurrently, but as 
 far as results are the same, we consider them one-by-one.  For different
 quoting constructs Perl performs different number of passes, from
@@ -1290,32 +1297,37 @@ one to five, but they are always performed in the same order.
 
 =item Finding the end
 
-First pass is finding the end of the quoted construct, be it multichar ender
+First pass is finding the end of the quoted construct, be it 
+a multichar delimiter
 C<"\nEOF\n"> of C<<<EOF> construct, C</> which terminates C<qq/> construct,
 C<]> which terminates C<qq[> construct, or C<E<gt>> which terminates a
 fileglob started with C<<>.
 
-When searching for multichar construct no skipping is performed.  When 
-searching for one-char non-matching delimiter, such as C</>, combinations
+When searching for one-char non-matching delimiter, such as C</>, combinations
 C<\\> and C<\/> are skipped.  When searching for one-char matching delimiter,
 such as C<]>, combinations C<\\>, C<\]> and C<\[> are skipped, and 
-nested C<[>, C<]> are skipped as well.
+nested C<[>, C<]> are skipped as well.  When searching for multichar delimiter
+no skipping is performed.  
 
-For 3-parts constructs, C<s///> etc. the search is repeated once more.
+For constructs with 3-part delimiters (C<s///> etc.) the search is
+repeated once more.
 
-During this search no attention is paid to the semantic of the construct, thus
+During this search no attention is paid to the semantic of the construct,
+thus:
 
     "$hash{"$foo/$bar"}"
 
-or
+or:
 
     m/ 
-      bar	#  This is not a comment, this slash / terminated m//!
+      bar	# NOT a comment, this slash / terminated m//!
      /x
 
-do not form legal quoted expressions.  Note that since the slash which 
-terminated C<m//> was followed by a C<SPACE>, this is not C<m//x>, 
-thus C<#> was interpreted as a literal C<#>.
+do not form legal quoted expressions, the quoted part ends on the first C<">
+and C</>, and the rest happens to be a syntax error.  Note that since the slash
+which terminated C<m//> was followed by a C<SPACE>, the above is not C<m//x>, 
+but rather C<m//> with no 'x' switch.  So the embedded C<#> is interpreted
+as a literal C<#>.
 
 =item Removal of backslashes before delimiters
 
@@ -1349,42 +1361,64 @@ The only interpolation is removal of C<\> from pairs C<\\>.
 =item C<"">, C<``>, C<qq//>, C<qx//>, C<<file*globE<gt>>
 
 C<\Q>, C<\U>, C<\u>, C<\L>, C<\l> (possibly paired with C<\E>) are converted
-to corresponding Perl constructs, thus C<"$foo\Qbaz$bar"> is converted to 
+to corresponding Perl constructs, thus C<"$foo\Qbaz$bar"> is converted to :
 
    $foo . (quotemeta("baz" . $bar));
 
 Other combinations of C<\> with following chars are substituted with
-appropriate expansions.  
+appropriate expansions.
 
-Interpolated scalars and arrays are converted to C<join> and C<.> Perl 
-constructs, thus C<"'@arr'"> becomes
+Let it be stressed that I<whatever is between C<\Q> and C<\E>> is interpolated
+in the usual way.  Say, C<"\Q\\E"> has no C<\E> inside: it has C<\Q>, C<\\>,
+and C<E>, thus the result is the same as for C<"\\\\E">.  Generally speaking,
+having backslashes between C<\Q> and C<\E> may lead to counterintuitive
+results.  So, C<"\Q\t\E"> is converted to:
 
-  "'" . (join $", @arr) . "'";
+  quotemeta("\t")
 
-Since all three above steps are performed simultaneously left-to-right,
-the is no way to insert a literal C<$> or C<@> inside C<\Q\E> pair: it
-cannot be protected by C<\>, since any C<\> (except in C<\E>) is 
-interpreted as a literal inside C<\Q\E>, and any C<$> is 
+which is the same as C<"\\\t"> (since TAB is not alphanumerical).  Note also
+that:
+
+  $str = '\t';
+  return "\Q$str";
+
+may be closer to the conjectural I<intention> of the writer of C<"\Q\t\E">.
+
+Interpolated scalars and arrays are internally converted to the C<join> and
+C<.> Perl operations, thus C<"$foo >>> '@arr'"> becomes:
+
+  $foo . " >>> '" . (join $", @arr) . "'";
+
+All the operations in the above are performed simultaneously left-to-right.
+
+Since the result of "\Q STRING \E" has all the metacharacters quoted
+there is no way to insert a literal C<$> or C<@> inside a C<\Q\E> pair: if
+protected by C<\> C<$> will be quoted to became "\\\$", if not, it is 
 interpreted as starting an interpolated scalar.
 
-Note also that the interpolating code needs to make decision where the 
-interpolated scalar ends, say, whether C<"a $b -E<gt> {c}"> means 
+Note also that the interpolating code needs to make a decision on where the 
+interpolated scalar ends. For instance, whether C<"a $b -E<gt> {c}"> means:
 
   "a " . $b . " -> {c}";
 
-or 
+or:
 
   "a " . $b -> {c};
 
-Most the time the decision is to take the longest possible text which does
-not include spaces between components and contains matching braces/brackets.
+I<Most of the time> the decision is to take the longest possible text which
+does not include spaces between components and contains matching
+braces/brackets.  Since the outcome may be determined by I<voting> based
+on heuristic estimators, the result I<is not strictly predictable>, but
+is usually correct for the ambiguous cases.
 
 =item C<?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>, 
 
 Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l> and interpolation happens 
 (almost) as with C<qq//> constructs, but I<the substitution of C<\> followed by
-other chars is not performed>!  Moreover, inside C<(?{BLOCK})> no processing
-is performed at all.
+RE-special chars (including C<\>) is not performed>!  Moreover, 
+inside C<(?{BLOCK})>, C<(?# comment )>, and C<#>-comment of
+C<//x>-regular expressions no processing is performed at all.
+This is the first step where presence of the C<//x> switch is relevant.
 
 Interpolation has several quirks: C<$|>, C<$(> and C<$)> are not interpolated, and
 constructs C<$var[SOMETHING]> are I<voted> (by several different estimators) 
@@ -1392,15 +1426,25 @@ to be an array element or C<$var> followed by a RE alternative.  This is
 the place where the notation C<${arr[$bar]}> comes handy: C</${arr[0-9]}/>
 is interpreted as an array element C<-9>, not as a regular expression from
 variable C<$arr> followed by a digit, which is the interpretation of 
-C</$arr[0-9]/>.
+C</$arr[0-9]/>.  Since voting among different estimators may be performed,
+the result I<is not predictable>.
+
+It is on this step that C<\1> is converted to C<$1> in the replacement
+text of C<s///>.
 
 Note that absence of processing of C<\\> creates specific restrictions on the
 post-processed text: if the delimiter is C</>, one cannot get the combination
 C<\/> into the result of this step: C</> will finish the regular expression,
 C<\/> will be stripped to C</> on the previous step, and C<\\/> will be left
 as is.  Since C</> is equivalent to C<\/> inside a regular expression, this
-does not matter unless the delimiter is special character for the RE engine, as 
-in C<s*foo*bar*>, C<m[foo]>, or C<?foo?>.
+does not matter unless the delimiter is a special character for the RE engine,
+as in C<s*foo*bar*>, C<m[foo]>, or C<?foo?>, or an alphanumeric char, as in:
+
+  m m ^ a \s* b mmx;
+
+In the above RE, which is intentionally obfuscated for illustration, the
+delimiter is C<m>, the modifier is C<mx>, and after backslash-removal the
+RE is the same as for C<m/ ^ a s* b /mx>).
 
 =back
 
@@ -1419,26 +1463,41 @@ engine for compilation.
 Whatever happens in the RE engine is better be discussed in L<perlre>,
 but for the sake of continuity let us do it here.
 
-This is the first step where presence of the C<//x> switch is relevant.
+This is another step where presence of the C<//x> switch is relevant.
 The RE engine scans the string left-to-right, and converts it to a finite 
 automaton.  
 
 Backslashed chars are either substituted by corresponding literal 
-strings, or generate special nodes of the finite automaton.  Characters
-which are special to the RE engine generate corresponding nodes.  C<(?#...)>
+strings (as with C<\{>), or generate special nodes of the finite automaton
+(as with C<\b>).  Characters which are special to the RE engine (such as
+C<|>) generate corresponding nodes or groups of nodes.  C<(?#...)>
 comments are ignored.  All the rest is either converted to literal strings
 to match, or is ignored (as is whitespace and C<#>-style comments if
 C<//x> is present).
 
 Note that the parsing of the construct C<[...]> is performed using 
-absolutely different rules than the rest of the regular expression.  
-Similarly, the C<(?{...})> is only checked for matching braces.
+rather different rules than for the rest of the regular expression.  
+The terminator of this construct is found using the same rules as for
+finding a terminator of a C<{}>-delimited construct, the only exception
+being that C<]> immediately following C<[> is considered as if preceded
+by a backslash.  Similarly, the terminator of C<(?{...})> is found using
+the same rules as for finding a terminator of a C<{}>-delimited construct.
+
+It is possible to inspect both the string given to RE engine, and the
+resulting finite automaton.  See arguments C<debug>/C<debugcolor>
+of C<use L<re>> directive, and/or B<-Dr> option of Perl in
+L<perlrun/Switches>.
 
 =item Optimization of regular expressions
 
 This step is listed for completeness only.  Since it does not change
 semantics, details of this step are not documented and are subject
-to change.
+to change.  This step is performed over the finite automaton generated
+during the previous pass.
+
+However, in older versions of Perl C<L<split>> used to silently
+optimize C</^/> to mean C</^/m>.  This behaviour, though present
+in current versions of Perl, may be deprecated in future.
 
 =back
 
