@@ -7141,7 +7141,12 @@ Perl_yyerror(pTHX_ char *s)
     }
     else if (yychar > 255)
 	where = "next token ???";
+#ifdef USE_PURE_BISON
+/*  GNU Bison sets the value -2 */
+    else if (yychar == -2) {
+#else
     else if ((yychar & 127) == 127) {
+#endif
 	if (PL_lex_state == LEX_NORMAL ||
 	   (PL_lex_state == LEX_KNOWNEXT && PL_lex_defer == LEX_NORMAL))
 	    where = "at end of line";
