@@ -195,10 +195,10 @@ else {
 	ok 29, ($Is_MSWin32 ? (`cmd /x /c set foo 2>NUL` eq "")
 				: (`echo \$foo` eq "\n") );
 
-	$ENV{NoNeSuCh} = "foo";
+	$ENV{__NoNeSuCh} = "foo";
 	$0 = "bar";
-	ok 30, ($Is_MSWin32 ? (`cmd /x /c set NoNeSuCh` eq "NoNeSuCh=foo\n")
-						: (`echo \$NoNeSuCh` eq "foo\n") );
+	ok 30, ($Is_MSWin32 ? (`cmd /x /c set __NoNeSuCh` eq "__NoNeSuCh=foo\n")
+			    : (`echo \$__NoNeSuCh` eq "foo\n") );
 }
 
 {

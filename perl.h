@@ -2833,7 +2833,8 @@ EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),MEMBER_TO_FP
 
 EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
 EXT MGVTBL PL_vtbl_regdata = {0, 0, MEMBER_TO_FPTR(Perl_magic_regdata_cnt), 0, 0};
-EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get), 0, 0, 0, 0};
+EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get),
+			       MEMBER_TO_FPTR(Perl_magic_regdatum_set), 0, 0, 0};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL PL_vtbl_collxfrm = {0,
@@ -3076,8 +3077,20 @@ typedef struct am_table_short AMTS;
 	((PL_hints & HINT_LOCALE) && \
 	  PL_numeric_radix && (c) == PL_numeric_radix)
 
-#define RESTORE_NUMERIC_LOCAL()		if ((PL_hints & HINT_LOCALE) && PL_numeric_standard) SET_NUMERIC_LOCAL()
-#define RESTORE_NUMERIC_STANDARD()	if ((PL_hints & HINT_LOCALE) && PL_numeric_local) SET_NUMERIC_STANDARD()
+#define STORE_NUMERIC_LOCAL_SET_STANDARD() \
+	bool was_local = (PL_hints & HINT_LOCALE) && PL_numeric_local; \
+	if (!was_local) SET_NUMERIC_STANDARD();
+
+#define STORE_NUMERIC_STANDARD_SET_LOCAL() \
+	bool was_standard = !(PL_hints & HINT_LOCALE) || PL_numeric_standard; \
+	if (!was_standard) SET_NUMERIC_LOCAL();
+
+#define RESTORE_NUMERIC_LOCAL() \
+	if (was_local) SET_NUMERIC_LOCAL();
+
+#define RESTORE_NUMERIC_STANDARD() \
+	if (was_standard) SET_NUMERIC_STANDARD();
+
 #define Atof				my_atof
 
 #else /* !USE_LOCALE_NUMERIC */
@@ -3085,6 +3098,8 @@ typedef struct am_table_short AMTS;
 #define SET_NUMERIC_STANDARD()  	/**/
 #define SET_NUMERIC_LOCAL()     	/**/
 #define IS_NUMERIC_RADIX(c)		(0)
+#define STORE_NUMERIC_LOCAL_SET_STANDARD()	/**/
+#define STORE_NUMERIC_STANDARD_SET_LOCAL()	/**/
 #define RESTORE_NUMERIC_LOCAL()		/**/
 #define RESTORE_NUMERIC_STANDARD()	/**/
 #define Atof				Perl_atof

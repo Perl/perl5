@@ -443,9 +443,8 @@ probably get away with setting an environment variable:
 
 If you want finer granularity than the 1 second that the sleep()
 function provides, the easiest way is to use the select() function as
-documented in L<perlfunc/"select">.  If your system has itimers and
-syscall() support, you can check out the old example in
-http://www.perl.com/CPAN/doc/misc/ancient/tutorial/eg/itimers.pl .
+documented in L<perlfunc/"select">.  Try the Time::HiRes and
+the BSD::Itimer modules (available from CPAN).
 
 =head2 How can I measure time under a second?
 
@@ -905,10 +904,6 @@ Background yourself like this:
 
 The Proc::Daemon module, available from CPAN, provides a function to
 perform these actions for you.
-
-=head2 How do I make my program run with sh and csh?
-
-See the F<eg/nih> script (part of the perl source distribution).
 
 =head2 How do I find out if I'm running interactively or not?
 

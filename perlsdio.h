@@ -213,9 +213,11 @@
 #define _flsbuf(c,f)  _CANNOT _flsbuf_
 #define fdopen(fd,p)  _CANNOT _fdopen_
 #define fileno(f)  _CANNOT _fileno_
+#if SFIO_VERSION < 20000101L
 #define flockfile(f)  _CANNOT _flockfile_
 #define ftrylockfile(f)  _CANNOT _ftrylockfile_
 #define funlockfile(f)  _CANNOT _funlockfile_
+#endif
 #define getc_unlocked(f)  _CANNOT _getc_unlocked_
 #define putc_unlocked(c,f)  _CANNOT _putc_unlocked_
 #define popen(c,m)  _CANNOT _popen_
@@ -315,9 +317,11 @@
 #define _flsbuf(c,f)		_CANNOT _flsbuf_
 #define getw(f)			_CANNOT _getw_
 #define putw(v,f)		_CANNOT _putw_
+#if SFIO_VERSION < 20000101L
 #define flockfile(f)		_CANNOT _flockfile_
 #define ftrylockfile(f)		_CANNOT _ftrylockfile_
 #define funlockfile(f)		_CANNOT _funlockfile_
+#endif
 #define freopen(p,m,f)		_CANNOT _freopen_
 #define setbuf(f,b)		_CANNOT _setbuf_
 #define setvbuf(f,b,x,s)	_CANNOT _setvbuf_

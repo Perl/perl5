@@ -439,9 +439,9 @@ foreach (@pages) {
 	next;
     }
     print STDERR "Searching for $_\n" if $opt_v;
-    # We must look both in @INC for library modules and in PATH
+    # We must look both in @INC for library modules and in $bindir
     # for executables, like h2xs or perldoc itself.
-    my @searchdirs = @INC;
+    my @searchdirs = ($bindir, @INC);
     if ($opt_F) {
 	next unless -r;
 	push @found, $_ if $opt_m or containspod($_);

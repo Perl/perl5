@@ -795,6 +795,8 @@ to check the condition at the top of the loop.
 
 =item cos EXPR
 
+=item cos
+
 Returns the cosine of EXPR (expressed in radians).  If EXPR is omitted,
 takes cosine of C<$_>.
 
@@ -3285,9 +3287,9 @@ Examples:
 
 The same template may generally also be used in unpack().
 
-=item package 
-
 =item package NAMESPACE
+
+=item package 
 
 Declares the compilation unit as being in the given namespace.  The scope
 of the package declaration is from the declaration itself through the end
@@ -3346,7 +3348,7 @@ array in subroutines, just like C<shift>.
 =item pos
 
 Returns the offset of where the last C<m//g> search left off for the variable
-is in question (C<$_> is used when the variable is not specified).  May be
+in question (C<$_> is used when the variable is not specified).  May be
 modified to change that offset.  Such modification will also influence
 the C<\G> zero-width assertion in regular expressions.  See L<perlre> and
 L<perlop>.
@@ -4445,6 +4447,10 @@ permits these unnecessary but widely-supported conversions:
    %U	a synonym for %lu
    %O	a synonym for %lo
    %F	a synonym for %f
+
+Conversions to scientific notation by C<%e>, C<%E>, C<%g> and C<%G>
+always have a two-digit exponent unless the modulus of the exponent is
+greater than 99.
 
 Perl permits the following universally-known flags between the C<%>
 and the conversion letter:

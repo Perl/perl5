@@ -183,9 +183,6 @@ one-liners:
       rename $was, $_ unless $was eq $_;
   }
 
-(this is the I<rename> program that comes in the I<eg/> directory
-of the Perl source distribution).
-
 The decompiler has several options for the code it generates.  For
 instance, you can set the size of each indent from 4 (as above) to
 2 with:

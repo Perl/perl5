@@ -436,12 +436,19 @@ win32_os_id(void)
 DllExport int
 win32_getpid(void)
 {
+    int pid;
 #ifdef USE_ITHREADS
     dTHXo;
     if (w32_pseudo_id)
 	return -((int)w32_pseudo_id);
 #endif
-    return _getpid();
+    pid = _getpid();
+    /* Windows 9x appears to always reports a pid for threads and processes
+     * that has the high bit set. So we treat the lower 31 bits as the
+     * "real" PID for Perl's purposes. */
+    if (IsWin95() && pid < 0)
+	pid = -pid;
+    return pid;
 }
 
 /* Tokenize a string.  Words are null-separated, and the list
@@ -568,7 +575,11 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 			       (const char* const*)argv);
     }
 
-    if (flag != P_NOWAIT) {
+    if (flag == P_NOWAIT) {
+	if (IsWin95())
+	    PL_statusvalue = -1;	/* >16bits hint for pp_system() */
+    }
+    else {
 	if (status < 0) {
     	    dTHR;
 	    if (ckWARN(WARN_EXEC))
@@ -657,7 +668,11 @@ do_spawn2(char *cmd, int exectype)
 	cmd = argv[0];
 	Safefree(argv);
     }
-    if (exectype != EXECF_SPAWN_NOWAIT) {
+    if (exectype == EXECF_SPAWN_NOWAIT) {
+	if (IsWin95())
+	    PL_statusvalue = -1;	/* >16bits hint for pp_system() */
+    }
+    else {
 	if (status < 0) {
     	    dTHR;
 	    if (ckWARN(WARN_EXEC))
@@ -1021,10 +1036,11 @@ win32_kill(int pid, int sig)
 {
     dTHXo;
     HANDLE hProcess;
+    long child;
 #ifdef USE_ITHREADS
     if (pid < 0) {
 	/* it is a pseudo-forked child */
-	long child = find_pseudo_pid(-pid);
+	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
 	    if (!sig)
 		return 0;
@@ -1034,11 +1050,15 @@ win32_kill(int pid, int sig)
 		return 0;
 	    }
 	}
+	else if (IsWin95()) {
+	    pid = -pid;
+	    goto alien_process;
+	}
     }
     else
 #endif
     {
-	long child = find_pid(pid);
+	child = find_pid(pid);
 	if (child >= 0) {
 	    if (!sig)
 		return 0;
@@ -1049,7 +1069,9 @@ win32_kill(int pid, int sig)
 	    }
 	}
 	else {
-	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
+alien_process:
+	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE,
+				   (IsWin95() ? -pid : pid));
 	    if (hProcess) {
 		if (!sig)
 		    return 0;
@@ -1636,15 +1658,16 @@ DllExport int
 win32_waitpid(int pid, int *status, int flags)
 {
     dTHXo;
+    DWORD timeout = (flags & WNOHANG) ? 0 : INFINITE;
     int retval = -1;
+    long child;
     if (pid == -1)				/* XXX threadid == 1 ? */
 	return win32_wait(status);
 #ifdef USE_ITHREADS
     else if (pid < 0) {
-	long child = find_pseudo_pid(-pid);
+	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
 	    HANDLE hThread = w32_pseudo_child_handles[child];
-	    DWORD timeout = (flags & WNOHANG) ? 0 : INFINITE;
 	    DWORD waitcode = WaitForSingleObject(hThread, timeout);
 	    if (waitcode == WAIT_TIMEOUT) {
 		return 0;
@@ -1654,41 +1677,59 @@ win32_waitpid(int pid, int *status, int flags)
 		    *status = (int)((waitcode & 0xff) << 8);
 		    retval = (int)w32_pseudo_child_pids[child];
 		    remove_dead_pseudo_process(child);
+		    return -retval;
+		}
+	    }
+	    else
+		errno = ECHILD;
+	}
+	else if (IsWin95()) {
+	    pid = -pid;
+	    goto alien_process;
+	}
+    }
+#endif
+    else {
+	HANDLE hProcess;
+	DWORD waitcode;
+	child = find_pid(pid);
+	if (child >= 0) {
+	    hProcess = w32_child_handles[child];
+	    waitcode = WaitForSingleObject(hProcess, timeout);
+	    if (waitcode == WAIT_TIMEOUT) {
+		return 0;
+	    }
+	    else if (waitcode != WAIT_FAILED) {
+		if (GetExitCodeProcess(hProcess, &waitcode)) {
+		    *status = (int)((waitcode & 0xff) << 8);
+		    retval = (int)w32_child_pids[child];
+		    remove_dead_process(child);
 		    return retval;
 		}
 	    }
 	    else
 		errno = ECHILD;
 	}
-    }
-#endif
-    else {
-	long child = find_pid(pid);
-	if (child >= 0) {
-	    HANDLE hProcess = w32_child_handles[child];
-	    DWORD timeout = (flags & WNOHANG) ? 0 : INFINITE;
-	    DWORD waitcode = WaitForSingleObject(hProcess, timeout);
-	    if (waitcode == WAIT_TIMEOUT) {
-		return 0;
-	    }
-	    else if (waitcode != WAIT_FAILED) {
-		 if (GetExitCodeProcess(hProcess, &waitcode)) {
-		     *status = (int)((waitcode & 0xff) << 8);
-		     retval = (int)w32_child_pids[child];
-		     remove_dead_process(child);
-		     return retval;
-		 }
+	else {
+alien_process:
+	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE,
+				   (IsWin95() ? -pid : pid));
+	    if (hProcess) {
+		waitcode = WaitForSingleObject(hProcess, timeout);
+		if (waitcode == WAIT_TIMEOUT) {
+		    return 0;
+		}
+		else if (waitcode != WAIT_FAILED) {
+		    if (GetExitCodeProcess(hProcess, &waitcode)) {
+			*status = (int)((waitcode & 0xff) << 8);
+			CloseHandle(hProcess);
+			return pid;
+		    }
+		}
+		CloseHandle(hProcess);
 	    }
 	    else
 		errno = ECHILD;
-	}
-	else {
-	    retval = cwait(status, pid, WAIT_CHILD);
-	    /* cwait() returns "correctly" on Borland */
-#ifndef __BORLANDC__
-	    if (status)
-		*status *= 256;
-#endif
 	}
     }
     return retval >= 0 ? pid : retval;                
@@ -1720,7 +1761,7 @@ win32_wait(int *status)
 		*status = (int)((exitcode & 0xff) << 8);
 		retval = (int)w32_pseudo_child_pids[i];
 		remove_dead_pseudo_process(i);
-		return retval;
+		return -retval;
 	    }
 	}
     }
@@ -3273,9 +3314,12 @@ RETRY:
 
     if (mode == P_NOWAIT) {
 	/* asynchronous spawn -- store handle, return PID */
-	w32_child_handles[w32_num_children] = ProcessInformation.hProcess;
-	w32_child_pids[w32_num_children] = ProcessInformation.dwProcessId;
 	ret = (int)ProcessInformation.dwProcessId;
+	if (IsWin95() && ret < 0)
+	    ret = -ret;
+
+	w32_child_handles[w32_num_children] = ProcessInformation.hProcess;
+	w32_child_pids[w32_num_children] = (DWORD)ret;
 	++w32_num_children;
     }
     else  {
@@ -3835,8 +3879,11 @@ XS(w32_Spawn)
 		&stStartInfo,		/* -> Startup info */
 		&stProcInfo))		/* <- Process info (if OK) */
     {
+	int pid = (int)stProcInfo.dwProcessId;
+	if (IsWin95() && pid < 0)
+	    pid = -pid;
+	sv_setiv(ST(2), pid);
 	CloseHandle(stProcInfo.hThread);/* library source code does this. */
-	sv_setiv(ST(2), stProcInfo.dwProcessId);
 	bSuccess = TRUE;
     }
     XSRETURN_IV(bSuccess);

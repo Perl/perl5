@@ -205,7 +205,7 @@ These are B<not> yet available with Cygwin.
 
 I<gcc> supports long doubles (12 bytes).  However, several additional
 long double math functions are necessary to use them within Perl
-(I<{atan2,cos,exp,floor,fmod,frexp,log,modf,pow,sin,sqrt}l,strtold>).
+(I<{atan2,cos,exp,floor,fmod,frexp,isnan,log,modf,pow,sin,sqrt}l,strtold>).
 These are B<not> yet available with Cygwin.
 
 =item * C<-Dusethreads>
@@ -267,7 +267,7 @@ The following error occurs because of the Cygwin C<#define> of
 C<_LONG_DOUBLE>:
 
   Guessing which symbols your C compiler and preprocessor define...
-  try.c:3847: parse error
+  try.c:<line#>: parse error
 
 This failure does not seem to cause any problems.
 
@@ -501,10 +501,11 @@ be kept as clean as possible.
 =item Documentation
 
   INSTALL README.cygwin
-  Changes Changes5.005 Changes5.004
+  Changes Changes5.005 Changes5.004 Changes5.6
   AUTHORS MAINTAIN MANIFEST README.win32
-  pod/perl.pod pod/perlfaq3.pod pod/perlhist.pod pod/perlmodlib.pod
-  pod/perlport.pod pod/perltoc.pod pod/perldelta.pod pod/perl5004delta.pod
+  pod/buildtoc.PL pod/perl.pod pod/perl5004delta.pod pod/perl56delta.pod
+  pod/perlfaq3.pod pod/perlhist.pod pod/perlmodlib.pod pod/perlport.pod
+  pod/perltoc.pod
 
 =item Build, Configure, Make, Install
 
@@ -526,6 +527,7 @@ be kept as clean as possible.
 =item Tests
 
   t/io/tell.t           - binmode
+  t/lib/b.t             - ignore Cwd from os_extras
   t/lib/glob-basic.t    - Win32 directory list access differs from read mode
   t/op/magic.t          - $^X/symlink WORKAROUND, s/.exe//
   t/op/stat.t           - no /dev, skip Win32 ftCreationTime quirk
@@ -562,8 +564,8 @@ be kept as clean as possible.
                         - canonpath, cflags, manifypods, perl_archive
   lib/File/Find.pm      - on remote drives stat() always sets st_nlink to 1
   lib/File/Spec/Unix.pm - preserve //unc
+  lib/File/Temp.pm      - no directory sticky bit
   lib/perl5db.pl        - use stdin not /dev/tty
-  utils/perlcc.PL       - DynaLoader.a in compile, -DUSEIMPORTLIB
   utils/perldoc.PL      - version comment
 
 =back
@@ -594,4 +596,4 @@ Teun Burgers <burgers@ecn.nl>.
 
 =head1 HISTORY
 
-Last updated: 10 August 2000
+Last updated: 15 August 2000

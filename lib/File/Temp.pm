@@ -91,8 +91,9 @@ use File::Spec 0.8;
 use File::Path qw/ rmtree /;
 use Fcntl 1.03;
 use Errno qw( EEXIST ENOENT ENOTDIR EINVAL );
+require VMS::Stdio if $^O eq 'VMS';
 
-# Need the Symbol package if we are running older perl 
+# Need the Symbol package if we are running older perl
 require Symbol if $] < 5.006;
 
 
@@ -131,7 +132,7 @@ Exporter::export_tags('POSIX','mktemp');
 
 # Version number 
 
-$VERSION = '0.09';
+$VERSION = '0.10';
 
 # This is a list of characters that can be used in random filenames
 
@@ -162,12 +163,25 @@ use constant HIGH     => 2;
 
 my $OPENFLAGS = O_CREAT | O_EXCL | O_RDWR;
 
-for my $oflag (qw/FOLLOW BINARY LARGEFILE EXLOCK NOINHERIT TEMPORARY/) {
+for my $oflag (qw/ FOLLOW BINARY LARGEFILE EXLOCK NOINHERIT /) {
   my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
   no strict 'refs';
   $OPENFLAGS |= $bit if eval { $bit = &$func(); 1 };
 }
 
+# On some systems the O_TEMPORARY flag can be used to tell the OS
+# to automatically remove the file when it is closed. This is fine
+# in most cases but not if tempfile is called with UNLINK=>0 and
+# the filename is requested -- in the case where the filename is to
+# be passed to another routine. This happens on windows. We overcome
+# this by using a second open flags variable
+
+my $OPENTEMPFLAGS = $OPENFLAGS;
+for my $oflag (qw/ TEMPORARY /) {
+  my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
+  no strict 'refs';
+  $OPENTEMPFLAGS |= $bit if eval { $bit = &$func(); 1 };
+}
 
 
 # INTERNAL ROUTINES - not to be used outside of package
@@ -190,7 +204,13 @@ for my $oflag (qw/FOLLOW BINARY LARGEFILE EXLOCK NOINHERIT TEMPORARY/) {
 #             default is 0
 #   "suffixlen" => number of characters at end of PATH to be ignored.
 #                  default is 0.
+#   "unlink_on_close" => indicates that, if possible,  the OS should remove
+#                        the file as soon as it is closed. Usually indicates
+#                        use of the O_TEMPORARY flag to sysopen. 
+#                        Usually irrelevant on unix
+
 # "open" and "mkdir" can not both be true
+# "unlink_on_close" is not used when "mkdir" is true.
 
 # The default options are equivalent to mktemp().
 
@@ -214,6 +234,7 @@ sub _gettemp {
 		 "open" => 0,
 		 "mkdir" => 0,
 		 "suffixlen" => 0,
+		 "unlink_on_close" => 0,
 		);
 
   # Read the template
@@ -338,21 +359,6 @@ sub _gettemp {
   }
 
 
-  # Calculate the flags that we wish to use for the sysopen
-  # Some of these are not always available
-#  my $openflags;
-#  if ($options{"open"}) {
-    # Default set
-#    $openflags = O_CREAT | O_EXCL | O_RDWR;
-
-#    for my $oflag (qw/FOLLOW BINARY LARGEFILE EXLOCK NOINHERIT TEMPORARY/) {
-#        my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
-#        no strict 'refs';
-#        $openflags |= $bit if eval { $bit = &$func(); 1 };
-#    }
-
-#  }
-
   # Now try MAX_TRIES time to open the file
   for (my $i = 0; $i < MAX_TRIES; $i++) {
 
@@ -377,7 +383,17 @@ sub _gettemp {
       umask(066);
 
       # Attempt to open the file
-      if ( sysopen($fh, $path, $OPENFLAGS, 0600) ) {
+      my $open_success = undef;
+      if ( $^O eq 'VMS' ) { # make it auto delete on close
+	$fh = VMS::Stdio::vmssysopen($path, $OPENFLAGS, 0600, 'fop=dlt');
+	$open_success = $fh;
+      } else {
+	my $flags = ( $options{"unlink_on_close"} ?
+		      $OPENTEMPFLAGS :
+		      $OPENFLAGS );
+	$open_success = sysopen($fh, $path, $flags, 0600);
+      }
+      if ( $open_success ) {
 
 	# Reset umask
 	umask($umask);
@@ -681,7 +697,7 @@ sub _can_do_level {
   return 1 if $level == STANDARD;
 
   # Currently, the systems that can do HIGH or MEDIUM are identical
-  if ( $^O eq 'MSWin32' || $^O eq 'os2') {
+  if ( $^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'cygwin') {
     return 0;
   } else {
     return 1;
@@ -703,7 +719,7 @@ sub _can_do_level {
 #   - isdir      (flag to indicate that we are being given a directory)
 #                 [and hence no filehandle]
 
-# Status is not referred to since all the magic is done with and END block
+# Status is not referred to since all the magic is done with an END block
 
 {
   # Will set up two lexical variables to contain all the files to be
@@ -722,6 +738,10 @@ sub _can_do_level {
       # if its already closed then I dont care about the answer
       # probably a better way to do this
       close($file->[0]);  # file handle is [0]
+
+      # On VMS, the file will be automatically deleted on close,
+      # so we are through with the file already.
+      next if $^O eq 'VMS';
 
       if (-f $file->[1]) {  # file name is [1]
 	unlink $file->[1] or warn "Error removing ".$file->[1];
@@ -758,10 +778,12 @@ sub _can_do_level {
       if (-d $fname) {
 
 	# Directory exists so store it
+	# first on VMS turn []foo into [.foo] for rmtree
+	$fname = VMS::Filespec::vmspath($fname) if $^O eq 'VMS';
 	push (@dirs_to_unlink, $fname);
 
       } else {
-	carp "Request to remove directory $fname could not be completed since it does not exists!\n";
+	carp "Request to remove directory $fname could not be completed since it does not exist!\n";
       }
 
     } else {
@@ -818,6 +840,13 @@ But see the WARNING at the end.
 Translates the template as before except that a directory name
 is specified.
 
+  ($fh, $filename) = tempfile($template, UNLINK => 1);
+
+Return the filename and filehandle as before except that the file is
+automatically removed when the program exits. Default is for the file
+to be removed if a file handle is requested and to be kept if the
+filename is requested.
+
 If the template is not specified, a template is always
 automatically generated. This temporary file is placed in tmpdir()
 (L<File::Spec>) unless a directory is specified explicitly with the 
@@ -843,6 +872,8 @@ to protect from possible race conditions. A warning is issued
 if warnings are turned on. Consider using the tmpnam()
 and mktemp() functions described elsewhere in this document
 if opening the file is not required.
+
+Options can be combined as required.
 
 =cut
 
@@ -909,7 +940,7 @@ sub tempfile {
   my ($fh, $path);
   croak "Error in tempfile() using $template"
     unless (($fh, $path) = _gettemp($template,
-				    "open" => $options{'OPEN'}, 
+				    "open" => $options{'OPEN'},
 				    "mkdir"=> 0 ,
 				    "suffixlen" => length($options{'SUFFIX'}),
 				   ) );
@@ -1023,8 +1054,9 @@ sub tempdir  {
     if ($options{'TMPDIR'} || $options{'DIR'}) {
 
       # Strip parent directory from the filename
-      # 
+      #
       # There is no filename at the end
+      $template = VMS::Filespec::vmspath($template) if $^O eq 'VMS';
       my ($volume, $directories, undef) = File::Spec->splitpath( $template, 1);
 
       # Last directory is then our template
@@ -1402,8 +1434,8 @@ the time the end block is executed since the deferred removal may not
 have access to the filehandle).
 
 Additionally, on Windows NT not all the fields returned by stat() can
-be compared. For example, the C<dev> and C<rdev> fields seem to be different
-and also. Also, it seems that the size of the file returned by stat()
+be compared. For example, the C<dev> and C<rdev> fields seem to be
+different.  Also, it seems that the size of the file returned by stat()
 does not always agree, with C<stat(FH)> being more accurate than
 C<stat(filename)>, presumably because of caching issues even when
 using autoflush (this is usually overcome by waiting a while after
@@ -1456,6 +1488,8 @@ sub unlink0 {
     @okstat = (1,2,3,4,5,7,8,9,10);
   } elsif ($^O eq 'os2') {
     @okstat = (0, 2..$#fh);
+  } elsif ($^O eq 'VMS') { # device and file ID are sufficient
+    @okstat = (0, 1);
   }
 
   # Now compare each entry explicitly by number

@@ -222,7 +222,7 @@ sub Init {
     # -------- Configuration ---------
 
     # perlbug address
-    $perlbug = 'perlbug@perl.com';
+    $perlbug = 'perlbug@perl.org';
 
     # Test address
     $testaddress = 'perlbug-test@perl.com';

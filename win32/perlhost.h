@@ -1666,6 +1666,11 @@ win32_start_child(LPVOID arg)
     w32_pseudo_id = id;
 #else
     w32_pseudo_id = GetCurrentThreadId();
+    if (IsWin95()) {
+	int pid = (int)w32_pseudo_id;
+	if (pid < 0)
+	    w32_pseudo_id = -pid;
+    }
 #endif
     if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV))
 	sv_setiv(GvSV(tmpgv), -(IV)w32_pseudo_id);
@@ -1746,7 +1751,13 @@ PerlProcFork(struct IPerlProc* piPerl)
 #ifdef USE_ITHREADS
     DWORD id;
     HANDLE handle;
-    CPerlHost *h = new CPerlHost(*(CPerlHost*)w32_internal_host);
+    CPerlHost *h;
+
+    if (w32_num_pseudo_children >= MAXIMUM_WAIT_OBJECTS) {
+	errno = EAGAIN;
+	return -1;
+    }
+    h = new CPerlHost(*(CPerlHost*)w32_internal_host);
     PerlInterpreter *new_perl = perl_clone_using((PerlInterpreter*)aTHXo, 1,
 						 h->m_pHostperlMem,
 						 h->m_pHostperlMemShared,
@@ -1774,6 +1785,11 @@ PerlProcFork(struct IPerlProc* piPerl)
     if (!handle) {
 	errno = EAGAIN;
 	return -1;
+    }
+    if (IsWin95()) {
+	int pid = (int)id;
+	if (pid < 0)
+	    id = -pid;
     }
     w32_pseudo_child_handles[w32_num_pseudo_children] = handle;
     w32_pseudo_child_pids[w32_num_pseudo_children] = id;
@@ -2202,7 +2218,7 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 	dwEnvIndex = 0;
 	lpLocalEnv = GetIndex(dwEnvIndex);
 	while(*lpEnvPtr != '\0') {
-	    if(lpLocalEnv == NULL) {
+	    if(!lpLocalEnv) {
 		// all environment overrides have been added
 		// so copy string into place
 		strcpy(lpStr, lpEnvPtr);
@@ -2232,6 +2248,16 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 		    }
 		}
 	    }
+	}
+
+	while(lpLocalEnv) {
+	    // still have environment overrides to add
+	    // so copy the strings into place
+	    strcpy(lpStr, lpLocalEnv);
+	    nLength = strlen(lpLocalEnv) + 1;
+	    lpStr += nLength;
+	    lpEnvPtr += nLength;
+	    lpLocalEnv = GetIndex(dwEnvIndex);
 	}
 
 	// add final NULL

@@ -16,8 +16,8 @@
 
 /*
  * Package name      : perl5
- * Source directory  : .
- * Configuration time: Wed May 31 01:48:08 EET DST 2000
+ * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
+ * Configuration time: Thu Aug 17 02:55:55 EET DST 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1092,8 +1092,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.6.0/alpha-dec_osf-thread-multi"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.6.0/alpha-dec_osf-thread-multi"		/**/
+#define ARCHLIB "/opt/perl/lib/5.7.0/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.7.0/alpha-dec_osf-thread"		/**/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -1101,7 +1101,7 @@
  *	where library files may be held under a private library, for
  *	instance.
  */
-#define ARCHNAME "alpha-dec_osf-thread-multi"		/**/
+#define ARCHNAME "alpha-dec_osf-thread"		/**/
 
 /* HAS_ATOLF:
  *	This symbol, if defined, indicates that the atolf routine is
@@ -1184,18 +1184,18 @@
  *	This macro surrounds its token with double quotes.
  */
 #if 42 == 1
-#  define CAT2(a,b)	a/**/b
-#  define STRINGIFY(a)	"a"
+#define CAT2(a,b)	a/**/b
+#define STRINGIFY(a)	"a"
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if 42 == 42
-#  define PeRl_CaTiFy(a, b)	a ## b	
-#  define PeRl_StGiFy(a)	#a
+#define PeRl_CaTiFy(a, b)	a ## b	
+#define PeRl_StGiFy(a)	#a
 /* the additional level of indirection enables these macros to be
  * used as arguments to other macros.  See K&R 2nd ed., page 231. */
-#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
-#  define StGiFy(a)	PeRl_StGiFy(a)
-#  define STRINGIFY(a)	PeRl_StGiFy(a)
+#define CAT2(a,b)	PeRl_CaTiFy(a,b)
+#define StGiFy(a)	PeRl_StGiFy(a)
+#define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42
 #   include "Bletch: How does this C preprocessor catenate tokens?"
@@ -1861,6 +1861,12 @@
  *	available.
  */
 #define HAS_SETPROTOENT		/**/
+
+/* HAS_SETPROCTITLE:
+ *	This symbol, if defined, indicates that the setproctitle routine is
+ *	available to set process title.
+ */
+/*#define HAS_SETPROCTITLE		/ **/
 
 /* HAS_SETPWENT:
  *	This symbol, if defined, indicates that the setpwent routine is
@@ -2750,8 +2756,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.6.0"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.6.0"		/**/
+#define PRIVLIB "/opt/perl/lib/5.7.0"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.7.0"		/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -2849,8 +2855,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.6.0/alpha-dec_osf-thread-multi"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.6.0/alpha-dec_osf-thread-multi"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.7.0/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.7.0/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2872,8 +2878,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.6.0"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.6.0"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.7.0"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.7.0"		/**/
 #define SITELIB_STEM "/opt/perl/lib/site_perl"		/**/
 
 /* Size_t_size:
@@ -3001,7 +3007,7 @@
  *	be built to use multiplicity.
  */
 #ifndef MULTIPLICITY
-#define	MULTIPLICITY		/**/
+/*#define	MULTIPLICITY		/ **/
 #endif
 
 /* USE_PERLIO:
@@ -3033,8 +3039,8 @@
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
  */
-/*#define	USE_5005THREADS		/ **/
-#define	USE_ITHREADS		/**/
+#define	USE_5005THREADS		/**/
+/*#define	USE_ITHREADS		/ **/
 #if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
 #define		USE_THREADS		/* until src is revised*/
 #endif
@@ -3098,7 +3104,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.6.0/alpha-dec_osf-thread-multi for older
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.7.0/alpha-dec_osf-thread for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -3117,7 +3123,7 @@
  *	compatible with the present perl.  (That is, pure perl modules
  *	written for pm_apiversion will still work for the current
  *	version).  perl.c:incpush() and lib/lib.pm will automatically
- *	search in /opt/perl/lib/site_perl/5.6.0 for older directories across major versions
+ *	search in /opt/perl/lib/site_perl/5.7.0 for older directories across major versions
  *	back to pm_apiversion.  This is only useful if you have a perl
  *	library directory tree structured like the default one.  The
  *	versioned site_perl library was introduced in 5.005, so that's
@@ -3127,7 +3133,13 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.6.0"
+#define PERL_XS_APIVERSION "5.7.0"
 #define PERL_PM_APIVERSION "5.005"
+
+/* I_LIBUTIL:
+ *	This symbol, if defined, indicates that <libutil.h> exists and
+ *	should be included.
+ */
+/*#define	I_LIBUTIL		/ **/
 
 #endif

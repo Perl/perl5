@@ -2666,6 +2666,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
     if (!pid)
 	return -1;
+#if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
     if (pid > 0) {
 	sprintf(spid, "%"IVdf, (IV)pid);
 	svp = hv_fetch(PL_pidstatus,spid,strlen(spid),FALSE);
@@ -2688,6 +2689,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	    return pid;
 	}
     }
+#endif
 #ifdef HAS_WAITPID
 #  ifdef HAS_WAITPID_RUNTIME
     if (!HAS_WAITPID_RUNTIME)

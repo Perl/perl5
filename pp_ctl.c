@@ -598,7 +598,7 @@ PP(pp_formline)
 	    value = SvNV(sv);
 	    /* Formats aren't yet marked for locales, so assume "yes". */
 	    {
-		RESTORE_NUMERIC_LOCAL();
+		STORE_NUMERIC_STANDARD_SET_LOCAL();
 #if defined(USE_LONG_DOUBLE)
 		if (arg & 256) {
 		    sprintf(t, "%#*.*" PERL_PRIfldbl,

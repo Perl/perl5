@@ -484,7 +484,7 @@ B<xsinit()> uses the xsi_* functions to generate most of it's code.
 =head1 EXAMPLES
 
 For examples on how to use B<ExtUtils::Embed> for building C/C++ applications
-with embedded perl, see the eg/ directory and L<perlembed>.
+with embedded perl, see L<perlembed>.
 
 =head1 SEE ALSO
 

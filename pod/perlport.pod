@@ -681,7 +681,7 @@ The ActiveState Pages, http://www.activestate.com/
 =item *
 
 The Cygwin environment for Win32; F<README.cygwin> (installed 
-as L<perlcygwin>), http://sourceware.cygnus.com/cygwin/
+as L<perlcygwin>), http://sources.redhat.com/cygwin/
 
 =item *
 
@@ -1753,7 +1753,7 @@ two seconds. (Win32)
 Not implemented. (S<Mac OS>, VOS)
 
 Can only be applied to process handles returned for processes spawned
-using C<system(1, ...)>. (Win32)
+using C<system(1, ...)> or pseudo processes created with C<fork()>. (Win32)
 
 Not useful. (S<RISC OS>)
 

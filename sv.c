@@ -1803,7 +1803,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    sv_upgrade(sv, SVt_NV);
 #if defined(USE_LONG_DOUBLE)
 	DEBUG_c({
-	    RESTORE_NUMERIC_STANDARD();
+	    STORE_NUMERIC_LOCAL_SET_STANDARD();
 	    PerlIO_printf(Perl_debug_log,
 			  "0x%"UVxf" num(%" PERL_PRIgldbl ")\n",
 			  PTR2UV(sv), SvNVX(sv));
@@ -1811,7 +1811,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	});
 #else
 	DEBUG_c({
-	    RESTORE_NUMERIC_STANDARD();
+	    STORE_NUMERIC_LOCAL_SET_STANDARD();
 	    PerlIO_printf(Perl_debug_log, "0x%"UVxf" num(%g)\n",
 			  PTR2UV(sv), SvNVX(sv));
 	    RESTORE_NUMERIC_LOCAL();
@@ -1843,14 +1843,14 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     SvNOK_on(sv);
 #if defined(USE_LONG_DOUBLE)
     DEBUG_c({
-	RESTORE_NUMERIC_STANDARD();
+	STORE_NUMERIC_LOCAL_SET_STANDARD();
 	PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2nv(%" PERL_PRIgldbl ")\n",
 		      PTR2UV(sv), SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
     });
 #else
     DEBUG_c({
-	RESTORE_NUMERIC_STANDARD();
+	STORE_NUMERIC_LOCAL_SET_STANDARD();
 	PerlIO_printf(Perl_debug_log, "0x%"UVxf" 1nv(%g)\n",
 		      PTR2UV(sv), SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
@@ -6545,9 +6545,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    *--eptr = '%';
 
 	    {
-		RESTORE_NUMERIC_STANDARD();
+		STORE_NUMERIC_STANDARD_SET_LOCAL();
+		if (!was_standard && maybe_tainted)
+		    *maybe_tainted = TRUE;
 		(void)sprintf(PL_efloatbuf, eptr, nv);
-		RESTORE_NUMERIC_LOCAL();
+		RESTORE_NUMERIC_STANDARD();
 	    }
 
 	    eptr = PL_efloatbuf;

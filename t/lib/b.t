@@ -114,7 +114,8 @@ $a =~ s/\s+/ /g;
 $a =~ s/\b(s|foo|bar|ullsv)\b\s?//g;
 $a =~ s/^\s+//;
 $a =~ s/\s+$//;
-if ($Config{use5005threads} eq 'define') {
+my $is_thread = $Config{use5005threads} && $Config{use5005threads} eq 'define';
+if ($is_thread) {
     $b=<<EOF;
 leave enter nextstate label leaveloop enterloop null and defined null
 threadsv readline gv lineseq nextstate aassign null pushmark split pushre
@@ -141,6 +142,7 @@ else {
 $a = join ',', sort split /,/, $a;
 $a =~ s/-uWin32,// if $^O eq 'MSWin32';
 $a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
+$a =~ s/-uCwd,// if $^O eq 'cygwin';
 if ($Config{static_ext} eq ' ') {
   $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
      . '-umain,-uwarnings';
@@ -150,7 +152,7 @@ if ($Config{static_ext} eq ' ') {
   print "ok $test # skipped: one or more static extensions\n"; $test++;
 }
 
-if ($Config{use5005threads} eq 'define') {
+if ($is_thread) {
     print "# use5005threads: test $test skipped\n";
 } else {
     if ($Is_VMS) {
