@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jun  7 00:46:23 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Jun  8 02:03:31 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -10495,6 +10495,10 @@ int main() {
     return 0;
 }
 EOCP
+	case "$osname:$gccversion" in
+	aix:)	saveccflags="$ccflags"
+		ccflags="$ccflags -qlongdouble" ;; # to avoid core dump
+	esac
 	set try
 	if eval $compile; then
 		foo=`./try`
@@ -10519,6 +10523,9 @@ EOCP
 		echo "I cannot figure out whether your modfl() is okay, assuming it isn't."
 		d_modfl="$undef"
 	fi
+	case "$osname:$gccversion" in
+	aix:)	$ccflags="saveccflags" ;; # restore
+	esac
 	;;
 esac
 
