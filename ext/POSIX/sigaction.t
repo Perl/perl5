@@ -118,10 +118,12 @@ eval {
 print $@ ? "ok 17\n" : "not ok 17\n";
 
 $newaction=POSIX::SigAction->new(sub { $ok10=1; });
-sigaction(SIGCONT, POSIX::SigAction->new('DEFAULT'));
-{
+if (eval { SIGCONT; 1 }) {
+    sigaction(SIGCONT, POSIX::SigAction->new('DEFAULT'));
+    {
 	local($^W)=0;
 	kill 'CONT', $$;
+    }
 }
 print $bad18 ? "not ok 18\n" : "ok 18\n";
 
