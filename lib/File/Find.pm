@@ -7,6 +7,12 @@ our $VERSION = '1.04';
 require Exporter;
 require Cwd;
 
+#
+# Modified to ensure sub-directory traversal order is not inverded by stack
+# push and pops.  That is remains in the same order as in the directory file,
+# or user pre-processing (EG:sorted).
+#
+
 =head1 NAME
 
 File::Find - Traverse a directory tree.
@@ -855,6 +861,11 @@ sub _find_dir($$$) {
 	    # This dir has subdirectories.
 	    $subcount = $nlink - 2;
 
+	    # HACK: insert directories at this position. so as to preserve
+	    # the user pre-processed ordering of files.
+	    # EG: directory traversal is in user sorted order, not at random.
+            my $stack_top = @Stack;
+
 	    for my $FN (@filenames) {
 		next if $FN =~ $File::Find::skip_pattern;
 		if ($subcount > 0 || $no_nlink) {
@@ -866,7 +877,10 @@ sub _find_dir($$$) {
 		    if (-d _) {
 			--$subcount;
 			$FN =~ s/\.dir\z// if $Is_VMS;
-			push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
+			# HACK: replace push to preserve dir traversal order
+			#push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
+			splice @Stack, $stack_top, 0,
+			         [$CdLvl,$dir_name,$FN,$sub_nlink];
 		    }
 		    else {
 			$name = $dir_pref . $FN; # $File::Find::name
