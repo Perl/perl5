@@ -9,6 +9,7 @@ BEGIN {
 
 use Config;
 
+my $Is_VMSish = ($^O eq 'VMS');
 $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'dos' or
 	      $^O eq 'os2' or $^O eq 'mint' or $^O eq 'cygwin' or
 	      $^O eq 'mpeix');
@@ -19,11 +20,21 @@ if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
 
 print "1..29\n";
 
-$wd = ((($^O eq 'MSWin32') || ($^O eq 'NetWare')) ? `cd` : `pwd`);
+$wd = ((($^O eq 'MSWin32') || ($^O eq 'NetWare')) ? `cd` : ($Is_VMSish) ? `show default` : `pwd`);
 chop($wd);
 
-if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) { `rmdir /s /q tmp 2>nul`; `mkdir tmp`; }
-else {  `rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`; }
+if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
+    `rmdir /s /q tmp 2>nul`;
+    `mkdir tmp`;
+}
+elsif ($Is_VMSish) {
+    `if f\$search("[.tmp]*.*") .nes. "" then delete/nolog/noconfirm [.tmp]*.*.*`;
+    `if f\$search("tmp.dir") .nes. "" then delete/nolog/noconfirm tmp.dir;`;
+    `create/directory [.tmp]`;
+}
+else {
+    `rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`;
+}
 chdir './tmp';
 `/bin/rm -rf a b c x` if -x '/bin/rm';
 
@@ -36,24 +47,24 @@ close(fh);
 open(fh,'>a') || die "Can't create a";
 close(fh);
 
-if ($Is_Dosish) {print "ok 2 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_VMSish) {print "ok 2 # skipped: no link\n";} 
 elsif (eval {link('a','b')}) {print "ok 2\n";} 
 else {print "not ok 2\n";}
 
-if ($Is_Dosish) {print "ok 3 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_VMSish) {print "ok 3 # skipped: no link\n";} 
 elsif (eval {link('b','c')}) {print "ok 3\n";} 
 else {print "not ok 3\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
 
-if ($Config{dont_use_nlink} || $Is_Dosish)
+if ($Config{dont_use_nlink} || $Is_Dosish || $Is_VMSish)
     {print "ok 4 # skipped: no link\n";} 
 elsif ($nlink == 3)
     {print "ok 4\n";} 
 else {print "not ok 4\n";}
 
-if ($^O eq 'amigaos' || $Is_Dosish)
+if ($^O eq 'amigaos' || $Is_Dosish || $Is_VMSish)
     {print "ok 5 # skipped: no link\n";} 
 elsif (($mode & 0777) == 0666)
     {print "ok 5\n";} 
@@ -64,7 +75,7 @@ if ((chmod $newmode,'a') == 1) {print "ok 6\n";} else {print "not ok 6\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
-if ($Is_Dosish) {print "ok 7 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_VMSish) {print "ok 7 # skipped: no link\n";} 
 elsif (($mode & 0777) == $newmode) {print "ok 7\n";} 
 else {print "not ok 7\n";}
 
@@ -74,23 +85,23 @@ if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
     $newmode = 0666;
 }
 
-if ($Is_Dosish) {print "ok 8 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_VMSish) {print "ok 8 # skipped: no link\n";} 
 elsif ((chmod $newmode,'c','x') == 2) {print "ok 8\n";} 
 else {print "not ok 8\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
-if ($Is_Dosish) {print "ok 9 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_VMSish) {print "ok 9 # skipped: no link\n";} 
 elsif (($mode & 0777) == $newmode) {print "ok 9\n";} 
 else {print "not ok 9\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('x');
-if ($Is_Dosish) {print "ok 10 # skipped: no link\n";} 
+if ($Is_Dosish || $Is_VMSish) {print "ok 10 # skipped: no link\n";} 
 elsif (($mode & 0777) == $newmode) {print "ok 10\n";} 
 else {print "not ok 10\n";}
 
-if ($Is_Dosish) {print "ok 11 # skipped: no link\n"; unlink 'b','x'; } 
+if ($Is_Dosish || $Is_VMSish) {print "ok 11 # skipped: no link\n"; unlink 'b','x'; } 
 elsif ((unlink 'b','x') == 2) {print "ok 11\n";} 
 else {print "not ok 11\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
@@ -124,6 +135,12 @@ elsif ($^O =~ /\blinux\b/i) {
 	{print "ok 18 # accounted for possible NFS/glibc2.2 bug on linux\n";}
     else
 	{print "not ok 18 $atime/$new_atime $mtime/$new_mtime\n";}
+}
+elsif ($Is_VMSish) {
+    if ($atime == 500000001 && $mtime == 500000000 + $delta)
+        {print "ok 18\n";}
+    else
+	{print "not ok 18 $atime $mtime\n";}
 } else
     {print "not ok 18 $atime $mtime\n";}
 
@@ -161,7 +178,18 @@ else {
 
 # truncate (may not be implemented everywhere)
 unlink "Iofs.tmp";
-`echo helloworld > Iofs.tmp`;
+if ($Is_VMSish) {
+    open IOFSCOM, ">Iofs.tmp" or die "Could not write IOfs.tmp: $!";
+    print IOFSCOM 'helloworld';
+    close(IOFSCOM);
+}
+else {
+    `echo helloworld > Iofs.tmp`;
+}
+#
+# Perhaps the eval would be better written with a construct such as?:
+#if (defined($Config{d_truncate}) && $Config{d_truncate} eq 'define') {
+#
 eval { truncate "Iofs.tmp", 5; };
 if ($@) {
   if ($@ =~ /not implemented/) {
@@ -197,7 +225,14 @@ else {
   {
       close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
   }
-  if (-s "Iofs.tmp" == 200) {print "ok 25\n"} else {print "not ok 25\n"}
+  if (-s "Iofs.tmp" == 200) {
+      print "ok 25\n"
+  }
+  else {
+    my $s = -s "Iofs.tmp";
+    printf "# -s Iofs.tmp: %s\n", defined($s) ? $s : "UNDEFINED";
+    print "not ok 25\n";
+  }
   truncate FH, 0;
   if ($^O eq 'dos'
 	# Not needed on HPFS, but needed on HPFS386 ?!
@@ -220,9 +255,14 @@ unlink 'X';
 chdir $wd || die "Can't cd back to $wd";
 
 # check if rename() works on directories
-rename 'tmp', 'tmp1' or print "not ";
+if ($Is_VMSish) {
+    rename 'tmp.dir', 'tmp1.dir' or print "not ";
+}
+else {
+    rename 'tmp', 'tmp1' or print "not ";
+}
 print "ok 28\n";
 -d 'tmp1' or print "not ";
 print "ok 29\n";
 
-END { rmdir 'tmp1'; unlink "Iofs.tmp"; }
+END { rmdir 'tmp1'; 1 while unlink "Iofs.tmp"; }

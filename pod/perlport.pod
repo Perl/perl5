@@ -1752,7 +1752,7 @@ Not useful. (S<RISC OS>)
 
 =item truncate EXPR,LENGTH
 
-Not implemented. (VMS)
+Not implemented. (Older versions of VMS)
 
 Truncation to zero-length only. (VOS)
 
