@@ -704,4 +704,10 @@ different things on the I<left> side of the C<s///>.
 
 =head2 SEE ALSO
 
+L<perlop/"Regexp Quote-Like Operators">.
+
+L<perlfunc/pos>.
+
+L<perllocale>.
+
 "Mastering Regular Expressions" (see L<perlbook>) by Jeffrey Friedl.

@@ -1305,6 +1305,18 @@ do_ipcget(I32 optype, SV **mark, SV **sp)
     return -1;			/* should never happen */
 }
 
+#if defined(__sun__) && defined(__svr4__) /* XXX Need metaconfig test */
+/* Solaris manpage says that it uses (like linux)
+   int semctl (int semid, int semnum, int cmd, union semun arg)
+   but the system include files do not define union semun !!!!
+*/
+union semun {
+     int val;
+     struct semid_ds *buf;
+     ushort *array;
+};
+#endif
+
 I32
 do_ipcctl(I32 optype, SV **mark, SV **sp)
 {
@@ -1313,7 +1325,8 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
     char *a;
     I32 id, n, cmd, infosize, getinfo;
     I32 ret = -1;
-#ifdef __linux__	/* XXX Need metaconfig test */
+#if defined(__linux__) || (defined(__sun__) && defined(__svr4__))
+/* XXX Need metaconfig test */
     union semun unsemds;
 #endif
 
@@ -1345,8 +1358,9 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 	else if (cmd == GETALL || cmd == SETALL)
 	{
 	    struct semid_ds semds;
-#ifdef __linux__	/* XXX Need metaconfig test */
-/* linux (and Solaris2?) uses :
+#if defined(__linux__) || (defined(__sun__) && defined(__svr4__))
+	/* XXX Need metaconfig test */
+/* linux and Solaris2 uses :
    int semctl (int semid, int semnum, int cmd, union semun arg)
        union semun {
             int val;
@@ -1405,7 +1419,8 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 #endif
 #ifdef HAS_SEM
     case OP_SEMCTL:
-#ifdef __linux__	/* XXX Need metaconfig test */
+#if defined(__linux__) || (defined(__sun__) && defined(__svr4__))
+	/* XXX Need metaconfig test */
         unsemds.buf = (struct semid_ds *)a;
 	ret = semctl(id, n, cmd, unsemds);
 #else
