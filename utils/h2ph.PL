@@ -108,24 +108,7 @@ while (defined (my $file = next_file())) {
     }
 
     print OUT "require '_h2ph_pre.ph';\n\n";
-    while (<IN>) {
-	chop;
-	while (/\\$/) {
-	    chop;
-	    $_ .= <IN>;
-	    chop;
-	}
-	print OUT "# $_\n" if $opt_D;
-
-	if (s:/\*:\200:g) {
-	    s:\*/:\201:g;
-	    s/\200[^\201]*\201//g;	# delete single line comments
-	    if (s/\200.*//) {		# begin multi-line comment?
-		$_ .= '/*';
-		$_ .= <IN>;
-		redo;
-	    }
-	}
+    while (defined (local $_ = next_line())) {
 	if (s/^\s*\#\s*//) {
 	    if (s/^define\s+(\w+)//) {
 		$name = $1;
@@ -412,6 +395,52 @@ sub expr {
 	};
 	s/^(.)// && do { if ($1 ne '#') { $new .= $1; } next;};
     }
+}
+
+
+sub next_line
+{
+    my ($in, $out);
+
+    READ: while (not eof IN) {
+        $in  .= <IN>;
+        chomp $in;
+        next unless length $in;
+
+        while (length $in) {
+            if ($in =~ s/\\$//) {                           # \-newline
+                $out    .= ' ';
+                next READ;
+            } elsif ($in =~ s/^([^"'\\\/]+)//) {            # Passthrough
+                $out    .= $1;
+            } elsif ($in =~ s/^(\\.)//) {                   # \...
+                $out    .= $1;
+            } elsif ($in =~ s/^('(\\.|[^'\\])*')//) {       # '...
+                $out    .= $1;
+            } elsif ($in =~ s/^("(\\.|[^"\\])*")//) {       # "...
+                $out    .= $1;
+            } elsif ($in =~ s/^\/\/.*//) {                  # //...
+                last READ;
+            } elsif ($in =~ m/^\/\*/) {                     # /*...
+                # C comment removal adapted from perlfaq6:
+                if ($in =~ s/^\/\*[^*]*\*+([^\/*][^*]*\*+)*\///) {
+                    $out    .= ' ';
+                } else {                                    # Incomplete /* */
+                    next READ;
+                }
+            } elsif ($in =~ s/^(\/)//) {                    # /...
+                $out    .= $1;
+            } elsif ($in =~ s/^([^\'\"\\\/]+)//) {
+                $out    .= $1;
+            } else {
+                die "Cannot parse:\n$in\n";
+            }
+        }
+
+        last READ;
+    }
+
+    return $out;
 }
 
 
