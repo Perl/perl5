@@ -1635,9 +1635,12 @@ sub SpecialCasing_txt()
         # Wait until all the special cases have been read since
         # they are not listed in numeric order.
         my $ix = hex($code);
-        push @{$CaseInfo{Lower}}, [ $ix, $code, $lower ];
-        push @{$CaseInfo{Title}}, [ $ix, $code, $title ];
-        push @{$CaseInfo{Upper}}, [ $ix, $code, $upper ];
+        push @{$CaseInfo{Lower}}, [ $ix, $code, $lower ]
+	    unless $code eq $lower;
+        push @{$CaseInfo{Title}}, [ $ix, $code, $title ]
+	    unless $code eq $title;
+        push @{$CaseInfo{Upper}}, [ $ix, $code, $upper ]
+	    unless $code eq $upper;
     }
     close IN;
 
