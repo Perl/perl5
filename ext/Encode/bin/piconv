@@ -9,9 +9,11 @@ my %Scheme =  map {$_ => 1} qw(from_to decode_encode perlio);
 
 use Getopt::Std;
 
-my %Opt; getopts("DS:lf:t:s:", \%Opt);
+my %Opt; getopts("hDS:lf:t:s:", \%Opt);
+$Opt{h} and help();
 $Opt{l} and list_encodings();
 my $locale = $ENV{LC_CTYPE} || $ENV{LC_ALL} || $ENV{LANG};
+$Opt{f} || $Opt{t} || help();
 my $from = $Opt{f} || $locale or help("from_encoding unspecified");
 my $to   = $Opt{t} || $locale or help("to_encoding unspecified");
 $Opt{s} and Encode::from_to($Opt{s}, $from, $to) and print $Opt{s} and exit;
@@ -114,6 +116,10 @@ uses I<string> instead of file for the source of text.  Same as F<iconv>.
 
 Lists all available encodings to STDERR.  This feature is missing from
 F<iconv>.
+
+=item -h
+
+Show usage.
 
 =item -D
 
