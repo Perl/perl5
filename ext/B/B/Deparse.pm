@@ -16,12 +16,10 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE OPpSORT_INPLACE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
-         CVf_METHOD CVf_LOCKED CVf_LVALUE
+         CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-# Not sure if I really should have this as maint's version, given that Deparse
-# differs from blead. (latter has // support)
-$VERSION = 0.67;
+$VERSION = 0.68;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -829,11 +827,12 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     if ($cv->FLAGS & SVf_POK) {
 	$proto = "(". $cv->PV . ") ";
     }
-    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE)) {
+    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ASSERTION)) {
         $proto .= ": ";
         $proto .= "lvalue " if $cv->CvFLAGS & CVf_LVALUE;
         $proto .= "locked " if $cv->CvFLAGS & CVf_LOCKED;
         $proto .= "method " if $cv->CvFLAGS & CVf_METHOD;
+        $proto .= "assertion " if $cv->CvFLAGS & CVf_ASSERTION;
     }
 
     local($self->{'curcv'}) = $cv;
@@ -1014,6 +1013,8 @@ sub maybe_local {
 	and not $self->{'avoid_local'}{$$op}) {
 	my $our_local = ($op->private & OPpLVAL_INTRO) ? "local" : "our";
 	if( $our_local eq 'our' ) {
+	    # XXX This assertion fails code with non-ASCII identifiers,
+	    # like ./ext/Encode/t/jperl.t
 	    die "Unexpected our($text)\n" unless $text =~ /^\W(\w+::)*\w+\z/;
 	    $text =~ s/(\w+::)+//;
 	}
@@ -2102,6 +2103,7 @@ sub logop {
 
 sub pp_and { logop(@_, "and", 3, "&&", 11, "if") }
 sub pp_or  { logop(@_, "or",  2, "||", 10, "unless") }
+sub pp_dor { logop(@_, "err", 2, "//", 10, "") }
 
 # xor is syntactically a logop, but it's really a binop (contrary to
 # old versions of opcode.pl). Syntax is what matters here.
@@ -2118,7 +2120,8 @@ sub logassignop {
 }
 
 sub pp_andassign { logassignop(@_, "&&=") }
-sub pp_orassign { logassignop(@_, "||=") }
+sub pp_orassign  { logassignop(@_, "||=") }
+sub pp_dorassign { logassignop(@_, "//=") }
 
 sub listop {
     my $self = shift;
@@ -2513,8 +2516,13 @@ sub loop_common {
 	} elsif ($var->name eq "gv") {
 	    $var = "\$" . $self->deparse($var, 1);
 	}
-	$head = "foreach $var ($ary) ";
 	$body = $kid->first->first->sibling; # skip OP_AND and OP_ITER
+	if (!is_state $body->first and $body->first->name ne "stub") {
+	    confess unless $var eq '$_';
+	    $body = $body->first;
+	    return $self->deparse($body, 2) . " foreach ($ary)";
+	}
+	$head = "foreach $var ($ary) ";
     } elsif ($kid->name eq "null") { # while/until
 	$kid = $kid->first;
 	my $name = {"and" => "while", "or" => "until"}->{$kid->name};
