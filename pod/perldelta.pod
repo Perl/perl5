@@ -2648,11 +2648,9 @@ In multi-CPU boxes there are some problems with the I/O buffering:
 some output may appear twice.  The Win32 following failures are known
 as of 5.7.3:
 
- ..\ext/Encode/t/JP....................dubious DIED. FAILED tests 9, 14, 18, 21 
- ..\ext/threads/t/end..................FAILED tests 3-6
- ..\lib/English........................dubious DIED. FAILED test 48
- ..\lib/Tie/File/t/16_handle...........FAILED tests 3-13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35-39
-
+  ..\ext/Encode/t/JP.t      4  1024    22    4  18.18%  9 14 18 21
+  ..\ext/threads/t/end.t                6    4  66.67%  3-6
+  ..\lib/blib.t             3   768     7    3  42.86%  1 4-5
 
 =head2 Localising a Tied Variable Leaks Memory
 
