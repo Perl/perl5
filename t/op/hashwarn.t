@@ -66,12 +66,18 @@ my $ref_msg = '/^Reference found where even-sized list expected/';
     %hash = sub { print "ok" };
     test_warning 6, shift @warnings, $odd_msg;
 
+    # Old pseudo-hash syntax, now removed.
     my $avhv = [{x=>1,y=>2}];
-    %$avhv = (x=>13,'y');
-    test_warning 7, shift @warnings, $odd_msg;
+    eval {
+        %$avhv = (x=>13,'y');
+    };
+    test 7, $@ =~ /^Not a HASH reference/;
 
-    %$avhv = 'x';
-    test_warning 8, shift @warnings, $odd_msg;
+    # Old pseudo-hash syntax, since removed.
+    eval {
+        %$avhv = 'x';
+    };
+    test 8, $@ =~ /^Not a HASH reference/;
 
     $_ = { 1..10 };
     test 9, ! @warnings, "Unexpected warning";

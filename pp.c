@@ -3683,11 +3683,10 @@ PP(pp_each)
     HV *hash = (HV*)POPs;
     HE *entry;
     I32 gimme = GIMME_V;
-    I32 realhv = (SvTYPE(hash) == SVt_PVHV);
 
     PUTBACK;
     /* might clobber stack_sp */
-    entry = realhv ? hv_iternext(hash) : avhv_iternext((AV*)hash);
+    entry = hv_iternext(hash);
     SPAGAIN;
 
     EXTEND(SP, 2);
@@ -3698,8 +3697,7 @@ PP(pp_each)
 	    SV *val;
 	    PUTBACK;
 	    /* might clobber stack_sp */
-	    val = realhv ?
-		  hv_iterval(hash, entry) : avhv_iterval((AV*)hash, entry);
+	    val = hv_iterval(hash, entry);
 	    SPAGAIN;
 	    PUSHs(val);
 	}
@@ -3739,19 +3737,13 @@ PP(pp_delete)
 		*MARK = sv ? sv : &PL_sv_undef;
 	    }
 	}
-	else if (hvtype == SVt_PVAV) {
-	    if (PL_op->op_flags & OPf_SPECIAL) {	/* array element */
-		while (++MARK <= SP) {
-		    sv = av_delete((AV*)hv, SvIV(*MARK), discard);
-		    *MARK = sv ? sv : &PL_sv_undef;
-		}
-	    }
-	    else {					/* pseudo-hash element */
-		while (++MARK <= SP) {
-		    sv = avhv_delete_ent((AV*)hv, *MARK, discard, 0);
-		    *MARK = sv ? sv : &PL_sv_undef;
-		}
-	    }
+	else if (hvtype == SVt_PVAV) {                  /* array element */
+            if (PL_op->op_flags & OPf_SPECIAL) {
+                while (++MARK <= SP) {
+                    sv = av_delete((AV*)hv, SvIV(*MARK), discard);
+                    *MARK = sv ? sv : &PL_sv_undef;
+                }
+            }
 	}
 	else
 	    DIE(aTHX_ "Not a HASH reference");
@@ -3771,8 +3763,6 @@ PP(pp_delete)
 	else if (SvTYPE(hv) == SVt_PVAV) {
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		sv = av_delete((AV*)hv, SvIV(keysv), discard);
-	    else
-		sv = avhv_delete_ent((AV*)hv, keysv, discard, 0);
 	}
 	else
 	    DIE(aTHX_ "Not a HASH reference");
@@ -3812,8 +3802,6 @@ PP(pp_exists)
 	    if (av_exists((AV*)hv, SvIV(tmpsv)))
 		RETPUSHYES;
 	}
-	else if (avhv_exists_ent((AV*)hv, tmpsv, 0))	/* pseudo-hash element */
-	    RETPUSHYES;
     }
     else {
 	DIE(aTHX_ "Not a HASH reference");
@@ -3826,7 +3814,6 @@ PP(pp_hslice)
     dSP; dMARK; dORIGMARK;
     register HV *hv = (HV*)POPs;
     register I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
-    I32 realhv = (SvTYPE(hv) == SVt_PVHV);
     bool localizing = PL_op->op_private & OPpLVAL_INTRO ? TRUE : FALSE;
     bool other_magic = FALSE;
 
@@ -3844,45 +3831,36 @@ PP(pp_hslice)
              && gv_fetchmethod_autoload(stash, "DELETE", TRUE));
     }
 
-    if (!realhv && localizing)
-	DIE(aTHX_ "Can't localize pseudo-hash element");
+    while (++MARK <= SP) {
+        SV *keysv = *MARK;
+        SV **svp;
+        HE *he;
+        bool preeminent = FALSE;
 
-    if (realhv || SvTYPE(hv) == SVt_PVAV) {
-	while (++MARK <= SP) {
-	    SV *keysv = *MARK;
-	    SV **svp;
-	    bool preeminent = FALSE;
+        if (localizing) {
+            preeminent = SvRMAGICAL(hv) && !other_magic ? 1 :
+                hv_exists_ent(hv, keysv, 0);
+        }
 
-            if (localizing) {
-                preeminent = SvRMAGICAL(hv) && !other_magic ? 1 :
-                    realhv ? hv_exists_ent(hv, keysv, 0)
-                    : avhv_exists_ent((AV*)hv, keysv, 0);
+        he = hv_fetch_ent(hv, keysv, lval, 0);
+        svp = he ? &HeVAL(he) : 0;
+
+        if (lval) {
+            if (!svp || *svp == &PL_sv_undef) {
+                STRLEN n_a;
+                DIE(aTHX_ PL_no_helem, SvPV(keysv, n_a));
             }
-
-	    if (realhv) {
-		HE *he = hv_fetch_ent(hv, keysv, lval, 0);
-		svp = he ? &HeVAL(he) : 0;
-	    }
-	    else {
-		svp = avhv_fetch_ent((AV*)hv, keysv, lval, 0);
-	    }
-	    if (lval) {
-		if (!svp || *svp == &PL_sv_undef) {
-		    STRLEN n_a;
-		    DIE(aTHX_ PL_no_helem, SvPV(keysv, n_a));
-		}
-		if (localizing) {
-		    if (preeminent)
-		        save_helem(hv, keysv, svp);
-		    else {
-			STRLEN keylen;
-			char *key = SvPV(keysv, keylen);
-			SAVEDELETE(hv, savepvn(key,keylen), keylen);
-		    }
+            if (localizing) {
+                if (preeminent)
+                    save_helem(hv, keysv, svp);
+                else {
+                    STRLEN keylen;
+                    char *key = SvPV(keysv, keylen);
+                    SAVEDELETE(hv, savepvn(key,keylen), keylen);
                 }
-	    }
-	    *MARK = svp ? *svp : &PL_sv_undef;
-	}
+            }
+        }
+        *MARK = svp ? *svp : &PL_sv_undef;
     }
     if (GIMME != G_ARRAY) {
 	MARK = ORIGMARK;

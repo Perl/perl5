@@ -461,8 +461,6 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
         else if (o->op_type == OP_AASSIGN) {
 	    if (o->op_private & OPpASSIGN_COMMON)
 		sv_catpv(tmpsv, ",COMMON");
-	    if (o->op_private & OPpASSIGN_HASH)
-		sv_catpv(tmpsv, ",HASH");
 	}
 	else if (o->op_type == OP_SASSIGN) {
 	    if (o->op_private & OPpASSIGN_BACKWARDS)

@@ -798,7 +798,7 @@ PP(pp_rv2hv)
 	tryAMAGICunDEREF(to_hv);
 
 	hv = (HV*)SvRV(sv);
-	if (SvTYPE(hv) != SVt_PVHV && SvTYPE(hv) != SVt_PVAV)
+	if (SvTYPE(hv) != SVt_PVHV)
 	    DIE(aTHX_ "Not a HASH reference");
 	if (PL_op->op_flags & OPf_REF) {
 	    SETs((SV*)hv);
@@ -812,7 +812,7 @@ PP(pp_rv2hv)
 	}
     }
     else {
-	if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) {
+	if (SvTYPE(sv) == SVt_PVHV) {
 	    hv = (HV*)sv;
 	    if (PL_op->op_flags & OPf_REF) {
 		SETs((SV*)hv);
@@ -894,8 +894,6 @@ PP(pp_rv2hv)
     }
     else {
 	dTARGET;
-	if (SvTYPE(hv) == SVt_PVAV)
-	    hv = avhv_keys((AV*)hv);
 	if (HvFILL(hv))
             Perl_sv_setpvf(aTHX_ TARG, "%"IVdf"/%"IVdf,
 			   (IV)HvFILL(hv), (IV)HvMAX(hv) + 1);
@@ -907,57 +905,14 @@ PP(pp_rv2hv)
     }
 }
 
-STATIC int
-S_do_maybe_phash(pTHX_ AV *ary, SV **lelem, SV **firstlelem, SV **relem,
-		 SV **lastrelem)
-{
-    OP *leftop;
-    I32 i;
-
-    leftop = ((BINOP*)PL_op)->op_last;
-    assert(leftop);
-    assert(leftop->op_type == OP_NULL && leftop->op_targ == OP_LIST);
-    leftop = ((LISTOP*)leftop)->op_first;
-    assert(leftop);
-    /* Skip PUSHMARK and each element already assigned to. */
-    for (i = lelem - firstlelem; i > 0; i--) {
-	leftop = leftop->op_sibling;
-	assert(leftop);
-    }
-    if (leftop->op_type != OP_RV2HV)
-	return 0;
-
-    /* pseudohash */
-    if (av_len(ary) > 0)
-	av_fill(ary, 0);		/* clear all but the fields hash */
-    if (lastrelem >= relem) {
-	while (relem < lastrelem) {	/* gobble up all the rest */
-	    SV *tmpstr;
-	    assert(relem[0]);
-	    assert(relem[1]);
-	    /* Avoid a memory leak when avhv_store_ent dies. */
-	    tmpstr = sv_newmortal();
-	    sv_setsv(tmpstr,relem[1]);	/* value */
-	    relem[1] = tmpstr;
-	    if (avhv_store_ent(ary,relem[0],tmpstr,0))
-		(void)SvREFCNT_inc(tmpstr);
-	    if (SvMAGICAL(ary) != 0 && SvSMAGICAL(tmpstr))
-		mg_set(tmpstr);
-	    relem += 2;
-	    TAINT_NOT;
-	}
-    }
-    if (relem == lastrelem)
-	return 1;
-    return 2;
-}
-
 STATIC void
 S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 {
     if (*relem) {
 	SV *tmpstr;
-	if (ckWARN(WARN_MISC)) {
+        HE *didstore;
+
+        if (ckWARN(WARN_MISC)) {
 	    if (relem == firstrelem &&
 		SvROK(*relem) &&
 		(SvTYPE(SvRV(*relem)) == SVt_PVAV ||
@@ -970,26 +925,16 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
 			    "Odd number of elements in hash assignment");
 	}
-	if (SvTYPE(hash) == SVt_PVAV) {
-	    /* pseudohash */
-	    tmpstr = sv_newmortal();
-	    if (avhv_store_ent((AV*)hash,*relem,tmpstr,0))
-		(void)SvREFCNT_inc(tmpstr);
-	    if (SvMAGICAL(hash) && SvSMAGICAL(tmpstr))
-		mg_set(tmpstr);
-	}
-	else {
-	    HE *didstore;
-	    tmpstr = NEWSV(29,0);
-	    didstore = hv_store_ent(hash,*relem,tmpstr,0);
-	    if (SvMAGICAL(hash)) {
-		if (SvSMAGICAL(tmpstr))
-		    mg_set(tmpstr);
-		if (!didstore)
-		    sv_2mortal(tmpstr);
-	    }
-	}
-	TAINT_NOT;
+
+        tmpstr = NEWSV(29,0);
+        didstore = hv_store_ent(hash,*relem,tmpstr,0);
+        if (SvMAGICAL(hash)) {
+            if (SvSMAGICAL(tmpstr))
+                mg_set(tmpstr);
+            if (!didstore)
+                sv_2mortal(tmpstr);
+        }
+        TAINT_NOT;
     }
 }
 
@@ -1041,19 +986,6 @@ PP(pp_aassign)
 	case SVt_PVAV:
 	    ary = (AV*)sv;
 	    magic = SvMAGICAL(ary) != 0;
-	    if (PL_op->op_private & OPpASSIGN_HASH) {
-		switch (do_maybe_phash(ary, lelem, firstlelem, relem,
-				       lastrelem))
-		{
-		case 0:
-		    goto normal_array;
-		case 1:
-		    do_oddball((HV*)ary, relem, firstrelem);
-		}
-		relem = lastrelem + 1;
-		break;
-	    }
-	normal_array:
 	    av_clear(ary);
 	    av_extend(ary, lastrelem - relem);
 	    i = 0;
@@ -1703,11 +1635,6 @@ PP(pp_helem)
 	}
 	he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
 	svp = he ? &HeVAL(he) : 0;
-    }
-    else if (SvTYPE(hv) == SVt_PVAV) {
-	if (PL_op->op_private & OPpLVAL_INTRO)
-	    DIE(aTHX_ "Can't localize pseudo-hash element");
-	svp = avhv_fetch_ent((AV*)hv, keysv, lval && !defer, hash);
     }
     else {
 	RETPUSHUNDEF;

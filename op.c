@@ -3645,15 +3645,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	curop = list(force_list(left));
 	o = newBINOP(OP_AASSIGN, flags, list(force_list(right)), curop);
 	o->op_private = (U8)(0 | (flags >> 8));
-	for (curop = ((LISTOP*)curop)->op_first;
-	     curop; curop = curop->op_sibling)
-	{
-	    if (curop->op_type == OP_RV2HV &&
-		((UNOP*)curop)->op_first->op_type != OP_GV) {
-		o->op_private |= OPpASSIGN_HASH;
-		break;
-	    }
-	}
 	if (!(left->op_private & OPpLVAL_INTRO)) {
 	    OP *lastop = o;
 	    PL_generation++;
@@ -5767,17 +5758,8 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 		    badtype = "an ARRAY";
 		break;
 	    case OP_RV2HV:
-		if (svtype != SVt_PVHV) {
-		    if (svtype == SVt_PVAV) {	/* pseudohash? */
-			SV **ksv = av_fetch((AV*)rsv, 0, FALSE);
-			if (ksv && SvROK(*ksv)
-			    && SvTYPE(SvRV(*ksv)) == SVt_PVHV)
-			{
-				break;
-			}
-		    }
+		if (svtype != SVt_PVHV)
 		    badtype = "a HASH";
-		}
 		break;
 	    case OP_RV2CV:
 		if (svtype != SVt_PVCV)
@@ -6979,7 +6961,6 @@ void
 Perl_peep(pTHX_ register OP *o)
 {
     register OP* oldop = 0;
-    STRLEN n_a;
 
     if (!o || o->op_seq)
 	return;
@@ -7203,11 +7184,8 @@ Perl_peep(pTHX_ register OP *o)
 	    break;
 
 	case OP_HELEM: {
-	    UNOP *rop;
-	    SV *lexname;
-	    GV **fields;
-	    SV **svp, **indsvp, *sv;
-	    I32 ind;
+            SV *lexname;
+	    SV **svp, *sv;
 	    char *key = NULL;
 	    STRLEN keylen;
 
@@ -7226,106 +7204,8 @@ Perl_peep(pTHX_ register OP *o)
 		SvREFCNT_dec(sv);
 		*svp = lexname;
 	    }
-
-	    if ((o->op_private & (OPpLVAL_INTRO)))
-		break;
-
-	    rop = (UNOP*)((BINOP*)o)->op_first;
-	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
-		break;
-	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
-		break;
-	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
-	    if (!fields || !GvHV(*fields))
-		break;
-	    key = SvPV(*svp, keylen);
-	    indsvp = hv_fetch(GvHV(*fields), key,
-			      SvUTF8(*svp) ? -(I32)keylen : keylen, FALSE);
-	    if (!indsvp) {
-		Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" in variable %s of type %s",
-		      key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
-	    }
-	    ind = SvIV(*indsvp);
-	    if (ind < 1)
-		Perl_croak(aTHX_ "Bad index while coercing array into hash");
-	    rop->op_type = OP_RV2AV;
-	    rop->op_ppaddr = PL_ppaddr[OP_RV2AV];
-	    o->op_type = OP_AELEM;
-	    o->op_ppaddr = PL_ppaddr[OP_AELEM];
-	    sv = newSViv(ind);
-	    if (SvREADONLY(*svp))
-		SvREADONLY_on(sv);
-	    SvFLAGS(sv) |= (SvFLAGS(*svp)
-			    & (SVs_PADBUSY|SVs_PADTMP|SVs_PADMY));
-	    SvREFCNT_dec(*svp);
-	    *svp = sv;
-	    break;
-	}
-
-	case OP_HSLICE: {
-	    UNOP *rop;
-	    SV *lexname;
-	    GV **fields;
-	    SV **svp, **indsvp, *sv;
-	    I32 ind;
-	    char *key;
-	    STRLEN keylen;
-	    SVOP *first_key_op, *key_op;
-
-	    o->op_seq = PL_op_seqmax++;
-	    if ((o->op_private & (OPpLVAL_INTRO))
-		/* I bet there's always a pushmark... */
-		|| ((LISTOP*)o)->op_first->op_sibling->op_type != OP_LIST)
-		/* hmmm, no optimization if list contains only one key. */
-		break;
-	    rop = (UNOP*)((LISTOP*)o)->op_last;
-	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
-		break;
-	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
-		break;
-	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
-	    if (!fields || !GvHV(*fields))
-		break;
-	    /* Again guessing that the pushmark can be jumped over.... */
-	    first_key_op = (SVOP*)((LISTOP*)((LISTOP*)o)->op_first->op_sibling)
-		->op_first->op_sibling;
-	    /* Check that the key list contains only constants. */
-	    for (key_op = first_key_op; key_op;
-		 key_op = (SVOP*)key_op->op_sibling)
-		if (key_op->op_type != OP_CONST)
-		    break;
-	    if (key_op)
-		break;
-	    rop->op_type = OP_RV2AV;
-	    rop->op_ppaddr = PL_ppaddr[OP_RV2AV];
-	    o->op_type = OP_ASLICE;
-	    o->op_ppaddr = PL_ppaddr[OP_ASLICE];
-	    for (key_op = first_key_op; key_op;
-		 key_op = (SVOP*)key_op->op_sibling) {
-		svp = cSVOPx_svp(key_op);
-		key = SvPV(*svp, keylen);
-		indsvp = hv_fetch(GvHV(*fields), key,
-				  SvUTF8(*svp) ? -(I32)keylen : keylen, FALSE);
-		if (!indsvp) {
-		    Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" "
-			       "in variable %s of type %s",
-			  key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
-		}
-		ind = SvIV(*indsvp);
-		if (ind < 1)
-		    Perl_croak(aTHX_ "Bad index while coercing array into hash");
-		sv = newSViv(ind);
-		if (SvREADONLY(*svp))
-		    SvREADONLY_on(sv);
-		SvFLAGS(sv) |= (SvFLAGS(*svp)
-				& (SVs_PADBUSY|SVs_PADTMP|SVs_PADMY));
-		SvREFCNT_dec(*svp);
-		*svp = sv;
-	    }
-	    break;
-	}
+            break;
+        }
 
 	default:
 	    o->op_seq = PL_op_seqmax++;

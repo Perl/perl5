@@ -75,13 +75,6 @@ p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
 ApM	|void	|apply_attrs_string|char *stashpv|CV *cv|char *attrstr|STRLEN len
-Ap	|SV*	|avhv_delete_ent|AV *ar|SV* keysv|I32 flags|U32 hash
-Ap	|bool	|avhv_exists_ent|AV *ar|SV* keysv|U32 hash
-Ap	|SV**	|avhv_fetch_ent	|AV *ar|SV* keysv|I32 lval|U32 hash
-Ap	|SV**	|avhv_store_ent	|AV *ar|SV* keysv|SV* val|U32 hash
-Ap	|HE*	|avhv_iternext	|AV *ar
-Ap	|SV*	|avhv_iterval	|AV *ar|HE* entry
-Ap	|HV*	|avhv_keys	|AV *ar
 Apd	|void	|av_clear	|AV* ar
 Apd	|SV*	|av_delete	|AV* ar|I32 key|I32 flags
 Apd	|bool	|av_exists	|AV* ar|I32 key
@@ -968,11 +961,6 @@ Adp	|int	|nothreadhook
 
 END_EXTERN_C
 
-#if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
-s	|I32	|avhv_index_sv	|SV* sv
-s	|I32	|avhv_index	|AV* av|SV* sv|U32 hash
-#endif
-
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 s	|I32	|do_trans_simple	|SV *sv
 s	|I32	|do_trans_count		|SV *sv
@@ -1112,8 +1100,6 @@ s	|bool	|path_is_absolute|char *name
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
-s	|int	|do_maybe_phash	|AV *ary|SV **lelem|SV **firstlelem \
-				|SV **relem|SV **lastrelem
 s	|void	|do_oddball	|HV *hash|SV **relem|SV **firstrelem
 s	|CV*	|get_db_sub	|SV **svp|CV *cv
 s	|SV*	|method_common	|SV* meth|U32* hashp

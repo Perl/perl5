@@ -1280,7 +1280,6 @@ Perl_do_kv(pTHX)
     I32 gimme = GIMME_V;
     I32 dokeys =   (PL_op->op_type == OP_KEYS);
     I32 dovalues = (PL_op->op_type == OP_VALUES);
-    I32 realhv = (SvTYPE(hv) == SVt_PVHV);
 
     if (PL_op->op_type == OP_RV2HV || PL_op->op_type == OP_PADHV)
 	dokeys = dovalues = TRUE;
@@ -1295,7 +1294,7 @@ Perl_do_kv(pTHX)
 	RETURN;
     }
 
-    keys = realhv ? hv : avhv_keys((AV*)hv);
+    keys = hv;
     (void)hv_iterinit(keys);	/* always reset iterator regardless */
 
     if (gimme == G_VOID)
@@ -1342,8 +1341,7 @@ Perl_do_kv(pTHX)
 	}
 	if (dovalues) {
 	    PUTBACK;
-	    tmpstr = realhv ?
-		     hv_iterval(hv,entry) : avhv_iterval((AV*)hv,entry);
+	    tmpstr = hv_iterval(hv,entry);
 	    DEBUG_H(Perl_sv_setpvf(aTHX_ tmpstr, "%lu%%%d=%lu",
 			    (unsigned long)HeHASH(entry),
 			    HvMAX(keys)+1,
