@@ -4651,9 +4651,9 @@ Perl_sv_inc(pTHX_ register SV *sv)
     }
     if (!(flags & SVp_POK) || !*SvPVX(sv)) {
 	if ((flags & SVTYPEMASK) < SVt_PVNV)
-	    sv_upgrade(sv, SVt_NV);
-	SvNVX(sv) = 1.0;
-	(void)SvNOK_only(sv);
+           sv_upgrade(sv, SVt_IV);
+       (void)SvIOK_only(sv);
+       SvIVX(sv) = 1;
 	return;
     }
     d = SvPVX(sv);
