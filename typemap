@@ -1,15 +1,16 @@
-Thread		T_XSOBJ
+Thread		T_XSCPTR
 
 INPUT
-T_XSOBJ
+T_XSCPTR
 	STMT_START {
 	    MAGIC *mg;
 	    SV *sv = ($arg);
 
 	    if (!sv_isobject(sv))
 		croak(\"$var is not an object\");
+	    sv = (SV*)SvRV(sv);
 	    if (!SvRMAGICAL(sv) || !(mg = mg_find(sv, '~')))
-		croak(\"$arg is a counterfeit ${ntype} object\");
+		croak(\"XSUB ${func_name}: $var is a forged ${ntype} object\");
 	    $var = ($type) SvPVX(mg->mg_obj);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 				  \"XSUB ${func_name}: %p\\n\", $var);)
