@@ -980,14 +980,16 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	        U8 tmpbuf [UTF8_MAXLEN+1];
 		U8 foldbuf[UTF8_MAXLEN_FOLD+1];
 		STRLEN len, foldlen;
+		char* se;
 		
 		if (c1 == c2) {
 		    while (s <= e) {
 		        c = utf8_to_uvchr((U8*)s, &len);
 			if ( c == c1
 			     && (ln == len ||
-				 !ibcmp_utf8(s, (STRLEN)-1, do_utf8,  0,
-					     m, ln,         UTF,      0))
+				 ((se = e + 1) &&
+				  !ibcmp_utf8(s, &se, 0,  do_utf8,
+					      m, 0  , ln, UTF)))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
@@ -997,8 +999,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *)foldbuf,
-						  (STRLEN)-1, do_utf8, 0,
-						  m, ln, UTF, 0))
+						  0, foldlen, do_utf8,
+						  m,
+						  0, ln,      UTF))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;
 			}
@@ -1022,8 +1025,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 
 			if ( (c == c1 || c == c2)
 			     && (ln == len ||
-				 !ibcmp_utf8(s, (STRLEN)-1, do_utf8,  0,
-					     m, ln,         UTF,      0))
+				 ((se = e + 1) &&
+				  !ibcmp_utf8(s, &se, 0,  do_utf8,
+					      m, 0,   ln, UTF)))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
@@ -1033,8 +1037,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *)foldbuf,
-						  (STRLEN)-1, do_utf8, 0,
-						  m, ln, UTF, 0))
+						  0, foldlen, do_utf8,
+						  m,
+						  0, ln,      UTF))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;
 			}
@@ -2336,20 +2341,17 @@ S_regmatch(pTHX_ regnode *prog)
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 
-	    {
+	    if (do_utf8 || UTF) {
+	      /* Either target or the pattern are utf8. */
 		char *l = locinput;
-		char *e = s + ln;
+		char *e = PL_regeol;
 
-		if (do_utf8 || UTF) {
-		     /* Either target or the pattern are utf8. */
-
-		     if (ibcmp_utf8(s, e - s,      TRUE,  0,
-				    l, (STRLEN)-1, TRUE, &l))
-			  sayNO;
-		     locinput = l;
-		     nextchr = UCHARAT(locinput);
-		     break;
-		}
+		if (ibcmp_utf8(s, 0,  ln, do_utf8,
+			       l, &e, 0,  UTF))
+		     sayNO;
+		locinput = e;
+		nextchr = UCHARAT(locinput);
+		break;
 	    }
 
 	    /* Neither the target and the pattern are utf8. */

@@ -1133,18 +1133,25 @@ Found in file hv.c
 Return true if the strings s1 and s2 differ case-insensitively, false
 if not (if they are equal case-insensitively).  If u1 is true, the
 string s1 is assumed to be in UTF-8-encoded Unicode.  If u2 is true,
-the string s2 is assumed to be in UTF-8-encoded Unicode.
+the string s2 is assumed to be in UTF-8-encoded Unicode.  If u1 or u2
+are false, the respective string is assumed to be in native 8-bit
+encoding.
+
+If the pe1 and pe2 are non-NULL, the scanning pointers will be copied
+in there (they will point at the beginning of the I<next> character).
+If the pointers behind pe1 or pe2 are non-NULL, they are the end
+pointers beyond which scanning will not continue under any
+circustances.  If the byte lengths l1 and l2 are non-zero, s1+l1 and
+s2+l2 will be used as goal end pointers that will also stop the scan,
+and which qualify towards defining a successful match: all the scans
+that define an explicit length must reach their goal pointers for
+a match to succeed).
 
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
 http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
-If either length is (STRLEN)-1 the scan will continue until a match is
-found.  If both lengths are (STRLEN)-1, true is returned (as a sign of
-non-match).  In the case of a match, the f1 and f2 are updated to record
-how far the comparison proceeded.
-
-	I32	ibcmp_utf8(const char* a, I32 len1, bool u1, char **ae, const char* b, I32 len2, bool u2, char **be)
+	I32	ibcmp_utf8(const char* a, char **pe1, UV l1, bool u1, const char* b, char **pe2, UV l2, bool u2)
 
 =for hackers
 Found in file utf8.c
