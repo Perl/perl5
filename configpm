@@ -500,7 +500,8 @@ EOF
 }
 
 if ($opts{glossary}) {
-  <GLOS>;				# Skip the preamble
+    <GLOS>;				# Skip the "DO NOT EDIT"
+    <GLOS>;				# Skip the preamble
   while (<GLOS>) {
     process;
     print CONFIG;
