@@ -1,5 +1,22 @@
-use Test::More tests => 2;
+#!./perl -Tw
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = ('../lib');
+}
+
 use Config;
+
+BEGIN {
+    require Test::More;
+
+    if( !$Config{d_crypt} ) {
+        Test::More->import('skip_all');
+    }
+    else {
+        Test::More->import(tests => 2);
+    }
+}
 
 # Can't assume too much about the string returned by crypt(),
 # and about how many bytes of the encrypted (really, hashed)
