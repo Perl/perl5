@@ -713,6 +713,7 @@ lib/lib.pm		For "use lib"
 lib/locale.pm		For "use locale"
 lib/look.pl		A "look" equivalent
 lib/newgetopt.pl	A perl library supporting long option parsing
+lib/open.pm		Pragma to specify default I/O disciplines
 lib/open2.pl		Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl		Open a three-ended pipe (uses IPC::Open3)
 lib/overload.pm		Module for overloading perl operators
