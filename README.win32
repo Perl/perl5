@@ -191,12 +191,15 @@ sure you have done the previous steps correctly.
 =head2 Testing
 
 Type "dmake test" (or "nmake test").  This will run most of the tests from
-the testsuite (many tests will be skipped, but no tests should typically
-fail).
+the testsuite (many tests will be skipped).
 
-If some tests do fail, it may be because you are using a different command
-shell than the native "cmd.exe", or because you are building from a path
-that contains spaces.  So don't do that.
+No tests should typically fail when running Windows NT 4.0.  Under Windows
+2000, test 22 in lib/open3.t is known to fail (cause still unknown).  Many
+tests will fail under Windows 9x due to the inferior command shell.
+
+Some test failures may occur if you use a command shell other than the
+native "cmd.exe", or if you are building from a path that contains
+spaces.  So don't do that.
 
 If you are running the tests from a emacs shell window, you may see
 failures in op/stat.t.  Run "dmake test-notty" in that case.
@@ -628,6 +631,6 @@ Support for fork() emulation was added in 5.6 (ActiveState Tool Corp).
 
 Win9x support was added in 5.6 (Benjamin Stuhl).
 
-Last updated: 13 March 2000
+Last updated: 22 March 2000
 
 =cut

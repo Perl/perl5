@@ -6,7 +6,7 @@
 #	Mingw32 with gcc-2.95.2 or better  **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl.dll).  Also makes individual DLLs for the XS extensions.
+# (perl56.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -804,7 +804,7 @@ POD2TEXT	= $(PODDIR)\pod2text
 #	-- BKS 10-17-1999
 CFG_VARS	=					\
 		INST_DRV=$(INST_DRV)		~	\
-		INST_TOP=$(INST_TOP)		~	\
+		INST_TOP=$(INST_TOP:s/\/\\/)	~	\
 		INST_VER=$(INST_VER:s/\/\\/)	~	\
 		INST_ARCH=$(INST_ARCH)		~	\
 		archname=$(ARCHNAME)		~	\
@@ -1182,7 +1182,14 @@ doc: $(PERLEXE)
 
 utils: $(PERLEXE) $(X2P)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
-	copy ..\README.win32 ..\pod\perlwin32.pod
+	copy ..\README.amiga ..\pod\perlamiga.pod
+	copy ..\README.cygwin ..\pod\perlcygwin.pod
+	copy ..\README.dos ..\pod\perldos.pod
+	copy ..\README.hpux ..\pod\perlhpux.pod
+	copy ..\README.machten ..\pod\perlmachten.pod
+	copy ..\README.os2 ..\pod\perlos2.pod
+	copy ..\README.os2 ..\pod\perlos2.pod
+	copy ..\vms\perlvms.pod ..\pod\perlvms.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 
