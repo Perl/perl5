@@ -2890,7 +2890,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 {
     register char *s;
     int olderrno;
-    SV *tsv;
+    SV *tsv, *origsv;
     char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
     char *tmpbuf = tbuf;
 
@@ -2939,6 +2939,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                     SvUTF8_off(sv);
                 return pv;
             }
+	    origsv = sv;
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
 		s = "NULLREF";
@@ -3020,6 +3021,11 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			    mg->mg_ptr[mg->mg_len] = 0;
 			}
 			PL_reginterp_cnt += re->program[0].next_off;
+
+			if (re->reganch & ROPT_UTF8)
+			    SvUTF8_on(origsv);
+			else
+			    SvUTF8_off(origsv);
 			*lp = mg->mg_len;
 			return mg->mg_ptr;
 		    }
@@ -3188,16 +3194,14 @@ would lose the UTF-8'ness of the PV.
 void
 Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
-    SV *tmpsv = sv_newmortal();
     STRLEN len;
     char *s;
     s = SvPV(ssv,len);
-    sv_setpvn(tmpsv,s,len);
+    sv_setpvn(dsv,s,len);
     if (SvUTF8(ssv))
-	SvUTF8_on(tmpsv);
+	SvUTF8_on(dsv);
     else
-	SvUTF8_off(tmpsv);
-    SvSetSV(dsv,tmpsv);
+	SvUTF8_off(dsv);
 }
 
 /*
