@@ -1,9 +1,10 @@
 package File::Find;
 require 5.000;
 require Exporter;
-use Config;
-use Cwd;
-use File::Basename;
+require Config;
+require Cwd;
+require File::Basename;
+
 
 =head1 NAME
 
@@ -23,10 +24,12 @@ finddepth - traverse a directory structure depth-first
 
 =head1 DESCRIPTION
 
-The wanted() function does whatever verifications you want.  $dir contains
-the current directory name, and $_ the current filename within that
-directory.  $name contains C<"$dir/$_">.  You are chdir()'d to $dir when
-the function is called.  The function may set $prune to prune the tree.
+The wanted() function does whatever verifications you want.
+$File::Find::dir contains the current directory name, and $_ the
+current filename within that directory.  $File::Find::name contains
+C<"$File::Find::dir/$_">.  You are chdir()'d to $File::Find::dir when
+the function is called.  The function may set $File::Find::prune to
+prune the tree.
 
 This library is primarily for the C<find2perl> tool, which when fed, 
 
@@ -43,10 +46,11 @@ produces something like:
         ||
         ($nlink || (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_))) &&
         $dev < 0 &&
-        ($prune = 1);
+        ($File::Find::prune = 1);
     }
 
-Set the variable $dont_use_nlink if you're using AFS, since AFS cheats.
+Set the variable $File::Find::dont_use_nlink if you're using AFS,
+since AFS cheats.
 
 C<finddepth> is just like C<find>, except that it does a depth-first
 search.
@@ -55,50 +59,19 @@ Here's another interesting wanted function.  It will find all symlinks
 that don't resolve:
 
     sub wanted {
-	-l && !-e && print "bogus link: $name\n";
+	-l && !-e && print "bogus link: $File::Find::name\n";
     } 
 
 =cut
 
 @ISA = qw(Exporter);
-@EXPORT = qw(find finddepth $name $dir);
+@EXPORT = qw(find finddepth);
 
-$dont_use_nlink = 1 if $Config{osname} =~ m:^os/?2$:i ;
-
-# Usage:
-#	use File::Find;
-#
-#	find(\&wanted, '/foo','/bar');
-#
-#	sub wanted { ... }
-#		where wanted does whatever you want.  $dir contains the
-#		current directory name, and $_ the current filename within
-#		that directory.  $name contains "$dir/$_".  You are cd'ed
-#		to $dir when the function is called.  The function may
-#		set $prune to prune the tree.
-#
-# This library is primarily for find2perl, which, when fed
-#
-#   find2perl / -name .nfs\* -mtime +7 -exec rm -f {} \; -o -fstype nfs -prune
-#
-# spits out something like this
-#
-#	sub wanted {
-#	    /^\.nfs.*$/ &&
-#	    (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
-#	    int(-M _) > 7 &&
-#	    unlink($_)
-#	    ||
-#	    ($nlink || (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_))) &&
-#	    $dev < 0 &&
-#	    ($prune = 1);
-#	}
-#
-# Set the variable $dont_use_nlink if you're using AFS, since AFS cheats.
 
 sub find {
     my $wanted = shift;
-    my $cwd = fastcwd();
+    my $cwd = Cwd::fastcwd();
+    my ($topdir,$topdev,$topino,$topmode,$topnlink);
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
 	  || (warn("Can't stat $topdir: $!\n"), next);
@@ -107,7 +80,8 @@ sub find {
 		($dir,$_) = ($topdir,'.');
 		$name = $topdir;
 		&$wanted;
-		($fixtopdir = $topdir) =~ s,/$,, ;
+		my $fixtopdir = $topdir;
+	        $fixtopdir =~ s,/$,, ;
 		$fixtopdir =~ s/\.dir$// if $Is_VMS; ;
 		&finddir($wanted,$fixtopdir,$topnlink);
 	    }
@@ -116,7 +90,7 @@ sub find {
 	    }
 	}
 	else {
-	    unless (($dir,$_) = fileparse($topdir)) {
+	    unless (($dir,$_) = File::Basename::fileparse($topdir)) {
 		($dir,$_) = ('.', $topdir);
 	    }
 	    $name = $topdir;
@@ -127,14 +101,15 @@ sub find {
 }
 
 sub finddir {
-    local($wanted,$dir,$nlink) = @_;
-    local($dev,$ino,$mode,$subcount);
-    local($name);
+    my($wanted, $nlink);
+    local($dir, $name);
+    ($wanted, $dir, $nlink) = @_;
+
+    my($dev, $ino, $mode, $subcount);
 
     # Get the list of files in the current directory.
-
     opendir(DIR,'.') || (warn "Can't open $dir: $!\n", return);
-    local(@filenames) = readdir(DIR);
+    my(@filenames) = readdir(DIR);
     closedir(DIR);
 
     if ($nlink == 2 && !$dont_use_nlink) {  # This dir has no subdirectories.
@@ -177,44 +152,20 @@ sub finddir {
     }
 }
 
-# Usage:
-#	use File::Find;
-#
-#	finddepth(\&wanted, '/foo','/bar');
-#
-#	sub wanted { ... }
-#		where wanted does whatever you want.  $dir contains the
-#		current directory name, and $_ the current filename within
-#		that directory.  $name contains "$dir/$_".  You are cd'ed
-#		to $dir when the function is called.  The function may
-#		set $prune to prune the tree.
-#
-# This library is primarily for find2perl, which, when fed
-#
-#   find2perl / -name .nfs\* -mtime +7 -exec rm -f {} \; -o -fstype nfs -prune
-#
-# spits out something like this
-#
-#	sub wanted {
-#	    /^\.nfs.*$/ &&
-#	    (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
-#	    int(-M _) > 7 &&
-#	    unlink($_)
-#	    ||
-#	    ($nlink || (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_))) &&
-#	    $dev < 0 &&
-#	    ($prune = 1);
-#	}
 
 sub finddepth {
     my $wanted = shift;
-    $cwd = fastcwd();;
+
+    $cwd = Cwd::fastcwd();;
+
+    my($topdir, $topdev, $topino, $topmode, $topnlink);
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
 	  || (warn("Can't stat $topdir: $!\n"), next);
 	if (-d _) {
 	    if (chdir($topdir)) {
-		($fixtopdir = $topdir) =~ s,/$,, ;
+		my $fixtopdir = $topdir;
+		$fixtopdir =~ s,/$,, ;
 		$fixtopdir =~ s/\.dir$// if $Is_VMS;
 		&finddepthdir($wanted,$fixtopdir,$topnlink);
 		($dir,$_) = ($fixtopdir,'.');
@@ -226,7 +177,7 @@ sub finddepth {
 	    }
 	}
 	else {
-	    unless (($dir,$_) = fileparse($topdir)) {
+	    unless (($dir,$_) = File::Basename::fileparse($topdir)) {
 		($dir,$_) = ('.', $topdir);
 	    }
 	    chdir $dir && &$wanted;
@@ -236,12 +187,12 @@ sub finddepth {
 }
 
 sub finddepthdir {
-    my($wanted,$dir,$nlink) = @_;
-    my($dev,$ino,$mode,$subcount);
-    local($name); # so &wanted sees current value
+    my($wanted, $nlink);
+    local($dir, $name);
+    ($wanted,$dir,$nlink) = @_;
+    my($dev, $ino, $mode, $subcount);
 
     # Get the list of files in the current directory.
-
     opendir(DIR,'.') || warn "Can't open $dir: $!\n";
     my(@filenames) = readdir(DIR);
     closedir(DIR);
@@ -260,7 +211,7 @@ sub finddepthdir {
 	for (@filenames) {
 	    next if $_ eq '.';
 	    next if $_ eq '..';
-	    $nlink = $prune = 0;
+	    $nlink = 0;
 	    $name = "$dir/$_";
 	    if ($subcount > 0 || $dont_use_nlink) {    # Seen all the subdirs?
 
@@ -272,7 +223,7 @@ sub finddepthdir {
 
 		    # It really is a directory, so do it recursively.
 
-		    if (!$prune && chdir $_) {
+		    if (chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
 			&finddepthdir($wanted,$name,$nlink);
 			chdir '..';
@@ -285,10 +236,20 @@ sub finddepthdir {
     }
 }
 
-if ($Config{'osname'} eq 'VMS') {
+# Set dont_use_nlink in your hint file if your system's stat doesn't
+# report the number of links in a directory as an indication
+# of the number of files.
+# See, e.g. hints/machten.sh for MachTen 2.2.
+$dont_use_nlink = 1 if ($Config::Config{'dont_use_nlink'});
+
+# These are hard-coded for now, but may move to hint files.
+if ($Config::Config{'osname'} eq 'VMS') {
   $Is_VMS = 1;
   $dont_use_nlink = 1;
 }
+
+$dont_use_nlink = 1 if $Config::Config{'osname'} =~ m:^os/?2$:i ;
+$dont_use_nlink = 1 if $Config::Config{'osname'} =~ m:^mswin32$:i ;
 
 1;
 
