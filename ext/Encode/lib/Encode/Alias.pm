@@ -158,7 +158,7 @@ sub init_aliases
     define_alias( qr/^(.+)\@euro$/i => '"$1"' );
 
     define_alias( qr/\b(?:iso[-_]?)?latin[-_]?(\d+)$/i 
-		  => '"iso-8859-$Encode::Alias::Latin2iso[$1]"' );
+		  => 'defined $Encode::Alias::Latin2iso[$1] ? "iso-8859-$Encode::Alias::Latin2iso[$1]" : undef' );
 
     define_alias( qr/\bwin(latin[12]|cyrillic|baltic|greek|turkish|
 			 hebrew|arabic|baltic|vietnamese)$/ix => 
