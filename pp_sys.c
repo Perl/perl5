@@ -668,8 +668,8 @@ PP(pp_fileno)
 
 PP(pp_umask)
 {
-#ifdef HAS_UMASK
     dSP; dTARGET;
+#ifdef HAS_UMASK
     Mode_t anum;
 
     if (MAXARG < 1) {
@@ -3986,72 +3986,72 @@ PP(pp_system)
     }
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
-  {
-    Pid_t childpid;
-    int status;
-    Sigsave_t ihand,qhand;     /* place to save signals during system() */
-
-    if (PerlProc_pipe(pp) >= 0)
-	did_pipes = 1;
-    while ((childpid = vfork()) == -1) {
-	if (errno != EAGAIN) {
-	    value = -1;
-	    SP = ORIGMARK;
-	    PUSHi(value);
-	    if (did_pipes) {
-		PerlLIO_close(pp[0]);
-		PerlLIO_close(pp[1]);
-	    }
-	    RETURN;
-	}
-	sleep(5);
-    }
-    if (childpid > 0) {
-	if (did_pipes)
-	    PerlLIO_close(pp[1]);
+    {
+	 Pid_t childpid;
+	 int status;
+	 Sigsave_t ihand,qhand;     /* place to save signals during system() */
+	 
+	 if (PerlProc_pipe(pp) >= 0)
+	      did_pipes = 1;
+	 while ((childpid = vfork()) == -1) {
+	      if (errno != EAGAIN) {
+		   value = -1;
+		   SP = ORIGMARK;
+		   PUSHi(value);
+		   if (did_pipes) {
+			PerlLIO_close(pp[0]);
+			PerlLIO_close(pp[1]);
+		   }
+		   RETURN;
+	      }
+	      sleep(5);
+	 }
+	 if (childpid > 0) {
+	      if (did_pipes)
+		   PerlLIO_close(pp[1]);
 #ifndef PERL_MICRO
-	rsignal_save(SIGINT, SIG_IGN, &ihand);
-	rsignal_save(SIGQUIT, SIG_IGN, &qhand);
+	      rsignal_save(SIGINT, SIG_IGN, &ihand);
+	      rsignal_save(SIGQUIT, SIG_IGN, &qhand);
 #endif
-	do {
-	    result = wait4pid(childpid, &status, 0);
-	} while (result == -1 && errno == EINTR);
+	      do {
+		   result = wait4pid(childpid, &status, 0);
+	      } while (result == -1 && errno == EINTR);
 #ifndef PERL_MICRO
-	(void)rsignal_restore(SIGINT, &ihand);
-	(void)rsignal_restore(SIGQUIT, &qhand);
+	      (void)rsignal_restore(SIGINT, &ihand);
+	      (void)rsignal_restore(SIGQUIT, &qhand);
 #endif
-	STATUS_NATIVE_SET(result == -1 ? -1 : status);
-	do_execfree();	/* free any memory child malloced on vfork */
-	SP = ORIGMARK;
-	if (did_pipes) {
-	    int errkid;
-	    int n = 0, n1;
-
-	    while (n < sizeof(int)) {
-		n1 = PerlLIO_read(pp[0],
-				  (void*)(((char*)&errkid)+n),
-				  (sizeof(int)) - n);
-		if (n1 <= 0)
-		    break;
-		n += n1;
-	    }
-	    PerlLIO_close(pp[0]);
-	    if (n) {			/* Error */
-		if (n != sizeof(int))
-		    DIE(aTHX_ "panic: kid popen errno read");
-		errno = errkid;		/* Propagate errno from kid */
-		STATUS_CURRENT = -1;
-	    }
-	}
-	PUSHi(STATUS_CURRENT);
-	RETURN;
-    }
-    if (did_pipes) {
-	PerlLIO_close(pp[0]);
+	      STATUS_NATIVE_SET(result == -1 ? -1 : status);
+	      do_execfree();	/* free any memory child malloced on vfork */
+	      SP = ORIGMARK;
+	      if (did_pipes) {
+		   int errkid;
+		   int n = 0, n1;
+		   
+		   while (n < sizeof(int)) {
+			n1 = PerlLIO_read(pp[0],
+					  (void*)(((char*)&errkid)+n),
+					  (sizeof(int)) - n);
+			if (n1 <= 0)
+			     break;
+			n += n1;
+		   }
+		   PerlLIO_close(pp[0]);
+		   if (n) {			/* Error */
+			if (n != sizeof(int))
+			     DIE(aTHX_ "panic: kid popen errno read");
+			errno = errkid;		/* Propagate errno from kid */
+			STATUS_CURRENT = -1;
+		   }
+	      }
+	      PUSHi(STATUS_CURRENT);
+	      RETURN;
+	 }
+	 if (did_pipes) {
+	      PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-	fcntl(pp[1], F_SETFD, FD_CLOEXEC);
-  }
+	      fcntl(pp[1], F_SETFD, FD_CLOEXEC);
 #endif
+	 }
     }
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;

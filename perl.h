@@ -3527,6 +3527,10 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
+#ifdef PERL_MICRO
+#   define IN_LOCALE_RUNTIME 0
+#endif
+
 #if !defined(Strtol) && defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
 #    ifdef __hpux
 #        define strtoll __strtoll	/* secret handshake */
