@@ -445,7 +445,7 @@ sub numbers_with_total {
         } else {
             $calc_sum = $total;
             # Shift into range by some multiple of the total
-            my $mult = int ($total / $max_p1);
+            my $mult = $max_p1 ? int ($total / $max_p1) : undef;
             # Need this to make sure that -1 + (~0+1) is ~0 (ie still integer)
             $calc_sum = $total - $mult;
             $calc_sum -= $mult * $max;
