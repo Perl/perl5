@@ -2529,11 +2529,11 @@ Perl_looks_like_number(pTHX_ SV *sv)
 			   UV_MAX= 18446744073709551615) so be cautious  */
 	    numtype |= IS_NUMBER_TO_INT_BY_STRTOL | IS_NUMBER_AS_LONG_AS_IV_MAX;
 
-        if (*s == '.'
+        if (
 #ifdef USE_LOCALE_NUMERIC
-	    || (specialradix = IS_NUMERIC_RADIX(s))
+	    (specialradix = IS_NUMERIC_RADIX(s, send)) ||
 #endif
-	    ) {
+	    *s == '.') {
 #ifdef USE_LOCALE_NUMERIC
 	    if (specialradix)
 		s += SvCUR(PL_numeric_radix_sv);
@@ -2545,10 +2545,11 @@ Perl_looks_like_number(pTHX_ SV *sv)
                 s++;
         }
     }
-    else if (*s == '.'
+    else if (
 #ifdef USE_LOCALE_NUMERIC
-	    || (specialradix = IS_NUMERIC_RADIX(s))
+	     (specialradix = IS_NUMERIC_RADIX(s, send)) ||
 #endif
+	    *s == '.'
 	    ) {
 #ifdef USE_LOCALE_NUMERIC
 	if (specialradix)
