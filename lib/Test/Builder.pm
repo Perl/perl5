@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION $CLASS);
-$VERSION = '0.17';
+$VERSION = '0.17_01';
 $CLASS = __PACKAGE__;
 
 my $IsVMS = $^O eq 'VMS';
@@ -316,7 +316,7 @@ ERR
     if( defined $name ) {
         $name =~ s|#|\\#|g;     # # in a name can confuse Test::Harness.
         $out   .= " - $name";
-        $result->{name} = $name;
+        $result->{name} = "$name";
     }
     else {
         $result->{name} = '';
@@ -325,7 +325,7 @@ ERR
     if( $todo ) {
         my $what_todo = $todo;
         $out   .= " # TODO $what_todo";
-        $result->{reason} = $what_todo;
+        $result->{reason} = "$what_todo";
         $result->{type}   = 'todo';
     }
     else {
