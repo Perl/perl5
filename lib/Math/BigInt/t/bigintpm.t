@@ -534,8 +534,8 @@ $x = Math::BigInt->new('+inf'); ok_inf ($x,$y);
 sub ok_inf {
     my ($x, $y) = @_;
 
-    $x =~ s/^inf(?:inity)?/$1/i;
-    $y =~ s/^inf(?:inity)?/$1/i;
+    $x =~ s/^inf(?:inity)?/Inf/i;
+    $y =~ s/^inf(?:inity)?/Inf/i;
 
     ok($x, $y);
 }
