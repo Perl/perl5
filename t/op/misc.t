@@ -686,6 +686,5 @@ ok
 # Bug 20010422.005
 {s//${}/; //}
 EXPECT
-syntax error at - line 2, near "${"
-syntax error at - line 2, near "//}"
+syntax error at - line 2, near "${}"
 Execution of - aborted due to compilation errors.
