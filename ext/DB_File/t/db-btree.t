@@ -156,6 +156,7 @@ ok(18, $@ =~ /^DB_File::BTREEINFO::FETCH - Unknown element 'fred' at/ ) ;
 
 my ($X, %h) ;
 ok(19, $X = tie(%h, 'DB_File',$Dfile, O_RDWR|O_CREAT, 0640, $DB_BTREE )) ;
+die "Could not tie: $!" unless $X;
 
 my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);
@@ -525,9 +526,9 @@ $dbh3->{compare} = sub { length $_[0] <=> length $_[1] } ;
  
  
 my (%g, %k);
-tie(%h, 'DB_File',$Dfile1, O_RDWR|O_CREAT, 0640, $dbh1 ) ; 
-tie(%g, 'DB_File',$Dfile2, O_RDWR|O_CREAT, 0640, $dbh2 ) ;
-tie(%k, 'DB_File',$Dfile3, O_RDWR|O_CREAT, 0640, $dbh3 ) ;
+tie(%h, 'DB_File',$Dfile1, O_RDWR|O_CREAT, 0640, $dbh1 ) or die $!;
+tie(%g, 'DB_File',$Dfile2, O_RDWR|O_CREAT, 0640, $dbh2 ) or die $!;
+tie(%k, 'DB_File',$Dfile3, O_RDWR|O_CREAT, 0640, $dbh3 ) or die $!;
  
 my @Keys = qw( 0123 12 -1234 9 987654321 def  ) ;
 my (@srt_1, @srt_2, @srt_3);

@@ -444,7 +444,7 @@ unlink $Dfile;
    1 ;
 EOM
 
-    close FILE ;
+    close FILE  or die "Could not close: $!";
 
     BEGIN { push @INC, '.'; } 
     eval 'use SubDB ; ';
@@ -454,6 +454,7 @@ EOM
     eval '
 	$X = tie(@h, "SubDB","recno.tmp", O_RDWR|O_CREAT, 0640, $DB_RECNO );
 	' ;
+    die "Could not tie: $!" unless $X;
 
     main::ok(68, $@ eq "") ;
 
