@@ -4056,6 +4056,8 @@ Perl_yylex(pTHX)
 			    TERM(FUNC0SUB);
 			if (strEQ(proto, "$"))
 			    OPERATOR(UNIOPSUB);
+			while (*proto == ';')
+			    proto++;
 			if (*proto == '&' && *s == '{') {
 			    sv_setpv(PL_subname, PL_curstash ? 
 					"__ANON__" : "__ANON__::__ANON__");

@@ -2058,6 +2058,11 @@
 #define mess_alloc		S_mess_alloc
 #endif
 #endif
+#if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define mulexp10		S_mulexp10
+#endif
+#endif
 #define sv_setsv_flags		Perl_sv_setsv_flags
 #define sv_catpvn_flags		Perl_sv_catpvn_flags
 #define sv_catsv_flags		Perl_sv_catsv_flags
@@ -4542,6 +4547,11 @@
 #endif
 #ifdef PERL_CORE
 #define mess_alloc()		S_mess_alloc(aTHX)
+#endif
+#endif
+#if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define mulexp10		S_mulexp10
 #endif
 #endif
 #define sv_setsv_flags(a,b,c)	Perl_sv_setsv_flags(aTHX_ a,b,c)

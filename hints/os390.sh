@@ -123,13 +123,19 @@ case "$ldlibpthname" in
 '') ldlibpthname=LIBPATH ;;
 esac
 
+# The folowing should always be used
+d_oldpthreads='define'
+
 # Header files to include.
-# You can override these with Configure -Ui_time -Ui_systime.
+# You can override these with Configure -Ui_time -Ui_systime -Dd_pthread_atfork.
 case "$i_time" in
 '') i_time='define' ;;
 esac
 case "$i_systime" in
 '') i_systime='define' ;;
+esac
+case "$d_pthread_atfork" in
+'') d_pthread_atfork='undef' ;;
 esac
 case "$d_pthread_atfork" in                                                  
 '') d_pthread_atfork='undef' ;;                                              

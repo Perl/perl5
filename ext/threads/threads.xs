@@ -350,13 +350,21 @@ ithread *
 SV_to_ithread(pTHX_ SV *sv)
 {
     ithread *thread;
+#ifdef OEMVS
+    void *ptr;
+#endif
     if (SvROK(sv))
      {
       thread = INT2PTR(ithread*, SvIV(SvRV(sv)));
      }
     else
      {
+#ifdef OEMVS
+      PERL_THREAD_GETSPECIFIC(self_key,ptr);
+      thread = (ithread *) ptr;
+#else
       PERL_THREAD_GETSPECIFIC(self_key,thread);
+#endif
      }
     return thread;
 }
@@ -515,7 +523,13 @@ SV*
 Perl_ithread_self (pTHX_ SV *obj, char* Class)
 {
     ithread *thread;
+#ifdef OEMVS
+    void *ptr;
+    PERL_THREAD_GETSPECIFIC(self_key,ptr);
+    thread = (ithread *) ptr;
+#else
     PERL_THREAD_GETSPECIFIC(self_key,thread);
+#endif
     return ithread_to_SV(aTHX_ obj, thread, Class, TRUE);
 }
 

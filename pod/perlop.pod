@@ -1153,7 +1153,8 @@ equivalent to:
 
     split(' ', q/STRING/);
 
-the difference being that it generates a real list at compile time.  So
+the differences being that it generates a real list at compile time, and
+in scalar context it returns the last element in the list.  So
 this expression:
 
     qw(foo bar baz)
@@ -1641,7 +1642,7 @@ alphanumeric char, as in:
 
 In the RE above, which is intentionally obfuscated for illustration, the
 delimiter is C<m>, the modifier is C<mx>, and after backslash-removal the
-RE is the same as for C<m/ ^ a s* b /mx>).  There's more than one 
+RE is the same as for C<m/ ^ a \s* b /mx>.  There's more than one 
 reason you're encouraged to restrict your delimiters to non-alphanumeric,
 non-whitespace choices.
 

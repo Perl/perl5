@@ -40,6 +40,12 @@
 #    ifdef __OPEN_VM
 #      define pthread_addr_t void *
 #    endif
+#    ifdef OEMVS
+#      define pthread_addr_t void *
+#      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
+#      define pthread_create(t,a,s,d)        pthread_create(t,&(a),s,d)
+#      define pthread_keycreate              pthread_key_create
+#    endif
 #    ifdef VMS
 #      define pthread_attr_init(a) pthread_attr_create(a)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_setdetach_np(a,s)
@@ -57,7 +63,7 @@
 #      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
 #    endif
-#    if defined(DJGPP) || defined(__OPEN_VM)
+#    if defined(DJGPP) || defined(__OPEN_VM) || defined(OEMVS)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,&(s))
 #      define YIELD pthread_yield(NULL)
 #    endif
@@ -273,11 +279,7 @@
 #ifdef HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP
 #  define PTHREAD_GETSPECIFIC(key) pthread_unchecked_getspecific_np(key)
 #else
-#  ifdef OEMVS
-#    define PTHREAD_GETSPECIFIC(key) pthread_getspecific_d8_np(key)
-#  else
 #    define PTHREAD_GETSPECIFIC(key) pthread_getspecific(key)
-#  endif
 #endif
 
 #ifndef PERL_GET_CONTEXT
