@@ -3261,9 +3261,11 @@ PP(pp_entereval)
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
     SAVESPTR(PL_compiling.cop_warnings);
-    if (!specialWARN(PL_compiling.cop_warnings)) {
-        PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
-        SAVEFREESV(PL_compiling.cop_warnings) ;
+    if (specialWARN(PL_curcop->cop_warnings))
+        PL_compiling.cop_warnings = PL_curcop->cop_warnings;
+    else {
+        PL_compiling.cop_warnings = newSVsv(PL_curcop->cop_warnings);
+        SAVEFREESV(PL_compiling.cop_warnings);
     }
 
     push_return(PL_op->op_next);
