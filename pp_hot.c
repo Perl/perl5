@@ -39,10 +39,10 @@ unset_cvowner(void *cvarg)
     dTHR;
 #endif /* DEBUGGING */
 
-    DEBUG_L((PerlIO_printf(PerlIO_stderr(), "%p unsetting CvOWNER of %p:%s\n",
+    DEBUG_S((PerlIO_printf(PerlIO_stderr(), "%p unsetting CvOWNER of %p:%s\n",
 			   thr, cv, SvPEEK((SV*)cv))));
     MUTEX_LOCK(CvMUTEXP(cv));
-    DEBUG_L(if (CvDEPTH(cv) != 0)
+    DEBUG_S(if (CvDEPTH(cv) != 0)
 		PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
 			      CvDEPTH(cv)););
     assert(thr == CvOWNER(cv));
@@ -2091,7 +2091,7 @@ PP(pp_entersub)
 	    while (MgOWNER(mg))
 		COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	    MgOWNER(mg) = thr;
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
+	    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
 				  thr, sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
 	    SvREFCNT_inc(sv);	/* Keep alive until magic_mutexfree */
@@ -2135,7 +2135,7 @@ PP(pp_entersub)
 	    /* We already have a clone to use */
 	    MUTEX_UNLOCK(CvMUTEXP(cv));
 	    cv = *(CV**)svp;
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 				  "entersub: %p already has clone %p:%s\n",
 				  thr, cv, SvPEEK((SV*)cv)));
 	    CvOWNER(cv) = thr;
@@ -2149,7 +2149,7 @@ PP(pp_entersub)
 		CvOWNER(cv) = thr;
 		SvREFCNT_inc(cv);
 		MUTEX_UNLOCK(CvMUTEXP(cv));
-		DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+		DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			    "entersub: %p grabbing %p:%s in stash %s\n",
 			    thr, cv, SvPEEK((SV*)cv), CvSTASH(cv) ?
 	    			HvNAME(CvSTASH(cv)) : "(none)"));
@@ -2158,7 +2158,7 @@ PP(pp_entersub)
 		CV *clonecv;
 		SvREFCNT_inc(cv); /* don't let it vanish from under us */
 		MUTEX_UNLOCK(CvMUTEXP(cv));
-		DEBUG_L((PerlIO_printf(PerlIO_stderr(),
+		DEBUG_S((PerlIO_printf(PerlIO_stderr(),
 				       "entersub: %p cloning %p:%s\n",
 				       thr, cv, SvPEEK((SV*)cv))));
 		/*
@@ -2175,7 +2175,7 @@ PP(pp_entersub)
 		cv = clonecv;
 		SvREFCNT_inc(cv);
 	    }
-	    DEBUG_L(if (CvDEPTH(cv) != 0)
+	    DEBUG_S(if (CvDEPTH(cv) != 0)
 			PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
 				      CvDEPTH(cv)););
 	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
@@ -2325,7 +2325,7 @@ PP(pp_entersub)
 	    SV** ary;
 
 #if 0
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 	    			  "%p entersub preparing @_\n", thr));
 #endif
 	    av = (AV*)PL_curpad[0];
@@ -2363,7 +2363,7 @@ PP(pp_entersub)
 	    }
 	}
 #if 0
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p entersub returning %p\n", thr, CvSTART(cv)));
 #endif
 	RETURNOP(CvSTART(cv));

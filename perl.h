@@ -1443,6 +1443,11 @@ Gid_t getegid _((void));
 #define DEBUG_H(a) if (PL_debug & 8192)	a
 #define DEBUG_X(a) if (PL_debug & 16384)	a
 #define DEBUG_D(a) if (PL_debug & 32768)	a
+#  ifdef USE_THREADS
+#    define DEBUG_S(a) if (PL_debug & (1<<16))	a
+#  else
+#    define DEBUG_S(a)
+#  endif
 #else
 #define DEB(a)
 #define DEBUG(a)
@@ -1458,10 +1463,11 @@ Gid_t getegid _((void));
 #define DEBUG_r(a)
 #define DEBUG_x(a)
 #define DEBUG_u(a)
-#define DEBUG_L(a)
+#define DEBUG_S(a)
 #define DEBUG_H(a)
 #define DEBUG_X(a)
 #define DEBUG_D(a)
+#define DEBUG_S(a)
 #endif
 #define YYMAXDEPTH 300
 

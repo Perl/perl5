@@ -382,7 +382,7 @@ save_threadsv(PADOFFSET i)
 #ifdef USE_THREADS
     dTHR;
     SV **svp = &THREADSV(i);	/* XXX Change to save by offset */
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "save_threadsv %u: %p %p:%s\n",
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "save_threadsv %u: %p %p:%s\n",
 			  i, svp, *svp, SvPEEK(*svp)));
     save_svref(svp);
     return svp;
@@ -567,7 +567,7 @@ leave_scope(I32 base)
 	    ptr = SSPOPPTR;
 	restore_sv:
 	    sv = *(SV**)ptr;
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 				  "restore svref: %p %p:%s -> %p:%s\n",
 			  	  ptr, sv, SvPEEK(sv), value, SvPEEK(value)));
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&

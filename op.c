@@ -548,7 +548,7 @@ find_threadsv(char *name)
 	default:
 	    sv_magic(sv, 0, 0, name, 1); 
 	}
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "find_threadsv: new SV %p for $%s%c\n",
 			      sv, (*name < 32) ? "^" : "",
 			      (*name < 32) ? toCTRL(*name) : *name));
