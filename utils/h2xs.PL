@@ -43,9 +43,9 @@ h2xs - convert .h C header files to Perl extensions
 
 =head1 SYNOPSIS
 
-B<h2xs> [B<OPTIONS> ...] [headerfile ... [extra_libraries]]
+B<h2xs> [B<-ACOPXacdfkmx>] [B<-F> addflags] [B<-M> fmask] [B<-n> module_name] [B<-o> tmask] [B<-p> prefix] [B<-s> subs] [B<-v> version] [B<-b> compat_version] [headerfile ... [extra_libraries]]
 
-B<h2xs> B<-h>|B<-?>|B<--help>
+B<h2xs> B<-h>
 
 =head1 DESCRIPTION
 
@@ -196,17 +196,6 @@ Specify the internal type that the constant() mechanism uses for macros.
 The default is IV (signed integer).  Currently all macros found during the
 header scanning process will be assumed to have this type.  Future versions
 of C<h2xs> may gain the ability to make educated guesses.
-
-=item B<--use-new-tests>
-
-When B<--compat-version> (B<-b>) is present the generated tests will use
-C<Test::More> rather then C<Test> which is the default for versions before
-5.7.2 .   C<Test::More> will be added to PREREQ_PM in the generated
-C<Makefile.PL>.
-
-=item B<--use-old-tests>
-
-Will force the generation of test code that uses the older C<Test> module.
 
 =item B<-v>, B<--version>=I<version>
 
@@ -473,8 +462,6 @@ OPTIONS:
                           Perl function names.
     -s, --const-subs      Create subroutines for specified macros.
     -t, --default-type    Default type for autoloaded constants
-        --use-new-tests   Use Test::More in backward compatible modules
-        --use-old-tests   Use the module Test rather than Test::More
     -v, --version         Specify a version number for this extension.
     -x, --autogen-xsubs   Autogenerate XSUBs using C::Scan.
 
@@ -505,9 +492,7 @@ my ($opt_A,
     $opt_v,
     $opt_x,
     $opt_b,
-    $opt_t,
-    $new_test,
-    $old_test
+    $opt_t
    );
 
 Getopt::Long::Configure('bundling');
@@ -534,9 +519,7 @@ my %options = (
                 'const-subs|s=s'     => \$opt_s,
                 'default-type|t=s'   => \$opt_t,
                 'version|v=s'        => \$opt_v,
-                'autogen-xsubs|x=s'  => \$opt_x,
-                'use-new-tests'      => \$new_test,
-                'use-old-tests'      => \$old_test
+                'autogen-xsubs|x=s'  => \$opt_x
               );
 
 GetOptions(%options) || usage;
@@ -546,8 +529,8 @@ usage if $opt_h;
 if( $opt_b ){
     usage "You cannot use -b and -m at the same time.\n" if ($opt_b && $opt_m);
     $opt_b =~ /^\d+\.\d+\.\d+/ ||
-    usage "You must provide the backwards compatibility version in X.Y.Z form. "
-          .  "(i.e. 5.5.0)\n";
+	usage "You must provide the backwards compatibility version in X.Y.Z form. " .
+	    "(i.e. 5.5.0)\n";
     my ($maj,$min,$sub) = split(/\./,$opt_b,3);
     $compat_version = sprintf("%d.%03d%02d",$maj,$min,$sub);
 } 
@@ -1121,13 +1104,6 @@ my $pod = <<"END" unless $opt_P;
 #  use $module;
 #  blah blah blah
 #
-#=head1 ABSTRACT
-#
-#  This should be the abstract for $module.
-#  The abstract is used when making PPD (Perl Package Description) files.
-#  If you don't want an ABSTRACT you should also edit Makefile.PL to
-#  remove the ABSTRACT_FROM option.
-#
 #=head1 DESCRIPTION
 #
 #Stub documentation for $module, created by h2xs. It looks like the
@@ -1647,17 +1623,6 @@ EOP
 warn "Writing $ext$modpname/Makefile.PL\n";
 open(PL, ">Makefile.PL") || die "Can't create $ext$modpname/Makefile.PL: $!\n";
 
-my $prereq_pm;
-
-if ( $compat_version < 5.00702 and $new_test )
-{
-  $prereq_pm = q%'Test::More  =>  0'%;
-}
-else
-{
-  $prereq_pm ='';
-}
-
 print PL <<END;
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
@@ -1665,7 +1630,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> '$module',
     'VERSION_FROM'	=> '$modfname.pm', # finds \$VERSION
-    'PREREQ_PM'		=> {$preq_pm}, # e.g., Module::Name => 1.1
+    'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
     (\$] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => '$modfname.pm', # retrieve abstract from module
        AUTHOR     => '$author <$email>') : ()),
@@ -1704,18 +1669,6 @@ open(RM, ">README") || die "Can't create $ext$modpname/README:$!\n";
 my $thisyear = (gmtime)[5] + 1900;
 my $rmhead = "$modpname version $TEMPLATE_VERSION";
 my $rmheadeq = "=" x length($rmhead);
-
-my $rm_prereq;
-
-if ( $compat_version < 5.00702 and $new_test )
-{
-   $rm_prereq = 'Test::More';
-}
-else
-{
-   $rm_prereq = 'blah blah blah';
-}
-
 print RM <<_RMEND_;
 $rmhead
 $rmheadeq
@@ -1744,7 +1697,7 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  $rm_prereq
+  blah blah blah
 
 COPYRIGHT AND LICENCE
 
@@ -1767,7 +1720,6 @@ warn "Writing $ext$modpname/$testfile\n";
 my $tests = @const_names ? 2 : 1;
 
 open EX, ">$testfile" or die "Can't create $ext$modpname/$testfile: $!\n";
-
 print EX <<_END_;
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 1.t'
@@ -1776,34 +1728,22 @@ print EX <<_END_;
 
 # change 'tests => $tests' to 'tests => last_test_to_print';
 
-_END_
-
-my $test_mod = 'Test::More';
-
-if ( $old_test or ($compat_version < 5.00702 and not $new_test ))
-{
-  my $test_mod = 'Test';
-
-  print EX <<_END_;
 use Test;
 BEGIN { plan tests => $tests };
 use $module;
 ok(1); # If we made it this far, we're ok.
 
 _END_
-
-   if (@const_names) {
-     my $const_names = join " ", @const_names;
-     print EX <<'_END_';
+if (@const_names) {
+  my $const_names = join " ", @const_names;
+  print EX <<'_END_';
 
 my $fail;
 foreach my $constname (qw(
 _END_
-
-     print EX wrap ("\t", "\t", $const_names);
-     print EX (")) {\n");
-
-     print EX <<_END_;
+  print EX wrap ("\t", "\t", $const_names);
+  print EX (")) {\n");
+  print EX <<_END_;
   next if (eval "my \\\$a = \$constname; 1");
   if (\$\@ =~ /^Your vendor has not defined $module macro \$constname/) {
     print "# pass: \$\@";
@@ -1819,50 +1759,14 @@ if (\$fail) {
 }
 
 _END_
-  }
 }
-else
-{
-  print EX <<_END_;
-use Test::More tests => $tests;
-BEGIN { use_ok('$module'); }
-
-_END_
-
-   if (@const_names) {
-     my $const_names = join " ", @const_names;
-     print EX <<'_END_';
-
-my $fail = 0;
-foreach my $constname (qw(
-_END_
-
-     print EX wrap ("\t", "\t", $const_names);
-     print EX (")) {\n");
-
-     print EX <<_END_;
-  next if (eval "my \\\$a = \$constname; 1");
-  if (\$\@ =~ /^Your vendor has not defined $module macro \$constname/) {
-    print "# pass: \$\@";
-  } else {
-    print "# fail: \$\@";
-    \$fail = 1;
-  }
-}
-
-ok( \$fail == 0 , 'Constants' );
-
-_END__
-}
-
-print EX <<_END_;
+print EX <<'_END_';
 #########################
 
-# Insert your test code below, the $test_mod module is use()ed here so read
-# its man page ( perldoc $test_mod ) for help writing this test script.
+# Insert your test code below, the Test module is use()ed here so read
+# its man page ( perldoc Test ) for help writing this test script.
 
 _END_
-
 close(EX) || die "Can't close $ext$modpname/$testfile: $!\n";
 
 unless ($opt_C) {
