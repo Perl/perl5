@@ -1918,7 +1918,6 @@
 #undef  whichsig
 #define whichsig		Perl_whichsig
 #ifdef USE_PURE_BISON
-#else
 #endif
 #if defined(MYMALLOC)
 #undef  Perl_dump_mstats
