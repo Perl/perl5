@@ -359,6 +359,7 @@ typedef struct stackinfo PERL_SI;
 
 #define POPSTACK \
     STMT_START {							\
+	djSP;								\
 	PERL_SI *prev = PL_curstackinfo->si_prev;			\
 	if (!prev) {							\
 	    PerlIO_printf(PerlIO_stderr(), "panic: POPSTACK\n");	\

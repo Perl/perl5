@@ -1020,7 +1020,7 @@ perl_run(void)
 perl_run(PerlInterpreter *sv_interp)
 #endif
 {
-    dSP;
+    dTHR;
     I32 oldscope;
     dJMPENV;
     int ret;
@@ -2978,7 +2978,7 @@ my_failure_exit(void)
 STATIC void
 my_exit_jump(void)
 {
-    dSP;
+    dTHR;
     register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
