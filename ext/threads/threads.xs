@@ -129,8 +129,10 @@ SV* thread_create(char* class, SV* init_function, SV* params) {
 	
 	PL_perl_destruct_level = 2;
 
-//	sv_dump(SvRV(Perl_get_sv(current_perl, "threads::calltempstore",FALSE)));	
-//	sv_dump(SvRV(Perl_get_sv(thread->interp, "threads::calltempstore",FALSE)));	
+#if 0
+	sv_dump(SvRV(Perl_get_sv(current_perl, "threads::calltempstore",FALSE)));	
+	sv_dump(SvRV(Perl_get_sv(thread->interp, "threads::calltempstore",FALSE)));	
+#endif
 
 	thread->init_function = newSVsv(Perl_get_sv(thread->interp, "threads::calltempstore",FALSE));
 	thread->params = newSVsv(Perl_get_sv(thread->interp, "threads::paramtempstore",FALSE));
