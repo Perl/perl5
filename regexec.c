@@ -960,7 +960,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    c1 = *(U8*)m;
 	    c2 = PL_fold_locale[c1];
 	  do_exactf:
-	    e = strend - ln;
+	    e = do_utf8 ? s + ln - 1 : strend - ln;
 
 	    if (norun && e < s)
 		e = s;			/* Due to minlen logic of intuit() */
@@ -2406,31 +2406,37 @@ S_regmatch(pTHX_ regnode *prog)
 
 		if (do_utf8 && UTF) {
 		     /* Both the target and the pattern are utf8. */
+		     U8 lfoldbuf[UTF8_MAXLEN_FOLD+1], *lf;
+		     U8 sfoldbuf[UTF8_MAXLEN_FOLD+1], *sf;
+		     STRLEN lfoldlen, sfoldlen;
+		     STRLEN llen = 0;
+		     STRLEN slen = 0;
+
 		     while (s < e) {
-			  if (l >= PL_regeol)
-			       sayNO;
-			  if (UTF8SKIP(s) != UTF8SKIP(l) ||
-			      memNE(s, (char*)l, UTF8SKIP(s))) {
-			       U8 lfoldbuf[UTF8_MAXLEN_FOLD+1];
-			       STRLEN lfoldlen;
+			  /* Fold them and walk them characterwise.  */
 
-			       /* Try one of them folded. */
-
+			  if (llen == 0) {
 			       to_utf8_fold((U8*)l, lfoldbuf, &lfoldlen);
-			       if (UTF8SKIP(s) != lfoldlen ||
-				   memNE(s, (char*)lfoldbuf, lfoldlen)) {
-				    U8 sfoldbuf[UTF8_MAXLEN_FOLD+1];
-				    STRLEN sfoldlen;
-
-				    /* Try both of them folded. */
-
-				    to_utf8_fold((U8*)s, sfoldbuf, &sfoldlen);
-				    if (sfoldlen != lfoldlen ||
-					memNE((char*)sfoldbuf,
-					      (char*)lfoldbuf, lfoldlen))
-				      sayNO;
-			       }
+			       lf   = lfoldbuf;
+			       llen = lfoldlen;
 			  }
+
+			  if (slen == 0) {
+			       to_utf8_fold((U8*)s, sfoldbuf, &sfoldlen);
+			       sf   = sfoldbuf;
+			       slen = sfoldlen;
+			  }
+
+			  while (llen && slen) {
+			       if (UTF8SKIP(lf) != UTF8SKIP(sf) ||
+				   memNE((char*)lf, (char*)sf, UTF8SKIP(lf)))
+				    sayNO;
+			       llen -= UTF8SKIP(lf);
+			       lf   += UTF8SKIP(lf);
+			       slen -= UTF8SKIP(sf);
+			       sf   += UTF8SKIP(sf);
+			  }
+			  
 			  l += UTF8SKIP(l);
 			  s += UTF8SKIP(s);
 		     }
