@@ -373,6 +373,7 @@ __DATA__
 perl_init_i18nl10n
 perl_init_ext
 perl_alloc
+perl_atexit
 perl_construct
 perl_destruct
 perl_free

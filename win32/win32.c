@@ -73,34 +73,29 @@ static BOOL		has_redirection(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
 
-char *	w32_perlshell_tokens = Nullch;
-char **	w32_perlshell_vec;
-long	w32_perlshell_items = -1;
-DWORD	w32_platform = (DWORD)-1;
-char	w32_perllib_root[MAX_PATH+1];
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
-#ifndef __BORLANDC__
-long	w32_num_children = 0;
-HANDLE	w32_child_pids[MAXIMUM_WAIT_OBJECTS];
-#endif
+static DWORD	w32_platform = (DWORD)-1;
 
 #ifdef USE_THREADS
 #  ifdef USE_DECLSPEC_THREAD
 __declspec(thread) char	strerror_buffer[512];
 __declspec(thread) char	getlogin_buffer[128];
+__declspec(thread) char	w32_perllib_root[MAX_PATH+1];
 #    ifdef HAVE_DES_FCRYPT
 __declspec(thread) char	crypt_buffer[30];
 #    endif
 #  else
 #    define strerror_buffer	(thr->i.Wstrerror_buffer)
 #    define getlogin_buffer	(thr->i.Wgetlogin_buffer)
+#    define w32_perllib_root	(thr->i.Ww32_perllib_root)
 #    define crypt_buffer	(thr->i.Wcrypt_buffer)
 #  endif
 #else
-char	strerror_buffer[512];
-char	getlogin_buffer[128];
+static char	strerror_buffer[512];
+static char	getlogin_buffer[128];
+static char	w32_perllib_root[MAX_PATH+1];
 #  ifdef HAVE_DES_FCRYPT
-char	crypt_buffer[30];
+static char	crypt_buffer[30];
 #  endif
 #endif
 
@@ -117,8 +112,10 @@ IsWinNT(void) {
 char *
 win32_perllib_path(char *sfx,...)
 {
+    dTHR;
     va_list ap;
     char *end;
+
     va_start(ap,sfx);
     GetModuleFileName((w32_perldll_handle == INVALID_HANDLE_VALUE) 
 		      ? GetModuleHandle(NULL)
@@ -868,7 +865,7 @@ win32_utime(const char *filename, struct utimbuf *times)
 DllExport int
 win32_wait(int *status)
 {
-#ifdef __BORLANDC__
+#ifdef USE_RTL_WAIT
     return wait(status);
 #else
     /* XXX this wait emulation only knows about processes
@@ -1393,7 +1390,7 @@ win32_pipe(int *pfd, unsigned int size, int mode)
 DllExport FILE*
 win32_popen(const char *command, const char *mode)
 {
-#ifdef USE_CRT_POPEN
+#ifdef USE_RTL_POPEN
     return _popen(command, mode);
 #else
     int p[2];
@@ -1452,7 +1449,8 @@ win32_popen(const char *command, const char *mode)
 
     /* close saved handle */
     win32_close(oldfd);
-    sv_setiv(*av_fetch(fdpid, p[parent], TRUE), childpid);
+
+    sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
 
     /* we have an fd, return a file stream */
     return (win32_fdopen(p[parent], (char *)mode));
@@ -1467,7 +1465,7 @@ cleanup:
     }
     return (NULL);
 
-#endif /* USE_CRT_POPEN */
+#endif /* USE_RTL_POPEN */
 }
 
 /*
@@ -1477,18 +1475,18 @@ cleanup:
 DllExport int
 win32_pclose(FILE *pf)
 {
-#ifdef USE_CRT_POPEN
+#ifdef USE_RTL_POPEN
     return _pclose(pf);
 #else
 
-#ifndef __BORLANDC__
+#ifndef USE_RTL_WAIT
     int child;
 #endif
 
     int childpid, status;
     SV *sv;
 
-    sv = *av_fetch(fdpid, win32_fileno(pf), TRUE);
+    sv = *av_fetch(w32_fdpid, win32_fileno(pf), TRUE);
     if (SvIOK(sv))
 	childpid = SvIVX(sv);
     else
@@ -1502,7 +1500,7 @@ win32_pclose(FILE *pf)
     win32_fclose(pf);
     SvIVX(sv) = 0;
 
-#ifndef __BORLANDC__
+#ifndef USE_RTL_WAIT
     for (child = 0 ; child < w32_num_children ; ++child) {
 	if (w32_child_pids[child] == (HANDLE)childpid) {
 	    Copy(&w32_child_pids[child+1], &w32_child_pids[child],
@@ -1523,7 +1521,7 @@ win32_pclose(FILE *pf)
     return (status);
 #endif
 
-#endif /* USE_CRT_OPEN */
+#endif /* USE_RTL_POPEN */
 }
 
 DllExport int
@@ -1618,13 +1616,13 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
     int status;
 
-#ifndef __BORLANDC__
+#ifndef USE_RTL_WAIT
     if (mode == P_NOWAIT && w32_num_children >= MAXIMUM_WAIT_OBJECTS)
 	return -1;
 #endif
 
     status = spawnvp(mode, cmdname, (char * const *) argv);
-#ifndef __BORLANDC__
+#ifndef USE_RTL_WAIT
     /* XXX For the P_NOWAIT case, Borland RTL returns pinfo.dwProcessId
      * while VC RTL returns pinfo.hProcess. For purposes of the custom
      * implementation of win32_wait(), we assume the latter.
@@ -2121,6 +2119,13 @@ Perl_init_os_extras()
     char *file = __FILE__;
     dXSUB_SYS;
 
+    w32_perlshell_tokens = Nullch;
+    w32_perlshell_items = -1;
+    w32_fdpid = newAV();		/* XXX needs to be in Perl_win32_init()? */
+#ifndef USE_RTL_WAIT
+    w32_num_children = 0;
+#endif
+
     /* these names are Activeware compatible */
     newXS("Win32::GetCwd", w32_GetCwd, file);
     newXS("Win32::SetCwd", w32_SetCwd, file);
@@ -2163,7 +2168,7 @@ Perl_win32_init(int *argcp, char ***argvp)
 #if !defined(_ALPHA_) && !defined(__GNUC__)
     _control87(MCW_EM, MCW_EM);
 #endif
-    MALLOC_INIT; 
+    MALLOC_INIT;
 }
 
 #ifdef USE_BINMODE_SCRIPTS

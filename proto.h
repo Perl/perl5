@@ -371,6 +371,7 @@ void	pad_reset _((void));
 void	pad_swipe _((PADOFFSET po));
 void	peep _((OP* o));
 PerlInterpreter*	perl_alloc _((void));
+void    perl_atexit _((void(*fn)(void *), void*));
 I32	perl_call_argv _((char* subname, I32 flags, char** argv));
 I32	perl_call_method _((char* methname, I32 flags));
 I32	perl_call_pv _((char* subname, I32 flags));

@@ -208,9 +208,10 @@ perl_construct(register PerlInterpreter *sv_interp)
     localpatches = local_patches;	/* For possible -v */
 #endif
 
-    PerlIO_init();      /* Hook to IO system */
+    PerlIO_init();			/* Hook to IO system */
 
-    fdpid = newAV();	/* for remembering popen pids by fd */
+    fdpid = newAV();			/* for remembering popen pids by fd */
+    modglobal = newHV();		/* pointers to per-interpreter module globals */
 
     DEBUG( {
 	New(51,debname,128,char);
@@ -350,6 +351,12 @@ perl_destruct(register PerlInterpreter *sv_interp)
     diehook = Nullsv;
     SvREFCNT_dec(parsehook);
     parsehook = Nullsv;
+
+    /* call exit list functions */
+    while (exitlistlen-- > 0)
+	exitlist[exitlistlen].fn(exitlist[exitlistlen].ptr);
+
+    Safefree(exitlist);
 
     if (destruct_level == 0){
 
@@ -550,6 +557,15 @@ perl_free(PerlInterpreter *sv_interp)
     if (!(curinterp = sv_interp))
 	return;
     Safefree(sv_interp);
+}
+
+void
+perl_atexit(void (*fn) (void *), void *ptr)
+{
+    Renew(exitlist, exitlistlen+1, PerlExitListEntry);
+    exitlist[exitlistlen].fn = fn;
+    exitlist[exitlistlen].ptr = ptr;
+    ++exitlistlen;
 }
 
 int

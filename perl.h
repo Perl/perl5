@@ -1645,6 +1645,12 @@ typedef enum {
 #define PERLVARI(var,type,init) type var;
 #define PERLVARIC(var,type,init) type var;
 
+/* Interpreter exitlist entry */
+typedef struct exitlistentry {
+    void (*fn) _((void*));
+    void *ptr;
+} PerlExitListEntry;
+
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
 #include "perlvars.h"
