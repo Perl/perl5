@@ -5,7 +5,7 @@ use File::Basename qw(&basename &dirname);
 use Cwd;
 use subs qw(link);
 
-sub link { # This is a cutdown vesion of installperl:link().
+sub link { # This is a cut-down version of installperl:link().
     my($from,$to) = @_;
     my($success) = 0;
 
