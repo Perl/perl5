@@ -321,6 +321,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		 && (sv && (strpos + SvCUR(sv) != strend)) )
 		goto fail;
 
+	    PL_regeol = strend;			/* Used in HOP() */
 	    s = (char*)HOP((U8*)strpos, prog->check_offset_min);
 	    if (SvTAIL(prog->check_substr)) {
 		slen = SvCUR(prog->check_substr);	/* >= 1 */

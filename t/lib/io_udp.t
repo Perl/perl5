@@ -31,6 +31,7 @@ BEGIN {
 }
 
 sub compare_addr {
+    no utf8;
     my $a = shift;
     my $b = shift;
     if (length($a) != length $b) {

@@ -57,7 +57,7 @@ EOT
 @tests = grep (!$infinite{$_}, @tests);
 @tests = map {
          my $new = $_;
-	 if ($datahandle{$_} && !( -f $new.t) ) {
+	 if ($datahandle{$_} && !( -f "$new.t") ) {
              $new .= '.t';
              local(*F, *T);
              open(F,"<$_") or die "Can't open $_: $!";

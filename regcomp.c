@@ -3224,6 +3224,7 @@ void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
     dTHR;
+    DEBUG_r(if (!PL_colorset) reginitcolors());
     DEBUG_r(PerlIO_printf(Perl_debug_log,
 		      "%sFreeing REx:%s `%s%.60s%s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
