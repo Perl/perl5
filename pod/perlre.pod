@@ -192,8 +192,8 @@ The POSIX character class syntax
 
 	[:class:]
 
-is also available.  The available classes and their \-equivalents
-(if any) are as follows:
+is also available.  The available classes and their backslash
+equivalents (if available) are as follows:
 
     alpha
     alnum
@@ -209,15 +209,15 @@ is also available.  The available classes and their \-equivalents
     word        \w
     xdigit
 
-Note that the [] are part of the [::] construct, not part of the whole
+For example use C<[:upper:]> to match all the uppercase characters.
+Note that the C<[]> are part of the C<[::]> construct, not part of the whole
 character class.  For example:
 
 	[01[:alpha:]%]
 
 matches one, zero, any alphabetic character, and the percentage sign.
 
-The exact meanings of the above classes depend from many things:
-if the C<utf8> pragma is used, the following equivalences to Unicode
+If the C<utf8> pragma is used, the following equivalences to Unicode
 \p{} constructs hold:
 
     alpha       IsAlpha
@@ -234,11 +234,11 @@ if the C<utf8> pragma is used, the following equivalences to Unicode
     word        IsWord
     xdigit      IsXDigit
 
-For example, [:lower:] and \p{IsLower} are equivalent.
+For example C<[:lower:]> and C<\p{IsLower}> are equivalent.
 
 If the C<utf8> pragma is not used but the C<locale> pragma is, the
 classes correlate with the isalpha(3) interface (except for `word',
-which is a Perl extension, mirroring \w).
+which is a Perl extension, mirroring C<\w>).
 
 The assumedly non-obviously named classes are:
 
@@ -283,8 +283,8 @@ with a '^'. This is a Perl extension.  For example:
     [:^space:]	    \S	    \P{IsSpace}
     [:^word:]	    \W	    \P{IsWord}
 
-The POSIX character classes [.cc.] and [=cc=] are B<not> supported
-and trying to use them will cause an error.
+The POSIX character classes [.cc.] and [=cc=] are recognized but
+B<not> supported and trying to use them will cause an error.
 
 Perl defines the following zero-width assertions:
 
