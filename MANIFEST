@@ -1,3 +1,4 @@
+
 apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
 Artistic		The "Artistic License"
 AUTHORS			Contact info for contributors
@@ -1815,6 +1816,7 @@ README.amiga		Notes about AmigaOS port
 README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
 README.bs2000		Notes about BS2000 POSIX port
+README.ce			Notes about WinCE port
 README.cygwin		Notes about Cygwin port
 README.dgux		Notes about DG/UX port
 README.dos		Notes about DOS/DJGPP port
@@ -2250,6 +2252,48 @@ win32/win32iop.h		Win32 port
 win32/win32sck.c		Win32 port
 win32/win32thread.c		Win32 functions for threads
 win32/win32thread.h		Win32 port mapping to threads
+wince/bin/exetype.pl			WinCE port
+wince/bin/perlglob.pl			WinCE port
+wince/bin/pl2bat.pl			WinCE port
+wince/bin/runperl.pl			WinCE port
+wince/bin/search.pl			WinCE port
+wince/config.ce				WinCE port
+wince/config.h				WinCE port
+wince/config_H.ce			WinCE port
+wince/config_h.PL			WinCE port
+wince/config_sh.PL			WinCE port
+wince/dl_win32.xs			WinCE port
+wince/FindExt.pm			WinCE port
+wince/include/arpa/inet.h		WinCE port
+wince/include/cectype.h			WinCE port
+wince/include/errno.h			WinCE port
+wince/include/netdb.h			WinCE port
+wince/include/sys/socket.h		WinCE port
+wince/include/sys/stat.h		WinCE port
+wince/include/sys/types.h		WinCE port
+wince/include/sys/utime.h		WinCE port
+wince/include/time.h			WinCE port
+wince/Makefile.ce			WinCE port
+wince/perl.ico				WinCE port
+wince/perl.rc				WinCE port
+wince/perldll.def			WinCE port
+wince/perllib.c				WinCE port
+wince/perlmain.c			WinCE port
+wince/README.compile			WinCE port
+wince/README.perlce			WinCE port
+wince/registry.bat			WinCE port
+wince/runperl.c				WinCE port
+wince/splittree.pl			WinCE port
+wince/win32.h				WinCE port
+wince/win32iop.h			WinCE port
+wince/win32thread.c			WinCE port
+wince/win32thread.h			WinCE port
+wince/wince.c				WinCE port
+wince/wince.h				WinCE port
+wince/wincesck.c			WinCE port
+wince/xbuildall.ksh			WinCE port
+wince/xdistclean.ksh			WinCE port
+wince/xmakediffs.ksh			WinCE port
 writemain.SH			Generate perlmain.c from miniperlmain.c+extensions
 x2p/a2p.c			Output of a2p.y run through byacc
 x2p/a2p.h			Global declarations

@@ -2212,10 +2212,12 @@ struct ptr_tbl {
 #endif
 
 #ifndef __cplusplus
+#ifndef UNDER_CE
 Uid_t getuid (void);
 Uid_t geteuid (void);
 Gid_t getgid (void);
 Gid_t getegid (void);
+#endif
 #endif
 
 #ifndef Perl_debug_log
@@ -3887,5 +3889,9 @@ extern void moncontrol(int);
    HAS_NL_LANGINFO
 
    so that Configure picks them up. */
+
+#ifdef UNDER_CE
+#include "wince.h"
+#endif
 
 #endif /* Include guard */

@@ -2396,6 +2396,11 @@ Perl_moreswitches(pTHX_ char *s)
 	PerlIO_printf(PerlIO_stdout(),
 		      "EPOC port by Olaf Flebbe, 1999-2000\n");
 #endif
+#ifdef UNDER_CE
+	printf("WINCE port by Rainer Keuchel, 2001\n");
+	printf("Built on " __DATE__ " " __TIME__ "\n\n");
+	wce_hitreturn();
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif

@@ -771,7 +771,7 @@ PerlIO_default_layers(pTHX)
    PerlIO_funcs *osLayer = &PerlIO_unix;
    PerlIO_def_layerlist  = PerlIO_list_alloc();
    PerlIO_define_layer(aTHX_ &PerlIO_unix);
-#ifdef WIN32
+#if defined(WIN32) && !defined(UNDER_CE)
    PerlIO_define_layer(aTHX_ &PerlIO_win32);
 #if 0
    osLayer = &PerlIO_win32;
