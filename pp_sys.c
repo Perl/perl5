@@ -17,14 +17,17 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-/* XXX Omit this -- it causes too much grief on mixed systems.
-   Next time, I should force broken systems to unset i_unistd in
-   hint files.
-*/
-#if 0
-# ifdef I_UNISTD
-#  include <unistd.h>
-# endif
+/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
+#ifdef I_UNISTD
+# include <unistd.h>
+#endif
+
+#ifdef I_SYS_WAIT
+# include <sys/wait.h>
+#endif
+
+#ifdef I_SYS_RESOURCE
+# include <sys/resource.h>
 #endif
 
 /* Put this after #includes because fork and vfork prototypes may
@@ -46,9 +49,7 @@
 
 #ifdef HAS_SELECT
 #ifdef I_SYS_SELECT
-#ifndef I_SYS_TIME
 #include <sys/select.h>
-#endif
 #endif
 #endif
 
@@ -3169,7 +3170,7 @@ PP(pp_sleep)
 
     (void)time(&lasttime);
     if (MAXARG < 1)
-	pause();
+	Pause();
     else {
 	duration = POPi;
 	sleep((unsigned int)duration);
@@ -4046,12 +4047,9 @@ PP(pp_syscall)
     locking module.
 */
 
-/*  We might need <unistd.h> because it sometimes defines the lockf()
-    constants.  Unfortunately, <unistd.h> causes troubles on some mixed
-    (BSD/POSIX) systems, such as SunOS 4.1.3.  We could just try including
-    <unistd.h> here in this part of the file, but that might
-    conflict with various other #defines and includes above, such as
-	#define vfork fork above.
+/*  The lockf() constants might have been defined in <unistd.h>.
+    Unfortunately, <unistd.h> causes troubles on some mixed
+    (BSD/POSIX) systems, such as SunOS 4.1.3.
 
    Further, the lockf() constants aren't POSIX, so they might not be
    visible if we're compiling with _POSIX_SOURCE defined.  Thus, we'll
