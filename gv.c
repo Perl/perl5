@@ -720,24 +720,31 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (isIDFIRST_lazy(name)) {
 	    bool global = FALSE;
 
-	    if (isUPPER(*name)) {
-		if (*name == 'S' && (
-		    strEQ(name, "SIG") ||
-		    strEQ(name, "STDIN") ||
-		    strEQ(name, "STDOUT") ||
-		    strEQ(name, "STDERR")))
+	    /* name is always \0 terminated, and initial \0 wouldn't return
+	       true from isIDFIRST_lazy, so we know that name[1] is defined  */
+	    switch (name[1]) {
+	    case '\0':
+		if (*name == '_')
 		    global = TRUE;
-		else if (*name == 'I' && strEQ(name, "INC"))
+		break;
+	    case 'N':
+		if (strEQ(name, "INC") || strEQ(name, "ENV"))
 		    global = TRUE;
-		else if (*name == 'E' && strEQ(name, "ENV"))
+		break;
+	    case 'I':
+		if (strEQ(name, "SIG"))
 		    global = TRUE;
-		else if (*name == 'A' && (
-		  strEQ(name, "ARGV") ||
-		  strEQ(name, "ARGVOUT")))
+		break;
+	    case 'T':
+		if (strEQ(name, "STDIN") || strEQ(name, "STDOUT") ||
+		    strEQ(name, "STDERR"))
 		    global = TRUE;
+		break;
+	    case 'R':
+		if (strEQ(name, "ARGV") || strEQ(name, "ARGVOUT"))
+		    global = TRUE;
+		break;
 	    }
-	    else if (*name == '_' && !name[1])
-		global = TRUE;
 
 	    if (global)
 		stash = PL_defstash;
