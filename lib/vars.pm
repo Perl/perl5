@@ -1,18 +1,11 @@
 package vars;
 
-require 5.002;
+require 5.6.0;
 
-our $VERSION = '1.00';
-
-# The following require can't be removed during maintenance
-# releases, sadly, because of the risk of buggy code that does
-# require Carp; Carp::croak "..."; without brackets dying
-# if Carp hasn't been loaded in earlier compile time. :-(
-# We'll let those bugs get found on the development track.
-require Carp if $] < 5.00450;
+our $VERSION = '1.01';
 
 use warnings::register;
-require strict;
+use strict qw(vars subs);
 
 sub import {
     my $callpack = caller;
