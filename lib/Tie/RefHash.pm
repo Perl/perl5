@@ -1,6 +1,6 @@
 package Tie::RefHash;
 
-our $VERSION = '1.3_00';
+our $VERSION = 1.30;
 
 =head1 NAME
 
@@ -59,7 +59,7 @@ Gurusamy Sarathy        gsar@activestate.com
 
 =head1 VERSION
 
-Version 1.3
+Version 1.30
 
 =head1 SEE ALSO
 

@@ -1,7 +1,7 @@
 package Time::HiRes;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
+use vars qw($VERSION $XS_VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 
 require Exporter;
 use XSLoader;
@@ -13,6 +13,8 @@ use XSLoader;
 		 getitimer setitimer ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF);
 
 $VERSION = '1.20_00';
+$XS_VERSION = $VERSION;
+$VERSION = eval $VERSION;
 
 sub AUTOLOAD {
     my $constname;
@@ -29,7 +31,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-XSLoader::load 'Time::HiRes', $VERSION;
+XSLoader::load 'Time::HiRes', $XS_VERSION;
 
 # Preloaded methods go here.
 
