@@ -20,12 +20,13 @@
 #endif
 
 STATIC I32
-S_do_trans_CC_simple(pTHX_ SV *sv)
+S_do_trans_simple(pTHX_ SV *sv) /* SPC - OK */
 {
     dTHR;
     U8 *s;
     U8 *send;
     I32 matches = 0;
+    I32 hasutf = SvUTF8(sv);
     STRLEN len;
     short *tbl;
     I32 ch;
@@ -38,11 +39,15 @@ S_do_trans_CC_simple(pTHX_ SV *sv)
     send = s + len;
 
     while (s < send) {
-	if ((ch = tbl[*s]) >= 0) {
-	    matches++;
-	    *s = ch;
-	}
+        if (hasutf && *s & 0x80)
+            s+=UTF8SKIP(s); /* Given that we're here because tbl is !UTF8...*/
+        else {
+	    if ((ch = tbl[*s]) >= 0) {
+	        matches++;
+	        *s = ch;
+	    }
 	s++;
+        }
     }
     SvSETMAGIC(sv);
 
@@ -50,12 +55,13 @@ S_do_trans_CC_simple(pTHX_ SV *sv)
 }
 
 STATIC I32
-S_do_trans_CC_count(pTHX_ SV *sv)
+S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 {
     dTHR;
     U8 *s;
     U8 *send;
     I32 matches = 0;
+    I32 hasutf = SvUTF8(sv);
     STRLEN len;
     short *tbl;
 
@@ -67,21 +73,26 @@ S_do_trans_CC_count(pTHX_ SV *sv)
     send = s + len;
 
     while (s < send) {
-	if (tbl[*s] >= 0)
-	    matches++;
-	s++;
+        if (hasutf && *s & 0x80)
+            s+=UTF8SKIP(s);
+        else {
+            if (tbl[*s] >= 0)
+                matches++;
+            s++;
+        }
     }
 
     return matches;
 }
 
 STATIC I32
-S_do_trans_CC_complex(pTHX_ SV *sv)
+S_do_trans_complex(pTHX_ SV *sv)/* SPC - OK */
 {
     dTHR;
     U8 *s;
     U8 *send;
     U8 *d;
+    I32 hasutf = SvUTF8(sv);
     I32 matches = 0;
     STRLEN len;
     short *tbl;
@@ -99,29 +110,37 @@ S_do_trans_CC_complex(pTHX_ SV *sv)
 	U8* p = send;
 
 	while (s < send) {
-	    if ((ch = tbl[*s]) >= 0) {
-		*d = ch;
-		matches++;
-		if (p == d - 1 && *p == *d)
-		    matches--;
-		else
-		    p = d++;
-	    }
-	    else if (ch == -1)		/* -1 is unmapped character */
-		*d++ = *s;		/* -2 is delete character */
-	    s++;
+            if (hasutf && *s & 0x80)
+                s+=UTF8SKIP(s);
+            else {
+	        if ((ch = tbl[*s]) >= 0) {
+		    *d = ch;
+		    matches++;
+		    if (p == d - 1 && *p == *d)
+		        matches--;
+	            else
+		        p = d++;
+	        }
+	        else if (ch == -1)		/* -1 is unmapped character */
+		    *d++ = *s;		/* -2 is delete character */
+	        s++;
+            }
 	}
     }
     else {
 	while (s < send) {
-	    if ((ch = tbl[*s]) >= 0) {
-		*d = ch;
-		matches++;
-		d++;
-	    }
-	    else if (ch == -1)		/* -1 is unmapped character */
-		*d++ = *s;		/* -2 is delete character */
-	    s++;
+            if (hasutf && *s & 0x80)
+                s+=UTF8SKIP(s);
+            else {
+	        if ((ch = tbl[*s]) >= 0) {
+		    *d = ch;
+		    matches++;
+		    d++;
+	        }
+	        else if (ch == -1)		/* -1 is unmapped character */
+		    *d++ = *s;		/* -2 is delete character */
+	        s++;
+            }
 	}
     }
     matches += send - d;	/* account for disappeared chars */
@@ -133,12 +152,14 @@ S_do_trans_CC_complex(pTHX_ SV *sv)
 }
 
 STATIC I32
-S_do_trans_UU_simple(pTHX_ SV *sv)
+S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 {
     dTHR;
     U8 *s;
     U8 *send;
     U8 *d;
+    U8 *start;
+    U8 *dstart;
     I32 matches = 0;
     STRLEN len;
 
@@ -149,43 +170,83 @@ S_do_trans_UU_simple(pTHX_ SV *sv)
     UV extra = none + 1;
     UV final;
     UV uv;
+    I32 isutf; 
+    I32 howmany;
 
+    isutf = SvUTF8(sv);
     s = (U8*)SvPV(sv, len);
     send = s + len;
+    start = s;
 
     svp = hv_fetch(hv, "FINAL", 5, FALSE);
     if (svp)
 	final = SvUV(*svp);
 
-    d = s;
+    /* d needs to be bigger than s, in case e.g. upgrading is required */
+    Newz(0, d, len*2+1, U8);
+    dstart = d;
     while (s < send) {
 	if ((uv = swash_fetch(rv, s)) < none) {
 	    s += UTF8SKIP(s);
 	    matches++;
+        if (uv & 0x80 && !isutf) {  
+            /* Sneaky-upgrade dstart...d */
+            U8* new;
+            STRLEN len;
+            len = dstart - d;
+            new = bytes_to_utf8(dstart, &len);
+            Copy(new,dstart,len,U8*);
+            d = dstart + len;
+            isutf++;
+        }
 	    d = uv_to_utf8(d, uv);
 	}
 	else if (uv == none) {
 	    int i;
-	    for (i = UTF8SKIP(s); i; i--)
-		*d++ = *s++;
+        i = UTF8SKIP(s);
+        if (i > 1 && !isutf) {
+            U8* new;
+            STRLEN len;
+            len = dstart - d;
+            new = bytes_to_utf8(dstart, &len);
+            Copy(new,dstart,len,U8*);
+            d = dstart + len;
+            isutf++;
+        }
+	    while(i--)
+            *d++ = *s++;
 	}
 	else if (uv == extra) {
-	    s += UTF8SKIP(s);
+	    int i;
+        i = UTF8SKIP(s);
+	    s += i;
 	    matches++;
+        if (i > 1 && !isutf) {
+            U8* new;
+            STRLEN len;
+            len = dstart - d;
+            new = bytes_to_utf8(dstart, &len);
+            Copy(new,dstart,len,U8*);
+            d = dstart + len;
+            isutf++;
+        }
 	    d = uv_to_utf8(d, final);
 	}
 	else
 	    s += UTF8SKIP(s);
     }
     *d = '\0';
-    SvCUR_set(sv, d - (U8*)SvPVX(sv));
+    SvPV_set(sv, dstart);
+    SvCUR_set(sv, d - dstart);
     SvSETMAGIC(sv);
+    if (isutf)
+        SvUTF8_on(sv);
 
     return matches;
 }
 
 STATIC I32
-S_do_trans_UU_count(pTHX_ SV *sv)
+S_do_trans_count_utf8(pTHX_ SV *sv)/* SPC - OK */
 {
     dTHR;
     U8 *s;
@@ -200,6 +261,8 @@ S_do_trans_UU_count(pTHX_ SV *sv)
     UV uv;
 
     s = (U8*)SvPV(sv, len);
+    if (!SvUTF8(sv))
+        s = bytes_to_utf8(s, &len);
     send = s + len;
 
     while (s < send) {
@@ -212,7 +275,7 @@ S_do_trans_UU_count(pTHX_ SV *sv)
 }
 
 STATIC I32
-S_do_trans_UU_complex(pTHX_ SV *sv)
+S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 {
     dTHR;
     U8 *s;
@@ -401,6 +464,8 @@ Perl_do_trans(pTHX_ SV *sv)
 {
     dTHR;
     STRLEN len;
+    I32 hasutf = (PL_op->op_private & 
+                    (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF));
 
     if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
 	Perl_croak(aTHX_ PL_no_modify);
@@ -415,24 +480,24 @@ Perl_do_trans(pTHX_ SV *sv)
 
     DEBUG_t( Perl_deb(aTHX_ "2.TBL\n"));
 
-    switch (PL_op->op_private & 63) {
+    switch (PL_op->op_private & ~hasutf & 63) {
     case 0:
-    if (SvUTF8(sv)) 
-        return do_trans_UU_simple(sv);
+    if (hasutf)
+        return do_trans_simple_utf8(sv);
     else
-        return do_trans_CC_simple(sv);
+        return do_trans_simple(sv);
 
     case OPpTRANS_IDENTICAL:
-    if (SvUTF8(sv)) 
-        return do_trans_UU_count(sv);
+    if (hasutf)
+        return do_trans_count_utf8(sv);
     else
-        return do_trans_CC_count(sv);
+        return do_trans_count(sv);
 
     default:
-	if (SvUTF8(sv))
-	    return do_trans_UU_complex(sv); /* could be UC or CU too */
+    if (hasutf)
+	    return do_trans_complex_utf8(sv);
 	else
-	    return do_trans_CC_complex(sv);
+	    return do_trans_complex(sv);
     }
 }
 

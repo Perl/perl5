@@ -4375,6 +4375,7 @@ PP(pp_pack)
     register I32 items;
     STRLEN fromlen;
     register char *pat = SvPVx(*++MARK, fromlen);
+    char *patcopy;
     register char *patend = pat + fromlen;
     register I32 len;
     I32 datumtype;
@@ -4405,6 +4406,7 @@ PP(pp_pack)
     items = SP - MARK;
     MARK++;
     sv_setpvn(cat, "", 0);
+    patcopy = pat;
     while (pat < patend) {
 	SV *lengthcode = Nullsv;
 #define NEXTFROM ( lengthcode ? lengthcode : items-- > 0 ? *MARK++ : &PL_sv_no)
@@ -4412,8 +4414,12 @@ PP(pp_pack)
 #ifdef PERL_NATINT_PACK
 	natint = 0;
 #endif
-	if (isSPACE(datumtype))
+	if (isSPACE(datumtype)) {
+	    patcopy++;
 	    continue;
+        }
+	if (datumtype == 'U' && pat==patcopy+1) 
+	    SvUTF8_on(cat);
 	if (datumtype == '#') {
 	    while (pat < patend && *pat != '\n')
 		pat++;

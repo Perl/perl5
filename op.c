@@ -2573,6 +2573,12 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     complement	= o->op_private & OPpTRANS_COMPLEMENT;
     del		= o->op_private & OPpTRANS_DELETE;
     squash	= o->op_private & OPpTRANS_SQUASH;
+    
+    if (SvUTF8(tstr))
+        o->op_private |= OPpTRANS_FROM_UTF;
+    
+    if (SvUTF8(rstr)) 
+        o->op_private |= OPpTRANS_TO_UTF;
 
     if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
 	SV* listsv = newSVpvn("# comment\n",10);
@@ -2644,15 +2650,9 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    r = t; rlen = tlen; rend = tend;
 	}
 	if (!squash) {
-	    if (to_utf && from_utf) {	/* only counting characters */
-		if (t == r || (tlen == rlen && memEQ(t, r, tlen)))
+		if (t == r ||
+		    (tlen == rlen && memEQ((char *)t, (char *)r, tlen)))
 		    o->op_private |= OPpTRANS_IDENTICAL;
-	    }
-	    else {	/* straight latin-1 translation */
-		if (tlen == 4 && memEQ(t, "\0\377\303\277", 4) &&
-		    rlen == 4 && memEQ(r, "\0\377\303\277", 4))
-		    o->op_private |= OPpTRANS_IDENTICAL;
-	    }
 	}
 
 	while (t < tend || tfirst <= tlast) {

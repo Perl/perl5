@@ -1162,6 +1162,7 @@ pod/perlmodinstall.pod	Installing CPAN Modules
 pod/perlmodlib.pod	Module policy info
 pod/perlmodlib.PL	Generate pod/perlmodlib.pod
 pod/perlnumber.pod	Semantics of numbers and numeric operations
+pod/perlnewmod.pod	Preparing a new module for distribution
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
 pod/perlopentut.pod	open() tutorial
