@@ -804,7 +804,7 @@ PP(pp_flip)
 	SV *targ = PAD_SV(op->op_targ);
 
 	if ((op->op_private & OPpFLIP_LINENUM)
-	  ? last_in_gv && SvIV(sv) == IoLINES(GvIOp(last_in_gv))
+	  ? (last_in_gv && SvIV(sv) == (IV)IoLINES(GvIOp(last_in_gv)))
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(cUNOP->op_first->op_targ), 1);
 	    if (op->op_flags & OPf_SPECIAL) {
@@ -870,7 +870,7 @@ PP(pp_flop)
 	SV *targ = PAD_SV(cUNOP->op_first->op_targ);
 	sv_inc(targ);
 	if ((op->op_private & OPpFLIP_LINENUM)
-	  ? last_in_gv && SvIV(sv) == IoLINES(GvIOp(last_in_gv))
+	  ? (last_in_gv && SvIV(sv) == (IV)IoLINES(GvIOp(last_in_gv)))
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
 	    sv_catpv(targ, "E0");
