@@ -8,6 +8,16 @@ use Carp;
 ## from the Unicode database files (lib/unicore/*.txt).
 ##
 
+## "Fuzzy" means this section in Unicode TR18:
+##
+##    The recommended names for UCD properties and property values are in
+##    PropertyAliases.txt [Prop] and PropertyValueAliases.txt
+##    [PropValue]. There are both abbreviated names and longer, more
+##    descriptive names. It is strongly recommended that both names be
+##    recognized, and that loose matching of property names be used,
+##    whereby the case distinctions, whitespace, hyphens, and underbar
+##    are ignored.
+
 mkdir("lib", 0755);
 mkdir("lib/gc_sc", 0755);
 mkdir("To",  0755);
