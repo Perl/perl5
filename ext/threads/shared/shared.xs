@@ -30,7 +30,7 @@ PerlInterpreter *PL_sharedsv_space;             /* The shared sv space */
 
 /* bug #24255: we include ENTER+SAVETMPS/FREETMPS+LEAVE with
  * SHARED_CONTEXT/CALLER_CONTEXT macros, so that any mortals etc created
- * while in the shared inpterpreter context don't languish */
+ * while in the shared interpreter context don't languish */
 
 #define SHARED_CONTEXT \
     STMT_START {					\
