@@ -196,3 +196,9 @@ vec($a,1,1)=0;
 vec($b,1,1)=0;
 die unless $a eq $b;
 EXPECT
+########
+# An attempt at lvalueable barewords broke this
+
+tie FH, 'main';
+EXPECT
+
