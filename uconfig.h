@@ -774,7 +774,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <math.h>.
  */
-/*#define I_MATH		/ **/
+#define I_MATH		/**/
 
 /* I_MEMORY:
  *	This symbol, if defined, indicates to the C program that it should
