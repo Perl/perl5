@@ -4999,14 +4999,14 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	case OP_PADAV:
 	case OP_AASSIGN:		/* Is this a good idea? */
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
-			"defined(@array) is deprecated (and not really meaningful)");
+			"defined(@array) is deprecated");
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
 			"(Maybe you should just omit the defined()?)\n");
 	break;
 	case OP_RV2HV:
 	case OP_PADHV:
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
-			"defined(%hash) is deprecated (and not really meaningful)");
+			"defined(%hash) is deprecated");
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
 			"(Maybe you should just omit the defined()?)\n");
 	    break;

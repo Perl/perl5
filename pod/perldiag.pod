@@ -1105,13 +1105,13 @@ times more than it has returned.  This probably indicates an infinite
 recursion, unless you're writing strange benchmark programs, in which
 case it indicates something else.
 
-=item defined(@array) is deprecated (and not really meaningful)
+=item defined(@array) is deprecated
 
 (D) defined() is not usually useful on arrays because it checks for an
 undefined I<scalar> value.  If you want to see if the array is empty,
 just use C<if (@array) { # not empty }> for example.  
 
-=item defined(%hash) is deprecated (and not really meaningful)
+=item defined(%hash) is deprecated
 
 (D) defined() is not usually useful on hashes because it checks for an
 undefined I<scalar> value.  If you want to see if the hash is empty,
