@@ -196,7 +196,7 @@ Clear the cached time for COUNT rounds of the null loop.
 
 Clear all cached times.
 
-=item cmpthese ( COUT, CODEHASHREF, [ STYLE ] )
+=item cmpthese ( COUNT, CODEHASHREF, [ STYLE ] )
 
 =item cmpthese ( RESULTSHASHREF, [ STYLE ] )
 
@@ -412,7 +412,7 @@ use Exporter;
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.04;
+$VERSION = 1.05;
 
 &init;
 
@@ -713,7 +713,9 @@ sub timethese{
 }
 
 sub cmpthese{
-    my ($results, $style) = ref $_[0] ? @_ : ( timethese( @_[0,1,2] ), $_[2] ) ;
+    my ($results, $style) =
+         ref $_ [0] ? @_
+                    : (timethese (@_ [0, 1], @_ > 2 ? $_ [2] : "none"), $_ [2]);
 
     $style = "" unless defined $style;
 

@@ -8,7 +8,7 @@ BEGIN {
 use warnings;
 use strict;
 use vars qw($foo $bar $baz $ballast);
-use Test::More tests => 159;
+use Test::More tests => 173;
 
 use Benchmark qw(:all);
 
@@ -346,7 +346,7 @@ sub check_graph {
 {
     select(OUT);
     my $start = times;
-    my $chart = cmpthese( -0.1, { a => "++\$i", b => "\$i = sqrt(\$i++)" } ) ;
+    my $chart = cmpthese( -0.1, { a => "++\$i", b => "\$i = sqrt(\$i++)" }, "auto" ) ;
     my $end = times;
     select(STDOUT);
     ok (($end - $start) > 0.05, "benchmarked code ran for over 0.05 seconds");
@@ -360,6 +360,28 @@ sub check_graph {
     # Remove the title
     $got =~ s/.*\.\.\.//s;
     like ($got, $default_pattern, 'should find default format somewhere');
+    like ($got, $graph_dissassembly, "Should find the output graph somewhere");
+    check_graph_vs_output ($chart, $got);
+}
+
+# Not giving auto should suppress timethese results.
+{
+    select(OUT);
+    my $start = times;
+    my $chart = cmpthese( -0.1, { a => "++\$i", b => "\$i = sqrt(\$i++)" } ) ;
+    my $end = times;
+    select(STDOUT);
+    ok (($end - $start) > 0.05, "benchmarked code ran for over 0.05 seconds");
+
+    $got = $out->read();
+    # Remove any warnings about having too few iterations.
+    $got =~ s/\(warning:[^\)]+\)//gs;
+
+    unlike ($got, qr/running\W+a\W+b.*?for at least 0\.1 CPU second/s,
+          'should not have title');
+    # Remove the title
+    $got =~ s/.*\.\.\.//s;
+    unlike ($got, $default_pattern, 'should not find default format somewhere');
     like ($got, $graph_dissassembly, "Should find the output graph somewhere");
     check_graph_vs_output ($chart, $got);
 }
