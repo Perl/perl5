@@ -117,7 +117,7 @@ Writing $name/Changes
 Writing $name/MANIFEST
 EONOXSFILES
 
-"-f -n $name $header -b $thisversion", $], <<"EOXSFILES",
+"-f -n $name -b $thisversion $header", $], <<"EOXSFILES",
 Writing $name/ppport.h
 Writing $name/lib/$name.pm
 Writing $name/$name.xs
