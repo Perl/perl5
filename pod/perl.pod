@@ -104,6 +104,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perl5005delta	Perl changes in version 5.005
     perl5004delta	Perl changes in version 5.004
 
+    perlaix		Perl notes for AIX
     perlamiga		Perl notes for Amiga
     perlcygwin		Perl notes for Cygwin
     perldos		Perl notes for DOS

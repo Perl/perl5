@@ -1995,8 +1995,9 @@ http://www.perl.com/CPAN/ports/index.html for binary distributions.
 
 =head1 SEE ALSO
 
-L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlhpux>, L<perlos2>,
-L<perlos390>, L<perlwin32>, L<perlvms>, and L<Win32>.
+L<perlaix>, L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlebcdic>,
+L<perlhpux>, L<perlos2>, L<perlos390>, L<perlposix-bc>, L<perlwin32>,
+L<perlvms>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 

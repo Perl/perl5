@@ -2354,6 +2354,16 @@ recipe 0, recipe 1, recipe 2, recipe 3, recipe 4
 
 =item CONVERSIONS
 
+=over
+
+=item tr///
+
+=item iconv
+
+=item C RTL
+
+=back
+
 =item OPERATOR DIFFERENCES
 
 =item FUNCTION DIFFERENCES
@@ -2378,7 +2388,21 @@ chr(), ord(), pack(), print(), printf(), sort(), sprintf(), unpack()
 
 =back
 
-=item URL ENCODING and DECODING
+=item TRANFORMATION FORMATS
+
+=over
+
+=item URL decoding and encoding
+
+=item uu encoding and decoding
+
+=item Quoted-Printable encoding and decoding
+
+=item Caesarian cyphers
+
+=back
+
+=item Hashing order and checksums
 
 =item I18N AND L10N
 
@@ -2394,7 +2418,7 @@ IFS access
 
 =item OS/390 
 
-chcp, dataset access, iconv, locales
+chcp, dataset access, OS/390 iconv, locales
 
 =item VM/ESA?
 
@@ -3806,6 +3830,8 @@ C<!!!>, C<!!>, C<!>
 =item What is an "IV"?
 
 =item Working with SVs
+
+=item Offsets
 
 =item What's Really Stored in an SV?
 
@@ -5492,6 +5518,42 @@ PERL_SH_DIR too long, Process terminated by SIG%s
 =item SEE ALSO
 
 =item HISTORY
+
+=back
+
+=head2 perlaix, README.aix - Perl version 5 on IBM Unix (AIX) systems
+
+=over
+
+=item DESCRIPTION
+
+=over
+
+=item Compiling Perl 5 on AIX
+
+=item OS level
+
+=item Building Dynamic Extensions on AIX
+
+=item The IBM ANSI C Compiler
+
+=item Using GNU's gcc for building perl
+
+=item Using Large Files with Perl
+
+=item Threaded Perl
+
+=item 64-bit Perl
+
+=item GDBM and Threads
+
+=item NFS filesystems and utime(2)
+
+=back
+
+=item AUTHOR
+
+=item DATE
 
 =back
 
@@ -7329,7 +7391,7 @@ B<Parameters:>, 4, 5, 6..
 =item OBTAINING THE SCRIPT'S URL
 
 B<-absolute>, B<-relative>, B<-full>, B<-path> (B<-path_info>), B<-query>
-(B<-query_string>)
+(B<-query_string>), B<-base>
 
 =item MIXING POST AND URL PARAMETERS
 
@@ -7443,9 +7505,9 @@ the <FORM> tag
 B<Accept()>, B<raw_cookie()>, B<user_agent()>, B<path_info()>,
 B<path_translated()>, B<remote_host()>, B<script_name()> Return the script
 name as a partial URL, for self-refering scripts, B<referer()>, B<auth_type
-()>, B<server_name ()>, B<virtual_host ()>, B<server_software ()>,
-B<remote_user ()>, B<user_name ()>, B<request_method()>, B<content_type()>,
-B<http()>, B<https()>
+()>, B<server_name ()>, B<virtual_host ()>, B<server_port ()>,
+B<server_software ()>, B<remote_user ()>, B<user_name ()>,
+B<request_method()>, B<content_type()>, B<http()>, B<https()>
 
 =item USING NPH SCRIPTS
 
@@ -7746,14 +7808,16 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
 =item FAQ
 
-I installed a new version of module X but CPAN keeps saying, I	     have
-the old version installed, So why is UNINST=1 not the default?, When I
-install bundles or multiple modules with one command	   there is too
-much output to keep track of, I am not root, how can I install a module in
-a personal directory?, How to get a package, unwrap it, and make a change
-before building it?, I installed a Bundle and had a couple of fails. When I
-retried,       everything resolved nicely. Can this be fixed to work on
-first	    try?
+1) I installed a new version of module X but CPAN keeps saying,       I
+have the old version installed, 2) So why is UNINST=1 not the default?, 3)
+When I install bundles or multiple modules with one command	  there is
+too much output to keep track of, 4) I am not root, how can I install a
+module in a personal	   directory?, 5) How to get a package, unwrap it,
+and make a change before       building it?, 6) I installed a Bundle and
+had a couple of fails. When I	    retried, everything resolved nicely.
+Can this be fixed to work	on first try?, 7) In our intranet we have
+many modules for internal use. How	 can I integrate these modules with
+CPAN.pm but without uploading	    the modules to CPAN?
 
 =item BUGS
 
@@ -7999,10 +8063,9 @@ C<i_varargs>, C<i_varhdr>, C<i_vfork>, C<ignore_versioned_solibs>,
 C<inc_version_list>, C<inc_version_list_init>, C<incpath>, C<inews>,
 C<installarchlib>, C<installbin>, C<installman1dir>, C<installman3dir>,
 C<installprefix>, C<installprefixexp>, C<installprivlib>, C<installscript>,
-C<installscripts>, C<installsitearch>, C<installsitebin>,
-C<installsitelib>, C<installstyle>, C<installusrbinperl>,
-C<installvendorarch>, C<installvendorbin>, C<installvendorlib>, C<intsize>,
-C<ivdformat>, C<ivsize>, C<ivtype>
+C<installsitearch>, C<installsitebin>, C<installsitelib>, C<installstyle>,
+C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
+C<installvendorlib>, C<intsize>, C<ivdformat>, C<ivsize>, C<ivtype>
 
 =item k
 
@@ -8099,7 +8162,7 @@ C<uvxformat>, C<uvXUformat>
 
 C<vendorarch>, C<vendorarchexp>, C<vendorbin>, C<vendorbinexp>,
 C<vendorlib>, C<vendorlib_stem>, C<vendorlibexp>, C<vendorprefix>,
-C<vendorprefixexp>, C<version>, C<vi>, C<voidflags>
+C<vendorprefixexp>, C<version>, C<versiononly>, C<vi>, C<voidflags>
 
 =item x
 
@@ -8379,6 +8442,12 @@ Dumper
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=over
+
+=item Memory footprint debugging
+
+=back
 
 =item EXAMPLES
 
@@ -12684,9 +12753,9 @@ new, new NUMBER, down, down NUMBER, up, up NUMBER
 
 =over
 
-=item SYNOPSIS	
+=item SYNOPSIS
 
-=item DESCRIPTION	
+=item DESCRIPTION
 
 TIEARRAY classname, LIST, STORE this, index, value, FETCH this, index,
 FETCHSIZE this, STORESIZE this, count, EXTEND this, count, EXISTS this,
@@ -12695,7 +12764,7 @@ SHIFT this, UNSHIFT this, LIST, SPLICE this, offset, length, LIST
 
 =item CAVEATS
 
-=item AUTHOR 
+=item AUTHOR
 
 =back
 
@@ -12714,6 +12783,8 @@ READLINE this, GETC this, CLOSE this, OPEN this, filename, BINMODE this,
 EOF this, TELL this, SEEK this, offset, whence, DESTROY this
 
 =item MORE INFORMATION
+
+=item COMPATIBILITY
 
 =back
 
