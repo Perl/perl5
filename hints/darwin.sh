@@ -8,18 +8,18 @@
 ##
 
 # BSD paths
-prefix='/usr';
+prefix='/usr/local'; # Built-in perl uses /usr
 siteprefix='/usr/local';
 vendorprefix='/usr/local'; usevendorprefix='define';
 
-# 4BSD uses /usr/share/man, not /usr/man.
-# Don't put man pages in /usr/lib; that's goofy.
-man1dir='/usr/share/man/man1';
-man3dir='/usr/share/man/man3';
+# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
+# Don't put man pages in ${prefix}/lib; that's goofy.
+man1dir="${prefix}/share/man/man1";
+man3dir="${prefix}/share/man/man3";
 
 # Where to put modules.
-privlib='/System/Library/Perl';
-sitelib='/Local/Library/Perl';
+privlib='/Library/Perl'; # Built-in perl uses /System/Library/Perl
+sitelib='/Library/Perl';
 vendorlib='/Network/Library/Perl';
 
 ##
@@ -33,7 +33,7 @@ archname='darwin';
 usenm='true';
 
 # Libc is in libsystem.
-libc='/System/Library/Frameworks/System.framework/System';
+#libc='/usr/lib/libSystem.dylib';
 
 # Optimize.
 optimize='-O3';
@@ -41,7 +41,7 @@ optimize='-O3';
 # We have a prototype for telldir.
 ccflags="${ccflags} -pipe -fno-common -DHAS_TELLDIR_PROTOTYPE";
 
-# At least OS X 10.0.3:
+# At least on Darwin 1.3.x:
 #
 # # define INT32_MIN -2147483648
 # int main () {
@@ -60,8 +60,8 @@ ccflags="${ccflags} -pipe -fno-common -DHAS_TELLDIR_PROTOTYPE";
 #
 ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN"
 
-# For Errno.
-cppflags='-traditional-cpp';
+# cpp-precomp is problematic.
+cppflags='-no-precomp';
 
 # Shared library extension is .dylib.
 # Bundle extension is .bundle.
@@ -91,7 +91,7 @@ usemymalloc='n';
 # Locales aren't feeling well.
 LC_ALL=C; export LC_ALL;
 
-# HFS+ will throw "make depend" into confusion since
-# Makefile and makefile are the same.
+# Case-insensitive filesystems don't get along with Makefile and
+# makefile in the same place.  Since Darwin uses GNU make, this dodges
+# the problem.
 firstmakefile=GNUmakefile;
-
