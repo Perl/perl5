@@ -426,7 +426,7 @@ PP(pp_prototype)
 			seen_question = 1;
 			str[n++] = ';';
 		    }
-		    else if (seen_question) 
+		    else if (n && str[0] == ';' && seen_question) 
 			goto set;	/* XXXX system, exec */
 		    if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF 
 			&& (oa & (OA_OPTIONAL - 1)) <= OA_HVREF) {

@@ -384,7 +384,7 @@ print "ok ", $i++, "\n";
 print "not " if defined prototype('CORE::system');
 print "ok ", $i++, "\n";
 
-print "# CORE::open => ($p)\nnot " if ($p = prototype('CORE::open')) ne '*;$;$';
+print "# CORE::open => ($p)\nnot " if ($p = prototype('CORE::open')) ne '*;$@';
 print "ok ", $i++, "\n";
 
 print "# CORE:Foo => ($p), \$@ => `$@'\nnot " 

@@ -605,13 +605,13 @@ exit		exit			ck_fun		ds%	S?
 
 # I/O.
 
-open		open			ck_fun		ist@	F S? S?
+open		open			ck_fun		ist@	F S? L
 close		close			ck_fun		is%	F?
 pipe_op		pipe			ck_fun		is@	F F
 
 fileno		fileno			ck_fun		ist%	F
 umask		umask			ck_fun		ist%	S?
-binmode		binmode			ck_fun		s%	F
+binmode		binmode			ck_fun		s@	F S?
 
 tie		tie			ck_fun		idms@	R S L
 untie		untie			ck_fun		is%	R

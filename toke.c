@@ -3984,7 +3984,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_BIND,XTERM);
 
 	case KEY_binmode:
-	    UNI(OP_BINMODE);
+	    LOP(OP_BINMODE,XTERM);
 
 	case KEY_bless:
 	    LOP(OP_BLESS,XTERM);
