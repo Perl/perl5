@@ -136,7 +136,7 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 	s++;
     }
 
-    if (UTF8LEN(uv) < len)
+    if (UNISKIP(uv) < len)
 	return 0;
 
     return len;
@@ -290,11 +290,11 @@ Perl_utf8_to_uv_chk(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, bool checking)
 			"Malformed UTF-8 character (impossible character 0x%04"UVxf")",
 			uv);
 	goto malformed;
-    } else if (expectlen > UTF8LEN(uv)) {
+    } else if (expectlen > UNISKIP(uv)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (%d byte%s, need %d)",
-			expectlen, expectlen > 1 ? "s": "", UTF8LEN(uv));
+			expectlen, expectlen > 1 ? "s": "", UNISKIP(uv));
 	goto malformed;
     }
 

@@ -1486,7 +1486,7 @@ PP(pp_complement)
 	  while (tmps < send) {
 	    UV c = utf8_to_uv(tmps, &l);
 	    tmps += UTF8SKIP(tmps);
-	    targlen += UTF8LEN(~c);
+	    targlen += UNISKIP(~c);
 	  }
 
 	  /* Now rewind strings and write them. */
