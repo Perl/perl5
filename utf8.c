@@ -309,7 +309,7 @@ Perl_utf8n_to_uvuni(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
     }
 
 #ifdef EBCDIC
-    uv = NATIVE_TO_UVF(uv);
+    uv = NATIVE_TO_UTF(uv);
 #else
     if ((uv == 0xfe || uv == 0xff) &&
 	!(flags & UTF8_ALLOW_FE_FF)) {

@@ -233,10 +233,10 @@ END_EXTERN_C
  * unnecessarily.
  */
 
-#define isIDFIRST_lazy_if(p,c) ((IN_BYTE || (!c || UTF8_INVARIANT(*p)) \
+#define isIDFIRST_lazy_if(p,c) ((IN_BYTE || (!c || UTF8_IS_INVARIANT(*p))) \
 				? isIDFIRST(*(p)) \
 				: isIDFIRST_utf8((U8*)p))
-#define isALNUM_lazy_if(p,c)   ((IN_BYTE || (!c || UTF8_INVARIANT(*p)) \
+#define isALNUM_lazy_if(p,c)   ((IN_BYTE || (!c || UTF8_IS_INVARIANT(*p))) \
 				? isALNUM(*(p)) \
 				: isALNUM_utf8((U8*)p))
 
@@ -280,7 +280,7 @@ END_EXTERN_C
 #define UTF_CONTINUATION_MASK		((U8)0x1f)
 #define UTF_ACCUMULATION_SHIFT		5
 
-#define UTF8_ACCUMULATE(old, new)	(((old) << UTF_ACCUMULATION_SHIFT)|(NATIVE_TO_UTF(new) & UTFE_CONTINUATION_MASK))
+#define UTF8_ACCUMULATE(old, new)	(((old) << UTF_ACCUMULATION_SHIFT)|(NATIVE_TO_UTF(new) & UTF_CONTINUATION_MASK))
 
 /* UTF-EBCDIC encode a downgradeable value */
 #define UTF8_EIGHT_BIT_HI(c)	UTF_TO_NATIVE((((U8)(c))>>UTF_ACCUMULATION_SHIFT)|UTF_START_MARK(2))
