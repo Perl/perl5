@@ -50,8 +50,14 @@ if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 
 @pods = (<pod/*.pod>);
 
+# Specify here any .pm files that are actually architecture-dependent.
+# (Those included with XS extensions under ext/ are automatically
+# added later.)
+# Now that the default privlib has the full perl version number included,
+# we no longer have to play the trick of sticking version-specific .pm 
+# files under the archlib directory.
 %archpms = (
-    Config => 1, FileHandle => 1, overload => 1,
+    Config => 1, 
 );
 
 if ($^O eq 'dos') {
@@ -318,15 +324,6 @@ if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
 	copy_if_diff($file, "${installprivlib}/${file}");
     }
 
-    # Link perldiag.pod into archlib
-    my ($from, $to) = ("${installprivlib}/pod/perldiag.pod",
-		       "${installarchlib}/pod/perldiag.pod");
-    $packlist->{$to} = { from => $from, type => 'link' };
-    if (compare($from, $to) || $nonono) {
-	mkpath("${installarchlib}/pod", 1, 0777);
-	unlink($to);
-	link($from, $to) if ($^O ne 'dos');
-    }
 }
 
 # Check to make sure there aren't other perls around in installer's
