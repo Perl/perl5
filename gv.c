@@ -1102,7 +1102,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	break;
 	case '\026':	/* $^V */
 	{
-	    SV *sv = GvSV(gv);
+	    SV * const sv = GvSV(gv);
 	    GvSV(gv) = new_version(PL_patchlevel);
 	    SvREADONLY_on(GvSV(gv));
 	    SvREFCNT_dec(sv);
@@ -1114,10 +1114,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 }
 
 void
-Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
+Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 {
-    char *name;
-    HV *hv = GvSTASH(gv);
+    const char *name;
+    const HV * const hv = GvSTASH(gv);
     if (!hv) {
 	SvOK_off(sv);
 	return;
@@ -1136,36 +1136,36 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 }
 
 void
-Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
+Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
 {
     gv_fullname4(sv, gv, prefix, TRUE);
 }
 
 void
-Perl_gv_efullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
+Perl_gv_efullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 {
-    GV *egv = GvEGV(gv);
+    const GV *egv = GvEGV(gv);
     if (!egv)
 	egv = gv;
     gv_fullname4(sv, egv, prefix, keepmain);
 }
 
 void
-Perl_gv_efullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
+Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
 {
     gv_efullname4(sv, gv, prefix, TRUE);
 }
 
-/* XXX compatibility with versions <= 5.003. */
+/* compatibility with versions <= 5.003. */
 void
-Perl_gv_fullname(pTHX_ SV *sv, GV *gv)
+Perl_gv_fullname(pTHX_ SV *sv, const GV *gv)
 {
-    gv_fullname3(sv, gv, sv == (SV*)gv ? "*" : "");
+    gv_fullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
 }
 
-/* XXX compatibility with versions <= 5.003. */
+/* compatibility with versions <= 5.003. */
 void
-Perl_gv_efullname(pTHX_ SV *sv, GV *gv)
+Perl_gv_efullname(pTHX_ SV *sv, const GV *gv)
 {
     gv_efullname3(sv, gv, sv == (SV*)gv ? "*" : "");
 }

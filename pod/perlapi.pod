@@ -179,7 +179,7 @@ Found in file av.c
 Returns the highest index in the array.  Returns -1 if the array is
 empty.
 
-	I32	av_len(AV* ar)
+	I32	av_len(const AV* ar)
 
 =for hackers
 Found in file av.c
@@ -1411,7 +1411,7 @@ Found in file mg.c
 
 Finds the magic pointer for type matching the SV.  See C<sv_magic>.
 
-	MAGIC*	mg_find(SV* sv, int type)
+	MAGIC*	mg_find(const SV* sv, int type)
 
 =for hackers
 Found in file mg.c
@@ -5160,7 +5160,7 @@ Found in file sv.c
 =item bytes_from_utf8
 
 Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
-Unlike <utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
+Unlike C<utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
 the newly-created string, and updates C<len> to contain the new
 length.  Returns the original string if no conversion occurs, C<len>
 is unchanged. Do nothing if C<is_utf8> points to 0. Sets C<is_utf8> to
@@ -5186,7 +5186,7 @@ see sv_recode_to_utf8().
 NOTE: this function is experimental and may change or be
 removed without notice.
 
-	U8*	bytes_to_utf8(U8 *s, STRLEN *len)
+	U8*	bytes_to_utf8(const U8 *s, STRLEN *len)
 
 =for hackers
 Found in file utf8.c
@@ -5457,7 +5457,7 @@ and C<b>.
 WARNING: use only if you *know* that the pointers point inside the
 same UTF-8 buffer.
 
-	IV	utf8_distance(U8 *a, U8 *b)
+	IV	utf8_distance(const U8 *a, const U8 *b)
 
 =for hackers
 Found in file utf8.c
@@ -5482,7 +5482,7 @@ Return the length of the UTF-8 char encoded string C<s> in characters.
 Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
 up past C<e>, croaks.
 
-	STRLEN	utf8_length(U8* s, U8 *e)
+	STRLEN	utf8_length(const U8* s, const U8 *e)
 
 =for hackers
 Found in file utf8.c

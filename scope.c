@@ -90,15 +90,15 @@ Perl_push_scope(pTHX)
 void
 Perl_pop_scope(pTHX)
 {
-    I32 oldsave = PL_scopestack[--PL_scopestack_ix];
+    const I32 oldsave = PL_scopestack[--PL_scopestack_ix];
     LEAVE_SCOPE(oldsave);
 }
 
 void
 Perl_markstack_grow(pTHX)
 {
-    I32 oldmax = PL_markstack_max - PL_markstack;
-    I32 newmax = GROW(oldmax);
+    const I32 oldmax = PL_markstack_max - PL_markstack;
+    const I32 newmax = GROW(oldmax);
 
     Renew(PL_markstack, newmax, I32);
     PL_markstack_ptr = PL_markstack + oldmax;
@@ -137,7 +137,7 @@ void
 Perl_free_tmps(pTHX)
 {
     /* XXX should tmps_floor live in cxstack? */
-    I32 myfloor = PL_tmps_floor;
+    const I32 myfloor = PL_tmps_floor;
     while (PL_tmps_ix > myfloor) {      /* clean up after last statement */
 	SV* sv = PL_tmps_stack[PL_tmps_ix];
 	PL_tmps_stack[PL_tmps_ix--] = Nullsv;
@@ -159,7 +159,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
 	MAGIC *mg;
 	sv_upgrade(sv, SvTYPE(osv));
 	if (SvGMAGICAL(osv)) {
-	    bool oldtainted = PL_tainted;
+	    const bool oldtainted = PL_tainted;
 	    mg_get(osv);		/* note, can croak! */
 	    if (PL_tainting && PL_tainted &&
 			(mg = mg_find(osv, PERL_MAGIC_taint))) {
@@ -582,7 +582,7 @@ Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
 }
 
 void
-Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
+Perl_save_aelem(pTHX_ const AV *av, I32 idx, SV **sptr)
 {
     SV *sv;
     SSCHECK(4);
@@ -604,7 +604,7 @@ Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
 }
 
 void
-Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
+Perl_save_helem(pTHX_ const HV *hv, SV *key, SV **sptr)
 {
     SV *sv;
     SSCHECK(4);
@@ -633,9 +633,9 @@ Perl_save_op(pTHX)
 I32
 Perl_save_alloc(pTHX_ I32 size, I32 pad)
 {
-    register I32 start = pad + ((char*)&PL_savestack[PL_savestack_ix]
+    register const I32 start = pad + ((char*)&PL_savestack[PL_savestack_ix]
 				- (char*)PL_savestack);
-    register I32 elems = 1 + ((size + pad - 1) / sizeof(*PL_savestack));
+    register const I32 elems = 1 + ((size + pad - 1) / sizeof(*PL_savestack));
 
     /* SSCHECK may not be good enough */
     while (PL_savestack_ix + elems + 2 > PL_savestack_max)
@@ -751,7 +751,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    av = (AV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
 	    if (GvAV(gv)) {
-		AV *goner = GvAV(gv);
+		AV * const goner = GvAV(gv);
 		SvMAGIC(av) = SvMAGIC(goner);
 		SvFLAGS((SV*)av) |= SvMAGICAL(goner);
 		SvMAGICAL_off(goner);
@@ -769,7 +769,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    hv = (HV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
 	    if (GvHV(gv)) {
-		HV *goner = GvHV(gv);
+		HV * const goner = GvHV(gv);
 		SvMAGIC(hv) = SvMAGIC(goner);
 		SvFLAGS(hv) |= SvMAGICAL(goner);
 		SvMAGICAL_off(goner);
@@ -908,7 +908,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvPADSTALE_on(sv); /* mark as no longer live */
 	    }
 	    else {	/* Someone has a claim on this, so abandon it. */
-		U32 padflags = SvFLAGS(sv) & (SVs_PADMY|SVs_PADTMP);
+		const U32 padflags = SvFLAGS(sv) & (SVs_PADMY|SVs_PADTMP);
 		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
 		case SVt_PVAV:	*(SV**)ptr = (SV*)newAV();	break;
 		case SVt_PVHV:	*(SV**)ptr = (SV*)newHV();	break;
@@ -969,7 +969,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    hv = (HV*)SSPOPPTR;
 	    ptr = hv_fetch_ent(hv, sv, 1, 0);
 	    if (ptr) {
-		SV *oval = HeVAL((HE*)ptr);
+		const SV * const oval = HeVAL((HE*)ptr);
 		if (oval && oval != &PL_sv_undef) {
 		    ptr = &HeVAL((HE*)ptr);
 		    if (SvTIED_mg((SV*)hv, PERL_MAGIC_tied))
@@ -1007,7 +1007,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_PADSV:
 	    {
-		PADOFFSET off = (PADOFFSET)SSPOPLONG;
+		const PADOFFSET off = (PADOFFSET)SSPOPLONG;
 		ptr = SSPOPPTR;
 		if (ptr)
 		    AvARRAY((PAD*)ptr)[off] = (SV*)SSPOPPTR;
@@ -1024,8 +1024,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_SET_SVFLAGS:
 	    {
-		U32 val  = (U32)SSPOPINT;
-		U32 mask = (U32)SSPOPINT;
+		const U32 val  = (U32)SSPOPINT;
+		const U32 mask = (U32)SSPOPINT;
 		sv = (SV*)SSPOPPTR;
 		SvFLAGS(sv) &= ~mask;
 		SvFLAGS(sv) |= val;

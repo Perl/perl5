@@ -90,7 +90,7 @@ Apd	|void	|av_extend	|AV* ar|I32 key
 p	|AV*	|av_fake	|I32 size|SV** svp
 Apd	|SV**	|av_fetch	|AV* ar|I32 key|I32 lval
 Apd	|void	|av_fill	|AV* ar|I32 fill
-Apd	|I32	|av_len		|AV* ar
+Apd	|I32	|av_len		|const AV* ar
 Apd	|AV*	|av_make	|I32 size|SV** svp
 Apd	|SV*	|av_pop		|AV* ar
 Apd	|void	|av_push	|AV* ar|SV* val
@@ -134,7 +134,7 @@ Afnp	|void	|sv_setpvf_mg_nocontext|SV* sv|const char* pat|...
 Afnp	|int	|fprintf_nocontext|PerlIO* stream|const char* fmt|...
 Afnp	|int	|printf_nocontext|const char* fmt|...
 #endif
-p	|void	|cv_ckproto	|CV* cv|GV* gv|char* p
+p	|void	|cv_ckproto	|const CV* cv|const GV* gv|const char* p
 pd	|CV*	|cv_clone	|CV* proto
 Apd	|SV*	|cv_const_sv	|CV* cv
 p	|SV*	|op_const_sv	|OP* o|CV* cv
@@ -161,7 +161,7 @@ p	|void	|deprecate	|char* s
 p	|void	|deprecate_old	|char* s
 Afp	|OP*	|die		|const char* pat|...
 p	|OP*	|vdie		|const char* pat|va_list* args
-p	|OP*	|die_where	|char* message|STRLEN msglen
+p	|OP*	|die_where	|const char* message|STRLEN msglen
 Ap	|void	|dounwind	|I32 cxix
 p	|bool	|do_aexec	|SV* really|SV** mark|SV** sp
 p	|bool	|do_aexec5	|SV* really|SV** mark|SV** sp|int fd|int flag
@@ -244,9 +244,9 @@ Ap	|GV*	|gv_IOadd	|GV* gv
 Ap	|GV*	|gv_autoload4	|HV* stash|const char* name|STRLEN len \
 				|I32 method
 Ap	|void	|gv_check	|HV* stash
-Ap	|void	|gv_efullname	|SV* sv|GV* gv
-Amb	|void	|gv_efullname3	|SV* sv|GV* gv|const char* prefix
-Ap	|void	|gv_efullname4	|SV* sv|GV* gv|const char* prefix|bool keepmain
+Ap	|void	|gv_efullname	|SV* sv|const GV* gv
+Amb	|void	|gv_efullname3	|SV* sv|const GV* gv|const char* prefix
+Ap	|void	|gv_efullname4	|SV* sv|const GV* gv|const char* prefix|bool keepmain
 Ap	|GV*	|gv_fetchfile	|const char* name
 Apd	|GV*	|gv_fetchmeth	|HV* stash|const char* name|STRLEN len \
 				|I32 level
@@ -256,9 +256,9 @@ Apd	|GV*	|gv_fetchmethod	|HV* stash|const char* name
 Apd	|GV*	|gv_fetchmethod_autoload|HV* stash|const char* name \
 				|I32 autoload
 Ap	|GV*	|gv_fetchpv	|const char* name|I32 add|I32 sv_type
-Ap	|void	|gv_fullname	|SV* sv|GV* gv
-Amb	|void	|gv_fullname3	|SV* sv|GV* gv|const char* prefix
-Ap	|void	|gv_fullname4	|SV* sv|GV* gv|const char* prefix|bool keepmain
+Ap	|void	|gv_fullname	|SV* sv|const GV* gv
+Amb	|void	|gv_fullname3	|SV* sv|const GV* gv|const char* prefix
+Ap	|void	|gv_fullname4	|SV* sv|const GV* gv|const char* prefix|bool keepmain
 Ap	|void	|gv_init	|GV* gv|HV* stash|const char* name \
 				|STRLEN len|int multi
 Apd	|HV*	|gv_stashpv	|const char* name|I32 create
@@ -439,7 +439,7 @@ p	|void	|qerror		|SV* err
 Apd     |void   |sortsv         |SV ** array|size_t num_elts|SVCOMPARE_t cmp
 Apd	|int	|mg_clear	|SV* sv
 Apd	|int	|mg_copy	|SV* sv|SV* nsv|const char* key|I32 klen
-Apd	|MAGIC*	|mg_find	|SV* sv|int type
+Apd	|MAGIC*	|mg_find	|const SV* sv|int type
 Apd	|int	|mg_free	|SV* sv
 Apd	|int	|mg_get		|SV* sv
 Apd	|U32	|mg_length	|SV* sv
@@ -637,7 +637,7 @@ Apd	|char*	|savesharedpv	|const char* pv
 Apd	|char*	|savepvn	|const char* pv|I32 len
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
-Ap	|void	|save_aelem	|AV* av|I32 idx|SV **sptr
+Ap	|void	|save_aelem	|const AV* av|I32 idx|SV **sptr
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Ap	|void	|save_aptr	|AV** aptr
 Ap	|AV*	|save_ary	|GV* gv
@@ -654,7 +654,7 @@ Ap	|void	|save_generic_pvref|char** str
 Ap	|void	|save_shared_pvref|char** str
 Ap	|void	|save_gp	|GV* gv|I32 empty
 Ap	|HV*	|save_hash	|GV* gv
-Ap	|void	|save_helem	|HV* hv|SV *key|SV **sptr
+Ap	|void	|save_helem	|const HV* hv|SV *key|SV **sptr
 Ap	|void	|save_hints
 Ap	|void	|save_hptr	|HV** hptr
 Ap	|void	|save_I16	|I16* intp
@@ -824,12 +824,12 @@ p	|void	|unshare_hek	|HEK* hek
 p	|void	|utilize	|int aver|I32 floor|OP* version|OP* idop|OP* arg
 Ap	|U8*	|utf16_to_utf8	|U8* p|U8 *d|I32 bytelen|I32 *newlen
 Ap	|U8*	|utf16_to_utf8_reversed|U8* p|U8 *d|I32 bytelen|I32 *newlen
-Adp	|STRLEN	|utf8_length	|U8* s|U8 *e
-Apd	|IV	|utf8_distance	|U8 *a|U8 *b
+Adp	|STRLEN	|utf8_length	|const U8* s|const U8 *e
+Apd	|IV	|utf8_distance	|const U8 *a|const U8 *b
 Apd	|U8*	|utf8_hop	|U8 *s|I32 off
 ApMd	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
 ApMd	|U8*	|bytes_from_utf8|U8 *s|STRLEN *len|bool *is_utf8
-ApMd	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
+ApMd	|U8*	|bytes_to_utf8	|const U8 *s|STRLEN *len
 Apd	|UV	|utf8_to_uvchr	|U8 *s|STRLEN* retlen
 Apd	|UV	|utf8_to_uvuni	|U8 *s|STRLEN* retlen
 Adp	|UV	|utf8n_to_uvchr	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
@@ -854,7 +854,7 @@ Ap	|void	|vwarn		|const char* pat|va_list* args
 Afp	|void	|warner		|U32 err|const char* pat|...
 Ap	|void	|vwarner	|U32 err|const char* pat|va_list* args
 p	|void	|watch		|char** addr
-Ap	|I32	|whichsig	|char* sig
+Ap	|I32	|whichsig	|const char* sig
 p	|void	|write_to_stderr|const char* message|int msglen
 p	|int	|yyerror	|char* s
 p	|int	|yylex

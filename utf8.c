@@ -581,7 +581,7 @@ Perl_utf8_to_uvuni(pTHX_ U8 *s, STRLEN *retlen)
 }
 
 /*
-=for apidoc A|STRLEN|utf8_length|U8 *s|U8 *e
+=for apidoc A|STRLEN|utf8_length|const U8 *s|const U8 *e
 
 Return the length of the UTF-8 char encoded string C<s> in characters.
 Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
@@ -591,7 +591,7 @@ up past C<e>, croaks.
 */
 
 STRLEN
-Perl_utf8_length(pTHX_ U8 *s, U8 *e)
+Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
 {
     STRLEN len = 0;
 
@@ -630,7 +630,7 @@ Perl_utf8_length(pTHX_ U8 *s, U8 *e)
 }
 
 /*
-=for apidoc A|IV|utf8_distance|U8 *a|U8 *b
+=for apidoc A|IV|utf8_distance|const U8 *a|const U8 *b
 
 Returns the number of UTF-8 characters between the UTF-8 pointers C<a>
 and C<b>.
@@ -642,7 +642,7 @@ same UTF-8 buffer.
 */
 
 IV
-Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
+Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
 {
     IV off = 0;
 
@@ -652,7 +652,7 @@ Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
 
     if (a < b) {
 	while (a < b) {
-	    U8 c = UTF8SKIP(a);
+	    const U8 c = UTF8SKIP(a);
 
 	    if (b - a < c) {
 	        if (ckWARN_d(WARN_UTF8)) {
@@ -769,7 +769,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 =for apidoc A|U8 *|bytes_from_utf8|U8 *s|STRLEN *len|bool *is_utf8
 
 Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
-Unlike <utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
+Unlike C<utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
 the newly-created string, and updates C<len> to contain the new
 length.  Returns the original string if no conversion occurs, C<len>
 is unchanged. Do nothing if C<is_utf8> points to 0. Sets C<is_utf8> to
@@ -820,7 +820,7 @@ Perl_bytes_from_utf8(pTHX_ U8 *s, STRLEN *len, bool *is_utf8)
 }
 
 /*
-=for apidoc A|U8 *|bytes_to_utf8|U8 *s|STRLEN *len
+=for apidoc A|U8 *|bytes_to_utf8|const U8 *s|STRLEN *len
 
 Converts a string C<s> of length C<len> from ASCII into UTF-8 encoding.
 Returns a pointer to the newly-created string, and sets C<len> to
@@ -833,18 +833,17 @@ see sv_recode_to_utf8().
 */
 
 U8*
-Perl_bytes_to_utf8(pTHX_ U8 *s, STRLEN *len)
+Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *len)
 {
-    U8 *send;
+    const U8 * const send = s + (*len);
     U8 *d;
     U8 *dst;
-    send = s + (*len);
 
     Newz(801, d, (*len) * 2 + 1, U8);
     dst = d;
 
     while (s < send) {
-        UV uv = NATIVE_TO_ASCII(*s++);
+        const UV uv = NATIVE_TO_ASCII(*s++);
         if (UNI_IS_INVARIANT(uv))
             *d++ = (U8)UTF_TO_NATIVE(uv);
         else {

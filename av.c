@@ -193,7 +193,7 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 	return 0;
 
     if (SvRMAGICAL(av)) {
-        MAGIC *tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
+        const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
         if (tied_magic || mg_find((SV*)av, PERL_MAGIC_regdata)) {
             U32 adjust_index = 1;
 
@@ -281,7 +281,7 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 	val = &PL_sv_undef;
 
     if (SvRMAGICAL(av)) {
-        MAGIC *tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
+        const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
         if (tied_magic) {
             /* Handle negative array indices 20020222 MJD */
             if (key < 0) {
@@ -723,7 +723,7 @@ empty.
 */
 
 I32
-Perl_av_len(pTHX_ register AV *av)
+Perl_av_len(pTHX_ const register AV *av)
 {
     return AvFILL(av);
 }
@@ -803,10 +803,10 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
 	Perl_croak(aTHX_ PL_no_modify);
 
     if (SvRMAGICAL(av)) {
-        MAGIC *tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
-        SV **svp;
+        const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
         if ((tied_magic || mg_find((SV*)av, PERL_MAGIC_regdata))) {
             /* Handle negative array indices 20020222 MJD */
+            SV **svp;
             if (key < 0) {
                 unsigned adjust_index = 1;
                 if (tied_magic) {
@@ -887,7 +887,7 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
 
 
     if (SvRMAGICAL(av)) {
-        MAGIC *tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
+        const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
         if (tied_magic || mg_find((SV*)av, PERL_MAGIC_regdata)) {
             SV *sv = sv_newmortal();
             MAGIC *mg;

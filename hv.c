@@ -90,7 +90,7 @@ S_more_he(pTHX)
 STATIC HEK *
 S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 {
-    int flags_masked = flags & HVhek_MASK;
+    const int flags_masked = flags & HVhek_MASK;
     char *k;
     register HEK *hek;
 
@@ -1999,7 +1999,7 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
             break;
         }
     } else {
-        int flags_masked = k_flags & HVhek_MASK;
+        const int flags_masked = k_flags & HVhek_MASK;
         for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
             if (HeHASH(entry) != hash)		/* strings can't be equal */
                 continue;
@@ -2075,7 +2075,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     register HE **oentry;
     register I32 i = 1;
     I32 found = 0;
-    int flags_masked = flags & HVhek_MASK;
+    const int flags_masked = flags & HVhek_MASK;
 
     /* what follows is the moral equivalent of:
 

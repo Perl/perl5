@@ -4031,7 +4031,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 }
 
 void
-Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
+Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
 {
     if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) && ckWARN_d(WARN_PROTOTYPE)) {
 	SV* msg = sv_newmortal();
