@@ -413,11 +413,11 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <unistd.h>
 #endif
 
-#if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO)
+#if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO) && !defined(PERL_MICRO)
 int syscall(int, ...);
 #endif
 
-#if defined(HAS_USLEEP) && !defined(HAS_USLEEP_PROTO)
+#if defined(HAS_USLEEP) && !defined(HAS_USLEEP_PROTO) && !defined(PERL_MICRO)
 int usleep(unsigned int);
 #endif
 
@@ -803,7 +803,7 @@ int sockatmark(int);
  * in the face of half-implementations.)
  */
 
-#ifdef I_SYSMODE
+#if defined(I_SYSMODE) && !defined(PERL_MICRO)
 #include <sys/mode.h>
 #endif
 
@@ -1285,7 +1285,7 @@ typedef NVTYPE NV;
 #    define Perl_fp_class_zero(x)	(Perl_fp_class(x)==FP_CLASS_NZERO||Perl_fp_class(x)==FP_CLASS_PZERO)
 #endif
 
-#if !defined(Perl_fp_class) && defined(HAS_FP_CLASS)
+#if !defined(Perl_fp_class) && defined(HAS_FP_CLASS) && !defined(PERL_MICRO)
 #    include <math.h>
 #    if !defined(FP_SNAN) && defined(I_FP_CLASS)
 #        include <fp_class.h>
@@ -4011,5 +4011,25 @@ extern void moncontrol(int);
 #ifdef UNDER_CE
 #include "wince.h"
 #endif
+
+/* ISO 6429 NEL - C1 control NExt Line */
+/* See http://www.unicode.org/unicode/reports/tr13/ */
+#ifdef EBCDIC	/* In EBCDIC NEL is just an alias for LF */
+#   if '^' == 95	/* CP 1047: MVS OpenEdition - OS/390 - z/OS */
+#       define NEXT_LINE_CHAR	0x15
+#   else		/* CDRA */
+#       define NEXT_LINE_CHAR	0x25
+#   endif
+#else
+#   define NEXT_LINE_CHAR	0x85
+#endif
+
+/* The UTF-8 bytes of the Unicode LS and PS, U+2028 and U+2029 */
+#define UNICODE_LINE_SEPA_0	0xE2
+#define UNICODE_LINE_SEPA_1	0x80
+#define UNICODE_LINE_SEPA_2	0xA8
+#define UNICODE_PARA_SEPA_0	0xE2
+#define UNICODE_PARA_SEPA_1	0x80
+#define UNICODE_PARA_SEPA_2	0xA9
 
 #endif /* Include guard */

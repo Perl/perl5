@@ -30,7 +30,7 @@ sub process_file {
     } elsif ($Config{gccversion} ne ''
              # OpenSTEP has gcc 2.7.2.1 which recognizes but
 	     # doesn't implement the -dM flag.
-	     && $^O ne 'openstep' && $^O ne 'next'
+	     && $^O ne 'openstep' && $^O ne 'next' && $^O ne 'darwin'
 	     ) { 
 	# With the -dM option, gcc outputs every #define it finds
 	unless(open(FH,"$Config{cc} -E -dM $Config{cppflags} $file |")) {

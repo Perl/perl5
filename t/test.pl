@@ -46,6 +46,8 @@ sub _ok {
 	print "# Failed $where\n";
     }
     $test++;
+
+    return $pass;
 }
 
 sub _where {
@@ -58,15 +60,6 @@ sub ok {
     _ok($pass, _where(), @mess);
 }
 
-sub _expect {
-    my ($got, $pass, @mess) = @_;
-    if ($pass) {
-	ok(1, @mess);
-    } else {
-	ok(0, @mess);
-    }
-} 
-
 sub is {
     my ($got, $expected, @mess) = @_;
     my $pass = $got eq $expected;
@@ -75,7 +68,7 @@ sub is {
 		"#      got '$got'\n",
 		"# expected '$expected'\n");
     }
-    _expect($pass, _where(), @mess);
+    _ok($pass, _where(), @mess);
 }
 
 # Note: this isn't quite as fancy as Test::More::like().
@@ -96,7 +89,7 @@ sub like {
 		    "# expected /$expected/\n");
 	}
     }
-    _expect($pass, _where(), @mess);
+    _ok($pass, _where(), @mess);
 }
 
 sub pass {
@@ -133,7 +126,7 @@ sub require_ok {
     eval <<REQUIRE_OK;
 require $require;
 REQUIRE_OK
-    ok(!$@, "require $require");
+    _ok(!$@, _where(), "require $require");
 }
 
 sub use_ok {
@@ -141,7 +134,7 @@ sub use_ok {
     eval <<USE_OK;
 use $use;
 USE_OK
-    ok(!$@, "use $use");
+    _ok(!$@, _where(), "use $use");
 }
 
 1;

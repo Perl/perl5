@@ -8,6 +8,14 @@ WriteMakefile(
     XSPROTOARG          => '-noprototypes',
     realclean => {FILES=> 'constants.c constants.xs'},
 );
+
+# We hope syslogd understands /dev/log.
+#
+# Solaris has a -c /dev/log, but the syslog.t #1 and #2 don't
+# seem to be happy if that's _PATH_LOG.
+#
+my $_PATH_LOG = -S "/dev/log" ? "/dev/log" : "";
+
 WriteConstants(
     NAME => 'Sys::Syslog',
     NAMES => [qw(LOG_ALERT LOG_AUTH LOG_AUTHPRIV LOG_CONS LOG_CRIT LOG_CRON
@@ -17,6 +25,6 @@ WriteConstants(
                  LOG_MAIL LOG_NDELAY LOG_NEWS LOG_NFACILITIES LOG_NOTICE
                  LOG_NOWAIT LOG_ODELAY LOG_PERROR LOG_PID LOG_PRIMASK LOG_SYSLOG
                  LOG_USER LOG_UUCP LOG_WARNING),
-              {name=>"_PATH_LOG", type=>"PV", default=>["PV", '""']},
+              {name=>"_PATH_LOG", type=>"PV", default=>["PV",qq("$_PATH_LOG")]},
              ],
 );

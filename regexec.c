@@ -2254,7 +2254,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    if (l >= PL_regeol)
 			sayNO;
 		    toLOWER_utf8((U8*)l, tmpbuf, &ulen);
-		    if (memNE(s, tmpbuf, ulen))
+		    if (memNE(s, (char*)tmpbuf, ulen))
 		        sayNO;
 		    s += UTF8SKIP(s);
 		    l += ulen;
@@ -2528,7 +2528,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    sayNO;
 			toLOWER_utf8((U8*)s, tmpbuf1, &ulen1);
 			toLOWER_utf8((U8*)l, tmpbuf2, &ulen2);
-			if (ulen1 != ulen2 || memNE(tmpbuf1, tmpbuf2, ulen1))
+			if (ulen1 != ulen2 || memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
 			    sayNO;
 			s += ulen1;
 			l += ulen2;

@@ -175,6 +175,7 @@ PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 PerlIO *
 PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
 {
+#ifndef PERL_MICRO
     if (f) {
 	int fd = PerlLIO_dup(PerlIO_fileno(f));
 	if (fd >= 0) {
@@ -189,6 +190,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
     else {
 	SETERRNO(EBADF, SS$_IVCHAN);
     }
+#endif
     return NULL;
 }
 
