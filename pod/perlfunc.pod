@@ -6625,10 +6625,10 @@ and for other examples.
 
 =item wantarray
 
-Returns true if the context of the currently executing subroutine is
-looking for a list value.  Returns false if the context is looking
-for a scalar.  Returns the undefined value if the context is looking
-for no value (void context).
+Returns true if the context of the currently executing subroutine or
+eval() block is looking for a list value.  Returns false if the context is
+looking for a scalar.  Returns the undefined value if the context is
+looking for no value (void context).
 
     return unless defined wantarray;	# don't bother doing more
     my @a = complex_calculation();
