@@ -62,14 +62,14 @@ completely in compile time, compile with C<-DNO_HASH_SEED> (see F<INSTALL>).
 See L<perlsec/"Algorithmic Complexity Attacks"> for the original
 rationale behind this change.
 
-=head2 UTF-8 On Filehandles No More Activated By Locale
+=head2 UTF-8 On Filehandles No Longer Activated By Locale
 
 In Perl 5.8.0 all filehandles, including the standard filehandles,
 were implicitly set to be in Unicode UTF-8 if the locale settings
 indicated the use of UTF-8.  This feature caused too many problems,
 so the feature was turned off and redesigned: see L</"Core Enhancements">.
 
-=head2 Single-number v-strings are no more v-strings before "=>"
+=head2 Single-number v-strings are no longer v-strings before "=>"
 
 The version strings or v-strings (see L<perldata/"Version Strings">)
 feature introduced in Perl 5.6.0 has been a source of some confusion--
@@ -348,7 +348,7 @@ and features.
 
 Mac OS X now installs with Perl version number embedded in
 installation directory names for easier upgrading of user-compiled
-Perl.  (In other words, the default installation no more breaks the
+Perl.  (In other words, the default installation no longer breaks the
 Apple-provided Perl.)
 
 In newer FreeBSD releases Perl 5.8.0 compilation failed because of
@@ -382,7 +382,7 @@ on the output side of the socket.  Now it works both ways.
 For threaded Perls certain system database functions like getpwent()
 and getgrent() now grow their result buffer dynamically, instead of
 failing.  This means that at sites with lots of users and groups the
-functions no more fail by returning only partial results.
+functions no longer fail by returning only partial results.
 
 Perl 5.8.0 had accidentally broken the capability for users
 to define their own uppercase<->lowercase Unicode mappings
@@ -583,7 +583,7 @@ of an SV: the UTF-8 cache does not get cleared as it should.
 APIs obsoleted in Perl 5.8.0s like sv_2pv, sv_catpvn, sv_catsv,
 sv_setsv, are again available.
 
-Certain Perl core C APIs like cxinc and regatom are no more available.
+Certain Perl core C APIs like cxinc and regatom are no longer available.
 They never should have been, and if you application depends on them,
 you should (be ashamed and) contact perl5-porters to discuss what are
 the proper APIs.
