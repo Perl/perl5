@@ -1,6 +1,9 @@
-/* $Header: arg.c,v 1.0.1.2 88/01/24 03:52:34 root Exp $
+/* $Header: arg.c,v 1.0.1.3 88/01/26 12:30:33 root Exp $
  *
  * $Log:	arg.c,v $
+ * Revision 1.0.1.3  88/01/26  12:30:33  root
+ * patch 6: sprintf didn't finish processing format string when out of args.
+ * 
  * Revision 1.0.1.2  88/01/24  03:52:34  root
  * patch 2: added STATBLKS dependencies.
  * 
@@ -646,11 +649,16 @@ register STR **sarg;
     register char *t;
     bool dolong;
     char ch;
+    static STR *sargnull = &str_no;
 
     str_set(str,"");
     len--;			/* don't count pattern string */
     sarg++;
-    for (s = str_get(*(sarg++)); *sarg && *s && len; len--) {
+    for (s = str_get(*(sarg++)); *s; len--) {
+	if (len <= 0 || !*sarg) {
+	    sarg = &sargnull;
+	    len = 0;
+	}
 	dolong = FALSE;
 	for (t = s; *t && *t != '%'; t++) ;
 	if (!*t)
