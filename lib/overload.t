@@ -1087,5 +1087,21 @@ print $@ =~ /zap/ ? "ok 227\n" : "not ok 227\n";
 
 print overload::StrVal(qr/a/) =~ /^Regexp=SCALAR\(0x[0-9a-f]+\)$/ ? "ok 228\n" : "not ok 228\n";
 
+{
+   package t229;
+   use overload '='  => sub { 42 },
+                '++' => sub { my $x = ${$_[0]}; $_[0] };
+   sub new { my $x = 42; bless \$x }
+
+   my $warn;
+   {  
+     local $SIG{__WARN__} = sub { $warn++ };
+      my $x = t229->new;
+      my $y = $x;
+      eval { $y++ };
+   }
+   print $warn ? "not ok 229\n" : "ok 229\n";
+}
+
 # Last test is:
-sub last {228}
+sub last {229}
