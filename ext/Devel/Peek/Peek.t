@@ -451,8 +451,8 @@ do_test(22,
   SV = PVMG\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(OBJECT,ROK\\)
-    IV = \d+
-    NV = \d+
+    IV = -?\d+
+    NV = $FLOAT
     RV = $ADDR
     SV = NULL\\(0x0\\) at $ADDR
       REFCNT = \d+
