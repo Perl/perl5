@@ -67,8 +67,6 @@ Pod::LaTeX upgraded to version 0.57
 
 Safe now works properly with Carp
 
-FIXME $VERSION
-
 =item *
 
 Scalar-List-Utils upgraded to version 1.14
@@ -218,7 +216,8 @@ suggesting that the user use the C<-S> flag:
 The Unicode character class files used by the regular expression engine are
 now built at build time from the supplied Unicode consortium data files,
 instead of being shipped prebuilt. This makes the compressed Perl source
-tarball about 200K smaller.
+tarball about 200K smaller. A side effect is that the layout of files inside
+lib/unicore has changed.
 
 =head1 New Tests
 
