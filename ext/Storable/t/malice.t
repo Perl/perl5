@@ -27,10 +27,28 @@ sub BEGIN {
 }
 
 use strict;
-use vars qw($file_magic_str $other_magic $network_magic $major $minor
-            $minor_write $fancy);
+use vars qw($file_magic_str $other_magic $network_magic $byteorder
+            $major $minor $minor_write $fancy);
+
+$byteorder = $Config{byteorder};
+
+if ($] < 5.007003 && $] >= 5.006 && $^O ne 'MSWin32'
+    && $Config{longsize} != $Config{ivsize}) {
+  # 5.6.x, not on Windows, built with IVs as long long
+  # config.h and Config.sh differ in their idea of the value of byteorder
+  # Storable's header is written out using C (hence config.h), but we're
+  # testing with perl
+  if ($byteorder eq '12345678') {
+    $byteorder = '1234';
+  } elsif ($byteorder eq '87654321') {
+    $byteorder = '4321';
+  } else {
+    die "I don't recognise Your byteorder: '$byteorder'";
+  }
+}
+
 $file_magic_str = 'pst0';
-$other_magic = 7 + length($Config{byteorder});
+$other_magic = 7 + length $byteorder;
 $network_magic = 2;
 $major = 2;
 $minor = 5;
@@ -46,7 +64,7 @@ use Test::More;
 # present in files, but not in things store()ed to memory
 $fancy = ($] > 5.007 ? 2 : 0);
 
-plan tests => 378 + length($Config{byteorder}) * 4 + $fancy * 8;
+plan tests => 368 + length ($byteorder) * 4 + $fancy * 8;
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
 
@@ -76,9 +94,10 @@ sub test_header {
   is ($header->{major}, $major, "major number");
   is ($header->{minor}, $minor_write, "minor number");
   is (!!$header->{netorder}, !!$isnetorder, "is network order");
- SKIP: {
-    skip "Network order header has no sizes", 5 if ($isnetorder);
-    is ($header->{byteorder}, $Config{byteorder}, "byte order");
+  if ($isnetorder) {
+    # Network order header has no sizes
+  } else {
+    is ($header->{byteorder}, $byteorder, "byte order");
     is ($header->{intsize}, $Config{intsize}, "int size");
     is ($header->{longsize}, $Config{longsize}, "long size");
     is ($header->{ptrsize}, $Config{ptrsize}, "long size");
