@@ -26,7 +26,7 @@ Methods for manipulating file specifications.
 =item canonpath
 
 No physical check on the filesystem, but a logical cleanup of a
-path. On UNIX eliminated successive slashes and successive "/.".
+path. On UNIX eliminate successive slashes and successive "/.".
 
     $cpath = File::Spec->canonpath( $path ) ;
 
@@ -41,7 +41,7 @@ sub canonpath {
       $node = $1;
     }
     $path =~ s|/+|/|g unless($^O eq 'cygwin');     # xx////xx  -> xx/xx
-    $path =~ s|(/\.)+/|/|g;                        # xx/././xx -> xx/xx
+    $path =~ s@(/\.)+(/|\Z(?!\n))@/@g;             # xx/././xx -> xx/xx
     $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
     $path =~ s|^/(\.\./)+|/|s;                     # /../../xx -> xx
     $path =~ s|/\Z(?!\n)|| unless $path eq "/";          # xx/       -> xx

@@ -53,7 +53,10 @@ BEGIN {
 
 [ "Unix->canonpath('')",                                      ''          ],
 [ "Unix->canonpath('///../../..//./././a//b/.././c/././')",   '/a/b/../c' ],
-[ "Unix->canonpath('/.')",                                    '/.'        ],
+[ "Unix->canonpath('/.')",                                    '/'         ],
+[ "Unix->canonpath('/./')",                                   '/'         ],
+[ "Unix->canonpath('/a/./')",                                 '/a'        ],
+[ "Unix->canonpath('/a/.')",                                  '/a'        ],
 
 [  "Unix->abs2rel('/t1/t2/t3','/t1/t2/t3')",          ''                   ],
 [  "Unix->abs2rel('/t1/t2/t4','/t1/t2/t3')",          '../t4'              ],
@@ -63,7 +66,7 @@ BEGIN {
 #[ "Unix->abs2rel('../t4','/t1/t2/t3')",              '../t4'              ],
 [  "Unix->abs2rel('/','/t1/t2/t3')",                  '../../..'           ],
 [  "Unix->abs2rel('///','/t1/t2/t3')",                '../../..'           ],
-[  "Unix->abs2rel('/.','/t1/t2/t3')",                 '../../../.'         ],
+[  "Unix->abs2rel('/.','/t1/t2/t3')",                 '../../..'           ],
 [  "Unix->abs2rel('/./','/t1/t2/t3')",                '../../..'           ],
 #[ "Unix->abs2rel('../t4','/t1/t2/t3')",              '../t4'              ],
 
