@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Aug  1 14:45:20 EEST 2003 [metaconfig 3.0 PL70]
+# Generated on Sat Aug  2 02:07:46 EEST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8601,6 +8601,9 @@ case "$siteman1dir" in
 '')	dflt=`echo $man1dir | $sed "s#^$prefix#$siteprefix#"` ;;
 *)  	dflt=$siteman1dir ;;
 esac
+case "$dflt" in
+''|' ') dflt=none ;;
+esac
 fn=dn+~
 rp='Pathname where the site-specific manual pages should be installed?'
 . ./getfile
@@ -8617,6 +8620,9 @@ fi
 case "$siteman3dir" in
 '')	dflt=`echo $man3dir | $sed "s#^$prefix#$siteprefix#"` ;;
 *)  	dflt=$siteman3dir ;;
+esac
+case "$dflt" in
+''|' ') dflt=none ;;
 esac
 fn=dn+~
 rp='Pathname where the site-specific library manual pages should be installed?'
