@@ -1,8 +1,10 @@
 #!./perl
 
-# $RCSfile: array.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:37 $
+print "1..63\n";
 
-print "1..36\n";
+#
+# @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
+#
 
 @ary = (1,2,3,4,5);
 if (join('',@ary) eq '12345') {print "ok 1\n";} else {print "not ok 1\n";}
@@ -119,12 +121,13 @@ print $foo eq 'e' ? "ok 35\n" : "not ok 35\n";
 $foo = ('a','b','c','d','e','f')[1];
 print $foo eq 'b' ? "ok 36\n" : "not ok 36\n";
 
-print 1 ? "ok 37\n" : "not ok 37\n";
+@foo = ( 'foo', 'bar', 'burbl');
+push(foo, 'blah');
+print $#foo == 3 ? "ok 37\n" : "not ok 37\n";
 
 # various AASSIGN_COMMON checks (see newASSIGNOP() in op.c)
 
 $test = 37;
-
 sub t { ++$test; print "not " unless $_[0]; print "ok $test\n"; }
 
 @foo = @foo;
@@ -144,59 +147,62 @@ t("@foo" eq "foo bar");
 t("@bar" eq "foo bar");						# 43
 
 # try the same with local
-@foo = ( 'foo', 'bar', 'burbl', 'blah');
+# XXX tie-stdarray fails the tests involving local, so we use
+# different variable names to escape the 'tie'
+
+@bee = ( 'foo', 'bar', 'burbl', 'blah');
 {
 
-    local @foo = @foo;
-    t("@foo" eq "foo bar burbl blah");				# 44
+    local @bee = @bee;
+    t("@bee" eq "foo bar burbl blah");				# 44
     {
-	local (undef,@foo) = @foo;
-	t("@foo" eq "bar burbl blah");				# 45
+	local (undef,@bee) = @bee;
+	t("@bee" eq "bar burbl blah");				# 45
 	{
-	    local @foo = ('XXX',@foo,'YYY');
-	    t("@foo" eq "XXX bar burbl blah YYY");		# 46
+	    local @bee = ('XXX',@bee,'YYY');
+	    t("@bee" eq "XXX bar burbl blah YYY");		# 46
 	    {
-		local @foo = local(@foo) = qw(foo bar burbl blah);
-		t("@foo" eq "foo bar burbl blah");		# 47
+		local @bee = local(@bee) = qw(foo bar burbl blah);
+		t("@bee" eq "foo bar burbl blah");		# 47
 		{
-		    local (@bar) = local(@foo) = qw(foo bar);
-		    t("@foo" eq "foo bar");			# 48
-		    t("@bar" eq "foo bar");			# 49
+		    local (@bim) = local(@bee) = qw(foo bar);
+		    t("@bee" eq "foo bar");			# 48
+		    t("@bim" eq "foo bar");			# 49
 		}
-		t("@foo" eq "foo bar burbl blah");		# 50
+		t("@bee" eq "foo bar burbl blah");		# 50
 	    }
-	    t("@foo" eq "XXX bar burbl blah YYY");		# 51
+	    t("@bee" eq "XXX bar burbl blah YYY");		# 51
 	}
-	t("@foo" eq "bar burbl blah");				# 52
+	t("@bee" eq "bar burbl blah");				# 52
     }
-    t("@foo" eq "foo bar burbl blah");				# 53
+    t("@bee" eq "foo bar burbl blah");				# 53
 }
 
 # try the same with my
 {
 
-    my @foo = @foo;
-    t("@foo" eq "foo bar burbl blah");				# 54
+    my @bee = @bee;
+    t("@bee" eq "foo bar burbl blah");				# 54
     {
-	my (undef,@foo) = @foo;
-	t("@foo" eq "bar burbl blah");				# 55
+	my (undef,@bee) = @bee;
+	t("@bee" eq "bar burbl blah");				# 55
 	{
-	    my @foo = ('XXX',@foo,'YYY');
-	    t("@foo" eq "XXX bar burbl blah YYY");		# 56
+	    my @bee = ('XXX',@bee,'YYY');
+	    t("@bee" eq "XXX bar burbl blah YYY");		# 56
 	    {
-		my @foo = my @foo = qw(foo bar burbl blah);
-		t("@foo" eq "foo bar burbl blah");		# 57
+		my @bee = my @bee = qw(foo bar burbl blah);
+		t("@bee" eq "foo bar burbl blah");		# 57
 		{
-		    my (@bar) = my(@foo) = qw(foo bar);
-		    t("@foo" eq "foo bar");			# 58
-		    t("@bar" eq "foo bar");			# 59
+		    my (@bim) = my(@bee) = qw(foo bar);
+		    t("@bee" eq "foo bar");			# 58
+		    t("@bim" eq "foo bar");			# 59
 		}
-		t("@foo" eq "foo bar burbl blah");		# 60
+		t("@bee" eq "foo bar burbl blah");		# 60
 	    }
-	    t("@foo" eq "XXX bar burbl blah YYY");		# 61
+	    t("@bee" eq "XXX bar burbl blah YYY");		# 61
 	}
-	t("@foo" eq "bar burbl blah");				# 62
+	t("@bee" eq "bar burbl blah");				# 62
     }
-    t("@foo" eq "foo bar burbl blah");				# 63
+    t("@bee" eq "foo bar burbl blah");				# 63
 }
 
