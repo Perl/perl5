@@ -7,6 +7,8 @@ archname='m68k-amigaos'
 cc='gcc'
 firstmakefile='GNUmakefile'
 usenm='true'
+
+usedl='n'
 usemymalloc='n'
 usevfork='true'
 useperlio='true'
@@ -14,6 +16,15 @@ d_eofnblk='define'
 d_fork='undef'
 d_vfork='define'
 groupstype='int'
+
+# libs
+
+libpth="$prefix/lib /local/lib"
+glibpth="$libpth"
+xlibpth="$libpth"
+
+libswanted='gdbm m'
+so=' '
 
 # compiler & linker flags
 
@@ -26,22 +37,13 @@ optimize='-O2 -fomit-frame-pointer'
 # ccflags='-DAMIGAOS -mstackextend -m68020 -resident32'
 # ldflags='-m68020 -resident32'
 
-# libs
+# uncomment the following line if you want dynamic loading and
+# a working version of dld is available
 
-libpth="$prefix/lib /local/lib"
-glibpth="$libpth"
-xlibpth="$libpth"
-
-libswanted='gdbm m'
-so=' '
-
-# dynamic loading
-
-usedl='n'
-
-# uncomment the following line if a working version of dld is available
-
-# usedl='y'
+# usedl=''
+# ccflags='-DAMIGAOS -mstackextend'
+# ldflags=''
+# optimize='-O2 -fomit-frame-pointer'
 # dlext='o'
 # cccdlflags='none'
 # ccdlflags='none'
