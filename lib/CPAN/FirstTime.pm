@@ -78,7 +78,8 @@ dialog anytime later by typing 'o conf init' at the cpan prompt.)
       } else {
 	$fastread = 1;
 	$CPAN::Config->{urllist} ||= [];
-	*prompt = sub {
+	# prototype should match that of &MakeMaker::prompt
+	*prompt = sub ($;$) {
 	  my($q,$a) = @_;
 	  my($ret) = defined $a ? $a : "";
 	  printf qq{%s [%s]\n\n}, $q, $ret;
