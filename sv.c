@@ -5091,7 +5091,9 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
     else {
 	av = newAV();
 	sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
-	SvREFCNT_dec(av);           /* for sv_magic */
+	/* av now has a refcnt of 2, which avoids it getting freed
+	 * before us during global cleanup. The extra ref is removed
+	 * by magic_killbackrefs() when tsv is being freed */
     }
     if (AvFILLp(av) >= AvMAX(av)) {
         SV **svp = AvARRAY(av);

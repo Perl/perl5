@@ -1881,6 +1881,7 @@ Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 	}
 	i--;
     }
+    SvREFCNT_dec(av); /* remove extra count added by sv_add_backref() */
     return 0;
 }
 
