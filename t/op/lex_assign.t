@@ -22,10 +22,71 @@ $nn = $n = 2;
 sub subb {"in s"}
 
 @INPUT = <DATA>;
-print "1..", (scalar @INPUT), "\n";
+print "1..", (8 + @INPUT), "\n";
 $ord = 0;
 
 sub wrn {"@_"}
+
+# Check correct optimization of ucfirst etc
+$ord++;
+my $a = "AB";
+my $b = "\u\L$a";
+print "not " unless $b eq 'Ab';
+print "ok $ord\n";
+
+# Check correct destruction of objects:
+my $dc = 0;
+sub A::DESTROY {$dc += 1}
+$a=8;
+my $b;
+{ my $c = 6; $b = bless \$c, "A"}
+
+$ord++;
+print "not " unless $dc == 0;
+print "ok $ord\n";
+
+$b = $a+5;
+
+$ord++;
+print "not " unless $dc == 1;
+print "ok $ord\n";
+
+{				# Check calling STORE
+  my $sc = 0;
+  sub B::TIESCALAR {bless [11], 'B'}
+  sub B::FETCH { -(shift->[0]) }
+  sub B::STORE { $sc++; my $o = shift; $o->[0] = 17 + shift }
+
+  my $m;
+  tie $m, 'B';
+  $m = 100;
+
+  $ord++;
+  print "not " unless $sc == 1;
+  print "ok $ord\n";
+
+  my $t = 11;
+  $m = $t + 89;
+  
+  $ord++;
+  print "not " unless $sc == 2;
+  print "ok $ord\n";
+
+  $ord++;
+  print "# $m\nnot " unless $m == -117;
+  print "ok $ord\n";
+
+  $m += $t;
+
+  $ord++;
+  print "not " unless $sc == 3;
+  print "ok $ord\n";
+
+  $ord++;
+  print "# $m\nnot " unless $m == 89;
+  print "ok $ord\n";
+
+}
 
 for (@INPUT) {
   $ord++;
