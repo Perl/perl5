@@ -954,7 +954,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     char *s;
     U32 flags;
     U32 type;
-    STRLEN n_a;
 
     if (!sv) {
 	Perl_dump_indent(aTHX_ level, file, "SV = 0\n");
