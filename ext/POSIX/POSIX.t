@@ -86,10 +86,8 @@ print getcwd() =~ m#[/\\]t$# ? "ok 13\n" : "not ok 13\n";
 if ($Config{d_strtod}) {
     $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C') if $Config{d_setlocale};
     ($n, $x) = &POSIX::strtod('3.14159_OR_SO');
-# Using long double NVs may introduce greater accuracy than wanted.
-    $n =~ s/^3.1415(8999|9000)\d*$/3.14159/
-        if $Config{uselongdouble} eq 'define';
-    print (($n == 3.14159) && ($x == 6) ?
+# we're just checking that strtod works, not how accurate it is
+    print (("3.14159" eq $n + 0) && ($x == 6) ?
           "ok 14\n" : "not ok 14\n");
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
 } else { print "# strtod not present\n", "ok 14\n"; }
