@@ -735,7 +735,7 @@ malloc(register size_t nbytes)
 			      (long)size));
 
 	/* remove from linked list */
-#ifdef RCHECK
+#if defined(RCHECK) && !defined(USE_PERL_SBRK)
 	if (*((int*)p) & (sizeof(union overhead) - 1))
 	    PerlIO_printf(PerlIO_stderr(), "Corrupt malloc ptr 0x%lx at 0x%lx\n",
 		(unsigned long)*((int*)p),(unsigned long)p);
