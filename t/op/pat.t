@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..995\n";
+print "1..996\n";
 
 BEGIN {
     chdir 't' if -d 't';
