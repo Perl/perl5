@@ -12,7 +12,7 @@ $DEBUG and warn __PACKAGE__, " called by ", join(", ", caller), "\n";
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
 
-our $fallback = Encode::PERLQQ()|Encode::WARN_ON_ERR;
+our $fallback = Encode::PERLQQ()|Encode::WARN_ON_ERR();
 
 1;
 __END__
