@@ -537,7 +537,7 @@ add		addition (+)		ck_null		IfsT2	S S
 i_add		integer addition (+)	ck_null		ifsT2	S S
 subtract	subtraction (-)		ck_null		IfsT2	S S
 i_subtract	integer subtraction (-)	ck_null		ifsT2	S S
-concat		concatenation (.) or string	ck_concat	fsT2	S S
+concat		concatenation (.) or string	ck_concat	fst2	S S
 stringify	string			ck_fun		fsT@	S
 
 left_shift	left bitshift (<<)	ck_bitop	fsT2	S S

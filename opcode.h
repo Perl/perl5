@@ -1536,7 +1536,7 @@ EXT U32 PL_opargs[] = {
 	0x0002251e,	/* i_add */
 	0x0002252e,	/* subtract */
 	0x0002251e,	/* i_subtract */
-	0x0002250e,	/* concat */
+	0x0002240e,	/* concat */
 	0x0000290e,	/* stringify */
 	0x0002250e,	/* left_shift */
 	0x0002250e,	/* right_shift */

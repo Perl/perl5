@@ -18,7 +18,7 @@ use threads::shared;
 # call is() from within the DESTROY() function at global destruction time,
 # and parts of Test::* may have already been freed by then
 
-print "1..4\n";
+print "1..5\n";
 
 my $test : shared = 1;
 
@@ -59,4 +59,18 @@ $|++;
     })->join();
     $bar->{tid} = 0;
 }
+
+#
+# This tests whether we can call Config::myconfig after threads have been
+# started (interpreter cloned).  5.8.1 and 5.8.2 contained a bug that would
+# disallow that too be done, because an attempt was made to change a variable
+# with the : unique attribute.
+#
+#########################
+
+threads->new( sub {1} )->join;
+my $not = eval { Config::myconfig() } ? '' : 'not ';
+print "${not}ok $test - Are we able to call Config::myconfig after clone\n";
+$test++;
+
 1;
