@@ -226,8 +226,11 @@ Make sure the newlines for the modules are in Mac format, not Unix format.
 If they are not then you might have decompressed them incorrectly.  Check
 your decompression and unpacking utilities settings to make sure they are
 translating text files properly.
-As a last resort, you can use the perl one-liner:  perl -i.bak -pe 
-'s/(?:\015)?\012/\015/g' <filenames> on the source files.
+As a last resort, you can use the perl one-liner:
+
+	perl -i.bak -pe 's/(?:\015)?\012/\015/g' filenames
+
+on the source files.
 
 Move the files manually into the correct folders.
 
