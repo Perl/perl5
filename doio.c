@@ -1200,7 +1200,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
      * but only until the system hard limit/the filesystem limit,
      * at which we would get EPERM.  Note that when using buffered
      * io the write failure can be delayed until the flush/close. --jhi */
-    if (len && (PerlIO_write(fp,tmps,len) == 0 || PerlIO_error(fp)))
+    if (len && (PerlIO_write(fp,tmps,len) == 0))
 	return FALSE;
     return !PerlIO_error(fp);
 }
