@@ -95,6 +95,20 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6620] By: jhi                                   on 2000/08/14  15:22:14
+        Log: Subject: Re: [PATCH] @+, @- readonly
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 14 Aug 2000 15:26:55 +0100
+             Message-Id: <E13OLCZ-00020N-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! XSUB.h embed.h embed.pl globvar.sym gv.c mg.c perl.h proto.h
+	   ! sv.c t/op/pat.t
+____________________________________________________________________________
+[  6619] By: jhi                                   on 2000/08/14  14:12:08
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6618] By: jhi                                   on 2000/08/14  14:09:34
         Log: For now remove the mail code.
      Branch: perl
