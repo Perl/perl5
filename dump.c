@@ -659,7 +659,11 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	break;
     case OP_CONST:
     case OP_METHOD_NAMED:
+#ifndef USE_ITHREADS
+	/* with ITHREADS, consts are stored in the pad, and the right pad
+	 * may not be active here, so skip */
 	Perl_dump_indent(aTHX_ level, file, "SV = %s\n", SvPEEK(cSVOPo_sv));
+#endif
 	break;
     case OP_SETSTATE:
     case OP_NEXTSTATE:
