@@ -300,6 +300,7 @@
 #define to_uni_upper_lc		Perl_to_uni_upper_lc
 #define to_uni_title_lc		Perl_to_uni_title_lc
 #define to_uni_lower_lc		Perl_to_uni_lower_lc
+#define is_utf8_char		Perl_is_utf8_char
 #define is_utf8_alnum		Perl_is_utf8_alnum
 #define is_utf8_alnumc		Perl_is_utf8_alnumc
 #define is_utf8_idfirst		Perl_is_utf8_idfirst
@@ -1744,6 +1745,7 @@
 #define to_uni_upper_lc(a)	Perl_to_uni_upper_lc(aTHX_ a)
 #define to_uni_title_lc(a)	Perl_to_uni_title_lc(aTHX_ a)
 #define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
+#define is_utf8_char(a)		Perl_is_utf8_char(aTHX_ a)
 #define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
 #define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
@@ -3420,6 +3422,8 @@
 #define to_uni_title_lc		Perl_to_uni_title_lc
 #define Perl_to_uni_lower_lc	CPerlObj::Perl_to_uni_lower_lc
 #define to_uni_lower_lc		Perl_to_uni_lower_lc
+#define Perl_is_utf8_char	CPerlObj::Perl_is_utf8_char
+#define is_utf8_char		Perl_is_utf8_char
 #define Perl_is_utf8_alnum	CPerlObj::Perl_is_utf8_alnum
 #define is_utf8_alnum		Perl_is_utf8_alnum
 #define Perl_is_utf8_alnumc	CPerlObj::Perl_is_utf8_alnumc

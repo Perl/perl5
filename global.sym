@@ -180,6 +180,7 @@ Perl_is_uni_xdigit_lc
 Perl_to_uni_upper_lc
 Perl_to_uni_title_lc
 Perl_to_uni_lower_lc
+Perl_is_utf8_char
 Perl_is_utf8_alnum
 Perl_is_utf8_alnumc
 Perl_is_utf8_idfirst

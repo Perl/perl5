@@ -1288,6 +1288,13 @@ Perl_to_uni_lower_lc(pTHXo_ U32 c)
     return ((CPerlObj*)pPerl)->Perl_to_uni_lower_lc(c);
 }
 
+#undef  Perl_is_utf8_char
+int
+Perl_is_utf8_char(pTHXo_ U8 *p)
+{
+    return ((CPerlObj*)pPerl)->Perl_is_utf8_char(p);
+}
+
 #undef  Perl_is_utf8_alnum
 bool
 Perl_is_utf8_alnum(pTHXo_ U8 *p)
