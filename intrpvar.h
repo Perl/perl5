@@ -122,7 +122,6 @@ PERLVAR(IDBsub,		GV *)
 PERLVAR(IDBsingle,	SV *)
 PERLVAR(IDBtrace,	SV *)
 PERLVAR(IDBsignal,	SV *)
-PERLVAR(IDBassertion,   SV *)
 PERLVAR(Ilineary,	AV *)		/* lines of script for debugger */
 PERLVAR(Idbargs,	AV *)		/* args to call listed by caller function */
 
@@ -501,6 +500,8 @@ PERLVARI(Iin_load_module, int, 0)	/* to prevent recursions in PerlIO_find_layer 
 PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
 PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
+
+PERLVAR(IDBassertion,   SV *)
 
 /* Don't forget to add your variable also to perl_clone()! */
 
