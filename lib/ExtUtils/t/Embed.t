@@ -102,7 +102,7 @@ if ($^O eq 'VMS') {
      # Everyone needs libperl copied if it's not found by '-lperl'.
      $testlib = $Config{'libperl'};
      my $srclib = $testlib;
-     $testlib =~ s/^[^.]+/libperl/;
+     $testlib =~ s/.+(?=\.[^.]*)/libperl/;
      $testlib = File::Spec::->catfile($lib, $testlib);
      $srclib = File::Spec::->catfile($lib, $srclib);
      if (-f $srclib) {
