@@ -60,19 +60,26 @@ print "ok 1\n";
 if($pid = fork()) {
 
     $sock = $listen->accept();
-    print "ok 2\n";
 
-    print $sock->getline();
+    if (defined $sock) {
+	print "ok 2\n";
 
-    print $sock "ok 4\n";
+	print $sock->getline();
 
-    $sock->close;
+	print $sock "ok 4\n";
 
-    waitpid($pid,0);
-    unlink($PATH) || $^O eq 'os2' || warn "Can't unlink $PATH: $!";
+	$sock->close;
 
-    print "ok 5\n";
+	waitpid($pid,0);
+	unlink($PATH) || $^O eq 'os2' || warn "Can't unlink $PATH: $!";
 
+	print "ok 5\n";
+    } else {
+	print "# accept() failed: $!\n";
+	for (2..5) {
+	    print "not ok $_ # accept failed\n";
+	}
+    }
 } elsif(defined $pid) {
 
     $sock = IO::Socket::UNIX->new(Peer => $PATH) or die "$!";
