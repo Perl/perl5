@@ -12,6 +12,32 @@ This document describes various features of HP's Unix operating system
 (HP-UX) that will affect how Perl version 5 (hereafter just Perl) is
 compiled and/or runs.
 
+=head2 Using perl as shipped with HP-UX
+
+As of application release September 2001, HP-UX 11.00 is shipped with
+perl-5.6.1 in /opt/perl. The first occurrance is on CD 5012-7954 and
+can be installed using
+
+    swinstall -s /cdrom perl
+
+assuming you have mounted that CD on /cdrom. In this version the
+following modules are installed:
+
+    ActivePerl::DocTools-0.04   HTML::Parser-3.19   XML::DOM-1.25
+    Archive::Tar-0.072          HTML::Tagset-3.03   XML::Parser-2.27
+    Compress::Zlib-1.08         MIME::Base64-2.11   XML::Simple-1.05
+    Convert::ASN1-0.10          Net-1.07            XML::XPath-1.09
+    Digest::MD5-2.11            PPM-2.1.5           XML::XSLT-0.32
+    File::CounterFile-0.12      SOAP::Lite-0.46     libwww-perl-5.51
+    Font::AFM-1.18              Storable-1.011      libxml-perl-0.07
+    HTML-Tree-3.11              URI-1.11            perl-ldap-0.23
+
+The build is a portable hppa-1.1 multithread build that supports large
+files compiled with gcc-2.9-hppa-991112
+
+If you perform a new installation, then Perl will be installed
+automatically.
+
 =head2 Compiling Perl 5 on HP-UX
 
 When compiling Perl, you must use an ANSI C compiler.  The C compiler
