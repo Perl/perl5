@@ -100,9 +100,6 @@ PerlIO_init(void)
 
 #undef printf
 void PerlIO_debug(char *fmt,...) __attribute__((format(printf,1,2)));
-#ifndef __GNUC__
-#define __FUNCTION__ "PerlIO_debug"
-#endif
 
 void
 PerlIO_debug(char *fmt,...)
@@ -252,6 +249,9 @@ PerlIO_cleantable(PerlIO **tablep)
   }
 }
 
+HV *PerlIO_layer_hv;
+AV *PerlIO_layer_av;
+
 void
 PerlIO_cleanup(void)
 {
@@ -320,9 +320,6 @@ XS(XS_perlio_unimport)
  PerlIO_debug("%.*s\n",(int) l,s);
  XSRETURN_EMPTY;
 }
-
-HV *PerlIO_layer_hv;
-AV *PerlIO_layer_av;
 
 SV *
 PerlIO_find_layer(char *name, STRLEN len)
@@ -1343,7 +1340,8 @@ PerlIO_funcs PerlIO_stdio = {
 #ifdef USE_STDIO_PTR
  PerlIOStdio_get_ptr,
  PerlIOStdio_get_cnt,
-#if (defined(STDIO_PTR_LVALUE) && (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
+#if (defined(STDIO_PTR_LVALUE) && \
+    (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
  PerlIOStdio_set_ptrcnt
 #else  /* STDIO_PTR_LVALUE */
  NULL
@@ -1645,11 +1643,8 @@ PerlIOBuf_seek(PerlIO *f, Off_t offset, int whence)
    if (code == 0)
     {
      b->posn = PerlIO_tell(PerlIONext(f));
-     PerlIO_debug(__FUNCTION__ " f=%p posn=%ld\n",f,(long) b->posn);
     }
   }
- if (code)
-  PerlIO_debug(__FUNCTION__ " f=%p code%d\n",f,code);
  return code;
 }
 
@@ -1660,7 +1655,6 @@ PerlIOBuf_tell(PerlIO *f)
  Off_t posn = b->posn;
  if (b->buf)
   posn += (b->ptr - b->buf);
- PerlIO_debug(__FUNCTION__ " f=%p posn=%ld\n",f,(long) posn);
  return posn;
 }
 
@@ -1825,12 +1819,10 @@ PerlIOMmap_map(PerlIO *f)
      if (len > 0)
       {
        b->buf = (STDCHAR *) mmap(NULL, len, PROT_READ, MAP_PRIVATE, fd, b->posn);
-       PerlIO_debug(__FUNCTION__ " f=%p b=%p for %ld @ %ld\n",
-                    f, b->buf, (long) len, (long) b->posn);
        if (b->buf && b->buf != (STDCHAR *) -1)
         {
 #if defined(HAS_MADVISE) && defined(MADV_SEQUENTIAL)
-         madvise((Mmap_t)b->buf, len, MADV_SEQUENTIAL);
+         madvise((Mmap_t) b->buf, len, MADV_SEQUENTIAL);
 #endif
          PerlIOBase(f)->flags = flags | PERLIO_F_RDBUF;
          b->end = b->buf+len;
@@ -1869,8 +1861,6 @@ PerlIOMmap_unmap(PerlIO *f)
      m->len = 0;
      if (PerlIO_seek(PerlIONext(f),b->posn,SEEK_SET) != 0)
       code = -1;
-     PerlIO_debug(__FUNCTION__ " f=%p b=%p c=%ld posn=%ld\n",
-                  f,b->buf,(long)m->len,(long) b->posn);
     }
    b->ptr = b->end = b->buf;
    PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF|PERLIO_F_WRBUF);
@@ -1924,7 +1914,7 @@ PerlIOMmap_unread(PerlIO *f, const void *vbuf, Size_t count)
   }
  if (m->len)
   {
-   PerlIO_debug(__FUNCTION__ " f=%p %d '%.*s'\n",f,count,count,(char *)vbuf);
+   /* Loose the unwritable mapped buffer */
    PerlIO_flush(f);
   }
  return PerlIOBuf_unread(f,vbuf,count);
@@ -1978,8 +1968,6 @@ PerlIOMmap_flush(PerlIO *f)
      m->bbuf = b->buf;
     }
   }
- if (code)
-  PerlIO_debug(__FUNCTION__ " f=%p %d\n",f,code);
  return code;
 }
 
@@ -1988,16 +1976,13 @@ PerlIOMmap_fill(PerlIO *f)
 {
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  IV code = PerlIO_flush(f);
- PerlIO_debug(__FUNCTION__ " f=%p flush posn=%ld\n",f,(long)b->posn);
  if (code == 0 && !b->buf)
   {
    code = PerlIOMmap_map(f);
-   PerlIO_debug(__FUNCTION__ " f=%p mmap code=%d posn=%ld\n",f,code,(long)b->posn);
   }
  if (code == 0 && !(PerlIOBase(f)->flags & PERLIO_F_RDBUF))
   {
    code = PerlIOBuf_fill(f);
-   PerlIO_debug(__FUNCTION__ " f=%p fill code=%d posn=%ld\n",f,code,(long)b->posn);
   }
  return code;
 }
@@ -2016,7 +2001,6 @@ PerlIOMmap_close(PerlIO *f)
   }
  if (PerlIOBuf_close(f) != 0)
   code = -1;
- PerlIO_debug(__FUNCTION__ " f=%p %d\n",f,code);
  return code;
 }
 
