@@ -2281,7 +2281,7 @@ sub cookie {
     push(@param,'-expires'=>$expires) if $expires;
     push(@param,'-secure'=>$secure) if $secure;
 
-    return new CGI::Cookie(@param);
+    return CGI::Cookie->new(@param);
 }
 END_OF_FUNC
 
