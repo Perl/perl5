@@ -1,5 +1,12 @@
 #!./perl -w
 
+BEGIN {
+    unless (-d 'blib') {
+	chdir 't' if -d 't';
+	@INC = '../lib';
+    }
+}
+
 use Net::Config;
 use Net::NNTP;
 use Net::Cmd qw(CMD_REJECT);
