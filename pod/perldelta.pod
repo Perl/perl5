@@ -153,6 +153,9 @@ and some bugs.  These are expected to be fixed in future versions.
 
 See L<README.threads>.
 
+Mach cthreads (NEXTSTEP, OPENSTEP, Rhapsody) are now supported by
+the Thread extension.
+
 =head2 Compiler
 
 WARNING: The Compiler and related tools are considered B<experimental>.
