@@ -2061,9 +2061,9 @@ tryagain:
 		    default:
 			if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) && isALPHA(*p))
 			    Perl_warner(aTHX_ WARN_UNSAFE, 
-				   "/%.127s/: Unrecognized escape \\%c passed through",
-				   PL_regprecomp,
-				   *p);
+					"/%.127s/: Unrecognized escape \\%c passed through",
+					PL_regprecomp,
+					*p);
 			goto normal_default;
 		    }
 		    break;
@@ -2363,6 +2363,13 @@ S_regclass(pTHX)
 	    case '5': case '6': case '7': case '8': case '9':
 		value = scan_oct(--PL_regcomp_parse, 3, &numlen);
 		PL_regcomp_parse += numlen;
+		break;
+	    default:
+		if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) && isALPHA(value))
+		    Perl_warner(aTHX_ WARN_UNSAFE, 
+				"/%.127s/: Unrecognized escape \\%c in character class passed through",
+				PL_regprecomp,
+				value);
 		break;
 	    }
 	}
@@ -2807,6 +2814,13 @@ S_regclassutf8(pTHX)
 	    case '5': case '6': case '7': case '8': case '9':
 		value = scan_oct(--PL_regcomp_parse, 3, &numlen);
 		PL_regcomp_parse += numlen;
+		break;
+	    default:
+		if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) && isALPHA(value))
+		    Perl_warner(aTHX_ WARN_UNSAFE, 
+				"/%.127s/: Unrecognized escape \\%c in character class passed through",
+				PL_regprecomp,
+				value);
 		break;
 	    }
 	}

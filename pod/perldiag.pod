@@ -110,7 +110,12 @@ your signed integers.  See L<perlfunc/unpack>.
 
 (W) You used a backslash-character combination which is not recognized
 by Perl.  This combination appears in an interpolated variable or a 
-C<'>-delimited regular expression.
+C<'>-delimited regular expression.  The character was understood literally.
+
+=item /%s/: Unrecognized escape \\%c in character class passed through
+
+(W) You used a backslash-character combination which is not recognized
+by Perl inside character classes.  The character was understood literally.
 
 =item /%s/ should probably be written as "%s"
 
