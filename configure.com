@@ -1727,27 +1727,6 @@ $     ENDIF
 $   ENDIF
 $ ENDIF
 $!
-$! Pre-load %ENV?
-$ echo ""
-$ echo "Because of the way perl fetches the list of logical names
-$ echo "for the %ENV hash (we spawn a subprocess that does a
-$ echo "SHOW LOGICALS *, which is expensive), we defer fetching it
-$ echo "until the first time a program iterates over the %ENV hash.
-$ echo "This means things like 'exists($ENV{'SYS$MANAGER'})' will
-$ echo "return false unless you've already accessed $ENV{SYS$MANAGER}
-$ echo "or done something like a keys %ENV."
-$ echo ""
-$ echo "If you choose, perl can populate the %ENV hash at startup.
-$ echo "This will exact both a memory penalty (to store the keys) and
-$ echo "a time penalty (to spawn the subprocess) every time you invoke
-$ echo "perl. Depending on your system, this might not be a big deal.
-$ echo ""
-$ dflt = "n"
-$ rp = "Populate %ENV at startup time? [''dflt'] "
-$ GOSUB myread
-$ if ans.eqs."" then ans="''dflt'"
-$ preload_env = f$extract(0, 1, f$edit(ans,"TRIM,COMPRESS,UPCASE"))
-$!
 $! Ask if they want to use perl's memory allocator
 $ echo ""
 $ echo "Perl has a built-in memory allocator that's tuned for perl's

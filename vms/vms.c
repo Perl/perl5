@@ -119,12 +119,13 @@ my_trnlnm(char *lnm, char *eqv, unsigned long int idx)
  * caller; this pointer will be invalidated at next Perl statement
  * transition.
  */
-/*{{{ char *my_getenv(char *lnm)*/
+/*{{{ char *my_getenv(const char *lnm)*/
 char *
-my_getenv(char *lnm)
+my_getenv(const char *lnm)
 {
     static char __my_getenv_eqv[LNM$C_NAMLENGTH+1];
-    char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2, *eqv;
+    char uplnm[LNM$C_NAMLENGTH+1], *cp2, *eqv;
+    const char *cp1;
     unsigned long int idx = 0;
     int trnsuccess;
     SV *tmpsv;
