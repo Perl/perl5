@@ -39,8 +39,13 @@ static I32 amagic_ncmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_i_ncmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_cmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_cmp_locale(pTHXo_ SV *a, SV *b);
+#ifdef PERL_OBJECT
 static I32 sv_cmp_static(pTHXo_ SV *a, SV *b);
 static I32 sv_cmp_locale_static(pTHXo_ SV *a, SV *b);
+#else
+#define sv_cmp_static Perl_sv_cmp
+#define sv_cmp_locale_static Perl_sv_cmp_locale
+#endif
 
 PP(pp_wantarray)
 {
@@ -4090,6 +4095,8 @@ amagic_cmp_locale(pTHXo_ register SV *str1, register SV *str2)
     return sv_cmp_locale(str1, str2);
 }
 
+#ifdef PERL_OBJECT
+
 static I32
 sv_cmp_locale_static(pTHXo_ register SV *str1, register SV *str2)
 {
@@ -4101,3 +4108,5 @@ sv_cmp_static(pTHXo_ register SV *str1, register SV *str2)
 {
     return sv_cmp(str1, str2);
 }
+
+#endif /* PERL_OBJECT */
