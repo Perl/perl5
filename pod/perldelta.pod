@@ -22,6 +22,23 @@ contains a package variable named C<$NEGATIVE_INDICES> which is set to
 a true value, negative values will be passed to C<FETCH>, C<STORE>,
 C<EXISTS>, and C<DELETE> unchanged.
 
+=head2 Fewer parentheses needed with C<? :>
+
+The grammar of the conditional operator (C<$x ? $y : $z>) has been
+broadened so that any operator may appear between the C<?> and the
+C<:> without parentheses.  Previously, the comma operator and the
+low-precedence logical operators had required parentheses in this
+context.  For instance, you may now write
+
+     $x ? $a and $b : $c
+
+as a shorter version of the more explicit
+
+     $x ? ($a and $b) : $c
+
+Perl is now compatible with C in this regard. However, writing the
+parentheses is still recommended as a matter of style.
+
 =head1 Modules and Pragmata
 
 =head1 Utility Changes
