@@ -46,9 +46,9 @@ $Is_Cygwin  = $^O eq 'cygwin';
 $Is_MacOS   = $^O eq 'MacOS';
 $Is_MPE     = $^O eq 'mpeix';		
 
-$PERL = ($Is_NetWare ? 'perl'   :
-	 $Is_MacOS   ? $^X      :
-	 $Is_MSWin32 ? '.\perl' :
+$PERL = ($Is_NetWare            ? 'perl'   :
+	 ($Is_MacOS || $Is_VMS) ? $^X      :
+	 $Is_MSWin32            ? '.\perl' :
 	 './perl');
 
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
@@ -56,6 +56,7 @@ eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
 # -- Nikola Knezevic
 if ($Is_MSWin32)  { ok `set FOO` =~ /^(FOO=)?hi there$/; }
 elsif ($Is_MacOS) { ok "1 # skipped", 1; }
+elsif ($Is_VMS)   { ok `write sys\$output f\$trnlnm("FOO")` eq "hi there\n"; }
 else              { ok `echo \$FOO` eq "hi there\n"; }
 
 unlink 'ajslkdfpqjsjfk';
@@ -68,9 +69,14 @@ if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE || $Is_MacOS) {
     skip('SIGINT not safe on this platform') for 1..2;
 }
 else {
-  # the next tests are embedded inside system simply because sh spits out
-  # a newline onto stderr when a child process kills itself with SIGINT.
-    system './perl', '-e', <<'END';
+  # the next tests are done in a subprocess because sh spits out a
+  # newline onto stderr when a child process kills itself with SIGINT.
+  # We use a pipe rather than system() because the VMS command buffer 
+  # would overflow with a command that long.
+
+    open( CMDPIPE, "| $PERL");
+
+    print CMDPIPE <<'END';
 
     $| = 1;		# command buffering
 
@@ -88,6 +94,9 @@ else {
     }
 
 END
+
+    close CMDPIPE;
+
     $test += 2;
 }
 
@@ -153,7 +162,7 @@ ok $$ > 0, $$;
     else {
 	$wd = '.';
     }
-    my $perl = $Is_MacOS ? $^X : "$wd/perl";
+    my $perl = ($Is_MacOS || $Is_VMS) ? $^X : "$wd/perl";
     my $headmaybe = '';
     my $tailmaybe = '';
     $script = "$wd/show-shebang";
@@ -181,8 +190,8 @@ EOT
     elsif ($Is_MacOS) {
       $script = ":show-shebang";
     }
-    elsif ($Is_MacOS) {
-      $script = ":show-shebang";
+    elsif ($Is_VMS) {
+      $script = "[]show-shebang";
     }
     if ($^O eq 'os390' or $^O eq 'posix-bc' or $^O eq 'vmesa') {  # no shebang
 	$headmaybe = <<EOH ;
@@ -199,7 +208,7 @@ print "\$^X is $^X, \$0 is $0\n";
 EOF
     ok close(SCRIPT), $!;
     ok chmod(0755, $script), $!;
-    $_ = $Is_MacOS ? `$perl $script` : `$script`;
+    $_ = ($Is_MacOS || $Is_VMS) ? `$perl $script` : `$script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
@@ -218,7 +227,7 @@ ok $^O;
 ok $^T > 850000000, $^T;
 
 if ($Is_VMS || $Is_Dos || $Is_MacOS) {
-    skip("cannot test on $^O") for 1..2;
+    skip("%ENV manipulations fail or aren't safe on $^O") for 1..2;
 }
 else {
 	$PATH = $ENV{PATH};
@@ -238,7 +247,10 @@ else {
 			    : (`echo \$__NoNeSuCh` eq "foo\n") );
 }
 
-{
+if ($Is_VMS) {
+    ok(1,0,"'\$!=undef' does throw a warning");
+}
+else {
     local $SIG{'__WARN__'} = sub { print "# @_\nnot " };
     $! = undef;
     ok 1;
