@@ -3239,21 +3239,23 @@ Perl_regdump(pTHX_ regexp *r)
 
     /* Header fields of interest. */
     if (r->anchored_substr)
-	PerlIO_printf(Perl_debug_log, "anchored `%s%.*s%s'%s at %d ", 
+	PerlIO_printf(Perl_debug_log,
+		      "anchored `%s%.*s%s'%s at %"IVdf" ", 
 		      PL_colors[0],
-		      SvCUR(r->anchored_substr) - (SvTAIL(r->anchored_substr)!=0),
+		      (int)(SvCUR(r->anchored_substr) - (SvTAIL(r->anchored_substr)!=0)),
 		      SvPVX(r->anchored_substr), 
 		      PL_colors[1],
 		      SvTAIL(r->anchored_substr) ? "$" : "",
-		      r->anchored_offset);
+		      (IV)r->anchored_offset);
     if (r->float_substr)
-	PerlIO_printf(Perl_debug_log, "floating `%s%.*s%s'%s at %d..%u ", 
+	PerlIO_printf(Perl_debug_log,
+		      "floating `%s%.*s%s'%s at %"IVdf"..%"UVuf" ", 
 		      PL_colors[0],
-		      SvCUR(r->float_substr) - (SvTAIL(r->float_substr)!=0), 
+		      (int)(SvCUR(r->float_substr) - (SvTAIL(r->float_substr)!=0)), 
 		      SvPVX(r->float_substr),
 		      PL_colors[1],
 		      SvTAIL(r->float_substr) ? "$" : "",
-		      r->float_min_offset, r->float_max_offset);
+		      (IV)r->float_min_offset, (UV)r->float_max_offset);
     if (r->check_substr)
 	PerlIO_printf(Perl_debug_log, 
 		      r->check_substr == r->float_substr 

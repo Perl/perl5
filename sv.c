@@ -1699,8 +1699,8 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	return 0;
     }
 
-    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2uv(%lu)\n",
-	(unsigned long)sv,SvUVX(sv)));
+    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2uv(%"UVuf")\n",
+	(UV)sv,SvUVX(sv)));
     return SvIsUV(sv) ? SvUVX(sv) : (UV)SvIVX(sv);
 }
 
@@ -5652,7 +5652,7 @@ do_clean_named_objs(pTHXo_ SV *sv)
 static void
 do_clean_all(pTHXo_ SV *sv)
 {
-    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%lx\n", sv) );)
+    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) );)
     SvFLAGS(sv) |= SVf_BREAK;
     SvREFCNT_dec(sv);
 }

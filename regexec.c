@@ -424,7 +424,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			  (s ? "Found" : "Did not find"),
 			  ((check == prog->anchored_substr) ? "anchored" : "floating"),
 			  PL_colors[0],
-			  SvCUR(check) - (SvTAIL(check)!=0), SvPVX(check),
+			  (int)(SvCUR(check) - (SvTAIL(check)!=0)),
+			  SvPVX(check),
 			  PL_colors[1], (SvTAIL(check) ? "$" : ""),
 			  (s ? " at offset " : "...\n") ) );
 
@@ -480,8 +481,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		DEBUG_r(PerlIO_printf(Perl_debug_log, "%s anchored substr `%s%.*s%s'%s",
 			(s ? "Found" : "Contradicts"),
 			PL_colors[0],
-			  SvCUR(prog->anchored_substr)
-			  - (SvTAIL(prog->anchored_substr)!=0),
+			  (int)(SvCUR(prog->anchored_substr)
+			  - (SvTAIL(prog->anchored_substr)!=0)),
 			  SvPVX(prog->anchored_substr),
 			  PL_colors[1], (SvTAIL(prog->anchored_substr) ? "$" : "")));
 		if (!s) {
@@ -532,8 +533,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		DEBUG_r(PerlIO_printf(Perl_debug_log, "%s floating substr `%s%.*s%s'%s",
 			(s ? "Found" : "Contradicts"),
 			PL_colors[0],
-			  SvCUR(prog->float_substr)
-			  - (SvTAIL(prog->float_substr)!=0),
+			  (int)(SvCUR(prog->float_substr)
+			  - (SvTAIL(prog->float_substr)!=0)),
 			  SvPVX(prog->float_substr),
 			  PL_colors[1], (SvTAIL(prog->float_substr) ? "$" : "")));
 		if (!s) {
@@ -2141,7 +2142,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    
 	    n = ARG(scan);
 	    PL_op = (OP_4tree*)PL_regdata->data[n];
-	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", PL_op) );
+	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%"UVxf"\n", (UV)PL_op) );
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 2]);
 	    PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
@@ -2704,8 +2705,9 @@ S_regmatch(pTHX_ regnode *prog)
 		locinput = PL_reginput;
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log,
-				  "%*s  matched %ld times, len=%ld...\n",
-				  REPORT_CODE_OFF+PL_regindent*2, "", n, l)
+				  "%*s  matched %d times, len=%"IVdf"...\n",
+				  (int)(REPORT_CODE_OFF+PL_regindent*2), "",
+				  n, (IV)l)
 		    );
 		if (n >= ln) {
 		    if (PL_regkind[(U8)OP(next)] == EXACT) {
@@ -2729,8 +2731,8 @@ S_regmatch(pTHX_ regnode *prog)
 		    {
 			DEBUG_r(
 				PerlIO_printf(Perl_debug_log,
-					      "%*s  trying tail with n=%ld...\n",
-					      REPORT_CODE_OFF+PL_regindent*2, "", n)
+					      "%*s  trying tail with n=%"IVdf"...\n",
+					      (int)(REPORT_CODE_OFF+PL_regindent*2), "", (IV)n)
 			    );
 			if (paren) {
 			    if (n) {
@@ -3306,8 +3308,8 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 
 		regprop(prop, p);
 		PerlIO_printf(Perl_debug_log, 
-			      "%*s  %s can match %ld times out of %ld...\n", 
-			      REPORT_CODE_OFF+1, "", SvPVX(prop),c,max);
+			      "%*s  %s can match %"IVdf" times out of %"IVdf"...\n", 
+			      REPORT_CODE_OFF+1, "", SvPVX(prop),(IV)c,(IV)max);
 	});
     
     return(c);

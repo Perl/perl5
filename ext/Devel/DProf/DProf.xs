@@ -163,13 +163,13 @@ static void
 prof_dumpa(opcode ptype, U32 id)
 {
     if(ptype == OP_LEAVESUB){
-	PerlIO_printf(fp,"- %lx\n", id );
+	PerlIO_printf(fp,"- %"UVxf"\n", (UV)id );
     } else if(ptype == OP_ENTERSUB) {
-	PerlIO_printf(fp,"+ %lx\n", id );
+	PerlIO_printf(fp,"+ %"UVxf"\n", (UV)id );
     } else if(ptype == OP_GOTO) {
-	PerlIO_printf(fp,"* %lx\n", id );
+	PerlIO_printf(fp,"* %"UVxf"\n", (UV)id );
     } else if(ptype == OP_DIE) {
-	PerlIO_printf(fp,"/ %lx\n", id );
+	PerlIO_printf(fp,"/ %"UVxf"\n", (UV)id );
     } else {
 	PerlIO_printf(fp,"Profiler unknown prof code %d\n", ptype);
     }
@@ -178,7 +178,7 @@ prof_dumpa(opcode ptype, U32 id)
 static void
 prof_dumps(U32 id, char *pname, char *gname)
 {
-    PerlIO_printf(fp,"& %lx %s %s\n", id, pname, gname);
+    PerlIO_printf(fp,"& %"UVxf" %s %s\n", (UV)id, pname, gname);
 }   
 
 static clock_t otms_utime, otms_stime, orealtime;
@@ -477,7 +477,7 @@ prof_recordheader(void)
 
         /* fp is opened in the BOOT section */
         PerlIO_printf(fp, "#fOrTyTwO\n" );
-        PerlIO_printf(fp, "$hz=%d;\n", DPROF_HZ );
+        PerlIO_printf(fp, "$hz=%"IVdf";\n", (IV)DPROF_HZ );
         PerlIO_printf(fp, "$XS_VERSION='DProf %s';\n", XS_VERSION );
         PerlIO_printf(fp, "# All values are given in HZ\n" );
 	test_time(&r, &u, &s);
@@ -516,7 +516,7 @@ prof_record(void)
                 prof_end.tms_utime - prof_start.tms_utime - wprof_u,
                 prof_end.tms_stime - prof_start.tms_stime - wprof_s,
                 rprof_end - rprof_start - wprof_r );
-        PerlIO_printf(fp, "\n$total_marks=%ld;", total);
+        PerlIO_printf(fp, "\n$total_marks=%"IVdf, (IV)total);
 	
         PerlIO_close( fp );
 }
