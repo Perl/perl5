@@ -93,10 +93,6 @@
 #define SETn(n)		STMT_START { sv_setnv(TARG, (double)(n)); SETTARG; } STMT_END
 #define SETi(i)		STMT_START { sv_setiv(TARG, (IV)(i)); SETTARG; } STMT_END
 
-#ifdef OVERLOAD
-#define SETsv(sv)	STMT_START { sv_setsv(TARG, (sv)); SETTARG; } STMT_END
-#endif /* OVERLOAD */
-
 #define dTOPss		SV *sv = TOPs
 #define dPOPss		SV *sv = POPs
 #define dTOPnv		double value = TOPn
@@ -127,7 +123,7 @@
 				stack_base = AvARRAY(t);		\
 				stack_max = stack_base + AvMAX(t);	\
 				sp = stack_sp = stack_base + AvFILL(t);	\
-				stack = t;
+				curstack = t;
 
 #ifdef OVERLOAD
 
@@ -169,10 +165,13 @@
 	  } \
 	} STMT_END
 
-#define tryAMAGICun(meth) tryAMAGICunW(meth,SETsv)
+#define tryAMAGICun	tryAMAGICunSET
 #define tryAMAGICunSET(meth) tryAMAGICunW(meth,SETs)
 
 #define opASSIGN (op->op_flags & OPf_STACKED)
+#define SETsv(sv)	STMT_START {					\
+		if (opASSIGN) { sv_setsv(TARG, (sv)); SETTARG; }	\
+		else SETs(sv); } STMT_END
 
 /* newSVsv does not behave as advertised, so we copy missing
  * information by hand */
