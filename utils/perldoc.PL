@@ -109,7 +109,7 @@ Options:
     -r   Recursive search (slow)
     -i   Ignore case
     -t   Display pod using pod2text instead of pod2man and nroff
-             (-t is the default on win32)
+             (-t is the default on win32 unless -n is specified)
     -u	 Display unformatted pod text
     -m   Display module's file in its entirety
     -n   Specify replacement for nroff
@@ -197,8 +197,6 @@ if (!($Is_VMS || $Is_MSWin32 || $Is_Dos || $Is_OS2) && ($> == 0 || $< == 0)
     die "Superuser must not run $0 without security audit and taint checks.\n";
 }}
 
-$opt_n = "nroff" if !$opt_n;
-
 my $podidx;
 if ($opt_X) {
     $podidx = "$Config{'archlib'}/pod.idx";
@@ -212,10 +210,12 @@ elsif ($Is_MSWin32
        || $Is_Dos
        || !($ENV{TERM} && $ENV{TERM} !~ /dumb|emacs|none|unknown/i))
 {
-    $opt_t = 1 unless $opts;
+    $opt_t = 1 unless ( $opts || $opt_n );
 }
 
 if ($opt_t) { require Pod::Text; import Pod::Text; }
+
+$opt_n = "nroff" if !$opt_n;
 
 my @pages;
 if ($opt_f) {
@@ -779,7 +779,7 @@ One useful value for C<PERLDOC_PAGER> is C<less -+C -E>.
 
 =head1 VERSION
 
-This is perldoc v2.03.
+This is perldoc v2.04.
 
 =head1 AUTHOR
 
@@ -791,6 +791,9 @@ and others.
 =cut
 
 #
+# Version 2.04: Sun Aug 18 13:27:12 BST 2002
+#   Randy W. Sims <RandyS@ThePierianSpring.org>
+#   allow -n to enable nroff under Win32
 # Version 2.03: Sun Apr 23 16:56:34 BST 2000
 #	Hugo van der Sanden <hv@crypt0.demon.co.uk>
 #	don't die when 'use blib' fails
