@@ -93,8 +93,8 @@ dl_load_file(filename, flags=0)
     PREINIT:
     int dlderr,x,max;
     GV *gv;
-    CODE:
     dMY_CXT;
+    CODE:
     RETVAL = filename;
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
     if (flags & 0x01)
@@ -180,8 +180,9 @@ dl_install_xsub(perl_name, symref, filename="$Package")
 
 char *
 dl_error()
-    CODE:
+    PREINIT:
     dMY_CXT;
+    CODE:
     RETVAL = dl_last_error ;
     OUTPUT:
     RETVAL
