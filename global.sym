@@ -4,8 +4,6 @@
 
 AMG_names
 Error
-No
-Yes
 abs_amg
 add_amg
 add_ass_amg
@@ -39,7 +37,6 @@ get_op_descs
 get_op_names
 ge_amg
 gt_amg
-hexdigit
 init_thread_intern
 inc_amg
 io_close
@@ -77,7 +74,6 @@ numer_amg
 op_desc
 op_name
 opargs
-patleave
 pow_amg
 pow_ass_amg
 ppaddr
@@ -113,7 +109,6 @@ string_amg
 subtr_amg
 subtr_ass_amg
 varies
-vert
 vivify_defelem
 vivify_ref
 vtbl_amagic

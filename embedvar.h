@@ -609,6 +609,8 @@
 
 #ifdef PERL_GLOBAL_STRUCT
 
+#define No			(Perl_Vars.GNo)
+#define Yes			(Perl_Vars.GYes)
 #define amagic_generation	(Perl_Vars.Gamagic_generation)
 #define an			(Perl_Vars.Gan)
 #define bufend			(Perl_Vars.Gbufend)
@@ -642,6 +644,7 @@
 #define expect			(Perl_Vars.Gexpect)
 #define gid			(Perl_Vars.Ggid)
 #define he_root			(Perl_Vars.Ghe_root)
+#define hexdigit		(Perl_Vars.Ghexdigit)
 #define hints			(Perl_Vars.Ghints)
 #define in_my			(Perl_Vars.Gin_my)
 #define in_my_stash		(Perl_Vars.Gin_my_stash)
@@ -694,6 +697,7 @@
 #define pad_reset_pending	(Perl_Vars.Gpad_reset_pending)
 #define padix			(Perl_Vars.Gpadix)
 #define padix_floor		(Perl_Vars.Gpadix_floor)
+#define patleave		(Perl_Vars.Gpatleave)
 #define pidstatus		(Perl_Vars.Gpidstatus)
 #define profiledata		(Perl_Vars.Gprofiledata)
 #define rsfp			(Perl_Vars.Grsfp)
@@ -723,6 +727,8 @@
 
 #else /* !PERL_GLOBAL_STRUCT */
 
+#define GNo			No
+#define GYes			Yes
 #define Gamagic_generation	amagic_generation
 #define Gan			an
 #define Gbufend			bufend
@@ -756,6 +762,7 @@
 #define Gexpect			expect
 #define Ggid			gid
 #define Ghe_root		he_root
+#define Ghexdigit		hexdigit
 #define Ghints			hints
 #define Gin_my			in_my
 #define Gin_my_stash		in_my_stash
@@ -808,6 +815,7 @@
 #define Gpad_reset_pending	pad_reset_pending
 #define Gpadix			padix
 #define Gpadix_floor		padix_floor
+#define Gpatleave		patleave
 #define Gpidstatus		pidstatus
 #define Gprofiledata		profiledata
 #define Grsfp			rsfp
@@ -837,6 +845,8 @@
 
 #ifdef EMBED
 
+#define No			Perl_No
+#define Yes			Perl_Yes
 #define amagic_generation	Perl_amagic_generation
 #define an			Perl_an
 #define bufend			Perl_bufend
@@ -870,6 +880,7 @@
 #define expect			Perl_expect
 #define gid			Perl_gid
 #define he_root			Perl_he_root
+#define hexdigit		Perl_hexdigit
 #define hints			Perl_hints
 #define in_my			Perl_in_my
 #define in_my_stash		Perl_in_my_stash
@@ -922,6 +933,7 @@
 #define pad_reset_pending	Perl_pad_reset_pending
 #define padix			Perl_padix
 #define padix_floor		Perl_padix_floor
+#define patleave		Perl_patleave
 #define pidstatus		Perl_pidstatus
 #define profiledata		Perl_profiledata
 #define rsfp			Perl_rsfp
