@@ -214,28 +214,3 @@ esac
 #     assembler of the form:
 #          (warning) Use of GR3 when frame >= 8192 may cause conflict.
 #     These warnings are harmless and can be safely ignored.
-
-# 64-bitness.
-# jhi@iki.fi, inspired by Jeff Okamoto.
-
-if [ X"$use64bits" = X"$define" ]; then
-  if [ "$xxOsRevMajor" -lt 11 ]; then
-     cat <<EOM >&4
-64-bit compilation is not supported on HP-UX $xxOsRevMajor.
-You need at least HP-UX 11.0.
-EOM
-     exit 1
-  fi
-  if [ ! -d /lib/pa20_64 ]; then
-     cat <<EOM >&4
-You do not seem to have the 64-bit libraries, /lib/pa20_64.
-EOM
-    exit 1
-  fi
-  ccflags="$ccflags +DD64 -D_FILE_OFFSET_BITS=64"
-  ldflags="$ldflags +DD64"
-  ld=/usr/bin/ld
-  set `echo " $libswanted " | sed -e 's@ dl @ @'`
-  libswanted="$*"
-  glibpth="/lib/pa20_64"
-fi
