@@ -75,6 +75,7 @@
 #include <stdio.h>
 #include <direct.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #ifndef EXT
 #include "EXTERN.h"
 #endif
