@@ -404,7 +404,11 @@ sub doConstants {
 	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		     d_nanosleep)) {
 	    my $macro = $_;
-	    $macro =~ s/d_(.*)/HAS_\U$1/;
+	    if ($macro eq 'd_nanosleep') {
+		$macro =~ s/d_(.*)/TIME_HIRES_\U$1/;
+	    } else {
+		$macro =~ s/d_(.*)/HAS_\U$1/;
+	    }
 	    push @names, {name => $_, macro => $macro, value => 1,
 			  default => ["IV", "0"]};
 	}
