@@ -1,4 +1,4 @@
-# SpecialCasing-3.txt
+# SpecialCasing-4.txt
 #
 # Special Casing Properties
 #
@@ -6,49 +6,36 @@
 # It contains additional information about the casing of Unicode characters.
 # (For compatibility, the UnicodeData.txt file only contains case mappings for
 # characters where they are 1-1, and does not have locale-specific mappings.)
-# These are informative character properties.
-#
-# Send comments to mark@unicode.org
+# For more information, see
+# UTR #21 Case Mappings, at http://www.unicode.org/unicode/reports/tr21/
 #
 # ================================================================================
 # Format
 # ================================================================================
 # The entries in this file are in the following machine-readable format:
 #
-# <entry> := <case_mapping> <condition_list>? (<s>* "#" <comment>)?
+# <code>; <lower> ; <title> ; <upper> ; (<condition_list> ;)? # <comment>
 #
-# <case_mapping> := <source> <sep> <lower> <sep> <title> <sep> <upper> <sep>
+# <code>, <lower>, <title>, and <upper> provide character values in hex. If there is more than
+# one character, they are separated by spaces.
 #
-# <source> := <code_point>
-# <sep> := <s>* ";" <s>*
-# <lower> := <code_point_list>
-# <title> := <code_point_list>
-# <upper> := <code_point_list>
-# <code_point_list> := <code_point> (<s>+ <code_point>)*
-# <code_point> := <hex><hex><hex><hex>
-# <hex> := [0-9A-Fa-f]
-# <s> := <space>
-#
-# <condition_list> := <locale>? (<s>+ <context>)* <sep>
-# <locale> := <ISO_639_code> ( "_" <ISO_3166_code> )? ( "_" <variant> )?
-# <ISO_3166_code> := 2-letter country code,
-#                    as in http://www.unicode.org/unicode/onlinedat/countries.html
-# <ISO_639_code> :=  2-letter code,
-#                    as in http://www.unicode.org/unicode/onlinedat/languages.html
-# <context> := "FINAL" | "NON_FINAL" | "MODERN" | "NON_MODERN" | "AFTER_i"
-#
+# The <condition_list> is optional. Where present, it consists of one or more locales or contexts,
+# separated by spaces.
 #  A condition list overrides the normal behavior if all of the listed conditions are true.
 #  Case distinctions in the condition list are not significant.
+#  Conditions preceded by "NON_" represent the negation of the condition
 #
-#   FINAL:  The letter is not followed by a letter of category L* (e.g. Ll, Lt, Lu, Lm, or Lo).
+# A locale is defined as:
+# <locale> := <ISO_639_code> ( "_" <ISO_3166_code> ( "_" <variant> )? )?
+# <ISO_3166_code> := 2-letter ISO country code,
+# <ISO_639_code> :=  2-letter ISO language code
+#
+# A context is one of the following choices:
+#   FINAL:  The letter is not followed by a letter of general category L* (e.g. Ll, Lt, Lu, Lm, or Lo).
 #   MODERN: The mapping is only used for modern text.
 #   AFTER_i: The last base character was "i" 0069
 #
-#  Conditions preceded by "NON_" represent the negation of the condition
-#
-# New contexts may be added in the future.
-# Additional whitespace around elements is optional. Blank lines are ignored in parsing.
-# On any line, all text following "#" is a comment, and are ignored in parsing.
+# Other than as used to separate elements, spaces are to be ignored.
 #
 # Parsers of this file must be prepared to deal future additions to this format:
 #  * Additional contexts
@@ -219,10 +206,13 @@ FB17; FB17; 0544 056D; 0544 053D; # ARMENIAN SMALL LIGATURE MEN XEH
 
 0307; 0307; ; ; lt AFTER_i; # Remove DOT ABOVE after "i" with upper or titlecase
 
-# Turkish
+# Turkish, Azeri
 
 0049; 0131; 0049; 0049; tr; # LATIN CAPITAL LETTER I
 0069; 0069; 0130; 0130; tr; # LATIN SMALL LETTER I
+
+0049; 0131; 0049; 0049; az; # LATIN CAPITAL LETTER I
+0069; 0069; 0130; 0130; az; # LATIN SMALL LETTER I
 
 # Note: the following cases are already in the UnicodeData file.
 
