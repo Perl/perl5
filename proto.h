@@ -465,6 +465,7 @@ PERL_CALLCONV int	Perl_magic_setsubstr(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_settaint(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_setuvar(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_setvec(pTHX_ SV* sv, MAGIC* mg);
+PERL_CALLCONV int	Perl_magic_setutf8(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_set_all_env(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV U32	Perl_magic_sizepack(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_wipepack(pTHX_ SV* sv, MAGIC* mg);
@@ -1279,6 +1280,8 @@ STATIC I32	S_expect_number(pTHX_ char** pattern);
 #  if defined(USE_ITHREADS)
 STATIC SV*	S_gv_share(pTHX_ SV *sv, CLONE_PARAMS *param);
 #  endif
+STATIC bool	S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, U8 **sp, U8 *start, U8 *send);
+STATIC bool	S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, U8 *s, U8 *start);
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

@@ -2656,6 +2656,7 @@ Gid_t getegid (void);
 #define PERL_MAGIC_uvar		  'U' /* Available for use by extensions */
 #define PERL_MAGIC_uvar_elem	  'u' /* Reserved for use by extensions */
 #define PERL_MAGIC_vec		  'v' /* vec() lvalue */
+#define PERL_MAGIC_utf8		  'w' /* Cached UTF-8 information */
 #define PERL_MAGIC_substr	  'x' /* substr() lvalue */
 #define PERL_MAGIC_defelem	  'y' /* Shadow "foreach" iterator variable /
 					smart parameter vivification */
@@ -3248,7 +3249,8 @@ enum {		/* pass one of these to get_vtbl */
 #endif
     want_vtbl_regdata,
     want_vtbl_regdatum,
-    want_vtbl_backref
+    want_vtbl_backref,
+    want_vtbl_utf8
 };
 
 				/* Note: the lowest 8 bits are reserved for
@@ -3568,6 +3570,10 @@ EXT MGVTBL PL_vtbl_backref = 	  {0,	0,
 EXT MGVTBL PL_vtbl_ovrld   = 	  {0,	0,
 					0,	0,	MEMBER_TO_FPTR(Perl_magic_freeovrld)};
 
+EXT MGVTBL PL_vtbl_utf8 = {0,
+				MEMBER_TO_FPTR(Perl_magic_setutf8),
+					0,	0,	0};
+
 #else /* !DOINIT */
 
 EXT MGVTBL PL_vtbl_sv;
@@ -3610,6 +3616,7 @@ EXT MGVTBL PL_vtbl_amagic;
 EXT MGVTBL PL_vtbl_amagicelem;
 
 EXT MGVTBL PL_vtbl_backref;
+EXT MGVTBL PL_vtbl_utf8;
 
 #endif /* !DOINIT */
 
@@ -4239,6 +4246,8 @@ extern void moncontrol(int);
 #ifndef PIPESOCK_MODE
 #  define PIPESOCK_MODE
 #endif
+
+#define PERL_MAGIC_UTF8_CACHESIZE	2
 
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT

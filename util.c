@@ -3264,6 +3264,9 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     case want_vtbl_backref:
 	result = &PL_vtbl_backref;
 	break;
+    case want_vtbl_utf8:
+	result = &PL_vtbl_utf8;
+	break;
     }
     return result;
 }

@@ -770,6 +770,7 @@ static struct { char type; char *name; } magic_names[] = {
 	{ PERL_MAGIC_taint,          "taint(t)" },
 	{ PERL_MAGIC_uvar_elem,      "uvar_elem(v)" },
 	{ PERL_MAGIC_vec,            "vec(v)" },
+	{ PERL_MAGIC_utf8,           "utf8(w)" },
 	{ PERL_MAGIC_substr,         "substr(x)" },
 	{ PERL_MAGIC_defelem,        "defelem(y)" },
 	{ PERL_MAGIC_ext,            "ext(~)" },
@@ -813,6 +814,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 	    else if (v == &PL_vtbl_amagic)     s = "amagic";
 	    else if (v == &PL_vtbl_amagicelem) s = "amagicelem";
 	    else if (v == &PL_vtbl_backref)    s = "backref";
+	    else if (v == &PL_vtbl_utf8)       s = "utf8";
 	    if (s)
 	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = &PL_vtbl_%s\n", s);
 	    else
@@ -877,6 +879,18 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 		PerlIO_puts(file, " ???? - please notify IZ");
             PerlIO_putc(file, '\n');
         }
+	if (mg->mg_type == PERL_MAGIC_utf8) {
+	     STRLEN *cache = (STRLEN *) mg->mg_ptr;
+	     if (cache) {
+		  IV i;
+		  for (i = 0; i < PERL_MAGIC_UTF8_CACHESIZE; i++)
+		       Perl_dump_indent(aTHX_ level, file,
+					"      %2"IVdf": %"UVuf" -> %"UVuf"\n",
+					i,
+					(UV)cache[i * 2],
+					(UV)cache[i * 2 + 1]);
+	     }
+	}
     }
 }
 

@@ -428,6 +428,7 @@ p	|int	|magic_setsubstr|SV* sv|MAGIC* mg
 p	|int	|magic_settaint	|SV* sv|MAGIC* mg
 p	|int	|magic_setuvar	|SV* sv|MAGIC* mg
 p	|int	|magic_setvec	|SV* sv|MAGIC* mg
+p	|int	|magic_setutf8	|SV* sv|MAGIC* mg
 p	|int	|magic_set_all_env|SV* sv|MAGIC* mg
 p	|U32	|magic_sizepack	|SV* sv|MAGIC* mg
 p	|int	|magic_wipepack	|SV* sv|MAGIC* mg
@@ -1244,6 +1245,8 @@ s	|I32	|expect_number	|char** pattern
 #  if defined(USE_ITHREADS)
 s	|SV*	|gv_share	|SV *sv|CLONE_PARAMS *param
 #  endif
+s 	|bool	|utf8_mg_pos	|SV *sv|MAGIC **mgp|STRLEN **cachep|I32 i|I32 *offsetp|I32 uoff|U8 **sp|U8 *start|U8 *send
+s	|bool	|utf8_mg_pos_init	|SV *sv|MAGIC **mgp|STRLEN **cachep|I32 i|I32 *offsetp|U8 *s|U8 *start
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
