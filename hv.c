@@ -89,6 +89,22 @@ S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     return hek;
 }
 
+/* free the pool of temporary HE/HEK pairs retunrned by hv_fetch_ent
+ * for tied hashes */
+
+void
+Perl_free_tied_hv_pool(pTHX)
+{
+    HE *ohe;
+    HE *he = PL_hv_fetch_ent_mh;
+    while (he) {
+	Safefree(HeKEY_hek(he));
+	ohe = he;
+	he = HeNEXT(he);
+	del_HE(ohe);
+    }
+}
+
 #if defined(USE_ITHREADS)
 HE *
 Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
@@ -107,8 +123,12 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
     ptr_table_store(PL_ptr_table, e, ret);
 
     HeNEXT(ret) = he_dup(HeNEXT(e),shared, param);
-    if (HeKLEN(e) == HEf_SVKEY)
+    if (HeKLEN(e) == HEf_SVKEY) {
+	char *k;
+	New(54, k, HEK_BASESIZE + sizeof(SV*), char);
+	HeKEY_hek(ret) = (HEK*)k;
 	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e), param));
+    }
     else if (shared)
 	HeKEY_hek(ret) = share_hek_flags(HeKEY(e), HeKLEN(e), HeHASH(e),
                                          HeKFLAGS(e));
@@ -208,11 +228,13 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
         */
 	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
+	    sv_upgrade(sv, SVt_PVLV);
 	    mg_copy((SV*)hv, sv, key, klen);
             if (flags & HVhek_FREEKEY)
                 Safefree(key);
-	    PL_hv_fetch_sv = sv;
-	    return &PL_hv_fetch_sv;
+	    LvTYPE(sv) = 't';
+	    LvTARG(sv) = sv; /* fake (SV**) */
+	    return &(LvTARG(sv));
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -356,17 +378,26 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
-	    keysv = sv_2mortal(newSVsv(keysv));
+	    keysv = newSVsv(keysv);
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
-	    if (!HeKEY_hek(&PL_hv_fetch_ent_mh)) {
+	    /* grab a fake HE/HEK pair from the pool or make a new one */
+	    entry = PL_hv_fetch_ent_mh;
+	    if (entry)
+		PL_hv_fetch_ent_mh = HeNEXT(entry);
+	    else {
 		char *k;
+		entry = new_HE();
 		New(54, k, HEK_BASESIZE + sizeof(SV*), char);
-		HeKEY_hek(&PL_hv_fetch_ent_mh) = (HEK*)k;
+		HeKEY_hek(entry) = (HEK*)k;
 	    }
-	    HeSVKEY_set(&PL_hv_fetch_ent_mh, keysv);
-	    HeVAL(&PL_hv_fetch_ent_mh) = sv;
-	    return &PL_hv_fetch_ent_mh;
-	}
+	    HeNEXT(entry) = Nullhe;
+	    HeSVKEY_set(entry, keysv);
+	    HeVAL(entry) = sv;
+	    sv_upgrade(sv, SVt_PVLV);
+	    LvTYPE(sv) = 'T';
+	    LvTARG(sv) = (SV*)entry; /* so we can free entry when freeing sv */
+	    return entry;
+ 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 	    U32 i;

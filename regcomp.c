@@ -575,14 +575,17 @@ S_cl_and(pTHX_ struct regnode_charclass_class *cl,
     if (!(and_with->flags & ANYOF_EOS))
 	cl->flags &= ~ANYOF_EOS;
 
-    if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_UNICODE) {
+    if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_UNICODE &&
+	!(and_with->flags & ANYOF_INVERT)) {
 	cl->flags &= ~ANYOF_UNICODE_ALL;
 	cl->flags |= ANYOF_UNICODE;
 	ARG_SET(cl, ARG(and_with));
     }
-    if (!(and_with->flags & ANYOF_UNICODE_ALL))
+    if (!(and_with->flags & ANYOF_UNICODE_ALL) &&
+	!(and_with->flags & ANYOF_INVERT))
 	cl->flags &= ~ANYOF_UNICODE_ALL;
-    if (!(and_with->flags & (ANYOF_UNICODE|ANYOF_UNICODE_ALL)))
+    if (!(and_with->flags & (ANYOF_UNICODE|ANYOF_UNICODE_ALL)) &&
+	!(and_with->flags & ANYOF_INVERT))
 	cl->flags &= ~ANYOF_UNICODE;
 }
 

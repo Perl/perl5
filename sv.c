@@ -3069,7 +3069,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 				    s = "REF";
 				else
 				    s = "SCALAR";		break;
-		case SVt_PVLV:	s = "LVALUE";			break;
+		case SVt_PVLV:	s = SvROK(sv) ? "REF":"LVALUE";	break;
 		case SVt_PVAV:	s = "ARRAY";			break;
 		case SVt_PVHV:	s = "HASH";			break;
 		case SVt_PVCV:	s = "CODE";			break;
@@ -5134,7 +5134,13 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	av_undef((AV*)sv);
 	break;
     case SVt_PVLV:
-	SvREFCNT_dec(LvTARG(sv));
+	if (LvTYPE(sv) == 'T') { /* for tie: return HE to pool */
+	    SvREFCNT_dec(HeKEY_sv((HE*)LvTARG(sv)));
+	    HeNEXT((HE*)LvTARG(sv)) = PL_hv_fetch_ent_mh;
+	    PL_hv_fetch_ent_mh = (HE*)LvTARG(sv);
+	}
+	else if (LvTYPE(sv) != 't') /* unless tie: unrefcnted fake SV**  */
+	    SvREFCNT_dec(LvTARG(sv));
 	goto freescalar;
     case SVt_PVGV:
 	gp_free((GV*)sv);
@@ -7500,7 +7506,7 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
 				    return "REF";
 				else
 				    return "SCALAR";
-	case SVt_PVLV:		return "LVALUE";
+	case SVt_PVLV:		return SvROK(sv) ? "REF" : "LVALUE";
 	case SVt_PVAV:		return "ARRAY";
 	case SVt_PVHV:		return "HASH";
 	case SVt_PVCV:		return "CODE";
@@ -9713,7 +9719,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	LvTARGOFF(dstr)	= LvTARGOFF(sstr);	/* XXX sometimes holds PMOP* when DEBUGGING */
 	LvTARGLEN(dstr)	= LvTARGLEN(sstr);
-	LvTARG(dstr)	= sv_dup_inc(LvTARG(sstr), param);
+	if (LvTYPE(sstr) == 't') /* for tie: unrefcnted fake (SV**) */
+	    LvTARG(dstr) = dstr;
+	else if (LvTYPE(sstr) == 'T') /* for tie: fake HE */
+	    LvTARG(dstr) = (SV*)he_dup((HE*)LvTARG(sstr), 0, param);
+	else
+	    LvTARG(dstr) = sv_dup_inc(LvTARG(sstr), param);
 	LvTYPE(dstr)	= LvTYPE(sstr);
 	break;
     case SVt_PVGV:
@@ -11040,9 +11051,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_protect		= proto_perl->Tprotect;
 #endif
     PL_errors		= sv_dup_inc(proto_perl->Terrors, param);
-    PL_av_fetch_sv	= Nullsv;
-    PL_hv_fetch_sv	= Nullsv;
-    Zero(&PL_hv_fetch_ent_mh, 1, HE);			/* XXX */
+    PL_hv_fetch_ent_mh	= Nullhe;
     PL_modcount		= proto_perl->Tmodcount;
     PL_lastgotoprobe	= Nullop;
     PL_dumpindent	= proto_perl->Tdumpindent;

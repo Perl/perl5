@@ -295,3 +295,34 @@ tie $a, 'main';
 print $a;
 EXPECT
 Tied variable freed while still in use at - line 6.
+########
+
+#  [20020716.007] - nested FETCHES
+
+sub F1::TIEARRAY { bless [], 'F1' }
+sub F1::FETCH { 1 }
+my @f1;
+tie @f1, 'F1';
+
+sub F2::TIEARRAY { bless [2], 'F2' }
+sub F2::FETCH { my $self = shift; my $x = $f1[3]; $self }
+my @f2;
+tie @f2, 'F2';
+
+print $f2[4][0],"\n";
+
+sub F3::TIEHASH { bless [], 'F3' }
+sub F3::FETCH { 1 }
+my %f3;
+tie %f3, 'F3';
+
+sub F4::TIEHASH { bless [3], 'F4' }
+sub F4::FETCH { my $self = shift; my $x = $f3{3}; $self }
+my %f4;
+tie %f4, 'F4';
+
+print $f4{'foo'}[0],"\n";
+
+EXPECT
+2
+3

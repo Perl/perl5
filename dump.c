@@ -1170,8 +1170,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  TARGOFF = %"IVdf"\n", (IV)LvTARGOFF(sv));
 	Perl_dump_indent(aTHX_ level, file, "  TARGLEN = %"IVdf"\n", (IV)LvTARGLEN(sv));
 	Perl_dump_indent(aTHX_ level, file, "  TARG = 0x%"UVxf"\n", PTR2UV(LvTARG(sv)));
-	/* XXX level+1 ??? */
-	do_sv_dump(level, file, LvTARG(sv), nest+1, maxnest, dumpops, pvlim);
+	if (LvTYPE(sv) != 't' && LvTYPE(sv) != 'T')
+	    do_sv_dump(level+1, file, LvTARG(sv), nest+1, maxnest,
+		    dumpops, pvlim);
 	break;
     case SVt_PVAV:
 	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%"UVxf, PTR2UV(AvARRAY(sv)));

@@ -652,7 +652,6 @@ PerlIO_get_layers(pTHX_ PerlIO *f)
      AV *av = newAV();
 
      if (PerlIOValid(f)) {
-          dSP;
 	  PerlIOl *l = PerlIOBase(f);
 
 	  while (l) {

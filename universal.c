@@ -576,7 +576,6 @@ XS(XS_PerlIO_get_layers)
 	bool	details = FALSE;
 
 	if (items > 1) {
-	     SV **popuntil = MARK + 1;
 	     SV **svp;
 	     
 	     for (svp = MARK + 2; svp <= SP; svp += 2) {

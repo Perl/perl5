@@ -1414,6 +1414,7 @@ STATIC void	S_cv_dump(pTHX_ CV *cv, char *title);
 STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 #endif
 PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp);
+PERL_CALLCONV void	Perl_free_tied_hv_pool(pTHX);
 
 
 

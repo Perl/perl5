@@ -901,7 +901,7 @@ perl_destruct(pTHXx)
     if (PL_reg_curpm)
 	Safefree(PL_reg_curpm);
     Safefree(PL_reg_poscache);
-    Safefree(HeKEY_hek(&PL_hv_fetch_ent_mh));
+    free_tied_hv_pool();
     Safefree(PL_op_mask);
     Safefree(PL_psig_ptr);
     Safefree(PL_psig_name);
