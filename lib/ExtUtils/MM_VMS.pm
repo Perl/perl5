@@ -873,6 +873,7 @@ sub cflags {
 	}
     }
     $quals .= "$incstr)";
+    $quals =~ s/\(,/\(/g;
     $self->{CCFLAGS} = $quals;
 
     $self->{OPTIMIZE} ||= $flagoptstr || $Config{'optimize'};
