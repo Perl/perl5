@@ -21,7 +21,7 @@
 #      ifndef HAS_SHMAT_PROTOTYPE
            extern Shmat_t shmat _((int, char *, int));
 #      endif
-#      if defined(__NetBSD__) && defined(__sparc__)
+#      if defined(__sparc__) && (defined(__NetBSD__) || defined(__OpenBSD__))
 #          undef  SHMLBA /* not static: determined at boot time */
 #          define SHMLBA getpagesize()
 #      endif
