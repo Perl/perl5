@@ -2,7 +2,7 @@ package File::Find;
 use strict;
 use warnings;
 use 5.6.0;
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 require Exporter;
 require Cwd;
 
@@ -267,6 +267,12 @@ volume actually maintains its own "Desktop Folder" directory.
 =back
 
 =back
+
+=head1 HISTORY
+
+File::Find used to produce incorrect results if called recursively.
+During the development of perl 5.8 this bug was fixed.
+The first fixed version of File::Find was 1.01.
 
 =cut
 
