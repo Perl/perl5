@@ -41,7 +41,7 @@ ok(!!looks_like_number("Inf"),	    $] >= 5.006001);
 ok(!!looks_like_number("Infinity"), $] >= 5.008);
 ok(!!looks_like_number("NaN"),	    $] >= 5.008);
 ok(!!looks_like_number("foo"),	    '');
-ok(!!looks_like_number(undef),	    1);
+ok(!!looks_like_number(undef),	    $] < 5.009002);
 # That's enough - we trust the perl core tests like t/base/num.t
 
 __END__

@@ -10,7 +10,7 @@ require Exporter;
 
 @ISA        = qw(Exporter);
 @EXPORT_OK  = qw(first min max minstr maxstr reduce sum shuffle);
-$VERSION    = "1.13";
+$VERSION    = "1.13_01";
 $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 

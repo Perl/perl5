@@ -11,7 +11,7 @@ require List::Util; # List::Util loads the XS
 
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number set_prototype);
-$VERSION   = "1.13";
+$VERSION   = "1.13_01";
 $VERSION   = eval $VERSION;
 
 sub export_fail {
