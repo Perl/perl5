@@ -1061,13 +1061,14 @@ sub test_splice {
     my @array = @$array;
     my @list = @$list;
 
-    open(TEXT, ">$tmp") or die "cannot write to $tmp: $!";
-    foreach (@array) { print TEXT "$_\n" }
-    close TEXT or die "cannot close $tmp: $!";
+    unlink $tmp;
     
     my @h;
-    my $H = tie @h, 'DB_File', $tmp, O_RDWR, 0644, $DB_RECNO
+    my $H = tie @h, 'DB_File', $tmp, O_CREAT|O_RDWR, 0644, $DB_RECNO
       or die "cannot open $tmp: $!";
+
+    my $i = 0;
+    foreach ( @array ) { $h[$i++] = $_ }
     
     return "basic DB_File sanity check failed"
       if list_diff(\@array, \@h);
