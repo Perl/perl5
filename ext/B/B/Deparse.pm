@@ -2408,7 +2408,9 @@ sub pp_const {
 #	return $self->const_sv($op)->PV;
 #    }
     my $sv = $self->const_sv($op);
-    return const($sv);
+#    return const($sv);
+    my $c = const $sv; 
+    return $c < 0 ? $self->maybe_parens($c, $cx, 21) : $c;
 }
 
 sub dq {
