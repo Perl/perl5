@@ -56,7 +56,7 @@ for ($i = 1; @tests; $i++) {
     }
     elsif ($y eq ">$result<")	# Some C libraries always give
     {				# three-digit exponent
-		print("ok $i >$result< $x # three-digit exponent accepted\n");
+		print("ok $i # >$result< $x three-digit exponent accepted\n");
     }
 	elsif ($result =~ /[-+]\d{3}$/ &&
 		   # Suppress tests with modulo of exponent >= 100 on platforms
@@ -64,8 +64,8 @@ for ($i = 1; @tests; $i++) {
 		   ((!eval {require POSIX}) || # Costly: only do this if we must!
 			(length(&POSIX::DBL_MAX) - rindex(&POSIX::DBL_MAX, '+')) == 3))
 	{
-		print("ok $i >$template< >$data< >$result<",
-			  " # Suppressed: exponent out of range?\n") 
+		print("ok $i # >$template< >$data< >$result<",
+			  " Suppressed: exponent out of range?\n") 
 	}
     else {
 	$y = ($x eq $y ? "" : " => $y");
