@@ -290,7 +290,7 @@ distribution.
 
 map() that changes the size of the list should now work faster.
 
-=sort *
+=item *
 
 sort() has been changed to use mergesort internally as opposed to the
 earlier quicksort.  For very small lists this may result in slightly
