@@ -1,5 +1,5 @@
 package Cwd;
-$VERSION = $VERSION = '2.14';
+$VERSION = $VERSION = '2.15';
 
 =head1 NAME
 
@@ -129,6 +129,12 @@ calls `pwd`. Likewise, the C<abs_path()> function is an alias for
 C<fast_abs_path()>.
 
 =back
+
+=head1 AUTHOR
+
+Originally by the perl5-porters.
+
+Now maintained by Ken Williams <KWILLIAMS@cpan.org>
 
 =head1 SEE ALSO
 

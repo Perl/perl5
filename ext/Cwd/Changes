@@ -1,5 +1,11 @@
 Revision history for Perl extension Cwd.
 
+2.15  Fri Jan 16 08:09:44 CST 2004
+
+ - Fixed a problem on static perl builds - while creating
+   Makefile.aperl, it was loading a mismatched version of Cwd from
+   blib/ . [Reported by Blair Zajac]
+
 2.14  Thu Jan  8 18:51:08 CST 2004
 
  - We now use File::Spec->canonpath() and properly-escaped regular
