@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Sep 18 08:54:57 EEST 2003 [metaconfig 3.0 PL70]
+# Generated on Thu Sep 18 09:10:02 EEST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5571,7 +5571,9 @@ EOCP
 		longdblsize="$ans"
 	fi
 	if $test "X$doublesize" = "X$longdblsize"; then
-		echo "(That isn't any different from an ordinary double.)"
+		echo "That isn't any different from an ordinary double."
+		echo "I'll keep your setting anyway, but you may see some"
+		echo "harmless compilation warnings."
 	fi	
 	;;
 esac
