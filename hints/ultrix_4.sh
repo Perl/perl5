@@ -64,3 +64,7 @@ groupstype='int'
 # configure test should be beefed up to try using the field when
 # it can't find any of the standardly-named fields.
 d_dirnamlen='define'
+
+# Ultrix can mmap only character devices, not regular files,
+# which is rather useless state of things for Perl.
+d_mmap='undef'
