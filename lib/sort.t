@@ -58,15 +58,18 @@ sub genarray {
 sub checkorder {
     my $aref = shift;
     my $status = '';			# so far, so good
-    my $i;
+    my ($i, $disorder);
 
     for ($i = 0; $i < $#$aref; ++$i) {
-	next if ($aref->[$i] lt $aref->[$i+1]);
-	$status = (substr($aref->[$i], 0, $RootWidth) eq
-		   substr($aref->[$i+1], 0, $RootWidth)) ?
-		  "Instability" : "Disorder";
-	$status .= " at element $i between $aref->[$i] and $aref->[$i+1]";
-	last;
+	# Equality shouldn't happen, but catch it in the contents check
+	next if ($aref->[$i] le $aref->[$i+1]);
+	$disorder = (substr($aref->[$i],   0, $RootWidth) eq
+		     substr($aref->[$i+1], 0, $RootWidth)) ?
+		     "Instability" : "Disorder";
+	# Keep checking if merely unstable... disorder is much worse.
+	$status =
+	    "$disorder at element $i between $aref->[$i] and $aref->[$i+1]";
+	last unless ($disorder eq "Instability");	
     }
     return $status;
 }
@@ -121,6 +124,11 @@ sub main {
 	$status = checkequal(\@sorted, $unsorted);
 	is($status, '', "contents ok for size $ts");
     }
+    # P5P: The following test (#58) has been observed failing on
+    # a solaris 2.8 platform.  Failure doesn't mean that sort is
+    # misbehaving, it is just exhibiting an exceedingly unlikely
+    # pattern of breaking ties.  If you see no other failures,
+    # it should be perfectly safe to install.
     if ($expect_unstable) {
 	ok($unstable_num > 0, 'Instability ok');
     }
