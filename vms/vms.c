@@ -4695,24 +4695,37 @@ do_spawn(char *cmd)
 /* 
  * A simple fwrite replacement which outputs itmsz*nitm chars without
  * introducing record boundaries every itmsz chars.
+ * We are using fputs, which depends on a terminating null.  We may
+ * well be writing binary data, so we need to accommodate not only
+ * data with nulls sprinkled in the middle but also data with no null 
+ * byte at the end.
  */
 /*{{{ int my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)*/
 int
 my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)
 {
-  register char *cp, *end;
+  register char *cp, *end, *cpd, *data;
+  int retval;
+  int bufsize = itmsz*nitm+1;
 
-  end = (char *)src + itmsz * nitm;
+  _ckvmssts_noperl(lib$get_vm( &bufsize, &data ));
+  memcpy( data, src, itmsz*nitm );
+  data[itmsz*nitm] = '\0';
 
-  while ((char *)src <= end) {
-    for (cp = src; cp <= end; cp++) if (!*cp) break;
-    if (fputs(src,dest) == EOF) return EOF;
+  end = data + itmsz * nitm;
+  retval = (int) nitm; /* on success return # items written */
+
+  cpd = data;
+  while (cpd <= end) {
+    for (cp = cpd; cp <= end; cp++) if (!*cp) break;
+    if (fputs(cpd,dest) == EOF) { retval = EOF; break; }
     if (cp < end)
-      if (fputc('\0',dest) == EOF) return EOF;
-    src = cp + 1;
+      if (fputc('\0',dest) == EOF) { retval = EOF; break; }
+    cpd = cp + 1;
   }
 
-  return nitm;
+  if (data) _ckvmssts_noperl(lib$free_vm( &bufsize, &data ));
+  return retval;
 
 }  /* end of my_fwrite() */
 /*}}}*/
