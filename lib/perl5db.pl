@@ -3191,7 +3191,7 @@ Return to any given position in the B<true>-history list
                     # hard.  See "debugger 'R'estart and open database
                     # connections" on p5p.
 
-                    my $max_fd;
+                    my $max_fd = 1024; # default if POSIX can't be loaded
                     if (eval { require POSIX }) {
                         $max_fd = POSIX::sysconf(POSIX::_SC_OPEN_MAX());
                     }
