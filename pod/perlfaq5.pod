@@ -723,8 +723,7 @@ Here's a much better web-page hit counter:
 
 If the count doesn't impress your friends, then the code might.  :-)
 
-=head2 All I want to do is append a small amount of text to the end of a
-file. Do I *still* have to use locking?
+=head2 All I want to do is append a small amount of text to the end of a file.  Do I still have to use locking?
 
 If you are on a system that correctly implements flock() and you use the
 example appending code from "perldoc -f flock" everything will be OK
