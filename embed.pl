@@ -1826,7 +1826,7 @@ Ap	|OP*	|newPMOP	|I32 type|I32 flags
 Ap	|OP*	|newPVOP	|I32 type|I32 flags|char* pv
 Ap	|SV*	|newRV		|SV* pref
 Apd	|SV*	|newRV_noinc	|SV *sv
-Ap	|SV*	|newSV		|STRLEN len
+Apd	|SV*	|newSV		|STRLEN len
 Ap	|OP*	|newSVREF	|OP* o
 Ap	|OP*	|newSVOP	|I32 type|I32 flags|SV* sv
 Apd	|SV*	|newSViv	|IV i
@@ -2003,13 +2003,13 @@ Apd	|IV	|sv_2iv		|SV* sv
 Apd	|SV*	|sv_2mortal	|SV* sv
 Apd	|NV	|sv_2nv		|SV* sv
 Aop	|char*	|sv_2pv		|SV* sv|STRLEN* lp
-Ap	|char*	|sv_2pvutf8	|SV* sv|STRLEN* lp
-Ap	|char*	|sv_2pvbyte	|SV* sv|STRLEN* lp
+Apd	|char*	|sv_2pvutf8	|SV* sv|STRLEN* lp
+Apd	|char*	|sv_2pvbyte	|SV* sv|STRLEN* lp
 Apd	|UV	|sv_2uv		|SV* sv
 Apd	|IV	|sv_iv		|SV* sv
 Apd	|UV	|sv_uv		|SV* sv
 Apd	|NV	|sv_nv		|SV* sv
-Ap	|char*	|sv_pvn		|SV *sv|STRLEN *len
+Apd	|char*	|sv_pvn		|SV *sv|STRLEN *len
 Apd	|char*	|sv_pvutf8n	|SV *sv|STRLEN *len
 Apd	|char*	|sv_pvbyten	|SV *sv|STRLEN *len
 Apd	|I32	|sv_true	|SV *sv
@@ -2062,7 +2062,7 @@ Apd	|int	|sv_realpath	|SV* sv|char *path|STRLEN len
 Apd	|char*	|sv_reftype	|SV* sv|int ob
 Apd	|void	|sv_replace	|SV* sv|SV* nsv
 Apd	|void	|sv_report_used
-Ap	|void	|sv_reset	|char* s|HV* stash
+Apd	|void	|sv_reset	|char* s|HV* stash
 Afpd	|void	|sv_setpvf	|SV* sv|const char* pat|...
 Ap	|void	|sv_vsetpvf	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_setiv	|SV* sv|IV num
@@ -2079,11 +2079,11 @@ Apd	|void	|sv_setpv	|SV* sv|const char* ptr
 Apd	|void	|sv_setpvn	|SV* sv|const char* ptr|STRLEN len
 Aopd	|void	|sv_setsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_taint	|SV* sv
-Ap	|bool	|sv_tainted	|SV* sv
+Apd	|bool	|sv_tainted	|SV* sv
 Apd	|int	|sv_unmagic	|SV* sv|int type
 Apd	|void	|sv_unref	|SV* sv
 Apd	|void	|sv_unref_flags	|SV* sv|U32 flags
-Ap	|void	|sv_untaint	|SV* sv
+Apd	|void	|sv_untaint	|SV* sv
 Apd	|bool	|sv_upgrade	|SV* sv|U32 mt
 Apd	|void	|sv_usepvn	|SV* sv|char* ptr|STRLEN len
 Apd	|void	|sv_vcatpvfn	|SV* sv|const char* pat|STRLEN patlen \
@@ -2205,7 +2205,7 @@ Ap	|void	|reginitcolors
 Apd	|char*	|sv_2pv_nolen	|SV* sv
 Apd	|char*	|sv_2pvutf8_nolen|SV* sv
 Apd	|char*	|sv_2pvbyte_nolen|SV* sv
-Ap	|char*	|sv_pv		|SV *sv
+Apd	|char*	|sv_pv		|SV *sv
 Apd	|char*	|sv_pvutf8	|SV *sv
 Apd	|char*	|sv_pvbyte	|SV *sv
 Aopd	|STRLEN	|sv_utf8_upgrade|SV *sv

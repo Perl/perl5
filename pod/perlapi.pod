@@ -1323,6 +1323,17 @@ SV is B<not> incremented.
 =for hackers
 Found in file sv.c
 
+=item newSV
+
+Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
+with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
+macro.
+
+	SV*	newSV(STRLEN len)
+
+=for hackers
+Found in file sv.c
+
 =item NEWSV
 
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
@@ -2087,22 +2098,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVX
-
-Returns the raw value in the SV's IV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvIV()>.
-
-	IV	SvIVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVx
 
 Coerces the given SV to an integer and returns it. Guarantees to evaluate
 sv only once. Use the more efficent C<SvIV> otherwise.
 
 	IV	SvIVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVX
+
+Returns the raw value in the SV's IV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvIV()>.
+
+	IV	SvIVX(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2632,19 +2643,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -2755,22 +2766,22 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvUVX
-
-Returns the raw value in the SV's UV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvUV()>.
-
-	UV	SvUVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvUVx
 
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
 evaluate sv only once. Use the more efficent C<SvUV> otherwise.
 
 	UV	SvUVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUVX
+
+Returns the raw value in the SV's UV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvUV()>.
+
+	UV	SvUVX(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2837,6 +2848,19 @@ macros.
 =for hackers
 Found in file sv.c
 
+=item sv_2pvbyte
+
+Return a pointer to the byte-encoded representation of the SV, and set *lp
+to its length.  May cause the SV to be downgraded from UTF8 as a
+side-effect.
+
+Usually accessed via the C<SvPVbyte> macro.
+
+	char*	sv_2pvbyte(SV* sv, STRLEN* lp)
+
+=for hackers
+Found in file sv.c
+
 =item sv_2pvbyte_nolen
 
 Return a pointer to the byte-encoded representation of the SV.
@@ -2845,6 +2869,18 @@ May cause the SV to be downgraded from UTF8 as a side-effect.
 Usually accessed via the C<SvPVbyte_nolen> macro.
 
 	char*	sv_2pvbyte_nolen(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item sv_2pvutf8
+
+Return a pointer to the UTF8-encoded representation of the SV, and set *lp
+to its length.  May cause the SV to be upgraded to UTF8 as a side-effect.
+
+Usually accessed via the C<SvPVutf8> macro.
+
+	char*	sv_2pvutf8(SV* sv, STRLEN* lp)
 
 =for hackers
 Found in file sv.c
@@ -3337,6 +3373,16 @@ type coercion.
 =for hackers
 Found in file sv.c
 
+=item sv_pv
+
+A private implementation of the C<SvPV_nolen> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+	char*	sv_pv(SV *sv)
+
+=for hackers
+Found in file sv.c
+
 =item sv_pvbyte
 
 A private implementation of the C<SvPVbyte_nolen> macro for compilers
@@ -3366,6 +3412,16 @@ which can't cope with complex macro expressions. Always use the macro
 instead.
 
 	char*	sv_pvbyten_force(SV* sv, STRLEN* lp)
+
+=for hackers
+Found in file sv.c
+
+=item sv_pvn
+
+A private implementation of the C<SvPV> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+	char*	sv_pvn(SV *sv, STRLEN *len)
 
 =for hackers
 Found in file sv.c
@@ -3465,6 +3521,16 @@ Found in file sv.c
 Dump the contents of all SVs not yet freed. (Debugging aid).
 
 	void	sv_report_used()
+
+=for hackers
+Found in file sv.c
+
+=item sv_reset
+
+Underlying implementation for the C<reset> Perl function.
+Note that the perl-level function is vaguely deprecated.
+
+	void	sv_reset(char* s, HV* stash)
 
 =for hackers
 Found in file sv.c
@@ -3746,6 +3812,14 @@ Taint an SV. Use C<SvTAINTED_on> instead.
 =for hackers
 Found in file sv.c
 
+=item sv_tainted
+
+Test an SV for taintedness. Use C<SvTAINTED> instead.
+	bool	sv_tainted(SV* sv)
+
+=for hackers
+Found in file sv.c
+
 =item sv_true
 
 Returns true if the SV has a true value by Perl's rules.
@@ -3789,6 +3863,14 @@ different from one or the reference being a readonly SV).
 See C<SvROK_off>.
 
 	void	sv_unref_flags(SV* sv, U32 flags)
+
+=for hackers
+Found in file sv.c
+
+=item sv_untaint
+
+Untaint an SV. Use C<SvTAINTED_off> instead.
+	void	sv_untaint(SV* sv)
 
 =for hackers
 Found in file sv.c
