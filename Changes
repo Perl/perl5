@@ -32,6 +32,190 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8042] By: jhi                                   on 2000/12/08  16:33:39
+        Log: Do not return the Unicode replacement character if UTF-8
+             decoding goes awry, it should be up to the caller to decide.
+     Branch: perl
+	   ! pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[  8041] By: jhi                                   on 2000/12/08  16:22:28
+        Log: metaconfig maintenance.
+     Branch: metaconfig
+	   ! U/modified/stdchar.U
+     Branch: metaconfig/U/perl
+	   + testsyml.U
+____________________________________________________________________________
+[  8040] By: jhi                                   on 2000/12/08  16:03:08
+        Log: Subject: [ID 20001207.009] Not OK: perl v5.7.0 +DEVEL8030 on os2-64int-ld 2.30
+             From: sthoenna@efn.org
+             Date: Thu, 7 Dec 2000 21:32:43 -0800 (PST)
+             Message-Id: <200012080532.eB85Wh729109@garcia.efn.org>
+     Branch: perl
+	   ! Changes lib/ExtUtils/MM_OS2.pm
+____________________________________________________________________________
+[  8039] By: jhi                                   on 2000/12/08  15:57:11
+        Log: Subject: [PATCH] Re: ebcdic <-> ascii tables interjected in uv <-> utf8 considered harmful
+             From: Simon Cozens <simon@cozens.net>
+             Date: Fri, 8 Dec 2000 13:33:31 +0000
+             Message-ID: <20001208133331.A11535@deep-dark-truthful-mirror.perlhacker.org>
+             
+             (The pp_hot part needed a rewrite.)
+     Branch: perl
+	   ! doop.c pp_hot.c utf8.c
+____________________________________________________________________________
+[  8038] By: jhi                                   on 2000/12/08  15:25:08
+        Log: Subject: djSP
+             From: Michael Stevens <michael@etla.org>
+             Date: Wed, 6 Dec 2000 23:24:01 +0000
+             Message-ID: <20001206232400.A21381@firedrake.org>
+             
+             Plus a note from Nick Ing-Simmons.
+     Branch: perl
+	   ! pp.h
+____________________________________________________________________________
+[  8037] By: jhi                                   on 2000/12/08  15:18:35
+        Log: Filetype is text.
+     Branch: perl
+	   ! t/op/utf8decode.t
+____________________________________________________________________________
+[  8036] By: jhi                                   on 2000/12/08  03:31:27
+        Log: Subject: [ID 20001207.004] [PATCH 5.6.0 and 5.7.x] add NCR MP-RAS support
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 7 Dec 2000 12:36:45 -0500 (EST)
+             Message-Id: <Pine.SOL.4.10.10012071235400.13162-100000@maxwell.phys.lafayette.edu>
+             
+             Subject: Re: [ID 20001207.004] [PATCH 5.6.0 and 5.7.x] add NCR MP-RAS support
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 7 Dec 2000 13:56:10 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10012071354420.6665-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   + ext/POSIX/hints/svr4.pl
+	   ! MANIFEST ext/POSIX/Makefile.PL hints/svr4.sh t/lib/bigfltpm.t
+____________________________________________________________________________
+[  8035] By: jhi                                   on 2000/12/08  03:26:01
+        Log: Subject: [ID 20001207.003] [PATCH] t/base/term.t causes abort if Config.pm not built
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 7 Dec 2000 10:50:47 -0500 (EST)
+             Message-Id: <Pine.SOL.4.10.10012071049400.7566-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! t/README t/base/term.t
+____________________________________________________________________________
+[  8034] By: jhi                                   on 2000/12/08  03:21:59
+        Log: Subject: DOC PATCH 5.6.0: -s return value incompletely documented
+             From: mjd@plover.com  
+             Date: 7 Dec 2000 21:04:20 -0000
+             Message-ID: <20001207210420.22282.qmail@plover.com>
+             
+             Plus -z doc.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  8033] By: jhi                                   on 2000/12/08  03:19:03
+        Log: Use the UTF8 macros a bit.  They can't be used with abandon
+             everywhere because we do generate illegal UTF-8 in some situations.
+             This is of course naughty.
+     Branch: perl
+	   ! pod/perlapi.pod utf8.c utf8.h
+____________________________________________________________________________
+[  8032] By: jhi                                   on 2000/12/08  03:00:09
+        Log: Out of sync?
+     Branch: perl
+	   ! t/pragma/warn/utf8
+____________________________________________________________________________
+[  8031] By: jhi                                   on 2000/12/08  02:22:39
+        Log: Cnt spl.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  8030] By: jhi                                   on 2000/12/08  01:23:54
+        Log: Add test for reverse().
+     Branch: perl
+	   + t/op/reverse.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  8029] By: jhi                                   on 2000/12/08  01:21:47
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/IO/IO.xs fakesdio.h global.sym lib/warnings.pm perlapi.c
+	  !> perlio.c perlio.h perlsdio.h warnings.pl
+____________________________________________________________________________
+[  8028] By: jhi                                   on 2000/12/08  01:19:08
+        Log: Introduce macros for UTF8 decoding.
+     Branch: perl
+	   ! t/op/utf8decode.t t/pragma/warn/utf8 utf8.c utf8.h
+____________________________________________________________________________
+[  8027] By: nick                                  on 2000/12/07  22:18:19
+        Log: Integrate mainline
+     Branch: perlio
+	  !> embed.pl pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[  8026] By: nick                                  on 2000/12/07  21:45:08
+        Log: Various oddities p4 diff -se showed up
+             Remove 'our' from warnings.pl
+     Branch: perlio
+	   ! global.sym lib/warnings.pm pod/perlapi.pod warnings.pl
+____________________________________________________________________________
+[  8025] By: nick                                  on 2000/12/07  21:43:32
+        Log: Change PerlIO_(get|set)pos to take SV *
+             Should fix, OS/2, VMS, (sfio??)
+     Branch: perlio
+	   ! ext/IO/IO.xs fakesdio.h perlapi.c perlio.c perlio.h perlsdio.h
+____________________________________________________________________________
+[  8024] By: jhi                                   on 2000/12/07  19:05:32
+        Log: Document utf8_to_uv() better.
+     Branch: perl
+	   ! pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[  8023] By: jhi                                   on 2000/12/07  18:23:47
+        Log: Document utf8_length(), utf8_distance(), and utf8_hop().
+     Branch: perl
+	   ! embed.pl pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[  8022] By: jhi                                   on 2000/12/07  04:13:51
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c t/io/dup.t win32/config.vc win32/config_H.bc
+	  !> win32/config_H.gc win32/config_H.vc win32/config_h.PL
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[  8021] By: nick                                  on 2000/12/07  00:28:14
+        Log: Various attempts at MSVC debug - not sure what has
+             changed but works now. 
+             Seems atexit() _may_ work for DLLs built with MSVC so don't
+             call cleanup that way.
+     Branch: perlio
+	   ! perlio.c win32/makefile.mk
+____________________________________________________________________________
+[  8020] By: nick                                  on 2000/12/06  19:57:20
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/ExtUtils/MANIFEST.SKIP t/op/concat.t
+	  !> (integrate 75 files)
+____________________________________________________________________________
+[  8019] By: nick                                  on 2000/12/06  19:28:21
+        Log: Add useperlio to config.vc
+             Turn off binmode in config_H.PL
+             Regen all the config_H.xx
+             Attempt to get debugging build with MSVC.
+     Branch: perlio
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc win32/config_h.PL win32/makefile.mk
+____________________________________________________________________________
+[  8018] By: nick                                  on 2000/12/06  19:21:57
+        Log: Test various dup/external program options on all platforms.
+     Branch: perlio
+	   ! t/io/dup.t
+____________________________________________________________________________
+[  8017] By: nick                                  on 2000/12/06  19:20:47
+        Log: Fix harness to be less picky
+     Branch: perlio
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[  8016] By: jhi                                   on 2000/12/06  16:45:12
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8015] By: jhi                                   on 2000/12/06  16:41:03
         Log: Test \x{...} with ord().
      Branch: perl
