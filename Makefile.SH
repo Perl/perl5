@@ -14,9 +14,12 @@ case "$0" in
 esac
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 1.0.1.2 88/01/26 08:46:04 root Exp $
+# $Header: Makefile.SH,v 1.0.1.3 88/01/26 14:14:52 root Exp $
 #
 # $Log:	Makefile.SH,v $
+# Revision 1.0.1.3  88/01/26  14:14:52  root
+# Added mallocsrc stuff.
+# 
 # Revision 1.0.1.2  88/01/26  08:46:04  root
 # patch 4: make depend didn't work right if . wasn't in PATH.
 # 
@@ -36,6 +39,8 @@ CFLAGS = $ccflags -O
 LDFLAGS = $ldflags
 SMALL = $small
 LARGE = $large $split
+mallocsrc = $mallocsrc
+mallocobj = $mallocobj
 
 libs = $libnm -lm
 !GROK!THIS!
@@ -57,12 +62,12 @@ h2 = hash.h perl.h search.h spat.h stab.h str.h util.h
 
 h = $(h1) $(h2)
 
-c1 = arg.c array.c cmd.c dump.c form.c hash.c malloc.c
+c1 = arg.c array.c cmd.c dump.c form.c hash.c $(mallocsrc)
 c2 = search.c stab.c str.c util.c version.c
 
 c = $(c1) $(c2)
 
-obj1 = arg.o array.o cmd.o dump.o form.o hash.o malloc.o
+obj1 = arg.o array.o cmd.o dump.o form.o hash.o $(mallocobj)
 obj2 = search.o stab.o str.o util.o version.o
 
 obj = $(obj1) $(obj2)

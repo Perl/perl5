@@ -12,11 +12,18 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
+case "$mallocsrc" in
+'') ;;
+*) mallocsrc="../$mallocsrc";;
+esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 1.0 87/12/18 17:50:17 root Exp $
+# $Header: Makefile.SH,v 1.0.1.1 88/01/26 14:15:24 root Exp $
 #
 # $Log:	Makefile.SH,v $
+# Revision 1.0.1.1  88/01/26  14:15:24  root
+# Added mallocsrc stuff.
+# 
 # Revision 1.0  87/12/18  17:50:17  root
 # Initial revision
 # 
@@ -31,6 +38,8 @@ CFLAGS = $ccflags -O
 LDFLAGS = $ldflags
 SMALL = $small
 LARGE = $large $split
+mallocsrc = $mallocsrc
+mallocobj = $mallocobj
 
 libs = $libnm -lm
 !GROK!THIS!
@@ -49,9 +58,9 @@ sh = Makefile.SH makedepend.SH
 
 h = EXTERN.h INTERN.h config.h handy.h hash.h a2p.h str.h util.h
 
-c = hash.c ../malloc.c str.c util.c walk.c
+c = hash.c $(mallocsrc) str.c util.c walk.c
 
-obj = hash.o malloc.o str.o util.o walk.o
+obj = hash.o $(mallocobj) str.o util.o walk.o
 
 lintflags = -phbvxac
 

@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 1.0.1.2 88/01/24 03:51:55 root Exp $
+# $Header: Configure,v 1.0.1.3 88/01/26 14:14:14 root Exp $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -79,6 +79,9 @@ d_vfork=''
 d_voidsig=''
 libc=''
 libnm=''
+mallocsrc=''
+mallocobj=''
+usemymalloc=''
 mansrc=''
 manext=''
 models=''
@@ -1249,6 +1252,31 @@ else
     esac
 fi
 
+: determine which malloc to compile in
+echo " "
+case "$usemymalloc" in
+'')
+    if bsd || v7; then
+	dflt='y'
+    else
+	dflt='n'
+    fi
+    ;;
+*)  dflt="$usemymalloc"
+    ;;
+esac
+rp="Do you wish to attempt to use the malloc that comes with $package? [$dflt]"
+$echo $n "$rp $c"
+. myread
+case "$ans" in
+'') ans=$dflt;;
+esac
+usemymalloc="$ans"
+case "$ans" in
+y*) mallocsrc='malloc.c'; mallocobj='malloc.o';;
+*) mallocsrc=''; mallocobj='';;
+esac
+
 echo " "
 echo "End of configuration questions."
 echo " "
@@ -1309,6 +1337,9 @@ d_vfork='$d_vfork'
 d_voidsig='$d_voidsig'
 libc='$libc'
 libnm='$libnm'
+mallocsrc='$mallocsrc'
+mallocobj='$mallocobj'
+usemymalloc='$usemymalloc'
 mansrc='$mansrc'
 manext='$manext'
 models='$models'
