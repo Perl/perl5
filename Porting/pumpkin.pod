@@ -103,7 +103,7 @@ always match the regular expression:
 C<$1> in the pattern is always an even number for maintenance
 versions, and odd for developer releases.
 
-In the past it has been observed that pumkings tend to invent new
+In the past it has been observed that pumpkings tend to invent new
 naming conventions on the fly. If you are a pumpking, before you
 invent a new name for any of the three types of perl distributions,
 please inform the guys from the CPAN who are doing indexing and
@@ -159,6 +159,8 @@ settled elsewhere.
 If feasible, try to keep filenames 8.3-compliant to humor those poor
 souls that get joy from running Perl under such dire limitations.
 There's a script, check83.pl, for keeping your nose 8.3-clean.
+In a similar vein, do not create files or directories which differ only
+in case (upper versus lower).
 
 =head2 Seek consensus on major changes
 
@@ -590,13 +592,13 @@ to change the version number near the top of the F<Changes> file.
 
 =head2 Todo
 
-The F<pod/perltodo.pod> file contains a roughly-catgorized unordered list of
-aspects of Perl that could use enhancement, features that could be
-added, areas that could be cleaned up, and so on.  During your term as
-pumpkin-holder, you will probably address some of these issues, and
-perhaps identify others which, while you decide not to address them
-this time around, may be tackled in the future.  Update the file
-reflect the situation as it stands when you hand over the pumpkin.
+The F<pod/perltodo.pod> file contains a roughly-categorized unordered
+list of aspects of Perl that could use enhancement, features that could
+be added, areas that could be cleaned up, and so on.  During your term
+as pumpkin-holder, you will probably address some of these issues, and
+perhaps identify others which, while you decide not to address them this
+time around, may be tackled in the future.  Update the file to reflect
+the situation as it stands when you hand over the pumpkin.
 
 You might like, early in your pumpkin-holding career, to see if you
 can find champions for partiticular issues on the to-do list: an issue
