@@ -302,6 +302,11 @@
     } STMT_END
 #endif
 
+#ifndef PTHREAD_ATFORK
+#  define PTHREAD_ATFORK(prepare,parent,child)			\
+    pthread_atfork(prepare,parent,child)
+#endif
+
 #ifndef THREAD_RET_TYPE
 #  define THREAD_RET_TYPE	void *
 #  define THREAD_RET_CAST(p)	((void *)(p))
@@ -455,4 +460,8 @@ typedef struct condpair {
 
 #ifndef INIT_THREADS
 #  define INIT_THREADS NOOP
+#endif
+
+#ifndef PTHREAD_ATFORK
+#  define PTHREAD_ATFORK(prepare,parent,child)	NOOP
 #endif
