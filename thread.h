@@ -334,8 +334,7 @@
     STMT_START {						\
 	int _eC_;						\
 	if ((_eC_ = pthread_key_create(&PL_thr_key, 0))) {	\
-	    PerlIO_printf(PerlIO_stderr(), "panic: pthread_key_create (%d) [%s:%d]",	\
-				 _eC_, __FILE__, __LINE__);	\
+            write(2, "panic: pthread_key_create failed\n", 33); \
 	    exit(1);						\
 	}							\
     } STMT_END

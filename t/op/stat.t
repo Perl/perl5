@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 78;
+plan tests => 80;
 
 my $Perl = which_perl();
 
@@ -406,16 +406,22 @@ unlink $tmpfile or print "# unlink failed: $!\n";
 my @r = \stat($Curdir);
 is(scalar @r, 13,   'stat returns full 13 elements');
 
-SKIP: {
-    skip "No lstat", 4 unless $Config{d_lstat};
+stat $0;
+eval { lstat _ };
+like( $@, qr/^The stat preceding lstat\(\) wasn't an lstat/,
+    'lstat _ croaks after stat' );
+eval { -l _ };
+like( $@, qr/^The stat preceding -l _ wasn't an lstat/,
+    '-l _ croaks after stat' );
 
-    stat $0;
-    eval { lstat _ };
-    like( $@, qr/^The stat preceding lstat\(\) wasn't an lstat/,
-	'lstat _ croaks after stat' );
-    eval { -l _ };
-    like( $@, qr/^The stat preceding -l _ wasn't an lstat/,
-	'-l _ croaks after stat' );
+lstat $0;
+eval { lstat _ };
+is( "$@", "", "lstat _ ok after lstat" );
+eval { -l _ };
+is( "$@", "", "-l _ ok after lstat" );
+  
+SKIP: {
+    skip "No lstat", 2 unless $Config{d_lstat};
 
     # bug id 20020124.004
     # If we have d_lstat, we should have symlink()
