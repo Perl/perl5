@@ -24,8 +24,7 @@ sub new
 {
  my $self = shift;
  my $type = ref($self) || $self;
- my $host;
- $host = shift if @_ % 2;
+ my $host = shift if @_ % 2;
  my %arg  = @_; 
  my $hosts = defined $host ? $host : $NetConfig{smtp_hosts};
  my $obj;
