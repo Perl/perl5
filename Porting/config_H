@@ -17,9 +17,9 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu Mar  6 08:37:41 EET 2003
+ * Configuration time: Tue Mar 18 09:54:47 EET 2003
  * Configured by     : jhi
- * Target system     : osf1 kosh.hut.fi v4.0 1229 alpha 
+ * Target system     : osf1 kosh.hut.fi v5.1 2650 alpha 
  */
 
 #ifndef _config_h_
@@ -1477,7 +1477,7 @@
  *	feature tests from Configure are generally more reliable.
  */
 #define OSNAME "dec_osf"		/**/
-#define OSVERS "4.0f"		/**/
+#define OSVERS "5.1b"		/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -1528,10 +1528,10 @@
  *	This symbol is intended to be used along with CPPRUN in the same manner
  *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
  */
-#define CPPSTDIN "cppstdin"
-#define CPPMINUS ""
-#define CPPRUN "/usr/local/bin/cpp"
-#define CPPLAST ""
+#define CPPSTDIN "cc -E"
+#define CPPMINUS "-"
+#define CPPRUN "cc -E"
+#define CPPLAST "-"
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1790,7 +1790,7 @@
  */
 #define HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
-#define LONG_DOUBLESIZE 8		/**/
+#define LONG_DOUBLESIZE 16		/**/
 #endif
 
 /* HAS_LONG_LONG:
@@ -2193,7 +2193,9 @@
  *	etc., where nn is the actual signal number (e.g. NUM37).
  *	The signal number for sig_name[i] is stored in sig_num[i].
  *	The last element is 0 to terminate the list with a NULL.  This
- *	corresponds to the 0 at the end of the sig_num list.
+ *	corresponds to the 0 at the end of the sig_name_init list.
+ *	Note that this variable is initialized from the sig_name_init,
+ *	not from sig_name (which is unused).
  */
 /* SIG_NUM:
  *	This symbol contains a list of signal numbers, in the same order as the
@@ -2207,11 +2209,13 @@
  *	The signal number corresponding to sig_name[i] is sig_number[i].
  *	if (i < NSIG) then sig_number[i] == i.  
  *	The last element is 0, corresponding to the 0 at the end of
- *	the sig_name list.
+ *	the sig_name_init list.
+ *	Note that this variable is initialized from the sig_num_init,
+ *	not from sig_num (which is unused).
  */
 /* SIG_SIZE:
- *	This variable contains the number of elements of the sig_name
- *	and sig_num arrays, excluding the final NULL entry.
+ *	This variable contains the number of elements of the SIG_NAME
+ *	and SIG_NUM arrays, excluding the final NULL entry.
  */
 #define SIG_NAME "ZERO", "HUP", "INT", "QUIT", "ILL", "TRAP", "ABRT", "EMT", "FPE", "KILL", "BUS", "SEGV", "SYS", "PIPE", "ALRM", "TERM", "IOINT", "STOP", "TSTP", "CONT", "CHLD", "TTIN", "TTOU", "AIO", "XCPU", "XFSZ", "VTALRM", "PROF", "WINCH", "INFO", "USR1", "USR2", "RESV", "RTMIN", "NUM34", "NUM35", "NUM36", "NUM37", "NUM38", "NUM39", "NUM40", "NUM41", "NUM42", "NUM43", "NUM44", "NUM45", "NUM46", "NUM47", "MAX", "IOT", "LOST", "URG", "CLD", "IO", "POLL", "PTY", "PWR", "RTMAX", 0		/**/
 #define SIG_NUM  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 6, 6, 16, 20, 23, 23, 23, 29, 48, 0		/**/
@@ -2221,7 +2225,7 @@
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
  */
-#define STDCHAR unsigned char	/**/
+#define STDCHAR char	/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
@@ -2448,7 +2452,7 @@
  *	This symbol, if defined, indicates that the fseeko routine is
  *	available to fseek beyond 32 bits (useful for ILP32 hosts).
  */
-/*#define HAS_FSEEKO		/ **/
+#define HAS_FSEEKO		/**/
 
 /* HAS_FSTATFS:
  *	This symbol, if defined, indicates that the fstatfs routine is
@@ -2467,7 +2471,7 @@
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
-/*#define HAS_FTELLO		/ **/
+#define HAS_FTELLO		/**/
 
 /* HAS_GETCWD:
  *	This symbol, if defined, indicates that the getcwd routine is
@@ -2572,14 +2576,14 @@
  *	This symbol, if defined, indicates that the mkdtemp routine is
  *	available to exclusively create a uniquely named temporary directory.
  */
-/*#define HAS_MKDTEMP		/ **/
+#define HAS_MKDTEMP		/**/
 
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
  *	available to excluslvely create and open a uniquely named
  *	(with a suffix) temporary file.
  */
-/*#define HAS_MKSTEMPS		/ **/
+#define HAS_MKSTEMPS		/**/
 
 /* HAS_MODFL:
  *	This symbol, if defined, indicates that the modfl routine is
@@ -2598,7 +2602,7 @@
  *	and 1.150000.  The bug has been seen in certain versions of glibc,
  *	release 2.2.2 is known to be okay.
  */
-/*#define HAS_MODFL		/ **/
+#define HAS_MODFL		/**/
 /*#define HAS_MODFL_PROTO		/ **/
 /*#define HAS_MODFL_POW32_BUG		/ **/
 
@@ -2774,7 +2778,7 @@
  *	This symbol, if defined, indicates that the strtold routine is
  *	available to convert strings to long doubles.
  */
-/*#define HAS_STRTOLD		/ **/
+#define HAS_STRTOLD		/**/
 
 /* HAS_STRTOLL:
  *	This symbol, if defined, indicates that the strtoll routine is
@@ -2807,7 +2811,7 @@
  *		extern int syscall(int,  ...);
  *		extern int syscall(long, ...);
  */
-/*#define	HAS_SYSCALL_PROTO	/ **/
+#define	HAS_SYSCALL_PROTO	/**/
 
 /* HAS_TELLDIR_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -2844,7 +2848,7 @@
  *	to the program to supply one.  A good guess is
  *		extern int usleep(useconds_t);
  */
-/*#define	HAS_USLEEP_PROTO	/ **/
+#define	HAS_USLEEP_PROTO	/**/
 
 /* HAS_USTAT:
  *	This symbol, if defined, indicates that the ustat system call is
@@ -3055,10 +3059,10 @@
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'f') for input.
  */
-#define PERL_PRIfldbl	"f"	/**/
-#define PERL_PRIgldbl	"g"	/**/
-#define PERL_PRIeldbl	"e"	/**/
-#define PERL_SCNfldbl	"f"	/**/
+#define PERL_PRIfldbl	"Lf"	/**/
+#define PERL_PRIgldbl	"Lg"	/**/
+#define PERL_PRIeldbl	"Le"	/**/
+#define PERL_SCNfldbl	"Lf"	/**/
 
 /* NEED_VA_COPY:
  *	This symbol, if defined, indicates that the system stores
@@ -3886,7 +3890,7 @@
  *	This symbol, if defined, indicates that the pthread_atfork routine
  *	is available setup fork handlers.
  */
-#define HAS_PTHREAD_ATFORK		/**/
+/*#define HAS_PTHREAD_ATFORK		/ **/
 
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield 
@@ -3904,8 +3908,8 @@
  *	thread.	 sched_yield is preferable to pthread_yield.
  */
 /*#define HAS_PTHREAD_YIELD	/ **/
-#define SCHED_YIELD	sched_yield()	/**/
-#define HAS_SCHED_YIELD	/**/
+#define SCHED_YIELD	undef	/**/
+/*#define HAS_SCHED_YIELD	/ **/
 
 /* HAS_RANDOM_R:
  *	This symbol, if defined, indicates that the random_r routine

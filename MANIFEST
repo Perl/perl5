@@ -129,6 +129,7 @@ ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
 ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
 ext/Data/Dumper/t/dumper.t	See if Data::Dumper works
+ext/Data/Dumper/t/pair.t	See if Data::Dumper pair separator works
 ext/Data/Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 ext/Data/Dumper/Todo		Data pretty printer, futures
 ext/DB_File/Changes	Berkeley DB extension change log
@@ -261,6 +262,7 @@ ext/Encode/t/big5-hkscs.utf	test data
 ext/Encode/t/CJKT.t		test script
 ext/Encode/t/Encode.t		test script
 ext/Encode/t/Encoder.t		test script
+ext/Encode/t/enc_data.t		test script for utf8 DATA
 ext/Encode/t/enc_eucjp.t	test script
 ext/Encode/t/enc_module.enc	test data for t/enc_module.t
 ext/Encode/t/enc_module.t	test script
@@ -2369,8 +2371,8 @@ regcomp.c			Regular expression compiler
 regcomp.h			Private declarations for above
 regcomp.pl			Builder of regnodes.h
 regcomp.sym			Data for regnodes.h
-regen.pl			Common file routines for generator scripts
-regen_headers.pl		Run all scripts that (re)generate files
+regen.pl			Run all scripts that (re)generate files
+regen_lib.pl			Common file routines for generator scripts
 regexec.c			Regular expression evaluator
 regexp.h			Public declarations for the above
 regnodes.h			Description of nodes of RE engine
@@ -2620,7 +2622,7 @@ t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
 t/op/read.t			See if read() works
-t/op/readline.t			See if <> / readline work
+t/op/readline.t			See if <> / readline / rcatline work
 t/op/readdir.t			See if readdir() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work

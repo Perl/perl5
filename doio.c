@@ -1321,7 +1321,7 @@ Perl_my_stat(pTHX)
     else {
 	SV* sv = POPs;
 	char *s;
-	STRLEN n_a;
+	STRLEN len;
 	PUTBACK;
 	if (SvTYPE(sv) == SVt_PVGV) {
 	    gv = (GV*)sv;
@@ -1332,9 +1332,10 @@ Perl_my_stat(pTHX)
 	    goto do_fstat;
 	}
 
-	s = SvPV(sv, n_a);
+	s = SvPV(sv, len);
 	PL_statgv = Nullgv;
-	sv_setpv(PL_statname, s);
+	sv_setpvn(PL_statname, s, len);
+	s = SvPVX(PL_statname);		/* s now NUL-terminated */
 	PL_laststype = OP_STAT;
 	PL_laststatval = PerlLIO_stat(s, &PL_statcache);
 	if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(s, '\n'))
@@ -1641,10 +1642,10 @@ nothing in the core.
 	if (mark == sp)
 	    break;
 	s = SvPVx(*++mark, n_a);
-	if (isUPPER(*s)) {
+	if (isALPHA(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		s += 3;
-	    if (!(val = whichsig(s)))
+	    if ((val = whichsig(s)) < 0)
 		Perl_croak(aTHX_ "Unrecognized signal name \"%s\"",s);
 	}
 	else

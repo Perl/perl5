@@ -1195,8 +1195,6 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.69 2003/01/23 17:21:29 rob Exp $
-
 =head1 SYNOPSIS
 
     use Net::Ping;

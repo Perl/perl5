@@ -937,9 +937,10 @@ libperl.so.8 rather with the installed libperl.so.8?  The answer is
 that you might not be able to.  The installation directory is encoded
 in the perl binary with the LD_RUN_PATH environment variable (or
 equivalent ld command-line option).  On Solaris, you can override that
-with LD_LIBRARY_PATH; on Linux you can't.  On Digital Unix, you can
-override LD_LIBRARY_PATH by setting the _RLD_ROOT environment variable
-to point to the perl build directory.
+with LD_LIBRARY_PATH; on Linux, you can only override at runtime via
+LD_PRELOAD, specifying the exact filename you wish to be used; and on
+Digital Unix, you can override LD_LIBRARY_PATH by setting the
+_RLD_ROOT environment variable to point to the perl build directory.
 
 The only reliable answer is that you should specify a different
 directory for the architecture-dependent library for your -DDEBUGGING

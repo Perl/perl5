@@ -104,7 +104,7 @@ for ($i = 1; @tests; $i++) {
     }
 }
 
-# In each of the the following lines, there are three required fields:
+# In each of the following lines, there are three required fields:
 # printf template, data to be formatted (as a Perl expression), and
 # expected result of formatting.  An optional fourth field can contain
 # a comment.  Each field is delimited by a starting '>' and a
@@ -359,7 +359,7 @@ __END__
 >%2$d %d %d<	>[12, 34]<	>34 12 34<
 >%3$d %d %d<	>[12, 34, 56]<	>56 12 34<
 >%2$*3$d %d<	>[12, 34, 3]<	> 34 12<
->%*3$2$d %d<	>[12, 34, 3]<	>%*3$2$d 34 INVALID<
+>%*3$2$d %d<	>[12, 34, 3]<	>%*3$2$d 12 INVALID<
 >%2$d<		>12<	>0 UNINIT<
 >%0$d<		>12<	>%0$d INVALID<
 >%1$$d<		>12<	>%1$$d INVALID<
@@ -374,4 +374,9 @@ __END__
 >%vs,%d<	>[1, 2, 3]<	>1,2<
 >%v_<	>''<	>%v_ INVALID<
 >%v#x<	>''<	>%v#x INVALID<
->%v02x<	>"foo\n"<	>66.6f.6f.0a< 
+>%v02x<	>"foo\012"<	>66.6f.6f.0a<
+>%V-%s<		>["Hello"]<	>%V-Hello INVALID<
+>%K %d %d<	>[13, 29]<	>%K 13 29 INVALID<
+>%*.*K %d<	>[13, 29, 76]<	>%*.*K 13 INVALID<
+>%4$K %d<	>[45, 67]<	>%4$K 45 INVALID<
+>%d %K %d<	>[23, 45]<	>23 %K 45 INVALID<

@@ -351,7 +351,10 @@ List out all pre-prompt Perl command actions.
 
 Set an action (Perl command) to happen before every debugger prompt.
 A multi-line command may be entered by backslashing the newlines.  
-B<WARNING> If C<command> is missing, all actions are wiped out!
+
+=item < * 
+
+Delete all pre-prompt Perl command actions.
 
 =item << command
 
@@ -367,8 +370,11 @@ List out post-prompt Perl command actions.
 Set an action (Perl command) to happen after the prompt when you've
 just given a command to return to executing the script.  A multi-line
 command may be entered by backslashing the newlines (we bet you
-couldn't've guessed this by now).  B<WARNING> If C<command> is
-missing, all actions are wiped out!
+couldn't've guessed this by now). 
+
+=item > * 
+
+Delete all post-prompt Perl command actions.
 
 =item >> command
 
@@ -384,12 +390,15 @@ List out pre-prompt debugger commands.
 
 Set an action (debugger command) to happen before every debugger prompt.
 A multi-line command may be entered in the customary fashion.  
-B<WARNING> If C<command> is missing, all actions are wiped out!
 
 Because this command is in some senses new, a warning is issued if
 you appear to have accidentally entered a block instead.  If that's
 what you mean to do, write it as with C<;{ ... }> or even 
 C<do { ... }>.
+
+=item { * 
+
+Delete all pre-prompt debugger commands.
 
 =item {{ command
 

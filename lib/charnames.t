@@ -11,6 +11,8 @@ BEGIN {
     $SIG{__WARN__} = sub { push @WARN, @_ };
 }
 
+require File::Spec;
+
 $| = 1;
 
 print "1..73\n";
@@ -270,7 +272,7 @@ print "ok 46\n";
 # ---- Alias extensions
 
 my $tmpfile = "tmp0000";
-my $alifile = "../lib/unicore/xyzzy_alias.pl";
+my $alifile = File::Spec->catfile(File::Spec->updir, qw(lib unicore xyzzy_alias.pl));
 my $i = 0;
 1 while -e ++$tmpfile;
 END { if ($tmpfile) { 1 while unlink $tmpfile; } }

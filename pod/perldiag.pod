@@ -64,7 +64,7 @@ L<perlfunc/accept>.
 
 =item '!' allowed only after types %s
 
-(F) The '!' is allowed in pack() and unpack() only after certain types.
+(F) The '!' is allowed in pack() or unpack() only after certain types.
 See L<perlfunc/pack>.
 
 =item Ambiguous call resolved as CORE::%s(), qualify as such or use &
@@ -466,29 +466,23 @@ checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
 
-=item Can only compress unsigned integers
+=item Can only compress unsigned integers in pack
 
 (F) An argument to pack("w",...) was not an integer.  The BER compressed
 integer format can only be used with positive integers, and you attempted
 to compress something else.  See L<perlfunc/pack>.
 
-=item Cannot compress integer
+=item Cannot compress integer in pack
 
 (F) An argument to pack("w",...) was too large to compress.  The BER
 compressed integer format can only be used with positive integers, and you
 attempted to compress Infinity or a very large number (> 1e308).
 See L<perlfunc/pack>.
 
-=item Cannot compress negative numbers
+=item Cannot compress negative numbers in pack
 
 (F) An argument to pack("w",...) was negative.  The BER compressed integer
 format can only be used with positive integers.  See L<perlfunc/pack>.
-
-=item / cannot take a count
-
-(F) You had an unpack template indicating a counted-length string, but
-you have also specified an explicit size for the string.  See
-L<perlfunc/pack>.
 
 =item Can't bless non-reference value
 
@@ -1127,7 +1121,7 @@ references can be weakened.
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
-=item Character in "C" format wrapped
+=item Character in "C" format wrapped in pack
 
 (W pack) You said
 
@@ -1142,7 +1136,7 @@ and so on) and not for Unicode characters, so Perl behaved as if you meant
 If you actually want to pack Unicode codepoints, use the C<"U"> format
 instead.
 
-=item Character in "c" format wrapped
+=item Character in "c" format wrapped in pack
 
 (W pack) You said
 
@@ -1156,6 +1150,11 @@ and so on) and not for Unicode characters, so Perl behaved as if you meant
 
 If you actually want to pack Unicode codepoints, use the C<"U"> format
 instead.
+
+=item Code missing after '/'
+
+(F) You had a (sub-)template that ends with a '/'. There must be another
+template code following the slash. See L<perlfunc/pack>.
 
 =item close() on unopened filehandle %s
 
@@ -1264,6 +1263,12 @@ valid magic number.
 
 (P) The malloc package that comes with Perl had an internal failure.
 
+=item Count after length/code in unpack
+
+(F) You had an unpack template indicating a counted-length string, but
+you have also specified an explicit size for the string.  See
+L<perlfunc/pack>.
+
 =item C<-p> destination: %s
 
 (F) An error occurred during the implicit output invoked by the C<-p>
@@ -1346,6 +1351,11 @@ See Server error.
 
 (F) You said something like "use Module 42" but the Module did not
 define a C<$VERSION.>
+
+=item '/' does not take a repeat count
+
+(F) You cannot put a repeat count of any kind right after the '/' code.
+See L<perlfunc/pack>.
 
 =item Don't know how to handle magic of type '%s'
 
@@ -1550,9 +1560,7 @@ some time before now.  Check your control flow.  flock() operates on
 filehandles.  Are you attempting to call flock() on a dirhandle by the
 same name?
 
-=item Quantifier follows nothing in regex;
-
-marked by <-- HERE in m/%s/
+=item Quantifier follows nothing in regex; marked by <-- HERE in m/%s/
 
 (F) You started a regular expression with a quantifier. Backslash it if you
 meant it literally. The <-- HERE shows in the regular expression about
@@ -1655,10 +1663,11 @@ version of Perl, and this should not happen anyway.
 (F) Unlike with "next" or "last", you're not allowed to goto an
 unspecified destination.  See L<perlfunc/goto>.
 
-=item %s-group starts with a count
+=item ()-group starts with a count
 
-(F) In pack/unpack a ()-group started with a count.  A count is
+(F) A ()-group started with a count.  A count is
 supposed to follow something: a template character or a ()-group.
+ See L<perlfunc/pack>.
 
 =item %s had compilation errors
 
@@ -1900,17 +1909,11 @@ elements of an attribute list.  If the previous attribute had a
 parenthesised parameter list, perhaps that list was terminated too soon.
 See L<attributes>.
 
-=item Invalid type in pack: '%s'
+=item Invalid type '%s' in %s
 
-(F) The given character is not a valid pack type.  See L<perlfunc/pack>.
-(W pack) The given character is not a valid pack type but used to be
-silently ignored.
-
-=item Invalid type in unpack: '%s'
-
-(F) The given character is not a valid unpack type.  See
-L<perlfunc/unpack>.
-(W unpack) The given character is not a valid unpack type but used to be
+(F) The given character is not a valid pack or unpack type.
+See L<perlfunc/pack>.
+(W) The given character is not a valid pack or unpack type but used to be
 silently ignored.
 
 =item Invalid version format (multiple underscores)
@@ -1977,6 +1980,12 @@ L<perlfunc/last>.
 (F) While under the C<use filetest> pragma, switching the real and
 effective uids or gids failed.
 
+=item length/code after end of string in unpack
+
+(F) While unpacking, the string buffer was alread used up when an unpack
+length/code combination tried to obtain more data. This results in
+an undefined value for the length. See L<perlfunc/pack>.
+
 =item listen() on closed socket %s
 
 (W closed) You tried to do a listen on a closed socket.  Did you forget
@@ -1995,13 +2004,21 @@ instead on the filehandle.)
 values cannot be returned in subroutines used in lvalue context.  See
 L<perlsub/"Lvalue subroutines">.
 
-=item Lookbehind longer than %d not implemented in regex;
-
-marked by <-- HERE in m/%s/
+=item Lookbehind longer than %d not implemented in regex; marked by <-- HERE in m/%s/
 
 (F) There is currently a limit on the length of string which lookbehind can
 handle. This restriction may be eased in a future release. The <-- HERE
 shows in the regular expression about where the problem was discovered.
+
+=item Malformed integer in [] in  pack
+
+(F) Between the  brackets enclosing a numeric repeat count only digits
+are permitted.  See L<perlfunc/pack>.
+
+=item Malformed integer in [] in unpack
+
+(F) Between the  brackets enclosing a numeric repeat count only digits
+are permitted.  See L<perlfunc/pack>.
 
 =item Malformed PERLLIB_PREFIX
 
@@ -2037,9 +2054,7 @@ possibility is careless use of utf8::upgrade().
 Perl thought it was reading UTF-16 encoded character data but while
 doing it Perl met a malformed Unicode surrogate.
 
-=item %s matches null string many times in regex;
-
-marked by <-- HERE in m/%s/
+=item %s matches null string many times in regex; marked by <-- HERE in m/%s/
 
 (W regexp) The pattern you've specified would be an infinite loop if the
 regular expression engine didn't specifically check for that.  The <-- HERE
@@ -2052,7 +2067,7 @@ See L<perlre>.
 interpreter, especially if the word that is being warned about is
 "use" or "my".
 
-=item % may only be used in unpack
+=item % may not be used in pack
 
 (F) You can't pack a string by supplying a checksum, because the
 checksumming process loses information, and you can't go the other way.
@@ -2187,22 +2202,17 @@ See L<perlfunc/open> for details.
 (W syntax) Multidimensional arrays aren't written like C<$foo[1,2,3]>.
 They're written like C<$foo[1][2][3]>, as in C.
 
-=item / must be followed by a*, A* or Z*
+=item '/' must be followed by 'a*', 'A*' or 'Z*'
 
 (F) You had a pack template indicating a counted-length string,
 Currently the only things that can have their length counted are a*, A*
 or Z*.  See L<perlfunc/pack>.
 
-=item / must be followed by a, A or Z
+=item '/' must follow a numeric type in unpack
 
-(F) You had an unpack template indicating a counted-length string, which
-must be followed by one of the letters a, A or Z to indicate what sort
-of string is to be unpacked.  See L<perlfunc/pack>.
-
-=item / must follow a numeric type
-
-(F) You had an unpack template that contained a '#', but this did not
-follow some numeric unpack specification.  See L<perlfunc/pack>.
+(F) You had an unpack template that contained a '/', but this did not
+follow some unpack specification producing a numeric value.
+See L<perlfunc/pack>.
 
 =item "my sub" not yet implemented
 
@@ -2221,6 +2231,11 @@ local() if you want to localize a package variable.
 If you had a good reason for having a unique name, then just mention it
 again somehow to suppress the message.  The C<our> declaration is
 provided for this purpose.
+
+=item Negative '/' count in unpack
+
+(F) The length count obtained from a length/code unpack operation was
+negative.  See L<perlfunc/pack>.
 
 =item Negative length
 
@@ -2306,6 +2321,11 @@ ordinary subroutine call.
 (F) An error peculiar to VMS.  Perl handles its own command line
 redirection, and found a '2>' or a '2>>' on the command line, but can't
 find the name of the file to which to write data destined for stderr.
+
+=item No group ending character '%c' found in template
+
+(F) A pack or unpack template has an opening '(' or '[' without its
+matching counterpart. See L<perlfunc/pack>.
 
 =item No input file after < on command line
 
@@ -2453,12 +2473,6 @@ supplied.  See L<perlform>.
 of Perl.  Check the #! line, or manually feed your script into Perl
 yourself.
 
-=item %s not allowed in length fields
-
-(F) The count in the (un)pack template may be replaced by C<[TEMPLATE]> only if
-C<TEMPLATE> always matches the same amount of packed bytes.  Redesign
-the template.
-
 =item no UTC offset information; assuming local time is UTC
 
 (S) A warning peculiar to VMS.  Perl was unable to find the local
@@ -2584,6 +2598,12 @@ in the current lexical scope.
 remaining memory (or virtual memory) to satisfy the request.  Perl has
 no option but to exit immediately.
 
+At least in Unix you may be able to get past this by increasing your
+process datasize limits: in csh/tcsh use C<limit> and
+C<limit datasize n> (where C<n> is the number of kilobytes) to check
+the current limits and change them, and in ksh/bash/zsh use C<ulimit -a>
+and C<ulimit -d n>, respectively.
+
 =item Out of memory during "large" request for %s
 
 (F) The malloc() function returned 0, indicating there was insufficient
@@ -2616,9 +2636,9 @@ C<$arr[time]> instead of C<$arr[$time]>.
 parsing, but realloc() wouldn't give it more memory, virtual or
 otherwise.
 
-=item @ outside of string
+=item '@' outside of string in unpack
 
-(F) You had a pack template that specified an absolute position outside
+(F) You had a template that specified an absolute position outside
 the string being unpacked.  See L<perlfunc/pack>.
 
 =item %s package attribute may clash with future reserved word: %s
@@ -2884,13 +2904,11 @@ value of the environment variable PERLIO.
 process which isn't a subprocess of the current process.  While this is
 fine from VMS' perspective, it's probably not what you intended.
 
-=item P must have an explicit size
+=item 'P' must have an explicit size in unpack
 
 (F) The unpack format P must have an explicit size, not "*".
 
-=item POSIX syntax [%s] belongs inside character classes in regex;
-
-marked by <-- HERE in m/%s/
+=item POSIX syntax [%s] belongs inside character classes in regex; marked by <-- HERE in m/%s/
 
 (W regexp) The character class constructs [: :], [= =], and [. .]  go
 I<inside> character classes, the [] are part of the construct, for example:
@@ -2899,9 +2917,7 @@ implemented; they are simply placeholders for future extensions and will
 cause fatal errors.  The <-- HERE shows in the regular expression about
 where the problem was discovered.  See L<perlre>.
 
-=item POSIX syntax [. .] is reserved for future extensions in regex;
-
-marked by <-- HERE in m/%s/
+=item POSIX syntax [. .] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 
 (F regexp) Within regular expression character classes ([]) the syntax
 beginning with "[." and ending with ".]" is reserved for future extensions.
@@ -2910,9 +2926,7 @@ expression character class, just quote the square brackets with the
 backslash: "\[." and ".\]".  The <-- HERE shows in the regular expression
 about where the problem was discovered.  See L<perlre>.
 
-=item POSIX syntax [= =] is reserved for future extensions in regex;
-
-marked by <-- HERE in m/%s/
+=item POSIX syntax [= =] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 
 (F) Within regular expression character classes ([]) the syntax beginning
 with "[=" and ending with "=]" is reserved for future extensions.  If you
@@ -2921,9 +2935,7 @@ character class, just quote the square brackets with the backslash: "\[="
 and "=\]".  The <-- HERE shows in the regular expression about where the
 problem was discovered.  See L<perlre>.
 
-=item POSIX class [:%s:] unknown in regex;
-
-marked by <-- HERE in m/%s/
+=item POSIX class [:%s:] unknown in regex; marked by <-- HERE in m/%s/
 
 (F) The class in the character class [: :] syntax is unknown.  The <-- HERE
 shows in the regular expression about where the problem was discovered.
@@ -3077,17 +3089,13 @@ declared or defined with a different function prototype.
 (F) You've omitted the closing parenthesis in a function prototype
 definition.
 
-=item Quantifier in {,} bigger than %d in regex;
-
-marked by <-- HERE in m/%s/
+=item Quantifier in {,} bigger than %d in regex; marked by <-- HERE in m/%s/
 
 (F) There is currently a limit to the size of the min and max values of the
 {min,max} construct. The <-- HERE shows in the regular expression about where
 the problem was discovered. See L<perlre>.
 
-=item Quantifier unexpected on zero-length expression;
-
-marked by <-- HERE in m/%s/
+=item Quantifier unexpected on zero-length expression; marked by <-- HERE in m/%s/
 
 (W regexp) You applied a regular expression quantifier in a place where
 it makes no sense, such as on a zero-width assertion.  Try putting the
@@ -3166,9 +3174,7 @@ Doing so has no effect.
 (W internal) The internal sv_replace() function was handed a new SV with
 a reference count of other than 1.
 
-=item Reference to nonexistent group in regex;
-
-marked by <-- HERE in m/%s/
+=item Reference to nonexistent group in regex; marked by <-- HERE in m/%s/
 
 (F) You used something like C<\7> in your regular expression, but there are
 not at least seven sets of capturing parentheses in the expression. If you
@@ -3188,15 +3194,10 @@ expression compiler gave it.
 (P) A "can't happen" error, because safemalloc() should have caught it
 earlier.
 
-=item Repeat count in pack overflows
+=item pack/unpack repeat count overflow
 
 (F) You can't specify a repeat count so large that it overflows your
 signed integers.  See L<perlfunc/pack>.
-
-=item Repeat count in unpack overflows
-
-(F) You can't specify a repeat count so large that it overflows your
-signed integers.  See L<perlfunc/unpack>.
 
 =item Reversed %s= operator
 
@@ -3303,34 +3304,26 @@ before now.  Check your control flow.
 shows in the regular expression about where the problem was discovered. See
 L<perlre>.
 
-=item Sequence (?{...}) not terminated or not {}-balanced in regex;
-
-marked by <-- HERE in m/%s/
+=item Sequence (?{...}) not terminated or not {}-balanced in regex; marked by <-- HERE in m/%s/
 
 (F) If the contents of a (?{...}) clause contains braces, they must balance
 for Perl to properly detect the end of the clause. The <-- HERE shows in
 the regular expression about where the problem was discovered. See
 L<perlre>.
 
-=item Sequence (?%s...) not implemented in regex;
-
-marked by <-- HERE in m/%s/
+=item Sequence (?%s...) not implemented in regex; marked by <-- HERE in m/%s/
 
 (F) A proposed regular expression extension has the character reserved but
 has not yet been written. The <-- HERE shows in the regular expression about
 where the problem was discovered. See L<perlre>.
 
-=item Sequence (?%s...) not recognized in regex;
-
-marked by <-- HERE in m/%s/
+=item Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/
 
 (F) You used a regular expression extension that doesn't make sense.  The
 <-- HERE shows in the regular expression about where the problem was
 discovered.  See L<perlre>.
 
-=item Sequence (?#... not terminated in regex;
-
-marked by <-- HERE in m/%s/
+=item Sequence (?#... not terminated in regex; marked by <-- HERE in m/%s/
 
 (F) A regular expression comment must be terminated by a closing
 parenthesis.  Embedded parentheses aren't allowed.  The <-- HERE shows in
@@ -3526,9 +3519,7 @@ assignment or as a subroutine argument for example).
 (F) Your Perl was compiled with B<-D>SETUID_SCRIPTS_ARE_SECURE_NOW, but
 a version of the setuid emulator somehow got run anyway.
 
-=item Switch (?(condition)... contains too many branches in regex;
-
-marked by <-- HERE in m/%s/
+=item Switch (?(condition)... contains too many branches in regex; marked by <-- HERE in m/%s/
 
 (F) A (?(condition)if-clause|else-clause) construct can have at most two
 branches (the if-clause and the else-clause). If you want one or both to
@@ -3540,9 +3531,7 @@ clustering parentheses:
 The <-- HERE shows in the regular expression about where the problem was
 discovered. See L<perlre>.
 
-=item Switch condition not recognized in regex;
-
-marked by <-- HERE in m/%s/
+=item Switch condition not recognized in regex; marked by <-- HERE in m/%s/
 
 (F) If the argument to the (?(...)if-clause|else-clause) construct is a
 number, it can be only a number. The <-- HERE shows in the regular expression
@@ -3587,7 +3576,7 @@ yourself.
 a perl4 interpreter, especially if the next 2 tokens are "use strict"
 or "my $var" or "our $var".
 
-=item %s syntax OK
+=item %s syntax
 
 (F) The final summary message when a C<perl -c> succeeds.
 
@@ -3672,6 +3661,12 @@ target of the change to
 
 (F) The entry point function of threads->create() failed for some reason.
 
+=item Tied variable freed while still in use
+
+(F) An access method for a tied variable (e.g. FETCH) did something to
+free the variable.  Since continuing the current operation is likely
+to result in a coredump, Perl is bailing out instead.
+
 =item times not implemented
 
 (F) Your version of the C library apparently doesn't do times().  I
@@ -3683,6 +3678,10 @@ suspect you're not running on Unix.
 uc(), or ucfirst() (or their string-inlined versions), but you
 specified an illegal mapping.
 See L<perlunicode/"User-Defined Character Properties">.
+
+=item Too deeply nested ()-groups
+
+(F) Your template contains ()-groups with a ridiculously deep nesting level. 
 
 =item Too few args to syscall
 
@@ -3728,6 +3727,9 @@ BEGIN block.
 (F) The function requires fewer arguments than you specified.
 
 =item Too many )'s
+
+(A) You've accidentally run your script through B<csh> instead of Perl.
+Check the #! line, or manually feed your script into Perl yourself.
 
 =item Too many ('s
 
@@ -3852,9 +3854,7 @@ order.
 
 You tried to use an unknown subpragma of the "re" pragma.
 
-=item Unknown switch condition (?(%.2s in regex;
-
-marked by <-- HERE in m/%s/
+=item Unknown switch condition (?(%.2s in regex; marked by <-- HERE in m/%s/
 
 (F) The condition part of a (?(condition)if-clause|else-clause) construct
 is not known. The condition may be lookahead or lookbehind (the condition
@@ -3938,9 +3938,7 @@ script, a binary program, or a directory as a Perl program.
 recognized by Perl inside character classes.  The character was
 understood literally.
 
-=item Unrecognized escape \\%c passed through in regex;
-
-marked by <-- HERE in m/%s/
+=item Unrecognized escape \\%c passed through in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You used a backslash-character combination which is not
 recognized by Perl. This combination appears in an interpolated variable or
@@ -4030,9 +4028,7 @@ earlier in the line, and you really meant a "less than".
 (W untie) A copy of the object returned from C<tie> (or C<tied>) was
 still valid when C<untie> was called.
 
-=item Useless (?%s) - use /%s modifier in regex;
-
-marked by <-- HERE in m/%s/
+=item Useless (?%s) - use /%s modifier in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You have used an internal modifier such as (?o) that has no
 meaning unless applied to the entire regexp:
@@ -4046,9 +4042,7 @@ must be written as
 The <-- HERE shows in the regular expression about
 where the problem was discovered. See L<perlre>.
 
-=item Useless (?-%s) - don't use /%s modifier in regex;
-
-marked by <-- HERE in m/%s/
+=item Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You have used an internal modifier such as (?-o) that has no
 meaning unless removed from the entire regexp:
@@ -4220,16 +4214,16 @@ matching, both for you and for any luckless subroutine that you happen
 to call.  You should use the new C<//m> and C<//s> modifiers now to do
 that without the dangerous action-at-a-distance effects of C<$*>.
 
+=item Use of $# is deprecated
+
+(D deprecated) This was an ill-advised attempt to emulate a poorly
+defined B<awk> feature.  Use an explicit printf() or sprintf() instead.
+
 =item Use of %s is deprecated
 
 (D deprecated) The construct indicated is no longer recommended for use,
 generally because there's a better way to do it, and also because the
 old way has bad side effects.
-
-=item Use of $# is deprecated
-
-(D deprecated) This was an ill-advised attempt to emulate a poorly
-defined B<awk> feature.  Use an explicit printf() or sprintf() instead.
 
 =item Use of reference "%s" as array index
 
@@ -4376,9 +4370,7 @@ anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
 reference variables in outer subroutines are called or referenced, they
 are automatically rebound to the current values of such variables.
 
-=item Variable length lookbehind not implemented in regex;
-
-marked by <-- HERE in m/%s/
+=item Variable length lookbehind not implemented in regex; marked by <-- HERE in m/%s/
 
 (F) Lookbehind is allowed only for subexpressions whose length is fixed and
 known at compile time. The <-- HERE shows in the regular expression about
@@ -4437,17 +4429,24 @@ one.  This warning is by default on for I/O (like print) but can be
 turned off by C<no warnings 'utf8';>.  You are supposed to explicitly
 mark the filehandle with an encoding, see L<open> and L<perlfunc/binmode>.
 
+=item Within []-length '%c' not allowed
+
+(F) The count in the (un)pack template may be replaced by C<[TEMPLATE]> only if
+C<TEMPLATE> always matches the same amount of packed bytes that can be
+determined from the template alone. This is not possible if it contains an
+of the codes @, /, U, u, w or a *-length. Redesign the template.
+
 =item write() on closed filehandle %s
 
 (W closed) The filehandle you're writing to got itself closed sometime
 before now.  Check your control flow.
 
-=item X outside of string
+=item 'X' outside of string
 
-(F) You had a pack template that specified a relative position before
-the beginning of the string being unpacked.  See L<perlfunc/pack>.
+(F) You had a (un)pack template that specified a relative position before
+the beginning of the string being (un)packed.  See L<perlfunc/pack>.
 
-=item x outside of string
+=item 'x' outside of string in unpack
 
 (F) You had a pack template that specified a relative position after
 the end of the string being unpacked.  See L<perlfunc/pack>.

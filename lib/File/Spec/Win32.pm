@@ -2,10 +2,11 @@ package File::Spec::Win32;
 
 use strict;
 use Cwd;
+
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.3';
+$VERSION = '1.4';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -48,7 +49,8 @@ from the following list:
     /tmp
     /
 
-The SYS:/temp is preferred in Novell NetWare.
+The SYS:/temp is preferred in Novell NetWare (the File::Spec::Win32
+is used also for NetWare).
 
 Since Perl 5.8.0, if running under taint mode, and if the environment
 variables are tainted, they are not used.
@@ -59,22 +61,11 @@ my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
     my $self = shift;
-    my @dirlist = (@ENV{qw(TMPDIR TEMP TMP)}, qw(C:/temp /tmp /));
-    {
-	no strict 'refs';
-	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
-	    require Scalar::Util;
-	    @dirlist = grep { ! Scalar::Util::tainted $_ } @dirlist;
-	}
-    }
-    foreach (@dirlist) {
-	next unless defined && -d;
-	$tmpdir = $_;
-	last;
-    }
-    $tmpdir = '' unless defined $tmpdir;
-    $tmpdir = $self->canonpath($tmpdir);
-    return $tmpdir;
+    $tmpdir = $self->_tmpdir( @ENV{qw(TMPDIR TEMP TMP)},
+			      'SYS:/temp',
+			      'C:/temp',
+			      '/tmp',
+			      '/'  );
 }
 
 sub case_tolerant {

@@ -2,7 +2,7 @@
 
 # "This IS structured code.  It's just randomly structured."
 
-print "1..27\n";
+print "1..28\n";
 
 while ($?) {
     $foo = 1;
@@ -176,6 +176,14 @@ print ($ok ? "ok 22\n" : "not ok 22\n");
     print "not " unless $ok;
     print "ok 27 - weird case of goto and for(;;) loop\n";
 }
+
+# bug #9990 - don't prematurely free the CV we're &going to.
+
+sub f1 {
+    my $x;
+    goto sub { $x; print "ok 28 - don't prematurely free CV\n" }
+}
+f1();
 
 exit;
 

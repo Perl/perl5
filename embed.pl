@@ -5,7 +5,7 @@ require 5.003;	# keep this compatible, an old perl is all we may have before
 
 BEGIN {
     # Get function prototypes
-    require 'regen.pl';
+    require 'regen_lib.pl';
 }
 
 #
@@ -200,8 +200,9 @@ sub write_global_sym {
     my $ret = "";
     if (@_ > 1) {
 	my ($flags,$retval,$func,@args) = @_;
-	if ($flags =~ /A/ && $flags !~ /[xm]/) { # public API, so export
-	    $func = "Perl_$func" if $flags =~ /p/;
+	if ($flags =~ /[AX]/ && $flags !~ /[xm]/
+	    || $flags =~ /b/) { # public API, so export
+	    $func = "Perl_$func" if $flags =~ /[pbX]/;
 	    $ret = "$func\n";
 	}
     }

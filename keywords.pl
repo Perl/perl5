@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-require 'regen.pl';
+require 'regen_lib.pl';
 safer_unlink ("keywords.h");
 open(KW, ">keywords.h") || die "Can't create keywords.h: $!\n";
 select KW;

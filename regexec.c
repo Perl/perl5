@@ -852,10 +852,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	char *startpos = strbeg;
 
 	t = s;
-	if (prog->reganch & ROPT_UTF8) {	
-	    PL_regdata = prog->data;
-	    PL_bostr = startpos;
-	}
 	cache_re(prog);
 	s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
 	if (!s) {

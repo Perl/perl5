@@ -1,4 +1,4 @@
-# $Id: enc_module.t,v 1.1 2003/02/28 01:40:27 dankogai Exp dankogai $
+# $Id: enc_module.t,v 1.3 2003/03/09 20:07:37 dankogai Exp dankogai $
 # This file is in euc-jp
 BEGIN {
     require Config; import Config;
@@ -10,13 +10,16 @@ BEGIN {
 	print "1..0 # Skip: PerlIO was not built\n";
 	exit 0;
     }
+    if (defined ${^UNICODE} and ${^UNICODE} != 0){
+	print "1..0 # Skip: \${^UNICODE} == ${^UNICODE}\n";
+	exit 0;
+    }
     if (ord("A") == 193) {
 	print "1..0 # encoding pragma does not support EBCDIC platforms\n";
 	exit(0);
     }
 }
-use lib 't';
-use lib qw(ext/Encode/t ../ext/Encode/t); # in case of perl core
+use lib qw(t ext/Encode/t ../ext/Encode/t); # latter 2 for perl core
 use Mod_EUCJP;
 use encoding "euc-jp";
 use Test::More tests => 3;
@@ -29,8 +32,6 @@ my $file0 = File::Spec->catfile($dir,"enc_module.enc");
 my $file1 = File::Spec->catfile($dir,"$$.enc");
 
 my $obj = Mod_EUCJP->new;
-# Isn't this dangerous in that we lose all possible warnings?
-# Maybe a scoped use warnings 'something' instead? --jhi
 local $SIG{__WARN__} = sub{}; # to silence reopening STD(IN|OUT) w/o closing
 
 open STDOUT, ">", $file1 or die "$file1:$!";
@@ -48,7 +49,7 @@ open STDIN, "<", $file0 or die "$file0:$!";
 $obj = Mod_EUCJP->new;
 my $i = 0;
 while(<STDIN>){
-    chomp;
+    s/\r?\n\z//;
     is ($cmp[$i++], $_, "encoding vs. STDIN - $i");
 }
 

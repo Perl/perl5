@@ -495,6 +495,13 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 	}
     }
     SvCUR_set(data->last_found, 0);
+    {
+	SV * sv = data->last_found;
+	MAGIC *mg =
+	    SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
+	if (mg && mg->mg_len > 0)
+	    mg->mg_len = 0;
+    }
     data->last_end = -1;
     data->flags &= ~SF_BEFORE_EOL;
 }
@@ -913,6 +920,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
  			? I32_MAX : data->pos_min + data->pos_delta;
 		}
 		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
+		{
+		    SV * sv = data->last_found;
+		    MAGIC *mg = SvUTF8(sv) && SvMAGICAL(sv) ?
+			mg_find(sv, PERL_MAGIC_utf8) : NULL;
+		    if (mg && mg->mg_len >= 0)
+			mg->mg_len += utf8_length((U8*)STRING(scan),
+						  (U8*)STRING(scan)+STR_LEN(scan));
+		}
 		if (UTF)
 		    SvUTF8_on(data->last_found);
 		data->last_end = data->pos_min + l;
@@ -1283,6 +1298,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 				SvCUR_set(data->last_found,
 					  SvCUR(data->last_found) - l);
 				sv_catsv(data->last_found, last_str);
+				{
+				    SV * sv = data->last_found;
+				    MAGIC *mg =
+					SvUTF8(sv) && SvMAGICAL(sv) ?
+					mg_find(sv, PERL_MAGIC_utf8) : NULL;
+				    if (mg && mg->mg_len >= 0)
+					mg->mg_len += CHR_SVLEN(last_str);
+				}
 				data->last_end += l * (mincount - 1);
 			    }
 			} else {
@@ -4714,7 +4737,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
     else if (k == ANYOF) {
 	int i, rangestart = -1;
 	U8 flags = ANYOF_FLAGS(o);
-	const char * const anyofs[] = {	/* Should be syncronized with
+	const char * const anyofs[] = {	/* Should be synchronized with
 					 * ANYOF_ #xdefines in regcomp.h */
 	    "\\w",
 	    "\\W",

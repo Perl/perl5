@@ -29,7 +29,7 @@ static I32 esc_q_utf8 (pTHX_ SV *sv, char *src, STRLEN slen);
 static SV *sv_x (pTHX_ SV *sv, char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, char *name, STRLEN namelen, SV *retval,
 		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
-		    SV *pad, SV *xpad, SV *apad, SV *sep,
+		    SV *pad, SV *xpad, SV *apad, SV *sep, SV *pair,
 		    SV *freezer, SV *toaster,
 		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless,
 		    I32 maxdepth, SV *sortkeys);
@@ -224,7 +224,7 @@ sv_x(pTHX_ SV *sv, register char *str, STRLEN len, I32 n)
 static I32
 DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	AV *postav, I32 *levelp, I32 indent, SV *pad, SV *xpad,
-	SV *apad, SV *sep, SV *freezer, SV *toaster, I32 purity,
+	SV *apad, SV *sep, SV *pair, SV *freezer, SV *toaster, I32 purity,
 	I32 deepcopy, I32 quotekeys, SV *bless, I32 maxdepth, SV *sortkeys)
 {
     char tmpbuf[128];
@@ -397,7 +397,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    if (realpack) {				     /* blessed */
 		sv_catpvn(retval, "do{\\(my $o = ", 13);
 		DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
-			postav, levelp,	indent, pad, xpad, apad, sep,
+			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys);
 		sv_catpvn(retval, ")}", 2);
@@ -405,7 +405,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    else {
 		sv_catpvn(retval, "\\", 1);
 		DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
-			postav, levelp,	indent, pad, xpad, apad, sep,
+			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys);
 	    }
@@ -417,7 +417,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catpvn(namesv, "}", 1);
 	    sv_catpvn(retval, "\\", 1);
 	    DD_dump(aTHX_ ival, SvPVX(namesv), SvCUR(namesv), retval, seenhv,
-		    postav, levelp,	indent, pad, xpad, apad, sep,
+		    postav, levelp,	indent, pad, xpad, apad, sep, pair,
 		    freezer, toaster, purity, deepcopy, quotekeys, bless,
 		    maxdepth, sortkeys);
 	    SvREFCNT_dec(namesv);
@@ -486,7 +486,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, ipad);
 		DD_dump(aTHX_ elem, iname, ilen, retval, seenhv, postav,
-			levelp,	indent, pad, xpad, apad, sep,
+			levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys);
 		if (ix < ixmax)
@@ -640,7 +640,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
                    There should also be less tests for the (probably currently)
                    more common doesn't need quoting case.
                    The code is also smaller (22044 vs 22260) because I've been
-                   able to pull the comon logic out to both sides.  */
+                   able to pull the common logic out to both sides.  */
                 if (quotekeys || needs_quote(key)) {
                     if (do_utf8) {
                         STRLEN ocur = SvCUR(retval);
@@ -671,7 +671,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 sv_catpvn(sname, nkey, nlen);
                 sv_catpvn(sname, "}", 1);
 
-		sv_catpvn(retval, " => ", 4);
+		sv_catsv(retval, pair);
 		if (indent >= 2) {
 		    char *extra;
 		    I32 elen = 0;
@@ -687,7 +687,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    newapad = apad;
 
 		DD_dump(aTHX_ hval, SvPVX(sname), SvCUR(sname), retval, seenhv,
-			postav, levelp,	indent, pad, xpad, newapad, sep,
+			postav, levelp,	indent, pad, xpad, newapad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys);
 		SvREFCNT_dec(sname);
@@ -849,7 +849,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			
 			DD_dump(aTHX_ e, SvPVX(nname), SvCUR(nname), postentry,
 				seenhv, postav, &nlevel, indent, pad, xpad,
-				newapad, sep, freezer, toaster, purity,
+				newapad, sep, pair, freezer, toaster, purity,
 				deepcopy, quotekeys, bless, maxdepth, 
 				sortkeys);
 			SvREFCNT_dec(e);
@@ -914,7 +914,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    I32 level = 0;
 	    I32 indent, terse, i, imax, postlen;
 	    SV **svp;
-	    SV *val, *name, *pad, *xpad, *apad, *sep, *varname;
+	    SV *val, *name, *pad, *xpad, *apad, *sep, *pair, *varname;
 	    SV *freezer, *toaster, *bless, *sortkeys;
 	    I32 purity, deepcopy, quotekeys, maxdepth = 0;
 	    char tmpbuf[1024];
@@ -947,7 +947,7 @@ Data_Dumper_Dumpxs(href, ...)
 
 	    todumpav = namesav = Nullav;
 	    seenhv = Nullhv;
-	    val = pad = xpad = apad = sep = varname
+	    val = pad = xpad = apad = sep = pair = varname
 		= freezer = toaster = bless = &PL_sv_undef;
 	    name = sv_newmortal();
 	    indent = 2;
@@ -983,6 +983,8 @@ Data_Dumper_Dumpxs(href, ...)
 		    apad = *svp;
 		if ((svp = hv_fetch(hv, "sep", 3, FALSE)))
 		    sep = *svp;
+		if ((svp = hv_fetch(hv, "pair", 4, FALSE)))
+		    pair = *svp;
 		if ((svp = hv_fetch(hv, "varname", 7, FALSE)))
 		    varname = *svp;
 		if ((svp = hv_fetch(hv, "freezer", 7, FALSE)))
@@ -1071,7 +1073,7 @@ Data_Dumper_Dumpxs(href, ...)
 			newapad = apad;
 		
 		    DD_dump(aTHX_ val, SvPVX(name), SvCUR(name), valstr, seenhv,
-			    postav, &level, indent, pad, xpad, newapad, sep,
+			    postav, &level, indent, pad, xpad, newapad, sep, pair,
 			    freezer, toaster, purity, deepcopy, quotekeys,
 			    bless, maxdepth, sortkeys);
 		

@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 34;
+plan tests => 36;
 
 use_ok('Config');
 
@@ -62,8 +62,8 @@ ok(exists $Config{ccflags_nolargefiles}, "has ccflags_nolargefiles");
     }
 }
 
-like(Config::myconfig(),       qr/osname=$Config{osname}/,   "myconfig");
-like(Config::config_sh(),      qr/osname='$Config{osname}'/, "config_sh");
+like(Config::myconfig(),       qr/osname=\Q$Config{osname}\E/,   "myconfig");
+like(Config::config_sh(),      qr/osname='\Q$Config{osname}\E'/, "config_sh");
 like(join("\n", Config::config_re('c.*')),
 			       qr/^c.*?=/,                   'config_re' );
 
@@ -79,7 +79,7 @@ $out->clear;
 
 untie *STDOUT;
 
-like($out1, qr/^cc='$Config{cc}';/, "config_vars cc");
+like($out1, qr/^cc='\Q$Config{cc}\E';/, "config_vars cc");
 like($out2, qr/^d_bork='UNKNOWN';/, "config_vars d_bork is UNKNOWN");
 
 # Read-only.
@@ -102,18 +102,25 @@ like($@, qr/Config is read-only/, "no CLEAR");
 
 ok( exists $Config{d_fork}, "still d_fork");
 
-package FakeOut;
+{
+    package FakeOut;
 
-sub TIEHANDLE {
-        bless(\(my $text), $_[0]);
+    sub TIEHANDLE {
+	bless(\(my $text), $_[0]);
+    }
+
+    sub clear {
+	${ $_[0] } = '';
+    }
+
+    sub PRINT {
+	my $self = shift;
+	$$self .= join('', @_);
+    }
 }
 
-sub clear {
-        ${ $_[0] } = '';
-}
+# Signal-related variables
+# (this is actually a regression test for Configure.)
 
-sub PRINT {
-        my $self = shift;
-        $$self .= join('', @_);
-}
-
+is($Config{sig_num_init}  =~ tr/,/,/, $Config{sig_size}, "sig_num_init size");
+is($Config{sig_name_init} =~ tr/,/,/, $Config{sig_size}, "sig_name_init size");

@@ -2161,8 +2161,13 @@ typedef pthread_key_t	perl_key;
  *   of bytes occurs on read or write operations.
  */
 #  define USEMYBINMODE / **/
+#  include <io.h> /* for setmode() prototype */
 #  define my_binmode(fp, iotype, mode) \
-            (PerlLIO_setmode(PerlIO_fileno(fp), mode) != -1 ? TRUE : FALSE)
+            (PerlLIO_setmode(fileno(fp), mode) != -1 ? TRUE : FALSE)
+#endif
+
+#ifdef __CYGWIN__
+void init_os_extras(void);
 #endif
 
 #ifdef UNION_ANY_DEFINITION
@@ -3350,6 +3355,25 @@ typedef void *Thread;
 #undef PERLVARI
 #undef PERLVARIC
 
+/* Types used by pack/unpack */ 
+typedef enum {
+  e_no_len,     /* no length  */
+  e_number,     /* number, [] */
+  e_star        /* asterisk   */
+} howlen_t;
+
+typedef struct {
+  char*    patptr;   /* current template char */
+  char*    patend;   /* one after last char   */
+  char*    grpbeg;   /* 1st char of ()-group  */
+  char*    grpend;   /* end of ()-group       */
+  I32      code;     /* template code (!)     */
+  I32      length;   /* length/repeat count   */
+  howlen_t howlen;   /* how length is given   */ 
+  int      level;    /* () nesting level      */
+  U32      flags;    /* /=4, comma=2, pack=1  */
+} tempsym_t;
+
 #include "thread.h"
 #include "pp.h"
 
@@ -4243,7 +4267,7 @@ extern void moncontrol(int);
 #endif
 
 /* Use instead of abs() since abs() forces its argument to be an int,
- * but also beware since evaluates its argument thrice. */
+ * but also beware since this evaluates its argument twice, so no x++. */
 #define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
 
 /* and finally... */

@@ -4,11 +4,10 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.3';
+$VERSION = '1.4';
 
 @ISA = qw(File::Spec::Unix);
 
-use Cwd;
 my $macfiles;
 if ($^O eq 'MacOS') {
 	$macfiles = eval { require Mac::Files };
@@ -361,20 +360,18 @@ sub rootdir {
 
 =item tmpdir
 
-Returns the contents of $ENV{TMPDIR}, if that directory exits or the current working
-directory otherwise. Under MacPerl, $ENV{TMPDIR} will contain a path like
-"MacintoshHD:Temporary Items:", which is a hidden directory on your startup volume.
+Returns the contents of $ENV{TMPDIR}, if that directory exits or the
+current working directory otherwise. Under MacPerl, $ENV{TMPDIR} will
+contain a path like "MacintoshHD:Temporary Items:", which is a hidden
+directory on your startup volume.
 
 =cut
 
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    $tmpdir = $ENV{TMPDIR} if -d $ENV{TMPDIR};
-    unless (defined($tmpdir)) {
-   	$tmpdir = cwd();
-    }
-    return $tmpdir;
+    my $self = shift;
+    $tmpdir = $self->_tmpdir( $ENV{TMPDIR} );
 }
 
 =item updir

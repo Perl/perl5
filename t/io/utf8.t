@@ -11,56 +11,44 @@ BEGIN {
 
 no utf8; # needed for use utf8 not griping about the raw octets
 
+require "./test.pl";
+
+plan(tests => 49);
+
 $| = 1;
-print "1..49\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
-print '#'.tell(F)."\n";
-print "not " unless tell(F) == 4;
-print "ok 1\n";
+ok( tell(F) == 4, tell(F) );
 print F "\n";
-print '#'.tell(F)."\n";
-print "not " unless tell(F) >= 5;
-print "ok 2\n";
+ok( tell(F) >= 5, tell(F) );
 seek(F,0,0);
-print "not " unless getc(F) eq chr(0x100);
-print "ok 3\n";
-print "not " unless getc(F) eq "£";
-print "ok 4\n";
-print "not " unless getc(F) eq "\n";
-print "ok 5\n";
+ok( getc(F) eq chr(0x100) );
+ok( getc(F) eq "£" );
+ok( getc(F) eq "\n" );
 seek(F,0,0);
 binmode(F,":bytes");
 my $chr = chr(0xc4);
 if (ord('A') == 193) { $chr = chr(0x8c); } # EBCDIC
-print "not " unless getc(F) eq $chr;
-print "ok 6\n";
+ok( getc(F) eq $chr );
 $chr = chr(0x80);
 if (ord('A') == 193) { $chr = chr(0x41); } # EBCDIC
-print "not " unless getc(F) eq $chr;
-print "ok 7\n";
+ok( getc(F) eq $chr );
 $chr = chr(0xc2);
 if (ord('A') == 193) { $chr = chr(0x80); } # EBCDIC
-print "not " unless getc(F) eq $chr;
-print "ok 8\n";
+ok( getc(F) eq $chr );
 $chr = chr(0xa3);
 if (ord('A') == 193) { $chr = chr(0x44); } # EBCDIC
-print "not " unless getc(F) eq $chr;
-print "ok 9\n";
-print "not " unless getc(F) eq "\n";
-print "ok 10\n";
+ok( getc(F) eq $chr );
+ok( getc(F) eq "\n" );
 seek(F,0,0);
 binmode(F,":utf8");
-print "not " unless scalar(<F>) eq "\x{100}£\n";
-print "ok 11\n";
+ok( scalar(<F>) eq "\x{100}£\n" );
 seek(F,0,0);
 $buf = chr(0x200);
 $count = read(F,$buf,2,1);
-print "not " unless $count == 2;
-print "ok 12\n";
-print "not " unless $buf eq "\x{200}\x{100}£";
-print "ok 13\n";
+ok( $count == 2 );
+ok( $buf eq "\x{200}\x{100}£" );
 close(F);
 
 {
@@ -74,8 +62,7 @@ close(F);
     open F, "<:utf8", 'a' or die $!;
     $x = <F>;
     chomp($x);
-    print "not " unless $x eq chr(300);
-    print "ok 14\n";
+    ok( $x eq chr(300) );
 
     open F, "a" or die $!; # Not UTF
     binmode(F, ":bytes");
@@ -83,8 +70,7 @@ close(F);
     chomp($x);
     $chr = chr(196).chr(172);
     if (ord('A') == 193) { $chr = chr(141).chr(83); } # EBCDIC
-    print "not " unless $x eq $chr;
-    print "ok 15\n";
+    ok( $x eq $chr );
     close F;
 
     open F, ">:utf8", 'a' or die $!;
@@ -94,29 +80,25 @@ close(F);
     my $y;
     { my $x = tell(F);
       { use bytes; $y = length($a);}
-      print "not " unless $x == $y;
-      print "ok 16\n";
+      ok( $x == $y );
   }
 
     { # Check byte length of $b
 	use bytes; my $y = length($b);
-	print "not " unless $y == 1;
-	print "ok 17\n";
+	ok( $y == 1 );
     }
 
     print F $b,"\n"; # Don't upgrades $b
 
     { # Check byte length of $b
 	use bytes; my $y = length($b);
-	print "not ($y) " unless $y == 1;
-	print "ok 18\n";
+	ok( $y == 1 );
     }
 
     {
 	my $x = tell(F);
 	{ use bytes; if (ord('A')==193){$y += 2;}else{$y += 3;}} # EBCDIC ASCII
-	print "not ($x,$y) " unless $x == $y;
-	print "ok 19\n";
+	ok( $x == $y );
     }
 
     close F;
@@ -127,15 +109,13 @@ close(F);
     chomp($x);
     $chr = v196.172.194.130;
     if (ord('A') == 193) { $chr = v141.83.130; } # EBCDIC
-    printf "not (%vd) ", $x unless $x eq $chr;
-    print "ok 20\n";
+    ok( $x eq $chr, sprintf('(%vd)', $x) );
 
     open F, "<:utf8", "a" or die $!;
     $x = <F>;
     chomp($x);
     close F;
-    printf "not (%vd) ", $x unless $x eq chr(300).chr(130);
-    print "ok 21\n";
+    ok( $x eq chr(300).chr(130), sprintf('(%vd)', $x) );
 
     open F, ">", "a" or die $!;
     if (${^OPEN} =~ /:utf8/) {
@@ -148,9 +128,8 @@ close(F);
 	use warnings 'utf8';
 	local $SIG{__WARN__} = sub { $w = $_[0] };
 	print F $a;
-	print "not " if ($@ || $w !~ /Wide character in print/i);
+        ok( !($@ || $w !~ /Wide character in print/i) );
     }
-    print "ok 22\n";
 }
 
 # Hm. Time to get more evil.
@@ -165,8 +144,7 @@ binmode(F, ":bytes");
 $x = <F>; chomp $x;
 $chr = v196.172.130;
 if (ord('A') == 193) { $chr = v141.83.130; } # EBCDIC
-print "not " unless $x eq $chr;
-print "ok 23\n";
+ok( $x eq $chr );
 
 # Right.
 open F, ">:utf8", "a" or die $!;
@@ -178,17 +156,16 @@ close F;
 
 open F, "<", "a" or die $!;
 $x = <F>; chomp $x;
-print "not " unless $x eq $chr;
-print "ok 24\n";
+ok( $x eq $chr );
 
 # Now we have a deformed file.
 
 if (ord('A') == 193) {
-    print "ok 25 # Skip: EBCDIC\n"; # EBCDIC doesn't complain
+    skip( "EBCDIC doesn't complain" );
 } else {
     open F, "<:utf8", "a" or die $!;
     $x = <F>; chomp $x;
-    local $SIG{__WARN__} = sub { print "ok 25\n" };
+    local $SIG{__WARN__} = sub { ok( 1 ) };
     eval { sprintf "%vd\n", $x };
 }
 
@@ -223,7 +200,7 @@ for (@a) {
     }
 }
 close F;
-print "ok 26\n";
+ok( 1 );
 
 {
     # Check that warnings are on on I/O, and that they can be muffled.
@@ -236,14 +213,14 @@ print "ok 26\n";
     print F chr(0x100);
     close(F);
 
-    print $@ =~ /Wide character in print/ ? "ok 27\n" : "not ok 27\n";
+    like( $@, 'Wide character in print' );
 
     undef $@;
     open F, ">:utf8", "a";
     print F chr(0x100);
     close(F);
 
-    print defined $@ ? "not ok 28\n" : "ok 28\n";
+    isnt( defined $@ );
 
     undef $@;
     open F, ">a";
@@ -251,7 +228,7 @@ print "ok 26\n";
     print F chr(0x100);
     close(F);
 
-    print defined $@ ? "not ok 29\n" : "ok 29\n";
+    isnt( defined $@ );
 
     no warnings 'utf8';
 
@@ -260,7 +237,7 @@ print "ok 26\n";
     print F chr(0x100);
     close(F);
 
-    print defined $@ ? "not ok 30\n" : "ok 30\n";
+    isnt( defined $@ );
 
     use warnings 'utf8';
 
@@ -270,7 +247,7 @@ print "ok 26\n";
     print F chr(0x100);
     close(F);
 
-    print $@ =~ /Wide character in print/ ? "ok 31\n" : "not ok 31\n";
+    like( $@, 'Wide character in print' );
 }
 
 {
@@ -279,8 +256,7 @@ print "ok 26\n";
     open F, "<:bytes", "a";
     my $b = chr 0x100;
     $b .= <F>;
-    print $b eq chr(0x100).chr(0xde) ? "ok 32" : "not ok 32";
-    print " \#21395 '.= <>' utf8 vs. bytes\n";
+    ok( $b eq chr(0x100).chr(0xde), "21395 '.= <>' utf8 vs. bytes" );
     close F;
 }
 
@@ -290,8 +266,7 @@ print "ok 26\n";
     open F, "<:utf8", "a";
     my $b = "\xde";
     $b .= <F>;
-    print $b eq chr(0xde).chr(0x100) ? "ok 33" : "not ok 33";
-    print " \#21395 '.= <>' bytes vs. utf8\n";
+    ok( $b eq chr(0xde).chr(0x100), "21395 '.= <>' bytes vs. utf8" );
     close F;
 }
 
@@ -316,13 +291,12 @@ print "ok 26\n";
 	    utf8::upgrade($s) if $v->[1] eq "utf8";
 
 	    $s .= <F>;
-	    print $s eq chr($v->[0]) . chr($u->[0]) ?
-		"ok $t # rcatline utf8\n" : "not ok $t # rcatline utf8\n";
+	    ok( $s eq chr($v->[0]) . chr($u->[0]), 'rcatline utf8' );
 	    close F;
 	    $t++;
 	}
     }
-    # last test here 47
+    # last test here 49
 }
 
 # sysread() and syswrite() tested in lib/open.t since Fnctl is used

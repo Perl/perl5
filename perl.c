@@ -65,6 +65,7 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 	    ALLOC_THREAD_KEY;			\
 	    PERL_SET_THX(my_perl);		\
 	    OP_REFCNT_INIT;			\
+	    MUTEX_INIT(&PL_dollarzero_mutex);	\
 	}					\
 	else {					\
 	    PERL_SET_THX(my_perl);		\
@@ -155,9 +156,6 @@ perl_construct(pTHXx)
 
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
-#ifdef USE_ITHREADS
-	MUTEX_INIT(&PL_dollarzero_mutex);       /* for $0 modifying */
-#endif
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
 #endif
@@ -385,6 +383,9 @@ perl_destruct(pTHXx)
 	PL_exitlist[PL_exitlistlen].fn(aTHX_ PL_exitlist[PL_exitlistlen].ptr);
 
     Safefree(PL_exitlist);
+
+    PL_exitlist = NULL;
+    PL_exitlistlen = 0;
 
     if (destruct_level == 0){
 
@@ -996,10 +997,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
       reswitch:
 	switch (*s) {
 	case 'C':
-#ifdef	WIN32
-	    win32_argv2utf8(argc-1, argv+1);
-	    /* FALL THROUGH */
-#endif
 #ifndef PERL_STRICT_CR
 	case '\r':
 #endif
@@ -2083,7 +2080,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 
 Tells Perl to C<require> the file named by the string argument.  It is
 analogous to the Perl code C<eval "require '$file'">.  It's even
-implemented that way; consider using Perl_load_module instead.
+implemented that way; consider using load_module instead.
 
 =cut */
 
@@ -2501,8 +2498,8 @@ Perl_moreswitches(pTHX_ char *s)
 		      "EPOC port by Olaf Flebbe, 1999-2002\n");
 #endif
 #ifdef UNDER_CE
-	printf("WINCE port by Rainer Keuchel, 2001-2002\n");
-	printf("Built on " __DATE__ " " __TIME__ "\n\n");
+	PerlIO_printf(PerlIO_stdout(),"WINCE port by Rainer Keuchel, 2001-2002\n");
+	PerlIO_printf(PerlIO_stdout(),"Built on " __DATE__ " " __TIME__ "\n\n");
 	wce_hitreturn();
 #endif
 #ifdef BINARY_BUILD_NOTICE

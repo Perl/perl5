@@ -3088,6 +3088,7 @@ Perl_yylex(pTHX)
 	    PL_oldbufptr = PL_oldoldbufptr;		/* allow print(STDOUT 123) */
 	else
 	    PL_expect = XTERM;
+	s = skipspace(s);
 	TOKEN('(');
     case ';':
 	CLINE;
@@ -4188,8 +4189,29 @@ Perl_yylex(pTHX)
 		}
 #endif
 #ifdef PERLIO_LAYERS
-		if (UTF && !IN_BYTES)
-		    PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, ":utf8");
+		if (!IN_BYTES) {
+		    if (UTF)
+			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, ":utf8");
+		    else if (PL_encoding) {
+			SV *name;
+			dSP;
+			ENTER;
+			SAVETMPS;
+			PUSHMARK(sp);
+			EXTEND(SP, 1);
+			XPUSHs(PL_encoding);
+			PUTBACK;
+			call_method("name", G_SCALAR);
+			SPAGAIN;
+			name = POPs;
+			PUTBACK;
+			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, 
+					    Perl_form(aTHX_ ":encoding(%"SVf")",
+						      name));
+			FREETMPS;
+			LEAVE;
+		    }
+		}
 #endif
 		PL_rsfp = Nullfp;
 	    }

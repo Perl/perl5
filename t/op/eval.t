@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..87\n";
+print "1..88\n";
 
 eval 'print "ok 1\n";';
 
@@ -419,3 +419,6 @@ $test++;
     $test++;
   }
 }
+
+sub Foo {} print Foo(eval {});
+print "ok ",$test++," - #20798 (used to dump core)\n";

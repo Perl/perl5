@@ -868,8 +868,8 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
     if (!hv)
 	return Nullsv;
     if (klen < 0) {
-      klen = -klen;
-      is_utf8 = TRUE;
+	klen = -klen;
+	is_utf8 = TRUE;
     }
     if (SvRMAGICAL(hv)) {
 	bool needs_copy;
@@ -878,7 +878,9 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 
 	if (needs_copy && (svp = hv_fetch(hv, key, klen, TRUE))) {
 	    sv = *svp;
-	    mg_clear(sv);
+	    if (SvMAGICAL(sv)) {
+	        mg_clear(sv);
+	    }
 	    if (!needs_store) {
 		if (mg_find(sv, PERL_MAGIC_tiedelem)) {
 		    /* No longer an element */
@@ -1031,7 +1033,9 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 
 	if (needs_copy && (entry = hv_fetch_ent(hv, keysv, TRUE, hash))) {
 	    sv = HeVAL(entry);
-	    mg_clear(sv);
+	    if (SvMAGICAL(sv)) {
+		mg_clear(sv);
+	    }
 	    if (!needs_store) {
 		if (mg_find(sv, PERL_MAGIC_tiedelem)) {
 		    /* No longer an element */

@@ -535,16 +535,16 @@ sub settime {
   $hz ||= 1;
   
   if( $opt_r ){
-    $$runtime = ($rrun_rtime - $overhead - $over_rtime * $total_marks/$over_tests/2)/$hz;
+    $$runtime = ($rrun_rtime - $overhead)/$hz;
   }
   elsif( $opt_s ){
-    $$runtime = ($rrun_stime - $overhead - $over_stime * $total_marks/$over_tests/2)/$hz;
+    $$runtime = ($rrun_stime - $overhead)/$hz;
   }
   elsif( $opt_u ){
-    $$runtime = ($rrun_utime - $overhead - $over_utime * $total_marks/$over_tests/2)/$hz;
+    $$runtime = ($rrun_utime - $overhead)/$hz;
   }
   else{
-    $$runtime = ($rrun_ustime - $overhead - ($over_utime + $over_stime) * $total_marks/$over_tests/2)/$hz;
+    $$runtime = ($rrun_ustime - $overhead)/$hz;
   }
   $$runtime = 0 unless $$runtime > 0;
 }
@@ -575,10 +575,9 @@ sub display_tree {
   exclusives_in_tree($deep_times);
   
   my $kid;
-  local *kids = $deep_times->{kids}; # %kids
 
   my $time;
-  if (%kids) {
+  if (%{$deep_times->{kids}}) {
     $time = sprintf '%.*fs = (%.*f + %.*f)', 
       $time_precision, $deep_times->{incl_time}/$hz,
         $time_precision, $deep_times->{excl_time}/$hz,
@@ -589,7 +588,7 @@ sub display_tree {
   print ' ' x (2*$level), "$name x $deep_times->{count}  \t${time}s\n"
     if $deep_times->{count};
 
-  for $kid (sort kids_by_incl keys %kids) {
+  for $kid (sort kids_by_incl %{$deep_times->{kids}}) {
     display_tree( $deep_times->{kids}{$kid}, $kid, $level + 1 );
   }  
 }
@@ -626,15 +625,16 @@ sub display {
 
 sub move_keys {
   my ($source, $dest) = @_;
-  my $kid;
-  
-  for $kid (keys %$source) {
-    if (exists $dest->{$kid}) {
-      $dest->{count} += $source->{count};
-      $dest->{incl_time} += $source->{incl_time};
-      move_keys($source->{kids},$dest->{kids});
+
+  for my $kid_name (keys %$source) {
+    my $source_kid = delete $source->{$kid_name};
+
+    if (my $dest_kid = $dest->{$kid_name}) {
+      $dest_kid->{count} += $source_kid->{count};
+      $dest_kid->{incl_time} += $source_kid->{incl_time};
+      move_keys($source_kid->{kids},$dest_kid->{kids});
     } else {
-      $dest->{$kid} = delete $source->{$kid};
+      $dest->{$kid_name} = $source_kid;
     }
   }
 }
@@ -645,11 +645,11 @@ sub add_to_tree {
     $name = $curdeep_times->[-1]{name};
   }
   die "Shorted?!" unless @$curdeep_times >= 2;
-  $curdeep_times->[-2]{kids}{$name} = { count => 0 , kids => {}, 
-					incl_time => 0,
-				      } 
-    unless exists $curdeep_times->[-2]{kids}{$name};
-  my $entry = $curdeep_times->[-2]{kids}{$name};
+  my $entry = $curdeep_times->[-2]{kids}{$name} ||= {
+    count => 0,
+    kids => {}, 
+    incl_time => 0,
+  };
   # Now transfer to the new node (could not do earlier, since name can change)
   $entry->{count}++;
   $entry->{incl_time} += $t - $curdeep_times->[-1]{enter_stamp};
@@ -666,6 +666,7 @@ sub parsestack {
 	my( $x, $z, $c, $id, $pack );
 	my @stack = ();
 	my @tstack = ();
+	my %outer;
 	my $tab = 3;
 	my $in = 0;
 
@@ -674,7 +675,6 @@ sub parsestack {
 	my $l_name = '';
 	my $repcnt = 0;
 	my $repstr = '';
-	my $dprof_t = 0;
 	my $dprof_stamp;
 	my %cv_hash;
 	my $in_level = not defined $opt_g; # Level deep in report grouping
@@ -720,22 +720,22 @@ sub parsestack {
 		  $name = defined $syst ? $syst : $cv_hash{$usert};
 		}
 
-		next unless $in_level or $name eq $opt_g or $dir eq '*';
+		next unless $in_level or $name eq $opt_g;
 		if ( $dir eq '-' or $dir eq '*' ) {
 		  	my $ename = $dir eq '*' ? $stack[-1][0]  : $name;
 			$overhead += $over_per_call;
 		  	if ($name eq "Devel::DProf::write") {
-			  $dprof_t += $t - $dprof_stamp;
+			  $overhead += $t - $dprof_stamp;
 			  next;
 		  	} elsif (defined $opt_g and $ename eq $opt_g) {
 			  $in_level--;
 			}
 			add_to_tree($curdeep_times, $ename,
-				    $t - $dprof_t - $overhead) if $opt_S;
+				    $t - $overhead) if $opt_S;
 			exitstamp( \@stack, \@tstack, 
-				   $t - $dprof_t - $overhead, 
+				   $t - $overhead, 
 				   $times, $ctimes, $ename, \$in, $tab, 
-				   $curdeep_times );
+				   $curdeep_times, \%outer );
 		} 
 		next unless $in_level or $name eq $opt_g;
 		if( $dir eq '+' or $dir eq '*' ){
@@ -774,11 +774,12 @@ sub parsestack {
 				push( @$idkeys, $name );
 			}
 			$calls->{$name}++;
+                        $outer{$name}++;
 			push @$curdeep_times, { kids => {}, 
 						name => $name, 
-						enter_stamp => $t - $dprof_t - $overhead,
+						enter_stamp => $t - $overhead,
 					      } if $opt_S;
-			$x = [ $name, $t - $dprof_t - $overhead ];
+			$x = [ $name, $t - $overhead ];
 			push( @stack, $x );
 
 			# my children will put their time here
@@ -791,6 +792,11 @@ sub parsestack {
 		$repstr = ' ('.++$repcnt.'x)' if $repcnt;
 		print ' ' x $l_in, "$l_name$repstr\n";
 	}
+
+        while (my ($key, $count) = each %outer) {
+            next unless $count;
+            warn "$key has $count unstacked calls in outer\n";
+        }
 
 	if( @stack ){
 		if( ! $opt_F ){
@@ -807,11 +813,11 @@ sub parsestack {
 			foreach $x ( reverse @stack ){
 				$name = $x->[0];
 				exitstamp( \@stack, \@tstack, 
-					   $t - $dprof_t - $overhead, $times, 
+					   $t - $overhead, $times, 
 					   $ctimes, $name, \$in, $tab, 
-					   $curdeep_times );
+					   $curdeep_times, \%outer );
 				add_to_tree($curdeep_times, $name,
-					    $t - $dprof_t - $overhead)
+					    $t - $overhead)
 				  if $opt_S;
 			}
 		}
@@ -823,7 +829,7 @@ sub parsestack {
 }
 
 sub exitstamp {
-	my($stack, $tstack, $t, $times, $ctimes, $name, $in, $tab, $deep) = @_;
+	my($stack, $tstack, $t, $times, $ctimes, $name, $in, $tab, $deep, $outer) = @_;
 	my( $x, $c, $z );
 
 	$x = pop( @$stack );
@@ -852,8 +858,9 @@ sub exitstamp {
 	$c = pop( @$tstack );
 	# total time this func has been active
 	$z = $t - $x->[1];
-	$ctimes->{$name} += $z;
-	$times->{$name} += ($z > $c)? $z - $c: 0;
+	$ctimes->{$name} += $z
+            unless --$outer->{$name};
+	$times->{$name} += $z - $c;
 	# pass my time to my parent
 	if( @$tstack ){
 		$c = pop( @$tstack );
@@ -922,7 +929,7 @@ sub rby_avgcpu { $persecs->{$a} <=> $persecs->{$b} }
 
 format CSTAT_top =
 Total Elapsed Time = @>>>>>>> Seconds
-(($rrun_rtime - $overhead - $over_rtime * $total_marks/$over_tests/2) / $hz)
+(($rrun_rtime - $overhead) / $hz)
   @>>>>>>>>>> Time = @>>>>>>> Seconds
 $whichtime, $runtime
 @<<<<<<<< Times

@@ -1796,7 +1796,7 @@ Perl_newPROG(pTHX_ OP *o)
 	CALL_PEEP(PL_eval_start);
     }
     else {
-	if (!o)
+	if (o->op_type == OP_STUB)
 	    return;
 	PL_main_root = scope(sawparens(scalarvoid(o)));
 	PL_curcop = &PL_compiling;
@@ -4718,10 +4718,9 @@ Perl_ck_eval(pTHX_ OP *o)
 	    o->op_flags &= ~OPf_KIDS;
 	    op_null(o);
 	}
-	else if (kid->op_type == OP_LINESEQ) {
+	else if (kid->op_type == OP_LINESEQ || kid->op_type == OP_STUB) {
 	    LOGOP *enter;
 
-	    kid->op_next = o->op_next;
 	    cUNOPo->op_first = 0;
 	    op_free(o);
 

@@ -5,7 +5,7 @@ require 5.003;	# keep this compatible, an old perl is all we may have before
 
 BEGIN {
   push @INC, 'lib';
-  require 'regen.pl';
+  require 'regen_lib.pl';
 }	# glob() below requires File::Glob
 
 

@@ -134,6 +134,13 @@ For C<last>, you have to be more elaborate:
 	    } while $x++ <= $z;
     }
 
+B<NOTE:> The behaviour of a C<my> statement modified with a statement
+modifier conditional or loop construct (e.g. C<my $x if ...>) is
+B<undefined>.  The value of the C<my> variable may be C<undef>, any
+previously assigned value, or possibly anything else.  Don't rely on
+it.  Future versions of perl might do something different from the
+version of perl you try it out on.  Here be dragons.
+
 =head2 Compound statements
 
 In Perl, a sequence of statements that defines a scope is called a block.

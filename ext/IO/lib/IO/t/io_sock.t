@@ -205,9 +205,9 @@ print "not " unless $server->blocking;
 print "ok 13\n";
 
 if ( $^O eq 'qnx' ) {
-  # QNX library bug: Can set non-blocking on socket, but
+  # QNX4 library bug: Can set non-blocking on socket, but
   # cannot return that status.
-  print "ok 14 # skipped\n";
+  print "ok 14 # skipped on QNX4\n";
 } else {
   $server->blocking(0);
   print "not " if $server->blocking;
@@ -352,6 +352,12 @@ $sock = IO::Socket::INET->new(Blocking => 0)
     or print "not ";
 print "ok 21\n";
 
-my $status = $sock->blocking;
-print "not " unless defined $status && !$status;
-print "ok 22\n";
+if ( $^O eq 'qnx' ) {
+  print "ok 22 # skipped on QNX4\n";
+  # QNX4 library bug: Can set non-blocking on socket, but
+  # cannot return that status.
+} else {
+  my $status = $sock->blocking;
+  print "not " unless defined $status && !$status;
+  print "ok 22\n";
+}

@@ -286,3 +286,12 @@ EXPECT
 7
 8
 0
+########
+#
+# FETCH freeing tie'd SV
+sub TIESCALAR { bless [] }
+sub FETCH { *a = \1; 1 }
+tie $a, 'main';
+print $a;
+EXPECT
+Tied variable freed while still in use at - line 6.

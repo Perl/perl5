@@ -55,7 +55,7 @@ SKIP: {
 
 SKIP: {
   skip "mtime and ctime not reliable", 2
-    if $Is_MSWin32 or $Is_NetWare or $Is_Cygwin or $Is_Dos;
+    if $Is_MSWin32 or $Is_NetWare or $Is_Cygwin or $Is_Dos or $Is_MacOS;
 
   ok( $mtime,           'mtime' );
   is( $mtime, $ctime,   'mtime == ctime' );
@@ -241,6 +241,11 @@ SKIP: {
     # so let's weed them out.
     $DEV =~ s{^.+?\s\..+?$}{}m;
     @DEV =  grep { ! m{^\..+$} } @DEV;
+
+    # Irix ls -l marks sockets with 'S' while 's' is a 'XENIX semaphore'.
+    if ($^O eq 'irix') {
+        $DEV =~ s{^S(.+?)}{s$1}mg;
+    }
 
     my $try = sub {
 	my @c1 = eval qq[\$DEV =~ /^$_[0].*/mg];

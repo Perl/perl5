@@ -2768,6 +2768,10 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
 #  elif defined(WIN32)
 #    if defined(__BORLANDC__)
     f->fd = PerlLIO_dup(fileno(f));
+#    elif defined(UNDER_CE)
+    /* WIN_CE does not have access to FILE internals, it hardly has FILE
+       structure at all
+     */
 #    else
     f->_file = -1;
 #    endif
