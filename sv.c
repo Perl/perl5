@@ -8240,6 +8240,33 @@ S_expect_number(pTHX_ char** pattern)
 }
 #define EXPECT_NUMBER(pattern, var) (var = S_expect_number(aTHX_ &pattern))
 
+static char *
+F0convert(NV nv, char *endbuf, STRLEN *len)
+{
+    int neg = nv < 0;
+    UV uv;
+    char *p = endbuf;
+
+    if (neg)
+	nv = -nv;
+    if (nv < UV_MAX) {
+	nv += 0.5;
+	uv = nv;
+	if (uv & 1 && uv == nv)
+	    uv--;			/* Round to even */
+	do {
+	    unsigned dig = uv % 10;
+	    *--p = '0' + dig;
+	} while (uv /= 10);
+	if (neg)
+	    *--p = '-';
+	*len = endbuf - p;
+	return p;
+    }
+    return Nullch;
+}
+
+
 /*
 =for apidoc sv_vcatpvfn
 
@@ -8267,6 +8294,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     bool has_utf8; /* has the result utf8? */
     bool pat_utf8; /* the pattern is in utf8? */
     SV *nsv = Nullsv;
+    /* Times 4: a decimal digit takes more than 3 binary digits.
+     * NV_DIG: mantissa takes than many decimal digits.
+     * Plus 32: Playing safe. */
+    char ebuf[IV_DIG * 4 + NV_DIG + 32];
+    /* large enough for "%#.#f" --chip */
+    /* what about long double NVs? --jhi */
 
     has_utf8 = pat_utf8 = DO_UTF8(sv);
 
@@ -8302,6 +8335,42 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
     }
 
+    /* special-case "%.<number>[gf]" */
+    if ( patlen <= 5 && pat[0] == '%' && pat[1] == '.'
+	 && (pat[patlen-1] == 'g' || pat[patlen-1] == 'f') ) {
+	unsigned digits = 0;
+	const char *pp;
+
+	pp = pat + 2;
+	while (*pp >= '0' && *pp <= '9')
+	    digits = 10 * digits + (*pp++ - '0');
+	if (pp - pat == patlen - 1) {
+	    NV nv;
+
+	    if (args)
+		nv = (NV)va_arg(*args, double);
+	    else if (svix < svmax)
+		nv = SvNV(*svargs);
+	    else
+		return;
+	    if (*pp == 'g') {
+		if (digits < sizeof(ebuf) - NV_DIG - 10) { /* 0, point, slack */
+		    Gconvert((double)nv, digits, 0, ebuf);
+		    sv_catpv(sv, ebuf);
+		    if (*ebuf)	/* May return an empty string for digits==0 */
+			return;
+		}
+	    } else if (!digits) {
+		STRLEN l;
+
+		if ((p = F0convert(nv, ebuf + sizeof ebuf, &l))) {
+		    sv_catpvn(sv, p, l);
+		    return;
+		}
+	    }
+	}
+    }
+
     if (!args && svix < svmax && DO_UTF8(*svargs))
 	has_utf8 = TRUE;
 
@@ -8333,13 +8402,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	char *eptr = Nullch;
 	STRLEN elen = 0;
-	/* Times 4: a decimal digit takes more than 3 binary digits.
-	 * NV_DIG: mantissa takes than many decimal digits.
-	 * Plus 32: Playing safe. */
-	char ebuf[IV_DIG * 4 + NV_DIG + 32];
-	/* large enough for "%#.#f" --chip */
-	/* what about long double NVs? --jhi */
-
 	SV *vecsv = Nullsv;
 	U8 *vecstr = Null(U8*);
 	STRLEN veclen = 0;
@@ -8999,6 +9061,17 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		PL_efloatbuf[0] = '\0';
 	    }
 
+	    if ( !(width || left || plus || alt) && fill != '0'
+		 && has_precis && intsize != 'q' ) {	/* Shortcuts */
+		if ( c == 'g') {
+		    Gconvert((double)nv, precis, 0, PL_efloatbuf);
+		    if (*PL_efloatbuf)	/* May return an empty string for digits==0 */
+			goto float_converted;
+		} else if ( c == 'f' && !precis) {
+		    if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
+			break;
+		}
+	    }
 	    eptr = ebuf + sizeof ebuf;
 	    *--eptr = '\0';
 	    *--eptr = c;
@@ -9043,6 +9116,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #else
 	    (void)sprintf(PL_efloatbuf, eptr, nv);
 #endif
+	float_converted:
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
 	    break;

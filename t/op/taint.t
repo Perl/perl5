@@ -124,7 +124,7 @@ my $echo = "$Invoke_Perl $ECHO";
 
 my $TEST = catfile(curdir(), 'TEST');
 
-print "1..206\n";
+print "1..220\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -981,4 +981,43 @@ else
     use re 'taint';
     $TAINT =~ /(.*)/;
     test 206, tainted(my $foo = $1);
+}
+
+{
+    # Remove this when changes 21542 and 21563 are integrated
+    test 207, 1;
+    test 208, 1;
+}
+
+{
+    # [perl #24248]
+    $TAINT =~ /(.*)/;
+    test 209, !tainted($1);
+    my $notaint = $1;
+    test 210, !tainted($notaint);
+
+    my $l;
+    $notaint =~ /($notaint)/;
+    $l = $1;
+    test 211, !tainted($1);
+    test 212, !tainted($l);
+    $notaint =~ /($TAINT)/;
+    $l = $1;
+    test 213, tainted($1);
+    test 214, tainted($l);
+
+    $TAINT =~ /($notaint)/;
+    $l = $1;
+    test 215, !tainted($1);
+    test 216, !tainted($l);
+    $TAINT =~ /($TAINT)/;
+    $l = $1;
+    test 217, tainted($1);
+    test 218, tainted($l);
+
+    my $r;
+    ($r = $TAINT) =~ /($notaint)/;
+    test 219, !tainted($1);
+    ($r = $TAINT) =~ /($TAINT)/;
+    test 220, tainted($1);
 }

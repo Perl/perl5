@@ -994,8 +994,11 @@ PP(pp_aassign)
     HV *hash;
     I32 i;
     int magic;
+    int duplicates = 0;
+    SV **firsthashrelem;
 
     PL_delaymagic = DM_DELAY;		/* catch simultaneous items */
+    gimme = GIMME_V;
 
     /* If there's a common identifier on both sides we have to take
      * special care that assigning the identifier on the left doesn't
@@ -1062,6 +1065,7 @@ PP(pp_aassign)
 		hash = (HV*)sv;
 		magic = SvMAGICAL(hash) != 0;
 		hv_clear(hash);
+		firsthashrelem = relem;
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
 		    HE *didstore;
@@ -1073,6 +1077,9 @@ PP(pp_aassign)
 		    if (*relem)
 			sv_setsv(tmpstr,*relem);	/* value */
 		    *(relem++) = tmpstr;
+		    if (gimme != G_VOID && hv_exists_ent(hash, sv, 0))
+			/* key overwrites an existing entry */
+			duplicates += 2;
 		    didstore = hv_store_ent(hash,sv,tmpstr,0);
 		    if (magic) {
 			if (SvSMAGICAL(tmpstr))
@@ -1173,17 +1180,26 @@ PP(pp_aassign)
     }
     PL_delaymagic = 0;
 
-    gimme = GIMME_V;
     if (gimme == G_VOID)
 	SP = firstrelem - 1;
     else if (gimme == G_SCALAR) {
 	dTARGET;
 	SP = firstrelem;
-	SETi(lastrelem - firstrelem + 1);
+	SETi(lastrelem - firstrelem + 1 - duplicates);
     }
     else {
-	if (ary || hash)
+	if (ary)
 	    SP = lastrelem;
+	else if (hash) {
+	    if (duplicates) {
+		/* Removes from the stack the entries which ended up as
+		 * duplicated keys in the hash (fix for [perl #24380]) */
+		Move(firsthashrelem + duplicates,
+			firsthashrelem, duplicates, SV**);
+		lastrelem -= duplicates;
+	    }
+	    SP = lastrelem;
+	}
 	else
 	    SP = firstrelem + (lastlelem - firstlelem);
 	lelem = firstlelem + (relem - firstrelem);

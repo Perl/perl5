@@ -59,6 +59,7 @@ PP(pp_regcreset)
     /* XXXX Should store the old value to allow for tie/overload - and
        restore in regcomp, where marked with XXXX. */
     PL_reginterp_cnt = 0;
+    TAINT_NOT;
     return NORMAL;
 }
 
