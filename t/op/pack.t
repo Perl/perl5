@@ -49,7 +49,7 @@ sub ok {
   } else {
     if ($err) {
       chomp $err;
-      print "not ok $test # \$\@ = $err\n";
+      print "not ok $test # $err\n";
     } else {
       if (defined $wrong) {
         $wrong = ", got $wrong";
@@ -556,14 +556,18 @@ ok ("@{[unpack('U*', pack('U*', 100, 200, 300))]}" eq "100 200 300");
 # is unpack U the reverse of pack U for byte string?
 ok ("@{[unpack('U*', pack('U*', 100, 200))]}" eq "100 200");
 
-# does unpack C unravel pack U?
-ok ("@{[unpack('C*', pack('U*', 100, 200))]}" eq "100 195 136");
+if (ord('A') == 65) {
+    # does unpack C unravel pack U?
+    ok ("@{[unpack('C*', pack('U*', 100, 200))]}" eq "100 195 136");
 
-# does pack U0C create Unicode?
-ok ("@{[pack('U0C*', 100, 195, 136)]}" eq v100.v200);
+    # does pack U0C create Unicode?
+     ok ("@{[pack('U0C*', 100, 195, 136)]}" eq v100.v200);
 
-# does pack C0U create characters?
-ok ("@{[pack('C0U*', 100, 200)]}" eq pack("C*", 100, 195, 136));
+    # does pack C0U create characters?
+    ok ("@{[pack('C0U*', 100, 200)]}" eq pack("C*", 100, 195, 136));
+} else {
+    ok(1, undef, "skipped") for 1..3; # EBCDIC?
+}
 
 # does unpack U0U on byte data warn?
 {
