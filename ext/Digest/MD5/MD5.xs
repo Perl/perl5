@@ -621,7 +621,7 @@ addfile(self, fh)
 	MD5_CTX* context = get_md5_ctx(self);
 	STRLEN fill = context->bytes_low & 0x3F;
 	unsigned char buffer[4096];
-	int  n;
+	SSize_t n;
     CODE:
 	if (fh) {
             if (fill) {
@@ -630,14 +630,19 @@ addfile(self, fh)
 	         * first.
 	         */
 	        STRLEN missing = 64 - fill;
-	        if ( (n = PerlIO_read(fh, buffer, missing)))
+	        n = PerlIO_read(fh, buffer, missing);
+		if (n >= 0)
 	 	    MD5Update(context, buffer, n);
-	        else
+	        else {
+		    if (PerlIO_error(fh)) {
+		        croak("Reading from filehandle failed");
+		    }
 		    XSRETURN(1);  /* self */
+		}
 	    }
 
 	    /* Process blocks until EOF or error */
-            while ( (n = PerlIO_read(fh, buffer, sizeof(buffer)))) {
+            while ( (n = PerlIO_read(fh, buffer, sizeof(buffer))) > 0 ) {
 	        MD5Update(context, buffer, n);
 	    }
 
