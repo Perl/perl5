@@ -51,8 +51,6 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
     copline	= NOLINE;	\
     curcop	= &compiling;	\
     curcopdb    = NULL;		\
-    cxstack_ix  = -1;		\
-    cxstack_max = 128;		\
     dbargs	= 0;		\
     dlmax	= 128;		\
     laststatval	= -1;		\
@@ -67,6 +65,13 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
     laststatval = -1;		\
     laststype   = OP_STAT;	\
     mess_sv     = Nullsv;	\
+    splitstr    = " ";		\
+    generation  = 100;		\
+    exitlist    = NULL;		\
+    exitlistlen = 0;		\
+    regindent   = 0;		\
+    in_clean_objs = FALSE;	\
+    in_clean_all= FALSE;	\
   } STMT_END
 
 #ifdef PERL_OBJECT
