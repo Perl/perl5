@@ -14,7 +14,9 @@ if ($now > $beg && $now - $beg < 10){print "ok 1\n";} else {print "not ok 1\n";}
 
 for ($i = 0; $i < 100000; $i++) {
     ($nowuser, $nowsys) = times;
-    $i = 200000 if $nowuser > $beguser && $nowsys > $begsys;
+    # on os x 10.1.5 we can't get a value for systime
+    $i = 200000 if $nowuser > $beguser;
+#    $i = 200000 if $nowuser > $beguser && $nowsys > $begsys;
     last if time - $beg > 20;
 }
 

@@ -1057,7 +1057,7 @@ STR ***retary;
 	    apush(ary,str_make(str_get(hiterval(entry))));
     }
     if (retary) { /* array wanted */
-	sarg = (STR**)saferealloc((char*)sarg,(max+2)*sizeof(STR*));
+	sarg = (STR**)safemalloc((max+2)*sizeof(STR*));
 	sarg[0] = Nullstr;
 	sarg[max+1] = Nullstr;
 	for (i = 1; i <= max; i++)
@@ -1084,7 +1084,7 @@ STR ***retary;
 
     if (retary) { /* array wanted */
 	if (entry) {
-	    sarg = (STR**)saferealloc((char*)sarg,4*sizeof(STR*));
+	    sarg = (STR**)safemalloc(4*sizeof(STR*));
 	    sarg[0] = Nullstr;
 	    sarg[3] = Nullstr;
 	    sarg[1] = mystr = str_make(hiterkey(entry));
@@ -1092,7 +1092,7 @@ STR ***retary;
 	    *retary = sarg;
 	}
 	else {
-	    sarg = (STR**)saferealloc((char*)sarg,2*sizeof(STR*));
+	    sarg = (STR**)safemalloc(2*sizeof(STR*));
 	    sarg[0] = Nullstr;
 	    sarg[1] = retstr = Nullstr;
 	    *retary = sarg;
@@ -1959,7 +1959,7 @@ STR ***retary;		/* where to return an array to, null if nowhere */
 	retary = Null(STR***);		/* do_stat already did retary */
 	goto donumset;
     case O_CRYPT:
-#ifdef CRYPT
+#ifdef HAS_CRYPT
 	tmps = str_get(sarg[1]);
 	str_set(str,crypt(tmps,str_get(sarg[2])));
 #else

@@ -68,16 +68,13 @@ Installation
     "make install" to create the awk to perl and sed to perl translators.
 
 9)  IMPORTANT!  Help save the world!  Communicate any problems and suggested
-    patches to me, lwall@jpl-devvax.jpl.nasa.gov (Larry Wall), so we can
-    keep the world in sync.  If you have a problem, there's someone else
-    out there who either has had or will have the same problem.
+    patches to perl1-porters@perl.org so we can keep the world in sync.  
+    If you have a problem, there's someone else out there who either has 
+    had or will have the same problem.
 
     If possible, send in patches such that the patch program will apply them.
     Context diffs are the best, then normal diffs.  Don't send ed scripts--
     I've probably changed my copy since the version you have.
 
-    Watch for perl patches in comp.sources.bugs.  Patches will generally be
-    in a form usable by the patch program.  If you are just now bringing up
-    perl and aren't sure how many patches there are, write to me and I'll
-    send any you don't have.  Your current patch level is shown in patchlevel.h.
+    Your current patch level is shown in patchlevel.h.
 

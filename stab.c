@@ -179,7 +179,13 @@ STR *str;
 	    curoutstab->stab_io->top_stab = stabent(str_get(str),TRUE);
 	    break;
 	case '~':
-	    safefree(curoutstab->stab_io->fmt_name);
+	    /* FIXME: investigate more carefully.  When the following
+	     * safefree is allowed to happen the subsequent stabent call
+	     * results in a segfault.  Commenting it out is a cheap band-aid
+	     * and probably a memory leak rolled into one 
+	     * 	-- richardc 2002-08-14
+	     */
+	    /* safefree(curoutstab->stab_io->fmt_name); */
 	    curoutstab->stab_io->fmt_name = str_get(str);
 	    curoutstab->stab_io->fmt_stab = stabent(str_get(str),TRUE);
 	    break;
@@ -244,7 +250,7 @@ STR *str;
 	}
     }
     else if (stab == envstab && envname) {
-	setenv(envname,str_get(str));
+	PL_setenv(envname,str_get(str));
 				/* And you'll never guess what the dog had */
 	safefree(envname);	/*   in its mouth... */
 	envname = Nullch;

@@ -32,5 +32,5 @@ if ($x == '1') {print "ok 4\n";} else {print "not ok 4\n";}
 open(try, "/dev/null") || (die "Can't open /dev/null.");
 if (<try> eq '') {print "ok 5\n";} else {print "not ok 5\n";}
 
-open(try, "/etc/termcap") || (die "Can't open /etc/termcap.");
+open(try, "/etc/passwd") || (die "Can't open /etc/passwd.");
 if (<try> ne '') {print "ok 6\n";} else {print "not ok 6\n";}

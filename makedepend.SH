@@ -101,7 +101,7 @@ make shlist || ($echo "Searching for .SH files..."; \
 	$echo *.SH */*.SH | $tr ' ' '\012' | $egrep -v '\*' >.shlist)
 if $test -s .deptmp; then
     for file in `cat .shlist`; do
-	$echo `$expr X$file : 'X\(.*\).SH`: $file config.sh \; \
+	$echo `$expr X$file : 'X\(.*\).SH'`: $file config.sh \; \
 	    /bin/sh $file >> .deptmp
     done
     $echo "Updating Makefile..."

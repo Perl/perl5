@@ -209,8 +209,6 @@ EXT jmp_buf eval_env;
 EXT char *goto_targ INIT(Nullch);	/* cmd_exec gets strange when set */
 
 double atof();
-long time();
-struct tm *gmtime(), *localtime();
 
 #ifdef EUNICE
 #define UNLINK(f) while (unlink(f) >= 0)

@@ -51,7 +51,8 @@ register char **env;
 #endif
 	case 'e':
 	    if (!e_fp) {
-		mktemp(e_tmpname);
+		e_tmpname = (char*) strdup(e_tmpname);
+		mkstemp(e_tmpname);
 		e_fp = fopen(e_tmpname,"w");
 	    }
 	    if (argv[1])
@@ -120,7 +121,7 @@ register char **env;
 	argv[0] = "";
     if (preprocess) {
 	sprintf(buf, "\
-/bin/sed -e '/^[^#]/b' \
+%s -e '/^[^#]/b' \
  -e '/^#[ 	]*include[ 	]/b' \
  -e '/^#[ 	]*define[ 	]/b' \
  -e '/^#[ 	]*if[ 	]/b' \
@@ -129,7 +130,7 @@ register char **env;
  -e '/^#[ 	]*endif/b' \
  -e 's/^#.*//' \
  %s | %s -C %s%s",
-	  argv[0], CPP, str_get(str), CPPMINUS);
+	  SED, argv[0], CPP, str_get(str), CPPMINUS);
 	rsfp = popen(buf,"r");
     }
     else if (!*argv[0])

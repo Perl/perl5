@@ -1,7 +1,3 @@
-After all the perl kits are run you should have the following files:
-
-Filename		Kit Description
---------		--- -----------
 Configure                6  Run this first
 EXTERN.h                10  Included before foreign .h files
 INTERN.h                10  Included before domestic .h files
@@ -15,14 +11,101 @@ array.c                  6  Numerically subscripted arrays
 array.h                 10  Public declarations for the above
 cmd.c                    7  Command interpreter
 cmd.h                    9  Public declarations for the above
-config.H                 9  Sample config.h
-config.h.SH              9  Produces config.h.
+config_H                 9  Sample config.h
+config_h.SH              9  Produces config.h.
 dump.c                   8  Debugging output
 form.c                   8  Format processing
 form.h                  10  Public declarations for the above
 handy.h                 10  Handy definitions
 hash.c                   9  Associative arrays
 hash.h                  10  Public declarations for the above
+hints/3b1.sh
+hints/3b1cc
+hints/README.hints
+hints/aix.sh
+hints/altos486.sh
+hints/amigaos.sh
+hints/apollo.sh
+hints/atheos.sh
+hints/aux_3.sh
+hints/beos.sh
+hints/broken-db.msg
+hints/bsdos.sh
+hints/convexos.sh
+hints/cxux.sh
+hints/cygwin.sh
+hints/darwin.sh
+hints/dcosx.sh
+hints/dec_osf.sh
+hints/dgux.sh
+hints/dos_djgpp.sh
+hints/dynix.sh
+hints/dynixptx.sh
+hints/epix.sh
+hints/esix4.sh
+hints/fps.sh
+hints/freebsd.sh
+hints/genix.sh
+hints/gnu.sh
+hints/greenhills.sh
+hints/hpux.sh
+hints/i386.sh
+hints/irix_4.sh
+hints/irix_5.sh
+hints/irix_6.sh
+hints/irix_6_0.sh
+hints/irix_6_1.sh
+hints/isc.sh
+hints/isc_2.sh
+hints/linux.sh
+hints/lynxos.sh
+hints/machten.sh
+hints/machten_2.sh
+hints/mint.sh
+hints/mips.sh
+hints/mpc.sh
+hints/mpeix.sh
+hints/ncr_tower.sh
+hints/netbsd.sh
+hints/newsos4.sh
+hints/next_3.sh
+hints/next_3_0.sh
+hints/next_4.sh
+hints/nonstopux.sh
+hints/openbsd.sh
+hints/opus.sh
+hints/os2.sh
+hints/os390.sh
+hints/posix-bc.sh
+hints/powerux.sh
+hints/qnx.sh
+hints/rhapsody.sh
+hints/sco.sh
+hints/sco_2_3_0.sh
+hints/sco_2_3_1.sh
+hints/sco_2_3_2.sh
+hints/sco_2_3_3.sh
+hints/sco_2_3_4.sh
+hints/solaris_2.sh
+hints/stellar.sh
+hints/sunos_4_0.sh
+hints/sunos_4_1.sh
+hints/super-ux.sh
+hints/svr4.sh
+hints/svr5.sh
+hints/t001.c
+hints/ti1500.sh
+hints/titanos.sh
+hints/ultrix_4.sh
+hints/umips.sh
+hints/unicos.sh
+hints/unicosmk.sh
+hints/unisysdynix.sh
+hints/utekv.sh
+hints/uts.sh
+hints/uwin.sh
+hints/vmesa.sh
+hints/vos.sh
 makedepend.SH            9  Precursor to makedepend
 makedir.SH              10  Precursor to makedir
 malloc.c                 7  A version of malloc you might not want
@@ -31,6 +114,8 @@ perl.h                   9  Global declarations
 perl.man.1               5  The manual page(s), first half
 perl.man.2               4  The manual page(s), second half
 perl.y                   5  Yacc grammar for perl
+perldb
+perldb.man
 perly.c                  2  The perl compiler
 search.c                 6  String matching
 search.h                10  Public declarations for the above
@@ -69,6 +154,7 @@ t/op.cond               10  See if conditional expressions work
 t/op.crypt              10  See if crypt works
 t/op.do                 10  See if subroutines work
 t/op.each               10  See if associative iterators work
+t/op.eval
 t/op.exec               10  See if exec and system work
 t/op.exp                10  See if math functions work
 t/op.flip               10  See if range operator works

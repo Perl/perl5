@@ -23,9 +23,11 @@ while (<config>) {
 }
 $bad = 0;
 while ($test = shift) {
+    next if $test =~ m/,v$/;
+    next if $test =~ m/~$/;
     print "$test...";
     if ($sharpbang) {
-	open(results,"$test|") || (print "can't run.\n");
+	open(results,"./$test|") || (print "can't run.\n");
     } else {
 	open(script,"$test") || die "Can't run $test";
 	$_ = <script>;

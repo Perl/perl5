@@ -111,7 +111,7 @@ struct cmd {
 EXT CMD *main_root INIT(Nullcmd);
 EXT CMD *eval_root INIT(Nullcmd);
 
-EXT struct compcmd {
+struct compcmd {
     CMD *comp_true;
     CMD *comp_alt;
 };

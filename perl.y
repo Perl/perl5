@@ -69,7 +69,6 @@ char *tokename[] = {
 %token <arg> RSTRING TRANS
 
 %type <ival> prog decl format
-%type <stabval>
 %type <cmdval> block lineseq line loop cond sideff nexpr else
 %type <arg> expr sexpr term
 %type <arg> condmod loopmod cexpr

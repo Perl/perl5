@@ -55,7 +55,7 @@ mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 SLN = $sln
 
-libs = $libnm -lm
+libs = $libs $cryptlib $libnm -lm
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'

@@ -17,7 +17,7 @@
 #define CHKLEN(allow) \
 if (d - orec->o_str + (allow) >= curlen) { \
     curlen = d - orec->o_str; \
-    GROWSTR(&orec->o_str,&orec->o_len,orec->o_len + (allow)); \
+    GROWSTR(&orec->o_str,&orec->o_len,orec->o_len + (allow) + 1); \
     d = orec->o_str + curlen;	/* in case it moves */ \
     curlen = orec->o_len - 2; \
 }

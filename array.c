@@ -34,7 +34,7 @@ STR *val;
     if (key < 0)
 	return FALSE;
     if (key > ar->ary_max) {
-	int newmax = key + ar->ary_max / 5;
+	int newmax = key + ar->ary_max;
 
 	ar->ary_array = (STR**)saferealloc((char*)ar->ary_array,
 	    (newmax+1) * sizeof(STR*));
