@@ -1,6 +1,6 @@
-use File::Find;
 use File::Basename;
 use Cwd;
+use FindExt;
 my $here = getcwd();
 my $perl = $^X;
 $here =~ s,/,\\,g;
@@ -15,12 +15,11 @@ my $dmod = -M $dep;
 my $dir  = shift;
 chdir($dir) || die "Cannot cd to $dir\n";
 (my $ext = getcwd()) =~ s,/,\\,g;
-my $no = join('|',qw(DynaLoader GDBM_File ODBM_File NDBM_File DB_File Syslog Sysv));
-$no = qr/^(?:$no)$/i;
-my %ext;
-find(\&find_xs,'.');
+FindExt::scan_ext($ext);
 
-foreach my $dir (sort keys %ext)
+my @ext = FindExt::extensions();
+
+foreach my $dir (sort @ext)
  {
   if (chdir("$ext\\$dir"))
    {
@@ -46,19 +45,3 @@ foreach my $dir (sort keys %ext)
    }
  }
 
-sub find_xs
-{
- if (/^(.*)\.pm$/i || /^(.*)_pm.PL$/i)
-  {
-   my $name = $1;
-   return if $name =~ $no; 
-   my $dir = $File::Find::dir; 
-   $dir =~ s,./,,;
-   return if exists $ext{$dir};
-   return unless -f "$ext/$dir/Makefile.PL";
-   if ($dir =~ /$name$/i)
-    {
-     $ext{$dir} = $name; 
-    }
-  }
-}

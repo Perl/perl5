@@ -1,3 +1,4 @@
+use FindExt;
 # take a semicolon separated path list and turn it into a quoted
 # list of paths that Text::Parsewords will grok
 sub mungepath {
@@ -33,12 +34,18 @@ sub loadopts {
     }
 }
 
+FindExt::scan_ext("../ext");
+
 my %opt;
+
 my $optref = loadopts();
 while (@{$optref} && $optref->[0] =~ /^([\w_]+)=(.*)$/) {
     $opt{$1}=$2;
     shift(@{$optref});
 }
+
+$opt{'dynamic_ext'} = join(' ',FindExt::dynamic_extensions());
+$opt{'nonxs_ext'}   = join(' ',FindExt::noxs_extensions());
 
 my $pl_h = '../patchlevel.h';
 
