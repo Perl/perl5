@@ -1620,6 +1620,7 @@ Ap	|U32	|to_uni_upper_lc|U32 c
 Ap	|U32	|to_uni_title_lc|U32 c
 Ap	|U32	|to_uni_lower_lc|U32 c
 Ap	|int	|is_utf8_char	|U8 *p
+Ap	|bool	|is_utf8_string	|U8 *s|STRLEN len
 Ap	|bool	|is_utf8_alnum	|U8 *p
 Ap	|bool	|is_utf8_alnumc	|U8 *p
 Ap	|bool	|is_utf8_idfirst|U8 *p
@@ -2063,7 +2064,7 @@ Ap	|U8*	|utf16_to_utf8_reversed|U16* p|U8 *d|I32 bytelen
 Ap	|I32	|utf8_distance	|U8 *a|U8 *b
 Ap	|U8*	|utf8_hop	|U8 *s|I32 off
 Ap	|U8*	|utf8_to_bytes	|U8 *s|STRLEN len
-Ap	|U8*	|bytes_to_utf8	|U8 *s|STRLEN len
+Ap	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
 Ap	|UV	|utf8_to_uv	|U8 *s|I32* retlen
 Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
