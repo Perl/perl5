@@ -4709,7 +4709,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	char *eptr = Nullch;
 	STRLEN elen = 0;
-	char ebuf[TYPE_DIGITS(IV) * 2 + 16];
+	/* Times 4: a decimal digit takes more than 3 binary digits.
+	 * NV_DIG: mantissa takes than many decimal digits.
+	 * Plus 32: Playing safe. */
+	char ebuf[IV_DIG * 4 + NV_DIG + 32];
         /* large enough for "%#.#f" --chip */
 	/* what about long double NVs? --jhi */
 	char c;
