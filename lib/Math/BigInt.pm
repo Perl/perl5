@@ -214,7 +214,7 @@ sub mul { #(*int_num_array, *int_num_array) return int_num_array
     for $x (@x) {
       ($car, $cty) = (0, $[);
       for $y (@y) {
-	$prod = $x * $y + $prod[$cty] + $car;
+	$prod = $x * $y + ($prod[$cty] || 0) + $car;
 	$prod[$cty++] =
 	  $prod - ($car = int($prod * 1e-5)) * 1e5;
       }
