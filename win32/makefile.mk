@@ -786,8 +786,10 @@ CFG_VARS	=					\
 		libpth=$(CCLIBDIR:s/\/\\/);$(EXTRALIBDIRS:s/\/\\/)	~	\
 		libc=$(LIBC)			~	\
 		make=dmake			~	\
-		_o=$(o)	obj_ext=$(o)		~	\
-		_a=$(a)	lib_ext=$(a)		~	\
+		_o=$(o)				~	\
+		obj_ext=$(o)			~	\
+		_a=$(a)				~	\
+		lib_ext=$(a)			~	\
 		static_ext=$(STATIC_EXT)	~	\
 		use5005threads=$(USE_5005THREADS)	~	\
 		useithreads=$(USE_ITHREADS)	~	\

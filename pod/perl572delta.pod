@@ -382,7 +382,7 @@ long doubles support in AIX should be better now.  See L<perlaix>.
 
 =item *
 
-AtheOS (http://www.atheos.cx/) is a new platform.
+AtheOS ( http://www.atheos.cx/ ) is a new platform.
 
 =item *
 
@@ -802,8 +802,8 @@ libraries).
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at http://bugs.perl.org.  There may also be
-information at http://www.perl.com/perl/, the Perl Home Page.
+bug database at http://bugs.perl.org/  There may also be
+information at http://www.perl.com/perl/ , the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down

@@ -199,11 +199,14 @@ ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
 ext/Encode/Byte/Byte.pm	Encode extension
 ext/Encode/Byte/Makefile.PL       Encode extension
+ext/Encode/Changes		Change Log
 ext/Encode/CN/CN.pm		Encode extension
 ext/Encode/CN/Makefile.PL	Encode extension
-ext/Encode/Changes		Change Log
+ext/Encode/compile		Encode extension
 ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
 ext/Encode/EBCDIC/Makefile.PL     Encode extension
+ext/Encode/encengine.c		Encode extension
+ext/Encode/encode.h		Encode extension
 ext/Encode/Encode.pm			Encode extension
 ext/Encode/Encode.xs		Encode extension
 ext/Encode/Encode/8859-1.ucm	Unicode Character Map
@@ -276,16 +279,6 @@ ext/Encode/JP/JP.pm		Encode extension
 ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
 ext/Encode/KR/Makefile.PL		Encode extension
-ext/Encode/MANIFEST		Encode extension
-ext/Encode/Makefile.PL		Encode extension makefile writer
-ext/Encode/README		Encode extension
-ext/Encode/Symbol/Makefile.PL     Encode extension
-ext/Encode/Symbol/Symbol.pm       Encode extension
-ext/Encode/TW/Makefile.PL	Encode extension
-ext/Encode/TW/TW.pm		Encode extension
-ext/Encode/compile		Encode extension
-ext/Encode/encengine.c		Encode extension
-ext/Encode/encode.h		Encode extension
 ext/Encode/lib/Encode/10646_1.pm	Encode extension
 ext/Encode/lib/Encode/Alias.pm	        Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
@@ -300,24 +293,31 @@ ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
 ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/Supported.pod	Documents supported encodings
-ext/Encode/lib/Encode/Unicode.pm	Encode extension
-ext/Encode/lib/Encode/XS.pm		Encode extension
 ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
+ext/Encode/lib/Encode/Unicode.pm	Encode extension
 ext/Encode/lib/Encode/utf8.pm		Encode extension
+ext/Encode/lib/Encode/XS.pm		Encode extension
+ext/Encode/Makefile.PL		Encode extension makefile writer
+ext/Encode/MANIFEST		Encode extension
+ext/Encode/README		Encode extension
+ext/Encode/Symbol/Makefile.PL     Encode extension
+ext/Encode/Symbol/Symbol.pm       Encode extension
 ext/Encode/t/Aliases.t	Encode extension test
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
-ext/Encode/t/JP.t		Encode extension test
-ext/Encode/t/KR.t		Encode extension test
-ext/Encode/t/TW.t		Encode extension test
 ext/Encode/t/gb2312.euc	test data
 ext/Encode/t/gb2312.ref	test data
 ext/Encode/t/jisx0208.euc	test data
 ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data
 ext/Encode/t/jisx0212.ref	test data
+ext/Encode/t/JP.t		Encode extension test
+ext/Encode/t/KR.t		Encode extension test
 ext/Encode/t/ksc5601.euc	test data
 ext/Encode/t/ksc5601.ref	test data
+ext/Encode/t/TW.t		Encode extension test
+ext/Encode/TW/Makefile.PL	Encode extension
+ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/ucm2table	Table Generator for testing
 ext/Errno/ChangeLog	Errno perl module change log
 ext/Errno/Errno.t	See if Errno works
@@ -832,12 +832,9 @@ lib/bignum.pm			bignum
 lib/bignum/t/bigint.t		See if bignum works
 lib/bignum/t/bignum.t		See if bignum works
 lib/bignum/t/bigrat.t		See if bignum works
-lib/bignum/t/bn_lite.t		See if bignum works
-lib/bignum/t/br_lite.t		See if bignum works
 lib/bignum/t/option_a.t		See if bignum works
 lib/bignum/t/option_l.t		See if bignum works
 lib/bignum/t/option_p.t		See if bignum works
-lib/bignum/t/trace.t		See if bignum works
 lib/bigrat.pl			An arbitrary precision rational arithmetic package
 lib/bigrat.pm			bignum
 lib/blib.pm			For "use blib"
@@ -1131,6 +1128,7 @@ lib/Math/BigInt/t/use_lib1.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_lib2.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_lib3.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_lib4.t	Test combinations of Math::BigInt and BigFloat
+lib/Math/BigInt/t/with_sub.t	Test use Math::BigFloat with => package
 lib/Math/BigInt/Trace.pm	bignum tracing
 lib/Math/BigRat.pm		Math::BigRat
 lib/Math/BigRat/t/bigfltpm.inc		Math::BigRat test

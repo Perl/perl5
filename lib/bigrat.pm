@@ -107,7 +107,6 @@ sub import
     {
     require Math::BigInt::Trace; $class = 'Math::BigInt::Trace';
     $upgrade = 'Math::BigFloat::Trace';
-#    print STDERR "Loading $class";
     }
   else
     {
@@ -150,7 +149,7 @@ __END__
 
 =head1 NAME
 
-bigrat - Transparent BigNumber/BigRationale support for Perl
+bigrat - Transparent BigNumber/BigRational support for Perl
 
 =head1 SYNOPSIS
 

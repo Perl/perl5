@@ -14,8 +14,15 @@ use warnings;
 
 # Okay, this is the list.
 
-my @Core_Modules = grep /\S/, sort <DATA>;
+my @Core_Modules = grep /\S/, <DATA>;
 chomp @Core_Modules;
+
+# Two Net:: modules need the Convert::EBCDIC if in EBDCIC.
+if (ord("A") != 193 || eval { require Convert::EBCDIC }) {
+    push @Core_Modules, qw(Net::Cmd Net::POP3);
+}
+
+@Core_Modules = sort @Core_Modules;
 
 print "1..".(1+@Core_Modules)."\n";
 
@@ -61,9 +68,7 @@ ExtUtils::MM_NW5
 ExtUtils::Install
 ExtUtils::Liblist
 ExtUtils::Mksymlists
-Net::Cmd
 Net::Domain
-Net::POP3
 O
 Pod::Plainer
 Test::Harness::Iterator

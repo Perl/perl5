@@ -21,7 +21,7 @@ use File::Spec;
 
 use strict;
 use vars qw/$AUTOLOAD $accuracy $precision $div_scale $round_mode $rnd_mode/;
-use vars qw/$upgrade $downgrade $MBI/;
+use vars qw/$upgrade $downgrade/;
 my $class = "Math::BigFloat";
 
 use overload
@@ -49,8 +49,8 @@ $div_scale  = 40;
 
 $upgrade = undef;
 $downgrade = undef;
-$MBI = 'Math::BigInt';	# the package we are using for our private parts
-			# changable by use Math::BigFloat with => 'package'
+my $MBI = 'Math::BigInt'; # the package we are using for our private parts
+			  # changable by use Math::BigFloat with => 'package'
 
 ##############################################################################
 # the old code had $rnd_mode, so we need to support it, too
@@ -202,6 +202,24 @@ sub isa
   my ($self,$class) = @_;
   return if $class =~ /^Math::BigInt/;		# we aren't one of these
   UNIVERSAL::isa($self,$class);
+  }
+
+sub config
+  {
+  # return (later set?) configuration data as hash ref
+  my $class = shift || 'Math::BigFloat';
+
+  my $cfg = $MBI->config();
+
+  no strict 'refs';
+  $cfg->{class} = $class;
+  $cfg->{with} = $MBI;
+  foreach (
+   qw/upgrade downgrade precision accuracy round_mode VERSION div_scale/)
+    {
+    $cfg->{lc($_)} = ${"${class}::$_"};
+    };
+  $cfg;
   }
 
 ##############################################################################
@@ -439,6 +457,9 @@ sub badd
     $x->{sign} = $y->{sign}, return $x if $y->{sign} =~ /^[+-]inf$/;
     return $x;
     }
+
+  return $upgrade->badd($x,$y,$a,$p,$r) if defined $upgrade &&
+   ((!$x->isa($self)) || (!$y->isa($self)));
 
   # speed: no add for 0+y or x+0
   return $x->bround($a,$p,$r) if $y->is_zero();		# x+0
@@ -784,6 +805,9 @@ sub bmul
     }
   # handle result = 0
   return $x->bzero() if $x->is_zero() || $y->is_zero();
+  
+  return $upgrade->bmul($x,$y,$a,$p,$r) if defined $upgrade &&
+   ((!$x->isa($self)) || (!$y->isa($self)));
 
   # aEb * cEd = (a*c)E(b+d)
   $x->{_m}->bmul($y->{_m});
@@ -1655,52 +1679,78 @@ sub parts
 sub import
   {
   my $self = shift;
-  my $l = scalar @_; my $j = 0; my @a = @_;
-  my $lib = '';
-  for ( my $i = 0; $i < $l ; $i++, $j++)
+  my $l = scalar @_;
+  my $lib = ''; my @a;
+  for ( my $i = 0; $i < $l ; $i++)
     {
+#    print "at $_[$i] (",$_[$i+1]||'undef',")\n";
     if ( $_[$i] eq ':constant' )
       {
       # this rest causes overlord er load to step in
       # print "overload @_\n";
       overload::constant float => sub { $self->new(shift); }; 
-      splice @a, $j, 1; $j--;
       }
     elsif ($_[$i] eq 'upgrade')
       {
       # this causes upgrading
       $upgrade = $_[$i+1];		# or undef to disable
-      my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
-      splice @a, $j, $s; $j -= $s;
+      $i++;
       }
     elsif ($_[$i] eq 'downgrade')
       {
       # this causes downgrading
       $downgrade = $_[$i+1];		# or undef to disable
-      my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
-      splice @a, $j, $s; $j -= $s;
+      $i++;
       }
     elsif ($_[$i] eq 'lib')
       {
       $lib = $_[$i+1] || '';		# default Calc
-      my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
-      splice @a, $j, $s; $j -= $s;
+      $i++;
       }
     elsif ($_[$i] eq 'with')
       {
       $MBI = $_[$i+1] || 'Math::BigInt';	# default Math::BigInt
-      my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
-      splice @a, $j, $s; $j -= $s;
+      $i++;
+      }
+    else
+      {
+      push @a, $_[$i];
       }
     }
-  my @parts = split /::/, $MBI;			# Math::BigInt => Math BigInt
-  my $file = pop @parts; $file .= '.pm';	# BigInt => BigInt.pm
-  $file = File::Spec->catdir (@parts, $file);
+#  print "mbf @a\n";
+
   # let use Math::BigInt lib => 'GMP'; use Math::BigFloat; still work
   my $mbilib = eval { Math::BigInt->config()->{lib} };
-  $lib .= ",$mbilib" if defined $mbilib;
-  require $file;
-  $MBI->import ( lib => $lib, 'objectify' );
+  if ((defined $mbilib) && ($MBI eq 'Math::BigInt'))
+    {
+    # MBI already loaded
+    $MBI->import('lib',"$lib,$mbilib", 'objectify');
+    }
+  else
+    {
+    # MBI not loaded, or with ne "Math::BigInt"
+    $lib .= ",$mbilib" if defined $mbilib;
+  
+#  my @parts = split /::/, $MBI;		# Math::BigInt => Math BigInt
+#  my $file = pop @parts; $file .= '.pm';	# BigInt => BigInt.pm
+#  $file = File::Spec->catfile (@parts, $file);
+
+    if ($] < 5.006)
+      {
+      # Perl < 5.6.0 dies with "out of memory!" when eval() and ':constant' is
+      # used in the same script, or eval inside import().
+      my @parts = split /::/, $MBI;		# Math::BigInt => Math BigInt
+      my $file = pop @parts; $file .= '.pm';	# BigInt => BigInt.pm
+      $file = File::Spec->catfile (@parts, $file);
+      eval { require $file; $MBI->import( lib => '$lib', 'objectify' ); }
+      }
+    else
+      {
+      my $rc = "use $MBI lib => '$lib', 'objectify';";
+      eval $rc;
+      }
+    }
+  die ("Couldn't load $MBI: $! $@") if $@;
 
   # any non :constant stuff is handled by our parent, Exporter
   # even if @_ is empty, to give it a chance

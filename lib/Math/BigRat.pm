@@ -6,7 +6,7 @@
 #   _n   : numeraotr (value = _n/_d)
 #   _a   : accuracy
 #   _p   : precision
-#   _f   : flags, used by MBR to flag parts of a rationale as untouchable
+#   _f   : flags, used by MBR to flag parts of a rational as untouchable
 
 package Math::BigRat;
 
@@ -21,7 +21,7 @@ use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK $upgrade $downgrade
 @ISA = qw(Exporter Math::BigFloat);
 @EXPORT_OK = qw();
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 use overload;				# inherit from Math::BigFloat
 
@@ -39,9 +39,15 @@ $downgrade = undef;
 my $nan = 'NaN';
 my $class = 'Math::BigRat';
 
+sub isa
+  {
+  return 0 if $_[1] =~ /^Math::Big(Int|Float)/;		# we aren't
+  UNIVERSAL::isa(@_);
+  }
+
 sub _new_from_float
   {
-  # turn a single float input into a rationale (like '0.1')
+  # turn a single float input into a rational (like '0.1')
   my ($self,$f) = @_;
 
   return $self->bnan() if $f->is_nan();
@@ -91,13 +97,21 @@ sub new
 #    print "is ref, but not rat\n";
     if ($n->isa('Math::BigFloat'))
       {
-#      print "is ref, and float\n";
+   #   print "is ref, and float\n";
       return $self->_new_from_float($n)->bnorm();
       }
     if ($n->isa('Math::BigInt'))
       {
 #      print "is ref, and int\n";
-      $self->{_n} = $n->copy();				# "mantissa" = $d
+      $self->{_n} = $n->copy();				# "mantissa" = $n
+      $self->{_d} = Math::BigInt->bone();
+      $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
+      return $self->bnorm();
+      }
+    if ($n->isa('Math::BigInt::Lite'))
+      {
+#      print "is ref, and lite\n";
+      $self->{_n} = Math::BigInt->new($$n);		# "mantissa" = $n
       $self->{_d} = Math::BigInt->bone();
       $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
       return $self->bnorm();
@@ -168,6 +182,8 @@ sub new
   $self->bnorm();
   }
 
+###############################################################################
+
 sub bstr
   {
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
@@ -223,6 +239,9 @@ sub bnorm
 
 #  print "$x->{_n} / $x->{_d} => ";
   # reduce other numbers
+  # print "bgcd $x->{_n} (",ref($x->{_n}),") $x->{_d} (",ref($x->{_d}),")\n";
+  # disable upgrade in BigInt, otherwise deep recursion
+  local $Math::BigInt::upgrade = undef;
   my $gcd = $x->{_n}->bgcd($x->{_d});
 
   if (!$gcd->is_one())
@@ -274,15 +293,13 @@ sub _bzero
 
 sub badd
   {
-  # add two rationales
+  # add two rationals
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
+  $x = $class->new($x) unless $x->isa($class);
+  $y = $class->new($y) unless $y->isa($class);
+
   return $x->bnan() if ($x->{sign} eq 'NaN' || $y->{sign} eq 'NaN');
-
-  # TODO: upgrade
-
-#  # upgrade
-#  return $upgrade->bdiv($x,$y,$a,$p,$r) if defined $upgrade;
 
   #  1   1    gcd(3,4) = 1    1*3 + 1*4    7
   #  - + -                  = --------- = --                 
@@ -311,16 +328,14 @@ sub badd
 
 sub bsub
   {
-  # subtract two rationales
+  # subtract two rationals
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+
+  $x = $class->new($x) unless $x->isa($class);
+  $y = $class->new($y) unless $y->isa($class);
 
   return $x->bnan() if ($x->{sign} eq 'NaN' || $y->{sign} eq 'NaN');
   # TODO: inf handling
-
-  # TODO: upgrade
-
-#  # upgrade
-#  return $upgrade->bdiv($x,$y,$a,$p,$r) if defined $upgrade;
 
   #  1   1    gcd(3,4) = 1    1*3 + 1*4    7
   #  - + -                  = --------- = --                 
@@ -349,8 +364,11 @@ sub bsub
 
 sub bmul
   {
-  # multiply two rationales
+  # multiply two rationals
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+
+  $x = $class->new($x) unless $x->isa($class);
+  $y = $class->new($y) unless $y->isa($class);
 
   return $x->bnan() if ($x->{sign} eq 'NaN' || $y->{sign} eq 'NaN');
 
@@ -369,11 +387,6 @@ sub bmul
   # x== 0 # also: or y == 1 or y == -1
   return wantarray ? ($x,$self->bzero()) : $x if $x->is_zero();
 
-  # TODO: upgrade
-
-#  # upgrade
-#  return $upgrade->bdiv($x,$y,$a,$p,$r) if defined $upgrade;
- 
   # According to Knuth, this can be optimized by doingtwice gcd (for d and n)
   # and reducing in one step)
 
@@ -395,6 +408,9 @@ sub bdiv
   # (BRAT,BRAT) (quo,rem) or BRAT (only rem)
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
+  $x = $class->new($x) unless $x->isa($class);
+  $y = $class->new($y) unless $y->isa($class);
+
   return $self->_div_inf($x,$y)
    if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
 
@@ -402,9 +418,6 @@ sub bdiv
   return wantarray ? ($x,$self->bzero()) : $x if $x->is_zero();
 
   # TODO: list context, upgrade
-
-#  # upgrade
-#  return $upgrade->bdiv($x,$y,$a,$p,$r) if defined $upgrade;
 
   # 1     1    1   3
   # -  /  - == - * -
@@ -710,7 +723,7 @@ __END__
 
 =head1 NAME
 
-Math::BigRat - arbitrarily big rationales
+Math::BigRat - arbitrarily big rationals
 
 =head1 SYNOPSIS
 

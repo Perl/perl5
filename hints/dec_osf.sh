@@ -375,7 +375,7 @@ case "$loclibpth" in
 	    done
 	    echo "LD_LIBRARY_PATH is now $LD_LIBRARY_PATH." >& 4
 	    ;;
-	done
+	esac
 	# This is evil but I can't think of a nice workaround:
 	# the /usr/shlib/libdb.so needs to be seen first,
 	# or running Configure will fail.

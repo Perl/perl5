@@ -1,7 +1,7 @@
 package bignum;
 require 5.005;
 
-$VERSION = '0.10';
+$VERSION = '0.11';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( ); 
@@ -123,7 +123,6 @@ sub import
     {
     require Math::BigInt::Trace; $class = 'Math::BigInt::Trace';
     $upgrade = 'Math::BigFloat::Trace';	
-#    print STDERR "Loading $class";
     }
   else
     {
@@ -148,7 +147,6 @@ sub import
     {
     require Math::BigFloat::Trace; $class = 'Math::BigFloat::Trace';
     $downgrade = 'Math::BigInt::Trace';	
-#    print STDERR "Loading $class";
     }
   else
     {

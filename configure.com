@@ -2548,6 +2548,7 @@ $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
 $ IF .NOT. use_ithreads THEN dflt = dflt - "threads/shared"
 $ IF .NOT. use_ithreads THEN dflt = dflt - "threads"
+$ IF .NOT. use_threads  THEN dflt = dflt - "Thread"
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
 $! Ask for their default list of extensions to build
@@ -2935,7 +2936,7 @@ $ usedl="define"
 $ startperl="""$ perl 'f$env(\""procedure\"")' \""'"+"'p1'\"" \""'"+"'p2'\"" \""'"+"'p3'\"" \""'"+"'p4'\"" \""'"+"'p5'\"" \""'"+"'p6'\"" \""'"+"'p7'\"" \""'"+"'p8'\""!\n"
 $ startperl=startperl + "$ exit++ + ++$status!=0 and $exit=$status=undef; while($#ARGV != -1 and $ARGV[$#ARGV] eq '"+"'){pop @ARGV;}"""
 $!
-$ IF ((Use_Threads) .AND. (vms_ver .LES. "6.2"))
+$ IF ((use_threads) .AND. (vms_ver .LES. "6.2"))
 $ THEN
 $   libs="SYS$SHARE:CMA$LIB_SHR.EXE/SHARE SYS$SHARE:CMA$RTL.EXE/SHARE SYS$SHARE:CMA$OPEN_LIB_SHR.exe/SHARE SYS$SHARE:CMA$OPEN_RTL.exe/SHARE"
 $ ELSE
@@ -3025,7 +3026,7 @@ $ sSCNfldbl = sPRIfldbl ! expect consistency
 $!
 $! Now some that we build up
 $!
-$ IF Use_Threads
+$ IF use_threads
 $ THEN
 $   IF use_5005_threads
 $   THEN
@@ -6013,7 +6014,7 @@ $   ELSE
 $     SOCKET_REPLACE = "SOCKET="
 $   ENDIF
 $ ENDIF
-$ IF Use_Threads
+$ IF use_threads
 $ THEN
 $   IF (vms_ver .LES. "6.2")
 $   THEN

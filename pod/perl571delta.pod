@@ -38,8 +38,8 @@ possible.  The suidperl code is being reviewed and if deemed too risky
 to continue to be supported, it may be completely removed from future
 releases.  In any case, suidperl should only be used by security
 experts who know exactly what they are doing and why they are using
-suidperl instead of some other solution such as sudo (see
-http://www.courtesan.com/sudo/).
+suidperl instead of some other solution such as sudo
+( see http://www.courtesan.com/sudo/ ).
 
 =head1 Incompatible Changes
 
@@ -175,7 +175,7 @@ particularly tricky to get right, so you have been warned)
 =item *
 
 The Unicode Character Database coming with Perl has been upgraded
-to Unicode 3.1.  For more information, see http://www.unicode.org/,
+to Unicode 3.1.  For more information, see http://www.unicode.org/ ,
 and http://www.unicode.org/unicode/reports/tr27/
 
 For developers interested in enhancing Perl's Unicode capabilities:
@@ -450,8 +450,8 @@ Class::Struct can now define the classes in compile time.
 Math::BigFloat has undergone much fixing, and in addition the fmod()
 function now supports modulus operations.
 
-(The fixed Math::BigFloat module is also available in CPAN for those
-who can't upgrade their Perl: http://www.cpan.org/authors/id/J/JP/JPEACOCK/)
+( The fixed Math::BigFloat module is also available in CPAN for those
+who can't upgrade their Perl: http://www.cpan.org/authors/id/J/JP/JPEACOCK/ )
 
 =item *
 
@@ -514,7 +514,7 @@ Storable, Text-Tabs+Wrap.
 =item *
 
 Hashes now use Bob Jenkins "One-at-a-Time" hashing key algorithm
-(http://burtleburtle.net/bob/hash/doobs.html).  This algorithm is
+( http://burtleburtle.net/bob/hash/doobs.html ).  This algorithm is
 reasonably fast while producing a much better spread of values than
 the old hashing algorithm (originally by Chris Torek, later tweaked by
 Ilya Zakharevich).  Hash values output from the algorithm on a hash of
@@ -1046,8 +1046,8 @@ working order yet.
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at http://bugs.perl.org.  There may also be
-information at http://www.perl.com/perl/, the Perl Home Page.
+bug database at http://bugs.perl.org/  There may also be
+information at http://www.perl.com/perl/ , the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down
