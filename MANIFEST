@@ -1324,7 +1324,6 @@ lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigFloat/Trace.pm	bignum tracing
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
-lib/Math/BigInt/Scalar.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mif.t	Rounding tests under BareCalc
@@ -1338,7 +1337,9 @@ lib/Math/BigInt/t/biglog.t	Test the log function
 lib/Math/BigInt/t/calling.t	Test calling conventions
 lib/Math/BigInt/t/config.t	Test Math::BigInt->config()
 lib/Math/BigInt/t/constant.t	Test Math::BigInt/BigFloat under :constant
+lib/Math/BigInt/t/const_mbf.t	Test Math::BigInt
 lib/Math/BigInt/t/downgrade.t	Test if use Math::BigInt(); under downgrade works
+lib/Math/BigInt/t/fallback.t	Test Math::BigInt
 lib/Math/BigInt/t/inf_nan.t	Special tests for inf and NaN handling
 lib/Math/BigInt/t/isa.t		Test for Math::BigInt inheritance
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
@@ -2614,6 +2615,7 @@ t/lib/MakeMaker/Test/Setup/Recurs.pm	MakeMaker test utilities
 t/lib/MakeMaker/Test/Utils.pm	MakeMaker test utilities
 t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
+t/lib/Math/BigInt/Scalar.pm	Pure Perl module to support Math::BigInt
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/sample-tests/bailout		Test data for Test::Harness
