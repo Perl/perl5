@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jun 19 23:54:48 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Jun 20 02:24:20 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8447,6 +8447,13 @@ int main()
 
 	Gconvert((DOUBLETYPE)123.456, 8, 0, buf); 
 	checkit("123.456", buf);
+
+        /* Testing of 1e+129 in bigintpm.t must not get extra '.' here. */
+        Gconvert((DOUBLETYPE)1e30, 8, 0, buf);
+        if (strlen(buf) > 5)
+            checkit("1e+030", buf); /* for Microsoft */
+        else
+            checkit("1e+30", buf);
 
 	exit(0);
 }
