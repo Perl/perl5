@@ -322,6 +322,7 @@ equivalent to B<-Dtls>):
     16384  X  Scratchpad allocation
     32768  D  Cleaning up
     65536  S  Thread synchronization
+   131072  T  Tokenising
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable.  See the F<INSTALL> file in the Perl source distribution 

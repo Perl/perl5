@@ -461,6 +461,7 @@ Perl_unlock_condpair
 Perl_unsharepvn
 Perl_utf16_to_utf8
 Perl_utf16_to_utf8_reversed
+Perl_utf8_length
 Perl_utf8_distance
 Perl_utf8_hop
 Perl_utf8_to_bytes

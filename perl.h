@@ -2136,6 +2136,7 @@ Gid_t getegid (void);
 #  else
 #    define DEBUG_S(a)
 #  endif
+#define DEBUG_T(a) if (PL_debug & (1<<17))	a
 #else
 #define DEB(a)
 #define DEBUG(a)
@@ -2156,6 +2157,7 @@ Gid_t getegid (void);
 #define DEBUG_X(a)
 #define DEBUG_D(a)
 #define DEBUG_S(a)
+#define DEBUG_T(a)
 #endif
 #define YYMAXDEPTH 300
 

@@ -725,6 +725,7 @@
 #define utilize			Perl_utilize
 #define utf16_to_utf8		Perl_utf16_to_utf8
 #define utf16_to_utf8_reversed	Perl_utf16_to_utf8_reversed
+#define utf8_length		Perl_utf8_length
 #define utf8_distance		Perl_utf8_distance
 #define utf8_hop		Perl_utf8_hop
 #define utf8_to_bytes		Perl_utf8_to_bytes
@@ -2186,6 +2187,7 @@
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
 #define utf16_to_utf8(a,b,c,d)	Perl_utf16_to_utf8(aTHX_ a,b,c,d)
 #define utf16_to_utf8_reversed(a,b,c,d)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c,d)
+#define utf8_length(a,b)	Perl_utf8_length(aTHX_ a,b)
 #define utf8_distance(a,b)	Perl_utf8_distance(aTHX_ a,b)
 #define utf8_hop(a,b)		Perl_utf8_hop(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
@@ -4284,6 +4286,8 @@
 #define utf16_to_utf8		Perl_utf16_to_utf8
 #define Perl_utf16_to_utf8_reversed	CPerlObj::Perl_utf16_to_utf8_reversed
 #define utf16_to_utf8_reversed	Perl_utf16_to_utf8_reversed
+#define Perl_utf8_length	CPerlObj::Perl_utf8_length
+#define utf8_length		Perl_utf8_length
 #define Perl_utf8_distance	CPerlObj::Perl_utf8_distance
 #define utf8_distance		Perl_utf8_distance
 #define Perl_utf8_hop		CPerlObj::Perl_utf8_hop

@@ -69,7 +69,7 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 	return d;
     }
 #ifdef HAS_QUAD
-    if (uv < 0x1000000000LL)
+    if (uv < UTF8_QUAD_MAX)
 #endif
     {
 	*d++ =                        0xfe;	/* Can't match U+FEFF! */
@@ -171,7 +171,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 }
 
 /*
-=for apidoc Am|U8* s|utf8_to_uv|STRLEN curlen|I32 *retlen|U32 flags
+=for apidoc Am|U8* s|utf8_to_uv|STRLEN curlen|STRLEN *retlen|U32 flags
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding and no longer than C<curlen>;
@@ -182,7 +182,8 @@ If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
 it is assumed that the caller will raise a warning, and this function
 will set C<retlen> to C<-1> and return.  The C<flags> can also contain
-various flags to allow deviations from the strict UTF-8 encoding.
+various flags to allow deviations from the strict UTF-8 encoding 
+(see F<utf8.h>).
 
 =cut */
 
@@ -350,28 +351,67 @@ returned and retlen is set, if possible, to -1.
 UV
 Perl_utf8_to_uv_simple(pTHX_ U8* s, STRLEN* retlen)
 {
-    return Perl_utf8_to_uv(aTHX_ s, (STRLEN)-1, retlen, 0);
+    return Perl_utf8_to_uv(aTHX_ s, UTF8_MAXLEN, retlen, 0);
+}
+
+/*
+=for apidoc|utf8_length|U8 *s|U8 *e
+
+Return the length of the UTF-8 char encoded string C<s> in characters.
+Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
+up past C<e>, croaks.
+
+=cut
+*/
+
+STRLEN
+Perl_utf8_length(pTHX_ U8* s, U8* e)
+{
+    STRLEN len = 0;
+
+    if (e < s)
+	Perl_croak(aTHX_ "panic: utf8_length: unexpected end");
+    while (s < e) {
+	U8 t = UTF8SKIP(s);
+
+	if (e - s < t)
+	    Perl_croak(aTHX_ "panic: utf8_length: unaligned end");
+	s += t;
+	len++;
+    }
+
+    return len;
 }
 
 /* utf8_distance(a,b) returns the number of UTF8 characters between
    the pointers a and b							*/
 
-I32
+IV
 Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
 {
-    I32 off = 0;
+    IV off = 0;
+
     if (a < b) {
 	while (a < b) {
-	    a += UTF8SKIP(a);
+	    U8 c = UTF8SKIP(a);
+
+	    if (b - a < c)
+		Perl_croak(aTHX_ "panic: utf8_distance: unaligned end");
+	    a += c;
 	    off--;
 	}
     }
     else {
 	while (b < a) {
-	    b += UTF8SKIP(b);
+	    U8 c = UTF8SKIP(b);
+
+	    if (a - b < c)
+		Perl_croak(aTHX_ "panic: utf8_distance: unaligned end");
+	    b += c;
 	    off++;
 	}
     }
+
     return off;
 }
 
@@ -961,7 +1001,7 @@ Perl_to_utf8_upper(pTHX_ U8 *p)
     if (!PL_utf8_toupper)
 	PL_utf8_toupper = swash_init("utf8", "ToUpper", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_toupper, p);
-    return uv ? uv : utf8_to_uv(p,STRLEN_MAX,0,0);
+    return uv ? uv : utf8_to_uv(p,UTF8_MAXLEN,0,0);
 }
 
 UV
@@ -972,7 +1012,7 @@ Perl_to_utf8_title(pTHX_ U8 *p)
     if (!PL_utf8_totitle)
 	PL_utf8_totitle = swash_init("utf8", "ToTitle", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_totitle, p);
-    return uv ? uv : utf8_to_uv(p,STRLEN_MAX,0,0);
+    return uv ? uv : utf8_to_uv(p,UTF8_MAXLEN,0,0);
 }
 
 UV
@@ -983,7 +1023,7 @@ Perl_to_utf8_lower(pTHX_ U8 *p)
     if (!PL_utf8_tolower)
 	PL_utf8_tolower = swash_init("utf8", "ToLower", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_tolower, p);
-    return uv ? uv : utf8_to_uv(p,STRLEN_MAX,0,0);
+    return uv ? uv : utf8_to_uv(p,UTF8_MAXLEN,0,0);
 }
 
 /* a "swash" is a swatch hash */
@@ -1073,7 +1113,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    PUSHMARK(SP);
 	    EXTEND(SP,3);
 	    PUSHs((SV*)sv);
-	    PUSHs(sv_2mortal(newSViv(utf8_to_uv(ptr, STRLEN_MAX, 0, 0) & ~(needents - 1))));
+	    PUSHs(sv_2mortal(newSViv(utf8_to_uv(ptr, UTF8_MAXLEN, 0, 0) & ~(needents - 1))));
 	    PUSHs(sv_2mortal(newSViv(needents)));
 	    PUTBACK;
 	    if (call_method("SWASHGET", G_SCALAR))

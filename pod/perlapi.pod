@@ -1165,7 +1165,7 @@ eligible for inlining at compile-time.
 	void	newCONSTSUB(HV* stash, char* name, SV* sv)
 
 =for hackers
-Found in file op.c
+Found in file opmini.c
 
 =item newHV
 
@@ -1298,7 +1298,7 @@ Found in file sv.c
 Used by C<xsubpp> to hook up XSUBs as Perl subs.
 
 =for hackers
-Found in file op.c
+Found in file opmini.c
 
 =item newXSproto
 
@@ -3200,9 +3200,10 @@ If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
 it is assumed that the caller will raise a warning, and this function
 will set C<retlen> to C<-1> and return.  The C<flags> can also contain
-various flags to allow deviations from the strict UTF-8 encoding.
+various flags to allow deviations from the strict UTF-8 encoding 
+(see F<utf8.h>).
 
-	U8* s	utf8_to_uv(STRLEN curlen, I32 *retlen, U32 flags)
+	U8* s	utf8_to_uv(STRLEN curlen, STRLEN *retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c

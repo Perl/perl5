@@ -3350,8 +3350,15 @@ Perl_utf16_to_utf8_reversed(pTHXo_ U8* p, U8 *d, I32 bytelen, I32 *newlen)
     return ((CPerlObj*)pPerl)->Perl_utf16_to_utf8_reversed(p, d, bytelen, newlen);
 }
 
+#undef  Perl_utf8_length
+STRLEN
+Perl_utf8_length(pTHXo_ U8* s, U8 *e)
+{
+    return ((CPerlObj*)pPerl)->Perl_utf8_length(s, e);
+}
+
 #undef  Perl_utf8_distance
-I32
+IV
 Perl_utf8_distance(pTHXo_ U8 *a, U8 *b)
 {
     return ((CPerlObj*)pPerl)->Perl_utf8_distance(a, b);

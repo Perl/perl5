@@ -9,6 +9,8 @@
 
 START_EXTERN_C
 
+#include "handy.h"
+
 #ifdef DOINIT
 EXTCONST unsigned char PL_utf8skip[] = {
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
@@ -48,6 +50,8 @@ END_EXTERN_C
 
 #define UTF8SKIP(s) PL_utf8skip[*(U8*)s]
 
+#define UTF8_QUAD_MAX	UINT64_C(0x1000000000)
+
 #ifdef HAS_QUAD
 #define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
 		      (uv) < 0x800          ? 2 : \
@@ -55,7 +59,7 @@ END_EXTERN_C
 		      (uv) < 0x200000       ? 4 : \
 		      (uv) < 0x4000000      ? 5 : \
 		      (uv) < 0x80000000     ? 6 : \
-                      (uv) < 0x1000000000LL ? 7 : 13 ) 
+                      (uv) < UTF8_QUAD_MAX ? 7 : 13 ) 
 #else
 /* No, I'm not even going to *TRY* putting #ifdef inside a #define */
 #define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
