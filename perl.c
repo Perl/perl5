@@ -260,10 +260,10 @@ register PerlInterpreter *sv_interp;
     doswitches   = FALSE;
     dowarn       = FALSE;
     doextract    = FALSE;
-    sawampersand = FALSE;	/* must save all match strings */
     sawstudy     = FALSE;	/* do fbm_instr on all strings */
     sawvec       = FALSE;
     unsafe       = FALSE;
+    sawampersand = 0;		/* match strings to save */
 
     Safefree(inplace);
     inplace = Nullch;
@@ -890,8 +890,9 @@ PerlInterpreter *sv_interp;
 	break;
     }
 
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
-                    sawampersand ? "Enabling" : "Omitting"));
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $&%s support.\n",
+			  sawampersand ? "Enabling" : "Omitting",
+			  sawampersand > 1 ? "$` $'" : ""));
 
     if (!restartop) {
 	DEBUG_x(dump_all());

@@ -185,14 +185,14 @@ static bool regtainted;		/* tainted information used? */
  - pregexec - match a regexp against a string
  */
 I32
-pregexec(prog, stringarg, strend, strbeg, minend, screamer, safebase)
+pregexec(prog, stringarg, strend, strbeg, minend, screamer, savematch)
 register regexp *prog;
 char *stringarg;
 register char *strend;	/* pointer to null at end of string */
 char *strbeg;	/* real beginning of string */
 I32 minend;	/* end of match must be at least minend after stringarg */
 SV *screamer;
-I32 safebase;	/* no need to remember string in subbase */
+I32 savematch;	/* no need to remember string in subbase */
 {
     register char *s;
     register char *c;
@@ -220,7 +220,7 @@ I32 safebase;	/* no need to remember string in subbase */
     if (startpos == strbeg)	/* is ^ valid at stringarg? */
 	regprev = '\n';
     else {
-	regprev = stringarg[-1];
+	regprev = startpos[-1];
 	if (!multiline && regprev == '\n')
 	    regprev = '\0';		/* force ^ to NOT match */
     }
@@ -241,7 +241,7 @@ I32 safebase;	/* no need to remember string in subbase */
 	(!(prog->reganch & ROPT_ANCH_BOL)
 	 || (multiline && prog->regback >= 0)) )
     {
-	if (stringarg == strbeg && screamer) {
+	if (startpos == strbeg && screamer) {
 	    if (screamfirst[BmRARE(prog->regmust)] >= 0)
 		    s = screaminstr(screamer,prog->regmust);
 	    else
@@ -554,30 +554,45 @@ I32 safebase;	/* no need to remember string in subbase */
 
 got_it:
     strend += dontbother;	/* uncheat */
+    prog->subskip = 0;
     prog->subbeg = strbeg;
     prog->subend = strend;
     prog->exec_tainted = regtainted;
 
     /* make sure $`, $&, $', and $digit will work later */
     if (strbeg != prog->subbase) {
-	if (safebase) {
+	if (!savematch) {
 	    if (prog->subbase) {
 		Safefree(prog->subbase);
 		prog->subbase = Nullch;
 	    }
 	}
 	else {
-	    I32 i = strend - startpos + (stringarg - strbeg);
-	    s = savepvn(strbeg, i);
+	    char *svptr;
+	    I32 svlen;
+	    I32 i;
+	    if (savematch == 1) {
+		/* just matched string, for () and $& */
+		svptr = prog->startp[0];
+		svlen = prog->endp[0] - svptr;
+	    }
+	    else {
+		/* whole string, even prefix, for s//g, $`, and $' */
+		svptr = strbeg;
+		svlen = strend - strbeg;
+	    }
+	    prog->subskip = svptr - strbeg;
+	    s = savepvn(svptr, svlen);
 	    Safefree(prog->subbase);
 	    prog->subbase = s;
 	    prog->subbeg = prog->subbase;
-	    prog->subend = prog->subbase + i;
-	    s = prog->subbase + (stringarg - strbeg);
+	    prog->subend = prog->subbase + svlen;
 	    for (i = 0; i <= prog->nparens; i++) {
 		if (prog->endp[i]) {
-		    prog->startp[i] = s + (prog->startp[i] - startpos);
-		    prog->endp[i] = s + (prog->endp[i] - startpos);
+		    prog->startp[i] = (prog->subbase
+				       + (prog->startp[i] - svptr));
+		    prog->endp[i] = (prog->subbase
+				     + (prog->endp[i] - svptr));
 		}
 	    }
 	}
