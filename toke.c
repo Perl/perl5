@@ -6705,7 +6705,7 @@ Perl_scan_num(pTHX_ char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
-    NV value;				/* number read, as a double */
+    NV nv;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
     char *lastub = 0;			/* position of last underbar */
@@ -6962,39 +6962,8 @@ Perl_scan_num(pTHX_ char *start)
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
 
-	/* unfortunately this monster needs to be on one line or
-	   makedepend will be confused. */
-#if (defined(USE_64_BIT_INT) && (!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || (!defined(USE_64_BIT_INT) && (!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
+#if defined(Strtol) && defined(Strtoul)
 
-	/*
-	   No working strto[u]l[l]. Since atoi() doesn't do range checks,
-	   we need to do this the hard way.
-	 */
-
-	value = Atof(PL_tokenbuf);
-
-	/* 
-	   See if we can make do with an integer value without loss of
-	   precision.  We use I_V to cast to an int, because some
-	   compilers have issues.  Then we try casting it back and see
-	   if it was the same.  We only do this if we know we
-	   specifically read an integer.
-
-	   Note: if floatit is true, then we don't need to do the
-	   conversion at all.
-	*/
-	{
-	    UV tryuv = U_V(value);
-	    if (!floatit && (NV)tryuv == value) {
-		if (tryuv <= IV_MAX)
-		    sv_setiv(sv, (IV)tryuv);
-		else
-		    sv_setuv(sv, tryuv);
-	    }
-	    else
-		sv_setnv(sv, value);
-	}
-#else
 	/*
 	   strtol/strtoll sets errno to ERANGE if the number is too big
 	   for an integer. We try to do an integer conversion first
@@ -7010,15 +6979,62 @@ Perl_scan_num(pTHX_ char *start)
 	    else
 		uv = Strtoul(PL_tokenbuf, (char**)NULL, 10);
 	    if (errno)
-	    	floatit = TRUE; /* probably just too large */
+	    	floatit = TRUE; /* Probably just too large. */
 	    else if (*PL_tokenbuf == '-')
 	    	sv_setiv(sv, iv);
+	    else if (uv <= IV_MAX)
+		sv_setiv(sv, uv); /* Prefer IVs over UVs. */
 	    else
 	    	sv_setuv(sv, uv);
 	}
 	if (floatit) {
-	    value = Atof(PL_tokenbuf);
-	    sv_setnv(sv, value);
+	    nv = Atof(PL_tokenbuf);
+	    sv_setnv(sv, nv);
+	}
+#else
+	/*
+	   No working strtou?ll?.
+
+	   Unfortunately atol() doesn't do range checks (returning
+	   LONG_MIN/LONG_MAX, and setting errno to ERANGE on overflows)
+	   everywhere [1], so we cannot use use atol() (or atoll()).
+	   If we could, they would be used, as Atol(), very much like
+	   Strtol() and Strtoul() are used above.
+
+	   [1] XXX Configure test needed to check for atol()
+	           (and atoll() overflow behaviour) XXX --jhi
+
+	   We need to do this the hard way.  */
+
+	nv = Atof(PL_tokenbuf);
+
+	/* See if we can make do with an integer value without loss of
+	   precision.  We use U_V to cast to a UV, because some
+	   compilers have issues.  Then we try casting it back and see
+	   if it was the same [1].  We only do this if we know we
+	   specifically read an integer.  If floatit is true, then we
+	   don't need to do the conversion at all. 
+
+	   [1] Note that this is lossy if our NVs cannot preserve our
+	   UVs.  There is a metaconfig define, NV_PRESERVES_UV, but we
+	   really do hope all such platforms have strtou?ll? to do a
+	   lossless IV/UV conversion.
+	   XXX Configure test needed to check how many UV bits
+	       do our NVs preserve, really (the current test checks
+	       for the roundtrip of ~0) XXX --jhi
+	       Maybe do some tricks with DBL_MANT_DIG and LDBL_MANT_DIG,
+	       and DBL_DIG, LDBL_DIG (this is already available as NV_DIG)?
+	   */
+	{
+	    UV uv = U_V(nv);
+	    if (!floatit && (NV)uv == nv) {
+		if (uv <= IV_MAX)
+		    sv_setiv(sv, uv); /* Prefer IVs over UVs. */
+		else
+		    sv_setuv(sv, uv);
+	    }
+	    else
+		sv_setnv(sv, nv);
 	}
 #endif
 	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
