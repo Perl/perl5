@@ -242,12 +242,6 @@ print $@;
     eval q{};
     print length($@) ? "not ok 46\t# \$\@ = '$@'\n" : "ok 46\n";
 }
-# [perl #9728] used to dump core
-{
-   $eval = eval 'sub { eval "sub { %S }" }';
-   $eval->({});
-   print "ok 47\n";
-}
 
 # DAPM Nov-2002. Perl should now capture the full lexical context during
 # evals.
@@ -346,6 +340,12 @@ eval q{
 };
 fred5();
 { my $yyy = 88; my $zzz = 99; fred5(); }
-eval q{ my $yyy = 888; my $zzz = 999; fred5(); }
+eval q{ my $yyy = 888; my $zzz = 999; fred5(); };
 
+# [perl #9728] used to dump core
+{
+   $eval = eval 'sub { eval "sub { %S }" }';
+   $eval->({});
+   print "ok 78\n";
+}
 
