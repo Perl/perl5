@@ -693,6 +693,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_mg_dup
 		    Perl_re_dup
 		    Perl_sv_dup
+		    Perl_rvpv_dup
 		    Perl_sys_intern_dup
 		    Perl_ptr_table_clear
 		    Perl_ptr_table_fetch
