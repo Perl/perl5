@@ -1064,6 +1064,27 @@ my_tmpfile(void)
 }
 /*}}}*/
 
+
+#ifndef HOMEGROWN_POSIX_SIGNALS
+/*
+ * The C RTL's sigaction fails to check for invalid signal numbers so we 
+ * help it out a bit.  The docs are correct, but the actual routine doesn't
+ * do what the docs say it will.
+ */
+/*{{{int Perl_my_sigaction (pTHX_ int, const struct sigaction*, struct sigaction*);*/
+int
+Perl_my_sigaction (pTHX_ int sig, const struct sigaction* act, 
+                   struct sigaction* oact)
+{
+  if (sig == SIGKILL || sig == SIGSTOP || sig == SIGCONT) {
+	SETERRNO(EINVAL, SS$_INVARG);
+	return -1;
+  }
+  return sigaction(sig, act, oact);
+}
+/*}}}*/
+#endif
+
 /* default piping mailbox size */
 #define PERL_BUFSIZ        512
 

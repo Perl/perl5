@@ -277,7 +277,9 @@ sub assign {
   return $clause;
 }
 
-=item return_clause VALUE, TYPE, INDENT, MACRO, DEFAULT, PRE, POST, PRE, POST
+=item return_clause
+
+return_clause VALUE, TYPE, INDENT, MACRO, DEFAULT, PRE, POST, PRE, POST
 
 A function to return a suitable C<#ifdef> clause. I<MACRO> defaults to
 I<VALUE> when not defined.  If I<TYPE> is aggregate (eg I<PVN> expects both

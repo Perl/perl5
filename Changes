@@ -31,6 +31,164 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10824] By: jhi                                   on 2001/06/22  12:46:56
+        Log: Add .i and .s targets.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 10823] By: jhi                                   on 2001/06/22  12:25:20
+        Log: Upgrade to Locale::Maketext 1.03.
+     Branch: perl
+	   ! lib/Locale/Maketext.pm lib/Locale/Maketext.pod
+	   ! lib/Locale/Maketext/ChangeLog lib/Locale/Maketext/test.pl
+____________________________________________________________________________
+[ 10822] By: jhi                                   on 2001/06/22  12:23:57
+        Log: Upgrade to I18N::LangTags 0.26.
+     Branch: perl
+	   ! lib/I18N/LangTags.pm lib/I18N/LangTags/ChangeLog
+	   ! lib/I18N/LangTags/test.pl
+____________________________________________________________________________
+[ 10821] By: jhi                                   on 2001/06/22  12:16:41
+        Log: The #10792 didn't take, and s/sighni/signi/, as noticed by
+             Philip Newton.
+     Branch: perl
+	   ! lib/ExtUtils/Constant.pm lib/Locale/Maketext.pod
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+____________________________________________________________________________
+[ 10820] By: jhi                                   on 2001/06/22  12:13:37
+        Log: Subject: [PATCH: perl@10800] trigraphs and tests for h2xs
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Fri, 22 Jun 2001 00:03:24 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0106212354510.6026-100000@shell8.ba.best.com>
+     Branch: perl
+	   + lib/h2xs.t
+	   ! MANIFEST utils/h2xs.PL
+____________________________________________________________________________
+[ 10819] By: jhi                                   on 2001/06/22  12:11:56
+        Log: Subject: [PATCH: perl@10800] nmake specific cleanliness for lib/ExtUtils.t
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Thu, 21 Jun 2001 23:53:27 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0106212346540.6026-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! lib/ExtUtils.t
+____________________________________________________________________________
+[ 10818] By: jhi                                   on 2001/06/22  12:11:08
+        Log: Subject: [PATCH: perl@10800] clean up after t/pod/plainer.t on Win32
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Thu, 21 Jun 2001 23:45:15 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0106212341510.6026-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! t/pod/plainer.t
+____________________________________________________________________________
+[ 10817] By: jhi                                   on 2001/06/22  12:10:05
+        Log: AUTHORS update.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 10816] By: jhi                                   on 2001/06/22  12:08:24
+        Log: Subject: should POSIX.xs use XSRETURN_UNDEF in sigaction?
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 21 Jun 2001 18:20:38 -0500
+             Message-Id: <5.1.0.14.0.20010621180227.02a8e930@exchi01>
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 10815] By: jhi                                   on 2001/06/22  12:07:19
+        Log: Subject: [PATCH perl@10765] fix Deparse.t and write.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 21 Jun 2001 09:58:52 -0500
+             Message-Id: <5.1.0.14.0.20010620172532.033cdb88@exchi01>
+     Branch: perl
+	   ! ext/B/Deparse.t t/op/write.t
+____________________________________________________________________________
+[ 10814] By: nick                                  on 2001/06/22  08:13:09
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> (integrate 46 files)
+____________________________________________________________________________
+[ 10813] By: jhi                                   on 2001/06/22  02:48:58
+        Log: Change the prefixes only if $prefix is unset,
+             as originally patched by Marcel Grunauer.
+     Branch: perl
+	   ! hints/darwin.sh hints/rhapsody.sh
+____________________________________________________________________________
+[ 10812] By: jhi                                   on 2001/06/22  02:44:41
+        Log: Subject: Re: Patch for hints/darwin.sh
+             From: Wilfredo Sanchez <wsanchez@MIT.EDU>
+             Date: Thu, 21 Jun 2001 11:23:46 -0700
+             Message-Id: <200106211823.OAA01089@melbourne-city-street.mit.edu>
+     Branch: perl
+	   ! hints/darwin.sh hints/rhapsody.sh
+____________________________________________________________________________
+[ 10811] By: jhi                                   on 2001/06/22  02:34:27
+        Log: Add .PHONY targets for non-file targets,
+             from Wilfredo Sánchez.  Should help saying
+             "make install" on case-insensitive filesystems.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 10810] By: jhi                                   on 2001/06/22  02:01:23
+        Log: Subject: Re: Automated smoke report for patch 10764 (truncated)
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Thu, 21 Jun 2001 19:32:05 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106211925020.17261-100000@mako.covalent.net>
+             
+             plus reword the getcwd() comment, plus use getcwd() buffer
+             size minus one.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10809] By: jhi                                   on 2001/06/22  01:16:58
+        Log: More gprofing from Doug MacEachern.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 10808] By: jhi                                   on 2001/06/22  01:15:11
+        Log: Metaconfig unit change for #10807.
+     Branch: metaconfig/U/perl
+	   ! d_sfio.U
+____________________________________________________________________________
+[ 10807] By: jhi                                   on 2001/06/22  01:14:43
+        Log: Tell that you are removing the unneeded -lsfio.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10806] By: jhi                                   on 2001/06/22  01:03:14
+        Log: More MPE/iX tweaks from Mark Bixby.
+     Branch: perl
+	   ! perl.c t/op/magic.t
+____________________________________________________________________________
+[ 10805] By: jhi                                   on 2001/06/21  22:41:11
+        Log: The fchdir() proto is supposed to live in <unistd.h>.
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[ 10804] By: jhi                                   on 2001/06/21  22:24:42
+        Log: This town is too small for the Cwd extension and me,
+             it would seem...
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[ 10803] By: jhi                                   on 2001/06/21  21:54:00
+        Log: Metaconfig unit change for #10802.
+     Branch: metaconfig/U/perl
+	   ! d_modfl.U
+____________________________________________________________________________
+[ 10802] By: jhi                                   on 2001/06/21  21:53:37
+        Log: More d'ohs.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10801] By: jhi                                   on 2001/06/21  21:38:38
+        Log: Off-by-one.  I'm so classic.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10800] By: jhi                                   on 2001/06/21  20:10:19
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10799] By: jhi                                   on 2001/06/21  20:03:54
         Log: Subject: Documentation patch for Net::FTP
              From: Marcel Grunauer <marcel@codewerk.com>

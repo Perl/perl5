@@ -11,7 +11,7 @@ $DirName = "t";
 
 # These scripts have problems (either abend or hang) as of now (11 May 2001).
 # So, they are commented out in the corresponding auto scripts, io.pl and lib.pl
-@ScriptsNotUsed = ("t/io/argv.t", "t/io/openpid.t", "t/lib/filehandle.t");
+@ScriptsNotUsed = ("t/io/argv.t", "t/io/openpid.t", "t/lib/filehandle.t", "t/lib/warnings.t");
 
 opendir(DIR, $DirName);
 @Dirs = readdir(DIR);

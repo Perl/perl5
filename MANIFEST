@@ -908,6 +908,7 @@ lib/Getopt/Std.pm		Fetch command options (getopt, getopts)
 lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
 lib/getopts.pl			Perl library supporting option parsing
 lib/h2ph.t			See if h2ph works like it should
+lib/h2xs.t			See if h2xs produces expected lists of files
 lib/hostname.pl			Old hostname code
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works

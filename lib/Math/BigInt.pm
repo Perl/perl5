@@ -2269,11 +2269,19 @@ L<Math::BigFloat>.
 
 =over 2
 
-=item bfround ( +$scale ) rounds to the $scale'th place left from the '.'
+=item bfround ( +$scale ) 
 
-=item bround  ( +$scale ) preserves accuracy to $scale sighnificant digits counted from the left and paddes the number with zeros
+rounds to the $scale'th place left from the '.'
 
-=item bround  ( -$scale ) preserves accuracy to $scale significant digits counted from the right and paddes the number with zeros.
+=item bround  ( +$scale ) 
+
+preserves accuracy to $scale significant digits counted from the left
+and pads the number with zeros
+
+=item bround  ( -$scale )
+
+preserves accuracy to $scale significant digits counted from the right
+and pads the number with zeros.
 
 =back
 

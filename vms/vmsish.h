@@ -492,6 +492,14 @@ struct utimbuf {
 #  define sa_mask sv_mask
 #  define sigsuspend(set) sigpause(*set)
 #  define sigpending(a) (not_here("sigpending"),0)
+#else
+/*
+ * The C RTL's sigaction fails to check for invalid signal numbers so we 
+ * help it out a bit.
+ */
+#  ifndef DONT_MASK_RTL_CALLS
+#    define sigaction(a,b,c) Perl_my_sigaction(a,b,c)
+#  endif
 #endif
 
 /* VMS doesn't use a real sys_nerr, but we need this when scanning for error
@@ -747,6 +755,9 @@ char *	my_gconvert (double, int, int, char *);
 int	Perl_kill_file (pTHX_ char *);
 int	Perl_my_chdir (pTHX_ char *);
 FILE *	Perl_my_tmpfile ();
+#ifndef HOMEGROWN_POSIX_SIGNALS
+int	Perl_my_sigaction (pTHX_ int, const struct sigaction*, struct sigaction*);
+#endif
 int	Perl_my_utime (pTHX_ char *, struct utimbuf *);
 void	Perl_vms_image_init (int *, char ***);
 struct dirent *	Perl_readdir (pTHX_ DIR *);

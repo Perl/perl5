@@ -381,6 +381,8 @@ my $make = $Config{make};
 
 $make = $ENV{MAKE} if exists $ENV{MAKE};
 
+if ($^O eq 'MSWin32' && $make =~ /\bnmake\b/) { $make .= " -nologo"; }
+
 my $makeout;
 
 print "# make = '$make'\n";

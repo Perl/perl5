@@ -273,6 +273,11 @@ else
 
 # 12..44: scary format testing from Merijn H. Brand
 
+if ($^O eq 'VMS') {
+  foreach (12..44) { print "ok $_ # skipped: '|-' and '-|' not supported\n"; }
+  exit(0);
+}
+
 use strict;	# Amazed that this hackery can be made strict ...
 
 # Just a complete test for format, including top-, left- and bottom marging

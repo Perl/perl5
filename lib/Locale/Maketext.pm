@@ -1,5 +1,5 @@
 
-# Time-stamp: "2000-11-14 22:27:26 MST"
+# Time-stamp: "2001-06-21 23:09:33 MDT"
 
 require 5;
 package Locale::Maketext;
@@ -14,7 +14,7 @@ use I18N::LangTags 0.21 ();
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.02";
+$VERSION = "1.03";
 @ISA = ();
 
 $MATCH_SUPERS = 1;

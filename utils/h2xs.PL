@@ -553,6 +553,7 @@ if( @path_h ){
     use Config;
     use File::Spec;
     my @paths;
+    my $pre_sub_tri_graphs = 1;
     if ($^O eq 'VMS') {  # Consider overrides of default location
       # XXXX This is not equivalent to what the older version did:
       #		it was looking at $hadsys header-file per header-file...
@@ -616,6 +617,19 @@ if( @path_h ){
       open(CH, "<$rel_path_h") || die "Can't open $rel_path_h: $!\n";
     defines:
       while (<CH>) {
+	if ($pre_sub_tri_graphs) {
+	    # Preprocess all tri-graphs 
+	    # including things stuck in quoted string constants.
+	    s/\?\?=/#/g;                         # | ??=|  #|
+	    s/\?\?\!/|/g;                        # | ??!|  ||
+	    s/\?\?'/^/g;                         # | ??'|  ^|
+	    s/\?\?\(/[/g;                        # | ??(|  [|
+	    s/\?\?\)/]/g;                        # | ??)|  ]|
+	    s/\?\?\-/~/g;                        # | ??-|  ~|
+	    s/\?\?\//\\/g;                       # | ??/|  \|
+	    s/\?\?</{/g;                         # | ??<|  {|
+	    s/\?\?>/}/g;                         # | ??>|  }|
+	}
 	if (/^[ \t]*#[ \t]*define\s+([\$\w]+)\b(?!\()\s*(?=[^" \t])(.*)/) {
 	    my $def = $1;
 	    my $rest = $2;
