@@ -20,7 +20,7 @@ DIALOG 262 Revert Dialog
 END-DIALOG
 
 DIALOG 266 Abort Alert
-	 1.1	Currently, a script is still running. Terminate it and quit MacPerl.
+	 1.1	Currently, a script is still running.  Terminate it and quit MacPerl.
 	 
 	 2.1	Continue without quitting.
 END-DIALOG
@@ -55,42 +55,52 @@ END-DIALOG
 
 DIALOG 384 Preferences Dialog
 	 1.1	Specify folders to be searched for Perl library files.
+	 
+	 2.1	Specify environment variables for MacPerl.
 
-	 2.1	Specify parameters for running/opening Perl scripts.
+	 3.1	Specify parameters for running/opening Perl scripts.
 	 
-	 3.1	Turn inline input of asian scripts on or off.
+	 4.1	Turn inline input of asian scripts on or off.
 	 
-	 4.1	Other preference settings.
+	 5.1	Other preference settings.
 	 
-	 7.1  Accept changed preferences. There is no way to undo them anyway (he he he!).
+	 8.1	Accept changed preferences.  There is no way to undo them anyway (he he he!).
 END-DIALOG
 
 DIALOG 385 Library Preferences
-	 9.2	These folders will be searched for Perl library files.
+	10.2	These folders will be searched for Perl library files.
 	
-	10.1	Remove currently selected folders from the list.
+	11.1	Remove currently selected folders from the list.
 	
-	11.1	Add another folder to the list.
+	12.1	Add another folder to the list.
 END-DIALOG
 
-DIALOG 386 Script Preferences
-	 9.1	Text files opened from the Finder will be run.
-	 9.3	Text files opened from the Finder will be opened for editing.
+DIALOG 386 Environment Preferences
+	10.2	These environment variables may be used in your Perl scripts.  Double-click to edit a name/value pair.
 	
-	10.1	Text files opened from the Finder will be opened for editing.
-	10.3	Text files opened from the Finder will be run.
+	11.1	Remove currently selected environment variables from the list.
 	
-	11.1	Don't mind if scripts have no #!perl line.
-	11.3	Warn if scripts have no #!perl line.
+	12.1	Add another environment variable to the list.
 END-DIALOG
 
-DIALOG 387 Input Preferences
-	 9.1	Japanese or Chinese text will be edited in a floating window.
-	 9.3	Japanese or Chinese text will be edited inline.
+DIALOG 387 Script Preferences
+	10.1	Text files opened from the Finder will be run.
+	10.3	Text files opened from the Finder will be opened for editing.
+	
+	11.1	Text files opened from the Finder will be opened for editing.
+	11.3	Text files opened from the Finder will be run.
+	
+	12.1	Don't mind if scripts have no #!perl line.
+	12.3	Warn if scripts have no #!perl line.
 END-DIALOG
 
-DIALOG 388 Internet Config Preferences
-	 9.1	Launch Internet Config to configure further settings.
+DIALOG 388 Input Preferences
+	10.1	Japanese or Chinese text will be edited in a floating window.
+	10.3	Japanese or Chinese text will be edited inline.
+END-DIALOG
+
+DIALOG 389 Internet Config Preferences
+	10.1	Launch the Internet control panel or Internet Config to configure further settings.
 END-DIALOG
 
 MENU 129 File
@@ -121,7 +131,7 @@ MENU 129 File
 	10.2	Prints all or part of the current file.  To enable this item, choose New or Open from the File menu.
 
 	12.1	Stop the currently running script.
-	12.2 	Stop the currently running script. Disabled because no script is running.
+	12.2 	Stop the currently running script.  Disabled because no script is running.
 
 	14.1	Quit from MacPerl.
 END-MENU
@@ -146,19 +156,19 @@ MENU 130	Edit
 	6.2	Clears or removes the selected text from the active window but does not place the contents onto the clipboard.  Not available because no text is selected.
 	
 	7.1	Selects all text in the active window.
-	7.2	Selects all text in the active window. Not available because this operation is non-functional.
+	7.2	Selects all text in the active window.  Not available because this operation is non-functional.
 
 	9.1	Find text in current editor window.
-	9.2	Find text in current editor window.Not available because there is no open current window.
+	9.2	Find text in current editor window.  Not available because there is no open current window.
 
 	10.1	Find text again.
-	10.2	Find text again. Not available because there is no open current window.
+	10.2	Find text again.  Not available because there is no open current window.
 
 	11.1	Jump to File (and Line) given by current selection.
-	11.2	Jump to File (and Line) given by current selection. Select a file name and/or line number to enable this item.
+	11.2	Jump to File (and Line) given by current selection.  Select a file name and/or line number to enable this item.
 
 	13.1	Set the font and size of the document.
-	15.1	Edit MacPerl Preferences.
+	15.1	Edit MacPerl's Preferences.
 END-MENU
 
 MENU 131	Window
@@ -171,12 +181,12 @@ MENU 132 Script
 	1.1	Runs a script
 	
 	2.1	Runs the script in the front window.
-	2.2	Runs the script in the front window. Enabled if a document window is open.
+	2.2	Runs the script in the front window.  Enabled if a document window is open.
 	
 	3.1	Performs a syntax check on a script.
 	
 	4.1	Performs a syntax check on the front window.
-	4.2	Performs a syntax check on the front window. Enabled if a document window is open.
+	4.2	Performs a syntax check on the front window.  Enabled if a document window is open.
 	
 	6.1	Enables warning messages from the Perl compiler.
 	6.3	Disables warning messages from the Perl compiler.

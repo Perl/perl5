@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MacPerl.r,v $
+Revision 1.17  2002/03/08 04:12:03  pudge
+Cosmetic fixes (Thomas Wegner)
+
 Revision 1.16  2002/03/01 06:18:31  pudge
 Update resources
 
@@ -268,18 +271,19 @@ resource 'STR#' (CreditID) {
 		"Jeff Johnson",			"John Kamp",
 		"Dick Karpinski",		"Jim Kateley",			"Pete Keleher",
 		"Thomas Kimpton",		"Andreas Kšnig",		"Manfred Lauer",
-		"Gary LaVoy",			"Xah Lee",		"Thomas Lenggenhager",
+		"Gary LaVoy",			"Xah Lee",				"Thomas Lenggenhager",
 		"Kevin Lenzo",			"Peter Lewis",			"John Liberty",
 		"Ron Liechty",			"Jann Linder",			"Roger Linder",
 		"Brian Matthews",		"Angus McIntyre",		"Mike Meckler",
 		"Will Merrill",			"William Middleton",	"Peter Mšller",
 		"Richard Moe",			"Bill Moore",			"Rich Morin",
-		"Chris Myers",			"Jennifer Nandor",		"Asa Packer",
+		"Chris Myers",			"Jennifer Nandor",		"Riley Nandor",
+		"Asa Packer",
 		"Paul Patton",			"Mark Pease",			"James \"Kibo\" Parry",
 		"Lasse Petersen",
 		"John Peterson",		"Brad Pickering",		"Marco Piovanelli",
 		"Tom Pollard",			"Simon Poole",			"Malcolm Pradhan",
-		"Quinn",				"Tim Rand",		"Alasdair Rawsthorne",
+		"Quinn",				"Tim Rand",				"Alasdair Rawsthorne",
 		"Kevin Reid",			"Charlie Reiman",		"King Rhoton",
 		"Marcel Riechert",		"Axel Rose",
 		"Diller Ryan",			"Gurusamy Sarathy",
@@ -752,13 +756,13 @@ resource 'DITL' (PrefEnvAddID, "", purgeable) {
 resource 'DITL' (PrefScriptID, "", purgeable) {
 	{	{ 80,  25, 100,  80}, RadioButton	{ enabled, "Edit"},
 		{100,  25, 120,  80}, RadioButton	{ enabled, "Run"},
-		{140,  25, 160, 375}, CheckBox		{ enabled, "Check for #! line"},
+		{140,  25, 160, 168}, CheckBox		{ enabled, "Check for #! line"},
 		{ 93,  80, 113, 375}, StaticText	{disabled, "Scripts opened from Finder"}
 	}
 };
 
 resource 'DITL' (PrefInputID, "", purgeable) {
-	{	{ 80,  25, 100, 200}, CheckBox		{ enabled, "Enable inline input"},
+	{	{ 80,  25, 100, 176}, CheckBox		{ enabled, "Enable inline input"},
 	}
 };
 
