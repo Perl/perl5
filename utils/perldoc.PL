@@ -306,13 +306,13 @@ foreach (@pages) {
 		for ($i = 0; $trn = $ENV{'DCL$PATH'.$i}; $i++) {
 		    push(@searchdirs,$trn);
 		}
-	    push(@dirs,'perl_root:[lib.pod]')  # installed pods
+		push(@searchdirs,'perl_root:[lib.pod]')  # installed pods
 	    } else {
 	        push(@searchdirs, grep(-d, split($Config{path_sep}, 
 						 $ENV{'PATH'})));
 	    }
-	    @files= searchfor(0,$_,@searchdirs);
 	}
+	@files = searchfor(0,$_,@searchdirs);
 	if( @files ) {
 		print STDERR "Found as @files\n" if $opt_v;
 	} else {
@@ -351,6 +351,8 @@ if ($opt_l) {
     print join("\n", @found), "\n";
     exit;
 }
+
+my $lines = $ENV{LINES} || 24;
 
 if( ! -t STDOUT ) { $no_tty = 1 }
 
@@ -410,8 +412,6 @@ if ($opt_f) {
        ++$found if /^\w/;	# found descriptive text
    }
    if (@pod) {
-	my $lines = $ENV{LINES} || 24;
-
        if ($opt_t) {
 	   open(FORMATTER, "| pod2text") || die "Can't start filter";
 	   print FORMATTER "=over 8\n\n";
@@ -458,11 +458,18 @@ if ($opt_q) {
 	 print FORMATTER @pod;
 	 print FORMATTER "=back\n";
 	 close(FORMATTER);
-      } else {
+      } elsif (@pod < $lines-2) {
 	 print @pod;
+      } else {
+	 foreach $pager (@pagers) {
+	    open (PAGER, "| $pager") or next;
+	    print PAGER @pod ;
+	    close(PAGER) or next;
+	    last;
+	 }
       }
    } else {
-      die "No documentation for perl function `$opt_f' found\n";
+      die "No documentation for perl FAQ keyword `$opt_q' found\n";
    }
    exit;
 }
