@@ -476,6 +476,17 @@ S_mergesortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 #define QSORT_BREAK_EVEN 6
 #endif
 
+/* QSORT_PLAY_SAFE is the size of the largest partition we're willing
+   to go quadratic on.  We innoculate larger partitions against
+   quadratic behavior by shuffling them before sorting.  This is not
+   an absolute guarantee of non-quadratic behavior, but it would take
+   staggeringly bad luck to pick extreme elements as the pivot
+   from randomized data.
+*/
+#ifndef QSORT_PLAY_SAFE
+#define QSORT_PLAY_SAFE 255
+#endif
+
 /* ************************************************************* Data Types */
 
 /* hold left and right index values of a partition waiting to be sorted (the
@@ -605,6 +616,18 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
    */
    if (num_elts <= 1) {
       return;
+   }
+
+   /* Innoculate large partitions against quadratic behavior */
+   if (num_elts > QSORT_PLAY_SAFE) {
+      register size_t n, j;
+      register SV **q;
+      for (n = num_elts, q = array; n > 1; ) {
+         j = n-- * Drand01();
+         temp = q[j];
+         q[j] = q[n];
+         q[n] = temp;
+      }
    }
 
    /* Setup the initial partition definition and fall into the sorting loop
@@ -1160,20 +1183,20 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 	 gptr *small[SMALLSORT], **indir, tmp;
 	 SVCOMPARE_t savecmp;
 	 if (nmemb <= 1) return;     /* sorted trivially */
-	 
+
 	 /* Small arrays can use the stack, big ones must be allocated */
 	 if (nmemb <= SMALLSORT) indir = small;
 	 else { New(1799, indir, nmemb, gptr *); }
-	 
+
 	 /* Copy pointers to original array elements into indirect array */
 	 for (n = nmemb, pp = indir, q = list1; n--; ) *pp++ = q++;
-	 
+
 	 savecmp = RealCmp;	/* Save current comparison routine, if any */
 	 RealCmp = cmp;	/* Put comparison routine where cmpindir can find it */
-	 
+
 	 /* sort, with indirection */
 	 S_qsortsvu(aTHX_ (gptr *)indir, nmemb, cmpindir);
-	 
+
 	 pp = indir;
 	 q = list1;
 	 for (n = nmemb; n--; ) {
@@ -1217,17 +1240,17 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 	 RealCmp = savecmp;
     }
 }
- 
-/* 
+
+/*
 =for apidoc sortsv
 
 Sort an array. Here is an example:
 
-    sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale); 
+    sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale);
 
 =cut
 */
-    
+
 void
 Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
@@ -1235,7 +1258,7 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
         S_mergesortsv;
     SV **hintsvp;
     I32 hints;
-    
+
     if ((hints = SORTHINTS(hintsvp))) {
 	 if (hints & HINT_SORT_QUICKSORT)
 	      sortsvp = S_qsortsv;
@@ -1246,7 +1269,7 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 		   sortsvp = S_mergesortsv;
 	 }
     }
-    
+
     sortsvp(aTHX_ array, nmemb, cmp);
 }
 
@@ -1553,7 +1576,7 @@ amagic_ncmp(pTHX_ register SV *a, register SV *b)
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
     if (tmpsv) {
     	NV d;
-    	
+ 
         if (SvIOK(tmpsv)) {
             I32 i = SvIVX(tmpsv);
             if (i > 0)
@@ -1575,7 +1598,7 @@ amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
     if (tmpsv) {
     	NV d;
-    	
+
         if (SvIOK(tmpsv)) {
             I32 i = SvIVX(tmpsv);
             if (i > 0)
@@ -1597,7 +1620,7 @@ amagic_cmp(pTHX_ register SV *str1, register SV *str2)
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
     if (tmpsv) {
     	NV d;
-    	
+ 
         if (SvIOK(tmpsv)) {
             I32 i = SvIVX(tmpsv);
             if (i > 0)
@@ -1619,7 +1642,7 @@ amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
     if (tmpsv) {
     	NV d;
-    	
+ 
         if (SvIOK(tmpsv)) {
             I32 i = SvIVX(tmpsv);
             if (i > 0)
