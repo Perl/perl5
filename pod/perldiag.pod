@@ -631,7 +631,7 @@ is no builtin with the name C<word>.
 =item Can't find %s character property "%s"
 
 (F) You used C<\p{}> or C<\P{}> but the character property by that name
-could not be find.  Maybe you mispelled the name of the property
+could not be find.  Maybe you misspelled the name of the property
 (remember that the names of character properties consist only of
 alphanumeric characters), or maybe you forgot the C<Is> or C<In> prefix?
 
@@ -2434,7 +2434,7 @@ mixed-case attribute name, instead.  See L<attributes>.
 =item Package '%s' not found (did you use the incorrect case?)
 
 (W misc) You included a package file via C<use>, but the package name
-did not match the file name. It's possible that you mispelled the
+did not match the file name. It's possible that you misspelled the
 package name.
 
 =item page overflow
