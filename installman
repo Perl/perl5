@@ -90,13 +90,15 @@ sub runpod2man {
 	$manpage =~ s#\.p(m|od)$##;
 	$manpage =~ s#/#::#g;
 	$manpage = "${mandir}/${manpage}.${manext}";
-	&cmd("$pod2man $mod > $manpage");
-	if (-z $manpage) {
-	    print STDERR "unlink $manpage\n";
-	    unless ($notify) {
-		unlink($manpage) || warn "cannot unlink $manpage: $!";
-	    } 
-	} 
+	&cmd("$pod2man $mod > $manpage.tmp");
+	if (-s "$manpage.tmp") {
+	    rename("$manpage.tmp", $manpage) && next;
+	    warn "cannot rename to $manpage: $!";
+	}
+	print STDERR "unlink $manpage.tmp\n";
+	unless ($notify) {
+	    unlink("$manpage.tmp") || warn "cannot unlink $manpage.tmp: $!";
+	}
     }
     chdir "$builddir" || die "Unable to cd back to $builddir directory!\n$!\n";
 }
