@@ -383,7 +383,7 @@ will be considered a block that loops once.  See L<perlfunc/last>.
 there isn't a current block.  Note that an "if" or "else" block doesn't
 count as a "loopish" block, as doesn't a block given to sort().  You can
 usually double the curlies to get the same effect though, because the inner
-curlies will be considered a block that loops once.  See L<perlfunc/last>.
+curlies will be considered a block that loops once.  See L<perlfunc/next>.
 
 =item Can't "redo" outside a block
 
@@ -391,7 +391,7 @@ curlies will be considered a block that loops once.  See L<perlfunc/last>.
 there isn't a current block.  Note that an "if" or "else" block doesn't
 count as a "loopish" block, as doesn't a block given to sort().  You can
 usually double the curlies to get the same effect though, because the inner
-curlies will be considered a block that loops once.  See L<perlfunc/last>.
+curlies will be considered a block that loops once.  See L<perlfunc/redo>.
 
 =item Can't bless non-reference value
 
@@ -400,7 +400,7 @@ encapsulation of objects.  See L<perlobj>.
 
 =item Can't break at that line
 
-(S) A warning intended for while running within the debugger, indicating
+(S) A warning intended to only be printed while running within the debugger, indicating
 the line number specified wasn't the location of a statement that could
 be stopped at.
 
@@ -1376,7 +1376,7 @@ this error was triggered?
 =item No command into which to pipe on command line
 
 (F) An error peculiar to VMS.  Perl handles its own command line redirection,
-and found a '|' at the end of the command line, so it doesn't know whither you
+and found a '|' at the end of the command line, so it doesn't know where you
 want to pipe the output from this command.
 
 =item No DB::DB routine defined
@@ -1416,7 +1416,7 @@ from which to read data for stdin.
 
 (F) An error peculiar to VMS.  Perl handles its own command line redirection,
 and found a lone 'E<gt>' at the end of the command line, so it doesn't know
-whither you wanted to redirect stdout.
+where you wanted to redirect stdout.
 
 =item No output file after E<gt> or E<gt>E<gt> on command line
 
@@ -1959,8 +1959,8 @@ L<perlref>.
 
 =item Script is not setuid/setgid in suidperl
 
-(F) Oddly, the suidperl program was invoked on a script with its setuid
-or setgid bit not set.  This doesn't make much sense.
+(F) Oddly, the suidperl program was invoked on a script without a setuid
+or setgid bit set.  This doesn't make much sense.
 
 =item Search pattern not terminated
 
@@ -1970,7 +1970,7 @@ construct.  Remember that bracketing delimiters count nesting level.
 =item seek() on unopened file
 
 (W) You tried to use the seek() function on a filehandle that was either
-never opened or has been closed since.
+never opened or has since been closed.
 
 =item select not implemented
 
@@ -2096,7 +2096,7 @@ See L<perlfunc/split>.
 =item Stat on unopened file E<lt>%sE<gt>
 
 (W) You tried to use the stat() function (or an equivalent file test)
-on a filehandle that was either never opened or has been closed since.
+on a filehandle that was either never opened or has since been closed.
 
 =item Statement unlikely to be reached
 
@@ -2189,7 +2189,7 @@ Check your logic flow.
 =item tell() on unopened file
 
 (W) You tried to use the tell() function on a filehandle that was either
-never opened or has been closed since.
+never opened or has since been closed.
 
 =item Test on unopened file E<lt>%sE<gt>
 
@@ -2412,7 +2412,7 @@ supplying the bad switch on your behalf.)
 
 (W) A file operation was attempted on a filename, and that operation
 failed, PROBABLY because the filename contained a newline, PROBABLY
-because you forgot to chop() or chomp() it off.  See L<perlfunc/chop>.
+because you forgot to chop() or chomp() it off.  See L<perlfunc/chomp>.
 
 =item Unsupported directory function "%s" called
 

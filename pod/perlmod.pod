@@ -77,8 +77,8 @@ use the C<*name> typeglob notation.  In fact, the following have the same
 effect, though the first is more efficient because it does the symbol
 table lookups at compile time:
 
-    local(*main::foo) = *main::bar; local($main::{'foo'}) =
-    $main::{'bar'};
+    local(*main::foo) = *main::bar;
+	local($main::{'foo'}) = $main::{'bar'};
 
 You can use this to print out all the variables in a package, for
 instance.  Here is F<dumpvar.pl> from the Perl library:
@@ -862,7 +862,8 @@ your system man(1) command.  If that fails, try the I<perldoc> program.
 
 =head2 Extension Modules
 
-Extension modules are written in C (or a mix of Perl and C) and get
+Extension modules are written in C (or a mix of Perl and C) and may be
+statically linked or in general are
 dynamically loaded into Perl if and when you need them.  Supported
 extension modules include the Socket, Fcntl, and POSIX modules.
 

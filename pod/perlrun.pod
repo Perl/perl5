@@ -44,7 +44,7 @@ beginning, unless you've specified a B<-x> switch, in which case it
 scans for the first line starting with #! and containing the word
 "perl", and starts there instead.  This is useful for running a script
 embedded in a larger message.  (In this case you would indicate the end
-of the script using the __END__ token.)
+of the script using the C<__END__> token.)
 
 The #! line is always examined for switches as the line is being
 parsed.  Thus, if you're on a machine that allows only one argument

@@ -164,7 +164,7 @@ accessible from the stack - think of the case where only one value is
 returned as being a list with only one element.  Any other items that
 were returned will not exist by the time control returns from the
 I<perl_call_*> function.  The section I<Returning a list in a scalar
-context> shows an example of this behaviour.
+context> shows an example of this behavior.
 
 
 =head2 G_ARRAY
@@ -293,7 +293,7 @@ from the stack.
 
 =back
 
-See I<Using G_EVAL> for details of using G_EVAL.
+See I<Using G_EVAL> for details on using G_EVAL.
 
 =head2 G_KEEPERR
 
@@ -565,7 +565,7 @@ Next, we come to XPUSHs. This is where the parameters actually get
 pushed onto the stack. In this case we are pushing a string and an
 integer.
 
-See the L<perlguts/"XSUBs and the Argument Stack"> for details
+See L<perlguts/"XSUBs and the Argument Stack"> for details
 on how the XPUSH macros work.
 
 =item 6.
@@ -672,7 +672,7 @@ allocated to the Perl stack has been reallocated whilst in the
 I<perl_call_pv> call.
 
 If you are making use of the Perl stack pointer in your code you must
-always refresh the your local copy using SPAGAIN whenever you make use
+always refresh the local copy using SPAGAIN whenever you make use
 of the I<perl_call_*> functions or any other Perl internal function.
 
 =item 4.
@@ -834,7 +834,7 @@ then the output will be
     Value 1 = 3
 
 In this case the main point to note is that only the last item in the
-list returned from the subroutine, I<Adder> actually made it back to
+list is returned from the subroutine, I<AddSubtract> actually made it back to
 I<call_AddSubScalar>.
 
 
@@ -1420,22 +1420,22 @@ will be more like this
                       ...
                       event handler --> perl_call --> perl 
                                                        |
-                      event handler <-- perl_call --<--+
+                      event handler <-- perl_call <----+
                       ...
                       event handler --> perl_call --> perl 
                                                        |
-                      event handler <-- perl_call --<--+
+                      event handler <-- perl_call <----+
                       ...
                       event handler --> perl_call --> perl 
                                                        |
-                      event handler <-- perl_call --<--+
+                      event handler <-- perl_call <----+
 
 In this case the flow of control can consist of only the repeated
 sequence
 
     event handler --> perl_call --> perl
 
-for the practically the complete duration of the program.  This means
+for practically the complete duration of the program.  This means
 that control may I<never> drop back to the surrounding scope in Perl at
 the extreme left.
 

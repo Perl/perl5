@@ -39,13 +39,13 @@ as the my if you expect to be able to access those private variables.
 
 Declaring a subroutine allows a subroutine name to be used as if it were a
 list operator from that point forward in the program.  You can declare a
-subroutine (prototyped to take one scalar parameter) without defining it by saying just:
+subroutine without defining it by just saying:
 
-    sub myname ($);
+    sub myname;
     $me = myname $0 		or die "can't get myname";
 
-Note that it functions as a list operator though, not as a unary
-operator, so be careful to use C<or> instead of C<||> there.
+Though note that it functions as a list operator, not as a unary
+operator, so be sure to use C<or> instead of C<||> in this case.
 
 Subroutines declarations can also be loaded up with the C<require> statement
 or both loaded and imported into your namespace with a C<use> statement.

@@ -369,7 +369,7 @@ surrounding whitespace) on the terminating line.
     Here's a line
     or two.
     THIS
-    and here another.
+    and here's another.
     THAT
 
 Just don't forget that you have to put a semicolon on the end 
@@ -401,12 +401,12 @@ assigns the entire list value to array foo, but
 
 assigns the value of variable bar to variable foo.  Note that the value
 of an actual array in a scalar context is the length of the array; the
-following assigns to $foo the value 3:
+following assigns the value 3 to $foo:
 
     @foo = ('cc', '-E', $bar);
     $foo = @foo;		# $foo gets 3
 
-You may have an optional comma before the closing parenthesis of an
+You may have an optional comma before the closing parenthesis of a
 list literal, so that you can say:
 
     @foo = (
@@ -434,7 +434,7 @@ interpolating an array with no elements is the same as if no
 array had been interpolated at that point.
 
 A list value may also be subscripted like a normal array.  You must
-put the list in parentheses to avoid ambiguity.  Examples:
+put the list in parentheses to avoid ambiguity.  For example:
 
     # Stat returns list value.
     $time = (stat($file))[8];

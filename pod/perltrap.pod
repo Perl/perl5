@@ -20,8 +20,8 @@ The English module, loaded via
 
     use English;
 
-allows you to refer to special variables (like $RS) as 
-though they were in B<awk>; see L<perlvar> for details.
+allows you to refer to special variables (like $/ ($RS)) with their
+B<awk> equivalent; see L<perlvar> for details.
 
 =item *
 
@@ -57,8 +57,8 @@ comparisons.
 =item *
 
 Reading an input line does not split it for you.  You get to split it
-yourself to an array.  And the split() operator has different
-arguments.
+to an array yourself.  And the split() operator has different
+arguments than B<awk>'s.
 
 =item *
 

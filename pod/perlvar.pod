@@ -459,7 +459,7 @@ the syntax error "at"?)
 
 Note that warning messages are not collected in this variable.  You can,
 however, set up a routine to process warnings by setting C<$SIG{__WARN__}>
-below.
+as described below.
 
 =item $PROCESS_ID
 

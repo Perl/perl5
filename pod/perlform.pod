@@ -7,7 +7,7 @@ perlform - Perl formats
 Perl has a mechanism to help you generate simple reports and charts.  To
 facilitate this, Perl helps you code up your output page 
 close to how it will look when it's printed.  It can keep
-track of things like how many lines on a page, what page you're on, when to
+track of things like how many lines are on a page, what page you're on, when to
 print page headers, etc.  Keywords are borrowed from FORTRAN:
 format() to declare and write() to execute; see their entries in
 L<perlfunc>.  Fortunately, the layout is much more legible, more like
@@ -30,7 +30,7 @@ Output record formats are declared as follows:
     .
 
 If name is omitted, format "STDOUT" is defined.  FORMLIST consists of
-a sequence of lines, each of which may be of one of three types:
+a sequence of lines, each of which may be one of three types:
 
 =over 4
 
@@ -277,8 +277,8 @@ Here's one strategy:  If you have a fixed-size footer, you can get footers
 by checking $FORMAT_LINES_LEFT before each write() and print the footer
 yourself if necessary.
 
-Here's another strategy; open a pipe to yourself, using C<open(MESELF, "|-")> 
-(see L<perlfunc/open()>) and always write() to MESELF instead of
+Here's another strategy; open a pipe to yourself, using C<open(MYSELF, "|-")> 
+(see L<perlfunc/open()>) and always write() to MYSELF instead of
 STDOUT.  Have your child process massage its STDIN to rearrange
 headers and footers however you like.  Not very convenient, but doable.
 

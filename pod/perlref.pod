@@ -23,7 +23,6 @@ destructed.  See L<perlobj> for more about objects.  (In a sense,
 everything in Perl is an object, but we usually reserve the word for
 references to objects that have been officially "blessed" into a class package.)
 
-
 A symbolic reference contains the name of a variable, just as a
 symbolic link in the filesystem contains merely the name of a file.  
 The C<*glob> notation is a kind of symbolic reference.  Hard references
@@ -36,14 +35,14 @@ dereferencing.  When a scalar is holding a reference, it always behaves
 as a scalar.  It doesn't magically start being an array or a hash
 unless you tell it so explicitly by dereferencing it.
 
-References can be constructed several ways.
+References can be constructed in several ways.
 
 =over 4
 
 =item 1.
 
 By using the backslash operator on a variable, subroutine, or value.
-(This works much like the & (address-of) operator works in C.)  Note
+(This works much like the & (address-of) operator in C.)  Note
 that this typically creates I<ANOTHER> reference to a variable, because
 there's already a reference to the variable in the symbol table.  But
 the symbol table reference might go away, and you'll still have the
@@ -69,7 +68,7 @@ brackets:
     $arrayref = [1, 2, ['a', 'b', 'c']];
 
 Here we've constructed a reference to an anonymous array of three elements
-whose final element is itself reference to another anonymous array of three
+whose final element is itself a reference to another anonymous array of three
 elements.  (The multidimensional syntax described later can be used to
 access this.  For example, after the above, C<$arrayref-E<gt>[2][1]> would have
 the value "b".)
@@ -138,8 +137,8 @@ context even when it's called outside of the context.
 In human terms, it's a funny way of passing arguments to a subroutine when
 you define it as well as when you call it.  It's useful for setting up
 little bits of code to run later, such as callbacks.  You can even
-do object-oriented stuff with it, though Perl provides a different
-mechanism to do that already--see L<perlobj>.
+do object-oriented stuff with it, though Perl already provides a different
+mechanism to do that--see L<perlobj>.
 
 You can also think of closure as a way to write a subroutine template without
 using eval.  (In fact, in version 5.000, eval was the I<only> way to get

@@ -42,7 +42,7 @@ In the following sections, these operators are covered in precedence order.
 
 =head2 Terms and List Operators (Leftward)
 
-Any TERM is of highest precedence of Perl.  These includes variables,
+A TERM has the highest precedence in Perl.  They includes variables,
 quote and quote-like operators, any expression in parentheses,
 and any function whose arguments are parenthesized.  Actually, there
 aren't really functions in this sense, just list operators and unary
@@ -56,7 +56,7 @@ just like a normal function call.
 
 In the absence of parentheses, the precedence of list operators such as
 C<print>, C<sort>, or C<chmod> is either very high or very low depending on
-whether you look at the left side of operator or the right side of it.
+whether you are looking at the left side or the right side of the operator.
 For example, in
 
     @ary = (1, 3, sort 4, 2);
@@ -915,7 +915,8 @@ Translates all occurrences of the characters found in the search list
 with the corresponding character in the replacement list.  It returns
 the number of characters replaced or deleted.  If no string is
 specified via the =~ or !~ operator, the $_ string is translated.  (The
-string specified with =~ must be a scalar variable, an array element,
+string specified with =~ must be a scalar variable, an array element, a
+hash element,
 or an assignment to one of those, i.e., an lvalue.)  For B<sed> devotees,
 C<y> is provided as a synonym for C<tr>.  If the SEARCHLIST is
 delimited by bracketing quotes, the REPLACEMENTLIST has its own pair of

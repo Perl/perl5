@@ -48,7 +48,7 @@ The C<{}> constructs a reference to an anonymous hash containing no
 key/value pairs.  The bless() takes that reference and tells the object
 it references that it's now a Critter, and returns the reference.
 This is for convenience, because the referenced object itself knows that
-it has been blessed, and its reference to it could have been returned 
+it has been blessed, and the reference to it could have been returned 
 directly, like this:
 
     sub new {
@@ -347,8 +347,8 @@ because it would have to do too much lookahead otherwise, just like any
 other postfix dereference in the language.  The left side of -E<gt> is not so
 limited, because it's an infix operator, not a postfix operator.  
 
-That means that below, A and B are equivalent to each other, and C and D
-are equivalent, but AB and CD are different:
+That means that in the following, A and B are equivalent to each other, and
+C and D are equivalent, but A/B and C/D are different:
 
     A: method $obref->{"fieldname"} 
     B: (method $obref)->{"fieldname"}

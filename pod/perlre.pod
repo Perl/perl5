@@ -107,12 +107,10 @@ modifier to C<{1,}>, and the "?" modifier to C<{0,1}>.  n and m are limited
 to integral values less than 65536.
 
 By default, a quantified sub-pattern is "greedy", that is, it will match as
-many times as possible without causing the rest of the pattern not to match.  
-The standard quantifiers are all "greedy", in that they match as many
-occurrences as possible (given a particular starting location) without
-causing the pattern to fail.  If you want it to match the minimum number
-of times possible, follow the quantifier with a "?" after any of them.
-Note that the meanings don't change, just the "gravity":
+many times as possible while still allowing the rest of the pattern to match.  
+If you want to match the minimum number of times possible, follow the
+quantifier with a "?".  Note that the meanings don't change, just the
+"gravity":
 
     *?	   Match 0 or more times
     +?	   Match 1 or more times

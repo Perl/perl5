@@ -52,7 +52,7 @@ of sections:
     perlpod	Perl plain old documentation
     perlbook	Perl book information
 
-    perlembed	Perl how to embed perl in your C or C++ app
+    perlembed	Perl how to embed perl in your C or C++ application
     perlapio	Perl internal IO abstraction interface
     perlxs	Perl XS application programming interface
     perlxstut	Perl XS tutorial

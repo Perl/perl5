@@ -420,7 +420,7 @@ an C<L<eval EXPR>>) frame.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable @DB::args to be the
-arguments with which that subroutine was invoked.
+arguments with which the subroutine was invoked.
 
 =item chdir EXPR
 
@@ -1020,7 +1020,7 @@ and 4 likewise behave in the same way: they run the code '$x', which
 does nothing but return the value of C<$x>.  (Case 4 is preferred for
 purely visual reasons, but it also has the advantage of compiling at
 compile-time instead of at run-time.)  Case 5 is a place where
-normally you I<WOULD> like to use double quotes, except that in that
+normally you I<WOULD> like to use double quotes, except that in this
 particular situation, you can just use symbolic references instead, as
 in case 6.
 
@@ -1540,7 +1540,7 @@ see L<oct>.)  If EXPR is omitted, uses $_.
 There is no built-in import() function.  It is merely an ordinary
 method (subroutine) defined (or inherited) by modules that wish to export
 names to another module.  The use() function calls the import() method
-for the package used.  See also L</use>, L<perlmod>, and L<Exporter>.
+for the package used.  See also L</use()>, L<perlmod>, and L<Exporter>.
 
 =item index STR,SUBSTR,POSITION
 
@@ -2571,7 +2571,7 @@ call of stdio.  FILEHANDLE may be an expression whose value gives the name
 of the filehandle.  The values for WHENCE are 0 to set the file pointer to
 POSITION, 1 to set the it to current plus POSITION, and 2 to set it to EOF
 plus offset.  You may use the values SEEK_SET, SEEK_CUR, and SEEK_END for
-this from POSIX module.  Returns 1 upon success, 0 otherwise.
+this from the POSIX module.  Returns 1 upon success, 0 otherwise.
 
 On some systems you have to do a seek whenever you switch between reading
 and writing.  Amongst other things, this may have the effect of calling
@@ -3384,7 +3384,7 @@ is available will be written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing
-from that many bytes counting backwards from the end of the string.
+that many bytes counting backwards from the end of the string.
 
 =item tell FILEHANDLE
 
@@ -3521,8 +3521,8 @@ digits.  See also L<oct>, if all you have is a string.
 
 =item undef
 
-Undefines the value of EXPR, which must be an lvalue.  Use on only a
-scalar value, an entire array or hash, or a subroutine name (using
+Undefines the value of EXPR, which must be an lvalue.  Use only on a
+scalar value, an entire array, an entire hash, or a subroutine name (using
 "&").  (Using undef() will probably not do what you expect on most
 predefined variables or DBM list values, so don't do that.)  Always
 returns the undefined value.  You can omit the EXPR, in which case
@@ -3793,7 +3793,7 @@ examples.
 
 Writes a formatted record (possibly multi-line) to the specified file,
 using the format associated with that file.  By default the format for
-a file is the one having the same name is the filehandle, but the
+a file is the one having the same name as the filehandle, but the
 format for the current output channel (see the select() function) may be set
 explicitly by assigning the name of the format to the C<$~> variable.
 
