@@ -55,6 +55,7 @@ Miscellaneous
     upgrade to newer versions of all independently maintained modules
     add new modules (Data-Dumper, Storable?)
     test it with large parts of CPAN
+    fix pod2html to generate relative URLs
 
 Documentation
     comprehensive perldelta.pod
