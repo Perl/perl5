@@ -4027,6 +4027,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    MAGIC *mg = SvMAGIC(sstr); 
 	    sv_magicext(dstr, NULL, PERL_MAGIC_vstring, NULL,
 			mg->mg_ptr, mg->mg_len);
+	    SvRMAGICAL_on(dstr);
 	} 
     }
     else if (sflags & SVp_IOK) {
@@ -7238,6 +7239,8 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
 	case SVt_PVNV:
 	case SVt_PVMG:
 	case SVt_PVBM:
+	    			if (SvVOK(sv))
+				    return "VSTRING";
 				if (SvROK(sv))
 				    return "REF";
 				else

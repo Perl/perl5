@@ -4072,6 +4072,7 @@ char *
 Perl_scan_vstring(pTHX_ char *s, SV *sv)
 {
     char *pos = s;
+    char *start = s;
     if (*pos == 'v') pos++;  /* get past 'v' */
     while (isDIGIT(*pos) || *pos == '_')
     pos++;
@@ -4121,7 +4122,8 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 		 pos++;
 	}
 	SvPOK_on(sv);
-	SvREADONLY_on(sv);
+	sv_magicext(sv,NULL,PERL_MAGIC_vstring,NULL,(const char*)start, pos-start);
+	SvRMAGICAL_on(sv);
     }
     return s;
 }
