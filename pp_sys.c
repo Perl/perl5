@@ -3600,10 +3600,18 @@ PP(pp_mkdir)
 
     tmps = SvPV(TOPs, len);
     /* Different operating and file systems take differently to
-     * trailing slashes.  To err on the side of portability, we
-     * snip away one trailing slash. */
-    if (tmps[len-1] == '/') {
-	tmps = savepvn(tmps, len - 1);
+     * trailing slashes.  According to POSIX 1003.1 1996 Edition
+     * any number of trailing slashes should be allowed.
+     * Thusly we snip them away so that even non-conforming
+     * systems are happy. */
+    /* We should probably do this "filtering" for all
+     * the functions that expect (potentially) directory names:
+     * -d, chdir(), chmod(), chown(), chroot(), fcntl()?,
+     * (mkdir()), opendir(), rename(), rmdir(), stat(). --jhi */
+    if (len > 1 && tmps[len-1] == '/') {
+	while (tmps[len] == '/' && len > 1)
+	    len--;
+	tmps = savepvn(tmps, len);
 	copy = TRUE;
     }
 

@@ -2924,7 +2924,7 @@
  */
 #define SIG_NAME "ZERO","ABRT","FPE","ILL","INT","SEGV","TERM","USR1","USR2","IO","HUP","URG","ALRM","KILL","PIPE","QUIT","CHLD","CONT","STOP","TSTP","TTIN","TTOU","BUS","RT1","RT2","RT3","RT4","RT5","RT6","RT7","RT8",0		/**/
 #define SIG_NUM  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,0		/**/
-#define SIG_SIZE 32			/**/
+#define SIG_SIZE 31			/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
