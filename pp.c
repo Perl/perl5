@@ -15,6 +15,7 @@
 #include "EXTERN.h"
 #define PERL_IN_PP_C
 #include "perl.h"
+#include "keywords.h"
 
 /* variations on pp_null */
 
@@ -365,6 +366,8 @@ PP(pp_prototype)
 		I32 oa;
 		char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
 
+		if (code == -KEY_chop || code == -KEY_chomp)
+		    goto set;
 		while (i < MAXO) {	/* The slow way. */
 		    if (strEQ(s + 6, PL_op_name[i])
 			|| strEQ(s + 6, PL_op_desc[i]))
