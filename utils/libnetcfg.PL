@@ -35,14 +35,74 @@ $Config{startperl}
 
 print OUT <<'!NO!SUBS!';
 
+=head1 NAME
+
+libnetcfg - configure libnet
+
+=head1 DESCRIPTION
+
+The libnetcfg utility can be be used to configure the libnet.
+Starting from perl 5.8 libnet is part of the standard Perl
+distribution, but the libnetcfg can be be used for any libnet
+installation.
+
+=head1 USAGE
+
+Without arguments libnetcfg displays the current configuration.
+
+    $ libnetcfg
+    # old config ./libnet.cfg
+    daytime_hosts        ntp1.none.such
+    ftp_int_passive      0
+    ftp_testhost         ftp.funet.fi
+    inet_domain          none.such
+    nntp_hosts           nntp.none.such
+    ph_hosts             
+    pop3_hosts           pop.none.such
+    smtp_hosts           smtp.none.such
+    snpp_hosts           
+    test_exist           1
+    test_hosts           1
+    time_hosts           ntp.none.such
+    # ./libnetcfg5.7.1 -h for help
+    $ 
+
+It tells where the old configuration file was found (if found).
+
+The C<-h> option will show a usage message.
+
+To change the configuration you will need to use either the C<-c> or
+the C<-d> options.
+
+The default name of the old configuration file is by default
+"libnet.cfg", unless otherwise specified using the -i option, and it
+is searched from your module path, C<-i oldfile>.
+
+The default name of new configuration file is "libnet.cfg", and by
+default it is written to the current directory, unless otherwise
+specified using the -o option, C<-o newfile>.
+
+=head1 SEE ALSO
+
+L<Net::Config>, L<Net::libnetFAQ>
+
+=head1 AUTHORS
+
+Graham Barr, the original Configure script of libnet.
+
+Jarkko Hietaniemi, conversion into libnet cfg for inclusion into Perl 5.8.
+
+=cut
+
 # $Id: Configure,v 1.8 1997/03/04 09:22:32 gbarr Exp $
 
 use strict;
 use IO::File;
 use Getopt::Std;
 use ExtUtils::MakeMaker qw(prompt);
+use File::Spec;
 
-use vars qw($opt_d $opt_o);
+use vars qw($opt_d $opt_c $opt_h $opt_o $opt_i);
 
 ##
 ##
@@ -51,7 +111,7 @@ use vars qw($opt_d $opt_o);
 my %cfg = ();
 my @cfg = ();
 
-my($libnet_cfg,$msg,$ans,$def,$have_old);
+my($libnet_cfg_in,$libnet_cfg_out,$msg,$ans,$def,$have_old);
 
 ##
 ##
@@ -268,17 +328,20 @@ sub default_hostname
 ##
 ##
 
-getopts('do:');
+getopts('dcho:i:');
 
-$libnet_cfg = "libnet.cfg"
-	unless(defined($libnet_cfg = $opt_o));
+$libnet_cfg_in = "libnet.cfg"
+	unless(defined($libnet_cfg_in  = $opt_i));
+
+$libnet_cfg_out = "libnet.cfg"
+	unless(defined($libnet_cfg_out = $opt_o));
 
 my %oldcfg = ();
 
 $Net::Config::CONFIGURE = 1; # Suppress load of user overrides
-if( -f $libnet_cfg )
+if( -f $libnet_cfg_in )
  {
-  %oldcfg = ( %{ do $libnet_cfg } );
+  %oldcfg = ( %{ do $libnet_cfg_in } );
  }
 elsif (eval { require Net::Config }) 
  {
@@ -287,6 +350,59 @@ elsif (eval { require Net::Config })
  }
 
 map { $cfg{lc $_} = $cfg{$_}; delete $cfg{$_} if /[A-Z]/ } keys %cfg;
+
+#---------------------------------------------------------------------------
+
+if ($opt_h) {
+ print <<EOU;
+$0: Usage: $0 [-c] [-d] [-i oldconfigile] [-o newconfigfile] [-h]
+Without options, the old configuration is shown.
+
+   -c change the configuration
+   -d use defaults from the old config (implies -c, non-interactive)
+   -i use a specific file as the old config file
+   -o use a specific file as the new config file
+   -h show this help
+
+The default name of the old configuration file is by default
+"libnet.cfg", unless otherwise specified using the -i option, and it
+is searched from your module path.
+
+The default name of new configuration file is "libnet.cfg", and by
+default it is written to the current directory, unless otherwise
+specified using the -o option.
+
+EOU
+ exit(0);
+}
+
+#---------------------------------------------------------------------------
+
+{
+   my $oldcfgfile;
+   my @inc;
+   push @inc, $ENV{PERL5LIB} if exists $ENV{PERL5LIB};
+   push @inc, $ENV{PERLLIB}  if exists $ENV{PERLLIB};
+   push @inc, @INC;
+   for (@inc) {
+    my $trycfgfile = File::Spec->catfile($_, $libnet_cfg_in);
+    if (-f $trycfgfile && -r $trycfgfile) {
+     $oldcfgfile = $trycfgfile;
+     last;
+    }
+   }
+   print "# old config $oldcfgfile\n" if defined $oldcfgfile;
+   for (sort keys %oldcfg) {
+	printf "%-20s %s\n", $_,
+               ref $oldcfg{$_} ? @{$oldcfg{$_}} : $oldcfg{$_};
+   }
+   unless ($opt_c || $opt_d) {
+    print "# $0 -h for help\n";
+    exit(0);
+   }
+}
+
+#---------------------------------------------------------------------------
 
 $oldcfg{'test_exist'} = 1 unless exists $oldcfg{'test_exist'};
 $oldcfg{'test_hosts'} = 1 unless exists $oldcfg{'test_hosts'};
@@ -595,10 +711,10 @@ print "\n";
 
 #---------------------------------------------------------------------------
 
-my $fh = IO::File->new($libnet_cfg, "w") or
-	die "Cannot create `$libnet_cfg': $!";
+my $fh = IO::File->new($libnet_cfg_out, "w") or
+	die "Cannot create `$libnet_cfg_out': $!";
 
-print "Writing $libnet_cfg\n";
+print "Writing $libnet_cfg_out\n";
 
 print $fh "{\n";
 
