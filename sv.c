@@ -6056,7 +6056,8 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	    assert(mg);
 
 	    if (!mg->mg_ptr) {
-		Newz(0, cache, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
+		mg->mg_len = PERL_MAGIC_UTF8_CACHESIZE * 2;
+		Newz(0, cache, mg->mg_len, STRLEN);
 		mg->mg_ptr = (char *) cache;
 	    }
 	    assert(cache);
