@@ -1,3 +1,20 @@
+Fri Jun  7 23:55:41 BST 2002   Nicholas Clark
+
+    Version 2.04
+
+	Bug fix from Radu Greab <radu@netsoft.ro> (plus regression test)
+	to fix a recently introduced bug detected by Dave Rolsky.
+	Bug was that for a non threaded build, the class information was
+	being lost at freeze time on the first object with a STORABLE_freeze
+	hook. Consequentially the object was not blessed at all when thawed.
+	(The presence (or lack) of STORABLE_thaw was irrelevant; this was
+	a store-time data lost bug, caused by failure to initialize internal
+	context)
+	The bug was introduced as development perl change 16442 (on
+	2002/05/07), so has been present since 2.00.
+	Patches to introduce more regression tests to reduce the chance of
+	a reoccurance of this sort of goof are always welcome.
+	
 Thu May 30 20:31:08 BST 2002   Nicholas Clark <nick@ccl4.org>
 
     Version 2.03        Header changes on 5.6.x on Unix where IV is long long

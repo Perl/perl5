@@ -1,34 +1,44 @@
 package Thread::Queue;
 
-our $VERSION = '1.00';
+use strict;
 
-our $ithreads;
-our $othreads;
+our $VERSION = '1.00';
 
 use Thread qw(cond_wait cond_broadcast);
 
 BEGIN {
     use Config;
-    $ithreads = $Config{useithreads};
-    $othreads = $Config{use5005threads};
-    if($ithreads) {
+    if ($Config{useithreads}) {
 	require 'threads/shared/queue.pm';
-	for my $m (qw(new enqueue dequeue dequeue_nb pending)) {
+	for my $meth (qw(new enqueue dequeue dequeue_nb pending)) {
 	    no strict 'refs';
-	    *{"Thread::Queue::$m"} = \&{"threads::shared::queue::${m}"};
+	    *{"Thread::Queue::$meth"} = \&{"threads::shared::queue::$meth"};
+	}
+    } elsif ($Config{use5005threads}) {
+	for my $meth (qw(new enqueue dequeue dequeue_nb pending)) {
+	    no strict 'refs';
+	    *{"Thread::Queue::$meth"} = \&{"Thread::Queue::${meth}_othread"};
 	}
     } else {
-	for my $m (qw(new enqueue dequeue dequeue_nb pending)) {
-	    no strict 'refs';
-	    *{"Thread::Queue::$m"} = \&{"Thread::Queue::${m}_othread"};
-	}
+        require Carp;
+        Carp::croak("This Perl has neither ithreads nor 5005threads");
     }
 }
 
 
 =head1 NAME
 
-Thread::Queue - thread-safe queues
+Thread::Queue - thread-safe queues (for old code only)
+
+=head1 CAVEAT
+
+For new code the use of the C<Thread::Queue> module is discouraged and
+the direct use of the C<threads>, C<threads::shared> and
+C<threads::shared::queue> modules is encouraged instead.
+
+For the whole story about the development of threads in Perl, and why you
+should B<not> be using this module unless you know what you're doing, see the
+CAVEAT of the C<Thread> module.
 
 =head1 SYNOPSIS
 
@@ -113,8 +123,7 @@ sub enqueue_othread : locked : method {
 }
 
 sub pending_othread : locked : method {
-  my $q = shift;
-  return scalar(@$q);
+  return scalar(@{(shift)});
 }
 
 1;

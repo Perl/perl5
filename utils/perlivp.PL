@@ -174,7 +174,7 @@ foreach (qw(Config.pm ExtUtils/Installed.pm)) {
         $needed_there++;
     }
     else {
-        print "# Needed module `$_' does not appear to be properly installed.\n";
+        print "# Needed module `$_' does not appear to be properly installed ($@).\n";
     }
     $@ = undef;
 }
@@ -210,7 +210,7 @@ if (defined($Config{'extensions'})) {
             $extensions_there++;
         }
         else {
-            print "# Required module `$_' does not appear to be properly installed.\n";
+            print "# Required module `$_' does not appear to be properly installed ($@).\n";
             $@ = undef;
         }
         $extensions_total++;
@@ -306,9 +306,17 @@ my @ph_files = qw(stdio.ph);
 while (($var, $val) = each %Config) {
     if ($var =~ m/i_(.+)/ && $val eq 'define') {
         $h_file = $1;
+	# Some header and symbol names don't match for hysterical raisins.
+	$h_file = 'arpa/inet'    if $h_file eq 'arpainet';
+	$h_file = 'netinet/in'   if $h_file eq 'niin';
+	$h_file = 'netinet/tcp'  if $h_file eq 'netinettcp';
+	$h_file = 'sys/resource' if $h_file eq 'sysresrc';
+	$h_file = 'sys/select'   if $h_file eq 'sysselct';
+	$h_file = 'sys/security' if $h_file eq 'syssecrt';
+        $h_file = 'rpcsvc/dbm'   if $h_file eq 'rpcsvcdbm';
         # This ought to distinguish syslog from sys/syslog.
         # (NB syslog.ph is heavily used for the DBI pre-requisites).
-        $h_file =~ s{^sys(.+)}{sys/$1} unless $h_file eq 'syslog';
+        $h_file =~ s{^sys(\w.+)}{sys/$1} unless $h_file eq 'syslog';
         push(@ph_files, "$h_file.ph");
     }
 }
@@ -321,7 +329,7 @@ foreach (@ph_files) {
         $ph_there++;
     }
     else {
-        print "# Perl header `$_' does not appear to be properly installed.\n";
+        print "# Perl header `$_' does not appear to be properly installed ($@).\n";
     }
     $@ = undef;
 }
