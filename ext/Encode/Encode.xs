@@ -477,18 +477,20 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 {
     STRLEN slen;
     U8 *s = (U8 *) SvPV(src, slen);
-    STRLEN tlen = slen;
+    STRLEN tlen  = slen;
+    STRLEN ddone = 0;
+    STRLEN sdone = 0;
     SV *dst = sv_2mortal(newSV(slen+1));
     if (slen) {
 	U8 *d = (U8 *) SvPVX(dst);
 	STRLEN dlen = SvLEN(dst)-1;
 	int code;
 	while ((code = do_encode(dir, s, &slen, d, dlen, &dlen, !check))) {
-	    SvCUR_set(dst, dlen);
+	    SvCUR_set(dst, dlen+ddone);
 	    SvPOK_on(dst);
 
 #if 0
-	    Perl_warn(aTHX_ "code=%d @ s=%d/%d d=%d",code,slen,tlen,dlen);
+	    Perl_warn(aTHX_ "code=%d @ s=%d/%d/%d d=%d/%d/%d",code,slen,sdone,tlen,dlen,ddone,SvLEN(dst)-1);
 #endif
 	
 	    if (code == ENCODE_FALLBACK || code == ENCODE_PARTIAL)
@@ -497,23 +499,25 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	    switch (code) {
 	    case ENCODE_NOSPACE:
 		{
-		    STRLEN done = tlen-slen;
 		    STRLEN need ;
-		    if (done) {
-			need = (tlen*dlen)/done+1;
+		    sdone += slen;
+		    ddone += dlen;
+		    if (sdone) {
+			need = (tlen*SvLEN(dst)+sdone-1)/sdone+UTF8_MAXLEN;
 		    }
 		    else {
-			need = dlen + UTF8_MAXLEN;
+			need = SvLEN(dst) + UTF8_MAXLEN;
 		    }
 		
 		    d = (U8 *) SvGROW(dst, need);
-		    if (dlen >= SvLEN(dst)) {
-			Perl_croak(aTHX_
-				   "Destination couldn't be grown (the need may be miscalculated).");
+		    if (ddone >= SvLEN(dst)) {
+			Perl_croak(aTHX_ "Destination couldn't be grown.");
 		    }
-		    dlen = SvLEN(dst);
-		    slen = tlen;
-		    break;
+		    dlen = SvLEN(dst)-ddone-1;
+		    d   += ddone;
+		    s   += slen;
+		    slen = tlen-sdone;
+		    continue;
 		}
 
 	    case ENCODE_NOREP:
@@ -551,13 +555,14 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		return &PL_sv_undef;
 	    }
 	}
-	SvCUR_set(dst, dlen);
+	SvCUR_set(dst, dlen+ddone);
 	SvPOK_on(dst);
 	if (check) {
-	    if (slen < SvCUR(src)) {
-		Move(s + slen, s, SvCUR(src) - slen, U8);
+	    sdone = SvCUR(src) - (slen+sdone);
+	    if (sdone) {
+		Move(s + slen, SvPVX(src), sdone , U8);
 	    }
-	    SvCUR_set(src, SvCUR(src) - slen);
+	    SvCUR_set(src, sdone);
 	    *SvEND(src) = '\0';
 	}
     }
