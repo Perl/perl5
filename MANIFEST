@@ -2333,8 +2333,6 @@ t/op/tiehandle.t		See if tie for handles works
 t/op/time.t			See if time functions work
 t/op/tr.t			See if tr works
 t/op/undef.t			See if undef works
-t/op/unifold.t			See if Unicode folding works
-t/op/unisprintf.t		See if Unicode sprintf works
 t/op/universal.t		See if UNIVERSAL class works
 t/op/unshift.t			See if unshift works
 t/op/utf8decode.t		See if UTF-8 decoding works
@@ -2395,6 +2393,8 @@ t/run/switchx.t                 Test the -x switch
 t/TEST				The regression tester
 t/test.pl			Simple testing library
 t/TestInit.pm			Preamble library for core tests
+t/uni/fold.t			See if Unicode folding works
+t/uni/sprintf.t			See if Unicode sprintf works
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
 thread.h			Threading header

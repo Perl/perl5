@@ -50,6 +50,7 @@ if (@ARGV) {
         push @tests, <run/*.t>;
         push @tests, <io/*.t>;
         push @tests, <op/*.t>;
+        push @tests, <uni/*.t>;
         push @tests, <lib/*.t>;
 	use File::Spec;
 	my $updir = File::Spec->updir;
