@@ -19,7 +19,7 @@ ok( require 'open.pm', 'requiring open' );
 
 # this should fail
 eval { import() };
-like( $@, qr/needs explicit list of disciplines/,
+like( $@, qr/needs explicit list of PerlIO layers/,
 	'import should fail without args' );
 
 # the hint bits shouldn't be set yet
@@ -32,16 +32,16 @@ local $SIG{__WARN__} = sub {
 	$warn .= shift;
 };
 
-# and it shouldn't be able to find this discipline
+# and it shouldn't be able to find this layer
 $warn = '';
 eval q{ no warnings 'layer'; use open IN => ':macguffin' ; };
 is( $warn, '',
-	'should not warn about unknown discipline with bad discipline provided' );
+	'should not warn about unknown layer with bad layer provided' );
 
 $warn = '';
 eval q{ use warnings 'layer'; use open IN => ':macguffin' ; };
-like( $warn, qr/Unknown discipline layer/,
-	'should warn about unknown discipline with bad discipline provided' );
+like( $warn, qr/Unknown PerlIO layer/,
+	'should warn about unknown layer with bad layer provided' );
 
 SKIP: {
     skip("no perlio, no :utf8", 1) unless (find PerlIO::Layer 'perlio');
@@ -64,12 +64,12 @@ is( $^H{'open_IN'}, 'raw', 'should have reset to raw layer' );
 
 # it dies if you don't set IN, OUT, or IO
 eval { import( 'sideways', ':raw' ) };
-like( $@, qr/Unknown discipline class/, 'should croak with unknown class' );
+like( $@, qr/Unknown PerlIO layer class/, 'should croak with unknown class' );
 
 # but it handles them all so well together
 import( 'IO', ':raw :crlf' );
 is( ${^OPEN}, ":raw :crlf\0:raw :crlf",
-	'should set multi types, multi disciplines' );
+	'should set multi types, multi layer' );
 is( $^H{'open_IO'}, 'crlf', 'should record last layer set in %^H' );
 
 SKIP: {
