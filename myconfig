@@ -21,7 +21,7 @@ $spitshell <<!GROK!THIS!
 
 Summary of my $package ($baserev patchlevel $PATCHLEVEL subversion $SUBVERSION) configuration:
   Platform:
-    osname=$osname, osver=$osvers, archname=$archname
+    osname=$osname, osvers=$osvers, archname=$archname
     uname='$myuname'
     hint=$hint, useposix=$useposix, d_sigaction=$d_sigaction
   Compiler:
