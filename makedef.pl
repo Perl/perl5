@@ -92,6 +92,7 @@ while (<CFG>)
   $define{$1} = 1 if /^\s*#\s*define\s+(USE_THREADS)\b/;
   $define{$1} = 1 if /^\s*#\s*define\s+(USE_PERLIO)\b/;
   $define{$1} = 1 if /^\s*#\s*define\s+(MULTIPLICITY)\b/;
+  $define{$1} = 1 if /^\s*#\s*define\s+(PERL_BINCOMPAT_5005)\b/;
  }
 close(CFG);
 
@@ -672,7 +673,8 @@ sub emit_symbol {
 
 sub output_symbol {
     my $symbol = shift;
-    $symbol = $bincompat5005{$symbol} if $symbol =~ /^($bincompat5005)$/;
+    $symbol = $bincompat5005{$symbol}
+	if $define{PERL_BINCOMPAT_5005} and $symbol =~ /^($bincompat5005)$/;
     if ($PLATFORM eq 'win32') {
 	$symbol = "_$symbol" if $CCTYPE eq 'BORLAND';
 	print "\t$symbol\n";
