@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Thu Jan 11 17:07:56 EST 1996 [metaconfig 3.0 PL60]
+# Generated on Fri Feb  9 14:09:07 EST 1996 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -122,8 +122,7 @@ static_ext=''
 useposix=''
 usesafe=''
 d_bsd=''
-d_unlnkallvers=''
-d_vms=''
+d_eunice=''
 d_xenix=''
 eunicefix=''
 Mcc=''
@@ -574,6 +573,7 @@ stdchar=''
 sysman=''
 uidtype=''
 nm_opt=''
+nm_so_opt=''
 runnm=''
 usenm=''
 incpath=''
@@ -671,7 +671,7 @@ libswanted=''
 useposix=true
 : set usesafe=false in your hint if you want to skip the Safe extension.
 usesafe=true
-: Define several unixisms.  These can be overridden in hint files.
+: Define several unixisms.  These can be used in hint files.
 exe_ext='' 
 : Extra object files, if any, needed on this platform.
 archobjs=''
@@ -1089,10 +1089,10 @@ while expr "X\$ans" : "X!" >/dev/null; do
 			case "\$1" in
 			-d)
 				fastread=yes
-				echo "(OK, I'll run with -d after this question.)"
+				echo "(OK, I'll run with -d after this question.)" >&4
 				;;
 			-*)
-				echo "*** Sorry, \$1 not supported yet."
+				echo "*** Sorry, \$1 not supported yet." >&4
 				;;
 			esac
 			$myecho
@@ -1369,6 +1369,7 @@ more
 nroff
 perl
 pg
+sendmail
 test
 uname
 "
@@ -2372,6 +2373,216 @@ else
 	d_archlib="$define"
 fi
 
+: set up the script used to warn in case of inconsistency
+cat <<'EOSC' >whoa
+dflt=y
+echo " "
+echo "*** WHOA THERE!!! ***" >&4
+echo "    The $hint value for \$$var on this machine was \"$was\"!" >&4
+rp="    Keep the $hint value?"
+. ./myread
+case "$ans" in
+y) td=$was; tu=$was;;
+esac
+EOSC
+
+: function used to set $1 to $val
+setvar='var=$1; eval "was=\$$1"; td=$define; tu=$undef;
+case "$val$was" in
+$define$undef) . ./whoa; eval "$var=\$td";;
+$undef$define) . ./whoa; eval "$var=\$tu";;
+*) eval "$var=$val";;
+esac'
+
+: make some quick guesses about what we are up against
+echo " "
+$echo $n "Hmm...  $c"
+echo exit 1 >bsd
+echo exit 1 >usg
+echo exit 1 >v7
+echo exit 1 >osf1
+echo exit 1 >eunice
+echo exit 1 >xenix
+echo exit 1 >venix
+d_bsd="$undef"
+$cat /usr/include/signal.h /usr/include/sys/signal.h >foo 2>/dev/null
+if test -f /osf_boot || $contains 'OSF/1' /usr/include/ctype.h >/dev/null 2>&1
+then
+	echo "Looks kind of like an OSF/1 system, but we'll see..."
+	echo exit 0 >osf1
+elif test `echo abc | tr a-z A-Z` = Abc ; then
+	xxx=`./loc addbib blurfl $pth`
+	if $test -f $xxx; then
+	echo "Looks kind of like a USG system with BSD features, but we'll see..."
+		echo exit 0 >bsd
+		echo exit 0 >usg
+	else
+		if $contains SIGTSTP foo >/dev/null 2>&1 ; then
+			echo "Looks kind of like an extended USG system, but we'll see..."
+		else
+			echo "Looks kind of like a USG system, but we'll see..."
+		fi
+		echo exit 0 >usg
+	fi
+elif $contains SIGTSTP foo >/dev/null 2>&1 ; then
+	echo "Looks kind of like a BSD system, but we'll see..."
+	d_bsd="$define"
+	echo exit 0 >bsd
+else
+	echo "Looks kind of like a Version 7 system, but we'll see..."
+	echo exit 0 >v7
+fi
+case "$eunicefix" in
+*unixtovms*)
+	$cat <<'EOI'
+There is, however, a strange, musty smell in the air that reminds me of
+something...hmm...yes...I've got it...there's a VMS nearby, or I'm a Blit.
+EOI
+	echo exit 0 >eunice
+	d_eunice="$define"
+: it so happens the Eunice I know will not run shell scripts in Unix format
+	;;
+*)
+	echo " "
+	echo "Congratulations.  You aren't running Eunice."
+	d_eunice="$undef"
+	;;
+esac
+if test -f /xenix; then
+	echo "Actually, this looks more like a XENIX system..."
+	echo exit 0 >xenix
+	d_xenix="$define"
+else
+	echo " "
+	echo "It's not Xenix..."
+	d_xenix="$undef"
+fi
+chmod +x xenix
+$eunicefix xenix
+if test -f /venix; then
+	echo "Actually, this looks more like a VENIX system..."
+	echo exit 0 >venix
+else
+	echo " "
+	if ./xenix; then
+		: null
+	else
+		echo "Nor is it Venix..."
+	fi
+fi
+chmod +x bsd usg v7 osf1 eunice xenix venix
+$eunicefix bsd usg v7 osf1 eunice xenix venix
+$rm -f foo
+
+: see if setuid scripts can be secure
+$cat <<EOM
+
+Some kernels have a bug that prevents setuid #! scripts from being
+secure.  Some sites have disabled setuid #! scripts because of this.
+
+First let's decide if your kernel supports secure setuid #! scripts.
+(If setuid #! scripts would be secure but have been disabled anyway,
+don't say that they are secure if asked.)
+
+EOM
+
+val="$undef"
+if $test -d /dev/fd; then
+	echo "#!$ls" >reflect
+	chmod +x,u+s reflect
+	./reflect >flect 2>&1
+	if $contains "/dev/fd" flect >/dev/null; then
+		echo "Congratulations, your kernel has secure setuid scripts!" >&4
+		val="$define"
+	else
+		$cat <<EOM
+If you are not sure if they are secure, I can check but I'll need a
+username and password different from the one you are using right now.
+If you don't have such a username or don't want me to test, simply
+enter 'none'.
+
+EOM
+		rp='Other username to test security of setuid scripts with?'
+		dflt='none'
+		. ./myread
+		case "$ans" in
+		n|none)
+			case "$d_suidsafe" in
+			'')	echo "I'll assume setuid scripts are *not* secure." >&4
+				dflt=n;;
+			"$undef")
+				echo "Well, the $hint value is *not* secure." >&4
+				dflt=n;;
+			*)	echo "Well, the $hint value *is* secure." >&4
+				dflt=y;;
+			esac
+			;;
+		*)
+			$rm -f reflect flect
+			echo "#!$ls" >reflect
+			chmod +x,u+s reflect
+			echo >flect
+			chmod a+w flect
+			echo '"su" will (probably) prompt you for '"$ans's password."
+			su $ans -c './reflect >flect'
+			if $contains "/dev/fd" flect >/dev/null; then
+				echo "Okay, it looks like setuid scripts are secure." >&4
+				dflt=y
+			else
+				echo "I don't think setuid scripts are secure." >&4
+				dflt=n
+			fi
+			;;
+		esac
+		rp='Does your kernel have *secure* setuid scripts?'
+		. ./myread
+		case "$ans" in
+		[yY]*)	val="$define";;
+		*)	val="$undef";;
+		esac
+	fi
+else
+	echo "I don't think setuid scripts are secure (no /dev/fd directory)." >&4
+	val="$undef"
+fi
+set d_suidsafe
+eval $setvar
+
+$rm -f reflect flect
+
+: now see if they want to do setuid emulation
+echo " "
+val="$undef"
+case "$d_suidsafe" in
+"$define")
+	val="$undef"
+	echo "No need to emulate SUID scripts since they are secure here." >& 4
+	;;
+*)
+	$cat <<EOM
+Some systems have disabled setuid scripts, especially systems where
+setuid scripts cannot be secure.  On systems where setuid scripts have
+been disabled, the setuid/setgid bits on scripts are currently
+useless.  It is possible for $package to detect those bits and emulate
+setuid/setgid in a secure fashion.  This emulation will only work if
+setuid scripts have been disabled in your kernel.
+
+EOM
+	case "$d_dosuid" in
+	"$define") dflt=y ;;
+	*) dflt=n ;;
+	esac
+	rp="Do you want to do setuid/setgid emulation?"
+	. ./myread
+	case "$ans" in
+	[yY]*)	val="$define";;
+	*)	val="$undef";;
+	esac
+	;;
+esac
+set d_dosuid
+eval $setvar
+
 : determine where site specific libraries go.
 set sitelib sitelib
 eval $prefixit
@@ -2458,27 +2669,6 @@ else
 	installsitearch="$sitearchexp"
 fi
 
-: set up the script used to warn in case of inconsistency
-cat <<'EOSC' >whoa
-dflt=y
-echo " "
-echo "*** WHOA THERE!!! ***" >&4
-echo "    The $hint value for \$$var on this machine was \"$was\"!" >&4
-rp="    Keep the $hint value?"
-. ./myread
-case "$ans" in
-y) td=$was; tu=$was;;
-esac
-EOSC
-
-: function used to set $1 to $val
-setvar='var=$1; eval "was=\$$1"; td=$define; tu=$undef;
-case "$val$was" in
-$define$undef) . ./whoa; eval "$var=\$td";;
-$undef$define) . ./whoa; eval "$var=\$tu";;
-*) eval "$var=$val";;
-esac'
-
 : determine where old public architecture dependent libraries might be
 case "$oldarchlib" in
 '')	case "$privlib" in
@@ -2495,7 +2685,7 @@ if $test ! -d "$dflt/auto"; then
 fi
 cat <<EOM
 
-In 5.001, Perl stored architecutre-dependent library files in a library
+In 5.001, Perl stored architecture-dependent library files in a library
 with a name such as $privlib/$archname, 
 and this directory contained files from the standard extensions and 
 files from any additional extensions you might have added.  Starting 
@@ -2829,86 +3019,6 @@ case "$man3dir" in
 	man3ext="$ans"
 	;;
 esac
-
-: make some quick guesses about what we are up against
-echo " "
-$echo $n "Hmm...  $c"
-echo exit 1 >bsd
-echo exit 1 >usg
-echo exit 1 >v7
-echo exit 1 >osf1
-echo exit 1 >eunice
-echo exit 1 >xenix
-echo exit 1 >venix
-d_bsd="$undef"
-$cat /usr/include/signal.h /usr/include/sys/signal.h >foo 2>/dev/null
-if test -f /osf_boot || $contains 'OSF/1' /usr/include/ctype.h >/dev/null 2>&1
-then
-	echo "Looks kind of like an OSF/1 system, but we'll see..."
-	echo exit 0 >osf1
-elif test `echo abc | tr a-z A-Z` = Abc ; then
-	xxx=`./loc addbib blurfl $pth`
-	if $test -f $xxx; then
-	echo "Looks kind of like a USG system with BSD features, but we'll see..."
-		echo exit 0 >bsd
-		echo exit 0 >usg
-	else
-		if $contains SIGTSTP foo >/dev/null 2>&1 ; then
-			echo "Looks kind of like an extended USG system, but we'll see..."
-		else
-			echo "Looks kind of like a USG system, but we'll see..."
-		fi
-		echo exit 0 >usg
-	fi
-elif $contains SIGTSTP foo >/dev/null 2>&1 ; then
-	echo "Looks kind of like a BSD system, but we'll see..."
-	d_bsd="$define"
-	echo exit 0 >bsd
-else
-	echo "Looks kind of like a Version 7 system, but we'll see..."
-	echo exit 0 >v7
-fi
-case "$eunicefix" in
-*unixtovms*)
-	$cat <<'EOI'
-There is, however, a strange, musty smell in the air that reminds me of
-something...hmm...yes...I've got it...there's a VMS nearby, or I'm a Blit.
-EOI
-	echo exit 0 >eunice
-	d_eunice="$define"
-: it so happens the Eunice I know will not run shell scripts in Unix format
-	;;
-*)
-	echo " "
-	echo "Congratulations.  You aren't running Eunice."
-	d_eunice="$undef"
-	;;
-esac
-if test -f /xenix; then
-	echo "Actually, this looks more like a XENIX system..."
-	echo exit 0 >xenix
-	d_xenix="$define"
-else
-	echo " "
-	echo "It's not Xenix..."
-	d_xenix="$undef"
-fi
-chmod +x xenix
-$eunicefix xenix
-if test -f /venix; then
-	echo "Actually, this looks more like a VENIX system..."
-	echo exit 0 >venix
-else
-	echo " "
-	if ./xenix; then
-		: null
-	else
-		echo "Nor is it Venix..."
-	fi
-fi
-chmod +x bsd usg v7 osf1 eunice xenix venix
-$eunicefix bsd usg v7 osf1 eunice xenix venix
-$rm -f foo
 
 : see what memory models we can support
 case "$models" in
@@ -4162,6 +4272,19 @@ case "$nm_opt" in
 	fi;;
 esac
 
+: nm options which may be necessary for shared libraries but illegal
+: for archive libraries.  Thank you, Linux.
+case "$nm_so_opt" in
+'')	case "$myuname" in
+	*linux*)
+		if nm --help | $grep 'dynamic' > /dev/null 2>&1; then
+			nm_so_opt='--dynamic'
+		fi
+		;;
+	esac
+	;;
+esac
+
 case "$runnm" in
 true)
 : get list of predefined functions in a handy place
@@ -4310,15 +4433,14 @@ echo " "
 $echo $n "This may take a while...$c" >&4
 
 : Linux may need the special Dynamic option to nm for shared libraries.
-if test -f /vmlinuz && nm -D $nm_opt $libc > /dev/null 2>&1; then
-  cat /dev/null >libc.tmp
-  for nm_libs_ext in $*; do
-    case $nm_libs_ext in *.so*) nm_opt_here=-D ;; *) nm_opt_here='' ;; esac
-    nm $nm_opt_here $nm_opt $nm_libs_ext 2>/dev/null >>libc.tmp
-  done
-else
-  nm $nm_opt $* 2>/dev/null >libc.tmp
-fi
+: In general, this is stored in the nm_so_opt variable.
+: Unfortunately, that option may be fatal on non-shared libraries.
+for nm_libs_ext in $*; do
+    case $nm_libs_ext in
+	*$so*)	nm $nm_so_opt $nm_opt $nm_libs_ext 2>/dev/null ;;
+	*)		nm $nm_opt $nm_libs_ext 2>/dev/null ;;
+	esac
+done > libc.tmp
 
 $echo $n ".$c"
 $grep fprintf libc.tmp > libc.ptf
@@ -5542,115 +5664,6 @@ $rm -f fred fred.? dyna.$dlext dyna.?
 set d_dlsymun
 eval $setvar
 
-: see if setuid scripts can be secure
-$cat <<EOM
-
-Some kernels have a bug that prevents setuid #! scripts from being
-secure.  Some sites have disabled setuid #! scripts because of this.
-
-First let's decide if your kernel supports secure setuid #! scripts.
-(If setuid #! scripts would be secure but have been disabled anyway,
-don't say that they are secure if asked.)
-
-EOM
-
-val="$undef"
-if $test -d /dev/fd; then
-	echo "#!$ls" >reflect
-	chmod +x,u+s reflect
-	./reflect >flect 2>&1
-	if $contains "/dev/fd" flect >/dev/null; then
-		echo "Congratulations, your kernel has secure setuid scripts!" >&4
-		val="$define"
-	else
-		$cat <<EOM
-If you are not sure if they are secure, I can check but I'll need a
-username and password different from the one you are using right now.
-If you don't have such a username or don't want me to test, simply
-enter 'none'.
-
-EOM
-		rp='Other username to test security of setuid scripts with?'
-		dflt='none'
-		. ./myread
-		case "$ans" in
-		n|none)
-			case "$d_suidsafe" in
-			'')	echo "I'll assume setuid scripts are *not* secure." >&4
-				dflt=n;;
-			"$undef")
-				echo "Well, the $hint value is *not* secure." >&4
-				dflt=n;;
-			*)	echo "Well, the $hint value *is* secure." >&4
-				dflt=y;;
-			esac
-			;;
-		*)
-			$rm -f reflect flect
-			echo "#!$ls" >reflect
-			chmod +x,u+s reflect
-			echo >flect
-			chmod a+w flect
-			echo '"su" will (probably) prompt you for '"$ans's password."
-			su $ans -c './reflect >flect'
-			if $contains "/dev/fd" flect >/dev/null; then
-				echo "Okay, it looks like setuid scripts are secure." >&4
-				dflt=y
-			else
-				echo "I don't think setuid scripts are secure." >&4
-				dflt=n
-			fi
-			;;
-		esac
-		rp='Does your kernel have *secure* setuid scripts?'
-		. ./myread
-		case "$ans" in
-		[yY]*)	val="$define";;
-		*)	val="$undef";;
-		esac
-	fi
-else
-	echo "I don't think setuid scripts are secure (no /dev/fd directory)." >&4
-	val="$undef"
-fi
-set d_suidsafe
-eval $setvar
-
-$rm -f reflect flect
-
-: now see if they want to do setuid emulation
-echo " "
-val="$undef"
-case "$d_suidsafe" in
-"$define")
-	val="$undef"
-	echo "No need to emulate SUID scripts since they are secure here." >& 4
-	;;
-*)
-	$cat <<EOM
-Some systems have disabled setuid scripts, especially systems where
-setuid scripts cannot be secure.  On systems where setuid scripts have
-been disabled, the setuid/setgid bits on scripts are currently
-useless.  It is possible for $package to detect those bits and emulate
-setuid/setgid in a secure fashion.  This emulation will only work if
-setuid scripts have been disabled in your kernel.
-
-EOM
-	case "$d_dosuid" in
-	"$define") dflt=y ;;
-	*) dflt=n ;;
-	esac
-	rp="Do you want to do setuid/setgid emulation?"
-	. ./myread
-	case "$ans" in
-	[yY]*)	val="$define";;
-	*)	val="$undef";;
-	esac
-	;;
-esac
-set d_dosuid
-eval $setvar
-
 : see if dup2 exists
 set dup2 d_dup2
 eval $inlibc
@@ -5816,7 +5829,8 @@ main()
 }
 EOCP
 	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1; then
-		echo "./try >try.out 2>try.ret 3>try.err || exit 4" >mtry
+		echo "$startsh" >mtry
+		echo "./try >try.out 2>try.ret 3>try.err || exit 4" >>mtry
 		chmod +x mtry
 		./mtry >/dev/null 2>&1
 		case $? in
@@ -7180,6 +7194,8 @@ rp="Doubles must be aligned on a how-many-byte boundary?"
 alignbytes="$ans"
 $rm -f try.c try
 
+: Define several unixisms. Hints files or command line options
+: can be used to override them.
 case "$ar" in
 '') ar='ar';;
 esac
@@ -7705,7 +7721,7 @@ main()
 }
 EOCP
 flags=''
-s_timezone=''
+for s_timezone in '-DS_TIMEZONE' ''; do
 sysselect=''
 for s_timeval in '-DS_TIMEVAL' ''; do
 for i_systimek in '' '-DSYSTIMEKERNEL'; do
@@ -7724,6 +7740,7 @@ for i_systime in '-DI_SYSTIME' ''; do
 		fi
 		;;
 	esac
+done
 done
 done
 done
@@ -8510,6 +8527,7 @@ va_dcl
 }
 EOP
 $cat > varargs <<EOP
+$startsh
 if $cc -c $ccflags -D\$1 varargs.c >/dev/null 2>&1; then
 	echo "true"
 else
@@ -8936,9 +8954,8 @@ d_dlopen='$d_dlopen'
 d_dlsymun='$d_dlsymun'
 d_dosuid='$d_dosuid'
 d_dup2='$d_dup2'
-d_unlnkallvers='$d_unlnkallvers'
-d_vms='$d_vms'
 d_eofnblk='$d_eofnblk'
+d_eunice='$d_eunice'
 d_fchmod='$d_fchmod'
 d_fchown='$d_fchown'
 d_fcntl='$d_fcntl'
@@ -9221,6 +9238,7 @@ myhostname='$myhostname'
 myuname='$myuname'
 n='$n'
 nm_opt='$nm_opt'
+nm_so_opt='$nm_so_opt'
 nroff='$nroff'
 o_nonblock='$o_nonblock'
 obj_ext='$obj_ext'
