@@ -305,7 +305,6 @@ EOF
 		exit 1
 		;;
 	esac
-	d_Gconvert='sprintf((b),"%.*Lg",(n),(x))'
 	;;
 esac
 EOCBU

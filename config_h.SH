@@ -1410,7 +1410,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	a macro using sprintf("%g") is used. Arguments for the Gconvert
  *	macro are: value, number of digits, whether trailing zeros should
  *	be retained, and the output buffer.
- *	Possible values are:
+ *	The usual values are:
  *		d_Gconvert='gconvert((x),(n),(t),(b))'
  *		d_Gconvert='gcvt((x),(n),(b))'
  *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
