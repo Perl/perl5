@@ -2452,10 +2452,15 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
     while (1) {
 	SSize_t len = PerlLIO_read(fd, vbuf, count);
 	if (len >= 0 || errno != EINTR) {
-	    if (len < 0)
-		PerlIOBase(f)->flags |= PERLIO_F_ERROR;
-	    else if (len == 0 && count != 0)
+	    if (len < 0) {
+		if (errno != EAGAIN) {
+		    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+		}
+	    }
+	    else if (len == 0 && count != 0) {
 		PerlIOBase(f)->flags |= PERLIO_F_EOF;
+		SETERRNO(0,0);
+	    }
 	    return len;
 	}
 	PERL_ASYNC_CHECK();
@@ -2469,8 +2474,11 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     while (1) {
 	SSize_t len = PerlLIO_write(fd, vbuf, count);
 	if (len >= 0 || errno != EINTR) {
-	    if (len < 0)
-		PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	    if (len < 0) {
+		if (errno != EAGAIN) {
+		    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+		}
+	    }
 	    return len;
 	}
 	PERL_ASYNC_CHECK();
@@ -2972,10 +2980,10 @@ PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	}
 	else
 	    got = PerlSIO_fread(vbuf, 1, count, s);
-	if (got || errno != EINTR)
+	if (got >= 0 || errno != EINTR)
 	    break;
 	PERL_ASYNC_CHECK();
-	errno = 0;	/* just in case */
+	SETERRNO(0,0);	/* just in case */
     }
     return got;
 }
@@ -3045,10 +3053,10 @@ PerlIOStdio_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     for (;;) {
 	got = PerlSIO_fwrite(vbuf, 1, count,
 			      PerlIOSelf(f, PerlIOStdio)->stdio);
-	if (got || errno != EINTR)
+	if (got >= 0 || errno != EINTR)
 	    break;
 	PERL_ASYNC_CHECK();
-	errno = 0;	/* just in case */
+	SETERRNO(0,0);	/* just in case */
     }
     return got;
 }
