@@ -31,6 +31,164 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11466] By: jhi                                   on 2001/07/24  15:40:28
+        Log: Subject: [PATCH bleadperl os2/perlrexx.c] my C compiler has no HTML parser
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Tue, 24 Jul 2001 06:45:55 +0200
+             Message-ID: <20010724.064500@ID-11583.news.dfncis.de>
+     Branch: perl
+	   ! os2/perlrexx.c
+____________________________________________________________________________
+[ 11465] By: jhi                                   on 2001/07/24  15:37:48
+        Log: Subject: [PATCH: perl@11446] add io/fs.t to vmsperl test suite
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 23 Jul 2001 16:58:30 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10107231643480.401242-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlport.pod t/io/fs.t vms/test.com
+____________________________________________________________________________
+[ 11464] By: jhi                                   on 2001/07/24  02:58:20
+        Log: Workaround on Cwd bootstrap problem.
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 11463] By: jhi                                   on 2001/07/23  23:11:41
+        Log: When in Rome, quote like the Romans do.
+     Branch: perl
+	   ! cflags.SH
+____________________________________________________________________________
+[ 11462] By: jhi                                   on 2001/07/23  23:04:02
+        Log: Subject: [PATCH 5.7.2] OS/2 multi-architecture
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 23 Jul 2001 19:29:49 -0400
+             Message-ID: <20010723192949.A14802@math.ohio-state.edu>
+     Branch: perl
+	   + os2/perlrexx.c
+	   ! MANIFEST configpm makedef.pl mg.c os2/Makefile.SHs
+	   ! os2/OS2/REXX/t/rx_vrexx.t os2/os2.c os2/os2ish.h perl.c
+	   ! t/op/write.t
+____________________________________________________________________________
+[ 11461] By: jhi                                   on 2001/07/23  22:58:15
+        Log: Subject: [PATCH 5.7.2] MakeMaker FIRST_MAKEFILE and subdir
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 23 Jul 2001 18:43:42 -0400
+             Message-ID: <20010723184342.A14494@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 11460] By: jhi                                   on 2001/07/23  22:54:52
+        Log: Subject: [PATCH 5.7.2] MakeMaker subdir
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 23 Jul 2001 18:33:16 -0400
+             Message-ID: <20010723183316.A14298@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 11459] By: jhi                                   on 2001/07/23  22:52:02
+        Log: Subject: [PATCH 5.7.2] OPTIMIZE= during perl make
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 23 Jul 2001 18:20:35 -0400
+             Message-ID: <20010723182035.A14192@math.ohio-state.edu>
+     Branch: perl
+	   ! Makefile.SH cflags.SH
+____________________________________________________________________________
+[ 11458] By: jhi                                   on 2001/07/23  22:41:19
+        Log: Subject: [PATCH] Print CONFIGURE params in ExtUtils::MakeMaker output
+             From: "David D. Kilzer" <ddkilzer@lubricants-oil.com>
+             Date: Mon, 23 Jul 2001 11:32:17 -0500
+             Message-ID: <20010723113217.A28614@elbonia.lubricants-oil.com>
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 11457] By: jhi                                   on 2001/07/23  21:22:36
+        Log: Subject: [PATCH 5.7.2] debug reloading selfloaded stuff
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 23 Jul 2001 18:13:20 -0400
+             Message-ID: <20010723181320.A14005@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 11456] By: jhi                                   on 2001/07/23  21:19:28
+        Log: Subject: [PATCH 5.7.2] debugging selfloaded stuff
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 23 Jul 2001 18:07:40 -0400
+             Message-ID: <20010723180740.A13960@math.ohio-state.edu>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11455] By: jhi                                   on 2001/07/23  21:13:12
+        Log: Subject: [PATCH perl@11446] util.c: return required in Perl_my_fork
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 23 Jul 2001 15:35:06 -0500
+             Message-Id: <5.1.0.14.0.20010723152732.02ad4470@exchi01>
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 11454] By: jhi                                   on 2001/07/23  21:09:13
+        Log: Subject: [PATCH perlfaq9.pod typo]
+             From: "Larry Shatzer, Jr." <lshatzer@islanddata.com>
+             Date: Mon, 23 Jul 2001 07:49:05 -0700
+             Message-ID: <002f01c11386$a8539580$bb01a8c0@LSHATZER>
+     Branch: perl
+	   ! pod/perlfaq9.pod
+____________________________________________________________________________
+[ 11453] By: jhi                                   on 2001/07/23  21:06:42
+        Log: Subject: win32\sncfnmcs.pl corrections
+             From: "Konovalov, Vadim Vladimirovich (Vadim)" <vkonovalov@lucent.com>
+             Date: Mon, 23 Jul 2001 12:56:54 +0200
+             Message-ID: <E3FB32585BF1D411B9E900805FF51A080C1C5D@RU0022EXCH001U>
+             
+             Rename the script a little bit more sensibly.
+     Branch: perl
+	   + win32/sync_ext.pl
+	   - win32/sncfnmcs.pl
+	   ! MANIFEST README.win32
+____________________________________________________________________________
+[ 11452] By: jhi                                   on 2001/07/23  17:22:37
+        Log: Test tweak.
+     Branch: perl
+	   ! ext/B/Deparse.t
+____________________________________________________________________________
+[ 11451] By: jhi                                   on 2001/07/23  17:10:52
+        Log: Metaconfig unit tweak for #11450.
+     Branch: metaconfig/U/perl
+	   ! Mksymlinks.U
+____________________________________________________________________________
+[ 11450] By: jhi                                   on 2001/07/23  17:09:46
+        Log: Too volatile failsafe check.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11449] By: jhi                                   on 2001/07/23  16:53:59
+        Log: Further doc tweaks.
+     Branch: perl
+	   ! lib/UnicodeCD.pm
+____________________________________________________________________________
+[ 11448] By: jhi                                   on 2001/07/23  05:26:50
+        Log: Doc tweaks.
+     Branch: perl
+	   ! lib/UnicodeCD.pm
+____________________________________________________________________________
+[ 11447] By: jhi                                   on 2001/07/23  04:57:49
+        Log: Doc tweakery from Abhijit.
+     Branch: perl
+	   ! Porting/repository.pod
+____________________________________________________________________________
+[ 11446] By: jhi                                   on 2001/07/22  15:41:02
+        Log: An accidental empty line.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11445] By: jhi                                   on 2001/07/22  15:38:30
+        Log: Missing MANIFESTations.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11444] By: jhi                                   on 2001/07/22  15:30:10
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11443] By: jhi                                   on 2001/07/22  15:02:11
         Log: Subject: Re: Typo in Porting/pumpkin/pod ?
              From: Mike Guy <mjtg@cam.ac.uk>
