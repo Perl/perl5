@@ -1,6 +1,13 @@
 #!./perl
 
-if (! -x ($groups = '/usr/ucb/groups') && ! -x ($groups = '/usr/bin/groups')) {
+$ENV{'PATH'} = "/bin:/usr/ucb:/usr/bin:$ENV{'PATH'}";
+
+$curgrp = (getgrgid($())[0];
+foreach (split(/\s+/, `groups 2>/dev/null`)) {
+    $ok++, last if $_ eq $curgrp;
+}
+
+if (! $ok) {
     print "1..0\n";
     exit 0;
 }
@@ -26,7 +33,7 @@ for (split(' ', $()) {
 
 $gr1 = join(' ', sort @gr);
 
-$gr2 = join(' ', grep(!$basegroup{$_}++, sort split(' ',`$groups`)));
+$gr2 = join(' ', grep(!$basegroup{$_}++, sort split(' ',`groups`)));
 
 if ($gr1 eq $gr2) {
     print "ok 1\n";
