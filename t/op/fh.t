@@ -12,9 +12,10 @@ print "not " if defined(fileno($a)) or defined *{$a};
 ++$test; print "ok $test\n";
 
 select select $a;
-print "not " if defined *{$a};
+print "not " unless defined *{$a};
 ++$test; print "ok $test\n";
 
+$a++;
 print "not " if close $a or defined *{$a};
 ++$test; print "ok $test\n";
 

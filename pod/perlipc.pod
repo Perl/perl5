@@ -1191,7 +1191,7 @@ you'll have to use the C<sysread> variant of the interactive client above.
 This server accepts one of five different commands, sending output
 back to the client.  Note that unlike most network servers, this one
 only handles one incoming client at a time.  Multithreaded servers are
-covered in Chapter 6 of the Camel as well as later in this manpage.
+covered in Chapter 6 of the Camel.
 
 Here's the code.  We'll
 
