@@ -27,7 +27,7 @@ $x = 15;
 $x = 10 while $x < 10;
 if ($x == 15) {print "ok 6\n";} else {print "not ok 6\n";}
 
-open(foo,'TEST') || open(foo,'t/TEST');
+open(foo,'./TEST') || open(foo,'TEST') || open(foo,'t/TEST');
 $x = 0;
 $x++ while <foo>;
 print $x > 50 && $x < 1000 ? "ok 7\n" : "not ok 7\n";
