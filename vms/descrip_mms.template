@@ -258,7 +258,7 @@ FULLLIBS2 = $(LIBS2)|$(THRLIBS1)|$(THRLIBS2)
 #### End of system configuration section. ####
 
 c0 = $(MALLOC_C) $(SOCKC) av.c deb.c doio.c doop.c dump.c globals.c gv.c hv.c
-c1 = mg.c locale.c miniperlmain.c numeric.c op.c pad.c perl.c perlapi.c perlio.c
+c1 = mg.c locale.c miniperlmain.c numeric.c op.c perl.c perlapi.c perlio.c
 c2 = perly.c pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c regcomp.c regexec.c reentr.c
 c3 = run.c scope.c sv.c taint.c toke.c universal.c utf8.c util.c vms.c xsutils.c
 c = $(c0) $(c1) $(c2) $(c3)
@@ -1418,8 +1418,6 @@ mg$(O) : mg.c $(h)
 miniperlmain$(O) : miniperlmain.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 numeric$(O) : numeric.c $(h)
-	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-pad$(O) : pad.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 op$(O) : op.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)

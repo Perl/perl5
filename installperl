@@ -269,7 +269,7 @@ SHELL
 	    chmod(0755, "$installbin/ld2");
 	};
     } else {
-	$perldll = 'perl59.' . $dlext;
+	$perldll = 'perl58.' . $dlext;
     }
 
     if ($dlsrc ne "dl_none.xs") {
