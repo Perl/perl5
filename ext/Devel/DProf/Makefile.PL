@@ -1,34 +1,21 @@
 use ExtUtils::MakeMaker;
-require 5.003;
-die qq{
 
-Your perl is too old for this version of DProf. The last version of
-DProf that works for perls older than 5.004 is DProf-19960930 and
-should be available from Dean Roehrich\'s directory on CPAN:
-
-    CPAN/authors/id/DMR/
-
-Please either upgrade your perl or get that older DProf from CPAN.
-
-} if $] < 5.004;
-
-if ($] < 5.005) {
-  $defines = '';
-} else {
-  $defines = '-DPERLDBf_NONAME=0x40 -DPERLDBf_GOTO=0x80 -DG_NODEBUG=32 -DPL_NEEDED';
-}
-
-$Verbose = 1;
 WriteMakefile(
-	'NAME'		=> 'Devel::DProf',
-	'DISTNAME'	=> 'DProf',
-	'VERSION_FROM'	=> 'DProf.pm',
-	'clean'		=> {'FILES' => 'tmon.out t/tmon.out t/err dprofpp T/tmon.out'},
-	'EXE_FILES'	=> ['dprofpp'],
-	'PL_FILES'	=> {'dprofpp.PL' => 'dprofpp'},
-	'XSPROTOARG'	=> '-noprototypes',
-	'DEFINE'	=> $defines,
-	'dist' => { COMPRESS => 'gzip', SUFFIX => 'gz' },
+	NAME		=> 'Devel::DProf',
+	DISTNAME	=> 'DProf',
+	VERSION_FROM	=> 'DProf.pm',
+	clean		=> { 'FILES' => 'tmon.out t/tmon.out t/err dprofpp T/tmon.out'},
+	EXE_FILES	=> ['dprofpp'],
+	PL_FILES	=> {'dprofpp.PL' => 'dprofpp'},
+	XSPROTOARG	=> '-noprototypes',
+	DEFINE		=> '-DPERLDBf_NONAME=0x40 -DPERLDBf_GOTO=0x80 '
+			  .'-DG_NODEBUG=32 -DPL_NEEDED',
+	dist		=> {
+			     COMPRESS => 'gzip -9f',
+			     SUFFIX => 'gz',
+			     DIST_DEFAULT => 'all tardist',
+			   },
+	MAN3PODS	=> {},
 );
 
 sub MY::test_via_harness { "" }

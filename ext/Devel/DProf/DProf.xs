@@ -1,3 +1,5 @@
+/* XXX DProf could use some cleanups for PERL_IMPLICIT_CONTEXT */
+
 #define PERL_POLLUTE
 
 #include "EXTERN.h"
@@ -219,7 +221,7 @@ prof_dump_until(long ix)
 #endif 
 	}
     }
-    fflush(fp);
+    PerlIO_flush(fp);
     realtime2 = Times(&t2);
     if (realtime2 != realtime1 || t1.tms_utime != t2.tms_utime
 	|| t1.tms_stime != t2.tms_stime) {
@@ -235,7 +237,7 @@ prof_dump_until(long ix)
 	otms_utime = t2.tms_utime;
 	otms_stime = t2.tms_stime;
 	orealtime = realtime2;
-	fflush(fp);
+	PerlIO_flush(fp);
     }
 }
 
@@ -243,8 +245,7 @@ static HV* cv_hash;
 static U32 total = 0;
 
 static void
-prof_mark( ptype )
-opcode ptype;
+prof_mark( opcode ptype )
 {
         struct tms t;
         clock_t realtime, rdelta, udelta, sdelta;
@@ -274,7 +275,7 @@ opcode ptype;
 	    } else { /* Write it to disk now so's not to eat up core */
 		if (prof_pid == (int)getpid()) {
 		    prof_dumpt(udelta, sdelta, rdelta);
-		    fflush(fp);
+		    PerlIO_flush(fp);
 		}
 	    }
 	    orealtime = realtime;
@@ -311,7 +312,7 @@ opcode ptype;
 		    /* Only record the parent's info */
 		    if (prof_pid == (int)getpid()) {
 			prof_dumps(id, pname, gname);
-			fflush(fp);
+			PerlIO_flush(fp);
 		    } else
 			perldb = 0;		/* Do not debug the kid. */
 		}
@@ -401,7 +402,7 @@ opcode ptype;
 #else
 		prof_dump(ptype, name);
 #endif 
-                fflush(fp);
+                PerlIO_flush(fp);
             } else
 		perldb = 0;		/* Do not debug the kid. */
         }
@@ -481,7 +482,7 @@ prof_recordheader()
                 u, s, r);
         PerlIO_printf(fp, "$over_tests=10000;\n");
 
-        TIMES_LOCATION = ftell(fp);
+        TIMES_LOCATION = PerlIO_tell(fp);
 
         /* Pad with whitespace. */
         /* This should be enough even for very large numbers. */
@@ -490,7 +491,7 @@ prof_recordheader()
         PerlIO_printf(fp, "\n");
         PerlIO_printf(fp, "PART2\n" );
 
-        fflush(fp);
+        PerlIO_flush(fp);
 }
 
 static void
@@ -506,7 +507,7 @@ prof_record()
         if(SAVE_STACK){
 	    prof_dump_until(profstack_ix);
         }
-        fseek(fp, TIMES_LOCATION, SEEK_SET);
+        PerlIO_seek(fp, TIMES_LOCATION, SEEK_SET);
 	/* Write into reserved 240 bytes: */
         PerlIO_printf(fp, "$rrun_utime=%ld; $rrun_stime=%ld; $rrun_rtime=%ld;",
                 prof_end.tms_utime - prof_start.tms_utime - wprof_u,
@@ -514,7 +515,7 @@ prof_record()
                 rprof_end - rprof_start - wprof_r );
         PerlIO_printf(fp, "\n$total_marks=%ld;", total);
 	
-        fclose( fp );
+        PerlIO_close( fp );
 }
 
 #define NONESUCH()
@@ -522,7 +523,7 @@ prof_record()
 static U32 depth = 0;
 
 static void
-check_depth(void *foo)
+check_depth(pTHX_ void *foo)
 {
     U32 need_depth = (U32)foo;
     if (need_depth != depth) {
@@ -677,7 +678,7 @@ BOOT:
 	    }
 	}
 
-        if( (fp = fopen( "tmon.out", "w" )) == NULL )
+        if( (fp = PerlIO_open( "tmon.out", "w" )) == NULL )
                 croak("DProf: unable to write tmon.out, errno = %d\n", errno );
 #ifdef PERLDBf_NONAME
 	default_perldb = PERLDBf_NONAME | PERLDBf_SUB; /* no name needed. */
