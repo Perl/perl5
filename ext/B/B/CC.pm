@@ -1020,7 +1020,14 @@ sub pp_mapstart {
 	$need_freetmps = 0;
     }
     write_back_stack();
-    doop($op);
+    # pp_mapstart can return either op_next->op_next or op_next->op_other and
+    # we need to be able to distinguish the two at runtime. 
+    my $sym= doop($op);
+    my $next=$op->next;
+    $next->save;
+    my $nexttonext=$next->next;
+    $nexttonext->save;
+    runtime(sprintf("if (PL_op == (($sym)->op_next)->op_next) goto %s;", label($nexttonext)));
     return $op->next->other;
 }
 
