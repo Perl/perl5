@@ -14,9 +14,13 @@ messages a day, depending on the heatedness of the debate.  Most days
 there are two or three patches, extensions, features, or bugs being
 discussed at a time.
 
-A searchable archive of the list is at:
+A searchable archive of the list is at either:
 
     http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
+
+or
+
+    http://archive.develooper.com/perl5-porters@perl.org/
 
 List subscribers (the porters themselves) come in several flavours.
 Some are quiet curious lurkers, who rarely pitch in and instead watch
