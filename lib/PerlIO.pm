@@ -33,8 +33,10 @@ PerlIO - On demand loader for PerlIO layers and root of PerlIO::* name space
 
 =head1 SYNOPSIS
 
-  open($fh,">:crlf","my.txt")
-  open($fh,">:raw","his.jpg")
+  open($fh,"<:crlf", "my.txt"); # portably open a text file for reading
+
+  open($fh,"<","his.jpg");      # portably open a binary file for reading
+  binmode($fh);
 
   Shell:
     PERLIO=perlio perl ....
@@ -77,6 +79,8 @@ its operations.
 
 A layer which does CRLF to "\n" translation distinguishing "text" and
 "binary" files in the manner of MS-DOS and similar operating systems.
+(It currently does I<not> mimic MS-DOS as far as treating of Control-Z
+as being an end-of-file marker.)
 
 =item utf8
 
@@ -108,24 +112,43 @@ to a such a stream.
 
 =item raw
 
-A pseudo-layer which performs two functions (which is messy, but
-necessary to maintain compatibility with non-PerlIO builds of Perl
-and their way things have been documented elsewhere).
+The C<:raw> layer is I<defined> as being identical to calling
+C<binmode($fh)> - the stream is made suitable for passing binary
+data i.e. each byte is passed as-is. The stream will still be
+buffered. Unlike earlier versions of perl C<:raw> is I<not> just the
+inverse of C<:crlf> - other layers which would affect the binary nature of
+the stream are also removed or disabled.
 
-Firstly it forces the file handle to be considered binary at that
-point in the layer stack, i.e. it turns off any CRLF translation.
+The implementation of C<:raw> is as a pseudo-layer which when "pushed"
+pops itself and then any layers which do not declare themselves as suitable
+for binary data. (Undoing :utf8 and :crlf are implemented by clearing
+flags rather than poping layers but that is an implementation detail.)
 
-Secondly in prevents the IO system seaching back before it in the
-layer specification.  Thus:
+As a consequence of the fact that C<:raw> normally pops layers
+it usually only makes sense to have it as the only or first element in a
+layer specification.  When used as the first element it provides
+a known base on which to build e.g.
 
-    open($fh,":raw:perlio",...)
+    open($fh,":raw:utf8",...)
 
-Forces the use of C<perlio> layer even if the platform default, or
-C<use open> default is something else (such as ":encoding(iso-8859-7)")
-(the C<:encoding> requires C<use Encode>) which would interfere with
-binary nature of the stream.
+will construct a "binary" stream, but then enable UTF-8 translation.
 
 =back
+
+=head2 Alternatives to raw
+
+To get a binary stream an alternate method is to use:
+
+    open($fh,"whatever")
+    binmode($fh);
+
+this has advantage of being backward compatible with how such things have
+had to be coded on some platforms for years.
+
+To get an un-buffered stream specify an unbuffered layer (e.g. C<:unix>)
+in the open call:
+
+    open($fh,"<:unix",$path)
 
 =head2 Defaults and how to override them
 

@@ -37,7 +37,7 @@ included to enable recognition of UTF-8 in the Perl scripts themselves
 (in string or regular expression literals, or in identifier names) on
 ASCII-based machines or to recognize UTF-EBCDIC on EBCDIC-based
 machines.  B<These are the only times when an explicit C<use utf8>
-is needed.>
+is needed.>  See L<utf8>.
 
 You can also use the C<encoding> pragma to change the default encoding
 of the data in your script; see L<encoding>.

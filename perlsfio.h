@@ -60,11 +60,11 @@ extern int	_stdprintf _ARG_((const char*, ...));
 #define PerlIO_tmpfile()		sftmp(0)
 
 #if 0
-#define PerlIO_importFILE(f,fl)		((void) Perl_croak(aTHX_ "Import from FILE * unimplemeted"), NULL)
+#define PerlIO_importFILE(f,fl)		((void) Perl_croak(aTHX_ "Import from FILE * unimplemented"), NULL)
 #define PerlIO_findFILE(f)		NULL
 #endif
-#define PerlIO_exportFILE(f,fl)		Perl_croak(aTHX_ "Export to FILE * unimplemeted")
-#define PerlIO_releaseFILE(p,f)		Perl_croak(aTHX_ "Release of FILE * unimplemeted")
+#define PerlIO_exportFILE(f,fl)		Perl_croak(aTHX_ "Export to FILE * unimplemented")
+#define PerlIO_releaseFILE(p,f)		Perl_croak(aTHX_ "Release of FILE * unimplemented")
 
 #define PerlIO_setlinebuf(f)		sfset(f,SF_LINE,1)
 

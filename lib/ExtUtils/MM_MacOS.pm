@@ -50,7 +50,7 @@ sub new {
     }
 
     mkdir("Obj", 0777) unless -d "Obj";
-    
+
     $self = {} unless (defined $self);
 
     my(%initial_att) = %$self; # record initial attributes

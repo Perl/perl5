@@ -146,7 +146,7 @@ open - perl pragma to set default disciplines for input and output
 
 =head1 SYNOPSIS
 
-    use open IN  => ":crlf", OUT => ":raw";
+    use open IN  => ":crlf", OUT => ":bytes";
     use open OUT => ':utf8';
     use open IO  => ":encoding(iso-8859-7)";
 
@@ -263,9 +263,9 @@ Directory handles may also support disciplines in future.
 =head1 NONPERLIO FUNCTIONALITY
 
 If Perl is not built to use PerlIO as its IO system then only the two
-pseudo-disciplines ":raw" and ":crlf" are available.
+pseudo-disciplines C<:bytes> and C<:crlf> are available.
 
-The ":raw" discipline corresponds to "binary mode" and the ":crlf"
+The C<:bytes> discipline corresponds to "binary mode" and the C<:crlf>
 discipline corresponds to "text mode" on platforms that distinguish
 between the two modes when opening files (which is many DOS-like
 platforms, including Windows).  These two disciplines are no-ops on

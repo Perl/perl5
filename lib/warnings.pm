@@ -294,17 +294,30 @@ sub Croaker
     croak @_ ;
 }
 
-sub bits {
-    my $mask ;
+sub bits
+{
+    # called from B::Deparse.pm
+
+    push @_, 'all' unless @_;
+
+    my $mask;
     my $catmask ;
     my $fatal = 0 ;
-    foreach my $word (@_) {
-	if  ($word eq 'FATAL') {
+    my $no_fatal = 0 ;
+
+    foreach my $word ( @_ ) {
+	if ($word eq 'FATAL') {
 	    $fatal = 1;
+	    $no_fatal = 0;
+	}
+	elsif ($word eq 'NONFATAL') {
+	    $fatal = 0;
+	    $no_fatal = 1;
 	}
 	elsif ($catmask = $Bits{$word}) {
 	    $mask |= $catmask ;
 	    $mask |= $DeadBits{$word} if $fatal ;
+	    $mask &= ~($DeadBits{$word}|$All) if $no_fatal ;
 	}
 	else
           { Croaker("Unknown warnings category '$word'")}
@@ -313,24 +326,70 @@ sub bits {
     return $mask ;
 }
 
-sub import {
+sub import 
+{
     shift;
+
+    my $catmask ;
+    my $fatal = 0 ;
+    my $no_fatal = 0 ;
+
     my $mask = ${^WARNING_BITS} ;
+
     if (vec($mask, $Offsets{'all'}, 1)) {
         $mask |= $Bits{'all'} ;
         $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
-    ${^WARNING_BITS} = $mask | bits(@_ ? @_ : 'all') ;
+    
+    push @_, 'all' unless @_;
+
+    foreach my $word ( @_ ) {
+	if ($word eq 'FATAL') {
+	    $fatal = 1;
+	    $no_fatal = 0;
+	}
+	elsif ($word eq 'NONFATAL') {
+	    $fatal = 0;
+	    $no_fatal = 1;
+	}
+	elsif ($catmask = $Bits{$word}) {
+	    $mask |= $catmask ;
+	    $mask |= $DeadBits{$word} if $fatal ;
+	    $mask &= ~($DeadBits{$word}|$All) if $no_fatal ;
+	}
+	else
+          { Croaker("Unknown warnings category '$word'")}
+    }
+
+    ${^WARNING_BITS} = $mask ;
 }
 
-sub unimport {
+sub unimport 
+{
     shift;
+
+    my $catmask ;
     my $mask = ${^WARNING_BITS} ;
+
     if (vec($mask, $Offsets{'all'}, 1)) {
         $mask |= $Bits{'all'} ;
         $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
-    ${^WARNING_BITS} = $mask & ~ (bits('FATAL' => (@_ ? @_ : 'all')) | $All) ;
+
+    push @_, 'all' unless @_;
+
+    foreach my $word ( @_ ) {
+	if ($word eq 'FATAL') {
+	    next; 
+	}
+	elsif ($catmask = $Bits{$word}) {
+	    $mask &= ~($catmask | $DeadBits{$word} | $All);
+	}
+	else
+          { Croaker("Unknown warnings category '$word'")}
+    }
+
+    ${^WARNING_BITS} = $mask ;
 }
 
 sub __chk

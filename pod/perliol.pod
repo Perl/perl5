@@ -87,10 +87,11 @@ same as the public C<PerlIO_xxxxx> functions:
 
   struct _PerlIO_funcs
   {
+   Size_t		fsize;
    char *		name;
    Size_t		size;
    IV		kind;
-   IV		(*Pushed)(pTHX_ PerlIO *f,const char *mode,SV *arg);
+   IV		(*Pushed)(pTHX_ PerlIO *f,const char *mode,SV *arg, PerlIO_funcs *tab);
    IV		(*Popped)(pTHX_ PerlIO *f);
    PerlIO *	(*Open)(pTHX_ PerlIO_funcs *tab,
   			AV *layers, IV n,
@@ -98,6 +99,7 @@ same as the public C<PerlIO_xxxxx> functions:
   			int fd, int imode, int perm,
   			PerlIO *old,
   			int narg, SV **args);
+   IV		(*Binmode)(pTHX_ PerlIO *f);
    SV *		(*Getarg)(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
    IV		(*Fileno)(pTHX_ PerlIO *f);
    PerlIO *     (*Dup)(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
@@ -123,9 +125,9 @@ same as the public C<PerlIO_xxxxx> functions:
    void		(*Set_ptrcnt)(pTHX_ PerlIO *f,STDCHAR *ptr,SSize_t cnt);
   };
 
-The first few members of the struct give a "name" for the layer, the
-size to C<malloc> for the per-instance data, and some flags which are
-attributes of the class as whole (such as whether it is a buffering
+The first few members of the struct give a function table size for
+compatibility check "name" for the layer, the  size to C<malloc> for the per-instance data,
+and some flags which are attributes of the class as whole (such as whether it is a buffering
 layer), then follow the functions which fall into four basic groups:
 
 =over 4
@@ -322,6 +324,14 @@ to change during one "get".)
 
 =over 4
 
+=item size
+
+	Size_t fsize;
+
+Size of the function table. This is compared against the value PerlIO
+code "knows" as a compatibility check. Future versions I<may> be able
+to tolerate layers compiled against an old version of the headers.
+
 =item name
 
 	char * name;
@@ -342,27 +352,42 @@ The size of the per-instance data structure, e.g.:
 
   sizeof(PerlIOAPR)
 
+If this field is zero then C<PerlIO_pushed> does not malloc anything
+and assumes layer's Pushed function will do any required layer stack
+manipulation - used to avoid malloc/free overhead for dummy layers.
+If the field is non-zero it must be at least the size of C<PerlIOl>,
+C<PerlIO_pushed> will allocate memory for the layer's data structures
+and link new layer onto the stream's stack. (If the layer's Pushed
+method returns an error indication the layer is popped again.)
+
 =item kind
 
 	IV kind;
-
- XXX: explain all the available flags here
 
 =over 4
 
 =item * PERLIO_K_BUFFERED
 
+The layer is buffered.
+
+=item * PERLIO_K_RAW
+
+The layer is acceptable to have in a binmode(FH) stack - i.e. it does not
+(or will configure itself not to) transform bytes passing through it.
+
 =item * PERLIO_K_CANCRLF
 
+Layer can translate between "\n" and CRLF line ends.
+
 =item * PERLIO_K_FASTGETS
+
+Layer allows buffer snooping.
 
 =item * PERLIO_K_MULTIARG
 
 Used when the layer's open() accepts more arguments than usual. The
 extra arguments should come not before the C<MODE> argument. When this
 flag is used it's up to the layer to validate the args.
-
-=item * PERLIO_K_RAW
 
 =back
 
@@ -429,10 +454,10 @@ special C<PerlIO_fdopen> calls; the C<'#'> prefix means that this is
 C<sysopen> and that I<imode> and I<perm> should be passed to
 C<PerlLIO_open3>; C<'r'> means B<r>ead, C<'w'> means B<w>rite and
 C<'a'> means B<a>ppend. The C<'+'> suffix means that both reading and
-writing/appending are permitted. The C<'b'> suffix means file should
-be binary, and C<'t'> means it is text. (Binary/Text should be ignored
-by almost all layers and binary IO done, with PerlIO. The C<:crlf>
-layer should be pushed to handle the distinction.)
+writing/appending are permitted.  The C<'b'> suffix means file should
+be binary, and C<'t'> means it is text. (Almost all layers should do
+the IO in binary mode, and ignore the b/t bits. The C<:crlf> layer
+should be pushed to handle the distinction.)
 
 If I<old> is not C<NULL> then this is a C<PerlIO_reopen>. Perl itself
 does not use this (yet?) and semantics are a little vague.
@@ -455,6 +480,16 @@ then push itself on top if that succeeds.
 
 Returns C<NULL> on failure.
 
+=item Binmode
+
+	IV        (*Binmode)(pTHX_ PerlIO *f);
+
+Optional. Used when C<:raw> layer is pushed (explicitly or as a result
+of binmode(FH)). If not present layer will be popped. If present
+should configure layer as binary (or pop itself) and return 0.
+If it returns -1 for error C<binmode> will fail with layer
+still on the stack.
+
 =item Getarg
 
 	SV *      (*Getarg)(pTHX_ PerlIO *f,
@@ -474,18 +509,19 @@ Returns the Unix/Posix numeric file descriptor for the handle. Normally
 C<PerlIOBase_fileno()> (which just asks next layer down) will suffice
 for this.
 
-Returns -1 if the layer cannot provide such a file descriptor, or in
-the case of the error.
-
-XXX: two possible results end up in -1, one is an error the other is
-not.
+Returns -1 on error, which is considered to include the case where the
+layer cannot provide such a file descriptor.
 
 =item Dup
 
 	PerlIO * (*Dup)(pTHX_ PerlIO *f, PerlIO *o,
 			CLONE_PARAMS *param, int flags);
 
-XXX: not documented
+XXX: Needs more docs.
+
+Used as part of the "clone" process when a thread is spawned (in which
+case param will be non-NULL) and when a stream is being duplicated via
+'&' in the C<open>.
 
 Similar to C<Open>, returns PerlIO* on success, C<NULL> on failure.
 
@@ -700,8 +736,11 @@ and so resumes reading from layer below.)
 =item "raw"
 
 A dummy layer which never exists on the layer stack. Instead when
-"pushed" it actually pops the stack(!), removing itself, and any other
-layers until it reaches a layer with the class C<PERLIO_K_RAW> bit set.
+"pushed" it actually pops the stack removing itself, it then calls
+Binmode function table entry on all the layers in the stack - normally
+this (via PerlIOBase_binmode) removes any layers which do not have
+C<PERLIO_K_RAW> bit set. Layers can modify that behaviour by defining
+their own Binmode entry.
 
 =item "utf8"
 

@@ -46,6 +46,12 @@ Optional - layer is about to be removed.
 
 Not yet in use.
 
+=item $obj->BINMODE([,$fh])
+
+Optional - if not available layer is popped on binmode($fh) or when C<:raw>
+is pushed. If present it should return 0 on success -1 on error and undef
+to pop the layer.
+
 =item $class->FDOPEN($fd)
 
 Not yet in use.

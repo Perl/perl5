@@ -1,12 +1,12 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Straps.pm,v 1.8 2002/05/29 23:02:48 schwern Exp $
+# $Id: Straps.pm,v 1.13 2002/06/19 21:01:04 schwern Exp $
 
 package Test::Harness::Straps;
 
 use strict;
 use vars qw($VERSION);
 use Config;
-$VERSION = '0.12';
+$VERSION = '0.14';
 
 use Test::Harness::Assert;
 use Test::Harness::Iterator;
@@ -187,7 +187,7 @@ sub _analyze_line {
         #   print "ok $num\n";
         if( $self->{saw_lone_not} && 
             ($self->{lone_not_line} == $self->{line} - 1) ) 
-        {   
+        {
             $result{ok} = 0;
         }
 
@@ -207,7 +207,7 @@ sub _analyze_line {
         $totals->{ok}++ if $pass;
 
         if( $result{number} > 100000 ) {
-            warn "Enourmous test number seen [test $result{number}]\n";
+            warn "Enormous test number seen [test $result{number}]\n";
             warn "Can't detailize, too big.\n";
         }
         else {
@@ -326,12 +326,14 @@ sub _switches {
     $s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
       if exists $ENV{'HARNESS_PERL_SWITCHES'};
 
-    # When taint mode is on, PERL5LIB is ignored.  So we need to put
-    # all that on the command line as -Is.
     if ($first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/) {
-      $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} $self->_filtered_INC;
-    } elsif ($^O eq 'MacOS') {
-      $s .= join " ", map {qq["-I$_"]} $self->_filtered_INC;
+        # When taint mode is on, PERL5LIB is ignored.  So we need to put
+        # all that on the command line as -Is.
+        $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} $self->_filtered_INC;
+    }
+    elsif ($^O eq 'MacOS') {
+        # MacPerl's putenv is broken, so it will not see PERL5LIB.
+        $s .= join " ", map {qq["-I$_"]} $self->_filtered_INC;
     }
 
     close(TEST) or print "can't close $file. $!\n";
@@ -355,7 +357,7 @@ sub _INC2PERL5LIB {
     $self->{_old5lib} = $ENV{PERL5LIB};
 
     return join $Config{path_sep}, $self->_filtered_INC;
-}    
+}
 
 =item B<_filtered_INC>
 
@@ -399,7 +401,7 @@ sub _restore_PERL5LIB {
         $ENV{PERL5LIB} = $self->{_old5lib};
     }
 }
-    
+
 
 =end _private
 

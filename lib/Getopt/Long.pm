@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.57 2002-05-03 17:03:38+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.58 2002-06-20 09:32:09+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri May  3 17:01:26 2002
-# Update Count    : 1080
+# Last Modified On: Thu Jun 20 07:48:05 2002
+# Update Count    : 1083
 # Status          : Released
 
 ################ Copyright ################
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.31;
+$VERSION        =  2.32;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.31";
+$VERSION_STRING = "2.32";
 
 use Exporter;
 
@@ -132,15 +132,9 @@ ConfigDefaults();
 
 package Getopt::Long::Parser;
 
-# NOTE: The object oriented routines use $error for thread locking.
-my $_lock = sub {
-    lock ($Getopt::Long::error) if $] >= 5.005
-};
-
 # Store a copy of the default configuration. Since ConfigDefaults has
 # just been called, what we get from Configure is the default.
 my $default_config = do {
-    &$_lock;
     Getopt::Long::Configure ()
 };
 
@@ -156,7 +150,6 @@ sub new {
 
     # Process config attributes.
     if ( defined $atts{config} ) {
-	&$_lock;
 	my $save = Getopt::Long::Configure ($default_config, @{$atts{config}});
 	$self->{settings} = Getopt::Long::Configure ($save);
 	delete ($atts{config});
@@ -177,8 +170,6 @@ sub new {
 sub configure {
     my ($self) = shift;
 
-    &$_lock;
-
     # Restore settings, merge new settings in.
     my $save = Getopt::Long::Configure ($self->{settings}, @_);
 
@@ -188,8 +179,6 @@ sub configure {
 
 sub getoptions {
     my ($self) = shift;
-
-    &$_lock;
 
     # Restore config settings.
     my $save = Getopt::Long::Configure ($self->{settings});
@@ -260,7 +249,7 @@ sub GetOptions {
     $error = '';
 
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION (",
-		  '$Revision: 2.57 $', ") ",
+		  '$Revision: 2.58 $', ") ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
 		  "ARGV: (@ARGV)",
@@ -909,7 +898,8 @@ sub FindOption ($$$$) {
     # Get key if this is a "name=value" pair for a hash option.
     my $key;
     if ($ctl->[CTL_DEST] == CTL_DEST_HASH && defined $arg) {
-	($key, $arg) = ($arg =~ /^([^=]*)=(.*)$/s) ? ($1, $2) : ($arg, 1);
+	($key, $arg) = ($arg =~ /^([^=]*)=(.*)$/s) ? ($1, $2)
+	  : ($arg, defined($ctl->[CTL_DEFAULT]) ? $ctl->[CTL_DEFAULT] : 1);
     }
 
     #### Check if the argument is valid for this option ####
@@ -1523,9 +1513,11 @@ Configuration options can be passed to the constructor:
     $p = new Getopt::Long::Parser
              config => [...configuration options...];
 
-For thread safety, each method call will acquire an exclusive lock to
-the Getopt::Long module. So don't call these methods from a callback
-routine!
+=head2 Thread Safety
+
+Getopt::Long is thread safe when using ithreads as of Perl 5.8.  It is
+I<not> thread safe when using the older (experimental and now
+obsolete) threads implementation that was added to Perl 5.005.
 
 =head2 Documentation and help texts
 

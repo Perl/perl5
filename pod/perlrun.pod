@@ -909,19 +909,21 @@ C<:perlio> will insert a C<:unix> layer below itself to do low level IO.
 
 =item :raw
 
-Arranges for all accesses go straight to the lowest level layer provided
+Applying the <:raw> layer is equivalent to calling C<binmode($fh)>.
+It makes the stream pass each byte as-is without any translation.
+In particular CRLF translation, and/or :utf8 inuited from locale
+are disabled.
+
+Arranges for all accesses go straight to the lowest buffered layer provided
 by the configration. That is it strips off any layers above that layer.
-(The intent - unless layers are then pushed on top again -
-is to make perl's C<read> behave like C<sysread>.)
 
-Not really useful in PERLIO environment variable, instead just use C<:unix>
-layer explicitly.
-
-In perl5.6 and some books the C<:raw> layer (also called a discipline) is
-documented as the inverse of the C<:crlf> layer. That is not really the case.
-If you want UNIX line endings on a platform that normaly does CRLF translation
-the appropriate thing to do is to add C<:perlio> to PERLIO environment
-variable.
+In Perl 5.6 and some books the C<:raw> layer (also called a discipline)
+is documented as the inverse of the C<:crlf> layer. That is no longer
+the case - other layers which would alter binary nature of the
+stream are also disabled.  If you want UNIX line endings on a platform
+that normally does CRLF translation, but still want UTF-8 or encoding
+defaults the appropriate thing to do is to add C<:perlio> to PERLIO
+environment variable.
 
 =item :stdio
 
@@ -948,7 +950,7 @@ default. (To turn off that behaviour use C<:bytes> layer.)
 
 =item :win32
 
-On Win32 platfroms this I<experimental> layer uses native "handle" IO
+On Win32 platforms this I<experimental> layer uses native "handle" IO
 rather than unix-like numeric file descriptor layer. Known to be
 buggy in this release.
 
@@ -956,7 +958,7 @@ buggy in this release.
 
 On all platforms the default set of layers should give acceptable results.
 
-For UNIX platfroms that will equivalent of "unix perlio" or "stdio".
+For UNIX platforms that will equivalent of "unix perlio" or "stdio".
 Configure is setup to prefer "stdio" implementation if system's library
 provides for fast access to the buffer, otherwise it uses the "unix perlio"
 implementation.

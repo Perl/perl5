@@ -416,10 +416,10 @@ their C<$ENV{SHELL}> variable) will be used, which can interfere
 with proper interpretation of exit status or signal and coredump
 information.
 
-=item @ file
+=item source file
 
-Read and execute debugger commands from I<file>.  I<file> may itself contain
-C<@> commands.
+Read and execute debugger commands from I<file>.
+I<file> may itself contain C<source> commands.
 
 =item H -number
 

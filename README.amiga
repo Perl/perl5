@@ -6,6 +6,13 @@ specially designed to be readable as is.
 
 perlamiga - Perl under Amiga OS
 
+=head1 NOTE
+
+B<Perl 5.8.0 cannot be built in AmigaOS.  You can use either the
+maintenance release Perl 5.6.1 or the development release Perl 5.7.2
+in AmigaOS.  See L</"PERL 5.8.0 BROKEN IN AMIGAOS"> if you want to help
+fixing this problem.>
+
 =head1 SYNOPSIS
 
 One can read this document in the following formats:
@@ -243,6 +250,21 @@ F<lib/io_pipe.t>, F<lib/io_sock.t>
 Run
 
   make install
+
+=head1 PERL 5.8.0 BROKEN IN AMIGAOS
+
+As told above, Perl 5.6.1 was still good in AmigaOS, as was 5.7.2.
+After Perl 5.7.2 (change #11423, see the Changes file, and the file
+pod/perlhack.pod for how to get the individual changes) Perl dropped
+its internal support for vfork(), and that was very probably the step
+that broke AmigaOS (since the ixemul library has only vfork).  
+The build finally fails when the ext/DynaLoader is being built, and
+PERL ends up as "0" in the produced Makefile, trying to run "0" does
+not quite work.  Also, executing miniperl in backticks seems to
+generate nothing: very probably related to the (v)fork problems.
+B<Fixing the breakage requires someone quite familiar with the ixemul
+library, and how one is supposed to run external commands in AmigaOS
+without fork().>
 
 =head1 AUTHORS
 

@@ -28,11 +28,11 @@ Better Unicode support
 
 =item *
 
-New Thread Implementation
+New IO Implementation
 
 =item *
 
-Many New Modules
+New Thread Implementation
 
 =item *
 
@@ -41,6 +41,10 @@ Better Numeric Accuracy
 =item *
 
 Safe Signals
+
+=item *
+
+Many New Modules
 
 =item *
 
@@ -233,6 +237,18 @@ source code level, this shouldn't be that drastic a change.
 
 =item *
 
+Previous versions of perl and some readings of some sections of Camel III
+implied that C<:raw> "discipline" was the inverse of  C<:crlf>.
+Turning off "clrfness" is no longer enough to make a stream truly
+binary. So the PerlIO C<:raw> discipline is now formally defined as being
+equivalent to binmode(FH) - which is in turn defined as doing whatever
+is necessary to pass each byte as-is without any translation.
+In particular binmode(FH) - and hence C<:raw> - will now turn off both CRLF
+and UTF-8  translation and remove other "layers" (e.g. :encoding()) which
+would modify byte stream.
+
+=item *
+
 The current user-visible implementation of pseudo-hashes (the weird
 use of the first array element) is deprecated starting from Perl 5.8.0
 and will be removed in Perl 5.10.0, and the feature will be
@@ -240,7 +256,9 @@ implemented differently.  Not only is the current interface rather
 ugly, but the current implementation slows down normal array and hash
 use quite noticeably. The C<fields> pragma interface will remain
 available.  The I<restricted hashes> interface is expected to
-be the replacement interface (see L<Hash::Util>).
+be the replacement interface (see L<Hash::Util>).  If your existing
+programs depends on the underlying implementation, consider using
+L<Class::PseudoHash> from CPAN.
 
 =item *
 
@@ -320,6 +338,17 @@ Layers to be applied by default may be specified via the 'open' pragma.
 
 See L</"Installation and Configuration Improvements"> for the effects
 of PerlIO on your architecture name.
+
+=item *
+
+If your platform supports fork(), you can use the list form of C<open>
+for pipes.  For example:
+
+    open KID_PS, "-|", "ps", "aux" or die $!;
+
+forks the ps(1) command (without spawning a shell, as there are more
+than three arguments to open()), and reads its standard output via the
+C<KID_PS> filehandle.  See L<perlipc>.
 
 =item *
 
@@ -737,7 +766,8 @@ See L<perlmod>
 
 =item *
 
-C<Attribute::Handlers> allows a class to define attribute handlers.
+C<Attribute::Handlers>, originally by Damian Conway and now maintained
+by Arthur Bergman, allows a class to define attribute handlers.
 
     package MyPack;
     use Attribute::Handlers;
@@ -1022,7 +1052,7 @@ C<sort> is a new pragma for controlling the behaviour of sort().
 C<Storable> gives persistence to Perl data structures by allowing the
 storage and retrieval of Perl data to and from files in a fast and
 compact binary format.  Because in effect Storable does serialisation
-of Perl data structues, with it you can also clone deep, hierarchical
+of Perl data structures, with it you can also clone deep, hierarchical
 datastructures.  Storable was originally created by Raphael Manfredi,
 but it is now maintained by Abhijit Menon-Sen.  Storable has been
 enhanced to understand the two new hash features, Unicode keys and
@@ -1223,6 +1253,20 @@ hit by saying
 (Assuming, of course, that you don't need the troublesome variables
 C<$`>, C<$&>, or C<$'>.)  Also, introduced C<@LAST_MATCH_START> and
 C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
+
+=item *
+
+ExtUtils::MakeMaker has been significantly cleaned up and fixed.
+The enhanced version has also been backported to earlier releases
+of Perl and submitted to CPAN so that the earlier releases can
+enjoy the fixes.
+
+=item *
+
+The arguments of WriteMakefile() in Makefile.PL are now checked
+for sanity much more carefully than before.  This may cause new
+warnings when modules are being installed.  See L<ExtUtils::MakeMaker>
+for more details.
 
 =item *
 
@@ -1938,8 +1982,8 @@ See L<perldgux>.
 
 =item *
 
-The DYNIX/ptx platform (a.k.a. dynixptx) is supported at or near
-osvers 4.5.2.
+The DYNIX/ptx platform (also known as dynixptx) is supported at or
+near osvers 4.5.2.
 
 =item *
 
@@ -2068,13 +2112,6 @@ Perl consistently handles such strings as zero in numeric contexts.
 =item *
 
 The order of DESTROYs has been made more predictable.
-
-=item *
-
-Several debugger fixes: exit code now reflects the script exit code,
-condition C<"0"> now treated correctly, the C<d> command now checks
-line number, C<$.> no longer gets corrupted, and all debugger output
-now goes correctly to the socket if RemotePort is set. [561]
 
 =item *
 
@@ -2580,7 +2617,8 @@ functionality and better error handling. [561]
 
 File access tests now use current process privileges rather than the
 user's default privileges, which could sometimes result in a mismatch
-between reported access and actual access.
+between reported access and actual access.  This improvement is only
+available on VMS v6.0 and later.
 
 There is a new C<kill> implementation based on C<sys$sigprc> that allows
 older VMS systems (pre-7.0) to use C<kill> to send signals rather than
@@ -2776,6 +2814,13 @@ respectively.
 
 =item *
 
+Several debugger fixes: exit code now reflects the script exit code,
+condition C<"0"> now treated correctly, the C<d> command now checks
+line number, C<$.> no longer gets corrupted, and all debugger output
+now goes correctly to the socket if RemotePort is set. [561]
+
+=item *
+
 The debugger (perl5db.pl) has been modified to present a more
 consistent commands interface, via (CommandSet=580).  perl5db.t was
 also added to test the changes, and as a placeholder for further tests.
@@ -2911,6 +2956,8 @@ There are now several profiling make targets.
 =head1 Security Vulnerability Closed [561]
 
 (This change was already made in 5.7.0 but bears repeating here.)
+(5.7.0 came out before 5.6.1: the development branch 5.7 released
+sooner than the maintenance branch 5.6)
 
 A potential security vulnerability in the optional suidperl component
 of Perl was identified in August 2000.  suidperl is neither built nor
@@ -3047,12 +3094,14 @@ find out whether it is threadsafe.  See L<perlthrtut> for more information.
 This is a known bug in FreeBSD's readdir_r() (see L<perlfreebsd>
 (README.freebsd)), which hopefully will be fixed in FreeBSD 4.6.
 
-=head2 FreeBSD Failing locale Test 117 For ISO8859-15 Locales
+=head2 FreeBSD Failing locale Test 117 For ISO 8859-15 Locales
 
-The ISO8859-15 locales may fail the locale test 117 in FreeBSD.
+The ISO 8859-15 locales may fail the locale test 117 in FreeBSD.
 This is caused by the characters \xFF (y with diaeresis) and \xBE
 (Y with diaeresis) not behaving correctly when being matched
-case-insensitively.
+case-insensitively.  Apparently this problem has been fixed in
+the latest FreeBSD releases.
+( http://www.freebsd.org/cgi/query-pr.cgi?pr=34308 )
 
 =head2 IRIX fails ext/List/Util/t/shuffle.t
 
@@ -3124,6 +3173,25 @@ this is not Perl's fault-- the libc of Mac OS X is not threadsafe
 (in this particular test, the localtime() call is found to be
 threadunsafe.)
 
+=head2 OS/2 Test Failures
+
+The following tests are known to fail on OS/2 (for clarity
+only the failures are shown, not the full error messages):
+
+t/io/utf8............................FAILED at test 19
+t/op/grent...........................FAILED at test 2
+t/op/pwent...........................FAILED at test 1
+t/lib/os2_base.......................FAILED at test 13
+t/lib/os2_process....................FAILED at test 10
+t/lib/os2_process_kid................FAILED at test 10
+t/lib/rx_cmprt.......................FAILED at test 16
+ext/DB_File/t/db-btree...............FAILED at test 0
+ext/DB_File/t/db-hash................FAILED at test 0
+ext/DB_File/t/db-recno...............FAILED at test 0
+lib/ExtUtils/t/basic.................FAILED at test 14
+lib/ExtUtils/t/Constant..............FAILED at test 4
+lib/Memoize/t/errors.................FAILED at test 4
+
 =head2 op/sprintf tests 91, 129, and 130
 
 The op/sprintf tests 91, 129, and 130 are known to fail on some platforms.
@@ -3143,6 +3211,14 @@ they produce "0" and "-0".)
 In case you are still using Solaris 2.5 (aka SunOS 5.5), you may
 experience failures (the test core dumping) in lib/locale.t.
 The suggested cure is to upgrade your Solaris.
+
+=head2 Solaris x86 Fails Tests With -Duse64bitint
+
+The following tests are known to fail in Solaris x86 with Perl
+configured to use 64 bit integers:
+
+ ext/Data/Dumper/t/dumper.............FAILED at test 268
+ ext/Devel/Peek/Peek..................FAILED at test 7
 
 =head2 SUPER-UX (NEC SX)
 
@@ -3164,6 +3240,10 @@ The op/pack failure ("Cannot compress negative numbers at op/pack.t line 126")
 is serious but as of yet unsolved.  It points at some problems with the
 signedness handling of the C compiler, as do the 64bitint, arith, and pow
 failures.  Most of the rest point at problems with SysV IPC.
+
+=head2 PDL failing some tests
+
+Use PDL 2.3.4 or later.
 
 =head2 Term::ReadKey not working on Win32
 
@@ -3209,15 +3289,18 @@ In case of failure please try running them manually, for example
 
     ./perl -Ilib ext/Time/HiRes/HiRes.t
 
-=head2 UNICOS
+=head2 Unicode in package/class and subroutine names does not work
 
- ../lib/Math/Trig.t                          26    1   3.85%  25
- ../lib/warnings.t                          470    1   0.21%  429
+One can have Unicode in identifier names, but not in package/class or
+subroutine names.  While some limited functionality towards this does
+exist as of Perl 5.8.0, that is more accidental than designed; use of
+Unicode for the said purposes is unsupported.
 
-The Trig.t failure is caused by the slighly differing (from IEEE)
-floating point implementation of UNICOS.  The warnings.t failure is
-also related: the test assumes a certain floating point output format;
-this assumption fails in UNICOS.
+One reason of this unfinishedness is its (currently) inherent
+unportability: since both package names and subroutine names may
+need to be mapped to file and directory names, the Unicode capability
+of the filesystem becomes important-- and there unfortunately aren't
+portable answers.
 
 =head2 UNICOS/mk
 
@@ -3336,6 +3419,15 @@ will now need an explicit untie to destroy a self-tied glob.  This
 behaviour may be fixed at a later date.
 
 Self-tying of scalars and IO thingies works.
+
+=head2 Tied/Magical Array/Hash Elements Do Not Autovivify
+
+For normal arrays C<$foo = \$bar[1]> will assign C<undef> to
+C<$bar[1]> (assuming that it didn't exist before), but for
+tied/magical arrays and hashes such autovivification does not happen
+because there is currently no way to catch the reference creation.
+The same problem affects slicing over non-existent indices/keys of
+a tied/magical array/hash.
 
 =head2 Building Extensions Can Fail Because Of Largefiles
 

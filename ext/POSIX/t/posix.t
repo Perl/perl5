@@ -11,7 +11,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan(tests => 38);
+plan(tests => 39);
 
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
@@ -30,10 +30,18 @@ $Is_UWin    = $^O eq 'uwin';
 $Is_OS390   = $^O eq 'os390';
 
 ok( $testfd = open("TEST", O_RDONLY, 0),        'O_RDONLY with open' );
-read($testfd, $buffer, 9) if $testfd > 2;
-is( $buffer, "#!./perl\n",                      '    with read' );
+read($testfd, $buffer, 4) if $testfd > 2;
+is( $buffer, "#!./",                      '    with read' );
 
-write(1,"ok 3\nnot ok 3\n", 5);
+TODO:
+{
+    local $TODO = "read to array element not working";
+
+    read($testfd, $buffer[1], 5) if $testfd > 2;
+    is( $buffer[1], "perl\n",	               '    read to array element' );
+}
+
+write(1,"ok 4\nnot ok 4\n", 5);
 next_test();
 
 SKIP: {
@@ -44,7 +52,7 @@ SKIP: {
 
     CORE::open($reader = \*READER, "<&=".$fds[0]);
     CORE::open($writer = \*WRITER, ">&=".$fds[1]);
-    print $writer "ok 5\n";
+    print $writer "ok 6\n";
     close $writer;
     print <$reader>;
     close $reader;
@@ -71,18 +79,18 @@ SKIP: {
 	kill 'HUP', $$;
 	sleep 1;
 
-        printf "%s 10 -   masked SIGINT received %s\n",
+        printf "%s 11 -   masked SIGINT received %s\n",
           $sigint_called ? "ok" : "not ok",
           $^O eq 'darwin' ? "# TODO Darwin seems to loose blocked signals" 
                           : '';
 
-	print "ok 11 - signal masks successful\n";
+	print "ok 12 - signal masks successful\n";
 	
 	sub SigHUP {
-	    print "ok 8 - sigaction SIGHUP\n";
+	    print "ok 9 - sigaction SIGHUP\n";
 	    kill 'INT', $$;
 	    sleep 2;
-	    print "ok 9 - sig mask delayed SIGINT\n";
+	    print "ok 10 - sig mask delayed SIGINT\n";
 	}
 
         sub SigINT {
@@ -152,7 +160,7 @@ ok( &POSIX::acos(1.0) == 0.0,   'dynamic loading' );
 # didn't detect it.  If this fails, try adding
 # -DSTRUCT_TM_HASZONE to your cflags when compiling ext/POSIX/POSIX.c.
 # See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl 
-print POSIX::strftime("ok 20 # %H:%M, on %D\n", localtime());
+print POSIX::strftime("ok 21 # %H:%M, on %D\n", localtime());
 next_test();
 
 # If that worked, validate the mini_mktime() routine's normalisation of

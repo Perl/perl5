@@ -3194,7 +3194,7 @@ Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
     SV *tmpsv;
 
-    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) && 
+    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) &&
 	 (tmpsv = AMG_CALLun(ssv,string))) {
 	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv))) {
 	    SvSetSV(dsv,tmpsv);
@@ -5882,13 +5882,15 @@ screamer2:
 	    /* Accomodate broken VAXC compiler, which applies U8 cast to
 	     * both args of ?: operator, causing EOF to change into 255
 	     */
-	    if (cnt) { i = (U8)buf[cnt - 1]; } else { i = EOF; }
+	    if (cnt > 0) { i = (U8)buf[cnt - 1]; } else { i = EOF; }
 	}
 
-	if (append)
-	    sv_catpvn(sv, (char *) buf, cnt);
-	else
-	    sv_setpvn(sv, (char *) buf, cnt);
+	if (cnt > 0) {
+	    if (append)
+		sv_catpvn(sv, (char *) buf, cnt);
+	    else
+		sv_setpvn(sv, (char *) buf, cnt);
+	}
 
 	if (i != EOF &&			/* joy */
 	    (!rslen ||
@@ -9342,7 +9344,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    case CXt_EVAL:
 		ncx->blk_eval.old_in_eval = cx->blk_eval.old_in_eval;
 		ncx->blk_eval.old_op_type = cx->blk_eval.old_op_type;
-		ncx->blk_eval.old_namesv = sv_dup_inc(cx->blk_eval.old_namesv, param);;
+		ncx->blk_eval.old_namesv = sv_dup_inc(cx->blk_eval.old_namesv, param);
 		ncx->blk_eval.old_eval_root = cx->blk_eval.old_eval_root;
 		ncx->blk_eval.cur_text	= sv_dup(cx->blk_eval.cur_text, param);
 		break;

@@ -289,6 +289,17 @@ a lot of tests.  If any tests fail, there will be a note made on-screen.
 At the end of all the tests, a summary of the tests, the number passed and 
 failed, and the time taken will be displayed.
 
+The test driver invoked via MMS TEST has a DCL wrapper ([.VMS]TEST.COM) that
+downgrades privileges to NETMBX, TMPMBX for the duration of the test run,
+and then restores them to their prior state upon completion of testing. 
+This is done to ensure that the tests run in a private sandbox and can do no
+harm to your system even in the unlikely event something goes badly wrong in
+one of the test scripts while running the tests from a privileged account. 
+A side effect of this safety precaution is that the account used to run the
+test suite must be the owner of the directory tree in which Perl has been
+built; otherwise the manipulations of temporary files and directories
+attempted by some of the tests will fail.
+
 If any tests fail, it means something is wrong with Perl. If the test suite
 hangs (some tests can take upwards of two or three minutes, or more if
 you're on an especially slow machine, depending on your machine speed, so
@@ -304,9 +315,17 @@ issuing this command sequence:
 where ".typ" is the file type of the Perl images you just built (if you
 didn't do anything special, use .EXE), and "[.subdir]test.T" is the test
 that failed. For example, with a normal Perl build, if the test indicated
-that [.op]time failed, then you'd do this:
+that t/op/time failed, then you'd do this:
 
     @ [.VMS]TEST .EXE "" "-v" [.OP]TIME.T
+
+Note that test names are reported in UNIX syntax and relative to the
+top-level build directory.  When supplying them individually to the test
+driver, you can use either UNIX or VMS syntax, but you must give the path
+relative to the [.T] directory and you must also add the .T extension to the
+filename.  So, for example if the test lib/Math/Trig fails, you would run:
+
+    @ [.VMS]TEST .EXE "" -"v" [-.lib.math]trig.t
 
 When you send in a bug report for failed tests, please include the output
 from this command, which is run from the main source directory:
@@ -606,23 +625,23 @@ gethostbyname() or gethostbyaddr() using DEC or Compaq C with a
 Multinet TCP/IP stack.  The problem was noted in Multinet 4.3A
 using either Compaq C 6.5 or DEC C 6.0, and with Multinet 4.2A
 using DEC C 5.2, but could easily affect other versions of Multinet.
-A representative of Process Software Inc. has acknowledged a
-bug in the Multinet version of UCX$IPC_SHR for which there is
-an ECO forthcoming.  If you see one or more tests in lib/Net/hostent
-fail we recommend that you apply the Multinet ECO when it becomes
-available from:
+Process Software Inc. has acknowledged a bug in the Multinet version 
+of UCX$IPC_SHR and has provided an ECO for it. The ECO is called
+UCX_LIBRARY_EMULATION-010_A044 and is available from:
 
     http://www.multinet.process.com/eco.html
 
-You may determine the version of Multinet that you are running using
-the command:
+As of this writing, the ECO is only available for Multinet versions 
+4.3A and later.  You may determine the version of Multinet that you 
+are running using the command:
 
     multinet show /version
 
 from the DCL command prompt.
 
-If you cannot wait for the ECO from Process you might try using
-Perl programming constructs such as:
+If the ECO is unavailable for your version of Multinet and you are 
+unable to upgrade, you might try using Perl programming constructs 
+such as:
 
     $address = substr($gethostbyname_addr,0,4);
 

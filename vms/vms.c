@@ -3341,6 +3341,7 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
     unsigned long int retlen;
     char *retpath, *cp1, *cp2, trndir[NAM$C_MAXRSS+1];
     unsigned short int trnlnm_iter_count;
+    STRLEN trnlen;
 
     if (!dir || !*dir) {
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
@@ -3354,7 +3355,7 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
 	   && my_trnlnm(trndir,trndir,0)) {
       trnlnm_iter_count++; 
       if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
-      STRLEN trnlen = strlen(trndir);
+      trnlen = strlen(trndir);
 
       /* Trap simple rooted lnms, and return lnm:[000000] */
       if (!strcmp(trndir+trnlen-2,".]")) {
@@ -6636,12 +6637,16 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, char *fname)
 
   /* Before we call $check_access, create a user profile with the current
    * process privs since otherwise it just uses the default privs from the
-   * UAF and might give false positives or negatives.
+   * UAF and might give false positives or negatives.  This only works on
+   * VMS versions v6.0 and later since that's when sys$create_user_profile
+   * became available.
    */
 
   /* get current process privs and username */
   _ckvmssts(sys$getjpiw(0,0,0,jpilst,iosb,0,0));
   _ckvmssts(iosb[0]);
+
+#if defined(__VMS_VER) && __VMS_VER >= 60000000
 
   /* find out the space required for the profile */
   _ckvmssts(sys$create_user_profile(&usrdsc,&usrprolst,0,0,
@@ -6656,6 +6661,13 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, char *fname)
   retsts = sys$check_access(&objtyp,&namdsc,0,armlst,0,0,0,&usrprodsc);
   Safefree(usrprodsc.dsc$a_pointer);
   if (retsts == SS$_NOCALLPRIV) retsts = SS$_NOPRIV; /* not really 3rd party */
+
+#else
+
+  retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
+
+#endif
+
   if (retsts == SS$_NOPRIV      || retsts == SS$_NOSUCHOBJECT ||
       retsts == SS$_INVFILFOROP || retsts == RMS$_FNF || retsts == RMS$_SYN ||
       retsts == RMS$_DIR        || retsts == RMS$_DEV || retsts == RMS$_DNF) {

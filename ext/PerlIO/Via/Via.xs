@@ -34,6 +34,7 @@ typedef struct
  CV *CLEARERR;
  CV *mERROR;
  CV *mEOF;
+ CV *BINMODE;
 } PerlIOVia;
 
 #define MYMethod(x) #x,&s->x
@@ -122,9 +123,9 @@ PerlIOVia_method(pTHX_ PerlIO *f,char *method,CV **save,int flags,...)
 }
 
 IV
-PerlIOVia_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
+PerlIOVia_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
- IV code = PerlIOBase_pushed(aTHX_ f,mode,Nullsv);
+ IV code = PerlIOBase_pushed(aTHX_ f,mode,Nullsv,tab);
  if (code == 0)
   {
    PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
@@ -315,6 +316,19 @@ PerlIOVia_fileno(pTHX_ PerlIO *f)
  PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
  SV *result = PerlIOVia_method(aTHX_ f,MYMethod(FILENO),G_SCALAR,Nullsv);
  return (result) ? SvIV(result) : PerlIO_fileno(PerlIONext(f));
+}
+
+IV
+PerlIOVia_binmode(pTHX_ PerlIO *f)
+{
+ PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
+ SV *result = PerlIOVia_method(aTHX_ f,MYMethod(BINMODE),G_SCALAR,Nullsv);
+ if (!result || !SvOK(result))
+  {
+   PerlIO_pop(aTHX_ f);
+   return 0;
+  }
+ return SvIV(result);
 }
 
 IV
@@ -545,12 +559,14 @@ PerlIOVia_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 }
 
 PerlIO_funcs PerlIO_object = {
+ sizeof(PerlIO_funcs),
  "Via",
  sizeof(PerlIOVia),
  PERLIO_K_BUFFERED|PERLIO_K_DESTRUCT,
  PerlIOVia_pushed,
  PerlIOVia_popped,
  PerlIOVia_open, /* NULL, */
+ PerlIOVia_binmode, /* NULL, */
  PerlIOVia_getarg,
  PerlIOVia_fileno,
  PerlIOVia_dup,

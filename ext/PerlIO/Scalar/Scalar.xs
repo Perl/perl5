@@ -14,7 +14,7 @@ typedef struct
 } PerlIOScalar;
 
 IV
-PerlIOScalar_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
+PerlIOScalar_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
  IV code;
  PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
@@ -38,7 +38,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
    s->var = newSVpvn("",0);
   }
  sv_upgrade(s->var,SVt_PV);
- code = PerlIOBase_pushed(aTHX_ f,mode,Nullsv);
+ code = PerlIOBase_pushed(aTHX_ f,mode,Nullsv,tab);
  if ((PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
    SvCUR(s->var) = 0;
  if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
@@ -263,12 +263,14 @@ PerlIOScalar_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 }
 
 PerlIO_funcs PerlIO_scalar = {
+ sizeof(PerlIO_funcs),
  "Scalar",
  sizeof(PerlIOScalar),
- PERLIO_K_BUFFERED,
+ PERLIO_K_BUFFERED|PERLIO_K_RAW,
  PerlIOScalar_pushed,
  PerlIOScalar_popped,
  PerlIOScalar_open,
+ PerlIOBase_binmode,
  PerlIOScalar_arg,
  PerlIOScalar_fileno,
  PerlIOScalar_dup,

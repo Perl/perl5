@@ -1,10 +1,13 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -ws
 
 #
 # findrfuncs: find reentrant variants of functions used in an executable.
+#
 # Requires a functional "nm -u".  Searches headers in /usr/include
 # to find available *_r functions and looks for non-reentrant
 # variants used in the supplied executable.
+#
+# Requires debug info in the shared libraries/executables.
 #
 # Gurusamy Sarathy
 # gsar@ActiveState.com
@@ -106,7 +109,7 @@ my %syms;
 
 for my $exe (@EXES) {
     # warn "#--- $exe\n";
-    for my $sym (`$NMU $exe`) {
+    for my $sym (`$NMU $exe 2>/dev/null`) {
         chomp $sym;
         $sym =~ s/^\s+//;
         $sym =~ s/^([0-9A-Fa-f]+\s+)?[Uu]\s+//;
@@ -128,4 +131,3 @@ for my $exe (@EXES) {
     }
     @syms = ();
 }
-

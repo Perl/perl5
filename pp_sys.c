@@ -5212,6 +5212,9 @@ PP(pp_gpwent)
     case OP_GPWENT:
 #   ifdef HAS_GETPWENT
 	pwent  = getpwent();
+#ifdef POSIX_BC   /* In some cases pw_passwd has invalid addresses */
+	if (pwent) pwent = getpwnam(pwent->pw_name);
+#endif
 #   else
 	DIE(aTHX_ PL_no_func, "getpwent");
 #   endif

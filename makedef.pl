@@ -738,6 +738,7 @@ my @layer_syms = qw(
 			 PerlIOBase_error
 			 PerlIOBase_fileno
 			 PerlIOBase_pushed
+			 PerlIOBase_binmode
 			 PerlIOBase_popped
 			 PerlIOBase_read
 			 PerlIOBase_setlinebuf
@@ -770,6 +771,7 @@ my @layer_syms = qw(
 			 PerlIO_apply_layera
 			 PerlIO_pending
 			 PerlIO_push
+			 PerlIO_pop
 			 PerlIO_sv_dup
 			 PerlIO_perlio
 

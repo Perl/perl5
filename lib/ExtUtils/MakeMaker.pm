@@ -2,10 +2,10 @@ package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = "6.01";
+$VERSION = "6.03";
 $Version_OK = "5.49";   # Makefiles older than $Version_OK will die
                         # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.59 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.63 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
@@ -54,32 +54,112 @@ sub WriteMakefile {
 }
 
 
-# Basic signatures of the attributes WriteMakefile takes.  Each is
-# the reference type.  Any not noted simply take strings.
+# Basic signatures of the attributes WriteMakefile takes.  Each is the
+# reference type.  Empty value indicate it takes a non-reference
+# scalar.
 my %Att_Sigs =
 (
- C          => 'array',
- CONFIG     => 'array',
- CONFIGURE  => 'code',
- DIR        => 'array',
- DL_FUNCS   => 'hash',
- DL_VARS    => 'array',
- EXCLUDE_EXT=> 'array',
- EXE_FILES  => 'array',
- FUNCLIST   => 'array',
- H          => 'array',
- IMPORTS    => 'hash',
- INCLUDE_EXT=> 'array',
- LIBS       => ['array','string'],
- MAN1PODS   => 'hash',
- MAN3PODS   => 'hash',
- PL_FILES   => 'hash',
- PM         => 'hash',
- PMLIBDIRS  => 'array',
- PREREQ_PM  => 'hash',
- SKIP       => 'array',
- TYPEMAPS   => 'array',
- XS         => 'hash',
+ ABSTRACT           => '',
+ ABSTRACT_FROM      => '',
+ AUTHOR             => '',
+ BINARY_LOCATION    => '',
+ C                  => 'array',
+ CCFLAGS            => '',
+ CONFIG             => 'array',
+ CONFIGURE          => 'code',
+ DEFINE             => '',
+ DIR                => 'array',
+ DISTNAME           => '',
+ DL_FUNCS           => 'hash',
+ DL_VARS            => 'array',
+ EXCLUDE_EXT        => 'array',
+ EXE_FILES          => 'array',
+ FIRST_MAKEFILE     => '',
+ FULLPERL           => '',
+ FULLPERLRUN        => '',
+ FULLPERLRUNINST    => '',
+ FUNCLIST           => 'array',
+ H                  => 'array',
+ IMPORTS            => 'hash',
+ INC                => '',
+ INCLUDE_EXT        => 'array',
+ INSTALLARCHLIB     => '',
+ INSTALLBIN         => '',
+ INSTALLDIRS        => '',
+ INSTALLMAN1DIR     => '',
+ INSTALLMAN3DIR     => '',
+ INSTALLPRIVLIB     => '',
+ INSTALLSCRIPT      => '',
+ INSTALLSITEARCH    => '',
+ INSTALLSITEBIN     => '',
+ INSTALLSITELIB     => '',
+ INSTALLSITEMAN1DIR => '',
+ INSTALLSITEMAN3DIR => '',
+ INSTALLVENDORARCH  => '',
+ INSTALLVENDORBIN   => '',
+ INSTALLVENDORLIB   => '',
+ INSTALLVENDORMAN1DIR   => '',
+ INSTALLVENDORMAN3DIR   => '',
+ INST_ARCHLIB       => '',
+ INST_BIN           => '',
+ INST_LIB           => '',
+ INST_MAN1DIR       => '',
+ INST_MAN3DIR       => '',
+ INST_SCRIPT        => '',
+ _KEEP_AFTER_FLUSH  => '',
+ LDDLFLAGS          => '',
+ LDFROM             => '',
+ LIB                => '',
+ LIBPERL_A          => '',
+ LIBS               => ['array',''],
+ LINKTYPE           => '',
+ MAKEAPERL          => '',
+ MAKEFILE           => '',
+ MAN1PODS           => 'hash',
+ MAN3PODS           => 'hash',
+ MAP_TARGET         => '',
+ MYEXTLIB           => '',
+ NAME               => '',
+ NEEDS_LINKING      => '',
+ NOECHO             => '',
+ NORECURS           => '',
+ NO_VC              => '',
+ OBJECT             => '',
+ OPTIMIZE           => '',
+ PERL               => '',
+ PERL_CORE          => '',
+ PERLMAINCC         => '',
+ PERL_ARCHLIB       => '',
+ PERL_LIB           => '',
+ PERL_MALLOC_OK     => '',
+ PERLRUN            => '',
+ PERLRUNINST        => '',
+ PERL_SRC           => '',
+ PERM_RW            => '',
+ PERM_RWX           => '',
+ PL_FILES           => 'hash',
+ PM                 => 'hash',
+ PMLIBDIRS          => 'array',
+ PM_FILTER          => '',
+ POLLUTE            => '',
+ PPM_INSTALL_EXEC   => '',
+ PPM_INSTALL_SCRIPT => '',
+ PREFIX             => '',
+ PREREQ_FATAL       => '',
+ PREREQ_PM          => 'hash',
+ PREREQ_PRINT       => '',
+ PRINT_PREREQ       => '',
+ SITEPREFIX         => '',
+ SKIP               => 'array',
+ TYPEMAPS           => 'array',
+ VENDORPREFIX       => '',
+ VERBINST           => '',
+ VERSION            => '',
+ VERSION_FROM       => '',
+ XS                 => 'hash',
+ XSOPT              => '',
+ XSPROTOARG         => '',
+ XS_VERSION         => '',
 
  clean      => 'hash',
  depend     => 'hash',
@@ -92,29 +172,27 @@ my %Att_Sigs =
  tool_autosplit => 'hash',
 );
 
-my %Default_Att = (
-                   string => '',
-                   hash   => {},
-                   array  => [],
-                   code   => sub {}
-                  );
 
 sub _verify_att {
     my($att) = @_;
 
     while( my($key, $val) = each %$att ) {
         my $sig = $Att_Sigs{$key};
-        my @sigs   = ref $sig ? @$sig : ($sig || 'string');
-        my $given = lc ref $val || 'string';
+        unless( defined $sig ) {
+            warn "WARNING: $key is not a known parameter.\n";
+            next;
+        }
+
+        my @sigs   = ref $sig ? @$sig : $sig;
+        my $given = lc ref $val;
         unless( grep $given eq $_, @sigs ) {
-            my $takes = join " or ", map { $_ ne 'string' ? "$_ reference"
-                                                          : "string/number"
+            my $takes = join " or ", map { $_ ne '' ? "$_ reference"
+                                                    : "string/number"
                                          } @sigs;
-            my $has   = $given ne 'string' ? "$given reference"
-                                           : "string/number";
+            my $has   = $given ne '' ? "$given reference"
+                                     : "string/number";
             warn "WARNING: $key takes a $takes not a $has.\n".
                  "         Please inform the author.\n";
-            $att->{$key} = $Default_Att{$sigs[0]};
         }
     }
 }
@@ -954,14 +1032,17 @@ Other interesting targets in the generated Makefile are
 =head2 make test
 
 MakeMaker checks for the existence of a file named F<test.pl> in the
-current directory and if it exists it adds commands to the test target
-of the generated Makefile that will execute the script with the proper
-set of perl C<-I> options.
+current directory and if it exists it execute the script with the
+proper set of perl C<-I> options.
 
 MakeMaker also checks for any files matching glob("t/*.t"). It will
-add commands to the test target of the generated Makefile that execute
-all matching files in alphabetical order via the L<Test::Harness>
-module with the C<-I> switches set correctly.
+execute all matching files in alphabetical order via the
+L<Test::Harness> module with the C<-I> switches set correctly.
+
+If you'd like to see the raw output of your tests, set the
+C<TEST_VERBOSE> variable to true.
+
+  make test TEST_VERBOSE=1
 
 =head2 make testdb
 
@@ -969,13 +1050,13 @@ A useful variation of the above is the target C<testdb>. It runs the
 test under the Perl debugger (see L<perldebug>). If the file
 F<test.pl> exists in the current directory, it is used for the test.
 
-If you want to debug some other testfile, set C<TEST_FILE> variable
+If you want to debug some other testfile, set the C<TEST_FILE> variable
 thusly:
 
   make testdb TEST_FILE=t/mytest.t
 
 By default the debugger is called using C<-d> option to perl. If you
-want to specify some other option, set C<TESTDB_SW> variable:
+want to specify some other option, set the C<TESTDB_SW> variable:
 
   make testdb TESTDB_SW=-Dx
 
@@ -1203,8 +1284,8 @@ recommends it (or you know what you're doing).
 
 =head2 Using Attributes and Parameters
 
-The following attributes can be specified as arguments to WriteMakefile()
-or as NAME=VALUE pairs on the command line:
+The following attributes may be specified as arguments to WriteMakefile()
+or as NAME=VALUE pairs on the command line.
 
 =over 2
 
@@ -1494,6 +1575,14 @@ Directory, where executable files should be installed during
 'make'. Defaults to "./blib/script", just to have a dummy location during
 testing. make install will copy the files in INST_SCRIPT to
 INSTALLSCRIPT.
+
+=item LDDLFLAGS
+
+Any special flags that might need to be passed to ld to create a
+shared library suitable for dynamic loading.  It is up to the makefile
+to use it.  (See L<Config/lddlflags>)
+
+Defaults to $Config{lddlflags}.
 
 =item LDFROM
 
@@ -1795,13 +1884,6 @@ by the PREFIX.
 
 Defaults to $Config{installprefixexp}.
 
-=item PREREQ_PM
-
-Hashref: Names of modules that need to be available to run this
-extension (e.g. Fcntl for SDBM_File) are the keys of the hash and the
-desired version is the value. If the required version number is 0, we
-only check if any version is installed already.
-
 =item PREREQ_FATAL
 
 Bool. If this parameter is true, failing to have the required modules
@@ -1815,6 +1897,13 @@ Do I<not> use this parameter for simple requirements, which could be resolved
 at a later time, e.g. after an unsuccessful B<make test> of your module.
 
 It is I<extremely> rare to have to use C<PREREQ_FATAL> at all!
+
+=item PREREQ_PM
+
+Hashref: Names of modules that need to be available to run this
+extension (e.g. Fcntl for SDBM_File) are the keys of the hash and the
+desired version is the value. If the required version number is 0, we
+only check if any version is installed already.
 
 =item PREREQ_PRINT
 
@@ -1888,7 +1977,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.59 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.63 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2045,6 +2134,27 @@ Makefile:
 
     MAKE_FRAG
     }
+
+=head2 The End Of Cargo Cult Programming
+
+WriteMakefile() now does some basic sanity checks on its parameters to
+protect against typos and malformatted values.  This means some things
+which happened to work in the past will now throw warnings and
+possibly produce internal errors.
+
+Some of the most common mistakes:
+
+=over 2
+
+=item C<<MAN3PODS => ' '>>
+
+This is commonly used to supress the creation of man pages.  MAN3PODS
+takes a hash ref not a string, but the above worked by accident in old
+versions of MakeMaker.
+
+The correct code is C<<MAN3PODS => { }>>.
+
+=back
 
 
 =head2 Hintsfile support

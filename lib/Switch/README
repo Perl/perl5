@@ -1,5 +1,5 @@
 ==============================================================================
-                      Release of version 2.07 of Switch
+                      Release of version 2.09 of Switch
 ==============================================================================
 
 
@@ -26,14 +26,10 @@ COPYRIGHT
 
 ==============================================================================
 
-CHANGES IN VERSION 2.07
+CHANGES IN VERSION 2.09
 
 
-	- Corified tests
-
-	- Updated "Perl6" syntax to reflect current design
-	  (as far as possible -- can't eliminate need to parenthesize
-	  variables, since they're ambiguous in Perl 5)
+	- Removed spurious debugging statement
 
 
 ==============================================================================

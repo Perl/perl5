@@ -8,59 +8,61 @@ README.tru64 - Perl version 5 on Tru64 (formerly known as Digital UNIX formerly 
 
 =head1 DESCRIPTION
 
-This document describes various features of Compaq's (formerly Digital's)
-Unix operating system (Tru64) that will affect how Perl version 5
-is compiled and/or runs.
+This document describes various features of HP's (formerly Compaq's,
+formerly Digital's) Unix operating system (Tru64) that will affect
+how Perl version 5 is configured, compiled and/or runs.
 
 =head2 Compiling Perl 5 on Tru64
 
 The recommended compiler to use in Tru64 is the native C compiler.
-The native compiler produces much faster code (the speed difference
-is noticeable: several dozen percentages) and also more correct code:
-if you are considering using the GNU C compiler you should use the
-gcc 2.95.3 since all older gcc releases are known to produce broken
-code when compiling Perl.  One manifestation of this brokenness is
-the lib/sdbm test dumping core; another is the op/regexp dumping core
-(depending on the GCC release).
+The native compiler produces much faster code (the speed difference is
+noticeable: several dozen percentages) and also more correct code: if
+you are considering using the GNU C compiler you should use the gcc
+2.95.3 since all older gcc releases are known to produce broken code
+when compiling Perl.  One manifestation of this brokenness is the
+lib/sdbm test dumping core; another is the op/regexp and op/pat,
+or ext/Storable tests dumping core (depending on the GCC release).
 
 =head2 Using Large Files with Perl on Tru64
 
-In Tru64 Perl is automatically able to use large files, that is, files
-larger than 2 gigabytes, there is no need to use the Configure
+In Tru64 Perl is automatically able to use large files, that is,
+files larger than 2 gigabytes, there is no need to use the Configure
 -Duselargefiles option as described in INSTALL.
 
 =head2 Threaded Perl on Tru64
 
-To compile Perl to use the old Perl 5.005 threads model, run Configure
-with the -Dusethreads -Duse5005threads options as described in INSTALL.
-This will probably only work in Tru64 4.0 and newer releases, older
-operating releases like 3.2 aren't probably going to work properly
-with threads.
+If you want to use threads, you should primarily use the new Perl
+5.8.0 threads model by running Configure with -Duseithreads.
 
-Beware: the Perl 5.005 threads model is known to have bugs, for
-example the regular expressions are not thread-safe.  The bugs are
-very hard to fix are and therefore the 5.005 threads model is still
-classified as an experimental feature.
+The old Perl 5.005 threads is obsolete, unmaintained, and its use is
+discouraged.  If you really want it, run Configure with the
+-Dusethreads -Duse5005threads options as described in INSTALL.
+
+Either thread model is going to work only in Tru64 4.0 and newer
+releases, older operating releases like 3.2 aren't probably going
+to work properly with threads.
 
 =head2 Long Doubles on Tru64
 
-You cannot Configure Perl to use long doubles unless you have at least
-Tru64 V5.0, the long double support simply wasn't functional before
-that.
+You cannot Configure Perl to use long doubles unless you have at
+least Tru64 V5.0, the long double support simply wasn't functional
+enough before that.
 
-At the time of this writing, there's a bug in the Tru64 libc printing
-of long doubles when not using "e" notation.  The values are correct
-and usable, but you only get a limited number of digits displayed
-unless you force the issue by using C<printf "%.33e",$num> or the like.
-For Tru64 versions V5.0A through V5.1A, a patch is expected sometime after
-perl 5.8.0 is released.  If your libc has not yet been patched, you'll get
-a warning from Configure when selecting long doubles.
+At the time of this writing (June 2002), there is a known bug in the
+Tru64 libc printing of long doubles when not using "e" notation.
+The values are correct and usable, but you only get a limited number
+of digits displayed unless you force the issue by using C<printf
+"%.33e",$num> or the like.  For Tru64 versions V5.0A through V5.1A, a
+patch is expected sometime after perl 5.8.0 is released.  If your libc
+has not yet been patched, you'll get a warning from Configure when
+selecting long doubles.
 
 =head2 64-bit Perl on Tru64
 
 In Tru64 Perl's integers are automatically 64-bit wide, there is
 no need to use the Configure -Duse64bitint option as described
-in INSTALL.  Similarly, there is no need for -Duse64bitall.
+in INSTALL.  Similarly, there is no need for -Duse64bitall
+since pointers are automatically 64-bit wide.
 
 =head2 Warnings about floating-point overflow when compiling Perl on Tru64
 
@@ -78,7 +80,8 @@ and when compiling the POSIX extension
     -------------------^
 
 The exact line numbers may vary between Perl releases.
-The warnings are benign and can be ignored.
+The warnings are benign and can be ignored: in later C compiler
+releases the warnings should be gone.
 
 When the file F<pp_sys.c> is being compiled you may (depending on the
 operating system release) see an additional compiler flag being used:
@@ -96,7 +99,7 @@ the use of the C<-P> option of Perl.
 =head1 ext/ODBM_File/odbm Test Failing With Static Builds
 
 The ext/ODBM_File/odbm is known to fail with static builds
-(Configure -Dusedl) due to a known bug in Tru64's static libdbm
+(Configure -Uusedl) due to a known bug in Tru64's static libdbm
 library.  The good news is that you very probably don't need to ever
 use the ODBM_File extension since more advanced NDBM_File works fine,
 not to mention the even more advanced DB_File.

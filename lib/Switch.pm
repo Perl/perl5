@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.07';
+$VERSION = '2.09';
 
 
 # LOAD FILTERING MODULE...
@@ -52,7 +52,6 @@ sub filter
 	return $status if $status<0;
     	$_ = filter_blocks($_,$offset);
 	$_ = "# line $offset\n" . $_ if $offset; undef $offset;
-	# print STDERR $_;
 	return $status;
 }
 
@@ -492,8 +491,8 @@ Switch - A switch statement for Perl
 
 =head1 VERSION
 
-This document describes version 2.07 of Switch,
-released May 15, 2002.
+This document describes version 2.09 of Switch,
+released June 12, 2002.
 
 =head1 SYNOPSIS
 

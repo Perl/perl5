@@ -165,8 +165,13 @@ is( $out->read(), 'a1', 'Tgoto() should print to filehandle if passed' );
 
 $t->{_test} = "a%.";
 like( $t->Tgoto('test', '', 1), qr/^a\x01/, 'Tgoto() should handle %.' );
+if (ord('A') == 193) {  # EBCDIC platform
+like( $t->Tgoto('test', '', 0), qr/\x81\x01\x16/, 
+	'Tgoto() should handle %. and magic' );
+} else { # ASCII platform
 like( $t->Tgoto('test', '', 0), qr/\x61\x01\x08/, 
 	'Tgoto() should handle %. and magic' );
+}
 
 $t->{_test} = 'a%+';
 like( $t->Tgoto('test', '', 1), qr/a\x01/, 'Tgoto() should handle %+' );

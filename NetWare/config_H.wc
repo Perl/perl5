@@ -1558,7 +1558,8 @@
 
 /* HAS_GNULIBC:
  *	This symbol, if defined, indicates to the C program that 
- *	the GNU C library is being used.
+ *	the GNU C library is being used.  A better check is to use
+ *	the __GLIBC__ and __GLIBC_MINOR__ symbols supplied with glibc.
  */
 /*#define HAS_GNULIBC  	/**/
 #if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
@@ -2617,6 +2618,12 @@
 /*#define PERL_PRIgldbl	"g"	/**/
 /*#define PERL_PRIeldbl	"e"	/**/
 /*#define PERL_SCNfldbl	undef	/**/
+
+#$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
+#$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
+#$d_PRIeldbl PERL_PRIeldbl	$sPRIeldbl	/**/
+
+/*#$d_SCNfldbl PERL_SCNfldbl	$sSCNfldbl	/**/
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.

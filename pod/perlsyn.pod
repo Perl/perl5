@@ -33,9 +33,19 @@ as C<0>; when used as a string, it is treated the empty string,
 C<"">; and when used as a reference that isn't being assigned
 to, it is treated as an error.  If you enable warnings, you'll
 be notified of an uninitialized value whenever you treat C<undef>
-as a string or a number.  Well, usually.  Boolean ("don't-care")
-contexts and operators such as C<++>, C<-->, C<+=>, C<-=>, and
-C<.=> are always exempt from such warnings.
+as a string or a number.  Well, usually.  Boolean contexts, such as:
+
+    my $a;
+    if ($a) {}
+
+are exempt from warnings (because they care about truth rather than
+definedness).  Operators such as C<++>, C<-->, C<+=>,
+C<-=>, and C<.=>, that operate on undefined left values such as:
+
+    my $a;
+    $a++;
+
+are also always exempt from such warnings.
 
 A declaration can be put anywhere a statement can, but has no effect on
 the execution of the primary sequence of statements--declarations all
@@ -254,10 +264,13 @@ The loop control statements don't work in an C<if> or C<unless>, since
 they aren't loops.  You can double the braces to make them such, though.
 
     if (/pattern/) {{
-	next if /fred/;
-	next if /barney/;
-	# so something here
+	last if /fred/;
+	next if /barney/; # same effect as "last", but doesn't document as well
+	# do something here
     }}
+
+This is caused by the fact that a block by itself acts as a loop that
+executes once, see L<"Basic BLOCKs and Switch Statements">.
 
 The form C<while/if BLOCK BLOCK>, available in Perl 4, is no longer
 available.   Replace any occurrence of C<if BLOCK> by C<if (do BLOCK)>.

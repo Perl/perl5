@@ -980,7 +980,28 @@ EOP
 			} 
 			$pretype = [$1];
 			next CMD; };
-	    $cmd =~ /^n$/ && do {
+                   $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/ && do {
+                       eval { require PadWalker; PadWalker->VERSION(0.08) }
+                         or &warn($@ =~ /locate/
+                            ? "PadWalker module not found - please install\n"
+                            : $@)
+                          and next CMD;
+                       do 'dumpvar.pl' unless defined &main::dumpvar;
+                       defined &main::dumpvar
+                          or print $OUT "dumpvar.pl not available.\n"
+                          and next CMD;
+                       my @vars = split(' ', $2 || '');
+                       my $h = eval { PadWalker::peek_my(($1 || 0) + 1) };
+                       $@ and $@ =~ s/ at .*//, &warn($@), next CMD;
+                       my $savout = select($OUT);
+                       dumpvar::dumplex($_, $h->{$_}, 
+                                       defined $option{dumpDepth}
+                                       ? $option{dumpDepth} : -1,
+                                       @vars)
+                           for sort keys %$h;
+                       select($savout);
+                       next CMD; };
+                   $cmd =~ /^n$/ && do {
 		        end_report(), next CMD if $finished and $level <= 1;
 			$single = 2;
 			$laststep = $cmd;
@@ -1257,7 +1278,7 @@ EOP
 			    } 
 			}
 			next CMD; };
-		    $cmd =~ /^\@\s*(.*\S)/ && do {
+                    $cmd =~ /^source\s+(.*\S)/ && do {
 		      if (open my $fh, $1) {
 			push @cmdfhs, $fh;
 		      } else {
@@ -2740,7 +2761,7 @@ B<$psh$psh> I<cmd>  	Run cmd in a subprocess (reads from DB::IN, writes to DB::O
   . ( $rc eq $sh ? "" : "
 B<$psh> [I<cmd>] 	Run I<cmd> in subshell (forces \"\$SHELL -c 'cmd'\")." ) . "
 		See 'B<O> I<shellBang>' too.
-B<@>I<file>		Execute I<file> containing debugger commands (may nest).
+B<source> I<file>		Execute I<file> containing debugger commands (may nest).
 B<H> I<-number>	Display last number commands (default all).
 B<p> I<expr>		Same as \"I<print {DB::OUT} expr>\" in current package.
 B<|>I<dbcmd>		Run debugger command, piping DB::OUT to current pager.
@@ -2815,7 +2836,7 @@ I<Debugger controls:>                        B<L>           List break/watch/act
   B<H> [I<-num>]    Display last num commands   B<a> [I<ln>] I<cmd>  Do cmd before line
   B<=> [I<a> I<val>]   Define/list an alias        B<A> I<ln|*>      Delete a/all actions
   B<h> [I<db_cmd>]  Get help on command         B<w> I<expr>      Add a watch expression
-  B<h h>         Complete help page          B<W> I<expr|*>    Delete a/all watch expressions
+  B<h h>         Complete help page          B<W> I<expr|*>    Delete a/all watch exprs
   B<|>[B<|>]I<db_cmd>  Send output to pager        B<$psh>\[B<$psh>\] I<syscmd> Run cmd in a subprocess
   B<q> or B<^D>     Quit                        B<R>           Attempt a restart
 I<Data Examination:>     B<expr>     Execute perl code, also see: B<s>,B<n>,B<t> I<expr>
@@ -2909,7 +2930,7 @@ B<$psh$psh> I<cmd>  	Run cmd in a subprocess (reads from DB::IN, writes to DB::O
   . ( $rc eq $sh ? "" : "
 B<$psh> [I<cmd>] 	Run I<cmd> in subshell (forces \"\$SHELL -c 'cmd'\")." ) . "
 		See 'B<O> I<shellBang>' too.
-B<@>I<file>		Execute I<file> containing debugger commands (may nest).
+B<source> I<file>		Execute I<file> containing debugger commands (may nest).
 B<H> I<-number>	Display last number commands (default all).
 B<p> I<expr>		Same as \"I<print {DB::OUT} expr>\" in current package.
 B<|>I<dbcmd>		Run debugger command, piping DB::OUT to current pager.

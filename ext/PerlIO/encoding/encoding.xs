@@ -80,11 +80,11 @@ PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
 }
 
 IV
-PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
+PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *tab)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     dSP;
-    IV  code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv);
+    IV  code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv,tab);
     SV *result = Nullsv;
 
     PUSHSTACKi(PERLSI_MAGIC);
@@ -584,12 +584,14 @@ PerlIOEncode_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 }
 
 PerlIO_funcs PerlIO_encode = {
+    sizeof(PerlIO_funcs),
     "encoding",
     sizeof(PerlIOEncode),
     PERLIO_K_BUFFERED|PERLIO_K_DESTRUCT,
     PerlIOEncode_pushed,
     PerlIOEncode_popped,
     PerlIOBuf_open,
+    NULL, /* binmode - always pop */
     PerlIOEncode_getarg,
     PerlIOBase_fileno,
     PerlIOEncode_dup,

@@ -19,7 +19,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.32';
+$VERSION = '1.33';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1719,9 +1719,12 @@ usually solves this kind of problem.
     }
 
     # strip blanks
-    if ($self->{VERSION}) {
+    if (defined $self->{VERSION}) {
 	$self->{VERSION} =~ s/^\s+//;
 	$self->{VERSION} =~ s/\s+$//;
+    }
+    else {
+        $self->{VERSION} = '';
     }
     ($self->{VERSION_SYM} = $self->{VERSION}) =~ s/\W/_/g;
 
@@ -2741,7 +2744,7 @@ q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
  $self->{MAKEFILE}, q[";' \\
 -e 'print "Manifying $$m{$$_}\n";' \\
 -e 'system(q[$(PERLRUN) $(POD2MAN_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
--e 'chmod(oct($(PERM_RW))), $$m{$$_} or warn "chmod $(PERM_RW) $$m{$$_}: $$!\n";}'
+-e 'chmod(oct($(PERM_RW)), $$m{$$_}) or warn "chmod $(PERM_RW) $$m{$$_}: $$!\n";}'
 ];
     push @m, "\nmanifypods : pure_all ";
     push @m, join " \\\n\t", keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}};
