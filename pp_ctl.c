@@ -2996,8 +2996,19 @@ PP(pp_require)
     {
 	tryname = name;
 	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
+#ifdef MACOS_TRADITIONAL
+	/* We consider paths of the form :a:b ambiguous and interpret them first
+	   as global then as local
+	*/
+    	if (!tryrsfp && name[0] == ':' && name[1] != ':' && strchr(name+2, ':'))
+	    goto trylocal;
+    }
+    else 
+trylocal: {
+#else
     }
     else {
+#endif
 	AV *ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
@@ -3115,6 +3126,10 @@ PP(pp_require)
 		}
 		else {
 		    char *dir = SvPVx(dirsv, n_a);
+#ifdef MACOS_TRADITIONAL
+		    /* We have ensured in incpush that library ends with ':' */
+		    Perl_sv_setpvf(aTHX_ namesv, "%s%s", dir, name+(name[0] == ':'));
+#else
 #ifdef VMS
 		    char *unixdir;
 		    if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
@@ -3124,8 +3139,17 @@ PP(pp_require)
 #else
 		    Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
 #endif
+#endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX(namesv);
+#ifdef MACOS_TRADITIONAL
+		    {
+		    	/* Convert slashes in the name part, but not the directory part, to colons */
+		    	char * colon;
+		    	for (colon = tryname+strlen(dir); colon = strchr(colon, '/'); )
+			    *colon++ = ':';
+		    }
+#endif
 		    tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')

@@ -2319,7 +2319,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     PERL_FLUSHALL_FOR_CHILD;
 #ifdef OS2
     if (doexec) {
-	return my_syspopen(cmd,mode);
+	return my_syspopen(aTHX_ cmd,mode);
     }
 #endif 
     This = (*mode == 'w');
@@ -3666,7 +3666,7 @@ Perl_get_ppaddr(pTHX)
 
 #ifndef HAS_GETENV_LEN
 char *
-Perl_getenv_len(pTHX_ char *env_elem, unsigned long *len)
+Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 {
     char *env_trans = PerlEnv_getenv(env_elem);
     if (env_trans)

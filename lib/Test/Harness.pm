@@ -212,7 +212,7 @@ sub runtests {
 	    }
 	    if (@failed) {
 		my ($txt, $canon) = canonfailed($max,$skipped,@failed);
-		print $txt;
+		print "${ml}$txt";
 		$failedtests{$test} = { canon => $canon,  max => $max,
 					failed => scalar @failed,
 					name => $test, percent => 100*(scalar @failed)/$max,

@@ -969,6 +969,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    goto reswitch;
 
 	case 'e':
+#ifdef MACOS_TRADITIONAL
+	    /* ignore -e for Dev:Pseudo argument */
+	    if (argv[1] && !strcmp(argv[1], "Dev:Pseudo"))
+	    	break; 
+#endif
 	    if (PL_euid != PL_uid || PL_egid != PL_gid)
 		Perl_croak(aTHX_ "No -e allowed in setuid scripts");
 	    if (!PL_e_script) {
@@ -1190,7 +1195,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
     }
 #endif
 
+#ifdef MACOS_TRADITIONAL
+    if (PL_doextract || gMacPerl_AlwaysExtract) {
+#else
     if (PL_doextract) {
+#endif
 	find_beginning();
 	if (cddir && PerlDir_chdir(cddir) < 0)
 	    Perl_croak(aTHX_ "Can't chdir to %s",cddir);
@@ -1251,6 +1260,16 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     SETERRNO(0,SS$_NORMAL);
     PL_error_count = 0;
+#ifdef MACOS_TRADITIONAL
+    if (gMacPerl_SyntaxError = (yyparse() || PL_error_count)) {
+	if (PL_minus_c)
+	    Perl_croak(aTHX_ "%s had compilation errors.\n", MacPerl_MPWFileName(PL_origfilename));
+	else {
+	    Perl_croak(aTHX_ "Execution of %s aborted due to compilation errors.\n",
+		       MacPerl_MPWFileName(PL_origfilename));
+	}
+    }
+#else
     if (yyparse() || PL_error_count) {
 	if (PL_minus_c)
 	    Perl_croak(aTHX_ "%s had compilation errors.\n", PL_origfilename);
@@ -1259,6 +1278,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		       PL_origfilename);
 	}
     }
+#endif
     CopLINE_set(PL_curcop, 0);
     PL_curstash = PL_defstash;
     PL_preprocess = FALSE;
@@ -1384,7 +1404,11 @@ S_run_body(pTHX_ I32 oldscope)
 			      PTR2UV(thr)));
 
 	if (PL_minus_c) {
+#ifdef MACOS_TRADITIONAL
+	    PerlIO_printf(Perl_error_log, "%s syntax OK\n", MacPerl_MPWFileName(PL_origfilename));
+#else
 	    PerlIO_printf(Perl_error_log, "%s syntax OK\n", PL_origfilename);
+#endif
 	    my_exit(0);
 	}
 	if (PERLDB_SINGLE && PL_DBsingle)
@@ -1633,7 +1657,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	method_op.op_next = PL_op;
 	method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
 	myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
-	PL_op = &method_op;
+	PL_op = (OP*)&method_op;
     }
 
     if (!(flags & G_EVAL)) {
@@ -2177,6 +2201,9 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'u':
+#ifdef MACOS_TRADITIONAL
+	Perl_croak(aTHX_ "Believe me, you don't want to use \"-u\" on a Macintosh");
+#endif
 	PL_do_undump = TRUE;
 	s++;
 	return s;
@@ -2982,9 +3009,30 @@ S_find_beginning(pTHX)
     /* skip forward in input to the real script? */
 
     forbid_setid("-x");
+#ifdef MACOS_TRADITIONAL
+    /* Since the Mac OS does not honor !# arguments for us, we do it ourselves */
+    
+    while (PL_doextract || gMacPerl_AlwaysExtract) {
+	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
+	    if (!gMacPerl_AlwaysExtract)
+		Perl_croak(aTHX_ "No Perl script found in input\n");
+		
+	    if (PL_doextract)			/* require explicit override ? */
+		if (!OverrideExtract(PL_origfilename))
+		    Perl_croak(aTHX_ "User aborted script\n");
+		else
+		    PL_doextract = FALSE;
+		
+	    /* Pater peccavi, file does not have #! */
+	    PerlIO_rewind(PL_rsfp);
+	    
+	    break;
+	}
+#else
     while (PL_doextract) {
 	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch)
 	    Perl_croak(aTHX_ "No Perl script found in input\n");
+#endif
 	if (*s == '#' && s[1] == '!' && (s = instr(s,"perl"))) {
 	    PerlIO_ungetc(PL_rsfp, '\n');		/* to keep line count right */
 	    PL_doextract = FALSE;
@@ -3166,8 +3214,9 @@ S_init_predump_symbols(pTHX)
 
     PL_statname = NEWSV(66,0);		/* last filename we did stat on */
 
-    if (!PL_osname)
-	PL_osname = savepv(OSNAME);
+    if (PL_osname)
+    	Safefree(PL_osname);
+    PL_osname = savepv(OSNAME);
 }
 
 STATIC void
@@ -3205,12 +3254,17 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 
     TAINT;
     if ((tmpgv = gv_fetchpv("0",TRUE, SVt_PV))) {
+#ifdef MACOS_TRADITIONAL
+	/* $0 is not majick on a Mac */
+	sv_setpv(GvSV(tmpgv),MacPerl_MPWFileName(PL_origfilename));
+#else
 	sv_setpv(GvSV(tmpgv),PL_origfilename);
 	magicname("0", "0", 1);
+#endif
     }
     if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV)))
 #ifdef OS2
-	sv_setpv(GvSV(tmpgv), os2_execname());
+	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
 #else
 	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
 #endif
@@ -3230,7 +3284,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
 	hv_magic(hv, PL_envgv, 'E');
-#if !defined( VMS) && !defined(EPOC)  /* VMS doesn't have environ array */
+#if !defined( VMS) && !defined(EPOC) && !defined(MACOS_TRADITIONAL) /* VMS doesn't have environ array */
 	/* Note that if the supplied env parameter is actually a copy
 	   of the global environ then it may now point to free'd memory
 	   if the environment has been modified since. To avoid this
@@ -3300,6 +3354,27 @@ S_init_perllib(pTHX)
 #ifdef ARCHLIB_EXP
     incpush(ARCHLIB_EXP, FALSE, FALSE);
 #endif
+#ifdef MACOS_TRADITIONAL
+    {
+	struct stat tmpstatbuf;
+    	SV * privdir = NEWSV(55, 0);
+	char * macperl = PerlEnv_getenv("MACPERL");
+	
+	if (!macperl)
+	    macperl = "";
+	
+	Perl_sv_setpvf(aTHX_ privdir, "%slib:", macperl);
+	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
+	    incpush(SvPVX(privdir), TRUE, FALSE);
+	Perl_sv_setpvf(aTHX_ privdir, "%ssite_perl:", macperl);
+	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
+	    incpush(SvPVX(privdir), TRUE, FALSE);
+	    
+   	SvREFCNT_dec(privdir);
+    }
+    if (!PL_tainting)
+	incpush(":", FALSE, FALSE);
+#else
 #ifndef PRIVLIB_EXP
 #  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
@@ -3355,6 +3430,7 @@ S_init_perllib(pTHX)
 
     if (!PL_tainting)
 	incpush(".", FALSE, FALSE);
+#endif /* MACOS_TRADITIONAL */
 }
 
 #if defined(DOSISH)
@@ -3363,7 +3439,11 @@ S_init_perllib(pTHX)
 #  if defined(VMS)
 #    define PERLLIB_SEP '|'
 #  else
-#    define PERLLIB_SEP ':'
+#    if defined(MACOS_TRADITIONAL)
+#      define PERLLIB_SEP ','
+#    else
+#      define PERLLIB_SEP ':'
+#    endif
 #  endif
 #endif
 #ifndef PERLLIB_MANGLE
@@ -3403,6 +3483,12 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 	    sv_setpv(libdir, PERLLIB_MANGLE(p, 0));
 	    p = Nullch;	/* break out */
 	}
+#ifdef MACOS_TRADITIONAL
+	if (!strchr(SvPVX(libdir), ':'))
+	    sv_insert(libdir, 0, 0, ":", 1);
+	if (SvPVX(libdir)[SvCUR(libdir)-1] != ':')
+	    sv_catpv(libdir, ":");
+#endif
 
 	/*
 	 * BEFORE pushing libdir onto @INC we may first push version- and
@@ -3430,8 +3516,15 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 			      SvPV(libdir,len));
 #endif
 	    if (addsubdirs) {
+#ifdef MACOS_TRADITIONAL
+#define PERL_AV_SUFFIX_FMT	""
+#define PERL_ARCH_FMT 		":%s"
+#else
+#define PERL_AV_SUFFIX_FMT 	"/"
+#define PERL_ARCH_FMT 		"/%s"
+#endif
 		/* .../version/archname if -d .../version/archname */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/"PERL_FS_VER_FMT"/%s", 
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT PERL_ARCH_FMT, 
 				libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION, ARCHNAME);
@@ -3440,7 +3533,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
 
 		/* .../version if -d .../version */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/"PERL_FS_VER_FMT, libdir,
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT, libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION);
 		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
@@ -3448,7 +3541,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
 
 		/* .../archname if -d .../archname */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s", libdir, ARCHNAME);
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT, libdir, ARCHNAME);
 		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		      S_ISDIR(tmpstatbuf.st_mode))
 		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
@@ -3458,7 +3551,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 	    if (addoldvers) {
 		for (incver = incverlist; *incver; incver++) {
 		    /* .../xxx if -d .../xxx */
-		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s", libdir, *incver);
+		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT, libdir, *incver);
 		    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 			  S_ISDIR(tmpstatbuf.st_mode))
 			av_push(GvAVn(PL_incgv), newSVsv(subdir));

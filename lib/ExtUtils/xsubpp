@@ -847,7 +847,14 @@ EOM
 print("#line 1 \"$filename\"\n")
     if $WantLineNumbers;
 
+firstmodule:
 while (<$FH>) {
+    if (/^=/) {
+    	do {
+	    next firstmodule if /^=cut\s*$/;
+	} while (<$FH>);
+	&Exit;
+    }
     last if ($Module, $Package, $Prefix) =
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
 
@@ -886,6 +893,16 @@ sub fetch_para {
     }
 
     for(;;) {
+	# Skip embedded PODs 
+	while ($lastline =~ /^=/) {
+    	    while ($lastline = <$FH>) {
+	    	last if ($lastline =~ /^=cut\s*$/);
+	    }
+	    death ("Error: Unterminated pod") unless $lastline;
+	    $lastline = <$FH>;
+	    chomp $lastline;
+	    $lastline =~ s/^\s+$//;
+	}
 	if ($lastline !~ /^\s*#/ ||
 	    # CPP directives:
 	    #	ANSI:	if ifdef ifndef elif else endif define undef

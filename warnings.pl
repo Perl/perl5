@@ -382,7 +382,7 @@ will be used.
 
 =back
 
-See L<perlmod/Pragmatic Modules> and L<perllexwarn>.
+See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
 
 =cut
 

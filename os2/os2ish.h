@@ -82,6 +82,9 @@
 
 #ifdef USE_THREADS
 
+#define do_spawn(a)      os2_do_spawn(aTHX_ (a))
+#define do_aspawn(a,b,c) os2_do_aspawn(aTHX_ (a),(b),(c))
+
 #define OS2_ERROR_ALREADY_POSTED 299	/* Avoid os2.h */
 
 extern int rc;
@@ -90,49 +93,49 @@ extern int rc;
     STMT_START {						\
 	int rc;							\
 	if ((rc = _rmutex_create(m,0)))				\
-	    croak("panic: MUTEX_INIT: rc=%i", rc);		\
+	    Perl_croak_nocontext("panic: MUTEX_INIT: rc=%i", rc);	\
     } STMT_END
 #define MUTEX_LOCK(m) \
     STMT_START {						\
 	int rc;							\
 	if ((rc = _rmutex_request(m,_FMR_IGNINT)))		\
-	    croak("panic: MUTEX_LOCK: rc=%i", rc);		\
+	    Perl_croak_nocontext("panic: MUTEX_LOCK: rc=%i", rc);	\
     } STMT_END
 #define MUTEX_UNLOCK(m) \
     STMT_START {						\
 	int rc;							\
 	if ((rc = _rmutex_release(m)))				\
-	    croak("panic: MUTEX_UNLOCK: rc=%i", rc);		\
+	    Perl_croak_nocontext("panic: MUTEX_UNLOCK: rc=%i", rc);	\
     } STMT_END
 #define MUTEX_DESTROY(m) \
     STMT_START {						\
 	int rc;							\
 	if ((rc = _rmutex_close(m)))				\
-	    croak("panic: MUTEX_DESTROY: rc=%i", rc);		\
+	    Perl_croak_nocontext("panic: MUTEX_DESTROY: rc=%i", rc);	\
     } STMT_END
 
 #define COND_INIT(c) \
     STMT_START {						\
 	int rc;							\
 	if ((rc = DosCreateEventSem(NULL,c,0,0)))		\
-	    croak("panic: COND_INIT: rc=%i", rc);		\
+	    Perl_croak_nocontext("panic: COND_INIT: rc=%i", rc);	\
     } STMT_END
 #define COND_SIGNAL(c) \
     STMT_START {						\
 	int rc;							\
-	if ((rc = DosPostEventSem(*(c))) && rc != OS2_ERROR_ALREADY_POSTED)		\
-	    croak("panic: COND_SIGNAL, rc=%ld", rc);		\
+	if ((rc = DosPostEventSem(*(c))) && rc != OS2_ERROR_ALREADY_POSTED)\
+	    Perl_croak_nocontext("panic: COND_SIGNAL, rc=%ld", rc);	\
     } STMT_END
 #define COND_BROADCAST(c) \
     STMT_START {						\
 	int rc;							\
 	if ((rc = DosPostEventSem(*(c))) && rc != OS2_ERROR_ALREADY_POSTED)\
-	    croak("panic: COND_BROADCAST, rc=%i", rc);		\
+	    Perl_croak_nocontext("panic: COND_BROADCAST, rc=%i", rc);	\
     } STMT_END
 /* #define COND_WAIT(c, m) \
     STMT_START {						\
 	if (WaitForSingleObject(*(c),INFINITE) == WAIT_FAILED)	\
-	    croak("panic: COND_WAIT");				\
+	    Perl_croak_nocontext("panic: COND_WAIT");		\
     } STMT_END
 */
 #define COND_WAIT(c, m) os2_cond_wait(c,m)
@@ -140,8 +143,8 @@ extern int rc;
 #define COND_WAIT_win32(c, m) \
     STMT_START {						\
 	int rc;							\
-	if ((rc = SignalObjectAndWait(*(m),*(c),INFINITE,FALSE)))\
-	    croak("panic: COND_WAIT");				\
+	if ((rc = SignalObjectAndWait(*(m),*(c),INFINITE,FALSE)))	\
+	    Perl_croak_nocontext("panic: COND_WAIT");			\
 	else							\
 	    MUTEX_LOCK(m);					\
     } STMT_END
@@ -149,7 +152,7 @@ extern int rc;
     STMT_START {						\
 	int rc;							\
 	if ((rc = DosCloseEventSem(*(c))))			\
-	    croak("panic: COND_DESTROY, rc=%i", rc);		\
+	    Perl_croak_nocontext("panic: COND_DESTROY, rc=%i", rc);	\
     } STMT_END
 /*#define THR ((struct thread *) TlsGetValue(PL_thr_key))
 #define dTHR struct thread *thr = THR
@@ -159,11 +162,15 @@ extern int rc;
 #  define pthread_getspecific(k)	(*_threadstore())
 #  define pthread_setspecific(k,v)	(*_threadstore()=v,0)
 #  define pthread_key_create(keyp,flag)	(*keyp=_gettid(),0)
-#else
+#else /* USE_SLOW_THREAD_SPECIFIC */
 #  define pthread_getspecific(k)	(*(k))
 #  define pthread_setspecific(k,v)	(*(k)=(v),0)
-#  define pthread_key_create(keyp,flag)	(DosAllocThreadLocalMemory(1,(U32*)keyp) ? croak("LocalMemory"),1 : 0)
-#endif
+#  define pthread_key_create(keyp,flag)			\
+	( DosAllocThreadLocalMemory(1,(U32*)keyp)	\
+	  ? Perl_croak_nocontext("LocalMemory"),1	\
+	  : 0						\
+	)
+#endif /* USE_SLOW_THREAD_SPECIFIC */
 #define pthread_key_delete(keyp)
 #define pthread_self()			_gettid()
 #define YIELD				DosSleep(0)
@@ -173,11 +180,16 @@ int pthread_join(pthread_t tid, void **status);
 int pthread_detach(pthread_t tid);
 int pthread_create(pthread_t *tid, const pthread_attr_t *attr,
 		   void *(*start_routine)(void*), void *arg);
-#endif 
+#endif /* PTHREAD_INCLUDED */
 
 #define THREADS_ELSEWHERE
 
-#endif 
+#else /* USE_THREADS */
+
+#define do_spawn(a)      os2_do_spawn(a)
+#define do_aspawn(a,b,c) os2_do_aspawn((a),(b),(c))
+
+#endif /* USE_THREADS */
  
 void Perl_OS2_init(char **);
 
@@ -231,9 +243,21 @@ void *sys_alloc(int size);
 #  define PerlIO FILE
 #endif 
 
+/* os2ish is used from a2p/a2p.h without pTHX/pTHX_ first being
+ * defined.  Hack around this to get us to compile.
+*/
+#ifdef PTHX_UNUSED
+# ifndef pTHX
+#  define pTHX
+# endif
+# ifndef pTHX_
+#  define pTHX_
+# endif
+#endif
+
 #define TMPPATH1 "plXXXXXX"
 extern char *tmppath;
-PerlIO *my_syspopen(char *cmd, char *mode);
+PerlIO *my_syspopen(pTHX_ char *cmd, char *mode);
 /* Cannot prototype with I32 at this point. */
 int my_syspclose(PerlIO *f);
 FILE *my_tmpfile (void);
@@ -352,7 +376,7 @@ void	Perl_Deregister_MQ(int serve);
 int	Perl_Serve_Messages(int force);
 /* Cannot prototype with I32 at this point. */
 int	Perl_Process_Messages(int force, long *cntp);
-char	*os2_execname(void);
+char	*os2_execname(pTHX);
 
 struct _QMSG;
 struct PMWIN_entries_t {
@@ -373,7 +397,7 @@ void init_PMWIN_entries(void);
 #define perl_hmq_GET(serve)	Perl_Register_MQ(serve)
 #define perl_hmq_UNSET(serve)	Perl_Deregister_MQ(serve)
 
-#define OS2_XS_init() (*OS2_Perl_data.xs_init)()
+#define OS2_XS_init() (*OS2_Perl_data.xs_init)(aTHX)
 
 #if _EMX_CRT_REV_ >= 60
 # define os2_setsyserrno(rc)	(Perl_rc = rc, errno = errno_isOS2_set, \

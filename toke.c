@@ -39,6 +39,13 @@ static void restore_rsfp(pTHXo_ void *f);
  * 1999-02-27 mjd-perl-patch@plover.com */
 #define isCONTROLVAR(x) (isUPPER(x) || strchr("[\\]^_?", (x)))
 
+/* On MacOS, respect nonbreaking spaces */
+#ifdef MACOS_TRADITIONAL
+#define SPACE_OR_TAB(c) ((c)==' '||(c)=='\312'||(c)=='\t')
+#else
+#define SPACE_OR_TAB(c) ((c)==' '||(c)=='\t')
+#endif
+
 /* LEX_* are values for PL_lex_state, the state of the lexer.
  * They are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
@@ -463,7 +470,7 @@ S_incline(pTHX_ char *s)
     CopLINE_inc(PL_curcop);
     if (*s++ != '#')
 	return;
-    while (*s == ' ' || *s == '\t') s++;
+    while (SPACE_OR_TAB(*s)) s++;
     if (strnEQ(s, "line", 4))
 	s += 4;
     else
@@ -472,13 +479,13 @@ S_incline(pTHX_ char *s)
 	s++;
     else 
 	return;
-    while (*s == ' ' || *s == '\t') s++;
+    while (SPACE_OR_TAB(*s)) s++;
     if (!isDIGIT(*s))
 	return;
     n = s;
     while (isDIGIT(*s))
 	s++;
-    while (*s == ' ' || *s == '\t')
+    while (SPACE_OR_TAB(*s))
 	s++;
     if (*s == '"' && (t = strchr(s+1, '"'))) {
 	s++;
@@ -488,7 +495,7 @@ S_incline(pTHX_ char *s)
 	for (t = s; !isSPACE(*t); t++) ;
 	e = t;
     }
-    while (*e == ' ' || *e == '\t' || *e == '\r' || *e == '\f')
+    while (SPACE_OR_TAB(*e) || *e == '\r' || *e == '\f')
 	e++;
     if (*e != '\n' && *e != '\0')
 	return;		/* false alarm */
@@ -512,7 +519,7 @@ S_skipspace(pTHX_ register char *s)
 {
     dTHR;
     if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
-	while (s < PL_bufend && (*s == ' ' || *s == '\t'))
+	while (s < PL_bufend && SPACE_OR_TAB(*s))
 	    s++;
 	return s;
     }
@@ -2024,6 +2031,9 @@ S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
       if we already built the token before, use it.
 */
 
+#ifdef __SC__
+#pragma segment Perl_yylex
+#endif
 int
 #ifdef USE_PURE_BISON
 Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp)
@@ -2584,6 +2594,7 @@ Perl_yylex(pTHX)
 			*s = '#';	/* Don't try to parse shebang line */
 		}
 #endif /* ALTERNATE_SHEBANG */
+#ifndef MACOS_TRADITIONAL
 		if (!d &&
 		    *s == '#' &&
 		    ipathend > ipath &&
@@ -2611,13 +2622,14 @@ Perl_yylex(pTHX)
 		    PerlProc_execv(ipath, newargv);
 		    Perl_croak(aTHX_ "Can't exec %s", ipath);
 		}
+#endif
 		if (d) {
 		    U32 oldpdb = PL_perldb;
 		    bool oldn = PL_minus_n;
 		    bool oldp = PL_minus_p;
 
 		    while (*d && !isSPACE(*d)) d++;
-		    while (*d == ' ' || *d == '\t') d++;
+		    while (SPACE_OR_TAB(*d)) d++;
 
 		    if (*d++ == '-') {
 			do {
@@ -2659,6 +2671,9 @@ Perl_yylex(pTHX)
       "\t(Maybe you didn't strip carriage returns after a network transfer?)\n");
 #endif
     case ' ': case '\t': case '\f': case 013:
+#ifdef MACOS_TRADITIONAL
+    case '\312':
+#endif
 	s++;
 	goto retry;
     case '#':
@@ -2692,7 +2707,7 @@ Perl_yylex(pTHX)
 	    PL_bufptr = s;
 	    tmp = *s++;
 
-	    while (s < PL_bufend && (*s == ' ' || *s == '\t'))
+	    while (s < PL_bufend && SPACE_OR_TAB(*s))
 		s++;
 
 	    if (strnEQ(s,"=>",2)) {
@@ -2976,20 +2991,20 @@ Perl_yylex(pTHX)
 		PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
 	    OPERATOR(HASHBRACK);
 	case XOPERATOR:
-	    while (s < PL_bufend && (*s == ' ' || *s == '\t'))
+	    while (s < PL_bufend && SPACE_OR_TAB(*s))
 		s++;
 	    d = s;
 	    PL_tokenbuf[0] = '\0';
 	    if (d < PL_bufend && *d == '-') {
 		PL_tokenbuf[0] = '-';
 		d++;
-		while (d < PL_bufend && (*d == ' ' || *d == '\t'))
+		while (d < PL_bufend && SPACE_OR_TAB(*d))
 		    d++;
 	    }
 	    if (d < PL_bufend && isIDFIRST_lazy_if(d,UTF)) {
 		d = scan_word(d, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
 			      FALSE, &len);
-		while (d < PL_bufend && (*d == ' ' || *d == '\t'))
+		while (d < PL_bufend && SPACE_OR_TAB(*d))
 		    d++;
 		if (*d == '}') {
 		    char minus = (PL_tokenbuf[0] == '-');
@@ -3206,9 +3221,9 @@ Perl_yylex(pTHX)
 	if (PL_lex_brackets < PL_lex_formbrack) {
 	    char *t;
 #ifdef PERL_STRICT_CR
-	    for (t = s; *t == ' ' || *t == '\t'; t++) ;
+	    for (t = s; SPACE_OR_TAB(*t); t++) ;
 #else
-	    for (t = s; *t == ' ' || *t == '\t' || *t == '\r'; t++) ;
+	    for (t = s; SPACE_OR_TAB(*t) || *t == '\r'; t++) ;
 #endif
 	    if (*t == '\n' || *t == '#') {
 		s--;
@@ -3802,7 +3817,7 @@ Perl_yylex(pTHX)
 		if (*s == '(') {
 		    CLINE;
 		    if (gv && GvCVu(gv)) {
-			for (d = s + 1; *d == ' ' || *d == '\t'; d++) ;
+			for (d = s + 1; SPACE_OR_TAB(*d); d++) ;
 			if (*d == ')' && (sv = cv_const_sv(GvCV(gv)))) {
 			    s = d + 1;
 			    goto its_constant;
@@ -4996,6 +5011,9 @@ Perl_yylex(pTHX)
 	}
     }}
 }
+#ifdef __SC__
+#pragma segment Main
+#endif
 
 I32
 Perl_keyword(pTHX_ register char *d, I32 len)
@@ -5869,7 +5887,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	if (isSPACE(s[-1])) {
 	    while (s < send) {
 		char ch = *s++;
-		if (ch != ' ' && ch != '\t') {
+		if (!SPACE_OR_TAB(ch)) {
 		    *d = ch;
 		    break;
 		}
@@ -5895,7 +5913,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 		    Perl_croak(aTHX_ ident_too_long);
 	    }
 	    *d = '\0';
-	    while (s < send && (*s == ' ' || *s == '\t')) s++;
+	    while (s < send && SPACE_OR_TAB(*s)) s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
 		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest)) {
@@ -6169,7 +6187,7 @@ S_scan_heredoc(pTHX_ register char *s)
     e = PL_tokenbuf + sizeof PL_tokenbuf - 1;
     if (!outer)
 	*d++ = '\n';
-    for (peek = s; *peek == ' ' || *peek == '\t'; peek++) ;
+    for (peek = s; SPACE_OR_TAB(*peek); peek++) ;
     if (*peek && strchr("`'\"",*peek)) {
 	s = peek;
 	term = *s++;
@@ -7134,9 +7152,9 @@ S_scan_formline(pTHX_ register char *s)
 	if (*s == '.' || *s == '}') {
 	    /*SUPPRESS 530*/
 #ifdef PERL_STRICT_CR
-	    for (t = s+1;*t == ' ' || *t == '\t'; t++) ;
+	    for (t = s+1;SPACE_OR_TAB(*t); t++) ;
 #else
-	    for (t = s+1;*t == ' ' || *t == '\t' || *t == '\r'; t++) ;
+	    for (t = s+1;SPACE_OR_TAB(*t) || *t == '\r'; t++) ;
 #endif
 	    if (*t == '\n' || t == PL_bufend)
 		break;

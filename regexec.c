@@ -599,9 +599,10 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	  find_anchor:
 	    while (t < strend - prog->minlen) {
 		if (*t == '\n') {
-		    if (t < s - prog->check_offset_min) {
+		    if (t < check_at - prog->check_offset_min) {
 			if (prog->anchored_substr) {
-			    /* We definitely contradict the found anchored
+			    /* Since we moved from the found position,
+			       we definitely contradict the found anchored
 			       substr.  Due to the above check we do not
 			       contradict "check" substr.
 			       Thus we can arrive here only if check substr
@@ -612,12 +613,17 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 				PL_colors[0],PL_colors[1], (long)(strpos - i_strpos), (long)(strpos - i_strpos + prog->anchored_offset)));
 			    goto do_other_anchored;
 			}
+			/* We don't contradict the found floating substring. */
+			/* XXXX Why not check for STCLASS? */
 			s = t + 1;
 			DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m at offset %ld...\n",
 			    PL_colors[0],PL_colors[1], (long)(s - i_strpos)));
 			goto set_useful;
 		    }
-		    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m, restarting at offset %ld...\n",
+		    /* Position contradicts check-string */
+		    /* XXXX probably better to look for check-string
+		       than for "\n", so one should lower the limit for t? */
+		    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
 			PL_colors[0],PL_colors[1], (long)(t + 1 - i_strpos)));
 		    strpos = s = t + 1;
 		    goto restart;
@@ -628,15 +634,20 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			PL_colors[0],PL_colors[1]));
 	    goto fail_finish;
 	}
+	else {
+	    DEBUG_r(PerlIO_printf(Perl_debug_log, "Starting position does not contradict /%s^%s/m...\n",
+			PL_colors[0],PL_colors[1]));
+	}
 	s = t;
       set_useful:
 	++BmUSEFUL(prog->check_substr);	/* hooray/5 */
     }
     else {
 	PL_bostr = tmp;
-	/* The found string does not prohibit matching at beg-of-str
+	/* The found string does not prohibit matching at strpos,
 	   - no optimization of calling REx engine can be performed,
-	   unless it was an MBOL and we are not after MBOL. */
+	   unless it was an MBOL and we are not after MBOL,
+	   or a future STCLASS check will fail this. */
       try_at_start:
 	/* Even in this situation we may use MBOL flag if strpos is offset
 	   wrt the start of the string. */
@@ -649,8 +660,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    goto find_anchor;
 	}
 	DEBUG_r( if (ml_anch)
-	    PerlIO_printf(Perl_debug_log, "Does not contradict /%s^%s/m...\n",
-			PL_colors[0],PL_colors[1]);
+	    PerlIO_printf(Perl_debug_log, "Position at offset %ld does not contradict /%s^%s/m...\n",
+			(long)(strpos - i_strpos), PL_colors[0],PL_colors[1]);
 	);
       success_at_start:
 	if (!(prog->reganch & ROPT_NAUGHTY)	/* XXXX If strpos moved? */
@@ -659,6 +670,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    && prog->check_substr == prog->float_substr)
 	{
 	    /* If flags & SOMETHING - do not do it many times on the same match */
+	    DEBUG_r(PerlIO_printf(Perl_debug_log, "... Disabling check substring...\n"));
 	    SvREFCNT_dec(prog->check_substr);
 	    prog->check_substr = Nullsv;	/* disable */
 	    prog->float_substr = Nullsv;	/* clear */
@@ -725,7 +737,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			goto fail;
 		    }
 		    DEBUG_r( PerlIO_printf(Perl_debug_log,
-				"Trying %s substr starting at offset %ld...\n",
+				"Looking for %s substr starting at offset %ld...\n",
 				 what, (long)(s + start_shift - i_strpos)) );
 		    goto restart;
 		}
@@ -735,7 +747,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		/* Recheck anchored substring, but not floating... */
 		s = check_at; 
 		DEBUG_r( PerlIO_printf(Perl_debug_log,
-			  "Trying anchored substr starting at offset %ld...\n",
+			  "Looking for anchored substr starting at offset %ld...\n",
 			  (long)(other_last - i_strpos)) );
 		goto do_other_anchored;
 	    }
@@ -744,8 +756,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    if (ml_anch) {
 		s = t = t + 1;
 		DEBUG_r( PerlIO_printf(Perl_debug_log,
-			  "Trying /^/m starting at offset %ld...\n",
-			  (long)(t - i_strpos)) );
+			  "Looking for /%s^%s/m starting at offset %ld...\n",
+			  PL_colors[0],PL_colors[1], (long)(t - i_strpos)) );
 		goto try_at_offset;
 	    }
 	    if (!prog->float_substr)	/* Could have been deleted */
