@@ -1251,7 +1251,7 @@ main() {
 EOF
 
     for $type (@intrinsics) {
-	next if !type || $type eq 'void' || $type =~ /complex/; # sun stuff
+	next if !$type || $type eq 'void' || $type =~ /complex/; # sun stuff
 	print <<"EOF";
     printf(mask,sizeof($type), "$type");
 EOF
