@@ -1,4 +1,4 @@
-# $Id: enc_module.t,v 1.1 2003/02/28 01:40:27 dankogai Exp dankogai $
+# $Id: enc_module.t,v 1.2 2003/03/09 17:32:43 dankogai Exp $
 # This file is in euc-jp
 BEGIN {
     require Config; import Config;
@@ -8,6 +8,10 @@ BEGIN {
     }
     unless (find PerlIO::Layer 'perlio') {
 	print "1..0 # Skip: PerlIO was not built\n";
+	exit 0;
+    }
+    if (defined ${^UNICODE} and ${^UNICODE} != 0){
+	print "1..0 # Skip: \${^UNICODE} == ${^UNICODE}\n";
 	exit 0;
     }
     if (ord("A") == 193) {
@@ -29,8 +33,6 @@ my $file0 = File::Spec->catfile($dir,"enc_module.enc");
 my $file1 = File::Spec->catfile($dir,"$$.enc");
 
 my $obj = Mod_EUCJP->new;
-# Isn't this dangerous in that we lose all possible warnings?
-# Maybe a scoped use warnings 'something' instead? --jhi
 local $SIG{__WARN__} = sub{}; # to silence reopening STD(IN|OUT) w/o closing
 
 open STDOUT, ">", $file1 or die "$file1:$!";

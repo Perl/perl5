@@ -1,8 +1,19 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.89 2003/02/28 01:40:27 dankogai Exp dankogai $
+# $Id: Changes,v 1.90 2003/03/09 17:32:43 dankogai Exp $
 #
-$Revision: 1.89 $ $Date: 2003/02/28 01:40:27 $
+$Revision: 1.90 $ $Date: 2003/03/09 17:32:43 $
+! encoding.pm
++ t/enc_data.t
+  Inaba-san has added a patch for perl 5.8.1 or later that makes
+  encoding.pm work for <DATA> filehandle.  t/enc_data.t is to test
+  that.  POD is further revised.
+  Message-Id: <200303091515.h29FF6B03903@smtp3.ActiveState.com>
+! encoding.pm t/enc_module.t
+  encoding vs. ${^UNICODE} resolved.  POD revised accordingly.
+  Message-Id: <20030306112940.GN20652@kosh.hut.fi>
+
+1.89 2003/02/28
 ! Encode.xs
   signed vs. unsigned issue discovered by Craig on OpenVM
   Message-Id: <a05200f12ba81fe9d6298@[172.16.52.1]>
