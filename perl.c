@@ -473,11 +473,11 @@ perl_destruct(pTHXx)
 
     /* magical thingies */
 
-    Safefree(PL_ofs);		/* $, */
-    PL_ofs = Nullch;
+    SvREFCNT_dec(PL_ofs_sv);	/* $, */
+    PL_ofs_sv = Nullsv;
 
-    Safefree(PL_ors);		/* $\ */
-    PL_ors = Nullch;
+    SvREFCNT_dec(PL_ors_sv);	/* $\ */
+    PL_ors_sv = Nullsv;
 
     SvREFCNT_dec(PL_rs);	/* $/ */
     PL_rs = Nullsv;
@@ -2158,23 +2158,23 @@ Perl_moreswitches(pTHX_ char *s)
     case 'l':
 	PL_minus_l = TRUE;
 	s++;
-	if (PL_ors)
-	    Safefree(PL_ors);
+	if (PL_ors_sv) {
+	    SvREFCNT_dec(PL_ors_sv);
+	    PL_ors_sv = Nullsv;
+	}
 	if (isDIGIT(*s)) {
-	    PL_ors = savepv("\n");
-	    PL_orslen = 1;
+	    PL_ors_sv = newSVpvn("\n",1);
 	    numlen = 0;			/* disallow underscores */
-	    *PL_ors = (char)scan_oct(s, 3 + (*s == '0'), &numlen);
+	    *SvPVX(PL_ors_sv) = (char)scan_oct(s, 3 + (*s == '0'), &numlen);
 	    s += numlen;
 	}
 	else {
 	    if (RsPARA(PL_nrs)) {
-		PL_ors = "\n\n";
-		PL_orslen = 2;
+		PL_ors_sv = newSVpvn("\n\n",2);
 	    }
-	    else
-		PL_ors = SvPV(PL_nrs, PL_orslen);
-	    PL_ors = savepvn(PL_ors, PL_orslen);
+	    else {
+		PL_ors_sv = newSVsv(PL_nrs);
+	    }
 	}
 	return s;
     case 'M':

@@ -152,7 +152,7 @@ PP(pp_concat)
 
     left_utf8  = DO_UTF8(left);
     right_utf8 = DO_UTF8(right);
- 
+
     if (left_utf8 != right_utf8) {
         if (TARG == right && !right_utf8) {
             sv_utf8_upgrade(TARG); /* Now straight binary copy */
@@ -425,13 +425,13 @@ PP(pp_print)
     }
     else {
 	MARK++;
-	if (PL_ofslen) {
+	if (PL_ofs_sv && SvOK(PL_ofs_sv)) {
 	    while (MARK <= SP) {
 		if (!do_print(*MARK, fp))
 		    break;
 		MARK++;
 		if (MARK <= SP) {
-		    if (PerlIO_write(fp, PL_ofs, PL_ofslen) == 0 || PerlIO_error(fp)) {
+		    if (!do_print(PL_ofs_sv, fp)) { /* $, */
 			MARK--;
 			break;
 		    }
@@ -448,8 +448,8 @@ PP(pp_print)
 	if (MARK <= SP)
 	    goto just_say_no;
 	else {
-	    if (PL_orslen)
-		if (PerlIO_write(fp, PL_ors, PL_orslen) == 0 || PerlIO_error(fp))
+	    if (PL_ors_sv && SvOK(PL_ors_sv))
+		if (!do_print(PL_ors_sv, fp)) /* $\ */
 		    goto just_say_no;
 
 	    if (IoFLAGS(io) & IOf_FLUSH)
