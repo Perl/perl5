@@ -2856,6 +2856,10 @@ When Perl is built using the native build process on VOS Release
 14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
 pass or result in TODO (ignored) failures.
 
+=head Term::ReadKey not working on Win32
+
+Use Term::ReadKey 2.20 or later.
+
 =head2 Failure of Thread (5.005-style) tests
 
 B<Note that support for 5.005-style threading is deprecated,
