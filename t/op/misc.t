@@ -338,6 +338,7 @@ print "you die joe!\n" unless "@x" eq 'x y z';
 ########
 /(?{"{"})/	# Check it outside of eval too
 EXPECT
+Sequence (?{...}) not terminated or not {}-balanced at - line 1, within pattern
 /(?{"{"})/: Sequence (?{...}) not terminated or not {}-balanced at - line 1.
 ########
 /(?{"{"}})/	# Check it outside of eval too

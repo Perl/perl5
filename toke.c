@@ -802,9 +802,31 @@ scan_const(char *start)
 		s++;
 	    }
 	}
-	else if (*s == '(' && lex_inpat && s[1] == '?' && s[2] == '#') {
-	    while (s < send && *s != ')')
-		*d++ = *s++;
+	else if (*s == '(' && lex_inpat && s[1] == '?') {
+	    if (s[2] == '#') {
+		while (s < send && *s != ')')
+		    *d++ = *s++;
+	    } else if (s[2] == '{') {	/* This should march regcomp.c */
+		I32 count = 1;
+		char *regparse = s + 3;
+		char c;
+
+		while (count && (c = *regparse)) {
+		    if (c == '\\' && regparse[1])
+			regparse++;
+		    else if (c == '{') 
+			count++;
+		    else if (c == '}') 
+			count--;
+		    regparse++;
+		}
+		if (*regparse == ')')
+		    regparse++;
+		else
+		    yyerror("Sequence (?{...}) not terminated or not {}-balanced");
+		while (s < regparse && *s != ')')
+		    *d++ = *s++;
+	    }
 	}
 	else if (*s == '#' && lex_inpat &&
 	  ((PMOP*)lex_inpat)->op_pmflags & PMf_EXTENDED) {
