@@ -995,7 +995,9 @@ lib/Locale/Currency.pm		Locale::Codes
 lib/Locale/Language.pm		Locale::Codes
 lib/Locale/Maketext.pm		Locale::Maketext
 lib/Locale/Maketext.pod		Locale::Maketext documentation
-lib/Locale/Maketext.t		See if Locale::Maketext works
+lib/Locale/Maketext/ChangeLog	Locale::Maketext
+lib/Locale/Maketext/README	Locale::Maketext
+lib/Locale/Maketext/test.pl	See if Locale::Maketext works
 lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package

@@ -1,5 +1,5 @@
 
-# Time-stamp: "2001-05-25 07:49:06 MDT"
+# Time-stamp: "2000-11-14 22:27:26 MST"
 
 require 5;
 package Locale::Maketext;
@@ -14,7 +14,7 @@ use I18N::LangTags 0.21 ();
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.01";
+$VERSION = "1.02";
 @ISA = ();
 
 $MATCH_SUPERS = 1;
@@ -286,12 +286,15 @@ sub get_handle {  # This is a constructor and, yes, it CAN FAIL.
      # if it's a locale ID, try converting to a lg tag (untainted),
      # otherwise nix it.
 
-    push @languages, map &I18N::LangTags::super_languages($_), @languages
+    push @languages, map I18N::LangTags::super_languages($_), @languages
      if $MATCH_SUPERS;
 
-    @languages =  map { $_, &I18N::LangTags::alternate_language_tags($_) }
+    @languages =  map { $_, I18N::LangTags::alternate_language_tags($_) }
                       @languages;    # catch alternation
 
+    push @languages, I18N::LangTags::panic_languages(@languages)
+      if defined &I18N::LangTags::panic_languages;
+    
     push @languages, $base_class->fallback_languages;
      # You are free to override fallback_languages to return empty-list!
 
@@ -349,11 +352,11 @@ sub _compile {
        |
        ~.       # ~[, ~], ~~, ~other
        |
-       \x5B        # [
+       \[          # [ presumably opening a group
        |
-       \x5D        # ]
+       \]          # ] presumably closing a group
        |
-       ~           # terminal ~?
+       ~           # terminal ~ ?
        |
        $
      )>xgs
@@ -379,7 +382,13 @@ sub _compile {
           if(length $c[-1]) {
             # Now actually processing the preceding literal
             $big_pile .= $c[-1];
-            if($USE_LITERALS and $c[-1] !~ m<[^\x20-\x7E]>s) {
+            if($USE_LITERALS and (
+              (ord('A') == 65)
+               ? $c[-1] !~ m<[^\x20-\x7E]>s
+                  # ASCII very safe chars
+               : $c[-1] !~ m/[^ !"\#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~\x07]/s
+                  # EBCDIC very safe chars
+            )) {
               # normal case -- all very safe chars
               $c[-1] =~ s/'/\\'/g;
               push @code, q{ '} . $c[-1] . "',\n";
@@ -411,14 +420,24 @@ sub _compile {
            #$c[-1] =~ s/\s+$//s;
           ($m,@params) = split(",", $c[-1], -1);  # was /\s*,\s*/
           
-          foreach($m, @params) { tr/\x7F/,/ }
-           # A bit of a hack -- we've turned "~,"'s into \x7F's, so turn
-           #  'em into real commas here.
+          # A bit of a hack -- we've turned "~,"'s into DELs, so turn
+          #  'em into real commas here.
+          if (ord('A') == 65) { # ASCII, etc
+            foreach($m, @params) { tr/\x7F/,/ } 
+          } else {              # EBCDIC (1047, 0037, POSIX-BC)
+            # Thanks to Peter Prymmer for the EBCDIC handling
+            foreach($m, @params) { tr/\x07/,/ } 
+          }
           
+          # Special-case handling of some method names:
           if($m eq '_*' or $m =~ m<^_(-?\d+)$>s) {
             # Treat [_1,...] as [,_1,...], etc.
             unshift @params, $m;
             $m = '';
+          } elsif($m eq '*') {
+            $m = 'quant'; # "*" for "times": "4 cars" is 4 times "cars"
+          } elsif($m eq '#') {
+            $m = 'numf';  # "#" for "number": [#,_1] for "the number _1"
           }
 
           # Most common case: a simple, legal-looking method name
@@ -461,7 +480,13 @@ sub _compile {
             } elsif($p =~ m<^_(-?\d+)$>s) {
               # _3 meaning $_[3]
               $code[-1] .= '$_[' . (0 + $1) . '], ';
-            } elsif($USE_LITERALS and $p !~ m<[^\x20-\x7E]>s) {
+            } elsif($USE_LITERALS and (
+              (ord('A') == 65)
+               ? $p !~ m<[^\x20-\x7E]>s
+                  # ASCII very safe chars
+               : $p !~ m/[^ !"\#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~\x07]/s
+                  # EBCDIC very safe chars            
+            )) {
               # Normal case: a literal containing only safe characters
               $p =~ s/'/\\'/g;
               $code[-1] .= q{'} . $p . q{', };
@@ -494,9 +519,13 @@ sub _compile {
 
       } elsif($1 eq '~,') { # "~,"
         if($in_group) {
-          $c[-1] .= "\x7F";
-           # This is a hack, based on the assumption that no-one will actually
-           # want a \x7f inside a bracket group.  Let's hope that's it's true.
+          # This is a hack, based on the assumption that no-one will actually
+          # want a DEL inside a bracket group.  Let's hope that's it's true.
+          if (ord('A') == 65) { # ASCII etc
+            $c[-1] .= "\x7F";
+          } else {              # EBCDIC (cp 1047, 0037, POSIX-BC)
+            $c[-1] .= "\x07";
+          }
         } else {
           $c[-1] .= '~,';
         }
@@ -627,7 +656,8 @@ sub _lex_refs {  # report the lexicon references for this handle's class
          scalar(keys %{$class . '::Lexicon'}), " entries\n" if DEBUG;
   }
 
-  # Implements depth(height?)-first recursive searching of superclasses
+  # Implements depth(height?)-first recursive searching of superclasses.
+  # In hindsight, I suppose I could have just used Class::ISA!
   foreach my $superclass (@{$class . "::ISA"}) {
     print " Super-class search into $superclass\n" if DEBUG;
     next if $seen_r->{$superclass}++;
@@ -642,5 +672,4 @@ sub clear_isa_scan { %isa_scan = (); return; } # end on a note of simplicity!
 
 ###########################################################################
 1;
-
 

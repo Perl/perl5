@@ -677,7 +677,7 @@ quantification is not as complicated an operation.
 =head2 The Devil in the Details
 
 There's plenty more to Maketext than described above -- for example,
-there's the details of how language tags ("en-US", "x-cree", "fi",
+there's the details of how language tags ("en-US", "i-pwn", "fi",
 etc.) or locale IDs ("en_US") interact with actual module naming
 ("BogoQuery/Locale/en_us.pm"), and what magic can ensue; there's the
 details of how to record (and possibly negotiate) what character
