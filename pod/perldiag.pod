@@ -1289,6 +1289,11 @@ something that isn't defined yet, you don't actually have to define the
 subroutine or package before the current location.  You can use an empty
 "sub foo;" or "package FOO;" to enter a "forward" declaration.
 
+=item dump() better written as CORE::dump()
+
+(W misc) You used the obsolescent C<dump()> built-in function, without fully
+qualifying it as C<CORE::dump()>.  Maybe it's a typo.  See L<perlfunc/dump>.
+
 =item Duplicate free() ignored
 
 (S malloc) An internal routine called free() on something that had

@@ -1204,7 +1204,9 @@ resulting confusion on the part of Perl.
 This function is now largely obsolete, partly because it's very
 hard to convert a core file into an executable, and because the
 real compiler backends for generating portable bytecode and compilable
-C code have superseded it.
+C code have superseded it.  That's why you should now invoke it as
+C<CORE::dump()>, if you don't want to be warned against a possible
+typo.
 
 If you're looking to use L<dump> to speed up your program, consider
 generating bytecode or native C code as described in L<perlcc>.  If
