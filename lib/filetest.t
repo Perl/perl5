@@ -5,7 +5,7 @@ BEGIN {
 	@INC = '../lib';
 }
 
-use Test::More tests => 13;
+use Test::More tests => 15;
 
 # these two should be kept in sync with the pragma itself
 # if hint bits are changed there, other things *will* break
