@@ -156,7 +156,7 @@ sub write_protos {
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
-	$ret .= '/* ' if $flags =~ /[mX]/;
+	$ret .= '/* ' if $flags =~ /m/;
 	if ($flags =~ /s/) {
 	    $retval = "STATIC $retval";
 	    $func = "S_$func";
@@ -189,7 +189,7 @@ sub write_protos {
 	    $ret .= "\n#endif\n";
 	}
 	$ret .= ";";
-	$ret .= ' */' if $flags =~ /[mX]/;
+	$ret .= ' */' if $flags =~ /m/;
 	$ret .= "\n";
     }
     $ret;

@@ -764,7 +764,7 @@ PERL_CALLCONV void	Perl_sv_dump(pTHX_ SV* sv);
 PERL_CALLCONV bool	Perl_sv_derived_from(pTHX_ SV* sv, const char* name);
 PERL_CALLCONV I32	Perl_sv_eq(pTHX_ SV* sv1, SV* sv2);
 PERL_CALLCONV void	Perl_sv_free(pTHX_ SV* sv);
-/* PERL_CALLCONV void	Perl_sv_free2(pTHX_ SV* sv); */
+PERL_CALLCONV void	Perl_sv_free2(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_free_arenas(pTHX);
 PERL_CALLCONV char*	Perl_sv_gets(pTHX_ SV* sv, PerlIO* fp, I32 append);
 PERL_CALLCONV char*	Perl_sv_grow(pTHX_ SV* sv, STRLEN newlen);
@@ -989,7 +989,7 @@ PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ OP* op);
 PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op);
 
 #if defined(PERL_COPY_ON_WRITE)
-/* PERL_CALLCONV int	Perl_sv_release_IVX(pTHX_ SV *sv); */
+PERL_CALLCONV int	Perl_sv_release_IVX(pTHX_ SV *sv);
 #endif
 
 PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *);
@@ -1337,7 +1337,7 @@ PERL_CALLCONV void	Perl_sv_copypv(pTHX_ SV* dsv, SV* ssv);
 PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value);
 PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
 #ifdef PERL_COPY_ON_WRITE
-/* PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dsv, SV* ssv); */
+PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dsv, SV* ssv);
 #endif
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
