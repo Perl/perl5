@@ -1050,11 +1050,14 @@ die_where(char *message)
 	    if (svp) {
 		if (!SvIOK(*svp)) {
 		    static char prefix[] = "\t(in cleanup) ";
+		    SV *err = ERRSV;
 		    sv_upgrade(*svp, SVt_IV);
 		    (void)SvIOK_only(*svp);
-		    SvGROW(ERRSV, SvCUR(ERRSV)+sizeof(prefix)+klen);
-		    sv_catpvn(ERRSV, prefix, sizeof(prefix)-1);
-		    sv_catpvn(ERRSV, message, klen);
+		    if (!SvPOK(err))
+			sv_setpv(err,"");
+		    SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
+		    sv_catpvn(err, prefix, sizeof(prefix)-1);
+		    sv_catpvn(err, message, klen);
 		}
 		sv_inc(*svp);
 	    }
