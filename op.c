@@ -5588,7 +5588,7 @@ peep(register OP *o)
 	    char *key;
 	    STRLEN keylen;
 	
-	    if (o->op_private & (OPpDEREF_HV|OPpDEREF_AV|OPpLVAL_INTRO)
+	    if ((o->op_private & (OPpLVAL_INTRO))
 		|| ((BINOP*)o)->op_last->op_type != OP_CONST)
 		break;
 	    rop = (UNOP*)((BINOP*)o)->op_first;
