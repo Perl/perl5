@@ -15,12 +15,12 @@
 :	p		function has a Perl_ prefix
 :	f		function takes printf style format string, varargs
 :	r		function never returns
-:       o		has no compatibility macro (#define foo Perl_foo)
-:       x		not exported
-:       X		explicitly exported
-:       M		may change
-:       E		visible to Perl core extensions
-:       b		binary backward compatibility; function is a macro
+:	o		has no compatibility macro (#define foo Perl_foo)
+:	x		not exported
+:	X		explicitly exported
+:	M		may change
+:	E		visible to Perl core extensions
+:	b		binary backward compatibility; function is a macro
 :			but has also Perl_ implementation (which is exported)
 :
 : Individual flags may be separated by whitespace.
@@ -947,8 +947,8 @@ Ap	|void	|sys_intern_clear
 Ap	|void	|sys_intern_init
 #endif
 
-Ap |char * |custom_op_name|OP* op
-Ap |char * |custom_op_desc|OP* op
+Ap	|char *	|custom_op_name	|OP* op
+Ap	|char *	|custom_op_desc	|OP* op
 
 #if defined(PERL_COPY_ON_WRITE)
 pMX	|int	|sv_release_IVX	|SV *sv
@@ -1019,7 +1019,7 @@ s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs|bool for_my
 s	|void	|apply_attrs_my	|HV *stash|OP *target|OP *attrs|OP **imopsp
 #  if defined(PL_OP_SLAB_ALLOC)
 s	|void*	|Slab_Alloc	|int m|size_t sz
-s      |void   |Slab_Free      |void *op
+s	|void	|Slab_Free	|void *op
 #  endif
 #endif
 
@@ -1060,12 +1060,12 @@ s	|U32	|seed
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
-s       |I32    |unpack_rec     |tempsym_t* symptr|char *s|char *strbeg|char *strend|char **new_s
-s       |SV **  |pack_rec       |SV *cat|tempsym_t* symptr|SV **beglist|SV **endlist
+s	|I32	|unpack_rec	|tempsym_t* symptr|char *s|char *strbeg|char *strend|char **new_s
+s	|SV **	|pack_rec	|SV *cat|tempsym_t* symptr|SV **beglist|SV **endlist
 s	|SV*	|mul128		|SV *sv|U8 m
 s	|I32	|measure_struct	|tempsym_t* symptr
 s	|char *	|group_end	|char *pat|char *patend|char ender
-s       |char * |get_num        |char *ppat|I32 *
+s	|char *	|get_num	|char *ppat|I32 *
 s	|bool	|next_symbol	|tempsym_t* symptr
 s	|void	|doencodes	|SV* sv|char* s|I32 len
 s	|SV*	|is_an_int	|char *s|STRLEN l
@@ -1220,7 +1220,7 @@ s	|void	|sv_del_backref	|SV *sv
 s	|void	|del_sv	|SV *p
 #  endif
 #  if !defined(NV_PRESERVES_UV)
-s      |int    |sv_2iuv_non_preserve   |SV *sv|I32 numtype
+s	|int	|sv_2iuv_non_preserve	|SV *sv|I32 numtype
 #  endif
 s	|I32	|expect_number	|char** pattern
 #

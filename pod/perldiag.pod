@@ -64,7 +64,7 @@ L<perlfunc/accept>.
 
 =item '!' allowed only after types %s
 
-(F) The '!' is allowed in pack() or unpack(9 only after certain types.
+(F) The '!' is allowed in pack() or unpack() only after certain types.
 See L<perlfunc/pack>.
 
 =item Ambiguous call resolved as CORE::%s(), qualify as such or use &
