@@ -3219,6 +3219,43 @@ string, false otherwise.
 =for hackers
 Found in file utf8.c
 
+=item utf8_distance
+
+Returns the number of UTF8 characters between the UTF-8 pointers C<a>
+and C<b>.
+
+WARNING: use only if you *know* that the pointers point inside the
+same UTF-8 buffer.
+
+	IV	utf8_distance(U8 *a, U8 *b)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8_hop
+
+Move the C<s> pointing to UTF-8 data by C<off> characters, either forward
+or backward.
+
+WARNING: do not use the following unless you *know* C<off> is within
+the UTF-8 buffer pointed to by C<s>.
+
+	U8*	utf8_hop(U8 *s, I32 off)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8_length
+
+Return the length of the UTF-8 char encoded string C<s> in characters.
+Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
+up past C<e>, croaks.
+
+	STRLEN	utf8_length(U8* s, U8 *e)
+
+=for hackers
+Found in file utf8.c
+
 =item utf8_to_bytes
 
 Converts a string C<s> of length C<len> from UTF8 into byte encoding.
@@ -3241,9 +3278,11 @@ and the pointer C<s> will be advanced to the end of the character.
 If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
 it is assumed that the caller will raise a warning, and this function
-will set C<retlen> to C<-1> and return.  The C<flags> can also contain
-various flags to allow deviations from the strict UTF-8 encoding 
-(see F<utf8.h>).
+will set C<retlen> to C<-1> and return zero.  If the C<flags> does not
+contain UTF8_CHECK_ONLY, the UNICODE_REPLACEMENT_CHARACTER (0xFFFD)
+will be returned, and C<retlen> will be set to the expected length of
+the UTF-8 character in bytes.  The C<flags> can also contain various
+flags to allow deviations from the strict UTF-8 encoding (see F<utf8.h>).
 
 	U8* s	utf8_to_uv(STRLEN curlen, STRLEN *retlen, U32 flags)
 
