@@ -3666,6 +3666,14 @@ sub dir_listing {
     my $lc_want =
 	File::Spec->catfile($CPAN::Config->{keep_source_where},
 			    "authors", "id", @$chksumfile);
+
+    my $fh = FileHandle->new;
+    if (open($fh, $lc_want)){
+	# purge and refetch old (pre-PGP) CHECKSUMS; they are a security hazard
+	my $line = <$fh>; close $fh;
+	unlink($lc_want) unless $line =~ /PGP/;
+    }
+
     local($") = "/";
     # connect "force" argument with "index_expire".
     my $force = 0;
