@@ -3,7 +3,7 @@ require 5.000;
 
 =head1 NAME
 
-getcwd - get pathname of current working directory
+Cwd - get pathname of current working directory
 
 =head1 SYNOPSIS
 
@@ -12,6 +12,9 @@ getcwd - get pathname of current working directory
 
     use Cwd;
     $dir = getcwd;
+
+    use Cwd;
+    $dir = fastcwd;
 
     use Cwd;
     $dir = fastgetcwd;
@@ -28,15 +31,20 @@ getcwd - get pathname of current working directory
 
 =head1 DESCRIPTION
 
+This module provides functions for determining the pathname of the
+current working directory.  By default, it exports the functions
+cwd(), getcwd(), fastcwd(), and fastgetcwd() into the caller's
+namespace.  Each of these functions are called without arguments and
+return the absolute path of the current working directory.  It is
+recommended that cwd (or another *cwd() function) be used in I<all>
+code to ensure portability.
+
+The cwd() is the most natural and safe form for the current
+architecture. For most systems it is identical to `pwd` (but without
+the trailing line terminator).
+
 The getcwd() function re-implements the getcwd(3) (or getwd(3)) functions
 in Perl.
-
-The abs_path() function takes a single argument and returns the
-absolute pathname for that argument.  It uses the same algorithm
-as getcwd().  (Actually, getcwd() is abs_path("."))  Symbolic links
-and relative-path components ("." and "..") are resolved to return
-the canonical pathname, just like realpath(3).  Also callable as
-realpath().
 
 The fastcwd() function looks the same as getcwd(), but runs faster.
 It's also more dangerous because it might conceivably chdir() you out
@@ -48,16 +56,17 @@ that it leaves you in the same directory that it started in. If it has
 changed it will C<die> with the message "Unstable directory path,
 current directory changed unexpectedly". That should never happen.
 
-The fast_abs_path() function looks the same as abs_path(), but runs faster.
-And like fastcwd() is more dangerous.
+The fastgetcwd() function is provided as a synonym for cwd().
 
-The cwd() function looks the same as getcwd and fastgetcwd but is
-implemented using the most natural and safe form for the current
-architecture. For most systems it is identical to `pwd` (but without
-the trailing line terminator).
+The abs_path() function takes a single argument and returns the
+absolute pathname for that argument.  It uses the same algorithm as
+getcwd().  (Actually, getcwd() is abs_path("."))  Symbolic links and
+relative-path components ("." and "..") are resolved to return the
+canonical pathname, just like realpath(3).  This function is also
+callable as realpath().
 
-It is recommended that cwd (or another *cwd() function) is used in
-I<all> code to ensure portability.
+The fast_abs_path() function looks the same as abs_path() but runs
+faster and, like fastcwd(), is more dangerous.
 
 If you ask to override your chdir() built-in function, then your PWD
 environment variable will be kept up to date.  (See
