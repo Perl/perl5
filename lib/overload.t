@@ -1066,5 +1066,23 @@ package main;
 my $utfvar = new utf8_o 200.2.1;
 test("$utfvar" eq 200.2.1); # 223
 
+# 224..226 -- more %{} tests.  Hangs in 5.6.0, okay in later releases.
+# Basically this example implements strong encapsulation: if Hderef::import()
+# were to eval the overload code in the caller's namespace, the privatisation
+# would be quite transparent.
+package Hderef;
+use overload '%{}' => sub { (caller(0))[0] eq 'Foo' ? $_[0] : die "zap" };
+package Foo;
+@Foo::ISA = 'Hderef';
+sub new { bless {}, shift }
+sub xet { @_ == 2 ? $_[0]->{$_[1]} :
+	  @_ == 3 ? ($_[0]->{$_[1]} = $_[2]) : undef }
+package main;
+my $a = Foo->new;
+$a->xet('b', 42);
+print $a->xet('b') == 42 ? "ok 224\n" : "not ok 224\n";
+print defined eval { $a->{b} } ? "not ok 225\n" : "ok 225\n";
+print $@ =~ /zap/ ? "ok 226\n" : "not ok 226\n";
+
 # Last test is:
-sub last {223}
+sub last {226}
