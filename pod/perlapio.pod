@@ -314,22 +314,26 @@ it a char *mode as in fopen/freopen.
 
 =item B<PerlIO_exportFILE(f,flags)>
 
-Given a PerlIO * return a 'native' FILE * suitable for passing to code
+Given a PerlIO * create a 'native' FILE * suitable for passing to code
 expecting to be compiled and linked with ANSI C I<stdio.h>.
 
 The fact that such a FILE * has been 'exported' is recorded, and may
 affect future PerlIO operations on the original PerlIO *.
 
+Calling this function repeatedly will create a FILE * on each call.
+
 =item B<PerlIO_findFILE(f)>
 
-Returns previously 'exported' FILE * (if any).  Placeholder until
-interface is fully defined.
+Returns a native FILE * used by a stdio layer. If there is none, it
+will create one with PerlIO_exportFILE.
 
 =item B<PerlIO_releaseFILE(p,f)>
 
 Calling PerlIO_releaseFILE informs PerlIO that all use of FILE * is
 complete. It is removed from list of 'exported' FILE *s, and
 associated PerlIO * should revert to original behaviour.
+
+(Currently a noop.)
 
 =back
 

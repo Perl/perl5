@@ -2433,10 +2433,14 @@ PerlIO_importFILE(FILE *stdio, int fl)
     dTHX;
     PerlIO *f = NULL;
     if (stdio) {
+        int mode = fcntl(fileno(stdio), F_GETFL);
 	PerlIOStdio *s =
 	    PerlIOSelf(PerlIO_push
 		       (aTHX_(f = PerlIO_allocate(aTHX)), &PerlIO_stdio,
-			"r+", Nullsv), PerlIOStdio);
+			(mode&O_ACCMODE) == O_RDONLY ? "r"
+                        : (mode&O_ACCMODE) == O_WRONLY ? "w"
+                        : "r+",
+                        Nullsv), PerlIOStdio);
 	s->stdio = stdio;
     }
     return f;
@@ -2828,11 +2832,12 @@ PerlIO_exportFILE(PerlIO *f, int fl)
 {
     dTHX;
     FILE *stdio;
+    char buf[8];
     PerlIO_flush(f);
-    stdio = fdopen(PerlIO_fileno(f), "r+");
+    stdio = fdopen(PerlIO_fileno(f), PerlIO_modestr(f,buf));
     if (stdio) {
 	PerlIOStdio *s =
-	    PerlIOSelf(PerlIO_push(aTHX_ f, &PerlIO_stdio, "r+", Nullsv),
+	    PerlIOSelf(PerlIO_push(aTHX_ f, &PerlIO_stdio, buf, Nullsv),
 		       PerlIOStdio);
 	s->stdio = stdio;
     }
