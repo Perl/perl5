@@ -4110,9 +4110,12 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
 		    STRLEN ulen;
-		    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+		    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
 
-		    toLOWER_utf8(p, tmpbuf, &ulen);
+		    to_utf8_fold(p, tmpbuf, &ulen);
+		    if (swash_fetch(sw, tmpbuf, do_utf8))
+			match = TRUE;
+		    to_utf8_upper(p, tmpbuf, &ulen);
 		    if (swash_fetch(sw, tmpbuf, do_utf8))
 			match = TRUE;
 		}
