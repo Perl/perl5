@@ -936,6 +936,28 @@ my_chdir(char *dir)
 }  /* end of my_chdir */
 /*}}}*/
 
+
+/*{{{FILE *my_tmpfile()*/
+FILE *
+my_tmpfile(void)
+{
+  FILE *fp;
+  char *cp;
+  dTHX;
+
+  if ((fp = tmpfile())) return fp;
+
+  New(1323,cp,L_tmpnam+24,char);
+  strcpy(cp,"Sys$Scratch:");
+  tmpnam(cp+strlen(cp));
+  strcat(cp,".Perltmp");
+  fp = fopen(cp,"w+","fop=dlt");
+  Safefree(cp);
+  return fp;
+}
+/*}}}*/
+
+
 static void
 create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
 {

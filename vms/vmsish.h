@@ -110,6 +110,7 @@
 #define kill_file		Perl_kill_file
 #define my_mkdir		Perl_my_mkdir
 #define my_chdir		Perl_my_chdir
+#define my_tmpfile		Perl_my_tmpfile
 #define my_utime		Perl_my_utime
 #define rmsexpand	Perl_rmsexpand
 #define rmsexpand_ts	Perl_rmsexpand_ts
@@ -174,6 +175,16 @@
 #  endif
 #  define vfork my_vfork
 #endif
+
+/*
+ * Toss in a shim to tmpfile which creates a plain temp file if the
+ * RMS tmp mechanism won't work (e.g. if someone is relying on ACLs
+ * from a specific directory to permit creation of files).
+ */
+#ifndef DONT_MASK_RTL_CALLS
+#  define tmpfile my_tmpfile
+#endif
+
 
 /* BIG_TIME:
  *	This symbol is defined if Time_t is an unsigned type on this system.
@@ -643,6 +654,7 @@ int	do_rmdir (char *);
 int	kill_file (char *);
 int	my_mkdir (char *, Mode_t);
 int	my_chdir (char *);
+FILE *	my_tmpfile (void);
 int	my_utime (char *, struct utimbuf *);
 char *	rmsexpand (char *, char *, char *, unsigned);
 char *	rmsexpand_ts (char *, char *, char *, unsigned);
