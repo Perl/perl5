@@ -2443,6 +2443,11 @@ intsize (intsize.U):
 	This variable contains the value of the INTSIZE symbol, which
 	indicates to the C program how many bytes there are in an int.
 
+issymlink (issymlink.U):
+	This variable holds the switch of the test command to test
+	for a symbolic link (if they are supported).  Typical values
+	include '-h' and '-L'.
+
 ivdformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl IV as a signed decimal integer. 

@@ -983,3 +983,6 @@ i_prot='undef'
 d_SCNfldbl='undef'
 d_perl_otherlibdirs='undef'
 nvsize='16'
+issymlink=''
+
+

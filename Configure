@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Dec 21 17:16:36 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Dec 21 18:12:08 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -722,6 +722,7 @@ installusrbinperl=''
 intsize=''
 longsize=''
 shortsize=''
+issymlink=''
 libc=''
 ldlibpthname=''
 libperl=''
@@ -909,7 +910,6 @@ stdchar=''
 d_stdio_stream_array=''
 stdio_stream_array=''
 sysman=''
-testsyml=''
 trnl=''
 uidformat=''
 uidsign=''
@@ -2175,18 +2175,18 @@ case "$lns" in
 *"ln -s")
 	echo "Checking how to test for symbolic links..." >&4
 	$lns blurfl sym
-	if $test "X$testsyml" = X; then
+	if $test "X$issymlink" = X; then
 		if $test -h sym 2>/dev/null; then
-			testsyml=-h
+			issymlink=-h
 		fi
 	fi
-	if $test "X$testsyml" = X; then
+	if $test "X$issymlink" = X; then
 		if $test -L sym 2>/dev/null; then
-			testsyml=-L
+			issymlink=-L
 		fi
 	fi
-	if $test "X$testsyml" != X; then
-		echo "You can test for symbolic links with $testsyml." >&4
+	if $test "X$issymlink" != X; then
+		echo "You can test for symbolic links with $issymlink." >&4
 	else
 		echo "I do not know how you can test for symbolic links." >&4
 	fi
@@ -2204,7 +2204,7 @@ $define|true|[yY]*)
 	''|'.')	echo "Cannot create symlinks in the original directory." >&4
 		exit 1
 		;;
-	*)	case "$lns:$testsyml" in
+	*)	case "$lns:$issymlink" in
 		*"ln -s:-"?)
 			echo "Creating the symbolic links..." >&4
 			echo "(First creating the subdirectories...)" >&4
@@ -2224,7 +2224,7 @@ $define|true|[yY]*)
 				read filename
 				test -z "$filename" && break
 				if test -f $filename; then
-					if test $testsyml $filename; then
+					if test $issymlink $filename; then
 						rm -f $filename
 					fi
 				fi
@@ -16289,6 +16289,7 @@ installvendorarch='$installvendorarch'
 installvendorbin='$installvendorbin'
 installvendorlib='$installvendorlib'
 intsize='$intsize'
+issymlink='$issymlink'
 ivdformat='$ivdformat'
 ivsize='$ivsize'
 ivtype='$ivtype'
@@ -16486,7 +16487,6 @@ tar='$tar'
 tbl='$tbl'
 tee='$tee'
 test='$test'
-testsyml='$testsyml'
 timeincl='$timeincl'
 timetype='$timetype'
 touch='$touch'
