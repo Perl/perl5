@@ -4797,49 +4797,35 @@ loaded the standard Math::Complex module.
 
 Sets the random number seed for the C<rand> operator.
 
-It's usually not necessary to call C<srand> at all, because if it is
-not called explicitly, it is called implicitly at the first use of the
-C<rand> operator.  However, this was not the case in versions of Perl
-before 5.004, so if your script will run under older Perl versions, it
-should call C<srand>.
-
 The point of the function is to "seed" the C<rand> function so that
 C<rand> can produce a different sequence each time you run your
-program.  Just do it B<once> at the top of your program, or you
-I<won't> get random numbers out of C<rand>.
+program.
 
-If EXPR is omitted, uses a semi-random value supplied by the kernel
-(if it supports the F</dev/urandom> device) or based on the current
-time and process ID, among other things.
+If srand() is not called explicitly, it is called implicitly at the
+first use of the C<rand> operator.  However, this was not the case in
+versions of Perl before 5.004, so if your script will run under older
+Perl versions, it should call C<srand>.
+
+Most programs won't even call srand() at all, except those that
+need a cryptographically-strong starting point rather than the
+generally acceptable default, which is based on time of day,
+process ID, and memory allocation, or the F</dev/urandom> device,
+if available. 
+
+You can call srand($seed) with the same $seed to reproduce the
+I<same> sequence from rand(), but this is usually reserved for
+generating predictable results for testing or debugging.
+Otherwise, don't call srand() more than once in your program.
+
+Do B<not> call srand() (i.e. without an argument) more than once in
+a script.  The internal state of the random number generator should
+contain more entropy than can be provided by any seed, so calling
+srand() again actually I<loses> randomness.
 
 Most implementations of C<srand> take an integer and will silently
 truncate decimal numbers.  This means C<srand(42)> will usually
 produce the same results as C<srand(42.1)>.  To be safe, always pass
 C<srand> an integer.
-
-Calling C<srand> multiple times is highly suspect.
-
-=over 4
-
-=item *
-
-Do B<not> call srand() (i.e. without an argument) more than once in
-a script.  The internal state of the random number generator should
-contain more entropy than can be provided by any seed, so calling
-srand() again actually I<loses> randomness.  And you shouldn't use
-srand() at all unless you need backward compatibility with Perls older
-than 5.004.
-
-=item *
-
-Do B<not> call srand($seed) (i.e. with an argument) multiple times in
-a script for any other purpose than calling it with the I<same>
-argument to produce the I<same> sequence out of rand() I<unless> you
-know exactly what you're doing and why you're doing it.  Usually doing
-anything else than reusing the same seed requires intimate knowledge of
-the implementation of srand() and rand() on your platform.
-
-=back
 
 In versions of Perl prior to 5.004 the default seed was just the
 current C<time>.  This isn't a particularly good seed, so many old
