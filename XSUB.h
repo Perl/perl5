@@ -4,7 +4,13 @@
 #  ifdef PERL_OBJECT
 #    define XS(name) void name(CV* cv, CPerlObj* pPerl)
 #  else
-#    define XS(name) void name(CV* cv)
+#    if defined(CYGWIN32) && defined(USE_DYNAMIC_LOADING)
+#      define XS(name) __declspec(dllexport) void name(CV* cv)
+       extern struct _reent *_impure_ptr;
+       void impure_setup(struct _reent *_impure_ptrMain);
+#    else
+#      define XS(name) void name(CV* cv)
+#    endif
 #  endif
 #else
 #  define XS(name) void name(cv) CV* cv;

@@ -72,11 +72,15 @@ configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 cv.h			Code value header
-cygwin32/cw32imp.h	Cygwin32 port
-cygwin32/gcc2		Cygwin32 port
-cygwin32/ld2		Cygwin32 port
-cygwin32/perlgcc	Cygwin32 port
-cygwin32/perlld		Cygwin32 port
+cygwin32/Makefile.SHs	Shared library generation for Cygwin32 port
+cygwin32/ld2.in		ld wrapper template for Cygwin32 port
+cygwin32/perlld.in	dll generator template for Cygwin32 port
+cygwin32/impure_ptr.c	impure pointer stub for dlls
+cygwin32/build-instructions.charles-wilson	Cygwin32 porters notes
+cygwin32/build-instructions.READFIRST		Cygwin32 porters notes
+cygwin32/build-instructions.steven-morlock2	Cygwin32 porters notes
+cygwin32/build-instructions.sebastien-barre	Cygwin32 porters notes
+cygwin32/build-instructions.steven-morlock	Cygwin32 porters notes
 deb.c			Debugging routines
 djgpp/config.over       DOS/DJGPP port
 djgpp/configure.bat     DOS/DJGPP port

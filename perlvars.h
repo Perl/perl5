@@ -138,7 +138,7 @@ PERLVAR(Gcryptseen,	I32)		/* has fast crypt() been initialized? */
 
 PERLVAR(Ghints,	U32)			/* pragma-tic compile-time flags */
 
-PERLVAR(Gdo_undump,	bool)		/* -u or dump seen? */
+PERLVARI(Gdo_undump,	bool,	FALSE)	/* -u or dump seen? */
 PERLVAR(Gdebug,		VOL U32)	/* flags given to -D switch */
 
 PERLVAR(Gamagic_generation,	long)

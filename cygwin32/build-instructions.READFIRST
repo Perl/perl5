@@ -1,0 +1,37 @@
+The perl source distribution is available from 
+   http://www.cpan.org/src/index.html
+
+For the easiest build of perl under Cygwin, do the following:
+
+(1) read
+       *(a) README.cygwin from the perl source distribution
+       *(b) read build-instructions.charles-wilson
+        (b) read build-instructions.sebastien-barre
+        (c) read build-instructions.steven-morlock
+        (d) read build-instructions.steven-morlock2
+        (e) read build-instructions.teun-burgers
+
+(2) prepare the source
+        (a) unpack perl source distribution in /usr/local/src
+        (b) copy perl5.005_03.patch into /usr/local/src/perl5.005_03/
+        (c) cd /usr/local/src/perl5.005_03
+        (d) chmod -R +w *
+        (e) patch -p1 < perl5.005_03.patch
+
+(3) get ready to build
+        (a) cp cygwin32/* .
+        (b) cp gcc2 /usr/local/bin
+        (c) cp ld2 /usr/local/bin
+        (d) cp hints/cygwin32.sh config.sh
+        (e) sh Configure -d 
+                (automatically does a make depend)
+
+(4) build and install
+        (b) make
+        (c) make test
+        (d) make install
+
+To customize, look around in the patchfile or ignore the patch and follow the build-instructions.* directly. If you want to edit the paths in the patchfile to reflect your system, search for "/usr/" within the patchfile.
+
+* MUST read.
+

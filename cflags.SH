@@ -76,7 +76,10 @@ for file do
 
     : allow variables like toke_cflags to be evaluated
 
-    eval 'eval ${'"${file}_cflags"'-""}'
+    if echo $file | grep -v / >/dev/null
+    then
+      eval 'eval ${'"${file}_cflags"'-""}'
+    fi
 
     : or customize here
 

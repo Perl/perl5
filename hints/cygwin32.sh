@@ -1,50 +1,59 @@
 #! /bin/sh
 # cygwin32.sh - hintsfile for building perl on Windows NT using the
 #     Cygnus Win32 Development Kit.
-#     See "http://www.cygnus.com/misc/gnu-win32/" to learn about the kit.
 #
-path_sep=\;
-exe_ext='.exe'
-firstmakefile='GNUmakefile'
-if test -f $sh.exe; then sh=$sh.exe; fi
-startsh="#!$sh"
-cc='gcc2'
-ld='ld2'
-usrinc='/gnuwin32/H-i386-cygwin32/i386-cygwin32/include'
-libpth='/gnuwin32/H-i386-cygwin32/i386-cygwin32/lib /gnuwin32/H-i386-cygwin32/lib'
-libs='-lcygwin -lm -lc -lkernel32'
-# dynamic lib stuff
-so='dll'
-#i_dlfcn='define'
-dlsrc='dl_cygwin32.xs'
-usedl='y'
-# flag to include the perl.exe export variable translation file cw32imp.h
-# when building extension libs
-cccdlflags='-DCYGWIN32 -DDLLIMPORT '
-# flag that signals gcc2 to build exportable perl
-ccdlflags='-buildperl '
-lddlflags='-L../.. -L/gnuwin32/H-i386-cygwin32/i386-cygwin32/lib -lperlexp -lcygwin'
-d_voidsig='undef'
-extensions='Fcntl IO Opcode SDBM_File'
-lns='cp'
-signal_t='int'
-useposix='false'
-rd_nodata='0'
-eagain='EAGAIN'
+_a='.a'
+_exe='.exe'
+_o='.o'
 archname='cygwin32'
-#
-
-installbin='/usr/local/bin'
-installman1dir=''
-installman3dir=''
-installprivlib='/usr/local/lib/perl5'
+# hmm... why Configure doesn't look for this?
+#bash='/usr/bin/bash'
+bin='/usr/local/bin'
+binexp='/usr/local/bin'
+byteorder='1234'
+cc='gcc'
+cccdlflags=''
+# ccflags='-I/usr/local/include -ggdb3 -DCYGWIN32 -DDEBUGGING'
+# ok, debugging may be not appropriate for everyone
+ccflags='-DCYGWIN32'
+clocktype='clock_t'
+cryptlib='-lcrypt'
+dlext='dll'
+dlsrc='dl_cygwin32.xs'
+exe_ext='.exe'
+# work around case-insensitive file names
+firstmakefile='GNUmakefile'
+gidtype='gid_t'
+installman1dir='/usr/local/man/man1'
+installman3dir='/usr/local/man/man3'
 installscript='/usr/local/bin'
-
 installsitelib='/usr/local/lib/perl5/site_perl'
-libc='/gnuwin32/H-i386-cygwin32/i386-cygwin32/lib/libc.a'
-
-perlpath='/usr/local/bin/perl'
-
+installusrbinperl='undef'
+ld='ld2'
+lddlflags='-DCYGWIN32 --export-dynamic --strip-debug'
+ldflags="-L. -L`pwd`"
+lib_ext='.a'
+libperl='libperl.a'
+libpth='/usr/lib /usr/local/lib /cygnus/cygwin-b20/H-i586-cygwin32/lib'
+libs='-lcygwin -lm -lc -lkernel32'
+man1dir='/usr/local/man/man1'
+man1direxp='/usr/local/man/man1'
+man1ext='1'
+man3dir='/usr/local/man/man3'
+man3direxp='/usr/local/man/man3'
+man3ext='3'
+obj_ext='.o'
+optimize='-O'
+path_sep=':'
+prefix='/usr/local'
+prefixexp='/usr/local'
+scriptdir='/usr/local/bin'
+scriptdirexp='/usr/local/bin'
 sitelib='/usr/local/lib/perl5/site_perl'
 sitelibexp='/usr/local/lib/perl5/site_perl'
-usrinc='/gnuwin32/H-i386-cygwin32/i386-cygwin32/include'
+sysman='/usr/local/man/man1'
+usenm='false'
+useperlio='define'
+useshrplib='true'
+usevfork='true'
+usrinc='/usr/i586-cygwin32/include'

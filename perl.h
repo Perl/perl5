@@ -218,7 +218,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  */
 
 /* define this once if either system, instead of cluttering up the src */
-#if defined(MSDOS) || defined(atarist) || defined(WIN32)
+#if defined(MSDOS) || defined(atarist) || defined(WIN32) || defined(CYGWIN32)
 #define DOSISH 1
 #endif
 
@@ -1495,11 +1495,7 @@ union any {
 #define ARGSproto void
 #endif /* USE_THREADS */
 
-/* Work around some cygwin32 problems with importing global symbols */
 #if defined(CYGWIN32)
-#  if defined(DLLIMPORT) 
-#   include "cw32imp.h"
-#  endif
 /* USEMYBINMODE
  *   This symbol, if defined, indicates that the program should
  *   use the routine my_binmode(FILE *fp, char iotype) to insure
@@ -2308,7 +2304,7 @@ struct perl_vars {
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
 #else /* PERL_CORE */
-#if !defined(__GNUC__) || !defined(WIN32)
+#if !defined(__GNUC__) || !(defined(WIN32) || defined(CYGWIN32))
 EXT
 #endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;

@@ -4342,11 +4342,13 @@ echo "Your cpp writes the filename in the $pos field of the line."
 $cat >findhdr <<EOF
 $startsh
 wanted=\$1
-name=''
-if test -f $usrinc/\$wanted; then
-	echo "$usrinc/\$wanted"
-	exit 0
-fi
+for usrincdir in $usrinc
+do
+	if test -f \$usrincdir/\$wanted; then
+		echo "\$usrincdir/\$wanted"
+		exit 0
+	fi
+done
 awkprg='{ print \$$fieldn }'
 echo "#include <\$wanted>" > foo\$\$.c
 $cppstdin $cppminus $cppflags < foo\$\$.c 2>/dev/null | \
@@ -4354,7 +4356,7 @@ $grep "^[ 	]*#.*\$wanted" | \
 while read cline; do
 	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
 	case "\$name" in
-	*/\$wanted) echo "\$name"; exit 0;;
+	*[/\\\\]\$wanted) echo "\$name"; exit 0;;
 	*) name='';;
 	esac;
 done;

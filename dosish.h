@@ -23,8 +23,22 @@
 #    define PERL_SYS_INIT(c,v)	Perl_win32_init(c,v)
 #    define BIT_BUCKET "nul"
 #  else
-#    define PERL_SYS_INIT(c,v)
-#    define BIT_BUCKET "\\dev\\nul" /* "wanna be like, umm, Newlined, or somethin?" */
+#    ifdef CYGWIN32
+       extern struct _reent *__imp_reent_data; /* global impure pointer */
+#      define PERL_SYS_INIT(c,v)	\
+		MALLOC_INIT; impure_setup(__imp_reent_data);
+#      define OP_BINARY O_BINARY
+#      define BIT_BUCKET "nul"
+#      define HAS_IOCTL
+#      define HAS_UTIME
+#      define HAS_KILL
+#      define HAS_WAIT
+#      define HAS_CHOWN
+#      define HAS_GROUP
+#    else
+#      define PERL_SYS_INIT(c,v)
+#      define BIT_BUCKET "\\dev\\nul" /* "wanna be like, umm, Newlined, or somethin?" */
+#    endif
 #  endif
 #endif	/* DJGPP */
 

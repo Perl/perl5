@@ -70,6 +70,7 @@ $Is_VMS   = $^O eq 'VMS';
 $Is_OS2   = $^O eq 'os2';
 $Is_Mac   = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
+$Is_Cygwin= $^O =~ /cygwin/i;
 
 require ExtUtils::MM_Unix;
 
@@ -85,6 +86,9 @@ if ($Is_Mac) {
 }
 if ($Is_Win32) {
     require ExtUtils::MM_Win32;
+}
+if ($Is_Cygwin) {
+    require ExtUtils::MM_Cygwin;
 }
 
 # The SelfLoader would bring a lot of overhead for MakeMaker, because

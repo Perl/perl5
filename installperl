@@ -8,12 +8,13 @@ BEGIN {
 }
 
 use strict;
-use vars qw($Is_VMS $Is_W32 $Is_OS2 $nonono $versiononly $depth);
+use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $nonono $versiononly $depth);
 
 BEGIN {
     $Is_VMS = $^O eq 'VMS';
     $Is_W32 = $^O eq 'MSWin32';
     $Is_OS2 = $^O eq 'os2';
+    $Is_Cygwin = $^O =~ /cygwin/i;
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
 }
 
@@ -141,10 +142,24 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 			|| warn "WARNING: You've never run 'make test'!!!",
 				"  (Installing anyway.)\n";
 
-if ($Is_W32) {
+if ($Is_W32 or $Is_Cygwin) {
+  my $perldll;
 
-my $perldll = 'perl.' . $dlext;
-$perldll = 'perlcore.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
+if ($Is_Cygwin) {
+  $perldll = $libperl;
+  $perldll =~ s/(\..*)?$/.$dlext/;
+  if ($Config{useshrplib} eq 'true') {
+    # install ld2 and perlld as well
+    foreach ('ld2', 'perlld') {
+      safe_unlink("$installbin/$_");
+      copy("$_", "$installbin/$_");
+      chmod(0755, "$installbin/$_");
+    };
+  };
+} else {
+  $perldll = 'perl.' . $dlext;
+  $perldll = 'perlcore.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
+}
 
 -f $perldll || die "No perl DLL built\n";
 
@@ -227,7 +242,13 @@ if ($Is_VMS) {  # We did core file selection during build
     @corefiles = <$coredir/*.*>;
 }
 else {
+    # [als] hard-coded 'libperl' name... not good!
     @corefiles = <*.h libperl*.*>;
+
+    # cygwin needs special stub for dll loading
+    push @corefiles, 'impure_ptr.o'
+      if ($Is_Cygwin and $Config{useshrplib} eq 'true');
+
     # AIX needs perl.exp installed as well.
     push(@corefiles,'perl.exp') if $^O eq 'aix';
     if ($^O eq 'mpeix') {
@@ -439,7 +460,7 @@ sub unlink {
 
     foreach my $name (@names) {
 	next unless -e $name;
-	chmod 0777, $name if ($Is_OS2 || $Is_W32);
+	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_Cygwin);
 	print STDERR "  unlink $name\n";
 	( CORE::unlink($name) and ++$cnt 
 	  or warn "Couldn't unlink $name: $!\n" ) unless $nonono;

@@ -209,6 +209,8 @@ sub abs_path
     my $start = @_ ? shift : '.';
     my($dotdots, $cwd, @pst, @cst, $dir, @tst);
 
+    return cwd() if ( $^O =~ /cygwin/ );
+
     unless (@cst = stat( $start ))
     {
 	carp "stat($start): $!";

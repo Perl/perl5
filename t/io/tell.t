@@ -6,8 +6,11 @@ print "1..21\n";
 
 $TST = 'tst';
 
+$Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'dos' or
+	      $^O eq 'os2' or $^O eq 'mint' or $^O =~ /cygwin/);
+
 open($TST, '../Configure') || (die "Can't open ../Configure");
-binmode $TST if $^O eq 'MSWin32';
+binmode $TST if $Is_Dosish;
 if (eof(tst)) { print "not ok 1\n"; } else { print "ok 1\n"; }
 
 $firstline = <$TST>;

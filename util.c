@@ -2209,7 +2209,7 @@ my_pclose(PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
+#if  !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN32)
 I32
 wait4pid(int pid, int *statusp, int flags)
 {

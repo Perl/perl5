@@ -3203,7 +3203,12 @@ re_croak2(const char* pat1,const char* pat2,...)
     Copy(pat2, buf + l1, l2 , char);
     buf[l1 + l2] = '\n';
     buf[l1 + l2 + 1] = '\0';
+#ifdef I_STDARG
+    /* ANSI variant takes additional second argument */
     va_start(args, pat2);
+#else
+    va_start(args);
+#endif
     msv = mess(buf, &args);
     va_end(args);
     message = SvPV(msv,l1);
