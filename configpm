@@ -17,7 +17,7 @@ my $glossary = $ARGV[1] || 'Porting/Glossary';
 
 
 open CONFIG, ">$config_pm" or die "Can't open $config_pm: $!\n";
-$myver = $];
+$myver = sprintf "v%vd", $^V;
 
 print CONFIG <<'ENDOFBEG_NOQ', <<"ENDOFBEG";
 package Config;
@@ -38,8 +38,9 @@ sub import {
 }
 
 ENDOFBEG_NOQ
-\$] == $myver
-  or die "Perl lib version ($myver) doesn't match executable version (\$])";
+\$^V eq $myver
+  or die "Perl lib version ($myver) doesn't match executable version (" .
+    (sprintf "v%vd",\$^V) . ")";
 
 # This file was created by configpm when Perl was built. Any changes
 # made to this file will be lost the next time perl is built.
