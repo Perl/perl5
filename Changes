@@ -31,6 +31,318 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14646] By: jhi                                   on 2002/02/11  15:07:28
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 14645] By: jhi                                   on 2002/02/11  14:59:02
+        Log: Forgot from #14641.
+     Branch: perl
+	   ! lib/ExtUtils/t/Embed.t
+____________________________________________________________________________
+[ 14642] By: jhi                                   on 2002/02/11  14:46:39
+        Log: -Dmksymlinks was broken by #14628.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14641] By: jhi                                   on 2002/02/11  14:32:12
+        Log: Subject: [PATCH @14577] OS/2 build
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 11 Feb 2002 06:56:41 -0500
+             Message-ID: <20020211065640.A14993@math.ohio-state.edu> 
+             
+             (sans the Configure, perlio.sym, and t/op/stat.t parts)
+     Branch: perl
+	   ! Makefile.SH autodoc.pl ext/Socket/socketpair.t hints/os2.sh
+	   ! lib/ExtUtils/Embed.pm opcode.pl os2/Makefile.SHs os2/os2.c
+	   ! os2/os2ish.h
+____________________________________________________________________________
+[ 14640] By: jhi                                   on 2002/02/11  14:11:13
+        Log: Integrate perlio;
+             
+             Re-structure Japanese encodings - part 1
+             
+             Split Japanese encodings - part 2
+             - build separate .c files with separate 'compile' steps
+             - overall Japanese.xs / Japanese.pm which loads them
+             
+             Add test for Japanese encoding (well euc-jp anyway).
+             Fix one bug shown by above
+             Skip test which does not pass yet.
+             
+             Patch up the failing multi-byte write case, and un-skip
+             the test.
+     Branch: perl
+	  +> ext/Encode/EUC_JP/Japanese.pm ext/Encode/t/Japanese.t
+	  +> ext/Encode/t/table.euc ext/Encode/t/table.ref
+	   - ext/Encode/EUC_JP/EUC_JP.pm
+	  !> MANIFEST ext/Encode/EUC_JP/Makefile.PL ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14634] By: jhi                                   on 2002/02/11  03:40:01
+        Log: Subject: Re: [PATCH] Re: Modulus operator inconsistency
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 11 Feb 2002 02:50:42 +0000
+             Message-Id: <E16a6YE-0006fq-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! t/op/arith.t
+____________________________________________________________________________
+[ 14633] By: jhi                                   on 2002/02/11  01:53:01
+        Log: "Can't happen" - yes, it can, with buggy UTF-8/EBCDIC.
+             Stepping backward in the string would be majorly bad.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14632] By: jhi                                   on 2002/02/11  01:38:40
+        Log: The debugger part of
+             
+             Subject: [PATCH hints/os2.sh lib/perl5db.pl] Debugger to use proper pager
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 6 Feb 2002 17:32:12 -0500
+             Message-ID: <20020206223212.GG1346@blackrider>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 14631] By: jhi                                   on 2002/02/10  22:11:53
+        Log: Integrate perlio;
+             
+             Borland/Win32 tuning
+             
+             Move PerlIO_perlio to layer_syms where it belongs?
+     Branch: perl
+	  !> makedef.pl perlio.sym t/op/stat.t win32/config_H.bc
+____________________________________________________________________________
+[ 14630] By: jhi                                   on 2002/02/10  22:10:19
+        Log: EBCDIC: the low 256 needs to be shuffled also
+             in pack/unpack U (this breaks the equivalence
+             of pack U and v-strings, but I think if someone
+             has to give, v-strings are a good victim)
+     Branch: perl
+	   ! pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 14628] By: jhi                                   on 2002/02/10  21:55:45
+        Log: Two Configure tweaks; the u32align test was trying
+             to write into a string literal, the ln -s test was
+             failing in VOS.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14627] By: jhi                                   on 2002/02/10  21:07:20
+        Log: DJGPP tweaks from Laszlo Molnar.
+     Branch: perl
+	   ! djgpp/djgpp.c lib/File/Spec.pm
+____________________________________________________________________________
+[ 14624] By: jhi                                   on 2002/02/10  15:33:40
+        Log: Additional explanation for the [:...:] failure.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 14623] By: jhi                                   on 2002/02/10  15:15:53
+        Log: Subject: [ PATCH ] Re: Smoke 14612 /pro/3gl/CPAN/perl-current
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Sun, 10 Feb 2002 13:32:48 +0100
+             Message-Id: <20020210115736.3702.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 14622] By: jhi                                   on 2002/02/10  15:08:06
+        Log: Test tweaks from chromatic for cases where there
+             are no installman1dir or installman3dir.
+     Branch: perl
+	   ! lib/ExtUtils/t/Installed.t
+____________________________________________________________________________
+[ 14621] By: jhi                                   on 2002/02/10  15:07:21
+        Log: Integrate perlio;
+             
+             Nick Clark's tweaks to Encode compile process
+             1. Use decimal constants to unit string arrays rather than
+             very long string litterals (latter having possible "\0"
+             on end issues, and needing ANSI C line splicing).
+             2. Replace tail-recursion during insert process with itteration.
+             Nick C sees 12% speedup from these.
+     Branch: perl
+	  !> ext/Encode/Encode.pm ext/Encode/compile
+____________________________________________________________________________
+[ 14620] By: jhi                                   on 2002/02/10  15:04:19
+        Log: Portability notes: filename characters, character sets.
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 14617] By: jhi                                   on 2002/02/10  02:56:54
+        Log: Use the "Unicode 1.0" name field for control characters,
+             as suggested by Mark Davis.  Note that Unicode 3.2 will
+             require some more legwork on this because of certain
+             alternative names.
+     Branch: perl
+	   ! lib/unicore/Name.pl lib/unicore/mktables
+____________________________________________________________________________
+[ 14616] By: jhi                                   on 2002/02/09  22:41:18
+        Log: The -W 0,float(ieee) and gcvt() are the bad combination.
+     Branch: perl
+	   ! hints/os390.sh
+____________________________________________________________________________
+[ 14615] By: jhi                                   on 2002/02/09  22:34:00
+        Log: EBCDIC: the non-printable characters are different.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14614] By: jhi                                   on 2002/02/09  21:42:26
+        Log: Subject: [PATCH] Re: FreeBSD hangs when reading from dup'd STDOUT/ERR w/o perlio
+             From: Nicholas Clark <nick@unfortu.net> 
+             Date: Sat, 9 Feb 2002 22:31:29 +0000
+             Message-ID: <20020209223129.GH410@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! t/lib/warnings/pp_hot
+____________________________________________________________________________
+[ 14613] By: jhi                                   on 2002/02/09  21:12:12
+        Log: Subject: [PATCH] Re: Modulus operator inconsistency
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 9 Feb 2002 21:00:13 +0000
+             Message-ID: <20020209210013.GG410@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! op.c t/op/arith.t
+____________________________________________________________________________
+[ 14612] By: jhi                                   on 2002/02/09  18:15:39
+        Log: Use the same escaping mechanism for all the *flags.
+     Branch: perl
+	   ! lib/ExtUtils/Embed.pm
+____________________________________________________________________________
+[ 14611] By: jhi                                   on 2002/02/09  17:26:06
+        Log: Protect possible parentheses in ccflags, ccdlflags, and
+             ldflags.  (In OS/390 there are parentheses in ccflags.)
+     Branch: perl
+	   ! lib/ExtUtils/Embed.pm
+____________________________________________________________________________
+[ 14610] By: jhi                                   on 2002/02/09  16:12:03
+        Log: Subject: [PATCH] perl5db.pl: restart in taint mode
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Fri, 08 Feb 2002 19:20:19 -0800
+             Message-id: <4.3.2.7.2.20020208191757.00b4cea0@shell2.webquarry.com>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 14609] By: jhi                                   on 2002/02/08  21:33:59
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq2.pod pod/perlfaq3.pod pod/perlfaq4.pod
+____________________________________________________________________________
+[ 14608] By: jhi                                   on 2002/02/08  20:46:38
+        Log: Subject: [PATCH] CopFILE / MacPerl_MPWFileName
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Fri, 08 Feb 2002 16:31:41 -0500
+             Message-ID: <pudge-10FC3D.16314108022002@onion.valueclick.com>
+     Branch: perl
+	   ! cop.h deb.c pp_ctl.c toke.c util.c
+____________________________________________________________________________
+[ 14605] By: jhi                                   on 2002/02/08  19:18:17
+        Log: The Configure change to go with #14604.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14604] By: jhi                                   on 2002/02/08  19:13:56
+        Log: Subject: [PATCH] Re:  [ID 20020205.007] BSDi test failure perl 5.6.1
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 8 Feb 2002 13:43:49 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10202081341170.15295-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! hints/bsdos.sh
+____________________________________________________________________________
+[ 14602] By: sky                                   on 2002/02/08  15:19:15
+        Log: Start testing for safe localtime functions, TODO, test more functions.
+     Branch: perl
+	   + ext/threads/t/libc.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14601] By: jhi                                   on 2002/02/08  14:14:16
+        Log: Subject: Re: [PATCH] eof() coredumps when ARGV is aliased to another filehandle
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 8 Feb 2002 00:21:07 +0100
+             Message-ID: <20020208002107.E763@rafael>
+     Branch: perl
+	   ! doio.c pp_sys.c t/io/argv.t
+____________________________________________________________________________
+[ 14600] By: jhi                                   on 2002/02/08  14:07:15
+        Log: Subject: [PATCH] Configure followed by make minitest
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Wed, 06 Feb 2002 21:35:20 -0800
+             Message-ID: <YIhY8gzkgSbC092yn@efn.org>
+     Branch: perl
+	   ! t/op/taint.t t/run/fresh_perl.t
+____________________________________________________________________________
+[ 14599] By: jhi                                   on 2002/02/08  14:05:12
+        Log: Integrate perlio;
+             
+             Extract something from yesterdays effort - convert my mail on pad
+             data structures (incoporating Sarathy's corrections/clarifications)
+             into POD in cv.h which gets autodoc.pl'ed into pod/perlintern.pod.
+     Branch: perl
+	  !> cv.h pod/perlapi.pod pod/perlintern.pod
+____________________________________________________________________________
+[ 14597] By: jhi                                   on 2002/02/08  14:01:01
+        Log: Configure DJGPP tweak from Laszlo Molnar.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14596] By: jhi                                   on 2002/02/08  14:00:23
+        Log: DJGPP tweaks from Laszlo Molnar.
+     Branch: perl
+	   ! djgpp/djgppsed.sh perl.c
+____________________________________________________________________________
+[ 14593] By: jhi                                   on 2002/02/08  03:08:20
+        Log: To really skip the test an exit() is needed.
+     Branch: perl
+	   ! lib/encoding.t
+____________________________________________________________________________
+[ 14592] By: jhi                                   on 2002/02/08  02:57:30
+        Log: More diagnostics from Nicholas Clark.
+     Branch: perl
+	   ! lib/Benchmark.t
+____________________________________________________________________________
+[ 14591] By: jhi                                   on 2002/02/07  22:54:57
+        Log: In case of failure be more verbose.
+     Branch: perl
+	   ! t/base/num.t
+____________________________________________________________________________
+[ 14581] By: jhi                                   on 2002/02/07  17:10:06
+        Log: Sanity checks to see that the IV/NV and the PV of numeric
+             scalars stay in sync (unearthed this via the OS/390 gcvt()
+             brokenness)
+     Branch: perl
+	   + t/base/num.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14580] By: jhi                                   on 2002/02/07  14:07:33
+        Log: Retract the anon leak subpatch of #14418 and #14431
+             (the latter came into bleadperl as part of #14433).
+     Branch: perl
+	   ! op.c t/run/fresh_perl.t
+____________________________________________________________________________
+[ 14579] By: jhi                                   on 2002/02/06  23:38:10
+        Log: OS/390 gcvt() seems buggy: with -W 0,float(ieee) it
+             mangles 0.1 to "10".  sprintf() seems more well-behaved.
+     Branch: perl
+	   ! hints/os390.sh
+____________________________________________________________________________
+[ 14578] By: jhi                                   on 2002/02/06  19:56:53
+        Log: Subject: [PATCH @14557] another Encode fix for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 06 Feb 2002 14:44:20 -0600
+             Message-Id: <5.1.0.14.2.20020206143717.01baf008@exchi01>
+     Branch: perl
+	   ! ext/Encode/Encode.xs ext/Encode/Makefile.PL
+____________________________________________________________________________
+[ 14577] By: jhi                                   on 2002/02/06  15:38:25
+        Log: Integrate perlio;
+             
+             One way to avoid OS390 winge about #line directives.
+     Branch: perl
+	  !> ext/Encode/EUC_JP/Makefile.PL
+____________________________________________________________________________
+[ 14576] By: jhi                                   on 2002/02/06  15:36:55
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14574] By: jhi                                   on 2002/02/06  15:11:05
         Log: s/Netware/NetWare/
      Branch: perl
