@@ -855,7 +855,7 @@ sub _can_do_level {
     # Dirs
     foreach my $dir (@dirs_to_unlink) {
       if (-d $dir) {
-	rmtree($dir, $DEBUG, 1);
+	rmtree($dir, $DEBUG, 0);
       }
     }
 
