@@ -5929,6 +5929,8 @@ Perl_ck_fun(pTHX_ OP *o)
 		}
 		break;
 	    case OA_FILEREF:
+                       if(kid==cLISTOPo->op_last)
+                           cLISTOPo->op_last = newop;
 		if (kid->op_type != OP_GV && kid->op_type != OP_RV2GV) {
 		    if (kid->op_type == OP_CONST &&
 			(kid->op_private & OPpCONST_BARE))
