@@ -1393,7 +1393,7 @@ Returns C<undef> on failure.
 Set a value in the c_cc field of a termios object.  The c_cc field is an
 array so an index must be specified.
 
-	$termios->setcc( 1, &POSIX::VEOF );
+	$termios->setcc( &POSIX::VEOF, 1 );
 
 =item setcflag
 
