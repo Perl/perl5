@@ -285,11 +285,11 @@ S_tokereport(pTHX_ char* s, I32 rv)
 	    }
 	}
 	if (name)
-	    Perl_sv_catpvf(aTHX_ report, "%s", name);
+	    Perl_sv_catpv(aTHX_ report, name);
 	else if ((char)rv > ' ' && (char)rv < '~')
 	    Perl_sv_catpvf(aTHX_ report, "'%c'", (char)rv);
 	else if (!rv)
-	    Perl_sv_catpvf(aTHX_ report, "EOF");
+	    Perl_sv_catpv(aTHX_ report, "EOF");
 	else
 	    Perl_sv_catpvf(aTHX_ report, "?? %"IVdf, (IV)rv);
 	switch (type) {

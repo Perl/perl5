@@ -477,7 +477,7 @@ malformed:
 	switch (warning) {
 	case 0: /* Intentionally empty. */ break;
 	case UTF8_WARN_EMPTY:
-	    Perl_sv_catpvf(aTHX_ sv, "(empty string)");
+	    Perl_sv_catpv(aTHX_ sv, "(empty string)");
 	    break;
 	case UTF8_WARN_CONTINUATION:
 	    Perl_sv_catpvf(aTHX_ sv, "(unexpected continuation byte 0x%02"UVxf", with no preceding start byte)", uv);
@@ -514,7 +514,7 @@ malformed:
 	    Perl_sv_catpvf(aTHX_ sv, "(character 0x%04"UVxf")", uv);
 	    break;
 	default:
-	    Perl_sv_catpvf(aTHX_ sv, "(unknown reason)");
+	    Perl_sv_catpv(aTHX_ sv, "(unknown reason)");
 	    break;
 	}
 	
@@ -1866,17 +1866,17 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 	     if (!ok && (flags & UNI_DISPLAY_BACKSLASH)) {
 	         switch (u & 0xFF) {
 		 case '\n':
-		     Perl_sv_catpvf(aTHX_ dsv, "\\n"); ok = TRUE; break;
+		     Perl_sv_catpv(aTHX_ dsv, "\\n"); ok = TRUE; break;
 		 case '\r':
-		     Perl_sv_catpvf(aTHX_ dsv, "\\r"); ok = TRUE; break;
+		     Perl_sv_catpv(aTHX_ dsv, "\\r"); ok = TRUE; break;
 		 case '\t':
-		     Perl_sv_catpvf(aTHX_ dsv, "\\t"); ok = TRUE; break;
+		     Perl_sv_catpv(aTHX_ dsv, "\\t"); ok = TRUE; break;
 		 case '\f':
-		     Perl_sv_catpvf(aTHX_ dsv, "\\f"); ok = TRUE; break;
+		     Perl_sv_catpv(aTHX_ dsv, "\\f"); ok = TRUE; break;
 		 case '\a':
-		     Perl_sv_catpvf(aTHX_ dsv, "\\a"); ok = TRUE; break;
+		     Perl_sv_catpv(aTHX_ dsv, "\\a"); ok = TRUE; break;
 		 case '\\':
-		     Perl_sv_catpvf(aTHX_ dsv, "\\\\" ); ok = TRUE; break;
+		     Perl_sv_catpv(aTHX_ dsv, "\\\\" ); ok = TRUE; break;
 		 default: break;
 		 }
 	     }
