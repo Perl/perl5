@@ -545,13 +545,17 @@ ci_compare(const void *p, const void *q)
 {
     const char *pp = *(const char **)p;
     const char *qq = *(const char **)q;
+    int ci;
     while (*pp && *qq) {
 	if (tolower(*pp) != tolower(*qq))
 	    break;
 	++pp;
 	++qq;
     }
-    return (tolower(*pp) - tolower(*qq));
+    ci = tolower(*pp) - tolower(*qq);
+    if (ci == 0)
+	return compare(p, q);
+    return ci;
 }
 
 static int
