@@ -3,6 +3,9 @@ Project	:	Perl5				-
 File	:	icemalloc.h			-	Memory allocator
 
 $Log: icemalloc.h,v $
+Revision 1.2  2001/09/14 08:10:36  neeri
+Make realloc smarter (MacPerl bug $404030)
+
 Revision 1.1  2000/08/14 01:48:17  neeri
 Checked into Sourceforge
 
@@ -195,6 +198,7 @@ extern _mem_pool_ptr	_mem_pool_forest;
 void	* 				pool_malloc(_mem_pool_ptr pool, u_long size);
 void	* 				pool_realloc(_mem_pool_ptr pool, void * ptr, u_long size);
 int 					pool_free(void * ptr);
+u_long 					pool_size(void * ptr);
 int 					free_pool(int id);
 int 					free_pool_memory(int id);
 _mem_pool_ptr		find_pool(int id);
