@@ -1,6 +1,15 @@
 Revision history for Perl module I18N::LangTags.
-                                        Time-stamp: "2004-06-17 23:07:01 PDT"
+                                        Time-stamp: "2004-06-20 21:50:16 ADT"
 
+2004-06-20  Sean M. Burke  sburke@cpan.org
+
+	* Release 0.32
+
+	Minor bugfix version:
+	The test 80_all_env.t was erroneously failing under MSWins that
+	had Win32::Locale installed.  A workaround added.
+	
+	
 2004-06-17  Sean M. Burke  sburke@cpan.org
 
 	* Release 0.31

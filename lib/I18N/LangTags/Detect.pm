@@ -1,5 +1,5 @@
 
-# Time-stamp: "2004-06-17 22:59:06 PDT"
+# Time-stamp: "2004-06-20 21:47:55 ADT"
 
 require 5;
 package I18N::LangTags::Detect;
@@ -11,7 +11,7 @@ use vars qw( @ISA $VERSION $MATCH_SUPERS $USING_LANGUAGE_TAGS
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.02";
+$VERSION = "1.03";
 @ISA = ();
 use I18N::LangTags qw(alternate_language_tags locale2language_tag);
 
@@ -57,7 +57,9 @@ sub ambient_langprefs { # always returns things untainted
     last; # first one wins
   }
   
-  if(&_try_use('Win32::Locale')) {
+  if($ENV{'IGNORE_WIN32_LOCALE'}) {
+    # no-op
+  } elsif(&_try_use('Win32::Locale')) {
     # If we have that module installed...
     push @languages, Win32::Locale::get_language() || ''
      if defined &Win32::Locale::get_language;

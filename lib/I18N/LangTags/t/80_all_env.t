@@ -1,7 +1,7 @@
 
 require 5;
 use Test;
-# Time-stamp: "2004-06-17 22:59:30 PDT"
+# Time-stamp: "2004-06-20 21:51:11 ADT"
 BEGIN { plan tests => 14; }
 use I18N::LangTags::Detect 1.01;
 print "# Hi there...\n";
@@ -33,6 +33,7 @@ sub printenv {
   print "# [end of ENV]\n#\n";
 }
 
+$ENV{'IGNORE_WIN32_LOCALE'} = 1; # a hack, just for testing's sake.
 
 print "# Test LANG...\n";
 $ENV{'REQUEST_METHOD'} = '';
