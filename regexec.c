@@ -4065,10 +4065,16 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case CANY:
 	scan = loceol;
 	break;
-    case EXACT:		/* length of string is 1 */
-	c = (U8)*STRING(p);
-	while (scan < loceol && UCHARAT(scan) == c)
-	    scan++;
+    case EXACT:
+        if (do_utf8) {
+	     c = (U8)*STRING(p);
+	     while (scan < loceol && utf8_to_uvuni((U8*)scan, 0) == c)
+		  scan += UTF8SKIP(scan);
+	} else {		/* length of string is 1 */
+	     c = (U8)*STRING(p);
+	     while (scan < loceol && UCHARAT(scan) == c)
+		  scan++;
+	}
 	break;
     case EXACTF:	/* length of string is 1 */
 	c = (U8)*STRING(p);

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1012\n";
+print "1..1015\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3212,5 +3212,16 @@ ok("  \x{10428}" =~ qr/\x{10400}/i,
 ok("  \x{1E01}x" =~ qr/\x{1E00}X/i,
    "<20030808193656.5109.1@llama.ni-s.u-net.com>");
 
-# last test 1012
+{
+    # [perl #23769] Unicode regex broken on simple example
+    # regrepeat() didn't handle UTF-8 EXACT case right.
+
+    my $s = "\x{a0}\x{a0}\x{a0}\x{100}"; chop $s;
+
+    ok($s =~ /\x{a0}/,       "[perl #23769]");
+    ok($s =~ /\x{a0}+/,      "[perl #23769]");
+    ok($s =~ /\x{a0}\x{a0}/, "[perl #23769]");
+}
+
+# last test 1015
 
