@@ -10,22 +10,16 @@ WriteMakefile(
     OBJECT	=> 'PPPort$(OBJ_EXT) module2$(OBJ_EXT) module3$(OBJ_EXT)',
     XSPROTOARG	=> '-noprototypes',
     'dist'	=> { COMPRESS=>"gzip", SUFFIX=>"gz" },
-    'clean'	=> { FILES => 'ppport.h'},
+    'clean'	=> { FILES => [qw(ppport.h ppport_h)]},
 );
 
 sub MY::postamble {
+    return <<"EOM";
 
-    my $pmfile = 'PPPort.pm' ;
+ppport.h:	ppport_h
+	\$(TOUCH) ppport_h
 
-    my $retval = <<"EOM";
-
-ppport.h:	ppport_h.PL
-	\$(PERL) "-I\$(PERL_ARCHLIB)" "-I\$(PERL_LIB)" ppport_h.PL
-
-PPPort.xs module2.\$(OBJ_EXT) module3.\$(OBJ_EXT) : ppport.h
-	-\$(TOUCH) \$@
+PPPort.xs module2\$(OBJ_EXT) module3\$(OBJ_EXT): ppport.h
 
 EOM
- 
-    return $retval;
 }
