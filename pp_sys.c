@@ -1592,10 +1592,10 @@ PP(pp_send)
     djSP; dMARK; dORIGMARK; dTARGET;
     GV *gv;
     IO *io;
-    int offset;
+    STRLEN offset;
     SV *bufsv;
     char *buffer;
-    int length;
+    STRLEN length;
     STRLEN blen;
     MAGIC *mg;
 
@@ -1737,7 +1737,11 @@ PP(pp_tell)
 	RETURN;
     }
 
+#if LSEEKSIZE > IVSIZE
+    PUSHn( do_tell(gv) );
+#else
     PUSHi( do_tell(gv) );
+#endif
     RETURN;
 }
 
@@ -1751,7 +1755,11 @@ PP(pp_sysseek)
     djSP;
     GV *gv;
     int whence = POPi;
+#if LSEEKSIZE > IVSIZE
+    Off_t offset = (Off_t)SvNVx(POPs);
+#else
     Off_t offset = (Off_t)SvIVx(POPs);
+#endif
     MAGIC *mg;
 
     gv = PL_last_in_gv = (GV*)POPs;
@@ -1773,9 +1781,18 @@ PP(pp_sysseek)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
 	Off_t n = do_sysseek(gv, offset, whence);
-	PUSHs((n < 0) ? &PL_sv_undef
-	      : sv_2mortal(n ? newSViv((IV)n)
-			   : newSVpvn(zero_but_true, ZBTLEN)));
+        if (n < 0)
+            PUSHs(&PL_sv_undef);
+        else {
+            SV* sv = n ?
+#if LSEEKSIZE > IVSIZE
+                newSVnv((NV)n)
+#else
+                newSViv((IV)n)
+#endif
+                : newSVpvn(zero_but_true, ZBTLEN);
+            PUSHs(sv_2mortal(sv));
+        }
     }
     RETURN;
 }
@@ -2478,7 +2495,7 @@ PP(pp_stat)
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
-#if Size_t_size > IVSIZE
+#if Off_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_size)));
 #else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_size)));
@@ -2708,7 +2725,7 @@ PP(pp_ftsize)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-#if Size_t_size > IVSISE
+#if Off_t_size > IVSIZE
     PUSHn(PL_statcache.st_size);
 #else
     PUSHi(PL_statcache.st_size);

@@ -1356,18 +1356,6 @@ typedef struct svtbl SVTBL;
 #   endif
 #endif
 
-/* I couldn't find any -Ddefine or -flags in IRIX 6.5 that would
- * have done the necessary symbol renaming using cpp. --jhi */
-#ifdef __sgi
-#define USE_FOPEN64
-#define USE_FSEEK64
-#define USE_FTELL64
-#define USE_FSETPOS64
-#define USE_FGETPOS64
-#define USE_TMPFILE64
-#define USE_FREOPEN64
-#endif
-
 #ifdef USE_64_BIT_RAWIO
 #   ifdef HAS_OFF64_T
 #       undef Off_t
