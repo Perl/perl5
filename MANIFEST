@@ -198,6 +198,7 @@ ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/dl_aix.xs	AIX implementation
+ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_cygwin32.xs	Cygwin32 implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
@@ -266,11 +267,11 @@ ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
-ext/POSIX/hints/freebsd.pl      Hint for POSIX for named architecture
-ext/POSIX/hints/linux.pl        Hint for POSIX for named architecture
-ext/POSIX/hints/mint.pl         Hint for POSIX for named architecture
-ext/POSIX/hints/netbsd.pl       Hint for POSIX for named architecture
-ext/POSIX/hints/next_3.pl       Hint for POSIX for named architecture
+ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/mint.pl		Hint for POSIX for named architecture
+ext/POSIX/hints/netbsd.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/next_3.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
 ext/POSIX/typemap		POSIX extension interface types

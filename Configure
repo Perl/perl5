@@ -4994,6 +4994,7 @@ EOM
 			linux|irix*)	dflt='-shared' ;;
 			next)  dflt='none' ;;
 			solaris) dflt='-G' ;;
+  			beos) dflt='-nostart' ;;
 			sunos) dflt='-assert nodefinitions' ;;
 			svr4*|esix*) dflt="-G $ldflags" ;;
 	        *)     dflt='none' ;;
@@ -5070,7 +5071,7 @@ $undef)
 	;;
 *)	case "$useshrplib" in
 	'')	case "$osname" in
-		svr4*|dgux|dynixptx|esix|powerux)
+		svr4*|dgux|dynixptx|esix|powerux|beos)
 			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
@@ -5115,6 +5116,7 @@ EOM
 		case "${osname}${osvers}" in
 		next4*)	xxx='DYLD_LIBRARY_PATH' ;;
 		os2*)	xxx='' ;; # Nothing special needed.
+		beos*)  xxx='' ;;
 		*)		xxx='LD_LIBRARY_PATH' ;;
 		esac
 		if test X"$xxx" != "X"; then
@@ -5246,6 +5248,9 @@ if "$useshrplib"; then
 		;;
 	next)
 		# next doesn't like the default...
+		;;
+	beos)
+		# beos doesn't like the default, either.
 		;;
 	*)
 		tmp_shrpenv="env LD_RUN_PATH=$shrpdir"

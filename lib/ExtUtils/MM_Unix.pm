@@ -3541,6 +3541,7 @@ and Win32 do.
 
 sub perl_archive
 {
+ return '$(PERL_INC)' . "/$Config{libperl}" if $^O eq "beos";
  return "";
 }
 
