@@ -141,17 +141,25 @@ sub _mon {
     $time->[c_mon];
 }
 
+sub has_mon_names {
+    my $time = shift;
+    return 0;
+}
+
 sub monname {
     my $time = shift;
     if (@_) {
         return $_[$time->[c_mon]];
     }
-    elsif (@MON_NAMES) {
-        return $MON_NAMES[$time->[c_mon]];
+    elsif ($time->has_mon_names) {
+        return $time->mon_name($time->[c_mon]);
     }
-    else {
-        return $time->strftime('%b');
-    }
+    return $MON_NAMES[$time->[c_mon]];
+}
+
+sub has_month_names {
+    my $time = shift;
+    return 0;
 }
 
 sub monthname {
@@ -159,12 +167,10 @@ sub monthname {
     if (@_) {
         return $_[$time->[c_mon]];
     }
-    elsif (@MONTH_NAMES) {
-        return $MONTH_NAMES[$time->[c_mon]];
+    elsif ($time->has_month_names) {
+        return $time->month_name($time->[c_mon]);
     }
-    else {
-        return $time->strftime('%B');
-    }
+    return $MONTH_NAMES[$time->[c_mon]];
 }
 
 *month = \&monthname;
@@ -193,17 +199,25 @@ sub _wday {
 
 *day_of_week = \&_wday;
 
+sub has_wday_names {
+    my $time = shift;
+    return 0;
+}
+
 sub wdayname {
     my $time = shift;
     if (@_) {
         return $_[$time->[c_wday]];
     }
-    elsif (@WDAY_NAMES) {
-        return $WDAY_NAMES[$time->[c_wday]];
+    elsif ($time->has_wday_names) {
+        return $time->wday_name($time->[c_mon]);
     }
-    else {
-        return $time->strftime('%a');
-    }
+    return $WDAY_NAMES[$time->[c_wday]];
+}
+
+sub has_weekday_names {
+    my $time = shift;
+    return 0;
 }
 
 sub weekdayname {
@@ -211,12 +225,10 @@ sub weekdayname {
     if (@_) {
         return $_[$time->[c_wday]];
     }
-    elsif (@WEEKDAY_NAMES) {
-        return $WEEKDAY_NAMES[$time->[c_wday]];
+    elsif ($time->has_weekday_names) {
+        return $time->weekday_name($time->[c_mon]);
     }
-    else {
-        return $time->strftime('%A');
-    }
+    return $WEEKDAY_NAMES[$time->[c_wday]];
 }
 
 *weekdayname = \&weekdayname;
@@ -365,142 +377,179 @@ $_ftime =
      return "%";
  }, 
  'a' => sub {
-     my ($format, $time, @rest) = @_;
-     $time->wdayname(@rest);
+     my ($format, $time) = @_;
+     $time->wdayname();
  }, 
  'A' => sub {
-     my ($format, $time, @rest) = @_;
-     $time->weekdayname(@rest);
+     my ($format, $time) = @_;
+     $time->weekdayname();
  }, 
  'b' => sub {
-     my ($format, $time, @rest) = @_;
-     $time->monname(@rest);
+     my ($format, $time) = @_;
+     $time->monname();
  }, 
  'B' => sub {
-     my ($format, $time, @rest) = @_;
-     $time->monthname(@rest);
+     my ($format, $time) = @_;
+     $time->monthname();
  }, 
  'c' => sub {
-     my ($format, $time, @rest) = @_;
-     $time->cdate(@rest);
+     my ($format, $time) = @_;
+     $time->cdate();
  }, 
  'C' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%02d", int($time->y(@rest) / 100));
+     my ($format, $time) = @_;
+     sprintf("%02d", int($time->y() / 100));
  }, 
  'd' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%02d", $time->d(@rest));
+     my ($format, $time) = @_;
+     sprintf("%02d", $time->d());
  }, 
  'D' => sub {
-     my ($format, $time, @rest) = @_;
+     my ($format, $time) = @_;
      join("/",
-	  $_ftime->{'m'}->('m', $time, @rest),
-	  $_ftime->{'d'}->('d', $time, @rest),
-	  $_ftime->{'y'}->('y', $time, @rest));
+	  $_ftime->{'m'}->('m', $time),
+	  $_ftime->{'d'}->('d', $time),
+	  $_ftime->{'y'}->('y', $time));
  }, 
  'e' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%2d", $time->d(@rest));
+     my ($format, $time) = @_;
+     sprintf("%2d", $time->d());
  }, 
- 'f' => sub {
+ 'h' => sub {
      my ($format, $time, @rest) = @_;
      $time->monname(@rest);
  }, 
  'H' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%02d", $time->h(@rest));
+     my ($format, $time) = @_;
+     sprintf("%02d", $time->h());
  }, 
  'I' => sub {
-     my ($format, $time, @rest) = @_;
-     my $h = $time->h(@rest);
+     my ($format, $time) = @_;
+     my $h = $time->h();
      sprintf("%02d", $h == 0 ? 12 : ($h < 13 ? $h : $h % 12));
  }, 
  'j' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%03d", $time->yday(@rest));
+     my ($format, $time) = @_;
+     sprintf("%03d", $time->yday());
  }, 
  'm' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%02d", $time->mon(@rest));
+     my ($format, $time) = @_;
+     sprintf("%02d", $time->mon());
  }, 
  'M' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%02d", $time->min(@rest));
+     my ($format, $time) = @_;
+     sprintf("%02d", $time->min());
  }, 
  'n' => sub {
      return "\n";
  }, 
  'p' => sub {
-     my ($format, $time, @rest) = @_;
-     my $h = $time->h(@rest);
+     my ($format, $time) = @_;
+     my $h = $time->h();
      $h == 0 ? 'pm' : ($h < 13 ? 'am' : 'pm');
  }, 
  'r' => sub {
-     my ($format, $time, @rest) = @_;
+     my ($format, $time) = @_;
      join(":",
-	  $_ftime->{'I'}->('I', $time, @rest),
-	  $_ftime->{'M'}->('M', $time, @rest),
-	  $_ftime->{'S'}->('S', $time, @rest)) .
-	      " " . $_ftime->{'p'}->('p', $time, @rest);
+	  $_ftime->{'I'}->('I', $time),
+	  $_ftime->{'M'}->('M', $time),
+	  $_ftime->{'S'}->('S', $time)) .
+	      " " . $_ftime->{'p'}->('p', $time);
  }, 
  'R' => sub {
-     my ($format, $time, @rest) = @_;
+     my ($format, $time) = @_;
      join(":",
-	  $_ftime->{'H'}->('H', $time, @rest),
-	  $_ftime->{'M'}->('M', $time, @rest));
+	  $_ftime->{'H'}->('H', $time),
+	  $_ftime->{'M'}->('M', $time));
  }, 
  'S' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%02d", $time->s(@rest));
+     my ($format, $time) = @_;
+     sprintf("%02d", $time->s());
  }, 
  't' => sub {
      return "\t";
  }, 
  'T' => sub {
-     my ($format, $time, @rest) = @_;
+     my ($format, $time) = @_;
      join(":",
-	  $_ftime->{'H'}->('H', $time, @rest),
-	  $_ftime->{'M'}->('M', $time, @rest),
-	  $_ftime->{'S'}->('S', $time, @rest));
+	  $_ftime->{'H'}->('H', $time),
+	  $_ftime->{'M'}->('M', $time),
+	  $_ftime->{'S'}->('S', $time));
  }, 
  'u' => sub {
-     my ($format, $time, @rest) = @_;
-     ($time->wday(@rest) + 5) % 7 + 1;
+     my ($format, $time) = @_;
+     ($time->wday() + 5) % 7 + 1;
  }, 
+ # U taken care by libc
  'V' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%02d", $time->week(@rest));
+     my ($format, $time) = @_;
+     sprintf("%02d", $time->week());
  }, 
  'w' => sub {
-     my ($format, $time, @rest) = @_;
-     $time->_wday(@rest);
+     my ($format, $time) = @_;
+     $time->_wday();
  }, 
+ # W taken care by libc
  'x' => sub {
-     my ($format, $time, @rest) = @_;
+     my ($format, $time) = @_;
      join("/",
-	  $_ftime->{'m'}->('m', $time, @rest),
-	  $_ftime->{'d'}->('d', $time, @rest),
-	  $_ftime->{'y'}->('y', $time, @rest));
+	  $_ftime->{'m'}->('m', $time),
+	  $_ftime->{'d'}->('d', $time),
+	  $_ftime->{'y'}->('y', $time));
  },
  'y' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%02d", $time->y(@rest) % 100);
+     my ($format, $time) = @_;
+     sprintf("%02d", $time->y() % 100);
  }, 
  'Y' => sub {
-     my ($format, $time, @rest) = @_;
-     sprintf("%4d", $time->y(@rest));
+     my ($format, $time) = @_;
+     sprintf("%4d", $time->y());
  }, 
+ # Z taken care by libc
 };
+
+sub has_ftime {
+    my ($format) = @_;
+    exists $_ftime->{$format};
+}
+
+sub has_ftimes {
+    keys %$_ftime;
+}
+
+sub delete_ftime {
+    delete $_ftime->{@_};
+}
+
+sub ftime {
+    my ($format) = $_[0];
+    if (@_ == 1) {
+	return $_ftime->{$format};
+    } elsif (@_ == 2) {
+	if (ref $_[0] eq 'CODE') {
+	    $_ftime->{$format} = $_[1];
+	} else {
+	    require Carp;
+	    Carp::croak "ftime: second argument not a code ref";
+	}
+    } else {
+	require Carp;
+	Carp::croak "ftime: want one or two arguments";
+    }
+}
 
 sub _ftime {
     my ($format, $time, @rest) = @_;
-    if (exists $_ftime->{$format}) {
+    if (has_ftime($format)) {
 	# We are passing format to the anonsubs so that
 	# one can share the same sub among several formats.
 	return $_ftime->{$format}->($format, $time, @rest);
     }
-    return $time->_strftime("%$format"); # cheat
+    # If we don't know it, pass it down to the libc layer.
+    # (In other words, cheat.)
+    # This pays for for '%Z', though, and for all the
+    # locale-specific %Ex and %Oy formats.
+    return $time->_strftime("%$format");
 }
 
 sub strftime {
@@ -514,6 +563,94 @@ sub _strftime {
     my $time = shift;
     my $format = @_ ? shift(@_) : "%a, %d %b %Y %H:%M:%S %Z";
     return __strftime($format, (@$time)[c_sec..c_isdst]);
+}
+
+use vars qw($_ptime);
+
+$_ptime =
+{
+ '%' => sub {
+     $_[1] =~ s/^(%)// && $1;
+ },
+ 'd' => sub {
+     $_[1] =~ s/^(0[1-9]|2[0-9]|3[01])// && $1;
+ },
+ 'H' => sub {
+     $_[1] =~ s/^([0-1][0-9]|2[0-3])// && $1;
+ },
+ 'm' => sub {
+     $_[1] =~ s/^(0[1-9]|1[012])// && $1;
+ },
+ 'M' => sub {
+     $_[1] =~ s/^([0-5][0-9])// && $1;
+ },
+ 'S' => sub {
+     $_[1] =~ s/^([0-5][0-9])// && $1;
+ },
+ 'Y' => sub {
+     $_[1] =~ s/^([1-9][0-9][0-9][0-9])// && $1;
+ },
+};
+
+sub has_ptime {
+    my ($format) = @_;
+    exists $_ptime->{$format};
+}
+
+sub has_ptimes {
+    keys %$_ptime;
+}
+
+sub delete_ptime {
+    delete $_ptime->{@_};
+}
+
+sub ptime {
+    my ($format) = $_[0];
+    if (@_ == 1) {
+	return $_ptime->{$format};
+    } elsif (@_ == 2) {
+	if (ref $_[0] eq 'CODE') {
+	    $_ptime->{$format} = $_[1];
+	} else {
+	    require Carp;
+	    Carp::croak "ptime: second argument not a code ref";
+	}
+    } else {
+	require Carp;
+	Carp::croak "ptime: want one or two arguments";
+    }
+}
+
+sub _ptime {
+    my ($format, $stime) = @_;
+    if (has_ptime($format)) {
+	# We are passing format to the anonsubs so that
+	# one can share the same sub among several formats.
+	return $_ptime->{$format}->($format, $stime);
+    }
+    die "strptime: unknown format %$format (time '$stime')\n";
+}
+
+sub strptime {
+    my $time   = shift;
+    my $format = shift;
+    my $stime =  @_ ? shift : "$time";
+    my %ptime;
+    while ($format ne '') {
+	if ($format =~ s/^([^%]+)//) {
+	    my $skip = $1;
+	    last unless $stime =~ s/^\Q$skip//;
+	}
+	while ($format =~ s/^%(.)//) {
+	    my $t = _ptime($1, $stime);
+	    if (defined $t) {
+		$ptime{$1} = $t;
+		substr($stime, 0, length($t)) = '';
+	    }
+	}
+    }
+    return %ptime;
 }
 
 sub wday_names {

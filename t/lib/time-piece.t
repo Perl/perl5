@@ -267,12 +267,12 @@ print "ok 74\n";
 
 my @days = $t->weekday_names();
 
-$t->weekday_names(@frdays);
+Time::Piece::weekday_names(@frdays);
 
 print "not " unless $t->weekday eq "Merdi";
 print "ok 75\n";
 
-$t->weekday_names(@days);
+Time::Piece::weekday_names(@days);
 
 print "not " unless $t->weekday eq "Tuesday";
 print "ok 76\n";
@@ -285,12 +285,12 @@ my @dumonths = qw(januari februari maart april mei juni
 print "not " unless $t->month(@dumonths) eq "februari";
 print "ok 77\n";
 
-$t->month_names(@dumonths);
+Time::Piece::month_names(@dumonths);
 
 print "not " unless $t->month eq "februari";
 print "ok 78\n";
 
-$t->mon_names(@months);
+Time::Piece::mon_names(@months);
 
 print "not " unless $t->monname eq "Feb";
 print "ok 79\n";
