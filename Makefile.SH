@@ -394,25 +394,31 @@ d_dummy $(dynamic_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 	@sh ext/util/make_ext static $@ LIBPERL_A=$(LIBPERL)
 
-clean:
+clean:		_tidy _mopop
+
+realclean:	_cleaner _mopup
+	@echo "Note that make realclean does not delete config.sh"
+
+clobber:	_cleaner _mopup
+	rm -f config.sh cppstdin
+
+distclean:	clobber
+
+# Do not 'make _mopup' directly.
+_mopup:
 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c
 	rm -f perl.exp ext.libs
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
+	rm -f perl suidperl miniperl $(LIBPERL)
+
+# Do not 'make _tidy' directly.
+_tidy:
 	-cd pod; $(MAKE) clean
 	-cd utils; $(MAKE) clean
 	-cd x2p; $(MAKE) clean
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext clean $$x ; \
 	done
-	rm -f perl suidperl miniperl $(LIBPERL)
-
-realclean: clean _cleaner
-	@echo "Note that make realclean does not delete config.sh"
-
-clobber:	clean _cleaner
-	rm -f config.sh cppstdin
-
-distclean:	clobber
 
 # Do not 'make _cleaner' directly.
 _cleaner:
