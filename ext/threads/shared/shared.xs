@@ -4,7 +4,7 @@
 #include "XSUB.h"
 
 
-void shared_sv_attach_sv (SV* sv, shared_sv* shared) {
+SV* shared_sv_attach_sv (SV* sv, shared_sv* shared) {
     HV* shared_hv = get_hv("threads::shared::shared", FALSE);
     SV* id = newSViv((IV)shared);
     STRLEN length = sv_len(id);
@@ -12,12 +12,16 @@ void shared_sv_attach_sv (SV* sv, shared_sv* shared) {
     SV** tiedobject_ = hv_fetch(shared_hv, SvPV(id,length), length, 0);
     if(tiedobject_) {
     	tiedobject = (*tiedobject_);
-        SvROK_on(sv);
-        SvRV(sv) = SvRV(tiedobject);
-
+	if(sv) {
+            SvROK_on(sv);
+            SvRV(sv) = SvRV(tiedobject);
+	} else {
+	    sv = newRV(SvRV(tiedobject));
+	}
     } else {
         croak("die\n");
     }
+    return sv;
 }
 
 
@@ -452,6 +456,13 @@ STORE(self, key, value)
         SV** hentry_;
 	STRLEN len;
 	char* ckey = SvPV(key, len);
+	if(SvROK(value)) {
+	    shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(value));
+	    if(!target) {
+		Perl_croak(aTHX_ "You cannot assign a non shared reference to a shared hash");
+            }
+	    value = newRV_noinc(newSViv((IV)target));
+	}
         SHAREDSvLOCK(shared);
         hentry_ = hv_fetch((HV*) SHAREDSvGET(shared), ckey, len, 0);
         if(hentry_ && SvIV((*hentry_))) {
@@ -470,6 +481,8 @@ STORE(self, key, value)
             hv_store((HV*) SHAREDSvGET(shared), ckey,len , hentry, 0);
             SHAREDSvRELEASE(shared);
         }
+	if(SvROK(SHAREDSvGET(slot)))
+	    Perl_sharedsv_thrcnt_inc(aTHX_ (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot))));
         SHAREDSvUNLOCK(shared);
 
 
@@ -493,7 +506,12 @@ FETCH(self, key)
                 retval = &PL_sv_undef;
             } else {
                 slot = (shared_sv*) SvIV(hentry);
-                retval = newSVsv(SHAREDSvGET(slot));
+		if(SvROK(SHAREDSvGET(slot))) {
+		    shared_sv* target = (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot)));
+		    retval = shared_sv_attach_sv(NULL, target);
+		} else {
+	            retval = newSVsv(SHAREDSvGET(slot));
+		}
             }
         } else {
             retval = &PL_sv_undef;
@@ -601,7 +619,12 @@ DELETE(self, key)
 	SHAREDSvRELEASE(shared);
 	if(tmp) {
 		slot = (shared_sv*) SvIV(tmp);
-		RETVAL = newSVsv(SHAREDSvGET(slot));
+		if(SvROK(SHAREDSvGET(slot))) {
+		    shared_sv* target = (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot)));
+		    RETVAL = shared_sv_attach_sv(NULL, target);
+		} else {
+		    RETVAL = newSVsv(SHAREDSvGET(slot));
+		}
 		Perl_sharedsv_thrcnt_dec(aTHX_ slot);
 	} else {
 		RETVAL = &PL_sv_undef;
