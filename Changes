@@ -31,6 +31,37 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12178] By: jhi                                   on 2001/09/24  14:12:06
+        Log: Subject: [REPATCH] Re: [PATCH lib/ExtUtils/Manifest.pm] Minor bug in comment logic in maniread() on VMS
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 24 Sep 2001 11:12:13 -0400
+             Message-ID: <20010924111213.G27885@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[ 12177] By: jhi                                   on 2001/09/24  14:02:32
+        Log: Subject: [PATCH vms/test.com] Fixing inline TODO recognition
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Mon, 24 Sep 2001 11:02:07 -0400
+             Message-ID: <20010924110207.E27885@blackrider>
+     Branch: perl
+	   ! vms/test.com
+____________________________________________________________________________
+[ 12176] By: ams                                   on 2001/09/24  14:01:59
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 12175] By: jhi                                   on 2001/09/24  13:20:28
+        Log: Various cleanups.
+     Branch: perl
+	   ! ext/threads/Makefile.PL ext/threads/threads.xs
+____________________________________________________________________________
+[ 12173] By: pudge                                 on 2001/09/24  12:56:13
+        Log: Integrate maint-5.6/perl changes 12024, 12026, 12145, 12146.
+     Branch: maint-5.6/macperl
+	  !> (integrate 33 files)
+____________________________________________________________________________
 [ 12171] By: jhi                                   on 2001/09/24  12:26:58
         Log: Subject: [PATCH gb2312.enc] (Re: [PATCH perl@12088] 2022-cn.enc of Encode.pm)
              From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
