@@ -1236,6 +1236,8 @@ PP(pp_leavewrite)
 
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
 	  (long)IoLINES_LEFT(io), (long)FmLINES(PL_formtarget)));
+    if (!io || !ofp)
+	goto forget_top;
     if (IoLINES_LEFT(io) < FmLINES(PL_formtarget) &&
 	PL_formtarget != PL_toptarget)
     {
@@ -1356,6 +1358,7 @@ PP(pp_leavewrite)
 	    PUSHs(&PL_sv_yes);
 	}
     }
+bad_ofp:
     PL_formtarget = PL_bodytarget;
     PUTBACK;
     return pop_return();
