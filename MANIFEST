@@ -1599,6 +1599,7 @@ t/op/lex_assign.t	See if ops involving lexicals or pad temps work
 t/op/lfs.t		See if large files work for perlio
 t/op/list.t		See if array lists work
 t/op/local.t		See if local works
+t/op/loopctl.t		See if next/last/redo work
 t/op/lop.t		See if logical operators work
 t/op/magic.t		See if magic variables work
 t/op/method.t		See if method calls work

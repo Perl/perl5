@@ -1,7 +1,7 @@
 *** y.tab.c.orig	Thu Aug 26 22:31:26 1999
 --- y.tab.c	Thu Aug 26 22:32:22 1999
 ***************
-*** 1447,1456 ****
+*** 1448,1457 ****
   yyparse()
   {
       register int yym, yyn, yystate;
@@ -12,7 +12,7 @@
       if (yys = getenv("YYDEBUG"))
       {
           yyn = *yys;
---- 1447,1476 ----
+--- 1448,1477 ----
   yyparse()
   {
       register int yym, yyn, yystate;
@@ -44,8 +44,8 @@
       {
           yyn = *yys;
 ***************
-*** 1463,1468 ****
---- 1483,1498 ----
+*** 1464,1469 ****
+--- 1484,1499 ----
       yyerrflag = 0;
       yychar = (-1);
   
@@ -63,7 +63,7 @@
       yyvsp = yyvs;
       *yyssp = yystate = 0;
 ***************
-*** 1493,1499 ****
+*** 1494,1500 ****
   #endif
           if (yyssp >= yyss + yystacksize - 1)
           {
@@ -71,7 +71,7 @@
           }
           *++yyssp = yystate = yytable[yyn];
           *++yyvsp = yylval;
---- 1523,1541 ----
+--- 1524,1542 ----
   #endif
           if (yyssp >= yyss + yystacksize - 1)
           {
@@ -92,7 +92,7 @@
           *++yyssp = yystate = yytable[yyn];
           *++yyvsp = yylval;
 ***************
-*** 1534,1540 ****
+*** 1535,1541 ****
   #endif
                   if (yyssp >= yyss + yystacksize - 1)
                   {
@@ -100,7 +100,7 @@
                   }
                   *++yyssp = yystate = yytable[yyn];
                   *++yyvsp = yylval;
---- 1576,1594 ----
+--- 1577,1595 ----
   #endif
                   if (yyssp >= yyss + yystacksize - 1)
                   {
@@ -121,7 +121,7 @@
                   *++yyssp = yystate = yytable[yyn];
                   *++yyvsp = yylval;
 ***************
-*** 2473,2487 ****
+*** 2481,2495 ****
   #endif
       if (yyssp >= yyss + yystacksize - 1)
       {
@@ -137,7 +137,7 @@
   yyaccept:
 !     return (0);
   }
---- 2527,2575 ----
+--- 2535,2583 ----
   #endif
       if (yyssp >= yyss + yystacksize - 1)
       {

@@ -2,7 +2,7 @@
 
 # "This IS structured code.  It's just randomly structured."
 
-print "1..16\n";
+print "1..19\n";
 
 while ($?) {
     $foo = 1;
@@ -76,6 +76,36 @@ for (1) {
     }
 }
 print "ok 16\n";
+
+# Does goto work correctly within a for(;;) loop?
+#  (BUG ID 20010309.004)
+
+for(my $i=0;!$i++;) {
+  my $x=1;
+  goto label;
+  label: print (defined $x?"ok ": "not ok ", "17\n")
+}
+
+# Does goto work correctly going *to* a for(;;) loop?
+#  (make sure it doesn't skip the initializer)
+
+my ($z, $y) = (0);
+FORL1: for($y="ok 18\n"; $z;) {print $y; goto TEST19}
+($y,$z) = ("not ok 18\n", 1);
+goto FORL1;
+
+# Even from within the loop?
+
+TEST19: $z = 0;
+FORL2: for($y="ok 19\n"; 1;) {
+  if ($z) {
+    print $y;
+    last;
+  }
+  ($y, $z) = ("not ok 19\n", 1);
+  goto FORL2;
+}
+
 exit;
 
 bypass:
