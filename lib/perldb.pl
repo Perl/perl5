@@ -1,6 +1,6 @@
 package DB;
 
-$header = '$Header: perldb.pl,v 3.0.1.2 90/03/12 16:39:39 lwall Locked $';
+$header = '$Header: perldb.pl,v 3.0.1.3 90/08/09 04:00:58 lwall Locked $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -10,6 +10,11 @@ $header = '$Header: perldb.pl,v 3.0.1.2 90/03/12 16:39:39 lwall Locked $';
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 3.0.1.3  90/08/09  04:00:58  lwall
+# patch19: debugger now allows continuation lines
+# patch19: debugger can now dump lists of variables
+# patch19: debugger can now add aliases easily from prompt
+# 
 # Revision 3.0.1.2  90/03/12  16:39:39  lwall
 # patch13: perl -d didn't format stack traces of *foo right
 # patch13: perl -d wiped out scalar return values of subroutines
@@ -33,7 +38,7 @@ select(STDOUT);
 $| = 1;				# for real STDOUT
 
 $header =~ s/.Header: ([^,]+),v(\s+\S+\s+\S+).*$/$1$2/;
-print OUT "\nLoading DB from $header\n\n";
+print OUT "\nLoading custom DB from $header\n\nEnter h for help.\n\n";
 
 sub DB {
     local($. ,$@, $!, $[, $,, $/, $\);
@@ -73,6 +78,11 @@ sub DB {
 	    $signal = 0;
 	    $cmd eq '' && exit 0;
 	    chop($cmd);
+	    $cmd =~ s/\\$// && do {
+		print OUT "  cont: ";
+		$cmd .= <IN>;
+		redo;
+	    };
 	    $cmd =~ /^q$/ && exit 0;
 	    $cmd =~ /^$/ && ($cmd = $laststep);
 	    push(@hist,$cmd) if length($cmd) > 1;
@@ -111,7 +121,8 @@ a [line] command
 		Sequence is: check for breakpoint, print line if necessary,
 		do action, prompt user if breakpoint or step, evaluate line.
 A		Delete all actions.
-V package	List all variables and values in package (default main).
+V [pkg [vars]]	List some (default all) variables in a package (default main).
+X [vars]	Same as \"V main [vars]\".
 < command	Define command before prompt.
 > command	Define command after prompt.
 ! number	Redo command (default previous command).
@@ -119,6 +130,7 @@ V package	List all variables and values in package (default main).
 H -number	Display last number commands (default all).
 q or ^D		Quit.
 p expr		Same as \"package main; print DB'OUT expr\".
+= [alias value]	Define a command alias, or list current aliases.
 command		Execute as a perl statement.
 
 ";
@@ -137,13 +149,15 @@ command		Execute as a perl statement.
 		    }
 		}
 		next; };
+	    $cmd =~ s/^X\b/V main/;
 	    $cmd =~ /^V$/ && do {
 		$cmd = 'V main'; };
-	    $cmd =~ /^V\s*(['A-Za-z_]['\w]*)$/ && do {
+		$cmd =~ /^V\s*(\S+)\s*(.*)/ && do {
 		$packname = $1;
+		@vars = split(' ',$2);
 		do 'dumpvar.pl' unless defined &main'dumpvar;
 		if (defined &main'dumpvar) {
-		    &main'dumpvar($packname);
+		    &main'dumpvar($packname,@vars);
 		}
 		else {
 		    print DB'OUT "dumpvar.pl not available.\n";
@@ -357,6 +371,20 @@ command		Execute as a perl statement.
 		};
 		next; };
 	    $cmd =~ s/^p( .*)?$/print DB'OUT$1/;
+	    $cmd =~ /^=/ && do {
+		if (local($k,$v) = ($cmd =~ /^=\s*(\S+)\s+(.*)/)) {
+		    $alias{$k}="s~$k~$v~";
+		    print OUT "$k = $v\n";
+		} elsif ($cmd =~ /^=\s*$/) {
+		    foreach $k (sort keys(%alias)) {
+			if (($v = $alias{$k}) =~ s~^s\~$k\~(.*)\~$~$1~) {
+			    print OUT "$k = $v\n";
+			} else {
+			    print OUT "$k\t$alias{$k}\n";
+			};
+		    };
+		};
+		next; };
 	    {
 		package main;
 		eval $DB'cmd;

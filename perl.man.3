@@ -1,7 +1,15 @@
 ''' Beginning of part 3
-''' $Header: perl_man.3,v 3.0.1.6 90/03/27 16:17:56 lwall Locked $
+''' $Header: perl_man.3,v 3.0.1.8 90/08/09 04:39:04 lwall Locked $
 '''
 ''' $Log:	perl.man.3,v $
+''' Revision 3.0.1.8  90/08/09  04:39:04  lwall
+''' patch19: added require operator
+''' patch19: added truncate operator
+''' patch19: unpack can do checksumming
+''' 
+''' Revision 3.0.1.7  90/08/03  11:15:42  lwall
+''' patch19: Intermediate diffs for Randal
+''' 
 ''' Revision 3.0.1.6  90/03/27  16:17:56  lwall
 ''' patch16: MSDOS support
 ''' 
@@ -202,14 +210,14 @@ Typically this is used like the normal piped open when you want to exercise
 more control over just how the pipe command gets executed, such as when
 you are running setuid, and don't want to have to scan shell commands
 for metacharacters.
-The following pairs are equivalent:
+The following pairs are more or less equivalent:
 .nf
 
 .ne 5
 	open(FOO, "|tr \'[a\-z]\' \'[A\-Z]\'");
 	open(FOO, "|\-") || exec \'tr\', \'[a\-z]\', \'[A\-Z]\';
 
-	open(FOO, "cat \-n $file|");
+	open(FOO, "cat \-n '$file'|");
 	open(FOO, "\-|") || exec \'cat\', \'\-n\', $file;
 
 .fi
@@ -240,6 +248,7 @@ DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 .Ip "ord EXPR" 8
 Returns the numeric ascii value of the first character of EXPR.
 If EXPR is omitted, uses $_.
+''' Comments on f & d by gnb@melba.bby.oz.au	22/11/89
 .Ip "pack(TEMPLATE,LIST)" 8 4
 Takes an array or list of values and packs it into a binary structure,
 returning the string containing the structure.
@@ -249,7 +258,7 @@ of values, as follows:
 
 	A	An ascii string, will be space padded.
 	a	An ascii string, will be null padded.
-	c	A native char value.
+	c	A signed char value.
 	C	An unsigned char value.
 	s	A signed short value.
 	S	An unsigned short value.
@@ -259,17 +268,37 @@ of values, as follows:
 	L	An unsigned long value.
 	n	A short in \*(L"network\*(R" order.
 	N	A long in \*(L"network\*(R" order.
+	f	A single-precision float in the native format.
+	d	A double-precision float in the native format.
 	p	A pointer to a string.
 	x	A null byte.
+	X	Back up a byte.
+	@	Null fill to absolute position.
+	u	A uuencoded string.
 
 .fi
 Each letter may optionally be followed by a number which gives a repeat
 count.
 With all types except "a" and "A" the pack function will gobble up that many values
 from the LIST.
-The "a" and "A" types gobble just one value, but pack it as a string that long,
+A * for the repeat count means to use however many items are left.
+The "a" and "A" types gobble just one value, but pack it as a string of length
+count,
 padding with nulls or spaces as necessary.
 (When unpacking, "A" strips trailing spaces and nulls, but "a" does not.)
+Real numbers (floats and doubles) are in the nnativeative machine format
+only; due to the multiplicity of floating formats around, and the lack
+of a standard \*(L"network\*(R" representation, no facility for
+interchange has been made.
+This means that packed floating point data
+written on one machine may not be readable on another - even if both
+use IEEE floating point arithmetic (as the endian-ness of the memory
+representation is not part of the IEEE spec).
+Note that perl uses
+doubles internally for all numeric calculation, and converting from
+double -> float -> double will loose precision (i.e. unpack("f",
+pack("f", $foo)) will not in general equal $foo).
+.br
 Examples:
 .nf
 
@@ -366,7 +395,7 @@ These are not really functions, but simply syntactic sugar to let you
 avoid putting too many backslashes into quoted strings.
 The q operator is a generalized single quote, and the qq operator a
 generalized double quote.
-Any delimiter can be used in place of /, including newline.
+Any non-alphanumeric delimiter can be used in place of /, including newline.
 If the delimiter is an opening bracket or parenthesis, the final delimiter
 will be the corresponding closing bracket or parenthesis.
 (Embedded occurrences of the closing bracket need to be backslashed as usual.)
@@ -449,6 +478,35 @@ about what was just input:
 Changes the name of a file.
 Returns 1 for success, 0 otherwise.
 Will not work across filesystem boundaries.
+.Ip "require(EXPR)" 8 6
+.Ip "require EXPR" 8
+.Ip "require" 8
+Includes the library file specified by EXPR, or by $_ if EXPR is not supplied.
+Has semantics similar to the following subroutine:
+.nf
+
+	sub require {
+	    local($filename) = @_;
+	    return 1 if $INC{$filename};
+	    local($realfilename,$result);
+	    ITER: {
+		foreach $prefix (@INC) {
+		    $realfilename = "$prefix/$filename";
+		    if (-f $realfilename) {
+			$result = do $realfilename;
+			last ITER;
+		    }
+		}
+		die "Can't find $filename in \e@INC";
+	    }
+	    die $@ if $@;
+	    die "$filename did not return true value" unless $result;
+	    $INC{$filename} = $realfilename;
+	    $result;
+	}
+
+.fi
+Note that the file will not be included twice under the same specified name.
 .Ip "reset(EXPR)" 8 6
 .Ip "reset EXPR" 8
 .Ip "reset" 8
@@ -512,7 +570,8 @@ is to be done in a case-insensitive manner.
 The \*(L"e\*(R" is likewise optional, and if present, indicates that
 the replacement string is to be evaluated as an expression rather than just
 as a double-quoted string.
-Any delimiter may replace the slashes; if single quotes are used, no
+Any non-alphanumeric delimiter may replace the slashes;
+if single quotes are used, no
 interpretation is done on the replacement string (the e modifier overrides
 this, however); if backquotes are used, the replacement string is a command
 to execute whose output will be used as the actual replacement text.
@@ -632,11 +691,6 @@ Any of the bitmasks can also be undef.
 The timeout, if specified, is in seconds, which may be fractional.
 NOTE: not all implementations are capable of returning the $timeleft.
 If not, they always return $timeleft equal to the supplied $timeout.
-.Ip "setpgrp(PID,PGRP)" 8 4
-Sets the current process group for the specified PID, 0 for the current
-process.
-Will produce a fatal error if used on a machine that doesn't implement
-setpgrp(2).
 .Ip "send(SOCKET,MSG,FLAGS,TO)" 8 4
 .Ip "send(SOCKET,MSG,FLAGS)" 8
 Sends a message on a socket.
@@ -644,6 +698,11 @@ Takes the same flags as the system call of the same name.
 On unconnected sockets you must specify a destination to send TO.
 Returns the number of characters sent, or the undefined value if
 there is an error.
+.Ip "setpgrp(PID,PGRP)" 8 4
+Sets the current process group for the specified PID, 0 for the current
+process.
+Will produce a fatal error if used on a machine that doesn't implement
+setpgrp(2).
 .Ip "setpriority(WHICH,WHO,PRIORITY)" 8 4
 Sets the current priority for a process, a process group, or a user.
 (See setpriority(2).)
@@ -778,8 +837,8 @@ If LIMIT is specified, splits into no more than that many fields (though it
 may split into fewer).
 If LIMIT is unspecified, trailing null fields are stripped (which
 potential users of pop() would do well to remember).
-A pattern matching the null string (not to be confused with a null pattern,
-which is one member of the set of patterns matching a null string)
+A pattern matching the null string (not to be confused with a null pattern //,
+which is just one member of the set of patterns matching a null string)
 will split the value of EXPR into separate characters at each point it
 matches that way.
 For example:
@@ -959,6 +1018,17 @@ If you assign something shorter than LEN, the string will shrink, and
 if you assign something longer than LEN, the string will grow to accommodate it.
 To keep the string the same length you may need to pad or chop your value using
 sprintf().
+.Ip "symlink(OLDFILE,NEWFILE)" 8 2
+Creates a new filename symbolically linked to the old filename.
+Returns 1 for success, 0 otherwise.
+On systems that don't support symbolic links, produces a fatal error at
+run time.
+To check for that, use eval:
+.nf
+
+	$symlink_exists = (eval \'symlink("","");\', $@ eq \'\');
+
+.fi
 .Ip "syscall(LIST)" 8 6
 .Ip "syscall LIST" 8
 Calls the system call specified as the first element of the list, passing
@@ -974,7 +1044,7 @@ in a numeric context, you may need to add 0 to them to force them to look
 like numbers.
 .nf
 
-	do 'syscall.h';		# may need to run makelib
+	require 'syscall.ph';		# may need to run makelib
 	syscall(&SYS_write, fileno(STDOUT), "hi there\en", 9);
 
 .fi
@@ -988,17 +1058,6 @@ call.
 To get the actual exit value divide by 256.
 See also
 .IR exec .
-.Ip "symlink(OLDFILE,NEWFILE)" 8 2
-Creates a new filename symbolically linked to the old filename.
-Returns 1 for success, 0 otherwise.
-On systems that don't support symbolic links, produces a fatal error at
-run time.
-To check for that, use eval:
-.nf
-
-	$symlink_exists = (eval \'symlink("","");\', $@ eq \'\');
-
-.fi
 .Ip "tell(FILEHANDLE)" 8 6
 .Ip "tell FILEHANDLE" 8 6
 .Ip "tell" 8
@@ -1049,6 +1108,11 @@ Examples:
     y/\e001\-@[\-_{\-\e177/ /;	\h'|3i'# change non-alphas to space
 
 .fi
+.Ip "truncate(FILEHANDLE,LENGTH)" 8 4
+.Ip "truncate(EXPR,LENGTH)" 8
+Truncates the file opened on FILEHANDLE, or named by EXPR, to the specified
+length.
+Produces a fatal error if truncate isn't implemented on your system.
 .Ip "umask(EXPR)" 8 4
 .Ip "umask EXPR" 8
 .Ip "umask" 8
@@ -1099,6 +1163,7 @@ Use rmdir instead.
 Unpack does the reverse of pack: it takes a string representing
 a structure and expands it out into an array value, returning the array
 value.
+(In a scalar context, it merely returns the first value produced.)
 The TEMPLATE has the same format as in the pack function.
 Here's a subroutine that does substring:
 .nf
@@ -1113,6 +1178,19 @@ Here's a subroutine that does substring:
 and then there's
 
 	sub ord { unpack("c",$_[0]); }
+
+.fi
+In addition, you may prefix a field with a %<number> to indicate that
+you want a <number>-bit checksum of the items instead of the items themselves.
+Default is a 16-bit checksum.
+For example, the following computes the same number as the System V sum program:
+.nf
+
+.ne 4
+	while (<>) {
+	    $checksum += unpack("%16C*", $_);
+	}
+	$checksum %= 65536;
 
 .fi
 .Ip "unshift(ARRAY,LIST)" 8 4

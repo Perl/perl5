@@ -1,7 +1,14 @@
 ''' Beginning of part 4
-''' $Header: perl_man.4,v 3.0.1.8 90/03/27 16:19:31 lwall Locked $
+''' $Header: perl_man.4,v 3.0.1.10 90/08/09 04:47:35 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.10  90/08/09  04:47:35  lwall
+''' patch19: added require operator
+''' patch19: added numeric interpretation of $]
+''' 
+''' Revision 3.0.1.9  90/08/03  11:15:58  lwall
+''' patch19: Intermediate diffs for Randal
+''' 
 ''' Revision 3.0.1.8  90/03/27  16:19:31  lwall
 ''' patch16: MSDOS support
 ''' 
@@ -500,7 +507,7 @@ Here is a sample client (untested):
 	$SIG{'INT'} = 'dokill';
 	sub dokill { kill 9,$child if $child; }
 
-	do 'sys/socket.h' || die "Can't do sys/socket.h: $@";
+	require 'sys/socket.ph';
 
 	$sockaddr = 'S n a4 x8';
 	chop($hostname = `hostname`);
@@ -546,7 +553,7 @@ And here's a server:
 	($port) = @ARGV;
 	$port = 2345 unless $port;
 
-	do 'sys/socket.h' || die "Can't do sys/socket.h: $@";
+	require 'sys/socket.ph';
 
 	$sockaddr = 'S n a4 x8';
 
@@ -783,15 +790,20 @@ when subscripting and when evaluating the index() and substr() functions.
 The string printed out when you say \*(L"perl -v\*(R".
 It can be used to determine at the beginning of a script whether the perl
 interpreter executing the script is in the right range of versions.
+If used in a numeric context, returns the version + patchlevel / 1000.
 Example:
 .nf
 
-.ne 5
+.ne 8
 	# see if getc is available
         ($version,$patchlevel) =
 		 $] =~ /(\ed+\e.\ed+).*\enPatch level: (\ed+)/;
         print STDERR "(No filename completion available.)\en"
 		 if $version * 1000 + $patchlevel < 2016;
+
+or, used numerically,
+
+	warn "No checksumming!\n" if $] < 3.019;
 
 .fi
 (Mnemonic: Is this version of perl in the right bracket?)
@@ -877,6 +889,8 @@ The current set of characters after which a string may be broken to
 fill continuation fields (starting with ^) in a format.
 Default is "\ \en-", to break on whitespace or hyphens.
 (Mnemonic: a \*(L"colon\*(R" in poetry is a part of a line.)
+.Ip $ARGV 8 3
+contains the name of the current file when reading from <>.
 .Ip @ARGV 8 3
 The array ARGV contains the command line arguments intended for the script.
 Note that $#ARGV is the generally number of arguments minus one, since
@@ -886,13 +900,21 @@ See $0 for the command name.
 The array INC contains the list of places to look for
 .I perl
 scripts to be
-evaluated by the \*(L"do EXPR\*(R" command.
+evaluated by the \*(L"do EXPR\*(R" command or the \*(L"require\*(r" command.
 It initially consists of the arguments to any
 .B \-I
 command line switches, followed
 by the default
 .I perl
-library, probably \*(L"/usr/local/lib/perl\*(R".
+library, probably \*(L"/usr/local/lib/perl\*(R",
+followed by \*(L".\*(R", to represent the current directory.
+.Ip %INC 8 3
+The associative array INC contains entries for each filename that has
+been included via \*(L"do\*(R" or \*(L"require\*(R".
+The key is the filename you specified, and the value is the location of
+the file actually found.
+The \*(L"require\*(R" command uses this array to determine whether
+a given file has already been included.
 .Ip $ENV{expr} 8 2
 The associative array ENV contains your current environment.
 Setting a value in ENV changes the environment for child processes.
@@ -928,7 +950,7 @@ declaration, you can switch namespaces.
 The scope of the package declaration is from the declaration itself to the end
 of the enclosing block (the same scope as the local() operator).
 Typically it would be the first declaration in a file to be included by
-the \*(L"do FILE\*(R" operator.
+the \*(L"require\*(R" operator.
 You can switch into a package in more than one place; it merely influences
 which symbol table is used by the compiler for the rest of that block.
 You can refer to variables and filehandles in other packages by prefixing
@@ -1099,16 +1121,26 @@ It will halt before the first executable statement and ask you for a
 command, such as:
 .Ip "h" 12 4
 Prints out a help message.
+.Ip "T" 12 4
+Stack trace.
 .Ip "s" 12 4
 Single step.
 Executes until it reaches the beginning of another statement.
+.Ip "n" 12 4
+Next.
+Executes over subroutine calls, until it reaches the beginning of the 
+next statement.
+.Ip "f" 12 4
+Finish.
+Executes statements until it has finished the current subroutine.
 .Ip "c" 12 4
 Continue.
 Executes until the next breakpoint is reached.
+.Ip "c line" 12 4
+Continue to the specified line.
+Inserts a one-time-only breakpoint at the specified line.
 .Ip "<CR>" 12 4
-Repeat last s or c.
-.Ip "n" 12 4
-Single step around subroutine call.
+Repeat last n or s.
 .Ip "l min+incr" 12 4
 List incr+1 lines starting at min.
 If min is omitted, starts where last listing left off.
@@ -1118,38 +1150,45 @@ List lines in the indicated range.
 .Ip "l line" 12 4
 List just the indicated line.
 .Ip "l" 12 4
-List incr+1 more lines after last printed line.
+List next window.
+.Ip "-" 12 4
+List previous window.
+.Ip "w line" 12 4
+List window around line.
 .Ip "l subname" 12 4
 List subroutine.
 If it's a long subroutine it just lists the beginning.
 Use \*(L"l\*(R" to list more.
+.Ip "/pattern/" 12 4
+Regular expression search forward for pattern; the final / is optional.
+.Ip "?pattern?" 12 4
+Regular expression search backward for pattern; the final ? is optional.
 .Ip "L" 12 4
 List lines that have breakpoints or actions.
-.Ip "t" 12 4
-Toggle trace mode on or off.
-.Ip "b line" 12 4
-Set a breakpoint.
-If line is omitted, sets a breakpoint on the current line
-line that is about to be executed.
-Breakpoints may only be set on lines that begin an executable statement.
-.Ip "b subname" 12 4
-Set breakpoint at first executable line of subroutine.
 .Ip "S" 12 4
 Lists the names of all subroutines.
+.Ip "t" 12 4
+Toggle trace mode on or off.
+.Ip "b line condition" 12 4
+Set a breakpoint.
+If line is omitted, sets a breakpoint on the 
+line that is about to be executed.
+If a condition is specified, it is evaluated each time the statement is
+reached and a breakpoint is taken only if the condition is true.
+Breakpoints may only be set on lines that begin an executable statement.
+.Ip "b subname condition" 12 4
+Set breakpoint at first executable line of subroutine.
 .Ip "d line" 12 4
 Delete breakpoint.
-If line is omitted, deletes the breakpoint on the current line
+If line is omitted, deletes the breakpoint on the 
 line that is about to be executed.
 .Ip "D" 12 4
 Delete all breakpoints.
-.Ip "A" 12 4
-Delete all line actions.
-.Ip "V package" 12 4
-List all variables in package.
-Default is main package.
 .Ip "a line command" 12 4
 Set an action for line.
 A multi-line command may be entered by backslashing the newlines.
+.Ip "A" 12 4
+Delete all line actions.
 .Ip "< command" 12 4
 Set an action to happen before every debugger prompt.
 A multi-line command may be entered by backslashing the newlines.
@@ -1157,6 +1196,9 @@ A multi-line command may be entered by backslashing the newlines.
 Set an action to happen after the prompt when you've just given a command
 to return to executing the script.
 A multi-line command may be entered by backslashing the newlines.
+.Ip "V package" 12 4
+List all variables in package.
+Default is main package.
 .Ip "! number" 12 4
 Redo a debugging command.
 If number is omitted, redoes the previous command.

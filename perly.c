@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perly.c,v 3.0.1.5 90/03/27 16:20:57 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$Header: perly.c,v 3.0.1.6 90/08/09 04:55:50 lwall Locked $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,14 @@ char rcsid[] = "$Header: perly.c,v 3.0.1.5 90/03/27 16:20:57 lwall Locked $\nPat
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perly.c,v $
+ * Revision 3.0.1.6  90/08/09  04:55:50  lwall
+ * patch19: added -x switch to extract script from input trash
+ * patch19: Added -c switch to do compilation only
+ * patch19: added numeric interpretation of $]
+ * patch19: added require operator
+ * patch19: $0, %ENV, @ARGV were wrong in dumped script
+ * patch19: . is now explicitly in @INC (and last)
+ * 
  * Revision 3.0.1.5  90/03/27  16:20:57  lwall
  * patch16: MSDOS support
  * patch16: do FILE inside eval blows up
@@ -48,6 +56,11 @@ char rcsid[] = "$Header: perly.c,v 3.0.1.5 90/03/27 16:20:57 lwall Locked $\nPat
 #endif
 #endif
 
+static char* moreswitches();
+static char* cddir;
+extern char **environ;
+static bool minus_c;
+
 main(argc,argv,env)
 register int argc;
 register char **argv;
@@ -85,6 +98,7 @@ setuid perl scripts securely.\n");
     (void)fclose(stdprn);
 #endif
     if (do_undump) {
+	origfilename = savestr(argv[0]);
 	do_undump = 0;
 	loop_ptr = -1;		/* start label stack again */
 	goto just_doit;
@@ -96,9 +110,9 @@ setuid perl scripts securely.\n");
     curstash = defstash = hnew(0);
     curstname = str_make("main",4);
     stab_xhash(stabent("_main",TRUE)) = defstash;
-    incstab = aadd(stabent("INC",TRUE));
+    incstab = hadd(aadd(stabent("INC",TRUE)));
     incstab->str_pok |= SP_MULTI;
-    for (argc--,argv++; argc; argc--,argv++) {
+    for (argc--,argv++; argc > 0; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
 	    break;
 #ifdef DOSUID
@@ -111,28 +125,20 @@ setuid perl scripts securely.\n");
       reswitch:
 	switch (*s) {
 	case 'a':
-	    minus_a = TRUE;
-	    s++;
-	    goto reswitch;
+	case 'c':
 	case 'd':
-#ifdef TAINT
-	    if (euid != uid || egid != gid)
-		fatal("No -d allowed in setuid scripts");
-#endif
-	    perldb = TRUE;
-	    s++;
-	    goto reswitch;
 	case 'D':
-#ifdef DEBUGGING
-#ifdef TAINT
-	    if (euid != uid || egid != gid)
-		fatal("No -D allowed in setuid scripts");
-#endif
-	    debug = atoi(s+1);
-#else
-	    warn("Recompile perl with -DDEBUGGING to use -D switch\n");
-#endif
+	case 'i':
+	case 'n':
+	case 'p':
+	case 'u':
+	case 'U':
+	case 'v':
+	case 'w':
+	    if (s = moreswitches(s))
+		goto reswitch;
 	    break;
+
 	case 'e':
 #ifdef TAINT
 	    if (euid != uid || egid != gid)
@@ -142,15 +148,14 @@ setuid perl scripts securely.\n");
 	        e_tmpname = savestr(TMPPATH);
 		(void)mktemp(e_tmpname);
 		e_fp = fopen(e_tmpname,"w");
+		if (!e_fp)
+		    fatal("Cannot open temporary file");
 	    }
-	    if (argv[1])
+	    if (argv[1]) {
 		fputs(argv[1],e_fp);
+		argc--,argv++;
+	    }
 	    (void)putc('\n', e_fp);
-	    argc--,argv++;
-	    break;
-	case 'i':
-	    inplace = savestr(s+1);
-	    argvoutstab = stabent("ARGVOUT",TRUE);
 	    break;
 	case 'I':
 #ifdef TAINT
@@ -163,21 +168,13 @@ setuid perl scripts securely.\n");
 	    if (*++s) {
 		(void)apush(stab_array(incstab),str_make(s,0));
 	    }
-	    else {
+	    else if (argv[1]) {
 		(void)apush(stab_array(incstab),str_make(argv[1],0));
 		str_cat(str,argv[1]);
 		argc--,argv++;
 		str_cat(str," ");
 	    }
 	    break;
-	case 'n':
-	    minus_n = TRUE;
-	    s++;
-	    goto reswitch;
-	case 'p':
-	    minus_p = TRUE;
-	    s++;
-	    goto reswitch;
 	case 'P':
 #ifdef TAINT
 	    if (euid != uid || egid != gid)
@@ -198,29 +195,12 @@ setuid perl scripts securely.\n");
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
-	case 'u':
-	    do_undump = TRUE;
+	case 'x':
+	    doextract = TRUE;
 	    s++;
-	    goto reswitch;
-	case 'U':
-	    unsafe = TRUE;
-	    s++;
-	    goto reswitch;
-	case 'v':
-	    fputs(rcsid,stdout);
-	    fputs("\nCopyright (c) 1989, 1990, Larry Wall\n",stdout);
-#ifdef MSDOS
-	    fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
-	    stdout);
-#endif
-	    fputs("\n\
-Perl may be copied only under the terms of the GNU General Public License,\n\
-a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
-	    exit(0);
-	case 'w':
-	    dowarn = TRUE;
-	    s++;
-	    goto reswitch;
+	    if (*s)
+		cddir = savestr(s);
+	    break;
 	case '-':
 	    argc--,argv++;
 	    goto switch_end;
@@ -240,6 +220,7 @@ a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
 #define PRIVLIB "/usr/local/lib/perl"
 #endif
     (void)apush(stab_array(incstab),str_make(PRIVLIB,0));
+    (void)apush(stab_array(incstab),str_make(".",1));
 
     str_set(&str_no,No);
     str_set(&str_yes,Yes);
@@ -254,10 +235,19 @@ a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
 
 	bufend = s + strlen(s);
 	while (*s) {
+#ifndef MSDOS
 	    s = cpytill(tokenbuf,s,bufend,':',&len);
+#else
+	    for (len = 0; *s && *s != ';'; tokenbuf[len++] = *s++);
+	    tokenbuf[len] = '\0';
+#endif
 	    if (*s)
 		s++;
-	    if (len)
+#ifndef MSDOS
+	    if (len && tokenbuf[len-1] != '/')
+#else
+	    if (len && tokenbuf[len-1] != '\\')
+#endif
 		(void)strcat(tokenbuf+len,"/");
 	    (void)strcat(tokenbuf+len,argv[0]);
 #ifdef DEBUGGING
@@ -283,15 +273,15 @@ a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
 
     pidstatary = anew(Nullstab);	/* for remembering popen pids, status */
 
-    filename = savestr(argv[0]);
-    origfilename = savestr(filename);
+    origfilename = savestr(argv[0]);
+    filename = origfilename;
     if (strEQ(filename,"-"))
 	argv[0] = "";
     if (preprocess) {
 	str_cat(str,"-I");
 	str_cat(str,PRIVLIB);
 	(void)sprintf(buf, "\
-/bin/sed -e '/^[^#]/b' \
+/bin/sed %s -e '/^[^#]/b' \
  -e '/^#[ 	]*include[ 	]/b' \
  -e '/^#[ 	]*define[ 	]/b' \
  -e '/^#[ 	]*if[ 	]/b' \
@@ -301,7 +291,9 @@ a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
  -e '/^#[ 	]*endif/b' \
  -e 's/^#.*//' \
  %s | %s -C %s %s",
+	  (doextract ? "-e '1,/^#/d\n'" : ""),
 	  argv[0], CPPSTDIN, str_get(str), CPPMINUS);
+	  doextract = FALSE;
 #ifdef IAMSUID				/* actually, this is caught earlier */
 	if (euid != uid && !euid)	/* if running suidperl */
 #ifdef SETEUID
@@ -420,7 +412,7 @@ a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
 	if ((statbuf.st_mode >> 6) & S_IWRITE)
 	    fatal("Setuid/gid script is writable by world");
 	doswitches = FALSE;		/* -s is insecure in suid */
-	line++;
+	curcmd->c_line++;
 	if (fgets(tokenbuf,sizeof tokenbuf, rsfp) == Nullch ||
 	  strnNE(tokenbuf,"#!",2) )	/* required even on Sys V */
 	    fatal("No #! line");
@@ -534,6 +526,26 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* TAINT */
 #endif /* DOSUID */
 
+#if !defined(IAMSUID) && !defined(TAINT)
+
+    /* skip forward in input to the real script? */
+
+    while (doextract) {
+	if ((s = str_gets(linestr, rsfp, 0)) == Nullch)
+	    fatal("No Perl script found in input\n");
+	if (*s == '#' && s[1] == '!' && instr(s,"perl")) {
+	    ungetc('\n',rsfp);		/* to keep line count right */
+	    doextract = FALSE;
+	    if (s = instr(s,"perl -")) {
+		s += 6;
+		while (s = moreswitches(s)) ;
+	    }
+	    if (cddir && chdir(cddir) < 0)
+		fatal("Can't chdir to %s",cddir);
+	}
+    }
+#endif /* !defined(IAMSUID) && !defined(TAINT) */
+
     defstab = stabent("_",TRUE);
 
     if (perldb) {
@@ -563,8 +575,14 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     /* now parse the script */
 
     error_count = 0;
-    if (yyparse() || error_count)
-	fatal("Execution aborted due to compilation errors.\n");
+    if (yyparse() || error_count) {
+	if (minus_c)
+	    fatal("%s had compilation errors.\n", origfilename);
+	else {
+	    fatal("Execution of %s aborted due to compilation errors.\n",
+		origfilename);
+	}
+    }
 
     New(50,loop_stack,128,struct loop);
 #ifdef DEBUGGING
@@ -589,6 +607,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     }
 
     magicalize("!#?^~=-%0123456789.+&*()<>,\\/[|`':");
+    userinit();		/* in case linked C routines want magical variables */
 
     amperstab = stabent("&",allstabs);
     leftstab = stabent("`",allstabs);
@@ -600,16 +619,14 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     /* these aren't necessarily magical */
     if (tmpstab = stabent(";",allstabs))
 	str_set(STAB_STR(tmpstab),"\034");
-#ifdef TAINT
-    tainted = 1;
-#endif
-    if (tmpstab = stabent("0",allstabs))
-	str_set(STAB_STR(tmpstab),origfilename);
-#ifdef TAINT
-    tainted = 0;
-#endif
-    if (tmpstab = stabent("]",allstabs))
-	str_set(STAB_STR(tmpstab),rcsid);
+    if (tmpstab = stabent("]",allstabs)) {
+	str = STAB_STR(tmpstab);
+	str_set(str,rcsid);
+	strncpy(tokenbuf,rcsid+19,3);
+	sprintf(tokenbuf+3,"%2.2d",PATCHLEVEL);
+	str->str_u.str_nval = atof(tokenbuf);
+	str->str_nok = 1;
+    }
     str_nset(stab_val(stabent("\"", TRUE)), " ", 1);
 
     stdinstab = stabent("STDIN",TRUE);
@@ -664,9 +681,12 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #ifdef TAINT
     tainted = 1;
 #endif
+    if (tmpstab = stabent("0",allstabs))
+	str_set(STAB_STR(tmpstab),origfilename);
     if (argvstab = stabent("ARGV",allstabs)) {
 	argvstab->str_pok |= SP_MULTI;
 	(void)aadd(argvstab);
+	aclear(stab_array(argvstab));
 	for (; argc > 0; argc--,argv++) {
 	    (void)apush(stab_array(argvstab),str_make(argv[0],0));
 	}
@@ -677,6 +697,9 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     if (envstab = stabent("ENV",allstabs)) {
 	envstab->str_pok |= SP_MULTI;
 	(void)hadd(envstab);
+	hclear(stab_hash(envstab));
+	if (env != environ)
+	    environ[0] = Nullch;
 	for (; *env; env++) {
 	    if (!(s = index(*env,'=')))
 		continue;
@@ -703,6 +726,11 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	fprintf(stderr,"\nEXECUTING...\n\n");
 #endif
 
+    if (minus_c) {
+	fprintf(stderr,"%s syntax OK\n", origfilename);
+	exit(0);
+    }
+
     /* do it */
 
     (void) cmd_exec(main_root,G_SCALAR,-1);
@@ -716,15 +744,24 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 magicalize(list)
 register char *list;
 {
-    register STAB *stab;
     char sym[2];
 
     sym[1] = '\0';
-    while (*sym = *list++) {
-	if (stab = stabent(sym,allstabs)) {
-	    stab_flags(stab) = SF_VMAGIC;
-	    str_magic(stab_val(stab), stab, 0, Nullch, 0);
-	}
+    while (*sym = *list++)
+	magicname(sym, Nullch, 0);
+}
+
+int
+magicname(sym,name,namlen)
+char *sym;
+char *name;
+int namlen;
+{
+    register STAB *stab;
+
+    if (stab = stabent(sym,allstabs)) {
+	stab_flags(stab) = SF_VMAGIC;
+	str_magic(stab_val(stab), stab, 0, name, namlen);
     }
 }
 
@@ -744,14 +781,14 @@ int *arglast;
     ARRAY *ar;
     int i;
     char * VOLATILE oldfile = filename;
-    VOLATILE line_t oldline = line;
+    CMD * VOLATILE oldcurcmd = curcmd;
     VOLATILE int oldtmps_base = tmps_base;
     VOLATILE int oldsave = savestack->ary_fill;
     SPAT * VOLATILE oldspat = curspat;
     static char *last_eval = Nullch;
     static CMD *last_root = Nullcmd;
     VOLATILE int sp = arglast[0];
-    char *tmps;
+    char *specfilename;
 
     tmps_base = tmps_max;
     if (curstash != stash) {
@@ -759,9 +796,10 @@ int *arglast;
 	curstash = stash;
     }
     str_set(stab_val(stabent("@",TRUE)),"");
-    if (optype != O_DOFILE) {	/* normal eval */
+    curcmd = &compiling;
+    if (optype == O_EVAL) {		/* normal eval */
 	filename = "(eval)";
-	line = 1;
+	curcmd->c_line = 1;
 	str_sset(linestr,str);
 	str_cat(linestr,";");		/* be kind to them */
     }
@@ -771,16 +809,30 @@ int *arglast;
 	    cmd_free(last_root);
 	    last_root = Nullcmd;
 	}
-	filename = savestr(str_get(str));	/* can't free this easily */
+	specfilename = str_get(str);
+	filename = savestr(specfilename);	/* can't free this easily */
 	str_set(linestr,"");
-	rsfp = fopen(filename,"r");
-	ar = stab_array(incstab);
-	if (!rsfp && *filename != '/') {
+	if (optype == O_REQUIRE &&
+	  hfetch(stab_hash(incstab), specfilename, strlen(specfilename), 0)) {
+	    filename = oldfile;
+	    tmps_base = oldtmps_base;
+	    st[++sp] = &str_yes;
+	    return sp;
+	}
+	else if (*filename == '/')
+	    rsfp = fopen(filename,"r");
+	else {
+	    ar = stab_array(incstab);
+	    Safefree(filename);
 	    for (i = 0; i <= ar->ary_fill; i++) {
 		(void)sprintf(buf,"%s/%s",str_get(afetch(ar,i,TRUE)),filename);
 		rsfp = fopen(buf,"r");
 		if (rsfp) {
-		    filename = savestr(buf);
+		    char *s = buf;
+
+		    if (*s == '.' && s[1] == '/')
+			s += 2;
+		    filename = savestr(s);
 		    break;
 		}
 	    }
@@ -788,11 +840,19 @@ int *arglast;
 	if (!rsfp) {
 	    filename = oldfile;
 	    tmps_base = oldtmps_base;
+	    if (optype == O_REQUIRE) {
+		sprintf(tokenbuf,"Can't locate %s in @INC", specfilename);
+		if (instr(tokenbuf,".h "))
+		    strcat(tokenbuf," (change .h to .ph maybe?)");
+		if (instr(tokenbuf,".ph "))
+		    strcat(tokenbuf," (did you run makelib?)");
+		fatal("%s",tokenbuf);
+	    }
 	    if (gimme != G_ARRAY)
 		st[++sp] = &str_undef;
 	    return sp;
 	}
-	line = 0;
+	curcmd->c_line = 0;
     }
     in_eval++;
     oldoldbufptr = oldbufptr = bufptr = str_get(linestr);
@@ -844,6 +904,8 @@ int *arglast;
 	if (rsfp) {
 	    fclose(rsfp);
 	    rsfp = 0;
+	    if (optype == O_REQUIRE)
+		fatal("%s", str_get(stab_val(stabent("@",TRUE))));
 	}
     }
     else {
@@ -854,21 +916,122 @@ int *arglast;
 				/* if we don't save result, free zaps it */
 	if (in_eval != 1 && myroot != last_root)
 	    cmd_free(myroot);
+	if (optype != O_EVAL) {
+	    if (gimme == G_SCALAR ? str_true(st[sp]) : sp > arglast[0]) {
+		(void)hstore(stab_hash(incstab), specfilename,
+		  strlen(specfilename), str_make(filename,0), 0 );
+	    }
+	    else if (optype == O_REQUIRE)
+		fatal("%s did not return a true value", specfilename);
+	}
     }
     in_eval--;
 #ifdef DEBUGGING
 	if (debug & 4) {
-	    tmps = loop_stack[loop_ptr].loop_label;
+	    char *tmps = loop_stack[loop_ptr].loop_label;
 	    deb("(Popping label #%d %s)\n",loop_ptr,
 		tmps ? tmps : "" );
 	}
 #endif
     loop_ptr--;
     filename = oldfile;
-    line = oldline;
+    curcmd = oldcurcmd;
     tmps_base = oldtmps_base;
     curspat = oldspat;
     if (savestack->ary_fill > oldsave)	/* let them use local() */
 	restorelist(oldsave);
     return sp;
+}
+
+/* This routine handles any switches that can be given during run */
+
+static char *
+moreswitches(s)
+char *s;
+{
+  reswitch:
+    switch (*s) {
+    case 'a':
+	minus_a = TRUE;
+	s++;
+	return s;
+    case 'c':
+	minus_c = TRUE;
+	s++;
+	return s;
+    case 'd':
+#ifdef TAINT
+	if (euid != uid || egid != gid)
+	    fatal("No -d allowed in setuid scripts");
+#endif
+	perldb = TRUE;
+	s++;
+	return s;
+    case 'D':
+#ifdef DEBUGGING
+#ifdef TAINT
+	if (euid != uid || egid != gid)
+	    fatal("No -D allowed in setuid scripts");
+#endif
+	debug = atoi(s+1);
+#else
+	warn("Recompile perl with -DDEBUGGING to use -D switch\n");
+#endif
+	break;
+    case 'i':
+	inplace = savestr(s+1);
+	for (s = inplace; *s && !isspace(*s); s++) ;
+	*s = '\0';
+	argvoutstab = stabent("ARGVOUT",TRUE);
+	break;
+    case 'I':
+#ifdef TAINT
+	if (euid != uid || egid != gid)
+	    fatal("No -I allowed in setuid scripts");
+#endif
+	if (*++s) {
+	    (void)apush(stab_array(incstab),str_make(s,0));
+	}
+	else
+	    fatal("No space allowed after -I");
+	break;
+    case 'n':
+	minus_n = TRUE;
+	s++;
+	return s;
+    case 'p':
+	minus_p = TRUE;
+	s++;
+	return s;
+    case 'u':
+	do_undump = TRUE;
+	s++;
+	return s;
+    case 'U':
+	unsafe = TRUE;
+	s++;
+	return s;
+    case 'v':
+	fputs(rcsid,stdout);
+	fputs("\nCopyright (c) 1989, 1990, Larry Wall\n",stdout);
+#ifdef MSDOS
+	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
+	stdout);
+#endif
+	fputs("\n\
+Perl may be copied only under the terms of the GNU General Public License,\n\
+a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
+	exit(0);
+    case 'w':
+	dowarn = TRUE;
+	s++;
+	return s;
+    case ' ':
+    case '\n':
+    case '\t':
+	break;
+    default:
+	fatal("Switch meaningless after -x: -%s",s);
+    }
+    return Nullch;
 }
