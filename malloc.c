@@ -225,7 +225,7 @@
 
 #ifdef DEBUGGING
 #  undef DEBUG_m
-#  define DEBUG_m(a)  if (debug & 128)   a
+#  define DEBUG_m(a)  if (PL_debug & 128)   a
 #endif
 
 /* I don't much care whether these are defined in sys/types.h--LAW */
@@ -581,11 +581,11 @@ emergency_sbrk(size)
 	dTHR;
 	/* First offense, give a possibility to recover by dieing. */
 	/* No malloc involved here: */
-	GV **gvp = (GV**)hv_fetch(defstash, "^M", 2, 0);
+	GV **gvp = (GV**)hv_fetch(PL_defstash, "^M", 2, 0);
 	SV *sv;
 	char *pv;
 
-	if (!gvp) gvp = (GV**)hv_fetch(defstash, "\015", 1, 0);
+	if (!gvp) gvp = (GV**)hv_fetch(PL_defstash, "\015", 1, 0);
 	if (!gvp || !(sv = GvSV(*gvp)) || !SvPOK(sv) 
 	    || (SvLEN(sv) < (1<<LOG_OF_MIN_ARENA) - M_OVERHEAD)) 
 	    return (char *)-1;		/* Now die die die... */
@@ -720,7 +720,7 @@ malloc(register size_t nbytes)
   	if ((p = nextf[bucket]) == NULL) {
 		MUTEX_UNLOCK(&malloc_mutex);
 #ifdef PERL_CORE
-		if (!nomemok) {
+		if (!PL_nomemok) {
 		    PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
 		    my_exit(1);
 		}
@@ -731,7 +731,7 @@ malloc(register size_t nbytes)
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log,
 			      "0x%lx: (%05lu) malloc %ld bytes\n",
-			      (unsigned long)(p+1), (unsigned long)(an++),
+			      (unsigned long)(p+1), (unsigned long)(PL_an++),
 			      (long)size));
 
 	/* remove from linked list */
@@ -1161,7 +1161,7 @@ free(void *mp)
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log, 
 			      "0x%lx: (%05lu) free\n",
-			      (unsigned long)cp, (unsigned long)(an++)));
+			      (unsigned long)cp, (unsigned long)(PL_an++)));
 
 	if (cp == NULL)
 		return;
@@ -1389,10 +1389,10 @@ realloc(void *mp, size_t nbytes)
 	}
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lu: (%05lu) rfree\n",
-			      (unsigned long)res,(unsigned long)(an++)));
+			      (unsigned long)res,(unsigned long)(PL_an++)));
 	DEBUG_m(PerlIO_printf(Perl_debug_log, 
 			      "0x%lx: (%05lu) realloc %ld bytes\n",
-			      (unsigned long)res,(unsigned long)(an++),
+			      (unsigned long)res,(unsigned long)(PL_an++),
 			      (long)size));
   	return ((Malloc_t)res);
 }

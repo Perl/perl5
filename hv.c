@@ -682,7 +682,7 @@ hsplit(HV *hv)
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
     Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
-      nomemok = FALSE;
+      PL_nomemok = FALSE;
       return;
     }
 #else
@@ -757,7 +757,7 @@ hv_ksplit(HV *hv, IV newmax)
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 	Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
         if (!a) {
-	  nomemok = FALSE;
+	  PL_nomemok = FALSE;
 	  return;
 	}
 #else
