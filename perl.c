@@ -83,19 +83,6 @@ static void validate_suid _((char *, char*));
 
 static int fdscript = -1;
 
-#if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
-#include <asm/sigcontext.h>
-static void
-catch_sigsegv(int signo, struct sigcontext_struct sc)
-{
-    PerlProc_signal(SIGSEGV, SIG_DFL);
-    fprintf(stderr, "Segmentation fault dereferencing 0x%lx\n"
-		    "return_address = 0x%lx, eip = 0x%lx\n",
-	    	    sc.cr2, __builtin_return_address(0), sc.eip);
-    fprintf(stderr, "thread = 0x%lx\n", (unsigned long)THR); 
-}
-#endif
-
 PerlInterpreter *
 perl_alloc(void)
 {
@@ -899,10 +886,6 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	(*xsinit)();	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)
     init_os_extras();
-#endif
-
-#if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
-    DEBUG_L(PerlProc_signal(SIGSEGV, (void(*)(int))catch_sigsegv););
 #endif
 
     init_predump_symbols();
