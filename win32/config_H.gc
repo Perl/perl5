@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Sat Dec 29 19:14:21 2001
+ * Configuration time: Fri Jan 11 12:16:14 2002
  * Configured by     : nick
  * Target system     : 
  */
@@ -30,7 +30,7 @@
  *	This symbol, if defined, indicates that the alarm routine is
  *	available.
  */
-/*#define HAS_ALARM		/**/
+#define HAS_ALARM		/**/
 
 /* HASATTRIBUTE:
  *	This symbol indicates the C compiler can check for function attributes,
@@ -3082,8 +3082,8 @@
  *	This variable contains the number of elements of the sig_name
  *	and sig_num arrays, excluding the final NULL entry.
  */
-#define SIG_NAME "ZERO", "NUM01", "INT", "QUIT", "ILL", "NUM05", "NUM06", "NUM07", "FPE", "KILL", "NUM10", "SEGV", "NUM12", "PIPE", "ALRM", "TERM", "NUM16", "NUM17", "NUM18", "NUM19", "CHLD", "BREAK", "ABRT", "STOP", "NUM24", "CONT", "CLD", 0		/**/
-#define SIG_NUM  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 20, 0		/**/
+#define SIG_NAME "ZERO", "HUP", "INT", "QUIT", "ILL", "NUM05", "NUM06", "NUM07", "FPE", "KILL", "NUM10", "SEGV", "NUM12", "PIPE", "ALRM", "TERM", "NUM16", "NUM17", "NUM18", "NUM19", "CHLD", "BREAK", "ABRT", "STOP", "NUM24", "CONT", "CLD", 0		/**/
+#define SIG_NUM  0, 1, 2, 21, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 20, 0		/**/
 #define SIG_SIZE 27			/**/
 
 /* SITEARCH:

@@ -1,5 +1,11 @@
 #
-use Config;
+BEGIN { warn "Running ".__FILE__."\n" };
+BEGIN 
+ {
+  require "../lib/Config.pm";
+  die "../Config.pm:$@" if $@;
+  Config::->import;
+ }
 use File::Compare qw(compare);
 use File::Copy qw(copy);
 my $name = $0;
@@ -12,6 +18,8 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
  }
 
 $opt{CONFIG_H} ||= 'config.h';
+
+warn "Writing $opt{CONFIG_H}\n";
 
 my $patchlevel = $opt{INST_VER};
 $patchlevel =~ s|^[\\/]||;
