@@ -1336,6 +1336,7 @@ PERL_CALLCONV void	Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val);
 PERL_CALLCONV void	Perl_hv_assert(pTHX_ HV* tb);
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
+STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* key_sv, const char* key, I32 klen, I32 flags, U32 hash);
 STATIC bool	S_hv_exists_common(pTHX_ HV* tb, SV* key_sv, const char* key, I32 klen, U32 hash);
 #endif
 END_EXTERN_C

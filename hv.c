@@ -948,154 +948,7 @@ will be returned.
 SV *
 Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 {
-    register XPVHV* xhv;
-    register I32 i;
-    register U32 hash;
-    register HE *entry;
-    register HE **oentry;
-    SV **svp;
-    SV *sv;
-    bool is_utf8 = FALSE;
-    int k_flags = 0;
-    const char *keysave = key;
-
-    if (!hv)
-	return Nullsv;
-    if (klen < 0) {
-	klen = -klen;
-	is_utf8 = TRUE;
-    }
-    if (SvRMAGICAL(hv)) {
-	bool needs_copy;
-	bool needs_store;
-	hv_magic_check (hv, &needs_copy, &needs_store);
-
-	if (needs_copy
-	    && (svp = hv_fetch(hv, key, is_utf8 ? -klen : klen, TRUE))) {
-	    sv = *svp;
-	    if (SvMAGICAL(sv)) {
-	        mg_clear(sv);
-	    }
-	    if (!needs_store) {
-		if (mg_find(sv, PERL_MAGIC_tiedelem)) {
-		    /* No longer an element */
-		    sv_unmagic(sv, PERL_MAGIC_tiedelem);
-		    return sv;
-		}
-		return Nullsv;          /* element cannot be deleted */
-	    }
-#ifdef ENV_IS_CASELESS
-	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
-		sv = sv_2mortal(newSVpvn(key,klen));
-		key = strupr(SvPVX(sv));
-	    }
-#endif
-	}
-    }
-    xhv = (XPVHV*)SvANY(hv);
-    if (!xhv->xhv_array /* !HvARRAY(hv) */)
-	return Nullsv;
-
-    if (is_utf8) {
-	STRLEN tmplen = klen;
-	/* See the note in hv_fetch(). --jhi */
-	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
-	klen = tmplen;
-        if (is_utf8)
-            k_flags = HVhek_UTF8;
-        if (key != keysave)
-            k_flags |= HVhek_FREEKEY;
-    }
-
-    if (HvREHASH(hv)) {
-	PERL_HASH_INTERNAL(hash, key, klen);
-    } else {
-	PERL_HASH(hash, key, klen);
-    }
-
-    /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
-    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    entry = *oentry;
-    i = 1;
-    for (; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
-	if (HeHASH(entry) != hash)		/* strings can't be equal */
-	    continue;
-	if (HeKLEN(entry) != (I32)klen)
-	    continue;
-	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
-	    continue;
-	if ((HeKFLAGS(entry) ^ k_flags) & HVhek_UTF8)
-	    continue;
-	if (k_flags & HVhek_FREEKEY)
-	    Safefree(key);
-	/* if placeholder is here, it's already been deleted.... */
-	if (HeVAL(entry) == &PL_sv_placeholder)
-	{
-	    if (SvREADONLY(hv))
-		return Nullsv;  /* if still SvREADONLY, leave it deleted. */
-	    else {
-		/* okay, really delete the placeholder... */
-		*oentry = HeNEXT(entry);
-		if (i && !*oentry)
-		    xhv->xhv_fill--; /* HvFILL(hv)-- */
-		if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
-		    HvLAZYDEL_on(hv);
-		else
-		    hv_free_ent(hv, entry);
-		xhv->xhv_keys--; /* HvKEYS(hv)-- */
-		if (xhv->xhv_keys == 0)
-		    HvHASKFLAGS_off(hv);
-		xhv->xhv_placeholders--;
-		return Nullsv;
-	    }
-	}
-	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
-	    S_hv_notallowed(aTHX_ k_flags, key, klen,
-			    "delete readonly key '%"SVf"' from"
-			    );
-	}
-
-	if (flags & G_DISCARD)
-	    sv = Nullsv;
-	else {
-	    sv = sv_2mortal(HeVAL(entry));
-	    HeVAL(entry) = &PL_sv_placeholder;
-	}
-
-	/*
-	 * If a restricted hash, rather than really deleting the entry, put
-	 * a placeholder there. This marks the key as being "approved", so
-	 * we can still access via not-really-existing key without raising
-	 * an error.
-	 */
-	if (SvREADONLY(hv)) {
-	    HeVAL(entry) = &PL_sv_placeholder;
-	    /* We'll be saving this slot, so the number of allocated keys
-	     * doesn't go down, but the number placeholders goes up */
-	    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
-	} else {
-	    *oentry = HeNEXT(entry);
-	    if (i && !*oentry)
-		xhv->xhv_fill--; /* HvFILL(hv)-- */
-	    if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
-		HvLAZYDEL_on(hv);
-	    else
-		hv_free_ent(hv, entry);
-	    xhv->xhv_keys--; /* HvKEYS(hv)-- */
-	    if (xhv->xhv_keys == 0)
-	        HvHASKFLAGS_off(hv);
-	}
-	return sv;
-    }
-    if (SvREADONLY(hv)) {
-	S_hv_notallowed(aTHX_ k_flags, key, klen,
-			"access disallowed key '%"SVf"' from"
-			);
-    }
-
-    if (k_flags & HVhek_FREEKEY)
-	Safefree(key);
-    return Nullsv;
+    return hv_delete_common(hv, NULL, key, klen, flags, 0);
 }
 
 /*
@@ -1112,42 +965,76 @@ precomputed hash value, or 0 to ask for it to be computed.
 SV *
 Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 {
+    return hv_delete_common(hv, keysv, NULL, 0, flags, hash);
+}
+
+SV *
+S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
+		   I32 flags, U32 hash)
+{
     register XPVHV* xhv;
     register I32 i;
-    register char *key;
     STRLEN klen;
     register HE *entry;
     register HE **oentry;
     SV *sv;
     bool is_utf8;
     int k_flags = 0;
-    char *keysave;
+    const char *keysave;
 
     if (!hv)
 	return Nullsv;
+
+    if (keysv) {
+	key = SvPV(keysv, klen);
+	is_utf8 = (SvUTF8(keysv) != 0);
+    } else {
+	if (klen_i32 < 0) {
+	    klen = -klen_i32;
+	    is_utf8 = TRUE;
+	} else {
+	    klen = klen_i32;
+	    is_utf8 = FALSE;
+	}
+    }
+    keysave = key;
+
     if (SvRMAGICAL(hv)) {
 	bool needs_copy;
 	bool needs_store;
 	hv_magic_check (hv, &needs_copy, &needs_store);
 
-	if (needs_copy && (entry = hv_fetch_ent(hv, keysv, TRUE, hash))) {
-	    sv = HeVAL(entry);
-	    if (SvMAGICAL(sv)) {
-		mg_clear(sv);
+	if (needs_copy) {
+	    sv = NULL;
+	    if (keysv) {
+		if ((entry = hv_fetch_ent(hv, keysv, TRUE, hash))) {
+		    sv = HeVAL(entry);
+		}
+	    } else {
+		SV **svp;
+		if ((svp = hv_fetch(hv, key, is_utf8 ? -klen : klen, TRUE))) {
+		    sv = *svp;
+		}
 	    }
-	    if (!needs_store) {
-		if (mg_find(sv, PERL_MAGIC_tiedelem)) {
-		    /* No longer an element */
-		    sv_unmagic(sv, PERL_MAGIC_tiedelem);
-		    return sv;
-		}		
-		return Nullsv;		/* element cannot be deleted */
+	    if (sv) {
+		if (SvMAGICAL(sv)) {
+		    mg_clear(sv);
+		}
+		if (!needs_store) {
+		    if (mg_find(sv, PERL_MAGIC_tiedelem)) {
+			/* No longer an element */
+			sv_unmagic(sv, PERL_MAGIC_tiedelem);
+			return sv;
+		    }		
+		    return Nullsv;		/* element cannot be deleted */
+		}
 	    }
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
-		key = SvPV(keysv, klen);
+		/* XXX This code isn't UTF8 clean.  */
 		keysv = sv_2mortal(newSVpvn(key,klen));
-		(void)strupr(SvPVX(keysv));
+		keysave = key = strupr(SvPVX(keysv));
+		is_utf8 = 0;
 		hash = 0;
 	    }
 #endif
@@ -1156,9 +1043,6 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array /* !HvARRAY(hv) */)
 	return Nullsv;
-
-    keysave = key = SvPV(keysv, klen);
-    is_utf8 = (SvUTF8(keysv) != 0);
 
     if (is_utf8) {
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
