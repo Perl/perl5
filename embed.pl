@@ -156,7 +156,7 @@ sub write_protos {
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
-	$ret .= '/* ' if $flags =~ /m/;
+	$ret .= '/* ' if $flags =~ /[mX]/;
 	if ($flags =~ /s/) {
 	    $retval = "STATIC $retval";
 	    $func = "S_$func";
@@ -189,7 +189,7 @@ sub write_protos {
 	    $ret .= "\n#endif\n";
 	}
 	$ret .= ";";
-	$ret .= ' */' if $flags =~ /m/;
+	$ret .= ' */' if $flags =~ /[mX]/;
 	$ret .= "\n";
     }
     $ret;
@@ -200,8 +200,9 @@ sub write_global_sym {
     my $ret = "";
     if (@_ > 1) {
 	my ($flags,$retval,$func,@args) = @_;
-	if ($flags =~ /A/ && $flags !~ /[xm]/) { # public API, so export
-	    $func = "Perl_$func" if $flags =~ /p/;
+	if ($flags =~ /[AX]/ && $flags !~ /[xm]/
+	    || $flags =~ /b/) { # public API, so export
+	    $func = "Perl_$func" if $flags =~ /[pbX]/;
 	    $ret = "$func\n";
 	}
     }
