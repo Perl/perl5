@@ -69,6 +69,7 @@
 #define hints		Perl_hints
 #define in_my		Perl_in_my
 #define inc_amg		Perl_inc_amg
+#define io_close	Perl_io_close
 #define know_next	Perl_know_next
 #define last_lop	Perl_last_lop
 #define last_lop_op	Perl_last_lop_op
@@ -148,6 +149,7 @@
 #define pow_ass_amg	Perl_pow_ass_amg
 #define ppaddr		Perl_ppaddr
 #define profiledata	Perl_profiledata
+#define provide_ref	Perl_provide_ref
 #define qrt_amg		Perl_qrt_amg
 #define rcsid		Perl_rcsid
 #define reall_srchlen	Perl_reall_srchlen
