@@ -21,6 +21,12 @@
 #  March 5, 1997
 #
 #  Locale, optimization, and malloc changes by Tom Phoenix Mar 15, 1997
+#
+#  groupstype change and note about t/lib/findbin.t by Tom, Mar 24, 1997
+
+# MachTen's ability to have valid filepaths beginning with "//" may
+# be causing lib/FindBin.pm to fail. I don't know how to fix it, but
+# the reader is encouraged to do so! :-)  -- Tom
 
 # There seem to be some hard-to-diagnose problems under MachTen's
 # malloc, so we'll use Perl's. If you have problems which Perl's
@@ -40,7 +46,13 @@ esac
 
 # MachTen doesn't have secure setid scripts
 d_suidsafe='undef'
-d_dosuid='define'
+case "$d_dosuid" in
+'') d_dosuid='define' ;;
+esac
+
+# groupstype should be gid_t, as near as I can tell, but it only
+# seems to work right when it's int. 
+groupstype='int'
 
 case "$optimize" in
 '') optimize='-O2' ;;
@@ -78,5 +90,8 @@ Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
 	Propagating recommended variable dont_use_nlink
 
 Read the File::Find documentation for more information.
+
+It's possible that test t/lib/findbin.t will fail on some configurations
+of MachTen.
 
 EOM
