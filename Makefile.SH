@@ -108,6 +108,13 @@ case "$ldlibpth" in
 esac
 
 case "$osname" in
+linux)
+	case "$useshrplib" in
+	true)
+	    ldlibpth="LD_PRELOAD=\"\$\$LD_PRELOAD `pwd`/$libperl\" $ldlibpth"
+	    ;;
+	esac
+	;;
 os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
 	;;
 esac
