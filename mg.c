@@ -916,7 +916,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     }
     FreeEnvironmentStrings(envv);
 #   else
-#	ifdef CYGWIN
+#	ifdef __CYGWIN__
     I32 i;
     for (i = 0; environ[i]; i++)
        safesysfree(environ[i]);
@@ -930,7 +930,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 	for (i = 0; environ[i]; i++)
 	    safesysfree(environ[i]);
 #	    endif /* PERL_USE_SAFE_PUTENV */
-#	endif /* CYGWIN */
+#	endif /* __CYGWIN__ */
 
     environ[0] = Nullch;
 

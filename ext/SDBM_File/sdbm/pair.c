@@ -8,7 +8,7 @@
  */
 
 #include "config.h"
-#ifdef CYGWIN
+#ifdef __CYGWIN__
 # define EXTCONST extern const
 #else
 # include "EXTERN.h"

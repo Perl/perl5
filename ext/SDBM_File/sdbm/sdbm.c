@@ -128,7 +128,7 @@ sdbm_prep(char *dirname, char *pagname, int flags, int mode)
  * open the files in sequence, and stat the dirfile.
  * If we fail anywhere, undo everything, return NULL.
  */
-#if defined(OS2) || defined(MSDOS) || defined(WIN32) || defined(CYGWIN)
+#if defined(OS2) || defined(MSDOS) || defined(WIN32) || defined(__CYGWIN__)
 	flags |= O_BINARY;
 #	endif
 	if ((db->pagf = open(pagname, flags, mode)) > -1) {

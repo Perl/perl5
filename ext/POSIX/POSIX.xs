@@ -106,7 +106,7 @@
    }
 #  define times(t) vms_times(t)
 #else
-#if defined (CYGWIN)
+#if defined (__CYGWIN__)
 #    define tzname _tzname
 #endif
 #if defined (WIN32)
@@ -289,7 +289,7 @@ unsigned long strtoul (const char *, char **, int);
 #endif
 
 #ifdef HAS_TZNAME
-#  if !defined(WIN32) && !defined(CYGWIN)
+#  if !defined(WIN32) && !defined(__CYGWIN__)
 extern char *tzname[];
 #  endif
 #else

@@ -40,7 +40,7 @@
 #      define dEXTCONST const
 #    endif
 #  else
-#    if defined(CYGWIN) && defined(USEIMPORTLIB)
+#    if defined(__CYGWIN__) && defined(USEIMPORTLIB)
 #      define EXT extern __declspec(dllimport)
 #      define dEXT 
 #      define EXTCONST extern __declspec(dllimport) const

@@ -1712,7 +1712,7 @@ typedef pthread_key_t	perl_key;
 #   endif
 #endif
 
-#if defined(CYGWIN)
+#if defined(__CYGWIN__)
 /* USEMYBINMODE
  *   This symbol, if defined, indicates that the program should
  *   use the routine my_binmode(FILE *fp, char iotype) to insure
