@@ -1435,7 +1435,7 @@ goto, or a loop control statement.
 
 =item Exiting format via %s
 
-(W exiting) You are exiting an eval by unconventional means, such as a
+(W exiting) You are exiting a format by unconventional means, such as a
 goto, or a loop control statement.
 
 =item Exiting pseudo-block via %s
