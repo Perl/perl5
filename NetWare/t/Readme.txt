@@ -38,14 +38,16 @@ For example, all the scripts that are under 't\base' folder will be
 entered in 'base.pl' and so on. 'nwauto.pl' includes all these '.pl' 
 scripts like 'base.pl', 'comp.pl' etc.
 
+
 Perform the following steps to execute the automated scripts:
 
-1. Make sure that your NetWare server is mapped to "i:".
+1. Map your NetWare server to "i:"
 
-2. Execute "nmake nwinstall" (after building interpreter and extensions)
-in the 'NetWare' folder of the CPAN download. This installs all the 
-library files, perl modules and all the 't' scripts in appropriate 
-folders onto your server.
+2. After complete build (building both interpreter and all extensions)
+of Perl for NetWare, execute "nmake nwinstall" in the 'NetWare' folder
+of the CPAN download. This installs all the library files, perl modules,
+the '.pl' files under 'NetWare\t' folder and all the '.t' scripts
+under 't' folder, all in appropriate folders onto your server.
 
 3. Execute the command  "perl t\NWModify.pl"  on the console command 
 prompt of your server. This script replaces
