@@ -393,6 +393,14 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		 m, (int)offset, RExC_precomp, RExC_precomp + offset);          \
     } STMT_END                                                               \
 
+#define	vWARNdep(loc,m)                                                         \
+    STMT_START {                                                             \
+        unsigned offset = strlen(RExC_precomp)-(RExC_end-(loc));          \
+        int warn_cat = ckWARN(WARN_REGEXP) ? WARN_REGEXP : WARN_DEPRECATED;  \
+	Perl_warner(aTHX_ warn_cat, "%s" REPORT_LOCATION,\
+		 m, (int)offset, RExC_precomp, RExC_precomp + offset);          \
+    } STMT_END                                                               \
+
 
 #define	vWARN2(loc, m, a1)                                                   \
     STMT_START {                                                             \
@@ -2082,8 +2090,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		*flagp = TRYAGAIN;
 		return NULL;
 	    case 'p':           /* (?p...) */
-		if (SIZE_ONLY)
-		    vWARN(RExC_parse, "(?p{}) is deprecated - use (??{})");
+		if (SIZE_ONLY && ckWARN2(WARN_DEPRECATED, WARN_REGEXP))
+		    vWARNdep(RExC_parse, "(?p{}) is deprecated - use (??{})");
 		/* FALL THROUGH*/
 	    case '?':           /* (??...) */
 		logical = 1;
