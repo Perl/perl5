@@ -1181,18 +1181,26 @@ die(pat, va_alist)
     message = mess(pat, &args);
     va_end(args);
 
-    if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
-	dSP;
-	SV *msg = sv_2mortal(newSVpv(message, 0));
+    if (diehook) {
+	/* sv_2cv might call croak() */
+	SV *olddiehook = diehook;
+	ENTER;
+	SAVESPTR(diehook);
+	diehook = Nullsv;
+	cv = sv_2cv(olddiehook, &stash, &gv, 0);
+	LEAVE;
+	if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
+	    dSP;
+	    SV *msg = sv_2mortal(newSVpv(message, 0));
 
-	PUSHMARK(sp);
-	EXTEND(sp, 1);
-	PUSHs(msg);
-	PUTBACK;
-	perl_call_sv((SV*)cv, G_DISCARD);
+	    PUSHMARK(sp);
+	    XPUSHs(msg);
+	    PUTBACK;
+	    perl_call_sv((SV*)cv, G_DISCARD);
 
-	/* It's okay for the __DIE__ hook to modify the message. */
-	message = SvPV(msg, na);
+	    /* It's okay for the __DIE__ hook to modify the message. */
+	    message = SvPV(msg, na);
+	}
     }
 
     restartop = die_where(message);
@@ -1226,17 +1234,19 @@ croak(pat, va_alist)
     message = mess(pat, &args);
     va_end(args);
     if (diehook) {
+	/* sv_2cv might call croak() */
 	SV *olddiehook = diehook;
-	diehook = Nullsv;                 /* sv_2cv might call croak() */
+	ENTER;
+	SAVESPTR(diehook);
+	diehook = Nullsv;
 	cv = sv_2cv(olddiehook, &stash, &gv, 0);
-	diehook = olddiehook;
-	if (cv && !CvDEPTH(cv)) {
+	LEAVE;
+	if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
 	    dSP;
 	    SV *msg = sv_2mortal(newSVpv(message, 0));
 
 	    PUSHMARK(sp);
-	    EXTEND(sp, 1);
-	    PUSHs(msg);
+	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
 
@@ -1292,16 +1302,17 @@ warn(pat,va_alist)
     va_end(args);
 
     if (warnhook) {
+	/* sv_2cv might call warn() */
 	SV *oldwarnhook = warnhook;
-	warnhook = Nullsv;	/* sv_2cv might end up calling warn() */
+	ENTER;
+	SAVESPTR(warnhook);
+	warnhook = Nullsv;
 	cv = sv_2cv(oldwarnhook, &stash, &gv, 0);
-	warnhook = oldwarnhook;
-	if (cv && !CvDEPTH(cv)) {
+	LEAVE;
+	if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
 	    dSP;
-
 	    PUSHMARK(sp);
-	    EXTEND(sp, 1);
-	    PUSHs(sv_2mortal(newSVpv(message,0)));
+	    XPUSHs(sv_2mortal(newSVpv(message,0)));
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
 	    return;
@@ -1637,12 +1648,7 @@ char	*mode;
     register I32 this, that;
     register I32 pid;
     SV *sv;
-    I32 doexec =
-#ifdef AMIGAOS
-	1;
-#else
-	strNE(cmd,"-");
-#endif
+    I32 doexec = strNE(cmd,"-");
 
 #ifdef OS2
     if (doexec) {
