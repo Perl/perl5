@@ -13,6 +13,7 @@ Perl_ck_eof
 Perl_ck_eval
 Perl_ck_exec
 Perl_ck_exists
+Perl_ck_exit
 Perl_ck_ftst
 Perl_ck_fun
 Perl_ck_fun_locale

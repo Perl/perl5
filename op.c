@@ -5163,6 +5163,20 @@ Perl_ck_eval(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_exit(pTHX_ OP *o)
+{
+#ifdef VMS
+    HV *table = GvHV(PL_hintgv);
+    if (table) {
+       SV **svp = hv_fetch(table, "vmsish_exit", 11, FALSE);
+       if (svp && *svp && SvTRUE(*svp))
+           o->op_private |= OPpEXIT_VMSISH;
+    }
+#endif
+    return ck_fun(o);
+}
+
+OP *
 Perl_ck_exec(pTHX_ OP *o)
 {
     OP *kid;
