@@ -90,7 +90,7 @@ L<"Configurable Options">.
 
 If the C<maxdepth> is included, it must be a numeral I<N>; the value is
 dumped only I<N> levels deep, as if the C<dumpDepth> option had been
-deporarily set to I<N>.
+temporarily set to I<N>.
 
 =item V [pkg [vars]]
 
