@@ -356,7 +356,7 @@ decode_qp(sv)
 
         PREINIT:
 	STRLEN len;
-	char *str = (unsigned char*)SvPVbyte(sv, len);
+	char *str = SvPVbyte(sv, len);
 	char const* end = str + len;
 	char *r;
 	char *whitespace = 0;
