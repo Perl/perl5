@@ -564,7 +564,7 @@ int kind;
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
 	       GSAR 96-10-12 */
-	    gv_fetchpv(s, in_eval ? GV_ADDMULTI : TRUE,
+	    gv_fetchpv(s, in_eval ? (GV_ADDMULTI | 8) : TRUE,
 		kind == '$' ? SVt_PV :
 		kind == '@' ? SVt_PVAV :
 		kind == '%' ? SVt_PVHV :
@@ -1486,7 +1486,7 @@ yylex()
 	/* build ops for a bareword */
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf+1, 0));
 	yylval.opval->op_private = OPpCONST_ENTERED;
-	gv_fetchpv(tokenbuf+1, in_eval ? GV_ADDMULTI : TRUE,
+	gv_fetchpv(tokenbuf+1, in_eval ? (GV_ADDMULTI | 8) : TRUE,
 		   ((tokenbuf[0] == '$') ? SVt_PV
 		    : (tokenbuf[0] == '@') ? SVt_PVAV
 		    : SVt_PVHV));
