@@ -750,6 +750,11 @@ one can (or, if one can, whether it's a good idea) link together at
 all binaries with different ideas about file offsets, all this is
 platform-dependent.
 
+=head2 Storable test st-06compat Fails in UNICOS and UNICOS/mk
+
+This means that you cannot read old (pre-Storable-0.7) Storable images
+made in other platforms.
+
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
