@@ -39,7 +39,7 @@ sub import {
 
 	my $closure_import_func = $func;	# Full name
 	my $closure_func = $func;		# Name inside package
-	my $index = index($func, '::');
+	my $index = rindex($func, '::');
 	if ($index == -1) {
 	    $closure_import_func = "${callpkg}::$func";
 	} else {
