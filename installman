@@ -150,7 +150,7 @@ sub runpod2man {
 	}
 	$tmp = "${mandir}/${manpage}.tmp";
 	$manpage = "${mandir}/${manpage}.${manext}";
-	if (&cmd("$pod2man $mod > $tmp", $tmp) == 0 && !$notify && -s $tmp) {
+	if (&cmd("$pod2man $mod > $tmp") == 0 && !$notify && -s $tmp) {
 	    if (rename($tmp, $manpage)) {
 		$packlist->{$manpage} = { type => 'file' };
 		next;
@@ -183,8 +183,8 @@ exit 0;
 # Utility subroutines from installperl
 
 sub cmd {
-    local($cmd, $tmp) = @_;
-    warn $silent ? "  $tmp\n" : "  $cmd\n";
+    local($cmd) = @_;
+    warn "  $cmd\n" unless $cmd;
     unless ($notify) {
 	if ($Config{d_fork}) {
 	    fork ? wait : exec $cmd;  # Allow user to ^C out of command.
@@ -215,7 +215,7 @@ sub link {
     my($from,$to) = @_;
     my($success) = 0;
 
-    warn "  ln $from $to\n" unless $silent;
+    warn $silent ? "  $to\n" : "  ln $from $to\n";
     eval {
         CORE::link($from, $to)
             ? $success++
