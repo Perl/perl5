@@ -605,12 +605,16 @@ sub linger {
     test { $watch eq '12' }
 }
 
-SKIP: { skip("tests not in maint because change #19637 not applied", 4) }
+require "./test.pl";
+
+curr_test(182);
+
+SKIP: { skip("tests not in maint because change #19637 not applied", 3) }
+
+$test= 185;
 
 # bugid #23265 - this used to coredump during destruction of PL_maincv
 # and its children
-
-require './test.pl';
 
 my $got = runperl(
     prog => q[
