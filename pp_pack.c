@@ -1525,8 +1525,9 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 		if (*s == '\n')
 		    s++;
-		else if (s[1] == '\n')		/* possible checksum byte */
-		    s += 2;
+		else	/* possible checksum byte */
+		    if (s + 1 < strend && s[1] == '\n')
+		        s += 2;
 	    }
 	    XPUSHs(sv_2mortal(sv));
 	    break;

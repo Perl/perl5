@@ -48,6 +48,9 @@ $!  Pick up a copy of vmspipe.com to use for the tests
 $   If F$Search("VMSPIPE.COM").nes."" then Delete/Log/Noconfirm VMSPIPE.COM;*
 $   Copy/Log/NoConfirm [-]VMSPIPE.COM []
 $!
+$!  This may be set for the C compiler in descrip.mms, but it confuses the File::Find tests
+$   DeAssign sys
+$!
 $!  And do it
 $   Show Process/Accounting
 $   testdir = "Directory/NoHead/NoTrail/Column=1"

@@ -197,10 +197,14 @@ ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		Encode extension
+ext/Encode/Byte/Byte.pm			Encode extension
+ext/Encode/Byte/Makefile.PL			Encode extension
 ext/Encode/Changes		Encode extension
 ext/Encode/CN/CN.pm		Encode extension
 ext/Encode/CN/Makefile.PL	Encode extension
 ext/Encode/compile		Encode extension
+ext/Encode/EBCDIC/EBCDIC.pm			Encode extension
+ext/Encode/EBCDIC/Makefile.PL			Encode extension
 ext/Encode/encengine.c		Encode extension
 ext/Encode/encode.h		Encode extension
 ext/Encode/Encode.pm			Encode extension
@@ -370,6 +374,8 @@ ext/Encode/lib/EncodeFormat.pod		Encode extension
 ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
+ext/Encode/Symbol/Makefile.PL			Encode extension
+ext/Encode/Symbol/Symbol.pm			Encode extension
 ext/Encode/t/Aliases.t	Encode extension
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
@@ -1301,8 +1307,8 @@ lib/Pod/t/basic.txt		podlators test
 lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/htmlescp.pod          pod2html escape test input data
 lib/Pod/t/htmlescp.t            pod2html escape test
-lib/Pod/t/htmlview.t            pod2html render test
 lib/Pod/t/htmlview.pod          pod2html render test input data
+lib/Pod/t/htmlview.t            pod2html render test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/latex.t		See if Pod::LaTeX works
 lib/Pod/t/man.t    		podlators test

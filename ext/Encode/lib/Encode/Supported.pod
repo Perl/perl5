@@ -4,7 +4,7 @@ Encode::Supported -- Supported encodings by Encode
 
 =head1 DESCRIPTION
 
-=Encoding Names
+=head2 Encoding Names
 
 Encoding names are case insensitive. White space in names
 is ignored.  In addition an encoding may have aliases.
@@ -16,35 +16,42 @@ he first in the following sequence:
        o The name in the IANA registry.
        o The name used by the organization that defined it.
 
-Because of all the alias issues, and because in the gen-
-eral case encodings have state, "Encode" uses the encoding
-object internally once an operation is in progress.
+Because of all the alias issues, and because in the general case 
+encodings have state, "Encode" uses the encoding object internally 
+once an operation is in progress.
 
-=head2 Supported Encodings
+=head1 Supported Encodings
 
 As of Perl 5.8.0, at least the following encodings are recognized.
 Note that unless otherwise specified, they are all case insensitive
 (via alias) and all occurance of spaces are replaced with '-'.  In
 other words, "ISO 8859 1" and "iso-8859-1" are identical.
 
-=head3 ASCII
+Encodings are categorized and implemented in several different modules
+but you don't have to C<use Encode::XX> to make them available for
+most cases.  Encode.pm will automatically load those modules in need.
+
+=head2 Built-in Encodings
+
+The following encodings are always available.
 
   Canonical	Aliases
   -----------------------
-  ascii	        uc-ascii
-
-=head3 The Unicode
-
-  utf8		UTF-8
-  utf16		UTF-16
-  ucs2		UCS-2, iso-10646-1
-
-=head3 The ISO 8859, KOI, and other 1-byte encodings
-
-The following encodings are based upon ASCII.  For most cases it uses
-\x80-\xff (upper half) to map non-ASCII characters.
-
   iso-8859-1	latin1
+  US-ascii	ascii
+  UCS-2		ucs2, iso-10646-1
+  UCS-2le
+  UTF-8		utf8
+  -----------------------
+
+=head2 Encode::Byte
+
+The following encodings are based single-byte encoding implemented as
+extended ASCII.  For most cases it uses \x80-\xff (upper half) to map
+non-ASCII characters.
+
+  -----------------------
+  iso-8859-1	latin
   iso-8859-2	latin2
   iso-8859-3	latin3
   iso-8859-4	latin4
@@ -90,52 +97,91 @@ The following encodings are based upon ASCII.  For most cases it uses
   macicelandic    
   macturkish
   macukraine
+  -----------------------
 
-=head3 The CJK: Chinese, Japanese, Korean (Multibyte)
+=head2 The CJK: Chinese, Japanese, Korean (Multibyte)
 
 Note Vietnamese is listed above.  Also read "Encoding vs Charset"
 below.  Also note these are impelemented in distinct module by
 languages, due the the size concerns.  See these perldocs also.
 
-  cp936      gbk		    # Encode::CN
-  euc-cn			    # Encode::CN
-  gb12345			    # Encode::CN
-  gb2312			    # Encode::CN
-  gb2312			    # Encode::CN
-  hz				    # Encode::CN
-  iso-ir-165			    # Encode::CN
+=over 4
 
-  7bit-jis	  jis		    # Encode::JP
-  cp932				    # Encode::JP
-  euc-jp	  ujis		    # Encode::JP
-  iso-2022-jp			    # Encode::JP
-  macjapan			    # Encode::JP
-  shiftjis	  Shift_JIS, sjis   # Encode::JP
-  
-  euc-kr			    # Encode::KR
-  ksc5601			    # Encode::KR
-  cp949                             # Encode::KR
+=item Encode::CN -- Continental China
 
-  big5				    # Encode::TW
-  big5-hkscs			    # Encode::TW
-  cp950                             # Encode::TW
+  -----------------------
+  cp936      gbk		    
+  euc-cn
+  gb12345
+  gb2312
+  hz
+  iso-ir-165
+  -----------------------
 
-Due to size concerns, additional Chinese encodings including "GB
-18030", "EUC-TW" and "BIG5PLUS" are distributed separately on CPAN,
-under the name Encode::HanExtra.
+=item Encode::JP -- Japan
 
-=head3 EBCDIC
+  -----------------------
+  7bit-jis	  jis
+  cp932
+  euc-jp	  ujis
+  iso-2022-jp
+  macjapan
+  shiftjis	  Shift_JIS, sjis
+  -----------------------
+
+=item Encode::KR -- Korea
+
+  -----------------------
+  euc-kr
+  ksc5601
+  cp949
+  -----------------------
+
+=item Encode::TW -- Taiwan
+
+  -----------------------
+  big5
+  big5-hkscs
+  cp950
+  -----------------------
+
+=item Encode::HanExtra -- More Chinese via CPAN
+
+Due to size concerns, additional Chinese encodings below are
+distributed separately on CPAN, under the name Encode::HanExtra.
+
+  -----------------------
+  gb18030
+  euc-tw
+  big5plus
+  -----------------------
+
+=back
+
+=head2 Miscellaneous encodings
+
+=over 4
+
+=item Encode::EBCDIC
 
 See perlebcdic for details.
 
+  -----------------------
   cp1047
   cp37
   posix-bc
+  -----------------------
 
-=head3 Symbols and dingbats
+=item Enocode::Symbols
 
+For symbols  and dingbats.
+
+  -----------------------
   symbol
   dingbats
+  -----------------------
+
+=back
 
 =head1 Encoding vs. Charset
 
@@ -208,6 +254,9 @@ F<http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM> (eq ISO-2022)
 
 =head1 See Also
 
-L<Encode>, L<Encode::CN>, L<Encode::JP>, L<Encode::KR>, L<Encode::TW>
+L<Encode>, 
+L<Encode::Byte>, 
+L<Encode::CN>, L<Encode::JP>, L<Encode::KR>, L<Encode::TW>
+L<Encode::EBCDIC>, L<Encode::Symbol>
 
 =cut

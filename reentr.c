@@ -22,19 +22,23 @@
 void
 Perl_reentrant_size(pTHX) {
 #ifdef USE_REENTRANT_API
+#define REENTRANTSMALLSIZE	 256	/* Make something up. */
+#define REENTRANTUSUALSIZE	4096	/* Make something up. */
 #ifdef HAS_ASCTIME_R
-	PL_reentrant_buffer->_asctime_size = 256; /* Make something up. */
+	PL_reentrant_buffer->_asctime_size = REENTRANTSMALLSIZE;
 #endif /* HAS_ASCTIME_R */
 #ifdef HAS_CRYPT_R
 #endif /* HAS_CRYPT_R */
 #ifdef HAS_CTIME_R
-	PL_reentrant_buffer->_ctime_size = 256; /* Make something up. */
+	PL_reentrant_buffer->_ctime_size = REENTRANTSMALLSIZE;
 #endif /* HAS_CTIME_R */
 #ifdef HAS_DRAND48_R
 #endif /* HAS_DRAND48_R */
 #ifdef HAS_GETGRNAM_R
 #   if defined(HAS_SYSCONF) && defined(_SC_GETGR_R_SIZE_MAX) && !defined(__GLIBC__)
 	PL_reentrant_buffer->_getgrent_size = sysconf(_SC_GETGR_R_SIZE_MAX);
+	if (PL_reentrant_buffer->_getgrent_size == -1)
+		PL_reentrant_buffer->_getgrent_size = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->_getgrent_size = SIABUFSIZ;
@@ -42,32 +46,34 @@ Perl_reentrant_size(pTHX) {
 #           ifdef __sgi
 	PL_reentrant_buffer->_getgrent_size = BUFSIZ;
 #           else
-	PL_reentrant_buffer->_getgrent_size = 256;
+	PL_reentrant_buffer->_getgrent_size = REENTRANTUSUALSIZE;
 #           endif
 #       endif
 #   endif 
 #endif /* HAS_GETGRNAM_R */
 #ifdef HAS_GETHOSTBYNAME_R
 #if   !(GETHOSTBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	PL_reentrant_buffer->_gethostent_size = 2048; /* Any better ideas? */
+	PL_reentrant_buffer->_gethostent_size = REENTRANTUSUALSIZE;
 #endif
 #endif /* HAS_GETHOSTBYNAME_R */
 #ifdef HAS_GETLOGIN_R
-	PL_reentrant_buffer->_getlogin_size = 256; /* Make something up. */
+	PL_reentrant_buffer->_getlogin_size = REENTRANTSMALLSIZE;
 #endif /* HAS_GETLOGIN_R */
 #ifdef HAS_GETNETBYNAME_R
 #if   !(GETNETBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	PL_reentrant_buffer->_getnetent_size = 2048; /* Any better ideas? */
+	PL_reentrant_buffer->_getnetent_size = REENTRANTUSUALSIZE;
 #endif
 #endif /* HAS_GETNETBYNAME_R */
 #ifdef HAS_GETPROTOBYNAME_R
 #if   !(GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-	PL_reentrant_buffer->_getprotoent_size = 2048; /* Any better ideas? */
+	PL_reentrant_buffer->_getprotoent_size = REENTRANTUSUALSIZE;
 #endif
 #endif /* HAS_GETPROTOBYNAME_R */
 #ifdef HAS_GETPWNAM_R
 #   if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
 	PL_reentrant_buffer->_getpwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+	if (PL_reentrant_buffer->_getgrent_size == -1)
+		PL_reentrant_buffer->_getgrent_size = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->_getpwent_size = SIABUFSIZ;
@@ -75,14 +81,14 @@ Perl_reentrant_size(pTHX) {
 #           ifdef __sgi
 	PL_reentrant_buffer->_getpwent_size = BUFSIZ;
 #           else
-	PL_reentrant_buffer->_getpwent_size = 256;
+	PL_reentrant_buffer->_getpwent_size = REENTRANTUSUALSIZE;
 #           endif
 #       endif
 #   endif 
 #endif /* HAS_GETPWNAM_R */
 #ifdef HAS_GETSERVBYNAME_R
 #if   !(GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD)
-	PL_reentrant_buffer->_getservent_size = 2048; /* Any better ideas? */
+	PL_reentrant_buffer->_getservent_size = REENTRANTUSUALSIZE;
 #endif
 #endif /* HAS_GETSERVBYNAME_R */
 #ifdef HAS_GETSPNAM_R
@@ -105,13 +111,13 @@ Perl_reentrant_size(pTHX) {
 	PL_reentrant_buffer->_readdir64_size = sizeof(struct dirent64) + MAXPATHLEN + 1;
 #endif /* HAS_READDIR64_R */
 #ifdef HAS_SETLOCALE_R
-	PL_reentrant_buffer->_setlocale_size = 256; /* Make something up. */
+	PL_reentrant_buffer->_setlocale_size = REENTRANTSMALLSIZE;
 #endif /* HAS_SETLOCALE_R */
 #ifdef HAS_STRERROR_R
-	PL_reentrant_buffer->_strerror_size = 256; /* Make something up. */
+	PL_reentrant_buffer->_strerror_size = REENTRANTSMALLSIZE;
 #endif /* HAS_STRERROR_R */
 #ifdef HAS_TTYNAME_R
-	PL_reentrant_buffer->_ttyname_size = 256; /* Make something up. */
+	PL_reentrant_buffer->_ttyname_size = REENTRANTSMALLSIZE;
 #endif /* HAS_TTYNAME_R */
 
 #endif /* USE_REENTRANT_API */

@@ -785,7 +785,7 @@ handle, because when it goes to restore the old value of whatever $ref
 pointed to after the scope of the local() is finished, it can't be sure
 that $ref will still be a reference.
 
-=item Can't locate file %s
+=item Can't locate %s
 
 (F) You said to C<do> (or C<require>, or C<use>) a file that couldn't be
 found. Perl looks for the file in all the locations mentioned in @INC,

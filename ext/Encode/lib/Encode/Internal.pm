@@ -1,6 +1,6 @@
 package Encode::Internal;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.92 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use base 'Encode::Encoding';
 
@@ -9,7 +9,9 @@ use base 'Encode::Encoding';
 
 __PACKAGE__->Define('Internal');
 
-Encode::define_alias( 'Unicode' => 'Internal' ) if ord('A') == 65;
+if (ord('A') == 65){
+    Encode::define_alias( 'Unicode' => 'Internal' );
+}
 
 sub decode
 {

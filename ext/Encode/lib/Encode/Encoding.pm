@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 sub Define
 {
@@ -36,7 +36,7 @@ Encode::Encoding - Encode Implementation Base Class
 
   __PACKAGE__->Define(qw(myCanonical myAlias));
 
-=head 1 DESCRIPTION
+=head1 DESCRIPTION
 
 As mentioned in L<Encode>, encodings are (in the current
 implementation at least) defined by objects. The mapping of encoding

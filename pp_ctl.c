@@ -3155,7 +3155,7 @@ PP(pp_require)
 		SvREFCNT_dec(dirmsgsv);
 		msgstr = SvPV_nolen(msg);
 	    }
-	    DIE(aTHX_ "Can't locate file %s", msgstr);
+	    DIE(aTHX_ "Can't locate %s", msgstr);
 	}
 
 	RETPUSHUNDEF;

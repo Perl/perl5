@@ -1,7 +1,11 @@
 AUTHORS		List of authors
+Byte/Byte.pm	Encode extension
+Byte/Makefile.PL       Encode extension
 CN/CN.pm		Encode extension
 CN/Makefile.PL	Encode extension
 Changes		Change Log
+EBCDIC/EBCDIC.pm       Encode extension
+EBCDIC/Makefile.PL     Encode extension
 Encode.pm			Encode extension
 Encode.xs		Encode extension
 Encode/11643-1.enc		Encode table
@@ -150,6 +154,8 @@ KR/Makefile.PL		Encode extension
 MANIFEST		Encode extension
 Makefile.PL		Encode extension makefile writer
 README		Encode extension
+Symbol/Makefile.PL     Encode extension
+Symbol/Symbol.pm       Encode extension
 TW/Makefile.PL	Encode extension
 TW/TW.pm		Encode extension
 compile		Encode extension

@@ -67,7 +67,7 @@ print "ok 10\n";
     local(*CORE::GLOBAL::require);
     $r = '';
     eval "require NoNeXiSt;";
-    print "not " if $r or $@ !~ /^Can't locate file NoNeXiSt/i;
+    print "not " if $r or $@ !~ /^Can't locate NoNeXiSt/i;
     print "ok 11\n";
 }
 

@@ -134,7 +134,7 @@ E<lt>F<larry@wall.org>E<gt>.
 
 UNIX domain sockets added by Sean Robinson
 E<lt>F<robinson_s@sc.maricopa.edu>E<gt> with support from Tim Bunce 
-E<lit>F<Tim.Bunce@ig.co.uk>E<gt> and the perl5-porters mailing list.
+E<lt>F<Tim.Bunce@ig.co.uk>E<gt> and the perl5-porters mailing list.
 
 Dependency on F<syslog.ph> replaced with XS code by Tom Hughes
 E<lt>F<tom@compton.nu>E<gt>.

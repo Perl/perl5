@@ -1,6 +1,7 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.95 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $DEBUG = 0;
 
 require DynaLoader;
 require Exporter;
@@ -20,7 +21,6 @@ our @EXPORT = qw (
 our @EXPORT_OK =
     qw(
        define_encoding
-       define_alias
        from_to
        is_utf8
        is_8bit
@@ -39,50 +39,78 @@ use Carp;
 
 use Encode::Alias;
 
-# Make a %encoding package variable to allow a certain amount of cheating
-our %encoding;
+# Make a %Encoding package variable to allow a certain amount of cheating
+our %Encoding;
 
-our %external_tables =
+our %ExtModule =
     (
-	'euc-cn'	=> 'Encode/CN.pm',
-	gb2312		=> 'Encode/CN.pm',
-	gb12345		=> 'Encode/CN.pm',
-	gbk		=> 'Encode/CN.pm',
-	cp936		=> 'Encode/CN.pm',
-	'iso-ir-165'	=> 'Encode/CN.pm',
-	'euc-jp'	=> 'Encode/JP.pm',
-	'iso-2022-jp'	=> 'Encode/JP.pm',
-	'7bit-jis'	=> 'Encode/JP.pm',
-	shiftjis	=> 'Encode/JP.pm',
-	macjapan	=> 'Encode/JP.pm',
-	cp932		=> 'Encode/JP.pm',
-	'euc-kr'	=> 'Encode/KR.pm',
-	ksc5601		=> 'Encode/KR.pm',
-	cp949		=> 'Encode/KR.pm',
-	big5		=> 'Encode/TW.pm',
-	'big5-hkscs'	=> 'Encode/TW.pm',
-	cp950		=> 'Encode/TW.pm',
-	gb18030		=> 'Encode/HanExtra.pm',
-	big5plus	=> 'Encode/HanExtra.pm',
-	'euc-tw'	=> 'Encode/HanExtra.pm',
+     viscii             => 'Encode/Byte.pm',
+     'koi8-r'           => 'Encode/Byte.pm',
+     cp1047             => 'Encode/EBCDIC.pm',
+     cp37               => 'Encode/EBCDIC.pm',
+     'posix-bc'         => 'Encode/EBCDIC.pm',
+     symbol             => 'Encode/Symbol.pm',
+     dingbats           => 'Encode/Symbol.pm',
+     'euc-cn'           => 'Encode/CN.pm',
+     gb2312		=> 'Encode/CN.pm',
+     gb12345		=> 'Encode/CN.pm',
+     gbk		=> 'Encode/CN.pm',
+     cp936		=> 'Encode/CN.pm',
+     'iso-ir-165'	=> 'Encode/CN.pm',
+     'euc-jp'	        => 'Encode/JP.pm',
+     'iso-2022-jp'	=> 'Encode/JP.pm',
+     '7bit-jis'         => 'Encode/JP.pm',
+     shiftjis	        => 'Encode/JP.pm',
+     macjapan	        => 'Encode/JP.pm',
+     cp932		=> 'Encode/JP.pm',
+     'euc-kr'       	=> 'Encode/KR.pm',
+     ksc5601		=> 'Encode/KR.pm',
+     cp949		=> 'Encode/KR.pm',
+     big5		=> 'Encode/TW.pm',
+     'big5-hkscs'	=> 'Encode/TW.pm',
+     cp950		=> 'Encode/TW.pm',
+     gb18030		=> 'Encode/HanExtra.pm',
+     big5plus     	=> 'Encode/HanExtra.pm',
+     'euc-tw'   	=> 'Encode/HanExtra.pm',
     );
+
+for my $k (2..11,13..16){
+    $ExtModule{"iso-8859-$k"} = 'Encode/Byte.pm';
+}
+
+for my $k (1250..1258){
+    $ExtModule{"cp$k"} = 'Encode/Byte.pm';
+}
+
+for my $k (qw(centeuro croatian cyrillic dingbats greek
+	      iceland roman rumanian sami 
+	      thai turkish  ukraine))
+{
+    $ExtModule{"mac$k"} = 'Encode/Byte.pm';
+}
+
 
 sub encodings
 {
- my ($class) = @_;
- return
-     map { $_->[0] }
-         sort { $a->[1] cmp $b->[1] }
-               map { [$_, lc $_] }
-                   grep { $_ ne 'Internal' }
-                        keys %encoding;
+    my $class = shift;
+    my @modules = ($_[0] eq ":all") ? values %ExtModule : @_;
+    for my $m (@modules)
+    {
+	$DEBUG and warn "about to require $m;";
+	eval { require $m; };
+    }
+    return
+	map({$_->[0]} 
+	    sort({$a->[1] cmp $b->[1]}
+		 map({[$_, lc $_]} 
+		     grep({ $_ ne 'Internal' }  keys %Encoding))));
 }
 
 sub define_encoding
 {
     my $obj  = shift;
     my $name = shift;
-    $encoding{$name} = $obj;
+    $Encoding{$name} = $obj;
     my $lc = lc($name);
     define_alias($lc => $obj) unless $lc eq $name;
     while (@_)
@@ -102,25 +130,25 @@ sub getEncoding
 	return $name;
     }
     my $lc = lc $name;
-    if (exists $encoding{$name})
+    if (exists $Encoding{$name})
     {
-	return $encoding{$name};
+	return $Encoding{$name};
     }
-    if (exists $encoding{$lc})
+    if (exists $Encoding{$lc})
     {
-	return $encoding{$lc};
+	return $Encoding{$lc};
     }
 
-    my $oc = $class->findAlias($name);
+    my $oc = $class->find_alias($name);
     return $oc if defined $oc;
 
-    $oc = $class->findAlias($lc) if $lc ne $name;
+    $oc = $class->find_alias($lc) if $lc ne $name;
     return $oc if defined $oc;
 
-    if (!$skip_external and exists $external_tables{$lc})
+    if (!$skip_external and exists $ExtModule{$lc})
     {
-	require $external_tables{$lc};
-	return $encoding{$name} if exists $encoding{$name};
+	eval{ require $ExtModule{$lc}; };
+	return $Encoding{$name} if exists $Encoding{$name};
     }
 
     return;
@@ -350,17 +378,28 @@ For CHECK see L</"Handling Malformed Data">.
 
 =head2 Listing available encodings
 
-  use Encode qw(encodings);
-  @list = encodings();
+  use Encode;
+  @list = Encode->encodings();
 
-Returns a list of the canonical names of the available encodings. 
+Returns a list of the canonical names of the available encodings that
+are loaded.  To get a list of all available encodings including the
+ones that are not loaded yet, say
+
+  @all_encodings = Encode->encodings(":all");
+
+Or you can give the name of specific module.
+
+  @with_jp = Encode->encodings("Encode/JP.pm");
+
+Note in this case you have to say "Encode/JP.pm instead of Encode::JP.
 
 To find which encodings are suppoted by this package in details, 
 see L<Encode::Supported>.
 
 =head2 Defining Aliases
 
-  use Encode qw(define_alias);
+  use Encode;
+  use Encode::Alias;
   define_alias( newName => ENCODING);
 
 Allows newName to be used as am alias for ENCODING. ENCODING may be
