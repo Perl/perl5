@@ -293,7 +293,7 @@ That's to say, C<pack "(sI)40"> would be the same as C<pack "sI"x40>
 =head2 Cross compilation
 
 Make Perl buildable with a cross-compiler. This will play havoc with
-Configure, which needs to how how the target system will respond to
+Configure, which needs to know how the target system will respond to
 its tests; maybe C<microperl> will be a good starting point here.
 (Indeed, Bart Schuller reports that he compiled up C<microperl> for
 the Agenda PDA and it works fine.)  A really big spanner in the works

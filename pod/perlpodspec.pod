@@ -1058,7 +1058,7 @@ loudly if they see "=biblio".
 
 Throughout this document, "Pod" has been the preferred spelling for
 the name of the documentation format.  One may also use "POD" or
-"pod".  For the the documentation that is (typically) in the Pod
+"pod".  For the documentation that is (typically) in the Pod
 format, you may use "pod", or "Pod", or "POD".  Understanding these
 distinctions is useful; but obsessing over how to spell them, usually
 is not.

@@ -1186,7 +1186,7 @@ To create a reference, we use the C<newRV> function.  Note that you can
 cast an AV* or an HV* to type SV* in this case (and many others).  This
 allows you to take references to arrays, hashes and scalars with the same
 function.  Conversely, the C<SvRV> function always returns an SV*, which may
-need to be be cast to the appropriate type if it is something other than a
+need to be cast to the appropriate type if it is something other than a
 scalar (check with C<SvTYPE>).
 
 =item *

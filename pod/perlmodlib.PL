@@ -148,7 +148,7 @@ system B<man> command, you might try the B<perldoc> program.
 
 Extension modules are written in C (or a mix of Perl and C).  They
 are usually dynamically loaded into Perl if and when you need them,
-but may also be be linked in statically.  Supported extension modules
+but may also be linked in statically.  Supported extension modules
 include Socket, Fcntl, and POSIX.
 
 Many popular C extension modules do not come bundled (at least, not

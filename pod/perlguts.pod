@@ -218,7 +218,7 @@ call is not necessary (see L<Reference Counts and Mortality>).
 
 Perl provides the function C<sv_chop> to efficiently remove characters
 from the beginning of a string; you give it an SV and a pointer to
-somewhere inside the the PV, and it discards everything before the
+somewhere inside the PV, and it discards everything before the
 pointer. The efficiency comes by means of a little hack: instead of
 actually removing the characters, C<sv_chop> sets the flag C<OOK>
 (offset OK) to signal to other functions that the offset hack is in

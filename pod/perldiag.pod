@@ -2317,7 +2317,7 @@ supplied it an uninitialized value.  See L<perlform>.
 =item Number too long
 
 (F) Perl limits the representation of decimal numbers in programs to
-about about 250 characters.  You've exceeded that length.  Future
+about 250 characters.  You've exceeded that length.  Future
 versions of Perl are likely to eliminate this arbitrary limitation.  In
 the meantime, try using scientific notation (e.g. "1e6" instead of
 "1_000_000").
