@@ -22,7 +22,7 @@ dEXT char *watchok;
 #ifndef DEBUGGING
 
 int
-run() {
+runops() {
     SAVEI32(runlevel);
     runlevel++;
 
@@ -35,7 +35,7 @@ run() {
 static void debprof _((OP*op));
 
 int
-run() {
+runops() {
     if (!op) {
 	warn("NULL OP IN RUN");
 	return 0;

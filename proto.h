@@ -338,7 +338,7 @@ char*	regnext _((char* p));
 char*	regprop _((char* op));
 void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 char*	rninstr _((char* big, char* bigend, char* little, char* lend));
-int	run _((void));
+int	runops _((void));
 #ifndef safemalloc
 void	safefree _((char* where));
 char*	safemalloc _((MEM_SIZE size));

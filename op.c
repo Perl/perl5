@@ -1378,7 +1378,7 @@ register OP *o;
     curop = LINKLIST(o);
     o->op_next = 0;
     op = curop;
-    run();
+    runops();
     sv = *(stack_sp--);
     if (o->op_targ && sv == PAD_SV(o->op_targ))	/* grab pad temp? */
 	pad_swipe(o->op_targ);
@@ -1455,7 +1455,7 @@ register OP *o;
     op = curop = LINKLIST(o);
     o->op_next = 0;
     pp_pushmark();
-    run();
+    runops();
     op = curop;
     pp_anonlist();
     tmps_floor = oldtmps_floor;
