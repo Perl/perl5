@@ -6,6 +6,7 @@ BEGIN {
 }
 
 require 'test.pl';
+use strict qw(refs subs);
 
 plan (74);
 
@@ -36,12 +37,15 @@ $foo = "global";
 }
 is ($foo, 'global');
 
+{
+    no strict 'refs';
 # Test fake references.
 
-$baz = "valid";
-$bar = 'baz';
-$foo = 'bar';
-is ($$$foo, 'valid');
+    $baz = "valid";
+    $bar = 'baz';
+    $foo = 'bar';
+    is ($$$foo, 'valid');
+}
 
 # Test real references.
 
@@ -64,7 +68,10 @@ for $i (3,1,2,0) {
 print @a;
 print ${$ref[1]}[0];
 print @{$ref[2]}[0];
-print @{'d'};
+{
+    no strict 'refs';
+    print @{'d'};
+}
 curr_test($test+4);
 
 # Test references to references.
@@ -127,7 +134,7 @@ is (ref $refref, 'HASH');
 
 $anonhash = {};
 is (ref $anonhash, 'HASH');
-$anonhash2 = {FOO => BAR, ABC => XYZ,};
+$anonhash2 = {FOO => 'BAR', ABC => 'XYZ',};
 is (join('', sort values %$anonhash2), 'BARXYZ');
 
 # Test bless operator.
@@ -148,7 +155,7 @@ main::is (ref $object2,	'MYHASH');
 sub mymethod {
     local($THIS, @ARGS) = @_;
     die 'Got a "' . ref($THIS). '" instead of a MYHASH'
-	unless ref $THIS eq MYHASH;
+	unless ref $THIS eq 'MYHASH';
     main::is ($ARGS[0], "argument");
     main::is ($THIS->{FOO}, 'BAR');
 }
@@ -173,24 +180,24 @@ DESTROY {
 
 package OBJ;
 
-@ISA = (BASEOBJ);
+@ISA = ('BASEOBJ');
 
-$main'object = bless {FOO => foo, BAR => bar};
+$main'object = bless {FOO => 'foo', BAR => 'bar'};
 
 package main;
 
 # Test arrow-style method invocation.
 
-is ($object->doit("BAR"), bar);
+is ($object->doit("BAR"), 'bar');
 
 # Test indirect-object-style method invocation.
 
 $foo = doit $object "FOO";
-main::is ($foo, foo);
+main::is ($foo, 'foo');
 
 sub BASEOBJ'doit {
     local $ref = shift;
-    die "Not an OBJ" unless ref $ref eq OBJ;
+    die "Not an OBJ" unless ref $ref eq 'OBJ';
     $ref->{shift()};
 }
 
@@ -325,7 +332,7 @@ foreach my $lexical ('', 'my $a; ') {
   is ($result, $expect);
 }
 
-my $test = curr_test();
+$test = curr_test();
 sub x::DESTROY {print "ok ", $test + shift->[0], "\n"}
 { my $a1 = bless [3],"x";
   my $a2 = bless [2],"x";
