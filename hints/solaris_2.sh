@@ -3,6 +3,13 @@
 # Andy Dougherty  <doughera@lafcol.lafayette.edu>
 # Based on input from lots of folks, especially
 # Dean Roehrich <roehrich@ironwood-fddi.cray.com>
+
+# If perl fails tests that involve dynamic loading of extensions, and
+# you are using gcc, be sure that you are NOT using GNU as and ld.  One
+# way to do that is to invoke Configure with
+# 
+#     sh Configure -Dcc='gcc -B/usr/ccs/bin/'
+# 
  
 # See man vfork.
 usevfork=false

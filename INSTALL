@@ -19,11 +19,12 @@ The basic steps to build and install perl5 on a Unix system are:
 
 Each of these is explained in further detail below.
 
-For information on non-Unix systems, see L<"Porting information"> below.
+For information on non-Unix systems, see the section on
+L<"Porting information"> below.
 
-For information on what's new in this release, see the pod/perldelta.pod
-file.  For more detailed information about specific changes, see the
-Changes file.
+For information on what's new in this release, see the
+pod/perldelta.pod file.  For more detailed information about specific
+changes, see the Changes file.
 
 =head1 DESCRIPTION
 
@@ -299,10 +300,10 @@ The installation directories can all be changed by answering the
 appropriate questions in Configure.  For convenience, all the
 installation questions are near the beginning of Configure.
 
-It is highly recommend that you running Configure interactively
-to be sure it puts everything where you want it.  At any point
-during the Configure process, you can answer a question with
-C<&-d> and Configure will use the defaults from then on.
+I highly recommend running Configure interactively to be sure it puts
+everything where you want it.  At any point during the Configure
+process, you can answer a question with  &-d  and Configure
+will use the defaults from then on.
 
 By default, Configure uses the following directories for
 library files  (archname is a string like sun4-sunos, determined
@@ -617,7 +618,9 @@ libperl.so.4 rather with the installed libperl.so.4?  The answer is
 that you might not be able to.  The installation directory is encoded
 in the perl binary with the LD_RUN_PATH environment variable (or
 equivalent ld command-line option).  On Solaris, you can override that
-with LD_LIBRARY_PATH; on Linux you can't.
+with LD_LIBRARY_PATH; on Linux you can't.  On Digital Unix, you can
+ovveride LD_LIBRARY_PATH by setting the _RLD_ROOT environment variable
+to point to the perl build directory.
 
 The only reliable answer is that you should specify a different
 directory for the architecture-dependent library for your -DDEBUGGING
@@ -976,6 +979,14 @@ Alternatively, you can use the GCC_EXEC_PREFIX
 environment variable to ensure that Sun's as and ld are used.  Consult
 your gcc documentation for further information on the -B option and
 the GCC_EXEC_PREFIX variable.
+
+One convenient way to ensure you are not using GNU as and ld is to
+invoke Configure with
+
+    sh Configure -Dcc='gcc -B/usr/ccs/bin/'
+
+for Solaris systems.  For a SunOS system, you must use -B/bin/
+instead.
 
 =item ld.so.1: ./perl: fatal: relocation error:
 
@@ -1384,4 +1395,4 @@ feedback from the perl5-porters@perl.org folks.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.15 1997/04/16 20:49:24 doughera Exp $
+$Id: INSTALL,v 1.17 1997/05/08 21:08:15 doughera Released $
