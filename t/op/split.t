@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..29\n";
+print "1..30\n";
 
 $FS = ':';
 
@@ -127,3 +127,8 @@ print "ok 28\n";
 $_ = join ':', split /(?=\w)/, "rm b";
 print "not" if $_ ne "r:m :b";
 print "ok 29\n";
+
+# unicode splittage
+@ary = map {ord} split //, v1.20.300.4000.50000.4000.300.20.1;
+print "not " unless "@ary" eq "1 20 300 4000 50000 4000 300 20 1";
+print "ok 30\n";
