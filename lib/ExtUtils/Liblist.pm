@@ -10,6 +10,13 @@ my $Config_libext = $Config{lib_ext} || ".a";
 
 sub ext {
     my($potential_libs, $Verbose) = @_;
+    if ($Config{'osname'} eq 'os2' and $Config{libs}) { 
+	# Dynamic libraries are not transitive, so we may need including
+	# the libraries linked against perl.dll again.
+
+	$potential_libs .= " " if $potential_libs;
+	$potential_libs .= $Config{libs};
+    }
     return ("", "", "", "") unless $potential_libs;
     print STDOUT "Potential libraries are '$potential_libs':\n" if $Verbose;
 
@@ -111,7 +118,7 @@ sub ext {
 
 	    # what do we know about this library...
 	    my $is_dyna = ($fullname !~ /\Q$Config_libext\E$/);
-	    my $in_perl = ($libs =~ /\B-l${thislib}\b/s);
+	    my $in_perl = ($libs =~ /\B-l\Q$ {thislib}\E\b/s);
 
 	    # Do not add it into the list if it is already linked in
 	    # with the main perl executable.

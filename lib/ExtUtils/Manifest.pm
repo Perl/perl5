@@ -136,9 +136,14 @@ $Debug = 0;
 $Verbose = 1;
 $Is_VMS = $Config{'osname'} eq 'VMS';
 
-$VERSION = $VERSION = substr(q$Revision: 1.16 $,10,4);
+$VERSION = $VERSION = substr(q$Revision: 1.17 $,10,4);
 
 $Quiet = 0;
+
+# Really cool fix from Ilya :)
+unless (defined $Config{d_link}) {
+    *ln = \&cp;
+}
 
 sub mkmanifest {
     my $manimiss = 0;

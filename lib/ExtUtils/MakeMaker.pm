@@ -56,10 +56,10 @@ sub warndirectuse {
 
 package ExtUtils::MakeMaker;
 
-# Last edited $Date: 1995/11/24 21:01:25 $ by Andreas Koenig
-# $Id: MakeMaker.pm,v 1.114 1995/11/24 21:01:25 k Exp $
+# Last edited $Date: 1995/12/05 18:20:28 $ by Andreas Koenig
+# $Id: MakeMaker.pm,v 1.115 1995/12/05 18:20:28 k Exp $
 
-$Version = $VERSION = "5.10";
+$Version = $VERSION = "5.11";
 
 $ExtUtils::MakeMaker::Version_OK = 4.13;	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
@@ -356,7 +356,7 @@ END
 	my($skipit) = $self->skipcheck($section);
 	if ($skipit){
 	    push @{$self->{RESULT}}, "\n# --- MakeMaker $section section $skipit.";
-	} else { # MEMO: b 329 print "$self->{NAME}**$section**\n" and $section eq 'postamble'
+	} else {
 	    my(%a) = %{$self->{$section} || {}};
 	    push @{$self->{RESULT}}, "\n# --- MakeMaker $section section:";
 	    push @{$self->{RESULT}}, "# " . join ", ", %a if $ExtUtils::MakeMaker::Verbose && %a;
@@ -791,8 +791,8 @@ sub init_main {
 
     # Perl Macro:    With source    No source
     # PERL_SRC       ../..          (undefined)
-    # PERL_LIB       PERL_SRC/lib   /usr/local/lib/perl5
-    # PERL_ARCHLIB   PERL_SRC/lib   /usr/local/lib/perl5/sun4-sunos
+    # PERL_LIB       PERL_SRC/lib   $Config{privlibexp}
+    # PERL_ARCHLIB   PERL_SRC/lib   $Config{archlibexp}
 
     # INST Macro:    For standard   for any other
     #                modules        module
@@ -890,21 +890,41 @@ EOM
     $self->{INST_EXE} ||= $self->catdir('.','blib',$Config::Config{archname});
 
     if ($self->{PREFIX}){
-	$self->{INSTALLPRIVLIB} = $self->catdir($self->{PREFIX},"lib","perl5");
-	$self->{INSTALLBIN} = $self->catdir($self->{PREFIX},"bin");
-	$self->{INSTALLMAN3DIR} = $self->catdir($self->{PREFIX},"perl5","man","man3")
-	    unless defined $self->{INSTALLMAN3DIR};
+# With perl5.002 it turns out, that we hardcoded some assumptions in here:
+#	$self->{INSTALLPRIVLIB} = $self->catdir($self->{PREFIX},"lib","perl5");
+#	$self->{INSTALLBIN} = $self->catdir($self->{PREFIX},"bin");
+#	$self->{INSTALLMAN3DIR} = $self->catdir($self->{PREFIX},"perl5","man","man3")
+#	    unless defined $self->{INSTALLMAN3DIR};
+
+	# we have to look at the relation between $Config{prefix} and
+	# the requested values
+	($self->{INSTALLPRIVLIB} = $Config{installprivlib})
+	    =~ s/\Q$Config{prefix}\E/$self->{PREFIX}/;
+	($self->{INSTALLBIN} = $Config{installbin})
+	    =~ s/\Q$Config{prefix}\E/$self->{PREFIX}/;
+	($self->{INSTALLMAN3DIR} = $Config{installman3dir})
+	    =~ s/\Q$Config{prefix}\E/$self->{PREFIX}/;
     }
 
     if( $self->{INSTALLPRIVLIB} && ! $self->{INSTALLARCHLIB} ){
-	my($archname) = $Config::Config{archname};
-	if (-d $self->catdir($self->{INSTALLPRIVLIB},$archname)){
-	    $self->{INSTALLARCHLIB} = $self->catdir($self->{INSTALLPRIVLIB},$archname);
+# Same as above here. With the unresolved versioned directory issue, we have to
+# be more careful to follow Configure
+#	my($archname) = $Config::Config{archname};
+#	if (-d $self->catdir($self->{INSTALLPRIVLIB},$archname)){
+#	    $self->{INSTALLARCHLIB} = $self->catdir($self->{INSTALLPRIVLIB},$archname);
+#	    print STDOUT "Defaulting INSTALLARCHLIB to $self->{INSTALLARCHLIB}\n";
+#	} else {
+#	    $self->{INSTALLARCHLIB} = $self->{INSTALLPRIVLIB};
+#	}
+	($self->{INSTALLARCHLIB} = $Config{installarchlib})
+	    =~ s/\Q$Config{installprivlib}\E/$self->{INSTALLPRIVLIB}/;
+	if (-d $self->{INSTALLARCHLIB}) {
 	    print STDOUT "Defaulting INSTALLARCHLIB to $self->{INSTALLARCHLIB}\n";
 	} else {
 	    $self->{INSTALLARCHLIB} = $self->{INSTALLPRIVLIB};
 	}
     }
+
     $self->{INSTALLPRIVLIB} ||= $Config::Config{installprivlib};
     $self->{INSTALLARCHLIB} ||= $Config::Config{installarchlib};
     $self->{INSTALLBIN}     ||= $Config::Config{installbin};
@@ -969,18 +989,19 @@ EOM
     $self->{VERSION} = "0.10" unless $self->{VERSION};
     ($self->{VERSION_SYM} = $self->{VERSION}) =~ s/\W/_/g;
 
+    # Graham Barr and Paul Marquess had some ideas how to ensure
+    # version compatibility between the *.pm file and the
+    # corresponding *.xs file. The bottomline was, that we need an
+    # XS_VERSION macro that defaults to VERSION:
+    $self->{XS_VERSION} ||= $self->{VERSION};
 
     # --- Initialize Perl Binary Locations
 
     # Find Perl 5. The only contract here is that both 'PERL' and 'FULLPERL'
     # will be working versions of perl 5. miniperl has priority over perl
     # for PERL to ensure that $(PERL) is usable while building ./ext/*
-    my $path_sep = $Is_OS2 ? ";" : $Is_VMS ? "/" : ":";
-    my $path = $ENV{PATH};
-    $path =~ s:\\:/:g if $Is_OS2;
-    my @path = split $path_sep, $path;
     my ($component,@defpath);
-    foreach $component ($self->{PERL_SRC}, @path, $Config::Config{binexp}) {
+    foreach $component ($self->{PERL_SRC}, $self->path(), $Config::Config{binexp}) {
 	push @defpath, $component if defined $component;
     }
     $self->{PERL} =
@@ -992,6 +1013,15 @@ EOM
     # Define 'FULLPERL' to be a non-miniperl (used in test: target)
     ($self->{FULLPERL} = $self->{PERL}) =~ s/miniperl/perl/i
 	unless ($self->{FULLPERL});
+}
+
+# Ilya's suggestion, will have to go into ExtUtils::MM_OS2 and MM_VMS
+sub path {
+    my($self) = @_;
+    my $path_sep = $Is_OS2 ? ";" : $Is_VMS ? "/" : ":";
+    my $path = $ENV{PATH};
+    $path =~ s:\\:/:g if $Is_OS2;
+    my @path = split $path_sep, $path;
 }
 
 sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
@@ -1119,7 +1149,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 		$ispod = 1;
 	    }
 	    if( $ispod ) {
-		$manifypods{$name} = '$(INST_MAN1DIR)'.basename($name).'$(MAN1EXT)';
+		$manifypods{$name} = $self->catdir('$(INST_MAN1DIR)',basename($name).'.$(MAN1EXT)');
 	    }
 	}
 
@@ -1296,10 +1326,50 @@ in these dirs:
     0; # false and not empty
 }
 
+
+# Ilya's suggestion. Not yet used, want to understand it first, but at least the code is here
+sub maybe_command_in_dirs {	# $ver is optional argument if looking for perl
+    my($self, $names, $dirs, $trace, $ver) = @_;
+    my($name, $dir);
+    foreach $dir (@$dirs){
+	next unless defined $dir; # $self->{PERL_SRC} may be undefined
+	foreach $name (@$names){
+	    my($abs,$tryabs);
+	    if ($self->file_name_is_absolute($name)) {
+		$abs = $name;
+	    } elsif ($name =~ m|/|) {
+		$abs = $self->catfile(".", $name); # not absolute
+	    } else {
+		$abs = $self->catfile($dir, $name);
+	    }
+	    print "Checking $abs for $name\n" if ($trace >= 2);
+	    next unless $tryabs = $self->maybe_command($abs);
+	    print "Substituting $tryabs instead of $abs\n" 
+		if ($trace >= 2 and $tryabs ne $abs);
+	    $abs = $tryabs;
+	    if (defined $ver) {
+		print "Executing $abs\n" if ($trace >= 2);
+		if (`$abs -e 'require $ver; print "VER_OK\n" ' 2>&1` =~ /VER_OK/) {
+		    print "Using PERL=$abs\n" if $trace;
+		    return $abs;
+		}
+	    } else { # Do not look for perl
+		return $abs;
+	    }
+	}
+    }
+}
+
 sub maybe_command {
     my($self,$file) = @_;
-    return 1 if -x $file && ! -d $file;
+    return $file if -x $file && ! -d $file;
     return;
+}
+
+# Ilya's suggestion, not yet used
+sub file_name_is_absolute {
+    my($self,$file) = @_;
+    $file =~ m:^/: ;
 }
 
 sub post_initialize {
@@ -1351,6 +1421,9 @@ VERSION = $self->{VERSION}
 VERSION_SYM = $self->{VERSION_SYM}
 VERSION_MACRO = VERSION
 DEFINE_VERSION = -D\$(VERSION_MACRO)=\\\"\$(VERSION)\\\"
+XS_VERSION = $self->{XS_VERSION}
+XS_VERSION_MACRO = XS_VERSION
+XS_DEFINE_VERSION = -D\$(XS_VERSION_MACRO)=\\\"\$(XS_VERSION)\\\"
 
 # In which directory should we put this extension during 'make'?
 # This is typically ./blib.
@@ -1621,7 +1694,7 @@ sub const_cccmd {
 
     my($cccmd) = $new;
     $cccmd =~ s/^\s*\Q$Config::Config{cc}\E\s/\$(CC) /;
-    $cccmd .= " \$(DEFINE_VERSION)";
+    $cccmd .= " \$(DEFINE_VERSION) \$(XS_DEFINE_VERSION)";
     $self->{CONST_CCCMD} = "CCCMD = $cccmd\n";
 }
 
@@ -1672,7 +1745,7 @@ sub tool_xsubpp {
 
     # What are the correct thresholds for version 1 && 2 Paul?
     if ( $xsubpp_version > 1.923 ){
-	$self->{XSPROTOARG} = "-noprototypes" unless defined $self->{XSPROTOARG};
+	$self->{XSPROTOARG} = "" unless defined $self->{XSPROTOARG};
     } else {
 	if (defined $self->{XSPROTOARG} && $self->{XSPROTOARG} =~ /\-prototypes/) {
 	    print STDOUT qq{Warning: This extension wants to pass the switch "-prototypes" to xsubpp.
@@ -1705,7 +1778,7 @@ sub xsubpp_version
     my $command = "$self->{PERL} $xsubpp -v 2>&1";
     print "Running: $command\n" if $Verbose;
     $version = `$command` ;
-    warn "Running '$command' exits with status " . $?>>8 if $?;
+    warn "Running '$command' exits with status " . ($?>>8) if $?;
     chop $version ;
 
     return $1 if $version =~ /^xsubpp version (.*)/ ;
@@ -1731,7 +1804,7 @@ EOM
     $command = "$self->{PERL} $xsubpp $file 2>&1";
     print "Running: $command\n" if $Verbose;
     my $text = `$command` ;
-    warn "Running '$command' exits with status " . $?>>8 if $?;
+    warn "Running '$command' exits with status " . ($?>>8) if $?;
     unlink $file ;
 
     # gets 1.2 -> 1.92 and 2.000a1
@@ -2232,7 +2305,8 @@ q[POD2MAN = $(PERL) -we '%m=@ARGV;for (keys %m){' \\
 -e 'system("$(PERL) $(POD2MAN_EXE) $$_>$$m{$$_}")==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
 -e 'chmod 0644, $$m{$$_} or warn "chmod 644 $$m{$$_}: $$!\n";}'
 ];
-    push @m, "\nmanifypods :";
+    push @m, "\nmanifypods : ";
+    push @m, join " \\\n\t", keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}};
 
     push(@m,"\n");
     if (%{$self->{MAN1PODS}} || %{$self->{MAN3PODS}}) {
@@ -2541,7 +2615,7 @@ doc_install ::
 	@ echo Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
 	@ $(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB)  \\
 		-e "use ExtUtils::MakeMaker; MY->new({})->writedoc('Module', '$(NAME)', \\
-		'LINKTYPE=$(LINKTYPE)', 'VERSION=$(VERSION)', \\
+		'LINKTYPE=$(LINKTYPE)', 'VERSION=$(VERSION)', 'XS_VERSION=$(XS_VERSION)', \\
 		'EXE_FILES=$(EXE_FILES)')" >> $(INSTALLARCHLIB)/perllocal.pod
 };
 
@@ -2560,8 +2634,14 @@ pure_install ::
 	-e 'foreach (\@ARGV){ die qq{ \$\$message \$\$_\\n} unless -w \$\$_}' \\
 	    \$(INSTALLPRIVLIB) \$(INSTALLARCHLIB)
 	\$(MAKE) INST_LIB=\$(INSTALLPRIVLIB) INST_ARCHLIB=\$(INSTALLARCHLIB) INST_EXE=\$(INSTALLBIN) INST_MAN1DIR=\$(INSTALLMAN1DIR) INST_MAN3DIR=\$(INSTALLMAN3DIR) all
-	\@\$(PERL) -i.bak -lne 'print unless \$\$seen{ \$\$_ }++' \$(INSTALLARCHLIB)/auto/\$(FULLEXT)/.packlist
 ");
+
+# .packlist is not supported in this MakeMaker, because it needs a serious fix. -i.bak
+# is not allowed in an environment, with afs, we have to read here, write there, and I
+# don't have time to fix it today -> TODO
+# The following line was executed with MMs up to 5.10:
+#	\@\$(PERL) -i.bak -lne 'print unless \$\$seen{ \$\$_ }++' \$(PERL_ARCHLIB)/auto/\$(FULLEXT)/.packlist
+
 
     push @m, '
 #### UNINSTALL IS STILL EXPERIMENTAL ####
@@ -2570,7 +2650,7 @@ uninstall ::
 
     push(@m, map("\tcd $_ && test -f $self->{MAKEFILE} && \$(MAKE) uninstall\n",
 		 @{$self->{DIR}}));
-    push @m, "\t".'$(RM_RF) `cat $(INSTALLARCHLIB)/auto/$(FULLEXT)/.packlist`
+    push @m, "\t".'$(RM_RF) `cat $(PERL_ARCHLIB)/auto/$(FULLEXT)/.packlist`
 ';
 
     join("",@m);
@@ -2824,7 +2904,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
     # Which *.a files could we make use of...
     local(%static);
     File::Find::find(sub {
-	return unless m/\Q$self->{LIB_EXT}$/;
+	return unless m/\Q$self->{LIB_EXT}\E$/;
 	return if m/^libperl/;
 	# don't include the installed version of this extension. I
 	# leave this line here, although it is not necessary anymore:
@@ -2843,7 +2923,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 
     $extra = [] unless $extra && ref $extra eq 'ARRAY';
     for (sort keys %static) {
-	next unless /\Q$self->{LIB_EXT}$/;
+	next unless /\Q$self->{LIB_EXT}\E$/;
 	$_ = dirname($_) . "/extralibs.ld";
 	push @$extra, $_;
     }
@@ -3121,10 +3201,17 @@ sub replace_manpage_seperator {
 
 sub maybe_command {
     my($self,$file) = @_;
-    return 1 if -x $file && ! -d _;
-    return 1 if -x "$file.exe" && ! -d _;
+    return $file if -x $file && ! -d _;
+    return "$file.exe" if -x "$file.exe" && ! -d _;
+    return "$file.cmd" if -x "$file.cmd" && ! -d _;
     return;
 }
+
+sub file_name_is_absolute {
+    my($self,$file) = @_;
+    $file =~ m{^([a-z]:)?[\\/]}i ;
+}
+
 
 # the following keeps AutoSplit happy
 package ExtUtils::MakeMaker;
@@ -3830,13 +3917,14 @@ that purpose.
 
 =item XSPROTOARG
 
-May be set to an empty string, C<-prototypes>, or
+May be set to an empty string, which is identical to C<-prototypes>, or
 C<-noprototypes>. See the xsubpp documentation for details. MakeMaker
-defaults to the empty string for older versions of xsubpp and to
-C<-noprototypes> for more recent ones. The default will change to
-C<-prototypes> really soon now. So do not rely on the default when
-writing extensions. Better armour your extension with prototype
-support from the start.
+defaults to the empty string.
+
+=item XS_VERSION
+
+Your version number for the XS part of your extension.  This defaults
+to S(VERSION).
 
 =back
 
