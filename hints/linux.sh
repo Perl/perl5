@@ -258,6 +258,15 @@ fi
 #'osfmach3ppc') ccdlflags='-Wl,-E' ;;
 #esac
 
+case "`uname -r`" in
+sparc-linux)
+	case "$cccdlflags" in
+	*-fpic*) cccdlflags="`echo $cccdlflags|sed 's/-fpic/-fPIC/'`" ;;
+	*)	 cccdlflags="$cccdlflags -fPIC" ;;
+	esac
+	;;
+esac
+
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
