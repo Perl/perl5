@@ -1,3 +1,8 @@
+/* We need access to debugger hooks */
+#ifndef DEBUGGING
+#  define DEBUGGING
+#endif
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"

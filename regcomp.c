@@ -19,7 +19,18 @@
  * with the POSIX routines of the same names.
 */
 
-#ifdef IN_XSUB_RE
+#ifdef PERL_EXT_RE_BUILD
+/* need to replace pregcomp et al, so enable that */
+#  ifndef PERL_IN_XSUB_RE
+#    define PERL_IN_XSUB_RE
+#  endif
+/* need access to debugger hooks */
+#  ifndef DEBUGGING
+#    define DEBUGGING
+#  endif
+#endif
+
+#ifdef PERL_IN_XSUB_RE
 /* We *really* need to overwrite these symbols: */
 #  define Perl_pregcomp my_regcomp
 #  define Perl_regdump my_regdump
@@ -66,7 +77,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifndef IN_XSUB_RE
+#ifndef PERL_IN_XSUB_RE
 #  include "INTERN.h"
 #endif
 
