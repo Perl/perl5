@@ -159,6 +159,11 @@ or a hash or array slice, such as:
     @foo[$bar, $baz, $xyzzy]
     @{$ref->[12]}{"susie", "queue"}
 
+=item %s argument is not a subroutine name
+
+(F) The argument to exists() for C<exists &sub> must be a subroutine
+name, and not a subroutine call.  C<exists &sub()> will generate this error.
+
 =item %s did not return a true value
 
 (F) A required (or used) file must return a true value to indicate that

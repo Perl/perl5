@@ -1311,6 +1311,7 @@ t/op/do.t		See if subroutines work
 t/op/each.t		See if hash iterators work
 t/op/eval.t		See if eval operator works
 t/op/exec.t		See if exec and system work
+t/op/exists_sub.t	See if exists(&sub) works
 t/op/exp.t		See if math functions work
 t/op/fh.t		See if filehandles work
 t/op/filetest.t		See if file tests work

@@ -77,6 +77,7 @@ typedef U32 PADOFFSET;
 				/*  On flipflop, we saw ... instead of .. */
 				/*  On UNOPs, saw bare parens, e.g. eof(). */
 				/*  On OP_ENTERSUB || OP_NULL, saw a "do". */
+				/*  On OP_EXISTS, treat av as av, not avhv.  */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
 				/*  On OP_ENTERITER, loop var is per-thread */
                                 /*  On pushre, re is /\s+/ imp. by split " " */
@@ -159,6 +160,9 @@ typedef U32 PADOFFSET;
 
 /* Private for OP_DELETE */
 #define OPpSLICE		64	/* Operating on a list of keys */
+
+/* Private for OP_EXISTS */
+#define OPpEXISTS_SUB		64	/* Checking for &sub, not {} or [].  */
 
 /* Private for OP_SORT, OP_PRTF, OP_SPRINTF, OP_FTTEXT, OP_FTBINARY, */
 /*             string comparisons, and case changers. */
