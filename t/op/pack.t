@@ -426,8 +426,8 @@ print "ok $test\n"; $test++;
 
 # 160: unpack("C") and ord() equivalence for Unicode
 
-#print "not " unless unpack("C", chr(0x100)) eq ord(chr(0x100)) &&
-#                    ord(chr(0x100)) == 0x100;
+print "not " unless unpack("C", chr(0x100)) eq ord(chr(0x100)) &&
+                    ord(chr(0x100)) == 0x100;
 print "ok $test\n"; $test++;
 
 # 161: use bytes + unpack C == UTF-8 unraveling

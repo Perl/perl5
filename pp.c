@@ -4335,7 +4335,8 @@ PP(pp_unpack)
 		if (DO_UTF8(right)) {
 		    while (len > 0) {
 			STRLEN l;
-			auv = utf8_to_uv((U8*)s, len, &l, UTF8_ALLOW_ANYUV);
+			auv = utf8_to_uv((U8*)s, strend - s,
+					 &l, UTF8_ALLOW_ANYUV);
 			culong += auv;
 			s += l;
 			len -= l;
@@ -4355,7 +4356,8 @@ PP(pp_unpack)
 		if (DO_UTF8(right)) {
 		    while (len > 0) {
 			STRLEN l;
-			auv = utf8_to_uv((U8*)s, len, &l, UTF8_ALLOW_ANYUV);
+			auv = utf8_to_uv((U8*)s, strend - s,
+					 &l, UTF8_ALLOW_ANYUV);
 			sv = NEWSV(37, 0);
 			sv_setuv(sv, auv);
 			PUSHs(sv_2mortal(sv));
