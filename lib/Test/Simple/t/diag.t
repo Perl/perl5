@@ -7,6 +7,18 @@ BEGIN {
     }
 }
 
+
+# Turn on threads here, if available, since this test tends to find
+# lots of threading bugs.
+use Config;
+BEGIN {
+    if( $] >= 5.008 && $Config{useithreads} ) {
+        require threads;
+        'threads'->import;
+    }
+}
+
+
 use strict;
 
 use Test::More tests => 7;

@@ -17,12 +17,15 @@ BEGIN {
     require Test::Harness;
 }
 
-if( $Test::Harness::VERSION < 1.20 ) {
-    plan skip_all => 'Need Test::Harness 1.20 or up';
+# This feature requires a fairly new version of Test::Harness
+if( $Test::Harness::VERSION < 2.03 ) {
+    plan tests => 1;
+    diag "Need Test::Harness 2.03 or up.  You have $Test::Harness::VERSION.";
+    fail 'Need Test::Harness 2.03 or up';
+    exit;
 }
-else {
-    plan 'no_plan';
-}
+
+plan 'no_plan';
 
 pass('Just testing');
 ok(1, 'Testing again');

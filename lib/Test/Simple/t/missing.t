@@ -33,6 +33,7 @@ require Test::Simple;
 
 require Test::Simple::Catch;
 my($out, $err) = Test::Simple::Catch::caught();
+local $ENV{HARNESS_ACTIVE} = 0;
 
 Test::Simple->import(tests => 5);
 
