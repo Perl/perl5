@@ -94,10 +94,6 @@ ARCHAUTO = [.lib.$(ARCH).$(PERL_VERSION).auto]
 PIPES_BROKEN = 1
 .endif
 
-.ifdef __DEBUG__
-NOX2P = 1
-.endif
-
 #: >>>>>Compiler-specific options <<<<<
 .ifdef GNUC
 .first
@@ -353,7 +349,7 @@ utils : $(utils1) $(utils2) $(utils3) $(utils4)
 	@ $(NOOP)
 podxform : [.lib.pod]pod2text.com [.lib.pod]pod2html.com [.lib.pod]pod2latex.com [.lib.pod]pod2man.com [.lib.pod]podchecker.com [.lib.pod]pod2usage.com [.lib.pod]podselect.com
 	@ $(NOOP)
-x2p : [.x2p]a2p$(E) [.x2p]s2p.com [.x2p]find2perl.com 
+x2p : [.x2p]$(DBG)a2p$(E) [.x2p]s2p.com [.x2p]find2perl.com 
 	@ $(NOOP)
 extra.pods : miniperl
 	@ @extra_pods.com
@@ -503,7 +499,7 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.VMS]
 
 [.lib.ExtUtils]XSSymSet.pm : [.vms.ext]XSSymSet.pm
-	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
+	@ If F$Search("[.lib]ExtUtils.Dir").eqs."" Then Create/Directory [.lib.ExtUtils]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.ExtUtils]
 
 [.lib.pod]perldoc.com : [.utils]perldoc.PL $(ARCHDIR)Config.pm
@@ -1223,8 +1219,8 @@ archify : all
 	Backup/Log/Verify [.lib.auto...]*.*;/Exclude=(*.al,*.ix) 'archroot'/New_Version
 	Delete/Log/NoConfirm [.lib.auto...]*.*;*/exclude=(*.al,*.ix,*.dir)
 	Delete/Log/NoConfirm [.lib]Config.pm;*
-	Copy/Log/NoConfirm *$(E);,[.x2p]a2p$(E); $(ARCHDIR)
-	Delete/Log/NoConfirm Perl*$(E);*,[.x2p]a2p$(E);*
+	Copy/Log/NoConfirm *$(E);,[.x2p]$(DBG)a2p$(E); $(ARCHDIR)
+	Delete/Log/NoConfirm Perl*$(E);*,[.x2p]$(DBG)a2p$(E);*
 	@ Write Sys$Output "Architecture-specific setup completed."
 	@ Write Sys$Output "Before building for another architecture, be sure to"
 	@ Write Sys$Output "    1. $(MMS)$(MMSQUALIFIERS) clean"
