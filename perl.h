@@ -3012,6 +3012,7 @@ typedef struct am_table_short AMTS;
  * Now we have __attribute__ out of the way 
  * Remap printf 
  */
+#undef printf
 #define printf PerlIO_stdoutf
 #endif
 
