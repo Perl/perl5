@@ -6405,7 +6405,7 @@ Perl_peep(pTHX_ register OP *o)
 			    o->op_next : o->op_next->op_next;
 		IV i;
 		if (pop && pop->op_type == OP_CONST &&
-		    (PL_op = pop->op_next) &&
+		    ((PL_op = pop->op_next)) &&
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
 		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB)) &&
@@ -6414,6 +6414,8 @@ Perl_peep(pTHX_ register OP *o)
 		    i >= 0)
 		{
 		    GV *gv;
+		    if (cSVOPx(pop)->op_private & OPpCONST_STRICT)
+			no_bareword_allowed(pop);
 		    if (o->op_type == OP_GV)
 			op_null(o->op_next);
 		    op_null(pop->op_next);
