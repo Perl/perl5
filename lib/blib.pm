@@ -38,8 +38,9 @@ Nick Ing-Simmons nik@tiuk.ti.com
 
 use Cwd;
 
-use vars qw($VERSION);
+use vars qw($VERSION $Verbose);
 $VERSION = '1.00';
+$Verbose = 0;
 
 sub import
 {
@@ -61,7 +62,7 @@ sub import
    if (-d $blib && -d "$blib/arch" && -d "$blib/lib")
     {
      unshift(@INC,"$blib/arch","$blib/lib");
-     warn "Using $blib\n";
+     warn "Using $blib\n" if $Verbose;
      return;
     }
    $dir .= "/..";

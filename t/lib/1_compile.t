@@ -194,6 +194,7 @@ Time::tm
 UNIVERSAL
 attributes
 base
+blib
 bytes
 ops
 warnings::register
