@@ -1,4 +1,3 @@
-#!perl
 use ExtUtils::MakeMaker;
 use Config;
 use strict;
