@@ -167,8 +167,10 @@ Tom Christiansen <F<tchrist@mox.perl.com>>, 25 June 1995.
 
 =cut
 
-require 5.001;
+require 5.005_64;
 use Carp;
+
+$VERSION = v1.0;
 
 use Config;
 ($privlib, $archlib) = @Config{qw(privlibexp archlibexp)};
@@ -377,7 +379,8 @@ if ($standalone) {
     } 
     exit;
 } else { 
-    $old_w = 0; $oldwarn = ''; $olddie = '';
+    #$old_w = 0;
+    $oldwarn = ''; $olddie = '';
 }
 
 sub import {
