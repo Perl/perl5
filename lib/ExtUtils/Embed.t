@@ -16,7 +16,7 @@ $| = 1;
 print "1..9\n";
 my $cc = $Config{'cc'};
 my $cl  = ($^O eq 'MSWin32' && $cc eq 'cl');
-my $exe = 'embedtest' . $Config{'exe_ext'};
+my $exe = 'embed_test' . $Config{'exe_ext'};
 my $inc = File::Spec->catdir($INC[0],"..");
 my $lib = File::Spec->catdir($INC[0],"..");
 my @cmd;
@@ -28,12 +28,12 @@ else {
 }
 push(@cmd,"-I$inc",ccopts(),'embed_test.c');
 if ($^O eq 'MSWin32') {
-    $inc = File::Spec->catdir($inc,'win32'); 
+    $inc = File::Spec->catdir($inc,'win32');
     push(@cmd,"-I$inc");
-    $inc = File::Spec->catdir($inc,'include'); 
+    $inc = File::Spec->catdir($inc,'include');
     push(@cmd,"-I$inc");
     if ($cc eq 'cl') {
-	push(@cmd,'-link',"-libpath:$lib",$Config{'libperl'},$Config{'libc'});     
+	push(@cmd,'-link',"-libpath:$lib",$Config{'libperl'},$Config{'libc'});
     }
     else {
 	push(@cmd,"-L$lib",'-lperl',$Config{'libc'});
@@ -44,13 +44,13 @@ else {
 }
 push(@cmd,ldopts());
 
- 
+
 print "#@cmd\n";
 print "not " if system(join(' ',@cmd));
 print "ok 1\n";
 print "not " if system("embed_test");
 print "ok 9\n";
-unlink("embed_test","embed_test.c");
+unlink($exe,"embed_test.c");
 
 #gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccopts -e ldopts`
 
