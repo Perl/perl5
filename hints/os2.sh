@@ -14,6 +14,11 @@
 # Note that during the .obj compile you need to move the perl.dll file
 # to LIBPATH :-(
 
+# Optimization (GNU make 3.74 cannot be loaded :-():
+emxload -m 30 sh.exe ls.exe tr.exe id.exe sed.exe # make.exe 
+emxload -m 30 grep.exe egrep.exe fgrep.exe cat.exe rm.exe mv.exe cp.exe
+emxload -m 30 uniq.exe basename.exe sort.exe awk.exe echo.exe
+
 path_sep=\;
 
 if test -f $sh.exe; then sh=$sh.exe; fi
@@ -27,7 +32,10 @@ libemx="`../UU/loc . X c:/emx/lib d:/emx/lib e:/emx/lib f:/emx/lib g:/emx/lib h:
 
 if test "$libemx" = "X"; then echo "Cannot find C library!"; fi
 
-libpth="$libemx/st $libemx"
+libpth="$libemx/mt $libemx"
+
+set `emxrev -f emxlibcm`
+emxcrtrev=$5
 
 so='dll'
 
@@ -45,11 +53,19 @@ aout_obj_ext='.o'
 aout_lib_ext='.a'
 aout_ar='ar'
 aout_plibext='.a'
-aout_d_fork='define'
 aout_lddlflags='-Zdll'
-aout_ldflags='-Zexe'
+if [ $emxcrtrev -ge 50 ]; then 
+    aout_ldflags='-Zexe -Zsmall-conv'
+else
+    aout_ldflags='-Zexe'
+fi
+
+# To get into config.sh:
+aout_ldflags="$aout_ldflags"
+
+aout_d_fork='define'
 aout_ccflags='-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS'
-aout_cppflags='-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC =DDEBUGGING_MSTATS'
+aout_cppflags='-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS'
 aout_use_clib='c'
 aout_usedl='undef'
 aout_archobjs="os2.o dl_os2.o"
@@ -64,7 +80,9 @@ if [ "$emxaout" != "" ]; then
     lib_ext="$aout_lib_ext"
     ar="$aout_ar"
     plibext="$aout_plibext"
-    d_fork="$aout_d_fork"
+    if [ $emxcrtrev -lt 50 ]; then 
+	d_fork="$aout_d_fork"
+    fi
     lddlflags="$aout_lddlflags"
     ldflags="$aout_ldflags"
     ccflags="$aout_ccflags"
@@ -78,11 +96,19 @@ else
     lib_ext='.lib'
     ar='emxomfar'
     plibext='.lib'
-    d_fork='undef'
+    if [ $emxcrtrev -ge 50 ]; then 
+	d_fork='define'
+    else
+	d_fork='undef'
+    fi
     lddlflags='-Zdll -Zomf -Zmt -Zcrtdll'
     # Recursive regmatch may eat 2.5M of stack alone.
     ldflags='-Zexe -Zomf -Zmt -Zcrtdll -Zstack 32000'
-    ccflags='-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS'
+    if [ $emxcrtrev -ge 50 ]; then 
+	ccflags='-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS'
+    else
+	ccflags='-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -DEMX_BAD_SBRK'
+    fi
     use_clib='c_import'
     usedl='define'
 fi
@@ -94,7 +120,7 @@ plibext="$plibext"
 libperl="libperl${plibext}"
 
 #libc="/emx/lib/st/c_import$lib_ext"
-libc="$libemx/st/$use_clib$lib_ext"
+libc="$libemx/mt/$use_clib$lib_ext"
 
 if test -r "$libemx/c_alias$lib_ext"; then 
     libnames="$libemx/c_alias$lib_ext"
@@ -167,6 +193,10 @@ d_setprior='define'
 
 # Commented:
 #startsh='extproc ksh\\n#! sh'
+
+# Copy pod:
+
+cp ../README.os2 ../pod/perlos2.pod
 
 # Now install the external modules. We are in the ./hints directory.
 
