@@ -740,9 +740,12 @@
 #define utf8_to_bytes		Perl_utf8_to_bytes
 #define bytes_from_utf8		Perl_bytes_from_utf8
 #define bytes_to_utf8		Perl_bytes_to_utf8
-#define utf8_to_uv_simple	Perl_utf8_to_uv_simple
-#define utf8_to_uv		Perl_utf8_to_uv
-#define uv_to_utf8		Perl_uv_to_utf8
+#define utf8_to_uvchr		Perl_utf8_to_uvchr
+#define utf8_to_uvuni		Perl_utf8_to_uvuni
+#define utf8n_to_uvchr		Perl_utf8n_to_uvchr
+#define utf8n_to_uvuni		Perl_utf8n_to_uvuni
+#define uvchr_to_utf8		Perl_uvchr_to_utf8
+#define uvuni_to_utf8		Perl_uvuni_to_utf8
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
 #define wait4pid		Perl_wait4pid
@@ -2226,9 +2229,12 @@
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define bytes_from_utf8(a,b,c)	Perl_bytes_from_utf8(aTHX_ a,b,c)
 #define bytes_to_utf8(a,b)	Perl_bytes_to_utf8(aTHX_ a,b)
-#define utf8_to_uv_simple(a,b)	Perl_utf8_to_uv_simple(aTHX_ a,b)
-#define utf8_to_uv(a,b,c,d)	Perl_utf8_to_uv(aTHX_ a,b,c,d)
-#define uv_to_utf8(a,b)		Perl_uv_to_utf8(aTHX_ a,b)
+#define utf8_to_uvchr(a,b)	Perl_utf8_to_uvchr(aTHX_ a,b)
+#define utf8_to_uvuni(a,b)	Perl_utf8_to_uvuni(aTHX_ a,b)
+#define utf8n_to_uvchr(a,b,c,d)	Perl_utf8n_to_uvchr(aTHX_ a,b,c,d)
+#define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
+#define uvchr_to_utf8(a,b)	Perl_uvchr_to_utf8(aTHX_ a,b)
+#define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
@@ -4366,12 +4372,18 @@
 #define bytes_from_utf8		Perl_bytes_from_utf8
 #define Perl_bytes_to_utf8	CPerlObj::Perl_bytes_to_utf8
 #define bytes_to_utf8		Perl_bytes_to_utf8
-#define Perl_utf8_to_uv_simple	CPerlObj::Perl_utf8_to_uv_simple
-#define utf8_to_uv_simple	Perl_utf8_to_uv_simple
-#define Perl_utf8_to_uv		CPerlObj::Perl_utf8_to_uv
-#define utf8_to_uv		Perl_utf8_to_uv
-#define Perl_uv_to_utf8		CPerlObj::Perl_uv_to_utf8
-#define uv_to_utf8		Perl_uv_to_utf8
+#define Perl_utf8_to_uvchr	CPerlObj::Perl_utf8_to_uvchr
+#define utf8_to_uvchr		Perl_utf8_to_uvchr
+#define Perl_utf8_to_uvuni	CPerlObj::Perl_utf8_to_uvuni
+#define utf8_to_uvuni		Perl_utf8_to_uvuni
+#define Perl_utf8n_to_uvchr	CPerlObj::Perl_utf8n_to_uvchr
+#define utf8n_to_uvchr		Perl_utf8n_to_uvchr
+#define Perl_utf8n_to_uvuni	CPerlObj::Perl_utf8n_to_uvuni
+#define utf8n_to_uvuni		Perl_utf8n_to_uvuni
+#define Perl_uvchr_to_utf8	CPerlObj::Perl_uvchr_to_utf8
+#define uvchr_to_utf8		Perl_uvchr_to_utf8
+#define Perl_uvuni_to_utf8	CPerlObj::Perl_uvuni_to_utf8
+#define uvuni_to_utf8		Perl_uvuni_to_utf8
 #define Perl_vivify_defelem	CPerlObj::Perl_vivify_defelem
 #define vivify_defelem		Perl_vivify_defelem
 #define Perl_vivify_ref		CPerlObj::Perl_vivify_ref

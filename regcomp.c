@@ -807,7 +807,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    if (UTF) {
 		U8 *s = (U8*)STRING(scan);
 		l = utf8_length(s, s + l);
-		uc = utf8_to_uv_simple(s, NULL);
+		uc = utf8_to_uvchr(s, NULL);
 	    }
 	    min += l;
 	    if (flags & SCF_DO_SUBSTR) { /* Update longest substr. */
@@ -862,7 +862,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    if (UTF) {
 		U8 *s = (U8 *)STRING(scan);
 		l = utf8_length(s, s + l);
-		uc = utf8_to_uv_simple(s, NULL);
+		uc = utf8_to_uvchr(s, NULL);
 	    }
 	    min += l;
 	    if (data && (flags & SCF_DO_SUBSTR))
@@ -2928,7 +2928,7 @@ tryagain:
 		default:
 		  normal_default:
 		    if (UTF8_IS_START(*p) && UTF) {
-			ender = utf8_to_uv((U8*)p, RExC_end - p,
+			ender = utf8n_to_uvuni((U8*)p, RExC_end - p,
 					       &numlen, 0);
 			p += numlen;
 		    }
@@ -2940,7 +2940,7 @@ tryagain:
 		    p = regwhite(p, RExC_end);
 		if (UTF && FOLD) {
 		    if (LOC)
-			ender = toLOWER_LC_uni(ender);
+			ender = toLOWER_LC_uvchr(UNI_TO_NATIVE(ender));
 		    else
 			ender = toLOWER_uni(ender);
 		}
@@ -3227,7 +3227,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	if (!range)
 	    rangebegin = RExC_parse;
 	if (UTF) {
-	    value = utf8_to_uv((U8*)RExC_parse,
+	    value = utf8n_to_uvuni((U8*)RExC_parse,
 			       RExC_end - RExC_parse,
 			       &numlen, 0);
 	    RExC_parse += numlen;
@@ -3238,7 +3238,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    namedclass = regpposixcc(pRExC_state, value);
 	else if (value == '\\') {
 	    if (UTF) {
-		value = utf8_to_uv((U8*)RExC_parse,
+		value = utf8n_to_uvuni((U8*)RExC_parse,
 				   RExC_end - RExC_parse,
 				   &numlen, 0);
 		RExC_parse += numlen;
@@ -3914,7 +3914,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 STATIC void
 S_reguni(pTHX_ RExC_state_t *pRExC_state, UV uv, char* s, STRLEN* lenp)
 {
-    *lenp = SIZE_ONLY ? UNISKIP(uv) : (uv_to_utf8((U8*)s, uv) - (U8*)s);
+    *lenp = SIZE_ONLY ? UNISKIP(uv) : (uvuni_to_utf8((U8*)s, uv) - (U8*)s);
 }
 
 /*
@@ -4284,7 +4284,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 		    U8 s[UTF8_MAXLEN+1];
 		
 		    for (i = 0; i <= 256; i++) { /* just the first 256 */
-			U8 *e = uv_to_utf8(s, i);
+			U8 *e = uvuni_to_utf8(s, i);
 			
 			if (i < 256 && swash_fetch(sw, s)) {
 			    if (rangestart == -1)
@@ -4294,14 +4294,14 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 			
 			    if (i <= rangestart + 3)
 				for (; rangestart < i; rangestart++) {
-				    for(e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
+				    for(e = uvuni_to_utf8(s, rangestart), p = s; p < e; p++)
 					put_byte(sv, *p);
 				}
 			    else {
-				for (e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
+				for (e = uvuni_to_utf8(s, rangestart), p = s; p < e; p++)
 				    put_byte(sv, *p);
 				sv_catpv(sv, "-");
-				    for (e = uv_to_utf8(s, i - 1), p = s; p < e; p++)
+				    for (e = uvuni_to_utf8(s, i - 1), p = s; p < e; p++)
 					put_byte(sv, *p);
 				}
 				rangestart = -1;

@@ -179,7 +179,7 @@ int yyactlevel = -1;
 
 STATIC void
 S_tokereport(pTHX_ char *thing, char* s, I32 rv)
-{ 
+{
     SV *report;
     DEBUG_T({
         report = newSVpv(thing, 0);
@@ -838,7 +838,7 @@ Perl_str_to_version(pTHX_ SV *sv)
 	STRLEN skip;
 	UV n;
 	if (utf)
-	    n = utf8_to_uv((U8*)start, len, &skip, 0);
+	    n = utf8n_to_uvchr((U8*)start, len, &skip, 0);
 	else {
 	    n = *(U8*)start;
 	    skip = 1;
@@ -1475,7 +1475,7 @@ S_scan_const(pTHX_ char *start)
 			if (hicount) {
 			    char *old_pvx = SvPVX(sv);
 			    char *src, *dst;
-			  
+			
 			    d = SvGROW(sv,
 				       SvLEN(sv) + hicount + 1) +
 				         (d - old_pvx);
@@ -1497,7 +1497,7 @@ S_scan_const(pTHX_ char *start)
                     }
 
                     if (has_utf8 || uv > 255) {
-		        d = (char*)uv_to_utf8((U8*)d, uv);
+		        d = (char*)uvchr_to_utf8((U8*)d, uv);
 			has_utf8 = TRUE;
 			if (PL_lex_inwhat == OP_TRANS &&
 			    PL_sublex_info.sub_op) {
@@ -1622,14 +1622,14 @@ S_scan_const(pTHX_ char *start)
            STRLEN len = (STRLEN) -1;
            UV uv;
            if (this_utf8) {
-               uv = utf8_to_uv((U8*)s, send - s, &len, 0);
+               uv = utf8n_to_uvchr((U8*)s, send - s, &len, 0);
            }
            if (len == (STRLEN)-1) {
                /* Illegal UTF8 (a high-bit byte), make it valid. */
                char *old_pvx = SvPVX(sv);
                /* need space for one extra char (NOTE: SvCUR() not set here) */
                d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
-               d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
+               d = (char*)uvchr_to_utf8((U8*)d, (U8)*s++);
            }
            else {
                while (len--)
@@ -7273,11 +7273,8 @@ vstring:
 					    "Integer overflow in decimal number");
 			}
 		    }
-		    /* THIS IS EVIL */
-		    if (rev < 256) 
-			rev = ASCII_TO_NATIVE(rev);
-
-		    tmpend = uv_to_utf8(tmpbuf, rev);
+		    /* Append native character for the rev point */
+		    tmpend = uvchr_to_utf8(tmpbuf, rev);
 		    if (rev > revmax)
 			revmax = rev;
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);

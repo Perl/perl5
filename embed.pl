@@ -2094,9 +2094,12 @@ Apd	|U8*	|utf8_hop	|U8 *s|I32 off
 ApMd	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
 ApMd	|U8*	|bytes_from_utf8|U8 *s|STRLEN *len|bool *is_utf8
 ApMd	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
-Apd	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
-Adp	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
-Apd	|U8*	|uv_to_utf8	|U8 *d|UV uv
+Apd	|UV	|utf8_to_uvchr	|U8 *s|STRLEN* retlen
+Apd	|UV	|utf8_to_uvuni	|U8 *s|STRLEN* retlen
+Adp	|UV	|utf8n_to_uvchr	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
+Adp	|UV	|utf8n_to_uvuni	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
+Apd	|U8*	|uvchr_to_utf8	|U8 *d|UV uv
+Apd	|U8*	|uvuni_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags

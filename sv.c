@@ -4705,8 +4705,8 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
     len = 0;
     while (s < send) {
 	STRLEN n;
-
-	if (utf8_to_uv(s, UTF8SKIP(s), &n, 0)) {
+        /* We can use low level directly here as we are not looking at the values */
+	if (utf8n_to_uvuni(s, UTF8SKIP(s), &n, 0)) {
 	    s += n;
 	    len++;
 	}
@@ -7099,7 +7099,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
 	    if ((uv > 255 || (uv > 127 && SvUTF8(sv))) && !IN_BYTE) {
 		eptr = (char*)utf8buf;
-		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
+		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;
 		is_utf = TRUE;
 	    }
 	    else {
@@ -7183,13 +7183,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (!veclen)
 		    continue;
 		if (vec_utf)
-		    iv = (IV)utf8_to_uv(vecstr, veclen, &ulen, 0);
+		    iv = (IV)utf8n_to_uvchr(vecstr, veclen, &ulen, 0);
 		else {
 		    iv = *vecstr;
 		    ulen = 1;
 		}
-		if (iv <256) 
-		iv = NATIVE_TO_ASCII(iv); /* v-strings are codepoints */
 		vecstr += ulen;
 		veclen -= ulen;
 	    }
@@ -7265,13 +7263,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (!veclen)
 		    continue;
 		if (vec_utf)
-		    uv = utf8_to_uv(vecstr, veclen, &ulen, 0);
+		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen, 0);
 		else {
 		    uv = *vecstr;
 		    ulen = 1;
 		}
-		if (uv <256) 
-		uv = NATIVE_TO_ASCII(uv); /* v-strings are codepoints */
 		vecstr += ulen;
 		veclen -= ulen;
 	    }

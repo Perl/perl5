@@ -1281,7 +1281,7 @@ PP(pp_subtract)
 	    UV result;
 	    register UV buv;
 	    bool buvok = SvUOK(TOPs);
-	    
+	
 	    if (buvok)
 		buv = SvUVX(TOPs);
 	    else {
@@ -2138,7 +2138,7 @@ PP(pp_complement)
 
 	  send = tmps + len;
 	  while (tmps < send) {
-	    UV c = utf8_to_uv(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
+	    UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 	    tmps += UTF8SKIP(tmps);
 	    targlen += UNISKIP(~c);
 	    nchar++;
@@ -2152,9 +2152,9 @@ PP(pp_complement)
 	  if (nwide) {
 	      Newz(0, result, targlen + 1, U8);
 	      while (tmps < send) {
-		  UV c = utf8_to_uv(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
+		  UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
 		  tmps += UTF8SKIP(tmps);
-		  result = uv_to_utf8(result, ~c);
+		  result = uvchr_to_utf8(result, ~c);
 	      }
 	      *result = '\0';
 	      result -= targlen;
@@ -2164,7 +2164,7 @@ PP(pp_complement)
 	  else {
 	      Newz(0, result, nchar + 1, U8);
 	      while (tmps < send) {
-		  U8 c = (U8)utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
+		  U8 c = (U8)utf8n_to_uvchr(tmps, 0, &l, UTF8_ALLOW_ANY);
 		  tmps += UTF8SKIP(tmps);
 		  *result++ = ~c;
 	      }
@@ -2934,7 +2934,7 @@ PP(pp_ord)
     STRLEN len;
     U8 *s = (U8*)SvPVx(argsv, len);
 
-    XPUSHu(DO_UTF8(argsv) ? utf8_to_uv_simple(s, 0) : (*s & 0xff));
+    XPUSHu(DO_UTF8(argsv) ? utf8_to_uvchr(s, 0) : (*s & 0xff));
     RETURN;
 }
 
@@ -2948,7 +2948,7 @@ PP(pp_chr)
 
     if (value > 255 && !IN_BYTE) {
 	SvGROW(TARG, UNISKIP(value)+1);
-	tmps = (char*)uv_to_utf8((U8*)SvPVX(TARG), value);
+	tmps = (char*)uvchr_to_utf8((U8*)SvPVX(TARG), value);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));
 	*tmps = '\0';
 	(void)SvPOK_only(TARG);
@@ -2997,17 +2997,17 @@ PP(pp_ucfirst)
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN+1];
 	U8 *tend;
-	UV uv = utf8_to_uv(s, slen, &ulen, 0);
+	UV uv;
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
 	    SvTAINTED_on(sv);
-	    uv = toTITLE_LC_uni(uv);
+	    uv = toTITLE_LC_uvchr(utf8n_to_uvchr(s, slen, &ulen, 0));
 	}
 	else
 	    uv = toTITLE_utf8(s);
 	
-	tend = uv_to_utf8(tmpbuf, uv);
+	tend = uvchr_to_utf8(tmpbuf, uv);
 
 	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
 	    dTARGET;
@@ -3056,17 +3056,17 @@ PP(pp_lcfirst)
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN+1];
 	U8 *tend;
-	UV uv = utf8_to_uv(s, slen, &ulen, 0);
+	UV uv;
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
 	    SvTAINTED_on(sv);
-	    uv = toLOWER_LC_uni(uv);
+	    uv = toLOWER_LC_uvchr(utf8n_to_uvchr(s, slen, &ulen, 0));
 	}
 	else
 	    uv = toLOWER_utf8(s);
 	
-	tend = uv_to_utf8(tmpbuf, uv);
+	tend = uvchr_to_utf8(tmpbuf, uv);
 
 	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
 	    dTARGET;
@@ -3133,13 +3133,13 @@ PP(pp_uc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv(s, len, &ulen, 0)));
+		    d = uvchr_to_utf8(d, toUPPER_LC_uvchr( utf8n_to_uvchr(s, len, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
 	    else {
 		while (s < send) {
-		    d = uv_to_utf8(d, toUPPER_utf8( s ));
+		    d = uvchr_to_utf8(d, toUPPER_utf8( s ));
 		    s += UTF8SKIP(s);
 		}
 	    }
@@ -3207,13 +3207,13 @@ PP(pp_lc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv(s, len, &ulen, 0)));
+		    d = uvchr_to_utf8(d, toLOWER_LC_uvchr( utf8n_to_uvchr(s, len, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
 	    else {
 		while (s < send) {
-		    d = uv_to_utf8(d, toLOWER_utf8(s));
+		    d = uvchr_to_utf8(d, toLOWER_utf8(s));
 		    s += UTF8SKIP(s);
 		}
 	    }
@@ -3967,7 +3967,7 @@ PP(pp_reverse)
 			continue;
 		    }
 		    else {
-			if (!utf8_to_uv_simple(s, 0))
+			if (!utf8_to_uvchr(s, 0))
 			    break;
 			up = (char*)s;
 			s += UTF8SKIP(s);
@@ -4046,7 +4046,14 @@ PP(pp_unpack)
     STRLEN llen;
     STRLEN rlen;
     register char *pat = SvPV(left, llen);
+#if 0
+    /* Packed side is assumed to be octets - so force downgrade if it
+       has been UTF-8 encoded by accident
+     */
+    register char *s = SvPVbyte(right, rlen);
+#else
     register char *s = SvPV(right, rlen);
+#endif
     char *strend = s + rlen;
     char *strbeg = s;
     register char *patend = pat + llen;
@@ -4355,7 +4362,7 @@ PP(pp_unpack)
 	    if (checksum) {
 		while (len-- > 0 && s < strend) {
 		    STRLEN alen;
-		    auint = utf8_to_uv((U8*)s, strend - s, &alen, 0);
+		    auint = utf8n_to_uvchr((U8*)s, strend - s, &alen, 0);
 		    along = alen;
 		    s += along;
 		    if (checksum > 32)
@@ -4369,7 +4376,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
 		    STRLEN alen;
-		    auint = utf8_to_uv((U8*)s, strend - s, &alen, 0);
+		    auint = utf8n_to_uvchr((U8*)s, strend - s, &alen, 0);
 		    along = alen;
 		    s += along;
 		    sv = NEWSV(37, 0);
@@ -5407,7 +5414,7 @@ PP(pp_pack)
 		fromstr = NEXTFROM;
 		auint = SvUV(fromstr);
 		SvGROW(cat, SvCUR(cat) + UTF8_MAXLEN + 1);
-		SvCUR_set(cat, (char*)uv_to_utf8((U8*)SvEND(cat),auint)
+		SvCUR_set(cat, (char*)uvchr_to_utf8((U8*)SvEND(cat),auint)
 			       - SvPVX(cat));
 	    }
 	    *SvEND(cat) = '\0';

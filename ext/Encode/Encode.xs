@@ -385,8 +385,8 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
           if (!check && ckWARN_d(WARN_UTF8))
            {
             STRLEN clen;
-            UV ch = utf8_to_uv(s+slen,(SvCUR(src)-slen),&clen,0);
-            Perl_warner(aTHX_ WARN_UTF8, "\"\\x{%"UVxf"}\" does not map to %s", ch, enc->name[0]);
+            UV ch = utf8n_to_uvuni(s+slen,(SvCUR(src)-slen),&clen,0);
+            Perl_warner(aTHX_ WARN_UTF8, "\"\\N{U+%"UVxf"}\" does not map to %s", ch, enc->name[0]);
             /* FIXME: Skip over the character, copy in replacement and continue
              * but that is messy so for now just fail.
              */
