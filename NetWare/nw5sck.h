@@ -98,6 +98,7 @@ void nw_sethostent(int stayopen);
 void nw_setnetent(int stayopen);
 void nw_setprotoent(int stayopen);
 void nw_setservent(int stayopen);
+int nw_setsockopt(SOCKET s, int level, int optname, const char* optval, int optlen);
 
 int nw_getsockname(SOCKET s, struct sockaddr *addr, int *addrlen);
 int nw_getsockopt(SOCKET s, int level, int optname, char *optval, int *optlen);

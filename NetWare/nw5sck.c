@@ -226,6 +226,12 @@ nw_setservent(int stayopen)
 }
 
 int
+nw_setsockopt(SOCKET s, int level, int optname, const char* optval, int optlen)
+{
+	return setsockopt(s, level, optname, optval, optlen);
+}
+
+int
 nw_getsockname(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
 	return getsockname(s, addr, addrlen);
