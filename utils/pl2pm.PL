@@ -1,4 +1,65 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
+
+use Config;
+use File::Basename qw(&basename &dirname);
+
+# List explicitly here the variables you want Configure to
+# generate.  Metaconfig only looks for shell variables, so you
+# have to mention them as if they were shell variables, not
+# %Config entries.  Thus you write
+#  $startperl
+# to ensure Configure will look for $Config{startperl}.
+
+# This forces PL files to create target in same directory as PL file.
+# This is so that make depend always knows where to find PL derivatives.
+chdir(dirname($0));
+($file = basename($0)) =~ s/\.PL$//;
+$file =~ s/\.pl$//
+	if ($Config{'osname'} eq 'VMS' or
+	    $Config{'osname'} eq 'OS2');  # "case-forgiving"
+
+open OUT,">$file" or die "Can't create $file: $!";
+
+print "Extracting $file (with variable substitutions)\n";
+
+# In this section, perl variables will be expanded during extraction.
+# You can use $Config{...} to use Configure variables.
+
+print OUT <<"!GROK!THIS!";
+$Config{'startperl'}
+    eval 'exec perl -S \$0 "\$@"'
+	if 0;
+!GROK!THIS!
+
+# In the following, perl variables are not expanded during extraction.
+
+print OUT <<'!NO!SUBS!';
+
+=head1 NAME
+
+pl2pm - Rough tool to translate Perl4 .pl files to Perl5 .pm modules.
+
+=head1 SYNOPSIS
+
+B<pl2pm> F<files>
+
+=head1 DESCRIPTION
+
+B<pl2pm> is a tool to aid in the conversion of Perl4-style .pl
+library files to Perl5-style library modules.  Usually, your old .pl
+file will still work fine and you should only use this tool if you
+plan to update your library to use some of the newer Perl 5 features,
+such as AutoLoading.
+
+=head1 LIMITATIONS
+
+It's just a first step, but it's usually a good first step.
+
+=head1 AUTHOR
+
+Larry Wall <lwall@sems.com>
+
+=cut
 
 while (<DATA>) {
     chop;
@@ -320,3 +381,8 @@ write
 x
 xor
 y
+!NO!SUBS!
+
+close OUT or die "Can't close $file: $!";
+chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
+exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
