@@ -732,10 +732,14 @@ chr(0x263a) is a Unicode smiley face.  Note that characters from 127
 to 255 (inclusive) are by default not encoded in Unicode for backward
 compatibility reasons (but see L<encoding>).
 
-For the reverse, use L</ord>.
-See L<perlunicode> and L<encoding> for more about Unicode.
-
 If NUMBER is omitted, uses C<$_>.
+
+For the reverse, use L</ord>.
+
+Note that under the C<bytes> pragma the NUMBER is masked to
+the low eight bits.
+
+See L<perlunicode> and L<encoding> for more about Unicode.
 
 =item chroot FILENAME
 
@@ -2428,10 +2432,14 @@ If EXPR is omitted, uses C<$_>.
 
 =item length
 
-Returns the length in characters of the value of EXPR.  If EXPR is
+Returns the length in I<characters> of the value of EXPR.  If EXPR is
 omitted, returns length of C<$_>.  Note that this cannot be used on
 an entire array or hash to find out how many elements these have.
 For that, use C<scalar @array> and C<scalar keys %hash> respectively.
+
+Note the I<characters>: if the EXPR is in Unicode, you will get the
+number of characters, not the number of bytes.  To get the length
+in bytes, use C<do { use bytes; length(EXPR) }>, see L<bytes>.
 
 =item link OLDFILE,NEWFILE
 
@@ -4198,9 +4206,9 @@ last occurrence at or before that position.
 
 =item rmdir
 
-Deletes the directory specified by FILENAME if that directory is empty.  If it
-succeeds it returns true, otherwise it returns false and sets C<$!> (errno).  If
-FILENAME is omitted, uses C<$_>.
+Deletes the directory specified by FILENAME if that directory is
+empty.  If it succeeds it returns true, otherwise it returns false and
+sets C<$!> (errno).  If FILENAME is omitted, uses C<$_>.
 
 =item s///
 
