@@ -1666,11 +1666,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
-    /* XXXX This looks very suspicious... */
-    if (pm->op_pmdynflags & PMdf_CMP_UTF8)
-        RExC_utf8 = 1;
-    else
-        RExC_utf8 = 0;
+    RExC_utf8 = 0;
 
     RExC_precomp = exp;
     DEBUG_r(if (!PL_colorset) reginitcolors());
