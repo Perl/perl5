@@ -57,9 +57,9 @@ SKIP: {
 
 SKIP: {
     skip "No perlio", 4 unless $Config{useperlio};
-    is($output[5], "6.000", "print_nv");
-    is($output[6], "2", "print_iv positive");
-    is($output[7], "-2", "print_iv negative");
-    is($output[8], "3", "print_uv");
+    is($output[5], "2", "print_nv");
+    is($output[6], "-2", "print_iv positive");
+    is($output[7], "3", "print_iv negative");
+    is($output[8], "6.000", "print_uv");
 }
 
