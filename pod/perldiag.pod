@@ -1564,6 +1564,11 @@ to your Perl administrator.
 your logic, or you need to put a conditional in to guard against
 meaningless input.
 
+=item Illegal hexadecimal code on \N{U+...}
+
+(F) You must specify a hexadecimal code for the Unicode codepoint
+after the "U+" inside your "\N{}".
+
 =item Illegal hexadecimal digit %s ignored
 
 (W digit) You may have tried to use a character other than 0 - 9 or

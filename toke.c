@@ -1518,7 +1518,7 @@ S_scan_const(pTHX_ char *start)
 
  	    /* \N{latin small letter a} is a named character */
  	    case 'N':
- 		++s;
+ 		s++;
  		if (*s == '{') {
  		    char* e = strchr(s, '}');
  		    SV *res;
@@ -1530,9 +1530,30 @@ S_scan_const(pTHX_ char *start)
 			e = s - 1;
 			goto cont_scan;
 		    }
-		    res = newSVpvn(s + 1, e - s - 1);
-		    res = new_constant( Nullch, 0, "charnames",
-					res, Nullsv, "\\N{...}" );
+		    if (s[1] == 'U' && s[2] == '+') { /* \N{U+HHHH} */
+			STRLEN alen = e - s - 3;
+			STRLEN blen;
+			UV uv = (UV)scan_hex(s + 3, alen, &blen);
+
+			if (blen == alen) {
+			    res = newSVpvn(s, (uv >> 8) + 1); /* filler */
+			    str = (char *)uv_to_utf8((U8*)SvPVX(res), uv);
+			    SvCUR_set(res, str - SvPVX(res));
+			    *str = 0;
+			    if (uv > 0x7f)
+				has_utf8 = TRUE;
+			}
+			else {
+			    yyerror("Illegal hexadecimal code on \\N{U+...}");
+			    e = s - 1;
+			    goto cont_scan;
+			}
+		    }
+		    else {
+			res = newSVpvn(s + 1, e - s - 1);
+			res = new_constant( Nullch, 0, "charnames",
+					    res, Nullsv, "\\N{...}" );
+		    }
 		    if (has_utf8)
 			sv_utf8_upgrade(res);
 		    str = SvPV(res,len);

@@ -86,6 +86,9 @@ charnames - define character names for C<\N{named}> string literal escape.
   use charnames qw(cyrillic greek);
   print "\N{sigma} is Greek sigma, and \N{be} is Cyrillic b.\n";
 
+  use charnames ...; # either :full or :short will do
+  print "This is Unicode code point \N{U+263A}\n"; # explicit code point
+
 =head1 DESCRIPTION
 
 Pragma C<use charnames> supports arguments C<:full>, C<:short> and
