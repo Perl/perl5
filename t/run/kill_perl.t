@@ -779,8 +779,7 @@ EXPECT
 1234 1
 5678 1
 1234 5678 2
-########
-# keep this last - doesn't seem to work otherwise?
+######## found by Markov chain stress testing
 eval "a.b.c.d.e.f;sub"
 EXPECT
 
