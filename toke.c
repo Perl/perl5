@@ -7484,7 +7484,11 @@ Perl_yyerror(pTHX_ char *s)
     }
     msg = sv_2mortal(newSVpv(s, 0));
     Perl_sv_catpvf(aTHX_ msg, " at %s line %"IVdf", ",
+#ifdef MACOS_TRADITIONAL
+		   MacPerl_MPWFileName(CopFILE(PL_curcop)), (IV)CopLINE(PL_curcop));
+#else
 		   CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+#endif
     if (context)
 	Perl_sv_catpvf(aTHX_ msg, "near \"%.*s\"\n", contlen, context);
     else
@@ -7502,10 +7506,18 @@ Perl_yyerror(pTHX_ char *s)
     if (PL_error_count >= 10) {
 	if (PL_in_eval && SvCUR(ERRSV))
 	    Perl_croak(aTHX_ "%"SVf"%s has too many errors.\n",
+#ifdef MACOS_TRADITIONAL
+		       ERRSV, MacPerl_MPWFileName(CopFILE(PL_curcop)));
+#else
 		       ERRSV, CopFILE(PL_curcop));
+#endif
 	else
 	    Perl_croak(aTHX_ "%s has too many errors.\n",
+#ifdef MACOS_TRADITIONAL
+		       MacPerl_MPWFileName(CopFILE(PL_curcop)));
+#else
 		       CopFILE(PL_curcop));
+#endif
     }
     PL_in_my = 0;
     PL_in_my_stash = Nullhv;
