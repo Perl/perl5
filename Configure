@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jun 24 18:18:07 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Jun 28 16:56:19 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3320,6 +3320,17 @@ esac
 set usemultiplicity
 eval $setvar
 
+
+case "$usemorebits" in
+"$define"|true|[yY]*)
+	use64bitint="$define"
+	uselongdouble="$define"
+	usemorebits="$define"
+	;;
+*)	usemorebits="$undef"
+	;;
+esac
+
 : make some quick guesses about what we are up against
 echo " "
 $echo $n "Hmm...  $c"
@@ -3511,154 +3522,6 @@ case "$gccversion" in
     esac
     ;;
 esac
-
-: see how we invoke the C preprocessor
-echo " "
-echo "Now, how can we feed standard input to your C preprocessor..." >&4
-cat <<'EOT' >testcpp.c
-#define ABC abc
-#define XYZ xyz
-ABC.XYZ
-EOT
-cd ..
-if test ! -f cppstdin; then
-	if test "X$osname" = "Xaix" -a "X$gccversion" = X; then
-		# AIX cc -E doesn't show the absolute headerfile
-		# locations but we'll cheat by using the -M flag.
-		echo 'cat >.$$.c; rm -f .$$.u; '"$cc"' ${1+"$@"} -M -c .$$.c 2>/dev/null; test -s .$$.u && awk '"'"'$2 ~ /\.h$/ { print "# 0 \""$2"\"" }'"'"' .$$.u; rm -f .$$.o .$$.u; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
-	else
-		echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
-	fi
-else
-	echo "Keeping your $hint cppstdin wrapper."
-fi
-chmod 755 cppstdin
-wrapper=`pwd`/cppstdin
-ok='false'
-cd UU
-
-if $test "X$cppstdin" != "X" && \
-	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-then
-	echo "You used to use $cppstdin $cppminus so we'll use that again."
-	case "$cpprun" in
-	'') echo "But let's see if we can live without a wrapper..." ;;
-	*)
-		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
-			ok='true'
-		else
-			echo "(However, $cpprun $cpplast does not work, let's see...)"
-		fi
-		;;
-	esac
-else
-	case "$cppstdin" in
-	'') ;;
-	*)
-		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
-		;;
-	esac
-fi
-
-if $ok; then
-	: nothing
-elif echo 'Maybe "'"$cc"' -E" will work...'; \
-	$cc -E <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
-	$cc -E - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='-';
-elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
-	$cc -P <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yipee, that works!"
-	x_cpp="$cc -P"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
-	$cc -P - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "At long last!"
-	x_cpp="$cc -P"
-	x_minus='-';
-elif echo 'No such luck, maybe "'$cpp'" will work...'; \
-	$cpp <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "It works!"
-	x_cpp="$cpp"
-	x_minus='';
-elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
-	$cpp - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Hooray, it works!  I was beginning to wonder."
-	x_cpp="$cpp"
-	x_minus='-';
-elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
-	$wrapper <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	x_cpp="$wrapper"
-	x_minus=''
-	echo "Eureka!"
-else
-	dflt=''
-	rp="No dice.  I can't find a C preprocessor.  Name one:"
-	. ./myread
-	x_cpp="$ans"
-	x_minus=''
-	$x_cpp <testcpp.c >testcpp.out 2>&1
-	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-		echo "OK, that will do." >&4
-	else
-echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
-		exit 1
-	fi
-fi
-
-case "$ok" in
-false)
-	cppstdin="$x_cpp"
-	cppminus="$x_minus"
-	cpprun="$x_cpp"
-	cpplast="$x_minus"
-	set X $x_cpp
-	shift
-	case "$1" in
-	"$cpp")
-		echo "Perhaps can we force $cc -E using a wrapper..."
-		if $wrapper <testcpp.c >testcpp.out 2>&1; \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "Yup, we can."
-			cppstdin="$wrapper"
-			cppminus='';
-		else
-			echo "Nope, we'll have to live without it..."
-		fi
-		;;
-	esac
-	case "$cpprun" in
-	"$wrapper")
-		cpprun=''
-		cpplast=''
-		;;
-	esac
-	;;
-esac
-
-case "$cppstdin" in
-"$wrapper"|'cppstdin') ;;
-*) $rm -f $wrapper;;
-esac
-$rm -f testcpp.c testcpp.out
 
 : decide how portable to be.  Allow command line overrides.
 case "$d_portable" in
@@ -3985,6 +3848,154 @@ y)	fn=d/
 *)	usrinc="$dflt"
 	;;
 esac
+
+: see how we invoke the C preprocessor
+echo " "
+echo "Now, how can we feed standard input to your C preprocessor..." >&4
+cat <<'EOT' >testcpp.c
+#define ABC abc
+#define XYZ xyz
+ABC.XYZ
+EOT
+cd ..
+if test ! -f cppstdin; then
+	if test "X$osname" = "Xaix" -a "X$gccversion" = X; then
+		# AIX cc -E doesn't show the absolute headerfile
+		# locations but we'll cheat by using the -M flag.
+		echo 'cat >.$$.c; rm -f .$$.u; '"$cc"' ${1+"$@"} -M -c .$$.c 2>/dev/null; test -s .$$.u && awk '"'"'$2 ~ /\.h$/ { print "# 0 \""$2"\"" }'"'"' .$$.u; rm -f .$$.o .$$.u; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
+	else
+		echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+	fi
+else
+	echo "Keeping your $hint cppstdin wrapper."
+fi
+chmod 755 cppstdin
+wrapper=`pwd`/cppstdin
+ok='false'
+cd UU
+
+if $test "X$cppstdin" != "X" && \
+	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+then
+	echo "You used to use $cppstdin $cppminus so we'll use that again."
+	case "$cpprun" in
+	'') echo "But let's see if we can live without a wrapper..." ;;
+	*)
+		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
+			ok='true'
+		else
+			echo "(However, $cpprun $cpplast does not work, let's see...)"
+		fi
+		;;
+	esac
+else
+	case "$cppstdin" in
+	'') ;;
+	*)
+		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
+		;;
+	esac
+fi
+
+if $ok; then
+	: nothing
+elif echo 'Maybe "'"$cc"' -E" will work...'; \
+	$cc -E <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
+	$cc -E - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='-';
+elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
+	$cc -P <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yipee, that works!"
+	x_cpp="$cc -P"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
+	$cc -P - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "At long last!"
+	x_cpp="$cc -P"
+	x_minus='-';
+elif echo 'No such luck, maybe "'$cpp'" will work...'; \
+	$cpp <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "It works!"
+	x_cpp="$cpp"
+	x_minus='';
+elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
+	$cpp - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Hooray, it works!  I was beginning to wonder."
+	x_cpp="$cpp"
+	x_minus='-';
+elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
+	$wrapper <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	x_cpp="$wrapper"
+	x_minus=''
+	echo "Eureka!"
+else
+	dflt=''
+	rp="No dice.  I can't find a C preprocessor.  Name one:"
+	. ./myread
+	x_cpp="$ans"
+	x_minus=''
+	$x_cpp <testcpp.c >testcpp.out 2>&1
+	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+		echo "OK, that will do." >&4
+	else
+echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
+		exit 1
+	fi
+fi
+
+case "$ok" in
+false)
+	cppstdin="$x_cpp"
+	cppminus="$x_minus"
+	cpprun="$x_cpp"
+	cpplast="$x_minus"
+	set X $x_cpp
+	shift
+	case "$1" in
+	"$cpp")
+		echo "Perhaps can we force $cc -E using a wrapper..."
+		if $wrapper <testcpp.c >testcpp.out 2>&1; \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "Yup, we can."
+			cppstdin="$wrapper"
+			cppminus='';
+		else
+			echo "Nope, we'll have to live without it..."
+		fi
+		;;
+	esac
+	case "$cpprun" in
+	"$wrapper")
+		cpprun=''
+		cpplast=''
+		;;
+	esac
+	;;
+esac
+
+case "$cppstdin" in
+"$wrapper"|'cppstdin') ;;
+*) $rm -f $wrapper;;
+esac
+$rm -f testcpp.c testcpp.out
 
 : Set private lib path
 case "$plibpth" in
@@ -4541,62 +4552,6 @@ n) echo "OK, that should do.";;
 esac
 $rm -f try try.* core
 
-: define an is-a-typedef? function
-typedef='type=$1; var=$2; def=$3; shift; shift; shift; inclist=$@;
-case "$inclist" in
-"") inclist="sys/types.h";;
-esac;
-eval "varval=\$$var";
-case "$varval" in
-"")
-	$rm -f temp.c;
-	for inc in $inclist; do
-		echo "#include <$inc>" >>temp.c;
-	done;
-	echo "#ifdef $type" >> temp.c;
-	echo "printf(\"We have $type\");" >> temp.c;
-	echo "#endif" >> temp.c;
-	$cppstdin $cppflags $cppminus < temp.c >temp.E 2>/dev/null;
-	if $contains $type temp.E >/dev/null 2>&1; then
-		eval "$var=\$type";
-	else
-		eval "$var=\$def";
-	fi;
-	$rm -f temp.?;;
-*) eval "$var=\$varval";;
-esac'
-
-: define an is-a-typedef? function that prompts if the type is not available.
-typedef_ask='type=$1; var=$2; def=$3; shift; shift; shift; inclist=$@;
-case "$inclist" in
-"") inclist="sys/types.h";;
-esac;
-eval "varval=\$$var";
-case "$varval" in
-"")
-	$rm -f temp.c;
-	for inc in $inclist; do
-		echo "#include <$inc>" >>temp.c;
-	done;
-	echo "#ifdef $type" >> temp.c;
-	echo "printf(\"We have $type\");" >> temp.c;
-	echo "#endif" >> temp.c;
-	$cppstdin $cppflags $cppminus < temp.c >temp.E 2>/dev/null;
-	echo " " ;
-	echo "$rp" | $sed -e "s/What is/Looking for/" -e "s/?/./";
-	if $contains $type temp.E >/dev/null 2>&1; then
-		echo "$type found." >&4;
-		eval "$var=\$type";
-	else
-		echo "$type NOT found." >&4;
-		dflt="$def";
-		. ./myread ;
-		eval "$var=\$ans";
-	fi;
-	$rm -f temp.?;;
-*) eval "$var=\$varval";;
-esac'
-
 : define a shorthand compile call
 compile='
 mc_file=$1;
@@ -4653,195 +4608,6 @@ EOM
 	;;
 esac
 $rm -f try try.*
-
-: see what type lseek is declared as in the kernel
-rp="What is the type used for lseek's offset on this system?"
-set off_t lseektype long stdio.h sys/types.h
-eval $typedef_ask
-
-echo " "
-echo "Checking to see how big your file offsets are..." >&4
-$cat >try.c <<EOCP
-#include <sys/types.h>
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof($lseektype));
-    return(0); 
-}
-EOCP
-set try
-if eval $compile_ok; then
-	lseeksize=`$run ./try`
-	echo "Your file offsets are $lseeksize bytes long."
-else
-	dflt=$longsize
-	echo " "
-	echo "(I can't seem to compile the test program.  Guessing...)"
-	rp="What is the size of your file offsets (in bytes)?"
-	. ./myread
-	lseeksize="$ans"
-fi
-$rm -f try.c try
-
-: see what type file positions are declared as in the library
-rp="What is the type for file position used by fsetpos()?"
-set fpos_t fpostype long stdio.h sys/types.h
-eval $typedef_ask
-
-echo " "
-case "$fpostype" in
-*_t) zzz="$fpostype"	;;
-*)   zzz="fpos_t"	;;
-esac
-echo "Checking the size of $zzz..." >&4 
-cat > try.c <<EOCP
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-    printf("%d\n", (int)sizeof($fpostype));
-    exit(0);
-}
-EOCP
-set try
-if eval $compile_ok; then
-	yyy=`$run ./try`
-	case "$yyy" in
-	'')	fpossize=4
-		echo "(I can't execute the test program--guessing $fpossize.)" >&4
-		;;
-	*)	fpossize=$yyy
-		echo "Your $zzz is $fpossize bytes long."
-		;;
-	esac
-else
-	dflt="$longsize"
-	echo " " >&4
-	echo "(I can't compile the test program.  Guessing...)" >&4
-	rp="What is the size of your file positions (in bytes)?"
-	. ./myread
-	fpossize="$ans"
-fi
-
-
-
-# Backward compatibility (uselfs is deprecated).
-case "$uselfs" in
-"$define"|true|[yY]*)
-	cat <<EOM >&4
-
-*** Configure -Duselfs is deprecated, using -Duselargefiles instead.
-EOM
-	uselargefiles="$define"
-	;;
-esac                          
-
-case "$lseeksize:$fpossize" in
-8:8) cat <<EOM
-
-You can have files larger than 2 gigabytes.
-EOM
-   val="$define" ;;
-*)    case "$uselargefiles" in
-   "$undef"|false|[nN]*) dflt='n' ;;
-   *)	dflt='y' ;;
-   esac
-   cat <<EOM
-
-Perl can be built to understand large files (files larger than 2 gigabytes)
-on some systems.  To do so, Configure can be run with -Duselargefiles.
-
-If this doesn't make any sense to you, just accept the default '$dflt'.
-EOM
-   rp='Try to understand large files, if available?'
-   . ./myread
-   case "$ans" in
-   y|Y) 	val="$define" ;;
-   *)   	val="$undef"  ;;
-   esac
-   ;;
-esac
-set uselargefiles
-eval $setvar
-case "$uselargefiles" in
-"$define")
-: Look for a hint-file generated 'call-back-unit'.  If the
-: user has specified that a large files perl is to be built,
-: we may need to set or change some other defaults.
-	if $test -f uselargefiles.cbu; then
-		echo "Your platform has some specific hints for large file builds, using them..."
-		. ./uselargefiles.cbu
-		echo " "
-		echo "Rechecking to see how big your file offsets are..." >&4
-		$cat >try.c <<EOCP
-#include <sys/types.h>
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof($lseektype));
-    return(0); 
-}
-EOCP
-		set try
-		if eval $compile_ok; then
-			lseeksize=`$run ./try`
-			$echo "Your file offsets are now $lseeksize bytes long."
-		else
-			dflt="$lseeksize"
-			echo " "
-			echo "(I can't seem to compile the test program.  Guessing...)"
-			rp="What is the size of your file offsets (in bytes)?"
-			. ./myread
-			lseeksize="$ans"
-		fi
-		case "$fpostype" in
-		*_t) zzz="$fpostype"	;;
-		*)   zzz="fpos_t"	;;
-		esac
-		$echo $n "Rechecking the size of $zzz...$c" >&4 
-		$cat > try.c <<EOCP
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-    printf("%d\n", (int)sizeof($fpostype));
-    exit(0);
-}
-EOCP
-		set try
-		if eval $compile_ok; then
-			yyy=`$run ./try`
-			dflt="$lseeksize"
-			case "$yyy" in
-			'')	echo " "
-				echo "(I can't execute the test program--guessing $fpossize.)" >&4
-				;;
-			*)	fpossize=$yyy
-				echo " $fpossize bytes." >&4
-				;;
-			esac
-		else
-			dflt="$fpossize"
-			echo " "
-			echo "(I can't compile the test program.  Guessing...)" >&4
-			rp="What is the size of your file positions (in bytes)?"
-			. ./myread
-			fpossize="$ans"
-		fi
-		$rm -f try.c try
-	fi
-	;;
-esac
-
-
-case "$usemorebits" in
-"$define"|true|[yY]*)
-	use64bitint="$define"
-	uselongdouble="$define"
-	usemorebits="$define"
-	;;
-*)	usemorebits="$undef"
-	;;
-esac
 
 : check for void type
 echo " "
@@ -8257,6 +8023,240 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installsitebin="$sitebinexp"
 fi
+
+: define an is-a-typedef? function
+typedef='type=$1; var=$2; def=$3; shift; shift; shift; inclist=$@;
+case "$inclist" in
+"") inclist="sys/types.h";;
+esac;
+eval "varval=\$$var";
+case "$varval" in
+"")
+	$rm -f temp.c;
+	for inc in $inclist; do
+		echo "#include <$inc>" >>temp.c;
+	done;
+	echo "#ifdef $type" >> temp.c;
+	echo "printf(\"We have $type\");" >> temp.c;
+	echo "#endif" >> temp.c;
+	$cppstdin $cppflags $cppminus < temp.c >temp.E 2>/dev/null;
+	if $contains $type temp.E >/dev/null 2>&1; then
+		eval "$var=\$type";
+	else
+		eval "$var=\$def";
+	fi;
+	$rm -f temp.?;;
+*) eval "$var=\$varval";;
+esac'
+
+: define an is-a-typedef? function that prompts if the type is not available.
+typedef_ask='type=$1; var=$2; def=$3; shift; shift; shift; inclist=$@;
+case "$inclist" in
+"") inclist="sys/types.h";;
+esac;
+eval "varval=\$$var";
+case "$varval" in
+"")
+	$rm -f temp.c;
+	for inc in $inclist; do
+		echo "#include <$inc>" >>temp.c;
+	done;
+	echo "#ifdef $type" >> temp.c;
+	echo "printf(\"We have $type\");" >> temp.c;
+	echo "#endif" >> temp.c;
+	$cppstdin $cppflags $cppminus < temp.c >temp.E 2>/dev/null;
+	echo " " ;
+	echo "$rp" | $sed -e "s/What is/Looking for/" -e "s/?/./";
+	if $contains $type temp.E >/dev/null 2>&1; then
+		echo "$type found." >&4;
+		eval "$var=\$type";
+	else
+		echo "$type NOT found." >&4;
+		dflt="$def";
+		. ./myread ;
+		eval "$var=\$ans";
+	fi;
+	$rm -f temp.?;;
+*) eval "$var=\$varval";;
+esac'
+
+: see what type lseek is declared as in the kernel
+rp="What is the type used for lseek's offset on this system?"
+set off_t lseektype long stdio.h sys/types.h
+eval $typedef_ask
+
+echo " "
+echo "Checking to see how big your file offsets are..." >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof($lseektype));
+    return(0); 
+}
+EOCP
+set try
+if eval $compile_ok; then
+	lseeksize=`$run ./try`
+	echo "Your file offsets are $lseeksize bytes long."
+else
+	dflt=$longsize
+	echo " "
+	echo "(I can't seem to compile the test program.  Guessing...)"
+	rp="What is the size of your file offsets (in bytes)?"
+	. ./myread
+	lseeksize="$ans"
+fi
+$rm -f try.c try
+
+: see what type file positions are declared as in the library
+rp="What is the type for file position used by fsetpos()?"
+set fpos_t fpostype long stdio.h sys/types.h
+eval $typedef_ask
+
+echo " "
+case "$fpostype" in
+*_t) zzz="$fpostype"	;;
+*)   zzz="fpos_t"	;;
+esac
+echo "Checking the size of $zzz..." >&4 
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+    printf("%d\n", (int)sizeof($fpostype));
+    exit(0);
+}
+EOCP
+set try
+if eval $compile_ok; then
+	yyy=`$run ./try`
+	case "$yyy" in
+	'')	fpossize=4
+		echo "(I can't execute the test program--guessing $fpossize.)" >&4
+		;;
+	*)	fpossize=$yyy
+		echo "Your $zzz is $fpossize bytes long."
+		;;
+	esac
+else
+	dflt="$longsize"
+	echo " " >&4
+	echo "(I can't compile the test program.  Guessing...)" >&4
+	rp="What is the size of your file positions (in bytes)?"
+	. ./myread
+	fpossize="$ans"
+fi
+
+
+
+# Backward compatibility (uselfs is deprecated).
+case "$uselfs" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** Configure -Duselfs is deprecated, using -Duselargefiles instead.
+EOM
+	uselargefiles="$define"
+	;;
+esac                          
+
+case "$lseeksize:$fpossize" in
+8:8) cat <<EOM
+
+You can have files larger than 2 gigabytes.
+EOM
+   val="$define" ;;
+*)    case "$uselargefiles" in
+   "$undef"|false|[nN]*) dflt='n' ;;
+   *)	dflt='y' ;;
+   esac
+   cat <<EOM
+
+Perl can be built to understand large files (files larger than 2 gigabytes)
+on some systems.  To do so, Configure can be run with -Duselargefiles.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+   rp='Try to understand large files, if available?'
+   . ./myread
+   case "$ans" in
+   y|Y) 	val="$define" ;;
+   *)   	val="$undef"  ;;
+   esac
+   ;;
+esac
+set uselargefiles
+eval $setvar
+case "$uselargefiles" in
+"$define")
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that a large files perl is to be built,
+: we may need to set or change some other defaults.
+	if $test -f uselargefiles.cbu; then
+		echo "Your platform has some specific hints for large file builds, using them..."
+		. ./uselargefiles.cbu
+		echo " "
+		echo "Rechecking to see how big your file offsets are..." >&4
+		$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof($lseektype));
+    return(0); 
+}
+EOCP
+		set try
+		if eval $compile_ok; then
+			lseeksize=`$run ./try`
+			$echo "Your file offsets are now $lseeksize bytes long."
+		else
+			dflt="$lseeksize"
+			echo " "
+			echo "(I can't seem to compile the test program.  Guessing...)"
+			rp="What is the size of your file offsets (in bytes)?"
+			. ./myread
+			lseeksize="$ans"
+		fi
+		case "$fpostype" in
+		*_t) zzz="$fpostype"	;;
+		*)   zzz="fpos_t"	;;
+		esac
+		$echo $n "Rechecking the size of $zzz...$c" >&4 
+		$cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+    printf("%d\n", (int)sizeof($fpostype));
+    exit(0);
+}
+EOCP
+		set try
+		if eval $compile_ok; then
+			yyy=`$run ./try`
+			dflt="$lseeksize"
+			case "$yyy" in
+			'')	echo " "
+				echo "(I can't execute the test program--guessing $fpossize.)" >&4
+				;;
+			*)	fpossize=$yyy
+				echo " $fpossize bytes." >&4
+				;;
+			esac
+		else
+			dflt="$fpossize"
+			echo " "
+			echo "(I can't compile the test program.  Guessing...)" >&4
+			rp="What is the size of your file positions (in bytes)?"
+			. ./myread
+			fpossize="$ans"
+		fi
+		$rm -f try.c try
+	fi
+	;;
+esac
 
 case "$vendorprefix" in
 '')	d_vendorbin="$undef"
