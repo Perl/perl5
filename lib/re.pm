@@ -11,6 +11,8 @@ re - Perl pragma to alter regular expression behaviour
     use re "taint";
     ($x) = ($^X =~ /^(.*)$/s);     # $x _is_ tainted here
 
+(We use $^X in these examples because it's tainted by default.)
+
 =head1 DESCRIPTION
 
 When C<use re 'taint'> is in effect, and a tainted string is the target
