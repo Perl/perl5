@@ -107,7 +107,7 @@ BEGIN
     }
    else
     {
-     my $doshish = ($^O eq 'MSWin32' or $^O eq 'os2');
+     my $dosish = ($^O eq 'MSWin32' or $^O eq 'os2');
      unless(($script =~ m#/# || ($dosish && $script =~ m#\\#))
             && -f $script)
       {
