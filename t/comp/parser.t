@@ -154,4 +154,5 @@ EOF
     my $x;
     $[ = 1 while $x;
     pass();
+    $[ = 0; # restore the original value for less side-effects
 }
