@@ -126,12 +126,11 @@ $filename = 'swstest.tmp';
 SKIP: {
     open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
     print $f <<'SWTEST';
-#!perl -s
-print $x
+#!perl -sn
+BEGIN { print $x; exit }
 SWTEST
     close $f or die "Could not close: $!";
     $r = runperl(
-	switches    => [ '-s' ],
 	progfile    => $filename,
 	args	    => [ '-x=foo' ],
     );
