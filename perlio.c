@@ -861,10 +861,10 @@ PerlIO_default_buffer(pTHX_ PerlIO_list_t *av)
     PerlIO_funcs *tab = &PerlIO_perlio;
 #ifdef PERLIO_CRLF
     tab = &PerlIO_crlf;
-#endif
+#else
     if (PerlIO_stdio.Set_ptrcnt)
         tab = &PerlIO_stdio;
-#else
+#endif
     PerlIO_debug("Pushing %s\n", tab->name);
     PerlIO_list_push(aTHX_ av, PerlIO_find_layer(aTHX_ tab->name, 0, 0),
 		     &PL_sv_undef);
