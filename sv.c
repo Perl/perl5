@@ -7734,7 +7734,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
         /* large enough for "%#.#f" --chip */
 	/* what about long double NVs? --jhi */
 
-	SV *vecsv;
+	SV *vecsv = Nullsv;
 	U8 *vecstr = Null(U8*);
 	STRLEN veclen = 0;
 	char c = 0;
