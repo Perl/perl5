@@ -237,12 +237,15 @@ source code level, this shouldn't be that drastic a change.
 
 =item *
 
-The PerlIO C<:raw> discipline (as described in Camel III) is deprecated
-because its definition (as either the discipline version of C<binmode(FH)>
-or as the opposite of C<:crlf>) didn't really work: most importantly
-because turning off "clrfness" is not enough to make a stream truly
-binary.  Instead of C<:raw> use one of the following: C<open(..., ':bytes')>,
-C<binmode(FH)>, C<sysopen()> + C<sysread()>.
+Previous versions of perl and some readings of some sections of Camel III
+implied that C<:raw> "discipline" was the inverse of  C<:crlf>.
+Turning off "clrfness" is no longer enough to make a stream truly
+binary. So the PerlIO C<:raw> discipline is now formally defined as being
+equivalent to binmode(FH) - which is in turn defined as doing whatever
+is necessary to pass each byte as-is without any translation.
+In particular binmode(FH) - and hence C<:raw> - will now turn off both CRLF
+and UTF-8  translation and remove other "layers" (e.g. :encoding()) which
+would modify byte stream.
 
 =item *
 
