@@ -12857,13 +12857,12 @@ esac
 : Remove SIGSTKSIZE used by Linux.
 : Remove SIGSTKSZ used by Posix.
 : Remove SIGTYP void lines used by OS2.
+: Some cpps, like os390, dont give the file name anywhere
 if [ "X$fieldn" = X ]; then
-    xxx=`echo '#include <signal.h>' |
-	$cppstdin $cppminus $cppflags 2>/dev/null |
-	$grep '^[ 	]*#.*include' | 
-	$sed 's!"!!g' | $sort | $uniq`
+	: Just make some guesses.  We check them later.
+	xxx='/usr/include/signal.h /usr/include/sys/signal.h'
 else
-    xxx=`echo '#include <signal.h>' |
+	xxx=`echo '#include <signal.h>' |
 	$cppstdin $cppminus $cppflags 2>/dev/null |
 	$grep '^[ 	]*#.*include' | 
 	$awk "{print \\$$fieldn}" | $sed 's!"!!g' | $sort | $uniq`
@@ -12887,10 +12886,12 @@ $1 == "#" && $2 ~ /^define$/ && $3 ~ /^SIG[A-Z0-9]*$/ && $3 !~ /SIGARRAYSIZE/ &&
 	print substr($3, 4, 20)
 }' $xxxfiles`
 : Append some common names just in case the awk scan failed.
-xxx="$xxx ABRT ALRM BUS CHLD CLD CONT DIL EMT FPE HUP ILL INT IO IOT KILL"
-xxx="$xxx LOST PHONE PIPE POLL PROF PWR QUIT SEGV STKFLT STOP SYS TERM TRAP"
-xxx="$xxx TSTP TTIN TTOU URG USR1 USR2 USR3 USR4 VTALRM"
-xxx="$xxx WINCH WIND WINDOW XCPU XFSZ"
+xxx="$xxx ABRT ALRM BUS CANCEL CHLD CLD CONT DIL EMT FPE"
+xxx="$xxx FREEZE HUP ILL INT IO IOT KILL LOST LWP PHONE"
+xxx="$xxx PIPE POLL PROF PWR QUIT RTMAX RTMIN SEGV STKFLT STOP"
+xxx="$xxx SYS TERM THAW TRAP TSTP TTIN TTOU URG USR1 USR2"
+xxx="$xxx USR3 USR4 VTALRM WAITING WINCH WIND WINDOW XCPU XFSZ"
+
 : generate a few handy files for later
 $cat > signal.c <<'EOCP'
 #include <sys/types.h>
