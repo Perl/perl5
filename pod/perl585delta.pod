@@ -113,10 +113,6 @@ been introduced to deal with some of the headers of the newest versions of
 the glibc. The standard warning still applies; to quote F<h2ph>'s
 documentation, I<you may need to dicker with the files produced>.
 
-=head1 New Documentation
-
-=head1 Performance Enhancements
-
 =head1 Installation and Configuration Improvements
 
 Perl 5.8.5 should build cleanly from source on LynxOS.
@@ -219,11 +215,14 @@ instead of being shipped prebuilt. This makes the compressed Perl source
 tarball about 200K smaller. A side effect is that the layout of files inside
 lib/unicore has changed.
 
-=head1 New Tests
-
 =head1 Known Problems
 
+The regression test F<t/uni/class.t> is now performing considerably more
+tests, and can take several minutes to run even on a fast machine.
+
 =head1 Platform Specific Problems
+
+This release is known not to build on Windows 95.
 
 =head1 Reporting Bugs
 
