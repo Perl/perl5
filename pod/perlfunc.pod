@@ -3008,7 +3008,7 @@ Examples:
 	}
     }
 
-See L<perliol/> for detailed info on PerlIO.
+See L<perliol> for detailed info on PerlIO.
 
 You may also, in the Bourne shell tradition, specify an EXPR beginning
 with C<< '>&' >>, in which case the rest of the string is interpreted
