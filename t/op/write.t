@@ -272,7 +272,7 @@ else
     { print "not ok 11\n"; }
 
 {
-    my $el;
+    our $el;
     format STDOUT =
 ok ^<<<<<<<<<<<<<<~~ # sv_chop() naze
 $el
@@ -287,7 +287,7 @@ $el
 
 if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'MacOS' ||
     ($^O eq 'os2' and not eval '$OS2::can_fork')) {
-  foreach (12..47) { print "ok $_ # skipped: '|-' and '-|' not supported\n"; }
+  foreach (13..48) { print "ok $_ # skipped: '|-' and '-|' not supported\n"; }
   exit(0);
 }
 
