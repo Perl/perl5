@@ -2,9 +2,12 @@
  * kit sizes from getting too big.
  */
 
-/* $Header: evalargs.xc,v 3.0.1.2 89/11/11 04:33:05 lwall Locked $
+/* $Header: evalargs.xc,v 3.0.1.3 89/11/17 15:25:07 lwall Locked $
  *
  * $Log:	evalargs.xc,v $
+ * Revision 3.0.1.3  89/11/17  15:25:07  lwall
+ * patch5: constant numeric subscripts disappeared in ?:
+ * 
  * Revision 3.0.1.2  89/11/11  04:33:05  lwall
  * patch2: Configure now locates csh
  * 
@@ -55,25 +58,35 @@
 	    break;
 	case A_LARYSTAB:
 	    ++sp;
+	    switch (optype) {
+		case O_ITEM2: argtype = 2; break;
+		case O_ITEM3: argtype = 3; break;
+		default:      argtype = anum; break;
+	    }
 	    str = afetch(stab_array(argptr.arg_stab),
-		arg[anum].arg_len - arybase, TRUE);
+		arg[argtype].arg_len - arybase, TRUE);
 #ifdef DEBUGGING
 	    if (debug & 8) {
 		(void)sprintf(buf,"LARYSTAB $%s[%d]",stab_name(argptr.arg_stab),
-		    arg[anum].arg_len);
+		    arg[argtype].arg_len);
 		tmps = buf;
 	    }
 #endif
 	    goto do_crement;
 	case A_ARYSTAB:
+	    switch (optype) {
+		case O_ITEM2: argtype = 2; break;
+		case O_ITEM3: argtype = 3; break;
+		default:      argtype = anum; break;
+	    }
 	    st[++sp] = afetch(stab_array(argptr.arg_stab),
-		arg[anum].arg_len - arybase, FALSE);
+		arg[argtype].arg_len - arybase, FALSE);
 	    if (!st[sp])
 		st[sp] = &str_undef;
 #ifdef DEBUGGING
 	    if (debug & 8) {
 		(void)sprintf(buf,"ARYSTAB $%s[%d]",stab_name(argptr.arg_stab),
-		    arg[anum].arg_len);
+		    arg[argtype].arg_len);
 		tmps = buf;
 	    }
 #endif

@@ -48,7 +48,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This symbol contains an encoding of the order of bytes in a long.
  *	Usual values (in octal) are 01234, 04321, 02143, 03412...
  */
-#define BYTEORDER 0$byteorder		/**/
+#define BYTEORDER 0x$byteorder		/**/
 
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
@@ -76,6 +76,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	to copy blocks of memory.  Otherwise you should probably use memcpy().
  */
 #$d_bcopy	BCOPY		/**/
+
+/* BZERO:
+ *	This symbol, if defined, indicates that the bzero routine is available
+ *	to zero blocks of memory.  Otherwise you should probably use memcpy().
+ */
+#$d_bzero	BZERO		/**/
 
 /* CHARSPRINTF:
  *	This symbol is defined if this system declares "char *sprintf()" in
@@ -211,6 +217,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	with a negative process number.
  */
 #$d_killpg	KILLPG		/**/
+
+/* LSTAT:
+ *	This symbol, if defined, indicates that the lstat() routine is
+ *	available to do file locking.
+ */
+#$d_lstat	LSTAT		/**/
 
 /* MEMCMP:
  *	This symbol, if defined, indicates that the memcmp routine is available
@@ -386,9 +398,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This symbol is defined if <sys/time.h> exists but doesn't include
  *	<time.h>.
  */
+/* I_SYSTIMETOO:
+ *	This symbol is defined if <sys/time.h> exists but isn't included
+ *	by <time.h>.
+ */
 #$d_tminsys	TMINSYS 	/**/
 #$i_systime	I_SYSTIME 	/**/
 #$i_timetoo	I_TIMETOO 	/**/
+#$i_systimetoo	I_SYSTIMETOO 	/**/
 
 /* VARARGS:
  *	This symbol, if defined, indicates to the C program that it should

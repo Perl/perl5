@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 3.0.1.1 89/11/11 04:14:30 lwall Locked $
+/* $Header: consarg.c,v 3.0.1.2 89/11/17 15:11:34 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
+ * Revision 3.0.1.2  89/11/17  15:11:34  lwall
+ * patch5: defined $foo{'bar'} should not create element
+ * 
  * Revision 3.0.1.1  89/11/11  04:14:30  lwall
  * patch2: '-' x 26 made warnings about undefined value
  * patch2: eval with no args caused strangeness
@@ -634,7 +637,10 @@ register ARG *arg;
 	    }
 	}
 	else if (arg1->arg_type == O_AELEM || arg1->arg_type == O_LAELEM)
-	    arg1->arg_type = O_LAELEM;
+	    if (arg->arg_type == O_DEFINED)
+		arg1->arg_type = O_AELEM;
+	    else
+		arg1->arg_type = O_LAELEM;
 	else if (arg1->arg_type == O_ARRAY || arg1->arg_type == O_LARRAY) {
 	    arg1->arg_type = O_LARRAY;
 	    if (arg->arg_len > 1) {
@@ -662,7 +668,10 @@ register ARG *arg;
 		arg[1].arg_flags |= AF_ARYOK;
 	}
 	else if (arg1->arg_type == O_HELEM || arg1->arg_type == O_LHELEM)
-	    arg1->arg_type = O_LHELEM;
+	    if (arg->arg_type == O_DEFINED)
+		arg1->arg_type = O_HELEM;	/* avoid creating one */
+	    else
+		arg1->arg_type = O_LHELEM;
 	else if (arg1->arg_type == O_HASH || arg1->arg_type == O_LHASH) {
 	    arg1->arg_type = O_LHASH;
 	    if (arg->arg_len > 1) {

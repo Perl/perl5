@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.2 89/11/11 04:25:51 lwall Locked $
+/* $Header: doio.c,v 3.0.1.3 89/11/17 15:13:06 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.3  89/11/17  15:13:06  lwall
+ * patch5: some systems have symlink() but not lstat()
+ * patch5: some systems have dirent.h but not readdir()
+ * 
  * Revision 3.0.1.2  89/11/11  04:25:51  lwall
  * patch2: orthogonalized the file modes some so we can have <& +<& etc.
  * patch2: do_open() now detects sockets passed to process from parent
@@ -510,7 +514,7 @@ int *arglast;
     else {
 	str_sset(statname,ary->ary_array[sp]);
 	statstab = Nullstab;
-#ifdef SYMLINK
+#ifdef LSTAT
 	if (arg->arg_type == O_LSTAT)
 	    i = lstat(str_get(statname),&statcache);
 	else
@@ -1717,7 +1721,7 @@ STAB *stab;
 int gimme;
 int *arglast;
 {
-#ifdef DIRENT
+#if defined(DIRENT) && defined(READDIR)
     register ARRAY *ary = stack;
     register STR **st = ary->ary_array;
     register int sp = arglast[1];
@@ -1892,7 +1896,7 @@ int *arglast;
 		    tot--;
 	    }
 	    else {	/* don't let root wipe out directories without -U */
-#ifdef SYMLINK
+#ifdef LSTAT
 		if (lstat(s,&statbuf) < 0 ||
 #else
 		if (stat(s,&statbuf) < 0 ||

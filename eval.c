@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.1 89/11/11 04:31:51 lwall Locked $
+/* $Header: eval.c,v 3.0.1.2 89/11/17 15:19:34 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.2  89/11/17  15:19:34  lwall
+ * patch5: simplified a too-complex expression for some machine or other
+ * 
  * Revision 3.0.1.1  89/11/11  04:31:51  lwall
  * patch2: mkdir and rmdir needed to quote argument when passed to shell
  * patch2: mkdir and rmdir now return better error codes
@@ -557,8 +560,8 @@ register int sp;
 	    str = afetch(ary,maxarg - 1,FALSE);
 	break;
     case O_AELEM:
-	str = afetch(stab_array(arg[1].arg_ptr.arg_stab),
-	    ((int)str_gnum(st[2])) - arybase,FALSE);
+	anum = ((int)str_gnum(st[2])) - arybase;
+	str = afetch(stab_array(arg[1].arg_ptr.arg_stab),anum,FALSE);
 	if (!str)
 	    goto say_undef;
 	break;
@@ -1739,7 +1742,7 @@ register int sp;
 	goto say_no;
 #endif
     case O_FTLINK:
-#ifdef SYMLINK
+#ifdef LSTAT
 	if (lstat(str_get(st[1]),&statcache) < 0)
 	    goto say_undef;
 	if ((statcache.st_mode & S_IFMT) == S_IFLNK )

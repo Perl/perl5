@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.2 89/11/11 04:05:37 lwall Locked $
+# $Header: Configure,v 3.0.1.3 89/11/17 15:01:21 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -101,6 +101,7 @@ cppstdin=''
 cppminus=''
 d_bcmp=''
 d_bcopy=''
+d_bzero=''
 d_charsprf=''
 d_crypt=''
 cryptlib=''
@@ -119,6 +120,7 @@ d_htonl=''
 d_index=''
 d_ioctl=''
 d_killpg=''
+d_lstat=''
 d_memcmp=''
 d_memcpy=''
 d_mkdir=''
@@ -149,6 +151,7 @@ d_syscall=''
 d_tminsys=''
 i_systime=''
 i_timetoo=''
+i_systimetoo=''
 d_varargs=''
 d_vfork=''
 d_voidsig=''
@@ -173,7 +176,6 @@ i_varargs=''
 i_vfork=''
 intsize=''
 libc=''
-libnm=''
 mallocsrc=''
 mallocobj=''
 usemymalloc=''
@@ -247,8 +249,8 @@ attrlist="$attrlist i186"
 pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb"
 d_newshome="/usr/NeWS"
 defvoidused=7
-libswanted="net nm ndir ndbm dbm c_s"
-
+libswanted="net nm ndir ndbm dbm sun bsd c_s"
+inclwanted='/usr/netinclude /usr/include/sun /usr/include/bsd'
 : some greps do not return status, grrr.
 echo "grimblepritz" >grimble
 if grep blurfldyick grimble >/dev/null 2>&1 ; then
@@ -1013,17 +1015,19 @@ esac
 case "$ccflags" in
 '') case "$cc" in
     *gcc*) dflt='-fpcc-struct-return';;
-    *) dflt='none';;
+    *) dflt='';;
     esac
     ;;
 *) dflt="$ccflags";;
 esac
-if test -d /usr/netinclude; then
-    case "$dflt" in
-    *netinclude*);;
-    *) dflt="$dflt -I/usr/netinclude";;
-    esac
-fi
+for thisincl in $inclwanted; do
+    if test -d $thisincl; then
+	case "$dflt" in
+	*$thisincl*);;
+	*) dflt="$dflt -I$thisincl";;
+	esac
+    fi
+done
 case "$optimize" in
 -g*)
     case "$dflt" in
@@ -1031,6 +1035,9 @@ case "$optimize" in
     *) dflt="$dflt -DDEBUGGING";;
     esac
     ;;
+esac
+case "$dflt" in
+'') dflt=none;;
 esac
 cat <<EOH
 
@@ -1097,20 +1104,33 @@ case "$libswanted" in
 '') libswanted='c_s';;
 esac
 for thislib in $libswanted; do
-    if xxx=`loc lib$thislib.a X /usr/lib /usr/local/lib /lib`; then
+    xxx=`loc lib$thislib.a X /usr/lib /usr/local/lib /lib`
+    if test -f $xxx; then
 	echo "Found -l$thislib."
 	case "$dflt" in
 	*-l$thislib*);;
 	*) dflt="$dflt -l$thislib";;
 	esac
-    elif xxx=`loc lib$thislib.a X $libpth`; then
-	echo "Found $xxx."
-	case "$dflt" in
-	*$xxx*);;
-	*) dflt="$dflt $xxx";;
-	esac
     else
-	echo "No -l$thislib."
+	xxx=`loc lib$thislib.a X $libpth`
+	if test -f $xxx; then
+	    echo "Found $xxx."
+	    case "$dflt" in
+	    *$xxx*);;
+	    *) dflt="$dflt $xxx";;
+	    esac
+	else
+	    xxx=`loc Slib$thislib.a X /usr/lib /usr/local/lib /lib`
+	    if test -f $xxx; then
+		echo "Found -l$thislib."
+		case "$dflt" in
+		*-l$thislib*);;
+		*) dflt="$dflt -l$thislib";;
+		esac
+	    else
+		echo "No -l$thislib."
+	    fi
+	fi
     fi
 done
 set X $dflt
@@ -1161,10 +1181,13 @@ main()
     int i;
     union {
 	unsigned long l;
-	char c[8];
+	char c[sizeof(long)];
     } u;
 
-    u.l = 0x0807060504030201;
+    if (sizeof(long) > 4)
+	u.l = 0x0807060504030201;
+    else
+	u.l = 0x04030201;
     for (i=0; i < sizeof(long); i++)
 	printf("%c",u.c[i]+'0');
     printf("\n");
@@ -1330,7 +1353,7 @@ case "$libs" in
 	    fi
 	    libnames="$libnames $try"
 	    ;;
-	*) libnames="$libnames $thisname" ;;
+	*) libnames="$libnames $thislib" ;;
 	esac
     done
     ;;
@@ -1440,6 +1463,10 @@ eval $inlibc
 set bcopy d_bcopy
 eval $inlibc
 
+: see if bzero exists
+set bzero d_bzero
+eval $inlibc
+
 : see if sprintf is declared as int or pointer to char
 echo " "
 cat >.ucbsprf.c <<'EOF'
@@ -1537,7 +1564,11 @@ if $test -r /usr/include/dirent.h ; then
     fi
 else
     i_dirent="$undef"
-    d_dirnamlen="$define"
+    if $contains 'd_namlen' /usr/include/sys/dir.h >/dev/null 2>&1; then
+	d_dirnamlen="$define"
+    else
+	d_dirnamlen="$undef"
+    fi
     echo "No dirent.h found."
 fi
 
@@ -1657,6 +1688,10 @@ fi
 set killpg d_killpg
 eval $inlibc
 
+: see if lstat exists
+set lstat d_lstat
+eval $inlibc
+
 : see if memcmp exists
 set memcmp d_memcmp
 eval $inlibc
@@ -1671,7 +1706,8 @@ eval $inlibc
 
 : see if ndbm is available
 echo " "
-if xxx=`loc ndbm.h x /usr/include /usr/local/include /usr/netinclude`; then
+xxx=`loc ndbm.h x /usr/include /usr/local/include $inclwanted`
+if test -f $xxx; then
     d_ndbm="$define"
     echo "ndbm.h found."
 else
@@ -1681,7 +1717,8 @@ fi
 
 : see if we have the old dbm
 echo " "
-if xxx=`loc dbm.h x /usr/include /usr/local/include /usr/netinclude`; then
+xxx=`loc dbm.h x /usr/include /usr/local/include $inclwanted`
+if test -f $xxx; then
     d_odbm="$define"
     echo "dbm.h found."
 else
@@ -1914,6 +1951,11 @@ if $contains '^#.*include.*<time\.h>' /usr/include/sys/time.h >/dev/null 2>&1 ; 
 else
     i_timetoo="$define"
 fi
+if $contains '^#.*include.*<sys/time\.h>' /usr/include/time.h >/dev/null 2>&1 ; then
+    i_systimetoo="$undef"
+else
+    i_systimetoo="$define"
+fi
 
 : see if this is a varargs system
 echo " "
@@ -1931,13 +1973,15 @@ eval $inlibc
 
 : see if signal is declared as pointer to function returning int or void
 echo " "
-if $contains 'void.*signal' /usr/include/signal.h >/dev/null 2>&1 ; then
+$cppstdin $cppflags < /usr/include/signal.h >$$.tmp
+if $contains 'void.*signal' $$.tmp >/dev/null 2>&1 ; then
     echo "You have void (*signal())() instead of int."
     d_voidsig="$define"
 else
     echo "You have int (*signal())() instead of void."
     d_voidsig="$undef"
 fi
+rm -f $$.tmp
 
 : see if there is a wait4
 set wait4 d_wait4
@@ -2014,10 +2058,15 @@ voidflags="$ans"
 $rm -f try.* .out
 
 : see what type gids are declared as in the kernel
+echo " "
 case "$gidtype" in
 '')
-    if $contains 'gid_t;' /usr/include/sys/types.h >/dev/null 2>&1 ; then
-	dflt='gid_t';
+    if $contains 'getgroups.*short' /usr/lib/lint/llib-lc >/dev/null 2>&1; then
+	dflt='short'
+    elif $contains 'getgroups.*int' /usr/lib/lint/llib-lc >/dev/null 2>&1; then
+	dflt='int'
+    elif $contains 'gid_t;' /usr/include/sys/types.h >/dev/null 2>&1 ; then
+	dflt='gid_t'
     else
 	set `grep 'groups\[NGROUPS\];' /usr/include/sys/user.h 2>/dev/null` unsigned short
 	case $1 in
@@ -2030,7 +2079,6 @@ case "$gidtype" in
     ;;
 esac
 cont=true
-echo " "
 echo "(The following only matters if you have getgroups().)"
 rp="What type are the group ids returned by getgroups()? [$dflt]"
 $echo $n "$rp $c"
@@ -2059,7 +2107,8 @@ fi
 
 : see if this is a netinet/in.h system
 echo " "
-if xxx=`loc netinet/in.h x /usr/include /usr/local/include /usr/netinclude`; then
+xxx=`loc netinet/in.h x /usr/include /usr/local/include $inclwanted`
+if test -f $xxx; then
     i_niin="$define"
     echo "netinet/in.h found."
 else
@@ -2273,25 +2322,6 @@ Log='$Log'
 Header='$Header'
 
 
-: see if we should include -lnm
-echo " "
-if $test -r /usr/lib/libnm.a || $test -r /usr/local/lib/libnm.a ; then
-    echo "New math library found."
-    libnm='-lnm'
-else
-    ans=`loc libnm.a x $libpth`
-    case "$ans" in
-    x)
-	echo "No nm library found--the normal math library will have to do."
-	libnm=''
-	;;
-    *)
-	echo "New math library found in $ans."
-	libnm="$ans"
-	;;
-    esac
-fi
-
 : determine which malloc to compile in
 echo " "
 case "$usemymalloc" in
@@ -2395,6 +2425,7 @@ cppstdin='$cppstdin'
 cppminus='$cppminus'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
+d_bzero='$d_bzero'
 d_charsprf='$d_charsprf'
 d_crypt='$d_crypt'
 cryptlib='$cryptlib'
@@ -2413,6 +2444,7 @@ d_htonl='$d_htonl'
 d_index='$d_index'
 d_ioctl='$d_ioctl'
 d_killpg='$d_killpg'
+d_lstat='$d_lstat'
 d_memcmp='$d_memcmp'
 d_memcpy='$d_memcpy'
 d_mkdir='$d_mkdir'
@@ -2443,6 +2475,7 @@ d_syscall='$d_syscall'
 d_tminsys='$d_tminsys'
 i_systime='$i_systime'
 i_timetoo='$i_timetoo'
+i_systimetoo='$i_systimetoo'
 d_varargs='$d_varargs'
 d_vfork='$d_vfork'
 d_voidsig='$d_voidsig'
@@ -2467,7 +2500,6 @@ i_varargs='$i_varargs'
 i_vfork='$i_vfork'
 intsize='$intsize'
 libc='$libc'
-libnm='$libnm'
 mallocsrc='$mallocsrc'
 mallocobj='$mallocobj'
 usemymalloc='$usemymalloc'

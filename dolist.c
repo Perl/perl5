@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.2 89/11/11 04:28:17 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.3 89/11/17 15:14:45 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.3  89/11/17  15:14:45  lwall
+ * patch5: grep() occasionally loses arguments or dumps core
+ * 
  * Revision 3.0.1.2  89/11/11  04:28:17  lwall
  * patch2: non-existent slice values are now undefined rather than null
  * 
@@ -719,8 +722,8 @@ int gimme;
 int *arglast;
 {
     STR **st = stack->ary_array;
-    register STR **dst = &st[arglast[1]];
-    register STR **src = dst + 1;
+    register int dst = arglast[1];
+    register int src = dst + 1;
     register int sp = arglast[2];
     register int i = sp - arglast[1];
     int oldsave = savestack->ary_fill;
@@ -730,10 +733,11 @@ int *arglast;
 	dehoist(arg,1);
     arg = arg[1].arg_ptr.arg_arg;
     while (i-- > 0) {
-	stab_val(defstab) = *src;
+	stab_val(defstab) = st[src];
 	(void)eval(arg,G_SCALAR,sp);
+	st = stack->ary_array;
 	if (str_true(st[sp+1]))
-	    *dst++ = *src;
+	    st[dst++] = st[src];
 	src++;
     }
     restorelist(oldsave);
@@ -743,7 +747,7 @@ int *arglast;
 	st[arglast[0]+1] = str;
 	return arglast[0]+1;
     }
-    return arglast[0] + (dst - &st[arglast[1]]);
+    return arglast[0] + (dst - arglast[1]);
 }
 
 int

@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.2 89/11/11 04:08:56 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.3 89/11/17 15:04:36 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.3  89/11/17  15:04:36  lwall
+ * patch5: nested foreach on same array didn't work
+ * 
  * Revision 3.0.1.2  89/11/11  04:08:56  lwall
  * patch2: non-BSD machines required two ^D's for <>
  * patch2: grow_dlevel() not inside #ifdef DEBUGGING
@@ -528,24 +531,26 @@ until_loop:
 	    retstr = &str_chop;
 	    goto flipmaybe;
 	case CFT_ARRAY:
-	    ar = stab_array(cmd->c_expr[1].arg_ptr.arg_stab);
-	    match = ar->ary_index;	/* just to get register */
+	    match = cmd->c_short->str_u.str_useful; /* just to get register */
 
 	    if (match < 0) {		/* first time through here? */
+		ar = stab_array(cmd->c_expr[1].arg_ptr.arg_stab);
 		aryoptsave = savestack->ary_fill;
 		savesptr(&stab_val(cmd->c_stab));
-		saveint(&ar->ary_index);
+		savelong(&cmd->c_short->str_u.str_useful);
 	    }
+	    else
+		ar = stab_xarray(cmd->c_expr[1].arg_ptr.arg_stab);
 
 	    if (match >= ar->ary_fill) {	/* we're in LAST, probably */
 		retstr = &str_undef;
-		ar->ary_index = -1;	/* this is actually redundant */
+		cmd->c_short->str_u.str_useful = -1;	/* actually redundant */
 		match = FALSE;
 	    }
 	    else {
 		match++;
 		retstr = stab_val(cmd->c_stab) = ar->ary_array[match];
-		ar->ary_index = match;
+		cmd->c_short->str_u.str_useful = match;
 		match = TRUE;
 	    }
 	    newsp = -2;

@@ -18,9 +18,12 @@ case "$mallocsrc" in
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.1 89/10/26 23:29:11 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.2 89/11/17 15:49:55 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.2  89/11/17  15:49:55  lwall
+# patch: in x2p/Makefile.SH, removed reference to $libnm
+# 
 # Revision 3.0.1.1  89/10/26  23:29:11  lwall
 # patch1: in x2p/Makefile.SH, added dependency on ../config.sh
 # 
@@ -50,7 +53,7 @@ LARGE = $large $split
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 
-libs = $libnm -lm $libs
+libs = $libs -lm
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'

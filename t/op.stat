@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.stat,v 3.0.1.1 89/11/11 05:02:46 lwall Locked $
+# $Header: op.stat,v 3.0.1.2 89/11/17 15:39:27 lwall Locked $
 
 print "1..56\n";
 
@@ -15,8 +15,7 @@ if ($mtime && $mtime == $ctime) {print "ok 2\n";} else {print "not ok 2\n";}
 print foo "Now is the time for all good men to come to.\n";
 close(foo);
 
-$base = time;
-while (time == $base) {}
+sleep 2;
 
 `rm -f Op.stat.tmp2; ln Op.stat.tmp Op.stat.tmp2; chmod 644 Op.stat.tmp`;
 

@@ -1,4 +1,4 @@
-/* $Header: array.c,v 3.0 89/10/18 15:08:33 lwall Locked $
+/* $Header: array.c,v 3.0.1.1 89/11/17 15:02:52 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	array.c,v $
+ * Revision 3.0.1.1  89/11/17  15:02:52  lwall
+ * patch5: nested foreach on same array didn't work
+ * 
  * Revision 3.0  89/10/18  15:08:33  lwall
  * 3.0 baseline
  * 
@@ -102,7 +105,6 @@ STAB *stab;
     ar->ary_magic = Str_new(7,0);
     str_magic(ar->ary_magic, stab, '#', Nullch, 0);
     ar->ary_fill = -1;
-    ar->ary_index = -1;
     ar->ary_max = 4;
     ar->ary_flags = ARF_REAL;
     return ar;
@@ -123,7 +125,6 @@ STR **strp;
     ar->ary_magic = Str_new(8,0);
     str_magic(ar->ary_magic, stab, '#', Nullch, 0);
     ar->ary_fill = size - 1;
-    ar->ary_index = -1;
     ar->ary_max = size - 1;
     ar->ary_flags = 0;
     return ar;

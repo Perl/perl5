@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.1 89/10/26 23:09:01 lwall Locked $
+/* $Header: cons.c,v 3.0.1.2 89/11/17 15:08:53 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.2  89/11/17  15:08:53  lwall
+ * patch5: nested foreach on same array didn't work
+ * 
  * Revision 3.0.1.1  89/10/26  23:09:01  lwall
  * patch1: numeric switch optimization was broken
  * patch1: unless was broken when run under the debugger
@@ -1029,6 +1032,8 @@ register CMD *cmd;
     cmd->c_flags &= ~CF_OPTIMIZE;	/* clear optimization type */
     cmd->c_flags |= CFT_ARRAY;		/* and set it to do the iteration */
     cmd->c_stab = eachstab;
+    cmd->c_short = str_new(0);		/* just to save a field in struct cmd */
+    cmd->c_short->str_u.str_useful = -1;
 
     return cmd;
 }

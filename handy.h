@@ -1,4 +1,4 @@
-/* $Header: handy.h,v 3.0 89/10/18 15:18:24 lwall Locked $
+/* $Header: handy.h,v 3.0.1.1 89/11/17 15:25:55 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	handy.h,v $
+ * Revision 3.0.1.1  89/11/17  15:25:55  lwall
+ * patch5: some machines already define TRUE and FALSE
+ * 
  * Revision 3.0  89/10/18  15:18:24  lwall
  * 3.0 baseline
  * 
@@ -27,6 +30,13 @@
 #define bool int
 #else
 #define bool char
+#endif
+
+#ifdef TRUE
+#undef TRUE
+#endif
+#ifdef FALSE
+#undef FALSE
 #endif
 #define TRUE (1)
 #define FALSE (0)
