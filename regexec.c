@@ -3568,6 +3568,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (c1 != -1000) {
 		    char *e; /* Should not check after this */
 		    char *old = locinput;
+		    int count = 0;
 
 		    if  (n == REG_INFTY) {
 			e = PL_regeol - 1;
@@ -3587,7 +3588,6 @@ S_regmatch(pTHX_ regnode *prog)
 			    e = PL_regeol - 1;
 		    }
 		    while (1) {
-			int count;
 			/* Find place 'next' could work */
 			if (!do_utf8) {
 			    if (c1 == c2) {
@@ -3605,18 +3605,20 @@ S_regmatch(pTHX_ regnode *prog)
 			else {
 			    STRLEN len;
 			    if (c1 == c2) {
-				for (count = 0;
-				     locinput <= e &&
-					 utf8_to_uvchr((U8*)locinput, &len) != c1;
-				     count++)
+				/* count initialised to 0 or 1 */
+				while (locinput <= e &&
+				       utf8_to_uvchr((U8*)locinput, &len) != c1) {
 				    locinput += len;
-				
+				    count++;
+				}
 			    } else {
-				for (count = 0; locinput <= e; count++) {
+				/* count initialised to 0 or 1 */
+				while (locinput <= e) {
 				    UV c = utf8_to_uvchr((U8*)locinput, &len);
 				    if (c == c1 || c == c2)
 					break;
-				    locinput += len;			
+				    locinput += len;
+				    count++;
 				}
 			    }
 			}
@@ -3638,6 +3640,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    locinput += UTF8SKIP(locinput);
 			else
 			    locinput++;
+			count = 1;
 		    }
 		}
 		else
