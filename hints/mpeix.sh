@@ -11,6 +11,7 @@
 # Substantially revised for 5.004_01 by Mark Bixby, markb@cccd.edu.
 # Revised again for 5.004_69 by Mark Bixby, markb@cccd.edu.
 # Revised for 5.6.0 by Mark Bixby, mbixby@power.net.
+# Revised for 5.7.3 by Mark Bixby, mark@bixby.org.
 #
 osname='mpeix'
 osvers=`uname -r | sed -e 's/.[A-Z]\.\([0-9]\)\([0-9]\)\.[0-9][0-9]/\1.\2/'`
@@ -30,7 +31,7 @@ alias -x cat=/bin/cat
 # Various directory locations.
 #
 # Which ones of these does Configure get wrong?
-test -z "$prefix" && prefix='/PERL/PUB'
+test -z "$prefix" && prefix="/$HPACCOUNT/$HPGROUP"
 archname='PA-RISC1.1'
 bin="$prefix"
 installman1dir="$prefix/man/man1"
@@ -144,3 +145,13 @@ timetype='time_t'
 #
 bincompat5005="$undef"
 uselargefiles="$undef"
+#
+# Expected functionality provided in mpeix.c.
+#
+archobjs='mpeix.o'
+
+# Help gmake find mpeix.c
+test -h mpeix.c || ln -s mpeix/mpeix.c mpeix.c
+
+d_gettimeod='define'
+d_truncate='define'

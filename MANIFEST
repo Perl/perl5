@@ -1864,6 +1864,7 @@ mint/README			MiNT port
 mint/stdio.h			MiNT port
 mint/sys/time.h			MiNT port
 mint/time.h			MiNT port
+mpeix/mpeix.c			MPE/iX port
 mpeix/mpeixish.h		MPE/iX port
 mpeix/nm			MPE/iX port
 mpeix/relink			MPE/iX port
