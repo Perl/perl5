@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 $overload::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
