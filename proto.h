@@ -58,6 +58,7 @@ START_EXTERN_C
 #  include "pp_proto.h"
 PERL_CALLCONV SV*	Perl_amagic_call(pTHX_ SV* left, SV* right, int method, int dir);
 PERL_CALLCONV bool	Perl_Gv_AMupdate(pTHX_ HV* stash);
+PERL_CALLCONV CV*	Perl_gv_handler(pTHX_ HV* stash, I32 id);
 PERL_CALLCONV OP*	Perl_append_elem(pTHX_ I32 optype, OP* head, OP* tail);
 PERL_CALLCONV OP*	Perl_append_list(pTHX_ I32 optype, LISTOP* first, LISTOP* last);
 PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp);

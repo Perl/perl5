@@ -3721,7 +3721,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     if (SvOBJECT(sv)) {
 	if (PL_defstash) {		/* Still have a symbol table? */
 	    djSP;
-	    GV* destructor;
+	    CV* destructor;
 	    SV tmpref;
 
 	    Zero(&tmpref, 1, SV);
@@ -3730,9 +3730,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    SvREADONLY_on(&tmpref);	/* DESTROY() could be naughty */
 	    SvREFCNT(&tmpref) = 1;
 
-	    do {
+	    do {	    
 		stash = SvSTASH(sv);
-		destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
+		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor) {
 		    ENTER;
 		    PUSHSTACKi(PERLSI_DESTROY);
@@ -3741,8 +3741,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		    PUSHMARK(SP);
 		    PUSHs(&tmpref);
 		    PUTBACK;
-		    call_sv((SV*)GvCV(destructor),
-			    G_DISCARD|G_EVAL|G_KEEPERR);
+		    call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR);
 		    SvREFCNT(sv)--;
 		    POPSTACK;
 		    SPAGAIN;

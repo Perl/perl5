@@ -3055,7 +3055,7 @@ enum {
   to_sv_amg,   to_av_amg,
   to_hv_amg,   to_gv_amg,
   to_cv_amg,   iter_amg,    
-  max_amg_code
+  DESTROY_amg, max_amg_code
   /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
 
@@ -3101,6 +3101,7 @@ EXTCONST char * PL_AMG_names[NofAMmeth] = {
   "(${}",	"(@{}",
   "(%{}",	"(*{}",
   "(&{}",	"(<>",
+  "DESTROY",
 };
 #else
 EXTCONST char * PL_AMG_names[NofAMmeth];
@@ -3128,10 +3129,15 @@ typedef struct am_table_short AMTS;
 #define AMGfallYES	3
 
 #define AMTf_AMAGIC		1
+#define AMTf_OVERLOADED		2
 #define AMT_AMAGIC(amt)		((amt)->flags & AMTf_AMAGIC)
 #define AMT_AMAGIC_on(amt)	((amt)->flags |= AMTf_AMAGIC)
 #define AMT_AMAGIC_off(amt)	((amt)->flags &= ~AMTf_AMAGIC)
+#define AMT_OVERLOADED(amt)	((amt)->flags & AMTf_OVERLOADED)
+#define AMT_OVERLOADED_on(amt)	((amt)->flags |= AMTf_OVERLOADED)
+#define AMT_OVERLOADED_off(amt)	((amt)->flags &= ~AMTf_OVERLOADED)
 
+#define StashHANDLER(stash,meth)	gv_handler((stash),CAT2(meth,_amg))
 
 /*
  * some compilers like to redefine cos et alia as faster

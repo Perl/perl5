@@ -68,6 +68,7 @@
 #endif
 #define amagic_call		Perl_amagic_call
 #define Gv_AMupdate		Perl_Gv_AMupdate
+#define gv_handler		Perl_gv_handler
 #define append_elem		Perl_append_elem
 #define append_list		Perl_append_list
 #define apply			Perl_apply
@@ -1556,6 +1557,7 @@
 #endif
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define Gv_AMupdate(a)		Perl_Gv_AMupdate(aTHX_ a)
+#define gv_handler(a,b)		Perl_gv_handler(aTHX_ a,b)
 #define append_elem(a,b,c)	Perl_append_elem(aTHX_ a,b,c)
 #define append_list(a,b,c)	Perl_append_list(aTHX_ a,b,c)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
@@ -3021,6 +3023,8 @@
 #define amagic_call		Perl_amagic_call
 #define Perl_Gv_AMupdate	CPerlObj::Perl_Gv_AMupdate
 #define Gv_AMupdate		Perl_Gv_AMupdate
+#define Perl_gv_handler		CPerlObj::Perl_gv_handler
+#define gv_handler		Perl_gv_handler
 #define Perl_append_elem	CPerlObj::Perl_append_elem
 #define append_elem		Perl_append_elem
 #define Perl_append_list	CPerlObj::Perl_append_list

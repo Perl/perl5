@@ -1155,7 +1155,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 
   if (mg && amtp->was_ok_am == PL_amagic_generation
       && amtp->was_ok_sub == PL_sub_generation)
-      return AMT_AMAGIC(amtp);
+      return AMT_OVERLOADED(amtp);
   if (amtp && AMT_AMAGIC(amtp)) {	/* Have table. */
     int i;
     for (i=1; i<NofAMmeth; i++) {
@@ -1174,8 +1174,8 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   amt.flags = 0;
 
   {
-    int filled = 0;
-    int i;
+    int filled = 0, have_ovl = 0;
+    int i, lim = 1;
     const char *cp;
     SV* sv = NULL;
 
@@ -1187,15 +1187,18 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	sv = GvSV(gv);
 
     if (!gv)
-	goto no_table;
+	lim = DESTROY_amg;		/* Skip overloading entries. */
     else if (SvTRUE(sv))
 	amt.fallback=AMGfallYES;
     else if (SvOK(sv))
 	amt.fallback=AMGfallNEVER;
 
-    for (i = 1; i < NofAMmeth; i++) {
+    for (i = 1; i < lim; i++)
+	amt.table[i] = Nullcv;
+    for (; i < NofAMmeth; i++) {
 	char *cooky = PL_AMG_names[i];
-	char *cp = AMG_id2name(i); /* Human-readable form, for debugging */
+	/* Human-readable form, for debugging: */
+	char *cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
 	STRLEN l = strlen(cooky);
 
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of `%s' in package `%.256s'\n",
@@ -1231,13 +1234,17 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 			 cp, HvNAME(stash), HvNAME(GvSTASH(CvGV(cv))),
 			 GvNAME(CvGV(cv))) );
 	    filled = 1;
+	    if (i < DESTROY_amg)
+		have_ovl = 1;
 	}
 	amt.table[i]=(CV*)SvREFCNT_inc(cv);
     }
     if (filled) {
       AMT_AMAGIC_on(&amt);
+      if (have_ovl)
+	  AMT_OVERLOADED_on(&amt);
       sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(AMT));
-      return TRUE;
+      return have_ovl;
     }
   }
   /* Here we have no table: */
@@ -1246,6 +1253,29 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(AMTS));
   return FALSE;
 }
+
+
+CV*
+Perl_gv_handler(pTHX_ HV *stash, I32 id)
+{
+    dTHR;
+    MAGIC *mg = mg_find((SV*)stash,'c');
+    AMT *amtp;
+
+    if (!mg) {
+      do_update:
+	Gv_AMupdate(stash);
+	mg = mg_find((SV*)stash,'c');
+    }
+    amtp = (AMT*)mg->mg_ptr;
+    if ( amtp->was_ok_am != PL_amagic_generation
+	 || amtp->was_ok_sub != PL_sub_generation )
+	goto do_update;
+    if (AMT_AMAGIC(amtp))
+	return amtp->table[id];
+    return Nullcv;
+}
+
 
 SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
