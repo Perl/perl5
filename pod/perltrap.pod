@@ -650,6 +650,23 @@ Better parsing in perl 5
     # perl4 prints: is zero
     # perl5 warns: "Useless use of a constant in void context" if using -w
 
+=item * Parsing
+
+String interpolation of the C<$#array> construct differs when braces
+are to used around the name.
+
+    @ = (1..3);
+    print "${#a}";
+
+    # perl4 prints: 2
+    # perl5 fails with syntax error
+
+    @ = (1..3);
+    print "$#{a}";
+
+    # perl4 prints: {a}
+    # perl5 prints: 2
+
 =back
 
 =head2 Numerical Traps
