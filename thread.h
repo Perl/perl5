@@ -115,8 +115,6 @@ struct thread {
 
     SV *	TSv;
     XPV *	TXpv;
-    char	Tbuf[2048];	/* should be a global locked by a mutex */
-    char	Ttokenbuf[256];	/* should be a global locked by a mutex */
     struct stat	Tstatbuf;
     struct tms	Ttimesbuf;
     
@@ -225,6 +223,8 @@ typedef struct condpair {
 #undef	curpad
 #undef	Sv
 #undef	Xpv
+#undef	statbuf
+#undef	timesbuf
 #undef	top_env
 #undef	runlevel
 #undef	in_eval
@@ -270,6 +270,8 @@ typedef struct condpair {
 #define curpad		(thr->Tcurpad)
 #define Sv		(thr->TSv)
 #define Xpv		(thr->TXpv)
+#define statbuf		(thr->Tstatbuf)
+#define timesbuf	(thr->Ttimesbuf)
 #define defstash	(thr->Tdefstash)
 #define curstash	(thr->Tcurstash)
 

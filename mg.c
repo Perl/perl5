@@ -629,13 +629,14 @@ MAGIC* mg;
 	    char *strend = s + len;
 
 	    while (s < strend) {
+		char tmpbuf[256];
 		struct stat st;
-		s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf,
+		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
 			     s, strend, ':', &i);
 		s++;
-		if (i >= sizeof tokenbuf   /* too long -- assume the worst */
-		      || *tokenbuf != '/'
-		      || (Stat(tokenbuf, &st) == 0 && (st.st_mode & 2)) ) {
+		if (i >= sizeof tmpbuf   /* too long -- assume the worst */
+		      || *tmpbuf != '/'
+		      || (Stat(tmpbuf, &st) == 0 && (st.st_mode & 2)) ) {
 		    MgTAINTEDDIR_on(mg);
 		    return 0;
 		}

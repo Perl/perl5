@@ -965,7 +965,7 @@ register SV *sv;
 
     case SVt_NULL:
 	sv_catpv(t, "UNDEF");
-	return tokenbuf;
+	goto finish;
     case SVt_IV:
 	sv_catpv(t, "IV");
 	break;
@@ -1609,6 +1609,7 @@ STRLEN *lp;
     register char *s;
     int olderrno;
     SV *tsv;
+    char tmpbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
 
     if (!sv) {
 	*lp = 0;
@@ -1621,13 +1622,13 @@ STRLEN *lp;
 	    return SvPVX(sv);
 	}
 	if (SvIOKp(sv)) {
-	    (void)sprintf(tokenbuf,"%ld",(long)SvIVX(sv));
+	    (void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
 	    tsv = Nullsv;
 	    goto tokensave;
 	}
 	if (SvNOKp(sv)) {
 	    SET_NUMERIC_STANDARD();
-	    Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
+	    Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
 	    tsv = Nullsv;
 	    goto tokensave;
 	}
@@ -1683,12 +1684,12 @@ STRLEN *lp;
 	if (SvREADONLY(sv)) {
 	    if (SvNOKp(sv)) {
 		SET_NUMERIC_STANDARD();
-		Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
+		Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
 		tsv = Nullsv;
 		goto tokensave;
 	    }
 	    if (SvIOKp(sv)) {
-		(void)sprintf(tokenbuf,"%ld",(long)SvIVX(sv));
+		(void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
 		tsv = Nullsv;
 		goto tokensave;
 	    }
@@ -1753,7 +1754,7 @@ STRLEN *lp;
 
       tokensaveref:
 	if (!tsv)
-	    tsv = newSVpv(tokenbuf, 0);
+	    tsv = newSVpv(tmpbuf, 0);
 	sv_2mortal(tsv);
 	*lp = SvCUR(tsv);
 	return SvPVX(tsv);
@@ -1768,8 +1769,8 @@ STRLEN *lp;
 	    len = SvCUR(tsv);
 	}
 	else {
-	    t = tokenbuf;
-	    len = strlen(tokenbuf);
+	    t = tmpbuf;
+	    len = strlen(tmpbuf);
 	}
 #ifdef FIXNEGATIVEZERO
 	if (len == 2 && t[0] == '-' && t[1] == '0') {

@@ -283,6 +283,7 @@ PerlIO *supplied_fp;
     }
     if (IoTYPE(io) &&
       IoTYPE(io) != '|' && IoTYPE(io) != '-') {
+	dTHR;
 	if (Fstat(PerlIO_fileno(fp),&statbuf) < 0) {
 	    (void)PerlIO_close(fp);
 	    goto say_false;
@@ -297,8 +298,9 @@ PerlIO *supplied_fp;
 	    !statbuf.st_mode
 #endif
 	) {
-	    Sock_size_t buflen = sizeof tokenbuf;
-	    if (getsockname(PerlIO_fileno(fp), (struct sockaddr *)tokenbuf,
+	    char tmpbuf[256];
+	    Sock_size_t buflen = sizeof tmpbuf;
+	    if (getsockname(PerlIO_fileno(fp), (struct sockaddr *)tmpbuf,
 			    &buflen) >= 0
 		  || errno != ENOTSOCK)
 		IoTYPE(io) = 's'; /* some OS's return 0 on fstat()ed socket */
@@ -340,6 +342,7 @@ PerlIO *supplied_fp;
 #endif
     IoIFP(io) = fp;
     if (writing) {
+	dTHR;
 	if (IoTYPE(io) == 's'
 	  || (IoTYPE(io) == '>' && S_ISCHR(statbuf.st_mode)) ) {
 	    if (!(IoOFP(io) = PerlIO_fdopen(PerlIO_fileno(fp),"w"))) {

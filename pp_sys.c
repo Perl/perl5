@@ -178,7 +178,8 @@ PP(pp_backtick)
     fp = my_popen(tmps, "r");
     if (fp) {
 	if (gimme == G_VOID) {
-	    while (PerlIO_read(fp, tokenbuf, sizeof tokenbuf) > 0)
+	    char tmpbuf[256];
+	    while (PerlIO_read(fp, tmpbuf, sizeof tmpbuf) > 0)
 		/*SUPPRESS 530*/
 		;
 	}
