@@ -139,37 +139,6 @@ else
 	selecttype='int *'
 fi
 
-# Under 10.X, a threaded perl can be built, but it needs
-# libcma and OLD_PTHREADS_API.  Also <pthread.h> needs to
-# be #included before any other includes (in perl.h)
-if [ "$xxOsRevMajor" -eq 10 -a "X$usethreads" = "X$define" ]; then
-
-    if [ ! -f /usr/include/pthread.h -o ! -f /usr/lib/libcma.sl ]; then
-     cat <<EOM >&4
-In HP-UX 10.X for threads you need both the files
-/usr/include/pthread.h and /usr/lib/libcma.sl.
-
-Either you must install the CMA package or you must upgrade to HP-UX 11.
-EOM
-	exit 1
-    fi
-
-    # HP-UX 10.X uses the old pthreads API
-    case "$d_oldpthreads" in
-    '') d_oldpthreads="$define" ;;
-    esac
-
-    # include libcma before all the others
-    libswanted="cma $libswanted"
-
-    # tell perl.h to include <pthread.h> before other include files
-    ccflags="$ccflags -DPTHREAD_H_FIRST"
-
-    # CMA redefines select to cma_select, and cma_select expects int *
-    # instead of fd_set * (just like 9.X)
-    selecttype='int *'
-fi
-
 # Remove bad libraries that will cause problems
 # (This doesn't remove libraries that don't actually exist)
 # -lld is unneeded (and I can't figure out what it's used for anyway)
@@ -224,28 +193,3 @@ esac
 #     assembler of the form:
 #          (warning) Use of GR3 when frame >= 8192 may cause conflict.
 #     These warnings are harmless and can be safely ignored.
-
-# 64-bitness.
-# jhi@iki.fi, inspired by Jeff Okamoto.
-
-if [ X"$use64bits" = X"$define" ]; then
-  if [ "$xxOsRevMajor" -lt 11 ]; then
-     cat <<EOM >&4
-64-bit compilation is not supported on HP-UX $xxOsRevMajor.
-You need at least HP-UX 11.0.
-EOM
-     exit 1
-  fi
-  if [ ! -d /lib/pa20_64 ]; then
-     cat <<EOM >&4
-You do not seem to have the 64-bit libraries, /lib/pa20_64.
-EOM
-    exit 1
-  fi
-  ccflags="$ccflags +DD64 -D_FILE_OFFSET_BITS=64"
-  ldflags="$ldflags +DD64"
-  ld=/usr/bin/ld
-  set `echo " $libswanted " | sed -e 's@ dl @ @'`
-  libswanted="$*"
-  glibpth="/lib/pa20_64"
-fi

@@ -189,12 +189,6 @@ after Configure prompts the user for the C compiler, it will load in
 and run the UU/cc.cbu "call-back" unit.  See hints/solaris_2.sh for an
 example.
 
-=item Threading-related flags
-
-Similarly, after Configure prompts the user about whether or not to
-compile Perl with threads, it will look for a "call-back" unit
-usethreads.cbu.  See hints/linux.sh for an example.
-
 =item Future status
 
 I hope this "call-back" scheme is simple enough to use but powerful
