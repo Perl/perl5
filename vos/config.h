@@ -1,7 +1,7 @@
 /* This is config.h for Stratus VOS.  It was created by hand
    from the distribution copy of config_h.SH.  */
 
-/* Configuration time: September 4, 1998
+/* Configuration time: March 5, 1999
  * Configured by: Paul Green
  * Target system: Stratus VOS
  */
@@ -1144,7 +1144,7 @@
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
  */
-#define	CASTI32		/**/
+/*#define	CASTI32		/**/
 
 /* CASTNEGFLOAT:
  *	This symbol is defined if the C compiler can cast negative
@@ -1989,6 +1989,18 @@
  *	instance.
  */
 #define ARCHNAME "vos"	/**/
+
+/* I_MACH_CTHREADS:
+ *    This symbol, if defined, indicates to the C program that it should
+ *    include <mach/cthreads.h>.
+ */
+/*#define	I_MACH_CTHREADS         /**/
+
+/* I_PTHREAD:
+ *    This symbol, if defined, indicates to the C program that it should
+ *    include <pthread.h>.
+ */
+/*#define   I_PTHREAD               /**/
 
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield 
