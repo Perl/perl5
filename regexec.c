@@ -3877,7 +3877,15 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	}
 	break;
     case SANY:
-	scan = loceol;
+        if (do_utf8) {
+	    loceol = PL_regeol;
+	    while (scan < loceol) {
+	        scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	}
+	else
+	    scan = loceol;
 	break;
     case CANY:
 	scan = loceol;

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..843\n";
+print "1..845\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2620,3 +2620,21 @@ print "# some Unicode properties\n";
     print "<\x{2029}>" =~ /<\s>/ ? "ok 843\n" : "not ok 843\n";
 }
 
+{
+    print "# . with /s should work on characters, not bytes\n";
+
+    my $s = "\x{e4}\x{100}";
+
+    # This is not expected to match: the point is that
+    # neither should we get "Malformed UTF-8" warnings.
+    print $s =~ /\G(.+?)\n/gcs ?
+	"not ok 844\n" : "ok 844\n";
+
+    my @c;
+
+    while ($s =~ /\G(.)/gs) {
+	push @c, $1;
+    }
+
+    print join("", @c) eq $s ? "ok 845\n" : "not ok 845\n";
+}
