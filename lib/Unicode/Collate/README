@@ -1,4 +1,4 @@
-Unicode/Collate version 0.24
+Unicode/Collate version 0.25
 ===============================
 
 NAME
@@ -54,7 +54,7 @@ SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
 
   http://homepage1.nifty.com/nomenclator/perl/
 
-  Copyright(C) 2001-2002, SADAHIRO Tomoyuki. Japan. All rights reserved.
+  Copyright(C) 2001-2003, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
   This library is free software; you can redistribute it
   and/or modify it under the same terms as Perl itself.

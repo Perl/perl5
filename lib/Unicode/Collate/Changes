@@ -1,4 +1,8 @@
-Revision history for Perl extension Unicode::Collate.
+Revision history for Perl module Unicode::Collate.
+
+0.25  Mon Jun 06 23:20:17 2003
+    - fix Makefile.PL.
+    - internal tweak (again): pack_U() and unpack_U().
 
 0.24  Thu Apr 02 23:12:54 2003
     - internal tweak for (?un)pack 'U'.
