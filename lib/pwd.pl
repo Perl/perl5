@@ -1,8 +1,11 @@
 ;# pwd.pl - keeps track of current working directory in PWD environment var
 ;#
-;# $Header: pwd.pl,v 4.0 91/03/20 01:26:03 lwall Locked $
+;# $RCSfile: pwd.pl,v $$Revision: 4.0.1.1 $$Date: 92/06/08 13:45:22 $
 ;#
 ;# $Log:	pwd.pl,v $
+;# Revision 4.0.1.1  92/06/08  13:45:22  lwall
+;# patch20: support added to pwd.pl to strip automounter crud
+;# 
 ;# Revision 4.0  91/03/20  01:26:03  lwall
 ;# 4.0 baseline.
 ;# 
@@ -25,9 +28,20 @@ sub main'initpwd {
     if ($ENV{'PWD'}) {
 	local($dd,$di) = stat('.');
 	local($pd,$pi) = stat($ENV{'PWD'});
-	return if $di == $pi && $dd == $pd;
+	if ($di != $pi || $dd != $pd) {
+	    chop($ENV{'PWD'} = `pwd`);
+	}
     }
-    chop($ENV{'PWD'} = `pwd`);
+    else {
+	chop($ENV{'PWD'} = `pwd`);
+    }
+    if ($ENV{'PWD'} =~ m|(/[^/]+(/[^/]+/[^/]+))(.*)|) {
+	local($pd,$pi) = stat($2);
+	local($dd,$di) = stat($1);
+	if ($di == $pi && $dd == $pd) {
+	    $ENV{'PWD'}="$2$3";
+	}
+    }
 }
 
 sub main'chdir {

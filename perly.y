@@ -1,4 +1,4 @@
-/* $RCSfile: perly.y,v $$Revision: 4.0.1.2 $$Date: 91/11/05 18:17:38 $
+/* $RCSfile: perly.y,v $$Revision: 4.0.1.4 $$Date: 92/06/08 17:33:25 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,17 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perly.y,v $
+ * Revision 4.0.1.4  92/06/08  17:33:25  lwall
+ * patch20: one of the backdoors to expectterm was on the wrong reduction
+ * 
+ * Revision 4.0.1.3  92/06/08  15:18:16  lwall
+ * patch20: an expression may now start with a bareword
+ * patch20: relaxed requirement for semicolon at the end of a block
+ * patch20: added ... as variant on ..
+ * patch20: fixed double debug break in foreach with implicit array assignment
+ * patch20: if {block} {block} didn't work any more
+ * patch20: deleted some minor memory leaks
+ * 
  * Revision 4.0.1.2  91/11/05  18:17:38  lwall
  * patch11: extra comma at end of list is now allowed in more places (Hi, Felix!)
  * patch11: once-thru blocks didn't display right in the debugger
@@ -47,8 +58,8 @@ ARG *arg5;
 
 %token <ival> '{' ')'
 
-%token <cval> WORD
-%token <ival> APPEND OPEN SSELECT LOOPEX
+%token <cval> WORD LABEL
+%token <ival> APPEND OPEN SSELECT LOOPEX DOTDOT
 %token <ival> USING FORMAT DO SHIFT PUSH POP LVALFUN
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE SPLIT FLIST
 %token <ival> FOR FILOP FILOP2 FILOP3 FILOP4 FILOP22 FILOP25
@@ -95,6 +106,7 @@ prog	:	/* NULL */
 		{
 #if defined(YYDEBUG) && defined(DEBUGGING)
 		    yydebug = (debug & 1);
+		    expectterm = 2;
 #endif
 		}
 	/*CONTINUED*/	lineseq
@@ -116,15 +128,16 @@ else	:	/* NULL */
 			{ $$ = $2; }
 	|	ELSIF '(' expr ')' compblock
 			{ cmdline = $1;
-			    $$ = make_ccmd(C_ELSIF,$3,$5); }
+			    $$ = make_ccmd(C_ELSIF,1,$3,$5); }
 	;
 
 block	:	'{' remember lineseq '}'
 			{ $$ = block_head($3);
-			  if (cmdline > $1)
+			  if (cmdline > (line_t)$1)
 			      cmdline = $1;
 			  if (savestack->ary_fill > $2)
-			    restorelist($2); }
+			    restorelist($2);
+			  expectterm = 2; }
 	;
 
 remember:	/* NULL */	/* in case they push a package name */
@@ -150,9 +163,11 @@ line	:	decl
 			    else {
 			      $$ = Nullcmd;
 			      cmdline = NOLINE;
-			    } }
+			    }
+			    expectterm = 2; }
 	|	label sideff ';'
-			{ $$ = add_label($1,$2); }
+			{ $$ = add_label($1,$2);
+			  expectterm = 2; }
 	;
 
 sideff	:	error
@@ -181,28 +196,28 @@ cond	:	IF '(' expr ')' compblock
 			    $$ = invert(make_icmd(C_IF,$3,$5)); }
 	|	IF block compblock
 			{ cmdline = $1;
-			    $$ = make_ccmd(C_IF,cmd_to_arg($2),$3); }
+			    $$ = make_icmd(C_IF,cmd_to_arg($2),$3); }
 	|	UNLESS block compblock
 			{ cmdline = $1;
-			    $$ = invert(make_ccmd(C_IF,cmd_to_arg($2),$3)); }
+			    $$ = invert(make_icmd(C_IF,cmd_to_arg($2),$3)); }
 	;
 
 loop	:	label WHILE '(' texpr ')' compblock
 			{ cmdline = $2;
 			    $$ = wopt(add_label($1,
-			    make_ccmd(C_WHILE,$4,$6) )); }
+			    make_ccmd(C_WHILE,1,$4,$6) )); }
 	|	label UNTIL '(' expr ')' compblock
 			{ cmdline = $2;
 			    $$ = wopt(add_label($1,
-			    invert(make_ccmd(C_WHILE,$4,$6)) )); }
+			    invert(make_ccmd(C_WHILE,1,$4,$6)) )); }
 	|	label WHILE block compblock
 			{ cmdline = $2;
 			    $$ = wopt(add_label($1,
-			    make_ccmd(C_WHILE, cmd_to_arg($3),$4) )); }
+			    make_ccmd(C_WHILE, 1, cmd_to_arg($3),$4) )); }
 	|	label UNTIL block compblock
 			{ cmdline = $2;
 			    $$ = wopt(add_label($1,
-			    invert(make_ccmd(C_WHILE, cmd_to_arg($3),$4)) )); }
+			    invert(make_ccmd(C_WHILE,1,cmd_to_arg($3),$4)) )); }
 	|	label FOR REG '(' expr crp compblock
 			{ cmdline = $2;
 			    /*
@@ -229,7 +244,7 @@ loop	:	label WHILE '(' texpr ')' compblock
 					Nullarg)),
 				      Nullarg),
 				    wopt(over($3,add_label($1,
-				      make_ccmd(C_WHILE,
+				      make_ccmd(C_WHILE, 0,
 					make_op(O_ARRAY, 1,
 					  stab2arg(A_STAB,scrstab),
 					  Nullarg,Nullarg ),
@@ -239,7 +254,7 @@ loop	:	label WHILE '(' texpr ')' compblock
 			    }
 			    else {
 				$$ = wopt(over($3,add_label($1,
-				make_ccmd(C_WHILE,$5,$7) )));
+				make_ccmd(C_WHILE,1,$5,$7) )));
 			    }
 			}
 	|	label FOR '(' expr crp compblock
@@ -256,7 +271,7 @@ loop	:	label WHILE '(' texpr ')' compblock
 					Nullarg)),
 				      Nullarg),
 				    wopt(over(defstab,add_label($1,
-				      make_ccmd(C_WHILE,
+				      make_ccmd(C_WHILE, 0,
 					make_op(O_ARRAY, 1,
 					  stab2arg(A_STAB,scrstab),
 					  Nullarg,Nullarg ),
@@ -266,7 +281,7 @@ loop	:	label WHILE '(' texpr ')' compblock
 			    }
 			    else {	/* lisp, anyone? */
 				$$ = wopt(over(defstab,add_label($1,
-				make_ccmd(C_WHILE,$4,$6) )));
+				make_ccmd(C_WHILE,1,$4,$6) )));
 			    }
 			}
 	|	label FOR '(' nexpr ';' texpr ';' nexpr ')' block
@@ -275,9 +290,9 @@ loop	:	label WHILE '(' texpr ')' compblock
 			    yyval.compval.comp_alt = $8;
 			    cmdline = $2;
 			    $$ = append_line($4,wopt(add_label($1,
-				make_ccmd(C_WHILE,$6,yyval.compval) ))); }
+				make_ccmd(C_WHILE,1,$6,yyval.compval) ))); }
 	|	label compblock	/* a block is a loop that happens once */
-			{ $$ = add_label($1,make_ccmd(C_BLOCK,Nullarg,$2)); }
+			{ $$ = add_label($1,make_ccmd(C_BLOCK,1,Nullarg,$2)); }
 	;
 
 nexpr	:	/* NULL */
@@ -286,13 +301,13 @@ nexpr	:	/* NULL */
 	;
 
 texpr	:	/* NULL means true */
-			{ (void)scanstr("1"); $$ = yylval.arg; }
+			{ (void)scanstr("1",SCAN_DEF); $$ = yylval.arg; }
 	|	expr
 	;
 
 label	:	/* empty */
 			{ $$ = Nullch; }
-	|	WORD ':'
+	|	LABEL
 	;
 
 decl	:	format
@@ -339,6 +354,7 @@ package :	PACKAGE WORD ';'
 			  curstash->tbl_coeffsize = 0;
 			  Safefree($2); $2 = Nullch;
 			  cmdline = NOLINE;
+			  expectterm = 2;
 			}
 	;
 
@@ -409,7 +425,8 @@ sexpr	:	sexpr '=' sexpr
 			{ $$ = make_op(O_BIT_OR, 2, $1, $3, Nullarg); }
 	|	sexpr DOTDOT sexpr
 			{ arg4 = Nullarg;
-			  $$ = make_op(O_F_OR_R, 4, $1, $3, Nullarg); }
+			  $$ = make_op(O_F_OR_R, 4, $1, $3, Nullarg);
+			  $$[0].arg_flags |= $2; }
 	|	sexpr ANDAND sexpr
 			{ $$ = make_op(O_AND, 2, $1, $3, Nullarg); }
 	|	sexpr OROR sexpr
@@ -449,6 +466,7 @@ term	:	'-' term %prec UMINUS
 			    $$ = make_op($1, 1,
 				stab2arg(A_STAB,stabent($2,TRUE)),
 				Nullarg, Nullarg);
+			    Safefree($2); $2 = Nullch;
 			}
 	|	FILETEST sexpr
 			{ opargs[$1] = 1;
@@ -487,11 +505,12 @@ term	:	'-' term %prec UMINUS
 			{ $$ = make_op(O_ARRAY, 1,
 				stab2arg(A_STAB,$1),
 				Nullarg, Nullarg); }
-	|	REG '{' expr '}'	%prec '('
+	|	REG '{' expr ';' '}'	%prec '('
 			{ $$ = make_op(O_HELEM, 2,
 				stab2arg(A_STAB,hadd($1)),
 				jmaybe($3),
-				Nullarg); }
+				Nullarg);
+			    expectterm = FALSE; }
 	|	'(' expr crp '[' expr ']'	%prec '('
 			{ $$ = make_op(O_LSLICE, 3,
 				Nullarg,
@@ -507,16 +526,24 @@ term	:	'-' term %prec UMINUS
 				stab2arg(A_STAB,aadd($1)),
 				listish(make_list($3)),
 				Nullarg); }
-	|	ARY '{' expr '}'	%prec '('
+	|	ARY '{' expr ';' '}'	%prec '('
 			{ $$ = make_op(O_HSLICE, 2,
 				stab2arg(A_STAB,hadd($1)),
 				listish(make_list($3)),
-				Nullarg); }
-	|	DELETE REG '{' expr '}'	%prec '('
+				Nullarg);
+			    expectterm = FALSE; }
+	|	DELETE REG '{' expr ';' '}'	%prec '('
 			{ $$ = make_op(O_DELETE, 2,
 				stab2arg(A_STAB,hadd($2)),
 				jmaybe($4),
-				Nullarg); }
+				Nullarg);
+			    expectterm = FALSE; }
+	|	DELETE '(' REG '{' expr ';' '}' ')'	%prec '('
+			{ $$ = make_op(O_DELETE, 2,
+				stab2arg(A_STAB,hadd($3)),
+				jmaybe($4),
+				Nullarg);
+			    expectterm = FALSE; }
 	|	ARYLEN	%prec '('
 			{ $$ = stab2arg(A_ARYLEN,$1); }
 	|	RSTRING	%prec '('
@@ -543,17 +570,22 @@ term	:	'-' term %prec UMINUS
 				stab2arg(A_WORD,stabent($2,MULTI)),
 				make_list(Nullarg),
 				Nullarg);
+			    Safefree($2); $2 = Nullch;
 			    $$->arg_flags |= AF_DEPR; }
 	|	AMPER WORD '(' ')'
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
 				stab2arg(A_WORD,stabent($2,MULTI)),
 				make_list(Nullarg),
-				Nullarg); }
+				Nullarg);
+			    Safefree($2); $2 = Nullch;
+			}
 	|	AMPER WORD
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
 				stab2arg(A_WORD,stabent($2,MULTI)),
 				Nullarg,
-				Nullarg); }
+				Nullarg);
+			    Safefree($2); $2 = Nullch;
+			}
 	|	DO REG '(' expr crp
 			{ $$ = make_op((perldb ? O_DBSUBR : O_SUBR), 2,
 				stab2arg(A_STAB,$2),
@@ -609,12 +641,16 @@ term	:	'-' term %prec UMINUS
 			{ $$ = make_op(O_OPEN, 2,
 			    stab2arg(A_WORD,stabent($2,TRUE)),
 			    stab2arg(A_STAB,stabent($2,TRUE)),
-			    Nullarg); }
+			    Nullarg);
+			    Safefree($2); $2 = Nullch;
+			}
 	|	OPEN '(' WORD ')'
 			{ $$ = make_op(O_OPEN, 2,
 			    stab2arg(A_WORD,stabent($3,TRUE)),
 			    stab2arg(A_STAB,stabent($3,TRUE)),
-			    Nullarg); }
+			    Nullarg);
+			    Safefree($3); $3 = Nullch;
+			}
 	|	OPEN '(' handle cexpr ')'
 			{ $$ = make_op(O_OPEN, 2,
 			    $3,
@@ -763,7 +799,9 @@ listop	:	LISTOP
 			{ $$ = make_op($1,2,
 				stab2arg(A_WORD,stabent($2,TRUE)),
 				stab2arg(A_STAB,defstab),
-				Nullarg); }
+				Nullarg);
+			    Safefree($2); $2 = Nullch;
+			}
 	|	LISTOP WORD expr
 			{ $$ = make_op($1,2,
 				stab2arg(A_WORD,stabent($2,TRUE)),
@@ -823,6 +861,7 @@ bareword:	WORD
 				warn(
 				  "\"%s\" may clash with future reserved word",
 				  $1 );
+			    Safefree($1); $1 = Nullch;
 			}
 		;
 %% /* PROGRAM */
