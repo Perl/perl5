@@ -1240,57 +1240,14 @@ Unicode data much easier.
 
 Some functions are slower when working on UTF-8 encoded strings than
 on byte encoded strings.  All functions that need to hop over
-characters such as length(), substr() or index() can work B<much>
-faster when the underlying data are byte-encoded. Witness the
-following benchmark:
+characters such as length(), substr() or index(), or matching regular
+expressions can work B<much> faster when the underlying data are
+byte-encoded.
 
-  % perl -e '
-  use Benchmark;
-  use strict;
-  our $l = 10000;
-  our $u = our $b = "x" x $l;
-  substr($u,0,1) = "\x{100}";
-  timethese(-2,{
-  LENGTH_B => q{ length($b) },
-  LENGTH_U => q{ length($u) },
-  SUBSTR_B => q{ substr($b, $l/4, $l/2) },
-  SUBSTR_U => q{ substr($u, $l/4, $l/2) },
-  });
-  '
-  Benchmark: running LENGTH_B, LENGTH_U, SUBSTR_B, SUBSTR_U for at least 2 CPU seconds...
-    LENGTH_B:  2 wallclock secs ( 2.36 usr +  0.00 sys =  2.36 CPU) @ 5649983.05/s (n=13333960)
-    LENGTH_U:  2 wallclock secs ( 2.11 usr +  0.00 sys =  2.11 CPU) @ 12155.45/s (n=25648)
-    SUBSTR_B:  3 wallclock secs ( 2.16 usr +  0.00 sys =  2.16 CPU) @ 374480.09/s (n=808877)
-    SUBSTR_U:  2 wallclock secs ( 2.11 usr +  0.00 sys =  2.11 CPU) @ 6791.00/s (n=14329)
-
-The numbers show an incredible slowness on long UTF-8 strings.  You
-should carefully avoid using these functions in tight loops. If you
-want to iterate over characters, the superior coding technique would
-split the characters into an array instead of using substr, as the following
-benchmark shows:
-
-  % perl -e '
-  use Benchmark;
-  use strict;
-  our $l = 10000;
-  our $u = our $b = "x" x $l;
-  substr($u,0,1) = "\x{100}";
-  timethese(-5,{
-  SPLIT_B => q{ for my $c (split //, $b){}  },
-  SPLIT_U => q{ for my $c (split //, $u){}  },
-  SUBSTR_B => q{ for my $i (0..length($b)-1){my $c = substr($b,$i,1);} },
-  SUBSTR_U => q{ for my $i (0..length($u)-1){my $c = substr($u,$i,1);} },
-  });
-  '
-  Benchmark: running SPLIT_B, SPLIT_U, SUBSTR_B, SUBSTR_U for at least 5 CPU seconds...
-     SPLIT_B:  6 wallclock secs ( 5.29 usr +  0.00 sys =  5.29 CPU) @ 56.14/s (n=297)
-     SPLIT_U:  5 wallclock secs ( 5.17 usr +  0.01 sys =  5.18 CPU) @ 55.21/s (n=286)
-    SUBSTR_B:  5 wallclock secs ( 5.34 usr +  0.00 sys =  5.34 CPU) @ 123.22/s (n=658)
-    SUBSTR_U:  7 wallclock secs ( 6.20 usr +  0.00 sys =  6.20 CPU) @  0.81/s (n=5)
-
-Even though the algorithm based on C<substr()> is faster than
-C<split()> for byte-encoded data, it pales in comparison to the speed
-of C<split()> when used with UTF-8 data.
+In Perl 5.8.0 the slowness was often quite spectacular; in Perl 5.8.1
+a caching scheme was introduced which will hopefully make the slowness
+somewhat less spectacular.  Operations with UTF-8 encoded strings are
+still slower, though.
 
 =head2 Porting code from perl-5.6.X
 
