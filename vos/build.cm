@@ -191,8 +191,6 @@
 &if (command_status) ^= 0 &then &return
 !&compiler& <<sv.c &diag& &cpu& &cflags& -o sv&s&
 &if (command_status) ^= 0 &then &return
-!&compiler& <<sharedsv.c &diag& &cpu& &cflags& -o sharedsv&s&
-&if (command_status) ^= 0 &then &return
 !&compiler& <<taint.c &diag& &cpu& &cflags& -o taint&s&
 &if (command_status) ^= 0 &then &return
 !&compiler& <<toke.c &diag& &cpu& &cflags& -o toke&s&
@@ -217,7 +215,7 @@
  !ar rc perl.a av.o deb.o doio.o doop.o dump.o globals.o gv.o hv.o locale.o &+
  mg.o numeric.o op.o perl.o perlapi.o perlio.o perly.o pp.o pp_ctl.o &+
  pp_hot.o pp_pack.o pp_sort.o pp_sys.o regcomp.o regexec.o run.o scope.o &+
- sharedsv.o sv.o taint.o toke.o universal.o utf8.o util.o xsutils.o
+ sv.o taint.o toke.o universal.o utf8.o util.o xsutils.o
  !delete_file *.o -no_ask -brief
 &end
 &else &do
