@@ -204,7 +204,7 @@ Floating point formatting is still causing some weird test failures.
 Locales and Unicode interact with each other in unpleasant ways.
 One possible solution would be to adopt/support ICU:
 
-	http://oss.software.ibm.com/developerworks/opensource/icu/project/
+	http://oss.software.ibm.com/icu/index.html
 
 =head2 Arithmetic on non-Arabic numerals
 

@@ -473,8 +473,8 @@ When LAYER is present using binmode on text file makes sense.
 If LAYER is omitted or specified as C<:raw> the filehandle is made
 suitable for passing binary data. This includes turning off possible CRLF
 translation and marking it as bytes (as opposed to Unicode characters).
-Note that as despite what may be implied in I<"Programming Perl">
-(the Camel) or elsewhere C<:raw> is I<not> the simply inverse of C<:crlf>
+Note that, despite what may be implied in I<"Programming Perl"> (the
+Camel) or elsewhere, C<:raw> is I<not> the simply inverse of C<:crlf>
 -- other layers which would affect binary nature of the stream are
 I<also> disabled. See L<PerlIO>, L<perlrun> and the discussion about the
 PERLIO environment variable.
@@ -3990,7 +3990,8 @@ C<redo> work.
 
 =item ref
 
-Returns a true value if EXPR is a reference, false otherwise.  If EXPR
+Returns a non-empty string if EXPR is a reference, the empty
+string otherwise. If EXPR
 is not specified, C<$_> will be used.  The value returned depends on the
 type of thing the reference is a reference to.
 Builtin types include:
@@ -4056,28 +4057,36 @@ version should be used instead.
 
 Otherwise, demands that a library file be included if it hasn't already
 been included.  The file is included via the do-FILE mechanism, which is
-essentially just a variety of C<eval>.  Has semantics similar to the following
-subroutine:
+essentially just a variety of C<eval>.  Has semantics similar to the
+following subroutine:
 
     sub require {
-	my($filename) = @_;
-	return 1 if $INC{$filename};
-	my($realfilename,$result);
-	ITER: {
-	    foreach $prefix (@INC) {
-		$realfilename = "$prefix/$filename";
-		if (-f $realfilename) {
-		    $INC{$filename} = $realfilename;
-		    $result = do $realfilename;
-		    last ITER;
-		}
-	    }
-	    die "Can't find $filename in \@INC";
-	}
-	delete $INC{$filename} if $@ || !$result;
-	die $@ if $@;
-	die "$filename did not return true value" unless $result;
-	return $result;
+       my ($filename) = @_;
+       if (exists $INC{$filename}) {
+           return 1 if $INC{$filename};
+           die "Compilation failed in require";
+       }
+       my ($realfilename,$result);
+       ITER: {
+           foreach $prefix (@INC) {
+               $realfilename = "$prefix/$filename";
+               if (-f $realfilename) {
+                   $INC{$filename} = $realfilename;
+                   $result = do $realfilename;
+                   last ITER;
+               }
+           }
+           die "Can't find $filename in \@INC";
+       }
+       if ($@) {
+           $INC{$filename} = undef;
+           die $@;
+       } elsif (!$result) {
+           delete $INC{$filename};
+           die "$filename did not return true value";
+       } else {
+           return $result;
+       }
     }
 
 Note that the file will not be included twice under the same specified

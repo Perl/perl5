@@ -281,8 +281,7 @@ of bits is also undefined.
 =head2 Named Unary Operators
 
 The various named unary operators are treated as functions with one
-argument, with optional parentheses.  These include the filetest
-operators, like C<-f>, C<-M>, etc.  See L<perlfunc>.
+argument, with optional parentheses.
 
 If any list operator (print(), etc.) or any unary operator (chdir(), etc.)
 is followed by a left parenthesis as the next token, the operator and
@@ -306,6 +305,11 @@ but, because * is higher precedence than named operators:
     rand(10) * 20;	# (rand 10) * 20
     rand (10) * 20;	# (rand 10) * 20
     rand +(10) * 20;	# rand (10 * 20)
+
+Regarding precedence, the filetest operators, like C<-f>, C<-M>, etc. are
+treated like named unary operators, but they don't follow this functional
+parenthesis rule.  That means, for example, that C<-f($file).".bak"> is
+equivalent to C<-f "$file.bak">.
 
 See also L<"Terms and List Operators (Leftward)">.
 

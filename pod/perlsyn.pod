@@ -28,16 +28,16 @@ see L<perltrap> for information about how they differ.
 
 =head2 Declarations
 
-The only things you need to declare in Perl are report formats
-and subroutines--and even undefined subroutines can be handled
-through AUTOLOAD.  A variable holds the undefined value (C<undef>)
-until it has been assigned a defined value, which is anything
-other than C<undef>.  When used as a number, C<undef> is treated
-as C<0>; when used as a string, it is treated the empty string,
-C<"">; and when used as a reference that isn't being assigned
-to, it is treated as an error.  If you enable warnings, you'll
-be notified of an uninitialized value whenever you treat C<undef>
-as a string or a number.  Well, usually.  Boolean contexts, such as:
+The only things you need to declare in Perl are report formats and
+subroutines (and sometimes not even subroutines).  A variable holds
+the undefined value (C<undef>) until it has been assigned a defined
+value, which is anything other than C<undef>.  When used as a number,
+C<undef> is treated as C<0>; when used as a string, it is treated as
+the empty string, C<"">; and when used as a reference that isn't being
+assigned to, it is treated as an error.  If you enable warnings,
+you'll be notified of an uninitialized value whenever you treat
+C<undef> as a string or a number.  Well, usually.  Boolean contexts,
+such as:
 
     my $a;
     if ($a) {}
@@ -106,8 +106,7 @@ as the last item in a statement.
 The number 0, the strings C<'0'> and C<''>, the empty list C<()>, and
 C<undef> are all false in a boolean context. All other values are true.
 
-Note that while 0, 0.0 and C<'0'> are false, C<'0.0'> and C<'0e0'> are
-true, but evaluate to 0 in a numeric context.
+=head2 Statement Modifiers
 
 Any simple statement may optionally be followed by a I<SINGLE> modifier,
 just before the terminating semicolon (or block ending).  The possible
@@ -117,16 +116,36 @@ modifiers are:
     unless EXPR
     while EXPR
     until EXPR
-    foreach EXPR
+    foreach LIST
 
-The C<if> and C<unless> modifiers have the expected semantics,
-presuming you're a speaker of English.  The C<foreach> modifier is an
-iterator:  For each value in EXPR, it aliases C<$_> to the value and
-executes the statement.  The C<while> and C<until> modifiers have the
-usual "C<while> loop" semantics (conditional evaluated first), except
-when applied to a C<do>-BLOCK (or to the deprecated C<do>-SUBROUTINE
-statement), in which case the block executes once before the
-conditional is evaluated.  This is so that you can write loops like:
+The C<EXPR> following the modifier is referred to as the "condition".
+Its truth or falsehood determines how the modifier will behave.
+
+C<if> executes the statement once I<if> and only if the condition is
+true.  C<unless> is the opposite, it executes the statement I<unless>
+the condition is true (i.e., if the condition is false).
+
+    print "Basset hounds got long ears" if length $ear >= 10;
+    go_outside() and play() unless $is_raining;
+
+The C<foreach> modifier is an iterator: it executes the statement once
+for each item in the LIST (with C<$_> aliased to each item in turn).
+
+    print "Hello $_!\n" foreach qw(world Dolly nurse);
+
+C<while> repeats the statement I<while> the condition is true.
+C<until> does the opposite, it repeats the statement I<until> the
+condition is true (or while the condition is false):
+
+    # Both of these count from 0 to 10.
+    print $i++ while $i <= 10;
+    print $j++ until $j >  10;
+
+The C<while> and C<until> modifiers have the usual "C<while> loop"
+semantics (conditional evaluated first), except when applied to a
+C<do>-BLOCK (or to the deprecated C<do>-SUBROUTINE statement), in
+which case the block executes once before the conditional is
+evaluated.  This is so that you can write loops like:
 
     do {
 	$line = <STDIN>;
