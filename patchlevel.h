@@ -39,6 +39,7 @@
 /* The following line and terminating '};' are read by perlbug.PL. Don't alter. */ 
 static	char	*local_patches[] = {
 	NULL
+	,"MAINT_TRIAL_1 - 5.004_05 maintenance trial 1"
 	,NULL
 };
 
