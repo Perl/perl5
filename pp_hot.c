@@ -2129,7 +2129,8 @@ PP(pp_subst)
 	    sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);
-	Safefree(SvPVX(TARG));
+	if (SvLEN(TARG))
+	    Safefree(SvPVX(TARG));
 	SvPVX(TARG) = SvPVX(dstr);
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));
