@@ -327,7 +327,9 @@ OP*	newLISTOP _((I32 type, I32 flags, OP* first, OP* last));
 OP*	newPMOP _((I32 type, I32 flags));
 OP*	newPVOP _((I32 type, I32 flags, char* pv));
 SV*	newRV _((SV* ref));
+#if !defined(__GNUC__) && (defined(CRIPPLED_CC) || defined(USE_THREADS))
 SV*	newRV_noinc _((SV *));
+#endif
 #ifdef LEAKTEST
 SV*	newSV _((I32 x, STRLEN len));
 #else

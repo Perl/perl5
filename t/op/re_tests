@@ -430,4 +430,7 @@ $(?<=^(a))	a	y	$1	a
 (?{$a=2})a*aa(?{local$a=$a+1})k*c(?{$b=$a})	yaaxxaaaacd	y	$b	3
 (?{$a=2})(a(?{local$a=$a+1}))*aak*c(?{$b=$a})	yaaxxaaaacd	y	$b	4
 (>a+)ab	aaab	n	-	-
+(?>a+)b	aaab	y	-	-
+((?>a+)b)	aaab	y	$1	aaab
+(?>(a+))b	aaab	y	$1	aaa
 ((?>[^()]+)|\([^()]*\))+	((abc(ade)ufh()()x	y	$&	abc(ade)ufh()()x

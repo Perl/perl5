@@ -1353,6 +1353,7 @@ yyparse(void)
         if (yyn >= '0' && yyn <= '9')
             yydebug = yyn - '0';
     }
+	else SETERRNO(0,SS$_NORMAL);
 #endif
 
     yynerrs = 0;

@@ -84,7 +84,6 @@ hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
     register XPVHV* xhv;
     register U32 hash;
     register HE *entry;
-    char *origkey = key;
     SV *sv;
 
     if (!hv)
@@ -100,8 +99,15 @@ hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
-	    sv = sv_2mortal(newSVpv(key,klen));
-	    key = strupr(SvPVX(sv));
+	    U32 i;
+	    for (i = 0; i < klen; ++i)
+		if (isLOWER(key[i])) {
+		    char *nkey = strupr(SvPVX(sv_2mortal(newSVpv(key,klen))));
+		    SV **ret = hv_fetch(hv, nkey, klen, 0);
+		    if (!ret && lval)
+			ret = hv_store(hv, key, klen, NEWSV(61,0), 0);
+		    return ret;
+		}
 	}
 #endif
     }
@@ -137,13 +143,13 @@ hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
       if ((gotenv = ENV_getenv(key)) != Nullch) {
         sv = newSVpv(gotenv,strlen(gotenv));
         SvTAINTED_on(sv);
-        return hv_store(hv,origkey,klen,sv,hash);
+        return hv_store(hv,key,klen,sv,hash);
       }
     }
 #endif
     if (lval) {		/* gonna assign to this, so it better be there */
 	sv = NEWSV(61,0);
-	return hv_store(hv,origkey,klen,sv,hash);
+	return hv_store(hv,key,klen,sv,hash);
     }
     return 0;
 }
@@ -157,7 +163,6 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
     register char *key;
     STRLEN klen;
     register HE *entry;
-    SV *origkeysv = keysv;
     SV *sv;
 
     if (!hv)
@@ -181,10 +186,17 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
+	    U32 i;
 	    key = SvPV(keysv, klen);
-	    keysv = sv_2mortal(newSVpv(key,klen));
-	    (void)strupr(SvPVX(keysv));
-	    hash = 0;
+	    for (i = 0; i < klen; ++i)
+		if (isLOWER(key[i])) {
+		    SV *nkeysv = sv_2mortal(newSVpv(key,klen));
+		    (void)strupr(SvPVX(nkeysv));
+		    entry = hv_fetch_ent(hv, nkeysv, 0, 0);
+		    if (!entry && lval)
+			entry = hv_store_ent(hv, keysv, NEWSV(61,0), hash);
+		    return entry;
+		}
 	}
 #endif
     }
@@ -223,13 +235,13 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
       if ((gotenv = ENV_getenv(key)) != Nullch) {
         sv = newSVpv(gotenv,strlen(gotenv));
         SvTAINTED_on(sv);
-        return hv_store_ent(hv,origkeysv,sv,hash);
+        return hv_store_ent(hv,keysv,sv,hash);
       }
     }
 #endif
     if (lval) {		/* gonna assign to this, so it better be there */
 	sv = NEWSV(61,0);
-	return hv_store_ent(hv,origkeysv,sv,hash);
+	return hv_store_ent(hv,keysv,sv,hash);
     }
     return 0;
 }
@@ -245,7 +257,6 @@ hv_magic_check (HV *hv, bool *needs_copy, bool *needs_store)
 	    *needs_copy = TRUE;
 	    switch (mg->mg_type) {
 	    case 'P':
-	    case 'I':
 	    case 'S':
 		*needs_store = FALSE;
 	    }
@@ -417,15 +428,21 @@ hv_delete(HV *hv, char *key, U32 klen, I32 flags)
     if (!hv)
 	return Nullsv;
     if (SvRMAGICAL(hv)) {
-	sv = *hv_fetch(hv, key, klen, TRUE);
-	mg_clear(sv);
-	if (mg_find(sv, 's')) {
-	    return Nullsv;		/* %SIG elements cannot be deleted */
-	}
-	else if (mg_find(sv, 'p')) {
-	    sv_unmagic(sv, 'p');	/* No longer an element */
-	    return sv;
-	}
+	bool needs_copy;
+	bool needs_store;
+	hv_magic_check (hv, &needs_copy, &needs_store);
+
+	if (needs_copy) {
+	    sv = *hv_fetch(hv, key, klen, TRUE);
+	    mg_clear(sv);
+	    if (!needs_store) {
+		if (mg_find(sv, 'p')) {
+		    sv_unmagic(sv, 'p');        /* No longer an element */
+		    return sv;
+		}
+		return Nullsv;          /* element cannot be deleted */
+	    }
+        }
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
 	    sv = sv_2mortal(newSVpv(key,klen));
@@ -480,12 +497,21 @@ hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
     if (!hv)
 	return Nullsv;
     if (SvRMAGICAL(hv)) {
-	entry = hv_fetch_ent(hv, keysv, TRUE, hash);
-	sv = HeVAL(entry);
-	mg_clear(sv);
-	if (mg_find(sv, 'p')) {
-	    sv_unmagic(sv, 'p');	/* No longer an element */
-	    return sv;
+	bool needs_copy;
+	bool needs_store;
+	hv_magic_check (hv, &needs_copy, &needs_store);
+
+	if (needs_copy) {
+	    entry = hv_fetch_ent(hv, keysv, TRUE, hash);
+	    sv = HeVAL(entry);
+	    mg_clear(sv);
+	    if (!needs_store) {
+		if (mg_find(sv, 'p')) {
+		    sv_unmagic(sv, 'p');	/* No longer an element */
+		    return sv;
+		}		
+		return Nullsv;		/* element cannot be deleted */
+	    }
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {

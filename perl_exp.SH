@@ -54,6 +54,13 @@ y*)
 	;;
 *)
 	sed -n '/^[A-Za-z]/ s/^/Perl_/p' global.sym interp.sym >> perl.exp
+	expperlvars=/tmp/exp$$pv
+	expthrdvar=/tmp/exp$$tv
+	sed -n 's/^PERLVARI*(G\([^,]*\).*/Perl_\1/p' perlvars.h >> $expperlvars
+	sed -n 's/^PERLVARI*(T\([^,]*\).*/Perl_\1/p' thrdvar.h  >> $expthrdvar
+	# The shebang line nicely sorts as the first one.
+	sort -o perl.exp -u perl.exp $expperlvars $expthrdvar
+	rm -f $expperlvars $expthrdvar
 	;;
 esac
 

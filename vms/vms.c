@@ -1019,6 +1019,14 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           if (*(cp1+2) == '.') cp1++;
           if (*(cp1+2) == '/' || *(cp1+2) == '\0') {
             if (do_tovmsspec(dir,vmsdir,0) == NULL) return NULL;
+            if (strchr(vmsdir,'/') != NULL) {
+              /* If do_tovmsspec() returned it, it must have VMS syntax
+               * delimiters in it, so it's a mixed VMS/Unix spec.  We take
+               * the time to check this here only so we avoid a recursion
+               * loop; otherwise, gigo.
+               */
+              set_errno(EINVAL);  set_vaxc_errno(RMS$_SYN);  return NULL;
+            }
             if (do_fileify_dirspec(vmsdir,trndir,0) == NULL) return NULL;
             return do_tounixspec(trndir,buf,ts);
           }
