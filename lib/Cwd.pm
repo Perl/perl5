@@ -85,6 +85,25 @@ use base qw/ Exporter /;
 our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
 our @EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
 
+# sys_cwd may keep the builtin command
+
+# All the functionality of this module may provided by builtins,
+# there is no sense to process the rest of the file.
+# The best choice may be to have this in BEGIN, but how to return from BEGIN?
+
+if ($^O eq 'os2' && defined &sys_cwd && defined &sys_abspath) {
+    local $^W = 0;
+    *cwd		= \&sys_cwd;
+    *getcwd		= \&cwd;
+    *fastgetcwd		= \&cwd;
+    *fastcwd		= \&cwd;
+    *abs_path		= \&sys_abspath;
+    *fast_abs_path	= \&abs_path;
+    *realpath		= \&abs_path;
+    *fast_realpath	= \&abs_path;
+    return 1;
+}
+
 eval {
     require XSLoader;
     XSLoader::load('Cwd');

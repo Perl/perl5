@@ -44,7 +44,7 @@ use File::Spec;
 use Cwd;
 
 
-my $NonTaintedCwd = $^O eq 'MSWin32' || $^O eq 'cygwin';
+my $NonTaintedCwd = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'os2';
 
 cleanup();
 

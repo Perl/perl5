@@ -107,15 +107,15 @@ BEGIN
     }
    else
     {
-     my $IsWin32 = $^O eq 'MSWin32';
-     unless(($script =~ m#/# || ($IsWin32 && $script =~ m#\\#))
+     my $doshish = ($^O eq 'MSWin32' or $^O eq 'os2');
+     unless(($script =~ m#/# || ($dosish && $script =~ m#\\#))
             && -f $script)
       {
        my $dir;
        foreach $dir (File::Spec->path)
 	{
         my $scr = File::Spec->catfile($dir, $script);
-	if(-r $scr && (!$IsWin32 || -x _))
+	if(-r $scr && (!$dosish || -x _))
          {
           $script = $scr;
 
