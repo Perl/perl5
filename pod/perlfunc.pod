@@ -2265,7 +2265,7 @@ See also L</map> for a list composed of the results of the BLOCK or EXPR.
 =item hex
 
 Interprets EXPR as a hex string and returns the corresponding value.
-(To convert strings that might start with either 0, 0x, or 0b, see
+(To convert strings that might start with either C<0>, C<0x>, or C<0b>, see
 L</oct>.)  If EXPR is omitted, uses C<$_>.
 
     print hex '0xAf'; # prints '175'
@@ -2273,7 +2273,8 @@ L</oct>.)  If EXPR is omitted, uses C<$_>.
 
 Hex strings may only represent integers.  Strings that would cause
 integer overflow trigger a warning.  Leading whitespace is not stripped,
-unlike oct().
+unlike oct(). To present something as hex, look into L</printf>,
+L</sprintf>, or L</unpack>.
 
 =item import
 
