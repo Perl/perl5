@@ -28,6 +28,164 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20045] By: jhi                                   on 2003/07/07  05:00:40
+        Log: Integrate:
+             [ 20030]
+             Subject: [PATCH] for pod/perlfaq2.pod against latest snapshot for Alpaca
+             From: merlyn@stonehenge.com (Randal L. Schwartz)
+             Date: 05 Jul 2003 16:29:14 -0700
+             Message-ID: <867k6weenp.fsf@blue.stonehenge.com>
+             
+             [ 20034]
+             Subject: [PATCH @19834] DProf fixes
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Sun, 6 Jul 2003 20:09:12 +0300
+             Message-ID: <16136.22456.99575.573777@ix.netsoft.ro>
+             
+             [ 20035]
+             PerlIOBase_pushed seems to have gone missing in change#20018
+             
+             [ 20036]
+             yet another symbol missing in change#20018
+             
+             [ 20039]
+             Update the CPAN mirrors list.
+             
+             [ 20040]
+             Subject: Re: [perl #5025] #line directive explination wrong
+             From: Casey West <casey@geeknest.com>
+             Date: Sun, 6 Jul 2003 18:24:46 -0400
+             Message-ID: <20030706222446.GL7506@geeknest.com>
+             
+             [ 20041]
+             Upgrade BigInt and BigRat
+             Subject: BigInt v1.65, Bigrat v0.10 - reloaded
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sun, 6 Jul 2003 15:41:36 +0200
+             Message-Id: <200307061158.23576@bloodgate.com>
+             
+             [ 20042]
+             MPE/iX tweak from Mark Bixby.
+             
+             [ 20043]
+             Use the existence, instead of the truth, to decide
+             whether to scan for a symbol.
+             (Also remove trailing spaces.)
+     Branch: maint-5.8/perl
+	  +> t/lib/dprof/test7_t t/lib/dprof/test7_v t/lib/dprof/test8_t
+	  +> t/lib/dprof/test8_v
+	  !> MANIFEST ext/Devel/DProf/DProf.pm ext/Devel/DProf/DProf.t
+	  !> ext/Devel/DProf/DProf.xs ext/Time/HiRes/Makefile.PL
+	  !> lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	  !> lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/biglog.t
+	  !> lib/Math/BigInt/t/mbimbf.t lib/Math/BigRat.pm
+	  !> lib/Math/BigRat/t/bigrat.t lib/Math/BigRat/t/bigratpm.inc
+	  !> lib/Math/BigRat/t/bigratpm.t makedef.pl perl.c
+	  !> pod/perldiag.pod pod/perlfaq2.pod pod/perlmodlib.PL
+	  !> pod/perlmodlib.pod pod/perlsyn.pod pod/perltodo.pod
+	  !> pod/perlvar.pod pp_ctl.c
+____________________________________________________________________________
+[ 20044] By: jhi                                   on 2003/07/07  04:52:33
+        Log: MANItweak.
+     Branch: maint-5.8/perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 20033] By: jhi                                   on 2003/07/06  16:26:13
+        Log: Subject: [PATCH] improve WinCE port
+             From: "Vadim Konovalov" <vkonovalov@peterstar.ru>
+             Date: Sun, 6 Jul 2003 18:46:09 +0400
+             Message-ID: <001401c343cd$8069cd40$ce5ec3d9@vad>
+             
+             Subject: [PATCH] improve WinCE port -- addition
+             From: "Vadim Konovalov" <vkonovalov@peterstar.ru>
+             Date: Sun, 6 Jul 2003 19:50:47 +0400
+             Message-ID: <000b01c343d6$7ff96920$5b5dc3d9@vad>
+     Branch: maint-5.8/perl
+	   + wince/perlhost.h wince/vdir.h wince/vmem.h
+	   ! MANIFEST makedef.pl malloc_ctl.h wince/Makefile.ce
+	   ! wince/README.compile wince/README.perlce wince/config.ce
+	   ! wince/perllib.c wince/registry.bat wince/win32.h
+	   ! wince/win32io.c wince/win32iop.h wince/win32thread.c
+	   ! wince/win32thread.h wince/wince.c wince/wince.h
+____________________________________________________________________________
+[ 20029] By: jhi                                   on 2003/07/06  15:53:28
+        Log: More perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20028] By: jhi                                   on 2003/07/06  08:35:50
+        Log: Integrate:
+             [ 20016]
+             OpenBSD sometimes gets -0, probably due to fp fuzziness..
+             
+             [ 20017]
+             Subject: [PATCH] fix for ext/threads/t/problems.t failures
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Sat, 5 Jul 2003 19:12:51 +0100
+             Message-ID: <20030705181251.GA14502@fdgroup.com>
+             
+             [ 20018]
+             Add PerlIOBuf_close to makedef.pl as pointed out by
+             Vadim Konovalov; add also PerlIOBuf_dup; sort and remove
+             duplicates.
+             
+             [ 20019]
+             Make a read from a write-only fh to set errno
+             (found by Gisle)
+             
+             [ 20020]
+             Upgrade to Digest::MD5 2.25.
+             
+             [ 20021]
+             Reintroduce changes #19723 and #19723 that were not
+             in Net::Ping 2.31; needed for Windows.
+             
+             [ 20022]
+             Subject: [PATCH] ExtUtils::MakeMaker 6.10_07
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 5 Jul 2003 16:59:49 -0700
+             Message-ID: <20030705235949.GB3485@windhund.schwern.org>
+             
+             [ 20023]
+             Subject: Re: maint @ 19975 [PATCH lib/Test/Harness.pm]
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 5 Jul 2003 13:34:37 -0700
+             Message-ID: <20030705203437.GB2598@windhund.schwern.org>
+             
+             Print out the "ok" messages only once every second,
+             this should make output much less and therefore testing
+             much faster, especially on slower connections.
+             
+             [ 20024]
+             The change #20022 didn't work for Command.t.
+             
+             [ 20025]
+             Make the 'slow ok' feature optional.
+             
+             [ 20026]
+             FreeBSD: if someone *really* wants to use the system malloc.
+     Branch: maint-5.8/perl
+	  +> ext/Digest/MD5/t/clone.t
+	  !> MANIFEST ext/Digest/MD5/Changes ext/Digest/MD5/MD5.pm
+	  !> ext/Digest/MD5/MD5.xs ext/Digest/MD5/t/badfile.t
+	  !> ext/Digest/MD5/t/files.t ext/threads/t/problems.t
+	  !> hints/freebsd.sh lib/Benchmark.t lib/ExtUtils/Changes
+	  !> lib/ExtUtils/META.yml lib/ExtUtils/MM_Unix.pm
+	  !> lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MM_Win32.pm
+	  !> lib/ExtUtils/MakeMaker/FAQ.pod lib/ExtUtils/t/Command.t
+	  !> lib/Net/Ping/t/250_ping_hires.t lib/Net/Ping/t/450_service.t
+	  !> lib/Test/Harness.pm makedef.pl perlio.c
+____________________________________________________________________________
+[ 20027] By: jhi                                   on 2003/07/06  08:32:12
+        Log: perldelta updates from Sarathy.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20014] By: jhi                                   on 2003/07/05  14:10:20
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20013] By: jhi                                   on 2003/07/05  13:58:18
         Log: Integrate:
              [ 19998]
