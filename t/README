@@ -1,8 +1,11 @@
-This is the perl test library.  To run most of the tests, just type './TEST'
-(which will not run the tests residing in lib/ or ext/.  In order to run
-all of the tests type 'make test' from the build direcotory above t/).
+This is the perl test library.  To run the test suite, just type './TEST'
+or 'make test' from the build directory above t/.  See also the section
+"Special Make Test Targets" in pod/perlhack.pod to learn about other
+specific test commands.
 
 To add new tests, just look at the current tests and do likewise.
+The library t/test.pl provides some utility functions that you can use
+in most tests, except in the most basic ones.
 
 If a test fails, run it by itself to see if it prints any informative
 diagnostics.  If not, modify the test to print informative diagnostics.
