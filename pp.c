@@ -2604,6 +2604,7 @@ PP(pp_int)
 		  (void)Perl_modf(tmp, &tmp);
 		  value = (NV)tmp;
 #endif
+		  SETn(value);
 	      }
 	  }
 	  else {
