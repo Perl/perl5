@@ -3569,9 +3569,7 @@ newSVpv(char *s, STRLEN len)
 }
 
 SV *
-newSVpvn(s,len)
-char *s;
-STRLEN len;
+newSVpvn(char *s, STRLEN len)
 {
     register SV *sv;
 

@@ -2,7 +2,7 @@ typedef char *pvcontents;
 typedef char *strconst;
 typedef U32 PV;
 typedef char *op_tr_array;
-typedef int comment;
+typedef int comment_t;
 typedef SV *svindex;
 typedef OP *opindex;
 typedef IV IV64;
