@@ -163,6 +163,8 @@ HTML
 <p>This is an href link1: <a href="http://example.com">http://example.com</a></p>
 <p>This is an href link2: <a href="http://example.com/foo/bar.html">http://example.com/foo/bar.html</a></p>
 <p>This is an email link: <a href="mailto:mailto:foo@bar.com">mailto:foo@bar.com</a></p>
+<pre>
+    This is a link in a verbatim block &lt;a href=&quot;<a href="http://perl.org">http://perl.org</a>&quot;&gt; Perl &lt;/a&gt;</pre>
 <p>
 </p>
 <hr />
