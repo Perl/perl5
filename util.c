@@ -66,6 +66,10 @@ long lastxycount[MAXXCOUNT][MAXYCOUNT];
 
 #endif
 
+#if defined(HAS_FCNTL) && defined(F_SETFD) && !defined(FD_CLOEXEC)
+#  define FD_CLOEXEC 1			/* NeXT needs this */
+#endif
+
 /* paranoid version of system's malloc() */
 
 /* NOTE:  Do not call the next three routines directly.  Use the macros
@@ -80,8 +84,9 @@ Perl_safesysmalloc(MEM_SIZE size)
     Malloc_t ptr;
 #ifdef HAS_64K_LIMIT
 	if (size > 0xffff) {
-		PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", size) FLUSH;
-		WITH_THX(my_exit(1));
+	    PerlIO_printf(PerlIO_stderr(),
+			  "Allocation too large: %lx\n", size) FLUSH;
+	    WITH_THX(my_exit(1));
 	}
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
