@@ -33,7 +33,7 @@ is($_, "aBCDEFGHIJKLMNOPQRSTUVWXYz",    'partial uc');
 
     tr/I-J/i-j/;
 
-    is($_, "i\xcaj",    'lc with unicode');
+    is($_, "i\xcaj",    'EBCDIC discontinuity');
 }
 #
 
