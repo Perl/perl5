@@ -6704,6 +6704,21 @@ Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
+I32
+S_expect_number(char** pattern)
+{
+    I32 var = 0;
+    switch (**pattern) {
+    case '1': case '2': case '3':
+    case '4': case '5': case '6':
+    case '7': case '8': case '9':
+	while (isDIGIT(**pattern))
+	    var = var * 10 + (*(*pattern)++ - '0');
+    }
+    return var;
+}
+#define EXPECT_NUMBER(pattern, var) (var = S_expect_number(&pattern))
+
 /*
 =for apidoc sv_vcatpvfn
 
@@ -6764,6 +6779,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	bool alt = FALSE;
 	bool left = FALSE;
 	bool vectorize = FALSE;
+	bool vectorarg = FALSE;
 	bool utf = FALSE;
 	char fill = ' ';
 	char plus = 0;
@@ -6801,10 +6817,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN gap;
 	char *dotstr = ".";
 	STRLEN dotstrlen = 1;
-	I32 epix = 0; /* explicit parameter index */
+	I32 efix = 0; /* explicit format parameter index */
 	I32 ewix = 0; /* explicit width index */
+	I32 epix = 0; /* explicit precision index */
+	I32 evix = 0; /* explicit vector index */
 	bool asterisk = FALSE;
 
+	/* echo everything up to the next format specification */
 	for (q = p; q < patend && *q != '%'; ++q) ;
 	if (q > p) {
 	    sv_catpvn(sv, p, q - p);
@@ -6812,6 +6831,25 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 	if (q++ >= patend)
 	    break;
+
+/*
+    We allow format specification elements in this order:
+	\d+\$              explicit format parameter index
+	[-+ 0#]+           flags
+	\*?(\d+\$)?v       vector with optional (optionally specified) arg
+	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
+	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
+	[hlqLV]            size
+    [%bcdefginopsux_DFOUX] format (mandatory)
+*/
+	if (EXPECT_NUMBER(q, width)) {
+	    if (*q == '$') {
+		++q;
+		efix = width;
+	    } else {
+		goto gotwidth;
+	    }
+	}
 
 	/* FLAGS */
 
@@ -6836,64 +6874,63 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		q++;
 		continue;
 
-	    case '*':			/* printf("%*vX",":",$ipv6addr) */
-		if (q[1] != 'v')
-		    break;
-		q++;
-		if (args)
-		    vecsv = va_arg(*args, SV*);
-		else if (svix < svmax)
-		    vecsv = svargs[svix++];
-		else
-		    continue;
-		dotstr = SvPVx(vecsv,dotstrlen);
-		if (DO_UTF8(vecsv))
-		    is_utf = TRUE;
-		/* FALL THROUGH */
-
-	    case 'v':
-		vectorize = TRUE;
-		q++;
-		continue;
-
 	    default:
 		break;
 	    }
 	    break;
 	}
 
-	/* WIDTH */
-
-    scanwidth:
-
+      tryasterisk:
 	if (*q == '*') {
-	    if (asterisk)
-		goto unknown;
-	    asterisk = TRUE;
 	    q++;
+	    if (EXPECT_NUMBER(q, ewix))
+		if (*q++ != '$')
+		    goto unknown;
+	    asterisk = TRUE;
+	}
+	if (*q == 'v') {
+	    q++;
+	    if (vectorize)
+		goto unknown;
+	    if (vectorarg = asterisk) {
+		evix = ewix;
+		ewix = 0;
+		asterisk = FALSE;
+	    }
+	    vectorize = TRUE;
+	    goto tryasterisk;
 	}
 
-	switch (*q) {
-	case '1': case '2': case '3':
-	case '4': case '5': case '6':
-	case '7': case '8': case '9':
-	    width = 0;
-	    while (isDIGIT(*q))
-		width = width * 10 + (*q++ - '0');
-	    if (*q == '$') {
-		if (asterisk && ewix == 0) {
-		    ewix  = width;
-		    width = 0;
-		    q++;
-		    goto scanwidth;
-		} else if (epix == 0) {
-		    epix  = width;
-		    width = 0;
-		    q++;
-		    goto scanwidth;
-		} else
-		    goto unknown;
+	if (!asterisk)
+	    EXPECT_NUMBER(q, width);
+
+	if (vectorize) {
+	    if (vectorarg) {
+		if (args)
+		    vecsv = va_arg(*args, SV*);
+		else
+		    vecsv = (evix ? evix <= svmax : svix < svmax) ?
+			svargs[ewix ? ewix-1 : svix++] : &PL_sv_undef;
+		dotstr = (U8*)SvPVx(vecsv, dotstrlen);
+		if (DO_UTF8(vecsv))
+		    is_utf = TRUE;
 	    }
+	    if (args) {
+		vecsv = va_arg(*args, SV*);
+		vecstr = (U8*)SvPVx(vecsv,veclen);
+		utf = DO_UTF8(vecsv);
+	    }
+	    else if (efix ? efix <= svmax : svix < svmax) {
+		vecsv = svargs[efix ? efix-1 : svix++];
+		vecstr = (U8*)SvPVx(vecsv,veclen);
+		utf = DO_UTF8(vecsv);
+	    }
+	    else {
+		vecstr = (U8*)"";
+		veclen = 0;
+	    }
+	    if (DO_UTF8(vecsv))
+		is_utf = TRUE;
 	}
 
 	if (asterisk) {
@@ -6905,19 +6942,22 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;
 	}
+      gotwidth:
 
 	/* PRECISION */
 
 	if (*q == '.') {
 	    q++;
 	    if (*q == '*') {
+		q++;
+		if (EXPECT_NUMBER(q, epix) && *q++ != '$')
+		    goto unknown;
 		if (args)
 		    i = va_arg(*args, int);
 		else
 		    i = (ewix ? ewix <= svmax : svix < svmax)
 			? SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
 		precis = (i < 0) ? 0 : i;
-		q++;
 	    }
 	    else {
 		precis = 0;
@@ -6925,23 +6965,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    precis = precis * 10 + (*q++ - '0');
 	    }
 	    has_precis = TRUE;
-	}
-
-	if (vectorize) {
-	    if (args) {
-		vecsv = va_arg(*args, SV*);
-		vecstr = (U8*)SvPVx(vecsv,veclen);
-		utf = DO_UTF8(vecsv);
-	    }
-	    else if (epix ? epix <= svmax : svix < svmax) {
-		vecsv = svargs[epix ? epix-1 : svix++];
-		vecstr = (U8*)SvPVx(vecsv,veclen);
-		utf = DO_UTF8(vecsv);
-	    }
-	    else {
-		vecstr = (U8*)"";
-		veclen = 0;
-	    }
 	}
 
 	/* SIZE */
@@ -6975,21 +6998,22 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	/* CONVERSION */
 
+	if (*q == '%') {
+	    eptr = q++;
+	    elen = 1;
+	    goto string;
+	}
+
+	if (!args)
+	    argsv = (efix ? efix <= svmax : svix < svmax) ?
+		    svargs[efix ? efix-1 : svix++] : &PL_sv_undef;
+
 	switch (c = *q++) {
 
 	    /* STRINGS */
 
-	case '%':
-	    eptr = q - 1;
-	    elen = 1;
-	    goto string;
-
 	case 'c':
-	    if (args)
-		uv = va_arg(*args, int);
-	    else
-		uv = (epix ? epix <= svmax : svix < svmax) ?
-		    SvIVx(svargs[epix ? epix-1 : svix++]) : 0;
+	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
 	    if ((uv > 255 || (uv > 127 && SvUTF8(sv))) && !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
@@ -7018,8 +7042,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    elen = sizeof nullstr - 1;
 		}
 	    }
-	    else if (epix ? epix <= svmax : svix < svmax) {
-		argsv = svargs[epix ? epix-1 : svix++];
+	    else {
 		eptr = SvPVx(argsv, elen);
 		if (DO_UTF8(argsv)) {
 		    if (has_precis && precis < elen) {
@@ -7043,7 +7066,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     */
 	    if (!args)
 		goto unknown;
-	    argsv = va_arg(*args,SV*);
+	    argsv = va_arg(*args, SV*);
 	    eptr = SvPVx(argsv, elen);
 	    if (DO_UTF8(argsv))
 		is_utf = TRUE;
@@ -7059,11 +7082,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	case 'p':
 	    if (alt)
 		goto unknown;
-	    if (args)
-		uv = PTR2UV(va_arg(*args, void*));
-	    else
-		uv = (epix ? epix <= svmax : svix < svmax) ?
-		    PTR2UV(svargs[epix ? epix-1 : svix++]) : 0;
+	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
 	    base = 16;
 	    goto integer;
 
@@ -7078,10 +7097,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	case 'i':
 	    if (vectorize) {
 		STRLEN ulen;
-		if (!veclen) {
-		    vectorize = FALSE;
-		    break;
-		}
+		if (!veclen)
+		    continue;
 		if (utf)
 		    iv = (IV)utf8_to_uv(vecstr, veclen, &ulen, 0);
 		else {
@@ -7103,8 +7120,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		iv = (epix ? epix <= svmax : svix < svmax) ?
-		    SvIVx(svargs[epix ? epix-1 : svix++]) : 0;
+		iv = SvIVx(argsv);
 		switch (intsize) {
 		case 'h':	iv = (short)iv; break;
 		default:	break;
@@ -7161,10 +7177,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (vectorize) {
 		STRLEN ulen;
 	vector:
-		if (!veclen) {
-		    vectorize = FALSE;
-		    break;
-		}
+		if (!veclen)
+		    continue;
 		if (utf)
 		    uv = utf8_to_uv(vecstr, veclen, &ulen, 0);
 		else {
@@ -7186,8 +7200,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		uv = (epix ? epix <= svmax : svix < svmax) ?
-		    SvUVx(svargs[epix ? epix-1 : svix++]) : 0;
+		uv = SvUVx(argsv);
 		switch (intsize) {
 		case 'h':	uv = (unsigned short)uv; break;
 		default:	break;
@@ -7276,11 +7289,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* This is evil, but floating point is even more evil */
 
 	    vectorize = FALSE;
-	    if (args)
-		nv = va_arg(*args, NV);
-	    else
-		nv = (epix ? epix <= svmax : svix < svmax) ?
-		    SvNVx(svargs[epix ? epix-1 : svix++]) : 0.0;
+	    nv = args ? va_arg(*args, NV) : SvNVx(argsv);
 
 	    need = 0;
 	    if (c != 'e' && c != 'E') {
@@ -7360,8 +7369,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 		}
 	    }
-	    else if (epix ? epix <= svmax : svix < svmax)
-		sv_setuv_mg(svargs[epix ? epix-1 : svix++], (UV)i);
+	    else 
+		sv_setuv_mg(argsv, (UV)i);
 	    continue;	/* not "break" */
 
 	    /* UNKNOWN */
