@@ -183,3 +183,12 @@ esac
 #     assembler of the form:
 #          (warning) Use of GR3 when frame >= 8192 may cause conflict.
 #     These warnings are harmless and can be safely ignored.
+
+#
+# You should enable these if you use the unbundled ANSI C compiler
+# (*not* when using the bundled K&R compiler or gcc)
+# [XXX this should be enabled automatically]
+#
+#cpprun='/opt/ansic/bin/cc -E -Aa'
+#cppstdin="$cpprun"
+
