@@ -584,7 +584,7 @@ Ap	|void	|push_scope
 p	|OP*	|ref		|OP* o|I32 type
 p	|OP*	|refkids	|OP* o|I32 type
 Ap	|void	|regdump	|regexp* r
-Ap	|SV*	|regclass_swash	|struct regnode *n|bool doinit|SV **initsvp
+Ap	|SV*	|regclass_swash	|struct regnode *n|bool doinit|SV **listsvp|SV **altsvp
 Ap	|I32	|pregexec	|regexp* prog|char* stringarg \
 				|char* strend|char* strbeg|I32 minend \
 				|SV* screamer|U32 nosave
@@ -1134,6 +1134,7 @@ s	|I32	|regrepeat	|regnode *p|I32 max
 s	|I32	|regrepeat_hard	|regnode *p|I32 max|I32 *lp
 s	|I32	|regtry		|regexp *prog|char *startpos
 s	|bool	|reginclass	|regnode *n|U8 *p|bool do_utf8sv_is_utf8
+s	|bool	|reginclasslen	|regnode *n|U8 *p|STRLEN *lenp|bool do_utf8sv_is_utf8
 s	|CHECKPOINT|regcppush	|I32 parenfloor
 s	|char*|regcppop
 s	|char*|regcp_set_to	|I32 ss

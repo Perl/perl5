@@ -2369,11 +2369,13 @@ S_regmatch(pTHX_ regnode *prog)
 	    break;
 	case ANYOF:
 	    if (do_utf8) {
-		if (!reginclass(scan, (U8*)locinput, do_utf8))
+	        STRLEN inclasslen = PL_regeol - locinput;
+
+	        if (!reginclasslen(scan, (U8*)locinput, &inclasslen, do_utf8))
 		    sayNO;
 		if (locinput >= PL_regeol)
 		    sayNO;
-		locinput += PL_utf8skip[nextchr];
+		locinput += inclasslen;
 		nextchr = UCHARAT(locinput);
 	    }
 	    else {
@@ -4107,10 +4109,11 @@ S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 */
 
 SV *
-Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** initsvp)
+Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** listsvp, SV **altsvp)
 {
-    SV *sw = NULL;
-    SV *si = NULL;
+    SV *sw  = NULL;
+    SV *si  = NULL;
+    SV *alt = NULL;
 
     if (PL_regdata && PL_regdata->count) {
 	U32 n = ARG(node);
@@ -4118,10 +4121,11 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** initsvp)
 	if (PL_regdata->what[n] == 's') {
 	    SV *rv = (SV*)PL_regdata->data[n];
 	    AV *av = (AV*)SvRV((SV*)rv);
-	    SV **a;
+	    SV **a, **b;
 	
-	    si = *av_fetch(av, 0, FALSE);
-	    a  =  av_fetch(av, 1, FALSE);
+	    si  = *av_fetch(av, 0, FALSE);
+	    a   =  av_fetch(av, 1, FALSE);
+	    b   =  av_fetch(av, 2, FALSE);
 	
 	    if (a)
 		sw = *a;
@@ -4129,11 +4133,15 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** initsvp)
 		sw = swash_init("utf8", "", si, 1, 0);
 		(void)av_store(av, 1, sw);
 	    }
+	    if (b)
+	        alt = *b;
 	}
     }
 	
-    if (initsvp)
-	*initsvp = si;
+    if (listsvp)
+	*listsvp = si;
+    if (altsvp)
+	*altsvp  = alt;
 
     return sw;
 }
@@ -4143,16 +4151,20 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** initsvp)
  */
 
 STATIC bool
-S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
+S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, register bool do_utf8)
 {
     char flags = ANYOF_FLAGS(n);
     bool match = FALSE;
     UV c;
     STRLEN len = 0;
+    STRLEN plen;
 
     c = do_utf8 ? utf8_to_uvchr(p, &len) : *p;
 
+    plen = lenp ? *lenp : UNISKIP(c);
     if (do_utf8 || (flags & ANYOF_UNICODE)) {
+        if (lenp)
+	    *lenp = 0;
 	if (do_utf8 && !ANYOF_RUNTIME(n)) {
 	    if (len != (STRLEN)-1 && c < 256 && ANYOF_BITMAP_TEST(n, c))
 		match = TRUE;
@@ -4160,24 +4172,46 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
 	if (!match && do_utf8 && (flags & ANYOF_UNICODE_ALL) && c >= 256)
 	    match = TRUE;
 	if (!match) {
-	    SV *sw = regclass_swash(n, TRUE, 0);
+	    AV *av;
+	    SV *sw = regclass_swash(n, TRUE, 0, (SV**)&av);
 	
 	    if (sw) {
 		if (swash_fetch(sw, p, do_utf8))
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
-		    U8 foldbuf[UTF8_MAXLEN_FOLD+1];
-		    STRLEN foldlen;
+		    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+		    STRLEN tmplen;
 
-		    to_utf8_fold(p, foldbuf, &foldlen);
-		    if (swash_fetch(sw, foldbuf, do_utf8))
-			match = TRUE;
-		    to_utf8_upper(p, foldbuf, &foldlen);
-		    if (swash_fetch(sw, foldbuf, do_utf8))
-			match = TRUE;
+		    if (!match && lenp && av) {
+		        I32 i;
+		      
+			for (i = 0; i <= av_len(av); i++) {
+			    SV* sv = *av_fetch(av, i, FALSE);
+			    STRLEN len;
+			    char *s = SvPV(sv, len);
+			
+			    if (len <= plen && memEQ(s, p, len)) {
+			        *lenp = len;
+				match = TRUE;
+				break;
+			    }
+			}
+		    }
+		    if (!match) {
+		        to_utf8_fold(p, tmpbuf, &tmplen);
+			if (swash_fetch(sw, tmpbuf, do_utf8))
+			    match = TRUE;
+		    }
+		    if (!match) {
+		        to_utf8_upper(p, tmpbuf, &tmplen);
+			if (swash_fetch(sw, tmpbuf, do_utf8))
+			    match = TRUE;
+		    }
 		}
 	    }
 	}
+	if (match && lenp && *lenp == 0)
+	    *lenp = UNISKIP(c);
     }
     if (!match && c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
@@ -4236,6 +4270,12 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
     }
 
     return (flags & ANYOF_INVERT) ? !match : match;
+}
+
+STATIC bool
+S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
+{
+    return S_reginclasslen(aTHX_ n, p, 0, do_utf8);
 }
 
 STATIC U8 *
