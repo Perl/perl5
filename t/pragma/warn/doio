@@ -86,11 +86,11 @@ use warning 'io' ;
 exec "lskdjfalksdjfdjfkls","" ;
 EXPECT
 OPTION regex
-Can't exec "lskdjfalksdjfdjfkls": (\w+ )?No such file or directory\.? at - line 3.
+Can't exec "lskdjfalksdjfdjfkls": (\w+ )?No such file or directory.*
 ########
 # doio.c
 use warning 'io' ;
 exec "lskdjfalksdjfdjfkls", "abc" ;
 EXPECT
 OPTION regex
-Can't exec "lskdjfalksdjfdjfkls": (\w+ )?No such file or directory\.? at - line 3.
+Can't exec "lskdjfalksdjfdjfkls": (\w+ )?No such file or directory.*

@@ -1617,7 +1617,7 @@ regmatch(regnode *prog)
 		    }
 		    if (mg) {
 			re = (regexp *)mg->mg_obj;
-			ReREFCNT_inc(re);
+			(void)ReREFCNT_inc(re);
 		    }
 		    else {
 			STRLEN len;
