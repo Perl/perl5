@@ -2104,8 +2104,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	if (PL_reg_sv) {
 	    /* Make $_ available to executed code. */
 	    if (PL_reg_sv != DEFSV) {
-		/* SAVE_DEFSV does *not* suffice here for USE_5005THREADS */
-		SAVESPTR(DEFSV);
+		SAVE_DEFSV;
 		DEFSV = PL_reg_sv;
 	    }
 	

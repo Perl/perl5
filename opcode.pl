@@ -493,9 +493,9 @@ regcreset	regexp internal reset	ck_fun		s1	S
 regcomp		regexp compilation	ck_null		s|	S
 match		pattern match (m//)	ck_match	d/
 qr		pattern quote (qr//)	ck_match	s/
-subst		substitution (s///)	ck_null		dis/	S
+subst		substitution (s///)	ck_match	dis/	S
 substcont	substitution iterator	ck_null		dis|	
-trans		transliteration (tr///)	ck_null		is"	S
+trans		transliteration (tr///)	ck_match	is"	S
 
 # Lvalue operators.
 # sassign is special-cased for op class

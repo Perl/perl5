@@ -693,6 +693,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     }
     len = namend - name;
 
+    /* $_ should always be in main:: even when our'ed */
+    if (*name == '_' && !name[1])
+	stash = PL_defstash;
+
     /* No stash in name, so see how we can default */
 
     if (!stash) {

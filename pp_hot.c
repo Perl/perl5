@@ -1195,6 +1195,8 @@ PP(pp_match)
 
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
+    else if (PL_op->op_private & OPpTARGET_MY)
+	GETTARGET;
     else {
 	TARG = DEFSV;
 	EXTEND(SP,1);
@@ -1958,6 +1960,8 @@ PP(pp_subst)
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
+    else if (PL_op->op_private & OPpTARGET_MY)
+	GETTARGET;
     else {
 	TARG = DEFSV;
 	EXTEND(SP,1);
@@ -2305,7 +2309,10 @@ PP(pp_grepwhile)
 
 	src = PL_stack_base[*PL_markstack_ptr];
 	SvTEMP_off(src);
-	DEFSV = src;
+	if (PL_op->op_private & OPpGREP_LEX)
+	    PAD_SVl(PL_op->op_targ) = src;
+	else
+	    DEFSV = src;
 
 	RETURNOP(cLOGOP->op_other);
     }

@@ -155,11 +155,11 @@ Perl_allocmy(pTHX_ char *name)
 {
     PADOFFSET off;
 
-    /* complain about "my $_" etc etc */
+    /* complain about "my $<special_var>" etc etc */
     if (!(PL_in_my == KEY_our ||
 	  isALPHA(name[1]) ||
 	  (USE_UTF8_IN_NAMES && UTF8_IS_START(name[1])) ||
-	  (name[1] == '_' && (int)strlen(name) > 2)))
+	  (name[1] == '_' && (*name == '$' || (int)strlen(name) > 2))))
     {
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
 	    /* 1999-02-27 mjd@plover.com */
@@ -1673,6 +1673,7 @@ OP *
 Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 {
     OP *o;
+    bool ismatchop = 0;
 
     if (ckWARN(WARN_MISC) &&
       (left->op_type == OP_RV2AV ||
@@ -1697,10 +1698,14 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	no_bareword_allowed(right);
     }
 
-    if (!(right->op_flags & OPf_STACKED) &&
-       (right->op_type == OP_MATCH ||
-	right->op_type == OP_SUBST ||
-	right->op_type == OP_TRANS)) {
+    ismatchop = right->op_type == OP_MATCH ||
+		right->op_type == OP_SUBST ||
+		right->op_type == OP_TRANS;
+    if (ismatchop && right->op_private & OPpTARGET_MY) {
+	right->op_targ = 0;
+	right->op_private &= ~OPpTARGET_MY;
+    }
+    if (!(right->op_flags & OPf_STACKED) && ismatchop) {
 	right->op_flags |= OPf_STACKED;
 	if (right->op_type != OP_MATCH &&
             ! (right->op_type == OP_TRANS &&
@@ -1801,7 +1806,15 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 STATIC OP *
 S_newDEFSVOP(pTHX)
 {
-    return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
+    I32 offset = pad_findmy("$_");
+    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS(offset) & SVpad_OUR) {
+	return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
+    }
+    else {
+	OP *o = newOP(OP_PADSV, 0);
+	o->op_targ = offset;
+	return o;
+    }
 }
 
 void
@@ -5362,6 +5375,7 @@ Perl_ck_grep(pTHX_ OP *o)
     LOGOP *gwop;
     OP *kid;
     OPCODE type = o->op_type == OP_GREPSTART ? OP_GREPWHILE : OP_MAPWHILE;
+    I32 offset;
 
     o->op_ppaddr = PL_ppaddr[OP_GREPSTART];
     NewOp(1101, gwop, 1, LOGOP);
@@ -5393,10 +5407,17 @@ Perl_ck_grep(pTHX_ OP *o)
     gwop->op_ppaddr = PL_ppaddr[type];
     gwop->op_first = listkids(o);
     gwop->op_flags |= OPf_KIDS;
-    gwop->op_private = 1;
     gwop->op_other = LINKLIST(kid);
-    gwop->op_targ = pad_alloc(type, SVs_PADTMP);
     kid->op_next = (OP*)gwop;
+    offset = pad_findmy("$_");
+    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS(offset) & SVpad_OUR) {
+	o->op_private = gwop->op_private = 0;
+	gwop->op_targ = pad_alloc(type, SVs_PADTMP);
+    }
+    else {
+	o->op_private = gwop->op_private = OPpGREP_LEX;
+	gwop->op_targ = o->op_targ = offset;
+    }
 
     kid = cLISTOPo->op_first->op_sibling;
     if (!kid || !kid->op_sibling)
@@ -5542,7 +5563,15 @@ Perl_ck_sassign(pTHX_ OP *o)
 OP *
 Perl_ck_match(pTHX_ OP *o)
 {
-    o->op_private |= OPpRUNTIME;
+    if (o->op_type != OP_QR) {
+	I32 offset = pad_findmy("$_");
+	if (offset != NOT_IN_PAD && !(PAD_COMPNAME_FLAGS(offset) & SVpad_OUR)) {
+	    o->op_targ = offset;
+	    o->op_private |= OPpTARGET_MY;
+	}
+    }
+    if (o->op_type == OP_MATCH || o->op_type == OP_QR)
+	o->op_private |= OPpRUNTIME;
     return o;
 }
 

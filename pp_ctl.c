@@ -863,14 +863,19 @@ PP(pp_grepstart)
     ENTER;					/* enter outer scope */
 
     SAVETMPS;
-    /* SAVE_DEFSV does *not* suffice here for USE_5005THREADS */
-    SAVESPTR(DEFSV);
+    if (PL_op->op_private & OPpGREP_LEX)
+	SAVESPTR(PAD_SVl(PL_op->op_targ));
+    else
+	SAVE_DEFSV;
     ENTER;					/* enter inner scope */
     SAVEVPTR(PL_curpm);
 
     src = PL_stack_base[*PL_markstack_ptr];
     SvTEMP_off(src);
-    DEFSV = src;
+    if (PL_op->op_private & OPpGREP_LEX)
+	PAD_SVl(PL_op->op_targ) = src;
+    else
+	DEFSV = src;
 
     PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
@@ -965,7 +970,10 @@ PP(pp_mapwhile)
 	/* set $_ to the new source item */
 	src = PL_stack_base[PL_markstack_ptr[-1]];
 	SvTEMP_off(src);
-	DEFSV = src;
+	if (PL_op->op_private & OPpGREP_LEX)
+	    PAD_SVl(PL_op->op_targ) = src;
+	else
+	    DEFSV = src;
 
 	RETURNOP(cLOGOP->op_other);
     }

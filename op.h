@@ -135,9 +135,11 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpTRANS_TO_UTF		2
 #define OPpTRANS_IDENTICAL	4	/* right side is same as left */
 #define OPpTRANS_SQUASH		8
-#define OPpTRANS_DELETE		16
+    /* 16 is used for OPpTARGET_MY */
 #define OPpTRANS_COMPLEMENT	32
 #define OPpTRANS_GROWS		64
+#define OPpTRANS_DELETE		128
+#define OPpTRANS_ALL	(OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE)
 
 /* Private for OP_REPEAT */
 #define OPpREPEAT_DOLIST	64	/* List replication. */
@@ -215,6 +217,9 @@ Deprecated.  Use C<GIMME_V> instead.
 	 ((op)->op_type) == OP_FTEWRITE ||	\
 	 ((op)->op_type) == OP_FTEEXEC)
 
+/* Private for OP_(MAP|GREP)(WHILE|START) */
+#define OPpGREP_LEX		2	/* iterate over lexical $_ */
+    
 struct op {
     BASEOP
 };

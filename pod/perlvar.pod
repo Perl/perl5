@@ -177,6 +177,11 @@ test.  Outside a C<while> test, this will not happen.
 
 =back
 
+As C<$_> is a global variable, this may lead in some cases to unwanted
+side-effects.  As of perl 5.9.1, you can now use a lexical version of
+C<$_> by declaring it in a file or in a block with C<my>.  Moreover,
+declaring C<our $> restores the global C<$_> in the current scope.
+
 (Mnemonic: underline is understood in certain operations.)
 
 =back

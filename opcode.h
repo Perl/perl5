@@ -1150,9 +1150,9 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* regcomp */
 	MEMBER_TO_FPTR(Perl_ck_match),	/* match */
 	MEMBER_TO_FPTR(Perl_ck_match),	/* qr */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* subst */
+	MEMBER_TO_FPTR(Perl_ck_match),	/* subst */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* substcont */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* trans */
+	MEMBER_TO_FPTR(Perl_ck_match),	/* trans */
 	MEMBER_TO_FPTR(Perl_ck_sassign),	/* sassign */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* aassign */
 	MEMBER_TO_FPTR(Perl_ck_spair),	/* chop */

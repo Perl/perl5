@@ -680,6 +680,8 @@ PP(pp_trans)
 
     if (PL_op->op_flags & OPf_STACKED)
 	sv = POPs;
+    else if (PL_op->op_private & OPpTARGET_MY)
+	sv = GETTARGET;
     else {
 	sv = DEFSV;
 	EXTEND(SP,1);

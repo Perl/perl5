@@ -11,6 +11,23 @@ the 5.9.1 release.
 
 =head1 Core Enhancements
 
+=head2 Lexical C<$_>
+
+The default variable C<$_> can now be lexicalized, by declaring it like
+any other lexical variable, with a simple
+
+    my $_;
+
+The operations that default on C<$_> will use the lexically-scoped
+version of C<$_> when it exists, instead of the global C<$_>.
+
+In a C<map> or a C<grep> block, if C<$_> was previously my'ed, then the
+C<$_> inside the block is lexical as well (and scoped to the block).
+
+In a scope where C<$_> has been lexicalized, you can still have access to
+the global version of C<$_> by using C<$::_>, or, more simply, by
+overriding the lexical declaration with C<our $_>.
+
 =head2 Tied hashes in scalar context
 
 As of perl 5.8.2, tied hashes did not return anything useful in scalar

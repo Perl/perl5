@@ -6522,7 +6522,8 @@ S_scan_trans(pTHX_ char *start)
 
     New(803, tbl, complement&&!del?258:256, short);
     o = newPVOP(OP_TRANS, 0, (char*)tbl);
-    o->op_private = del|squash|complement|
+    o->op_private &= ~OPpTRANS_ALL;
+    o->op_private |= del|squash|complement|
       (DO_UTF8(PL_lex_stuff)? OPpTRANS_FROM_UTF : 0)|
       (DO_UTF8(PL_lex_repl) ? OPpTRANS_TO_UTF   : 0);
 
