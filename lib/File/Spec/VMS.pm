@@ -133,21 +133,17 @@ Removes redundant portions of file specifications according to VMS syntax
 =cut
 
 sub canonpath {
-    my($self,$path,$reduce_ricochet) = @_;
+    my($self,$path) = @_;
 
     if ($path =~ m|/|) { # Fake Unix
       my $pathify = $path =~ m|/\z|;
-      $path = $self->SUPER::canonpath($path,$reduce_ricochet);
+      $path = $self->SUPER::canonpath($path);
       if ($pathify) { return vmspath($path); }
       else          { return vmsify($path);  }
     }
     else {
-      $path =~ s-\]\[--g;  $path =~ s/><//g;         # foo.][bar       ==> foo.bar
-      $path =~ s/([\[<])000000\./$1/;                # [000000.foo     ==> foo
-      if ($reduce_ricochet) { 
-        $path =~ s/\.[^\[<\.]+\.-([\]\>])/$1/g;
-        $path =~ s/([\[<\.])([^\[<\.]+)\.-\.?/$1/g;
-      }
+      $path =~ s-\]\[--g;  $path =~ s/><//g;    # foo.][bar       ==> foo.bar
+      $path =~ s/([\[<])000000\./$1/;           # [000000.foo     ==> foo
       return $path;
     }
 }
@@ -355,116 +351,6 @@ sub catpath {
     else { $dev .= ':' unless $dev eq '' or $dev =~ /:\z/; }
     $dir = vmspath($dir);
     "$dev$dir$file";
-}
-
-=item splitpath
-
-    ($volume,$directories,$file) = File::Spec->splitpath( $path );
-    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
-
-Splits a VMS path in to volume, directory, and filename portions.
-Ignores $no_file, if present, since VMS paths indicate the 'fileness' of a 
-file.
-
-The results can be passed to L</catpath()> to get back a path equivalent to
-(usually identical to) the original path.
-
-=cut
-
-sub splitpath {
-    my $self = shift ;
-    my ($path, $nofile) = @_;
-
-    my ($volume,$directory,$file) ;
-
-    if ( $path =~ m{/} ) {
-        $path =~ 
-            m{^ ( (?: /[^/]* )? )
-                ( (?: .*/(?:[^/]+\.dir)? )? )
-                (.*)
-             }xs;
-        $volume    = $1;
-        $directory = $2;
-        $file      = $3;
-    }
-    else {
-        $path =~ 
-            m{^ ( (?: (?: (?: [\w\$-]+ (?: "[^"]*")?:: )? [\w\$-]+: )? ) )
-                ( (?:\[.*\])? )
-                (.*)
-             }xs;
-        $volume    = $1;
-        $directory = $2;
-        $file      = $3;
-    }
-
-    $directory = $1
-        if $directory =~ /^\[(.*)\]\z/s ;
-
-    return ($volume,$directory,$file);
-}
-
-
-=item splitdir
-
-The opposite of L</catdir()>.
-
-    @dirs = File::Spec->splitdir( $directories );
-
-$directories must be only the directory portion of the path.
-
-'[' and ']' delimiters are optional. An empty string argument is
-equivalent to '[]': both return an array with no elements.
-
-=cut
-
-sub splitdir {
-    my $self = shift ;
-    my $directories = $_[0] ;
-
-    return File::Spec::Unix::splitdir( $self, @_ )
-        if ( $directories =~ m{/} ) ;
-
-    $directories =~ s/^\[(.*)\]\z/$1/s ;
-
-    #
-    # split() likes to forget about trailing null fields, so here we
-    # check to be sure that there will not be any before handling the
-    # simple case.
-    #
-    if ( $directories !~ m{\.\z} ) {
-        return split( m{\.}, $directories );
-    }
-    else {
-        #
-        # since there was a trailing separator, add a file name to the end, 
-        # then do the split, then replace it with ''.
-        #
-        my( @directories )= split( m{\.}, "${directories}dummy" ) ;
-        $directories[ $#directories ]= '' ;
-        return @directories ;
-    }
-}
-
-
-sub catpath {
-    my $self = shift;
-
-    return File::Spec::Unix::catpath( $self, @_ )
-        if ( join( '', @_ ) =~ m{/} ) ;
-
-    my ($volume,$directory,$file) = @_;
-
-    $volume .= ':'
-        if $volume =~ /[^:]\z/ ;
-
-    $directory = "[$directory"
-        if $directory =~ /^[^\[]/s ;
-
-    $directory .= ']'
-        if $directory =~ /[^\]]\z/ ;
-
-    return "$volume$directory$file" ;
 }
 
 
