@@ -145,6 +145,7 @@ For pthreads you should use the AIX C compiler cc_r.
 But I cannot find it as /bin/cc_r.
 Cannot continue, aborting.
 EOM
+	    exit 1
 	    fi
 	    ;;
 	'') 
