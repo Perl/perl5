@@ -113,7 +113,7 @@ sub encode
  my ($name,$string,$check) = @_;
  my $enc = find_encoding($name);
  croak("Unknown encoding '$name'") unless defined $enc;
- my $octets = $enc->fromUnicode($string,$check);
+ my $octets = $enc->encode($string,$check);
  return undef if ($check && length($string));
  return $octets;
 }
@@ -123,7 +123,7 @@ sub decode
  my ($name,$octets,$check) = @_;
  my $enc = find_encoding($name);
  croak("Unknown encoding '$name'") unless defined $enc;
- my $string = $enc->toUnicode($octets,$check);
+ my $string = $enc->decode($octets,$check);
  return undef if ($check && length($octets));
  return $string;
 }
@@ -135,9 +135,9 @@ sub from_to
  croak("Unknown encoding '$from'") unless defined $f;
  my $t = find_encoding($to);
  croak("Unknown encoding '$to'") unless defined $t;
- my $uni = $f->toUnicode($string,$check);
+ my $uni = $f->decode($string,$check);
  return undef if ($check && length($string));
- $string = $t->fromUnicode($uni,$check);
+ $string = $t->encode($uni,$check);
  return undef if ($check && length($uni));
  return length($_[0] = $string);
 }
@@ -156,14 +156,24 @@ sub decode_utf8
  return $str;
 }
 
+package Encode::Encoding;
+# Base class for classes which implement encodings
+# Temporary legacy methods
+sub toUnicode   { shift->decode(@_) }
+sub fromUnicode { shift->encode(@_) }
+
+package Encode::XS;
+use base 'Encode::Encoding';
+
 package Encode::Unicode;
+use base 'Encode::Encoding';
 
 # Dummy package that provides the encode interface but leaves data
 # as UTF-8 encoded. It is here so that from_to() works.
 
 sub name { 'Unicode' }
 
-sub toUnicode
+sub decode
 {
  my ($obj,$str,$chk) = @_;
  Encode::utf8_upgrade($str);
@@ -171,9 +181,10 @@ sub toUnicode
  return $str;
 }
 
-*fromUnicode = \&toUnicode;
+*encode = \&decode;
 
 package Encode::utf8;
+use base 'Encode::Encoding';
 
 # package to allow long-hand
 #   $octets = encode( utf8 => $string );
@@ -181,7 +192,7 @@ package Encode::utf8;
 
 sub name { 'utf8' }
 
-sub toUnicode
+sub decode
 {
  my ($obj,$octets,$chk) = @_;
  my $str = Encode::decode_utf8($octets);
@@ -193,7 +204,7 @@ sub toUnicode
  return undef;
 }
 
-sub fromUnicode
+sub encode
 {
  my ($obj,$string,$chk) = @_;
  my $octets = Encode::encode_utf8($string);
@@ -202,6 +213,7 @@ sub fromUnicode
 }
 
 package Encode::Table;
+use base 'Encode::Encoding';
 
 sub read
 {
@@ -266,7 +278,7 @@ sub representation
  $obj-{'Rep'}->($ch);
 }
 
-sub toUnicode
+sub decode
 {
  my ($obj,$str,$chk) = @_;
  my $rep   = $obj->{'Rep'};
@@ -296,7 +308,7 @@ sub toUnicode
  return $uni;
 }
 
-sub fromUnicode
+sub encode
 {
  my ($obj,$uni,$chk) = @_;
  my $fmuni = $obj->{'FmUni'};
@@ -319,12 +331,14 @@ sub fromUnicode
 }
 
 package Encode::iso10646_1;
+use base 'Encode::Encoding';
+
 # Encoding is 16-bit network order Unicode
 # Used for X font encodings
 
 sub name { 'iso10646-1' }
 
-sub toUnicode
+sub decode
 {
  my ($obj,$str,$chk) = @_;
  my $uni   = '';
@@ -338,7 +352,7 @@ sub toUnicode
  return $uni;
 }
 
-sub fromUnicode
+sub encode
 {
  my ($obj,$uni,$chk) = @_;
  my $str   = '';
@@ -359,6 +373,8 @@ sub fromUnicode
 
 
 package Encode::Escape;
+use base 'Encode::Encoding';
+
 use Carp;
 
 sub read
@@ -377,12 +393,12 @@ sub read
 
 sub name { shift->{'Name'} }
 
-sub toUnicode
+sub decode
 {
  croak("Not implemented yet");
 }
 
-sub fromUnicode
+sub encode
 {
  croak("Not implemented yet");
 }

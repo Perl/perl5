@@ -167,7 +167,7 @@ PerlIOEncode_fill(PerlIO *f)
    XPUSHs(e->bufsv);
    XPUSHs(&PL_sv_yes);
    PUTBACK;
-   if (perl_call_method("toUnicode",G_SCALAR) != 1)
+   if (perl_call_method("decode",G_SCALAR) != 1)
     code = -1;
    SPAGAIN;
    uni = POPs;
@@ -223,7 +223,7 @@ PerlIOEncode_flush(PerlIO *f)
    XPUSHs(e->bufsv);
    XPUSHs(&PL_sv_yes);
    PUTBACK;
-   if (perl_call_method("fromUnicode",G_SCALAR) != 1)
+   if (perl_call_method("encode",G_SCALAR) != 1)
     code = -1;
    SPAGAIN;
    str = POPs;
@@ -462,12 +462,12 @@ sv_utf8_downgrade(sv,failok=0)
 SV *	sv
 bool	failok
 
-MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Encode_
+MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Method_
 
 PROTOTYPES: ENABLE
 
 void
-Encode_toUnicode(obj,src,check = 0)
+Method_decode(obj,src,check = 0)
 SV *	obj
 SV *	src
 int	check
@@ -480,7 +480,7 @@ CODE:
  }
 
 void
-Encode_fromUnicode(obj,src,check = 0)
+Method_encode(obj,src,check = 0)
 SV *	obj
 SV *	src
 int	check

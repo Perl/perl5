@@ -30,9 +30,9 @@ $cpy = $str;
 ok(length($str),from_to($cpy,'iso8859-1','Unicode'),"Length Wrong");
 
 my $sym = Encode->getEncoding('symbol');
-my $uni = $sym->toUnicode('a');
+my $uni = $sym->decode('a');
 ok("\N{alpha}",substr($uni,0,1),"alpha does not map to symbol 'a'");
-$str = $sym->fromUnicode("\N{Beta}");
+$str = $sym->encode("\N{Beta}");
 ok("B",substr($str,0,1),"Symbol 'B' does not map to Beta");
 
 foreach my $enc (qw(symbol dingbats ascii),@encodings)
@@ -40,8 +40,8 @@ foreach my $enc (qw(symbol dingbats ascii),@encodings)
   my $tab = Encode->getEncoding($enc);
   ok(1,defined($tab),"Could not load $enc");
   $str = join('',map(chr($_),0x20..0x7E));
-  $uni = $tab->toUnicode($str);
-  $cpy = $tab->fromUnicode($uni);
+  $uni = $tab->decode($str);
+  $cpy = $tab->encode($uni);
   ok($cpy,$str,"$enc mangled translating to Unicode and back");
  }
 
