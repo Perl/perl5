@@ -5464,9 +5464,9 @@ meanings of the fields:
 
 (The epoch was at 00:00 January 1, 1970 GMT.)
 
-(*) The ctime field is non-portable.  In particular, you cannot expect
-it to be a "creation time", see L<perlport/"Files and Filesystems">
-for details.
+(*) Not all fields are supported on all filesystem types. Notably, the
+ctime field is non-portable.  In particular, you cannot expect it to be a
+"creation time", see L<perlport/"Files and Filesystems"> for details.
 
 If C<stat> is passed the special filehandle consisting of an underline, no
 stat is done, but the current contents of the stat structure from the
