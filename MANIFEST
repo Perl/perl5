@@ -102,7 +102,6 @@ ext/B/t/bblock.t        See if B::Bblock works
 ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/debug.t		See if B::Debug works
 ext/B/t/deparse.t	See if B::Deparse works
-ext/B/t/lint.t		See if B::Lint works
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/stash.t		See if B::Stash works
 ext/B/t/terse.t		See if B::Terse works
