@@ -20,6 +20,8 @@ sub import {
 }
 
 sub croak { require Carp;  goto &Carp::croak }
+# declare usage to assist AutoLoad
+sub usage;
 
 XSLoader::load 'POSIX', $VERSION;
 
@@ -56,17 +58,17 @@ sub POSIX::SigAction::new {
 1;
 __END__
 
-sub usage { 
+sub usage {
     my ($mess) = @_;
     croak "Usage: POSIX::$mess";
 }
 
-sub redef { 
+sub redef {
     my ($mess) = @_;
     croak "Use method $mess instead";
 }
 
-sub unimpl { 
+sub unimpl {
     my ($mess) = @_;
     $mess =~ s/xxx//;
     croak "Unimplemented: POSIX::$mess";
@@ -898,7 +900,7 @@ for (values %EXPORT_TAGS) {
     chmod mkdir stat umask
     times
     wait waitpid
-    gmtime localtime time 
+    gmtime localtime time
     alarm chdir chown close fork getlogin getppid getpgrp link
 	pipe read rmdir sleep unlink write
     utime
