@@ -1,10 +1,12 @@
+#!./perl
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require "./test.pl";
 }
 
-plan tests => 29;
+plan tests => 34;
 
 use_ok('Config');
 
@@ -50,12 +52,20 @@ ok(exists $Config{ccflags_nolargefiles}, "has ccflags_nolargefiles");
 
 # Utility functions.
 
-like(Config::myconfig(),  qr/cc='$Config{cc}'/, "myconfig");
-
-SKIP: {
-	skip "cc is tied in $^O", 1 if $^O eq 'MacOS';
-	like(Config::config_sh(), qr/cc='$Config{cc}'/, "config_sh");
+{
+    # make sure we can export what we say we can export.
+    package Foo;
+    my @exports = qw(myconfig config_sh config_vars config_re);
+    Config->import(@exports);
+    foreach my $func (@exports) {
+	::ok( __PACKAGE__->can($func), "$func exported" );
+    }
 }
+
+like(Config::myconfig(),       qr/osname=$Config{osname}/,   "myconfig");
+like(Config::config_sh(),      qr/osname='$Config{osname}'/, "config_sh");
+like(join("\n", Config::config_re('c.*')),
+			       qr/^c.*?=/,                   'config_re' );
 
 my $out = tie *STDOUT, 'FakeOut';
 
