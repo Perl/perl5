@@ -12,6 +12,8 @@ maintenance release since the two releases were kept closely
 coordinated (while 5.8.0 was still called 5.7.something).
 
 Changes that were integrated into the 5.6.1 release are marked C<[561]>.
+In some cases the said bug/feature may have been further fixed/enhanced
+after 5.6.1.
 
 You can see the list of changes in the 5.6.1 (from 5.6.0) by reading
 L<perl561delta>.
@@ -71,7 +73,7 @@ authors, however: PerlIO has been designed as a drop-in replacement
 (at the source code level) for the stdio interface.
 
 Depending on your platform, there are also other reasons why
-we decided to break binary compatibility, please read on. 
+we decided to break binary compatibility, please read on.
 
 =head2 64-bit platforms and malloc
 
@@ -435,6 +437,37 @@ This change leads to often slightly faster and always less lossy
 arithmetics. (Previously Perl always preferred floating point numbers
 in its math.)
 
+=head2 Arrays now always interpolate into double-quoted strings [561]
+
+In double-quoted strings, arrays now interpolate, no matter what.  The
+behavior in earlier versions of perl 5 was that arrays would interpolate
+into strings if the array had been mentioned before the string was
+compiled, and otherwise Perl would raise a fatal compile-time error.
+In versions 5.000 through 5.003, the error was
+
+        Literal @example now requires backslash
+
+In versions 5.004_01 through 5.6.0, the error was
+
+        In string, @example now must be written as \@example
+
+The idea here was to get people into the habit of writing
+C<"fred\@example.com"> when they wanted a literal C<@> sign, just as
+they have always written C<"Give me back my \$5"> when they wanted a
+literal C<$> sign.
+
+Starting with 5.6.1, when Perl now sees an C<@> sign in a
+double-quoted string, it I<always> attempts to interpolate an array,
+regardless of whether or not the array has been used or declared
+already.  The fatal error has been downgraded to an optional warning:
+
+        Possible unintended interpolation of @example in string
+
+This warns you that C<"fred@example.com"> is going to turn into
+C<fred.com> if you don't backslash the C<@>.
+See http://www.plover.com/~mjd/perl/at-error.html for more details
+about the history here.
+
 =head2 Miscellaneous Changes
 
 =over 4
@@ -465,7 +498,7 @@ in multiple arguments.)
 
 The builtin dump() now gives an optional warning
 C<dump() better written as CORE::dump()>,
-meaning that by default C<dump(...)> is resolved as the builtin 
+meaning that by default C<dump(...)> is resolved as the builtin
 dump() which dumps core and aborts, not as (possibly) user-defined
 C<sub dump>.  To call the latter, qualify the call as C<&dump(...)>.
 (The whole dump() feature is to considered deprecated, and possibly
@@ -481,7 +514,7 @@ replacements to override these builtins.
 =item *
 
 END blocks are now run even if you exit/die in a BEGIN block.
-Internally, the execution of END blocks is now controlled by 
+Internally, the execution of END blocks is now controlled by
 PL_exit_flags & PERL_EXIT_DESTRUCT_END. This enables the new
 behaviour for Perl embedders. This will default in 5.10. See
 L<perlembed>.
@@ -559,7 +592,7 @@ of the parameters can vary.
 
 =item *
 
-prototype(\&) is now available.
+The (\&) prototype now works properly. [561]
 
 =item *
 
@@ -634,8 +667,8 @@ The command-line options -s and -F are now recognized on the shebang
 Use of the C</c> match modifier without an accompanying C</g> modifier
 elicits a new warning: C<Use of /c modifier is meaningless without /g>.
 
-Use of C</c> in substitutions, even with C</g>, elicits 
-C<Use of /c modifier is meaningless in s///>.  
+Use of C</c> in substitutions, even with C</g>, elicits
+C<Use of /c modifier is meaningless in s///>.
 
 Use of C</g> with C<split> elicits C<Use of /g modifier is meaningless
 in split>.
@@ -1138,7 +1171,7 @@ leads to better portability.
 
 =item *
 
-Fcntl, Socket, and Sys::Syslog have been rewritten by Nicholas Clark 
+Fcntl, Socket, and Sys::Syslog have been rewritten by Nicholas Clark
 to use the new-style constant dispatch section (see L<ExtUtils::Constant>).
 This means that they will be more robust and hopefully faster.
 
@@ -1164,8 +1197,9 @@ You can enable/disable them with C<use/no warnings 'File::Find';>.
 
 =item *
 
-File::Glob::glob() renamed to File::Glob::bsd_glob() to avoid
-prototype mismatch with CORE::glob(). [561]
+File::Glob::glob() has been renamed to File::Glob::bsd_glob()
+because the name clashes with the builtin glob().  The older
+name is still available for compatibility, but is deprecated. [561]
 
 =item *
 
@@ -1181,6 +1215,11 @@ IPC::Open3 now allows the use of numeric file descriptors.
 IO::Socket now has an atmark() method, which returns true if the socket
 is positioned at the out-of-band mark.  The method is also exportable
 as a sockatmark() function.
+
+=item *
+
+IO::Socket::INET failed to open the specified port if the service name
+was not known.  It now correctly uses the supplied port number as is. [561]
 
 =item *
 
@@ -1512,6 +1551,12 @@ common scenarios. [561]
 
 =item *
 
+sort() is also fully reentrant, in the sense that the sort function
+can itself call sort().  This did not work reliably in previous
+releases. [561]
+
+=item *
+
 sort() has been changed to use primarily mergesort internally as
 opposed to the earlier quicksort.  For very small lists this may
 result in slightly slower sorting times, but in general the speedup
@@ -1654,7 +1699,7 @@ modules in @INC.
 
 =item *
 
-Configure C<-S> can now run non-interactively.
+Configure C<-S> can now run non-interactively. [561]
 
 =item *
 
@@ -1848,9 +1893,10 @@ need a thread library package installed. See README.hpux. [561]
 
 =item *
 
-Mac OS Classic (MacPerl has of course been available since
-perl 5.004 but now the source code bases of standard Perl
-and MacPerl have been synchronised)
+Mac OS Classic is now supported in the mainstream source package
+(MacPerl has of course been available since perl 5.004 but now the
+source code bases of standard Perl and MacPerl have been synchronised)
+[561]
 
 =item *
 
@@ -1887,9 +1933,11 @@ specific ones) have been merged back to the main distribution.
 =item *
 
 Perl has been tested with the GNU pth userlevel thread package
-( http://www.gnu.org/software/pth/pth.html ) . All but one thread
-test worked, and that one failure was because of test results arriving
-in unexpected order.
+( http://www.gnu.org/software/pth/pth.html ).  All thread tests
+of Perl now work, but not without adding some yield()s to the tests,
+so while pth (and other userlevel thread implementations) can be
+considered to be "working" with Perl ithreads, keep in mind the
+possible non-preemptability of the underlying thread implementation.
 
 =item *
 
@@ -1966,8 +2014,9 @@ now goes correctly to the socket if RemotePort is set. [561]
 
 =item *
 
-Perl 5.6.0 could emit spurious warnings about redefinition of dl_error()
-when statically building extensions into perl.  This has been corrected. [561]
+Perl 5.6.0 could emit spurious warnings about redefinition of
+dl_error() when statically building extensions into perl.
+This has been corrected. [561]
 
 =item *
 
@@ -2087,7 +2136,8 @@ Attributes (such as :shared) didn't work with our().
 
 =item *
 
-our() variables will not cause "will not stay shared" warnings.
+our() variables will not cause bogus "Variable will not stay shared"
+warnings. [561]
 
 =item *
 
@@ -2398,7 +2448,7 @@ MPE/iX update after Perl 5.6.0.  See README.mpeix. [561]
 
 NetBSD/threads: try installing the GNU pth (should be in the
 packages collection, or http://www.gnu.org/software/pth/),
-and Configure with -Duseithreads. 
+and Configure with -Duseithreads.
 
 =item *
 
@@ -2442,7 +2492,7 @@ Unicos
 
 Fixed various alignment problems that lead into core dumps either
 during build or later; no longer dies on math errors at runtime;
-now using full quad integers (64 bits), previously was using 
+now using full quad integers (64 bits), previously was using
 only 46 bit integers for speed.
 
 =item *
@@ -2457,7 +2507,7 @@ unimplemented.  It now works as documented.
 
 The C<waitpid> emulation has been improved.  The worst bug (now fixed)
 was that a pid of -1 would cause a wildcard search of all processes on
-the system.  
+the system.
 
 POSIX-style signals are now emulated much better on VMS versions prior
 to 7.0.
@@ -2469,7 +2519,7 @@ File access tests now use current process privileges rather than the
 user's default privileges, which could sometimes result in a mismatch
 between reported access and actual access.
 
-There is a new C<kill> implementation based on C<sys$sigprc> that allows 
+There is a new C<kill> implementation based on C<sys$sigprc> that allows
 older VMS systems (pre-7.0) to use C<kill> to send signals rather than
 simply force exit.  This implementation also allows later systems to
 call C<kill> from within a signal handler.
@@ -2549,6 +2599,10 @@ Can now send() from all threads, not just the first one. [561]
 
 =item *
 
+ExtUtils::MakeMaker now uses $ENV{LIB} to search for libraries.
+
+=item *
+
 Fake signal handling reenabled, bugs and all.
 
 =item *
@@ -2574,6 +2628,11 @@ Better UNC path handling under ithreads. [561]
 
 wait(), waitpid(), and backticks now return the correct exit status
 under Windows 9x. [561]
+
+=item *
+
+Non-blocking waits for child processes (or pseudo-processes) are
+supported via C<waitpid($pid, &POSIX::WNOHANG)>.
 
 =item *
 
@@ -2608,7 +2667,7 @@ marked by a C<E<lt>-- HERE> marker.
 
 The various "opened only for", "on closed", "never opened" warnings
 drop the C<main::> prefix for filehandles in the C<main> package,
-for example C<STDIN> instead of C<main::STDIN>. 
+for example C<STDIN> instead of C<main::STDIN>.
 
 =item *
 
@@ -2663,7 +2722,7 @@ for the C<"c"> format and a number less than -128 or more than 127.
 
 Certain regex modifiers such as C<(?o)> make sense only if applied to
 the entire regex.  You will get an optional warning if you try to do
-otherwise. 
+otherwise.
 
 =item *
 
@@ -3064,12 +3123,6 @@ this assumption fails in UNICOS.
 
 =head2 UNICOS/mk
 
-=head2 VOS (Stratus)
-
-When Perl is built using the native build process on VOS Release
-14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
-pass or result in TODO (ignored) failures.
-
 =over 4
 
 =item *
@@ -3110,6 +3163,12 @@ return only three values, not four.
 =head2 UTS
 
 There are a few known test failures, see L<perluts> (README.uts).
+
+=head2 VOS (Stratus)
+
+When Perl is built using the native build process on VOS Release
+14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
+pass or result in TODO (ignored) failures.
 
 =head2 VMS
 
