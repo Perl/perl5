@@ -40,7 +40,7 @@ my $tmpfile = 'Op_stat.tmp';
 my $tmpfile_link = $tmpfile.'2';
 
 
-unlink $tmpfile;
+1 while unlink $tmpfile;
 open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 close FOO;
 
@@ -425,4 +425,8 @@ SKIP: {
     like( $@, qr/^The stat preceding -l _ wasn't an lstat/,
 	'-l _ croaks after -T _' );
     unlink $linkname or print "# unlink $linkname failed: $!\n";
+}
+
+END {
+    1 while unlink $tmpfile;
 }

@@ -14,8 +14,8 @@ BEGIN {                                # Set up a tiny script file
     close(F);
 }
 END {
-    unlink("rel2abs2rel$$.pl");
-    unlink("rel2abs2rel$$.tmp");
+    1 while unlink("rel2abs2rel$$.pl");
+    1 while unlink("rel2abs2rel$$.tmp");
 }
 
 use Config;

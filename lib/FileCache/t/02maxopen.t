@@ -12,7 +12,7 @@ BEGIN {
     plan tests=>5;
 }
 END{
-  unlink @files;
+  1 while unlink @files;
 }
 
 {# Test 2: that we actually adhere to maxopen

@@ -151,5 +151,5 @@ print "not " unless ($dstr eq $str);
 print "ok 14\n";
 
 END {
-    unlink($grk, $utf, $fail1, $fail2, $russki, $threebyte);
+    1 while unlink($grk, $utf, $fail1, $fail2, $russki, $threebyte);
 }
