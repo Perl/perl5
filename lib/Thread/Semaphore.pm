@@ -1,30 +1,44 @@
 package Thread::Semaphore;
-use Thread qw(cond_wait cond_broadcast);
+
+use strict;
 
 our $VERSION = '1.00';
 
+use Thread qw(cond_wait cond_broadcast);
+
 BEGIN {
     use Config;
-    $ithreads = $Config{useithreads};
-    $othreads = $Config{use5005threads};
-    if($ithreads) {
+    if ($Config{useithreads}) {
 	require 'threads/shared/semaphore.pm';
-	for my $m (qw(new up down)) {
+	for my $meth (qw(new up down)) {
 	    no strict 'refs';
-	    *{"Thread::Semaphore::$m"} = \&{"threads::shared::semaphore::${m}"};
+	    *{"Thread::Semaphore::$meth"} = \&{"threads::shared::semaphore::$meth"};
+	}
+    } elsif ($Config{use5005threads}) {
+	for my $meth (qw(new up down)) {
+	    no strict 'refs';
+	    *{"Thread::Semaphore::$meth"} = \&{"Thread::Semaphore::${meth}_othread"};
 	}
     } else {
-	for my $m (qw(new up down)) {
-	    no strict 'refs';
-	    *{"Thread::Semaphore::$m"} = \&{"Thread::Semaphore::${m}_othread"};
-	}
+        require Carp;
+        Carp::croak("This Perl has neither ithreads nor 5005threads");
     }
 }
 
 
 =head1 NAME
 
-Thread::Semaphore - thread-safe semaphores
+Thread::Semaphore - thread-safe semaphores (for old code only)
+
+=head1 CAVEAT
+
+For new code the use of the C<Thread::Semaphore> module is discouraged and
+the direct use of the C<threads>, C<threads::shared> and
+C<threads::shared::semaphore> modules is encouraged instead.
+
+For the whole story about the development of threads in Perl, and why you
+should B<not> be using this module unless you know what you're doing, see the
+CAVEAT of the C<Thread> module.
 
 =head1 SYNOPSIS
 

@@ -28,7 +28,7 @@ BEGIN {
 
 =head1 NAME
 
-Thread - manipulate threads in Perl
+Thread - manipulate threads in Perl (for old code only)
 
 =head1 CAVEAT
 
@@ -65,7 +65,7 @@ be thought differently.  With the ithreads you must explicitly share()
 variables between the threads.
 
 For new code the use of the C<Thread> module is discouraged and
-the direct use use of the C<threads> and C<threads::shared> modules
+the direct use of the C<threads> and C<threads::shared> modules
 is encouraged instead.
 
 Finally, note that there are many known serious problems with the
