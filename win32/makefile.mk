@@ -111,7 +111,7 @@ CCTYPE		*= GCC
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
 #
-#CFG		*= Debug
+CFG		*= Debug
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
@@ -715,7 +715,7 @@ SETARGV_OBJ	= setargv$(o)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable Filter/Util
+		Sys/Hostname Storable Filter/Util Encode
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -739,6 +739,7 @@ GLOB		= $(EXTDIR)\File\Glob\Glob
 HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
 STORABLE	= $(EXTDIR)\Storable\Storable
 FILTER		= $(EXTDIR)\Filter\Util\Call
+ENCODE          = $(EXTDIR)\Encode\Encode   
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -757,7 +758,8 @@ DPROF_DLL	= $(AUTODIR)\Devel\DProf\DProf.dll
 GLOB_DLL	= $(AUTODIR)\File\Glob\Glob.dll
 HOSTNAME_DLL	= $(AUTODIR)\Sys\Hostname\Hostname.dll
 STORABLE_DLL	= $(AUTODIR)\Storable\Storable.dll
-FILTER_DLL	= $(EXTDIR)\Filter\Util\Call.dll
+FILTER_DLL	= $(AUTODIR)\Filter\Util\Call\Call.dll
+ENCODE_DLL	= $(AUTODIR)\Encode\Encode.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -779,7 +781,8 @@ EXTENSION_C	=		\
 		$(GLOB).c	\
 		$(HOSTNAME).c	\
 		$(STORABLE).c	\
-		$(FILTER).c
+		$(FILTER).c     \
+		$(ENCODE).c
 
 EXTENSION_DLL	=		\
 		$(SOCKET_DLL)	\
@@ -799,7 +802,8 @@ EXTENSION_DLL	=		\
 		$(GLOB_DLL)	\
 		$(HOSTNAME_DLL)	\
 		$(STORABLE_DLL)	\
-		$(FILTER_DLL)
+		$(FILTER_DLL)   \
+		$(ENCODE_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
@@ -853,7 +857,7 @@ RIGHTMAKE	= __switch_makefiles
 NOOP		= @rem
 .ELSE
 MK2		= __not_needed
-RIGHTMAKE	= __not_needed
+RIGHTMAKE	= 
 .ENDIF
 
 #
@@ -1178,6 +1182,11 @@ $(HOSTNAME_DLL): $(PERLEXE) $(HOSTNAME).xs
 	cd $(EXTDIR)\Sys\$(*B) && $(MAKE)
 
 $(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
+$(ENCODE_DLL): $(PERLEXE) $(ENCODE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
