@@ -2787,7 +2787,9 @@ PP(pp_int)
 	 else preferring IV has introduced a subtle behaviour change bug. OTOH
 	 relying on floating point to be accurate is a bug.  */
 
-      if (SvIOK(TOPs)) {
+      if (!SvOK(TOPs))
+        SETu(0);
+      else if (SvIOK(TOPs)) {
 	if (SvIsUV(TOPs)) {
 	    UV uv = TOPu;
 	    SETu(uv);
@@ -2821,7 +2823,9 @@ PP(pp_abs)
       /* This will cache the NV value if string isn't actually integer  */
       IV iv = TOPi;
 
-      if (SvIOK(TOPs)) {
+      if (!SvOK(TOPs))
+        SETu(0);
+      else if (SvIOK(TOPs)) {
 	/* IVX is precise  */
 	if (SvIsUV(TOPs)) {
 	  SETu(TOPu);	/* force it to be numeric only */
