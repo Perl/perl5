@@ -298,7 +298,10 @@ and syswrite().)
 
 While none of the built-in data types have any arbitrary size limits
 (apart from memory size), there are still a few arbitrary limits:  a
-given variable name may not be longer than 251 characters.
+given variable name may not be longer than 251 characters.  Line numbers
+displayed by diagnostics are internally stored as short integers,
+so they are limited to a maximum of 65535 (higher numbers usually being
+affected by wraparound).
 
 You may mail your bug reports (be sure to include full configuration
 information as output by the myconfig program in the perl source tree,

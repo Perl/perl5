@@ -4964,7 +4964,6 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
     bool oldcatch = CATCH_GET;
     SV **cvp;
     SV *cv, *typesv;
-    char buf[128];
 	    
     if (!table) {
 	yyerror("%^H is not defined");
@@ -4972,6 +4971,7 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
     }
     cvp = hv_fetch(table, key, strlen(key), FALSE);
     if (!cvp || !SvOK(*cvp)) {
+	char buf[128];
 	sprintf(buf,"$^H{%s} is not defined", key);
 	yyerror(buf);
 	return sv;
@@ -5017,6 +5017,7 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
     POPSTACK;
 
     if (!SvOK(res)) {
+	char buf[128];
 	sprintf(buf,"Call to &{$^H{%s}} did not return a defined value", key);
 	yyerror(buf);
     }
