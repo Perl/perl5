@@ -2251,18 +2251,16 @@ Perl_scope(pTHX_ OP *o)
 	    o->op_type = OP_LEAVE;
 	    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
 	}
-	else {
-	    if (o->op_type == OP_LINESEQ) {
-		OP *kid;
-		o->op_type = OP_SCOPE;
-		o->op_ppaddr = PL_ppaddr[OP_SCOPE];
-		kid = ((LISTOP*)o)->op_first;
-		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
-		    op_null(kid);
-	    }
-	    else
-		o = newLISTOP(OP_SCOPE, 0, o, Nullop);
+	else if (o->op_type == OP_LINESEQ) {
+	    OP *kid;
+	    o->op_type = OP_SCOPE;
+	    o->op_ppaddr = PL_ppaddr[OP_SCOPE];
+	    kid = ((LISTOP*)o)->op_first;
+	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		op_null(kid);
 	}
+	else
+	    o = newLISTOP(OP_SCOPE, 0, o, Nullop);
     }
     return o;
 }
@@ -2315,17 +2313,9 @@ OP*
 Perl_block_end(pTHX_ I32 floor, OP *seq)
 {
     int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
-    line_t copline = PL_copline;
     OP* retval = scalarseq(seq);
     /* If there were syntax errors, don't try to close a block */
     if (PL_yynerrs) return retval;
-    if (!seq) {
-	/* scalarseq() gave us an OP_STUB */
-	retval->op_flags |= OPf_PARENS;
-	/* there should be a nextstate in every block */
-	retval = newSTATEOP(0, Nullch, retval);
-	PL_copline = copline;  /* XXX newSTATEOP may reset PL_copline */
-    }
     LEAVE_SCOPE(floor);
     PL_pad_reset_pending = FALSE;
     PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
@@ -2513,19 +2503,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     op_free(o);
     if (type == OP_RV2GV)
 	return newGVOP(OP_GV, 0, (GV*)sv);
-    else {
-	/* try to smush double to int, but don't smush -2.0 to -2 */
-	if ((SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK)) == SVf_NOK &&
-	    type != OP_NEGATE)
-	{
-#ifdef PERL_PRESERVE_IVUV
-	    /* Only bother to attempt to fold to IV if
-	       most operators will benefit  */
-	    SvIV_please(sv);
-#endif
-	}
-	return newSVOP(OP_CONST, 0, sv);
-    }
+    return newSVOP(OP_CONST, 0, sv);
 
   nope:
     return o;

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 51;
+plan tests => 50;
 
 $FS = ':';
 
@@ -265,13 +265,21 @@ ok(@ary == 3 &&
 
 {
     # [perl #18195]
-    for my $u (0, 1) {
-	for my $a (0, 1) {
-	    $_ = 'readin,database,readout';
-	    utf8::upgrade $_ if $u;
-	    /(.+)/;
-	    my @d = split /[,]/,$1;
-	    is(join (':',@d), 'readin:database:readout', "[perl #18195]");
+    for my $a (0,1) {
+	$_ = 'readin,database,readout';
+	if ($ARGV[0])  {
+	    $_ .= chr 256;
+	    chop;
 	}
+	/(.+)/;
+	my @d = split /[,]/,$1;
+	is(join (':',@d), 'readin:database:readout', "[perl #18195]")
     }
+}
+
+{
+    $p="a,b";
+    utf8::upgrade $p;
+    @a=split(/[, ]+/,$p);
+    is ("$@-@a-", '-a b-', '#20912 - split() to array with /[]+/ and utf8');
 }

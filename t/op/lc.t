@@ -128,16 +128,16 @@ $a = "\x{3c3}foo.bar"; # \x{3c3} == GREEK SMALL LETTER SIGMA.
 $b = "\x{3a3}FOO.BAR"; # \x{3a3} == GREEK CAPITAL LETTER SIGMA.
 
 ($c = $b) =~ s/(\w+)/lc($1)/ge;
-ok($c eq $a, "Using s///e to change case.");
+is($c , $a, "Using s///e to change case.");
 
 ($c = $a) =~ s/(\w+)/uc($1)/ge;
-ok($c eq $b, "Using s///e to change case.");
+is($c , $b, "Using s///e to change case.");
 
 ($c = $b) =~ s/(\w+)/lcfirst($1)/ge;
-ok($c eq "\x{3c3}FOO.bAR", "Using s///e to change case.");
+is($c , "\x{3c3}FOO.bAR", "Using s///e to change case.");
 
 ($c = $a) =~ s/(\w+)/ucfirst($1)/ge;
-ok($c eq "\x{3a3}foo.Bar", "Using s///e to change case.");
+is($c , "\x{3a3}foo.Bar", "Using s///e to change case.");
 
 # #18931: perl5.8.0 bug in \U..\E processing
 # Test case from Nick Clark.
@@ -158,4 +158,3 @@ for my $a (0,1) {
 	$test++;
     } 
 }
-

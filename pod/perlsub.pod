@@ -1157,8 +1157,8 @@ only occasionally and for good reason.  Typically this might be
 done by a package attempting to emulate missing built-in functionality
 on a non-Unix system.
 
-Overriding may be done only by importing the name from a
-module--ordinary predeclaration isn't good enough.  However, the
+Overriding may be done only by importing the name from a module at
+compile time--ordinary predeclaration isn't good enough.  However, the
 C<use subs> pragma lets you, in effect, predeclare subs
 via the import syntax, and these names may then override built-in ones:
 

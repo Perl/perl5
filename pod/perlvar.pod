@@ -1091,9 +1091,15 @@ regular expression assertion (see L<perlre>).  May be written to.
 
 =item $^S
 
-Current state of the interpreter.  Undefined if parsing of the current
-module/eval is not finished (may happen in $SIG{__DIE__} and
-$SIG{__WARN__} handlers).  True if inside an eval(), otherwise false.
+Current state of the interpreter.
+
+    $^S         State
+    ---------   -------------------
+    undef       Parsing module/eval
+    true (1)    Executing an eval
+    false (0)   Otherwise
+
+The first state may happen in $SIG{__DIE__} and $SIG{__WARN__} handlers.
 
 =item $BASETIME
 
