@@ -1,7 +1,11 @@
 Revision history for Perl extension Time::HiRes.
 
+1.48
+	- workaround for buggy gcc 2.95.3 in openbsd/sparc64
+	  (perl change #19592)
+
 1.47
-	- do not use -lrt in Linux (from March Lehmann)
+	- do not use -lrt in Linux (from March Lehmann, perl change #19449)
 		- unnecessary (nanosleep is in libc anyway)
 		- harmful (-lrt slows down execution)
 		- incompatible (with many distributions' pthreads)
