@@ -493,6 +493,10 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 #endif
 #endif
 
+/* IO.xs and POSIX.xs define PERLIO_NOT_STDIO to 1 */ 
+#if defined(PERL_EXT_IO) || defined(PERL_EXT_POSIX)
+#undef  PERLIO_NOT_STDIO
+#endif
 #define PERLIO_NOT_STDIO 0
 
 #include "perlio.h"
