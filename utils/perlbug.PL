@@ -14,6 +14,7 @@ use File::Basename qw(&basename &dirname);
 # This is so that make depend always knows where to find PL derivatives.
 chdir dirname($0);
 $file = basename($0, '.PL');
+$file .= '.com' if $^O eq 'VMS';
 
 open OUT,">$file" or die "Can't create $file: $!";
 
@@ -48,7 +49,7 @@ use strict;
 sub paraprint;
 
 
-my($Version) = "1.15";
+my($Version) = "1.16";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -66,6 +67,7 @@ my($Version) = "1.15";
 #                 helpful information. Also let file read fail gracefully.
 # Changed in 1.15 to add warnings to stop people using perlbug for non-bugs.
 #                 Also report selected environment variables.
+# Changed in 1.16 to include @INC, and allow user to re-edit if no changes.
 
 # TODO: Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is 
@@ -73,7 +75,7 @@ my($Version) = "1.15";
 
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
     $subject, $from, $verbose, $ed, 
-    $fh, $me, $Is_VMS, $msg, $body, $andcc );
+    $fh, $me, $Is_VMS, $msg, $body, $andcc, %REP);
 
 Init();
 
@@ -176,7 +178,8 @@ EOF
 		paraprint <<EOF;
 First of all, please provide a subject for the 
 message. It should be a concise description of 
-the bug or problem.
+the bug or problem. "perl bug" or "perl problem"
+is not a concise description.
 
 EOF
 		print "Subject: ";
@@ -402,10 +405,29 @@ EOF
 		}
 		close(F);
 	} else {
-		print REP "[Please enter your report here]\n";
+		print REP <<EOF;
+
+-----------------------------------------------------------------
+[Please enter your report here]
+
+
+
+[Please do not change anything below this line]
+-----------------------------------------------------------------
+EOF
 	}
 	
 	Dump(*REP);
+	close(REP);
+
+	# read in the report template once so that
+	# we can track whether the user does any editing.
+	# yes, *all* whitespace is ignored.
+        open(REP, "<$filename");
+        while (<REP>) {
+		s/\s+//g;
+		$REP{$_}++;
+	}
 	close(REP);
 
 }
@@ -415,8 +437,7 @@ sub Dump {
 	
 	print OUT <<EOF;
 
-
-
+---
 Site configuration information for perl $]:
 
 EOF
@@ -438,7 +459,16 @@ EOF
 	}
 	print OUT <<EOF;
 
+---
+\@INC for perl $]:
+EOF
+        for my $i (@INC) {
+	    print OUT "\t$i\n";
+        }
 
+	print OUT <<EOF;
+
+---
 Environment for perl $]:
 EOF
         for my $env (qw(PATH LD_LIBRARY_PATH
@@ -502,6 +532,42 @@ EOF
 			}
 		} 
 	}
+
+        # Check that we have a report that has some, eh, report in it.
+
+        my $unseen = 0;
+
+        open(REP, "<$filename");
+	# a strange way to check whether any significant editing
+	# have been done: check whether any new non-empty lines
+	# have been added. Yes, the below code ignores *any* space
+	# in *any* line.
+        while (<REP>) {
+	    s/\s+//g;
+	    $unseen++ if ($_ ne '' and not exists $REP{$_});
+	}
+
+	while ($unseen == 0) {
+	    paraprint <<EOF;
+
+I am sorry but it looks like you did not report anything.
+
+EOF
+		print "Action (Retry Edit/Cancel) ";
+		my ($action) = scalar(<>);
+		if ($action =~ /^[re]/i) { # <R>etry <E>dit
+			goto tryagain;
+		} elsif ($action =~ /^[cq]/i) { # <C>ancel, <Q>uit
+		        Cancel();
+		}
+        }
+
+}
+
+sub Cancel {
+    1 while unlink($filename);  # remove all versions under VMS
+    print "\nCancelling.\n";
+    exit(0);
 }
 
 sub NowWhat {
@@ -572,9 +638,7 @@ EOF
 				Edit();
 				#system("$ed $filename");
 			} elsif( $action =~ /^[qc]/i ) { # <C>ancel, <Q>uit
-				1 while unlink($filename);  # remove all versions under VMS
-				print "\nCancelling.\n";
-				exit(0);
+			        Cancel();
 			} elsif( $action =~ /^s/ ) {
 				paraprint <<EOF;
 

@@ -113,6 +113,9 @@ usemymalloc='y'
 alignbytes=8
 selecttype='int *'
 
+# When HP-UX runs a script with "#!", it sets argv[0] to the script name.
+toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
+
 # If your compile complains about FLT_MIN, uncomment the next line
 # POSIX_cflags='ccflags="$ccflags -DFLT_MIN=1.17549435E-38"'
 

@@ -508,3 +508,47 @@ ignored by both the compiler and the translators.
 You probably shouldn't rely upon the warn() being podded out forever.
 Not all pod translators are well-behaved in this regard, and perhaps
 the compiler will become pickier.
+
+One may also use pod directives to quickly comment out a section
+of code.
+
+=head2 Plain Old Comments (Not!)
+
+Much like the C preprocessor, perl can process line directives.  Using
+this, one can control perl's idea of filenames and line numbers in
+error or warning messages (especially for strings that are processed
+with eval()).  The syntax for this mechanism is the same as for most
+C preprocessors: it matches the regular expression
+C</^#\s*line\s+(\d+)\s*(?:\s"([^"])*")?/> with C<$1> being the line
+number for the next line, and C<$2> being the optional filename
+(specified within quotes).
+
+Here are some examples that you should be able to type into your command
+shell:
+
+    % perl
+    # line 200 "bzzzt"
+    # the `#' on the previous line must be the first char on line
+    die 'foo';
+    __END__
+    foo at bzzzt line 201.
+    
+    % perl
+    # line 200 "bzzzt"
+    eval qq[\n#line 2001 ""\ndie 'foo']; print $@;
+    __END__
+    foo at - line 2001.
+    
+    % perl
+    eval qq[\n#line 200 "foo bar"\ndie 'foo']; print $@;
+    __END__
+    foo at foo bar line 200.
+    
+    % perl
+    # line 345 "goop"
+    eval "\n#line " . __LINE__ . ' "' . __FILE__ ."\"\ndie 'foo'";
+    print $@;
+    __END__
+    foo at goop line 345.
+
+=cut

@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00321#
+PERL_VERSION = 5_00323#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -265,8 +265,10 @@ CRTLOPTS =,$(CRTL)/Options
 	$(CC) $(CFLAGS) $(MMS$SOURCE_NAME).c
 .endif
 
+utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com
+utils2 = [.lib]splain.com [.utils]pl2pm.com
 
-all : base extras libmods utils podxform archcorefiles preplibrary perlpods
+all : base extras x2p archcorefiles preplibrary perlpods
 	@ $(NOOP)
 base : miniperl perl
 	@ $(NOOP)
@@ -274,9 +276,11 @@ extras : Fcntl IO Opcode $(POSIX) libmods utils podxform
 	@ $(NOOP)
 libmods : [.lib]Config.pm $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm 
 	@ $(NOOP)
-utils : [.lib.pod]perldoc [.lib.ExtUtils]Miniperl.pm [.utils]c2ph [.utils]h2ph [.utils]h2xs [.lib]perlbug
+utils : $(utils1) $(utils2)
 	@ $(NOOP)
-podxform : [.lib.pod]pod2text [.lib.pod]pod2html [.lib.pod]pod2latex [.lib.pod]pod2man
+podxform : [.lib.pod]pod2text.com [.lib.pod]pod2html.com [.lib.pod]pod2latex.com [.lib.pod]pod2man.com
+	@ $(NOOP)
+x2p : [.x2p]a2p$(E) [.x2p]s2p.com [.x2p]find2perl.com 
 	@ $(NOOP)
 
 pod1 = [.lib.pod]perl.pod [.lib.pod]perlapio.pod [.lib.pod]perlbook.pod [.lib.pod]perlbot.pod [.lib.pod]perlcall.pod
@@ -498,50 +502,59 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 [.lib.pod]perldoc : [.utils]perldoc.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
-	Copy/Log [.utils]perldoc $(MMS$TARGET)
+	Copy/Log [.utils]perldoc.com $(MMS$TARGET)
 
 [.lib.ExtUtils]Miniperl.pm : Minimod.PL miniperlmain.c $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE) >$(MMS$TARGET)
 
-[.utils]c2ph : [.utils]c2ph.PL $(ARCHDIR)Config.pm
+[.utils]c2ph.com : [.utils]c2ph.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
-[.utils]h2ph : [.utils]h2ph.PL $(ARCHDIR)Config.pm
+[.utils]h2ph.com : [.utils]h2ph.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
-[.utils]h2xs : [.utils]h2xs.PL $(ARCHDIR)Config.pm
+[.utils]h2xs.com : [.utils]h2xs.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
-[.lib]perlbug : [.utils]perlbug.PL $(ARCHDIR)Config.pm
+[.lib]perlbug.com : [.utils]perlbug.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.utils]perlbug $(MMS$TARGET)
+	Rename/Log [.utils]perlbug.com $(MMS$TARGET)
 
-[.utils]pl2pm : [.utils]pl2pm.PL $(ARCHDIR)Config.pm
+[.utils]pl2pm.com : [.utils]pl2pm.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
-[.lib]splain : [.utils]splain.PL $(ARCHDIR)Config.pm
+[.lib]splain.com : [.utils]splain.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.utils]splain $(MMS$TARGET)
+	Rename/Log [.utils]splain.com $(MMS$TARGET)
 
-[.lib.pod]pod2html : [.pod]pod2html.PL $(ARCHDIR)Config.pm
+[.x2p]find2perl.com : [.x2p]find2perl.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) $(MMS$SOURCE)
+
+[.x2p]s2p.com : [.x2p]s2p.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) $(MMS$SOURCE)
+
+[.x2p]$(DBG)a2p$(E) : [.x2p]a2p$(O), [.x2p]hash$(O), [.x2p]str$(O), [.x2p]util$(O), [.x2p]walk$(O)
+	Link $(LINKFLAGS) /Exe=$(MMS$TARGET) $(MMS$SOURCE_LIST) $(CRTLOPTS)
+
+[.lib.pod]pod2html.com : [.pod]pod2html.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.pod]pod2html $(MMS$TARGET)
+	Rename/Log [.pod]pod2html.com $(MMS$TARGET)
 
-[.lib.pod]pod2latex : [.pod]pod2latex.PL $(ARCHDIR)Config.pm
+[.lib.pod]pod2latex.com : [.pod]pod2latex.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.pod]pod2latex $(MMS$TARGET)
+	Rename/Log [.pod]pod2latex.com $(MMS$TARGET)
 
-[.lib.pod]pod2man : [.pod]pod2man.PL $(ARCHDIR)Config.pm
+[.lib.pod]pod2man.com : [.pod]pod2man.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.pod]pod2man $(MMS$TARGET)
+	Rename/Log [.pod]pod2man.com $(MMS$TARGET)
 
-[.lib.pod]pod2text : [.pod]pod2text.PL $(ARCHDIR)Config.pm
+[.lib.pod]pod2text.com : [.pod]pod2text.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.pod]pod2text $(MMS$TARGET)
+	Rename/Log [.pod]pod2text.com $(MMS$TARGET)
 
 preplibrary : $(MINIPERL_EXE) $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm $(SOCKPM)
 	@ Write Sys$Output "Autosplitting Perl library . . ."
@@ -748,6 +761,9 @@ perly.h : [.vms]perly_h.vms
 perly$(O) : perly.c, perly.h, $(h)
 	$(CC) $(CFLAGS) $(MMS$SOURCE)
 .endif
+
+[.t.lib]vmsfspec.t : [.vms.ext]filespec.t
+	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
 test : all
 	- @[.VMS]Test.Com "$(E)"
@@ -1533,6 +1549,42 @@ globals$(O) : scope.h
 globals$(O) : sv.h
 globals$(O) : vmsish.h
 globals$(O) : util.h
+[.x2p]a2p$(O) : [.x2p]a2p.c
+[.x2p]a2p$(O) : [.x2p]a2py.c
+[.x2p]a2p$(O) : [.x2p]INTERN.h
+[.x2p]a2p$(O) : [.x2p]a2p.h
+[.x2p]a2p$(O) : [.x2p]hash.h
+[.x2p]a2p$(O) : [.x2p]str.h
+[.x2p]a2p$(O) : handy.h 
+[.x2p]hash$(O) : [.x2p]hash.c
+[.x2p]hash$(O) : [.x2p]EXTERN.h
+[.x2p]hash$(O) : [.x2p]a2p.h
+[.x2p]hash$(O) : [.x2p]hash.h
+[.x2p]hash$(O) : [.x2p]str.h
+[.x2p]hash$(O) : handy.h
+[.x2p]hash$(O) : [.x2p]util.h
+[.x2p]str$(O) : [.x2p]str.c
+[.x2p]str$(O) : [.x2p]EXTERN.h
+[.x2p]str$(O) : [.x2p]a2p.h
+[.x2p]str$(O) : [.x2p]hash.h
+[.x2p]str$(O) : [.x2p]str.h
+[.x2p]str$(O) : handy.h
+[.x2p]str$(O) : [.x2p]util.h
+[.x2p]util$(O) : [.x2p]util.c
+[.x2p]util$(O) : [.x2p]EXTERN.h
+[.x2p]util$(O) : [.x2p]a2p.h
+[.x2p]util$(O) : [.x2p]hash.h
+[.x2p]util$(O) : [.x2p]str.h
+[.x2p]util$(O) : handy.h
+[.x2p]util$(O) : [.x2p]INTERN.h
+[.x2p]util$(O) : [.x2p]util.h
+[.x2p]walk$(O) : [.x2p]walk.c
+[.x2p]walk$(O) : [.x2p]EXTERN.h
+[.x2p]walk$(O) : [.x2p]a2p.h
+[.x2p]walk$(O) : [.x2p]hash.h
+[.x2p]walk$(O) : [.x2p]str.h
+[.x2p]walk$(O) : handy.h
+[.x2p]walk$(O) : [.x2p]util.h
 .endif # !LINK_ONLY
 
 config.h : [.vms]config.vms
@@ -1603,7 +1655,7 @@ clean : tidy
 	Set Default [--]
 .endif
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
-	- If F$Search("*$(O);*") .nes."" Then Delete/NoConfirm/Log *$(O);*
+	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*
 	- If F$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*
 	- If F$Search("Config.SH").nes."" Then Delete/NoConfirm/Log Config.SH;*
 	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKH)")).nes."" Then Delete/NoConfirm/Log $(SOCKH);*
@@ -1650,10 +1702,11 @@ realclean : clean
 	- If F$Search("$(ARCHDIR)Config.pm").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config.pm;*
 	- If F$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Delete/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm;*
 	- If F$Search("[.utils]*.").nes."" Then Delete/NoConfirm/Log [.utils]*.;*/Exclude=Makefile.
+	- If F$Search("[.x2p]*.").nes."" Then Delete/NoConfirm/Log [.x2p]*.;*/Exclude=Makefile.
 	- If F$Search("[.lib.pod]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pod]*.pod;*
 	- If F$Search("[.lib.pod]perldoc.").nes."" Then Delete/NoConfirm/Log [.lib.pod]perldoc.;*
-	- If F$Search("[.lib.pod]pod2*.").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.;*
-	- If F$Search("*$(E)").nes."" Then Delete/NoConfirm/Log *$(E);*
+	- If F$Search("[.lib.pod]pod2*.com").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.com;*
+	- If F$Search("[...]*$(E)").nes."" Then Delete/NoConfirm/Log [...]*$(E);*
 
 cleansrc : clean
 	- If F$Search("*.C;-1").nes."" Then Purge/NoConfirm/Log *.C

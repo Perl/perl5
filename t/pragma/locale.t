@@ -364,6 +364,7 @@ print "ok 101\n";
 
 # Find places where the collation order differs from the default locale.
 
+print "# testing 102\n";
 {
     my (@k, $i, $j, @d);
 
@@ -386,6 +387,7 @@ print "ok 101\n";
     for (@d) {
 	($i, $j) = @$_;
 	if ($i gt $j) {
+	    print "# failed 102 at:\n";
 	    print "# i = $i, j = $j, i ",
 	          $i le $j ? 'le' : 'gt', " j\n";
 	    print 'not ';
@@ -397,12 +399,15 @@ print "ok 102\n";
 
 # Cross-check whole character set.
 
+print "# testing 103\n";
 for (map { chr } 0..255) {
     if (/\w/ and /\W/) { print 'not '; last }
     if (/\d/ and /\D/) { print 'not '; last }
     if (/\s/ and /\S/) { print 'not '; last }
     if (/\w/ and /\D/ and not /_/ and
 	not (exists $UPPER{$_} or exists $lower{$_})) {
+	print "# failed 103 at:\n";
+	print "# ", ord($_), " '$_'\n";
 	print 'not ';
 	last;
     }
@@ -411,8 +416,9 @@ print "ok 103\n";
 
 # The @Locale should be internally consistent.
 
+print "# testing 104\n";
 {
-    my ($from, $to, , $lesser, $greater);
+    my ($from, $to, $lesser, $greater, @test, %test, $test);
 
     for (0..9) {
 	# Select a slice.
@@ -424,23 +430,42 @@ print "ok 103\n";
 	$from++; $to++;
         $to = $#Locale if ($to > $#Locale);
 	$greater = join('', @Locale[$from..$to]);
-	if (not ($lesser  lt $greater) or
-	    not ($lesser  le $greater) or
-	    not ($lesser  ne $greater) or
-	        ($lesser  eq $greater) or
-	        ($lesser  ge $greater) or
-	        ($lesser  gt $greater) or
-	        ($greater lt $lesser ) or
-	        ($greater le $lesser ) or
-	    not ($greater ne $lesser ) or
-	        ($greater eq $lesser ) or
-	    not ($greater ge $lesser ) or
-	    not ($greater gt $lesser ) or
-	    # Well, these two are sort of redundant because @Locale
-	    # was derived using cmp.
-	    not (($lesser  cmp $greater) == -1) or
-	    not (($greater cmp $lesser ) ==  1)
-	   ) {
+	@test = 
+	    (
+	     'not ($lesser  lt $greater)', # 0
+	     'not ($lesser  le $greater)', # 1
+	     'not ($lesser  ne $greater)', # 2
+	     '    ($lesser  eq $greater)', # 3
+	     '    ($lesser  ge $greater)', # 4
+	     '    ($lesser  gt $greater)', # 5
+	     '    ($greater lt $lesser )', # 6
+	     '    ($greater le $lesser )', # 7
+	     'not ($greater ne $lesser )', # 8
+	     '    ($greater eq $lesser )', # 9
+	     'not ($greater ge $lesser )', # 10
+	     'not ($greater gt $lesser )', # 11
+	     # Well, these two are sort of redundant
+	     # because @Locale was derived using cmp.
+	     'not (($lesser  cmp $greater) == -1)', # 12
+	     'not (($greater cmp $lesser ) ==  1)'  # 13
+	     );
+	@test{@test} = 0 x @test;
+	$test = 0;
+	for my $ti (@test) { $test{$ti} = eval $ti ; $test ||= $test{$ti} }
+	if ($test) {
+	    print "# failed 104 at:\n";
+	    print "# lesser  = '$lesser'\n";
+	    print "# greater = '$greater'\n";
+	    print "# (greater) from = $from, to = $to\n";
+	    for my $ti (@test) {
+		printf("# %-40s %-4s", $ti,
+		       $test{$ti} ? 'FAIL' : 'ok');
+		if ($ti =~ /\(\.*(\$.+ +cmp +\$[^\)]+)\.*\)/) {
+		    printf("(%s == %4d)", $1, eval $1);
+	        }
+		print "\n";
+	    }
+
 	    print 'not ';
 	    last;
 	}

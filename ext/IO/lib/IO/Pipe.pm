@@ -1,6 +1,144 @@
+# IO::Pipe.pm
 #
+# Copyright (c) 1996 Graham Barr <Graham.Barr@tiuk.ti.com>. All rights
+# reserved. This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
 
 package IO::Pipe;
+
+require 5.000;
+
+use IO::Handle;
+use strict;
+use vars qw($VERSION);
+use Carp;
+use Symbol;
+
+$VERSION = "1.09";
+
+sub new {
+    my $type = shift;
+    my $class = ref($type) || $type || "IO::Pipe";
+    @_ == 0 || @_ == 2 or croak "usage: new $class [READFH, WRITEFH]";
+
+    my $me = bless gensym(), $class;
+
+    my($readfh,$writefh) = @_ ? @_ : $me->handles;
+
+    pipe($readfh, $writefh)
+	or return undef;
+
+    @{*$me} = ($readfh, $writefh);
+
+    $me;
+}
+
+sub handles {
+    @_ == 1 or croak 'usage: $pipe->handles()';
+    (IO::Pipe::End->new(), IO::Pipe::End->new());
+}
+
+my $do_spawn = $^O eq 'os2';
+
+sub _doit {
+    my $me = shift;
+    my $rw = shift;
+
+    my $pid = $do_spawn ? 0 : fork();
+
+    if($pid) { # Parent
+        return $pid;
+    }
+    elsif(defined $pid) { # Child or spawn
+        my $fh;
+        my $io = $rw ? \*STDIN : \*STDOUT;
+        my ($mode, $save) = $rw ? "r" : "w";
+        if ($do_spawn) {
+          require Fcntl;
+          $save = IO::Handle->new_from_fd($io, $mode);
+          # Close in child:
+          fcntl(shift, Fcntl::F_SETFD(), 1) or croak "fcntl: $!";
+          $fh = $rw ? ${*$me}[0] : ${*$me}[1];
+        } else {
+          shift;
+          $fh = $rw ? $me->reader() : $me->writer(); # close the other end
+        }
+        bless $io, "IO::Handle";
+        $io->fdopen($fh, $mode);
+
+        if ($do_spawn) {
+          $pid = eval { system 1, @_ }; # 1 == P_NOWAIT
+          my $err = $!;
+    
+          $io->fdopen($save, $mode);
+          $save->close or croak "Cannot close $!";
+          croak "IO::Pipe: Cannot spawn-NOWAIT: $err" if not $pid or $pid < 0;
+          return $pid;
+        } else {
+          exec @_ or
+            croak "IO::Pipe: Cannot exec: $!";
+        }
+    }
+    else {
+        croak "IO::Pipe: Cannot fork: $!";
+    }
+
+    # NOT Reached
+}
+
+sub reader {
+    @_ >= 1 or croak 'usage: $pipe->reader()';
+    my $me = shift;
+    my $fh  = ${*$me}[0];
+    my $pid = $me->_doit(0, $fh, @_)
+        if(@_);
+
+    close ${*$me}[1];
+    bless $me, ref($fh);
+    *{*$me} = *{*$fh};          # Alias self to handle
+    bless $fh;                  # Really wan't un-bless here
+    ${*$me}{'io_pipe_pid'} = $pid
+        if defined $pid;
+
+    $me;
+}
+
+sub writer {
+    @_ >= 1 or croak 'usage: $pipe->writer()';
+    my $me = shift;
+    my $fh  = ${*$me}[1];
+    my $pid = $me->_doit(1, $fh, @_)
+        if(@_);
+
+    close ${*$me}[0];
+    bless $me, ref($fh);
+    *{*$me} = *{*$fh};          # Alias self to handle
+    bless $fh;                  # Really wan't un-bless here
+    ${*$me}{'io_pipe_pid'} = $pid
+        if defined $pid;
+
+    $me;
+}
+
+package IO::Pipe::End;
+
+use vars qw(@ISA);
+
+@ISA = qw(IO::Handle);
+
+sub close {
+    my $fh = shift;
+    my $r = $fh->SUPER::close(@_);
+
+    waitpid(${*$fh}{'io_pipe_pid'},0)
+	if(defined ${*$fh}{'io_pipe_pid'});
+
+    $r;
+}
+
+1;
+
+__END__
 
 =head1 NAME
 
@@ -79,7 +217,7 @@ is called and C<ARGS> are passed to exec.
 
 This method is called during construction by C<IO::Pipe::new>
 on the newly created C<IO::Pipe> object. It returns an array of two objects
-blessed into C<IO::Handle>, or a subclass thereof.
+blessed into C<IO::Pipe::End>, or a subclass thereof.
 
 =back
 
@@ -93,101 +231,8 @@ Graham Barr <bodg@tiuk.ti.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
+Copyright (c) 1996 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 
 =cut
-
-require 5.000;
-use     strict;
-use 	vars qw($VERSION);
-use 	Carp;
-use 	Symbol;
-require IO::Handle;
-
-$VERSION = "1.08";
-
-sub new {
-    my $type = shift;
-    my $class = ref($type) || $type || "IO::Pipe";
-    @_ == 0 || @_ == 2 or croak "usage: new $class [READFH, WRITEFH]";
-
-    my $me = bless gensym(), $class;
-
-    my($readfh,$writefh) = @_ ? @_ : $me->handles;
-
-    pipe($readfh, $writefh)
-	or return undef;
-
-    @{*$me} = ($readfh, $writefh);
-
-    $me;
-}
-
-sub handles {
-    @_ == 1 or croak 'usage: $pipe->handles()';
-    (IO::Handle->new(), IO::Handle->new());
-}
-
-sub _doit {
-    my $me = shift;
-    my $rw = shift;
-
-    my $pid = fork();
-
-    if($pid) { # Parent
-	return $pid;
-    }
-    elsif(defined $pid) { # Child
-	my $fh = $rw ? $me->reader() : $me->writer();
-	my $io = $rw ? \*STDIN : \*STDOUT;
-
-	bless $io, "IO::Handle";
-	$io->fdopen($fh, $rw ? "r" : "w");
-	exec @_ or
-	    croak "IO::Pipe: Cannot exec: $!";
-    }
-    else {
-	croak "IO::Pipe: Cannot fork: $!";
-    }
-
-    # NOT Reached
-}
-
-sub reader {
-    @_ >= 1 or croak 'usage: $pipe->reader()';
-    my $me = shift;
-    my $fh  = ${*$me}[0];
-    my $pid = $me->_doit(0,@_)
-	if(@_);
-
-    close(${*$me}[1]);
-    bless $me, ref($fh);
-    *{*$me} = *{*$fh};			# Alias self to handle
-    bless $fh, 'IO::Pipe::DeadEnd';	# Really wan't un-bless here
-    ${*$me}{'io_pipe_pid'} = $pid
-	if defined $pid;
-
-    $me;
-}
-
-sub writer {
-    @_ >= 1 or croak 'usage: $pipe->writer()';
-    my $me = shift;
-    my $fh  = ${*$me}[1];
-    my $pid = $me->_doit(1,@_)
-	if(@_);
-
-    close(${*$me}[0]);
-    bless $me, ref($fh);
-    *{*$me} = *{*$fh};			# Alias self to handle
-    bless $fh, 'IO::Pipe::DeadEnd';	# Really wan't un-bless here
-    ${*$me}{'io_pipe_pid'} = $pid
-	if defined $pid;
-
-    $me;
-}
-
-1;
-

@@ -1191,15 +1191,19 @@ die(pat, va_alist)
 	LEAVE;
 	if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
 	    dSP;
-	    SV *msg = sv_2mortal(newSVpv(message, 0));
+	    SV *msg;
+
+	    ENTER;
+	    msg = newSVpv(message, 0);
+	    SvREADONLY_on(msg);
+	    SAVEFREESV(msg);
 
 	    PUSHMARK(sp);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
 
-	    /* It's okay for the __DIE__ hook to modify the message. */
-	    message = SvPV(msg, na);
+	    LEAVE;
 	}
     }
 
@@ -1243,15 +1247,19 @@ croak(pat, va_alist)
 	LEAVE;
 	if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
 	    dSP;
-	    SV *msg = sv_2mortal(newSVpv(message, 0));
+	    SV *msg;
+
+	    ENTER;
+	    msg = newSVpv(message, 0);
+	    SvREADONLY_on(msg);
+	    SAVEFREESV(msg);
 
 	    PUSHMARK(sp);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
 
-	    /* It's okay for the __DIE__ hook to modify the message. */
-	    message = SvPV(msg, na);
+	    LEAVE;
 	}
     }
     if (in_eval) {
@@ -1311,10 +1319,19 @@ warn(pat,va_alist)
 	LEAVE;
 	if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
 	    dSP;
+	    SV *msg;
+
+	    ENTER;
+	    msg = newSVpv(message, 0);
+	    SvREADONLY_on(msg);
+	    SAVEFREESV(msg);
+
 	    PUSHMARK(sp);
-	    XPUSHs(sv_2mortal(newSVpv(message,0)));
+	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
+
+	    LEAVE;
 	    return;
 	}
     }

@@ -30,7 +30,7 @@ esac
 toroff=`
 	echo		\
     $mandir/perl.1	\
-    $mandir/perlnews.1	\
+    $mandir/perldelta.1	\
     $mandir/perldata.1	\
     $mandir/perlsyn.1	\
     $mandir/perlop.1	\

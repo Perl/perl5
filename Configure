@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Tue Dec 17 14:33:33 EST 1996 [metaconfig 3.0 PL60]
+# Generated on Thu Jan 23 14:39:28 EST 1997 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -390,7 +390,6 @@ d_stdstdio=''
 stdio_base=''
 stdio_bufsiz=''
 stdio_cnt=''
-stdio_filbuf=''
 stdio_ptr=''
 d_index=''
 d_strchr=''
@@ -1707,6 +1706,9 @@ EOM
 			*) osvers=$tmp;;
 			esac
 			;;
+		*dc.osx) osname=dcosx
+			osvers="$3"
+			;;
 		dnix) osname=dnix
 			osvers="$3"
 			;;
@@ -2434,7 +2436,7 @@ else
 fi
 
 : set the base revision
-baserev=5
+baserev=5.0
 
 : get the patchlevel
 echo " "
@@ -2466,23 +2468,26 @@ set archlib archlib
 eval $prefixit
 case "$archlib" in
 '')
-	case "$privlib" in
-	'')	dflt=`./loc . "." $prefixexp/lib /usr/local/lib /usr/lib /lib`
-		set dflt
-		eval $prefixup
-		;;
-	*)	if test 0 -eq "$subversion"; then
-			version=`echo $baserev $patchlevel | \
-				 $awk '{ printf "%d.%03d\n",$1,$2 }'`
-		else
-			version=`echo $baserev $patchlevel $subversion | \
-				 $awk '{ printf "%d.%03d%02d\n",$1,$2,$3 }'`
-		fi
-		dflt="$privlib/$archname/$version"
-		;;
-	esac
+    case "$privlib" in
+    '')	dflt=`./loc . "." $prefixexp/lib /usr/local/lib /usr/lib /lib`
+	set dflt
+	eval $prefixup
 	;;
-*) dflt="$archlib";;
+    *)	if test 0 -eq "$subversion"; then
+	    version=`LC_ALL=C; export LC_ALL; \
+		     echo $baserev $patchlevel | \
+		     $awk '{ printf "%.3f\n", $1 + $2/1000.0 }'`
+	else
+	    version=`LC_ALL=C; export LC_ALL; \
+		     echo $baserev $patchlevel $subversion | \
+		     $awk '{ printf "%.5f\n", $1 + $2/1000.0 + $3/100000.0 }'`
+	fi
+	;;
+    esac
+    ;;
+*)
+    dflt="$archlib"
+    ;;
 esac
 cat <<EOM
 
@@ -5158,7 +5163,7 @@ case "$myhostname" in
 				.) dflt=.`$sed -n -e 's/	/ /g' \
 				     -e 's/^domain  *\([^ ]*\).*/\1/p' $tans \
 				     | ./tr '[A-Z]' '[a-z]' 2>/dev/null`
-					;;
+  					;;
 				esac
 			fi
 			;;
@@ -6418,9 +6423,7 @@ main()
 }
 EOCP
 	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1; then
-		cat <<EOS >mtry
-$startsh
-EOS
+		echo "$startsh" >mtry
 		echo "./try >try.out 2>try.ret 3>try.err || exit 4" >>mtry
 		chmod +x mtry
 		./mtry >/dev/null 2>&1
@@ -7048,7 +7051,8 @@ for (align = 7; align >= 0; align--) {
 exit(0);
 }
 EOCP
-	if $cc $ccflags $ldflags foo.c -o safebcpy $libs >/dev/null 2>&1; then
+	if $cc $optimize $ccflags $ldflags foo.c \
+		    -o safebcpy $libs >/dev/null 2>&1; then
 		if ./safebcpy 2>/dev/null; then
 			echo "Yes, it can."
 			val="$define"
@@ -7126,7 +7130,8 @@ for (align = 7; align >= 0; align--) {
 exit(0);
 }
 EOCP
-	if $cc $ccflags $ldflags foo.c -o safemcpy $libs >/dev/null 2>&1; then
+	if $cc $optimize $ccflags $ldflags foo.c \
+		    -o safemcpy $libs >/dev/null 2>&1; then
 		if ./safemcpy 2>/dev/null; then
 			echo "Yes, it can."
 			val="$define"
@@ -7186,7 +7191,8 @@ if ((a < b) && memcmp(&a, &b, 1) < 0)
 exit(0);
 }
 EOCP
-	if $cc $ccflags $ldflags foo.c -o sanemcmp $libs >/dev/null 2>&1; then
+	if $cc $optimize $ccflags $ldflags foo.c \
+		    -o sanemcmp $libs >/dev/null 2>&1; then
 		if ./sanemcmp 2>/dev/null; then
 			echo "Yes, it can."
 			val="$define"
@@ -7634,47 +7640,6 @@ $define$define) val=$define ;;
 esac
 set d_stdio_cnt_lval
 eval $setvar
-
-: How to access the stdio _filbuf or __filbuf function.
-: If this fails, check how the getc macro in stdio.h works.
-case "${d_stdio_ptr_lval}${d_stdio_cnt_lval}" in
-${define}${define})
-	: Try $hint value, if any, then _filbuf, __filbuf, _fill, then punt.
-	: _fill is for os/2.
-	xxx='notok'
-	for filbuf in $stdio_filbuf '_filbuf(fp)' '__filbuf(fp) ' '_fill(fp)' ; do
-		$cat >try.c <<EOP
-#include <stdio.h>
-#define FILE_ptr(fp)	$stdio_ptr
-#define FILE_cnt(fp)	$stdio_cnt
-#define FILE_filbuf(fp)	$filbuf
-main() {
-	FILE *fp = fopen("try.c", "r");
-	int c;
-	c = getc(fp);
-	c = FILE_filbuf(fp);  /* Just looking for linker errors.*/
-	exit(0);
-}
-EOP
-		if $cc $ccflags $ldflags -o try try.c $libs >/dev/null 2>&1 && ./try; then
-			echo "Your stdio appears to use $filbuf"
-			stdio_filbuf="$filbuf"
-			xxx='ok'
-			break
-		else
-			echo "Hmm.  $filbuf doesn't seem to work."
-		fi
-		$rm -f try.c try
-	done
-	case "$xxx" in
-	notok)	echo "I can't figure out how to access _filbuf"
-			echo "I'll just have to work around it."
-			d_stdio_ptr_lval="$undef"
-			d_stdio_cnt_lval="$undef"
-			;;
-	esac
-	;;
-esac
 
 
 : see if _base is also standard
@@ -10298,7 +10263,6 @@ stdchar='$stdchar'
 stdio_base='$stdio_base'
 stdio_bufsiz='$stdio_bufsiz'
 stdio_cnt='$stdio_cnt'
-stdio_filbuf='$stdio_filbuf'
 stdio_ptr='$stdio_ptr'
 strings='$strings'
 submit='$submit'

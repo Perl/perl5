@@ -3090,11 +3090,8 @@ I32 append;
 	    PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), 
 	    PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0));
 	/* This used to call 'filbuf' in stdio form, but as that behaves like 
-	   getc when cnt <= 0 we use PerlIO_getc here to avoid another 
-	   abstraction.  This may also avoid issues with different named 
-	   'filbuf' equivalents, though Configure tries to handle them now
-	   anyway.
-	 */
+	   getc when cnt <= 0 we use PerlIO_getc here to avoid introducing
+	   another abstraction.  */
 	i   = PerlIO_getc(fp);		/* get more characters */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 	    "Screamer: post: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
@@ -3593,7 +3590,7 @@ I32 lref;
 	    ENTER;
 	    tmpsv = NEWSV(704,0);
 	    gv_efullname3(tmpsv, gv, Nullch);
-	    newSUB(start_subparse(0),
+	    newSUB(start_subparse(FALSE, 0),
 		   newSVOP(OP_CONST, 0, tmpsv),
 		   Nullop,
 		   Nullop);
@@ -4029,9 +4026,12 @@ SV* sv;
 
     switch (type) {
     case SVt_PVCV:
-      if (CvANON(sv))   strcat(d, "ANON,");
-      if (CvCLONE(sv))  strcat(d, "CLONE,");
-      if (CvCLONED(sv)) strcat(d, "CLONED,");
+    case SVt_PVFM:
+      if (CvANON(sv))		strcat(d, "ANON,");
+      if (CvUNIQUE(sv))		strcat(d, "UNIQUE,");
+      if (CvCLONE(sv))		strcat(d, "CLONE,");
+      if (CvCLONED(sv))		strcat(d, "CLONED,");
+      if (CvNODEBUG(sv))	strcat(d, "NODEBUG,");
       break;
     case SVt_PVHV:
       if (HvSHAREKEYS(sv))	strcat(d, "SHAREKEYS,");

@@ -116,4 +116,5 @@ print join(':',200..400) eq join(':',@foo) ? "ok 10\n" : "not ok 10\n";
 print ($h{'foo'} eq '' ? "ok 11\n" : "not ok 11\n");
 print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
 
+untie %h;
 unlink 'Op.dbmx.dir', $Dfile;

@@ -7,7 +7,7 @@ BEGIN {
     $| = 1;
     chdir 't' if -d 't';
     @INC = '../lib';
-    $SIG{__WARN__} = sub { die @_ };
+    $SIG{__WARN__} = sub { die "Dying on warning: ", @_ };
 }
 
 sub ok {
@@ -97,19 +97,33 @@ ok 17, $@ eq "foo\n", $@;
 ok 18, $$ > 0, $$;
 
 # $^X and $0
-$script = './show-shebang';
+if ($^O eq 'qnx') {
+    chomp($wd = `pwd`);
+}
+else {
+    $wd = '.';
+}
+$script = "$wd/show-shebang";
+if ($^O eq 'os2') {
+    # Started by ksh, which adds suffixes '.exe' and '.' to perl and script
+    $s = "\$^X is $wd/perl.exe, \$0 is $script.\n";
+}
+else {
+    $s = "\$^X is $wd/perl, \$0 is $script\n";
+}
 ok 19, open(SCRIPT, ">$script"), $!;
-ok 20, print(SCRIPT <<'EOF'), $!;
-#!./perl
+ok 20, print(SCRIPT <<EOB . <<'EOF'), $!;
+#!$wd/perl
+EOB
 print "\$^X is $^X, \$0 is $0\n";
 EOF
 ok 21, close(SCRIPT), $!;
 ok 22, chmod(0755, $script), $!;
-$s = "\$^X is ./perl, \$0 is $script\n";
 $_ = `$script`;
-ok 23, $_ eq $s, ":$_:";
-$_ = `./perl $script`;
-ok 24, $_ eq $s, ":$_:";
+s{is perl}{is $wd/perl}; # for systems where $^X is only a basename
+ok 23, $_ eq $s, ":$_:!=:$s:";
+$_ = `$wd/perl $script`;
+ok 24, $_ eq $s, ":$_:!=:$s:";
 ok 25, unlink($script), $!;
 
 # $], $^O, $^T

@@ -102,10 +102,9 @@ installprivlib='$installprivlib'
 installarchlib='$installarchlib'
 installsitelib='$installsitelib'
 installsitearch='$installsitearch'
-startperl='\$ perl 'f\$env("procedure")' - ! q#
-  'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8'
-$ exit !#
-'
+path_sep='|'
+startperl='\$ perl 'f\$env("procedure")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8' !
+$ exit++ + ++$status != 0 and $exit = $status = undef;
 EndOfIntro
 
 foreach (@ARGV) {

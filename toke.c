@@ -1579,35 +1579,31 @@ yylex()
 #endif /* ALTERNATE_SHEBANG */
 	    }
 	    if (d) {
-		/*
-		 * HP-UX (at least) sets argv[0] to the script name,
-		 * which makes $^X incorrect.  And Digital UNIX and Linux,
-		 * at least, set argv[0] to the basename of the Perl
-		 * interpreter. So, having found "#!", we'll set it right.
-		 */
-		SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV));
 		char *ipath;
-		char *ibase;
+		char *ipathend;
 
-		while (*d == ' ' || *d == '\t')
+		while (isSPACE(*d))
 		    d++;
 		ipath = d;
-		ibase = Nullch;
-		while (*d && !isSPACE(*d)) {
-		    if (*d++ == '/')
-			ibase = d;
+		while (*d && !isSPACE(*d))
+		    d++;
+		ipathend = d;
+
+#ifdef ARG_ZERO_IS_SCRIPT
+		if (ipathend > ipath) {
+		    /*
+		     * HP-UX (at least) sets argv[0] to the script name,
+		     * which makes $^X incorrect.  And Digital UNIX and Linux,
+		     * at least, set argv[0] to the basename of the Perl
+		     * interpreter. So, having found "#!", we'll set it right.
+		     */
+		    SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV));
+		    assert(SvPOK(x) || SvGMAGICAL(x));
+		    if (sv_eq(x, GvSV(curcop->cop_filegv)))
+			sv_setpvn(x, ipath, ipathend - ipath);
+		    TAINT_NOT;	/* $^X is always tainted, but that's OK */
 		}
-		assert(SvPOK(x) || SvGMAGICAL(x));
-		if (sv_eq(x, GvSV(curcop->cop_filegv))
-		    || (ibase
-			&& SvCUR(x) == (d - ibase)
-			&& strnEQ(SvPVX(x), ibase, d - ibase)))
-		    sv_setpvn(x, ipath, d - ipath);
-		/*
-		 * $^X is always tainted, but taintedness must be off
-		 * when parsing code, so forget we ever saw it.
-		 */
-		TAINT_NOT;
+#endif /* ARG_ZERO_IS_SCRIPT */
 
 		/*
 		 * Look for options.
@@ -1624,10 +1620,9 @@ yylex()
 		 * other interpreter.  Similarly, if "perl" is there, but
 		 * not in the first 'word' of the line, we assume the line
 		 * contains the start of the Perl program.
-		 * This isn't foolproof, but it's generally a good guess.
 		 */
 		if (d && *s != '#') {
-		    char *c = s;
+		    char *c = ipath;
 		    while (*c && !strchr("; \t\r\n\f\v#", *c))
 			c++;
 		    if (c < d)
@@ -1635,23 +1630,18 @@ yylex()
 		    else
 			*s = '#';	/* Don't try to parse shebang line */
 		}
-#endif
+#endif /* ALTERNATE_SHEBANG */
 		if (!d &&
 		    *s == '#' &&
+		    ipathend > ipath &&
 		    !minus_c &&
 		    !instr(s,"indir") &&
 		    instr(origargv[0],"perl"))
 		{
 		    char **newargv;
-		    char *cmd;
 
-		    s += 2;
-		    if (*s == ' ')
-			s++;
-		    cmd = s;
-		    while (s < bufend && !isSPACE(*s))
-			s++;
-		    *s++ = '\0';
+		    *ipathend = '\0';
+		    s = ipathend + 1;
 		    while (s < bufend && isSPACE(*s))
 			s++;
 		    if (s < bufend) {
@@ -1664,9 +1654,9 @@ yylex()
 		    }
 		    else
 			newargv = origargv;
-		    newargv[0] = cmd;
-		    execv(cmd,newargv);
-		    croak("Can't exec %s", cmd);
+		    newargv[0] = ipath;
+		    execv(ipath, newargv);
+		    croak("Can't exec %s", ipath);
 		}
 		if (d) {
 		    int oldpdb = perldb;
@@ -4533,9 +4523,10 @@ register PMOP *pm;
 		return;
 	    }
 	}
-	if (!pm->op_pmshort ||	/* promote the better string */
-	  ((pm->op_pmflags & PMf_SCANFIRST) &&
-	   (SvCUR(pm->op_pmshort) < SvCUR(pm->op_pmregexp->regmust)) )){
+	/* promote the better string */
+	if ((!pm->op_pmshort && !(pm->op_pmregexp->reganch & ROPT_ANCH)) ||
+	    ((pm->op_pmflags & PMf_SCANFIRST) &&
+	     (SvCUR(pm->op_pmshort) < SvCUR(pm->op_pmregexp->regmust)))) {
 	    SvREFCNT_dec(pm->op_pmshort);		/* ok if null */
 	    pm->op_pmshort = pm->op_pmregexp->regmust;
 	    pm->op_pmslen = SvCUR(pm->op_pmshort);
@@ -4610,10 +4601,11 @@ register char *s;
     char term;
     register char *d;
     char *peek;
+    int outer = (rsfp && !lex_inwhat);
 
     s += 2;
     d = tokenbuf;
-    if (!rsfp)
+    if (!outer)
 	*d++ = '\n';
     for (peek = s; *peek == ' ' || *peek == '\t'; peek++) ;
     if (*peek && strchr("`'\"",*peek)) {
@@ -4638,7 +4630,7 @@ register char *s;
     *d = '\0';
     len = d - tokenbuf;
     d = "\n";
-    if (rsfp || !(d=ninstr(s,bufend,d,d+1)))
+    if (outer || !(d=ninstr(s,bufend,d,d+1)))
 	herewas = newSVpv(s,bufend-s);
     else
 	s--, herewas = newSVpv(s,d-s);
@@ -4659,7 +4651,7 @@ register char *s;
     multi_start = curcop->cop_line;
     multi_open = multi_close = '<';
     term = *tokenbuf;
-    if (!rsfp) {
+    if (!outer) {
 	d = s;
 	while (s < bufend &&
 	  (*s != term || memNE(s,tokenbuf,len)) ) {
@@ -4680,7 +4672,7 @@ register char *s;
     else
 	sv_setpvn(tmpstr,"",0);   /* avoid "uninitialized" warning */
     while (s >= bufend) {	/* multiple line string? */
-	if (!rsfp ||
+	if (!outer ||
 	 !(oldoldbufptr = oldbufptr = s = linestart = filter_gets(linestr, rsfp, 0))) {
 	    curcop->cop_line = multi_start;
 	    missingterm(tokenbuf);
@@ -5069,7 +5061,8 @@ set_csh()
 }
 
 int
-start_subparse(flags)
+start_subparse(is_format, flags)
+I32 is_format;
 U32 flags;
 {
     int oldsavestack_ix = savestack_ix;
@@ -5092,7 +5085,7 @@ U32 flags;
     SAVEI32(pad_reset_pending);
 
     compcv = (CV*)NEWSV(1104,0);
-    sv_upgrade((SV *)compcv, (flags & CVf_FORMAT) ? SVt_PVFM : SVt_PVCV);
+    sv_upgrade((SV *)compcv, is_format ? SVt_PVFM : SVt_PVCV);
     CvFLAGS(compcv) |= flags;
 
     comppad = newAV();

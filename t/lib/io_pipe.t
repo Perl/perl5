@@ -1,6 +1,5 @@
 #!./perl
 
-
 BEGIN {
     unless(grep /blib/, @INC) {
 	chdir 't' if -d 't';
@@ -12,7 +11,9 @@ use Config;
 
 BEGIN {
     if(-d "lib" && -f "TEST") {
-        if ($Config{'extensions'} !~ /\bIO\b/ && $^O ne 'VMS') {
+        if (! $Config{'d_fork'} ||
+	    ($Config{'extensions'} !~ /\bIO\b/ && $^O ne 'VMS'))
+	{
 	    print "1..0\n";
 	    exit 0;
         }
@@ -21,8 +22,24 @@ BEGIN {
 
 use IO::Pipe;
 
+my $perl = './perl';
+
 $| = 1;
-print "1..6\n";
+print "1..10\n";
+
+$pipe = new IO::Pipe->reader($perl, '-e', 'print "not ok 1\n"');
+while (<$pipe>) {
+  s/^not //;
+  print;
+}
+$pipe->close or print "# \$!=$!\nnot ";
+print "ok 2\n";
+
+$cmd = 'BEGIN{$SIG{ALRM} = sub {print "not ok 4\n"; exit}; alarm 10} s/not //';
+$pipe = new IO::Pipe->writer($perl, '-pe', $cmd);
+print $pipe "not ok 3\n" ;
+$pipe->close or print "# \$!=$!\nnot ";
+print "ok 4\n";
 
 $pipe = new IO::Pipe;
 
@@ -31,8 +48,8 @@ $pid = fork();
 if($pid)
  {
   $pipe->writer;
-  print $pipe "Xk 1\n";
-  print $pipe "oY 2\n";
+  print $pipe "Xk 5\n";
+  print $pipe "oY 6\n";
   $pipe->close;
   wait;
  }
@@ -45,7 +62,7 @@ elsif(defined $pid)
  }
 else
  {
-  die;
+  die "# error = $!";
  }
 
 $pipe = new IO::Pipe;
@@ -67,8 +84,8 @@ elsif(defined $pid)
 
   $stdout = bless \*STDOUT, "IO::Handle";
   $stdout->fdopen($pipe,"w");
-  print STDOUT "not ok 3\n";
-  exec 'echo', 'not ok 4';
+  print STDOUT "not ok 7\n";
+  exec 'echo', 'not ok 8';
  }
 else
  {
@@ -81,12 +98,12 @@ $pipe->writer;
 $SIG{'PIPE'} = 'broken_pipe';
 
 sub broken_pipe {
-    print "ok 5\n";
+    print "ok 9\n";
 }
 
-print $pipe "not ok 5\n";
+print $pipe "not ok 9\n";
 $pipe->close;
 
 
-print "ok 6\n";
+print "ok 10\n";
 

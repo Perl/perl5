@@ -48,8 +48,12 @@ sub runtests {
     my $bad = 0;
     my $good = 0;
     my $total = @tests;
+
+    # pass -I flags to children
     my $old5lib = $ENV{PERL5LIB};
-    local($ENV{'PERL5LIB'}) = join($Config{path_sep}, @INC); # pass -I flags to children
+    local($ENV{'PERL5LIB'}) = join($Config{path_sep}, @INC);
+
+    if ($Is_VMS) { $switches =~ s/-(\S*[A-Z]\S*)/"-$1"/g }
 
     my $t_start = new Benchmark;
     while ($test = shift(@tests)) {
@@ -150,7 +154,14 @@ sub runtests {
     }
     my $t_total = timediff(new Benchmark, $t_start);
     
-    if ($^O eq 'VMS' and defined($old5lib)) { $ENV{PERL5LIB} = $old5lib; }
+    if ($^O eq 'VMS') {
+	if (defined $old5lib) {
+	    $ENV{PERL5LIB} = $old5lib;
+	}
+	else {
+	    delete $ENV{PERL5LIB};
+	}
+    }
     if ($bad == 0 && $totmax) {
 	    print "All tests successful.\n";
     } elsif ($total==0){

@@ -18,7 +18,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok ($FOO[$i] <=> $FOO[$j])\n";
+	    print "not ok $ok ($FOO[$i] <=> $FOO[$j]) gives: '$cmp'\n";
 	}
 	$ok++;
 	$cmp = $FOO[$i] cmp $FOO[$j];
@@ -29,7 +29,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    print "not ok $ok ($FOO[$i] cmp $FOO[$j])\n";
+	    print "not ok $ok ($FOO[$i] cmp $FOO[$j]) gives '$cmp'\n";
 	}
     }
 }

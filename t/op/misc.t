@@ -269,3 +269,23 @@ eval q[ my $a = 'inner'; eval q[ print "$a " ] ];
 eval { my $x = 'peace'; eval q[ print "$x\n" ] }
 EXPECT
 inner peace
+########
+-w
+$| = 1;
+sub foo {
+    print "In foo1\n";
+    eval 'sub foo { print "In foo2\n" }';
+    print "Exiting foo1\n";
+}
+foo;
+foo;
+EXPECT
+In foo1
+Subroutine foo redefined at (eval 1) line 1.
+Exiting foo1
+In foo2
+########
+$s = 0;
+map {#this newline here tickles the bug
+$s += $_} (1,2,4);
+print "eat flaming death\n" unless ($s == 7);

@@ -212,7 +212,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		    SvNVX(sv) = (double)curcop->cop_seq;
 		    SvIVX(sv) = 999999999;	/* A ref, intro immediately */
 		    SvFLAGS(sv) |= SVf_FAKE;
-		    if (CvANON(compcv) || CvFORMAT(compcv)) {
+		    if (CvANON(compcv) || SvTYPE(compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
 			CvCLONE_on(compcv);
 			if (cv != startcv) {
@@ -223,7 +223,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 				if (CvANON(bcv))
 				    CvCLONE_on(bcv);
 				else {
-				    if (dowarn)
+				    if (dowarn && !CvUNIQUE(cv))
 					warn(
 					  "Variable \"%s\" may be unavailable",
 					     name);
@@ -2637,8 +2637,10 @@ OP *block;
     if (expr) {
 	if (once && expr->op_type == OP_CONST && !SvTRUE(((SVOP*)expr)->op_sv))
 	    return block;	/* do {} while 0 does once */
-	else if (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB)
-	    expr = newASSIGNOP(0, newSVREF(newGVOP(OP_GV, 0, defgv)), 0, expr);
+	if (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB) {
+	    expr = newUNOP(OP_DEFINED, 0,
+		newASSIGNOP(0, newSVREF(newGVOP(OP_GV, 0, defgv)), 0, expr) );
+	}
     }
 
     listop = append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));

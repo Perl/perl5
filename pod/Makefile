@@ -5,7 +5,7 @@ PERL = ../miniperl
 
 POD = \
 	perl.pod	\
-	perlnews.pod	\
+	perldelta.pod	\
 	perldata.pod	\
 	perlsyn.pod	\
 	perlop.pod	\
@@ -42,7 +42,7 @@ POD = \
 
 MAN = \
 	perl.man	\
-	perlnews.man	\
+	perldelta.man	\
 	perldata.man	\
 	perlsyn.man	\
 	perlop.man	\
@@ -79,7 +79,7 @@ MAN = \
 
 HTML = \
 	perl.html	\
-	perlnews.html	\
+	perldelta.html	\
 	perldata.html	\
 	perlsyn.html	\
 	perlop.html	\
@@ -116,7 +116,7 @@ HTML = \
 
 TEX = \
 	perl.tex	\
-	perlnews.tex	\
+	perldelta.tex	\
 	perldata.tex	\
 	perlsyn.tex	\
 	perlop.tex	\

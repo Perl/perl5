@@ -19,7 +19,7 @@ For ease of access, the Perl manual has been split up into a number
 of sections:
 
     perl	Perl overview (this section)
-    perlnews	Perl news about changes from previous version
+    perldelta	Perl changes since previous version
 
     perldata	Perl data structures
     perlsyn	Perl syntax

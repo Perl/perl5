@@ -207,7 +207,8 @@ I32 safebase;	/* no need to remember string in subbase */
     /* If there is a "must appear" string, look for it. */
     s = startpos;
     if (prog->regmust != Nullsv &&
-	(!(prog->reganch & ROPT_ANCH)
+	!(prog->reganch & ROPT_ANCH_GPOS) &&
+	(!(prog->reganch & ROPT_ANCH_BOL)
 	 || (multiline && prog->regback >= 0)) )
     {
 	if (stringarg == strbeg && screamer) {
@@ -250,11 +251,13 @@ I32 safebase;	/* no need to remember string in subbase */
     regtill = startpos+minend;
 
     /* Simplest case:  anchored match need be tried only once. */
-    /*  [unless multiline is set] */
+    /*  [unless only anchor is BOL and multiline is set] */
     if (prog->reganch & ROPT_ANCH) {
 	if (regtry(prog, startpos))
 	    goto got_it;
-	else if (multiline || (prog->reganch & ROPT_IMPLICIT)) {
+	else if (!(prog->reganch & ROPT_ANCH_GPOS) &&
+		 (multiline || (prog->reganch & ROPT_IMPLICIT)))
+	{
 	    if (minlen)
 		dontbother = minlen - 1;
 	    strend -= dontbother;
@@ -662,7 +665,7 @@ char *prog;
 	    if (locinput == regbol && regprev == '\n')
 		break;
 	    sayNO;
-	case GBOL:
+	case GPOS:
 	    if (locinput == regbol)
 		break;
 	    sayNO;

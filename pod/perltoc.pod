@@ -40,7 +40,7 @@ HOME, LOGDIR, PATH, PERL5LIB, PERL5DB, PERL_DESTRUCT_LEVEL, PERLLIB
 
 =item NOTES
 
-=head2 perlnews - what's new for perl5.004
+=head2 perldelta - what's new for perl5.004
 
 =item DESCRIPTION
 
@@ -54,6 +54,8 @@ HOME, LOGDIR, PATH, PERL5LIB, PERL5DB, PERL_DESTRUCT_LEVEL, PERLLIB
 
 =item New Opcode Module and Revised Safe Module
 
+=item Extended Fcntl Module
+
 =item Internal Change: FileHandle Deprecated
 
 =item Internal Change: PerlIO internal IO abstraction interface
@@ -66,9 +68,9 @@ $^E, $^H, $^M
 
 delete on slices, flock, keys as an lvalue, my() in Control Structures,
 unpack() and pack(), use VERSION, use Module VERSION LIST,
-prototype(FUNCTION), $_ as Default
-
-=item C<m//g> does not trigger a pos() reset on failure
+prototype(FUNCTION), $_ as Default, C<m//g> does not trigger a pos() reset
+on failure, nested C<sub{}> closures work now, formats work right on
+changing lexicals
 
 =item New Built-in Methods
 
@@ -76,17 +78,20 @@ isa(CLASS), can(METHOD), VERSION( [NEED] ), class(), is_instance()
 
 =item TIEHANDLE Now Supported
 
-TIEHANDLE classname, LIST, PRINT this, LIST, READLINE this, DESTROY this
+TIEHANDLE classname, LIST, PRINT this, LIST, READLINE this, DESTROY this,
+Efficiency Enhancements
 
 =back
 
 =item Pragmata
 
-use blib, use locale, use ops
+use blib, use blib 'dir', use locale, use ops
 
 =item Modules
 
 =over
+
+=item Fcntl
 
 =item Module Information Summary
 
@@ -98,25 +103,40 @@ use blib, use locale, use ops
 
 =back
 
-=item Efficiency Enhancements
+=item Utility Changes
+
+=over
+
+=item xsubpp
+
+C<void> XSUBs now default to returning nothing
+
+=back
 
 =item Documentation Changes
 
-L<perlnews>, L<perllocale>, L<perltoot>, L<perlapio>, L<perldebug>,
+L<perldelta>, L<perllocale>, L<perltoot>, L<perlapio>, L<perldebug>,
 L<perlsec>
 
 =item New Diagnostics
 
-"my" variable %s masks earlier declaration in same scope, Allocation too
-large: %lx, Allocation too large, Attempt to free non-existent shared
-string, Attempt to use reference as lvalue in substr, Unsupported function
-fork, Ill-formed logical name |%s| in prime_env_iter, Integer overflow in
-hex number, Integer overflow in octal number, Null picture in formline,
-Offset outside string, Out of memory!, Out of memory during request for %s,
-Possible attempt to put comments in qw() list, Possible attempt to separate
-words with commas, untie attempted while %d inner references still exist,
-Got an error from DosAllocMem:, Malformed PERLLIB_PREFIX, PERL_SH_DIR too
-long, Process terminated by SIG%s
+"my" variable %s masks earlier declaration in same scope, %s argument is
+not a HASH element or slice, Allocation too large: %lx, Allocation too
+large, Attempt to free non-existent shared string, Attempt to use reference
+as lvalue in substr, Unsupported function fork, Ill-formed logical name
+|%s| in prime_env_iter, Can't use bareword ("%s") as %s ref while "strict
+refs" in use, Constant subroutine %s redefined, Died, Integer overflow in
+hex number, Integer overflow in octal number, Name "%s::%s" used only once:
+possible typo, Null picture in formline, Offset outside string, Stub found
+while resolving method `%s' overloading `%s' in package `%s', Cannot
+resolve method `%s' overloading `%s' in package `s', Out of memory!, Out of
+memory during request for %s, Possible attempt to put comments in qw()
+list, Possible attempt to separate words with commas, Scalar value @%s{%s}
+better written as $%s{%s}, untie attempted while %d inner references still
+exist, Value of %s construct can be "0"; test with defined(), Variable "%s"
+may be unavailable, Variable "%s" will not stay shared, Warning:
+something's wrong, Got an error from DosAllocMem, Malformed PERLLIB_PREFIX,
+PERL_SH_DIR too long, Process terminated by SIG%s
 
 =item BUGS
 
@@ -167,6 +187,8 @@ long, Process terminated by SIG%s
 =item Goto
 
 =item PODs: Embedded Documentation
+
+=item Plain Old Comments (Not!)
 
 =back
 
@@ -1007,19 +1029,27 @@ safe subprocesses, sockets, and semaphores)
 
 =item Debugger Commands
 
-h [command], p expr, x expr, V [pkg [vars]], X [vars], T, s [expr], n,
-E<lt>CRE<gt>, c [line|sub], l, l min+incr, l min-max, l line, l subname, -,
-w [line], f filename, /pattern/, ?pattern?, L, S [[!]pattern], t, t expr, b
-[line] [condition], b subname [condition], b postpone subname [condition],
-b load filename, d [line], D, a [line] command, A, O [opt[=val]] [opt"val"]
-[opt?].., recallCommand, ShellBang, pager, tkRunning, signalLevel,
-warnLevel, dieLevel, AutoTrace, LineInfo, C<inhibit_exit>, C<PrintRet>,
-C<frame>, arrayDepth, hashDepth, compactDump, veryCompact, globPrint,
-DumpDBFiles, DumpPackages, quote, HighBit, undefPrint, C<TTY>, noTTY,
-C<noTTY>, C<ReadLine>, C<NonStop>, E<lt> [ command ], E<lt>E<lt> command,
-E<gt> command, E<gt>E<gt> command, { [ command ], {{ command, ! number, !
--number, ! pattern, !! cmd, H -number, q or ^D, R, |dbcmd, ||dbcmd, =
-[alias value], command, p expr
+h [command], p expr, x expr, V [pkg [vars]], X [vars], T, s [expr], n
+[expr], E<lt>CRE<gt>, c [line|sub], l, l min+incr, l min-max, l line, l
+subname, -, w [line], f filename, /pattern/, ?pattern?, L, S [[!]pattern],
+t, t expr, b [line] [condition], b subname [condition], b postpone subname
+[condition], b load filename, b compile subname, d [line], D, a [line]
+command, A, O [opt[=val]] [opt"val"] [opt?].., C<recallCommand>,
+C<ShellBang>, C<pager>, C<tkRunning>, C<signalLevel>, C<warnLevel>,
+C<dieLevel>, C<AutoTrace>, C<LineInfo>, C<inhibit_exit>, C<PrintRet>,
+C<frame>, C<maxTraceLen>, C<arrayDepth>, C<hashDepth>, C<compactDump>,
+C<veryCompact>, C<globPrint>, C<DumpDBFiles>, C<DumpPackages>, C<quote>,
+C<HighBit>, C<undefPrint>, C<UsageOnly>, C<TTY>, C<noTTY>, C<ReadLine>,
+C<NonStop>, E<lt> [ command ], E<lt>E<lt> command, E<gt> command,
+E<gt>E<gt> command, { [ command ], {{ command, ! number, ! -number, !
+pattern, !! cmd, H -number, q or ^D, R, |dbcmd, ||dbcmd, = [alias value],
+command, m expr, m package
+
+=item Debugger input/output
+
+Prompt, Multi-line commands, Stack backtrace, Listing, Frame listing
+
+=item Debugging compile-time statements
 
 =item Debugger Customization
 
@@ -1422,7 +1452,7 @@ av_shift, av_store, av_undef, av_unshift, CLASS, Copy, croak, CvSTASH,
 DBsingle, DBsub, DBtrace, dMARK, dORIGMARK, dowarn, dSP, dXSARGS, dXSI32,
 dXSI32, ENTER, EXTEND, FREETMPS, G_ARRAY, G_DISCARD, G_EVAL, GIMME,
 G_NOARGS, G_SCALAR, gv_fetchmeth, gv_fetchmethod, gv_stashpv, gv_stashsv,
-he_free, he_delayfree, hv_clear, hv_delete, hv_exists, hv_fetch,
+GvSV, he_delayfree, he_free, hv_clear, hv_delete, hv_exists, hv_fetch,
 hv_iterinit, hv_iterkey, hv_iternext, hv_iternextsv, hv_iterval, hv_magic,
 HvNAME, hv_store, hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE,
 isUPPER, items, ix, LEAVE, MARK, mg_clear, mg_copy, mg_find, mg_free,
@@ -1643,13 +1673,18 @@ I<Arithmetic operations>, I<Comparison operations>, I<Bit operations>,
 I<Increment and decrement>, I<Transcendental functions>, I<Boolean, string
 and numeric conversion>, I<Special>
 
+=item Inheritance and overloading
+
+Strings as values of C<use overload> directive, Overloading of an operation
+is inherited by derived classes
+
 =back
 
 =item SPECIAL SYMBOLS FOR C<use overload>
 
 =over
 
-=item  Last Resort
+=item Last Resort
 
 =item Fallback 
 
@@ -1818,9 +1853,14 @@ timeit(COUNT, CODE), timethis, timethese, timediff, timestr
 =item Interactive Mode
 
 Searching for authors, bundles, distribution files and modules, make, test,
-install, clean modules or distributions
+install, clean	modules or distributions, readme, look module or
+distribution
 
 =item CPAN::Shell
+
+=item autobundle
+
+=item recompile
 
 =item ProgrammerE<39>s interface
 
@@ -1828,9 +1868,11 @@ install, clean modules or distributions
 
 =item Bundles
 
-=item autobundle
+=item Prerequisites
 
-=item recompile
+=item Debugging
+
+=item Floppy, Zip, and all that Jazz
 
 =back
 
@@ -1845,13 +1887,7 @@ E<lt>listE<gt>
 
 =item EXPORT
 
-=item Debugging
-
-=over
-
-=item Prerequisites
-
-=back
+=item BUGS
 
 =item AUTHOR
 
@@ -2028,9 +2064,11 @@ $value, $flags) ;>, B<$status = $X-E<gt>sync([$flags]) ;>
 
 =item DESCRIPTION
 
-@dl_library_path, @dl_resolve_using, @dl_require_symbols, dl_error(),
-$dl_debug, dl_findfile(), dl_expandspec(), dl_load_file(),
-dl_find_symbol(), dl_undef_symbols(), dl_install_xsub(), bootstrap()
+@dl_library_path, @dl_resolve_using, @dl_require_symbols, @dl_librefs,
+@dl_modules, dl_error(), $dl_debug, dl_findfile(), dl_expandspec(),
+dl_load_file(), dl_loadflags(), dl_find_symbol(),
+dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(),
+bootstrap()
 
 =item AUTHOR
 

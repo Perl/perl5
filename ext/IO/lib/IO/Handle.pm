@@ -1,3 +1,4 @@
+
 package IO::Handle;
 
 =head1 NAME
@@ -9,39 +10,33 @@ IO::Handle - supply object methods for I/O handles
     use IO::Handle;
 
     $fh = new IO::Handle;
-    if ($fh->open "< file") {
-        print <$fh>;
+    if ($fh->fdopen(fileno(STDIN),"r")) {
+        print $fh->getline;
         $fh->close;
     }
 
-    $fh = new IO::Handle "> FOO";
-    if (defined $fh) {
-        print $fh "bar\n";
-        $fh->close;
+    $fh = new IO::Handle;
+    if ($fh->fdopen(fileno(STDOUT),"w")) {
+        $fh->print("Some text\n");
     }
-
-    $fh = new IO::Handle "file", "r";
-    if (defined $fh) {
-        print <$fh>;
-        undef $fh;       # automatically closes the file
-    }
-
-    $fh = new IO::Handle "file", O_WRONLY|O_APPEND;
-    if (defined $fh) {
-        print $fh "corge\n";
-        undef $fh;       # automatically closes the file
-    }
-
-    $pos = $fh->getpos;
-    $fh->setpos $pos;
 
     $fh->setvbuf($buffer_var, _IOLBF, 1024);
+
+    undef $fh;       # automatically closes the file if it's open
 
     autoflush STDOUT 1;
 
 =head1 DESCRIPTION
 
-C<IO::Handle> is the base class for all other IO handle classes.
+C<IO::Handle> is the base class for all other IO handle classes. It is
+not intended that objects of C<IO::Handle> would be created directly,
+but instead C<IO::Handle> is inherited from by several other classes
+in the IO hierarchy.
+
+If you are reading this documentation, looking for a replacement for
+the C<FileHandle> package, then I suggest you read the documentation
+for C<IO::File>
+
 A C<IO::Handle> object is a reference to a symbol (see the C<Symbol> package)
 
 =head1 CONSTRUCTOR
@@ -167,7 +162,7 @@ module keeps a C<timeout> variable in 'io_socket_timeout'.
 
 L<perlfunc>, 
 L<perlop/"I/O Operators">,
-L<FileHandle>
+L<IO::File>
 
 =head1 BUGS
 
@@ -184,7 +179,7 @@ Derived from FileHandle.pm by Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>
 
 require 5.000;
 use strict;
-use vars qw($VERSION @EXPORT_OK $AUTOLOAD @ISA);
+use vars qw($VERSION $XS_VERSION @EXPORT_OK $AUTOLOAD @ISA);
 use Carp;
 use Symbol;
 use SelectSaver;
@@ -192,7 +187,8 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.1402";
+$VERSION = "1.1501";
+$XS_VERSION = "1.15";
 
 @EXPORT_OK = qw(
     autoflush
@@ -231,7 +227,7 @@ $VERSION = "1.1402";
 
 require DynaLoader;
 @IO::ISA = qw(DynaLoader);
-bootstrap IO $VERSION;
+bootstrap IO $XS_VERSION;
 
 sub AUTOLOAD {
     if ($AUTOLOAD =~ /::(_?[a-z])/) {
@@ -314,14 +310,8 @@ sub fdopen {
 sub close {
     @_ == 1 or croak 'usage: $fh->close()';
     my($fh) = @_;
-    my $r = close($fh);
 
-    # This may seem as though it should be in IO::Pipe, but the
-    # object gets blessed out of IO::Pipe when reader/writer is called
-    waitpid(${*$fh}{'io_pipe_pid'},0)
-	if(defined ${*$fh}{'io_pipe_pid'});
-
-    $r;
+    close($fh);
 }
 
 ################################################

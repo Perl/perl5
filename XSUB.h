@@ -38,19 +38,25 @@
 
 #ifdef XS_VERSION
 # define XS_VERSION_BOOTCHECK \
-    STMT_START {                                                                      \
-        char vn[255], *module = SvPV(ST(0),na);                               \
-        if (items >= 2)         /* version supplied as bootstrap arg */       \
-            Sv=ST(1);                                                         \
-        else {                  /* read version from module::VERSION */       \
-            sprintf(vn,"%s::VERSION", module);                                \
-            Sv = perl_get_sv(vn, FALSE);   /* XXX GV_ADDWARN */               \
-        }                                                                     \
-        if (Sv && (!SvOK(Sv) || strNE(XS_VERSION, SvPV(Sv,na))) )             \
-            croak("%s object version %s does not match %s.pm $VERSION %s",    \
-              module,XS_VERSION, module,(Sv && SvOK(Sv))?SvPV(Sv,na):"(undef)");\
+    STMT_START {							\
+	char vn[255], *module = SvPV(ST(0),na);				\
+	if (items >= 2)	 /* version supplied as bootstrap arg */	\
+	    Sv = ST(1);							\
+	else {								\
+	    sprintf(vn,"%s::XS_VERSION", module);			\
+	    Sv = perl_get_sv(vn, FALSE);   /* XXX GV_ADDWARN */		\
+	    if (!Sv || !SvOK(Sv)) {					\
+		sprintf(vn,"%s::VERSION", module);			\
+		Sv = perl_get_sv(vn, FALSE);   /* XXX GV_ADDWARN */	\
+	    }								\
+	}								\
+	if (!Sv || !SvOK(Sv))						\
+	    croak("%s object can't find $%s::XS_VERSION or $%s::VERSION", \
+		  module, module, module);				\
+	else if (strNE(XS_VERSION, SvPV(Sv, na)))			\
+	    croak("%s object version %s does not match $%s %s",		\
+		  module, XS_VERSION, vn, SvPV(Sv, na));		\
     } STMT_END
 #else
 # define XS_VERSION_BOOTCHECK
 #endif
-

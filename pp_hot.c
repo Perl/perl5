@@ -612,6 +612,7 @@ PP(pp_aassign)
 	    magic = SvMAGICAL(ary) != 0;
 	    
 	    av_clear(ary);
+	    av_extend(ary, lastrelem - relem);
 	    i = 0;
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
 		sv = NEWSV(28,0);
@@ -1677,12 +1678,6 @@ PP(pp_leavesub)
 		/* in case LEAVE wipes old return values */
     }
 
-    if (cx->blk_sub.hasargs) {		/* You don't exist; go away. */
-	AV* av = cx->blk_sub.argarray;
-
-	av_clear(av);
-	AvREAL_off(av);
-    }
     curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE;

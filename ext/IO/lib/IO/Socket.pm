@@ -1,4 +1,8 @@
+# IO::Socket.pm
 #
+# Copyright (c) 1996 Graham Barr <Graham.Barr@tiuk.ti.com>. All rights
+# reserved. This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
 
 package IO::Socket;
 
@@ -114,7 +118,7 @@ use Exporter;
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.15";
+$VERSION = "1.16";
 
 sub import {
     my $pkg = shift;
@@ -136,16 +140,7 @@ my @domain2pkg = ();
 
 sub register_domain {
     my($p,$d) = @_;
-    $domain2pkg[$d] = bless \$d, $p;
-}
-
-sub _domain2pkg {
-    my $domain = shift;
-
-    croak "Unsupported socket domain"
-	unless defined $domain2pkg[$domain];
-
-    $domain2pkg[$domain]
+    $domain2pkg[$d] = $p;
 }
 
 sub configure {
@@ -155,12 +150,13 @@ sub configure {
     croak 'IO::Socket: Cannot configure a generic socket'
 	unless defined $domain;
 
-    my $class = ref(_domain2pkg($domain));
+    croak "IO::Socket: Unsupported socket domain"
+	unless defined $domain2pkg[$domain];
 
     croak "IO::Socket: Cannot configure socket in domain '$domain'"
 	unless ref($fh) eq "IO::Socket";
 
-    bless($fh, $class);
+    bless($fh, $domain2pkg[$domain]);
     $fh->configure;
 }
 
@@ -168,18 +164,13 @@ sub socket {
     @_ == 4 or croak 'usage: $fh->socket(DOMAIN, TYPE, PROTOCOL)';
     my($fh,$domain,$type,$protocol) = @_;
 
-    if(!defined ${*$fh}{'io_socket_domain'}
-	|| !ref(${*$fh}{'io_socket_domain'})
-	|| ${${*$fh}{'io_socket_domain'}} != $domain) {
-	my $pkg = 
-	${*$fh}{'io_socket_domain'} = _domain2pkg($domain);
-    }
-
     socket($fh,$domain,$type,$protocol) or
     	return undef;
 
-    ${*$fh}{'io_socket_type'}  = $type;
-    ${*$fh}{'io_socket_proto'} = $protocol;
+    ${*$fh}{'io_socket_domain'} = $domain;
+    ${*$fh}{'io_socket_type'}   = $type;
+    ${*$fh}{'io_socket_proto'}  = $protocol;
+
     $fh;
 }
 
@@ -352,7 +343,7 @@ sub timeout {
 sub sockdomain {
     @_ == 1 or croak 'usage: $fh->sockdomain()';
     my $fh = shift;
-    ${${*$fh}{'io_socket_domain'}}
+    ${*$fh}{'io_socket_domain'};
 }
 
 sub socktype {
@@ -549,9 +540,6 @@ sub configure {
     my $pname = (getprotobynumber($proto))[0];
     $type = $arg->{Type} || $socket_type{$pname};
 
-    my $domain = AF_INET;
-    ${*$fh}{'io_socket_domain'} = bless \$domain;
-
     $fh->socket(AF_INET, $type, $proto) or
 	return _error($fh,"$!");
 
@@ -667,9 +655,6 @@ sub configure {
 
     my $type = $arg->{Type} || SOCK_STREAM;
 
-    my $domain = AF_UNIX;
-    ${*$fh}{'io_socket_domain'} = bless \$domain;
-
     $fh->socket(AF_UNIX, $type, 0) or
 	return undef;
 
@@ -713,7 +698,7 @@ Graham Barr E<lt>F<Graham.Barr@tiuk.ti.com>E<gt>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
+Copyright (c) 1996 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 

@@ -519,8 +519,10 @@ PP(pp_undef)
     dSP;
     SV *sv;
 
-    if (!op->op_private)
+    if (!op->op_private) {
+	EXTEND(SP, 1);
 	RETPUSHUNDEF;
+    }
 
     sv = POPs;
     if (!sv)
@@ -1393,15 +1395,28 @@ PP(pp_sqrt)
 PP(pp_int)
 {
     dSP; dTARGET;
-    double value;
-    value = POPn;
-    if (value >= 0.0)
-	(void)modf(value, &value);
-    else {
-	(void)modf(-value, &value);
-	value = -value;
+    {
+      double value = TOPn;
+      IV iv;
+
+      if (SvIOKp(TOPs) && !SvNOKp(TOPs) && !SvPOKp(TOPs)) {
+	iv = SvIVX(TOPs);
+	SETi(iv);
+      }
+      else {
+	if (value >= 0.0)
+	  (void)modf(value, &value);
+	else {
+	  (void)modf(-value, &value);
+	  value = -value;
+	}
+	iv = I_V(value);
+	if (iv == value)
+	  SETi(iv);
+	else
+	  SETn(value);
+      }
     }
-    XPUSHn(value);
     RETURN;
 }
 
@@ -1409,15 +1424,22 @@ PP(pp_abs)
 {
     dSP; dTARGET; tryAMAGICun(abs);
     {
-      double value;
-      value = POPn;
+      double value = TOPn;
+      IV iv;
 
-      if (value < 0.0)
-	value = -value;
-
-      XPUSHn(value);
-      RETURN;
+      if (SvIOKp(TOPs) && !SvNOKp(TOPs) && !SvPOKp(TOPs) &&
+	  (iv = SvIVX(TOPs)) != IV_MIN) {
+	if (iv < 0)
+	  iv = -iv;
+	SETi(iv);
+      }
+      else {
+	if (value < 0.0)
+	    value = -value;
+	SETn(value);
+      }
     }
+    RETURN;
 }
 
 PP(pp_hex)

@@ -140,7 +140,6 @@ void *emx_realloc (void *, size_t);
 /* This guy is needed for quick stdstd  */
 
 #if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
-#  define _filbuf _fill
 	/* Perl uses ungetc only with successful return */
 #  define ungetc(c,fp) \
 	(FILE_ptr(fp) > FILE_base(fp) && c == (int)*(FILE_ptr(fp) - 1) \

@@ -12,7 +12,17 @@ all: $(plextract)
 $(plextract):
 	$(PERL) -I../lib $@.PL
 
-splain: ../lib/diagnostics.pm
+c2ph:		c2ph.PL
+
+h2ph:		h2ph.PL
+
+perlbug:	perlbug.PL
+
+perldoc:	perldoc.PL
+
+pl2pm:		pl2pm.PL
+
+splain:		splain.PL ../lib/diagnostics.pm
 
 clean:
 

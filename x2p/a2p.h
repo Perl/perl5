@@ -9,7 +9,11 @@
  */
 
 #define VOIDUSED 1
-#include "../config.h"
+#ifdef VMS
+#  include "config.h"
+#else
+#  include "../config.h"
+#endif
 
 #if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)
 # define STANDARD_C 1
@@ -101,7 +105,7 @@
 #else
 # if defined(VMS)
 #   define NO_PERL_TYPEDEFS
-#   include "[-]vmsish.h"
+#   include "vmsish.h"
 # endif
 #endif
 
@@ -113,7 +117,11 @@ char *strchr(), *strrchr();
 char *strcpy(), *strcat();
 #endif /* ! STANDARD_C */
 
-#include "../handy.h"
+#ifdef VMS
+#  include "handy.h"
+#else 
+#  include "../handy.h"
+#endif
 
 #undef Nullfp
 #define Nullfp Null(FILE*)

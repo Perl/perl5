@@ -60,11 +60,16 @@ it's run through your pager, as in
 
     DB> |h
 
+You may change the pager which is used via C<O pager=...> command.
+
 =item p expr
 
 Same as C<print {$DB::OUT} expr> in the current package.  In particular,
 because this is just Perl's own B<print> function, this means that nested
 data structures and objects are not dumped, unlike with the C<x> command.
+
+The C<DB::OUT> filehandle is opened to F</dev/tty>, regardless of
+where STDOUT may be redirected to.
 
 =item x expr
 
@@ -105,10 +110,12 @@ Single step.  Executes until it reaches the beginning of another
 statement, descending into subroutine calls.  If an expression is
 supplied that includes function calls, it too will be single-stepped.
 
-=item n
+=item n [expr]
 
 Next.  Executes over subroutine calls, until it reaches the beginning
-of the next statement.
+of the next statement.  If an expression is supplied that includes
+function calls, those functions will be executed with stops before
+each statement.
 
 =item E<lt>CRE<gt>
 
@@ -129,7 +136,7 @@ List C<incr+1> lines starting at C<min>.
 
 =item l min-max
 
-List lines C<min> through C<max>.
+List lines C<min> through C<max>.  C<l -> is synonymous to C<->.
 
 =item l line
 
@@ -154,7 +161,9 @@ print it out.
 
 =item f filename
 
-Switch to viewing a different file.
+Switch to viewing a different file or eval statement.  If C<filename>
+is not a full filename as found in values of %INC, it is considered as
+a regexp.
 
 =item /pattern/
 
@@ -235,7 +244,13 @@ Set breakpoint at first line of subroutine after it is compiled.
 
 =item b load filename
 
-Set breakpoint at the first executed line of the file.
+Set breakpoint at the first executed line of the file.  Filename should
+be a full name as found in values of %INC.
+
+=item b compile subname
+
+Sets breakpoint at the first statement executed after the subroutine
+is compiled.
 
 =item d [line]
 
@@ -273,34 +288,41 @@ be abbreviated.  Several options can be listed.
 
 =over 12
 
-=item recallCommand, ShellBang
+=item C<recallCommand>, C<ShellBang>
 
 The characters used to recall command or spawn shell.  By
 default, these are both set to C<!>.
 
-=item pager
+=item C<pager>
 
 Program to use for output of pager-piped commands (those
 beginning with a C<|> character.)  By default,
 C<$ENV{PAGER}> will be used.
 
-=item tkRunning
+=item C<tkRunning>
 
 Run Tk while prompting (with ReadLine).
 
-=item signalLevel, warnLevel, dieLevel
+=item C<signalLevel>, C<warnLevel>, C<dieLevel>
 
-Level of verbosity.
+Level of verbosity.  By default the debugger is in a sane verbose mode,
+thus it will print backtraces on all the warnings and die-messages
+which are going to be printed out, and will print a message when
+interesting uncaught signals arrive. 
 
-=item AutoTrace
+To disable this behaviour, set these values to 0.  If C<dieLevel> is 2,
+then the messages which will be caught by surrounding C<eval> are also
+printed.
 
-Where to print all the breakable points in the executed program
-(similar to C<t> command, but can be put into C<PERLDB_OPTS>).
+=item C<AutoTrace>
 
-=item LineInfo
+Trace mode (similar to C<t> command, but can be put into
+C<PERLDB_OPTS>).
 
-File or pipe to print line number info to.  If it is a
-pipe, then a short, "emacs like" message is used.
+=item C<LineInfo>
+
+File or pipe to print line number info to.  If it is a pipe (say,
+C<|visual_perl_db>), then a short, "emacs like" message is used.
 
 =item C<inhibit_exit>
 
@@ -317,7 +339,14 @@ C<frame & 2> is false, messages are printed on entry only. (Printing
 on exit may be useful if inter(di)spersed with other messages.)
 
 If C<frame & 4>, arguments to functions are printed as well as the
-context and caller info.
+context and caller info.  If C<frame & 8>, overloaded C<stringify> and
+C<tie>d C<FETCH> are enabled on the printed arguments.  The length at
+which the argument list is truncated is governed by the next option:
+
+=item C<maxTraceLen>
+
+length at which the argument list is truncated when C<frame> option's
+bit 4 is set.
 
 =back
 
@@ -326,29 +355,38 @@ commands:
 
 =over 12
 
-=item arrayDepth, hashDepth
+=item C<arrayDepth>, C<hashDepth>
 
 Print only first N elements ('' for all).
 
-=item compactDump, veryCompact
+=item C<compactDump>, C<veryCompact>
 
-Change style of array and hash dump.
+Change style of array and hash dump.  If C<compactDump>, short array
+may be printed on one line.
 
-=item globPrint
+=item C<globPrint>
 
 Whether to print contents of globs.
 
-=item DumpDBFiles
+=item C<DumpDBFiles>
 
 Dump arrays holding debugged files.
 
-=item DumpPackages
+=item C<DumpPackages>
 
 Dump symbol tables of packages.
 
-=item quote, HighBit, undefPrint
+=item C<quote>, C<HighBit>, C<undefPrint>
 
-Change style of string dump.
+Change style of string dump.  Default value of C<quote> is C<auto>, one
+can enable either double-quotish dump, or single-quotish by setting it
+to C<"> or C<'>.  By default, characters with high bit set are printed
+I<as is>.
+
+=item C<UsageOnly> 
+
+I<very> rudimentally per-package memory usage dump.  Calculates total
+size of strings in variables in the package.
 
 =back
 
@@ -358,7 +396,7 @@ C<ReadLine>, and C<NonStop> there.
 
 Example rc file:
 
-    &parse_options("NonStop=1 LineInfo=db.out AutoTrace");
+  &parse_options("NonStop=1 LineInfo=db.out AutoTrace");
 
 The script will run without human intervention, putting trace information
 into the file I<db.out>.  (If you interrupt it, you would better reset
@@ -370,16 +408,9 @@ C<LineInfo> to something "interactive"!)
 
 The TTY to use for debugging I/O.
 
-=item noTTY
-
-If set, goes in C<NonStop> mode.  On interrupt if TTY is not set uses the
-value of C<noTTY> or "/tmp/perldbtty$$" to find TTY using
-C<Term::Rendezvous>.  Current variant is to have the name of TTY in this
-file.
-
 =item C<noTTY>
 
-If set, goes in C<NonStop> mode, and would not connect to a TTY. If
+If set, goes in C<NonStop> mode, and would not connect to a TTY.  If
 interrupt (or if control goes to debugger via explicit setting of
 $DB::signal or $DB::single from the Perl script), connects to a TTY
 specified by the C<TTY> option at startup, or to a TTY found at
@@ -387,7 +418,7 @@ runtime using C<Term::Rendezvous> module of your choice.
 
 This module should implement a method C<new> which returns an object
 with two methods: C<IN> and C<OUT>, returning two filehandles to use
-for debugging input and output correspondingly. Method C<new> may
+for debugging input and output correspondingly.  Method C<new> may
 inspect an argument which is a value of C<$ENV{PERLDB_NOTTY}> at
 startup, or is C<"/tmp/perldbtty$$"> otherwise.
 
@@ -405,18 +436,18 @@ programmatically by setting $DB::signal or $DB::single.
 
 Here's an example of using the C<$ENV{PERLDB_OPTS}> variable:
 
-        $ PERLDB_OPTS="N f=2" perl -d myprogram
+  $ PERLDB_OPTS="N f=2" perl -d myprogram
 
 will run the script C<myprogram> without human intervention, printing
 out the call tree with entry and exit points.  Note that C<N f=2> is
-equivalent to C<NonStop=1 frame=2>. Note also that at the moment when
+equivalent to C<NonStop=1 frame=2>.  Note also that at the moment when
 this documentation was written all the options to the debugger could
 be uniquely abbreviated by the first letter (with exception of
 C<Dump*> options).
 
 Other examples may include
 
-        $ PERLDB_OPTS="N f A L=listing" perl -d myprogram
+  $ PERLDB_OPTS="N f A L=listing" perl -d myprogram
 
 - runs script non-interactively, printing info on each entry into a
 subroutine and each executed line into the file F<listing>. (If you
@@ -424,13 +455,13 @@ interrupt it, you would better reset C<LineInfo> to something
 "interactive"!)
 
 
-        $ env "PERLDB_OPTS=R=0 TTY=/dev/ttyc" perl -d myprogram
+  $ env "PERLDB_OPTS=R=0 TTY=/dev/ttyc" perl -d myprogram
 
 may be useful for debugging a program which uses C<Term::ReadLine>
-itself. Do not forget detach shell from the TTY in the window which
+itself.  Do not forget detach shell from the TTY in the window which
 corresponds to F</dev/ttyc>, say, by issuing a command like
 
-	$ sleep 1000000
+  $ sleep 1000000
 
 See L<"Debugger Internals"> below for more details.
 
@@ -500,7 +531,7 @@ Quit.  ("quit" doesn't work for this.)  This is the only supported way
 to exit the debugger, though typing C<exit> twice may do it too.
 
 Set an C<O>ption C<inhibit_exit> to 0 if you want to be able to I<step
-off> the end the script. You may also need to set C<$finished> to 0 at
+off> the end the script.  You may also need to set C<$finished> to 0 at
 some moment if you want to step through global destruction.
 
 =item R
@@ -527,19 +558,33 @@ output, such as
 
 =item = [alias value]
 
-Define a command alias, or list current aliases.
+Define a command alias, like
+
+    = quit q
+
+or list current aliases.
 
 =item command
 
 Execute command as a Perl statement.  A missing semicolon will be
 supplied.
 
-=item p expr
+=item m expr
 
-Same as C<print DB::OUT expr>.  The DB::OUT filehandle is opened to
-/dev/tty, regardless of where STDOUT may be redirected to.
+The expression is evaluated, and the methods which may be applied to
+the result are listed.
+
+=item m package
+
+The methods which may be applied to objects in the C<package> are listed.
 
 =back
+
+=head2 Debugger input/output
+
+=over 8
+
+=item Prompt
 
 The debugger prompt is something like
 
@@ -557,9 +602,12 @@ you'd already at a breakpoint and then printed out the result of a
 function call that itself also has a breakpoint, or you step into an
 expression via C<s/n/t expression> command.
 
+=item Multi-line commands
+
 If you want to enter a multi-line command, such as a subroutine
-definition with several statements, you may escape the newline that would
-normally end the debugger command with a backslash.  Here's an example:
+definition with several statements, or a format, you may escape the
+newline that would normally end the debugger command with a backslash.
+Here's an example:
 
       DB<1> for (1..4) {         \
       cont:     print "ok\n";   \
@@ -572,7 +620,10 @@ normally end the debugger command with a backslash.  Here's an example:
 Note that this business of escaping a newline is specific to interactive
 commands typed into the debugger.
 
-Here's an example of what a stack back-trace might look like:
+=item Stack backtrace
+
+Here's an example of what a stack back-trace via C<T> command might
+look like:
 
     $ = main::infested called from file `Ambulation.pm' line 10
     @ = Ambulation::legs(1, 2, 3, 4) called from file `camel_flea' line 7
@@ -589,6 +640,160 @@ I<camel_flea> file with four arguments.  The last stack frame shows that
 C<main::pests> was called in a scalar context, also from I<camel_flea>,
 but from line 4.
 
+Note that if you execute C<T> command from inside an active C<use>
+statement, the backtrace will contain both C<L<perlfunc/require>>
+frame and an C<L<perlfunc/eval EXPR>>) frame.
+
+=item Listing
+
+Listing given via different flavors of C<l> command looks like this:
+
+    DB<<13>> l
+  101:                @i{@i} = ();
+  102:b               @isa{@i,$pack} = ()
+  103                     if(exists $i{$prevpack} || exists $isa{$pack});
+  104             }
+  105
+  106             next
+  107==>              if(exists $isa{$pack});
+  108
+  109:a           if ($extra-- > 0) {
+  110:                %isa = ($pack,1);
+
+Note that the breakable lines are marked with C<:>, lines with
+breakpoints are marked by C<b>, with actions by C<a>, and the
+next executed line is marked by C<==E<gt>>.
+
+=item Frame listing
+
+When C<frame> option is set, debugger would print entered (and
+optionally exited) subroutines in different styles.
+
+What follows is the start of the listing of 
+
+  env "PERLDB_OPTS=f=1 N" perl -d -V
+
+=over 4
+
+=item 1
+
+  entering main::BEGIN
+   entering Config::BEGIN
+    Package lib/Exporter.pm.
+    Package lib/Carp.pm.
+   Package lib/Config.pm.
+   entering Config::TIEHASH
+   entering Exporter::import
+    entering Exporter::export
+  entering Config::myconfig
+   entering Config::FETCH
+   entering Config::FETCH
+   entering Config::FETCH
+   entering Config::FETCH
+
+=item 2
+
+  entering main::BEGIN
+   entering Config::BEGIN
+    Package lib/Exporter.pm.
+    Package lib/Carp.pm.
+   exited Config::BEGIN
+   Package lib/Config.pm.
+   entering Config::TIEHASH
+   exited Config::TIEHASH
+   entering Exporter::import
+    entering Exporter::export
+    exited Exporter::export
+   exited Exporter::import
+  exited main::BEGIN
+  entering Config::myconfig
+   entering Config::FETCH
+   exited Config::FETCH
+   entering Config::FETCH
+   exited Config::FETCH
+   entering Config::FETCH
+
+=item 4
+
+  in  $=main::BEGIN() from /dev/nul:0
+   in  $=Config::BEGIN() from lib/Config.pm:2
+    Package lib/Exporter.pm.
+    Package lib/Carp.pm.
+   Package lib/Config.pm.
+   in  $=Config::TIEHASH('Config') from lib/Config.pm:644
+   in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/nul:0
+    in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from li
+  in  @=Config::myconfig() from /dev/nul:0
+   in  $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'PATCHLEVEL') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'SUBVERSION') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'osname') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'osvers') from lib/Config.pm:574
+
+=item 6
+
+  in  $=main::BEGIN() from /dev/nul:0
+   in  $=Config::BEGIN() from lib/Config.pm:2
+    Package lib/Exporter.pm.
+    Package lib/Carp.pm.
+   out $=Config::BEGIN() from lib/Config.pm:0
+   Package lib/Config.pm.
+   in  $=Config::TIEHASH('Config') from lib/Config.pm:644
+   out $=Config::TIEHASH('Config') from lib/Config.pm:644
+   in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/nul:0
+    in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/
+    out $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/
+   out $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/nul:0
+  out $=main::BEGIN() from /dev/nul:0
+  in  @=Config::myconfig() from /dev/nul:0
+   in  $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
+   out $=Config::FETCH(ref(Config), 'package') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
+   out $=Config::FETCH(ref(Config), 'baserev') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'PATCHLEVEL') from lib/Config.pm:574
+   out $=Config::FETCH(ref(Config), 'PATCHLEVEL') from lib/Config.pm:574
+   in  $=Config::FETCH(ref(Config), 'SUBVERSION') from lib/Config.pm:574
+
+=item 14
+
+  in  $=main::BEGIN() from /dev/nul:0
+   in  $=Config::BEGIN() from lib/Config.pm:2
+    Package lib/Exporter.pm.
+    Package lib/Carp.pm.
+   out $=Config::BEGIN() from lib/Config.pm:0
+   Package lib/Config.pm.
+   in  $=Config::TIEHASH('Config') from lib/Config.pm:644
+   out $=Config::TIEHASH('Config') from lib/Config.pm:644
+   in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/nul:0
+    in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/E
+    out $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/E
+   out $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/nul:0
+  out $=main::BEGIN() from /dev/nul:0
+  in  @=Config::myconfig() from /dev/nul:0
+   in  $=Config::FETCH('Config=HASH(0x1aa444)', 'package') from lib/Config.pm:574
+   out $=Config::FETCH('Config=HASH(0x1aa444)', 'package') from lib/Config.pm:574
+   in  $=Config::FETCH('Config=HASH(0x1aa444)', 'baserev') from lib/Config.pm:574
+   out $=Config::FETCH('Config=HASH(0x1aa444)', 'baserev') from lib/Config.pm:574
+
+=back
+
+In all the cases indentation of lines shows the call tree, if bit 2 of
+C<frame> is set, then a line is printed on exit from a subroutine as
+well, if bit 4 is set, then the arguments are printed as well as the
+caller info, if bit 8 is set, the arguments are printed even if they
+are tied or references.
+
+When a package is compiled, a line like this
+
+    Package lib/Carp.pm.
+
+is printed with proper indentation.
+
+=back
+
+=head2 Debugging compile-time statements
+
 If you have any compile-time executable statements (code within a BEGIN
 block or a C<use> statement), these will C<NOT> be stopped by debugger,
 although C<require>s will (and compile-time statements can be traced
@@ -604,10 +809,19 @@ just typed the C<n> command, whereas a value of 1 means the C<s>
 command.  The C<$DB::trace>  variable should be set to 1 to simulate
 having typed the C<t> command.
 
+Another way to debug compile-time code is to start debugger, set a
+breakpoint on I<load> of some module thusly
+
+    DB<7> b load f:/perllib/lib/Carp.pm
+  Will stop on load of `f:/perllib/lib/Carp.pm'.
+
+and restart debugger by C<R> command (if possible).  One can use C<b
+compile subname> for the same purpose.
+
 =head2 Debugger Customization
 
 Most probably you not want to modify the debugger, it contains enough
-hooks to satisfy most needs. You may change the behaviour of debugger
+hooks to satisfy most needs.  You may change the behaviour of debugger
 from the debugger itself, using C<O>ptions, from the command line via
 C<PERLDB_OPTS> environment variable, and from I<customization files>.
 
@@ -624,10 +838,10 @@ One changes options from F<.perldb> file via calls like this one;
 
     parse_options("NonStop=1 LineInfo=db.out AutoTrace=1 frame=2");
 
-(the code is executed in the package C<DB>). Note that F<.perldb> is
-processed before processing C<PERLDB_OPTS>. If F<.perldb> defines the
+(the code is executed in the package C<DB>).  Note that F<.perldb> is
+processed before processing C<PERLDB_OPTS>.  If F<.perldb> defines the
 subroutine C<afterinit>, it is called after all the debugger
-initialization ends. F<.perldb> may be contained in the current
+initialization ends.  F<.perldb> may be contained in the current
 directory, or in the C<LOGDIR>/C<HOME> directory.
 
 If you want to modify the debugger, copy F<perl5db.pl> from the Perl
@@ -646,6 +860,10 @@ that checks for leading exclamation points.  However, if you install
 the Term::ReadKey and Term::ReadLine modules from CPAN, you will
 have full editing capabilities much like GNU I<readline>(3) provides.
 Look for these in the F<modules/by-module/Term> directory on CPAN.
+
+A rudimentary command-line completion is also available.
+Unfortunately, the names of lexical variables are not available for
+completion.
 
 =head2 Editor Support for Debugging
 
@@ -683,9 +901,9 @@ in that profile.
 
 =head2 Debugger support in perl
 
-When you call the B<caller> function from package DB, Perl sets the
-C<@DB::args> array to contain the arguments that stack frame was called
-with.  
+When you call the B<caller> function (see L<perlfunc/caller>) from the
+package DB, Perl sets the array @DB::args to contain the arguments the
+corresponding stack frame was called with.  
 
 If perl is run with B<-d> option, the following additional features
 are enabled:
@@ -701,48 +919,48 @@ application.
 =item *
 
 The array C<@{"_<$filename"}> is the line-by-line contents of
-$filename for all the compiled files. Same for C<eval>ed strings which
-contain subroutines, or which are currently executed. The C<$filename>
+$filename for all the compiled files.  Same for C<eval>ed strings which
+contain subroutines, or which are currently executed.  The C<$filename>
 for C<eval>ed strings looks like C<(eval 34)>.
 
 =item *
 
 The hash C<%{"_<$filename"}> contains breakpoints and action (it is
 keyed by line number), and individual entries are settable (as opposed
-to the whole hash). Only true/false is important to Perl, though the
+to the whole hash).  Only true/false is important to Perl, though the
 values used by F<perl5db.pl> have the form
-C<"$break_condition\0$action">. Values are magical in numeric context:
+C<"$break_condition\0$action">.  Values are magical in numeric context:
 they are zeros if the line is not breakable.
 
 Same for evaluated strings which contain subroutines, or which are
-currently executed. The C<$filename> for C<eval>ed strings looks like
+currently executed.  The C<$filename> for C<eval>ed strings looks like
 C<(eval 34)>.
 
 =item *
 
-The scalar C<${"_<$filename"}> contains C<"_<$filename">. Same for
+The scalar C<${"_<$filename"}> contains C<"_<$filename">.  Same for
 evaluated strings which contain subroutines, or which are currently
-executed. The C<$filename> for C<eval>ed strings looks like C<(eval
+executed.  The C<$filename> for C<eval>ed strings looks like C<(eval
 34)>.
 
 =item *
 
 After each C<require>d file is compiled, but before it is executed,
 C<DB::postponed(*{"_<$filename"})> is called (if subroutine
-C<DB::postponed> exists). Here the $filename is the expanded name of
+C<DB::postponed> exists).  Here the $filename is the expanded name of
 the C<require>d file (as found in values of C<%INC>).
 
 =item *
 
 After each subroutine C<subname> is compiled existence of
-C<$DB::postponed{subname}> is checked. If this key exists,
+C<$DB::postponed{subname}> is checked.  If this key exists,
 C<DB::postponed(subname)> is called (if subroutine C<DB::postponed>
 exists).
 
 =item *
 
 A hash C<%DB::sub> is maintained, with keys being subroutine names,
-values having the form C<filename:startline-endline>. C<filename> has
+values having the form C<filename:startline-endline>.  C<filename> has
 the form C<(eval 31)> for subroutines defined inside C<eval>s.
 
 =item *
@@ -752,7 +970,7 @@ a breakpoint, a call to C<DB::DB()> is performed if any one of
 variables $DB::trace, $DB::single, or $DB::signal is true. (Note that
 these variables are not C<local>izable.) This feature is disabled when
 the control is inside C<DB::DB()> or functions called from it (unless
-C<$^D & 1 E<lt>E<lt> 30>).
+C<$^D & (1E<lt>E<lt>30)>).
 
 =item *
 
@@ -764,10 +982,42 @@ in the package C<DB>.)
 =back
 
 Note that no subroutine call is possible until C<&DB::sub> is defined
-(for subroutines outside of package C<DB>).  (In fact, for the
-standard debugger the same is true if C<$DB::deep> (how many levels of
-recursion deep into the debugger you can go before a mandatory break)
-is not defined.)
+(for subroutines outside of package C<DB>).  (This restriction is
+recently lifted.)
+
+(In fact, for the standard debugger the same is true if C<$DB::deep>
+(how many levels of recursion deep into the debugger you can go before
+a mandatory break) is not defined.)
+
+With the recent updates the minimal possible debugger consists of one
+line
+
+  sub DB::DB {}
+
+which is quite handy as contents of C<PERL5DB> environment
+variable:
+
+  env "PERL5DB=sub DB::DB {}" perl -d your-script
+
+Another (a little bit more useful) minimal debugger can be created
+with the only line being
+
+  sub DB::DB {print ++$i; scalar <STDIN>}
+
+This debugger would print the sequential number of encountered
+statement, and would wait for your C<CR> to continue.
+
+The following debugger is quite functional:
+
+  { 
+    package DB; 
+    sub DB  {} 
+    sub sub {print ++$i, " $sub\n"; &$sub}
+  }
+
+It prints the sequential number of subroutine call and the name of the
+called subroutine.  Note that C<&DB::sub> should be compiled into the
+package C<DB>.
 
 =head2 Debugger Internals
 
@@ -781,21 +1031,21 @@ PERLDB_OPTS and parses it as a rest of C<O ...> line in debugger prompt.
 
 It also maintains magical internal variables, such as C<@DB::dbline>,
 C<%DB::dbline>, which are aliases for C<@{"::_<current_file"}>
-C<%{"::_<current_file"}>. Here C<current_file> is the currently
+C<%{"::_<current_file"}>.  Here C<current_file> is the currently
 selected (with the debugger's C<f> command, or by flow of execution)
 file.
 
-Some functions are provided to simplify customization. See L<"Debugger
-Customization"> for description of C<DB::parse_options(string)>. The
+Some functions are provided to simplify customization.  See L<"Debugger
+Customization"> for description of C<DB::parse_options(string)>.  The
 function C<DB::dump_trace(skip[, count])> skips the specified number
 of frames, and returns an array containing info about the caller
-frames (all if C<count> is missing). Each entry is a hash with keys
+frames (all if C<count> is missing).  Each entry is a hash with keys
 C<context> (C<$> or C<@>), C<sub> (subroutine name, or info about
 eval), C<args> (C<undef> or a reference to an array), C<file>, and
 C<line>.
 
 The function C<DB::print_trace(FH, skip[, count[, short]])> prints 
-formatted info about caller frames. The last two functions may be
+formatted info about caller frames.  The last two functions may be
 convenient as arguments to C<E<lt>>, C<E<lt>E<lt>> commands.
 
 =head2 Other resources

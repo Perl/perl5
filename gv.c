@@ -912,8 +912,8 @@ HV* stash;
   AMT *amtp=mg ? (AMT*)mg->mg_ptr: NULL;
   AMT amt;
 
-  if (mg && (amtp=((AMT*)(mg->mg_ptr)))->was_ok_am == amagic_generation &&
-             amtp->was_ok_sub == sub_generation)
+  if (mg && amtp->was_ok_am == amagic_generation
+      && amtp->was_ok_sub == sub_generation)
       return AMT_AMAGIC(amtp);
   if (amtp && AMT_AMAGIC(amtp)) {	/* Have table. */
     int i;
@@ -997,10 +997,10 @@ HV* stash;
 
     if ( cp = (char *)AMG_names[0] ) {
 	/* Try to find via inheritance. */
-	gv = gv_fetchmeth(stash, "()", 2, 0); /* A cooky: "()". */
+	gv = gv_fetchmeth(stash, "()", 2, -1); /* A cookie: "()". */
 	if (gv) sv = GvSV(gv);
 
-	if (!sv) /* Empty */;
+	if (!gv) goto no_table;
 	else if (SvTRUE(sv)) amt.fallback=AMGfallYES;
 	else if (SvOK(sv)) amt.fallback=AMGfallNEVER;
     }
@@ -1009,7 +1009,7 @@ HV* stash;
         cv = 0;
         cp = (char *)AMG_names[i];
       
-	*buf = '(';			/* A cooky: "(". */
+	*buf = '(';			/* A cookie: "(". */
 	strcpy(buf + 1, cp);
 	DEBUG_o( deb("Checking overloading of `%s' in package `%.256s'\n",
 		     cp, HvNAME(stash)) );
@@ -1057,6 +1057,7 @@ HV* stash;
     }
   }
   /* Here we have no table: */
+ no_table:
   AMT_AMAGIC_off(&amt);
   sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(AMTS));
   return FALSE;
@@ -1221,9 +1222,11 @@ int flags;
       } else if (cvp && (cv=cvp[nomethod_amg])) {
 	notfound = 1; lr = 1;
       } else {
-        if (off==-1) off=method;
-	sprintf(buf, "Operation `%s': no method found,\n\tleft argument %s%.256s,\n\tright argument %s%.256s",
+	if (off==-1) off=method;
+	sprintf(buf,
+		"Operation `%s': no method found,%sargument %s%.256s%s%.256s",
 		      AMG_names[method + assignshift],
+		      (flags & AMGf_unary ? " " : "\n\tleft "),
 		      SvAMAGIC(left)? 
 		        "in overloaded package ":
 		        "has no overloaded magic",
@@ -1231,8 +1234,10 @@ int flags;
 		        HvNAME(SvSTASH(SvRV(left))):
 		        "",
 		      SvAMAGIC(right)? 
-		        "in overloaded package ":
-		        "has no overloaded magic",
+		        ",\n\tright argument in overloaded package ":
+		        (flags & AMGf_unary 
+			 ? ""
+			 : ",\n\tright argument has no overloaded magic"),
 		      SvAMAGIC(right)? 
 		        HvNAME(SvSTASH(SvRV(right))):
 		        "");
@@ -1246,7 +1251,8 @@ int flags;
     }
   }
   if (!notfound) {
-    DEBUG_o( deb("Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %.256s%s\n",
+    DEBUG_o( deb(
+  "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %.256s%s\n",
 		 AMG_names[off],
 		 method+assignshift==off? "" :
 		             " (initially `",

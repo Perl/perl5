@@ -4,8 +4,9 @@ Changes5.000		Differences between 4.x and 5.000
 Changes5.001		Differences between 5.000 and 5.001
 Changes5.002		Differences between 5.001 and 5.002
 Changes5.003		Differences between 5.002 and 5.003
-Configure		Portability tool
 configure		Crude emulation of GNU configure
+configure.gnu		Copy of configure (for case-insensitive systems)
+Configure		Portability tool
 Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
 INSTALL			Detailed installation instructions
@@ -208,6 +209,7 @@ hints/broken-db.msg	Warning message for systems with broken DB library
 hints/bsdos.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture
 hints/cxux.sh		Hints for named architecture
+hints/dcosx.sh		Hints for named architecture
 hints/dec_osf.sh	Hints for named architecture
 hints/dgux.sh		Hints for named architecture
 hints/dynix.sh		Hints for named architecture
@@ -495,6 +497,7 @@ pod/perlbot.pod		Object-oriented Bag o' Tricks
 pod/perlcall.pod	Callback info
 pod/perldata.pod	Data structure info
 pod/perldebug.pod	Debugger info
+pod/perldelta.pod	Changes since last version
 pod/perldiag.pod	Diagnostic info
 pod/perldsc.pod		Data Structures Cookbook
 pod/perlembed.pod	Embedding info
@@ -505,7 +508,6 @@ pod/perlipc.pod		IPC info
 pod/perllocale.pod	Locale support info
 pod/perllol.pod		How to use lists of lists
 pod/perlmod.pod		Module info
-pod/perlnews.pod	News of changes since last version
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
 pod/perlpod.pod		Pod info

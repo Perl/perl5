@@ -11,12 +11,12 @@ IO::File - supply object methods for filehandles
     use IO::File;
 
     $fh = new IO::File;
-    if ($fh->open "< file") {
+    if ($fh->open("< file")) {
         print <$fh>;
         $fh->close;
     }
 
-    $fh = new IO::File "> FOO";
+    $fh = new IO::File "> file";
     if (defined $fh) {
         print $fh "bar\n";
         $fh->close;
@@ -31,13 +31,12 @@ IO::File - supply object methods for filehandles
     $fh = new IO::File "file", O_WRONLY|O_APPEND;
     if (defined $fh) {
         print $fh "corge\n";
+
+        $pos = $fh->getpos;
+        $fh->setpos($pos);
+
         undef $fh;       # automatically closes the file
     }
-
-    $pos = $fh->getpos;
-    $fh->setpos $pos;
-
-    $fh->setvbuf($buffer_var, _IOLBF, 1024);
 
     autoflush STDOUT 1;
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlnews - what's new for perl5.004
+perldelta - what's new for perl5.004
 
 =head1 DESCRIPTION
 
@@ -24,7 +24,8 @@ There is a new Configure question that asks if you want to maintain
 binary compatibility with Perl 5.003.  If you choose binary
 compatibility, you do not have to recompile your extensions, but you
 might have symbol conflicts if you embed Perl in another application,
-just as in the 5.003 release.
+just as in the 5.003 release.  By default, binary compatibility
+is preserved at the expense of symbol table pollution.
 
 =head2 New Opcode Module and Revised Safe Module
 
@@ -33,11 +34,26 @@ application of opcode masks.  The revised Safe module has a new API
 and is implemented using the new Opcode module.  Please read the new
 Opcode and Safe documentation.
 
+=head2 Extended Fcntl Module
+
+The Fcntl module now supports these new constants
+
+	F_GETOWN F_SETOWN
+	O_ASYNC O_DEFER O_DSYNC O_RSYNC O_SYNC
+	O_EXLOCK O_SHLOCK
+
+provided that your operating system supports these constants. The
+constants are for use with the Perl sysopen() and fcntl(). These
+constants are also visible for the basic database modules like the
+SDBM_File. For the exact meaning of these contants and other Fcntl
+constants please refer to the fcntl() documentation of your operating
+system. Unsupported constants will cause run-time errors.
+
 =head2 Internal Change: FileHandle Deprecated
 
 Filehandles are now stored internally as type IO::Handle.
 Although C<use FileHandle> and C<*STDOUT{FILEHANDLE}>
-are still supported for backwards compatibility
+are still supported for backwards compatibility,
 C<use IO::Handle> (or C<IO::Seekable> or C<IO::File>) and
 C<*STDOUT{IO}> are the way of the future.
 
@@ -73,7 +89,7 @@ compiled with -DEMERGENCY_SBRK and used Perl's malloc.  Then
 
     $^M = 'a' x (1<<16);
 
-would allocate 64K buffer for use when in emergency.
+would allocate a 64K buffer for use when in emergency.
 See the F<INSTALL> file for information on how to enable this option.
 As a disincentive to casual use of this advanced feature,
 there is no C<use English> long name for this variable.
@@ -121,13 +137,13 @@ expressions of control structures such as:
         print $line;
     }
 
-    if ((my $answer = <STDIN>) =~ /^yes$/i) {
+    if ((my $answer = <STDIN>) =~ /^y(es)?$/i) {
         user_agrees();
-    } elsif ($answer =~ /^no$/i) {
+    } elsif ($answer =~ /^n(o)?$/i) {
         user_disagrees();
     } else {
         chomp $answer;
-        die "'$answer' is neither 'yes' nor 'no'";
+        die "`$answer' is neither `yes' nor `no'";
     }
 
 Also, you can declare a foreach loop control variable as lexical by
@@ -156,10 +172,12 @@ which bit eight is clear.
 If the first argument to C<use> is a number, it is treated as a version
 number instead of a module name.  If the version of the Perl interpreter
 is less than VERSION, then an error message is printed and Perl exits
-immediately.  This is often useful if you need to check the current
-Perl version before C<use>ing library modules which have changed in
-incompatible ways from older versions of Perl.  (We try not to do
-this more than we have to.)
+immediately.  Because C<use> occurs at compile time, this check happens
+immediately during the compilation process, unlike C<require VERSION>,
+which waits until run-time for the check.  This is often useful if you
+need to check the current Perl version before C<use>ing library modules
+which have changed in incompatible ways from older versions of Perl.
+(We try not to do this more than we have to.)
 
 =item use Module VERSION LIST
 
@@ -187,7 +205,7 @@ function whose prototype you want to retrieve.
 Functions documented in the Camel to default to $_ now in
 fact do, and all those that do are so documented in L<perlfunc>.
 
-=head2 C<m//g> does not trigger a pos() reset on failure
+=item C<m//g> does not trigger a pos() reset on failure
 
 The C<m//g> match iteration construct used to reset the iteration
 when it failed to match (so that the next C<m//g> match would start at
@@ -196,6 +214,27 @@ C<pos $str = 0;> to reset the "last match" position, or modify the
 string in some way.  This change makes it practical to chain C<m//g>
 matches together in conjunction with ordinary matches using the C<\G>
 zero-width assertion.  See L<perlop> and L<perlre>.
+
+=item nested C<sub{}> closures work now
+
+Prior to the 5.004 release, nested anonymous functions 
+didn't work right.  They do now.
+
+=item formats work right on changing lexicals
+
+Just like anonymous functions that contain lexical variables
+that change (like a lexical index variable for a C<foreach> loop),
+formats now work properly.  For example, this silently failed
+before, and is fine now:
+
+    my $i;
+    foreach $i ( 1 .. 10 ) {
+	format =
+	my i is @#
+	$i
+    .
+	write;
+    } 
 
 =back
 
@@ -255,10 +294,21 @@ class, false if its object is the class (package) itself. Example
     $ref = bless [], 'A';
     $ref->is_instance();    # True
 
+This can be useful for methods that wish to easily distinguish
+whether they were invoked as class or as instance methods.
+
+    sub some_meth {
+	my $classname = shift;
+	if ($classname->is_instance()) {
+	    die "unexpectedly called as instance not class method";
+	} 
+	.....
+    } 
+
 =back
 
 B<NOTE:> C<can> directly uses Perl's internal code for method lookup, and
-C<isa> uses a very similar method and cache-ing strategy. This may cause
+C<isa> uses a very similar method and caching strategy. This may cause
 strange effects if the Perl code dynamically changes @ISA in any package.
 
 You may add other methods to the UNIVERSAL class via Perl or XS code.
@@ -268,6 +318,8 @@ have C<isa> available as a plain subroutine in the current package.
 
 =head2 TIEHANDLE Now Supported
 
+See L<perltie> for other kinds of tie()s.
+
 =over
 
 =item TIEHANDLE classname, LIST
@@ -276,7 +328,11 @@ This is the constructor for the class.  That means it is expected to
 return an object of some sort. The reference can be used to
 hold some internal information.
 
-    sub TIEHANDLE { print "<shout>\n"; my $i; bless \$i, shift }
+    sub TIEHANDLE { 
+	print "<shout>\n"; 
+	my $i; 
+	return bless \$i, shift;
+    }
 
 =item PRINT this, LIST
 
@@ -284,14 +340,21 @@ This method will be triggered every time the tied handle is printed to.
 Beyond its self reference it also expects the list that was passed to
 the print function.
 
-    sub PRINT { $r = shift; $$r++; print join($,,map(uc($_),@_)),$\ }
+    sub PRINT { 
+	$r = shift; 
+	$$r++; 
+	return print join( $, => map {uc} @_), $\;
+    }
 
 =item READLINE this
 
 This method will be called when the handle is read from. The method
 should return undef when there is no more data.
 
-    sub READLINE { $r = shift; "PRINT called $$r times\n"; }
+    sub READLINE { 
+	$r = shift; 
+	return "PRINT called $$r times\n"; 
+    }
 
 =item DESTROY this
 
@@ -299,9 +362,20 @@ As with the other types of ties, this method will be called when the
 tied handle is about to be destroyed. This is useful for debugging and
 possibly for cleaning up.
 
-    sub DESTROY { print "</shout>\n" }
+    sub DESTROY { 
+	print "</shout>\n";
+    }
 
 =back
+
+=item Efficiency Enhancements
+
+All hash keys with the same string are only allocated once, so
+even if you have 100 copies of the same hash, the immutable keys
+never have to be re-allocated.
+
+Functions that have an empty prototype and that do nothing but return
+a fixed value are now inlined (e.g. C<sub PI () { 3.14159 }>).
 
 =head1 Pragmata
 
@@ -310,6 +384,8 @@ Three new pragmatic modules exist:
 =over
 
 =item use blib
+
+=item use blib 'dir'
 
 Looks for MakeMaker-like I<'blib'> directory structure starting in
 I<dir> (or current directory) and working back up to five levels of
@@ -344,9 +420,23 @@ Disable unsafe opcodes, or any named opcodes, when compiling Perl code.
 
 =head1 Modules
 
+=head2 Fcntl
+
+New constants in the existing Fcntl modules are now supported,
+provided that your operating system happens to support them:
+
+    F_GETOWN F_SETOWN
+    O_ASYNC O_DEFER O_DSYNC O_FSYNC O_SYNC 
+    O_EXLOCK O_SHLOCK
+
 =head2 Module Information Summary
 
-Brand new modules:
+Brand new modules, arranged by topic rather than strictly
+alphabetically:
+
+    CPAN                 interface to Comprehensive Perl Archive Network
+    CPAN::FirstTime      create a CPAN configuration file
+    CPAN::Nox            run CPAN while avoiding compiled extensions
 
     IO.pm                Top-level interface to IO::* classes
     IO/File.pm           IO::File extension Perl module
@@ -376,7 +466,7 @@ Brand new modules:
     User/grent.pm        Object-oriented wrapper around CORE::getgr*
     User/pwent.pm        Object-oriented wrapper around CORE::getpw*
 
-    lib/Tie/RefHash.pm   Base class for tied hashes with references as keys
+    Tie/RefHash.pm       Base class for tied hashes with references as keys
 
     UNIVERSAL.pm         Base class for *ALL* classes
 
@@ -430,14 +520,28 @@ For example, you can now say
     use User::pwent;
     $his = (stat($filename)->st_uid == pwent($whoever)->pw_uid);
 
-=head1 Efficiency Enhancements
+=head1 Utility Changes
 
-All hash keys with the same string are only allocated once, so
-even if you have 100 copies of the same hash, the immutable keys
-never have to be re-allocated.
+=head2 xsubpp
 
-Functions that have an empty prototype and that do nothing but return
-a fixed value are now inlined (e.g. C<sub PI () { 3.14159 }>).
+=item C<void> XSUBs now default to returning nothing
+
+Due to a documentation/implementation bug in previous versions of
+Perl, XSUBs with a return type of C<void> have actually been
+returning one value.  Usually that value was the GV for the XSUB,
+but sometimes it was some already freed or reused value, which would
+sometimes lead to program failure.
+
+In Perl 5.004, if an XSUB is declared as returning C<void>, it
+actually returns no value, i.e. an empty list (though there is a
+backward-compatibility exception; see below).  If your XSUB really
+does return an SV, you should give it a return type of C<SV *>.
+
+For backward compatibility, I<xsubpp> tries to guess whether a
+C<void> XSUB is really C<void> or if it wants to return an C<SV *>.
+It does so by examining the text of the XSUB: if I<xsubpp> finds
+what looks like an assignment to C<ST(0)>, it assumes that the
+XSUB's return type is really C<SV *>.
 
 =head1 Documentation Changes
 
@@ -446,7 +550,7 @@ new pods are included in section 1:
 
 =over 4
 
-=item L<perlnews>
+=item L<perldelta>
 
 This document.
 
@@ -476,8 +580,17 @@ Although not new, this has been massively updated.
 
 Several new conditions will trigger warnings that were
 silent before.  Some only affect certain platforms.
-The following new warnings and errors
-outline these:
+The following new warnings and errors outline these.  
+These messages are classified as follows (listed in
+increasing order of desperation):
+
+   (W) A warning (optional).
+   (D) A deprecation (optional).
+   (S) A severe warning (mandatory).
+   (F) A fatal error (trappable).
+   (P) An internal error you should never see (trappable).
+   (X) A very fatal error (non-trappable).
+   (A) An alien error message (not generated by Perl).
 
 =over 4
 
@@ -488,6 +601,18 @@ eliminating all access to the previous instance.  This is almost always
 a typographical error.  Note that the earlier variable will still exist
 until the end of the scope or until all closure referents to it are
 destroyed.
+
+=item %s argument is not a HASH element or slice
+
+(F) The argument to delete() must be either a hash element, such as
+
+    $foo{$bar}
+    $ref->[12]->{"susie"}
+
+or a hash slice, such as
+
+    @foo{$bar, $baz, $xyzzy}
+    @{$ref->[12]}{"susie", "queue"}
 
 =item Allocation too large: %lx
 
@@ -527,6 +652,22 @@ appear in %ENV.  This may be a benign occurrence, as some software packages
 might directly modify logical name tables and introduce non-standard names,
 or it may indicate that a logical name table has been corrupted.
 
+=item Can't use bareword ("%s") as %s ref while "strict refs" in use
+
+(F) Only hard references are allowed by "strict refs".  Symbolic references
+are disallowed.  See L<perlref>.
+
+=item Constant subroutine %s redefined
+
+(S) You redefined a subroutine which had previously been eligible for
+inlining.  See L<perlsub/"Constant Functions"> for commentary and
+workarounds.
+
+=item Died
+
+(F) You passed die() an empty string (the equivalent of C<die "">) or
+you called it with no args and both C<$@> and C<$_> were empty.
+
 =item Integer overflow in hex number
 
 (S) The literal hex number you have specified is too big for your
@@ -538,6 +679,13 @@ architecture. On a 32-bit architecture the largest hex literal is
 (S) The literal octal number you have specified is too big for your
 architecture. On a 32-bit architecture the largest octal literal is
 037777777777.
+
+=item Name "%s::%s" used only once: possible typo
+
+(W) Typographical errors often show up as unique variable names.
+If you had a good reason for having a unique name, then just mention
+it again somehow to suppress the message (the C<use vars> pragma is
+provided for just this purpose).
 
 =item Null picture in formline
 
@@ -551,6 +699,17 @@ supplied it an uninitialized value.  See L<perlform>.
 pointing outside the buffer.  This is difficult to imagine.
 The sole exception to this is that C<sysread()>ing past the buffer
 will extend the buffer and zero pad the new area.
+
+=item Stub found while resolving method `%s' overloading `%s' in package `%s'
+
+(P) Overloading resolution over @ISA tree may be broken by importing stubs.
+Stubs should never be implicitely created, but explicit calls to C<can>
+may break this.
+
+=item Cannot resolve method `%s' overloading `%s' in package `s'
+
+(P) Internal error trying to resolve overloading specified by a method
+name (as opposed to a subroutine reference).
 
 =item Out of memory!
 
@@ -572,37 +731,125 @@ a possibility to shut down by trapping this error is granted.
 
 =item Possible attempt to put comments in qw() list
 
-(W) You probably wrote something like this:
+(W) qw() lists contain items separated by whitespace; as with literal
+strings, comment characters are not ignored, but are instead treated
+as literal data.  (You may have used different delimiters than the
+exclamation marks parentheses shown here; braces are also frequently
+used.)
 
-    qw( a # a comment
+You probably wrote something like this:
+
+    @list = qw( 
+        a # a comment
         b # another comment
-      ) ;
+    );
 
 when you should have written this:
 
-    qw( a
+    @list = qw(
+        a 
         b
-      ) ;
+    );
+
+If you really want comments, build your list the
+old-fashioned way, with quotes and commas:
+
+    @list = (
+        'a',    # a comment
+        'b',    # another comment
+    );
 
 =item Possible attempt to separate words with commas
 
-(W) You probably wrote something like this:
+(W) qw() lists contain items separated by whitespace; therefore commas
+aren't needed to separate the items. (You may have used different
+delimiters than the parentheses shown here; braces are also frequently
+used.)
 
-    qw( a, b, c );
+You probably wrote something like this: 
 
-when you should have written this:
+    qw! a, b, c !;
 
-    qw( a b c );
+which puts literal commas into some of the list items.  Write it without
+commas if you don't want them to appear in your data:
+
+    qw! a b c !;
+
+=item Scalar value @%s{%s} better written as $%s{%s}
+
+(W) You've used a hash slice (indicated by @) to select a single element of
+a hash.  Generally it's better to ask for a scalar value (indicated by $).
+The difference is that C<$foo{&bar}> always behaves like a scalar, both when
+assigning to it and when evaluating its argument, while C<@foo{&bar}> behaves
+like a list when you assign to it, and provides a list context to its
+subscript, which can do weird things if you're expecting only one subscript.
 
 =item untie attempted while %d inner references still exist
 
 (W) A copy of the object returned from C<tie> (or C<tied>) was still
 valid when C<untie> was called.
 
-=item Got an error from DosAllocMem:
+=item Value of %s construct can be "0"; test with defined()
 
-(P) An error peculiar to OS/2. Most probably you use an obsolete version
-of Perl, and should not happen anyway.
+(W) In a conditional expression, you used <HANDLE>, <*> (glob), or
+C<readdir> as a boolean value.  Each of these constructs can return a
+value of "0"; that would make the conditional expression false, which
+is probably not what you intended.  When using these constructs in
+conditional expressions, test their values with the C<defined> operator.
+
+=item Variable "%s" may be unavailable
+
+(W) An inner (nested) I<anonymous> subroutine is inside a I<named>
+subroutine, and outside that is another subroutine; and the anonymous
+(innermost) subroutine is referencing a lexical variable defined in
+the outermost subroutine.  For example:
+
+   sub outermost { my $a; sub middle { sub { $a } } }
+
+If the anonymous subroutine is called or referenced (directly or
+indirectly) from the outermost subroutine, it will share the variable
+as you would expect.  But if the anonymous subroutine is called or
+referenced when the outermost subroutine is not active, it will see
+the value of the shared variable as it was before and during the
+*first* call to the outermost subroutine, which is probably not what
+you want.
+
+In these circumstances, it is usually best to make the middle
+subroutine anonymous, using the C<sub {}> syntax.  Perl has specific
+support for shared variables in nested anonymous subroutines; a named
+subroutine in between interferes with this feature.
+
+=item Variable "%s" will not stay shared
+
+(W) An inner (nested) I<named> subroutine is referencing a lexical
+variable defined in an outer subroutine.
+
+When the inner subroutine is called, it will probably see the value of
+the outer subroutine's variable as it was before and during the
+*first* call to the outer subroutine; in this case, after the first
+call to the outer subroutine is complete, the inner and outer
+subroutines will no longer share a common value for the variable.  In
+other words, the variable will no longer be shared.
+
+Furthermore, if the outer subroutine is anonymous and references a
+lexical variable outside itself, then the outer and inner subroutines
+will I<never> share the given variable.
+
+This problem can usually be solved by making the inner subroutine
+anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
+reference variables in outer subroutines are called or referenced,
+they are automatically re-bound to the current values of such
+variables.
+
+=item Warning: something's wrong
+
+(W) You passed warn() an empty string (the equivalent of C<warn "">) or
+you called it with no args and C<$_> was empty.
+
+=item Got an error from DosAllocMem
+
+(P) An error peculiar to OS/2.  Most probably you're using an obsolete
+version of Perl, and this should not happen anyway.
 
 =item Malformed PERLLIB_PREFIX
 
@@ -634,10 +881,10 @@ L<perlipc/"Signals">.  See L<perlos2/"Process terminated by SIGTERM/SIGINT">.
 
 =head1 BUGS
 
-If you find what you think is a bug, you might check the headers
-of recently posted articles 
-in the comp.lang.perl.misc newsgroup.  There may also be
-information at http://www.perl.com/perl/, the Perl Home Page.
+If you find what you think is a bug, you might check the headers of
+recently posted articles in the comp.lang.perl.misc newsgroup.
+There may also be information at http://www.perl.com/perl/, the Perl
+Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Make sure you trim your bug

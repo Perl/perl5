@@ -10,10 +10,11 @@ BEGIN {
 use Config;
 
 BEGIN {
-    if(-d "lib" && -f "TEST") {
-        if ( ($Config{'extensions'} !~ /\bSocket\b/ ||
-              $Config{'extensions'} !~ /\bIO\b/)    &&
-              !(($^O eq 'VMS') && $Config{d_socket})) {
+    if (-d "lib" && -f "TEST") {
+        if (!$Config{'d_fork'} ||
+	    (($Config{'extensions'} !~ /\bSocket\b/ ||
+	      $Config{'extensions'} !~ /\bIO\b/) &&
+	     !(($^O eq 'VMS') && $Config{d_socket}))) {
 	    print "1..0\n";
 	    exit 0;
         }

@@ -167,7 +167,21 @@ be received by Perl as the return value of the XSUB.
 
 If the XSUB has a return type of C<void> then the compiler will
 not supply a RETVAL variable for that function.  When using
-the PPCODE: directive the RETVAL variable may not be needed.
+the PPCODE: directive the RETVAL variable is not needed, unless used
+explicitly.
+
+If PPCODE: directive is not used, C<void> return value should be used
+only for subroutines which do not return a value, I<even if> CODE:
+directive is used which sets ST(0) explicitly. 
+
+Older versions of this document recommended to use C<void> return
+value in such cases. It was discovered that this could lead to
+segfaults in cases when XSUB was I<truely> C<void>. This practice is
+now deprecated, and may be not supported at some future version. Use
+the return value C<SV *> in such cases. (Currently C<xsubpp> contains
+some heuristic code which tries to disambiguate between "truely-void"
+and "old-practice-declared-as-void" functions. Hence your code is at
+mercy of this heuristics unless you use C<SV *> as return value.)
 
 =head2 The MODULE Keyword
 
@@ -570,13 +584,13 @@ of $timep will either be undef or it will be a valid time.
 
      $timep = rpcb_gettime( "localhost" );
 
-The following XSUB uses the C<void> return type to disable the generation of
-the RETVAL variable and uses a CODE: block to indicate to the compiler
+The following XSUB uses the C<SV *> return type as a mneumonic only,
+and uses a CODE: block to indicate to the compiler
 that the programmer has supplied all the necessary code.  The
 sv_newmortal() call will initialize the return value to undef, making that
 the default return value.
 
-     void
+     SV *
      rpcb_gettime(host)
           char *  host
 	  PREINIT:
@@ -590,7 +604,7 @@ the default return value.
 The next example demonstrates how one would place an explicit undef in the
 return value, should the need arise.
 
-     void
+     SV *
      rpcb_gettime(host)
           char *  host
 	  PREINIT:
@@ -1102,7 +1116,7 @@ File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
 
      MODULE = RPC  PACKAGE = RPC
 
-     void
+     SV *
      rpcb_gettime(host="localhost")
           char *host
 	  PREINIT:

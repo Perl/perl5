@@ -47,6 +47,9 @@
 #  include <libdef.h>       /* LIB$_INVARG constant */
 #  include <lib$routines.h> /* prototype for lib$ediv() */
 #  include <starlet.h>      /* prototype for sys$gettim() */
+#  if DECC_VERSION < 50000000
+#    define pid_t int       /* old versions of DECC miss this in types.h */
+#  endif
 
 #  undef mkfifo  /* #defined in perl.h */
 #  define mkfifo(a,b) (not_here("mkfifo"),-1)
@@ -624,9 +627,33 @@ int arg;
 #else
 		goto not_there;
 #endif
+	    if (strEQ(name, "EADDRINUSE"))
+#ifdef EADDRINUSE
+		return EADDRINUSE;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "EADDRNOTAVAIL"))
+#ifdef EADDRNOTAVAIL
+		return EADDRNOTAVAIL;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "EAFNOSUPPORT"))
+#ifdef EAFNOSUPPORT
+		return EAFNOSUPPORT;
+#else
+		goto not_there;
+#endif
 	    if (strEQ(name, "EAGAIN"))
 #ifdef EAGAIN
 		return EAGAIN;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "EALREADY"))
+#ifdef EALREADY
+		return EALREADY;
 #else
 		goto not_there;
 #endif
@@ -676,6 +703,24 @@ int arg;
 #else
 		goto not_there;
 #endif
+	    if (strEQ(name, "ECONNABORTED"))
+#ifdef ECONNABORTED
+		return ECONNABORTED;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ECONNREFUSED"))
+#ifdef ECONNREFUSED
+		return ECONNREFUSED;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ECONNRESET"))
+#ifdef ECONNRESET
+		return ECONNRESET;
+#else
+		goto not_there;
+#endif
 	    break;
 	case 'D':
 	    if (strEQ(name, "EDEADLK"))
@@ -684,9 +729,21 @@ int arg;
 #else
 		goto not_there;
 #endif
+	    if (strEQ(name, "EDESTADDRREQ"))
+#ifdef EDESTADDRREQ
+		return EDESTADDRREQ;
+#else
+		goto not_there;
+#endif
 	    if (strEQ(name, "EDOM"))
 #ifdef EDOM
 		return EDOM;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "EDQUOT"))
+#ifdef EDQUOT
+		return EDQUOT;
 #else
 		goto not_there;
 #endif
@@ -713,7 +770,27 @@ int arg;
 		goto not_there;
 #endif
 	    break;
+	case 'H':
+	    if (strEQ(name, "EHOSTDOWN"))
+#ifdef EHOSTDOWN
+		return EHOSTDOWN;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "EHOSTUNREACH"))
+#ifdef EHOSTUNREACH
+		return EHOSTUNREACH;
+#else
+		goto not_there;
+#endif
+    	    break;
 	case 'I':
+	    if (strEQ(name, "EINPROGRESS"))
+#ifdef EINPROGRESS
+		return EINPROGRESS;
+#else
+		goto not_there;
+#endif
 	    if (strEQ(name, "EINTR"))
 #ifdef EINTR
 		return EINTR;
@@ -732,9 +809,21 @@ int arg;
 #else
 		goto not_there;
 #endif
+	    if (strEQ(name, "EISCONN"))
+#ifdef EISCONN
+		return EISCONN;
+#else
+		goto not_there;
+#endif
 	    if (strEQ(name, "EISDIR"))
 #ifdef EISDIR
 		return EISDIR;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ELOOP"))
+#ifdef ELOOP
+		return ELOOP;
 #else
 		goto not_there;
 #endif
@@ -752,17 +841,35 @@ int arg;
 #else
 		goto not_there;
 #endif
-	    break;
-	case 'N':
-	    if (strEQ(name, "ENOMEM"))
-#ifdef ENOMEM
-		return ENOMEM;
+	    if (strEQ(name, "EMSGSIZE"))
+#ifdef EMSGSIZE
+		return EMSGSIZE;
 #else
 		goto not_there;
 #endif
-	    if (strEQ(name, "ENOSPC"))
-#ifdef ENOSPC
-		return ENOSPC;
+	    break;
+	case 'N':
+	    if (strEQ(name, "ENETDOWN"))
+#ifdef ENETDOWN
+		return ENETDOWN;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ENETRESET"))
+#ifdef ENETRESET
+		return ENETRESET;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ENETUNREACH"))
+#ifdef ENETUNREACH
+		return ENETUNREACH;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ENOBUFS"))
+#ifdef ENOBUFS
+		return ENOBUFS;
 #else
 		goto not_there;
 #endif
@@ -772,9 +879,33 @@ int arg;
 #else
 		goto not_there;
 #endif
-	    if (strEQ(name, "ENOTTY"))
-#ifdef ENOTTY
-		return ENOTTY;
+	    if (strEQ(name, "ENOMEM"))
+#ifdef ENOMEM
+		return ENOMEM;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ENOPROTOOPT"))
+#ifdef ENOPROTOOPT
+		return ENOPROTOOPT;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ENOSPC"))
+#ifdef ENOSPC
+		return ENOSPC;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ENOTBLK"))
+#ifdef ENOTBLK
+		return ENOTBLK;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ENOTCONN"))
+#ifdef ENOTCONN
+		return ENOTCONN;
 #else
 		goto not_there;
 #endif
@@ -787,6 +918,18 @@ int arg;
 	    if (strEQ(name, "ENOTEMPTY"))
 #ifdef ENOTEMPTY
 		return ENOTEMPTY;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ENOTSOCK"))
+#ifdef ENOTSOCK
+		return ENOTSOCK;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ENOTTY"))
+#ifdef ENOTTY
+		return ENOTTY;
 #else
 		goto not_there;
 #endif
@@ -840,6 +983,12 @@ int arg;
 #else
 		goto not_there;
 #endif
+	    if (strEQ(name, "EOPNOTSUPP"))
+#ifdef EOPNOTSUPP
+		return EOPNOTSUPP;
+#else
+		goto not_there;
+#endif
 	    break;
 	case 'P':
 	    if (strEQ(name, "EPERM"))
@@ -848,9 +997,33 @@ int arg;
 #else
 		goto not_there;
 #endif
+	    if (strEQ(name, "EPFNOSUPPORT"))
+#ifdef EPFNOSUPPORT
+		return EPFNOSUPPORT;
+#else
+		goto not_there;
+#endif
 	    if (strEQ(name, "EPIPE"))
 #ifdef EPIPE
 		return EPIPE;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "EPROCLIM"))
+#ifdef EPROCLIM
+		return EPROCLIM;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "EPROTONOSUPPORT"))
+#ifdef EPROTONOSUPPORT
+		return EPROTONOSUPPORT;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "EPROTOTYPE"))
+#ifdef EPROTOTYPE
+		return EPROTOTYPE;
 #else
 		goto not_there;
 #endif
@@ -862,6 +1035,18 @@ int arg;
 #else
 		goto not_there;
 #endif
+	    if (strEQ(name, "EREMOTE"))
+#ifdef EREMOTE
+		return EREMOTE;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ERESTART"))
+#ifdef ERESTART
+		return ERESTART;
+#else
+		goto not_there;
+#endif
 	    if (strEQ(name, "EROFS"))
 #ifdef EROFS
 		return EROFS;
@@ -870,6 +1055,18 @@ int arg;
 #endif
 	    break;
 	case 'S':
+	    if (strEQ(name, "ESHUTDOWN"))
+#ifdef ESHUTDOWN
+		return ESHUTDOWN;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ESOCKTNOSUPPORT"))
+#ifdef ESOCKTNOSUPPORT
+		return ESOCKTNOSUPPORT;
+#else
+		goto not_there;
+#endif
 	    if (strEQ(name, "ESPIPE"))
 #ifdef ESPIPE
 		return ESPIPE;
@@ -882,7 +1079,49 @@ int arg;
 #else
 		goto not_there;
 #endif
+	    if (strEQ(name, "ESTALE"))
+#ifdef ESTALE
+		return ESTALE;
+#else
+		goto not_there;
+#endif
 	    break;
+	case 'T':
+	    if (strEQ(name, "ETIMEDOUT"))
+#ifdef ETIMEDOUT
+		return ETIMEDOUT;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ETOOMANYREFS"))
+#ifdef ETOOMANYREFS
+		return ETOOMANYREFS;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "ETXTBSY"))
+#ifdef ETXTBSY
+		return ETXTBSY;
+#else
+		goto not_there;
+#endif
+    	    break;
+	case 'U':
+	    if (strEQ(name, "EUSERS"))
+#ifdef EUSERS
+		return EUSERS;
+#else
+		goto not_there;
+#endif
+    	    break;
+    	case 'W':
+	    if (strEQ(name, "EWOULDBLOCK"))
+#ifdef EWOULDBLOCK
+		return EWOULDBLOCK;
+#else
+		goto not_there;
+#endif
+    	    break;
 	case 'X':
 	    if (strEQ(name, "EXIT_FAILURE"))
 #ifdef EXIT_FAILURE
@@ -1769,12 +2008,51 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SA_NOCLDSTOP"))
+	if (strnEQ(name, "SA_", 3)) {
+	    if (strEQ(name, "SA_NOCLDSTOP"))
 #ifdef SA_NOCLDSTOP
-	    return SA_NOCLDSTOP;
+		return SA_NOCLDSTOP;
 #else
-	    goto not_there;
+		goto not_there;
 #endif
+	    if (strEQ(name, "SA_NOCLDWAIT"))
+#ifdef SA_NOCLDWAIT
+		return SA_NOCLDWAIT;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "SA_NODEFER"))
+#ifdef SA_NODEFER
+		return SA_NODEFER;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "SA_ONSTACK"))
+#ifdef SA_ONSTACK
+		return SA_ONSTACK;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "SA_RESETHAND"))
+#ifdef SA_RESETHAND
+		return SA_RESETHAND;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "SA_RESTART"))
+#ifdef SA_RESTART
+		return SA_RESTART;
+#else
+		goto not_there;
+#endif
+	    if (strEQ(name, "SA_SIGINFO"))
+#ifdef SA_SIGINFO
+		return SA_SIGINFO;
+#else
+		goto not_there;
+#endif
+	    break;
+	}
 	if (strEQ(name, "SCHAR_MAX"))
 #ifdef SCHAR_MAX
 	    return SCHAR_MAX;

@@ -408,8 +408,17 @@ With EXPR, it returns some extra information that the debugger uses to
 print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
-    ($package, $filename, $line,
-     $subroutine, $hasargs, $wantarray) = caller($i);
+    ($package, $filename, $line, $subroutine, 
+     $hasargs, $wantarray, $evaltext, $is_require) = caller($i);
+
+Here $subroutine may be C<"(eval)"> if the frame is not a subroutine
+call, but C<L<eval>>. In such a case additional elements $evaltext and
+$is_require are set: $is_require is true if the frame is created by
+C<L<require>> or C<L<use>> statement, $evaltext contains the text of
+C<L<eval EXPR>> statement. In particular, for C<L<eval BLOCK>>
+statement $filename is C<"(eval)">, but $evaltext is undefined. (Note
+also that C<L<use>> statement creates a C<L<require>> frame inside
+an C<L<eval EXPR>>) frame.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable @DB::args to be the
@@ -774,6 +783,12 @@ produce, respectively
 
 See also exit() and warn().
 
+You can arrange for a callback to be called just before the die() does
+its deed, by setting the C<$SIG{__DIE__}> hook.  The associated handler
+will be called with the error text and can change the error message, if
+it sees fit, by calling die() again.  See L<perlvar> for details on
+setting C<%SIG> entries, and eval() for some examples.
+
 =item do BLOCK
 
 Not really a function.  Returns the value of the last command in the
@@ -919,8 +934,11 @@ context of the eval.
 If there is a syntax error or runtime error, or a die() statement is
 executed, an undefined value is returned by eval(), and C<$@> is set to the
 error message.  If there was no error, C<$@> is guaranteed to be a null
-string.  If EXPR is omitted, evaluates $_.  The final semicolon, if
-any, may be omitted from the expression.
+string.  If EXPR is omitted, evaluates C<$_>.  The final semicolon, if
+any, may be omitted from the expression.  Beware that using eval()
+neither silences perl from printing warnings to STDERR, nor does it
+stuff the text of warning messages into C<$@>.  To do either of those,
+you have to use the C<$SIG{__WARN__}> facility.  See warn() and L<perlvar>.
 
 Note that, because eval() traps otherwise-fatal errors, it is useful for
 determining whether a particular feature (such as socket() or symlink())
@@ -943,6 +961,24 @@ Examples:
 
     # a run-time error
     eval '$answer =';	# sets $@
+
+When using the eval{} form as an exception trap in libraries, you may
+wish not to trigger any C<__DIE__> hooks that user code may have
+installed.  You can use the C<local $SIG{__DIE__}> construct for this
+purpose, as shown in this example:
+
+    # a very private exception trap for divide-by-zero
+    eval { local $SIG{'__DIE__'}; $answer = $a / $b; }; warn $@ if $@;
+
+This is especially significant, given that C<__DIE__> hooks can call
+die() again, which has the effect of changing their error messages:
+
+    # __DIE__ hooks may modify error messages
+    {
+       local $SIG{'__DIE__'} = sub { (my $x = $_[0]) =~ s/foo/bar/g; die $x };
+       eval { die "foo foofs here" };
+       print $@ if $@;                # prints "bar barfs here"
+    }
 
 With an eval(), you should be especially careful to remember what's 
 being looked at when:
@@ -3045,7 +3081,7 @@ meaning of the fields:
   size	    total size of file, in bytes 
   atime	    last access time since the epoch
   mtime	    last modify time since the epoch
-  ctime	    inode change time (NOT creation type!) since the epoch
+  ctime	    inode change time (NOT creation time!) since the epoch
   blksize   preferred block size for file system I/O
   blocks    actual number of blocks allocated
 
@@ -3640,8 +3676,38 @@ for a scalar.
 
 =item warn LIST
 
-Produces a message on STDERR just like die(), but doesn't exit or
-on an exception.
+Produces a message on STDERR just like die(), but doesn't exit or throw
+an exception.
+
+No message is printed if there is a C<$SIG{__WARN__}> handler
+installed.  It is the handler's responsibility to deal with the message
+as it sees fit (like, for instance, converting it into a die()).  Most
+handlers must therefore make arrangements to actually display the
+warnings that they are not prepared to deal with, by calling warn()
+again in the handler.  Note that this is quite safe and will not
+produce an endless loop, since C<__WARN__> hooks are not called from
+inside one.
+
+You will find this behavior is slightly different from that of
+C<$SIG{__DIE__}> handlers (which don't suppress the error text, but can
+instead call die() again to change it).
+
+Using a C<__WARN__> handler provides a powerful way to silence all
+warnings (even the so-called mandatory ones).  An example:
+
+    # wipe out *all* compile-time warnings
+    BEGIN { $SIG{'__WARN__'} = sub { warn $_[0] if $DOWARN } }
+    my $foo = 10;
+    my $foo = 20;          # no warning about duplicate my $foo,
+                           # but hey, you asked for it!
+    # no compile-time or run-time warnings before here
+    $DOWARN = 1;
+
+    # run-time warnings enabled after here
+    warn "\$foo is alive and $foo!";     # does show up
+
+See L<perlvar> for details on setting C<%SIG> entries, and for more
+examples.
 
 =item write FILEHANDLE
 

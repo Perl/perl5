@@ -930,7 +930,8 @@ B<ExtUtils::Embed> can also automate writing the I<xs_init> glue code.
  % perl -MExtUtils::Embed -e xsinit -o perlxsi.c
  % cc -c perlxsi.c `perl -MExtUtils::Embed -e ccopts`
  % cc -c interp.c  `perl -MExtUtils::Embed -e ccopts`
- % cc -o interp perlxsi.o interp.o `perl -MExtUtils::Embed -e ldopts`
+ % cc -o interp perlxsi.o interp.o \
+	`perl -MExtUtils::Embed -e ccdlflags -e ldopts`
 
 Consult L<perlxs> and L<perlguts> for more details.
 

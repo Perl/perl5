@@ -26,8 +26,8 @@ libpods = ${podnames:%=pod/%.pod}
 
 perlpods = $libpods
 
-extensions = IO Socket Opcode DynaLoader Fcntl FileHandle POSIX
-ext_xs = IO.xs Socket.xs Opcode.xs  dl_none.xs Fcntl.xs FileHandle.xs POSIX.xs
+extensions = IO Socket Opcode DynaLoader Fcntl POSIX
+ext_xs = IO.xs Socket.xs Opcode.xs  dl_none.xs Fcntl.xs POSIX.xs
 ext_c = ${ext_xs:%.xs=%.c}
 ext_obj = ${ext_xs:%.xs=%.$O}
 
@@ -97,10 +97,6 @@ Opcode.c:		miniperl ext/Opcode/Opcode.xs
 Fcntl.c:		miniperl ext/Fcntl/Fcntl.xs
 			./miniperl $privlib/ExtUtils/xsubpp -noprototypes -typemap $privlib/ExtUtils/typemap ext/Fcntl/Fcntl.xs > $target
 			cp ext/Fcntl/Fcntl.pm $privlib
-
-FileHandle.c:		miniperl ext/FileHandle/FileHandle.xs
-			./miniperl $privlib/ExtUtils/xsubpp -noprototypes -typemap $privlib/ExtUtils/typemap ext/FileHandle/FileHandle.xs > $target
-			cp ext/FileHandle/FileHandle.pm $privlib
 
 POSIX.c:		miniperl ext/POSIX/POSIX.xs
 			./miniperl $privlib/ExtUtils/xsubpp -noprototypes -typemap $privlib/ExtUtils/typemap ext/POSIX/POSIX.xs > $target

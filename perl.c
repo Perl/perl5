@@ -59,7 +59,7 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
 
 static void find_beginning _((void));
 static void forbid_setid _((char *));
-static void incpush _((char *));
+static void incpush _((char *, int));
 static void init_ids _((void));
 static void init_debugger _((void));
 static void init_lexer _((void));
@@ -561,10 +561,10 @@ setuid perl scripts securely.\n");
 	    sv_catpv(sv,s);
 	    sv_catpv(sv," ");
 	    if (*++s) {
-		av_push(GvAVn(incgv),newSVpv(s,0));
+		incpush(s, TRUE);
 	    }
 	    else if (argv[1]) {
-		av_push(GvAVn(incgv),newSVpv(argv[1],0));
+		incpush(argv[1], TRUE);
 		sv_catpv(sv,argv[1]);
 		argc--,argv++;
 		sv_catpv(sv," ");
@@ -881,7 +881,7 @@ I32 create;
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVCV);
     if (create && !GvCVu(gv))
-    	return newSUB(start_subparse(0),
+    	return newSUB(start_subparse(FALSE, 0),
 		      newSVOP(OP_CONST, 0, newSVpv(name,0)),
 		      Nullop,
 		      Nullop);
@@ -1190,47 +1190,6 @@ I32 namlen;
 	sv_magic(GvSV(gv), (SV*)gv, 0, name, namlen);
 }
 
-#if defined(DOSISH)
-#    define PERLLIB_SEP ';'
-#else
-#  if defined(VMS)
-#    define PERLLIB_SEP '|'
-#  else
-#    define PERLLIB_SEP ':'
-#  endif
-#endif
-#ifndef PERLLIB_MANGLE
-#  define PERLLIB_MANGLE(s,n) (s)
-#endif 
-
-static void
-incpush(p)
-char *p;
-{
-    char *s;
-
-    if (!p)
-	return;
-
-    /* Break at all separators */
-    while (*p) {
-	/* First, skip any consecutive separators */
-	while ( *p == PERLLIB_SEP ) {
-	    /* Uncomment the next line for PATH semantics */
-	    /* av_push(GvAVn(incgv), newSVpv(".", 1)); */
-	    p++;
-	}
-	if ( (s = strchr(p, PERLLIB_SEP)) != Nullch ) {
-	    av_push(GvAVn(incgv), newSVpv(PERLLIB_MANGLE(p, (STRLEN)(s - p)), 
-					  (STRLEN)(s - p)));
-	    p = s + 1;
-	} else {
-	    av_push(GvAVn(incgv), newSVpv(PERLLIB_MANGLE(p, 0), 0));
-	    break;
-	}
-    }
-}
-
 static void
 usage(name)		/* XXX move this out into a module ? */
 char *name;
@@ -1346,9 +1305,11 @@ char *s;
     case 'I':
 	forbid_setid("-I");
 	if (*++s) {
-	    char *e;
+	    char *e, *p;
 	    for (e = s; *e && !isSPACE(*e); e++) ;
-	    av_push(GvAVn(incgv),newSVpv(s,e-s));
+	    p = savepvn(s, e-s);
+	    incpush(p, TRUE);
+	    Safefree(p);
 	    if (*e)
 		return e;
 	}
@@ -1444,7 +1405,6 @@ char *s;
 #endif
 
 	printf("\n\nCopyright 1987-1997, Larry Wall\n");
-	printf("\n\t+ suidperl security patch");
 #ifdef MSDOS
 	printf("\n\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
@@ -2298,9 +2258,9 @@ init_perllib()
 #ifndef VMS
 	s = getenv("PERL5LIB");
 	if (s)
-	    incpush(s);
+	    incpush(s, TRUE);
 	else
-	    incpush(getenv("PERLLIB"));
+	    incpush(getenv("PERLLIB"), FALSE);
 #else /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the
 	 * "natural" VMS idiom for a Unix path string.  We allow each
@@ -2309,9 +2269,9 @@ init_perllib()
 	char buf[256];
 	int idx = 0;
 	if (my_trnlnm("PERL5LIB",buf,0))
-	    do { incpush(buf); } while (my_trnlnm("PERL5LIB",buf,++idx));
+	    do { incpush(buf,TRUE); } while (my_trnlnm("PERL5LIB",buf,++idx));
 	else
-	    while (my_trnlnm("PERLLIB",buf,idx++)) incpush(buf);
+	    while (my_trnlnm("PERLLIB",buf,idx++)) incpush(buf,FALSE);
 #endif /* VMS */
     }
 
@@ -2319,29 +2279,116 @@ init_perllib()
     ARCHLIB PRIVLIB SITEARCH SITELIB and OLDARCHLIB
 */
 #ifdef APPLLIB_EXP
-    incpush(APPLLIB_EXP);
+    incpush(APPLLIB_EXP, FALSE);
 #endif
 
 #ifdef ARCHLIB_EXP
-    incpush(ARCHLIB_EXP);
+    incpush(ARCHLIB_EXP, FALSE);
 #endif
 #ifndef PRIVLIB_EXP
 #define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
-    incpush(PRIVLIB_EXP);
+    incpush(PRIVLIB_EXP, FALSE);
 
 #ifdef SITEARCH_EXP
-    incpush(SITEARCH_EXP);
+    incpush(SITEARCH_EXP, FALSE);
 #endif
 #ifdef SITELIB_EXP
-    incpush(SITELIB_EXP);
+    incpush(SITELIB_EXP, FALSE);
 #endif
 #ifdef OLDARCHLIB_EXP  /* 5.00[01] compatibility */
-    incpush(OLDARCHLIB_EXP);
+    incpush(OLDARCHLIB_EXP, FALSE);
 #endif
     
     if (!tainting)
-	incpush(".");
+	incpush(".", FALSE);
+}
+
+#if defined(DOSISH)
+#    define PERLLIB_SEP ';'
+#else
+#  if defined(VMS)
+#    define PERLLIB_SEP '|'
+#  else
+#    define PERLLIB_SEP ':'
+#  endif
+#endif
+#ifndef PERLLIB_MANGLE
+#  define PERLLIB_MANGLE(s,n) (s)
+#endif 
+
+static void
+incpush(p, addsubdirs)
+char *p;
+int addsubdirs;
+{
+    SV *subdir = Nullsv;
+    static char *archpat_auto;
+
+    if (!p)
+	return;
+
+    if (addsubdirs) {
+	subdir = newSV(0);
+	if (!archpat_auto) {
+	    STRLEN len = (sizeof(ARCHNAME) + strlen(patchlevel)
+			  + sizeof("//auto"));
+	    New(55, archpat_auto, len, char);
+	    sprintf(archpat_auto, "/%s/%s/auto", ARCHNAME, patchlevel);
+	}
+    }
+
+    /* Break at all separators */
+    while (p && *p) {
+	SV *libdir = newSV(0);
+	char *s;
+
+	/* skip any consecutive separators */
+	while ( *p == PERLLIB_SEP ) {
+	    /* Uncomment the next line for PATH semantics */
+	    /* av_push(GvAVn(incgv), newSVpv(".", 1)); */
+	    p++;
+	}
+
+	if ( (s = strchr(p, PERLLIB_SEP)) != Nullch ) {
+	    sv_setpvn(libdir, PERLLIB_MANGLE(p, (STRLEN)(s - p)),
+		      (STRLEN)(s - p));
+	    p = s + 1;
+	}
+	else {
+	    sv_setpv(libdir, PERLLIB_MANGLE(p, 0));
+	    p = Nullch;	/* break out */
+	}
+
+	/*
+	 * BEFORE pushing libdir onto @INC we may first push version- and
+	 * archname-specific sub-directories.
+	 */
+	if (addsubdirs) {
+	    struct stat tmpstatbuf;
+
+	    /* .../archname/version if -d .../archname/auto */
+	    sv_setsv(subdir, libdir);
+	    sv_catpv(subdir, archpat_auto);
+	    if (Stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
+		  S_ISDIR(tmpstatbuf.st_mode))
+		av_push(GvAVn(incgv),
+			newSVpv(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
+
+	    /* .../archname/version if -d .../archname/version/auto */
+	    sv_insert(subdir, SvCUR(libdir) + sizeof(ARCHNAME),
+		      strlen(patchlevel) + 1, "", 0);
+	    if (Stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
+		  S_ISDIR(tmpstatbuf.st_mode))
+		av_push(GvAVn(incgv),
+			newSVpv(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
+	}
+
+	/* finally push this lib directory on the end of @INC */
+	av_push(GvAVn(incgv), libdir);
+    }
+
+    SvREFCNT_dec(subdir);
 }
 
 void

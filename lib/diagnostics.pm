@@ -326,8 +326,9 @@ EOFUNC
 		#$lhs =~ s/\377([^\377]*)$/\Q$1\E\$/;
 		$lhs =~ s/\377([^\377]*)$/\Q$1\E/;
 		$lhs =~ s/\377//g;
+		$lhs =~ s/\.\*\?$/.*/; # Allow %s at the end to eat it all
 	    } 
-	    $transmo .= "    s{^$lhs}\n     {\Q$rhs\E}\n\t&& return 1;\n";
+	    $transmo .= "    s{^$lhs}\n     {\Q$rhs\E}s\n\t&& return 1;\n";
 	} else {
 	    $transmo .= "    m{^\Q$header\E} && return 1;\n";
 	} 
@@ -506,7 +507,7 @@ sub unescape {
 
 sub shorten {
     my $line = $_[0];
-    if (length $line > 79) {
+    if (length($line) > 79 and index($line, "\n") == -1) {
 	my $space_place = rindex($line, ' ', 79);
 	if ($space_place != -1) {
 	    substr($line, $space_place, 1) = "\n\t";

@@ -35,6 +35,8 @@ if ($count == 3) {print "ok 3\n";} else {print "not ok 3\n";}
 $_ = `cat Comp.try`;
 
 if (/.*\n.*\n.*\n$/) {print "ok 4\n";} else {print "not ok 4\n";}
+
+close(try) || (die "Can't close temp file.");
 unlink 'Comp.try' || `/bin/rm -f Comp.try`;
 
 if ($_ eq $y) {print "ok 5\n";} else {print "not ok 5\n";}

@@ -2,6 +2,16 @@
 
 # $RCSfile: pipe.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:31 $
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require Config; import Config;
+    unless ($Config{'d_fork'}) {
+	print "1..0\n";
+	exit 0;
+    }
+}
+
 $| = 1;
 print "1..8\n";
 

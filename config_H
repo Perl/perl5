@@ -28,6 +28,14 @@
  */
 #define MEM_ALIGNBYTES 4	/**/
 
+/* ARCHNAME:
+ *	This symbol holds a string representing the architecture name.
+ *	It may be used to construct an architecture-dependant pathname
+ *	where library files may be held under a private library, for
+ *	instance.
+ */
+#define ARCHNAME "unknown"	/**/
+
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
  *	be installed. Program must be prepared to deal with ~name substitution.
@@ -334,13 +342,6 @@
 #define HAS_HTONS		/**/
 #define HAS_NTOHL		/**/
 #define HAS_NTOHS		/**/
-
-/* HAS_INET_ATON:
- *	This symbol, if defined, indicates to the C program that the
- *	inet_aton() function is available to parse IP address "dotted-quad"
- *	strings.
- */
-#define HAS_INET_ATON		/**/
 
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
@@ -723,22 +724,12 @@
  *	This symbol is defined if the FILE_cnt macro can be used as an
  *	lvalue.
  */
-/* FILE_filbuf:
- *	This macro is used to access the internal stdio _filbuf function
- *	(or equivalent), if STDIO_CNT_LVALUE and STDIO_PTR_LVALUE
- *	are defined.  It is typically either _filbuf or __filbuf.
- *	This macro will only be defined if both STDIO_CNT_LVALUE and
- *	STDIO_PTR_LVALUE are defined.
- */
 #define USE_STDIO_PTR 	/**/
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	((fp)->_ptr)
 #define STDIO_PTR_LVALUE 		/**/
 #define FILE_cnt(fp)	((fp)->_cnt)
 #define STDIO_CNT_LVALUE 		/**/
-#if defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
-#define FILE_filbuf(fp)	_filbuf(fp) 		/**/
-#endif
 #endif
 
 /* USE_STDIO_BASE:
@@ -813,19 +804,19 @@
 
 /* HAS_STRTOD:
  *	This symbol, if defined, indicates that the strtod routine is
- *	available to translate strings to doubles.
+ *	available to provide better numeric string conversion than atof().
  */
 #define HAS_STRTOD	/**/
 
 /* HAS_STRTOL:
- *	This symbol, if defined, indicates that the strtol routine is
- *	available to translate strings to integers.
+ *	This symbol, if defined, indicates that the strtol routine is available
+ *	to provide better numeric string conversion than atoi() and friends.
  */
 #define HAS_STRTOL	/**/
 
 /* HAS_STRTOUL:
  *	This symbol, if defined, indicates that the strtoul routine is
- *	available to translate strings to integers.
+ *	available to provide conversion of strings to unsigned long.
  */
 #define HAS_STRTOUL	/**/
 
@@ -1290,6 +1281,33 @@
  */
 #define Mode_t mode_t	 /* file mode parameter for system calls */
 
+/* VAL_O_NONBLOCK:
+ *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
+ *	non-blocking I/O for the file descriptor. Note that there is no way
+ *	back, i.e. you cannot turn it blocking again this way. If you wish to
+ *	alternatively switch between blocking and non-blocking, use the
+ *	ioctl(FIOSNBIO) call instead, but that is not supported by all devices.
+ */
+/* VAL_EAGAIN:
+ *	This symbol holds the errno error code set by read() when no data was
+ *	present on the non-blocking file descriptor.
+ */
+/* RD_NODATA:
+ *	This symbol holds the return code from read() when no data is present
+ *	on the non-blocking file descriptor. Be careful! If EOF_NONBLOCK is
+ *	not defined, then you can't distinguish between no data and EOF by
+ *	issuing a read(). You'll have to find another way to tell for sure!
+ */
+/* EOF_NONBLOCK:
+ *	This symbol, if defined, indicates to the C program that a read() on
+ *	a non-blocking file descriptor will return 0 on EOF, and not the value
+ *	held in RD_NODATA (-1 usually, in that case!).
+ */
+#define VAL_O_NONBLOCK O_NONBLOCK
+#define VAL_EAGAIN EAGAIN
+#define RD_NODATA -1
+#define EOF_NONBLOCK
+
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
  *	function prototypes.
@@ -1337,6 +1355,16 @@
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Size_t size_t	 /* length paramater for string functions */
+
+/* SSize_t:
+ *	This symbol holds the type used by functions that return
+ *	a count of bytes or an error condition.  It must be a signed type.
+ *	It is usually ssize_t, but may be long or int, etc.
+ *	It may be necessary to include <sys/types.h> or <unistd.h>
+ *	to get any typedef'ed information.
+ *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
+ */
+#define SSize_t ssize_t	 /* signed count of bytes */
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
@@ -1477,6 +1505,13 @@
 #define HAS_GETPGRP		/**/
 /*#define USE_BSD_GETPGRP	/ **/
 
+/* HAS_INET_ATON:
+ *	This symbol, if defined, indicates to the C program that the
+ *	inet_aton() function is available to parse IP address "dotted-quad"
+ *	strings.
+ */
+#define HAS_INET_ATON		/**/
+
 /* HAS_SETPGID:
  *	This symbol, if defined, indicates to the C program that 
  *	the setpgid(pid, gpid) function is available to set the
@@ -1591,33 +1626,6 @@
  */
 #define MYMALLOC			/**/
 
-/* VAL_O_NONBLOCK:
- *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
- *	non-blocking I/O for the file descriptor. Note that there is no way
- *	back, i.e. you cannot turn it blocking again this way. If you wish to
- *	alternatively switch between blocking and non-blocking, use the
- *	ioctl(FIOSNBIO) call instead, but that is not supported by all devices.
- */
-/* VAL_EAGAIN:
- *	This symbol holds the errno error code set by read() when no data was
- *	present on the non-blocking file descriptor.
- */
-/* RD_NODATA:
- *	This symbol holds the return code from read() when no data is present
- *	on the non-blocking file descriptor. Be careful! If EOF_NONBLOCK is
- *	not defined, then you can't distinguish between no data and EOF by
- *	issuing a read(). You'll have to find another way to tell for sure!
- */
-/* EOF_NONBLOCK:
- *	This symbol, if defined, indicates to the C program that a read() on
- *	a non-blocking file descriptor will return 0 on EOF, and not the value
- *	held in RD_NODATA (-1 usually, in that case!).
- */
-#define VAL_O_NONBLOCK O_NONBLOCK
-#define VAL_EAGAIN EAGAIN
-#define RD_NODATA -1
-#define EOF_NONBLOCK
-
 /* OLDARCHLIB:
  *	This variable, if defined, holds the name of the directory in
  *	which the user has perl5.000 or perl5.001 architecture-dependent
@@ -1717,16 +1725,6 @@
  */
 #define SITELIB "/opt/perl/lib/site_perl"		/**/
 #define SITELIB_EXP "/opt/perl/lib/site_perl"		/**/
-
-/* SSize_t:
- *	This symbol holds the type used by functions that return
- *	a count of bytes or an error condition.  It must be a signed type.
- *	It is usually ssize_t, but may be long or int, etc.
- *	It may be necessary to include <sys/types.h> or <unistd.h>
- *	to get any typedef'ed information.
- *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
- */
-#define SSize_t ssize_t	 /* signed count of bytes */
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl

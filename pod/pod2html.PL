@@ -14,6 +14,7 @@ use File::Basename qw(&basename &dirname);
 # This is so that make depend always knows where to find PL derivatives.
 chdir dirname($0);
 $file = basename($0, '.PL');
+$file .= '.com' if $^O eq 'VMS';
 
 open OUT,">$file" or die "Can't create $file: $!";
 
@@ -502,7 +503,7 @@ sub gensym {
 sub pre_escapes {  # twiddle these, and stay up late  :-)
     my($thing) = @_;
     for ($$thing) { 
-    s/([\200-\377])/noremap("&".ord($1).";")/ge;
+    s/([\200-\377])/noremap("&#".ord($1).";")/ge;
 	s/"(.*?)"/``$1''/gs;
 	s/&/noremap("&amp;")/ge;
 	s/<</noremap("&lt;&lt;")/eg;

@@ -1706,15 +1706,15 @@ case 52:
 break;
 case 53:
 #line 280 "perly.y"
-{ yyval.ival = start_subparse(0); }
+{ yyval.ival = start_subparse(FALSE, 0); }
 break;
 case 54:
 #line 284 "perly.y"
-{ yyval.ival = start_subparse(CVf_ANON); }
+{ yyval.ival = start_subparse(FALSE, CVf_ANON); }
 break;
 case 55:
 #line 288 "perly.y"
-{ yyval.ival = start_subparse(CVf_FORMAT); }
+{ yyval.ival = start_subparse(TRUE, 0); }
 break;
 case 56:
 #line 291 "perly.y"

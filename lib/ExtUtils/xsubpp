@@ -75,10 +75,13 @@ perl(1), perlxs(1), perlxstut(1), perlxs(1)
 
 =cut
 
-# Global Constants
-$XSUBPP_version = "1.940";
 require 5.002;
+use Cwd;
 use vars '$cplusplus';
+
+# Global Constants
+$XSUBPP_version = "1.94001";
+$Is_VMS = $^O eq 'VMS';
 
 sub Q ;
 
@@ -118,10 +121,7 @@ else
 	or ($dir, $filename) = $ARGV[0] =~ m#(.*[>\]])(.*)#
 	or ($dir, $filename) = ('.', $ARGV[0]);
 chdir($dir);
-# Check for VMS; Config.pm may not be installed yet, but this routine
-# is built into VMS perl
-if (defined(&VMS::Filespec::vmsify)) { $Is_VMS = 1; $pwd = $ENV{DEFAULT}; }
-else                                 { $Is_VMS = 0; chomp($pwd = `pwd`);   }
+$pwd = cwd();
 
 ++ $IncludedFiles{$ARGV[0]} ;
 

@@ -51,7 +51,7 @@
 #include <unixio.h>
 #include <unixlib.h>
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
-#ifdef __DECC
+#if defined(__DECC) && defined(__DECC_VER) && __DECC_VER > 20000000
 #  include <unistd.h> /* DECC has this; VAXC and gcc don't */
 #endif
 
@@ -158,6 +158,7 @@
 /* Macros to set errno using the VAX thread-safe calls, if present */
 #if (defined(__DECC) || defined(__DECCXX)) && !defined(__ALPHA)
 #  define set_errno(v)      (cma$tis_errno_set_value(v))
+   void cma$tis_errno_set_value(int __value);  /* missing in some errno.h */
 #  define set_vaxc_errno(v) (vaxc$errno = (v))
 #else
 #  define set_errno(v)      (errno = (v))

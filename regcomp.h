@@ -76,7 +76,7 @@
 #define	OPEN	25	/* num	Mark this point in input as start of #n. */
 #define	CLOSE	26	/* num	Analogous to OPEN. */
 #define MINMOD	27	/* no	Next operator is not greedy. */
-#define GBOL	28	/* no	Matches where last m//g left off. */
+#define GPOS	28	/* no	Matches where last m//g left off. */
 #define IFMATCH	29	/* no	Succeeds if the following matches. */
 #define UNLESSM	30	/* no	Fails if the following matches. */
 #define SUCCEED	31	/* no	Return from a subroutine, basically. */
@@ -158,7 +158,7 @@ EXT char regkind[] = {
 	OPEN,
 	CLOSE,
 	MINMOD,
-	BOL,
+	GPOS,
 	BRANCH,
 	BRANCH,
 	END,

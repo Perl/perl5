@@ -6,7 +6,7 @@
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
 
 package ExtUtils::MM_VMS;
-$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.38 (19-Nov-1996)';
+$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.39 (16-Jan-1997)';
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 use Config;
@@ -1055,6 +1055,7 @@ CP = $self->{CP}
 MV = $self->{MV}
 RM_F  = $self->{RM_F}
 RM_RF = $self->{RM_RF}
+SAY = Write Sys\$Output
 UMASK_NULL = $self->{UMASK_NULL}
 NOOP = $self->{NOOP}
 NOECHO = $self->{NOECHO}
@@ -1064,7 +1065,7 @@ EQUALIZE_TIMESTAMP = \$(PERL) -we "open F,qq{>\$ARGV[1]};close F;utime(0,(stat(\
 qq!WARN_IF_OLD_PACKLIST = \$(PERL) -e "if (-f \$ARGV[0]){print qq[WARNING: Old package found (\$ARGV[0]); please check for collisions\\n]}"
 MOD_INSTALL = \$(PERL) "-I\$(PERL_LIB)" "-MExtUtils::Install" -e "install({split(' ',<STDIN>)},1);"
 DOC_INSTALL = \$(PERL) -e "\@ARGV=split(/\\|/,<STDIN>);print '=head2 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];while(\$key=shift && \$val=shift){print qq[=item *\\n\\nC<\$key: \$val>\\n\\n];}print qq[=back\\n\\n]"
-UNINSTALL = \$(PERL) "-I\$(PERL_LIB)" "-MExtUtils::Install" -e "uninstall(\$ARGV[0],1);"
+UNINSTALL = \$(PERL) "-I\$(PERL_LIB)" "-MExtUtils::Install" -e "uninstall(\$ARGV[0],1,1);"
 !);
 }
 
@@ -1335,7 +1336,7 @@ BOOTSTRAP = '."$self->{BASEEXT}.bs".'
 # we use touch to prevent make continually trying to remake it.
 # The DynaLoader only reads a non-empty file.
 $(BOOTSTRAP) : $(MAKEFILE) '."$self->{BOOTDEP}".' $(INST_ARCHAUTODIR).exists
-	$(NOECHO) Write Sys$Output "Running mkbootstrap for $(NAME) ($(BSLOADLIBS))"
+	$(NOECHO) $(SAY) "Running mkbootstrap for $(NAME) ($(BSLOADLIBS))"
 	$(NOECHO) $(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -
 	-e "use ExtUtils::Mkbootstrap; Mkbootstrap(\'$(BASEEXT)\',\'$(BSLOADLIBS)\');"
 	$(NOECHO) $(TOUCH) $(MMS$TARGET)
@@ -1790,19 +1791,19 @@ install_site :: all pure_site_install doc_site_install
 	$(NOECHO) $(NOOP)
 
 install_ :: install_site
-	$(NOECHO) Write Sys$Output "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
+	$(NOECHO) $(SAY) "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
 
 pure_install :: pure_$(INSTALLDIRS)_install
 	$(NOECHO) $(NOOP)
 
 doc_install :: doc_$(INSTALLDIRS)_install
-	$(NOECHO) Write Sys$Output "Appending installation info to $(INSTALLARCHLIB)perllocal.pod"
+	$(NOECHO) $(SAY) "Appending installation info to $(INSTALLARCHLIB)perllocal.pod"
 
 pure__install : pure_site_install
-	$(NOECHO) Write Sys$Output "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
+	$(NOECHO) $(SAY) "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
 
 doc__install : doc_site_install
-	$(NOECHO} Write Sys$Output "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
+	$(NOECHO} $(SAY) "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
 
 # This hack brought to you by DCL's 255-character command line limit
 pure_perl_install ::
@@ -1866,9 +1867,16 @@ uninstall :: uninstall_from_$(INSTALLDIRS)dirs
 
 uninstall_from_perldirs ::
 	$(NOECHO) $(UNINSTALL) ].$self->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').q[
+	$(NOECHO) $(SAY) "Uninstall is now deprecated and makes no actual changes."
+	$(NOECHO) $(SAY) "Please check the list above carefully for errors, and manually remove"
+	$(NOECHO) $(SAY) "the appropriate files.  Sorry for the inconvenience."
 
 uninstall_from_sitedirs ::
-	$(NOECHO) $(UNINSTALL) ].$self->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist')."\n";
+	$(NOECHO) $(UNINSTALL) ],$self->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist'),"\n",q[
+	$(NOECHO) $(SAY) "Uninstall is now deprecated and makes no actual changes."
+	$(NOECHO) $(SAY) "Please check the list above carefully for errors, and manually remove"
+	$(NOECHO) $(SAY) "the appropriate files.  Sorry for the inconvenience."
+];
 
     join('',@m);
 }
@@ -1951,13 +1959,13 @@ $(OBJECT) : $(FIRST_MAKEFILE)
 # We take a very conservative approach here, but it\'s worth it.
 # We move $(MAKEFILE) to $(MAKEFILE)_old here to avoid gnu make looping.
 $(MAKEFILE) : Makefile.PL $(CONFIGDEP)
-	$(NOECHO) Write Sys$Output "$(MAKEFILE) out-of-date with respect to $(MMS$SOURCE_LIST)"
-	$(NOECHO) Write Sys$Output "Cleaning current config before rebuilding $(MAKEFILE) ..."
+	$(NOECHO) $(SAY) "$(MAKEFILE) out-of-date with respect to $(MMS$SOURCE_LIST)"
+	$(NOECHO) $(SAY) "Cleaning current config before rebuilding $(MAKEFILE) ..."
 	- $(MV) $(MAKEFILE) $(MAKEFILE)_old
 	- $(MMS) $(USEMAKEFILE)$(MAKEFILE)_old clean
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL ],join(' ',map(qq["$_"],@ARGV)),q[
-	$(NOECHO) Write Sys$Output "$(MAKEFILE) has been rebuilt."
-	$(NOECHO) Write Sys$Output "Please run $(MMS) to build the extension."
+	$(NOECHO) $(SAY) "$(MAKEFILE) has been rebuilt."
+	$(NOECHO) $(SAY) "Please run $(MMS) to build the extension."
 ];
 
     join('',@m);
@@ -1991,7 +1999,7 @@ testdb :: testdb_\$(LINKTYPE)
       push(@m, '	If F$Search("',$vmsdir,'$(MAKEFILE)").nes."" Then $(PERL) -e "chdir ',"'$vmsdir'",
            '; print `$(MMS) $(PASTHRU2) test`'."\n");
     }
-    push(@m, "\t\$(NOECHO) Write Sys\$Output \"No tests defined for \$(NAME) extension.\"\n")
+    push(@m, "\t\$(NOECHO) \$(SAY) \"No tests defined for \$(NAME) extension.\"\n")
         unless $tests or -f "test.pl" or @{$self->{DIR}};
     push(@m, "\n");
 
@@ -2074,7 +2082,7 @@ MAP_TARGET    = $target
     unless ($self->{MAKEAPERL}) {
 	push @m, q{
 $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
-	$(NOECHO) Write Sys$Output "Writing ""$(MMS$TARGET)"" for this $(MAP_TARGET)"
+	$(NOECHO) $(SAY) "Writing ""$(MMS$TARGET)"" for this $(MAP_TARGET)"
 	$(NOECHO) $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" \
 		Makefile.PL DIR=}, $dir, q{ \
 		MAKEFILE=$(MAKE_APERL_FILE) LINKTYPE=static \
@@ -2226,10 +2234,10 @@ $(MAP_SHRTARGET) : $(MAP_LIBPERL) $(MAP_STATIC) ',"${libperldir}Perlshr_Attr.Opt
 	$(MAP_LINKCMD)/Shareable=$(MMS$TARGET) $(MAP_OPTS), $(MAP_EXTRA), $(MAP_LIBPERL) ',"${libperldir}Perlshr_Attr.Opt",'
 $(MAP_TARGET) : $(MAP_SHRTARGET) ',"${tmp}perlmain\$(OBJ_EXT) ${tmp}PerlShr.Opt",'
 	$(MAP_LINKCMD) ',"${tmp}perlmain\$(OBJ_EXT)",', PerlShr.Opt/Option
-	$(NOECHO) Write Sys$Output "To install the new ""$(MAP_TARGET)"" binary, say"
-	$(NOECHO) Write Sys$Output "    $(MMS)$(USEMAKEFILE)$(MAKEFILE) inst_perl $(USEMACROS)MAP_TARGET=$(MAP_TARGET)$(ENDMACRO)"
-	$(NOECHO) Write Sys$Output "To remove the intermediate files, say
-	$(NOECHO) Write Sys$Output "    $(MMS)$(USEMAKEFILE)$(MAKEFILE) map_clean"
+	$(NOECHO) $(SAY) "To install the new ""$(MAP_TARGET)"" binary, say"
+	$(NOECHO) $(SAY) "    $(MMS)$(USEMAKEFILE)$(MAKEFILE) inst_perl $(USEMACROS)MAP_TARGET=$(MAP_TARGET)$(ENDMACRO)"
+	$(NOECHO) $(SAY) "To remove the intermediate files, say
+	$(NOECHO) $(SAY) "    $(MMS)$(USEMAKEFILE)$(MAKEFILE) map_clean"
 ';
     push @m,'
 ',"${tmp}perlmain.c",' : $(MAKEFILE)

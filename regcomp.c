@@ -228,18 +228,23 @@ PMOP* pm;
 		 regkind[(U8)OP(first)] == NBOUND)
 	    r->regstclass = first;
 	else if (regkind[(U8)OP(first)] == BOL) {
-	    r->reganch = ROPT_ANCH;
+	    r->reganch |= ROPT_ANCH_BOL;
 	    first = NEXTOPER(first);
-	  	goto again;
+	    goto again;
+	}
+	else if (OP(first) == GPOS) {
+	    r->reganch |= ROPT_ANCH_GPOS;
+	    first = NEXTOPER(first);
+	    goto again;
 	}
 	else if ((OP(first) == STAR &&
 	    regkind[(U8)OP(NEXTOPER(first))] == ANY) &&
 	    !(r->reganch & ROPT_ANCH) )
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
-	    r->reganch = ROPT_ANCH | ROPT_IMPLICIT;
+	    r->reganch |= ROPT_ANCH_BOL | ROPT_IMPLICIT;
 	    first = NEXTOPER(first);
-	  	goto again;
+	    goto again;
 	}
 	if (sawplus && (!sawopen || !regsawback))
 	    r->reganch |= ROPT_SKIP;	/* x+ must match 1st of run */
@@ -783,7 +788,7 @@ tryagain:
 	    nextchar();
 	    break;
 	case 'G':
-	    ret = regnode(GBOL);
+	    ret = regnode(GPOS);
 	    *flagp |= SIMPLE;
 	    nextchar();
 	    break;
@@ -1499,8 +1504,14 @@ regexp *r;
 	PerlIO_printf(Perl_debug_log, "start `%s' ", SvPVX(r->regstart));
     if (r->regstclass)
 	PerlIO_printf(Perl_debug_log, "stclass `%s' ", regprop(r->regstclass));
-    if (r->reganch & ROPT_ANCH)
-	PerlIO_printf(Perl_debug_log, "anchored ");
+    if (r->reganch & ROPT_ANCH) {
+	PerlIO_printf(Perl_debug_log, "anchored");
+	if (r->reganch & ROPT_ANCH_BOL)
+	    PerlIO_printf(Perl_debug_log, "(BOL)");
+	if (r->reganch & ROPT_ANCH_GPOS)
+	    PerlIO_printf(Perl_debug_log, "(GPOS)");
+	PerlIO_putc(Perl_debug_log, ' ');
+    }
     if (r->reganch & ROPT_SKIP)
 	PerlIO_printf(Perl_debug_log, "plus ");
     if (r->reganch & ROPT_IMPLICIT)
@@ -1613,8 +1624,8 @@ char *op;
     case MINMOD:
 	p = "MINMOD";
 	break;
-    case GBOL:
-	p = "GBOL";
+    case GPOS:
+	p = "GPOS";
 	break;
     case UNLESSM:
 	p = "UNLESSM";

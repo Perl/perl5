@@ -9,6 +9,311 @@ releases.)
 
 
 ----------------
+Version 5.003_23
+----------------
+
+This release is our first candidate for a public beta test.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Disallow changing $_[0] in __DIE__ handlers"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pod/perlfunc.pod util.c
+
+  Title:  "Fix overloading with inheritance and AUTOLOAD"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701202226.RAA05072@monk.mps.ohio-state.edu>
+   Date:  Mon, 20 Jan 1997 17:26:32 -0500 (EST)
+  Files:  gv.c lib/diagnostics.pm lib/overload.pm pod/perldebug.pod
+          pod/perldiag.pod pod/perlfunc.pod pod/perlop.pod
+          pod/perlre.pod pod/perltoc.pod pod/perlxs.pod
+
+  Title:  "Nested here-docs"
+   From:  larry@wall.org (Larry Wall)
+ Msg-ID:  <199701202313.PAA11693@wall.org>
+   Date:  Mon, 20 Jan 1997 15:13:42 -0800
+  Files:  toke.c
+
+  Title:  "Revert $^X to old behavior (plus HP-UX bug fix)"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  hints/hpux.sh toke.c
+
+  Title:  "Protect against '0' in 'stmt while <HANDLE>'"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c
+
+  Title:  "Don't warn when closure uses var at file scope"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c
+
+ CORE PORTABILITY
+
+  Title:  "VMS patches for _22"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IEGBJ2TMYS003PCL@hmivax.humgen.upenn.edu>
+   Date:  Mon, 20 Jan 1997 22:50:21 -0500 (EST)
+  Files:  ext/POSIX/POSIX.xs lib/ExtUtils/MM_VMS.pm lib/ExtUtils/xsubpp
+          lib/Test/Harness.pm toke.c vms/Makefile vms/descrip.mms
+          vms/genconfig.pl vms/perly_c.vms vms/vmsish.h x2p/a2p.h
+          vms/Makefile vms/config.vms vms/descrip.mms vms/perly_c.vms
+
+  Title:  "Re: Perl 5.003_21: OS/2 patches"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701170446.XAA28939@monk.mps.ohio-state.edu>
+   Date:  Thu, 16 Jan 1997 23:46:40 -0500 (EST)
+  Files:  os2/Changes os2/os2.c
+
+  Title:  "Plan9 update"
+   From:  lutherh@stratcom.com (Luther Huffman)
+  Files:  plan9/config.plan9 plan9/mkfile
+
+  Title:  "Bugfixes for AmigaOS"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724691@Armageddon.meb.uni-bonn.de>
+   Date:  Wed, 22 Jan 1997 00:13:54 +0100
+  Files:  hints/amigaos.sh lib/File/Basename.pm
+
+  Title:  "New dec_osf.sh hints file"
+   From:  Achim Bohnet <ach@rosat.mpe-garching.mpg.de>
+ Msg-ID:  <9701241058.AA29550@o09.rosat.mpe-garching.mpg.de>
+   Date:  Fri, 24 Jan 1997 11:58:24 +0100
+  Files:  hints/dec_osf.sh
+
+  Title:  "on NeXT: gdbm problem fixed"
+   From:  Andreas Koenig <k@anna.in-berlin.de>
+ Msg-ID:  <199701210201.DAA17794@anna.in-berlin.de>
+   Date:  Tue, 21 Jan 1997 03:01:32 +0100
+  Files:  hints/next_3.sh hints/next_3_0.sh
+
+  Title:  "patch for hints/powerux.sh"
+   From:  tom@amber.ssd.hcsc.com (Tom Horsley)
+ Msg-ID:  <9701181833.AA02602@amber.ssd.hcsc.com>
+   Date:  Sat, 18 Jan 97 13:33:26 -0500
+  Files:  hints/powerux.sh
+
+  Title:  "hints & Configure changes to build perl on DC/OSx"
+   From:  Stephen Zander <stephen.zander@interlock.mckesson.com>
+ Msg-ID:  <199701170043.QAA25985@wsbip1.mckesson.com>
+   Date:  Thu, 16 Jan 1997 16:43:52 -0800
+  Files:  Configure MANIFEST hints/dcosx.sh
+
+  Title:  "patch for hints/cxux.sh perl5.003_22"
+   From:  tom@amber.ssd.hcsc.com (Tom Horsley)
+ Msg-ID:  <9701192014.AA05722@amber.ssd.hcsc.com>
+   Date:  Sun, 19 Jan 97 15:14:04 -0500
+  Files:  hints/cxux.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Make PERL5LIB and -I work like C<use lib>"
+   From:  Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <9701231523.AA26613@toad.ig.co.uk>
+   Date:  Thu, 23 Jan 1997 15:23:27 +0000
+  Files:  lib/lib.pm perl.c
+
+  Title:  "Fix /\G.a/"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  regcomp.c regcomp.h regexec.c regexp.h toke.c
+
+  Title:  "Extend stack in pp_undef (!)"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c
+
+  Title:  "Allow for sub to be redefined while executing"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  cop.h pp_hot.c t/op/misc.t
+
+  Title:  "Eliminate redundant flag CVf_FORMAT"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  cv.h op.c perl.c perly.c perly.y proto.h sv.c toke.c
+
+  Title:  "Generate IVs when possible in abs() and int()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c
+
+  Title:  "Efficiency patchlet for pp_aassign()"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701210305.WAA05451@monk.mps.ohio-state.edu>
+   Date:  Mon, 20 Jan 1997 22:05:39 -0500 (EST)
+  Files:  pp_hot.c
+
+  Title:  "When sorting, promote to PVNV only for built-in comparison"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp_ctl.c
+
+  Title:  "Remove "suidperl security patch" message"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perl.c
+
+ BUILD PROCESS
+
+  Title:  "Make configure.gnu a copy of configure; make configure writea
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  MANIFEST configure.gnu
+
+  Title:  "Regen Configure with metaconfig: +ARCHNAME, -FILE_filbuf"
+   From:  Chip Salzenberg and Charles Bailey
+  Files:  Configure config_H config_h.SH hints/lynxos.sh
+          os2/diff.configure os2/os2ish.h plan9/config.plan9 sv.c
+          utils/perlbug.PL vms/config.vms vms/fndvers.com
+
+  Title:  "Compile with optimization when testing memory functions"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Configure
+
+  Title:  "Minor patch for Debian installation"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  installperl
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Debugger update"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701190455.XAA02579@monk.mps.ohio-state.edu>
+   Date:  Sat, 18 Jan 1997 23:54:59 -0500 (EST)
+  Files:  lib/perl5db.pl
+
+  Title:  "DynaLoader enhancement: support RTLD_GLOBAL"
+   From:  Nick Ing-Simmons <nik@tiuk.ti.com>
+ Msg-ID:  <199701240937.JAA11443@pluto.tiuk.ti.com>
+   Date:  Fri, 24 Jan 1997 09:37:18 GMT
+  Files:  ext/DynaLoader/DynaLoader.pm ext/DynaLoader/dl_aix.xs
+          ext/DynaLoader/dl_dld.xs ext/DynaLoader/dl_dlopen.xs
+          ext/DynaLoader/dl_hpux.xs ext/DynaLoader/dl_next.xs
+          ext/DynaLoader/dl_vms.xs
+
+  Title:  "Fcntl: add more constants"
+   From:  Jarkko.Hietaniemi@cc.hut.fi
+ Msg-ID:  <199701191811.UAA16346@alpha.hut.fi>
+   Date:  Sun, 19 Jan 1997 20:11:22 +0200 (EET)
+  Files:  ext/Fcntl/Fcntl.pm ext/Fcntl/Fcntl.xs
+
+  Title:  "Refresh IO to 1.15 (plus DESTROY and new_tmpfile fixes)"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/IO/lib/IO/File.pm ext/IO/lib/IO/Handle.pm
+          ext/IO/lib/IO/Pipe.pm ext/IO/lib/IO/Seekable.pm
+          ext/IO/lib/IO/Socket.pm t/lib/io_pipe.t
+
+  Title:  "Allow IO.xs to remain at 1.15 while $VERSION is 1.1501"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  XSUB.h ext/IO/Makefile.PL ext/IO/lib/IO/Handle.pm
+
+  Title:  "Refresh CPAN to 1.15"
+   From:  Andreas Koenig <a.koenig@mind.de>
+  Files:  lib/CPAN.pm lib/CPAN/FirstTime.pm
+
+  Title:  "Add E* and SA_* constants"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <23338.853986967@eeyore.ibcinc.com>
+   Date:  Wed, 22 Jan 1997 21:36:07 -0500
+  Files:  ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs
+
+ TESTS
+
+  Title:  "Test nested here-docs"
+   From:  hv@crypt.compulink.co.uk (Hugo van der Sanden)
+ Msg-ID:  <199701210053.AAA02139@crypt.compulink.co.uk>
+   Date:  Tue, 21 Jan 1997 00:53:44 +0000 (GMT)
+  Files:  t/base/lex.t
+
+  Title:  "Fix tests of $^X and $0 to work with QNX"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  t/lib/io_pipe.t t/lib/open2.t t/lib/open3.t t/op/magic.t
+
+  Title:  "Patch tests for systems without fork()"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724697@Armageddon.meb.uni-bonn.de>
+   Date:  Thu, 23 Jan 1997 23:51:28 +0100
+  Files:  t/io/pipe.t t/lib/filehand.t t/lib/io_pipe.t t/lib/io_sock.t
+          t/lib/open2.t t/lib/open3.t t/op/fork.t
+
+  Title:  "Test patches for OS/2"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701170448.XAA28948@monk.mps.ohio-state.edu>
+   Date:  Thu, 16 Jan 1997 23:48:18 -0500 (EST)
+  Files:  os2/OS2/ExtAttr/t/os2_ea.t os2/OS2/PrfDB/t/os2_prfdb.t
+          os2/OS2/REXX/t/rx_cmprt.t os2/OS2/REXX/t/rx_dllld.t
+          os2/OS2/REXX/t/rx_objcall.t os2/OS2/REXX/t/rx_sql.test
+          os2/OS2/REXX/t/rx_tiesql.test os2/OS2/REXX/t/rx_tievar.t
+          os2/OS2/REXX/t/rx_tieydb.t os2/OS2/REXX/t/rx_varset.t
+          os2/OS2/REXX/t/rx_vrexx.t t/README t/cmd/while.t
+          t/comp/colon.t t/comp/multiline.t t/io/argv.t t/lib/anydbm.t
+          t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t t/lib/sdbm.t
+          t/op/cmp.t t/op/magic.t
+
+ UTILITIES
+
+  Title:  "Translate \200 to &#200; in pod2html"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pod/pod2html.PL
+
+  Title:  "VMS patches: '.com' extension on scripts"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IELNPDLYJM003E7J@hmivax.humgen.upenn.edu>
+   Date:  Fri, 24 Jan 1997 18:42:29 -0500 (EST)
+  Files:  pod/checkpods.PL pod/pod2html.PL pod/pod2latex.PL
+          pod/pod2man.PL pod/pod2text.PL utils/c2ph.PL utils/h2ph.PL
+          utils/h2xs.PL utils/perlbug.PL utils/perldoc.PL
+          utils/pl2pm.PL utils/splain.PL vms/Makefile vms/descrip.mms
+          x2p/find2perl.PL x2p/s2p.PL
+
+  Title:  "Allow MakeMaker 5.34 to use libraries containing '+' in name"
+   From:  dennism@cyrix.com (Dennis Marsa)
+ Msg-ID:  <9701172027.AA27861@orion.cyrix.com>
+   Date:  Fri, 17 Jan 97 14:27:32 CST
+  Files:  lib/ExtUtils/Liblist.pm
+
+ DOCUMENTATION
+
+  Title:  "First cut at INSTALL edit"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  INSTALL
+
+  Title:  "Additional docs for __DIE__ and __WARN__"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  pod/perlfunc.pod pod/perlrun.pod pod/perlvar.pod
+
+  Title:  "Document #line directive"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199701240908.EAA23846@aatma.engin.umich.edu>
+   Date:  Fri, 24 Jan 1997 04:08:44 -0500
+  Files:  pod/perlsyn.pod pod/perltoc.pod
+
+  Title:  "Perlguts version 30"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199701172117.AA116515863@hpcc123.corp.hp.com>
+   Date:  Fri, 17 Jan 1997 13:17:43 -0800
+  Files:  pod/perlguts.pod
+
+  Title:  "delta for perldelta"
+   From:  Tom Christiansen <tchrist@mox.perl.com>
+ Msg-ID:  <804.854121463@jinete>
+   Date:  Fri, 24 Jan 1997 07:57:43 -0800
+  Files:  pod/perlnews.pod pod/perltoc.pod
+
+  Title:  "Updates to perldelta"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199701211610.LAA06227@monk.mps.ohio-state.edu>
+   Date:  Mon, 20 Jan 1997 06:48:49 -0500 (EST)
+  Files:  pod/perlnews.pod pod/perltoc.pod
+
+  Title:  "perlnews.pod diff for the Fcntl"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199701211600.SAA30117@alpha.hut.fi>
+   Date:  Tue, 21 Jan 1997 18:00:56 +0200 (EET)
+  Files:  pod/perlnews.pod
+
+  Title:  "Rename perlnews -> perldelta per Tom's request"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  MANIFEST pod/Makefile pod/buildtoc pod/perl.pod
+          pod/perldelta.pod pod/perltoc.pod pod/roffitall
+
+  Title:  "Remove bad advice from perllocale.pod"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pod/perllocale.pod
+
+
+----------------
 Version 5.003_22
 ----------------
 

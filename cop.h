@@ -49,9 +49,13 @@ struct block_sub {
 /* We muck with cxstack_ix since _dec may call a DESTROY, overwriting cx. */
 
 #define POPSUB(cx)							\
-	if (cx->blk_sub.hasargs) {   /* put back old @_ */		\
+	if (cx->blk_sub.hasargs) {					\
+	    /* put back old @_ */					\
 	    SvREFCNT_dec(GvAV(defgv));					\
 	    GvAV(defgv) = cx->blk_sub.savearray;			\
+	    /* destroy arg array */					\
+	    av_clear(cx->blk_sub.argarray);				\
+	    AvREAL_off(cx->blk_sub.argarray);				\
 	}								\
 	if (cx->blk_sub.cv) {						\
 	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {	\

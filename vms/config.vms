@@ -76,8 +76,16 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00321"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00323"  /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
+
+/* ARCHNAME:
+ *	This symbol holds a string representing the architecture name.
+ *	It may be used to construct an architecture-dependant pathname
+ *	where library files may be held under a private library, for
+ *	instance.
+ */
+#define ARCHNAME "VMS_VAX"  /**/
 
 /* BINCOMPAT3:
  *	This symbol, if defined, indicates that Perl 5.004 should be
@@ -529,16 +537,6 @@
 #  define FILE_ptr(fp)	((*fp)->_ptr)
 #  define FILE_cnt(fp)	((*fp)->_cnt)
 #endif
-
-/* FILE_filbuf:
- *	This macro is used to access the internal stdio _filbuf function
- *	(or equivalent), if STDIO_CNT_LVALUE and STDIO_PTR_LVALUE
- *	are defined.  It is typically either _filbuf or __filbuf.
- *	This macro will only be defined if both STDIO_CNT_LVALUE and
- *	STDIO_PTR_LVALUE are defined.
- */
-#define FILE_filbuf(fp) do { register int c; if ((c = fgetc(fp)) != EOF) \
-                             ungetc(c,(fp)); } while (0);
 
 /* FILE_base:
  *	This macro is used to access the _base field (or equivalent) of the

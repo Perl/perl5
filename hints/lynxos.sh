@@ -7,6 +7,5 @@
 #
 
 cc='gcc'
-ccflags='-D_filbuf=_fillbuf'
 so='none'
 usemymalloc='n'

@@ -737,6 +737,32 @@ The last example should print:
 Note how C<m//g> matches change the value reported by C<pos()>, but the
 non-global match doesn't.
 
+A useful idiom for C<lex>-like scanners is C</\G.../g>. You can
+combine several regexps like this to process a string part-by-part,
+doing different actions depending on which regexp matched.  The next
+regexp would step in at the place the previous one left off.
+
+    $_ = <<'EOL';
+      $url = new URI::URL "http://www/";   die if $url eq "xXx";
+EOL
+  LOOP:
+    {
+      print(" digits"),		redo LOOP if /\G\d+\b[,.;]?\s*/g;
+      print(" lowercase"),	redo LOOP if /\G[a-z]+\b[,.;]?\s*/g;
+      print(" UPPERCASE"),	redo LOOP if /\G[A-Z]+\b[,.;]?\s*/g;
+      print(" Capitalized"),	redo LOOP if /\G[A-Z][a-z]+\b[,.;]?\s*/g;
+      print(" MiXeD"),		redo LOOP if /\G[A-Za-z]+\b[,.;]?\s*/g;
+      print(" alphanumeric"),	redo LOOP if /\G[A-Za-z0-9]+\b[,.;]?\s*/g;
+      print(" line-noise"),	redo LOOP if /\G[^A-Za-z0-9]+/g;
+      print ". That's all!\n";
+    }
+
+Here is the output (split into several lines):
+
+ line-noise lowercase line-noise lowercase UPPERCASE line-noise
+ UPPERCASE line-noise lowercase line-noise lowercase line-noise
+ lowercase lowercase line-noise lowercase lowercase line-noise
+ MiXeD line-noise. That's all!
 
 =item q/STRING/
 
