@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..28\n";
+print "1..29\n";
 
 eval 'print "ok 1\n";';
 
@@ -117,3 +117,15 @@ sub recurse {
   local $SIG{__WARN__} = sub { die "not ok $x\n" if $_[0] =~ /^Deep recurs/ };
   recurse($x-5);
 }
+$x++;
+
+# do closures created within eval bind correctly?
+eval <<'EOT';
+  sub create_closure {
+    my $self = shift;
+    return sub {
+       print $self;
+    };
+  }
+EOT
+create_closure("ok $x\n")->();

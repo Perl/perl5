@@ -310,6 +310,7 @@ pad_findmy(char *name)
     SV **svp = AvARRAY(PL_comppad_name);
     U32 seq = PL_cop_seqmax;
     PERL_CONTEXT *cx;
+    CV *outside;
 
 #ifdef USE_THREADS
     /*
@@ -339,16 +340,20 @@ pad_findmy(char *name)
 	}
     }
 
-    /* Check if if we're in an eval'', and adjust seq to be the eval's
-     * seq number */
-    if (cxstack_ix >= 0) {
+    outside = CvOUTSIDE(PL_compcv);
+
+    /* Check if if we're compiling an eval'', and adjust seq to be the
+     * eval's seq number.  This depends on eval'' having a non-null
+     * CvOUTSIDE() while it is being compiled.  The eval'' itself is
+     * identified by CvUNIQUE being set and CvGV being null. */
+    if (outside && CvUNIQUE(PL_compcv) && !CvGV(PL_compcv) && cxstack_ix >= 0) {
 	cx = &cxstack[cxstack_ix];
 	if (CxREALEVAL(cx))
 	    seq = cx->blk_oldcop->cop_seq;
     }
 
     /* See if it's in a nested scope */
-    off = pad_findlex(name, 0, seq, CvOUTSIDE(PL_compcv), cxstack_ix, 0);
+    off = pad_findlex(name, 0, seq, outside, cxstack_ix, 0);
     if (off) {
 	/* If there is a pending local definition, this new alias must die */
 	if (pendoff)
@@ -3500,7 +3505,7 @@ CV* cv;
 		  cv,
 		  (CvANON(cv) ? "ANON"
 		   : (cv == PL_main_cv) ? "MAIN"
-		   : CvUNIQUE(outside) ? "UNIQUE"
+		   : CvUNIQUE(cv) ? "UNIQUE"
 		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "UNDEFINED"),
 		  outside,
 		  (!outside ? "null"
