@@ -231,7 +231,7 @@ shextract = Makefile cflags config.h makeaperl makedepend \
 # available.  Dependencies handled manually below (for now).
 
 pl = pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL \
-	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL lib/lib.pm.PL
+	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL lib/lib_pm.PL
 
 plextract = pod/pod2html pod/pod2latex pod/pod2man pod/pod2text \
 	pod/pod2usage pod/podchecker pod/podselect lib/lib.pm

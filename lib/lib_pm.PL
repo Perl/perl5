@@ -6,6 +6,7 @@ use Cwd;
 my $origdir = cwd;
 chdir dirname($0);
 my $file = basename($0, '.PL');
+$file =~ s!_(pm)$!.$1!i;
 
 my $Config_archname = defined($Config{'archname'}) ? $Config{'archname'} : '';
 my $Config_ver = defined($Config{'version'}) ? $Config{'version'} : '';
