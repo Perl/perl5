@@ -1096,7 +1096,7 @@ For example:
     $_ = 'bar';
     s/\w??/<$&>/g;
 
-results in C<"<><b><><a><><r><>">.  At each position of the string the best
+results in C<< <><b><><a><><r><> >>.  At each position of the string the best
 match given by non-greedy C<??> is the zero-length match, and the I<second 
 best> match is what is matched by C<\w>.  Thus zero-length matches
 alternate with one-character-long matches.

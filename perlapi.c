@@ -3413,6 +3413,13 @@ Perl_utf8_to_bytes(pTHXo_ U8 *s, STRLEN *len)
     return ((CPerlObj*)pPerl)->Perl_utf8_to_bytes(s, len);
 }
 
+#undef  Perl_bytes_from_utf8
+U8*
+Perl_bytes_from_utf8(pTHXo_ U8 *s, STRLEN *len, bool *is_utf8)
+{
+    return ((CPerlObj*)pPerl)->Perl_bytes_from_utf8(s, len, is_utf8);
+}
+
 #undef  Perl_bytes_to_utf8
 U8*
 Perl_bytes_to_utf8(pTHXo_ U8 *s, STRLEN *len)

@@ -84,15 +84,15 @@ PERLVAR(Tcurpm,		PMOP *)		/* what to do \ interps in REs from */
 PERLVAR(Tnrs,		SV *)
 
 /*
-=for apidoc Amn|SV*|PL_rs
+=for apidoc mn|SV*|PL_rs
 
 The input record separator - C<$/> in Perl space.
 
-=for apidoc Amn|GV*|PL_last_in_gv
+=for apidoc mn|GV*|PL_last_in_gv
 
 The GV which was last used for a filehandle input operation. (C<< <FH> >>)
 
-=for apidoc Amn|SV*|PL_ofs_sv
+=for apidoc mn|SV*|PL_ofs_sv
 
 The output field separator - C<$,> in Perl space.
 

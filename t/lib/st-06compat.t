@@ -91,16 +91,18 @@ my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $r = ROOT->make;
 
 my $data = '';
-while (<DATA>) {
-	if (!$Is_EBCDIC) {
+if (!$Is_EBCDIC) {
+	while (<DATA>) {
 	    next if /^#/;
 	    $data .= unpack("u", $_);
 	}
-	else {
-	    next if /^#$/;
-	    next if /^#\s+/;
-	    next if /^[^#]/;
-	    s/^#//;
+}
+else {
+	while (<DATA>) {
+	    next if /^#$/;    # skip comments
+	    next if /^#\s+/;  # skip comments
+	    next if /^[^#]/;  # skip uuencoding for ASCII machines
+	    s/^#//;           # prepare uuencoded data for EBCDIC machines
 	    $data .= unpack("u", $_);
 	}
 }
@@ -143,7 +145,7 @@ M24U03$586`0"`````0B"6&(&4TE-4$Q%6%@$`@````$(@UAB!E-)35!,15A8
 M!`(````!"(188@9324U03$586%A8`````V]B:@0,!``````*6%A8`````W)E
 (9F($4D]/5%@`
 #
-# using Storable-1.007, output of: print '#' . pack("u", nfreeze(ROOT->make));
+# using Storable-0.6@11, output of: print '#' . pack("u", nfreeze(ROOT->make));
 # on OS/390 (cp 1047) original size: 217 bytes
 #
 #M!0,1!-G6UN,#````!00,!!$)X\G%Q&W(P>+(`P````(*!*6!D_$````$DH6H

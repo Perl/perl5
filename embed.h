@@ -737,6 +737,7 @@
 #define utf8_distance		Perl_utf8_distance
 #define utf8_hop		Perl_utf8_hop
 #define utf8_to_bytes		Perl_utf8_to_bytes
+#define bytes_from_utf8		Perl_bytes_from_utf8
 #define bytes_to_utf8		Perl_bytes_to_utf8
 #define utf8_to_uv_simple	Perl_utf8_to_uv_simple
 #define utf8_to_uv		Perl_utf8_to_uv
@@ -2214,6 +2215,7 @@
 #define utf8_distance(a,b)	Perl_utf8_distance(aTHX_ a,b)
 #define utf8_hop(a,b)		Perl_utf8_hop(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
+#define bytes_from_utf8(a,b,c)	Perl_bytes_from_utf8(aTHX_ a,b,c)
 #define bytes_to_utf8(a,b)	Perl_bytes_to_utf8(aTHX_ a,b)
 #define utf8_to_uv_simple(a,b)	Perl_utf8_to_uv_simple(aTHX_ a,b)
 #define utf8_to_uv(a,b,c,d)	Perl_utf8_to_uv(aTHX_ a,b,c,d)
@@ -4342,6 +4344,8 @@
 #define utf8_hop		Perl_utf8_hop
 #define Perl_utf8_to_bytes	CPerlObj::Perl_utf8_to_bytes
 #define utf8_to_bytes		Perl_utf8_to_bytes
+#define Perl_bytes_from_utf8	CPerlObj::Perl_bytes_from_utf8
+#define bytes_from_utf8		Perl_bytes_from_utf8
 #define Perl_bytes_to_utf8	CPerlObj::Perl_bytes_to_utf8
 #define bytes_to_utf8		Perl_bytes_to_utf8
 #define Perl_utf8_to_uv_simple	CPerlObj::Perl_utf8_to_uv_simple

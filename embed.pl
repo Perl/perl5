@@ -2085,6 +2085,7 @@ Adp	|STRLEN	|utf8_length	|U8* s|U8 *e
 Apd	|IV	|utf8_distance	|U8 *a|U8 *b
 Apd	|U8*	|utf8_hop	|U8 *s|I32 off
 ApMd	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
+ApMd	|U8*	|bytes_from_utf8|U8 *s|STRLEN *len|bool *is_utf8
 ApMd	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
 Apd	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
 Adp	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags

@@ -32,6 +32,307 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8584] By: jhi                                   on 2001/01/28  19:30:02
+        Log: Integrate perlio.
+     Branch: perl
+	  +> pod/perliol.pod
+	  !> MANIFEST pod/perlapio.pod
+____________________________________________________________________________
+[  8583] By: jhi                                   on 2001/01/28  19:28:40
+        Log: Patch from Inaba Hiroto:
+             - canonical UTF-8 hash keys: if a key string for a hash is
+             UTF8-on, try downgrade the string and use it if
+             unicode::distinct is not in effect.
+             For the task, I added a function bytes_from_utf8() to utf8.c.
+             It might resemble utf8_to_bytes() but it is not convenient
+             to the task.
+             Made a test for it and added to t/op/each.t
+             - Changed do_print in doio.c to apply sv_utf8_(downgrade|upgrade) to
+             the mortal copy of the argument SV.
+             And changed t/io/utf8.t test 18 which expects print() to
+             upgrade its argument.
+             - re-implement sv_eq with bytes_from_utf8()
+             - some bug fixes
+             - tr/// does not handle UTF8 range (\x{}-\x{})
+             - \ before raw UTF8 character produced
+             "Malformed UTF-8 character" warning.
+             - "\x{100}\N{CENT SIGN}" is Malformed.
+             Added tests for these 3.
+             - and one silly bug (by me) with qu operator.
+     Branch: perl
+	   ! doio.c embed.h embed.pl global.sym hv.c objXSUB.h perlapi.c
+	   ! pod/perlapi.pod proto.h sv.c t/io/utf8.t t/lib/charnames.t
+	   ! t/op/each.t t/op/tr.t t/pragma/utf8.t toke.c utf8.c
+____________________________________________________________________________
+[  8582] By: nick                                  on 2001/01/28  19:25:04
+        Log: Add pod/perliol.pod to MANIFEST :-(
+     Branch: perlio
+	   ! MANIFEST
+____________________________________________________________________________
+[  8581] By: nick                                  on 2001/01/28  19:22:40
+        Log: PerlIO documentation. Proofing and sub-editing requested.
+     Branch: perlio
+	   + pod/perliol.pod
+	   ! pod/perlapio.pod
+____________________________________________________________________________
+[  8580] By: jhi                                   on 2001/01/28  05:16:25
+        Log: Revert the change to sv_2pv() done by #8054: Someone who
+             did SvNV_set() on a scalar that also happened to be POK,
+             followed by sv_2pv() won't get the right coercion anymore.
+             [Sarathy]
+     Branch: maint-5.6/perl
+	   ! sv.c
+____________________________________________________________________________
+[  8579] By: jhi                                   on 2001/01/28  05:15:04
+        Log: Remove the #8084 effect: do not allow -Q to be interpreted
+             as -&Q(), this is too much wiggle room.
+     Branch: maint-5.6/perl
+	   ! toke.c
+____________________________________________________________________________
+[  8578] By: jhi                                   on 2001/01/28  05:12:45
+        Log: Needed bits of #8439 (should have been in #8576),
+             mainly for lval substr().
+     Branch: maint-5.6/perl
+	   ! mg.c pp.c pp_hot.c
+____________________________________________________________________________
+[  8577] By: jhi                                   on 2001/01/28  05:02:46
+        Log: A missing check-in.
+     Branch: maint-5.6/perl
+	   ! utf8.c
+____________________________________________________________________________
+[  8576] By: jhi                                   on 2001/01/28  04:26:18
+        Log: Integrate changes #8425,8436,8439,8517 from mainline.
+             The 8439 was not truly integrated because it had too many
+             dependencies on the development branch and because it introduced
+             concepts too bold for a maintenance branch (such as the qu operator).
+             
+             Subject: [PATCH perl@8342] -Wformat
+             
+             Tighten some of the UTF-8 tests a bit.
+             
+             More UTF-8 patches from Inaba Hiroto. (8439, but only partly)
+             - The substr lval was still not okay.
+             - Now pp_stringify and sv_setsv copies source's UTF8 flag
+             even if IN_BYTE.  pp_stringify is called from fold_constants
+             at optimization phase and "\x{100}" was made SvUTF8_off under
+             use bytes (the bytes pragma is for "byte semantics" and not
+             for "do not produce UTF8 data")
+     Branch: maint-5.6/perl
+	   ! t/lib/charnames.t t/op/substr.t toke.c
+	  !> sv.c t/pragma/utf8.t
+____________________________________________________________________________
+[  8575] By: jhi                                   on 2001/01/28  04:01:51
+        Log: Integrate changes #8378,8379,8385,8386,8405 from mainline.
+             
+             Subject: One more patch for UTF8  (UTF-8 fixes for 'x' and tr////)
+             
+             Subject: [ID 20001230.003] UTF-8 tr still hurts
+             
+             Test cases for #8385 (from Simon's "torture.pl")
+             
+             Start fixing UTF-8 lval substr() (8405)
+     Branch: maint-5.6/perl
+	  !> doop.c embed.h embed.pl mg.c op.c pod/perlapi.pod pp.c proto.h
+	  !> regcomp.c regexec.c t/op/substr.t t/op/tr.t toke.c utf8.c
+____________________________________________________________________________
+[  8574] By: jhi                                   on 2001/01/28  03:09:06
+        Log: Integrate changes #8328,8329,8330,8331,8332,8341,8343,8377
+             from mainline.
+             
+             UTF-8 cleanup.
+             
+             Subject: [PATCH perl@8327] strings with \x{..} in the middle are corrupted 
+             
+             "\x{FF}\xFF" was broken.
+             
+             Tests for #8329 and #8330.
+             
+             Add a note about EBCDIC versus UTF-8 to a potential problem spot.
+             
+             IRIX compiler noticed that the bof initialization might be
+             bypassed by control flow.
+             
+             Make explicit our assumption that (for now) "\x{80}" produces UTF-8.
+     Branch: maint-5.6/perl
+	  !> doop.c op.c pp.c pp_ctl.c pp_hot.c pp_sys.c regcomp.c
+	  !> regexec.c sv.c t/op/bop.t toke.c utf8.c
+____________________________________________________________________________
+[  8573] By: jhi                                   on 2001/01/28  02:06:12
+        Log: Retract #8552.
+     Branch: perl
+	   ! lib/Text/Wrap.pm t/lib/textwrap.t
+____________________________________________________________________________
+[  8572] By: jhi                                   on 2001/01/28  02:04:49
+        Log: Integrate changes #8267,8272[perlio],8274,8298,8300,8303,
+             8305,8323,8324 from mainline.  The 8267,8272, and 8298 were
+             not really integrated but instead salvaged by hand
+             (they had too many dependencies on the development release
+             to be cleanly integratable).
+             
+             Subject: more UTF8 test suites and an UTF8 patch
+             
+             Tweak for MULTIPLICITY/USE_PERLIO
+             
+             Signedness nit.
+             
+             Turn SvUTF8 off if not required in pp_chr and pp_stringify.
+             
+             Use the UTF8_XXX macros in is_utf8_char().
+             
+             Rewrite pp_concat() in terms of sv_catsv().  The . operator
+             should now be UTF-8-proof.
+             
+             Subject: [PATCH perl@8269] scanning two hex-constants
+             fails on EBCDIC environment (script length.t)
+             
+             Add some Unicode chop() tests.
+     Branch: maint-5.6/perl
+	   ! doop.c mg.c pp.c pp_hot.c toke.c utf8.c
+	  !> sv.c t/op/chop.t utf8.h
+____________________________________________________________________________
+[  8571] By: jhi                                   on 2001/01/28  00:35:59
+        Log: Integrate changes #8090,8093[perlio,only the sv.c tweak],
+             8245,8247,8248,8249,8250,8251,8260,8263,8264,8265 from mainline.
+             
+             Subject: [PATCH] Re: Breadperl & Tk (sv_utf8_upgrade fixes)
+             
+             The maxiters upper limit sanity check (guarding against
+             non-progress) assumed bytes instead of characters in s///
+             and split().
+             
+             Signedness nit.
+             
+             sv_catsv() rewrite (8248,8249,8251,8260,8263,8264,8265)
+             join() should now be UTF-8-proof.
+             
+             More split // UTF-8 tests. (8250)
+     Branch: maint-5.6/perl
+	  !> doop.c hv.c pp.c pp_hot.c sv.c t/op/join.t utf8.c utf8.h
+	  !> util.c
+____________________________________________________________________________
+[  8570] By: jhi                                   on 2001/01/27  22:15:46
+        Log: Integrate changes #7941,7943,7944,7958,7967,7995,7996,7998,
+             8004,8005,8023,8024,8028,8030,8031,8033,8039,8042,8052[perlio],
+             8053[perlio],8054[perlio,+sv.c(-PerlIO_isutf8),+require.t],
+             8084,8204,8244,8333 from mainline.
+             
+             For -Q where Q might be a one-letter sub name one does no more
+             get a warning about an unknown filetest (7941,7943,7944,8084).
+             
+             Subject: Re: [ID 20001130.011] expression parsing bug ?
+             
+             Make uv_to_utf8() to zero-terminate its output buffer.
+             
+             Split off t/op/length.t (7995)
+             
+             Split off t/op/utf8decode.t (7996)
+             
+             Remove an unnecessary 'use utf8' from the utf8.t (7998)
+             
+             Split off t/op/concat.t (8004)
+             
+             Split off t/op/ver.t (8005)
+             
+             Document utf8_length(), utf8_distance(), and utf8_hop().
+             
+             Document utf8_to_uv() better.
+             
+             Introduce macros for UTF8 decoding (8028,8033).
+             
+             Add test for reverse() (8030,8031).
+             
+             Subject: [PATCH] Re: ebcdic <-> ascii tables interjected in uv <-> utf8 considered harmful (8039,8333)
+             
+             Do not return the Unicode replacement character	on UTF-8
+             decoding failure.
+             
+             Typo/thinko in S_scan_const() - seeing high bit sets has_utf8
+             not this_utf8 i.e. the output string has one, but don't mess
+             with source assumption. (8052,8053)
+             
+             Tweak t/comp/require.t to add a 'use bytes' to permit its dubious
+             writing of BOM to a non-utf8 stream.  Fix SvPVutf8() - sv_2pv()
+             was not expecting to be called with something that was already
+             SvPOK() - (we just fossiked with SvUTF8 bit). Fix that and also
+             just use the SvPV macro in sv_2pvutf8() to avoid the issue/overhead.
+             (8054)
+             
+             Recode the naughty binary bytes in utf8decode.t using the \xHH.
+             
+             Make some panic messages a bit more logical.
+     Branch: maint-5.6/perl
+	  +> t/op/concat.t t/op/length.t t/op/reverse.t t/op/utf8decode.t
+	  !> MANIFEST doop.c embed.pl lib/ExtUtils/Liblist.pm op.c
+	  !> pod/perlapi.pod pod/perldiag.pod pp.c pp_hot.c regcomp.c
+	  !> regexec.c sv.c t/comp/require.t t/op/misc.t t/op/ver.t
+	  !> t/pragma/utf8.t t/pragma/warn/toke t/pragma/warn/utf8 toke.c
+	  !> utf8.c utf8.h
+____________________________________________________________________________
+[  8569] By: jhi                                   on 2001/01/27  19:16:43
+        Log: Integrate changes #7750 from perlio and #8566 from mainline.
+     Branch: maint-5.6/perl
+	  !> regexec.c sv.c
+____________________________________________________________________________
+[  8568] By: jhi                                   on 2001/01/27  18:06:51
+        Log: Integrate changes #7355[-doio.c],7691,7744,7753[perlio],
+             7783,7790[perlio],7869,7871,7872,7911,7916,7932,
+             7935[-perlio.c],7936,7959,7965 from mainline.
+             
+             Change the "big byte" error message to "Wide character".
+             (7355, the croak-if-wide-chars-in-print part ignored)
+             
+             Use UINT64_C().
+             
+             Introduce Perl_utf8_length().
+             
+             diff -se shows these as different (7753, forgotten check-ins)
+             
+             Subject: [PATCH] doop.c - UTF8 tr///
+             
+             If we use (aTHX_ ...) then put Perl_ on the front.
+             
+             Make utf8_length() and utf8_distance() to be less forgiving
+             about bad UTF-8.
+             
+             Test line numbers are different with utf8.
+             
+             No need to scan till infinity, 13 is enough. (7872,7911)
+             
+             Subject: [PATCH] Tokeniser debugging
+             
+             Subject: Re: question about retlen in utf8.c:Perl_utf8_to_uv()
+             
+             Subject: [PATCH perl@7930] toke.c perlio.c -Wformat nits (only toke.c)
+             
+             Be more careful in Perl_sv_utf8_downgrade().
+             
+             Use DO_UTF8().
+             
+             Raw zero bytes in text files confuse at least GNU patch 2.1.
+     Branch: maint-5.6/perl
+	  !> doop.c embed.h embed.pl global.sym handy.h objXSUB.h op.c
+	  !> perl.c perl.h perlapi.c pod/perlapi.pod pod/perldiag.pod
+	  !> pod/perlrun.pod proto.h scope.h sv.c t/op/re_tests
+	  !> t/pragma/utf8.t toke.c utf8.c utf8.h
+____________________________________________________________________________
+[  8567] By: nick                                  on 2001/01/27  11:10:38
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes README.os390 embed.h embed.pl op.c patchlevel.h pp.c
+	  !> proto.h regexec.c sv.c t/lib/1_compile.t t/lib/b.t
+	  !> t/lib/st-06compat.t t/pragma/overload.t t/pragma/sub_lval.t
+	  !> toke.c
+____________________________________________________________________________
+[  8566] By: jhi                                   on 2001/01/27  06:22:48
+        Log: More documentation for the regexp context stack.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  8565] By: jhi                                   on 2001/01/27  05:21:57
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8564] By: jhi                                   on 2001/01/27  04:44:04
         Log: Threadedness patch for #8562 from Doug MacEachern.
      Branch: perl

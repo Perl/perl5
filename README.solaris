@@ -358,13 +358,6 @@ instead.
 All this should be handled automatically by the hints file, if
 requested.
 
-If you do want to be able to allocate more than 4GB memory inside
-perl, then you should use the Solaris malloc, since the perl
-malloc breaks when dealing with more than 2GB of memory.  You can do
-this with
-
-	sh Configure -Uusemymalloc
-
 =head3 Long Doubles.
 
 As of 5.6.0, long doubles are not working.
@@ -379,21 +372,21 @@ in -lrt.  The hints file should handle adding this automatically.
 
 =head2 Malloc Issues.
 
+Starting from Perl 5.7.1 Perl uses the Solaris malloc, since the perl
+malloc breaks when dealing with more than 2GB of memory, and the Solaris
+malloc also seems to be faster.
+
+If you for some reason (such as binary backward compatibility) really
+need to use perl's malloc, you can rebuild Perl from the sources
+and Configure the build with 
+
+	sh Configure -Dusemymalloc
+  
 You should not use perl's malloc if you are building with gcc.  There
 are reports of core dumps, especially in the PDL module.  The problem
 appears to go away under -DDEBUGGING, so it has been difficult to
 track down.  Sun's compiler appears to be ok with or without perl's
 malloc. [XXX further investigation is needed here.]
-
-You should also not use perl's malloc if you are building perl as
-an LP64 application, since perl's malloc has trouble allocating more
-than 2GB of memory.
-
-You can avoid perl's malloc by Configuring with
-
-	sh Configure -Uusemymalloc
-
-[XXX Update hints file.]
 
 =head1 MAKE PROBLEMS.
 

@@ -91,17 +91,17 @@ print "not " unless $y == 1;
 print "ok 17\n";
 }
 
-print F $b,"\n"; # This upgrades $b!
+print F $b,"\n"; # Don't upgrades $b
 
 { # Check byte length of $b
 use bytes; my $y = length($b);
-print "not " unless $y == 2;
+print "not ($y) " unless $y == 1;
 print "ok 18\n";
 }
 
 { my $x = tell(F); 
     { use bytes; $y += 3;}
-    print "not " unless $x == $y;
+    print "not ($x,$y) " unless $x == $y;
     print "ok 19\n";
 }
 
@@ -110,14 +110,14 @@ close F;
 open F, "a" or die $!; # Not UTF
 $x = <F>;
 chomp($x);
-print "not " unless $x eq v196.172.194.130;
+printf "not (%vd) ", $x unless $x eq v196.172.194.130;
 print "ok 20\n";
 
 open F, "<:utf8", "a" or die $!;
 $x = <F>;
 chomp($x);
 close F;
-print "not " unless $x eq chr(300).chr(130);
+printf "not (%vd) ", $x unless $x eq chr(300).chr(130);
 print "ok 21\n";
 
 # Now let's make it suffer.
