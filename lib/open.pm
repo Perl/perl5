@@ -156,6 +156,7 @@ level.
 
 =head1 SEE ALSO
 
-L<perlfunc/"binmode">, L<perlfunc/"open">, L<perlunicode>, L<PerlIO>
+L<perlfunc/"binmode">, L<perlfunc/"open">, L<perlunicode>, L<PerlIO>,
+L<encoding>
 
 =cut

@@ -867,6 +867,9 @@ More examples:
 
 See L<PerlIO> for more information.
 
+See also L<encoding> for how to change the default encoding of the
+script itself.
+
 =head1 Encoding How to ...
 
 To do:
@@ -1089,7 +1092,7 @@ to be rationalized.
 
 =head1 SEE ALSO
 
-L<perlunicode>, L<perlebcdic>, L<perlfunc/open>, L<PerlIO>
+L<perlunicode>, L<perlebcdic>, L<perlfunc/open>, L<PerlIO>, L<encoding>
 
 =cut
 

@@ -52,6 +52,9 @@ ASCII based machines or recognize UTF-EBCDIC on EBCDIC based machines.
 B<NOTE: this should be the only place where an explicit C<use utf8> is
 needed>.
 
+You can also use the C<encoding> pragma to change the default encoding
+of the whole script; see L<encoding>.
+
 =back
 
 =head2 Byte and Character semantics

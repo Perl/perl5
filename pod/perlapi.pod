@@ -3669,13 +3669,13 @@ of the sv is assumed to be octets in that encoding, and the sv
 will be converted into Unicode (and UTF-8).
 
 If the sv already is UTF-8 (or if it is not POK), or if the encoding
-is not an object, nothing is done to the sv.
-
-If the encoding is not Encode object, bad things happen.
+is not a reference, nothing is done to the sv.  If the encoding is not
+an C<Encode::XS> Encoding object, bad things will happen.
+(See F<lib/encoding.pm> and L<Encode>).
 
 The PV of the sv is returned.
 
-	void	sv_recode_to_utf8(SV* sv, SV *encoding)
+	char*	sv_recode_to_utf8(SV* sv, SV *encoding)
 
 =for hackers
 Found in file sv.c

@@ -45,7 +45,7 @@ C<use encoding> matters, and it affects B<the whole script>.
 The C<\x..> and C<\0...> in regular expressions are not
 affected by this pragma.  They probably should.
 
-Also C<\N{...}> might become affected.
+Also chr(), ord(), and C<\N{...}> might become affected.
 
 =head1 SEE ALSO
 

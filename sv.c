@@ -10368,7 +10368,8 @@ will be converted into Unicode (and UTF-8).
 
 If the sv already is UTF-8 (or if it is not POK), or if the encoding
 is not a reference, nothing is done to the sv.  If the encoding is not
-Encode object, bad things happen.
+an C<Encode::XS> Encoding object, bad things will happen.
+(See F<lib/encoding.pm> and L<Encode>).
 
 The PV of the sv is returned.
 
