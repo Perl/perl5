@@ -48,7 +48,7 @@ sub encode_M
 eval "\@ARGV = map(glob(\$_),\@ARGV)" if ($^O eq 'MSWin32');
 
 my %opt;
-getopts('qo:F:n:',\%opt);
+getopts('qo:f:n:',\%opt);
 my $cname = (exists $opt{'o'}) ? $opt{'o'} : shift(@ARGV);
 chmod(0666,$cname) if -f $cname && !-w $cname;
 open(C,">$cname") || die "Cannot open $cname:$!";
@@ -99,10 +99,10 @@ elsif ($cname =~ /\.ucm$/)
  }
 
 my @encfiles;
-if (exists $opt{'F'})
+if (exists $opt{'f'})
  {
   # -F is followed by name of file containing list of filenames
-  my $flist = $opt{'F'};
+  my $flist = $opt{'f'};
   open(FLIST,$flist) || die "Cannot open $flist:$!";
   chomp(@encfiles = <FLIST>);
   close(FLIST);
