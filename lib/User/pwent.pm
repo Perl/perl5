@@ -250,7 +250,7 @@ You may ask whether one of these was implemented on the system Perl
 was built on by asking the importable C<pw_has> function about them.
 This function returns true if all parameters are supported fields
 on the build platform, false if one or more were not, and raises
-and exception if you asked about a field that Perl never knows how
+an exception if you asked about a field that Perl never knows how
 to provide.  Parameters may be in a space-separated string, or as
 separate arguments.  If you pass no parameters, the function returns
 the list of C<struct pwd> fields supported by your build platform's

@@ -195,8 +195,8 @@ sub unwrap {
 	  if ($#$v >= 0) {
 	    $short = $sp . "0..$#{$v}  " . 
 	      join(" ", 
-		   map {stringify $_} @{$v}[0..$tArrayDepth])
-		. "$shortmore";
+		   map {exists $v->[$_] ? stringify $v->[$_] : "empty"} ($[..$tArrayDepth)
+		  ) . "$shortmore";
 	  } else {
 	    $short = $sp . "empty array";
 	  }
@@ -209,7 +209,11 @@ sub unwrap {
 	for $num ($[ .. $tArrayDepth) {
 	    return if $DB::signal;
 	    print "$sp$num  ";
-	    DumpElem $v->[$num], $s;
+	    if (exists $v->[$num]) {
+	        DumpElem $v->[$num], $s;
+	    } else {
+	    	print "empty slot\n";
+	    }
 	}
 	print "$sp  empty array\n" unless @$v;
 	print "$sp$more" if defined $more ;  

@@ -750,6 +750,28 @@ C<*HANDLE{IO}> only works if HANDLE has already been used as a handle.
 In other words, C<*FH> must be used to create new symbol table entries;
 C<*foo{THING}> cannot.  When in doubt, use C<*FH>.
 
+All functions that are capable of creating filehandles (open(),
+opendir(), pipe(), socketpair(), sysopen(), socket(), and accept())
+automatically create an anonymous filehandle if the handle passed to
+them is an uninitialized scalar variable. This allows the constructs
+such as C<open(my $fh, ...)> and C<open(local $fh,...)> to be used to
+create filehandles that will conveniently be closed automatically when
+the scope ends, provided there are no other references to them. This
+largely eliminates the need for typeglobs when opening filehandles
+that must be passed around, as in the following example:
+
+    sub myopen {
+        open my $fh, "@_"
+	     or die "Can't open '@_': $!";
+	return $fh;
+    }
+
+    {
+        my $f = myopen("</etc/motd");
+	print <$f>;
+	# $f implicitly closed here
+    }
+
 Another way to create anonymous filehandles is with the Symbol
 module or with the IO::Handle module and its ilk.  These modules
 have the advantage of not hiding different types of the same name

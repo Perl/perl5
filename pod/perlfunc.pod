@@ -2587,7 +2587,10 @@ conversion assumes base 10.)
 
 Opens the file whose filename is given by EXPR, and associates it with
 FILEHANDLE.  If FILEHANDLE is an expression, its value is used as the
-name of the real filehandle wanted.  If EXPR is omitted, the scalar
+name of the real filehandle wanted.  (This is considered a symbolic
+reference, so C<use strict 'refs'> should I<not> be in effect.)
+
+If EXPR is omitted, the scalar
 variable of the same name as the FILEHANDLE contains the filename.
 (Note that lexical variables--those declared with C<my>--will not work
 for this purpose; so if you're using C<my>, specify EXPR in your call

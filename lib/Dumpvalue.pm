@@ -227,9 +227,9 @@ sub unwrap {
     if ($self->{compactDump} && !grep(ref $_, @{$v})) {
       if ($#$v >= 0) {
 	$short = $sp . "0..$#{$v}  " .
-	  join(" ",
-	       map {$self->stringify($_)} @{$v}[0..$tArrayDepth])
-	    . "$shortmore";
+	  join(" ", 
+	       map {exists $v->[$_] ? $self->stringify($v->[$_]) : "empty"} ($[..$tArrayDepth)
+	      ) . "$shortmore";
       } else {
 	$short = $sp . "empty array";
       }
@@ -238,7 +238,11 @@ sub unwrap {
     for my $num ($[ .. $tArrayDepth) {
       return if $DB::signal and $self->{stopDbSignal};
       print "$sp$num  ";
-      $self->DumpElem($v->[$num], $s);
+      if (exists $v->[$num]) {
+        $self->DumpElem($v->[$num], $s);
+      } else {
+	print "empty slot\n";
+      }
     }
     print "$sp  empty array\n" unless @$v;
     print "$sp$more" if defined $more ;

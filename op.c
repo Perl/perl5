@@ -5520,6 +5520,13 @@ Perl_ck_fun(pTHX_ OP *o)
 				name = GvNAME(gv);
 				len = GvNAMELEN(gv);
 			    }
+			    else if (kid->op_type == OP_AELEM
+				     || kid->op_type == OP_HELEM)
+			    {
+				name = "__ANONIO__";
+				len = 10;
+				mod(kid,type);
+			    }
 			    if (name) {
 				SV *namesv;
 				targ = pad_alloc(OP_RV2GV, SVs_PADTMP);

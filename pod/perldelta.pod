@@ -2686,6 +2686,18 @@ rather mild: Perl itself is not adversely affected by the error, only
 the h2ph utility coming with Perl, and that is rather rarely needed
 these days.
 
+=head2 Arrow operator and arrays
+
+When the left argument to the arrow operator C<< -> >> is an array, or
+the C<scalar> operator operating on an array, the result of the
+operation must be considered erroneous. For example:
+
+    @x->[2]
+    scalar(@x)->[2]
+
+These expressions will get run-time errors in some future release of
+Perl.
+
 =head2 Many features still experimental
 
 As discussed above, many features are still experimental.  Interfaces and

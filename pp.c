@@ -205,7 +205,7 @@ PP(pp_rv2gv)
 		if (SvROK(sv))
 		    goto wasref;
 	    }
-	    if (!SvOK(sv)) {
+	    if (!SvOK(sv) && sv != &PL_sv_undef) {
 		/* If this is a 'my' scalar and flag is set then vivify 
 		 * NI-S 1999/05/07
 		 */ 
