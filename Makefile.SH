@@ -161,7 +161,8 @@ CLDFLAGS = $ldflags
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 LNS = $lns
-CPS = $cp -f
+# NOTE: some systems don't grok "cp -f". XXX Configure test needed?
+CPS = $cp
 RMS = rm -f
 ranlib = $ranlib
 
