@@ -18,7 +18,7 @@ libc='/NextLibrary/Frameworks/System.framework/System'
 
 ldflags='-dynamic -prebind'
 lddlflags='-dynamic -bundle -undefined suppress'
-ccflags='-dynamic -fno-common -DUSE_NEXT_CTYPE -DUSE_PERL_SBRK'
+ccflags='-dynamic -fno-common -DUSE_NEXT_CTYPE -DUSE_PERL_SBRK -DMULTIARCH'
 cccdlflags='none'
 ld='cc'
 #optimize='-g -O'
