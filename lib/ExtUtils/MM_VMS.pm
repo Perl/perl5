@@ -151,11 +151,12 @@ sub AUTOLOAD {
 
 
 # This isn't really an override.  It's just here because ExtUtils::MM_VMS
-# appears in @MM::ISA before ExtUtils::Liblist, so if there isn't an ext()
+# appears in @MM::ISA before ExtUtils::Liblist::Kid, so if there isn't an ext()
 # in MM_VMS, then AUTOLOAD is called, and bad things happen.  So, we just
-# mimic inheritance here and hand off to ExtUtils::Liblist.
+# mimic inheritance here and hand off to ExtUtils::Liblist::Kid.
 sub ext {
-  ExtUtils::Liblist::ext(@_);
+  require ExtUtils::Liblist;
+  ExtUtils::Liblist::Kid::ext(@_);
 }
 
 =back
