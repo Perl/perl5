@@ -5068,9 +5068,9 @@ case the SCALAR is empty you can use OFFSET but only zero offset.
 
 =item tell
 
-Returns the current position for FILEHANDLE.  FILEHANDLE may be an
-expression whose value gives the name of the actual filehandle.  If
-FILEHANDLE is omitted, assumes the file last read.  
+Returns the current position for FILEHANDLE, or -1 on error.  FILEHANDLE
+may be an expression whose value gives the name of the actual filehandle.
+If FILEHANDLE is omitted, assumes the file last read.  
 
 There is no C<systell> function.  Use C<sysseek(FH, 0, 1)> for that.
 
