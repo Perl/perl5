@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri May  2 23:30:45 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Wed May  7 21:05:53 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3195,7 +3195,7 @@ EOM
 			mips)	osname=mips_osf1 ;;
 			esac
 			;;
-		# UnixWare 8 is now known as OpenUnix
+		# UnixWare 7.1.2 is known as Open UNIX 8
 		openunix|unixware) osname=svr5
 			osvers="$4"
 			;;
@@ -14043,6 +14043,10 @@ esac
 set sqrtl d_sqrtl
 eval $inlibc
 
+: see if scalbnl exists
+set scalbnl d_scalbnl
+eval $inlibc
+
 : see if modfl exists
 set modfl d_modfl
 eval $inlibc
@@ -14116,32 +14120,31 @@ EOCP
 esac
 
 if $test "$uselongdouble" = "$define"; then
-    message=none
-    case "$d_sqrtl:$d_modfl" in
-    $define:$define)
-	: You have both
-	;;
-    $define:$undef)
+    message=""
+    if $test "$d_sqrtl" != "$define"; then
+	message="$message sqrtl"
+    fi
+    if $test "$d_modfl" != "$define"; then
 	if $test "$d_aintl:$d_copysignl" = "$define:$define"; then
 	    echo "You have both aintl and copysignl, so I can emulate modfl."
 	else
-	    message="I could not find modfl."
+	    message="$message modfl"
 	fi
-	;;
-    $undef:$define)
-	message="I could not find sqrtl."
-	;;
-    $undef:$undef)
-	message="I found neither sqrtl nor modfl."
-	;;
-    esac
+    fi
+    if $test "$d_frexpl" != "$define"; then
+	if $test "$d_ilogbl:$d_scalbnl" = "$define:$define"; then
+	    echo "You have both ilogbl and scalbnl, so I can emulate frexpl."
+	else
+	    message="$message frexpl"
+	fi
+    fi
 
-    if $test "$message" != none; then
+    if $test "$message" != ""; then
 	$cat <<EOM >&4
 
 *** You requested the use of long doubles but you do not seem to have
-*** the mathematic functions for long doubles.
-*** ($message)
+*** the following mathematical functions needed for long double support:
+***    $message
 *** Please rerun Configure without -Duselongdouble and/or -Dusemorebits.
 *** Cannot continue, aborting.
 
@@ -15173,10 +15176,6 @@ eval $setvar
 echo " "
 set d_sbrkproto sbrk $i_unistd unistd.h
 eval $hasproto
-
-: see if scalbnl exists
-set scalbnl d_scalbnl
-eval $inlibc
 
 : see if select exists
 set select d_select
