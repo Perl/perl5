@@ -5,7 +5,8 @@ perldelta - what is new for perl v5.9.1
 =head1 DESCRIPTION
 
 This document describes differences between the 5.9.0 release and
-the 5.9.1 release.
+the 5.9.1 release. See L<perl590delta> for the differences between
+5.8.0 and 5.9.0.
 
 =head1 Incompatible Changes
 
@@ -156,6 +157,19 @@ enabled and when *ENV has been aliased (and thus doesn't reflect the
 program's environment anymore.)
 
 =head1 Changed Internals
+
+These news matter to you only if you either write XS code or like to
+know about or hack Perl internals (using Devel::Peek or any of the
+C<B::> modules counts), or like to run Perl with the C<-D> option.
+
+=head2 Reordering of SVt_* constants
+
+The relative ordering of constants that define the various types of C<SV>
+have changed; in particular, C<SVt_PVGV> has been moved ahead of C<SVt_PVLV>,
+C<SVt_PVAV>, C<SVt_PVHV> and C<SVt_PVCV>.  This is unlikely to make any
+difference unless you have code that explicitly makes assumptions about that
+ordering. (The inheritance hierarchy of C<B::*> objects has been changed
+to reflect this.)
 
 =head1 Configuration and Building
 
