@@ -17,12 +17,14 @@
 
 BEGIN {
     chdir "t" if -d "t";
-    @INC = '../lib';
+    @INC = qw(. ../lib);
 }
 
 use strict;
 use Config;
-use Test::More tests => 8;
+
+require "test.pl";
+plan(tests => 8);
 
 
 my $reps = 10000;	# How many times to try rand each time.

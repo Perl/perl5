@@ -2204,11 +2204,12 @@ t/run/exit.t                    Test perl's exit status.
 t/run/kill_perl.t               Tests that kill perl.
 t/run/runenv.t			Test if perl honors its environment variables.
 t/TEST				The regression tester
+t/test.pl			Simple testing library
 t/TestInit.pm			Preamble library for core tests
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
 thread.h			Threading header
-Todo.micro		The Wishlist for microperl
+Todo.micro			The Wishlist for microperl
 toke.c				The tokener
 uconfig.h			Configuration header for microperl
 uconfig.sh			Configuration script for microperl

@@ -1,20 +1,20 @@
-#!./perl -Tw
+#!./perl -w
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = ('../lib');
+    @INC = qw(. ../lib);
 }
 
-use Config;
-
 BEGIN {
-    require Test::More;
+    use Config;
+
+    require "test.pl";
 
     if( !$Config{d_crypt} ) {
-        Test::More->import('skip_all');
+        skip_all("crypt unimplemented");
     }
     else {
-        Test::More->import(tests => 2);
+        plan(tests => 2);
     }
 }
 
@@ -28,10 +28,6 @@ BEGIN {
 # bets, given alternative encryption/hashing schemes like MD5,
 # C2 (or higher) security schemes, and non-UNIX platforms.
 
-SKIP: {
-    skip "crypt unimplemented", 2, unless $Config{d_crypt};
-    
-    ok(substr(crypt("ab", "cd"), 2) ne substr(crypt("ab", "ce"), 2), "salt makes a difference");
+ok(substr(crypt("ab", "cd"), 2) ne substr(crypt("ab", "ce"), 2), "salt makes a difference");
 
-    ok(crypt("HI", "HO") eq crypt(join("",map{chr($_+256)}unpack"C*","HI"), "HO"), "low eight bits of Unicode");
-}
+ok(crypt("HI", "HO") eq crypt(join("",map{chr($_+256)}unpack"C*","HI"), "HO"), "low eight bits of Unicode");

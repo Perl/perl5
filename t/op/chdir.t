@@ -2,9 +2,11 @@ BEGIN {
     # We're not going to chdir() into 't' because we don't know if
     # chdir() works!  Instead, we'll hedge our bets and put both
     # possibilities into @INC.
-    @INC = ('lib', '../lib');
+    @INC = qw(t . lib ../lib);
 }
 
+require "test.pl";
+plan(tests => 25);
 
 # Might be a little early in the testing process to start using these,
 # but I can't think of a way to write this test without them.
@@ -15,8 +17,6 @@ use File::Spec::Functions qw(:DEFAULT splitdir rel2abs);
 sub abs_path {
     rel2abs(curdir);
 }
-
-use Test::More tests => 25;
 
 my $cwd = abs_path;
 

@@ -1,14 +1,16 @@
-#!./perl -wT
+#!./perl -w
 
 # Tests for the coderef-in-@INC feature
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = qw(. ../lib);
 }
 
 use File::Spec;
-use Test::More tests => 39;
+
+require "test.pl";
+plan(tests => 39);
 
 my @tempfiles = ();
 
