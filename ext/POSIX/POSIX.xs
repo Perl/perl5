@@ -1386,9 +1386,17 @@ lseek(fd, offset, whence)
     OUTPUT:
 	RETVAL
 
-SysRet
+SV *
 nice(incr)
 	int		incr
+    PPCODE:
+	errno = 0;
+	if ((incr = nice(incr)) != -1 || errno == 0) {
+	    if (incr == 0)
+		XPUSHs(sv_2mortal(newSVpvn("0 but true", 10)));
+	    else
+		XPUSHs(sv_2mortal(newSViv(incr)));
+	}
 
 void
 pipe()
