@@ -1101,6 +1101,7 @@ sub clear_noremap {
 
 sub internal_lrefs {
     local($_) = shift;
+    local $trailing_and = s/and\s+$// ? "and " : "";
 
     s{L</([^>]+)>}{$1}g;
     my(@items) = split( /(?:,?\s+(?:and\s+)?)/ );
@@ -1114,6 +1115,7 @@ sub internal_lrefs {
 
     $retstr .= " entr" . ( @items > 1  ? "ies" : "y" )
 	    .  " elsewhere in this document "; # terminal space to avoid words running together (pattern used strips terminal spaces)
+    $retstr .=  $trailing_and;
 
     return $retstr;
 
