@@ -351,7 +351,7 @@ $= = 10;
 	? "ok $test\n" : "not ok $test # TODO \$- = $- instead of 9\n";
     $test++;
     print $^ ne "Comment_TOP"
-	? "ok $test\n" : "not ok $test # TODO \$^ = $^ instead of 'STDOUT_TOP'\n";
+	? "ok $test\n" : "not ok $test\n# \$^ = $^ instead of 'STDOUT_TOP'\n";
     $test++;
     }
 
