@@ -93,7 +93,7 @@ sub Q ;
 
 # Global Constants
 
-$XSUBPP_version = "1.9506";
+$XSUBPP_version = "1.9507";
 
 my ($Is_VMS, $SymSet);
 if ($^O eq 'VMS') {
@@ -243,7 +243,7 @@ $END = "!End!\n\n";		# "impossible" keyword (multiple newline)
 $BLOCK_re= '\s*(' . join('|', qw(
 	REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE OUTPUT 
 	CLEANUP ALIAS PROTOTYPES PROTOTYPE VERSIONCHECK INCLUDE
-	SCOPE
+	SCOPE INTERFACE INTERFACE_MACRO C_ARGS
 	)) . "|$END)\\s*:";
 
 # Input:  ($_, @line) == unparsed input.
@@ -308,6 +308,20 @@ sub print_section {
 	print "$_\n";
     }
     print "$xsubpp::counter::SECTION_END_MARKER\n" if $WantLineNumbers;
+}
+
+sub merge_section {
+    my $in = '';
+  
+    while (!/\S/ && @line) {
+        $_ = shift(@line);
+    }
+    
+    for (;  defined($_) && !/^$BLOCK_re/o;  $_ = shift(@line)) {
+	$in .= "$_\n";
+    }
+    chomp $in;
+    return $in;
 }
 
 sub process_keyword($)
@@ -405,6 +419,42 @@ sub OUTPUT_handler {
 	    &generate_output($var_types{$outarg}, $var_num, $outarg, $DoSetMagic);
 	}
     }
+}
+
+sub C_ARGS_handler() {
+    my $in = merge_section();
+  
+    TrimWhitespace($in);
+    $func_args = $in;
+} 
+
+sub INTERFACE_MACRO_handler() {
+    my $in = merge_section();
+  
+    TrimWhitespace($in);
+    if ($in =~ /\s/) {		# two
+        ($interface_macro, $interface_macro_set) = split ' ', $in;
+    } else {
+        $interface_macro = $in;
+	$interface_macro_set = 'UNKNOWN_CVT'; # catch later
+    }
+    $interface = 1;		# local
+    $Interfaces = 1;		# global
+}
+
+sub INTERFACE_handler() {
+    my $in = merge_section();
+  
+    TrimWhitespace($in);
+    
+    foreach (split /[\s,]+/, $in) {
+        $Interfaces{$_} = $_;
+    }
+    print Q<<"EOF";
+#	XSFUNCTION = $interface_macro($ret_type,cv,XSANY.any_dptr);
+EOF
+    $interface = 1;		# local
+    $Interfaces = 1;		# global
 }
 
 sub CLEANUP_handler() { print_section() } 
@@ -731,6 +781,8 @@ while (<$FH>) {
 }
 &Exit unless defined $_;
 
+print "$xsubpp::counter::SECTION_END_MARKER\n" if $WantLineNumbers;
+
 $lastline    = $_;
 $lastline_no = $.;
 
@@ -847,6 +899,9 @@ while (fetch_para()) {
     undef(@proto_arg) ;
     undef($proto_in_this_xsub) ;
     undef($scope_in_this_xsub) ;
+    undef($interface);
+    $interface_macro = 'XSINTERFACE_FUNC' ;
+    $interface_macro_set = 'XSINTERFACE_FUNC_SET' ;
     $ProtoThisXSUB = $WantPrototypes ;
     $ScopeThisXSUB = 0;
 
@@ -867,7 +922,7 @@ while (fetch_para()) {
 
 
     # extract return type, function name and arguments
-    my($ret_type) = TidyType($_);
+    ($ret_type) = TidyType($_);
 
     # a function definition needs at least 2 lines
     blurt ("Error: Function definition too short '$ret_type'"), next PARAGRAPH
@@ -892,7 +947,7 @@ while (fetch_para()) {
 	last;
     }
     $XSStack[$XSS_work_idx]{functions}{$Full_func_name} ++ ;
-    %XsubAliases = %XsubAliasValues = ();
+    %XsubAliases = %XsubAliasValues = %Interfaces = ();
     $DoSetMagic = 1;
 
     @args = split(/\s*,\s*/, $orig_args);
@@ -935,6 +990,7 @@ while (fetch_para()) {
     $EXPLICIT_RETURN = ($CODE &&
 		("@line" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
     $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
+    $INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @line);
 
     # print function header
     print Q<<"EOF";
@@ -944,6 +1000,9 @@ while (fetch_para()) {
 EOF
     print Q<<"EOF" if $ALIAS ;
 #    dXSI32;
+EOF
+    print Q<<"EOF" if $INTERFACE ;
+#    dXSFUNCTION($ret_type);
 EOF
     if ($elipsis) {
 	$cond = ($min_args ? qq(items < $min_args) : 0);
@@ -997,7 +1056,7 @@ EOF
         $gotRETVAL = 0;
 
 	INPUT_handler() ;
-	process_keyword("INPUT|PREINIT|ALIAS|PROTOTYPE|SCOPE") ;
+	process_keyword("INPUT|PREINIT|INTERFACE_MACRO|C_ARGS|ALIAS|PROTOTYPE|SCOPE") ;
 
 	print Q<<"EOF" if $ScopeThisXSUB;
 #   ENTER;
@@ -1031,7 +1090,7 @@ EOF
 
 		print $deferred;
 
-        process_keyword("INIT|ALIAS|PROTOTYPE") ;
+        process_keyword("INIT|ALIAS|PROTOTYPE|INTERFACE_MACRO|INTERFACE|C_ARGS") ;
 
 		if (check_keyword("PPCODE")) {
 			print_section();
@@ -1064,6 +1123,7 @@ EOF
 			}
 			$func_name =~ s/^($spat)//
 			    if defined($spat);
+			$func_name = 'XSFUNCTION' if $interface;
 			print "$func_name($func_args);\n";
 		}
 	}
@@ -1172,6 +1232,18 @@ EOF
 #        sv_setpv((SV*)cv$proto) ;
 EOF
         }
+    } 
+    elsif ($interface) {
+	while ( ($name, $value) = each %Interfaces) {
+	    $name = "$Package\::$name" unless $name =~ /::/;
+	    push(@InitFileCode, Q<<"EOF");
+#        cv = newXS(\"$name\", XS_$Full_func_name, file);
+#        $interface_macro_set(cv,$value) ;
+EOF
+	    push(@InitFileCode, Q<<"EOF") if $proto;
+#        sv_setpv((SV*)cv$proto) ;
+EOF
+        }
     }
     else {
 	push(@InitFileCode,
@@ -1210,7 +1282,7 @@ print Q<<"EOF" if $WantVersionChk ;
 #
 EOF
 
-print Q<<"EOF" if defined $XsubAliases ;
+print Q<<"EOF" if defined $XsubAliases or defined $Interfaces ;
 #    {
 #        CV * cv ;
 #
@@ -1218,7 +1290,7 @@ EOF
 
 print @InitFileCode;
 
-print Q<<"EOF" if defined $XsubAliases ;
+print Q<<"EOF" if defined $XsubAliases or defined $Interfaces ;
 #    }
 EOF
 
