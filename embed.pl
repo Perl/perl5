@@ -2048,6 +2048,8 @@ Ap	|U8*	|utf16_to_utf8	|U16* p|U8 *d|I32 bytelen
 Ap	|U8*	|utf16_to_utf8_reversed|U16* p|U8 *d|I32 bytelen
 Ap	|I32	|utf8_distance	|U8 *a|U8 *b
 Ap	|U8*	|utf8_hop	|U8 *s|I32 off
+Ap	|U8*	|utf8_to_bytes	|U8 *s|STRLEN len
+Ap	|U8*	|bytes_to_utf8	|U8 *s|STRLEN len
 Ap	|UV	|utf8_to_uv	|U8 *s|I32* retlen
 Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
@@ -2188,8 +2190,6 @@ s	|I32	|do_trans_CC_complex	|SV *sv
 s	|I32	|do_trans_UU_simple	|SV *sv
 s	|I32	|do_trans_UU_count	|SV *sv
 s	|I32	|do_trans_UU_complex	|SV *sv
-s	|I32	|do_trans_UC_simple	|SV *sv
-s	|I32	|do_trans_CU_simple	|SV *sv
 s	|I32	|do_trans_UC_trivial	|SV *sv
 s	|I32	|do_trans_CU_trivial	|SV *sv
 #endif

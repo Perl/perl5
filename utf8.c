@@ -222,6 +222,72 @@ Perl_utf8_hop(pTHX_ U8 *s, I32 off)
     return s;
 }
 
+/*
+=for apidoc utf8_to_bytes
+
+Converts a string C<s> of length C<len> from UTF8 into ASCII encoding.
+Unlike C<bytes_to_utf8>, this over-writes the original string.
+
+=cut
+*/
+
+U8 *
+Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN len)
+{
+    dTHR;
+    U8 *send;
+    U8 *d;
+    U8 *save;
+
+    send = s + len;
+    d = save = s;
+    while (s < send) {
+        if (*s < 0x80)
+            *d++ = *s++;
+        else {
+            I32 ulen;
+            UV uv = utf8_to_uv(s, &ulen);
+            s += ulen;
+            *d++ = (U8)uv;
+        }
+    }
+    *d = '\0';
+    return save;
+}
+
+/*
+=for apidoc bytes_to_utf8
+
+Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
+Returns a pointer to the newly-created string.
+
+*/
+
+U8*
+Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN len)
+{
+    dTHR;
+    U8 *send;
+    U8 *d;
+    U8 *dst;
+    send = s + len;
+
+    Newz(801, d, len * 2 + 1, U8);
+    dst = d;
+
+    while (s < send) {
+        if (*s < 0x80)
+            *d++ = *s++;
+        else {
+            UV uv = *s++;
+            *d++ = (( uv >>  6)         | 0xc0);
+            *d++ = (( uv        & 0x3f) | 0x80);
+        }
+    }
+    *d = '\0';
+    return dst;
+}
+
 /* XXX NOTHING CALLS THE FOLLOWING TWO ROUTINES YET!!! */
 /*
  * Convert native or reversed UTF-16 to UTF-8.
