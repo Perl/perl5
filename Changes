@@ -31,6 +31,210 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14255] By: jhi                                   on 2002/01/14  14:04:24
+        Log: Retract #14251 (the op slab allocator from perlio)
+             until we figure out why 2.2.19 x86 debian gets
+             a circular sibling chain and therefore hangs in
+             the Perl_ck_subr() sibling for-loop.
+     Branch: perl
+	   ! embed.fnc embed.h embedvar.h global.sym intrpvar.h op.c perl.h
+	   ! perlapi.c perlapi.h proto.h
+____________________________________________________________________________
+[ 14254] By: jhi                                   on 2002/01/14  13:25:07
+        Log: Big mktables rewrite from Jeffrey;
+             documentation not yet updated.
+     Branch: perl
+	   + (add 171 files)
+	   - (delete 182 files)
+	   ! (edit 135 files)
+____________________________________________________________________________
+[ 14253] By: ams                                   on 2002/01/14  03:15:05
+        Log: Subject: Re: [ID 20020113.006] Cwd.pm uses uninitialized $ENV{PATH}
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 13 Jan 2002 21:00:07 -0500
+             Message-Id: <20020114020007.GB2877@blackrider>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 14252] By: jhi                                   on 2002/01/14  00:27:41
+        Log: Subject: Re: Win32 status - progress !
+             From: Abe Timmerman <abe@ztreet.demon.nl>       
+             Date: Mon, 14 Jan 2002 02:29:51 +0100
+             Message-ID: <9rc44u4sl4hjfm32if71ggjlm0qpvvacs3@4ax.com>
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Win32.t
+____________________________________________________________________________
+[ 14251] By: jhi                                   on 2002/01/13  23:30:05
+        Log: Integrate perlio.
+             
+             Slab allocator for ops
+             - moved the statics to intrpvar.h
+             - implemented Slab_Free()
+             - uses PerlMemShared (for now) if distinction exists.
+     Branch: perl
+	  !> embed.fnc embed.h embedvar.h global.sym intrpvar.h op.c perl.h
+	  !> perlapi.c perlapi.h proto.h
+____________________________________________________________________________
+[ 14249] By: jhi                                   on 2002/01/13  19:55:10
+        Log: Start a new test category: uni.  Much of t/op/pat
+             should probably be moved here, but holding on that
+             until Jeffrey finishes his big mktables rewrite.
+             Bits and pieces of op/split, op/pack, op/append,
+             op/join, could probably be moved to respective uni
+             tests, too.
+     Branch: perl
+	   + t/uni/fold.t t/uni/sprintf.t
+	   - t/op/unifold.t t/op/unisprintf.t
+	   ! MANIFEST t/TEST t/harness
+____________________________________________________________________________
+[ 14248] By: jhi                                   on 2002/01/13  19:52:02
+        Log: Subject: [PATCH] enable Win32 to build again
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sun, 13 Jan 2002 21:49:24 +0100
+             Message-ID: <3C4200E4.15926.23F6131@localhost>
+             
+             miniperl.exe.exe does not exe that well.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 14247] By: jhi                                   on 2002/01/13  19:50:23
+        Log: Mention some of the load-affected tests.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 14246] By: jhi                                   on 2002/01/13  19:38:17
+        Log: Move the UTF-8 conversion code earlier so that
+             op/ver is happy.
+     Branch: perl
+	   ! sv.c t/op/ver.t
+____________________________________________________________________________
+[ 14245] By: jhi                                   on 2002/01/13  19:19:59
+        Log: Upgrade to Scalar-List-Util 1.06.  The Makefile.PLs
+             have diverged quite a bit so no updates there.
+     Branch: perl
+	   ! ext/List/Util/ChangeLog ext/List/Util/Util.xs
+	   ! ext/List/Util/lib/List/Util.pm
+	   ! ext/List/Util/lib/Scalar/Util.pm
+____________________________________________________________________________
+[ 14244] By: jhi                                   on 2002/01/13  18:27:00
+        Log: Make the crypt() pickier: if downgrading doesn't work,
+             croak.
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlfunc.pod pp.c t/op/crypt.t
+____________________________________________________________________________
+[ 14243] By: jhi                                   on 2002/01/13  18:12:23
+        Log: Grow the buffer in case Unicode caused size changes
+             (and it very probably did).
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 14242] By: jhi                                   on 2002/01/13  17:46:45
+        Log: Future-proofing from Jeffrey Friedl (for conflicting
+             In* and Is* names).
+     Branch: perl
+	   ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 14241] By: jhi                                   on 2002/01/13  17:40:29
+        Log: Subject: [PATCH] Re: Warning in B.xs
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sun, 13 Jan 2002 19:39:52 +0100
+             Message-ID: <3C41E288.20562.1C8C895@localhost>
+     Branch: perl
+	   ! ext/B/B.xs
+____________________________________________________________________________
+[ 14240] By: jhi                                   on 2002/01/13  17:35:48
+        Log: Subject: Re: lookbehind broken with latest bleedperl
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Sun, 13 Jan 2002 18:06:22 +0000
+             Message-Id: <200201131806.g0DI6Mp20089@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[ 14239] By: jhi                                   on 2002/01/13  17:24:51
+        Log: Subject: [PATCH] more MM_Unix.t tests
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sun, 13 Jan 2002 17:16:19 +0100 (CET) 
+             Message-Id: <200201131621.SAA17925@tiku.hut.fi>
+             
+             Subject: [PATCH] 14220 misunderstood, I bet          
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 12 Jan 2002 21:31:58 +0100
+             Message-ID: <m3k7un8g5d.fsf@anima.de>
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Unix.t
+____________________________________________________________________________
+[ 14238] By: jhi                                   on 2002/01/13  17:14:25
+        Log: Subject: [PATCH] Re: MM_UNIX::parse_version() and my $VERSION        
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sun, 13 Jan 2002 16:58:27 +0100 (CET) 
+             Message-Id: <200201131602.SAA15687@tiku.hut.fi>
+             
+             Subject: RE: [PATCH] Re: MM_UNIX::parse_version() and my $VERSION    
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sun, 13 Jan 2002 17:05:23 +0100 (CET) 
+             Message-Id: <200201131610.SAA18974@tiku.hut.fi>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 14237] By: jhi                                   on 2002/01/13  17:12:04
+        Log: Subject: [PATCH] Re: [FAIL] Benchmark.t intermittent failure
+             From: Nicholas Clark <nick@unfortu.net> 
+             Date: Sun, 13 Jan 2002 15:58:34 +0000
+             Message-ID: <20020113155833.C314@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! lib/Benchmark.t
+____________________________________________________________________________
+[ 14236] By: jhi                                   on 2002/01/13  17:08:18
+        Log: Anton Berezin did more reading and the uid setting story
+             gets more complex.
+     Branch: perl
+	   ! pod/perltodo.pod utils/perldoc.PL
+____________________________________________________________________________
+[ 14235] By: jhi                                   on 2002/01/13  16:45:52
+        Log: Integrate perlio;
+             
+             Win32 fixes:
+             - vmem.h hack to handle free-by-wrong-thread after eval "".
+             - Initialize timerid 
+     Branch: perl
+	  !> win32/perlhost.h win32/perllib.c win32/vmem.h win32/win32.c
+____________________________________________________________________________
+[ 14234] By: jhi                                   on 2002/01/13  16:44:07
+        Log: Subject: Re: HiRes
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Sun, 13 Jan 2002 10:18:46 +0100
+             Message-Id: <20020113100616.B6B5.H.M.BRAND@hccnet.nl>
+             
+             Give up on socketpair in HP-UX.
+     Branch: perl
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 14231] By: jhi                                   on 2002/01/13  05:15:01
+        Log: *groan*
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14230] By: jhi                                   on 2002/01/13  05:13:03
+        Log: One more sharp s case found by Jeffrey.
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 14229] By: jhi                                   on 2002/01/13  04:43:33
+        Log: Comment tweak.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14228] By: jhi                                   on 2002/01/13  04:30:45
+        Log: Don't bother checking for the Greek special
+             cases if the node is too short.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14227] By: jhi                                   on 2002/01/12  21:00:04
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14225] By: jhi                                   on 2002/01/12  20:28:05
         Log: Subject: [PATCH 2] Re: [PATCH Configure ext/NDBM_File/hints/linux.pl] Support for linux systems with gdbm
              From: Jonathan Stowe <gellyfish@gellyfish.com>
