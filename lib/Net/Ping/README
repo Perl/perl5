@@ -1,7 +1,7 @@
 NAME
     Net::Ping - check a remote host for reachability
 
-    $Id: Ping.pm,v 1.6 2002/06/19 15:23:48 rob Exp $
+    $Id: Ping.pm,v 1.69 2003/01/23 17:21:29 rob Exp $
 
 SYNOPSIS
         use Net::Ping;
@@ -32,6 +32,16 @@ SYNOPSIS
         }
         undef($p);
 
+        # Like tcp protocol, but with many hosts
+        $p = Net::Ping->new("syn");
+        $p->{port_num} = getservbyname("http", "tcp");
+        foreach $host (@host_array) {
+          $p->ping($host);
+        }
+        while (($host,$rtt,$ip) = $p->ack) {
+          print "HOST: $host [$ip] ACKed in $rtt seconds.\n";
+        }
+
         # High precision syntax (requires Time::HiRes)
         $p = Net::Ping->new();
         $p->hires();
@@ -49,16 +59,16 @@ DESCRIPTION
     variable number of hosts may be pinged multiple times and then the
     connection is closed.
 
-    You may choose one of four different protocols to use for the ping. The
-    "udp" protocol is the default. Note that a live remote host may still
+    You may choose one of six different protocols to use for the ping. The
+    "tcp" protocol is the default. Note that a live remote host may still
     fail to be pingable by one or more of these protocols. For example,
-    www.microsoft.com is generally alive but not pingable.
+    www.microsoft.com is generally alive but not "icmp" pingable.
 
     With the "tcp" protocol the ping() method attempts to establish a
     connection to the remote host's echo port. If the connection is
     successfully established, the remote host is considered reachable. No
     data is actually echoed. This protocol does not require any special
-    privileges but has higher overhead than the other two protocols.
+    privileges but has higher overhead than the "udp" and "icmp" protocols.
 
     Specifying the "udp" protocol causes the ping() method to send a udp
     packet to the remote host's echo port. If the echoed packet is received
@@ -77,18 +87,34 @@ DESCRIPTION
     or that the program be setuid to root.
 
     If the "external" protocol is specified, the ping() method attempts to
-    use the `Net::Ping::External' module to ping the remote host.
-    `Net::Ping::External' interfaces with your system's default `ping'
+    use the "Net::Ping::External" module to ping the remote host.
+    "Net::Ping::External" interfaces with your system's default "ping"
     utility to perform the ping, and generally produces relatively accurate
-    results. If `Net::Ping::External' if not installed on your system,
+    results. If "Net::Ping::External" if not installed on your system,
     specifying the "external" protocol will result in an error.
+
+    If the "syn" protocol is specified, the ping() method will only send a
+    TCP SYN packet to the remote host then immediately return. If the syn
+    packet was sent successfully, it will return a true value, otherwise it
+    will return false. NOTE: Unlike the other protocols, the return value
+    does NOT determine if the remote host is alive or not since the full TCP
+    three-way handshake may not have completed yet. The remote host is only
+    considered reachable if it receives a TCP ACK within the timeout
+    specifed. To begin waiting for the ACK packets, use the ack() method as
+    explained below. Use the "syn" protocol instead the "tcp" protocol to
+    determine reachability of multiple destinations simultaneously by
+    sending parallel TCP SYN packets. It will not block while testing each
+    remote host. demo/fping is provided in this distribution to demonstrate
+    the "syn" protocol as an example. This protocol does not require any
+    special privileges.
 
   Functions
 
-    Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);
+    Net::Ping->new([$proto [, $def_timeout [, $bytes [, $device ]]]]);
         Create a new ping object. All of the parameters are optional. $proto
         specifies the protocol to use when doing a ping. The current choices
-        are "tcp", "udp" or "icmp". The default is "udp".
+        are "tcp", "udp", "icmp", "stream", "syn", or "external". The
+        default is "tcp".
 
         If a default timeout ($def_timeout) in seconds is provided, it is
         used when a timeout is not given to the ping() method (below). The
@@ -102,6 +128,10 @@ DESCRIPTION
         otherwise. The maximum number of data bytes that can be specified is
         1024.
 
+        If $device is given, this device is used to bind the source endpoint
+        before sending the ping packet. I beleive this only works with
+        superuser privileges and with udp and icmp protocols at this time.
+
     $p->ping($host [, $timeout]);
         Ping the remote host and wait for a response. $host can be either
         the hostname or the IP number of the remote host. The optional
@@ -111,10 +141,11 @@ DESCRIPTION
         number, the success flag returned will be undef. Otherwise, the
         success flag will be 1 if the host is reachable and 0 if it is not.
         For most practical purposes, undef and 0 and can be treated as the
-        same case. In array context, the elapsed time is also returned. The
-        elapsed time value will be a float, as retuned by the
-        Time::HiRes::time() function, if hires() has been previously called,
-        otherwise it is returned as an integer.
+        same case. In array context, the elapsed time as well as the string
+        form of the ip the host resolved to are also returned. The elapsed
+        time value will be a float, as retuned by the Time::HiRes::time()
+        function, if hires() has been previously called, otherwise it is
+        returned as an integer.
 
     $p->source_verify( { 0 | 1 } );
         Allows source endpoint verification to be enabled or disabled. This
@@ -124,6 +155,25 @@ DESCRIPTION
         icmp protocol pings.
 
         This is enabled by default.
+
+    $p->tcp_service_check( { 0 | 1 } );
+        Set whether or not the tcp connect behavior should enforce remote
+        service availability as well as reachability. Normally, if the
+        remote server reported ECONNREFUSED, it must have been reachable
+        because of the status packet that it reported. With this option
+        enabled, the full three-way tcp handshake must have been established
+        successfully before it will claim it is reachable. NOTE: It still
+        does nothing more than connect and disconnect. It does not speak any
+        protocol (i.e., HTTP or FTP) to ensure the remote server is sane in
+        any way. The remote server CPU could be grinding to a halt and
+        unresponsive to any clients connecting, but if the kernel throws the
+        ACK packet, it is considered alive anyway. To really determine if
+        the server is responding well would be application specific and is
+        beyond the scope of Net::Ping.
+
+        This only affects "tcp" and "syn" protocols.
+
+        This is disabled by default.
 
     $p->hires( { 0 | 1 } );
         Causes this module to use Time::HiRes module, allowing milliseconds
@@ -145,13 +195,34 @@ DESCRIPTION
         that object.
 
     $p->open($host);
-        When you are using the stream protocol, this call pre-opens the tcp
-        socket. It's only necessary to do this if you want to provide a
+        When you are using the "stream" protocol, this call pre-opens the
+        tcp socket. It's only necessary to do this if you want to provide a
         different timeout when creating the connection, or remove the
         overhead of establishing the connection from the first ping. If you
-        don't call `open()', the connection is automatically opened the
-        first time `ping()' is called. This call simply does nothing if you
+        don't call "open()", the connection is automatically opened the
+        first time "ping()" is called. This call simply does nothing if you
         are using any protocol other than stream.
+
+    $p->ack( [ $host ] );
+        When using the "syn" protocol, use this method to determine the
+        reachability of the remote host. This method is meant to be called
+        up to as many times as ping() was called. Each call returns the host
+        (as passed to ping()) that came back with the TCP ACK. The order in
+        which the hosts are returned may not necessarily be the same order
+        in which they were SYN queued using the ping() method. If the
+        timeout is reached before the TCP ACK is received, or if the remote
+        host is not listening on the port attempted, then the TCP connection
+        will not be established and ack() will return undef. In list
+        context, the host, the ack time, and the dotted ip string will be
+        returned instead of just the host. If the optional $host argument is
+        specified, the return value will be partaining to that host only.
+        This call simply does nothing if you are using any protocol other
+        than syn.
+
+    $p->nack( $failed_ack_host );
+        The reason that host $failed_ack_host did not receive a valid ACK.
+        Useful to find out why when ack( $fail_ack_host ) returns a false
+        value.
 
     $p->close();
         Close the network connection for this ping object. The network
@@ -166,12 +237,6 @@ DESCRIPTION
         return values and parameters are the same as described for the
         ping() method. This subroutine is obsolete and may be removed in a
         future version of Net::Ping.
-
-WARNING
-    pingecho() or a ping object with the tcp protocol use alarm() to
-    implement the timeout. So, don't use alarm() in your program while you
-    are using pingecho() or a ping object with the tcp protocol. The udp and
-    icmp protocols do not use alarm() to implement the timeout.
 
 NOTES
     There will be less network overhead (and some efficiency in your
@@ -204,7 +269,7 @@ NOTES
 INSTALL
     The latest source tree is available via cvs:
 
-      cvs -z3 -q -d :pserver:anonymous@cvs.roobik.com.:/usr/local/cvsroot/freeware co Net-Ping
+      cvs -z3 -q -d :pserver:anonymous@cvs.roobik.com.:/usr/local/cvsroot/freeware checkout Net-Ping
       cd Net-Ping
 
     The tarball can be created as follows:
@@ -255,7 +320,7 @@ AUTHORS
         mose@ns.ccsn.edu (Russell Mosemann)
 
 COPYRIGHT
-    Copyright (c) 2002, Rob Brown. All rights reserved.
+    Copyright (c) 2002-2003, Rob Brown. All rights reserved.
 
     Copyright (c) 2001, Colin McMillen. All rights reserved.
 
