@@ -12,7 +12,7 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..51\n";
+print "1..52\n";
 
 sub ok
 {
@@ -308,6 +308,16 @@ untie %h ;
     untie %x ;
     unlink $filename ;
     ok(51, $::count >0) ;
+}
+
+{
+    # check that attempting to tie an array to a DB_HASH will fail
+
+    my $filename = "xyz" ;
+    my @x ;
+    eval { tie @x, 'DB_File', $filename, O_RDWR|O_CREAT, 0640, $DB_HASH ; } ;
+    ok(52, $@ =~ /^DB_File can only tie an associative array to a DB_HASH database/) ;
+    unlink $filename ;
 }
 
 exit ;

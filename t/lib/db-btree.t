@@ -12,7 +12,7 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..91\n";
+print "1..92\n";
 
 sub ok
 {
@@ -502,5 +502,15 @@ ok(91, $i == 0);
 
 untie %h ;
 unlink $Dfile1 ;
+
+{
+    # check that attempting to tie an array to a DB_BTREE will fail
+
+    my $filename = "xyz" ;
+    my @x ;
+    eval { tie @x, 'DB_File', $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE ; } ;
+    ok(92, $@ =~ /^DB_File can only tie an associative array to a DB_BTREE database/) ;
+    unlink $filename ;
+}
 
 exit ;

@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 27th Apr 1997
- version 1.13
+ last modified 30th Apr 1997
+ version 1.14
 
  All comments/suggestions/problems are welcome
 
@@ -40,6 +40,8 @@
 	1.11 -  No change to DB_File.xs
 	1.12 -  No change to DB_File.xs
 	1.13 -  Tidied up a few casts.
+	1.14 -  Made it illegal to tie an associative array to a RECNO
+	        database and an ordinary array to a HASH or BTREE database.
 
 */
 
@@ -352,7 +354,8 @@ I32      value ;
 }
 
 static DB_File
-ParseOpenInfo(name, flags, mode, sv)
+ParseOpenInfo(isHASH, name, flags, mode, sv)
+int    isHASH ;
 char * name ;
 int    flags ;
 int    mode ;
@@ -387,6 +390,10 @@ SV *   sv ;
 
         if (sv_isa(sv, "DB_File::HASHINFO"))
         {
+
+	    if (!isHASH)
+	        croak("DB_File can only tie an associative array to a DB_HASH database") ;
+
             RETVAL->type = DB_HASH ;
             openinfo = (void*)info ;
   
@@ -419,6 +426,9 @@ SV *   sv ;
         }
         else if (sv_isa(sv, "DB_File::BTREEINFO"))
         {
+	    if (!isHASH)
+	        croak("DB_File can only tie an associative array to a DB_BTREE database");
+
             RETVAL->type = DB_BTREE ;
             openinfo = (void*)info ;
    
@@ -463,6 +473,9 @@ SV *   sv ;
         }
         else if (sv_isa(sv, "DB_File::RECNOINFO"))
         {
+	    if (isHASH)
+	        croak("DB_File can only tie an array to a DB_RECNO database");
+
             RETVAL->type = DB_RECNO ;
             openinfo = (void *)info ;
 
@@ -780,7 +793,8 @@ constant(name,arg)
 
 
 DB_File
-db_DoTie_(dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_HASH)
+db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_HASH)
+	int		isHASH
 	char *		dbtype
 	int		flags
 	int		mode
@@ -789,13 +803,13 @@ db_DoTie_(dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_HASH)
 	    char *	name = (char *) NULL ; 
 	    SV *	sv = (SV *) NULL ; 
 
-	    if (items >= 2 && SvOK(ST(1))) 
-	        name = (char*) SvPV(ST(1), na) ; 
+	    if (items >= 3 && SvOK(ST(2))) 
+	        name = (char*) SvPV(ST(2), na) ; 
 
-            if (items == 5)
-	        sv = ST(4) ;
+            if (items == 6)
+	        sv = ST(5) ;
 
-	    RETVAL = ParseOpenInfo(name, flags, mode, sv) ;
+	    RETVAL = ParseOpenInfo(isHASH, name, flags, mode, sv) ;
 	    if (RETVAL->dbp == NULL)
 	        RETVAL = NULL ;
 	}
@@ -880,7 +894,7 @@ db_FIRSTKEY(db)
 	    ST(0) = sv_newmortal();
 	    if (RETVAL == 0)
 	    {
-	        if (Db->type != DB_RECNO)
+	        if (db->type != DB_RECNO)
 	            sv_setpvn(ST(0), key.data, key.size);
 	        else
 	            sv_setiv(ST(0), (I32)*(I32*)key.data - 1);
@@ -901,7 +915,7 @@ db_NEXTKEY(db, key)
 	    ST(0) = sv_newmortal();
 	    if (RETVAL == 0)
 	    {
-	        if (Db->type != DB_RECNO)
+	        if (db->type != DB_RECNO)
 	            sv_setpvn(ST(0), key.data, key.size);
 	        else
 	            sv_setiv(ST(0), (I32)*(I32*)key.data - 1);

@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 27th Apr 1997
-# version 1.13
+# last modified 30th Apr 1997
+# version 1.14
 #
 #     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -146,7 +146,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.13" ;
+$VERSION = "1.14" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -229,17 +229,26 @@ bootstrap DB_File $VERSION;
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.
 
-sub TIEHASH
+sub tie_hash_or_array
 {
     my (@arg) = @_ ;
+    my $tieHASH = ( (caller(1))[3] =~ /TIEHASH/ ) ;
 
     $arg[4] = tied %{ $arg[4] } 
 	if @arg >= 5 && ref $arg[4] && $arg[4] =~ /=HASH/ && tied %{ $arg[4] } ;
 
-    DoTie_(@arg) ;
+    DoTie_($tieHASH, @arg) ;
 }
 
-*TIEARRAY = \&TIEHASH ;
+sub TIEHASH
+{
+    tie_hash_or_array(@_) ;
+}
+
+sub TIEARRAY
+{
+    tie_hash_or_array(@_) ;
+}
 
 sub get_dup
 {
@@ -1651,6 +1660,11 @@ Documented the incompatibility with version 2 of Berkeley DB.
 =item 1.13
 
 Minor changes to DB_FIle.xs and DB_File.pm
+
+=item 1.14
+
+Made it illegal to tie an associative array to a RECNO database and an
+ordinary array to a HASH or BTREE database.
 
 =back
 

@@ -41,7 +41,7 @@ sub bad_one
 EOM
 }
 
-print "1..55\n";
+print "1..56\n";
 
 my $Dfile = "recno.tmp";
 unlink $Dfile ;
@@ -268,6 +268,16 @@ unlink $Dfile;
     my $ok = ($x eq "abc--def-------ghi--") ;
     bad_one() unless $ok ;
     ok(55, $ok) ;
+}
+
+{
+    # check that attempting to tie an associative array to a DB_RECNO will fail
+
+    my $filename = "xyz" ;
+    my %x ;
+    eval { tie %x, 'DB_File', $filename, O_RDWR|O_CREAT, 0640, $DB_RECNO ; } ;
+    ok(56, $@ =~ /^DB_File can only tie an array to a DB_RECNO database/) ;
+    unlink $filename ;
 }
 
 exit ;
