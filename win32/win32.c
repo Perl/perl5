@@ -1840,7 +1840,7 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 static int _alloc_osfhnd()
 {
     HANDLE hF = CreateFile("NUL", 0, 0, NULL, OPEN_ALWAYS, 0, NULL);
-    int fh = _open_osfhandle(hF, 0);
+    int fh = _open_osfhandle((long)hF, 0);
     CloseHandle(hF);
     if (fh == -1)
         return fh;
@@ -1876,7 +1876,7 @@ my_open_osfhandle(long osfhandle, int flags)
     fileflags |= FOPEN;		/* mark as open */
 
     _osfile(fh) = fileflags;	/* set osfile entry */
-    LeaveCritiicalSection(&_pioinfo(fh)->lock);
+    LeaveCriticalSection(&_pioinfo(fh)->lock);
 
     return fh;			/* return handle */
 }
