@@ -3247,12 +3247,14 @@ END_EXTERN_C
 /*****************************************************************************/
 /* XXX This needs to be revisited, since BEGIN makes yacc re-enter... */
 
+#ifdef __Lynx__
 /* LynxOS defines these in scsi.h which is included via ioctl.h */
 #ifdef FORMAT
 #undef FORMAT
 #endif
 #ifdef SPACE
 #undef SPACE
+#endif
 #endif
 
 #include "perly.h"
