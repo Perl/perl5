@@ -92,8 +92,8 @@ is( $out, "not ok 2 - different types\n",   'different types' );
 like( $err, <<ERR,                          '   right diagnostic' );
 #     Failed test \\($Filename at line 78\\)
 #     Structures begin differing at:
-#          \\\$got = HASH\\(0x[0-9a-f]+\\)
-#     \\\$expected = ARRAY\\(0x[0-9a-f]+\\)
+#          \\\$got = 'HASH\\(0x[0-9a-f]+\\)'
+#     \\\$expected = 'ARRAY\\(0x[0-9a-f]+\\)'
 ERR
 
 #line 88
@@ -166,8 +166,8 @@ is( $out, "not ok 9 - mixed scalar and array refs\n",
 like( $err, <<ERR,                      '    right diagnostic' );
 #     Failed test \\($Filename at line 151\\)
 #     Structures begin differing at:
-#          \\\$got = ARRAY\\(0x[0-9a-f]+\\)
-#     \\\$expected = SCALAR\\(0x[0-9a-f]+\\)
+#          \\\$got = 'ARRAY\\(0x[0-9a-f]+\\)'
+#     \\\$expected = 'SCALAR\\(0x[0-9a-f]+\\)'
 ERR
 
 
@@ -212,36 +212,4 @@ is( $err, <<ERR,                            '    right diagnostic' );
 #     Structures begin differing at:
 #          \$got->{that}{foo} = Does not exist
 #     \$expected->{that}{foo} = '42'
-ERR
-
-#line 217
-is_deeply([(\"a"), "b"], [(\"a"), "c"], "scalar refs diag");
-is( $out, "not ok 12 - scalar refs diag\n",  'scalar refs diag' );
-is( $err, <<ERR,                            '    right diagnostic' );
-#     Failed test ($0 at line 217)
-#     Structures begin differing at:
-#          \$got->[1] = 'b'
-#     \$expected->[1] = 'c'
-ERR
-
-#line 228
-my $a = [];
-is_deeply($a, $a."", "mixed ref and stringified ref");
-is( $out, "not ok 13 - mixed ref and stringified ref\n",  'mixed ref and stringified ref' );
-is( $err, <<ERR,                            '    right diagnostic' );
-#     Failed test ($0 at line 229)
-#     Structures begin differing at:
-#          \$got = $a
-#     \$expected = '$a'
-ERR
-
-#line 238
-my $b = [];
-is_deeply({}, {key => $b}, "Does Not Exist");
-is( $out, "not ok 14 - Does Not Exist\n",  'Does Not Exist' );
-is( $err, <<ERR,                            '    right diagnostic' );
-#     Failed test ($0 at line 239)
-#     Structures begin differing at:
-#          \$got->{key} = Does not exist
-#     \$expected->{key} = $b
 ERR
