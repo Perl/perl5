@@ -34,7 +34,7 @@ sub populate (@) {
     return $stob;
 } 
 
-sub lstat (*)  { populate(CORE::lstat(shift)) }
+sub lstat ($)  { populate(CORE::lstat(shift)) }
 
 sub stat ($) {
     my $arg = shift;
