@@ -228,7 +228,7 @@ sub Init {
     $perlbug = 'perlbug@perl.org';
 
     # Test address
-    $testaddress = 'perlbug-test@perl.com';
+    $testaddress = 'perlbug-test@perl.org';
 
     # Target address
     $address = $::opt_a || ($::opt_t ? $testaddress : $perlbug);
@@ -1135,7 +1135,7 @@ version of perl comes out and your bug is still present.
 
 =item B<-a>
 
-Address to send the report to.  Defaults to `perlbug@perl.org'.
+Address to send the report to.  Defaults to B<perlbug@perl.org>.
 
 =item B<-A>
 
@@ -1227,7 +1227,7 @@ supply one on the command line.
 
 =item B<-t>
 
-Test mode.  The target address defaults to `perlbug-test@perl.com'.
+Test mode.  The target address defaults to B<perlbug-test@perl.org>.
 
 =item B<-v>
 
