@@ -80,12 +80,12 @@ $Is_MacOS  = $^O eq 'MacOS';
 my $Mac_FS;
 $Mac_FS = eval { require Mac::FileSpec::Unixish } if $Is_MacOS;
 
-@dl_shared_objects  = ();       # shared objects for symbols we have 
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
 @dl_library_path    = ();       # path to look for files
 
 #XSLoader.pm may have added elements before we were required
+#@dl_shared_objects  = ();       # shared objects for symbols we have 
 #@dl_librefs         = ();       # things we have loaded
 #@dl_modules         = ();       # Modules we have loaded
 
