@@ -960,6 +960,7 @@ Ap	|DIR*	|dirp_dup	|DIR* dp
 Ap	|GP*	|gp_dup		|GP* gp|CLONE_PARAMS* param
 Ap	|MAGIC*	|mg_dup		|MAGIC* mg|CLONE_PARAMS* param
 Ap	|SV*	|sv_dup		|SV* sstr|CLONE_PARAMS* param
+Ap	|void	|rvpv_dup	|SV* dstr|SV *sstr|CLONE_PARAMS* param
 #if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_dup	|struct interp_intern* src \
 				|struct interp_intern* dst
@@ -1026,11 +1027,11 @@ s	|int	|magic_methcall	|SV *sv|const MAGIC *mg|const char *meth|I32 f \
 #endif
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
-s	|I32	|list_assignment|OP *o
-s	|void	|bad_type	|I32 n|const char *t|const char *name|OP *kid
+s	|I32	|list_assignment|const OP *o
+s	|void	|bad_type	|I32 n|const char *t|const char *name|const OP *kid
 s	|void	|cop_free	|COP *cop
 s	|OP*	|modkids	|OP *o|I32 type
-s	|void	|no_bareword_allowed|OP *o
+s	|void	|no_bareword_allowed|const OP *o
 s	|OP*	|no_fh_allowed	|OP *o
 s	|OP*	|scalarboolean	|OP *o
 s	|OP*	|too_few_arguments|OP *o|const char* name
@@ -1038,9 +1039,9 @@ s	|OP*	|too_many_arguments|OP *o|const char* name
 s	|OP*	|newDEFSVOP
 s	|OP*	|new_logop	|I32 type|I32 flags|OP **firstp|OP **otherp
 s	|void	|simplify_sort	|OP *o
-s	|bool	|is_handle_constructor	|OP *o|I32 argnum
+s	|bool	|is_handle_constructor	|const OP *o|I32 argnum
 s	|char*	|gv_ename	|GV *gv
-s	|bool	|scalar_mod_type|OP *o|I32 type
+s	|bool	|scalar_mod_type|const OP *o|I32 type
 s	|OP *	|my_kid		|OP *o|OP *attrs|OP **imopsp
 s	|OP *	|dup_attrlist	|OP *o
 s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs|bool for_my

@@ -1016,6 +1016,7 @@
 #define gp_dup			Perl_gp_dup
 #define mg_dup			Perl_mg_dup
 #define sv_dup			Perl_sv_dup
+#define rvpv_dup		Perl_rvpv_dup
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup		Perl_sys_intern_dup
 #endif
@@ -3007,6 +3008,7 @@
 #define gp_dup(a,b)		Perl_gp_dup(aTHX_ a,b)
 #define mg_dup(a,b)		Perl_mg_dup(aTHX_ a,b)
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)
+#define rvpv_dup(a,b,c)		Perl_rvpv_dup(aTHX_ a,b,c)
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
 #endif

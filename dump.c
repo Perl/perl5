@@ -1460,7 +1460,6 @@ Perl_runops_debug(pTHX)
 I32
 Perl_debop(pTHX_ OP *o)
 {
-    AV *padlist, *comppad;
     CV *cv;
     SV *sv;
 
@@ -1489,8 +1488,8 @@ Perl_debop(pTHX_ OP *o)
 	/* print the lexical's name */
         cv = deb_curcv(cxstack_ix);
         if (cv) {
-            padlist = CvPADLIST(cv);
-            comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
+            AV *padlist = CvPADLIST(cv);
+            AV *comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
             sv = *av_fetch(comppad, o->op_targ, FALSE);
         } else
             sv = Nullsv;

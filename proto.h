@@ -917,6 +917,7 @@ PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR* dp);
 PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp, CLONE_PARAMS* param);
 PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg, CLONE_PARAMS* param);
 PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr, CLONE_PARAMS* param);
+PERL_CALLCONV void	Perl_rvpv_dup(pTHX_ SV* dstr, SV *sstr, CLONE_PARAMS* param);
 #if defined(HAVE_INTERP_INTERN)
 PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct interp_intern* dst);
 #endif
@@ -981,11 +982,11 @@ STATIC int	S_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32
 #endif
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
-STATIC I32	S_list_assignment(pTHX_ OP *o);
-STATIC void	S_bad_type(pTHX_ I32 n, const char *t, const char *name, OP *kid);
+STATIC I32	S_list_assignment(pTHX_ const OP *o);
+STATIC void	S_bad_type(pTHX_ I32 n, const char *t, const char *name, const OP *kid);
 STATIC void	S_cop_free(pTHX_ COP *cop);
 STATIC OP*	S_modkids(pTHX_ OP *o, I32 type);
-STATIC void	S_no_bareword_allowed(pTHX_ OP *o);
+STATIC void	S_no_bareword_allowed(pTHX_ const OP *o);
 STATIC OP*	S_no_fh_allowed(pTHX_ OP *o);
 STATIC OP*	S_scalarboolean(pTHX_ OP *o);
 STATIC OP*	S_too_few_arguments(pTHX_ OP *o, const char* name);
@@ -993,9 +994,9 @@ STATIC OP*	S_too_many_arguments(pTHX_ OP *o, const char* name);
 STATIC OP*	S_newDEFSVOP(pTHX);
 STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp);
 STATIC void	S_simplify_sort(pTHX_ OP *o);
-STATIC bool	S_is_handle_constructor(pTHX_ OP *o, I32 argnum);
+STATIC bool	S_is_handle_constructor(pTHX_ const OP *o, I32 argnum);
 STATIC char*	S_gv_ename(pTHX_ GV *gv);
-STATIC bool	S_scalar_mod_type(pTHX_ OP *o, I32 type);
+STATIC bool	S_scalar_mod_type(pTHX_ const OP *o, I32 type);
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp);
 STATIC OP *	S_dup_attrlist(pTHX_ OP *o);
 STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my);
