@@ -25,7 +25,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..14\n" };
+BEGIN { print "1..15\n" };
 use threads;
 
 
@@ -96,24 +96,24 @@ threads->create('test5')->join();
 
 sub test7 {
 	my $self = threads->self();
-	ok(9, $self->tid == 7, "Wanted 7, got ".$self->tid);
-	ok(10, threads->tid() == 7, "Wanted 7, got ".threads->tid());
+	ok(10, $self->tid == 7, "Wanted 7, got ".$self->tid);
+	ok(11, threads->tid() == 7, "Wanted 7, got ".threads->tid());
 }
 
 threads->create('test7')->join;
 
 sub test8 {
 	my $self = threads->self();
-	ok(11, $self->tid == 8, "Wanted 8, got ".$self->tid);
-	ok(12, threads->tid() == 8, "Wanted 8, got ".threads->tid());
+	ok(12, $self->tid == 8, "Wanted 8, got ".$self->tid);
+	ok(13, threads->tid() == 8, "Wanted 8, got ".threads->tid());
 }
 
 threads->create('test8')->join;
 
 
 #check support for threads->self() in main thread
-ok(13, 0 == threads->self->tid(),"Check so that tid for threads work for main thread");
-ok(14, 0 == threads->tid(),"Check so that tid for threads work for main thread");
+ok(14, 0 == threads->self->tid(),"Check so that tid for threads work for main thread");
+ok(15, 0 == threads->tid(),"Check so that tid for threads work for main thread");
 
 1;
 
