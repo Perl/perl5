@@ -150,11 +150,20 @@ threadstart(void *arg)
     SvREFCNT_dec(thr->errsv);
     SvREFCNT_dec(thr->errhv);
 
+    /*Safefree(cxstack);*/
+    while (curstackinfo->si_next)
+	curstackinfo = curstackinfo->si_next;
+    while (curstackinfo) {
+	PERL_SI *p = curstackinfo->si_prev;
+	SvREFCNT_dec(curstackinfo->si_stack);
+	Safefree(curstackinfo->si_cxstack);
+	Safefree(curstackinfo);
+	curstackinfo = p;
+    }    
     Safefree(markstack);
     Safefree(scopestack);
     Safefree(savestack);
     Safefree(retstack);
-    Safefree(cxstack);
     Safefree(tmps_stack);
     Safefree(ofs);
 
@@ -165,6 +174,7 @@ threadstart(void *arg)
     Safefree(screamnext);
     Safefree(reg_start_tmp);
     SvREFCNT_dec(lastscream);
+    /*SvREFCNT_dec(defoutgv);*/
 
     MUTEX_LOCK(&thr->mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),

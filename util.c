@@ -2784,7 +2784,7 @@ new_struct_thread(struct perl_thread *t)
     curpm = t->Tcurpm;         /* XXX No PMOP ref count */
     nrs = newSVsv(t->Tnrs);
     rs = SvREFCNT_inc(nrs);
-    last_in_gv = (GV*)SvREFCNT_inc(t->Tlast_in_gv);
+    last_in_gv = Nullgv;
     ofslen = t->Tofslen;
     ofs = savepvn(t->Tofs, ofslen);
     defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
