@@ -98,6 +98,7 @@ char *my_tmpnam (char *);
 
 #define tmpfile	my_tmpfile
 #define tmpnam	my_tmpnam
+#define isatty	_isterm
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),

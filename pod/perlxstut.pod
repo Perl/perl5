@@ -491,7 +491,7 @@ And finally create a file Makefile.PL that looks like this:
 	$Verbose = 1;
 	WriteMakefile(
 	    'NAME' => 'Mytest2::mylib',
-	    'clean'     => {'FILES' => 'libmylib.a'},
+	    'clean'     => {'FILES' => 'libmylib$(LIB_EXT)'},
 	);
 
 
