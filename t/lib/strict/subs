@@ -352,5 +352,5 @@ use strict;
 use warnings;
 print "" if BAREWORD;
 EXPECT
-Bareword "BAREWORD" not allowed while "strict subs" in use at - line 5
+Bareword "BAREWORD" not allowed while "strict subs" in use at - line 5.
 Execution of - aborted due to compilation errors.
