@@ -122,7 +122,7 @@ IMPLIB		= implib -c
 #
 RUNTIME		= -D_RTLDLL
 INCLUDES	= -I.\include -I. -I.. -I$(CCINCDIR)
-#PCHFLAGS	= -H -H$(INTDIR)\bcmoduls.pch 
+#PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
 DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
@@ -200,7 +200,7 @@ RUNTIME		= -MD
 .ENDIF
 
 INCLUDES	= -I.\include -I. -I.. 
-#PCHFLAGS	= -Fp$(INTDIR)\vcmoduls.pch -YX 
+#PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console

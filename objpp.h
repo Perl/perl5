@@ -817,6 +817,8 @@
 #define newWHILEOP        CPerlObj::Perl_newWHILEOP
 #undef  new_logop
 #define new_logop         CPerlObj::new_logop
+#undef  new_stackinfo
+#define new_stackinfo     CPerlObj::Perl_new_stackinfo
 #undef  new_sv
 #define new_sv            CPerlObj::new_sv
 #undef  new_xiv

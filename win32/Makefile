@@ -118,7 +118,7 @@ RUNTIME		= -MD
 !ENDIF
 
 INCLUDES	= -I.\include -I. -I..
-#PCHFLAGS	= -Fp"$(INTDIR)/modules.pch" -YX 
+#PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
