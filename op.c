@@ -3428,7 +3428,7 @@ OP *block;
 	if (PERLDB_SUBLINE && curstash != debstash) {
 	    SV *sv = NEWSV(0,0);
 	    SV *tmpstr = sv_newmortal();
-	    static GV *db_postponed;
+	    GV *db_postponed = gv_fetchpv("DB::postponed", GV_ADDMULTI, SVt_PVHV);
 	    CV *cv;
 	    HV *hv;
 
@@ -3437,9 +3437,6 @@ OP *block;
 		    (long)subline, (long)curcop->cop_line);
 	    gv_efullname3(tmpstr, gv, Nullch);
 	    hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
-	    if (!db_postponed) {
-		db_postponed = gv_fetchpv("DB::postponed", GV_ADDMULTI, SVt_PVHV);
-	    }
 	    hv = GvHVn(db_postponed);
 	    if (HvFILL(hv) > 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
 		  && (cv = GvCV(db_postponed))) {
