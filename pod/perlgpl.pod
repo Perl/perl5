@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-perlgpl -- the GNU Public General Public License, version 2
+perlgpl - the GNU General Public License, version 2
 
 =head1 SYNOPSIS
 
