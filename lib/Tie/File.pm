@@ -97,6 +97,7 @@ sub TIEARRAY {
     $fh = \do { local *FH };   # only works in 5.005 and later
     sysopen $fh, $file, $opts{mode}, 0666 or return;
     binmode $fh;
+    ++$opts{ourfh};
   }
   { my $ofh = select $fh; $| = 1; select $ofh } # autoflush on write
   if (defined $opts{discipline} && $] >= 5.006) {
@@ -407,6 +408,18 @@ sub DESTROY {
   my $self = shift;
   $self->flush if $self->_is_deferring;
   $self->{cache}->delink if defined $self->{cache}; # break circular link
+  if ($self->{fh} and $self->{ourfh}) {
+      delete $self->{ourfh};
+      close delete $self->{fh};
+      # The above close() causes a problem which would tickle a bug in
+      # 09_gen_rs.t subtest #51 and onwards but only with threaded builds:
+      # Couldn't seek filehandle: Bad file number at lib/Tie/File.pm line 826
+      # Tie::File::_seek('Tie::File=HASH(0x14015e2f0)',-1) called at lib/Tie/File.pm line 870
+      # Tie::File::_fill_offsets('Tie::File=HASH(0x14015e2f0)') called at lib/Tie/File.pm line 256
+      # Tie::File::FETCHSIZE('Tie::File=HASH(0x14015e2f0)') called at lib/Tie/File.pm line 428
+      # Tie::File::_splice('Tie::File=HASH(0x14015e2f0)',1,0,'x','y') called at lib/Tie/File.pm line 403
+      # Tie::File::SPLICE('Tie::File=HASH(0x14015e2f0)',1,0,'x','y') called at lib/Tie/File/t/09_gen_rs.t line 120
+  }
 }
 
 sub _splice {
@@ -2288,6 +2301,11 @@ array.  Handles must be attached to seekable sources of data---that
 means no pipes or sockets.  If C<Tie::File> can detect that you
 supplied a non-seekable handle, the C<tie> call will throw an
 exception.  (On Unix systems, it can detect this.)
+
+Note that Tie::File will only close any filehandles that it opened
+internally.  If you passed it a filehandle as above, you "own" the
+filehandle, and are responsible for closing it after you have untied
+the @array.
 
 =head1 Deferred Writing
 
