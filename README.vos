@@ -1,0 +1,87 @@
+Perl 5 README file for the Stratus VOS operating system.
+Paul Green (Paul_Green@stratus.com)
+August 12, 1998
+
+Introduction
+------------
+This is a port of Perl version 5, revision 005-02, to VOS.  Perl
+is a scripting or macro language that is popular on many
+systems.  See your local computer bookstore for a number of good
+books on Perl.
+
+Most of the Perl features should work on VOS.  However, any
+attempt by perl.pm to call the following unimplemented POSIX
+functions will result in an error message and an immediate and
+fatal call to the VOS debugger.  They are "dup", "execlp",
+"execl", "execvp", "fork", and "waitpid".
+
+Compiling Perl 5 on VOS
+-----------------------
+Before you can build Perl 5 on VOS, you need to have or acquire the
+following additional items.
+
+1.   The VOS Standard C Compiler and Runtime, or the VOS Standard C
+     Cross-Compiler.  This is a standard Stratus product.
+
+2.   The VOS OS TCP/IP product set.  While the necessary header files
+     are included in this distribution, you still need the appropriate
+     object files in order to bind perl.pm.  This is a standard
+     Stratus product.
+
+3.   The VOS POSIX.1 environment.  As of this writing, this is
+     available on the VOS FTP site.  Login to ftp.stratus.com
+     anonymously and get the file /pub/vos/alpha/posix.save.evf.gz in
+     binary file-transfer mode.  Or use the Uniform Resource Locator
+     (URL) ftp://ftp.stratus.com/pub/vos/alpha/posix.save.evf.gz from
+     your web browser.  This is not a standard Stratus product.
+
+To build build 5, change to one of the VOS object directories
+(e.g., perl5.005_02>vos>obj), and give the command "<build".  If
+you have the cross-compilers and wish to build for a specific
+architecture, say "<build -processor pa7100" (for example).  You
+can also customize the "compile_perl.cm" command macro for your
+system.
+
+Changes to Perl for VOS
+-----------------------
+1.   The header perl.h was changed to include vosish.h instead
+     of unixish.h.  This change is necessary because VOS POSIX.1
+     does not (yet) implement the getgrname() or getgrgid()
+     functions.
+
+Unimplemented Features
+----------------------
+If Perl 5 attempts to call an unimplemented VOS POSIX.1
+function, it will print a fatal error message and enter the VOS
+debugger.  This error is not recoverable.  See vos_dummies.c for
+a list of the unimplemented POSIX.1 functions.  To see what the
+error message looks like, compile and execute
+"test_vos_dummies.c".
+
+Restrictions
+------------
+This port of Perl version 5 to VOS uses Unix-style,
+slash-separated pathnames, not VOS-style greater-than-separated
+pathnames.  If you wish to have it use VOS-style pathnames, try
+setting the external variable s$c_options to 4 with the
+following command line.  Note that this way of configuring Perl
+5 has not been tested; I don't know if Perl can handle the
+presence of the greater-thans, and the absence of the slashes.
+
+     set_external_variable s$c_options -in perl.pm -type integer -to 4
+
+The following command can be used to check the value:
+
+     get_external_variable s$c_options -in perl.pm -type integer
+
+See the documentation for VOS POSIX.1 for the full set of option
+values.
+
+Support Status
+--------------
+I'm offering this port "as is".  You can ask me questions, but I
+can't guarantee I'll be able to answer them; I don't know much
+about Perl itself; I'm still learning that.
+
+(end)
+

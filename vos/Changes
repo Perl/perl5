@@ -1,0 +1,23 @@
+This file documents the changes made to port Perl to the Stratus
+VOS operating system.
+
+after 5.005_02:
+     Initial release.
+     Supplied "build.cm" command macro to build perl.
+     Supplied "Changes" to document the change history.
+     Supplied "compile_perl.cm" to launch processes to compile all
+          four versions of the Perl 5 binaries.
+     Supplied "config.h" to configure Perl 5 to VOS. Unfortunately,
+          since VOS does not have the configure tool, this file was
+          built by hand by editing "config_h.SH".
+     Supplied "config_h.SH.orig", which is the version of this file
+          that was current for version 5.005_02. Use this to discover
+          any subsequent changes to config_h.SH that must be
+          hand-copied into the real config.h.
+     Supplied "perl.bind" to control the VOS binder.
+     Supplied "README.vos" to describe the VOS port.
+     Supplied "test_vos_dummies.c" to test the VOS dummy functions.
+     Supplied "vos_dummies.c" to trap unimplemented POSIX functions.
+     Supplied "vosish.h" to configure Perl 5 to VOS.
+     
+(end)

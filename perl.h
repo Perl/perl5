@@ -1122,7 +1122,11 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #     if defined(MPE)
 #       include "mpeix/mpeixish.h"
 #     else
-#       include "unixish.h"
+#       if defined(__VOS__)
+#         include "vosish.h"
+#       else
+#         include "unixish.h"
+#       endif
 #     endif
 #   endif
 # endif

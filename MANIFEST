@@ -41,6 +41,7 @@ README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
 README.threads		Notes about multithreading
 README.vms		Notes about VMS port
+README.vos		Notes about Stratus VOS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
 Todo-5.005		What needs doing before 5.005 release
@@ -1194,7 +1195,7 @@ vms/genconfig.pl	retcon config.sh from config.h
 vms/genopt.com		hack to write options files in case of broken makes
 vms/make_command.com	record MM[SK] command used to build Perl
 vms/mms2make.pl		convert descrip.mms to make syntax
-vms/munchconfig.c   performs shell $var substitution for VMS
+vms/munchconfig.c	performs shell $var substitution for VMS
 vms/myconfig.com	record local configuration info for bug report
 vms/perlvms.pod		VMS-specific additions to Perl documentation
 vms/perly_c.vms		perly.c with fixed declarations for global syms
@@ -1207,6 +1208,15 @@ vms/vms.c		VMS-specific C code for Perl core
 vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/vmsish.h		VMS-specific C header for Perl core
 vms/writemain.pl	Generate perlmain.c from miniperlmain.c+extensions
+vos/build.cm		VOS command macro to build Perl
+vos/Changes		Changes made to port Perl to the VOS operating system
+vos/compile_perl.cm	VOS commnad macro to build multiple version of Perl
+vos/config.h		config.h for VOS
+vos/config_h.SH_orig	config_h.SH at the time config.h was created
+vos/perl.bind		VOS bind control file
+vos/test_vos_dummies.c	Test program for "vos_dummies.c"
+vos/vos_dummies.c	Wrappers to soak up undefined functions
+vos/vosish.h		VOS-specific header file
 warning.h		The warning numbers
 warning.pl		Program to write warning.h and lib/warning.pm
 win32/GenCAPI.pl	Win32 port for C API with PERL_OBJECT

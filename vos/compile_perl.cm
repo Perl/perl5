@@ -1,0 +1,13 @@
+&echo command_lines
+& This macro assumes you have either licensed the cross-compilers or
+& have one module of each type of architecture.  Comment-out or edit
+& the lines that are different for your system.
+!change_current_dir obj
+!start_process '<build.cm -processor mc68020' -module m75
+!change_current_dir <obj.860
+!start_process '<build.cm -processor i80860' -module m10
+!change_current_dir <obj.7100
+!start_process '<build.cm -processor pa7100' -module m9
+!change_current_dir <obj.8000
+!start_process '<build.cm -processor pa8000' -module m9
+!change_current_dir <

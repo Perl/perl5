@@ -1742,6 +1742,9 @@ moreswitches(char *s)
 #ifdef OEMVS
 	printf("MVS (OS390) port by Mortice Kern Systems, 1997-1998\n");
 #endif
+#ifdef __VOS__
+	printf("Stratus VOS port by Paul_Green@stratus.com, 1997-1998\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
