@@ -971,6 +971,8 @@
 #define ck_svconst		pPerl->Perl_ck_svconst
 #undef  ck_trunc
 #define ck_trunc		pPerl->Perl_ck_trunc
+#undef  clear_re
+#define clear_re		pPerl->Perl_clear_re
 #undef  condpair_magic
 #define condpair_magic		pPerl->Perl_condpair_magic
 #undef  convert

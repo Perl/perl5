@@ -1080,6 +1080,7 @@
 #define ck_subr			CPerlObj::Perl_ck_subr
 #define ck_svconst		CPerlObj::Perl_ck_svconst
 #define ck_trunc		CPerlObj::Perl_ck_trunc
+#define clear_re		CPerlObj::Perl_clear_re
 #define condpair_magic		CPerlObj::Perl_condpair_magic
 #define convert			CPerlObj::Perl_convert
 #define croak			CPerlObj::Perl_croak

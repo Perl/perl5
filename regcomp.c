@@ -147,6 +147,7 @@ static char* regwhite _((char *, char *));
 static char* nextchar _((void));
 static void re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
 static char* regpposixcc _((I32 value));
+static void clear_re _((void *r));
 #endif
 
 /* Length of a variant. */
@@ -205,6 +206,12 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
+
+STATIC void
+clear_re(void *r)
+{
+    ReREFCNT_dec((regexp *)r);
+}
 
 STATIC void
 scan_commit(scan_data_t *data)
@@ -868,7 +875,12 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     r->prelen = xend - exp;
     r->precomp = PL_regprecomp;
     r->subbeg = r->subbase = NULL;
-    r->nparens = PL_regnpar - 1;		/* set early to validate backrefs */
+    r->nparens = PL_regnpar - 1;	/* set early to validate backrefs */
+
+    r->substrs = 0;			/* Useful during FAIL. */
+    r->startp = 0;			/* Useful during FAIL. */
+    r->endp = 0;			/* Useful during FAIL. */
+
     PL_regcomp_rx = r;
 
     /* Second pass: emit code. */
