@@ -2066,6 +2066,7 @@ usually solves this kind of problem.
 
     # How do we run perl?
     $self->{PERLRUN}      = $self->{PERL};
+    $self->{PERLRUN} .= ' -I$(PERL_LIB)' if $self->{UNINSTALLED_PERL};
 
     # How do we run perl when installing libraries?
     $self->{PERLRUNINST} .= $self->{PERL}. ' -I$(INST_ARCHLIB) -I$(INST_LIB)';
@@ -3504,12 +3505,12 @@ test :: \$(TEST_TYPE)
     push(@m, "\n");
 
     push(@m, "test_dynamic :: pure_all\n");
-    push(@m, $self->test_via_harness('$(FULLPERL)', '$(TEST_FILES)')) if $tests;
-    push(@m, $self->test_via_script('$(FULLPERL)', '$(TEST_FILE)')) if -f "test.pl";
+    push(@m, $self->test_via_harness('$(PERLRUN)', '$(TEST_FILES)')) if $tests;
+    push(@m, $self->test_via_script('$(PERLRUN)', '$(TEST_FILE)')) if -f "test.pl";
     push(@m, "\n");
 
     push(@m, "testdb_dynamic :: pure_all\n");
-    push(@m, $self->test_via_script('$(FULLPERL) $(TESTDB_SW)', '$(TEST_FILE)'));
+    push(@m, $self->test_via_script('$(PERLRUN) $(TESTDB_SW)', '$(TEST_FILE)'));
     push(@m, "\n");
 
     # Occasionally we may face this degenerate target:
