@@ -63,7 +63,7 @@ my $version = '1.46';	# adjust manually to match latest release
 my ($func,@args,$ans,$rc,$class,$try);
 while (<DATA>)
   {
-  chop;
+  chomp;
   next if /^#/; # skip comments
   if (s/^&//)
     {

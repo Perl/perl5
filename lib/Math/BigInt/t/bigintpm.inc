@@ -40,7 +40,7 @@ my ($f,$z,$a,$exp,@a,$m,$e,$round_mode,$expected_class);
 
 while (<DATA>) 
   {
-  chop;
+  chomp;
   next if /^#/;	# skip comments
   if (s/^&//) 
     {
@@ -163,9 +163,18 @@ while (<DATA>)
         $try .= "\$x ^ \$y;";
       }elsif ($f eq "bpow"){
         $try .= "\$x ** \$y;";
+      } elsif( $f eq "bmodinv") {
+       $try .= "\$x->bmodinv(\$y);";
       }elsif ($f eq "digit"){
         $try .= "\$x->digit(\$y);";
-      } else { warn "Unknown op '$f'"; }
+      } else {
+       $try .= "\$z = $class->new(\"$args[2]\");";
+
+       # Functions with three arguments
+       if( $f eq "bmodpow") {
+         $try .= "\$x->bmodpow(\$y,\$z);";
+       } else { warn "Unknown op '$f'"; }
+      }
     } # end else all other ops
 
   $ans1 = eval $try;
@@ -1311,6 +1320,42 @@ inf:0:inf
 14:3:4
 # bug in Calc with '99999' vs $BASE-1
 10000000000000000000000000000000000000000000000000000000000000000000000000000000000:10000000375084540248994272022843165711074:999999962491547381984643365663244474111576
+#&bmodinv
+## format: number:modulus:result
+## bmodinv Data errors
+#abc:abc:NaN
+#abc:5:NaN
+#5:abc:NaN
+## bmodinv Expected Results from normal use
+#1:5:1
+#3:5:2
+#-2:5:2
+#324958749843759385732954874325984357439658735983745:2348249874968739:1741662881064902
+## bmodinv Error cases / useless use of function
+#3:-5:NaN
+#inf:5:NaN
+#&bmodpow
+## format: number:exponent:modulus:result
+## bmodpow Data errors
+#abc:abc:abc:NaN
+#5:abc:abc:NaN
+#abc:5:abc:NaN
+#abc:abc:5:NaN
+#5:5:abc:NaN
+#5:abc:5:NaN
+#abc:5:5:NaN
+## bmodpow Expected results
+#0:0:2:1
+#1:0:2:1
+#0:0:1:0
+#8:7:5032:3840
+#8:-1:5033:4404
+#98436739867439843769485798542749827593285729587325:43698764986460981048259837659386739857456983759328457:6943857329857295827698367:3104744730915914415259518
+## bmodpow Error cases
+#8:8:-5:NaN
+#8:-1:16:NaN
+#inf:5:13:NaN
+#5:inf:13:NaN
 &bmod
 # inf handling, see table in doc
 0:inf:0
