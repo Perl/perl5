@@ -99,20 +99,6 @@
 	else							\
 		SETERRNO(EBADF, SS_IVCHAN)
 
-#define Perl_PerlIO_fail_if_hasnot(f, able, ueno, veno, ret)	\
-     if (PerlIOValid(f) && (PerlIOBase(f)->flags & (able)) == 0) {	\
-	  PerlIOBase(f)->flags |= PERLIO_F_ERROR;	\
-	  SETERRNO(ueno, veno);				\
-	  return ret;					\
-     }
-
-#define Perl_PerlIO_fail_if_has(f, able, ueno, veno, ret)	\
-     if (PerlIOValid(f) && (PerlIOBase(f)->flags & (able)) == able) {	\
-	  PerlIOBase(f)->flags |= PERLIO_F_ERROR;	\
-	  SETERRNO(ueno, veno);				\
-	  return ret;					\
-     }
-
 int
 perlsio_binmode(FILE *fp, int iotype, int mode)
 {
@@ -1570,21 +1556,18 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 SSize_t
 Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
-     Perl_PerlIO_fail_if_hasnot(f, PERLIO_F_CANREAD, EBADF, SS_IVCHAN, -1);
      Perl_PerlIO_or_Base(f, Read, read, -1, (aTHX_ f, vbuf, count));
 }
 
 SSize_t
 Perl_PerlIO_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-     Perl_PerlIO_fail_if_hasnot(f, PERLIO_F_CANREAD, EBADF, SS_IVCHAN, -1);
      Perl_PerlIO_or_Base(f, Unread, unread, -1, (aTHX_ f, vbuf, count));
 }
 
 SSize_t
 Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-     Perl_PerlIO_fail_if_hasnot(f, PERLIO_F_CANWRITE, EBADF, SS_IVCHAN, -1);
      Perl_PerlIO_or_fail(f, Write, -1, (aTHX_ f, vbuf, count));
 }
 
@@ -2050,6 +2033,11 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     STDCHAR *buf = (STDCHAR *) vbuf;
     if (f) {
+        if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD)) {
+	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	    SETERRNO(EBADF, SS_IVCHAN);
+	    return 0;
+	}
 	while (count > 0) {
 	    SSize_t avail = PerlIO_get_cnt(f);
 	    SSize_t take = 0;
@@ -2459,7 +2447,7 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
     if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD) ||
          PerlIOBase(f)->flags & (PERLIO_F_EOF|PERLIO_F_ERROR)) {
-	return -1;
+	return 0;
     }
     while (1) {
 	SSize_t len = PerlLIO_read(fd, vbuf, count);
@@ -2500,15 +2488,17 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 IV
 PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
-    int fd;
+    int fd = PerlIOSelf(f, PerlIOUnix)->fd;
     Off_t new;
-#ifdef ESPIPE
-    Perl_PerlIO_fail_if_has(f, PERLIO_F_NOTREG, ESPIPE, SS_IVCHAN, -1);
+    if (PerlIOBase(f)->flags & PERLIO_F_NOTREG) {
+#ifdef  ESPIPE
+	SETERRNO(ESPIPE, LIB_INVARG);
 #else
-    Perl_PerlIO_fail_if_has(f, PERLIO_F_NOTREG, EBADF,  SS_IVCHAN, -1);
+	SETERRNO(EINVAL, LIB_INVARG);
 #endif
-    fd  = PerlIOSelf(f, PerlIOUnix)->fd;
-    new = PerlLIO_lseek(fd, offset, whence);
+	return -1;
+    }
+    new  = PerlLIO_lseek(fd, offset, whence);
     if (new == (Off_t) - 1)
      {
       return -1;
@@ -3120,13 +3110,7 @@ PerlIOStdio_eof(pTHX_ PerlIO *f)
 IV
 PerlIOStdio_error(pTHX_ PerlIO *f)
 {
-    IV stdio_error  = PerlSIO_ferror(PerlIOSelf(f, PerlIOStdio)->stdio);
-    /* Some stdio implementations do not mind e.g. trying to output
-     * to a write-only filehandle, or vice versa.  Therefore we will
-     * try both the stdio way and the perlio way. */
-    IV iobase_error = PerlIOValid(f) ?
-	 ((PerlIOBase(f)->flags & PERLIO_F_ERROR) != 0) : 0;
-    return stdio_error || iobase_error;
+    return PerlSIO_ferror(PerlIOSelf(f, PerlIOStdio)->stdio);
 }
 
 void
