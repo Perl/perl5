@@ -414,7 +414,7 @@ while (<DATA>) {
 #$list{'all'} = [ $offset .. 8 * ($warn_size/2) - 1 ] ;
 
 $last_ver = 0;
-print PM "our %Offsets : unique = (\n" ;
+print PM "our %Offsets = (\n" ;
 foreach my $k (sort { $a <=> $b } keys %ValueToName) {
     my ($name, $version) = @{ $ValueToName{$k} };
     $name = lc $name;
@@ -430,7 +430,7 @@ foreach my $k (sort { $a <=> $b } keys %ValueToName) {
 
 print PM "  );\n\n" ;
 
-print PM "our %Bits : unique = (\n" ;
+print PM "our %Bits = (\n" ;
 foreach $k (sort keys  %list) {
 
     my $v = $list{$k} ;
@@ -444,7 +444,7 @@ foreach $k (sort keys  %list) {
 
 print PM "  );\n\n" ;
 
-print PM "our %DeadBits : unique = (\n" ;
+print PM "our %DeadBits = (\n" ;
 foreach $k (sort keys  %list) {
 
     my $v = $list{$k} ;

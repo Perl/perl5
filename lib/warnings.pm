@@ -133,7 +133,7 @@ See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
 
 use Carp ();
 
-our %Offsets : unique = (
+our %Offsets = (
 
     # Warnings Categories added in Perl 5.008
 
@@ -190,7 +190,7 @@ our %Offsets : unique = (
     'assertions'	=> 94,
   );
 
-our %Bits : unique = (
+our %Bits = (
     'all'		=> "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55", # [0..47]
     'ambiguous'		=> "\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00", # [29]
     'assertions'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40", # [47]
@@ -241,7 +241,7 @@ our %Bits : unique = (
     'y2k'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10", # [46]
   );
 
-our %DeadBits : unique = (
+our %DeadBits = (
     'all'		=> "\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa", # [0..47]
     'ambiguous'		=> "\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00", # [29]
     'assertions'	=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80", # [47]
