@@ -1,4 +1,4 @@
-# $Id: encoding.pm,v 2.1 2004/10/19 04:55:01 dankogai Exp dankogai $
+# $Id: encoding.pm,v 2.1 2004/10/19 04:55:01 dankogai Exp $
 package encoding;
 our $VERSION = do { my @r = (q$Revision: 2.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
