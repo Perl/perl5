@@ -48,7 +48,7 @@ There have been many fixes in the area of anonymous subs, lexicals and
 closures. Although this means that Perl is now more "correct", it is
 possible that some existing code will break that happens to rely on
 the faulty behaviour.  In practice this is unlikely unless your code
-contains very complexly nested anonymous subs, evals and lexicals.
+contains a very complex nesting of anonymous subs, evals and lexicals.
 
 =head1 Core Enhancements
 
