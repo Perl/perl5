@@ -2,7 +2,7 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.47";
+$VERSION = "5.48";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 ($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
@@ -12,18 +12,15 @@ $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 require Exporter;
 use Config;
 use Carp ();
-#use FileHandle ();
 
 use vars qw(
-
 	    @ISA @EXPORT @EXPORT_OK $AUTOLOAD
-	    $ISA_TTY $Is_Mac $Is_OS2 $Is_VMS $Revision
-	    $VERSION $Verbose $Version_OK %Config %Keep_after_flush
-	    %MM_Sections %Prepend_dot_dot %Recognized_Att_Keys
-	    @Get_from_Config @MM_Sections @Overridable @Parent
-
+	    $ISA_TTY $Revision $VERSION $Verbose $Version_OK %Config 
+            %Keep_after_flush %MM_Sections %Prepend_dot_dot 
+            %Recognized_Att_Keys @Get_from_Config @MM_Sections @Overridable 
+            @Parent $PACKNAME
 	   );
-# use strict;
+use strict;
 
 # &DynaLoader::mod2fname should be available to miniperl, thus 
 # should be a pseudo-builtin (cmp. os2.c).
@@ -66,12 +63,13 @@ package ExtUtils::MakeMaker;
 #
 # Now we can pull in the friends
 #
-$Is_VMS     = $^O eq 'VMS';
-$Is_OS2     = $^O eq 'os2';
-$Is_Mac     = $^O eq 'MacOS';
-$Is_Win32   = $^O eq 'MSWin32';
-$Is_Cygwin  = $^O eq 'cygwin';
-$Is_NetWare = $Config{'osname'} eq 'NetWare';
+my $Is_VMS     = $^O eq 'VMS';
+my $Is_OS2     = $^O eq 'os2';
+my $Is_Mac     = $^O eq 'MacOS';
+my $Is_Win32   = $^O eq 'MSWin32';
+my $Is_Cygwin  = $^O eq 'cygwin';
+my $Is_NetWare = $Config{osname} eq 'NetWare';
+my $Is_BeOS    = $^O =~ /beos/i;    # XXX should this be that loose?
 
 require ExtUtils::MM_Unix;
 
@@ -94,6 +92,9 @@ if ($Is_Win32) {
 }
 if ($Is_Cygwin) {
     require ExtUtils::MM_Cygwin;
+}
+if ($Is_BeOS) {
+    require ExtUtils::MM_BeOS;
 }
 
 full_setup();
@@ -148,12 +149,11 @@ sub prompt ($;$) {
 
 sub eval_in_subdirs {
     my($self) = @_;
-    my($dir);
     use Cwd qw(cwd abs_path);
     my $pwd = cwd();
     local @INC = map eval {abs_path($_) if -e} || $_, @INC;
 
-    foreach $dir (@{$self->{DIR}}){
+    foreach my $dir (@{$self->{DIR}}){
 	my($abs) = $self->catdir($pwd,$dir);
 	$self->eval_in_x($abs);
     }
@@ -164,16 +164,8 @@ sub eval_in_x {
     my($self,$dir) = @_;
     package main;
     chdir $dir or Carp::carp("Couldn't change to directory $dir: $!");
-#    use FileHandle ();
-#    my $fh = new FileHandle;
-#    $fh->open("Makefile.PL") or Carp::carp("Couldn't open Makefile.PL in $dir");
-    local *FH;
-    open(FH,"Makefile.PL") or Carp::carp("Couldn't open Makefile.PL in $dir");
-#    my $eval = join "", <$fh>;
-    my $eval = join "", <FH>;
-#    $fh->close;
-    close FH;
-    eval $eval;
+
+    eval { do './Makefile.PL' };
     if ($@) {
 # 	  if ($@ =~ /prerequisites/) {
 # 	      die "MakeMaker WARNING: $@";
@@ -190,7 +182,7 @@ sub full_setup {
     # package name for the classes into which the first object will be blessed
     $PACKNAME = "PACK000";
 
-    @Attrib_help = qw/
+    my @attrib_help = qw/
 
     AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION
     C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
@@ -273,11 +265,10 @@ sub full_setup {
 	   exe_ext full_ar
 	  );
 
-    my $item;
-    foreach $item (@Attrib_help){
+    foreach my $item (@attrib_help){
 	$Recognized_Att_Keys{$item} = 1;
     }
-    foreach $item (@Get_from_Config) {
+    foreach my $item (@Get_from_Config) {
 	$Recognized_Att_Keys{uc $item} = $Config{$item};
 	print "Attribute '\U$item\E' => '$Config{$item}'\n"
 	    if ($Verbose >= 2);
@@ -351,10 +342,8 @@ sub ExtUtils::MakeMaker::new {
     my(%initial_att) = %$self; # record initial attributes
 
     my(%unsatisfied) = ();
-    my($prereq);
-    foreach $prereq (sort keys %{$self->{PREREQ_PM}}) {
-	my $eval = "require $prereq";
-	eval $eval;
+    foreach my $prereq (sort keys %{$self->{PREREQ_PM}}) {
+	eval "require $prereq";
 
 	if ($@) {
 	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found.\n" unless $self->{PREREQ_FATAL};
@@ -403,7 +392,7 @@ sub ExtUtils::MakeMaker::new {
     my $newclass = ++$PACKNAME;
     local @Parent = @Parent;	# Protect against non-local exits
     {
-#	no strict;
+	no strict 'refs';
 	print "Blessing Object into class [$newclass]\n" if $Verbose>=2;
 	mv_all_methods("MY",$newclass);
 	bless $self, $newclass;
@@ -491,7 +480,7 @@ END
 #   MakeMaker Parameters:
 END
 
-    foreach $key (sort keys %initial_att){
+    foreach my $key (sort keys %initial_att){
 	my($v) = neatvalue($initial_att{$key});
 	$v =~ s/(CODE|HASH|ARRAY|SCALAR)\([\dxa-f]+\)/$1\(...\)/;
 	$v =~ tr/\n/ /s;
@@ -505,7 +494,7 @@ END
 #   MakeMaker 'CONFIGURE' Parameters:
 END
         if (scalar(keys %configure_att) > 0) {
-            foreach $key (sort keys %configure_att){
+            foreach my $key (sort keys %configure_att){
                my($v) = neatvalue($configure_att{$key});
                $v =~ s/(CODE|HASH|ARRAY|SCALAR)\([\dxa-f]+\)/$1\(...\)/;
                $v =~ tr/\n/ /s;
@@ -538,8 +527,7 @@ END
 	$self->eval_in_subdirs if @{$self->{DIR}};
     }
 
-    my $section;
-    foreach $section ( @MM_Sections ){
+    foreach my $section ( @MM_Sections ){
 	print "Processing Makefile '$section' section\n" if ($Verbose >= 2);
 	my($skipit) = $self->skipcheck($section);
 	if ($skipit){
@@ -589,9 +577,10 @@ EOP
 sub check_manifest {
     print STDOUT "Checking if your kit is complete...\n";
     require ExtUtils::Manifest;
-    $ExtUtils::Manifest::Quiet=$ExtUtils::Manifest::Quiet=1; #avoid warning
-    my(@missed)=ExtUtils::Manifest::manicheck();
-    if (@missed){
+    # avoid warning
+    $ExtUtils::Manifest::Quiet = $ExtUtils::Manifest::Quiet = 1;
+    my(@missed) = ExtUtils::Manifest::manicheck();
+    if (@missed) {
 	print STDOUT "Warning: the following files are missing in your kit:\n";
 	print "\t", join "\n\t", @missed;
 	print STDOUT "\n";
@@ -603,14 +592,14 @@ sub check_manifest {
 
 sub parse_args{
     my($self, @args) = @_;
-    foreach (@args){
-	unless (m/(.*?)=(.*)/){
+    foreach (@args) {
+	unless (m/(.*?)=(.*)/) {
 	    help(),exit 1 if m/^help$/;
 	    ++$Verbose if m/^verb/;
 	    next;
 	}
 	my($name, $value) = ($1, $2);
-	if ($value =~ m/^~(\w+)?/){ # tilde with optional username
+	if ($value =~ m/^~(\w+)?/) { # tilde with optional username
 	    $value =~ s [^~(\w*)]
 		[$1 ?
 		 ((getpwnam($1))[7] || "~$1") :
@@ -660,8 +649,8 @@ sub parse_args{
     if (defined $self->{EXCLUDE_EXT} && ref \$self->{EXCLUDE_EXT} eq 'SCALAR') {
 	$self->{EXCLUDE_EXT} = [grep $_, split '\s+', $self->{EXCLUDE_EXT}];
     }
-    my $mmkey;
-    foreach $mmkey (sort keys %$self){
+
+    foreach my $mmkey (sort keys %$self){
 	print STDOUT "	$mmkey => ", neatvalue($self->{$mmkey}), "\n" if $Verbose;
 	print STDOUT "'$mmkey' is not a known MakeMaker parameter name.\n"
 	    unless exists $Recognized_Att_Keys{$mmkey};
@@ -676,7 +665,6 @@ sub check_hints {
     return unless -d "hints";
 
     # First we look for the best hintsfile we have
-    my(@goodhints);
     my($hint)="${^O}_$Config{osvers}";
     $hint =~ s/\./_/g;
     $hint =~ s/_$//;
@@ -691,32 +679,22 @@ sub check_hints {
     return unless -f "hints/$hint.pl";    # really there
 
     # execute the hintsfile:
-#    use FileHandle ();
-#    my $fh = new FileHandle;
-#    $fh->open("hints/$hint.pl");
-    local *FH;
-    open(FH,"hints/$hint.pl");
-#    @goodhints = <$fh>;
-    @goodhints = <FH>;
-#    $fh->close;
-    close FH;
     print STDOUT "Processing hints file hints/$hint.pl\n";
-    eval join('',@goodhints);
+    eval { do "hints/$hint.pl" };
     print STDOUT $@ if $@;
 }
 
 sub mv_all_methods {
     my($from,$to) = @_;
-    my($method);
+    no strict 'refs';
     my($symtab) = \%{"${from}::"};
-#    no strict;
 
     # Here you see the *current* list of methods that are overridable
     # from Makefile.PL via MY:: subroutines. As of VERSION 5.07 I'm
     # still trying to reduce the list to some reasonable minimum --
     # because I want to make it easier for the user. A.K.
 
-    foreach $method (@Overridable) {
+    foreach my $method (@Overridable) {
 
 	# We cannot say "next" here. Nick might call MY->makeaperl
 	# which isn't defined right now
@@ -845,9 +823,9 @@ sub neatvalue {
     my($t) = ref $v;
     return "q[$v]" unless $t;
     if ($t eq 'ARRAY') {
-	my(@m, $elem, @neat);
+	my(@m, @neat);
 	push @m, "[";
-	foreach $elem (@$v) {
+	foreach my $elem (@$v) {
 	    push @neat, "q[$elem]";
 	}
 	push @m, join ", ", @neat;
@@ -868,7 +846,7 @@ sub selfdocument {
     my(@m);
     if ($Verbose){
 	push @m, "\n# Full list of MakeMaker attribute values:";
-	foreach $key (sort keys %$self){
+	foreach my $key (sort keys %$self){
 	    next if $key eq 'RESULT' || $key =~ /^[A-Z][a-z]/;
 	    my($v) = neatvalue($self->{$key});
 	    $v =~ s/(CODE|HASH|ARRAY|SCALAR)\([\dxa-f]+\)/$1\(...\)/;
