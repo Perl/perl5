@@ -48,11 +48,11 @@ if(@ARGV<1) {
 	$me = $0;		# Editing $0 is unportable
 	$me =~ s,.*/,,;
 	die <<EOF;
-Usage: $me [-h] [-v] [-t] [-u] [-m] [-l] [-F] PageName|ModuleName|ProgramName
+Usage: $me [-h] [-v] [-t] [-u] [-m] [-l] [-F] [-X] PageName|ModuleName|ProgramName
        $me -f PerlFunc
 
-We suggest you use "perldoc perldoc" to get aquainted 
-with the system.
+The -h option prints more help.  Also try "perldoc perldoc" to get
+aquainted with the system.
 EOF
 }
 
@@ -82,6 +82,7 @@ Options:
     -l   Display the modules file name
     -F   Arguments are file names, not modules
     -v	 Verbosely describe what's going on
+    -X	 use index if present (looks for pod.idx at $Config{archlib})
 
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You 
@@ -95,7 +96,8 @@ BuiltinFunction
          `perlfunc'.
          
 Any switches in the PERLDOC environment variable will be used before the 
-command line arguments.
+command line arguments.  The optional pod index file contains a list of
+filenames, one per line.
 
 EOF
 }
@@ -446,7 +448,7 @@ perldoc - Look up Perl documentation in pod format.
 
 =head1 SYNOPSIS
 
-B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] [B<-m>] [B<-l>] PageName|ModuleName|ProgramName
+B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] [B<-m>] [B<-l>] [B<-F>]  [B<-X>] PageName|ModuleName|ProgramName
 
 B<perldoc> B<-f> BuiltinFunction
 
@@ -495,12 +497,18 @@ Display the file name of the module found.
 
 =item B<-F> file names
 
-Consider arguments as file names, no search in directories should be performed.
+Consider arguments as file names, no search in directories will be performed.
 
 =item B<-f> perlfunc
 
 The B<-f> option followed by the name of a perl built in function will
 extract the documentation of this function from L<perlfunc>.
+
+=item B<-X> use an index if present
+
+The B<-X> option looks for a entry whose basename matches the name given on the
+command line in the file C<$Config{archlib}/pod.idx>.  The pod.idx file should
+contain fully qualified filenames, one per line.
 
 =item B<PageName|ModuleName|ProgramName>
 
@@ -531,6 +539,9 @@ Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
 =cut
 
 #
+# Version 1.13: Fri Feb 27 16:20:50 EST 1997
+#       Gurusamy Sarathy <gsar@umich.edu>
+#	-doc tweaks for -F and -X options
 # Version 1.12: Sat Apr 12 22:41:09 EST 1997
 #       Gurusamy Sarathy <gsar@umich.edu>
 #	-various fixes for win32
