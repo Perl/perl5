@@ -1,6 +1,6 @@
-README                      Read this first
-MANIFEST                    This shipping list
-Makefile.PL                 Generic Makefile template
-Storable.pm                 The perl side of Storable
-Storable.xs                 The C side of Storable
-ChangeLog                   Changes since baseline
+README			    Read this first
+MANIFEST		    This shipping list
+Makefile.PL		    Generic Makefile template
+Storable.pm		    The perl side of Storable
+Storable.xs		    The C side of Storable
+ChangeLog		    Changes since baseline
