@@ -155,6 +155,9 @@ perl_construct(pTHXx)
 
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
+#ifdef USE_ITHREADS
+	MUTEX_INIT(&PL_dollarzero_mutex);       /* for $0 modifying */
+#endif
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
 #endif
@@ -917,10 +920,6 @@ setuid perl scripts securely.\n");
     time(&PL_basetime);
     oldscope = PL_scopestack_ix;
     PL_dowarn = G_WARN_OFF;
-
-#ifdef USE_ITHREADS
-    MUTEX_INIT(&PL_dollarzero_mutex);
-#endif
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
     CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vparse_body), env, xsinit);

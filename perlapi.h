@@ -930,6 +930,8 @@ END_EXTERN_C
 #define PL_curinterp		(*Perl_Gcurinterp_ptr(NULL))
 #undef  PL_do_undump
 #define PL_do_undump		(*Perl_Gdo_undump_ptr(NULL))
+#undef  PL_dollarzero_mutex
+#define PL_dollarzero_mutex	(*Perl_Gdollarzero_mutex_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
 #undef  PL_lockhook

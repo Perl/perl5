@@ -410,7 +410,9 @@ same package can be detected).  SvCUR is sometimes hijacked to
 store the generation number during compilation.
 
 If SvFAKE is set on the name SV then slot in the frame AVs are
-a REFCNT'ed references to a lexical from "outside".
+a REFCNT'ed references to a lexical from "outside". In this case,
+the name SV does not have a cop_seq range, since it is in scope
+throughout.
 
 If the 'name' is '&' the the corresponding entry in frame AV
 is a CV representing a possible closure.
