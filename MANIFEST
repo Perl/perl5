@@ -25,6 +25,7 @@ Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
 Porting/p4d2p		Generate standard patches from p4 diffs
+Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
