@@ -12,7 +12,9 @@ use vars qw($VERSION @ISA $PACKAGE
 
 @ISA = qw(Exporter Math::BigFloat);
 
-$VERSION = 0.02;
+$VERSION = 0.03;
+
+use overload; 		# inherit overload from BigInt
 
 # Globals
 $accuracy = $precision = undef;

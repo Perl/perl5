@@ -23,5 +23,3 @@ ok ($x||'undef',2);
 
 # all tests done
 
-1;
-

@@ -26,14 +26,15 @@ BEGIN
     }
   print "# INC = @INC\n"; 
   
-  plan tests => 1528
+  plan tests => 1585
     + 4;	# + 4 own tests
   }
 
 use Math::BigFloat::Subclass;
 
-use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup);
+use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
 $class = "Math::BigFloat::Subclass";
+$CL = "Math::BigInt::Calc";
 
 require 'bigfltpm.inc';	# perform same tests as bigfltpm
 

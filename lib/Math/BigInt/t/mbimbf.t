@@ -31,12 +31,12 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 428 
-    + 8;		# own test
+  plan tests => 435 
+    + 16;		# own tests
   }
 
-use Math::BigInt 1.49;
-use Math::BigFloat 1.26;
+use Math::BigInt 1.50;
+use Math::BigFloat 1.27;
 
 use vars qw/$mbi $mbf/;
 
@@ -69,4 +69,12 @@ ok ($@ =~ /^Unknown round mode huhmbf at/);
 # see if accessor also changes old variable
 $mbi->round_mode('odd'); ok ($Math::BigInt::rnd_mode,'odd');
 $mbf->round_mode('odd'); ok ($Math::BigInt::rnd_mode,'odd');
+
+foreach my $class (qw/Math::BigInt Math::BigFloat/)
+  {
+  ok ($class->accuracy(5),5);		# set A
+  ok_undef ($class->precision());	# and now P must be cleared
+  ok ($class->precision(5),5);		# set P
+  ok_undef ($class->accuracy());	# and now A must be cleared
+  }
 

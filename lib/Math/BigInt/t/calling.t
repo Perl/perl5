@@ -97,7 +97,7 @@ ok_undef ( $_ );               # should result in error!
 
 # test whether fallback to calc works
 $try = "use $class ($version,'lib','foo, bar , ');";
-$try .= "$class\->_core_lib();";
+$try .= "$class\->config()->{lib};";
 $ans = eval $try;
 ok ( $ans, "Math::BigInt::Calc");
 

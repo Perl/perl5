@@ -26,18 +26,18 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 2005;
+  plan tests => 2095;
   }
 
 use Math::BigInt lib => 'BareCalc';
 
-print "# ",Math::BigInt::_core_lib(),"\n";
+print "# ",Math::BigInt->config()->{lib},"\n";
 
 use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
 $class = "Math::BigInt";
 $CL = "Math::BigInt::BareCalc";
 
-my $version = '1.49';   # for $VERSION tests, match current release (by hand!)
+my $version = '1.51';   # for $VERSION tests, match current release (by hand!)
 
 require 'bigintpm.inc';	# perform same tests as bigintpm
 

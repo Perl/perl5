@@ -1134,19 +1134,25 @@ lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
-lib/Math/BigInt/t/bare_mbi.t	Test Math::BigInt::CareCalc
+lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
+lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and sub_mbf.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
 lib/Math/BigInt/t/bigintpm.inc	Shared tests for bigintpm.t and sub_mbi.t
 lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
 lib/Math/BigInt/t/calling.t	Test calling conventions
+lib/Math/BigInt/t/config.t	Test Math::BigInt->config()
+lib/Math/BigInt/t/constant.t	Test Math::BigInt/BigFloat under :constant
+lib/Math/BigInt/t/inf_nan.t	Special tests for inf and NaN handling
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precicion and fallback, round_mode tests
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
 lib/Math/BigInt/t/require.t	Test if require Math::BigInt works
 lib/Math/BigInt/t/sub_mbf.t	Empty subclass test of BigFloat
 lib/Math/BigInt/t/sub_mbi.t	Empty subclass test of BigInt
 lib/Math/BigInt/t/sub_mif.t	Test A & P with subclasses using mbimbf.inc
+lib/Math/BigInt/t/upgrade.inc	Actual tests for upgrade.t
+lib/Math/BigInt/t/upgrade.t	Test if use Math::BigInt(); under upgrade works
 lib/Math/BigInt/t/use.t		Test if use Math::BigInt(); works
 lib/Math/Complex.pm		A Complex package
 lib/Math/Complex.t		See if Math::Complex works
