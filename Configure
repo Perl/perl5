@@ -538,6 +538,7 @@ d_mmap=''
 mmaptype=''
 d_modfl=''
 d_modfl_pow32_bug=''
+d_modflproto=''
 d_mprotect=''
 d_msg=''
 d_msgctl=''
@@ -6296,6 +6297,9 @@ esac
 case "$prefix" in
 '')
 	dflt=`./loc . /usr/local /usr/local /local /opt /usr`
+	;;
+*?/)
+	dflt=`echo "$prefix" | sed 's/.$//'`
 	;;
 *)
 	dflt="$prefix"
@@ -19952,6 +19956,7 @@ d_mktime='$d_mktime'
 d_mmap='$d_mmap'
 d_modfl='$d_modfl'
 d_modfl_pow32_bug='$d_modfl_pow32_bug'
+d_modflproto='$d_modflproto'
 d_mprotect='$d_mprotect'
 d_msg='$d_msg'
 d_msg_ctrunc='$d_msg_ctrunc'

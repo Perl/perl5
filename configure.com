@@ -3001,6 +3001,7 @@ $   d_frexpl = "define"
 $   d_isnan = "define"
 $   d_isnanl = "define"
 $   d_modfl = "define"
+$   d_modflproto = "define"
 $ ELSE
 $   d_PRId64 = "undef"
 $   d_PRIXU64 = "undef"
@@ -3021,6 +3022,7 @@ $   d_frexpl = "undef"
 $   d_isnan = "undef"
 $   d_isnanl = "undef"
 $   d_modfl = "undef"
+$   d_modflproto = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
@@ -5324,6 +5326,7 @@ $ WC "d_mkstemps='" + d_mkstemps + "'"
 $ WC "d_mktime='" + d_mktime + "'"
 $ WC "d_mmap='" + d_mmap + "'"
 $ WC "d_modfl='" + d_modfl + "'"
+$ WC "d_modflproto='" + d_modflproto + "'"
 $ WC "d_modfl_pow32_bug='undef'"
 $ WC "d_mprotect='" + d_mprotect + "'"
 $ WC "d_msg='undef'"
