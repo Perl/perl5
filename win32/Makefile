@@ -1,5 +1,7 @@
 #
 # Makefile to build perl on Windows NT using Microsoft NMAKE.
+# Supported compilers:
+#	Visual C++ 5.x (possibly other versions)
 #
 # This is set up to build a perl.exe that runs off a shared library
 # (perl57.dll).  Also makes individual DLLs for the XS extensions.
@@ -76,7 +78,7 @@ INST_ARCH	= \$(ARCHNAME)
 # USE_ITHREADS, and is only here for people who may have come to rely
 # on the experimental Thread support that was in 5.005.
 #
-#USE_5005THREADS= define
+#USE_5005THREADS	= define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -301,7 +303,7 @@ ARCHNAME	= $(ARCHNAME)-thread
 
 # VC 6.0 can load the socket dll on demand.  Makes the test suite
 # run in about 10% less time.
-DELAYLOAD	= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib 
+DELAYLOAD	= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib
 
 # VC 6.0 seems capable of compiling perl correctly with optimizations
 # enabled.  Anything earlier fails tests.
@@ -341,7 +343,7 @@ RSC		= rc
 #
 
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
-#PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
+#PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
@@ -409,7 +411,7 @@ o = .obj
 
 #
 # Rules
-# 
+#
 
 .SUFFIXES : .c $(o) .dll .lib .exe .rc .res
 
@@ -421,7 +423,7 @@ o = .obj
 
 $(o).dll:
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
-	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
+	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)
 
 .rc.res:
 	$(RSC) -i.. $<
@@ -534,7 +536,7 @@ EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c
 WIN32_SRC	=		\
 		.\win32.c	\
 		.\win32sck.c	\
-		.\win32thread.c 
+		.\win32thread.c
 
 !IF "$(CRYPT_SRC)" != ""
 WIN32_SRC	= $(WIN32_SRC) .\$(CRYPT_SRC)
@@ -753,7 +755,7 @@ $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 $(GLOBEXE) : perlglob$(o)
 	$(LINK32) $(LINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
-	    perlglob$(o) setargv$(o) 
+	    perlglob$(o) setargv$(o)
 
 perlglob$(o)  : perlglob.c
 
@@ -769,7 +771,7 @@ config.w32 : $(CFGSH_TMPL)
 
 # this target is for when changes to the main config.sh happen
 # edit config.{b,v,g}c and make this target once for each supported
-# compiler (e.g. `dmake CCTYPE=BORLAND regen_config_h`)
+# compiler (e.g. `nmake CCTYPE=BORLAND regen_config_h`)
 regen_config_h:
 	perl config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
 	cd ..
@@ -782,7 +784,7 @@ regen_config_h:
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
-	cd .. 
+	cd ..
 	miniperl configpm
 	cd win32
 	if exist lib\* $(RCOPY) lib\*.* ..\lib\$(NULL)
@@ -834,7 +836,7 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
-	cd .. 
+	cd ..
 	miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
 	cd win32
 
@@ -860,7 +862,7 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 		$(LINK_FLAGS) $(LIBFILES) $(X2P_OBJ)
 <<
 
-perlmain.c : runperl.c 
+perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
 perlmain$(o) : perlmain.c
@@ -871,7 +873,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
-	copy splittree.pl .. 
+	copy splittree.pl ..
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
@@ -985,6 +987,12 @@ $(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
 	$(MAKE)
 	cd ..\..\win32
 
+$(ENCODE_DLL): $(PERLEXE) $(ENCODE).xs
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\win32
+
 $(STORABLE_DLL): $(PERLEXE) $(STORABLE).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -1050,13 +1058,13 @@ distclean: clean
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
 	-del /f $(LIBDIR)\Filter\Util\Call\Call.pm
-	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO 
+	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s $(LIBDIR)\IO
-	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread 
+	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread
 	-rmdir /s $(LIBDIR)\Thread
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
 	-rmdir /s $(LIBDIR)\B
-	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data 
+	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
 	-rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Filter\Util\Call rmdir /s /q $(LIBDIR)\Filter\Util\Call
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
@@ -1076,9 +1084,9 @@ distclean: clean
 	cd $(EXTDIR)
 	-del /s *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib
 	cd ..\win32
-	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR) 
+	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
 	-rmdir /s $(AUTODIR)
-	-if exist $(COREDIR) rmdir /s /q $(COREDIR) 
+	-if exist $(COREDIR) rmdir /s /q $(COREDIR)
 	-rmdir /s $(COREDIR)
 
 install : all installbare installhtml
@@ -1093,7 +1101,7 @@ installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
 
 inst_lib : $(CONFIGPM)
-	copy splittree.pl .. 
+	copy splittree.pl ..
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
@@ -1135,7 +1143,7 @@ test-wide-notty : test-prep
 	$(PERLEXE) -I..\lib harness
 	cd ..\win32
 
-clean : 
+clean :
 	-@$(DEL) miniperlmain$(o)
 	-@$(DEL) $(MINIPERL)
 	-@$(DEL) perlglob$(o)
@@ -1147,8 +1155,8 @@ clean :
 	-@$(DEL) $(WPERLEXE)
 	-@$(DEL) $(PERLDLL)
 	-@$(DEL) $(CORE_OBJ)
-	-if exist $(MINIDIR) rmdir /s /q $(MINIDIR) 
-	-rmdir /s $(MINIDIR) 
+	-if exist $(MINIDIR) rmdir /s /q $(MINIDIR)
+	-rmdir /s $(MINIDIR)
 	-@$(DEL) $(WIN32_OBJ)
 	-@$(DEL) $(DLL_OBJ)
 	-@$(DEL) $(X2P_OBJ)
@@ -1157,7 +1165,7 @@ clean :
 	-@$(DEL) ..\x2p\*.exe ..\x2p\*.bat
 	-@$(DEL) *.ilk
 	-@$(DEL) *.pdb
- 
+
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
 # Please *don't* use this unless all tests pass.
@@ -1167,9 +1175,9 @@ ok: utils
 
 okfile: utils
 	$(PERLEXE) -I..\lib ..\utils\perlbug -ok -s "(UNINSTALLED)" -F perl.ok
- 
+
 nok: utils
 	$(PERLEXE) -I..\lib ..\utils\perlbug -nok -s "(UNINSTALLED)"
- 
+
 nokfile: utils
 	$(PERLEXE) -I..\lib ..\utils\perlbug -nok -s "(UNINSTALLED)" -F perl.nok
