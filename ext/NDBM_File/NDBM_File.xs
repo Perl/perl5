@@ -35,10 +35,10 @@ typedef datum datum_value ;
 	}
 
 
-MODULE = NDBM_File	PACKAGE = NDBM_File	PREFIX = dbm_
+MODULE = NDBM_File	PACKAGE = NDBM_File	PREFIX = ndbm_
 
 NDBM_File
-dbm_TIEHASH(dbtype, filename, flags, mode)
+ndbm_TIEHASH(dbtype, filename, flags, mode)
 	char *		dbtype
 	char *		filename
 	int		flags
@@ -59,20 +59,20 @@ dbm_TIEHASH(dbtype, filename, flags, mode)
 	  RETVAL
 
 void
-dbm_DESTROY(db)
+ndbm_DESTROY(db)
 	NDBM_File	db
 	CODE:
 	dbm_close(db->dbp);
 
-#define dbm_FETCH(db,key)			dbm_fetch(db->dbp,key)
+#define ndbm_FETCH(db,key)			dbm_fetch(db->dbp,key)
 datum_value
-dbm_FETCH(db, key)
+ndbm_FETCH(db, key)
 	NDBM_File	db
 	datum_key	key
 
-#define dbm_STORE(db,key,value,flags)		dbm_store(db->dbp,key,value,flags)
+#define ndbm_STORE(db,key,value,flags)		dbm_store(db->dbp,key,value,flags)
 int
-dbm_STORE(db, key, value, flags = DBM_REPLACE)
+ndbm_STORE(db, key, value, flags = DBM_REPLACE)
 	NDBM_File	db
 	datum_key	key
 	datum_value	value
@@ -86,31 +86,31 @@ dbm_STORE(db, key, value, flags = DBM_REPLACE)
 	    dbm_clearerr(db->dbp);
 	}
 
-#define dbm_DELETE(db,key)			dbm_delete(db->dbp,key)
+#define ndbm_DELETE(db,key)			dbm_delete(db->dbp,key)
 int
-dbm_DELETE(db, key)
+ndbm_DELETE(db, key)
 	NDBM_File	db
 	datum_key	key
 
-#define dbm_FIRSTKEY(db)			dbm_firstkey(db->dbp)
+#define ndbm_FIRSTKEY(db)			dbm_firstkey(db->dbp)
 datum_key
-dbm_FIRSTKEY(db)
+ndbm_FIRSTKEY(db)
 	NDBM_File	db
 
-#define dbm_NEXTKEY(db,key)			dbm_nextkey(db->dbp)
+#define ndbm_NEXTKEY(db,key)			dbm_nextkey(db->dbp)
 datum_key
-dbm_NEXTKEY(db, key)
+ndbm_NEXTKEY(db, key)
 	NDBM_File	db
 	datum_key	key
 
-#define dbm_error(db)				dbm_error(db->dbp)
+#define ndbm_error(db)				dbm_error(db->dbp)
 int
-dbm_error(db)
+ndbm_error(db)
 	NDBM_File	db
 
-#define dbm_clearerr(db)			dbm_clearerr(db->dbp)
+#define ndbm_clearerr(db)			dbm_clearerr(db->dbp)
 void
-dbm_clearerr(db)
+ndbm_clearerr(db)
 	NDBM_File	db
 
 
