@@ -132,3 +132,8 @@ libswanted=`echo " $libswanted " | sed -e 's/ dl / /'`
 set X $libswanted
 shift
 libswanted="$*"
+
+# Perl 5.003_05 and later try to include both <time.h> and <sys/select.h>
+# in pp_sys.c, but that fails due to a redefinition of struct timeval.
+# This will generate a WHOA THERE.  Accept the default.
+i_sysselct=$undef
