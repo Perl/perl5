@@ -190,13 +190,17 @@ S_regcppop(pTHX)
 			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
 	}
     );
-#if 0
+#if 1
     /* It would seem that the similar code in regtry()
      * already takes care of this, and in fact it is in
      * a better location to since this code can #if 0-ed out
      * but the code in regtry() is needed or otherwise tests
      * requiring null fields (pat.t#187 and split.t#{13,14}
-     * (as of patchlevel 7877)  will fail. --jhi */
+     * (as of patchlevel 7877)  will fail.  Then again,
+     * this code seems to be necessary or otherwise
+     * building DynaLoader will fail:
+     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
+     * --jhi */
     for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
 	if (paren > PL_regsize)
 	    PL_regstartp[paren] = -1;
@@ -1802,10 +1806,14 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 
     /* Tests pat.t#187 and split.t#{13,14} seem to depend on this code.
      * Actually, the code in regcppop() (which Ilya may be meaning by
-     * PL_reglastparen), does not seem to be needed at all (?!), whereas
-     * this code *is* needed for the above-mentioned tests to succeed.
-     * The common theme on those tests seems to be returning null fields
-     * from matches. --jhi */
+     * PL_reglastparen), is not needed at all by the test suite
+     * (op/regexp, op/pat, op/split), but that code is needed, oddly
+     * enough, for building DynaLoader, or otherwise this
+     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
+     * will happen.  Meanwhile, this code *is* needed for the
+     * above-mentioned test suite tests to succeed.  The common theme
+     * on those tests seems to be returning null fields from matches.
+     * --jhi */
 #if 1
     sp = prog->startp;
     ep = prog->endp;
