@@ -70,7 +70,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.014';
+$VERSION = '1.015';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -125,6 +125,31 @@ sub CAN_FLOCK {
 		$Config{'d_flock'} ||
 		$Config{'d_fcntl_can_lock'} ||
 		$Config{'d_lockf'};
+}
+
+sub show_file_magic {
+    print <<EOM;
+#
+# To recognize the data files of the Perl module Storable,
+# the following lines need to be added to the local magic(5) file,
+# usually either /usr/share/misc/magic or /etc/magic.
+# Note the couple of unportable lines, consult your operating
+# system's documentation whether you can use those lines.
+#
+0	string	perl-store	perl Storable(v0.6) data
+>1	byte	&01	(network-ordered)
+0	string	pst0	perl Storable(v0.7) data
+# byte&04 unportable syntax
+>4	byte&04	=4
+>>5	byte	>0	v2.%d
+>4	byte	&01	(network-ordered)
+# byte&01 unportable syntax
+>4	byte&01	=0	(local-ordered)
+>>6	byte	>0	(sizeof int %d)
+>>7	byte	>0	(sizeof long %d)
+>>8	byte	>0	(sizeof ptr %d)
+>>9	byte	>0	(sizeof NV %d)
+EOM
 }
 
 bootstrap Storable;
@@ -673,6 +698,18 @@ There is a new Clone module available on CPAN which implements deep cloning
 natively, i.e. without freezing to memory and thawing the result.  It is
 aimed to replace Storable's dclone() some day.  However, it does not currently
 support Storable hooks to redefine the way deep cloning is performed.
+
+=head1 Storable magic
+
+Yes, there's a lot of that :-) But more precisely, in UNIX systems
+there's a utility called C<file>, which recognizes data files based on
+their contents (usually their first few bytes).  For this to work,
+a certain file called "magic" needs to taught about the "signature"
+of the data.  Where that configuration file lives depends on the UNIX
+flavour, often it's something like F</usr/share/misc/magic> or
+F</etc/magic>.  Your system administrator needs to do the updating.
+The necessary signature information is output to stdout by
+invoking Storable::show_file_magic().
 
 =head1 EXAMPLES
 
