@@ -1138,20 +1138,20 @@ In general, you usually want C<use> and a proper Perl module.
 
 =head2 How do I keep my own module/library directory?
 
-When you build modules, use the PREFIX option when generating
+When you build modules, use the PREFIX and LIB options when generating
 Makefiles:
 
-    perl Makefile.PL PREFIX=/u/mydir/perl
+    perl Makefile.PL PREFIX=/mydir/perl LIB=/mydir/perl/lib
 
 then either set the PERL5LIB environment variable before you run
 scripts that use the modules/libraries (see L<perlrun>) or say
 
-    use lib '/u/mydir/perl';
+    use lib '/mydir/perl/lib';
 
 This is almost the same as
 
     BEGIN {
-	unshift(@INC, '/u/mydir/perl');
+	unshift(@INC, '/mydir/perl/lib');
     }
 
 except that the lib module checks for machine-dependent subdirectories.
