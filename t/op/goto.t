@@ -2,7 +2,7 @@
 
 # "This IS structured code.  It's just randomly structured."
 
-print "1..21\n";
+print "1..22\n";
 
 while ($?) {
     $foo = 1;
@@ -128,6 +128,21 @@ eval q{
 };
 print ($ok&&!$@ ? "ok 21\n" : "not ok 21\n");
 
+
+# Test that goto works in nested eval-string
+$ok = 0;
+{eval q{
+  eval q{
+    goto LABEL22;
+  };
+  $ok = 0;
+  last;
+
+  LABEL22: $ok = 1;
+};
+$ok = 0 if $@;
+}
+print ($ok ? "ok 22\n" : "not ok 22\n");
 
 exit;
 

@@ -2455,6 +2455,7 @@ PP(pp_goto)
     if (label && *label) {
 	OP *gotoprobe = 0;
 	bool leaving_eval = FALSE;
+        PERL_CONTEXT *last_eval_cx = 0;
 
 	/* find label */
 
@@ -2466,7 +2467,10 @@ PP(pp_goto)
 	    case CXt_EVAL:
 		leaving_eval = TRUE;
                 if (CxREALEVAL(cx)) {
-		    gotoprobe = PL_eval_root; /* XXX not good for nested eval */
+		    gotoprobe = (last_eval_cx ?
+				last_eval_cx->blk_eval.old_eval_root :
+				PL_eval_root);
+		    last_eval_cx = cx;
 		    break;
                 }
                 /* else fall through */
