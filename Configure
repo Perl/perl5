@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul 23 21:06:18 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Sun Jul 29 20:50:18 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6996,6 +6996,7 @@ EOM
 		    esac
 			;;
 		*)  case "$osname" in
+	                darwin) dflt='none' ;;
 			svr4*|esix*|solaris|nonstopux) dflt='-fPIC' ;;
 			*)	dflt='-fpic' ;;
 		    esac ;;
