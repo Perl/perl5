@@ -335,6 +335,7 @@ ext/Encode/ucm/cp932.ucm	Unicode Character Map
 ext/Encode/ucm/cp936.ucm	Unicode Character Map
 ext/Encode/ucm/cp949.ucm	Unicode Character Map
 ext/Encode/ucm/cp950.ucm	Unicode Character Map
+ext/Encode/ucm/ctrl.ucm		Unicode Character Map
 ext/Encode/ucm/dingbats.ucm	Unicode Character Map
 ext/Encode/ucm/euc-cn.ucm	Unicode Character Map
 ext/Encode/ucm/euc-jp.ucm	Unicode Character Map
@@ -374,6 +375,7 @@ ext/Encode/ucm/macThai.ucm	Unicode Character Map
 ext/Encode/ucm/macTurkish.ucm	Unicode Character Map
 ext/Encode/ucm/macUkraine.ucm	Unicode Character Map
 ext/Encode/ucm/nextstep.ucm	Unicode Character Map
+ext/Encode/ucm/null.ucm		Unicode Character Map
 ext/Encode/ucm/posix-bc.ucm	Unicode Character Map
 ext/Encode/ucm/shiftjis.ucm	Unicode Character Map
 ext/Encode/ucm/symbol.ucm	Unicode Character Map

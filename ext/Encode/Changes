@@ -1,9 +1,28 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.72 2002/05/20 15:49:56 dankogai Exp dankogai $
+# $Id: Changes,v 1.74 2002/05/28 18:33:15 dankogai Exp dankogai $
 #
 
-$Revision: 1.72 $ $Date: 2002/05/20 15:49:56 $
+$Revision: 1.74 $ $Date: 2002/05/28 18:33:15 $
++ ucm/null.ucm ucm/ctrl.ucm
+! Makefile.PL bin/enc2xs lib/Encode/Supported.pod
+  "null" and "ascii-ctrl" encodings added upon the request of Autrijus
+  Subject: Re: unicode -> &# notation
+  Message-ID: <20020518193704.GB40272@not.autrijus.org>
+
+1.73 2002/05/28 17:26:18
+! */Makefile.PL Makefile.PL bin/enc2xs Encode/Makefile_PL.e2x AUTHORS
+  Chris Nandor has fixed Encode so that it works w/ MacPerl --
+  at least w/ PPC (68k need static linking which does not work due to
+  64k limit).  pudge is added to AUTHORS (I'm surprised he was not
+  there in the list).  Encode/Makefile_PL.e2x was additionally fixed
+  by dankogai to reflect changes in other Makefile.PL
+  Message-Id: <p0510030ab9195ed230ff@[10.0.1.107]>
+! t/mime-header.t
+  Subject: Change 16746: -Mutf8 cleanup.
+  Message-Id: <200205222345.g4MNj7e10597@smtp3.ActiveState.com>
+
+1.72 2002/05/20 15:49:56
 ! Makefile.PL
   Subject: [PATCH] Encode should be in perl-core library path
   Message-Id: <86r8k7h738.wl@mail.edge.co.jp>
@@ -652,7 +671,7 @@ $Revision: 1.72 $ $Date: 2002/05/20 15:49:56 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/05/20 15:49:56 $
+1.11  $Date: 2002/05/28 18:33:15 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
