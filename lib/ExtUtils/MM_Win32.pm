@@ -29,7 +29,7 @@ use vars qw(@ISA $VERSION $BORLAND $GCC $DMAKE $NMAKE);
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '1.08';
+$VERSION = '1.09';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -181,7 +181,6 @@ sub init_others {
     $self->{TEST_F}   ||= '$(PERLRUN) -MExtUtils::Command -e test_f';
     $self->{DEV_NULL} ||= '> NUL';
 
-    # technically speaking, these should be in init_main()
     $self->{LD}     ||= $Config{ld} || 'link';
     $self->{AR}     ||= $Config{ar} || 'lib';
 

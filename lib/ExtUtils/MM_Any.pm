@@ -11,7 +11,7 @@ use File::Spec;
 
 =head1 NAME
 
-ExtUtils::MM_Any - Platform agnostic MM methods
+ExtUtils::MM_Any - Platform-agnostic MM methods
 
 =head1 SYNOPSIS
 

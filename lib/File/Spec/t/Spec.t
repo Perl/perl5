@@ -171,6 +171,10 @@ if ($^O eq 'MacOS') {
 [ "Win32->catdir()",                        ''                   ],
 [ "Win32->catdir('')",                      '\\'                 ],
 [ "Win32->catdir('/')",                     '\\'                 ],
+[ "Win32->catdir('/', '../')",              '\\'                 ],
+[ "Win32->catdir('/', '..\\')",             '\\'                 ],
+[ "Win32->catdir('\\', '../')",             '\\'                 ],
+[ "Win32->catdir('\\', '..\\')",            '\\'                 ],
 [ "Win32->catdir('//d1','d2')",             '\\\\d1\\d2'         ],
 [ "Win32->catdir('\\d1\\','d2')",           '\\d1\\d2'         ],
 [ "Win32->catdir('\\d1','d2')",             '\\d1\\d2'         ],
@@ -190,6 +194,7 @@ if ($^O eq 'MacOS') {
 #[ "Win32->catdir('A:/d1','B:/d2','d3','')", 'A:\\d1\\d2\\d3'     ],
 [ "Win32->catdir('A:/d1','B:/d2','d3','')", 'A:\\d1\\B:\\d2\\d3' ],
 [ "Win32->catdir('A:/')",                   'A:\\'               ],
+[ "Win32->catdir('\\', 'foo')",             '\\foo'              ],
 
 [ "Win32->catfile('a','b','c')",        'a\\b\\c' ],
 [ "Win32->catfile('a','b','.\\c')",      'a\\b\\c'  ],
@@ -201,6 +206,7 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('')",               ''                    ],
 [ "Win32->canonpath('a:')",             'A:'                  ],
 [ "Win32->canonpath('A:f')",            'A:f'                 ],
+[ "Win32->canonpath('A:/')",            'A:\\'                ],
 [ "Win32->canonpath('//a\\b//c')",      '\\\\a\\b\\c'         ],
 [ "Win32->canonpath('/a/..../c')",      '\\a\\....\\c'        ],
 [ "Win32->canonpath('//a/b\\c')",       '\\\\a\\b\\c'         ],
@@ -214,6 +220,10 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('/a/b/c/../../d')", '\\a\\d'              ],
 [ "Win32->canonpath('/a/b/c/.../d')",   '\\a\\d'              ],
 [ "Win32->canonpath('\\../temp\\')",    '\\temp'              ],
+[ "Win32->canonpath('\\../')",          '\\'                  ],
+[ "Win32->canonpath('\\..\\')",         '\\'                  ],
+[ "Win32->canonpath('/../')",           '\\'                  ],
+[ "Win32->canonpath('/..\\')",          '\\'                  ],
 [ "Win32->can('_cwd')",                 qr/CODE/              ],
 
 # FakeWin32 subclass (see below) just sets CWD to C:\one\two
@@ -275,6 +285,7 @@ if ($^O eq 'MacOS') {
 [ "VMS->catpath('','[.d1.d2.d3]','file')",                            '[.d1.d2.d3]file'                          ],
 [ "VMS->catpath('','d1/d2/d3','file')",                               '[.d1.d2.d3]file'                            ],
 [ "VMS->catpath('v','d1/d2/d3','file')",                              'v:[.d1.d2.d3]file'                            ],
+[ "VMS->catpath('v','w:[d1.d2.d3]','file')",                          'v:[d1.d2.d3]file'                         ],
 [ "VMS->catpath('node::volume:','[d1.d2.d3]','')",                    'node::volume:[d1.d2.d3]'                  ],
 [ "VMS->catpath('node::volume:','[d1.d2.d3]','file')",                'node::volume:[d1.d2.d3]file'              ],
 [ "VMS->catpath('node\"access_spec\"::volume:','[d1.d2.d3]','')",     'node"access_spec"::volume:[d1.d2.d3]'     ],
@@ -310,9 +321,11 @@ if ($^O eq 'MacOS') {
 [  "VMS->abs2rel('node::volume:[t1.t2.t4]','[t1.t2.t3]')", 'node::volume:[t1.t2.t4]'           ],
 [  "VMS->abs2rel('[t1.t2.t3]','[t1.t2.t3]')",              ''                 ],
 [  "VMS->abs2rel('[t1.t2.t3]file','[t1.t2.t3]')",          'file'             ],
+[  "VMS->abs2rel('[t1.t2.t3]file','[t1.t2]')",             '[.t3]file'        ],
+[  "VMS->abs2rel('v:[t1.t2.t3]file','v:[t1.t2]')",         '[.t3]file'        ],
 [  "VMS->abs2rel('[t1.t2.t4]','[t1.t2.t3]')",              '[-.t4]'           ],
 [  "VMS->abs2rel('[t1.t2]file','[t1.t2.t3]')",             '[-]file'          ],
-[  "VMS->abs2rel('[t1.t2.t3.t4]','[t1.t2.t3]')",           '[t4]'             ],
+[  "VMS->abs2rel('[t1.t2.t3.t4]','[t1.t2.t3]')",           '[.t4]'            ],
 [  "VMS->abs2rel('[t4.t5.t6]','[t1.t2.t3]')",              '[---.t4.t5.t6]'   ],
 [ "VMS->abs2rel('[000000]','[t1.t2.t3]')",                 '[---]'            ],
 [ "VMS->abs2rel('a:[t1.t2.t4]','a:[t1.t2.t3]')",             '[-.t4]'           ],
@@ -335,6 +348,11 @@ if ($^O eq 'MacOS') {
 [ "OS2->catfile('./a','b','c')",          'a/b/c'  ],
 [ "OS2->catfile('c')",                    'c' ],
 [ "OS2->catfile('./c')",                  'c' ],
+
+[ "OS2->catdir('/', '../')",              '/'                 ],
+[ "OS2->catdir('/', '..\\')",             '/'                 ],
+[ "OS2->catdir('\\', '../')",             '/'                 ],
+[ "OS2->catdir('\\', '..\\')",            '/'                 ],
 
 [ "Mac->case_tolerant()",         '1'  ],
 
@@ -359,6 +377,7 @@ if ($^O eq 'MacOS') {
 
 [ "Mac->catpath('hd:','d1','file')",     'hd:d1:file'      ],
 [ "Mac->catpath('hd:',':d1:',':file')",  'hd:d1:file'      ],
+[ "Mac->catpath('hd:','hd:d1','')",      'hd:d1:'          ],
 
 [ "Mac->catpath('','d1','')",            ':d1:'            ],
 [ "Mac->catpath('',':d1','')",           ':d1:'            ],
@@ -509,7 +528,7 @@ if ($^O eq 'MacOS') {
 [ "Mac->abs2rel('hd:d3:','hd:d1:d2:')",               ':::d3:'       ], # same as above
 [ "Mac->abs2rel('hd:d1:d2:d3:','hd:d1:d2:')",         ':d3:'         ],
 [ "Mac->abs2rel('hd:d1:d2:d3::','hd:d1:d2:')",        ':d3::'        ],
-[ "Mac->abs2rel('hd1:d3:d4:d5:','hd2:d1:d2:')",       ':::d3:d4:d5:' ], # ignore base's volume
+[ "Mac->abs2rel('hd1:d3:d4:d5:','hd2:d1:d2:')",       'hd1:d3:d4:d5:'], # volume mismatch
 [ "Mac->abs2rel('hd:','hd:d1:d2:')",                  ':::'          ],
 
 [ "Mac->rel2abs(':d3:','hd:d1:d2:')",          'hd:d1:d2:d3:'     ],
