@@ -617,7 +617,7 @@ sub GetOptions {
 	my $opt = shift (@optionlist);
 
 	# Strip leading prefix so people can specify "--foo=i" if they like.
-	$opt = $' if $opt =~ /^($genprefix)+/;
+	$opt = $+ if $opt =~ /^($genprefix)+(.*)/s;
 
 	if ( $opt eq '<>' ) {
 	    if ( (defined $userlinkage)
@@ -909,9 +909,9 @@ sub config (@) {
     foreach $opt ( @options ) {
 	my $try = lc ($opt);
 	my $action = 1;
-	if ( $try =~ /^no_?/ ) {
+	if ( $try =~ /^no_?(.*)/s ) {
 	    $action = 0;
-	    $try = $';
+	    $try = $+;
 	}
 	if ( $try eq 'default' or $try eq 'defaults' ) {
 	    &$config_defaults () if $action;
@@ -976,19 +976,19 @@ sub require_version {
 
 $find_option = sub {
 
-    return 0 unless $opt =~ /^$genprefix/;
+    return 0 unless $opt =~ /^($genprefix)(.*)/s;
 
-    $opt = $';
-    my ($starter) = $&;
+    $opt = $+;
+    my ($starter) = $1;
 
     my $optarg = undef;	# value supplied with --opt=value
     my $rest = undef;	# remainder from unbundling
 
     # If it is a long option, it may include the value.
     if (($starter eq "--" || $getopt_compat)
-	&& $opt =~ /^([^=]+)=/ ) {
+	&& $opt =~ /^([^=]+)=(.*)/s ) {
 	$opt = $1;
-	$optarg = $';
+	$optarg = $+;
 	print STDERR ("=> option \"", $opt, 
 		      "\", optarg = \"$optarg\"\n") if $debug;
     }
@@ -1124,7 +1124,7 @@ $find_option = sub {
     # Get key if this is a "name=value" pair for a hash option.
     $key = undef;
     if ($hash && defined $arg) {
-	($key, $arg) = ($arg =~ /=/o) ? ($`, $') : ($arg, 1);
+	($key, $arg) = ($arg =~ /(.*)=(.*)/os) ? ($1, $+) : ($arg, 1);
     }
 
     #### Check if the argument is valid for this option ####
