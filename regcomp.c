@@ -4887,7 +4887,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 
 	 s = (r->reganch & ROPT_UTF8) ? pv_uni_display(dsv, (U8*)r->precomp,
 		r->prelen, 60, UNI_DISPLAY_REGEX)
-	     : pv_display(dsv, (U8*)r->precomp, r->prelen, 0, 60);
+            : pv_display(dsv, r->precomp, r->prelen, 0, 60);
 	 len = SvCUR(dsv);
 	 if (!PL_colorset)
 	      reginitcolors();
