@@ -20,7 +20,7 @@ closedir(ENC);
 
 WriteMakefile(
 	      NAME		=> "Encode",
-	      VERSION_FROM	=> 'lib/Encode.pm',
+	      VERSION_FROM	=> 'Encode.pm',
 	      OBJECT		=> '$(O_FILES)',
 	      'dist'		=> {
 		  COMPRESS	=> 'gzip -9f',
