@@ -396,8 +396,8 @@ undefined, or you might be able to use the C<syscall> interface to
 access setitimer(2) if your system supports it.  The Time::HiRes module
 from CPAN may also prove useful.
 
-It is usually a mistake to intermix C<alarm>
-and C<sleep> calls.
+It is usually a mistake to intermix C<alarm> and C<sleep> calls.
+(C<sleep> may be internally implemented in your system with C<alarm>)
 
 If you want to use C<alarm> to time out a system call you need to use an
 C<eval>/C<die> pair.  You can't rely on the alarm causing the system call to
@@ -2227,11 +2227,13 @@ In scalar context, returns the ctime(3) value:
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
 This scalar value is B<not> locale dependent, see L<perllocale>, but
-instead a Perl builtin.  Also see the C<Time::Local> module, and the
-strftime(3) and mktime(3) function available via the POSIX module.  To
-get somewhat similar but locale dependent date strings, set up your
-locale environment variables appropriately (please see L<perllocale>)
-and try for example:
+instead a Perl builtin.  Also see the C<Time::Local> module
+(to convert the second, minutes, hours, ... back to seconds since the
+stroke of midnight the 1st of January 1970, the value returned by
+time()), and the strftime(3) and mktime(3) function available via the
+POSIX module.  To get somewhat similar but locale dependent date
+strings, set up your locale environment variables appropriately
+(please see L<perllocale>) and try for example:
 
     use POSIX qw(strftime);
     $now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
@@ -3742,8 +3744,9 @@ however, because your process might not be scheduled right away in a
 busy multitasking system.
 
 For delays of finer granularity than one second, you may use Perl's
-C<syscall> interface to access setitimer(2) if your system supports it,
-or else see L</select> above.
+C<syscall> interface to access setitimer(2) if your system supports
+it, or else see L</select> above.  The Time::HiRes module from CPAN
+may also help.
 
 See also the POSIX module's C<sigpause> function.
 
@@ -4609,6 +4612,11 @@ Returns the number of non-leap seconds since whatever time the system
 considers to be the epoch (that's 00:00:00, January 1, 1904 for MacOS,
 and 00:00:00 UTC, January 1, 1970 for most other systems).
 Suitable for feeding to C<gmtime> and C<localtime>.
+
+For measuring time in better granularity than one second,
+you may use either the Time::HiRes module from CPAN, or
+if you have gettimeofday(2), you may be able to use the
+C<syscall> interface of Perl, see L<perlfaq8> for details.
 
 =item times
 
