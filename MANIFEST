@@ -658,6 +658,8 @@ ext/MIME/Base64/t/warn.t	See whether MIME::Base64 works
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/gnuknetbsd.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/sco.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
@@ -669,10 +671,10 @@ ext/NDBM_File/t/ndbm.t		See if NDBM_File works
 ext/NDBM_File/typemap		NDBM extension interface types
 ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
-ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
-ext/ODBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/gnuknetbsd.pl	Hint for NDBM_File for named architecture
+ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
@@ -710,9 +712,9 @@ ext/PerlIO/via/via.xs		PerlIO layer for layers in perl
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
-ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/gnukfreebsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/gnuknetbsd.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/mint.pl		Hint for POSIX for named architecture
 ext/POSIX/hints/netbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/next_3.pl	Hint for POSIX for named architecture
@@ -773,9 +775,9 @@ ext/Socket/Socket.xs		Socket extension external subroutines
 ext/Socket/t/socketpair.t	See if socketpair works
 ext/Socket/t/Socket.t		See if Socket works
 ext/Storable/ChangeLog		Storable extension
-ext/Storable/hints/linux.pl	Hint for Storable for named architecture
 ext/Storable/hints/gnukfreebsd.pl	Hint for Storable for named architecture
 ext/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
+ext/Storable/hints/linux.pl	Hint for Storable for named architecture
 ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
 ext/Storable/README		Storable extension
@@ -980,6 +982,8 @@ hints/esix4.sh			Hints for named architecture
 hints/fps.sh			Hints for named architecture
 hints/freebsd.sh		Hints for named architecture
 hints/genix.sh			Hints for named architecture
+hints/gnukfreebsd.sh			Hints for named architecture
+hints/gnuknetbsd.sh			Hints for named architecture
 hints/gnu.sh			Hints for named architecture
 hints/greenhills.sh		Hints for named architecture
 hints/hpux.sh			Hints for named architecture
@@ -993,8 +997,6 @@ hints/irix_6.sh			Hints for named architecture
 hints/isc_2.sh			Hints for named architecture
 hints/isc.sh			Hints for named architecture
 hints/linux.sh			Hints for named architecture
-hints/gnukfreebsd.sh			Hints for named architecture
-hints/gnuknetbsd.sh			Hints for named architecture
 hints/lynxos.sh			Hints for named architecture
 hints/machten_2.sh		Hints for named architecture
 hints/machten.sh		Hints for named architecture
@@ -1276,8 +1278,8 @@ lib/Exporter.t			See if Exporter works
 lib/ExtUtils/Changes		MakeMaker change log
 lib/ExtUtils/Command/MM.pm	Calling MM functions from the cmd line
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
-lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Constant/Base.pm	generate XS code to import C header constants
+lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Constant/Utils.pm	generate XS code to import C header constants
 lib/ExtUtils/Constant/XS.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
@@ -1787,8 +1789,8 @@ lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness/Straps.pm	Test::Harness::Straps
-lib/Test/Harness/TAP.pod	Documentation for the Test Anything Protocol
 lib/Test/Harness/t/00compile.t	Test::Harness test
+lib/Test/Harness/TAP.pod	Documentation for the Test Anything Protocol
 lib/Test/Harness/t/assert.t	Test::Harness::Assert test
 lib/Test/Harness/t/base.t	Test::Harness test
 lib/Test/Harness/t/callback.t	Test::Harness test
@@ -2186,6 +2188,7 @@ perlio.c			C code for PerlIO abstraction
 perlio.h			PerlIO abstraction
 perliol.h			PerlIO Layer definition
 perlio.sym			Symbols for PerlIO abstraction
+perl_keyword.pl			A script to generate Perl_keyword() in toke.c
 perlsdio.h			Fake stdio using perlio
 perlsfio.h			Prototype sfio mapping for PerlIO
 perlsh				A poor man's perl shell
@@ -2195,7 +2198,6 @@ perly.c				parser code (NOT derived from perly.y)
 perly.h				header file for perly.c; derived from perly.y
 perly.tab			parser state tables; derived from perly.y
 perly.y				Yacc grammar for perl
-perl_keyword.pl			A script to generate Perl_keyword() in toke.c
 plan9/aperl			Shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h		Plan9 port: replacement C header file
 plan9/buildinfo			Plan9 port: configuration information
