@@ -8337,6 +8337,22 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    continue;	/* not "break" */
 	}
 
+	if (is_utf8 != has_utf8) {
+	     if (is_utf8) {
+		  if (SvCUR(sv))
+		       sv_utf8_upgrade(sv);
+	     }
+	     else {
+		  SV *nsv = sv_2mortal(newSVpvn(eptr, elen));
+		  sv_utf8_upgrade(nsv);
+		  eptr = SvPVX(nsv);
+		  elen = SvCUR(nsv);
+	     }
+	     SvGROW(sv, SvCUR(sv) + elen + 1);
+	     p = SvEND(sv);
+	     *p = '\0';
+	}
+	
 	have = esignlen + zeros + elen;
 	need = (have > width ? have : width);
 	gap = need - have;
@@ -8360,20 +8376,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		*p++ = '0';
 	}
 	if (elen) {
-	    if (is_utf8 != has_utf8) {
-	        if (is_utf8) {
-		    if (SvCUR(sv))
-		        sv_utf8_upgrade(sv);
-		}
-		else {
-		    SV *nsv = sv_2mortal(newSVpvn(eptr, elen));
-		    sv_utf8_upgrade(nsv);
-		    eptr = SvPVX(nsv);
-		    elen = SvCUR(nsv);
-		}
-		SvGROW(sv, SvCUR(sv) + elen + 1);
-		p = SvEND(sv);
-	    }
 	    Copy(eptr, p, elen, char);
 	    p += elen;
 	}
