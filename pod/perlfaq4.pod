@@ -1291,6 +1291,12 @@ in the permute() function should work on any list:
 	}
     }
 
+Unfortunately, this algorithm is very inefficient. The Algorithm::Permute
+module from CPAN runs at least an order of magnitude faster. If you don't
+have a C compiler (or a binary distribution of Algorithm::Permute), then
+you can use List::Permutor which is written in pure Perl, and is still
+several times faster than the toy algorithm above.
+
 =head2 How do I sort an array by (anything)?
 
 Supply a comparison function to sort() (described in L<perlfunc/sort>):
