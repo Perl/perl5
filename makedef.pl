@@ -314,7 +314,6 @@ elsif ($PLATFORM eq 'os2') {
 
 unless ($define{'DEBUGGING'}) {
     skip_symbols [qw(
-		    Perl_deb
 		    Perl_deb_growlevel
 		    Perl_debop
 		    Perl_debprofdump
