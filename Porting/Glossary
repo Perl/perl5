@@ -613,11 +613,6 @@ d_mkfifo (d_mkfifo.U):
 	This variable conditionally defines the HAS_MKFIFO symbol, which
 	indicates to the C program that the mkfifo() routine is available.
 
-d_mkstemp (d_mkstemp.U):
-	This variable conditionally defines the HAS_MKSTEMP symbol, which
-	indicates to the C program that the mkstemp() routine is available
-	to create and open a unique tempporary file.
-
 d_mktime (d_mktime.U):
 	This variable conditionally defines the HAS_MKTIME symbol, which
 	indicates to the C program that the mktime() routine is available.

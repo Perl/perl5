@@ -1634,12 +1634,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define LONGLONGSIZE $longlongsize		/**/
 #endif
 
-/* HAS_MKSTEMP:
- *	This symbol, if defined, indicates that the mkstemp routine is
- *	available to create and open a unique temporary file.
- */
-#$d_mkstemp HAS_MKSTEMP		/**/
-
 /* HAS_SETGROUPS:
  *	This symbol, if defined, indicates that the setgroups() routine is
  *	available to set the list of process groups.  If unavailable, multiple
