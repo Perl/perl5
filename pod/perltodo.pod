@@ -28,7 +28,7 @@ always be set to true, but it needs to be set to false when F<utf8.pm>
 is being compiled. (To stop Perl trying to autoload the C<utf8>
 pragma...)
 
-=head2 Create a char *sv_printify(sv, STRLEN *lenp, UV flags)
+=head2 Create a char *sv_pvprintify(sv, STRLEN *lenp, UV flags)
 
 For displaying PVs with control characters, embedded nulls, and Unicode.
 This would be useful for printing warnings, or data and regex dumping,
@@ -82,9 +82,21 @@ Simon Cozens promises to work on this.
 
 =head2 Unicode regular expression character classes
 
-They have some tricks Perl doesn't yet implement.
+They have some tricks Perl doesn't yet implement like character
+class subtraction.
 
 	http://www.unicode.org/unicode/reports/tr18/
+
+=head2 Unicode Scripts support
+
+Currently the C<\p{In...}> supports only the Blocks database, like
+C<\p{BasicLatin}>, C<\p{InGreek}>, C<\p{InThai}>, but there's also the
+Scripts database, which has members like C<Latin>, C<Greek>,
+C<Armenian>, C<Han>.  It is desireable that also the script names
+could be used for the C<\p{In...}> construct.  Note: needs to be
+researched whether this is possible, that is, are there conflicts
+between the Blocks and the Scripts, is the Blocks Greek the same as
+the Scripts Greek?
 
 =head2 use Thread for iThreads
 
@@ -327,6 +339,12 @@ has changed. Detecting a change is perhaps the difficult bit.
 =head2 Support for rerunning debugger
 
 There should be a way of restarting the debugger on demand.
+
+=head2 Test Suite for the Debugger
+
+The debugger is a complex piece of software and fixing something
+here may inadvertently break something else over there.  To tame
+this chaotic behaviour, a test suite is necessary. 
 
 =head2 my sub foo { }
 
