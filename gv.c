@@ -81,7 +81,7 @@ int multi;
 {
     register GP *gp;
 
-    sv_upgrade(gv, SVt_PVGV);
+    sv_upgrade((SV*)gv, SVt_PVGV);
     if (SvLEN(gv))
 	Safefree(SvPVX(gv));
     Newz(602,gp, 1, GP);
@@ -185,7 +185,7 @@ I32 level;
     }
 
     if (!level) {
-	if (lastchance = gv_stashpv("UNIVERSAL", FALSE)) {
+	if (lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE)) {
 	    if (gv = gv_fetchmeth(lastchance, name, len, level + 1)) {
 		if (cv) {				/* junk old undef */
 		    assert(SvREFCNT(topgv) > 1);
@@ -227,11 +227,11 @@ char* name;
 	    /* Degenerate case ->SUPER::method should really lookup in original stash */
 	    SV *tmpstr = sv_2mortal(newSVpv(HvNAME(curcop->cop_stash),0));
 	    sv_catpvn(tmpstr, "::SUPER", 7);
-	    stash = gv_stashpv(SvPV(tmpstr,na),TRUE);
+	    stash = gv_stashpvn(SvPVX(tmpstr),SvCUR(tmpstr),TRUE);
 	    *nsplit = ch;
 	    DEBUG_o( deb("Treating %s as %s::%s\n",origname,HvNAME(stash),name) );
 	} else {
-	    stash = gv_stashpv(origname,TRUE);
+	    stash = gv_stashpvn(origname, nsplit - origname, TRUE);
 	    *nsplit = ch;
 	}
     }
@@ -241,7 +241,7 @@ char* name;
 	/* Failed obvious case - look for SUPER as last element of stash's name */
 	char *packname = HvNAME(stash);
 	STRLEN len     = strlen(packname);
-	if (len >= 7 && strEQ(packname+len-7,"::SUPER")) {
+	if ((len -= 7) >= 0 && strEQ(packname+len,"::SUPER")) {
 	    /* Now look for @.*::SUPER::ISA */
 	    GV** gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
 	    if (!gvp || (gv = *gvp) == (GV*)&sv_undef || !GvAV(gv)) {
@@ -249,11 +249,11 @@ char* name;
 		   and see if there is an @ISA there
 		 */
 		HV *basestash;
-		char ch = packname[len-7];
+		char ch = packname[len];
 		AV *av;
-		packname[len-7] = '\0';
-		basestash = gv_stashpv(packname, TRUE);
-		packname[len-7] = ch;
+		packname[len] = '\0';
+		basestash = gv_stashpvn(packname, len, TRUE);
+		packname[len] = ch;
 		gvp = (GV**)hv_fetch(basestash,"ISA",3,FALSE);
 		if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
 		     /* Okay found @ISA after dropping the SUPER, alias it */
@@ -276,7 +276,7 @@ char* name;
 	CV* cv;
 
 	if (strEQ(name,"import") || strEQ(name,"unimport"))
-	    gv = &sv_yes;
+	    gv = (GV*)&sv_yes;
 	else if (strNE(name, "AUTOLOAD")) {
 	    gv = gv_fetchmeth(stash, "AUTOLOAD", 8, 0);
 	    if (gv && (cv = GvCV(gv))) { /* One more chance... */
@@ -297,14 +297,31 @@ gv_stashpv(name,create)
 char *name;
 I32 create;
 {
-    char tmpbuf[1234];
+    return gv_stashpvn(name, strlen(name), create);
+}
+
+HV*
+gv_stashpvn(name,namelen,create)
+char *name;
+U32 namelen;
+I32 create;
+{
+    char tmpbuf[1203];
     HV *stash;
     GV *tmpgv;
-    /* Use strncpy to avoid bug in VMS sprintf */
-    /* sprintf(tmpbuf,"%.*s::",1200,name); */
-    strncpy(tmpbuf, name, 1200);
-    tmpbuf[1200] = '\0';  /* just in case . . . */
-    strcat(tmpbuf, "::");
+
+    if (namelen > 1200) {
+	namelen = 1200;
+#ifdef VMS
+	warn("Weird package name \"%s\" truncated", name);
+#else
+	warn("Weird package name \"%.*s...\" truncated", namelen, name);
+#endif
+    }
+    Copy(name,tmpbuf,namelen,char);
+    tmpbuf[namelen++] = ':';
+    tmpbuf[namelen++] = ':';
+    tmpbuf[namelen] = '\0';
     tmpgv = gv_fetchpv(tmpbuf,create, SVt_PVHV);
     if (!tmpgv)
 	return 0;
@@ -321,7 +338,10 @@ gv_stashsv(sv,create)
 SV *sv;
 I32 create;
 {
-    return gv_stashpv(SvPV(sv,na), create);
+    register char *ptr;
+    STRLEN len;
+    ptr = SvPV(sv,len);
+    return gv_stashpvn(ptr, len, create);
 }
 
 
@@ -349,7 +369,7 @@ I32 sv_type;
 	{
 	    if (!stash)
 		stash = defstash;
-	    if (!SvREFCNT(stash))	/* symbol table under destruction */
+	    if (!stash || !SvREFCNT(stash)) /* symbol table under destruction */
 		return Nullgv;
 
 	    len = namend - name;
@@ -384,7 +404,7 @@ I32 sv_type;
 	    namend++;
 	    name = namend;
 	    if (!*name)
-		return gv ? gv : *hv_fetch(defstash, "main::", 6, TRUE);
+		return gv ? gv : (GV*)*hv_fetch(defstash, "main::", 6, TRUE);
 	}
     }
     len = namend - name;
@@ -518,15 +538,15 @@ I32 sv_type;
 	    {
 		char *pname;
 		av_push(av, newSVpv(pname = "NDBM_File",0));
-		gv_stashpv(pname, TRUE);
+		gv_stashpvn(pname, 9, TRUE);
 		av_push(av, newSVpv(pname = "DB_File",0));
-		gv_stashpv(pname, TRUE);
+		gv_stashpvn(pname, 7, TRUE);
 		av_push(av, newSVpv(pname = "GDBM_File",0));
-		gv_stashpv(pname, TRUE);
+		gv_stashpvn(pname, 9, TRUE);
 		av_push(av, newSVpv(pname = "SDBM_File",0));
-		gv_stashpv(pname, TRUE);
+		gv_stashpvn(pname, 9, TRUE);
 		av_push(av, newSVpv(pname = "ODBM_File",0));
-		gv_stashpv(pname, TRUE);
+		gv_stashpvn(pname, 9, TRUE);
 	    }
 	}
 	break;
@@ -542,11 +562,19 @@ I32 sv_type;
     case 'S':
 	if (strEQ(name, "SIG")) {
 	    HV *hv;
+	    I32 i;
 	    siggv = gv;
 	    GvMULTI_on(siggv);
 	    hv = GvHVn(siggv);
 	    hv_magic(hv, siggv, 'S');
-
+	    for(i=1;sig_name[i];i++) {
+	    	SV ** init;
+	    	init=hv_fetch(hv,sig_name[i],strlen(sig_name[i]),1);
+	    	if(init)
+	    		sv_setsv(*init,&sv_undef);
+	    	psig_ptr[i] = 0;
+	    	psig_name[i] = 0;
+	    }
 	    /* initialize signal stack */
 	    signalstack = newAV();
 	    AvREAL_off(signalstack);
@@ -702,7 +730,7 @@ newIO()
     sv_upgrade((SV *)io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
-    iogv = gv_fetchpv("FileHandle::", TRUE, SVt_PVHV);
+    iogv = gv_fetchpv("IO::Handle::", TRUE, SVt_PVHV);
     SvSTASH(io) = (HV*)SvREFCNT_inc(GvHV(iogv));
     return io;
 }
@@ -720,15 +748,15 @@ HV* stash;
     if (!HvARRAY(stash))
 	return;
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
-	for (entry = HvARRAY(stash)[i]; entry; entry = entry->hent_next) {
-	    if (entry->hent_key[entry->hent_klen-1] == ':' &&
-		(gv = (GV*)entry->hent_val) && (hv = GvHV(gv)) && HvNAME(hv))
+	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
+	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
+		(gv = (GV*)HeVAL(entry)) && (hv = GvHV(gv)) && HvNAME(hv))
 	    {
 		if (hv != defstash)
 		     gv_check(hv);              /* nested package */
 	    }
-	    else if (isALPHA(*entry->hent_key)) {
-		gv = (GV*)entry->hent_val;
+	    else if (isALPHA(*HeKEY(entry))) {
+		gv = (GV*)HeVAL(entry);
 		if (GvMULTI(gv))
 		    continue;
 		curcop->cop_line = GvLINE(gv);
@@ -736,7 +764,7 @@ HV* stash;
 		curcop->cop_filegv = filegv;
 		if (filegv && GvMULTI(filegv))	/* Filename began with slash */
 		    continue;
-		warn("Identifier \"%s::%s\" used only once: possible typo",
+		warn("Name \"%s::%s\" used only once: possible typo",
 			HvNAME(stash), GvNAME(gv));
 	    }
 	}
@@ -854,6 +882,7 @@ HV* stash;
     AMT amt;
     SV* sv;
     SV** svp;
+    GV** gvp;
 
 /*  if (*(svp)==(SV*)amagic_generation && *(svp+1)==(SV*)sub_generation) {
       DEBUG_o( deb("Overload magic in package %s up-to-date\n",HvNAME(stash))
@@ -878,7 +907,7 @@ HV* stash;
 
       if ( (cp=((char**)(*AMG_names))[i]) ) {
         svp=(SV**)hv_fetch(hv,cp,strlen(cp),FALSE);
-        if (svp && ((sv = *svp) != (GV*)&sv_undef)) {
+        if (svp && ((sv = *svp) != &sv_undef)) {
           switch (SvTYPE(sv)) {
             default:
               if (!SvROK(sv)) {
@@ -977,6 +1006,12 @@ int flags;
 	 case string_amg:
 	   (void)((cv = cvp[off=numer_amg]) || (cv = cvp[off=bool__amg]));
 	   break;
+ case not_amg:
+   (void)((cv = cvp[off=bool__amg]) 
+	  || (cv = cvp[off=numer_amg])
+	  || (cv = cvp[off=string_amg]));
+   postpr = 1;
+   break;
 	 case copy_amg:
 	   {
 	     SV* ref=SvRV(left);
@@ -1132,6 +1167,8 @@ int flags;
     ENTER;
     SAVESPTR(op);
     op = (OP *) &myop;
+    if (perldb && curstash != debstash)
+	op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
     pp_pushmark();
 
@@ -1182,6 +1219,8 @@ int flags;
       case inc_amg:
       case dec_amg:
 	SvSetSV(left,res); return res; break;
+      case not_amg:
+ans=!SvOK(res); break;
       }
       return ans? &sv_yes: &sv_no;
     } else if (method==copy_amg) {
