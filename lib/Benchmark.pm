@@ -176,6 +176,10 @@ for Exporter.
 
 =head1 CAVEATS
 
+Comparing eval'd strings with code references will give you
+inaccurate results: a code reference will show a slower
+execution time than the equivalent eval'd string.
+
 The real time timing is done using time(2) and
 the granularity is therefore only one second.
 
@@ -258,7 +262,7 @@ sub timestr {
     my($pt, $ct, $t) = ($tr->cpu_p, $tr->cpu_c, $tr->cpu_a);
     $f = $defaultfmt unless defined $f;
     # format a time in the required style, other formats may be added here
-    $style = $defaultstyle unless defined $style;
+    $style ||= $defaultstyle;
     $style = ($ct>0) ? 'all' : 'noc' if $style eq 'auto';
     my $s = "@t $style"; # default for unknown style
     $s=sprintf("%2d secs (%$f usr %$f sys + %$f cusr %$f csys = %$f cpu)",
