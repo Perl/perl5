@@ -4014,7 +4014,7 @@ Perl_sv_reset(pTHX_ register char *s, HV *stash)
     register I32 i;
     register PMOP *pm;
     register I32 max;
-    char todo[256];
+    char todo[PERL_UCHAR_MAX+1];
 
     if (!stash)
 	return;
@@ -4033,11 +4033,11 @@ Perl_sv_reset(pTHX_ register char *s, HV *stash)
 
     Zero(todo, 256, char);
     while (*s) {
-	i = *s;
+	i = (unsigned char)*s;
 	if (s[1] == '-') {
 	    s += 2;
 	}
-	max = *s++;
+	max = (unsigned char)*s++;
 	for ( ; i <= max; i++) {
 	    todo[i] = 1;
 	}
