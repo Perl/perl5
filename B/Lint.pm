@@ -183,6 +183,15 @@ sub B::UNOP::lint {
 	warning("Implicit scalar context for %s in %s",
 		$ppaddr eq "pp_rv2av" ? "array" : "hash", $parent->desc);
     }
+    if ($check{private_names} && $ppaddr eq "pp_method") {
+	my $methop = $op->first;
+	if ($methop->ppaddr eq "pp_const") {
+	    my $method = $methop->sv->PV;
+	    if ($method =~ /^_/ && !defined(&{"$curstash\::$method"})) {
+		warning("Illegal reference to private method name $method");
+	    }
+	}
+    }
 }
 
 sub B::PMOP::lint {
