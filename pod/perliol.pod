@@ -87,11 +87,10 @@ same as the public C<PerlIO_xxxxx> functions:
 
   struct _PerlIO_funcs
   {
-   Size_t		fsize;
    char *		name;
    Size_t		size;
    IV		kind;
-   IV		(*Pushed)(pTHX_ PerlIO *f,const char *mode,SV *arg, PerlIO_funcs *tab);
+   IV		(*Pushed)(pTHX_ PerlIO *f,const char *mode,SV *arg);
    IV		(*Popped)(pTHX_ PerlIO *f);
    PerlIO *	(*Open)(pTHX_ PerlIO_funcs *tab,
   			AV *layers, IV n,
@@ -125,9 +124,9 @@ same as the public C<PerlIO_xxxxx> functions:
    void		(*Set_ptrcnt)(pTHX_ PerlIO *f,STDCHAR *ptr,SSize_t cnt);
   };
 
-The first few members of the struct give a function table size for
-compatibility check "name" for the layer, the  size to C<malloc> for the per-instance data,
-and some flags which are attributes of the class as whole (such as whether it is a buffering
+The first few members of the struct give a "name" for the layer, the
+size to C<malloc> for the per-instance data, and some flags which are
+attributes of the class as whole (such as whether it is a buffering
 layer), then follow the functions which fall into four basic groups:
 
 =over 4
@@ -324,14 +323,6 @@ to change during one "get".)
 
 =over 4
 
-=item size
-
-	Size_t fsize;
-
-Size of the function table. This is compared against the value PerlIO code "knows"
-as a compatibility check. Future versions I<may> be able to tolerate layers
-compiled against an old version of the headers.
-
 =item name
 
 	char * name;
@@ -351,14 +342,6 @@ implemented by the APR layer.
 The size of the per-instance data structure, e.g.:
 
   sizeof(PerlIOAPR)
-
-If this field is zero then C<PerlIO_pushed> does not malloc anything and assumes
-layer's Pushed function will do any required layer stack manipulation - used
-to avoid malloc/free overhead for dummy layers.
-If the field is non-zero it must be at least the size of C<PerlIOl>,
-C<PerlIO_pushed> will allocate memory for the layer's data structures
-and link new layer onto the stream's stack. (If the layer's Pushed
-method returns an error indication the layer is popped again.)
 
 =item kind
 
@@ -509,18 +492,18 @@ Returns the Unix/Posix numeric file descriptor for the handle. Normally
 C<PerlIOBase_fileno()> (which just asks next layer down) will suffice
 for this.
 
-Returns -1 on error, which is considered to include the case where the layer cannot
-provide such a file descriptor.
+Returns -1 if the layer cannot provide such a file descriptor, or in
+the case of the error.
+
+XXX: two possible results end up in -1, one is an error the other is
+not.
 
 =item Dup
 
 	PerlIO * (*Dup)(pTHX_ PerlIO *f, PerlIO *o,
 			CLONE_PARAMS *param, int flags);
 
-XXX: Needs more docs.
-
-Used as part of the "clone" process when a thread is spawned (in which case
-param will be non-NULL) and when a stream is being duplicated via '&' in the C<open>.
+XXX: not documented
 
 Similar to C<Open>, returns PerlIO* on success, C<NULL> on failure.
 
