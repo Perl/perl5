@@ -52,7 +52,7 @@ The default input and pattern-searching space.  The following pairs are
 equivalent:
 
     while (<>) {...}	# equivalent in only while!
-    while ($_ = <>) {...}
+    while (defined($_ = <>)) {...}
 
     /^Subject:/
     $_ =~ /^Subject:/
@@ -200,7 +200,9 @@ number.)
 The input record separator, newline by default.  Works like B<awk>'s RS
 variable, including treating empty lines as delimiters if set to the
 null string.  (Note:  An empty line cannot contain any spaces or
-tabs.) You may set it to a multicharacter string to match a
+tabs.) You may set it to C<undef> if you want to treat the whole file
+as a single record.
+You may set it to a multicharacter string to match a
 multi-character delimiter.  Note that setting it to C<"\n\n"> means
 something slightly different than setting it to C<"">, if the file
 contains consecutive empty lines.  Setting it to C<""> will treat two
@@ -222,7 +224,7 @@ better for something :-)
 
 =item $|
 
-If set to nonzero, forces a flush after every write or print on the
+If set to nonzero, forces a flush right away and after every write or print on the
 currently selected output channel.  Default is 0 (regardless of whether
 the channel is actually buffered by the system or not; C<$|> tells you
 only whether you've asked Perl explicitly to flush after each write). 
@@ -531,7 +533,8 @@ multiple groups.
 =item $0
 
 Contains the name of the file containing the Perl script being
-executed.  Assigning to "C<$0>" modifies the argument area that the ps(1)
+executed.  On some operating systems
+assigning to "C<$0>" modifies the argument area that the ps(1)
 program sees.  This is more useful as a way of indicating the
 current program state than it is for hiding the program you're running.
 (Mnemonic: same as B<sh> and B<ksh>.)
