@@ -1503,22 +1503,21 @@ win32_times(struct tms *timebuf)
     FILETIME user;
     FILETIME kernel;
     FILETIME dummy;
+    clock_t process_time_so_far = clock();
     if (GetProcessTimes(GetCurrentProcess(), &dummy, &dummy,
                         &kernel,&user)) {
 	timebuf->tms_utime = filetime_to_clock(&user);
 	timebuf->tms_stime = filetime_to_clock(&kernel);
 	timebuf->tms_cutime = 0;
 	timebuf->tms_cstime = 0;
-
     } else {
         /* That failed - e.g. Win95 fallback to clock() */
-        clock_t t = clock();
-	timebuf->tms_utime = t;
+	timebuf->tms_utime = process_time_so_far;
 	timebuf->tms_stime = 0;
 	timebuf->tms_cutime = 0;
 	timebuf->tms_cstime = 0;
     }
-    return 0;
+    return process_time_so_far;
 }
 
 /* fix utime() so it works on directories in NT */
