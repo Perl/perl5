@@ -1377,6 +1377,10 @@ realloc(void *mp, size_t nbytes)
 #endif
 		res = cp;
 		MUTEX_UNLOCK(&PL_malloc_mutex);
+		DEBUG_m(PerlIO_printf(Perl_debug_log, 
+			      "0x%lx: (%05lu) realloc %ld bytes inplace\n",
+			      (unsigned long)res,(unsigned long)(PL_an++),
+			      (long)size));
 	} else if (incr == 1 && (cp - M_OVERHEAD == last_op) 
 		   && (onb > (1 << LOG_OF_MIN_ARENA))) {
 	    MEM_SIZE require, newarena = nbytes, pow;
@@ -1405,6 +1409,10 @@ realloc(void *mp, size_t nbytes)
 	} else {
 	  hard_way:
 	    MUTEX_UNLOCK(&PL_malloc_mutex);
+	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
+			      "0x%lx: (%05lu) realloc %ld bytes the hard way\n",
+			      (unsigned long)cp,(unsigned long)(PL_an++),
+			      (long)size));
 	    if ((res = (char*)malloc(nbytes)) == NULL)
 		return (NULL);
 	    if (cp != res)			/* common optimization */
@@ -1412,13 +1420,6 @@ realloc(void *mp, size_t nbytes)
 	    if (was_alloced)
 		free(cp);
 	}
-
-	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lu: (%05lu) rfree\n",
-			      (unsigned long)res,(unsigned long)(PL_an++)));
-	DEBUG_m(PerlIO_printf(Perl_debug_log, 
-			      "0x%lx: (%05lu) realloc %ld bytes\n",
-			      (unsigned long)res,(unsigned long)(PL_an++),
-			      (long)size));
   	return ((Malloc_t)res);
 }
 
