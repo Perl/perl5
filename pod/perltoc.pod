@@ -95,8 +95,8 @@ line?, Why don't perl one-liners work on my DOS/Mac/VMS system?, Where can
 I learn about CGI or Web programming in Perl?, Where can I learn about
 object-oriented Perl programming?, Where can I learn about linking C with
 Perl? [h2xs, xsubpp], I've read perlembed, perlguts, etc., but I can't
-embed perl inmy C program, what am I doing wrong?, When I tried to run my
-script, I got this message. What does itmean?, What's MakeMaker?,
+embed perl in my C program, what am I doing wrong?, When I tried to run my
+script, I got this message. What does it mean?, What's MakeMaker?,
 L<perlfaq4>: Data Manipulation, Why am I getting long decimals (eg,
 19.9499999999999) instead of the numbers I should be getting (eg, 19.95)?,
 Why isn't my octal data interpreted correctly?, Does Perl have a round()
@@ -116,7 +116,7 @@ How do I reformat a paragraph?, How can I access/change the first N letters
 of a string?, How do I change the Nth occurrence of something?, How can I
 count the number of occurrences of a substring within a string?, How do I
 capitalize all the words on one line?, How can I split a [character]
-delimited string except when inside[character]? (Comma-separated files),
+delimited string except when inside [character]? (Comma-separated files),
 How do I strip blank space from the beginning/end of a string?, How do I
 pad a string with blanks or pad a number with zeroes?, How do I extract
 selected columns from a string?, How do I find the soundex value of a
@@ -600,7 +600,7 @@ the tag
 
 =item How can I remove duplicate elements from a list or array?
 
-a) If @in is sorted, and you want @out to be sorted:(this assumes all true
+a) If @in is sorted, and you want @out to be sorted: (this assumes all true
 values in the array), b) If you don't know whether @in is sorted:, c) Like
 (b), but @in contains only small integers:, d) A way to do (b) without any
 loops or greps:, e) Like (d), but @in contains only small positive
@@ -2231,10 +2231,9 @@ B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or C<\U>),
 B<Matching operator> (C<m//>):, B<Substitution operator> (C<s///>):,
 B<Output formatting functions> (printf() and write()):, B<Case-mapping
 functions> (lc(), lcfirst(), uc(), ucfirst()):, B<POSIX locale-dependent
-functions> (localeconv(), strcoll(),strftime(), strxfrm()):, B<POSIX
-character class tests> (isalnum(), isalpha(), isdigit(),isgraph(),
-islower(), isprint(), ispunct(), isspace(), isupper(),
-isxdigit()):
+functions> (localeconv(), strcoll(), strftime(), strxfrm()):, B<POSIX
+character class tests> (isalnum(), isalpha(), isdigit(), isgraph(),
+islower(), isprint(), ispunct(), isspace(), isupper(), isxdigit()):
 
 =item ENVIRONMENT
 
@@ -4989,7 +4988,7 @@ B<-On>, B<-D>, B<-Do>, B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-m>
 
 =item CALLING CGI.PM ROUTINES
 
-1. Use another name for the argument, if one is available.  Forexample,
+1. Use another name for the argument, if one is available.  For example,
 -value is an alias for -values, 2. Change the capitalization, e.g. -Values,
 3. Put quotes around the argument name, e.g. '-values'
 
@@ -5139,9 +5138,8 @@ B<Parameters:>
 
 =item CREATING A CLICKABLE IMAGE BUTTON
 
-B<Parameters:>, 3.The third option (-align, optional) is an alignment type,
-and may be
-TOP, BOTTOM or MIDDLE
+B<Parameters:>, 3. The third option (-align, optional) is an alignment
+type, and may be TOP, BOTTOM or MIDDLE
 
 =item CREATING A JAVASCRIPT ACTION BUTTON
 
@@ -5171,11 +5169,11 @@ the <FORM> tag
 =item FETCHING ENVIRONMENT VARIABLES
 
 B<Accept()>, B<raw_cookie()>, B<user_agent()>, B<path_info()>,
-B<path_translated()>, B<remote_host()>, B<script_name()>Return the script
-name as a partial URL, for self-refering
-scripts, B<referer()>, B<auth_type ()>, B<server_name ()>, B<virtual_host
-()>, B<server_software ()>, B<remote_user ()>, B<user_name ()>,
-B<request_method()>, B<content_type()>, B<http()>, B<https()>
+B<path_translated()>, B<remote_host()>, B<script_name()> Return the script
+name as a partial URL, for self-refering scripts, B<referer()>, B<auth_type
+()>, B<server_name ()>, B<virtual_host ()>, B<server_software ()>,
+B<remote_user ()>, B<user_name ()>, B<request_method()>, B<content_type()>,
+B<http()>, B<https()>
 
 =item USING NPH SCRIPTS
 
@@ -9966,10 +9964,10 @@ arrays
 
 =item EXAMPLES
 
-0a simple word, 1multiple spaces are skipped because of our $delim, 2use of
-quotes to include a space in a word, 3use of a backslash to include a space
-in a word, 4use of a backslash to remove the special meaning of a
-double-quote, 5another simple word (note the lack of effect of the
+0 a simple word, 1 multiple spaces are skipped because of our $delim, 2 use
+of quotes to include a space in a word, 3 use of a backslash to include a
+space in a word, 4 use of a backslash to remove the special meaning of a
+double-quote, 5 another simple word (note the lack of effect of the
 backslashed double-quote)
 
 =item AUTHORS
