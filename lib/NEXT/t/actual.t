@@ -1,4 +1,4 @@
-use Test::More 'no_plan';
+use Test::More tests => 10;
 
 BEGIN {
     if ($ENV{PERL_CORE}) {
