@@ -764,7 +764,9 @@ affected.
 
 All of the following functions would be inlined.
 
-    sub PI ()		{ 3.14159 }
+    sub pi ()		{ 3.14159 }		# Not exact, but close.
+    sub PI ()		{ 4 * atan2 1, 1 }	# As good as it gets,
+						# and it's inlined, too!
     sub ST_DEV ()	{ 0 }
     sub ST_INO ()	{ 1 }
 
