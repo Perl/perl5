@@ -5109,13 +5109,8 @@ $   WS "    iss =  ((iss&1)==1 && code == 0x1234);"
 $   WS "    printf(""%d\n"",iss);"
 $   WS "}"
 $   CS
-$   IF (F$EXTRACT(0,7,archname) .EQS. "VMS_AXP")
-$   THEN
-$     GOSUB compile
-$   ELSE
-$     ! Causes SS$_BADSTACK on OpenVMS I64 v8.1 (but hey, it was undocumented)
-$     tmp = "0"	
-$   ENDIF
+$   ON ERROR THEN CONTINUE
+$   GOSUB compile
 $   IF tmp .EQS. "1"
 $   THEN
 $       echo4 "Yep, we can."
