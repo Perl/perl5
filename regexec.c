@@ -1671,6 +1671,7 @@ regmatch(regnode *prog)
 		    PL_reg_call_cc = state.prev;
 		    PL_regcc = state.cc;
 		    PL_reg_re = state.re;
+		    cache_re(PL_reg_re);
 		    sayNO;
 		}
 		sw = SvTRUE(ret);
