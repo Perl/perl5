@@ -4187,6 +4187,10 @@ SV* sv;
     SvFAKE_off(sv);
     if (GvGP(sv))
 	gp_free((GV*)sv);
+    if (GvSTASH(sv)) {
+	SvREFCNT_dec(GvSTASH(sv));
+	GvSTASH(sv) = Nullhv;
+    }
     sv_unmagic(sv, '*');
     Safefree(GvNAME(sv));
     GvMULTI_off(sv);
