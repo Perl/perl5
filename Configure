@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Fri Oct  4 15:07:00 EDT 1996 [metaconfig 3.0 PL60]
+# Generated on Thu Oct 10 15:08:34 EDT 1996 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -298,6 +298,7 @@ d_bsdgetpgrp=''
 d_getpgrp=''
 d_getppid=''
 d_getprior=''
+d_gnulibc=''
 d_htonl=''
 d_isascii=''
 d_killpg=''
@@ -3311,343 +3312,6 @@ none) libs=' ';;
 *) libs="$ans";;
 esac
 
-: see if nm is to be used to determine whether a symbol is defined or not
-case "$usenm" in
-'')
-	dflt=`egrep 'inlibc|csym' ../Configure | wc -l 2>/dev/null`
-	if $test $dflt -gt 20; then
-		dflt=y
-	else
-		dflt=n
-	fi
-	;;
-*)
-	case "$usenm" in
-	true) dflt=y;;
-	*) dflt=n;;
-	esac
-	;;
-esac
-$cat <<EOM
-
-I can use 'nm' to extract the symbols from your C libraries. This is a time
-consuming task which may generate huge output on the disk (up to 3 megabytes)
-but that should make the symbols extraction faster. The alternative is to skip
-the 'nm' extraction part and to compile a small test program instead to
-determine whether each symbol is present. If you have a fast C compiler and/or
-if your 'nm' output cannot be parsed, this may be the best solution.
-
-EOM
-rp='Shall I use nm to extract C symbols from the libraries?'
-. ./myread
-case "$ans" in
-n|N) usenm=false;;
-*) usenm=true;;
-esac
-
-runnm=$usenm
-case "$reuseval" in
-true) runnm=false;;
-esac
-
-: nm options which may be necessary
-case "$nm_opt" in
-'') if $test -f /mach_boot; then
-		nm_opt=''
-	elif $test -d /usr/ccs/lib; then
-		nm_opt='-p'
-	elif $test -f /dgux; then
-		nm_opt='-p'
-	else
-		nm_opt=''
-	fi;;
-esac
-
-: nm options which may be necessary for shared libraries but illegal
-: for archive libraries.  Thank you, Linux.
-case "$nm_so_opt" in
-'')	case "$myuname" in
-	*linux*)
-		if nm --help | $grep 'dynamic' > /dev/null 2>&1; then
-			nm_so_opt='--dynamic'
-		fi
-		;;
-	esac
-	;;
-esac
-
-case "$runnm" in
-true)
-: get list of predefined functions in a handy place
-echo " "
-case "$libc" in
-'') libc=unknown
-	case "$libs" in
-	*-lc_s*) libc=`./loc libc_s.a $libc $libpth`
-	esac
-	;;
-esac
-libnames='';
-case "$libs" in
-'') ;;
-*)  for thislib in $libs; do
-	case "$thislib" in
-	-lc|-lc_s)
-		: Handle C library specially below.
-		;;
-	-l*)
-		thislib=`echo $thislib | $sed -e 's/^-l//'`
-		if try=`./loc lib$thislib.$so.'*' X $libpth`; $test -f "$try"; then
-			:
-		elif try=`./loc lib$thislib.$so X $libpth`; $test -f "$try"; then
-			:
-		elif try=`./loc lib$thislib.a X $libpth`; $test -f "$try"; then
-			:
-		elif try=`./loc lib$thislib X $libpth`; $test -f "$try"; then
-			:
-		elif try=`./loc $thislib X $libpth`; $test -f "$try"; then
-			:
-		elif try=`./loc Slib$thislib.a X $xlibpth`; $test -f "$try"; then
-			:
-		else
-			try=''
-		fi
-		libnames="$libnames $try"
-		;;
-	*) libnames="$libnames $thislib" ;;
-	esac
-	done
-	;;
-esac
-xxx=normal
-case "$libc" in
-unknown)
-	set /lib/libc.$so
-	for xxx in $libpth; do
-		$test -r $1 || set $xxx/libc.$so
-		: The messy sed command sorts on library version numbers.
-		$test -r $1 || \
-			set `echo blurfl; echo $xxx/libc.$so.[0-9]* | \
-				tr ' ' '\012' | egrep -v '\.[A-Za-z]*$' | $sed -e '
-				h
-				s/[0-9][0-9]*/0000&/g
-				s/0*\([0-9][0-9][0-9][0-9][0-9]\)/\1/g
-				G
-				s/\n/ /' | \
-		 	sort | $sed -e 's/^.* //'`
-		eval set \$$#
-	done
-	$test -r $1 || set /usr/ccs/lib/libc.$so
-  	$test -r $1 || set /lib/libsys_s.a
-  	;;
-*)
-	set blurfl
-	;;
-esac
-if $test -r "$1"; then
-	echo "Your (shared) C library seems to be in $1."
-	libc="$1"
-elif $test -r /lib/libc && $test -r /lib/clib; then
-	echo "Your C library seems to be in both /lib/clib and /lib/libc."
-	xxx=apollo
-	libc='/lib/clib /lib/libc'
-	if $test -r /lib/syslib; then
-		echo "(Your math library is in /lib/syslib.)"
-		libc="$libc /lib/syslib"
-	fi
-elif $test -r "$libc" || (test -h "$libc") >/dev/null 2>&1; then
-	echo "Your C library seems to be in $libc, as you said before."
-elif $test -r $incpath/usr/lib/libc.a; then
-	libc=$incpath/usr/lib/libc.a;
-	echo "Your C library seems to be in $libc.  That's fine."
-elif $test -r /lib/libc.a; then
-	libc=/lib/libc.a;
-	echo "Your C library seems to be in $libc.  You're normal."
-else
-	if tans=`./loc libc.a blurfl/dyick $libpth`; $test -r "$tans"; then
-		:
-	elif tans=`./loc libc blurfl/dyick $libpth`; $test -r "$tans"; then
-		libnames="$libnames "`./loc clib blurfl/dyick $libpth`
-	elif tans=`./loc clib blurfl/dyick $libpth`; $test -r "$tans"; then
-		:
-	elif tans=`./loc Slibc.a blurfl/dyick $xlibpth`; $test -r "$tans"; then
-		:
-	elif tans=`./loc Mlibc.a blurfl/dyick $xlibpth`; $test -r "$tans"; then
-		:
-	else
-		tans=`./loc Llibc.a blurfl/dyick $xlibpth`
-	fi
-	if $test -r "$tans"; then
-		echo "Your C library seems to be in $tans, of all places."
-		libc=$tans
-	else
-		libc='blurfl'
-	fi
-fi
-if $test $xxx = apollo -o -r "$libc" || (test -h "$libc") >/dev/null 2>&1; then
-	dflt="$libc"
-	cat <<EOM
-
-If the guess above is wrong (which it might be if you're using a strange
-compiler, or your machine supports multiple models), you can override it here.
-
-EOM
-else
-	dflt=''
-	echo $libpth | tr ' ' '\012' | sort | uniq > libpath
-	cat >&4 <<EOM
-I can't seem to find your C library.  I've looked in the following places:
-
-EOM
-	$sed 's/^/	/' libpath
-	cat <<EOM
-
-None of these seems to contain your C library. I need to get its name...
-
-EOM
-fi
-fn=f
-rp='Where is your C library?'
-. ./getfile
-libc="$ans"
-
-echo " "
-echo $libc $libnames | tr ' ' '\012' | sort | uniq > libnames
-set X `cat libnames`
-shift
-xxx=files
-case $# in 1) xxx=file; esac
-echo "Extracting names from the following $xxx for later perusal:" >&4
-echo " "
-$sed 's/^/	/' libnames >&4
-echo " "
-$echo $n "This may take a while...$c" >&4
-
-: Linux may need the special Dynamic option to nm for shared libraries.
-: In general, this is stored in the nm_so_opt variable.
-: Unfortunately, that option may be fatal on non-shared libraries.
-for nm_libs_ext in $*; do
-    case $nm_libs_ext in
-	*$so*)	nm $nm_so_opt $nm_opt $nm_libs_ext 2>/dev/null ;;
-	*)		nm $nm_opt $nm_libs_ext 2>/dev/null ;;
-	esac
-done > libc.tmp
-
-$echo $n ".$c"
-$grep fprintf libc.tmp > libc.ptf
-xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
-xrun='eval "<libc.tmp $com >libc.list"; echo "done" >&4'
-xxx='[ADTSIW]'
-if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *_[_.]*//p' -e 's/^.* $xxx  *//p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$sed -n -e 's/^__*//' -e 's/^\([a-zA-Z_0-9$]*\).*xtern.*/\1/p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$sed -n -e '/|UNDEF/d' -e '/FUNC..GL/s/^.*|__*//p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$sed -n -e 's/^.* D __*//p' -e 's/^.* D //p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$sed -n -e 's/^_//' -e 's/^\([a-zA-Z_0-9]*\).*xtern.*text.*/\1/p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$sed -n -e 's/^.*|FUNC |GLOB .*|//p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$grep '|' | $sed -n -e '/|COMMON/d' -e '/|DATA/d' \
-				-e '/ file/d' -e 's/^\([^ 	]*\).*/\1/p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$sed -n -e 's/^.*|FUNC |GLOB .*|//p' -e 's/^.*|FUNC |WEAK .*|//p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$sed -n -e 's/^__//' -e '/|Undef/d' -e '/|Proc/s/ .*//p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$sed -n -e '/Def. Text/s/.* \([^ ]*\)\$/\1/p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-elif com="$sed -n -e 's/^[-0-9a-f ]*_\(.*\)=.*/\1/p'";\
-	eval $xscan;\
-	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
-		eval $xrun
-else
-	nm -p $* 2>/dev/null >libc.tmp
-	$grep fprintf libc.tmp > libc.ptf
-	if com="$sed -n -e 's/^.* [ADTSIW]  *_[_.]*//p' -e 's/^.* [ADTSIW] //p'";\
-		eval $xscan; $contains '^fprintf$' libc.list >/dev/null 2>&1
-	then
-		nm_opt='-p'
-		eval $xrun
-	else
-		echo " "
-		echo "nm didn't seem to work right. Trying ar instead..." >&4
-		com=''
-		if ar t $libc > libc.tmp; then
-			for thisname in $libnames; do
-				ar t $thisname >>libc.tmp
-			done
-			$sed -e 's/\.o$//' < libc.tmp > libc.list
-			echo "Ok." >&4
-		else
-			echo "ar didn't seem to work right." >&4
-			echo "Maybe this is a Cray...trying bld instead..." >&4
-			if bld t $libc | $sed -e 's/.*\///' -e 's/\.o:.*$//' > libc.list
-			then
-				for thisname in $libnames; do
-					bld t $libnames | \
-					$sed -e 's/.*\///' -e 's/\.o:.*$//' >>libc.list
-					ar t $thisname >>libc.tmp
-				done
-				echo "Ok." >&4
-			else
-				echo "That didn't work either.  Giving up." >&4
-				exit 1
-			fi
-		fi
-	fi
-fi
-nm_extract="$com"
-if $test -f /lib/syscalls.exp; then
-	echo " "
-	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
-	$sed -n 's/^\([^ 	]*\)[ 	]*syscall$/\1/p' /lib/syscalls.exp >>libc.list
-fi
-;;
-esac
-$rm -f libnames libpath
-
-: Define several unixisms. Hints files or command line options
-: can be used to override them.
-case "$ar" in
-'') ar='ar';;
-esac
-case "$lib_ext" in
-'') lib_ext='.a';;
-esac
-case "$obj_ext" in
-'') obj_ext='.o';;
-esac
-case "$path_sep" in
-'') path_sep=':';;
-esac
-: Which makefile gets called first.  This is used by make depend.
-case "$firstmakefile" in
-'') firstmakefile='makefile';;
-esac
-
 : see how we invoke the C preprocessor
 echo " "
 echo "Now, how can we feed standard input to your C preprocessor..." >&4
@@ -4055,6 +3719,372 @@ y)
 n) echo "OK, that should do.";;
 esac
 $rm -f try try.* core
+
+echo " "
+echo "Checking for GNU C Library..." >&4
+cat >gnulibc.c <<EOM
+int
+main()
+{
+  return __libc_main();
+}
+EOM
+if $cc $ccflags $ldflags -o gnulibc gnulibc.c $libs >/dev/null 2>&1 && \
+    ./gnulibc | $contains '^GNU C Library' >/dev/null 2>&1; then
+	val="$define"
+	echo "You are using the GNU C Library"
+else
+	val="$undef"
+	echo "You are not using the GNU C Library"
+fi
+$rm -f gnulibc*
+set d_gnulibc
+eval $setvar
+
+: see if nm is to be used to determine whether a symbol is defined or not
+case "$usenm" in
+'')
+	case "$d_gnulibc" in
+	$define)
+		dflt=n
+		;;
+	*)
+		dflt=`egrep 'inlibc|csym' ../Configure | wc -l 2>/dev/null`
+		if $test $dflt -gt 20; then
+			dflt=y
+		else
+			dflt=n
+		fi
+		;;
+	esac
+	;;
+*)
+	case "$usenm" in
+	true) dflt=y;;
+	*) dflt=n;;
+	esac
+	;;
+esac
+$cat <<EOM
+
+I can use 'nm' to extract the symbols from your C libraries. This is a time
+consuming task which may generate huge output on the disk (up to 3 megabytes)
+but that should make the symbols extraction faster. The alternative is to skip
+the 'nm' extraction part and to compile a small test program instead to
+determine whether each symbol is present. If you have a fast C compiler and/or
+if your 'nm' output cannot be parsed, this may be the best solution.
+You shouldn't let me use 'nm' if you have the GNU C Library.
+
+EOM
+rp='Shall I use nm to extract C symbols from the libraries?'
+. ./myread
+case "$ans" in
+n|N) usenm=false;;
+*) usenm=true;;
+esac
+
+runnm=$usenm
+case "$reuseval" in
+true) runnm=false;;
+esac
+
+: nm options which may be necessary
+case "$nm_opt" in
+'') if $test -f /mach_boot; then
+		nm_opt=''
+	elif $test -d /usr/ccs/lib; then
+		nm_opt='-p'
+	elif $test -f /dgux; then
+		nm_opt='-p'
+	else
+		nm_opt=''
+	fi;;
+esac
+
+: nm options which may be necessary for shared libraries but illegal
+: for archive libraries.  Thank you, Linux.
+case "$nm_so_opt" in
+'')	case "$myuname" in
+	*linux*)
+		if nm --help | $grep 'dynamic' > /dev/null 2>&1; then
+			nm_so_opt='--dynamic'
+		fi
+		;;
+	esac
+	;;
+esac
+
+case "$runnm" in
+true)
+: get list of predefined functions in a handy place
+echo " "
+case "$libc" in
+'') libc=unknown
+	case "$libs" in
+	*-lc_s*) libc=`./loc libc_s.a $libc $libpth`
+	esac
+	;;
+esac
+libnames='';
+case "$libs" in
+'') ;;
+*)  for thislib in $libs; do
+	case "$thislib" in
+	-lc|-lc_s)
+		: Handle C library specially below.
+		;;
+	-l*)
+		thislib=`echo $thislib | $sed -e 's/^-l//'`
+		if try=`./loc lib$thislib.$so.'*' X $libpth`; $test -f "$try"; then
+			:
+		elif try=`./loc lib$thislib.$so X $libpth`; $test -f "$try"; then
+			:
+		elif try=`./loc lib$thislib.a X $libpth`; $test -f "$try"; then
+			:
+		elif try=`./loc lib$thislib X $libpth`; $test -f "$try"; then
+			:
+		elif try=`./loc $thislib X $libpth`; $test -f "$try"; then
+			:
+		elif try=`./loc Slib$thislib.a X $xlibpth`; $test -f "$try"; then
+			:
+		else
+			try=''
+		fi
+		libnames="$libnames $try"
+		;;
+	*) libnames="$libnames $thislib" ;;
+	esac
+	done
+	;;
+esac
+xxx=normal
+case "$libc" in
+unknown)
+	set /lib/libc.$so
+	for xxx in $libpth; do
+		$test -r $1 || set $xxx/libc.$so
+		: The messy sed command sorts on library version numbers.
+		$test -r $1 || \
+			set `echo blurfl; echo $xxx/libc.$so.[0-9]* | \
+				tr ' ' '\012' | egrep -v '\.[A-Za-z]*$' | $sed -e '
+				h
+				s/[0-9][0-9]*/0000&/g
+				s/0*\([0-9][0-9][0-9][0-9][0-9]\)/\1/g
+				G
+				s/\n/ /' | \
+		 	sort | $sed -e 's/^.* //'`
+		eval set \$$#
+	done
+	$test -r $1 || set /usr/ccs/lib/libc.$so
+  	$test -r $1 || set /lib/libsys_s.a
+  	;;
+*)
+	set blurfl
+	;;
+esac
+if $test -r "$1"; then
+	echo "Your (shared) C library seems to be in $1."
+	libc="$1"
+elif $test -r /lib/libc && $test -r /lib/clib; then
+	echo "Your C library seems to be in both /lib/clib and /lib/libc."
+	xxx=apollo
+	libc='/lib/clib /lib/libc'
+	if $test -r /lib/syslib; then
+		echo "(Your math library is in /lib/syslib.)"
+		libc="$libc /lib/syslib"
+	fi
+elif $test -r "$libc" || (test -h "$libc") >/dev/null 2>&1; then
+	echo "Your C library seems to be in $libc, as you said before."
+elif $test -r $incpath/usr/lib/libc.a; then
+	libc=$incpath/usr/lib/libc.a;
+	echo "Your C library seems to be in $libc.  That's fine."
+elif $test -r /lib/libc.a; then
+	libc=/lib/libc.a;
+	echo "Your C library seems to be in $libc.  You're normal."
+else
+	if tans=`./loc libc.a blurfl/dyick $libpth`; $test -r "$tans"; then
+		:
+	elif tans=`./loc libc blurfl/dyick $libpth`; $test -r "$tans"; then
+		libnames="$libnames "`./loc clib blurfl/dyick $libpth`
+	elif tans=`./loc clib blurfl/dyick $libpth`; $test -r "$tans"; then
+		:
+	elif tans=`./loc Slibc.a blurfl/dyick $xlibpth`; $test -r "$tans"; then
+		:
+	elif tans=`./loc Mlibc.a blurfl/dyick $xlibpth`; $test -r "$tans"; then
+		:
+	else
+		tans=`./loc Llibc.a blurfl/dyick $xlibpth`
+	fi
+	if $test -r "$tans"; then
+		echo "Your C library seems to be in $tans, of all places."
+		libc=$tans
+	else
+		libc='blurfl'
+	fi
+fi
+if $test $xxx = apollo -o -r "$libc" || (test -h "$libc") >/dev/null 2>&1; then
+	dflt="$libc"
+	cat <<EOM
+
+If the guess above is wrong (which it might be if you're using a strange
+compiler, or your machine supports multiple models), you can override it here.
+
+EOM
+else
+	dflt=''
+	echo $libpth | tr ' ' '\012' | sort | uniq > libpath
+	cat >&4 <<EOM
+I can't seem to find your C library.  I've looked in the following places:
+
+EOM
+	$sed 's/^/	/' libpath
+	cat <<EOM
+
+None of these seems to contain your C library. I need to get its name...
+
+EOM
+fi
+fn=f
+rp='Where is your C library?'
+. ./getfile
+libc="$ans"
+
+echo " "
+echo $libc $libnames | tr ' ' '\012' | sort | uniq > libnames
+set X `cat libnames`
+shift
+xxx=files
+case $# in 1) xxx=file; esac
+echo "Extracting names from the following $xxx for later perusal:" >&4
+echo " "
+$sed 's/^/	/' libnames >&4
+echo " "
+$echo $n "This may take a while...$c" >&4
+
+: Linux may need the special Dynamic option to nm for shared libraries.
+: In general, this is stored in the nm_so_opt variable.
+: Unfortunately, that option may be fatal on non-shared libraries.
+for nm_libs_ext in $*; do
+    case $nm_libs_ext in
+	*$so*)	nm $nm_so_opt $nm_opt $nm_libs_ext 2>/dev/null ;;
+	*)		nm $nm_opt $nm_libs_ext 2>/dev/null ;;
+	esac
+done > libc.tmp
+
+$echo $n ".$c"
+$grep fprintf libc.tmp > libc.ptf
+xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
+xrun='eval "<libc.tmp $com >libc.list"; echo "done" >&4'
+xxx='[ADTSIW]'
+if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *_[_.]*//p' -e 's/^.* $xxx  *//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^__*//' -e 's/^\([a-zA-Z_0-9$]*\).*xtern.*/\1/p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e '/|UNDEF/d' -e '/FUNC..GL/s/^.*|__*//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^.* D __*//p' -e 's/^.* D //p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^_//' -e 's/^\([a-zA-Z_0-9]*\).*xtern.*text.*/\1/p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^.*|FUNC |GLOB .*|//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$grep '|' | $sed -n -e '/|COMMON/d' -e '/|DATA/d' \
+				-e '/ file/d' -e 's/^\([^ 	]*\).*/\1/p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^.*|FUNC |GLOB .*|//p' -e 's/^.*|FUNC |WEAK .*|//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^__//' -e '/|Undef/d' -e '/|Proc/s/ .*//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e '/Def. Text/s/.* \([^ ]*\)\$/\1/p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^[-0-9a-f ]*_\(.*\)=.*/\1/p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+else
+	nm -p $* 2>/dev/null >libc.tmp
+	$grep fprintf libc.tmp > libc.ptf
+	if com="$sed -n -e 's/^.* [ADTSIW]  *_[_.]*//p' -e 's/^.* [ADTSIW] //p'";\
+		eval $xscan; $contains '^fprintf$' libc.list >/dev/null 2>&1
+	then
+		nm_opt='-p'
+		eval $xrun
+	else
+		echo " "
+		echo "nm didn't seem to work right. Trying ar instead..." >&4
+		com=''
+		if ar t $libc > libc.tmp; then
+			for thisname in $libnames; do
+				ar t $thisname >>libc.tmp
+			done
+			$sed -e 's/\.o$//' < libc.tmp > libc.list
+			echo "Ok." >&4
+		else
+			echo "ar didn't seem to work right." >&4
+			echo "Maybe this is a Cray...trying bld instead..." >&4
+			if bld t $libc | $sed -e 's/.*\///' -e 's/\.o:.*$//' > libc.list
+			then
+				for thisname in $libnames; do
+					bld t $libnames | \
+					$sed -e 's/.*\///' -e 's/\.o:.*$//' >>libc.list
+					ar t $thisname >>libc.tmp
+				done
+				echo "Ok." >&4
+			else
+				echo "That didn't work either.  Giving up." >&4
+				exit 1
+			fi
+		fi
+	fi
+fi
+nm_extract="$com"
+if $test -f /lib/syscalls.exp; then
+	echo " "
+	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
+	$sed -n 's/^\([^ 	]*\)[ 	]*syscall$/\1/p' /lib/syscalls.exp >>libc.list
+fi
+;;
+esac
+$rm -f libnames libpath
+
+: Define several unixisms. Hints files or command line options
+: can be used to override them.
+case "$ar" in
+'') ar='ar';;
+esac
+case "$lib_ext" in
+'') lib_ext='.a';;
+esac
+case "$obj_ext" in
+'') obj_ext='.o';;
+esac
+case "$path_sep" in
+'') path_sep=':';;
+esac
+: Which makefile gets called first.  This is used by make depend.
+case "$firstmakefile" in
+'') firstmakefile='makefile';;
+esac
 
 : determine filename position in cpp output
 echo " "
@@ -8498,10 +8528,9 @@ $cat >fd_set.c <<EOCP
 #endif
 #ifdef I_SYS_TIME
 #include <sys/time.h>
-#else
+#endif
 #ifdef I_SYS_SELECT
 #include <sys/select.h>
-#endif
 #endif
 main() {
 	fd_set fds;
@@ -9726,6 +9755,7 @@ d_getpgrp2='$d_getpgrp2'
 d_getpgrp='$d_getpgrp'
 d_getppid='$d_getppid'
 d_getprior='$d_getprior'
+d_gnulibc='$d_gnulibc'
 d_htonl='$d_htonl'
 d_index='$d_index'
 d_isascii='$d_isascii'
