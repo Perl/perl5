@@ -15,6 +15,10 @@
 # Updated Fri Jun 21 11:07:54 EDT 1996
 # NDBM support for ELF renabled by <kjahds@kjahds.com>
 
+# No version of Linux supports setuid scripts.
+d_suidsafe='undef'
+d_dosuid='define'
+
 # perl goes into the /usr tree.  See the Filesystem Standard
 # available via anonymous FTP at tsx-11.mit.edu in
 # /pub/linux/docs/linux-standards/fsstnd.
