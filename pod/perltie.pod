@@ -6,6 +6,8 @@ perltie - how to hide an object class in a simple variable
 
  tie VARIABLE, CLASSNAME, LIST
 
+ $object = tied VARIABLE
+
  untie VARIABLE
 
 =head1 DESCRIPTION
@@ -36,8 +38,8 @@ passed to the dbminit() function of C.) The object returned by the "new"
 method is also returned by the tie() function, which would be useful if
 you wanted to access other methods in C<CLASSNAME>. (You don't actually
 have to return a reference to a right "type" (e.g. HASH or C<CLASSNAME>)
-so long as it's a properly blessed object.)
-
+so long as it's a properly blessed object.)  You can also retrieve
+a reference to the underlying object using the tied() function.
 
 Unlike dbmopen(), the tie() function will not C<use> or C<require> a module
 for you--you need to do that explicitly yourself.
@@ -81,12 +83,12 @@ expected to return a blessed reference to a new scalar
         my $pid = shift || $$; # 0 means me
 
         if ($pid !~ /^\d+$/) {
-            carp "Nice::TieScalar got non-numeric pid $pid" if $^W;
+            carp "Nice::Tie::Scalar got non-numeric pid $pid" if $^W;
             return undef;
         }
 
         unless (kill 0, $pid) { # EPERM or ERSCH, no doubt
-            carp "Nice::TieScalar got bad pid $pid: $!" if $^W;
+            carp "Nice::Tie::Scalar got bad pid $pid: $!" if $^W;
             return undef;
         }
 
@@ -301,8 +303,8 @@ functions to iterate over all the keys.  And DESTROY is called when the
 tied variable is garbage collected.
 
 If this seems like a lot, then feel free to merely inherit
-from the standard TieHash module for most of your methods, redefining only
-the interesting ones.  See L<TieHash> for details.
+from the standard Tie::Hash module for most of your methods, redefining only
+the interesting ones.  See L<Tie::Hash> for details.
 
 Remember that Perl distinguishes between a key not existing in the hash,
 and the key existing in the hash but having a corresponding value of
@@ -478,7 +480,14 @@ If they wanted to clobber something, they might say:
     $ob->clobber(1);
     $daemon_dots{signature} = "A true daemon\n";
 
-Where the clobber method is simply:
+Another way to lay hands on a reference to the underlying object is to
+use the tied() function, so they might alternately have set clobber
+using:
+
+    tie %daemon_dots, 'daemon';
+    tied(%daemon_dots)->clobber(1);
+
+The clobber method is simply:
 
     sub clobber {
 	my $self = shift;
@@ -545,7 +554,7 @@ call.
     sub FIRSTKEY {
 	carp &whowasi if $DEBUG;
 	my $self = shift;
-	my $a = keys %{$self->{LIST}};
+	my $a = keys %{$self->{LIST}};		# reset each() iterator
 	each %{$self->{LIST}}
     }
 
