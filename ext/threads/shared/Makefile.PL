@@ -6,9 +6,9 @@ WriteMakefile(
     'NAME'		=> 'threads::shared',
     'VERSION_FROM'	=> 'shared.pm', # finds $VERSION
 	      'PM' => {
-		  'shared.pm' => '$(INST_LIBDIR)/shared.pm',
-		  'queue.pm' => '$(INST_LIBDIR)/shared/queue.pm',
-
+		  'shared.pm'    => '$(INST_LIBDIR)/shared.pm',
+		  'queue.pm'     => '$(INST_LIBDIR)/shared/queue.pm',
+		  'semaphore.pm' => '$(INST_LIBDIR)/shared/semaphore.pm',
 	      },
     'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
