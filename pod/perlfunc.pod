@@ -1168,9 +1168,7 @@ make your program I<appear> to run faster.
 When called in list context, returns a 2-element list consisting of the
 key and value for the next element of a hash, so that you can iterate over
 it.  When called in scalar context, returns the key for only the "next"
-element in the hash.  (Note: Keys may be C<"0"> or C<"">, which are logically
-false; you may wish to avoid constructs like C<while ($k = each %foo) {}>
-for this reason.)
+element in the hash.
 
 Entries are returned in an apparently random order.  The actual random
 order is subject to change in future versions of perl, but it is guaranteed
