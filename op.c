@@ -2871,6 +2871,15 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		}
 	    }
 	}
+	if (!del) {
+	    if (j >= rlen)
+		j = rlen - 1;
+	    else
+		cPVOPo->op_pv = (char*)Renew(tbl, 0x101+rlen-j, short);
+	    tbl[0x100] = rlen - j;
+	    for (i=0; i < rlen - j; i++)
+		tbl[0x101+i] = r[j+i];
+	}
     }
     else {
 	if (!rlen && !del) {

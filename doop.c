@@ -99,6 +99,7 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
     I32 matches = 0;
     STRLEN len;
     short *tbl;
+    I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
@@ -117,7 +118,10 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 	    UV c;
 	    STRLEN ulen;
 	    c = utf8_to_uv(s, send - s, &ulen, 0);
-	    if (c < 0x100 && tbl[c] >= 0)
+	    if (c < 0x100) {
+		if (tbl[c] >= 0)
+		    matches++;
+	    } else if (complement)
 		matches++;
 	    s += ulen;
 	}
@@ -135,7 +139,9 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
     I32 isutf8;
     I32 matches = 0;
     I32 grows = PL_op->op_private & OPpTRANS_GROWS;
-    STRLEN len;
+    I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
+    I32 del = PL_op->op_private & OPpTRANS_DELETE;
+    STRLEN len, rlen;
     short *tbl;
     I32 ch;
 
@@ -186,6 +192,8 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 	else
 	    d = s;
 	dstart = d;
+	if (complement && !del)
+	    rlen = tbl[0x100];
 
 #ifdef MACOS_TRADITIONAL
 #define comp CoMP   /* "comp" is a keyword in some compilers ... */
@@ -197,9 +205,24 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 		STRLEN len;
 	        UV comp = utf8_to_uv_simple(s, &len);
 
-		if (comp > 0xff) {	/* always unmapped */	
-		    Copy(s, d, len, U8);
-		    d += len;
+		if (comp > 0xff) {
+		    if (!complement) {
+			Copy(s, d, len, U8);
+			d += len;
+		    }
+		    else {
+			matches++;
+			if (!del) {
+			    ch = (comp - 0x100 < rlen) ?
+				tbl[comp+1] : tbl[0x100+rlen];
+			    if (ch != pch) {
+				d = uv_to_utf8(d, ch);
+				pch = ch;
+			    }
+			    s += len;
+			    continue;
+			}
+		    }
 		}
 		else if ((ch = tbl[comp]) >= 0) {
 		    matches++;
@@ -224,9 +247,20 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 	    while (s < send) {
 		STRLEN len;
 	        UV comp = utf8_to_uv_simple(s, &len);
-		if (comp > 0xff) {	/* always unmapped */
-		    Copy(s, d, len, U8);
-		    d += len;
+		if (comp > 0xff) {
+		    if (!complement) {
+			Copy(s, d, len, U8);
+			d += len;
+		    }
+		    else {
+			matches++;
+			if (!del) {
+			    if (comp - 0x100 < rlen) 
+				d = uv_to_utf8(d, tbl[comp+1]);
+			    else
+				d = uv_to_utf8(d, tbl[0x100+rlen]);
+			}
+		    }
 		}
 		else if ((ch = tbl[comp]) >= 0) {
 		    d = uv_to_utf8(d, ch);
@@ -499,8 +533,8 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    if (uv < none) {
 		matches++;
-		d = uv_to_utf8(d, uv);
 		s += UTF8SKIP(s);
+		d = uv_to_utf8(d, uv);
 		continue;
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
