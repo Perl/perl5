@@ -31,6 +31,238 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10358] By: jhi                                   on 2001/05/31  12:35:05
+        Log: Integrate perlio.
+     Branch: perl
+	  !> t/pragma/warn/toke win32/config_H.bc win32/config_H.gc
+	  !> win32/config_H.vc
+____________________________________________________________________________
+[ 10357] By: jhi                                   on 2001/05/31  12:34:04
+        Log: Metaconfig unit change for #10356.
+     Branch: metaconfig
+	   ! U/installdirs/inc_version_list.U
+____________________________________________________________________________
+[ 10356] By: jhi                                   on 2001/05/31  12:33:41
+        Log: Allow Configure -Dinc_version_list='5.6.0/$archname 5.6.0' ...
+             (idea from Sarathy; implementation from Andy)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10355] By: jhi                                   on 2001/05/31  12:18:06
+        Log: More AUTHORS.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 10354] By: jhi                                   on 2001/05/31  12:16:24
+        Log: Subject: Re: [PATCH] Tests for File::Compare
+             From: Alexander Gough <alexander.gough@st-hughs.oxford.ac.uk>
+             Date: Thu, 31 May 2001 13:26:34 +0100 (GMT)
+             Message-Id: <E155RX8-0004X2-00@wing1.herald.ox.ac.uk>
+     Branch: perl
+	   + t/lib/filecomp.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10353] By: jhi                                   on 2001/05/31  12:11:24
+        Log: Subject: [PATCH] DEBUG_* macro cleanups
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Thu, 31 May 2001 12:16:22 +0530
+             Message-ID: <20010531121622.B4829@lustre.linux.in>
+             
+             Subject: Re: [PATCH] DEBUG_* macro cleanups
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Thu, 31 May 2001 13:57:01 +0530
+             Message-ID: <20010531135701.A21775@lustre.linux.in>
+             
+             (The DEBUG_ definitions in perl.h changed to use the
+             STMT_START and STMT_END.)
+     Branch: perl
+	   ! perl.h pp_ctl.c sv.c toke.c
+____________________________________________________________________________
+[ 10352] By: jhi                                   on 2001/05/31  11:53:31
+        Log: Subject: [PATCH] -Wall cleanups: perl.c, gv.c, Storable.xs
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Thu, 31 May 2001 08:27:55 +0530
+             Message-ID: <20010531082755.A10018@lustre.linux.in>
+     Branch: perl
+	   ! ext/Storable/Storable.xs gv.c perl.c
+____________________________________________________________________________
+[ 10351] By: jhi                                   on 2001/05/31  11:45:16
+        Log: Subject: [PATCH] AUTHORS
+             From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
+             Date: Thu, 31 May 2001 01:27:59 -0500
+             Message-ID: <20010531012758.A1595@staff1.cso.uiuc.edu>
+             
+             Subject: Re: [PATCH] AUTHORS
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Thu, 31 May 2001 10:08:06 +0200
+             (Message-Id missing?)
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 10350] By: nick                                  on 2001/05/31  11:40:43
+        Log: win32 - dmake regen_config_h
+     Branch: perlio
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10349] By: jhi                                   on 2001/05/31  11:38:27
+        Log: Subject: Re: [PATCH util.c] More warning cleanups.
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Thu, 31 May 2001 07:41:36 +0200
+             Message-Id: <200105310538.IAA25458@taku.hut.fi>
+             
+             Undo C++-ism that snekt in.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10348] By: nick                                  on 2001/05/31  11:36:46
+        Log: Tolerate Win32 numerics
+     Branch: perlio
+	   ! t/pragma/warn/toke
+____________________________________________________________________________
+[ 10347] By: jhi                                   on 2001/05/31  11:29:40
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c win32/win32.h
+____________________________________________________________________________
+[ 10346] By: nick                                  on 2001/05/31  10:54:55
+        Log: Hack to restore Win32 pseudo fork broken by Multiple Interpreter
+             perlio.c change 10255.
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 10345] By: nick                                  on 2001/05/31  10:01:57
+        Log: Conditionaly put back some "unused" dTHX which are used
+             with PERL_IMPLICIT_SYS
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 10344] By: nick                                  on 2001/05/31  10:00:59
+        Log: Fix Win32 for new spelling IN_BYTES 
+     Branch: perlio
+	   ! win32/win32.h
+____________________________________________________________________________
+[ 10343] By: nick                                  on 2001/05/31  08:01:32
+        Log: perlio.c -Wall cleaner under MULTIPLICITY
+             - still minor noise with linux stdio
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 10342] By: nick                                  on 2001/05/31  07:52:23
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> (integrate 42 files)
+____________________________________________________________________________
+[ 10341] By: jhi                                   on 2001/05/31  01:39:02
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 10340] By: jhi                                   on 2001/05/31  00:19:29
+        Log: Subject: [PATCH: perl@10328] new md5sum for modified MD5.xs file
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 30 May 2001 17:57:20 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10105301753210.129765-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/md5-file.t
+____________________________________________________________________________
+[ 10339] By: jhi                                   on 2001/05/31  00:16:44
+        Log: Salvage bits and pieces from the experimental 'utf8 everywhere'
+             patch: rename HINT_BYTE and IN_BYTE to HINT_BYTES and IN_BYTES
+             to match the pragma name; various robustness cleanups.
+     Branch: perl
+	   ! lib/utf8_heavy.pl mg.c perl.h pp.c pp_ctl.c pp_sys.c regexec.c
+	   ! sv.c toke.c utf8.c utf8.h utfebcdic.h
+____________________________________________________________________________
+[ 10338] By: jhi                                   on 2001/05/30  23:56:14
+        Log: More -Wall sweeping.
+     Branch: perl
+	   ! av.c doio.c ext/Cwd/Cwd.xs ext/Devel/DProf/DProf.xs
+	   ! ext/Devel/Peek/Peek.xs ext/Encode/Encode.xs
+	   ! ext/List/Util/Util.xs gv.c op.c pp.c pp_ctl.c pp_hot.c
+	   ! regcomp.c sv.c toke.c utf8.c
+____________________________________________________________________________
+[ 10337] By: jhi                                   on 2001/05/30  23:20:23
+        Log: Subject: [PATCH] (was Re: [PATCH] Re: Report /pro/3gl/CPAN/perl-5.7.1)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 30 May 2001 22:34:41 +0100
+             Message-ID: <20010530223441.Y86445@plum.flirble.org>
+     Branch: perl
+	   ! t/op/cmp.t
+____________________________________________________________________________
+[ 10336] By: jhi                                   on 2001/05/30  23:18:48
+        Log: It's is not, it isn't ain't, and it's it's, not its, if you mean it
+             is. If you don't, it's its. Then too, it's hers. It isn't her's. It
+             isn't our's either. It's ours, and likewise yours and theirs.
+             -- Oxford University Press, Edpress News
+     Branch: perl
+	   ! lib/autouse.pm
+____________________________________________________________________________
+[ 10335] By: jhi                                   on 2001/05/30  23:12:30
+        Log: More -Wall silencing from Michael Schwern and Jarkko Hietaniemi.
+     Branch: perl
+	   ! doop.c ext/ByteLoader/bytecode.h ext/DB_File/DB_File.xs mg.c
+	   ! perl.c perlio.c regexec.c universal.c util.c x2p/a2py.c
+	   ! x2p/str.c x2p/walk.c xsutils.c
+____________________________________________________________________________
+[ 10334] By: jhi                                   on 2001/05/30  22:52:41
+        Log: Subject: [PATCH perl.c t/run/runenv.t] (was Re: [[ID 20010514.042] Perl v5.6.1 mangles PERL5OPT])
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 30 May 2001 17:10:38 +0100
+             Message-ID: <20010530171038.L670@blackrider.blackstar.co.uk>
+             
+             Subject: Re: [PATCH perl.c t/run/runenv.t] (was Re: [ID 20010514.042] Perl v5.6.1 mangles PERL5OPT])
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Wed, 30 May 2001 23:16:13 +0530
+             Message-ID: <20010530231613.A31933@lustre.linux.in>
+     Branch: perl
+	   ! perl.c t/run/runenv.t
+____________________________________________________________________________
+[ 10333] By: jhi                                   on 2001/05/30  22:25:02
+        Log: IRIX hints patch from Merijn Broeren.
+             
+             TODO: (this and the earlier Linux hints patch) should be solved
+             at Configure level.  Merijn: -ldb should not be used on any platform
+             for perl, just when linking DBFile itself. Trying to be helpful here
+             is counterproductive.
+     Branch: perl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[ 10332] By: jhi                                   on 2001/05/30  22:11:13
+        Log: Subject: Re: [PATCH doop.c] unused variable in Perl_do_join
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 30 May 2001 23:20:58 +0100
+             Message-ID: <20010530232058.B86445@plum.flirble.org>
+     Branch: perl
+	   ! doop.c
+____________________________________________________________________________
+[ 10331] By: jhi                                   on 2001/05/30  22:09:49
+        Log: Subject: Re: [PATCH perl@10298] fix extutils.t and autouse.t for VMS
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 30 May 2001 15:24:20 +0100
+             Message-ID: <20010530152420.H670@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! t/pragma/autouse.t
+____________________________________________________________________________
+[ 10330] By: jhi                                   on 2001/05/30  22:02:21
+        Log: The regex trick wasn't a good idea.
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 10329] By: nick                                  on 2001/05/30  18:34:35
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 40 files)
+____________________________________________________________________________
+[ 10328] By: jhi                                   on 2001/05/30  14:28:39
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 10327] By: jhi                                   on 2001/05/30  14:07:01
+        Log: The metaconfig unit change for #10325.
+     Branch: metaconfig
+	   + U/modified/afs.U
+____________________________________________________________________________
 [ 10326] By: jhi                                   on 2001/05/30  14:06:36
         Log: More -Wall cleanup from Schwern; the EBCDIC MD5.xs checksum
              is now wrong.
@@ -273,12 +505,16 @@ ____________________________________________________________________________
 	   ! ext/POSIX/Makefile.PL
 ____________________________________________________________________________
 [ 10294] By: jhi                                   on 2001/05/29  15:53:43
-        Log: Syncing with Test 1.21, from Michael G Schwern (#10240 retracted)
+        Log: Syncing with Test::Harness 1.21, from Michael G Schwern
+             (#10280 retracted)
      Branch: perl
 	   ! lib/Test/Harness.pm t/lib/test-harness.t
 ____________________________________________________________________________
 [ 10293] By: jhi                                   on 2001/05/29  15:46:10
-        Log: Syncing with Test 1.17, from Michael G Schwern.
+        Log: Subject: [PATCH t/TEST lib/Test.pm t/lib/Test/*.t] Syncing with Test-1.17
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 29 May 2001 09:19:52 +0100
+             Message-ID: <20010529091952.R675@blackrider.blackstar.co.uk>
      Branch: perl
 	   + t/lib/Test/fail.t t/lib/Test/mix.t t/lib/Test/onfail.t
 	   + t/lib/Test/qr.t t/lib/Test/skip.t t/lib/Test/success.t
@@ -286,8 +522,10 @@ ____________________________________________________________________________
 	   ! MANIFEST lib/Test.pm t/TEST
 ____________________________________________________________________________
 [ 10292] By: jhi                                   on 2001/05/29  15:34:08
-        Log: Allow tests to be in deeper subdirectories so we can have
-             things like t/lib/Some-Module/foo.t (from Michael G Schwern)
+        Log: From: Michael G Schwern <schwern@pobox.com>
+             Subject: Re: [PATCH t/TEST] Allowing deeper test subdirectories
+             Date: Tue, 29 May 2001 08:26:09 +0100
+             Message-ID: <20010529082609.P675@blackrider.blackstar.co.uk>
      Branch: perl
 	   ! t/TEST
 ____________________________________________________________________________
