@@ -1854,6 +1854,7 @@ pod/perlop.pod			Operator info
 pod/perlopentut.pod		open() tutorial
 pod/perlothrtut.pod		Threads old tutorial
 pod/perlpod.pod			Pod info
+pod/perlpodspec.pod		Pod specification
 pod/perlport.pod		Portability guide
 pod/perlre.pod			Regular expression info
 pod/perlref.pod			References info

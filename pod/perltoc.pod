@@ -642,7 +642,7 @@ more elaborate constructs
 
 =back
 
-=head2 perlpod - plain old documentation
+=head2 perlpod - the Plain Old Documentation format
 
 =over 4
 
@@ -650,19 +650,72 @@ more elaborate constructs
 
 =over 4
 
+=item Ordinary Paragraph
+
 =item Verbatim Paragraph
 
 =item Command Paragraph
 
-=item Ordinary Block of Text
+C<=head1 I<Heading Text>>, C<=head2 I<Heading Text>>, C<=head3 I<Heading
+Text>>, C<=head4 I<Heading Text>>, C<=over I<indentlevel>>, C<=item
+I<stuff...>>, C<=back>, C<=cut>, C<=pod>, C<=begin I<formatname>>, C<=end
+I<formatname>>, C<=for I<formatname> I<text...>>
+
+=item Formatting Codes
+
+C<IE<lt>textE<gt>> -- italic text, C<BE<lt>textE<gt>> -- bold text,
+C<CE<lt>codeE<gt>> -- code text, C<LE<lt>nameE<gt>> -- a hyperlink,
+C<EE<lt>escapeE<gt>> -- a character escape, C<FE<lt>filenameE<gt>> -- used
+for filenames, C<SE<lt>textE<gt>> -- text contains non-breaking spaces,
+C<XE<lt>topic nameE<gt>> -- an index entry, C<ZE<lt>E<gt>> -- a null
+(zero-effect) formatting code
 
 =item The Intent
 
 =item Embedding Pods in Perl Modules
 
-=item Common Pod Pitfalls
+=item Hints for Writing Pod
 
 =back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 perlpodspec - Plain Old Documentation: format specification and
+notes
+
+=over 4
+
+=item DESCRIPTION
+
+=item Pod Definitions
+
+=item Pod Commands
+
+"=head1", "=head2", "=head3", "=head4", "=pod", "=cut", "=over", "=item",
+"=back", "=begin formatname", "=end formatname", "=for formatname text..."
+
+=item Pod Formatting Codes
+
+C<IE<lt>textE<gt>> -- italic text, C<BE<lt>textE<gt>> -- bold text,
+C<CE<lt>codeE<gt>> -- code text, C<FE<lt>filenameE<gt>> -- style for
+filenames, C<XE<lt>topic nameE<gt>> -- an index entry, C<ZE<lt>E<gt>> -- a
+null (zero-effect) formatting code, C<LE<lt>nameE<gt>> -- a hyperlink,
+C<EE<lt>escapeE<gt>> -- a character escape, C<SE<lt>textE<gt>> -- text
+contains non-breaking spaces
+
+=item Notes on Implementing Pod Processors
+
+=item About LE<lt>...E<gt> Codes
+
+First:, Second:, Third:, Fourth:, Fifth:, Sixth:
+
+=item About =over...=back Regions
+
+=item About Data Paragraphs and "=begin/=end" Regions
 
 =item SEE ALSO
 

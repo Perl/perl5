@@ -63,6 +63,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlfunc		Perl built-in functions
       perlopentut	Perl open() tutorial
     perlpod		Perl plain old documentation
+    perlpodspec         Perl plain old documentation format specification
     perlrun		Perl execution and options
     perldiag		Perl diagnostic messages
     perllexwarn		Perl warnings and their control
