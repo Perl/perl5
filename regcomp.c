@@ -4218,8 +4218,7 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	    node = dumpuntil(start, NEXTOPER(node), NEXTOPER(node) + 1, sv, l + 1);
 	}
 	else if (op == ANYOF) {
-	    node = NEXTOPER(node);
-	    node += ANYOF_SKIP;
+            node = next;
 	}
 	else if (PL_regkind[(U8)op] == EXACT) {
             /* Literal string, where present. */
