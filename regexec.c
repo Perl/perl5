@@ -346,7 +346,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    I32 slen;
 
 	    if ( !(prog->reganch & ROPT_ANCH_GPOS) /* Checked by the caller */
-		 && (sv && (strpos + SvCUR(sv) != strend)) ) {
+		 /* SvCUR is not set on references: SvRV and SvPVX overlap */
+		 && sv && !SvROK(sv)
+		 && (strpos + SvCUR(sv) != strend)) {
 		DEBUG_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 		goto fail;
 	    }
@@ -638,7 +640,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
       try_at_start:
 	/* Even in this situation we may use MBOL flag if strpos is offset
 	   wrt the start of the string. */
-	if (ml_anch && sv
+	if (ml_anch && sv && !SvROK(sv)	/* See prev comment on SvROK */
 	    && (strpos + SvCUR(sv) != strend) && strpos[-1] != '\n'
 	    /* May be due to an implicit anchor of m{.*foo}  */
 	    && !(prog->reganch & ROPT_IMPLICIT))
