@@ -878,9 +878,13 @@ of O'Reilly and Associates, Inc. Used with permission.
 
 =item Nick Ing-Simmons E<lt>nick@ing-simmons.netE<gt>
 
+=item Jan Dubois E<lt>jand@activestate.comE<gt>
+
+=item Steve Hay E<lt>steve.hay@uk.radan.comE<gt>
+
 =back
 
-This document is maintained by Gurusamy Sarathy.
+This document is maintained by Jan Dubois.
 
 =head1 SEE ALSO
 
@@ -905,6 +909,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 30 July 2004
+Last updated: 15 February 2005
 
 =cut

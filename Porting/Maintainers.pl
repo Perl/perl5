@@ -25,6 +25,7 @@ package Maintainers;
 	'gsar'		=> 'Gurusamy Sarathy <gsar@activestate.com>',
 	'ilyam'		=> 'Ilya Martynov <ilyam@cpan.org>',
 	'ilyaz'		=> 'Ilya Zakharevich <ilyaz@cpan.org>',
+	'jand'		=> 'Jan Dubois <jand@activestate.com>',
 	'jhi'		=> 'Jarkko Hietaniemi <jhi@cpan.org>',
 	'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
 	'jv'		=> 'Johan Vromans <jv@cpan.org>',
@@ -572,8 +573,8 @@ package Maintainers;
 
 	'win32' =>
 		{
-		'MAINTAINER'	=> 'gsar',
-		'FILES'		=> q[win32 README.win32 lib/Win32.pod t/win32],
+		'MAINTAINER'	=> 'jand',
+		'FILES'		=> q[win32 README.win32 t/win32],
 		'CPAN'		=> 0,
 		},
 
