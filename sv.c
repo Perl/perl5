@@ -3984,6 +3984,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	 * has to be allocated and SvPVX(sstr) has to be freed.
 	 */
 
+	/* Whichever path we take through the next code, we want this true,
+	   and doing it now facilitates the COW check.  */
+	(void)SvPOK_only(dstr);
+
 	if (
 #ifdef PERL_COPY_ON_WRITE
             (sflags & (SVf_FAKE | SVf_READONLY)) != (SVf_FAKE | SVf_READONLY)
@@ -3998,6 +4002,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	      !(PL_op && PL_op->op_type == OP_AASSIGN))
 #ifdef PERL_COPY_ON_WRITE
             && !((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
+		 && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
                  && SvTYPE(sstr) >= SVt_PVIV)
 #endif
             ) {
@@ -4008,7 +4013,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
             Move(SvPVX(sstr),SvPVX(dstr),len,char);
             SvCUR_set(dstr, len);
             *SvEND(dstr) = '\0';
-            (void)SvPOK_only(dstr);
         } else {
             /* If PERL_COPY_ON_WRITE is not defined, then isSwipe will always
                be true in here.  */
@@ -4046,7 +4050,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		else if (SvLEN(dstr))
 		    Safefree(SvPVX(dstr));
 	    }
-	    (void)SvPOK_only(dstr);
 
 #ifdef PERL_COPY_ON_WRITE
             if (!isSwipe) {
