@@ -3031,7 +3031,7 @@ STATIC regnode *
 S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 {
 #ifdef DEBUGGING
-    register char op = EXACT;	/* Arbitrary non-END op. */
+    register U8 op = EXACT;	/* Arbitrary non-END op. */
     register regnode *next, *onode;
 
     while (op != END && (!last || node < last)) {

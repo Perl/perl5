@@ -947,14 +947,16 @@ Perl_gp_ref(pTHX_ GP *gp)
 void
 Perl_gp_free(pTHX_ GV *gv)
 {
+    dTHR;  
     GP* gp;
     CV* cv;
-    dTHR;  
 
     if (!gv || !(gp = GvGP(gv)))
 	return;
-    if (gp->gp_refcnt == 0 && ckWARN_d(WARN_INTERNAL)) {
-        Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free unreferenced glob pointers");
+    if (gp->gp_refcnt == 0) {
+	if (ckWARN_d(WARN_INTERNAL))
+	    Perl_warner(aTHX_ WARN_INTERNAL,
+			"Attempt to free unreferenced glob pointers");
         return;
     }
     if (gp->gp_cv) {

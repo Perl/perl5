@@ -3198,9 +3198,10 @@ PP(pp_reverse)
 			up = (char*)s;
 			s += UTF8SKIP(s);
 			down = (char*)(s - 1);
-			if ((s > send || !((*down & 0xc0) == 0x80)) &&
-					ckWARN_d(WARN_UTF8)) {
-			    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
+			if (s > send || !((*down & 0xc0) == 0x80)) {
+			    if (ckWARN_d(WARN_UTF8))
+				Perl_warner(aTHX_ WARN_UTF8,
+					    "Malformed UTF-8 character");
 			    break;
 			}
 			while (down > up) {

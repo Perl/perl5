@@ -463,7 +463,6 @@ STATIC void
 S_check_uni(pTHX)
 {
     char *s;
-    char ch;
     char *t;
     dTHR;
 
@@ -475,7 +474,7 @@ S_check_uni(pTHX)
     if ((t = strchr(s, '(')) && t < PL_bufptr)
 	return;
     if (ckWARN_d(WARN_AMBIGUOUS)){
-        ch = *s;
+        char ch = *s;
         *s = '\0';
         Perl_warner(aTHX_ WARN_AMBIGUOUS, 
 		   "Warning: Use of \"%s\" without parens is ambiguous", 
@@ -3259,8 +3258,7 @@ Perl_yylex(pTHX)
 		}
 
 	    safe_bareword:
-		if (lastchar && strchr("*%&", lastchar) && 
-			ckWARN_d(WARN_AMBIGUOUS)) {
+		if (lastchar && strchr("*%&", lastchar) && ckWARN_d(WARN_AMBIGUOUS)) {
 		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
 		  	"Operator or semicolon missing before %c%s",
 			lastchar, PL_tokenbuf);
@@ -6000,10 +5998,10 @@ Perl_scan_num(pTHX_ char *start)
 	     we in octal/hex/binary?" indicator to disallow hex characters
 	     when in octal mode.
 	   */
+    	    dTHR;
 	    UV u;
 	    I32 shift;
 	    bool overflowed = FALSE;
-    	    dTHR;
 
 	    /* check for hex */
 	    if (s[1] == 'x') {
@@ -6071,10 +6069,13 @@ Perl_scan_num(pTHX_ char *start)
 		  digit:
 		    n = u << shift;	/* make room for the digit */
 		    if (!overflowed && (n >> shift) != u
-			&& !(PL_hints & HINT_NEW_BINARY) && ckWARN_d(WARN_UNSAFE)) {
-			Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in %s number",
-			     (shift == 4) ? "hex"
-			     : ((shift == 3) ? "octal" : "binary"));
+			&& !(PL_hints & HINT_NEW_BINARY))
+		    {
+			if (ckWARN_d(WARN_UNSAFE))
+			    Perl_warner(aTHX_ WARN_UNSAFE,
+					"Integer overflow in %s number",
+					(shift == 4) ? "hex"
+					    : ((shift == 3) ? "octal" : "binary"));
 			overflowed = TRUE;
 		    }
 		    u = n | b;		/* add the digit to the end */

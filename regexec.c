@@ -1254,7 +1254,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    break;
 	case ASCII:
 	    while (s < strend) {
-		if (isASCII(*s)) {
+		if (isASCII(*(U8*)s)) {
 		    if (tmp && regtry(prog, s))
 			goto got_it;
 		    else
@@ -1267,7 +1267,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    break;
 	case NASCII:
 	    while (s < strend) {
-		if (!isASCII(*s)) {
+		if (!isASCII(*(U8*)s)) {
 		    if (tmp && regtry(prog, s))
 			goto got_it;
 		    else

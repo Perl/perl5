@@ -341,7 +341,7 @@ Perl_is_uni_print(pTHX_ U32 c)
 }
 
 bool
-is_uni_punct(U32 c)
+Perl_is_uni_punct(pTHX_ U32 c)
 {
     U8 tmpbuf[10];
     uv_to_utf8(tmpbuf, (UV)c);

@@ -2752,14 +2752,15 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
     register UV retval = 0;
     bool overflowed = FALSE;
     while (len && *s >= '0' && *s <= '1') {
-      dTHR;	    
-      register UV n = retval << 1;
-      if (!overflowed && (n >> 1) != retval  && ckWARN_d(WARN_UNSAFE)) {
-          Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in binary number");
-          overflowed = TRUE;
-      }
-      retval = n | (*s++ - '0');
-      len--;
+	register UV n = retval << 1;
+	if (!overflowed && (n >> 1) != retval) {
+	    dTHR;
+	    if (ckWARN_d(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in binary number");
+	    overflowed = TRUE;
+	}
+	retval = n | (*s++ - '0');
+	len--;
     }
     if (len && (*s >= '2' && *s <= '9')) {
       dTHR;
@@ -2777,10 +2778,11 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
     bool overflowed = FALSE;
 
     while (len && *s >= '0' && *s <= '7') {
-	dTHR;
 	register UV n = retval << 3;
-	if (!overflowed && (n >> 3) != retval && ckWARN_d(WARN_UNSAFE)) {
-	    Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in octal number");
+	if (!overflowed && (n >> 3) != retval) {
+	    dTHR;
+	    if (ckWARN_d(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in octal number");
 	    overflowed = TRUE;
 	}
 	retval = n | (*s++ - '0');
@@ -2818,12 +2820,11 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 	    }
 	}
 	n = retval << 4;
-	{
+	if (!overflowed && (n >> 4) != retval) {
 	    dTHR;
-	    if (!overflowed && (n >> 4) != retval && ckWARN_d(WARN_UNSAFE)) {
-	        Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in hex number");
-	        overflowed = TRUE;
-	    }
+	    if (ckWARN_d(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in hex number");
+	    overflowed = TRUE;
 	}
 	retval = n | ((tmp - PL_hexdigit) & 15);
     }

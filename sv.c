@@ -3214,8 +3214,8 @@ Perl_sv_free(pTHX_ SV *sv)
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
 	if (ckWARN_d(WARN_DEBUGGING))
-	Perl_warner(aTHX_ WARN_DEBUGGING,
-	       "Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
+	    Perl_warner(aTHX_ WARN_DEBUGGING,
+			"Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
 	return;
     }
 #endif

@@ -490,11 +490,12 @@ Perl_nextargv(pTHX_ register GV *gv)
 #ifdef DJGPP
                       || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
 #endif
-                      ) {
-		    if (ckWARN_d(WARN_INPLACE))	
-			Perl_warner(aTHX_ WARN_INPLACE,
-			  "Can't do inplace edit: %s would not be unique",
-			  SvPVX(sv) );
+                      )
+		    {
+			if (ckWARN_d(WARN_INPLACE))	
+			    Perl_warner(aTHX_ WARN_INPLACE,
+			      "Can't do inplace edit: %s would not be unique",
+			      SvPVX(sv));
 			do_close(gv,FALSE);
 			continue;
 		    }
