@@ -51,6 +51,11 @@ The B<-verbose> flag first prints out the L<perldiag> introduction before
 any other diagnostics.  The $diagnostics::PRETTY variable can generate nicer
 escape sequences for pagers.
 
+Warnings dispatched from perl itself (or more accurately, those that match
+descriptions found in L<perldiag>) are only displayed once (no duplicate
+descriptions).  User code generated warnings ala warn() are unaffected,
+allowing duplicate user messages to be displayed.
+
 =head2 The I<splain> Program
 
 While apparently a whole nuther program, I<splain> is actually nothing
@@ -458,13 +463,15 @@ sub splainthis {
     s/\.?\n+$//;
     my $orig = $_;
     # return unless defined;
-    if ($exact_duplicate{$_}++) {
-	return 1;
-    } 
     s/, <.*?> (?:line|chunk).*$//;
     $real = s/(.*?) at .*? (?:line|chunk) \d+.*/$1/;
     s/^\((.*)\)$/$1/;
-    return 0 unless &transmo;
+    if ($exact_duplicate{$orig}++) {
+	return &transmo;
+    }
+    else {
+	return 0 unless &transmo;
+    }
     $orig = shorten($orig);
     if ($old_diag{$_}) {
 	autodescribe();
