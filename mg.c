@@ -1238,7 +1238,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     SV* lsv = LvTARG(sv);
     SSize_t pos;
     STRLEN len;
-    STRLEN ulen;
+    STRLEN ulen = 0;
     dTHR;
 
     mg = 0;
@@ -1263,8 +1263,6 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	ulen = sv_len_utf8(lsv);
 	if (ulen)
 	    len = ulen;
-	else
-	    ulen = 0;
     }
 
     if (pos < 0) {

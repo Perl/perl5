@@ -942,9 +942,9 @@ remove_dead_process(long child)
     if (child >= 0) {
 	dTHXo;
 	CloseHandle(w32_child_handles[child]);
-	Copy(&w32_child_handles[child+1], &w32_child_handles[child],
+	Move(&w32_child_handles[child+1], &w32_child_handles[child],
 	     (w32_num_children-child-1), HANDLE);
-	Copy(&w32_child_pids[child+1], &w32_child_pids[child],
+	Move(&w32_child_pids[child+1], &w32_child_pids[child],
 	     (w32_num_children-child-1), DWORD);
 	w32_num_children--;
     }
@@ -969,9 +969,9 @@ remove_dead_pseudo_process(long child)
     if (child >= 0) {
 	dTHXo;
 	CloseHandle(w32_pseudo_child_handles[child]);
-	Copy(&w32_pseudo_child_handles[child+1], &w32_pseudo_child_handles[child],
+	Move(&w32_pseudo_child_handles[child+1], &w32_pseudo_child_handles[child],
 	     (w32_num_pseudo_children-child-1), HANDLE);
-	Copy(&w32_pseudo_child_pids[child+1], &w32_pseudo_child_pids[child],
+	Move(&w32_pseudo_child_pids[child+1], &w32_pseudo_child_pids[child],
 	     (w32_num_pseudo_children-child-1), DWORD);
 	w32_num_pseudo_children--;
     }
@@ -1397,6 +1397,8 @@ win32_unlink(const char *filename)
 	A2WHELPER(filename, wBuffer, sizeof(wBuffer));
 	wcscpy(wBuffer, PerlDir_mapW(wBuffer));
 	attrs = GetFileAttributesW(wBuffer);
+	if (attrs == 0xFFFFFFFF)
+	    goto fail;
 	if (attrs & FILE_ATTRIBUTE_READONLY) {
 	    (void)SetFileAttributesW(wBuffer, attrs & ~FILE_ATTRIBUTE_READONLY);
 	    ret = _wunlink(wBuffer);
@@ -1409,6 +1411,8 @@ win32_unlink(const char *filename)
     else {
 	filename = PerlDir_mapA(filename);
 	attrs = GetFileAttributesA(filename);
+	if (attrs == 0xFFFFFFFF)
+	    goto fail;
 	if (attrs & FILE_ATTRIBUTE_READONLY) {
 	    (void)SetFileAttributesA(filename, attrs & ~FILE_ATTRIBUTE_READONLY);
 	    ret = unlink(filename);
@@ -1419,6 +1423,9 @@ win32_unlink(const char *filename)
 	    ret = unlink(filename);
     }
     return ret;
+fail:
+    errno = ENOENT;
+    return -1;
 }
 
 DllExport int

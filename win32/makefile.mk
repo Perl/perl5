@@ -598,13 +598,8 @@ PERL95EXE	= ..\perl95.exe
 
 .ENDIF
 
-.IF "$(USE_OBJECT)" == "define"
 PERLIMPLIB	*= ..\perl56$(a)
 PERLDLL		= ..\perl56.dll
-.ELSE
-PERLIMPLIB	*= ..\perl$(a)
-PERLDLL		= ..\perl.dll
-.ENDIF
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
