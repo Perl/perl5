@@ -132,7 +132,8 @@ struct perl_thread;
 #  define pTHX_4	4
 #endif
 
-#ifndef pTHXo
+/* these are only defined for compatibility; should not be used internally */
+#if !defined(pTHXo) && !defined(PERL_CORE)
 #  define pTHXo		pTHX
 #  define pTHXo_	pTHX_
 #  define aTHXo		aTHX
