@@ -4101,7 +4101,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    *SvEND(sv) = '\0';
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
-	    unsharepvn(pvx,SvUTF8(sv)?-len:len,hash);
+	    unsharepvn(pvx, SvUTF8(sv) ? -(I32)len : len, hash);
 	}
 	else if (PL_curcop != &PL_compiling)
 	    Perl_croak(aTHX_ PL_no_modify);
@@ -4946,7 +4946,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	else if (SvPVX(sv) && SvLEN(sv))
 	    Safefree(SvPVX(sv));
 	else if (SvPVX(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
-	    unsharepvn(SvPVX(sv),SvUTF8(sv)?-SvCUR(sv):SvCUR(sv),SvUVX(sv));
+	    unsharepvn(SvPVX(sv),
+		       SvUTF8(sv) ? -(I32)SvCUR(sv) : SvCUR(sv),
+		       SvUVX(sv));
 	    SvFAKE_off(sv);
 	}
 	break;

@@ -441,7 +441,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
                 key = savepvn(key,klen);
-		key = strupr(key);
+		key = (const char*)strupr((char*)key);
 		hash = 0;
 	    }
 #endif
@@ -598,9 +598,9 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 
     entry = new_HE();
     if (HvSHAREKEYS(hv))
-	HeKEY_hek(entry) = share_hek(key, is_utf8?-klen:klen, hash);
+	HeKEY_hek(entry) = share_hek(key, is_utf8?-(I32)klen:klen, hash);
     else                                       /* gotta do the real thing */
-	HeKEY_hek(entry) = save_hek(key, is_utf8?-klen:klen, hash);
+	HeKEY_hek(entry) = save_hek(key, is_utf8?-(I32)klen:klen, hash);
     if (key != keysave)
 	Safefree(key);
     HeVAL(entry) = val;

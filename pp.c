@@ -943,7 +943,7 @@ PP(pp_multiply)
 		    /* 2s complement assumption that (UV)-IV_MIN is correct.  */
 		    /* -ve result, which could overflow an IV  */
 		    SP--;
-		    SETi( -product );
+		    SETi( -(IV)product );
 		    RETURN;
 		} /* else drop to NVs below. */
 	    } else {
@@ -980,7 +980,7 @@ PP(pp_multiply)
 			    /* 2s complement assumption again  */
 			    /* -ve result, which could overflow an IV  */
 			    SP--;
-			    SETi( -product_low );
+			    SETi( -(IV)product_low );
 			    RETURN;
 			} /* else drop to NVs below. */
 		    }

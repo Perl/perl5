@@ -1361,15 +1361,11 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   int postpr = 0, force_cpy = 0, assignshift = assign ? 1 : 0;
 #ifdef DEBUGGING
   int fl=0;
+#endif
   HV* stash=NULL;
-#endif
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
-      && (mg = mg_find((SV*)(
-#ifdef DEGUGGING
-			     stash=
-#endif
-			     SvSTASH(SvRV(left))),
-			PERL_MAGIC_overload_table))
+      && (stash = SvSTASH(SvRV(left)))
+      && (mg = mg_find((SV*)stash, PERL_MAGIC_overload_table))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
 			: (CV **) NULL))
@@ -1486,12 +1482,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 }
 	 if (!cv) goto not_found;
     } else if (!(AMGf_noright & flags) && SvAMAGIC(right)
-	       && (mg = mg_find((SV*)(
-#ifdef DEBUGGING
-				      stash=
-#endif
-				      SvSTASH(SvRV(right))),
-			PERL_MAGIC_overload_table))
+	       && (stash = SvSTASH(SvRV(right)))
+	       && (mg = mg_find((SV*)stash, PERL_MAGIC_overload_table))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
 			  : (CV **) NULL))
@@ -1590,7 +1582,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		     flags & AMGf_unary? "" :
 		     lr==1 ? " for right argument": " for left argument",
 		     flags & AMGf_unary? " for argument" : "",
-		     HvNAME(stash),
+		     stash ? HvNAME(stash) : "null",
 		     fl? ",\n\tassignment variant used": "") );
   }
 #endif

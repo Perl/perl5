@@ -1257,7 +1257,7 @@ S_scan_const(pTHX_ char *start)
 		    char *e = d++;
 		    while (e-- > c)
 			*(e + 1) = *e;
-		    *c = UTF_TO_NATIVE(0xff);
+		    *c = (char)UTF_TO_NATIVE(0xff);
 		    /* mark the range as done, and continue */
 		    dorange = FALSE;
 		    didrange = TRUE;
@@ -1308,7 +1308,7 @@ S_scan_const(pTHX_ char *start)
 		    Perl_croak(aTHX_ "Ambiguous range in transliteration operator");
 		}
 		if (has_utf8) {
-		    *d++ = UTF_TO_NATIVE(0xff);	/* use illegal utf8 byte--see pmtrans */
+		    *d++ = (char)UTF_TO_NATIVE(0xff);	/* use illegal utf8 byte--see pmtrans */
 		    s++;
 		    continue;
 		}
