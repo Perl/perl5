@@ -7,10 +7,9 @@ BEGIN {
 
     my $PW = "/etc/passwd";
 
-    if ($Config{'i_pwd'} ne 'define' or not -f $PW or not open(PW, $PW)
-	# NeXTstep /etc/passwd is used only at boot time,
-	# after that it's up to NetInfo and NIS/YP.
-	or $^O eq 'next'
+    if (($^O eq 'next' and not open(PW, "nidump passwd .|"))
+        or (defined $Config{'i_pwd'} and $Config{'i_pwd'} ne 'define')
+	or not -f $PW or not open(PW, $PW)
 	) {
 	print "1..0\n";
 	exit 0;

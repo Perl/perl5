@@ -7,10 +7,9 @@ BEGIN {
 
     my $GR = "/etc/group";
 
-    if ($Config{'i_grp'} ne 'define' or not -f $GR or not open(GR, $GR)
-	# NeXTstep /etc/group is used only at boot time,
-	# after that it's up to NetInfo and NIS/YP.
-	or $^O eq 'next'
+    if (($^O eq 'next' and not open(GR, "nidump group .|"))
+	or (defined $Config{'i_grp'} and $Config{'i_grp'} ne 'define')
+	or not -f $GR or not open(GR, $GR)
 	) {
 	print "1..0\n";
 	exit 0;
@@ -50,6 +49,7 @@ while (<GR>) {
 	$not = 1, last
 	    if $name    ne $name_s    or
 # Shadow passwords confuse this.
+# Not that group passwords are used much but still.
 #              $passwd  ne $passwd_s  or
                $gid     ne $gid_s     or
                $members ne $members_s;
