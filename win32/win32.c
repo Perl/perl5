@@ -1115,6 +1115,11 @@ win32_kill(int pid, int sig)
 		if (GenerateConsoleCtrlEvent(CTRL_C_EVENT,pid))
 		    return 0;
 		break;
+            case SIGBREAK:
+            case SIGTERM:
+                if (GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,pid))
+                    return 0;
+                break;
 	    default: /* For now be backwards compatible with perl5.6 */
 	    case 9:
 	        if (TerminateProcess(hProcess, sig)) {
@@ -1139,6 +1144,11 @@ alien_process:
 		    if (GenerateConsoleCtrlEvent(CTRL_C_EVENT,pid))
 			retval = 0;
 		    break;
+                case SIGBREAK:
+                case SIGTERM:
+                    if (GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,pid))
+                       retval = 0;
+                    break;
 		default: /* For now be backwards compatible with perl5.6 */
                 case 9:
 		    if (TerminateProcess(hProcess, sig))
