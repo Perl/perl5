@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 29 18:56:27 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Feb 29 19:02:20 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -457,6 +457,7 @@ old_pthread_create_joinable=''
 d_pthread_yield=''
 d_sched_yield=''
 sched_yield=''
+d_qgcvt=''
 d_readdir=''
 d_rewinddir=''
 d_seekdir=''
@@ -7270,6 +7271,10 @@ else
 	installvendorbin="$vendorbinexp"
 fi
 
+: see if qgcvt exists
+set qgcvt d_qgcvt
+eval $inlibc
+
 : check for length of double
 echo " "
 case "$doublesize" in
@@ -7345,118 +7350,6 @@ EOCP
 	;;
 esac
 $rm -f try.* try
-
-: Check how to convert floats to strings.
-if test "X$d_Gconvert" = X; then
-	echo " "
-	echo "Checking for an efficient way to convert floats to strings."
-	$cat >try.c <<EOP
-#ifdef TRY_gconvert
-#define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
-char *myname = "gconvert";
-#endif
-#ifdef TRY_gcvt
-#define Gconvert(x,n,t,b) gcvt((x),(n),(b))
-char *myname = "gcvt";
-#endif
-#ifdef TRY_qgcvt
-#define Gconvert(x,n,t,b) qgcvt((x),(n),(b))
-char *myname = "qgcvt";
-#define DOUBLETYPE long double
-#endif
-#ifdef TRY_sprintf
-#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
-char *myname = "sprintf";
-#endif
-
-#ifndef DOUBLETYPE
-#define DOUBLETYPE double
-#endif
-
-#include <stdio.h>
-
-#define I_STDLIB $i_stdlib
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-
-int
-checkit(expect, got)
-char *expect;
-char *got;
-{
-    if (strcmp(expect, got)) {
-		printf("%s oddity:  Expected %s, got %s\n",
-			myname, expect, got);
-		exit(1);
-	}
-}
-
-int main()
-{ 
-	char buf[64]; 
-	buf[63] = '\0';
-
-	/* This must be 1st test on (which?) platform */
-	/* Alan Burlison <AlanBurlsin@unn.unisys.com> */
-	Gconvert((DOUBLETYPE)0.1, 8, 0, buf);
-	checkit("0.1", buf);
-
-	Gconvert((DOUBLETYPE)1.0, 8, 0, buf); 
-	checkit("1", buf);
-
-	Gconvert((DOUBLETYPE)0.0, 8, 0, buf); 
-	checkit("0", buf);
-
-	Gconvert((DOUBLETYPE)-1.0, 8, 0, buf); 
-	checkit("-1", buf);
-
-	/* Some Linux gcvt's give 1.e+5 here. */
-	Gconvert((DOUBLETYPE)100000.0, 8, 0, buf); 
-	checkit("100000", buf);
-	
-	/* Some Linux gcvt's give -1.e+5 here. */
-	Gconvert((DOUBLETYPE)-100000.0, 8, 0, buf); 
-	checkit("-100000", buf);
-
-	exit(0);
-}
-EOP
-	case "$d_Gconvert" in
-	gconvert*) xxx_list='gconvert gcvt sprintf' ;;
-	gcvt*) xxx_list='gcvt gconvert sprintf' ;;
-	sprintf*) xxx_list='sprintf gconvert gcvt' ;;
-	*) xxx_list='gconvert gcvt sprintf' ;;
-	esac
-
-        case "$d_longdbl$uselongdouble" in
-        definedefine) xxx_list="`echo $xxx_list|sed 's/gcvt/qgcvt gcvt/'`" ;;
-	esac
-
-	for xxx_convert in $xxx_list; do
-		echo "Trying $xxx_convert..."
-		$rm -f try try$_o
-		set try -DTRY_$xxx_convert
-		if eval $compile; then
-			echo "$xxx_convert() found." >&4
-			if ./try; then
-				echo "I'll use $xxx_convert to convert floats into a string." >&4
-				break;
-			else
-				echo "...But $xxx_convert didn't work as I expected."
-			fi
-		else
-			echo "$xxx_convert NOT found." >&4
-		fi
-	done
-		
-	case "$xxx_convert" in
-	gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
-	gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
-	qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
-	*) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
-	esac
-fi
 
 echo " "
 
@@ -7568,6 +7461,159 @@ case "$sPRIfldbl" in
 	d_PRIFldbl="$define"; d_PRIGldbl="$define"; d_PRIEldbl="$define"; 
 	;;
 esac
+
+: Check how to convert floats to strings.
+if test "X$d_Gconvert" = X; then
+	echo " "
+	echo "Checking for an efficient way to convert floats to strings."
+	echo " " > try.c
+	case "$uselongdouble" in
+	"$define") echo "#define USE_LONG_DOUBLE" >>try.c ;;
+	esac
+	case "$d_longdbl" in
+	"$define") echo "#define HAS_LONG_DOUBLE" >>try.c ;;
+	esac
+	case "$d_PRIgldbl" in
+	"$define") echo "#define HAS_PRIgldbl"    >>try.c ;;
+	esac
+	$cat >>try.c <<EOP
+#ifdef TRY_gconvert
+#define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
+char *myname = "gconvert";
+#endif
+#ifdef TRY_gcvt
+#define Gconvert(x,n,t,b) gcvt((x),(n),(b))
+char *myname = "gcvt";
+#endif
+#ifdef TRY_qgcvt
+#define Gconvert(x,n,t,b) qgcvt((x),(n),(b))
+char *myname = "qgcvt";
+#define DOUBLETYPE long double
+#endif
+#ifdef TRY_sprintf
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && defined(HAS_PRIgldbl)
+#define Gconvert(x,n,t,b) sprintf((b),"%.*"$sPRIgldbl,(n),(x))
+#else
+#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
+#endif
+char *myname = "sprintf";
+#endif
+
+#ifndef DOUBLETYPE
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
+#define DOUBLETYPE long double
+#else
+#define DOUBLETYPE double
+#endif
+#endif
+
+#include <stdio.h>
+
+#define I_STDLIB $i_stdlib
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+
+int
+checkit(expect, got)
+char *expect;
+char *got;
+{
+    if (strcmp(expect, got)) {
+		printf("%s oddity:  Expected %s, got %s\n",
+			myname, expect, got);
+		exit(1);
+	}
+}
+
+int main()
+{ 
+	char buf[64]; 
+	buf[63] = '\0';
+
+	/* This must be 1st test on (which?) platform */
+	/* Alan Burlison <AlanBurlsin@unn.unisys.com> */
+	Gconvert((DOUBLETYPE)0.1, 8, 0, buf);
+	checkit("0.1", buf);
+
+	Gconvert((DOUBLETYPE)1.0, 8, 0, buf); 
+	checkit("1", buf);
+
+	Gconvert((DOUBLETYPE)1.1, 8, 0, buf); 
+	checkit("1.1", buf);
+
+	Gconvert((DOUBLETYPE)1.01, 8, 0, buf); 
+	checkit("1.01", buf);
+
+	Gconvert((DOUBLETYPE)1.001, 8, 0, buf); 
+	checkit("1.001", buf);
+
+	Gconvert((DOUBLETYPE)1.0001, 8, 0, buf); 
+	checkit("1.0001", buf);
+
+	Gconvert((DOUBLETYPE)1.00001, 8, 0, buf); 
+	checkit("1.00001", buf);
+
+	Gconvert((DOUBLETYPE)1.000001, 8, 0, buf); 
+	checkit("1.000001", buf);
+
+	Gconvert((DOUBLETYPE)0.0, 8, 0, buf); 
+	checkit("0", buf);
+
+	Gconvert((DOUBLETYPE)-1.0, 8, 0, buf); 
+	checkit("-1", buf);
+
+	/* Some Linux gcvt's give 1.e+5 here. */
+	Gconvert((DOUBLETYPE)100000.0, 8, 0, buf); 
+	checkit("100000", buf);
+	
+	/* Some Linux gcvt's give -1.e+5 here. */
+	Gconvert((DOUBLETYPE)-100000.0, 8, 0, buf); 
+	checkit("-100000", buf);
+
+	exit(0);
+}
+EOP
+	case "$d_Gconvert" in
+	gconvert*) xxx_list='gconvert gcvt sprintf' ;;
+	gcvt*) xxx_list='gcvt gconvert sprintf' ;;
+	sprintf*) xxx_list='sprintf gconvert gcvt' ;;
+	*) xxx_list='gconvert gcvt sprintf' ;;
+	esac
+
+        case "$d_longdbl$uselongdouble$d_qgcvt" in
+        "$define$define$define") xxx_list="`echo $xxx_list|sed 's/gcvt/qgcvt gcvt/'`" ;;
+	esac
+
+	for xxx_convert in $xxx_list; do
+		echo "Trying $xxx_convert..."
+		$rm -f try try$_o
+		set try -DTRY_$xxx_convert
+		if eval $compile; then
+			echo "$xxx_convert() found." >&4
+			if ./try; then
+				echo "I'll use $xxx_convert to convert floats into a string." >&4
+				break;
+			else
+				echo "...But $xxx_convert didn't work as I expected."
+			fi
+		else
+			echo "$xxx_convert NOT found." >&4
+		fi
+	done
+		
+	case "$xxx_convert" in
+	gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
+	gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
+	qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
+	*) case "$uselongdouble$d_longdbl$d_PRIgldbl" in
+	   "$define$define$define")
+	      d_Gconvert="sprintf((b),\"%.*$sPRIgldbl\",(n),(x))" ;;
+	   *) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
+	   esac
+	   ;;  
+	esac
+fi
 
 : Initialize h_fcntl
 h_fcntl=false
@@ -14987,6 +15033,7 @@ d_pwexpire='$d_pwexpire'
 d_pwgecos='$d_pwgecos'
 d_pwpasswd='$d_pwpasswd'
 d_pwquota='$d_pwquota'
+d_qgcvt='$d_qgcvt'
 d_quad='$d_quad'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
