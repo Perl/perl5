@@ -2987,9 +2987,6 @@ C<STDERR> using various methods:
     print STDOUT "stdout 1\n";	# this works for
     print STDERR "stderr 1\n"; 	# subprocesses too
 
-    close STDOUT;
-    close STDERR;
-
     open STDOUT, ">&", $oldout or die "Can't dup \$oldout: $!";
     open STDERR, ">&OLDERR"    or die "Can't dup OLDERR: $!";
 
