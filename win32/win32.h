@@ -109,15 +109,15 @@ struct tms {
 #define DllMain DllEntryPoint
 #endif
 
-#pragma warn -ccc
-#pragma warn -rch
-#pragma warn -sig
-#pragma warn -pia
-#pragma warn -par
-#pragma warn -aus
-#pragma warn -use
-#pragma warn -csu
-#pragma warn -pro
+#pragma warn -ccc	/* "condition is always true/false" */
+#pragma warn -rch	/* "unreachable code" */
+#pragma warn -sig	/* "conversion may lose significant digits" */
+#pragma warn -pia	/* "possibly incorrect assignment" */
+#pragma warn -par	/* "parameter 'foo' is never used" */
+#pragma warn -aus	/* "'foo' is assigned a value that is never used" */
+#pragma warn -use	/* "'foo' is declared but never used" */
+#pragma warn -csu	/* "comparing signed and unsigned values" */
+#pragma warn -pro	/* "call to function with no prototype" */
 
 #endif
 

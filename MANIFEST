@@ -876,6 +876,7 @@ win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/TEST		Win32 port
 win32/autosplit.pl	Win32 port
 win32/bin/network.pl	Win32 port
+win32/bin/perlglob.pl	glob() support
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake
 win32/bin/search.pl	Win32 port

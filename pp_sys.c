@@ -114,7 +114,7 @@ static int dooneliner _((char *cmd, char *filename));
 # ifdef my_chsize  /* Probably #defined to Perl_my_chsize in embed.h */
 #   undef my_chsize
 # endif
-# define my_chsize chsize
+# define my_chsize PerlLIO_chsize
 #endif
 
 #ifdef HAS_FLOCK
@@ -183,7 +183,7 @@ PP(pp_backtick)
     I32 gimme = GIMME_V;
 
     TAINT_PROPER("``");
-    fp = my_popen(tmps, "r");
+    fp = PerlProc_popen(tmps, "r");
     if (fp) {
 	if (gimme == G_VOID) {
 	    char tmpbuf[256];
@@ -216,7 +216,7 @@ PP(pp_backtick)
 		SvTAINTED_on(sv);
 	    }
 	}
-	STATUS_NATIVE_SET(my_pclose(fp));
+	STATUS_NATIVE_SET(PerlProc_pclose(fp));
 	TAINT;		/* "I believe that this is not gratuitous!" */
     }
     else {
@@ -392,7 +392,7 @@ PP(pp_pipe_op)
     if (IoIFP(wstio))
 	do_close(wgv, FALSE);
 
-    if (pipe(fd) < 0)
+    if (PerlProc_pipe(fd) < 0)
 	goto badexit;
 
     IoIFP(rstio) = PerlIO_fdopen(fd[0], "r");
@@ -403,9 +403,9 @@ PP(pp_pipe_op)
 
     if (!IoIFP(rstio) || !IoOFP(wstio)) {
 	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
-	else close(fd[0]);
+	else PerlLIO_close(fd[0]);
 	if (IoOFP(wstio)) PerlIO_close(IoOFP(wstio));
-	else close(fd[1]);
+	else PerlLIO_close(fd[1]);
 	goto badexit;
     }
 
@@ -440,11 +440,11 @@ PP(pp_umask)
 
 #ifdef HAS_UMASK
     if (MAXARG < 1) {
-	anum = umask(0);
-	(void)umask(anum);
+	anum = PerlLIO_umask(0);
+	(void)PerlLIO_umask(anum);
     }
     else
-	anum = umask(POPi);
+	anum = PerlLIO_umask(POPi);
     TAINT_PROPER("umask");
     XPUSHi(anum);
 #else
@@ -476,7 +476,7 @@ PP(pp_binmode)
     else
 	RETPUSHUNDEF;
 #else
-    if (setmode(PerlIO_fileno(fp), OP_BINARY) != -1) {
+    if (PerlLIO_setmode(PerlIO_fileno(fp), OP_BINARY) != -1) {
 #if defined(WIN32) && defined(__BORLANDC__)
 	/* The translation mode of the stream is maintained independent
 	 * of the translation mode of the fd in the Borland RTL (heavy
@@ -775,7 +775,7 @@ PP(pp_sselect)
 #endif
     }
 
-    nfound = select(
+    nfound = PerlSock_select(
 	maxlen * 8,
 	(Select_fd_set_t) fd_sets[1],
 	(Select_fd_set_t) fd_sets[2],
@@ -1238,7 +1238,7 @@ PP(pp_sysread)
 #endif
 	buffer = SvGROW(bufsv, length+1);
 	/* 'offset' means 'flags' here */
-	length = recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
+	length = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
 			  (struct sockaddr *)namebuf, &bufsize);
 	if (length < 0)
 	    RETPUSHUNDEF;
@@ -1269,7 +1269,7 @@ PP(pp_sysread)
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
     if (op->op_type == OP_SYSREAD) {
-	length = read(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
+	length = PerlLIO_read(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
     }
     else
 #ifdef HAS_SOCKET__bad_code_maybe
@@ -1280,7 +1280,7 @@ PP(pp_sysread)
 #else
 	bufsize = sizeof namebuf;
 #endif
-	length = recvfrom(PerlIO_fileno(IoIFP(io)), buffer+offset, length, 0,
+	length = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer+offset, length, 0,
 			  (struct sockaddr *)namebuf, &bufsize);
     }
     else
@@ -1352,18 +1352,18 @@ PP(pp_send)
 	    offset = 0;
 	if (length > blen - offset)
 	    length = blen - offset;
-	length = write(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
+	length = PerlLIO_write(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
     }
 #ifdef HAS_SOCKET
     else if (SP > MARK) {
 	char *sockbuf;
 	STRLEN mlen;
 	sockbuf = SvPVx(*++MARK, mlen);
-	length = sendto(PerlIO_fileno(IoIFP(io)), buffer, blen, length,
+	length = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen, length,
 				(struct sockaddr *)sockbuf, mlen);
     }
     else
-	length = send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
+	length = PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
 
 #else
     else
@@ -1477,12 +1477,12 @@ PP(pp_truncate)
 #else
 	{
 	    int tmpfd;
-	    if ((tmpfd = open(name, O_RDWR)) < 0)
+	    if ((tmpfd = PerlLIO_open(name, O_RDWR)) < 0)
 		result = 0;
 	    else {
 		if (my_chsize(tmpfd, len) < 0)
 		    result = 0;
-		close(tmpfd);
+		PerlLIO_close(tmpfd);
 	    }
 	}
 #endif
@@ -1630,7 +1630,7 @@ PP(pp_socket)
 	do_close(gv, FALSE);
 
     TAINT_PROPER("socket");
-    fd = socket(domain, type, protocol);
+    fd = PerlSock_socket(domain, type, protocol);
     if (fd < 0)
 	RETPUSHUNDEF;
     IoIFP(io) = PerlIO_fdopen(fd, "r");	/* stdio gets confused about sockets */
@@ -1639,7 +1639,7 @@ PP(pp_socket)
     if (!IoIFP(io) || !IoOFP(io)) {
 	if (IoIFP(io)) PerlIO_close(IoIFP(io));
 	if (IoOFP(io)) PerlIO_close(IoOFP(io));
-	if (!IoIFP(io) && !IoOFP(io)) close(fd);
+	if (!IoIFP(io) && !IoOFP(io)) PerlLIO_close(fd);
 	RETPUSHUNDEF;
     }
 
@@ -1675,7 +1675,7 @@ PP(pp_sockpair)
 	do_close(gv2, FALSE);
 
     TAINT_PROPER("socketpair");
-    if (socketpair(domain, type, protocol, fd) < 0)
+    if (PerlSock_socketpair(domain, type, protocol, fd) < 0)
 	RETPUSHUNDEF;
     IoIFP(io1) = PerlIO_fdopen(fd[0], "r");
     IoOFP(io1) = PerlIO_fdopen(fd[0], "w");
@@ -1686,10 +1686,10 @@ PP(pp_sockpair)
     if (!IoIFP(io1) || !IoOFP(io1) || !IoIFP(io2) || !IoOFP(io2)) {
 	if (IoIFP(io1)) PerlIO_close(IoIFP(io1));
 	if (IoOFP(io1)) PerlIO_close(IoOFP(io1));
-	if (!IoIFP(io1) && !IoOFP(io1)) close(fd[0]);
+	if (!IoIFP(io1) && !IoOFP(io1)) PerlLIO_close(fd[0]);
 	if (IoIFP(io2)) PerlIO_close(IoIFP(io2));
 	if (IoOFP(io2)) PerlIO_close(IoOFP(io2));
-	if (!IoIFP(io2) && !IoOFP(io2)) close(fd[1]);
+	if (!IoIFP(io2) && !IoOFP(io2)) PerlLIO_close(fd[1]);
 	RETPUSHUNDEF;
     }
 
@@ -1714,7 +1714,7 @@ PP(pp_bind)
 
     addr = SvPV(addrsv, len);
     TAINT_PROPER("bind");
-    if (bind(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
+    if (PerlSock_bind(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -1744,7 +1744,7 @@ PP(pp_connect)
 
     addr = SvPV(addrsv, len);
     TAINT_PROPER("connect");
-    if (connect(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
+    if (PerlSock_connect(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -1770,7 +1770,7 @@ PP(pp_listen)
     if (!io || !IoIFP(io))
 	goto nuts;
 
-    if (listen(PerlIO_fileno(IoIFP(io)), backlog) >= 0)
+    if (PerlSock_listen(PerlIO_fileno(IoIFP(io)), backlog) >= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -1813,7 +1813,7 @@ PP(pp_accept)
     if (IoIFP(nstio))
 	do_close(ngv, FALSE);
 
-    fd = accept(PerlIO_fileno(IoIFP(gstio)), (struct sockaddr *)&saddr, &len);
+    fd = PerlSock_accept(PerlIO_fileno(IoIFP(gstio)), (struct sockaddr *)&saddr, &len);
     if (fd < 0)
 	goto badexit;
     IoIFP(nstio) = PerlIO_fdopen(fd, "r");
@@ -1822,7 +1822,7 @@ PP(pp_accept)
     if (!IoIFP(nstio) || !IoOFP(nstio)) {
 	if (IoIFP(nstio)) PerlIO_close(IoIFP(nstio));
 	if (IoOFP(nstio)) PerlIO_close(IoOFP(nstio));
-	if (!IoIFP(nstio) && !IoOFP(nstio)) close(fd);
+	if (!IoIFP(nstio) && !IoOFP(nstio)) PerlLIO_close(fd);
 	goto badexit;
     }
 
@@ -1853,7 +1853,7 @@ PP(pp_shutdown)
     if (!io || !IoIFP(io))
 	goto nuts;
 
-    PUSHi( shutdown(PerlIO_fileno(IoIFP(io)), how) >= 0 );
+    PUSHi( PerlSock_shutdown(PerlIO_fileno(IoIFP(io)), how) >= 0 );
     RETURN;
 
 nuts:
@@ -1908,7 +1908,7 @@ PP(pp_ssockopt)
 	SvCUR_set(sv,256);
 	*SvEND(sv) ='\0';
 	len = SvCUR(sv);
-	if (getsockopt(fd, lvl, optname, SvPVX(sv), &len) < 0)
+	if (PerlSock_getsockopt(fd, lvl, optname, SvPVX(sv), &len) < 0)
 	    goto nuts2;
 	SvCUR_set(sv, len);
 	*SvEND(sv) ='\0';
@@ -1926,7 +1926,7 @@ PP(pp_ssockopt)
 		buf = (char*)&aint;
 		len = sizeof(int);
 	    }
-	    if (setsockopt(fd, lvl, optname, buf, len) < 0)
+	    if (PerlSock_setsockopt(fd, lvl, optname, buf, len) < 0)
 		goto nuts2;
 	    PUSHs(&sv_yes);
 	}
@@ -1977,11 +1977,11 @@ PP(pp_getpeername)
     fd = PerlIO_fileno(IoIFP(io));
     switch (optype) {
     case OP_GETSOCKNAME:
-	if (getsockname(fd, (struct sockaddr *)SvPVX(sv), &len) < 0)
+	if (PerlSock_getsockname(fd, (struct sockaddr *)SvPVX(sv), &len) < 0)
 	    goto nuts2;
 	break;
     case OP_GETPEERNAME:
-	if (getpeername(fd, (struct sockaddr *)SvPVX(sv), &len) < 0)
+	if (PerlSock_getpeername(fd, (struct sockaddr *)SvPVX(sv), &len) < 0)
 	    goto nuts2;
 #if defined(VMS_DO_SOCKETS) && defined (DECCRTL_SOCKETS)
 	{
@@ -2041,7 +2041,7 @@ PP(pp_stat)
 	    statgv = tmpgv;
 	    sv_setpv(statname, "");
 	    laststatval = (GvIO(tmpgv) && IoIFP(GvIOp(tmpgv))
-		? Fstat(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), &statcache) : -1);
+		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), &statcache) : -1);
 	}
 	if (laststatval < 0)
 	    max = 0;
@@ -2061,7 +2061,7 @@ PP(pp_stat)
 #ifdef HAS_LSTAT
 	laststype = op->op_type;
 	if (op->op_type == OP_LSTAT)
-	    laststatval = lstat(SvPV(statname, na), &statcache);
+	    laststatval = PerlLIO_lstat(SvPV(statname, na), &statcache);
 	else
 #endif
 	    laststatval = Stat(SvPV(statname, na), &statcache);
@@ -2396,7 +2396,7 @@ PP(pp_fttty)
 	fd = atoi(tmps);
     else
 	RETPUSHUNDEF;
-    if (isatty(fd))
+    if (PerlLIO_isatty(fd))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2449,7 +2449,7 @@ PP(pp_fttext)
 	if (io && IoIFP(io)) {
 	    if (! PerlIO_has_base(IoIFP(io)))
 		DIE("-T and -B not implemented on filehandles");
-	    laststatval = Fstat(PerlIO_fileno(IoIFP(io)), &statcache);
+	    laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &statcache);
 	    if (laststatval < 0)
 		RETPUSHUNDEF;
 	    if (S_ISDIR(statcache.st_mode))	/* handle NFS glitch */
@@ -2485,20 +2485,20 @@ PP(pp_fttext)
 	laststatval = -1;
 	sv_setpv(statname, SvPV(sv, na));
 #ifdef HAS_OPEN3
-	i = open(SvPV(sv, na), O_RDONLY, 0);
+	i = PerlLIO_open3(SvPV(sv, na), O_RDONLY, 0);
 #else
-	i = open(SvPV(sv, na), 0);
+	i = PerlLIO_open(SvPV(sv, na), 0);
 #endif
 	if (i < 0) {
 	    if (dowarn && strchr(SvPV(sv, na), '\n'))
 		warn(warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
-	laststatval = Fstat(i, &statcache);
+	laststatval = PerlLIO_fstat(i, &statcache);
 	if (laststatval < 0)
 	    RETPUSHUNDEF;
-	len = read(i, tbuf, 512);
-	(void)close(i);
+	len = PerlLIO_read(i, tbuf, 512);
+	(void)PerlLIO_close(i);
 	if (len <= 0) {
 	    if (S_ISDIR(statcache.st_mode) && op->op_type == OP_FTTEXT)
 		RETPUSHNO;		/* special case NFS directories */
@@ -2557,7 +2557,7 @@ PP(pp_chdir)
 	    tmps = SvPV(*svp, na);
     }
     TAINT_PROPER("chdir");
-    PUSHi( chdir(tmps) >= 0 );
+    PUSHi( PerlDir_chdir(tmps) >= 0 );
 #ifdef VMS
     /* Clear the DEFAULT element of ENV so we'll get the new value
      * in the future. */
@@ -2722,14 +2722,14 @@ char *filename;
 	*s++ = *filename++;
     }
     strcpy(s, " 2>&1");
-    myfp = my_popen(cmdline, "r");
+    myfp = PerlProc_popen(cmdline, "r");
     Safefree(cmdline);
 
     if (myfp) {
 	SV *tmpsv = sv_newmortal();
 	/* Need to save/restore 'rs' ?? */
 	s = sv_gets(tmpsv, myfp, 0);
-	(void)my_pclose(myfp);
+	(void)PerlProc_pclose(myfp);
 	if (s != Nullch) {
 	    int e;
 	    for (e = 1;
@@ -2802,12 +2802,12 @@ PP(pp_mkdir)
 
     TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR
-    SETi( Mkdir(tmps, mode) >= 0 );
+    SETi( PerlDir_mkdir(tmps, mode) >= 0 );
 #else
     SETi( dooneliner("mkdir", tmps) );
-    oldumask = umask(0);
-    umask(oldumask);
-    chmod(tmps, (mode & ~oldumask) & 0777);
+    oldumask = PerlLIO_umask(0);
+    PerlLIO_umask(oldumask);
+    PerlLIO_chmod(tmps, (mode & ~oldumask) & 0777);
 #endif
     RETURN;
 }
@@ -2820,7 +2820,7 @@ PP(pp_rmdir)
     tmps = POPp;
     TAINT_PROPER("rmdir");
 #ifdef HAS_RMDIR
-    XPUSHi( rmdir(tmps) >= 0 );
+    XPUSHi( PerlDir_rmdir(tmps) >= 0 );
 #else
     XPUSHi( dooneliner("rmdir", tmps) );
 #endif
@@ -2841,8 +2841,8 @@ PP(pp_open_dir)
 	goto nope;
 
     if (IoDIRP(io))
-	closedir(IoDIRP(io));
-    if (!(IoDIRP(io) = opendir(dirname)))
+	PerlDir_close(IoDIRP(io));
+    if (!(IoDIRP(io) = PerlDir_open(dirname)))
 	goto nope;
 
     RETPUSHYES;
@@ -2872,7 +2872,7 @@ PP(pp_readdir)
 
     if (GIMME == G_ARRAY) {
 	/*SUPPRESS 560*/
-	while (dp = (Direntry_t *)readdir(IoDIRP(io))) {
+	while (dp = (Direntry_t *)PerlDir_read(IoDIRP(io))) {
 #ifdef DIRNAMLEN
 	    sv = newSVpv(dp->d_name, dp->d_namlen);
 #else
@@ -2885,7 +2885,7 @@ PP(pp_readdir)
 	}
     }
     else {
-	if (!(dp = (Direntry_t *)readdir(IoDIRP(io))))
+	if (!(dp = (Direntry_t *)PerlDir_read(IoDIRP(io))))
 	    goto nope;
 #ifdef DIRNAMLEN
 	sv = newSVpv(dp->d_name, dp->d_namlen);
@@ -2924,7 +2924,7 @@ PP(pp_telldir)
     if (!io || !IoDIRP(io))
 	goto nope;
 
-    PUSHi( telldir(IoDIRP(io)) );
+    PUSHi( PerlDir_tell(IoDIRP(io)) );
     RETURN;
 nope:
     if (!errno)
@@ -2946,7 +2946,7 @@ PP(pp_seekdir)
     if (!io || !IoDIRP(io))
 	goto nope;
 
-    (void)seekdir(IoDIRP(io), along);
+    (void)PerlDir_seek(IoDIRP(io), along);
 
     RETPUSHYES;
 nope:
@@ -2968,7 +2968,7 @@ PP(pp_rewinddir)
     if (!io || !IoDIRP(io))
 	goto nope;
 
-    (void)rewinddir(IoDIRP(io));
+    (void)PerlDir_rewind(IoDIRP(io));
     RETPUSHYES;
 nope:
     if (!errno)
@@ -2990,9 +2990,9 @@ PP(pp_closedir)
 	goto nope;
 
 #ifdef VOID_CLOSEDIR
-    closedir(IoDIRP(io));
+    PerlDir_close(IoDIRP(io));
 #else
-    if (closedir(IoDIRP(io)) < 0) {
+    if (PerlDir_close(IoDIRP(io)) < 0) {
 	IoDIRP(io) = 0; /* Don't try to close again--coredumps on SysV */
 	goto nope;
     }
@@ -3119,7 +3119,7 @@ PP(pp_system)
     else {
 	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), na));
     }
-    _exit(-1);
+    PerlProc__exit(-1);
 #else /* ! FORK or VMS or OS/2 */
     if (op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
@@ -3579,16 +3579,16 @@ PP(pp_ghostent)
     register char **elem;
     register SV *sv;
 #if defined(HAS_GETHOSTENT) && !defined(DONT_DECLARE_STD)
-    struct hostent *gethostbyname(const char *);
-    struct hostent *gethostbyaddr(const Gethbadd_addr_t, Gethbadd_alen_t, int);
-    struct hostent *gethostent(void);
+    struct hostent *PerlSock_gethostbyname(const char *);
+    struct hostent *PerlSock_gethostbyaddr(const Gethbadd_addr_t, Gethbadd_alen_t, int);
+    struct hostent *PerlSock_gethostent(void);
 #endif
     struct hostent *hent;
     unsigned long len;
 
     EXTEND(SP, 10);
     if (which == OP_GHBYNAME) {
-	hent = gethostbyname(POPp);
+	hent = PerlSock_gethostbyname(POPp);
     }
     else if (which == OP_GHBYADDR) {
 	int addrtype = POPi;
@@ -3596,11 +3596,11 @@ PP(pp_ghostent)
 	STRLEN addrlen;
 	Gethbadd_addr_t addr = (Gethbadd_addr_t) SvPV(addrsv, addrlen);
 
-	hent = gethostbyaddr(addr, (Gethbadd_alen_t) addrlen, addrtype);
+	hent = PerlSock_gethostbyaddr(addr, (Gethbadd_alen_t) addrlen, addrtype);
     }
     else
 #ifdef HAS_GETHOSTENT
-	hent = gethostent();
+	hent = PerlSock_gethostent();
 #else
 	DIE("gethostent not implemented");
 #endif
@@ -3759,18 +3759,18 @@ PP(pp_gprotoent)
     register char **elem;
     register SV *sv;  
 #ifndef DONT_DECLARE_STD
-    struct protoent *getprotobyname(const char *);
-    struct protoent *getprotobynumber(int);
-    struct protoent *getprotoent(void);
+    struct protoent *PerlSock_getprotobyname(const char *);
+    struct protoent *PerlSock_getprotobynumber(int);
+    struct protoent *PerlSock_getprotoent(void);
 #endif
     struct protoent *pent;
 
     if (which == OP_GPBYNAME)
-	pent = getprotobyname(POPp);
+	pent = PerlSock_getprotobyname(POPp);
     else if (which == OP_GPBYNUMBER)
-	pent = getprotobynumber(POPi);
+	pent = PerlSock_getprotobynumber(POPi);
     else
-	pent = getprotoent();
+	pent = PerlSock_getprotoent();
 
     EXTEND(SP, 3);
     if (GIMME != G_ARRAY) {
@@ -3829,9 +3829,9 @@ PP(pp_gservent)
     register char **elem;
     register SV *sv;
 #ifndef DONT_DECLARE_STD
-    struct servent *getservbyname(const char *, const char *);
-    struct servent *getservbynumber();
-    struct servent *getservent(void);
+    struct servent *PerlSock_getservbyname(const char *, const char *);
+    struct servent *PerlSock_getservbynumber();
+    struct servent *PerlSock_getservent(void);
 #endif
     struct servent *sent;
 
@@ -3842,19 +3842,19 @@ PP(pp_gservent)
 	if (proto && !*proto)
 	    proto = Nullch;
 
-	sent = getservbyname(name, proto);
+	sent = PerlSock_getservbyname(name, proto);
     }
     else if (which == OP_GSBYPORT) {
 	char *proto = POPp;
 	unsigned short port = POPu;
 
 #ifdef HAS_HTONS
-	port = htons(port);
+	port = PerlSock_htons(port);
 #endif
-	sent = getservbyport(port, proto);
+	sent = PerlSock_getservbyport(port, proto);
     }
     else
-	sent = getservent();
+	sent = PerlSock_getservent();
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {
@@ -3862,7 +3862,7 @@ PP(pp_gservent)
 	if (sent) {
 	    if (which == OP_GSBYNAME) {
 #ifdef HAS_NTOHS
-		sv_setiv(sv, (IV)ntohs(sent->s_port));
+		sv_setiv(sv, (IV)PerlSock_ntohs(sent->s_port));
 #else
 		sv_setiv(sv, (IV)(sent->s_port));
 #endif
@@ -4383,9 +4383,9 @@ int operation;
 
     /* flock locks entire file so for lockf we need to do the same	*/
     save_errno = errno;
-    pos = lseek(fd, (Off_t)0, SEEK_CUR);    /* get pos to restore later */
+    pos = PerlLIO_lseek(fd, (Off_t)0, SEEK_CUR);    /* get pos to restore later */
     if (pos > 0)	/* is seekable and needs to be repositioned	*/
-	if (lseek(fd, (Off_t)0, SEEK_SET) < 0)
+	if (PerlLIO_lseek(fd, (Off_t)0, SEEK_SET) < 0)
 	    pos = -1;	/* seek failed, so don't seek back afterwards	*/
     errno = save_errno;
 
@@ -4422,7 +4422,7 @@ int operation;
     }
 
     if (pos > 0)      /* need to restore position of the handle	*/
-	lseek(fd, pos, SEEK_SET);	/* ignore error here	*/
+	PerlLIO_lseek(fd, pos, SEEK_SET);	/* ignore error here	*/
 
     return (i);
 }

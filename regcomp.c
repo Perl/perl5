@@ -750,7 +750,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     DEBUG_r(
 	if (!colorset) {
 	    int i = 0;
-	    char *s = getenv("TERMCAP_COLORS");
+	    char *s = PerlEnv_getenv("TERMCAP_COLORS");
 	    
 	    colorset = 1;
 	    if (s) {
