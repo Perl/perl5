@@ -156,8 +156,7 @@ if ($Is_Cygwin) {
     };
   };
 } else {
-  $perldll = 'perl.' . $dlext;
-  $perldll = 'perl56.' . $dlext if $Config{'ccflags'} =~ /PERL_OBJECT/i;
+  $perldll = 'perl56.' . $dlext;
 }
 
    if ($dlsrc ne "dl_none.xs") {

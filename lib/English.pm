@@ -15,14 +15,6 @@ English - use nice English (or awk) names for ugly punctuation variables
 
 =head1 DESCRIPTION
 
-You should I<not> use this module in programs intended to be portable
-among Perl versions, programs that must perform regular expression
-matching operations efficiently, or libraries intended for use with
-such programs.  In a sense, this module is deprecated.  The reasons
-for this have to do with implementation details of the Perl
-interpreter which are too thorny to go into here.  Perhaps someday
-they will be fixed to make "C<use English>" more practical.
-
 This module provides aliases for the built-in variables whose
 names no one seems to like to read.  Variables with side-effects
 which get triggered just by accessing them (like $0) will still 
@@ -35,9 +27,15 @@ $INPUT_RECORD_SEPARATOR if you are using the English module.
 
 See L<perlvar> for a complete list of these.
 
+=head1 BUGS
+
+This module provokes sizeable inefficiencies for regular expressions,
+due to unfortunate implementation details.  If performance matters,
+consider avoiding English.
+
 =cut
 
-local $^W = 0;
+no warnings;
 
 # Grandfather $NAME import
 sub import {
@@ -89,6 +87,7 @@ sub import {
 	*EGID
 	*PROGRAM_NAME
 	*PERL_VERSION
+	*PERL_VERSION_TUPLE
 	*ACCUMULATOR
 	*DEBUGGING
 	*SYSTEM_FD_MAX
@@ -167,6 +166,7 @@ sub import {
 # Internals.
 
 	*PERL_VERSION				= *]	;
+	*PERL_VERSION_TUPLE			= *^V	;
 	*ACCUMULATOR				= *^A	;
 	*COMPILING				= *^C	;
 	*DEBUGGING				= *^D	;

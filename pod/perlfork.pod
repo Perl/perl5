@@ -172,6 +172,73 @@ the seek position in the parent will change it in the child and vice-versa.
 One can avoid this by opening files that need distinct seek pointers
 separately in the child.
 
+=item Forking pipe open() not yet implemented
+
+The C<open(FOO, "|-")> and C<open(BAR, "-|")> constructs are not yet
+implemented.  This limitation can be easily worked around in new code
+by creating a pipe explicitly.  The following example shows how to
+write to a forked child:
+
+    # simulate open(FOO, "|-")
+    sub pipe_to_fork ($) {
+	my $parent = shift;
+	pipe my $child, $parent or die;
+	my $pid = fork();
+	die "fork() failed: $!" unless defined $pid;
+	if ($pid) {
+	    close $child;
+	}
+	else {
+	    close $parent;
+	    open(STDIN, "<&=" . fileno($child)) or die;
+	}
+	$pid;
+    }
+
+    if (pipe_to_fork('FOO')) {
+	# parent
+	print FOO "pipe_to_fork\n";
+	close FOO;
+    }
+    else {
+	# child
+	while (<STDIN>) { print; }
+	close STDIN;
+	exit(0);
+    }
+
+And this one reads from the child:
+
+    # simulate open(FOO, "-|")
+    sub pipe_from_fork ($) {
+	my $parent = shift;
+	pipe $parent, my $child or die;
+	my $pid = fork();
+	die "fork() failed: $!" unless defined $pid;
+	if ($pid) {
+	    close $child;
+	}
+	else {
+	    close $parent;
+	    open(STDOUT, ">&=" . fileno($child)) or die;
+	}
+	$pid;
+    }
+
+    if (pipe_from_fork('BAR')) {
+	# parent
+	while (<BAR>) { print; }
+	close BAR;
+    }
+    else {
+	# child
+	print "pipe_from_fork\n";
+	close STDOUT;
+	exit(0);
+    }
+
+Forking pipe open() constructs will be supported in future.
+
 =item Global state maintained by XSUBs 
 
 External subroutines (XSUBs) that maintain their own global state may
@@ -216,6 +283,8 @@ representation for pseudo-process IDs will be implemented in future.
 =item *
 
 This document may be incomplete in some respects.
+
+=back
 
 =head1 AUTHOR
 

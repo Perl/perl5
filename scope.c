@@ -1,6 +1,6 @@
 /*    scope.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -933,6 +933,13 @@ Perl_leave_scope(pTHX_ I32 base)
 		GvHV(PL_hintgv) = NULL;
 	    }
 	    *(I32*)&PL_hints = (I32)SSPOPINT;
+	    break;
+	case SAVEt_COMPPAD:
+	    PL_comppad = (AV*)SSPOPPTR;
+	    if (PL_comppad)
+		PL_curpad = AvARRAY(PL_comppad);
+	    else
+		PL_curpad = Null(SV**);
 	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");

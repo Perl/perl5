@@ -31,6 +31,7 @@
 #define SAVEt_DESTRUCTOR_X	30
 #define SAVEt_VPTR		31
 #define SAVEt_I8		32
+#define SAVEt_COMPPAD		33
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
@@ -45,6 +46,24 @@
 #define SSPOPPTR (PL_savestack[--PL_savestack_ix].any_ptr)
 #define SSPOPDPTR (PL_savestack[--PL_savestack_ix].any_dptr)
 #define SSPOPDXPTR (PL_savestack[--PL_savestack_ix].any_dxptr)
+
+/*
+=for apidoc Ams||SAVETMPS
+Opening bracket for temporaries on a callback.  See C<FREETMPS> and
+L<perlcall>.
+
+=for apidoc Ams||FREETMPS
+Closing bracket for temporaries on a callback.  See C<SAVETMPS> and
+L<perlcall>.
+
+=for apidoc Ams||ENTER
+Opening bracket on a callback.  See C<LEAVE> and L<perlcall>.
+
+=for apidoc Ams||LEAVE
+Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
+
+=cut
+*/
 
 #define SAVETMPS save_int((int*)&PL_tmps_floor), PL_tmps_floor = PL_tmps_ix
 #define FREETMPS if (PL_tmps_ix > PL_tmps_floor) free_tmps()
@@ -112,6 +131,19 @@
 	    SSPUSHINT(PL_hints);		\
 	    SSPUSHINT(SAVEt_HINTS);		\
 	}					\
+    } STMT_END
+
+#define SAVECOMPPAD() \
+    STMT_START {						\
+	if (PL_comppad && PL_curpad == AvARRAY(PL_comppad)) {	\
+	    SSCHECK(2);						\
+	    SSPUSHPTR((SV*)PL_comppad);				\
+	    SSPUSHINT(SAVEt_COMPPAD);				\
+	}							\
+	else {							\
+	    SAVEVPTR(PL_curpad);				\
+	    SAVESPTR(PL_comppad);				\
+	}							\
     } STMT_END
 
 #ifdef USE_ITHREADS

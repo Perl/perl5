@@ -24,7 +24,6 @@ sub cflags {
       / *= */ and $self->{$`} = $';
     };
     $self->{CCFLAGS} .= " -DUSEIMPORTLIB" if ($Config{useshrplib} eq 'true');
-    $self->{CCFLAGS} .= " -DCYGWIN" unless ($self->{CCFLAGS} =~ /\-DCYGWIN/);
 
     return $self->{CFLAGS} = qq{
 CCFLAGS = $self->{CCFLAGS}

@@ -1,9 +1,10 @@
 package User::pwent;
 use strict;
 
+use 5.005_64;
+our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 BEGIN { 
     use Exporter   ();
-    use vars       qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
     @EXPORT      = qw(getpwent getpwuid getpwnam getpw);
     @EXPORT_OK   = qw(
 			$pw_name   $pw_passwd 	$pw_uid	 

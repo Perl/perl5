@@ -125,6 +125,10 @@ DeadCode(pTHX)
 	PerlIO_printf(Perl_debug_log, "%s: perl not compiled with DEBUGGING_MSTATS\n",str);
 #endif
 
+#define _CvGV(cv)					\
+	(SvROK(cv) && (SvTYPE(SvRV(cv))==SVt_PVCV)	\
+	 ? (SV*)CvGV((CV*)SvRV(cv)) : &PL_sv_undef)
+
 MODULE = Devel::Peek		PACKAGE = Devel::Peek
 
 void
@@ -206,3 +210,9 @@ CODE:
     RETVAL = DeadCode(aTHX);
 OUTPUT:
     RETVAL
+
+MODULE = Devel::Peek		PACKAGE = Devel::Peek	PREFIX = _
+
+SV *
+_CvGV(cv)
+    SV *cv

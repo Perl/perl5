@@ -145,7 +145,7 @@ List C<incr+1> lines starting at C<min>.
 
 =item l min-max
 
-List lines C<min> through C<max>.  C<l -> is synonymous to C<->.
+List lines C<min> through C<max>.  C<l E<45>> is synonymous to C<E<45>>.
 
 =item l line
 
@@ -153,7 +153,8 @@ List a single line.
 
 =item l subname
 
-List first window of lines from subroutine.
+List first window of lines from subroutine.  I<subname> may
+be a variable which contains a code reference.
 
 =item -
 
@@ -173,6 +174,12 @@ print it out.
 Switch to viewing a different file or eval statement.  If C<filename>
 is not a full filename as found in values of %INC, it is considered as
 a regexp.
+
+C<eval>ed strings (when accessible) are considered to be filenames:
+C<f (eval 7)> and C<f eval 7\b> access the body of the 7th C<eval>ed string
+(in the order of execution).  The bodies of currently executed C<eval>
+and of C<eval>ed strings which define subroutines are saved, thus are
+accessible by this mechanism.
 
 =item /pattern/
 
@@ -245,7 +252,9 @@ that begin an executable statement.  Conditions don't use B<if>:
 
 =item b subname [condition]
 
-Set a breakpoint at the first line of the named subroutine.
+Set a breakpoint at the first line of the named subroutine.  I<subname> may
+be a variable which contains a code reference (in this case I<condition>
+is not supported).
 
 =item b postpone subname [condition]
 

@@ -300,14 +300,15 @@ sub bits {
     my $catmask ;
     my $fatal = 0 ;
     foreach my $word (@_) {
-	if  ($word eq 'FATAL')
-	  { $fatal = 1 }
-	elsif ($catmask = $Bits{$word}) {
-	  $mask |= $catmask ;
-	  $mask |= $DeadBits{$word} if $fatal ;
+	if  ($word eq 'FATAL') {
+	    $fatal = 1;
 	}
-	else
-	  { croak "unknown warning category '$word'" }
+	else {
+	    if ($catmask = $Bits{$word}) {
+		$mask |= $catmask ;
+		$mask |= $DeadBits{$word} if $fatal ;
+	    }
+	}
     }
 
     return $mask ;
@@ -315,12 +316,12 @@ sub bits {
 
 sub import {
     shift;
-    ${^Warnings} |= bits(@_ ? @_ : 'all') ;
+    ${^WARNING_BITS} |= bits(@_ ? @_ : 'all') ;
 }
 
 sub unimport {
     shift;
-    ${^Warnings} &= ~ bits(@_ ? @_ : 'all') ;
+    ${^WARNING_BITS} &= ~ bits(@_ ? @_ : 'all') ;
 }
 
 sub enabled
@@ -328,7 +329,7 @@ sub enabled
     my $string = shift ;
 
     return 1
-	if $bits{$string} && ${^Warnings} & $bits{$string} ;
+	if $bits{$string} && ${^WARNING_BITS} & $bits{$string} ;
    
     return 0 ; 
 }

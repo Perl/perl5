@@ -13,7 +13,7 @@ use Carp;
 use Symbol;
 use Exporter;
 use IO::File;
-use vars qw(@ISA $VERSION @EXPORT_OK);
+our(@ISA, $VERSION, @EXPORT_OK);
 use Tie::Hash;
 use File::stat;
 

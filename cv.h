@@ -1,6 +1,6 @@
 /*    cv.h
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -35,6 +35,16 @@ struct xpvcv {
 #endif /* USE_THREADS */
     cv_flags_t	xcv_flags;
 };
+
+/*
+=for apidoc AmU||Nullcv
+Null CV pointer.
+
+=for apidoc Am|HV*|CvSTASH|CV* cv
+Returns the stash of the CV.
+
+=cut
+*/
 
 #define Nullcv Null(CV*)
 

@@ -5,14 +5,12 @@ BEGIN {
 	use strict;
     }
 }
-use vars qw($VERSION @ISA); 
 
 require Tie::Hash;
-use DynaLoader ();
+use XSLoader ();
 
-@ISA = qw(Tie::Hash);
-
-$VERSION = "1.03";
+our @ISA = qw(Tie::Hash);
+our $VERSION = "1.03";
 
 XSLoader::load 'NDBM_File', $VERSION;
 

@@ -66,7 +66,7 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1991-1999, Larry Wall
+ ****    Copyright (c) 1991-2000, Larry Wall
  ****
  ****    You may distribute under the terms of either the GNU General Public
  ****    License or the Artistic License, as specified in the README file.
@@ -2335,6 +2335,7 @@ S_regmatch(pTHX_ regnode *prog)
 			I32 onpar = PL_regnpar;
 
 			pm.op_pmflags = 0;
+			pm.op_pmdynflags = (UTF||DO_UTF8(ret) ? PMdf_UTF8 : 0);
 			re = CALLREGCOMP(aTHX_ t, t + len, &pm);
 			if (!(SvFLAGS(ret) 
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)))

@@ -87,8 +87,6 @@ perl_get_host_info(struct IPerlMemInfo* perlMemInfo,
     }
 }
 
-#ifdef PERL_OBJECT
-
 EXTERN_C PerlInterpreter*
 perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 		 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
@@ -97,33 +95,26 @@ perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 		 struct IPerlProc** ppProc)
 {
     PerlInterpreter *my_perl = NULL;
-    try
-    {
-	CPerlHost* pHost = new CPerlHost(ppMem, ppMemShared, ppMemParse, ppEnv,
-					 ppStdIO, ppLIO, ppDir, ppSock, ppProc);
+    CPerlHost* pHost = new CPerlHost(ppMem, ppMemShared, ppMemParse, ppEnv,
+				     ppStdIO, ppLIO, ppDir, ppSock, ppProc);
 
-	if (pHost) {
-	    my_perl = perl_alloc_using(pHost->m_pHostperlMem,
-				       pHost->m_pHostperlMemShared,
-				       pHost->m_pHostperlMemParse,
-				       pHost->m_pHostperlEnv,
-				       pHost->m_pHostperlStdIO,
-				       pHost->m_pHostperlLIO,
-				       pHost->m_pHostperlDir,
-				       pHost->m_pHostperlSock,
-				       pHost->m_pHostperlProc);
-	    if (my_perl) {
-		CPerlObj* pPerl = (CPerlObj*)my_perl;
-		w32_internal_host = pHost;
-	    }
+    if (pHost) {
+	my_perl = perl_alloc_using(pHost->m_pHostperlMem,
+				   pHost->m_pHostperlMemShared,
+				   pHost->m_pHostperlMemParse,
+				   pHost->m_pHostperlEnv,
+				   pHost->m_pHostperlStdIO,
+				   pHost->m_pHostperlLIO,
+				   pHost->m_pHostperlDir,
+				   pHost->m_pHostperlSock,
+				   pHost->m_pHostperlProc);
+	if (my_perl) {
+#ifdef PERL_OBJECT
+	    CPerlObj* pPerl = (CPerlObj*)my_perl;
+#endif
+	    w32_internal_host = pHost;
 	}
     }
-    catch(...)
-    {
-	win32_fprintf(stderr, "%s\n", "Error: Unable to allocate memory");
-	my_perl = NULL;
-    }
-
     return my_perl;
 }
 
@@ -131,33 +122,28 @@ EXTERN_C PerlInterpreter*
 perl_alloc(void)
 {
     PerlInterpreter* my_perl = NULL;
-    try
-    {
-	CPerlHost* pHost = new CPerlHost();
-	if (pHost) {
-	    my_perl = perl_alloc_using(pHost->m_pHostperlMem,
-				       pHost->m_pHostperlMemShared,
-				       pHost->m_pHostperlMemParse,
-				       pHost->m_pHostperlEnv,
-				       pHost->m_pHostperlStdIO,
-				       pHost->m_pHostperlLIO,
-				       pHost->m_pHostperlDir,
-				       pHost->m_pHostperlSock,
-				       pHost->m_pHostperlProc);
-	    if (my_perl) {
-		CPerlObj* pPerl = (CPerlObj*)my_perl;
-		w32_internal_host = pHost;
-	    }
+    CPerlHost* pHost = new CPerlHost();
+    if (pHost) {
+	my_perl = perl_alloc_using(pHost->m_pHostperlMem,
+				   pHost->m_pHostperlMemShared,
+				   pHost->m_pHostperlMemParse,
+				   pHost->m_pHostperlEnv,
+				   pHost->m_pHostperlStdIO,
+				   pHost->m_pHostperlLIO,
+				   pHost->m_pHostperlDir,
+				   pHost->m_pHostperlSock,
+				   pHost->m_pHostperlProc);
+	if (my_perl) {
+#ifdef PERL_OBJECT
+	    CPerlObj* pPerl = (CPerlObj*)my_perl;
+#endif
+	    w32_internal_host = pHost;
 	}
     }
-    catch(...)
-    {
-	win32_fprintf(stderr, "%s\n", "Error: Unable to allocate memory");
-	my_perl = NULL;
-    }
-
     return my_perl;
 }
+
+#ifdef PERL_OBJECT
 
 EXTERN_C void
 perl_construct(PerlInterpreter* my_perl)
@@ -263,30 +249,6 @@ perl_parse(PerlInterpreter* my_perl, void (*xsinit)(CPerlObj*), int argc, char**
 #undef PL_perl_destruct_level
 #define PL_perl_destruct_level int dummy
 
-#else /* !PERL_OBJECT */
-
-EXTERN_C PerlInterpreter*
-perl_alloc(void)
-{
-    PerlInterpreter *my_perl = NULL;
-    CPerlHost* pHost = new CPerlHost();
-    if (pHost) {
-	my_perl = perl_alloc_using(pHost->m_pHostperlMem,
-				   pHost->m_pHostperlMemShared,
-				   pHost->m_pHostperlMemParse,
-				   pHost->m_pHostperlEnv,
-				   pHost->m_pHostperlStdIO,
-				   pHost->m_pHostperlLIO,
-				   pHost->m_pHostperlDir,
-				   pHost->m_pHostperlSock,
-				   pHost->m_pHostperlProc);
-	if (my_perl) {
-	    w32_internal_host = pHost;
-	}
-    }
-    return my_perl;
-}
-
 #endif /* PERL_OBJECT */
 #endif /* PERL_IMPLICIT_SYS */
 
@@ -297,13 +259,19 @@ static DWORD g_TlsAllocIndex;
 EXTERN_C DllExport bool
 SetPerlInterpreter(void *interp)
 {
-    return TlsSetValue(g_TlsAllocIndex, interp);
+    DWORD dwErr = GetLastError();
+    bool bResult = TlsSetValue(g_TlsAllocIndex, interp);
+    SetLastError(dwErr);
+    return bResult;
 }
 
 EXTERN_C DllExport void*
 GetPerlInterpreter(void)
 {
-    return TlsGetValue(g_TlsAllocIndex);
+    DWORD dwErr = GetLastError();
+    LPVOID pResult = TlsGetValue(g_TlsAllocIndex);
+    SetLastError(dwErr);
+    return pResult;
 }
 
 EXTERN_C DllExport int

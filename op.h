@@ -1,6 +1,6 @@
 /*    op.h
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -52,6 +52,20 @@ typedef U32 PADOFFSET;
 	 ((op)->op_flags & OPf_WANT) == OPf_WANT_LIST   ? G_ARRAY   : \
 	 dfl)
 
+/*
+=for apidoc Amn|U32|GIMME_V
+The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
+C<G_SCALAR> or C<G_ARRAY> for void, scalar or array context,
+respectively.
+
+=for apidoc Amn|U32|GIMME
+A backward-compatible version of C<GIMME_V> which can only return
+C<G_SCALAR> or C<G_ARRAY>; in a void context, it returns C<G_SCALAR>.
+Deprecated.  Use C<GIMME_V> instead.
+
+=cut
+*/
+
 #define GIMME_V		OP_GIMME(PL_op, block_gimme())
 
 /* Public flags */
@@ -77,6 +91,7 @@ typedef U32 PADOFFSET;
 				/*  On flipflop, we saw ... instead of .. */
 				/*  On UNOPs, saw bare parens, e.g. eof(). */
 				/*  On OP_ENTERSUB || OP_NULL, saw a "do". */
+				/*  On OP_EXISTS, treat av as av, not avhv.  */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
 				/*  On OP_ENTERITER, loop var is per-thread */
                                 /*  On pushre, re is /\s+/ imp. by split " " */
@@ -84,12 +99,16 @@ typedef U32 PADOFFSET;
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
 #define OPf_KNOW	OPf_WANT
+
 #define GIMME \
 	  (PL_op->op_flags & OPf_WANT					\
 	   ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
 	      ? G_ARRAY							\
 	      : G_SCALAR)						\
 	   : dowantarray())
+
+/* NOTE: OP_NEXTSTATE, OP_DBSTATE, and OP_SETSTATE (i.e. COPs) carry lower
+ * bits of PL_hints in op_private */
 
 /* Private for lvalues */
 #define OPpLVAL_INTRO	128	/* Lvalue must be localized or lvalue sub */
@@ -136,7 +155,7 @@ typedef U32 PADOFFSET;
 #define OPpEARLY_CV		32	/* foo() called before sub foo was parsed */
   /* OP_?ELEM only */
 #define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
-  /* OP_RV2?V only */
+  /* OP_RV2?V, OP_GVSV only */
 #define OPpOUR_INTRO		16	/* Defer creation of array/hash elem */
   /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
 
@@ -159,6 +178,9 @@ typedef U32 PADOFFSET;
 
 /* Private for OP_DELETE */
 #define OPpSLICE		64	/* Operating on a list of keys */
+
+/* Private for OP_EXISTS */
+#define OPpEXISTS_SUB		64	/* Checking for &sub, not {} or [].  */
 
 /* Private for OP_SORT, OP_PRTF, OP_SPRINTF, OP_FTTEXT, OP_FTBINARY, */
 /*             string comparisons, and case changers. */
@@ -215,6 +237,7 @@ struct pmop {
 
 #define PMdf_USED	0x01		/* pm has been used once already */
 #define PMdf_TAINTED	0x02		/* pm compiled from tainted pattern */
+#define PMdf_UTF8	0x04		/* pm compiled from utf8 data */
 
 #define PMf_RETAINT	0x0001		/* taint $1 etc. if target tainted */
 #define PMf_ONCE	0x0002		/* use pattern only once per reset */

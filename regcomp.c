@@ -69,7 +69,7 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1991-1999, Larry Wall
+ ****    Copyright (c) 1991-2000, Larry Wall
  ****
  ****    You may distribute under the terms of either the GNU General Public
  ****    License or the Artistic License, as specified in the README file.
@@ -1339,8 +1339,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
-    if (PL_curcop == &PL_compiling ? (PL_hints & HINT_UTF8) : IN_UTF8)
+    if (pm->op_pmdynflags & PMdf_UTF8) {
 	PL_reg_flags |= RF_utf8;
+    }
     else
 	PL_reg_flags = 0;
 
@@ -1602,7 +1603,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_r((sv = sv_newmortal(),
 		     regprop(sv, (regnode*)data.start_class),
-		     PerlIO_printf(Perl_debug_log, "synthetic stclass.\n",
+		     PerlIO_printf(Perl_debug_log, "synthetic stclass `%s'.\n",
 				   SvPVX(sv))));
 	}
 
@@ -1651,7 +1652,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_r((sv = sv_newmortal(),
 		     regprop(sv, (regnode*)data.start_class),
-		     PerlIO_printf(Perl_debug_log, "synthetic stclass.\n",
+		     PerlIO_printf(Perl_debug_log, "synthetic stclass `%s'.\n",
 				   SvPVX(sv))));
 	}
     }
@@ -3372,10 +3373,10 @@ S_regclassutf8(pTHX)
 		if (!SIZE_ONLY) {
 		    if (value == 'p')
 			Perl_sv_catpvf(aTHX_ listsv,
-				       "+utf8::%.*s\n", n, PL_regcomp_parse);
+				       "+utf8::%.*s\n", (int)n, PL_regcomp_parse);
 		    else
 			Perl_sv_catpvf(aTHX_ listsv,
-				       "!utf8::%.*s\n", n, PL_regcomp_parse);
+				       "!utf8::%.*s\n", (int)n, PL_regcomp_parse);
 		}
 		PL_regcomp_parse = e + 1;
 		lastvalue = OOB_UTF8;
@@ -3936,7 +3937,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
     else if (k == WHILEM && o->flags)			/* Ordinal/of */
 	Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", o->flags & 0xf, o->flags>>4);
     else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP )
-	Perl_sv_catpvf(aTHX_ sv, "%d", ARG(o));	/* Parenth number */
+	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
     else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {

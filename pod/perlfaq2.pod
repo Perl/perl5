@@ -344,7 +344,7 @@ following list is I<not> the complete list of CPAN mirrors.
 
 Most of the major modules (Tk, CGI, libwww-perl) have their own
 mailing lists.  Consult the documentation that came with the module for
-subscription information.  Perl Mongers attempts to maintain a
+subscription information.  The Perl Mongers attempt to maintain a
 list of mailing lists at:
 
 	http://www.perl.org/support/online_support.html#mail

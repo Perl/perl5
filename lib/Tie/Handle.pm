@@ -1,5 +1,8 @@
 package Tie::Handle;
 
+use 5.005_64;
+our $VERSION = '1.0';
+
 =head1 NAME
 
 Tie::Handle, Tie::StdHandle  - base class definitions for tied handles
@@ -183,8 +186,7 @@ sub CLOSE {
 } 
 
 package Tie::StdHandle; 
-use vars qw(@ISA);
-@ISA = 'Tie::Handle';       
+our @ISA = 'Tie::Handle';       
 use Carp;
 
 sub TIEHANDLE 

@@ -956,6 +956,7 @@ END
 static double
 constant(char *name, int len, int arg)
 {
+    errno = 0;
     if (strEQ(name + $offarg, "$list->[0]")) {	/* $pref removed */
 #ifdef $pref$list->[0]
 	return $protect$pref$list->[0];
@@ -994,6 +995,9 @@ END
 static double
 constant$npref(char *name, int len, int arg)
 {
+END
+
+  print $fh <<"END" if $npref eq '';
     errno = 0;
 END
 
@@ -1286,19 +1290,22 @@ EOP
 warn "Writing $ext$modpname/Makefile.PL\n";
 open(PL, ">Makefile.PL") || die "Can't create $ext$modpname/Makefile.PL: $!\n";
 
-print PL <<'END';
+print PL <<END;
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
+WriteMakefile(
+    'NAME'		=> '$module',
+    'VERSION_FROM'	=> '$modfname.pm', # finds \$VERSION
+    'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
 END
-print PL "WriteMakefile(\n";
-print PL "    'NAME'	=> '$module',\n";
-print PL "    'VERSION_FROM' => '$modfname.pm', # finds \$VERSION\n"; 
-if( ! $opt_X ){ # print C stuff, unless XS is disabled
+if (!$opt_X) { # print C stuff, unless XS is disabled
   $opt_F = '' unless defined $opt_F;
-  print PL "    'LIBS'	=> ['$extralibs'],   # e.g., '-lm' \n";
-  print PL "    'DEFINE'	=> '$opt_F',     # e.g., '-DHAVE_SOMETHING' \n";
-  print PL "    'INC'	=> '',     # e.g., '-I/usr/include/other' \n";
+  print PL <<END;
+    'LIBS'		=> ['$extralibs'], # e.g., '-lm'
+    'DEFINE'		=> '$opt_F', # e.g., '-DHAVE_SOMETHING'
+    'INC'		=> '', # e.g., '-I/usr/include/other'
+END
 }
 print PL ");\n";
 close(PL) || die "Can't close $ext$modpname/Makefile.PL: $!\n";

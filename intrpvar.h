@@ -35,7 +35,17 @@ PERLVAR(Iminus_l,	bool)
 PERLVAR(Iminus_a,	bool)
 PERLVAR(Iminus_F,	bool)
 PERLVAR(Idoswitches,	bool)
-PERLVAR(Idowarn,	bool)
+
+/*
+=for apidoc Amn|bool|PL_dowarn
+
+The C variable which corresponds to Perl's $^W warning variable.
+
+=cut
+*/
+
+PERLVAR(Idowarn,	U8)
+PERLVAR(Iwidesyscalls,	bool)		/* wide system calls */
 PERLVAR(Idoextract,	bool)
 PERLVAR(Isawampersand,	bool)		/* must save all match strings */
 PERLVAR(Iunsafe,	bool)
@@ -80,6 +90,29 @@ PERLVAR(Ierrgv,		GV *)
 /* shortcuts to debugging objects */
 PERLVAR(IDBgv,		GV *)
 PERLVAR(IDBline,	GV *)
+
+/*
+=for apidoc Amn|GV *|PL_DBsub
+When Perl is run in debugging mode, with the B<-d> switch, this GV contains
+the SV which holds the name of the sub being debugged.  This is the C
+variable which corresponds to Perl's $DB::sub variable.  See
+C<PL_DBsingle>.
+
+=for apidoc Amn|SV *|PL_DBsingle
+When Perl is run in debugging mode, with the B<-d> switch, this SV is a
+boolean which indicates whether subs are being single-stepped. 
+Single-stepping is automatically turned on after every step.  This is the C
+variable which corresponds to Perl's $DB::single variable.  See
+C<PL_DBsub>.
+
+=for apidoc Amn|SV *|PL_DBtrace
+Trace variable used when Perl is run in debugging mode, with the B<-d>
+switch.  This is the C variable which corresponds to Perl's $DB::trace
+variable.  See C<PL_DBsingle>.
+
+=cut
+*/
+
 PERLVAR(IDBsub,		GV *)
 PERLVAR(IDBsingle,	SV *)
 PERLVAR(IDBtrace,	SV *)
@@ -93,7 +126,7 @@ PERLVAR(Iglobalstash,	HV *)		/* global keyword overrides imported here */
 PERLVAR(Icurstname,	SV *)		/* name of current package */
 PERLVAR(Ibeginav,	AV *)		/* names of BEGIN subroutines */
 PERLVAR(Iendav,		AV *)		/* names of END subroutines */
-PERLVAR(Istopav,	AV *)		/* names of STOP subroutines */
+PERLVAR(Icheckav,	AV *)		/* names of CHECK subroutines */
 PERLVAR(Iinitav,	AV *)		/* names of INIT subroutines */
 PERLVAR(Istrtab,	HV *)		/* shared string table */
 PERLVARI(Isub_generation,U32,1)		/* incr to invalidate method cache */
@@ -147,6 +180,19 @@ PERLVAR(Iofmt,		char *)		/* output format for numbers $# */
 PERLVARI(Iexitlist,	PerlExitListEntry *, NULL)
 					/* list of exit functions */
 PERLVARI(Iexitlistlen,	I32, 0)		/* length of same */
+
+/*
+=for apidoc Amn|HV*|PL_modglobal
+
+C<PL_modglobal> is a general purpose, interpreter global HV for use by 
+extensions that need to keep information on a per-interpreter basis.
+In a pinch, it can also be used as a symbol table for extensions 
+to share data among each other.  It is a good idea to use keys 
+prefixed by the package name of the extension that owns the data.
+
+=cut
+*/
+
 PERLVAR(Imodglobal,	HV *)		/* per-interp module data */
 
 /* these used to be in global before 5.004_68 */
@@ -221,6 +267,21 @@ PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
 PERLVARI(Irunops,	runops_proc_t,	MEMBER_TO_FPTR(RUNOPS_DEFAULT))
 
 PERLVARA(Itokenbuf,256,	char)
+
+/*
+=for apidoc Amn|SV|PL_sv_undef
+This is the C<undef> SV.  Always refer to this as C<&PL_sv_undef>.
+
+=for apidoc Amn|SV|PL_sv_no
+This is the C<false> SV.  See C<PL_sv_yes>.  Always refer to this as
+C<&PL_sv_no>.
+
+=for apidoc Amn|SV|PL_sv_yes
+This is the C<true> SV.  See C<PL_sv_no>.  Always refer to this as
+C<&PL_sv_yes>.
+
+=cut
+*/
 
 PERLVAR(Isv_undef,	SV)
 PERLVAR(Isv_no,		SV)

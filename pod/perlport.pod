@@ -870,7 +870,8 @@ Even though VOS allows the slash character to appear in object
 names, because the VOS port of Perl interprets it as a pathname
 delimiting character, VOS files, directories, or links whose names
 contain a slash character cannot be processed.  Such files must be
-renamed before they can be processed by Perl.
+renamed before they can be processed by Perl.  Note that VOS limits
+file names to 32 or fewer characters.
 
 The following C functions are unimplemented on VOS, and any attempt by
 Perl to use them will result in a fatal error message and an immediate
@@ -883,7 +884,7 @@ The value of C<$^O> on VOS is "VOS".  To determine the architecture that
 you are running on without resorting to loading all of C<%Config> you
 can examine the content of the C<@INC> array like so:
 
-    if (grep(/VOS/, @INC)) {
+    if ($^O =~ /VOS/) {
         print "I'm on a Stratus box!\n";
     } else {
         print "I'm not on a Stratus box!\n";
@@ -894,13 +895,13 @@ can examine the content of the C<@INC> array like so:
         print "This box is a Stratus XA/R!\n";
 
     } elsif (grep(/7100/, @INC)) {
-        print "This box is a Stratus HP 7100 or 8000!\n";
+        print "This box is a Stratus HP 7100 or 8xxx!\n";
 
     } elsif (grep(/8000/, @INC)) {
-        print "This box is a Stratus HP 8000!\n";
+        print "This box is a Stratus HP 8xxx!\n";
 
     } else {
-        print "This box is a Stratus 68K...\n";
+        print "This box is a Stratus 68K!\n";
     }
 
 Also see:
@@ -1401,11 +1402,11 @@ Not implemented. (Plan9, Win32, S<RISC OS>)
 
 =item endpwent
 
-Not implemented. (S<Mac OS>, Win32, VM/ESA)
+Not implemented. (S<Mac OS>, MPE/iX, VM/ESA, Win32)
 
 =item endgrent
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VM/ESA)
+Not implemented. (S<Mac OS>, MPE/iX, S<RISC OS>, VM/ESA, VMS, Win32)
 
 =item endhostent
 
@@ -1462,10 +1463,13 @@ the process.  (Win32)
 
 =item link OLDFILE,NEWFILE
 
-Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
+Not implemented. (S<Mac OS>, MPE/iX, VMS, S<RISC OS>)
 
 Link count not updated because hard links are not quite that hard
 (They are sort of half-way between hard and soft links). (AmigaOS)
+
+Hard links are implemented on Win32 (Windows NT and Windows 2000)
+under NTFS only.
 
 =item lstat FILEHANDLE
 
@@ -1494,7 +1498,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, Plan9, S<RISC OS>, VOS)
 The C<|> variants are supported only if ToolServer is installed.
 (S<Mac OS>)
 
-open to C<|-> and C<-|> are unsupported. (S<Mac OS>, Win32, S<RISC OS>)
+open to C<|E<45>> and C<-|> are unsupported. (S<Mac OS>, Win32, S<RISC OS>)
 
 =item pipe READHANDLE,WRITEHANDLE
 
@@ -1522,6 +1526,10 @@ Only reliable on sockets. (S<RISC OS>)
 
 Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
+=item setgrent
+
+Not implemented. (MPE/iX, Win32)
+
 =item setpgrp PID,PGRP
 
 Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
@@ -1529,6 +1537,10 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 =item setpriority WHICH,WHO,PRIORITY
 
 Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
+
+=item setpwent
+
+Not implemented. (MPE/iX, Win32)
 
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
 

@@ -24,10 +24,10 @@ responsibility to ensure that warnings are enabled judiciously.
 
 =over 4
 
-=item STOP is a new keyword
+=item CHECK is a new keyword
 
 In addition to C<BEGIN>, C<INIT>, C<END>, C<DESTROY> and C<AUTOLOAD>,
-subroutines named C<STOP> are now special.  These are queued up during
+subroutines named C<CHECK> are now special.  These are queued up during
 compilation and behave similar to END blocks, except they are called at
 the end of compilation rather than at the end of execution.  They cannot
 be called directly.
@@ -149,6 +149,14 @@ needs to be written with additional parentheses now:
 
 The behavior remains unaffected when C<not> is not followed by parentheses.
 
+=item Semantics of bareword prototype C<(*)> have changed
+
+Arguments prototyped as C<*> will now be visible within the subroutine
+as either a simple scalar or as a reference to a typeglob.  Perl 5.005
+always coerced simple scalar arguments to a typeglob, which wasn't useful
+in situations where the subroutine must distinguish between a simple
+scalar and a typeglob.  See L<perlsub/Prototypes>.
+
 =back
 
 =head2 C Source Incompatibilities
@@ -242,13 +250,62 @@ change#3386, also needs perlguts documentation
 
 =head2 Binary Incompatibilities
 
-The default build of this release is binary compatible with the 5.005
-release or its maintenance versions.
+In general, the default build of this release is expected to be binary
+compatible for extensions built with the 5.005 release or its maintenance
+versions.  However, specific platforms may have broken binary compatibility
+due to changes in the defaults used in hints files.  Therefore, please be
+sure to always check the platform-specific README files for any notes to
+the contrary.
 
 The usethreads or usemultiplicity builds are B<not> binary compatible
 with the corresponding builds in 5.005.
 
+On platforms that require an explicit list of exports (AIX, OS/2 and Windows,
+among others), purely internal symbols such as parser functions and the
+run time opcodes are not exported by default.  Perl 5.005 used to export
+all functions irrespective of whether they were considered part of the
+public API or not.
+
+For the full list of public API functions, see L<perlapi>.
+
 =head1 Installation and Configuration Improvements
+
+=head2 -Dusethreads means something different
+
+WARNING: Support for threads continues to be an experimental feature.
+Interfaces and implementation are subject to sudden and drastic changes.
+
+The -Dusethreads flag now enables the experimental interpreter-based thread
+support by default.  To get the flavor of experimental threads that was in
+5.005 instead, you need to ask for -Duse5005threads.
+
+As of v5.5.640, interpreter-threads support is still lacking a way to
+create new threads from Perl (i.e., C<use Thread;> will not work with
+interpreter threads).  C<use Thread;> continues to be available when you
+ask for -Duse5005threads, bugs and all.
+
+=head2 Perl's version numbering has changed
+
+Beginning with Perl version 5.6, the version number convention has been
+changed to a "dotted tuple" scheme that is more commonly found in open
+source projects.
+
+Maintenance versions of v5.6.0 will be released as v5.6.1, v5.6.2 etc.
+The next development series following v5.6 will be numbered v5.7.x,
+beginning with v5.7.0, and the next major production release following
+v5.6 will be v5.8.
+
+The v1.2.3 syntax is also now legal in Perl.  See L<Support for version tuples>
+for more on that.
+
+To cope with the new versioning system's use of at least three significant
+digits for each version component, the method used for incrementing the
+subversion number has also changed slightly.  We assume that versions older
+than v5.6 have been incrementing the subversion component in multiples of
+10.  Versions after v5.6 will increment them by 1.  Thus, using the new
+notation, 5.005_03 is the same as v5.5.30, and the first maintenance
+version following v5.6 will be v5.6.1, which amounts to a floating point
+value of 5.006_001).
 
 =head2 New Configure flags
 
@@ -256,6 +313,7 @@ The following new flags may be enabled on the Configure command line
 by running Configure with C<-Dflag>.
 
     usemultiplicity
+    use5005threads
 
     uselongdouble
     usemorebits
@@ -320,10 +378,11 @@ building and installing from source, the defaults should be fine.
 =head2 Unicode and UTF-8 support
 
 Perl can optionally use UTF-8 as its internal representation for character
-strings.  The C<utf8> pragma enables this support in the current lexical
-scope.  See L<utf8> for more information.
+strings.  The C<utf8> and C<byte> pragmas are used to control this support
+in the current lexical scope.  See L<perlunicode>, L<utf8> and L<byte> for
+more information.
 
-=head2 Interpreter threads
+=head2 Interpreter cloning, threads, and concurrency
 
 WARNING: This is an experimental feature in a pre-alpha state.  Use
 at your own risk.
@@ -347,24 +406,24 @@ interpreters, little or no locking will be needed (unless parts of
 the symbol table are explicitly shared).  This is obviously intended
 to be an easy-to-use replacement for the existing threads support.
 
-Support for cloning interpreters must currently be manually enabled
-by defining the cpp macro USE_ITHREADS on non-Windows platforms.
-(See win32/Makefile for how to enable it on Windows.)  The resulting
-perl executable will be functionally identical to one that was built
-without USE_ITHREADS, but the perl_clone() API call will only be
-available in the former.
+Support for cloning interpreters and interpreter concurrency can be
+enabled using the -Dusethreads Configure option (see win32/Makefile for
+how to enable it on Windows.)  The resulting perl executable will be
+functionally identical to one that was built with -Dmultiplicity, but
+the perl_clone() API call will only be available in the former.
 
-USE_ITHREADS enables Perl source code changes that provide a clear
-separation between the op tree and the data it operates with.  The
-former is considered immutable, and can therefore be shared between
-an interpreter and all of its clones, while the latter is considered
-local to each interpreter, and is therefore copied for each clone.
+-Dusethreads enables, the cpp macros USE_ITHREADS by default, which enables
+Perl source code changes that provide a clear separation between the op tree
+and the data it operates with.  The former is considered immutable, and can
+therefore be shared between an interpreter and all of its clones, while the
+latter is considered local to each interpreter, and is therefore copied for
+each clone.
 
 Note that building Perl with the -Dusemultiplicity Configure option
 is adequate if you wish to run multiple B<independent> interpreters
-concurrently in different threads.  USE_ITHREADS only needs to be
-enabled if you wish to obtain access to perl_clone() and cloned
-interpreters.
+concurrently in different threads.  -Dusethreads only provides the
+additional functionality of the perl_clone() API call and other
+support for running B<cloned> interpreters concurrently.
 
 [XXX TODO - the Compiler backends may be broken when USE_ITHREADS is
 enabled.]
@@ -381,23 +440,74 @@ WARNING: This is an experimental feature.
 
 change#4081
 [TODO - Ilya Zakharevich <ilya@math.ohio-state.edu>,
-Tuomas Lukka <lukka@fas.harvard.edu>)]
+Tuomas Lukka <lukka@iki.fi>)]
 
 =head2 "our" declarations
 
 An "our" declaration introduces a value that can be best understood
 as a lexically scoped symbolic alias to a global variable in the
-current package.  This is mostly useful as an alternative to the
-C<vars> pragma, but also provides the opportunity to introduce
-typing and other attributes for such variables.  See L<perlfunc/our>.
+package that was current where the variable was declared.  This is
+mostly useful as an alternative to the C<vars> pragma, but also provides
+the opportunity to introduce typing and other attributes for such
+variables.  See L<perlfunc/our>.
+
+=head2 Support for version tuples
+
+Literals of the form v1.2.3.4 are now parsed as the utf8 string
+C<"\x{1}\x{2}\x{3}\x{4}">.  This allows comparing version numbers using
+regular string comparison operators C<eq>, C<ne>, C<lt>, C<gt> etc.
+
+These "dotted tuples" are dual-valued.  They are both strings of utf8
+characters, and floating point numbers.  Thus v1.2.3.4 has the string
+value C<"\x{1}\x{2}\x{3}\x{4}"> and the numeric value 1.002_003_004.
+As another example, v5.5.640 has the string value C<"\x{5}\x{5}\x{280}">
+(remember 280 hexadecimal is 640 decimal) and the numeric value
+5.005_64.
+
+In conjunction with the new C<$^V> magic variable (which contains
+the perl version in this format), such literals can be used to
+check if you're running a particular version of Perl.
+
+    if ($^V and $^V gt v5.5.640) {
+        # new style version numbers are supported
+    }
+
+C<require> and C<use> also support such literals:
+
+    require v5.6.0;	# croak if $^V lt v5.6.0
+    use v5.6.0;		# same, but croaks at compile-time
+
+C<sprintf> and C<printf> support the Perl-specific format type C<%v>
+to print arbitrary strings as dotted tuples.
+
+    printf "v%v", $^V;	# prints current version, such as "v5.5.650"
 
 =head2 Weak references
 
 WARNING: This is an experimental feature.
 
-change#3385, also need perlguts documentation
+In previous versions of Perl, you couldn't cache objects so as
+to allow them to be deleted if the last reference from outside 
+the cache is deleted.  The reference in the cache would hold a
+reference count on the object and the objects would never be
+destroyed.
 
-[TODO - Tuomas Lukka <lukka@fas.harvard.edu>]
+Another familiar problem is with circular references.  When an
+object references itself, its reference count would never go
+down to zero, and it would not get destroyed until the program
+is about to exit.
+
+Weak references solve this by allowing you to "weaken" any
+reference, that is, make it not count towards the reference count.
+When the last non-weak reference to an object is deleted, the object
+is destroyed and all the weak references to the object are
+automatically undef-ed.
+
+To use this feature, you need the WeakRef package from CPAN, which
+contains additional documentation.
+
+change#3385, also need perlguts documentation
+[TODO - Tuomas Lukka <lukka@iki.fi>]
 
 =head2 File globbing implemented internally
 
@@ -425,6 +535,12 @@ This is rather similar to how the arrow may be omitted from
 C<$foo[10]->{'foo'}>.  Note however, that the arrow is still
 required for C<foo(10)->('bar')>.
 
+=head2 exists() is supported on subroutine names
+
+The exists() builtin now works on subroutine names.  A subroutine
+is considered to exist if it has been declared (even if implicitly).
+See L<perlfunc/exists> for examples.
+
 =head2 exists() and delete() are supported on array elements
 
 The exists() and delete() builtins now work on simple arrays as well.
@@ -447,16 +563,17 @@ See L<perlfunc/exists> and L<perlfunc/delete> for examples.
 
 The length argument of C<syswrite()> has become optional.
 
-=head2 Filehandles can be autovivified
+=head2 File and directory handles can be autovivified
 
 Similar to how constructs such as C<$x->[0]> autovivify a reference,
-open() now autovivifies a filehandle if the first argument is an
-uninitialized variable.  This allows the constructs C<open(my $fh, ...)> and
-C<open(local $fh,...)> to be used to create filehandles that will
-conveniently be closed automatically when the scope ends, provided there
-are no other references to them.  This largely eliminates the need for
-typeglobs when opening filehandles that must be passed around, as in the
-following example:
+handle constructors (open(), opendir(), pipe(), socketpair(), sysopen(),
+socket(), and accept()) now autovivify a file or directory handle
+if the handle passed to them is an uninitialized scalar variable.  This
+allows the constructs such as C<open(my $fh, ...)> and C<open(local $fh,...)>
+to be used to create filehandles that will conveniently be closed
+automatically when the scope ends, provided there are no other references
+to them.  This largely eliminates the need for typeglobs when opening
+filehandles that must be passed around, as in the following example:
 
     sub myopen {
         open my $fh, "@_"
@@ -529,7 +646,9 @@ start losing precision (their lower digits).
 If you have filesystems that support "large files" (files larger than
 2 gigabytes), you may now also be able to create and access them from
 Perl.  You have to use Configure -Duselargefiles.  Turning on the
-large file support turns on also the 64-bit support, for obvious reasons.
+large file support turns on also the 64-bit support on many platforms.
+Beware that unless your filesystem also supports "sparse files" seeking
+to umpteen petabytes may be unadvisable.
 
 Note that in addition to requiring a proper file system to do large
 files you may also need to adjust your per-process (or your
@@ -552,13 +671,13 @@ process resource usage limits, including the maximum filesize limit.
 =head2 Long doubles
 
 In some systems you may be able to use long doubles to enhance the
-range of precision of your double precision floating point numbers
+range and precision of your double precision floating point numbers
 (that is, Perl's numbers).  Use Configure -Duselongdouble to enable
 this support (if it is available).
 
 =head2 "more bits"
 
-You can Configure -Dusemorebits to turn on both the 64-bit support
+You can "Configure -Dusemorebits" to turn on both the 64-bit support
 and the long double support.
 
 =head2 Enhanced support for sort() subroutines
@@ -660,13 +779,23 @@ acquire special meaning in any future version of Perl.
 Formerly, if you wanted to mark a subroutine as being a method call or
 as requiring an automatic lock() when it is entered, you had to declare
 that with a C<use attrs> pragma in the body of the subroutine.
-That can now be accomplished with a declaration syntax, like this:
+That can now be accomplished with declaration syntax, like this:
 
-    sub mymethod : locked, method ;
+    sub mymethod : locked method ;
     ...
-    sub mymethod : locked, method {
+    sub mymethod : locked method {
 	...
     }
+
+    sub othermethod :locked :method ;
+    ...
+    sub othermethod :locked :method {
+	...
+    }
+
+
+(Note how only the first C<:> is mandatory, and whitespace surrounding
+the C<:> is optional.)
 
 F<AutoSplit.pm> and F<SelfLoader.pm> have been updated to keep the attributes
 with the stubs they provide.  See L<attributes>.
@@ -711,6 +840,12 @@ BEGIN blocks are executed under such conditions, this variable
 enables perl code to determine whether actions that make sense
 only during normal running are warranted.  See L<perlvar>.
 
+=head2 New variable $^V contains Perl version in v5.6.0 format
+
+C<$^V> contains the Perl version number as a version tuple that
+can be used in string or numeric comparisons.  See
+C<Support for version tuples> for an example.
+
 =head2 Optional Y2K warnings
 
 If Perl is built with the cpp macro C<PERL_Y2KWARN> defined,
@@ -724,9 +859,10 @@ See L<INSTALL> and L<README.Y2K>.
 
 =head2 E<lt>HANDLEE<gt> on empty files
 
-With C<$/> set to C<undef>, slurping an empty file returns a string of
+With C<$/> set to C<undef>, "slurping" an empty file returns a string of
 zero length (instead of C<undef>, as it used to) the first time the
-HANDLE is read.  Further reads yield C<undef>.
+HANDLE is read after C<$/> is set to C<undef>.  Further reads yield
+C<undef>.
 
 This means that the following will append "foo" to an empty file (it used
 to do nothing):
@@ -907,7 +1043,7 @@ run in compile-only mode.  Since this is typically not the expected
 behavior, END blocks are not executed anymore when the C<-c> switch
 is used.
 
-See L<STOP blocks> for how to run things when the compile phase ends.
+See L<CHECK blocks> for how to run things when the compile phase ends.
 
 =head2 Potential to leak DATA filehandles
 
@@ -1072,6 +1208,14 @@ detected at the end of the line containing the __END__ or __DATA__
 token; if not, the DATA filehandle will be left open in binary mode.
 Earlier versions always opened the DATA filehandle in text mode.
 
+The glob() operator is implemented via the L<File::Glob> extension,
+which supports glob syntax of the C shell.  This increases the flexibility
+of the glob() operator, but there may be compatibility issues for
+programs that relied on the older globbing syntax.  If you want to
+preserve compatibility with the older syntax, you might want to put
+a C<use File::DosGlob;> in your program.  For details and compatibility
+information, see L<File::Glob>.
+
 [TODO - GSAR]
 
 =head1 New tests
@@ -1113,6 +1257,10 @@ File test operators.
 =item	op/lex_assign
 
 Verify operations that access pad objects (lexicals and temporaries).
+
+=item	op/exists_sub
+
+Verify C<exists &sub> operations.
 
 =back
 
@@ -1239,10 +1387,12 @@ change#4135, also needs docs in module pod
 =item Fcntl
 
 More Fcntl constants added: F_SETLK64, F_SETLKW64, O_LARGEFILE for
-large (more than 4G) file access (64-bit support is not yet
-working, though, so no need to get overly excited), Free/Net/OpenBSD
-locking behaviour flags F_FLOCK, F_POSIX, Linux F_SHLCK, and
-O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
+large file (more than 4GB) access Note that the O_LARGEFILE is
+automatically/transparently added to sysopen() flags if large file
+support has been configured), Free/Net/OpenBSD locking behaviour flags
+F_FLOCK, F_POSIX, Linux F_SHLCK, and O_ACCMODE: the combined mask of
+O_RDONLY, O_WRONLY, and O_RDWR.  Also SEEK_SET, SEEK_CUR, and SEEK_END
+added for one-stop shopping of the seek/sysseek constants.
 
 =item File::Compare
 
@@ -1390,9 +1540,66 @@ act as mutators (accessor $z->Re(), mutator $z->Re(3)).
 A little bit of radial trigonometry (cylindrical and spherical),
 radial coordinate conversions, and the great circle distance were added.
 
-=item Pod::Parser
+=item Pod::Parser, Pod::InputObjects
 
-[TODO - Brad Appleton <bradapp@enteract.com>]
+Pod::Parser is a base class for parsing and selecting sections of
+pod documentation from an input stream.  This module takes care of
+identifying pod paragraphs and commands in the input and hands off the
+parsed paragraphs and commands to user-defined methods which are free
+to interpret or translate them as they see fit.
+
+Pod::InputObjects defines some input objects needed by Pod::Parser, and
+for advanced users of Pod::Parser that need more about a command besides
+its name and text.
+
+As of release 5.6 of Perl, Pod::Parser is now the officially sanctioned
+"base parser code" recommended for use by all pod2xxx translators.
+Pod::Text (pod2text) and Pod::Man (pod2man) have already been converted
+to use Pod::Parser and efforts to convert Pod::HTML (pod2html) are already
+underway.  For any questions or comments about pod parsing and translating
+issues and utilities, please use the pod-people@perl.org mailing list.
+
+For further information, please see L<Pod::Parser> and L<Pod::InputObjects>.
+
+=item Pod::Checker, podchecker
+
+This utility checks pod files for correct syntax, according to
+L<perlpod>.  Obvious errors are flagged as such, while warnings are
+printed for mistakes that can be handled gracefully.  The checklist is
+not complete yet.  See L<Pod::Checker>.
+
+=item Pod::ParseUtils, Pod::Find
+
+These modules provide a set of gizmos that are useful mainly for pod
+translators.  L<Pod::Find|Pod::Find> traverses directory structures and
+returns found pod files, along with their canonical names (like
+C<File::Spec::Unix>).  L<Pod::ParseUtils|Pod::ParseUtils> contains
+B<Pod::List> (useful for storing pod list information), B<Pod::Hyperlink>
+(for parsing the contents of C<LE<gt>E<lt>> sequences) and B<Pod::Cache>
+(for caching information about pod files, e.g. link nodes).
+
+=item Pod::Select, podselect
+
+Pod::Select is a subclass of Pod::Parser which provides a function
+named "podselect()" to filter out user-specified sections of raw pod
+documentation from an input stream. podselect is a script that provides
+access to Pod::Select from other scripts to be used as a filter.
+See L<Pod::Select>.
+
+=item Pod::Usage, pod2usage
+
+Pod::Usage provides the function "pod2usage()" to print usage messages for
+a Perl script based on its embedded pod documentation.  The pod2usage()
+function is generally useful to all script authors since it lets them
+write and maintain a single source (the pods) for documentation, thus
+removing the need to create and maintain redundant usage message text
+consisting of information already in the pods.
+
+There is also a pod2usage script which can be used from other kinds of
+scripts to print usage messages from pods (even for non-Perl scripts
+with pods embedded in comments).
+
+For details and examples, please see L<Pod::Usage>.
 
 =item Pod::Text and Pod::Man
 
@@ -1408,6 +1615,11 @@ runtime error.
 A bug that may have caused data loss when more than one disk block
 happens to be read from the database in a single FETCH() has been
 fixed.
+
+=item Sys::Syslog
+
+Sys::Syslog now uses XSUBs to access facilities from syslog.h so it
+no longer requires syslog.ph to exist. 
 
 =item Time::Local
 
@@ -1462,10 +1674,6 @@ syntax.  See L<perlsub/"Subroutine Attributes"> and L<attributes>.
 
 C<use utf8> to enable UTF-8 and Unicode support.
 
-C<use caller 'encoding'> allows modules to inherit pragmatic attributes
-from the caller's context.  C<encoding> is currently the only supported
-attribute.
-
 Lexical warnings pragma, C<use warnings;>, to control optional warnings.
 See L<perllexwarn>.
 
@@ -1499,6 +1707,10 @@ change#4232
 
 =over 4
 
+=item perlapi.pod
+
+The official list of public Perl API functions.
+
 =item perlcompile.pod
 
 An introduction to using the Perl Compiler suite.
@@ -1510,6 +1722,11 @@ An introduction to writing Perl source filters.
 =item perlhack.pod
 
 Some guidelines for hacking the Perl source code.
+
+=item perlintern.pod
+
+A list of internal functions in the Perl source code.
+(List is currently empty.)
 
 =item perlopentut.pod
 
@@ -1523,16 +1740,33 @@ A tutorial that introduces the essentials of references.
 
 A tutorial on managing class data for object modules.
 
+=item perlunicode.pod
+
+An introduction to Unicode support features in Perl.
+
 =back
 
 =head1 New or Changed Diagnostics
 
 =over 4
 
+=item "%s" variable %s masks earlier declaration in same %s
+
+(W) A "my" or "our" variable has been redeclared in the current scope or statement,
+effectively eliminating all access to the previous instance.  This is almost
+always a typographical error.  Note that the earlier variable will still exist
+until the end of the scope or until all closure referents to it are
+destroyed.
+
 =item "my sub" not yet implemented
 
 (F) Lexically scoped subroutines are not yet implemented.  Don't try that
 yet.
+
+=item "our" variable %s redeclared
+
+(W) You seem to have already declared the same global once before in the
+current lexical scope.
 
 =item '!' allowed only after types %s
 
@@ -1591,6 +1825,30 @@ declaration for the subroutine in question, or move the subroutine
 definition ahead of the call to get proper prototype checking.  Alternatively,
 if you are certain that you're calling the function correctly, you may put
 an ampersand before the name to avoid the warning.  See L<perlsub>.
+
+=item %s argument is not a HASH or ARRAY element
+
+(F) The argument to exists() must be a hash or array element, such as:
+
+    $foo{$bar}
+    $ref->[12]->["susie"]
+
+=item %s argument is not a HASH or ARRAY element or slice
+
+(F) The argument to delete() must be either a hash or array element, such as:
+
+    $foo{$bar}
+    $ref->[12]->["susie"]
+
+or a hash or array slice, such as:
+
+    @foo[$bar, $baz, $xyzzy]
+    @{$ref->[12]}{"susie", "queue"}
+
+=item %s argument is not a subroutine name
+
+(F) The argument to exists() for C<exists &sub> must be a subroutine
+name, and not a subroutine call.  C<exists &sub()> will generate this error.
 
 =item %s package attribute may clash with future reserved word: %s
 
@@ -1653,6 +1911,17 @@ so it was truncated to the string shown.
 =item Can't check filesystem of script "%s"
 
 (P) For some reason you can't check the filesystem of the script for nosuid.
+
+=item Can't declare class for non-scalar %s in "%s"
+
+(S) Currently, only scalar variables can declared with a specific class
+qualifier in a "my" or "our" declaration.  The semantics may be extended
+for other types of variables in future.
+
+=item Can't declare %s in "%s"
+
+(F) Only scalar, array, and hash variables may be declared as "my" or
+"our" variables.  They must have ordinary identifiers as names.
 
 =item Can't ignore signal CHLD, forcing to default
 
@@ -1739,6 +2008,11 @@ just use C<if (%hash) { # not empty }> for example.
 
 See Server error.
 
+=item Did you mean "local" instead of "our"?
+
+(W) Remember that "our" does not localize the declared global variable.
+You have declared it again in the same lexical scope, which seems superfluous.
+
 =item Document contains no data
 
 See Server error.
@@ -1762,6 +2036,19 @@ intended it to be a read/write filehandle, you needed to open it with
 "+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
 you intended only to read from the file, use "E<lt>".  See
 L<perlfunc/open>.
+
+=item flock() on closed filehandle %s
+
+(W) The filehandle you're attempting to flock() got itself closed some
+time before now.  Check your logic flow.  flock() operates on filehandles.
+Are you attempting to call flock() on a dirhandle by the same name?
+
+=item Global symbol "%s" requires explicit package name
+
+(F) You've said "use strict vars", which indicates that all variables
+must either be lexically scoped (using "my"), declared beforehand using
+"our", or explicitly qualified to say which package the global variable
+is in (using "::").
 
 =item Hexadecimal number > 0xffffffff non-portable
 
@@ -1824,14 +2111,14 @@ The offending range is now explicitly displayed.
 
 =item Invalid separator character %s in attribute list
 
-(F) Something other than a comma or whitespace was seen between the
+(F) Something other than a colon or whitespace was seen between the
 elements of an attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.  See L<attributes>.
 
 =item Invalid separator character %s in subroutine attribute list
 
-(F) Something other than a comma or whitespace was seen between the
+(F) Something other than a colon or whitespace was seen between the
 elements of a subroutine attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.
@@ -1866,6 +2153,22 @@ construction, but the command was missing or blank.
 (F) The reserved syntax for lexically scoped subroutines requires that they
 have a name with which they can be found.
 
+=item No %s specified for -%c
+
+(F) The indicated command line switch needs a mandatory argument, but
+you haven't specified one.
+
+=item No package name allowed for variable %s in "our"
+
+(F) Fully qualified variable names are not allowed in "our" declarations,
+because that doesn't make much sense under existing semantics.  Such
+syntax is reserved for future extensions.
+
+=item No space allowed after -%c
+
+(F) The argument to the indicated command line switch must follow immediately
+after the switch, without intervening spaces.
+
 =item no UTC offset information; assuming local time is UTC
 
 (S) A warning peculiar to VMS.  Perl was unable to find the local
@@ -1895,6 +2198,18 @@ reference.
 
 (P) Failed an internal consistency check while trying to reset all weak
 references to an object.
+
+=item Parentheses missing around "%s" list
+
+(W) You said something like
+
+    my $foo, $bar = @_;
+
+when you meant
+
+    my ($foo, $bar) = @_;
+
+Remember that "my", "our" and "local" bind closer than comma.
 
 =item Possible Y2K bug: %s
 
@@ -1957,8 +2272,8 @@ L<perlvms>) so that the environ array isn't the target of the change to
 =item Unknown open() mode '%s'
 
 (F) The second argument of 3-argument open() is not among the list
-of valid modes: C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>,
-C<+L<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|->.
+of valid modes: C<E<lt>>, C<E<gt>>, C<E<gt>E<gt>>, C<+E<lt>>,
+C<+E<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|E<45>>.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 

@@ -5,7 +5,7 @@ use Getopt::Long;	# package for handling command-line parameters
 use File::Spec::Unix;
 require Exporter;
 use vars qw($VERSION);
-$VERSION = 1.02;
+$VERSION = 1.03;
 @ISA = Exporter;
 @EXPORT = qw(pod2html htmlify);
 use Cwd;
@@ -176,10 +176,6 @@ Uses $Config{pod2html} to setup default options.
 
 Tom Christiansen, E<lt>tchrist@perl.comE<gt>.
 
-=head1 BUGS
-
-Has trouble with C<> etc in = commands.
-
 =head1 SEE ALSO
 
 L<perlpod>
@@ -216,13 +212,8 @@ my $quiet = 0;			# not quiet by default
 my $verbose = 0;		# not verbose by default
 my $doindex = 1;   	    	# non-zero if we should generate an index
 my $listlevel = 0;		# current list depth
-my @listitem = ();		# stack of HTML commands to use when a =item is
-				#   encountered.  the top of the stack is the
-				#   current list.
-my @listdata = ();		# similar to @listitem, but for the text after
-				#   an =item
-my @listend = ();		# similar to @listitem, but the text to use to
-				#   end the list.
+my @listend = ();		# the text to use to end the list.
+my $after_lpar = 0;             # set to true after a par in an =item
 my $ignore = 1;			# whether or not to format text.  we don't
 				#   format text until we hit our first pod
 				#   directive.
@@ -236,11 +227,13 @@ my $top = 1;			# true if we are at the top of the doc.  used
 				#   to prevent the first <HR> directive.
 my $paragraph;			# which paragraph we're processing (used
 				#   for error messages)
+my $ptQuote = 0;                # status of double-quote conversion
 my %pages = ();			# associative array used to find the location
 				#   of pages referenced by L<> links.
 my %sections = ();		# sections within this page
 my %items = ();			# associative array used to find the location
 				#   of =item directives referenced by C<> links
+my %local_items = ();           # local items - avoid destruction of %items
 my $Is83;                       # is dos with short filenames (8.3)
 
 sub init_globals {
@@ -263,13 +256,8 @@ $quiet = 0;		# not quiet by default
 $verbose = 0;		# not verbose by default
 $doindex = 1;   	    	# non-zero if we should generate an index
 $listlevel = 0;		# current list depth
-@listitem = ();		# stack of HTML commands to use when a =item is
-				#   encountered.  the top of the stack is the
-				#   current list.
-@listdata = ();		# similar to @listitem, but for the text after
-				#   an =item
-@listend = ();		# similar to @listitem, but the text to use to
-				#   end the list.
+@listend = ();		# the text to use to end the list.
+$after_lpar = 0;        # set to true after a par in an =item
 $ignore = 1;			# whether or not to format text.  we don't
 				#   format text until we hit our first pod
 				#   directive.
@@ -291,8 +279,27 @@ $paragraph = '';			# which paragraph we're processing (used
 				#   of pages referenced by L<> links.
 #%items = ();			# associative array used to find the location
 				#   of =item directives referenced by C<> links
+%local_items = ();
 $Is83=$^O eq 'dos';
 }
+
+#
+# clean_data: global clean-up of pod data
+#
+sub clean_data($){
+    my( $dataref ) = @_;
+    my $i;
+    for( $i = 0; $i <= $#$dataref; $i++ ){
+	${$dataref}[$i] =~ s/\s+\Z//;
+
+        # have a look for all-space lines
+	if( ${$dataref}[$i] =~ /^\s+$/m ){
+	    my @chunks = split( /^\s+$/m, ${$dataref}[$i] );
+	    splice( @$dataref, $i, 1, @chunks );
+	}
+    }
+}
+
 
 sub pod2html {
     local(@ARGV) = @_;
@@ -341,6 +348,7 @@ sub pod2html {
     $/ = "";
     my @poddata  = <POD>;
     close(POD);
+    clean_data( \@poddata );
 
     # scan the pod for =head[1-6] directives and build an index
     my $index = scan_headings(\%sections, @poddata);
@@ -410,12 +418,13 @@ END_OF_HEAD
     get_cache($dircache, $itemcache, \@podpath, $podroot, $recurse);
 
     # scan the pod for =item directives
-    scan_items("", \%items, @poddata);
+    scan_items( \%local_items, "", @poddata);
 
     # put an index at the top of the file.  note, if $doindex is 0 we
     # still generate an index, but surround it with an html comment.
     # that way some other program can extract it if desired.
     $index =~ s/--+/-/g;
+    print HTML "<A NAME=\"__index__\"></A>\n";
     print HTML "<!-- INDEX BEGIN -->\n";
     print HTML "<!--\n" unless $doindex;
     print HTML $index;
@@ -424,12 +433,16 @@ END_OF_HEAD
     print HTML "<HR>\n" if $doindex and $index;
 
     # now convert this file
-    warn "Converting input file\n" if $verbose;
-    foreach my $i (0..$#poddata) {
+    my $after_item;             # set to true after an =item
+    warn "Converting input file $podfile\n" if $verbose;
+    foreach my $i (0..$#poddata){
+        $ptQuote = 0; # status of quote conversion
+
 	$_ = $poddata[$i];
 	$paragraph = $i+1;
 	if (/^(=.*)/s) {	# is it a pod directive?
 	    $ignore = 0;
+	    $after_item = 0;
 	    $_ = $1;
 	    if (/^=begin\s+(\S+)\s*(.*)/si) {# =begin
 		process_begin($1, $2);
@@ -443,14 +456,17 @@ END_OF_HEAD
 		next if @begin_stack && $begin_stack[-1] ne 'html';
 
 		if (/^=(head[1-6])\s+(.*\S)/s) {	# =head[1-6] heading
-		    process_head($1, $2);
-		} elsif (/^=item\s*(.*\S)/sm) {	# =item text
-		    process_item($1);
+		    process_head( $1, $2, $doindex && $index );
+		} elsif (/^=item\s*(.*\S)?/sm) {	# =item text
+		    warn "$0: $podfile: =item without bullet, number or text"
+		       . " in paragraph $paragraph.\n" if !defined($1) or $1 eq '';
+		    process_item( $1 );
+		    $after_item = 1;
 		} elsif (/^=over\s*(.*)/) {		# =over N
 		    process_over();
 		} elsif (/^=back/) {		# =back
 		    process_back();
-		} elsif (/^=for\s+(\S+)\s+(.*)/si) {# =for
+		} elsif (/^=for\s+(\S+)\s*(.*)/si) {# =for
 		    process_for($1,$2);
 		} else {
 		    /^=(\S*)\s*/;
@@ -464,13 +480,53 @@ END_OF_HEAD
 	    next if $ignore;
 	    next if @begin_stack && $begin_stack[-1] ne 'html';
 	    my $text = $_;
-	    process_text(\$text, 1);
-	    print HTML "<P>\n$text</P>\n";
+	    if( $text =~ /\A\s+/ ){
+		process_pre( \$text );
+	        print HTML "<PRE>\n$text</PRE>\n";
+
+	    } else {
+		process_text( \$text );
+
+		# experimental: check for a paragraph where all lines
+		# have some ...\t...\t...\n pattern
+		if( $text =~ /\t/ ){
+		    my @lines = split( "\n", $text );
+		    if( @lines > 1 ){
+			my $all = 2;
+			foreach my $line ( @lines ){
+			    if( $line =~ /\S/ && $line !~ /\t/ ){
+				$all--;
+				last if $all == 0;
+			    }
+			}
+			if( $all > 0 ){
+			    $text =~ s/\t+/<TD>/g;
+			    $text =~ s/^/<TR><TD>/gm;
+			    $text = '<TABLE CELLSPACING=0 CELLPADDING=0>' .
+                                    $text . '</TABLE>';
+			}
+		    }
+		}
+		## end of experimental
+
+		if( $after_item ){
+		    print HTML "$text\n";
+		    $after_lpar = 1;
+		} else {
+		    print HTML "<P>$text</P>\n";
+		}
+	    }
+	    $after_item = 0;
 	}
     }
 
     # finish off any pending directives
     finish_list();
+
+    # link to page index
+    print HTML "<P><A HREF=\"#__index__\"><SMALL>page index</SMALL></A></P>\n"
+	if $doindex and $index;
+
     print HTML <<END_OF_TAIL;
 $block
 </BODY>
@@ -532,7 +588,7 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
 END_OF_USAGE
 
 sub parse_command_line {
-    my ($opt_flush,$opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_norecurse,$opt_recurse,$opt_title,$opt_verbose,$opt_css,$opt_header,$opt_quiet);
+    my ($opt_flush,$opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_recurse,$opt_title,$opt_verbose,$opt_css,$opt_header,$opt_quiet);
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
 			    'flush'      => \$opt_flush,
@@ -546,7 +602,6 @@ sub parse_command_line {
 			    'outfile=s'  => \$opt_outfile,
 			    'podpath=s'  => \$opt_podpath,
 			    'podroot=s'  => \$opt_podroot,
-			    'norecurse'  => \$opt_norecurse,
 			    'recurse!'   => \$opt_recurse,
 			    'title=s'    => \$opt_title,
 			    'header'     => \$opt_header,
@@ -626,7 +681,6 @@ sub cache_key {
 #  are valid caches of %pages and %items.  if they are valid then it loads
 #  them and returns a non-zero value.
 #
-
 sub load_cache {
     my($dircache, $itemcache, $podpath, $podroot) = @_;
     my($tests);
@@ -740,15 +794,17 @@ sub scan_podpath {
 		    die "$0: error opening $dirname/$pod for input: $!\n";
 		@poddata = <POD>;
 		close(POD);
+		clean_data( \@poddata );
 
-		scan_items("$dirname/$pod", @poddata);
+		scan_items( \%items, "$dirname/$pod", @poddata);
 	    }
 
 	    # use the names of files as =item directives too.
-	    foreach $pod (@files) {
-		$pod =~ /^(.*)(\.pod|\.pm)$/;
-		$items{$1} = "$dirname/$1.html" if $1;
-	    }
+### Don't think this should be done this way - confuses issues.(WL)
+###	    foreach $pod (@files) {
+###		$pod =~ /^(.*)(\.pod|\.pm)$/;
+###		$items{$1} = "$dirname/$1.html" if $1;
+###	    }
 	} elsif ($pages{$libpod} =~ /([^:]*\.pod):/ ||
 		 $pages{$libpod} =~ /([^:]*\.pm):/) {
 	    # scan the .pod or .pm file for =item directives
@@ -757,8 +813,9 @@ sub scan_podpath {
 		die "$0: error opening $pod for input: $!\n";
 	    @poddata = <POD>;
 	    close(POD);
+	    clean_data( \@poddata );
 
-	    scan_items("$pod", @poddata);
+	    scan_items( \%items, "$pod", @poddata);
 	} else {
 	    warn "$0: shouldn't be here (line ".__LINE__."\n";
 	}
@@ -842,7 +899,7 @@ sub scan_dir {
 #
 sub scan_headings {
     my($sections, @data) = @_;
-    my($tag, $which_head, $title, $listdepth, $index);
+    my($tag, $which_head, $otitle, $listdepth, $index);
 
     # here we need	local $ignore = 0;
     #  unfortunately, we can't have it, because $ignore is lexical
@@ -855,9 +912,12 @@ sub scan_headings {
     #  pointing to each of them.
     foreach my $line (@data) {
 	if ($line =~ /^=(head)([1-6])\s+(.*)/) {
-	    ($tag,$which_head, $title) = ($1,$2,$3);
-	    chomp($title);
-	    $$sections{htmlify(0,$title)} = 1;
+	    ($tag, $which_head, $otitle) = ($1,$2,$3);
+
+            my $title = depod( $otitle );
+            my $name = htmlify( $title );
+	    $$sections{$name} = 1;
+	    $title = process_text( \$otitle );
 
 	    while ($which_head != $listdepth) {
 		if ($which_head > $listdepth) {
@@ -870,8 +930,8 @@ sub scan_headings {
 	    }
 
 	    $index .= "\n" . ("\t" x $listdepth) . "<LI>" .
-	              "<A HREF=\"#" . htmlify(0,$title) . "\">" .
-		      html_escape(process_text(\$title, 0)) . "</A></LI>";
+	              "<A HREF=\"#" . $name . "\">" .
+		      $title . "</A></LI>";
 	}
     }
 
@@ -893,7 +953,7 @@ sub scan_headings {
 #  will use this information later on in resolving C<> links.
 #
 sub scan_items {
-    my($pod, @poddata) = @_;
+    my( $itemref, $pod, @poddata ) = @_;
     my($i, $item);
     local $_;
 
@@ -901,28 +961,22 @@ sub scan_items {
     $pod .= ".html" if $pod;
 
     foreach $i (0..$#poddata) {
-	$_ = $poddata[$i];
+	my $txt = depod( $poddata[$i] );
 
-	# remove any formatting instructions
-	s,[A-Z]<([^<>]*)>,$1,g;
-
-	# figure out what kind of item it is and get the first word of
-	#  it's name.
-	if (/^=item\s+(\w*)\s*.*$/s) {
-	    if ($1 eq "*") {		# bullet list
-		/\A=item\s+\*\s*(.*?)\s*\Z/s;
-		$item = $1;
-	    } elsif ($1 =~ /^\d+/) {	# numbered list
-		/\A=item\s+\d+\.?(.*?)\s*\Z/s;
-		$item = $1;
-	    } else {
-#		/\A=item\s+(.*?)\s*\Z/s;
-		/\A=item\s+(\w*)/s;
-		$item = $1;
-	    }
-
-	    $items{$item} = "$pod" if $item;
+	# figure out what kind of item it is.
+	# Build string for referencing this item.
+	if ( $txt =~ /\A=item\s+\*\s*(.*)\Z/s ) { # bullet
+	    next unless $1;
+	    $item = $1;
+        } elsif( $txt =~ /\A=item\s+(?>\d+\.?)\s*(.*)\Z/s ) { # numbered list
+	    $item = $1;
+	} elsif( $txt =~ /\A=item\s+(.*)\Z/s ) { # plain item
+	    $item = $1;
+	} else {
+	    next;
 	}
+	my $fid = fragment_id( $item );
+	$$itemref{$fid} = "$pod" if $fid;
     }
 }
 
@@ -930,168 +984,167 @@ sub scan_items {
 # process_head - convert a pod head[1-6] tag and convert it to HTML format.
 #
 sub process_head {
-    my($tag, $heading) = @_;
-    my $firstword;
+    my($tag, $heading, $hasindex) = @_;
 
     # figure out the level of the =head
     $tag =~ /head([1-6])/;
     my $level = $1;
 
-    # can't have a heading full of spaces and speechmarks and so on
-    $firstword = $heading; $firstword =~ s/\s*(\w+)\s.*/$1/;
+    if( $listlevel ){
+	warn "$0: $podfile: unterminated list at =head in paragraph $paragraph.  ignoring.\n";
+        while( $listlevel ){
+            process_back();
+        }
+    }
 
-    print HTML "<P>\n" unless $listlevel;
-    print HTML "<HR>\n" unless $listlevel || $top;
-    print HTML "<H$level>"; # unless $listlevel;
-    #print HTML "<H$level>" unless $listlevel;
-    my $convert = $heading; process_text(\$convert, 0);
-    $convert = html_escape($convert);
-    print HTML '<A NAME="' . htmlify(0,$heading) . "\">$convert</A>";
-    print HTML "</H$level>"; # unless $listlevel;
-    print HTML "\n";
+    print HTML "<P>\n";
+    if( $level == 1 && ! $top ){
+	print HTML "<A HREF=\"#__index__\"><SMALL>page index</SMALL></A>\n"
+	    if $hasindex;
+	print HTML "<HR>\n"
+    }
+
+    my $name = htmlify( depod( $heading ) );
+    my $convert = process_text( \$heading );
+    print HTML "<H$level><A NAME=\"$name\">$convert</A></H$level>\n";
+}
+
+
+#
+# emit_item_tag - print an =item's text
+# Note: The global $EmittedItem is used for inhibiting self-references.
+#
+my $EmittedItem;
+
+sub emit_item_tag($$$){
+    my( $otext, $text, $compact ) = @_;
+    my $item = fragment_id( $text );
+
+    $EmittedItem = $item;
+    ### print STDERR "emit_item_tag=$item ($text)\n";
+
+    print HTML '<STRONG>';
+    if ($items_named{$item}++) {
+	print HTML process_text( \$otext );
+    } else {
+	my $name = 'item_' . $item;
+	print HTML qq{<A NAME="$name">}, process_text( \$otext ), '</A>';
+    }
+    print HTML "</STRONG><BR>\n";
+    undef( $EmittedItem );
+}
+
+sub emit_li {
+    my( $tag ) = @_;
+    if( $items_seen[$listlevel]++ == 0 ){
+	push( @listend, "</$tag>" );
+	print HTML "<$tag>\n";
+    }
+    print HTML $tag eq 'DL' ? '<DT>' : '<LI>';
 }
 
 #
 # process_item - convert a pod item tag and convert it to HTML format.
 #
 sub process_item {
-    my $text = $_[0];
-    my($i, $quote, $name);
-
-    my $need_preamble = 0;
-    my $this_entry;
-
+    my( $otext ) = @_;
 
     # lots of documents start a list without doing an =over.  this is
     # bad!  but, the proper thing to do seems to be to just assume
     # they did do an =over.  so warn them once and then continue.
-    warn "$0: $podfile: unexpected =item directive in paragraph $paragraph.  ignoring.\n"
-	unless $listlevel;
-    process_over() unless $listlevel;
+    if( $listlevel == 0 ){
+	warn "$0: $podfile: unexpected =item directive in paragraph $paragraph.  ignoring.\n";
+	process_over();
+    }
 
-    return unless $listlevel;
+    # formatting: insert a paragraph if preceding item has >1 paragraph
+    if( $after_lpar ){
+	print HTML "<P></P>\n";
+	$after_lpar = 0;
+    }
 
     # remove formatting instructions from the text
-    1 while $text =~ s/[A-Z]<([^<>]*)>/$1/g;
-    pre_escape(\$text);
+    my $text = depod( $otext );
 
-    $need_preamble = $items_seen[$listlevel]++ == 0;
-
-    # check if this is the first =item after an =over
-    $i = $listlevel - 1;
-    my $need_new = $listlevel >= @listitem;
-
-    if ($text =~ /\A\*/) {		# bullet
-
-	if ($need_preamble) {
-	    push(@listend,  "</UL>");
-	    print HTML "<UL>\n";
+    # all the list variants:
+    if( $text =~ /\A\*/ ){ # bullet
+        emit_li( 'UL' );
+	if ($text =~ /\A\*\s+(.+)\Z/s ) { # with additional text
+	    my $tag = $1;
+	    $otext =~ s/\A\*\s+//;
+	    emit_item_tag( $otext, $tag, 1 );
 	}
 
-	print HTML '<LI>';
-	if ($text =~ /\A\*\s*(.+)\Z/s) {
-	    print HTML '<STRONG>';
-	    if ($items_named{$1}++) {
-		print HTML html_escape($1);
-	    } else {
-		my $name = 'item_' . htmlify(1,$1);
-		print HTML qq(<A NAME="$name">), html_escape($1), '</A>';
-	    }
-	    print HTML '</STRONG>';
+    } elsif( $text =~ /\A\d+/ ){ # numbered list
+	emit_li( 'OL' );
+	if ($text =~ /\A(?>\d+\.?)\s*(.+)\Z/s ) { # with additional text
+	    my $tag = $1;
+	    $otext =~ s/\A\d+\.?\s*//;
+	    emit_item_tag( $otext, $tag, 1 );
 	}
 
-    } elsif ($text =~ /\A[\d#]+/) {	# numbered list
-
-	if ($need_preamble) {
-	    push(@listend,  "</OL>");
-	    print HTML "<OL>\n";
-	}
-
-	print HTML '<LI>';
-	if ($text =~ /\A\d+\.?\s*(.+)\Z/s) {
-	    print HTML '<STRONG>';
-	    if ($items_named{$1}++) {
-		print HTML html_escape($1);
-	    } else {
-		my $name = 'item_' . htmlify(0,$1);
-		print HTML qq(<A NAME="$name">), html_escape($1), '</A>';
-	    }
-	    print HTML '</STRONG>';
-	}
-
-    } else {			# all others
-
-	if ($need_preamble) {
-	    push(@listend,  '</DL>');
-	    print HTML "<DL>\n";
-	}
-
-	print HTML '<DT>';
-	if ($text =~ /(\S+)/) {
-	    print HTML '<STRONG>';
-	    if ($items_named{$1}++) {
-		print HTML html_escape($text);
-	    } else {
-		my $name = 'item_' . htmlify(1,$text);
-		print HTML qq(<A NAME="$name">), html_escape($text), '</A>';
-	    }
-	    print HTML '</STRONG>';
+    } else {			# definition list
+	emit_li( 'DL' );
+	if ($text =~ /\A(.+)\Z/s ){ # should have text
+	    emit_item_tag( $otext, $text, 1 );
 	}
        print HTML '<DD>';
     }
-
     print HTML "\n";
 }
 
 #
-# process_over - process a pod over tag and start a corresponding HTML
-# list.
+# process_over - process a pod over tag and start a corresponding HTML list.
 #
 sub process_over {
     # start a new list
     $listlevel++;
+    push( @items_seen, 0 );
+    $after_lpar = 0;
 }
 
 #
 # process_back - process a pod back tag and convert it to HTML format.
 #
 sub process_back {
-    warn "$0: $podfile: unexpected =back directive in paragraph $paragraph.  ignoring.\n"
-	unless $listlevel;
-    return unless $listlevel;
+    if( $listlevel == 0 ){
+	warn "$0: $podfile: unexpected =back directive in paragraph $paragraph.  ignoring.\n";
+	return;
+    }
 
     # close off the list.  note, I check to see if $listend[$listlevel] is
     # defined because an =item directive may have never appeared and thus
     # $listend[$listlevel] may have never been initialized.
     $listlevel--;
-    print HTML $listend[$listlevel] if defined $listend[$listlevel];
-    print HTML "\n";
+    if( defined $listend[$listlevel] ){
+	print HTML '<P></P>' if $after_lpar;
+	print HTML $listend[$listlevel];
+        print HTML "\n";
+        pop( @listend );
+    }
+    $after_lpar = 0;
 
-    # don't need the corresponding perl code anymore
-    pop(@listitem);
-    pop(@listdata);
-    pop(@listend);
-
-    pop(@items_seen);
+    # clean up item count
+    pop( @items_seen );
 }
 
 #
-# process_cut - process a pod cut tag, thus stop ignoring pod directives.
+# process_cut - process a pod cut tag, thus start ignoring pod directives.
 #
 sub process_cut {
     $ignore = 1;
 }
 
 #
-# process_pod - process a pod pod tag, thus ignore pod directives until we see a
-# corresponding cut.
+# process_pod - process a pod pod tag, thus stop ignoring pod directives
+# until we see a corresponding cut.
 #
 sub process_pod {
     # no need to set $ignore to 0 cause the main loop did it
 }
 
 #
-# process_for - process a =for pod tag.  if it's for html, split
+# process_for - process a =for pod tag.  if it's for html, spit
 # it out verbatim, if illustration, center it, otherwise ignore it.
 #
 sub process_for {
@@ -1131,78 +1184,69 @@ sub process_end {
     if ($begin_stack[-1] ne $whom ) {
 	die "Unmatched begin/end at chunk $paragraph\n"
     } 
-    pop @begin_stack;
+    pop( @begin_stack );
 }
 
 #
-# process_text - handles plaintext that appears in the input pod file.
-# there may be pod commands embedded within the text so those must be
-# converted to html commands.
+# process_pre - indented paragraph, made into <PRE></PRE>
 #
-sub process_text {
-    my($text, $escapeQuotes) = @_;
-    my($result, $rest, $s1, $s2, $s3, $s4, $match, $bf);
-    my($podcommand, $params, $tag, $quote);
-
+sub process_pre {
+    my( $text ) = @_;
+    my( $rest );
     return if $ignore;
 
-    $quote  = 0;    	    	# status of double-quote conversion
-    $result = "";
     $rest = $$text;
 
-    if ($rest =~ /^\s+/) {	# preformatted text, no pod directives
-	$rest =~ s/\n+\Z//;
-	$rest =~ s#.*#
+    # insert spaces in place of tabs
+    $rest =~ s#.*#
 	    my $line = $&;
 	    1 while $line =~ s/\t+/' ' x (length($&) * 8 - length($`) % 8)/e;
 	    $line;
 	#eg;
 
-	$rest   =~ s/&/&amp;/g;
-	$rest   =~ s/</&lt;/g;
-	$rest   =~ s/>/&gt;/g;
-	$rest   =~ s/"/&quot;/g;
+    # convert some special chars to HTML escapes
+    $rest =~ s/&/&amp;/g;
+    $rest =~ s/</&lt;/g;
+    $rest =~ s/>/&gt;/g;
+    $rest =~ s/"/&quot;/g;
 
-	# try and create links for all occurrences of perl.* within
-	# the preformatted text.
-	$rest =~ s{
-		    (\s*)(perl\w+)
-		  }{
-		    if (defined $pages{$2}) {	# is a link
-			qq($1<A HREF="$htmlroot/$pages{$2}">$2</A>);
-		    } elsif (defined $pages{dosify($2)}) {	# is a link
-			qq($1<A HREF="$htmlroot/$pages{dosify($2)}">$2</A>);
-		    } else {
-			"$1$2";
-		    }
-		  }xeg;
-#	$rest =~ s/(<A HREF=)([^>:]*:)?([^>:]*)\.pod:([^>:]*:)?/$1$3.html/g;
-	$rest =~ s{
-		    (<A\ HREF="?) ([^>:]*:)? ([^>:]*) \.pod: ([^>:]*:)?
-                  }{
-                    my $url ;
-                    if ( $htmlfileurl ne '' ) {
-			# Here, we take advantage of the knowledge 
-			# that $htmlfileurl ne '' implies $htmlroot eq ''.
-			# Since $htmlroot eq '', we need to prepend $htmldir
-			# on the fron of the link to get the absolute path
-			# of the link's target. We check for a leading '/'
-			# to avoid corrupting links that are #, file:, etc.
-			my $old_url = $3 ;
-			$old_url = "$htmldir$old_url"
-			    if ( $old_url =~ m{^\/} ) ;
-			$url = relativize_url( "$old_url.html", $htmlfileurl );
-# print( "  a: [$old_url.html,$htmlfileurl,$url]\n" ) ;
-		    }
-		    else {
-			$url = "$3.html" ;
-		    }
-		    "$1$url" ;
-		  }xeg;
+    # try and create links for all occurrences of perl.* within
+    # the preformatted text.
+    $rest =~ s{
+	         (\s*)(perl\w+)
+	      }{
+		 if ( defined $pages{$2} ){	# is a link
+		     qq($1<A HREF="$htmlroot/$pages{$2}">$2</A>);
+		 } elsif (defined $pages{dosify($2)}) {	# is a link
+		     qq($1<A HREF="$htmlroot/$pages{dosify($2)}">$2</A>);
+		 } else {
+		     "$1$2";
+		 }
+	      }xeg;
+     $rest =~ s{
+		 (<A\ HREF="?) ([^>:]*:)? ([^>:]*) \.pod: ([^>:]*:)?
+               }{
+                  my $url ;
+                  if ( $htmlfileurl ne '' ){
+		     # Here, we take advantage of the knowledge 
+		     # that $htmlfileurl ne '' implies $htmlroot eq ''.
+		     # Since $htmlroot eq '', we need to prepend $htmldir
+		     # on the fron of the link to get the absolute path
+		     # of the link's target. We check for a leading '/'
+		     # to avoid corrupting links that are #, file:, etc.
+		     my $old_url = $3 ;
+		     $old_url = "$htmldir$old_url" if $old_url =~ m{^\/};
+ 		     $url = relativize_url( "$old_url.html", $htmlfileurl );
+	          } else {
+		     $url = "$3.html" ;
+		  }
+		  "$1$url" ;
+	       }xeg;
 
-  # Look for embedded URLs and make them in to links.  We don't
-  # relativize them since they are best left as the author intended.
-  my $urls = '(' . join ('|', qw{
+    # Look for embedded URLs and make them into links.  We don't
+    # relativize them since they are best left as the author intended.
+
+    my $urls = '(' . join ('|', qw{
                 http
                 telnet
 		mailto
@@ -1214,12 +1258,12 @@ sub process_text {
             } ) 
         . ')';
   
-  my $ltrs = '\w';
-  my $gunk = '/#~:.?+=&%@!\-';
-  my $punc = '.:?\-';
-  my $any  = "${ltrs}${gunk}${punc}";
+    my $ltrs = '\w';
+    my $gunk = '/#~:.?+=&%@!\-';
+    my $punc = '.:?\-';
+    my $any  = "${ltrs}${gunk}${punc}";
 
-  $rest =~ s{
+    $rest =~ s{
         \b                          # start at word boundary
         (                           # begin $1  {
           $urls     :               # need resource and a colon
@@ -1237,166 +1281,76 @@ sub process_text {
         )
       }{<A HREF="$1">$1</A>}igox;
 
-	$result =   "<PRE>"	# text should be as it is (verbatim)
-		  . "$rest\n"
-		  . "</PRE>\n";
-    } else {			# formatted text
-	# parse through the string, stopping each time we find a
-	# pod-escape.  once the string has been throughly processed
-	# we can output it.
-	while (length $rest) {
-	    # check to see if there are any possible pod directives in
-	    # the remaining part of the text.
-	    if ($rest =~ m/[BCEIFLSZ]</) {
-		warn "\$rest\t= $rest\n" unless
-		    $rest =~ /\A
-			   ([^<]*?)
-			   ([BCEIFLSZ]?)
-			   <
-			   (.*)\Z/xs;
-
-		$s1 = $1;	# pure text
-		$s2 = $2;	# the type of pod-escape that follows
-		$s3 = '<';	# '<'
-		$s4 = $3;	# the rest of the string
-	    } else {
-		$s1 = $rest;
-		$s2 = "";
-		$s3 = "";
-		$s4 = "";
-	    }
-
-	    if ($s3 eq '<' && $s2) {	# a pod-escape
-		$result    .= ($escapeQuotes ? process_puretext($s1, \$quote) : $s1);
-		$podcommand = "$s2<";
-		$rest       = $s4;
-
-		# find the matching '>'
-		$match = 1;
-		$bf = 0;
-		while ($match && !$bf) {
-		    $bf = 1;
-		    if ($rest =~ /\A([^<>]*[BCEIFLSZ]<)(.*)\Z/s) {
-			$bf = 0;
-			$match++;
-			$podcommand .= $1;
-			$rest        = $2;
-		    } elsif ($rest =~ /\A([^>]*>)(.*)\Z/s) {
-			$bf = 0;
-			$match--;
-			$podcommand .= $1;
-			$rest        = $2;
-		    }
-		}
-
-		if ($match != 0) {
-		    warn <<WARN;
-$0: $podfile: cannot find matching > for $s2 in paragraph $paragraph.
-WARN
-		    $result .= substr $podcommand, 0, 2;
-		    $rest = substr($podcommand, 2) . $rest;
-		    next;
-		}
-
-		# pull out the parameters to the pod-escape
-		$podcommand =~ /^([BCFEILSZ]?)<(.*)>$/s;
-		$tag    = $1;
-		$params = $2;
-
-		# process the text within the pod-escape so that any escapes
-		# which must occur do.
-		process_text(\$params, 0) unless $tag eq 'L';
-
-		$s1 = $params;
-		if (!$tag || $tag eq " ") {	#  <> : no tag
-		    $s1 = "&lt;$params&gt;";
-		} elsif ($tag eq "L") {		# L<> : link 
-		    $s1 = process_L($params);
-		} elsif ($tag eq "I" ||		# I<> : italicize text
-			 $tag eq "B" ||		# B<> : bold text
-			 $tag eq "F") {		# F<> : file specification
-		    $s1 = process_BFI($tag, $params);
-		} elsif ($tag eq "C") {		# C<> : literal code
-		    $s1 = process_C($params, 1);
-		} elsif ($tag eq "E") {		# E<> : escape
-		    $s1 = process_E($params);
-		} elsif ($tag eq "Z") {		# Z<> : zero-width character
-		    $s1 = process_Z($params);
-		} elsif ($tag eq "S") {		# S<> : non-breaking space
-		    $s1 = process_S($params);
-		} elsif ($tag eq "X") {		# S<> : non-breaking space
-		    $s1 = process_X($params);
-		} else {
-		    warn "$0: $podfile: unhandled tag '$tag' in paragraph $paragraph\n";
-		}
-
-		$result .= "$s1";
-	    } else {
-		# for pure text we must deal with implicit links and
-		# double-quotes among other things.
-		$result .= ($escapeQuotes ? process_puretext("$s1$s2$s3", \$quote) : "$s1$s2$s3");
-		$rest    = $s4;
-	    }
-	}
-    }
-    $$text = $result;
+    # text should be as it is (verbatim)
+    $$text = $rest;
 }
 
-sub html_escape {
-    my $rest = $_[0];
-    $rest   =~ s/&(?!\w+;|#)/&amp;/g;	# XXX not bulletproof
-    $rest   =~ s/</&lt;/g;
-    $rest   =~ s/>/&gt;/g;
-    $rest   =~ s/"/&quot;/g;
-    return $rest;
-} 
+
+#
+# pure text processing
+#
+# pure_text/inIS_text: differ with respect to automatic C<> recognition.
+# we don't want this to happen within IS
+#
+sub pure_text($){
+    my $text = shift();
+    process_puretext( $text, \$ptQuote, 1 );
+}
+
+sub inIS_text($){
+    my $text = shift();
+    process_puretext( $text, \$ptQuote, 0 );
+}
 
 #
 # process_puretext - process pure text (without pod-escapes) converting
 #  double-quotes and handling implicit C<> links.
 #
 sub process_puretext {
-    my($text, $quote) = @_;
-    my(@words, $result, $rest, $lead, $trail);
+    my($text, $quote, $notinIS) = @_;
+
+    ## Guessing at func() or [$@%&]*var references in plain text is destined
+    ## to produce some strange looking ref's. uncomment to disable:
+    ## $notinIS = 0;
+
+    my(@words, $lead, $trail);
 
     # convert double-quotes to single-quotes
-    $text =~ s/\A([^"]*)"/$1''/s if $$quote;
-    while ($text =~ s/\A([^"]*)["]([^"]*)["]/$1``$2''/sg) {}
-
-    $$quote = ($text =~ m/"/ ? 1 : 0);
-    $text =~ s/\A([^"]*)"/$1``/s if $$quote;
+    if( $$quote && $text =~ s/"/''/s ){
+        $$quote = 0;
+    }
+    while ($text =~ s/"([^"]*)"/``$1''/sg) {};
+    $$quote = 1 if $text =~ s/"/``/s;
 
     # keep track of leading and trailing white-space
-    $lead  = ($text =~ /\A(\s*)/s ? $1 : "");
-    $trail = ($text =~ /(\s*)\Z/s ? $1 : "");
+    $lead  = ($text =~ s/\A(\s+)//s ? $1 : "");
+    $trail = ($text =~ s/(\s+)\Z//s ? $1 : "");
 
-    # collapse all white space into a single space
-    $text =~ s/\s+/ /g;
-    @words = split(" ", $text);
+    # split at space/non-space boundaries
+    @words = split( /(?<=\s)(?=\S)|(?<=\S)(?=\s)/, $text );
 
     # process each word individually
     foreach my $word (@words) {
+	# skip space runs
+ 	next if $word =~ /^\s*$/;
 	# see if we can infer a link
-	if ($word =~ /^\w+\(/) {
+	if( $notinIS && $word =~ s/^(\w+)\((.*)\)\W*$/$1/ ) {
 	    # has parenthesis so should have been a C<> ref
-	    $word = process_C($word);
-#	    $word =~ /^[^()]*]\(/;
-#	    if (defined $items{$1} && $items{$1}) {
-#		$word =   "\n<CODE><A HREF=\"$htmlroot/$items{$1}#item_"
-#			. htmlify(0,$word)
-#			. "\">$word</A></CODE>";
-#	    } elsif (defined $items{$word} && $items{$word}) {
-#		$word =   "\n<CODE><A HREF=\"$htmlroot/$items{$word}#item_"
-#			. htmlify(0,$word)
-#			. "\">$word</A></CODE>";
-#	    } else {
-#		$word =   "\n<CODE><A HREF=\"#item_"
-#			. htmlify(0,$word)
-#			. "\">$word</A></CODE>";
-#	    }
-	} elsif ($word =~ /^[\$\@%&*]+\w+$/) {
-	    # perl variables, should be a C<> ref
-	    $word = process_C($word, 1);
+            ## try for a pagename (perlXXX(1))?
+            if( $2 =~ /^\d+$/ ){
+                my $url = page_sect( $word, '' );
+                if( defined $url ){
+                    $word = "<A HREF=\"$url\">the $word manpage</A>";
+                    next;
+                }
+            }
+	    $word = emit_C( $word );
+
+#### disabled. either all (including $\W, $\w+{.*} etc.) or nothing.
+##      } elsif( $notinIS && $word =~ /^[\$\@%&*]+\w+$/) {
+##	    # perl variables, should be a C<> ref
+##	    $word = emit_C( $word );
+
 	} elsif ($word =~ m,^\w+://\w,) {
 	    # looks like a URL
             # Don't relativize it: leave it as the author intended
@@ -1415,35 +1369,268 @@ sub process_puretext {
 	}
     }
 
-    # build a new string based upon our conversion
-    $result = "";
-    $rest   = join(" ", @words);
-    while (length($rest) > 75) {
-	if ( $rest =~ m/^(.{0,75})\s(.*?)$/o ||
-	     $rest =~ m/^(\S*)\s(.*?)$/o) {
+    # put everything back together
+    return $lead . join( '', @words ) . $trail;
+}
 
-	    $result .= "$1\n";
-	    $rest    = $2;
+
+#
+# process_text - handles plaintext that appears in the input pod file.
+# there may be pod commands embedded within the text so those must be
+# converted to html commands.
+#
+
+sub process_text1($$;$);
+
+sub process_text {
+    return if $ignore;
+    my( $tref ) = @_;
+    my $res = process_text1( 0, $tref );
+    $$tref = $res;
+}
+
+sub process_text1($$;$){
+    my( $lev, $rstr, $func ) = @_;
+    $lev++ unless defined $func;
+    my $res = '';
+
+    $func ||= '';
+    if( $func eq 'B' ){
+	# B<text> - boldface
+	$res = '<STRONG>' . process_text1( $lev, $rstr ) . '</STRONG>';
+
+    } elsif( $func eq 'C' ){
+	# C<code> - can be a ref or <CODE></CODE>
+	# need to extract text
+	my $par = go_ahead( $rstr, 'C' );
+
+	## clean-up of the link target
+        my $text = depod( $par );
+
+	### my $x = $par =~ /[BI]</ ? 'yes' : 'no' ;
+        ### print STDERR "-->call emit_C($par) lev=$lev, par with BI=$x\n"; 
+
+	$res = emit_C( $text, $lev > 1 || ($par =~ /[BI]</) );
+
+    } elsif( $func eq 'E' ){
+	# E<x> - convert to character
+	$$rstr =~ s/^(\w+)>//;
+	$res = "&$1;";
+
+    } elsif( $func eq 'F' ){
+	# F<filename> - italizice
+	$res = '<EM>' . process_text1( $lev, $rstr ) . '</EM>';
+
+    } elsif( $func eq 'I' ){
+	# I<text> - italizice
+	$res = '<EM>' . process_text1( $lev, $rstr ) . '</EM>';
+
+    } elsif( $func eq 'L' ){
+	# L<link> - link
+	## L<text|cross-ref> => produce text, use cross-ref for linking 
+	## L<cross-ref> => make text from cross-ref
+	## need to extract text
+	my $par = go_ahead( $rstr, 'L' );
+
+        # some L<>'s that shouldn't be:
+	# a) full-blown URL's are emitted as-is
+        if( $par =~ m{^\w+://}s ){
+	    return make_URL_href( $par );
+	}
+        # b) C<...> is stripped and treated as C<>
+        if( $par =~ /^C<(.*)>$/ ){
+	    my $text = depod( $1 );
+ 	    return emit_C( $text, $lev > 1 || ($par =~ /[BI]</) );
+	}
+
+	# analyze the contents
+	$par =~ s/\n/ /g;   # undo word-wrapped tags
+        my $opar = $par;
+	my $linktext;
+	if( $par =~ s{^([^|]+)\|}{} ){
+	    $linktext = $1;
+	}
+    
+	# make sure sections start with a /
+	$par =~ s{^"}{/"};
+
+	my( $page, $section, $ident );
+
+	# check for link patterns
+	if( $par =~ m{^([^/]+?)/(?!")(.*?)$} ){     # name/ident
+            # we've got a name/ident (no quotes) 
+            ( $page, $ident ) = ( $1, $2 );
+            ### print STDERR "--> L<$par> to page $page, ident $ident\n";
+
+	} elsif( $par =~ m{^(.*?)/"?(.*?)"?$} ){ # [name]/"section"
+            # even though this should be a "section", we go for ident first
+	    ( $page, $ident ) = ( $1, $2 );
+            ### print STDERR "--> L<$par> to page $page, section $section\n";
+
+	} elsif( $par =~ /\s/ ){  # this must be a section with missing quotes
+	    ( $page, $section ) = ( '', $par );
+            ### print STDERR "--> L<$par> to void page, section $section\n";
+
+        } else {
+	    ( $page, $section ) = ( $par, '' );
+            ### print STDERR "--> L<$par> to page $par, void section\n";
+	}
+
+        # now, either $section or $ident is defined. the convoluted logic
+        # below tries to resolve L<> according to what the user specified.
+        # failing this, we try to find the next best thing...
+        my( $url, $ltext, $fid );
+
+        RESOLVE: {
+            if( defined $ident ){
+                ## try to resolve $ident as an item
+	        ( $url, $fid ) = coderef( $page, $ident );
+                if( $url ){
+                    if( ! defined( $linktext ) ){
+                        $linktext = $ident;
+                        $linktext .= " in " if $ident && $page;
+                        $linktext .= "the $page manpage" if $page;
+                    }
+                    ###  print STDERR "got coderef url=$url\n";
+                    last RESOLVE;
+                }
+                ## no luck: go for a section (auto-quoting!)
+                $section = $ident;
+            }
+            ## now go for a section
+            my $htmlsection = htmlify( $section );
+ 	    $url = page_sect( $page, $htmlsection );
+            if( $url ){
+                if( ! defined( $linktext ) ){
+                    $linktext = $section;
+                    $linktext .= " in " if $section && $page;
+                    $linktext .= "the $page manpage" if $page;
+                }
+                ### print STDERR "got page/section url=$url\n";
+                last RESOLVE;
+            }
+            ## no luck: go for an ident 
+            if( $section ){
+                $ident = $section;
+            } else {
+                $ident = $page;
+                $page  = undef();
+            }
+            ( $url, $fid ) = coderef( $page, $ident );
+            if( $url ){
+                if( ! defined( $linktext ) ){
+                    $linktext = $ident;
+                    $linktext .= " in " if $ident && $page;
+                    $linktext .= "the $page manpage" if $page;
+                }
+                ### print STDERR "got section=>coderef url=$url\n";
+                last RESOLVE;
+            }
+
+            # warning; show some text.
+            $linktext = $opar unless defined $linktext;
+            warn "$0: $podfile: cannot resolve L<$opar> in paragraph $paragraph.";
+        }
+
+        # now we have an URL or just plain code
+        $$rstr = $linktext . '>' . $$rstr;
+        if( defined( $url ) ){
+            $res = "<A HREF=\"$url\">" . process_text1( $lev, $rstr ) . '</A>';
+        } else {
+	    $res = '<EM>' . process_text1( $lev, $rstr ) . '</EM>';
+        }
+
+    } elsif( $func eq 'S' ){
+	# S<text> - non-breaking spaces
+	$res = process_text1( $lev, $rstr );
+	$res =~ s/ /&nbsp;/g;
+
+    } elsif( $func eq 'X' ){
+	# X<> - ignore
+	$$rstr =~ s/^[^>]*>//;
+
+    } elsif( $func eq 'Z' ){
+	# Z<> - empty 
+	warn "$0: $podfile: invalid X<> in paragraph $paragraph."
+	    unless $$rstr =~ s/^>//;
+
+    } else {
+	while( $$rstr =~ s/\A(.*?)([BCEFILSXZ]<|>)//s ){
+	    # all others: either recurse into new function or
+	    # terminate at closing angle bracket
+	    my $pt = $1;
+            $pt .= '>' if $2 eq '>' &&  $lev == 1;
+	    $res .= $lev == 1 ? pure_text( $pt ) : inIS_text( $pt );
+	    return $res if $2 eq '>' && $lev > 1;
+            if( $2 ne '>' ){
+		$res .= process_text1( $lev, $rstr, substr($2,0,1) );
+	    }
+
+	}
+	if( $lev == 1 ){
+	    $res .= pure_text( $$rstr );
 	} else {
-	    $result .= "$rest\n";
-	    $rest    = "";
+	    warn "$0: $podfile: undelimited $func<> in paragraph $paragraph.";
 	}
     }
-    $result .= $rest if $rest;
-
-    # restore the leading and trailing white-space
-    $result = "$lead$result$trail";
-
-    return $result;
+    return $res;
 }
 
 #
-# pre_escape - convert & in text to $amp;
+# go_ahead: extract text of an IS (can be nested)
 #
-sub pre_escape {
-    my($str) = @_;
-    $$str =~ s/&(?!\w+;|#)/&amp;/g;	# XXX not bulletproof
+sub go_ahead($$){
+    my( $rstr, $func ) = @_;
+    my $res = '';
+    my $level = 1;
+    while( $$rstr =~ s/\A(.*?)([BCEFILSXZ]<|>)//s ){
+	$res .= $1;
+	if( $2 eq '>' ){
+	    return $res if --$level == 0;
+	} else {
+	    ++$level;
+	}
+	$res .= $2;
+    }
+    warn "$0: $podfile: undelimited $func<> in paragraph $paragraph.";
+    return $res;
 }
+
+#
+# emit_C - output result of C<text>
+#    $text is the depod-ed text
+#
+sub emit_C($;$){
+    my( $text, $nocode ) = @_;
+    my $res;
+    my( $url, $fid ) = coderef( undef(), $text );
+
+    # need HTML-safe text
+    my $linktext = html_escape( $text );
+
+    if( defined( $url ) &&
+        (!defined( $EmittedItem ) || $EmittedItem ne $fid ) ){
+	$res = "<A HREF=\"$url\"><CODE>$linktext</CODE></A>";
+    } elsif( 0 && $nocode ){
+	$res = $linktext;
+    } else {
+	$res = "<CODE>$linktext</CODE>";
+    }
+    return $res;
+}
+
+#
+# html_escape: make text safe for HTML
+#
+sub html_escape {
+    my $rest = $_[0];
+    $rest   =~ s/&/&amp;/g;
+    $rest   =~ s/</&lt;/g;
+    $rest   =~ s/>/&gt;/g;
+    $rest   =~ s/"/&quot;/g;
+    return $rest;
+} 
+
 
 #
 # dosify - convert filenames to 8.3
@@ -1460,54 +1647,24 @@ sub dosify {
 }
 
 #
-# process_L - convert a pod L<> directive to a corresponding HTML link.
-#  most of the links made are inferred rather than known about directly
-#  (i.e it's not known whether the =head\d section exists in the target file,
-#   or whether a .pod file exists in the case of split files).  however, the
-#  guessing usually works.
+# page_sect - make an URL from the text of a L<>
 #
-# Unlike the other directives, this should be called with an unprocessed
-# string, else tags in the link won't be matched.
-#
-sub process_L {
-    my($str) = @_;
-    my($s1, $s2, $linktext, $page, $page83, $section, $link);	# work strings
+sub page_sect($$) {
+    my( $page, $section ) = @_;
+    my( $linktext, $page83, $link);	# work strings
 
-    $str =~ s/\n/ /g;			# undo word-wrapped tags
-    $s1 = $str;
-    for ($s1) {
-	# LREF: a la HREF L<show this text|man/section>
-	$linktext = $1 if s:^([^|]+)\|::;
-
-	# make sure sections start with a /
-	s,^",/",g;
-	s,^,/,g if (!m,/, && / /);
-
-	# check if there's a section specified
-	if (m,^(.*?)/"?(.*?)"?$,) {	# yes
-	    ($page, $section) = ($1, $2);
-	} else {			# no
-	    ($page, $section) = ($_, "");
-	}
-
-	# check if we know that this is a section in this page
-	if (!defined $pages{$page} && defined $sections{$page}) {
-	    $section = $page;
-	    $page = "";
-	}
-
-	# remove trailing punctuation, like ()
-	$section =~ s/\W*$// ;
+    # check if we know that this is a section in this page
+    if (!defined $pages{$page} && defined $sections{$page}) {
+	$section = $page;
+	$page = "";
+        ### print STDERR "reset page='', section=$section\n";
     }
 
     $page83=dosify($page);
     $page=$page83 if (defined $pages{$page83});
     if ($page eq "") {
-	$link = "#" . htmlify(0,$section);
-	$linktext = $section unless defined($linktext);
+	$link = "#" . htmlify( $section );
     } elsif ( $page =~ /::/ ) {
-	$linktext  = ($section ? "$section" : "$page")
-	    unless defined($linktext);
 	$page =~ s,::,/,g;
 	# Search page cache for an entry keyed under the html page name,
 	# then look to see what directory that page might be in.  NOTE:
@@ -1529,45 +1686,42 @@ sub process_L {
 	    # but A::C is found in lib/A/C.pm, then A::B is assumed to be in
 	    # lib/A/B.pm. This is also limited, but it's an improvement.
 	    # Maybe a hints file so that the links point to the correct places
-	    # non-theless?
-	    # Also, maybe put a warn "$0: cannot resolve..." here.
+	    # nonetheless?
+
 	}
 	$link = "$htmlroot/$page.html";
-	$link .= "#" . htmlify(0,$section) if ($section);
+	$link .= "#" . htmlify( $section ) if ($section);
     } elsif (!defined $pages{$page}) {
-	warn "$0: $podfile: cannot resolve L<$str> in paragraph $paragraph: no such page '$page'\n" unless $quiet;
 	$link = "";
-	$linktext = $page unless defined($linktext);
     } else {
-	$linktext  = ($section ? "$section" : "the $page manpage") unless defined($linktext);
-	$section = htmlify(0,$section) if $section ne "";
+	$section = htmlify( $section ) if $section ne "";
+        ### print STDERR "...section=$section\n";
 
 	# if there is a directory by the name of the page, then assume that an
 	# appropriate section will exist in the subdirectory
 #	if ($section ne "" && $pages{$page} =~ /([^:]*[^(\.pod|\.pm)]):/) {
 	if ($section ne "" && $pages{$page} =~ /([^:]*(?<!\.pod)(?<!\.pm)):/) {
 	    $link = "$htmlroot/$1/$section.html";
+            ### print STDERR "...link=$link\n";
 
 	# since there is no directory by the name of the page, the section will
 	# have to exist within a .html of the same name.  thus, make sure there
 	# is a .pod or .pm that might become that .html
 	} else {
-	    $section = "#$section";
+	    $section = "#$section" if $section;
+            ### print STDERR "...section=$section\n";
+
 	    # check if there is a .pod with the page name
 	    if ($pages{$page} =~ /([^:]*)\.pod:/) {
 		$link = "$htmlroot/$1.html$section";
 	    } elsif ($pages{$page} =~ /([^:]*)\.pm:/) {
 		$link = "$htmlroot/$1.html$section";
 	    } else {
-		warn "$0: $podfile: cannot resolve L$str in paragraph $paragraph: ".
-			     "no .pod or .pm found\n";
 		$link = "";
-		$linktext = $section unless defined($linktext);
 	    }
 	}
     }
 
-    process_text(\$linktext, 0);
     if ($link) {
 	# Here, we take advantage of the knowledge that $htmlfileurl ne ''
 	# implies $htmlroot eq ''. This means that the link in question
@@ -1576,21 +1730,18 @@ sub process_L {
 	# for other kinds of links, like file:, ftp:, etc.
         my $url ;
         if (  $htmlfileurl ne '' ) {
-            $link = "$htmldir$link"
-		if ( $link =~ m{^/} ) ;
-            
-            $url = relativize_url( $link, $htmlfileurl ) ;
-# print( "  b: [$link,$htmlfileurl,$url]\n" ) ;
+            $link = "$htmldir$link" if $link =~ m{^/};
+            $url = relativize_url( $link, $htmlfileurl );
+# print( "  b: [$link,$htmlfileurl,$url]\n" );
 	}
 	else {
             $url = $link ;
 	}
+	return $url;
 
-	$s1 = "<A HREF=\"$url\">$linktext</A>";
     } else {
-	$s1 = "<EM>$linktext</EM>";
+	return undef();
     }
-    return $s1;
 }
 
 #
@@ -1626,110 +1777,63 @@ sub relativize_url {
     return $rel_path ;
 }
 
-#
-# process_BFI - process any of the B<>, F<>, or I<> pod-escapes and
-# convert them to corresponding HTML directives.
-#
-sub process_BFI {
-    my($tag, $str) = @_;
-    my($s1);			# work string
-    my(%repltext) = (	'B' => 'STRONG',
-			'F' => 'EM',
-			'I' => 'EM');
-
-    # extract the modified text and convert to HTML
-    $s1 = "<$repltext{$tag}>$str</$repltext{$tag}>";
-    return $s1;
-}
 
 #
-# process_C - process the C<> pod-escape.
+# coderef - make URL from the text of a C<>
 #
-sub process_C {
-    my($str, $doref) = @_;
-    my($s1, $s2);
+sub coderef($$){
+    my( $page, $item ) = @_;
+    my( $url );
 
-    $s1 = $str;
-    $s1 =~ s/\([^()]*\)//g;	# delete parentheses
-    $s2 = $s1;
-    $s1 =~ s/\W//g;		# delete bogus characters
-    $str = html_escape($str);
+    my $fid = fragment_id( $item );
+    return( $url, $fid );
+    if( defined( $page ) ){
+	# we have been given a $page...
+	$page =~ s{::}{/}g;
+
+	# Do we take it? Item could be a section!
+	my $base = $items{$fid} || "";
+	$base =~ s{[^/]*/}{};
+	if( $base ne "$page.html" ){
+            ###   print STDERR "coderef( $page, $item ): items{$fid} = $items{$fid} = $base => discard page!\n";
+	    $page = undef();
+	}
+
+    } else {
+        # no page - local items precede cached items
+        if(  exists $local_items{$fid} ){
+	    $page = $local_items{$fid};
+	} else {
+	    $page = $items{$fid};
+	}
+    }
 
     # if there was a pod file that we found earlier with an appropriate
     # =item directive, then create a link to that page.
-    if ($doref && defined $items{$s1}) {
-        if ( $items{$s1} ) {
-            my $link = "$htmlroot/$items{$s1}#item_" . htmlify(0,$s2) ;
-	    # Here, we take advantage of the knowledge that $htmlfileurl ne ''
-	    # implies $htmlroot eq ''.
-            my $url ;
-            if (  $htmlfileurl ne '' ) {
-                $link = "$htmldir$link" ;
-                $url = relativize_url( $link, $htmlfileurl ) ;
+    if( defined $page ){
+	if( $page ){
+            if( exists $pages{$page} and $pages{$page} =~ /([^:.]*)\.[^:]*:/){
+		$page = $1 . '.html';
 	    }
-	    else {
-                $url = $link ;
+	    my $link = "$htmlroot/$page#item_$fid";
+
+	    # Here, we take advantage of the knowledge that $htmlfileurl
+	    # ne '' implies $htmlroot eq ''.
+	    if (  $htmlfileurl ne '' ) {
+		$link = "$htmldir$link" ;
+		$url = relativize_url( $link, $htmlfileurl ) ;
+	    } else {
+		$url = $link ;
 	    }
-	    $s1 = "<A HREF=\"$url\">$str</A>" ;
-        }
-        else {
-	    $s1 = "<A HREF=\"#item_" . htmlify(0,$s2) .  "\">$str</A>" ;
-        }
-	$s1 =~ s,(perl\w+/(\S+)\.html)#item_\2\b,$1,; 
-	confess "s1 has space: $s1" if $s1 =~ /HREF="[^"]*\s[^"]*"/;
-    } else {
-	$s1 = "<CODE>$str</CODE>";
-	# warn "$0: $podfile: cannot resolve C<$str> in paragraph $paragraph\n" if $verbose
-    }
+	} else {
+	    $url = "#item_" . $fid;
+	}
 
-
-    return $s1;
+	confess "url has space: $url" if $url =~ /"[^"]*\s[^"]*"/;
+    }       
+    return( $url, $fid );
 }
 
-#
-# process_E - process the E<> pod directive which seems to escape a character.
-#
-sub process_E {
-    my($str) = @_;
-
-    for ($str) {
-	s,([^/].*),\&$1\;,g;
-    }
-
-    return $str;
-}
-
-#
-# process_Z - process the Z<> pod directive which really just amounts to
-# ignoring it.  this allows someone to start a paragraph with an =
-#
-sub process_Z {
-    my($str) = @_;
-
-    # there is no equivalent in HTML for this so just ignore it.
-    $str = "";
-    return $str;
-}
-
-#
-# process_S - process the S<> pod directive which means to convert all
-# spaces in the string to non-breaking spaces (in HTML-eze).
-#
-sub process_S {
-    my($str) = @_;
-
-    # convert all spaces in the text to non-breaking spaces in HTML.
-    $str =~ s/ /&nbsp;/g;
-    return $str;
-}
-
-#
-# process_X - this is supposed to make an index entry.  we'll just 
-# ignore it.
-#
-sub process_X {
-    return '';
-}
 
 
 #
@@ -1757,29 +1861,129 @@ sub finish_list {
 
 #
 # htmlify - converts a pod section specification to a suitable section
-# specification for HTML.  if first arg is 1, only takes 1st word.
+# specification for HTML. Note that we keep spaces and special characters
+# except ", ? (Netscape problem) and the hyphen (writer's problem...).
 #
 sub htmlify {
-    my($compact, $heading) = @_;
-
-    if ($compact) {
-      $heading =~ /^(\w+)/;
-      $heading = $1;
-    } 
-
-  # $heading = lc($heading);
-  $heading =~ s/[^\w\s]/_/g;
-  $heading =~ s/(\s+)/ /g;
-  $heading =~ s/^\s*(.*?)\s*$/$1/s;
-  $heading =~ s/ /_/g;
-  $heading =~ s/\A(.{32}).*\Z/$1/s;
-  $heading =~ s/\s+\Z//;
-  $heading =~ s/_{2,}/_/g;
-
-  return $heading;
+    my( $heading) = @_;
+    $heading =~ s/(\s+)/ /g;
+    $heading =~ s/\s+\Z//;
+    $heading =~ s/\A\s+//;
+    # The hyphen is a disgrace to the English language.
+    $heading =~ s/[-"?]//g;
+    $heading = lc( $heading );
+    return $heading;
 }
 
-BEGIN {
+#
+# depod - convert text by eliminating all interior sequences
+# Note: can be called with copy or modify semantics
+#
+my %E2c;
+$E2c{lt} = '<';
+$E2c{gt} = '>';
+$E2c{sol} = '/';
+$E2c{verbar} = '|';
+
+sub depod1($;$);
+
+sub depod($){
+    my $string;
+    if( ref( $_[0] ) ){
+	$string =  ${$_[0]};
+        ${$_[0]} = depod1( \$string );
+    } else {
+	$string =  $_[0];
+        depod1( \$string );
+    }    
+}
+
+sub depod1($;$){
+  my( $rstr, $func ) = @_;
+  my $res = '';
+  return $res unless defined $$rstr;
+  if( ! defined( $func ) ){
+      # skip to next begin of an interior sequence
+      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ])<// ){
+         # recurse into its text
+         $res .= $1 . depod1( $rstr, $2 );
+      }
+      $res .= $$rstr;
+  } elsif( $func eq 'E' ){
+      # E<x> - convert to character
+      $$rstr =~ s/^(\w+)>//;
+      $res .= $E2c{$1} || "";
+  } elsif( $func eq 'X' ){
+      # X<> - ignore
+      $$rstr =~ s/^[^>]*>//;
+  } elsif( $func eq 'Z' ){
+      # Z<> - empty 
+      $$rstr =~ s/^>//;
+  } else {
+      # all others: either recurse into new function or
+      # terminate at closing angle bracket
+      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ]<|>)// ){
+	  $res .= $1;
+	  last if $2 eq '>';
+          $res .= depod1( $rstr, substr($2,0,1) );
+      }
+      ## If we're here and $2 ne '>': undelimited interior sequence.
+      ## Ignored, as this is called without proper indication of where we are.
+      ## Rely on process_text to produce diagnostics.
+  }
+  return $res;
+}
+
+#
+# fragment_id - construct a fragment identifier from:
+#   a) =item text
+#   b) contents of C<...>
+#
+my @hc;
+sub fragment_id {
+    my $text = shift();
+    $text =~ s/\s+\Z//s;
+    if( $text ){
+	# a method or function?
+	return $1 if $text =~ /(\w+)\s*\(/;
+	return $1 if $text =~ /->\s*(\w+)\s*\(?/;
+
+	# a variable name?
+	return $1 if $text =~ /^([$@%*]\S+)/;
+
+	# some pattern matching operator?
+	return $1 if $text =~ m|^(\w+/).*/\w*$|;
+
+	# fancy stuff... like "do { }"
+	return $1 if $text =~ m|^(\w+)\s*{.*}$|;
+
+	# honour the perlfunc manpage: func [PAR[,[ ]PAR]...]
+	# and some funnies with ... Module ...
+	return $1 if $text =~ m{^([a-z\d]+)(\s+[A-Z\d,/& ]+)?$};
+	return $1 if $text =~ m{^([a-z\d]+)\s+Module(\s+[A-Z\d,/& ]+)?$};
+
+	# text? normalize!
+	$text =~ s/\s+/_/sg;
+	$text =~ s{(\W)}{
+         defined( $hc[ord($1)] ) ? $hc[ord($1)]
+                 : ( $hc[ord($1)] = sprintf( "%%%02X", ord($1) ) ) }gxe;
+        $text = substr( $text, 0, 50 );
+    } else {
+	return undef();
+    }
+}
+
+#
+# make_URL_href - generate HTML href from URL
+# Special treatment for CGI queries.
+#
+sub make_URL_href($){
+    my( $url ) = @_;
+    if( $url !~ 
+        s{^(http:[-\w/#~:.+=&%@!]+)(\?.*)$}{<A HREF="$1$2">$1</A>}i ){
+        $url = "<A HREF=\"$url\">$url</A>";
+    }
+    return $url;
 }
 
 1;

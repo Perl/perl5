@@ -22,17 +22,12 @@ my @patchlevel_h = <PATCHLEVEL>;
 close PATCHLEVEL;
 my $patchlevel_h = join "", grep { /^#\s*define/ } @patchlevel_h;
 print $patchlevel_h;
+$revision = $1 if $patchlevel_h =~ /PERL_REVISION\s+(\d+)/;
 $patchlevel = $1 if $patchlevel_h =~ /PERL_VERSION\s+(\d+)/;
 $subversion = $1 if $patchlevel_h =~ /PERL_SUBVERSION\s+(\d+)/;
 die "Unable to parse patchlevel.h" unless $subversion >= 0;
-$vers = sprintf("5.%03d", $patchlevel);
-$vms_vers = sprintf("5_%03d", $patchlevel);
-if ($subversion) {
-    $vers.= sprintf( "_%02d", $subversion);
-    $vms_vers.= sprintf( "%02d", $subversion);
-} else {
-    $vms_vers.= "  ";
-}
+$vers = sprintf("%d.%d.%d", $revision, $patchlevel, $subversion);
+$vms_vers = sprintf("%d_%d_%d", $revision, $patchlevel, $subversion);
 
 # fetch list of local patches
 my (@local_patches, @lpatch_tags, $lpatch_tags);

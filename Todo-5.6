@@ -1,10 +1,26 @@
+Unicode support
+    finish byte <-> utf8 and localencoding <-> utf8 conversions 
+    make "$bytestr$charstr" do the right conversion
+    add Unicode::Map equivivalent to core
+    add support for I/O disciplines
+        - open(F, "<!crlf!utf16", $file)
+	- binmode(STDIN, "<!crlf!utf16")?
+	- a way to set the "system" discipline (binmode("!crlf!utf16") maybe?)
+	- nice IO::Filter module to push/pop disciplines
+    eliminate need for "use utf8;"
+    support C<print v1.2.3>
+    make C<v123> mean C<chr(123)> (if !exists(&v123))
+    autoload utf8_heavy.pl's swash routines in swash_init()
+
 Multi-threading
-    $AUTOLOAD. Hmm.
-    consistent semantics for exit/die in threads
-    SvREFCNT_dec(curstack) in threadstart() in Thread.xs
-    better support for externally created threads
-    Thread::Pool
-    spot-check globals like statcache and global GVs for thread-safety
+    support "use Thread;" under useithreads
+    add mechanism to:
+      - create new interpreter in a different thread
+      - exchange data between interpreters/threads
+      - share namespaces between interpreters/threads
+    work out consistent semantics for exit/die in threads
+    support for externally created threads?
+    Thread::Pool?
 
 Compiler
     auto-produce executable
@@ -16,13 +32,9 @@ Compiler
 	from where newASSIGNOP steals the field)
 
 Namespace cleanup
-    CPP-space:	  restrict what we export from headers
-    header-space: move into CORE/perl/
-    API-space:    begin list of things that constitute public api
-
-MULTIPLICITY support
-    complete work on safe recursive interpreters, C<Perl->new()>
-    revisit extra implicit arg that provides curthread/curinterp context
+    CPP-space:	  restrict what we export from headers when !PERL_CORE
+    header-space: move into CORE/perl/?
+    API-space:    complete the list of things that constitute public api
 
 Configure
     make configuring+building away from source directory work (VPATH et al)
@@ -31,9 +43,12 @@ Configure
     POSIX 1003.1 1996 Edition support
 
 Locales
+    deprecate traditional/legacy locales?
+    figure out how to support Unicode locales
     locales across packages?
 
 Regexen
+   make RE engine thread-safe
    POSIX [=bar=] and [.zap.] would nice too but there's no API for them
    (=bar= could be done with Unicode, though)
    approximate matching
@@ -42,22 +57,16 @@ Reliable Signals
     custom opcodes
     alternate runops() for signal despatch
     figure out how to die() in delayed sighandler
-    add tests for Thread::Signal
+    make Thread::Signal work under useithreads
 
 Win32 stuff
-    get PERL_OBJECT building under gcc
-    get PERL_OBJECT building on non-win32
-    automate generation of 'protected' prototypes for CPerlObj 
-    rename new headers to be consistent with the rest
-    sort out the spawnvp() mess
+    sort out the spawnvp() mess for system('a','b','c') compatibility
     work out DLL versioning
-    style-check
 
 Miscellaneous
-    rename and alter ISA.pm
     magic_setisa should be made to update %FIELDS [???]
     add new modules (Archive::Tar, Compress::Zlib, CPAN::FTP?)
-    fix pod2html to generate relative URLs (replace with new PodtoHtml?)
+    replace pod2html with new PodtoHtml? (requires other modules from CPAN)
     automate testing with large parts of CPAN
 
 Ongoing

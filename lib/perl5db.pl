@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.04041;
+$VERSION = 1.05;
 $header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -597,16 +597,26 @@ EOP
 			  }
 		      };
 		    $cmd =~ s/^l\s+-\s*$/-/;
-		    $cmd =~ /^l\b\s*([\':A-Za-z_][\':\w]*)/ && do {
+		    $cmd =~ /^([lb])\b\s*(\$.*)/s && do {
+			$evalarg = $2;
+			my ($s) = &eval;
+			print($OUT "Error: $@\n"), next CMD if $@;
+			$s = CvGV_name($s);
+			print($OUT "Interpreted as: $1 $s\n");
+			$cmd = "$1 $s";
+		    };
+		    $cmd =~ /^l\b\s*([\':A-Za-z_][\':\w]*(\[.*\])?)/s && do {
 			$subname = $1;
 			$subname =~ s/\'/::/;
 			$subname = $package."::".$subname 
 			  unless $subname =~ /::/;
 			$subname = "main".$subname if substr($subname,0,2) eq "::";
-			@pieces = split(/:/,find_sub($subname));
+			@pieces = split(/:/,find_sub($subname) || $sub{$subname});
 			$subrange = pop @pieces;
 			$file = join(':', @pieces);
 			if ($file ne $filename) {
+			    print $OUT "Switching to file '$file'.\n"
+				unless $emacs;
 			    *dbline = $main::{'_<' . $file};
 			    $max = $#dbline;
 			    $filename = $file;
@@ -782,7 +792,7 @@ EOP
 			$postponed{$subname} = $break 
 			  ? "break +0 if $cond" : "compile";
 			next CMD; };
-		    $cmd =~ /^b\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ && do {
+		    $cmd =~ /^b\b\s*([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ && do {
 			$subname = $1;
 			$cond = $2 || '1';
 			$subname =~ s/\'/::/;
@@ -793,8 +803,8 @@ EOP
 			($file,$i) = (find_sub($subname) =~ /^(.*):(.*)$/);
 			$i += 0;
 			if ($i) {
-			    $filename = $file;
-			    *dbline = $main::{'_<' . $filename};
+			    local $filename = $file;
+			    local *dbline = $main::{'_<' . $filename};
 			    $had_breakpoints{$filename} = 1;
 			    $max = $#dbline;
 			    ++$i while $dbline[$i] == 0 && $i < $max;
@@ -884,6 +894,10 @@ EOP
 		    $cmd =~ /^c\b\s*([\w:]*)\s*$/ && do {
 		        end_report(), next CMD if $finished and $level <= 1;
 			$subname = $i = $1;
+			#  Probably not needed, since we finish an interactive
+			#  sub-session anyway...
+			# local $filename = $filename;
+			# local *dbline = *dbline;	# XXX Would this work?!
 			if ($i =~ /\D/) { # subroutine name
 			    $subname = $package."::".$subname 
 			        unless $subname =~ /::/;
@@ -1254,11 +1268,11 @@ sub save {
 # The following takes its argument via $evalarg to preserve current @_
 
 sub eval {
-    my @res;
+    local @res;			# 'my' would make it visible from user code
     {
-	my $otrace = $trace;
-	my $osingle = $single;
-	my $od = $^D;
+	local $otrace = $trace;
+	local $osingle = $single;
+	local $od = $^D;
 	@res = eval "$usercontext $evalarg;\n"; # '\n' for nice recursive debug
 	$trace = $otrace;
 	$single = $osingle;
@@ -1807,11 +1821,18 @@ B<l> I<min>B<+>I<incr>	List I<incr>+1 lines starting at I<min>.
 B<l> I<min>B<->I<max>	List lines I<min> through I<max>.
 B<l> I<line>		List single I<line>.
 B<l> I<subname>	List first window of lines from subroutine.
+B<l> I<$var>	List first window of lines from subroutine referenced by I<$var>.
 B<l>		List next window of lines.
 B<->		List previous window of lines.
 B<w> [I<line>]	List window around I<line>.
 B<.>		Return to the executed line.
-B<f> I<filename>	Switch to viewing I<filename>. Must be loaded.
+B<f> I<filename>	Switch to viewing I<filename>. File must be already loaded.
+		I<filename> may be either the full name of the file, or a regular
+		expression matching the full file name:
+		B<f> I</home/me/foo.pl> and B<f> I<oo\\.> may access the same file.
+		Evals (with saved bodies) are considered to be filenames:
+		B<f> I<(eval 7)> and B<f> I<eval 7\\b> access the body of the 7th eval
+		(in the order of execution).
 B</>I<pattern>B</>	Search forwards for I<pattern>; final B</> is optional.
 B<?>I<pattern>B<?>	Search backwards for I<pattern>; final B<?> is optional.
 B<L>		List all breakpoints and actions.
@@ -1823,6 +1844,7 @@ B<b> [I<line>] [I<condition>]
 		I<condition> breaks if it evaluates to true, defaults to '1'.
 B<b> I<subname> [I<condition>]
 		Set breakpoint at first line of subroutine.
+B<b> I<$var>	Set breakpoint at first line of subroutine referenced by I<$var>.
 B<b> B<load> I<filename> Set breakpoint on `require'ing the given file.
 B<b> B<postpone> I<subname> [I<condition>]
 		Set breakpoint at first line of subroutine after 
@@ -2051,10 +2073,31 @@ sub signalLevel {
   $signalLevel;
 }
 
+sub CvGV_name {
+  my $in = shift;
+  my $name = CvGV_name_or_bust($in);
+  defined $name ? $name : $in;
+}
+
+sub CvGV_name_or_bust {
+  my $in = shift;
+  return if $skipCvGV;		# Backdoor to avoid problems if XS broken...
+  $in = \&$in;			# Hard reference...
+  eval {require Devel::Peek; 1} or return;
+  my $gv = Devel::Peek::CvGV($in) or return;
+  *$gv{PACKAGE} . '::' . *$gv{NAME};
+}
+
 sub find_sub {
   my $subr = shift;
-  return unless defined &$subr;
   $sub{$subr} or do {
+    return unless defined &$subr;
+    my $name = CvGV_name_or_bust($subr);
+    my $data;
+    $data = $sub{$name} if defined $name;
+    return $data if defined $data;
+
+    # Old stupid way...
     $subr = \&$subr;		# Hard reference
     my $s;
     for (keys %sub) {

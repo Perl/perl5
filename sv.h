@@ -1,6 +1,6 @@
 /*    sv.h
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -10,6 +10,35 @@
 #ifdef sv_flags
 #undef sv_flags		/* Convex has this in <signal.h> for sigvec() */
 #endif
+
+/*
+=for apidoc AmU||svtype
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for apidoc AmU||SVt_PV
+Pointer type flag for scalars.  See C<svtype>.
+
+=for apidoc AmU||SVt_IV
+Integer type flag for scalars.  See C<svtype>.
+
+=for apidoc AmU||SVt_NV
+Double type flag for scalars.  See C<svtype>.
+
+=for apidoc AmU||SVt_PVMG
+Type flag for blessed scalars.  See C<svtype>.
+
+=for apidoc AmU||SVt_PVAV
+Type flag for arrays.  See C<svtype>.
+
+=for apidoc AmU||SVt_PVHV
+Type flag for hashes.  See C<svtype>.
+
+=for apidoc AmU||SVt_PVCV
+Type flag for code refs.  See C<svtype>.
+
+=cut
+*/
 
 typedef enum {
 	SVt_NULL,	/* 0 */
@@ -67,6 +96,26 @@ struct io {
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
 };
+
+/*
+=for apidoc Am|U32|SvREFCNT|SV* sv
+Returns the value of the object's reference count.
+
+=for apidoc Am|SV*|SvREFCNT_inc|SV* sv
+Increments the reference count of the given SV.
+
+=for apidoc Am|void|SvREFCNT_dec|SV* sv
+Decrements the reference count of the given SV.
+
+=for apidoc Am|svtype|SvTYPE|SV* sv
+Returns the type of the SV.  See C<svtype>.
+
+=for apidoc Am|void|SvUPGRADE|SV* sv|svtype type
+Used to upgrade an SV to a more complex form.  Uses C<sv_upgrade> to
+perform the upgrade if necessary.  See C<svtype>.
+
+=cut
+*/
 
 #define SvANY(sv)	(sv)->sv_any
 #define SvFLAGS(sv)	(sv)->sv_flags
@@ -330,6 +379,123 @@ struct xpvio {
 
 /* The following macros define implementation-independent predicates on SVs. */
 
+/*
+=for apidoc Am|bool|SvNIOK|SV* sv
+Returns a boolean indicating whether the SV contains a number, integer or
+double.
+
+=for apidoc Am|bool|SvNIOKp|SV* sv
+Returns a boolean indicating whether the SV contains a number, integer or
+double.  Checks the B<private> setting.  Use C<SvNIOK>.
+
+=for apidoc Am|void|SvNIOK_off|SV* sv
+Unsets the NV/IV status of an SV.
+
+=for apidoc Am|bool|SvOK|SV* sv
+Returns a boolean indicating whether the value is an SV.
+
+=for apidoc Am|bool|SvIOKp|SV* sv
+Returns a boolean indicating whether the SV contains an integer.  Checks
+the B<private> setting.  Use C<SvIOK>.
+
+=for apidoc Am|bool|SvNOKp|SV* sv
+Returns a boolean indicating whether the SV contains a double.  Checks the
+B<private> setting.  Use C<SvNOK>.
+
+=for apidoc Am|bool|SvPOKp|SV* sv
+Returns a boolean indicating whether the SV contains a character string.
+Checks the B<private> setting.  Use C<SvPOK>.
+
+=for apidoc Am|bool|SvIOK|SV* sv
+Returns a boolean indicating whether the SV contains an integer.
+
+=for apidoc Am|void|SvIOK_on|SV* sv
+Tells an SV that it is an integer.
+
+=for apidoc Am|void|SvIOK_off|SV* sv
+Unsets the IV status of an SV.
+
+=for apidoc Am|void|SvIOK_only|SV* sv
+Tells an SV that it is an integer and disables all other OK bits.
+
+=for apidoc Am|bool|SvNOK|SV* sv
+Returns a boolean indicating whether the SV contains a double.
+
+=for apidoc Am|void|SvNOK_on|SV* sv
+Tells an SV that it is a double.
+
+=for apidoc Am|void|SvNOK_off|SV* sv
+Unsets the NV status of an SV.
+
+=for apidoc Am|void|SvNOK_only|SV* sv
+Tells an SV that it is a double and disables all other OK bits.
+
+=for apidoc Am|bool|SvPOK|SV* sv
+Returns a boolean indicating whether the SV contains a character
+string.
+
+=for apidoc Am|void|SvPOK_on|SV* sv
+Tells an SV that it is a string.
+
+=for apidoc Am|void|SvPOK_off|SV* sv
+Unsets the PV status of an SV.
+
+=for apidoc Am|void|SvPOK_only|SV* sv
+Tells an SV that it is a string and disables all other OK bits.
+
+=for apidoc Am|bool|SvOOK|SV* sv
+Returns a boolean indicating whether the SvIVX is a valid offset value for
+the SvPVX.  This hack is used internally to speed up removal of characters
+from the beginning of a SvPV.  When SvOOK is true, then the start of the
+allocated string buffer is really (SvPVX - SvIVX).
+
+=for apidoc Am|bool|SvROK|SV* sv
+Tests if the SV is an RV.
+
+=for apidoc Am|void|SvROK_on|SV* sv
+Tells an SV that it is an RV.
+
+=for apidoc Am|void|SvROK_off|SV* sv
+Unsets the RV status of an SV.
+
+=for apidoc Am|SV*|SvRV|SV* sv
+Dereferences an RV to return the SV.
+
+=for apidoc Am|IV|SvIVX|SV* sv
+Returns the integer which is stored in the SV, assuming SvIOK is
+true.
+
+=for apidoc Am|UV|SvUVX|SV* sv
+Returns the unsigned integer which is stored in the SV, assuming SvIOK is
+true.
+
+=for apidoc Am|NV|SvNVX|SV* sv
+Returns the double which is stored in the SV, assuming SvNOK is
+true.
+
+=for apidoc Am|char*|SvPVX|SV* sv
+Returns a pointer to the string in the SV.  The SV must contain a
+string.
+
+=for apidoc Am|STRLEN|SvCUR|SV* sv
+Returns the length of the string which is in the SV.  See C<SvLEN>.
+
+=for apidoc Am|STRLEN|SvLEN|SV* sv
+Returns the size of the string buffer in the SV.  See C<SvCUR>.
+
+=for apidoc Am|char*|SvEND|SV* sv
+Returns a pointer to the last character in the string which is in the SV.
+See C<SvCUR>.  Access the character as *(SvEND(sv)).
+
+=for apidoc Am|HV*|SvSTASH|SV* sv
+Returns the stash of the SV.
+
+=for apidoc Am|void|SvCUR_set|SV* sv|STRLEN len
+Set the length of the string which is in the SV.  See C<SvCUR>.
+
+=cut
+*/
+
 #define SvNIOK(sv)		(SvFLAGS(sv) & (SVf_IOK|SVf_NOK))
 #define SvNIOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK))
 #define SvNIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK| \
@@ -337,9 +503,10 @@ struct xpvio {
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
 #define SvOK_off(sv)		(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
-						  SVf_IVisUV),		\
+						  SVf_IVisUV|SVf_UTF8),	\
 							SvOOK_off(sv))
-#define SvOK_off_exc_UV(sv)	(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC),	\
+#define SvOK_off_exc_UV(sv)	(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
+						  SVf_UTF8),		\
 							SvOOK_off(sv))
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
@@ -381,7 +548,11 @@ struct xpvio {
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
 #define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
-#define SvPOK_only(sv)		(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|SVf_IVisUV),	\
+#define SvPOK_only(sv)		(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
+						  SVf_IVisUV|SVf_UTF8),	\
+				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
+#define SvPOK_only_UTF8(sv)	(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
+						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
@@ -537,6 +708,28 @@ struct xpvio {
 #define IoTYPE(sv)	((XPVIO*)  SvANY(sv))->xio_type
 #define IoFLAGS(sv)	((XPVIO*)  SvANY(sv))->xio_flags
 
+/*
+=for apidoc Am|bool|SvTAINTED|SV* sv
+Checks to see if an SV is tainted. Returns TRUE if it is, FALSE if
+not.
+
+=for apidoc Am|void|SvTAINTED_on|SV* sv
+Marks an SV as tainted.
+
+=for apidoc Am|void|SvTAINTED_off|SV* sv
+Untaints an SV. Be I<very> careful with this routine, as it short-circuits
+some of Perl's fundamental security features. XS module authors should not
+use this function unless they fully understand all the implications of
+unconditionally untainting the value. Untainting should be done in the
+standard perl fashion, via a carefully crafted regexp, rather than directly
+untainting variables.
+
+=for apidoc Am|void|SvTAINT|SV* sv
+Taints an SV if tainting is enabled
+
+=cut
+*/
+
 #define SvTAINTED(sv)	  (SvMAGICAL(sv) && sv_tainted(sv))
 #define SvTAINTED_on(sv)  STMT_START{ if(PL_tainting){sv_taint(sv);}   }STMT_END
 #define SvTAINTED_off(sv) STMT_START{ if(PL_tainting){sv_untaint(sv);} }STMT_END
@@ -549,6 +742,35 @@ struct xpvio {
 		SvTAINTED_on(sv);	\
 	}				\
     } STMT_END
+
+/*
+=for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len
+Like <SvPV> but will force the SV into becoming a string (SvPOK).  You want
+force if you are going to update the SvPVX directly.
+
+=for apidoc Am|char*|SvPV|SV* sv|STRLEN len
+Returns a pointer to the string in the SV, or a stringified form of the SV
+if the SV does not contain a string.  Handles 'get' magic.
+
+=for apidoc Am|char*|SvPV_nolen|SV* sv
+Returns a pointer to the string in the SV, or a stringified form of the SV
+if the SV does not contain a string.  Handles 'get' magic.
+
+=for apidoc Am|IV|SvIV|SV* sv
+Coerces the given SV to an integer and returns it.
+
+=for apidoc Am|NV|SvNV|SV* sv
+Coerce the given SV to a double and return it.
+
+=for apidoc Am|UV|SvUV|SV* sv
+Coerces the given SV to an unsigned integer and returns it.
+
+=for apidoc Am|bool|SvTRUE|SV* sv
+Returns a boolean indicating whether Perl would evaluate the SV as true or
+false, defined or undefined.  Does not handle 'get' magic.
+
+=cut
+*/
 
 #define SvPV_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvPV(sv, lp) sv_pvn(sv, &lp)
@@ -676,8 +898,7 @@ struct xpvio {
     :    SvPOK(sv)						\
 	?   (({XPV *nxpv = (XPV*)SvANY(sv);			\
 	     nxpv &&						\
-	     (*nxpv->xpv_pv > '0' ||				\
-	      nxpv->xpv_cur > 1 ||				\
+	     (nxpv->xpv_cur > 1 ||				\
 	      (nxpv->xpv_cur && *nxpv->xpv_pv != '0')); })	\
 	     ? 1						\
 	     : 0)						\
@@ -712,8 +933,7 @@ struct xpvio {
     ? 0								\
     :    SvPOK(sv)						\
 	?   ((PL_Xpv = (XPV*)SvANY(sv)) &&			\
-	     (*PL_Xpv->xpv_pv > '0' ||				\
-	      PL_Xpv->xpv_cur > 1 ||				\
+	     (PL_Xpv->xpv_cur > 1 ||				\
 	      (PL_Xpv->xpv_cur && *PL_Xpv->xpv_pv != '0'))	\
 	     ? 1						\
 	     : 0)						\
@@ -728,9 +948,44 @@ struct xpvio {
 #endif /* !__GNU__ */
 #endif /* !CRIPPLED_CC */
 
+/*
+=for apidoc Am|SV*|newRV_inc|SV* sv
+
+Creates an RV wrapper for an SV.  The reference count for the original SV is
+incremented.
+
+=cut
+*/
+
 #define newRV_inc(sv)	newRV(sv)
 
 /* the following macros update any magic values this sv is associated with */
+
+/*
+=for apidoc Am|void|SvGETMAGIC|SV* sv
+Invokes C<mg_get> on an SV if it has 'get' magic.  This macro evaluates its
+argument more than once.
+
+=for apidoc Am|void|SvSETMAGIC|SV* sv
+Invokes C<mg_set> on an SV if it has 'set' magic.  This macro evaluates its
+argument more than once.
+
+=for apidoc Am|void|SvSetSV|SV* dsb|SV* ssv
+Calls C<sv_setsv> if dsv is not the same as ssv.  May evaluate arguments
+more than once.
+
+=for apidoc Am|void|SvSetSV_nosteal|SV* dsv|SV* ssv
+Calls a non-destructive version of C<sv_setsv> if dsv is not the same as
+ssv. May evaluate arguments more than once.
+
+=for apidoc Am|void|SvGROW|SV* sv|STRLEN len
+Expands the character buffer in the SV so that it has room for the
+indicated number of bytes (remember to reserve space for an extra trailing
+NUL character).  Calls C<sv_grow> to perform the expansion if necessary. 
+Returns a pointer to the character buffer.
+
+=cut
+*/
 
 #define SvGETMAGIC(x) STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
 #define SvSETMAGIC(x) STMT_START { if (SvSMAGICAL(x)) mg_set(x); } STMT_END

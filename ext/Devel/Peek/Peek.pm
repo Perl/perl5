@@ -3,14 +3,15 @@
 
 package Devel::Peek;
 
-$VERSION = 0.95;
+# Underscore to allow older Perls to access older version from CPAN
+$VERSION = '1.00_01';
 
 require Exporter;
 use XSLoader ();
 
 @ISA = qw(Exporter);
 @EXPORT = qw(Dump mstat DeadCode DumpArray DumpWithOP DumpProg);
-@EXPORT_OK = qw(SvREFCNT SvREFCNT_inc SvREFCNT_dec);
+@EXPORT_OK = qw(SvREFCNT SvREFCNT_inc SvREFCNT_dec CvGV);
 %EXPORT_TAGS = ('ALL' => [@EXPORT, @EXPORT_OK]);
 
 XSLoader::load 'Devel::Peek';
@@ -372,32 +373,32 @@ This shows that
 
 =over
 
-=item
+=item *
 
 the subroutine is not an XSUB (since C<START> and C<ROOT> are
 non-zero, and C<XSUB> is zero);
 
-=item
+=item *
 
 that it was compiled in the package C<main>;
 
-=item
+=item *
 
 under the name C<MY::top_targets>; 
 
-=item
+=item *
 
 inside a 5th eval in the program;
 
-=item
+=item *
 
 it is not currently executed (see C<DEPTH>);
 
-=item
+=item *
 
 it has no prototype (C<PROTOTYPE> field is missing).
 
-=over
+=back
 
 =head1 EXPORTS
 

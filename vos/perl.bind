@@ -2,9 +2,6 @@ name:     perl;
 
 /* entry:    main; */
 
-variables:
-          s$c_options init (4);    /* Use VOS-style pathnames. */
-
 modules:  miniperlmain,
           av,
           deb,
@@ -17,6 +14,7 @@ modules:  miniperlmain,
           mg,
           op,
           perl,
+          perlapi,
           perlio,
           perly,
           pp,
@@ -31,7 +29,9 @@ modules:  miniperlmain,
           taint,
           toke,
           universal,
+          utf8,
           util,
+          xsutils,
           vos_dummies,
           tcp_runtime,
           tcp_gethost;

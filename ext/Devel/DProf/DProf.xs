@@ -143,20 +143,21 @@ dprof_times(pTHX_ struct tms *t)
 #ifdef OS2
     ULONG rc;
     QWORD cnt;
+    STRLEN n_a;
     
     if (!g_frequ) {
 	if (CheckOSError(DosTmrQueryFreq(&g_frequ)))
-	    croak("DosTmrQueryFreq: %s", SvPV(perl_get_sv("!",TRUE),na));
+	    croak("DosTmrQueryFreq: %s", SvPV(perl_get_sv("!",TRUE),n_a));
 	else
 	    g_frequ = g_frequ/DPROF_HZ;	/* count per tick */
 	if (CheckOSError(DosTmrQueryTime(&cnt)))
 	    croak("DosTmrQueryTime: %s",
-		  SvPV(perl_get_sv("!",TRUE),na));
+		  SvPV(perl_get_sv("!",TRUE), n_a));
 	g_start_cnt = toLongLong(cnt);
     }
 
     if (CheckOSError(DosTmrQueryTime(&cnt)))
-	    croak("DosTmrQueryTime: %s", SvPV(perl_get_sv("!",TRUE),na));
+	    croak("DosTmrQueryTime: %s", SvPV(perl_get_sv("!",TRUE), n_a));
     t->tms_stime = 0;
     return (t->tms_utime = (toLongLong(cnt) - g_start_cnt)/g_frequ);
 #else		/* !OS2 */
@@ -538,7 +539,7 @@ XS(XS_DB_sub)
     {
 	HV *oldstash = PL_curstash;
 
-        DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV(Sub, na));
+        DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV_nolen(Sub));
 
 	SAVEDESTRUCTOR_X(check_depth, (void*)g_depth);
 	g_depth++;
@@ -577,7 +578,7 @@ XS(XS_DB_goto)
                 HV *oldstash = PL_curstash;
 		SV *Sub = GvSV(PL_DBsub);	/* name of current sub */
                 /* SP -= items;  added by xsubpp */
-                DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV(Sub, na));
+                DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV_nolen(Sub));
 
                 sv_setiv(PL_DBsingle, 0);	/* disable DB single-stepping */
 

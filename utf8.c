@@ -1,6 +1,6 @@
 /*    utf8.c
  *
- *    Copyright (c) 1998-1999, Larry Wall
+ *    Copyright (c) 1998-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -84,6 +84,11 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 #ifdef HAS_QUAD
     {
 	*d++ =                        0xff;	/* Can't match U+FFFE! */
+	*d++ =                        0x80;	/* 6 Reserved bits */
+	*d++ = (((uv >> 60) & 0x0f) | 0x80);	/* 2 Reserved bits */
+	*d++ = (((uv >> 54) & 0x3f) | 0x80);
+	*d++ = (((uv >> 48) & 0x3f) | 0x80);
+	*d++ = (((uv >> 42) & 0x3f) | 0x80);
 	*d++ = (((uv >> 36) & 0x3f) | 0x80);
 	*d++ = (((uv >> 30) & 0x3f) | 0x80);
 	*d++ = (((uv >> 24) & 0x3f) | 0x80);
@@ -120,8 +125,8 @@ Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
     else if (!(uv & 0x08))	{ len = 4; uv &= 0x07; }
     else if (!(uv & 0x04))	{ len = 5; uv &= 0x03; }
     else if (!(uv & 0x02))	{ len = 6; uv &= 0x01; }
-    else if (!(uv & 0x01))	{ len = 7; uv &= 0x00; }
-    else 			  len = 8;	/* whoa! */
+    else if (!(uv & 0x01))	{ len = 7;  uv = 0; }
+    else 			{ len = 13; uv = 0; } /* whoa! */
 
     if (retlen)
 	*retlen = len;

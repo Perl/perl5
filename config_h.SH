@@ -1226,9 +1226,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available directly to the user. Note that it may well be different from
  *	the preprocessor used to compile the C program.
  */
+/* CPPLAST:
+ *	This symbol is intended to be used along with CPPRUN in the same manner
+ *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
+ */
 #define CPPSTDIN "$cppstdin"
 #define CPPMINUS "$cppminus"
 #define CPPRUN "$cpprun"
+#define CPPLAST "$cpplast"
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1420,9 +1425,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	so that it is safe even if used by a process with super-user
  *	privileges.
  */
+/* HAS_PHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	contents of PHOSTNAME as a command to feed to the popen() routine
+ *	to derive the host name.
+ */
 #$d_gethname HAS_GETHOSTNAME	/**/
 #$d_uname HAS_UNAME		/**/
-#$d_phostname HAS_PHOSTNAME
+#$d_phostname HAS_PHOSTNAME	/**/
 #ifdef HAS_PHOSTNAME
 #define PHOSTNAME "$aphostname"	/* How to get the host name */
 #endif
@@ -1547,6 +1557,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	the GNU C library is being used.
  */
 #$d_gnulibc HAS_GNULIBC  	/**/
+#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
+#   define _GNU_SOURCE
+#endif
 /* HAS_HASMNTOPT:
  *	This symbol, if defined, indicates that the hasmntopt routine is
  *	available to query the mount options of file systems.
@@ -1577,6 +1590,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_htonl HAS_HTONS		/**/
 #$d_htonl HAS_NTOHL		/**/
 #$d_htonl HAS_NTOHS		/**/
+
+/* HAS_ICONV:
+ *	This symbol, if defined, indicates that the iconv routine is
+ *	available to do character set conversions.
+ */
+#$d_iconv HAS_ICONV		/**/
 
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
@@ -2165,6 +2184,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$i_grp I_GRP		/**/
 #$d_grpasswd GRPASSWD	/**/
 
+/* I_ICONV:
+ *	This symbol, if defined, indicates that <iconv.h> exists and
+ *	should be included.
+ */
+#$i_iconv	I_ICONV		/**/
+
 /* I_INTTYPES:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <inttypes.h>.
@@ -2323,7 +2348,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	for a C initialization string.  See the inc_version_list entry
  *	in Porting/Glossary for more details.
  */
-#define PERL_INC_VERSION_LIST $inc_version_list		/**/
+#define PERL_INC_VERSION_LIST $inc_version_list_init		/**/
 
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
@@ -2494,6 +2519,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 /* U64SIZE:
  *	This symbol contains the sizeof(U64).
  */
+/* NV_PRESERVES_UV:
+ *	This symbol, if defined, indicates that a variable of type NVTYPE
+ *	can preserve all the bit of a variable of type UVSIZE.
+ */
 #define	IVTYPE		$ivtype		/**/
 #define	UVTYPE		$uvtype		/**/
 #define	I8TYPE		$i8type		/**/
@@ -2519,6 +2548,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define	I64SIZE		$i64size	/**/
 #define	U64SIZE		$u64size	/**/
 #endif
+#$d_nv_preserves_uv	NV_PRESERVES_UV
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
@@ -2765,6 +2795,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$uselonglong	USE_LONG_LONG		/**/
 #endif
 
+/* USE_MORE_BITS:
+ *	This symbol, if defined, indicates that 64-bit interfaces and
+ *	long doubles should be used when available.
+ */
 #ifndef USE_MORE_BITS
 #$usemorebits	USE_MORE_BITS		/**/
 #endif
@@ -2773,7 +2807,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
-#ifndef MULTIPLICTY
+#ifndef MULTIPLICITY
 #$usemultiplicity	MULTIPLICITY		/**/
 #endif
 

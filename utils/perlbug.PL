@@ -57,12 +57,14 @@ print "Extracting $file (with variable substitutions)\n";
 # In this section, perl variables will be expanded during extraction.
 # You can use $Config{...} to use Configure variables.
 
+my $extract_version = sprintf("v%v", $^V);
+
 print OUT <<"!GROK!THIS!";
 $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
 	if \$running_under_some_shell;
 
-my \$config_tag1 = '$] - $Config{cf_time}';
+my \$config_tag1 = '$extract_version - $Config{cf_time}';
 
 my \$patchlevel_date = $patchlevel_date;
 my \$patch_tags = '$patch_tags';
@@ -76,7 +78,7 @@ my \@patches = (
 print OUT <<'!NO!SUBS!';
 
 use Config;
-use File::Spec::Functions;
+use File::Spec;		# keep perlbug Perl 5.005 compatible
 use Getopt::Std;
 use strict;
 
@@ -131,7 +133,9 @@ my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
     $subject, $from, $verbose, $ed, $outfile, $Is_MacOS,
     $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
-my $config_tag2 = "$] - $Config{cf_time}";
+my $perl_version = $^V ? sprintf("v%v", $^V) : $];
+
+my $config_tag2 = "$perl_version - $Config{cf_time}";
 
 Init();
 
@@ -242,7 +246,7 @@ EOF
 	    $::opt_C = 1; # don't send a copy to the local admin
 	    $::opt_s = 1; # we have a subject line
 	    $subject = ($::opt_n ? 'Not ' : '')
-		    . "OK: perl $] ${patch_tags}on"
+		    . "OK: perl $perl_version ${patch_tags}on"
 		    ." $::Config{'archname'} $::Config{'osvers'} $subject";
 	    $ok = 1;
 	} else {
@@ -470,7 +474,7 @@ EOF
 
     print REP <<EOF;
 This is a $reptype report for perl from $from,
-generated with the help of perlbug $Version running under perl $].
+generated with the help of perlbug $Version running under perl $perl_version.
 
 EOF
 
@@ -513,12 +517,12 @@ sub Dump {
     local(*OUT) = @_;
 
     print REP "\n---\n";
-    print REP "This perlbug was built using Perl $config_tag2\n",
-	    "It is being executed now by  Perl $config_tag1.\n\n"
+    print REP "This perlbug was built using Perl $config_tag1\n",
+	    "It is being executed now by  Perl $config_tag2.\n\n"
 	if $config_tag2 ne $config_tag1;
 
     print OUT <<EOF;
-Site configuration information for perl $]:
+Site configuration information for perl $perl_version:
 
 EOF
     if ($::Config{cf_by} and $::Config{cf_time}) {
@@ -534,7 +538,7 @@ EOF
     print OUT <<EOF;
 
 ---
-\@INC for perl $]:
+\@INC for perl $perl_version:
 EOF
     for my $i (@INC) {
 	print OUT "    $i\n";
@@ -543,7 +547,7 @@ EOF
     print OUT <<EOF;
 
 ---
-Environment for perl $]:
+Environment for perl $perl_version:
 EOF
     my @env =
         qw(PATH LD_LIBRARY_PATH LANG PERL_BADLANG SHELL HOME LOGDIR LANGUAGE);
@@ -557,7 +561,7 @@ EOF
 		"\n";
     }
     if ($verbose) {
-	print OUT "\nComplete configuration data for perl $]:\n\n";
+	print OUT "\nComplete configuration data for perl $perl_version:\n\n";
 	my $value;
 	foreach (sort keys %::Config) {
 	    $value = $::Config{$_};
@@ -848,8 +852,8 @@ sub filename {
 	: '/tmp';
     $filename = "bugrep0$$";
 #    $dir .= "\\" if $Is_MSWin32 and $dir !~ m|[\\/]$|;
-    $filename++ while -e catfile($dir, $filename);
-    $filename = catfile($dir, $filename);
+    $filename++ while -e File::Spec->catfile($dir, $filename);
+    $filename = File::Spec->catfile($dir, $filename);
 }
 
 sub paraprint {

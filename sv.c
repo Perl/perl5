@@ -1,6 +1,6 @@
 /*    sv.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -921,6 +921,15 @@ S_my_safemalloc(MEM_SIZE size)
 #define new_XPVIO() (void*)my_safemalloc(sizeof(XPVIO))
 #define del_XPVIO(p) my_safefree((char*)p)
 
+/*
+=for apidoc sv_upgrade
+
+Upgrade an SV to a more complex form.  Use C<SvUPGRADE>.  See
+C<svtype>.
+
+=cut
+*/
+
 bool
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
@@ -1210,6 +1219,16 @@ Perl_sv_backoff(pTHX_ register SV *sv)
     return 0;
 }
 
+/*
+=for apidoc sv_grow
+
+Expands the character buffer in the SV.  This will use C<sv_unref> and will
+upgrade the SV to C<SVt_PV>.  Returns a pointer to the character buffer.
+Use C<SvGROW>.
+
+=cut
+*/
+
 char *
 Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 {
@@ -1259,6 +1278,15 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
     return s;
 }
 
+/*
+=for apidoc sv_setiv
+
+Copies an integer into the given SV.  Does not handle 'set' magic.  See
+C<sv_setiv_mg>.
+
+=cut
+*/
+
 void
 Perl_sv_setiv(pTHX_ register SV *sv, IV i)
 {
@@ -1292,12 +1320,29 @@ Perl_sv_setiv(pTHX_ register SV *sv, IV i)
     SvTAINT(sv);
 }
 
+/*
+=for apidoc sv_setiv_mg
+
+Like C<sv_setiv>, but also handles 'set' magic.
+
+=cut
+*/
+
 void
 Perl_sv_setiv_mg(pTHX_ register SV *sv, IV i)
 {
     sv_setiv(sv,i);
     SvSETMAGIC(sv);
 }
+
+/*
+=for apidoc sv_setuv
+
+Copies an unsigned integer into the given SV.  Does not handle 'set' magic.
+See C<sv_setuv_mg>.
+
+=cut
+*/
 
 void
 Perl_sv_setuv(pTHX_ register SV *sv, UV u)
@@ -1307,12 +1352,29 @@ Perl_sv_setuv(pTHX_ register SV *sv, UV u)
     SvUVX(sv) = u;
 }
 
+/*
+=for apidoc sv_setuv_mg
+
+Like C<sv_setuv>, but also handles 'set' magic.
+
+=cut
+*/
+
 void
 Perl_sv_setuv_mg(pTHX_ register SV *sv, UV u)
 {
     sv_setuv(sv,u);
     SvSETMAGIC(sv);
 }
+
+/*
+=for apidoc sv_setnv
+
+Copies a double into the given SV.  Does not handle 'set' magic.  See
+C<sv_setnv_mg>.
+
+=cut
+*/
 
 void
 Perl_sv_setnv(pTHX_ register SV *sv, NV num)
@@ -1345,6 +1407,14 @@ Perl_sv_setnv(pTHX_ register SV *sv, NV num)
     (void)SvNOK_only(sv);			/* validate number */
     SvTAINT(sv);
 }
+
+/*
+=for apidoc sv_setnv_mg
+
+Like C<sv_setnv>, but also handles 'set' magic.
+
+=cut
+*/
 
 void
 Perl_sv_setnv_mg(pTHX_ register SV *sv, NV num)
@@ -1872,6 +1942,15 @@ S_asUV(pTHX_ SV *sv)
  * with a possible addition of IS_NUMBER_NEG.
  */
 
+/*
+=for apidoc looks_like_number
+
+Test if an the content of an SV looks like a number (or is a
+number).
+
+=cut
+*/
+
 I32
 Perl_looks_like_number(pTHX_ SV *sv)
 {
@@ -2325,6 +2404,17 @@ Perl_sv_2bool(pTHX_ register SV *sv)
  * as temporary.
  */
 
+/*
+=for apidoc sv_setsv
+
+Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
+The source SV may be destroyed if it is mortal.  Does not handle 'set'
+magic.  See the macro forms C<SvSetSV>, C<SvSetSV_nosteal> and
+C<sv_setsv_mg>.
+
+=cut
+*/
+
 void
 Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 {
@@ -2679,7 +2769,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    *SvEND(dstr) = '\0';
 	    (void)SvPOK_only(dstr);
 	}
-	if (SvUTF8(sstr))
+	if (DO_UTF8(sstr))
 	    SvUTF8_on(dstr);
 	/*SUPPRESS 560*/
 	if (sflags & SVp_NOK) {
@@ -2721,12 +2811,29 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
     SvTAINT(dstr);
 }
 
+/*
+=for apidoc sv_setsv_mg
+
+Like C<sv_setsv>, but also handles 'set' magic.
+
+=cut
+*/
+
 void
 Perl_sv_setsv_mg(pTHX_ SV *dstr, register SV *sstr)
 {
     sv_setsv(dstr,sstr);
     SvSETMAGIC(dstr);
 }
+
+/*
+=for apidoc sv_setpvn
+
+Copies a string into an SV.  The C<len> parameter indicates the number of
+bytes to be copied.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
+
+=cut
+*/
 
 void
 Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
@@ -2750,12 +2857,29 @@ Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
     SvTAINT(sv);
 }
 
+/*
+=for apidoc sv_setpvn_mg
+
+Like C<sv_setpvn>, but also handles 'set' magic.
+
+=cut
+*/
+
 void
 Perl_sv_setpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
     sv_setpvn(sv,ptr,len);
     SvSETMAGIC(sv);
 }
+
+/*
+=for apidoc sv_setpv
+
+Copies a string into an SV.  The string must be null-terminated.  Does not
+handle 'set' magic.  See C<sv_setpv_mg>.
+
+=cut
+*/
 
 void
 Perl_sv_setpv(pTHX_ register SV *sv, register const char *ptr)
@@ -2777,12 +2901,34 @@ Perl_sv_setpv(pTHX_ register SV *sv, register const char *ptr)
     SvTAINT(sv);
 }
 
+/*
+=for apidoc sv_setpv_mg
+
+Like C<sv_setpv>, but also handles 'set' magic.
+
+=cut
+*/
+
 void
 Perl_sv_setpv_mg(pTHX_ register SV *sv, register const char *ptr)
 {
     sv_setpv(sv,ptr);
     SvSETMAGIC(sv);
 }
+
+/*
+=for apidoc sv_usepvn
+
+Tells an SV to use C<ptr> to find its string value.  Normally the string is
+stored inside the SV but sv_usepvn allows the SV to use an outside string. 
+The C<ptr> should point to memory that was allocated by C<malloc>.  The
+string length, C<len>, must be supplied.  This function will realloc the
+memory pointed to by C<ptr>, so that pointer should not be freed or used by
+the programmer after giving it to sv_usepvn.  Does not handle 'set' magic.
+See C<sv_usepvn_mg>.
+
+=cut
+*/
 
 void
 Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
@@ -2805,6 +2951,14 @@ Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
     SvTAINT(sv);
 }
 
+/*
+=for apidoc sv_usepvn_mg
+
+Like C<sv_usepvn>, but also handles 'set' magic.
+
+=cut
+*/
+
 void
 Perl_sv_usepvn_mg(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 {
@@ -2826,6 +2980,17 @@ Perl_sv_force_normal(pTHX_ register SV *sv)
 	sv_unglob(sv);
 }
     
+/*
+=for apidoc sv_chop
+
+Efficient removal of characters from the beginning of the string buffer. 
+SvPOK(sv) must be true and the C<ptr> must be a pointer to somewhere inside
+the string buffer.  The C<ptr> becomes the first character of the adjusted
+string.
+
+=cut
+*/
+
 void
 Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)	/* like set but assuming ptr is in sv */
                 
@@ -2858,6 +3023,16 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)	/* like set but assuming
     SvIVX(sv) += delta;
 }
 
+/*
+=for apidoc sv_catpvn
+
+Concatenates the string onto the end of the string which is in the SV.  The
+C<len> indicates number of bytes to copy.  Handles 'get' magic, but not
+'set' magic.  See C<sv_catpvn_mg>.
+
+=cut
+*/
+
 void
 Perl_sv_catpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
@@ -2871,9 +3046,17 @@ Perl_sv_catpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
     Move(ptr,SvPVX(sv)+tlen,len,char);
     SvCUR(sv) += len;
     *SvEND(sv) = '\0';
-    (void)SvPOK_only(sv);		/* validate pointer */
+    (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
 }
+
+/*
+=for apidoc sv_catpvn_mg
+
+Like C<sv_catpvn>, but also handles 'set' magic.
+
+=cut
+*/
 
 void
 Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
@@ -2881,6 +3064,15 @@ Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRL
     sv_catpvn(sv,ptr,len);
     SvSETMAGIC(sv);
 }
+
+/*
+=for apidoc sv_catsv
+
+Concatenates the string from SV C<ssv> onto the end of the string in SV
+C<dsv>.  Handles 'get' magic, but not 'set' magic.  See C<sv_catsv_mg>.
+
+=cut
+*/
 
 void
 Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
@@ -2891,7 +3083,17 @@ Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 	return;
     if (s = SvPV(sstr, len))
 	sv_catpvn(dstr,s,len);
+    if (SvUTF8(sstr))
+	SvUTF8_on(dstr);
 }
+
+/*
+=for apidoc sv_catsv_mg
+
+Like C<sv_catsv>, but also handles 'set' magic.
+
+=cut
+*/
 
 void
 Perl_sv_catsv_mg(pTHX_ SV *dstr, register SV *sstr)
@@ -2899,6 +3101,15 @@ Perl_sv_catsv_mg(pTHX_ SV *dstr, register SV *sstr)
     sv_catsv(dstr,sstr);
     SvSETMAGIC(dstr);
 }
+
+/*
+=for apidoc sv_catpv
+
+Concatenates the string onto the end of the string which is in the SV.
+Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
+
+=cut
+*/
 
 void
 Perl_sv_catpv(pTHX_ register SV *sv, register const char *ptr)
@@ -2916,9 +3127,17 @@ Perl_sv_catpv(pTHX_ register SV *sv, register const char *ptr)
 	ptr = SvPVX(sv);
     Move(ptr,SvPVX(sv)+tlen,len+1,char);
     SvCUR(sv) += len;
-    (void)SvPOK_only(sv);		/* validate pointer */
+    (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
 }
+
+/*
+=for apidoc sv_catpv_mg
+
+Like C<sv_catpv>, but also handles 'set' magic.
+
+=cut
+*/
 
 void
 Perl_sv_catpv_mg(pTHX_ register SV *sv, register const char *ptr)
@@ -2941,6 +3160,14 @@ Perl_newSV(pTHX_ STRLEN len)
 }
 
 /* name is assumed to contain an SV* if (name && namelen == HEf_SVKEY) */
+
+/*
+=for apidoc sv_magic
+
+Adds magic to an SV.
+
+=cut
+*/
 
 void
 Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
@@ -3189,6 +3416,15 @@ S_sv_del_backref(pTHX_ SV *sv)
 	i--;
     }
 }
+
+/*
+=for apidoc sv_insert
+
+Inserts a string at the specified offset/length within the SV. Similar to
+the Perl substr() function.
+
+=cut
+*/
 
 void
 Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN littlelen)
@@ -3540,6 +3776,14 @@ Perl_sv_free(pTHX_ SV *sv)
 	del_SV(sv);
 }
 
+/*
+=for apidoc sv_len
+
+Returns the length of the string in the SV.  See also C<SvCUR>.
+
+=cut
+*/
+
 STRLEN
 Perl_sv_len(pTHX_ register SV *sv)
 {
@@ -3641,6 +3885,15 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
     return;
 }
 
+/*
+=for apidoc sv_eq
+
+Returns a boolean indicating whether the strings in the two SVs are
+identical.
+
+=cut
+*/
+
 I32
 Perl_sv_eq(pTHX_ register SV *str1, register SV *str2)
 {
@@ -3666,6 +3919,16 @@ Perl_sv_eq(pTHX_ register SV *str1, register SV *str2)
 
     return memEQ(pv1, pv2, cur1);
 }
+
+/*
+=for apidoc sv_cmp
+
+Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
+string in C<sv1> is less than, equal to, or greater than the string in
+C<sv2>.
+
+=cut
+*/
 
 I32
 Perl_sv_cmp(pTHX_ register SV *str1, register SV *str2)
@@ -4063,6 +4326,14 @@ screamer2:
 }
 
 
+/*
+=for apidoc sv_inc
+
+Auto-increment of the value in the SV.
+
+=cut
+*/
+
 void
 Perl_sv_inc(pTHX_ register SV *sv)
 {
@@ -4164,6 +4435,14 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	*d = d[1];
 }
 
+/*
+=for apidoc sv_dec
+
+Auto-decrement of the value in the SV.
+
+=cut
+*/
+
 void
 Perl_sv_dec(pTHX_ register SV *sv)
 {
@@ -4224,6 +4503,15 @@ Perl_sv_dec(pTHX_ register SV *sv)
     sv_setnv(sv,Atof(SvPVX(sv)) - 1.0);	/* punt */
 }
 
+/*
+=for apidoc sv_mortalcopy
+
+Creates a new SV which is a copy of the original SV.  The new SV is marked
+as mortal.
+
+=cut
+*/
+
 /* Make a string that will exist for the duration of the expression
  * evaluation.  Actually, it may have to last longer than that, but
  * hopefully we won't free it until it has been assigned to a
@@ -4243,6 +4531,14 @@ Perl_sv_mortalcopy(pTHX_ SV *oldstr)
     return sv;
 }
 
+/*
+=for apidoc sv_newmortal
+
+Creates a new SV which is mortal.  The reference count of the SV is set to 1.
+
+=cut
+*/
+
 SV *
 Perl_sv_newmortal(pTHX)
 {
@@ -4255,6 +4551,15 @@ Perl_sv_newmortal(pTHX)
     PL_tmps_stack[++PL_tmps_ix] = sv;
     return sv;
 }
+
+/*
+=for apidoc sv_2mortal
+
+Marks an SV as mortal.  The SV will be destroyed when the current context
+ends.
+
+=cut
+*/
 
 /* same thing without the copying */
 
@@ -4272,6 +4577,16 @@ Perl_sv_2mortal(pTHX_ register SV *sv)
     return sv;
 }
 
+/*
+=for apidoc newSVpv
+
+Creates a new SV and copies a string into it.  The reference count for the
+SV is set to 1.  If C<len> is zero, Perl will compute the length using
+strlen().  For efficiency, consider using C<newSVpvn> instead.
+
+=cut
+*/
+
 SV *
 Perl_newSVpv(pTHX_ const char *s, STRLEN len)
 {
@@ -4283,6 +4598,17 @@ Perl_newSVpv(pTHX_ const char *s, STRLEN len)
     sv_setpvn(sv,s,len);
     return sv;
 }
+
+/*
+=for apidoc newSVpvn
+
+Creates a new SV and copies a string into it.  The reference count for the
+SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length 
+string.  You are responsible for ensuring that the source string is at least
+C<len> bytes long.
+
+=cut
+*/
 
 SV *
 Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
@@ -4308,6 +4634,15 @@ Perl_newSVpvf_nocontext(const char* pat, ...)
 }
 #endif
 
+/*
+=for apidoc newSVpvf
+
+Creates a new SV an initialize it with the string formatted like
+C<sprintf>.
+
+=cut
+*/
+
 SV *
 Perl_newSVpvf(pTHX_ const char* pat, ...)
 {
@@ -4328,6 +4663,15 @@ Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args)
     return sv;
 }
 
+/*
+=for apidoc newSVnv
+
+Creates a new SV and copies a floating point value into it.
+The reference count for the SV is set to 1.
+
+=cut
+*/
+
 SV *
 Perl_newSVnv(pTHX_ NV n)
 {
@@ -4338,6 +4682,15 @@ Perl_newSVnv(pTHX_ NV n)
     return sv;
 }
 
+/*
+=for apidoc newSViv
+
+Creates a new SV and copies an integer into it.  The reference count for the
+SV is set to 1.
+
+=cut
+*/
+
 SV *
 Perl_newSViv(pTHX_ IV i)
 {
@@ -4347,6 +4700,15 @@ Perl_newSViv(pTHX_ IV i)
     sv_setiv(sv,i);
     return sv;
 }
+
+/*
+=for apidoc newRV_noinc
+
+Creates an RV wrapper for an SV.  The reference count for the original
+SV is B<not> incremented.
+
+=cut
+*/
 
 SV *
 Perl_newRV_noinc(pTHX_ SV *tmpRef)
@@ -4362,11 +4724,20 @@ Perl_newRV_noinc(pTHX_ SV *tmpRef)
     return sv;
 }
 
+/* newRV_inc is #defined to newRV in sv.h */
 SV *
 Perl_newRV(pTHX_ SV *tmpRef)
 {
     return newRV_noinc(SvREFCNT_inc(tmpRef));
 }
+
+/*
+=for apidoc newSVsv
+
+Creates a new SV which is an exact duplicate of the original SV.
+
+=cut
+*/
 
 /* make an exact duplicate of old */
 
@@ -4582,8 +4953,7 @@ Perl_sv_true(pTHX_ register SV *sv)
     if (SvPOK(sv)) {
 	register XPV* tXpv;
 	if ((tXpv = (XPV*)SvANY(sv)) &&
-		(*tXpv->xpv_pv > '0' ||
-		tXpv->xpv_cur > 1 ||
+		(tXpv->xpv_cur > 1 ||
 		(tXpv->xpv_cur && *tXpv->xpv_pv != '0')))
 	    return 1;
 	else
@@ -4759,6 +5129,16 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
     }
 }
 
+/*
+=for apidoc sv_isobject
+
+Returns a boolean indicating whether the SV is an RV pointing to a blessed
+object.  If the SV is not an RV, or if the object is not blessed, then this
+will return false.
+
+=cut
+*/
+
 int
 Perl_sv_isobject(pTHX_ SV *sv)
 {
@@ -4773,6 +5153,16 @@ Perl_sv_isobject(pTHX_ SV *sv)
 	return 0;
     return 1;
 }
+
+/*
+=for apidoc sv_isa
+
+Returns a boolean indicating whether the SV is blessed into the specified
+class.  This does not check for subtypes; use C<sv_derived_from> to verify
+an inheritance relationship.
+
+=cut
+*/
 
 int
 Perl_sv_isa(pTHX_ SV *sv, const char *name)
@@ -4789,6 +5179,17 @@ Perl_sv_isa(pTHX_ SV *sv, const char *name)
 
     return strEQ(HvNAME(SvSTASH(sv)), name);
 }
+
+/*
+=for apidoc newSVrv
+
+Creates a new SV for the RV, C<rv>, to point to.  If C<rv> is not an RV then
+it will be upgraded to one.  If C<classname> is non-null then the new SV will
+be blessed in the specified package.  The new SV is returned and its
+reference count is 1.
+
+=cut
+*/
 
 SV*
 Perl_newSVrv(pTHX_ SV *rv, const char *classname)
@@ -4815,6 +5216,24 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
     return sv;
 }
 
+/*
+=for apidoc sv_setref_pv
+
+Copies a pointer into a new SV, optionally blessing the SV.  The C<rv>
+argument will be upgraded to an RV.  That RV will be modified to point to
+the new SV.  If the C<pv> argument is NULL then C<PL_sv_undef> will be placed
+into the SV.  The C<classname> argument indicates the package for the
+blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+will be returned and will have a reference count of 1.
+
+Do not use with other Perl types such as HV, AV, SV, CV, because those
+objects will become corrupted by the pointer copy process.
+
+Note that C<sv_setref_pvn> copies the string while this copies the pointer.
+
+=cut
+*/
+
 SV*
 Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
 {
@@ -4827,12 +5246,36 @@ Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
     return rv;
 }
 
+/*
+=for apidoc sv_setref_iv
+
+Copies an integer into a new SV, optionally blessing the SV.  The C<rv>
+argument will be upgraded to an RV.  That RV will be modified to point to
+the new SV.  The C<classname> argument indicates the package for the
+blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+will be returned and will have a reference count of 1.
+
+=cut
+*/
+
 SV*
 Perl_sv_setref_iv(pTHX_ SV *rv, const char *classname, IV iv)
 {
     sv_setiv(newSVrv(rv,classname), iv);
     return rv;
 }
+
+/*
+=for apidoc sv_setref_nv
+
+Copies a double into a new SV, optionally blessing the SV.  The C<rv>
+argument will be upgraded to an RV.  That RV will be modified to point to
+the new SV.  The C<classname> argument indicates the package for the
+blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+will be returned and will have a reference count of 1.
+
+=cut
+*/
 
 SV*
 Perl_sv_setref_nv(pTHX_ SV *rv, const char *classname, NV nv)
@@ -4841,12 +5284,37 @@ Perl_sv_setref_nv(pTHX_ SV *rv, const char *classname, NV nv)
     return rv;
 }
 
+/*
+=for apidoc sv_setref_pvn
+
+Copies a string into a new SV, optionally blessing the SV.  The length of the
+string must be specified with C<n>.  The C<rv> argument will be upgraded to
+an RV.  That RV will be modified to point to the new SV.  The C<classname>
+argument indicates the package for the blessing.  Set C<classname> to
+C<Nullch> to avoid the blessing.  The new SV will be returned and will have
+a reference count of 1.
+
+Note that C<sv_setref_pv> copies the pointer while this copies the string.
+
+=cut
+*/
+
 SV*
 Perl_sv_setref_pvn(pTHX_ SV *rv, const char *classname, char *pv, STRLEN n)
 {
     sv_setpvn(newSVrv(rv,classname), pv, n);
     return rv;
 }
+
+/*
+=for apidoc sv_bless
+
+Blesses an SV into a specified package.  The SV must be an RV.  The package
+must be designated by its stash (see C<gv_stashpv()>).  The reference count
+of the SV is unaffected.
+
+=cut
+*/
 
 SV*
 Perl_sv_bless(pTHX_ SV *sv, HV *stash)
@@ -4897,6 +5365,16 @@ S_sv_unglob(pTHX_ SV *sv)
     SvFLAGS(sv) |= SVt_PVMG;
 }
 
+/*
+=for apidoc sv_unref
+
+Unsets the RV status of the SV, and decrements the reference count of
+whatever was being referenced by the RV.  This can almost be thought of
+as a reversal of C<newSVrv>.  See C<SvROK_off>.
+
+=cut
+*/
+
 void
 Perl_sv_unref(pTHX_ SV *sv)
 {
@@ -4943,6 +5421,15 @@ Perl_sv_tainted(pTHX_ SV *sv)
     return FALSE;
 }
 
+/*
+=for apidoc sv_setpviv
+
+Copies an integer into the given SV, also updating its string value.
+Does not handle 'set' magic.  See C<sv_setpviv_mg>.
+
+=cut
+*/
+
 void
 Perl_sv_setpviv(pTHX_ SV *sv, IV iv)
 {
@@ -4953,6 +5440,14 @@ Perl_sv_setpviv(pTHX_ SV *sv, IV iv)
     sv_setpvn(sv, ptr, ebuf - ptr);
 }
 
+
+/*
+=for apidoc sv_setpviv_mg
+
+Like C<sv_setpviv>, but also handles 'set' magic.
+
+=cut
+*/
 
 void
 Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv)
@@ -4988,6 +5483,15 @@ Perl_sv_setpvf_mg_nocontext(SV *sv, const char* pat, ...)
 }
 #endif
 
+/*
+=for apidoc sv_setpvf
+
+Processes its arguments like C<sprintf> and sets an SV to the formatted
+output.  Does not handle 'set' magic.  See C<sv_setpvf_mg>.
+
+=cut
+*/
+
 void
 Perl_sv_setpvf(pTHX_ SV *sv, const char* pat, ...)
 {
@@ -5002,6 +5506,14 @@ Perl_sv_vsetpvf(pTHX_ SV *sv, const char* pat, va_list* args)
 {
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
 }
+
+/*
+=for apidoc sv_setpvf_mg
+
+Like C<sv_setpvf>, but also handles 'set' magic.
+
+=cut
+*/
 
 void
 Perl_sv_setpvf_mg(pTHX_ SV *sv, const char* pat, ...)
@@ -5041,6 +5553,16 @@ Perl_sv_catpvf_mg_nocontext(SV *sv, const char* pat, ...)
 }
 #endif
 
+/*
+=for apidoc sv_catpvf
+
+Processes its arguments like C<sprintf> and appends the formatted output
+to an SV.  Handles 'get' magic, but not 'set' magic.  C<SvSETMAGIC()> must
+typically be called after calling this function to handle 'set' magic.
+
+=cut
+*/
+
 void
 Perl_sv_catpvf(pTHX_ SV *sv, const char* pat, ...)
 {
@@ -5055,6 +5577,14 @@ Perl_sv_vcatpvf(pTHX_ SV *sv, const char* pat, va_list* args)
 {
     sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
 }
+
+/*
+=for apidoc sv_catpvf_mg
+
+Like C<sv_catpvf>, but also handles 'set' magic.
+
+=cut
+*/
 
 void
 Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...)
@@ -5072,12 +5602,33 @@ Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
     SvSETMAGIC(sv);
 }
 
+/*
+=for apidoc sv_vsetpvfn
+
+Works like C<vcatpvfn> but copies the text into the SV instead of
+appending it.
+
+=cut
+*/
+
 void
 Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
 {
     sv_setpvn(sv, "", 0);
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
+
+/*
+=for apidoc sv_vcatpvfn
+
+Processes its arguments like C<vsprintf> and appends the formatted output
+to an SV.  Uses an array of SVs if the C style variable argument list is
+missing (NULL).  When running with taint checks enabled, indicates via
+C<maybe_tainted> if results are untrustworthy (often due to the use of
+locales).
+
+=cut
+*/
 
 void
 Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
@@ -5089,6 +5640,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     STRLEN origlen;
     I32 svix = 0;
     static char nullstr[] = "(null)";
+    SV *argsv;
 
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
@@ -5103,12 +5655,18 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		char *s = va_arg(*args, char*);
 		sv_catpv(sv, s ? s : nullstr);
 	    }
-	    else if (svix < svmax)
+	    else if (svix < svmax) {
 		sv_catsv(sv, *svargs);
+		if (DO_UTF8(*svargs))
+		    SvUTF8_on(sv);
+	    }
 	    return;
 	case '_':
 	    if (args) {
-		sv_catsv(sv, va_arg(*args, SV*));
+		argsv = va_arg(*args, SV*);
+		sv_catsv(sv, argsv);
+		if (DO_UTF8(argsv))
+		    SvUTF8_on(sv);
 		return;
 	    }
 	    /* See comment on '_' below */
@@ -5127,6 +5685,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN zeros = 0;
 	bool has_precis = FALSE;
 	STRLEN precis = 0;
+	bool is_utf = FALSE;
 
 	char esignbuf[4];
 	U8 utf8buf[10];
@@ -5267,22 +5826,20 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto string;
 
 	case 'c':
-	    if (IN_UTF8) {
-		if (args)
-		    uv = va_arg(*args, int);
-		else
-		    uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
-
+	    if (args)
+		uv = va_arg(*args, int);
+	    else
+		uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+	    if ((uv > 255 || (uv > 127 && SvUTF8(sv))) && !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
-		goto string;
+		is_utf = TRUE;
 	    }
-	    if (args)
-		c = va_arg(*args, int);
-	    else
-		c = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
-	    eptr = &c;
-	    elen = 1;
+	    else {
+		c = (char)uv;
+		eptr = &c;
+		elen = 1;
+	    }
 	    goto string;
 
 	case 's':
@@ -5302,17 +5859,76 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else if (svix < svmax) {
-		eptr = SvPVx(svargs[svix++], elen);
-		if (IN_UTF8) {
+		argsv = svargs[svix++];
+		eptr = SvPVx(argsv, elen);
+		if (DO_UTF8(argsv)) {
 		    if (has_precis && precis < elen) {
 			I32 p = precis;
-			sv_pos_u2b(svargs[svix - 1], &p, 0); /* sticks at end */
+			sv_pos_u2b(argsv, &p, 0); /* sticks at end */
 			precis = p;
 		    }
 		    if (width) { /* fudge width (can't fudge elen) */
-			width += elen - sv_len_utf8(svargs[svix - 1]);
+			width += elen - sv_len_utf8(argsv);
 		    }
+		    is_utf = TRUE;
 		}
+	    }
+	    goto string;
+
+	case 'v':
+	    if (args)
+		argsv = va_arg(*args, SV*);
+	    else if (svix < svmax)
+		argsv = svargs[svix++];
+	    {
+		STRLEN len;
+		U8 *str = (U8*)SvPVx(argsv,len);
+		I32 vlen = len*3+1;
+		SV *vsv = NEWSV(73,vlen);
+		I32 ulen;
+		I32 vfree = vlen;
+		U8 *vptr = (U8*)SvPVX(vsv);
+		STRLEN vcur = 0;
+		bool utf = DO_UTF8(argsv);
+
+		if (utf)
+		    is_utf = TRUE;
+		while (len) {
+		    UV uv;
+
+		    if (utf)
+			uv = utf8_to_uv(str, &ulen);
+		    else {
+			uv = *str;
+			ulen = 1;
+		    }
+		    str += ulen;
+		    len -= ulen;
+		    eptr = ebuf + sizeof ebuf;
+		    do {
+			*--eptr = '0' + uv % 10;
+		    } while (uv /= 10);
+		    elen = (ebuf + sizeof ebuf) - eptr;
+		    while (elen >= vfree-1) {
+			STRLEN off = vptr - (U8*)SvPVX(vsv);
+			vfree += vlen;
+			vlen *= 2;
+			SvGROW(vsv, vlen);
+			vptr = (U8*)SvPVX(vsv) + off;
+		    }
+		    memcpy(vptr, eptr, elen);
+		    vptr += elen;
+		    *vptr++ = '.';
+		    vfree -= elen + 1;
+		    vcur += elen + 1;
+		}
+		if (vcur) {
+		    vcur--;
+		    vptr[-1] = '\0';
+		}
+		SvCUR_set(vsv,vcur);
+		eptr = SvPVX(vsv);
+		elen = vcur;
 	    }
 	    goto string;
 
@@ -5324,7 +5940,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     */
 	    if (!args)
 		goto unknown;
-	    eptr = SvPVx(va_arg(*args, SV*), elen);
+	    argsv = va_arg(*args,SV*);
+	    eptr = SvPVx(argsv, elen);
+	    if (DO_UTF8(argsv))
+		is_utf = TRUE;
 
 	string:
 	    if (has_precis && elen > precis)
@@ -5618,7 +6237,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 				       (UV)c & 0xFF);
 		} else
 		    sv_catpv(msg, "end of string");
-		Perl_warner(aTHX_ WARN_PRINTF, "%_", msg); /* yes, this is reentrant */
+		Perl_warner(aTHX_ WARN_PRINTF, "%"SVf, msg); /* yes, this is reentrant */
 	    }
 
 	    /* output mangled stuff ... */
@@ -5667,6 +6286,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    memset(p, ' ', gap);
 	    p += gap;
 	}
+	if (is_utf)
+	    SvUTF8_on(sv);
 	*p = '\0';
 	SvCUR(sv) = p - SvPVX(sv);
     }
@@ -5834,7 +6455,7 @@ void *
 Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv)
 {
     PTR_TBL_ENT_t *tblent;
-    UV hash = (UV)sv;
+    UV hash = PTR2UV(sv);
     assert(tbl);
     tblent = tbl->tbl_ary[hash & tbl->tbl_max];
     for (; tblent; tblent = tblent->next) {
@@ -5851,7 +6472,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
     /* XXX this may be pessimal on platforms where pointers aren't good
      * hash values e.g. if they grow faster in the most significant
      * bits */
-    UV hash = (UV)oldv;
+    UV hash = PTR2UV(oldv);
     bool i = 1;
 
     assert(tbl);
@@ -5891,7 +6512,7 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
 	    continue;
 	curentp = ary + oldsize;
 	for (entp = ary, ent = *ary; ent; ent = *entp) {
-	    if ((newsize & (UV)ent->oldval) != i) {
+	    if ((newsize & PTR2UV(ent->oldval)) != i) {
 		*entp = ent->next;
 		ent->next = *curentp;
 		*curentp = ent;
@@ -6585,6 +7206,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
 	    break;
+	case SAVEt_COMPPAD:
+	    av = (AV*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = av_dup(av);
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");
 	}
@@ -6833,7 +7458,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_beginav		= av_dup_inc(proto_perl->Ibeginav);
     PL_endav		= av_dup_inc(proto_perl->Iendav);
-    PL_stopav		= av_dup_inc(proto_perl->Istopav);
+    PL_checkav		= av_dup_inc(proto_perl->Icheckav);
     PL_initav		= av_dup_inc(proto_perl->Iinitav);
 
     PL_sub_generation	= proto_perl->Isub_generation;

@@ -1,6 +1,6 @@
 /*    perly.y
  *
- *    Copyright (c) 1991-1997, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -337,7 +337,7 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 
 subname	:	WORD	{ STRLEN n_a; char *name = SvPV(((SVOP*)$1)->op_sv,n_a);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
-			      || strEQ(name, "STOP") || strEQ(name, "INIT"))
+			      || strEQ(name, "INIT") || strEQ(name, "CHECK"))
 			      CvSPECIAL_on(PL_compcv);
 			  $$ = $1; }
 	;

@@ -13,7 +13,7 @@ $VERSION = '2.101';
 
 #$| = 1;
 
-require 5.004_02;
+require 5.005_64;
 require Exporter;
 use XSLoader ();
 require overload;
@@ -230,7 +230,7 @@ sub _dump {
 	  if ($s->{purity} and $s->{level} > 0) {
 	    $out = ($realtype eq 'HASH')  ? '{}' :
 	      ($realtype eq 'ARRAY') ? '[]' :
-		"''" ;
+		'do{my $o}' ;
 	    push @post, $name . " = " . $s->{seen}{$id}[0];
 	  }
 	  else {

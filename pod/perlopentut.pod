@@ -494,7 +494,7 @@ to mean standard input, per the standard convention.
 You've probably noticed how Perl's C<warn> and C<die> functions can
 produce messages like:
 
-    Some warning at scriptname line 29, <FH> chunk 7.
+    Some warning at scriptname line 29, <FH> line 7.
 
 That's because you opened a filehandle FH, and had read in seven records
 from it.  But what was the name of the file, not the handle?
@@ -510,7 +510,7 @@ temporarily, then all you have to do is this:
 Since you're using the pathname of the file as its handle,
 you'll get warnings more like
 
-    Some warning at scriptname line 29, </etc/motd> chunk 7.
+    Some warning at scriptname line 29, </etc/motd> line 7.
 
 =head2 Single Argument Open
 

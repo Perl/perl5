@@ -1,9 +1,10 @@
 package Net::netent;
 use strict;
 
+use 5.005_64;
+our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 BEGIN { 
     use Exporter   ();
-    use vars       qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
     @EXPORT      = qw(getnetbyname getnetbyaddr getnet);
     @EXPORT_OK   = qw(
 			$n_name	    	@n_aliases

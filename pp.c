@@ -1,6 +1,6 @@
 /*    pp.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -47,7 +47,7 @@ typedef unsigned UBW;
  * have an integral type (except char) small enough to be represented
  * in a double without loss; that is, it has no 32-bit type.
  */
-#if LONGSIZE > 4  && defined(_CRAY) && !defined(_CRAYMPP)
+#if LONGSIZE > 4  && defined(_CRAY)
 #  define BW_BITS  32
 #  define BW_MASK  ((1 << BW_BITS) - 1)
 #  define BW_SIGN  (1 << (BW_BITS - 1))
@@ -86,7 +86,7 @@ typedef unsigned UBW;
 #   define PERL_NATINT_PACK
 #endif
 
-#if BYTEORDER > 0xFFFF && defined(_CRAY) && !defined(_CRAYMPP)
+#if LONGSIZE > 4 && defined(_CRAY)
 #  if BYTEORDER == 0x12345678
 #    define OFF16(p)	(char*)(p)
 #    define OFF32(p)	(char*)(p)
@@ -389,7 +389,7 @@ PP(pp_pos)
 	    mg = mg_find(sv, 'g');
 	    if (mg && mg->mg_len >= 0) {
 		I32 i = mg->mg_len;
-		if (IN_UTF8)
+		if (DO_UTF8(sv))
 		    sv_pos_b2u(sv, &i);
 		PUSHi(i + PL_curcop->cop_arybase);
 		RETURN;
@@ -1426,7 +1426,7 @@ PP(pp_negate)
 		sv_setsv(TARG, sv);
 		*SvPV_force(TARG, len) = *s == '-' ? '+' : '-';
 	    }
-	    else if (IN_UTF8 && *(U8*)s >= 0xc0 && isIDFIRST_utf8((U8*)s)) {
+	    else if (DO_UTF8(sv) && *(U8*)s >= 0xc0 && isIDFIRST_utf8((U8*)s)) {
 		sv_setpvn(TARG, "-", 1);
 		sv_catsv(TARG, sv);
 	    }
@@ -1930,13 +1930,12 @@ PP(pp_oct)
 PP(pp_length)
 {
     djSP; dTARGET;
+    SV *sv = TOPs;
 
-    if (IN_UTF8) {
-	SETi( sv_len_utf8(TOPs) );
-	RETURN;
-    }
-
-    SETi( sv_len(TOPs) );
+    if (DO_UTF8(sv))
+	SETi(sv_len_utf8(sv));
+    else
+	SETi(sv_len(sv));
     RETURN;
 }
 
@@ -1957,6 +1956,7 @@ PP(pp_substr)
     STRLEN repl_len;
 
     SvTAINTED_off(TARG);			/* decontaminate */
+    SvUTF8_off(TARG);				/* decontaminate */
     if (MAXARG > 2) {
 	if (MAXARG > 3) {
 	    sv = POPs;
@@ -1968,7 +1968,7 @@ PP(pp_substr)
     sv = POPs;
     PUTBACK;
     tmps = SvPV(sv, curlen);
-    if (IN_UTF8) {
+    if (DO_UTF8(sv)) {
         utfcurlen = sv_len_utf8(sv);
 	if (utfcurlen == curlen)
 	    utfcurlen = 0;
@@ -2017,8 +2017,10 @@ PP(pp_substr)
 	RETPUSHUNDEF;
     }
     else {
-        if (utfcurlen)
+        if (utfcurlen) {
 	    sv_pos_u2b(sv, &pos, &rem);
+	    SvUTF8_on(TARG);
+	}
 	tmps += pos;
 	sv_setpvn(TARG, tmps, rem);
 	if (repl)
@@ -2106,7 +2108,7 @@ PP(pp_index)
     little = POPs;
     big = POPs;
     tmps = SvPV(big, biglen);
-    if (IN_UTF8 && offset > 0)
+    if (offset > 0 && DO_UTF8(big))
 	sv_pos_u2b(big, &offset, 0);
     if (offset < 0)
 	offset = 0;
@@ -2117,7 +2119,7 @@ PP(pp_index)
 	retval = -1;
     else
 	retval = tmps2 - tmps;
-    if (IN_UTF8 && retval > 0)
+    if (retval > 0 && DO_UTF8(big))
 	sv_pos_b2u(big, &retval);
     PUSHi(retval + arybase);
     RETURN;
@@ -2145,7 +2147,7 @@ PP(pp_rindex)
     if (MAXARG < 3)
 	offset = blen;
     else {
-	if (IN_UTF8 && offset > 0)
+	if (offset > 0 && DO_UTF8(big))
 	    sv_pos_u2b(big, &offset, 0);
 	offset = offset - arybase + llen;
     }
@@ -2158,7 +2160,7 @@ PP(pp_rindex)
 	retval = -1;
     else
 	retval = tmps2 - tmps;
-    if (IN_UTF8 && retval > 0)
+    if (retval > 0 && DO_UTF8(big))
 	sv_pos_b2u(big, &retval);
     PUSHi(retval + arybase);
     RETURN;
@@ -2179,10 +2181,11 @@ PP(pp_ord)
     djSP; dTARGET;
     UV value;
     STRLEN n_a;
-    U8 *tmps = (U8*)POPpx;
+    SV *tmpsv = POPs;
+    U8 *tmps = (U8*)SvPVx(tmpsv,n_a);
     I32 retlen;
 
-    if (IN_UTF8 && (*tmps & 0x80))
+    if ((*tmps & 0x80) && DO_UTF8(tmpsv))
 	value = utf8_to_uv(tmps, &retlen);
     else
 	value = (UV)(*tmps & 255);
@@ -2198,12 +2201,13 @@ PP(pp_chr)
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
-    if (IN_UTF8 && value >= 128) {
+    if (value > 255 && !IN_BYTE) {
 	SvGROW(TARG,8);
 	tmps = SvPVX(TARG);
 	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));
 	*tmps = '\0';
+	SvUTF8_on(TARG);
 	(void)SvPOK_only(TARG);
 	XPUSHs(TARG);
 	RETURN;
@@ -2214,6 +2218,7 @@ PP(pp_chr)
     tmps = SvPVX(TARG);
     *tmps++ = value;
     *tmps = '\0';
+    SvUTF8_off(TARG);				/* decontaminate */
     (void)SvPOK_only(TARG);
     XPUSHs(TARG);
     RETURN;
@@ -2245,7 +2250,7 @@ PP(pp_ucfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (IN_UTF8 && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
+    if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
 	I32 ulen;
 	U8 tmpbuf[10];
 	U8 *tend;
@@ -2265,6 +2270,7 @@ PP(pp_ucfirst)
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
+	    SvUTF8_on(TARG);
 	    SETs(TARG);
 	}
 	else {
@@ -2275,6 +2281,7 @@ PP(pp_ucfirst)
     else {
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
+	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
 	    SETs(sv);
@@ -2302,7 +2309,7 @@ PP(pp_lcfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (IN_UTF8 && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
+    if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
 	I32 ulen;
 	U8 tmpbuf[10];
 	U8 *tend;
@@ -2322,6 +2329,7 @@ PP(pp_lcfirst)
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
+	    SvUTF8_on(TARG);
 	    SETs(TARG);
 	}
 	else {
@@ -2332,6 +2340,7 @@ PP(pp_lcfirst)
     else {
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
+	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
 	    SETs(sv);
@@ -2346,7 +2355,6 @@ PP(pp_lcfirst)
 	    else
 		*s = toLOWER(*s);
 	}
-	SETs(sv);
     }
     if (SvSMAGICAL(sv))
 	mg_set(sv);
@@ -2360,7 +2368,7 @@ PP(pp_uc)
     register U8 *s;
     STRLEN len;
 
-    if (IN_UTF8) {
+    if (DO_UTF8(sv)) {
 	dTARGET;
 	I32 ulen;
 	register U8 *d;
@@ -2368,6 +2376,7 @@ PP(pp_uc)
 
 	s = (U8*)SvPV(sv,len);
 	if (!len) {
+	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setpvn(TARG, "", 0);
 	    SETs(TARG);
 	}
@@ -2392,6 +2401,7 @@ PP(pp_uc)
 		}
 	    }
 	    *d = '\0';
+	    SvUTF8_on(TARG);
 	    SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
 	    SETs(TARG);
 	}
@@ -2399,6 +2409,7 @@ PP(pp_uc)
     else {
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
+	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
 	    SETs(sv);
@@ -2431,7 +2442,7 @@ PP(pp_lc)
     register U8 *s;
     STRLEN len;
 
-    if (IN_UTF8) {
+    if (DO_UTF8(sv)) {
 	dTARGET;
 	I32 ulen;
 	register U8 *d;
@@ -2439,6 +2450,7 @@ PP(pp_lc)
 
 	s = (U8*)SvPV(sv,len);
 	if (!len) {
+	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setpvn(TARG, "", 0);
 	    SETs(TARG);
 	}
@@ -2463,6 +2475,7 @@ PP(pp_lc)
 		}
 	    }
 	    *d = '\0';
+	    SvUTF8_on(TARG);
 	    SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
 	    SETs(TARG);
 	}
@@ -2470,6 +2483,7 @@ PP(pp_lc)
     else {
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
+	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
 	    SETs(sv);
@@ -2504,11 +2518,12 @@ PP(pp_quotemeta)
     register char *s = SvPV(sv,len);
     register char *d;
 
+    SvUTF8_off(TARG);				/* decontaminate */
     if (len) {
 	(void)SvUPGRADE(TARG, SVt_PV);
 	SvGROW(TARG, (len * 2) + 1);
 	d = SvPVX(TARG);
-	if (IN_UTF8) {
+	if (DO_UTF8(sv)) {
 	    while (len) {
 		if (*s & 0x80) {
 		    STRLEN ulen = UTF8SKIP(s);
@@ -2525,6 +2540,7 @@ PP(pp_quotemeta)
 		    len--;
 		}
 	    }
+	    SvUTF8_on(TARG);
 	}
 	else {
 	    while (len--) {
@@ -2701,8 +2717,22 @@ PP(pp_delete)
 PP(pp_exists)
 {
     djSP;
-    SV *tmpsv = POPs;
-    HV *hv = (HV*)POPs;
+    SV *tmpsv;
+    HV *hv;
+
+    if (PL_op->op_private & OPpEXISTS_SUB) {
+	GV *gv;
+	CV *cv;
+	SV *sv = POPs;
+	cv = sv_2cv(sv, &hv, &gv, FALSE);
+	if (cv)
+	    RETPUSHYES;
+	if (gv && isGV(gv) && GvCV(gv) && !GvCVGEN(gv))
+	    RETPUSHYES;
+	RETPUSHNO;
+    }
+    tmpsv = POPs;
+    hv = (HV*)POPs;
     if (SvTYPE(hv) == SVt_PVHV) {
 	if (hv_exists_ent(hv, tmpsv, 0))
 	    RETPUSHYES;
@@ -3170,13 +3200,14 @@ PP(pp_reverse)
 	dTARGET;
 	STRLEN len;
 
+	SvUTF8_off(TARG);				/* decontaminate */
 	if (SP - MARK > 1)
 	    do_join(TARG, &PL_sv_no, MARK, SP);
 	else
 	    sv_setsv(TARG, (SP > MARK) ? *SP : DEFSV);
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
-	    if (IN_UTF8) {	/* first reverse each character */
+	    if (DO_UTF8(TARG)) {	/* first reverse each character */
 		U8* s = (U8*)SvPVX(TARG);
 		U8* send = (U8*)(s + len);
 		while (s < send) {

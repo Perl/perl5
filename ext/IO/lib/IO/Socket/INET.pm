@@ -7,7 +7,7 @@
 package IO::Socket::INET;
 
 use strict;
-use vars qw(@ISA $VERSION);
+our(@ISA, $VERSION);
 use IO::Socket;
 use Socket;
 use Carp;
@@ -331,6 +331,8 @@ As of VERSION 1.18 all IO::Socket objects have autoflush turned on
 by default. This was not the case with earlier releases.
 
  NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+
+=back
 
 =head2 METHODS
 

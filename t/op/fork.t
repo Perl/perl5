@@ -6,7 +6,10 @@ BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
     require Config; import Config;
-    unless ($Config{'d_fork'} || ($^O eq 'MSWin32' && $Config{'useithreads'})) {
+    unless ($Config{'d_fork'}
+	    or ($^O eq 'MSWin32' and $Config{useithreads}
+		and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/))
+    {
 	print "1..0 # Skip: no fork\n";
 	exit 0;
     }
@@ -21,7 +24,7 @@ print "1..", scalar @prgs, "\n";
 
 $tmpfile = "forktmp000";
 1 while -f ++$tmpfile;
-END { unlink $tmpfile if $tmpfile; }
+END { close TEST; unlink $tmpfile if $tmpfile; }
 
 $CAT = (($^O eq 'MSWin32') ? '.\perl -e "print <>"' : 'cat');
 
@@ -51,6 +54,8 @@ for (@prgs){
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;
+    $results =~ s/^\n*Process terminated by SIG\w+\n?//mg
+	if $^O eq 'os2';
     my @results = sort split /\n/, $results;
     if ( "@results" ne "@expected" ) {
 	print STDERR "PROG: $switch\n$prog\n";
@@ -317,3 +322,50 @@ BEGIN {
 #print "outer\n"
 EXPECT
 inner
+########
+sub pipe_to_fork ($$) {
+    my $parent = shift;
+    my $child = shift;
+    pipe($child, $parent) or die;
+    my $pid = fork();
+    die "fork() failed: $!" unless defined $pid;
+    close($pid ? $child : $parent);
+    $pid;
+}
+
+if (pipe_to_fork('PARENT','CHILD')) {
+    # parent
+    print PARENT "pipe_to_fork\n";
+    close PARENT;
+}
+else {
+    # child
+    while (<CHILD>) { print; }
+    close CHILD;
+    exit;
+}
+
+sub pipe_from_fork ($$) {
+    my $parent = shift;
+    my $child = shift;
+    pipe($parent, $child) or die;
+    my $pid = fork();
+    die "fork() failed: $!" unless defined $pid;
+    close($pid ? $child : $parent);
+    $pid;
+}
+
+if (pipe_from_fork('PARENT','CHILD')) {
+    # parent
+    while (<PARENT>) { print; }
+    close PARENT;
+}
+else {
+    # child
+    print CHILD "pipe_from_fork\n";
+    close CHILD;
+    exit;
+}
+EXPECT
+pipe_from_fork
+pipe_to_fork

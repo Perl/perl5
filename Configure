@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jan 18 21:42:31 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Feb  4 21:57:24 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -399,6 +399,7 @@ d_getsbyport=''
 d_gnulibc=''
 d_hasmntopt=''
 d_htonl=''
+d_iconv=''
 d_inetaton=''
 d_int64t=''
 d_isascii=''
@@ -600,6 +601,7 @@ i_float=''
 i_gdbm=''
 d_grpasswd=''
 i_grp=''
+i_iconv=''
 i_inttypes=''
 i_limits=''
 i_locale=''
@@ -671,6 +673,7 @@ i_varargs=''
 i_varhdr=''
 i_vfork=''
 inc_version_list=''
+inc_version_list_init=''
 installprefix=''
 installprefixexp=''
 installstyle=''
@@ -692,6 +695,9 @@ plibpth=''
 xlibpth=''
 ignore_versioned_solibs=''
 libs=''
+libsdirs=''
+libsfiles=''
+libsfound=''
 lns=''
 d_PRIEldbl=''
 d_PRIFldbl=''
@@ -760,6 +766,7 @@ subversion=''
 version=''
 perladmin=''
 perlpath=''
+d_nv_preserves_uv=''
 i16size=''
 i16type=''
 i32size=''
@@ -905,71 +912,6 @@ if test -f /etc/unixtovms.exe; then
 fi
 
 i_whoami=''
-: list of known cpp symbols, sorted alphabetically
-al="AMIX BIT_MSF BSD BSD4_3 BSD_NET2 CMU CRAY DGUX DOLPHIN DPX2"
-al="$al GO32 GOULD_PN HP700 I386 I80960 I960 Lynx M68000 M68K MACH"
-al="$al MIPSEB MIPSEL MSDOS MTXINU MULTIMAX MVS"
-al="$al M_COFF M_I186 M_I286 M_I386 M_I8086 M_I86 M_I86SM"
-al="$al M_SYS3 M_SYS5 M_SYSIII M_SYSV M_UNIX M_XENIX"
-al="$al NeXT OCS88 OSF1 PARISC PC532 PORTAR POSIX"
-al="$al PWB R3000 RES RISC6000 RT Sun386i SVR3 SVR4 SVR5"
-al="$al SYSTYPE_BSD SYSTYPE_SVR4 SYSTYPE_SYSV Tek4132 Tek4300"
-al="$al UMAXV USGr4 USGr4_2 UTEK UTS UTek UnicomPBB UnicomPBD Utek"
-al="$al VMS Xenix286"
-al="$al _AIX _AIX32 _AIX370 _AIX41 _AM29000 _COFF _CRAY _CX_UX _EPI"
-al="$al _IBMESA _IBMR2 _M88K _M88KBCS_TARGET _POWER"
-al="$al _MIPSEB _MIPSEL _M_COFF _M_I86 _M_I86SM _M_SYS3"
-al="$al _M_SYS5 _M_SYSIII _M_SYSV _M_UNIX _M_XENIX _NLS _PGC_ _R3000"
-al="$al _SYSTYPE_BSD _SYSTYPE_BSD43 _SYSTYPE_SVR4"
-al="$al _SYSTYPE_SYSV _SYSV3 _U370 _UNICOS"
-al="$al __386BSD__ __BIG_ENDIAN __BIG_ENDIAN__ __BSD_4_4__"
-al="$al __DGUX__ __DPX2__ __H3050R __H3050RX"
-al="$al __LITTLE_ENDIAN __LITTLE_ENDIAN__ __MACH__"
-al="$al __MIPSEB __MIPSEB__ __MIPSEL __MIPSEL__"
-al="$al __Next__ __OSF1__ __PARAGON__ __PGC__ __PWB __STDC__"
-al="$al __SVR4_2__ __UMAXV__"
-al="$al ____386BSD____ __alpha __alpha__ __amiga"
-al="$al __bsd4_2 __bsd4_2__ __bsdi__ __convex__"
-al="$al __host_mips__"
-al="$al __hp9000s200 __hp9000s300 __hp9000s400 __hp9000s500"
-al="$al __hp9000s500 __hp9000s700 __hp9000s800"
-al="$al __hppa __hpux __hp_osf __i286 __i286__ __i386 __i386__"
-al="$al __i486 __i486__ __i860 __i860__ __ibmesa __ksr1__ __linux__"
-al="$al __m68k __m68k__ __m88100__ __m88k __m88k__"
-al="$al __mc68000 __mc68000__ __mc68020 __mc68020__"
-al="$al __mc68030 __mc68030__ __mc68040 __mc68040__"
-al="$al __mc88100 __mc88100__ __mips __mips__"
-al="$al __motorola__ __osf__ __pa_risc __sparc__ __stdc__"
-al="$al __sun __sun__ __svr3__ __svr4__ __ultrix __ultrix__"
-al="$al __unix __unix__ __uxpm__ __uxps__ __vax __vax__"
-al="$al _host_mips _mips _unix"
-al="$al a29k aegis aix aixpc alliant alpha am29000 amiga ansi ardent"
-al="$al apollo ardent att386 att3b"
-al="$al bsd bsd43 bsd4_2 bsd4_3 bsd4_4 bsdi bull"
-al="$al cadmus clipper concurrent convex cray ctix"
-al="$al dmert encore gcos gcx gimpel gould"
-al="$al hbullx20 hcx host_mips hp200 hp300 hp700 hp800"
-al="$al hp9000 hp9000s300 hp9000s400 hp9000s500"
-al="$al hp9000s700 hp9000s800 hp9k8 hppa hpux"
-al="$al i186 i286 i386 i486 i8086"
-al="$al i80960 i860 iAPX286 ibm ibm032 ibmrt interdata is68k"
-al="$al ksr1 linux luna luna88k m68k m88100 m88k"
-al="$al mc300 mc500 mc68000 mc68010 mc68020 mc68030"
-al="$al mc68040 mc68060 mc68k mc68k32 mc700"
-al="$al mc88000 mc88100 merlin mert mips mvs n16"
-al="$al ncl_el ncl_mr"
-al="$al news1500 news1700 news1800 news1900 news3700"
-al="$al news700 news800 news900 ns16000 ns32000"
-al="$al ns32016 ns32332 ns32k nsc32000 os osf"
-al="$al parisc pc532 pdp11 plexus posix pyr"
-al="$al riscix riscos scs sequent sgi sinix sony sony_news"
-al="$al sonyrisc sparc sparclite spectrum stardent stratos"
-al="$al sun sun3 sun386 svr4 sysV68 sysV88"
-al="$al titan tower tower32 tower32_200 tower32_600 tower32_700"
-al="$al tower32_800 tower32_850 tss u370 u3b u3b2 u3b20 u3b200"
-al="$al u3b20d u3b5 ultrix unix unixpc unos vax venix vms"
-al="$al xenix z8000"
-
 : set useposix=false in your hint file to disable the POSIX extension.
 useposix=true
 : set useopcode=false in your hint file to disable the Opcode extension.
@@ -2128,7 +2070,8 @@ $eunicefix tr
 : Try to determine whether config.sh was made on this system
 case "$config_sh" in
 '')
-myuname=`( ($uname -a) 2>/dev/null || hostname) 2>&1`
+myuname=`$uname -a 2>/dev/null`
+$test -z "$myuname" && myuname=`hostname 2>/dev/null`
 # tr '[A-Z]' '[a-z]' would not work in EBCDIC
 # because the A-Z/a-z are not consecutive.
 myuname=`echo $myuname | $sed -e 's/^[^=]*=//' -e 's/\///g' | \
@@ -2194,6 +2137,7 @@ EOM
 	$test -f /dnix && osname=dnix
 	$test -f /lynx.os && osname=lynxos
 	$test -f /unicos && osname=unicos && osvers=`$uname -r`
+	$test -f /unicosmk && osname=unicosmk && osvers=`$uname -r`
 	$test -f /unicosmk.ar && osname=unicosmk && osvers=`$uname -r`
 	$test -f /bin/mips && /bin/mips && osname=mips
 	$test -d /NextApps && set X `hostinfo | grep 'NeXT Mach.*:' | \
@@ -2654,7 +2598,7 @@ esac'
 
 cat <<EOM
 
-Perl can be built to take advantage of threads, on some systems.
+Perl can be built to take advantage of threads on some systems.
 To do so, Configure must be run with -Dusethreads.
 
 Note that threading is a highly experimental feature, and
@@ -2685,6 +2629,10 @@ the 5.005 version (5005threads) and an interpreter-based version
 (ithreads) that has one interpreter per thread.  Both are very 
 experimental.  This arrangement exists to help developers work out
 which one is better.
+
+If you're a casual user, you probably don't want interpreter-threads
+at this time.  There doesn't yet exist a way to create threads from
+within Perl in this model, i.e., "use Thread;" will NOT work.
 EOM
 	: Default to ithreads unless overridden on command line or with
 	: old config.sh
@@ -3100,8 +3048,6 @@ if $cc -o gccvers gccvers.c; then
 	case "$gccversion" in
 	'') echo "You are not using GNU cc." ;;
 	*)  echo "You are using GNU cc $gccversion."
-	    echo "Adding -D_GNU_SOURCE to ccflags."
-	    ccflags="$ccflags -D_GNU_SOURCE" # expose glibc interfaces
 	    ;;
 	esac
 else
@@ -3651,7 +3597,7 @@ esac
 $cat <<EOM
 
 On some systems, shared libraries may be available.  Answer 'none' if
-you want to suppress searching of shared libraries for the remaining
+you want to suppress searching of shared libraries for the remainder
 of this configuration.
 
 EOM
@@ -3739,42 +3685,43 @@ $define)
 esac
 for thislib in $libswanted; do
 	
+	libname="$thislib"
 	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`;
 		$test -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
-		echo "Found -l$thislib (shared)."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=shared
 	elif xxx=`./loc lib$thislib.$so X $libpth` ; $test -f "$xxx"; then
-		echo "Found -l$thislib (shared)."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=shared
 	elif xxx=`./loc lib$thislib$_a X $libpth`; $test -f "$xxx"; then
-		echo "Found -l$thislib."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=static
 	elif xxx=`./loc $thislib$_a X $libpth`; $test -f "$xxx"; then
-		echo "Found -l$thislib."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=static
 	elif xxx=`./loc lib${thislib}_s$_a X $libpth`; $test -f "$xxx"; then
-		echo "Found -l${thislib}_s."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l${thislib}_s";;
-		esac
+		libstyle=static
+		libname=${thislib}_s
 	elif xxx=`./loc Slib$thislib$_a X $xlibpth`; $test -f "$xxx"; then
-		echo "Found -l$thislib."
+		libstyle="static"
+	fi
+	if $test -f "$xxx"; then
+		eval $libscheck
+	fi
+	if $test -f "$xxx"; then
+		case "$libstyle" in
+		shared) echo "Found -l$libname (shared)." ;;
+		static) echo "Found -l$libname." ;;
+		*)      echo "Found -l$libname ($libstyle)." ;;
+		esac
 		case " $dflt " in
 		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
+		*) dflt="$dflt -l$libname"
+                   libsfound="$libsfound $xxx"
+                   yyy=`basename $xxx`
+                   libsfiles="$libsfiles $yyy"
+                   yyy=`echo $xxx|sed "s@/$yyy\\$@@"`
+                   case " $libsdirs " in
+                   *" $yyy "*) ;;
+                   *) libsdirs="$libsdirs $yyy" ;;
+                   esac
+		   ;;
 		esac
 	else
 		echo "No -l$thislib."
@@ -5379,9 +5326,7 @@ foreach $d (@candidates) {
 }
 
 if (@inc_version_list) {
-    print '"';
-    print join('", "', @inc_version_list);
-    print '"';
+    print join(' ', @inc_version_list);
 }
 else {
     # Blank space to preserve value for next Configure run.
@@ -5393,9 +5338,10 @@ case "$inc_version_list" in
 '')	if test -x $perl; then
 		dflt=`$perl getverlist`
 	else
-		dflt=''
+		dflt='none'
 	fi
 	;;
+$undef) dflt='none' ;;
 *)  dflt="$inc_version_list" ;;
 esac
 $cat <<'EOM'
@@ -5405,15 +5351,26 @@ can be configured to use modules built and installed with earlier
 versions of perl that were installed under $prefix.  Specify here
 the list of earlier versions that this version of perl should check.
 If Configure detected no earlier versions of perl installed under
-$prefix, then the list will be empty.
+$prefix, then the list will be empty.  Answer 'none' to tell perl
+to not search earlier versions.
 
 The default should almost always be sensible, so if you're not sure,
 just accept the default.
 EOM
 
-rp='list of earlier versions to include in @INC?'
+rp='List of earlier versions to include in @INC?'
 . ./myread
-inc_version_list="$ans"
+case "$ans" in
+[Nn]one) inc_version_list=' ' ;;
+*) inc_version_list="$ans" ;;
+esac
+case "$inc_version_list" in
+''|' ') 
+	inc_version_list_init='0';;
+*)	inc_version_list_init=`echo $inc_version_list |
+		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/",0/'`
+	;;
+esac
 $rm -f getverlist
 
 : determine whether to install perl also as /usr/bin/perl
@@ -6108,7 +6065,7 @@ EOM
     ' ')  dflt='none' ;;
     *)  dflt="$ccdlflags" ;;
     esac
-    rp="Any special flags to pass to $cc to use dynamic loading?"
+    rp="Any special flags to pass to $cc to use dynamic linking?"
     . ./myread
     case "$ans" in
     none) ccdlflags=' ' ;;
@@ -6812,7 +6769,7 @@ $cat <<EOM
 I need to get your e-mail address in Internet format if possible, i.e.
 something like user@host.domain. Please answer accurately since I have
 no easy means to double check it. The default value provided below
-is most probably close to the reality but may not be valid from outside
+is most probably close to reality but may not be valid from outside
 your organization...
 
 EOM
@@ -7013,6 +6970,10 @@ else
 	installsitebin="$sitebinexp"
 fi
 
+: see if sqrtl exists
+set sqrtl d_sqrtl
+eval $inlibc
+
 cat <<EOM
 
 Perl can be built to take advantage of long doubles which
@@ -7058,6 +7019,18 @@ EOM
 	;;
 esac
 
+case "$uselongdouble:$d_sqrtl" in
+$define:$undef)
+		$cat <<EOM >&4
+
+You requested the use of long doubles but you do not seem to have
+the mathematic functions for long doubles.  I'm disabling the use
+of long doubles.
+EOM
+	uselongdouble=$undef
+	;;
+esac
+
 cat <<EOM
 
 Perl can be built to take advantage of long longs which
@@ -7071,8 +7044,7 @@ case "$ccflags" in
 esac
 
 case "$uselonglong" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
+'')	dflt='y';;
 esac
 rp='Try to use long longs if available?'
 . ./myread
@@ -7260,6 +7232,7 @@ char *myname = "sprintf";
 
 #include <stdio.h>
 
+#define I_STDLIB $i_stdlib
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
@@ -8928,7 +8901,7 @@ esac
 set fseeko d_fseeko
 eval $inlibc
 case "$longsize" in
-8) echo "(Your long is 64 bits, so in a pinch you could use fseek.)" ;;
+8) echo "(Your long is 64 bits, so you could use fseek.)" ;;
 esac
 
 : see if fsetpos exists
@@ -8954,7 +8927,7 @@ eval $inlibc
 set ftello d_ftello
 eval $inlibc
 case "$longsize" in
-8) echo "(Your long is 64 bits, so in a pinch you could use ftell.)" ;;
+8) echo "(Your long is 64 bits, so you could use ftell.)" ;;
 esac
 
 : see if getgrent exists
@@ -9254,6 +9227,10 @@ esac
 set d_htonl
 eval $setvar
 
+: see if iconv exists
+set iconv d_iconv
+eval $inlibc
+
 : index or strchr
 echo " "
 if set index val -f; eval $csym; $val; then
@@ -9543,6 +9520,356 @@ eval $setvar
 set nice d_nice
 eval $inlibc
 
+: see if inttypes.h is available
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+echo " "
+$cat >try.c <<EOCP
+#include <inttypes.h>
+int main() {
+	static int32_t foo32 = 0x12345678;
+}
+EOCP
+set try
+if eval $compile; then
+	echo "<inttypes.h> found." >&4
+	val="$define"
+else
+	echo "<inttypes.h> NOT found." >&4
+	val="$undef"
+fi
+$rm -f try.c try
+set i_inttypes
+eval $setvar
+
+: check for int64_t
+echo " "
+$echo $n "Checking to see if your system supports int64_t...$c" >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+int main() { int64_t x = 7; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo " Yes, it does." >&4
+else
+	val="$undef"
+	echo " No, it doesn't." >&4
+fi
+$rm -f try try.*
+set d_int64t
+eval $setvar
+
+
+echo " "
+echo "Checking which 64-bit integer type we could use..." >&4
+
+case "$intsize" in
+8) val=int
+   set quadtype
+   eval $setvar
+   val='"unsigned int"'
+   set uquadtype
+   eval $setvar
+   quadkind=1
+   ;;
+*) case "$longsize" in
+   8) val=long
+      set quadtype
+      eval $setvar
+      val='"unsigned long"'
+      set uquadtype
+      eval $setvar
+      quadkind=2
+      ;;
+   *) case "$d_longlong:$longlongsize" in
+      define:8)
+        val='"long long"'
+        set quadtype
+        eval $setvar
+        val='"unsigned long long"'
+        set uquadtype
+        eval $setvar
+        quadkind=3
+        ;;
+      *) case "$d_int64t" in
+         define)
+           val=int64_t
+           set quadtype
+           eval $setvar
+           val=uint64_t
+           set uquadtype
+           eval $setvar
+           quadkind=4
+           ;;
+         esac
+         ;;
+      esac
+      ;;
+   esac
+   ;;
+esac
+
+case "$quadtype" in
+'')	case "$uselonglong:$d_longlong:$longlongsize" in
+	undef:define:8)
+	   echo "(You would have 'long long', but you are not using it.)" >&4 ;;
+	*) echo "Alas, no 64-bit integer types in sight." >&4 ;;
+	esac
+	d_quad="$undef"
+	;;
+*)	if test X"$use64bits" = Xdefine -o X"$longsize" = X8; then
+	    verb="will"
+	else
+	    verb="could"
+	fi
+	echo "We $verb use '$quadtype' for 64-bit integers." >&4
+	d_quad="$define"
+	;;
+esac
+
+: check for length of character
+echo " "
+case "$charsize" in
+'')
+	echo "Checking to see how big your characters are (hey, you never know)..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof(char));
+    exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		dflt=`./try`
+	else
+		dflt='1'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+	fi
+	;;
+*)
+	dflt="$charsize"
+	;;
+esac
+rp="What is the size of a character (in bytes)?"
+. ./myread
+charsize="$ans"
+$rm -f try.c try
+
+
+echo " "
+$echo "Choosing the C types to be used for Perl's internal types..." >&4
+
+case "$use64bits:$d_quad:$quadtype" in
+define:define:?*)
+	ivtype="$quadtype"
+	uvtype="$uquadtype"
+	ivsize=8
+	uvsize=8
+	;;
+*)	ivtype="long"
+	uvtype="unsigned long"
+	ivsize=$longsize
+	uvsize=$longsize
+	;;
+esac
+
+case "$uselongdouble:$d_longdbl" in
+define:define)
+	nvtype="long double"
+	nvsize=$longdblsize
+	;;
+*)	nvtype=double
+	nvsize=$doublesize
+	;;
+esac
+
+$echo "(IV will be "$ivtype", $ivsize bytes)"
+$echo "(UV will be "$uvtype", $uvsize bytes)"
+$echo "(NV will be "$nvtype", $nvsize bytes)"
+
+$cat >try.c <<EOCP
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+#include <stdio.h>
+int main() {
+#ifdef INT8
+   int8_t i =  INT8_MAX;
+  uint8_t u = UINT8_MAX;
+  printf("int8_t\n");
+#endif
+#ifdef INT16
+   int16_t i =  INT16_MAX;
+  uint16_t i = UINT16_MAX;
+  printf("int16_t\n");
+#endif
+#ifdef INT32
+   int32_t i =  INT32_MAX;
+  uint32_t u = UINT32_MAX;
+  printf("int32_t\n");
+#endif
+}
+EOCP
+
+case "$i8type" in
+'')	case "$charsize" in
+	1)	i8type=char
+		u8type="unsigned char"
+		i8size=$charsize
+		u8size=$charsize
+		;;
+	esac
+	;;
+esac
+case "$i8type" in
+'')	set try -DINT8
+	if eval $compile; then
+		case "`./try$exe_ext`" in
+		int8_t)	i8type=int8_t
+			u8type=uint8_t
+			i8size=1
+			u8size=1
+			;;
+		esac
+	fi
+	;;
+esac
+case "$i8type" in
+'')	if $test $charsize -ge 1; then
+		i8type=char
+		u8type="unsigned char"
+		i8size=$charsize
+		u8size=$charsize
+	fi
+	;;
+esac
+
+case "$i16type" in
+'')	case "$shortsize" in
+	2)	i16type=short
+		u16type="unsigned short"
+		i16size=$shortsize
+		u16size=$shortsize
+		;;
+	esac
+	;;
+esac
+case "$i16type" in
+'')	set try -DINT16
+	if eval $compile; then
+		case "`./try$exe_ext`" in
+		int16_t)
+			i16type=int16_t
+			u16type=uint16_t
+			i16size=2
+			u16size=2
+			;;
+		esac
+	fi
+	;;
+esac
+case "$i16type" in
+'')	if $test $shortsize -ge 2; then
+		i16type=short
+		u16type="unsigned short"
+		i16size=$shortsize
+		u16size=$shortsize
+	fi
+	;;
+esac
+
+case "$i32type" in
+'')	case "$longsize" in
+	4)	i32type=long
+		u32type="unsigned long"
+		i32size=$longsize
+		u32size=$longsize
+		;;
+	*)	case "$intsize" in
+		4)	i32type=int
+			u32type="unsigned int"
+			i32size=$intsize
+			u32size=$intsize
+			;;
+		esac
+		;;
+	esac
+	;;
+esac
+case "$i32type" in
+'')	set try -DINT32
+	if eval $compile; then
+		case "`./try$exe_ext`" in
+		int32_t)
+			i32type=int32_t
+			u32type=uint32_t
+			i32size=4
+			u32size=4
+			;;
+		esac
+	fi
+	;;
+esac
+case "$i32type" in
+'')	if $test $intsize -ge 4; then
+		i32type=int
+		u32type="unsigned int"
+		i32size=$intsize
+		u32size=$intsize
+	fi
+	;;
+esac
+
+case "$i64type" in
+'')	case "$d_quad:$quadtype" in
+	define:?*)
+		i64type="$quadtype"
+		u64type="$uquadtype"
+		i64size=8
+		u64size=8
+		;;
+	esac
+	;;
+esac
+
+$echo "Checking whether your NVs can preserve your UVs..." >&4
+$cat <<EOP >try.c
+#include <stdio.h>
+int main() {
+    $uvtype k = ($uvtype)~0, l;
+    $nvtype d;
+    l = k;
+    d = ($nvtype)l;
+    l = ($uvtype)d;
+    if (l == k)
+       printf("preserve\n");
+    exit(0);
+}
+EOP
+set try
+if eval $compile; then
+	case "`./try$exe_ext`" in
+	preserve) d_nv_preserves_uv="$define" ;;
+	esac
+fi	
+case "$d_nv_preserves_uv" in
+$define) $echo "Yes, they can."  2>&1 ;;
+*)	 $echo "No, they can't." 2>&1
+	 d_nv_preserves_uv="$undef"
+	 ;;
+esac
+
+$rm -f try.* try
+
 : see if POSIX threads are available
 set pthread.h i_pthread
 eval $inhdr
@@ -9775,119 +10102,6 @@ $define)
 	set d_pwcomment; eval $setvar
 	set d_pwgecos; eval $setvar
 	set d_pwpasswd; eval $setvar
-	;;
-esac
-
-: see if inttypes.h is available
-: we want a real compile instead of Inhdr because some systems
-: have an inttypes.h which includes non-existent headers
-echo " "
-$cat >try.c <<EOCP
-#include <inttypes.h>
-int main() {
-	static int32_t foo32 = 0x12345678;
-}
-EOCP
-set try
-if eval $compile; then
-	echo "<inttypes.h> found." >&4
-	val="$define"
-else
-	echo "<inttypes.h> NOT found." >&4
-	val="$undef"
-fi
-$rm -f try.c try
-set i_inttypes
-eval $setvar
-
-: check for int64_t
-echo " "
-$echo $n "Checking to see if your system supports int64_t...$c" >&4
-$cat >try.c <<EOCP
-#include <sys/types.h>
-#$i_inttypes I_INTTYPES
-#ifdef I_INTTYPES
-#include <inttypes.h>
-#endif
-int main() { int64_t x = 7; }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo " Yes, it does." >&4
-else
-	val="$undef"
-	echo " No, it doesn't." >&4
-fi
-$rm -f try try.*
-set d_int64t
-eval $setvar
-
-
-echo " "
-echo "Checking which 64-bit integer type we could use..." >&4
-
-case "$intsize" in
-8) val=int
-   set quadtype
-   eval $setvar
-   val='"unsigned int"'
-   set uquadtype
-   eval $setvar
-   quadkind=1
-   ;;
-*) case "$longsize" in
-   8) val=long
-      set quadtype
-      eval $setvar
-      val='"unsigned long"'
-      set uquadtype
-      eval $setvar
-      quadkind=2
-      ;;
-   *) case "$uselonglong:$d_longlong:$longlongsize" in
-      define:define:8)
-        val='"long long"'
-        set quadtype
-        eval $setvar
-        val='"unsigned long long"'
-        set uquadtype
-        eval $setvar
-        quadkind=3
-        ;;
-      *) case "$d_int64t" in
-         define)
-           val=int64_t
-           set quadtype
-           eval $setvar
-           val=uint64_t
-           set uquadtype
-           eval $setvar
-           quadkind=4
-           ;;
-         esac
-         ;;
-      esac
-      ;;
-   esac
-   ;;
-esac
-
-case "$quadtype" in
-'')	case "$uselonglong:$d_longlong:$longlongsize" in
-	undef:define:8)
-	   echo "(You would have 'long long', but you are not using it.)" >&4 ;;
-	*) echo "Alas, no 64-bit integer types in sight." >&4 ;;
-	esac
-	d_quad="$undef"
-	;;
-*)	if test X"$use64bits" = Xdefine -o X"$longsize" = X8; then
-	    verb="will"
-	else
-	    verb="could"
-	fi
-	echo "We $verb use '$quadtype' for 64-bit integers." >&4
-	d_quad="$define"
 	;;
 esac
 
@@ -10675,10 +10889,6 @@ esac
 set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
-
-: see if sqrtl exists
-set sqrtl d_sqrtl
-eval $inlibc
 
 : see if sys/stat.h is available
 set sys/stat.h i_sysstat
@@ -12113,216 +12323,6 @@ else
 fi
 
 
-: check for length of character
-echo " "
-case "$charsize" in
-'')
-	echo "Checking to see how big your characters are (hey, you never know)..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof(char));
-    exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		dflt=`./try`
-	else
-		dflt='1'
-		echo "(I can't seem to compile the test program.  Guessing...)"
-	fi
-	;;
-*)
-	dflt="$charsize"
-	;;
-esac
-rp="What is the size of a character (in bytes)?"
-. ./myread
-charsize="$ans"
-$rm -f try.c try
-
-
-echo " "
-$echo "Choosing the C types to be used for Perl's internal types..." >&4
-
-case "$use64bits:$d_quad:$quadtype" in
-define:define:?*)
-	ivtype="$quadtype"
-	uvtype="$uquadtype"
-	ivsize=8
-	uvsize=8
-	;;
-*)	ivtype="long"
-	uvtype="unsigned long"
-	ivsize=$longsize
-	uvsize=$longsize
-	;;
-esac
-
-case "$uselongdouble:$d_longdbl" in
-define:define)
-	nvtype="long double"
-	nvsize=$longdblsize
-	;;
-*)	nvtype=double
-	nvsize=$doublesize
-	;;
-esac
-
-echo "(IV will be "$ivtype", $ivsize bytes)"
-echo "(UV will be "$uvtype", $uvsize bytes)"
-echo "(NV will be "$nvtype", $nvsize bytes)"
-
-$cat >try.c <<EOCP
-#$i_inttypes I_INTTYPES
-#ifdef I_INTTYPES
-#include <inttypes.h>
-#endif
-#include <stdio.h>
-int main() {
-#ifdef INT8
-   int8_t i =  INT8_MAX;
-  uint8_t u = UINT8_MAX;
-  printf("int8_t\n");
-#endif
-#ifdef INT16
-   int16_t i =  INT16_MAX;
-  uint16_t i = UINT16_MAX;
-  printf("int16_t\n");
-#endif
-#ifdef INT32
-   int32_t i =  INT32_MAX;
-  uint32_t u = UINT32_MAX;
-  printf("int32_t\n");
-#endif
-}
-EOCP
-
-case "$i8type" in
-'')	case "$charsize" in
-	1)	i8type=char
-		u8type="unsigned char"
-		i8size=$charsize
-		u8size=$charsize
-		;;
-	esac
-	;;
-esac
-case "$i8type" in
-'')	set try -DINT8
-	if eval $compile; then
-		case "`./try$exe_ext`" in
-		int8_t)	i8type=int8_t
-			u8type=uint8_t
-			i8size=1
-			u8size=1
-			;;
-		esac
-	fi
-	;;
-esac
-case "$i8type" in
-'')	if $test $charsize -ge 1; then
-		i8type=char
-		u8type="unsigned char"
-		i8size=$charsize
-		u8size=$charsize
-	fi
-	;;
-esac
-
-case "$i16type" in
-'')	case "$shortsize" in
-	2)	i16type=short
-		u16type="unsigned short"
-		i16size=$shortsize
-		u16size=$shortsize
-		;;
-	esac
-	;;
-esac
-case "$i16type" in
-'')	set try -DINT16
-	if eval $compile; then
-		case "`./try$exe_ext`" in
-		int16_t)
-			i16type=int16_t
-			u16type=uint16_t
-			i16size=2
-			u16size=2
-			;;
-		esac
-	fi
-	;;
-esac
-case "$i16type" in
-'')	if $test $shortsize -ge 2; then
-		i16type=short
-		u16type="unsigned short"
-		i16size=$shortsize
-		u16size=$shortsize
-	fi
-	;;
-esac
-
-case "$i32type" in
-'')	case "$longsize" in
-	4)	i32type=long
-		u32type="unsigned long"
-		i32size=$longsize
-		u32size=$longsize
-		;;
-	*)	case "$intsize" in
-		4)	i32type=int
-			u32type="unsigned int"
-			i32size=$intsize
-			u32size=$intsize
-			;;
-		esac
-		;;
-	esac
-	;;
-esac
-case "$i32type" in
-'')	set try -DINT32
-	if eval $compile; then
-		case "`./try$exe_ext`" in
-		int32_t)
-			i32type=int32_t
-			u32type=uint32_t
-			i32size=4
-			u32size=4
-			;;
-		esac
-	fi
-	;;
-esac
-case "$i32type" in
-'')	if $test $intsize -ge 4; then
-		i32type=int
-		u32type="unsigned int"
-		i32size=$intsize
-		u32size=$intsize
-	fi
-	;;
-esac
-
-case "$i64type" in
-'')	case "$d_quad:$quadtype" in
-	define:?*)
-		i64type="$quadtype"
-		u64type="$uquadtype"
-		i64size=8
-		u64size=8
-		;;
-	esac
-	;;
-esac
-
-$rm -f try.* try
-
 echo " "
 
 if $test X"$quadtype" != X; then
@@ -12373,7 +12373,7 @@ EOCP
 	fi
 fi
 
-if $test X"$sPRId64" = X -a X"$i_inttypes.h" = X"$define" -a X"$quadtype" = Xint64_t; then
+if $test X"$sPRId64" = X -a X"$i_inttypes" = X"$define" -a X"$quadtype" = Xint64_t; then
 	$cat >try.c <<'EOCP'
 #include <sys/types.h>
 #include <inttypes.h>
@@ -12894,6 +12894,7 @@ $rm -f foo* bar*
 case "$selecttype" in
 '') case "$d_select" in
 	$define)
+		echo " "
 		$cat <<EOM
 Checking to see what type of arguments are accepted by select().
 EOM
@@ -13580,6 +13581,10 @@ esac
 set i_fcntl
 eval $setvar
 
+: see if this is a iconv.h system
+set iconv.h i_iconv
+eval $inhdr
+
 : see if locale.h is available
 set locale.h i_locale
 eval $inhdr
@@ -13659,57 +13664,122 @@ eval $inhdr
 set poll.h i_poll
 eval $inhdr
 
-: get C preprocessor symbols handy
 echo " "
-$echo $n "Hmm... $c"
-echo $al | $tr ' ' $trnl >Cppsym.know
-$cat <<EOSS >Cppsym
+$echo "Guessing which symbols your C compiler and preprocessor define..." >&4 
+$cat <<'EOSH' > Cppsym.know
+a29k ABI64 aegis AES_SOURCE AIX AIX32 AIX370
+AIX41 AIX42 AIX43 AIX_SOURCE aixpc ALL_SOURCE
+alliant alpha am29000 AM29000 amiga AMIGAOS AMIX
+ansi ANSI_C_SOURCE apollo ardent atarist att386 att3b BeOS
+BIG_ENDIAN BIT_MSF bsd BSD bsd43 bsd4_2 bsd4_3 BSD4_3 bsd4_4
+BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES BSDCOMPAT bsdi
+bull c cadmus clipper CMU COFF COMPILER_VERSION
+concurrent convex cpu cray CRAY CRAYMPP ctix CX_UX
+CYGWIN DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO
+Dynix DynixPTX ELF encore EPI EXTENSIONS FILE_OFFSET_BITS
+FreeBSD GCC_NEW_VARARGS gcos gcx gimpel
+GNU_SOURCE GNUC GNUC_MINOR GO32 gould GOULD_PN
+H3050R H3050RX hbullx20 hcx host_mips
+hp200 hp300 hp700 HP700 hp800 hp9000
+hp9000s200 hp9000s300 hp9000s400 hp9000s500
+hp9000s700 hp9000s800 hp9k8 hp_osf hppa hpux HPUX_SOURCE
+i186 i286 i386 i486 i586 i686 i8086 i80960 i860 I960
+iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64
+INLINE_INTRINSICS INTRINSICS INT64 interdata is68k ksr1
+LANGUAGE_C LARGE_FILE_API LARGEFILE64_SOURCE
+LARGEFILE_SOURCE LFS64_LARGEFILE LFS_LARGEFILE
+Linux LITTLE_ENDIAN LONG64 LONG_DOUBLE LONG_LONG
+LONGDOUBLE LONGLONG LP64 luna luna88k Lynx
+M68000 m68k m88100 m88k M88KBCS_TARGET M_COFF
+M_I186 M_I286 M_I386 M_I8086 M_I86 M_I86SM M_SYS3
+M_SYS5 M_SYSIII M_SYSV M_UNIX M_XENIX MACH machine MachTen
+MATH_HAS_NO_SIDE_EFFECTS
+mc300 mc500 mc68000 mc68010 mc68020 mc68030 mc68040
+mc68060 mc68k mc68k32 mc700 mc88000 mc88100 merlin
+mert MiNT mips MIPS_FPSET MIPS_ISA MIPS_SIM MIPS_SZINT
+MIPS_SZLONG MIPS_SZPTR MIPSEB MIPSEL MODERN_C motorola
+mpeix MSDOS MTXINU MULTIMAX mvs MVS n16 ncl_el ncl_mr
+NetBSD news1500 news1700 news1800 news1900 news3700
+news700 news800 news900 NeXT NLS ns16000 ns32000
+ns32016 ns32332 ns32k nsc32000
+OCS88 OEMVS OpenBSD os OS2 OS390 osf OSF1 OSF_SOURCE
+pa_risc PA_RISC1_1 PA_RISC2_0 PARAGON parisc
+pc532 pdp11 PGC PIC plexus PORTAR posix
+POSIX1B_SOURCE POSIX2_SOURCE POSIX4_SOURCE
+POSIX_C_SOURCE POSIX_SOURCE POWER
+PROTOTYPES PWB pyr QNX R3000 REENTRANT RES Rhapsody RISC6000
+riscix riscos RT scs SCO sequent sgi SGI_SOURCE sinix
+SIZE_INT SIZE_LONG SIZE_PTR SOCKET_SOURCE SOCKETS_SOURCE
+sony sony_news sonyrisc sparc sparclite spectrum
+stardent stdc STDC_EXT stratos sun sun3 sun386
+Sun386i svr3 svr4 SVR4_2 SVR4_SOURCE svr5
+SX system SYSTYPE_BSD SYSTYPE_BSD43 SYSTYPE_BSD44
+SYSTYPE_SVR4 SYSTYPE_SVR5 SYSTYPE_SYSV SYSV SYSV3 SYSV4 SYSV5
+sysV68 sysV88 Tek4132 Tek4300 titan
+tower tower32 tower32_200 tower32_600 tower32_700
+tower32_800 tower32_850 tss
+u370 u3b u3b2 u3b20 u3b200 u3b20d u3b5
+ultrix UMAXV UnicomPBB UnicomPBD UNICOS UNICOSMK
+unix UNIX95 UNIX99 unixpc unos USGr4 USGr4_2
+Utek UTek UTS UWIN uxpm uxps vax venix VMESA vms xenix Xenix286
+XOPEN_SOURCE XOPEN_SOURCE_EXTENDED XPG2 XPG2_EXTENDED
+XPG3 XPG3_EXTENDED XPG4 XPG4_EXTENDED
+z8000
+EOSH
+# Maybe put other stuff here too.
+cat <<EOSH >>Cppsym.know
+$osname
+EOSH
+./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
+./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
+$cat Cppsym.a Cppsym.b | $tr ' ' $trnl | sort | uniq > Cppsym.know
+$rm -f Cppsym.a Cppsym.b
+cat <<EOSH > Cppsym
 $startsh
-case "\$1" in
--l) list=true
-	shift
-	;;
-esac
-unknown=''
-case "\$list\$#" in
-1|2)
-	for sym do
-		if $contains "^\$1$" Cppsym.true >/dev/null 2>&1; then
-			exit 0
-		elif $contains "^\$1$" Cppsym.know >/dev/null 2>&1; then
-			:
-		else
-			unknown="\$unknown \$sym"
-		fi
-	done
-	set X \$unknown
-	shift
-	;;
-esac
-case \$# in
-0) exit 1;;
-esac
-echo \$* | $tr ' ' '$trnl' | $sed -e 's/\(.*\)/\\
-#ifdef \1\\
-exit 0; _ _ _ _\1\\	 \1\\
-#endif\\
-/' >Cppsym\$\$
-echo "exit 1; _ _ _" >>Cppsym\$\$
-$cppstdin $cppminus <Cppsym\$\$ | $grep '^exit [01]; _ _'  >Cppsym2\$\$
-case "\$list" in
-true) $awk 'NF > 5 {print substr(\$6,2,100)}' <Cppsym2\$\$ ;;
-*)
-	sh Cppsym2\$\$
-	status=\$?
-	;;
-esac
-$rm -f Cppsym\$\$ Cppsym2\$\$
-exit \$status
-EOSS
+if $test \$# -gt 0; then
+    echo \$* | $tr " " "$trnl" | ./Cppsym.try > Cppsym.got
+    if $test -s Cppsym.got; then
+        $rm -f Cppsym.got
+        exit 0
+    fi
+    $rm -f Cppsym.got
+    exit 1
+else
+    $tr " " "$trnl" | ./Cppsym.try
+    exit 0
+fi
+EOSH
 chmod +x Cppsym
 $eunicefix Cppsym
-./Cppsym -l $al | $sort | $grep -v '^$' >Cppsym.true
-
+cat <<EOSH > Cppsym.try
+$startsh
+cat <<'EOCP' > try.c
+#include <stdio.h>
+int main() {
+EOCP
+$awk \\
+EOSH
+cat <<'EOSH' >> Cppsym.try
+'length($1) > 0 {
+    printf "#ifdef %s\n#if %s+0\nprintf(\"%s=%%ld\\n\", %s);\n#else\nprintf(\"%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef _%s\n#if _%s+0\nprintf(\"_%s=%%ld\\n\", _%s);\n#else\nprintf(\"_%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef __%s\n#if __%s+0\nprintf(\"__%s=%%ld\\n\", __%s);\n#else\nprintf(\"__%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef __%s__\n#if __%s__+0\nprintf(\"__%s__=%%ld\\n\", __%s__);\n#else\nprintf(\"__%s__\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+}'	 >> try.c
+echo '}' >> try.c
+EOSH
+cat <<EOSH >> Cppsym.try
+cc="$cc"
+optimize="$optimize"
+ccflags="$ccflags"
+ldflags="$ldflags"
+libs="$libs"
+exe_ext="$exe_ext"
+$cc $optimize $ccflags $ldflags -o try$exe_ext try.c $libs && ./try$exe_ext
+EOSH
+chmod +x Cppsym.try
+$eunicefix Cppsym.try
+./Cppsym < Cppsym.know > Cppsym.true
 : now check the C compiler for additional symbols
 postprocess_cc_v=''
 case "$osname" in
@@ -13741,7 +13811,8 @@ fi
 
 $awk '/\=/ { print $0; next }
 	{ print $0"=1" }' ccsym.raw >ccsym.list
-$awk '{ print $0"=1" }' Cppsym.true >ccsym.true
+$awk '/\=/ { print $0; next }
+	{ print $0"=1" }' Cppsym.true >ccsym.true
 $comm -13 ccsym.true ccsym.list >ccsym.own
 $comm -12 ccsym.true ccsym.list >ccsym.com
 $comm -23 ccsym.true ccsym.list >ccsym.cpp
@@ -14523,6 +14594,7 @@ d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
 d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
+d_iconv='$d_iconv'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64t='$d_int64t'
@@ -14559,6 +14631,7 @@ d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
+d_nv_preserves_uv='$d_nv_preserves_uv'
 d_off64_t='$d_off64_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'
@@ -14752,6 +14825,7 @@ i_fcntl='$i_fcntl'
 i_float='$i_float'
 i_gdbm='$i_gdbm'
 i_grp='$i_grp'
+i_iconv='$i_iconv'
 i_inttypes='$i_inttypes'
 i_limits='$i_limits'
 i_locale='$i_locale'
@@ -14813,6 +14887,7 @@ i_varhdr='$i_varhdr'
 i_vfork='$i_vfork'
 ignore_versioned_solibs='$ignore_versioned_solibs'
 inc_version_list='$inc_version_list'
+inc_version_list_init='$inc_version_list_init'
 incpath='$incpath'
 inews='$inews'
 installarchlib='$installarchlib'
@@ -14847,6 +14922,9 @@ libc='$libc'
 libperl='$libperl'
 libpth='$libpth'
 libs='$libs'
+libsdirs='$libsdirs'
+libsfiles='$libsfiles'
+libsfound='$libsfound'
 libswanted='$libswanted'
 line='$line'
 lint='$lint'

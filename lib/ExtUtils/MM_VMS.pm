@@ -13,7 +13,7 @@ require Exporter;
 use VMS::Filespec;
 use File::Basename;
 use File::Spec;
-use vars qw($Revision @ISA);
+our($Revision, @ISA);
 $Revision = '5.56 (27-Apr-1999)';
 
 @ISA = qw( File::Spec );

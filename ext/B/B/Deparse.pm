@@ -1194,7 +1194,7 @@ BEGIN {
 sub deparse_binop_left {
     my $self = shift;
     my($op, $left, $prec) = @_;
-    if ($left{assoc_class($op)}
+    if ($left{assoc_class($op)} && $left{assoc_class($left)}
 	and $left{assoc_class($op)} == $left{assoc_class($left)})
     {
 	return $self->deparse($left, $prec - .00001);
@@ -1227,7 +1227,7 @@ BEGIN {
 sub deparse_binop_right {
     my $self = shift;
     my($op, $right, $prec) = @_;
-    if ($right{assoc_class($op)}
+    if ($right{assoc_class($op)} && $right{assoc_class($right)}
 	and $right{assoc_class($op)} == $right{assoc_class($right)})
     {
 	return $self->deparse($right, $prec - .00001);

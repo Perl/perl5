@@ -423,19 +423,19 @@ sub timestr {
     my @t = @$tr;
     warn "bad time value (@t)" unless @t==6;
     my($r, $pu, $ps, $cu, $cs, $n) = @t;
-    my($pt, $ct, $t) = ($tr->cpu_p, $tr->cpu_c, $tr->cpu_a);
+    my($pt, $ct, $tt) = ($tr->cpu_p, $tr->cpu_c, $tr->cpu_a);
     $f = $defaultfmt unless defined $f;
     # format a time in the required style, other formats may be added here
     $style ||= $defaultstyle;
     $style = ($ct>0) ? 'all' : 'noc' if $style eq 'auto';
     my $s = "@t $style"; # default for unknown style
     $s=sprintf("%2d wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU)",
-			    @t,$t) if $style eq 'all';
+			    $r,$pu,$ps,$cu,$cs,$tt) if $style eq 'all';
     $s=sprintf("%2d wallclock secs (%$f usr + %$f sys = %$f CPU)",
 			    $r,$pu,$ps,$pt) if $style eq 'noc';
     $s=sprintf("%2d wallclock secs (%$f cusr + %$f csys = %$f CPU)",
 			    $r,$cu,$cs,$ct) if $style eq 'nop';
-    $s .= sprintf(" @ %$f/s (n=$n)", $n / ( $pu + $ps )) if $n;
+    $s .= sprintf(" @ %$f/s (n=$n)", $n / ( $pu + $ps )) if $n && $pu+$ps;
     $s;
 }
 

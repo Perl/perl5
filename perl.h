@@ -1,6 +1,6 @@
 /*    perl.h
  *
- *    Copyright (c) 1987-1997, Larry Wall
+ *    Copyright (c) 1987-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -37,6 +37,12 @@
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
+#ifdef USE_ITHREADS
+#  if !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
+#    define MULTIPLICITY
+#  endif
+#endif
+
 #ifdef USE_THREADS
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -69,10 +75,6 @@
 #  ifndef PERL_IMPLICIT_SYS
 #    define PERL_IMPLICIT_SYS
 #  endif
-#endif
-
-#if defined(USE_ITHREADS) && !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
-#  include "error: USE_ITHREADS must be built with MULTIPLICITY"
 #endif
 
 #ifdef PERL_OBJECT
@@ -189,6 +191,10 @@ struct perl_thread;
 #  define dTHX		dTHXa(PERL_GET_THX)
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
+#  define pTHX_1	2	
+#  define pTHX_2	3
+#  define pTHX_3	4
+#  define pTHX_4	5
 #endif
 
 #define STATIC static
@@ -221,6 +227,10 @@ struct perl_thread;
 #  define aTHX_
 #  define dTHXa(a)	dNOOP
 #  define dTHX		dNOOP
+#  define pTHX_1	1	
+#  define pTHX_2	2
+#  define pTHX_3	3
+#  define pTHX_4	4
 #endif
 
 #ifndef pTHXo
@@ -1674,6 +1684,14 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+#ifndef SVf
+#  ifdef CHECK_FORMAT
+#    define SVf "p"
+#  else
+#    define SVf "_"
+#  endif 
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compmiler.  Sigh.
@@ -1694,7 +1712,7 @@ typedef pthread_key_t	perl_key;
 #   endif
 #endif
 
-#if defined(CYGWIN)
+#if defined(__CYGWIN__)
 /* USEMYBINMODE
  *   This symbol, if defined, indicates that the program should
  *   use the routine my_binmode(FILE *fp, char iotype) to insure
@@ -2024,7 +2042,7 @@ char *crypt (const char*, const char*);
 #    ifndef getenv
 char *getenv (const char*);
 #    endif /* !getenv */
-#ifndef EPOC
+#if !defined(EPOC) && !(defined(__hpux) && defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64)
 Off_t lseek (int,Off_t,int);
 #endif
 #  endif /* !DONT_DECLARE_STD */
@@ -2447,8 +2465,8 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_INTEGER		0x00000001
 #define HINT_STRICT_REFS	0x00000002
 /* #define HINT_notused4	0x00000004 */
-#define HINT_UTF8		0x00000008
-#define HINT_BYTE		0x00000010
+#define HINT_BYTE		0x00000008
+/* #define HINT_notused10	0x00000010 */
 				/* Note: 20,40,80 used for NATIVE_HINTS */
 
 #define HINT_BLOCK_SCOPE	0x00000100
@@ -2467,6 +2485,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_RE_EVAL		0x00200000
 
 #define HINT_FILETEST_ACCESS	0x00400000
+#define HINT_UTF8		0x00800000
 
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))
@@ -2931,16 +2950,22 @@ typedef struct am_table_short AMTS;
 #   endif
 #endif /* _FASTMATH */
 
-#define PERLDB_ALL	0x3f		/* No _NONAME, _GOTO */
-#define PERLDBf_SUB	0x01		/* Debug sub enter/exit. */
-#define PERLDBf_LINE	0x02		/* Keep line #. */
-#define PERLDBf_NOOPT	0x04		/* Switch off optimizations. */
-#define PERLDBf_INTER	0x08		/* Preserve more data for
-					   later inspections.  */
-#define PERLDBf_SUBLINE	0x10		/* Keep subr source lines. */
-#define PERLDBf_SINGLE	0x20		/* Start with single-step on. */
-#define PERLDBf_NONAME	0x40		/* For _SUB: no name of the subr. */
-#define PERLDBf_GOTO	0x80		/* Report goto: call DB::goto. */
+#define PERLDB_ALL		(PERLDBf_SUB	| PERLDBf_LINE	|	\
+				 PERLDBf_NOOPT	| PERLDBf_INTER	|	\
+				 PERLDBf_SUBLINE| PERLDBf_SINGLE|	\
+				 PERLDBf_NAMEEVAL| PERLDBf_NAMEANON)
+					/* No _NONAME, _GOTO */
+#define PERLDBf_SUB		0x01	/* Debug sub enter/exit */
+#define PERLDBf_LINE		0x02	/* Keep line # */
+#define PERLDBf_NOOPT		0x04	/* Switch off optimizations */
+#define PERLDBf_INTER		0x08	/* Preserve more data for
+					   later inspections  */
+#define PERLDBf_SUBLINE		0x10	/* Keep subr source lines */
+#define PERLDBf_SINGLE		0x20	/* Start with single-step on */
+#define PERLDBf_NONAME		0x40	/* For _SUB: no name of the subr */
+#define PERLDBf_GOTO		0x80	/* Report goto: call DB::goto */
+#define PERLDBf_NAMEEVAL	0x100	/* Informative names for evals */
+#define PERLDBf_NAMEANON	0x200	/* Informative names for anon subs */
 
 #define PERLDB_SUB	(PL_perldb && (PL_perldb & PERLDBf_SUB))
 #define PERLDB_LINE	(PL_perldb && (PL_perldb & PERLDBf_LINE))
@@ -2950,6 +2975,8 @@ typedef struct am_table_short AMTS;
 #define PERLDB_SINGLE	(PL_perldb && (PL_perldb & PERLDBf_SINGLE))
 #define PERLDB_SUB_NN	(PL_perldb && (PL_perldb & (PERLDBf_NONAME)))
 #define PERLDB_GOTO	(PL_perldb && (PL_perldb & PERLDBf_GOTO))
+#define PERLDB_NAMEEVAL	(PL_perldb && (PL_perldb & PERLDBf_NAMEEVAL))
+#define PERLDB_NAMEANON	(PL_perldb && (PL_perldb & PERLDBf_NAMEANON))
 
 
 #ifdef USE_LOCALE_NUMERIC
@@ -2985,7 +3012,7 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(Atol) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG)
+#if !defined(Atol) && defined(HAS_LONG_LONG)
 #   if !defined(Atol) && defined(HAS_STRTOLL)
 #       define Atol(s) strtoll(s, (char**)NULL, 10)
 #   endif
@@ -2998,8 +3025,7 @@ typedef struct am_table_short AMTS;
 #   define Atol atol /* we assume atol being available anywhere */
 #endif
 
-#if !defined(Strtoul) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) \
-	&& defined(HAS_STRTOULL)
+#if !defined(Strtoul) && defined(HAS_LONG_LONG) && defined(HAS_STRTOULL)
 #   define Strtoul strtoull
 #endif
 /* is there atouq() anywhere? */
@@ -3141,5 +3167,13 @@ typedef struct am_table_short AMTS;
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
 #undef PERL_PATCHLEVEL_H_IMPLICIT
+
+/* Mention
+   
+   NV_PRESERVES_UV
+   HAS_ICONV
+   I_ICONV
+
+   so that Configure picks them up. */
 
 #endif /* Include guard */

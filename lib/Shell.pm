@@ -1,5 +1,6 @@
 package Shell;
-use vars qw($capture_stderr $VERSION);
+use 5.005_64;
+our($capture_stderr, $VERSION);
 
 $VERSION = '0.2';
 
@@ -71,7 +72,7 @@ AUTOLOAD {
 		    for (\@arr) {
 			s/"/\\\\"/g;
 			s/\\\\\\\\"/\\\\\\\\"""/g;
-			\$_ = qq["\$_"] if /\s/;
+			\$_ = qq["\$_"] if /\\s/;
 		    }
 		}
 		else {

@@ -199,6 +199,7 @@
 #define PL_bitcount		(PERL_GET_INTERP->Ibitcount)
 #define PL_bufend		(PERL_GET_INTERP->Ibufend)
 #define PL_bufptr		(PERL_GET_INTERP->Ibufptr)
+#define PL_checkav		(PERL_GET_INTERP->Icheckav)
 #define PL_collation_ix		(PERL_GET_INTERP->Icollation_ix)
 #define PL_collation_name	(PERL_GET_INTERP->Icollation_name)
 #define PL_collation_standard	(PERL_GET_INTERP->Icollation_standard)
@@ -367,7 +368,6 @@
 #define PL_statusvalue_vms	(PERL_GET_INTERP->Istatusvalue_vms)
 #define PL_stderrgv		(PERL_GET_INTERP->Istderrgv)
 #define PL_stdingv		(PERL_GET_INTERP->Istdingv)
-#define PL_stopav		(PERL_GET_INTERP->Istopav)
 #define PL_strtab		(PERL_GET_INTERP->Istrtab)
 #define PL_strtab_mutex		(PERL_GET_INTERP->Istrtab_mutex)
 #define PL_sub_generation	(PERL_GET_INTERP->Isub_generation)
@@ -412,6 +412,7 @@
 #define PL_utf8_xdigit		(PERL_GET_INTERP->Iutf8_xdigit)
 #define PL_uudmap		(PERL_GET_INTERP->Iuudmap)
 #define PL_warnhook		(PERL_GET_INTERP->Iwarnhook)
+#define PL_widesyscalls		(PERL_GET_INTERP->Iwidesyscalls)
 #define PL_xiv_arenaroot	(PERL_GET_INTERP->Ixiv_arenaroot)
 #define PL_xiv_root		(PERL_GET_INTERP->Ixiv_root)
 #define PL_xnv_root		(PERL_GET_INTERP->Ixnv_root)
@@ -463,6 +464,7 @@
 #define PL_bitcount		(vTHX->Ibitcount)
 #define PL_bufend		(vTHX->Ibufend)
 #define PL_bufptr		(vTHX->Ibufptr)
+#define PL_checkav		(vTHX->Icheckav)
 #define PL_collation_ix		(vTHX->Icollation_ix)
 #define PL_collation_name	(vTHX->Icollation_name)
 #define PL_collation_standard	(vTHX->Icollation_standard)
@@ -631,7 +633,6 @@
 #define PL_statusvalue_vms	(vTHX->Istatusvalue_vms)
 #define PL_stderrgv		(vTHX->Istderrgv)
 #define PL_stdingv		(vTHX->Istdingv)
-#define PL_stopav		(vTHX->Istopav)
 #define PL_strtab		(vTHX->Istrtab)
 #define PL_strtab_mutex		(vTHX->Istrtab_mutex)
 #define PL_sub_generation	(vTHX->Isub_generation)
@@ -676,6 +677,7 @@
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
 #define PL_uudmap		(vTHX->Iuudmap)
 #define PL_warnhook		(vTHX->Iwarnhook)
+#define PL_widesyscalls		(vTHX->Iwidesyscalls)
 #define PL_xiv_arenaroot	(vTHX->Ixiv_arenaroot)
 #define PL_xiv_root		(vTHX->Ixiv_root)
 #define PL_xnv_root		(vTHX->Ixnv_root)
@@ -864,6 +866,7 @@
 #define PL_bitcount		(aTHXo->interp.Ibitcount)
 #define PL_bufend		(aTHXo->interp.Ibufend)
 #define PL_bufptr		(aTHXo->interp.Ibufptr)
+#define PL_checkav		(aTHXo->interp.Icheckav)
 #define PL_collation_ix		(aTHXo->interp.Icollation_ix)
 #define PL_collation_name	(aTHXo->interp.Icollation_name)
 #define PL_collation_standard	(aTHXo->interp.Icollation_standard)
@@ -1032,7 +1035,6 @@
 #define PL_statusvalue_vms	(aTHXo->interp.Istatusvalue_vms)
 #define PL_stderrgv		(aTHXo->interp.Istderrgv)
 #define PL_stdingv		(aTHXo->interp.Istdingv)
-#define PL_stopav		(aTHXo->interp.Istopav)
 #define PL_strtab		(aTHXo->interp.Istrtab)
 #define PL_strtab_mutex		(aTHXo->interp.Istrtab_mutex)
 #define PL_sub_generation	(aTHXo->interp.Isub_generation)
@@ -1077,6 +1079,7 @@
 #define PL_utf8_xdigit		(aTHXo->interp.Iutf8_xdigit)
 #define PL_uudmap		(aTHXo->interp.Iuudmap)
 #define PL_warnhook		(aTHXo->interp.Iwarnhook)
+#define PL_widesyscalls		(aTHXo->interp.Iwidesyscalls)
 #define PL_xiv_arenaroot	(aTHXo->interp.Ixiv_arenaroot)
 #define PL_xiv_root		(aTHXo->interp.Ixiv_root)
 #define PL_xnv_root		(aTHXo->interp.Ixnv_root)
@@ -1129,6 +1132,7 @@
 #define PL_Ibitcount		PL_bitcount
 #define PL_Ibufend		PL_bufend
 #define PL_Ibufptr		PL_bufptr
+#define PL_Icheckav		PL_checkav
 #define PL_Icollation_ix	PL_collation_ix
 #define PL_Icollation_name	PL_collation_name
 #define PL_Icollation_standard	PL_collation_standard
@@ -1297,7 +1301,6 @@
 #define PL_Istatusvalue_vms	PL_statusvalue_vms
 #define PL_Istderrgv		PL_stderrgv
 #define PL_Istdingv		PL_stdingv
-#define PL_Istopav		PL_stopav
 #define PL_Istrtab		PL_strtab
 #define PL_Istrtab_mutex	PL_strtab_mutex
 #define PL_Isub_generation	PL_sub_generation
@@ -1342,6 +1345,7 @@
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
 #define PL_Iuudmap		PL_uudmap
 #define PL_Iwarnhook		PL_warnhook
+#define PL_Iwidesyscalls	PL_widesyscalls
 #define PL_Ixiv_arenaroot	PL_xiv_arenaroot
 #define PL_Ixiv_root		PL_xiv_root
 #define PL_Ixnv_root		PL_xnv_root

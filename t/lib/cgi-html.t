@@ -69,12 +69,12 @@ test(15,start_html(-Title=>'The world of foo') ."\n" eq <<END,"start_html()");
 END
     ;
 test(16,($cookie=cookie(-name=>'fred',-value=>['chocolate','chip'],-path=>'/')) eq 
-     'fred=chocolate&chip; domain=localhost; path=/',"cookie()");
+     'fred=chocolate&chip; path=/',"cookie()");
 if (!$Is_EBCDIC) {
-test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; domain=localhost; path=/\015\012Date:.*\015\012Content-Type: text/html\015\012\015\012!s,
+test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; path=/\015\012Date:.*\015\012Content-Type: text/html\015\012\015\012!s,
      "header(-cookie)");
 } else {
-test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; domain=localhost; path=/\r\nDate:.*\r\nContent-Type: text/html\r\n\r\n!s,
+test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; path=/\r\nDate:.*\r\nContent-Type: text/html\r\n\r\n!s,
      "header(-cookie)");
 }
 test(18,start_h3 eq '<H3>');

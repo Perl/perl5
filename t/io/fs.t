@@ -16,7 +16,7 @@ if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
     $Is_Dosish = '' if Win32::FsType() eq 'NTFS';
 }
 
-print "1..28\n";
+print "1..29\n";
 
 $wd = (($^O eq 'MSWin32') ? `cd` : `pwd`);
 chop($wd);
@@ -152,11 +152,12 @@ else {
   truncate "Iofs.tmp", 0;
   if (-z "Iofs.tmp") {print "ok 24\n"} else {print "not ok 24\n"}
   open(FH, ">Iofs.tmp") or die "Can't create Iofs.tmp";
+  binmode FH;
   { select FH; $| = 1; select STDOUT }
   {
     use strict;
-    print FH "helloworld\n";
-    truncate FH, 5;
+    print FH "x\n" x 200;
+    truncate(FH, 200) or die "Can't truncate FH: $!";
   }
   if ($^O eq 'dos'
 	# Not needed on HPFS, but needed on HPFS386 ?!
@@ -164,7 +165,7 @@ else {
   {
       close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
   }
-  if (-s "Iofs.tmp" == 5) {print "ok 25\n"} else {print "not ok 25\n"}
+  if (-s "Iofs.tmp" == 200) {print "ok 25\n"} else {print "not ok 25\n"}
   truncate FH, 0;
   if ($^O eq 'dos'
 	# Not needed on HPFS, but needed on HPFS386 ?!
@@ -176,10 +177,20 @@ else {
   close FH;
 }
 
+# check if rename() can be used to just change case of filename
+chdir './tmp';
+open(fh,'>x') || die "Can't create x";
+close(fh);
+rename('x', 'X');
+print 'not ' unless -e 'X';
+print "ok 27\n";
+unlink 'X';
+chdir $wd || die "Can't cd back to $wd";
+
 # check if rename() works on directories
 rename 'tmp', 'tmp1' or print "not ";
-print "ok 27\n";
--d 'tmp1' or print "not ";
 print "ok 28\n";
+-d 'tmp1' or print "not ";
+print "ok 29\n";
 
 END { rmdir 'tmp1'; unlink "Iofs.tmp"; }

@@ -2,8 +2,8 @@ package File::Glob;
 
 use strict;
 use Carp;
-use vars qw($VERSION @ISA @EXPORT_OK @EXPORT_FAIL
-            %EXPORT_TAGS $AUTOLOAD $DEFAULT_FLAGS);
+our($VERSION, @ISA, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS,
+    $AUTOLOAD, $DEFAULT_FLAGS);
 
 require Exporter;
 use XSLoader ();
@@ -238,7 +238,7 @@ The FreeBSD extensions to the POSIX standard are the following flags:
 
 =item C<GLOB_BRACE>
 
-Pre-process the string to expand C<{pat,pat,...} strings like csh(1).
+Pre-process the string to expand C<{pat,pat,...}> strings like csh(1).
 The pattern '{}' is left unexpanded for historical reasons (and csh(1)
 does the same thing to ease typing of find(1) patterns).
 
@@ -330,6 +330,8 @@ All other backslashes are passed through unchanged.
 Win32 users should use the real slash.  If you really want to use
 backslashes, consider using Sarathy's File::DosGlob, which comes with
 the standard Perl distribution.
+
+=back
 
 =head1 AUTHOR
 

@@ -1,6 +1,6 @@
 /*    av.h
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -44,6 +44,16 @@ struct xpvav {
 
 /* XXX this is not used anywhere */
 #define AVf_REUSED 4	/* got undeffed--don't turn old memory into SVs now */
+
+/*
+=for apidoc AmU||Nullav
+Null AV pointer.
+
+=for apidoc Am|int|AvFILL|AV* av
+Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
+
+=cut
+*/
 
 #define Nullav Null(AV*)
 

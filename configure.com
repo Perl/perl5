@@ -1876,11 +1876,13 @@ $ echo ""
 $ echo "It's time to specify which modules you want to build into
 $ echo "perl. Most of these are standard and should be chosen, though
 $ echo "you might, for example, want to build GDBM_File instead of
-$ echo "SDBM_File if you have the GDBM library built on your machine
+$ echo "SDBM_File if you have the GDBM library built on your machine.
+$ echo "Whatever you do, make sure the re module is first or things will
+$ echo "break badly"
 $ echo "
 $ echo "Which modules do you want to build into perl?"
 $! dflt = "Fcntl Errno File::Glob IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
-$ dflt = "Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
+$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File"
 $ if Using_Dec_C.eqs."Yes"
 $ THEN
 $   dflt = dflt + " POSIX"

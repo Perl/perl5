@@ -16,7 +16,7 @@ WriteMakefile(
 	VERSION_FROM	=> 'DB_File.pm',
 	OBJECT		=> 'version$(OBJ_EXT) DB_File$(OBJ_EXT)',
 	XSPROTOARG	=> '-noprototypes',
-	DEFINE		=> "$OS2",
+	DEFINE		=> $OS2 || "",
 	);
 
 sub MY::postamble {

@@ -712,6 +712,7 @@
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
 #define wait4pid		Perl_wait4pid
+#define report_closed_fh	Perl_report_closed_fh
 #define report_uninit		Perl_report_uninit
 #define warn			Perl_warn
 #define vwarn			Perl_vwarn
@@ -857,6 +858,7 @@
 #define too_many_arguments	S_too_many_arguments
 #define op_clear		S_op_clear
 #define null			S_null
+#define pad_addlex		S_pad_addlex
 #define pad_findlex		S_pad_findlex
 #define newDEFSVOP		S_newDEFSVOP
 #define new_logop		S_new_logop
@@ -2129,6 +2131,7 @@
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
+#define report_closed_fh(a,b,c,d)	Perl_report_closed_fh(aTHX_ a,b,c,d)
 #define report_uninit()		Perl_report_uninit(aTHX)
 #define vwarn(a,b)		Perl_vwarn(aTHX_ a,b)
 #define vwarner(a,b,c)		Perl_vwarner(aTHX_ a,b,c)
@@ -2268,6 +2271,7 @@
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
 #define op_clear(a)		S_op_clear(aTHX_ a)
 #define null(a)			S_null(aTHX_ a)
+#define pad_addlex(a)		S_pad_addlex(aTHX_ a)
 #define pad_findlex(a,b,c,d,e,f,g)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g)
 #define newDEFSVOP()		S_newDEFSVOP(aTHX)
 #define new_logop(a,b,c,d)	S_new_logop(aTHX_ a,b,c,d)
@@ -4172,6 +4176,8 @@
 #define vivify_ref		Perl_vivify_ref
 #define Perl_wait4pid		CPerlObj::Perl_wait4pid
 #define wait4pid		Perl_wait4pid
+#define Perl_report_closed_fh	CPerlObj::Perl_report_closed_fh
+#define report_closed_fh	Perl_report_closed_fh
 #define Perl_report_uninit	CPerlObj::Perl_report_uninit
 #define report_uninit		Perl_report_uninit
 #define Perl_warn		CPerlObj::Perl_warn
@@ -4435,6 +4441,8 @@
 #define op_clear		S_op_clear
 #define S_null			CPerlObj::S_null
 #define null			S_null
+#define S_pad_addlex		CPerlObj::S_pad_addlex
+#define pad_addlex		S_pad_addlex
 #define S_pad_findlex		CPerlObj::S_pad_findlex
 #define pad_findlex		S_pad_findlex
 #define S_newDEFSVOP		CPerlObj::S_newDEFSVOP

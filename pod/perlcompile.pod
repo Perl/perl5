@@ -409,7 +409,7 @@ formats are defined and used within a program and the modules it
 loads.  See L</"The Cross Referencing Back End"> for details about
 usage.
 
-=cut
+=back
 
 =head1 KNOWN PROBLEMS
 

@@ -91,16 +91,15 @@ Charles Bailey <F<bailey@newman.upenn.edu>>
 
 =cut
 
+use 5.005_64;
 use Carp;
 use File::Basename ();
-use DirHandle ();
 use Exporter ();
 use strict;
 
-use vars qw( $VERSION @ISA @EXPORT );
-$VERSION = "1.0402";
-@ISA = qw( Exporter );
-@EXPORT = qw( mkpath rmtree );
+our $VERSION = "1.0403";
+our @ISA = qw( Exporter );
+our @EXPORT = qw( mkpath rmtree );
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -170,10 +169,14 @@ sub rmtree {
 	      or carp "Can't make directory $root read+writeable: $!"
 		unless $safe;
 
-	    my $d = DirHandle->new($root)
-	      or carp "Can't read $root: $!";
-	    @files = $d->read;
-	    $d->close;
+	    if (opendir my $d, $root) {
+		@files = readdir $d;
+		closedir $d;
+	    }
+	    else {
+	        carp "Can't read $root: $!";
+		@files = ();
+	    }
 
 	    # Deleting large numbers of files from VMS Files-11 filesystems
 	    # is faster if done in reverse ASCIIbetical order 

@@ -81,7 +81,6 @@ sub catfile {
 }
 
 sub path {
-    local $^W = 1;
     my $path = $ENV{'PATH'} || $ENV{'Path'} || $ENV{'path'};
     my @path = split(';',$path);
     foreach (@path) { $_ = '.' if $_ eq '' }
@@ -309,14 +308,18 @@ sub abs2rel {
     $path_directories = CORE::join( '\\', @pathchunks );
     $base_directories = CORE::join( '\\', @basechunks );
 
-    # $base now contains the directories the resulting relative path 
-    # must ascend out of before it can descend to $path_directory.  So, 
+    # $base_directories now contains the directories the resulting relative
+    # path must ascend out of before it can descend to $path_directory.  So, 
     # replace all names with $parentDir
-    $base_directories =~ s|[^/]+|..|g ;
+
+    #FA Need to replace between backslashes...
+    $base_directories =~ s|[^\\]+|..|g ;
 
     # Glue the two together, using a separator if necessary, and preventing an
     # empty result.
-    if ( $path ne '' && $base ne '' ) {
+
+    #FA Must check that new directories are not empty.
+    if ( $path_directories ne '' && $base_directories ne '' ) {
         $path_directories = "$base_directories\\$path_directories" ;
     } else {
         $path_directories = "$base_directories$path_directories" ;

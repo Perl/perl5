@@ -123,15 +123,18 @@ struct utsname {
 #define PERL_SOCK_SYSREAD_IS_RECV
 #define PERL_SOCK_SYSWRITE_IS_SEND
 
+#define PERL_NO_FORCE_LINK		/* no need for PL_force_link_funcs */
 
 /* if USE_WIN32_RTL_ENV is not defined, Perl uses direct Win32 calls
  * to read the environment, bypassing the runtime's (usually broken)
  * facilities for accessing the same.  See note in util.c/my_setenv(). */
 /*#define USE_WIN32_RTL_ENV */
 
-/* Define USE_FIXED_OSFHANDLE to fix VC's _open_osfhandle() on W95.
- * Can only enable it if not using the DLL CRT (it doesn't expose internals) */
-#if defined(_MSC_VER) && !defined(_DLL) && defined(_M_IX86)
+/* Define USE_FIXED_OSFHANDLE to fix MSVCRT's _open_osfhandle() on W95.
+   It now uses some black magic to work seamlessly with the DLL CRT and
+   works with MSVC++ 4.0+ or GCC/Mingw32
+	-- BKS 1-24-2000 */
+#if (defined(_M_IX86) && _MSC_VER >= 1000) || defined(__MINGW32__)
 #define USE_FIXED_OSFHANDLE
 #endif
 
@@ -160,6 +163,7 @@ struct utsname {
 #define _access access
 #define _chdir chdir
 #define _getpid getpid
+#define wcsicmp _wcsicmp
 #include <sys/types.h>
 
 #ifndef DllMain
@@ -229,7 +233,7 @@ typedef long		gid_t;
 /* compatibility stuff for other compilers goes here */
 
 
-#if !defined(PERL_OBJECT) && defined(PERL_MEMBER_PTR_SIZE)
+#if !defined(PERL_OBJECT) && defined(PERL_CAPI) && defined(PERL_MEMBER_PTR_SIZE)
 #  define STRUCT_MGVTBL_DEFINITION \
 struct mgvtbl {								\
     union {								\
@@ -265,7 +269,7 @@ struct mgvtbl {								\
     U8		op_flags;						\
     U8		op_private;
 
-#endif /* !PERL_OBJECT && PERL_MEMBER_PTR_SIZE */
+#endif /* !PERL_OBJECT && PERL_CAPI && PERL_MEMBER_PTR_SIZE */
 
 
 START_EXTERN_C
@@ -418,13 +422,17 @@ struct interp_intern {
 /* Use CP_ACP when mode is ANSI */
 /* Use CP_UTF8 when mode is UTF8 */
 
-#define A2WHELPER(lpa, lpw, nBytes)\
-    lpw[0] = 0, MultiByteToWideChar((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpa, -1, lpw, (nBytes/sizeof(WCHAR)))
+#define A2WHELPER_LEN(lpa, alen, lpw, nBytes)\
+    (lpw[0] = 0, MultiByteToWideChar((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
+				    lpa, alen, lpw, (nBytes/sizeof(WCHAR))))
+#define A2WHELPER(lpa, lpw, nBytes)	A2WHELPER_LEN(lpa, -1, lpw, nBytes)
 
-#define W2AHELPER(lpw, lpa, nChars)\
-    lpa[0] = '\0', WideCharToMultiByte((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpw, -1, (LPSTR)lpa, nChars, NULL, NULL)
+#define W2AHELPER_LEN(lpw, wlen, lpa, nChars)\
+    (lpa[0] = '\0', WideCharToMultiByte((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
+				       lpw, wlen, (LPSTR)lpa, nChars,NULL,NULL))
+#define W2AHELPER(lpw, lpa, nChars)	W2AHELPER_LEN(lpw, -1, lpa, nChars)
 
-#define USING_WIDE()	(PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
+#define USING_WIDE() (PL_widesyscalls && PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
 
 #ifdef USE_ITHREADS
 #  define PERL_WAIT_FOR_CHILDREN \

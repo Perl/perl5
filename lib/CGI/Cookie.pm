@@ -13,9 +13,9 @@ package CGI::Cookie;
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-$CGI::Cookie::VERSION='1.10';
+$CGI::Cookie::VERSION='1.12';
 
-use CGI;
+use CGI qw(-no_debug);
 use overload '""' => \&as_string,
     'cmp' => \&compare,
     'fallback'=>1;
@@ -97,10 +97,12 @@ sub new {
 	},$class;
 
     # IE requires the path and domain to be present for some reason.
-    $path   ||= CGI::url(-absolute=>1);
-    $domain ||= CGI::virtual_host();
+    $path   = CGI::url(-absolute=>1) unless defined $path;
+# however, this breaks networks which use host tables without fully qualified
+# names, so we comment it out.
+#    $domain = CGI::virtual_host()    unless defined $domain;
 
-    $self->path($path) if defined $path;
+    $self->path($path)     if defined $path;
     $self->domain($domain) if defined $domain;
     $self->secure($secure) if defined $secure;
     $self->expires($expires) if defined $expires;
@@ -250,8 +252,8 @@ against your script's URL before returning the cookie.  For example,
 if you specify the path "/cgi-bin", then the cookie will be returned
 to each of the scripts "/cgi-bin/tally.pl", "/cgi-bin/order.pl", and
 "/cgi-bin/customer_service/complain.pl", but not to the script
-"/cgi-private/site_admin.pl".  By default, the path is set to the
-directory that contains your script.
+"/cgi-private/site_admin.pl".  By default, the path is set to your
+script, so that only it will receive the cookie.
 
 =item B<4. secure flag>
 

@@ -1,9 +1,53 @@
 #ifndef _INC_PERL_XSUB_H
 #define _INC_PERL_XSUB_H 1
 
+/* first, some documentation for xsubpp-generated items */
+
+/*
+=for apidoc Amn|char*|CLASS
+Variable which is setup by C<xsubpp> to indicate the 
+class name for a C++ XS constructor.  This is always a C<char*>.  See C<THIS>.
+
+=for apidoc Amn|(whatever)|RETVAL
+Variable which is setup by C<xsubpp> to hold the return value for an 
+XSUB. This is always the proper type for the XSUB. See 
+L<perlxs/"The RETVAL Variable">.
+
+=for apidoc Amn|(whatever)|THIS
+Variable which is setup by C<xsubpp> to designate the object in a C++ 
+XSUB.  This is always the proper type for the C++ object.  See C<CLASS> and 
+L<perlxs/"Using XS With C++">.
+
+=for apidoc Amn|I32|items
+Variable which is setup by C<xsubpp> to indicate the number of 
+items on the stack.  See L<perlxs/"Variable-length Parameter Lists">.
+
+=for apidoc Amn|I32|ix
+Variable which is setup by C<xsubpp> to indicate which of an 
+XSUB's aliases was used to invoke it.  See L<perlxs/"The ALIAS: Keyword">.
+
+=for apidoc Am|SV*|ST|int ix
+Used to access elements on the XSUB's stack.
+
+=for apidoc AmU||XS
+Macro to declare an XSUB and its C parameter list.  This is handled by
+C<xsubpp>.
+
+=for apidoc Ams||dXSARGS
+Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.  This
+is usually handled automatically by C<xsubpp>.  Declares the C<items>
+variable to indicate the number of items on the stack.
+
+=for apidoc Ams||dXSI32
+Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
+handled automatically by C<xsubpp>.
+
+=cut
+*/
+
 #define ST(off) PL_stack_base[ax + (off)]
 
-#if defined(CYGWIN) && defined(USE_DYNAMIC_LOADING)
+#if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
 #  define XS(name) __declspec(dllexport) void name(pTHXo_ CV* cv)
 #else
 #  define XS(name) void name(pTHXo_ CV* cv)
@@ -34,14 +78,75 @@
 #define XSINTERFACE_FUNC_SET(cv,f)	\
 		CvXSUBANY(cv).any_dptr = (void (*) (pTHXo_ void*))(f)
 
-#define XSRETURN(off)					\
-    STMT_START {					\
-	PL_stack_sp = PL_stack_base + ax + ((off) - 1);	\
-	return;						\
-    } STMT_END
-
 /* Simple macros to put new mortal values onto the stack.   */
 /* Typically used to return values from XS functions.       */
+
+/*
+=for apidoc Am|void|XST_mIV|int pos|IV iv
+Place an integer into the specified position C<pos> on the stack.  The
+value is stored in a new mortal SV.
+
+=for apidoc Am|void|XST_mNV|int pos|NV nv
+Place a double into the specified position C<pos> on the stack.  The value
+is stored in a new mortal SV.
+
+=for apidoc Am|void|XST_mPV|int pos|char* str
+Place a copy of a string into the specified position C<pos> on the stack. 
+The value is stored in a new mortal SV.
+
+=for apidoc Am|void|XST_mNO|int pos
+Place C<&PL_sv_no> into the specified position C<pos> on the
+stack.
+
+=for apidoc Am|void|XST_mYES|int pos
+Place C<&PL_sv_yes> into the specified position C<pos> on the
+stack.
+
+=for apidoc Am|void|XST_mUNDEF|int pos
+Place C<&PL_sv_undef> into the specified position C<pos> on the
+stack.
+
+=for apidoc Am|void|XSRETURN|int nitems
+Return from XSUB, indicating number of items on the stack.  This is usually
+handled by C<xsubpp>.
+
+=for apidoc Am|void|XSRETURN_IV|IV iv
+Return an integer from an XSUB immediately.  Uses C<XST_mIV>.
+
+=for apidoc Am|void|XSRETURN_NV|NV nv
+Return an double from an XSUB immediately.  Uses C<XST_mNV>.
+
+=for apidoc Am|void|XSRETURN_PV|char* str
+Return a copy of a string from an XSUB immediately.  Uses C<XST_mPV>.
+
+=for apidoc Ams||XSRETURN_NO
+Return C<&PL_sv_no> from an XSUB immediately.  Uses C<XST_mNO>.
+
+=for apidoc Ams||XSRETURN_YES
+Return C<&PL_sv_yes> from an XSUB immediately.  Uses C<XST_mYES>.
+
+=for apidoc Ams||XSRETURN_UNDEF
+Return C<&PL_sv_undef> from an XSUB immediately.  Uses C<XST_mUNDEF>.
+
+=for apidoc Ams||XSRETURN_EMPTY
+Return an empty list from an XSUB immediately.
+
+=for apidoc AmU||newXSproto
+Used by C<xsubpp> to hook up XSUBs as Perl subs.  Adds Perl prototypes to
+the subs.
+
+=for apidoc AmU||XS_VERSION
+The version identifier for an XS module.  This is usually
+handled automatically by C<ExtUtils::MakeMaker>.  See C<XS_VERSION_BOOTCHECK>.
+
+=for apidoc Ams||XS_VERSION_BOOTCHECK
+Macro to verify that a PM module's $VERSION variable matches the XS
+module's C<XS_VERSION> variable.  This is usually handled automatically by
+C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
+
+=cut
+*/
+
 #define XST_mIV(i,v)  (ST(i) = sv_2mortal(newSViv(v))  )
 #define XST_mNV(i,v)  (ST(i) = sv_2mortal(newSVnv(v))  )
 #define XST_mPV(i,v)  (ST(i) = sv_2mortal(newSVpv(v,0)))
@@ -49,11 +154,17 @@
 #define XST_mNO(i)    (ST(i) = &PL_sv_no   )
 #define XST_mYES(i)   (ST(i) = &PL_sv_yes  )
 #define XST_mUNDEF(i) (ST(i) = &PL_sv_undef)
- 
+
+#define XSRETURN(off)					\
+    STMT_START {					\
+	PL_stack_sp = PL_stack_base + ax + ((off) - 1);	\
+	return;						\
+    } STMT_END
+
 #define XSRETURN_IV(v) STMT_START { XST_mIV(0,v);  XSRETURN(1); } STMT_END
 #define XSRETURN_NV(v) STMT_START { XST_mNV(0,v);  XSRETURN(1); } STMT_END
 #define XSRETURN_PV(v) STMT_START { XST_mPV(0,v);  XSRETURN(1); } STMT_END
-#define XSRETURN_PVN(v) STMT_START { XST_mPVN(0,v,n);  XSRETURN(1); } STMT_END
+#define XSRETURN_PVN(v,n) STMT_START { XST_mPVN(0,v,n);  XSRETURN(1); } STMT_END
 #define XSRETURN_NO    STMT_START { XST_mNO(0);    XSRETURN(1); } STMT_END
 #define XSRETURN_YES   STMT_START { XST_mYES(0);   XSRETURN(1); } STMT_END
 #define XSRETURN_UNDEF STMT_START { XST_mUNDEF(0); XSRETURN(1); } STMT_END
@@ -77,7 +188,7 @@
 				    vn = "VERSION"), FALSE);		\
 	}								\
 	if (tmpsv && (!SvOK(tmpsv) || strNE(XS_VERSION, SvPV(tmpsv, n_a))))	\
-	    Perl_croak(aTHX_ "%s object version %s does not match %s%s%s%s %_",	\
+	    Perl_croak(aTHX_ "%s object version %s does not match %s%s%s%s %"SVf,\
 		  module, XS_VERSION,					\
 		  vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
 		  vn ? vn : "bootstrap parameter", tmpsv);		\
@@ -119,10 +230,8 @@
 #  define VTBL_amagicelem	&PL_vtbl_amagicelem
 #endif
 
-#if defined(PERL_OBJECT) || defined(PERL_CAPI)
-#  include "perlapi.h"
-#  include "objXSUB.h"
-#endif	/* PERL_OBJECT || PERL_CAPI */
+#include "perlapi.h"
+#include "objXSUB.h"
 
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
 #  undef aTHX

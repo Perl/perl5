@@ -1,6 +1,6 @@
 /*    gv.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -154,6 +154,27 @@ S_gv_init_sv(pTHX_ GV *gv, I32 sv_type)
     }
 }
 
+/*
+=for apidoc gv_fetchmeth
+
+Returns the glob with the given C<name> and a defined subroutine or
+C<NULL>.  The glob lives in the given C<stash>, or in the stashes
+accessible via @ISA and @UNIVERSAL. 
+
+The argument C<level> should be either 0 or -1.  If C<level==0>, as a
+side-effect creates a glob with the given C<name> in the given C<stash>
+which in the case of success contains an alias for the subroutine, and sets
+up caching info for this glob.  Similarly for all the searched stashes. 
+
+This function grants C<"SUPER"> token as a postfix of the stash name. The
+GV returned from C<gv_fetchmeth> may be a method cache entry, which is not
+visible to Perl code.  So when calling C<perl_call_sv>, you should not use
+the GV directly; instead, you should use the method's CV, which can be
+obtained from the GV with the C<GvCV> macro. 
+
+=cut
+*/
+
 GV *
 Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 {
@@ -275,11 +296,47 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     return 0;
 }
 
+/*
+=for apidoc gv_fetchmethod
+
+See L<gv_fetchmethod_autoload>.
+
+=cut
+*/
+
 GV *
 Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
 {
     return gv_fetchmethod_autoload(stash, name, TRUE);
 }
+
+/*
+=for apidoc gv_fetchmethod_autoload
+
+Returns the glob which contains the subroutine to call to invoke the method
+on the C<stash>.  In fact in the presence of autoloading this may be the
+glob for "AUTOLOAD".  In this case the corresponding variable $AUTOLOAD is
+already setup. 
+
+The third parameter of C<gv_fetchmethod_autoload> determines whether
+AUTOLOAD lookup is performed if the given method is not present: non-zero
+means yes, look for AUTOLOAD; zero means no, don't look for AUTOLOAD. 
+Calling C<gv_fetchmethod> is equivalent to calling C<gv_fetchmethod_autoload>
+with a non-zero C<autoload> parameter. 
+
+These functions grant C<"SUPER"> token as a prefix of the method name. Note
+that if you want to keep the returned glob for a long time, you need to
+check for it being "AUTOLOAD", since at the later time the call may load a
+different subroutine due to $AUTOLOAD changing its value. Use the glob
+created via a side effect to do this. 
+
+These functions have the same side-effects and as C<gv_fetchmeth> with
+C<level==0>.  C<name> should be writable if contains C<':'> or C<'
+''>. The warning against passing the GV returned by C<gv_fetchmeth> to
+C<perl_call_sv> apply equally to these functions. 
+
+=cut
+*/
 
 GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
@@ -387,6 +444,17 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     return gv;
 }
 
+/*
+=for apidoc gv_stashpv
+
+Returns a pointer to the stash for a specified package.  If C<create> is
+set then the package will be created if it does not already exist.  If
+C<create> is not set and the package does not exist then NULL is
+returned.
+
+=cut
+*/
+
 HV*
 Perl_gv_stashpv(pTHX_ const char *name, I32 create)
 {
@@ -421,6 +489,15 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
 	HvNAME(stash) = savepv(name);
     return stash;
 }
+
+/*
+=for apidoc gv_stashsv
+
+Returns a pointer to the stash for a specified package.  See
+C<gv_stashpv>.
+
+=cut
+*/
 
 HV*
 Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
@@ -504,9 +581,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     /* No stash in name, so see how we can default */
 
     if (!stash) {
-	if (isIDFIRST(*name)
-	    || (IN_UTF8 && ((*name & 0xc0) == 0xc0) && isIDFIRST_utf8((U8*)name)))
-	{
+	if (isIDFIRST_lazy(name)) {
 	    bool global = FALSE;
 
 	    if (isUPPER(*name)) {
@@ -752,25 +827,26 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\\':
     case '/':
     case '|':
-    case '\001':
-    case '\003':
-    case '\004':
-    case '\005':
-    case '\006':
-    case '\010':
-    case '\011':	/* NOT \t in EBCDIC */
-    case '\017':
-    case '\020':
-    case '\024':
+    case '\001':	/* $^A */
+    case '\003':	/* $^C */
+    case '\004':	/* $^D */
+    case '\005':	/* $^E */
+    case '\006':	/* $^F */
+    case '\010':	/* $^H */
+    case '\011':	/* $^I, NOT \t in EBCDIC */
+    case '\017':	/* $^O */
+    case '\020':	/* $^P */
+    case '\024':	/* $^T */
 	if (len > 1)
 	    break;
 	goto magicalize;
-    case '\023':
+    case '\023':	/* $^S */
 	if (len > 1)
 	    break;
 	goto ro_magicalize;
-    case '\027':	/* $^W & $^Warnings */
-	if (len > 1 && strNE(name, "\027arnings"))
+    case '\027':	/* $^W & $^WARNING_BITS */
+	if (len > 1 && strNE(name, "\027ARNING_BITS")
+	    && strNE(name, "\027IDE_SYSTEM_CALLS"))
 	    break;
 	goto magicalize;
 
@@ -797,7 +873,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
 	break;
 
-    case '\014':
+    case '\014':	/* $^L */
 	if (len > 1)
 	    break;
 	sv_setpv(GvSV(gv),"\f");
@@ -816,6 +892,13 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    SvNOK_on(sv);
 	    (void)SvPV_nolen(sv);
 	    SvREADONLY_on(sv);
+	}
+	break;
+    case '\026':	/* $^V */
+	if (len == 1) {
+	    SV *sv = GvSV(gv);
+	    GvSV(gv) = SvREFCNT_inc(PL_patchlevel);
+	    SvREFCNT_dec(sv);
 	}
 	break;
     }
@@ -1365,7 +1448,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	if (amtp && amtp->fallback >= AMGfallYES) {
 	  DEBUG_o( Perl_deb(aTHX_ "%s", SvPVX(msg)) );
 	} else {
-	  Perl_croak(aTHX_ "%_", msg);
+	  Perl_croak(aTHX_ "%"SVf, msg);
 	}
 	return NULL;
       }

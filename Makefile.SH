@@ -30,7 +30,12 @@ case "$useshrplib" in
 true)
 	# Prefix all runs of 'miniperl' and 'perl' with 
 	# $ldlibpth so that ./perl finds *this* shared libperl.
-	ldlibpth="LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH"
+	case "$LD_LIBRARY_PATH" in
+	'')
+		ldlibpth="LD_LIBRARY_PATH=`pwd`";;
+	*)
+		ldlibpth="LD_LIBRARY_PATH=`pwd`:${LD_LIBRARY_PATH}";;
+	esac
 
 	pldlflags="$cccdlflags"
 	case "${osname}${osvers}" in
@@ -78,6 +83,8 @@ true)
 		eval "ldlibpth=\"$ldlibpthname=`pwd`:\$$ldlibpthname\""
 		;;
 	    esac
+	    # Strip off any trailing :'s
+	    ldlibpth=`echo $ldlibpth | sed 's/:*$//'`
 	    ;;
         esac
 	;;
@@ -228,7 +235,7 @@ addedbyconf = UU $(shextract) $(plextract) pstruct
 
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
-h3 = opcode.h patchlevel.h perl.h perly.h pp.h proto.h regcomp.h
+h3 = opcode.h patchlevel.h perl.h perlapi.h perly.h pp.h proto.h regcomp.h
 h4 = regexp.h scope.h sv.h unixish.h util.h iperlsys.h thread.h
 h5 = utf8.h warnings.h
 h = $(h1) $(h2) $(h3) $(h4) $(h5)
@@ -236,13 +243,13 @@ h = $(h1) $(h2) $(h3) $(h4) $(h5)
 c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c
 c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c utf8.c
 c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c xsutils.c
-c4 = globals.c perlio.c
+c4 = globals.c perlio.c perlapi.c
 
 c = $(c1) $(c2) $(c3) $(c4) miniperlmain.c perlmain.c
 
 obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
-obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT)
+obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT)
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 
@@ -287,7 +294,10 @@ FORCE:
 	@sh -c true
 
 opmini$(OBJ_EXT): op.c
-	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
+	$(RMS) opmini.c
+	$(LNS) op.c opmini.c
+	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB opmini.c
+	$(RMS) opmini.c
 
 miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -551,7 +561,7 @@ install.html: all installhtml
 
 run_byacc:	FORCE
 	$(BYACC) -d perly.y
-	chmod 664 perly.c
+	-chmod 664 perly.c
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
 	sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
 	    -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c

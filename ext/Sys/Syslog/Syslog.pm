@@ -1,11 +1,13 @@
 package Sys::Syslog;
 require 5.000;
 require Exporter;
+require DynaLoader;
 use Carp;
 
-@ISA = qw(Exporter);
+@ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(openlog closelog setlogmask syslog);
 @EXPORT_OK = qw(setlogsock);
+$VERSION = '0.01';
 
 use Socket;
 use Sys::Hostname;
@@ -17,6 +19,7 @@ use Sys::Hostname;
 # NOTE: openlog now takes three arguments, just like openlog(3)
 # Modified to add UNIX domain sockets by Sean Robinson <robinson_s@sc.maricopa.edu>
 #  with support from Tim Bunce <Tim.Bunce@ig.co.uk> and the perl5-porters mailing list
+# Modified to use an XS backend instead of syslog.ph by Tom Hughes <tom@compton.nu>
 
 # Todo: enable connect to try all three types before failing (auto setlogsock)?
 
@@ -98,10 +101,6 @@ Note that C<openlog> now takes three arguments, just like C<openlog(3)>.
     $! = 55;
     syslog('info', 'problem was %m'); # %m == $! in syslog(3)
 
-=head1 DEPENDENCIES
-
-B<Sys::Syslog> needs F<syslog.ph>, which can be created with C<h2ph>.
-
 =head1 SEE ALSO
 
 L<syslog(3)>
@@ -111,10 +110,27 @@ L<syslog(3)>
 Tom Christiansen E<lt>F<tchrist@perl.com>E<gt> and Larry Wall E<lt>F<larry@wall.org>E<gt>.
 UNIX domain sockets added by Sean Robinson E<lt>F<robinson_s@sc.maricopa.edu>E<gt>
 with support from Tim Bunce <Tim.Bunce@ig.co.uk> and the perl5-porters mailing list.
+Dependency on F<syslog.ph> replaced with XS code bu Tom Hughes E<lt>F<tom@compton.nu>E<gt>.
 
 =cut
 
-require 'syslog.ph';
+sub AUTOLOAD {
+    # This AUTOLOAD is used to 'autoload' constants from the constant()
+    # XS function.
+
+    my $constname;
+    our $AUTOLOAD;
+    ($constname = $AUTOLOAD) =~ s/.*:://;
+    croak "& not defined" if $constname eq 'constant';
+    my $val = constant($constname, @_ ? $_[0] : 0);
+    if ($! != 0) {
+	croak "Your vendor has not defined Sys::Syslog macro $constname";
+    }
+    *$AUTOLOAD = sub { $val };
+    goto &$AUTOLOAD;
+}
+
+bootstrap Sys::Syslog $VERSION;
 
 $maskpri = &LOG_UPTO(&LOG_DEBUG);
 
@@ -240,7 +256,7 @@ sub xlate {
     $name = uc $name;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
     $name = "Sys::Syslog::$name";
-    defined &$name ? &$name : -1;
+    eval { &$name } || -1;
 }
 
 sub connect {

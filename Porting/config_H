@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Jan 16 21:10:53 EET 2000
+ * Configuration time: Wed Jan 26 09:55:17 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1212,9 +1212,14 @@
  *	available directly to the user. Note that it may well be different from
  *	the preprocessor used to compile the C program.
  */
+/* CPPLAST:
+ *	This symbol is intended to be used along with CPPRUN in the same manner
+ *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
+ */
 #define CPPSTDIN "cppstdin"
 #define CPPMINUS ""
 #define CPPRUN "/usr/bin/cpp"
+#define CPPLAST ""
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1406,6 +1411,11 @@
  *	so that it is safe even if used by a process with super-user
  *	privileges.
  */
+/* HAS_PHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	contents of PHOSTNAME as a command to feed to the popen() routine
+ *	to derive the host name.
+ */
 #define HAS_GETHOSTNAME	/**/
 #define HAS_UNAME		/**/
 #undef HAS_PHOSTNAME
@@ -1533,6 +1543,9 @@
  *	the GNU C library is being used.
  */
 /*#define HAS_GNULIBC  	/ **/
+#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
+#   define _GNU_SOURCE
+#endif
 /* HAS_HASMNTOPT:
  *	This symbol, if defined, indicates that the hasmntopt routine is
  *	available to query the mount options of file systems.
@@ -2309,7 +2322,7 @@
  *	for a C initialization string.  See the inc_version_list entry
  *	in Porting/Glossary for more details.
  */
-#define PERL_INC_VERSION_LIST  		/**/
+#define PERL_INC_VERSION_LIST ""		/**/
 
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
@@ -2480,6 +2493,10 @@
 /* U64SIZE:
  *	This symbol contains the sizeof(U64).
  */
+/* NV_PRESERVES_UV:
+ *	This symbol, if defined, indicates that a variable of type NVTYPE
+ *	can preserve all the bit of a variable of type UVSIZE.
+ */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
 #define	I8TYPE		char		/**/
@@ -2505,6 +2522,7 @@
 #define	I64SIZE		8	/**/
 #define	U64SIZE		8	/**/
 #endif
+#undef	NV_PRESERVES_UV
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
@@ -2751,6 +2769,10 @@
 /*#define	USE_LONG_LONG		/ **/
 #endif
 
+/* USE_MORE_BITS:
+ *	This symbol, if defined, indicates that 64-bit interfaces and
+ *	long doubles should be used when available.
+ */
 #ifndef USE_MORE_BITS
 /*#define	USE_MORE_BITS		/ **/
 #endif

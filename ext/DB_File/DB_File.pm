@@ -1,10 +1,10 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 4th September 1999
-# version 1.71
+# last modified 16th January 2000
+# version 1.72
 #
-#     Copyright (c) 1995-1999 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995-2000 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -141,11 +141,13 @@ sub TIEHASH
 package DB_File ;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO $db_version) ;
+use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO 
+            $db_version $use_XSLoader
+           ) ;
 use Carp;
 
 
-$VERSION = "1.71" ;
+$VERSION = "1.72" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -155,8 +157,18 @@ $DB_RECNO = new DB_File::RECNOINFO ;
 require Tie::Hash;
 require Exporter;
 use AutoLoader;
-use XSLoader ();
-@ISA = qw(Tie::Hash Exporter);
+BEGIN {
+    $use_XSLoader = 1 ;
+    eval { require XSLoader } ;
+
+    if ($@) {
+        $use_XSLoader = 0 ;
+        require DynaLoader;
+        @ISA = qw(DynaLoader);
+    }
+}
+
+push @ISA, qw(Tie::Hash Exporter);
 @EXPORT = qw(
         $DB_BTREE $DB_HASH $DB_RECNO 
 
@@ -219,19 +231,10 @@ eval {
     push(@EXPORT, @O);
 };
 
-## import borrowed from IO::File
-##   exports Fcntl constants if available.
-#sub import {
-#    my $pkg = shift;
-#    my $callpkg = caller;
-#    Exporter::export $pkg, $callpkg, @_;
-#    eval {
-#        require Fcntl;
-#        Exporter::export 'Fcntl', $callpkg, '/^O_/';
-#    };
-#}
-
-XSLoader::load 'DB_File', $VERSION;
+if ($use_XSLoader)
+  { XSLoader::load("DB_File", $VERSION)}
+else
+  { bootstrap DB_File $VERSION }
 
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.
@@ -475,12 +478,7 @@ like version 1. This feature allows B<DB_File> scripts that were built
 with version 1 to be migrated to version 2 or 3 without any changes.
 
 If you want to make use of the new features available in Berkeley DB
-2.x or 3.x, use the Perl module B<BerkeleyDB> instead.
-
-At the time of writing this document the B<BerkeleyDB> module is still
-alpha quality (the version number is < 1.0), and so unsuitable for use
-in any serious development work. Once its version number is >= 1.0, it
-is considered stable enough for real work.
+2.x or greater, use the Perl module B<BerkeleyDB> instead.
 
 B<Note:> The database file format has changed in both Berkeley DB
 version 2 and 3. If you cannot recreate your databases, you must dump
@@ -953,7 +951,7 @@ and it will print:
 
     $status = $X->find_dup($key, $value) ;
 
-This method checks for the existance of a specific key/value pair. If the
+This method checks for the existence of a specific key/value pair. If the
 pair exists, the cursor is left pointing to the pair and the method 
 returns 0. Otherwise the method returns a non-zero value.
 
@@ -995,7 +993,7 @@ This method deletes a specific key/value pair. It returns
 0 if they exist and have been deleted successfully.
 Otherwise the method returns a non-zero value.
 
-Again assuming the existance of the C<tree> database
+Again assuming the existence of the C<tree> database
 
     use strict ;
     use DB_File ;
@@ -1491,8 +1489,8 @@ R_CURSOR is the only valid flag at present.
 
 Returns the file descriptor for the underlying database.
 
-See L<Locking Databases> for an example of how to make use of the
-C<fd> method to lock your database.
+See L<Locking: The Trouble with fd> for an explanation for why you should
+not use C<fd> to lock your database.
 
 =item B<$status = $X-E<gt>seq($key, $value, $flags) ;>
 
@@ -1651,64 +1649,124 @@ filters.
 =head1 HINTS AND TIPS 
 
 
-=head2 Locking Databases
+=head2 Locking: The Trouble with fd
 
-Concurrent access of a read-write database by several parties requires
-them all to use some kind of locking.  Here's an example of Tom's that
-uses the I<fd> method to get the file descriptor, and then a careful
-open() to give something Perl will flock() for you.  Run this repeatedly
-in the background to watch the locks granted in proper order.
+Until version 1.72 of this module, the recommended technique for locking
+B<DB_File> databases was to flock the filehandle returned from the "fd"
+function. Unfortunately this technique has been shown to be fundamentally
+flawed (Kudos to David Harris for tracking this down). Use it at your own
+peril!
 
-    use DB_File;
+The locking technique went like this. 
 
-    use strict;
-
-    sub LOCK_SH { 1 }
-    sub LOCK_EX { 2 }
-    sub LOCK_NB { 4 }
-    sub LOCK_UN { 8 }
-
-    my($oldval, $fd, $db, %db, $value, $key);
-
-    $key = shift || 'default';
-    $value = shift || 'magic';
-
-    $value .= " $$";
-
-    $db = tie(%db, 'DB_File', '/tmp/foo.db', O_CREAT|O_RDWR, 0644) 
-	    || die "dbcreat /tmp/foo.db $!";
+    $db = tie(%db, 'DB_File', '/tmp/foo.db', O_CREAT|O_RDWR, 0644)
+        || die "dbcreat /tmp/foo.db $!";
     $fd = $db->fd;
-    print "$$: db fd is $fd\n";
     open(DB_FH, "+<&=$fd") || die "dup $!";
-
-
-    unless (flock (DB_FH, LOCK_SH | LOCK_NB)) {
-	print "$$: CONTENTION; can't read during write update!
-		    Waiting for read lock ($!) ....";
-	unless (flock (DB_FH, LOCK_SH)) { die "flock: $!" }
-    } 
-    print "$$: Read lock granted\n";
-
-    $oldval = $db{$key};
-    print "$$: Old value was $oldval\n";
-    flock(DB_FH, LOCK_UN);
-
-    unless (flock (DB_FH, LOCK_EX | LOCK_NB)) {
-	print "$$: CONTENTION; must have exclusive lock!
-		    Waiting for write lock ($!) ....";
-	unless (flock (DB_FH, LOCK_EX)) { die "flock: $!" }
-    } 
-
-    print "$$: Write lock granted\n";
-    $db{$key} = $value;
-    $db->sync;	# to flush
-    sleep 10;
-
+    flock (DB_FH, LOCK_EX) || die "flock: $!";
+    ...
+    $db{"Tom"} = "Jerry" ;
+    ...
     flock(DB_FH, LOCK_UN);
     undef $db;
     untie %db;
     close(DB_FH);
-    print "$$: Updated db to $key=$value\n";
+
+In simple terms, this is what happens:
+
+=over 5
+
+=item 1.
+
+Use "tie" to open the database.
+
+=item 2.
+
+Lock the database with fd & flock.
+
+=item 3.
+
+Read & Write to the database.
+
+=item 4.
+
+Unlock and close the database.
+
+=back
+
+Here is the crux of the problem. A side-effect of opening the B<DB_File>
+database in step 2 is that an initial block from the database will get
+read from disk and cached in memory.
+
+To see why this is a problem, consider what can happen when two processes,
+say "A" and "B", both want to update the same B<DB_File> database
+using the locking steps outlined above. Assume process "A" has already
+opened the database and has a write lock, but it hasn't actually updated
+the database yet (it has finished step 2, but not started step 3 yet). Now
+process "B" tries to open the same database - step 1 will succeed,
+but it will block on step 2 until process "A" releases the lock. The
+important thing to notice here is that at this point in time both
+processes will have cached identical initial blocks from the database.
+
+Now process "A" updates the database and happens to change some of the
+data held in the initial buffer. Process "A" terminates, flushing
+all cached data to disk and releasing the database lock. At this point
+the database on disk will correctly reflect the changes made by process
+"A".
+
+With the lock released, process "B" can now continue. It also updates the
+database and unfortunately it too modifies the data that was in its
+initial buffer. Once that data gets flushed to disk it will overwrite
+some/all of the changes process "A" made to the database.
+
+The result of this scenario is at best a database that doesn't contain
+what you expect. At worst the database will corrupt.
+
+The above won't happen every time competing process update the same
+B<DB_File> database, but it does illustrate why the technique should
+not be used.
+
+=head2 Safe ways to lock a database
+
+Starting with version 2.x, Berkeley DB  has internal support for locking.
+The companion module to this one, B<BerkeleyDB>, provides an interface
+to this locking functionality. If you are serious about locking
+Berkeley DB databases, I strongly recommend using B<BerkeleyDB>.
+
+If using B<BerkeleyDB> isn't an option, there are a number of modules
+available on CPAN that can be used to implement locking. Each one
+implements locking differently and has different goals in mind. It is
+therefore worth knowing the difference, so that you can pick the right
+one for your application. Here are the three locking wrappers:
+
+=over 5
+
+=item B<Tie::DB_Lock>
+
+A B<DB_File> wrapper which creates copies of the database file for
+read access, so that you have a kind of a multiversioning concurrent read
+system. However, updates are still serial. Use for databases where reads
+may be lengthy and consistency problems may occur.
+
+=item B<Tie::DB_LockFile> 
+
+A B<DB_File> wrapper that has the ability to lock and unlock the database
+while it is being used. Avoids the tie-before-flock problem by simply
+re-tie-ing the database when you get or drop a lock.  Because of the
+flexibility in dropping and re-acquiring the lock in the middle of a
+session, this can be massaged into a system that will work with long
+updates and/or reads if the application follows the hints in the POD
+documentation.
+
+=item B<DB_File::Lock> 
+
+An extremely lightweight B<DB_File> wrapper that simply flocks a lockfile
+before tie-ing the database and drops the lock after the untie. Allows
+one to use the same lockfile for multiple databases to avoid deadlock
+problems, if desired. Use for databases where updates are reads are
+quick and simple flock locking semantics are enough.
+
+=back
 
 =head2 Sharing Databases With C Applications
 
@@ -1814,7 +1872,7 @@ C<%x>, and C<$X> above hold a reference to the object. The call to
 untie() will destroy the first, but C<$X> still holds a valid
 reference, so the destructor will not get called and the database file
 F<tst.fil> will remain open. The fact that Berkeley DB then reports the
-attempt to open a database that is alreday open via the catch-all
+attempt to open a database that is already open via the catch-all
 "Invalid argument" doesn't help.
 
 If you run the script with the C<-w> flag the error message becomes:
@@ -1966,7 +2024,7 @@ makes use of, namely Berkeley DB, is not. Berkeley DB has its own
 copyright and its own license. Please take the time to read it.
 
 Here are are few words taken from the Berkeley DB FAQ (at
-http://www.sleepycat.com) regarding the license:
+F<http://www.sleepycat.com>) regarding the license:
 
     Do I have to license DB to use it in Perl scripts? 
 

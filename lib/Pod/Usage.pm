@@ -311,22 +311,58 @@ command line syntax error is detected. They should also provide an
 option (usually C<-H> or C<-help>) to print a (possibly more verbose)
 usage message to C<STDOUT>. Some scripts may even wish to go so far as to
 provide a means of printing their complete documentation to C<STDOUT>
-(perhaps by allowing a C<-man> option). The following example uses
-B<Pod::Usage> in combination with B<Getopt::Long> to do all of these
+(perhaps by allowing a C<-man> option). The following complete example
+uses B<Pod::Usage> in combination with B<Getopt::Long> to do all of these
 things:
 
     use Getopt::Long;
     use Pod::Usage;
 
+    my $man = 0;
+    my $help = 0;
     ## Parse options and print usage if there is a syntax error,
     ## or if usage was explicitly requested.
-    GetOptions("help", "man", "flag1")  ||  pod2usage(2);
-    pod2usage(1)  if ($opt_help);
-    pod2usage(-verbose => 2)  if ($opt_man);
+    GetOptions('help|?' => \$help, man => \$man) or pod2usage(2);
+    pod2usage(1) if $help;
+    pod2usage(-verbose => 2) if $man;
 
     ## If no arguments were given, then allow STDIN to be used only
     ## if it's not connected to a terminal (otherwise print usage)
     pod2usage("$0: No files given.")  if ((@ARGV == 0) && (-t STDIN));
+    __END__
+
+    =head1 NAME
+
+    sample - Using GetOpt::Long and Pod::Usage
+
+    =head1 SYNOPSIS
+
+    sample [options] [file ...]
+
+     Options:
+       -help            brief help message
+       -man             full documentation
+
+    =head1 OPTIONS
+
+    =over 8
+
+    =item B<-help>
+
+    Print a brief help message and exits.
+
+    =item B<-man>
+
+    Prints the manual page and exits.
+
+    =back
+
+    =head1 DESCRIPTION
+
+    B<This program> will read the given input file(s) and do something
+    useful with the contents thereof.
+
+    =cut
 
 =head1 CAVEATS
 

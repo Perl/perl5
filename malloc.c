@@ -1034,8 +1034,15 @@ Perl_malloc(register size_t nbytes)
 	if ((PTR2UV(p)) & (MEM_ALIGNBYTES - 1)) {
 	    dTHXo;
 	    PerlIO_printf(PerlIO_stderr(),
-			  "Corrupt malloc ptr 0x%lx at 0x%"UVxf"\n",
-			  (unsigned long)*((int*)p),PTR2UV(p));
+			  "Unaligned pointer in the free chain 0x%"UVxf"\n",
+			  PTR2UV(p));
+	}
+	if ((PTR2UV(p->ov_next)) & (MEM_ALIGNBYTES - 1)) {
+	    dTHXo;
+	    PerlIO_printf(PerlIO_stderr(),
+			  "Unaligned `next' pointer in the free "
+			  "chain 0x"UVxf" at 0x%"UVxf"\n",
+			  PTR2UV(p->ov_next), PTR2UV(p));
 	}
 #endif
   	nextf[bucket] = p->ov_next;
@@ -1748,9 +1755,9 @@ char *
 Perl_strdup(const char *s)
 {
     MEM_SIZE l = strlen(s);
-    char *s1 = (char *)Perl_malloc(l);
+    char *s1 = (char *)Perl_malloc(l+1);
 
-    Copy(s, s1, (MEM_SIZE)l, char);
+    Copy(s, s1, (MEM_SIZE)(l+1), char);
     return s1;
 }
 
@@ -1776,8 +1783,8 @@ Perl_putenv(char *a)
   else
       var = Perl_malloc(l + 1);
   Copy(a, var, l, char);
-  val++;
-  my_setenv(var,val);
+  var[l + 1] = 0;
+  my_setenv(var, val+1);
   if (var != buf)
       Perl_mfree(var);
   return 0;

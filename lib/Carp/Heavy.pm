@@ -87,7 +87,7 @@ sub longmess_heavy {
 		    # set args to the string "undef" if undefined
 		    $_ = "undef", next unless defined $_;
 		    if (ref $_) {
-			# dunno what this is for...
+			# force reference to string representation
 			$_ .= '';
 			s/'/\\'/g;
 		    }
@@ -128,6 +128,30 @@ sub longmess_heavy {
 }
 
 
+# ancestors() returns the complete set of ancestors of a module
+
+sub ancestors($$);
+
+sub ancestors($$){
+    my( $pack, $href ) = @_;
+    if( @{"${pack}::ISA"} ){
+	my $risa = \@{"${pack}::ISA"};
+	my %tree  = ();
+	@tree{@$risa} = ();
+	foreach my $mod ( @$risa ){
+	    # visit ancestors - if not already in the gallery
+	    if( ! defined( $$href{$mod} ) ){
+		my @ancs = ancestors( $mod, $href );
+		@tree{@ancs} = ();
+	    }
+	}
+	return ( keys( %tree ) );
+    } else {
+	return ();
+    }
+}
+
+
 # shortmess() is called by carp() and croak() to skip all the way up to
 # the top-level caller's package and report the error from there.  confess()
 # and cluck() generate a full stack trace so they call longmess() to
@@ -140,6 +164,8 @@ sub shortmess_heavy {	# Short-circuit &longmess if called via multiple packages
     my $error = join '', @_;
     my ($prevpack) = caller(1);
     my $extra = $CarpLevel;
+
+    my @Clans = ( $prevpack );
     my $i = 2;
     my ($pack,$file,$line);
     # when reporting an error, we want to report it from the context of the
@@ -150,33 +176,45 @@ sub shortmess_heavy {	# Short-circuit &longmess if called via multiple packages
     # track of all the packages to which the calling package belongs.  We
     # do this by examining its @ISA variable.  Any call from a base class
     # method (one of our caller's @ISA packages) can be ignored
-    my %isa = ($prevpack,1);
+    my %isa;
 
-    # merge all the caller's @ISA packages into %isa.
-    @isa{@{"${prevpack}::ISA"}} = ()
-	if(@{"${prevpack}::ISA"});
+    # merge all the caller's @ISA packages and ancestors into %isa.
+    my @pars = ancestors( $prevpack, \%isa );
+    @isa{@pars} = () if @pars;
+    $isa{$prevpack} = 1;
 
     # now we crawl up the calling stack and look at all the packages in
     # there.  For each package, we look to see if it has an @ISA and then
     # we see if our caller features in that list.  That would imply that
     # our caller is a derived class of that package and its calls can also
     # be ignored
+CALLER:
     while (($pack,$file,$line) = caller($i++)) {
-	if(@{$pack . "::ISA"}) {
-	    my @i = @{$pack . "::ISA"};
-	    my %i;
-	    @i{@i} = ();
-	    # merge any relevant packages into %isa
-	    @isa{@i,$pack} = ()
-		if(exists $i{$prevpack} || exists $isa{$pack});
-	}
 
-	# and here's where we do the ignoring... if the package in
-	# question is one of our caller's base or derived packages then
-	# we can ignore it (skip it) and go onto the next (but note that
-	# the continue { } block below gets called every time)
-	next
-	    if(exists $isa{$pack});
+        # Chances are, the caller's caller (or its caller...) is already
+        # in the gallery - if so, ignore this caller.
+        next if exists( $isa{$pack} );
+
+        # no: collect this module's ancestors.
+        my @i = ancestors( $pack, \%isa );
+        my %i;
+        if( @i ){
+ 	    @i{@i} = ();
+            # check whether our representative of one of the clans is
+            # in this family tree.
+	    foreach my $cl (@Clans){
+                if( exists( $i{$cl} ) ){
+    	            # yes: merge all of the family tree into %isa
+	            @isa{@i,$pack} = ();
+		    # and here's where we do some more ignoring...
+		    # if the package in question is one of our caller's
+		    # base or derived packages then we can ignore it (skip it)
+		    # and go onto the next.
+		    next CALLER if exists( $isa{$pack} );
+		    last;
+		}
+            }
+	}
 
 	# Hey!  We've found a package that isn't one of our caller's
 	# clan....but wait, $extra refers to the number of 'extra' levels
@@ -184,9 +222,8 @@ sub shortmess_heavy {	# Short-circuit &longmess if called via multiple packages
 	# We must merge the package into the %isa hash (so we can ignore it
 	# if it pops up again), decrement $extra, and continue.
 	if ($extra-- > 0) {
-	    %isa = ($pack,1);
-	    @isa{@{$pack . "::ISA"}} = ()
-		if(@{$pack . "::ISA"});
+	    push( @Clans, $pack );
+	    @isa{@i,$pack} = ();
 	}
 	else {
 	    # OK!  We've got a candidate package.  Time to construct the
@@ -203,9 +240,6 @@ sub shortmess_heavy {	# Short-circuit &longmess if called via multiple packages
 	    $msg =~ tr/\0//d;
 	    return $msg;
 	}
-    }
-    continue {
-	$prevpack = $pack;
     }
 
     # uh-oh!  It looks like we crawled all the way up the stack and

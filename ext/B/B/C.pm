@@ -1576,6 +1576,8 @@ No copy-on-grow.
 Optimisation level (n = 0, 1, 2, ...). B<-O> means B<-O1>.  Currently,
 B<-O1> and higher set B<-fcog>.
 
+=back
+
 =head1 EXAMPLES
 
     perl -MO=C,-ofoo.c foo.pl

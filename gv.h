@@ -1,6 +1,6 @@
 /*    gv.h
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -33,6 +33,14 @@ struct gp {
 #define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
 #define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
 #define GvFLAGS(gv)	(GvXPVGV(gv)->xgv_flags)
+
+/*
+=for apidoc Am|SV*|GvSV|GV* gv
+
+Return the SV from the GV.
+
+=cut
+*/
 
 #define GvSV(gv)	(GvGP(gv)->gp_sv)
 #define GvREFCNT(gv)	(GvGP(gv)->gp_refcnt)

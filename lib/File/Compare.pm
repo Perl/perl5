@@ -1,7 +1,8 @@
 package File::Compare;
 
+use 5.005_64;
 use strict;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $Too_Big *FROM *TO);
+our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Too_Big);
 
 require Exporter;
 use Carp;
@@ -115,6 +116,7 @@ sub compare {
     return -1;
 }
 
+sub cmp;
 *cmp = \&compare;
 
 sub compare_text {

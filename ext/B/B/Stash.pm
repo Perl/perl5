@@ -4,7 +4,7 @@ package B::Stash;
 
 BEGIN { %Seen = %INC }
 
-STOP {
+CHECK {
 	my @arr=scan($main::{"main::"});
 	@arr=map{s/\:\:$//;$_;}  @arr;
 	print "-umain,-u", join (",-u",@arr) ,"\n";

@@ -1136,7 +1136,7 @@ Really really odious function to implement. Returns absolute name of
 file which would have C<name> if CWD were C<dir>.  C<Dir> defaults to the
 current dir.
 
-=item  C<Cwd::extLibpath([type])
+=item  C<Cwd::extLibpath([type])>
 
 Get current value of extended library search path. If C<type> is
 present and I<true>, works with END_LIBPATH, otherwise with

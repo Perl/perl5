@@ -89,10 +89,6 @@ toke.c	AOK
 	sub time {} 
 	my $a = time()
 
-    Use of \\x{} without utf8 declaration
-	$_ = " \x{123} " ;
-
-
     \x%.*s will produce malformed UTF-8 character; use \x{%.*s} for that
         use utf8 ; 
 	$_ = "\xffe"
@@ -440,18 +436,7 @@ EXPECT
 Ambiguous call resolved as CORE::time(), qualify as such or use & at - line 4.
 ########
 # toke.c
-use warnings 'utf8' ;
-eval <<'EOE';
-{
-#line 30 "foo"
-  $_ = " \x{123} " ;
-}
-EOE
-EXPECT
-Use of \x{} without utf8 declaration at foo line 30.
-########
-# toke.c
-no warnings 'utf8' ;
+use warnings ;
 eval <<'EOE';
 {
 #line 30 "foo"

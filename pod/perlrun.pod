@@ -4,7 +4,7 @@ perlrun - how to execute the Perl interpreter
 
 =head1 SYNOPSIS
 
-B<perl>	S<[ B<-sTuUWX> ]>
+B<perl>	S<[ B<-CsTuUWX> ]>
 	S<[ B<-hv> ] [ B<-V>[:I<configvar>] ]>
 	S<[ B<-cw> ] [ B<-d>[:I<debugger>] ] [ B<-D>[I<number/list>] ]>
 	S<[ B<-pna> ] [ B<-F>I<pattern> ] [ B<-l>[I<octal>] ] [ B<-0>[I<octal>] ]>
@@ -265,10 +265,18 @@ is equivalent to
 
 An alternate delimiter may be specified using B<-F>.
 
+=item B<-C>
+
+enables Perl to use the native wide character APIs on the target system.
+The magic variable C<${^WIDE_SYSTEM_CALLS}> reflects the state of
+this switch.  See L<perlvar/"${^WIDE_SYSTEM_CALLS}">.
+
+This feature is currently only implemented on the Win32 platform.
+
 =item B<-c>
 
 causes Perl to check the syntax of the program and then exit without
-executing it.  Actually, it I<will> execute C<BEGIN>, C<STOP>, and
+executing it.  Actually, it I<will> execute C<BEGIN>, C<CHECK>, and
 C<use> blocks, because these are considered as occurring outside the
 execution of your program.  C<INIT> and C<END> blocks, however, will
 be skipped.

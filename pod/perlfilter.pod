@@ -19,12 +19,10 @@ you'll soon learn. But first, the basics.
 =head1 CONCEPTS
 
 Before the Perl interpreter can execute a Perl script, it must first
-read it from a file into memory for parsing and compilation. (Even
-scripts specified on the command line with the C<-e> option are stored in
-a temporary file for the parser to process.) If that script itself
-includes other scripts with a C<use> or C<require> statement, then each
-of those scripts will have to be read from their respective files as
-well.
+read it from a file into memory for parsing and compilation. If that
+script itself includes other scripts with a C<use> or C<require>
+statement, then each of those scripts will have to be read from their
+respective files as well.
 
 Now think of each logical connection between the Perl parser and an
 individual file as a I<source stream>. A source stream is created when

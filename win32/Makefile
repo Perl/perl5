@@ -29,7 +29,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.5.640
+INST_VER	= \5.5.650
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -43,42 +43,47 @@ INST_VER	= \5.5.640
 INST_ARCH	= \$(ARCHNAME)
 
 #
-# XXX WARNING! This option currently undergoing changes.  May be broken.
-#
-# uncomment to enable threads-capabilities
-#
-#USE_5005THREADS= define
-
-#
-# XXX WARNING! This option currently undergoing changes.  May be broken.
-#
-# uncomment to enable multiple interpreters
+# uncomment to enable multiple interpreters.  This is need for fork()
+# emulation.
 #
 #USE_MULTI	= define
 
 #
-# XXX WARNING! This option currently undergoing changes.  May be broken.
+# XXX WARNING! This option is still very experimental.  May be broken.
 #
-# uncomment next line if you want to use the perl object
-# Currently, this cannot be enabled if you ask for threads above
-#
-#USE_OBJECT	= define
-
-#
-# XXX WARNING! This option currently undergoing changes.  May be broken.
-#
-# Beginnings of interpreter cloning/threads: still rather rough, fails
-# tests.  This should be enabled to get the fork() emulation.  Do not
-# enable unless you know what you're doing!
+# Beginnings of interpreter cloning/threads; still very incomplete.
+# This should be enabled to get the fork() emulation.  This needs
+# USE_MULTI as well.
 #
 #USE_ITHREADS	= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
-# made by perl.  This is needed and auto-enabled by USE_OBJECT above.
-# This is also needed to get fork().
+# made by perl.  This needs USE_MULTI above.  This is also needed to
+# get fork().
 #
 #USE_IMP_SYS	= define
+
+#
+# WARNING! This option is deprecated and will eventually go away (enable
+# USE_ITHREADS instead).
+#
+# uncomment to enable threads-capabilities.  This is incompatible with
+# USE_ITHREADS, and is only here for people who may have come to rely
+# on the experimental Thread support that was in 5.005.
+#
+#USE_5005THREADS= define
+
+#
+# WARNING! This option is deprecated and will eventually go away (enable
+# USE_MULTI instead).
+#
+# uncomment next line if you want to use the PERL_OBJECT build option.
+# DO NOT ENABLE unless you have legacy code that relies on the C++
+# CPerlObj class that was available in 5.005.  This cannot be enabled
+# if you ask for USE_5005THREADS above.
+#
+#USE_OBJECT	= define
 
 #
 # uncomment one of the following lines if you are using either
@@ -102,7 +107,6 @@ INST_ARCH	= \$(ARCHNAME)
 # Not recommended if you have VC 6.x and you're not running Windows 9x.
 #
 #USE_PERLCRT	= define
-#BUILD_FOR_WIN95    = define
 
 #
 # uncomment to enable linking with setargv.obj under the Visual C
@@ -132,7 +136,7 @@ INST_ARCH	= \$(ARCHNAME)
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all
 # extensions if you change the default.  Currently, this cannot be enabled
-# if you ask for USE_OBJECT above.
+# if you ask for USE_IMP_SYS above.
 #
 #PERL_MALLOC	= define
 
@@ -222,6 +226,10 @@ USE_5005THREADS	= undef
 USE_ITHREADS	= undef
 !ENDIF
 
+!IF "$(USE_IMP_SYS)" == "define"
+PERL_MALLOC	= undef
+!ENDIF
+
 !IF "$(USE_MULTI)" == ""
 USE_MULTI	= undef
 !ENDIF
@@ -240,6 +248,15 @@ USE_IMP_SYS	= undef
 
 !IF "$(USE_PERLCRT)" == ""
 USE_PERLCRT	= undef
+!ENDIF
+
+!IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" == "defineundefundefundef"
+USE_MULTI	= define
+!ENDIF
+
+!IF "$(USE_ITHREADS)$(USE_MULTI)$(USE_OBJECT)" == "defineundefundef"
+USE_MULTI	= define
+USE_5005THREADS	= undef
 !ENDIF
 
 !IF "$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" != "undefundefundef"
@@ -415,17 +432,12 @@ $(o).dll:
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
 
 .rc.res:
-	$(RSC) $<
+	$(RSC) -i.. $<
 
 #
 # various targets
-!IF "$(USE_OBJECT)" == "define"
 PERLIMPLIB	= ..\perl56.lib
 PERLDLL		= ..\perl56.dll
-!ELSE
-PERLIMPLIB	= ..\perl.lib
-PERLDLL		= ..\perl.dll
-!ENDIF
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
@@ -468,10 +480,6 @@ MAKE		= nmake -nologo
 
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
-
-!IF "$(BUILD_FOR_WIN95)" == "define"
-PERL95EXE	= ..\perl95.exe
-!ENDIF
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
@@ -536,15 +544,6 @@ WIN32_SRC	= $(WIN32_SRC) .\win32thread.c
 WIN32_SRC	= $(WIN32_SRC) .\$(CRYPT_SRC)
 !ENDIF
 
-PERL95_SRC	=		\
-		perl95.c	\
-		win32mt.c	\
-		win32sckmt.c
-
-!IF "$(CRYPT_SRC)" != ""
-PERL95_SRC	= $(PERL95_SRC) .\$(CRYPT_SRC)
-!ENDIF
-
 DLL_SRC		= $(DYNALOADER).c
 
 X2P_SRC		=		\
@@ -607,7 +606,6 @@ MINICORE_OBJ	= $(MICROCORE_OBJ:..\=.\mini\)	\
 		  $(MINIDIR)\perlio$(o)
 MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\)
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
-PERL95_OBJ	= $(PERL95_SRC:.c=.obj)
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
@@ -616,7 +614,6 @@ PERLEXE_OBJ	= perlmain$(o)
 
 PERLDLL_OBJ	= $(PERLDLL_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 #PERLEXE_OBJ	= $(PERLEXE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
-#PERL95_OBJ	= $(PERL95_OBJ) DynaLoadmt$(o)
 
 !IF "$(USE_SETARGV)" != ""
 SETARGV_OBJ	= setargv$(o)
@@ -736,7 +733,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) \
+all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) \
 	$(X2P) $(EXTENSION_DLL) $(EXTENSION_PM)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
@@ -810,7 +807,6 @@ $(MINI_OBJ)	: $(CORE_NOCFG_H)
 $(WIN32_OBJ)	: $(CORE_H)
 $(CORE_OBJ)	: $(CORE_H)
 $(DLL_OBJ)	: $(CORE_H)
-$(PERL95_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
@@ -858,36 +854,9 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
 	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 	copy $(PERLEXE) $(WPERLEXE)
-	editbin /subsystem:windows $(WPERLEXE)
+	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
-
-!IF "$(BUILD_FOR_WIN95)" == "define"
-
-perl95.c : runperl.c 
-	copy runperl.c perl95.c
-
-perl95$(o) : perl95.c
-	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c perl95.c
-
-win32sckmt$(o) : win32sck.c
-	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
-	    $(OBJOUT_FLAG)win32sckmt$(o) win32sck.c
-
-win32mt$(o) : win32.c
-	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
-	    $(OBJOUT_FLAG)win32mt$(o) win32.c
-
-DynaLoadmt$(o) : $(DYNALOADER).c
-	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
-	    $(OBJOUT_FLAG)DynaLoadmt$(o) $(DYNALOADER).c
-
-$(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
-	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(LINK_FLAGS) \
-	    $(LIBBASEFILES) $(PERL95_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) \
-	    libcmt.lib
-
-!ENDIF
 
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
@@ -1015,7 +984,7 @@ utils: $(PERLEXE) $(X2P)
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 
 distclean: clean
-	-del /f $(MINIPERL) $(PERLEXE) $(PERL95EXE) $(PERLDLL) $(GLOBEXE) \
+	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(EXTENSION_DLL) $(EXTENSION_PM)
@@ -1046,7 +1015,6 @@ distclean: clean
 	cd ..\win32
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f $(CONFIGPM)
-	-del /f perl95.c
 	-del /f bin\*.bat
 	cd $(EXTDIR)
 	-del /s *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib
@@ -1058,9 +1026,6 @@ install : all installbare installhtml
 
 installbare : utils
 	$(PERLEXE) ..\installperl
-!IF "$(BUILD_FOR_WIN95)" == "define"
-	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
-!ENDIF
 	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) $(INST_BIN)\*.*
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*

@@ -523,8 +523,8 @@ C<eval EXPR> statement.  In particular, for a C<eval BLOCK> statement,
 $filename is C<(eval)>, but $evaltext is undefined.  (Note also that
 each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
 frame.  C<$hints> contains pragmatic hints that the caller was
-compiled with.  It currently only reflects the hint corresponding to
-C<use utf8>.
+compiled with.  The C<$hints> value is subject to change between versions
+of Perl, and is not meant for external use.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable C<@DB::args> to be the
@@ -539,8 +539,10 @@ previous time C<caller> was called.
 =item chdir EXPR
 
 Changes the working directory to EXPR, if possible.  If EXPR is omitted,
-changes to the user's home directory.  Returns true upon success,
-false otherwise.  See the example under C<die>.
+changes to the directory specified by C<$ENV{HOME}>, if set; if not,
+changes to the directory specified by C<$ENV{LOGDIR}>.  If neither is
+set, C<chdir> does nothing.  It returns true upon success, false
+otherwise.  See the example under C<die>.
 
 =item chmod LIST
 
@@ -1422,14 +1424,24 @@ element is not autovivified if it doesn't exist.
 A hash or array element can be true only if it's defined, and defined if
 it exists, but the reverse doesn't necessarily hold true.
 
+Given an expression that specifies the name of a subroutine,
+returns true if the specified subroutine has ever been declared, even
+if it is undefined.  Mentioning a subroutine name for exists or defined
+does not count as declaring it.
+
+    print "Exists\n" 	if exists &subroutine;
+    print "Defined\n" 	if defined &subroutine;
+
 Note that the EXPR can be arbitrarily complicated as long as the final
-operation is a hash or array key lookup:
+operation is a hash or array key lookup or subroutine name:
 
     if (exists $ref->{A}->{B}->{$key}) 	{ }
     if (exists $hash{A}{B}{$key}) 	{ }
 
     if (exists $ref->{A}->{B}->[$ix]) 	{ }
     if (exists $hash{A}{B}[$ix]) 	{ }
+
+    if (exists &{$ref->{A}{B}{$key}})   { }
 
 Although the deepest nested array or hash will not spring into existence
 just because its existence was tested, any intervening ones will.
@@ -1447,6 +1459,12 @@ release.
 
 See L<perlref/"Pseudo-hashes"> for specifics on how exists() acts when
 used on a pseudo-hash.
+
+Use of a subroutine call, rather than a subroutine name, as an argument
+to exists() is an error.
+
+    exists &sub;	# OK
+    exists &sub();	# Error
 
 =item exit EXPR
 
@@ -1541,11 +1559,11 @@ in the way of your getting your job done.)
 
 OPERATION is one of LOCK_SH, LOCK_EX, or LOCK_UN, possibly combined with
 LOCK_NB.  These constants are traditionally valued 1, 2, 8 and 4, but
-you can use the symbolic names if import them from the Fcntl module,
+you can use the symbolic names if you import them from the Fcntl module,
 either individually, or as a group using the ':flock' tag.  LOCK_SH
 requests a shared lock, LOCK_EX requests an exclusive lock, and LOCK_UN
-releases a previously requested lock.  If LOCK_NB is added to LOCK_SH or
-LOCK_EX then C<flock> will return immediately rather than blocking
+releases a previously requested lock.  If LOCK_NB is bitwise-or'ed with
+LOCK_SH or LOCK_EX then C<flock> will return immediately rather than blocking
 waiting for the lock (check the return status to see if you got it).
 
 To avoid the possibility of miscoordination, Perl now flushes FILEHANDLE
@@ -3508,13 +3526,16 @@ for this.  Other restrictions include whether it works on directories,
 open files, or pre-existing files.  Check L<perlport> and either the
 rename(2) manpage or equivalent system documentation for details.
 
+=item require VERSION
+
 =item require EXPR
 
 =item require
 
 Demands some semantics specified by EXPR, or by C<$_> if EXPR is not
-supplied.  If EXPR is numeric, demands that the current version of Perl
-(C<$]> or $PERL_VERSION) be equal or greater than EXPR.
+supplied.  If a version number or tuple is specified, or if EXPR is
+numeric, demands that the current version of Perl
+(C<$^V> or C<$]> or $PERL_VERSION) be equal or greater than EXPR.
 
 Otherwise, demands that a library file be included if it hasn't already
 been included.  The file is included via the do-FILE mechanism, which is
@@ -3886,7 +3907,7 @@ array by 1 and moving everything down.  If there are no elements in the
 array, returns the undefined value.  If ARRAY is omitted, shifts the
 C<@_> array within the lexical scope of subroutines and formats, and the
 C<@ARGV> array at file scopes or within the lexical scopes established by
-the C<eval ''>, C<BEGIN {}>, C<INIT {}>, C<STOP {}>, and C<END {}>
+the C<eval ''>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>, and C<END {}>
 constructs.
 
 See also C<unshift>, C<push>, and C<pop>.  C<Shift()> and C<unshift> do the
@@ -4288,6 +4309,10 @@ In addition, Perl permits the following widely-supported conversions:
    %p	a pointer (outputs the Perl value's address in hexadecimal)
    %n	special: *stores* the number of characters output so far
         into the next variable in the parameter list 
+
+And the following Perl-specific conversion:
+
+   %v   a string, output as a tuple of integers ("Perl" is 80.101.114.108)
 
 Finally, for backward (and we do mean "backward") compatibility, Perl
 permits these unnecessary but widely-supported conversions:
@@ -5125,13 +5150,17 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 
-If the first argument to C<use> is a number, it is treated as a version
-number instead of a module name.  If the version of the Perl interpreter
-is less than VERSION, then an error message is printed and Perl exits
-immediately.  This is often useful if you need to check the current
-Perl version before C<use>ing library modules that have changed in
-incompatible ways from older versions of Perl.  (We try not to do
-this more than we have to.)
+If the first argument to C<use> is a number or a version tuple, it is
+treated as a version instead of a module name.  If the version
+of the Perl interpreter is less than VERSION, then an error message
+is printed and Perl exits immediately.
+
+    use 5.005_03;	# version number
+    use v5.6.0;		# version tuple
+
+This is often useful if you need to check the current Perl version before
+C<use>ing library modules that have changed in incompatible ways from
+older versions of Perl.  (We try not to do this more than we have to.)
 
 The C<BEGIN> forces the C<require> and C<import> to happen at compile time.  The
 C<require> makes sure the module is loaded into memory if it hasn't been
@@ -5141,8 +5170,7 @@ features back into the current package.  The module can implement its
 C<import> method any way it likes, though most modules just choose to
 derive their C<import> method via inheritance from the C<Exporter> class that
 is defined in the C<Exporter> module.  See L<Exporter>.  If no C<import>
-method can be found then the error is currently silently ignored.  This
-may change to a fatal error in a future version.
+method can be found then the call is skipped.
 
 If you don't want your namespace altered, explicitly supply an empty list:
 
@@ -5245,9 +5273,13 @@ to give the expression the correct precedence as in
 
     vec($image, $max_x * $x + $y, 8) = 3;
 
-Vectors created with C<vec> can also be manipulated with the logical
-operators C<|>, C<&>, and C<^>, which will assume a bit vector
-operation is desired when both operands are strings.
+If the selected element is off the end of the string, the value 0 is
+returned.  If an element off the end of the string is written to,
+Perl will first extend the string with sufficiently many zero bytes.
+
+Strings created with C<vec> can also be manipulated with the logical
+operators C<|>, C<&>, C<^>, and C<~>.  These operators will assume a bit
+vector operation is desired when both operands are strings.
 See L<perlop/"Bitwise String Operators">.
 
 The following code will build up an ASCII string saying C<'PerlPerlPerl'>.

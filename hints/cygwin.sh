@@ -21,7 +21,6 @@ so='dll'
 # - eliminate -lc, implied by gcc
 libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
 libswanted="$libswanted cygipc cygwin kernel32"
-ccflags="$ccflags -DCYGWIN"
 # - otherwise i686-cygwin
 archname='cygwin'
 
@@ -33,6 +32,11 @@ cccdlflags=' '
 # optional(ish)
 # - perl malloc needs to be unpolluted
 bincompat5005='undef'
+
+# stubs (ENOSYS, not implemented)
+d_chroot='undef'
+d_seteuid='undef'
+d_setegid='undef'
 
 # strip exe's and dll's
 #ldflags="$ldflags -s"

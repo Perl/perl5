@@ -207,7 +207,7 @@ core, as are modules whose names are in all lower case.  A
 function in all capitals is a loosely-held convention meaning it
 will be called indirectly by the run-time system itself, usually
 due to a triggered event.  Functions that do special, pre-defined
-things include C<BEGIN>, C<STOP>, C<INIT>, C<END>, C<AUTOLOAD>, and
+things include C<BEGIN>, C<CHECK>, C<INIT>, C<END>, C<AUTOLOAD>, and
 C<DESTROY>--plus all functions mentioned in L<perltie>.
 
 =head2 Private Variables via my()
@@ -454,7 +454,7 @@ starts to run:
     }
 
 See L<perlmod/"Package Constructors and Destructors"> about the
-special triggered functions, C<BEGIN>, C<STOP>, C<INIT> and C<END>.
+special triggered functions, C<BEGIN>, C<CHECK>, C<INIT> and C<END>.
 
 If declared at the outermost scope (the file scope), then lexicals
 work somewhat like C's file statics.  They are available to all
@@ -928,11 +928,21 @@ Unbackslashed prototype characters have special meanings.  Any
 unbackslashed C<@> or C<%> eats all remaining arguments, and forces
 list context.  An argument represented by C<$> forces scalar context.  An
 C<&> requires an anonymous subroutine, which, if passed as the first
-argument, does not require the C<sub> keyword or a subsequent comma.  A
-C<*> allows the subroutine to accept a bareword, constant, scalar expression,
+argument, does not require the C<sub> keyword or a subsequent comma.
+
+A C<*> allows the subroutine to accept a bareword, constant, scalar expression,
 typeglob, or a reference to a typeglob in that slot.  The value will be
 available to the subroutine either as a simple scalar, or (in the latter
-two cases) as a reference to the typeglob.
+two cases) as a reference to the typeglob.  If you wish to always convert
+such arguments to a typeglob reference, use Symbol::qualify_to_ref() as
+follows:
+
+    use Symbol 'qualify_to_ref';
+
+    sub foo (*) {
+	my $fh = qualify_to_ref(shift, caller);
+	...
+    }
 
 A semicolon separates mandatory arguments from optional arguments.
 It is redundant before C<@> or C<%>, which gobble up everything else.
@@ -1220,7 +1230,7 @@ functions to Perl code in L<perlxs>.
 
 A subroutine declaration or definition may have a list of attributes
 associated with it.  If such an attribute list is present, it is
-broken up at space or comma boundaries and treated as though a
+broken up at space or colon boundaries and treated as though a
 C<use attributes> had been seen.  See L<attributes> for details
 about what attributes are currently supported.
 Unlike the limitation with the obsolescent C<use attrs>, the
@@ -1234,8 +1244,8 @@ nest properly.
 
 Examples of valid syntax (even though the attributes are unknown):
 
-    sub fnord (&\%) : switch(10,foo(7,3)) , ,  expensive ;
-    sub plugh () : Ugly('\(") , Bad ;
+    sub fnord (&\%) : switch(10,foo(7,3))  :  expensive ;
+    sub plugh () : Ugly('\(") :Bad ;
     sub xyzzy : _5x5 { ... }
 
 Examples of invalid syntax:
@@ -1244,7 +1254,7 @@ Examples of invalid syntax:
     sub snoid : Ugly('(') ;	  # ()-string not balanced
     sub xyzzy : 5x5 ;		  # "5x5" not a valid identifier
     sub plugh : Y2::north ;	  # "Y2::north" not a simple identifier
-    sub snurt : foo + bar ;	  # "+" not a comma or space
+    sub snurt : foo + bar ;	  # "+" not a colon or space
 
 The attribute list is passed as a list of constant strings to the code
 which associates them with the subroutine.  In particular, the second example

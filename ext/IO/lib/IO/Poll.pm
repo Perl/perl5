@@ -9,7 +9,7 @@ package IO::Poll;
 use strict;
 use IO::Handle;
 use Exporter ();
-use vars qw(@ISA @EXPORT_OK @EXPORT $VERSION);
+our(@ISA, @EXPORT_OK, @EXPORT, $VERSION);
 
 @ISA = qw(Exporter);
 $VERSION = "0.01";

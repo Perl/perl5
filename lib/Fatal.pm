@@ -1,8 +1,9 @@
 package Fatal;
 
+use 5.005_64;
 use Carp;
 use strict;
-use vars qw( $AUTOLOAD $Debug $VERSION);
+our($AUTOLOAD, $Debug, $VERSION);
 
 $VERSION = 1.02;
 
@@ -115,7 +116,7 @@ EOS
       no strict 'refs'; # to avoid: Can't use string (...) as a symbol ref ...
       $code = eval("package $pkg; use Carp; $code");
       die if $@;
-      local($^W) = 0;   # to avoid: Subroutine foo redefined ...
+      no warnings;   # to avoid: Subroutine foo redefined ...
       *{$sub} = $code;
     }
 }

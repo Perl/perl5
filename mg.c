@@ -1,6 +1,6 @@
 /*    mg.c
  *
- *    Copyright (c) 1991-1999, Larry Wall
+ *    Copyright (c) 1991-2000, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -60,6 +60,14 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
     SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 }
 
+/*
+=for apidoc mg_magical
+
+Turns on the magical status of an SV.  See C<sv_magic>.
+
+=cut
+*/
+
 void
 Perl_mg_magical(pTHX_ SV *sv)
 {
@@ -76,6 +84,14 @@ Perl_mg_magical(pTHX_ SV *sv)
 	}
     }
 }
+
+/*
+=for apidoc mg_get
+
+Do magic after a value is retrieved from the SV.  See C<sv_magic>.
+
+=cut
+*/
 
 int
 Perl_mg_get(pTHX_ SV *sv)
@@ -112,6 +128,14 @@ Perl_mg_get(pTHX_ SV *sv)
     return 0;
 }
 
+/*
+=for apidoc mg_set
+
+Do magic after a value is assigned to the SV.  See C<sv_magic>.
+
+=cut
+*/
+
 int
 Perl_mg_set(pTHX_ SV *sv)
 {
@@ -137,6 +161,14 @@ Perl_mg_set(pTHX_ SV *sv)
     restore_magic(aTHXo_ (void*)mgs_ix);
     return 0;
 }
+
+/*
+=for apidoc mg_length
+
+Report on the SV's length.  See C<sv_magic>.
+
+=cut
+*/
 
 U32
 Perl_mg_length(pTHX_ SV *sv)
@@ -196,6 +228,14 @@ Perl_mg_size(pTHX_ SV *sv)
     return 0;
 }
 
+/*
+=for apidoc mg_clear
+
+Clear something magical that the SV represents.  See C<sv_magic>.
+
+=cut
+*/
+
 int
 Perl_mg_clear(pTHX_ SV *sv)
 {
@@ -217,6 +257,14 @@ Perl_mg_clear(pTHX_ SV *sv)
     return 0;
 }
 
+/*
+=for apidoc mg_find
+
+Finds the magic pointer for type matching the SV.  See C<sv_magic>.
+
+=cut
+*/
+
 MAGIC*
 Perl_mg_find(pTHX_ SV *sv, int type)
 {
@@ -227,6 +275,14 @@ Perl_mg_find(pTHX_ SV *sv, int type)
     }
     return 0;
 }
+
+/*
+=for apidoc mg_copy
+
+Copies the magic from one SV to another.  See C<sv_magic>.
+
+=cut
+*/
 
 int
 Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
@@ -243,6 +299,14 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     }
     return count;
 }
+
+/*
+=for apidoc mg_free
+
+Free any magic storage used by the SV.  See C<sv_magic>.
+
+=cut
+*/
 
 int
 Perl_mg_free(pTHX_ SV *sv)
@@ -503,10 +567,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)PL_basetime);
 #endif
 	break;
-    case '\027':		/* ^W  & $^Warnings*/
+    case '\027':		/* ^W  & $^WARNING_BITS & ^WIDE_SYSTEM_CALLS */
 	if (*(mg->mg_ptr+1) == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
-	else if (strEQ(mg->mg_ptr, "\027arnings")) {
+	else if (strEQ(mg->mg_ptr, "\027ARNING_BITS")) {
 	    if (PL_compiling.cop_warnings == WARN_NONE ||
 	        PL_compiling.cop_warnings == WARN_STD)
 	    {
@@ -519,6 +583,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	        sv_setsv(sv, PL_compiling.cop_warnings);
 	    }    
 	}
+	else if (strEQ(mg->mg_ptr, "\027IDE_SYSTEM_CALLS"))
+	    sv_setiv(sv, (IV)PL_widesyscalls);
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
@@ -545,6 +611,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 			PL_tainted = FALSE;
 		    }
 		    sv_setpvn(sv, s, i);
+		    if ((PL_curpm->op_pmdynflags & PMdf_UTF8) && !IN_BYTE)
+			SvUTF8_on(sv);
+		    else
+			SvUTF8_off(sv);
 		    if (PL_tainting)
 			PL_tainted = (was_tainted || RX_MATCH_TAINTED(rx));
 		    break;
@@ -845,7 +915,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     }
     FreeEnvironmentStrings(envv);
 #   else
-#	ifdef CYGWIN
+#	ifdef __CYGWIN__
     I32 i;
     for (i = 0; environ[i]; i++)
        safesysfree(environ[i]);
@@ -859,7 +929,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 	for (i = 0; environ[i]; i++)
 	    safesysfree(environ[i]);
 #	    endif /* PERL_USE_SAFE_PUTENV */
-#	endif /* CYGWIN */
+#	endif /* __CYGWIN__ */
 
     environ[0] = Nullch;
 
@@ -1222,7 +1292,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 	if (mg && mg->mg_len >= 0) {
 	    dTHR;
 	    I32 i = mg->mg_len;
-	    if (IN_UTF8)
+	    if (DO_UTF8(lsv))
 		sv_pos_b2u(lsv, &i);
 	    sv_setiv(sv, i + PL_curcop->cop_arybase);
 	    return 0;
@@ -1238,7 +1308,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     SV* lsv = LvTARG(sv);
     SSize_t pos;
     STRLEN len;
-    STRLEN ulen;
+    STRLEN ulen = 0;
     dTHR;
 
     mg = 0;
@@ -1259,12 +1329,10 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 
     pos = SvIV(sv) - PL_curcop->cop_arybase;
 
-    if (IN_UTF8) {
+    if (DO_UTF8(lsv)) {
 	ulen = sv_len_utf8(lsv);
 	if (ulen)
 	    len = ulen;
-	else
-	    ulen = 0;
     }
 
     if (pos < 0) {
@@ -1641,7 +1709,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #endif
 	break;
-    case '\027':	/* ^W & $^Warnings */
+    case '\027':	/* ^W & $^WARNING_BITS & ^WIDE_SYSTEM_CALLS */
 	if (*(mg->mg_ptr+1) == '\0') {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 	        i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1649,7 +1717,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    		| (i ? G_WARN_ON : G_WARN_OFF) ;
 	    }
 	}
-	else if (strEQ(mg->mg_ptr, "\027arnings")) {
+	else if (strEQ(mg->mg_ptr, "\027ARNING_BITS")) {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
                 if (memEQ(SvPVX(sv), WARN_ALLstring, WARNsize)) {
 	            PL_compiling.cop_warnings = WARN_ALL;
@@ -1667,6 +1735,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	        }
 	    }
 	}
+	else if (strEQ(mg->mg_ptr, "\027IDE_SYSTEM_CALLS"))
+	    PL_widesyscalls = SvTRUE(sv);
 	break;
     case '.':
 	if (PL_localizing) {

@@ -217,7 +217,6 @@ else
 
 NOTE: You are using HP cc(1) but GNU ar(1).  This might lead into trouble
 later on, I'm switching to HP ar to play safe.
-
 END
 		ar=/usr/bin/ar
 	    fi
@@ -290,74 +289,62 @@ EOM
 esac
 EOCBU
 
-# This script UU/uselfs.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
-cat > UU/uselfs.cbu <<'EOCBU'
-case "$uselargefiles" in
-$define|true|[yY]*)
-	lfcflags="`getconf _CS_XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
-	lfldflags="`getconf _CS_XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
-	lflibs="`getconf _CS_XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
-	case "$lfcflags$lfldflags$lflibs" in
-	'');;
-	*) # This sucks.  To get the HP-UX strict ANSI mode (-Aa) to
-	   # approve of large file offsets, we must turn on the 64-bitness
-	   # (+DD64), too.  A callback file (a hack) calling another, yuck.
-	   case "$use64bits" in
-           $undef|false|[nN]*|'')
-	       use64bits="$define"
-	       if $test -f use64bits.cbu; then
-                   echo "(Large files in HP-UX require also 64-bitness, picking up 64-bit hints...)"
-		   . ./use64bits.cbu
-	       fi
-               ;;
-           esac
-	   ccflags="$ccflags $lfcflags"
-	   ldflags="$ldflags $ldldflags"
-	   libswanted="$libswanted $lflibs"
-	   ;;
-	esac
-	lfcflags=''
-	lfldflags=''
-	lflibs=''
-	;;
-esac
-EOCBU
-
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bits.cbu <<'EOCBU'
-case "$ccflags" in
-*+DD64*) # Been here, done this (via uselfs.cbu, most likely.)
-   ;;
-*) case "$use64bits" in
+case "$use64bits" in
 $define|true|[yY]*)
-	    if [ "$xxOsRevMajor" -lt 11 ]; then
+	if [ "$xxOsRevMajor" -lt 11 ]; then
 		cat <<EOM >&4
 64-bit compilation is not supported on HP-UX $xxOsRevMajor.
 You need at least HP-UX 11.0.
 Cannot continue, aborting.
 EOM
 		exit 1
-	    fi
-	    if [ ! -f /lib/pa20_64/libc.sl ]; then
+	fi
+	if [ ! -f /lib/pa20_64/libc.sl ]; then
 		cat <<EOM >&4
 You do not seem to have the 64-bit libraries in /lib/pa20_64.
 Most importantly, I cannot find /lib/pa20_64/libc.sl.
 Cannot continue, aborting.
 EOM
 		exit 1
-	    fi
-	    ccflags="$ccflags +DD64"
-	    ldflags="$ldflags +DD64"
-	    ld=/usr/bin/ld
-	    set `echo " $libswanted " | sed -e 's@ dl @ @'`
-	    libswanted="$*"
-	    glibpth="/lib/pa20_64"
-   esac
-   ;;
+	fi
+
+        ccflags="$ccflags +DD64"
+	ld=/usr/bin/ld
+	ar=/usr/bin/ar
+	loclibpth="/lib/pa20_64 $loclibpth"
+
+        # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
+	ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
+
+	set `echo " $libswanted " | sed -e 's@ dl @ @'`
+	libswanted="$*"
+
+	libscheck='
+case "`/usr/bin/file $xxx`" in
+*LP64*) ;;
+*) xxx=/non/64/bit$xxx ;;
+esac
+'
+	;;
 esac
 EOCBU
 
+# This script UU/uselfs.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/uselfs.cbu <<'EOCBU'
+case "$uselargefiles" in
+$define|true|[yY]*)
+        ccflags="$ccflags `getconf _CS_XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
+        ldflags="$ldflags `getconf _CS_XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 
+        libswanted="$libswanted `getconf _CS_XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+
+        # The strict ANSI mode (-Aa) doesn't like large files.
+	ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
+	;;
+esac
+EOCBU
 
