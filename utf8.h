@@ -199,10 +199,10 @@ END_EXTERN_C
 #define UNI_DISPLAY_QQ		(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 #define UNI_DISPLAY_REGEX	(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 
-#define ANYOF_UNICODE_FOLD_SHARP_S(n, s, e)	\
-	(ANYOF_BITMAP_TEST(n, UNICODE_LATIN_SMALL_LETTER_SHARP_S) && \
-	 ANYOF_FLAGS(n) & ANYOF_UNICODE && \
-	 ANYOF_FLAGS(n) & ANYOF_FOLD && \
-	 ((e) > (s) + 1) && \
-	 toLOWER((s)[0]) == 's' && \
-	 toLOWER((s)[1]) == 's')
+#define ANYOF_UNICODE_FOLD_SHARP_S(node, input, end)	\
+	(ANYOF_BITMAP_TEST(node, UNICODE_LATIN_SMALL_LETTER_SHARP_S) && \
+	 (ANYOF_FLAGS(node) & ANYOF_UNICODE) && \
+	 (ANYOF_FLAGS(node) & ANYOF_FOLD) && \
+	 ((end) > (input) + 1) && \
+	 toLOWER((input)[0]) == 's' && \
+	 toLOWER((input)[1]) == 's')
