@@ -1396,6 +1396,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Gconvert(x,n,t,b) $d_Gconvert
 
+/* HAS_GETCWD:
+ *	This symbol, if defined, indicates that the getcwd routine is
+ *	available to get the current working directory.
+ */
+#$d_getcwd HAS_GETCWD		/**/
+
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
  *	available for sequential access of the group database.

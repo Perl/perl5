@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Feb  9 04:06:18 EET 2000
+ * Configuration time: Wed Feb  9 04:57:13 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1382,6 +1382,12 @@
  */
 #define Gconvert(x,n,t,b) gcvt((x),(n),(b))
 
+/* HAS_GETCWD:
+ *	This symbol, if defined, indicates that the getcwd routine is
+ *	available to get the current working directory.
+ */
+#define HAS_GETCWD		/**/
+
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
  *	available for sequential access of the group database.
@@ -2386,7 +2392,7 @@
  *	for a C initialization string.  See the inc_version_list entry
  *	in Porting/Glossary for more details.
  */
-#define PERL_INC_VERSION_LIST ""		/**/
+#define PERL_INC_VERSION_LIST 0		/**/
 
 /* INSTALL_USR_BIN_PERL:
  *	This symbol, if defined, indicates that Perl is to be installed

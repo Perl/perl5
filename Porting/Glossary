@@ -606,6 +606,11 @@ d_Gconvert (d_gconvert.U):
 	d_Gconvert='gcvt((x),(n),(b))'
 	d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 
+d_getcwd (d_getcwd.U):
+	This variable conditionally defines the HAS_GETCWD symbol, which
+	indicates to the C program that the getcwd() routine is available
+	to get the current working directory.
+
 d_getgrent (d_getgrent.U):
 	This variable conditionally defines the HAS_GETGRENT symbol, which
 	indicates to the C program that the getgrent() routine is available
