@@ -1,5 +1,9 @@
 # irix_5.sh
-# Last modified Fri May  5 11:01:23 EDT 1995
+# Last modified Tue Jan  2 14:52:36 EST 1996
+# Apparently, there's a stdio bug that can lead to memory
+# corruption using perl's malloc, but not SGI's malloc.
+usemymalloc='n'
+
 ld=ld
 i_time='define'
 
