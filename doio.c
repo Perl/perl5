@@ -66,15 +66,6 @@
 # endif
 #endif
 
-/* Put this after #includes because <unistd.h> defines _XOPEN_*. */
-#ifndef Sock_size_t
-#  if _XOPEN_VERSION >= 5 || defined(_XOPEN_SOURCE_EXTENDED)
-#    define Sock_size_t Size_t
-#  else
-#    define Sock_size_t int
-#  endif
-#endif
-
 bool
 do_open(gv,name,len,as_raw,rawmode,rawperm,supplied_fp)
 GV *gv;
@@ -297,10 +288,9 @@ PerlIO *supplied_fp;
 	    !statbuf.st_mode
 #endif
 	) {
-	    Sock_size_t buflen = sizeof tokenbuf;
-	    if (getsockname(PerlIO_fileno(fp), (struct sockaddr *)tokenbuf,
-			    &buflen) >= 0
-		  || errno != ENOTSOCK)
+	    int buflen = sizeof tokenbuf;
+	    if (getsockname(PerlIO_fileno(fp), (struct sockaddr *)tokenbuf, &buflen) >= 0
+		|| errno != ENOTSOCK)
 		IoTYPE(io) = 's'; /* some OS's return 0 on fstat()ed socket */
 				/* but some return 0 for streams too, sigh */
 	}

@@ -1687,6 +1687,7 @@ either say:
 or you can edit the default by saying something like:
 
 	sub MY::c_o {
+	    package MY;
             my($inherited) = shift->SUPER::c_o(@_);
 	    $inherited =~ s/old text/new text/;
 	    $inherited;

@@ -89,13 +89,11 @@ extern int h_errno;
 #   define vfork fork
 #endif
 
-/* Put this after #includes because <unistd.h> defines _XOPEN_*. */
-#ifndef Sock_size_t
-#  if _XOPEN_VERSION >= 5 || defined(_XOPEN_SOURCE_EXTENDED)
-#    define Sock_size_t Size_t
-#  else
-#    define Sock_size_t int
-#  endif
+/* Put this after #includes because <unistd.h> defines _XOPEN_VERSION. */
+#if _XOPEN_VERSION >= 4
+#   define Sock_size_t Size_t
+#else
+#   define Sock_size_t int
 #endif
 
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)

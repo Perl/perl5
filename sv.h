@@ -572,9 +572,9 @@ SV *newRV_noinc _((SV *));
 	    }
 
 #define SvSetSV(dst,src) \
-		SvSetSV_and(dst,src,/*nothing*/;)
+		SvSetSV_and(dst,src,)
 #define SvSetSV_nosteal(dst,src) \
-		SvSetSV_nosteal_and(dst,src,/*nothing*/;)
+		SvSetSV_nosteal_and(dst,src,)
 
 #define SvSetMagicSV(dst,src) \
 		SvSetSV_and(dst,src,SvSETMAGIC(dst))

@@ -404,22 +404,7 @@ if ($section =~ /^1/) {
     $name = uc File::Basename::basename($name);
 }
 $name =~ s/\.(pod|p[lm])$//i;
-
-# Lose everything up to the first of
-#     */lib/*perl*	standard or site_perl module
-#     */*perl*/lib	from -D prefix=/opt/perl
-#     */*perl*/		random module hierarchy
-# which works.
-$name =~ s-//+-/-g;
-if ($name =~ s-^.*?/lib/[^/]*perl[^/]*/--i
-	or $name =~ s-^.*?/[^/]*perl[^/]*/lib/--i
-	or $name =~ s-^.*?/[^/]*perl[^/]*/--i) {
-    # Lose ^arch/version/.
-    $name =~ s-^[^/]+/\d+\.\d+/--;
-}
-
-# Translate Getopt/Long to Getopt::Long, etc.
-$name =~ s(/)(::)g;
+$name =~ s(/)(::)g; # translate Getopt/Long to Getopt::Long, etc.
 
 if ($name ne 'something') {
     FCHECK: {

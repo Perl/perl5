@@ -622,11 +622,7 @@ sublex_start()
 	return THING;
     }
     if (op_type == OP_CONST || op_type == OP_READLINE) {
-	SV *sv = q(lex_stuff);
-	STRLEN len;
-	char *p = SvPV(sv, len);
-	yylval.opval = (OP*)newSVOP(op_type, 0, newSVpv(p, len));
-	SvREFCNT_dec(sv);
+	yylval.opval = (OP*)newSVOP(op_type, 0, q(lex_stuff));
 	lex_stuff = Nullsv;
 	return THING;
     }
