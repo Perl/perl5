@@ -242,6 +242,7 @@ lib/AutoSplit.pm	A module to split up autoload functions
 lib/Benchmark.pm	A module to time pieces of code and such
 lib/Carp.pm		Error message base class
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
+lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
 lib/English.pm		Readable aliases for short variables
 lib/Env.pm		Map environment into ordinary variables
 lib/Exporter.pm		Exporter base class
@@ -266,6 +267,7 @@ lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
 lib/Net/Ping.pm		Ping methods
 lib/Search/Dict.pm	A module to do binary search on dictionaries
+lib/SelfLoader.pm	A module to load functions only on demand.
 lib/Shell.pm		A module to make AUTOLOADEed system() calls
 lib/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Sys/Hostname.pm	Hostname methods
