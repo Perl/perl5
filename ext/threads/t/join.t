@@ -103,17 +103,17 @@ if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
   if (open PS, "ps -f |") { # Note: must work in (all) Linux(es).
     my ($sawpid, $sawexe);
     while (<PS>) {
-      s/\s+$//; # there seems to be extra whitespace at the end by ps(1)?
-      print "# $_\n";
+      chomp;
+      print "# [$_]\n";
       if (/^\S+\s+$$\s/) {
 	$sawpid++;
-	if (/\sfoobar\b/) {
+	if (/\sfoobar$/) {
 	  $sawexe++;
         }
 	last;
       }
     }
-    close PS;
+    close PS or die;
     if ($sawpid) {
       ok($sawpid && $sawexe, 'altering $0 is effective');
     } else {
