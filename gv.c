@@ -1240,7 +1240,7 @@ Perl_gp_free(pTHX_ GV *gv)
 
     SvREFCNT_dec(gp->gp_sv);
     SvREFCNT_dec(gp->gp_av);
-    if(gp->gp_hv && PL_stashcache)
+    if(gp->gp_hv && HvNAME(gp->gp_hv) && PL_stashcache)
         hv_delete(PL_stashcache, HvNAME(gp->gp_hv), strlen(HvNAME(gp->gp_hv)), G_DISCARD);
     SvREFCNT_dec(gp->gp_hv);
     SvREFCNT_dec(gp->gp_io);
