@@ -34,7 +34,8 @@ if (find PerlIO::Layer 'perlio') {
  {
   skip("miniperl can't rely on loading PerlIO::scalar")
       if $ENV{PERL_CORE_MINITEST};
-  eval 'PerlIO::scalar';
+  skip("no PerlIO::scalar") unless $Config{extensions} =~ /PerlIO::scalar/;
+  require PerlIO::scalar;
   my $fcontents = join "", map {"$_\015\012"} "a".."zzz";
   open my $fh, "<:crlf", \$fcontents;
   local $/ = "xxx";
