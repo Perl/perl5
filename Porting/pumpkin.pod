@@ -1323,7 +1323,7 @@ configure-and-build process to use your function.  Perform these steps.
 
 =item *
 
-Code and test the function you wish to add.  Test is carefully; you will
+Code and test the function you wish to add.  Test it carefully; you will
 have a much easier time debugging your code independently than when it is a
 part of perl.
 
