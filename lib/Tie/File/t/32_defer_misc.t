@@ -11,7 +11,7 @@ $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
 my ($o, $n);
 
-print "1..42\n";
+print "1..53\n";
 
 my $N = 1;
 use Tie::File;
