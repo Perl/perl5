@@ -298,12 +298,36 @@ prints a summary of the options.
 
 =item B<-i>[I<extension>]
 
-specifies that files processed by the C<E<lt>E<gt>> construct are to be edited
-in-place.  It does this by renaming the input file, opening the output
-file by the original name, and selecting that output file as the default
-for print() statements.  The extension, if supplied, is added to the name
-of the old file to make a backup copy.  If no extension is supplied, no
-backup is made.  From the shell, saying
+specifies that files processed by the C<E<lt>E<gt>> construct are to be
+edited in-place.  It does this by renaming the input file, opening the
+output file by the original name, and selecting that output file as the
+default for print() statements.  The extension, if supplied, is used to
+modify the name of the old file to make a backup copy, following these
+rules:
+
+If no extension is supplied, no backup is made and the current file is
+overwritten.
+
+If the extension doesn't contain a C<*> then it is appended to the end
+of the current filename as a suffix.
+
+If the extension does contain one or more C<*> characters, then each C<*>
+is replaced with the current filename.  In perl terms you could think of
+this as:
+
+    ($old_file_name = $extension) =~ s/\*/$file_name/g;
+
+This allows you to add a prefix to the backup file, instead of (or in
+addition to) a suffix:
+
+    $ perl -pi'bak_*' -e 's/bar/baz/' fileA	# backup to 'bak_fileA'
+
+Or even to place backup copies of the original files into another
+directory (provided the directory already exists):
+
+    $ perl -pi'old/*.bak' -e 's/bar/baz/' fileA # backup to 'old/fileA.bak'
+
+From the shell, saying
 
     $ perl -p -i.bak -e "s/foo/bar/; ... "
 

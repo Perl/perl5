@@ -421,11 +421,19 @@ nextargv(register GV *gv)
 		    continue;
 		}
 		if (*inplace) {
-#ifdef SUFFIX
-		    add_suffix(sv,inplace);
-#else
-		    sv_catpv(sv,inplace);
-#endif
+		    char *star = strchr(inplace, '*');
+		    if (star) {
+			char *begin = inplace;
+			sv_setpvn(sv, "", 0);
+			do {
+			    sv_catpvn(sv, begin, star - begin);
+			    sv_catpvn(sv, oldname, oldlen);
+			    begin = ++star;
+			} while ((star = strchr(begin, '*')));
+		    }
+		    else {
+			sv_catpv(sv,inplace);
+		    }
 #ifndef FLEXFILENAMES
 		    if (PerlLIO_stat(SvPVX(sv),&statbuf) >= 0
 		      && statbuf.st_dev == filedev
