@@ -2279,10 +2279,12 @@ struct ptr_tbl {
 #  define htovs(x)	vtohs(x)
 # endif
 	/* otherwise default to functions in util.c */
+#ifndef htovs
 short htovs(short n);
 short vtohs(short n);
 long htovl(long n);
 long vtohl(long n);
+#endif
 #endif
 
 /* *MAX Plus 1. A floating point value.
