@@ -29,6 +29,395 @@ Version v5.8.2		Maintenance release working toward v5.8.2
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 21635] By: nicholas                              on 2003/11/02  22:45:22
+        Log: Integrate:
+             [ 21634]
+             Provide Internals::new_hash_seed to return PL_new_hash_seed, and
+             make Hash::Util::hash_seed use this.
+     Branch: maint-5.8/perl
+	  !> lib/Hash/Util.pm universal.c
+____________________________________________________________________________
+[ 21633] By: nicholas                              on 2003/11/02  22:22:34
+        Log: Integrate:
+             [ 21588]
+             Subject: [PATCH] Devel::PPPort and scan_bin
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Wed, 29 Oct 2003 22:53:43 +0100
+             Message-ID: <037201c39e67$1faa9940$0c2f1fac@R2D2>
+     Branch: maint-5.8/perl
+	  !> ext/Devel/PPPort/PPPort.pm
+____________________________________________________________________________
+[ 21632] By: nicholas                              on 2003/11/02  21:56:48
+        Log: Integrate:
+             [ 21587]
+             Subject: [PATCH] change p4d2p to deal with new style diff2 output
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Thu, 30 Oct 2003 18:43:08 -0800
+             Message-ID: <dpi3qvgf1uke7pj1gcpgmoh622lqcvl6uc@4ax.com>
+     Branch: maint-5.8/perl
+	  !> Porting/p4d2p
+____________________________________________________________________________
+[ 21631] By: nicholas                              on 2003/11/02  21:55:32
+        Log: Integrate:
+             [ 21614]
+             Subject: Re: [PATCH bleadperl] (was Re: Is this brokenness in $< $( $> & $) ?)
+             From: Rick Delaney <rick@bort.ca>
+             Date: Mon, 27 Oct 2003 16:24:16 -0500
+             Message-ID: <20031027162416.H2233@biff.bort.ca>
+     Branch: maint-5.8/perl
+	  !> pp_hot.c
+____________________________________________________________________________
+[ 21630] By: nicholas                              on 2003/11/02  21:28:01
+        Log: 
+             Fix for [perl #24347] segfault with Safe
+             The empty %INC created for safe compartements was freed
+             too early.
+     Branch: maint-5.8/perl
+	  !> ext/Opcode/Opcode.xs
+____________________________________________________________________________
+[ 21629] By: nicholas                              on 2003/11/02  21:13:40
+        Log: Integrate:
+             [ 21599]
+             whoops, typo
+             
+             [ 21616]
+             Subject: DOCPATCH: does STORE need to return anything and if so what?
+             From: david nicol <whatever@davidnicol.com>
+             Date: 26 Oct 2003 22:34:04 -0600
+             Message-Id: <1067229244.1071.51.camel@plaza.davidnicol.com>
+             
+             [ 21625]
+             Mention perl 5.8.2-RC1 in perlhist, as spotted by Abigail.
+             
+             [ 21627]
+             Subject: [PATCH pod/perlguts.pod] update embed.pl description
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Sun, 2 Nov 2003 22:24:28 +0100
+             Message-ID: <007b01c3a187$b34c6110$0c2f1fac@R2D2>
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/shared.xs pod/perlguts.pod pod/perlhist.pod
+	  !> pod/perltie.pod
+____________________________________________________________________________
+[ 21626] By: nicholas                              on 2003/11/02  20:27:25
+        Log: Integrate:
+             [ 21615]
+             Subject: [PATCH] DB_File 1.807
+             From: "Paul Marquess" <Paul.Marquess@btinternet.com>
+             Date: Sat, 1 Nov 2003 13:50:12 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLOENMPAAA.Paul.Marquess@btinternet.com>
+     Branch: maint-5.8/perl
+	  !> ext/DB_File/Changes ext/DB_File/DB_File.pm
+	  !> ext/DB_File/DB_File.xs ext/DB_File/dbinfo
+	  !> ext/DB_File/t/db-hash.t ext/DB_File/t/db-recno.t
+____________________________________________________________________________
+[ 21624] By: nicholas                              on 2003/11/02  20:16:07
+        Log: Tweaks (from Jan Dubois, Petras Kudaras and Slaven Rezic)
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21623] By: nicholas                              on 2003/11/02  19:52:04
+        Log: Integrate:
+             [ 21617]
+             Portability nit for MinGW 3.
+             
+             Subject: MinGW-3.1.0-1 _CRTIMP definition preempting win32.h's
+             From: Greg Matheson <lang@ms.chinmin.edu.tw>
+             Date: Thu, 30 Oct 2003 14:11:58 +0800
+             Message-ID: <20031030141158.A11772@ms>
+             (actual patch by Abe Timmerman)
+             
+             [ 21619]
+             Quoted-printable is evil.
+     Branch: maint-5.8/perl
+	  !> win32/win32.h
+____________________________________________________________________________
+[ 21622] By: nicholas                              on 2003/11/02  18:50:41
+        Log: Integrate:
+             [ 21620]
+             Subject: [PATCH 5.8.2 @21574] OS/2 build
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Wed, 29 Oct 2003 14:00:18 -0800
+             Message-ID: <20031029220017.GA26384@math.berkeley.edu>
+     Branch: maint-5.8/perl
+	  !> ext/DynaLoader/DynaLoader_pm.PL makedef.pl os2/Makefile.SHs
+	  !> os2/OS2/REXX/REXX.xs os2/os2.c os2/os2_base.t os2/os2ish.h
+	  !> os2/perl2cmd.pl perlio.c
+____________________________________________________________________________
+[ 21621] By: nicholas                              on 2003/11/02  18:29:05
+        Log: Integrate:
+             [ 21618]
+             Stas spotted a missed s//new_/ for the hash seed renaming games
+     Branch: maint-5.8/perl
+	  !> perl.c
+____________________________________________________________________________
+[ 21613] By: nicholas                              on 2003/11/01  16:52:03
+        Log: @INC caching of failures was backed out
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21612] By: nicholas                              on 2003/11/01  16:32:46
+        Log: Integrate:
+             [ 21611]
+             D'oh! t/op/hash.t wasn't in the MANIFEST. Rafael spotted this
+     Branch: maint-5.8/perl
+	  !> MANIFEST
+____________________________________________________________________________
+[ 21610] By: nicholas                              on 2003/11/01  16:30:14
+        Log: Integrate:
+             [ 21589]
+             Subject: [5.8.x segfault + patch] chicken&egg segfault in -Dm -Mthreads
+             From: Stas Bekman <stas@stason.org>
+             Date: Wed, 29 Oct 2003 15:15:15 -0800
+             Message-ID: <3FA04A03.5010603@stason.org>
+             (enclosed in a #ifdef DEBUGGING)
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 21609] By: nicholas                              on 2003/11/01  16:14:51
+        Log: Integrate:
+             [ 21595]
+             Prevent the installation of makefiles that can be found
+             under lib/.
+     Branch: maint-5.8/perl
+	  !> installperl
+____________________________________________________________________________
+[ 21608] By: nicholas                              on 2003/11/01  15:35:16
+        Log: Integrate:
+             [ 21607]
+             mod_perl2 will require access to the Plan C hashing function.
+     Branch: maint-5.8/perl
+	  !> hv.h
+____________________________________________________________________________
+[ 21606] By: nicholas                              on 2003/11/01  14:58:31
+        Log: Integrate:
+             [ 21591]
+             Subject: [PATCH] Off-by-one error in regcomp.c
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Fri, 31 Oct 2003 12:16:11 +0000
+             Message-Id: <1067602571.12768@devpc01.iconmobile.de>
+             
+             [ 21593]
+             Test nit ; goes with change 21591
+     Branch: maint-5.8/perl
+	  !> regcomp.c t/lib/warnings/regcomp t/op/regmesg.t
+____________________________________________________________________________
+[ 21605] By: nicholas                              on 2003/11/01  14:38:22
+        Log: Integrate:
+             [ 21604]
+             Add Internals::HvREHASH to expose the rehashing flag
+             t/op/hash.t tests that pathological data triggers rehashing
+     Branch: maint-5.8/perl
+	  +> t/op/hash.t
+	  !> universal.c
+____________________________________________________________________________
+[ 21603] By: nicholas                              on 2003/11/01  13:03:55
+        Log: Integrate:
+             [ 21598]
+             [perl #24368] seg faults when deleting keys of shared hash refs
+             Ensure that the shared_sv get magic of the element being deleted
+             is called. Also, avoid posible memory leaks by wrapping all shared
+             context sections with ENTER/SAVETMPS
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 21602] By: nicholas                              on 2003/11/01  12:45:20
+        Log: Forgot to manually merge in the diffs rejected from 21601
+             due to LF/CRLF differences.
+     Branch: maint-5.8/perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 21601] By: nicholas                              on 2003/11/01  12:34:09
+        Log: Subject: [PATCH 5.8.1] make reentr.[ch] compatible with 5.8.0 again
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Thu, 30 Oct 2003 16:58:05 -0800
+             Message-ID: <mja3qv47kmrhiip1l8pfl7bij0reesjr6p@4ax.com>
+     Branch: maint-5.8/perl
+	   + reentr.inc
+	   ! MANIFEST installperl perl.h reentr.c reentr.h reentr.pl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 21600] By: nicholas                              on 2003/11/01  11:00:46
+        Log: Integrate:
+             [ 21590]
+             Subject: [patch pod/perlfunc.pod] separate two unrelated notes in require
+             From: Stas Bekman <stas@stason.org>
+             Date: Wed, 29 Oct 2003 16:47:24 -0800
+             Message-ID: <3FA05F9C.2080304@stason.org>
+             
+             [ 21592]
+             Subject: [PATCH] Document PERL_DL_NONLAZY
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 31 Oct 2003 03:13:03 -0800
+             Message-ID: <lrn0bhbqyo.fsf@caliper.activestate.com>
+             
+             [ 21596]
+             Subject: Re: [perl #24367] [PATCH] configure flag -Dextras="HTML::Parser" doesn't seem to do anything 
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 31 Oct 2003 15:32:35 -0500 (EST)
+             Message-ID: <Pine.SOL.4.53.0310311433440.8552@maxwell.phys.lafayette.edu>
+             (plus POD link fixes)
+     Branch: maint-5.8/perl
+	  !> INSTALL pod/perlfunc.pod pod/perlrun.pod
+____________________________________________________________________________
+[ 21597] By: nicholas                              on 2003/10/31  21:03:47
+        Log: Back out 21449 (MakeMaker SIGN)
+             Schwern will integrate and make a CPAN release first
+     Branch: maint-5.8/perl
+	   ! lib/ExtUtils/MM_Any.pm lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MakeMaker.pm pod/perldelta.pod
+____________________________________________________________________________
+[ 21594] By: nicholas                              on 2003/10/31  20:28:11
+        Log: Integrate (as TODO test):
+             [ 21565]
+             Subject: [PATCH t/comp/proto.t]  Test (5.9.x)
+             From: Abigail <abigail@abigail.nl>
+             Date: Mon, 27 Oct 2003 14:50:24 +0100
+             Message-ID: <20031027135024.GA12666@abigail.nl>
+     Branch: maint-5.8/perl
+	   ! t/comp/proto.t
+____________________________________________________________________________
+[ 21585] By: nicholas                              on 2003/10/30  22:54:30
+        Log: Integrate:
+             [ 21583]
+             Rewrite to correctly use test.pl
+             
+             Date: Thu, 30 Oct 2003 15:51:03 -0800
+             From: Michael G Schwern <schwern@pobox.com>
+             Subject: Re: Fix for the orange lion bug - aka empty sub bug
+             Message-ID: <20031030235103.GC27017@localhost.comcast.net>
+     Branch: maint-5.8/perl
+	  !> t/op/sub.t
+____________________________________________________________________________
+[ 21584] By: nicholas                              on 2003/10/30  22:40:29
+        Log: Integrate:
+             [ 21582]
+             Date: Thu, 30 Oct 2003 22:01:35 +0000
+             Subject: Fix for the orange lion bug - aka empty sub bug
+             From: Arthur Bergman <sky@nanisky.com>
+             Message-Id: <A10EEA90-0B24-11D8-93CD-000A95A2734C@nanisky.com>
+     Branch: maint-5.8/perl
+	  +> t/op/sub.t
+	  !> MANIFEST op.c
+____________________________________________________________________________
+[ 21581] By: nicholas                              on 2003/10/30  20:16:52
+        Log: Integrate:
+             [ 21580]
+             14 is the chain length for attack. From
+             
+             Message-ID: <20031030204117.16008.qmail@plover.com>
+             Subject: Re: 5.8.2-RC1 and mp2
+             Date: Thu, 30 Oct 2003 15:41:17 -0500
+             From: Mark Jason Dominus <mjd@plover.com>
+             
+             and
+             
+             From: Scott A Crosby <scrosby@cs.rice.edu>
+             Subject: Re: 5.8.2-RC1 and mp2
+             Date: 30 Oct 2003 14:08:06 -0600
+             Message-ID: <oydd6cea3q1.fsf@bert.cs.rice.edu>
+     Branch: maint-5.8/perl
+	  !> hv.c
+____________________________________________________________________________
+[ 21579] By: nicholas                              on 2003/10/30  19:24:06
+        Log: Revert part of 21497 (integration of 21418:
+             Subject: [PATCH] Fixing UNIVERSAL.pm's bit of unpleasantness)
+             and 21496 (caching of require failures in %INC)
+             Reconsider these for 5.8.3	
+     Branch: maint-5.8/perl
+	   ! lib/UNIVERSAL.pm pp_ctl.c t/comp/require.t t/op/universal.t
+____________________________________________________________________________
+[ 21578] By: nicholas                              on 2003/10/29  21:44:55
+        Log: Suggested changes from Chip
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21577] By: nicholas                              on 2003/10/29  18:42:35
+        Log: Integrate:
+             [ 21575]
+             Move a fcntl() example in perlfunc at a more proper place,
+             as suggested by :
+             Subject: [perl #24334] ioctl/fcntl doc confusion 
+             From: "perl-5.8.0@ton.iguana.be (via RT)" <perlbug-followup@perl.org>
+             Date: 28 Oct 2003 13:37:49 -0000
+             Message-ID: <rt-24334-66603.12.4990768314782@rt.perl.org>
+     Branch: maint-5.8/perl
+	  !> pod/perlfunc.pod
+____________________________________________________________________________
+[ 21576] By: nicholas                              on 2003/10/29  18:02:31
+        Log: Date: Wed, 29 Oct 2003 07:39:30 +0800
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Subject: Re: 5.8.2 perldelta
+             Message-ID: <20031028233930.GA31574@aut.dyndns.org>
+             
+             Date: Tue, 28 Oct 2003 21:35:23 -0800
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Subject: Re: 5.8.2 perldelta
+             Message-ID: <20031029053403.GA252@efn.org>
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21574] By: nicholas                              on 2003/10/28  22:19:10
+        Log: Ronald J Kimball correctly spotted that I forgot the timezone.
+             GMT. What else?
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21573] By: nicholas                              on 2003/10/28  21:43:07
+        Log: Improvements from Dave Mitchell, Tom Christiansen and
+             Rafael Garcia-Suarez
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21572] By: nicholas                              on 2003/10/28  21:15:11
+        Log: At last! A perldelta
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21571] By: nicholas                              on 2003/10/28  19:38:08
+        Log: Integrate:
+             [ 21567]
+             Upgrade to Time::HiRes 1.52.
+     Branch: maint-5.8/perl
+	  !> ext/Time/HiRes/Changes ext/Time/HiRes/HiRes.pm
+	  !> ext/Time/HiRes/Makefile.PL ext/Time/HiRes/t/HiRes.t
+____________________________________________________________________________
+[ 21570] By: nicholas                              on 2003/10/28  19:37:44
+        Log: Changes was in a mess, with some entries in triplicate.
+             ("This is your receipt for your husband...
+             and this is my receipt for your receipt")
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 21569] By: nicholas                              on 2003/10/28  18:36:05
+        Log: Integrate:
+             [ 21564]
+             Fix more shared threads leaks: add SAVETMPS to the second branch
+             of sharedsv_scalar_store().
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 21568] By: nicholas                              on 2003/10/28  18:20:54
+        Log: Drop the "RC1"
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 21562] By: nicholas                              on 2003/10/27  18:06:15
+        Log: Watch the wheels fall off, the springs fly out and the cogs jam...
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 21561] By: nicholas                              on 2003/10/27  18:02:11
+        Log: Integrate:
+             [ 21560]
+             Record the escape^Wrelease of 5.9.0
+     Branch: maint-5.8/perl
+	  !> pod/perlhist.pod
+____________________________________________________________________________
+[ 21559] By: nicholas                              on 2003/10/27  17:35:53
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21558] By: nicholas                              on 2003/10/27  17:29:16
         Log: Forgot to submit the updated table of contents
      Branch: maint-5.8/perl
