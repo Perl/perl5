@@ -2061,7 +2061,8 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    }
 	    if (SvPVX(dstr)) {
 		(void)SvOOK_off(dstr);		/* backoff */
-		Safefree(SvPVX(dstr));
+		if (SvLEN(dstr))
+		    Safefree(SvPVX(dstr));
 		SvLEN(dstr)=SvCUR(dstr)=0;
 	    }
 	}
@@ -2098,7 +2099,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		    SvFLAGS(dstr) &= ~SVf_OOK;
 		    Safefree(SvPVX(dstr) - SvIVX(dstr));
 		}
-		else
+		else if (SvLEN(dstr))
 		    Safefree(SvPVX(dstr));
 	    }
 	    (void)SvPOK_only(dstr);
@@ -2227,7 +2228,7 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 	return;
     }
     (void)SvOOK_off(sv);
-    if (SvPVX(sv))
+    if (SvPVX(sv) && SvLEN(sv))
 	Safefree(SvPVX(sv));
     Renew(ptr, len+1, char);
     SvPVX(sv) = ptr;
@@ -2273,6 +2274,13 @@ sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in 
 	sv_upgrade(sv,SVt_PVIV);
 
     if (!SvOOK(sv)) {
+	if (!SvLEN(sv)) { /* make copy of shared string */
+	    char *pvx = SvPVX(sv);
+	    STRLEN len = SvCUR(sv);
+	    SvGROW(sv, len + 1);
+	    Move(pvx,SvPVX(sv),len,char);
+	    *SvEND(sv) = '\0';
+	}
 	SvIVX(sv) = 0;
 	SvFLAGS(sv) |= SVf_OOK;
     }
