@@ -2505,7 +2505,8 @@ enum {
   to_sv_amg,   to_av_amg,
   to_hv_amg,   to_gv_amg,
   to_cv_amg,   iter_amg,    
-  max_amg_code,
+  max_amg_code
+  /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
 
 #define NofAMmeth max_amg_code
