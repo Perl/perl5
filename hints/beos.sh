@@ -39,13 +39,18 @@ d_syserrlst='undef'
 # large negative numbers really kind of suck in arrays.
 
 # Sockets didn't use to be real sockets but BONE changes this.
-# How does one test for BONEness?
-if [ ! -f /some/bone/file.h ]; then
+if [ ! -f /boot/develop/headers/be/bone/sys/socket.h ]; then
     d_socket='undef'
     d_gethbyaddr='undef'
     d_gethbyname='undef'
     d_getsbyname='undef'
+
+	libs='-lnet'
 fi
+
+# We provide a flock() emulation.
+d_flock='define'
+d_flockproto='define'
 
 ld='gcc'
 
@@ -55,8 +60,6 @@ case "$ldlibpthname" in
 '') ldlibpthname=LIBRARY_PATH ;;
 esac
 
-# the waitpid() wrapper
+# the waitpid() wrapper (among other things)
 archobjs="beos.o"
 test -f beos.c || cp beos/beos.c .
-
-

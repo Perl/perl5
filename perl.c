@@ -316,8 +316,9 @@ perl_construct(pTHXx)
 #endif
 
     /* Use sysconf(_SC_CLK_TCK) if available, if not
-     * available or if the sysconf() fails, use the HZ. */
-#if defined(HAS_SYSCONF) && defined(_SC_CLK_TCK)
+     * available or if the sysconf() fails, use the HZ.
+     * BeOS has those, but returns the wrong value. */
+#if defined(HAS_SYSCONF) && defined(_SC_CLK_TCK) && !defined(__BEOS__)
     PL_clocktick = sysconf(_SC_CLK_TCK);
     if (PL_clocktick <= 0)
 #endif
