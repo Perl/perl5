@@ -189,7 +189,6 @@ Thread
 Tie::Array
 Tie::Handle
 Tie::Hash
-Tie::Scalar
 Time::tm
 UNIVERSAL
 attributes
