@@ -80,8 +80,9 @@ SKIP: {
 
         printf "%s 11 -   masked SIGINT received %s\n",
           $sigint_called ? "ok" : "not ok",
-          $^O eq 'darwin' ? "# TODO Darwin seems to loose blocked signals" 
-                          : '';
+          $^O =~ /^(?:darwin|(?:free|net|open)bsd)$/ ?
+	      "# TODO $^O seems to loose blocked signals" 
+	      : '';
 
 	print "ok 12 - signal masks successful\n";
 	
