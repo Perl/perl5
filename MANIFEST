@@ -75,7 +75,7 @@ ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
 ext/B/B/disassemble	Disassemble compiler bytecode output
-ext/B/B/Disassembler.pm Compiler Disassembler backend
+ext/B/B/Disassembler.pm	Compiler Disassembler backend
 ext/B/B/Lint.pm		Compiler Lint backend
 ext/B/B/makeliblinks	Make a simplistic XSUB .so symlink tree for compiler
 ext/B/B/Showlex.pm	Compiler Showlex backend
@@ -95,7 +95,7 @@ ext/B/ramblings/curcop.runtime	Compiler ramblings: notes on curcop use
 ext/B/ramblings/flip-flop	Compiler ramblings: notes on flip-flop
 ext/B/ramblings/magic		Compiler ramblings: notes on magic
 ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
-ext/B/ramblings/runtime.porting Compiler ramblings: porting PP engine
+ext/B/ramblings/runtime.porting	`Compiler ramblings: porting PP engine
 ext/B/README		Compiler backend README
 ext/B/t/asmdata.t	See if B::Asmdata works
 ext/B/t/assembler.t	See if B::Assembler, B::Disassembler comply
@@ -138,7 +138,7 @@ ext/DB_File/DB_File.xs	Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS	Berkeley DB extension mkbootstrap fodder
 ext/DB_File/hints/dynixptx.pl	Hint for DB_File for named architecture
 ext/DB_File/hints/sco.pl	Hint for DB_File for named architecture
-ext/DB_File/Makefile.PL Berkeley DB extension makefile writer
+ext/DB_File/Makefile.PL	Berkeley DB extension makefile writer
 ext/DB_File/t/db-btree.t	See if DB_File works
 ext/DB_File/t/db-hash.t		See if DB_File works
 ext/DB_File/t/db-recno.t	See if DB_File works
@@ -195,11 +195,11 @@ ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
-ext/DynaLoader/DynaLoader_pm.PL Dynamic Loader perl module
+ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
-ext/DynaLoader/hints/openbsd.pl Hint for DynaLoader for named architecture
+ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
@@ -236,7 +236,7 @@ ext/Encode/lib/Encode/Alias.pm	Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
 ext/Encode/lib/Encode/Config.pm	Encode configuration module
-ext/Encode/lib/Encode/Encoder.pm       OO Encoder
+ext/Encode/lib/Encode/Encoder.pm	OO Encoder
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Guess.pm	Encode Extension
 ext/Encode/lib/Encode/JP/H2Z.pm	Encode extension
@@ -424,7 +424,7 @@ ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/typemap		GDBM extension interface types
 ext/I18N/Langinfo/fallback/const-c.inc	I18N::Langinfo
-ext/I18N/Langinfo/fallback/const-xs.inc I18N::Langinfo
+ext/I18N/Langinfo/fallback/const-xs.inc	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.t	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.xs	I18N::Langinfo
@@ -448,7 +448,7 @@ ext/IO/lib/IO/t/io_const.t	See if constants from IO work
 ext/IO/lib/IO/t/io_dir.t	See if directory-related methods from IO work
 ext/IO/lib/IO/t/io_dup.t	See if dup()-related methods from IO work
 ext/IO/lib/IO/t/io_linenum.t	See if I/O line numbers are tracked correctly
-ext/IO/lib/IO/t/io_multihomed.t See if INET sockets work with multi-homed hosts
+ext/IO/lib/IO/t/io_multihomed.t	See if INET sockets work with multi-homed hosts
 ext/IO/lib/IO/t/io_pipe.t	See if pipe()-related methods from IO work
 ext/IO/lib/IO/t/io_poll.t	See if poll()-related methods from IO work
 ext/IO/lib/IO/t/io_sel.t	See if select()-related methods from IO work
@@ -510,7 +510,7 @@ ext/MIME/Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME/Base64/t/unicode.t	See whether MIME::Base64 works
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
-ext/NDBM_File/hints/dynixptx.pl Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/sco.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
@@ -540,9 +540,9 @@ ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/ops.t		See if Opcode works
 ext/Opcode/Safe.pm		Safe extension Perl module
-ext/PerlIO/encoding/encoding.pm PerlIO::encoding
-ext/PerlIO/encoding/encoding.xs PerlIO::encoding
-ext/PerlIO/encoding/Makefile.PL PerlIO::encoding makefile writer
+ext/PerlIO/encoding/encoding.pm	PerlIO::encoding
+ext/PerlIO/encoding/encoding.xs	PerlIO::encoding
+ext/PerlIO/encoding/Makefile.PL	PerlIO::encoding makefile writer
 ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
 ext/PerlIO/PerlIO.t		See if PerlIO works
 ext/PerlIO/scalar/Makefile.PL	PerlIO layer for scalars
@@ -695,10 +695,10 @@ ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
 ext/threads/shared/t/av_refs.t	Tests for arrays containing references
 ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
 ext/threads/shared/t/cond.t	Test condition variables
-ext/threads/shared/t/disabled.t Test threads::shared when threads are disabled.
+ext/threads/shared/t/disabled.t	Test threads::shared when threads are disabled.
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
-ext/threads/shared/t/no_share.t Tests for disabled share on variables.
+ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
@@ -897,7 +897,7 @@ jpl/JPL_Rolo/cardfile		Rolodex sample application
 jpl/JPL_Rolo/JPL_Rolo.jpl	Rolodex sample application
 jpl/JPL_Rolo/Makefile.PL	Makefile generator
 jpl/JPL_Rolo/README		Instructions
-jpl/PerlInterpreter/Makefile.PL Makefile generator
+jpl/PerlInterpreter/Makefile.PL	Makefile generator
 jpl/PerlInterpreter/PerlInterpreter.c	Perl interpreter abstraction
 jpl/PerlInterpreter/PerlInterpreter.h	Perl interpreter abstraction
 jpl/PerlInterpreter/PerlInterpreter.java	Perl interpreter abstraction
@@ -1079,7 +1079,7 @@ lib/ExtUtils/MM_Any.pm		MakeMaker methods for Any OS
 lib/ExtUtils/MM_BeOS.pm		MakeMaker methods for BeOS
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_DOS.pm		MakeMaker methods for DOS
-lib/ExtUtils/MM_MacOS.pm        MakeMaker methods for MacOS
+lib/ExtUtils/MM_MacOS.pm	MakeMaker methods for MacOS
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker methods for Unix
@@ -1113,8 +1113,8 @@ lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/problems.t	How MakeMaker reacts to build problems
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
 lib/ExtUtils/t/VERSION_FROM.t	See if MakeMaker's VERSION_FROM works
-lib/ExtUtils/t/writemakefile_args.t   See if WriteMakefile works
-lib/ExtUtils/t/zz_cleanup_dummy.t   Cleanup MakeMaker test module
+lib/ExtUtils/t/writemakefile_args.t	See if WriteMakefile works
+lib/ExtUtils/t/zz_cleanup_dummy.t	Cleanup MakeMaker test module
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
@@ -1184,7 +1184,7 @@ lib/Getopt/Long/CHANGES		Getopt::Long changes
 lib/Getopt/Long/README		Getopt::Long README
 lib/Getopt/Long/t/gol-basic.t	See if Getopt::Long works
 lib/Getopt/Long/t/gol-compat.t	See if Getopt::Long works
-lib/Getopt/Long/t/gol-linkage.t See if Getopt::Long works
+lib/Getopt/Long/t/gol-linkage.t	See if Getopt::Long works
 lib/Getopt/Long/t/gol-oo.t	See if Getopt::Long works
 lib/Getopt/Std.pm		Fetch command options (getopt, getopts)
 lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
@@ -1500,7 +1500,7 @@ lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Harness.pm		A test harness
-lib/Test/Harness/Assert.pm  Test::Harness::Assert (internal use only)
+lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
 lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
 lib/Test/Harness/Straps.pm	Test::Harness::Straps
@@ -1517,7 +1517,7 @@ lib/Test/More.pm		More utilities for writing tests
 lib/Test/Simple.pm		Basic utility for writing tests
 lib/Test/Simple/Changes		Test::Simple changes
 lib/Test/Simple/README		Test::Simple README
-lib/Test/Simple/t/bad_plan.t    Test::Builder plan() test
+lib/Test/Simple/t/bad_plan.t	Test::Builder plan() test
 lib/Test/Simple/t/buffer.t	Test::Builder buffering test
 lib/Test/Simple/t/Builder.t	Test::Builder tests
 lib/Test/Simple/t/curr_test.t	Test::Builder->curr_test tests
@@ -1528,14 +1528,14 @@ lib/Test/Simple/t/extra.t	Test::Simple test
 lib/Test/Simple/t/fail-like.t	Test::More test, like() failures
 lib/Test/Simple/t/fail-more.t	Test::More test, tests failing
 lib/Test/Simple/t/fail.t	Test::Simple test, test failures
-lib/Test/Simple/t/filehandles.t Test::Simple test, STDOUT can be played with
+lib/Test/Simple/t/filehandles.t	Test::Simple test, STDOUT can be played with
 lib/Test/Simple/t/fork.t	Test::More fork tests
 lib/Test/Simple/t/has_plan.t	Test::Builder->plan tests
 lib/Test/Simple/t/has_plan2.t	Test::More->plan tests
 lib/Test/Simple/t/import.t	Test::More test, importing functions
 lib/Test/Simple/t/is_deeply.t	Test::More test, is_deeply()
-lib/Test/Simple/t/ok_obj.t Test::Builder object tests
-lib/Test/Simple/t/maybe_regex.t Test::Builder->maybe_regex() tests
+lib/Test/Simple/t/ok_obj.t	Test::Builder object tests
+lib/Test/Simple/t/maybe_regex.t	Test::Builder->maybe_regex() tests
 lib/Test/Simple/t/missing.t	Test::Simple test, missing tests
 lib/Test/Simple/t/More.t	Test::More test, basic stuff
 lib/Test/Simple/t/no_ending.t	Test::Builder test, no_ending()
@@ -1550,7 +1550,7 @@ lib/Test/Simple/t/simple.t	Test::Simple test, basic stuff
 lib/Test/Simple/t/skip.t	Test::More test, SKIP tests
 lib/Test/Simple/t/skipall.t	Test::More test, skip all tests
 lib/Test/Simple/t/strays.t	Test::Builder stray newline checks
-lib/Test/Simple/t/threads.t     Test::Builder thread-safe checks
+lib/Test/Simple/t/threads.t	Test::Builder thread-safe checks
 lib/Test/Simple/t/todo.t	Test::More test, TODO tests
 lib/Test/Simple/t/undef.t	Test::More test, undefs don't cause warnings
 lib/Test/Simple/t/useing.t	Test::More test, compile test
@@ -1589,8 +1589,8 @@ lib/Text/Wrap.pm		Paragraph formatter
 lib/Thread.pm			Thread extensions frontend
 lib/Thread/Queue.pm		Threadsafe queue
 lib/Thread/Queue.t		See if threadsafe queue works
-lib/Thread/Semaphore.pm         Threadsafe semaphore
-lib/Thread/Semaphore.t          See if threadsafe semaphore works
+lib/Thread/Semaphore.pm		Threadsafe semaphore
+lib/Thread/Semaphore.t		See if threadsafe semaphore works
 lib/Tie/Array.pm		Base class for tied arrays
 lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
@@ -1608,8 +1608,8 @@ lib/Tie/File/t/07_rv_splice.t	SPLICE method return value tests for Tie::File
 lib/Tie/File/t/08_ro.t		read-only mode tests for Tie::File
 lib/Tie/File/t/09_gen_rs.t	Like 01_gen.t, with unusual record separator
 lib/Tie/File/t/10_splice_rs.t	Like 04_splice.t, with unusual record separator
-lib/Tie/File/t/11_rv_splice_rs.t  Like 07_rv_splice.t, with unusual record separator
-lib/Tie/File/t/12_longfetch_rs.t  Like 03_longfetch.t, with unusual record separator
+lib/Tie/File/t/11_rv_splice_rs.t	Like 07_rv_splice.t, with unusual record separator
+lib/Tie/File/t/12_longfetch_rs.t	Like 03_longfetch.t, with unusual record separator
 lib/Tie/File/t/13_size_rs.t	Like 05_size.t, with unusual record separator
 lib/Tie/File/t/14_lock.t	File locking method tests for Tie::File
 lib/Tie/File/t/15_pushpop.t	PUSH / POP / SHIFT / UNSHIFT for Tie::File
@@ -1620,9 +1620,9 @@ lib/Tie/File/t/19_cache.t	Read cache exercises and regression for Tie::File
 lib/Tie/File/t/20_cache_full.t	LRU expiry exercises and regression for Tie::File
 lib/Tie/File/t/21_win32.t	Win32 special behavior of Tie::File
 lib/Tie/File/t/22_autochomp.t	'autochomp' option of Tie::File
-lib/Tie/File/t/23_rv_ac_splice.t  Like 07_rv_splice.t, but with autochomp
+lib/Tie/File/t/23_rv_ac_splice.t	Like 07_rv_splice.t, but with autochomp
 lib/Tie/File/t/24_cache_loop.t	Regression for old Tie::File cache bug
-lib/Tie/File/t/25_gen_nocache.t Like 01_gen.t, but with caching disabled
+lib/Tie/File/t/25_gen_nocache.t	Like 01_gen.t, but with caching disabled
 lib/Tie/File/t/26_twrite.t	Unit tests for Tie::File::_twrite
 lib/Tie/File/t/30_defer.t	deferred writing feature tests for Tie::File
 lib/Tie/File/t/31_autodefer.t	'autodefer' feature tests for Tie::File
@@ -1970,7 +1970,7 @@ lib/unicore/Name.pl		Unicode character database
 lib/unicore/NamesList.txt	Unicode character database
 lib/unicore/Number.pl		Unicode character database
 lib/unicore/Properties		Built-in \p{...} / \P{...} property list
-lib/unicore/PropertyAliases.txt Unicode character database
+lib/unicore/PropertyAliases.txt	Unicode character database
 lib/unicore/PropList.txt	Unicode character database
 lib/unicore/PropValueAliases.txt	Unicode character database
 lib/unicore/README.perl		Unicode character database
@@ -2118,7 +2118,7 @@ os2/OS2/Process/Makefile.PL	system() constants in a module
 os2/OS2/Process/MANIFEST	system() constants in a module
 os2/OS2/Process/Process.pm	system() constants in a module
 os2/OS2/Process/Process.xs	system() constants in a module
-os2/OS2/Process/t/os2_process.t Tests
+os2/OS2/Process/t/os2_process.t	Tests
 os2/OS2/Process/t/os2_process_kid.t	Tests
 os2/OS2/Process/t/os2_process_text.t	Tests
 os2/OS2/REXX/Changes		DLL access module
@@ -2292,7 +2292,7 @@ Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/apply		Apply patches sent by mail
 Porting/check83.pl	Check whether we are 8.3-friendly
 Porting/checkURL.pl	Check whether we have working URLs
-Porting/checkVERSION.pl Check whether we have $VERSIONs
+Porting/checkVERSION.pl	Check whether we have $VERSIONs
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/Contract	Social contract for contributed modules in Perl core
@@ -2302,6 +2302,7 @@ Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/Glossary	Glossary of config.sh variables
+Porting/manicheck	Check against MANIFEST
 Porting/makerel		Release making utility
 Porting/p4d2p		Generate patch from p4 diff
 Porting/p4genpatch	Generate patch from p4 change in repository (obsoletes p4desc)
@@ -2452,8 +2453,8 @@ t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
-t/lib/MakeMaker/Test/Utils.pm		MakeMaker test utilities
-t/lib/Math/BigFloat/Subclass.pm Empty subclass of BigFloat for test
+t/lib/MakeMaker/Test/Utils.pm	MakeMaker test utilities
+t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
