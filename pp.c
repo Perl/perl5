@@ -879,16 +879,15 @@ PP(pp_postdec)
 
 PP(pp_pow)
 {
-    dSP; dATARGET; tryAMAGICbin(pow,opASSIGN);
+    dSP; dATARGET;
 #ifdef PERL_PRESERVE_IVUV
-    /* ** is implemented with pow. pow is floating point. Perl programmers
-       write 2 ** 31 and expect it to be 2147483648
-       pow never made any guarantee to deliver a result to 53 (or whatever)
-       bits of accuracy. Which is unfortunate, as perl programmers expect it
-       to, and on some platforms (eg Irix with long doubles) it doesn't in
-       a very visible case. (2 ** 31, which a regression test uses)
-       So we'll implement power-of-2 ** +ve integer with multiplies, to avoid
-       these problems.  */
+    bool is_int = 0;
+#endif
+    tryAMAGICbin(pow,opASSIGN);
+#ifdef PERL_PRESERVE_IVUV
+    /* For integer to integer power, we do the calculation by hand wherever
+       we're sure it is safe; otherwise we call pow() and try to convert to
+       integer afterwards. */
     {
         SvIV_please(TOPm1s);
         if (SvIOK(TOPm1s)) {
@@ -920,10 +919,12 @@ PP(pp_pow)
                         goto float_it; /* Can't do negative powers this way.  */
                     }
                 }
-                /* now we have integer ** positive integer.
-                   foo & (foo - 1) is zero only for a power of 2.  */
+                /* now we have integer ** positive integer. */
+                is_int = 1;
+
+                /* foo & (foo - 1) is zero only for a power of 2.  */
                 if (!(baseuv & (baseuv - 1))) {
-                    /* We are raising power-of-2 to postive integer.
+                    /* We are raising power-of-2 to a positive integer.
                        The logic here will work for any base (even non-integer
                        bases) but it can be less accurate than
                        pow (base,power) or exp (power * log (base)) when the
@@ -935,20 +936,6 @@ PP(pp_pow)
                     NV base = baseuok ? baseuv : -(NV)baseuv;
                     int n = 0;
 
-                    /* The logic is this.
-                       x ** n === x ** m1 * x ** m2 where n = m1 + m2
-                       so as 42 is 32 + 8 + 2
-                       x ** 42 can be written as
-                       x ** 32 * x ** 8 * x ** 2
-                       I can calculate x ** 2, x ** 4, x ** 8 etc trivially:
-                       x ** 2n is x ** n * x ** n
-                       So I loop round, squaring x each time
-                       (x, x ** 2, x ** 4, x ** 8) and multiply the result
-                       by the x-value whenever that bit is set in the power.
-                       To finish as soon as possible I zero bits in the power
-                       when I've done them, so that power becomes zero when
-                       I clear the last bit (no more to do), and the loop
-                       terminates.  */
                     for (; power; base *= base, n++) {
                         /* Do I look like I trust gcc with long longs here?
                            Do I hell.  */
@@ -956,24 +943,69 @@ PP(pp_pow)
                         if (power & bit) {
                             result *= base;
                             /* Only bother to clear the bit if it is set.  */
-                            power &= ~bit;
+                            power -= bit;
                            /* Avoid squaring base again if we're done. */
                            if (power == 0) break;
                         }
                     }
                     SP--;
                     SETn( result );
+                    SvIV_please(TOPs);
                     RETURN;
-                }
-            }
-        }
+		} else {
+		    register unsigned int highbit = 8 * sizeof(UV);
+		    register unsigned int lowbit = 0;
+		    register unsigned int diff;
+		    while ((diff = (highbit - lowbit) >> 1)) {
+			if (baseuv & ~((1 << (lowbit + diff)) - 1))
+			    lowbit += diff;
+			else 
+			    highbit -= diff;
+		    }
+		    /* we now have baseuv < 2 ** highbit */
+		    if (power * highbit <= 8 * sizeof(UV)) {
+			/* result will definitely fit in UV, so use UV math
+			   on same algorithm as above */
+			register UV result = 1;
+			register UV base = baseuv;
+			register int n = 0;
+			for (; power; base *= base, n++) {
+			    register UV bit = (UV)1 << (UV)n;
+			    if (power & bit) {
+				result *= base;
+				power -= bit;
+				if (power == 0) break;
+			    }
+			}
+			SP--;
+			if (baseuok || !(power & 1))
+			    /* answer is positive */
+			    SETu( result );
+			else if (result <= (UV)IV_MAX)
+			    /* answer negative, fits in IV */
+			    SETi( -(IV)result );
+			else if (result == (UV)IV_MIN) 
+			    /* 2's complement assumption: special case IV_MIN */
+			    SETi( IV_MIN );
+			else
+			    /* answer negative, doesn't fit */
+			    SETn( -(NV)result );
+			RETURN;
+		    } 
+		}
+	    }
+	}
     }
-      float_it:
+  float_it:
 #endif    
     {
-        dPOPTOPnnrl;
-        SETn( Perl_pow( left, right) );
-        RETURN;
+	dPOPTOPnnrl;
+	SETn( Perl_pow( left, right) );
+#ifdef PERL_PRESERVE_IVUV
+	if (is_int)
+	    SvIV_please(TOPs);
+#endif
+	RETURN;
     }
 }
 

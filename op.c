@@ -1942,19 +1942,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     op_free(o);
     if (type == OP_RV2GV)
 	return newGVOP(OP_GV, 0, (GV*)sv);
-    else {
-	/* try to smush double to int, but don't smush -2.0 to -2 */
-	if ((SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK)) == SVf_NOK &&
-	    type != OP_NEGATE)
-	{
-#ifdef PERL_PRESERVE_IVUV
-	    /* Only bother to attempt to fold to IV if
-	       most operators will benefit  */
-	    SvIV_please(sv);
-#endif
-	}
-	return newSVOP(OP_CONST, 0, sv);
-    }
+    return newSVOP(OP_CONST, 0, sv);
 
   nope:
     return o;
