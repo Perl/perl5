@@ -2198,8 +2198,12 @@ char *crypt (const char*, const char*);
 #    ifndef getenv
 char *getenv (const char*);
 #    endif /* !getenv */
-#    if !defined(EPOC) && !(defined(__hpux) && defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64) && !defined(HAS_LSEEK_PROTO)
+#    if !defined(HAS_LSEEK_PROTO) && !defined(EPOC) && !(defined(__hpux)
+#      ifdef _FILE_OFFSET_BITS
+#        if_FILE_OFFSET_BITS == 64
 Off_t lseek (int,Off_t,int);
+#        endif
+#      endif
 #    endif
 #  endif /* !DONT_DECLARE_STD */
 char *getlogin (void);
