@@ -42,6 +42,26 @@ stack_grow(SV **sp, SV **p, int n)
 #define GROW(old) ((old) + 1)
 #endif
 
+PERL_SI *
+new_stackinfo(I32 stitems, I32 cxitems)
+{
+    PERL_SI *si;
+    PERL_CONTEXT *cxt;
+    New(56, si, 1, PERL_SI);
+    si->si_stack = newAV();
+    AvREAL_off(si->si_stack);
+    av_extend(si->si_stack, stitems > 0 ? stitems-1 : 0);
+    AvALLOC(si->si_stack)[0] = &sv_undef;
+    AvFILLp(si->si_stack) = 0;
+    si->si_prev = 0;
+    si->si_next = 0;
+    si->si_cxmax = cxitems - 1;
+    si->si_cxix = -1;
+    si->si_type = SI_UNDEF;
+    New(56, si->si_cxstack, cxitems, PERL_CONTEXT);
+    return si;
+}
+
 I32
 cxinc(void)
 {

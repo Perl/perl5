@@ -1273,13 +1273,6 @@ die(pat, va_alist)
 			  "%p: die: curstack = %p, mainstack = %p\n",
 			  thr, curstack, mainstack));
 #endif /* USE_THREADS */
-    /* We have to switch back to mainstack or die_where may try to pop
-     * the eval block from the wrong stack if die is being called from a
-     * signal handler.  - dkindred@cs.cmu.edu */
-    if (curstack != mainstack) {
-        dSP;
-        SWITCHSTACK(curstack, mainstack);
-    }
 
 #ifdef I_STDARG
     va_start(args, pat);

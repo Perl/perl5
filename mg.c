@@ -954,6 +954,7 @@ magic_setnkeys(SV *sv, MAGIC *mg)
     return 0;
 }          
 
+/* caller is responsible for stack switching/cleanup */
 static int
 magic_methcall(MAGIC *mg, char *meth, I32 flags, int n, SV *val)
 {
@@ -988,11 +989,13 @@ magic_methpack(SV *sv, MAGIC *mg, char *meth)
 
     ENTER;
     SAVETMPS;
+    PUSHSTACK(SI_MAGIC);
 
     if (magic_methcall(mg, meth, G_SCALAR, 2, NULL)) {
 	sv_setsv(sv, *stack_sp--);
     }
 
+    POPSTACK();
     FREETMPS;
     LEAVE;
     return 0;
@@ -1009,9 +1012,12 @@ magic_getpack(SV *sv, MAGIC *mg)
 
 int
 magic_setpack(SV *sv, MAGIC *mg)
-{   
+{
+    dSP;
     ENTER;
+    PUSHSTACK(SI_MAGIC);
     magic_methcall(mg, "STORE", G_SCALAR|G_DISCARD, 3, sv);
+    POPSTACK();
     LEAVE;
     return 0;
 }
@@ -1026,15 +1032,17 @@ magic_clearpack(SV *sv, MAGIC *mg)
 U32
 magic_sizepack(SV *sv, MAGIC *mg)
 {         
-    dTHR;
+    dSP;
     U32 retval = 0;
 
     ENTER;
     SAVETMPS;
+    PUSHSTACK(SI_MAGIC);
     if (magic_methcall(mg, "FETCHSIZE", G_SCALAR, 2, NULL)) {
 	sv = *stack_sp--;
 	retval = (U32) SvIV(sv)-1;
     }
+    POPSTACK();
     FREETMPS;
     LEAVE;
     return retval;
@@ -1044,11 +1052,13 @@ int magic_wipepack(SV *sv, MAGIC *mg)
 {
     dSP;
 
+    ENTER;
+    PUSHSTACK(SI_MAGIC);
     PUSHMARK(SP);
     XPUSHs(mg->mg_obj);
     PUTBACK;
-    ENTER;
     perl_call_method("CLEAR", G_SCALAR|G_DISCARD);
+    POPSTACK();
     LEAVE;
     return 0;
 }
@@ -1061,6 +1071,7 @@ magic_nextpack(SV *sv, MAGIC *mg, SV *key)
 
     ENTER;
     SAVETMPS;
+    PUSHSTACK(SI_MAGIC);
     PUSHMARK(SP);
     EXTEND(SP, 2);
     PUSHs(mg->mg_obj);
@@ -1071,6 +1082,7 @@ magic_nextpack(SV *sv, MAGIC *mg, SV *key)
     if (perl_call_method(meth, G_SCALAR))
 	sv_setsv(key, *stack_sp--);
 
+    POPSTACK();
     FREETMPS;
     LEAVE;
     return 0;
@@ -1803,17 +1815,13 @@ sighandler(int sig)
     HV *st;
     SV *sv, *tSv = Sv;
     CV *cv = Nullcv;
-    AV *oldstack;
     OP *myop = op;
     U32 flags = 0;
     I32 o_save_i = savestack_ix, type;
-    PERL_CONTEXT *cx;
     XPV *tXpv = Xpv;
     
     if (savestack_ix + 15 <= savestack_max)
 	flags |= 1;
-    if (cxstack_ix < cxstack_max - 2)
-	flags |= 2;
     if (markstack_ptr < markstack_max - 2)
 	flags |= 4;
     if (retstack_ix < retstack_max - 2)
@@ -1821,12 +1829,6 @@ sighandler(int sig)
     if (scopestack_ix < scopestack_max - 3)
 	flags |= 16;
 
-    if (flags & 2) {		/* POPBLOCK may decrease cxstack too early. */
-	cxstack_ix++;		/* Protect from overwrite. */
-	cx = &cxstack[cxstack_ix];
-	type = cx->cx_type;		/* Can be during partial write. */
-	cx->cx_type = CXt_NULL;		/* Make it safe for unwind. */
-    }
     if (!psig_ptr[sig])
 	die("Signal SIG%s received, but no signal handler set.\n",
 	    sig_name[sig]);
@@ -1861,11 +1863,6 @@ sighandler(int sig)
 	goto cleanup;
     }
 
-    oldstack = curstack;
-    if (curstack != signalstack)
-	AvFILLp(signalstack) = 0;
-    SWITCHSTACK(curstack, signalstack);
-
     if(psig_name[sig]) {
     	sv = SvREFCNT_inc(psig_name[sig]);
 	flags |= 64;
@@ -1874,20 +1871,18 @@ sighandler(int sig)
 	sv = sv_newmortal();
 	sv_setpv(sv,sig_name[sig]);
     }
+
+    PUSHSTACK(SI_SIGNAL);
     PUSHMARK(SP);
     PUSHs(sv);
     PUTBACK;
 
     perl_call_sv((SV*)cv, G_DISCARD);
 
-    SWITCHSTACK(signalstack, oldstack);
+    POPSTACK();
 cleanup:
     if (flags & 1)
 	savestack_ix -= 8; /* Unprotect save in progress. */
-    if (flags & 2) {
-	cxstack[cxstack_ix].cx_type = type;
-	cxstack_ix -= 1;
-    }
     if (flags & 4) 
 	markstack_ptr--;
     if (flags & 8) 

@@ -115,7 +115,7 @@ debstack(void)
     dTHR;
     I32 top = stack_sp - stack_base;
     register I32 i = top - 30;
-    I32 *markscan = markstack;
+    I32 *markscan = curstackinfo->si_markbase;
 
     if (i < 0)
 	i = 0;
