@@ -618,7 +618,7 @@ sleep(...)
 	if (items > 0) {
 	    NV seconds  = SvNV(ST(0));
 	    if (seconds >= 0.0) {
-	         UV useconds = 1E6 * (seconds - (UV)seconds);
+	         UV useconds = (UV)(1E6 * (seconds - (UV)seconds));
 		 if (seconds >= 1.0)
 		     sleep((UV)seconds);
 		 usleep(useconds);

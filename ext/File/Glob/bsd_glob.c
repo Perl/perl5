@@ -520,7 +520,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 	/* Copy up to the end of the string or / */
 	eb = &patbuf[patbuf_len - 1];
 	for (p = pattern + 1, h = (char *) patbuf;
-	     h < (char*)eb && *p && *p != BG_SLASH; *h++ = *p++)
+	     h < (char*)eb && *p && *p != BG_SLASH; *h++ = (char)*p++)
 		;
 
 	*h = BG_EOS;
@@ -1164,7 +1164,7 @@ static int
 g_Ctoc(register const Char *str, char *buf, STRLEN len)
 {
 	while (len--) {
-		if ((*buf++ = *str++) == BG_EOS)
+		if ((*buf++ = (char)*str++) == BG_EOS)
 			return (0);
 	}
 	return (1);

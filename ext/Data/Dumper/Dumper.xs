@@ -147,10 +147,10 @@ esc_q_utf8(pTHX_ SV* sv, register char *src, register STRLEN slen)
 
             if (k == '"' || k == '\\' || k == '$' || k == '@') {
                 *r++ = '\\';
-                *r++ = k;
+                *r++ = (char)k;
             }
             else if (k < 0x80)
-                *r++ = k;
+                *r++ = (char)k;
             else {
                 r += sprintf(r, "\\x{%"UVxf"}", k);
             }

@@ -61,7 +61,7 @@ enc_pack(pTHX_ SV *result,STRLEN size,U8 endian,UV value)
 	d += SvCUR(result);
 	SvCUR_set(result,SvCUR(result)+size);
 	while (size--) {
-	    *d++ = value & 0xFF;
+	    *d++ = (U8)(value & 0xFF);
 	    value >>= 8;
 	}
 	break;
@@ -70,7 +70,7 @@ enc_pack(pTHX_ SV *result,STRLEN size,U8 endian,UV value)
 	SvCUR_set(result,SvCUR(result)+size);
 	d += SvCUR(result);
 	while (size--) {
-	    *--d = value & 0xFF;
+	    *--d = (U8)(value & 0xFF);
 	    value >>= 8;
 	}
 	break;

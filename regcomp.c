@@ -4775,7 +4775,6 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	
 	    if (lv) {
 		if (sw) {
-		    UV i;
 		    U8 s[UTF8_MAXLEN+1];
 		
 		    for (i = 0; i <= 256; i++) { /* just the first 256 */

@@ -317,7 +317,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    if (SvLEN(e->dataSV) && SvPVX(e->dataSV)) {
 		Safefree(SvPVX(e->dataSV));
 	    }
-	    if (use > e->base.bufsiz) {
+	    if (use > (SSize_t)e->base.bufsiz) {
 		if (e->flags & NEEDS_LINES) {
 		    /* Have to grow buffer */
 		    e->base.bufsiz = use;
@@ -427,7 +427,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    PUTBACK;
 	    s = SvPV(str, len);
 	    count = PerlIO_write(PerlIONext(f),s,len);
-	    if (count != len) {
+	    if ((STRLEN)count != len) {
 		code = -1;
 	    }
 	    FREETMPS;
@@ -447,7 +447,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    if (e->dataSV && SvCUR(e->dataSV)) {
 		s = SvPV(e->dataSV, len);
 		count = PerlIO_unread(PerlIONext(f),s,len);
-		if (count != len) {
+		if ((STRLEN)count != len) {
 		    code = -1;
 		}
 	    }
@@ -478,7 +478,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		PUTBACK;
 		s = SvPV(str, len);
 		count = PerlIO_unread(PerlIONext(f),s,len);
-		if (count != len) {
+		if ((STRLEN)count != len) {
 		    code = -1;
 		}
 		FREETMPS;

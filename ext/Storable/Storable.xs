@@ -2695,7 +2695,7 @@ static int store_hook(
 		PUTMARK(clen);
 	}
 	if (len2)
-		WRITE(pv, len2);	/* Final \0 is omitted */
+		WRITE(pv, (SSize_t)len2);	/* Final \0 is omitted */
 
 	/* [<len3> <object-IDs>] */
 	if (flags & SHF_HAS_LIST) {
@@ -3059,7 +3059,7 @@ static int magic_write(stcxt_t *cxt)
                  : -1));
 
 	if (cxt->fio)
-		WRITE(magicstr, strlen(magicstr));	/* Don't write final \0 */
+		WRITE(magicstr, (SSize_t)strlen(magicstr));	/* Don't write final \0 */
 
 	/*
 	 * Starting with 0.6, the "use_network_order" byte flag is also used to
@@ -3085,7 +3085,7 @@ static int magic_write(stcxt_t *cxt)
 	sprintf(buf, "%lx", (unsigned long) BYTEORDER);
 	c = (unsigned char) strlen(buf);
 	PUTMARK(c);
-	WRITE(buf, (unsigned int) c);		/* Don't write final \0 */
+	WRITE(buf, (SSize_t)c);		/* Don't write final \0 */
 	PUTMARK((unsigned char) sizeof(int));
 	PUTMARK((unsigned char) sizeof(long));
 	PUTMARK((unsigned char) sizeof(char *));
@@ -4479,7 +4479,7 @@ static SV *retrieve_hash(stcxt_t *cxt, char *cname)
 		 */
 
 		RLEN(size);						/* Get key size */
-		KBUFCHK(size);					/* Grow hash key read pool if needed */
+		KBUFCHK((STRLEN)size);					/* Grow hash key read pool if needed */
 		if (size)
 			READ(kbuf, size);
 		kbuf[size] = '\0';				/* Mark string end, just in case */
@@ -4609,7 +4609,7 @@ static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
 #endif
 
             RLEN(size);						/* Get key size */
-            KBUFCHK(size);					/* Grow hash key read pool if needed */
+            KBUFCHK((STRLEN)size);				/* Grow hash key read pool if needed */
             if (size)
                 READ(kbuf, size);
             kbuf[size] = '\0';				/* Mark string end, just in case */
@@ -4773,7 +4773,7 @@ static SV *old_retrieve_hash(stcxt_t *cxt, char *cname)
 		if (c != SX_KEY)
 			(void) retrieve_other((stcxt_t *) 0, 0);	/* Will croak out */
 		RLEN(size);						/* Get key size */
-		KBUFCHK(size);					/* Grow hash key read pool if needed */
+		KBUFCHK((STRLEN)size);					/* Grow hash key read pool if needed */
 		if (size)
 			READ(kbuf, size);
 		kbuf[size] = '\0';				/* Mark string end, just in case */
@@ -4826,7 +4826,7 @@ static SV *magic_check(stcxt_t *cxt)
 		STRLEN len = sizeof(magicstr) - 1;
 		STRLEN old_len;
 
-		READ(buf, len);					/* Not null-terminated */
+		READ(buf, (SSize_t)len);			/* Not null-terminated */
 		buf[len] = '\0';				/* Is now */
 
 		if (0 == strcmp(buf, magicstr))
@@ -4838,7 +4838,7 @@ static SV *magic_check(stcxt_t *cxt)
 		 */
 
 		old_len = sizeof(old_magicstr) - 1;
-		READ(&buf[len], old_len - len);
+		READ(&buf[len], (SSize_t)(old_len - len));
 		buf[old_len] = '\0';			/* Is now null-terminated */
 
 		if (strcmp(buf, old_magicstr))
@@ -5065,7 +5065,7 @@ first_time:		/* Will disappear when support for old format is dropped */
 			default:
 				return (SV *) 0;		/* Failed */
 			}
-			KBUFCHK(len);				/* Grow buffer as necessary */
+			KBUFCHK((STRLEN)len);			/* Grow buffer as necessary */
 			if (len)
 				READ(kbuf, len);
 			kbuf[len] = '\0';			/* Mark string end */
