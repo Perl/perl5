@@ -2987,7 +2987,7 @@ yylex()
 	case KEY_foreach:
 	    yylval.ival = curcop->cop_line;
 	    s = skipspace(s);
-	    if (isIDFIRST(*s)) {
+	    if (expect == XSTATE && isIDFIRST(*s)) {
 		char *p = s;
 		if ((bufend - p) >= 3 &&
 		    strnEQ(p, "my", 2) && isSPACE(*(p + 2)))

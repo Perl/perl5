@@ -79,14 +79,16 @@ modifiers are:
     unless EXPR
     while EXPR
     until EXPR
+    foreach EXPR
 
 The C<if> and C<unless> modifiers have the expected semantics,
-presuming you're a speaker of English.  The C<while> and C<until>
-modifiers also have the usual "while loop" semantics (conditional
-evaluated first), except when applied to a do-BLOCK (or to the
-now-deprecated do-SUBROUTINE statement), in which case the block
-executes once before the conditional is evaluated.  This is so that you
-can write loops like:
+presuming you're a speaker of English.  The C<foreach> modifier is an
+iterator:  For each value in EXPR, it aliases $_ to the value and
+executes the statement.  The C<while> and C<until> modifiers have the
+usual "while loop" semantics (conditional evaluated first), except
+when applied to a do-BLOCK (or to the now-deprecated do-SUBROUTINE
+statement), in which case the block executes once before the
+conditional is evaluated.  This is so that you can write loops like:
 
     do {
 	$line = <STDIN>;
