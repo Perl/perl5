@@ -14,7 +14,15 @@ the L<perl58delta>, which describes differences between 5.6.0 and
 
 =head1 Incompatible Changes
 
-None, we believe.
+For threaded builds for modules calling certain re-entrant system calls,
+binary compatibility was accidentally lost between 5.8.0 and 5.8.1.
+Binary compatibility with 5.8.0 has been restored in 5.8.2, which
+necessitates breaking compatibility with 5.8.1. We see this as the
+lesser of two evils.
+
+This will only affect people who have a threaded perl 5.8.1, and compiled
+modules which use these calls, and now attempt to run the compiled modules
+with 5.8.2. The fix is to re-compile and re-install the modules using 5.8.2.
 
 =head1 Core Enhancements
 
@@ -72,6 +80,8 @@ Documentation improved
 
 =item UNIVERSAL
 
+Documentation improved
+
 =back
 
 =head1 Selected Bug Fixes
@@ -84,8 +94,6 @@ correctly by the parser.
 Interpreter initialization is more complete when -DMULTIPLICITY is off.
 This should resolve problems with initializing and destroying the Perl
 interpreter more than once in a single process.                      
-
-dup2() now uses the PerlLIO abstraction layer
 
 =head1 Platform Specific Problems
 
@@ -131,8 +139,8 @@ See L<perl581delta/"Future Directions"> for more soothsaying.
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at F<http://bugs.perl.org/>.  There may also be
-information at F<http://www.perl.com/>, the Perl Home Page.
+bug database at http://bugs.perl.org/.  There may also be
+information at http://www.perl.com/, the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down
