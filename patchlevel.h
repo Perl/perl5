@@ -40,7 +40,7 @@
  */
 static	char	*local_patches[] = {
 	NULL
-	,"MAINT_TRIAL_3 - 5.005_03 maintenance trial 3"
+	,"MAINT_TRIAL_4 - 5.005_03 maintenance trial 4"
 	,NULL
 };
 
