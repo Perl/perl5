@@ -1871,11 +1871,11 @@ couldn't be created for some peculiar reason.
 
 (F) Only a bare module name is allowed as the first argument to a "use".
 
-=item Module name required with -M option
+=item Module name required with -%c option
 
-(F) The C<-M> option says that Perl should load some module, but you
-omitted the name of the module.  Consult L<perlrun> for full details
-about C<-M>.
+(F) The C<-M> or C<-m> options say that Perl should load some module, but
+you omitted the name of the module.  Consult L<perlrun> for full details
+about C<-M> and C<-m>.
 
 =item msg%s not implemented
 
