@@ -555,7 +555,7 @@ And here's a safe pipe open for writing:
 
     # add error processing as above
     $pid = open(KID_TO_WRITE, "|-");
-    $SIG{ALRM} = sub { die "whoops, $program pipe broke" };
+    $SIG{PIPE} = sub { die "whoops, $program pipe broke" };
 
     if ($pid) {  # parent
 	for (@data) {
