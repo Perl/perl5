@@ -22,7 +22,7 @@ use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.62"; # $Id: //depot/libnet/Net/FTP.pm#64 $
+$VERSION = "2.64"; # $Id: //depot/libnet/Net/FTP.pm#67 $
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -411,12 +411,10 @@ sub get
 {
  my($ftp,$remote,$local,$where) = @_;
 
- my($loc,$len,$buf,$resp,$localfd,$data);
+ my($loc,$len,$buf,$resp,$data);
  local *FD;
 
- $localfd = ref($local) || ref(\$local) eq "GLOB"
-             ? fileno($local)
-	     : undef;
+ my $localfd = ref($local) || ref(\$local) eq "GLOB";
 
  ($local = $remote) =~ s#^.*/##
 	unless(defined $local);
@@ -433,7 +431,7 @@ sub get
  $data = $ftp->retr($remote) or
 	return undef;
 
- if(defined $localfd)
+ if($localfd)
   {
    $loc = $local;
   }
@@ -486,14 +484,14 @@ sub get
      carp "Cannot write to Local file $local: $!\n";
      $data->abort;
      close($loc)
-        unless defined $localfd;
+        unless $localfd;
      return undef;
     }
   }
 
  print $hashh "\n" if $hashh;
 
- unless (defined $localfd)
+ unless ($localfd)
   {
    unless (close($loc))
     {
@@ -672,17 +670,15 @@ sub appe { shift->_data_cmd("APPE",@_) }
 sub _store_cmd 
 {
  my($ftp,$cmd,$local,$remote) = @_;
- my($loc,$sock,$len,$buf,$localfd);
+ my($loc,$sock,$len,$buf);
  local *FD;
 
- $localfd = ref($local) || ref(\$local) eq "GLOB"
-             ? fileno($local)
-	     : undef;
+ my $localfd = ref($local) || ref(\$local) eq "GLOB";
 
  unless(defined $remote)
   {
    croak 'Must specify remote filename with stream input'
-	if defined $localfd;
+	if $localfd;
 
    require File::Basename;
    $remote = File::Basename::basename($local);
@@ -691,7 +687,7 @@ sub _store_cmd
  croak("Bad remote filename '$remote'\n")
 	if $remote =~ /[\r\n]/s;
 
- if(defined $localfd)
+ if($localfd)
   {
    $loc = $local;
   }
@@ -729,7 +725,7 @@ sub _store_cmd
   {
    last unless $len = sysread($loc,$buf="",$blksize);
 
-   if (trEBCDIC)
+   if (trEBCDIC && $ftp->type ne 'I')
     {
      $buf = $ftp->toascii($buf); 
      $len = length($buf);
@@ -746,7 +742,7 @@ sub _store_cmd
     {
      $sock->abort;
      close($loc)
-	unless defined $localfd;
+	unless $localfd;
      print $hashh "\n" if $hashh;
      return undef;
     }
@@ -755,7 +751,7 @@ sub _store_cmd
  print $hashh "\n" if $hashh;
 
  close($loc)
-	unless defined $localfd;
+	unless $localfd;
 
  $sock->close() or
 	return undef;
@@ -1301,8 +1297,8 @@ Log into the remote FTP server with the given login information. If
 no arguments are given then the C<Net::FTP> uses the C<Net::Netrc>
 package to lookup the login information for the connected host.
 If no information is found then a login of I<anonymous> is used.
-If no password is given and the login is I<anonymous> then the users
-Email address will be used for a password.
+If no password is given and the login is I<anonymous> then I<anonymous@>
+will be used for password.
 
 If the connection is via a firewall then the C<authorize> method will
 be called with no arguments.
@@ -1714,6 +1710,6 @@ under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/FTP.pm#64 $>
+I<$Id: //depot/libnet/Net/FTP.pm#67 $>
 
 =cut

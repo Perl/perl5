@@ -1,5 +1,19 @@
 Revision history for Perl extension Unicode::Normalize.
 
+0.14  Sat Feb 02 20:40:14 2002
+	- synchronization with bleadperl.
+	- Change 14128: by Arthur
+	- Change 14129: by jhi
+	- Change 14156: 
+	- Change 14199: by Nikola Knezevic
+	- Change 14308: by Benjamin Goldberg
+	- Change 14370: by jhi
+
+0.13  Sat Dec 01 11:42:43 2001
+	- modify Makefile.PL to enable rebuild.
+	  (This problem is pointed out by David Dyck.)
+	- Change 13388: by Jarkko Hietaniemi.
+
 0.12  Wed Nov 29 22:49:02 2001
 	- documentation in .pod is appended to .pm and the .pod is removed.
 	 (only POD in NON-XS refers to Lingua::KO::Hangul::Util.)

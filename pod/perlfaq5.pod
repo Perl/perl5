@@ -78,9 +78,13 @@ See L<perlfaq9> for other examples of fetching URLs over the web.
 
 =head2 How do I change one line in a file/delete a line in a file/insert a line in the middle of a file/append to the beginning of a file?
 
-Those are operations of a text editor.  Perl is not a text editor.
-Perl is a programming language.  You have to decompose the problem into
-low-level calls to read, write, open, close, and seek.
+The short answer is to use the Tie::File module, which is included
+in the standard distribution since Perl 5.8.0.
+
+The long answer is that those are operations of a text editor.  Perl
+is not a text editor.  Perl is a programming language.  You have to
+decompose the problem into low-level calls to read, write, open,
+close, and seek.
 
 Although humans have an easy time thinking of a text file as being a
 sequence of lines that operates much like a stack of playing cards--or

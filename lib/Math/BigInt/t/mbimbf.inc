@@ -578,10 +578,16 @@ foreach (qw/new bsqrt/)
   print "# Tried: '$try'\n" if !ok ($rc, 'NaN');
   }
 
-# see if $x->bsub(0) really rounds
-$x = $mbi->new(123); $mbi->accuracy(2); $x->bsub(0);
-ok ($x,120);
-$mbi->accuracy(undef);
+# see if $x->bsub(0) and $x->badd(0) really round
+foreach my $class ($mbi,$mbf)
+  {
+  $x = $class->new(123); $class->accuracy(2); $x->bsub(0);
+  ok ($x,120);
+  $class->accuracy(undef);
+  $x = $class->new(123); $class->accuracy(2); $x->badd(0);
+  ok ($x,120);
+  $class->accuracy(undef);
+  }
 
 ###############################################################################
 # test whether shortcuts returning zero/one preserve A and P

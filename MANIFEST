@@ -1144,6 +1144,7 @@ lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
 lib/Math/BigInt/t/calling.t	Test calling conventions
 lib/Math/BigInt/t/config.t	Test Math::BigInt->config()
 lib/Math/BigInt/t/constant.t	Test Math::BigInt/BigFloat under :constant
+lib/Math/BigInt/t/downgrade.t	Test if use Math::BigInt(); under downgrade works
 lib/Math/BigInt/t/inf_nan.t	Special tests for inf and NaN handling
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precicion and fallback, round_mode tests
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
@@ -1418,6 +1419,20 @@ lib/Tie/Array/stdpush.t		Test for Tie::StdArray
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
+lib/Tie/File.pm                 Files as tied arrays.
+lib/Tie/File/01_gen.t           Test for Tie::File.
+lib/Tie/File/02_fetchsize.t     Test for Tie::File.
+lib/Tie/File/03_longfetch.t     Test for Tie::File.
+lib/Tie/File/04_splice.t        Test for Tie::File.
+lib/Tie/File/05_size.t          Test for Tie::File.
+lib/Tie/File/06_fixrec.t        Test for Tie::File.
+lib/Tie/File/07_rv_splice.t     Test for Tie::File.
+lib/Tie/File/08_ro.t            Test for Tie::File.
+lib/Tie/File/09_gen_rs.t        Test for Tie::File.
+lib/Tie/File/10_splice_rs.t     Test for Tie::File.
+lib/Tie/File/11_rv_splice_rs.t  Test for Tie::File.
+lib/Tie/File/12_longfetch_rs.t  Test for Tie::File.
+lib/Tie/File/13_size_rs.t       Test for Tie::File.
 lib/Tie/Memoize.pm		Base class for memoized tied hashes
 lib/Tie/Memoize.t		Test for Memoize.t
 lib/Tie/RefHash.pm		Base class for tied hashes with references as keys

@@ -1,4 +1,4 @@
-# Net::Cmd.pm $Id: //depot/libnet/Net/Cmd.pm#26 $
+# Net::Cmd.pm $Id: //depot/libnet/Net/Cmd.pm#28 $
 #
 # Copyright (c) 1995-1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
@@ -12,6 +12,7 @@ require Exporter;
 use strict;
 use vars qw(@ISA @EXPORT $VERSION);
 use Carp;
+use Symbol 'gensym';
 
 BEGIN {
   if ($^O eq 'os390') {
@@ -20,7 +21,7 @@ BEGIN {
   }
 }
 
-$VERSION = "2.20";
+$VERSION = "2.21";
 @ISA     = qw(Exporter);
 @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -476,6 +477,70 @@ sub dataend
  $cmd->response() == CMD_OK;
 }
 
+# read and write to tied filehandle
+sub tied_fh {
+  my $cmd = shift;
+  ${*$cmd}{'net_cmd_readbuf'} = '';
+  my $fh = gensym();
+  tie *$fh,ref($cmd),$cmd;
+  return $fh;
+}
+
+# tie to myself
+sub TIEHANDLE {
+  my $class = shift;
+  my $cmd = shift;
+  return $cmd;
+}
+
+# Tied filehandle read.  Reads requested data length, returning
+# end-of-file when the dot is encountered.
+sub READ {
+  my $cmd = shift;
+  my (undef,$len,$offset) = @_;
+  return unless exists ${*$cmd}{'net_cmd_readbuf'};
+  my $done = 0;
+  while (!$done and length(${*$cmd}{'net_cmd_readbuf'}) < $len) {
+     ${*$cmd}{'net_cmd_readbuf'} .= $cmd->getline() or return;
+     $done++ if ${*$cmd}{'net_cmd_readbuf'} =~ s/^\.\r?\n\Z//m;
+  }
+
+  $_[0] = '';
+  substr($_[0],$offset+0) = substr(${*$cmd}{'net_cmd_readbuf'},0,$len);
+  substr(${*$cmd}{'net_cmd_readbuf'},0,$len) = '';
+  delete ${*$cmd}{'net_cmd_readbuf'} if $done;
+
+  return length $_[0];
+}
+
+sub READLINE {
+  my $cmd = shift;
+  # in this context, we use the presence of readbuf to
+  # indicate that we have not yet reached the eof
+  return unless exists ${*$cmd}{'net_cmd_readbuf'};
+  my $line = $cmd->getline;
+  return if $line =~ /^\.\r?\n/;
+  $line;
+}
+
+sub PRINT {
+  my $cmd = shift;
+  my ($buf,$len,$offset) = @_;
+  $len    ||= length ($buf);
+  $offset += 0;
+  return unless $cmd->datasend(substr($buf,$offset,$len));
+  ${*$cmd}{'net_cmd_sending'}++;  # flag that we should call dataend()
+  return $len;
+}
+
+sub CLOSE {
+  my $cmd = shift;
+  my $r = exists(${*$cmd}{'net_cmd_sending'}) ? $cmd->dataend : 1; 
+  delete ${*$cmd}{'net_cmd_readbuf'};
+  delete ${*$cmd}{'net_cmd_sending'};
+  $r;
+}
+
 1;
 
 __END__
@@ -619,6 +684,16 @@ Any lines starting with '..' will have one of the '.'s removed.
 
 Returns a reference to a list containing the lines, or I<undef> upon failure.
 
+=item tied_fh ()
+
+Returns a filehandle tied to the Net::Cmd object.  After issuing a
+command, you may read from this filehandle using read() or <>.  The
+filehandle will return EOF when the final dot is encountered.
+Similarly, you may write to the filehandle in order to send data to
+the server after issuing a commmand that expects data to be written.
+
+See the Net::POP3 and Net::SMTP modules for examples of this.
+
 =back
 
 =head1 EXPORTS
@@ -639,6 +714,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/Cmd.pm#26 $>
+I<$Id: //depot/libnet/Net/Cmd.pm#28 $>
 
 =cut

@@ -4027,7 +4027,8 @@ Perl_yylex(pTHX)
 			if (strEQ(proto, "$"))
 			    OPERATOR(UNIOPSUB);
 			if (*proto == '&' && *s == '{') {
-			    sv_setpv(PL_subname,"__ANON__");
+			    sv_setpv(PL_subname, PL_curstash ? 
+					"__ANON__" : "__ANON__::__ANON__");
 			    PREBLOCK(LSTOPSUB);
 			}
 		    }
@@ -5008,7 +5009,8 @@ Perl_yylex(pTHX)
 		    force_next(THING);
 		}
 		if (!have_name) {
-		    sv_setpv(PL_subname,"__ANON__");
+		    sv_setpv(PL_subname,
+			PL_curstash ? "__ANON__" : "__ANON__::__ANON__");
 		    TOKEN(ANONSUB);
 		}
 		(void) force_word(PL_oldbufptr + tboffset, WORD,

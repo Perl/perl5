@@ -23,6 +23,8 @@ struct hek {
     U32		hek_hash;	/* hash of key */
     I32		hek_len;	/* length of hash key */
     char	hek_key[1];	/* variable-length hash key */
+    /* the hash-key is \0-terminated */
+    /* after the \0 there is a byte telling whether the key is UTF8 */
 };
 
 /* hash structure: */
@@ -211,7 +213,7 @@ C<SV*>.
 #define HEK_HASH(hek)		(hek)->hek_hash
 #define HEK_LEN(hek)		(hek)->hek_len
 #define HEK_KEY(hek)		(hek)->hek_key
-#define HEK_UTF8(hek)  (*(HEK_KEY(hek)+HEK_LEN(hek)))
+#define HEK_UTF8(hek)		(*(HEK_KEY(hek)+HEK_LEN(hek)+1))
 
 /* calculate HV array allocation */
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)

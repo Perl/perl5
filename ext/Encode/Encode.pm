@@ -150,12 +150,22 @@ define_alias( 'ascii'    => 'US-ascii',
 	    );
 
 # At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
-define_alias( qr/^ibm[-_]?(\d\d\d\d?)$/i => '"cp$1"');
+# And Microsoft has their own naming (again, surprisingly).
+define_alias( qr/^(?:ibm|ms)[-_]?(\d\d\d\d?)$/i => '"cp$1"');
+
+# Sometimes seen with a leading zero.
+define_alias( qr/^cp037$/i => '"cp37"');
+
+# Ououououou.
+define_alias( qr/^macRomanian$/i => '"macRumanian"');
 
 # Standardize on the dashed versions.
 define_alias( qr/^utf8$/i  => 'utf-8' );
 define_alias( qr/^koi8r$/i => 'koi8-r' );
 define_alias( qr/^koi8u$/i => 'koi8-u' );
+
+# Seen in some Linuxes.
+define_alias( qr/^ujis$/i => 'euc-jp' );
 
 # TODO: HP-UX '8' encodings arabic8 greek8 hebrew8 kana8 thai8 turkish8
 # TODO: HP-UX '15' encodings japanese15 korean15 roi15
@@ -172,10 +182,8 @@ define_alias( qr/^koi8u$/i => 'koi8-u' );
 #       Farsi Georgian Gujarati Gurmukhi Hebrew Japanese
 #       Kannada Khmer Korean Laotian Malayalam Mongolian
 #       Oriya Sinhalese Symbol Tamil Telugu Tibetan Vietnamese
-# TODO: what is the Japanese 'UJIS' encoding seen in some Linuxes?
-#       Answer: euc-jp <dankogai@dan.co.jp>
-# Map white space and _ to '-'
 
+# Map white space and _ to '-'
 define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
 
 sub define_encoding
@@ -504,7 +512,7 @@ The Mac codepages:
 
   MacCentralEuropean   MacJapanese
   MacCroatian          MacRoman
-  MacCyrillic          MacRumanian
+  MacCyrillic          MacRomanian
   MacDingbats          MacSami
   MacGreek             MacThai
   MacIcelandic         MacTurkish

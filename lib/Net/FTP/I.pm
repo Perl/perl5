@@ -1,4 +1,4 @@
-## $Id: //depot/libnet/Net/FTP/I.pm#12 $
+## $Id: //depot/libnet/Net/FTP/I.pm#13 $
 ## Package to read/write on BINARY data connections
 ##
 
@@ -10,7 +10,7 @@ use Carp;
 require Net::FTP::dataconn;
 
 @ISA = qw(Net::FTP::dataconn);
-$VERSION = "1.11"; 
+$VERSION = "1.12"; 
 
 sub read {
   my    $data 	 = shift;
@@ -18,25 +18,28 @@ sub read {
   my    $size    = shift || croak 'read($buf,$size,[$timeout])';
   my    $timeout = @_ ? shift : $data->timeout;
 
-  $data->can_read($timeout) or
-	 croak "Timeout";
+  my $n;
 
-  my($b,$n,$l);
-  my $blksize = ${*$data}{'net_ftp_blksize'};
-  $blksize = $size if $size > $blksize;
+  if ($size > length ${*$data} and !${*$data}{'net_ftp_eof'}) {
+    $data->can_read($timeout) or
+	   croak "Timeout";
 
-  while(($l = length(${*$data})) < $size) {
-   $n += ($b = sysread($data, ${*$data}, $blksize, $l)) || 0;
-   last unless $b;
+    my $blksize = ${*$data}{'net_ftp_blksize'};
+    $blksize = $size if $size > $blksize;
+
+    unless ($n = sysread($data, ${*$data}, $blksize, length ${*$data})) {
+      return undef unless defined $n;
+      ${*$data}{'net_ftp_eof'} = 1;
+    }
   }
 
-  $n = $size < ($l = length(${*$data})) ? $size : $l;
+  $buf = substr(${*$data},0,$size);
 
-  $buf = substr(${*$data},0,$n);
+  $n = length($buf);
+
   substr(${*$data},0,$n) = '';
 
-  ${*$data}{'net_ftp_bytesread'} += $n if $n;
-  ${*$data}{'net_ftp_eof'} = 1 unless $n;
+  ${*$data}{'net_ftp_bytesread'} += $n;
 
   $n;
 }

@@ -52,7 +52,7 @@ walk(int useval, int level, register int node, int *numericptr, int minprec)
     STR *tmp2str;
     STR *tmp3str;
     char *t;
-    char *d, *s = 0;
+    char *d, *s;
     int numarg;
     int numeric = FALSE;
     STR *fstr;
@@ -822,11 +822,8 @@ sub Pick {\n\
 	str_cat(str,")");
 	break;
     case OGSUB:
-    case OSUB:
-	if (type == OGSUB)
-	    s = "g";
-	else
-	    s = "";
+    case OSUB: {
+	int gsub = type == OGSUB ? 1 : 0;
 	str = str_new(0);
 	tmpstr = str_new(0);
 	i = 0;
@@ -856,6 +853,7 @@ sub Pick {\n\
 	    }
 	    *d = '\0';
 	    str_set(tmp2str,tokenbuf);
+	    s = gsub ? "/g" : "/";
 	}
 	else {
 	    tmp2str=walk(1,level,ops[node+2].ival,&numarg,P_MIN);
@@ -863,9 +861,10 @@ sub Pick {\n\
 	    str_scat(tmp3str,tmp2str);
 	    str_cat(tmp3str,").'\"') =~ s/&/\\$&/g, ");
 	    str_set(tmp2str,"eval $s_");
-	    s = (char*)(*s == 'g' ? "ge" : "e");
+	    s = gsub ? "/ge" : "/e";
 	    i++;
 	}
+	str_cat(tmp2str,s);
 	type = ops[ops[node+1].ival].ival;
 	len = type >> 8;
 	type &= 255;
@@ -877,8 +876,6 @@ sub Pick {\n\
 	    str_scat(str,tmpstr);
 	    str_scat(str,fstr);
 	    str_scat(str,tmp2str);
-	    str_cat(str,"/");
-	    str_cat(str,s);
 	}
 	else if ((type == OFLD && !split_to_array) || (type == OVAR && len == 1)) {
 	    if (useval && i)
@@ -889,8 +886,6 @@ sub Pick {\n\
 	    str_scat(str,fstr);
 	    str_cat(str,"/");
 	    str_scat(str,tmp2str);
-	    str_cat(str,"/");
-	    str_cat(str,s);
 	}
 	else {
 	    i++;
@@ -903,8 +898,6 @@ sub Pick {\n\
 	    str_scat(str,tmpstr);
 	    str_cat(str,"/$s/");
 	    str_scat(str,tmp2str);
-	    str_cat(str,"/");
-	    str_cat(str,s);
 	}
 	if (useval && i)
 	    str_cat(str,")");
@@ -913,7 +906,7 @@ sub Pick {\n\
 	str_free(tmp2str);
 	str_free(tmp3str);
 	numeric = 1;
-	break;
+	break; }
     case ONUM:
 	str = walk(1,level,ops[node+1].ival,&numarg,P_MIN);
 	numeric = 1;

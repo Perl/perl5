@@ -310,6 +310,50 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 }
 
 /*
+=for apidoc gv_fetchmeth_autoload
+
+Same as gv_fetchmeth(), but looks for autoloaded subroutines too.
+Returns a glob for the subroutine.
+
+For an autoloaded subroutine without a GV, will create a GV even
+if C<level < 0>.  For an autoloaded subroutine without a stub, GvCV()
+of the result may be zero.
+
+=cut
+*/
+
+GV *
+Perl_gv_fetchmeth_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
+{
+    GV *gv = gv_fetchmeth(stash, name, len, level);
+
+    if (!gv) {
+	char autoload[] = "AUTOLOAD";
+	STRLEN autolen = sizeof(autoload)-1;
+	CV *cv;
+	GV **gvp;
+
+	if (!stash)
+	    return Nullgv;	/* UNIVERSAL::AUTOLOAD could cause trouble */
+	if (len == autolen && strnEQ(name, autoload, autolen))
+	    return Nullgv;
+	if (!(gv = gv_fetchmeth(stash, autoload, autolen, FALSE)))
+	    return Nullgv;
+	cv = GvCV(gv);
+	if (!(CvROOT(cv) || CvXSUB(cv)))
+	    return Nullgv;
+	/* Have an autoload */
+	if (level < 0)	/* Cannot do without a stub */
+	    gv_fetchmeth(stash, name, len, 0);
+	gvp = (GV**)hv_fetch(stash, name, len, (level >= 0));
+	if (!gvp)
+	    return Nullgv;
+	return *gvp;
+    }
+    return gv;
+}
+
+/*
 =for apidoc gv_fetchmethod
 
 See L<gv_fetchmethod_autoload>.
@@ -662,7 +706,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		  strEQ(name, "ARGVOUT")))
 		    global = TRUE;
 	    }
-	    else if (*name == '_' && (!name[1] || strEQ(name,"__ANON__")))
+	    else if (*name == '_' && !name[1])
 		global = TRUE;
 
 	    if (global)
@@ -1295,12 +1339,23 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of `%s' in package `%.256s'\n",
 		     cp, HvNAME(stash)) );
-	/* don't fill the cache while looking up! */
-	gv = gv_fetchmeth(stash, cooky, l, -1);
+	/* don't fill the cache while looking up!
+	   Creation of inheritance stubs in intermediate packages may
+	   conflict with the logic of runtime method substitution.
+	   Indeed, for inheritance A -> B -> C, if C overloads "+0",
+	   then we could have created stubs for "(+0" in A and C too.
+	   But if B overloads "bool", we may want to use it for
+	   numifying instead of C's "+0". */
+	if (i >= DESTROY_amg)
+	    gv = Perl_gv_fetchmeth_autoload(aTHX_ stash, cooky, l, 0);
+	else				/* Autoload taken care of below */
+	    gv = Perl_gv_fetchmeth(aTHX_ stash, cooky, l, -1);
         cv = 0;
         if (gv && (cv = GvCV(gv))) {
 	    if (GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")
 		&& strEQ(HvNAME(GvSTASH(CvGV(cv))), "overload")) {
+		/* This is a hack to support autoloading..., while
+		   knowing *which* methods were declared as overloaded. */
 		/* GvSV contains the name of the method. */
 		GV *ngv = Nullgv;
 		
@@ -1328,6 +1383,9 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	    filled = 1;
 	    if (i < DESTROY_amg)
 		have_ovl = 1;
+	} else if (gv) {		/* Autoloaded... */
+	    cv = (CV*)gv;
+	    filled = 1;
 	}
 	amt.table[i]=(CV*)SvREFCNT_inc(cv);
     }

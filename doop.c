@@ -872,7 +872,7 @@ Perl_do_vecset(pTHX_ SV *sv)
     lval = SvUV(sv);
     offset = LvTARGOFF(sv);
     if (offset < 0)
-	Perl_croak(aTHX_ "Assigning to negative offset in vec");
+	Perl_croak(aTHX_ "Negative offset to vec in lvalue context");
     size = LvTARGLEN(sv);
     if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */
 	Perl_croak(aTHX_ "Illegal number of bits in vec");

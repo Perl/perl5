@@ -395,10 +395,10 @@ Using "or" for assignment is unlikely to do what you want; see below.
 
 Binary ".." is the range operator, which is really two different
 operators depending on the context.  In list context, it returns an
-array of values counting (up by ones) from the left value to the right
+list of values counting (up by ones) from the left value to the right
 value.  If the left value is greater than the right value then it
 returns the empty array.  The range operator is useful for writing
-C<foreach (1..10)> loops and for doing slice operations on arrays.  In
+C<foreach (1..10)> loops and for doing slice operations on arrays. In
 the current implementation, no temporary array is created when the
 range operator is used as the expression in C<foreach> loops, but older
 versions of Perl might burn a lot of memory when you write something
@@ -407,6 +407,9 @@ like this:
     for (1 .. 1_000_000) {
 	# code
     }
+
+The range operator also works on strings, using the magical auto-increment,
+see below.
 
 In scalar context, ".." returns a boolean value.  The operator is
 bistable, like a flip-flop, and emulates the line-range (comma) operator
@@ -462,7 +465,7 @@ can say
 
     @alphabet = ('A' .. 'Z');
 
-to get all normal letters of the alphabet, or
+to get all normal letters of the English alphabet, or
 
     $hexdigit = (0 .. 9, 'a' .. 'f')[$num & 15];
 

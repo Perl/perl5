@@ -692,24 +692,31 @@ numbers.  To use these numbers various encodings are needed.
 
 =over 4
 
-=item UTF-8
+=item
+
+UTF-8
 
 UTF-8 is a variable-length (1 to 6 bytes, current character allocations
 require 4 bytes), byteorder independent encoding. For ASCII, UTF-8 is
 transparent (and we really do mean 7-bit ASCII, not another 8-bit encoding).
 
-The following table is from Unicode 3.1.
+The following table is from Unicode 3.2.
 
  Code Points            1st Byte  2nd Byte  3rd Byte  4th Byte
 
-   U+0000..U+007F       00..7F   
-   U+0080..U+07FF       C2..DF    80..BF   
+   U+0000..U+007F       00..7F
+   U+0080..U+07FF       C2..DF    80..BF
    U+0800..U+0FFF       E0        A0..BF    80..BF  
-   U+1000..U+FFFF       E1..EF    80..BF    80..BF  
+   U+1000..U+CFFF       E1..EC    80..BF    80..BF  
+   U+D000..U+D7FF       ED        80..9F    80..BF  
+   U+D800..U+DFFF       ******* ill-formed *******
+   U+E000..U+FFFF       EE..EF    80..BF    80..BF  
   U+10000..U+3FFFF      F0        90..BF    80..BF    80..BF
   U+40000..U+FFFFF      F1..F3    80..BF    80..BF    80..BF
  U+100000..U+10FFFF     F4        80..8F    80..BF    80..BF
 
+Note the A0..BF in U+0800..U+0FFF, the 80..9F in U+D000...U+D7FF,
+the 90..BF in U+10000..U+3FFFF, and the 80...8F in U+100000..U+10FFFF.
 Or, another way to look at it, as bits:
 
  Code Points                    1st Byte   2nd Byte  3rd Byte  4th Byte
@@ -720,14 +727,18 @@ Or, another way to look at it, as bits:
   00000dddccccccbbbbbbaaaaaa     11110ddd  10cccccc  10bbbbbb  10aaaaaa
 
 As you can see, the continuation bytes all begin with C<10>, and the
-leading bits of the start byte tells how many bytes the are in the
+leading bits of the start byte tell how many bytes the are in the
 encoded character.
 
-=item UTF-EBCDIC
+=item
+
+UTF-EBCDIC
 
 Like UTF-8, but EBCDIC-safe, as UTF-8 is ASCII-safe.
 
-=item UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
+=item
+
+UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
 
 (The followings items are mostly for reference, Perl doesn't
 use them internally.)
@@ -778,20 +789,26 @@ sequence of bytes 0xFF 0xFE is unambiguously "BOM, represented in
 little-endian format" and cannot be "0xFFFE, represented in big-endian
 format".
 
-=item UTF-32, UTF-32BE, UTF32-LE
+=item
+
+UTF-32, UTF-32BE, UTF32-LE
 
 The UTF-32 family is pretty much like the UTF-16 family, expect that
 the units are 32-bit, and therefore the surrogate scheme is not
 needed.  The BOM signatures will be 0x00 0x00 0xFE 0xFF for BE and
 0xFF 0xFE 0x00 0x00 for LE.
 
-=item UCS-2, UCS-4
+=item
+
+UCS-2, UCS-4
 
 Encodings defined by the ISO 10646 standard.  UCS-2 is a 16-bit
 encoding, UCS-4 is a 32-bit encoding.  Unlike UTF-16, UCS-2
 is not extensible beyond 0xFFFF, because it does not use surrogates.
 
-=item UTF-7
+=item
+
+UTF-7
 
 A seven-bit safe (non-eight-bit) encoding, useful if the
 transport/storage is not eight-bit safe.  Defined by RFC 2152.

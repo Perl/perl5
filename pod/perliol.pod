@@ -322,7 +322,9 @@ to change during one "get".)
 
 =over 4
 
-=item char * name;
+=item name
+
+	char * name;
 
 The name of the layer whose open() method Perl should invoke on
 open().  For example if the layer is called APR, you will call:
@@ -332,13 +334,17 @@ open().  For example if the layer is called APR, you will call:
 and Perl knows that it has to invoke the PerlIOAPR_open() method
 implemented by the APR layer.
 
-=item Size_t size;
+=item size
+
+	Size_t size;
 
 The size of the per-instance data structure, e.g.:
 
   sizeof(PerlIOAPR)
 
-=item IV kind;
+=item kind
+
+	IV kind;
 
  XXX: explain all the available flags here
 
@@ -360,7 +366,9 @@ flag is used it's up to the layer to validate the args.
 
 =back
 
-=item IV		(*Pushed)(pTHX_ PerlIO *f,const char *mode, SV *arg);
+=item Pushed
+
+	IV	(*Pushed)(pTHX_ PerlIO *f,const char *mode, SV *arg);
 
 The only absolutely mandatory method. Called when the layer is pushed
 onto the stack.  The C<mode> argument may be NULL if this occurs
@@ -374,7 +382,9 @@ was un-expected).
 
 Returns 0 on success. On failure returns -1 and should set errno.
 
-=item  IV		(*Popped)(pTHX_ PerlIO *f);
+=item Popped
+
+	IV	(*Popped)(pTHX_ PerlIO *f);
 
 Called when the layer is popped from the stack. A layer will normally
 be popped after C<Close()> is called. But a layer can be popped
@@ -387,7 +397,9 @@ can be re-provided to what ever is now above.
 
 Returns 0 on success and failure.
 
-=item  PerlIO *	(*Open)(...);
+=item Open
+
+	PerlIO *	(*Open)(...);
 
 The C<Open()> method has lots of arguments because it combines the
 functions of perl's C<open>, C<PerlIO_open>, perl's C<sysopen>,
@@ -443,7 +455,10 @@ then push itself on top if that succeeds.
 
 Returns C<NULL> on failure.
 
-=item SV *      (*Getarg)(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
+=item Getarg
+
+	SV *      (*Getarg)(pTHX_ PerlIO *f,
+			    CLONE_PARAMS *param, int flags);
 
 Optional. If present should return an SV * representing the string
 argument passed to the layer when it was
@@ -451,7 +466,9 @@ pushed. e.g. ":encoding(ascii)" would return an SvPV with value
 "ascii". (I<param> and I<flags> arguments can be ignored in most
 cases)
 
-=item IV        (*Fileno)(pTHX_ PerlIO *f);
+=item Fileno
+
+	IV        (*Fileno)(pTHX_ PerlIO *f);
 
 Returns the Unix/Posix numeric file descriptor for the handle. Normally
 C<PerlIOBase_fileno()> (which just asks next layer down) will suffice
@@ -463,13 +480,18 @@ the case of the error.
 XXX: two possible results end up in -1, one is an error the other is
 not.
 
-=item PerlIO *  (*Dup)(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
+=item Dup
+
+	PerlIO * (*Dup)(pTHX_ PerlIO *f, PerlIO *o,
+			CLONE_PARAMS *param, int flags);
 
 XXX: not documented
 
 Similar to C<Open>, returns PerlIO* on success, C<NULL> on failure.
 
-=item  SSize_t	(*Read)(pTHX_ PerlIO *f, void *vbuf, Size_t count);
+=item Read
+
+	SSize_t	(*Read)(pTHX_ PerlIO *f, void *vbuf, Size_t count);
 
 Basic read operation.
 
@@ -479,7 +501,10 @@ provide "fast gets" methods.
 
 Returns actual bytes read, or -1 on an error.
 
-=item  SSize_t	(*Unread)(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
+=item	Unread
+
+	SSize_t	(*Unread)(pTHX_ PerlIO *f,
+			  const void *vbuf, Size_t count);
 
 A superset of stdio's C<ungetc()>. Should arrange for future reads to
 see the bytes in C<vbuf>. If there is no obviously better implementation
@@ -488,27 +513,35 @@ then C<PerlIOBase_unread()> provides the function by pushing a "fake"
 
 Returns the number of unread chars.
 
-=item  SSize_t	(*Write)(PerlIO *f, const void *vbuf, Size_t count);
+=item Write
+
+	SSize_t	(*Write)(PerlIO *f, const void *vbuf, Size_t count);
 
 Basic write operation.
 
 Returns bytes written or -1 on an error.
 
-=item  IV		(*Seek)(pTHX_ PerlIO *f, Off_t offset, int whence);
+=item Seek
+
+	IV	(*Seek)(pTHX_ PerlIO *f, Off_t offset, int whence);
 
 Position the file pointer. Should normally call its own C<Flush>
 method and then the C<Seek> method of next layer down.
 
 Returns 0 on success, -1 on failure.
 
-=item  Off_t		(*Tell)(pTHX_ PerlIO *f);
+=item Tell
+
+	Off_t	(*Tell)(pTHX_ PerlIO *f);
 
 Return the file pointer. May be based on layers cached concept of
 position to avoid overhead.
 
 Returns -1 on failure to get the file pointer.
 
-=item  IV		(*Close)(pTHX_ PerlIO *f);
+=item Close
+
+	IV	(*Close)(pTHX_ PerlIO *f);
 
 Close the stream. Should normally call C<PerlIOBase_close()> to flush
 itself and close layers below, and then deallocate any data structures
@@ -517,7 +550,9 @@ structure.
 
 Returns 0 on success, -1 on failure.
 
-=item  IV		(*Flush)(pTHX_ PerlIO *f);
+=item Flush
+
+	IV	(*Flush)(pTHX_ PerlIO *f);
 
 Should make stream's state consistent with layers below. That is, any
 buffered write data should be written, and file position of lower layers
@@ -526,7 +561,9 @@ adjusted for data read from below but not actually consumed.
 
 Returns 0 on success, -1 on failure.
 
-=item  IV		(*Fill)(pTHX_ PerlIO *f);
+=item Fill
+
+	IV	(*Fill)(pTHX_ PerlIO *f);
 
 The buffer for this layer should be filled (for read) from layer
 below.  When you "subclass" PerlIOBuf layer, you want to use its
@@ -535,47 +572,66 @@ PerlIOBuf's buffer.
 
 Returns 0 on success, -1 on failure.
 
-=item  IV		(*Eof)(pTHX_ PerlIO *f);
+=item Eof
+
+	IV	(*Eof)(pTHX_ PerlIO *f);
 
 Return end-of-file indicator. C<PerlIOBase_eof()> is normally sufficient.
 
 Returns 0 on end-of-file, 1 if not end-of-file, -1 on error.
 
-=item  IV		(*Error)(pTHX_ PerlIO *f);
+=item Error
+
+	IV	(*Error)(pTHX_ PerlIO *f);
 
 Return error indicator. C<PerlIOBase_error()> is normally sufficient.
 
 Returns 1 if there is an error (usually when C<PERLIO_F_ERROR> is set,
 0 otherwise.
 
-=item  void		(*Clearerr)(pTHX_ PerlIO *f);
+=item  Clearerr
+
+	void	(*Clearerr)(pTHX_ PerlIO *f);
 
 Clear end-of-file and error indicators. Should call C<PerlIOBase_clearerr()>
 to set the C<PERLIO_F_XXXXX> flags, which may suffice.
 
-=item  void		(*Setlinebuf)(pTHX_ PerlIO *f);
+=item Setlinebuf
+
+	void	(*Setlinebuf)(pTHX_ PerlIO *f);
 
 Mark the stream as line buffered. C<PerlIOBase_setlinebuf()> sets the
 PERLIO_F_LINEBUF flag and is normally sufficient.
 
-=item  STDCHAR *	(*Get_base)(pTHX_ PerlIO *f);
+=item Get_base
+
+	STDCHAR *	(*Get_base)(pTHX_ PerlIO *f);
 
 Allocate (if not already done so) the read buffer for this layer and
 return pointer to it. Return NULL on failure.
 
-=item  Size_t		(*Get_bufsiz)(pTHX_ PerlIO *f);
+=item Get_bufsiz
+
+	Size_t	(*Get_bufsiz)(pTHX_ PerlIO *f);
 
 Return the number of bytes that last C<Fill()> put in the buffer.
 
-=item  STDCHAR *	(*Get_ptr)(pTHX_ PerlIO *f);
+=item Get_ptr
+
+	STDCHAR *	(*Get_ptr)(pTHX_ PerlIO *f);
 
 Return the current read pointer relative to this layer's buffer.
 
-=item  SSize_t	(*Get_cnt)(pTHX_ PerlIO *f);
+=item Get_cnt
+
+	SSize_t	(*Get_cnt)(pTHX_ PerlIO *f);
 
 Return the number of bytes left to be read in the current buffer.
 
-=item  void		(*Set_ptrcnt)(pTHX_ PerlIO *f,STDCHAR *ptr,SSize_t cnt);
+=item Set_ptrcnt
+
+	void	(*Set_ptrcnt)(pTHX_ PerlIO *f,
+			      STDCHAR *ptr, SSize_t cnt);
 
 Adjust the read pointer and count of bytes to match C<ptr> and/or C<cnt>.
 The application (or layer above) must ensure they are consistent.

@@ -46,7 +46,7 @@ $x = eval { vec $foo, 0, -13 };
 print "not " if defined $x or $@ !~ /^Illegal number of bits in vec/;
 print "ok 21\n";
 $x = eval { vec($foo, -1, 4) = 2 };
-print "not " if defined $x or $@ !~ /^Assigning to negative offset in vec/;
+print "not " if defined $x or $@ !~ /^Negative offset to vec in lvalue context/;
 print "ok 22\n";
 print "not " if vec('abcd', 7, 8);
 print "ok 23\n";

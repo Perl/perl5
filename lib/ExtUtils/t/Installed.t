@@ -108,7 +108,11 @@ FAKE
 
 
 SKIP: {
+    TODO: {
 	skip("could not write packlist: $!", 3 ) unless $wrotelist;
+
+       local $TODO = "new() attempts to derive package name from filename"
+           if $^O eq 'VMS';
 
 	# avoid warning and death by localizing glob
 	local *ExtUtils::Installed::Config;
@@ -126,6 +130,7 @@ SKIP: {
 	isa_ok( $realei->{FakeMod}{packlist}, 'ExtUtils::Packlist' );
 	is( $realei->{FakeMod}{version}, '1.1.1', 
 		'... should find version in modules' );
+    }
 }
 
 # modules
@@ -169,7 +174,7 @@ SKIP: {
 is( scalar @files, 0, '... should find no doc files given wrong dirs' );
 @files = $ei->files('goodmod', 'prog');
 is( scalar @files, 1, '... should find doc file in correct dir' );
-like( $files[0], qr/foobar$/, '... checking file name' );
+like( $files[0], qr/foobar[>\]]?$/, '... checking file name' );
 @files = $ei->files('goodmod');
 is( scalar @files, 2 + $mandirs, '... should find all files with no type specified' );
 my %dirnames = map { lc($_) => dirname($_) } @files;

@@ -47,7 +47,7 @@ ok( exists $INC{'Net/Netrc.pm'}, 'should be able to use Net::Netrc' );
 
 SKIP: {
 	skip('incompatible stat() handling for OS', 4), next SKIP 
-		if ($^O =~ /os2|win32|macos|cygwin/i);
+		if ($^O =~ /os2|win32|macos|cygwin/i or $] < 5.005);
 	
 	my $warn;
 	local $SIG{__WARN__} = sub {
@@ -58,8 +58,8 @@ SKIP: {
 	$stat[2] = 077;
 	ok( !defined(Net::Netrc::_readrc()),
 		'_readrc() should not read world-writable file' );
-	ok( scalar( $warn =~ /^Bad permissions:/ ),
-	    '... and should warn about it' );
+	ok( scalar($warn =~ /^Bad permissions:/),
+		'... and should warn about it' );
 
 	# the owner field should still not match
 	$stat[2] = 0;
@@ -67,10 +67,10 @@ SKIP: {
         if ($<) { 
           ok( !defined(Net::Netrc::_readrc()), 
               '_readrc() should not read file owned by someone else' ); 
-          ok( scalar( $warn =~ /^Not owner:/ ),
-	      '... and should warn about it' );
+          ok( scalar($warn =~ /^Not owner:/),
+		'... and should warn about it' ); 
         } else { 
-          ok(1, "Skip - testing as root") for 1..2; 
+          skip("testing as root",2);
         } 
 }
 
@@ -138,7 +138,7 @@ sub new {
 }
 
 sub TIEHANDLE {
-	my ($class, undef, $file, $mode) = @_;
+	my ($class, $file, $mode) = @_[0,2,3];
 	bless({ file => $file, mode => $mode }, $class);
 }
 

@@ -58,7 +58,7 @@ is( $stat->blocks, $stat[12], "number of blocks in position 12" );
 
 SKIP: {
 	local *STAT;
-	skip(2, "Could not open file: $!") unless open(STAT, 'TEST');
+	skip("Could not open file: $!", 2) unless open(STAT, 'TEST');
 	ok( File::stat::stat('STAT'), '... should be able to find filehandle' );
 
 	package foo;
@@ -66,6 +66,8 @@ SKIP: {
 	main::ok( my $stat2 = File::stat::stat('STAT'), 
 		'... and filehandle in another package' );
 	close STAT;
+
+	main::skip("Win32: different stat-info on filehandle", 1) if $^O eq 'MSWin32';
 
 	main::is( "@$stat", "@$stat2", '... and must match normal stat' );
 }

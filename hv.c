@@ -85,9 +85,10 @@ S_save_hek(pTHX_ const char *str, I32 len, U32 hash)
       is_utf8 = TRUE;
     }
 
-    New(54, k, HEK_BASESIZE + len + 1, char);
+    New(54, k, HEK_BASESIZE + len + 2, char);
     hek = (HEK*)k;
     Copy(str, HEK_KEY(hek), len, char);
+    HEK_KEY(hek)[len] = 0;
     HEK_LEN(hek) = len;
     HEK_HASH(hek) = hash;
     HEK_UTF8(hek) = (char)is_utf8;

@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.23';
+$VERSION = '0.24';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -577,12 +577,24 @@ sub _div_use_mul
       return $x; 
       }
     }
-  #if (@$yorg == 1)
-  #  {
-  #  # shortcut, $y is < $BASE
-  #
-  #  }
+  if (@$yorg == 1)
+    {
+    my $rem;
+    $rem = _mod($c,[ @$x ],$yorg) if wantarray;
 
+    # shortcut, $y is < $BASE
+    my $j = scalar @$x; my $r = 0; 
+    my $y = $yorg->[0]; my $b;
+    while ($j-- > 0)
+      {
+      $b = $r * $MBASE + $x->[$j];
+      $x->[$j] = int($b/$y);
+      $r = $b % $y;
+      }
+    pop @$x if @$x > 1 && $x->[-1] == 0;	# splice up a leading zero 
+    return ($x,$rem) if wantarray;
+    return $x;
+    }
 
   my $y = [ @$yorg ];
   if ($LEN_CONVERT != 0)
@@ -705,11 +717,24 @@ sub _div_use_div
       return $x; 
       }
     }
-#  if (@$yorg == 1)
-#    {
-#    # shortcut, $y is < $BASE
-#
-#    }
+  if (@$yorg == 1)
+    {
+    my $rem;
+    $rem = _mod($c,[ @$x ],$yorg) if wantarray;
+
+    # shortcut, $y is < $BASE
+    my $j = scalar @$x; my $r = 0; 
+    my $y = $yorg->[0]; my $b;
+    while ($j-- > 0)
+      {
+      $b = $r * $MBASE + $x->[$j];
+      $x->[$j] = int($b/$y);
+      $r = $b % $y;
+      }
+    pop @$x if @$x > 1 && $x->[-1] == 0;	# splice up a leading zero 
+    return ($x,$rem) if wantarray;
+    return $x;
+    }
 
   my $y = [ @$yorg ];
   if ($LEN_CONVERT != 0)
@@ -1032,12 +1057,12 @@ sub _mod
     }
   elsif ($b == 1)
     {
-    # else need to go trough all elements: O(N),  but loop is a bit simplified
+    # else need to go trough all elements: O(N), but loop is a bit simplified
     my $r = 0;
     foreach (@$x)
       {
-      $r += $_ % $y;
-      $r %= $y;
+      $r = ($r + $_) % $y;		# not much faster, but heh...
+      #$r += $_ % $y; $r %= $y;
       }
     $r = 0 if $r == $y;
     $x->[0] = $r;
@@ -1048,10 +1073,13 @@ sub _mod
     my $r = 0; my $bm = 1;
     foreach (@$x)
       {
-      $r += ($_ % $y) * $bm;
-      $bm *= $b;
-      $bm %= $y;
-      $r %= $y;
+      $r = ($_ * $bm + $r) % $y;
+      $bm = ($bm * $b) % $y;
+
+      #$r += ($_ % $y) * $bm;
+      #$bm *= $b;
+      #$bm %= $y;
+      #$r %= $y;
       }
     $r = 0 if $r == $y;
     $x->[0] = $r;

@@ -49,5 +49,10 @@ ok(hexNFC("0000 0041 0000 0000"), "0000 0041 0000 0000");
 ok(hexNFD("0000 0041 0000 0000"), "0000 0041 0000 0000");
 
 # should be unary.
-ok(NFC "\x{41}\x{0302}\x{0301}\x62" eq "\x{1EA4}\x62");
-ok(NFD "\x{E0}\x{AC00}" eq "\x{61}\x{0300}\x{1100}\x{1161}");
+my $str11 = pack('U*', 0x41, 0x0302, 0x0301, 0x62);
+my $str12 = pack('U*', 0x1EA4, 0x62);
+ok(NFC $str11 eq $str12);
+
+my $str21 = pack('U*', 0xE0, 0xAC00);
+my $str22 = pack('U*', 0x61, 0x0300, 0x1100, 0x1161);
+ok(NFD $str21 eq $str22);

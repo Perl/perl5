@@ -116,13 +116,15 @@ close(CFG);
 
 # perl.h logic duplication begins
 
+if ($define{PERL_IMPLICIT_SYS}) {
+    $define{PL_OP_SLAB_ALLOC} = 1;
+}
+
 if ($define{USE_ITHREADS}) {
     if (!$define{MULTIPLICITY}) {
         $define{MULTIPLICITY} = 1;
     }
 }
-
-my $sym_ord = 0;
 
 $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{USE_ITHREADS} ||
@@ -130,6 +132,8 @@ $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{MULTIPLICITY} ;
 
 # perl.h logic duplication ends
+
+my $sym_ord = 0;
 
 if ($PLATFORM eq 'win32') {
     warn join(' ',keys %define)."\n";
@@ -139,7 +143,7 @@ if ($PLATFORM eq 'win32') {
     if ($define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_get_host_info");
 	output_symbol("perl_alloc_override");
-    output_symbol("perl_clone_host");
+	output_symbol("perl_clone_host");
     }
 }
 elsif ($PLATFORM eq 'os2') {
@@ -187,9 +191,9 @@ elsif ($PLATFORM eq 'netware') {
 	print "EXPORTS\n";
 	}
 	if ($define{PERL_IMPLICIT_SYS}) {
-	output_symbol("perl_get_host_info");
-	output_symbol("perl_alloc_override");
-	output_symbol("perl_clone_host");
+	    output_symbol("perl_get_host_info");
+	    output_symbol("perl_alloc_override");
+	    output_symbol("perl_clone_host");
 	}
 }
 
@@ -611,6 +615,14 @@ unless ($define{'PERL_IMPLICIT_SYS'}) {
 
 unless ($define{'FAKE_THREADS'}) {
     skip_symbols [qw(PL_curthr)];
+}
+
+unless ($define{'PL_OP_SLAB_ALLOC'}) {
+    skip_symbols [qw(
+                     PL_OpPtr
+                     PL_OpSlab
+                     PL_OpSpace
+                    )];
 }
 
 sub readvar {

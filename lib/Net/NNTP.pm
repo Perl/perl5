@@ -14,7 +14,7 @@ use Carp;
 use Time::Local;
 use Net::Config;
 
-$VERSION = "2.20"; # $Id: //depot/libnet/Net/NNTP.pm#14 $
+$VERSION = "2.21"; # $Id: //depot/libnet/Net/NNTP.pm#15 $
 @ISA     = qw(Net::Cmd IO::Socket::INET);
 
 sub new
@@ -116,6 +116,14 @@ sub article
     : undef;
 }
 
+sub articlefh {
+ @_ >= 1 && @_ <= 2 or croak 'usage: $nntp->articlefh( [ MSGID ] )';
+ my $nntp = shift;
+
+ return unless $nntp->_ARTICLE(@_);
+ return $nntp->tied_fh;
+}
+
 sub authinfo
 {
  @_ == 3 or croak 'usage: $nntp->authinfo( USER, PASS )';
@@ -147,6 +155,14 @@ sub body
     : undef;
 }
 
+sub bodyfh
+{
+ @_ >= 1 && @_ <= 2 or croak 'usage: $nntp->bodyfh( [ MSGID ] )';
+ my $nntp = shift;
+ return unless $nntp->_BODY(@_);
+ return $nntp->tied_fh;
+}
+
 sub head
 {
  @_ >= 1 && @_ <= 3 or croak 'usage: $nntp->head( [ MSGID ], [ FH ] )';
@@ -158,6 +174,14 @@ sub head
  $nntp->_HEAD(@_)
     ? $nntp->read_until_dot(@fh)
     : undef;
+}
+
+sub headfh
+{
+ @_ >= 1 && @_ <= 2 or croak 'usage: $nntp->headfh( [ MSGID ] )';
+ my $nntp = shift;
+ return unless $nntp->_HEAD(@_);
+ return $nntp->tied_fh;
 }
 
 sub nntpstat
@@ -294,6 +318,12 @@ sub post
  $nntp->_POST() && $nntp->datasend(@_)
     ? @_ == 0 || $nntp->dataend
     : undef;
+}
+
+sub postfh {
+  my $nntp = shift;
+  return unless $nntp->_POST();
+  return $nntp->tied_fh;
 }
 
 sub quit
@@ -743,6 +773,16 @@ Like C<article> but only fetches the body of the article.
 
 Like C<article> but only fetches the headers for the article.
 
+=item articlefh ( [ MSGID|MSGNUM ] )
+
+=item bodyfh ( [ MSGID|MSGNUM ] )
+
+=item headfh ( [ MSGID|MSGNUM ] )
+
+These are similar to article(), body() and head(), but rather than
+returning the requested data directly, they return a tied filehandle
+from which to read the article.
+
 =item nntpstat ( [ MSGID|MSGNUM ] )
 
 The C<nntpstat> command is similar to the C<article> command except that no
@@ -841,6 +881,15 @@ If C<MESSAGE> is not specified then the message must be sent using the
 C<datasend> and C<dataend> methods from L<Net::Cmd>
 
 C<MESSAGE> can be either an array of lines or a reference to an array.
+
+=item postfh ()
+
+Post a new article to the news server using a tied filehandle.  If
+posting is allowed, this method will return a tied filehandle that you
+can print() the contents of the article to be posted.  You must
+explicitly close() the filehandle when you are finished posting the
+article, and the return value from the close() call will indicate
+whether the message was successfully posted.
 
 =item slave ()
 
@@ -1064,6 +1113,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/NNTP.pm#14 $>
+I<$Id: //depot/libnet/Net/NNTP.pm#15 $>
 
 =cut

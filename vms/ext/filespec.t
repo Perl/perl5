@@ -30,7 +30,7 @@ $defwarn = <<'EOW';
 # file specifications shwn above are in fact equivalent.
 EOW
 
-is(rmsexpand('[]'),       "\U$ENV{DEFAULT}", 'rmsexpand()') || print $defwarn;
+is(uc(rmsexpand('[]')),   "\U$ENV{DEFAULT}", 'rmsexpand()') || print $defwarn;
 is(rmsexpand('from.here'),"\L$ENV{DEFAULT}from.here") || print $defwarn;
 is(rmsexpand('from'),     "\L$ENV{DEFAULT}from")      || print $defwarn;
 

@@ -1317,7 +1317,7 @@ sub process_pre {
 
     my $ltrs = '\w';
     my $gunk = '/#~:.?+=&%@!\-';
-    my $punc = '.:?\-';
+    my $punc = '.:!?\-;';
     my $any  = "${ltrs}${gunk}${punc}";
 
     $rest =~ s{
@@ -1325,14 +1325,17 @@ sub process_pre {
         (                           # begin $1  {
           $urls     :               # need resource and a colon
 	  (?!:)                     # Ignore File::, among others.
-          [$any] +?                 # followed by on or more
-                                    #  of any valid character, but
-                                    #  be conservative and take only
-                                    #  what you need to....
+          [$any] +?                 # followed by one or more of any valid
+                                    #   character, but be conservative and
+                                    #   take only what you need to....
         )                           # end   $1  }
         (?=                         # look-ahead non-consumptive assertion
-                [$punc]*            # either 0 or more puntuation
-                [^$any]             #   followed by a non-url char
+                [$punc]*            # either 0 or more punctuation
+                (?:                 #   followed
+                    [^$any]         #   by a non-url char
+                    |               #   or
+                    $               #   end of the string
+                )                   #
             |                       # or else
                 $                   #   then end of the string
         )
