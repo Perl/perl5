@@ -42,7 +42,7 @@ CCTYPE		*= GCC
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
-#CFG		*= Debug
+CFG		*= Debug
 
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
@@ -62,7 +62,7 @@ CCTYPE		*= GCC
 # you may have compiled with/without it.  Be prepared to recompile all extensions
 # if you change the default.  Currently, this cannot be enabled if you ask for
 # PERL_OBJECT above.
-PERL_MALLOC	*= define
+#PERL_MALLOC	*= define
 
 #
 # set the install locations of the compiler include/libraries
