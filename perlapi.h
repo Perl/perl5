@@ -136,6 +136,8 @@ START_EXTERN_C
 #define PL_bufend		(*Perl_Ibufend_ptr(aTHXo))
 #undef  PL_bufptr
 #define PL_bufptr		(*Perl_Ibufptr_ptr(aTHXo))
+#undef  PL_checkav
+#define PL_checkav		(*Perl_Icheckav_ptr(aTHXo))
 #undef  PL_collation_ix
 #define PL_collation_ix		(*Perl_Icollation_ix_ptr(aTHXo))
 #undef  PL_collation_name
@@ -472,8 +474,6 @@ START_EXTERN_C
 #define PL_stderrgv		(*Perl_Istderrgv_ptr(aTHXo))
 #undef  PL_stdingv
 #define PL_stdingv		(*Perl_Istdingv_ptr(aTHXo))
-#undef  PL_stopav
-#define PL_stopav		(*Perl_Istopav_ptr(aTHXo))
 #undef  PL_strtab
 #define PL_strtab		(*Perl_Istrtab_ptr(aTHXo))
 #undef  PL_strtab_mutex

@@ -357,11 +357,11 @@ BEGIN { @ARGV = qw(a b c d e) }
 BEGIN { print "argv <@ARGV>\nbegin <",shift,">\n" }
 END { print "end <",shift,">\nargv <@ARGV>\n" }
 INIT { print "init <",shift,">\n" }
-STOP { print "stop <",shift,">\n" }
+CHECK { print "check <",shift,">\n" }
 EXPECT
 argv <a b c d e>
 begin <a>
-stop <b>
+check <b>
 init <c>
 end <d>
 argv <e>

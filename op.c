@@ -4547,7 +4547,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	else
 	    s = name;
 
-	if (*s != 'B' && *s != 'E' && *s != 'S' && *s != 'I')
+	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I')
 	    goto done;
 
 	if (strEQ(s, "BEGIN")) {
@@ -4577,12 +4577,12 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    av_store(PL_endav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
-	else if (strEQ(s, "STOP") && !PL_error_count) {
-	    if (!PL_stopav)
-		PL_stopav = newAV();
+	else if (strEQ(s, "CHECK") && !PL_error_count) {
+	    if (!PL_checkav)
+		PL_checkav = newAV();
 	    DEBUG_x( dump_sub(gv) );
-	    av_unshift(PL_stopav, 1);
-	    av_store(PL_stopav, 0, SvREFCNT_inc(cv));
+	    av_unshift(PL_checkav, 1);
+	    av_store(PL_checkav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
 	else if (strEQ(s, "INIT") && !PL_error_count) {
@@ -4693,7 +4693,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	else
 	    s = name;
 
-	if (*s != 'B' && *s != 'E' && *s != 'S' && *s != 'I')
+	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I')
 	    goto done;
 
 	if (strEQ(s, "BEGIN")) {
@@ -4709,11 +4709,11 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	    av_store(PL_endav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
-	else if (strEQ(s, "STOP")) {
-	    if (!PL_stopav)
-		PL_stopav = newAV();
-	    av_unshift(PL_stopav, 1);
-	    av_store(PL_stopav, 0, SvREFCNT_inc(cv));
+	else if (strEQ(s, "CHECK")) {
+	    if (!PL_checkav)
+		PL_checkav = newAV();
+	    av_unshift(PL_checkav, 1);
+	    av_store(PL_checkav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
 	else if (strEQ(s, "INIT")) {

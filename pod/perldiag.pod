@@ -1342,7 +1342,7 @@ unlikely to be what you want.
 
 =item %s failed--call queue aborted
 
-(F) An untrapped exception was raised while executing a STOP, INIT, or
+(F) An untrapped exception was raised while executing a CHECK, INIT, or
 END subroutine.  Processing of the remainder of the queue of such
 routines has been prematurely ended.
 

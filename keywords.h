@@ -16,7 +16,7 @@
 #define KEY_LE			15
 #define KEY_LT			16
 #define KEY_NE			17
-#define KEY_STOP		18
+#define KEY_CHECK		18
 #define KEY_abs			19
 #define KEY_accept		20
 #define KEY_alarm		21

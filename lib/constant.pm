@@ -9,7 +9,7 @@ $VERSION = '1.01';
 #=======================================================================
 
 # Some names are evil choices.
-my %keywords = map +($_, 1), qw{ BEGIN INIT STOP END DESTROY AUTOLOAD };
+my %keywords = map +($_, 1), qw{ BEGIN INIT CHECK END DESTROY AUTOLOAD };
 
 my %forced_into_main = map +($_, 1),
     qw{ STDIN STDOUT STDERR ARGV ARGVOUT ENV INC SIG };

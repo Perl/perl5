@@ -6832,7 +6832,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_beginav		= av_dup_inc(proto_perl->Ibeginav);
     PL_endav		= av_dup_inc(proto_perl->Iendav);
-    PL_stopav		= av_dup_inc(proto_perl->Istopav);
+    PL_checkav		= av_dup_inc(proto_perl->Icheckav);
     PL_initav		= av_dup_inc(proto_perl->Iinitav);
 
     PL_sub_generation	= proto_perl->Isub_generation;
