@@ -1830,6 +1830,10 @@
 #define Perl_dump_mstats	pPerl->Perl_dump_mstats
 #undef  dump_mstats
 #define dump_mstats		Perl_dump_mstats
+#undef  Perl_get_mstats
+#define Perl_get_mstats		pPerl->Perl_get_mstats
+#undef  get_mstats
+#define get_mstats		Perl_get_mstats
 #endif
 #undef  Perl_safesysmalloc
 #define Perl_safesysmalloc	pPerl->Perl_safesysmalloc

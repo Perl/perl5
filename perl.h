@@ -529,6 +529,19 @@ Malloc_t Perl_realloc (Malloc_t where, MEM_SIZE nbytes);
  * that causes clashes with case-insensitive linkers */
 Free_t   Perl_mfree (Malloc_t where);
 
+typedef struct perl_mstats perl_mstats_t;
+
+struct perl_mstats {
+    unsigned long *nfree;
+    unsigned long *ntotal;
+    long topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
+    long total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
+    long minbucket;
+    /* Level 1 info */
+    unsigned long *bucket_mem_size;
+    unsigned long *bucket_available_size;
+};
+
 #  define safemalloc  Perl_malloc
 #  define safecalloc  Perl_calloc
 #  define saferealloc Perl_realloc

@@ -344,6 +344,7 @@ else {
 if ($define{'MYMALLOC'}) {
     emit_symbols [qw(
 		    Perl_dump_mstats
+		    Perl_get_mstats
 		    Perl_malloc
 		    Perl_mfree
 		    Perl_realloc

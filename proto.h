@@ -820,6 +820,7 @@ PERL_CALLCONV int	Perl_yyparse(pTHX);
 PERL_CALLCONV int	Perl_yywarn(pTHX_ char* s);
 #if defined(MYMALLOC)
 PERL_CALLCONV void	Perl_dump_mstats(pTHX_ char* s);
+PERL_CALLCONV int	Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level);
 #endif
 PERL_CALLCONV Malloc_t	Perl_safesysmalloc(MEM_SIZE nbytes);
 PERL_CALLCONV Malloc_t	Perl_safesyscalloc(MEM_SIZE elements, MEM_SIZE size);
