@@ -117,6 +117,24 @@ all the possible code points, pack("U",ord("A")) would in EBCDIC
 equal I<A with acute> or chr(101), and unpack("U", "A") would equal
 65, or I<non-breaking space>, not 193, or ord "A".)
 
+=head2 Remaining Perl Unicode problems in EBCDIC
+
+=over 4
+
+=item *
+
+Many of the remaining seem to be related to case-insensitive matching:
+for example, C<< /[\x{131}]/ >> (LATIN SMALL LETTER DOTLESS I) does
+not match "I" case-insensitively, as it should under Unicode.
+(The match succeeds in ASCII-derived platforms.)
+
+=item *
+
+The extensions Unicode::Collate and Unicode::Normalized are not
+supported under EBCDIC, likewise for the encoding pragma.
+
+=back
+
 =head2 Unicode and UTF
 
 UTF is a Unicode Transformation Format.  UTF-8 is a Unicode conforming

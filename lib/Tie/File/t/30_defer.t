@@ -223,6 +223,7 @@ undef $o;
 untie @a;
 # (79) We can't use check_contents any more, because the object is dead
 open F, "< $file" or die;
+binmode F;
 { local $/ ; $z = <F> }
 close F;
 my $x = join("$:", qw(flushed recordB recordE 

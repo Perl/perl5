@@ -114,6 +114,16 @@ This is similar to calling the C<x> command on each applicable var.
 
 Same as C<V currentpackage [vars]>.
 
+=item y [level [vars]]
+
+Display all (or some) lexical variables (mnemonic: C<mY> variables)
+in the current scope or I<level> scopes higher.  You can limit the
+variables that you see with I<vars> which works exactly as it does
+for the C<V> and C<X> commands.  Requires the C<PadWalker> module
+version 0.08 or higher; will warn if this isn't installed.  Output
+is pretty-printed in the same style as for C<V> and the format is
+controlled by the same options.
+
 =item T
 
 Produce a stack backtrace.  See below for details on its output.

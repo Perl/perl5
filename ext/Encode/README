@@ -24,3 +24,7 @@ DEPENDENCIES
 
 This module requires perl5.7.2 or later.
 
+QUESTIONS?
+
+If you have any questions "perldoc Encode" does not answer, please
+feel free to ask at perl-unicode@perl.org.

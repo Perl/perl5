@@ -196,13 +196,15 @@ ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
+ext/Encode/AUTHORS		Encode extension
+ext/Encode/Changes		Encode extension
 ext/Encode/CN/CN.pm		Encode extension
 ext/Encode/CN/Makefile.PL	Encode extension
 ext/Encode/compile		Encode extension
 ext/Encode/encengine.c		Encode extension
 ext/Encode/encode.h		Encode extension
 ext/Encode/Encode.pm			Encode extension
-ext/Encode/Encode.xs		Encode extension
+ext/Encode/Encode.xs			Encode extension
 ext/Encode/Encode/11643-1.enc		Encode table
 ext/Encode/Encode/11643-2.enc		Encode table
 ext/Encode/Encode/2022-cn.enc		Encode table
@@ -289,7 +291,6 @@ ext/Encode/Encode/cp950.enc		Encode table
 ext/Encode/Encode/dingbats.enc		Encode table
 ext/Encode/Encode/dingbats.ucm		Encode table
 ext/Encode/Encode/euc-cn.enc		Encode table
-ext/Encode/Encode/euc-jp-0212.enc	Encode table
 ext/Encode/Encode/euc-jp.enc		Encode table
 ext/Encode/Encode/euc-jp.ucm		Encode table
 ext/Encode/Encode/euc-kr.enc		Encode table
@@ -339,6 +340,7 @@ ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
 ext/Encode/KR/Makefile.PL		Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
+ext/Encode/lib/Encode/Description.pod	Encode extension
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Internal.pm	Encode extension
 ext/Encode/lib/Encode/iso10646_1.pm	Encode extension
@@ -348,7 +350,6 @@ ext/Encode/lib/Encode/JP/ISO_2022_JP.pm	Encode extension
 ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
 ext/Encode/lib/Encode/Tcl.pm		Encode extension
 ext/Encode/lib/Encode/Tcl/Escape.pm	Encode extension
-ext/Encode/lib/Encode/Tcl/Extended.pm	Encode extension
 ext/Encode/lib/Encode/Tcl/Table.pm	Encode extension
 ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
 ext/Encode/lib/Encode/Unicode.pm	Encode extension
@@ -358,12 +359,14 @@ ext/Encode/lib/EncodeFormat.pod		Encode extension
 ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
+ext/Encode/t/CJKalias.t		Encode extension
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
-ext/Encode/t/japanese.pl	Encode extension
+ext/Encode/t/jisx0208.euc	Encode extension test
+ext/Encode/t/jisx0208.ref	Encode extension test
+ext/Encode/t/jisx0212.euc	Encode extension test
+ext/Encode/t/jisx0212.ref	Encode extension test
 ext/Encode/t/JP.t		Encode extension test
-ext/Encode/t/table.euc		Encode extension test
-ext/Encode/t/table.ref		Encode extension test
 ext/Encode/t/Tcl.t		Encode extension test
 ext/Encode/t/TW.t		Encode extension test
 ext/Encode/TW/Makefile.PL	Encode extension
@@ -398,7 +401,8 @@ ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/typemap		GDBM extension interface types
-ext/I18N/Langinfo/fallback.xs	I18N::Langinfo
+ext/I18N/Langinfo/fallback/const-c.inc	I18N::Langinfo
+ext/I18N/Langinfo/fallback/const-xs.inc	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.t	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.xs	I18N::Langinfo
@@ -992,8 +996,8 @@ lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
+lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
-lib/ExtUtils/t/ExtUtils.t	See if extutils work
 lib/ExtUtils/t/hints.t      See if hint files are honored.
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works

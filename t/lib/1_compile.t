@@ -114,9 +114,17 @@ foreach my $mod (<DATA>) {
 
 my @Core_Modules = sort keys %Core_Modules;
 
-print "1..".@Core_Modules."\n";
+print "1..".(1+@Core_Modules)."\n";
 
-my $test_num = 1;
+my $message
+  = "ok 1 - All modules should have tests # TODO Make Schwern Poorer\n";
+if (@Core_Modules) {
+  print "not $message";
+} else {
+  print $message;
+}
+
+my $test_num = 2;
 
 foreach my $module (@Core_Modules) {
     print "$module compile failed\nnot " unless compile_module($module);
@@ -149,8 +157,15 @@ CGI::Util
 Carp::Heavy
 CPAN::Nox
 Exporter::Heavy
+ExtUtils::Command
 ExtUtils::Constant
+ExtUtils::Embed
+ExtUtils::Installed
 ExtUtils::MakeMaker
+ExtUtils::Manifest
+ExtUtils::Mkbootstrap
+ExtUtils::Packlist
+File::Spec::Functions
 Filter::Util::Call
 GDBM_File
 I18N::LangTags::List
@@ -168,6 +183,7 @@ Locale::Constants
 Locale::Country
 Locale::Currency
 Locale::Language
+Locale::Script
 MIME::QuotedPrint
 Math::BigFloat
 Math::BigInt::Calc
@@ -188,11 +204,14 @@ Net::Time
 ODBM_File
 Pod::Checker
 Pod::Find
+Pod::Functions
 Pod::Html
+Pod::InputObjects
 Pod::LaTeX
 Pod::Man
 Pod::ParseLink
 Pod::ParseUtils
+Pod::Select
 Pod::Text
 Pod::Text::Overstrike
 Pod::Text::Termcap
@@ -201,6 +220,9 @@ SDBM_File
 Safe
 Scalar::Util
 Sys::Syslog
+Test::Builder
+Test::Harness::Assert
+Test::Harness::Straps
 Test::More
 Test::ParseWords
 Text::Tabs

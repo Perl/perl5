@@ -1,4 +1,4 @@
-Unicode/Normalize version 0.14
+Unicode/Normalize version 0.15
 ===================================
 
 Unicode::Normalize - normalized forms of Unicode text
@@ -7,23 +7,26 @@ SYNOPSIS
 
   use Unicode::Normalize;
 
-  $string_NFD  = NFD($string);  # Normalization Form D
-  $string_NFC  = NFC($string);  # Normalization Form C
-  $string_NFKD = NFKD($string); # Normalization Form KD
-  $string_NFKC = NFKC($string); # Normalization Form KC
+  $NFD_string  = NFD($string);  # Normalization Form D
+  $NFC_string  = NFC($string);  # Normalization Form C
+  $NFKD_string = NFKD($string); # Normalization Form KD
+  $NFKC_string = NFKC($string); # Normalization Form KC
 
-   or
+
+  or
+
 
   use Unicode::Normalize 'normalize';
 
-  $string_NFD  = normalize('D',  $string);  # Normalization Form D
-  $string_NFC  = normalize('C',  $string);  # Normalization Form C
-  $string_NFKD = normalize('KD', $string);  # Normalization Form KD
-  $string_NFKC = normalize('KC', $string);  # Normalization Form KC
+  $NFD_string  = normalize('D',  $string);  # Normalization Form D
+  $NFC_string  = normalize('C',  $string);  # Normalization Form C
+  $NFKD_string = normalize('KD', $string);  # Normalization Form KD
+  $NFKC_string = normalize('KC', $string);  # Normalization Form KC
+
 
 INSTALLATION
 
-Perl 5.006 or later
+Perl 5.6 or later
 
 To install this module type the following:
 
@@ -58,26 +61,30 @@ Exporter
 File::Copy
 File::Spec
 
-unicore/CombiningClass.pl
-  (or unicode/CombiningClass.pl)
-unicore/Decomposition.pl
-  (or unicode/Decomposition.pl)
-unicore/CompositionExclusions.txt
-  (or unicode/CompExcl.txt)
+unicore/CombiningClass.pl         (or unicode/CombiningClass.pl)
+unicore/Decomposition.pl          (or unicode/Decomposition.pl)
+unicore/CompositionExclusions.txt (or unicode/CompExcl.txt)
 
-# CAVEAT:
-# In bleadperl, unicore/CompExcl.txt is renamed
-# unicore/CompositionExclusions.txt.
+CAVEAT
 
-And for the NoXS version, in addition to the above,
+(1) In bleadperl, unicore/CompExcl.txt is renamed
+  unicore/CompositionExclusions.txt.
 
-  Lingua::KO::Hangul::Util 0.06
+(2) When these unicore/*.* files are updated;
 
-is required.
+  in the case of an XS version:
+    You must rebuild the module,
+    as the data will be compiled on building.
+
+  in the case of a NoXS version:
+    Rebuilding is not necessary,
+    as the data will be read on requirement.
 
 COPYRIGHT AND LICENCE
 
-SADAHIRO Tomoyuki, E<lt>SADAHIRO@cpan.orgE<gt>
+  SADAHIRO Tomoyuki
+
+  SADAHIRO@cpan.org
 
   http://homepage1.nifty.com/nomenclator/perl/
 
@@ -85,4 +92,3 @@ SADAHIRO Tomoyuki, E<lt>SADAHIRO@cpan.orgE<gt>
 
   This program is free software; you can redistribute it and/or
   modify it under the same terms as Perl itself.
-

@@ -169,16 +169,17 @@ To output UTF-8 always, use the ":utf8" output discipline.  Prepending
 to this sample program ensures the output is completely UTF-8, and      
 of course, removes the warning.
 
+If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
+contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
+the default encoding of your STDIN, STDOUT, and STDERR, and of
+B<any subsequent file open>, is UTF-8.
+
 =head2 Unicode and EBCDIC
 
 Perl 5.8.0 also supports Unicode on EBCDIC platforms.  There,
 the Unicode support is somewhat more complex to implement since
 additional conversions are needed at every step.  Some problems
-remain, but they all seem to be related to the combination of
-the extra mapping just described and case-insensitive matching:
-for example, "\x{131}" (LATIN SMALL LETTER DOTLESS I) does not
-match "I" case-insensitively, as it should under Unicode.
-(The match succeeds in ASCII-derived platforms.)
+remain, see L<perlebcdic> for details.
 
 In any case, the Unicode support on EBCDIC platforms is better than
 in the 5.6 series, which didn't work much at all for EBCDIC platform.

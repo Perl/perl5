@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..864\n";
+print "1..892\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2730,3 +2730,44 @@ print "# some Unicode properties\n";
     print $u eq "feeber" ? "ok 864\n" : "not ok 864\n";
 }
 
+{
+    print "# UTF-8 bug with s///\n";
+    # check utf8/non-utf8 mixtures
+    # try to force all float/anchored check combinations
+    my $c = "\x{100}";
+    my $test = 865;
+    my $subst;
+    for my $re (
+	"xx.*$c", "x.*$c$c", "$c.*xx", "$c$c.*x", "xx.*(?=$c)", "(?=$c).*xx",
+    ) {
+	print "xxx" =~ /$re/ ? "not ok $test\n" : "ok $test\n";
+	++$test;
+	print +($subst = "xxx") =~ s/$re// ? "not ok $test\n" : "ok $test\n";
+	++$test;
+    }
+    for my $re ("xx.*$c*", "$c*.*xx") {
+	print "xxx" =~ /$re/ ? "ok $test\n" : "not ok $test\n";
+	++$test;
+	($subst = "xxx") =~ s/$re//;
+	print $subst eq '' ? "ok $test\n" : "not ok $test\t# $subst\n";
+	++$test;
+    }
+    for my $re ("xxy*", "y*xx") {
+	print "xx$c" =~ /$re/ ? "ok $test\n" : "not ok $test\n";
+	++$test;
+	($subst = "xx$c") =~ s/$re//;
+	print $subst eq $c ? "ok $test\n" : "not ok $test\n";
+	++$test;
+	print "xy$c" =~ /$re/ ? "not ok $test\n" : "ok $test\n";
+	++$test;
+	print +($subst = "xy$c") =~ /$re/ ? "not ok $test\n" : "ok $test\n";
+	++$test;
+    }
+    for my $re ("xy$c*z", "x$c*yz") {
+	print "xyz" =~ /$re/ ? "ok $test\n" : "not ok $test\n";
+	++$test;
+	($subst = "xyz") =~ s/$re//;
+	print $subst eq '' ? "ok $test\n" : "not ok $test\n";
+	++$test;
+    }
+}

@@ -6,6 +6,7 @@ WriteMakefile(
     MAN3PODS 	=> {}, 	# Pods will be built by installman.
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
     VERSION_FROM => 'GDBM_File.pm',
+    realclean => {FILES=> 'const-c.inc const-xs.inc'},
 );
 WriteConstants(
     NAME => 'GDBM_File',

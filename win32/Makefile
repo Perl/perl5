@@ -1077,6 +1077,14 @@ test-wide-notty : test-prep
 	$(PERLEXE) -I..\lib harness
 	cd ..\win32
 
+_test : 
+       $(XCOPY) $(PERLEXE) ..\t\$(NULL)
+       $(XCOPY) $(PERLDLL) ..\t\$(NULL)
+       $(XCOPY) $(GLOBEXE) ..\t\$(NULL)
+       cd ..\t
+       $(PERLEXE) -I..\lib harness
+       cd ..\win32
+
 clean : Extensions_clean
 	-@$(DEL) miniperlmain$(o)
 	-@$(DEL) $(MINIPERL)

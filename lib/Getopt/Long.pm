@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.54 2002-02-20 15:00:10+01 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.55 2002-03-13 13:06:44+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Feb 20 15:00:04 2002
-# Update Count    : 1045
+# Last Modified On: Wed Mar 13 12:54:01 2002
+# Update Count    : 1070
 # Status          : Released
 
 ################ Copyright ################
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.28;
+$VERSION        =  2.29;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.28";
+$VERSION_STRING = "2.29";
 
 use Exporter;
 
@@ -70,7 +70,6 @@ sub ConfigDefaults ();
 sub ParseOptionSpec ($$);
 sub OptCtl ($);
 sub FindOption ($$$$);
-sub Croak (@);			# demand loading the real Croak
 
 ################ Local Variables ################
 
@@ -168,8 +167,8 @@ sub new {
     }
 
     if ( %atts ) {		# Oops
-	Getopt::Long::Croak(__PACKAGE__.": unhandled attributes: ".
-			    join(" ", sort(keys(%atts))));
+	die(__PACKAGE__.": unhandled attributes: ".
+	    join(" ", sort(keys(%atts)))."\n");
     }
 
     $self;
@@ -261,7 +260,7 @@ sub GetOptions {
     $error = '';
 
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION (",
-		  '$Revision: 2.54 $', ") ",
+		  '$Revision: 2.55 $', ") ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
 		  "ARGV: (@ARGV)",
@@ -504,7 +503,7 @@ sub GetOptions {
 		    else {
 			print STDERR ("Invalid REF type \"", ref($linkage{$opt}),
 				      "\" in linkage\n");
-			Croak ("Getopt::Long -- internal error!\n");
+			die("Getopt::Long -- internal error!\n");
 		    }
 		}
 		# No entry in linkage means entry in userlinkage.
@@ -713,10 +712,8 @@ sub ParseOptionSpec ($$) {
     }
 
     if ( $dups && $^W ) {
-	require 'Carp.pm';
-	$Carp::CarpLevel = 2;
 	foreach ( split(/\n+/, $dups) ) {
-	    Carp::cluck($_);
+	    warn($_."\n");
 	}
     }
     ($names[0], $orig);
@@ -757,7 +754,7 @@ sub FindOption ($$$$) {
 
     #### Look it up ###
 
-    my $tryopt;			# option to try
+    my $tryopt = $opt;		# option to try
 
     if ( $bundling && $starter eq '-' ) {
 
@@ -1011,7 +1008,7 @@ sub FindOption ($$$$) {
 	}
     }
     else {
-	Croak ("GetOpt::Long internal error (Can't happen)\n");
+	die("GetOpt::Long internal error (Can't happen)\n");
     }
     return (1, $opt, $ctl, $arg, $key);
 }
@@ -1090,7 +1087,7 @@ sub Configure (@) {
 	    # Turn into regexp. Needs to be parenthesized!
 	    $genprefix = "(" . quotemeta($genprefix) . ")";
 	    eval { '' =~ /$genprefix/; };
-	    Croak ("Getopt::Long: invalid pattern \"$genprefix\"") if $@;
+	    die("Getopt::Long: invalid pattern \"$genprefix\"") if $@;
 	}
 	elsif ( $try =~ /^prefix_pattern=(.+)$/ && $action ) {
 	    $genprefix = $1;
@@ -1098,13 +1095,13 @@ sub Configure (@) {
 	    $genprefix = "(" . $genprefix . ")"
 	      unless $genprefix =~ /^\(.*\)$/;
 	    eval { '' =~ /$genprefix/; };
-	    Croak ("Getopt::Long: invalid pattern \"$genprefix\"") if $@;
+	    die("Getopt::Long: invalid pattern \"$genprefix\"") if $@;
 	}
 	elsif ( $try eq 'debug' ) {
 	    $debug = $action;
 	}
 	else {
-	    Croak ("Getopt::Long: unknown config parameter \"$opt\"")
+	    die("Getopt::Long: unknown config parameter \"$opt\"")
 	}
     }
     $prevconfig;
@@ -1114,13 +1111,6 @@ sub Configure (@) {
 sub config (@) {
     Configure (@_);
 }
-
-# To prevent Carp from being loaded unnecessarily.
-sub Croak (@) {
-    require 'Carp.pm';
-    $Carp::CarpLevel = 1;
-    Carp::croak(@_);
-};
 
 ################ Documentation ################
 

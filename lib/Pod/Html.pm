@@ -492,8 +492,6 @@ END_OF_HEAD
 		if (/^=(head[1-6])\s+(.*\S)/s) {	# =head[1-6] heading
 		    process_head( $1, $2, $doindex && $index );
 		} elsif (/^=item\s*(.*\S)?/sm) {	# =item text
-		    warn "$0: $podfile: =item without bullet, number or text"
-		       . " in paragraph $paragraph.\n" if !defined($1) or $1 eq '';
 		    $need_dd = process_item( $1 );
 		    $after_item = 1;
 		} elsif (/^=over\s*(.*)/) {		# =over N

@@ -719,19 +719,23 @@ line so that the hint files can make appropriate adjustments.
 
 The default is to compile without thread support.
 
-As of v5.5.64, perl has two different internal threads implementations.
-The 5.005 version (5005threads) and an interpreter-based implementation
-(ithreads) with one interpreter per thread.  By default, Configure selects
-ithreads if -Dusethreads is specified.  However, you can select the old
-5005threads behavior instead by either
+Perl has two different internal threads implementations.  The current
+model (available internally since 5.6, and as a user-level module
+since 5.8) is called interpreter-based implementation (ithreads),
+with one interpreter per thread, and explicit sharing of data.
+
+The 5.005 version (5005threads) is considered obsolete, buggy, and
+unmaintained.
+
+By default, Configure selects ithreads if -Dusethreads is specified.
+
+However, you can select the old 5005threads behavior
 
 	sh Configure -Dusethreads -Duse5005threads
 
-or by
-	sh Configure -Dusethreads -Uuseithreads
-
-Eventually (by perl v5.6.0) this internal confusion ought to disappear,
-and these options may disappear as well.
+If you decide to use ithreads, the 'threads' module allows their use,
+and the 'Thread' module offers an interface to both 5005threads and
+ithreads (whichever has been configured).
 
 =head2 Large file support.
 
@@ -801,32 +805,30 @@ and the long double support.
 =head2 Selecting File IO mechanisms
 
 Previous versions of perl used the standard IO mechanisms as defined in
-stdio.h.  Versions 5.003_02 and later of perl allow alternate IO
+stdio.h.  Versions 5.003_02 and later of perl allowed alternate IO
 mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
 the default and is the only supported mechanism.
 
-This PerlIO abstraction can be enabled either on the Configure command
-line with
+Starting from Perl 5.8 the default mechanism is to use the PerlIO
+abstraction, because it allows better control of I/O mechanisms,
+instead of having to work with (often, work around) vendors' I/O
+implementations.
 
-	sh Configure -Duseperlio
+This PerlIO abstraction can be disabled either on the Configure
+command line with
+
+	sh Configure -Uuseperlio
 
 or interactively at the appropriate Configure prompt.
 
-If you choose to use the PerlIO abstraction layer, there are two
-(experimental) possibilities for the underlying IO calls.  These have been
-tested to some extent on some platforms, but are not guaranteed to work
-everywhere.
-
-=over 4
-
-=item 1.
-
-AT&T's "sfio".  This has superior performance to stdio.h in many
-cases, and is extensible by the use of "discipline" modules.  Sfio
-currently only builds on a subset of the UNIX platforms perl supports.
-Because the data structures are completely different from stdio, perl
-extension modules or external libraries may not work.  This
-configuration exists to allow these issues to be worked on.
+With the PerlIO abstraction layer, there is another possibility for
+the underlying IO calls, AT&T's "sfio".  This has superior performance
+to stdio.h in many cases, and is extensible by the use of "discipline"
+modules ("Native" PerlIO has them too).  Sfio currently only builds on
+a subset of the UNIX platforms perl supports.  Because the data
+structures are completely different from stdio, perl extension modules
+or external libraries may not work.  This configuration exists to
+allow these issues to be worked on.
 
 This option requires the 'sfio' package to have been built and installed.
 The latest sfio is available from http://www.research.att.com/sw/tools/sfio/
@@ -845,24 +847,6 @@ this is a problem at least for some versions of Linux and SunOS 4.
 Configure should detect this problem and warn you about problems with
 _exit vs. exit.  If you have this problem, the fix is to go back to
 your sfio sources and correct iffe's guess about atexit.
-
-=item 2.
-
-Normal stdio IO, but with all IO going through calls to the PerlIO
-abstraction layer.  This configuration can be used to check that perl and
-extension modules have been correctly converted to use the PerlIO
-abstraction.
-
-This configuration should work on all platforms (but might not).
-
-You select this option via:
-
-	sh Configure -Duseperlio -Uusesfio
-
-If you have already selected -Duseperlio, and if Configure does not
-detect sfio, then this will be the default suggested by Configure.
-
-=back
 
 =head2 SOCKS
 

@@ -1206,6 +1206,8 @@ STATIC U8*	S_reghop3(pTHX_ U8 *pos, I32 off, U8 *lim);
 STATIC U8*	S_reghopmaybe(pTHX_ U8 *pos, I32 off);
 STATIC U8*	S_reghopmaybe3(pTHX_ U8 *pos, I32 off, U8 *lim);
 STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *startpos, I32 norun);
+STATIC void	S_to_utf8_substr(pTHX_ regexp * prog);
+STATIC void	S_to_byte_substr(pTHX_ regexp * prog);
 #endif
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)

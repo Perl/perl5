@@ -439,6 +439,7 @@
 #define PL_utf8_upper		(PERL_GET_INTERP->Iutf8_upper)
 #define PL_utf8_xdigit		(PERL_GET_INTERP->Iutf8_xdigit)
 #define PL_uudmap		(PERL_GET_INTERP->Iuudmap)
+#define PL_wantutf8		(PERL_GET_INTERP->Iwantutf8)
 #define PL_warnhook		(PERL_GET_INTERP->Iwarnhook)
 #define PL_widesyscalls		(PERL_GET_INTERP->Iwidesyscalls)
 #define PL_xiv_arenaroot	(PERL_GET_INTERP->Ixiv_arenaroot)
@@ -737,6 +738,7 @@
 #define PL_utf8_upper		(vTHX->Iutf8_upper)
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
 #define PL_uudmap		(vTHX->Iuudmap)
+#define PL_wantutf8		(vTHX->Iwantutf8)
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_widesyscalls		(vTHX->Iwidesyscalls)
 #define PL_xiv_arenaroot	(vTHX->Ixiv_arenaroot)
@@ -1038,6 +1040,7 @@
 #define PL_Iutf8_upper		PL_utf8_upper
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
 #define PL_Iuudmap		PL_uudmap
+#define PL_Iwantutf8		PL_wantutf8
 #define PL_Iwarnhook		PL_warnhook
 #define PL_Iwidesyscalls	PL_widesyscalls
 #define PL_Ixiv_arenaroot	PL_xiv_arenaroot

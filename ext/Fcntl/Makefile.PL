@@ -5,6 +5,7 @@ WriteMakefile(
     MAN3PODS 	=> {}, 	# Pods will be built by installman.
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
     VERSION_FROM => 'Fcntl.pm',
+    realclean => {FILES=> 'const-c.inc const-xs.inc'},
 );
 
 my @names = (qw(FAPPEND FASYNC FCREAT FDEFER FDSYNC FD_CLOEXEC FEXCL FLARGEFILE

@@ -395,18 +395,27 @@ EOF
 	    pushinitfree $f;
 	    pushssif $endif;
 	}
-        elsif ($f =~ /^(crypt|drand48|gmtime|localtime|random)$/) {
+        elsif ($f =~ /^(crypt)$/) {
 	    pushssif $ifdef;
 	    push @struct, <<EOF;
+#if CRYPT_R_PROTO == REENTRANT_PROTO_B_CCD
+	$seend{$f} _${f}_data;
+#else
 	$seent{$f} _${f}_struct;
+#endif
 EOF
-	    if ($f eq 'crypt') {
-		push @init, <<EOF;
+    	    push @init, <<EOF;
 #ifdef __GLIBC__
 	PL_reentrant_buffer->_${f}_struct.initialized = 0;
 #endif
 EOF
-	    }
+	    pushssif $endif;
+	}
+        elsif ($f =~ /^(drand48|gmtime|localtime|random)$/) {
+	    pushssif $ifdef;
+	    push @struct, <<EOF;
+	$seent{$f} _${f}_struct;
+EOF
 	    if ($1 eq 'drand48') {
 	        push @struct, <<EOF;
 	double	_${f}_double;
@@ -877,7 +886,7 @@ EOF
 
 __DATA__
 asctime S	|time	|const struct tm|B_SB|B_SBI|I_SB|I_SBI
-crypt CC	|crypt	|struct crypt_data|B_CCS
+crypt CC	|crypt	|struct crypt_data|B_CCS|B_CCD|D=CRYPTD*
 ctermid	B	|stdio	|		|B_B
 ctime S		|time	|const time_t	|B_SB|B_SBI|I_SB|I_SBI
 drand48		|stdlib	|struct drand48_data	|I_ST|T=double*

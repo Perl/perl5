@@ -7,6 +7,7 @@ WriteMakefile(
    ($Config{libs} =~ /(-lsocks\S*)/ ? (LIBS => [ "$1" ] ) : ()),
     MAN3PODS  	 => {}, 	# Pods will be built by installman.
     XSPROTOARG   => '-noprototypes', 		# XXX remove later?
+    realclean => {FILES=> 'const-c.inc const-xs.inc'},
 );
 my @names = (qw(AF_802 AF_AAL AF_APPLETALK AF_CCITT AF_CHAOS AF_CTF
 		AF_DATAKIT AF_DECnet AF_DLI AF_ECMA AF_GOSIP AF_HYLINK

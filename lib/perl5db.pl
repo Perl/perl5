@@ -316,6 +316,8 @@ sub eval {
 #   + m(methods),   M(modules)        # ...           (was m,v)
 #   + o(option)                       # lc            (was O)
 #   + v(view code), V(view Variables) # ...           (was w,V)
+# Changes: 1.18: Mar 17, 2002 Richard Foley <richard.foley@rfi.net>
+#   + fixed missing cmd_O bug
 # 
 ####################################################################
 
@@ -1441,7 +1443,7 @@ sub cmd_wrapper {
 	my $call = 'cmd_'.(
 		$set{$CommandSet}{$cmd} || $cmd
 	);
-	# print "rjsf: cmd_wrapper($cmd): $CommandSet($set{$CommandSet}{$cmd}) => call($call)\n";
+	# print "cmd_wrapper($cmd): $CommandSet($set{$CommandSet}{$cmd}) => call($call)\n";
 
 	return &$call($line, $dblineno);
 }
@@ -1883,6 +1885,12 @@ sub cmd_o {
 			&dump_option($_);
 		}
 	}
+}
+
+sub cmd_O {
+	print $OUT "The old O command is now the o command.\n";        # hint
+	print $OUT "Use 'h' to get current command help synopsis or\n"; # 
+	print $OUT "use 'o CommandSet=pre580' to revert to old usage\n"; # 
 }
 
 sub cmd_v {
@@ -2809,6 +2817,7 @@ I<Data Examination:>     B<expr>     Execute perl code, also see: B<s>,B<n>,B<t>
   B<S> [[B<!>]I<pat>]     List subroutine names [not] matching pattern
   B<V> [I<Pk> [I<Vars>]]  List Variables in Package.  Vars can be ~pattern or !pattern.
   B<X> [I<Vars>]       Same as \"B<V> I<current_package> [I<Vars>]\".
+  B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
 For more help, type B<h> I<cmd_letter>, or run B<$doccmd perldebug> for all docs.
 END_SUM
 				# ')}}; # Fix balance of vi % matching
@@ -2976,6 +2985,7 @@ I<Data Examination:>     B<expr>     Execute perl code, also see: B<s>,B<n>,B<t>
   B<S> [[B<!>]I<pat>]     List subroutine names [not] matching pattern
   B<V> [I<Pk> [I<Vars>]]  List Variables in Package.  Vars can be ~pattern or !pattern.
   B<X> [I<Vars>]       Same as \"B<V> I<current_package> [I<Vars>]\".
+  B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
 For more help, type B<h> I<cmd_letter>, or run B<$doccmd perldebug> for all docs.
 END_SUM
 				# ')}}; # Fix balance of vi % matching

@@ -496,7 +496,6 @@ literals
 
 	open FILE, "<", "  file  ";  # filename is "   file   "
 	open FILE, ">", ">file";     # filename is ">file"
-	
 
 It may be a lot clearer to use sysopen(), though:
 

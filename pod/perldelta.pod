@@ -312,6 +312,13 @@ The list form of C<open> is now implemented for pipes (at least on UNIX):
 creates a pipe, and runs the equivalent of exec('cat', '/etc/motd') in
 the child process.
 
+=item *
+
+If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
+contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
+the default encoding of your STDIN, STDOUT, and STDERR, and of
+B<any subsequent file open>, is UTF-8.
+
 =back
 
 =head2 Safe Signals
@@ -334,7 +341,8 @@ out from potentially blocking operations should still work, though.
 Unicode in general should be now much more usable than in Perl 5.6.0
 (or even in 5.6.1).  Unicode can be used in hash keys, Unicode in
 regular expressions should work now, Unicode in tr/// should work now,
-Unicode in I/O should work now.
+Unicode in I/O should work now.  See L<perluniintro> for introduction
+and L<perlunicode> for details.
 
 =over 4
 
@@ -619,9 +627,11 @@ included since its further use is discouraged.
 C<Encode>, by Nick Ing-Simmons, provides a mechanism to translate
 between different character encodings.  Support for Unicode,
 ISO-8859-*, ASCII, CP*, KOI8-R, and three variants of EBCDIC are
-compiled in to the module.  Several other encodings (like Japanese,
-Chinese, and MacIntosh encodings) are included and will be loaded at
-runtime.  See L<Encode>.
+compiled in to the module.  Several other encodings (like Chinese,
+Japanese, Korean, and MacIntosh encodings) are included and will be
+loaded at runtime.  (For space considerations, the largest Chinese
+encodings have been separated into their own CPAN module,
+Encode::HanExtra).  See L<Encode>.
 
 Any encoding supported by Encode module is also available to the
 ":encoding()" layer if PerlIO is used.
@@ -2369,11 +2379,11 @@ respectively.
 
 =item *
 
-perl5db.pl has been modified to present a more consistent commands
-interface, via (CommandSet=580).  perl5db.t was also added to test the
-changes, and as a placeholder for further tests.
+The debugger (perl5db.pl) has been modified to present a more
+consistent commands interface, via (CommandSet=580).  perl5db.t was
+also added to test the changes, and as a placeholder for further tests.
 
-See L<perldebug>
+See L<perldebug>.
 
 =item *
 
@@ -2381,6 +2391,11 @@ The debugger has a new C<dumpDepth> option to control the maximum
 depth to which nested structures are dumped.  The C<x> command has
 been extended so that C<x N EXPR> dumps out the value of I<EXPR> to a
 depth of at most I<N> levels.
+
+=item *
+
+The debugger can now show lexical variables if you have the CPAN
+module PadWalker installed.
 
 =item *
 
@@ -2608,21 +2623,22 @@ If you are building on a UFS partition, you will also probably see
 t/op/stat.t subtest #9 fail.  This is caused by Darwin's UFS not
 supporting inode change time.
 
-=head2 OS/390
+=head2 z/OS (OS/390)
 
-OS/390 has rather many test failures but the situation is actually
+z/OS has rather many test failures but the situation is actually
 better than it was in 5.6.0, it's just that so many new modules and
 tests have been added.
 
- ../ext/B/t/deparse.t                        17    1   5.88%  14
+ Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
+ -------------------------------------------------------------------------
  ../ext/Data/Dumper/t/dumper.t              321    2   0.62%  311 314
  ../ext/IO/lib/IO/t/io_unix.t                 5    4  80.00%  2-5
  ../lib/utf8.t                               94   13  13.83%  27 30-31 43 46 73
                                                               76 79 82 85 88 91
                                                               94
  ../lib/Benchmark.t               1   256   159    1   0.63%  75
+ ../lib/ExtUtils/t/Constant.t                27   19  70.37%  5-23
  ../lib/ExtUtils/t/Embed.t                    9    9 100.00%  1-9
- ../lib/ExtUtils/t/ExtUtils.t                27   19  70.37%  5-23
  op/pat.t                                   864    9   1.04%  242-243 665 776
                                                               785 832-834 845
  op/sprintf.t                               224    3   1.34%  98 100 136
@@ -2661,6 +2677,8 @@ threads are considered fundamentally broken.
 
 =head2 UNICOS
 
+ Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
+ -------------------------------------------------------------------------
  ../ext/Socket/socketpair.t    1   256    45    1   2.22%  12
  ../lib/Math/Trig.t                       26    1   3.85%  25
  ../lib/warnings.t                       460    1   0.22%  425
@@ -2688,12 +2706,12 @@ needing further debugging and/or porting work.
 =head2 Win32
 
 In multi-CPU boxes there are some problems with the I/O buffering:
-some output may appear twice.  The Win32 following failures are known
+some output may appear twice.  The following Win32 failures are known
 as of 5.7.3:
 
-  ..\ext/Encode/t/JP.t      4  1024    22    4  18.18%  9 14 18 21
+ Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
+ -------------------------------------------------------------------------
   ..\ext/threads/t/end.t                6    4  66.67%  3-6
-  ..\lib/blib.t             3   768     7    3  42.86%  1 4-5
 
 =head2 Localising a Tied Variable Leaks Memory
 

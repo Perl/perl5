@@ -828,6 +828,29 @@ are specifically discussed. There is no C<utfebcdic> pragma or
 the platform's "natural" 8-bit encoding of Unicode. See L<perlebcdic>
 for more discussion of the issues.
 
+=head2 Locales
+
+Usually locale settings and Unicode do not affect each other, but
+there are a couple of exceptions:
+
+=over 4
+
+=item *
+
+If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
+contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
+the default encoding of your STDIN, STDOUT, and STDERR, and of
+B<any subsequent file open>, is UTF-8.
+
+=item *
+
+Perl tries really hard to work both with Unicode and the old byte
+oriented world: most often this is nice, but sometimes this causes
+problems.  See L</BUGS> for example how sometimes using locales
+with Unicode can help with these problems.
+
+=back
+
 =head2 Using Unicode in XS
 
 If you want to handle Perl Unicode in XS extensions, you may find
@@ -936,14 +959,23 @@ Use of locales with Unicode data may lead to odd results.  Currently
 there is some attempt to apply 8-bit locale info to characters in the
 range 0..255, but this is demonstrably incorrect for locales that use
 characters above that range when mapped into Unicode.  It will also
-tend to run slower.  Avoidance of locales is strongly encouraged.
+tend to run slower.  Avoidance of locales is strongly encouraged,
+with one known expection, see the next paragraph.
+
+If the keys of a hash are "mixed", that is, some keys are Unicode,
+while some keys are "byte", the keys may behave differently in regular
+expressions since the definition of character classes like C</\w/>
+is different for byte strings and character strings.  This problem can
+sometimes be helped by using an appropriate locale (see L<perllocale>).
+Another way is to force all the strings to be character encoded by
+using utf8::upgrade() (see L<utf8>).
 
 Some functions are slower when working on UTF-8 encoded strings than
 on byte encoded strings. All functions that need to hop over
 characters such as length(), substr() or index() can work B<much>
 faster when the underlying data are byte-encoded. Witness the
 following benchmark:
-  
+
   % perl -e '
   use Benchmark;
   use strict;
@@ -962,7 +994,7 @@ following benchmark:
     LENGTH_U:  2 wallclock secs ( 2.11 usr +  0.00 sys =  2.11 CPU) @ 12155.45/s (n=25648)
     SUBSTR_B:  3 wallclock secs ( 2.16 usr +  0.00 sys =  2.16 CPU) @ 374480.09/s (n=808877)
     SUBSTR_U:  2 wallclock secs ( 2.11 usr +  0.00 sys =  2.11 CPU) @ 6791.00/s (n=14329)
-  
+
 The numbers show an incredible slowness on long UTF-8 strings and you
 should carefully avoid to use these functions within tight loops. For
 example if you want to iterate over characters, it is infinitely
@@ -990,7 +1022,7 @@ benchmark shows:
 
 You see, the algorithm based on substr() was faster with byte encoded
 data but it is pathologically slow with UTF-8 data.
-  
+
 =head1 SEE ALSO
 
 L<perluniintro>, L<encoding>, L<Encode>, L<open>, L<utf8>, L<bytes>,

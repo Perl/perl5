@@ -3433,10 +3433,10 @@ aligned at a multiple of C<count> bytes.  For example, to pack() or
 unpack() C's C<struct {char c; double d; char cc[2]}> one may need to
 use the template C<C x![d] d C[2]>; this assumes that doubles must be
 aligned on the double's size.
- 
+
 For alignment commands C<count> of 0 is equivalent to C<count> of 1;
 both result in no-ops.
-  
+
 =item *
 
 A comment in a TEMPLATE starts with C<#> and goes to the end of line.

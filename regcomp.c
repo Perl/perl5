@@ -931,6 +931,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
  			? I32_MAX : data->pos_min + data->pos_delta;
 		}
 		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
+		if (UTF)
+		    SvUTF8_on(data->last_found);
 		data->last_end = data->pos_min + l;
 		data->pos_min += l; /* As in the first entry. */
 		data->flags &= ~SF_BEFORE_EOL;
@@ -1963,17 +1965,23 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 		&& SvCUR(data.longest_fixed) == SvCUR(data.longest_float))
 		    goto remove_float;		/* As in (a)+. */
 
-	    r->float_substr = data.longest_float;
+	    if (SvUTF8(data.longest_float)) {
+		r->float_utf8 = data.longest_float;
+		r->float_substr = Nullsv;
+	    } else {
+		r->float_substr = data.longest_float;
+		r->float_utf8 = Nullsv;
+	    }
 	    r->float_min_offset = data.offset_float_min;
 	    r->float_max_offset = data.offset_float_max;
 	    t = (data.flags & SF_FL_BEFORE_EOL /* Can't have SEOL and MULTI */
 		       && (!(data.flags & SF_FL_BEFORE_MEOL)
 			   || (RExC_flags16 & PMf_MULTILINE)));
-	    fbm_compile(r->float_substr, t ? FBMcf_TAIL : 0);
+	    fbm_compile(data.longest_float, t ? FBMcf_TAIL : 0);
 	}
 	else {
 	  remove_float:
-	    r->float_substr = Nullsv;
+	    r->float_substr = r->float_utf8 = Nullsv;
 	    SvREFCNT_dec(data.longest_float);
 	    longest_float_length = 0;
 	}
@@ -1985,22 +1993,29 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 		    || (RExC_flags16 & PMf_MULTILINE)))) {
 	    int t;
 
-	    r->anchored_substr = data.longest_fixed;
+	    if (SvUTF8(data.longest_fixed)) {
+		r->anchored_utf8 = data.longest_fixed;
+		r->anchored_substr = Nullsv;
+	    } else {
+		r->anchored_substr = data.longest_fixed;
+		r->anchored_utf8 = Nullsv;
+	    }
 	    r->anchored_offset = data.offset_fixed;
 	    t = (data.flags & SF_FIX_BEFORE_EOL /* Can't have SEOL and MULTI */
 		 && (!(data.flags & SF_FIX_BEFORE_MEOL)
 		     || (RExC_flags16 & PMf_MULTILINE)));
-	    fbm_compile(r->anchored_substr, t ? FBMcf_TAIL : 0);
+	    fbm_compile(data.longest_fixed, t ? FBMcf_TAIL : 0);
 	}
 	else {
-	    r->anchored_substr = Nullsv;
+	    r->anchored_substr = r->anchored_utf8 = Nullsv;
 	    SvREFCNT_dec(data.longest_fixed);
 	    longest_fixed_length = 0;
 	}
 	if (r->regstclass
 	    && (OP(r->regstclass) == REG_ANY || OP(r->regstclass) == SANY))
 	    r->regstclass = NULL;
-	if ((!r->anchored_substr || r->anchored_offset) && stclass_flag
+	if ((!(r->anchored_substr || r->anchored_utf8) || r->anchored_offset)
+	    && stclass_flag
 	    && !(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class)) {
 	    I32 n = add_data(pRExC_state, 1, "f");
@@ -2023,20 +2038,22 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	/* A temporary algorithm prefers floated substr to fixed one to dig more info. */
 	if (longest_fixed_length > longest_float_length) {
 	    r->check_substr = r->anchored_substr;
+	    r->check_utf8 = r->anchored_utf8;
 	    r->check_offset_min = r->check_offset_max = r->anchored_offset;
 	    if (r->reganch & ROPT_ANCH_SINGLE)
 		r->reganch |= ROPT_NOSCAN;
 	}
 	else {
 	    r->check_substr = r->float_substr;
+	    r->check_utf8 = r->float_utf8;
 	    r->check_offset_min = data.offset_float_min;
 	    r->check_offset_max = data.offset_float_max;
 	}
 	/* XXXX Currently intuiting is not compatible with ANCH_GPOS.
 	   This should be changed ASAP!  */
-	if (r->check_substr && !(r->reganch & ROPT_ANCH_GPOS)) {
+	if ((r->check_substr || r->check_utf8) && !(r->reganch & ROPT_ANCH_GPOS)) {
 	    r->reganch |= RE_USE_INTUIT;
-	    if (SvTAIL(r->check_substr))
+	    if (SvTAIL(r->check_substr ? r->check_substr : r->check_utf8))
 		r->reganch |= RE_INTUIT_TAIL;
 	}
     }
@@ -2052,7 +2069,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	data.start_class = &ch_class;
 	data.last_closep = &last_close;
 	minlen = study_chunk(pRExC_state, &scan, &fake, scan + RExC_size, &data, SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS);
-	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
+	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
+		= r->float_substr = r->float_utf8 = Nullsv;
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class)) {
 	    I32 n = add_data(pRExC_state, 1, "f");
@@ -4529,6 +4547,15 @@ Perl_regdump(pTHX_ regexp *r)
 		      PL_colors[1],
 		      SvTAIL(r->anchored_substr) ? "$" : "",
 		      (IV)r->anchored_offset);
+    else if (r->anchored_utf8)
+	PerlIO_printf(Perl_debug_log,
+		      "anchored utf8 `%s%.*s%s'%s at %"IVdf" ",
+		      PL_colors[0],
+		      (int)(SvCUR(r->anchored_utf8) - (SvTAIL(r->anchored_utf8)!=0)),
+		      SvPVX(r->anchored_utf8),
+		      PL_colors[1],
+		      SvTAIL(r->anchored_utf8) ? "$" : "",
+		      (IV)r->anchored_offset);
     if (r->float_substr)
 	PerlIO_printf(Perl_debug_log,
 		      "floating `%s%.*s%s'%s at %"IVdf"..%"UVuf" ",
@@ -4538,15 +4565,25 @@ Perl_regdump(pTHX_ regexp *r)
 		      PL_colors[1],
 		      SvTAIL(r->float_substr) ? "$" : "",
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
-    if (r->check_substr)
+    else if (r->float_utf8)
+	PerlIO_printf(Perl_debug_log,
+		      "floating utf8 `%s%.*s%s'%s at %"IVdf"..%"UVuf" ",
+		      PL_colors[0],
+		      (int)(SvCUR(r->float_utf8) - (SvTAIL(r->float_utf8)!=0)),
+		      SvPVX(r->float_utf8),
+		      PL_colors[1],
+		      SvTAIL(r->float_utf8) ? "$" : "",
+		      (IV)r->float_min_offset, (UV)r->float_max_offset);
+    if (r->check_substr || r->check_utf8)
 	PerlIO_printf(Perl_debug_log,
 		      r->check_substr == r->float_substr
+		      && r->check_utf8 == r->float_utf8
 		      ? "(checking floating" : "(checking anchored");
     if (r->reganch & ROPT_NOSCAN)
 	PerlIO_printf(Perl_debug_log, " noscan");
     if (r->reganch & ROPT_CHECK_ALL)
 	PerlIO_printf(Perl_debug_log, " isall");
-    if (r->check_substr)
+    if (r->check_substr || r->check_utf8)
 	PerlIO_printf(Perl_debug_log, ") ");
 
     if (r->regstclass) {
@@ -4795,18 +4832,21 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
 {				/* Assume that RE_INTUIT is set */
     DEBUG_r(
 	{   STRLEN n_a;
-	    char *s = SvPV(prog->check_substr,n_a);
+	    char *s = SvPV(prog->check_substr
+		      ? prog->check_substr : prog->check_utf8, n_a);
 
 	    if (!PL_colorset) reginitcolors();
 	    PerlIO_printf(Perl_debug_log,
-		      "%sUsing REx substr:%s `%s%.60s%s%s'\n",
-		      PL_colors[4],PL_colors[5],PL_colors[0],
+		      "%sUsing REx %ssubstr:%s `%s%.60s%s%s'\n",
+		      PL_colors[4],
+		      prog->check_substr ? "" : "utf8 ",
+		      PL_colors[5],PL_colors[0],
 		      s,
 		      PL_colors[1],
 		      (strlen(s) > 60 ? "..." : ""));
 	} );
 
-    return prog->check_substr;
+    return prog->check_substr ? prog->check_substr : prog->check_utf8;
 }
 
 void
@@ -4841,8 +4881,12 @@ Perl_pregfree(pTHX_ struct regexp *r)
     if (r->substrs) {
 	if (r->anchored_substr)
 	    SvREFCNT_dec(r->anchored_substr);
+	if (r->anchored_utf8)
+	    SvREFCNT_dec(r->anchored_utf8);
 	if (r->float_substr)
 	    SvREFCNT_dec(r->float_substr);
+	if (r->float_utf8)
+	    SvREFCNT_dec(r->float_utf8);
 	Safefree(r->substrs);
     }
     if (r->data) {

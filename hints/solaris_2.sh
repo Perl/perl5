@@ -409,6 +409,8 @@ EOM
 	# Ditto. (Solaris 7)
 	d_readdir_r_proto="$define"
 	d_readdir64_r_proto="$define"
+	d_tmpnam_r_proto="$define"
+	d_ttyname_r_proto="$define"
 
 	;;
 esac

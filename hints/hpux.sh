@@ -31,11 +31,12 @@ else
 	sed -e 's/HP-//' -e 1q`;
     selecttype='int *'
     fi
-    # For some strange reason, the u32align test from Configure hangs in
-    # HP-UX 10.20 since the December 2001 patches.  So hint it to avoid
-    # the test.
-    if [ "$xxOsRevMajor" -le 10 ]; then
-	d_u32align=$define
+
+# For some strange reason, the u32align test from Configure hangs in
+# HP-UX 10.20 since the December 2001 patches.  So hint it to avoid
+# the test.
+if [ "$xxOsRevMajor" -le 10 ]; then
+    d_u32align=$define
     fi
 
 echo "Archname is $archname"
@@ -73,11 +74,11 @@ case `$cc -v 2>&1`"" in
 		# Done too late in Configure if hinted
 		gccversion=`$cc --version`
 		fi
-           case "$gccversion" in
-               [012]*) # HP-UX and gcc-2.* break UINT32_MAX :-(
-                       ccflags="$ccflags -DUINT32_MAX_BROKEN"
-                       ;;
-               esac
+	    case "$gccversion" in
+		[012]*) # HP-UX and gcc-2.* break UINT32_MAX :-(
+			ccflags="$ccflags -DUINT32_MAX_BROKEN"
+			;;
+		esac
 	    case "`getconf KERNEL_BITS 2>/dev/null`" in
 		*64*)
 		    echo "main(){}">try.c
@@ -101,12 +102,12 @@ case `$cc -v 2>&1`"" in
 			    gnu_ld=yes
 			    ;;
 			*)			# HPld
-                           case "$gccversion" in
-                               [12]*)
-                                   ldflags="$ldflags -Wl,+vnocompatwarnings"
-                                   ccflags="$ccflags -Wl,+vnocompatwarnings"
-                                   ;;
-                               esac
+			   case "$gccversion" in
+			       [12]*)
+				   ldflags="$ldflags -Wl,+vnocompatwarnings"
+				   ccflags="$ccflags -Wl,+vnocompatwarnings"
+				   ;;
+			       esac
 			    ;;
 			esac
 		    rm -f try.c
@@ -168,16 +169,16 @@ case "$archname" in
 	so='so'
 	;;
     *)
-    case "$uselongdouble" in
-	*) ;;
-	$define|true|[yY]*)
-	    cat <<EOM >&4
+	case "$uselongdouble" in
+	    *) ;;
+	    $define|true|[yY]*)
+		cat <<EOM >&4
 
 *** long doubles are not (yet) supported on HP-UX (any version)
 *** Until it does, we cannot continue, aborting.
 EOM
-	    exit 1 ;;
-	esac
+		exit 1 ;;
+	    esac
 	;;
     esac
 
@@ -349,14 +350,14 @@ case "$ccisgcc" in
 	    esac
 	case "$optimize" in
 	    *-O*|\
-	    *O2*)    opt=`echo "$optimize" | sed -e 's/-O/+O2/' -e 's/O2/O1/' -e 's/ *+Onolimit//'`
+	    *O2*)   opt=`echo "$optimize" | sed -e 's/-O/+O2/' -e 's/O2/O1/' -e 's/ *+Onolimit//'`
 		    ;;
-	    *)	opt="$optimize"
-		;;
-		esac
+	    *)      opt="$optimize"
+		    ;;
+	    esac
 	if [ $maxdsiz -le 64 ]; then
-		toke_cflags="$toke_cflags;optimize=\"$opt\""
-		regexec_cflags="optimize=\"$opt\""
+	    toke_cflags="$toke_cflags;optimize=\"$opt\""
+	    regexec_cflags="optimize=\"$opt\""
 	    fi
 	case "$archname" in
 	    IA64*)
@@ -397,7 +398,7 @@ ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 	*) ccflags="$ccflags $ccflags_uselargefiles" ;;
 	esac
 
-        if test -z "$ccisgcc" -a -z "$gccversion"; then
+	if test -z "$ccisgcc" -a -z "$gccversion"; then
 	    # The strict ANSI mode (-Aa) doesn't like large files.
 	    ccflags=`echo " $ccflags "|sed 's@ -Aa @ @g'`
 	    case "$ccflags" in
@@ -432,10 +433,10 @@ EOM
 		if [ -f /usr/lib/libcma.sl ]; then
 		    # DCE (from Core OS CD) is installed
 
-                   # Check if it is pristine, or patched
-                   cmavsn=`what /usr/lib/libcma.sl 2>&1 | grep 1996`
-                   if [ ! -z "$cmavsn" ]; then
-                       cat <<EOM >&4
+		   # Check if it is pristine, or patched
+		   cmavsn=`what /usr/lib/libcma.sl 2>&1 | grep 1996`
+		   if [ ! -z "$cmavsn" ]; then
+		       cat <<EOM >&4
 
 ***************************************************************************
 
@@ -450,8 +451,8 @@ consider to upgrade using patch PHSS_23672 (read README.hpux)
 
 (sleeping for 10 seconds...)
 EOM
-			  sleep 10
-                       fi
+		       sleep 10
+		       fi
 
 		    # It needs # libcma and OLD_PTHREADS_API. Also
 		    # <pthread.h> needs to be #included before any

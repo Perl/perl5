@@ -9,7 +9,7 @@ littered with answers involving regular expressions.  For example,
 decoding a URL and checking whether something is a number are handled
 with regular expressions, but those answers are found elsewhere in
 this document (in L<perlfaq9>: ``How do I decode or create those %-encodings 
-on the web'' and L<perfaq4>: ``How do I determine whether a scalar is
+on the web'' and L<perlfaq4>: ``How do I determine whether a scalar is
 a number/whole/integer/float'', to be precise).
 
 =head2 How can I hope to use regular expressions without creating illegible and unmaintainable code?

@@ -1,6 +1,7 @@
 package Encode::Tcl::Table;
 use strict;
-our $VERSION = do {my @r=(q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r};
+our $VERSION = do { my @r = (q$Revision: 0.92 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+
 use base 'Encode::Encoding';
 
 use Carp;
@@ -109,7 +110,6 @@ sub decode
     return $uni;
 }
 
-
 sub encode
 {
     my ($obj,$uni,$chk) = @_;
@@ -152,7 +152,7 @@ This module is used internally by Encode::Tcl
 and handles types S, D, and M of Tcl encodings.
 
 Implementation for type M is restricted to encodings
-in which bytes per a character is up to 2.
+in which the number of bytes per a character is up to 2.
 
 =head1 SEE ALSO
 

@@ -48,7 +48,7 @@ sub _get_locale_encoding {
 	    } elsif ($country_language =~ /^zh_CN|chin(?:a|ese)?$/i) {
 		$locale_encoding = 'euc-cn';
 	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)?$/i) {
-		$locale_encoding = 'big5';
+		$locale_encoding = 'euc-tw';
 	    }
 	    croak "Locale encoding 'euc' too ambiguous"
 		if $locale_encoding eq 'euc';
@@ -90,7 +90,10 @@ sub import {
 		}
 		$std = 1;
 	    } else {
-		unless(PerlIO::Layer::->find($layer)) {
+		my $target = $layer;		# the layer name itself
+		$target =~ s/^(\w+)\(.+\)$/$1/;	# strip parameters
+
+		unless(PerlIO::Layer::->find($target)) {
 		    carp("Unknown discipline layer '$layer'");
 		}
 	    }
@@ -241,6 +244,11 @@ any found, C<:utf8> is used as the default encoding for the open
 pragma.
 
 =back
+
+If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
+contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
+the default encoding of your STDIN, STDOUT, and STDERR, and of
+B<any subsequent file open>, is UTF-8.
 
 Directory handles may also support disciplines in future.
 

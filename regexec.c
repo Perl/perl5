@@ -102,7 +102,7 @@
  * Forwards.
  */
 
-#define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
+#define CHR_SVLEN(sv) (do_utf8 ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (PL_reg_match_utf8 ? utf8_distance(a,b) : a - b)
 
 #define reghop_c(pos,off) ((char*)reghop((U8*)pos, off))
@@ -392,6 +392,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     register SV *check;
     char *strbeg;
     char *t;
+    int do_utf8 = sv ? SvUTF8(sv) : 0;	/* if no sv we have to assume bytes */
     I32 ml_anch;
     register char *other_last = Nullch;	/* other substr checked before this */
     char *check_at = Nullch;		/* check substr found at this pos */
@@ -437,7 +438,20 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     }
     strbeg = (sv && SvPOK(sv)) ? strend - SvCUR(sv) : strpos;
     PL_regeol = strend;
-    check = prog->check_substr;
+    if (do_utf8) {
+	if (!prog->check_utf8 && prog->check_substr)
+	    to_utf8_substr(prog);
+	check = prog->check_utf8;
+    } else {
+	if (!prog->check_substr && prog->check_utf8)
+	    to_byte_substr(prog);
+	check = prog->check_substr;
+    }
+   if (check == &PL_sv_undef) {
+	DEBUG_r(PerlIO_printf(Perl_debug_log,
+		"Non-utf string cannot match utf check string\n"));
+	goto fail;
+    }
     if (prog->reganch & ROPT_ANCH) {	/* Match at beg-of-str or after \n */
 	ml_anch = !( (prog->reganch & ROPT_ANCH_SINGLE)
 		     || ( (prog->reganch & ROPT_ANCH_BOL)
@@ -543,7 +557,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%s %s substr `%s%.*s%s'%s%s",
 			  (s ? "Found" : "Did not find"),
-			  ((check == prog->anchored_substr) ? "anchored" : "floating"),
+			  (check == (do_utf8 ? prog->anchored_utf8 : prog->anchored_substr) ? "anchored" : "floating"),
 			  PL_colors[0],
 			  (int)(SvCUR(check) - (SvTAIL(check)!=0)),
 			  SvPVX(check),
@@ -566,16 +580,17 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
        Probably it is right to do no SCREAM here...
      */
 
-    if (prog->float_substr && prog->anchored_substr) {
+    if (do_utf8 ? (prog->float_utf8 && prog->anchored_utf8) : (prog->float_substr && prog->anchored_substr)) {
 	/* Take into account the "other" substring. */
 	/* XXXX May be hopelessly wrong for UTF... */
 	if (!other_last)
 	    other_last = strpos;
-	if (check == prog->float_substr) {
+	if (check == (do_utf8 ? prog->float_utf8 : prog->float_substr)) {
 	  do_other_anchored:
 	    {
 		char *last = HOP3c(s, -start_shift, strbeg), *last1, *last2;
 		char *s1 = s;
+		SV* must;
 
 		t = s - prog->check_offset_max;
 		if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
@@ -593,20 +608,27 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    last1 = last;
  /* XXXX It is not documented what units *_offsets are in.  Assume bytes.  */
 		/* On end-of-str: see comment below. */
-		s = fbm_instr((unsigned char*)t,
-			      HOP3(HOP3(last1, prog->anchored_offset, strend)
-				   + SvCUR(prog->anchored_substr),
-				   -(SvTAIL(prog->anchored_substr)!=0), strbeg),
-			      prog->anchored_substr,
-			      PL_multiline ? FBMrf_MULTILINE : 0);
+		must = do_utf8 ? prog->anchored_utf8 : prog->anchored_substr;
+		if (must == &PL_sv_undef) {
+		    s = (char*)NULL;
+		    DEBUG_r(must = prog->anchored_utf8);	/* for debug */
+		}
+		else
+		    s = fbm_instr(
+			(unsigned char*)t,
+			HOP3(HOP3(last1, prog->anchored_offset, strend)
+				+ SvCUR(must), -(SvTAIL(must)!=0), strbeg),
+			must,
+			PL_multiline ? FBMrf_MULTILINE : 0
+		    );
 		DEBUG_r(PerlIO_printf(Perl_debug_log,
 			"%s anchored substr `%s%.*s%s'%s",
 			(s ? "Found" : "Contradicts"),
 			PL_colors[0],
-			  (int)(SvCUR(prog->anchored_substr)
-			  - (SvTAIL(prog->anchored_substr)!=0)),
-			  SvPVX(prog->anchored_substr),
-			  PL_colors[1], (SvTAIL(prog->anchored_substr) ? "$" : "")));
+			  (int)(SvCUR(must)
+			  - (SvTAIL(must)!=0)),
+			  SvPVX(must),
+			  PL_colors[1], (SvTAIL(must) ? "$" : "")));
 		if (!s) {
 		    if (last1 >= last2) {
 			DEBUG_r(PerlIO_printf(Perl_debug_log,
@@ -633,54 +655,60 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    }
 	}
 	else {		/* Take into account the floating substring. */
-		char *last, *last1;
-		char *s1 = s;
+	    char *last, *last1;
+	    char *s1 = s;
+	    SV* must;
 
-		t = HOP3c(s, -start_shift, strbeg);
-		last1 = last =
-		    HOP3c(strend, -prog->minlen + prog->float_min_offset, strbeg);
-		if (CHR_DIST((U8*)last, (U8*)t) > prog->float_max_offset)
-		    last = HOP3c(t, prog->float_max_offset, strend);
-		s = HOP3c(t, prog->float_min_offset, strend);
-		if (s < other_last)
-		    s = other_last;
+	    t = HOP3c(s, -start_shift, strbeg);
+	    last1 = last =
+		HOP3c(strend, -prog->minlen + prog->float_min_offset, strbeg);
+	    if (CHR_DIST((U8*)last, (U8*)t) > prog->float_max_offset)
+		last = HOP3c(t, prog->float_max_offset, strend);
+	    s = HOP3c(t, prog->float_min_offset, strend);
+	    if (s < other_last)
+		s = other_last;
  /* XXXX It is not documented what units *_offsets are in.  Assume bytes.  */
-		/* fbm_instr() takes into account exact value of end-of-str
-		   if the check is SvTAIL(ed).  Since false positives are OK,
-		   and end-of-str is not later than strend we are OK. */
+	    must = do_utf8 ? prog->float_utf8 : prog->float_substr;
+	    /* fbm_instr() takes into account exact value of end-of-str
+	       if the check is SvTAIL(ed).  Since false positives are OK,
+	       and end-of-str is not later than strend we are OK. */
+	    if (must == &PL_sv_undef) {
+		s = (char*)NULL;
+		DEBUG_r(must = prog->float_utf8);	/* for debug message */
+	    }
+	    else
 		s = fbm_instr((unsigned char*)s,
-			      (unsigned char*)last + SvCUR(prog->float_substr)
-				  - (SvTAIL(prog->float_substr)!=0),
-			      prog->float_substr, PL_multiline ? FBMrf_MULTILINE : 0);
-		DEBUG_r(PerlIO_printf(Perl_debug_log, "%s floating substr `%s%.*s%s'%s",
-			(s ? "Found" : "Contradicts"),
-			PL_colors[0],
-			  (int)(SvCUR(prog->float_substr)
-			  - (SvTAIL(prog->float_substr)!=0)),
-			  SvPVX(prog->float_substr),
-			  PL_colors[1], (SvTAIL(prog->float_substr) ? "$" : "")));
-		if (!s) {
-		    if (last1 == last) {
-			DEBUG_r(PerlIO_printf(Perl_debug_log,
-						", giving up...\n"));
-			goto fail_finish;
-		    }
+			      (unsigned char*)last + SvCUR(must)
+				  - (SvTAIL(must)!=0),
+			      must, PL_multiline ? FBMrf_MULTILINE : 0);
+	    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s floating substr `%s%.*s%s'%s",
+		    (s ? "Found" : "Contradicts"),
+		    PL_colors[0],
+		      (int)(SvCUR(must) - (SvTAIL(must)!=0)),
+		      SvPVX(must),
+		      PL_colors[1], (SvTAIL(must) ? "$" : "")));
+	    if (!s) {
+		if (last1 == last) {
 		    DEBUG_r(PerlIO_printf(Perl_debug_log,
-			", trying anchored starting at offset %ld...\n",
-			(long)(s1 + 1 - i_strpos)));
-		    other_last = last;
-		    s = HOP3c(t, 1, strend);
-		    goto restart;
+					    ", giving up...\n"));
+		    goto fail_finish;
 		}
-		else {
-		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
-			  (long)(s - i_strpos)));
-		    other_last = s; /* Fix this later. --Hugo */
-		    s = s1;
-		    if (t == strpos)
-			goto try_at_start;
-		    goto try_at_offset;
-		}
+		DEBUG_r(PerlIO_printf(Perl_debug_log,
+		    ", trying anchored starting at offset %ld...\n",
+		    (long)(s1 + 1 - i_strpos)));
+		other_last = last;
+		s = HOP3c(t, 1, strend);
+		goto restart;
+	    }
+	    else {
+		DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
+		      (long)(s - i_strpos)));
+		other_last = s; /* Fix this later. --Hugo */
+		s = s1;
+		if (t == strpos)
+		    goto try_at_start;
+		goto try_at_offset;
+	    }
 	}
     }
 
@@ -703,7 +731,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    while (t < strend - prog->minlen) {
 		if (*t == '\n') {
 		    if (t < check_at - prog->check_offset_min) {
-			if (prog->anchored_substr) {
+			if (do_utf8 ? prog->anchored_utf8 : prog->anchored_substr) {
 			    /* Since we moved from the found position,
 			       we definitely contradict the found anchored
 			       substr.  Due to the above check we do not
@@ -743,7 +771,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	}
 	s = t;
       set_useful:
-	++BmUSEFUL(prog->check_substr);	/* hooray/5 */
+	++BmUSEFUL(do_utf8 ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
     }
     else {
 	/* The found string does not prohibit matching at strpos,
@@ -767,15 +795,23 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	);
       success_at_start:
 	if (!(prog->reganch & ROPT_NAUGHTY)	/* XXXX If strpos moved? */
-	    && prog->check_substr		/* Could be deleted already */
-	    && --BmUSEFUL(prog->check_substr) < 0
-	    && prog->check_substr == prog->float_substr)
+	    && (do_utf8 ? (
+		prog->check_utf8		/* Could be deleted already */
+		&& --BmUSEFUL(prog->check_utf8) < 0
+		&& (prog->check_utf8 == prog->float_utf8)
+	    ) : (
+		prog->check_substr		/* Could be deleted already */
+		&& --BmUSEFUL(prog->check_substr) < 0
+		&& (prog->check_substr == prog->float_substr)
+	    )))
 	{
 	    /* If flags & SOMETHING - do not do it many times on the same match */
 	    DEBUG_r(PerlIO_printf(Perl_debug_log, "... Disabling check substring...\n"));
-	    SvREFCNT_dec(prog->check_substr);
-	    prog->check_substr = Nullsv;	/* disable */
-	    prog->float_substr = Nullsv;	/* clear */
+	    SvREFCNT_dec(do_utf8 ? prog->check_utf8 : prog->check_substr);
+	    if (do_utf8 ? prog->check_substr : prog->check_utf8)
+		SvREFCNT_dec(do_utf8 ? prog->check_substr : prog->check_utf8);
+	    prog->check_substr = prog->check_utf8 = Nullsv;	/* disable */
+	    prog->float_substr = prog->float_utf8 = Nullsv;	/* clear */
 	    check = Nullsv;			/* abort */
 	    s = strpos;
 	    /* XXXX This is a remnant of the old implementation.  It
@@ -802,9 +838,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	int cl_l = (PL_regkind[(U8)OP(prog->regstclass)] == EXACT
 		    ? CHR_DIST(str+STR_LEN(prog->regstclass), str)
 		    : 1);
-	char *endpos = (prog->anchored_substr || ml_anch)
+	char *endpos = (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
 		? HOP3c(s, (prog->minlen ? cl_l : 0), strend)
-		: (prog->float_substr
+		: (prog->float_substr || prog->float_utf8
 		   ? HOP3c(HOP3c(check_at, -start_shift, strbeg),
 			   cl_l, strend)
 		   : strend);
@@ -830,8 +866,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    if ((prog->reganch & ROPT_ANCH) && !ml_anch)
 		goto fail;
 	    /* Contradict one of substrings */
-	    if (prog->anchored_substr) {
-		if (prog->anchored_substr == check) {
+	    if (prog->anchored_substr || prog->anchored_utf8) {
+		if ((do_utf8 ? prog->anchored_utf8 : prog->anchored_substr) == check) {
 		    DEBUG_r( what = "anchored" );
 		  hop_and_restart:
 		    s = HOP3c(t, 1, strend);
@@ -871,7 +907,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			  PL_colors[0],PL_colors[1], (long)(t - i_strpos)) );
 		goto try_at_offset;
 	    }
-	    if (!prog->float_substr)	/* Could have been deleted */
+	    if (!(do_utf8 ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
 		goto fail;
 	    /* Check is floating subtring. */
 	  retry_floating_check:
@@ -898,8 +934,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     return s;
 
   fail_finish:				/* Substring not found */
-    if (prog->check_substr)		/* could be removed already */
-	BmUSEFUL(prog->check_substr) += 5; /* hooray */
+    if (prog->check_substr || prog->check_utf8)		/* could be removed already */
+	BmUSEFUL(do_utf8 ? prog->check_utf8 : prog->check_substr) += 5; /* hooray */
   fail:
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sMatch rejected by optimizer%s\n",
 			  PL_colors[4],PL_colors[5]));
@@ -1626,8 +1662,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    PL_reg_ganch = strbeg;
     }
 
-    if (do_utf8 == (UTF!=0) &&
-	!(flags & REXEC_CHECKED) && prog->check_substr != Nullsv) {
+    if (!(flags & REXEC_CHECKED) && (prog->check_substr != Nullsv || prog->check_utf8 != Nullsv)) {
 	re_scream_pos_data d;
 
 	d.scream_olds = &scream_olds;
@@ -1677,7 +1712,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		dontbother = minlen - 1;
 	    end = HOP3c(strend, -dontbother, strbeg) - 1;
 	    /* for multiline we only have to try after newlines */
-	    if (prog->check_substr) {
+	    if (prog->check_substr || prog->check_utf8) {
 		if (s == startpos)
 		    goto after_try;
 		while (1) {
@@ -1713,13 +1748,16 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     /* Messy cases:  unanchored match. */
-    if (prog->anchored_substr && prog->reganch & ROPT_SKIP) {
+    if ((prog->anchored_substr || prog->anchored_utf8) && prog->reganch & ROPT_SKIP) {
 	/* we have /x+whatever/ */
 	/* it must be a one character string (XXXX Except UTF?) */
-	char ch = SvPVX(prog->anchored_substr)[0];
+	char ch;
 #ifdef DEBUGGING
 	int did_match = 0;
 #endif
+	if (!(do_utf8 ? prog->anchored_utf8 : prog->anchored_substr))
+	    do_utf8 ? to_utf8_substr(prog) : to_byte_substr(prog);
+	ch = SvPVX(do_utf8 ? prog->anchored_utf8 : prog->anchored_substr)[0];
 
 	if (do_utf8) {
 	    while (s < strend) {
@@ -1751,23 +1789,37 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
                );
     }
     /*SUPPRESS 560*/
-    else if (do_utf8 == (UTF!=0) &&
-	     (prog->anchored_substr != Nullsv
-	      || (prog->float_substr != Nullsv
-		  && prog->float_max_offset < strend - s))) {
-	SV *must = prog->anchored_substr
-	    ? prog->anchored_substr : prog->float_substr;
-	I32 back_max =
-	    prog->anchored_substr ? prog->anchored_offset : prog->float_max_offset;
-	I32 back_min =
-	    prog->anchored_substr ? prog->anchored_offset : prog->float_min_offset;
-	char *last = HOP3c(strend,	/* Cannot start after this */
-			  -(I32)(CHR_SVLEN(must)
-				 - (SvTAIL(must) != 0) + back_min), strbeg);
+    else if (prog->anchored_substr != Nullsv
+	      || prog->anchored_utf8 != Nullsv
+	      || ((prog->float_substr != Nullsv || prog->float_utf8 != Nullsv)
+		  && prog->float_max_offset < strend - s)) {
+	SV *must;
+	I32 back_max;
+	I32 back_min;
+	char *last;
 	char *last1;		/* Last position checked before */
 #ifdef DEBUGGING
 	int did_match = 0;
 #endif
+	if (prog->anchored_substr || prog->anchored_utf8) {
+	    if (!(do_utf8 ? prog->anchored_utf8 : prog->anchored_substr))
+		do_utf8 ? to_utf8_substr(prog) : to_byte_substr(prog);
+	    must = do_utf8 ? prog->anchored_utf8 : prog->anchored_substr;
+	    back_max = back_min = prog->anchored_offset;
+	} else {
+	    if (!(do_utf8 ? prog->float_utf8 : prog->float_substr))
+		do_utf8 ? to_utf8_substr(prog) : to_byte_substr(prog);
+	    must = do_utf8 ? prog->float_utf8 : prog->float_substr;
+	    back_max = prog->float_max_offset;
+	    back_min = prog->float_min_offset;
+	}
+	if (must == &PL_sv_undef)
+	    /* could not downgrade utf8 check substring, so must fail */
+	    goto phooey;
+
+	last = HOP3c(strend,	/* Cannot start after this */
+			  -(I32)(CHR_SVLEN(must)
+				 - (SvTAIL(must) != 0) + back_min), strbeg);
 
 	if (s > PL_bostr)
 	    last1 = HOPc(s, -1);
@@ -1815,7 +1867,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	DEBUG_r(if (!did_match)
                     PerlIO_printf(Perl_debug_log, 
                                   "Did not find %s substr `%s%.*s%s'%s...\n",
-			      ((must == prog->anchored_substr)
+			      ((must == prog->anchored_substr || must == prog->anchored_utf8)
 			       ? "anchored" : "floating"),
 			      PL_colors[0],
 			      (int)(SvCUR(must) - (SvTAIL(must)!=0)),
@@ -1855,20 +1907,26 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
     else {
 	dontbother = 0;
-	if (prog->float_substr != Nullsv) {	/* Trim the end. */
+	if (prog->float_substr != Nullsv || prog->float_utf8 != Nullsv) {
+	    /* Trim the end. */
 	    char *last;
+	    SV* float_real;
+
+	    if (!(do_utf8 ? prog->float_utf8 : prog->float_substr))
+		do_utf8 ? to_utf8_substr(prog) : to_byte_substr(prog);
+	    float_real = do_utf8 ? prog->float_utf8 : prog->float_substr;
 
 	    if (flags & REXEC_SCREAM) {
-		last = screaminstr(sv, prog->float_substr, s - strbeg,
+		last = screaminstr(sv, float_real, s - strbeg,
 				   end_shift, &scream_pos, 1); /* last one */
 		if (!last)
 		    last = scream_olds; /* Only one occurrence. */
 	    }
 	    else {
 		STRLEN len;
-		char *little = SvPV(prog->float_substr, len);
+		char *little = SvPV(float_real, len);
 
-		if (SvTAIL(prog->float_substr)) {
+		if (SvTAIL(float_real)) {
 		    if (memEQ(strend - len + 1, little, len - 1))
 			last = strend - len + 1;
 		    else if (!PL_multiline)
@@ -4425,4 +4483,60 @@ restore_pos(pTHX_ void *arg)
 	PL_reg_eval_set = 0;
 	PL_curpm = PL_reg_oldcurpm;
     }	
+}
+
+STATIC void
+S_to_utf8_substr(pTHX_ register regexp *prog)
+{
+    SV* sv;
+    if (prog->float_substr && !prog->float_utf8) {
+	prog->float_utf8 = sv = NEWSV(117, 0);
+	SvSetMagicSV(sv, prog->float_substr);
+	sv_utf8_upgrade(sv);
+	if (SvTAIL(prog->float_substr))
+	    SvTAIL_on(sv);
+	if (prog->float_substr == prog->check_substr)
+	    prog->check_utf8 = sv;
+    }
+    if (prog->anchored_substr && !prog->anchored_utf8) {
+	prog->anchored_utf8 = sv = NEWSV(118, 0);
+	SvSetMagicSV(sv, prog->anchored_substr);
+	sv_utf8_upgrade(sv);
+	if (SvTAIL(prog->anchored_substr))
+	    SvTAIL_on(sv);
+	if (prog->anchored_substr == prog->check_substr)
+	    prog->check_utf8 = sv;
+    }
+}
+
+STATIC void
+S_to_byte_substr(pTHX_ register regexp *prog)
+{
+    SV* sv;
+    if (prog->float_utf8 && !prog->float_substr) {
+	prog->float_substr = sv = NEWSV(117, 0);
+	SvSetMagicSV(sv, prog->float_utf8);
+	if (sv_utf8_downgrade(sv, TRUE)) {
+	    if (SvTAIL(prog->float_utf8))
+		SvTAIL_on(sv);
+	} else {
+	    SvREFCNT_dec(sv);
+	    prog->float_substr = sv = &PL_sv_undef;
+	}
+	if (prog->float_utf8 == prog->check_utf8)
+	    prog->check_substr = sv;
+    }
+    if (prog->anchored_utf8 && !prog->anchored_substr) {
+	prog->anchored_substr = sv = NEWSV(118, 0);
+	SvSetMagicSV(sv, prog->anchored_utf8);
+	if (sv_utf8_downgrade(sv, TRUE)) {
+	    if (SvTAIL(prog->anchored_utf8))
+		SvTAIL_on(sv);
+	} else {
+	    SvREFCNT_dec(sv);
+	    prog->anchored_substr = sv = &PL_sv_undef;
+	}
+	if (prog->anchored_utf8 == prog->check_utf8)
+	    prog->check_substr = sv;
+    }
 }

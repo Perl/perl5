@@ -230,11 +230,11 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 	      if (thr && PL_curcop) {
 #endif
 		if (ckWARN(WARN_MISC)) {
-		  Perl_warner(aTHX_ WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
+		  Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of CLI symbol \"%s\" too long",lnm);
 		}
 #if defined(USE_5005THREADS)
 	      } else {
-		  Perl_warner(aTHX_ WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
+		  Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of CLI symbol \"%s\" too long",lnm);
 	      }
 #endif
 	      
@@ -494,7 +494,7 @@ prime_env_iter(void)
       for (j = 0; environ[j]; j++) { 
         if (!(start = strchr(environ[j],'='))) {
           if (ckWARN(WARN_INTERNAL)) 
-            Perl_warner(aTHX_ WARN_INTERNAL,"Ill-formed CRTL environ value \"%s\"\n",environ[j]);
+            Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Ill-formed CRTL environ value \"%s\"\n",environ[j]);
         }
         else {
           start++;
@@ -564,7 +564,7 @@ prime_env_iter(void)
         continue;
       }
       if (sts == SS$_BUFFEROVF && ckWARN(WARN_INTERNAL))
-        Perl_warner(aTHX_ WARN_INTERNAL,"Buffer overflow in prime_env_iter: %s",buf);
+        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Buffer overflow in prime_env_iter: %s",buf);
 
       for (cp1 = buf; *cp1 && isspace(*cp1); cp1++) ;
       if (*cp1 == '(' || /* Logical name table name */
@@ -585,7 +585,7 @@ prime_env_iter(void)
         cp1--;  /* stop on last non-space char */
       }
       if ((!keylen || (cp1 - cp2 < -1)) && ckWARN(WARN_INTERNAL)) {
-        Perl_warner(aTHX_ WARN_INTERNAL,"Ill-formed message in prime_env_iter: |%s|",buf);
+        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Ill-formed message in prime_env_iter: |%s|",buf);
         continue;
       }
       PERL_HASH(hash,key,keylen);
@@ -661,7 +661,7 @@ Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
           ivenv = 1; retsts = SS$_NOLOGNAM;
 #else
               if (ckWARN(WARN_INTERNAL))
-                Perl_warner(aTHX_ WARN_INTERNAL,"This Perl can't reset CRTL environ elements (%s)",lnm);
+                Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"This Perl can't reset CRTL environ elements (%s)",lnm);
               ivenv = 1; retsts = SS$_NOSUCHPGM;
               break;
             }
@@ -696,7 +696,7 @@ Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
         return setenv(lnm,eqv,1) ? vaxc$errno : 0;
 #else
         if (ckWARN(WARN_INTERNAL))
-          Perl_warner(aTHX_ WARN_INTERNAL,"This Perl can't set CRTL environ elements (%s=%s)",lnm,eqv);
+          Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"This Perl can't set CRTL environ elements (%s=%s)",lnm,eqv);
         retsts = SS$_NOSUCHPGM;
 #endif
       }
@@ -718,7 +718,7 @@ Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
 	  if (eqvdsc.dsc$w_length > LNM$C_NAMLENGTH) {
 	    eqvdsc.dsc$w_length = LNM$C_NAMLENGTH;
 	    if (ckWARN(WARN_MISC)) {
-	      Perl_warner(aTHX_ WARN_MISC,"Value of logical \"%s\" too long. Truncating to %i bytes",lnm, LNM$C_NAMLENGTH);
+	      Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of logical \"%s\" too long. Truncating to %i bytes",lnm, LNM$C_NAMLENGTH);
 	    }
 	  }
           retsts = lib$set_logical(&lnmdsc,&eqvdsc,tabvec[0],0,0);
@@ -2253,7 +2253,7 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
         tpipe = vmspipe_tempfile(aTHX);
         if (!tpipe) {       /* a fish popular in Boston */
             if (ckWARN(WARN_PIPE)) {
-                Perl_warner(aTHX_ WARN_PIPE,"unable to find VMSPIPE.COM for i/o piping");
+                Perl_warner(aTHX_ packWARN(WARN_PIPE),"unable to find VMSPIPE.COM for i/o piping");
             }
         return Nullfp;
         }
@@ -2284,7 +2284,7 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
       }
       set_vaxc_errno(sts);
       if (*mode != 'n' && ckWARN(WARN_PIPE)) {
-        Perl_warner(aTHX_ WARN_PIPE,"Can't pipe \"%*s\": %s", strlen(cmd), cmd, Strerror(errno));
+        Perl_warner(aTHX_ packWARN(WARN_PIPE),"Can't pipe \"%*s\": %s", strlen(cmd), cmd, Strerror(errno));
       }
       *psts = sts;
       return Nullfp; 
@@ -2727,7 +2727,7 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
         /* remind folks they are asking for non-standard waitpid behavior */
         _ckvmssts(lib$getjpi(&pidcode,0,0,&mypid,0,0));
         if (ownerpid != mypid)
-          Perl_warner(aTHX_ WARN_EXEC,
+          Perl_warner(aTHX_ packWARN(WARN_EXEC),
                       "waitpid: process %x is not a child of process %x",
                       pid,mypid);
       }
@@ -5221,7 +5221,7 @@ Perl_vms_do_exec(pTHX_ char *cmd)
     }
     set_vaxc_errno(retsts);
     if (ckWARN(WARN_EXEC)) {
-      Perl_warner(aTHX_ WARN_EXEC,"Can't exec \"%*s\": %s",
+      Perl_warner(aTHX_ packWARN(WARN_EXEC),"Can't exec \"%*s\": %s",
              vmscmd->dsc$w_length, vmscmd->dsc$a_pointer, Strerror(errno));
     }
     vms_execfree(vmscmd);
@@ -5275,7 +5275,7 @@ Perl_do_spawn(pTHX_ char *cmd)
       }
       set_vaxc_errno(sts);
       if (ckWARN(WARN_EXEC)) {
-        Perl_warner(aTHX_ WARN_EXEC,"Can't spawn: %s",
+        Perl_warner(aTHX_ packWARN(WARN_EXEC),"Can't spawn: %s",
 		    Strerror(errno));
       }
     }

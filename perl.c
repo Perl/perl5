@@ -1428,6 +1428,22 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (!PL_do_undump)
 	init_postdump_symbols(argc,argv,env);
 
+    if (PL_wantutf8) { /* Requires init_predump_symbols(). */
+	 IO* io;
+	 PerlIO* fp;
+	 SV* sv;
+	 if (PL_stdingv  && (io = GvIO(PL_stdingv))  && (fp = IoIFP(io)))
+	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
+	 if (PL_defoutgv && (io = GvIO(PL_defoutgv)) && (fp = IoOFP(io)))
+	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
+	 if (PL_stderrgv && (io = GvIO(PL_stderrgv)) && (fp = IoOFP(io)))
+	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
+	 if ((sv = GvSV(gv_fetchpv("\017PEN", TRUE, SVt_PV)))) {
+	     sv_setpvn(sv, ":utf8\0:utf8", 11);
+	     SvSETMAGIC(sv);
+	 }
+    }
+
     init_lexer();
 
     /* now parse the script */
