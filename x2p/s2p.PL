@@ -339,11 +339,11 @@ if ($appendseen || $tseen || !$assumen) {
 :	    if ($atext) { chop $atext; print $atext; $atext = ''; }
 :	#endif
 EOT
+}
 
 print BODY &q(<<'EOT');
 :	}
 EOT
-}
 
 unless ($debug) {
 
