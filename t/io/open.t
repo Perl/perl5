@@ -5,7 +5,7 @@ $|  = 1;
 $^W = 1;
 $Is_VMS = $^O eq 'VMS';
 
-print "1..64\n";
+print "1..66\n";
 
 my $test = 1;
 
@@ -258,3 +258,12 @@ EOE
 ok;
 $@ =~ /Unknown open\(\) mode \'<&\'/ or print "not ";
 ok;
+
+# 65..66
+{
+    local *F;
+    for (1..2) { open(F, "echo #foo|") or print "not "; }
+    ok;
+    for (1..2) { open(F, "-|", "echo #foo") or print "not "; }
+    ok;
+}
