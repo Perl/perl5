@@ -130,7 +130,8 @@ to the data itself, and for most of the time "use utf8" is not needed
 at all.  The only remaining use of "use utf8" is when the Perl script
 itself has been written in the UTF-8 encoding of Unicode.
 
-See L<perluniintro> for the explanation of the current model. 
+See L<perluniintro> for the explanation of the current model,
+and L<utf8> for the current use of the utf8 pragma.
 
 =head2 New Unicode Properties
 
