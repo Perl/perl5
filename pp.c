@@ -4434,7 +4434,7 @@ PP(pp_split)
 		s++;
 	}
     }
-    if ((bool)(pm->op_pmflags & PMf_MULTILINE) != (bool)PL_multiline) {
+    if ((int)(pm->op_pmflags & PMf_MULTILINE) != PL_multiline) {
 	SAVEINT(PL_multiline);
 	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
     }
