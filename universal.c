@@ -1,7 +1,7 @@
 /*    universal.c
  *
  *    Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
- *    by Larry Wall and others
+ *    2005, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -716,3 +716,13 @@ XS(XS_Internals_HvREHASH)	/* Subject to change  */
     }
     Perl_croak(aTHX_ "Internals::HvREHASH $hashref");
 }
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: shiftwidth=4:
+*/

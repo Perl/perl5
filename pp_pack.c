@@ -2644,3 +2644,12 @@ PP(pp_pack)
     RETURN;
 }
 
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * vim: shiftwidth=4:
+*/
