@@ -2119,7 +2119,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     dSP;				/* Make POPBLOCK work. */
     PERL_CONTEXT *cx;
     SV **newsp;
-    I32 gimme;
+    I32 gimme = GIMME;
     I32 optype;
     OP dummy;
     OP *oop = op, *rop;
@@ -2880,4 +2880,5 @@ doparseform(SV *sv)
     sv_magic(sv, Nullsv, 'f', Nullch, 0);
     SvCOMPILED_on(sv);
 }
+
 

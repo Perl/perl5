@@ -1338,7 +1338,7 @@ sbrk(int need)
    if (committed && reserved && committed < reserved)
     {
      /* Commit last of previous chunk cannot span allocations */
-     addr = VirtualAlloc(committed,reserved-committed,MEM_COMMIT,PAGE_READWRITE);
+     addr = (char *) VirtualAlloc(committed,reserved-committed,MEM_COMMIT,PAGE_READWRITE);
      if (addr)
       committed = reserved;
     }
@@ -1347,7 +1347,7 @@ sbrk(int need)
     * so lets system choose where we start, subsequent calls pass
     * the old end address so ask for a contiguous block
     */
-   addr  = VirtualAlloc(reserved,size,MEM_RESERVE,PAGE_NOACCESS);
+   addr  = (char *) VirtualAlloc(reserved,size,MEM_RESERVE,PAGE_NOACCESS);
    if (addr)
     {
      reserved = addr+size;
@@ -1368,7 +1368,7 @@ sbrk(int need)
  if (brk > committed)
   {
    DWORD size = ((brk-committed + pagesize -1)/pagesize) * pagesize;
-   char *addr = VirtualAlloc(committed,size,MEM_COMMIT,PAGE_READWRITE);
+   char *addr = (char *) VirtualAlloc(committed,size,MEM_COMMIT,PAGE_READWRITE);
    if (addr)
     {
      committed += size;
@@ -1749,6 +1749,7 @@ win32_strip_return(SV *sv)
 }
 
 #endif
+
 
 
 

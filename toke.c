@@ -1230,6 +1230,8 @@ yylex(void)
     register char *d;
     register I32 tmp;
     STRLEN len;
+    GV *gv = Nullgv;
+    GV **gvp = 0;
 
     if (pending_ident) {
 	char pit = pending_ident;
@@ -2545,8 +2547,8 @@ yylex(void)
     case 'z': case 'Z':
 
       keylookup: {
-	GV *gv = Nullgv;
-	GV **gvp = 0;
+	gv = Nullgv;
+	gvp = 0;
 
 	bufptr = s;
 	s = scan_word(s, tokenbuf, sizeof tokenbuf, FALSE, &len);
@@ -5380,4 +5382,5 @@ yyerror(char *s)
     in_my_stash = Nullhv;
     return 0;
 }
+
 

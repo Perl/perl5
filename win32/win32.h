@@ -111,6 +111,7 @@ extern  gid_t	getegid(void);
 extern  int	setuid(uid_t uid);
 extern  int	setgid(gid_t gid);
 extern  int	kill(int pid, int sig);
+extern  void	*sbrk(int need);
 
 #undef	 Stat
 #define  Stat		win32_stat

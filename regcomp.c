@@ -372,7 +372,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
  		    data->last_start_max = is_inf
  			? I32_MAX : data->pos_min + data->pos_delta; 
 		}
-		sv_catpvn(data->last_found, OPERAND(scan)+1, l);
+		sv_catpvn(data->last_found, (char *)(OPERAND(scan)+1), l);
 		data->last_end = data->pos_min + l;
 		data->pos_min += l; /* As in the first entry. */
 		data->flags &= ~SF_BEFORE_EOL;
@@ -1673,7 +1673,7 @@ tryagain:
 	    ret = reg_node((regflags & PMf_FOLD)
 			  ? ((regflags & PMf_LOCALE) ? EXACTFL : EXACTF)
 			  : EXACT);
-	    s = OPERAND(ret);
+	    s = (char *) OPERAND(ret);
 	    regc(0, s++);		/* save spot for len */
 	    for (len = 0, p = regparse - 1;
 	      len < 127 && p < regxend;
@@ -1841,7 +1841,7 @@ regclass(void)
     register I32 def;
     I32 numlen;
 
-    s = opnd = OPERAND(regcode);
+    s = opnd = (char *) OPERAND(regcode);
     ret = reg_node(ANYOF);
     for (Class = 0; Class < 33; Class++)
 	regc(0, s++);
@@ -2661,4 +2661,5 @@ re_croak2(const char* pat1,const char* pat2, va_alist)
     buf[l1] = '\0';			/* Overwrite \n */
     croak("%s", buf);
 }
+
 

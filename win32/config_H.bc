@@ -10,8 +10,8 @@
  * $Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
  */
 
-/* Configuration time: Thu Apr 11 06:20:49 PDT 1996
- * Configured by: garyng
+/* Configuration time: undef
+ * Configured by: nick
  * Target system: 
  */
 
@@ -47,11 +47,7 @@
  *	where library files may be held under a private library, for
  *	instance.
  */
-#ifdef _ALPHA_
-#define ARCHNAME "alpha-mswin32"              /**/
-#else
-#define ARCHNAME "x86-mswin32"              /**/
-#endif
+#define ARCHNAME "MSWin32"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -314,6 +310,36 @@
  *	available to lookup host names in some data base or other.
  */
 /*#define HAS_GETHOSTENT		/**/
+
+/* HAS_GETHBADD:
+ *	This symbol, if defined, indicates that the gethostbyaddr routine is
+ *	available to lookup host names by their IP addresses.
+ */
+/*#define HAS_GETHBADD		/**/
+
+/* Gethbadd_addr_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to gethostbyaddr().
+ */
+#define Gethbadd_addr_t		char *
+
+/* Gethbadd_alen_t:
+ *	This symbol holds the type used for the 2nd argument
+ *	to gethostbyaddr().
+ */
+#define Gethbadd_alen_t		int
+
+/* HAS_GETNBADD:
+ *	This symbol, if defined, indicates that the getnetbyaddr routine is
+ *	available to lookup networks by their IP addresses.
+ */
+/*#define HAS_GETNBADD		/**/
+
+/* Gethbadd_net_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to getnetbyaddr().
+ */
+#define Getnbadd_net_t		long
 
 /* HAS_UNAME:
  *	This symbol, if defined, indicates that the C program may use the
@@ -1103,6 +1129,12 @@
  */
 /*#define I_NETINET_IN	/**/
 
+/* I_NETDB:
+ *	This symbol, if defined, indicates that <netdb.h> exists and 
+ *	should be included.
+ */
+/*#define I_NETDB		/**/
+
 /* I_PWD:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <pwd.h>.
@@ -1436,6 +1468,7 @@
  */
 #define ARCHLIB "c:\\perl\\lib"		/**/
 #define ARCHLIB_EXP (win32PerlLibPath())	/**/
+#define APPLLIB_EXP (win32SiteLibPath())	/**/
 
 /* BINCOMPAT3:
  *	This symbol, if defined, indicates that Perl 5.004 should be
@@ -1691,7 +1724,7 @@
  *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
  *	D:/bin/sh.exe.
  */
-#define SH_PATH "cmd.exe"  /**/
+#define SH_PATH "cmd /x /c"  /**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
@@ -1761,7 +1794,7 @@
  *	script to make sure (one hopes) that it runs with perl and not
  *	some shell.
  */
-#define STARTPERL "#perl"		/**/
+#define STARTPERL "#!perl"		/**/
 
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should

@@ -867,9 +867,9 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr)
 	if (!len) {
 	    if (SvTAIL(littlestr)) {
 		if (bigend > big && bigend[-1] == '\n')
-		    return bigend - 1;
+		    return (char *)(bigend - 1);
 		else
-		    return bigend;
+		    return (char *) bigend;
 	    }
 	    return (char*)big;
 	}
@@ -2546,4 +2546,5 @@ Perl_huge(void)
  return HUGE_VAL;
 }
 #endif
+
 

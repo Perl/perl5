@@ -411,7 +411,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend, cha
 	goto phooey;
     } else if (c = prog->regstclass) {
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
-	char *class;
+	char *Class;
 
 	if (minlen)
 	    dontbother = minlen - 1;
@@ -420,9 +420,9 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend, cha
 	/* We know what class it must start with. */
 	switch (OP(c)) {
 	case ANYOF:
-	    class = OPERAND(c);
+	    Class = (char *) OPERAND(c);
 	    while (s < strend) {
-		if (reginclass(class, *s)) {
+		if (reginclass(Class, *s)) {
 		    if (tmp && regtry(prog, s))
 			goto got_it;
 		    else
@@ -854,7 +854,7 @@ regmatch(regnode *prog)
 	    nextchar = UCHARAT(++locinput);
 	    break;
 	case EXACT:
-	    s = OPERAND(scan);
+	    s = (char *) OPERAND(scan);
 	    ln = UCHARAT(s++);
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchar)
@@ -870,7 +870,7 @@ regmatch(regnode *prog)
 	    reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case EXACTF:
-	    s = OPERAND(scan);
+	    s = (char *) OPERAND(scan);
 	    ln = UCHARAT(s++);
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchar &&
@@ -887,7 +887,7 @@ regmatch(regnode *prog)
 	    nextchar = UCHARAT(locinput);
 	    break;
 	case ANYOF:
-	    s = OPERAND(scan);
+	    s = (char *) OPERAND(scan);
 	    if (nextchar < 0)
 		nextchar = UCHARAT(locinput);
 	    if (!reginclass(s, nextchar))
@@ -1633,7 +1633,7 @@ regrepeat(regnode *p, I32 max)
     scan = reginput;
     if (max != REG_INFTY && max < loceol - scan)
       loceol = scan + max;
-    opnd = OPERAND(p);
+    opnd = (char *) OPERAND(p);
     switch (OP(p)) {
     case ANY:
 	while (scan < loceol && *scan != '\n')
@@ -1800,4 +1800,6 @@ reginclass(register char *p, register I32 c)
 
     return match ^ ((flags & ANYOF_INVERT) != 0);
 }
+
+
 
