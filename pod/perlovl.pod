@@ -6,3 +6,10 @@ perlovl - overload perl mathematical functions [superseded]
 
 This man page has been superseded by L<overload>.
 
+=head1 WARNING
+
+The old interface involving %OVERLOAD is deprecated and will go away
+RSN. Convert your scripts to
+use overload ...;
+style.
+
