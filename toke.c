@@ -1485,8 +1485,9 @@ yylex()
 		    if (*d++ == '-') {
 			while (d = moreswitches(d)) ;
 			if (perldb && !oldpdb ||
-			    minus_n && !oldn ||
-			    minus_p && !oldp)
+			    ( minus_n || minus_p ) && !(oldn || oldp) )
+			      /* if we have already added "LINE: while (<>) {",
+			         we must not do it again */
 			{
 			    sv_setpv(linestr, "");
 			    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
