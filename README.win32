@@ -212,6 +212,13 @@ Edit the makefile.mk (or Makefile, if you're using nmake) and change
 the values of INST_DRV and INST_TOP.   You can also enable various
 build flags.  These are explained in the makefiles.
 
+Note that it is generally not a good idea to try to build a perl with
+INST_DRV and INST_TOP set to a path that already exists from a previous
+build.  In particular, this may cause problems with the
+lib/ExtUtils/t/Embed.t test, which attempts to build a test program and
+may end up building against the installed perl's lib/CORE directory rather
+than the one being tested.
+
 You will have to make sure that CCTYPE is set correctly and that 
 CCHOME points to wherever you installed your compiler.
 
