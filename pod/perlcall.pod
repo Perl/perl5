@@ -526,12 +526,18 @@ The C function required to call I<LeftString> would look like this.
     {
         dSP ;
 
+	ENTER ;
+        SAVETMPS ;
+
         PUSHMARK(SP) ;
         XPUSHs(sv_2mortal(newSVpv(a, 0)));
         XPUSHs(sv_2mortal(newSViv(b)));
         PUTBACK ;
 
         perl_call_pv("LeftString", G_DISCARD);
+
+        FREETMPS ;
+        LEAVE ;
     }
 
 Here are a few notes on the C function I<call_LeftString>.
@@ -598,6 +604,36 @@ on how the XPUSH macros work.
 
 =item 6.
 
+Because we created temporary values (by means of sv_2mortal() calls)
+we will have to tidy up the Perl stack and dispose of mortal SVs.
+
+This is the purpose of
+
+    ENTER ;
+    SAVETMPS ;
+
+at the start of the function, and
+
+    FREETMPS ;
+    LEAVE ;
+
+at the end. The C<ENTER>/C<SAVETMPS> pair creates a boundary for any
+temporaries we create.  This means that the temporaries we get rid of
+will be limited to those which were created after these calls.
+
+The C<FREETMPS>/C<LEAVE> pair will get rid of any values returned by
+the Perl subroutine (see next example), plus it will also dump the
+mortal SVs we have created.  Having C<ENTER>/C<SAVETMPS> at the
+beginning of the code makes sure that no other mortals are destroyed.
+
+Think of these macros as working a bit like using C<{> and C<}> in Perl
+to limit the scope of local variables.
+
+See the section I<Using Perl to dispose of temporaries> for details of
+an alternative to using these macros.
+
+=item 7.
+
 Finally, I<LeftString> can now be called via the I<perl_call_pv>
 function.
 
@@ -660,39 +696,7 @@ The only flag specified this time was G_SCALAR. That means the C<@_>
 array will be created and that the value returned by I<Adder> will
 still exist after the call to I<perl_call_pv>.
 
-
-
 =item 2.
-
-Because we are interested in what is returned from I<Adder> we cannot
-specify G_DISCARD. This means that we will have to tidy up the Perl
-stack and dispose of any temporary values ourselves. This is the
-purpose of
-
-    ENTER ;
-    SAVETMPS ;
-
-at the start of the function, and
-
-    FREETMPS ;
-    LEAVE ;
-
-at the end. The C<ENTER>/C<SAVETMPS> pair creates a boundary for any
-temporaries we create.  This means that the temporaries we get rid of
-will be limited to those which were created after these calls.
-
-The C<FREETMPS>/C<LEAVE> pair will get rid of any values returned by
-the Perl subroutine, plus it will also dump the mortal SVs we have
-created.  Having C<ENTER>/C<SAVETMPS> at the beginning of the code
-makes sure that no other mortals are destroyed.
-
-Think of these macros as working a bit like using C<{> and C<}> in Perl
-to limit the scope of local variables.
-
-See the section I<Using Perl to dispose of temporaries> for details of
-an alternative to using these macros.
-
-=item 3.
 
 The purpose of the macro C<SPAGAIN> is to refresh the local copy of the
 stack pointer. This is necessary because it is possible that the memory
@@ -703,7 +707,7 @@ If you are making use of the Perl stack pointer in your code you must
 always refresh the local copy using SPAGAIN whenever you make use
 of the I<perl_call_*> functions or any other Perl internal function.
 
-=item 4.
+=item 3.
 
 Although only a single value was expected to be returned from I<Adder>,
 it is still good practice to check the return code from I<perl_call_pv>
@@ -715,7 +719,7 @@ didn't check for that possibility and take appropriate action the Perl
 stack would end up in an inconsistent state. That is something you
 I<really> don't want to happen ever.
 
-=item 5.
+=item 4.
 
 The C<POPi> macro is used here to pop the return value from the stack.
 In this case we wanted an integer, so C<POPi> was used.
@@ -730,7 +734,7 @@ they return.
     POPi	integer
     POPl	long
 
-=item 6.
+=item 5.
 
 The final C<PUTBACK> is used to leave the Perl stack in a consistent
 state before exiting the function.  This is necessary because when we
