@@ -8,6 +8,7 @@ XSLoader::load 'ByteLoader', $VERSION;
 
 1;
 __END__
+
 =head1 NAME
 
 ByteLoader - load byte compiled perl code
