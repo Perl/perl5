@@ -1232,7 +1232,7 @@ print PM <<"END";
 __END__
 END
 
-my ($email,$author);
+my ($email,$author,$licence);
 
 eval {
        my $username;
@@ -1247,6 +1247,14 @@ eval {
 
 $author ||= "A. U. Thor";
 $email  ||= 'a.u.thor@a.galaxy.far.far.away';
+
+$licence = sprintf << "DEFAULT", $^V;
+Copyright (C) ${\(1900 + (localtime) [5])} by $author
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version %vd or,
+at your option, any later version of Perl 5 you may have available.
+DEFAULT
 
 my $revhist = '';
 $revhist = <<EOT if $opt_C;
@@ -1306,6 +1314,12 @@ if ($opt_x && $opt_a) {
     while ($name, $struct) = each %structs;
 }
 
+# Prefix the default licence with hash symbols.
+# Is this just cargo cult - it seems that the first thing that happens to this
+# block is that all the hashes are then s///g out.
+my $licence_hash = $licence;
+$licence_hash =~ s/^/#/gm;
+
 my $pod = <<"END" unless $opt_P;
 ## Below is stub documentation for your module. You'd better edit it!
 #
@@ -1344,10 +1358,7 @@ $exp_doc$meth_doc$revhist
 #
 #=head1 COPYRIGHT AND LICENSE
 #
-#Copyright ${\(1900 + (localtime) [5])} by $author
-#
-#This library is free software; you can redistribute it and/or modify
-#it under the same terms as Perl itself. 
+$licence_hash
 #
 #=cut
 END
@@ -2048,10 +2059,7 @@ COPYRIGHT AND LICENCE
 
 Put the correct copyright and licence information here.
 
-Copyright (C) $thisyear $author
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+$licence
 
 _RMEND_
 close(RM) || die "Can't close $ext$modpname/README: $!\n";
