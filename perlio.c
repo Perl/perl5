@@ -300,6 +300,19 @@ PerlIO_debug(const char *fmt, ...)
     }
     if (dbg > 0) {
 	dTHX;
+#ifdef USE_ITHREADS
+	/* Use fixed buffer as sv_catpvf etc. needs SVs */
+	char buffer[1024];
+	char *s;
+	STRLEN len;
+	s = CopFILE(PL_curcop);
+	if (!s)
+	    s = "(none)";
+	sprintf(buffer, "%s:%" IVdf " ", s, (IV) CopLINE(PL_curcop));
+        len = strlen(buffer);
+	vsprintf(buffer+len, fmt, ap);
+	PerlLIO_write(dbg, buffer, strlen(buffer));
+#else
 	SV *sv = newSVpvn("", 0);
 	char *s;
 	STRLEN len;
@@ -313,6 +326,7 @@ PerlIO_debug(const char *fmt, ...)
 	s = SvPV(sv, len);
 	PerlLIO_write(dbg, s, len);
 	SvREFCNT_dec(sv);
+#endif
     }
     va_end(ap);
 }
