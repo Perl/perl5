@@ -74,9 +74,229 @@ indicator:
 
 
 ----------------
-Version 5.005_52        Development release working toward 5.006
+Version 5.005_53        Development release working toward 5.006
 ----------------
 
+____________________________________________________________________________
+[  1919] By: gsar                                  on 1998/10/02  04:59:13
+        Log: add note to INSTALL about ANSI C
+     Branch: perl
+           ! INSTALL
+____________________________________________________________________________
+[  1918] By: gsar                                  on 1998/10/02  04:21:10
+        Log: tolerate spaces when fixing up __cplusplus output by old h2xs
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Wed, 30 Sep 1998 23:35:30 +0200
+             Message-ID: <3619a1e8.12336659@smtp1.ibm.net>
+             Subject: [PATCH 5.005_52]: xsubpp and PERL_OBJECT
+     Branch: perl
+           ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[  1917] By: gsar                                  on 1998/10/02  04:16:02
+        Log: From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 1 Oct 1998 11:37:26 +0300 (EET DST)
+             Message-Id: <199810010837.LAA31371@alpha.hut.fi>
+             Subject: Re: Configure test for selectbits busted
+     Branch: perl
+           ! Configure
+____________________________________________________________________________
+[  1916] By: gsar                                  on 1998/10/02  04:14:17
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Wed, 30 Sep 1998 17:15:20 -0700
+             Message-Id: <3.0.6.32.19980930171520.00b22eb0@ous.edu>
+             Subject: [PATCH 5.005_02]VMS config tweaks
+     Branch: perl
+           ! vms/descrip_mms.template vms/subconfigure.com
+____________________________________________________________________________
+[  1915] By: gsar                                  on 1998/10/02  04:10:47
+        Log: use Off_t to permit 64-bit seek()
+             From: Scott Henry <scotth@sgi.com>
+             Date: 29 Sep 1998 17:38:46 -0700
+             Message-ID: <yd8lnn2zb6x.fsf_-_@hoshi.engr.sgi.com>
+             Subject: Re: [PATCH] 5.005_02: Configure "Massive Attack"
+             --
+             Date: 28 Sep 1998 18:55:37 -0700
+             Message-ID: <yd8ogrz1y3q.fsf@hoshi.engr.sgi.com>
+             Subject: Re: [PATCH] 5.005_51: Configure "Massive Attack"
+     Branch: perl
+           ! doio.c pp_sys.c proto.h sv.c
+____________________________________________________________________________
+[  1914] By: gsar                                  on 1998/10/02  04:05:36
+        Log: normalize tm struct passed to strftime() with mktime()
+             From: Spider Boardman <spider@orb.nashua.nh.us>
+             Date: Wed, 30 Sep 1998 15:12:09 -0400
+             Message-Id: <199809301912.PAA26119@Orb.Nashua.NH.US>
+             Subject: [PATCH 5.005_52] Re: POSIX::strftime returns incorrect date 
+     Branch: perl
+           ! ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  1913] By: gsar                                  on 1998/10/02  03:59:46
+        Log: don't try to run foo_SH.orig etc.
+     Branch: perl
+           ! Configure
+____________________________________________________________________________
+[  1912] By: gsar                                  on 1998/10/02  03:45:37
+        Log: make warning about glob process failure optional
+     Branch: perl
+           ! pod/perldiag.pod pp_hot.c
+____________________________________________________________________________
+[  1911] By: gsar                                  on 1998/10/02  02:52:21
+        Log: document yet another RE diagnostic, make it consistent with REG_INFTY
+             From: Dominic Dunlop <domo@vo.lu>
+             Date: Tue, 29 Sep 1998 21:06:30 +0000
+             Message-Id: <v03110700b236f60b1375@[212.24.192.106]>
+             Subject: [PATCH 5.005_52] Fix hard-coded "matches null string many times" limit
+             --
+             Date: Wed, 30 Sep 1998 11:46:44 +0000
+             Message-Id: <v03110702b237beb04830@[212.24.192.74]>
+             Subject: [PATCH 5.005_52] Add "Strange *+?{} ..." to perldiag
+     Branch: perl
+           ! pod/perldiag.pod regcomp.c
+____________________________________________________________________________
+[  1910] By: gsar                                  on 1998/10/02  02:48:48
+        Log: minor Configure tweaks (via private mail)
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Wed, 30 Sep 1998 02:25:06 +0300 (EET DST)
+             Message-Id: <199809292325.CAA19737@alpha.hut.fi>
+             Subject: [PATCH] 5.005_52: the drizzle continues
+     Branch: perl
+           ! Configure config_h.SH handy.h
+____________________________________________________________________________
+[  1909] By: gsar                                  on 1998/10/02  02:46:39
+        Log: update SCO hints for dynamic loading
+             From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date: Mon, 28 Sep 1998 16:50:38 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980928164648.8130E-100000@newton.phys>
+             Subject: [PATCH 5.004_04-MAINT_TRIAL_5 and 5.005_xx] Re: Perl on SCO_SV
+             --
+             Date: Tue, 29 Sep 1998 16:48:55 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980929164612.8634A-100000@newton.phys>
+             Subject: Re: [PATCH 5.004_04-MAINT_TRIAL_5 and 5.005_xx] Re: Perl on SCO_SV
+     Branch: perl
+           ! hints/sco.sh
+____________________________________________________________________________
+[  1908] By: gsar                                  on 1998/10/02  02:33:39
+        Log: make File::Find work when wanted() is autoloaded or a symbolic ref
+     Branch: perl
+           ! lib/File/Find.pm
+____________________________________________________________________________
+[  1907] By: gsar                                  on 1998/10/02  02:21:52
+        Log: applied patches, but retained old behavior for win32 (where compilers
+             can't read from stdin at all)
+             From: Graham Barr <gbarr@ti.com>
+             Date: Mon, 28 Sep 1998 09:41:49 -0500
+             Message-ID: <19980928094149.B26576@asic.sc.ti.com>
+             Subject: Re: 5.005_51 Errno invokes cpprun incorrectly
+             --
+             Date: Tue, 29 Sep 1998 12:35:43 -0500
+             Message-ID: <19980929123543.Z26576@asic.sc.ti.com>
+             Subject: Re: 5.005_51 Errno invokes cpprun incorrectly
+     Branch: perl
+           ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  1906] By: gsar                                  on 1998/10/02  02:02:19
+        Log: tolerate whitespace in /etc/group entries (suggested by Jarkko
+             Hietaniemi)
+     Branch: perl
+           ! t/op/grent.t
+____________________________________________________________________________
+[  1905] By: gsar                                  on 1998/10/02  01:59:56
+        Log: win32 caveats about truncate()
+     Branch: perl
+           ! pod/perlport.pod
+____________________________________________________________________________
+[  1904] By: gsar                                  on 1998/10/02  01:53:25
+        Log: various Configure and hints updates (prefer drand48() or random()
+             over rand(); add -Dusemultiplicity; enhanced 64-bitness);  patch
+             applied modulo SCO hints superceded by later patch
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Tue, 29 Sep 1998 00:56:33 +0300 (EET DST)
+             Message-Id: <199809282156.AAA18615@alpha.hut.fi>
+             Subject: [PATCH] 5.005_52: Configure et al:
+     Branch: perl
+           + ext/IPC/SysV/hints/next_3.pl
+	   ! Configure INSTALL MANIFEST config_h.SH ext/IPC/SysV/SysV.xs
+	   ! hints/dec_osf.sh hints/irix_6.sh hints/next_3.sh
+           ! hints/solaris_2.sh perl.h pod/perldiag.pod pp.c pp_sys.c
+____________________________________________________________________________
+[  1903] By: gsar                                  on 1998/10/02  01:42:37
+        Log: fixes for bugs in /RE/p	from Hugo van der Sanden
+             Date: Mon, 28 Sep 1998 17:41:49 +0100
+             Message-Id: <199809281641.RAA02450@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_52] Re: More on ?p 
+             --
+             Date: Thu, 01 Oct 1998 09:10:58 +0100
+             Message-Id: <199810010810.JAA16426@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_52] ?p fix
+             --
+             Date: Thu, 01 Oct 1998 10:45:56 +0100
+             Message-Id: <199810010945.KAA16733@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_52] more on ?p
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  1902] By: gsar                                  on 1998/10/02  01:36:14
+        Log: From: Kenneth Duda <kjd@cisco.com>
+             Date: Sun, 27 Sep 1998 20:22:12 -0700 (PDT)
+             Message-Id: <199809280322.UAA01261@scorpion.cisco.com>
+             Subject: writemain dies when there are more than 4000 characters of extensions
+     Branch: perl
+           ! writemain.SH
+____________________________________________________________________________
+[  1901] By: gsar                                  on 1998/10/02  01:33:16
+        Log: tweak run_byacc recipe
+     Branch: perl
+           ! Makefile.SH Porting/pumpkin.pod
+____________________________________________________________________________
+[  1900] By: gsar                                  on 1998/10/02  01:02:09
+        Log: use SETERRNO() to reset errno (suggested by Charles Bailey)
+     Branch: perl
+           ! perl.h pp_ctl.c
+____________________________________________________________________________
+[  1899] By: gsar                                  on 1998/09/28  20:46:30
+        Log: fix various 5.00552 mishaps (fixes suggested by Jan Dubois,
+             Kurt Starsinic, Spider Boardman, Dan Sugalski and Albert
+             Dvornik)
+     Branch: perl
+           ! hints/irix_6.sh lib/ExtUtils/MakeMaker.pm mg.c scope.c
+____________________________________________________________________________
+[  1898] By: gsar                                  on 1998/09/28  20:42:52
+        Log: flush unsubmitted 5.00552 change
+     Branch: perl
+           ! MANIFEST
+____________________________________________________________________________
+[  1897] By: gsar                                  on 1998/09/27  04:43:06
+        Log: run vms_yfix.pl
+     Branch: perl
+           ! vms/perly_c.vms
+____________________________________________________________________________
+[  1896] By: gsar                                  on 1998/09/27  03:38:55
+        Log: small tweak on last change
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  1895] By: gsar                                  on 1998/09/27  03:17:17
+        Log: fix win32_stat() to do the right thing for share names
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  1891] By: larry                                 on 1998/09/25  18:50:40
+        Log: Fixed apostrophe problem from Mark Knutsen.
+     Branch: perl
+           ! sv.h
+
+----------------
+Version 5.005_52
+----------------
+
+____________________________________________________________________________
+[  1890] By: gsar                                  on 1998/09/25  10:25:00
+        Log: update template config.sh, add new config vars to win32 stuff
+     Branch: perl
+	   ! Changes Porting/config.sh Porting/config_H config_h.SH objpp.h
+	   ! pp_sys.c proto.h win32/config.bc win32/config.gc
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+           ! win32/config_H.vc win32/win32.h
 ____________________________________________________________________________
 [  1889] By: gsar                                  on 1998/09/25  07:13:13
         Log: big Configure update from Jarkko: sync metaconfig units; d_statblks fix
