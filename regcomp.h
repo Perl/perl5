@@ -194,6 +194,9 @@ struct regnode_charclass_class {
 #define ANYOF_UNICODE		0x20
 #define ANYOF_UNICODE_ALL	0x40	/* Can match any char past 0xff */
 
+/* size of node is large (includes class pointer) */
+#define ANYOF_LARGE 		0x80
+
 /* Are there any runtime flags on in this node? */
 #define ANYOF_RUNTIME(s)	(ANYOF_FLAGS(s) & 0x0f)
 
