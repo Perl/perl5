@@ -119,7 +119,7 @@ AUTODIR		= ..\lib\auto
 
 CC		= bcc32
 LINK32		= tlink32
-LIB32		= tlib
+LIB32		= tlib /P128
 IMPLIB		= implib -c
 
 #
@@ -149,12 +149,13 @@ CFLAGS		= -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
+LIBOUT_FLAG	= 
 
 .ELIF "$(CCTYPE)" == "GCC"
 
 CC		= gcc -pipe
 LINK32		= gcc -pipe
-LIB32		= ar
+LIB32		= ar rc
 IMPLIB		= dlltool
 
 o = .o
@@ -185,6 +186,7 @@ CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
+LIBOUT_FLAG	= 
 
 .ELSE
 
@@ -244,6 +246,7 @@ CFLAGS		= -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 LINK_FLAGS	= -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
+LIBOUT_FLAG	= /out:
 
 .ENDIF
 
@@ -755,17 +758,29 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	cd $(EXTDIR)\$(*B) && $(XSUBPP) dl_win32.xs > $(*B).c
 	$(XCOPY) $(EXTDIR)\$(*B)\dlutils.c .
 
-!IF "$(OBJECT)" == "-DPERL_OBJECT"
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+
 PerlCAPI.cpp : $(MINIPERL)
 	$(MINIPERL) GenCAPI.pl $(COREDIR)
 
 PerlCAPI$(o) : PerlCAPI.cpp
+.IF "$(CCTYPE)" == "BORLAND"
+	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+.ELIF "$(CCTYPE)" == "GCC"
+	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+.ELSE
 	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
 	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+.ENDIF
 
 $(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)
-	lib /OUT:$(CAPILIB) PerlCAPI$(o)
-!ENDIF
+.IF "$(CCTYPE)" == "BORLAND"
+	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) +PerlCAPI$(o)
+.ELSE
+	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) PerlCAPI$(o)
+.ENDIF
+
+.ENDIF
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs

@@ -1202,10 +1202,6 @@ win32_crypt(const char *txt, const char *salt)
 }
 #endif
 
-#ifdef _M_IX86
-#define USE_FIXED_OSFHANDLE
-#endif
-
 #ifdef USE_FIXED_OSFHANDLE
 
 EXTERN_C int __cdecl _alloc_osfhnd(void);
