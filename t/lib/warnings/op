@@ -969,3 +969,5 @@ no warnings 'deprecated' ;
 package;
 EXPECT
 Use of "package" with no arguments is deprecated at - line 3.
+Global symbol "BEGIN" requires explicit package name at - line 4.
+BEGIN not safe after errors--compilation aborted at - line 4.
