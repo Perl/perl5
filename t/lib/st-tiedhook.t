@@ -1,6 +1,6 @@
 #!./perl
 
-# $Id: tied_hook.t,v 1.0 2000/09/01 19:40:42 ram Exp $
+# $Id: tied_hook.t,v 1.0.1.1 2001/02/17 12:29:01 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
@@ -8,6 +8,9 @@
 #  in the README file that comes with the distribution.
 #
 # $Log: tied_hook.t,v $
+# Revision 1.0.1.1  2001/02/17 12:29:01  ram
+# patch8: added test for blessed ref to tied hash
+#
 # Revision 1.0  2000/09/01 19:40:42  ram
 # Baseline for first official release.
 #
@@ -28,7 +31,7 @@ sub ok;
 
 use Storable qw(freeze thaw);
 
-print "1..21\n";
+print "1..25\n";
 
 ($scalar_fetch, $array_fetch, $hash_fetch) = (0, 0, 0);
 
@@ -212,4 +215,40 @@ ok 18, $thash->{'attribute'} eq 'plain value';
 ok 19, ($scalar_hook1 && $scalar_hook2);
 ok 20, ($array_hook1 && $array_hook2);
 ok 21, ($hash_hook1 && $hash_hook2);
+
+#
+# And now for the "blessed ref to tied hash" with "store hook" test...
+#
+
+my $bc = bless \%hash, 'FOO';		# FOO does not exist -> no hook
+my $bx = thaw freeze $bc;
+
+ok 22, ref $bx eq 'FOO';
+my $old_hash_fetch = $hash_fetch;
+my $v = $bx->{attribute};
+ok 23, $hash_fetch == $old_hash_fetch + 1;	# Still tied
+
+package TIED_HASH_REF;
+
+
+sub STORABLE_freeze {
+        my ($self, $cloning) = @_;
+        return if $cloning;
+        return('ref lost');
+}
+
+sub STORABLE_thaw {
+        my ($self, $cloning, $data) = @_;
+        return if $cloning;
+}
+
+package main;
+
+$bc = bless \%hash, 'TIED_HASH_REF';
+$bx = thaw freeze $bc;
+
+ok 24, ref $bx eq 'TIED_HASH_REF';
+$old_hash_fetch = $hash_fetch;
+$v = $bx->{attribute};
+ok 25, $hash_fetch == $old_hash_fetch + 1;	# Still tied
 

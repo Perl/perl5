@@ -1,4 +1,4 @@
-;# $Id: Storable.pm,v 1.0.1.7 2001/01/03 09:39:02 ram Exp $
+;# $Id: Storable.pm,v 1.0.1.8 2001/02/17 12:24:37 ram Exp $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
@@ -6,6 +6,9 @@
 ;#  in the README file that comes with the distribution.
 ;#
 ;# $Log: Storable.pm,v $
+;# Revision 1.0.1.8  2001/02/17 12:24:37  ram
+;# patch8: fixed incorrect error message
+;#
 ;# Revision 1.0.1.7  2001/01/03 09:39:02  ram
 ;# patch7: added CAN_FLOCK to determine whether we can flock() or not
 ;#
@@ -148,7 +151,7 @@ sub _store {
 	my $self = shift;
 	my ($file, $use_locking) = @_;
 	logcroak "not a reference" unless ref($self);
-	logcroak "too many arguments" unless @_ == 2;	# No @foo in arglist
+	logcroak "wrong argument number" unless @_ == 2;	# No @foo in arglist
 	local *FILE;
 	open(FILE, ">$file") || logcroak "can't create $file: $!";
 	binmode FILE;				# Archaic systems...

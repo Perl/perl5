@@ -1,6 +1,6 @@
 #!./perl
 
-# $Id: recurse.t,v 1.0.1.2 2000/11/05 17:22:05 ram Exp ram $
+# $Id: recurse.t,v 1.0.1.3 2001/02/17 12:28:33 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
@@ -8,6 +8,9 @@
 #  in the README file that comes with the distribution.
 #  
 # $Log: recurse.t,v $
+# Revision 1.0.1.3  2001/02/17 12:28:33  ram
+# patch8: ensure blessing occurs ASAP, specially designed for hooks
+#
 # Revision 1.0.1.2  2000/11/05 17:22:05  ram
 # patch6: stress hook a little more with refs to lexicals
 #
@@ -36,7 +39,7 @@ sub ok;
 
 use Storable qw(freeze thaw dclone);
 
-print "1..28\n";
+print "1..32\n";
 
 package OBJ_REAL;
 
@@ -240,4 +243,58 @@ ok 25, ref($bar->{b}[0]) eq 'Foo';
 ok 26, ref($bar->{b}[1]) eq 'Foo';
 ok 27, ref($bar2->{b}[0]) eq 'Foo';
 ok 28, ref($bar2->{b}[1]) eq 'Foo';
+
+#
+# The following attempts to make sure blessed objects are blessed ASAP
+# at retrieve time.
+#
+
+package CLASS_1;
+
+sub make {
+	my $self = bless {}, shift;
+	return $self;
+}
+
+package CLASS_2;
+
+sub make {
+	my $self = bless {}, shift;
+	my ($o) = @_;
+	$self->{c1} = CLASS_1->make();
+	$self->{o} = $o;
+	$self->{c3} = bless CLASS_1->make(), "CLASS_3";
+	$o->set_c2($self);
+	return $self;
+}
+
+sub STORABLE_freeze {
+	my($self, $clonning) = @_;
+	return "", $self->{c1}, $self->{c3}, $self->{o};
+}
+
+sub STORABLE_thaw {
+	my($self, $clonning, $frozen, $c1, $c3, $o) = @_;
+	main::ok 29, ref $self eq "CLASS_2";
+	main::ok 30, ref $c1 eq "CLASS_1";
+	main::ok 31, ref $c3 eq "CLASS_3";
+	main::ok 32, ref $o eq "CLASS_OTHER";
+	$self->{c1} = $c1;
+	$self->{c3} = $c3;
+}
+
+package CLASS_OTHER;
+
+sub make {
+	my $self = bless {}, shift;
+	return $self;
+}
+
+sub set_c2 { $_[0]->{c2} = $_[1] }
+
+package main;
+
+my $o = CLASS_OTHER->make();
+my $c2 = CLASS_2->make($o);
+my $so = thaw freeze $o;
 
