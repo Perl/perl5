@@ -464,17 +464,22 @@ S_incline(pTHX_ char *s)
     dTHR;
     char *t;
     char *n;
+    char *e;
     char ch;
-    int sawline = 0;
 
     CopLINE_inc(PL_curcop);
     if (*s++ != '#')
 	return;
     while (*s == ' ' || *s == '\t') s++;
-    if (strnEQ(s, "line ", 5)) {
-	s += 5;
-	sawline = 1;
-    }
+    if (strnEQ(s, "line", 4))
+	s += 4;
+    else
+	return;
+    if (*s == ' ' || *s == '\t')
+	s++;
+    else 
+	return;
+    while (*s == ' ' || *s == '\t') s++;
     if (!isDIGIT(*s))
 	return;
     n = s;
@@ -482,13 +487,19 @@ S_incline(pTHX_ char *s)
 	s++;
     while (*s == ' ' || *s == '\t')
 	s++;
-    if (*s == '"' && (t = strchr(s+1, '"')))
+    if (*s == '"' && (t = strchr(s+1, '"'))) {
 	s++;
-    else {
-	if (!sawline)
-	    return;		/* false alarm */
-	for (t = s; !isSPACE(*t); t++) ;
+	e = t + 1;
     }
+    else {
+	for (t = s; !isSPACE(*t); t++) ;
+	e = t;
+    }
+    while (*e == ' ' || *e == '\t' || *e == '\r' || *e == '\f')
+	e++;
+    if (*e != '\n' && *e != '\0')
+	return;		/* false alarm */
+
     ch = *t;
     *t = '\0';
     if (t - s > 0)
