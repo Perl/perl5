@@ -712,7 +712,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     case '!':
 	if(len > 1)
 	    break;
-	if(sv_type == SVt_PVHV) {
+	if(sv_type > SVt_PV) {
 	    HV* stash = gv_stashpvn("Errno",5,FALSE);
 	    if(!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 		dSP;
@@ -721,7 +721,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		SPAGAIN;
 		stash = gv_stashpvn("Errno",5,FALSE);
 		if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
-		    croak("%! is not avaliable on this machine");
+		    croak("Can't use %%! because Errno.pm is not avaliable");
 	    }
 	}
 	goto magicalize;

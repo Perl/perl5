@@ -38,7 +38,9 @@ use Config;
 use File::Path qw(mkpath);
 use Getopt::Std;
 
-getopts('Dd:rlh');
+getopts('Dd:rlha');
+die "-r and -a options are mutually exclusive\n" if ($opt_r and $opt_a);
+@inc_dirs = inc_dirs() if $opt_a;
 
 my $Exit = 0;
 
@@ -82,6 +84,14 @@ while (defined ($file = next_file())) {
 	    $dir = $1;
 	    mkpath "$Dest_dir/$dir";
 	}
+
+	if ($opt_a) { # automagic mode:  locate header file in @inc_dirs
+	    foreach (@inc_dirs) {
+		chdir $_;
+		last if -f $file;
+	    }
+	}
+
 	open(IN,"$file") || (($Exit = 1),(warn "Can't open $file: $!\n"),next);
 	open(OUT,">$Dest_dir/$outfile") || die "Can't create $outfile: $!\n";
     }
@@ -240,6 +250,9 @@ while (defined ($file = next_file())) {
 	}
     }
     print OUT "1;\n";
+
+    $is_converted{$file} = 1;
+    queue_includes_from($file) if ($opt_a);
 }
 
 exit $Exit;
@@ -380,7 +393,9 @@ sub next_file
             } else {
                 print STDERR "Skipping directory `$file'\n";
             }
-	} else {
+        } elsif ($opt_a) {
+            return $file;
+        } else {
             print STDERR "Skipping `$file':  not a file or directory\n";
         }
     }
@@ -402,11 +417,8 @@ sub expand_glob
 
             # expand_glob() is going to be called until $ARGV[0] isn't a
             # directory; so push directories, and unshift everything else.
-            if (-d "$directory/$_") {
-		push    @ARGV, "$directory/$_";
-	    } else {
-		unshift @ARGV, "$directory/$_";
-	    }
+            if (-d "$directory/$_") { push    @ARGV, "$directory/$_" }
+            else                    { unshift @ARGV, "$directory/$_" }
         }
     closedir DIR;
 }
@@ -431,18 +443,54 @@ sub link_if_possible
             unlink "$Dest_dir/$dirlink" or
                 print STDERR "Could not remove link $Dest_dir/$dirlink:  $!\n";
         }
+
         if (eval 'symlink($target, "$Dest_dir/$dirlink")') {
             print "Linking $target -> $Dest_dir/$dirlink\n";
 
             # Make sure that the link _links_ to something:
             if (! -e "$Dest_dir/$target") {
-                mkdir("$Dest_dir/$target", 0755) or
+                mkpath("$Dest_dir/$target", 0755) or
                     print STDERR "Could not create $Dest_dir/$target/\n";
             }
         } else {
             print STDERR "Could not symlink $target -> $Dest_dir/$dirlink:  $!\n";
         }
     }
+}
+
+
+# Push all #included files in $file onto our stack, except for STDIN
+# and files we've already processed.
+sub queue_includes_from
+{
+    my ($file)    = @_;
+    my $line;
+
+    return if ($file eq "-");
+
+    open HEADER, $file or return;
+        while (defined($line = <HEADER>)) {
+            while (/\\$/) { # Handle continuation lines
+                chop $line;
+                $line .= <HEADER>;
+            }
+
+            if ($line =~ /^#\s*include\s+<(.*?)>/) {
+                push(@ARGV, $1) unless $is_converted{$1};
+            }
+        }
+    close HEADER;
+}
+
+
+# Determine include directories; $Config{usrinc} should be enough for (all
+# non-GCC?) C compilers, but gcc uses an additional include directory.
+sub inc_dirs
+{
+    my $from_gcc    = `$Config{cc} -v 2>&1`;
+    $from_gcc       =~ s:^Reading specs from (.*?)/specs\b.*:$1/include:s;
+
+    length($from_gcc) ? ($from_gcc, $Config{usrinc}) : ($Config{usrinc});
 }
 
 
@@ -457,7 +505,7 @@ h2ph - convert .h C header files to .ph Perl header files
 
 =head1 SYNOPSIS
 
-B<h2ph [-d destination directory] [-r] [-l] [headerfiles]>
+B<h2ph [-d destination directory] [-r | -a] [-l] [headerfiles]>
 
 =head1 DESCRIPTION
 
@@ -490,7 +538,15 @@ beneath the default Perl library location (C<$Config{'installsitsearch'}>).
 =item -r
 
 Run recursively; if any of B<headerfiles> are directories, then run I<h2ph>
-on all files in those directories (and their subdirectories, etc.).
+on all files in those directories (and their subdirectories, etc.).  B<-r>
+and B<-a> are mutually exclusive.
+
+=item -a
+
+Run automagically; convert B<headerfiles>, as well as any B<.h> files
+which they include.  This option will search for B<.h> files in all
+directories which your C compiler ordinarily uses.  B<-a> and B<-r> are
+mutually exclusive.
 
 =item -l
 
@@ -510,6 +566,11 @@ you will see the slightly more helpful
 	[ some error condition ] at filename.ph line nnn
 
 However, the B<.ph> files almost double in size when built using B<-h>.
+
+=item -D
+
+Include the code from the B<.h> file as a comment in the B<.ph> file.
+This is primarily used for debugging I<h2ph>.
 
 =back
 

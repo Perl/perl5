@@ -6,6 +6,7 @@ $| = 1;				# flush stdout
 
 if ($^O eq 'MSWin32') {
     print "# exec is unsupported on Win32\n";
+    # XXX the system tests could be written to use ./perl and so work on Win32
     print "1..0\n";
     exit(0);
 }
@@ -16,6 +17,7 @@ print "not ok 1\n" if system "echo ok \\1";	# shell interpreted
 print "not ok 2\n" if system "echo ok 2";	# split and directly called
 print "not ok 3\n" if system "echo", "ok", "3"; # directly called
 
+# these should probably be rewritten to match the examples in perlfunc.pod
 if (system "true") {print "not ok 4\n";} else {print "ok 4\n";}
 
 if ((system "/bin/sh -c 'exit 1'") != 256) { print "not "; }

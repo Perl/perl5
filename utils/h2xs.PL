@@ -486,6 +486,7 @@ sub AUTOLOAD {
 
     my \$constname;
     (\$constname = \$AUTOLOAD) =~ s/.*:://;
+    croak "&$module::constant not defined" if \$constname eq 'constant';
     my \$val = constant(\$constname, \@_ ? \$_[0] : 0);
     if (\$! != 0) {
 	if (\$! =~ /Invalid/) {
@@ -496,7 +497,7 @@ sub AUTOLOAD {
 		croak "Your vendor has not defined $module macro \$constname";
 	}
     }
-    eval "sub \$AUTOLOAD { \$val }";
+    *\$AUTOLOAD = sub () { \$val };
     goto &\$AUTOLOAD;
 }
 

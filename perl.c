@@ -937,6 +937,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #endif
 
     init_predump_symbols();
+    /* init_postdump_symbols not currently designed to be called */
+    /* more than once (ENV isn't cleared first, for example)	 */
+    /* But running with -u leaves %ENV & @ARGV undefined!    XXX */
     if (!do_undump)
 	init_postdump_symbols(argc,argv,env);
 
