@@ -1,5 +1,5 @@
 # hints/aix.sh
-# AIX 3.x.x hints thanks to Wayne Scott <wscott@ichips.intel.com>
+#
 # AIX 4.1 hints thanks to Christopher Chan-Nui <channui@austin.ibm.com>.
 # AIX 4.1 pthreading by Christopher Chan-Nui <channui@austin.ibm.com> and
 #	  Jarkko Hietaniemi <jhi@iki.fi>.
@@ -54,7 +54,7 @@ esac
 # AIX 4.3.* and above default to letting Configure test if nm
 # extraction will work.
 case "$osvers" in
-   3.*|4.1.*|4.2.*)
+   4.1.*|4.2.*)
       case "$usenm" in
 	  '') usenm='undef'
 	  esac
@@ -113,19 +113,12 @@ esac
 
 cc=${cc:-cc}
 
-case "$osvers" in
-3*) d_fchmod=undef
-    ccflags="$ccflags -D_ALL_SOURCE"
-    ;;
-*)  # These hints at least work for 4.x, possibly other systems too.
-    ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
-    case "$cc" in
-     *gcc*) ;;
-     *) ccflags="$ccflags -qmaxmem=-1 -qnoansialias" ;;
+ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
+case "$cc" in
+    *gcc*) ;;
+    *) ccflags="$ccflags -qmaxmem=-1 -qnoansialias" ;;
     esac
-    nm_opt='-B'
-    ;;
-esac
+nm_opt='-B'
 
 # These functions don't work like Perl expects them to.
 d_setregid='undef'
@@ -218,14 +211,7 @@ esac
 # -bI:$(PERL_INC)/perl.exp  Read the exported symbols from the perl binary
 # -bE:$(BASEEXT).exp	    Export these symbols.  This file contains only one
 #			    symbol: boot_$(EXP)	 can it be auto-generated?
-case "$osvers" in
-    3*) 
-	lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -e _nostart -lc"
-	;;
-    *) 
-	lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -bnoentry -lc"
-	;;
-    esac
+lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -bnoentry -lc"
 
 case "$use64bitall" in
     $define|true|[yY]*) use64bitint="$define" ;;
@@ -425,8 +411,8 @@ EOCBU
 cat > UU/use64bitint.cbu <<'EOCBU'
 case "$use64bitint" in
 $define|true|[yY]*)
-	    case "`oslevel`" in
-	    3.*|4.[012].*)
+	case "`oslevel`" in
+	    4.[012].*)
 		cat >&4 <<EOM
 AIX `oslevel` does not support 64-bit interfaces.
 You should upgrade to at least AIX 4.3.
@@ -443,8 +429,8 @@ cat > UU/use64bitall.cbu <<'EOCBU'
 # after it has prompted the user for whether to be maximally 64-bitty.
 case "$use64bitall" in
 $define|true|[yY]*)
-	    case "`oslevel`" in
-	    3.*|4.[012].*)
+	case "`oslevel`" in
+	    4.[012].*)
 		cat >&4 <<EOM
 AIX `oslevel` does not support 64-bit interfaces.
 You should upgrade to at least AIX 4.3.
