@@ -411,6 +411,9 @@ output statements mean the patch won't apply cleanly.  Long ago I
 started to fix F<perly.fixer> to detect this, but I never completed the
 task.
 
+If C<perly.c> changes, make sure you run C<perl vms/vms_yfix.pl> to
+update the corresponding VMS files.  See L<VMS-specific updates>.
+
 Some additional notes from Larry on this:
 
 Don't forget to regenerate perly_c.diff.
@@ -520,8 +523,8 @@ things that need to be fixed in Configure.
 
 =head2 VMS-specific updates
 
-If you have changed F<perly.y>, then you may want to update
-F<vms/perly_{h,c}.vms> by running C<perl vms/vms_yfix.pl>.
+If you have changed F<perly.y> or F<perly.c>, then you most probably want
+to update F<vms/perly_{h,c}.vms> by running C<perl vms/vms_yfix.pl>.
 
 The Perl version number appears in several places under F<vms>.
 It is courteous to update these versions.  For example, if you are
