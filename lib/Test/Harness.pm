@@ -3,22 +3,26 @@ package Test::Harness;
 use Exporter;
 use Benchmark;
 use Config;
+use FileHandle;
+use vars qw($VERSION $verbose $switches);
 require 5.002;
 
-$VERSION = $VERSION = "1.02";
+$VERSION = "1.07";
 
 @ISA=('Exporter');
 @EXPORT= qw(&runtests);
 @EXPORT_OK= qw($verbose $switches);
 
 
-$Test::Harness::verbose = 0;
-$Test::Harness::switches = "-w";
+$verbose = 0;
+$switches = "-w";
 
 sub runtests {
     my(@tests) = @_;
     local($|) = 1;
-    my($test,$te,$ok,$next,$max,$totmax, $files,$pct,@failed);
+    my($test,$te,$ok,$next,$max,$pct);
+    my $totmax = 0;
+    my $files = 0;
     my $bad = 0;
     my $good = 0;
     my $total = @tests;
@@ -29,68 +33,84 @@ sub runtests {
 	$te = $test;
 	chop($te);
 	print "$te" . '.' x (20 - length($te));
-	my $fh = "RESULTS";
-	open($fh,"$^X $Test::Harness::switches $test|") || (print "can't run. $!\n");
+	my $fh = new FileHandle;
+	$fh->open("$^X $switches $test|") || (print "can't run. $!\n");
 	$ok = $next = $max = 0;
 	@failed = ();
 	while (<$fh>) {
-	    if( $Test::Harness::verbose ){
+	    if( $verbose ){
 		print $_;
 	    }
-	    unless (/^\#/) {
+	    unless (/^\s*\#/) {
 		if (/^1\.\.([0-9]+)/) {
 		    $max = $1;
 		    $totmax += $max;
 		    $files++;
 		    $next = 1;
-		} elsif ($max) {
-		    if (/^not ok ([0-9]*)/){
-			push @failed, $next;
-		    } elsif (/^ok (.*)/ && $1 == $next) {
+		} elsif ($max && /^(not\s+)?ok\b/) {
+		    my $this = $next;
+		    if (/^not ok\s*(\d*)/){
+			$this = $1 if $1 > 0;
+			push @failed, $this;
+		    } elsif (/^ok\s*(\d*)/) {
+			$this = $1 if $1 > 0;
 			$ok++;
+			$totok++;
 		    }
-		    $next = $1 + 1;
+		    if ($this > $next) {
+			# warn "Test output counter mismatch [test $this]\n";
+			# no need to warn probably
+			push @failed, $next..$this-1;
+		    } elsif ($this < $next) {
+			#we have seen more "ok" lines than the number suggests
+			warn "Aborting test: output counter mismatch [test $this answered when test $next expected]\n";
+			last;
+		    }
+		    $next = $this + 1;
 		}
 	    }
 	}
-	close($fh); # must close to reap child resource values
+	$fh->close; # must close to reap child resource values
 	my $wstatus = $?;
 	my $estatus = $wstatus >> 8;
-	$next-- if $next;
-	if ($ok == $max && $next == $max && ! $wstatus) {
+	if ($ok == $max && $next == $max+1 && ! $estatus) {
 	    print "ok\n";
 	    $good++;
-	} else {
+	} elsif ($max) {
+	    if ($next <= $max) {
+		push @failed, $next..$max;
+	    }
 	    if (@failed) {
 		print canonfailed($max,@failed);
 	    } else {
-		if ($next == 0) {
-		    print "FAILED before any test output arrived\n";
-		} else {
-		    print canonfailed($max,$next+1..$max);
-		}
-	    }
-	    if ($wstatus) {
-		print "\tTest returned status $estatus (wstat $wstatus)\n";
+		print "Don't know which tests failed for some reason\n";
 	    }
 	    $bad++;
-	    $_ = $test;
+	} elsif ($next == 0) {
+	    print "FAILED before any test output arrived\n";
+	    $bad++;
+	}
+	if ($wstatus) {
+	    print "\tTest returned status $estatus (wstat $wstatus)\n";
 	}
     }
     my $t_total = timediff(new Benchmark, $t_start);
     
-    if ($bad == 0) {
-	if ($ok) {
+    if ($bad == 0 && $totmax) {
 	    print "All tests successful.\n";
-	} else {
-	    die "FAILED--no tests were run for some reason.\n";
-	}
+    } elsif ($total==0){
+	die "FAILED--no tests were run for some reason.\n";
+    } elsif ($totmax==0) {
+	my $blurb = $total==1 ? "script" : "scripts";
+	die "FAILED--$total test $blurb could be run, alas -- no output ever seen\n";
     } else {
 	$pct = sprintf("%.2f", $good / $total * 100);
+	my $subpct = sprintf " %d/%d subtests failed, %.2f%% okay.",
+	$totmax - $totok, $totmax, 100*$totok/$totmax;
 	if ($bad == 1) {
-	    die "Failed 1 test script, $pct% okay.\n";
+	    die "Failed 1 test script, $pct% okay.$subpct\n";
 	} else {
-	    die "Failed $bad/$total test scripts, $pct% okay.\n";
+	    die "Failed $bad/$total test scripts, $pct% okay.$subpct\n";
 	}
     }
     printf("Files=%d,  Tests=%d, %s\n", $files, $totmax, timestr($t_total, 'nop'));
@@ -98,6 +118,8 @@ sub runtests {
 
 sub canonfailed ($@) {
     my($max,@failed) = @_;
+    my %seen;
+    @failed = sort {$a <=> $b} grep !$seen{$_}++, @failed;
     my $failed = @failed;
     my @result = ();
     my @canon = ();
@@ -152,6 +174,36 @@ C<"ok N"> strings.
 After all tests have been performed, runscripts() prints some
 performance statistics that are computed by the Benchmark module.
 
+=head2 The test script output
+
+Any output from the testscript to standard error is ignored and
+bypassed, thus will be seen by the user. Lines written to standard
+output that look like perl comments (start with C</^\s*\#/>) are
+discarded. Lines containing C</^(not\s+)?ok\b/> are interpreted as
+feedback for runtests().
+
+It is tolerated if the test numbers after C<ok> are omitted. In this
+case Test::Harness maintains temporarily its own counter until the
+script supplies test numbers again. So the following test script
+
+    print <<END;
+    1..6
+    not ok
+    ok
+    not ok
+    ok
+    ok
+    END
+
+will generate 
+
+    FAILED tests 1, 3, 6
+    Failed 3/6 tests, 50.00% okay
+
+The global variable $Test::Harness::verbose is exportable and can be
+used to let runscripts() display the standard output of the script
+without altering the behavior otherwise.
+
 =head1 EXPORT
 
 C<&runscripts> is exported by Test::Harness per default.
@@ -165,9 +217,19 @@ C<&runscripts> is exported by Test::Harness per default.
 If all tests are successful some statistics about the performance are
 printed.
 
-=item C<Failed 1 test, $pct% okay.>
+=item C<FAILED tests %s\n\tFailed %d/%d tests, %.2f%% okay.>
 
-=item C<Failed %d/%d tests, %.2f%% okay.>
+For any single script that has failing subtests statistics like the
+above are printed.
+
+=item C<Test returned status %d (wstat %d)>
+
+Scripts that return a non-zero exit status, both $?>>8 and $? are
+printed in a message similar to the above.
+
+=item C<Failed 1 test, %.2f%% okay. %s>
+
+=item C<Failed %d/%d tests, %.2f%% okay. %s>
 
 If not all tests were successful, the script dies with one of the
 above messages.
@@ -188,9 +250,9 @@ Koenig.
 =head1 BUGS
 
 Test::Harness uses $^X to determine the perl binary to run the tests
-with. Test scripts running via the shebang (C<#!>) line may not be portable
-because $^X is not consistent for shebang scripts across
+with. Test scripts running via the shebang (C<#!>) line may not be
+portable because $^X is not consistent for shebang scripts across
 platforms. This is no problem when Test::Harness is run with an
-absolute path to the perl binary.
+absolute path to the perl binary or when $^X can be found in the path.
 
 =cut
