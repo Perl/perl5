@@ -2843,7 +2843,7 @@ t/run/switcha.t			Test the -a switch
 t/run/switch_A.t		Test the -A switch
 t/run/switchC.t			Test the -C switch
 t/run/switchd.t			Test the -d switch
-t/run/switches.t		Tests for the other switches (-0, -l, -c, -s, -M, -m, -V, -v)
+t/run/switches.t		Tests for the other switches (-0, -l, -c, -s, -M, -m, -V, -v, -h, -z)
 t/run/switchF.t			Test the -F switch
 t/run/switchI.t			Test the -I switch
 t/run/switchn.t			Test the -n switch

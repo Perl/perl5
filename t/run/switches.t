@@ -1,6 +1,6 @@
 #!./perl -w
 
-# Tests for the command-line switches -0, -c, -l, -s, -m, -M, -V, -v
+# Tests for the command-line switches -0, -c, -l, -s, -m, -M, -V, -v, -h, -z
 # Some switches have their own tests, see MANIFEST.
 
 BEGIN {
@@ -10,7 +10,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan(tests => 22);
+plan(tests => 24);
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
 # to emulate echo -n (ie. stdin always winds up with a newline), these 
@@ -216,12 +216,32 @@ SWTESTPM
 {
     local $TODO = '';   # these ones should work on VMS
 
-    # basic perl -V should generate significant output.
-    # we don't test actual format since it could change
     my $v = sprintf "%vd", $^V;
     use Config;
     like( runperl( switches => ['-v'] ),
 	  qr/This is perl, v$v built for $Config{archname}.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
           '-v looks okay' );
+
+}
+
+# Tests for -h
+
+{
+    local $TODO = '';   # these ones should work on VMS
+
+    like( runperl( switches => ['-h'] ),
+	  qr/Usage: .+perl.+switches.+programfile.+arguments/,
+          '-h looks okay' );
+
+}
+
+# Tests for -z (which does not exist)
+
+{
+    local $TODO = '';   # these ones should work on VMS
+
+    like( runperl( switches => ['-z'], stderr => 1 ),
+	  qr/\QUnrecognized switch: -z  (-h will show valid options)./,
+          '-z correctly unknown' );
 
 }
