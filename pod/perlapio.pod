@@ -160,9 +160,14 @@ so it is (currently) legal to use C<printf(fmt,...)> in perl sources.
 
 =item B<PerlIO_read(f,buf,count)>, B<PerlIO_write(f,buf,count)>
 
-These correspond to fread() and fwrite(). Note that arguments are
-different, there is only one "count" and order has "file"
-first. Returns a byte count if successful (which may be zero or
+These correspond functionally to fread() and fwrite() but the
+arguments and return values are different.  The PerlIO_read() and
+PerlIO_write() signatures have been modeled on the more sane low level
+read() and write() functions instead: The "file" argument is passed
+first, there is only one "count", and the return value can distinguish
+between error and C<EOF>.
+
+Returns a byte count if successful (which may be zero or
 positive), returns negative value and sets C<errno> on error.
 Depending on implementation C<errno> may be C<EINTR> if operation was
 interrupted by a signal.

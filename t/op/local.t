@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..75\n";
+print "1..78\n";
 
 sub foo {
     local($a, $b) = @_;
@@ -257,3 +257,17 @@ print "not " if exists $h{'y'}; print "ok 72\n";
 print "not " if exists $h{'z'}; print "ok 73\n";
 print "not " if exists $ENV{_A_}; print "ok 74\n";
 print "not " if exists $ENV{_B_}; print "ok 75\n";
+
+# local() and readonly magic variables
+
+eval { local $1 = 1 };
+print "not " if $@ !~ /Modification of a read-only value attempted/;
+print "ok 76\n";
+
+eval { for ($1) { local $_ = 1 } };
+print "not " if $@ !~ /Modification of a read-only value attempted/;
+print "ok 77\n";
+
+eval { for ($1) { local $_ = 1 } };
+print "not " if $@;
+print "ok 78\n";

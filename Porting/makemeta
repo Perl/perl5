@@ -1,0 +1,36 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+use lib "Porting";
+
+my $file = "META.yml";
+die "$0: will not override $file, delete it first.\n" if -e $file;
+
+use Maintainers qw(%Modules get_module_files get_module_pat);
+
+my @CPAN  = grep { $Modules{$_}{CPAN} } keys %Modules;
+my @files = map { get_module_files($_) } @CPAN;
+my @dirs  = grep { -d $_ } map { get_module_pat($_) } @CPAN;
+
+my $files = join '', map { "    - $_\n" } sort { lc $a cmp lc $b } @files;
+my $dirs  = join '', map { "    - $_\n" } sort { lc $a cmp lc $b } @dirs;
+
+open my $fh, ">$file" or die "Can't open $file: $!";
+
+print $fh <<"EOI";
+name: perl
+version: $]
+abstract: Practical Extraction and Reporting Language
+author: perl5-porters\@perl.org
+license: perl
+distribution_type: core
+private:
+  directory:
+$dirs
+  file:
+$files
+EOI
+
+close $fh;
+

@@ -2603,8 +2603,8 @@ Gid_t getegid (void);
 #  define DEBUG_J_TEST DEBUG_J_TEST_
 #  define DEBUG_v_TEST DEBUG_v_TEST_
 
-#  define DEB(a)     a
-#  define DEBUG(a)   if (PL_debug)   a
+#  define PERL_DEB(a)                  a
+#  define PERL_DEBUG(a) if (PL_debug)  a
 #  define DEBUG_p(a) if (DEBUG_p_TEST) a
 #  define DEBUG_s(a) if (DEBUG_s_TEST) a
 #  define DEBUG_l(a) if (DEBUG_l_TEST) a
@@ -2668,8 +2668,8 @@ Gid_t getegid (void);
 #  define DEBUG_J_TEST (0)
 #  define DEBUG_v_TEST (0)
 
-#  define DEB(a)
-#  define DEBUG(a)
+#  define PERL_DEB(a)
+#  define PERL_DEBUG(a)
 #  define DEBUG_p(a)
 #  define DEBUG_s(a)
 #  define DEBUG_l(a)
@@ -2755,14 +2755,14 @@ Gid_t getegid (void);
 
 #ifndef assert  /* <assert.h> might have been included somehow */
 #ifdef DEBUGGING
-#define assert(what)	DEB( {						\
+#define assert(what)	PERL_DEB( {					\
 	if (!(what)) {							\
 	    Perl_croak(aTHX_ "Assertion " STRINGIFY(what) " failed: file \"%s\", line %d",	\
 		__FILE__, __LINE__);					\
 	    PerlProc_exit(1);						\
 	}})
 #else
-#define assert(what)	DEB( {						\
+#define assert(what)	PERL_DEB( {					\
 	if (!(what)) {							\
 	    Perl_croak(aTHX_ "Assertion failed: file \"%s\", line %d",	\
 		__FILE__, __LINE__);					\

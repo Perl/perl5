@@ -1,3 +1,13 @@
+2003-08-04   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.27
+
+   Avoid having to figure how to compile alignment test program
+   on MS-Windows by just assume free alignment as for i386.  Source
+   builds on Windows was apparently broken.
+
+
+
 2003-07-21   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.26

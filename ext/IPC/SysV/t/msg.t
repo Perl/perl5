@@ -27,8 +27,9 @@ use IPC::Msg;
 
 print "1..9\n";
 
-$msq = new IPC::Msg(IPC_PRIVATE, S_IRWXU | S_IRWXG | S_IRWXO)
-	|| die "msgget: ",$!+0," $!\n";
+my $msq =
+    new IPC::Msg(IPC_PRIVATE, S_IRWXU | S_IRWXG | S_IRWXO)
+    || die "msgget: ",$!+0," $!\n";
 	
 print "ok 1\n";
 
@@ -58,5 +59,7 @@ print "ok 7\n";
 print "not " unless $ds && $ds->qnum() == 0;
 print "ok 8\n";
 
-$msq->remove || print "not ";
-print "ok 9\n";
+END {
+	(defined $msq && $msq->remove) || print "not ";
+	print "ok 9\n";
+}

@@ -177,8 +177,10 @@ EOCBU
 # vfork works
 usevfork='true';
 
-# malloc works
-usemymalloc='n';
+# our malloc works (but allow users to override)
+case "$usemymalloc" in
+'') usemymalloc='n' ;;
+esac
 
 # Locales aren't feeling well.
 LC_ALL=C; export LC_ALL;

@@ -2107,6 +2107,7 @@ Makefile.SH			A script that generates Makefile
 malloc.c			A version of malloc you might not want
 malloc_ctl.h			A version of malloc you might not want
 MANIFEST			This list of files
+META.yml			Distribution meta-data in YAML
 mg.c				Magic code
 mg.h				Magic header
 minimod.pl			Writes lib/ExtUtils/Miniperl.pm
@@ -2401,7 +2402,9 @@ Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/Glossary	Glossary of config.sh variables
 Porting/Maintainers	Program to pretty print info in Maintainers.pl
+Porting/Maintainers.pm	Library to pretty print info in Maintainers.pl
 Porting/Maintainers.pl	Information about maintainers
+Porting/makemeta	Create the top-level META.yml
 Porting/makerel		Release making utility
 Porting/manicheck	Check against MANIFEST
 Porting/p4d2p		Generate patch from p4 diff
