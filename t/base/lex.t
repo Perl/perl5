@@ -130,10 +130,10 @@ print $foo;
   if (eval "\$ {\cX}" != 17 or $@) { print "not "  }
   print "ok 32\n";
 
-  eval "\$\cN = 24";                 # Literal control character
-  if ($@ or ${"\cN"} != 24) {  print "not "  }
+  eval "\$\cQ = 24";                 # Literal control character
+  if ($@ or ${"\cQ"} != 24) {  print "not "  }
   print "ok 33\n";
-  if ($^N != 24) {  print "not "  }  # Control character escape sequence
+  if ($^Q != 24) {  print "not "  }  # Control character escape sequence
   print "ok 34\n";
 
 # Does the old UNBRACED syntax still do what it used to?
@@ -141,11 +141,11 @@ print $foo;
   print "ok 35\n";
 
   sub XX () { 6 }
-  $ {"\cN\cXX"} = 119; 
-  $^N = 5; #  This should be an unused ^Var.
+  $ {"\cQ\cXX"} = 119; 
+  $^Q = 5; #  This should be an unused ^Var.
   $N = 5;
   # The second caret here should be interpreted as an xor
-  if (($^N^XX) != 3) { print "not " } 
+  if (($^Q^XX) != 3) { print "not " } 
   print "ok 36\n";
 #  if (($N  ^  XX()) != 3) { print "not " } 
 #  print "ok 32\n";
@@ -166,13 +166,13 @@ print $foo;
 
 # Now let's make sure that caret variables are all forced into the main package.
   package Someother;
-  $^N = 'Someother';
-  $ {^Nostril} = 'Someother 2';
+  $^Q = 'Someother';
+  $ {^Quixote} = 'Someother 2';
   $ {^M} = 'Someother 3';
   package main;
-  print "not " unless $^N eq 'Someother';
+  print "not " unless $^Q eq 'Someother';
   print "ok 39\n";
-  print "not " unless $ {^Nostril} eq 'Someother 2';
+  print "not " unless $ {^Quixote} eq 'Someother 2';
   print "ok 40\n";
   print "not " unless $ {^M} eq 'Someother 3';
   print "ok 41\n";
