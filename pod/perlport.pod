@@ -675,6 +675,15 @@ DOSish perls are as follows:
     Windows NT    MSWin32    MSWin32-ppc
     Cygwin        cygwin
 
+The various MSWin32 Perl's can distinguish the OS they are running on
+via the value of the fifth element of the list returned from 
+Win32::GetOSVersion().  For example:
+
+    if ($^O eq 'MSWin32') {
+        my @os_version_info = Win32::GetOSVersion();
+        print +('3.1','95','NT')[$os_version_info[4]],"\n";
+    }
+
 Also see:
 
 =over 4
@@ -1225,7 +1234,7 @@ Be OS, F<README.beos>
 =item *
 
 HP 300 MPE/iX, F<README.mpeix> and Mark Bixby's web page
-http://www.cccd.edu/~markb/perlix.html
+http://www.bixby.org/mark/perlix.html
 
 =item *
 
