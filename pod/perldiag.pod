@@ -982,12 +982,12 @@ references can be weakened.
 an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
-=item Cannot find an opnumber for "%s"
+=item Can't find an opnumber for "%s"
 
 (F) A string of a form C<CORE::word> was given to prototype(), but
 there is no builtin with the name C<word>.
 
-=item Cannot resolve method `%s' overloading `%s' in package `%s'
+=item Can't resolve method `%s' overloading `%s' in package `%s'
 
 (F|P) Error resolving overloading specified by a method name (as
 opposed to a subroutine reference): no such method callable via the

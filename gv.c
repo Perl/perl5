@@ -1130,7 +1130,7 @@ Gv_AMupdate(HV *stash)
 			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
 			      cp, HvNAME(stash));
 		    } else
-			croak("Cannot resolve method `%.256s' overloading `%s' in package `%.256s'", 
+			croak("Can't resolve method `%.256s' overloading `%s' in package `%.256s'", 
 			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
 			      cp, HvNAME(stash));
 		}

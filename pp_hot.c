@@ -1270,9 +1270,14 @@ do_readline(void)
 	    SP--;
     }
     if (!fp) {
-	if (ckWARN(WARN_CLOSED) && io && !(IoFLAGS(io) & IOf_START))
-	    warner(WARN_CLOSED,
-		   "Read on closed filehandle <%s>", GvENAME(PL_last_in_gv));
+	if (ckWARN(WARN_CLOSED) && io && !(IoFLAGS(io) & IOf_START)) {
+	    if (type == OP_GLOB)
+		warner(WARN_CLOSED, "glob failed (can't start child: %s)",
+		       Strerror(errno));
+	    else
+		warner(WARN_CLOSED, "Read on closed filehandle <%s>",
+		       GvENAME(PL_last_in_gv));
+	}
 	if (gimme == G_SCALAR) {
 	    (void)SvOK_off(TARG);
 	    PUSHTARG;
