@@ -13,7 +13,7 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV	*= c:
-INST_TOP	*= $(INST_DRV)\perl
+INST_TOP	*= $(INST_DRV)\perl.gcc
 
 # Comment this out if you DON'T want your perl installation to be versioned.
 # This means that the new installation will overwrite any files from the
@@ -32,8 +32,8 @@ INST_VER	*= \5.00467
 # uncomment one
 #CCTYPE		*= MSVC20
 #CCTYPE		*= MSVC
-CCTYPE		*= BORLAND
-#CCTYPE		*= GCC
+#CCTYPE		*= BORLAND
+CCTYPE		*= GCC
 
 #
 # uncomment next line if you want to use the perl object
@@ -62,14 +62,14 @@ CCTYPE		*= BORLAND
 # you may have compiled with/without it.  Be prepared to recompile all extensions
 # if you change the default.  Currently, this cannot be enabled if you ask for
 # PERL_OBJECT above.
-#PERL_MALLOC	*= define
+PERL_MALLOC	*= define
 
 #
 # set the install locations of the compiler include/libraries
 #
 #CCHOME		*= f:\msdev\vc
-CCHOME		*= C:\bc5
-#CCHOME		*= D:\packages\mingw32
+#CCHOME		*= C:\bc5
+CCHOME		*= C:\mingw32
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -162,12 +162,13 @@ LIBOUT_FLAG	=
 
 .ELIF "$(CCTYPE)" == "GCC"
 
-CC		= gcc -pipe
-LINK32		= gcc -pipe
+CC		= gcc 
+LINK32		= gcc 
 LIB32		= ar rc
 IMPLIB		= dlltool
 
 o = .o
+a = .a
 
 #
 # Options
@@ -262,6 +263,7 @@ CFLAGS_O	= $(CFLAGS) $(OBJECT)
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
 
 o *= .obj
+a *= .lib
 
 LKPRE		= INPUT (
 LKPOST		= )
@@ -270,7 +272,7 @@ LKPOST		= )
 # Rules
 # 
 
-.SUFFIXES : .c $(o) .dll .lib .exe .a
+.SUFFIXES : .c $(o) .dll $(a) .exe 
 
 .c$(o):
 	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
@@ -284,7 +286,7 @@ $(o).dll:
 	$(IMPLIB) $(*B).lib $@
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -o $@ $(LINK_FLAGS) $< $(LIBFILES)
-	$(IMPLIB) -def $(*B).def $(*B).lib $@
+	$(IMPLIB) -def $(*B).def $(*B).a $@
 .ELSE
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
@@ -303,16 +305,6 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 
 #
 # various targets
-.IF "$(OBJECT)" == "-DPERL_OBJECT"
-PERLIMPLIB	= ..\perlcore.lib
-PERLDLL		= ..\perlcore.dll
-CAPILIB		= $(COREDIR)\PerlCAPI.lib
-.ELSE
-PERLIMPLIB	= ..\perl.lib
-PERLDLL		= ..\perl.dll
-CAPILIB		=
-.ENDIF
-
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
@@ -333,6 +325,7 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
+PERLIMPLIB	*= ..\libperl$(a)
 
 .ELSE
 
@@ -341,6 +334,18 @@ CFGH_TMPL	= config_H.vc
 PERL95EXE	= ..\perl95.exe
 
 .ENDIF
+
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+PERLIMPLIB	*= ..\perlcore$(a)
+PERLDLL		= ..\perlcore.dll
+CAPILIB		= $(COREDIR)\PerlCAPI$(a)
+.ELSE
+PERLIMPLIB	*= ..\perl$(a)
+PERLDLL		= ..\perl.dll
+CAPILIB		=
+.ENDIF
+
+
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
@@ -467,7 +472,7 @@ CORE_H		= $(CORE_NOCFG_H) .\config.h
 MICROCORE_OBJ	= $(MICROCORE_SRC:db:+$(o))
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:db:+$(o))
 WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
-MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) perlio$(o)}
+MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) $(EXTRACORE_SRC:db:+$(o))}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 PERL95_OBJ	= $(PERL95_SRC:db:+$(o))
@@ -551,10 +556,13 @@ CFG_VARS	=					\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES:f)"			\
 		"incpath=$(CCINCDIR)"			\
-		"libperl=$(PERLIMPLIB)"			\
+		"libperl=$(PERLIMPLIB:f)"			\
 		"libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
 		"libc=$(LIBC)"				\
 		"make=dmake"				\
+		"_o=$(o)"				\
+		"_a=$(a)"				\
+		"lib_ext=$(a)"				\
 		"static_ext=$(STATIC_EXT)"		\
 		"dynamic_ext=$(DYNAMIC_EXT)"		\
 		"usethreads=$(USE_THREADS)"		\
@@ -860,7 +868,7 @@ utils: $(PERLEXE)
 
 distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERL95EXE) $(PERLDLL) $(GLOBEXE) \
-		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
+		$(PERLIMPLIB) ..\miniperl$(a) $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(EXTENSION_DLL)
 	-del /f $(EXTENSION_C) $(DYNALOADER).c
@@ -883,7 +891,7 @@ distclean: clean
 	-del /f perl95.c
 .ENDIF
 	-del /f bin\*.bat
-	-cd $(EXTDIR) && del /s *.lib *.def *.map *.bs Makefile *$(o) pm_to_blib
+	-cd $(EXTDIR) && del /s *$(a) *.def *.map *.bs Makefile *$(o) pm_to_blib
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 
@@ -952,7 +960,7 @@ clean :
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
 	-@erase $(X2P_OBJ)
-	-@erase ..\*$(o) ..\*.lib ..\*.exp *$(o) *.lib *.exp
+	-@erase ..\*$(o) ..\*$(a) ..\*.exp *$(o) *$(a) *.exp
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk
