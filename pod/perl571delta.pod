@@ -60,18 +60,14 @@ natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
 
 =back
 
-=head1 Retired Features
-
-The use of chop() is now deprecated.  This has been made easier by
-rewriting all the examples in the documentation to use chomp() instead.
-
 =head1 Core Enhancements
 
 =over 4
 
 =item *
 
-AUTOLOAD is now lvaluable.
+AUTOLOAD is now lvaluable, meaning that you can add the :lvalue attribute
+to AUTOLOAD subroutines and you can assign to the AUTOLOAD return value.
 
 =item *
 
@@ -104,6 +100,11 @@ File handles can be marked as accepting Perl's internal encoding of Unicode
 
    open($fh,">:utf8","Uni.txt");
 
+Note for EBCDIC users: the pseudo layer ":utf8" is badly named for you
+since it's not UTF-8 what you will be getting but instead UTF-EBCDIC.
+See http://www.unicode.org/unicode/reports/tr16/ for more information.
+In future release this naming issue may or may not change.
+
 =item *
 
 File handles can translate character encodings from/to Perl's internal
@@ -135,8 +136,8 @@ the child process.
 
 =item *
 
-The following keywords are now overrideable: chop, chomp, each, keys,
-pop, push, shift, splice, unshift.
+The following builtin functions are now overrideable: chop(), chomp(),
+each(), keys(), pop(), push(), shift(), splice(), unshift().
 
 =item *
 
@@ -153,8 +154,13 @@ in its math)
 
 =item *
  
-The printf and sprintf now support parameter reordering using the
-C<%\d+\$> and C<*\d+\$> syntaxes.
+The printf() and sprintf() now support parameter reordering using the
+C<%\d+\$> and C<*\d+\$> syntaxes.  For example
+
+    print "%2\$s %1\$s\n", "foo", "bar";
+
+will print "bar foo\n"; This feature helps in writing
+internationalised software.
 
 =item *
 
@@ -166,7 +172,13 @@ particularly tricky to get right, so you have been warned)
 =item *
 
 The Unicode Character Database coming with Perl has been upgraded
-to Unicode 3.1.
+to Unicode 3.1.  For more information, see http://www.unicode.org/,
+and http://www.unicode.org/unicode/reports/tr27/
+
+For developers interested in enhanching Perl's Unicode capabilities:
+almost all the UCD files are included with the Perl distribution in
+the lib/unicode subdirectory.  The most notable omission, for space
+considerations, is the Unihan database.
 
 =item *
 
@@ -278,11 +290,11 @@ It converts POD data to formatted overstrike text.
 
 =item *
 
-Switch from Damian Conway has been added.  After
+Switch from Damian Conway has been added.  Just by saying
 
-	use Switch;
+    use Switch;
 
-you have switch() and case() in Perl.
+you have C<switch> and C<case> available in Perl.
 
 =item *
 
@@ -317,7 +329,9 @@ Class::Struct has now compile-time features.
 
 =item *
 
-Math::BigFloat has undergone much fixing.
+Math::BigFloat has undergone much fixing.  (The fixed Math::BigFloat
+module is also available in CPAN for those who can't upgrade their Perl:
+http://www.cpan.org/authors/id/J/JP/JPEACOCK/)
 
 =item *
 
@@ -363,8 +377,9 @@ has been implemented.
 
 =back
 
-The following modules have been upgraded from CPAN: CPAN, CGI, DB::File,
-Getopt::Long, Pod::Man, Pod::Text, Storable, Text-Tabs+Wrap.
+The following modules have been upgraded from the versions at CPAN:
+CPAN, CGI, DB::File, Getopt::Long, Pod::Man, Pod::Text, Storable,
+Text-Tabs+Wrap.
 
 =head1 Performance Enhancements
 
@@ -410,6 +425,7 @@ xsubpp now supports OUT keyword.
 =head2 perlclib
 
 Internal replacements for standard C library functions.
+(Interesting only for extension writers and Perl core hackers.)
 
 =head2 perliol
 
@@ -441,7 +457,7 @@ steps.  On install README.macos will be installed as L<perlmacos>.
 
 The README.mpeix has been podified, which means that this information
 about compiling and using Perl on the MPE/iX miniframe platform will
-on install be installed as L<perlmpeix>.
+be installed as L<perlmpeix>.
 
 =head2 README.solaris
 
@@ -452,8 +468,8 @@ README.solaris will be installed as L<perlsolaris>.
 =head2 README.vos
 
 The README.vos has been podified, which means that this information
-about compiling and using Perl on the Stratus VOS miniframe platform will
-on install be installed as L<perlvos>.
+about compiling and using Perl on the Stratus VOS miniframe platform
+will be installed as L<perlvos>.
 
 =head2 Porting/repository.pod
 
@@ -463,27 +479,44 @@ Documentation on how to use the Perl source repository has been added.
 
 =head1 Installation and Configuration Improvements
 
+=over 4
+
+=item *
+
 Because PerlIO is now the default on most platforms, "-perlio" doesn't
 get appended to the $Config{archname} (also known as $^O) anymore.
 Instead, if you explicitly choose not to use perlio (Configure command
 line option -Uuseperlio), you will get "-stdio" appended.
 
+=item *
+
 Another change related to the architecture name is that "-64all"
 (-Duse64bitall, or "maximally 64-bit") is appended only if your pointers
 are 64 bits wide.
+
+=item *
 
 APPLLIB_EXP, a less-know configuration-time definition, has been
 documented.  It can be used to prepend site-specific directories
 to Perl's default search path (@INC), see INSTALL for information.
 
+=item *
+
 Building Berkeley DB3 for compatibility modes for DB, NDBM, and ODBM
 has been documented in INSTALL.
+
+=item *
 
 If you are on IRIX or Tru64 platforms, new profiling/debugging options
 have been added, see L</perlhack> for more information about pixie and
 Third Degree.
 
+=back
+
 =head2 New Or Improved Platforms
+
+For the list of platforms known to support Perl,
+see L<perlport/"Supported Platforms">.
 
 =over 4
 
@@ -493,7 +526,21 @@ AIX dynamic loading should be now better supported.
 
 =item *
 
-AmigaOS has been verified to be happy with Perl after a long pause.
+After a long pause, AmigaOS has been verified to be happy with Perl.
+
+=item *
+
+EBCDIC platforms (z/OS, also known as OS/390, POSIX-BC, and VM/ESA)
+have been regained.  Many test suite tests still fail and the
+co-existence of Unicode and EBCDIC isn't quite settled, but the
+situation is much better than with Perl 5.6.  See L<perlos390>,
+L<perlbs2000> (for POSIX-BC), and L<perlvmesa> for more information.
+
+=item *
+
+In HP-UX 10.20 Perl threading is now working with the various threading
+packages available fror HP-UX.  See L<perlhpux> (or in the source
+distribution, README.hpux) for more information.
 
 =item *
 
@@ -581,8 +628,7 @@ subs used to leak quite a bit.
 
 =item *
 
-Small unpredictactabilities in the order of DESTROYS have been
-even small.
+The order of DESTROYS has been made more predictable.
 
 =item *
 
@@ -591,7 +637,12 @@ as mandated by POSIX.
 
 =item *
 
-The PERL5OPT environment variable didn't really work before.
+Attributes (like :shared) didn't work with our().
+
+=item *
+
+The PERL5OPT environment variable (for passing command line arguments
+to Perl) didn't work for more than a single group of options.
 
 =item *
 
@@ -620,8 +671,7 @@ accept(), revcfrom() (in Perl: recv()), getpeername(), and getsockname().
 
 =item *
 
-Previously DYNIX/ptx had problems in its Configure probe for
-non-blocking I/O.
+Previously DYNIX/ptx had problems in its Configure probe for non-blocking I/O.
 
 =back
 
@@ -653,17 +703,21 @@ code.
 
 =item *
 
-Some new internal APIs: ptr_table_clear, ptr_table_free, sv_setref_uv.
-For the full list see L<perlapi>.
+Some new APIs: ptr_table_clear(), ptr_table_free(), sv_setref_uv().
+For the full list of the available APIs see L<perlapi>.
 
 =item *
 
-dTHR and djSP have been obsoleted; the former removed and the latter
-replaced with dSP.
+dTHR and djSP have been obsoleted; the former removed (because it's
+a no-op) and the latter replaced with dSP.
 
 =item *
 
-Perl now uses system malloc instead of Perl malloc in all 64-bit platforms.
+Perl now uses system malloc instead of Perl malloc in all 64-bit
+platforms.  This change breaks backward compatibility but Perl's
+malloc has problems with large address spaces and also the speed of
+vendors' malloc is generally better in large address space machines
+(Perl's malloc is mostly tuned for space).
 
 =back
 
