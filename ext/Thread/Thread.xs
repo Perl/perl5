@@ -114,7 +114,6 @@ threadstart(void *arg)
 			  thr, SvPEEK(TOPs)));
 
     sv = POPs;
-    SAVETMPS;
     PUTBACK;
     ENTER;
     SAVETMPS;
