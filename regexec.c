@@ -643,6 +643,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    prog->check_substr = Nullsv;	/* disable */
 	    prog->float_substr = Nullsv;	/* clear */
 	    s = strpos;
+	    /* XXXX This is a remnant of the old implementation.  It
+	            looks wasteful, since now INTUIT can use many
+	            other heuristics too. */
 	    prog->reganch &= ~RE_USE_INTUIT;
 	}
 	else
@@ -805,9 +808,13 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		  after_try:
 		    if (s >= end)
 			goto phooey;
-		    s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);
-		    if (!s)
-			goto phooey;
+		    if (prog->reganch & RE_USE_INTUIT) {
+			s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);
+			if (!s)
+			    goto phooey;
+		    }
+		    else
+			s++;
 		}		
 	    } else {
 		if (s > startpos)
