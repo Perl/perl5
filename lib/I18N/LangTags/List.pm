@@ -1,7 +1,7 @@
 
 require 5;
 package I18N::LangTags::List;
-#  Time-stamp: "2001-05-27 19:55:19 MDT"
+#  Time-stamp: "2001-06-20 12:01:15 MDT"
 use strict;
 use vars qw(%Name $Debug $VERSION);
 $VERSION = '0.24';
@@ -659,11 +659,13 @@ Notable forms:
 
 =item {grb} : Grebo
 
-=item {grc} : Ancient Greek (to 1453)
+=item {grc} : Ancient Greek
 
-(Historical)
+(Historical)  (Until 15th century or so.)
 
-=item {el} : Modern Greek (1453-)
+=item {el} : Modern Greek
+
+(Since 15th century or so.)
 
 =item {gn} : Guarani
 

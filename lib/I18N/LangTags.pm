@@ -1,5 +1,5 @@
 
-# Time-stamp: "2001-06-20 01:28:32 MDT"
+# Time-stamp: "2001-06-20 14:59:28 MDT"
 # Sean M. Burke <sburke@cpan.org>
 
 require 5.000;
@@ -17,7 +17,7 @@ require Exporter;
                );
 %EXPORT_TAGS = ('ALL' => \@EXPORT_OK);
 
-$VERSION = "0.24";
+$VERSION = "0.25";
 
 =head1 NAME
 
@@ -635,9 +635,12 @@ sub alternate_language_tags {
    #  you.  Because if I start trying to add "little languages" in
    #  here, I'll just go crazy.
 
-   # In a pinch, consider Scandinavian languages (minus
-   #  Icelandic?) to be mutually intelligible.
-   ([qw(no nn nb se da fo)]) x 2,
+   # Scandinavian lgs.  All based on opinion and hearsay.
+   'sv' => [qw(nb no da nn)],
+   'da' => [qw(nb no sv nn)], # I guess
+   [qw(no nn nb)], [qw(no nn nb sv da)],
+   'is' => [qw(da sv no nb nn)],
+   'fo' => [qw(da is no nb nn sv)], # I guess
    
    # I think this is about the extent of tolerable intelligibility
    #  among large modern Romance languages.
