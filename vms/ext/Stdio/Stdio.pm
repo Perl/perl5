@@ -1,8 +1,8 @@
 #   VMS::Stdio - VMS extensions to Perl's stdio calls
 #
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
-#   Version: 2.02
-#   Revised: 15-Feb-1997
+#   Version: 2.1
+#   Revised: 24-Mar-1998
 
 package VMS::Stdio;
 
@@ -12,17 +12,18 @@ use Carp '&croak';
 use DynaLoader ();
 use Exporter ();
  
-$VERSION = '2.02';
+$VERSION = '2.1';
 @ISA = qw( Exporter DynaLoader IO::File );
 @EXPORT = qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY &O_NOWAIT
               &O_RDONLY &O_RDWR  &O_TRUNC &O_WRONLY );
-@EXPORT_OK = qw( &flush &getname &remove &rewind &sync &tmpnam
-                 &vmsopen &vmssysopen &waitfh );
+@EXPORT_OK = qw( &flush &getname &remove &rewind &sync &setdef &tmpnam
+                 &vmsopen &vmssysopen &waitfh &writeof );
 %EXPORT_TAGS = ( CONSTANTS => [ qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY
                                     &O_NOWAIT &O_RDONLY &O_RDWR &O_TRUNC
                                     &O_WRONLY ) ],
-                 FUNCTIONS => [ qw( &flush &getname &remove &rewind &sync
-                                     &tmpnam &vmsopen &vmssysopen &waitfh ) ] );
+                 FUNCTIONS => [ qw( &flush &getname &remove &rewind &setdef
+                                    &sync &tmpnam &vmsopen &vmssysopen
+                                    &waitfh &writeof ) ] );
 
 bootstrap VMS::Stdio $VERSION;
 
@@ -80,8 +81,9 @@ VMS::Stdio - standard I/O functions via VMS extensions
 
 =head1 SYNOPSIS
 
-use VMS::Stdio qw( &flush &getname &remove &rewind &sync &tmpnam
-                   &vmsopen &vmssysopen &waitfh );
+use VMS::Stdio qw( &flush &getname &remove &rewind &setdef &sync &tmpnam
+                   &vmsopen &vmssysopen &waitfh &writeof );
+setdef("new:[default.dir]");
 $uniquename = tmpnam;
 $fh = vmsopen("my.file","rfm=var","alq=100",...) or die $!;
 $name = getname($fh);
@@ -96,7 +98,7 @@ sysread($fh,$data,128);
 waitfh($fh);
 close($fh);
 remove("another.file");
-
+writeof($pipefh);
 =head1 DESCRIPTION
 
 This package gives Perl scripts access via VMS extensions to several
@@ -175,6 +177,13 @@ to the beginning of the file.  It's really just a convenience
 method equivalent in effect to C<seek($fh,0,0)>.  It returns a
 true value if successful, and C<undef> if it fails.
 
+=item setdef
+
+This function sets the default device and directory for the process.
+It is identical to the built-in chdir() operator, except that the change
+persists after Perl exits.  It returns a true value on success, and
+C<undef> if it encounters and error.
+
 =item sync
 
 This function flushes buffered data for the specified file handle
@@ -230,6 +239,14 @@ This function causes Perl to wait for the completion of an I/O
 operation on the file handle specified as its argument.  It is
 used with handles opened for asynchronous I/O, and performs its
 task by calling the CRTL routine fwait().
+
+=item writeof
+
+This function writes an EOF to a file handle, if the device driver
+supports this operation.  Its primary use is to send an EOF to a
+subprocess through a pipe opened for writing without closing the
+pipe.  It returns a true value if successful, and C<undef> if
+it encounters an error.
 
 =head1 REVISION
 

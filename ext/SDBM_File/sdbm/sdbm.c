@@ -11,6 +11,7 @@
 static char rcsid[] = "$Id: sdbm.c,v 1.16 90/12/13 13:01:31 oz Exp $";
 #endif
 
+#include "INTERN.h"
 #include "config.h"
 #include "sdbm.h"
 #include "tune.h"
@@ -39,7 +40,7 @@ extern int errno;
 
 extern Malloc_t malloc proto((MEM_SIZE));
 extern Free_t free proto((Malloc_t));
-extern Off_t lseek(int, off_t, int);
+extern Off_t lseek(int, Off_t, int);
 #endif
 
 /*
@@ -71,8 +72,6 @@ static long masks[] = {
 	000077777777, 000177777777, 000377777777, 000777777777,
 	001777777777, 003777777777, 007777777777, 017777777777
 };
-
-datum nullitem = {NULL, 0};
 
 DBM *
 sdbm_open(register char *file, register int flags, register int mode)

@@ -16,12 +16,11 @@
 #include <stsdef.h>  /* bitmasks for exit status testing */
 
 /* Suppress compiler warnings from DECC for VMS-specific extensions:
- * GLOBALEXT, NOSHAREEXT, READONLYEXT: global[dr]ef declarations
  * ADDRCONSTEXT,NEEDCONSTEXT: initialization of data with non-constant values
  *                            (e.g. pointer fields of descriptors)
  */
 #ifdef __DECC
-#  pragma message disable (GLOBALEXT,NOSHAREEXT,READONLYEXT,ADDRCONSTEXT,NEEDCONSTEXT)
+#  pragma message disable (ADDRCONSTEXT,NEEDCONSTEXT)
 #endif
 
 /* DEC's C compilers and gcc use incompatible definitions of _to(upp|low)er() */
@@ -75,11 +74,6 @@
 
 /* DECC introduces this routine in the RTL as of VMS 7.0; for now,
  * we'll use ours, since it gives us the full VMS exit status. */
-#ifdef __PID_T
-#  define Pid_t pid_t
-#else
-#  define Pid_t unsigned int
-#endif
 #define waitpid my_waitpid
 
 /* Don't redeclare standard RTL routines in Perl's header files;

@@ -51,7 +51,11 @@ typedef struct {
 	int dsize;
 } datum;
 
-extern datum nullitem;
+EXTCONST datum nullitem
+#ifdef DOINIT
+                        = {NULL, 0}
+#endif
+                                   ;
 
 #if defined(__STDC__) || defined(__cplusplus) || defined(CAN_PROTOTYPE)
 #define proto(p) p
@@ -120,12 +124,13 @@ extern long sdbm_hash proto((char *, int));
 #include <ctype.h>
 #include <setjmp.h>
 
-#if defined(I_UNISTD) || defined(VMS)
+#if defined(I_UNISTD)
 #include <unistd.h>
 #endif
 
 #ifdef VMS
-# include <fcntl.h>
+#  include <file.h>
+#  include <unixio.h>
 #endif
 
 #if !defined(MSDOS) && !defined(WIN32) && !defined(VMS)

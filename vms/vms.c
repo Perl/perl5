@@ -184,7 +184,7 @@ prime_env_iter(void)
  */
 {
   dTHR;
-  static int primed = 0;  /* XXX Not thread-safe!!! */
+  static int primed = 0;
   HV *envhv = GvHVn(envgv);
   FILE *sholog;
   char eqv[LNM$C_NAMLENGTH+1],*start,*end;
@@ -841,12 +841,14 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
 
   retsts = sys$parse(&myfab,0,0);
   if (!(retsts & 1)) {
+    mynam.nam$b_nop |= NAM$M_SYNCHK;
     if (retsts == RMS$_DNF || retsts == RMS$_DIR ||
         retsts == RMS$_DEV || retsts == RMS$_DEV) {
-      mynam.nam$b_nop |= NAM$M_SYNCHK;
       retsts = sys$parse(&myfab,0,0);
       if (retsts & 1) goto expanded;
     }  
+    mynam.nam$l_rlf = NULL; myfab.fab$b_dns = 0;
+    (void) sys$parse(&myfab,0,0);  /* Free search context */
     if (out) Safefree(out);
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
@@ -857,6 +859,8 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
   }
   retsts = sys$search(&myfab,0,0);
   if (!(retsts & 1) && retsts != RMS$_FNF) {
+    mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
+    myfab.fab$b_dns = 0; (void) sys$parse(&myfab,0,0);  /* Free search context */
     if (out) Safefree(out);
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
@@ -874,6 +878,10 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
   if (!(mynam.nam$l_fnb & NAM$M_EXP_VER) &&
       (!defspec || !*defspec || !strchr(myfab.fab$l_dna,';')))
     speclen = mynam.nam$l_ver - out;
+  if (!(mynam.nam$l_fnb & NAM$M_EXP_TYPE) &&
+      (!defspec || !*defspec || defspec[myfab.fab$b_dns-1] != '.' ||
+       defspec[myfab.fab$b_dns-2] == '.'))
+    speclen = mynam.nam$l_type - out;
   /* If we just had a directory spec on input, $PARSE "helpfully"
    * adds an empty name and type for us */
   if (mynam.nam$l_name == mynam.nam$l_type &&
@@ -895,6 +903,9 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
     if (do_tounixspec(outbuf,tmpfspec,0) == NULL) return NULL;
     strcpy(outbuf,tmpfspec);
   }
+  mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
+  mynam.nam$l_rsa = NULL; mynam.nam$b_rss = 0;
+  myfab.fab$b_dns = 0; (void) sys$parse(&myfab,0,0);  /* Free search context */
   return outbuf;
 }
 /*}}}*/
@@ -1032,6 +1043,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           }
           cp1++;
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
+        lastdir = strrchr(dir,'/');
       }
       else if (!strcmp(&dir[dirlen-7],"/000000")) {
         /* Ditto for specs that end in an MFD -- let the VMS code
@@ -2441,7 +2453,7 @@ trim_unixpath(char *fspec, char *wildspec, int opts)
       for (front = end ; front >= base; front--)
          if (*front == '/' && !dirs--) { front++; break; }
     }
-    for (cp1=template,cp2=lcres; *cp1; 
+    for (cp1=template,cp2=lcres; *cp1 && cp2 <= lcres + sizeof lcres;
          cp1++,cp2++) *cp2 = _tolower(*cp1);  /* Make lc copy for match */
     if (cp1 != '\0') return 0;  /* Path too long. */
     lcend = cp2;
@@ -4119,11 +4131,11 @@ my_binmode(FILE *fp, char iotype)
     if (iotype != '-'&& (ret = fgetpos(fp, &pos)) == -1 && dirend) return NULL;
     switch (iotype) {
       case '<': case 'r':           acmode = "rb";                      break;
-      case '>': case 'w':
+      case '>': case 'w': case '|':
         /* use 'a' instead of 'w' to avoid creating new file;
            fsetpos below will take care of restoring file position */
       case 'a':                     acmode = "ab";                      break;
-      case '+': case '|': case 's': acmode = "rb+";                     break;
+      case '+':  case 's':          acmode = "rb+";                     break;
       case '-':                     acmode = fileno(fp) ? "ab" : "rb";  break;
       default:
         warn("Unrecognized iotype %c in my_binmode",iotype);
@@ -4538,6 +4550,11 @@ init_os_extras()
   newXSproto("VMS::Filespec::unixpath",unixpath_fromperl,file,"$");
   newXSproto("VMS::Filespec::candelete",candelete_fromperl,file,"$");
   newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
+
+#ifdef PRIME_ENV_AT_STARTUP
+  prime_env_iter();
+#endif
+
   return;
 }
   

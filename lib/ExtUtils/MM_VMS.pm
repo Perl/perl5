@@ -61,15 +61,22 @@ sub eliminate_macros {
         if ($self->{$2}) {
             ($head,$macro,$tail) = ($1,$2,$3);
             if (ref $self->{$macro}) {
-              carp "Can't expand macro containing " . ref $self->{$macro};
-              $npath = "$head\cB$macro\cB$tail";
-              $complex = 1;
+                if (ref $self->{$macro} eq 'ARRAY') {
+                    print "Note: expanded array macro \$($macro) in $path\n" if $Verbose;
+                    $macro = join ' ', @{$self->{$macro}};
+                }
+                else {
+                    print "Note: can't expand macro \$($macro) containing ",ref($self->{$macro}),
+                          "\n\t(using MMK-specific deferred substitutuon; MMS will break)\n";
+                    $macro = "\cB$macro\cB";
+                    $complex = 1;
+                }
             }
             else { ($macro = unixify($self->{$macro})) =~ s#/$##; }
             $npath = "$head$macro$tail";
         }
     }
-    if ($complex) { $npath =~ s#\cB(.*?)\cB#\$($1)#g; }
+    if ($complex) { $npath =~ s#\cB(.*?)\cB#\${$1}#g; }
     print "eliminate_macros($path) = |$npath|\n" if $Verbose >= 3;
     $npath;
 }
@@ -193,7 +200,7 @@ sub wraplist {
       # traversing array (scalar(@array) doesn't show them, but
       # foreach(@array) does) (5.00307)
       next unless $word =~ /\w/;
-      $line .= ', ' if length($line);
+      $line .= ' ' if length($line);
       if ($hlen > 80) { $line .= "\\\n\t"; $hlen = 0; }
       $line .= $word;
       $hlen += length($word) + 2;
@@ -632,9 +639,9 @@ sub constants {
 
     if ($self->{OBJECT} =~ /\s/) {
 	$self->{OBJECT} =~ s/(\\)?\n+\s+/ /g;
-	$self->{OBJECT} = join(' ',map($self->fixpath($_),split(/,?\s+/,$self->{OBJECT})));
+	$self->{OBJECT} = $self->wraplist(map($self->fixpath($_),split(/,?\s+/,$self->{OBJECT})));
     }
-    $self->{LDFROM} = join(' ',map($self->fixpath($_),split(/,?\s+/,$self->{LDFROM})));
+    $self->{LDFROM} = $self->wraplist(map($self->fixpath($_),split(/,?\s+/,$self->{LDFROM})));
 
 
     # Fix up directory specs
@@ -726,12 +733,12 @@ MM_VMS_REVISION = $ExtUtils::MM_VMS::Revision
     push @m,'
 
 # Handy lists of source code files:
-XS_FILES = ',$self->wraplist(', ', sort keys %{$self->{XS}}),'
-C_FILES  = ',$self->wraplist(', ', @{$self->{C}}),'
-O_FILES  = ',$self->wraplist(', ', @{$self->{O_FILES}} ),'
-H_FILES  = ',$self->wraplist(', ', @{$self->{H}}),'
-MAN1PODS = ',$self->wraplist(', ', sort keys %{$self->{MAN1PODS}}),'
-MAN3PODS = ',$self->wraplist(', ', sort keys %{$self->{MAN3PODS}}),'
+XS_FILES = ',$self->wraplist(sort keys %{$self->{XS}}),'
+C_FILES  = ',$self->wraplist(@{$self->{C}}),'
+O_FILES  = ',$self->wraplist(@{$self->{O_FILES}} ),'
+H_FILES  = ',$self->wraplist(@{$self->{H}}),'
+MAN1PODS = ',$self->wraplist(sort keys %{$self->{MAN1PODS}}),'
+MAN3PODS = ',$self->wraplist(sort keys %{$self->{MAN3PODS}}),'
 
 ';
 
@@ -764,21 +771,22 @@ INST_DYNAMIC = $(INST_ARCHAUTODIR)$(BASEEXT).$(DLEXT)
 INST_BOOT = $(INST_ARCHAUTODIR)$(BASEEXT).bs
 ';
     } else {
+	my $shr = $Config{'dbgprefix'} . 'PERLSHR';
 	push @m,'
 INST_STATIC =
 INST_DYNAMIC =
 INST_BOOT =
 EXPORT_LIST = $(BASEEXT).opt
-PERL_ARCHIVE = ',($ENV{'PERLSHR'} ? $ENV{'PERLSHR'} : "Sys\$Share:PerlShr.$Config{'dlext'}"),'
+PERL_ARCHIVE = ',($ENV{$shr} ? $ENV{$shr} : "Sys\$Share:$shr.$Config{'dlext'}"),'
 ';
     }
 
     $self->{TO_INST_PM} = [ sort keys %{$self->{PM}} ];
     $self->{PM_TO_BLIB} = [ %{$self->{PM}} ];
     push @m,'
-TO_INST_PM = ',$self->wraplist(', ',@{$self->{TO_INST_PM}}),'
+TO_INST_PM = ',$self->wraplist(@{$self->{TO_INST_PM}}),'
 
-PM_TO_BLIB = ',$self->wraplist(', ',@{$self->{PM_TO_BLIB}}),'
+PM_TO_BLIB = ',$self->wraplist(@{$self->{PM_TO_BLIB}}),'
 ';
 
     join('',@m);
@@ -1365,6 +1373,7 @@ sub dynamic_lib {
 
     my($otherldflags) = $attribs{OTHERLDFLAGS} || "";
     my($inst_dynamic_dep) = $attribs{INST_DYNAMIC_DEP} || "";
+    my $shr = $Config{'dbgprefix'} . 'PerlShr';
     my(@m);
     push @m,"
 
@@ -1375,7 +1384,7 @@ INST_DYNAMIC_DEP = $inst_dynamic_dep
     push @m, '
 $(INST_DYNAMIC) : $(INST_STATIC) $(PERL_INC)perlshr_attr.opt $(INST_ARCHAUTODIR).exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
 	$(NOECHO) $(MKPATH) $(INST_ARCHAUTODIR)
-	$(NOECHO) If F$TrnLNm("PerlShr").eqs."" Then Define/NoLog/User PerlShr Sys$Share:PerlShr.',$Config{'dlext'},'
+	$(NOECHO) If F$TrnLNm("',$shr,'").eqs."" Then Define/NoLog/User ',"$shr Sys\$Share:$shr.$Config{'dlext'}",'
 	Link $(LDFLAGS) /Shareable=$(MMS$TARGET)$(OTHERLDFLAGS) $(BASEEXT).opt/Option,$(PERL_INC)perlshr_attr.opt/Option
 ';
 
@@ -1436,27 +1445,20 @@ $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
 ';
     # If this extension has it's own library (eg SDBM_File)
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
-    push(@m, '	$(CP) $(MYEXTLIB) $(MMS$TARGET)',"\n") if $self->{MYEXTLIB};
+    push(@m, "\t",'$(CP) $(MYEXTLIB) $(MMS$TARGET)',"\n") if $self->{MYEXTLIB};
 
-    push(@m,'
-	If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)
-');
+    push(@m,"\t",'If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)',"\n");
+
     # if there was a library to copy, then we can't use MMS$SOURCE_LIST,
     # 'cause it's a library and you can't stick them in other libraries.
     # In that case, we use $OBJECT instead and hope for the best
     if ($self->{MYEXTLIB}) {
-      push(@m,'
-	Library/Object/Replace $(MMS$TARGET) $(OBJECT)
-'); 
+      push(@m,"\t",'Library/Object/Replace $(MMS$TARGET) $(OBJECT)',"\n"); 
     } else {
-      push(@m,'
-	Library/Object/Replace $(MMS$TARGET) $(MMS$SOURCE_LIST)
-'); 
+      push(@m,"\t",'Library/Object/Replace $(MMS$TARGET) $(MMS$SOURCE_LIST)',"\n");
     }
     
-    push(@m, '
-	$(NOECHO) $(PERL) -e "open F,\'>>$(INST_ARCHAUTODIR)extralibs.ld\';print F qq{$(EXTRALIBS)\n};close F;"
-');
+    push(@m,"\t",'$(NOECHO) $(PERL) -e "open F,\'>>$(INST_ARCHAUTODIR)extralibs.ld\';print F qq{$(EXTRALIBS)\n};close F;"',"\n");
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
     join('',@m);
 }
@@ -1679,6 +1681,9 @@ clean ::
     push(@otherfiles,$self->catfile('$(INST_ARCHAUTODIR)','extralibs.all'));
     my($file,$line);
     $line = '';  #avoid unitialized var warning
+    # Occasionally files are repeated several times from different sources
+    { my(%of) = map { ($_,1) } @otherfiles; @otherfiles = keys %of; }
+    
     foreach $file (@otherfiles) {
 	$file = $self->fixpath($file);
 	if (length($line) + length($file) > 80) {
@@ -1723,6 +1728,8 @@ realclean :: clean
     }
     push(@files, values %{$self->{PM}});
     $line = '';  #avoid unitialized var warning
+    # Occasionally files are repeated several times from different sources
+    { my(%f) = map { ($_,1) } @files; @files = keys %f; }
     foreach $file (@files) {
 	$file = $self->fixpath($file);
 	if (length($line) + length($file) > 80 || ++$fcnt >= 2) {
@@ -1744,6 +1751,8 @@ realclean :: clean
 	    else { push(@allfiles, $attribs{FILES}); }
 	}
 	$line = '';
+	# Occasionally files are repeated several times from different sources
+	{ my(%af) = map { ($_,1) } @allfiles; @allfiles = keys %af; }
 	foreach $file (@allfiles) {
 	    $file = $self->fixpath($file);
 	    if (length($line) + length($file) > 80) {

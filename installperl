@@ -5,6 +5,8 @@ BEGIN {
     chdir '..' if !-d 'lib' and -d '..\lib';
     @INC = 'lib';
     $ENV{PERL5LIB} = 'lib';
+    $Is_VMS = $^O eq 'VMS';
+    if ($Is_VMS) { eval 'use VMS::Filespec;' }
 }
 
 use File::Find;
@@ -30,12 +32,14 @@ while (@ARGV) {
     shift;
 }
 
-umask 022;
+umask 022 unless $Is_VMS;
 
 @scripts = qw(	utils/c2ph utils/h2ph utils/h2xs
 		utils/perlbug utils/perldoc utils/pl2pm utils/splain
 		x2p/s2p x2p/find2perl
 		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text);
+
+if ($Is_VMS) { @scripts = map { "$_.Com" } @scripts; }
 
 @pods = (<pod/*.pod>);
 
@@ -77,6 +81,14 @@ $dlext = $Config{dlext};
 $d_dosuid = $Config{d_dosuid};
 $binexp = $Config{binexp};
 
+if ($Is_VMS) {  # Hang in there until File::Spec hits the big time
+    foreach ( \$installbin,     \$installscript,  \$installprivlib,
+              \$installarchlib, \$installsitelib, \$installsitearch,
+              \$installman1dir ) {
+      $$_ = unixify($$_);  $$_ =~ s:/$::;
+    }
+}
+
 # Do some quick sanity checks.
 
 if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
@@ -110,7 +122,15 @@ $packlist = ExtUtils::Packlist->new("$installarchlib/.packlist");
 
 # First we install the version-numbered executables.
 
-if ($^O ne 'dos') {
+if ($Is_VMS) {
+    safe_unlink("$installbin/perl$exe_ext");
+    copy("perl$exe_ext", "$installbin/perl$exe_ext");
+    chmod(0755, "$installbin/perl$exe_ext");
+    safe_unlink("$installbin/perlshr$exe_ext");
+    copy("perlshr$exe_ext", "$installbin/perlshr$exe_ext");
+    chmod(0755, "$installbin/perlshr$exe_ext");
+}
+elsif ($^O ne 'dos') {
     safe_unlink("$installbin/perl$ver$exe_ext");
     copy("perl$exe_ext", "$installbin/perl$ver$exe_ext");
     chmod(0755, "$installbin/perl$ver$exe_ext");
@@ -150,11 +170,18 @@ else {
 
 # Install header files and libraries.
 mkpath("$installarchlib/CORE", 1, 0777);
-@corefiles = <*.h libperl*.*>;
-# AIX needs perl.exp installed as well.
-push(@corefiles,'perl.exp') if $^O eq 'aix';
-# If they have built sperl.o...
-push(@corefiles,'sperl.o') if -f 'sperl.o';
+if ($Is_VMS) {  # We did core file selection during build
+    my $coredir = "lib/$Config{'arch'}/$]";
+    $coredir =~ tr/./_/;
+    @corefiles = <$coredir/*.*>;
+}
+else {
+    @corefiles = <*.h libperl*.*>;
+    # AIX needs perl.exp installed as well.
+    push(@corefiles,'perl.exp') if $^O eq 'aix';
+    # If they have built sperl.o...
+    push(@corefiles,'sperl.o') if -f 'sperl.o';
+}
 foreach $file (@corefiles) {
     # HP-UX (at least) needs to maintain execute permissions
     # on dynamically-loadable libraries. So we do it for all.
@@ -166,7 +193,7 @@ foreach $file (@corefiles) {
 # Install main perl executables
 # Make links to ordinary names if installbin directory isn't current directory.
 
-if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos')) {
+if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
     safe_unlink("$installbin/perl$exe_ext", "$installbin/suidperl$exe_ext");
     link("$installbin/perl$ver$exe_ext", "$installbin/perl$exe_ext");
     link("$installbin/sperl$ver$exe_ext", "$installbin/suidperl$exe_ext") 
@@ -177,7 +204,7 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos')) {
 
 $mainperl_is_instperl = 0;
 
-if (!$versiononly && !$nonono && $^O ne 'MSWin32' && -t STDIN && -t STDERR
+if (!$versiononly && !$nonono && $^O ne 'MSWin32' && !$Is_VMS && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
     local($usrbinperl)	= "$mainperldir/perl$exe_ext";
     local($instperl)	= "$installbin/perl$exe_ext";
@@ -241,9 +268,10 @@ if (! $versiononly) {
 # pstruct should be a link to c2ph
 
 if (! $versiononly) {
-    safe_unlink("$installscript/pstruct");
-    if ($^O eq 'dos') {
-        copy("$installscript/c2ph","$installscript/pstruct"); 
+    safe_unlink("$installscript/pstruct" . ($Is_VMS ? '.Com' : ''));
+    if ($^O eq 'dos' or $Is_VMS) {
+        copy("$installscript/c2ph" . ($Is_VMS ? '.Com' : ''),
+             "$installscript/pstruct" . ($Is_VMS ? '.Com' : '')); 
     } else {
         link("$installscript/c2ph","$installscript/pstruct");
     }
@@ -296,6 +324,13 @@ if (!$versiononly) {
     $dirsep = ($^O eq 'os2' || $^O eq 'MSWin32') ? ';' : ':' ;
     ($path = $ENV{"PATH"}) =~ s:\\:/:g ;
     @path = split(/$dirsep/, $path);
+    if ($Is_VMS) {
+        my $i = 0;
+        while (exists $ENV{'DCL$PATH' . $i}) {
+            $dir = unixpath($ENV{'DCL$PATH' . $i});  $dir =~ s-/$--;
+            push(@path,$dir);
+        }
+    }
     @otherperls = ();
     for (@path) {
 	next unless m,^/,;
@@ -338,6 +373,8 @@ sub unlink {
     local(@names) = @_;
     my($cnt) = 0;
 
+    return scalar(@names) if $Is_VMS;
+
     foreach $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if ($^O eq 'os2' || $^O eq 'MSWin32');
@@ -349,7 +386,7 @@ sub unlink {
 }
 
 sub safe_unlink {
-    return if $nonono;
+    return if $nonono or $Is_VMS;
     local @names = @_;
     foreach $name (@names) {
 	next unless -e $name;
@@ -394,6 +431,7 @@ sub link {
         $packlist->{$to} = { from => $from, type => 'link' };
     };
     if ($@) {
+	print STDERR "  creating new version of $to\n" if $Is_VMS and -e $to;
 	File::Copy::copy($from, $to)
 	    ? $success++
 	    : warn "Couldn't copy $from to $to: $!\n"
@@ -417,6 +455,7 @@ sub copy {
     my($from,$to) = @_;
 
     print STDERR "  cp $from $to\n";
+    print STDERR "  creating new version of $to\n" if $Is_VMS and -e $to;
     File::Copy::copy($from, $to)
 	|| warn "Couldn't copy $from to $to: $!\n"
       unless $nonono;

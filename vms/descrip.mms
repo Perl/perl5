@@ -74,7 +74,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00462#
+PERL_VERSION = 5_00463#
 
 .ifdef DECC_SOCKETS
 SOCKET=1
@@ -395,8 +395,8 @@ byteperl.c : [.ext.B]byteperl.c
 .ifdef __DEBUG__
 # Link an extra perl that doesn't invoke the debugger
 perl : $(DBG)perl$(E) $(DBG)byteperl$(E)
-	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)perl$(E) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option
-	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)byteperl$(E) byteperl$(O), perlshr.opt/Option, perlshr_attr.opt/Option
+	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)perl$(E) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
+	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)byteperl$(E) byteperl$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 .else
 perl : $(DBG)perl$(E) $(DBG)byteperl$(E)
 	@ Continue
@@ -404,11 +404,11 @@ perl : $(DBG)perl$(E) $(DBG)byteperl$(E)
 
 $(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 	@ @[.vms]genopt "PerlShr.Opt/Write" "|" "''F$Environment("Default")'$(DBG)PerlShr$(E)/Share"
-	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option
+	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 
 $(DBG)byteperl$(E) : byteperl$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 	@ @[.vms]genopt "PerlShr.Opt/Write" "|" "''F$Environment("Default")'$(DBG)PerlShr$(E)/Share"
-	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) byteperl$(O), perlshr.opt/Option, perlshr_attr.opt/Option
+	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) byteperl$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 
 $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 	Link $(LINKFLAGS)/Share=$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
@@ -1342,6 +1342,17 @@ clean : tidy
 	Set Default [.ext.Opcode]
 	- $(MMS) clean
 	Set Default [--]
+	Set Default [.ext.attrs]
+	- $(MMS) clean
+	Set Default [--]
+	Set Default [.ext.B]
+	- $(MMS) clean
+	Set Default [--]
+.ifdef THREAD
+	Set Default [.ext.Thread]
+	- $(MMS) realclean
+	Set Default [--]
+.endif
 .ifdef DECC
 	Set Default [.ext.POSIX]
 	- $(MMS) clean
@@ -1382,6 +1393,9 @@ realclean : clean
 	- $(MMS) realclean
 	Set Default [--]
 	Set Default [.ext.attrs]
+	- $(MMS) realclean
+	Set Default [--]
+	Set Default [.ext.B]
 	- $(MMS) realclean
 	Set Default [--]
 .ifdef THREAD

@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00462"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00463"  /**/
 
 
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
@@ -177,6 +177,7 @@
  *	This symbol, if defined, indicates that the C-shell exists.
  *	If defined, contains the full pathname of csh.
  */
+#undef HAS_CSH		/**/
 #undef CSH 		/**/
 
 /* HAS_DUP2:
@@ -241,6 +242,26 @@
 #ifdef HAS_GETTIMEOFDAY
 #  define Timeval struct timeval /*config-skip*/
 #endif
+
+/* HAS_LONG_DOUBLE:
+ *	This symbol will be defined if the C compiler supports long
+ *	doubles.
+ */
+/* LONG_DOUBLESIZE:
+ *	This symbol contains the size of a long double, so that the 
+ *	C preprocessor can make decisions based on it.  It is only
+ *	defined if the system supports long doubles.
+ */
+#undef HAS_LONG_DOUBLE		/**/
+#ifdef HAS_LONG_DOUBLE
+#  define LONG_DOUBLESIZE 8		/**/
+#endif
+
+/* HAS_MKSTEMP:
+ *	This symbol, if defined, indicates that the mkstemp routine is
+ *	available to create and open a unique temporary file.
+ */
+#undef HAS_MKSTEMP		/**/
 
 /* HAS_GETGROUPS:
  *	This symbol, if defined, indicates that the getgroups() routine is
@@ -1847,6 +1868,13 @@
  */
 #undef	USE_PERLIO		/**/
 
+/* HAS_SETVBUF:
+ *	This symbol, if defined, indicates that the setvbuf routine is
+ *	available to change buffering on an open stdio stream.
+ *	to a line-buffered mode.
+ */
+#define HAS_SETVBUF		/**/
+
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
  *	compiler.  What various bits mean:
@@ -1916,8 +1944,8 @@
  *	This symbol, if defined, indicates that the getprotobynumber()
  *	routine is available to look up protocols by their number.
  */
-#define HAS_GETPROTOBYNAME		/**/
-#define HAS_GETPROTOBYNUMBER		/**/
+#define HAS_GETPROTOBYNAME		/*config-skip*/
+#define HAS_GETPROTOBYNUMBER		/*config-skip*/
 
 /* HAS_GETHOSTBYNAME:
  *	This symbol, if defined, indicates that the gethostbyname routine is
@@ -1952,9 +1980,30 @@
  *	available to lookup networks by their names.
  */
 #define HAS_GETNETBYNAME		/*config-skip*/
+
+/* HAS_GETNETENT:
+ *	This symbol, if defined, indicates that the getnetent() routine is
+ *	available to look up network names in some data base or another.
+ */
+#define HAS_GETNETENT		/*config-skip*/
+
+/* HAS_SETNETENT:
+ *	This symbol, if defined, indicates that the setnetent() routine is
+ *	available.
+ */
+#define HAS_SETNETENT		/*config-skip*/
+
+/* HAS_ENDNETENT:
+ *	This symbol, if defined, indicates that the endnetent() routine is
+ *	available to close whatever was being used for network queries.
+ */
+#define HAS_ENDNETENT		/*config-skip*/
 #else
-#undef HAS_GETNETBYADDR			/*config-skip*/
+#undef HAS_GETNETBYADDR		/*config-skip*/
 #undef HAS_GETNETBYNAME		/*config-skip*/
+#undef HAS_GETNETENT		/*config-skip*/
+#undef HAS_SETNETENT		/*config-skip*/
+#undef HAS_ENDNETENT		/*config-skip*/
 #endif
 
 /* HAS_GETPROTOBYNAME:
@@ -2014,6 +2063,48 @@
  */
 #define HAS_SELECT	/**/              /* config-skip */
 
+/* HAS_ENDHOSTENT:
+ *	This symbol, if defined, indicates that the endhostent() routine is
+ *	available to close whatever was being used for host queries.
+ */
+#define HAS_ENDHOSTENT		/*config-skip*/
+
+/* HAS_GETPROTOENT:
+ *	This symbol, if defined, indicates that the getprotoent() routine is
+ *	available to look up protocols in some data base or another.
+ */
+#define HAS_GETPROTOENT		/*config-skip*/
+
+/* HAS_ENDPROTOENT:
+ *	This symbol, if defined, indicates that the endprotoent() routine is
+ *	available to close whatever was being used for protocol queries.
+ */
+#define HAS_ENDPROTOENT		/*config-skip*/
+
+/* HAS_SETPROTOENT:
+ *	This symbol, if defined, indicates that the setprotoent() routine is
+ *	available.
+ */
+#define HAS_SETPROTOENT		/*config-skip*/
+
+/* HAS_GETSERVENT:
+ *	This symbol, if defined, indicates that the getservent() routine is
+ *	available to look up network services in some data base or another.
+ */
+#define HAS_GETSERVENT		/*config-skip*/
+
+/* HAS_SETSERVENT:
+ *	This symbol, if defined, indicates that the setservent() routine is
+ *	available.
+ */
+#define HAS_SETSERVENT		/*config-skip*/
+
+/* HAS_ENDSERVENT:
+ *	This symbol, if defined, indicates that the endservent() routine is
+ *	available to close whatever was being used for service queries.
+ */
+#define HAS_ENDSERVENT		/*config-skip*/
+
 #else /* VMS_DO_SOCKETS */
 
 #undef HAS_SOCKET				/*config-skip*/
@@ -2026,12 +2117,22 @@
 #undef HAS_SELECT				/*config-skip*/
 #undef HAS_GETHOSTBYADDR		/*config-skip*/
 #undef HAS_GETNETBYADDR			/*config-skip*/
+#undef HAS_GETNETENT			/*config-skip*/
+#undef HAS_SETNETENT			/*config-skip*/
+#undef HAS_ENDNETENT			/*config-skip*/
 #undef HAS_GETHOSTBYNAME		/*config-skip*/
 #undef HAS_GETNETBYNAME			/*config-skip*/
 #undef HAS_GETPROTOBYNAME		/*config-skip*/
 #undef HAS_GETPROTOBYNUMBER		/*config-skip*/
 #undef HAS_GETSERVBYNAME		/*config-skip*/
 #undef HAS_GETSERVBYPORT		/*config-skip*/
+#undef HAS_ENDHOSTENT			/*config-skip*/
+#undef HAS_GETPROTOENT			/*config-skip*/
+#undef HAS_SETPROTOENT			/*config-skip*/
+#undef HAS_ENDPROTOENT			/*config-skip*/
+#undef HAS_GETSERVENT			/*config-skip*/
+#undef HAS_SETSERVENT			/*config-skip*/
+#undef HAS_ENDSERVENT			/*config-skip*/
 
 #endif /* !VMS_DO_SOCKETS */
 
