@@ -464,21 +464,16 @@ subtest 10 of lib/posix may arrive before the successful result of the
 subtest 9, which confuses the test harness so much that it thinks the
 subtest 9 failed.
 
-=head2 lib/b test 19
-
-The test fails on various platforms (PA64 and IA64 are known), but the
-exact cause is still being investigated.
-
 =head2 Linux With Sfio Fails op/misc Test 48
 
 No known fix.
 
-=head2 sigaction test 13 in VMS
+=head2 ext/POSIX/sigaction test 13 on VMS
 
 The test is known to fail; whether it's because of VMS of because
 of faulty test is not known.
 
-=head2 sprintf tests 129 and 130
+=head2 op/sprintf tests 129 and 130
 
 The op/sprintf tests 129 and 130 are known to fail on some platforms.
 Examples include any platform using sfio, and Compaq/Tandem's NonStop-UX.
@@ -495,10 +490,21 @@ The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
 5.005_0x has the same bugs, but didn't have these tests.
 
-lib/Memoize/t/correctness.t  23-25
-lib/Memoize/t/unmemoize.t    2-5
-t/pragma/autouse.t           4
-t/lib/thr5005.t              19-20
+  lib/autouse.t                 4
+  t/lib/thr5005.t               19-20
+
+=head2 Numerous numerical test failures on UNICOS
+
+  op/numconvert                 209,210,217,218
+  ext/Time/HiRes/HiRes          9
+  lib/Math/BigInt/t/bigintpm    1145
+  lib/Math/Trig                 25
+
+These tests fail because of yet unresolved floating point inaccuracies.
+
+=head2 ext/IPC/SysV/t/sem test 8 on UNICOS/mk
+
+No known fix.
 
 =head2 Localising a Tied Variable Leaks Memory
 
