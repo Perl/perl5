@@ -1,0 +1,50 @@
+#!./perl 
+
+BEGIN {
+    chdir 't';
+    @INC = '../lib';
+    require './test.pl';
+}
+
+BEGIN {
+    use Config;
+    if( !$Config{d_alarm} ) {
+        skip_all("alarm() not implemented on this platform");
+    }
+}
+
+plan tests => 4;
+my $Perl = which_perl();
+
+my $start_time = time;
+eval {
+    local $SIG{ALRM} = sub { die "ALARM!\n" };
+    alarm 3;
+
+    # perlfunc recommends against using sleep in combination with alarm.
+    1 while (time - $start_time < 6);
+};
+alarm 0;
+my $diff = time - $start_time;
+
+# alarm time might be one second less than you said.
+is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs inf loop' );
+ok( $diff == 3 || $diff == 2,   '   right time' );
+
+
+my $start_time = time;
+eval {
+    local $SIG{ALRM} = sub { die "ALARM!\n" };
+    alarm 3;
+    system(qq{$Perl -e "sleep 6"});
+};
+alarm 0;
+$diff = time - $start_time;
+
+# alarm time might be one second less than you said.
+is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs system()' );
+
+TODO: {
+    local $TODO = "alarm() can't stop a system call with \$SIG{ALRM} set";
+    ok( $diff == 3 || $diff == 2,   '   right time' );
+}
