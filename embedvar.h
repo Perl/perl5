@@ -40,7 +40,6 @@
 
 #define PL_Sv			(vTHX->TSv)
 #define PL_Xpv			(vTHX->TXpv)
-#define PL_av_fetch_sv		(vTHX->Tav_fetch_sv)
 #define PL_bodytarget		(vTHX->Tbodytarget)
 #define PL_bostr		(vTHX->Tbostr)
 #define PL_chopset		(vTHX->Tchopset)
@@ -63,7 +62,6 @@
 #define PL_firstgv		(vTHX->Tfirstgv)
 #define PL_formtarget		(vTHX->Tformtarget)
 #define PL_hv_fetch_ent_mh	(vTHX->Thv_fetch_ent_mh)
-#define PL_hv_fetch_sv		(vTHX->Thv_fetch_sv)
 #define PL_in_eval		(vTHX->Tin_eval)
 #define PL_last_in_gv		(vTHX->Tlast_in_gv)
 #define PL_lastgotoprobe	(vTHX->Tlastgotoprobe)
@@ -747,7 +745,6 @@
 
 #define PL_TSv			PL_Sv
 #define PL_TXpv			PL_Xpv
-#define PL_Tav_fetch_sv		PL_av_fetch_sv
 #define PL_Tbodytarget		PL_bodytarget
 #define PL_Tbostr		PL_bostr
 #define PL_Tchopset		PL_chopset
@@ -770,7 +767,6 @@
 #define PL_Tfirstgv		PL_firstgv
 #define PL_Tformtarget		PL_formtarget
 #define PL_Thv_fetch_ent_mh	PL_hv_fetch_ent_mh
-#define PL_Thv_fetch_sv		PL_hv_fetch_sv
 #define PL_Tin_eval		PL_in_eval
 #define PL_Tlast_in_gv		PL_last_in_gv
 #define PL_Tlastgotoprobe	PL_lastgotoprobe

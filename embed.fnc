@@ -1375,6 +1375,7 @@ sd	|void	|cv_dump	|CV *cv|char *title
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 #endif
 pd 	|CV*	|find_runcv	|U32 *db_seqp
+p	|void	|free_tied_hv_pool
 
 
 

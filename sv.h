@@ -274,7 +274,8 @@ struct xpvlv {
     STRLEN	xlv_targoff;
     STRLEN	xlv_targlen;
     SV*		xlv_targ;
-    char	xlv_type;
+    char	xlv_type;	/* k=keys .=pos x=substr v=vec /=join/re
+				 * y=alem/helem/iter t=tie T=tied HE */
 };
 
 struct xpvgv {

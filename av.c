@@ -209,9 +209,11 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
             }
 
             sv = sv_newmortal();
-            mg_copy((SV*)av, sv, 0, key);
-            PL_av_fetch_sv = sv;
-            return &PL_av_fetch_sv;
+	    sv_upgrade(sv, SVt_PVLV);
+	    mg_copy((SV*)av, sv, 0, key);
+	    LvTYPE(sv) = 't';
+	    LvTARG(sv) = sv; /* fake (SV**) */
+	    return &(LvTARG(sv));
         }
     }
 
