@@ -992,9 +992,9 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 
 perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 .IF "$(USE_IMP_SYS)" == "define"
-	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
+	$(CC) -c -I. -DWITH_STATIC $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
 .ELSE
-	$(CC) -c -I. $(CFLAGS_O) $(OBJOUT_FLAG)$@ perllib.c
+	$(CC) -c -I. -DWITH_STATIC $(CFLAGS_O) $(OBJOUT_FLAG)$@ perllib.c
 .ENDIF
 
 # 1. we don't want to rebuild miniperl.exe when config.h changes
@@ -1010,10 +1010,11 @@ $(DLL_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
+	$(MINIPERL) -I..\lib buildext.pl --create-perllibst-h $(STATIC_EXT)
 	$(MINIPERL) -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) \
 	$(BUILDOPT) CCTYPE=$(CCTYPE) > perldll.def
 
-$(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
+$(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpd -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,\\)\n \
@@ -1034,10 +1035,13 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 		perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
-	    @$(mktmp -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
-	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\))
+	    -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
+	    $(foreach,i,$(shell $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --list-static-libs) \
+	    ..\lib\auto\$i) \
+	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\)
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
+
 
 $(PERLEXE_ICO): $(MINIPERL) makeico.pl
 	$(MINIPERL) makeico.pl > $@
@@ -1114,8 +1118,12 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 
 #----------------------------------------------------------------------------------
 Extensions : buildext.pl $(PERLDEP) $(CONFIGPM)
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic
+
+Extensions_static : buildext.pl $(PERLDEP) $(CONFIGPM)
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --static
 
 # Note: The next two targets explicitly remove a "blibdirs.exists" file that
 # currerntly gets left behind, until CPAN RT Ticket #5616 is resolved.
@@ -1258,6 +1266,7 @@ distclean: realclean
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f $(CONFIGPM)
 	-del /f bin\*.bat
+	-del /f perllibst.h
 	-del /f $(PERLEXE_ICO) perl.base
 	-cd .. && del /s *$(a) *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old

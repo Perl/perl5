@@ -816,6 +816,7 @@ CFG_VARS	=					\
 		"libpth=$(CCLIBDIR:"=\");$(EXTRALIBDIRS:"=\")"	\
 		"libc=$(LIBC)"				\
 		"make=$(MAKE_BARE)"				\
+		"static_ext=$(STATIC_EXT)"		\
 		"usethreads=$(USE_ITHREADS)"		\
 		"useithreads=$(USE_ITHREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
