@@ -16,11 +16,8 @@
 #  - Assigned characters that are not listed explicitly are given the value
 #    "AL".
 #  - Unassigned characters are given the value "XX".
-#  - Characters within ranges marked by "First>" and "Last>" are omitted,
-#    as in UnicodeData.txt. For example, the following means that
-#    all characters between 3400 and 4DB5 have the value "ID"
-#     3400;ID;<CJK Ideograph Extension A, First>
-#     4DB5;ID;<CJK Ideograph Extension A, Last>
+#  - Characters ranges are specified as for other property files in
+#         the Unicode Character Database.
 #
 # The Unicode name of each character is provided in a comment for help
 # in identifying the characters.
@@ -206,7 +203,7 @@
 00B1;PR # PLUS-MINUS SIGN
 00B2;AI # SUPERSCRIPT TWO
 00B3;AI # SUPERSCRIPT THREE
-00B4;BA # ACUTE ACCENT
+00B4;BB # ACUTE ACCENT
 00B5;AL # MICRO SIGN
 00B6;AI # PILCROW SIGN
 00B7;AI # MIDDLE DOT
@@ -5144,7 +5141,7 @@
 2012;BA # FIGURE DASH
 2013;BA # EN DASH
 2014;B2 # EM DASH
-2015;AL # HORIZONTAL BAR
+2015;AI # HORIZONTAL BAR
 2016;AI # DOUBLE VERTICAL LINE
 2017;AL # DOUBLE LOW LINE
 2018;QU # LEFT SINGLE QUOTATION MARK
@@ -6253,7 +6250,7 @@
 25C5;AL # WHITE LEFT-POINTING POINTER
 25C6;AI # BLACK DIAMOND
 25C7;AI # WHITE DIAMOND
-25C8;AL # WHITE DIAMOND CONTAINING BLACK SMALL DIAMOND
+25C8;AI # WHITE DIAMOND CONTAINING BLACK SMALL DIAMOND
 25C9;AL # FISHEYE
 25CA;AL # LOZENGE
 25CB;AI # WHITE CIRCLE
@@ -8037,10 +8034,8 @@
 33FC;ID # IDEOGRAPHIC TELEGRAPH SYMBOL FOR DAY TWENTY-NINE
 33FD;ID # IDEOGRAPHIC TELEGRAPH SYMBOL FOR DAY THIRTY
 33FE;ID # IDEOGRAPHIC TELEGRAPH SYMBOL FOR DAY THIRTY-ONE
-3400;ID # <CJK Ideograph Extension A, First>
-4DB5;ID # <CJK Ideograph Extension A, Last>
-4E00;ID # <CJK Ideograph, First>
-9FA5;ID # <CJK Ideograph, Last>
+3400..4DB5;ID # <CJK Ideograph Extension A, First>..<CJK Ideograph Extension A, Last>
+4E00..9FA5;ID # <CJK Ideograph, First>..<CJK Ideograph, Last>
 A000;ID # YI SYLLABLE IT
 A001;ID # YI SYLLABLE IX
 A002;ID # YI SYLLABLE I
@@ -9256,16 +9251,11 @@ A4C2;ID # YI RADICAL SHOP
 A4C3;ID # YI RADICAL CHE
 A4C4;ID # YI RADICAL ZZIET
 A4C6;ID # YI RADICAL KE
-AC00;ID # <Hangul Syllable, First>
-D7A3;ID # <Hangul Syllable, Last>
-D800;SG # <Non Private Use High Surrogate, First>
-DB7F;SG # <Non Private Use High Surrogate, Last>
-DB80;SG # <Private Use High Surrogate, First>
-DBFF;SG # <Private Use High Surrogate, Last>
-DC00;SG # <Low Surrogate, First>
-DFFF;SG # <Low Surrogate, Last>
-E000;AI # <Private Use, First>
-F8FF;AI # <Private Use, Last>
+AC00..D7A3;ID # <Hangul Syllable, First>..<Hangul Syllable, Last>
+D800..DB7F;SG # <Non Private Use High Surrogate, First>..<Non Private Use High Surrogate, Last>
+DB80..DBFF;SG # <Private Use High Surrogate, First>..<Private Use High Surrogate, Last>
+DC00..DFFF;SG # <Low Surrogate, First>..<Low Surrogate, Last>
+E000..F8FF;XX # <Private Use, First>..<Private Use, Last>
 F900;ID # CJK COMPATIBILITY IDEOGRAPH-F900
 F901;ID # CJK COMPATIBILITY IDEOGRAPH-F901
 F902;ID # CJK COMPATIBILITY IDEOGRAPH-F902
@@ -10276,7 +10266,7 @@ FE66;ID # SMALL EQUALS SIGN
 FE68;ID # SMALL REVERSE SOLIDUS
 FE69;PR # SMALL DOLLAR SIGN
 FE6A;PO # SMALL PERCENT SIGN
-FE6B;AL # SMALL COMMERCIAL AT
+FE6B;ID # SMALL COMMERCIAL AT
 FE70;AL # ARABIC FATHATAN ISOLATED FORM
 FE71;AL # ARABIC TATWEEL WITH FATHATAN ABOVE
 FE72;AL # ARABIC DAMMATAN ISOLATED FORM
@@ -12239,8 +12229,7 @@ FFFD;AI # REPLACEMENT CHARACTER
 1D7FD;NU # MATHEMATICAL MONOSPACE DIGIT SEVEN
 1D7FE;NU # MATHEMATICAL MONOSPACE DIGIT EIGHT
 1D7FF;NU # MATHEMATICAL MONOSPACE DIGIT NINE
-20000;ID # <CJK Ideograph Extension B, First>
-2A6D6;ID # <CJK Ideograph Extension B, Last>
+20000..2A6D6;ID # <CJK Ideograph Extension B, First>..<CJK Ideograph Extension B, Last>
 2F800;ID # CJK COMPATIBILITY IDEOGRAPH-2F800
 2F801;ID # CJK COMPATIBILITY IDEOGRAPH-2F801
 2F802;ID # CJK COMPATIBILITY IDEOGRAPH-2F802
@@ -12880,3 +12869,5 @@ E007C;CM # TAG VERTICAL LINE
 E007D;CM # TAG RIGHT CURLY BRACKET
 E007E;CM # TAG TILDE
 E007F;CM # CANCEL TAG
+F0000..FFFFD;XX # <Plane 15 Private Use, First>..<Plane 15 Private Use, Last>
+100000..10FFFD;XX # <Plane 16 Private Use, First>..<Plane 16 Private Use, Last>

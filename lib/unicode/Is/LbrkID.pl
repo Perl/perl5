@@ -50,15 +50,12 @@ return <<'END';
 3300	3376
 337b	33dd
 33e0	33fe
-3400	4db5
-4e00	9fa5
 a000	a48c
 a490	a4a1
 a4a4	a4b3
 a4b5	a4c0
 a4c2	a4c4
 a4c6	
-ac00	d7a3
 f900	fa2d
 fe30	fe34
 fe49	fe4f
@@ -66,6 +63,7 @@ fe51
 fe58	
 fe5f	fe66
 fe68	
+fe6b	
 ff02	ff03
 ff06	ff07
 ff0a	ff0b
@@ -78,6 +76,5 @@ ff3e	ff5a
 ff5c	
 ff5e	
 ffe2	ffe4
-20000	2a6d6
 2f800	2fa1d
 END

@@ -10,12 +10,29 @@
 
 <body>
 
-<h1>UnicodeData File Format<br>
-Version 3.0.1</h1>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td>
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td class="icon"><a href="http://www.unicode.org"><img border="0"
+            src="http://www.unicode.org/webscripts/logo60s2.gif" align="middle"
+            alt="[Unicode]" width="34" height="33"></a>&nbsp;&nbsp;<a
+            class="bar" href="UnicodeCharacterDatabase.html">Unicode Character 
+            Database</a></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="gray">&nbsp;</td>
+  </tr>
+</table>
+<h1>Unicode Data File Format</h1>
 <table border="1" cellspacing="2" cellpadding="0" height="87" width="100%">
   <tr>
     <td valign="TOP" width="144">Revision</td>
-    <td valign="TOP">3.0.1</td>
+    <td valign="TOP">3.1.0</td>
   </tr>
   <tr>
     <td valign="TOP" width="144">Authors</td>
@@ -23,17 +40,17 @@ Version 3.0.1</h1>
   </tr>
   <tr>
     <td valign="TOP" width="144">Date</td>
-    <td valign="TOP">2000-08-17</td>
+    <td valign="TOP">2001-02-28</td>
   </tr>
   <tr>
     <td valign="TOP" width="144">This Version</td>
     <td valign="TOP"><a
-      href="http://www.unicode.org/Public/3.0-Update1/UnicodeData-3.0.1.html">http://www.unicode.org/Public/3.0-Update1/UnicodeData-3.0.1.html</a></td>
+      href="http://www.unicode.org/Public/3.1-Update/UnicodeData-3.1.0.html">http://www.unicode.org/Public/3.1-Update/UnicodeData-3.1.0.html</a></td>
   </tr>
   <tr>
     <td valign="TOP" width="144">Previous Version</td>
     <td valign="TOP"><a
-      href="http://www.unicode.org/Public/3.0-Update/UnicodeData-3.0.0.html">http://www.unicode.org/Public/3.0-Update/UnicodeData-3.0.0.html</a></td>
+      href="http://www.unicode.org/Public/3.0-Update1/UnicodeData-3.0.1.html">http://www.unicode.org/Public/3.0-Update1/UnicodeData-3.0.1.html</a></td>
   </tr>
   <tr>
     <td valign="TOP" width="144">Latest Version</td>
@@ -41,9 +58,29 @@ Version 3.0.1</h1>
       href="http://www.unicode.org/Public/UNIDATA/UnicodeData.html">http://www.unicode.org/Public/UNIDATA/UnicodeData.html</a></td>
   </tr>
 </table>
-<p align="center">Copyright © 1995-2000 Unicode, Inc. All Rights reserved.<br>
-<i>For more information, including Disclamer and Limitations, see <a
-href="UnicodeCharacterDatabase-3.0.1.html">UnicodeCharacterDatabase-3.0.1.html</a></i></p>
+<h3><br>
+S<i>ummary</i></h3>
+<blockquote>
+  <p><i>This document describes the format and content of the UnicodeData.txt 
+  file in the Unicode Character Database (UCD).</i></p>
+</blockquote>
+<h3><i>Status</i></h3>
+<blockquote>
+  <p><i>The file and the files described herein are part of the Unicode 
+  Character Database&nbsp; and governed by the <a href="#UCD_Terms">UCD Terms of 
+  Use</a> given below.</i></p>
+  <p><i>For general information on file formats and table formats, and the 
+  implications of normative vs informative properties, see 
+  UnicodeCharacterDatabase.html. </i></p>
+  <p><i><b>Warning: </b>the information in this file does not completely 
+  describe the use and interpretation of Unicode character properties and 
+  behavior. It must be used in conjunction with the data in the other files in 
+  the UCD, and relies on the notation and definitions supplied in <a
+  href="http://www.unicode.org/unicode/standard/versions/Unicode3.0.html">The 
+  Unicode Standard</a>. All chapter references are to Version 3.1.0 of the 
+  standard.</i></p>
+</blockquote>
+<h2>Introduction</h2>
 <p>This document describes the format of the UnicodeData.txt file, which is one 
 of the files in the Unicode Character Database. The document is divided into the 
 following sections:
@@ -62,80 +99,68 @@ following sections:
   <li><a href="#Property Invariants">Property Invariants</a></li>
   <li><a href="#Modification History">Modification History</a></li>
 </ul>
-<p><b>Warning: </b>the information in this file does not completely describe the 
-use and interpretation of Unicode character properties and behavior. It must be 
-used in conjunction with the data in the other files in the <a
-href="UnicodeCharacterDatabase-3.0.1.html">Unicode Character Database</a>, and 
-relies on the notation and definitions supplied in <i><a
-href="http://www.unicode.org/unicode/standard/versions/Unicode3.0.html">The 
-Unicode Standard</a></i>. All chapter references are to Version 3.0 of the 
-standard.</p>
 <h2><a name="Field Formats"></a>Field Formats</h2>
-<p>The file consists of lines containing fields separated by semicolons. Each 
-line represents the data for one encoded character in the Unicode Standard. 
-Every encoded character has a data entry, with the exception of certain special 
-ranges, as detailed below.
+<p>Each line represents the data for one encoded character in the Unicode 
+Standard. (For information on the file format, see UCD File Format in 
+UnicodeCharacterDatabase.html).
+<p>Every encoded character has a data entry, with the exception of certain 
+special ranges, as detailed below.
 <ul>
-  <li>There are nine special ranges of characters that are represented only by 
-    their start and end characters, since the properties in the file are 
-    uniform, except for code values (which are all sequential and assigned).</li>
+  <li>These ranges represented only by their start and end characters, since the 
+    properties in the file are uniform, except for code values (which are all 
+    sequential and assigned).</li>
   <li>The names of CJK ideograph characters and the names and decompositions of 
     Hangul syllable characters are algorithmically derivable. (See the Unicode 
     Standard and <a href="http://www.unicode.org/unicode/reports/tr15/">Unicode 
     Standard Annex #15</a> for more information).</li>
   <li>Surrogate code values and private use characters have no names.</li>
-  <li>The Private Use character outside of the BMP (U+F0000..U+FFFFD, 
-    U+100000..U+10FFFD) are listed as distinct ranges. These correspond to surrogate pairs 
+  <li>The supplementary Private Use characters (U+F0000 .. U+FFFFD, U+100000 .. 
+    U+10FFFD) are listed as distinct ranges. These correspond to surrogate pairs 
     where the first surrogate is in the High Surrogate Private Use section.</li>
 </ul>
 <p>The exact ranges represented by start and end characters are:
 <ul>
-  <li>CJK Ideographs Extension A (U+3400 - U+4DB5)</li>
-  <li>CJK Ideographs (U+4E00 - U+9FA5)</li>
-  <li>Hangul Syllables (U+AC00 - U+D7A3)</li>
-  <li>Non-Private Use High Surrogates (U+D800 - U+DB7F)</li>
-  <li>Private Use High Surrogates (U+DB80 - U+DBFF)</li>
-  <li>Low Surrogates (U+DC00 - U+DFFF)</li>
-  <li>The Private Use Area (U+E000 - U+F8FF)</li>
-  <li>Plane 15 Private Use Area (U+F0000 - U+FFFFD)</li>
-  <li>Plane 16 Private Use Area (U+100000 - U+10FFFD)</li>
+  <li>CJK Ideographs Extension A (U+3400 .. U+4DB5)</li>
+  <li>CJK Ideographs (U+4E00 .. U+9FA5)</li>
+  <li>Hangul Syllables (U+AC00 .. U+D7A3)</li>
+  <li>Non-Private Use High Surrogates (U+D800 .. U+DB7F)</li>
+  <li>Private Use High Surrogates (U+DB80 .. U+DBFF)</li>
+  <li>Low Surrogates (U+DC00 .. U+DFFF)</li>
+  <li>The Private Use Area (U+E000 .. U+F8FF)</li>
+  <li>CJK Ideographs Extension B (U+20000 .. U+2A6D6)</li>
+  <li>Plane 15 Private Use Area (U+F0000 .. U+FFFFD)</li>
+  <li>Plane 16 Private Use Area (U+100000 .. U+10FFFD)</li>
 </ul>
 <p>The following table describes the format and meaning of each field in a data 
-entry in the UnicodeData file. Fields which contain normative information are so 
-indicated.</p>
+entry in the UnicodeData file.</p>
 <table border="1" cellspacing="2" cellpadding="2">
   <tr>
     <th valign="top" align="LEFT">
       <p align="LEFT">Field</th>
     <th valign="top" align="LEFT">
       <p align="LEFT">Name</th>
-    <th valign="top" align="LEFT">
-      <p align="LEFT">Status</th>
+    <th valign="top" align="center">
+      <p align="LEFT">N/I</th>
     <th valign="top" align="LEFT">
       <p align="LEFT">Explanation</th>
   </tr>
   <tr>
     <th valign="top">0</th>
     <td valign="top">Code value</td>
-    <td valign="top">normative</td>
-    <td valign="top">Code value. For characters in the range U+0000..U+FFFD
-      the code value uses a 4-digit hexadecimal format; for characters in the
-      range U+10000..U+FFFFD the code value uses a 5-digit hexadecimal format;
-      and for characters in the range U+100000..U+10FFFD the code value uses a
-      6-digit hexadecimal format.</td>
+    <td valign="top" align="center">N</td>
+    <td valign="top">Code value.</td>
   </tr>
   <tr>
     <th valign="top">1</th>
     <td valign="top">Character name</td>
-    <td valign="top">normative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">These names match exactly the names published in Chapter 14 
       of the Unicode Standard, Version 3.0.</td>
   </tr>
   <tr>
     <th valign="top">2</th>
     <td valign="top"><a href="#General Category">General Category</a></td>
-    <td valign="top">normative / informative<br>
-      (see below)</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">This is a useful breakdown into various &quot;character 
       types&quot; which can be used as a default categorization in 
       implementations. See below for a brief explanation.</td>
@@ -144,7 +169,7 @@ indicated.</p>
     <th valign="top">3</th>
     <td valign="top"><a href="#Canonical Combining Classes">Canonical Combining 
       Classes</a></td>
-    <td valign="top">normative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">The classes used for the Canonical Ordering Algorithm in 
       the Unicode Standard. These classes are also printed in Chapter 4 of the 
       Unicode Standard.</td>
@@ -152,7 +177,7 @@ indicated.</p>
   <tr>
     <th valign="top">4</th>
     <td valign="top"><a href="#Bidirectional Category">Bidirectional Category</a></td>
-    <td valign="top">normative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">See the list below for an explanation of the abbreviations 
       used in this field. These are the categories required by the Bidirectional 
       Behavior Algorithm in the Unicode Standard. These categories are 
@@ -162,7 +187,7 @@ indicated.</p>
     <th valign="top">5</th>
     <td valign="top"><a href="#Character Decomposition">Character Decomposition 
       Mapping</a></td>
-    <td valign="top">normative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">In the Unicode Standard, not all of the mappings are full 
       (maximal) decompositions. Recursive application of look-up for 
       decompositions will, in all cases, lead to a maximal decomposition. The 
@@ -172,7 +197,7 @@ indicated.</p>
   <tr>
     <th valign="top">6</th>
     <td valign="top">Decimal digit value</td>
-    <td valign="top">normative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">This is a numeric field. If the character has the decimal 
       digit property, as specified in Chapter 4 of the Unicode Standard, the 
       value of that digit is represented with an integer value in this field</td>
@@ -180,7 +205,7 @@ indicated.</p>
   <tr>
     <th valign="top">7</th>
     <td valign="top">Digit value</td>
-    <td valign="top">normative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">This is a numeric field. If the character represents a 
       digit, not necessarily a decimal digit, the value is here. This covers 
       digits which do not form decimal radix forms, such as the compatibility 
@@ -189,7 +214,7 @@ indicated.</p>
   <tr>
     <th valign="top">8</th>
     <td valign="top">Numeric value</td>
-    <td valign="top">normative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">This is a numeric field. If the character has the numeric 
       property, as specified in Chapter 4 of the Unicode Standard, the value of 
       that character is represented with an integer or rational number in this 
@@ -200,7 +225,7 @@ indicated.</p>
   <tr>
     <th valign="top">9</th>
     <td valign="top">Mirrored</td>
-    <td valign="top">normative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">If the character has been identified as a 
       &quot;mirrored&quot; character in bidirectional text, this field has the 
       value &quot;Y&quot;; otherwise &quot;N&quot;. The list of mirrored 
@@ -209,51 +234,58 @@ indicated.</p>
   <tr>
     <th valign="top">10</th>
     <td valign="top">Unicode 1.0 Name</td>
-    <td valign="top">informative</td>
+    <td valign="top" align="center">I</td>
     <td valign="top">This is the old name as published in Unicode 1.0. This name 
-      is only provided when it is significantly different from the Unicode 3.0 
-      name for the character.</td>
+      is only provided when it is significantly different from the current name 
+      for the character.</td>
   </tr>
   <tr>
     <th valign="top">11</th>
     <td valign="top">10646 comment field</td>
-    <td valign="top">informative</td>
-    <td valign="top">This is the ISO 10646 comment field. It appears in parentheses 
-      in the 10646 names list, or contains an asterisk to mark an Annex P note.</td>
+    <td valign="top" align="center">I</td>
+    <td valign="top">This is the ISO 10646 comment field. It appears in 
+      parentheses in the 10646 names list, or contains an asterisk to mark an 
+      Annex P note.</td>
   </tr>
   <tr>
     <th valign="top">12</th>
     <td valign="top"><a href="#Case Mappings">Uppercase Mapping</a></td>
-    <td valign="top">informative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">Upper case equivalent mapping. If a character is part of an 
-      alphabet with case distinctions, and has an upper case equivalent, then 
-      the upper case equivalent is in this field. See the explanation below on 
-      case distinctions. These mappings are always one-to-one, not one-to-many 
-      or many-to-one. This field is informative.</td>
+      alphabet with case distinctions, and has a simple upper case equivalent, 
+      then the upper case equivalent is in this field. See the explanation below 
+      on case distinctions. These mappings are always one-to-one, not 
+      one-to-many or many-to-one.
+      <p><i>For full case mappings, see <a
+      href="http://www.unicode.org/unicode/reports/tr21/">UTR #21</a> and 
+      SpecialCasing.txt.</i></p>
+    </td>
   </tr>
   <tr>
     <th valign="top">13</th>
     <td valign="top"><a href="#Case Mappings">Lowercase Mapping</a></td>
-    <td valign="top">informative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">Similar to Uppercase mapping</td>
   </tr>
   <tr>
     <th valign="top">14</th>
     <td valign="top"><a href="#Case Mappings">Titlecase Mapping</a></td>
-    <td valign="top">informative</td>
+    <td valign="top" align="center">N</td>
     <td valign="top">Similar to Uppercase mapping</td>
   </tr>
 </table>
 <h3><a name="General Category"></a>General Category</h3>
-<p>The values in this field are abbreviations for the following. Some of the 
-values are normative, and some are informative. For more information, see the 
-Unicode Standard.</p>
-<p><b>Note:</b> the standard does not assign information to control characters 
-(except for certain cases in the Bidirectional Algorithm). Implementations will 
-generally also assign categories to certain control characters, notably CR and 
-LF, according to platform conventions.</p>
-<h4>Normative Categories</h4>
-<table border="0" cellspacing="2" cellpadding="0">
+<p>The values in this field are abbreviations for the following values. For more 
+information, see the Unicode Standard.</p>
+<blockquote>
+  <p><b>Note:</b> the standard does not assign information to control characters 
+  (except for certain cases in the Bidirectional Algorithm). Implementations 
+  will generally also assign categories to certain control characters, notably 
+  CR and LF, according to platform conventions. See <a
+  href="http://www.unicode.org/unicode/reports/tr13/">UAX #13: Unicode Newline 
+  Guidelines</a> for more information.</p>
+</blockquote>
+<table border="0" cellspacing="0" cellpadding="4">
   <tr>
     <th>
       <p align="LEFT">Abbr.</th>
@@ -271,6 +303,14 @@ LF, according to platform conventions.</p>
   <tr>
     <td align="CENTER">Lt</td>
     <td>Letter, Titlecase</td>
+  </tr>
+  <tr>
+    <td align="CENTER">Lm</td>
+    <td>Letter, Modifier</td>
+  </tr>
+  <tr>
+    <td align="CENTER">Lo</td>
+    <td>Letter, Other</td>
   </tr>
   <tr>
     <td align="CENTER">Mn</td>
@@ -295,55 +335,6 @@ LF, according to platform conventions.</p>
   <tr>
     <td align="CENTER">No</td>
     <td>Number, Other</td>
-  </tr>
-  <tr>
-    <td align="CENTER">Zs</td>
-    <td>Separator, Space</td>
-  </tr>
-  <tr>
-    <td align="CENTER">Zl</td>
-    <td>Separator, Line</td>
-  </tr>
-  <tr>
-    <td align="CENTER">Zp</td>
-    <td>Separator, Paragraph</td>
-  </tr>
-  <tr>
-    <td align="CENTER">Cc</td>
-    <td>Other, Control</td>
-  </tr>
-  <tr>
-    <td align="CENTER">Cf</td>
-    <td>Other, Format</td>
-  </tr>
-  <tr>
-    <td align="CENTER">Cs</td>
-    <td>Other, Surrogate</td>
-  </tr>
-  <tr>
-    <td align="CENTER">Co</td>
-    <td>Other, Private Use</td>
-  </tr>
-  <tr>
-    <td align="CENTER">Cn</td>
-    <td>Other, Not Assigned (no characters in the file have this property)</td>
-  </tr>
-</table>
-<h4>Informative Categories</h4>
-<table border="0" cellspacing="2" cellpadding="0">
-  <tr>
-    <th>
-      <p align="LEFT">Abbr.</th>
-    <th>
-      <p align="LEFT">Description</th>
-  </tr>
-  <tr>
-    <td align="CENTER">Lm</td>
-    <td>Letter, Modifier</td>
-  </tr>
-  <tr>
-    <td align="CENTER">Lo</td>
-    <td>Letter, Other</td>
   </tr>
   <tr>
     <td align="CENTER">Pc</td>
@@ -389,14 +380,50 @@ LF, according to platform conventions.</p>
     <td align="CENTER">So</td>
     <td>Symbol, Other</td>
   </tr>
+  <tr>
+    <td align="CENTER">Zs</td>
+    <td>Separator, Space</td>
+  </tr>
+  <tr>
+    <td align="CENTER">Zl</td>
+    <td>Separator, Line</td>
+  </tr>
+  <tr>
+    <td align="CENTER">Zp</td>
+    <td>Separator, Paragraph</td>
+  </tr>
+  <tr>
+    <td align="CENTER">Cc</td>
+    <td>Other, Control</td>
+  </tr>
+  <tr>
+    <td align="CENTER">Cf</td>
+    <td>Other, Format</td>
+  </tr>
+  <tr>
+    <td align="CENTER">Cs</td>
+    <td>Other, Surrogate</td>
+  </tr>
+  <tr>
+    <td align="CENTER">Co</td>
+    <td>Other, Private Use</td>
+  </tr>
+  <tr>
+    <td align="CENTER">Cn</td>
+    <td>Other, Not Assigned (no characters in the file have this property)</td>
+  </tr>
 </table>
+<blockquote>
+  <p><b>Note:</b> The term &quot;L&amp;&quot; is sometimes used to stand for 
+  Uppercase, Lowercase or Titlecase letters (Lu, Ll, or Lt).</p>
+</blockquote>
 <h3><a name="Bidirectional Category"></a>Bidirectional Category</h3>
 <p>Please refer to Chapter 3 for an explanation of the algorithm for 
 Bidirectional Behavior and an explanation of the significance of these 
 categories. An up-to-date version can be found on <a
 href="http://www.unicode.org/unicode/reports/tr9/">Unicode Standard Annex #9: 
-The Bidirectional Algorithm</a>. These values are normative.</p>
-<table border="0" cellpadding="2">
+The Bidirectional Algorithm</a>.</p>
+<table border="0" cellpadding="4" cellspacing="0">
   <tr>
     <th valign="TOP" align="LEFT">
       <p align="LEFT">Type</th>
@@ -481,12 +508,11 @@ The Bidirectional Algorithm</a>. These values are normative.</p>
   </tr>
 </table>
 <h3><a name="Character Decomposition"></a>Character Decomposition Mapping</h3>
-<p>The decomposition is a normative property of a character. The tags supplied 
-with certain decomposition mappings generally indicate formatting information. 
-Where no such tag is given, the mapping is designated as canonical. Conversely, 
-the presence of a formatting tag also indicates that the mapping is a 
-compatibility mapping and not a canonical mapping. In the absence of other 
-formatting information in a compatibility mapping, the tag is used to 
+<p>The tags supplied with certain decomposition mappings generally indicate 
+formatting information. Where no such tag is given, the mapping is designated as 
+canonical. Conversely, the presence of a formatting tag also indicates that the 
+mapping is a compatibility mapping and not a canonical mapping. In the absence 
+of other formatting information in a compatibility mapping, the tag is used to 
 distinguish it from canonical mappings.</p>
 <p>In some instances a canonical mapping or a compatibility mapping may consist 
 of a single character. For a canonical mapping, this indicates that the 
@@ -494,7 +520,7 @@ character is a canonical equivalent of another single character. For a
 compatibility mapping, this indicates that the character is a compatibility 
 equivalent of another single character. The compatibility formatting tags used 
 are:</p>
-<table border="0" cellspacing="2" cellpadding="0">
+<table border="0" cellspacing="0" cellpadding="4">
   <tr>
     <th>Tag</th>
     <th>
@@ -577,7 +603,7 @@ in Chapter 3 to use those mappings <i>recursively.</i>
     reordering algorithm.</li>
 </ul>
 <h3><a name="Canonical Combining Classes"></a>Canonical Combining Classes</h3>
-<table border="0" cellspacing="2" cellpadding="0">
+<table border="0" cellspacing="0" cellpadding="4">
   <tr>
     <th>
       <p align="LEFT">Value</th>
@@ -695,52 +721,31 @@ currently have members but are specified here for completeness.</p>
 Normalization</h3>
 <p>Decomposition is specified in Chapter 3. <a
 href="http://www.unicode.org/unicode/reports/tr15/"><i>Unicode Standard Annex 
-#15: Unicode Normalization Forms</i></a> specifies the interaction between decomposition 
-and normalization. The most up-to-date version is found on <a
-href="http://www.unicode.org/unicode/reports/tr15/">http://www.unicode.org/unicode/reports/tr15/</a>. 
-That report specifies how the decompositions defined in UnicodeData.txt are used 
-to derive normalized forms of Unicode text.</p>
+#15: Unicode Normalization Forms</i></a> specifies the interaction between 
+decomposition and normalization. That report specifies how the decompositions 
+defined in UnicodeData.txt are used to derive normalized forms of Unicode text.</p>
 <p>Note that as of the 2.1.9 update of the Unicode Character Database, the 
 decompositions in the UnicodeData.txt file can be used to recursively derive the 
 full decomposition in canonical order, without the need to separately apply 
 canonical reordering. However, canonical reordering of combining character 
-sequences must still be applied in decomposition when normalizing source text 
-which contains any combining marks.</p>
+sequences <b><i>must</i></b> still be applied in decomposition when normalizing 
+source text which contains any combining marks.</p>
 <h3><a name="Case Mappings"></a>Case Mappings</h3>
-<p>The case mapping is an informative, default mapping. Case itself, on the 
-other hand, has normative status. Thus, for example, 0041 LATIN CAPITAL LETTER A 
-is normatively uppercase, but its lowercase mapping the 0061 LATIN SMALL LETTER 
-A is informative. The reason for this is that case can be considered to be an 
-inherent property of a particular character (and is usually, but not always, 
-derivable from the presence of the terms &quot;CAPITAL&quot; or 
-&quot;SMALL&quot; in the character name), but case mappings between characters 
-are occasionally influenced by local conventions. For example, certain 
-languages, such as Turkish, German, French, or Greek may have small deviations 
-from the default mappings listed in UnicodeData.</p>
-<p>In addition to uppercase and lowercase, because of the inclusion of certain 
-composite characters for compatibility, such as 01F1 LATIN CAPITAL LETTER DZ, 
-there is a third case, called <i>titlecase</i>, which is used where the first 
-letter of a word is to be capitalized (e.g. UPPERCASE, Titlecase, lowercase). An 
-example of such a titlecase letter is 01F2 LATIN CAPITAL LETTER D WITH SMALL 
-LETTER Z.</p>
-<p>The uppercase, titlecase and lowercase fields are only included for 
-characters that have a single corresponding character of that type. Composite 
-characters (such as &quot;339D SQUARE CM&quot;) that do not have a single 
-corresponding character of that type can be cased by decomposition.</p>
-<p>For compatibility with existing parsers, UnicodeData only contains case 
+<p>There are a number of complications to case mappings that occur once the 
+repertoire of characters is expanded beyond ASCII. For more information, see <a
+href="http://www.unicode.org/unicode/reports/tr21/">UTR #21: Case Mappings</a>.</p>
+<p>For compatibility with existing parsers, UnicodeData.txt only contains case 
 mappings for characters where they are one-to-one mappings; it also omits 
 information about context-sensitive case mappings. Information about these 
-special cases can be found in a separate data file, <a
-href="http://www.unicode.org/Public/3.0-Update1/">SpecialCasing.txt</a>, which 
-has been added starting with the 2.1.8 update to the Unicode data files. 
-SpecialCasing.txt contains additional informative case mappings that are either 
-not one-to-one or which are context-sensitive.</p>
+special cases can be found in a separate data file, SpecialCasing.txt.</p>
 <h2><a name="Property Invariants"></a>Property Invariants</h2>
 <p>Values in UnicodeData.txt are subject to correction as errors are found; 
 however, some characteristics of the categories themselves can be considered 
 invariants. Applications may wish to take these invariants into account when 
-choosing how to implement character properties. The following is a partial list 
-of known invariants for the Unicode Character Database.</p>
+choosing how to implement character properties. For more information, see <a
+href="http://www.unicode.org/unicode/standard/policies.html">Unicode Policies</a>.</p>
+<p>The following is a partial list of known invariants for the Unicode Character 
+Database.</p>
 <h4>Database Fields</h4>
 <ul>
   <li>The number of fields in UnicodeData.txt is fixed.</li>
@@ -792,17 +797,6 @@ of known invariants for the Unicode Character Database.</p>
     </ul>
   </li>
 </ul>
-<h4>Case</h4>
-<ul>
-  <li>Characters of type Lu, Lt, or Ll are called <i>cased</i>. All characters 
-    with an Upper, Lower, or Titlecase mapping are cased characters.
-    <ul>
-      <li>However, characters with the General Categories of Lu, Ll, or Lt may 
-        not always have case mappings, and case mappings may vary by locale. 
-        (See http://www.unicode.org/Public/UNIDATA/SpecialCasing.txt).</li>
-    </ul>
-  </li>
-</ul>
 <h4>Canonical Decomposition</h4>
 <ul>
   <li>Canonical mappings are always in canonical order.</li>
@@ -831,6 +825,16 @@ of known invariants for the Unicode Character Database.</p>
 <h2><a name="Modification History"></a>Modification History</h2>
 <p>This section provides a summary of the changes between update versions of the 
 Unicode Standard.</p>
+<h3><a
+href="http://www.unicode.org/unicode/standard/versions/enumeratedversions.html#Unicode 3.1">Unicode 
+3.1</a></h3>
+<p>Modifications made for Version 3.0.1 of UnicodeData.txt include:
+<ul>
+  <li>Addition of 2237 new entries, to cover new characters and new ranges of 
+    unified Han characters encoded in Unicode 3.1.</li>
+  <li>Changed General Category value of 16EE..16F0 (Runic golden numbers) from 
+    No to Nl.</li>
+</ul>
 <h3><a
 href="http://www.unicode.org/unicode/standard/versions/enumeratedversions.html#Unicode 3.0.1">Unicode 
 3.0.1</a></h3>
@@ -1019,6 +1023,45 @@ Version 2.0 include:
   <li>Added categories Me, Sk, Pc, Nl, Cs, Cf, and rectified a number of 
     mistakes in the database.</li>
 </ul>
+<h2><i><a name="UCD_Terms">UCD Terms of Use</a></i></h2>
+<h3><i>Disclaimer</i></h3>
+<blockquote>
+  <p><i>The Unicode Character Database is provided as is by Unicode, Inc. No 
+  claims are made as to fitness for any particular purpose. No warranties of any 
+  kind are expressed or implied. The recipient agrees to determine applicability 
+  of information provided. If this file has been purchased on magnetic or 
+  optical media from Unicode, Inc., the sole remedy for any claim will be 
+  exchange of defective media within 90 days of receipt.</i></p>
+  <p><i>This disclaimer is applicable for all other data files accompanying the 
+  Unicode Character Database, some of which have been compiled by the Unicode 
+  Consortium, and some of which have been supplied by other sources.</i></p>
+</blockquote>
+<h3><i>Limitations on Rights to Redistribute This Data</i></h3>
+<blockquote>
+  <p><i>Recipient is granted the right to make copies in any form for internal 
+  distribution and to freely use the information supplied in the creation of 
+  products supporting the Unicode<sup>TM</sup> Standard. The files in the 
+  Unicode Character Database can be redistributed to third parties or other 
+  organizations (whether for profit or not) as long as this notice and the 
+  disclaimer notice are retained. Information can be extracted from these files 
+  and used in documentation or programs, as long as there is an accompanying 
+  notice indicating the source.</i></p>
+</blockquote>
+<hr width="50%">
+<div align="center">
+  <center>
+  <table cellspacing="0" cellpadding="0" border="0">
+    <tr>
+      <td><a href="http://www.unicode.org/unicode/copyright.html"><img
+        src="http://www.unicode.org/img/hb_home.gif" border="0" alt="Home"
+        width="40" height="49"><img src="http://www.unicode.org/img/hb_mid.gif"
+        border="0" alt="Terms of Use" width="152" height="49"><img
+        src="http://www.unicode.org/img/hb_mail.gif" border="0" alt="E-mail"
+        width="46" height="49"></a></td>
+    </tr>
+  </table>
+  </center>
+</div>
 
 </body>
 
