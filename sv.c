@@ -2885,7 +2885,8 @@ sv_clear(register SV *sv)
     stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
-	if (IoIFP(sv) != PerlIO_stdin() &&
+	if (IoIFP(sv) &&
+	    IoIFP(sv) != PerlIO_stdin() &&
 	    IoIFP(sv) != PerlIO_stdout() &&
 	    IoIFP(sv) != PerlIO_stderr())
 	  io_close((IO*)sv);
