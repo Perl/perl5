@@ -54,8 +54,8 @@ sub B::OP::ix {
     my $ix = $optab{$$op};
     defined($ix) ? $ix : do {
 	nice '['.$op->name.']';
-	asm "newop", $op->size;
-	asm "stop", $optab{$$op} = $opix = $ix = $tix++;
+	asm "newopx", $op->size | $op->type <<7;
+	$optab{$$op} = $opix = $ix = $tix++;
 	$op->bsave($ix);
 	$ix;
     }
@@ -66,9 +66,8 @@ sub B::SPECIAL::ix {
     my $ix = $spectab{$$spec};
     defined($ix) ? $ix : do {
 	nice '['.$specialsv_name[$$spec].']';
-	asm "ldspecsv", $$spec;
-	asm "stsv", $spectab{$$spec} = $varix = $tix;
-	$tix++;
+	asm "ldspecsvx", $$spec;
+	$spectab{$$spec} = $varix = $tix++;
     }
 }
 
@@ -77,8 +76,8 @@ sub B::SV::ix {
     my $ix = $svtab{$$sv};
     defined($ix) ? $ix : do {
 	nice '['.class($sv).']';
-	asm "newsv", $sv->SvTYPE;
-	asm "stsv", $svtab{$$sv} = $varix = $ix = $tix++;
+	asm "newsvx", $sv->FLAGS;
+	$svtab{$$sv} = $varix = $ix = $tix++;
 	$sv->bsave($ix);
 	$ix;
     }
@@ -92,8 +91,8 @@ sub B::GV::ix {
 	    my ($svix, $avix, $hvix, $cvix, $ioix, $formix);
 	    nice "[GV]";
 	    my $name = $gv->STASH->NAME . "::" . $gv->NAME;
-	    asm "gv_fetchpv", cstring $name;
-	    asm "stsv", $svtab{$$gv} = $varix = $ix = $tix++;
+	    asm "gv_fetchpvx", cstring $name;
+	    $svtab{$$gv} = $varix = $ix = $tix++;
 	    asm "sv_flags", $gv->FLAGS;
 	    asm "sv_refcnt", $gv->REFCNT;
 	    asm "xgv_flags", $gv->GvFLAGS;
@@ -106,13 +105,14 @@ sub B::GV::ix {
 	    $avix = $gv->AV->ix;
 	    $hvix = $gv->HV->ix;
 
-    # TODO: kludge
+    # XXX {{{{
 	    my $cv = $gv->CV;
 	    $cvix = $$cv && defined $files{$cv->FILE} ? $cv->ix : 0;
 	    my $form = $gv->FORM;
 	    $formix = $$form && defined $files{$form->FILE} ? $form->ix : 0;
 
-	    $ioix = $name !~ /STDOUT$/ ? $gv->IO->ix : 0;		# XXX
+	    $ioix = $name !~ /STDOUT$/ ? $gv->IO->ix : 0;	
+							    # }}}} XXX
 
 	    nice "-GV-",
 	    asm "ldsv", $varix = $ix unless $ix == $varix;
@@ -128,8 +128,8 @@ sub B::GV::ix {
 	    asm "formfeed", $svix if $name eq "main::\cL";
 	} else {
 	    nice "[GV]";
-	    asm "newsv", SVt_PVGV;
-	    asm "stsv", $svtab{$$gv} = $varix = $ix = $tix++;
+	    asm "newsvx", $gv->FLAGS;
+	    $svtab{$$gv} = $varix = $ix = $tix++;
 	    my $stashix = $gv->STASH->ix;
 	    $gv->B::PVMG::bsave($ix);
 	    asm "xgv_flags", $gv->GvFLAGS;
@@ -147,16 +147,17 @@ sub B::HV::ix {
 	my $name = $hv->NAME;
 	if ($name) {
 	    nice "[STASH]";
-	    asm "gv_stashpv", cstring $name;
-	    asm "stsv", $svtab{$$hv} = $varix = $ix = $tix++;
+	    asm "gv_stashpvx", cstring $name;
+	    asm "sv_flags", $hv->FLAGS;
+	    $svtab{$$hv} = $varix = $ix = $tix++;
 	    asm "xhv_name", pvix $name;
 	    # my $pmrootix = $hv->PMROOT->ix;	# XXX
 	    asm "ldsv", $varix = $ix unless $ix == $varix;
 	    # asm "xhv_pmroot", $pmrootix;	# XXX
 	} else {
 	    nice "[HV]";
-	    asm "newsv", SVt_PVHV;
-	    asm "stsv", $svtab{$$hv} = $varix = $ix = $tix++;
+	    asm "newsvx", $hv->FLAGS;
+	    $svtab{$$hv} = $varix = $ix = $tix++;
 	    my $stashix = $hv->SvSTASH->ix;
 	    for (@array = $hv->ARRAY) {
 		next if $i = not $i;
@@ -170,7 +171,6 @@ sub B::HV::ix {
 	    asm "xmg_stash", $stashix;
 	}
 	asm "sv_refcnt", $hv->REFCNT;
-	asm "sv_flags", $hv->FLAGS;
 	$ix;
     }
 }
@@ -190,7 +190,6 @@ sub B::NULL::bsave {
     nice '-'.class($sv).'-',
     asm "ldsv", $varix = $ix unless $ix == $varix;
     asm "sv_refcnt", $sv->REFCNT;
-    asm "sv_flags", $sv->FLAGS;
 }
 
 sub B::SV::bsave;
@@ -316,12 +315,12 @@ sub B::IO::bsave {
 sub B::CV::bsave {
     my ($cv,$ix) = @_;
     my $stashix = $cv->STASH->ix;
-    my $startix = $cv->START->opwalk;
-    my $rootix = $cv->ROOT->ix;
     my $gvix = $cv->GV->ix;
     my $padlistix = $cv->PADLIST->ix;
     my $outsideix = $cv->OUTSIDE->ix;
     my $constix = $cv->CONST ? $cv->XSUBANY->ix : 0;
+    my $startix = $cv->START->opwalk;
+    my $rootix = $cv->ROOT->ix;
 
     $cv->B::PVMG::bsave($ix);
     asm "xcv_stash", $stashix;
@@ -356,7 +355,6 @@ sub B::AV::bsave {
     asm "av_extend", $av->MAX;
     asm "av_pushx", $_ for @array;
     asm "sv_refcnt", $av->REFCNT;
-    asm "sv_flags", $av->FLAGS;
     asm "xav_flags", $av->AvFLAGS;
     asm "xmg_stash", $stashix;
 }
@@ -382,9 +380,10 @@ sub B::HV::bwalk {
 	    $v->ix(1) if desired $v;
 	} else {
 	    nice "[prototype]";
-	    asm "gv_fetchpv", cstring $hv->NAME . "::$k";
-	    asm "stsv", $svtab{$$v} = $varix = $tix;
+	    asm "gv_fetchpvx", cstring $hv->NAME . "::$k";
+	    $svtab{$$v} = $varix = $tix;
 	    $v->bsave($tix++);
+	    asm "sv_flags", $v->FLAGS;
 	}
     }
 }
@@ -401,7 +400,6 @@ sub B::OP::bsave_thin {
 	nice '-'.$op->name.'-',
 	asm "ldop", $opix = $ix;
     }
-    asm "op_type", $op->type;
     asm "op_next", $nextix;
     asm "op_targ", $op->targ if $op->type;		# tricky
     asm "op_flags", $op->flags;
@@ -419,7 +417,7 @@ sub B::UNOP::bsave {
     my $firstix = 
 	$name =~ /fl[io]p/
 			# that's just neat
-    ||	(!$ithreads && $name =~ /regcomp/)
+    ||	(!$ithreads && $name eq 'regcomp')
 			# trick for /$a/o in pp_regcomp
     ||	$name eq 'rv2sv'
 	    && $op->flags & OPf_MOD	
@@ -432,8 +430,27 @@ sub B::UNOP::bsave {
     asm "op_first", $firstix;
 }
 
-sub B::BINOP::bsave;
-    *B::BINOP::bsave = *B::OP::bsave;
+sub B::BINOP::bsave {
+    my ($op, $ix) = @_;
+    if ($op->name eq 'aassign' && $op->private & B::OPpASSIGN_HASH()) {
+	my $last = $op->last;
+	my $lastix = do {
+	    local *B::OP::bsave = *B::OP::bsave_fat;
+	    local *B::UNOP::bsave = *B::UNOP::bsave_fat;
+	    $last->ix;
+	};
+	asm "ldop", $lastix unless $lastix == $opix;
+	asm "op_targ", $last->targ;
+	$op->B::OP::bsave($ix);
+	asm "op_last", $lastix;
+    } else {
+	$op->B::OP::bsave($ix);
+    }
+}
+
+# not needed if no pseudohashes
+
+*B::BINOP::bsave = *B::OP::bsave if $] >= 5.009;
 
 # deal with sort / formline 
 
@@ -628,9 +645,16 @@ sub save_cq {
 	} else {
 	    for ($av->ARRAY) {
 		next unless $_->FILE eq $0;
-		# XXX BEGIN { exit while 1 }
+		# XXX BEGIN { goto A while 1; A: }
 		for (my $op = $_->START; $$op; $op = $op->next) {
-		    next unless $op->name =~ /require/;
+		    next unless $op->name eq 'require' || 
+			# this kludge needed for tests
+			$op->name eq 'gv' && do {
+			    my $gv = class($op) eq 'SVOP' ?
+				$op->gv :
+			    	(($_->PADLIST->ARRAY)[1]->ARRAY)[$op->padix];
+			    $$gv && $gv->NAME =~ /use_ok|plan/
+			};
 		    asm "push_begin", $_->ix;
 		    last;
 		}
@@ -652,7 +676,7 @@ sub save_cq {
 }
 
 sub compile {
-    my ($head, $scan, $T_inhinc, $T_thatfile, $keep_syn);
+    my ($head, $scan, $T_inhinc, $keep_syn);
     my $cwd = '';
     $files{$0} = 1;
     sub keep_syn {
@@ -675,41 +699,36 @@ sub compile {
 	} elsif (/^-k/) {
 	    keep_syn;
 	} elsif (/^-o(.*)$/) {
-	    my $ofile = $1;
-	    open STDOUT, ">$ofile" or die "open $ofile: $!";
-	    *B::COP::file = sub { $ofile } if $T_thatfile;
+	    open STDOUT, ">$1" or die "open $1: $!";
 	} elsif (/^-f(.*)$/) {
 	    $files{$1} = 1;
-	} elsif (/^-s/) {
-	    $scan = 1;
+	} elsif (/^-s(.*)$/) {
+	    $scan = length($1) ? $1 : $0;
 	} elsif (/^-b/) {
 	    $savebegins = 1;
-    # these are here for the testsuite
-	} elsif (/^-TD(.*)/) {
+    # this is here for the testsuite
+	} elsif (/^-TI/) {
 	    $T_inhinc = 1;
-	    $cwd = $1;
-	} elsif (/^-TF/) {
-	    $T_thatfile = 1;
+	} elsif (/^-TF(.*)/) {
+	    my $thatfile = $1;
+	    *B::COP::file = sub { $thatfile };
 	} else {
 	    bwarn "Ignoring '$_' option";
 	}
     }
     if ($scan) {
-	for(keys %files) {
-	    my $f;
-	    # KLUDGE
-	    open($f, $_) or open ($f, "$cwd/$_")
-		or bwarn("cannot rescan '$_'"), next;
-	    while (<$f>) {
-		/^#\s*line\s+\d+\s+("?)(.*)\1/ and $files{$2} = 1;
-		/^#/ and next;
-		if (/\bgoto\b/ && !$keep_syn) {
-		    bwarn "keeping the syntax tree: \"goto\" op found";
-		    keep_syn;
-		}
+	my $f;
+	open $f, $scan
+	    or bwarn("cannot rescan '$_'"), next;
+	while (<$f>) {
+	    /^#\s*line\s+\d+\s+("?)(.*)\1/ and $files{$2} = 1;
+	    /^#/ and next;
+	    if (/\bgoto\b/ && !$keep_syn) {
+		bwarn "keeping the syntax tree: \"goto\" op found";
+		keep_syn;
 	    }
-	    close $f;
 	}
+	close $f;
     }
     binmode STDOUT;
     return sub {
@@ -747,3 +766,87 @@ sub compile {
 }
 
 1;
+
+=head1 NAME
+
+B::Bytecode - Perl compiler's bytecode backend
+
+=head1 SYNOPSIS
+
+B<perl -MO=Bytecode>[B<,-H>][B<,-o>I<script.plc>] I<script.pl>
+
+=head1 DESCRIPTION
+
+Compiles a Perl script into a bytecode format that could be loaded
+later by the ByteLoader module and executed as a regular Perl script.
+
+=head1 EXAMPLE
+
+    $ perl -MO=Bytecode,-H,-ohi -e 'print "hi!\n"'
+    $ perl hi
+    hi!
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-b>
+
+Save all the BEGIN blocks. Normally only BEGIN blocks that C<require>
+other files (ex. C<use Foo;>) are saved.
+
+=item B<-H>
+
+prepend a C<use ByteLoader VERSION;> line to the produced bytecode.
+
+=item B<-k>
+
+keep the syntax tree - it is stripped by default.
+
+=item B<-o>I<outfile>
+
+put the bytecode in <outfile> instead of dumping it to STDOUT.
+
+=item B<-s>
+
+scan the script for C<# line ..> directives and for <goto LABEL>
+expressions. When gotos are found keep the syntax tree.
+
+=back
+
+=head1 KNOWN BUGS
+
+=over 4
+
+=item *
+
+C<BEGIN { goto A: while 1; A: }> won't even compile.
+
+=item *
+
+C<?...?> and C<reset> do not work as expected.
+
+=item *
+
+variables in C<(?{ ... })> constructs are not properly scoped.
+
+=item *
+
+scripts that use source filters will fail miserably. 
+
+=back
+
+=head1 NOTICE
+
+There are also undocumented bugs and options.
+
+THIS CODE IS HIGHLY EXPERIMENTAL. USE AT YOUR OWN RISK.
+
+=head1 AUTHORS
+
+Originally written by Malcolm Beattie <mbeattie@sable.ox.ac.uk> and
+modified by Benjamin Stuhl <sho_pi@hotmail.com>.
+
+Rewritten by Enache Adrian <enache@rdslink.ro>, 2003 a.d.
+
+=cut

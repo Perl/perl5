@@ -13,7 +13,7 @@ print OUT <<"END";
 END
 
 foreach my $const (qw(
-		      AVf_REAL 
+		      AVf_REAL
 		      HEf_SVKEY
 		      SVf_READONLY SVTYPEMASK
 		      GVf_IMPORTED_AV GVf_IMPORTED_HV

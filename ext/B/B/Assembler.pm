@@ -285,10 +285,9 @@ sub assemble {
 sub asm {
     return if $_[0] =~ /\s*\W/;
     if (defined $_[1]) {
-	return if $_[1] eq "0" and $_[0] !~ /^(?:newsv|av_pushx?|xav_flags)$/;
+	return if $_[1] eq "0" and $_[0] !~ /^(?:newsvx?|av_pushx?|xav_flags)$/;
 	return if $_[1] eq "1" and $_[0] =~ /^(?:sv_refcnt)$/;
     }
-    # warn "@_\n";
     assemble "@_";
 }
 

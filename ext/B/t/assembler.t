@@ -159,7 +159,6 @@ BEGIN {
     print "1..0 # Skip -- Perl configured without ByteLoader module\n";
     exit 0;
   }
-  print "1..0\n"; exit 0;
 }
 
 use B::Asmdata      qw( %insn_data );
@@ -248,7 +247,7 @@ NV          => [ 1.23456789E3 ],
 U16         => [ 0xffff, 0 ],
 pvcontents  => [],
 strconst    => [ '""', '"another string"' ], # no NUL
-op_tr_array => [ join( ',', 0..255 ) ],
+op_tr_array => [ join( ',', 256, 0..255 ) ],
 	      );
 
 # Erronous operand values
@@ -270,7 +269,7 @@ IV          => $Config{ivsize} == 4 ?
 NV          => undef, # PUT_NV accepts anything - it shouldn't, real-ly
 pvcontents  => [ '"spurious arg"' ],
 strconst    => [  'no quote"',  '"with NUL '."\0".' char"' ], # no NUL
-op_tr_array => [ join( ',', 1..42 ) ],
+op_tr_array => undef, # op_pv_tr is no longer exactly 256 shorts
 	      );
 
 

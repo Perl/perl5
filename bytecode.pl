@@ -111,6 +111,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
     New(666, bstate->bs_obj_list, 32, void*); /* set op objlist */
     bstate->bs_obj_list_fill = 31;
     bstate->bs_obj_list[0] = NULL; /* first is always Null */
+    bstate->bs_ix = 1;
 
 EOT
 
@@ -205,6 +206,7 @@ struct byteloader_state {
     SV				*bs_sv;
     void			**bs_obj_list;
     int				bs_obj_list_fill;
+    int				bs_ix;
     XPV				bs_pv;
     int				bs_iv_overflows;
 };
@@ -344,8 +346,11 @@ stsv		bstate->bs_sv				U32		s
 stop		PL_op					U32		s
 stpv		bstate->bs_pv.xpv_pv			U32		x
 ldspecsv	bstate->bs_sv				U8		x
+ldspecsvx	bstate->bs_sv				U8		x
 newsv		bstate->bs_sv				U8		x
+newsvx		bstate->bs_sv				U32		x
 newop		PL_op					U8		x
+newopx		PL_op					U16		x
 newopn		PL_op					U8		x
 newpv		none					PV
 pv_cur		bstate->bs_pv.xpv_cur			STRLEN
@@ -410,7 +415,9 @@ mg_name		SvMAGIC(bstate->bs_sv)			pvcontents	x
 mg_namex	SvMAGIC(bstate->bs_sv)			svindex		x
 xmg_stash	*(SV**)&SvSTASH(bstate->bs_sv)		svindex
 gv_fetchpv	bstate->bs_sv				strconst	x
+gv_fetchpvx	bstate->bs_sv				strconst	x
 gv_stashpv	bstate->bs_sv				strconst	x
+gv_stashpvx	bstate->bs_sv				strconst	x
 gp_sv		GvSV(bstate->bs_sv)			svindex
 gp_refcnt	GvREFCNT(bstate->bs_sv)			U32
 gp_refcnt_add	GvREFCNT(bstate->bs_sv)			I32		x

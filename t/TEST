@@ -153,7 +153,7 @@ TESTING DEPARSER
 ------------------------------------------------------------------------------
 EOT
 
-    print <<'EOT' if ($type eq 'bytecompile');
+    print <<EOT if ($type eq 'bytecompile');
 ------------------------------------------------------------------------------
 TESTING BYTECODE COMPILER
 ------------------------------------------------------------------------------
@@ -246,13 +246,11 @@ EOT
 	elsif ($type eq 'bytecompile') {
 	    my $perl = $ENV{PERL} || './perl';
 	    my $redir = ($^O eq 'VMS' ? '2>&1' : '');
-	    my $bswitch = "-MO=Bytecode,-H,-s,-TD`pwd`,";
-	    $bswitch .= "-TF,"
+	    my $bswitch = "-MO=Bytecode,-H,-TI,-s`pwd`/$test,";
+	    $bswitch .= "-TF$test.plc,"
 		if $test =~ m(chdir|pod/|CGI/t/carp|lib/DB);
 	    $bswitch .= "-k,"
 		if $test =~ m(deparse|terse|ext/Storable/t/code);
-	    $bswitch .= "-k,"
-		if $] < 5.009 && $test =~ m(avhv|hashwarn);
 	    $bswitch .= "-b,"
 		if $test =~ m(op/getpid);
 	    my $bytecompile =

@@ -88,6 +88,11 @@ typedef char *pvindex;
     } STMT_END
 
 #define BSET_ldspecsv(sv, arg) sv = specialsv_list[arg]
+#define BSET_ldspecsvx(sv, arg) STMT_START {	\
+	BSET_ldspecsv(sv, arg);			\
+	BSET_OBJ_STOREX(sv);			\
+    } STMT_END
+
 #define BSET_stpv(pv, arg) STMT_START {		\
 	BSET_OBJ_STORE(pv, arg);		\
 	SAVEFREEPV(pv);				\
@@ -101,7 +106,17 @@ typedef char *pvindex;
     } STMT_END
 
 #define BSET_gv_fetchpv(sv, arg)	sv = (SV*)gv_fetchpv(arg, TRUE, SVt_PV)
+#define BSET_gv_fetchpvx(sv, arg) STMT_START {	\
+	BSET_gv_fetchpv(sv, arg);		\
+	BSET_OBJ_STOREX(sv);			\
+    } STMT_END
+
 #define BSET_gv_stashpv(sv, arg)	sv = (SV*)gv_stashpv(arg, TRUE)
+#define BSET_gv_stashpvx(sv, arg) STMT_START {	\
+	BSET_gv_stashpv(sv, arg);		\
+	BSET_OBJ_STOREX(sv);			\
+    } STMT_END
+
 #define BSET_sv_magic(sv, arg)		sv_magic(sv, Nullsv, arg, 0, 0)
 #define BSET_mg_name(mg, arg)	mg->mg_ptr = arg; mg->mg_len = bstate->bs_pv.xpv_cur
 #define BSET_mg_namex(mg, arg)			\
@@ -162,8 +177,24 @@ typedef char *pvindex;
 		  NEWSV(666,0));			\
 	    SvUPGRADE(sv, arg);				\
 	} STMT_END
+#define BSET_newsvx(sv, arg) STMT_START {		\
+	    BSET_newsv(sv, arg &  SVTYPEMASK);		\
+	    SvFLAGS(sv) = arg;				\
+	    BSET_OBJ_STOREX(sv);			\
+	} STMT_END
 #define BSET_newop(o, arg)				\
 	((o = (OP*)safemalloc(arg)), memzero((char*)o,arg))
+#define BSET_newopx(o, arg) STMT_START {	\
+	register int sz = arg & 0x7f;		\
+	register OP* new = (OP*) safemalloc(sz);\
+	memzero(new, sz);			\
+	/* new->op_next = o; XXX */		\
+	o = new;				\
+	arg >>=7;				\
+	BSET_op_type(o, arg);			\
+	BSET_OBJ_STOREX(o);			\
+    } STMT_END
+
 #define BSET_newopn(o, arg) STMT_START {	\
 	OP *oldop = o;				\
 	BSET_newop(o, arg);			\
@@ -284,9 +315,15 @@ typedef char *pvindex;
 	    av_store(PL_endav, 0, cv);			\
 	} STMT_END
 #define BSET_OBJ_STORE(obj, ix)			\
-	(I32)ix > bstate->bs_obj_list_fill ?	\
-	bset_obj_store(aTHX_ bstate, obj, (I32)ix) : \
-	(bstate->bs_obj_list[ix] = obj)
+	((I32)ix > bstate->bs_obj_list_fill ?	\
+	 bset_obj_store(aTHX_ bstate, obj, (I32)ix) : \
+	 (bstate->bs_obj_list[ix] = obj),	\
+	 bstate->bs_ix = ix+1)
+#define BSET_OBJ_STOREX(obj)			\
+	(bstate->bs_ix > bstate->bs_obj_list_fill ?	\
+	 bset_obj_store(aTHX_ bstate, obj, bstate->bs_ix) : \
+	 (bstate->bs_obj_list[bstate->bs_ix] = obj),	\
+	 bstate->bs_ix++)
 
 #define BSET_signal(cv, name)						\
 	mg_set(*hv_store(GvHV(gv_fetchpv("SIG", TRUE, SVt_PVHV)),	\
