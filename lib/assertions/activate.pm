@@ -40,11 +40,11 @@ L<assertions>
 
 =head1 AUTHOR
 
-Salvador Fandiño, E<lt>sfandino@yahoo.comE<gt>
+Salvador FandiE<ntilde>o, E<lt>sfandino@yahoo.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2002 by Salvador Fandiño
+Copyright 2002 by Salvador FandiE<ntilde>o
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
