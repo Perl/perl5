@@ -2188,13 +2188,13 @@ s	|void	|debprof	|OP *o
 s	|SV*	|save_scalar_at	|SV **sptr
 #endif
 
-#if defined(USE_ITHREADS) && (defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT))
+#if defined(USE_ITHREADS) || defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT)
 Adp    |void        |sharedsv_init
-Adp    |shared_sv*    |sharedsv_new
-Adp    |shared_sv*    |sharedsv_find        |SV* sv
-Adp    |void        |sharedsv_lock        |shared_sv* ssv
-Adp    |void        |sharedsv_unlock    |shared_sv* ssv
-p      |void        |sharedsv_unlock_scope    |shared_sv* ssv
+Adp    |shared_sv*  |sharedsv_new
+Adp    |shared_sv*  |sharedsv_find          |SV* sv
+Adp    |void        |sharedsv_lock          |shared_sv* ssv
+Adp    |void        |sharedsv_unlock        |shared_sv* ssv
+p      |void        |sharedsv_unlock_scope  |shared_sv* ssv
 Adp    |void        |sharedsv_thrcnt_inc    |shared_sv* ssv
 Adp    |void        |sharedsv_thrcnt_dec    |shared_sv* ssv
 #endif
