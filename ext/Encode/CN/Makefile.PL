@@ -24,6 +24,7 @@ WriteMakefile(
 	      MAN3PODS	=> {},
 	      # OS 390 winges about line numbers > 64K ???
 	      XSOPT => '-nolinenumbers',
+              XSPROTOARG => '-noprototypes',
 	      );
 
 package MY;
