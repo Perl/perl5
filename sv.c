@@ -9739,7 +9739,7 @@ S_gv_share(pTHX_ SV *sstr, CLONE_PARAMS *param)
         GvHV(gv) = (HV*)sv;
     }
     else {
-        SvREADONLY_on(GvAV(gv));
+        SvREADONLY_on(GvHV(gv));
     }
 
     return sstr; /* he_dup() will SvREFCNT_inc() */
