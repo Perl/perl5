@@ -83,7 +83,7 @@ static void yydestruct(pTHXo_ void *ptr);
 %token COLONATTR
 
 %type <ival> prog decl format startsub startanonsub startformsub
-%type <ival> remember mremember '&'
+%type <ival> progstart remember mremember '&'
 %type <opval> block mblock lineseq line loop cond else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> argexpr nexpr texpr iexpr mexpr mnexpr mtexpr miexpr
@@ -126,15 +126,9 @@ static void yydestruct(pTHXo_ void *ptr);
 %% /* RULES */
 
 /* The whole program */
-prog	:	/* NULL */
-		{
-#if defined(YYDEBUG) && defined(DEBUGGING)
-		    yydebug = (DEBUG_p_TEST);
-#endif
-		    PL_expect = XSTATE; $$ = block_start(TRUE);
-		}
+prog	:	progstart
 	/*CONTINUED*/	lineseq
-			{ newPROG(block_end($1,$2)); }
+			{ $$ = $1; newPROG(block_end($1,$2)); }
 	;
 
 /* An ordinary block */
@@ -147,6 +141,16 @@ block	:	'{' remember lineseq '}'
 remember:	/* NULL */	/* start a full lexical scope */
 			{ $$ = block_start(TRUE); }
 	;
+
+progstart:
+		{
+#if defined(YYDEBUG) && defined(DEBUGGING)
+		    yydebug = (DEBUG_p_TEST);
+#endif
+		    PL_expect = XSTATE; $$ = block_start(TRUE);
+		}
+	;
+
 
 mblock	:	'{' mremember lineseq '}'
 			{ if (PL_copline > (line_t)$1)
@@ -456,7 +460,7 @@ listop	:	LSTOP indirob argexpr          /* print $fh @args */
 			{ $$ = convert($1, 0, $2); }
 	|	FUNC '(' listexprcom ')'             /* print (@args) */
 			{ $$ = convert($1, 0, $3); }
-	|	LSTOPSUB startanonsub block          /* map { foo } ... */ 
+	|	LSTOPSUB startanonsub block          /* map { foo } ... */
 			{ $3 = newANONATTRSUB($2, 0, Nullop, $3); }
 		    listexpr		%prec LSTOP  /* ... @bar */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
@@ -575,7 +579,7 @@ anonymous:	'[' expr ']'
 	|	'[' ']'
 			{ $$ = newANONLIST(Nullop); }
 	|	HASHBRACK expr ';' '}'	%prec '(' /* { foo => "Bar" } */
-			{ $$ = newANONHASH($2); } 
+			{ $$ = newANONHASH($2); }
 	|	HASHBRACK ';' '}'	%prec '(' /* { } (';' by tokener) */
 			{ $$ = newANONHASH(Nullop); }
 	|	ANONSUB startanonsub proto subattrlist block	%prec '('
@@ -666,7 +670,7 @@ term	:	termbinop
 			{ $$ = $1; }
 	|	amper                                /* &foo; */
 			{ $$ = newUNOP(OP_ENTERSUB, 0, scalar($1)); }
-	|	amper '(' ')'                        /* &foo() */ 
+	|	amper '(' ')'                        /* &foo() */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1)); }
 	|	amper '(' expr ')'                   /* &foo(@args) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
