@@ -1904,6 +1904,10 @@ some common testing and debugging tools with Perl.  This is
 meant as a guide to interfacing these tools with Perl, not
 as any kind of guide to the use of the tools themselves.
 
+Note that running under memory debuggers such as Purify, valgrind,
+or Third Degree greatly slows down the execution: seconds become minutes,
+minutes become hours.
+
 =head2 Rational Software's Purify
 
 Purify is a commercial tool that is helpful in identifying
