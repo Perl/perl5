@@ -97,3 +97,8 @@ sub X {
 X();
 EXPECT
 ok 1
+########
+package;
+print sub { return "ok 1\n" } -> ();
+EXPECT
+ok 1

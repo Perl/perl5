@@ -656,7 +656,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		  strEQ(name, "ARGVOUT")))
 		    global = TRUE;
 	    }
-	    else if (*name == '_' && !name[1])
+	    else if (*name == '_' && (!name[1] || strEQ(name,"__ANON__")))
 		global = TRUE;
 
 	    if (global)
