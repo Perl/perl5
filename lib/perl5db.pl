@@ -273,13 +273,13 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 );
 
 # These guys may be defined in $ENV{PERL5DB} :
-$rl = 1 unless defined $rl;
-$warnLevel = 1 unless defined $warnLevel;
-$dieLevel = 1 unless defined $dieLevel;
-$signalLevel = 1 unless defined $signalLevel;
-$pre = [] unless defined $pre;
-$post = [] unless defined $post;
-$pretype = [] unless defined $pretype;
+$rl		= 1	unless defined $rl;
+$warnLevel	= 0	unless defined $warnLevel;
+$dieLevel	= 0	unless defined $dieLevel;
+$signalLevel	= 1	unless defined $signalLevel;
+$pre		= []	unless defined $pre;
+$post		= []	unless defined $post;
+$pretype	= []	unless defined $pretype;
 
 warnLevel($warnLevel);
 dieLevel($dieLevel);
