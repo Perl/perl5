@@ -360,50 +360,6 @@ sub filter_nroff {
   join "\n\n", @data;
 }
 
-sub printout {
-    my ($file, $tmp, $filter) = @_;
-    my $err;
-
-    if ($opt_t) {
-	# why was this append?
-	sysopen(OUT, $tmp, O_WRONLY | O_EXCL | O_CREAT, 0600)
-	    or die ("Can't open $tmp: $!");
-	Pod::Text->new()->parse_from_file($file,\*OUT);
-	close OUT   or die "can't close $tmp: $!";
-    }
-    elsif (not $opt_u) {
-	my $cmd = catfile($bindir, 'pod2man') . " --lax $file | $opt_n -man";
-	$cmd .= " | col -x" if $^O =~ /hpux/;
-	my $rslt = `$cmd`;
-	$rslt = filter_nroff($rslt) if $filter;
-	unless (($err = $?)) {
-	    # why was this append?
-	    sysopen(TMP, $tmp, O_WRONLY | O_EXCL | O_CREAT, 0600)
-		or die "Can't open $tmp: $!";
-	    print TMP $rslt
-		or die "Can't print $tmp: $!";
-	    close TMP
-		or die "Can't close $tmp: $!";
-	}
-    }
-    if ($opt_u or $err or -z $tmp) {  # XXX: race with -z
-	# why was this append?
-	sysopen(OUT, $tmp, O_WRONLY | O_EXCL | O_CREAT, 0600)
-	    or die "Can't open $tmp: $!";
-	open(IN,"<", $file)   or die("Can't open $file: $!");
-	my $cut = 1;
-	local $_;
-	while (<IN>) {
-	    $cut = $1 eq 'cut' if /^=(\w+)/;
-	    next if $cut;
-	    print OUT
-		or die "Can't print $tmp: $!";
-	}
-	close IN    or die "Can't close $file: $!";
-	close OUT   or die "Can't close $tmp: $!";
-    }
-}
-
 sub page {
     my ($tmp, $no_tty, @pagers) = @_;
     if ($no_tty) {
@@ -428,6 +384,7 @@ sub page {
 sub cleanup {
     my @files = @_;
     for (@files) {
+	next unless defined;
 	if ($Is_VMS) { 
 	    1 while unlink($_);    # XXX: expect failure
 	} else {
@@ -450,14 +407,14 @@ foreach (@pages) {
 	next;
     }
     print STDERR "Searching for $_\n" if $opt_v;
-    # We must look both in @INC for library modules and in $bindir
-    # for executables, like h2xs or perldoc itself.
-    my @searchdirs = ($bindir, @INC);
     if ($opt_F) {
 	next unless -r;
 	push @found, $_ if $opt_m or containspod($_);
 	next;
     }
+    # We must look both in @INC for library modules and in $bindir
+    # for executables, like h2xs or perldoc itself.
+    my @searchdirs = ($bindir, @INC);
     unless ($opt_m) {
 	if ($Is_VMS) {
 	    my($i,$trn);
@@ -516,60 +473,26 @@ my $no_tty;
 if (! -t STDOUT) { $no_tty = 1 }
 END { close(STDOUT) || die "Can't close STDOUT: $!" }
 
-# until here we could simply exit or die
-# now we create temporary files that we have to clean up
-# namely $tmp, $buffer
-# that's because you did it wrong, should be descriptor based --tchrist
-
-my $tmp;
-my $buffer;
 if ($Is_MSWin32) {
-    $tmp = "$ENV{TEMP}\\perldoc1.$$";
-    $buffer = "$ENV{TEMP}\\perldoc1.b$$";
     push @pagers, qw( more< less notepad );
     unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
     for (@found) { s,/,\\,g }
 }
 elsif ($Is_VMS) {
-    $tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
-    $buffer = 'Sys$Scratch:perldoc.tmp1_b'.$$;
     push @pagers, qw( most more less type/page );
 }
 elsif ($Is_Dos) {
-    $tmp = "$ENV{TEMP}/perldoc1.$$";
-    $buffer = "$ENV{TEMP}/perldoc1.b$$";
-    $tmp =~ tr!\\/!//!s;
-    $buffer =~ tr!\\/!//!s;
     push @pagers, qw( less.exe more.com< );
     unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
 }
 else {
     if ($^O eq 'os2') {
-      require POSIX;
-      $tmp = POSIX::tmpnam();
-      $buffer = POSIX::tmpnam();
       unshift @pagers, 'less', 'cmd /c more <';
-    }
-    else {
-      # XXX: this is not secure, because it doesn't open it
-      ($tmp, $buffer) = eval { require POSIX } 
-	    ? (POSIX::tmpnam(),    POSIX::tmpnam()     )
-	    : ("/tmp/perldoc1.$$", "/tmp/perldoc1.b$$" );
     }
     push @pagers, qw( more less pg view cat );
     unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
 }
 unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
-
-# make sure cleanup called
-eval q{
-    sub END { cleanup($tmp, $buffer) } 
-    1;
-} || die;
-
-# exit/die in a windows sighandler is dangerous, so let it do the
-# default thing, which is to exit
-eval q{ use sigtrap qw(die INT TERM HUP QUIT) } unless $^O eq 'MSWin32';
 
 if ($opt_m) {
     foreach my $pager (@pagers) {
@@ -658,22 +581,74 @@ EOD
     }
 }
 
+# until here we could simply exit or die
+# now we create temporary files that we have to clean up
+# namely $tmp, $buffer
+# that's because you did it wrong, should be descriptor based --tchrist
+
+my $tmp;
+my $tmpfd;
+my $buffer;
+
+require File::Temp;
+
+($tmpfd, $tmp) = File::Temp::tempfile();
+
+# make sure cleanup called
+eval q{
+    sub END { cleanup($tmp, $buffer) } 
+    1;
+} || die;
+
+# exit/die in a windows sighandler is dangerous, so let it do the
+# default thing, which is to exit
+eval q{ use sigtrap qw(die INT TERM HUP QUIT) } unless $^O eq 'MSWin32';
+
 my $filter;
 
 if (@pod) {
-    sysopen(TMP, $buffer, O_WRONLY | O_EXCL | O_CREAT)
-	or die("Can't open $buffer: $!");
-    print TMP "=over 8\n\n";
-    print TMP @pod	or die "Can't print $buffer: $!";
-    print TMP "=back\n";
-    close TMP		or die "Can't close $buffer: $!";
+    my $buffd;
+    ($buffd, $buffer) = File::Temp::tempfile();
+    print $buffd "=over 8\n\n";
+    print $buffd @pod	or die "Can't print $buffer: $!";
+    print $buffd "=back\n";
+    close $buffd	or die "Can't close $buffer: $!";
     @found = $buffer;
     $filter = 1;
 }
 
 foreach (@found) {
-    printout($_, $tmp, $filter);
+    my $file = $_;
+    my $err;
+
+    if ($opt_t) {
+	Pod::Text->new()->parse_from_file($file, $tmpfd);
+    }
+    elsif (not $opt_u) {
+	my $cmd = catfile($bindir, 'pod2man') . " --lax $file | $opt_n -man";
+	$cmd .= " | col -x" if $^O =~ /hpux/;
+	my $rslt = `$cmd`;
+	$rslt = filter_nroff($rslt) if $filter;
+	unless (($err = $?)) {
+	    print $tmpfd $rslt
+		or die "Can't print $tmp: $!";
+	}
+    }
+    if ($opt_u or $err) {
+	open(IN,"<", $file)   or die("Can't open $file: $!");
+	my $cut = 1;
+	local $_;
+	while (<IN>) {
+	    $cut = $1 eq 'cut' if /^=(\w+)/;
+	    next if $cut;
+	    print $tmpfd $_
+		or die "Can't print $tmp: $!";
+	}
+	close IN    or die "Can't close $file: $!";
+    }
 }
+close $tmpfd
+    or die "Can't close $tmp: $!";
 page($tmp, $no_tty, @pagers);
 
 exit;
