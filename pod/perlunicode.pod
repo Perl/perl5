@@ -1015,8 +1015,10 @@ straddling of the proverbial fence causes problems.
 
 =head2 Using Unicode in XS
 
-If you want to handle Perl Unicode in XS extensions, you may find
-the following C APIs useful.  See L<perlapi> for details.
+If you want to handle Perl Unicode in XS extensions, you may find the
+following C APIs useful.  See also L<perlguts/"Unicode Support"> for an
+explanation about Unicode at the XS level, and L<perlapi> for the API
+details.
 
 =over 4
 
