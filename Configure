@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Oct 25 20:32:59 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Oct 25 22:43:09 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16430,7 +16430,7 @@ for xxx in $known_extensions ; do
                         esac
 		esac
 		;;
-	threads)
+	threads|threads/shared)
                 case "$usethreads" in
                 true|$define|y)
                         case "$useithreads" in
