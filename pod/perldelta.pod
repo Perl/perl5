@@ -2730,12 +2730,12 @@ such as sudo ( see http://www.courtesan.com/sudo/ ).
 
 =head1 New Tests
 
-Several new tests have been added, especially for the F<lib>
-subsection.  There are now about 56 000 individual tests (spread over
-about 620 test scripts), in the regression suite (5.6.1 has about
-11700 tests, in 258 test scripts) Many of the new tests are introduced
-by the new modules, but still in general Perl is now more thoroughly
-tested.
+Several new tests have been added, especially for the F<lib> and F<ext>
+subsections.  There are now about 65 000 individual tests (spread over
+about 700 test scripts), in the regression suite (5.6.1 has about
+11700 tests, in 258 test scripts)  Many of the new tests are of course
+introduced by the new modules, but still in general Perl is now more
+thoroughly tested.
 
 Because of the large number of tests, running the regression suite
 will take considerably longer time than it used to: expect the suite
