@@ -218,7 +218,7 @@ cc*|xlc*) # cc should've been set by line 116 or so if empty.
 		*) if test ! -x /QOpenSys/usr/bin/$cc; then
 			# The /QOpenSys/usr/bin/$cc saves us if we are
 			# building natively in OS/400 PASE.
-			cat <<EOF
+			cat >&4 <<EOF
 
 ***
 *** You either implicitly or explicitly specified an IBM C compiler,
