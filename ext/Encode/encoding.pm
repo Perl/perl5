@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.28 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -9,6 +9,16 @@ BEGIN {
 	require Carp;
 	Carp::croak "encoding pragma does not support EBCDIC platforms";
     }
+}
+
+our $HAS_PERLIO_ENCODING;
+
+eval { require PerlIO::encoding; };
+if ($@){
+    $HAS_PERLIO_ENCODING = 0;
+}else{
+    $HAS_PERLIO_ENCODING = 1;
+    binmode(STDIN);
 }
 
 sub import {
@@ -24,9 +34,10 @@ sub import {
     }
     unless ($arg{Filter}){
 	${^ENCODING} = $enc; # this is all you need, actually.
+	$HAS_PERLIO_ENCODING or return 1;
 	for my $h (qw(STDIN STDOUT)){
 	    if ($arg{$h}){
-		unless (defined find_encoding($arg{h})) {
+		unless (defined find_encoding($arg{$h})) {
 		    require Carp;
 		    Carp::croak "Unknown encoding for $h, '$arg{$h}'";
 		}
@@ -46,8 +57,8 @@ sub import {
 	eval {
 	    require Filter::Util::Call ;
 	    Filter::Util::Call->import ;
-	    binmode(STDIN,  ":raw");
-	    binmode(STDOUT, ":raw");
+	    binmode(STDIN);
+	    binmode(STDOUT);
 	    filter_add(sub{
 			   my $status;
                            if (($status = filter_read()) > 0){
@@ -65,8 +76,8 @@ sub import {
 sub unimport{
     no warnings;
     undef ${^ENCODING};
-    binmode(STDIN,  ":raw");
-    binmode(STDOUT, ":raw");
+    binmode(STDIN);
+    binmode(STDOUT);
     if ($INC{"Filter/Util/Call.pm"}){
 	eval { filter_del() };
     }

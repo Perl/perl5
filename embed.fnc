@@ -278,7 +278,7 @@ Apd	|char*	|hv_iterkey	|HE* entry|I32* retlen
 Apd	|SV*	|hv_iterkeysv	|HE* entry
 Apd	|HE*	|hv_iternext	|HV* tb
 Apd	|SV*	|hv_iternextsv	|HV* hv|char** key|I32* retlen
-ApM	|HE*	|hv_iternext_flags|HV* tb|I32 flags
+ApMd	|HE*	|hv_iternext_flags|HV* tb|I32 flags
 Apd	|SV*	|hv_iterval	|HV* tb|HE* entry
 Ap	|void	|hv_ksplit	|HV* hv|IV newmax
 Apd	|void	|hv_magic	|HV* hv|GV* gv|int how

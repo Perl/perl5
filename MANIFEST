@@ -197,33 +197,40 @@ ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
+ext/Encode/Byte/Byte.pm	Encode extension
+ext/Encode/Byte/Makefile.PL       Encode extension
+ext/Encode/CN/CN.pm		Encode extension
+ext/Encode/CN/Makefile.PL	Encode extension
+ext/Encode/Changes		Change Log
+ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
+ext/Encode/EBCDIC/Makefile.PL     Encode extension
+ext/Encode/Encode.pm	       Mother of all Encode extensions
+ext/Encode/Encode.xs		Encode extension
+ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
+ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
+ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/_PM.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/_T.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/encode.h		Encode extension header file
+ext/Encode/JP/JP.pm		Encode extension
+ext/Encode/JP/Makefile.PL	Encode extension
+ext/Encode/KR/KR.pm		Encode extension
+ext/Encode/KR/Makefile.PL		Encode extension
+ext/Encode/MANIFEST		Encode extension
+ext/Encode/Makefile.PL		Encode extension makefile writer
+ext/Encode/README		Encode extension
+ext/Encode/Symbol/Makefile.PL     Encode extension
+ext/Encode/Symbol/Symbol.pm       Encode extension
+ext/Encode/TW/Makefile.PL	Encode extension
+ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/bin/enc2xs	Encode module generator
 ext/Encode/bin/piconv	iconv by perl
 ext/Encode/bin/ucm2table	Table Generator for testing
 ext/Encode/bin/ucmlint	A UCM Lint utility
 ext/Encode/bin/unidump	Unicode Dump like hexdump(1)
-ext/Encode/Byte/Byte.pm	Encode extension
-ext/Encode/Byte/Makefile.PL       Encode extension
-ext/Encode/Changes		Change Log
-ext/Encode/CN/CN.pm		Encode extension
-ext/Encode/CN/Makefile.PL	Encode extension
-ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
-ext/Encode/EBCDIC/Makefile.PL     Encode extension
 ext/Encode/encengine.c		Encode extension
-ext/Encode/Encode.pm	       Mother of all Encode extensions
-ext/Encode/Encode.xs		Encode extension
-ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/encode.h		Encode extension header file
-ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_PM.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_T.e2x		Skeleton file for enc2xs
 ext/Encode/encoding.pm	Perl Pragmactic Module
-ext/Encode/JP/JP.pm		Encode extension
-ext/Encode/JP/Makefile.PL	Encode extension
-ext/Encode/KR/KR.pm		Encode extension
-ext/Encode/KR/Makefile.PL		Encode extension
 ext/Encode/lib/Encode/Alias.pm	        Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
@@ -235,17 +242,15 @@ ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/Supported.pod	Documents supported encodings
 ext/Encode/lib/Encode/Unicode.pm	Encode extension
-ext/Encode/lib/Encode/XS.pm		Encode extension
-ext/Encode/Makefile.PL		Encode extension makefile writer
-ext/Encode/MANIFEST		Encode extension
-ext/Encode/README		Encode extension
-ext/Encode/Symbol/Makefile.PL     Encode extension
-ext/Encode/Symbol/Symbol.pm       Encode extension
 ext/Encode/t/Aliases.t	Encode extension test
-ext/Encode/t/bogus.ucm	Sample data for ucmlint
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/Encoder.t	Encode::Encoder test
+ext/Encode/t/JP.t		Encode extension test
+ext/Encode/t/KR.t		Encode extension test
+ext/Encode/t/TW.t		Encode extension test
+ext/Encode/t/Unicode.t	Encode extension test
+ext/Encode/t/bogus.ucm	Sample data for ucmlint
 ext/Encode/t/encoding.t	encoding extension test
 ext/Encode/t/gb2312.euc	test data
 ext/Encode/t/gb2312.ref	test data
@@ -254,16 +259,10 @@ ext/Encode/t/jisx0208.euc	test data
 ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data
 ext/Encode/t/jisx0212.ref	test data
-ext/Encode/t/JP.t		Encode extension test
 ext/Encode/t/jperl.t	encoding extension test
-ext/Encode/t/KR.t		Encode extension test
 ext/Encode/t/ksc5601.euc	test data
 ext/Encode/t/ksc5601.ref	test data
-ext/Encode/t/TW.t		Encode extension test
 ext/Encode/t/unibench.pl	Unicode benchmark
-ext/Encode/t/Unicode.t	Encode extension test
-ext/Encode/TW/Makefile.PL	Encode extension
-ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/ucm/8859-1.ucm	Unicode Character Map
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
 ext/Encode/ucm/8859-11.ucm	Unicode Character Map
@@ -352,9 +351,9 @@ ext/Encode/ucm/macHebrew.ucm	Unicode Character Map
 ext/Encode/ucm/macIceland.ucm	Unicode Character Map
 ext/Encode/ucm/macJapanese.ucm	Unicode Character Map
 ext/Encode/ucm/macKorean.ucm	Unicode Character Map
-ext/Encode/ucm/macRoman.ucm	Unicode Character Map
 ext/Encode/ucm/macROMnn.ucm	Unicode Character Map
 ext/Encode/ucm/macRUMnn.ucm	Unicode Character Map
+ext/Encode/ucm/macRoman.ucm	Unicode Character Map
 ext/Encode/ucm/macSami.ucm	Unicode Character Map
 ext/Encode/ucm/macSymbol.ucm	Unicode Character Map
 ext/Encode/ucm/macThai.ucm	Unicode Character Map
@@ -505,6 +504,10 @@ ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/ops.t		See if Opcode works
 ext/Opcode/Safe.pm		Safe extension Perl module
+ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
+ext/PerlIO/encoding/Makefile.PL	PerlIO::encoding makefile writer
+ext/PerlIO/encoding/encoding.pm	PerlIO::encoding
+ext/PerlIO/encoding/encoding.xs	PerlIO::encoding
 ext/PerlIO/PerlIO.t		See if PerlIO works
 ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
@@ -647,7 +650,9 @@ ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
+ext/threads/shared/t/queue.t	thread shared variables
 ext/threads/shared/typemap	thread::shared types
+ext/threads/shared/queue.pm	Threadsafe queue.
 ext/threads/t/basic.t		ithreads
 ext/threads/t/end.t		Test end functions
 ext/threads/t/join.t		Testing the join function
@@ -1208,34 +1213,34 @@ lib/Math/Complex.t		See if Math::Complex works
 lib/Math/Trig.pm		A simple interface to complex trigonometry
 lib/Math/Trig.t			See if Math::Trig works
 lib/Memoize.pm			Memoize
-lib/Memoize/AnyDBM_File.pm	Memoize
-lib/Memoize/Expire.pm		Memoize
-lib/Memoize/ExpireFile.pm	Memoize
-lib/Memoize/ExpireTest.pm	Memoize
-lib/Memoize/NDBM_File.pm	Memoize
-lib/Memoize/README		Memoize
-lib/Memoize/SDBM_File.pm	Memoize
-lib/Memoize/Storable.pm		Memoize
-lib/Memoize/t/array.t		Memoize
-lib/Memoize/t/array_confusion.t		Memoize
-lib/Memoize/t/correctness.t	Memoize
-lib/Memoize/t/errors.t		Memoize
-lib/Memoize/t/expfile.t		Memoize
-lib/Memoize/t/expire.t		Memoize
-lib/Memoize/t/expmod_n.t	Memoize
-lib/Memoize/t/expmod_t.t	Memoize
-lib/Memoize/t/flush.t		Memoize
-lib/Memoize/t/normalize.t	Memoize
-lib/Memoize/t/prototype.t	Memoize
-lib/Memoize/t/speed.t		Memoize
-lib/Memoize/t/tie.t		Memoize
-lib/Memoize/t/tiefeatures.t	Memoize
-lib/Memoize/t/tie_gdbm.t	Memoize
-lib/Memoize/t/tie_ndbm.t	Memoize
-lib/Memoize/t/tie_sdbm.t	Memoize
-lib/Memoize/t/tie_storable.t	Memoize
-lib/Memoize/t/unmemoize.t	Memoize
-lib/Memoize/TODO		Memoize
+lib/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
+lib/Memoize/Expire.pm		Memoize expiry manager example
+lib/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
+lib/Memoize/ExpireTest.pm	Memoize expiry manager test scaffold
+lib/Memoize/NDBM_File.pm	Memoize glue layer for NDBM_File
+lib/Memoize/README		Memoize release notes
+lib/Memoize/SDBM_File.pm	Memoize glue layer for SDBM_File
+lib/Memoize/Storable.pm		Memoize glue layer for Storable
+lib/Memoize/t/array.t		Memoize array context return tests
+lib/Memoize/t/array_confusion.t		Memoize ambiguous array return tests
+lib/Memoize/t/correctness.t	Memoize basic correctness tests
+lib/Memoize/t/errors.t		Memoize PEBKAC detection tests
+lib/Memoize/t/expfile.t		Memoize expiry manager tests
+lib/Memoize/t/expire.t		Memoize expiry manager tests
+lib/Memoize/t/expmod_n.t	Memoize expiry manager tests
+lib/Memoize/t/expmod_t.t	Memoize expiry manager (timed) tests
+lib/Memoize/t/flush.t		Memoize 'flush_cache' function tests
+lib/Memoize/t/normalize.t	Memoize 'normalizer' feature tests
+lib/Memoize/t/prototype.t	Memoize prototyped function handling tests
+lib/Memoize/t/speed.t		"Makes functions faster" advertisement test
+lib/Memoize/t/tie.t		Memoize tied file test
+lib/Memoize/t/tiefeatures.t	Memoize FAULT / MERGE / HASH options test
+lib/Memoize/t/tie_gdbm.t	Memoize GDBM interface test
+lib/Memoize/t/tie_ndbm.t	Memoize NDBM interface test
+lib/Memoize/t/tie_sdbm.t	Memoize SDBM interface test
+lib/Memoize/t/tie_storable.t	Memoize Storable interface test
+lib/Memoize/t/unmemoize.t	Memoize 'unmemoize' function test
+lib/Memoize/TODO		Memoize to-do list
 lib/Net/ChangeLog.libnet	libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet
@@ -1472,39 +1477,39 @@ lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
 lib/Tie/Array/std.t		Test for Tie::StdArray
 lib/Tie/Array/stdpush.t		Test for Tie::StdArray
 lib/Tie/File.pm                 Files as tied arrays
-lib/Tie/File/t/00_version.t     Test for Tie::File
-lib/Tie/File/t/01_gen.t         Test for Tie::File
-lib/Tie/File/t/02_fetchsize.t   Test for Tie::File
-lib/Tie/File/t/03_longfetch.t   Test for Tie::File
-lib/Tie/File/t/04_splice.t      Test for Tie::File
-lib/Tie/File/t/05_size.t        Test for Tie::File
-lib/Tie/File/t/06_fixrec.t      Test for Tie::File
-lib/Tie/File/t/07_rv_splice.t   Test for Tie::File
-lib/Tie/File/t/08_ro.t          Test for Tie::File
-lib/Tie/File/t/09_gen_rs.t      Test for Tie::File
-lib/Tie/File/t/10_splice_rs.t   Test for Tie::File
-lib/Tie/File/t/11_rv_splice_rs.t  Test for Tie::File
-lib/Tie/File/t/12_longfetch_rs.t  Test for Tie::File
-lib/Tie/File/t/13_size_rs.t     Test for Tie::File
-lib/Tie/File/t/14_lock.t        Test for Tie::File
-lib/Tie/File/t/15_pushpop.t     Test for Tie::File
-lib/Tie/File/t/16_handle.t      Test for Tie::File
-lib/Tie/File/t/17_misc_meth.t   Test for Tie::File
-lib/Tie/File/t/18_rs_fixrec.t   Test for Tie::File
-lib/Tie/File/t/19_cache.t       Test for Tie::File
-lib/Tie/File/t/20_cache_full.t  Test for Tie::File
-lib/Tie/File/t/21_win32.t       Test for Tie::File
-lib/Tie/File/t/22_autochomp.t   Test for Tie::File
-lib/Tie/File/t/23_rv_ac_splice.t  Test for Tie::File
-lib/Tie/File/t/24_cache_loop.t	Test for Tie::File
-lib/Tie/File/t/25_gen_nocache.t	Test for Tie::File
-lib/Tie/File/t/26_twrite.t	Test for Tie::File
-lib/Tie/File/t/30_defer.t       Test for Tie::File
-lib/Tie/File/t/31_autodefer.t   Test for Tie::File
-lib/Tie/File/t/32_defer_misc.t  Test for Tie::File
-lib/Tie/File/t/33_defer_vs.t	Test for Tie::File
-lib/Tie/File/t/40_abs_cache.t	Test for Tie::File
-lib/Tie/File/t/41_heap.t	Test for Tie::File
+lib/Tie/File/t/00_version.t     Trivial test for Tie::File
+lib/Tie/File/t/01_gen.t         Generic read/write tests for Tie::File
+lib/Tie/File/t/02_fetchsize.t   File length fetch test for Tie::File
+lib/Tie/File/t/03_longfetch.t   Past-the-end-of-the-array tests for Tie::File
+lib/Tie/File/t/04_splice.t      SPLICE method tests for Tie::File
+lib/Tie/File/t/05_size.t        $#a tests for Tie::File
+lib/Tie/File/t/06_fixrec.t      '_fixrec' method functional tests for Tie::File
+lib/Tie/File/t/07_rv_splice.t   SPLICE method return value tests for Tie::File
+lib/Tie/File/t/08_ro.t          read-only mode tests for Tie::File
+lib/Tie/File/t/09_gen_rs.t      Like 01_gen.t, with unusual record separator
+lib/Tie/File/t/10_splice_rs.t   Like 04_splice.t, with unusual record separator
+lib/Tie/File/t/11_rv_splice_rs.t  Like 07_rv_splice.t, with unusual record separator
+lib/Tie/File/t/12_longfetch_rs.t  Like 03_longfetch.t, with unusual record separator
+lib/Tie/File/t/13_size_rs.t     Like 05_size.t, with unusual record separator
+lib/Tie/File/t/14_lock.t        File locking method tests for Tie::File
+lib/Tie/File/t/15_pushpop.t     PUSH / POP / SHIFT / UNSHIFT for Tie::File
+lib/Tie/File/t/16_handle.t      Tying a handle instead of a file for Tie::File
+lib/Tie/File/t/17_misc_meth.t   CLEAR / EXISTS / DELETE / EXTEND for Tie::File
+lib/Tie/File/t/18_rs_fixrec.t   Like 06_fixrec.t, with unusual record separator
+lib/Tie/File/t/19_cache.t       Read cache exercises and regression for Tie::File
+lib/Tie/File/t/20_cache_full.t  LRU expiry exercises and regression for Tie::File
+lib/Tie/File/t/21_win32.t       Win32 special behavior of Tie::File
+lib/Tie/File/t/22_autochomp.t   'autochomp' option of Tie::File
+lib/Tie/File/t/23_rv_ac_splice.t  Like 07_rv_splice.t, but with autochomp
+lib/Tie/File/t/24_cache_loop.t	Regression for old Tie::File cache bug
+lib/Tie/File/t/25_gen_nocache.t	Like 01_gen.t, but with caching disabled
+lib/Tie/File/t/26_twrite.t	Unit tests for Tie::File::_twrite
+lib/Tie/File/t/30_defer.t       deferred writing feature tests for Tie::File
+lib/Tie/File/t/31_autodefer.t   'autodefer' feature tests for Tie::File
+lib/Tie/File/t/32_defer_misc.t  Like 17_misc_meth.t, but with deferred writing
+lib/Tie/File/t/33_defer_vs.t	Like 30_defer.t, but with varying-length records
+lib/Tie/File/t/40_abs_cache.t	Unit tests for Tie::File::Cache
+lib/Tie/File/t/41_heap.t	Unit tests for Tie::File::Heap
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
@@ -2270,6 +2275,7 @@ t/io/crlf.t			See if :crlf works
 t/io/dup.t			See if >& works right
 t/io/fflush.t			See if auto-flush on fork/exec/system/qx works
 t/io/fs.t			See if directory manipulations work
+t/io/full.t			See if 'disk full' errors are reported
 t/io/inplace.t			See if inplace editing works
 t/io/iprefix.t			See if inplace editing works with prefixes
 t/io/nargv.t			See if nested ARGV stuff works

@@ -254,6 +254,21 @@ flag -Aa is added to the cpprun and cppstdin variables in the config.sh
 file (though see the section on 64-bit perl below). If you are using a
 recent version of the Perl distribution, these flags are set automatically.
 
+=head2 The GNU C Compiler
+
+When you are going to use the GNU C compiler (gcc), and you don't have
+gcc yet, you can either build it yourself from the sources (available
+from e.g. http://www.gnu.ai.mit.edu/software/gcc/releases.html) or fetch
+a prebuilt binary from the HP porting center. There are two places where
+gcc prebuilds can be fetched the first and best (for HP-UX 11 only) is
+http://h21007.www2.hp.com/dspp/tech/tech_TechSoftwareDetailPage_IDX/1,1703,547,00.html
+the second is http://hpux.cs.utah.edu/hppd/hpux/Gnu/ where you can also
+find the GNU binutils package.
+
+Building a 64bit capable gcc from source is possible only when you have
+the HP C-ANSI C compiler available, which you should use anyway when
+building perl.
+
 =head2 Using Large Files with Perl on HP-UX
 
 Beginning with HP-UX version 10.20, files larger than 2GB (2^31 bytes)
@@ -263,7 +278,8 @@ using the -Duselargefiles flag to Configure.  This causes Perl to be
 compiled using structures and functions in which these are 64 bits wide,
 rather than 32 bits wide.  (Note that this will only work with HP's ANSI
 C compiler.  If you want to compile Perl using gcc, you will have to get
-a version of the compiler that support 64-bit operations.)
+a version of the compiler that support 64-bit operations. See above for
+where to find it)
 
 There are some drawbacks to this approach.  One is that any extension
 which calls any file-manipulating C function will need to be recompiled

@@ -1,9 +1,48 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.40 2002/04/14 22:27:14 dankogai Exp $
+# $Id: Changes,v 1.42 2002/04/17 03:01:20 dankogai Exp dankogai $
 #
 
-1.40 $Date: 2002/04/14 22:27:14 $
+1.42 $Date: 2002/04/17 03:01:20 $
+- lib/Encode/XS.pm
+  no-op module;  Thought of adding a pod there but enc2xs has
+  one so gone.
+! encoding.pm
+! t/JP.pm
+! t/KR.pm
+  correct mechanism to detect Perlio::encoding layar installed.
+! Encode.xs
+  PerlIO Layer detached.
+
+1.41 2002/04/16 23:35:00
+! encoding.pm
+  binmode(STDIN|STDOUT ...) done iff PerlIO is available
+! t/*.t
+  Cleaned up PerlIO skip conditions to prepare for the upcoming
+  Encode - PerlIO forking.
+! Encode.pm
+  exported functions are now prototyped.
+! lib/Encode/CN/HZ.pm
+! bin/enc2xs
+! Encode.xs
+  fallback implemented # was /* FIXME */
+  affected programs revised to fit (only HZ was using the try-catch
+  approach which needed to be fixed for API-compliance).
+! Encode/Config.pm
+! Encode/KR/2022_KR.pm
+! Encode/KR/KR.pm
+  can find =head1 NAME now, jhi
+  Message-Id: <20020416083059.V30639@alpha.hut.fi>
+! encoding.pm
+  s/\{h\}/{$h}/g ;)
+! Encode.xs
+  now complies with less warnings with the pickest compilers.
+  Suggested by Craig, fixed by Dan.
+  ! Encode/Makefile_PL.e2x
+! bin/enc2xs
+  A bug that fails to find *.e2x in certain conditions fixed
+
+1.40 2002/04/14 22:27:14
 + Encode/ConfigLocal_PM.e2x
 ! lib/Encode/Config.pm
 ! bin/enc2xs
@@ -296,7 +335,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/14 22:27:14 $
+1.11  $Date: 2002/04/17 03:01:20 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.40 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.42 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -126,9 +126,10 @@ sub resolve_alias {
     return;
 }
 
-sub encode
+sub encode($$;$)
 {
     my ($name,$string,$check) = @_;
+    $check ||=0;
     my $enc = find_encoding($name);
     croak("Unknown encoding '$name'") unless defined $enc;
     my $octets = $enc->encode($string,$check);
@@ -136,9 +137,10 @@ sub encode
     return $octets;
 }
 
-sub decode
+sub decode($$;$)
 {
     my ($name,$octets,$check) = @_;
+    $check ||=0;
     my $enc = find_encoding($name);
     croak("Unknown encoding '$name'") unless defined $enc;
     my $string = $enc->decode($octets,$check);
@@ -146,9 +148,10 @@ sub decode
     return $string;
 }
 
-sub from_to
+sub from_to($$$;$)
 {
     my ($string,$from,$to,$check) = @_;
+    $check ||=0;
     my $f = find_encoding($from);
     croak("Unknown encoding '$from'") unless defined $f;
     my $t = find_encoding($to);
@@ -160,14 +163,14 @@ sub from_to
     return defined($_[0] = $string) ? length($string) : undef ;
 }
 
-sub encode_utf8
+sub encode_utf8($)
 {
     my ($str) = @_;
     utf8::encode($str);
     return $str;
 }
 
-sub decode_utf8
+sub decode_utf8($)
 {
     my ($str) = @_;
     return undef unless utf8::decode($str);
@@ -249,7 +252,8 @@ sub predefine_encodings{
 }
 
 require Encode::Encoding;
-require Encode::XS;
+
+eval { require PerlIO::encoding };
 
 1;
 

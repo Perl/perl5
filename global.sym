@@ -208,6 +208,7 @@ Perl_is_utf8_string
 Perl_is_utf8_alnum
 Perl_is_utf8_alnumc
 Perl_is_utf8_idfirst
+Perl_is_utf8_idcont
 Perl_is_utf8_alpha
 Perl_is_utf8_ascii
 Perl_is_utf8_space

@@ -16,7 +16,7 @@ my %tables = (
 #### DO NOT EDIT BEYOND THIS POINT!
 my $enc2xs = '$_Enc2xs_';
 WriteMakefile(
-              INC		=> "-I$_Inc_",
+              INC		=> "-I$_E2X_",
 #### END_OF_HEADER -- DO NOT EDIT THIS LINE BY HAND! ####
 	      NAME		=> 'Encode::'.$name,
 	      VERSION_FROM	=> "$name.pm",

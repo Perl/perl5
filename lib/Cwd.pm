@@ -38,6 +38,8 @@ Returns the current working directory.
 
 Re-implements the getcwd(3) (or getwd(3)) functions in Perl.
 
+Taint-safe.
+
 =item cwd
 
     my $cwd = cwd();
@@ -46,7 +48,7 @@ The cwd() is the most natural form for the current architecture. For
 most systems it is identical to `pwd` (but without the trailing line
 terminator).
 
-Unfortunately, cwd() tends to break if called under taint mode.
+Unfortunately, cwd() is B<not> taint-safe.
 
 =item fastcwd
 
@@ -87,17 +89,23 @@ Uses the same algorithm as getcwd().  Symbolic links and relative-path
 components ("." and "..") are resolved to return the canonical
 pathname, just like realpath(3).
 
+Taint-safe.
+
 =item realpath
 
   my $abs_path = realpath($file);
 
 A synonym for abs_path().
 
+Taint-safe.
+
 =item fast_abs_path
 
   my $abs_path = fast_abs_path($file);
 
 A more dangerous, but potentially faster version of abs_path.
+
+B<Not> taint-safe.
 
 =back
 
@@ -409,13 +417,7 @@ sub fast_abs_path {
     my $path = @_ ? shift : File::Spec->curdir;
     CORE::chdir($path) || croak "Cannot chdir to $path: $!";
     my $realpath = getcwd();
-    # I cannot think of an untainting regular expression 
-    # that wouldn't also (a) be unportable (b) disqualify valid pathnames
-    # so just untainting all of it here and relying on -d and CORE::chdir
-    # to verify the validity.
-    # --jhi
-    my ($cwd_untainted) = ($cwd =~ /^(.+)$/);
-    -d $cwd_untainted && CORE::chdir($cwd_untainted) ||
+    -d $cwd && CORE::chdir($cwd) ||
 	croak "Cannot chdir back to $cwd: $!";
     $realpath;
 }

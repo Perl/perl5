@@ -44,7 +44,6 @@ lib/Encode/JP/JIS7.pm	Encode extension
 lib/Encode/KR/2022_KR.pm	 Encode extension
 lib/Encode/Supported.pod	Documents supported encodings
 lib/Encode/Unicode.pm	Encode extension
-lib/Encode/XS.pm		Encode extension
 t/Aliases.t	Encode extension test
 t/CN.t		Encode extension test
 t/Encode.t		Encode extension test

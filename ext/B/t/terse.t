@@ -78,6 +78,9 @@ sub bar {
 
 	# make a PV
 	$foo = "a string";
+
+	# make an OP_SUBSTCONT
+	$foo =~ s/(a)/$1/;
 }
 
 SKIP: {

@@ -4,7 +4,7 @@ use base 'Encode::Encoding';
 
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 
 my $canon = 'iso-2022-kr';
@@ -64,3 +64,9 @@ sub euc_iso{
 
 1;
 __END__
+
+=head1 NAME
+
+Encode::KR::2022_KR -- internally used by Encode::KR
+
+=cut

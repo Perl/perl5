@@ -2,14 +2,6 @@ use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
-use Config;
-
-
-unless($Config{'useithreads'} eq 'define') {
-    die "We need a perl that is built with USEITHREADS!\n";
-}
-
-
 WriteMakefile(
     'NAME'		=> 'threads',
     'VERSION_FROM'	=> 'threads.pm', # finds $VERSION

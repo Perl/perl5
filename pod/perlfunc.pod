@@ -452,14 +452,16 @@ L<perlipc/"Sockets: Client/Server Communication">.
 Arranges for FILEHANDLE to be read or written in "binary" or "text" mode
 on systems where the run-time libraries distinguish between binary and
 text files.  If FILEHANDLE is an expression, the value is taken as the
-name of the filehandle.  DISCIPLINE can be either of C<:raw> for
-binary mode or C<:crlf> for "text" mode.  If the DISCIPLINE is
-omitted, it defaults to C<:raw>.  Returns true on success, C<undef> on
-failure.  The C<:raw> are C<:clrf>, and any other directives of the
-form C<:...>, are called I/O I<disciplines>.
+name of the filehandle.
 
-The C<open> pragma can be used to establish default I/O disciplines.
-See L<open>.
+DISCIPLINE can be either of C<:raw> for binary mode or C<:crlf> for
+"text" mode.  If the DISCIPLINE is omitted, it defaults to C<:raw>.
+Returns true on success, C<undef> on failure.  To mark FILEHANDLE as
+UTF-8, use C<:utf8>, and to mark the as bytes, use C<:bytes>.
+
+The C<:raw> are C<:clrf>, and any other directives of the form
+C<:...>, are called I/O I<disciplines>.  The C<open> pragma can be
+used to establish default I/O disciplines.  See L<open>.
 
 In general, binmode() should be called after open() but before any I/O
 is done on the filehandle.  Calling binmode() will flush any possibly

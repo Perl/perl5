@@ -1,5 +1,5 @@
 #
-# $Id: Unicode.t,v 1.7 2002/04/14 22:05:20 dankogai Exp $
+# $Id: Unicode.t,v 1.8 2002/04/16 23:35:00 dankogai Exp $
 #
 # This script is written entirely in ASCII, even though quoted literals
 # do include non-BMP unicode characters -- Are you happy, jhi?
@@ -12,17 +12,6 @@ BEGIN {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
     }
-# should work without perlio
-#     unless (find PerlIO::Layer 'perlio') {
-# 	print "1..0 # Skip: PerlIO was not built\n";
-# 	exit 0;
-#     }
-
-# should work on EBCDIC
-#    if (ord("A") == 193) {
-# 	print "1..0 # Skip: EBCDIC\n";
-# 	exit 0;
-#    }
     $ON_EBCDIC = (ord("A") == 193) || $ARGV[0];
     $| = 1;
 }

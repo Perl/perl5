@@ -1758,6 +1758,14 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 
 Returns entries from a hash iterator.  See C<hv_iterinit>.
 
+You may call C<hv_delete> or C<hv_delete_ent> on the hash entry that the
+iterator currently points to, without losing your place or invalidating your
+iterator.  Note that in this case the current entry is deleted from the hash
+with your iterator holding the last reference to it.  Your iterator is flagged
+to free the entry on the next call to C<hv_iternext>, so you must not discard
+your iterator immediately else the entry will leak - call C<hv_iternext> to
+trigger the resource deallocation.
+
 =cut
 */
 
@@ -1768,11 +1776,19 @@ Perl_hv_iternext(pTHX_ HV *hv)
 }
 
 /*
-XXX=for apidoc hv_iternext
+=for apidoc hv_iternext_flags
 
-Returns entries from a hash iterator.  See C<hv_iterinit>.
+Returns entries from a hash iterator.  See C<hv_iterinit> and C<hv_iternext>.
+The C<flags> value will normally be zero; if HV_ITERNEXT_WANTPLACEHOLDERS is
+set the placeholders keys (for restricted hashes) will be returned in addition
+to normal keys. By default placeholders are automatically skipped over.
+Currently a placeholder is implemented with a value that is literally
+<&Perl_sv_undef> (a regular C<undef> value is a normal read-write SV for which
+C<!SvOK> is false). Note that the implementation of placeholders and
+restricted hashes may change, and the implementation currently is
+insufficiently abstracted for any change to be tidy.
 
-XXX=cut
+=cut
 */
 
 HE *

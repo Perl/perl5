@@ -3,6 +3,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifdef USE_ITHREADS
+
 #ifdef WIN32
 #include <windows.h>
 #include <win32thread.h>
@@ -516,10 +518,12 @@ Perl_ithread_DESTROY(pTHX_ SV *sv)
     sv_unmagic(SvRV(sv),PERL_MAGIC_shared_scalar);
 }
 
-
+#endif /* USE_ITHREADS */
 
 MODULE = threads		PACKAGE = threads	PREFIX = ithread_
 PROTOTYPES: DISABLE
+
+#ifdef USE_ITHREADS
 
 void
 ithread_new (classname, function_to_call, ...)
@@ -569,8 +573,11 @@ ithread_detach(ithread *thread)
 void
 ithread_DESTROY(SV *thread)
 
+#endif /* USE_ITHREADS */
+
 BOOT:
 {
+#ifdef USE_ITHREADS
 	ithread* thread;
 	PL_perl_destruct_level = 2;
 	PERL_THREAD_ALLOC_SPECIFIC(self_key);
@@ -598,5 +605,6 @@ BOOT:
 
 	PERL_THREAD_SETSPECIFIC(self_key,thread);
 	MUTEX_UNLOCK(&create_destruct_mutex);
+#endif /* USE_ITHREADS */
 }
 

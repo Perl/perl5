@@ -1,7 +1,31 @@
 package threads::shared;
+
+use 5.007_003;
 use strict;
 use warnings;
 use Config;
+
+BEGIN {
+    unless ($Config{useithreads}) {
+	my @caller = caller(2);
+        die <<EOF;
+$caller[1] line $caller[2]:
+
+This Perl hasn't been configured and built properly for the threads
+module to work.  (The 'useithreads' configuration option hasn't been used.)
+
+Having threads support requires all of Perl and all of the modules in
+the Perl installation to be rebuilt, it is not just a question of adding
+the threads module.  (In other words, threaded and non-threaded Perls
+are binary incompatible.)
+
+If you want to the use the threads module, please contact the people
+who built your Perl.
+
+Cannot continue, aborting.
+EOF
+    }
+}
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -53,6 +77,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 SYNOPSIS
 
+  use threads;
   use threads::shared;
 
   my($foo, @foo, %foo);
