@@ -86,7 +86,7 @@ else {
 # Two-arg tv_interval() is always available.
 {
     my $f = tv_interval [5, 100_000], [10, 500_000];
-    ok 9, $f == 5.4, $f;
+    ok 9, abs($f - 5.4) < 0.001, $f;
 }
 
 if (!$have_gettimeofday) {
