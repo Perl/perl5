@@ -25,4 +25,3 @@ It is up to you what to do with them (They use long names like EXE_EXT now).
 
 diff.c2ph, diff.rest are small and should not break anything.
 
-diff.db_file adds binary mode.
