@@ -10,6 +10,29 @@
 #define H_PERL 1
 #define OVERLOAD
 
+/*
+ * STMT_START { statements; } STMT_END;
+ * can be used as a single statement, as in
+ * if (x) STMT_START { ... } STMT_END; else ...
+ *
+ * Trying to select a version that gives no warnings...
+ */
+#if !(defined(STMT_START) && defined(STMT_END))
+# if defined(__GNUC__) && !defined(__STRICT_ANSI__)
+#   define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
+#   define STMT_END	)
+# else
+   /* Now which other defined()s do we need here ??? */
+#  if (VOIDFLAGS) && (defined(sun) || defined(__sun__))
+#   define STMT_START	if (1)
+#   define STMT_END	else (void)0
+#  else
+#   define STMT_START	do
+#   define STMT_END	while (0)
+#  endif
+# endif
+#endif
+
 #include "embed.h"
 
 #define VOIDUSED 1
@@ -283,7 +306,7 @@
 #else
 #   define FIXSTATUS(sts)  (U_L(sts))
 #   define SHIFTSTATUS(sts) (sts)
-#   define SETERRNO(errcode,vmserrcode) {set_errno(errcode); set_vaxc_errno(vmserrcode);}
+#   define SETERRNO(errcode,vmserrcode) STMT_START {set_errno(errcode); set_vaxc_errno(vmserrcode);} STMT_END
 #endif
 
 #ifndef MSDOS
@@ -861,6 +884,7 @@ EXT char **	origenviron;
 EXT U32		origalen;
 EXT U32 *	profiledata;
 EXT int		maxo INIT(MAXO);/* Number of ops */
+EXT char *	osname;		/* operating system */
 
 EXT XPV*	xiv_arenaroot;	/* list of allocated xiv areas */
 EXT IV **	xiv_root;	/* free xiv list--shared by interpreters */
@@ -1207,6 +1231,7 @@ IEXT SV *	Iparsehook;
 IEXT char *	Icddir;
 IEXT bool	Iminus_c;
 IEXT char	Ipatchlevel[10];
+IEXT char **	Ilocalpatches;
 IEXT SV *	Inrs;
 IEXT char *	Isplitstr IINIT(" ");
 IEXT bool	Ipreprocess;
