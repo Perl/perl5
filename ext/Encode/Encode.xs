@@ -340,10 +340,14 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
    U8 *d = (U8 *) SvGROW(dst, 2*slen+1);
    STRLEN dlen = SvLEN(dst);
    int code;
-   while ((code = do_encode(dir,s,&slen,d,dlen,&dlen)))
+   while ((code = do_encode(dir,s,&slen,d,dlen,&dlen,!check)))
     {
      SvCUR_set(dst,dlen);
      SvPOK_on(dst);
+
+     if (code == ENCODE_FALLBACK)
+      break;
+
      switch(code)
       {
        case ENCODE_NOSPACE:

@@ -92,7 +92,7 @@ we add a flag to re-add the removed byte to the source we could handle
 #include "encode.h"
 
 int
-do_encode(encpage_t *enc, const U8 *src, STRLEN *slen, U8 *dst, STRLEN dlen, STRLEN *dout)
+do_encode(encpage_t *enc, const U8 *src, STRLEN *slen, U8 *dst, STRLEN dlen, STRLEN *dout, int approx)
 {
  const U8 *s    = src;
  const U8 *send = s+*slen;
@@ -106,9 +106,9 @@ do_encode(encpage_t *enc, const U8 *src, STRLEN *slen, U8 *dst, STRLEN dlen, STR
    U8 byte = *s;
    while (byte > e->max)
     e++;
-   if (byte >= e->min && e->slen)
+   if (byte >= e->min && e->slen && (approx || !(e->slen & 0x80)))
     {
-     const U8 *cend = s + e->slen;
+     const U8 *cend = s + (e->slen & 0x7f);
      if (cend <= send)
       {
        STRLEN n;
@@ -136,7 +136,11 @@ do_encode(encpage_t *enc, const U8 *src, STRLEN *slen, U8 *dst, STRLEN dlen, STR
        enc = e->next;
        s++;
        if (s == cend)
-        last = s;
+        {
+         if (approx && (e->slen & 0x80))
+          code = ENCODE_FALLBACK;
+         last = s;
+        }
       }
      else
       {

@@ -342,7 +342,7 @@ sub from_to
 
 # The global hash is declared in XS code
 $encoding{Unicode}    = bless({},'Encode::Unicode');
-$encoding{iso10646-1} = bless({},'Encode::iso10646_1');
+$encoding{'iso10646-1'} = bless({},'Encode::iso10646_1');
 
 sub encodings
 {
@@ -378,7 +378,7 @@ sub loadEncoding
      last unless $type eq '#';
     }
    $class .= ('::'.(($type eq 'E') ? 'Escape' : 'Table'));
-   # warn "Loading $file";
+   #warn "Loading $file";
    return $class->read($fh,$name,$type);
   }
  else
@@ -408,7 +408,8 @@ sub getEncoding
 
 package Encode::Unicode;
 
-# Dummy package that provides the encode interface
+# Dummy package that provides the encode interface but leaves data
+# as UTF-8 encoded. It is here so that from_to()
 
 sub name { 'Unicode' }
 
@@ -533,7 +534,9 @@ sub fromUnicode
  return $str;
 }
 
-package Encode::iso10646_1;#
+package Encode::iso10646_1;
+# Encoding is 16-bit network order Unicode
+# Used for X font encodings
 
 sub name { 'iso10646-1' }
 
