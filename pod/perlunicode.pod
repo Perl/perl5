@@ -158,9 +158,12 @@ Named Unicode properties and block ranges make be used as character
 classes via the new C<\p{}> (matches property) and C<\P{}> (doesn't
 match property) constructs.  For instance, C<\p{Lu}> matches any
 character with the Unicode uppercase property, while C<\p{M}> matches
-any mark character.  Single letter properties may omit the brackets, so
-that can be written C<\pM> also.  Many predefined character classes are
-available, such as C<\p{IsMirrored}> and  C<\p{InTibetan}>.
+any mark character.  Single letter properties may omit the brackets,
+so that can be written C<\pM> also.  Many predefined character classes
+are available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.  The
+names of the C<In> classes are the official Unicode block names but
+with all non-alphanumeric characters removed, for example the block
+name C<"Latin-1 Supplement"> becomes C<\p{InLatin1Supplement}>.
 
 =item *
 
