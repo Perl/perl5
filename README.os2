@@ -178,13 +178,14 @@ has much more functions working (like C<fork>, C<popen> and so on). In
 fact RSX is required if there is no VCPI present. Note the
 RSX requires DPMI.
 
-Only the latest runtime is supported, currently C<0.9c>. Perl may run
+Only the latest runtime is supported, currently C<0.9d fix 03>. Perl may run
 under earlier versions of EMX, but this is not tested.
 
 One can get different parts of EMX from, say
 
-  ftp://ftp.cdrom.com/pub/os2/emx09c/
-  ftp://hobbes.nmsu.edu/os2/unix/emx09c/
+  http://www.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/
+  http://powerusersbbs.com/pub/os2/dev/   [EMX+GCC Development]
+  http://hobbes.nmsu.edu/pub/os2/dev/emx/v0.9d/
 
 The runtime component should have the name F<emxrt.zip>.
 
@@ -1059,6 +1060,10 @@ You did not run C<omflibs>. See L<Prerequisites>.
 =head2 Segfault in make
 
 You use an old version of GNU make. See L<Prerequisites>.
+
+=head2 op/sprintf test failure
+
+This can result from a bug in emx sprintf which was fixed in 0.9d fix 03.
 
 =head1 Specific (mis)features of OS/2 port
 
