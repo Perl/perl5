@@ -92,13 +92,6 @@ more natural interpretation
 The multi-number v-strings like v65.66 and 65.66.67 still continue
 to be v-strings.
 
-=head2 (FreeBSD) Perl now uses the Perl malloc
-
-Using FreeBSD's system malloc for Perl was found to be very slow:
-in some applications that was 200 times slower than using the Perl
-malloc.  Therefore Perl now uses by default its own malloc, though
-one can still force the system malloc with Configure C<-Uusemymalloc>.
-
 =head2 (Win32) The -C Switch Has Been Repurposed
 
 The -C switch has changed in an incompatible way.  The old semantics
@@ -636,7 +629,29 @@ doing well.
 
 =head1 Platform Specific Problems
 
-=head2 Win32 sysopen, sysread, syswrite
+=head2 (FreeBSD)
+
+The choice of malloc (the C-level memory management interface)
+when building Perl is problematic in FreeBSD.
+
+Using FreeBSD's system malloc for Perl was found to be very slow:
+in some cases that was 200 times slower than using the Perl malloc.
+One such case is file input: for example
+
+    # slurping the whole compressed Perl source code into $a
+    if (open F,"perl-5.8.1.tar.gz") { local $/; $a=<F> }
+
+is about 200-250 times slower with the system malloc than with
+the Perl malloc.
+
+One could use Perl's malloc (Configure -Dusemymalloc), but that
+was found to cause random core dumps in FreeBSD with multithreaded
+programs.  No such problems were found in other platforms, however.
+
+A decision was made to stick with the system malloc, regardless
+of the performance problems.
+
+=head2 (Win32) sysopen, sysread, syswrite
 
 As of the 5.8.0 release, sysopen()/sysread()/syswrite() do not behave
 like they used to in 5.6.1 and earlier with respect to "text" mode.
