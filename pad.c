@@ -434,7 +434,11 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	  "Pad 0x%"UVxf"[0x%"UVxf"] alloc:   %ld for %s\n",
 	  PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long) retval,
 	  PL_op_name[optype]));
+#ifdef DEBUG_LEAKING_SCALARS
+    sv->sv_debug_optype = optype;
+    sv->sv_debug_inpad = 1;
     return (PADOFFSET)retval;
+#endif
 }
 
 /*

@@ -28,6 +28,8 @@ sub do_test {
 	    local $/;
 	    $pattern =~ s/\$ADDR/0x[[:xdigit:]]+/g;
 	    $pattern =~ s/\$FLOAT/(?:\\d*\\.\\d+(?:e[-+]\\d+)?|\\d+)/g;
+	    # handle DEBUG_LEAKING_SCALARS prefix
+	    $pattern =~ s/^(\s*)(SV =.* at )/$1ALLOCATED at .*?\n$1$2/mg;
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;

@@ -68,6 +68,13 @@ struct STRUCT_SV {		/* struct sv { */
     void*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
+#ifdef DEBUG_LEAKING_SCALARS
+    unsigned	sv_debug_optype:9;	/* the type of OP that allocated us */
+    unsigned	sv_debug_inpad:1;	/* was allocated in a pad for an OP */
+    unsigned	sv_debug_cloned:1;	/* was cloned for an ithread */
+    unsigned	sv_debug_line:16;	/* the line where we were allocated */
+    char *	sv_debug_file;		/* the file where we were allocated */
+#endif
 };
 
 struct gv {

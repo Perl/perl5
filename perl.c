@@ -827,8 +827,16 @@ perl_destruct(pTHXx)
 		if (SvTYPE(sv) != SVTYPEMASK) {
 		    PerlIO_printf(Perl_debug_log, "leaked: sv=0x%p"
 			" flags=0x08%"UVxf
-			" refcnt=%"UVuf pTHX__FORMAT "\n",
-			sv, sv->sv_flags, sv->sv_refcnt pTHX__VALUE);
+			" refcnt=%"UVuf pTHX__FORMAT "\n"
+			"\tallocated at %s:%d %s %s%s\n",
+			sv, sv->sv_flags, sv->sv_refcnt pTHX__VALUE,
+			sv->sv_debug_file ? sv->sv_debug_file : "(unknown)",
+			sv->sv_debug_line,
+			sv->sv_debug_inpad ? "for" : "by",
+			sv->sv_debug_optype ?
+			    PL_op_name[sv->sv_debug_optype]: "(none)",
+			sv->sv_debug_cloned ? " (cloned)" : ""
+		    );
 		}
 	    }
 	}

@@ -165,8 +165,19 @@ Public API:
  * "A time to plant, and a time to uproot what was planted..."
  */
 
+#ifdef DEBUG_LEAKING_SCALARS
+#  ifdef NETWARE
+#    define FREE_SV_DEBUG_FILE(sv) PerlMemfree((sv)->sv_debug_file)
+#  else
+#    define FREE_SV_DEBUG_FILE(sv) PerlMemShared_free((sv)->sv_debug_file)
+#  endif
+#else
+#  define FREE_SV_DEBUG_FILE(sv)
+#endif
+
 #define plant_SV(p) \
     STMT_START {					\
+	FREE_SV_DEBUG_FILE(p);				\
 	SvANY(p) = (void *)PL_sv_root;			\
 	SvFLAGS(p) = SVTYPEMASK;			\
 	PL_sv_root = (p);				\
@@ -200,6 +211,17 @@ S_new_SV(pTHX)
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
+    sv->sv_debug_optype = PL_op ? PL_op->op_type : 0;
+    sv->sv_debug_line = (U16) ((PL_copline == NOLINE) ?
+        (PL_curcop ? CopLINE(PL_curcop) : 0) : PL_copline);
+    sv->sv_debug_inpad = 0;
+    sv->sv_debug_cloned = 0;
+#  ifdef NETWARE
+    sv->sv_debug_file = PL_curcop ? savepv(CopFILE(PL_curcop)): NULL;
+#  else
+    sv->sv_debug_file = PL_curcop ? savesharedpv(CopFILE(PL_curcop)): NULL;
+#  endif
+    
     return sv;
 }
 #  define new_SV(p) (p)=S_new_SV(aTHX)
@@ -5822,7 +5844,14 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     SvREFCNT(sv) = 0;
     sv_clear(sv);
     assert(!SvREFCNT(sv));
+#ifdef DEBUG_LEAKING_SCALARS
+    sv->sv_flags  = nsv->sv_flags;
+    sv->sv_any    = nsv->sv_any;
+    sv->sv_refcnt = nsv->sv_refcnt;
+#else
     StructCopy(nsv,sv,SV);
+#endif
+
 #ifdef PERL_COPY_ON_WRITE
     if (SvIsCOW_normal(nsv)) {
 	/* We need to follow the pointers around the loop to make the
@@ -10727,6 +10756,19 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 
     /* create anew and remember what it is */
     new_SV(dstr);
+
+#ifdef DEBUG_LEAKING_SCALARS
+    dstr->sv_debug_optype = sstr->sv_debug_optype;
+    dstr->sv_debug_line = sstr->sv_debug_line;
+    dstr->sv_debug_inpad = sstr->sv_debug_inpad;
+    dstr->sv_debug_cloned = 1;
+#  ifdef NETWARE
+    dstr->sv_debug_file = savepv(sstr->sv_debug_file);
+#  else
+    dstr->sv_debug_file = savesharedpv(sstr->sv_debug_file);
+#  endif
+#endif
+
     ptr_table_store(PL_ptr_table, sstr, dstr);
 
     /* clone */
@@ -11540,6 +11582,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #  ifdef DEBUGGING
     Poison(my_perl, 1, PerlInterpreter);
+    PL_op = Nullop;
+    PL_curcop = Nullop;
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
@@ -11572,6 +11616,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #    ifdef DEBUGGING
     Poison(my_perl, 1, PerlInterpreter);
+    PL_op = Nullop;
+    PL_curcop = Nullop;
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
