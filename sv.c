@@ -1455,6 +1455,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	LvTARGLEN(sv)	= 0;
 	LvTARG(sv)	= 0;
 	LvTYPE(sv)	= 0;
+    GvGP(sv)    = 0;
+    GvNAME(sv)  = 0;
+    GvNAMELEN(sv)   = 0;
+    GvSTASH(sv) = 0;
+    GvFLAGS(sv) = 0;
 	break;
     case SVt_PVAV:
 	SvANY(sv) = new_XPVAV();
@@ -3783,7 +3788,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    if (dtype != SVt_PVGV) {
 		char *name = GvNAME(sstr);
 		STRLEN len = GvNAMELEN(sstr);
-		sv_upgrade(dstr, SVt_PVGV);
+        if (dtype != SVt_PVLV)  /* don't upgrade SVt_PVLV: it can hold a glob */
+            sv_upgrade(dstr, SVt_PVGV);
 		sv_magic(dstr, dstr, PERL_MAGIC_glob, Nullch, 0);
 		GvSTASH(dstr) = (HV*)SvREFCNT_inc(GvSTASH(sstr));
 		GvNAME(dstr) = savepvn(name, len);

@@ -1034,7 +1034,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (HvHASKFLAGS(sv))	sv_catpv(d, "HASKFLAGS,");
 	if (HvREHASH(sv))	sv_catpv(d, "REHASH,");
 	break;
-    case SVt_PVGV:
+    case SVt_PVGV: case SVt_PVLV:
 	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
 	if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
 	if (GvUNIQUE(sv))       sv_catpv(d, "UNIQUE,");
@@ -1170,7 +1170,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	SvREFCNT_dec(d);
 	return;
     }
-    if (type <= SVt_PVLV) {
+    if (type <= SVt_PVLV && type != SVt_PVGV) {
 	if (SvPVX(sv)) {
 	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%"UVxf" ", PTR2UV(SvPVX(sv)));
 	    if (SvOOK(sv))
@@ -1192,15 +1192,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    do_hv_dump(level, file, "  STASH", SvSTASH(sv));
     }
     switch (type) {
-    case SVt_PVLV:
-	Perl_dump_indent(aTHX_ level, file, "  TYPE = %c\n", LvTYPE(sv));
-	Perl_dump_indent(aTHX_ level, file, "  TARGOFF = %"IVdf"\n", (IV)LvTARGOFF(sv));
-	Perl_dump_indent(aTHX_ level, file, "  TARGLEN = %"IVdf"\n", (IV)LvTARGLEN(sv));
-	Perl_dump_indent(aTHX_ level, file, "  TARG = 0x%"UVxf"\n", PTR2UV(LvTARG(sv)));
-	if (LvTYPE(sv) != 't' && LvTYPE(sv) != 'T')
-	    do_sv_dump(level+1, file, LvTARG(sv), nest+1, maxnest,
-		    dumpops, pvlim);
-	break;
     case SVt_PVAV:
 	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%"UVxf, PTR2UV(AvARRAY(sv)));
 	if (AvARRAY(sv) != AvALLOC(sv)) {
@@ -1357,7 +1348,16 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (nest < maxnest && (CvCLONE(sv) || CvCLONED(sv)))
 	    do_sv_dump(level+1, file, (SV*)CvOUTSIDE(sv), nest+1, maxnest, dumpops, pvlim);
 	break;
-    case SVt_PVGV:
+    case SVt_PVGV: case SVt_PVLV:
+    if (type == SVt_PVLV) {
+        Perl_dump_indent(aTHX_ level, file, "  TYPE = %c\n", LvTYPE(sv));
+        Perl_dump_indent(aTHX_ level, file, "  TARGOFF = %"IVdf"\n", (IV)LvTARGOFF(sv));
+        Perl_dump_indent(aTHX_ level, file, "  TARGLEN = %"IVdf"\n", (IV)LvTARGLEN(sv));
+        Perl_dump_indent(aTHX_ level, file, "  TARG = 0x%"UVxf"\n", PTR2UV(LvTARG(sv)));
+        if (LvTYPE(sv) != 't' && LvTYPE(sv) != 'T')
+            do_sv_dump(level+1, file, LvTARG(sv), nest+1, maxnest,
+                dumpops, pvlim);
+    }
 	Perl_dump_indent(aTHX_ level, file, "  NAME = \"%s\"\n", GvNAME(sv));
 	Perl_dump_indent(aTHX_ level, file, "  NAMELEN = %"IVdf"\n", (IV)GvNAMELEN(sv));
 	do_hv_dump (level, file, "  GvSTASH", GvSTASH(sv));

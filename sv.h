@@ -53,11 +53,11 @@ typedef enum {
 	SVt_PVNV,	/* 6 */
 	SVt_PVMG,	/* 7 */
 	SVt_PVBM,	/* 8 */
-	SVt_PVLV,	/* 9 */
-	SVt_PVAV,	/* 10 */
-	SVt_PVHV,	/* 11 */
-	SVt_PVCV,	/* 12 */
-	SVt_PVGV,	/* 13 */
+	SVt_PVGV,	/* 9 */
+	SVt_PVLV,	/* 10 */
+	SVt_PVAV,	/* 11 */
+	SVt_PVHV,	/* 12 */
+	SVt_PVCV,	/* 13 */
 	SVt_PVFM,	/* 14 */
 	SVt_PVIO	/* 15 */
 } svtype;
@@ -271,6 +271,13 @@ struct xpvlv {
     NV    	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
+
+    /* a full glob fits into this */
+    GP*		xgv_gp;
+    char*	xgv_name;
+    STRLEN	xgv_namelen;
+    HV*		xgv_stash;
+    U8		xgv_flags;
 
     STRLEN	xlv_targoff;
     STRLEN	xlv_targlen;

@@ -29,11 +29,11 @@ static char *svclassnames[] = {
     "B::PVNV",
     "B::PVMG",
     "B::BM",
+    "B::GV",
     "B::PVLV",
     "B::AV",
     "B::HV",
     "B::CV",
-    "B::GV",
     "B::FM",
     "B::IO",
 };

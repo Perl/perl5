@@ -295,7 +295,7 @@ PP(pp_eq)
 PP(pp_preinc)
 {
     dSP;
-    if (SvTYPE(TOPs) > SVt_PVLV)
+    if (SvTYPE(TOPs) == SVt_PVGV || SvTYPE(TOPs) > SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MAX)
@@ -1980,8 +1980,8 @@ PP(pp_subst)
 	!is_cow &&
 #endif
 	(SvREADONLY(TARG)
-	|| (SvTYPE(TARG) > SVt_PVLV
-	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
+	|| ( (SvTYPE(TARG) == SVt_PVGV || SvTYPE(TARG) > SVt_PVLV)
+	     && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
 	DIE(aTHX_ PL_no_modify);
     PUTBACK;
 

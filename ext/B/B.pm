@@ -36,7 +36,7 @@ use strict;
 @B::PVIV::ISA = qw(B::PV B::IV);
 @B::PVNV::ISA = qw(B::PV B::NV);
 @B::PVMG::ISA = 'B::PVNV';
-@B::PVLV::ISA = 'B::PVMG';
+@B::PVLV::ISA = 'B::GV';
 @B::BM::ISA = 'B::PVMG';
 @B::AV::ISA = 'B::PVMG';
 @B::GV::ISA = 'B::PVMG';
@@ -547,11 +547,11 @@ inheritance hierarchy mimics the underlying C "inheritance":
                            |
                         B::PVMG
                            |
-         +------+-----+----+------+-----+-----+
-         |      |     |    |      |     |     |
-      B::PVLV B::BM B::AV B::GV B::HV B::CV B::IO
-                                        |
-                                        |
+                +-----+----+------+-----+-----+
+                |     |    |      |     |     |
+              B::BM B::AV B::GV B::HV B::CV B::IO
+                           |            |
+                        B::PVLV         |
                                       B::FM
 
 

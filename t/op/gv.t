@@ -11,7 +11,7 @@ BEGIN {
 
 use warnings;
 
-print "1..48\n";
+print "1..52\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -217,6 +217,33 @@ print $j[0] == 1 ? "ok 43\n" : "not ok 43\n";
     print $x;
 }
 
+{
+    # test the assignment of a GLOB to an LVALUE
+    my $e = '';
+    local $SIG{__DIE__} = sub { $e = $_[0] };
+    my $v;
+    sub f { $_[0] = 0; $_[0] = "a"; $_[0] = *DATA }
+    f($v);
+    print $v eq '*main::DATA' ? "ok 49\n" : "not ok 49\n# $e";
+    my $x = <$v>;
+    print $x || "not ok 50\n";
+}
+
+{   
+    # GLOB assignment to tied element
+    local $SIG{__DIE__} = sub { $e = $_[0] };
+    sub T::TIEARRAY { bless [] => "T" }
+    sub T::STORE    { $_[0]->[ $_[1] ] = $_[2] }
+    sub T::FETCH    { $_[0]->[ $_[1] ] }
+    tie my @ary => "T";
+    $ary[0] = *DATA;
+    print $ary[0] eq '*main::DATA' ? "ok 51\n" : "not ok 51\n# $e";
+    my $x = readline $ary[0];
+    print $x || "not ok 52\n";
+}
+
 __END__
 ok 44
 ok 48
+ok 50
+ok 52
