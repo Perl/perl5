@@ -2,7 +2,7 @@
 #
 # This script generates "unfcan.h", "unfcpt.h", "unfcmb.h",
 # "unfcmp.h", and "unfexc.h"
-# from CombiningClass.pl, Decomposition.pl, CompExcl.txt
+# from CombiningClass.pl, Decomposition.pl, CompositionExclusions.txt
 # in lib/unicore or unicode directory
 # for Unicode::Normalize.xs. (cf. Makefile.PL)
 #
@@ -24,13 +24,19 @@ our $Decomp = do "unicore/Decomposition.pl"
     || do "unicode/Decomposition.pl"
     || croak "$PACKAGE: Decomposition.pl not found";
 
-our %Combin; # $codepoint => $number      : combination class
-our %Canon;  # $codepoint => $hexstring   : canonical decomp.
-our %Compat; # $codepoint => $hexstring   : compat. decomp.
-our %Compos; # $1st,$2nd  => $codepoint   : composite
-our %Exclus; # $codepoint => 1            : composition exclusions
-our %Single; # $codepoint => 1            : singletons
-our %NonStD; # $codepoint => 1            : non-starter decompositions
+our %Combin;	# $codepoint => $number    : combination class
+our %Canon;	# $codepoint => $hexstring : canonical decomp.
+our %Compat;	# $codepoint => $hexstring : compat. decomp.
+our %Exclus;	# $codepoint => 1          : composition exclusions
+our %Single;	# $codepoint => 1          : singletons
+our %NonStD;	# $codepoint => 1          : non-starter decompositions
+
+our %Comp1st;	# $codepoint => $listname  : may be composed with a next char.
+our %Comp2nd;	# $codepoint => 1          : may be composed with a prev char.
+our %CompList;	# $listname,$2nd  => $codepoint : composite
+
+our $prefix = "UNF_";
+our $structname = "${prefix}complist";
 
 {
     my($f, $fh);
@@ -42,14 +48,21 @@ our %NonStD; # $codepoint => 1            : non-starter decompositions
 	last if open($fh, $f);
 	$f = undef;
     }
-	croak "$PACKAGE: CompExcl.txt not found in @INC" unless defined $f;
-	while (<$fh>) {
-	    next if /^#/ or /^$/;
-	    s/#.*//;
-	    $Exclus{ hex($1) } =1 if /([0-9A-Fa-f]+)/;
-	}
+    croak "$PACKAGE: neither unicore/CompositionExclusions.txt "
+	. "nor unicode/CompExcl.txt is found in @INC" unless defined $f;
+
+    while (<$fh>) {
+	next if /^#/ or /^$/;
+	s/#.*//;
+	$Exclus{ hex($1) } = 1 if /([0-9A-Fa-f]+)/;
+    }
     close $fh;
 }
+
+##
+## converts string "hhhh hhhh hhhh" to a numeric list
+##
+sub _getHexArray { map hex, $_[0] =~ /([0-9A-Fa-f]+)/g }
 
 while ($Combin =~ /(.+)/g) {
     my @tab = split /\t/, $1;
@@ -66,17 +79,24 @@ while ($Decomp =~ /(.+)/g) {
     my $compat = $tab[2] =~ s/<[^>]+>//;
     my $dec = [ _getHexArray($tab[2]) ]; # decomposition
     my $ini = hex($tab[0]); # initial decomposable character
+
+    my $listname =
+	@$dec == 2 ? sprintf("${structname}_%06x", $dec->[0]) : 'USELESS';
+		# %04x is bad since it'd place _3046 after _1d157.
+
     if ($tab[1] eq '') {
 	$Compat{ $ini } = $dec;
 
 	if (! $compat) {
-	    $Canon{  $ini } = $dec;
+	    $Canon{ $ini } = $dec;
 
 	    if (@$dec == 2) {
 		if ($Combin{ $dec->[0] }) {
 		    $NonStD{ $ini } = 1;
 		} else {
-		    $Compos{ $dec->[0] }{ $dec->[1] } = $ini;
+		    $CompList{ $listname }{ $dec->[1] } = $ini;
+		    $Comp1st{ $dec->[0] } = $listname;
+		    $Comp2nd{ $dec->[1] } = 1 if ! $Exclus{$ini};
 		}
 	    } elsif (@$dec == 1) {
 		$Single{ $ini } = 1;
@@ -85,16 +105,19 @@ while ($Decomp =~ /(.+)/g) {
 	    }
 	}
     } else {
-	foreach my $u ($ini .. hex($tab[1])){
+	foreach my $u ($ini .. hex($tab[1])) {
 	    $Compat{ $u } = $dec;
+
 	    if (! $compat) {
-		$Canon{  $u }   = $dec;
+		$Canon{ $u } = $dec;
 
 		if (@$dec == 2) {
 		    if ($Combin{ $dec->[0] }) {
 			$NonStD{ $u } = 1;
 		    } else {
-			$Compos{ $dec->[0] }{ $dec->[1] } = $u;
+			$CompList{ $listname }{ $dec->[1] } = $u;
+			$Comp1st{ $dec->[0] } = $listname;
+			$Comp2nd{ $dec->[1] } = 1 if ! $Exclus{$u};
 		    }
 		} elsif (@$dec == 1) {
 		    $Single{ $u } = 1;
@@ -106,14 +129,9 @@ while ($Decomp =~ /(.+)/g) {
     }
 }
 
-# exhaustive decomposition
-foreach my $key (keys %Canon) {
-    $Canon{$key}  = [ getCanonList($key) ];
-}
-
-# exhaustive decomposition
-foreach my $key (keys %Compat) { 
-    $Compat{$key} = [ getCompatList($key) ];
+# modern HANGUL JUNGSEONG and HANGUL JONGSEONG jamo
+foreach my $j (0x1161..0x1175, 0x11A8..0x11C2) {
+    $Comp2nd{$j} = 1;
 }
 
 sub getCanonList {
@@ -130,7 +148,15 @@ sub getCompatList {
     # condition @src == @dec is not ok.
 }
 
-sub _getHexArray { map hex, $_[0] =~ /([0-9A-Fa-f]+)/g }
+# exhaustive decomposition
+foreach my $key (keys %Canon) {
+    $Canon{$key}  = [ getCanonList($key) ];
+}
+
+# exhaustive decomposition
+foreach my $key (keys %Compat) { 
+    $Compat{$key} = [ getCompatList($key) ];
+}
 
 sub _U_stringify {
     sprintf '"%s"', join '',
@@ -143,38 +169,6 @@ foreach my $hash (\%Canon, \%Compat) {
     foreach my $key (keys %$hash) {
 	$hash->{$key} = _U_stringify( @{ $hash->{$key} } );
     }
-}
-
-my $prefix = "UNF_";
-my $structname = "${prefix}complist";
-
-our (%Comp1st, %Comp2nd, %CompList);
-
-foreach my $c1 (keys %Compos) {
-    my $name = sprintf "${structname}_%06x", $c1;
-    $Comp1st{$c1} = $name;
-
-    foreach my $c2 (keys %{ $Compos{$c1} }) {
-	my $composite = $Compos{$c1}{$c2};
-	$Comp2nd{$c2} = 1 if ! $Exclus{$composite} && ! $Combin{$c1};
-	$CompList{$name}{$c2} = $composite;
-    }
-}
-
-# modern HANGUL JUNGSEONG and HANGUL JONGSEONG jamo
-foreach my $j (0x1161..0x1175, 0x11A8..0x11C2) {
-    $Comp2nd{$j} = 1;
-}
-
-my $compinit =
-    "typedef struct { UV nextchar; UV composite; } $structname;\n\n";
-
-foreach my $i (sort keys %CompList) {
-    $compinit .= "$structname $i [] = {\n";
-    $compinit .= join ",\n",
-	map sprintf("\t{ %d, %d }", $_, $CompList{$i}{$_}),
-	    sort {$a <=> $b } keys %{ $CompList{$i} };
-    $compinit .= ",\n{0,0}\n};\n\n"; # with sentinel
 }
 
 ####################################
@@ -238,8 +232,18 @@ foreach my $tbl (@boolfunc) {
 
 close FH;
 
-
 ####################################
+
+my $compinit =
+    "typedef struct { UV nextchar; UV composite; } $structname;\n\n";
+
+foreach my $i (sort keys %CompList) {
+    $compinit .= "$structname $i [] = {\n";
+    $compinit .= join ",\n",
+	map sprintf("\t{ %d, %d }", $_, $CompList{$i}{$_}),
+	    sort {$a <=> $b } keys %{ $CompList{$i} };
+    $compinit .= ",\n{0,0}\n};\n\n"; # with sentinel
+}
 
 my @tripletable = (
     {
