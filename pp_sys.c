@@ -3400,7 +3400,7 @@ PP(pp_chown)
     PUSHi(value);
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "Unsupported function chown");
+    DIE(aTHX_ PL_no_func, "chown");
 #endif
 }
 
@@ -3486,7 +3486,7 @@ PP(pp_link)
     TAINT_PROPER("link");
     SETi( PerlLIO_link(tmps, tmps2) >= 0 );
 #else
-    DIE(aTHX_ PL_no_func, "Unsupported function link");
+    DIE(aTHX_ PL_no_func, "link");
 #endif
     RETURN;
 }
@@ -3907,7 +3907,7 @@ PP(pp_fork)
     PUSHi(childpid);
     RETURN;
 #  else
-    DIE(aTHX_ PL_no_func, "Unsupported function fork");
+    DIE(aTHX_ PL_no_func, "fork");
 #  endif
 #endif
 }
@@ -3935,7 +3935,7 @@ PP(pp_wait)
     XPUSHi(childpid);
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "Unsupported function wait");
+    DIE(aTHX_ PL_no_func, "wait");
 #endif
 }
 
@@ -3965,7 +3965,7 @@ PP(pp_waitpid)
     SETi(childpid);
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "Unsupported function waitpid");
+    DIE(aTHX_ PL_no_func, "waitpid");
 #endif
 }
 
@@ -4148,7 +4148,7 @@ PP(pp_kill)
     PUSHi(value);
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "Unsupported function kill");
+    DIE(aTHX_ PL_no_func, "kill");
 #endif
 }
 
@@ -4375,7 +4375,7 @@ PP(pp_alarm)
     PUSHi(anum);
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "Unsupported function alarm");
+    DIE(aTHX_ PL_no_func, "alarm");
 #endif
 }
 
