@@ -1572,11 +1572,7 @@ dump_mstats(char *s)
 
 #ifdef USE_PERL_SBRK
 
-#   ifdef NeXT
-#      define PERL_SBRK_VIA_MALLOC
-#   endif
-
-#   ifdef __MACHTEN_PPC__
+#   if defined(__MACHTEN_PPC__) || defined(__NeXT__)
 #      define PERL_SBRK_VIA_MALLOC
 /*
  * MachTen's malloc() returns a buffer aligned on a two-byte boundary.
