@@ -4,7 +4,7 @@
 # doubles (if supported), of machine-specific short and long
 # integers, machine-specific floating point exceptions (infinity,
 # not-a-number ...), of the effects of locale, and of features
-# specific to multi-byte characters (under use utf8 and such).
+# specific to multi-byte characters (under the utf8 pragma and such).
 
 BEGIN {
     chdir 't' if -d 't';

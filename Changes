@@ -31,6 +31,226 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11625] By: jhi                                   on 2001/08/09  14:54:05
+        Log: s/z/tz/
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[ 11624] By: jhi                                   on 2001/08/09  14:52:52
+        Log: Article nit.
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[ 11623] By: jhi                                   on 2001/08/09  14:49:00
+        Log: Rename lib/unicode files to lib/unicore to avoid
+             conflicts between core lib/unicode and Unicode::
+             files in case-ignoring filesystems.
+     Branch: perl
+	   + (add 325 files)
+	   - (delete 324 files)
+	   ! MANIFEST lib/charnames.pm lib/utf8_heavy.pl pod/perlretut.pod
+____________________________________________________________________________
+[ 11622] By: jhi                                   on 2001/08/09  13:33:47
+        Log: Upgrade to Math::BigInt 1.41.
+     Branch: perl
+	   ! lib/Math/BigInt.pm lib/Math/BigInt/t/bigintpm.t
+____________________________________________________________________________
+[ 11621] By: jhi                                   on 2001/08/09  13:31:20
+        Log: Subject: [PATCH] remove PL_na from typemap
+             From: James <james@rf.net>
+             Date: Mon, 06 Aug 2001 20:23:15 -0700
+             Message-ID: <3B6F5F23.A31A81B1@rf.net>
+             
+             (had to be manually applied)
+     Branch: perl
+	   ! lib/ExtUtils/typemap
+____________________________________________________________________________
+[ 11620] By: jhi                                   on 2001/08/09  13:27:11
+        Log: The metaconfig unit changes for #11618.
+     Branch: metaconfig/U/perl
+	   + d_fpclassl.U i_fp.U
+____________________________________________________________________________
+[ 11619] By: jhi                                   on 2001/08/09  13:25:21
+        Log: Forgot this from #11618.
+             
+             NOTE: wince/config_H.ce needs updating.
+     Branch: perl
+	   ! wince/config.ce
+____________________________________________________________________________
+[ 11618] By: jhi                                   on 2001/08/09  13:21:51
+        Log: Introduce more floating point classifying APIs;
+             try to define (most importantly) Perl_is{inf,nan}(x).
+             
+             For this first cut, assume none such APIs exist in non-UNIXoid
+             platforms-- this is of course too unkind: Win32 rumoredly has
+             _fpclass() and _isnan(), and VMS/VOS very probably have some
+             of the APIs available. 	The only thing Perl uses at the moment
+             is Perl_isnan() (has been in use for a while now).
+             
+             NOTE: the Win32 and NetWare config_h.?c need regenerating.
+     Branch: perl
+	   ! Configure NetWare/config.wc Porting/Glossary Porting/config.sh
+	   ! Porting/config_H config_h.SH configure.com epoc/config.sh
+	   ! hints/hpux.sh perl.h pod/perltoc.pod uconfig.h uconfig.sh
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h win32/config.bc win32/config.gc
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc wince/config.ce wince/config.h
+____________________________________________________________________________
+[ 11617] By: jhi                                   on 2001/08/09  11:08:51
+        Log: Integrate change #11519 from perlio:
+             
+             Avoid testing for (non-)existance of "encoding(xxxx)"
+             layer is called "encoding" the (xxxx) is an argument.
+     Branch: perl
+	  !> lib/open.pm
+____________________________________________________________________________
+[ 11616] By: nick                                  on 2001/08/09  07:50:24
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/PerlIO/t/via.t lib/Getopt/Long/CHANGES
+	  +> lib/Getopt/Long/README lib/Getopt/Long/t/gol-basic.t
+	  +> lib/Getopt/Long/t/gol-compat.t lib/Getopt/Long/t/gol-linkage.t
+	  +> lib/Getopt/Long/t/gol-oo.t utils/perlivp.PL
+	   - lib/Getopt/Long/t/basic.t lib/Getopt/Long/t/compat.t
+	   - lib/Getopt/Long/t/linkage.t lib/Getopt/Long/t/oo.t
+	  !> (integrate 79 files)
+____________________________________________________________________________
+[ 11615] By: nick                                  on 2001/08/09  06:23:44
+        Log: Avoid testing for (non-)existance of "encoding(xxxx)"
+             layer is called "encoding" the (xxxx) is an argument.
+     Branch: perlio
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 11614] By: jhi                                   on 2001/08/08  21:50:19
+        Log: Subject: [PATCH bleadperl] Teach B::Concise about PADOP
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Wed, 8 Aug 2001 23:54:17 +0200
+             Message-ID: <20010808235417.O1006@pjcj.net>
+     Branch: perl
+	   ! ext/B/B/Concise.pm
+____________________________________________________________________________
+[ 11613] By: jhi                                   on 2001/08/08  13:22:13
+        Log: Make VMS use IEEE math by default; reorder Tru64 hints
+             so that -fprm d -ieee (the -ieee gives as e.g. IEEE 754
+             exception semantics) is always set if using (the new) cc.
+     Branch: perl
+	   ! configure.com hints/dec_osf.sh
+____________________________________________________________________________
+[ 11612] By: jhi                                   on 2001/08/08  12:14:56
+        Log: Subject: Re: [ID 20010806.008] tied hashes, invocation of FIRSTKEY
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Tue, 7 Aug 2001 17:16:05 +0530
+             Message-ID: <20010807171605.K526@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 11611] By: jhi                                   on 2001/08/08  02:28:58
+        Log: Subject: [PATCH perl@11597] fix t/run/exit.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 07 Aug 2001 22:27:47 -0500
+             Message-Id: <5.1.0.14.0.20010806105326.02d22298@exchi01>
+     Branch: perl
+	   ! t/run/exit.t
+____________________________________________________________________________
+[ 11610] By: jhi                                   on 2001/08/08  00:12:00
+        Log: Subject: [PATCH bleadperl] better VMS docs for $?, exit(), and system()
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 07 Aug 2001 20:01:53 -0500
+             Message-Id: <5.1.0.14.0.20010807155648.01ba3c98@exchi01>
+     Branch: perl
+	   ! pod/perlport.pod pod/perlvar.pod vms/perlvms.pod
+____________________________________________________________________________
+[ 11609] By: jhi                                   on 2001/08/07  23:49:09
+        Log: Update the magazine information.
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[ 11608] By: jhi                                   on 2001/08/07  23:35:27
+        Log: Ignore SIGFPE everywhere.
+     Branch: perl
+	   ! hints/os390.sh hints/posix-bc.sh hints/uts.sh numeric.c perl.h
+____________________________________________________________________________
+[ 11607] By: jhi                                   on 2001/08/07  23:07:04
+        Log: With permission, change the licensing of the docs by
+             TomC (and Gnat) to comply with the rest of Perl.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+	   ! pod/perlfaq9.pod pod/perlopentut.pod pod/perltoot.pod
+	   ! pod/perltootc.pod
+____________________________________________________________________________
+[ 11606] By: jhi                                   on 2001/08/07  22:50:04
+        Log: Subject: [PATCH 5.6.x, 5.7.2] hints/openbsd.sh tweaks.
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 7 Aug 2001 15:49:33 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10108071544040.2431-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! hints/openbsd.sh
+____________________________________________________________________________
+[ 11605] By: jhi                                   on 2001/08/07  22:49:18
+        Log: Subject: [PATCH] Makefile.SH test_prep dependency
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 7 Aug 2001 15:44:01 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10108071540190.2431-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11604] By: jhi                                   on 2001/08/07  22:44:35
+        Log: Don't autogenerate the headers et alia,
+             make regen_headers explicitly.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11603] By: jhi                                   on 2001/08/07  22:33:48
+        Log: Subject: Re: [ID 20010807.011] 5.6.1 coredumping on bleedperl embed.pl
+             From: Gurusamy Sarathy <gsar@ActiveState.com> 
+             Date: Tue, 07 Aug 2001 08:33:26 -0700
+             Message-Id: <200108071533.f77FXQf01168@smtp3.ActiveState.com>
+             
+             Unnecessary dependency.
+     Branch: perl
+	   ! embed.pl
+____________________________________________________________________________
+[ 11602] By: jhi                                   on 2001/08/07  13:52:41
+        Log: Subject: Re: [ID 20010806.006] Can't read coderef from tied variable
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Tue, 7 Aug 2001 09:10:54 +0530
+             Message-ID: <20010807091054.H526@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 11601] By: jhi                                   on 2001/08/07  13:46:33
+        Log: Subject: [PATCH perl@11597] B && BEGIN handling
+             From: "James A. Duncan" <jduncan@fotango.com>
+             Date: Mon, 6 Aug 2001 17:29:11 +0100
+             Message-ID: <20010806172911.A2071@fotango.com>
+             
+             (the intrpvar.h addition moved to the end for bincompat)
+     Branch: perl
+	   ! embedvar.h ext/B/B.xs intrpvar.h perl.c perlapi.h
+____________________________________________________________________________
+[ 11600] By: jhi                                   on 2001/08/07  11:53:48
+        Log: Integrate change #11598 from maintperl (fcrypt.c URL updates)
+     Branch: perl
+	  !> README.win32
+____________________________________________________________________________
+[ 11599] By: gsar                                  on 2001/08/07  06:31:39
+        Log: fix URLs for fcrypt.c
+     Branch: maint-5.6/perl
+	   ! README.win32
+____________________________________________________________________________
+[ 11598] By: jhi                                   on 2001/08/06  15:02:48
+        Log: Yet another way to say Infinity: HP-UX calls its "++".
+     Branch: perl
+	   ! lib/Math/BigInt/t/bigintpm.t
+____________________________________________________________________________
+[ 11597] By: jhi                                   on 2001/08/06  13:40:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11596] By: jhi                                   on 2001/08/06  13:24:28
         Log: Advertise File::Temp, don't advertise POSIX::tmpnam().
      Branch: perl

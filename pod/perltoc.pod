@@ -884,32 +884,32 @@ listing
 $ARG, $_, $a, $b, $<I<digits>>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
 $LAST_PAREN_MATCH, $+, $^N, @LAST_MATCH_END, @+, $MULTILINE_MATCHING, $*,
 input_line_number HANDLE EXPR, $INPUT_LINE_NUMBER, $NR, $,
-input_record_separator HANDLE EXPR, $INPUT_RECORD_SEPARATOR, $RS, $/,
-autoflush HANDLE EXPR, $OUTPUT_AUTOFLUSH, $|, output_field_separator HANDLE
-EXPR, $OUTPUT_FIELD_SEPARATOR, $OFS, $,, output_record_separator HANDLE
-EXPR, $OUTPUT_RECORD_SEPARATOR, $ORS, $\, $LIST_SEPARATOR, $",
-$SUBSCRIPT_SEPARATOR, $SUBSEP, $;, $OFMT, $#, format_page_number HANDLE
-EXPR, $FORMAT_PAGE_NUMBER, $%, format_lines_per_page HANDLE EXPR,
-$FORMAT_LINES_PER_PAGE, $=, format_lines_left HANDLE EXPR,
-$FORMAT_LINES_LEFT, $-, @LAST_MATCH_START, @-, C<$`> is the same as
-C<substr($var, 0, $-[0])>, C<$&> is the same as C<substr($var, $-[0], $+[0]
-- $-[0])>, C<$'> is the same as C<substr($var, $+[0])>, C<$1> is the same
-as C<substr($var, $-[1], $+[1] - $-[1])>, C<$2> is the same as
-C<substr($var, $-[2], $+[2] - $-[2])>, C<$3> is the same as C<substr $var,
-$-[3], $+[3] - $-[3])>, format_name HANDLE EXPR, $FORMAT_NAME, $~,
-format_top_name HANDLE EXPR, $FORMAT_TOP_NAME, $^,
-format_line_break_characters HANDLE EXPR, $FORMAT_LINE_BREAK_CHARACTERS,
-$:, format_formfeed HANDLE EXPR, $FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A,
-$CHILD_ERROR, $?, $OS_ERROR, $ERRNO, $!, $EXTENDED_OS_ERROR, $^E,
-$EVAL_ERROR, $@, $PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<,
-$EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID, $GID, $(,
-$EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $], $COMPILING, $^C,
-$DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M,
-$OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
-0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S,
-$BASETIME, $^T, $PERL_VERSION, $^V, $WARNING, $^W, ${^WARNING_BITS},
-${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @F, @INC, @_,
-%INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
+IO::Handle->input_record_separator EXPR, $INPUT_RECORD_SEPARATOR, $RS, $/,
+autoflush HANDLE EXPR, $OUTPUT_AUTOFLUSH, $|,
+IO::Handle->output_field_separator EXPR, $OUTPUT_FIELD_SEPARATOR, $OFS, $,,
+IO::Handle->output_record_separator EXPR, $OUTPUT_RECORD_SEPARATOR, $ORS,
+$\, $LIST_SEPARATOR, $", $SUBSCRIPT_SEPARATOR, $SUBSEP, $;, $OFMT, $#,
+format_page_number HANDLE EXPR, $FORMAT_PAGE_NUMBER, $%,
+format_lines_per_page HANDLE EXPR, $FORMAT_LINES_PER_PAGE, $=,
+format_lines_left HANDLE EXPR, $FORMAT_LINES_LEFT, $-, @LAST_MATCH_START,
+@-, C<$`> is the same as C<substr($var, 0, $-[0])>, C<$&> is the same as
+C<substr($var, $-[0], $+[0] - $-[0])>, C<$'> is the same as C<substr($var,
+$+[0])>, C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>, C<$2>
+is the same as C<substr($var, $-[2], $+[2] - $-[2])>, C<$3> is the same as
+C<substr $var, $-[3], $+[3] - $-[3])>, format_name HANDLE EXPR,
+$FORMAT_NAME, $~, format_top_name HANDLE EXPR, $FORMAT_TOP_NAME, $^,
+IO::Handle->format_line_break_characters EXPR,
+$FORMAT_LINE_BREAK_CHARACTERS, $:, IO::Handle->format_formfeed EXPR,
+$FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A, $CHILD_ERROR, $?, $OS_ERROR,
+$ERRNO, $!, $EXTENDED_OS_ERROR, $^E, $EVAL_ERROR, $@, $PROCESS_ID, $PID,
+$$, $REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID,
+$GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $],
+$COMPILING, $^C, $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H,
+$INPLACE_EDIT, $^I, $^M, $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04,
+0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R,
+$EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, $PERL_VERSION, $^V,
+$WARNING, $^W, ${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME,
+$^X, $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item Error Indicators
 
@@ -1850,13 +1850,13 @@ ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent,
 getgrent, gethostent, getnetent, getprotoent, getservent, setpwent,
 setgrent, sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN,
 setservent STAYOPEN, endpwent, endgrent, endhostent, endnetent,
-endprotoent, endservent, getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob,
-ioctl FILEHANDLE,FUNCTION,SCALAR, kill SIGNAL, LIST, link OLDFILE,NEWFILE,
-lstat FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS,
-msgsnd ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR,
-open FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink EXPR, readlink,
-select RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
-KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
+endprotoent, endservent, exit EXPR, exit, getsockopt SOCKET,LEVEL,OPTNAME,
+glob EXPR, glob, ioctl FILEHANDLE,FUNCTION,SCALAR, kill SIGNAL, LIST, link
+OLDFILE,NEWFILE, lstat FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG,
+msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open
+FILEHANDLE,EXPR, open FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink
+EXPR, readlink, select RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG,
+semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
 setpriority WHICH,WHO,PRIORITY, setpwent, setsockopt
 SOCKET,LEVEL,OPTNAME,OPTVAL, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS,
 shmread ID,VAR,POS,SIZE, shmwrite ID,STRING,POS,SIZE, sockatmark SOCKET,
@@ -1992,7 +1992,7 @@ LC_NUMERIC, LC_TIME, LANG
 =item Important Caveats
 
 Input and Output Disciplines, Regular Expressions, C<use utf8> still needed
-to enable a few features
+to enable UTF-8/UTF-EBCDIC in scripts
 
 =item Byte and Character semantics
 
@@ -8831,39 +8831,41 @@ C<d__fwalk>, C<d_access>, C<d_accessx>, C<d_alarm>, C<d_archlib>,
 C<d_atolf>, C<d_atoll>, C<d_attribut>, C<d_bcmp>, C<d_bcopy>,
 C<d_bincompat5005>, C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_bzero>,
 C<d_casti32>, C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>,
-C<d_chsize>, C<d_closedir>, C<d_cmsghdr_s>, C<d_const>, C<d_crypt>,
-C<d_csh>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>, C<d_difftime>,
-C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>, C<d_dosuid>,
-C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>, C<d_endhent>,
-C<d_endnent>, C<d_endpent>, C<d_endpwent>, C<d_endsent>, C<d_eofnblk>,
-C<d_eunice>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>, C<d_fcntl>,
-C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>, C<d_fds_bits>,
-C<d_fgetpos>, C<d_flexfnam>, C<d_flock>, C<d_flockproto>, C<d_fork>,
-C<d_fpathconf>, C<d_fpos64_t>, C<d_frexpl>, C<d_fs_data_s>, C<d_fseeko>,
-C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>, C<d_fsync>, C<d_ftello>,
-C<d_ftime>, C<d_Gconvert>, C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>,
-C<d_getgrent>, C<d_getgrps>, C<d_gethbyaddr>, C<d_gethbyname>,
-C<d_gethent>, C<d_gethname>, C<d_gethostprotos>, C<d_getitimer>,
-C<d_getlogin>, C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>,
-C<d_getnbyname>, C<d_getnent>, C<d_getnetprotos>, C<d_getpagsz>,
-C<d_getpbyname>, C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>,
-C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>, C<d_getprior>,
-C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>, C<d_getsbyname>,
-C<d_getsbyport>, C<d_getsent>, C<d_getservprotos>, C<d_getspnam>,
-C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>,
-C<d_iconv>, C<d_index>, C<d_inetaton>, C<d_int64_t>, C<d_isascii>,
-C<d_isnan>, C<d_isnanl>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
-C<d_link>, C<d_locconv>, C<d_lockf>, C<d_longdbl>, C<d_longlong>,
-C<d_lseekproto>, C<d_lstat>, C<d_madvise>, C<d_mblen>, C<d_mbstowcs>,
-C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>,
-C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>,
-C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>, C<d_modfl_pow32_bug>,
-C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>,
-C<d_msg_peek>, C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>,
-C<d_msgrcv>, C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>,
-C<d_nice>, C<d_nl_langinfo>, C<d_nv_preserves_uv>,
-C<d_nv_preserves_uv_bits>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
-C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
+C<d_chsize>, C<d_class>, C<d_closedir>, C<d_cmsghdr_s>, C<d_const>,
+C<d_crypt>, C<d_csh>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>,
+C<d_difftime>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>,
+C<d_dosuid>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>,
+C<d_endhent>, C<d_endnent>, C<d_endpent>, C<d_endpwent>, C<d_endsent>,
+C<d_eofnblk>, C<d_eunice>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>,
+C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
+C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>, C<d_flexfnam>,
+C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>, C<d_fpathconf>,
+C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>,
+C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>,
+C<d_fsync>, C<d_ftello>, C<d_ftime>, C<d_Gconvert>, C<d_getcwd>,
+C<d_getespwnam>, C<d_getfsstat>, C<d_getgrent>, C<d_getgrps>,
+C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>, C<d_gethname>,
+C<d_gethostprotos>, C<d_getitimer>, C<d_getlogin>, C<d_getmnt>,
+C<d_getmntent>, C<d_getnbyaddr>, C<d_getnbyname>, C<d_getnent>,
+C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>, C<d_getpbynumber>,
+C<d_getpent>, C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>,
+C<d_getprior>, C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>,
+C<d_getsbyname>, C<d_getsbyport>, C<d_getsent>, C<d_getservprotos>,
+C<d_getspnam>, C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>,
+C<d_htonl>, C<d_iconv>, C<d_index>, C<d_inetaton>, C<d_int64_t>,
+C<d_isascii>, C<d_isfinite>, C<d_isinf>, C<d_isnan>, C<d_isnanl>,
+C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>, C<d_link>, C<d_locconv>,
+C<d_lockf>, C<d_longdbl>, C<d_longlong>, C<d_lseekproto>, C<d_lstat>,
+C<d_madvise>, C<d_mblen>, C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>,
+C<d_memcmp>, C<d_memcpy>, C<d_memmove>, C<d_memset>, C<d_mkdir>,
+C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>,
+C<d_mmap>, C<d_modfl>, C<d_modfl_pow32_bug>, C<d_mprotect>, C<d_msg>,
+C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
+C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>,
+C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>,
+C<d_nl_langinfo>, C<d_nv_preserves_uv>, C<d_nv_preserves_uv_bits>,
+C<d_off64_t>, C<d_old_pthread_create_joinable>, C<d_oldpthreads>,
+C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
 C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
 C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
 C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
@@ -8895,14 +8897,14 @@ C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_syscallproto>,
 C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
 C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
 C<d_truncate>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
-C<d_uname>, C<d_union_semun>, C<d_usleep>, C<d_usleepproto>, C<d_ustat>,
-C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>,
-C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
-C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
-C<d_writev>, C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>,
-C<db_version_major>, C<db_version_minor>, C<db_version_patch>,
-C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>,
-C<drand01>, C<dynamic_ext>
+C<d_uname>, C<d_union_semun>, C<d_unordered>, C<d_usleep>,
+C<d_usleepproto>, C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>,
+C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>,
+C<d_volatile>, C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>,
+C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>, C<db_hashtype>,
+C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
+C<db_version_patch>, C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>,
+C<doublesize>, C<drand01>, C<dynamic_ext>
 
 =item e
 
@@ -8928,28 +8930,28 @@ C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>
 
 C<i16size>, C<i16type>, C<i32size>, C<i32type>, C<i64size>, C<i64type>,
 C<i8size>, C<i8type>, C<i_arpainet>, C<i_bsdioctl>, C<i_db>, C<i_dbm>,
-C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>, C<i_gdbm>,
-C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>, C<i_langinfo>,
-C<i_libutil>, C<i_limits>, C<i_locale>, C<i_machcthr>, C<i_malloc>,
-C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>, C<i_netdb>, C<i_neterrno>,
-C<i_netinettcp>, C<i_niin>, C<i_poll>, C<i_prot>, C<i_pthread>, C<i_pwd>,
-C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>, C<i_shadow>, C<i_socks>,
-C<i_stdarg>, C<i_stddef>, C<i_stdlib>, C<i_string>, C<i_sunmath>,
-C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>, C<i_sysfilio>, C<i_sysin>,
-C<i_sysioctl>, C<i_syslog>, C<i_sysmman>, C<i_sysmode>, C<i_sysmount>,
-C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>, C<i_syssecrt>, C<i_sysselct>,
-C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>, C<i_sysstatvfs>,
-C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>, C<i_sysuio>,
-C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>, C<i_termio>,
-C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>, C<i_values>,
-C<i_varargs>, C<i_varhdr>, C<i_vfork>, C<ignore_versioned_solibs>,
-C<inc_version_list>, C<inc_version_list_init>, C<incpath>, C<inews>,
-C<installarchlib>, C<installbin>, C<installman1dir>, C<installman3dir>,
-C<installprefix>, C<installprefixexp>, C<installprivlib>, C<installscript>,
-C<installsitearch>, C<installsitebin>, C<installsitelib>, C<installstyle>,
-C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
-C<installvendorlib>, C<intsize>, C<issymlink>, C<ivdformat>, C<ivsize>,
-C<ivtype>
+C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>, C<i_fp>,
+C<i_fp_class>, C<i_gdbm>, C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>,
+C<i_langinfo>, C<i_libutil>, C<i_limits>, C<i_locale>, C<i_machcthr>,
+C<i_malloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>, C<i_netdb>,
+C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>, C<i_prot>,
+C<i_pthread>, C<i_pwd>, C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>, C<i_shadow>,
+C<i_socks>, C<i_stdarg>, C<i_stddef>, C<i_stdlib>, C<i_string>,
+C<i_sunmath>, C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>, C<i_sysfilio>,
+C<i_sysin>, C<i_sysioctl>, C<i_syslog>, C<i_sysmman>, C<i_sysmode>,
+C<i_sysmount>, C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>, C<i_syssecrt>,
+C<i_sysselct>, C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>,
+C<i_sysstatvfs>, C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>,
+C<i_sysuio>, C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>,
+C<i_termio>, C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>,
+C<i_values>, C<i_varargs>, C<i_varhdr>, C<i_vfork>,
+C<ignore_versioned_solibs>, C<inc_version_list>, C<inc_version_list_init>,
+C<incpath>, C<inews>, C<installarchlib>, C<installbin>, C<installman1dir>,
+C<installman3dir>, C<installprefix>, C<installprefixexp>,
+C<installprivlib>, C<installscript>, C<installsitearch>, C<installsitebin>,
+C<installsitelib>, C<installstyle>, C<installusrbinperl>,
+C<installvendorarch>, C<installvendorbin>, C<installvendorlib>, C<intsize>,
+C<issymlink>, C<ivdformat>, C<ivsize>, C<ivtype>
 
 =item k
 
@@ -11201,7 +11203,7 @@ B<$_>, B<$status>, B<filter_read> and B<filter_read_exact>, B<filter_del>
 
 =item Summary of Option Specifications
 
-!, +, s, i, f, : I<type> [ I<desttype> ]
+!, +, s, i, o, f, : I<type> [ I<desttype> ]
 
 =back
 
@@ -12514,26 +12516,9 @@ ffround ( +$scale ), ffround ( -$scale ), ffround ( 0 ), fround  ( +$scale
 
 =item EXAMPLES
 
-  use Math::BigFloat qw(bstr bint);
   # not ready yet
-  $x = bstr("1234")		       # string "1234"
-  $x = "$x";			       # same as bstr()
-  $x = bneg("1234")		       # BigFloat "-1234"
-  $x = Math::BigFloat->bneg("1234");   # BigFloat "1234"
-  $x = Math::BigFloat->babs("-12345"); # BigFloat "12345"
-  $x = Math::BigFloat->bnorm("-0 00"); # BigFloat "0"
-  $x = bint(1) + bint(2);	       # BigFloat "3"
-  $x = bint(1) + "2";		       # ditto (auto-BigFloatify of "2")
-  $x = bint(1); 		       # BigFloat "1"
-  $x = $x + 5 / 2;		       # BigFloat "3"
-  $x = $x ** 3; 		       # BigFloat "27"
-  $x *= 2;			       # BigFloat "54"
-  $x = new Math::BigFloat;	       # BigFloat "0"
-  $x--; 			       # BigFloat "-1"
 
 =item Autocreating constants
-
-=item PERFORMANCE
 
 =item BUGS
 
@@ -12580,30 +12565,17 @@ Remarks
 
 =over 4
 
+=item MATH LIBRARY
+
+=item SIGN
+
 =item mantissa(), exponent() and parts()
 
 =back
 
 =item EXAMPLES
 
-  use Math::BigInt qw(bstr bint);
-  $x = bstr("1234")			# string "1234"
-  $x = "$x";				# same as bstr()
-  $x = bneg("1234")			# Bigint "-1234"
-  $x = Math::BigInt->bneg("1234");	# Bigint "-1234"
-  $x = Math::BigInt->babs("-12345");	# Bigint "12345"
-  $x = Math::BigInt->bnorm("-0 00");	# BigInt "0"
-  $x = bint(1) + bint(2);		# BigInt "3"
-  $x = bint(1) + "2";			# ditto (auto-BigIntify of "2")
-  $x = bint(1); 			# BigInt "1"
-  $x = $x + 5 / 2;			# BigInt "3"
-  $x = $x ** 3; 			# BigInt "27"
-  $x *= 2;				# BigInt "54"
-  $x = new Math::BigInt;		# BigInt "0"
-  $x--; 				# BigInt "-1"
-  $x = Math::BigInt->badd(4,5)		# BigInt "9"
-  $x = Math::BigInt::badd(4,5)		# BigInt "9"
-  print $x->bsstr();			# 9e+0
+  use Math::BigInt qw(bstr);
 
 =item Autocreating constants
 
@@ -12611,13 +12583,13 @@ Remarks
 
 =over 4
 
-=item Replacing the math library
+=item Alternative math libraries
 
 =back
 
 =item BUGS
 
-:constant and eval()
+Out of Memory!, Fails to load Calc on Perl prior 5.6.0
 
 =item CAVEATS
 
@@ -12641,6 +12613,8 @@ Overloading -$x, Mixing different object types, bsqrt()
 =item DESCRIPTION
 
 =item EXPORT
+
+=item WRAP YOUR OWN
 
 =item LICENSE
 
@@ -15771,90 +15745,6 @@ getitimer ( $which )
 
 =back
 
-=head2 Time::Piece - Object Oriented time objects
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item USAGE
-
-=over 4
-
-=item Local Locales
-
-=item Date Calculations
-
-=item Date Comparisons
-
-=item YYYY-MM-DDThh:mm:ss
-
-=item Week Number
-
-=item strftime method
-
-%%, %a, %A, %b, %B, %c, %C, %d, %D, %e, %h, %H, %I, %j, %m, %M, %n, %p, %r,
-%R, %S, %t, %T, %u, %U, %V, %w, %W, %x, %y, %Y, %Z
-
-=item strptime function
-
-=item Global Overriding
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=over 4
-
-=item License
-
-=item Bugs
-
-=back
-
-=back
-
-=head2 Time::Piece::Seconds, Time::Seconds - a simple API to convert
-seconds to other date values
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item METHODS
-
-=item AUTHOR
-
-=item LICENSE
-
-=item Bugs
-
-=back
-
-=head2 Time::Seconds - a simple API to convert seconds to other date values
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item METHODS
-
-=item AUTHOR
-
-=item LICENSE
-
-=item Bugs
-
-=back
-
 =head2 Time::gmtime - by-name interface to Perl's built-in gmtime()
 function
 
@@ -15910,7 +15800,7 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 
 =back
 
-=head2 UnicodeCD - Unicode character database
+=head2 Unicode::UCD - Unicode character database
 
 =over 4
 
@@ -15982,7 +15872,7 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 
 =over 4
 
-=item UnicodeCD::UnicodeVersion
+=item Unicode::UCD::UnicodeVersion
 
 =back
 

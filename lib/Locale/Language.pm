@@ -247,13 +247,15 @@ modify it under the same terms as Perl itself.
 # initialisation code - stuff the DATA into the CODES hash
 #=======================================================================
 {
+    no utf8; # __DATA__ contains Latin-1
+
     my $code;
     my $language;
 
 
     while (<DATA>)
     {
-        next unless /\S/;
+	next unless /\S/;
         chop;
         ($code, $language) = split(/:/, $_, 2);
         $CODES{$code} = $language;

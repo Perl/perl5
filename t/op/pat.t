@@ -1287,7 +1287,7 @@ print "ok 247\n";
 	    "#latin[$latin]\nnot ok $test\n";
 	$test++;
 	$latin =~ s/stra\337e/straße/; # \303\237 after the 2nd a
-	use utf8;
+	use utf8; # needed for the raw UTF-8
 	$latin =~ s!(s)tr(?:aß|s+e)!$1tr.!; # \303\237 after the a
     }
 }

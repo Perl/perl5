@@ -1,3 +1,4 @@
+no utf8; # naked Latin-1
 $locales .= <<EOF;
 Català Catalan:ca:es:1 15
 Français French:fr:be ca ch fr lu:1 15

@@ -398,8 +398,15 @@ perl_destruct(pTHXx)
 #endif
 
     LEAVE;
+    {
+      dJMPENV;
+      int x = 0;
+      JMPENV_PUSH(x);
+      if (PL_endav && !PL_minus_c)
+       call_list(PL_scopestack_ix, PL_endav);
+      JMPENV_POP;
+    }
     FREETMPS;
-
 
     /* We must account for everything.  */
 
@@ -1499,8 +1506,6 @@ perl_run(pTHXx)
 	    LEAVE;
 	FREETMPS;
 	PL_curstash = PL_defstash;
-	if (PL_endav && !PL_minus_c)
-	    call_list(oldscope, PL_endav);
 #ifdef MYMALLOC
 	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");

@@ -452,3 +452,7 @@ EOM
 	;;
     esac
 EOCBU
+
+# fpclassify() is a macro, the library call is Fpclassify
+d_fpclassify='define'
+

@@ -1139,8 +1139,10 @@ PP(pp_repeat)
 	MEXTEND(MARK, max);
 	if (count > 1) {
 	    while (SP > MARK) {
-		if (*SP)
-		    SvTEMP_off((*SP));
+		if (*SP) {
+		    *SP = sv_2mortal(newSVsv(*SP));
+		    SvREADONLY_on(*SP);
+		}
 		SP--;
 	    }
 	    MARK++;
@@ -3013,8 +3015,10 @@ PP(pp_ucfirst)
 	    SvTAINTED_on(sv);
 	    uv = toTITLE_LC_uvchr(utf8n_to_uvchr(s, slen, &ulen, 0));
 	}
-	else
-	    uv = toTITLE_utf8(s);
+	else {
+	    uv   = toTITLE_utf8(s);
+	    ulen = UNISKIP(uv);
+	}
 	
 	tend = uvchr_to_utf8(tmpbuf, uv);
 
@@ -3072,8 +3076,10 @@ PP(pp_lcfirst)
 	    SvTAINTED_on(sv);
 	    uv = toLOWER_LC_uvchr(utf8n_to_uvchr(s, slen, &ulen, 0));
 	}
-	else
-	    uv = toLOWER_utf8(s);
+	else {
+	    uv   = toLOWER_utf8(s);
+	    ulen = UNISKIP(uv);
+	}
 	
 	tend = uvchr_to_utf8(tmpbuf, uv);
 

@@ -24,7 +24,7 @@ closedir(OP);
 ## This range will have to adjust as the number of tests expands,
 ## as it's counting the number of .t files in src/t
 ##
-if (@D > 90 && @D < 110) { print "ok 2\n"; } else { print "not ok 2\n"; }
+if (@D > 100 && @D < 120) { print "ok 2\n"; } else { print "not ok 2\n"; }
 
 @R = sort @D;
 @G = sort <op/*.t>;

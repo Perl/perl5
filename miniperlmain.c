@@ -74,9 +74,12 @@ main(int argc, char **argv, char **env)
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
     if (!exitstatus) {
 	exitstatus = perl_run(my_perl);
+       perl_destruct(my_perl);
+       exitstatus = STATUS_NATIVE_EXPORT;
+    } else {
+      perl_destruct(my_perl);
     }
 
-    perl_destruct(my_perl);
     perl_free(my_perl);
 
     PERL_SYS_TERM();

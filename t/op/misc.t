@@ -532,35 +532,8 @@ print "ok\n";
 EXPECT
 ok
 ########
-my @l = qw(hello.* world);
-my $x;
-
-foreach $x (@l) {
-    print "before - $x\n";
-    $x = "\Q$x\E";
-    print "quotemeta - $x\n";
-    $x = "\u$x";
-    print "ucfirst - $x\n";
-    $x = "\l$x";
-    print "lcfirst - $x\n";
-    $x = "\U$x\E";
-    print "uc - $x\n";
-    $x = "\L$x\E";
-    print "lc - $x\n";
-}
+# moved to op/lc.t
 EXPECT
-before - hello.*
-quotemeta - hello\.\*
-ucfirst - Hello\.\*
-lcfirst - hello\.\*
-uc - HELLO\.\*
-lc - hello\.\*
-before - world
-quotemeta - world
-ucfirst - World
-lcfirst - world
-uc - WORLD
-lc - world
 ########
 sub f { my $a = 1; my $b = 2; my $c = 3; my $d = 4; next }
 my $x = "foo";

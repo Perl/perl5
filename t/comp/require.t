@@ -86,7 +86,6 @@ print "not " unless 5.5.1 gt v5.5;
 print "ok ",$i++,"\n";
 
 {
-    use utf8;
     print "not " unless v5.5.640 eq "\x{5}\x{5}\x{280}";
     print "ok ",$i++,"\n";
 

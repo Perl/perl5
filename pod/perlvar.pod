@@ -263,7 +263,7 @@ has the effect of also localizing Perl's notion of "the last read
 filehandle".  (Mnemonic: many programs use "." to mean the current line
 number.)
 
-=item input_record_separator HANDLE EXPR
+=item IO::Handle->input_record_separator EXPR
 
 =item $INPUT_RECORD_SEPARATOR
 
@@ -334,7 +334,7 @@ a Perl program under B<rsh> and want to see the output as it's
 happening.  This has no effect on input buffering.  See L<perlfunc/getc>
 for that.  (Mnemonic: when you want your pipes to be piping hot.)
 
-=item output_field_separator HANDLE EXPR
+=item IO::Handle->output_field_separator EXPR
 
 =item $OUTPUT_FIELD_SEPARATOR
 
@@ -349,7 +349,7 @@ you would set B<awk>'s OFS variable to specify what is printed
 between fields.  (Mnemonic: what is printed when there is a "," in
 your print statement.)
 
-=item output_record_separator HANDLE EXPR
+=item IO::Handle->output_record_separator EXPR
 
 =item $OUTPUT_RECORD_SEPARATOR
 
@@ -513,7 +513,7 @@ The name of the current top-of-page format for the currently selected
 output channel.  Default is the name of the filehandle with _TOP
 appended.  (Mnemonic: points to top of page.)
 
-=item format_line_break_characters HANDLE EXPR
+=item IO::Handle->format_line_break_characters EXPR
 
 =item $FORMAT_LINE_BREAK_CHARACTERS
 
@@ -524,7 +524,7 @@ fill continuation fields (starting with ^) in a format.  Default is
 S<" \n-">, to break on whitespace or hyphens.  (Mnemonic: a "colon" in
 poetry is a part of a line.)
 
-=item format_formfeed HANDLE EXPR
+=item IO::Handle->format_formfeed EXPR
 
 =item $FORMAT_FORMFEED
 

@@ -15,6 +15,8 @@ use CGI (':standard','-no_debug','*h3','start_table');
 $loaded = 1;
 print "ok 1\n";
 
+no utf8; # we contain Latin-1
+
 ######################### End of black magic.
 
 my $CRLF = "\015\012";

@@ -519,31 +519,16 @@ ok ($x,-3);
 ok (ref($x),'Math::Foo');
 
 ###############################################################################
-# test whether +inf eq inf
-
-$y = 1e1000000;	# create inf, since bareword inf does not work
-$x = Math::BigInt->new('+inf'); ok_inf ($x,$y);
+# Test whether +inf eq inf
+# This tried to test whether BigInt inf equals Perl inf. Unfortunately, Perl
+# hasn't (before 5.7.3 at least) a consistent way to say inf, and some things
+# like 1e100000 crash on some platforms. So simple test for 'inf'
+$x = Math::BigInt->new('+inf'); ok ($x,'inf');
 
 ###############################################################################
 # all tests done
 
 ###############################################################################
-
-# libc are confused what to call Infinity
-
-sub fix_inf {
-    $_[0] =~ s/^(inf(?:inity)?|\+\+)$/Inf/i; # HP-UX calls it "++"
-}
-
-sub ok_inf {
-    my ($x, $y) = @_;
-
-    fix_inf($x);
-    fix_inf($y);
-
-    ok($x, $y);
-}
-
 # Perl 5.005 does not like ok ($x,undef)
 
 sub ok_undef

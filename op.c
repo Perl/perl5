@@ -115,7 +115,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 
     if (!(PL_in_my == KEY_our ||
 	  isALPHA(name[1]) ||
-	  (PL_hints & HINT_UTF8 && UTF8_IS_START(name[1])) ||
+	  (USE_UTF8_IN_NAMES && UTF8_IS_START(name[1])) ||
 	  (name[1] == '_' && (int)strlen(name) > 2)))
     {
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
@@ -2961,14 +2961,14 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 	pmop->op_pmpermflags |= PMf_LOCALE;
     pmop->op_pmflags = pmop->op_pmpermflags;
 
- #ifdef USE_ITHREADS
+#ifdef USE_ITHREADS
         {
                 SV* repointer = newSViv(0);
                 av_push(PL_regex_padav,SvREFCNT_inc(repointer));
                 pmop->op_pmoffset = av_len(PL_regex_padav);
                 PL_regex_pad = AvARRAY(PL_regex_padav);
         }
- #endif
+#endif
         
         /* link into pm list */
     if (type != OP_TRANS && PL_curstash) {
@@ -3002,16 +3002,12 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	    p = SvPV(pat, plen);
 	    pm->op_pmflags |= PMf_SKIPWHITE;
 	}
-	if ((PL_hints & HINT_UTF8) || DO_UTF8(pat))
-	    pm->op_pmdynflags |= PMdf_UTF8;
 	PM_SETRE(pm, CALLREGCOMP(aTHX_ p, p + plen, pm));
 	if (strEQ("\\s+", PM_GETRE(pm)->precomp))
 	    pm->op_pmflags |= PMf_WHITE;
 	op_free(expr);
     }
     else {
-	if (PL_hints & HINT_UTF8)
-	    pm->op_pmdynflags |= PMdf_UTF8;
 	if (pm->op_pmflags & PMf_KEEP || !(PL_hints & HINT_RE_EVAL))
 	    expr = newUNOP((!(PL_hints & HINT_RE_EVAL)
 			    ? OP_REGCRESET
@@ -6881,6 +6877,15 @@ Perl_peep(pTHX_ register OP *o)
 				"%s() called too early to check prototype",
 				SvPV_nolen(sv));
 		}
+	    }
+	    else if (o->op_next->op_type == OP_READLINE
+		    && o->op_next->op_next->op_type == OP_CONCAT
+		    && (o->op_next->op_next->op_flags & OPf_STACKED))
+	    {
+		/* Turn "$a .= <FH>" into an OP_RCATLINE. AMS 20010811 */
+		o->op_next->op_type   = OP_RCATLINE;
+		o->op_next->op_flags |= OPf_STACKED;
+		op_null(o->op_next->op_next);
 	    }
 
 	    o->op_seq = PL_op_seqmax++;

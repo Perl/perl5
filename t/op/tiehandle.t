@@ -77,7 +77,7 @@ package main;
 
 use Symbol;
 
-print "1..35\n";
+print "1..38\n";
 
 my $fh = gensym;
 
@@ -187,5 +187,33 @@ ok($r == 1);
     main::ok(1);
     do_read(\*STDIN);
     untie *STDIN;
+}
+
+
+{
+    # test for change 11639: Can't localize *FH, then tie it
+    {
+	local *foo;
+	tie %foo, 'Blah';
+    }
+    ok(!tied %foo);
+
+    {
+	local *bar;
+	tie @bar, 'Blah';
+    }
+    ok(!tied @bar);
+
+    {
+	local *BAZ;
+	tie *BAZ, 'Blah';
+    }
+    ok(!tied *BAZ);
+
+    package Blah;
+
+    sub TIEHANDLE {bless {}}
+    sub TIEHASH   {bless {}}
+    sub TIEARRAY  {bless {}}
 }
 

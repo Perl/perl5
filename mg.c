@@ -93,34 +93,48 @@ Do magic after a value is retrieved from the SV.  See C<sv_magic>.
 int
 Perl_mg_get(pTHX_ SV *sv)
 {
-    I32 mgs_ix;
-    MAGIC* mg;
-    MAGIC** mgp;
-    int mgp_valid = 0;
+    int new = 0;
+    MAGIC *newmg, *head, *cur, *mg;
+    I32 mgs_ix = SSNEW(sizeof(MGS));
 
-    mgs_ix = SSNEW(sizeof(MGS));
     save_magic(mgs_ix, sv);
 
-    mgp = &SvMAGIC(sv);
-    while ((mg = *mgp) != 0) {
-	MGVTBL* vtbl = mg->mg_virtual;
+    /* We must call svt_get(sv, mg) for each valid entry in the linked
+       list of magic. svt_get() may delete the current entry, add new
+       magic to the head of the list, or upgrade the SV. AMS 20010810 */
+
+    newmg = cur = head = mg = SvMAGIC(sv);
+    while (mg) {
+	MGVTBL *vtbl = mg->mg_virtual;
+
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    CALL_FPTR(vtbl->svt_get)(aTHX_ sv, mg);
-	    /* Ignore this magic if it's been deleted */
-	    if ((mg == (mgp_valid ? *mgp : SvMAGIC(sv))) &&
-		  (mg->mg_flags & MGf_GSKIP))
-		(SSPTR(mgs_ix, MGS*))->mgs_flags = 0;
+	    /* Don't restore the flags for this entry if it was deleted. */
+	    if (mg->mg_flags & MGf_GSKIP)
+		(SSPTR(mgs_ix, MGS *))->mgs_flags = 0;
 	}
-	/* Advance to next magic (complicated by possible deletion) */
-	if (mg == (mgp_valid ? *mgp : SvMAGIC(sv))) {
-	    mgp = &mg->mg_moremagic;
-	    mgp_valid = 1;
+
+	mg = mg->mg_moremagic;
+
+	if (new) {
+	    /* Have we finished with the new entries we saw? Start again
+	       where we left off (unless there are more new entries). */
+	    if (mg == head) {
+		new  = 0;
+		mg   = cur;
+		head = newmg;
+	    }
 	}
-	else
-	    mgp = &SvMAGIC(sv);	/* Re-establish pointer after sv_upgrade */
+
+	/* Were any new entries added? */
+	if (!new && (newmg = SvMAGIC(sv)) != head) {
+	    new = 1;
+	    cur = mg;
+	    mg  = newmg;
+	}
     }
 
-    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
+    restore_magic(aTHXo_ INT2PTR(void *, (IV)mgs_ix));
     return 0;
 }
 

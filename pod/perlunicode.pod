@@ -40,16 +40,16 @@ presented with Unicode data, or a traditional byte scheme when
 presented with byte data.  The implementation is still new and
 (particularly on EBCDIC platforms) may need further work.
 
-=item C<use utf8> still needed to enable a few features
+=item C<use utf8> still needed to enable UTF-8/UTF-EBCDIC in scripts
 
 The C<utf8> pragma implements the tables used for Unicode support.
 These tables are automatically loaded on demand, so the C<utf8> pragma
 need not normally be used.
 
 However, as a compatibility measure, this pragma must be explicitly
-used to enable recognition of UTF-8 encoded literals and identifiers
-in the source text on ASCII based machines or recognize UTF-EBCDIC
-encoded literals and identifiers on EBCDIC based machines.
+used to enable recognition of UTF-8 in the Perl scripts themselves on
+ASCII based machines or recognize UTF-EBCDIC on EBCDIC based machines.
+B<This should be the only place where an explicit C<use utf8> is needed>.
 
 =back
 

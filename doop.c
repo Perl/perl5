@@ -386,9 +386,6 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
     }
     SvSETMAGIC(sv);
     SvUTF8_on(sv);
-    /* Downgrading just 'cos it will is suspect - NI-S */
-    if (!isutf8 && !(PL_hints & HINT_UTF8))
-	sv_utf8_downgrade(sv, TRUE);
 
     return matches;
 }
@@ -590,8 +587,6 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	SvCUR_set(sv, d - dstart);
     }
     SvUTF8_on(sv);
-    if (!isutf8 && !(PL_hints & HINT_UTF8))
-	sv_utf8_downgrade(sv, TRUE);
     SvSETMAGIC(sv);
 
     return matches;

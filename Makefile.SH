@@ -238,7 +238,7 @@ CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $(LIBPERL) $@`
 
 CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $(LIBPERL) $<`
 
-private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
+private = preplibrary lib/Config.pm lib/ExtUtils/Miniperl.pm
 
 # Files to be built with variable substitution before miniperl
 # is available.
@@ -627,26 +627,27 @@ sperl$(OBJ_EXT): perl.c $(h)
 #	test -d lib/auto || mkdir lib/auto
 #
 .PHONY: preplibrary
-preplibrary: miniperl lib/Config.pm lib/lib.pm lib/re.pm
+preplibrary: miniperl lib/Config.pm lib/lib.pm
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
 	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
 		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
+	$(MAKE) lib/re.pm
 
 # Take care to avoid modifying lib/Config.pm without reason
 # (If trying to create a new port and having problems with the configpm script,
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
-lib/Config.pm: config.sh miniperl configpm lib/re.pm
+lib/Config.pm: config.sh miniperl configpm
 	$(LDLIBPTH) ./miniperl configpm configpm.tmp
 	sh mv-if-diff configpm.tmp $@
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
 	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
 	sh mv-if-diff minimod.tmp $@
+	-touch lib/ExtUtils/Miniperl.pm
 
 lib/re.pm: ext/re/re.pm
-	@-rm -f $@
-	cat ext/re/re.pm > $@
+	cp ext/re/re.pm ext/re/re.tmp && sh mv-if-diff ext/re/re.tmp lib/re.pm
 
 $(plextract):	miniperl lib/Config.pm
 	@-rm -f $@
@@ -821,13 +822,9 @@ $(DYNALOADER):	miniperl preplibrary FORCE
 	@$(LDLIBPTH) sh ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 d_dummy $(dynamic_ext):	miniperl preplibrary $(DYNALOADER) FORCE
-	@-rm -f lib/re.pm
-	@cat ext/re/re.pm > lib/re.pm
 	@$(LDLIBPTH) sh ext/util/make_ext dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
-	@-rm -f lib/re.pm
-	@cat ext/re/re.pm > lib/re.pm
 	@$(LDLIBPTH) sh ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 n_dummy $(nonxs_ext):	miniperl preplibrary $(DYNALOADER) FORCE

@@ -1,0 +1,5 @@
+Everything that used to be here is now in the "unicore" directory.
+
+The renaming was done to avoid naming conflicts with the Perl core
+Unicode files and modules in the Unicode:: space in case-ignoring
+filesystems.

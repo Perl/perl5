@@ -645,7 +645,6 @@ MD5		= $(EXTDIR)\Digest\MD5\MD5
 PERLIOSCALAR	= $(EXTDIR)\PerlIO\Scalar\Scalar
 MIMEBASE64	= $(EXTDIR)\MIME\Base64\Base64
 TIMEHIRES	= $(EXTDIR)\Time\HiRes\HiRes
-TIMEPIECE	= $(EXTDIR)\Time\Piece\Piece
 CWD		= $(EXTDIR)\Cwd\Cwd
 LISTUTIL  	= $(EXTDIR)\List\Util\Util
 PERLIOVIA	= $(EXTDIR)\PerlIO\Via\Via
@@ -674,7 +673,6 @@ MD5_DLL		= $(AUTODIR)\Digest\MD5\MD5.dll
 PERLIOSCALAR_DLL= $(AUTODIR)\PerlIO\Scalar\Scalar.dll
 MIMEBASE64_DLL	= $(AUTODIR)\MIME\Base64\Base64.dll
 TIMEHIRES_DLL	= $(AUTODIR)\Time\HiRes\HiRes.dll
-TIMEPIECE_DLL	= $(AUTODIR)\Time\Piece\Piece.dll
 CWD_DLL		= $(AUTODIR)\Cwd\Cwd.dll
 LISTUTIL_DLL	= $(AUTODIR)\List\Util\Util.dll
 PERLIOVIA_DLL	= $(AUTODIR)\PerlIO\Via\Via.dll
@@ -704,7 +702,6 @@ EXTENSION_C	= 		\
 		$(PERLIOSCALAR).c	\
 		$(MIMEBASE64).c	\
 		$(TIMEHIRES).c	\
-		$(TIMEPIECE).c	\
 		$(CWD).c	\
 		$(LISTUTIL).c	\
 		$(PERLIOVIA).c	\
@@ -734,7 +731,6 @@ EXTENSION_DLL	= 		\
 		$(PERLIOSCALAR_DLL) \
 		$(MIMEBASE64_DLL) \
 		$(TIMEHIRES_DLL)  \
-		$(TIMEPIECE_DLL)  \
 		$(CWD_DLL)	\
 		$(LISTUTIL_DLL)	\
 		$(PERLIOVIA_DLL)	\
@@ -999,7 +995,6 @@ distclean: clean
 	-del /f $(LIBDIR)\List\Util.pm
 	-del /f $(LIBDIR)\Scalar\Util.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
-	-del /f $(LIBDIR)\Time\Piece.pm
 	-del /f $(LIBDIR)\XS\Typemap.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s $(LIBDIR)\IO
