@@ -95,6 +95,54 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6567] By: jhi                                   on 2000/08/10  14:06:19
+        Log: Amened the description of Perl6.
+             Subject: [PATCH Perl-5.6.0] perlfaq1.pod
+             From: Elaine -HFB- Ashton <elaine@chaos.wustl.edu>
+             Date: Wed, 9 Aug 2000 22:11:06 -0500
+             Message-ID: <20000809221106.A12246@chaos.wustl.edu>
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[  6566] By: jhi                                   on 2000/08/10  13:58:57
+        Log: Subject: Remove dead entry in perldiag
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Thu, 10 Aug 2000 14:19:19 +0100
+             Message-Id: <E13MsEx-00033G-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  6565] By: jhi                                   on 2000/08/10  13:51:48
+        Log: Zero entries were skipped, fix from Adrian Goalby
+             <argoalby@yahoo.co.uk>
+     Branch: perl
+	   ! lib/unicode/Number.pl lib/unicode/mktables.PL
+____________________________________________________________________________
+[  6564] By: jhi                                   on 2000/08/10  13:00:12
+        Log: Subject: [PATCH 5.6.0] cygwin port
+             From: "Fifer, Eric" <EFifer@sanwaint.com>
+             Date: Thu, 10 Aug 2000 13:15:36 +0100
+             Message-ID: <779F20BCCE5AD31186A50008C75D997917176A@silldn_mail1.sanwaint.com>
+     Branch: perl
+	   ! README.cygwin hints/cygwin.sh
+____________________________________________________________________________
+[  6563] By: jhi                                   on 2000/08/10  12:55:16
+        Log: Get back into sync with Jeffrey on the enhanced regex warnings.
+     Branch: perl
+	   ! pod/perldiag.pod regcomp.c t/op/re_tests t/op/readdir.t
+____________________________________________________________________________
+[  6562] By: gsar                                  on 2000/08/10  08:38:39
+        Log: warn is a macro, avoid using at a variable to avoid warnings
+             in some configurations; readdir.t is too conservative in
+             estimating number of *.t's
+     Branch: perl
+	   ! t/op/readdir.t util.c
+____________________________________________________________________________
+[  6561] By: jhi                                   on 2000/08/09  23:35:42
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6560] By: jhi                                   on 2000/08/09  23:05:47
         Log: Subject: Re: enhanced(?) regex error messages
              From: Jeffrey Friedl <jfriedl@yahoo-inc.com>
