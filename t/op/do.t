@@ -87,14 +87,6 @@ ok( !$@ );
 eval qq{ do uc qq(a file that does not exist); };
 ok( !$@ );
 
-eval qq{ do qq(a file that does not exist); };
-print "not " if $@;
-print "ok 19\n";
-
-eval qq{ do uc qq(a file that does not exist); };
-print "not " if $@;
-print "ok 20\n";
-
 END {
     1 while unlink("$$.16", "$$.17", "$$.18");
 }
