@@ -88,19 +88,21 @@ copy_errmsg(msg,unused)
 {
     if (*(msg->dsc$a_pointer) == '%') { /* first line */
       if (LastError)
-        strncpy((LastError = saferealloc(LastError,msg->dsc$w_length)),
+        strncpy((LastError = saferealloc(LastError,msg->dsc$w_length+1)),
                  msg->dsc$a_pointer, msg->dsc$w_length);
       else
-        strncpy((LastError = safemalloc(msg->dsc$w_length)),
+        strncpy((LastError = safemalloc(msg->dsc$w_length+1)),
                  msg->dsc$a_pointer, msg->dsc$w_length);
-      return 0;
+      LastError[msg->dsc$w_length] = '\0';
     }
     else { /* continuation line */
       int errlen = strlen(LastError);
-      LastError = saferealloc(LastError, errlen + msg->dsc$w_length + 1);
+      LastError = saferealloc(LastError, errlen + msg->dsc$w_length + 2);
       LastError[errlen] = '\n';  LastError[errlen+1] = '\0';
       strncat(LastError, msg->dsc$a_pointer, msg->dsc$w_length);
+      LastError[errlen+msg->dsc$w_length+1] = '\0';
     }
+    return 0;
 }
 
 /* Use $PutMsg to retrieve error message for failure status code */
@@ -115,6 +117,33 @@ dl_set_error(sts,stv)
     vec[1] = sts;  vec[2] = stv;
     _ckvmssts(sys$putmsg(vec,copy_errmsg,0,0));
 }
+
+static unsigned int
+findsym_handler(void *sig, void *mech)
+{
+    unsigned long int myvec[8],args, *usig = (unsigned long int *) sig;
+    /* Be paranoid and assume signal vector passed in might be readonly */
+    myvec[0] = args = usig[0] > 10 ? 9 : usig[0] - 1;
+    while (--args) myvec[args] = usig[args];
+    _ckvmssts(sys$putmsg(myvec,copy_errmsg,0,0));
+    DLDEBUG(2,fprintf(stderr,"findsym_handler: received\n\t%s\n",LastError));
+    return SS$_CONTINUE;
+}
+
+/* wrapper for lib$find_image_symbol, so signalled errors can be saved
+ * for dl_error and then returned */
+static unsigned long int
+my_find_image_symbol(struct dsc$descriptor_s *imgname,
+                     struct dsc$descriptor_s *symname,
+                     void (**entry)(),
+                     struct dsc$descriptor_s *defspec)
+{
+  unsigned long int retsts;
+  VAXC$ESTABLISH(findsym_handler);
+  retsts = lib$find_image_symbol(imgname,symname,entry,defspec);
+  return retsts;
+}
+
 
 static void
 dl_private_init()
@@ -182,7 +211,7 @@ dl_expandspec(filespec)
         /* Now find the actual file */
         sts = sys$search(&dlfab);
         DLDEBUG(2,fprintf(stderr,"\tsys$search = %d\n",sts));
-        if (!(sts & 1) && sts != RMS$_FNF) {
+        if (!(sts & 1)) {
           dl_set_error(dlfab.fab$l_sts,dlfab.fab$l_stv);
           ST(0) = &sv_undef;
         }
@@ -211,7 +240,7 @@ dl_load_file(filespec)
     }  namlst[2] = {{0,FSCN$_NAME,0},{0,0,0}};
     struct libref *dlptr;
     vmssts sts, failed = 0;
-    void *entry;
+    void (*entry)();
 
     DLDEBUG(1,fprintf(stderr,"dl_load_file(%s):\n",filespec));
     specdsc.dsc$a_pointer = tovmsspec(filespec,vmsspec);
@@ -250,7 +279,7 @@ dl_load_file(filespec)
         symdsc.dsc$a_pointer = SvPVX(reqSV);
         DLDEBUG(2,fprintf(stderr,"\t$dl_require_symbols[0] = %.*s\n",
                           symdsc.dsc$w_length, symdsc.dsc$a_pointer));
-        sts = lib$find_image_symbol(&(dlptr->name),&symdsc,
+        sts = my_find_image_symbol(&(dlptr->name),&symdsc,
                                     &entry,&(dlptr->defspec));
         DLDEBUG(2,fprintf(stderr,"\tlib$find_image_symbol returns %d\n",sts));
         if (!(sts&1)) {
@@ -285,13 +314,13 @@ dl_find_symbol(librefptr,symname)
     DLDEBUG(1,fprintf(stderr,"dl_find_dymbol(%.*s,%.*s):\n",
                       thislib.name.dsc$w_length, thislib.name.dsc$a_pointer,
                       symdsc.dsc$w_length,symdsc.dsc$a_pointer));
-    sts = lib$find_image_symbol(&(thislib.name),&symdsc,
-                                &entry,&(thislib.defspec));
+    sts = my_find_image_symbol(&(thislib.name),&symdsc,
+                               &entry,&(thislib.defspec));
     DLDEBUG(2,fprintf(stderr,"\tlib$find_image_symbol returns %d\n",sts));
     DLDEBUG(2,fprintf(stderr,"\tentry point is %d\n",
                       (unsigned long int) entry));
     if (!(sts & 1)) {
-      dl_set_error(sts,0);
+      /* error message already saved by findsym_handler */
       ST(0) = &sv_undef;
     }
     else ST(0) = sv_2mortal(newSViv((IV) entry));
