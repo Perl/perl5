@@ -3719,11 +3719,12 @@ typedef struct {
   char*    patend;   /* one after last char   */
   char*    grpbeg;   /* 1st char of ()-group  */
   char*    grpend;   /* end of ()-group       */
-  I32      code;     /* template code (!)     */
+  I32      code;     /* template code (!<>)   */
   I32      length;   /* length/repeat count   */
   howlen_t howlen;   /* how length is given   */ 
   int      level;    /* () nesting level      */
   U32      flags;    /* /=4, comma=2, pack=1  */
+                     /*   and group modifiers */
 } tempsym_t;
 
 #include "thread.h"

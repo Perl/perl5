@@ -1035,6 +1035,13 @@ indicates that such a conversion was attempted.
 upgradability.  Upgrading to undef indicates an error in the code
 calling sv_upgrade.
 
+=item Can't use '%c' in a group with different byte-order in %s
+
+(F) You attempted to force a different byte-order on a type
+that is already inside a group with a byte-order modifier.
+For example you cannot force little-endianness on a type that
+is inside a big-endian group.
+
 =item Can't use anonymous symbol table for method lookup
 
 (F) The internal routine that does method lookup was handed a symbol

@@ -3344,6 +3344,10 @@ which the modifier is valid):
     <   sSiIlLqQ   Force little-endian byte-order on the type.
         jJfFdDpP   (The "little end" touches the construct.)
 
+The C<E<gt>> and C<E<lt>> modifiers can also be used on C<()>-groups,
+in which case they force a certain byte-order on all components of
+that group, including subgroups.
+
 The following rules apply:
 
 =over 8
@@ -3557,12 +3561,12 @@ See also L<perlport>.
 
 =item *
 
-All integer and floating point formats as well as C<p> and C<P> may
-be followed by the C<E<gt>> or C<E<lt>> modifiers to force big- or
-little- endian byte-order, respectively.  This is especially useful,
-since C<n>, C<N>, C<v> and C<V> don't cover signed integers, 64-bit
-integers and floating point values.  However, there are some things
-to keep in mind.
+All integer and floating point formats as well as C<p> and C<P> and
+C<()>-groups may be followed by the C<E<gt>> or C<E<lt>> modifiers
+to force big- or little- endian byte-order, respectively.
+This is especially useful, since C<n>, C<N>, C<v> and C<V> don't cover
+signed integers, 64-bit integers and floating point values.  However,
+there are some things to keep in mind.
 
 Exchanging signed integers between different platforms only works
 if all platforms store them in the same format.  Most platforms store
@@ -3580,6 +3584,12 @@ to use C<E<gt>> or C<E<lt>> on floating point values can be very useful,
 but also very dangerous if you don't know exactly what you're doing.
 It is definetely not a general way to portably store floating point
 values.
+
+When using C<E<gt>> or C<E<lt>> on an C<()>-group, this will affect
+all types inside the group that accept the byte-order modifiers,
+including all subgroups.  It will silently be ignored for all other
+types.  You are not allowed to override the byte-order within a group
+that already has a byte-order modifier suffix.
 
 =item *
 
@@ -3719,6 +3729,8 @@ Examples:
     # exactly the same
     $foo = pack('s<l<', -42, 4711);
     # pack little-endian 16- and 32-bit signed integers
+    $foo = pack('(sl)<', -42, 4711);
+    # exactly the same
 
 The same template may generally also be used in unpack().
 

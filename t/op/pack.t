@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 13576;
+plan tests => 13679;
 
 use strict;
 use warnings;
@@ -214,10 +214,10 @@ sub list_eq ($$) {
 
   for my $mod (qw( ! < > )) {
     eval { $x = pack "a$mod", 42 };
-    like ($@, qr/^'$mod' allowed only after types \w+ in pack/);
+    like ($@, qr/^'$mod' allowed only after types \S+ in pack/);
 
     eval { $x = unpack "a$mod", 'x'x8 };
-    like ($@, qr/^'$mod' allowed only after types \w+ in unpack/);
+    like ($@, qr/^'$mod' allowed only after types \S+ in unpack/);
   }
 
   for my $mod (qw( <> >< !<> !>< <!> >!< <>! ><! )) {
@@ -973,6 +973,74 @@ foreach (
     # "w/a*" should be seen as one unit
 
     is(scalar unpack("w/a*", "\x02abc"), "ab");
+}
+
+{
+  print "# group modifiers\n";
+
+  for my $t (qw{ (s<)< (sl>s)> (s(l(sl)<l)s)< }) {
+    print "# testing pattern '$t'\n";
+    eval { ($_) = unpack($t, 'x'x18); };
+    is($@, '');
+    eval { $_ = pack($t, (0)x6); };
+    is($@, '');
+  }
+
+  for my $t (qw{ (s<)> (sl>s)< (s(l(sl)<l)s)> }) {
+    print "# testing pattern '$t'\n";
+    eval { ($_) = unpack($t, 'x'x18); };
+    like($@, qr/Can't use '[<>]' in a group with different byte-order in unpack/);
+    eval { $_ = pack($t, (0)x6); };
+    like($@, qr/Can't use '[<>]' in a group with different byte-order in pack/);
+  }
+
+  sub compress_template {
+    my $t = shift;
+    for my $mod (qw( < > )) {
+      $t =~ s/((?:(?:[SILQJFDP]!?$mod|[^SILQJFDP\W]!?)(?:\d+|\*|\[(?:[^]]+)\])?\/?){2,})/
+              my $x = $1; $x =~ s!$mod!!g ? "($x)$mod" : $x /ieg;
+    }
+    return $t;
+  }
+
+  is(pack('L<L>', (0x12345678)x2),
+     pack('(((L1)1)<)(((L)1)1)>1', (0x12345678)x2));
+
+  my %templates = (
+    's<'                  => [-42],
+    's<c2x![S]S<'         => [-42, -11, 12, 4711],
+    '(i<j<[s]l<)3'        => [-11, -22, -33, 1000000, 1100, 2201, 3302,
+                              -1000000, 32767, -32768, 1, -123456789 ],
+    '(I!<4(J<2L<)3)5'     => [1 .. 65],
+    'q<Q<'                => [-50000000005, 60000000006],
+    'f<F<d<'              => [3.14159, 111.11, 2222.22],
+    'D<cCD<'              => [1e42, -128, 255, 1e-42],
+    'n/a*'                => ['/usr/bin/perl'],
+    'C/a*S</A*L</Z*I</a*' => [qw(Just another Perl hacker)],
+  );
+
+  for my $tle (sort keys %templates) {
+    my @d = @{$templates{$tle}};
+    my $tbe = $tle;
+    $tbe =~ y/</>/;
+    for my $t ($tbe, $tle) {
+      my $c = compress_template($t);
+      print "# '$t' -> '$c'\n";
+      SKIP: {
+        my $p1 = eval { pack $t, @d };
+        skip "cannot pack '$t' on this perl", 5 if is_valid_error($@);
+        my $p2 = eval { pack $c, @d };
+        is($@, '');
+        is($p1, $p2);
+        s!(/[aAZ])\*!$1!g for $t, $c;
+        my @u1 = eval { unpack $t, $p1 };
+        is($@, '');
+        my @u2 = eval { unpack $c, $p2 };
+        is($@, '');
+        is(join('!', @u1), join('!', @u2));
+      }
+    }
+  }
 }
 
 {

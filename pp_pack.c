@@ -72,7 +72,7 @@
 /* Avoid stack overflow due to pathological templates. 100 should be plenty. */
 #define MAX_SUB_TEMPLATE_LEVEL 100
 
-/* flags */
+/* flags (note that type modifiers can also be used as flags!) */
 #define FLAG_UNPACK_ONLY_ONE  0x10
 #define FLAG_UNPACK_DO_UTF8   0x08
 #define FLAG_SLASH            0x04
@@ -119,16 +119,21 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #define ISUUCHAR(ch)    (memchr(PL_uuemap, (ch), sizeof(PL_uuemap)-1) || (ch) == ' ')
 #endif
 
+/* type modifiers */
 #define TYPE_IS_SHRIEKING	0x100
 #define TYPE_IS_BIG_ENDIAN	0x200
 #define TYPE_IS_LITTLE_ENDIAN	0x400
 #define TYPE_ENDIANNESS_MASK	(TYPE_IS_BIG_ENDIAN|TYPE_IS_LITTLE_ENDIAN)
+#define TYPE_ENDIANNESS(t)	((t) & TYPE_ENDIANNESS_MASK)
 #define TYPE_NO_ENDIANNESS(t)	((t) & ~TYPE_ENDIANNESS_MASK)
+#define TYPE_MODIFIERS(t)	((t) & ~0xFF)
 #define TYPE_NO_MODIFIERS(t)	((t) & 0xFF)
+
+#define ENDIANNESS_ALLOWED_TYPES   "sSiIlLqQjJfFdDpP("
 
 #define DO_BO_UNPACK(var, type)                                               \
         STMT_START {                                                          \
-          switch (datumtype & TYPE_ENDIANNESS_MASK) {                         \
+          switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:    var = my_betoh ## type (var); break;  \
             case TYPE_IS_LITTLE_ENDIAN: var = my_letoh ## type (var); break;  \
             default: break;                                                   \
@@ -137,7 +142,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 #define DO_BO_PACK(var, type)                                                 \
         STMT_START {                                                          \
-          switch (datumtype & TYPE_ENDIANNESS_MASK) {                         \
+          switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:    var = my_htobe ## type (var); break;  \
             case TYPE_IS_LITTLE_ENDIAN: var = my_htole ## type (var); break;  \
             default: break;                                                   \
@@ -146,7 +151,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 #define DO_BO_UNPACK_PTR(var, type, pre_cast)                                 \
         STMT_START {                                                          \
-          switch (datumtype & TYPE_ENDIANNESS_MASK) {                         \
+          switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:                                          \
               var = (void *) my_betoh ## type ((pre_cast) var);               \
               break;                                                          \
@@ -160,7 +165,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 #define DO_BO_PACK_PTR(var, type, pre_cast)                                   \
         STMT_START {                                                          \
-          switch (datumtype & TYPE_ENDIANNESS_MASK) {                         \
+          switch (TYPE_ENDIANNESS(datumtype)) {                               \
             case TYPE_IS_BIG_ENDIAN:                                          \
               var = (void *) my_htobe ## type ((pre_cast) var);               \
               break;                                                          \
@@ -173,8 +178,8 @@ S_mul128(pTHX_ SV *sv, U8 m)
         } STMT_END
 
 #define BO_CANT_DOIT(action, type)                                            \
-         STMT_START {                                                         \
-           switch (datumtype & TYPE_ENDIANNESS_MASK) {                        \
+        STMT_START {                                                          \
+          switch (TYPE_ENDIANNESS(datumtype)) {                               \
              case TYPE_IS_BIG_ENDIAN:                                         \
                Perl_croak(aTHX_ "Can't %s big-endian %ss on this "            \
                                 "platform", #action, #type);                  \
@@ -203,7 +208,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
     defined(my_htoben) && defined(my_betohn)
 # define DO_BO_UNPACK_N(var, type)                                            \
          STMT_START {                                                         \
-           switch (datumtype & TYPE_ENDIANNESS_MASK) {                        \
+           switch (TYPE_ENDIANNESS(datumtype)) {                              \
              case TYPE_IS_BIG_ENDIAN:    my_betohn(&var, sizeof(type)); break;\
              case TYPE_IS_LITTLE_ENDIAN: my_letohn(&var, sizeof(type)); break;\
              default: break;                                                  \
@@ -212,7 +217,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 # define DO_BO_PACK_N(var, type)                                              \
          STMT_START {                                                         \
-           switch (datumtype & TYPE_ENDIANNESS_MASK) {                        \
+           switch (TYPE_ENDIANNESS(datumtype)) {                              \
              case TYPE_IS_BIG_ENDIAN:    my_htoben(&var, sizeof(type)); break;\
              case TYPE_IS_LITTLE_ENDIAN: my_htolen(&var, sizeof(type)); break;\
              default: break;                                                  \
@@ -480,6 +485,7 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
     } else {
       /* We should have found a template code */ 
       I32 code = *patptr++ & 0xFF;
+      U32 inherited_modifiers = 0;
 
       if (code == ','){ /* grandfather in commas but with a warning */
 	if (((symptr->flags & FLAG_COMMA) == 0) && ckWARN(WARN_UNPACK)){
@@ -503,6 +509,12 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
                      symptr->flags & FLAG_PACK ? "pack" : "unpack" );
       }
 
+      /* look for group modifiers to inherit */
+      if (TYPE_ENDIANNESS(symptr->flags)) {
+        if (strchr(ENDIANNESS_ALLOWED_TYPES, TYPE_NO_MODIFIERS(code)))
+          inherited_modifiers |= TYPE_ENDIANNESS(symptr->flags);
+      }
+
       /* look for modifiers */
       while (patptr < patend) {
         const char *allowed;
@@ -514,24 +526,32 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
             break;
           case '>':
             modifier = TYPE_IS_BIG_ENDIAN;
-            allowed = "sSiIlLqQjJfFdDpP";
+            allowed = ENDIANNESS_ALLOWED_TYPES;
             break;
           case '<':
             modifier = TYPE_IS_LITTLE_ENDIAN;
-            allowed = "sSiIlLqQjJfFdDpP";
+            allowed = ENDIANNESS_ALLOWED_TYPES;
             break;
           default:
             break;
         }
+
         if (modifier == 0)
           break;
+
         if (!strchr(allowed, TYPE_NO_MODIFIERS(code)))
           Perl_croak(aTHX_ "'%c' allowed only after types %s in %s", *patptr,
                      allowed, symptr->flags & FLAG_PACK ? "pack" : "unpack" );
-        if ((code | modifier) == (code | TYPE_IS_BIG_ENDIAN | TYPE_IS_LITTLE_ENDIAN))
+
+        if (TYPE_ENDIANNESS(code | modifier) == TYPE_ENDIANNESS_MASK)
           Perl_croak(aTHX_ "Can't use both '<' and '>' after type '%c' in %s",
                      (int) TYPE_NO_MODIFIERS(code),
                      symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+        else if (TYPE_ENDIANNESS(code | modifier | inherited_modifiers) ==
+                 TYPE_ENDIANNESS_MASK)
+          Perl_croak(aTHX_ "Can't use '%c' in a group with different byte-order in %s",
+                     *patptr, symptr->flags & FLAG_PACK ? "pack" : "unpack" );
+
         if (ckWARN(WARN_UNPACK)) {
           if (code & modifier)
 	    Perl_warner(aTHX_ packWARN(WARN_UNPACK),
@@ -539,9 +559,13 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
                         *patptr, (int) TYPE_NO_MODIFIERS(code),
                         symptr->flags & FLAG_PACK ? "pack" : "unpack" );
         }
+
         code |= modifier;
         patptr++;
       }
+
+      /* inherit modifiers */
+      code |= inherited_modifiers;
 
       /* look for count and/or / */ 
       if (patptr < patend) {
@@ -586,11 +610,11 @@ S_next_symbol(pTHX_ register tempsym_t* symptr )
             if (patptr < patend)
 	      patptr++;
           } else {
-            if( *patptr == '/' ){ 
+            if (*patptr == '/') {
               symptr->flags |= FLAG_SLASH;
               patptr++;
-              if( patptr < patend &&
-                  (isDIGIT(*patptr) || *patptr == '*' || *patptr == '[') )
+              if (patptr < patend &&
+                  (isDIGIT(*patptr) || *patptr == '*' || *patptr == '['))
                 Perl_croak(aTHX_ "'/' does not take a repeat count in %s",
                            symptr->flags & FLAG_PACK ? "pack" : "unpack" );
             }
@@ -739,6 +763,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	{
 	    char *ss = s;		/* Move from register */
             tempsym_t savsym = *symptr;
+	    U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);
+	    symptr->flags |= group_modifiers;
             symptr->patend = savsym.grpend;
             symptr->level++;
 	    PUTBACK;
@@ -750,6 +776,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    }
 	    SPAGAIN;
 	    s = ss;
+	    symptr->flags &= ~group_modifiers;
             savsym.flags = symptr->flags;
             *symptr = savsym;
 	    break;
@@ -2252,6 +2279,8 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case '(':
 	{
             tempsym_t savsym = *symptr;
+	    U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);
+	    symptr->flags |= group_modifiers;
             symptr->patend = savsym.grpend;
             symptr->level++;
 	    while (len--) {
@@ -2260,6 +2289,7 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		if (savsym.howlen == e_star && beglist == endlist)
 		    break;		/* No way to continue */
 	    }
+	    symptr->flags &= ~group_modifiers;
             lookahead.flags = symptr->flags;
             *symptr = savsym;
 	    break;
