@@ -732,7 +732,7 @@ sub _can_do_level {
   return 1 if $level == STANDARD;
 
   # Currently, the systems that can do HIGH or MEDIUM are identical
-  if ( $^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'cygwin') {
+  if ( $^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'cygwin' || $^O eq 'dos') {
     return 0;
   } else {
     return 1;
@@ -1530,6 +1530,8 @@ sub unlink0 {
     @okstat = (2,3,4,5,7,8,9,10);
   } elsif ($^O eq 'VMS') { # device and file ID are sufficient
     @okstat = (0, 1);
+  } elsif ($^O eq 'dos') {
+     @okstat = (0,2..7,11..$#fh);
   }
 
   # Now compare each entry explicitly by number
