@@ -665,7 +665,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      *   -1 = fallback to C locale failed
      */
 
-#if defined(USE_LOCALE) && defined(USE_ENVIRON_ARRAY)
+#if defined(USE_LOCALE)
 
 #ifdef USE_LOCALE_CTYPE
     char *curctype   = NULL;
@@ -808,6 +808,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 			  lc_all ? lc_all : "unset",
 			  lc_all ? '"' : ')');
 
+#if defined(USE_ENVIRON_ARRAY)
 	    {
 	      char **e;
 	      for (e = environ; *e; e++) {
@@ -818,6 +819,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 				    (int)(p - *e), *e, p + 1);
 	      }
 	    }
+#else
+	    PerlIO_printf(Perl_error_log,
+			  "\t(possibly more locale environment variables)\n");
+#endif
 
 	    PerlIO_printf(Perl_error_log,
 			  "\tLANG = %c%s%c\n",
@@ -891,7 +896,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* USE_LOCALE_NUMERIC */
     }
 
-#endif /* USE_LOCALE && USE_ENVIRON_ARRAY */
+#endif /* USE_LOCALE */
 
 #ifdef USE_LOCALE_CTYPE
     if (curctype != NULL)
