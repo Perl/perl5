@@ -53,6 +53,7 @@ sub SWASHNEW {
 
     {
         $list ||= do "$file.pl"
+	      ||  do "unicore/Is/$type.pl"
 	      ||  croak("Can't find Unicode character property \"$type\"");
     }
 

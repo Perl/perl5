@@ -2881,7 +2881,7 @@ tryagain:
 		    if (!RExC_end) {
 			RExC_parse += 2;
 			RExC_end = oldregxend;
-			vFAIL("Missing right brace on \\p{}");
+			vFAIL2("Missing right brace on \\%c{}", UCHARAT(RExC_parse - 2));
 		    }
 		    RExC_end++;
 		}
@@ -3085,7 +3085,7 @@ tryagain:
 			/* FALL THROUGH */
 		    default:
 			if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(*p))
-			    vWARN2(p +1, "Unrecognized escape \\%c passed through", *p);
+			    vWARN2(p + 1, "Unrecognized escape \\%c passed through", UCHARAT(p));
 			goto normal_default;
 		    }
 		    break;

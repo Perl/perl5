@@ -169,17 +169,27 @@ character with the Unicode uppercase property, while C<\p{M}> matches
 any mark character.  Single letter properties may omit the brackets,
 so that can be written C<\pM> also.  Many predefined character classes
 are available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.
-The recommended naming convention of the C<In> classes are the
-official Unicode script and block names, but with all non-alphanumeric
-characters removed, for example the block name C<"Latin-1 Supplement">
-becomes C<\p{InLatin1Supplement}>.  Perl will ignore the case of
-letters, and any space or dash can be a space, dash, underbar, or be
-missing altogether, so C<\p{ in latin 1 supplement }> will work, too.
+
+The C<\p{Is...}> test for "general properties" such as "letter",
+"digit", while the C<\p{In...}> test for Unicode scripts and blocks.
+
+The official Unicode script and block names have spaces and
+dashes and separators, but for convenience you can have
+dashes, spaces, and underbars at every word division, and
+you need not care about correct casing.  It is recommended,
+however, that for consistency you use the following naming:
+the official Unicode script or block name (see below for
+the additional rules that apply to block names), with the whitespace
+and dashes removed, and the words "uppercase-first-lowercase-otherwise".
+That is, "Latin-1 Supplement" becomes "Latin1Supplement".
+
 You can also negate both C<\p{}> and C<\P{}> by introducing a caret
 (^) between the first curly and the property name: C<\p{^InTamil}> is
-equal to C<\P{Tamil}>.
+equal to C<\P{InTamil}>.
 
-Here is the list as of Unicode 3.1.0 (the two-letter classes) and
+The C<In> can be left out: C<\p{Greek}> is equal to C<\p{InGreek}>.
+
+Here is the list as of Unicode 3.1.1 (the two-letter classes) and
 as defined by Perl (the one-letter classes) (in Unicode materials
 what Perl calls C<L> is often called C<L&>):
 

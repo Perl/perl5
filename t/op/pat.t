@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..717\n";
+print "1..722\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2127,12 +2127,42 @@ sub ok ($$) {
     print "ok 715\n";
 }
 
+print "# some Unicode properties\n";
+
 {
+    # Dashes, underbars, case.
     print "not " unless "\x80" =~ /\p{in-latin1_SUPPLEMENT}/;
     print "ok 716\n";
 }
 
 {
+    # Complement, leading and trailing whitespace.
     print "not " unless "\x80" =~ /\P{  ^  In Latin 1 Supplement  }/;
     print "ok 717\n";
+}
+
+{
+    # No ^In, dashes, case.
+    print "not " unless "\x80" =~ /\p{latin-1-supplement}/;
+    print "ok 718\n";
+}
+
+{
+    print "not " unless "a" =~ /\pL/;
+    print "ok 719\n";
+}
+
+{
+    print "not " unless "a" =~ /\p{IsLl}/;
+    print "ok 720\n";
+}
+
+{
+    print "not " unless "A" =~ /\pL/;
+    print "ok 721\n";
+}
+
+{
+    print "not " unless "A" =~ /\p{IsLu}/;
+    print "ok 722\n";
 }
