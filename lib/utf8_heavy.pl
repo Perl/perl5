@@ -24,7 +24,7 @@ sub SWASHNEW {
     my $caller;
     my $i = 0;
     while (($caller = caller($i)) eq __PACKAGE__) { $i++ }
-    my $encoding = $enc{$caller} || "unicode";
+    my $encoding = $enc{$caller} || "unicore";
     (my $file = $type) =~ s!::!/!g;
     if ($file =~ /^In(.+)/) {
 	my $In = $1;

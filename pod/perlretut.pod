@@ -1683,7 +1683,7 @@ One can also use short names or restrict names to a certain alphabet:
     print "\N{sigma} is Greek sigma\n";
 
 A list of full names is found in the file Names.txt in the
-lib/perl5/5.6.0/unicode directory.
+lib/perl5/5.X.X/unicore directory.
 
 The answer to requirement 2), as of 5.6.0, is that if a regexp
 contains Unicode characters, the string is searched as a sequence of

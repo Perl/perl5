@@ -11,7 +11,7 @@ my $txt;
 # This is not optimized in any way yet
 sub charnames {
   $name = shift;
-  $txt = do "unicode/Name.pl" unless $txt;
+  $txt = do "unicore/Name.pl" unless $txt;
   my @off;
   if ($^H{charnames_full} and $txt =~ /\t\t$name$/m) {
     @off = ($-[0], $+[0]);
@@ -59,7 +59,7 @@ sub import {
   $^H{charnames_short} = delete $h{':short'};
   $^H{charnames_scripts} = [map uc, keys %h];
   if (warnings::enabled('utf8') && @{$^H{charnames_scripts}}) {
-	$txt = do "unicode/Name.pl" unless $txt;
+	$txt = do "unicore/Name.pl" unless $txt;
     for (@{$^H{charnames_scripts}}) {
         warnings::warn('utf8',  "No such script: '$_'") unless
 	    $txt =~ m/\t\t$_ (?:CAPITAL |SMALL )?LETTER /;
