@@ -131,7 +131,6 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	    destroyperl = thread->interp;
 	    thread->interp = NULL;
 	}
-	PERL_SET_CONTEXT(aTHX);
 	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_DESTROY(&thread->mutex);
         PerlMemShared_free(thread);
@@ -139,6 +138,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	    perl_destruct(destroyperl);
             perl_free(destroyperl);
 	}
+	PERL_SET_CONTEXT(aTHX);
 }
 
 int
