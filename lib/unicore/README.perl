@@ -6,8 +6,24 @@ and most of them were renamed to better fit 8.3 filename limitations,
 by which the Perl distribution tries to live.  The renamings are listed
 in the file 'rename'.
 
-The two big files, NormalizationTest.txt (1.7MB) and Unihan.txt (15.8MB)
-were not copied due to space considerations.
+The two big files, NormalizationTest.txt (2.0MB) and Unihan.txt (15.8MB)
+were not copied due to space considerations.  Also not included are the
+derived files:
+
+	DerivedBidiClass.txt
+	DerivedBinaryProperties.txt
+	DerivedCombiningClass.txt
+	DerivedCoreProperties.txt
+	DerivedDecompositionType.txt
+	DerivedEastAsianWidth.txt
+	DerivedGeneralCategory.txt
+	DerivedJoiningGroup.txt
+	DerivedJoiningType.txt
+	DerivedLineBreak.txt
+	DerivedNormalizationProperties.txt
+	DerivedNumericType.txt
+	DerivedNumericValues.txt
+	DerivedProperties.html
 
 The *.pl files are generated from these files by the 'mktables.PL' script.
 

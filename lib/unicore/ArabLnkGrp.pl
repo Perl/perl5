@@ -2,6 +2,7 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
+0621		<no shaping>
 0622	0623	ALEF
 0624		WAW
 0625		ALEF
@@ -61,7 +62,7 @@ return <<'END';
 06cf		WAW
 06d0	06d1	YEH
 06d2	06d3	YEH BARREE
-06d5		<no shaping>
+06d5		TEH MARBUTA
 06fa		SEEN
 06fb		SAD
 06fc		AIN
@@ -90,4 +91,5 @@ return <<'END';
 072a		DALATH RISH
 072b		SHIN
 072c		TAW
+200d		<no shaping>
 END
