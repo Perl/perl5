@@ -1187,8 +1187,12 @@ savepvn(char *sv, register I32 len)
 STATIC SV *
 mess_alloc(void)
 {
+    dTHR;
     SV *sv;
     XPVMG *any;
+
+    if (!PL_dirty)
+	return sv_2mortal(newSVpvn("",0));
 
     /* Create as PVMG now, to avoid any upgrading later */
     New(905, sv, 1, SV);
@@ -1196,30 +1200,27 @@ mess_alloc(void)
     SvFLAGS(sv) = SVt_PVMG;
     SvANY(sv) = (void*)any;
     SvREFCNT(sv) = 1 << 30; /* practically infinite */
+    PL_mess_sv = sv;
     return sv;
 }
 
 char *
 form(const char* pat, ...)
 {
+    SV *sv = mess_alloc();
     va_list args;
     va_start(args, pat);
-    if (!PL_mess_sv)
-	PL_mess_sv = mess_alloc();
-    sv_vsetpvfn(PL_mess_sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
-    return SvPVX(PL_mess_sv);
+    return SvPVX(sv);
 }
 
 char *
 mess(const char *pat, va_list *args)
 {
-    SV *sv;
+    SV *sv = mess_alloc();
     static char dgd[] = " during global destruction.\n";
 
-    if (!PL_mess_sv)
-	PL_mess_sv = mess_alloc();
-    sv = PL_mess_sv;
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;

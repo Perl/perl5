@@ -947,8 +947,9 @@ magic_setsig(SV *sv, MAGIC *mg)
     register char *s;
     I32 i;
     SV** svp;
+    STRLEN len;
 
-    s = MgPV(mg,PL_na);
+    s = MgPV(mg,len);
     if (*s == '_') {
 	if (strEQ(s,"__DIE__"))
 	    svp = &PL_diehook;
@@ -975,7 +976,7 @@ magic_setsig(SV *sv, MAGIC *mg)
 	SvREFCNT_dec(PL_psig_ptr[i]);
 	PL_psig_ptr[i] = SvREFCNT_inc(sv);
 	SvTEMP_off(sv); /* Make sure it doesn't go away on us */
-	PL_psig_name[i] = newSVpv(s, strlen(s));
+	PL_psig_name[i] = newSVpvn(s, len);
 	SvREADONLY_on(PL_psig_name[i]);
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
@@ -985,7 +986,7 @@ magic_setsig(SV *sv, MAGIC *mg)
 	    *svp = SvREFCNT_inc(sv);
 	return 0;
     }
-    s = SvPV_force(sv,PL_na);
+    s = SvPV_force(sv,len);
     if (strEQ(s,"IGNORE")) {
 	if (i)
 	    (void)rsignal(i, SIG_IGN);
@@ -1005,7 +1006,7 @@ magic_setsig(SV *sv, MAGIC *mg)
 	 * tell whether HINT_STRICT_REFS is in force or not.
 	 */
 	if (!strchr(s,':') && !strchr(s,'\''))
-	    sv_setpv(sv, form("main::%s", s));
+	    sv_insert(sv, 0, 0, "main::", 6);
 	if (i)
 	    (void)rsignal(i, PL_sighandlerp);
 	else
