@@ -1439,7 +1439,7 @@ Perl_debop(pTHX_ OP *o)
            PerlIO_printf(Perl_debug_log, "[%"UVuf"]", (UV)o->op_targ);
         break;
     default:
-	return 0;
+	break;
     }
     PerlIO_printf(Perl_debug_log, "\n");
     return 0;
