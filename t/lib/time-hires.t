@@ -161,7 +161,7 @@ unless (defined &Time::HiRes::gettimeofday
     $SIG{ALRM} = "tick";
     while ($i)
     {
-	alarm(2.5);
+	alarm(0.3);
 	select (undef, undef, undef, 10);
 	print "# Select returned! $i ", Time::HiRes::tv_interval ($r), "\n";
     }
@@ -181,7 +181,7 @@ unless (defined &Time::HiRes::setitimer
 	&& exists &Time::HiRes::ITIMER_VIRTUAL
 	&& $Config{d_select}) {
     for (18..19) {
-	print "ok $_ # skipped\n";
+	print "ok $_ # Skip: no virtual interval timers\n";
     }
 } else {
     use Time::HiRes qw (setitimer getitimer ITIMER_VIRTUAL);
@@ -194,7 +194,11 @@ unless (defined &Time::HiRes::setitimer
 	print "# Tick! $i ", Time::HiRes::tv_interval($r), "\n";
     };	
 
-    print "# setitimer: ", join(" ", setitimer(ITIMER_VIRTUAL, 1, 0.5)), "\n";
+    print "# setitimer: ", join(" ", setitimer(ITIMER_VIRTUAL, 0.5, 0.4)), "\n";
+
+    # Assume interval timer granularity of 0.05 seconds.  Too bold?
+    print "not " unless abs(getitimer(ITIMER_VIRTUAL) / 0.5) - 1 < 0.1;
+    print "ok 18\n";
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
 
@@ -203,6 +207,9 @@ unless (defined &Time::HiRes::setitimer
     }
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
+
+    print "not " unless getitimer(ITIMER_VIRTUAL) == 0;
+    print "ok 19\n";
 
     $SIG{VTALRM} = 'DEFAULT';
 }
