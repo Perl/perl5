@@ -20,7 +20,6 @@ return <<'END';
 007D		
 00A1		
 00AB		
-00AD		
 00B7		
 00BB		
 00BF		
