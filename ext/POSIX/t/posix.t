@@ -91,7 +91,8 @@ SKIP: {
     skip("_POSIX_OPEN_MAX is inaccurate on MPE", 1) if $Is_MPE;
     skip("_POSIX_OPEN_MAX undefined ($fds[1])",  1) unless &_POSIX_OPEN_MAX;
 
-    ok( &_POSIX_OPEN_MAX > $fds[1], '_POSIX_OPEN_MAX' );
+    ok( &_POSIX_OPEN_MAX == 16 || &_POSIX_OPEN_MAX == 20, "The two allowed values according to susv2 and susv3" );
+
 }
 
 my $pat;
