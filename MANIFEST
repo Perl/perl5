@@ -1120,6 +1120,7 @@ t/lib/hostname.t	See if Sys::Hostname works
 t/lib/io_const.t	See if constants from IO work
 t/lib/io_dir.t		See if directory-related methods from IO work
 t/lib/io_dup.t		See if dup()-related methods from IO work
+t/lib/io_linenum.t	See if I/O line numbers are tracked correctly
 t/lib/io_multihomed.t	See if INET sockets work with multi-homed hosts
 t/lib/io_pipe.t		See if pipe()-related methods from IO work
 t/lib/io_poll.t		See if poll()-related methods from IO work
