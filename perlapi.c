@@ -616,9 +616,9 @@ Perl_dounwind(pTHXo_ I32 cxix)
 
 #undef  Perl_do_binmode
 int
-Perl_do_binmode(pTHXo_ PerlIO *fp, int iotype, int flag)
+Perl_do_binmode(pTHXo_ PerlIO *fp, int iotype, int mode)
 {
-    return ((CPerlObj*)pPerl)->Perl_do_binmode(fp, iotype, flag);
+    return ((CPerlObj*)pPerl)->Perl_do_binmode(fp, iotype, mode);
 }
 
 #undef  Perl_do_close
@@ -631,6 +631,13 @@ Perl_do_close(pTHXo_ GV* gv, bool not_implicit)
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 #endif
+
+#undef  Perl_do_join
+void
+Perl_do_join(pTHXo_ SV* sv, SV* del, SV** mark, SV** sp)
+{
+    ((CPerlObj*)pPerl)->Perl_do_join(sv, del, mark, sp);
+}
 
 #undef  Perl_do_open
 bool
@@ -2343,6 +2350,13 @@ Perl_rninstr(pTHXo_ const char* big, const char* bigend, const char* little, con
 {
     return ((CPerlObj*)pPerl)->Perl_rninstr(big, bigend, little, lend);
 }
+
+#undef  Perl_rsignal
+Sighandler_t
+Perl_rsignal(pTHXo_ int i, Sighandler_t t)
+{
+    return ((CPerlObj*)pPerl)->Perl_rsignal(i, t);
+}
 #if !defined(HAS_RENAME)
 #endif
 
@@ -3365,6 +3379,13 @@ void
 Perl_vwarner(pTHXo_ U32 err, const char* pat, va_list* args)
 {
     ((CPerlObj*)pPerl)->Perl_vwarner(err, pat, args);
+}
+
+#undef  Perl_whichsig
+I32
+Perl_whichsig(pTHXo_ char* sig)
+{
+    return ((CPerlObj*)pPerl)->Perl_whichsig(sig);
 }
 #if defined(USE_PURE_BISON)
 #else
