@@ -1,17 +1,18 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = qw(../lib .);
     require Config; import Config;
     unless ($Config{'useithreads'}) {
         print "1..0 # Skip: no useithreads\n";
         exit 0;
     }
+    require "test.pl";
 }
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { $| = 1; print "1..22\n" };
+BEGIN { $| = 1; print "1..21\n" };
 use threads;
 use threads::shared;
 
@@ -78,37 +79,24 @@ $t->join->join;
 sub testsprintf {
     my $testno = shift;
     my $same = sprintf( "%0.f", $testno);
-    if($testno eq $same) {
-	print "ok $testno\n";
-    } else {
-	print "not ok $testno\t# '$testno' ne '$same'\n";
-    }
+    return $testno eq $same;
 }
 
 sub threaded {
-    my ($string, $string_end, $testno) = @_;
+    my ($string, $string_end) = @_;
 
   # Do the match, saving the output in appropriate variables
     $string =~ /(.*)(is)(.*)/;
   # Yield control, allowing the other thread to fill in the match variables
     threads->yield();
   # Examine the match variable contents; on broken perls this fails
-    if ($3 eq $string_end) {
-	print "ok $testno\n";
-    }
-    else {
-	warn <<EOT;
-#
-# This is a 5005thread failure that should be gone in ithreads
-# $3 - $string_end
-
-EOT
-   print "not ok $testno # other thread filled in match variables\n";
-   }
+    return $3 eq $string_end;
 }
 
 
 { 
+    curr_test(15);
+
     my $thr1 = threads->new(\&testsprintf, 15);
     my $thr2 = threads->new(\&testsprintf, 16);
     
@@ -118,22 +106,17 @@ EOT
     my $longe  = " short.";
     my $foo = "This is bar bar bar.";
     my $fooe = " bar bar bar.";
-    my $thr3 = new threads \&threaded, $short, $shorte, "17";
-    my $thr4 = new threads \&threaded, $long, $longe, "18";
-    my $thr5 = new threads \&testsprintf, "19";
-    my $thr6 = threads->new(\&testsprintf, 20);
-    my $thr7 = new threads \&threaded, $foo, $fooe, "21";
+    my $thr3 = new threads \&threaded, $short, $shorte;
+    my $thr4 = new threads \&threaded, $long, $longe;
+    my $thr5 = new threads \&testsprintf, 19;
+    my $thr6 = new threads \&testsprintf, 20;
+    my $thr7 = new threads \&threaded, $foo, $fooe;
 
-    
-
-    $thr1->join();
-    $thr2->join();
-    $thr3->join();
-    $thr4->join();
-    $thr5->join();
-    $thr6->join();
-    $thr7->join();
-    print "ok 22\n";
+    ok($thr1->join());
+    ok($thr2->join());
+    ok($thr3->join());
+    ok($thr4->join());
+    ok($thr5->join());
+    ok($thr6->join());
+    ok($thr7->join());
 }
-
-
