@@ -9,8 +9,11 @@
 awk -f versnum ../patchlevel.h
 . buildinfo
 builddir = `{ cd .. ; pwd } 
-if(flag a) platforms = (386 mips sparc 68020)
-if not platforms = $objtype
+if (~ $#* 0) platforms = $objtype
+if not switch($1) {
+	case -a ; platforms = (386 mips sparc 68020)
+	case * ; echo 'Usage: setup.rc [-a]' >[1=2] ; exit
+}
 sourcedir=/sys/src/cmd/perl/$p9pvers
 privlib=/sys/lib/perl
 sitelib=$privlib/site_perl

@@ -1,22 +1,14 @@
-/* This file (config_H) is a sample config.h file.  If you are unable
-   to successfully run Configure, copy this file to config.h and
-   edit it to suit your system.
-*/
 /*
- * This file was produced by running the config_h.SH script, which
- * gets its values from config.sh, which is generally produced by
- * running Configure.
- *
- * Feel free to modify any of this as the need arises.  Note, however,
- * that running config_h.SH again will wipe out any changes you've made.
- * For a more permanent change edit config.sh and rerun config_h.SH.
- *
- * $Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
- */
+ * This file is mangled by fndvers (and perhaps other scripts) to produce the config.h 
+ * for Plan 9. It was handwritten because the standard configuration scripts were
+ * written in a shell dialect incomprehensible to Plan 9. 
+ * config.h for Plan 9
+ * Version: 5.004
+ */                 
 
-/* Configuration time: Thu Feb  8 17:15:11 EST 1996
- * Configured by: doughera
- * Target system: sunos fractal 5.4 generic_101946-29 i86pc i386 
+/* Configuration time: 21-Oct-1996 15:11
+ * Configured by: Luther Huffman, lutherh@stratcom.com
+ * Target system: Plan 9
  */
 
 #ifndef _config_h_
@@ -43,7 +35,15 @@
  *	This symbol contains the number of bytes required to align a
  *	double. Usual values are 2, 4 and 8.
  */
-#define MEM_ALIGNBYTES 8	/* config-skip */
+#if (_P9P_OBJTYPE == 386) || (_P9P_OBJTYPE==power)
+#	define MEM_ALIGNBYTES 4	 /* config-skip */
+#else
+# if _P9P_OBJTYPE == 68020
+#	define MEM_ALIGNBYTES 2  /* config-skip */
+# else
+#	define MEM_ALIGNBYTES 8 /* config-skip */
+# endif
+#endif
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will

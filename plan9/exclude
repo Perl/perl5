@@ -2,6 +2,8 @@ comp/cpp.t
 io/dup.t
 io/fs.t
 lib/anydbm.t
+lib/complex.t
+lib/filefind.t
 lib/io_dup.t
 lib/io_pipe.t
 lib/io_sock.t

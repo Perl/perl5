@@ -82,7 +82,6 @@ eunicefix=':'
 hint='none'
 hintfile=''
 intsize='4'
-alignbytes='8'
 shrplib='define'
 usemymalloc='n'
 usevfork='true'
@@ -127,24 +126,26 @@ print OUT "siglongjmp='siglongjmp(buf,retval) '\n";
 print OUT "exe_ext=''\n";
 if ($p9p_objtype eq '386') {
 	$objext = '.8';
+	$alignbytes = '4';
+	$cstflags = 2;
 }
 elsif ($p9p_objtype eq '68020') {
 	$objext = '.2';
+	$alignbytes = '2';
+	$cstflags = 0;
 }
 elsif ($p9p_objtype eq 'mips') {
 	$objext = '.v';
+	$alignbytes = '8';
+	$cstflags = 0;
 }
 elsif ($p9p_objtype eq 'sparc') {
 	$objext = '.k';
-}
-print OUT "obj_ext='$objext'\n";
-
-if ($p9p_objtype eq '386') {
-	$cstflags = 2;
-}
-else {
+	$alignbytes = '4';
 	$cstflags = 0;
 }
+print OUT "obj_ext='$objext'\n";
+print OUT "alignbytes='$alignbytes'\n";
 print OUT "castflags='$cstflags'\n";
 
 $myname = $ENV{'site'} ;

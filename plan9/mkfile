@@ -8,7 +8,7 @@ archlib = /$objtype/lib/perl/$p9pvers
 sitelib = $privlib/site_perl
 sitearch = $archlib/site_perl
 
-CFLAGS =  -B  -D_POSIX_SOURCE -D_BSD_EXTENSION -DNO_EMBED -DMY_UV_MAX=0x7fffffffUL
+CFLAGS =  -B  -D_POSIX_SOURCE -D_BSD_EXTENSION -DMY_UV_MAX=0x7fffffffUL
 LDFLAGS = -B 
 
 CCCMD = $CC  -c $CFLAGS 
@@ -40,6 +40,7 @@ testlist = base/*.t comp/*.t cmd/*.t io/*.t op/*.t
 install:V:	perl preplibrary 
 		cp perl /$objtype/bin/perl
 		cp plan9/aperl /rc/bin/Perl
+		mk man
 		
 perl:		config.h miniperlmain.$O miniperl $archlib/Config.pm perlmain.$O $perlshr 
 		$LD $CFLAGS -o perl perlmain.$O $perllib $perlshr
