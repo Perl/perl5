@@ -48,8 +48,8 @@ sub bad_one
 # broken functionality (recno databases with a modified bval). 
 # Otherwise you'll have to upgrade your DB library.
 #
-# If you want to upgrade Berkeley DB, the most recent version is 1.85.
-# Check out http://www.bostic.com/db for more details.
+# If you want to upgrade Berkeley DB, the most recent version is 1.86.
+# Check out http://www.sleepycat.com/ for more details.
 #
 EOM
 }
