@@ -18,11 +18,11 @@ ok( require 'open.pm', 'requiring open' );
 
 # this should fail
 eval { import() };
-like( $@, qr/needs explicit list of disciplines/, 
+like( $@, qr/needs explicit list of disciplines/,
 	'import should fail without args' );
 
 # the hint bits shouldn't be set yet
-is( $^H & $open::hint_bits, 0, 
+is( $^H & $open::hint_bits, 0,
 	'hint bits should not be set in $^H before open import' );
 
 # prevent it from loading I18N::Langinfo, so we can test encoding failures
@@ -39,11 +39,11 @@ is( $warn, '',
 
 $warn = '';
 eval q{ use warnings 'layer'; use open IN => ':macguffin' ; };
-like( $warn, qr/Unknown discipline layer/, 
+like( $warn, qr/Unknown discipline layer/,
 	'should warn about unknown discipline with bad discipline provided' );
 
 SKIP: {
-    skip("no perlio, no :utf8", 1) unless $Config{useperlio};
+    skip("no perlio, no :utf8", 1) unless (find PerlIO::Layer 'perlio');
     # now load a real-looking locale
     $ENV{LC_ALL} = ' .utf8';
     import( 'IN', 'locale' );
@@ -53,7 +53,7 @@ SKIP: {
 
 # and see if it sets the magic variables appropriately
 import( 'IN', ':crlf' );
-ok( $^H & $open::hint_bits, 
+ok( $^H & $open::hint_bits,
 	'hint bits should be set in $^H after open import' );
 is( $^H{'open_IN'}, 'crlf', 'should have set crlf layer' );
 
@@ -72,7 +72,7 @@ is( ${^OPEN}, ":raw :crlf\0:raw :crlf",
 is( $^H{'open_IO'}, 'crlf', 'should record last layer set in %^H' );
 
 SKIP: {
-    skip("no perlio, no :utf8", 4) unless $Config{'useperlio'};
+    skip("no perlio, no :utf8", 4) unless (find PerlIO::Layer 'perlio');
 
     eval <<EOE;
     use open ':utf8';
