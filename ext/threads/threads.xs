@@ -157,7 +157,21 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 
 #else
 #ifdef OLD_PTHREADS_API
-	pthread_create( &thread->thr, (pthread_attr_t)NULL, Perl_thread_run, (void *)thread);
+	{
+	  static pthread_attr_t attr;
+	  static int attr_inited = 0;
+	  sigset_t fullmask, oldmask;
+	  static int attr_joinable = PTHREAD_CREATE_JOINABLE;
+	  if (!attr_inited) {
+	    attr_inited = 1;
+	    pthread_attr_init(&attr);
+	  }
+#  ifdef PTHREAD_ATTR_SETDETACHSTATE
+            PTHREAD_ATTR_SETDETACHSTATE(&attr, attr_joinable);
+#  endif
+
+	  pthread_create( &thread->thr, attr, Perl_thread_run, (void *)thread);
+	}
 #else
 	pthread_create( &thread->thr, (pthread_attr_t*)NULL, Perl_thread_run, (void *)thread);
 #endif
