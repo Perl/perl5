@@ -23,7 +23,7 @@ if (ord "A" == 193) { # EBCDIC
 ed8efe2e2dbab62fcc9dea2df6682569  Changes
 0565ec21b15c0f23f4c51fb327c8926d  README
 0fcdd6d6e33b8772bd4b4832043035cd  MD5.pm
-4757a101ad5df97136a2fa8e910d9d6a  MD5.xs
+de2c149900efee0fbb39ad87dea68a43  MD5.xs
 276da0aa4e9a08b7fe09430c9c5690aa  rfc1321.txt
 EOT
 } elsif ("\n" eq "\015") { # MacOS
@@ -31,7 +31,7 @@ EOT
 2879619f967d5fc5a00ffe37b639f2ee  Changes
 6c950a0211a5a28f023bb482037698cd  README
 4e1043f0a7a266416d8408d6fa96f454  MD5.pm
-fc1b8007a6f5262561a0a76493759a55  MD5.xs
+df178436ead9d354d63089fa0e01af27  MD5.xs
 754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT
 } else {
@@ -40,7 +40,7 @@ EOT
 2879619f967d5fc5a00ffe37b639f2ee  Changes
 6c950a0211a5a28f023bb482037698cd  README
 4e1043f0a7a266416d8408d6fa96f454  MD5.pm
-fc1b8007a6f5262561a0a76493759a55  MD5.xs
+df178436ead9d354d63089fa0e01af27  MD5.xs
 754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT
 }
@@ -61,6 +61,7 @@ if ($@) {
 for (split /^/, $EXPECT) {
      my($md5hex, $file) = split ' ';
      my $base = $file;
+     print "# $base\n";
      if ($ENV{PERL_CORE}) {
          if ($file eq 'rfc1321.txt') { # Don't have it in core.
 	     print "ok ", ++$testno, " # Skip: PERL_CORE\n";
