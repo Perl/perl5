@@ -2218,7 +2218,7 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 	dwEnvIndex = 0;
 	lpLocalEnv = GetIndex(dwEnvIndex);
 	while(*lpEnvPtr != '\0') {
-	    if(lpLocalEnv == NULL) {
+	    if(!lpLocalEnv) {
 		// all environment overrides have been added
 		// so copy string into place
 		strcpy(lpStr, lpEnvPtr);
@@ -2248,6 +2248,16 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 		    }
 		}
 	    }
+	}
+
+	while(lpLocalEnv) {
+	    // still have environment overrides to add
+	    // so copy the strings into place
+	    strcpy(lpStr, lpLocalEnv);
+	    nLength = strlen(lpLocalEnv) + 1;
+	    lpStr += nLength;
+	    lpEnvPtr += nLength;
+	    lpLocalEnv = GetIndex(dwEnvIndex);
 	}
 
 	// add final NULL
