@@ -5,7 +5,7 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 	require Test; import Test;
-	plan(tests => 16);
+	plan(tests => 20);
 }
 
 use strict;
@@ -51,6 +51,10 @@ my ($fh, $tempfile) = tempfile(
 			      );
 
 ok( (-f $tempfile) );
+# Should still be around after closing
+ok( close( $fh ) ); 
+ok( (-f $tempfile) );
+# Check again at exit
 push(@files, $tempfile);
 
 # TEMPDIR test
@@ -113,5 +117,29 @@ ok( -f $tempfile );
 ok( close( $fh ) );
 push( @still_there, $tempfile); # check at END
 
+# Would like to create a temp file and just retrieve the handle
+# but the test is problematic since:
+#  - We dont know the filename so we cant check that it is tidied
+#    correctly
+#  - The unlink0 required on unix for tempfile creation will fail
+#    on NFS
+# Try to do what we can.
+# Tempfile croaks on error so we need an eval
+$fh = eval { tempfile( 'ftmpXXXXX', DIR => File::Spec->tmpdir ) };
+
+if ($fh) {
+
+  # print something to it to make sure something is there
+  ok( print $fh "Test\n" );
+
+  # Close it - can not check it is gone since we dont know the name
+  ok( close($fh) );
+
+} else {
+  skip "Skip Failed probably due to NFS", 1;
+  skip "Skip Failed probably due to NFS", 1;
+}
+
 # Now END block will execute to test the removal of directories
+print "# End of tests. Execute END blocks\n";
 
