@@ -6,48 +6,49 @@
 # ifdef I_SYS_TYPES
 #  include <sys/types.h>
 # endif
-#include <sys/socket.h>
-#ifdef MPE
-# define PF_INET AF_INET
-# define PF_UNIX AF_UNIX
-# define SOCK_RAW 3
-#endif
-#ifdef I_SYS_UN
-#include <sys/un.h>
-#endif
+# include <sys/socket.h>
+# ifdef MPE
+#  define PF_INET AF_INET
+#  define PF_UNIX AF_UNIX
+#  define SOCK_RAW 3
+# endif
+# ifdef I_SYS_UN
+#  include <sys/un.h>
+# endif
 # ifdef I_NETINET_IN
 #  include <netinet/in.h>
 # endif
-#include <netdb.h>
-#ifdef I_ARPA_INET
-# include <arpa/inet.h>
-#endif
+# include <netdb.h>
+# ifdef I_ARPA_INET
+#  include <arpa/inet.h>
+# endif
+# ifdef I_NETINET_TCP
+#  include <netinet/tcp.h>
+# endif
 #else
-#include "sockadapt.h"
+# include "sockadapt.h"
 #endif
-
-#include <netinet/tcp.h>
 
 #ifdef I_SYSUIO
 # include <sys/uio.h>
 #endif
 
 #ifndef AF_NBS
-#undef PF_NBS
+# undef PF_NBS
 #endif
 
 #ifndef AF_X25
-#undef PF_X25
+# undef PF_X25
 #endif
 
 #ifndef INADDR_NONE
-#define INADDR_NONE	0xffffffff
+# define INADDR_NONE	0xffffffff
 #endif /* INADDR_NONE */
 #ifndef INADDR_BROADCAST
-#define INADDR_BROADCAST	0xffffffff
+# define INADDR_BROADCAST	0xffffffff
 #endif /* INADDR_BROADCAST */
 #ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK         0x7F000001
+# define INADDR_LOOPBACK         0x7F000001
 #endif /* INADDR_LOOPBACK */
 
 #ifndef HAS_INET_ATON

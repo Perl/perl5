@@ -1449,17 +1449,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This macro surrounds its token with double quotes.
  */
 #if $cpp_stuff == 1
-# define CAT2(a,b)a/**/b
-# define STRINGIFY(a)"a"
+#define CAT2(a,b)a/**/b
+#define STRINGIFY(a)"a"
 		/* If you can get stringification with catify, tell me how! */
-#else
-# if $cpp_stuff == 42
-#  define CAT2(a,b)a ## b
-#  define StGiFy(a)# a
-#  define STRINGIFY(a)StGiFy(a)
-# else
-#  include "Bletch: How does this C preprocessor catenate tokens?"
-# endif
+#endif
+#if $cpp_stuff == 42
+#define CAT2(a,b)a ## b
+#define StGiFy(a)# a
+#define STRINGIFY(a)StGiFy(a)
+#endif
+#if $cpp_stuff != 1 && $cpp_stuff != 42
+#include "Bletch: How does this C preprocessor catenate tokens?"
 #endif
 
 /* CPPSTDIN:
@@ -2243,6 +2243,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	should be included.
  */
 #$i_mntent	I_MNTENT		/**/
+
+/* I_NETINET_TCP:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <netinet/tcp.h>.
+ */
+#$i_netinettcp   I_NETINET_TCP                /**/
 
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
