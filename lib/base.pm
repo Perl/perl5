@@ -1,7 +1,8 @@
 package base;
 
+use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.02';
+$VERSION = '2.03';
 
 # constant.pm is slow
 sub SUCCESS () { 1 }
@@ -17,13 +18,13 @@ my $Fattr = \%fields::attr;
 sub has_fields {
     my($base) = shift;
     my $fglob = ${"$base\::"}{FIELDS};
-    return $fglob && *$fglob{HASH};
+    return( ($fglob && *$fglob{HASH}) ? 1 : 0 );
 }
 
 sub has_version {
     my($base) = shift;
     my $vglob = ${$base.'::'}{VERSION};
-    return $vglob && *$vglob{SCALAR};
+    return( ($vglob && *$vglob{SCALAR}) ? 1 : 0 );
 }
 
 sub has_attr {
@@ -43,14 +44,6 @@ sub get_fields {
 
     return \%{$_[0].'::FIELDS'};
 }
-
-sub show_fields {
-    my($base, $mask) = @_;
-    my $fields = \%{$base.'::FIELDS'};
-    return grep { ($Fattr->{$base}[$fields->{$_}] & $mask) == $mask} 
-                keys %$fields;
-}
-
 
 sub import {
     my $class = shift;
@@ -88,25 +81,13 @@ ERROR
         }
         push @{"$inheritor\::ISA"}, $base;
 
-        # A simple test like (defined %{"$base\::FIELDS"}) will
-        # sometimes produce typo warnings because it would create
-        # the hash if it was not present before.
-        #
-        # We don't just check to see if the base in question has %FIELDS
-        # defined, we also check to see if it has -inheritable- fields.
-        # Its perfectly alright to inherit from multiple classes that have 
-        # %FIELDS as long as only one of them has fields to give.
         if ( has_fields($base) || has_attr($base) ) {
-	    # Check to see if there are fields to be inherited.
-	    if ( show_fields($base, PUBLIC) or
-                 show_fields($base, PROTECTED) ) {
-		# No multiple fields inheritence *suck*
-		if ($fields_base) {
-		    require Carp;
-		    Carp::croak("Can't multiply inherit %FIELDS");
-		} else {
-		    $fields_base = $base;
-		}
+	    # No multiple fields inheritence *suck*
+	    if ($fields_base) {
+		require Carp;
+		Carp::croak("Can't multiply inherit %FIELDS");
+	    } else {
+		$fields_base = $base;
 	    }
         }
     }
@@ -148,15 +129,17 @@ sub inherit_fields {
 	}
 
         if( $battr->[$v] & PRIVATE ) {
-            $dattr->[$v] = undef;
+            $dattr->[$v] = PRIVATE | INHERITED;
         }
         else {
             $dattr->[$v] = INHERITED | $battr->[$v];
-
-            # Derived fields must be kept in the same position as the
-            # base in order to make "static" typing work with psuedo-hashes.
-            # Alas, this kills multiple field inheritance.
             $dfields->{$k} = $v;
+        }
+    }
+
+    unless( keys %$bfields ) {
+        foreach my $idx (1..$#{$battr}) {
+            $dattr->[$idx] = $battr->[$idx] & INHERITED;
         }
     }
 }
