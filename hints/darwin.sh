@@ -183,6 +183,11 @@ EOCBU
 # vfork works
 usevfork='true';
 
+# malloc wrap works
+case "$usemallocwrap" in
+'') usemallocwrap='define' ;;
+esac
+
 # our malloc works (but allow users to override)
 case "$usemymalloc" in
 '') usemymalloc='n' ;;

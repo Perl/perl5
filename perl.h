@@ -1767,10 +1767,6 @@ typedef struct ptr_tbl_ent PTR_TBL_ENT_t;
 typedef struct ptr_tbl PTR_TBL_t;
 typedef struct clone_params CLONE_PARAMS;
 
-#ifndef NO_PERL_MALLOC_WRAP
-#define PERL_MALLOC_WRAP	/* We'd like malloc wrap checks.  */
-#endif
-
 #include "handy.h"
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
