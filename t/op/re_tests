@@ -784,3 +784,6 @@ tt+$	xxxtt	y	-	-
 \((\w\. \w+)\)	cd. (A. Tw)	y	-$1-	-A. Tw-
 ((?:aaaa|bbbb)cccc)?	aaaacccc	y	-	-
 ((?:aaaa|bbbb)cccc)?	bbbbcccc	y	-	-
+(a)?(a)+	a	y	$1:$2	:a	-
+(ab)?(ab)+	ab	y	$1:$2	:ab	-
+(abc)?(abc)+	abc	y	$1:$2	:abc	-
