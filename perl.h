@@ -1712,6 +1712,7 @@ typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 #include "form.h"
 #include "gv.h"
 #include "cv.h"
+#include "opnames.h"
 #include "op.h"
 #include "cop.h"
 #include "av.h"

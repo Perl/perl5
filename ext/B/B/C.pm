@@ -600,11 +600,19 @@ sub B::CV::save {
     # from PL_initav->save. Re-bootstrapping  will push INIT back in
     # so nullop should be sent.
     if ($cvxsub && ($cvname ne "INIT")) {
-    #if ($cvxsub) {
 	my $egv = $gv->EGV;
 	my $stashname = $egv->STASH->NAME;
-	$xsub{$stashname}='Static' unless  $xsub{$stashname};
-	return qq/(perl_get_cv("$stashname\:\:$cvname",0))/;
+         if ($cvname eq "bootstrap")
+          {                                   
+           my $file = $cv->FILEGV->SV->PV;    
+           $decl->add("/* bootstrap $file */"); 
+           warn "Bootstrap $stashname $file\n";
+           $xsub{$stashname}='Dynamic'; 
+	   # $xsub{$stashname}='Static' unless  $xsub{$stashname};
+           return qq/NULL/;
+          }                                   
+        warn sprintf("stub for XSUB $cvstashname\:\:$cvname CV 0x%x\n", $$cv) if $debug_cv;
+	return qq/(perl_get_cv("$stashname\:\:$cvname",TRUE))/;
     }
     if ($cvxsub && $cvname eq "INIT") {
 	 no strict 'refs';
@@ -616,7 +624,7 @@ sub B::CV::save {
     $xpvcvsect->add("xpvcvix$xpvcv_ix");
     # Save symbol now so that GvCV() doesn't recurse back to us via CvGV()
     $sym = savesym($cv, "&sv_list[$sv_ix]");
-    warn sprintf("saving CV 0x%x as $sym\n", $$cv) if $debug_cv;
+    warn sprintf("saving $cvstashname\:\:$cvname CV 0x%x as $sym\n", $$cv) if $debug_cv;
     if (!$$root && !$cvxsub) {
 	if (try_autoload($cvstashname, $cvname)) {
 	    # Recalculate root and xsub
@@ -706,7 +714,7 @@ sub B::CV::save {
 }
 
 sub B::GV::save {
-    my ($gv,$skip_cv) = @_;
+    my ($gv) = @_;
     my $sym = objsym($gv);
     if (defined($sym)) {
 	#warn sprintf("GV 0x%x already saved as $sym\n", $$gv); # debug
@@ -764,20 +772,20 @@ sub B::GV::save {
 #	    warn "GV::save \%$name\n"; # debug
 	}
 	my $gvcv = $gv->CV;
-	if ($$gvcv && !$skip_cv && !$gvcv->XSUB) { #not XSUB
-            $gvcv->save;
-            $init->add(sprintf("GvCV($sym) = (CV*)s\\_%x;", $$gvcv));
-#           warn "GV::save &$name\n"; # debug
-        }elsif ($$gvcv && $gvcv->XSUB && $name ne 
-               (my $origname=cstring($gvcv->GV->EGV->STASH->NAME .
-		 "::" . $gvcv->GV->EGV->NAME))) { #XSUB alias
-
+	if ($$gvcv) { 
+	    my $origname=cstring($gvcv->GV->EGV->STASH->NAME .
+		 "::" . $gvcv->GV->EGV->NAME);  
+	    if (0 && $gvcv->XSUB && $name ne $origname) { #XSUB alias
+	        # must save as a 'stub' so newXS() has a CV to populate
                 $init->add("{ CV *cv;");
-                $init->add("\tcv=GvCV(gv_fetchpv($origname,FALSE,SVt_PV));");
+                $init->add("\tcv=perl_get_cv($origname,TRUE);");
                 $init->add("\tGvCV($sym)=cv;");
                 $init->add("\tSvREFCNT_inc((SV *)cv);");
-                $init->add("}");
-
+                $init->add("}");    
+	    } else {     
+               $init->add(sprintf("GvCV($sym) = (CV*)(%s);", $gvcv->save));
+#              warn "GV::save &$name\n"; # debug
+	    } 
         }     
 	my $gvfilegv = $gv->FILEGV;
 	if ($$gvfilegv) {
@@ -1046,6 +1054,7 @@ sub output_boilerplate {
 EXTERN_C void boot_DynaLoader (CV* cv);
 
 static void xs_init (void);
+static void dl_init (void);
 static PerlInterpreter *my_perl;
 EOT
 }
@@ -1110,6 +1119,7 @@ main(int argc, char **argv, char **env)
     exitstatus = perl_init();
     if (exitstatus)
 	exit( exitstatus );
+    dl_init();
 
     exitstatus = perl_run( my_perl );
 
@@ -1130,28 +1140,60 @@ EOT
     print "\n#ifdef USE_DYNAMIC_LOADING";
     print qq/\n\tnewXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);/;
     print "\n#endif\n" ;
-    delete $xsub{'DynaLoader'}; 
+    # delete $xsub{'DynaLoader'}; 
     delete $xsub{'UNIVERSAL'}; 
-    print("/* bootstrapping code*/\nSAVETMPS;\n");
+    print("/* bootstrapping code*/\n\tSAVETMPS;\n");
     print("\ttarg=sv_newmortal();\n");
-    foreach my $stashname (keys %xsub ){
-	my $stashxsub=$stashname;
-	$stashxsub  =~ s/::/__/g; 
-	if ($xsub{$stashname} eq 'Dynamic') {
+    print "#ifdef DYNALOADER_BOOTSTRAP\n";
+    print "\tPUSHMARK(sp);\n";
+    print qq/\tXPUSHp("DynaLoader",strlen("DynaLoader"));\n/;
+    print qq/\tPUTBACK;\n/;
+    print "\tboot_DynaLoader(NULL);\n";
+    print qq/\tSPAGAIN;\n/;
+    print "#endif\n";
+    foreach my $stashname (keys %xsub){
+	if ($xsub{$stashname} ne 'Dynamic') {
+	   my $stashxsub=$stashname;
+	   $stashxsub  =~ s/::/__/g; 
+	   print "\tPUSHMARK(sp);\n";
+	   print qq/\tXPUSHp("$stashname",strlen("$stashname"));\n/;
+	   print qq/\tPUTBACK;\n/;
+	   print "\tboot_$stashxsub(NULL);\n";
+	   print qq/\tSPAGAIN;\n/;
+	}   
+    }
+    print("\tFREETMPS;\n/* end bootstrapping code */\n");
+    print "}\n";
+    
+print <<'EOT';
+static void
+dl_init()
+{
+    char *file = __FILE__;
+    dTARG;
+    djSP;
+EOT
+    print("/* Dynamicboot strapping code*/\n\tSAVETMPS;\n");
+    print("\ttarg=sv_newmortal();\n");
+    foreach my $stashname (@DynaLoader::dl_modules) {
+	warn "Loaded $stashname\n";
+	if (exists($xsub{$stashname}) && $xsub{$stashname} eq 'Dynamic') {
+  	   my $stashxsub=$stashname;
+	   $stashxsub  =~ s/::/__/g; 
+   	   print "\tPUSHMARK(sp);\n";
+   	   print qq/\tXPUSHp("$stashname",/,length($stashname),qq/);\n/;
+	   print qq/\tPUTBACK;\n/;
            print "#ifdef DYNALOADER_BOOTSTRAP\n";
 	   warn "bootstrapping $stashname added to xs_init\n";
-	   print qq/\n\t{\n\tchar *args[]={"$stashxsub", NULL};/;
-           print qq/\n\t\tperl_call_argv("${stashxsub}::bootstrap",G_DISCARD,args);\n\t}/;
+	   print qq/\tperl_call_method("bootstrap",G_DISCARD);\n/;
            print "\n#else\n";
-	}
-	print "\tPUSHMARK(sp);\n";
-   	print qq/\tXPUSHp("$stashname",strlen("$stashname")+1);\n/;
-	print "\tboot_$stashxsub(NULL);\n";
-        print "#endif\n" if ($xsub{$stashname} eq 'Dynamic');
+	   print "\tboot_$stashxsub(NULL);\n";
+           print "#endif\n";
+	   print qq/\tSPAGAIN;\n/;
+	}   
     }
-
-    print("\tFREETMPS;\n/* end bootstrapping code */\n");
-    print "\n}";
+    print("\tFREETMPS;\n/* end Dynamic bootstrapping code */\n");
+    print "}\n";
 }
 sub dump_symtable {
     # For debugging
@@ -1181,32 +1223,14 @@ sub B::GV::savecv
  my $sv = $gv->SV;
  my $av = $gv->AV;
  my $hv = $gv->HV;
- my $skip_cv = 0;
 
  # We may be looking at this package just because it is a branch in the 
  # symbol table which is on the path to a package which we need to save
  # e.g. this is 'Getopt' and we need to save 'Getopt::Long'
  # 
  return unless ($unused_sub_packages{$package});
- if ($$cv) 
-  {
-   if ($name eq "bootstrap" && $cv->XSUB) 
-    {
-     my $file = $cv->FILEGV->SV->PV;
-     my $name = $gv->STASH->NAME.'::'.$name;
-     no strict 'refs';
-     *{$name} = \&Dummy_BootStrap;   
-     $xsub{$gv->STASH->NAME}='Dynamic';
-     $cv = $gv->CV;
-    }
-   warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
-                  $package, $name, $$cv, $$gv) if ($debug_cv); 
-  }                                     
- else
-  {
-   return unless ($$av || $$sv || $$hv)
-  }
- $gv->save($skip_cv);
+ return unless ($$cv || $$av || $$sv || $$hv);
+ $gv->save;
 }
 
 sub mark_package
@@ -1228,7 +1252,7 @@ sub mark_package
            eval { $package->bootstrap }; 
           }
         }
-       else
+#      else
         {
          unless ($unused_sub_packages{$isa})
           {

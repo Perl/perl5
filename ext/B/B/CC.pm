@@ -53,6 +53,8 @@ my %skip_invalidate;	# Hash of PP names which don't need invalidate_lexicals
 my %ignore_op;		# Hash of ops which do nothing except returning op_next
 my %need_curcop;	# Hash of ops which need PL_curcop
 
+my %lexstate;		#state of padsvs at the start of a bblock
+
 BEGIN {
     foreach (qw(pp_scalar pp_regcmaybe pp_lineseq pp_scope pp_null)) {
 	$ignore_op{$_} = 1;
@@ -211,6 +213,31 @@ sub write_back_lexicals {
     foreach $lex (@pad) {
 	next unless ref($lex);
 	$lex->write_back unless $lex->{flags} & $avoid;
+    }
+}
+
+sub save_or_restore_lexical_state {
+    my $bblock=shift;
+    unless( exists $lexstate{$bblock}){
+    	foreach my $lex (@pad) {
+		next unless ref($lex);
+		${$lexstate{$bblock}}{$lex->{iv}} = $lex->{flags} ;
+	}
+    }else{
+    	foreach my $lex (@pad) {
+	    next unless ref($lex);
+	    my $old_flags=${$lexstate{$bblock}}{$lex->{iv}}  ;
+	    next if ( $old_flags eq $lex->{flags});
+	    if  (($old_flags & VALID_SV)  && !($lex->{flags} & VALID_SV)){
+		$lex->write_back;
+	    }
+	    if (($old_flags & VALID_DOUBLE) && !($lex->{flags} & VALID_DOUBLE)){
+                $lex->load_double;
+            }
+            if (($old_flags & VALID_INT) && !($lex->{flags} & VALID_INT)){
+                $lex->load_int;
+            }
+        }
     }
 }
 
@@ -498,8 +525,10 @@ sub pp_and {
     if (@stack >= 1) {
 	my $bool = pop_bool();
 	write_back_stack();
+        save_or_restore_lexical_state($$next);
 	runtime(sprintf("if (!$bool) {XPUSHs(&PL_sv_no); goto %s;}", label($next)));
     } else {
+        save_or_restore_lexical_state($$next);
 	runtime(sprintf("if (!%s) goto %s;", top_bool(), label($next)),
 		"*sp--;");
     }
@@ -514,9 +543,11 @@ sub pp_or {
     if (@stack >= 1) {
 	my $bool = pop_bool @stack;
 	write_back_stack();
+        save_or_restore_lexical_state($$next);
 	runtime(sprintf("if (%s) { XPUSHs(&PL_sv_yes); goto %s; }",
 			$bool, label($next)));
     } else {
+        save_or_restore_lexical_state($$next);
 	runtime(sprintf("if (%s) goto %s;", top_bool(), label($next)),
 		"*sp--;");
     }
@@ -530,6 +561,7 @@ sub pp_cond_expr {
     reload_lexicals();
     my $bool = pop_bool();
     write_back_stack();
+    save_or_restore_lexical_state($$false);
     runtime(sprintf("if (!$bool) goto %s;", label($false)));
     return $op->other;
 }
@@ -1014,6 +1046,7 @@ sub pp_preinc {
     return $op->next;
 }
 
+
 sub pp_pushmark {
     my $op = shift;
     write_back_stack();
@@ -1055,6 +1088,7 @@ sub pp_formline {
     # See comment in pp_grepwhile to see why!
     $init->add("((LISTOP*)$sym)->op_first = $sym;");    
     runtime("if (PL_op == ((LISTOP*)($sym))->op_first){");
+    save_or_restore_lexical_state(${$op->first});
     runtime( sprintf("goto %s;",label($op->first)));
     runtime("}");
     return $op->next;
@@ -1164,6 +1198,7 @@ sub pp_grepstart {
     $next->save;
     my $nexttonext=$next->next;
     $nexttonext->save;
+    save_or_restore_lexical_state($$nexttonext);
     runtime(sprintf("if (PL_op == (($sym)->op_next)->op_next) goto %s;",
 		    label($nexttonext)));
     return $op->next->other;
@@ -1183,6 +1218,7 @@ sub pp_mapstart {
     $next->save;
     my $nexttonext=$next->next;
     $nexttonext->save;
+    save_or_restore_lexical_state($$nexttonext);
     runtime(sprintf("if (PL_op == (($sym)->op_next)->op_next) goto %s;",
 		    label($nexttonext)));
     return $op->next->other;
@@ -1201,6 +1237,7 @@ sub pp_grepwhile {
     # around that, we hack op_next to be our own op (purely because we
     # know it's a non-NULL pointer and can't be the same as op_other).
     $init->add("((LOGOP*)$sym)->op_next = $sym;");
+    save_or_restore_lexical_state($$next);
     runtime(sprintf("if (PL_op == ($sym)->op_next) goto %s;", label($next)));
     $know_op = 0;
     return $op->other;
@@ -1238,6 +1275,7 @@ sub pp_range {
 	# We need to save our UNOP structure since pp_flop uses
 	# it to find and adjust out targ. We don't need it ourselves.
 	$op->save;
+        save_or_restore_lexical_state(${$op->other});
 	runtime sprintf("if (SvTRUE(PL_curpad[%d])) goto %s;",
 			$op->targ, label($op->other));
 	unshift(@bblock_todo, $op->other);
@@ -1268,6 +1306,7 @@ sub pp_flip {
     if ($op->flags & OPf_SPECIAL) {
 	runtime("sv_setiv(PL_curpad[$ix], 1);");
     } else {
+    	save_or_restore_lexical_state(${$op->first->other});
 	runtime("\tsv_setiv(PL_curpad[$ix], 0);",
 		"\tsp--;",
 		sprintf("\tgoto %s;", label($op->first->other)));
@@ -1339,6 +1378,7 @@ sub pp_next {
     default_pp($op);
     my $nextop = $cxstack[$cxix]->{nextop};
     push(@bblock_todo, $nextop);
+    save_or_restore_lexical_state($$nextop);
     runtime(sprintf("goto %s;", label($nextop)));
     return $op->next;
 }
@@ -1362,6 +1402,7 @@ sub pp_redo {
     default_pp($op);
     my $redoop = $cxstack[$cxix]->{redoop};
     push(@bblock_todo, $redoop);
+    save_or_restore_lexical_state($$redoop);
     runtime(sprintf("goto %s;", label($redoop)));
     return $op->next;
 }
@@ -1390,6 +1431,7 @@ sub pp_last {
     default_pp($op);
     my $lastop = $cxstack[$cxix]->{lastop}->next;
     push(@bblock_todo, $lastop);
+    save_or_restore_lexical_state($$lastop);
     runtime(sprintf("goto %s;", label($lastop)));
     return $op->next;
 }
@@ -1401,6 +1443,7 @@ sub pp_subst {
     my $sym = doop($op);
     my $replroot = $op->pmreplroot;
     if ($$replroot) {
+        save_or_restore_lexical_state($$replroot);
 	runtime sprintf("if (PL_op == ((PMOP*)(%s))->op_pmreplroot) goto %s;",
 			$sym, label($replroot));
 	$op->pmreplstart->save;
@@ -1421,6 +1464,7 @@ sub pp_substcont {
 #   my $pmopsym = objsym($pmop);
     my $pmopsym = $pmop->save; # XXX can this recurse?
 #   warn "pmopsym = $pmopsym\n";#debug
+    save_or_restore_lexical_state(${$pmop->pmreplstart});
     runtime sprintf("if (PL_op == ((PMOP*)(%s))->op_pmreplstart) goto %s;",
 		    $pmopsym, label($pmop->pmreplstart));
     invalidate_lexicals();
@@ -1468,6 +1512,7 @@ sub compile_op {
 sub compile_bblock {
     my $op = shift;
     #warn "compile_bblock: ", peekop($op), "\n"; # debug
+    save_or_restore_lexical_state($$op);
     write_label($op);
     $know_op = 0;
     do {
@@ -1488,6 +1533,7 @@ sub cc {
     }
     init_pp($name);
     load_pad(@padlist);
+    %lexstate=();
     B::Pseudoreg->new_scope;
     @cxstack = ();
     if ($debug_timings) {
@@ -1523,6 +1569,7 @@ sub cc {
 	if (!$$op) {
 	    runtime("PUTBACK;","return PL_op;");
 	} elsif ($done{$$op}) {
+    	    save_or_restore_lexical_state($$op);
 	    runtime(sprintf("goto %s;", label($op)));
 	}
     }
