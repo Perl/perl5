@@ -61,6 +61,7 @@ if ($^O eq 'vmesa') {
 	exec 'echo', 'not ok 6';
     }
 }
+wait;				# Collect from $pid
 
 pipe(READER,WRITER) || die "Can't open pipe";
 close READER;
@@ -134,7 +135,6 @@ else {
 }
 
 # check that status for the correct process is collected
-wait;				# Collect from $pid
 my $zombie = fork or exit 37;
 my $pipe = open *FH, "sleep 2;exit 13|" or die "Open: $!\n";
 $SIG{ALRM} = sub { return };

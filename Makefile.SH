@@ -605,7 +605,9 @@ depend: makedepend
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
-test-prep: miniperl perl preplibrary utilities $(dynamic_ext) $(nonxs_ext)
+# Cannot delegate rebuilding of t/perl to make to allow interlaced
+# test and minitest
+test-prep: miniperl perl preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
 	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
 
 # Second branch is for testing without a tty or controling terminal.
@@ -672,11 +674,18 @@ elc:	emacs/cperl-mode.elc
 emacs/cperl-mode.elc: emacs/cperl-mode.el
 	-cd emacs; emacs -batch -q -no-site-file -f batch-byte-compile cperl-mode.el
 
-etags:	emacs/cperl-mode.elc
-	sh emacs/ptags
-	perl emacs/e2ctags.pl TAGS > tags
+etags:	TAGS
 
-ctags:	etags
+TAGS: emacs/cperl-mode.elc
+	sh emacs/ptags
+
+ctags:	tags
+
+# Let's hope make will not go into an infinite loop on case-unsensitive systems
+# This may also fail if . is in the head of the path, since perl will
+# require -Ilib
+tags:	TAGS
+	perl emacs/e2ctags.pl TAGS > tags
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.

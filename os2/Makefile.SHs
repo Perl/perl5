@@ -35,12 +35,13 @@ LD_OPT		= $optimize
 
 PERL_DLL_BASE	= perl$dll_post
 PERL_DLL	= \$(PERL_DLL_BASE)\$(DLSUFFIX)
+TEST_PERL_DLL	= perl_dll_t
 CONFIG_ARGS	= $config_args
 
 !GROK!THIS!
 
 $spitshell >>Makefile <<'!NO!SUBS!'
-$(LIBPERL): perl.imp $(PERL_DLL) perl5.def
+$(LIBPERL): perl.imp perl_dll perl5.def
 	emximp -o $(LIBPERL) perl.imp
 
 $(AOUT_LIBPERL_DLL): perl.imp $(PERL_DLL) perl5.def
@@ -54,6 +55,11 @@ perl.imp: perl5.def
 	echo	'emx_realloc		emxlibcm	403	?' >> $@
 
 perl_dll: $(PERL_DLL)
+
+perl_dll_t: t/$(PERL_DLL)
+
+t/$(PERL_DLL): $(PERL_DLL)
+	$(LNS) $(PERL_DLL) t/$(PERL_DLL)
 
 $(PERL_DLL): $(obj) perl5.def perl$(OBJ_EXT)
 	$(LD) $(LD_OPT) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj) $(libs) perl5.def
