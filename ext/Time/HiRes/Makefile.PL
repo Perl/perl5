@@ -71,7 +71,7 @@ sub TMPDIR {
     my $TMPDIR =
 	(grep(defined $_ && -d $_ && -w _,
 	      ((defined $ENV{'TMPDIR'} ? $ENV{'TMPDIR'} : undef),
-	       qw(/var/tmp /usr/tmp /tmp))))[0];
+	       qw(/var/tmp /usr/tmp /tmp c:/temp))))[0];
     $TMPDIR || die "Cannot find writable temporary directory.\n";
 }
 
