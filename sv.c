@@ -8757,7 +8757,6 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
     for (tblent = *otblent; tblent; i=0, tblent = tblent->next) {
 	if (tblent->oldval == oldv) {
 	    tblent->newval = newv;
-	    tbl->tbl_items++;
 	    return;
 	}
     }
@@ -8859,10 +8858,10 @@ char *PL_watch_pvx;
 /* attempt to make everything in the typeglob readonly */
 
 STATIC SV *
-S_gv_share(pTHX_ SV *sstr)
+S_gv_share(pTHX_ SV *sstr, CLONE_PARAMS *param)
 {
     GV *gv = (GV*)sstr;
-    SV *sv = &PL_sv_no; /* just need SvREADONLY-ness */
+    SV *sv = &param->proto_perl->Isv_no; /* just need SvREADONLY-ness */
 
     if (GvIO(gv) || GvFORM(gv)) {
         GvUNIQUE_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
@@ -8872,7 +8871,7 @@ S_gv_share(pTHX_ SV *sstr)
     }
     else {
         /* CvPADLISTs cannot be shared */
-        if (!CvXSUB(GvCV(gv))) {
+        if (!SvREADONLY(GvCV(gv)) && !CvXSUB(GvCV(gv))) {
             GvUNIQUE_off(gv);
         }
     }
@@ -9053,9 +9052,10 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     case SVt_PVGV:
 	if (GvUNIQUE((GV*)sstr)) {
             SV *share;
-            if ((share = gv_share(sstr))) {
+            if ((share = gv_share(sstr, param))) {
                 del_SV(dstr);
                 dstr = share;
+                ptr_table_store(PL_ptr_table, sstr, dstr);
 #if 0
                 PerlIO_printf(Perl_debug_log, "sv_dup: sharing %s::%s\n",
                               HvNAME(GvSTASH(share)), GvNAME(share));
@@ -9758,6 +9758,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #    endif	/* DEBUGGING */
 #endif		/* PERL_IMPLICIT_SYS */
     param->flags = flags;
+    param->proto_perl = proto_perl;
 
     /* arena roots */
     PL_xiv_arenaroot	= NULL;

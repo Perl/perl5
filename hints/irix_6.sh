@@ -13,9 +13,8 @@
 #    - tries to check for various compiler versions and do the right 
 #      thing when it can
 #    - warnings turned off (-n32 messages):
-#       1116 - non-void function should return a value
-#       1048 - cast between pointer-to-object and pointer-to-function
-#       1042 - operand types are incompatible
+#       1184 - "=" is used where where "==" may have been intended
+#       1552 - variable "foo" set but never used
 
 # Tweaked by Chip Salzenberg <chip@perl.com> on 5/13/97
 #    - don't assume 'cc -n32' if the n32 libm.so is missing

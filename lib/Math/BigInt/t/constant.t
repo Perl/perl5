@@ -9,6 +9,11 @@ BEGIN
   chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
   plan tests => 7;
+  if ($] < 5.006)
+    {
+    for (1..7) { skip (1,'Not supported on older Perls'); }
+    exit;
+    }
   } 
 
 use Math::BigInt ':constant';

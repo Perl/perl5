@@ -1,6 +1,13 @@
 CHANGES
 -------
 
+2.19  Jun 03 19:00 2002
+	- Add $p->udp_source_verify method to skip source
+	  endpoint verification of udp protocol pings for
+	  those remote destinations with multiple interfaces
+	  that may have the "reverse telnet" bug.
+	- Moved files to more standard locations.
+
 2.18  May 06 12:00 2002
 	- More RPM spec generalizations.
 

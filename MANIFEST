@@ -1306,7 +1306,7 @@ lib/Net/netent.t		See if Net::netent works
 lib/Net/Netrc.pm		libnet
 lib/Net/NNTP.pm			libnet
 lib/Net/Ping.pm			Hello, anybody home?
-lib/Net/Ping/CHANGES		Net::Ping
+lib/Net/Ping/Changes		Net::Ping
 lib/Net/Ping/README		Net::Ping
 lib/Net/Ping/t/100_load.t		Ping Net::Ping
 lib/Net/Ping/t/110_icmp_inst.t		Ping Net::Ping

@@ -566,6 +566,12 @@ is a NaN.  Previously the behaviour was unspecified.
 
 =item *
 
+C<our> can now have an experimental optional attribute C<unique> that
+affects how global variables are shared among multiple interpreters,
+see L<perlfunc/our>.
+
+=item *
+
 The following builtin functions are now overridable: each(), keys(),
 pop(), push(), shift(), splice(), unshift(). [561]
 
