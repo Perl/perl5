@@ -7130,7 +7130,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'c':
 	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
-	    if ((uv > 255 || (!UNI_IS_INVARIANT(uv) || SvUTF8(sv))) && !IN_BYTE) {
+	    if ((uv > 255 ||
+		 (!UNI_IS_INVARIANT(uv) && SvUTF8(sv)))
+		&& !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;
 		is_utf = TRUE;
