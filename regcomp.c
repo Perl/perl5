@@ -736,6 +736,50 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    n = nnext;
 		}
 	    }
+
+	    if (UTF && OP(scan) == EXACTF) {
+/*
+  Two problematic code points in Unicode casefolding of EXACT nodes:
+
+   U+0390 - GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS
+   U+03B0 - GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS
+
+   which casefold to
+
+   Unicode			UTF-8
+
+   U+03B9 U+0308 U+0301		0xCE 0xB9 0xCC 0x88 0xCC 0x81
+   U+03C5 U+0308 U+0301		0xCF 0x85 0xCC 0x88 0xCC 0x81
+
+   This means that in case-insensitive matching (or "loose matching",
+   as Unicode calls it), an EXACTF of length six (the UTF-8 encoded byte
+   length of the above casefolded versions) can match a target string
+   of length two (the byte length of UTF-8 encoded U+0390 or U+03B0).
+   This would rather mess up the minimum length computation.
+
+   What we'll do is to look for the tail four bytes, and then peek
+   at the preceding two bytes to see whether we need to decrease
+   the minimum length by four (six minus two).
+
+   Thanks to the design of UTF-8, there cannot be false matches:
+   A sequence of valid UTF-8 bytes cannot be a subsequence of
+   another valid sequence of UTF-8 bytes.
+
+*/
+		 char *s0 = STRING(scan), *s, *t;
+		 char *s1 = s0 + STR_LEN(scan) - 1, *s2 = s1 - 4;
+		 char *t0 = "\xcc\x88\xcc\x81";
+		 char *t1 = t0 + 3;
+		 
+		 for (s = s0 + 2;
+		      s < s2 && (t = ninstr(s, s1, t0, t1));
+		      s = t + 4) {
+		      if (((U8)t[-1] == 0xB9 && (U8)t[-2] == 0xCE) ||
+			  ((U8)t[-1] == 0x85 && (U8)t[-2] == 0xCF))
+			   min -= 4;
+		 }
+	    }
+
 #ifdef DEBUGGING
 	    /* Allow dumping */
 	    n = scan + NODE_SZ_STR(scan);

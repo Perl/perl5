@@ -1554,9 +1554,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     minlen = prog->minlen;
-    if (strend - startpos < minlen &&
-	!PL_reg_match_utf8 /* ANYOFs can balloon to EXACTFs */
-	) {
+    if (strend - startpos < minlen) {
         DEBUG_r(PerlIO_printf(Perl_debug_log,
 			      "String too short [regexec_flags]...\n"));
 	goto phooey;
