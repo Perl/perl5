@@ -43,7 +43,10 @@ delete_by_prefix('ExtUtils::MM_');	# ExtUtils::MakeMaker's domain
 delete_by_prefix('File::Spec::');	# File::Spec's domain
 $Core_Modules{'File::Spec::Functions'}++;	# put this back
 
-delete_by_prefix('Thread::') unless $Config{extensions} =~ /\bThread\b/;
+unless ($Config{extensions} =~ /\bThread\b/) {
+    delete $Core_Modules{Thread};
+    delete_by_prefix('Thread::')++;
+}
 
 delete_by_prefix('unicode::');
 $Core_Modules{'unicode::distinct'}++;	# put this back
