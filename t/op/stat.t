@@ -242,6 +242,11 @@ SKIP: {
     $DEV =~ s{^.+?\s\..+?$}{}m;
     @DEV =  grep { ! m{^\..+$} } @DEV;
 
+    # Irix ls -l marks sockets with 'S' while 's' is a 'XENIX semaphore'.
+    if ($^O eq 'irix') {
+        $DEV =~ s{^S(.+?)}{s$1}mg;
+    }
+
     my $try = sub {
 	my @c1 = eval qq[\$DEV =~ /^$_[0].*/mg];
 	my @c2 = eval qq[grep { $_[1] "/dev/\$_" } \@DEV];
