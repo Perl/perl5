@@ -2,20 +2,20 @@ package I18N::Collate;
 
 =head1 NAME
 
-Collate - compare 8-bit scalar data according to the current locale
+I18N::Collate - compare 8-bit scalar data according to the current locale
 
 =head1 SYNOPSIS
 
-    use Collate;
+    use I18N::Collate;
     setlocale(LC_COLLATE, 'locale-of-your-choice'); 
-    $s1 = new Collate "scalar_data_1";
-    $s2 = new Collate "scalar_data_2";
+    $s1 = new I18N::Collate "scalar_data_1";
+    $s2 = new I18N::Collate "scalar_data_2";
 
 =head1 DESCRIPTION
 
 This module provides you with objects that will collate 
-according to your national character set, providing the 
-POSIX setlocale() function should be supported on your system.
+according to your national character set, provided that the 
+POSIX setlocale() function is supported on your system.
 
 You can compare $s1 and $s2 above with
 
@@ -23,7 +23,7 @@ You can compare $s1 and $s2 above with
 
 to extract the data itself, you'll need a dereference: $$s1
 
-This uses POSIX::setlocale. The basic collation conversion is done by
+This uses POSIX::setlocale(). The basic collation conversion is done by
 strxfrm() which terminates at NUL characters being a decent C routine.
 collate_xfrm() handles embedded NUL characters gracefully.  Due to C<cmp>
 and overload magic, C<lt>, C<le>, C<eq>, C<ge>, and C<gt> work also.  The
@@ -32,7 +32,7 @@ available locales depend on your operating system; try whether C<locale
 the direct approach C<ls /usr/lib/nls/loc> or C<ls
 /usr/lib/nls>.  Not all the locales that your vendor supports
 are necessarily installed: please consult your operating system's
-documentation.
+documentation and possibly your local system administration.
 
 The locale names are probably something like
 C<"xx_XX.(ISO)?8859-N"> or C<"xx_XX.(ISO)?8859N">, for example
@@ -41,7 +41,7 @@ ISO Latin (8859) 1 (-1) which is the Western European character set.
 
 =cut
 
-# Collate.pm
+# I18N::Collate.pm
 #
 # Author:	Jarkko Hietaniemi <Jarkko.Hietaniemi@hut.fi>
 #		Helsinki University of Technology, Finland
@@ -60,10 +60,10 @@ ISO Latin (8859) 1 (-1) which is the Western European character set.
 #
 # Overloads:	cmp # 3)
 #
-# Usage:	use Collate;
+# Usage:	use I18N::Collate;
 #	        setlocale(LC_COLLATE, 'locale-of-your-choice'); # 4)
-#		$s1 = new Collate "scalar_data_1";
-#		$s2 = new Collate "scalar_data_2";
+#		$s1 = new I18N::Collate "scalar_data_1";
+#		$s2 = new I18N::Collate "scalar_data_2";
 #		
 #		now you can compare $s1 and $s2: $s1 le $s2
 #		to extract the data itself, you need to deref: $$s1
@@ -87,7 +87,7 @@ ISO Latin (8859) 1 (-1) which is the Western European character set.
 #		   variant of French (fr), ISO Latin (8859) 1 (-1)
 #		   which is the Western European character set.
 #
-# Updated:	19950602 1601 GMT
+# Updated:	19960104 1946 GMT
 #
 # ---
 
