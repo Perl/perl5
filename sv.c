@@ -789,8 +789,8 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
       {
 	bool pad  = (obase->op_type == OP_PADAV || obase->op_type == OP_PADHV);
 	bool hash = (obase->op_type == OP_PADHV || obase->op_type == OP_RV2HV);
-	I32 index;
-	SV *keysv;
+	I32 index = 0;
+	SV *keysv = Nullsv;
 	int subscript_type = FUV_SUBSCRIPT_WITHIN;
 
 	if (pad) { /* @lex, %lex */
@@ -1072,7 +1072,7 @@ void
 Perl_report_uninit(pTHX_ SV* uninit_sv)
 {
     if (PL_op) {
-	SV* varname;
+	SV* varname = Nullsv;
 	if (uninit_sv) {
 	    varname = find_uninit_var(PL_op, uninit_sv,0);
 	    if (varname)
