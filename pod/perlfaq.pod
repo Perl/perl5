@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 1998/06/22 15:15:57 $)
+perlfaq - frequently asked questions about Perl ($Date: 1998/07/20 23:12:17 $)
 
 =head1 DESCRIPTION
 
@@ -18,7 +18,7 @@ Very general, high-level information about Perl.
 
 =item L<perlfaq2>: Obtaining and Learning about Perl
 
-Where to find source and documentation to Perl, support and training,
+Where to find source and documentation to Perl, support,
 and related matters.
 
 =item L<perlfaq3>: Programming Tools
@@ -117,7 +117,7 @@ in respect of this information or its use.
 
 =over 4
 
-=item 22/June/98
+=head 22/June/98
 
 Significant changes throughout in preparation for the 5.005
 release.

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.27 $, $Date: 1998/07/05 15:07:20 $)
+perlfaq3 - Programming Tools ($Revision: 1.28 $, $Date: 1998/07/16 22:08:49 $)
 
 =head1 DESCRIPTION
 
@@ -30,14 +30,14 @@ L<perltoc> provides a crude table of contents for the perl man page set.
 =head2 How can I use Perl interactively?
 
 The typical approach uses the Perl debugger, described in the
-perldebug(1) man page, on an "empty" program, like this:
+perldebug(1) man page, on an ``empty'' program, like this:
 
     perl -de 42
 
 Now just type in any legal Perl code, and it will be immediately
 evaluated.  You can also examine the symbol table, get stack
 backtraces, check variable values, set breakpoints, and other
-operations typically found in symbolic debuggers
+operations typically found in symbolic debuggers.
 
 =head2 Is there a Perl shell?
 
@@ -48,15 +48,27 @@ uninteresting, but may still be what you want.
 
 =head2 How do I debug my Perl programs?
 
-Have you used C<-w>?
+Have you used C<-w>?  It enables warnings for dubious practices.
 
-Have you tried C<use strict>?
+Have you tried C<use strict>?  It prevents you from using symbolic
+references, makes you predeclare any subroutines that you call as bare
+words, and (probably most importantly) forces you to predeclare your
+variables with C<my> or C<use vars>.
 
-Did you check the returns of each and every system call?
+Did you check the returns of each and every system call?  The operating
+system (and thus Perl) tells you whether they worked or not, and if not
+why.
 
-Did you read L<perltrap>?
+  open(FH, "> /etc/cantwrite")
+    or die "Couldn't write to /etc/cantwrite: $!\n";
 
-Have you tried the Perl debugger, described in L<perldebug>?
+Did you read L<perltrap>?  It's full of gotchas for old and new Perl
+programmers, and even has sections for those of you who are upgrading
+from languages like I<awk> and I<C>.
+
+Have you tried the Perl debugger, described in L<perldebug>?  You can
+step through your program and see what it's doing and thus work out
+why what it's doing isn't what it should be doing.
 
 =head2 How do I profile my Perl programs?
 
@@ -64,6 +76,31 @@ You should get the Devel::DProf module from CPAN, and also use
 Benchmark.pm from the standard distribution.  Benchmark lets you time
 specific portions of your code, while Devel::DProf gives detailed
 breakdowns of where your code spends its time.
+
+Here's a sample use of Benchmark:
+
+  use Benchmark;
+
+  @junk = `cat /etc/motd`;
+  $count = 10_000;
+
+  timethese($count, {
+            'map' => sub { my @a = @junk;
+			   map { s/a/b/ } @a;
+			   return @a
+			 },
+            'for' => sub { my @a = @junk;
+			   local $_;
+			   for (@a) { s/a/b/ };
+			   return @a },
+           });
+
+This is what it prints (on one machine--your results will be dependent
+on your hardware, operating system, and the load on your machine):
+
+  Benchmark: timing 10000 iterations of for, map...
+         for:  4 secs ( 3.97 usr  0.01 sys =  3.98 cpu)
+         map:  6 secs ( 4.97 usr  0.00 sys =  4.97 cpu)
 
 =head2 How do I cross-reference my Perl programs?
 
@@ -75,21 +112,20 @@ to generate cross-reference reports for Perl programs.
 
 =head2 Is there a pretty-printer (formatter) for Perl?
 
-There is no program that will reformat Perl as much as indent(1) will
-do for C.  The complex feedback between the scanner and the parser
-(this feedback is what confuses the vgrind and emacs programs) makes it
+There is no program that will reformat Perl as much as indent(1) does
+for C.  The complex feedback between the scanner and the parser (this
+feedback is what confuses the vgrind and emacs programs) makes it
 challenging at best to write a stand-alone Perl parser.
 
 Of course, if you simply follow the guidelines in L<perlstyle>, you
-shouldn't need to reformat.
+shouldn't need to reformat.  The habit of formatting your code as you
+write it will help prevent bugs.  Your editor can and should help you
+with this.  The perl-mode for emacs can provide a remarkable amount of
+help with most (but not all) code, and even less programmable editors
+can provide significant assistance.
 
-Your editor can and should help you with source formatting.  The
-perl-mode for emacs can provide a remarkable amount of help with most
-(but not all) code, and even less programmable editors can provide
-significant assistance.
-
-If you are used to using vgrind program for printing out nice code to
-a laser printer, you can take a stab at this using
+If you are used to using I<vgrind> program for printing out nice code
+to a laser printer, you can take a stab at this using
 http://www.perl.com/CPAN/doc/misc/tips/working.vgrind.entry, but the
 results are not particularly satisfying for sophisticated code.
 
@@ -117,9 +153,10 @@ In the perl source directory, you'll find a directory called "emacs",
 which contains a cperl-mode that color-codes keywords, provides
 context-sensitive help, and other nifty things.
 
-Note that the perl-mode of emacs will have fits with "main'foo"
+Note that the perl-mode of emacs will have fits with C<"main'foo">
 (single quote), and mess up the indentation and hilighting.  You
-should be using "main::foo", anyway.
+should be using C<"main::foo"> in new Perl code anyway, so this
+shouldn't be an issue.
 
 =head2 How can I use curses with Perl?
 
@@ -136,6 +173,13 @@ that doesn't force you to use Tcl just to get at Tk.  Sx is an interface
 to the Athena Widget set.  Both are available from CPAN.  See the
 directory http://www.perl.com/CPAN/modules/by-category/08_User_Interfaces/
 
+Invaluable for Perl/Tk programming are: the Perl/Tk FAQ at
+http://w4.lns.cornell.edu/~pvhp/ptk/ptkTOC.html , the Perl/Tk Reference
+Guide available at
+http://www.perl.com/CPAN-local/authors/Stephen_O_Lidie/ , and the
+online manpages at
+http://www-users.cs.umn.edu/~amundson/perl/perltk/toc.html .
+
 =head2 How can I generate simple menus without using CGI or Tk?
 
 The http://www.perl.com/CPAN/authors/id/SKUNZ/perlmenu.v4.0.tar.gz
@@ -147,11 +191,16 @@ See the next questions.
 
 =head2 How can I make my Perl program run faster?
 
-The best way to do this is to come up with a better algorithm.
-This can often make a dramatic difference.  Chapter 8 in the Camel
-has some efficiency tips in it you might want to look at.
+The best way to do this is to come up with a better algorithm.  This
+can often make a dramatic difference.  Chapter 8 in the Camel has some
+efficiency tips in it you might want to look at.  Jon Bentley's book
+``Programming Pearls'' (that's not a misspelling!)  has some good tips
+on optimization, too.  Advice on benchmarking boils down to: benchmark
+and profile to make sure you're optimizing the right part, look for
+better algorithms instead of microtuning your code, and when all else
+fails consider just buying faster hardware.
 
-Other approaches include autoloading seldom-used Perl code.  See the
+A different approach is to autoload seldom-used Perl code.  See the
 AutoSplit and AutoLoader modules in the standard distribution for
 that.  Or you could locate the bottleneck and think about writing just
 that part in C, the way we used to take bottlenecks in C code and
@@ -163,9 +212,10 @@ In some cases, it may be worth it to use the backend compiler to
 produce byte code (saving compilation time) or compile into C, which
 will certainly save compilation time and sometimes a small amount (but
 not much) execution time.  See the question about compiling your Perl
-programs.
+programs for more on the compiler--the wins aren't as obvious as you'd
+hope.
 
-If you're currently linking your perl executable to a shared libc.so,
+If you're currently linking your perl executable to a shared I<libc.so>,
 you can often gain a 10-25% performance benefit by rebuilding it to
 link with a static libc.a instead.  This will make a bigger perl
 executable, but your Perl programs (and programmers) may thank you for
@@ -175,7 +225,7 @@ information.
 Unsubstantiated reports allege that Perl interpreters that use sfio
 outperform those that don't (for IO intensive applications).  To try
 this, see the F<INSTALL> file in the source distribution, especially
-the "Selecting File IO mechanisms" section.
+the ``Selecting File IO mechanisms'' section.
 
 The undump program was an old attempt to speed up your Perl program
 by storing the already-compiled form to disk.  This is no longer
@@ -235,8 +285,7 @@ only platform that will reliably (albeit, slowly) return memory to the OS.
 
 However, judicious use of my() on your variables will help make sure
 that they go out of scope so that Perl can free up their storage for
-use in other parts of your program.  (NB: my() variables also execute
-about 10% faster than globals.)  A global variable, of course, never
+use in other parts of your program.  A global variable, of course, never
 goes out of scope, so you can't get its space automatically reclaimed,
 although undef()ing and/or delete()ing it will achieve the same effect.
 In general, memory allocation and de-allocation isn't something you can
@@ -252,44 +301,49 @@ to be re-compiled and will often allocate a megabyte or more of system
 memory, this can be a killer.  Compiling into C B<isn't going to help
 you> because the process start-up overhead is where the bottleneck is.
 
-There are at least two popular ways to avoid this overhead.  One
-solution involves running the Apache HTTP server (available from
+There are two popular ways to avoid this overhead.  One solution
+involves running the Apache HTTP server (available from
 http://www.apache.org/) with either of the mod_perl or mod_fastcgi
-plugin modules.  With mod_perl and the Apache::* modules (from CPAN),
-httpd will run with an embedded Perl interpreter which pre-compiles
-your script and then executes it within the same address space without
-forking.  The Apache extension also gives Perl access to the internal
-server API, so modules written in Perl can do just about anything a
-module written in C can.  With the FCGI module (from CPAN), a Perl
-executable compiled with sfio (see the F<INSTALL> file in the
-distribution) and the mod_fastcgi module (available from
-http://www.fastcgi.com/) each of your perl scripts becomes a permanent
-CGI daemon process.
+plugin modules.
+
+With mod_perl and the Apache::Registry module (distributed with
+mod_perl), httpd will run with an embedded Perl interpreter which
+pre-compiles your script and then executes it within the same address
+space without forking.  The Apache extension also gives Perl access to
+the internal server API, so modules written in Perl can do just about
+anything a module written in C can.  For more on mod_perl, see
+http://perl.apache.org/
+
+With the FCGI module (from CPAN), a Perl executable compiled with sfio
+(see the F<INSTALL> file in the distribution) and the mod_fastcgi
+module (available from http://www.fastcgi.com/) each of your perl
+scripts becomes a permanent CGI daemon process.
 
 Both of these solutions can have far-reaching effects on your system
 and on the way you write your CGI scripts, so investigate them with
 care.
 
-See http://www.perl.com/CPAN/modules/by-category/15_World_Wide_Web_HTML_HTTP_CGI/.
+See http://www.perl.com/CPAN/modules/by-category/15_World_Wide_Web_HTML_HTTP_CGI/ .
 
-A non-free, commerical product, 'The Velocity Engine for Perl',
+A non-free, commerical product, ``The Velocity Engine for Perl'',
 (http://www.binevolve.com/ or http://www.binevolve.com/bine/vep) might
 also be worth looking at.  It will allow you to increase the performance
-of your perl scripts, upto 25 times faster than normal cgi perl by
+of your perl scripts, upto 25 times faster than normal CGI perl by
 running in persistent perl mode, or 4 to 5 times faster without any
-modification to your existing cgi scripts. Fully functional evaluation
+modification to your existing CGI scripts. Fully functional evaluation
 copies are available from the web site.
 
 =head2 How can I hide the source for my Perl program?
 
 Delete it. :-) Seriously, there are a number of (mostly
-unsatisfactory) solutions with varying levels of "security".
+unsatisfactory) solutions with varying levels of ``security''.
 
 First of all, however, you I<can't> take away read permission, because
 the source code has to be readable in order to be compiled and
 interpreted.  (That doesn't mean that a CGI script's source is
-readable by people on the web, though.)  So you have to leave the
-permissions at the socially friendly 0755 level.
+readable by people on the web, though, only by people with access to
+the filesystem) So you have to leave the permissions at the socially
+friendly 0755 level.
 
 Some people regard this as a security problem.  If your program does
 insecure things, and relies on people not knowing how to exploit those
@@ -298,8 +352,8 @@ determine the insecure things and exploit them without viewing the
 source.  Security through obscurity, the name for hiding your bugs
 instead of fixing them, is little security indeed.
 
-You can try using encryption via source filters (Filter::* from CPAN).
-But crackers might be able to decrypt it.  You can try using the byte
+You can try using encryption via source filters (Filter::* from CPAN),
+but crackers might be able to decrypt it.  You can try using the byte
 code compiler and interpreter described below, but crackers might be
 able to de-compile it.  You can try using the native-code compiler
 described below, but crackers might be able to disassemble it.  These
@@ -310,43 +364,42 @@ language, not just Perl).
 If you're concerned about people profiting from your code, then the
 bottom line is that nothing but a restrictive licence will give you
 legal security.  License your software and pepper it with threatening
-statements like "This is unpublished proprietary software of XYZ Corp.
+statements like ``This is unpublished proprietary software of XYZ Corp.
 Your access to it does not give you permission to use it blah blah
-blah."  We are not lawyers, of course, so you should see a lawyer if
+blah.''  We are not lawyers, of course, so you should see a lawyer if
 you want to be sure your licence's wording will stand up in court.
 
 =head2 How can I compile my Perl program into byte code or C?
 
 Malcolm Beattie has written a multifunction backend compiler,
 available from CPAN, that can do both these things.  It is as of
-Feb-1997 in late alpha release, which means it's fun to play with if
+Jul-1998 in late alpha release, which means it's fun to play with if
 you're a programmer but not really for people looking for turn-key
 solutions.
 
-I<Please> understand that merely compiling into C does not in and of
-itself guarantee that your code will run very much faster.  That's
-because except for lucky cases where a lot of native type inferencing
-is possible, the normal Perl run time system is still present and thus
-will still take just as long to run and be just as big.  Most programs
-save little more than compilation time, leaving execution no more than
-10-30% faster.  A few rare programs actually benefit significantly
-(like several times faster), but this takes some tweaking of your
-code.
+Merely compiling into C does not in and of itself guarantee that your
+code will run very much faster.  That's because except for lucky cases
+where a lot of native type inferencing is possible, the normal Perl
+run time system is still present and so your program will take just as
+long to run and be just as big.  Most programs save little more than
+compilation time, leaving execution no more than 10-30% faster.  A few
+rare programs actually benefit significantly (like several times
+faster), but this takes some tweaking of your code.
 
 The 5.005 release of Perl itself, whose main goal is merging the various
 non-Unix ports back into the one Perl source, will also have preliminary
 (strictly beta) support for Malcolm's compiler and his light-weight
-processes (sometimes called "threads").
+processes (sometimes called ``threads'').
 
 You'll probably be astonished to learn that the current version of the
 compiler generates a compiled form of your script whose executable is
 just as big as the original perl executable, and then some.  That's
 because as currently written, all programs are prepared for a full
 eval() statement.  You can tremendously reduce this cost by building a
-shared libperl.so library and linking against that.  See the
+shared I<libperl.so> library and linking against that.  See the
 F<INSTALL> podfile in the perl source distribution for details.  If
 you link your main perl binary with this, it will make it miniscule.
-For example, on one author's system, /usr/bin/perl is only 11k in
+For example, on one author's system, F</usr/bin/perl> is only 11k in
 size!
 
 In general, the compiler will do nothing to make a Perl program smaller,
@@ -359,7 +412,7 @@ packaging, and once you see the size of what it makes (well, unless
 you use a shared I<libperl.so>), you'll probably want a complete
 Perl install anywayt.
 
-=head2 How can I get '#!perl' to work on [MS-DOS,NT,...]?
+=head2 How can I get C<#!perl> to work on [MS-DOS,NT,...]?
 
 For OS/2 just use
 
@@ -370,11 +423,12 @@ as the first line in C<*.cmd> file (C<-S> due to a bug in cmd.exe's
 batch file, and codify it in C<ALTERNATIVE_SHEBANG> (see the
 F<INSTALL> file in the source distribution for more information).
 
-The Win95/NT installation, when using the Activeware port of Perl,
-will modify the Registry to associate the .pl extension with the perl
-interpreter.  If you install another port, or (eventually) build your
-own Win95/NT Perl using WinGCC, then you'll have to modify the
-Registry yourself.
+The Win95/NT installation, when using the ActiveState port of Perl,
+will modify the Registry to associate the C<.pl> extension with the
+perl interpreter.  If you install another port (Gurusaramy Sarathy's
+is the recommended Win95/NT port), or (eventually) build your own
+Win95/NT Perl using WinGCC, then you'll have to modify the Registry
+yourself.
 
 Macintosh perl scripts will have the the appropriate Creator and
 Type, so that double-clicking them will invoke the perl application.
@@ -433,10 +487,10 @@ For example:
     # VMS
     perl -e "print ""Hello world\n"""
 
-The problem is that none of this is reliable: it depends on the command
-interpreter.  Under Unix, the first two often work. Under DOS, it's
-entirely possible neither works.  If 4DOS was the command shell, I'd
-probably have better luck like this:
+The problem is that none of this is reliable: it depends on the
+command interpreter.  Under Unix, the first two often work. Under DOS,
+it's entirely possible neither works.  If 4DOS was the command shell,
+you'd probably have better luck like this:
 
   perl -e "print <Ctrl-x>"Hello world\n<Ctrl-x>""
 
@@ -445,8 +499,8 @@ shell, or MPW, is much like Unix shells in its support for several
 quoting variants, except that it makes free use of the Mac's non-ASCII
 characters as control characters.
 
-I'm afraid that there is no general solution to all of this.  It is a
-mess, pure and simple.
+There is no general solution to all of this.  It is a mess, pure and
+simple.  Sucks to be away from Unix, huh? :-)
 
 [Some of this answer was contributed by Kenneth Albanowski.]
 
@@ -454,9 +508,9 @@ mess, pure and simple.
 
 For modules, get the CGI or LWP modules from CPAN.  For textbooks,
 see the two especially dedicated to web stuff in the question on
-books.  For problems and questions related to the web, like "Why
-do I get 500 Errors" or "Why doesn't it run from the browser right
-when it runs fine on the command line", see these sources:
+books.  For problems and questions related to the web, like ``Why
+do I get 500 Errors'' or ``Why doesn't it run from the browser right
+when it runs fine on the command line'', see these sources:
 
     WWW Security FAQ
         http://www.w3.org/Security/Faq/

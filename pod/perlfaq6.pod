@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regexps ($Revision: 1.21 $, $Date: 1998/06/22 04:23:04 $)
+perlfaq6 - Regexps ($Revision: 1.22 $, $Date: 1998/07/16 14:01:07 $)
 
 =head1 DESCRIPTION
 
@@ -545,12 +545,10 @@ L<perlfaq2>).
 
 =head2 What's wrong with using grep or map in a void context?
 
-Strictly speaking, nothing.  Stylistically speaking, it's not a good
-way to write maintainable code.  That's because you're using these
-constructs not for their return values but rather for their
-side-effects, and side-effects can be mystifying.  There's no void
-grep() that's not better written as a C<for> (well, C<foreach>,
-technically) loop.
+Both grep and map build a return list, regardless of their context.
+This means you're making Perl go to the trouble of building up a
+return list that you then just ignore.  That's no way to treat a
+programming language, you insensitive scoundrel!
 
 =head2 How can I match strings with multibyte characters?
 

@@ -1,11 +1,11 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.20 $, $Date: 1998/07/05 15:07:20 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.24 $, $Date: 1998/07/20 23:40:28 $)
 
 =head1 DESCRIPTION
 
 This section of the FAQ answers questions about where to find
-source and documentation for Perl, support and training, and
+source and documentation for Perl, support, and
 related matters.
 
 =head2 What machines support Perl?  Where do I get it?
@@ -15,22 +15,21 @@ development team) is distributed only in source code form.  You can
 find this at http://www.perl.com/CPAN/src/latest.tar.gz, which is a
 gzipped archive in POSIX tar format.  This source builds with no
 porting whatsoever on most Unix systems (Perl's native environment),
-as well as Windows NT, Plan 9, VMS, QNX, OS/2, and the Amiga.
+as well as Plan 9, VMS, QNX, OS/2, and the Amiga.
 
-Binary distributions for various platforms can be found
-http://www.perl.com/CPAN/ports/ directory.  Some of these ports (especially
-the ones not part of the standard sources) may behave differently
-than what is documented in the standard source documentation.  These
-differences can be either positive (e.g. extensions for the features of the
-particular platform that are not supported in the source release of perl)
-or negative (e.g. might be based upon a less current source release of perl).
+Although it's rumored that the (imminent) 5.004 release may build
+on Windows NT, this is yet to be proven.  Binary distributions
+for 32-bit Microsoft systems and for Apple systems can be found
+http://www.perl.com/CPAN/ports/ directory.  Because these are not part of
+the standard distribution, they may and in fact do differ from the base
+Perl port in a variety of ways.  You'll have to check their respective
+release notes to see just what the differences are.  These differences
+can be either positive (e.g. extensions for the features of the particular
+platform that are not supported in the source release of perl) or negative
+(e.g. might be based upon a less current source release of perl).
 
-A useful FAQ for Win32 Perl users is:
+A useful FAQ for Win32 Perl users is
 http://www.endcontsw.com/people/evangelo/Perl_for_Win32_FAQ.html
-[This FAQ is seriously outdated as of May 1998--it is only relevant to
-the perl that ActiveState distributes, especially where it describes
-various inadequacies and differences with the standard perl extension
-build support.]
 
 =head2 How can I get a binary version of Perl?
 
@@ -382,19 +381,6 @@ very slow to select on 18000 articles.
 
 If you have, or know where can be found, the missing sections, please
 let perlfaq-suggestions@perl.com know.
-
-=head2 Perl Training
-
-While some large training companies offer their own courses on
-Perl, you may prefer to contact individuals near and dear to
-the heart of Perl development.  Two well-known members of the
-Perl development team head companies which offer such things
-are Tom Christiansen <perl-classes@perl.com> and Randal Schwartz
-<perl-training-info@stonehenge.com>, plus their respective minions,
-who offer a variety of professional tutorials and seminars on Perl.
-These courses include large public seminars, private corporate training,
-and fly-ins to Colorado and Oregon.  Contact Tom or Randal for details,
-or see http://www.perl.com/perl/info/training.html on the web.
 
 =head2 Where can I buy a commercial version of Perl?
 

@@ -344,7 +344,7 @@ reference to an existing or anonymous variable or function:
 
     func( \$some_scalar );
 
-    func( \$some_array );
+    func( \$some_array  );
     func( [ 1 .. 10 ]   );
 
     func( \%some_hash   );
@@ -766,7 +766,7 @@ that includes the kind of object you were called on (which is
 not necessarily the same as the one in which you were compiled):
 
     sub amethod {
-	my $self = shift;
+	my $self  = shift;
 	my $class = ref($self) || $self;
 	warn "called me from a $class object";
     }

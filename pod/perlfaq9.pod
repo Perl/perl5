@@ -23,7 +23,7 @@ The useful FAQs and related documents are:
         http://www.webthing.com/page.cgi/cgifaq
 
     Web FAQ
-    http://www.boutell.com/faq/
+        http://www.boutell.com/faq/
 
     WWW Security FAQ
         http://www.w3.org/Security/Faq/
