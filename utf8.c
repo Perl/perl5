@@ -1299,11 +1299,12 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
     uv2 = swash_fetch(*swashp, tmpbuf, TRUE);
     if (uv2) {
 	 /* It was "normal" (single character mapping). */
-	 if (lenp)
-	      *lenp = UNISKIP(uv2);
-	 uvuni_to_utf8(ustrp, uv2);
+         uv2 = UNI_TO_NATIVE(uv2);
+         len = uvchr_to_utf8(ustrp, uv2) - ustrp;
+         if (lenp)
+              *lenp = len;
 
-	 return uv2;
+         return uv2;
     }
     else {
 	 HV *hv;
