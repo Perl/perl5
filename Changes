@@ -31,6 +31,143 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11937] By: jhi                                   on 2001/09/07  13:52:03
+        Log: Rename the old threading tutorial, start a new one,
+             regen toc.
+     Branch: perl
+	   + pod/perlothrtut.pod
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perlthrtut.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 11936] By: jhi                                   on 2001/09/07  13:05:48
+        Log: vars very much has a test.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 11935] By: jhi                                   on 2001/09/07  12:52:06
+        Log: Subject: Re: wince/perl.ico marked as binary
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 7 Sep 2001 13:54:40 +0100
+             Message-ID: <20010907135439.D39150@plum.flirble.org>
+             
+             and wince/Makefile.ce change from Rainer Keuchel.
+     Branch: perl
+	   + wince/makeico.pl
+	   ! MANIFEST wince/Makefile.ce
+____________________________________________________________________________
+[ 11934] By: jhi                                   on 2001/09/07  12:43:50
+        Log: Subject: Re: [PATCH regexec.c] more general .* and .*?
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Fri, 7 Sep 2001 09:41:10 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0109070933530.7041-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 11933] By: jhi                                   on 2001/09/07  12:37:46
+        Log: (Replaced by #11934)
+             Subject: Re: [PATCH regexec.c] more general .* and .*?
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Fri, 7 Sep 2001 08:44:17 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0109070836110.7041-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 11932] By: jhi                                   on 2001/09/07  12:27:14
+        Log: The #11931 patching misbehaved.
+     Branch: perl
+	   ! lib/Test/Harness/t/test-harness.t
+____________________________________________________________________________
+[ 11931] By: jhi                                   on 2001/09/07  12:21:30
+        Log: Subject: [PATCH lib/Test/Harness* t/TEST] Test::Harness 1.25 sync
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 7 Sep 2001 03:30:41 -0400
+             Message-ID: <20010907033041.A2796@blackrider>
+     Branch: perl
+	   + lib/Test/Harness/Changes lib/Test/Harness/t/base.t
+	   + lib/Test/Harness/t/ok.t lib/Test/Harness/t/test-harness.t
+	   + t/lib/sample-tests/header_at_end_fail
+	   + t/lib/sample-tests/skip_no_msg t/lib/sample-tests/todo_inline
+	   - lib/Test/Harness.t
+	   ! MANIFEST lib/Test/Harness.pm t/TEST
+____________________________________________________________________________
+[ 11930] By: jhi                                   on 2001/09/07  11:59:17
+        Log: Subject: [PATCH] Digest::MD5 update
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 06 Sep 2001 23:32:56 -0700
+             Message-ID: <lrofon5x47.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! ext/Digest/MD5/Changes ext/Digest/MD5/MD5.pm
+	   ! ext/Digest/MD5/MD5.xs ext/Digest/MD5/t/files.t
+____________________________________________________________________________
+[ 11929] By: jhi                                   on 2001/09/07  11:23:05
+        Log: Subject: [PATCH MANIFEST, lib/less.t] Add Tests for the less Pragma
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Thu, 06 Sep 2001 23:11:44 -0600
+             Message-ID: <20010907051609.91459.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/less.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 11928] By: jhi                                   on 2001/09/07  11:19:29
+        Log: The binary file must somehow differently stored.
+     Branch: perl
+	   - wince/perl.ico
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11927] By: jhi                                   on 2001/09/07  03:53:29
+        Log: Add more modules to the list of modules that have tests,
+             Schwern's wallet is getting more nervous.
+             (Run t/lib/1_compile.t manually to see which modules
+             are lacking tests, or the tests can't be run for some
+             reason or another, such as the Net:: modules)
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 11926] By: jhi                                   on 2001/09/07  03:43:11
+        Log: Try to make Socket::inet_ntoa() more robust.
+     Branch: perl
+	   ! ext/Socket/Socket.t ext/Socket/Socket.xs pod/perldiag.pod
+____________________________________________________________________________
+[ 11925] By: jhi                                   on 2001/09/07  01:57:58
+        Log: Subject: Re: [PATCH lib/English.t] Test All Aliases (including %Errno)
+             From: chromatic <chromatic@rmci.net>       
+             Date: Wed, 5 Sep 2001 22:58:05 -0600                         
+             Message-Id: <01090522580506.19590@firewheel>           
+     Branch: perl
+	   ! lib/English.t
+____________________________________________________________________________
+[ 11924] By: jhi                                   on 2001/09/07  01:55:05
+        Log: Subject: Re: perlvar manpage and localizing special vars
+             From: Stas Bekman <stas@stason.org>
+             Date: Fri, 7 Sep 2001 10:10:24 +0800 (SGT)
+             Message-ID: <Pine.LNX.4.33.0109071009240.19262-100000@stas.singnet.com.sg>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 11923] By: jhi                                   on 2001/09/07  01:49:36
+        Log: Subject: [PATCH MakeMaker.pm] noise from make in ext/SDBM
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 6 Sep 2001 19:36:49 +0100 (BST)
+             Message-Id: <200109061836.TAA08747@tempest.npl.co.uk>
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 11922] By: jhi                                   on 2001/09/06  18:09:08
+        Log: Symbol missing; AIX unhappy.
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 11921] By: jhi                                   on 2001/09/06  17:52:43
+        Log: Add a test for [ID 20010906.019] perl crashes on "undef foo"
+             Reported in 5.61, seems to work okay in blead.
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 11920] By: jhi                                   on 2001/09/06  14:35:09
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11919] By: jhi                                   on 2001/09/06  14:20:10
         Log: Document the bad assumptions currently breaking
              the Socket.t tests 10, 11, and 13 in UNICOS.
