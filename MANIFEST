@@ -1008,6 +1008,7 @@ lib/validate.pl		Perl library supporting wholesale file mode validation
 lib/vars.pm		Declare pseudo-imported global variables
 lib/warnings.pm		For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
+lib/Win32.pod		Documentation for Win32 extras
 makeaperl.SH		perl script that produces a new perl binary
 makedef.pl		Create symbol export lists for linking
 makedepend.SH		Precursor to makedepend
@@ -1118,7 +1119,6 @@ plan9/plan9ish.h	Plan9 port: Plan9-specific C header file
 plan9/setup.rc		Plan9 port: script for easy build+install
 plan9/versnum		Plan9 port: script to print version number
 pod/Makefile.SH		generate Makefile whichs makes pods into something else
-pod/Win32.pod		Documentation for Win32 extras
 pod/buildtoc.PL		generate buildtoc which generates perltoc.pod
 pod/checkpods.PL	Tool to check for common errors in pods
 pod/perl.pod		Top level perl documentation
