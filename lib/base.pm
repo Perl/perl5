@@ -5,7 +5,6 @@ base - Establish IS-A relationship with base class at compile time
 =head1 SYNOPSIS
 
     package Baz;
-
     use base qw(Foo Bar);
 
 =head1 DESCRIPTION
@@ -18,11 +17,14 @@ Roughly similar in effect to
 	push @ISA, qw(Foo Bar);
     }
 
+When strict 'vars' is in scope I<base> also let you assign to @ISA
+without having to declare @ISA with the 'vars' pragma first.
+
 This module was introduced with Perl 5.004_04.
 
-=head1 BUGS
+=head1 SEE ALSO
 
-Needs proper documentation!
+L<fields>
 
 =cut
 
@@ -30,6 +32,7 @@ package base;
 
 sub import {
     my $class = shift;
+    my $fields_base;
 
     foreach my $base (@_) {
 	unless (defined %{"$base\::"}) {
@@ -44,9 +47,29 @@ sub import {
 			    "which defines that package first.)");
 	    }
 	}
+
+	# A simple test like (defined %{"$base\::FIELDS"}) will
+	# sometimes produce typo warnings because it would create
+	# the hash if it was not present before.
+	my $fglob;
+	if ($fglob = ${"$base\::"}{"FIELDS"} and *$fglob{HASH}) {
+	    if ($fields_base) {
+		require Carp;
+		Carp::croak("Can't multiply inherit %FIELDS");
+	    } else {
+		$fields_base = $base;
+	    }
+	}
     }
-    
-    push @{caller(0) . '::ISA'}, @_;
+    my $pkg = caller(0);
+    push @{"$pkg\::ISA"}, @_;
+    if ($fields_base) {
+	# 5.004 doesn't supply/support fields.pm (a 5.005 feature)
+	# We allow the require to silently fail rather than comment
+	# it out so people can add their own/experiment is required.
+	eval { require fields; };
+	fields::inherit($pkg, $fields_base) unless $@;
+    }
 }
 
 1;

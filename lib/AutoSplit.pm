@@ -356,7 +356,7 @@ EOT
 	# perl downcases all filenames on VMS (which upcases all filenames) so
 	# we'd better downcase the sub name list too, or subs with upper case
 	# letters in them will get their .al files deleted right after they're
-	# created. (The mixed case sub name wonn't match the all-lowercase
+	# created. (The mixed case sub name won't match the all-lowercase
 	# filename, and so be cleaned up as a scrap file)
 	if ($Is_VMS or $Is83) {
 	    %outfiles = map {lc($_) => lc($_) } @outfiles;
@@ -372,7 +372,7 @@ EOT
 	    foreach (sort readdir(OUTDIR)){
 		next unless /\.al$/;
 		my($file) = "$dir/$_";
-		$file = lc $file if $Is83;
+		$file = lc $file if $Is83 or $Is_VMS;
 		next if $outfiles{$file};
 		print "  deleting $file\n" if ($Verbose>=2);
 		my($deleted,$thistime);  # catch all versions on VMS

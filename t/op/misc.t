@@ -61,7 +61,7 @@ EXPECT
 ########
 $foo=undef; $foo->go;
 EXPECT
-Can't call method "go" without a package or object reference at - line 1.
+Can't call method "go" on an undefined value at - line 1.
 ########
 BEGIN
         {
