@@ -4,7 +4,7 @@ ok ($class->config()->{lib},$CL);
 
 while (<DATA>)
   {
-  chop;
+  chomp;
   $_ =~ s/#.*$//;	# remove comments
   $_ =~ s/\s+$//;	# trailing spaces
   next if /^$/;		# skip empty lines & comments
@@ -87,6 +87,8 @@ while (<DATA>)
         $try .= '$x->bacmp($y);';
       } elsif ($f eq "bpow") {
         $try .= '$x ** $y;';
+      } elsif ($f eq "fpow") {
+        $try .= '$x->bpow($y);';
       } elsif ($f eq "badd") {
         $try .= '$x + $y;';
       } elsif ($f eq "bsub") {
@@ -568,15 +570,17 @@ NaN:0
 NaN:0
 -inf:1
 +inf:0
-#&parts
-#0:0 1
-#1:1 0
-#123:123 0
-#-123:-123 0
-#-1200:-12 2
-#NaNparts:NaN NaN
-#+inf:inf inf
-#-inf:-inf inf
+&parts
+0:0 1
+1:1 1
+123:123 1
+-123:-123 1
+-1200:-1200 1
+5/7:5 7
+-5/7:-5 7
+NaNparts:NaN NaN
++inf:inf inf
+-inf:-inf inf
 #&exponent
 #0:1
 #1:0
@@ -631,6 +635,20 @@ abc:NaN
 -51:-51
 -51.2:-52
 12.2:12
+3/7:0
+6/7:0
+7/7:1
+8/7:1
+13/7:1
+14/7:2
+15/7:2
+-3/7:-1
+-6/7:-1
+-7/1:-7
+-8/7:-2
+-13/7:-2
+-14/7:-2
+-15/7:-3
 &fceil
 0:0
 abc:NaN
@@ -640,3 +658,64 @@ abc:NaN
 -51:-51
 -51.2:-51
 12.2:13
+3/7:1
+6/7:1
+8/7:2
+13/7:2
+14/7:2
+15/7:3
+-3/7:0
+-6/7:0
+-8/7:-1
+-13/7:-1
+-14/7:-2
+-15/7:-2
+&ffac
+NaN:NaN
+1:1
+-1:NaN
+&bpow
+# bpow test for overload of **
+2:2:4
+3:3:27
+&fpow
+2/1:3/1:8
+3/1:3/1:27
+5/2:3/1:125/8
+-2/1:3/1:-8
+-3/1:3/1:-27
+-5/2:3/1:-125/8
+-2/1:4/1:16
+-3/1:4/1:81
+-5/2:4/1:625/16
+-5/2:-4/1:16/625
+1/5:-3:125
+-1/5:-3:-125
+&numerator
+NaN:NaN
+inf:inf
+-inf:-inf
+3/7:3
+-3/7:-3
+0:0
+1:1
+&denominator
+NaN:NaN
+inf:inf
+-inf:-inf
+3/7:7
+0:1
+1/1:1
+-3/7:7
+&finc
+3/2:5/2
+-15/6:-3/2
+NaN:NaN
+-1/3:2/3
+-2/7:5/7
+&fdec
+15/6:3/2
+-3/2:-5/2
+1/3:-2/3
+2/7:-5/7
+NaN:NaN
