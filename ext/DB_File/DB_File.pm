@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 6th June 1999
-# version 1.67
+# last modified 22nd July 1999
+# version 1.68
 #
 #     Copyright (c) 1995-1999 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -145,7 +145,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO $db_ver
 use Carp;
 
 
-$VERSION = "1.67" ;
+$VERSION = "1.68" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -670,6 +670,7 @@ contents of the database.
     use DB_File ;
     use vars qw( %h $k $v ) ;
 
+    unlink "fruit" ;
     tie %h, "DB_File", "fruit", O_RDWR|O_CREAT, 0640, $DB_HASH 
         or die "Cannot open file 'fruit': $!\n";
 
@@ -729,6 +730,7 @@ insensitive compare function will be used.
     # specify the Perl sub that will do the comparison
     $DB_BTREE->{'compare'} = \&Compare ;
 
+    unlink "tree" ;
     tie %h, "DB_File", "tree", O_RDWR|O_CREAT, 0640, $DB_BTREE 
         or die "Cannot open file 'tree': $!\n" ;
 
@@ -805,7 +807,7 @@ code:
 
     # iterate through the associative array
     # and print each key/value pair.
-    foreach (keys %h)
+    foreach (sort keys %h)
       { print "$_  -> $h{$_}\n" }
 
     untie %h ;
@@ -907,6 +909,19 @@ particular value occurred in the BTREE.
 So assuming the database created above, we can use C<get_dup> like
 this:
 
+    use strict ;
+    use DB_File ;
+ 
+    use vars qw($filename $x %h ) ;
+
+    $filename = "tree" ;
+ 
+    # Enable duplicate records
+    $DB_BTREE->{'flags'} = R_DUP ;
+ 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+	or die "Cannot open $filename: $!\n";
+
     my $cnt  = $x->get_dup("Wall") ;
     print "Wall occurred $cnt times\n" ;
 
@@ -914,7 +929,7 @@ this:
     print "Larry is there\n" if $hash{'Larry'} ;
     print "There are $hash{'Brick'} Brick Walls\n" ;
 
-    my @list = $x->get_dup("Wall") ;
+    my @list = sort $x->get_dup("Wall") ;
     print "Wall =>	[@list]\n" ;
 
     @list = $x->get_dup("Smith") ;
@@ -967,7 +982,7 @@ Assuming the database from the previous example:
 
 prints this
 
-    Larry Wall is there
+    Larry Wall is  there
     Harry Wall is not there
 
 
@@ -1059,7 +1074,7 @@ and print the first matching key/value pair given a partial key.
 	 $st == 0 ;
          $st = $x->seq($key, $value, R_NEXT) )
 	
-      {  print "$key -> $value\n" }
+      {  print "$key	-> $value\n" }
  
     print "\nPARTIAL MATCH\n" ;
 
@@ -1132,8 +1147,11 @@ L<Extra RECNO Methods> for a workaround).
     use strict ;
     use DB_File ;
 
+    my $filename = "text" ;
+    unlink $filename ;
+
     my @h ;
-    tie @h, "DB_File", "text", O_RDWR|O_CREAT, 0640, $DB_RECNO 
+    tie @h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_RECNO 
         or die "Cannot open file 'text': $!\n" ;
 
     # Add a few key/value pairs to the file
@@ -1166,7 +1184,7 @@ Here is the output from the script:
 
     The array contains 5 entries
     popped black
-    unshifted white
+    shifted white
     Element 1 Exists with value blue
     The last element is green
     The 2nd last element is yellow

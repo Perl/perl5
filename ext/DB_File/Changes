@@ -246,3 +246,12 @@
 
    * A few instances of newSVpvn were used in 1.66. This isn't available in
      Perl 5.004_04 or earlier. Replaced with newSVpv.
+
+1.68 22nd July 1999
+
+   * Merged changes from 5.005_58 
+
+   * Fixed a bug in R_IBEFORE & R_IAFTER procesing in Berkeley DB
+     2 databases.
+
+   * Added some of the examples in the POD into the test harness.

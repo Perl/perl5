@@ -12,7 +12,7 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..108\n";
+print "1..109\n";
 
 sub ok
 {
@@ -22,6 +22,39 @@ sub ok
     print "not " unless $result ;
     print "ok $no\n" ;
 }
+
+{
+    package Redirect ;
+    use Symbol ;
+
+    sub new
+    {
+        my $class = shift ;
+        my $filename = shift ;
+	my $fh = gensym ;
+	open ($fh, ">$filename") || die "Cannot open $filename: $!" ;
+	my $real_stdout = select($fh) ;
+	return bless [$fh, $real_stdout ] ;
+
+    }
+    sub DESTROY
+    {
+        my $self = shift ;
+	close $self->[0] ;
+	select($self->[1]) ;
+    }
+}
+
+sub docat_del
+{ 
+    my $file = shift;
+    local $/ = undef;
+    open(CAT,$file) || die "Cannot open $file: $!";
+    my $result = <CAT>;
+    close(CAT);
+    unlink $file ;
+    return $result;
+}   
 
 my $Dfile = "dbhash.tmp";
 unlink $Dfile;
@@ -598,6 +631,53 @@ EOM
    undef $db ;
    untie %h;
    unlink $Dfile;
+}
+
+
+{
+   # Examples from the POD
+
+  my $file = "xyzt" ;
+  {
+    my $redirect = new Redirect $file ;
+
+    use strict ;
+    use DB_File ;
+    use vars qw( %h $k $v ) ;
+
+    unlink "fruit" ;
+    tie %h, "DB_File", "fruit", O_RDWR|O_CREAT, 0640, $DB_HASH 
+        or die "Cannot open file 'fruit': $!\n";
+
+    # Add a few key/value pairs to the file
+    $h{"apple"} = "red" ;
+    $h{"orange"} = "orange" ;
+    $h{"banana"} = "yellow" ;
+    $h{"tomato"} = "red" ;
+
+    # Check for existence of a key
+    print "Banana Exists\n\n" if $h{"banana"} ;
+
+    # Delete a key/value pair.
+    delete $h{"apple"} ;
+
+    # print the contents of the file
+    while (($k, $v) = each %h)
+      { print "$k -> $v\n" }
+
+    untie %h ;
+
+    unlink "fruit" ;
+  }  
+
+  ok(109, docat_del($file) eq <<'EOM') ;
+Banana Exists
+
+orange -> orange
+tomato -> red
+banana -> yellow
+EOM
+   
 }
 
 exit ;
