@@ -31,7 +31,7 @@ BEGIN {
 SKIP: {
     skip "crypt unimplemented", 2, unless $Config{d_crypt};
     
-    ok(substr(crypt("ab", "cd"), 2) ne substr(crypt("ab", "ce"), 2), "salt");
+    ok(substr(crypt("ab", "cd"), 2) ne substr(crypt("ab", "ce"), 2), "salt makes a difference");
 
-    ok(crypt("HI", "HO") eq crypt(v4040.4041, "HO"), "Unicode");
+    ok(crypt("HI", "HO") eq crypt(join("",map{chr($_+256)}unpack"C*","HI"), "HO"), "low eight bits of Unicode");
 }
