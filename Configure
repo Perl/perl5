@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Mar 10 03:07:09 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Mar 11 20:26:09 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -12554,9 +12554,52 @@ EOM
 	$rm -f core try.core core.try.*
 	case "$fflushNULL" in
 	x)	$cat >&4 <<EOM
-Your fflush(NULL) works okay.
+Your fflush(NULL) works okay for output streams.
+Let's see if it clobbers input pipes...
 EOM
-		fflushNULL="$define"
+# As of mid-March 2000 all versions of Solaris appear to have a stdio
+# bug that improperly flushes the input end of pipes.  So we avoid the
+# autoflush on fork/system/exec support for now. :-(
+$cat >tryp.c <<EOCP
+#include <stdio.h>
+int
+main(int argc, char **argv)
+{
+    char buf[1024];
+    int i;
+    char *bp = buf;
+    while (1) {
+        while ((i = getc(stdin)) != -1
+               && (*bp++ = i) != '\n'
+               && bp < &buf[1024])
+    	/* DO NOTHING */ ;
+        *bp = '\0';
+        fprintf(stdout, "%s", buf);
+        fflush(NULL);
+        if (i == -1)
+    	return 0;
+        bp = buf;
+    }
+}
+EOCP
+                fflushNULL="$define"
+                set tryp
+                if eval $compile; then
+                    $rm -f tryp.out
+                    $cat tryp.c | ./tryp$exe_ext 2>/dev/null > tryp.out
+                    if cmp tryp.c tryp.out >/dev/null 2>&1; then
+                       $cat >&4 <<EOM
+fflush(NULL) seems to behave okay with input streams.
+EOM
+			fflushNULL="$define"
+                    else
+			$cat >&4 <<EOM
+Ouch, fflush(NULL) clobbers input pipes!  We will not use it.
+EOM
+                        fflushNULL="$undef"
+                    fi
+                fi
+	        $rm -f core tryp.core core.tryp.*
 		;;
 	'')	$cat >&4 <<EOM
 Your fflush(NULL) isn't working (contrary to ANSI C).
