@@ -721,6 +721,7 @@ If Perl is configured to use the new 'perlio' IO system then
 C<Encode> provides a "layer" (See L<perliol>) which can transform
 data as it is read or written.
 
+    use Encode;
     open(my $ilyad,'>:encoding(iso-8859-7)','ilyad.greek');
     print $ilyad @epic;
 
