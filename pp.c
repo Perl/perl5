@@ -576,7 +576,7 @@ PP(pp_predec)
 {
     dSP;
     if (SvIOK(TOPs)) {
-    	if (SvIVX(TOPs) == PERL_LONG_MIN) {
+    	if (SvIVX(TOPs) == IV_MIN) {
     	    sv_setnv(TOPs, (double)SvIVX(TOPs) - 1.0);
     	}
     	else {
@@ -595,7 +595,7 @@ PP(pp_postinc)
     dSP; dTARGET;
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs)) {
-    	if (SvIVX(TOPs) == PERL_LONG_MAX) {
+    	if (SvIVX(TOPs) == IV_MAX) {
     	    sv_setnv(TOPs, (double)SvIVX(TOPs) + 1.0);
     	}
     	else {
@@ -617,7 +617,7 @@ PP(pp_postdec)
     dSP; dTARGET;
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs)) {
-    	if (SvIVX(TOPs) == PERL_LONG_MIN) {
+    	if (SvIVX(TOPs) == IV_MIN) {
     	    sv_setnv(TOPs, (double)SvIVX(TOPs) - 1.0);
     	}
     	else {
@@ -1446,8 +1446,17 @@ PP(pp_substr)
 	    rem = len;
 	sv_setpvn(TARG, tmps, rem);
 	if (lvalue) {			/* it's an lvalue! */
-	    if (!SvGMAGICAL(sv))
-		(void)SvPOK_only(sv);
+	    if (!SvGMAGICAL(sv)) {
+		if (SvROK(sv)) {
+		    SvPV_force(sv,na);
+		    if (dowarn)
+			warn("Attempt to use reference as lvalue in substr");
+		}
+		if (SvOK(sv))		/* is it defined ? */
+		    (void)SvPOK_only(sv);
+		else
+		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
+	    }
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
 		sv_magic(TARG, Nullsv, 'x', Nullch, 0);
