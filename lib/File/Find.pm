@@ -641,16 +641,14 @@ sub _find_dir($$$) {
     my $SE= [];
     my $dir_name= $p_dir;
     my $dir_pref;
-    my $dir_rel;
+    my $dir_rel = $File::Find::current_dir;
     my $tainted = 0;
 
     if ($Is_MacOS) {
 	$dir_pref= ($p_dir =~ /:$/) ? $p_dir : "$p_dir:"; # preface
-	$dir_rel= ':'; # directory name relative to current directory
     }
     else {
 	$dir_pref= ( $p_dir eq '/' ? '/' : "$p_dir/" );
-	$dir_rel= '.'; # directory name relative to current directory
     }
 
     local ($dir, $name, $prune, *DIR);
@@ -809,12 +807,7 @@ sub _find_dir($$$) {
 
 	    if ( $nlink == -2 ) {
 		$name = $dir = $p_dir; # $File::Find::name / dir
-		if ($Is_MacOS) {
-		    $_ = ':'; # $_
-		}
-		else {
-		    $_ = '.';
-		}
+                $_ = $File::Find::current_dir;
 		&$post_process;		# End-of-directory processing
 	    }
 	    elsif ( $nlink < 0 ) {  # must be finddepth, report dirname now
@@ -865,7 +858,7 @@ sub _find_dir_symlnk($$$) {
     my $dir_name = $p_dir;
     my $dir_pref;
     my $loc_pref;
-    my $dir_rel;
+    my $dir_rel = $File::Find::current_dir;
     my $byd_flag; # flag for pending stack entry if $bydepth
     my $tainted = 0;
     my $ok = 1;
@@ -873,11 +866,9 @@ sub _find_dir_symlnk($$$) {
     if ($Is_MacOS) {
 	$dir_pref = ($p_dir =~ /:$/) ? "$p_dir" : "$p_dir:";
 	$loc_pref = ($dir_loc =~ /:$/) ? "$dir_loc" : "$dir_loc:";
-	$dir_rel  = ':'; # directory name relative to current directory
     } else {
 	$dir_pref = ( $p_dir   eq '/' ? '/' : "$p_dir/" );
 	$loc_pref = ( $dir_loc eq '/' ? '/' : "$dir_loc/" );
-	$dir_rel  = '.'; # directory name relative to current directory
     }
 
     local ($dir, $name, $fullname, $prune, *DIR);
