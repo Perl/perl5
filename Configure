@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Apr 19 21:10:39 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Sun Apr 20 11:44:59 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5487,6 +5487,7 @@ $undef:$define)
 
 *** You have chosen to use 64-bit integers,
 *** but none cannot be found.
+*** Please rerun Configure without -Duse64bitint and/or -Dusemorebits.
 *** Cannot continue, aborting.
 
 EOF
@@ -6226,9 +6227,20 @@ case "$use64bitall" in
 
 *** You have chosen a maximally 64-bit build,
 *** but your pointers are only 4 bytes wide.
+*** Please rerun Configure without -Duse64bitall.
+EOM
+		case "$d_quad" in
+		define)
+			cat <<EOM >&4
+*** Since you have quads, you could possibly try with -Duse64bitint.
+EOM
+			;;
+		esac
+		cat <<EOM >&4
 *** Cannot continue, aborting.
 
 EOM
+
 		exit 1
 		;;
 	esac
