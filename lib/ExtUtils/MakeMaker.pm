@@ -152,7 +152,7 @@ sub eval_in_subdirs {
     my($dir);
     use Cwd qw(cwd abs_path);
     my $pwd = cwd();
-    local @INC = map eval {abs_path($_)} || $_, @INC;
+    local @INC = map eval {abs_path($_) if -e} || $_, @INC;
 
     foreach $dir (@{$self->{DIR}}){
 	my($abs) = $self->catdir($pwd,$dir);
