@@ -8,6 +8,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use File::Find;
 use File::Basename;
+use File::Spec;
 our $VERSION = '0.04';
 
 my $DOSISH = ($^O =~ /^(MSWin\d\d|os2|dos|mint)$/);
@@ -104,7 +105,7 @@ my $sub = sub
    $self->{$module}{version} = '';
    foreach my $dir (@INC)
       {
-      my $p = MM->catfile($dir, $modfile);
+      my $p = File::Spec->catfile($dir, $modfile);
       if (-f $p)
          {
          $self->{$module}{version} = MM->parse_version($p);

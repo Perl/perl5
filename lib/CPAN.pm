@@ -456,7 +456,7 @@ sub all_objects {
 #-> sub CPAN::checklock ;
 sub checklock {
     my($self) = @_;
-    my $lockfile = MM->catfile($CPAN::Config->{cpan_home},".lock");
+    my $lockfile = File::Spec->catfile($CPAN::Config->{cpan_home},".lock");
     if (-f $lockfile && -M _ > 0) {
 	my $fh = FileHandle->new($lockfile) or
             $CPAN::Frontend->mydie("Could not open $lockfile: $!");
@@ -535,7 +535,7 @@ Please make sure the directory exists and is writable.
     unless ($fh = FileHandle->new(">$lockfile")) {
 	if ($! =~ /Permission/) {
 	    my $incc = $INC{'CPAN/Config.pm'};
-	    my $myincc = MM->catfile($ENV{HOME},'.cpan','CPAN','MyConfig.pm');
+	    my $myincc = File::Spec->catfile($ENV{HOME},'.cpan','CPAN','MyConfig.pm');
 	    $CPAN::Frontend->myprint(qq{
 
 Your configuration suggests that CPAN.pm should use a working
@@ -823,9 +823,9 @@ sub entries {
     for ($dh->read) {
 	next if $_ eq "." || $_ eq "..";
 	if (-f $_) {
-	    push @entries, MM->catfile($dir,$_);
+	    push @entries, File::Spec->catfile($dir,$_);
 	} elsif (-d _) {
-	    push @entries, MM->catdir($dir,$_);
+	    push @entries, File::Spec->catdir($dir,$_);
 	} else {
 	    $CPAN::Frontend->mywarn("Warning: weird direntry in $dir: $_\n");
 	}
@@ -1103,7 +1103,7 @@ sub load {
     eval {require CPAN::Config;};       # We eval because of some
                                         # MakeMaker problems
     unless ($dot_cpan++){
-      unshift @INC, MM->catdir($ENV{HOME},".cpan");
+      unshift @INC, File::Spec->catdir($ENV{HOME},".cpan");
       eval {require CPAN::MyConfig;};   # where you can override
                                         # system wide settings
       shift @INC;
@@ -1122,8 +1122,8 @@ sub load {
 	$redo++;
     } else {
 	my($path_to_cpan) = File::Basename::dirname($INC{"CPAN.pm"});
-	my($configpmdir) = MM->catdir($path_to_cpan,"CPAN");
-	my($configpmtest) = MM->catfile($configpmdir,"Config.pm");
+	my($configpmdir) = File::Spec->catdir($path_to_cpan,"CPAN");
+	my($configpmtest) = File::Spec->catfile($configpmdir,"Config.pm");
 	if (-d $configpmdir or File::Path::mkpath($configpmdir)) {
 	    if (-w $configpmtest) {
 		$configpm = $configpmtest;
@@ -1142,9 +1142,9 @@ sub load {
 	    }
 	}
 	unless ($configpm) {
-	    $configpmdir = MM->catdir($ENV{HOME},".cpan","CPAN");
+	    $configpmdir = File::Spec->catdir($ENV{HOME},".cpan","CPAN");
 	    File::Path::mkpath($configpmdir);
-	    $configpmtest = MM->catfile($configpmdir,"MyConfig.pm");
+	    $configpmtest = File::Spec->catfile($configpmdir,"MyConfig.pm");
 	    if (-w $configpmtest) {
 		$configpm = $configpmtest;
 	    } elsif (-w $configpmdir) {
@@ -1314,13 +1314,13 @@ sub local_bundles {
     foreach $incdir ($CPAN::Config->{'cpan_home'},@INC) {
         my @bbase = "Bundle";
         while (my $bbase = shift @bbase) {
-            $bdir = MM->catdir($incdir,split /::/, $bbase);
+            $bdir = File::Spec->catdir($incdir,split /::/, $bbase);
             CPAN->debug("bdir[$bdir]\@bbase[@bbase]") if $CPAN::DEBUG;
             if ($dh = DirHandle->new($bdir)) { # may fail
                 my($entry);
                 for $entry ($dh->read) {
                     next if $entry =~ /^\./;
-                    if (-d MM->catdir($bdir,$entry)){
+                    if (-d File::Spec->catdir($bdir,$entry)){
                         push @bbase, "$bbase\::$entry";
                     } else {
                         next unless $entry =~ s/\.pm(?!\n)\Z//;
@@ -1677,7 +1677,7 @@ sub autobundle {
     my($self) = shift;
     CPAN::Config->load unless $CPAN::Config_loaded++;
     my(@bundle) = $self->_u_r_common("a",@_);
-    my($todir) = MM->catdir($CPAN::Config->{'cpan_home'},"Bundle");
+    my($todir) = File::Spec->catdir($CPAN::Config->{'cpan_home'},"Bundle");
     File::Path::mkpath($todir);
     unless (-d $todir) {
 	$CPAN::Frontend->myprint("Couldn't mkdir $todir for some reason\n");
@@ -1688,10 +1688,10 @@ sub autobundle {
     $m++;
     my($c) = 0;
     my($me) = sprintf "Snapshot_%04d_%02d_%02d_%02d", $y, $m, $d, $c;
-    my($to) = MM->catfile($todir,"$me.pm");
+    my($to) = File::Spec->catfile($todir,"$me.pm");
     while (-f $to) {
 	$me = sprintf "Snapshot_%04d_%02d_%02d_%02d", $y, $m, $d, ++$c;
-	$to = MM->catfile($todir,"$me.pm");
+	$to = File::Spec->catfile($todir,"$me.pm");
     }
     my($fh) = FileHandle->new(">$to") or Carp::croak "Can't open >$to: $!";
     $fh->print(
@@ -2760,7 +2760,7 @@ package CPAN::FTP::netrc;
 
 sub new {
     my($class) = @_;
-    my $file = MM->catfile($ENV{HOME},".netrc");
+    my $file = File::Spec->catfile($ENV{HOME},".netrc");
 
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
        $atime,$mtime,$ctime,$blksize,$blocks)
@@ -3025,8 +3025,8 @@ sub reload_x {
     CPAN::Config->load; # we should guarantee loading wherever we rely
                         # on Config XXX
     $localname ||= $wanted;
-    my $abs_wanted = MM->catfile($CPAN::Config->{'keep_source_where'},
-				   $localname);
+    my $abs_wanted = File::Spec->catfile($CPAN::Config->{'keep_source_where'},
+					 $localname);
     if (
 	-f $abs_wanted &&
 	-M $abs_wanted < $CPAN::Config->{'index_expire'} &&
@@ -3298,7 +3298,7 @@ sub write_metadata_cache {
 		      CPAN::Distribution)) {
 	$cache->{$k} = $CPAN::META->{readonly}{$k}; # unsafe meta access, ok
     }
-    my $metadata_file = MM->catfile($CPAN::Config->{cpan_home},"Metadata");
+    my $metadata_file = File::Spec->catfile($CPAN::Config->{cpan_home},"Metadata");
     $cache->{last_time} = $LAST_TIME;
     $cache->{DATE_OF_02} = $DATE_OF_02;
     $cache->{PROTOCOL} = PROTOCOL;
@@ -3312,7 +3312,7 @@ sub read_metadata_cache {
     my($self) = @_;
     return unless $CPAN::Config->{'cache_metadata'};
     return unless $CPAN::META->has_usable("Storable");
-    my $metadata_file = MM->catfile($CPAN::Config->{cpan_home},"Metadata");
+    my $metadata_file = File::Spec->catfile($CPAN::Config->{cpan_home},"Metadata");
     return unless -r $metadata_file and -f $metadata_file;
     $CPAN::Frontend->myprint("Going to read $metadata_file\n");
     my $cache;
@@ -3544,8 +3544,8 @@ sub dir_listing {
     my $chksumfile = shift;
     my $recursive = shift;
     my $lc_want =
-	MM->catfile($CPAN::Config->{keep_source_where},
-                    "authors", "id", @$chksumfile);
+	File::Spec->catfile($CPAN::Config->{keep_source_where},
+			    "authors", "id", @$chksumfile);
     local($") = "/";
     # connect "force" argument with "index_expire".
     my $force = 0;
@@ -3738,12 +3738,12 @@ sub get {
 
     my($local_file);
     my($local_wanted) =
-        MM->catfile(
-                    $CPAN::Config->{keep_source_where},
-                    "authors",
-                    "id",
-                    split("/",$self->id)
-                   );
+        File::Spec->catfile(
+			    $CPAN::Config->{keep_source_where},
+			    "authors",
+			    "id",
+			    split("/",$self->id)
+			   );
 
     $self->debug("Doing localize") if $CPAN::DEBUG;
     unless ($local_file =
@@ -3812,7 +3812,7 @@ sub get {
     my ($distdir,$packagedir);
     if (@readdir == 1 && -d $readdir[0]) {
         $distdir = $readdir[0];
-        $packagedir = MM->catdir($builddir,$distdir);
+        $packagedir = File::Spec->catdir($builddir,$distdir);
         $self->debug("packagedir[$packagedir]builddir[$builddir]distdir[$distdir]")
             if $CPAN::DEBUG;
         -d $packagedir and $CPAN::Frontend->myprint("Removing previously used ".
@@ -3835,12 +3835,12 @@ sub get {
         my $pragmatic_dir = $userid . '000';
         $pragmatic_dir =~ s/\W_//g;
         $pragmatic_dir++ while -d "../$pragmatic_dir";
-        $packagedir = MM->catdir($builddir,$pragmatic_dir);
+        $packagedir = File::Spec->catdir($builddir,$pragmatic_dir);
         $self->debug("packagedir[$packagedir]") if $CPAN::DEBUG;
         File::Path::mkpath($packagedir);
         my($f);
         for $f (@readdir) { # is already without "." and ".."
-            my $to = MM->catdir($packagedir,$f);
+            my $to = File::Spec->catdir($packagedir,$f);
             rename($f,$to) or Carp::confess("Couldn't rename $f to $to: $!");
         }
     }
@@ -3853,7 +3853,7 @@ sub get {
     $self->safe_chdir(File::Spec->updir);
     File::Path::rmtree("tmp");
 
-    my($mpl) = MM->catfile($packagedir,"Makefile.PL");
+    my($mpl) = File::Spec->catfile($packagedir,"Makefile.PL");
     my($mpl_exists) = -f $mpl;
     unless ($mpl_exists) {
         # NFS has been reported to have racing problems after the
@@ -3870,11 +3870,11 @@ sub get {
                              $mpl,
                              CPAN::anycwd(),
                             )) if $CPAN::DEBUG;
-        my($configure) = MM->catfile($packagedir,"Configure");
+        my($configure) = File::Spec->catfile($packagedir,"Configure");
         if (-f $configure) {
             # do we have anything to do?
             $self->{'configure'} = $configure;
-        } elsif (-f MM->catfile($packagedir,"Makefile")) {
+        } elsif (-f File::Spec->catfile($packagedir,"Makefile")) {
             $CPAN::Frontend->myprint(qq{
 Package comes with a Makefile and without a Makefile.PL.
 We\'ll try to build it with that Makefile then.
@@ -4045,12 +4045,12 @@ sub readme {
     $self->debug("sans[$sans] suffix[$suffix]\n") if $CPAN::DEBUG;
     my($local_file);
     my($local_wanted) =
-	 MM->catfile(
-			$CPAN::Config->{keep_source_where},
-			"authors",
-			"id",
-			split("/","$sans.readme"),
-		       );
+	 File::Spec->catfile(
+			     $CPAN::Config->{keep_source_where},
+			     "authors",
+			     "id",
+			     split("/","$sans.readme"),
+			    );
     $self->debug("Doing localize") if $CPAN::DEBUG;
     $local_file = CPAN::FTP->localize("authors/id/$sans.readme",
 				      $local_wanted)
@@ -4091,8 +4091,8 @@ sub verifyMD5 {
     pop @local;
     push @local, "CHECKSUMS";
     $lc_want =
-	MM->catfile($CPAN::Config->{keep_source_where},
-		      "authors", "id", @local);
+	File::Spec->catfile($CPAN::Config->{keep_source_where},
+			    "authors", "id", @local);
     local($") = "/";
     if (
 	-s $lc_want
@@ -4281,17 +4281,17 @@ sub isa_perl {
 #-> sub CPAN::Distribution::perl ;
 sub perl {
     my($self) = @_;
-    my($perl) = MM->file_name_is_absolute($^X) ? $^X : "";
+    my($perl) = File::Spec->file_name_is_absolute($^X) ? $^X : "";
     my $pwd  = CPAN::anycwd();
-    my $candidate = MM->catfile($pwd,$^X);
+    my $candidate = File::Spec->catfile($pwd,$^X);
     $perl ||= $candidate if MM->maybe_command($candidate);
     unless ($perl) {
 	my ($component,$perl_name);
       DIST_PERLNAME: foreach $perl_name ($^X, 'perl', 'perl5', "perl$]") {
-	    PATH_COMPONENT: foreach $component (MM->path(),
+	    PATH_COMPONENT: foreach $component (File::Spec->path(),
 						$Config::Config{'binexp'}) {
 		  next unless defined($component) && $component;
-		  my($abs) = MM->catfile($component,$perl_name);
+		  my($abs) = File::Spec->catfile($component,$perl_name);
 		  if (MM->maybe_command($abs)) {
 		      $perl = $abs;
 		      last DIST_PERLNAME;
@@ -4817,9 +4817,9 @@ sub contains {
         my(@me,$from,$to,$me);
         @me = split /::/, $self->id;
         $me[-1] .= ".pm";
-        $me = MM->catfile(@me);
+        $me = File::Spec->catfile(@me);
         $from = $self->find_bundle_file($dist->{'build_dir'},$me);
-        $to = MM->catfile($todir,$me);
+        $to = File::Spec->catfile($todir,$me);
         File::Path::mkpath(File::Basename::dirname($to));
         File::Copy::copy($from, $to)
               or Carp::confess("Couldn't copy $from to $to: $!");
@@ -4861,9 +4861,9 @@ sub find_bundle_file {
     my($self,$where,$what) = @_;
     $self->debug("where[$where]what[$what]") if $CPAN::DEBUG;
 ### The following two lines let CPAN.pm become Bundle/CPAN.pm :-(
-###    my $bu = MM->catfile($where,$what);
+###    my $bu = File::Spec->catfile($where,$what);
 ###    return $bu if -f $bu;
-    my $manifest = MM->catfile($where,"MANIFEST");
+    my $manifest = File::Spec->catfile($where,"MANIFEST");
     unless (-f $manifest) {
 	require ExtUtils::Manifest;
 	my $cwd = CPAN::anycwd();
@@ -4889,7 +4889,7 @@ sub find_bundle_file {
 	my($file) = /(\S+)/;
 	if ($file =~ m|\Q$what\E$|) {
 	    $bu = $file;
-	    # return MM->catfile($where,$bu); # bad
+	    # return File::Spec->catfile($where,$bu); # bad
 	    last;
 	}
 	# retry if she managed to
@@ -4897,7 +4897,7 @@ sub find_bundle_file {
 	$bu = $file if $file =~ m|\Q$what2\E$|;
     }
     $bu =~ tr|/|:| if $^O eq 'MacOS';
-    return MM->catfile($where, $bu) if $bu;
+    return File::Spec->catfile($where, $bu) if $bu;
     Carp::croak("Couldn't find a Bundle file in $where");
 }
 
@@ -4915,7 +4915,7 @@ sub inst_file {
     $me[-1] .= ".pm";
     my($incdir,$bestv);
     foreach $incdir ($CPAN::Config->{'cpan_home'},@INC) {
-        my $bfile = MM->catfile($incdir, @me);
+        my $bfile = File::Spec->catfile($incdir, @me);
         CPAN->debug("bfile[$bfile]") if $CPAN::DEBUG;
         next unless -f $bfile;
         my $foundv = MM->parse_version($bfile);
@@ -5208,7 +5208,7 @@ sub as_string {
             if (
                 $dist->{build_dir}
                 and
-                (-f  ($mff = MM->catfile($dist->{build_dir}, "MANIFEST")))
+                (-f  ($mff = File::Spec->catfile($dist->{build_dir}, "MANIFEST")))
                 and
                 $mfh = FileHandle->new($mff)
                ) {
@@ -5230,7 +5230,7 @@ sub as_string {
                 }
                 $lfl =~ s/\s.*//; # remove comments
                 $lfl =~ s/\s+//g; # chomp would maybe be too system-specific
-                my $lfl_abs = MM->catfile($dist->{build_dir},$lfl);
+                my $lfl_abs = File::Spec->catfile($dist->{build_dir},$lfl);
                 # warn "lfl_abs[$lfl_abs]";
                 if (-f $lfl_abs) {
                     $self->{MANPAGE} = $self->manpage_headline($lfl_abs);
@@ -5425,7 +5425,7 @@ sub inst_file {
     @packpath = split /::/, $self->{ID};
     $packpath[-1] .= ".pm";
     foreach $dir (@INC) {
-	my $pmfile = MM->catfile($dir,@packpath);
+	my $pmfile = File::Spec->catfile($dir,@packpath);
 	if (-f $pmfile){
 	    return $pmfile;
 	}
@@ -5441,7 +5441,7 @@ sub xs_file {
     push @packpath, $packpath[-1];
     $packpath[-1] .= "." . $Config::Config{'dlext'};
     foreach $dir (@INC) {
-	my $xsfile = MM->catfile($dir,'auto',@packpath);
+	my $xsfile = File::Spec->catfile($dir,'auto',@packpath);
 	if (-f $xsfile){
 	    return $xsfile;
 	}

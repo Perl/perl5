@@ -185,12 +185,12 @@ sub install_default {
   @_ < 2 or die "install_default should be called with 0 or 1 argument";
   my $FULLEXT = @_ ? shift : $ARGV[0];
   defined $FULLEXT or die "Do not know to where to write install log";
-  my $INST_LIB = MM->catdir(MM->curdir,"blib","lib");
-  my $INST_ARCHLIB = MM->catdir(MM->curdir,"blib","arch");
-  my $INST_BIN = MM->catdir(MM->curdir,'blib','bin');
-  my $INST_SCRIPT = MM->catdir(MM->curdir,'blib','script');
-  my $INST_MAN1DIR = MM->catdir(MM->curdir,'blib','man1');
-  my $INST_MAN3DIR = MM->catdir(MM->curdir,'blib','man3');
+  my $INST_LIB = File::Spec->catdir(File::Spec->curdir,"blib","lib");
+  my $INST_ARCHLIB = File::Spec->catdir(File::Spec->curdir,"blib","arch");
+  my $INST_BIN = File::Spec->catdir(File::Spec->curdir,'blib','bin');
+  my $INST_SCRIPT = File::Spec->catdir(File::Spec->curdir,'blib','script');
+  my $INST_MAN1DIR = File::Spec->catdir(File::Spec->curdir,'blib','man1');
+  my $INST_MAN3DIR = File::Spec->catdir(File::Spec->curdir,'blib','man3');
   install({
 	   read => "$Config{sitearchexp}/auto/$FULLEXT/.packlist",
 	   write => "$Config{installsitearch}/auto/$FULLEXT/.packlist",

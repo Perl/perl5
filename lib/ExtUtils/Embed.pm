@@ -146,7 +146,6 @@ sub ldopts {
     my(@mods,@link_args,@argv);
     my($dllib,$config_libs,@potential_libs,@path);
     local($") = ' ' unless $" eq ' ';
-    my $MM = bless {} => 'MY';
     if (scalar @_) {
        @link_args = @$link_args if $link_args;
        @mods = @$mods if $mods;
@@ -210,7 +209,7 @@ sub ldopts {
     my $lpath = File::Spec->catdir($Config{archlibexp}, 'CORE');
     $lpath = qq["$lpath"] if $^O eq 'MSWin32';
     my($extralibs, $bsloadlibs, $ldloadlibs, $ld_run_path) =
-	$MM->ext(join ' ', "-L$lpath", $libperl, @potential_libs);
+	MM->ext(join ' ', "-L$lpath", $libperl, @potential_libs);
 
     my $ld_or_bs = $bsloadlibs || $ldloadlibs;
     print STDERR "bs: $bsloadlibs ** ld: $ldloadlibs" if $Verbose;
