@@ -661,6 +661,10 @@ You can actually chomp anything that's an lvalue, including an assignment:
 If you chomp a list, each element is chomped, and the total number of
 characters removed is returned.
 
+If the C<encoding> pragma is in scope then the lengths returned are
+calculated from the length of C<$/> in Unicode characters, which is not
+always the same as the length of C<$/> in the native encoding.
+
 Note that parentheses are necessary when you're chomping anything
 that is not a simple variable.  This is because C<chomp $cwd = `pwd`;>
 is interpreted as C<(chomp $cwd) = `pwd`;>, rather than as
