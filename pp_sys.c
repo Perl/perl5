@@ -293,6 +293,8 @@ PP(pp_die)
 {
     dSP; dMARK;
     char *tmps;
+    SV *tmpsv = Nullsv;
+    char *pat = "%s";
     if (SP - MARK != 1) {
 	dTARGET;
 	do_join(TARG, &sv_no, MARK, SP);
@@ -300,18 +302,26 @@ PP(pp_die)
 	SP = MARK + 1;
     }
     else {
-	tmps = SvPV(TOPs, na);
+	tmpsv = TOPs;
+	tmps = SvROK(tmpsv) ? Nullch : SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
 	SV *error = GvSV(errgv);
 	(void)SvUPGRADE(error, SVt_PV);
-	if (SvPOK(error) && SvCUR(error))
-	    sv_catpv(error, "\t...propagated");
-	tmps = SvPV(error, na);
+	if(tmpsv ? SvROK(tmpsv) : SvROK(error)) {
+	    if(tmpsv)
+		SvSetSV(error,tmpsv);
+	    pat = Nullch;
+	}
+	else {
+	    if (SvPOK(error) && SvCUR(error))
+		sv_catpv(error, "\t...propagated");
+	    tmps = SvPV(error, na);
+	}
     }
     if (!tmps || !*tmps)
 	tmps = "Died";
-    DIE("%s", tmps);
+    DIE(pat, tmps);
 }
 
 /* I/O. */

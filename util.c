@@ -1183,7 +1183,7 @@ die(pat, va_alist)
 #else
     va_start(args);
 #endif
-    message = mess(pat, &args);
+    message = pat ? mess(pat, &args) : Nullch;
     va_end(args);
 
     if (diehook) {
@@ -1199,10 +1199,14 @@ die(pat, va_alist)
 	    SV *msg;
 
 	    ENTER;
-	    msg = newSVpv(message, 0);
-	    SvREADONLY_on(msg);
-	    SAVEFREESV(msg);
-
+	    if(message) {
+		msg = newSVpv(message, 0);
+		SvREADONLY_on(msg);
+		SAVEFREESV(msg);
+	    }
+	    else {
+		msg = GvSV(errgv);
+	    }
 	    PUSHMARK(sp);
 	    XPUSHs(msg);
 	    PUTBACK;
