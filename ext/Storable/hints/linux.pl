@@ -8,7 +8,7 @@
 use Config;
 if ($Config{gccversion}) {
     my $optimize = $Config{optimize};
-    if ($optimize =~ s/(^| )-O3( |$)/$1-O2$2/) {
+    if ($optimize =~ s/(^| )-O[3-9]( |$)/$1-O2$2/) {
 	$self->{OPTIMIZE} = $optimize;
     }
 }
