@@ -654,8 +654,7 @@ This function is optional and may not necessarily be provided on all platforms.
 If it is defined, it is called automatically when the interpreter exits for
 every shared object or library loaded by DynaLoader::bootstrap.  All such
 library references are stored in @dl_librefs by DynaLoader::Bootstrap as it
-loads the libraries.  The files are unloaded in the reverse order in to they
-were initially loaded.
+loads the libraries.  The files are unloaded in last-in, first-out order.
 
 This unloading is usually necessary when embedding a shared-object perl (e.g.
 one configured with -Duseshrplib) within a larger application, and the perl
