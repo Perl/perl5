@@ -564,6 +564,7 @@
 #define save_alloc		Perl_save_alloc
 #define save_aptr		Perl_save_aptr
 #define save_ary		Perl_save_ary
+#define save_bool		Perl_save_bool
 #define save_clearsv		Perl_save_clearsv
 #define save_delete		Perl_save_delete
 #define save_destructor		Perl_save_destructor
@@ -2122,6 +2123,7 @@
 #define save_alloc(a,b)		Perl_save_alloc(aTHX_ a,b)
 #define save_aptr(a)		Perl_save_aptr(aTHX_ a)
 #define save_ary(a)		Perl_save_ary(aTHX_ a)
+#define save_bool(a)		Perl_save_bool(aTHX_ a)
 #define save_clearsv(a)		Perl_save_clearsv(aTHX_ a)
 #define save_delete(a,b,c)	Perl_save_delete(aTHX_ a,b,c)
 #define save_destructor(a,b)	Perl_save_destructor(aTHX_ a,b)

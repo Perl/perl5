@@ -626,6 +626,7 @@ Ap	|void	|save_aelem	|AV* av|I32 idx|SV **sptr
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Ap	|void	|save_aptr	|AV** aptr
 Ap	|AV*	|save_ary	|GV* gv
+Ap	|void	|save_bool	|bool* boolp
 Ap	|void	|save_clearsv	|SV** svp
 Ap	|void	|save_delete	|HV* hv|char* key|I32 klen
 Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|void* p

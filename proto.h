@@ -661,6 +661,7 @@ PERL_CALLCONV void	Perl_save_aelem(pTHX_ AV* av, I32 idx, SV **sptr);
 PERL_CALLCONV I32	Perl_save_alloc(pTHX_ I32 size, I32 pad);
 PERL_CALLCONV void	Perl_save_aptr(pTHX_ AV** aptr);
 PERL_CALLCONV AV*	Perl_save_ary(pTHX_ GV* gv);
+PERL_CALLCONV void	Perl_save_bool(pTHX_ bool* boolp);
 PERL_CALLCONV void	Perl_save_clearsv(pTHX_ SV** svp);
 PERL_CALLCONV void	Perl_save_delete(pTHX_ HV* hv, char* key, I32 klen);
 PERL_CALLCONV void	Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p);
