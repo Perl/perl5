@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jul 29 02:48:03 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Aug  1 20:27:06 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3185,7 +3185,8 @@ case "$gccversion" in
 '') gccosandvers='' ;;
 *) gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed 's!.*/[^-]*-[^-]*-\([^/]*\)/'$gccversion'/specs$!\1!'`
    case "$gccosandvers" in
-   $osname$osvers) ;;
+   $osname) gccosandvers='' ;; # linux gccs seem to have no linux osvers, grr
+   $osname$osvers) ;; # looking good
    $osname*) cat <<EOM >&4
 
 *** WHOA THERE!!! ***
@@ -3199,7 +3200,8 @@ case "$gccversion" in
 
     I'm trying to be optimistic here, though, and will continue.
     If later during the configuration and build icky compilation
-    problems appear, I suggest reinstalling the gcc to match
+    problems appear (headerfile conflicts being the most common
+    manifestation), I suggest reinstalling the gcc to match
     your operating system release.
 
 EOM
