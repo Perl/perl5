@@ -60,7 +60,7 @@ $CarpLevel = 0;		# How many extra package levels to skip on carp.
 $MaxEvalLen = 0;	# How much eval '...text...' to show. 0 = all.
 $MaxArgLen = 64;        # How much of each argument to print. 0 = all.
 $MaxArgNums = 8;        # How many arguments to print. 0 = all.
-$Verbose = 0;
+$Verbose = 0;		# If true then make shortmess call longmess instead
 
 require Exporter;
 @ISA = ('Exporter');
@@ -76,10 +76,7 @@ require Exporter;
 
 sub export_fail {
     shift;
-    if ($_[0] eq 'verbose') {
-	++$Verbose;
-	shift; # remove 'verbose' from the args to keep Exporter happy
-    }
+    $Verbose = shift if $_[0] eq 'verbose';
     return @_;
 }
 
@@ -188,14 +185,11 @@ sub longmess {
 # shortmess() is called by carp() and croak() to skip all the way up to
 # the top-level caller's package and report the error from there.  confess()
 # and cluck() generate a full stack trace so they call longmess() to
-# generate that.  In verbose mode shortmess() is aliased to longmess() so
+# generate that.  In verbose mode shortmess() calls longmess() so
 # you always get a stack trace
 
 sub shortmess {	# Short-circuit &longmess if called via multiple packages
-    if ($Verbose) {
-	local $CarpLevel = $CarpLevel + 1;
-	return &longmess;
-    }
+    goto &longmess if $Verbose;
     my $error = join '', @_;
     my ($prevpack) = caller(1);
     my $extra = $CarpLevel;
