@@ -391,12 +391,13 @@ see F<INSTALL>.
 
 In Cygwin Perl can now be built with threads (C<Configure -Duseithreads>).
 This works 100% with Cygwin 1.3.22, with Cygwin 1.5.x there are some
-problems causes by the changes in the Cygwin threading libraries,
-see L</"Cygwin 1.5 problems">:
+new problems causes by the changes in the Cygwin threading libraries,
+see L</"Cygwin 1.5 problems">.
 
 In newer FreeBSD releases Perl 5.8.0 compilation failed because of
 trying to use F<malloc.h>, which in FreeBSD is just a dummy file, and
-a fatal error to even try to use.  Now F<malloc.h> is not used.
+a fatal error to even try to use.  Now F<malloc.h> is not used,
+but see L</"FreeBSD: malloc dilemma">.
 
 Perl is now known to build also in Hitachi HI-UXMPP.
 
@@ -419,12 +420,13 @@ environment.  See README.os400.
 Yet another cross-compilation option has been added: now Perl builds
 on OpenZaurus.  See the Cross subdirectory.
 
-Tru64 gcc 3.2.1 C<-O3 toke.c> dropped to C<-O2> because of gigantic
-memory use otherwise.
+Tru64 when using gcc 3 drops the optimisation for F<toke.c> to C<-O2>
+because of gigantic memory use with the default <-O3>.
 
 Tru64 can now build Perl with the newer Berkeley DBs.
 
-Building Perl on WinCE has been much enhanced, see the wince subdirectory.
+Building Perl on WinCE has been much enhanced, see F<README.ce>
+and F<README.perlce>.
 
 =head1 Selected Bug Fixes
 
