@@ -204,7 +204,8 @@ if (-f "Makefile.PL") {
 
     # don't add if superuser
     if ($< && $>) {   # don't be looking too hard now!
-	eval q{ use blib; 1 } or die;
+	eval q{ use blib; 1 };
+	warn $@ if $@ && $opt_v;
     }
 }
 
@@ -791,7 +792,7 @@ One useful value for C<PERLDOC_PAGER> is C<less -+C -E>.
 
 =head1 VERSION
 
-This is perldoc v2.01.
+This is perldoc v2.03.
 
 =head1 AUTHOR
 
@@ -803,6 +804,9 @@ and others.
 =cut
 
 #
+# Version 2.03: Sun Apr 23 16:56:34 BST 2000
+#	Hugo van der Sanden <hv@crypt0.demon.co.uk>
+#	don't die when 'use blib' fails
 # Version 2.02: Mon Mar 13 18:03:04 MST 2000
 #       Tom Christiansen <tchrist@perl.com>
 #	Added -U insecurity option
