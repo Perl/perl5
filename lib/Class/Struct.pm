@@ -54,7 +54,7 @@ sub printem {
 sub import {
     my $self = shift;
 
-    if ( @_ ) {
+    if ( @_ % 2 == 0 ) {
       &struct;
     } else {
       $self->export_to_level( 1, $self, @EXPORT );
@@ -86,6 +86,7 @@ sub struct {
         $class = (caller())[0];
         @decls = @_;
     }
+
     _usage_error() if @decls % 2 == 1;
 
     # Ensure we are not, and will not be, a subclass.
@@ -256,7 +257,6 @@ Class::Struct - declare struct-like datatypes as Perl classes
     use Class::Struct CLASS_NAME => [ ELEMENT_NAME => ELEMENT_TYPE, ... ];
     use Class::Struct CLASS_NAME => { ELEMENT_NAME => ELEMENT_TYPE, ... };
 
-
     package Myobj;
     use Class::Struct;
             # declare struct with four types of elements:
@@ -276,13 +276,12 @@ Class::Struct - declare struct-like datatypes as Perl classes
                                     # hash type accessor:
     $hash_ref = $obj->h;                # reference to whole hash
     $hash_element_value = $obj->h('x'); # hash element value
-    $obj->h('x', 'new value');        # assign to hash element
+    $obj->h('x', 'new value');          # assign to hash element
 
                                     # class type accessor:
     $element_value = $obj->c;           # object reference
     $obj->c->method(...);               # call method of object
     $obj->c(new My_Other_Class);        # assign a new object
-
 
 =head1 DESCRIPTION
 
@@ -300,7 +299,6 @@ default accessor can be overridden by declaring a C<sub> of the
 same name in the package.  (See Example 2.)
 
 Each element's type can be scalar, array, hash, or class.
-
 
 =head2 The C<struct()> function
 
@@ -433,7 +431,6 @@ contents of that hash are passed to the element's own constructor.
 
 See Example 3 below for an example of initialization.
 
-
 =head1 EXAMPLES
 
 =over
@@ -466,7 +463,6 @@ type C<timeval>.
     $t->ru_utime->tv_usecs(0);
     $t->ru_stime->tv_secs(5);
     $t->ru_stime->tv_usecs(0);
-
 
 =item Example 2
 
@@ -515,7 +511,6 @@ Note that the initializer for a nested struct is specified
 as an anonymous hash of initializers, which is passed on to the nested
 struct's constructor.
 
-
     use Class::Struct;
 
     struct Breed =>
@@ -547,7 +542,6 @@ struct's constructor.
 
 =head1 Author and Modification History
 
-
 Modified by Casey Tweten, 2000-11-08, v0.59.
 
     Added the ability for compile time class creation.
@@ -568,7 +562,6 @@ Modified by Damian Conway, 1999-03-05, v0.58.
     Previously these were returned as a reference to a reference
     to the element.
 
-
 Renamed to C<Class::Struct> and modified by Jim Miner, 1997-04-02.
 
     members() function removed.
@@ -579,7 +572,6 @@ Renamed to C<Class::Struct> and modified by Jim Miner, 1997-04-02.
     Treatment of classes as element types corrected.
     Class name to struct() made optional.
     Diagnostic checks added.
-
 
 Originally C<Class::Template> by Dean Roehrich.
 

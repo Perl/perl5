@@ -1353,6 +1353,7 @@ t/lib/cgi-pretty.t	See if CGI.pm works
 t/lib/cgi-request.t	See if CGI.pm works
 t/lib/charnames.t	See if character names work
 t/lib/checktree.t	See if File::CheckTree works
+t/lib/class-struct.t	See if Class::Struct works
 t/lib/complex.t		See if Math::Complex works
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
