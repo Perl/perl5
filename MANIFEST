@@ -1424,13 +1424,13 @@ lib/Tie/File/t/03_longfetch.t   Test for Tie::File.
 lib/Tie/File/t/04_splice.t      Test for Tie::File.
 lib/Tie/File/t/05_size.t        Test for Tie::File.
 lib/Tie/File/t/06_fixrec.t      Test for Tie::File.
-lib/Tie/File/t/07_rv_splice     Test for Tie::File.
+lib/Tie/File/t/07_rv_splice.t   Test for Tie::File.
 lib/Tie/File/t/08_ro.t          Test for Tie::File.
-lib/Tie/File/t/09_gen_rs        Test for Tie::File.
-lib/Tie/File/t/10_splice_rs     Test for Tie::File.
+lib/Tie/File/t/09_gen_rs.t      Test for Tie::File.
+lib/Tie/File/t/10_splice_rs.t   Test for Tie::File.
 lib/Tie/File/t/11_rv_splice_rs.t  Test for Tie::File.
 lib/Tie/File/t/12_longfetch_rs.t  Test for Tie::File.
-lib/Tie/File/t/13_size_rs       Test for Tie::File.
+lib/Tie/File/t/13_size_rs.t     Test for Tie::File.
 lib/Tie/File/t/14_lock.t        Test for Tie::File.
 lib/Tie/File/t/15_pushpop.t     Test for Tie::File.
 lib/Tie/Handle.pm		Base class for tied handles
