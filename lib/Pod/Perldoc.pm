@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.10';
+$VERSION = '3.11';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -39,6 +39,8 @@ BEGIN {
  *IS_Dos     = $^O eq 'dos'     ? \&TRUE : \&FALSE unless defined &IS_Dos;
  *IS_OS2     = $^O eq 'os2'     ? \&TRUE : \&FALSE unless defined &IS_OS2;
  *IS_Cygwin  = $^O eq 'cygwin'  ? \&TRUE : \&FALSE unless defined &IS_Cygwin;
+ *IS_Linux   = $^O eq 'linux'   ? \&TRUE : \&FALSE unless defined &IS_Linux;
+ *IS_HPUX    = $^O =~ m/hpux/   ? \&TRUE : \&FALSE unless defined &IS_HPUX;
 }
 
 $Temp_File_Lifetime ||= 60 * 60 * 24 * 5;

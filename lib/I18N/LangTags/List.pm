@@ -1,10 +1,10 @@
 
 require 5;
 package I18N::LangTags::List;
-#  Time-stamp: "2003-07-20 07:31:08 ADT"
+#  Time-stamp: "2003-10-10 17:39:45 ADT"
 use strict;
-use vars qw(%Name $Debug $VERSION);
-$VERSION = '0.26';
+use vars qw(%Name %Is_Disrec $Debug $VERSION);
+$VERSION = '0.29';
 # POD at the end.
 
 #----------------------------------------------------------------------
@@ -12,21 +12,23 @@ $VERSION = '0.26';
 # read the table out of our own POD!
   my $seeking = 1;
   my $count = 0;
-  my($tag,$name);
+  my($disrec,$tag,$name);
   my $last_name = '';
   while(<I18N::LangTags::List::DATA>) {
     if($seeking) {
       $seeking = 0 if m/=for woohah/;
-    } elsif( ($tag, $name) =
-          m/\{([-0-9a-zA-Z]+)\}(?:\s*:)?\s*([^\[\]]+)/
+    } elsif( ($disrec, $tag, $name) =
+          m/(\[?)\{([-0-9a-zA-Z]+)\}(?:\s*:)?\s*([^\[\]]+)/
     ) {
       $name =~ s/\s*[;\.]*\s*$//g;
       next unless $name;
       ++$count;
       print "<$tag> <$name>\n" if $Debug;
       $last_name = $Name{$tag} = $name;
-    } elsif (m/Formerly \"([-a-z0-9]+)\"/) {
+      $Is_Disrec{$tag} = 1 if $disrec;
+    } elsif (m/[Ff]ormerly \"([-a-z0-9]+)\"/) {
       $Name{$1} = "$last_name (old tag)" if $last_name;
+      $Is_Disrec{$1} = 1;
     }
   }
   die "No tags read??" unless $count;
@@ -74,6 +76,42 @@ sub name {
   return "$name (Subform \"$subform\")";
 }
 
+#--------------------------------------------------------------------------
+
+sub is_decent {
+  my $tag = lc($_[0] || return 0);
+  #require I18N::LangTags;
+
+  return 0 unless
+    $tag =~ 
+    /^(?:  # First subtag
+         [xi] | [a-z]{2,3}
+      )
+      (?:  # Subtags thereafter
+         -           # separator
+         [a-z0-9]{1,8}  # subtag  
+      )*
+    $/xs;
+
+  my @supers = ();
+  foreach my $bit (split('-', $tag)) {
+    push @supers, 
+      scalar(@supers) ? ($supers[-1] . '-' . $bit) : $bit;
+  }
+  return 0 unless @supers;
+  shift @supers if $supers[0] =~ m<^(i|x|sgn)$>s;
+  return 0 unless @supers;
+
+  foreach my $f ($tag, @supers) {
+    return 0 if $Is_Disrec{$f};
+    return 2 if $Name{$f};
+     # so that decent subforms of indecent tags are decent
+  }
+  return 2 if $Name{$tag}; # not only is it decent, it's known!
+  return 1;
+}
+
+#--------------------------------------------------------------------------
 1;
 
 __DATA__
@@ -98,13 +136,20 @@ prints:
 
 =head1 DESCRIPTION
 
-This module provides a function 
+This module provides a function
 C<I18N::LangTags::List::name( I<langtag> ) > that takes
 a language tag (see L<I18N::LangTags|I18N::LangTags>)
 and returns the best attempt at an English name for it, or
 undef if it can't make sense of the tag.
 
 The function I18N::LangTags::List::name(...) is not exported.
+
+This module also provides a function
+C<I18N::LangTags::List::is_decent( I<langtag> )> that returns true iff
+the language tag is syntactically valid and is for general use (like
+"fr" or "fr-ca", below).  That is, it returns false for tags that are
+syntactically invalid and for tags, like "aus", that are listed in
+brackets below.  This function is not exported.
 
 The map of tags-to-names that it uses is accessable as
 %I18N::LangTags::List::Name, and it's the same as the list
@@ -117,7 +162,7 @@ Internet language tags, as defined in RFC 3066, are a formalism
 for denoting human languages.  The two-letter ISO 639-1 language
 codes are well known (as "en" for English), as are their forms
 when qualified by a country code ("en-US").  Less well-known are the
-arbitrary-length non-ISO codes (like "i-mingo"), and the 
+arbitrary-length non-ISO codes (like "i-mingo"), and the
 recently (in 2001) introduced three-letter ISO-639-2 codes.
 
 Remember these important facts:

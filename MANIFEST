@@ -1260,6 +1260,7 @@ lib/I18N/LangTags/List.pm	List of tags for human languages
 lib/I18N/LangTags.pm		I18N::LangTags
 lib/I18N/LangTags/README	I18N::LangTags
 lib/I18N/LangTags/t/01test.t	See whether I18N::LangTags works
+lib/I18N/LangTags/t/02decency.t See if I18N::LangTags::List::is_decent works
 lib/if.pm			For "use if"
 lib/if.t			Tests for "use if"
 lib/importenv.pl		Perl routine to get environment into variables

@@ -55,12 +55,21 @@ sub parse_from_file {
     . " $switches --lax $file | $render -man"
   ;               # no temp file, just a pipe!
 
+  # Thanks to Brendan O'Dea for contributing the following block
+  if(Pod::Perldoc::IS_Linux and -t STDOUT
+    and my ($cols) = `stty -a` =~ m/\bcolumns\s+(\d+)/
+  ) {
+    my $c = $cols * 39 / 40;
+    $cols = $c > $cols - 2 ? $c : $cols -2;
+    $command .= ' -rLL=' . (int $c) . 'n' if $cols > 80;
+  }
+
   # I hear persistent reports that adding a -c switch to $render
   # solves many people's problems.  But I also hear that some mans
   # don't have a -c switch, so that adding it here would presumably
   # be a Bad Thing   -- sburke@cpan.org
 
-  $command .= " | col -x" if $^O =~ /hpux/;
+  $command .= " | col -x" if Pod::Perldoc::IS_HPUX;
   
   defined(&Pod::Perldoc::DEBUG)
    and Pod::Perldoc::DEBUG()
