@@ -332,6 +332,10 @@ If 0, allows I<stepping off> the end of the script.
 
 affects printing of return value after C<r> command.
 
+=item C<ornaments>
+
+affects screen appearance of the command line (see L<Term::Readline>).
+
 =item C<frame>
 
 affects printing messages on entry and exit from subroutines.  If
@@ -340,8 +344,11 @@ on exit may be useful if inter(di)spersed with other messages.)
 
 If C<frame & 4>, arguments to functions are printed as well as the
 context and caller info.  If C<frame & 8>, overloaded C<stringify> and
-C<tie>d C<FETCH> are enabled on the printed arguments.  The length at
-which the argument list is truncated is governed by the next option:
+C<tie>d C<FETCH> are enabled on the printed arguments. If C<frame &
+16>, the return value from the subroutine is printed as well.
+
+The length at which the argument list is truncated is governed by the
+next option:
 
 =item C<maxTraceLen>
 
@@ -669,7 +676,9 @@ optionally exited) subroutines in different styles.
 
 What follows is the start of the listing of
 
-  env "PERLDB_OPTS=f=1 N" perl -d -V
+  env "PERLDB_OPTS=f=n N" perl -d -V
+
+for different values of C<n>:
 
 =over 4
 
@@ -774,13 +783,33 @@ What follows is the start of the listing of
    in  $=Config::FETCH('Config=HASH(0x1aa444)', 'baserev') from lib/Config.pm:574
    out $=Config::FETCH('Config=HASH(0x1aa444)', 'baserev') from lib/Config.pm:574
 
+=item 30
+
+  in  $=CODE(0x15eca4)() from /dev/null:0
+   in  $=CODE(0x182528)() from lib/Config.pm:2
+    Package lib/Exporter.pm.
+   out $=CODE(0x182528)() from lib/Config.pm:0
+   scalar context return from CODE(0x182528): undef
+   Package lib/Config.pm.
+   in  $=Config::TIEHASH('Config') from lib/Config.pm:628
+   out $=Config::TIEHASH('Config') from lib/Config.pm:628
+   scalar context return from Config::TIEHASH:   empty hash
+   in  $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
+    in  $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/Exporter.pm:171
+    out $=Exporter::export('Config', 'main', 'myconfig', 'config_vars') from lib/Exporter.pm:171
+    scalar context return from Exporter::export: ''
+   out $=Exporter::import('Config', 'myconfig', 'config_vars') from /dev/null:0
+   scalar context return from Exporter::import: ''
+
+
 =back
 
 In all the cases indentation of lines shows the call tree, if bit 2 of
 C<frame> is set, then a line is printed on exit from a subroutine as
 well, if bit 4 is set, then the arguments are printed as well as the
 caller info, if bit 8 is set, the arguments are printed even if they
-are tied or references.
+are tied or references, if bit 16 is set, the return value is printed
+as well.
 
 When a package is compiled, a line like this
 
