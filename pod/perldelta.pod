@@ -1187,6 +1187,11 @@ F<emacs/e2ctags.pl> is now much faster.
 
 =item *
 
+C<enc2xs> is a tool for people adding their own encodings to the
+Encode module.
+
+=item *
+
 C<h2ph> now supports C trigraphs.
 
 =item *
@@ -1229,6 +1234,11 @@ command line) is much more like that of the UNIX C compiler, cc.
 
 C<perlivp> is a new Installation Verification Procedure utility
 for running any time after installing Perl.
+
+=item *
+
+C<piconv> is an implementation of the character conversion utility
+C<iconv>, demonstrating the new Encode module.
 
 =item *
 
