@@ -32,7 +32,7 @@ sub read
 		    $val =~ /[\x30-\x3F]$/ ? 2 : # (only 2 is supported)
 			$val =~ /[\x40-\x5F]$/ ? 2 : # double byte
 			    $val =~ /[\x60-\x6F]$/ ? 3 : # triple byte
-				$val =~ /[\x70-\x7F]$/ ? 4 :
+				$val =~ /[\x70-\x7E]$/ ? 4 :
 				  # 4 or more (only 4 is supported)
 				    croak("odd sequence is defined");
 
@@ -97,8 +97,8 @@ sub decode
 	    }
 	    else
 	    {
-		# strictly, ([\x20-\x2F]*[\x30-\x7E]). '?' for chopped.
-		$str =~ s/^([\x20-\x2F]*[\x30-\x7E]?)//;
+		# strictly, ([\x21-\x2F]*[\x30-\x7E]). '?' for chopped.
+		$str =~ s/^([\x21-\x2F]*[\x30-\x7E]?)//;
 		if ($chk && ! length $str)
 		{
 		    $str = "\e$1"; # split sequence
@@ -216,7 +216,7 @@ and the following:
   SINGLE SHIFT TWO (SS2)             ESC 04/14
   SINGLE SHIFT THREE (SS3)           ESC 04/15
 
-Designation of control character sets are not supported.
+Designation of control character sets is not supported.
 
 =head1 SEE ALSO
 

@@ -15,12 +15,11 @@ use Test;
 use Encode qw(encode decode);
 use Encode::Tcl;
 
-my @encodings = qw(euc-cn euc-jp euc-kr big5 shiftjis); # CJK
+my @encodings = qw(euc-cn euc-kr big5 shiftjis); # CJK
 my $n = 2;
 
 my %greek = (
   'euc-cn'   => [0xA6A1..0xA6B8,0xA6C1..0xA6D8],
-  'euc-jp'   => [0xA6A1..0xA6B8,0xA6C1..0xA6D8],
   'euc-kr'   => [0xA5C1..0xA5D8,0xA5E1..0xA5F8],
   'big5'     => [0xA344..0xA35B,0xA35C..0xA373],
   'shiftjis' => [0x839F..0x83B6,0x83BF..0x83D6],
@@ -37,7 +36,6 @@ my @greek = qw(
 
 my %ideodigit = ( # cjk ideograph 'one' to 'ten'
   'euc-cn'   => [qw(d2bb b6fe c8fd cbc4 cee5 c1f9 c6df b0cb bec5 caae)],
-  'euc-jp'   => [qw(b0ec c6f3 bbb0 bbcd b8de cfbb bcb7 c8ac b6e5 bdbd)],
   'euc-kr'   => [qw(ece9 eca3 dfb2 decc e7e9 d7bf f6d2 f8a2 cefa e4a8)],
   'big5'     => [qw(a440 a447 a454 a57c a4ad a4bb a443 a44b a445 a451)],
   'shiftjis' => [qw(88ea 93f1 8e4f 8e6c 8cdc 985a 8eb5 94aa 8be3 8f5c)],
@@ -45,22 +43,8 @@ my %ideodigit = ( # cjk ideograph 'one' to 'ten'
 );
 my @ideodigit = qw(one two three four five six seven eight nine ten);
 
-my $jis = '7bit-jis';
 my $kr  = '2022-kr';
 my %esc_str;
-
-$esc_str{$jis} = {qw(
-  1b24422422242424262428242a1b2842
-  3042304430463048304a
-  1b284931323334355d1b2842
-  ff71ff72ff73ff74ff75ff9d
-  1b2442467c4b5c1b2842
-  65e5672c
-  3132331b244234413b7a1b28425065726c
-  0031003200336f225b57005000650072006c
-  546573740a1b24422546253925481b28420a
-  0054006500730074000a30c630b930c8000a
-)};
 
 $esc_str{$kr} = {qw(
   1b2429430e2a22213e0f410d0a
@@ -84,24 +68,15 @@ use constant YES      =>  1;
 my @ary_buff = (  # [ encoding, decoded, encoded ]
 # type-M
   ["euc-cn",      hiragana, "\xA4\xA2\xA4\xA4\xA4\xA6\xA4\xA8\xA4\xAA" ],
-  ["euc-jp",      hiragana, "\xA4\xA2\xA4\xA4\xA4\xA6\xA4\xA8\xA4\xAA" ],
-  ["euc-jp",      han_kana, "\x8E\xB1\x8E\xB2\x8E\xB3\x8E\xB4\x8E\xB5" ],
   ["euc-kr",      hiragana, "\xAA\xA2\xAA\xA4\xAA\xA6\xAA\xA8\xAA\xAA" ],
   ["shiftjis",    hiragana, "\x82\xA0\x82\xA2\x82\xA4\x82\xA6\x82\xA8" ],
   ["shiftjis",    han_kana, "\xB1\xB2\xB3\xB4\xB5" ],
 # type-E
   ["2022-cn",     hiragana, "\e\$)A\cN". '$"$$$&$($*' . "\cO" ],
-  ["2022-jp",     hiragana, "\e\$B".'$"$$$&$($*'."\e(B" ],
   ["2022-kr",     hiragana, "\e\$)C\cN". '*"*$*&*(**' . "\cO" ],
-#  [ $jis,         han_kana, "\e\(I".'12345'."\e(B" ],
   ["2022-jp1", macron, "\e\$(D\x2A\x27\x2A\x37\x2A\x45\x2A\x57\x2A\x69\e(B"],
   ["2022-jp2", "\x{C0}" . macron . "\x{C1}", 
        "\e\$(D\e.A\eN\x40\x2A\x27\x2A\x37\x2A\x45\x2A\x57\x2A\x69\e(B\eN\x41"],
-# type-X
-  ["euc-jp-0212", hiragana, "\xA4\xA2\xA4\xA4\xA4\xA6\xA4\xA8\xA4\xAA" ],
-  ["euc-jp-0212", han_kana, "\x8E\xB1\x8E\xB2\x8E\xB3\x8E\xB4\x8E\xB5" ],
-  ["euc-jp-0212", macron, 
-     "\x8F\xAA\xA7\x8F\xAA\xB7\x8F\xAA\xC5\x8F\xAA\xD7\x8F\xAA\xE9" ],
 );
 
 plan test => $n*@encodings + $n*@encodings*@greek

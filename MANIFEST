@@ -289,8 +289,7 @@ ext/Encode/Encode/cp950.enc		Encode table
 ext/Encode/Encode/dingbats.enc		Encode table
 ext/Encode/Encode/dingbats.ucm		Encode table
 ext/Encode/Encode/euc-cn.enc		Encode table
-ext/Encode/Encode/euc-jp+0212.ucm	Encode extension
-ext/Encode/Encode/euc-jp-0212.enc	Encode table
+ext/Encode/Encode/euc-jp+0212.ucm	Encode table
 ext/Encode/Encode/euc-jp.enc		Encode table
 ext/Encode/Encode/euc-jp.ucm		Encode table
 ext/Encode/Encode/euc-kr.enc		Encode table
@@ -349,7 +348,6 @@ ext/Encode/lib/Encode/JP/ISO_2022_JP.pm	Encode extension
 ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
 ext/Encode/lib/Encode/Tcl.pm		Encode extension
 ext/Encode/lib/Encode/Tcl/Escape.pm	Encode extension
-ext/Encode/lib/Encode/Tcl/Extended.pm	Encode extension
 ext/Encode/lib/Encode/Tcl/Table.pm	Encode extension
 ext/Encode/lib/Encode/ucs2_le.pm	Encode extension
 ext/Encode/lib/Encode/Unicode.pm	Encode extension
