@@ -4466,7 +4466,9 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 	(SvTYPE(obj) == SVt_PVGV &&
 	    (GvSV(obj) == sv || GvHV(obj) == (HV*)sv || GvAV(obj) == (AV*)sv ||
 	    GvCV(obj) == (CV*)sv || GvIOp(obj) == (IO*)sv ||
-	    GvFORM(obj) == (CV*)sv)))
+	    GvFORM(obj) == (CV*)sv)) ||
+	(how == PERL_MAGIC_tiedscalar &&
+	    SvROK(obj) && (SvRV(obj) == sv || GvIO(SvRV(obj)) == (IO*)sv)))
     {
 	mg->mg_obj = obj;
     }
