@@ -290,6 +290,8 @@ source code distribution of the Perl release 5.006 but are not
 supported in the Perl release 5.005_03:
 
         BS2000
+	Netware
+	Rhapsody
         VM/ESA
 
 The following platforms have their own source code distributions and
