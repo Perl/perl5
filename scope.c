@@ -727,7 +727,7 @@ leave_scope(I32 base)
 	    goto restore_sv;
 	case SAVEt_HELEM:		/* hash element */
 	    value = (SV*)SSPOPPTR;
-	    sv = (SV*)SSPOPINT;
+	    sv = (SV*)SSPOPPTR;
 	    hv = (HV*)SSPOPPTR;
 	    ptr = hv_fetch_ent(hv, sv, 1, 0);
 	    ptr = &HeVAL((HE*)ptr);
