@@ -36,7 +36,7 @@
 #endif
 #endif
 
-#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
+#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE) && !defined(__QNX__)
 #  define FAST_SV_GETS
 #endif
 
@@ -103,6 +103,7 @@ new_sv()
 	del_sv(p);			\
     else {				\
 	SvANY(p) = (void *)sv_root;	\
+	SvFLAGS(p) = SVTYPEMASK;	\
 	sv_root = p;			\
 	--sv_count;			\
     }
@@ -176,8 +177,11 @@ more_sv()
 	sv_add_arena(nice_chunk, nice_chunk_size, 0);
 	nice_chunk = Nullch;
     }
-    else
-	sv_add_arena(safemalloc(1008), 1008, 0);
+    else {
+	char *chunk;                /* must use New here to match call to */
+	New(704,chunk,1008,char);   /* Safefree() in sv_free_arenas()     */
+	sv_add_arena(chunk, 1008, 0);
+    }
     return new_sv();
 }
 #endif
@@ -213,9 +217,9 @@ sv_clean_objs()
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     register GV* gv;
     for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
-	gv = sva + 1;
+	gv = (GV*)sva + 1;
 	svend = &sva[SvREFCNT(sva)];
-	while (gv < svend) {
+	while ((SV*)gv < svend) {
 	    if (SvTYPE(gv) == SVt_PVGV && (sv = GvSV(gv)) &&
 		SvROK(sv) && SvOBJECT(rv = SvRV(sv)))
 	    {
@@ -248,6 +252,8 @@ sv_clean_objs()
     }
 }
 
+static int in_clean_all = 0;
+
 void
 sv_clean_all()
 {
@@ -255,18 +261,20 @@ sv_clean_all()
     register SV* sv;
     register SV* svend;
 
+    in_clean_all = 1;
     for (sva = sv_arenaroot; sva; sva = (SV*) SvANY(sva)) {
 	sv = sva + 1;
 	svend = &sva[SvREFCNT(sva)];
 	while (sv < svend) {
 	    if (SvTYPE(sv) != SVTYPEMASK) {
-		DEBUG_D((fprintf(stderr, "Cleaning loops:\n "), sv_dump(sv));)
+		DEBUG_D((fprintf(Perl_debug_log, "Cleaning loops:\n "), sv_dump(sv));)
 		SvFLAGS(sv) |= SVf_BREAK;
 		SvREFCNT_dec(sv);
 	    }
 	    ++sv;
 	}
     }
+    in_clean_all = 0;
 }
 
 void
@@ -284,7 +292,7 @@ sv_free_arenas()
 	    svanext = (SV*) SvANY(svanext);
 
 	if (!SvFAKE(sva))
-	    Safefree(sva);
+	    Safefree((void *)sva);
     }
 }
 
@@ -1199,7 +1207,8 @@ register SV *sv;
 	    warn(warn_uninit);
 	return 0;
     }
-    DEBUG_c(fprintf(stderr,"0x%lx 2iv(%ld)\n",
+    (void)SvIOK_on(sv);
+    DEBUG_c(fprintf(Perl_debug_log,"0x%lx 2iv(%ld)\n",
 	(unsigned long)sv,(long)SvIVX(sv)));
     return SvIVX(sv);
 }
@@ -1252,7 +1261,7 @@ register SV *sv;
 	    sv_upgrade(sv, SVt_PVNV);
 	else
 	    sv_upgrade(sv, SVt_NV);
-	DEBUG_c(fprintf(stderr,"0x%lx num(%g)\n",(unsigned long)sv,SvNVX(sv)));
+	DEBUG_c(fprintf(Perl_debug_log,"0x%lx num(%g)\n",(unsigned long)sv,SvNVX(sv)));
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
@@ -1272,7 +1281,7 @@ register SV *sv;
 	return 0.0;
     }
     SvNOK_on(sv);
-    DEBUG_c(fprintf(stderr,"0x%lx 2nv(%g)\n",(unsigned long)sv,SvNVX(sv)));
+    DEBUG_c(fprintf(Perl_debug_log,"0x%lx 2nv(%g)\n",(unsigned long)sv,SvNVX(sv)));
     return SvNVX(sv);
 }
 
@@ -1407,7 +1416,7 @@ STRLEN *lp;
     *lp = s - SvPVX(sv);
     SvCUR_set(sv, *lp);
     SvPOK_on(sv);
-    DEBUG_c(fprintf(stderr,"0x%lx 2pv(%s)\n",(unsigned long)sv,SvPVX(sv)));
+    DEBUG_c(fprintf(Perl_debug_log,"0x%lx 2pv(%s)\n",(unsigned long)sv,SvPVX(sv)));
     return SvPVX(sv);
 
   tokensave:
@@ -1600,7 +1609,7 @@ register SV *sstr;
 	    }
 	    (void)SvOK_off(dstr);
 	    GvINTRO_off(dstr);		/* one-shot flag */
-	    gp_free(dstr);
+	    gp_free((GV*)dstr);
 	    GvGP(dstr) = gp_ref(GvGP(sstr));
 	    SvTAINT(dstr);
 	    if (curcop->cop_stash != GvSTASH(dstr))
@@ -1635,7 +1644,7 @@ register SV *sstr;
 		    GvREFCNT(dstr) = 1;
 		    GvSV(dstr) = NEWSV(72,0);
 		    GvLINE(dstr) = curcop->cop_line;
-		    GvEGV(dstr) = dstr;
+		    GvEGV(dstr) = (GV*)dstr;
 		}
 		GvMULTI_on(dstr);
 		switch (SvTYPE(sref)) {
@@ -1991,6 +2000,8 @@ STRLEN len;
     return sv;
 }
 
+/* name is assumed to contain an SV* if (name && namelen == HEf_SVKEY) */
+
 void
 sv_magic(sv, obj, how, name, namlen)
 register SV *sv;
@@ -2026,8 +2037,12 @@ I32 namlen;
     }
     mg->mg_type = how;
     mg->mg_len = namlen;
-    if (name && namlen >= 0)
-	mg->mg_ptr = savepvn(name, namlen);
+    if (name)
+	if (namlen >= 0)
+	    mg->mg_ptr = savepvn(name, namlen);
+	else if (namlen == HEf_SVKEY)
+	    mg->mg_ptr = (char*)SvREFCNT_inc((SV*)name);
+    
     switch (how) {
     case 0:
 	mg->mg_virtual = &vtbl_sv;
@@ -2134,7 +2149,10 @@ int type;
 	    if (vtbl && vtbl->svt_free)
 		(*vtbl->svt_free)(sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
-		Safefree(mg->mg_ptr);
+		if (mg->mg_len >= 0)
+		    Safefree(mg->mg_ptr);
+		else if (mg->mg_len == HEf_SVKEY)
+		    SvREFCNT_dec((SV*)mg->mg_ptr);
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 		SvREFCNT_dec(mg->mg_obj);
 	    Safefree(mg);
@@ -2261,6 +2279,7 @@ register SV *nsv;
     sv_clear(sv);
     StructCopy(nsv,sv,SV);
     SvREFCNT(sv) = refcnt;
+    SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
     del_SV(nsv);
 }
 
@@ -2285,7 +2304,6 @@ register SV *sv;
 
 		Zero(&ref, 1, SV);
 		sv_upgrade(&ref, SVt_RV);
-		SAVEI32(SvREFCNT(sv));
 		SvRV(&ref) = SvREFCNT_inc(sv);
 		SvROK_on(&ref);
 
@@ -2295,6 +2313,7 @@ register SV *sv;
 		PUTBACK;
 		perl_call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR);
 		del_XRV(SvANY(&ref));
+		SvREFCNT(sv)--;
 	    }
 	    LEAVE;
 	}
@@ -2304,6 +2323,19 @@ register SV *sv;
 	    SvOBJECT_off(sv);	/* Curse the object. */
 	    if (SvTYPE(sv) != SVt_PVIO)
 		--sv_objcount;	/* XXX Might want something more general */
+	}
+	if (SvREFCNT(sv)) {
+	    SV *ret;  
+	    if ( perldb
+		 && (ret = perl_get_sv("DB::ret", FALSE))
+		 && SvROK(ret) && SvRV(ret) == sv && SvREFCNT(sv) == 1) {
+		/* Debugger is prone to dangling references. */
+		SvRV(ret) = 0;
+		SvROK_off(ret);
+		SvREFCNT(sv) = 0;
+	    } else {
+		croak("panic: dangling references in DESTROY");
+	    }
 	}
     }
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
@@ -2328,7 +2360,7 @@ register SV *sv;
 	av_undef((AV*)sv);
 	break;
     case SVt_PVGV:
-	gp_free(sv);
+	gp_free((GV*)sv);
 	Safefree(GvNAME(sv));
 	/* FALL THROUGH */
     case SVt_PVLV:
@@ -2342,7 +2374,7 @@ register SV *sv;
     case SVt_RV:
 	if (SvROK(sv))
 	    SvREFCNT_dec(SvRV(sv));
-	else if (SvPVX(sv))
+	else if (SvPVX(sv) && SvLEN(sv))
 	    Safefree(SvPVX(sv));
 	break;
 /*
@@ -2427,6 +2459,8 @@ SV *sv;
     }
     if (SvREFCNT(sv) == 0) {
 	if (SvFLAGS(sv) & SVf_BREAK)
+	    return;
+	if (in_clean_all) /* All is fair */
 	    return;
 	warn("Attempt to free unreferenced scalar");
 	return;
@@ -2680,15 +2714,21 @@ thats_really_all_folks:
 
 screamer:
 	if (rslen) {
-	    register STDCHAR *bpe = buf + sizeof(buf);
-	    bp = buf;
-	    while ((i = getc(fp)) != EOF && (*bp++ = i) != rslast && bp < bpe)
-		; /* keep reading */
-	    cnt = bp - buf;
+	    if (rslast == '\n') {
+		i = fgets(buf,sizeof buf,fp) == NULL ? EOF : *buf;
+		cnt = i == EOF ? 0 : strlen(buf);
+	    }
+	    else {
+		register STDCHAR *bpe = buf + sizeof(buf);
+		bp = buf;
+		while ((i = getc(fp)) != EOF && (*bp++ = i) != rslast && bp < bpe)
+		    ; /* keep reading */
+		cnt = bp - buf;
+	    }
 	}
 	else {
 	    cnt = fread((char*)buf, 1, sizeof(buf), fp);
-	    i = cnt ? (U8)buf[cnt - 1] : EOF;
+	    i = cnt ? !EOF : EOF;
 	}
 
 	if (append)
@@ -3023,10 +3063,10 @@ HV *stash;
 	for (i = 0; i <= (I32) HvMAX(stash); i++) {
 	    for (entry = HvARRAY(stash)[i];
 	      entry;
-	      entry = entry->hent_next) {
-		if (!todo[(U8)*entry->hent_key])
+	      entry = HeNEXT(entry)) {
+		if (!todo[(U8)*HeKEY(entry)])
 		    continue;
-		gv = (GV*)entry->hent_val;
+		gv = (GV*)HeVAL(entry);
 		sv = GvSV(gv);
 		(void)SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
@@ -3225,7 +3265,7 @@ STRLEN *lp;
 	if (!SvPOK(sv)) {
 	    SvPOK_on(sv);		/* validate pointer */
 	    SvTAINT(sv);
-	    DEBUG_c(fprintf(stderr,"0x%lx 2pv(%s)\n",
+	    DEBUG_c(fprintf(Perl_debug_log,"0x%lx 2pv(%s)\n",
 		(unsigned long)sv,SvPVX(sv)));
 	}
     }
@@ -3394,7 +3434,7 @@ SV* sv;
     assert(SvTYPE(sv) == SVt_PVGV);
     SvFAKE_off(sv);
     if (GvGP(sv))
-	gp_free(sv);
+	gp_free((GV*)sv);
     sv_unmagic(sv, '*');
     Safefree(GvNAME(sv));
     GvMULTI_off(sv);
@@ -3427,7 +3467,7 @@ SV* sv;
     U32 type;
 
     if (!sv) {
-	fprintf(stderr, "SV = 0\n");
+	fprintf(Perl_debug_log, "SV = 0\n");
 	return;
     }
     
@@ -3456,76 +3496,93 @@ SV* sv;
     if (flags & SVf_READONLY)	strcat(d, "READONLY,");
     d += strlen(d);
 
+#ifdef OVERLOAD
+    if (flags & SVf_AMAGIC)	strcat(d, "OVERLOAD,");
+#endif /* OVERLOAD */
     if (flags & SVp_IOK)	strcat(d, "pIOK,");
     if (flags & SVp_NOK)	strcat(d, "pNOK,");
     if (flags & SVp_POK)	strcat(d, "pPOK,");
     if (flags & SVp_SCREAM)	strcat(d, "SCREAM,");
+
+    switch (type) {
+    case SVt_PVCV:
+      if (CvANON(sv))   strcat(d, "ANON,");
+      if (CvCLONE(sv))  strcat(d, "CLONE,");
+      if (CvCLONED(sv)) strcat(d, "CLONED,");
+      break;
+    case SVt_PVGV:
+      if (GvMULTI(sv))	strcat(d, "MULTI,");
+#ifdef OVERLOAD
+      if (flags & SVpgv_AM)	strcat(d, "withOVERLOAD,");
+#endif /* OVERLOAD */
+    }
+
     d += strlen(d);
     if (d[-1] == ',')
 	d--;
     *d++ = ')';
     *d = '\0';
 
-    fprintf(stderr, "SV = ");
+    fprintf(Perl_debug_log, "SV = ");
     switch (type) {
     case SVt_NULL:
-	fprintf(stderr,"NULL%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"NULL%s\n", tmpbuf);
 	return;
     case SVt_IV:
-	fprintf(stderr,"IV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"IV%s\n", tmpbuf);
 	break;
     case SVt_NV:
-	fprintf(stderr,"NV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"NV%s\n", tmpbuf);
 	break;
     case SVt_RV:
-	fprintf(stderr,"RV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"RV%s\n", tmpbuf);
 	break;
     case SVt_PV:
-	fprintf(stderr,"PV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PV%s\n", tmpbuf);
 	break;
     case SVt_PVIV:
-	fprintf(stderr,"PVIV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVIV%s\n", tmpbuf);
 	break;
     case SVt_PVNV:
-	fprintf(stderr,"PVNV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVNV%s\n", tmpbuf);
 	break;
     case SVt_PVBM:
-	fprintf(stderr,"PVBM%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVBM%s\n", tmpbuf);
 	break;
     case SVt_PVMG:
-	fprintf(stderr,"PVMG%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVMG%s\n", tmpbuf);
 	break;
     case SVt_PVLV:
-	fprintf(stderr,"PVLV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVLV%s\n", tmpbuf);
 	break;
     case SVt_PVAV:
-	fprintf(stderr,"PVAV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVAV%s\n", tmpbuf);
 	break;
     case SVt_PVHV:
-	fprintf(stderr,"PVHV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVHV%s\n", tmpbuf);
 	break;
     case SVt_PVCV:
-	fprintf(stderr,"PVCV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVCV%s\n", tmpbuf);
 	break;
     case SVt_PVGV:
-	fprintf(stderr,"PVGV%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVGV%s\n", tmpbuf);
 	break;
     case SVt_PVFM:
-	fprintf(stderr,"PVFM%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVFM%s\n", tmpbuf);
 	break;
     case SVt_PVIO:
-	fprintf(stderr,"PVIO%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"PVIO%s\n", tmpbuf);
 	break;
     default:
-	fprintf(stderr,"UNKNOWN%s\n", tmpbuf);
+	fprintf(Perl_debug_log,"UNKNOWN%s\n", tmpbuf);
 	return;
     }
     if (type >= SVt_PVIV || type == SVt_IV)
-	fprintf(stderr, "  IV = %ld\n", (long)SvIVX(sv));
+	fprintf(Perl_debug_log, "  IV = %ld\n", (long)SvIVX(sv));
     if (type >= SVt_PVNV || type == SVt_NV)
-	fprintf(stderr, "  NV = %.*g\n", DBL_DIG, SvNVX(sv));
+	fprintf(Perl_debug_log, "  NV = %.*g\n", DBL_DIG, SvNVX(sv));
     if (SvROK(sv)) {
-	fprintf(stderr, "  RV = 0x%lx\n", (long)SvRV(sv));
+	fprintf(Perl_debug_log, "  RV = 0x%lx\n", (long)SvRV(sv));
 	sv_dump(SvRV(sv));
 	return;
     }
@@ -3533,103 +3590,112 @@ SV* sv;
 	return;
     if (type <= SVt_PVLV) {
 	if (SvPVX(sv))
-	    fprintf(stderr, "  PV = 0x%lx \"%s\"\n  CUR = %ld\n  LEN = %ld\n",
+	    fprintf(Perl_debug_log, "  PV = 0x%lx \"%s\"\n  CUR = %ld\n  LEN = %ld\n",
 		(long)SvPVX(sv), SvPVX(sv), (long)SvCUR(sv), (long)SvLEN(sv));
 	else
-	    fprintf(stderr, "  PV = 0\n");
+	    fprintf(Perl_debug_log, "  PV = 0\n");
     }
     if (type >= SVt_PVMG) {
 	if (SvMAGIC(sv)) {
-	    fprintf(stderr, "  MAGIC = 0x%lx\n", (long)SvMAGIC(sv));
+	    fprintf(Perl_debug_log, "  MAGIC = 0x%lx\n", (long)SvMAGIC(sv));
 	}
 	if (SvSTASH(sv))
-	    fprintf(stderr, "  STASH = %s\n", HvNAME(SvSTASH(sv)));
+	    fprintf(Perl_debug_log, "  STASH = \"%s\"\n", HvNAME(SvSTASH(sv)));
     }
     switch (type) {
     case SVt_PVLV:
-	fprintf(stderr, "  TYPE = %c\n", LvTYPE(sv));
-	fprintf(stderr, "  TARGOFF = %ld\n", (long)LvTARGOFF(sv));
-	fprintf(stderr, "  TARGLEN = %ld\n", (long)LvTARGLEN(sv));
-	fprintf(stderr, "  TARG = 0x%lx\n", (long)LvTARG(sv));
+	fprintf(Perl_debug_log, "  TYPE = %c\n", LvTYPE(sv));
+	fprintf(Perl_debug_log, "  TARGOFF = %ld\n", (long)LvTARGOFF(sv));
+	fprintf(Perl_debug_log, "  TARGLEN = %ld\n", (long)LvTARGLEN(sv));
+	fprintf(Perl_debug_log, "  TARG = 0x%lx\n", (long)LvTARG(sv));
 	sv_dump(LvTARG(sv));
 	break;
     case SVt_PVAV:
-	fprintf(stderr, "  ARRAY = 0x%lx\n", (long)AvARRAY(sv));
-	fprintf(stderr, "  ALLOC = 0x%lx\n", (long)AvALLOC(sv));
-	fprintf(stderr, "  FILL = %ld\n", (long)AvFILL(sv));
-	fprintf(stderr, "  MAX = %ld\n", (long)AvMAX(sv));
-	fprintf(stderr, "  ARYLEN = 0x%lx\n", (long)AvARYLEN(sv));
+	fprintf(Perl_debug_log, "  ARRAY = 0x%lx\n", (long)AvARRAY(sv));
+	fprintf(Perl_debug_log, "  ALLOC = 0x%lx\n", (long)AvALLOC(sv));
+	fprintf(Perl_debug_log, "  FILL = %ld\n", (long)AvFILL(sv));
+	fprintf(Perl_debug_log, "  MAX = %ld\n", (long)AvMAX(sv));
+	fprintf(Perl_debug_log, "  ARYLEN = 0x%lx\n", (long)AvARYLEN(sv));
 	flags = AvFLAGS(sv);
 	d = tmpbuf;
+	*d = '\0';
 	if (flags & AVf_REAL)	strcat(d, "REAL,");
 	if (flags & AVf_REIFY)	strcat(d, "REIFY,");
 	if (flags & AVf_REUSED)	strcat(d, "REUSED,");
 	if (*d)
 	    d[strlen(d)-1] = '\0';
-	fprintf(stderr, "  FLAGS = (%s)\n", d);
+	fprintf(Perl_debug_log, "  FLAGS = (%s)\n", d);
 	break;
     case SVt_PVHV:
-	fprintf(stderr, "  ARRAY = 0x%lx\n",(long)HvARRAY(sv));
-	fprintf(stderr, "  KEYS = %ld\n", (long)HvKEYS(sv));
-	fprintf(stderr, "  FILL = %ld\n", (long)HvFILL(sv));
-	fprintf(stderr, "  MAX = %ld\n", (long)HvMAX(sv));
-	fprintf(stderr, "  RITER = %ld\n", (long)HvRITER(sv));
-	fprintf(stderr, "  EITER = 0x%lx\n",(long) HvEITER(sv));
+	fprintf(Perl_debug_log, "  ARRAY = 0x%lx\n",(long)HvARRAY(sv));
+	fprintf(Perl_debug_log, "  KEYS = %ld\n", (long)HvKEYS(sv));
+	fprintf(Perl_debug_log, "  FILL = %ld\n", (long)HvFILL(sv));
+	fprintf(Perl_debug_log, "  MAX = %ld\n", (long)HvMAX(sv));
+	fprintf(Perl_debug_log, "  RITER = %ld\n", (long)HvRITER(sv));
+	fprintf(Perl_debug_log, "  EITER = 0x%lx\n",(long) HvEITER(sv));
 	if (HvPMROOT(sv))
-	    fprintf(stderr, "  PMROOT = 0x%lx\n",(long)HvPMROOT(sv));
+	    fprintf(Perl_debug_log, "  PMROOT = 0x%lx\n",(long)HvPMROOT(sv));
 	if (HvNAME(sv))
-	    fprintf(stderr, "  NAME = \"%s\"\n", HvNAME(sv));
+	    fprintf(Perl_debug_log, "  NAME = \"%s\"\n", HvNAME(sv));
 	break;
     case SVt_PVFM:
     case SVt_PVCV:
-	fprintf(stderr, "  STASH = 0x%lx\n", (long)CvSTASH(sv));
-	fprintf(stderr, "  START = 0x%lx\n", (long)CvSTART(sv));
-	fprintf(stderr, "  ROOT = 0x%lx\n", (long)CvROOT(sv));
-	fprintf(stderr, "  XSUB = 0x%lx\n", (long)CvXSUB(sv));
-	fprintf(stderr, "  XSUBANY = %ld\n", (long)CvXSUBANY(sv).any_i32);
-	fprintf(stderr, "  FILEGV = 0x%lx\n", (long)CvFILEGV(sv));
-	fprintf(stderr, "  DEPTH = %ld\n", (long)CvDEPTH(sv));
-	fprintf(stderr, "  PADLIST = 0x%lx\n", (long)CvPADLIST(sv));
-	fprintf(stderr, "  OUTSIDE = 0x%lx\n", (long)CvOUTSIDE(sv));
+	if (SvPOK(sv))
+	    fprintf(Perl_debug_log, "  PROTOTYPE = \"%s\"\n", SvPV(sv,na));
+	fprintf(Perl_debug_log, "  STASH = 0x%lx\n", (long)CvSTASH(sv));
+	fprintf(Perl_debug_log, "  START = 0x%lx\n", (long)CvSTART(sv));
+	fprintf(Perl_debug_log, "  ROOT = 0x%lx\n", (long)CvROOT(sv));
+	fprintf(Perl_debug_log, "  XSUB = 0x%lx\n", (long)CvXSUB(sv));
+	fprintf(Perl_debug_log, "  XSUBANY = %ld\n", (long)CvXSUBANY(sv).any_i32);
+	fprintf(stderr, "  GV = 0x%lx", (long)CvGV(sv));
+	if (CvGV(sv) && GvNAME(CvGV(sv))) {
+	    fprintf(stderr, "  \"%s\"\n", GvNAME(CvGV(sv)));
+	} else {
+	    fprintf(stderr, "\n");
+	}
+	fprintf(Perl_debug_log, "  FILEGV = 0x%lx\n", (long)CvFILEGV(sv));
+	fprintf(Perl_debug_log, "  DEPTH = %ld\n", (long)CvDEPTH(sv));
+	fprintf(Perl_debug_log, "  PADLIST = 0x%lx\n", (long)CvPADLIST(sv));
+	fprintf(Perl_debug_log, "  OUTSIDE = 0x%lx\n", (long)CvOUTSIDE(sv));
 	if (type == SVt_PVFM)
-	    fprintf(stderr, "  LINES = %ld\n", (long)FmLINES(sv));
+	    fprintf(Perl_debug_log, "  LINES = %ld\n", (long)FmLINES(sv));
 	break;
     case SVt_PVGV:
-	fprintf(stderr, "  NAME = %s\n", GvNAME(sv));
-	fprintf(stderr, "  NAMELEN = %ld\n", (long)GvNAMELEN(sv));
-	fprintf(stderr, "  STASH = 0x%lx\n", (long)GvSTASH(sv));
-	fprintf(stderr, "  GP = 0x%lx\n", (long)GvGP(sv));
-	fprintf(stderr, "    SV = 0x%lx\n", (long)GvSV(sv));
-	fprintf(stderr, "    REFCNT = %ld\n", (long)GvREFCNT(sv));
-	fprintf(stderr, "    IO = 0x%lx\n", (long)GvIOp(sv));
-	fprintf(stderr, "    FORM = 0x%lx\n", (long)GvFORM(sv));
-	fprintf(stderr, "    AV = 0x%lx\n", (long)GvAV(sv));
-	fprintf(stderr, "    HV = 0x%lx\n", (long)GvHV(sv));
-	fprintf(stderr, "    CV = 0x%lx\n", (long)GvCV(sv));
-	fprintf(stderr, "    CVGEN = 0x%lx\n", (long)GvCVGEN(sv));
-	fprintf(stderr, "    LASTEXPR = %ld\n", (long)GvLASTEXPR(sv));
-	fprintf(stderr, "    LINE = %ld\n", (long)GvLINE(sv));
-	fprintf(stderr, "    FLAGS = 0x%x\n", (int)GvFLAGS(sv));
-	fprintf(stderr, "    STASH = 0x%lx\n", (long)GvSTASH(sv));
-	fprintf(stderr, "    EGV = 0x%lx\n", (long)GvEGV(sv));
+	fprintf(Perl_debug_log, "  NAME = \"%s\"\n", GvNAME(sv));
+	fprintf(Perl_debug_log, "  NAMELEN = %ld\n", (long)GvNAMELEN(sv));
+	fprintf(Perl_debug_log, "  STASH = \"%s\"\n", HvNAME(GvSTASH(sv)));
+	fprintf(Perl_debug_log, "  GP = 0x%lx\n", (long)GvGP(sv));
+	fprintf(Perl_debug_log, "    SV = 0x%lx\n", (long)GvSV(sv));
+	fprintf(Perl_debug_log, "    REFCNT = %ld\n", (long)GvREFCNT(sv));
+	fprintf(Perl_debug_log, "    IO = 0x%lx\n", (long)GvIOp(sv));
+	fprintf(Perl_debug_log, "    FORM = 0x%lx\n", (long)GvFORM(sv));
+	fprintf(Perl_debug_log, "    AV = 0x%lx\n", (long)GvAV(sv));
+	fprintf(Perl_debug_log, "    HV = 0x%lx\n", (long)GvHV(sv));
+	fprintf(Perl_debug_log, "    CV = 0x%lx\n", (long)GvCV(sv));
+	fprintf(Perl_debug_log, "    CVGEN = 0x%lx\n", (long)GvCVGEN(sv));
+	fprintf(Perl_debug_log, "    LASTEXPR = %ld\n", (long)GvLASTEXPR(sv));
+	fprintf(Perl_debug_log, "    LINE = %ld\n", (long)GvLINE(sv));
+	fprintf(Perl_debug_log, "    FLAGS = 0x%x\n", (int)GvFLAGS(sv));
+	fprintf(Perl_debug_log, "    STASH = \"%s\"\n", HvNAME(GvSTASH(sv)));
+	fprintf(Perl_debug_log, "    EGV = 0x%lx\n", (long)GvEGV(sv));
 	break;
     case SVt_PVIO:
-	fprintf(stderr, "  IFP = 0x%lx\n", (long)IoIFP(sv));
-	fprintf(stderr, "  OFP = 0x%lx\n", (long)IoOFP(sv));
-	fprintf(stderr, "  DIRP = 0x%lx\n", (long)IoDIRP(sv));
-	fprintf(stderr, "  LINES = %ld\n", (long)IoLINES(sv));
-	fprintf(stderr, "  PAGE = %ld\n", (long)IoPAGE(sv));
-	fprintf(stderr, "  PAGE_LEN = %ld\n", (long)IoPAGE_LEN(sv));
-	fprintf(stderr, "  LINES_LEFT = %ld\n", (long)IoLINES_LEFT(sv));
-	fprintf(stderr, "  TOP_NAME = %s\n", IoTOP_NAME(sv));
-	fprintf(stderr, "  TOP_GV = 0x%lx\n", (long)IoTOP_GV(sv));
-	fprintf(stderr, "  FMT_NAME = %s\n", IoFMT_NAME(sv));
-	fprintf(stderr, "  FMT_GV = 0x%lx\n", (long)IoFMT_GV(sv));
-	fprintf(stderr, "  BOTTOM_NAME = %s\n", IoBOTTOM_NAME(sv));
-	fprintf(stderr, "  BOTTOM_GV = 0x%lx\n", (long)IoBOTTOM_GV(sv));
-	fprintf(stderr, "  SUBPROCESS = %ld\n", (long)IoSUBPROCESS(sv));
-	fprintf(stderr, "  TYPE = %c\n", IoTYPE(sv));
-	fprintf(stderr, "  FLAGS = 0x%lx\n", (long)IoFLAGS(sv));
+	fprintf(Perl_debug_log, "  IFP = 0x%lx\n", (long)IoIFP(sv));
+	fprintf(Perl_debug_log, "  OFP = 0x%lx\n", (long)IoOFP(sv));
+	fprintf(Perl_debug_log, "  DIRP = 0x%lx\n", (long)IoDIRP(sv));
+	fprintf(Perl_debug_log, "  LINES = %ld\n", (long)IoLINES(sv));
+	fprintf(Perl_debug_log, "  PAGE = %ld\n", (long)IoPAGE(sv));
+	fprintf(Perl_debug_log, "  PAGE_LEN = %ld\n", (long)IoPAGE_LEN(sv));
+	fprintf(Perl_debug_log, "  LINES_LEFT = %ld\n", (long)IoLINES_LEFT(sv));
+	fprintf(Perl_debug_log, "  TOP_NAME = \"%s\"\n", IoTOP_NAME(sv));
+	fprintf(Perl_debug_log, "  TOP_GV = 0x%lx\n", (long)IoTOP_GV(sv));
+	fprintf(Perl_debug_log, "  FMT_NAME = \"%s\"\n", IoFMT_NAME(sv));
+	fprintf(Perl_debug_log, "  FMT_GV = 0x%lx\n", (long)IoFMT_GV(sv));
+	fprintf(Perl_debug_log, "  BOTTOM_NAME = \"%s\"\n", IoBOTTOM_NAME(sv));
+	fprintf(Perl_debug_log, "  BOTTOM_GV = 0x%lx\n", (long)IoBOTTOM_GV(sv));
+	fprintf(Perl_debug_log, "  SUBPROCESS = %ld\n", (long)IoSUBPROCESS(sv));
+	fprintf(Perl_debug_log, "  TYPE = %c\n", IoTYPE(sv));
+	fprintf(Perl_debug_log, "  FLAGS = 0x%lx\n", (long)IoFLAGS(sv));
 	break;
     }
 }
