@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: Memory.xs,v $
+ * Revision 1.5  2002/01/05 02:21:54  pudge
+ * Sync with perforce
+ *
  * Revision 1.4  2002/01/04 03:38:19  pudge
  * Disable Mac::Memory::_open (HandleSocket::OpenHandle) for now
  *

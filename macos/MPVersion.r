@@ -5,6 +5,9 @@
  *    as specified in the README file.
  *
  * $Log: MPVersion.r,v $
+ * Revision 1.10  2002/01/05 02:21:54  pudge
+ * Sync with perforce
+ *
  * Revision 1.9  2001/11/20 04:18:21  pudge
  * Misc. updates
  *

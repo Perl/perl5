@@ -25,6 +25,16 @@ Version v5.6.1b3
 ----------------
 
 ____________________________________________________________________________
+[ 14126] By: pudge                                 on 2002/01/07  22:23:06
+        Log: Eliminate nested calls to exit() (MacPerl bug #469132)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPFile.c macos/macperl/MPMain.c
+____________________________________________________________________________
+[ 14080] By: pudge                                 on 2002/01/04  21:21:22
+        Log: Bump version, update Changes
+     Branch: maint-5.6/macperl
+	   ! macos/Changes macos/MPVersion.r
+____________________________________________________________________________
 [ 14079] By: pudge                                 on 2002/01/04  21:09:40
         Log: Add more droplets
      Branch: maint-5.6/macperl
