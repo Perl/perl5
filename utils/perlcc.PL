@@ -314,10 +314,10 @@ sub _ccharness
     }
 
     my @sharedobjects = _getSharedObjects($sourceprog); 
-    my $dynaloader="$Config{'installarchlib'}/auto/DynaLoader/DynaLoader.a";
-
+    my $dynaloader = "$Config{'installarchlib'}/auto/DynaLoader/DynaLoader.a";
+    my $optimize = $Config{'optimize'} =~ /-O\d/ ? '' : $Config{'optimize'};
     my $cccmd = 
-        "$Config{cc} @Config{qw(ccflags optimize)} $incdir @sharedobjects @args $dynaloader $linkargs";
+        "$Config{cc} @Config{qw(ccflags)} $optimize $incdir @sharedobjects @args $dynaloader $linkargs";
 
 
     _print ("$cccmd\n", 36);

@@ -748,45 +748,45 @@ sub B::GV::save {
 #	warn "GV::save saving subfields\n"; # debug
 	my $gvsv = $gv->SV;
 	if ($$gvsv) {
+	    $gvsv->save;
 	    $init->add(sprintf("GvSV($sym) = s\\_%x;", $$gvsv));
 #	    warn "GV::save \$$name\n"; # debug
-	    $gvsv->save;
 	}
 	my $gvav = $gv->AV;
 	if ($$gvav) {
+	    $gvav->save;
 	    $init->add(sprintf("GvAV($sym) = s\\_%x;", $$gvav));
 #	    warn "GV::save \@$name\n"; # debug
-	    $gvav->save;
 	}
 	my $gvhv = $gv->HV;
 	if ($$gvhv) {
+	    $gvhv->save;
 	    $init->add(sprintf("GvHV($sym) = s\\_%x;", $$gvhv));
 #	    warn "GV::save \%$name\n"; # debug
-	    $gvhv->save;
 	}
 	my $gvcv = $gv->CV;
 	if ($$gvcv && !$skip_cv) {
+	    $gvcv->save;
 	    $init->add(sprintf("GvCV($sym) = (CV*)s\\_%x;", $$gvcv));
 #	    warn "GV::save &$name\n"; # debug
-	    $gvcv->save;
 	}
 	my $gvfilegv = $gv->FILEGV;
 	if ($$gvfilegv) {
+	    $gvfilegv->save;
 	    $init->add(sprintf("GvFILEGV($sym) = (GV*)s\\_%x;",$$gvfilegv));
 #	    warn "GV::save GvFILEGV(*$name)\n"; # debug
-	    $gvfilegv->save;
 	}
 	my $gvform = $gv->FORM;
 	if ($$gvform) {
+	    $gvform->save;
 	    $init->add(sprintf("GvFORM($sym) = (CV*)s\\_%x;", $$gvform));
 #	    warn "GV::save GvFORM(*$name)\n"; # debug
-	    $gvform->save;
 	}
 	my $gvio = $gv->IO;
 	if ($$gvio) {
+	    $gvio->save;
 	    $init->add(sprintf("GvIOp($sym) = s\\_%x;", $$gvio));
 #	    warn "GV::save GvIO(*$name)\n"; # debug
-	    $gvio->save;
 	}
     }
     return $sym;
@@ -1226,7 +1226,8 @@ sub should_save
  if (exists $unused_sub_packages{$package})
   {
    # warn "Cached $package is ".$unused_sub_packages{$package}."\n"; 
-   return $unused_sub_packages{$package} 
+   delete_unsaved_hashINC($package) unless  $unused_sub_packages{$package} ;
+   return $unused_sub_packages{$package}; 
   }
  # Omit the packages which we use (and which cause grief
  # because of fancy "goto &$AUTOLOAD" stuff).
@@ -1234,6 +1235,7 @@ sub should_save
  if ($package eq "FileHandle" || $package eq "Config" || 
      $package eq "SelectSaver" || $package =~/^(B|IO)::/) 
   {
+   delete_unsaved_hashINC($package);
    return $unused_sub_packages{$package} = 0;
   }
  # Now see if current package looks like an OO class this is probably too strong.
@@ -1245,9 +1247,16 @@ sub should_save
      return mark_package($package);
     }
   }
+ delete_unsaved_hashINC($package);
  return $unused_sub_packages{$package} = 0;
 }
-
+sub delete_unsaved_hashINC{
+	my $packname=shift;
+	$packname =~ s/\:\:/\//g;
+	$packname .= '.pm';
+	warn "deleting $packname" if $INC{$packname} ;# debug
+	delete $INC{$packname};
+}
 sub walkpackages 
 {
  my ($symref, $recurse, $prefix) = @_;
@@ -1300,7 +1309,6 @@ sub descend_marked_unused {
     	mark_package($pack);
     }
 }
-
  
 sub save_main {
     warn "Starting compile\n";

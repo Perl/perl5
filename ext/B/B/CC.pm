@@ -1107,7 +1107,7 @@ sub pp_range {
     }
     write_back_lexicals();
     write_back_stack();
-    if (!($flags & OPf_WANT_LIST)) {
+    unless (($flags & OPf_WANT)== OPf_WANT_LIST) {
 	# We need to save our UNOP structure since pp_flop uses
 	# it to find and adjust out targ. We don't need it ourselves.
 	$op->save;
@@ -1124,7 +1124,7 @@ sub pp_flip {
     if (!($flags & OPf_WANT)) {
 	error("context of flip unknown at compile-time");
     }
-    if ($flags & OPf_WANT_LIST) {
+    if (($flags & OPf_WANT)==OPf_WANT_LIST) {
 	return $op->first->false;
     }
     write_back_lexicals();
@@ -1418,12 +1418,13 @@ sub cc_main {
     my $curpad_nam  = $comppadlist[0]->save;
     my $curpad_sym  = $comppadlist[1]->save;
     my $init_av     = init_av->save; 
-    my $inc_hv      = svref_2object(\%INC)->save;
-    my $inc_av      = svref_2object(\@INC)->save;
     my $start = cc_recurse("pp_main", main_root, main_start, @comppadlist);
+    # Do save_unused_subs before saving inc_hv
     save_unused_subs();
     cc_recurse();
 
+    my $inc_hv      = svref_2object(\%INC)->save;
+    my $inc_av      = svref_2object(\@INC)->save;
     return if $errors;
     if (!defined($module)) {
 	$init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
