@@ -141,9 +141,7 @@ esac
 ldlibpthname='DYLD_LIBRARY_PATH';
 
 # useshrplib=true results in much slower startup times.
-case "$useshrplib" in
-'') useshrplib='false' ;;
-esac
+# 'false' is the default value.  Use Configure -Duseshrplib to override.
 
 cat > UU/archname.cbu <<'EOCBU'
 # This script UU/archname.cbu will get 'called-back' by Configure 

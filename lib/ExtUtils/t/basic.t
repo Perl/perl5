@@ -16,7 +16,7 @@ BEGIN {
 use strict;
 use Config;
 
-use Test::More tests => 52;
+use Test::More tests => 54;
 use MakeMaker::Test::Utils;
 use File::Find;
 use File::Spec;
@@ -40,7 +40,7 @@ $| = 1;
 ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
   diag("chdir failed: $!");
 
-my @mpl_out = run(qq{$perl Makefile.PL "PREFIX=dummy-install"});
+my @mpl_out = run(qq{$perl Makefile.PL "PREFIX=../dummy-install"});
 
 cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) ||
   diag(@mpl_out);
@@ -119,12 +119,12 @@ is( $?, 0, 'install' ) || diag $install_out;
 like( $install_out, qr/^Installing /m );
 like( $install_out, qr/^Writing /m );
 
-ok( -r 'dummy-install',     '  install dir created' );
+ok( -r '../dummy-install',     '  install dir created' );
 my %files = ();
 find( sub { 
     # do it case-insensitive for non-case preserving OSs
     $files{lc $_} = $File::Find::name; 
-}, 'dummy-install' );
+}, '../dummy-install' );
 ok( $files{'dummy.pm'},     '  Dummy.pm installed' );
 ok( $files{'liar.pm'},      '  Liar.pm installed'  );
 ok( $files{'.packlist'},    '  packlist created'   );
@@ -170,9 +170,17 @@ my $metafile_out = run("$make metafile");
 is( $?, 0, 'metafile' ) || diag($metafile_out);
 ok( !-f 'META.yml',   'META.yml generation suppressed by NO_META' );
 
+# Test if MANIFEST is read-only.
+chmod 0444, 'MANIFEST';
+@mpl_out = run(qq{$perl Makefile.PL});
+cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) || diag(@mpl_out);
+$metafile_out = run("$make metafile_addtomanifest");
+is( $?, 0, q{metafile_addtomanifest didn't die with locked MANIFEST} ) || 
+    diag($metafile_out);
+
 
 # Make sure init_dirscan doesn't go into the distdir
-@mpl_out = run(qq{$perl Makefile.PL "PREFIX=dummy-install"});
+@mpl_out = run(qq{$perl Makefile.PL "PREFIX=../dummy-install"});
 
 cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) || diag(@mpl_out);
 

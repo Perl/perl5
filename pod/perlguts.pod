@@ -2428,11 +2428,6 @@ Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
 Bowers, Matthew Green, Tim Bunce, Spider Boardman, Ulrich Pfeifer,
 Stephen McCamant, and Gurusamy Sarathy.
 
-API Listing originally by Dean Roehrich E<lt>roehrich@cray.comE<gt>.
-
-Modifications to autogenerate the API listing (L<perlapi>) by Benjamin
-Stuhl.
-
 =head1 SEE ALSO
 
 perlapi(1), perlintern(1), perlxs(1), perlembed(1)

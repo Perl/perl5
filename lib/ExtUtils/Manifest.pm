@@ -315,7 +315,7 @@ sub maniread {
     local $_;
     while (<M>){
         chomp;
-        next if /^#/;
+        next if /^\s*#/;
 
         my($file, $comment) = /^(\S+)\s*(.*)/;
         next unless $file;
@@ -526,7 +526,7 @@ sub _unmacify {
 
   maniadd({ $file => $comment, ...});
 
-Adds an entry to an existing F<MANIFEST>.
+Adds an entry to an existing F<MANIFEST> unless its already there.
 
 $file will be normalized (ie. Unixified).  B<UNIMPLEMENTED>
 
@@ -541,9 +541,10 @@ sub maniadd {
     my $manifest = maniread();
     open(MANIFEST, ">>$MANIFEST") or die "Could not open $MANIFEST: $!";
     foreach my $file (_sort keys %$additions) {
+        next if exists $manifest->{$file};
+
         my $comment = $additions->{$file} || '';
-        printf MANIFEST "%-40s%s\n", $file, $comment unless
-          exists $manifest->{$file};
+        printf MANIFEST "%-40s%s\n", $file, $comment;
     }
     close MANIFEST;
 }

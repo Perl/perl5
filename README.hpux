@@ -319,7 +319,7 @@ using the -Duselargefiles flag to Configure.  This causes Perl to be
 compiled using structures and functions in which these are 64 bits wide,
 rather than 32 bits wide.  (Note that this will only work with HP's ANSI
 C compiler.  If you want to compile Perl using gcc, you will have to get
-a version of the compiler that support 64-bit operations. See above for
+a version of the compiler that supports 64-bit operations. See above for
 where to find it.)
 
 There are some drawbacks to this approach.  One is that any extension
@@ -401,11 +401,15 @@ Work is being performed on Perl to make it 64-bit compliant on all
 versions of Unix.  Once this is complete, scalar variables will be able
 to hold numbers larger than 2^32 with complete precision.
 
-As of the date of this document, Perl is not 64-bit compliant on HP-UX.
+As of the date of this document, Perl is fully 64-bit compliant on
+HP-UX 11.00 and up for both ccc- and gcc builds.
 
 Should a user wish to experiment with compiling Perl in the LP64
 environment, use the -Duse64bitall flag to Configure.  This will force
 Perl to be compiled in a pure LP64 environment (via the +DD64 flag).
+(Note that these flags will only work with HP's ANSI C compiler.  If
+you want to compile Perl using gcc, you will have to get a version of
+the compiler that supports 64-bit operations.)
 
 You can also use the -Duse64bitint flag to Configure.  Although there
 are some minor differences between compiling Perl with this flag versus
@@ -417,10 +421,6 @@ you run Configure.  If you do not use do this, but later answer the
 questions about 64-bit numbers when Configure asks you, you may get a
 configuration that cannot be compiled, or that does not function as
 expected.
-
-(Note that these Configure flags will only work with HP's ANSI C
-compiler.  If you want to compile Perl using gcc, you will have to get a
-version of the compiler that support 64-bit operations.)
 
 =head2 Oracle on HP-UX
 
