@@ -1329,7 +1329,18 @@ mod2fname(pTHX_ SV *sv)
 #ifdef USE_THREADS
     sum++;				/* Avoid conflict of DLLs in memory. */
 #endif 
-    sum += PERL_VERSION * 200 + PERL_SUBVERSION * 2;  /*  */
+   /* We always load modules as *specific* DLLs, and with the full name.
+      When loading a specific DLL by its full name, one cannot get a
+      different DLL, even if a DLL with the same basename is loaded already.
+      Thus there is no need to include the version into the mangling scheme. */
+#if 0
+    sum += PERL_VERSION * 200 + PERL_SUBVERSION * 2;  /* Up to 5.6.1 */
+#else
+#  ifndef COMPATIBLE_VERSION_SUM  /* Binary compatibility with the 5.00553 binary */
+#    define COMPATIBLE_VERSION_SUM (5 * 200 + 53 * 2)
+#  endif
+    sum += COMPATIBLE_VERSION_SUM;
+#endif
     fname[pos] = 'A' + (sum % 26);
     fname[pos + 1] = 'A' + (sum / 26 % 26);
     fname[pos + 2] = '\0';
