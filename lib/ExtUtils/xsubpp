@@ -274,7 +274,7 @@ foreach $key (keys %output_expr) {
 
     my ($t, $with_size, $arg, $sarg) =
       ($output_expr{$key} =~
-	 m[^ \s+ sv_set ( [iunp] ) v (n)? 	# Type, is_setpvn
+	 m[^ \s+ sv_set ( [iunp] | ref_[iunp] ) v (n)? 	# Type, is_setpvn
 	     \s* \( \s* $cast \$arg \s* ,
 	     \s* ( (??{ $bal }) )		# Set from
 	     ( (??{ $size }) )?			# Possible sizeof set-from
@@ -1352,6 +1352,18 @@ EOF
 		warn $@ if $@;
 
 		print "\tsv_setpv(TARG, $what); XSprePUSH; PUSHTARG;\n";
+		$prepush_done = 1;
+	    }
+	    elsif ($t and $t->[0] =~ /^ref_/) {
+		local $ntype = $ret_type;
+		my $what = eval qq("$t->[2]");
+		warn $@ if $@;
+		my $size = $t->[3];
+		$size = '' unless defined $size;
+		$size = eval qq("$size");
+		my $n = $t->[1] || '';
+		warn $@ if $@;
+		print "\tXSprePUSH; sv_set$t->[0]v$n(TARG, $what$size); PUSHTARG;\n";
 		$prepush_done = 1;
 	    }
 	    elsif ($t) {
