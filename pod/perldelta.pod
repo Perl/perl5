@@ -351,6 +351,13 @@ act as mutators (accessor $z->Re(), mutator $z->Re(3)).
 A little bit of radial trigonometry (cylindrical and spherical) added,
 radial coordinate conversions and the great circle distance.
 
+=item SDBM_File
+
+An EXISTS method has been added to this module (and sdbm_exists() has
+been added to the underlying sdbm library), so one can now call exists
+on an SDBM_File tied hash and get the correct result rather than a
+runtime error.
+
 =item Time::Local
 
 The timelocal() and timegm() functions used to silently return bogus

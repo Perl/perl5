@@ -311,7 +311,7 @@ struct loop {
 #define OA_PMOP (6 << 8)
 #define OA_SVOP (7 << 8)
 #define OA_GVOP (8 << 8)
-#define OA_PVOP (9 << 8)
+#define OA_PVOP_OR_SVOP (9 << 8)
 #define OA_LOOP (10 << 8)
 #define OA_COP (11 << 8)
 #define OA_BASEOP_OR_UNOP (12 << 8)

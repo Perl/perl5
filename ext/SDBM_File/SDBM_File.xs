@@ -8,6 +8,7 @@ typedef DBM* SDBM_File;
 #define sdbm_FETCH(db,key)			sdbm_fetch(db,key)
 #define sdbm_STORE(db,key,value,flags)		sdbm_store(db,key,value,flags)
 #define sdbm_DELETE(db,key)			sdbm_delete(db,key)
+#define sdbm_EXISTS(db,key)			sdbm_exists(db,key)
 #define sdbm_FIRSTKEY(db)			sdbm_firstkey(db)
 #define sdbm_NEXTKEY(db,key)			sdbm_nextkey(db)
 
@@ -49,6 +50,11 @@ sdbm_STORE(db, key, value, flags = DBM_REPLACE)
 
 int
 sdbm_DELETE(db, key)
+	SDBM_File	db
+	datum		key
+
+int
+sdbm_EXISTS(db,key)
 	SDBM_File	db
 	datum		key
 

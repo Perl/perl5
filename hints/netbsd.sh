@@ -66,3 +66,7 @@ esac
 # Pre-empt the /usr/bin/perl question of installperl.
 installusrbinperl='n'
 
+# Recognize the NetBSD packages collection.
+# GDBM might be here.
+test -d /usr/pkg/lib     && loclibpth="$loclibpth /usr/pkg/lib"
+test -d /usr/pkg/include && locincpth="$locincpth /usr/pkg/include"

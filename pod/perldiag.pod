@@ -399,7 +399,7 @@ Perl yourself.
 =item Bareword "%s" not allowed while "strict subs" in use
 
 (F) With "strict subs" in use, a bareword is only allowed as a
-subroutine identifier, in curly braces or to the left of the "=>" symbol.
+subroutine identifier, in curly brackets or to the left of the "=>" symbol.
 Perhaps you need to predeclare a subroutine?
 
 =item Bareword "%s" refers to nonexistent package
@@ -1441,17 +1441,16 @@ C<$ENV{ENV}> or C<$ENV{BASH_ENV}> are derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
 
-=item Integer overflow in hex number
+=item Integer overflow in %s number
 
-(S) The literal hex number you have specified is too big for your
-architecture. On a 32-bit architecture the largest hex literal is
-0xFFFFFFFF.
-
-=item Integer overflow in octal number
-
-(S) The literal octal number you have specified is too big for your
-architecture. On a 32-bit architecture the largest octal literal is
-037777777777.
+(S) The literal hex, octal or binary number you have specified is
+too big for your architecture. On a 32-bit architecture the largest
+literal hex, octal or binary number representable without overflow
+is 0xFFFFFFFF, 037777777777, or 0b11111111111111111111111111111111
+respectively.  Note that Perl transparently promotes decimal literals
+to a floating point representation internally--subject to loss of
+precision errors in subsequent operations--so this limit usually
+doesn't apply to decimal literals.
 
 =item Internal inconsistency in tracking vforks
 
@@ -1580,11 +1579,11 @@ construction, but the command was missing or blank.
 (S) This is an educated guess made in conjunction with the message "%s
 found where operator expected".  Often the missing operator is a comma.
 
-=item Missing right bracket
+=item Missing right curly or square bracket
 
-(F) The lexer counted more opening curly brackets (braces) than closing ones.
-As a general rule, you'll find it's missing near the place you were last
-editing.
+(F) The lexer counted more opening curly or square brackets than
+closing ones.  As a general rule, you'll find it's missing near the place
+you were last editing.
 
 =item Modification of a read-only value attempted
 
@@ -2782,12 +2781,12 @@ representative, who probably put it there in the first place.
 expressions.  If you're a vi user, the % key is valuable for finding
 the matching parenthesis.  See L<perlre>.
 
-=item Unmatched right bracket
+=item Unmatched right %s bracket
 
-(F) The lexer counted more closing curly brackets (braces) than opening
-ones, so you're probably missing an opening bracket.  As a general
-rule, you'll find the missing one (so to speak) near the place you were
-last editing.
+(F) The lexer counted more closing curly or square brackets than
+opening ones, so you're probably missing a matching opening bracket.
+As a general rule, you'll find the missing one (so to speak) near the
+place you were last editing.
 
 =item unmatched [] in regexp
 

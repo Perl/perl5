@@ -79,6 +79,7 @@ extern int sdbm_delete proto((DBM *, datum));
 extern int sdbm_store proto((DBM *, datum, datum, int));
 extern datum sdbm_firstkey proto((DBM *));
 extern datum sdbm_nextkey proto((DBM *));
+extern int sdbm_exists proto((DBM *, datum));
 
 /*
  * other

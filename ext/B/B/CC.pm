@@ -877,7 +877,7 @@ sub pp_sassign {
 	    } elsif ($type == T_DOUBLE) {
 		$dst->set_double("SvNV(sv)");
 	    } else {
-		runtime("SvSetSV($dst->{sv}, sv);");
+		runtime("SvSetMagicSV($dst->{sv}, sv);");
 		$dst->invalidate;
 	    }
 	}
@@ -946,14 +946,13 @@ sub pp_entersub {
 sub pp_formline {
     my $op = shift;
     my $ppname = $op->ppaddr;
-    write_label($op);
     write_back_lexicals() unless $skip_lexicals{$ppname};
     write_back_stack() unless $skip_stack{$ppname};
     my $sym=doop($op);
     # See comment in pp_grepwhile to see why!
     $init->add("((LISTOP*)$sym)->op_first = $sym;");    
-    runtime("if  (PL_op != ($sym)->op_next && PL_op != (OP*)0 ){");
-    runtime( sprintf("goto %s;",label($op)));
+    runtime("if (PL_op == ((LISTOP*)($sym))->op_first){");
+    runtime( sprintf("goto %s;",label($op->first)));
     runtime("}");
     return $op->next;
 }

@@ -679,6 +679,7 @@ sub B::CV::save {
 
     if (${$cv->OUTSIDE} == ${main_cv()}){
 	$init->add(sprintf("CvOUTSIDE(s\\_%x)=PL_main_cv;",$$cv));
+	$init->add(sprintf("SvREFCNT_inc(PL_main_cv);"));
     }
 
     if ($$gv) {

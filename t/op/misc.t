@@ -349,7 +349,7 @@ Sequence (?{...}) not terminated or not {}-balanced at - line 1, within pattern
 ########
 /(?{"{"}})/	# Check it outside of eval too
 EXPECT
-Unmatched right bracket at (re_eval 1) line 1, at end of line
+Unmatched right curly bracket at (re_eval 1) line 1, at end of line
 syntax error at (re_eval 1) line 1, near ""{"}"
 Compilation failed in regexp at - line 1.
 ########

@@ -891,7 +891,7 @@ EXT char *PL_op_desc[] = {
 	"line sequence",
 	"next statement",
 	"debug next statement",
-	"unstack",
+	"iteration finalizer",
 	"block entry",
 	"block exit",
 	"block",

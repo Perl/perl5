@@ -151,7 +151,7 @@ If you want to append something to the end of string stored in an C<SV*>,
 you can use the following functions:
 
     void  sv_catpv(SV*, const char*);
-    void  sv_catpvn(SV*, const char*, int);
+    void  sv_catpvn(SV*, const char*, STRLEN);
     void  sv_catpvf(SV*, const char*, ...);
     void  sv_catpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
     void  sv_catsv(SV*, SV*);
@@ -503,7 +503,7 @@ reference is rv.  SV is blessed if C<classname> is non-null.
 Copies string into an SV whose reference is C<rv>.  Set length to 0 to let
 Perl calculate the string length.  SV is blessed if C<classname> is non-null.
 
-	SV* sv_setref_pvn(SV* rv, const char* classname, PV iv, int length);
+	SV* sv_setref_pvn(SV* rv, const char* classname, PV iv, STRLEN length);
 
 Tests whether the SV is blessed into the specified class.  It does not
 check inheritance relationships.
@@ -3032,21 +3032,21 @@ Checks the B<private> setting.  Use C<SvPOK>.
 Returns a pointer to the string in the SV, or a stringified form of the SV
 if the SV does not contain a string.  Handles 'get' magic.
 
-	char*	SvPV (SV* sv, int len)
+	char*	SvPV (SV* sv, STRLEN len)
 
 =item SvPV_force
 
 Like <SvPV> but will force the SV into becoming a string (SvPOK).  You
 want force if you are going to update the SvPVX directly.
 
-	char*	SvPV_force(SV* sv, int len)
+	char*	SvPV_force(SV* sv, STRLEN len)
 
 =item SvPV_nolen
 
 Returns a pointer to the string in the SV, or a stringified form of the SV
 if the SV does not contain a string.  Handles 'get' magic.
 
-	char*	SvPV (SV* sv)
+	char*	SvPV_nolen (SV* sv)
 
 =item SvPVX
 

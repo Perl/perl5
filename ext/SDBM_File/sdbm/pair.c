@@ -102,6 +102,17 @@ getpair(char *pag, datum key)
 	return val;
 }
 
+int
+exipair(char *pag, datum key)
+{
+	register short *ino = (short *) pag;
+
+	if (ino[0] == 0)
+		return 0;
+
+	return (seepair(pag, ino[0], key.dptr, key.dsize) != 0);
+}
+
 #ifdef SEEDUPS
 int
 duppair(char *pag, datum key)

@@ -182,11 +182,9 @@ esac
 # "-Uuseshrplib" prevents this default.
 #
 
-# This or the glibpth change above breaks the build. Commented out
-# for this snapshot.
-#case "$_DEC_cc_style.$useshrplib" in
-#	new.)	useshrplib="$define"	;;
-#esac
+case "$_DEC_cc_style.$useshrplib" in
+	new.)	useshrplib="$define"	;;
+esac
 
 # The EFF_ONLY_OK from <sys/access.h> is present but dysfunctional for
 # [RWX]_OK as of Digital UNIX 4.0[A-D]?.  If and when this gets fixed,
