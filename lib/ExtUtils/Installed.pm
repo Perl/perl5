@@ -26,6 +26,9 @@ sub _is_prefix {
         $prefix = VMS::Filespec::unixify($prefix);
         $path   = VMS::Filespec::unixify($path);
     }
+    $prefix =~ m!/+! && $prefix =~ s!/+!/!g;
+    $path   =~ m!/+! && $path   =~ s!/+!/!g;
+
     return 1 if substr($path, 0, length($prefix)) eq $prefix;
 
     if ($DOSISH) {
