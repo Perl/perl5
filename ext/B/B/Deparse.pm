@@ -2417,7 +2417,13 @@ sub dq {
     if ($type eq "const") {
 	return uninterp(escape_str(unback($self->const_sv($op)->PV)));
     } elsif ($type eq "concat") {
-	return $self->dq($op->first) . $self->dq($op->last);
+	my $first = $self->dq($op->first);
+	my $last  = $self->dq($op->last);
+	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
+        if ($last =~ /^[{\[\w]/) {
+	    $first =~ s/([%\$@])([A-Za-z_]\w*)$/${1}{$2}/;
+	}
+	return $first . $last;
     } elsif ($type eq "uc") {
 	return '\U' . $self->dq($op->first->sibling) . '\E';
     } elsif ($type eq "lc") {
