@@ -127,7 +127,7 @@ as the first line in C<*.cmd> file (B<-S> due to a bug in cmd.exe's
 =item MS-DOS
 
 Create a batch file to run your program, and codify it in
-C<ALTERNATIVE_SHEBANG> (see the F<dosish.h> file in the source
+C<ALTERNATE_SHEBANG> (see the F<dosish.h> file in the source
 distribution for more information).
 
 =item Win95/NT
