@@ -18,5 +18,6 @@ case "$tmp" in
     toke_cflags='optimize="-g"'
     ttoke_cflags='optimize="-g"'
     ;;
+*4.2*) libswanted=`echo $libswanted | sed 's/ malloc / /'` ;;
 esac
 

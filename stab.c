@@ -1,4 +1,4 @@
-/* $RCSfile: stab.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 18:35:33 $
+/* $RCSfile: stab.c,v $$Revision: 4.0.1.4 $$Date: 92/06/08 15:32:19 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	stab.c,v $
+ * Revision 4.0.1.4  92/06/08  15:32:19  lwall
+ * patch20: fixed confusion between a *var's real name and its effective name
+ * patch20: the debugger now warns you on lines that can't set a breakpoint
+ * patch20: the debugger made perl forget the last pattern used by //
+ * patch20: paragraph mode now skips extra newlines automatically
+ * patch20: ($<,$>) = ... didn't work on some architectures
+ * 
  * Revision 4.0.1.3  91/11/05  18:35:33  lwall
  * patch11: length($x) was sometimes wrong for numeric $x
  * patch11: perl now issues warning if $SIG{'ALARM'} is referenced
@@ -91,7 +98,7 @@ STR *str;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (curspat) {
-	    paren = atoi(stab_name(stab));
+	    paren = atoi(stab_ename(stab));
 	  getparen:
 	    if (curspat->spat_regexp &&
 	      paren <= curspat->spat_regexp->nparens &&
@@ -138,7 +145,7 @@ STR *str;
 	break;
     case '.':
 #ifndef lint
-	if (last_in_stab) {
+	if (last_in_stab && stab_io(last_in_stab)) {
 	    str_numset(stab_val(stab),(double)stab_io(last_in_stab)->lines);
 	}
 #endif
@@ -151,14 +158,14 @@ STR *str;
 	if (s)
 	    str_set(stab_val(stab),s);
 	else {
-	    str_set(stab_val(stab),stab_name(curoutstab));
+	    str_set(stab_val(stab),stab_ename(curoutstab));
 	    str_cat(stab_val(stab),"_TOP");
 	}
 	break;
     case '~':
 	s = stab_io(curoutstab)->fmt_name;
 	if (!s)
-	    s = stab_name(curoutstab);
+	    s = stab_ename(curoutstab);
 	str_set(stab_val(stab),s);
 	break;
 #ifndef lint
@@ -172,6 +179,8 @@ STR *str;
 	str_numset(stab_val(stab),(double)stab_io(curoutstab)->page);
 	break;
 #endif
+    case ':':
+	break;
     case '/':
 	break;
     case '[':
@@ -260,7 +269,7 @@ STR *str;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (curspat) {
-	    paren = atoi(stab_name(stab));
+	    paren = atoi(stab_ename(stab));
 	  getparen:
 	    if (curspat->spat_regexp &&
 	      paren <= curspat->spat_regexp->nparens &&
@@ -314,6 +323,7 @@ STR *str;
     }
 }
 
+void
 stabset(mstr,str)
 register STR *mstr;
 STR *str;
@@ -324,7 +334,7 @@ STR *str;
 
     switch (mstr->str_rare) {
     case 'E':
-	setenv(mstr->str_ptr,str_get(str));
+	my_setenv(mstr->str_ptr,str_get(str));
 				/* And you'll never guess what the dog had */
 				/*   in its mouth... */
 #ifdef TAINT
@@ -376,9 +386,12 @@ STR *str;
 	    stab = mstr->str_u.str_stab;
 	    i = str_true(str);
 	    str = afetch(stab_xarray(stab),atoi(mstr->str_ptr), FALSE);
-	    cmd = str->str_magic->str_u.str_cmd;
-	    cmd->c_flags &= ~CF_OPTIMIZE;
-	    cmd->c_flags |= i? CFT_D1 : CFT_D0;
+	    if (str->str_magic && (cmd = str->str_magic->str_u.str_cmd)) {
+		cmd->c_flags &= ~CF_OPTIMIZE;
+		cmd->c_flags |= i? CFT_D1 : CFT_D0;
+	    }
+	    else
+		warn("Can't break at that line\n");
 	}
 	break;
     case '#':
@@ -405,7 +418,7 @@ STR *str;
 		strcpy(stab_magic(stab),"StB");
 		stab_val(stab) = Str_new(70,0);
 		stab_line(stab) = curcmd->c_line;
-		stab_stash(stab) = curcmd->c_stash;
+		stab_estab(stab) = stab;
 	    }
 	    else {
 		stab = stabent(s,TRUE);
@@ -459,10 +472,19 @@ STR *str;
 		inplace = Nullch;
 	    break;
 	case '\020':	/* ^P */
-	    perldb = (int)str_gnum(str);
+	    i = (int)str_gnum(str);
+	    if (i != perldb) {
+		static SPAT *oldlastspat;
+
+		if (perldb)
+		    oldlastspat = lastspat;
+		else
+		    lastspat = oldlastspat;
+	    }
+	    perldb = i;
 	    break;
 	case '\024':	/* ^T */
-	    basetime = (long)str_gnum(str);
+	    basetime = (time_t)str_gnum(str);
 	    break;
 	case '\027':	/* ^W */
 	    dowarn = (bool)str_gnum(str);
@@ -508,7 +530,7 @@ STR *str;
 	    if (str->str_pok) {
 		rs = str_get(str);
 		rslen = str->str_cur;
-		if (!rslen) {
+		if (rspara = !rslen) {
 		    rs = "\n\n";
 		    rslen = 2;
 		}
@@ -547,42 +569,35 @@ STR *str;
 	    break;
 	case '<':
 	    uid = (int)str_gnum(str);
-#if defined(HAS_SETREUID) || !defined(HAS_SETRUID)
 	    if (delaymagic) {
-		delaymagic |= DM_REUID;
+		delaymagic |= DM_RUID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* HAS_SETREUID or not HASSETRUID */
 #ifdef HAS_SETRUID
-	    if (setruid((UIDTYPE)uid) < 0)
-		uid = (int)getuid();
+	    (void)setruid((UIDTYPE)uid);
 #else
 #ifdef HAS_SETREUID
-	    if (setreuid((UIDTYPE)uid, (UIDTYPE)-1) < 0)
-		uid = (int)getuid();
+	    (void)setreuid((UIDTYPE)uid, (UIDTYPE)-1);
 #else
 	    if (uid == euid)		/* special case $< = $> */
-		setuid(uid);
+		(void)setuid(uid);
 	    else
 		fatal("setruid() not implemented");
 #endif
 #endif
+	    uid = (int)getuid();
 	    break;
 	case '>':
 	    euid = (int)str_gnum(str);
-#if defined(HAS_SETREUID) || !defined(HAS_SETEUID)
 	    if (delaymagic) {
-		delaymagic |= DM_REUID;
+		delaymagic |= DM_EUID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* HAS_SETREUID or not HAS_SETEUID */
 #ifdef HAS_SETEUID
-	    if (seteuid((UIDTYPE)euid) < 0)
-		euid = (int)geteuid();
+	    (void)seteuid((UIDTYPE)euid);
 #else
 #ifdef HAS_SETREUID
-	    if (setreuid((UIDTYPE)-1, (UIDTYPE)euid) < 0)
-		euid = (int)geteuid();
+	    (void)setreuid((UIDTYPE)-1, (UIDTYPE)euid);
 #else
 	    if (euid == uid)		/* special case $> = $< */
 		setuid(euid);
@@ -590,42 +605,47 @@ STR *str;
 		fatal("seteuid() not implemented");
 #endif
 #endif
+	    euid = (int)geteuid();
 	    break;
 	case '(':
 	    gid = (int)str_gnum(str);
-#if defined(HAS_SETREGID) || !defined(HAS_SETRGID)
 	    if (delaymagic) {
-		delaymagic |= DM_REGID;
+		delaymagic |= DM_RGID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* HAS_SETREGID or not HAS_SETRGID */
 #ifdef HAS_SETRGID
 	    (void)setrgid((GIDTYPE)gid);
 #else
 #ifdef HAS_SETREGID
 	    (void)setregid((GIDTYPE)gid, (GIDTYPE)-1);
 #else
-	    fatal("setrgid() not implemented");
+	    if (gid == egid)			/* special case $( = $) */
+		(void)setgid(gid);
+	    else
+		fatal("setrgid() not implemented");
 #endif
 #endif
+	    gid = (int)getgid();
 	    break;
 	case ')':
 	    egid = (int)str_gnum(str);
-#if defined(HAS_SETREGID) || !defined(HAS_SETEGID)
 	    if (delaymagic) {
-		delaymagic |= DM_REGID;
+		delaymagic |= DM_EGID;
 		break;				/* don't do magic till later */
 	    }
-#endif /* HAS_SETREGID or not HAS_SETEGID */
 #ifdef HAS_SETEGID
 	    (void)setegid((GIDTYPE)egid);
 #else
 #ifdef HAS_SETREGID
 	    (void)setregid((GIDTYPE)-1, (GIDTYPE)egid);
 #else
-	    fatal("setegid() not implemented");
+	    if (egid == gid)			/* special case $) = $( */
+		(void)setgid(egid);
+	    else
+		fatal("setegid() not implemented");
 #endif
 #endif
+	    egid = (int)getegid();
 	    break;
 	case ':':
 	    chopset = str_get(str);
@@ -640,7 +660,8 @@ STR *str;
 			s += strlen(++s);	/* this one is ok too */
 		}
 		if (origenviron[0] == s + 1) {	/* can grab env area too? */
-		    setenv("NoNeSuCh", Nullch);	/* force copy of environment */
+		    my_setenv("NoNeSuCh", Nullch);
+						/* force copy of environment */
 		    for (i = 0; origenviron[i]; i++)
 			if (origenviron[i] == s + 1)
 			    s += strlen(++s);
@@ -653,10 +674,10 @@ STR *str;
 		i = origalen;
 		str->str_cur = i;
 		str->str_ptr[i] = '\0';
-		bcopy(s, origargv[0], i);
+		Copy(s, origargv[0], i, char);
 	    }
 	    else {
-		bcopy(s, origargv[0], i);
+		Copy(s, origargv[0], i, char);
 		s = origargv[0]+i;
 		*s++ = '\0';
 		while (++i < origalen)
@@ -676,6 +697,7 @@ STR *str;
     }
 }
 
+int
 whichsig(sig)
 char *sig;
 {
@@ -725,7 +747,7 @@ int sig;
     if (!sub) {
 	if (dowarn)
 	    warn("SIG%s handler \"%s\" not defined.\n",
-		sig_name[sig], stab_name(stab) );
+		sig_name[sig], stab_ename(stab) );
 	return;
     }
     /*SUPPRESS 701*/
@@ -751,7 +773,7 @@ int sig;
     sub->depth++;
     if (sub->depth >= 2) {	/* save temporaries on recursion? */
 	if (sub->depth == 100 && dowarn)
-	    warn("Deep recursion on subroutine \"%s\"",stab_name(stab));
+	    warn("Deep recursion on subroutine \"%s\"",stab_ename(stab));
 	savelist(sub->tosave->ary_array,sub->tosave->ary_fill);
     }
 
@@ -888,6 +910,7 @@ int add;
 	strcpy(stab_magic(stab),"StB");
 	stab_val(stab) = Str_new(72,0);
 	stab_line(stab) = curcmd->c_line;
+	stab_estab(stab) = stab;
 	str_magic((STR*)stab, stab, '*', name, len);
 	stab_stash(stab) = stash;
 	if (isDIGIT(*name) && *name != '0') {
@@ -900,6 +923,7 @@ int add;
     }
 }
 
+void
 stab_fullname(str,stab)
 STR *str;
 STAB *stab;
@@ -913,6 +937,20 @@ STAB *stab;
     str_scat(str,stab->str_magic);
 }
 
+void
+stab_efullname(str,stab)
+STR *str;
+STAB *stab;
+{
+    HASH *tb = stab_estash(stab);
+
+    if (!tb)
+	return;
+    str_set(str,tb->tbl_name);
+    str_ncat(str,"'", 1);
+    str_scat(str,stab_estab(stab)->str_magic);
+}
+
 STIO *
 stio_new()
 {
@@ -923,6 +961,7 @@ stio_new()
     return stio;
 }
 
+void
 stab_check(min,max)
 int min;
 register int max;
@@ -960,6 +999,8 @@ register STAB *stab;
     STIO *stio;
     SUBR *sub;
 
+    if (!stab || !stab->str_ptr)
+	return;
     afree(stab_xarray(stab));
     stab_xarray(stab) = Null(ARRAY*);
     (void)hfree(stab_xhash(stab), FALSE);

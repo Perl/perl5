@@ -7,9 +7,14 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regexec.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 18:23:55 $
+/* $RCSfile: regexec.c,v $$Revision: 4.0.1.4 $$Date: 92/06/08 15:25:50 $
  *
  * $Log:	regexec.c,v $
+ * Revision 4.0.1.4  92/06/08  15:25:50  lwall
+ * patch20: pattern modifiers i and g didn't interact right
+ * patch20: in some cases $` and $' didn't get set by match
+ * patch20: /x{0}/ was wrongly interpreted as /x{0,}/
+ * 
  * Revision 4.0.1.3  91/11/05  18:23:55  lwall
  * patch11: prepared for ctype implementations that don't define isascii()
  * patch11: initial .* in pattern had dependency on value of $*
@@ -140,10 +145,9 @@ int safebase;	/* no need to remember string in subbase */
 	}
 
 	if (prog->do_folding) {
-		safebase = FALSE;
 		i = strend - string;
 		New(1101,c,i+1,char);
-		(void)bcopy(string, c, i+1);
+		Copy(string, c, i+1, char);
 		string = c;
 		strend = string + i;
 		for (s = string; s < strend; s++)
@@ -441,6 +445,8 @@ int safebase;	/* no need to remember string in subbase */
 	goto phooey;
 
     got_it:
+	prog->subbeg = strbeg;
+	prog->subend = strend;
 	if ((!safebase && (prog->nparens || sawampersand)) || prog->do_folding){
 		strend += dontbother;	/* uncheat */
 		if (safebase)			/* no need for $digit later */
@@ -453,8 +459,11 @@ int safebase;	/* no need to remember string in subbase */
 		    prog->subbeg = prog->subbase = s;
 		    prog->subend = s+i;
 		}
-		else
-		    s = prog->subbase;
+		else {
+		    i = strend - string + (stringarg - strbeg);
+		    prog->subbeg = s = prog->subbase;
+		    prog->subend = s+i;
+		}
 		s += (stringarg - strbeg);
 		for (i = 0; i <= prog->nparens; i++) {
 			if (prog->endp[i]) {
@@ -742,7 +751,7 @@ char *prog;
 			goto repeat;
 		case STAR:
 			ln = 0;
-			n = 0;
+			n = 32767;
 			scan = NEXTOPER(scan);
 			goto repeat;
 		case PLUS:
@@ -751,7 +760,7 @@ char *prog;
 			 * when we know what character comes next.
 			 */
 			ln = 1;
-			n = 0;
+			n = 32767;
 			scan = NEXTOPER(scan);
 		    repeat:
 			if (OP(next) == EXACTLY)
@@ -813,7 +822,7 @@ int max;
 	register char *loceol = regeol;
 
 	scan = reginput;
-	if (max && max < loceol - scan)
+	if (max != 32767 && max < loceol - scan)
 	    loceol = scan + max;
 	opnd = OPERAND(p);
 	switch (OP(p)) {

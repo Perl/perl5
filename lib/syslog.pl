@@ -2,6 +2,9 @@
 # syslog.pl
 #
 # $Log:	syslog.pl,v $
+# Revision 4.0.1.1  92/06/08  13:48:05  lwall
+# patch20: new warning for ambiguous use of unary operators
+# 
 # Revision 4.0  91/03/20  01:26:24  lwall
 # 4.0 baseline.
 # 
@@ -164,7 +167,7 @@ sub xlate {
     $name =~ y/a-z/A-Z/;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
     $name = "syslog'$name";
-    eval &$name || -1;
+    eval(&$name) || -1;
 }
 
 sub connect {

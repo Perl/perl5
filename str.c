@@ -1,4 +1,4 @@
-/* $RCSfile: str.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 18:40:51 $
+/* $RCSfile: str.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 15:40:43 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,16 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.c,v $
+ * Revision 4.0.1.5  92/06/08  15:40:43  lwall
+ * patch20: removed implicit int declarations on functions
+ * patch20: Perl now distinguishes overlapped copies from non-overlapped
+ * patch20: paragraph mode now skips extra newlines automatically
+ * patch20: fixed memory leak in doube-quote interpretation
+ * patch20: made /\$$foo/ look for literal '$foo'
+ * patch20: "$var{$foo'bar}" didn't scan subscript correctly
+ * patch20: a splice on non-existent array elements could dump core
+ * patch20: running taintperl explicitly now does checks even if $< == $>
+ * 
  * Revision 4.0.1.4  91/11/05  18:40:51  lwall
  * patch11: $foo .= <BAR> could overrun malloced memory
  * patch11: \$ didn't always make it through double-quoter to regexp routines
@@ -32,6 +42,9 @@
 #include "perl.h"
 #include "perly.h"
 
+static void ucase();
+static void lcase();
+
 #ifndef str_get
 char *
 str_get(str)
@@ -48,6 +61,7 @@ STR *str;
  * dlb the following functions are usually macros.
  */
 #ifndef str_true
+int
 str_true(Str)
 STR *Str;
 {
@@ -81,7 +95,7 @@ STR *Str;
 char *
 str_grow(str,newlen)
 register STR *str;
-#ifndef MSDOS
+#ifndef DOSISH
 register int newlen;
 #else
 unsigned long newlen;
@@ -99,7 +113,7 @@ unsigned long newlen;
 	str->str_len += str->str_u.str_useful;
 	str->str_ptr -= str->str_u.str_useful;
 	str->str_u.str_useful = 0L;
-	bcopy(s, str->str_ptr, str->str_cur+1);
+	Move(s, str->str_ptr, str->str_cur+1, char);
 	s = str->str_ptr;
 	str->str_state = SS_NORM;			/* normal again */
 	if (newlen > str->str_len)
@@ -116,6 +130,7 @@ unsigned long newlen;
     return s;
 }
 
+void
 str_numset(str,num)
 register STR *str;
 double num;
@@ -212,6 +227,7 @@ register STR *str;
  * as temporary.
  */
 
+void
 str_sset(dstr,sstr)
 STR *dstr;
 register STR *sstr;
@@ -273,6 +289,10 @@ register STR *sstr;
 		char *tmps = dstr->str_ptr;
 
 		if (*tmps == 'S' && bcmp(tmps,"StB",4) == 0) {
+		    if (dstr->str_magic && dstr->str_magic->str_rare == 'X') {
+			str_free(dstr->str_magic);
+			dstr->str_magic = Nullstr;
+		    }
 		    if (!dstr->str_magic) {
 			dstr->str_magic = str_smake(sstr->str_magic);
 			dstr->str_magic->str_rare = 'X';
@@ -296,6 +316,7 @@ register STR *sstr;
     }
 }
 
+void
 str_nset(str,ptr,len)
 register STR *str;
 register char *ptr;
@@ -305,7 +326,7 @@ register STRLEN len;
 	return;
     STR_GROW(str, len + 1);
     if (ptr)
-	(void)bcopy(ptr,str->str_ptr,len);
+	Move(ptr,str->str_ptr,len,char);
     str->str_cur = len;
     *(str->str_ptr+str->str_cur) = '\0';
     str->str_nok = 0;		/* invalidate number */
@@ -315,6 +336,7 @@ register STRLEN len;
 #endif
 }
 
+void
 str_set(str,ptr)
 register STR *str;
 register char *ptr;
@@ -327,7 +349,7 @@ register char *ptr;
 	ptr = "";
     len = strlen(ptr);
     STR_GROW(str, len + 1);
-    (void)bcopy(ptr,str->str_ptr,len+1);
+    Move(ptr,str->str_ptr,len+1,char);
     str->str_cur = len;
     str->str_nok = 0;		/* invalidate number */
     str->str_pok = 1;		/* validate pointer */
@@ -336,6 +358,7 @@ register char *ptr;
 #endif
 }
 
+void
 str_chop(str,ptr)	/* like set but assuming ptr is in str */
 register STR *str;
 register char *ptr;
@@ -358,6 +381,7 @@ register char *ptr;
     str->str_pok = 1;		/* validate pointer (and unstudy str) */
 }
 
+void
 str_ncat(str,ptr,len)
 register STR *str;
 register char *ptr;
@@ -368,7 +392,7 @@ register STRLEN len;
     if (!(str->str_pok))
 	(void)str_2ptr(str);
     STR_GROW(str, str->str_cur + len + 1);
-    (void)bcopy(ptr,str->str_ptr+str->str_cur,len);
+    Move(ptr,str->str_ptr+str->str_cur,len,char);
     str->str_cur += len;
     *(str->str_ptr+str->str_cur) = '\0';
     str->str_nok = 0;		/* invalidate number */
@@ -378,6 +402,7 @@ register STRLEN len;
 #endif
 }
 
+void
 str_scat(dstr,sstr)
 STR *dstr;
 register STR *sstr;
@@ -393,6 +418,7 @@ register STR *sstr;
 	str_ncat(dstr,sstr->str_ptr,sstr->str_cur);
 }
 
+void
 str_cat(str,ptr)
 register STR *str;
 register char *ptr;
@@ -407,7 +433,7 @@ register char *ptr;
 	(void)str_2ptr(str);
     len = strlen(ptr);
     STR_GROW(str, str->str_cur + len + 1);
-    (void)bcopy(ptr,str->str_ptr+str->str_cur,len+1);
+    Move(ptr,str->str_ptr+str->str_cur,len+1,char);
     str->str_cur += len;
     str->str_nok = 0;		/* invalidate number */
     str->str_pok = 1;		/* validate pointer */
@@ -530,13 +556,13 @@ STRLEN littlelen;
 	*bigend = '\0';
 	while (midend > mid)		/* shove everything down */
 	    *--bigend = *--midend;
-	(void)bcopy(little,big+offset,littlelen);
+	Move(little,big+offset,littlelen,char);
 	bigstr->str_cur += i;
 	STABSET(bigstr);
 	return;
     }
     else if (i == 0) {
-	(void)bcopy(little,bigstr->str_ptr+offset,len);
+	Move(little,bigstr->str_ptr+offset,len,char);
 	STABSET(bigstr);
 	return;
     }
@@ -551,12 +577,12 @@ STRLEN littlelen;
 
     if (mid - big > bigend - midend) {	/* faster to shorten from end */
 	if (littlelen) {
-	    (void)bcopy(little, mid, littlelen);
+	    Move(little, mid, littlelen,char);
 	    mid += littlelen;
 	}
 	i = bigend - midend;
 	if (i > 0) {
-	    (void)bcopy(midend, mid, i);
+	    Move(midend, mid, i,char);
 	    mid += i;
 	}
 	*mid = '\0';
@@ -571,12 +597,12 @@ STRLEN littlelen;
 	while (i--)
 	    *--midend = *--big;
 	if (littlelen)
-	    (void)bcopy(little, mid, littlelen);
+	    Move(little, mid, littlelen,char);
     }
     else if (littlelen) {
 	midend -= littlelen;
 	str_chop(bigstr,midend);
-	(void)bcopy(little,midend,littlelen);
+	Move(little,midend,littlelen,char);
     }
     else {
 	str_chop(bigstr,midend);
@@ -679,6 +705,7 @@ register STR *str;
 	return 0;
 }
 
+int
 str_eq(str1,str2)
 register STR *str1;
 register STR *str2;
@@ -699,6 +726,7 @@ register STR *str2;
     return !bcmp(str1->str_ptr, str2->str_ptr, str1->str_cur);
 }
 
+int
 str_cmp(str1,str2)
 register STR *str1;
 register STR *str2;
@@ -747,6 +775,15 @@ int append;
 
     if (str == &str_undef)
 	return Nullch;
+    if (rspara) {		/* have to do this both before and after */
+	do {			/* to make sure file boundaries work right */
+	    i = getc(fp);
+	    if (i != '\n') {
+		ungetc(i,fp);
+		break;
+	    }
+	} while (i != EOF);
+    }
 #ifdef STDSTDIO		/* Here is some breathtakingly efficient cheating */
     cnt = fp->_cnt;			/* get count into register */
     str->str_nok = 0;			/* invalidate number */
@@ -849,6 +886,15 @@ screamer:
 
 #endif /* STDSTDIO */
 
+    if (rspara) {
+        while (i != EOF) {
+	    i = getc(fp);
+	    if (i != '\n') {
+		ungetc(i,fp);
+		break;
+	    }
+	}
+    }
     return str->str_cur - append ? str->str_ptr : Nullch;
 }
 
@@ -906,7 +952,8 @@ STR *str;
     if (cmd->c_type != C_EXPR || cmd->c_next || arg->arg_type != O_LIST)
 	fatal("panic: error in parselist %d %x %d", cmd->c_type,
 	  cmd->c_next, arg ? arg->arg_type : -1);
-    Safefree(cmd);
+    cmd->c_expr = Nullarg;
+    cmd_free(cmd);
     eval_root = Nullcmd;
     return arg;
 }
@@ -945,10 +992,6 @@ STR *src;
 		if (*nointrp) {		/* in a regular expression */
 		    if (*s == '@')	/* always strip \@ */ /*SUPPRESS 530*/
 			;
-		    else if (*s == '$') {
-			if (s+1 >= send || index(nointrp, s[1]))
-			    str_ncat(str,s-1,1); /* only strip \$ for vars */
-		    }
 		    else		/* don't strip \\, \[, \{ etc. */
 			str_ncat(str,s-1,1);
 		}
@@ -988,27 +1031,30 @@ STR *src;
 		do {
 		    switch (*s) {
 		    case '[':
-			if (s[-1] != '$')
-			    brackets++;
+			brackets++;
 			break;
 		    case '{':
 			brackets++;
 			break;
 		    case ']':
-			if (s[-1] != '$')
-			    brackets--;
+			brackets--;
 			break;
 		    case '}':
 			brackets--;
 			break;
+		    case '$':
+		    case '%':
+		    case '@':
+		    case '&':
+		    case '*':
+			s = scanident(s,send,tokenbuf);
+			break;
 		    case '\'':
 		    case '"':
-			if (s[-1] != '$') {
-			    /*SUPPRESS 68*/
-			    s = cpytill(tokenbuf,s+1,send,*s,&len);
-			    if (s >= send)
-				fatal("Unterminated string");
-			}
+			/*SUPPRESS 68*/
+			s = cpytill(tokenbuf,s+1,send,*s,&len);
+			if (s >= send)
+			    fatal("Unterminated string");
 			break;
 		    }
 		    s++;
@@ -1254,6 +1300,7 @@ int sp;
     return str;
 }
 
+static void
 ucase(s,send)
 register char *s;
 register char *send;
@@ -1265,6 +1312,7 @@ register char *send;
     }
 }
 
+static void
 lcase(s,send)
 register char *s;
 register char *send;
@@ -1381,7 +1429,7 @@ STR *
 str_2mortal(str)
 register STR *str;
 {
-    if (str == &str_undef)
+    if (!str || str == &str_undef)
 	return str;
     if (++tmps_max > tmps_size) {
 	tmps_size = tmps_max;
@@ -1439,7 +1487,7 @@ register STR *old;
 	Str_Grow(old,0);
     if (new->str_ptr)
 	Safefree(new->str_ptr);
-    Copy(old,new,1,STR);
+    StructCopy(old,new,STR);
     if (old->str_ptr) {
 	new->str_ptr = nsavestr(old->str_ptr,old->str_len);
 	new->str_pok &= ~SP_TEMP;
@@ -1447,6 +1495,7 @@ register STR *old;
     return new;
 }
 
+void
 str_reset(s,stash)
 register char *s;
 HASH *stash;
@@ -1504,6 +1553,7 @@ HASH *stash;
 }
 
 #ifdef TAINT
+void
 taintproper(s)
 char *s;
 {
@@ -1511,7 +1561,7 @@ char *s;
     if (debug & 2048)
 	fprintf(stderr,"%s %d %d %d\n",s,tainted,uid, euid);
 #endif
-    if (tainted && (!euid || euid != uid || egid != gid)) {
+    if (tainted && (!euid || euid != uid || egid != gid || taintanyway)) {
 	if (!unsafe)
 	    fatal("%s", s);
 	else if (dowarn)
@@ -1519,6 +1569,7 @@ char *s;
     }
 }
 
+void
 taintenv()
 {
     register STR *envstr;

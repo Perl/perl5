@@ -7,9 +7,15 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 22:55:14 $
+/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 15:23:36 $
  *
  * $Log:	regcomp.c,v $
+ * Revision 4.0.1.5  92/06/08  15:23:36  lwall
+ * patch20: Perl now distinguishes overlapped copies from non-overlapped
+ * patch20: /^stuff/ wrongly assumed an implicit $* == 1
+ * patch20: /x{0}/ was wrongly interpreted as /x{0,}/
+ * patch20: added \W, \S and \D inside /[...]/
+ * 
  * Revision 4.0.1.4  91/11/05  22:55:14  lwall
  * patch11: Erratum
  * 
@@ -86,7 +92,11 @@
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
 	((*s) == '{' && regcurly(s)))
+#ifdef atarist
+#define	PERL_META	"^$.[()|?+*\\"
+#else
 #define	META	"^$.[()|?+*\\"
+#endif
 
 #ifdef SPSTART
 #undef SPSTART		/* dratted cpp namespace... */
@@ -160,10 +170,6 @@ int fold;
 	int backest;
 	int curback;
 	int minlen;
-#ifndef safemalloc
-	extern char *safemalloc();
-#endif
-	extern char *savestr();
 	int sawplus = 0;
 	int sawopen = 0;
 
@@ -198,7 +204,7 @@ int fold;
 
 	/* Second pass: emit code. */
 	if (regsawbracket)
-	    bcopy(regprecomp,exp,xend-exp);
+	    Copy(regprecomp,exp,xend-exp,char);
 	r->prelen = xend-exp;
 	r->precomp = regprecomp;
 	r->subbeg = r->subbase = NULL;
@@ -243,9 +249,14 @@ int fold;
 			r->regstclass = first;
 		else if (OP(first) == BOUND || OP(first) == NBOUND)
 			r->regstclass = first;
-		else if (OP(first) == BOL ||
-		    (OP(first) == STAR && OP(NEXTOPER(first)) == ANY) ) {
-			/* kinda turn .* into ^.* */
+		else if (OP(first) == BOL) {
+			r->reganch = ROPT_ANCH;
+			first = NEXTOPER(first);
+		    	goto again;
+		}
+		else if ((OP(first) == STAR && OP(NEXTOPER(first)) == ANY) &&
+			 !(r->reganch & ROPT_ANCH) ) {
+			/* turn .* into ^.* with an implied $*=1 */
 			r->reganch = ROPT_ANCH | ROPT_IMPLICIT;
 			first = NEXTOPER(first);
 		    	goto again;
@@ -564,6 +575,8 @@ int *flagp;
 		    else
 			max = regparse;
 		    tmp = atoi(max);
+		    if (!tmp && *max != '0')
+			tmp = 32767;		/* meaning "infinity" */
 		    if (tmp && tmp < iter)
 			fatal("Can't do {n,m} with n > m");
 		    if (regcode != &regdummy) {
@@ -967,25 +980,38 @@ regclass()
 			class = UCHARAT(regparse++);
 			switch (class) {
 			case 'w':
-				for (class = 'a'; class <= 'z'; class++)
+				for (class = 0; class < 256; class++)
+				    if (isALNUM(class))
 					regset(bits,def,class);
-				for (class = 'A'; class <= 'Z'; class++)
+				lastclass = 1234;
+				continue;
+			case 'W':
+				for (class = 0; class < 256; class++)
+				    if (!isALNUM(class))
 					regset(bits,def,class);
-				for (class = '0'; class <= '9'; class++)
-					regset(bits,def,class);
-				regset(bits,def,'_');
 				lastclass = 1234;
 				continue;
 			case 's':
-				regset(bits,def,' ');
-				regset(bits,def,'\t');
-				regset(bits,def,'\r');
-				regset(bits,def,'\f');
-				regset(bits,def,'\n');
+				for (class = 0; class < 256; class++)
+				    if (isSPACE(class))
+					regset(bits,def,class);
+				lastclass = 1234;
+				continue;
+			case 'S':
+				for (class = 0; class < 256; class++)
+				    if (!isSPACE(class))
+					regset(bits,def,class);
 				lastclass = 1234;
 				continue;
 			case 'd':
 				for (class = '0'; class <= '9'; class++)
+					regset(bits,def,class);
+				lastclass = 1234;
+				continue;
+			case 'D':
+				for (class = 0; class < '0'; class++)
+					regset(bits,def,class);
+				for (class = '9' + 1; class < 256; class++)
 					regset(bits,def,class);
 				lastclass = 1234;
 				continue;
@@ -1184,6 +1210,9 @@ char *opnd;
 	*place++ = '\0';
 	while (offset-- > 0)
 	    *place++ = '\0';
+#ifdef REGALIGN
+	*place++ = '\177';
+#endif
 }
 
 /*
@@ -1420,6 +1449,7 @@ char *op;
 }
 #endif /* DEBUGGING */
 
+void
 regfree(r)
 struct regexp *r;
 {

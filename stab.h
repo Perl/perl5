@@ -1,4 +1,4 @@
-/* $RCSfile: stab.h,v $$Revision: 4.0.1.2 $$Date: 91/11/05 18:36:15 $
+/* $RCSfile: stab.h,v $$Revision: 4.0.1.3 $$Date: 92/06/08 15:33:44 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	stab.h,v $
+ * Revision 4.0.1.3  92/06/08  15:33:44  lwall
+ * patch20: fixed confusion between a *var's real name and its effective name
+ * patch20: ($<,$>) = ... didn't work on some architectures
+ * 
  * Revision 4.0.1.2  91/11/05  18:36:15  lwall
  * patch11: length($x) was sometimes wrong for numeric $x
  * 
@@ -25,7 +29,7 @@ struct stabptrs {
     FCMD	*stbp_form;	/* format value */
     ARRAY	*stbp_array;	/* array value */
     HASH	*stbp_hash;	/* associative array value */
-    HASH	*stbp_stash;	/* symbol table for this stab */
+    STAB	*stbp_stab;	/* effective stab, if *glob */
     SUBR	*stbp_sub;	/* subroutine value */
     int		stbp_lastexpr;	/* used by nothing_in_common() */
     line_t	stbp_line;	/* line first declared at (for -w) */
@@ -56,12 +60,19 @@ HASH *stab_hash();
 				 ((STBP*)(stab->str_ptr))->stbp_hash : \
 				 ((STBP*)(hadd(stab)->str_ptr))->stbp_hash)
 #endif			/* Microport 2.4 hack */
-#define stab_stash(stab)	(((STBP*)(stab->str_ptr))->stbp_stash)
 #define stab_sub(stab)		(((STBP*)(stab->str_ptr))->stbp_sub)
 #define stab_lastexpr(stab)	(((STBP*)(stab->str_ptr))->stbp_lastexpr)
 #define stab_line(stab)		(((STBP*)(stab->str_ptr))->stbp_line)
 #define stab_flags(stab)	(((STBP*)(stab->str_ptr))->stbp_flags)
+
+#define stab_stab(stab)		(stab->str_magic->str_u.str_stab)
+#define stab_estab(stab)	(((STBP*)(stab->str_ptr))->stbp_stab)
+
 #define stab_name(stab)		(stab->str_magic->str_ptr)
+#define stab_ename(stab)	stab_name(stab_estab(stab))
+
+#define stab_stash(stab)	(stab->str_magic->str_u.str_stash)
+#define stab_estash(stab)	stab_stash(stab_estab(stab))
 
 #define SF_VMAGIC 1		/* call routine to dereference STR val */
 #define SF_MULTI 2		/* seen more than once */
@@ -114,10 +125,18 @@ EXT STAB *stab_index[128];
 EXT unsigned short statusvalue;
 
 EXT int delaymagic INIT(0);
-#define DM_DELAY 1
-#define DM_REUID 2
-#define DM_REGID 4
+#define DM_UID   0x003
+#define DM_RUID   0x001
+#define DM_EUID   0x002
+#define DM_GID   0x030
+#define DM_RGID   0x010
+#define DM_EGID   0x020
+#define DM_DELAY 0x100
 
 STAB *aadd();
 STAB *hadd();
 STAB *fstab();
+void stabset();
+void stab_fullname();
+void stab_efullname();
+void stab_check();

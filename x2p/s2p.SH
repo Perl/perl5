@@ -20,8 +20,12 @@ echo "Extracting s2p (with variable substitutions)"
 : Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
 : Protect any dollar signs and backticks that you do not want interpreted
 : by putting a backslash in front.  You may delete these comments.
+rm -f s2p
 $spitshell >s2p <<!GROK!THIS!
 #!$bin/perl
+
+eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
+	if \$running_under_some_shell;
 
 \$bin = '$bin';
 !GROK!THIS!
@@ -29,9 +33,14 @@ $spitshell >s2p <<!GROK!THIS!
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $RCSfile: s2p.SH,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:19:18 $
+# $RCSfile: s2p.SH,v $$Revision: 4.0.1.2 $$Date: 92/06/08 17:26:31 $
 #
 # $Log:	s2p.SH,v $
+# Revision 4.0.1.2  92/06/08  17:26:31  lwall
+# patch20: s2p didn't output portable startup code
+# patch20: added ... as variant on ..
+# patch20: s2p didn't translate s/pat/\&/ or s/pat/\$/ or s/pat/\\1/ right
+# 
 # Revision 4.0.1.1  91/06/07  12:19:18  lwall
 # patch4: s2p now handles embedded newlines better and optimizes common idioms
 # 
@@ -162,7 +171,12 @@ while (<>) {
 	} else {
 	    &Die("Invalid second address at line $.\n");
 	}
-	$addr1 .= " .. $addr2";
+	if ($addr2 =~ /^\d+$/) {
+	    $addr1 .= "..$addr2";
+	}
+	else {
+	    $addr1 .= "...$addr2";
+	}
     }
 
     # Now we check for metacommands {, }, and ! and worry
@@ -488,6 +502,19 @@ EOT
 		      substr($_,$i,1) =~ /^[<>]$/) {
 			substr($_,$i,1) = 'b';
 		    }
+		    elsif ($repl && substr($_,$i,1) =~ /^\d$/) {
+			substr($_,$i-1,1) = '$';
+		    }
+		}
+		elsif ($c eq '&' && $repl) {
+		    substr($_, $i, 0) = '$';
+		    $i++;
+		    $len++;
+		}
+		elsif ($c eq '$' && $repl) {
+		    substr($_, $i, 0) = '\\';
+		    $i++;
+		    $len++;
 		}
 		elsif ($c eq '[' && !$repl) {
 		    $i++ if substr($_,$i,1) eq '^';
@@ -515,9 +542,6 @@ EOT
 	    $end = substr($_, $end + 1, 1000);
 	    &simplify($pat);
 	    $dol = '$';
-	    $repl =~ s/\$/\\$/;
-	    $repl =~ s'&'$&'g;
-	    $repl =~ s/[\\]([0-9])/$dol$1/g;
 	    $subst = "$pat$repl$delim";
 	    $cmd = '';
 	    while ($end) {
