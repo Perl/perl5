@@ -7631,6 +7631,25 @@ echo " "
 case "$d_msgctl$d_msgget$d_msgsnd$d_msgrcv" in
 *"$undef"*) h_msg=false;;
 esac
+case "$osname" in
+freebsd)
+    case "`ipcs 2>&1`" in
+    "SVID messages"*"not configured"*)
+	echo "But your FreeBSD kernel does not have the msg*(2) configured." >&4
+        h_msg=false
+	val="$undef"
+	set msgctl d_msgctl
+	eval $setvar
+	set msgget d_msgget
+	eval $setvar
+	set msgsnd d_msgsnd
+	eval $setvar
+	set msgrcv d_msgrcv
+	eval $setvar
+	;;
+    esac
+    ;;
+esac
 : we could also check for sys/ipc.h ...
 if $h_msg && $test `./findhdr sys/msg.h`; then
 	echo "You have the full msg*(2) library." >&4
@@ -8113,6 +8132,23 @@ echo " "
 case "$d_semctl$d_semget$d_semop" in
 *"$undef"*) h_sem=false;;
 esac
+case "$osname" in
+freebsd)
+    case "`ipcs 2>&1`" in
+    "SVID messages"*"not configured"*)
+	echo "But your FreeBSD kernel does not have the sem*(2) configured." >&4
+        h_sem=false
+	val="$undef"
+	set semctl d_semctl
+	eval $setvar
+	set semget d_semget
+	eval $setvar
+	set semop d_semop
+	eval $setvar
+	;;
+    esac
+    ;;
+esac
 : we could also check for sys/ipc.h ...
 if $h_sem && $test `./findhdr sys/sem.h`; then
 	echo "You have the full sem*(2) library." >&4
@@ -8458,6 +8494,25 @@ h_shm=true
 echo " "
 case "$d_shmctl$d_shmget$d_shmat$d_shmdt" in
 *"$undef"*) h_shm=false;;
+esac
+case "$osname" in
+freebsd)
+    case "`ipcs 2>&1`" in
+    "SVID shared memory"*"not configured"*)
+	echo "But your FreeBSD kernel does not have the shm*(2) configured." >&4
+        h_shm=false
+	val="$undef"
+	set shmctl d_shmctl
+	evat $setvar
+	set shmget d_shmget
+	evat $setvar
+	set shmat d_shmat
+	evat $setvar
+	set shmdt d_shmdt
+	evat $setvar
+	;;
+    esac
+    ;;
 esac
 : we could also check for sys/ipc.h ...
 if $h_shm && $test `./findhdr sys/shm.h`; then

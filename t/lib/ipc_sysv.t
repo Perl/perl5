@@ -28,6 +28,27 @@ my $sem;
 
 $SIG{__DIE__} = 'cleanup'; # will cleanup $msg and $sem if needed
 
+# FreeBSD is known to throw this if there's no SysV IPC in the kernel.
+$SIG{SYS} = sub {
+    print STDERR <<EOM;
+SIGSYS caught.
+It may be that your kernel does not have SysV IPC configured.
+
+EOM
+    if ($^O eq 'freebsd') {
+	print STDERR <<EOM;
+You must have following options in your kernel:
+
+options         SYSVSHM
+options         SYSVSEM
+options         SYSVMSG
+
+See config(8).
+EOM
+    }
+    exit(1);
+};
+
 if ($Config{'d_msgget'} eq 'define' &&
     $Config{'d_msgctl'} eq 'define' &&
     $Config{'d_msgsnd'} eq 'define' &&
