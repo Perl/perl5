@@ -187,4 +187,8 @@ explain if $fail;
 
 bye(); # does the necessary cleanup
 
+END {
+   unlink "big"; # be paranoid about leaving 5 gig files lying around
+}
+
 # eof

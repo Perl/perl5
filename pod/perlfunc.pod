@@ -2149,6 +2149,10 @@ C<last> cannot be used to exit a block which returns a value such as
 C<eval {}>, C<sub {}> or C<do {}>, and should not be used to exit
 a grep() or map() operation.
 
+Note that a block by itself is semantically identical to a loop
+that executes once.  Thus C<last> can be used to effect an early
+exit out of such a block.
+
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
 
@@ -2393,6 +2397,9 @@ refers to the innermost enclosing loop.
 C<next> cannot be used to exit a block which returns a value such as
 C<eval {}>, C<sub {}> or C<do {}>, and should not be used to exit
 a grep() or map() operation.
+
+Note that a block by itself is semantically identical to a loop
+that executes once.  Thus C<next> will exit such a block early.
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
@@ -2700,6 +2707,18 @@ Returns the numeric (ASCII or Unicode) value of the first character of EXPR.  If
 EXPR is omitted, uses C<$_>.  For the reverse, see L</chr>.
 See L<utf8> for more about Unicode.
 
+=item our EXPR
+
+An C<our> declares the listed variables to be valid globals within
+the enclosing block, file, or C<eval>.  That is, it has the same
+scoping rules as a "my" declaration, but does not create a local
+variable.  If more than one value is listed, the list must be placed
+in parentheses.  The C<our> declaration has no semantic effect unless
+"use strict vars" is in effect, in which case it lets you use the
+declared global variable without qualifying it with a package name.
+(But only within the lexical scope of the C<our> declaration.  In this
+it differs from "use vars", which is package scoped.)
+
 =item pack TEMPLATE,LIST
 
 Takes a list of values and packs it into a binary structure,
@@ -2809,9 +2828,9 @@ C<"P"> is C<undef>.
 
 =item *
 
-The C<"#"> character allows packing and unpacking of strings where the
+The C<"/"> character allows packing and unpacking of strings where the
 packed structure contains a byte count followed by the string itself.
-You write I<length-item>C<#>I<string-item>.
+You write I<length-item>C</>I<string-item>.
 
 The I<length-item> can be any C<pack> template letter,
 and describes how the length value is packed.
@@ -2823,9 +2842,9 @@ The I<string-item> must, at present, be C<"A*">, C<"a*"> or C<"Z*">.
 For C<unpack> the length of the string is obtained from the I<length-item>,
 but if you put in the '*' it will be ignored.
 
-    unpack 'C#a', "\04Gurusamy";        gives 'Guru'
-    unpack 'a3#A* A*', '007 Bond  J ';  gives (' Bond','J')
-    pack 'n#a* w#a*','hello,','world';  gives "\000\006hello,\005world"
+    unpack 'C/a', "\04Gurusamy";        gives 'Guru'
+    unpack 'a3/A* A*', '007 Bond  J ';  gives (' Bond','J')
+    pack 'n/a* w/a*','hello,','world';  gives "\000\006hello,\005world"
 
 The I<length-item> is not returned explicitly from C<unpack>.
 
@@ -2861,7 +2880,7 @@ L<Config>:
        print $Config{longsize},     "\n";
        print $Config{longlongsize}, "\n";
 
-(The C<$Config{longlongsize}> will be empty if your system does
+(The C<$Config{longlongsize}> will be undefine if your system does
 not support long longs.) 
 
 =item *
@@ -2869,7 +2888,7 @@ not support long longs.)
 The integer formats C<"s">, C<"S">, C<"i">, C<"I">, C<"l">, and C<"L">
 are inherently non-portable between processors and operating systems
 because they obey the native byteorder and endianness.  For example a
-4-byte integer 0x87654321 (2271560481 decimal) be ordered natively
+4-byte integer 0x12345678 (305419896 decimal) be ordered natively
 (arranged in and handled by the CPU registers) into bytes as
  
  	0x12 0x34 0x56 0x78	# little-endian
@@ -2885,7 +2904,7 @@ the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
 Plea for Peace" by Danny Cohen, USC/ISI IEN 137, April 1, 1980) and
 the egg-eating habits of the Lilliputians.
  
-Some systems may even have weird byte orders such as
+Some systems may have even weirder byte orders such as
  
  	0x56 0x78 0x12 0x34
  	0x34 0x12 0x78 0x56
@@ -2930,6 +2949,10 @@ enough C<'x'>es while packing.  There is no way to pack() and unpack()
 could know where the bytes are going to or coming from.  Therefore
 C<pack> (and C<unpack>) handle their output and input as flat
 sequences of bytes.
+
+=item *
+
+A comment in a TEMPLATE starts with C<#> and goes to the end of line.
 
 =back
 
@@ -3268,6 +3291,10 @@ themselves about what was just input:
 C<redo> cannot be used to retry a block which returns a value such as
 C<eval {}>, C<sub {}> or C<do {}>, and should not be used to exit
 a grep() or map() operation.
+
+Note that a block by itself is semantically identical to a loop
+that executes once.  Thus C<redo> inside such a block will effectively
+turn it into a looping construct.
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.

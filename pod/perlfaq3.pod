@@ -53,7 +53,7 @@ Have you used C<-w>?  It enables warnings for dubious practices.
 Have you tried C<use strict>?  It prevents you from using symbolic
 references, makes you predeclare any subroutines that you call as bare
 words, and (probably most importantly) forces you to predeclare your
-variables with C<my> or C<use vars>.
+variables with C<my> or C<our> or C<use vars>.
 
 Did you check the returns of each and every system call?  The operating
 system (and thus Perl) tells you whether they worked or not, and if not

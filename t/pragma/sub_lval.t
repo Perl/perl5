@@ -5,8 +5,8 @@ BEGIN {
     unshift @INC, '../lib';
 }
 
-sub a {use attrs 'lvalue'; my $a = 34; bless \$a}  # Return a temporary
-sub b {use attrs 'lvalue'; shift}
+sub a : lvalue { my $a = 34; bless \$a }  # Return a temporary
+sub b : lvalue { shift }
 
 my $out = a(b());		# Check that temporaries are allowed.
 print "# `$out'\nnot " unless ref $out eq 'main'; # Not reached if error.
@@ -20,8 +20,8 @@ my $in;
 
 # Check that we can return localized values from subroutines:
 
-sub in {use attrs 'lvalue'; $in = shift;}
-sub neg {use attrs 'lvalue';  #(num_str) return num_str
+sub in : lvalue { $in = shift; }
+sub neg : lvalue {  #(num_str) return num_str
     local $_ = shift;
     s/^\+/-/;
     $_;
@@ -32,11 +32,11 @@ in(neg("+2"));
 print "# `$in'\nnot " unless $in eq '-2';
 print "ok 3\n";
 
-sub get_lex {use attrs 'lvalue'; $in}
-sub get_st {use attrs 'lvalue'; $blah}
-sub id {use attrs 'lvalue'; shift}
-sub id1 {use attrs 'lvalue'; $_[0]}
-sub inc {use attrs 'lvalue'; ++$_[0]}
+sub get_lex : lvalue { $in }
+sub get_st : lvalue { $blah }
+sub id : lvalue { shift }
+sub id1 : lvalue { $_[0] }
+sub inc : lvalue { ++$_[0] }
 
 $in = 5;
 $blah = 3;
@@ -139,9 +139,9 @@ $#c = 3;			# These slots are not fillable.
 
 =for disabled constructs
 
-sub a3 {use attrs 'lvalue'; @a}
-sub b2 {use attrs 'lvalue'; @b}
-sub c4 {use attrs 'lvalue'; @c}
+sub a3 :lvalue {@a}
+sub b2 : lvalue {@b}
+sub c4: lvalue {@c}
 
 $_ = '';
 
@@ -162,7 +162,7 @@ print "ok 22\n";
 
 my $var;
 
-sub a::var {use attrs 'lvalue'; $var}
+sub a::var : lvalue { $var }
 
 "a"->var = 45;
 
@@ -177,7 +177,7 @@ $o->var = 47;
 print "# `$var' ne 47\nnot " unless $var eq 47;
 print "ok 24\n";
 
-sub o {use attrs 'lvalue'; $o}
+sub o : lvalue { $o }
 
 o->var = 49;
 
@@ -242,7 +242,7 @@ print "# '$_', '$x0', '$x1'.\nnot "
   unless /Can\'t modify non-lvalue subroutine call/;
 print "ok 30\n";
 
-sub lv0 {use attrs 'lvalue';}		# Converted to lv10 in scalar context
+sub lv0 : lvalue { }		# Converted to lv10 in scalar context
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -254,7 +254,7 @@ print "# '$_'.\nnot "
   unless /Can\'t return a readonly value from lvalue subroutine/;
 print "ok 31\n";
 
-sub lv10 {use attrs 'lvalue';}
+sub lv10 : lvalue {}
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -265,7 +265,7 @@ EOE
 print "# '$_'.\nnot " if defined $_;
 print "ok 32\n";
 
-sub lv1u {use attrs 'lvalue'; undef }
+sub lv1u :lvalue { undef }
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -288,7 +288,7 @@ print "# '$_'.\nnot "
 print "ok 34\n";
 
 $x = '1234567';
-sub lv1t {use attrs 'lvalue'; index $x, 2 }
+sub lv1t : lvalue { index $x, 2 }
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -312,7 +312,7 @@ print "ok 36\n";
 
 $xxx = 'xxx';
 sub xxx () { $xxx }  # Not lvalue
-sub lv1tmp {use attrs 'lvalue'; xxx }			# is it a TEMP?
+sub lv1tmp : lvalue { xxx }			# is it a TEMP?
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -335,7 +335,7 @@ print "# '$_'.\nnot "
 print "ok 38\n";
 
 sub xxx () { 'xxx' } # Not lvalue
-sub lv1tmpr {use attrs 'lvalue'; xxx }			# is it a TEMP?
+sub lv1tmpr : lvalue { xxx }			# is it a TEMP?
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -359,7 +359,7 @@ print "ok 40\n";
 
 =for disabled constructs
 
-sub lva {use attrs 'lvalue';@a}
+sub lva : lvalue {@a}
 
 $_ = undef;
 @a = ();
@@ -401,7 +401,7 @@ print "ok 43\n";
 
 print "ok $_\n" for 41..43;
 
-sub lv1n {use attrs 'lvalue'; $newvar }
+sub lv1n : lvalue { $newvar }
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -412,7 +412,7 @@ EOE
 print "# '$_', '$newvar'.\nnot " unless "'$newvar' $_" eq "'4' ";
 print "ok 44\n";
 
-sub lv1nn {use attrs 'lvalue'; $nnewvar }
+sub lv1nn : lvalue { $nnewvar }
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;

@@ -328,8 +328,6 @@ perl_destruct(pTHXx)
     PL_warnhook = Nullsv;
     SvREFCNT_dec(PL_diehook);
     PL_diehook = Nullsv;
-    SvREFCNT_dec(PL_parsehook);
-    PL_parsehook = Nullsv;
 
     /* call exit list functions */
     while (PL_exitlistlen-- > 0)
@@ -442,6 +440,10 @@ perl_destruct(pTHXx)
     hv = PL_defstash;
     PL_defstash = 0;
     SvREFCNT_dec(hv);
+
+    /* clear queued errors */
+    SvREFCNT_dec(PL_errors);
+    PL_errors = Nullsv;
 
     FREETMPS;
     if (destruct_level >= 2 && ckWARN_d(WARN_INTERNAL)) {

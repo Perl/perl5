@@ -47,7 +47,7 @@ else
     {print "not ok 5\n";}
 
 # This could be stricter.
-if (gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Nov|Dec) ([ \d]\d) (\d\d):(\d\d):(\d\d) (\d\d\d\d)$/)
+if (gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([ \d]\d) (\d\d):(\d\d):(\d\d) (\d\d\d\d)$/)
     {print "ok 6\n";}
 else
     {print "not ok 6\n";}

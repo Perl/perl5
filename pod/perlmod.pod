@@ -279,7 +279,7 @@ create a file called F<Some/Module.pm> and start with this template:
 
     BEGIN {
         use Exporter   ();
-        use vars       qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+        our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
         # set the version for version checking
         $VERSION     = 1.00;
@@ -294,10 +294,11 @@ create a file called F<Some/Module.pm> and start with this template:
         # as well as any optionally exported functions
         @EXPORT_OK   = qw($Var1 %Hashit &func3);
     }
-    use vars      @EXPORT_OK;
+    our @EXPORT_OK;
 
     # non-exported package globals go here
-    use vars      qw(@more $stuff);
+    our @more;
+    our $stuff;
 
     # initialize package globals, first exported ones
     $Var1   = '';

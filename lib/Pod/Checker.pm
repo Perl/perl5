@@ -1,10 +1,7 @@
 #############################################################################
 # Pod/Checker.pm -- check pod documents for syntax errors
 #
-# Based on Tom Christiansen's Pod::Text::pod2text() function
-# (with modifications).
-#
-# Copyright (C) 1994-1999 Tom Christiansen. All rights reserved.
+# Copyright (C) 1994-1999 by Bradford Appleton. All rights reserved.
 # This file is part of "PodParser". PodParser is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.
@@ -13,7 +10,7 @@
 package Pod::Checker;
 
 use vars qw($VERSION);
-$VERSION = 1.081;  ## Current version of this package
+$VERSION = 1.085;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 =head1 NAME
@@ -140,7 +137,27 @@ sub new {
 
 sub initialize {
     my $self = shift;
-    $self->num_errors(0);
+    ## Initialize number of errors, and setup an error function to
+    ## increment this number and then print to the designated output.
+    $self->{_NUM_ERRORS} = 0;
+    $self->errorsub('poderror');
+}
+
+## Invoked as $self->poderror( @args ), or $self->poderror( {%opts}, @args )
+sub poderror {
+    my $self = shift;
+    my %opts = (ref $_[0]) ? %{shift()} : ();
+
+    ## Retrieve options
+    chomp( my $msg  = ($opts{-msg} || "")."@_" );
+    my $line = (exists $opts{-line}) ? " at line $opts{-line}" : "";
+    my $file = (exists $opts{-file}) ? " in file $opts{-file}" : "";
+    my $severity = (exists $opts{-severity}) ? "*** $opts{-severity}: " : "";
+
+    ## Increment error count and print message
+    ++($self->{_NUM_ERRORS});
+    my $out_fh = $self->output_handle();
+    print $out_fh ($severity, $msg, $line, $file, "\n");
 }
 
 sub num_errors {
@@ -164,18 +181,16 @@ sub end_pod {
 }
 
 sub command { 
-    my ($self, $command, $paragraph, $line_num, $pod_para) = @_;
+    my ($self, $cmd, $paragraph, $line_num, $pod_para) = @_;
     my ($file, $line) = $pod_para->file_line;
-    my $out_fh  = $self->output_handle();
     ## Check the command syntax
-    if (! $VALID_COMMANDS{$command}) {
-       ++($self->{_NUM_ERRORS});
-       _invalid_cmd($out_fh, $command, $paragraph, $file, $line);
+    if (! $VALID_COMMANDS{$cmd}) {
+       $self->poderror({ -line => $line, -file => $file, -severity => 'ERROR',
+                         -msg => "Unknown command \"$cmd\"" });
     }
     else {
        ## check syntax of particular command
     }
-    ## Check the interior sequences in the command-text
     my $expansion = $self->interpolate($paragraph, $line_num);
 }
 
@@ -186,39 +201,19 @@ sub verbatim {
 
 sub textblock { 
     my ($self, $paragraph, $line_num, $pod_para) = @_;
-    my $out_fh  = $self->output_handle();
-    ## Check the interior sequences in the text (set $SIG{__WARN__} to
-    ## send parse_text warnings about untermnated sequences to $out_fh)
-    local  $SIG{__WARN__} = sub {
-                                ++($self->{_NUM_ERRORS});
-                                print $out_fh @_
-                            };
     my $expansion = $self->interpolate($paragraph, $line_num);
 }
 
 sub interior_sequence { 
     my ($self, $seq_cmd, $seq_arg, $pod_seq) = @_;
     my ($file, $line) = $pod_seq->file_line;
-    my $out_fh  = $self->output_handle();
     ## Check the sequence syntax
     if (! $VALID_SEQUENCES{$seq_cmd}) {
-       ++($self->{_NUM_ERRORS});
-       _invalid_seq($out_fh, $seq_cmd, $seq_arg, $file, $line);
+       $self->poderror({ -line => $line, -file => $file, -severity => 'ERROR',
+                         -msg => "Unknown interior-sequence \"$seq_cmd\"" });
     }
     else {
        ## check syntax of the particular sequence
     }
-}
-
-sub _invalid_cmd {
-    my ($fh, $cmd, $text, $file, $line) = @_;
-    print $fh "*** ERROR: Unknown command \"$cmd\""
-            . " at line $line of file $file\n";
-}
-
-sub _invalid_seq {
-    my ($fh, $cmd, $text, $file, $line) = @_;
-    print $fh "*** ERROR: Unknown interior-sequence \"$cmd\""
-            . " at line $line of file $file\n";
 }
 

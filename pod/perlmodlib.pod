@@ -36,7 +36,7 @@ which lasts until the end of that BLOCK.
 
 Some pragmas are lexically scoped--typically those that affect the
 C<$^H> hints variable.  Others affect the current package instead,
-like C<use vars> and C<use subs>, whic allow you to predeclare a
+like C<use vars> and C<use subs>, which allow you to predeclare a
 variables or subroutines within a particular I<file> rather than
 just a block.  Such declarations are effective for the entire file
 for which they were declared.  You cannot rescind them with C<no

@@ -2,6 +2,7 @@
  
 use Config;
 use File::Basename qw(&basename &dirname);
+use File::Spec;
 use Cwd;
  
 # List explicitly here the variables you want Configure to
@@ -270,13 +271,14 @@ sub _createCode
     if (@_ == 3)                                   # compiling a program   
     {
         chmod $generated_file, 0777 & ~umask if $backend eq "Bytecode";
-
+	my $null=File::Spec->devnull;
         _print( "$^X -I@INC -MB::Stash -c  $file\n", 36);
-        my $stash=`$^X -I@INC -MB::Stash -c  $file 2>/dev/null|tail -1`;
+        my @stash=`$^X -I@INC -MB::Stash -c  $file 2>$null`;
+	my $stash=$stash[-1];
         chomp $stash;
 
         _print( "$^X -I@INC -MO=$backend,$stash $file\n", 36);
-        $return =  _run("$^X -I@INC -MO=$backend,$stash $file >> $generated_file", 9);
+        $return =  _run("$^X -I@INC -MO=$backend,$stash,-o$generated_file $file", 9);
         $return;
     }
     else                                           # compiling a shared object
@@ -284,7 +286,7 @@ sub _createCode
         _print( 
             "$^X -I@INC -MO=$backend,-m$final_output $file\n", 36);
         $return = 
-        _run("$^X -I@INC -MO=$backend,-m$final_output $file >> $generated_file", 9);
+        _run("$^X -I@INC -MO=$backend,-m$final_output,-o$generated_file $file  ", 9);
         $return;
     }
 }
@@ -373,7 +375,9 @@ sub _ccharness
 
     my $libs = _getSharedObjects($sourceprog);
 
-    my $cccmd = "$Config{cc} $Config{ccflags} $optimize $incdir "
+    my $ccflags = $Config{ccflags};
+    $ccflags .= ' -DUSEIMPORTLIB' if $Config{osname} =~ /cygwin/i;
+    my $cccmd = "$Config{cc} $ccflags $optimize $incdir "
 		."@args $dynaloader $linkargs @$libs";
 
     _print ("$cccmd\n", 36);
@@ -390,17 +394,8 @@ sub _getSharedObjects
     my ($tmpprog);
     ($tmpprog = $sourceprog) =~ s"(.*)[\\/](.*)"$2";
 
-    my $tempdir;
+    my $tempdir= File::Spec->tmpdir;
 
-    if ($Config{'osname'} eq 'MSWin32') 
-    { 
-         $tempdir = $ENV{TEMP};
-         $tempdir =~ s[\\][/]g;
-    }
-    else
-    {
-         $tempdir = "/tmp";
-    }
     $tmpfile = "$tempdir/$tmpprog.tst";
     $incfile = "$tempdir/$tmpprog.val";
 
@@ -474,12 +469,13 @@ sub _lookforAuto
     my ($relabs, $relshared);
     my ($prefix);
     my $return;
-
+    my $sharedextension = $^O =~ /MSWin32|cygwin|os2/i
+			  ? $Config{_a} : ".$Config{so}";
     ($prefix = $file) =~ s"(.*)\.pm"$1";
 
     my ($tmp, $modname) = ($prefix =~ m"(?:(.*)[\\/]){0,1}(.*)"s);
 
-    $relshared = "$pathsep$prefix$pathsep$modname.$Config{so}";
+    $relshared = "$pathsep$prefix$pathsep$modname$sharedextension";
     $relabs    = "$pathsep$prefix$pathsep$modname$Config{_a}";
                                                # HACK . WHY DOES _a HAVE A '.'
                                                # AND so HAVE NONE??
@@ -614,7 +610,7 @@ sub _checkopts
        one file the names clash)\n");
     }
 
-    if ($options->{'e'} && ($options->{'sav'} || $options->{'gen'}) && ò0
+    if ($options->{'e'} && ($options->{'sav'} || $options->{'gen'}) &&
                                                             !$options->{'C'})
     {
         push(@errors, 
@@ -766,7 +762,7 @@ sub _run
 sub _interruptrun
 {
     my ($command) = @_;
-    my $pid = open (FD, "$command 2|");
+    my $pid = open (FD, "$command  |");
 
     local($SIG{HUP}) = sub { 
 #	kill 9, $pid + 1;  

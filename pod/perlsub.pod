@@ -353,7 +353,7 @@ which are always global, if you say
 
 then any variable mentioned from there to the end of the enclosing
 block must either refer to a lexical variable, be predeclared via
-C<use vars>, or else must be fully qualified with the package name.
+C<our> or C<use vars>, or else must be fully qualified with the package name.
 A compilation error results otherwise.  An inner block may countermand
 this with C<no strict 'vars'>.
 

@@ -107,9 +107,10 @@ Also remember that C doesn't allow you to safely say C<foo(SvPV(s, len),
 len);>. It might work with your compiler, but it won't work for everyone.
 Break this sort of statement up into separate assignments:
 
+	SV *s;
 	STRLEN len;
 	char * ptr;
-	ptr = SvPV(len);
+	ptr = SvPV(s, len);
 	foo(ptr, len);
 
 If you want to know if the scalar value is TRUE, you can use:
@@ -2907,15 +2908,17 @@ Test two strings to see if they are different.  Returns true or false.
 
 Test two strings to see if they are equal.  The C<len> parameter indicates
 the number of bytes to compare.  Returns true or false.
+(A wrapper for C<strncmp>).
 
-	int	strnEQ( char *s1, char *s2 )
+	int	strnEQ( const char *s1, const char *s2, size_t len )
 
 =item strnNE
 
 Test two strings to see if they are different.  The C<len> parameter
 indicates the number of bytes to compare.  Returns true or false.
+(A wrapper for C<strncmp>).
 
-	int	strnNE( char *s1, char *s2, int len )
+	int	strnNE( const char *s1, const char *s2, size_t len )
 
 =item sv_2mortal
 

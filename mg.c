@@ -905,8 +905,6 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	    svp = &PL_diehook;
 	else if (strEQ(s,"__WARN__"))
 	    svp = &PL_warnhook;
-	else if (strEQ(s,"__PARSE__"))
-	    svp = &PL_parsehook;
 	else
 	    Perl_croak(aTHX_ "No such hook: %s", s);
 	i = 0;

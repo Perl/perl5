@@ -1,10 +1,7 @@
 #############################################################################
 # Pod/Select.pm -- function to select portions of POD docs
 #
-# Based on Tom Christiansen's pod2text() function
-# (with extensive modifications).
-#
-# Copyright (C) 1996-1999 Tom Christiansen. All rights reserved.
+# Copyright (C) 1996-1999 by Bradford Appleton. All rights reserved.
 # This file is part of "PodParser". PodParser is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.
@@ -13,7 +10,7 @@
 package Pod::Select;
 
 use vars qw($VERSION);
-$VERSION = 1.081;  ## Current version of this package
+$VERSION = 1.085;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 #############################################################################

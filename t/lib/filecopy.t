@@ -88,3 +88,7 @@ print "not " unless $foo eq "ok 3\n" and not -e "file-$$";;
 print "ok 11\n";
 unlink "lib/file-$$" or die "unlink: $!";
 
+END {
+    1 while unlink "file-$$";
+    1 while unlink "lib/file-$$";
+}

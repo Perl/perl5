@@ -1602,11 +1602,19 @@ S_regmatch(pTHX_ regnode *prog)
 #ifdef DEBUGGING
 #  define sayYES goto yes
 #  define sayNO goto no
+#  define sayYES_FINAL goto yes_final
+#  define sayYES_LOUD  goto yes_loud
+#  define sayNO_FINAL  goto no_final
+#  define sayNO_SILENT goto do_no
 #  define saySAME(x) if (x) goto yes; else goto no
 #  define REPORT_CODE_OFF 24
 #else
 #  define sayYES return 1
 #  define sayNO return 0
+#  define sayYES_FINAL return 1
+#  define sayYES_LOUD  return 1
+#  define sayNO_FINAL  return 0
+#  define sayNO_SILENT return 0
 #  define saySAME(x) return x
 #endif
 	DEBUG_r( {
@@ -2220,11 +2228,6 @@ S_regmatch(pTHX_ regnode *prog)
 			regcpblow(cp);
 			sayYES;
 		    }
-		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log,
-				      "%*s  failed...\n",
-				      REPORT_CODE_OFF+PL_regindent*2, "")
-			);
 		    ReREFCNT_dec(re);
 		    REGCP_UNWIND;
 		    regcppop();
@@ -2411,11 +2414,6 @@ S_regmatch(pTHX_ regnode *prog)
 			);
 		    if (regmatch(cc->next))
 			sayYES;
-		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log,
-				      "%*s  failed...\n",
-				      REPORT_CODE_OFF+PL_regindent*2, "")
-			);
 		    if (PL_regcc)
 			PL_regcc->cur = ln;
 		    PL_regcc = cc;
@@ -2431,11 +2429,6 @@ S_regmatch(pTHX_ regnode *prog)
 			sayYES;
 		    cc->cur = n - 1;
 		    cc->lastloc = lastloc;
-		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log,
-				      "%*s  failed...\n",
-				      REPORT_CODE_OFF+PL_regindent*2, "")
-			);
 		    sayNO;
 		}
 
@@ -2478,7 +2471,7 @@ S_regmatch(pTHX_ regnode *prog)
 				      "%*s  already tried at this position...\n",
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
-			sayNO;
+			sayNO_SILENT;
 		    }
 		    PL_reg_poscache[o] |= (1<<b);
 		}
@@ -2528,11 +2521,6 @@ S_regmatch(pTHX_ regnode *prog)
 			regcpblow(cp);
 			sayYES;
 		    }
-		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log,
-				      "%*s  failed...\n",
-				      REPORT_CODE_OFF+PL_regindent*2, "")
-			);
 		    REGCP_UNWIND;
 		    regcppop();
 		    cc->cur = n - 1;
@@ -2574,10 +2562,6 @@ S_regmatch(pTHX_ regnode *prog)
 		    ln = PL_regcc->cur;
 		if (regmatch(cc->next))
 		    sayYES;
-		DEBUG_r(
-		    PerlIO_printf(Perl_debug_log, "%*s  failed...\n",
-				  REPORT_CODE_OFF+PL_regindent*2, "")
-		    );
 		if (PL_regcc)
 		    PL_regcc->cur = ln;
 		PL_regcc = cc;
@@ -2972,14 +2956,22 @@ S_regmatch(pTHX_ regnode *prog)
 				  "%*s  continuation failed...\n",
 				  REPORT_CODE_OFF+PL_regindent*2, "")
 		    );
-		sayNO;
+		sayNO_SILENT;
 	    }
-	    if (locinput < PL_regtill)
-		sayNO;			/* Cannot match: too short. */
-	    /* Fall through */
+	    if (locinput < PL_regtill) {
+		DEBUG_r(PerlIO_printf(Perl_debug_log,
+				      "%sMatch possible, but length=%ld is smaller than requested=%ld, failing!%s\n",
+				      PL_colors[4],
+				      (long)(locinput - PL_reg_starttry),
+				      (long)(PL_regtill - PL_reg_starttry),
+				      PL_colors[5]));
+		sayNO_FINAL;		/* Cannot match: too short. */
+	    }
+	    PL_reginput = locinput;	/* put where regtry can find it */
+	    sayYES_FINAL;		/* Success! */
 	case SUCCEED:
 	    PL_reginput = locinput;	/* put where regtry can find it */
-	    sayYES;			/* Success! */
+	    sayYES_LOUD;		/* Success! */
 	case SUSPEND:
 	    n = 1;
 	    PL_reginput = locinput;
@@ -3070,6 +3062,16 @@ S_regmatch(pTHX_ regnode *prog)
     /*NOTREACHED*/
     sayNO;
 
+yes_loud:
+    DEBUG_r(
+	PerlIO_printf(Perl_debug_log,
+		      "%*s  %scould match...%s\n",
+		      REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],PL_colors[5])
+	);
+    goto yes;
+yes_final:
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sMatch successful!%s\n",
+			  PL_colors[4],PL_colors[5]));
 yes:
 #ifdef DEBUGGING
     PL_regindent--;
@@ -3077,6 +3079,14 @@ yes:
     return 1;
 
 no:
+    DEBUG_r(
+	PerlIO_printf(Perl_debug_log,
+		      "%*s  %sfailed...%s\n",
+		      REPORT_CODE_OFF+PL_regindent*2, "",PL_colors[4],PL_colors[5])
+	);
+    goto do_no;
+no_final:
+do_no:
 #ifdef DEBUGGING
     PL_regindent--;
 #endif

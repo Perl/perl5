@@ -95,10 +95,6 @@ static bool will_taint = FALSE;  /* tainting active, but no PL_curinterp yet */
 /* munching */ 
 static int no_translate_barewords;
 
-/* True if we shouldn't treat barewords as logicals during directory */
-/* munching */ 
-static int no_translate_barewords;
-
 /*{{{int vmstrnenv(const char *lnm, char *eqv, unsigned long int idx, struct dsc$descriptor_s **tabvec, unsigned long int flags) */
 int
 vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,

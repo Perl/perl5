@@ -66,17 +66,22 @@ struct block_sub {
 #define POPSAVEARRAY()							\
     STMT_START {							\
 	SvREFCNT_dec(GvAV(PL_defgv));					\
-	GvAV(PL_defgv) = cxsub.savearray;					\
+	GvAV(PL_defgv) = cxsub.savearray;				\
     } STMT_END
 #endif /* USE_THREADS */
 
 #define POPSUB2()							\
 	if (cxsub.hasargs) {						\
 	    POPSAVEARRAY();						\
-	    /* destroy arg array */					\
-	    av_clear(cxsub.argarray);					\
-	    AvREAL_off(cxsub.argarray);					\
-	    AvREIFY_on(cxsub.argarray);					\
+	    /* abandon @_ if it got reified */				\
+	    if (AvREAL(cxsub.argarray)) {				\
+		SSize_t fill = AvFILLp(cxsub.argarray);			\
+		SvREFCNT_dec(cxsub.argarray);				\
+		cxsub.argarray = newAV();				\
+		av_extend(cxsub.argarray, fill);			\
+		AvFLAGS(cxsub.argarray) = AVf_REIFY;			\
+		PL_curpad[0] = (SV*)cxsub.argarray;			\
+	    }								\
 	}								\
 	if (cxsub.cv) {							\
 	    if (!(CvDEPTH(cxsub.cv) = cxsub.olddepth))			\

@@ -296,6 +296,8 @@ sub tab {
 #	ucfirst etc not OK: TMP arg processed inplace
 #	each repeat not OK too due to array context
 #	pack split - unknown whether they are safe
+#	sprintf: is calling do_sprintf(TARG,...) which can act on TARG
+#	  before other args are processed.
 
 # pp_hot.c
 #	readline - unknown whether it is safe
@@ -357,7 +359,7 @@ bless		bless			ck_fun		s@	S S?
 
 # Pushy I/O.
 
-backtick	backticks (``, qx)	ck_null		t%	
+backtick	quoted execution (``, qx)	ck_null		t%	
 # glob defaults its first arg to $_
 glob		glob			ck_glob		t@	S? S?
 readline	<HANDLE>		ck_null		t%	
@@ -479,7 +481,7 @@ vec		vec			ck_fun		ist@	S S S
 index		index			ck_index	isT@	S S S?
 rindex		rindex			ck_index	isT@	S S S?
 
-sprintf		sprintf			ck_fun_locale	mfsT@	S L
+sprintf		sprintf			ck_fun_locale	mfst@	S L
 formline	formline		ck_fun		ms@	S L
 ord		ord			ck_fun		ifsTu%	S?
 chr		chr			ck_fun		fsTu%	S?
@@ -747,9 +749,9 @@ semop		semop			ck_fun		imst@	S S
 # Eval.
 
 require		require			ck_require	du%	S?
-dofile		do 'file'		ck_fun		d1	S
-entereval	eval 'string'		ck_eval		d%	S
-leaveeval	eval 'string' exit	ck_null		1	S
+dofile		do "file"		ck_fun		d1	S
+entereval	eval "string"		ck_eval		d%	S
+leaveeval	eval "string" exit	ck_null		1	S
 #evalonce	eval constant string	ck_null		d1	S
 entertry	eval {block}		ck_null		|	
 leavetry	eval {block} exit	ck_null		@	

@@ -971,7 +971,7 @@ PP(pp_flop)
 	  (looks_like_number(left) && *SvPVX(left) != '0') )
 	{
 	    if (SvNV(left) < IV_MIN || SvNV(right) > IV_MAX)
-		Perl_croak(aTHX_ "Range iterator outside integer range");
+		DIE(aTHX_ "Range iterator outside integer range");
 	    i = SvIV(left);
 	    max = SvIV(right);
 	    if (max >= i) {
@@ -1247,6 +1247,18 @@ S_free_closures(pTHX)
     }
 }
 
+void
+Perl_qerror(pTHX_ SV *err)
+{
+    if (PL_in_eval)
+	sv_catsv(ERRSV, err);
+    else if (PL_errors)
+	sv_catsv(PL_errors, err);
+    else
+	Perl_warn(aTHX_ "%_", err);
+    ++PL_error_count;
+}
+
 OP *
 Perl_die_where(pTHX_ char *message, STRLEN msglen)
 {
@@ -1288,7 +1300,9 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	else
 	    message = SvPVx(ERRSV, msglen);
 
-	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && PL_curstackinfo->si_prev) {
+	while ((cxix = dopoptoeval(cxstack_ix)) < 0
+	       && PL_curstackinfo->si_prev)
+	{
 	    dounwind(-1);
 	    POPSTACK;
 	}
@@ -1315,7 +1329,8 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    if (optype == OP_REQUIRE) {
 		char* msg = SvPVx(ERRSV, n_a);
-		DIE(aTHX_ "%s", *msg ? msg : "Compilation failed in require");
+		DIE(aTHX_ "%sCompilation failed in require",
+		    *msg ? msg : "Unknown error\n");
 	    }
 	    return pop_return();
 	}
@@ -1601,7 +1616,7 @@ PP(pp_enteriter)
 		(looks_like_number(sv) && *SvPVX(sv) != '0')) {
 		 if (SvNV(sv) < IV_MIN ||
 		     SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
-		     Perl_croak(aTHX_ "Range iterator outside integer range");
+		     DIE(aTHX_ "Range iterator outside integer range");
 		 cx->blk_loop.iterix = SvIV(sv);
 		 cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
 	    }
@@ -1972,7 +1987,6 @@ PP(pp_goto)
 	    SV** mark;
 	    I32 items = 0;
 	    I32 oldsave;
-	    int arg_was_real = 0;
 
 	retry:
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
@@ -2004,8 +2018,8 @@ PP(pp_goto)
 	    if (CxTYPE(cx) == CXt_EVAL && cx->blk_eval.old_op_type == OP_ENTEREVAL) 
 		DIE(aTHX_ "Can't goto subroutine from an eval-string");
 	    mark = PL_stack_sp;
-	    if (CxTYPE(cx) == CXt_SUB &&
-		cx->blk_sub.hasargs) {   /* put @_ back onto stack */
+	    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs) {
+		/* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 		
 		items = AvFILLp(av) + 1;
@@ -2017,11 +2031,14 @@ PP(pp_goto)
 		SvREFCNT_dec(GvAV(PL_defgv));
 		GvAV(PL_defgv) = cx->blk_sub.savearray;
 #endif /* USE_THREADS */
+		/* abandon @_ if it got reified */
 		if (AvREAL(av)) {
-		    arg_was_real = 1;
-		    AvREAL_off(av);	/* so av_clear() won't clobber elts */
+		    (void)sv_2mortal((SV*)av);	/* delay until return */
+		    av = newAV();
+		    av_extend(av, items-1);
+		    AvFLAGS(av) = AVf_REIFY;
+		    PL_curpad[0] = (SV*)(cx->blk_sub.argarray = av);
 		}
-		av_clear(av);
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
 		AV* av;
@@ -2179,11 +2196,7 @@ PP(pp_goto)
 		    }
 		    Copy(mark,AvARRAY(av),items,SV*);
 		    AvFILLp(av) = items - 1;
-		    /* preserve @_ nature */
-		    if (arg_was_real) {
-			AvREIFY_off(av);
-			AvREAL_on(av);
-		    }
+		    assert(!AvREAL(av));
 		    while (items--) {
 			if (*mark)
 			    SvTEMP_off(*mark);
@@ -2627,13 +2640,16 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	LEAVE;
 	if (optype == OP_REQUIRE) {
 	    char* msg = SvPVx(ERRSV, n_a);
-	    DIE(aTHX_ "%s", *msg ? msg : "Compilation failed in require");
-	} else if (startop) {
+	    DIE(aTHX_ "%sCompilation failed in require",
+		*msg ? msg : "Unknown error\n");
+	}
+	else if (startop) {
 	    char* msg = SvPVx(ERRSV, n_a);
 
 	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
-	    Perl_croak(aTHX_ "%sCompilation failed in regexp", (*msg ? msg : "Unknown error\n"));
+	    Perl_croak(aTHX_ "%sCompilation failed in regexp",
+		       (*msg ? msg : "Unknown error\n"));
 	}
 	SvREFCNT_dec(PL_rs);
 	PL_rs = SvREFCNT_inc(PL_nrs);

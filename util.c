@@ -912,7 +912,7 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
    If FBMcf_TAIL, the table is created as if the string has a trailing \n. */
 
 void
-Perl_fbm_compile(pTHX_ SV *sv, U32 flags /* not used yet */)
+Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 {
     register U8 *s;
     register U8 *table;
@@ -928,23 +928,23 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags /* not used yet */)
     if (len == 0)		/* TAIL might be on on a zero-length string. */
 	return;
     if (len > 2) {
-	I32 mlen = len;
+	U8 mlen;
 	unsigned char *sb;
 
-	if (mlen > 255)
+	if (len > 255)
 	    mlen = 255;
-	Sv_Grow(sv,len + 256 + FBM_TABLE_OFFSET);
+	else
+	    mlen = (U8)len;
+	Sv_Grow(sv, len + 256 + FBM_TABLE_OFFSET);
 	table = (unsigned char*)(SvPVX(sv) + len + FBM_TABLE_OFFSET);
-	s = table - 1 - FBM_TABLE_OFFSET; /* Last char */
-	for (i = 0; i < 256; i++) {
-	    table[i] = mlen;
-	}
-	table[-1] = flags;		/* Not used yet */
+	s = table - 1 - FBM_TABLE_OFFSET;	/* last char */
+	memset((void*)table, mlen, 256);
+	table[-1] = (U8)flags;
 	i = 0;
-	sb = s - mlen;
+	sb = s - mlen + 1;			/* first char (maybe) */
 	while (s >= sb) {
 	    if (table[*s] == mlen)
-		table[*s] = i;
+		table[*s] = (U8)i;
 	    s--, i++;
 	}
     }
@@ -963,7 +963,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags /* not used yet */)
     BmUSEFUL(sv) = 100;			/* Initial value */
     if (flags & FBMcf_TAIL)
 	SvTAIL_on(sv);
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %d\n",BmRARE(sv),BmPREVIOUS(sv)));
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %d\n",
+			  BmRARE(sv),BmPREVIOUS(sv)));
 }
 
 /* If SvTAIL(littlestr), it has a fake '\n' at end. */
@@ -1075,15 +1076,17 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
     }
     if (SvTAIL(littlestr) && !multiline) {	/* tail anchored? */
 	s = bigend - littlelen;
-	if (s >= big
-	    && bigend[-1] == '\n' 
-	    && *s == *little 
+	if (s >= big && bigend[-1] == '\n' && *s == *little 
 	    /* Automatically of length > 2 */
 	    && memEQ((char*)s + 1, (char*)little + 1, littlelen - 2))
+	{
 	    return (char*)s;		/* how sweet it is */
-	if (s[1] == *little && memEQ((char*)s + 2,(char*)little + 1,
-				     littlelen - 2))
+	}
+	if (s[1] == *little
+	    && memEQ((char*)s + 2, (char*)little + 1, littlelen - 2))
+	{
 	    return (char*)s + 1;	/* how sweet it is */
+	}
 	return Nullch;
     }
     if (SvTYPE(littlestr) != SVt_PVBM || !SvVALID(littlestr)) {
@@ -1093,9 +1096,11 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	if (!b && SvTAIL(littlestr)) {	/* Automatically multiline!  */
 	    /* Chop \n from littlestr: */
 	    s = bigend - littlelen + 1;
-	    if (*s == *little && memEQ((char*)s + 1, (char*)little + 1,
-				       littlelen - 2))
+	    if (*s == *little
+		&& memEQ((char*)s + 1, (char*)little + 1, littlelen - 2))
+	    {
 		return (char*)s;
+	    }
 	    return Nullch;
 	}
 	return b;
@@ -1117,7 +1122,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 
 	  top2:
 	    /*SUPPRESS 560*/
-	    if (tmp = table[*s]) {
+	    if ((tmp = table[*s])) {
 #ifdef POINTERRIGOR
 		if (bigend - s > tmp) {
 		    s += tmp;
@@ -1379,8 +1384,33 @@ Perl_vform(pTHX_ const char *pat, va_list *args)
     return SvPVX(sv);
 }
 
+#if defined(PERL_IMPLICIT_CONTEXT)
 SV *
-Perl_mess(pTHX_ const char *pat, va_list *args)
+Perl_mess_nocontext(const char *pat, ...)
+{
+    dTHX;
+    SV *retval;
+    va_list args;
+    va_start(args, pat);
+    retval = vmess(pat, &args);
+    va_end(args);
+    return retval;
+}
+#endif /* PERL_IMPLICIT_CONTEXT */
+
+SV *
+Perl_mess(pTHX_ const char *pat, ...)
+{
+    SV *retval;
+    va_list args;
+    va_start(args, pat);
+    retval = vmess(pat, &args);
+    va_end(args);
+    return retval;
+}
+
+SV *
+Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
     SV *sv = mess_alloc();
     static char dgd[] = " during global destruction.\n";
@@ -1438,8 +1468,14 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 			  thr, PL_curstack, PL_mainstack));
 
     if (pat) {
-	msv = mess(pat, args);
-	message = SvPV(msv,msglen);
+	msv = vmess(pat, args);
+	if (PL_errors && SvCUR(PL_errors)) {
+	    sv_catsv(PL_errors, msv);
+	    message = SvPV(PL_errors, msglen);
+	    SvCUR_set(PL_errors, 0);
+	}
+	else
+	    message = SvPV(msv,msglen);
     }
     else {
 	message = Nullch;
@@ -1529,9 +1565,18 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     SV *msv;
     STRLEN msglen;
 
-    msv = mess(pat, args);
-    message = SvPV(msv,msglen);
-    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
+    msv = vmess(pat, args);
+    if (PL_errors && SvCUR(PL_errors)) {
+	sv_catsv(PL_errors, msv);
+	message = SvPV(PL_errors, msglen);
+	SvCUR_set(PL_errors, 0);
+    }
+    else
+	message = SvPV(msv,msglen);
+
+    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s",
+			  (unsigned long) thr, message));
+
     if (PL_diehook) {
 	/* sv_2cv might call Perl_croak() */
 	SV *olddiehook = PL_diehook;
@@ -1609,7 +1654,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     SV *msv;
     STRLEN msglen;
 
-    msv = mess(pat, args);
+    msv = vmess(pat, args);
     message = SvPV(msv, msglen);
 
     if (PL_warnhook) {
@@ -1705,7 +1750,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     SV *msv;
     STRLEN msglen;
 
-    msv = mess(pat, args);
+    msv = vmess(pat, args);
     message = SvPV(msv, msglen);
 
     if (ckDEAD(err)) {
@@ -3370,6 +3415,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_restartop = 0;
 
     PL_statname = NEWSV(66,0);
+    PL_errors = newSVpvn("", 0);
     PL_maxscream = -1;
     PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);
     PL_regexecp = MEMBER_TO_FPTR(Perl_regexec_flags);

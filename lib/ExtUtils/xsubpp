@@ -367,7 +367,17 @@ sub INPUT_handler {
 	$thisdone |= $var_name eq "THIS";
 	$retvaldone |= $var_name eq "RETVAL";
 	$var_types{$var_name} = $var_type;
-	print "\t" . &map_type($var_type);
+	# XXXX This check is a safeguard against the unfinished conversion of
+	# generate_init().  When generate_init() is fixed,
+	# one can use 2-args map_type() unconditionally.
+	if ($var_type =~ / \( \s* \* \s* \) /x) {
+	  # Function pointers are not yet supported with &output_init!
+	  print "\t" . &map_type($var_type, $var_name);
+	  $name_printed = 1;
+	} else {
+	  print "\t" . &map_type($var_type);
+	  $name_printed = 0;
+	}
 	$var_num = $args_match{$var_name};
 
         $proto_arg[$var_num] = ProtoString($var_type) 
@@ -377,12 +387,16 @@ sub INPUT_handler {
 	    $func_args =~ s/\b($var_name)\b/&$1/;
 	}
 	if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/) {
+	  if ($name_printed) {
+	    print ";\n";
+	  } else {
 	    print "\t$var_name;\n";
+	  }
 	} elsif ($var_init =~ /\S/) {
-	    &output_init($var_type, $var_num, $var_name, $var_init);
+	    &output_init($var_type, $var_num, $var_name, $var_init, $name_printed);
 	} elsif ($var_num) {
 	    # generate initialization code
-	    &generate_init($var_type, $var_num, $var_name);
+	    &generate_init($var_type, $var_num, $var_name, $name_printed);
 	} else {
 	    print ";\n";
 	}
@@ -1081,7 +1095,7 @@ EOF
 		$_ = '' ;
 	} else {
 		if ($ret_type ne "void") {
-			print "\t" . &map_type($ret_type) . "\tRETVAL;\n"
+			print "\t" . &map_type($ret_type, 'RETVAL') . ";\n"
 				if !$retvaldone;
 			$args_match{"RETVAL"} = 0;
 			$var_types{"RETVAL"} = $ret_type;
@@ -1305,15 +1319,22 @@ warn("Please specify prototyping behavior for $filename (see perlxs manual)\n")
 &Exit;
 
 sub output_init {
-    local($type, $num, $var, $init) = @_;
+    local($type, $num, $var, $init, $name_printed) = @_;
     local($arg) = "ST(" . ($num - 1) . ")";
 
     if(  $init =~ /^=/  ) {
-	eval qq/print "\\t$var $init\\n"/;
+        if ($name_printed) {
+	  eval qq/print " $init\\n"/;
+	} else {
+	  eval qq/print "\\t$var $init\\n"/;
+	}
 	warn $@   if  $@;
     } else {
 	if(  $init =~ s/^\+//  &&  $num  ) {
-	    &generate_init($type, $num, $var);
+	    &generate_init($type, $num, $var, $name_printed);
+	} elsif ($name_printed) {
+	    print ";\n";
+	    $init =~ s/^;//;
 	} else {
 	    eval qq/print "\\t$var;\\n"/;
 	    warn $@   if  $@;
@@ -1382,16 +1403,26 @@ sub generate_init {
     if (defined($defaults{$var})) {
 	    $expr =~ s/(\t+)/$1    /g;
 	    $expr =~ s/        /\t/g;
-	    eval qq/print "\\t$var;\\n"/;
-	    warn $@   if  $@;
+	    if ($name_printed) {
+	      print ";\n";
+	    } else {
+	      eval qq/print "\\t$var;\\n"/;
+	      warn $@   if  $@;
+	    }
 	    $deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
 	    warn $@   if  $@;
     } elsif ($ScopeThisXSUB or $expr !~ /^\t\$var =/) {
-	    eval qq/print "\\t$var;\\n"/;
-	    warn $@   if  $@;
+	    if ($name_printed) {
+	      print ";\n";
+	    } else {
+	      eval qq/print "\\t$var;\\n"/;
+	      warn $@   if  $@;
+	    }
 	    $deferred .= eval qq/"\\n$expr;\\n"/;
 	    warn $@   if  $@;
     } else {
+	    die "panic: do not know how to handle this branch for function pointers"
+	      if $name_printed;
 	    eval qq/print "$expr;\\n"/;
 	    warn $@   if  $@;
     }
@@ -1405,7 +1436,7 @@ sub generate_output {
 
     $type = TidyType($type) ;
     if ($type =~ /^array\(([^,]*),(.*)\)/) {
-	    print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1)), XFree((char *)$var);\n";
+	    print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1));\n";
 	    print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
     } else {
 	    blurt("Error: '$type' not in typemap"), return
@@ -1468,10 +1499,17 @@ sub generate_output {
 }
 
 sub map_type {
-    my($type) = @_;
+    my($type, $varname) = @_;
 
     $type =~ tr/:/_/;
     $type =~ s/^array\(([^,]*),(.*)\).*/$1 */s;
+    if ($varname) {
+      if ($varname && $type =~ / \( \s* \* (?= \s* \) ) /xg) {
+	(substr $type, pos $type, 0) = " $varname ";
+      } else {
+	$type .= "\t$varname";
+      }
+    }
     $type;
 }
 

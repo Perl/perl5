@@ -31,6 +31,7 @@ Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 README			The Instructions
+README.Y2K		Notes about Year 2000 concerns
 README.amiga		Notes about AmigaOS port
 README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
@@ -471,6 +472,7 @@ hints/stellar.sh	Hints for named architecture
 hints/sunos_4_0.sh	Hints for named architecture
 hints/sunos_4_1.sh	Hints for named architecture
 hints/svr4.sh		Hints for named architecture
+hints/svr5.sh		Hints for named architecture
 hints/ti1500.sh		Hints for named architecture
 hints/titanos.sh	Hints for named architecture
 hints/ultrix_4.sh	Hints for named architecture
@@ -612,9 +614,8 @@ lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Html.pm		Convert POD data to HTML
 lib/Pod/InputObjects.pm	Pod-Parser - define objects for input streams
 lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
-lib/Pod/PlainText.pm	Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
-lib/Pod/Text.pm		Convert POD data to formatted ASCII text
+lib/Pod/Text.pm		Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Text/Color.pm	Convert POD data to color ASCII text
 lib/Pod/Text/Termcap.pm	Convert POD data to ASCII text with format escapes
 lib/Pod/Usage.pm	Pod-Parser - print usage messages
@@ -1236,6 +1237,7 @@ t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
 t/op/64bit.t		See if 64 bitness works
 t/op/append.t		See if . works
+t/op/args.t		See if operations on @_ work
 t/op/arith.t		See if arithmetic works
 t/op/array.t		See if array operations work
 t/op/assignwarn.t	See if OP= operators warn correctly for undef targets
@@ -1341,14 +1343,20 @@ t/pod/included.t	Test =include directive
 t/pod/included.xr	Expected results for included.t
 t/pod/lref.t		Test L<...> sequences
 t/pod/lref.xr		Expected results for lref.t
+t/pod/multiline_items.t	Test multiline =items
+t/pod/multiline_items.xr	Test multiline =items
 t/pod/nested_items.t	Test nested =items
 t/pod/nested_items.xr	Expected results for nested_items.t
 t/pod/nested_seqs.t	Test nested interior sequences
 t/pod/nested_seqs.xr	Expected results for nested_seqs.t
 t/pod/oneline_cmds.t	Test single paragraph ==cmds
 t/pod/oneline_cmds.xr	Expected results for oneline_cmds.t
+t/pod/pod2usage.t	Test Pod::Usage
+t/pod/pod2usage.xr	Expected results for pod2usage.t
 t/pod/poderrs.t		Test POD errors
 t/pod/poderrs.xr	Expected results for emptycmd.t
+t/pod/podselect.t	Test Pod::Select
+t/pod/podselect.xr	Expected results for podselect.t
 t/pod/special_seqs.t	Test "special" interior sequences
 t/pod/special_seqs.xr	Expected results for emptycmd.t
 t/pod/testcmp.pl	Module to compare output against expected results

@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..148\n";
+print "1..152\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -354,18 +354,34 @@ print "ok ", $test++, "\n";
 print "not " unless pack("V", 0xdeadbeef) eq "\xef\xbe\xad\xde";
 print "ok ", $test++, "\n";
 
-# 143..148: # 
+# 143..148: /
 
 my $z;
-eval { ($x) = unpack '#a*','hello' };
+eval { ($x) = unpack '/a*','hello' };
 print 'not ' unless $@; print "ok $test\n"; $test++;
-eval { ($z,$x,$y) = unpack 'a3#A C#a* C#Z', "003ok \003yes\004z\000abc" };
+eval { ($z,$x,$y) = unpack 'a3/A C/a* C/Z', "003ok \003yes\004z\000abc" };
 print $@ eq '' && $z eq 'ok' ? "ok $test\n" : "not ok $test\n"; $test++;
 print $@ eq '' && $x eq 'yes' ? "ok $test\n" : "not ok $test\n"; $test++;
 print $@ eq '' && $y eq 'z' ? "ok $test\n" : "not ok $test\n"; $test++;
 
-eval { ($x) = pack '#a*','hello' };
+eval { ($x) = pack '/a*','hello' };
 print 'not ' unless $@; print "ok $test\n"; $test++;
-$z = pack 'n#a* w#A*','string','etc';
+$z = pack 'n/a* w/A*','string','etc';
 print 'not ' unless $z eq "\000\006string\003etc"; print "ok $test\n"; $test++;
 
+# 149..152: / with #
+
+eval { ($z,$x,$y) = unpack <<EOU, "003ok \003yes\004z\000abc" };
+ a3/A			# Count in ASCII
+ C/a*			# Count in a C char
+ C/Z			# Count in a C char but skip after \0
+EOU
+print $@ eq '' && $z eq 'ok' ? "ok $test\n" : "not ok $test\n"; $test++;
+print $@ eq '' && $x eq 'yes' ? "ok $test\n" : "not ok $test\n"; $test++;
+print $@ eq '' && $y eq 'z' ? "ok $test\n" : "not ok $test\n"; $test++;
+
+$z = pack <<EOP,'string','etc';
+  n/a*			# Count as network short
+  w/A*			# Count a  BER integer
+EOP
+print 'not ' unless $z eq "\000\006string\003etc"; print "ok $test\n"; $test++;
