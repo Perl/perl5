@@ -104,7 +104,7 @@ for ($i = 1; @tests; $i++) {
     }
 }
 
-# In each of the the following lines, there are three required fields:
+# In each of the following lines, there are three required fields:
 # printf template, data to be formatted (as a Perl expression), and
 # expected result of formatting.  An optional fourth field can contain
 # a comment.  Each field is delimited by a starting '>' and a

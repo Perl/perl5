@@ -113,8 +113,19 @@ is(takeuchi($x, $y, $z), $z + 1, "takeuchi($x, $y, $z) == $z + 1");
 }
 
 # check ok for recursion depth > 65536
-is(runperl(
-	nolib => 1,
-	prog => q{$d=0; $e=1; sub c { ++$d; if ($d > 66000) { $e=0 } else { c(); c() unless $d % 32768 } --$d } c(); exit $e},
-), '', "64K deep recursion - no output expected");
-is($?, 0, "64K deep recursion - no coredump expected");
+{
+    my $r;
+    eval { 
+	$r = runperl(
+		     nolib => 1,
+		     stderr => 1,
+		     prog => q{$d=0; $e=1; sub c { ++$d; if ($d > 66000) { $e=0 } else { c(); c() unless $d % 32768 } --$d } c(); exit $e});
+    };
+  SKIP: {
+      skip("Out of memory -- increase your data/heap?", 2)
+	  if $r =~ /Out of memory/i;
+      is($r, '', "64K deep recursion - no output expected");
+      is($?,  0, "64K deep recursion - no coredump expected");
+  }
+}
+
