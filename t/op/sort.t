@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..125\n";
+print "1..127\n";
 
 # these shouldn't hang
 {
@@ -634,8 +634,7 @@ sub sortnumr {
 ok "@output", "I H G F E D C B A",
     'reversed stable $a <=> $b sort return list context';
 $output = sortnumr &generate1;
-ok $output, "IHGFEDCBA",
-    'reversed stable $a <=> $b sort return scalar context';
+ok $output, "IHGFEDCBA", 'reversed stable $a <=> $b sort return scalar context';
 
 sub sortnumrba {
     reverse sort {$b <=> $a} @_;
@@ -645,8 +644,7 @@ sub sortnumrba {
 ok "@output", "C B A F E D I H G",
     'reversed stable $b <=> $a sort return list context';
 $output = sortnumrba &generate1;
-ok $output, "CBAFEDIHG",
-'reversed stable $b <=> $a sort return scalar context';
+ok $output, "CBAFEDIHG", 'reversed stable $b <=> $a sort return scalar context';
 
 sub sortnumrq {
     reverse sort {stuff || $a <=> $b} @_;
@@ -656,5 +654,10 @@ sub sortnumrq {
 ok "@output", "I H G F E D C B A",
     'reversed stable complex sort return list context';
 $output = sortnumrq &generate1;
-ok $output, "IHGFEDCBA",
-    'reversed stable complex sort return scalar context';
+ok $output, "IHGFEDCBA", 'reversed stable complex sort return scalar context';
+
+@output = reverse (sort(qw(C A B)), 0);
+ok "@output", "0 C B A", 'reversed sort with trailing argument';
+
+@output = reverse (0, sort(qw(C A B)));
+ok "@output", "C B A 0", 'reversed sort with leading argument';
