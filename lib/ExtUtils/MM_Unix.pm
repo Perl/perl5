@@ -2262,7 +2262,7 @@ sub installbin {
     push(@m, qq{
 EXE_FILES = @{$self->{EXE_FILES}}
 
-} . (($Is_Win32 || $Is_NetWare)x
+} . (($Is_Win32 || $Is_NetWare)
   ? q{FIXIN = pl2bat.bat
 } : q{FIXIN = $(PERLRUN) "-MExtUtils::MY" \
     -e "MY->fixin(shift)"
