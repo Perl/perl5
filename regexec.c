@@ -2423,7 +2423,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    sayNO_ANYOF;
 		if (locinput >= PL_regeol)
 		    sayNO;
-		locinput += inclasslen ? inclasslen : 1;
+		locinput += inclasslen ? inclasslen : UTF8SKIP(locinput);
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
@@ -4240,7 +4240,7 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, register b
 
     c = do_utf8 ? utf8_to_uvchr(p, &len) : *p;
 
-    plen = lenp ? *lenp : UNISKIP(c);
+    plen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
     if (do_utf8 || (flags & ANYOF_UNICODE)) {
         if (lenp)
 	    *lenp = 0;
@@ -4285,7 +4285,7 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, register b
 	    }
 	}
 	if (match && lenp && *lenp == 0)
-	    *lenp = UNISKIP(c);
+	    *lenp = UNISKIP(NATIVE_TO_UNI(c));
     }
     if (!match && c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
