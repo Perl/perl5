@@ -6371,8 +6371,10 @@ Perl_peep(pTHX_ register OP *o)
 		    line_t oldline = CopLINE(PL_curcop);
 
 		    CopLINE_set(PL_curcop, CopLINE((COP*)o->op_next));
-		    Perl_warner(aTHX_ WARN_SYNTAX, "Statement unlikely to be reached");
-		    Perl_warner(aTHX_ WARN_SYNTAX, "(Maybe you meant system() when you said exec()?)\n");
+		    Perl_warner(aTHX_ WARN_EXEC,
+				"Statement unlikely to be reached");
+		    Perl_warner(aTHX_ WARN_EXEC,
+				"(Maybe you meant system() when you said exec()?)\n");
 		    CopLINE_set(PL_curcop, oldline);
 		}
 	    }
