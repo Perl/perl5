@@ -1,11 +1,10 @@
-
 package File::Spec::Cygwin;
 
 use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.0';
+$VERSION = '1.1';
 
 @ISA = qw(File::Spec::Unix);
 
