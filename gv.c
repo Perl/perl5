@@ -103,7 +103,6 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     GvSV(gv) = NEWSV(72,0);
     GvLINE(gv) = curcop->cop_line;
     GvFILEGV(gv) = curcop->cop_filegv;
-    GvCVGEN(gv) = sub_generation - 1;   /* as old as possible */
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, '*', name, len);
     GvSTASH(gv) = (HV*)SvREFCNT_inc(stash);
@@ -118,6 +117,7 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
 	GvCV(gv) = compcv;
 	LEAVE;
 
+	GvCVGEN(gv) = 0;
 	sub_generation++;
 	CvGV(GvCV(gv)) = (GV*)SvREFCNT_inc(gv);
 	CvFILEGV(GvCV(gv)) = curcop->cop_filegv;
@@ -176,15 +176,13 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 	    gv_init(topgv, stash, name, len, TRUE);
 	if (cv = GvCV(topgv)) {
 	    /* If genuine method or valid cache entry, use it */
-	    if (!GvCVGEN(topgv) || GvCVGEN(topgv) == sub_generation)
+	    if (!GvCVGEN(topgv) || GvCVGEN(topgv) >= sub_generation)
 		return topgv;
 	    /* Stale cached entry: junk it */
 	    SvREFCNT_dec(cv);
 	    GvCV(topgv) = cv = Nullcv;
 	    GvCVGEN(topgv) = 0;
 	}
-	else if (GvCVGEN(topgv) == sub_generation)
-	    return 0;  /* cache indicates sub doesn't exist */
     }
 
     gvp = (GV**)hv_fetch(stash, "ISA", 3, FALSE);
@@ -259,10 +257,6 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 		    GvCVGEN(topgv) = sub_generation;
 		}
 		return gv;
-	    }
-	    else if (topgv && GvREFCNT(topgv) == 1) {
-		/* cache the fact that the method is not defined */
-		GvCVGEN(topgv) = sub_generation;
 	    }
 	}
     }

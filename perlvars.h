@@ -50,6 +50,7 @@ PERLVAR(Gan,		U32)		/* malloc sequence number */
 PERLVAR(Gcop_seqmax,	U32)		/* statement sequence number */
 PERLVAR(Gop_seqmax,	U16)		/* op sequence number */
 PERLVAR(Gevalseq,	U32)		/* eval sequence number */
+PERLVAR(Gsub_generation,U32)		/* incr to invalidate method cache */
 PERLVAR(Gorigenviron,	char **)
 PERLVAR(Gorigalen,	U32)
 PERLVAR(Gpidstatus,	HV *)		/* pid-to-status mappings for waitpid */
