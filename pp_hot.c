@@ -2930,13 +2930,13 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
         if(SvOK(sv) && (packname = SvPV(sv, packlen))) {
           HE* he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
           if (he) { 
-            stash = HeVAL(he);
+            stash = (HV*)HeVAL(he);
             goto fetch;
           }
         }
 
 	if (!SvOK(sv) ||
-	    !(packname = SvPV(sv, packlen)) ||
+	    !(packname) ||
 	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
 	    !(ob=(SV*)GvIO(iogv)))
 	{
@@ -2957,7 +2957,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		packsv = sv;
             else {
               SvREFCNT_inc((SV*)stash);
-              if(!hv_store(PL_stashcache, packname, packlen, stash, 0))
+              if(!hv_store(PL_stashcache, packname, packlen, (SV*)stash, 0))
                 SvREFCNT_dec((SV*)stash);
             }
 	    goto fetch;
