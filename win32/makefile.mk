@@ -328,8 +328,8 @@ LIBOUT_FLAG	=
 
 .ELSE
 
-CC		= cl.exe
-LINK32		= link.exe
+CC		= cl
+LINK32		= link
 LIB32		= $(LINK32) -lib
 
 #

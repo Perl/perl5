@@ -244,8 +244,8 @@ INST_HTML	= $(INST_POD)\html
 # Programs to compile, build .lib files and link
 #
 
-CC		= cl.exe
-LINK32		= link.exe
+CC		= cl
+LINK32		= link
 LIB32		= $(LINK32) -lib
 
 #
