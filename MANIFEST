@@ -1291,6 +1291,7 @@ perly.c			A byacc'ed perly.y
 perly.fixer		A program to remove yacc stack limitations
 perly.h			The header file for perly.c
 perly.y			Yacc grammar for perl
+perlyline.pl		Perl code to fix #line directives and gcc warnings in perly.c
 perly_c.diff		Fixup perly.c to allow recursion
 plan9/aperl		Shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h	Plan9 port: replacement C header file
