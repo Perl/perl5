@@ -2203,6 +2203,94 @@ Stack marker variable for the XSUB.  See C<dMARK>.
 =for hackers
 Found in file pp.h
 
+=item mPUSHi
+
+Push an integer onto the stack.  The stack must have room for this element.
+Does not handle 'set' magic.  Does not use C<TARG>.  See also C<PUSHi>,
+C<mXPUSHi> and C<XPUSHi>.
+
+	void	mPUSHi(IV iv)
+
+=for hackers
+Found in file pp.h
+
+=item mPUSHn
+
+Push a double onto the stack.  The stack must have room for this element.
+Does not handle 'set' magic.  Does not use C<TARG>.  See also C<PUSHn>,
+C<mXPUSHn> and C<XPUSHn>.
+
+	void	mPUSHn(NV nv)
+
+=for hackers
+Found in file pp.h
+
+=item mPUSHp
+
+Push a string onto the stack.  The stack must have room for this element.
+The C<len> indicates the length of the string.  Does not handle 'set' magic.
+Does not use C<TARG>.  See also C<PUSHp>, C<mXPUSHp> and C<XPUSHp>.
+
+	void	mPUSHp(char* str, STRLEN len)
+
+=for hackers
+Found in file pp.h
+
+=item mPUSHu
+
+Push an unsigned integer onto the stack.  The stack must have room for this
+element.  Does not handle 'set' magic.  Does not use C<TARG>.  See also
+C<PUSHu>, C<mXPUSHu> and C<XPUSHu>.
+
+	void	mPUSHu(UV uv)
+
+=for hackers
+Found in file pp.h
+
+=item mXPUSHi
+
+Push an integer onto the stack, extending the stack if necessary.  Does not
+handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHi>, C<mPUSHi>
+and C<PUSHi>.
+
+	void	mXPUSHi(IV iv)
+
+=for hackers
+Found in file pp.h
+
+=item mXPUSHn
+
+Push a double onto the stack, extending the stack if necessary.  Does not
+handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHn>, C<mPUSHn>
+and C<PUSHn>.
+
+	void	mXPUSHn(NV nv)
+
+=for hackers
+Found in file pp.h
+
+=item mXPUSHp
+
+Push a string onto the stack, extending the stack if necessary.  The C<len>
+indicates the length of the string.  Does not handle 'set' magic.  Does not
+use C<TARG>.  See also C<XPUSHp>, C<mPUSHp> and C<PUSHp>.
+
+	void	mXPUSHp(char* str, STRLEN len)
+
+=for hackers
+Found in file pp.h
+
+=item mXPUSHu
+
+Push an unsigned integer onto the stack, extending the stack if necessary.
+Does not handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHu>,
+C<mPUSHu> and C<PUSHu>.
+
+	void	mXPUSHu(UV uv)
+
+=for hackers
+Found in file pp.h
+
 =item ORIGMARK
 
 The original stack mark for the XSUB.  See C<dORIGMARK>.
@@ -2279,7 +2367,10 @@ Found in file pp.h
 =item PUSHi
 
 Push an integer onto the stack.  The stack must have room for this element.
-Handles 'set' magic.  See C<XPUSHi>.
+Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be
+called to declare it.  Do not call multiple C<TARG>-oriented macros to 
+return lists from XSUB's - see C<mPUSHi> instead.  See also C<XPUSHi> and
+C<mXPUSHi>.
 
 	void	PUSHi(IV iv)
 
@@ -2296,10 +2387,24 @@ L<perlcall>.
 =for hackers
 Found in file pp.h
 
+=item PUSHmortal
+
+Push a new mortal SV onto the stack.  The stack must have room for this
+element.  Does not handle 'set' magic.  Does not use C<TARG>.  See also
+C<PUSHs>, C<XPUSHmortal> and C<XPUSHs>.
+
+	void	PUSHmortal()
+
+=for hackers
+Found in file pp.h
+
 =item PUSHn
 
 Push a double onto the stack.  The stack must have room for this element.
-Handles 'set' magic.  See C<XPUSHn>.
+Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be
+called to declare it.  Do not call multiple C<TARG>-oriented macros to
+return lists from XSUB's - see C<mPUSHn> instead.  See also C<XPUSHn> and
+C<mXPUSHn>.
 
 	void	PUSHn(NV nv)
 
@@ -2309,8 +2414,10 @@ Found in file pp.h
 =item PUSHp
 
 Push a string onto the stack.  The stack must have room for this element.
-The C<len> indicates the length of the string.  Handles 'set' magic.  See
-C<XPUSHp>.
+The C<len> indicates the length of the string.  Handles 'set' magic.  Uses
+C<TARG>, so C<dTARGET> or C<dXSTARG> should be called to declare it.  Do not
+call multiple C<TARG>-oriented macros to return lists from XSUB's - see
+C<mPUSHp> instead.  See also C<XPUSHp> and C<mXPUSHp>.
 
 	void	PUSHp(char* str, STRLEN len)
 
@@ -2320,7 +2427,8 @@ Found in file pp.h
 =item PUSHs
 
 Push an SV onto the stack.  The stack must have room for this element.
-Does not handle 'set' magic.  See C<XPUSHs>.
+Does not handle 'set' magic.  Does not use C<TARG>.  See also C<PUSHmortal>,
+C<XPUSHs> and C<XPUSHmortal>.
 
 	void	PUSHs(SV* sv)
 
@@ -2330,7 +2438,10 @@ Found in file pp.h
 =item PUSHu
 
 Push an unsigned integer onto the stack.  The stack must have room for this
-element.  See C<XPUSHu>.
+element.  Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG>
+should be called to declare it.  Do not call multiple C<TARG>-oriented
+macros to return lists from XSUB's - see C<mPUSHu> instead.  See also
+C<XPUSHu> and C<mXPUSHu>.
 
 	void	PUSHu(UV uv)
 
@@ -2367,9 +2478,22 @@ Found in file pp.h
 =item XPUSHi
 
 Push an integer onto the stack, extending the stack if necessary.  Handles
-'set' magic. See C<PUSHi>.
+'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be called to
+declare it.  Do not call multiple C<TARG>-oriented macros to return lists
+from XSUB's - see C<mXPUSHi> instead.  See also C<PUSHi> and C<mPUSHi>.
 
 	void	XPUSHi(IV iv)
+
+=for hackers
+Found in file pp.h
+
+=item XPUSHmortal
+
+Push a new mortal SV onto the stack, extending the stack if necessary.  Does
+not handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHs>,
+C<PUSHmortal> and C<PUSHs>.
+
+	void	XPUSHmortal()
 
 =for hackers
 Found in file pp.h
@@ -2377,7 +2501,9 @@ Found in file pp.h
 =item XPUSHn
 
 Push a double onto the stack, extending the stack if necessary.  Handles
-'set' magic.  See C<PUSHn>.
+'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be called to
+declare it.  Do not call multiple C<TARG>-oriented macros to return lists
+from XSUB's - see C<mXPUSHn> instead.  See also C<PUSHn> and C<mPUSHn>.
 
 	void	XPUSHn(NV nv)
 
@@ -2387,8 +2513,10 @@ Found in file pp.h
 =item XPUSHp
 
 Push a string onto the stack, extending the stack if necessary.  The C<len>
-indicates the length of the string.  Handles 'set' magic.  See
-C<PUSHp>.
+indicates the length of the string.  Handles 'set' magic.  Uses C<TARG>, so
+C<dTARGET> or C<dXSTARG> should be called to declare it.  Do not call
+multiple C<TARG>-oriented macros to return lists from XSUB's - see
+C<mXPUSHp> instead.  See also C<PUSHp> and C<mPUSHp>.
 
 	void	XPUSHp(char* str, STRLEN len)
 
@@ -2398,7 +2526,8 @@ Found in file pp.h
 =item XPUSHs
 
 Push an SV onto the stack, extending the stack if necessary.  Does not
-handle 'set' magic.  See C<PUSHs>.
+handle 'set' magic.  Does not use C<TARG>.  See also C<XPUSHmortal>,
+C<PUSHs> and C<PUSHmortal>.
 
 	void	XPUSHs(SV* sv)
 
@@ -2408,7 +2537,10 @@ Found in file pp.h
 =item XPUSHu
 
 Push an unsigned integer onto the stack, extending the stack if necessary.
-See C<PUSHu>.
+Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be
+called to declare it.  Do not call multiple C<TARG>-oriented macros to
+return lists from XSUB's - see C<mXPUSHu> instead.  See also C<PUSHu> and
+C<mPUSHu>.
 
 	void	XPUSHu(UV uv)
 
