@@ -1677,14 +1677,37 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
     sv_setpvn(dsv, "", 0);
     for (s = (char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
 	 UV u;
+	 bool ok = FALSE;
+
 	 if (pvlim && SvCUR(dsv) >= pvlim) {
 	      truncated++;
 	      break;
 	 }
 	 u = utf8_to_uvchr((U8*)s, 0);
-	 if ((flags & UNI_DISPLAY_ISPRINT) && u < 256 && isprint(u))
-	     Perl_sv_catpvf(aTHX_ dsv, "%c", u);
-	 else
+	 if (u < 256) {
+	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isprint(u & 0xFF)) {
+	         Perl_sv_catpvf(aTHX_ dsv, "%c", u);
+		 ok = TRUE;
+	     }
+	     if (!ok && (flags & UNI_DISPLAY_BACKSLASH)) {
+	         switch (u & 0xFF) {
+		 case '\n':
+		     Perl_sv_catpvf(aTHX_ dsv, "\\n"); ok = TRUE; break;
+		 case '\r':
+		     Perl_sv_catpvf(aTHX_ dsv, "\\r"); ok = TRUE; break;
+		 case '\t':
+		     Perl_sv_catpvf(aTHX_ dsv, "\\t"); ok = TRUE; break;
+		 case '\f':
+		     Perl_sv_catpvf(aTHX_ dsv, "\\f"); ok = TRUE; break;
+		 case '\a':
+		     Perl_sv_catpvf(aTHX_ dsv, "\\a"); ok = TRUE; break;
+		 case '\\':
+		     Perl_sv_catpvf(aTHX_ dsv, "\\" ); ok = TRUE; break;
+		 default: break;
+		 }
+	     }
+	 }
+	 if (!ok)
 	     Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
     }
     if (truncated)

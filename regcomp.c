@@ -4557,9 +4557,13 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
     if (k == EXACT) {
         SV *dsv = sv_2mortal(newSVpvn("", 0));
-	bool do_utf8 = DO_UTF8(sv);
+	/* Using is_utf8_string() is a crude hack but it may
+	 * be the best for now since we have no flag "this EXACTish
+	 * node was UTF-8" --jhi */
+	bool do_utf8 = is_utf8_string((U8*)STRING(o), STR_LEN(o));
 	char *s    = do_utf8 ?
-	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60, 0) :
+	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60,
+			 UNI_DISPLAY_REGEX) :
 	  STRING(o);
 	int len = do_utf8 ?
 	  strlen(s) :
@@ -4750,7 +4754,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	return;
     DEBUG_r({
          char *s = pv_uni_display(dsv, (U8*)r->precomp, r->prelen, 60,
-				  UNI_DISPLAY_ISPRINT);
+				  UNI_DISPLAY_REGEX);
 	 int len = SvCUR(dsv);
 	 if (!PL_colorset)
 	      reginitcolors();
