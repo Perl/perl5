@@ -942,13 +942,13 @@ win32_getenv(const char *name)
     }
     else
     {
-	/* allow any environment variables that begin with 'PERL5'
+	/* allow any environment variables that begin with 'PERL'
 	   to be stored in the registry
 	*/
 	if(curitem != NULL)
 	    *curitem = '\0';
 
-	if (strncmp(name, "PERL5", 5) == 0) {
+	if (strncmp(name, "PERL", 4) == 0) {
 	    if (curitem != NULL) {
 		Safefree(curitem);
 		curitem = NULL;

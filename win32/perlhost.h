@@ -661,7 +661,7 @@ public:
     };
     virtual int GetBufsiz(PerlIO* pf, int &err)
     {
-#ifdef FILE_bufsize
+#ifdef FILE_bufsiz
 	FILE *f = (FILE*)pf;
 	return FILE_bufsiz(f);
 #else

@@ -2957,6 +2957,9 @@ my_exit_jump(void)
     JMPENV_JUMP(2);
 }
 
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#endif  /* PERL_OBJECT */
 
 #include "XSUB.h"
 
