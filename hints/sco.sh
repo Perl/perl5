@@ -84,7 +84,7 @@ icc)# Apparently, SCO's cc gives rather verbose warnings
 	# Set -w0 to turn them off.
 	case $scorls in
 	3) ccflags="$ccflags -W0 -quiet -U M_XENIX" ;;
-	5) ccflags="$ccflags -w0 -U M_XENIX" ;;
+	5) ccflags="$ccflags -w0 -U M_XENIX -DPERL_SCO5" ;;
 	esac
 	;;
 esac

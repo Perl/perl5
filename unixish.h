@@ -93,11 +93,6 @@
 #endif
 #define ABORT() kill(getpid(),SIGABRT);
 
-#define BIT_BUCKET "/dev/null"
-#define PERL_SYS_INIT(c,v)
-#define PERL_SYS_TERM()
-#define dXSUB_SYS int dummy
-
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
  * but which outputs all of the bytes requested as a single stream (unlike
@@ -112,3 +107,13 @@
 
 #define my_getenv(var) getenv(var)
 
+#ifdef PERL_SCO5
+#  define PERL_SYS_INIT(c,v)	fpsetmask(0)
+#else
+#  define PERL_SYS_INIT(c,v)
+#endif
+#define PERL_SYS_TERM()
+
+#define BIT_BUCKET "/dev/null"
+
+#define dXSUB_SYS int dummy
