@@ -15,12 +15,6 @@
 #define PERL_IN_SV_C
 #include "perl.h"
 
-#ifdef PERL_OBJECT
-#define VTBL this->*vtbl
-#else /* !PERL_OBJECT */
-#define VTBL *vtbl
-#endif /* PERL_OBJECT */
-
 #define FCALL *f
 #define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)
 
@@ -2721,7 +2715,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 	    MGVTBL* vtbl = mg->mg_virtual;
 	    *mgp = mg->mg_moremagic;
 	    if (vtbl && (vtbl->svt_free != NULL))
-		(VTBL->svt_free)(aTHX_ sv, mg);
+		CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
 		if (mg->mg_len >= 0)
 		    Safefree(mg->mg_ptr);

@@ -12,8 +12,6 @@
 #  define aTHXo			pPerl
 #  undef  aTHXo_
 #  define aTHXo_		aTHXo,
-#  undef  _aTHXo
-#  define _aTHXo		,aTHXo
 #endif /* PERL_OBJECT */
 
 START_EXTERN_C

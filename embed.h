@@ -875,7 +875,6 @@
 #define reganode		S_reganode
 #define regatom			S_regatom
 #define regbranch		S_regbranch
-#define regc			S_regc
 #define reguni			S_reguni
 #define regclass		S_regclass
 #define regclassutf8		S_regclassutf8
@@ -2192,7 +2191,6 @@
 #define reganode(a,b)		S_reganode(aTHX_ a,b)
 #define regatom(a)		S_regatom(aTHX_ a)
 #define regbranch(a,b)		S_regbranch(aTHX_ a,b)
-#define regc(a,b)		S_regc(aTHX_ a,b)
 #define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
 #define regclass()		S_regclass(aTHX)
 #define regclassutf8()		S_regclassutf8(aTHX)
@@ -4293,8 +4291,6 @@
 #define regatom			S_regatom
 #define S_regbranch		CPerlObj::S_regbranch
 #define regbranch		S_regbranch
-#define S_regc			CPerlObj::S_regc
-#define regc			S_regc
 #define S_reguni		CPerlObj::S_reguni
 #define reguni			S_reguni
 #define S_regclass		CPerlObj::S_regclass

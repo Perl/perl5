@@ -146,22 +146,17 @@ class CPerlObj;
 
 #define pTHXo			CPerlObj *pPerl
 #define pTHXo_			pTHXo,
-#define _pTHXo			,pTHXo
 #define aTHXo			this
 #define aTHXo_			this,
-#define _aTHXo			,this
 #define PERL_OBJECT_THIS	aTHXo
 #define PERL_OBJECT_THIS_	aTHXo_
-#define _PERL_OBJECT_THIS	_aTHXo
 #define dTHXoa(a)		pTHXo = a
 #define dTHXo			dTHXoa(PERL_GET_THX)
 
 #define pTHXx		void
 #define pTHXx_
-#define _pTHXx
 #define aTHXx
 #define aTHXx_
-#define _aTHXx
 
 #else /* !PERL_OBJECT */
 
@@ -181,9 +176,7 @@ struct perl_thread;
 #  define dTHXa(a)	pTHX = a
 #  define dTHX		dTHXa(PERL_GET_THX)
 #  define pTHX_		pTHX,
-#  define _pTHX		,pTHX
 #  define aTHX_		aTHX,
-#  define _aTHX		,aTHX
 #endif
 
 #define STATIC static
@@ -212,10 +205,8 @@ struct perl_thread;
 #ifndef pTHX
 #  define pTHX		void
 #  define pTHX_
-#  define _pTHX
 #  define aTHX
 #  define aTHX_
-#  define _aTHX
 #  define dTHXa(a)	dNOOP
 #  define dTHX		dNOOP
 #endif
@@ -223,20 +214,16 @@ struct perl_thread;
 #ifndef pTHXo
 #  define pTHXo		pTHX
 #  define pTHXo_	pTHX_
-#  define _pTHXo	_pTHX
 #  define aTHXo		aTHX
 #  define aTHXo_	aTHX_
-#  define _aTHXo	_aTHX
 #  define dTHXo		dTHX
 #endif
 
 #ifndef pTHXx
 #  define pTHXx		register PerlInterpreter *my_perl
 #  define pTHXx_	pTHXx,
-#  define _pTHXx	,pTHXx
 #  define aTHXx		my_perl
 #  define aTHXx_	aTHXx,
-#  define _aTHXx	,aTHXx
 #  define dTHXx		dTHX
 #endif
 

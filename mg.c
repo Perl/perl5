@@ -27,12 +27,6 @@
 #  endif
 #endif
 
-#ifdef PERL_OBJECT
-#  define VTBL            this->*vtbl
-#else
-#  define VTBL			*vtbl
-#endif
-
 static void restore_magic(pTHXo_ void *p);
 static void unwind_handler_stack(pTHXo_ void *p);
 
@@ -99,7 +93,7 @@ Perl_mg_get(pTHX_ SV *sv)
     while ((mg = *mgp) != 0) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && (vtbl->svt_get != NULL)) {
-	    (VTBL->svt_get)(aTHX_ sv, mg);
+	    CALL_FTPR(vtbl->svt_get)(aTHX_ sv, mg);
 	    /* Ignore this magic if it's been deleted */
 	    if ((mg == (mgp_valid ? *mgp : SvMAGIC(sv))) &&
 		  (mg->mg_flags & MGf_GSKIP))
@@ -137,7 +131,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	    (SSPTR(mgs_ix, MGS*))->mgs_flags = 0;
 	}
 	if (vtbl && (vtbl->svt_set != NULL))
-	    (VTBL->svt_set)(aTHX_ sv, mg);
+	    CALL_FPTR(vtbl->svt_set)(aTHX_ sv, mg);
     }
 
     restore_magic(aTHXo_ (void*)mgs_ix);
@@ -159,7 +153,7 @@ Perl_mg_length(pTHX_ SV *sv)
 	    mgs_ix = SSNEW(sizeof(MGS));
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
-	    len = (VTBL->svt_len)(aTHX_ sv, mg);
+	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
 	    restore_magic(aTHXo_ (void*)mgs_ix);
 	    return len;
 	}
@@ -183,7 +177,7 @@ Perl_mg_size(pTHX_ SV *sv)
 	    mgs_ix = SSNEW(sizeof(MGS));
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
-	    len = (VTBL->svt_len)(aTHX_ sv, mg);
+	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
 	    restore_magic(aTHXo_ (void*)mgs_ix);
 	    return len;
 	}
@@ -216,7 +210,7 @@ Perl_mg_clear(pTHX_ SV *sv)
 	/* omit GSKIP -- never set here */
 	
 	if (vtbl && (vtbl->svt_clear != NULL))
-	    (VTBL->svt_clear)(aTHX_ sv, mg);
+	    CALL_FPTR(vtbl->svt_clear)(aTHX_ sv, mg);
     }
 
     restore_magic(aTHXo_ (void*)mgs_ix);
@@ -259,7 +253,7 @@ Perl_mg_free(pTHX_ SV *sv)
 	MGVTBL* vtbl = mg->mg_virtual;
 	moremagic = mg->mg_moremagic;
 	if (vtbl && (vtbl->svt_free != NULL))
-	    (VTBL->svt_free)(aTHX_ sv, mg);
+	    CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
 	if (mg->mg_ptr && mg->mg_type != 'g')
 	    if (mg->mg_len >= 0)
 		Safefree(mg->mg_ptr);

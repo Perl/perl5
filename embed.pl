@@ -756,8 +756,6 @@ print CAPIH <<'EOT';
 #  define aTHXo			pPerl
 #  undef  aTHXo_
 #  define aTHXo_		aTHXo,
-#  undef  _aTHXo
-#  define _aTHXo		,aTHXo
 #endif /* PERL_OBJECT */
 
 START_EXTERN_C
@@ -970,9 +968,9 @@ EOT
 __END__
 
 # Lines are of the form:
-#    flags|return_type|function_name|return_type|arg1|arg2|...|argN
+#    flags|return_type|function_name|arg1|arg2|...|argN
 #
-# They may continue on multiple lines when \w| begins the next line.
+# A line may be continued on another by ending it with a backslash.
 # Leading and trailing whitespace will be ignored in each component.
 #
 # flags are single letters with following meanings:

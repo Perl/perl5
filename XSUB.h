@@ -118,10 +118,8 @@
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
 #  undef aTHX
 #  undef aTHX_
-#  undef _aTHX
 #  define aTHX		PERL_GET_THX
 #  define aTHX_		aTHX,
-#  define _aTHX		,aTHX
 #endif
 
 #if defined(PERL_CAPI)

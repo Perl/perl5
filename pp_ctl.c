@@ -26,12 +26,6 @@
 
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
-#ifdef PERL_OBJECT
-#define CALLOP this->*PL_op
-#else
-#define CALLOP *PL_op
-#endif
-
 static I32 sortcv(pTHXo_ SV *a, SV *b);
 static I32 sv_ncmp(pTHXo_ SV *a, SV *b);
 static I32 sv_i_ncmp(pTHXo_ SV *a, SV *b);
@@ -2304,7 +2298,7 @@ PP(pp_goto)
 		if (PL_op->op_type == OP_ENTERITER)
 		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop",
 			label);
-		(CALLOP->op_ppaddr)(aTHX);
+		CALL_FPTR(PL_op->op_ppaddr)(aTHX);
 	    }
 	    PL_op = oldop;
 	}
