@@ -31,8 +31,9 @@ else
 	sed -e 's/HP-//' -e 1q`;
     selecttype='int *'
     fi
-    # For some strange reason under the smoke harness the alignment
-    # test hangs in HP-UX 10.20.  So hint it to avoid the test.
+    # For some strange reason, the u32align test from Configure hangs in
+    # HP-UX 10.20 since the December 2001 patches.  So hint it to avoid
+    # the test.
     if [ "$xxOsRevMajor" -le 10 ]; then
 	d_u32align=$define
     fi
@@ -275,6 +276,7 @@ int main ()
 EOF
 $cc -o try $ccflags $ldflags try.c
 	maxdsiz=`try`
+rm -f try try.c core
 if [ $maxdsiz -le 64 ]; then
     # 64 Mb is probably not enough to optimize toke.c
     # and regexp.c with -O2
