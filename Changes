@@ -31,6 +31,234 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12888] By: jhi                                   on 2001/11/07  14:26:42
+        Log: The (emulated) "no utf8" must be in a BEGIN block
+             to be effective.
+     Branch: perl
+	   ! lib/CGI/t/html.t
+____________________________________________________________________________
+[ 12887] By: jhi                                   on 2001/11/07  13:52:58
+        Log: "v-strings" is the right term.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 12886] By: jhi                                   on 2001/11/07  13:48:36
+        Log: Add vstrings-as-objects need to perltodo.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 12885] By: jhi                                   on 2001/11/07  13:43:33
+        Log: Subject: Re: SunOS 5.8 is FUN! (and not quite ok, either) - @12876, gcc and suncc
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 7 Nov 2001 14:36:32 +0000
+             Message-ID: <20011107143631.I24980@plum.flirble.org>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 12884] By: jhi                                   on 2001/11/07  13:34:44
+        Log: The Embed test requires a major rewrite for VMS
+             (plus it reveals a couple of annoying glitches
+             in buffering), so skip the test for now; from
+             Charles Lane.
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12883] By: jhi                                   on 2001/11/07  13:33:16
+        Log: Subject: [PATCH Perl@12856] vms/gen_shrfls.pl more general config.sh parsing
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Wed, 7 Nov 2001 09:23:28 EST
+             Message-Id: <011107092325.11726@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm vms/gen_shrfls.pl
+____________________________________________________________________________
+[ 12882] By: ams                                   on 2001/11/07  05:14:04
+        Log: Subject: Re: [ID 20011106.083] $dbline[$i] == 0 generates warnings
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Wed, 07 Nov 2001 00:43:46 -0500
+             Message-Id: <20011107054346.14428.qmail@plover.com>
+     Branch: perl
+	   ! gv.c op.c toke.c
+____________________________________________________________________________
+[ 12881] By: jhi                                   on 2001/11/07  03:33:08
+        Log: Subject: [PATCH lib/perl5db.pl] Mentioning perldebguts   
+             From: Michael G Schwern <schwern@pobox.com>             
+             Date: Tue, 6 Nov 2001 22:04:39 -0500
+             Message-ID: <20011106220439.D2858@blackrider>              
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 12880] By: jhi                                   on 2001/11/07  01:35:30
+        Log: Subject: [PATCH lib/Term/Cap.t] Sync CPAN version of tests (was Re: [PATCH lib/Term/Cap.t] Skip testing where Term::Cap won't run (was Re: Win95 under
+             stress))
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Tue, 6 Nov 2001 06:54:37 +0000 (GMT)
+             Message-ID: <Pine.LNX.4.33.0111060651210.315-100000@orpheus.gellyfish.com>
+             
+             (except for one hunk where indentation differs)
+     Branch: perl
+	   ! lib/Term/Cap.t
+____________________________________________________________________________
+[ 12879] By: jhi                                   on 2001/11/07  01:22:40
+        Log: Subject: [PATCH File::Spec::*] a bunch of untested patches
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 6 Nov 2001 21:45:01 +0100
+             Message-ID: <20011106214501.A704@rafael>
+     Branch: perl
+	   ! lib/File/Spec/OS2.pm lib/File/Spec/VMS.pm
+	   ! lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 12878] By: jhi                                   on 2001/11/07  01:06:41
+        Log: Subject: [PATCH t/test.pl] Adding isnt() and next_test() 
+             From: Michael G Schwern <schwern@pobox.com>              
+             Date: Tue, 6 Nov 2001 20:58:45 -0500
+             Message-ID: <20011106205845.G29411@blackrider>
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 12877] By: jhi                                   on 2001/11/07  01:01:18
+        Log: Subject: making do_sprintf public       
+             From: Doug MacEachern <dougm@covalent.net>    
+             Date: Tue, 6 Nov 2001 10:52:31 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0111061051250.27804-100000@localhost>
+     Branch: perl
+	   ! embed.h embed.pl global.sym
+____________________________________________________________________________
+[ 12876] By: jhi                                   on 2001/11/06  22:12:28
+        Log: Update to CGI.pm 2.78.
+             
+             TODO: the test suite needs to be merged so that
+             when in core, the core version is tested, and when
+             using the CPAN version, testing the CPAN version.
+             (the changes need to be sent to Lincoln, too...)
+     Branch: perl
+	   ! lib/CGI.pm lib/CGI/Apache.pm lib/CGI/Carp.pm lib/CGI/Cookie.pm
+	   ! lib/CGI/Pretty.pm lib/CGI/Switch.pm lib/CGI/Util.pm
+	   ! lib/CGI/t/apache.t lib/CGI/t/carp.t lib/CGI/t/cookie.t
+	   ! lib/CGI/t/fast.t lib/CGI/t/form.t lib/CGI/t/function.t
+	   ! lib/CGI/t/html.t lib/CGI/t/pretty.t lib/CGI/t/push.t
+	   ! lib/CGI/t/request.t lib/CGI/t/switch.t lib/CGI/t/util.t
+____________________________________________________________________________
+[ 12875] By: jhi                                   on 2001/11/06  22:10:03
+        Log: Integrate with perlio; (strictly) readonly hashes via XS.
+     Branch: perl
+	  +> t/lib/access.t
+	  !> MANIFEST ext/B/t/stash.t hv.c pod/perldiag.pod universal.c
+____________________________________________________________________________
+[ 12874] By: nick                                  on 2001/11/06  21:05:16
+        Log: Keep It Simple and Stupid version of readonly hash support.
+             - Test for SvREAONLY(hv) at a few spots in hv.c
+             - add the error message to perldiag.pod
+             - (dubious) add access::readonly() to univeral.c
+             - add test using above
+             - fixup ext/B/t/stash.t to account for access:: existing
+     Branch: perlio
+	   + t/lib/access.t
+	   ! MANIFEST ext/B/t/stash.t hv.c pod/perldiag.pod universal.c
+____________________________________________________________________________
+[ 12873] By: jhi                                   on 2001/11/06  17:07:50
+        Log: Fix incorrect warnings about broken globbing;
+             from Andy Dougherty.
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 12872] By: jhi                                   on 2001/11/06  15:18:41
+        Log: More UTF-8 EXACT tweaking, plus a forgotten UTF-8 
+             toggle-on from the encoding pragma.
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[ 12871] By: jhi                                   on 2001/11/06  13:19:46
+        Log: Retract #12824, doesn't help and is ignored
+             by Configure anyway.
+     Branch: perl
+	   ! hints/beos.sh
+____________________________________________________________________________
+[ 12870] By: ams                                   on 2001/11/06  10:40:37
+        Log: Subject: Cosmetic change
+             From: H.Merijn Brand <h.m.brand@hccnet.nl>
+             Date: Tue, 06 Nov 2001 12:30:52 +0100
+             Message-Id: <20011106122922.30FA.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 12869] By: nick                                  on 2001/11/06  08:26:40
+        Log: Integrate mainline
+     Branch: perlio
+	  !> ext/DB_File/DB_File.pm global.sym hints/os390.sh
+	  !> lib/encoding.pm lib/encoding.t proto.h regcomp.c regexec.c
+____________________________________________________________________________
+[ 12868] By: jhi                                   on 2001/11/06  03:15:50
+        Log: The parentheses are protected enough.
+     Branch: perl
+	   ! hints/os390.sh
+____________________________________________________________________________
+[ 12867] By: jhi                                   on 2001/11/06  03:13:50
+        Log: ccflags, not ldflags.
+     Branch: perl
+	   ! hints/os390.sh
+____________________________________________________________________________
+[ 12866] By: jhi                                   on 2001/11/06  03:12:57
+        Log: ... and the proto to go with #12865.
+     Branch: perl
+	   ! proto.h
+____________________________________________________________________________
+[ 12865] By: jhi                                   on 2001/11/06  03:11:12
+        Log: Oops.  Luckily nothing was using this symbol yet.
+     Branch: perl
+	   ! global.sym
+____________________________________________________________________________
+[ 12864] By: jhi                                   on 2001/11/06  03:05:34
+        Log: Implement the encoding pragma for regex literals.
+     Branch: perl
+	   ! lib/encoding.pm lib/encoding.t regcomp.c regexec.c
+____________________________________________________________________________
+[ 12863] By: jhi                                   on 2001/11/06  01:01:49
+        Log: More UTF8 EXACT fixing.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 12862] By: jhi                                   on 2001/11/06  00:05:19
+        Log: More re debugging.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 12861] By: jhi                                   on 2001/11/05  23:24:24
+        Log: EXACT correction attempt.  Continued in #12863.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 12860] By: jhi                                   on 2001/11/05  22:57:04
+        Log: Unterminated L<.
+     Branch: perl
+	   ! ext/DB_File/DB_File.pm
+____________________________________________________________________________
+[ 12859] By: nick                                  on 2001/11/05  19:15:17
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Math/BigInt/t/Math/BigFloat/Subclass.pm
+	  +> lib/Math/BigInt/t/Math/BigInt/Subclass.pm
+	  +> lib/Math/BigInt/t/bigintpm.inc lib/Math/BigInt/t/sub_mbf.t
+	  +> lib/Math/BigInt/t/sub_mbi.t
+	   - lib/Math/BigInt/t/Math/Subclass.pm
+	   - lib/Math/BigInt/t/subclass.t
+	  !> (integrate 30 files)
+____________________________________________________________________________
+[ 12858] By: jhi                                   on 2001/11/05  17:05:38
+        Log: Regex debugging fixes from Hugo.
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[ 12857] By: jhi                                   on 2001/11/05  16:09:51
+        Log: IRIX: at some point the cc -version has started
+             to output to stderr, not stdout any more.
+     Branch: perl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[ 12856] By: jhi                                   on 2001/11/05  15:27:45
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12855] By: jhi                                   on 2001/11/05  15:21:13
         Log: The ${"\cTAINT"} raises the ire of 'use strict'.
      Branch: perl
