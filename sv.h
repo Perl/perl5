@@ -1110,6 +1110,7 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_GMAGIC		2
 #define SV_COW_DROP_PV		4	/* Unused in Perl 5.8.x */
 #define SV_UTF8_NO_ENCODING	8
+#define SV_NOSTEAL		16
 
 /* all these 'functions' are now just macros */
 
@@ -1220,10 +1221,7 @@ Returns a pointer to the character buffer.
 #define SvSetSV_nosteal_and(dst,src,finally) \
 	STMT_START {					\
 	    if ((dst) != (src)) {			\
-		U32 tMpF = SvFLAGS(src) & SVs_TEMP;	\
-		SvTEMP_off(src);			\
-		sv_setsv(dst, src);			\
-		SvFLAGS(src) |= tMpF;			\
+		sv_setsv_flags(dst, src, SV_GMAGIC | SV_NOSTEAL);	\
 		finally;				\
 	    }						\
 	} STMT_END
