@@ -77,7 +77,7 @@ package main;
 
 use Symbol;
 
-print "1..33\n";
+print "1..35\n";
 
 my $fh = gensym;
 
@@ -165,3 +165,27 @@ ok($r == 1);
     $r = print STDERR @expect[2,3];
     ok($r == 1);
 }
+
+{
+    # Test for change #11536
+    package Foo;
+    use strict;
+    sub TIEHANDLE { bless {} }
+    my $cnt = 'a';
+    sub READ {
+	$_[1] = $cnt++;
+	1;
+    }
+    sub do_read {
+	my $fh = shift;
+	read $fh, my $buff, 1;
+	main::ok(1);
+    }
+    $|=1;
+    tie *STDIN, 'Foo';
+    read STDIN, my $buff, 1;
+    main::ok(1);
+    do_read(\*STDIN);
+    untie *STDIN;
+}
+
