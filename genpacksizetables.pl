@@ -7,11 +7,14 @@ use Encode;
 my @lines = grep {!/^#/} <DATA>;
 
 sub addline {
-  my ($arrays, $chrmap, $letter, $arrayname, $noone, $nocsum, $size) = @_;
+  my ($arrays, $chrmap, $letter, $arrayname, $spare, $nocsum, $size,
+      $condition) = @_;
   my $line = "/* $letter */ $size";
-  $line .= " | PACK_SIZE_CANNOT_ONLY_ONE" if $noone;
+  $line .= " | PACK_SIZE_SPARE" if $spare;
   $line .= " | PACK_SIZE_CANNOT_CSUM" if $nocsum;
   $line .= ",";
+  # And then the hack
+  $line = [$condition, $line] if $condition;
   $arrays->{$arrayname}->[ord $chrmap->{$letter}] = $line;
   # print ord $chrmap->{$letter}, " $line\n";
 }
@@ -21,16 +24,19 @@ sub output_tables {
 
   my $chrmap = shift;
   foreach (@_) {
-    my ($letter, $shriek, $noone, $nocsum, $size)
-      = /^([A-Za-z])(!?)\t(\S*)\t(\S*)\t(.*)/;
+    my ($letter, $shriek, $spare, $nocsum, $size, $condition)
+      = /^([A-Za-z])(!?)\t(\S*)\t(\S*)\t([^\t\n]+)(?:\t+(.*))?$/;
     die "Can't parse '$_'" unless $size;
 
+    if (defined $condition) {
+	$condition = join " && ", map {"defined($_)"} split ' ', $condition;
+    }
     unless ($size =~ s/^=//) {
       $size = "sizeof($size)";
     }
 
     addline (\%arrays, $chrmap, $letter, $shriek ? 'shrieking' : 'normal',
-	     $noone, $nocsum, $size);
+	     $spare, $nocsum, $size, $condition);
   }
 
   my %earliest;
@@ -43,10 +49,24 @@ sub output_tables {
     # Remove all the empty elements.
     splice @$array, 0, $earliest;
     print "unsigned char size_${arrayname}[", scalar @$array, "] = {\n";
-    my @lines = map {$_ || "0,"} @$array;
+    my @lines;
+    foreach (@$array) {
+	# Remove the assumption here that the last entry isn't conditonal
+	if (ref $_) {
+	    push @lines,
+	      ["#if $_->[0]", "  $_->[1]", "#else", "  0,", "#endif"];
+	} else {
+	    push @lines, $_ ? "  $_" : "  0,";
+	}
+    }
     # remove the last, annoying, comma
-    chop $lines[$#lines];
-    print "  $_\n" foreach @lines;
+    my $last = $lines[$#lines];
+    my $got;
+    foreach (ref $last ? @$last : $last) {
+      $got += s/,$//;
+    }
+    die "Last entry had no commas" unless $got;
+    print map {"$_\n"} ref $_ ? @$_ : $_ foreach @lines;
     print "};\n";
     $earliest{$arrayname} = $earliest;
   }
@@ -80,7 +100,7 @@ output_tables (\%ebcdicmap, @lines);
 print "#endif\n";
 
 __DATA__
-#Symbol	nooone	nocsum	size
+#Symbol	spare	nocsum	size
 c			char
 C			unsigned char
 U			char
@@ -90,8 +110,8 @@ S!			unsigned short
 v			=SIZE16
 n			=SIZE16
 S			=SIZE16
-v!			=SIZE16
-n!			=SIZE16
+v!			=SIZE16	PERL_PACK_CAN_SHRIEKSIGN
+n!			=SIZE16	PERL_PACK_CAN_SHRIEKSIGN
 i			int
 i!			int
 I			unsigned int
@@ -103,14 +123,14 @@ l			=SIZE32
 L!			unsigned long
 V			=SIZE32
 N			=SIZE32
-V!			=SIZE32
-N!			=SIZE32
+V!			=SIZE32	PERL_PACK_CAN_SHRIEKSIGN
+N!			=SIZE32	PERL_PACK_CAN_SHRIEKSIGN
 L			=SIZE32
-p	*	*	char *
+p		*	char *
 w		*	char
-q			Quad_t
-Q			Uquad_t
+q			Quad_t	HAS_QUAD
+Q			Uquad_t	HAS_QUAD
 f			float
 d			double
 F			=NVSIZE
-D			=LONG_DOUBLESIZE
+D			=LONG_DOUBLESIZE	HAS_LONG_DOUBLE USE_LONG_DOUBLE
