@@ -148,9 +148,6 @@ register PerlInterpreter *sv_interp;
 		    0,
 		    FALSE,
 		    DUPLICATE_SAME_ACCESS);
-    /* XXX TlsAlloc() should probably be done in the DLL entry
-     * point also.
-     */
     if ((thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
 	croak("panic: pthread_key_create");
     if (TlsSetValue(thr_key, (LPVOID) thr) != TRUE)
@@ -256,11 +253,11 @@ register PerlInterpreter *sv_interp;
 #ifdef USE_THREADS
 #ifndef FAKE_THREADS
     /* Join with any remaining non-detached threads */
-    MUTEX_LOCK(&threads_mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "perl_destruct: waiting for %d threads...\n",
 			  nthreads - 1));
     for (t = thr->next; t != thr; t = t->next) {
+	MUTEX_LOCK(&threads_mutex);
 	MUTEX_LOCK(&t->mutex);
 	switch (ThrSTATE(t)) {
 	    AV *av;
@@ -271,7 +268,12 @@ register PerlInterpreter *sv_interp;
 	    MUTEX_UNLOCK(&t->mutex);
 	    nthreads--;
 	    MUTEX_UNLOCK(&threads_mutex);
+#ifdef WIN32
+	    if ((WaitForSingleObject(t->Tself,INFINITE) == WAIT_FAILED)
+		|| (GetExitCodeThread(t->Tself,(LPDWORD)&av) == 0))
+#else
 	    if (pthread_join(t->Tself, (void**)&av))
+#endif
 		croak("panic: pthread_join failed during global destruction");
 	    SvREFCNT_dec((SV*)av);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
@@ -300,6 +302,7 @@ register PerlInterpreter *sv_interp;
 	    /* fall through and out */
 	}
     }
+    MUTEX_LOCK(&threads_mutex);
     /* Now wait for the thread count nthreads to drop to one */
     while (nthreads > 1)
     {

@@ -112,8 +112,10 @@ typedef HANDLE perl_thread;
 
 #define DETACH(t) \
     STMT_START {						\
-	if (CloseHandle((t)->Tself) == 0)			\
+	if (CloseHandle((t)->Tself) == 0) {			\
+	    MUTEX_UNLOCK(&(t)->mutex);				\
 	    croak("panic: DETACH");				\
+	}							\
     } STMT_END
 
 #define THR ((struct thread *) TlsGetValue(thr_key))
