@@ -76,12 +76,18 @@ ccflags="${ccflags} -pipe -fno-common"
 # seems to work.  INT64_MIN seems to be similarly broken.
 # -- Nicholas Clark, Ken Williams, and Edward Moy
 #
-ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN"
+# This seems to have been fixed since at least Mac OS X 10.1.3,
+# stdint.h defining INT32_MIN as (-INT32_MAX-1)
+# -- Edward Moy
+#
+case "`grep '^#define INT32_MIN' /usr/include/stdint.h`" in
+*-2147483648) ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN" ;;
+esac
 
 # cppflags='-traditional-cpp';
 # avoid Apple's cpp precompiler, better for extensions
 cppflags="${cppflags} -no-cpp-precomp"
-# and ccflags needs them aswell since we don't use cpp directly
+# and ccflags needs them as well since we don't use cpp directly
 ccflags="${ccflags} -no-cpp-precomp"
 
 # Known optimizer problems.
