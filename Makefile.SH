@@ -765,6 +765,9 @@ extras.install: perl$(EXE_EXT)
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man install.html
 
+META.yml:	Porting/makemeta Porting/Maintainers.pl Porting/Maintainers.pm
+	$(LDLIBPTH) ./miniperl -Ilib Porting/makemeta
+
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install
 

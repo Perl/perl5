@@ -6,6 +6,8 @@
 # and in CPAN.  Those that have a CPAN existence, have the CPAN
 # attribute set to true.
 
+package Maintainers;
+
 %Maintainers =
 	(
 	'abergman'	=> 'Arthur Bergman <abergman@cpan.org>',
