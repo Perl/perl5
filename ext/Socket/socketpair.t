@@ -1,5 +1,7 @@
 #!./perl -w
 
+my $child;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -8,9 +10,32 @@ BEGIN {
         !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";
 	exit 0;
+      }
+
+    # Too many things in this test will hang forever if something is wrong,
+    # so we need a self destruct timer. And IO can hang despite an alarm.
+
+    # This is convoluted, but we must fork before Test::More, else child's
+    # Test::More thinks that it ran no tests, and prints a message to that
+    # effect
+    if( $Config{d_fork} ) {
+      my $parent = $$;
+      $child = fork;
+      die "Fork failed" unless defined $child;
+      if (!$child) {
+        $SIG{INT} = sub {exit 0}; # You have 60 seconds. Your time starts now.
+        my $must_finish_by = time + 60;
+        my $remaining;
+        while ($remaining = time - $must_finish_by) {
+          sleep $remaining;
+        }
+        warn "Something unexpectedly hung during testing";
+        kill "INT", $parent or die "Kill failed: $!";
+        exit 1;
+      }
     }
 }
-	
+
 use Socket;
 use Test::More;
 use strict;
@@ -21,6 +46,8 @@ my $skip_reason;
 
 if( !$Config{d_alarm} ) {
   plan skip_all => "alarm() not implemented on this platform";
+} elsif( !$Config{d_fork} ) {
+  plan skip_all => "fork() not implemented on this platform";
 } else {
   # This should fail but not die if there is real socketpair
   eval {socketpair LEFT, RIGHT, -1, -1, -1};
@@ -36,10 +63,8 @@ if( !$Config{d_alarm} ) {
   }
 }
 
-# Too many things in this test will hang forever if something is wrong, so
-# we need a self destruct timer.
-$SIG{ALRM} = sub {die "Something unexpectedly hung during testing"};
-alarm(60);
+# But we'll install an alarm handler in case any of the races below fail.
+$SIG{ALRM} = sub {die "Unexpected alarm during testing"};
 
 ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_STREAM, PF_UNSPEC),
     "socketpair (LEFT, RIGHT, AF_UNIX, SOCK_STREAM, PF_UNSPEC)")
@@ -69,9 +94,12 @@ is (read (RIGHT, $buffer, length $expect), length $expect, "read on right");
 is ($buffer, $expect, "content what we expected?");
 
 ok (shutdown(LEFT, SHUT_WR), "shutdown left for writing");
-# This will hang forever if eof is buggy.
+# This will hang forever if eof is buggy, and alarm doesn't interrupt system
+# Calls. Hence the child process minder.
 {
   local $SIG{ALRM} = sub { warn "EOF on right took over 3 seconds" };
+  local $TODO = "Known problems with unix sockets on $^O"
+      if $^O eq 'hpux' || $^O eq 'unicosmk';
   alarm 3;
   $! = 0;
   ok (eof RIGHT, "right is at EOF");
@@ -171,3 +199,6 @@ foreach $expect (@gripping) {
 
 ok (close LEFT, "close left");
 ok (close RIGHT, "close right");
+
+kill "INT", $child or warn "Failed to kill child process $child: $!";
+exit 0;

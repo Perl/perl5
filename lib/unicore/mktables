@@ -234,9 +234,11 @@ if (open(my $Unicode, "Unicode.txt")) {
 	    gencat(\@Name, \%General, \@General, \%Cat,
 		   $name, $cat, $code, \&append);
 
-	    append($To{Upper}       ||= [], $code, $upper)   if $upper;
-	    append($To{Lower}       ||= [], $code, $lower)   if $lower;
-	    append($To{Title}       ||= [], $code, $title)   if $title;
+	    # No append() here since since several codes may map into one.
+	    push @{$To{Upper}}, [ $code, $code, $upper ]     if $upper;
+	    push @{$To{Lower}}, [ $code, $code, $lower ]     if $lower;
+	    push @{$To{Title}}, [ $code, $code, $title ]     if $title;
+
 	    append($To{Digit}       ||= [], $code, $decimal) if $decimal;
 	    
 	    append(\@Bidi,                  $code, $bidi);

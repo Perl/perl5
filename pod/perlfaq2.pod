@@ -185,7 +185,8 @@ following groups:
 
 There is also Usenet gateway to the mailing list used by the crack
 Perl development team (perl5-porters) at
-news://news.perl.com/perl.porters-gw/ .
+news://nntp.perl.org/perl.perl5.porters or its web interface at
+http://nntp.perl.org/group/perl.perl5.porters .
 
 =head2 Where should I post source code?
 

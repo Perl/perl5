@@ -97,15 +97,17 @@ There is no equivalent to C<fgets>; one should use C<sv_gets> instead:
 
 =head2 Memory Management and String Handling
 
-    Instead Of:                 Use:
+    Instead Of:                 	Use:
 
-    t* p = malloc(n)            New(id, p, n, t)
-    t* p = calloc(n, s)         Newz(id, p, n, t)
-    p = realloc(p, n)           Renew(p, n, t)
-    memcpy(dst, src, n)         Copy(src, dst, n, t)
-    memmove(dst, src, n)        Move(src, dst, n, t)
-    memcpy/*(struct foo *)      StructCopy(src, dst, t)
-    free(p)                     Safefree(p)
+    t* p = malloc(n)            	New(id, p, n, t)
+    t* p = calloc(n, s)         	Newz(id, p, n, t)
+    p = realloc(p, n)           	Renew(p, n, t)
+    memcpy(dst, src, n)         	Copy(src, dst, n, t)
+    memmove(dst, src, n)        	Move(src, dst, n, t)
+    memcpy/*(struct foo *)      	StructCopy(src, dst, t)
+    memset(dst, 0, n * sizeof(t))	Zero(dst, n, t)
+    memzero(dst, 0)			Zero(dst, n, char)
+    free(p)             	        Safefree(p)
 
     strdup(p)                   savepv(p)
     strndup(p, n)               savepvn(p, n) (Hey, strndup doesn't exist!)

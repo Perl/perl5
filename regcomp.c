@@ -3427,7 +3427,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     SV *listsv = Nullsv;
     register char *e;
     UV n;
-    bool optimize_invert = TRUE;
+    bool optimize_invert   = TRUE;
+    AV* unicode_alternate  = 0;
 
     ret = reganode(pRExC_state, ANYOF, 0);
 
@@ -4028,18 +4029,38 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			 /* If folding and foldable and a single
 			  * character, insert also the folded version
 			  * to the charclass. */
-			 if (f != value && foldlen == UNISKIP(f))
-			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", f);
+			 if (f != value) {
+			      if (foldlen == UNISKIP(f))
+				  Perl_sv_catpvf(aTHX_ listsv,
+						 "%04"UVxf"\n", f);
+			      else {
+				  /* Any multicharacter foldings
+				   * require the following transform:
+				   * [ABCDEF] -> (?:[ABCabcDEFd]|pq|rst)
+				   * where E folds into "pq" and F folds
+				   * into "rst", all other characters
+				   * fold to single characters.  We save
+				   * away these multicharacter foldings,
+				   * to be later saved as part of the
+				   * additional "s" data. */
+				  SV *sv;
+
+				  if (!unicode_alternate)
+				      unicode_alternate = newAV();
+				  sv = newSVpvn((char*)foldbuf, foldlen);
+				  SvUTF8_on(sv);
+				  av_push(unicode_alternate, sv);
+			      }
+			 }
 
 			 /* If folding and the value is one of the Greek
 			  * sigmas insert a few more sigmas to make the
 			  * folding rules of the sigmas to work right.
 			  * Note that not all the possible combinations
 			  * are handled here: some of them are handled
-			  * handled by the standard folding rules, and
-			  * some of them (literal or EXACTF cases) are
-			  * handled during runtime in
-			  * regexec.c:S_find_byclass(). */
+			  * by the standard folding rules, and some of
+			  * them (literal or EXACTF cases) are handled
+			  * during runtime in regexec.c:S_find_byclass(). */
 			 if (value == UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA) {
 			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
 					     (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA);
@@ -4094,8 +4115,15 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	AV *av = newAV();
 	SV *rv;
 
+	/* The 0th element stores the character class description
+	 * in its textual form: used later (regexec.c:Perl_regclass_swatch())
+	 * to initialize the appropriate swash (which gets stored in
+	 * the 1st element), and also useful for dumping the regnode.
+	 * The 2nd element stores the multicharacter foldings,
+	 * used later (regexec.c:s_reginclasslen()). */
 	av_store(av, 0, listsv);
 	av_store(av, 1, NULL);
+	av_store(av, 2, (SV*)unicode_alternate);
 	rv = newRV_noinc((SV*)av);
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rx->data->data[n] = (void*)rv;
@@ -4625,7 +4653,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
 	{
 	    SV *lv;
-	    SV *sw = regclass_swash(o, FALSE, &lv);
+	    SV *sw = regclass_swash(o, FALSE, &lv, 0);
 	
 	    if (lv) {
 		if (sw) {
@@ -4714,16 +4742,26 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
 void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
-    DEBUG_r(if (!PL_colorset) reginitcolors());
+#ifdef DEBUGGING
+    SV *dsv = PERL_DEBUG_PAD_ZERO(0);
+#endif
 
     if (!r || (--r->refcnt > 0))
 	return;
-    DEBUG_r(PerlIO_printf(Perl_debug_log,
-		      "%sFreeing REx:%s `%s%.60s%s%s'\n",
-		      PL_colors[4],PL_colors[5],PL_colors[0],
-		      r->precomp,
-		      PL_colors[1],
-		      (strlen(r->precomp) > 60 ? "..." : "")));
+    DEBUG_r({
+         bool utf8 = r->reganch & ROPT_UTF8;
+         char *s = pv_uni_display(dsv, (U8*)r->precomp, r->prelen, 60,
+				  UNI_DISPLAY_ISPRINT);
+	 int len = SvCUR(dsv);
+	 if (!PL_colorset)
+	      reginitcolors();
+	 PerlIO_printf(Perl_debug_log,
+		       "%sFreeing REx:%s `%s%*.*s%s%s'\n",
+		       PL_colors[4],PL_colors[5],PL_colors[0],
+		       len, len, s,
+		       PL_colors[1],
+		       len > 60 ? "..." : "");
+    });
 
     if (r->precomp)
 	Safefree(r->precomp);
@@ -4779,7 +4817,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		new_comppad = NULL;
 		break;
 	    case 'n':
-		break;
+	        break;
 	    default:
 		Perl_croak(aTHX_ "panic: regfree data code '%c'", r->data->what[n]);
 	    }

@@ -1698,6 +1698,7 @@ lib/unicore/UCD.html		Unicode character database
 lib/unicore/Unicode.html	Unicode character database
 lib/unicore/Unicode.txt		Unicode character database
 lib/unicore/version		The version of the Unicode
+lib/unifold.t			See if Unicode folding works
 lib/UNIVERSAL.pm		Base class for ALL classes
 lib/User/grent.pm		By-name interface to Perl's builtin getgr*
 lib/User/grent.t		See if User::grwent works

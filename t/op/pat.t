@@ -2602,7 +2602,8 @@ print "# some Unicode properties\n";
     print "SS" =~
 	/\N{LATIN SMALL LETTER SHARP S}/i   ? "ok 840\n" : "not ok 840\n";
 
-# Fix coming up.
+# These are a bit tricky.  Since the LATIN SMALL LETTER SHARP S is U+00DF,
+# the ANYOF reduces to a byte.  The Unicodeness needs to be caught earlier.
 #    print "ss" =~
 #	/[\N{LATIN SMALL LETTER SHARP S}]/i ? "ok 841\n" : "not ok 841\n";
 #

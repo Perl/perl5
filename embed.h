@@ -1049,6 +1049,7 @@
 #define regrepeat_hard		S_regrepeat_hard
 #define regtry			S_regtry
 #define reginclass		S_reginclass
+#define reginclasslen		S_reginclasslen
 #define regcppush		S_regcppush
 #define regcppop		S_regcppop
 #define regcp_set_to		S_regcp_set_to
@@ -2104,7 +2105,7 @@
 #define ref(a,b)		Perl_ref(aTHX_ a,b)
 #define refkids(a,b)		Perl_refkids(aTHX_ a,b)
 #define regdump(a)		Perl_regdump(aTHX_ a)
-#define regclass_swash(a,b,c)	Perl_regclass_swash(aTHX_ a,b,c)
+#define regclass_swash(a,b,c,d)	Perl_regclass_swash(aTHX_ a,b,c,d)
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
 #define pregcomp(a,b,c)		Perl_pregcomp(aTHX_ a,b,c)
@@ -2588,6 +2589,7 @@
 #define regrepeat_hard(a,b,c)	S_regrepeat_hard(aTHX_ a,b,c)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
 #define reginclass(a,b,c)	S_reginclass(aTHX_ a,b,c)
+#define reginclasslen(a,b,c,d)	S_reginclasslen(aTHX_ a,b,c,d)
 #define regcppush(a)		S_regcppush(aTHX_ a)
 #define regcppop()		S_regcppop(aTHX)
 #define regcp_set_to(a)		S_regcp_set_to(aTHX_ a)
