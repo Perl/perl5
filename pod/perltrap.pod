@@ -1127,6 +1127,23 @@ found using the C<pos()> function--see L<perlfunc/pos>).
 You may always reset the iterator yourself as shown in the commented line
 to get the old behavior.
 
+=item * Regular Expression
+
+Currently, if you use the /o qualifier on a regular expression within
+an anonymous subroutine, I<all> closures generated from that anonymous
+sub constructor will use the regular expression compiled the very
+first time the constructor was called.  For instance, if you say
+
+    sub build_match {
+       my($left,$right) = @_;
+       return sub { $_[0] =~ /$left stuff $right/o; };
+    }
+
+build_match will always return a sub which matches the contents of
+C<$left> and <$right> from the first time it was called, not from
+the current call.  This is probably a bug, and may change in future
+versions of Perl.
+
 =back
 
 =head2 Subroutine, Signal, Sorting Traps
