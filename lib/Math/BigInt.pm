@@ -82,9 +82,9 @@ use overload
 'sqrt'  =>	sub { $_[0]->copy()->bsqrt(); },
 '~'	=>	sub { $_[0]->copy()->bnot(); },
 
-# for subtract it is a bit tricky to keep b: b-a => -a+b
+# for subtract it's a bit tricky to not modify b: b-a => -a+b
 '-'	=>	sub { my $c = $_[0]->copy; $_[2] ?
-                   $c->bneg()->badd($_[1]) :
+                   $c->bneg()->badd( $_[1]) :
                    $c->bsub( $_[1]) },
 '+'	=>	sub { $_[0]->copy()->badd($_[1]); },
 '*'	=>	sub { $_[0]->copy()->bmul($_[1]); },
@@ -670,7 +670,7 @@ sub bzero
   {
   # create a bigint '+0', if given a BigInt, set it to 0
   my $self = shift;
-  $self = $class if !defined $self;
+  $self = __PACKAGE__ if !defined $self;
  
   if (!ref($self))
     {
@@ -761,7 +761,7 @@ sub bsstr
   # (ref to BFLOAT or num_str ) return num_str
   # Convert number from internal format to scientific string format.
   # internal format is always normalized (no leading zeros, "-0E0" => "+0E0")
-  my $x = shift; $class = ref($x) || $x; $x = $class->new(shift) if !ref($x); 
+  my $x = shift; my $class = ref($x) || $x; $x = $class->new(shift) if !ref($x); 
   # my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_); 
 
   if ($x->{sign} !~ /^[+-]$/)
@@ -778,7 +778,7 @@ sub bsstr
 sub bstr 
   {
   # make a string from bigint object
-  my $x = shift; $class = ref($x) || $x; $x = $class->new(shift) if !ref($x); 
+  my $x = shift; my $class = ref($x) || $x; $x = $class->new(shift) if !ref($x); 
   # my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_); 
 
   if ($x->{sign} !~ /^[+-]$/)
@@ -892,7 +892,8 @@ sub round
   # $r round_mode, if given by caller
   # @args all 'other' arguments (0 for unary, 1 for binary ops)
 
-  # leave bigfloat parts alone
+  # leave bigfloat parts alone (that is only used in BigRat for now and can be
+  # removed once we rewrote BigRat))
   return ($self) if exists $self->{_f} && ($self->{_f} & MB_NEVER_ROUND) != 0;
 
   my $c = ref($self);				# find out class of argument(s)
@@ -945,7 +946,8 @@ sub round
     {
     $self->bfround($p,$r) if !defined $self->{_p} || $self->{_p} <= $p;
     }
-  $self->bnorm();			# after round, normalize
+  # bround() or bfround() already callled bnorm() if necc.
+  $self;
   }
 
 sub bnorm
@@ -1251,7 +1253,7 @@ sub blcm
     }
   else
     {
-    $x = __PACKAGE__->new($y);
+    $x = $class->new($y);
     }
   my $self = ref($x);
   while (@_) 
@@ -1269,7 +1271,7 @@ sub bgcd
   # GCD -- Euclids algorithm, variant C (Knuth Vol 3, pg 341 ff)
 
   my $y = shift;
-  $y = __PACKAGE__->new($y) if !ref($y);
+  $y = $class->new($y) if !ref($y);
   my $self = ref($y);
   my $x = $y->copy()->babs();			# keep arguments
   return $x->bnan() if $x->{sign} !~ /^[+-]$/;	# x NaN?

@@ -2333,19 +2333,13 @@ sub import
     # MBI not loaded, or with ne "Math::BigInt::Calc"
     $lib .= ",$mbilib" if defined $mbilib;
     $lib =~ s/^,//;				# don't leave empty 
+    
     # replacement library can handle lib statement, but also could ignore it
-    if ($] < 5.006)
-      {
-      # Perl < 5.6.0 dies with "out of memory!" when eval() and ':constant' is
-      # used in the same script, or eval inside import().
-      require Math::BigInt;
-      Math::BigInt->import( lib => $lib, 'objectify' );
-      }
-    else
-      {
-      my $rc = "use Math::BigInt lib => '$lib', 'objectify';";
-      eval $rc;
-      }
+    
+    # Perl < 5.6.0 dies with "out of memory!" when eval() and ':constant' is
+    # used in the same script, or eval inside import(). So we require MBI:
+    require Math::BigInt;
+    Math::BigInt->import( lib => $lib, 'objectify' );
     }
   if ($@)
     {
