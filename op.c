@@ -3615,22 +3615,7 @@ OP *block;
     return cv;
 }
 
-#ifdef DEPRECATED
-CV *
-newXSUB(name, ix, subaddr, filename)
-char *name;
-I32 ix;
-I32 (*subaddr)();
-char *filename;
-{
-    CV* cv = newXS(name, (void(*)())subaddr, filename);
-    CvOLDSTYLE_on(cv);
-    CvXSUBANY(cv).any_i32 = ix;
-    return cv;
-}
-#endif
-
-CV *
+V *
 newXS(name, subaddr, filename)
 char *name;
 void (*subaddr) _((CV*));
