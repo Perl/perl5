@@ -493,7 +493,7 @@ package DB;
 use IO::Handle;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.27;
+$VERSION = 1.28;
 
 $header = "perl5db.pl version $VERSION";
 
@@ -679,8 +679,6 @@ sub eval {
 # Note that no subroutine call is possible until &DB::sub is defined
 # (for subroutines defined outside of the package DB). In fact the same is
 # true if $deep is not defined.
-#
-# $Log: perldb.pl,v $
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
 
@@ -919,6 +917,8 @@ sub eval {
 #   + removed windowid restriction for forking into an xterm.
 #   + more whitespace again.
 #   + wrapped restart and enabled rerun [-n] (go back n steps) command.
+# Changes: 1.28: Oct 12, 2004 Richard Foley <richard.foley@rfi.net>
+#   + Added threads support (inc. e and E commands)
 ####################################################################
 
 =head1 DEBUGGER INITIALIZATION
@@ -956,12 +956,57 @@ BEGIN {
 
 local ($^W) = 0;    # Switch run-time warnings off during init.
 
+=head2 THREADS SUPPORT
+
+If we are running under a threaded Perl, we require threads and threads::shared
+if the environment variable C<PERL5DB_THREADED> is set, to enable proper
+threaded debugger control.  C<-dt> can also be used to set this.
+
+Each new thread will be announced and the debugger prompt will always inform
+you of each new thread created.  It will also indicate the thread id in which
+we are currently running within the prompt like this:
+
+	[tid] DB<$i>
+
+Where C<[tid]> is an integer thread id and C<$i> is the familiar debugger
+command prompt.  The prompt will show: C<[0]> when running under threads, but
+not actually in a thread.  C<[tid]> is consistent with C<gdb> usage.
+
+While running under threads, when you set or delete a breakpoint (etc.), this
+will apply to all threads, not just the currently running one.  When you are 
+in a currently executing thread, you will stay there until it completes.  With
+the current implementation it is not currently possible to hop from one thread
+to another.
+
+The C<e> and C<E> commands are currently fairly minimal - see C<h e> and C<h E>.
+
+Note that threading support was built into the debugger as of Perl version
+C<5.8.6> and debugger version C<1.2.8>.
+
+=cut
+
+BEGIN {
+  # ensure we can share our non-threaded variables or no-op
+  if ($ENV{PERL5DB_THREADED}) {
+	require threads;
+	require threads::shared;
+	import threads::shared qw(share);
+	$DBGR;
+	share(\$DBGR);
+	lock($DBGR);
+	print "Threads support enabled\n";
+  } else {
+	*lock  = sub(*) {};
+	*share = sub(*) {};
+  }
+}
+
 # This would probably be better done with "use vars", but that wasn't around
 # when this code was originally written. (Neither was "use strict".) And on
 # the principle of not fiddling with something that was working, this was
 # left alone.
 warn(               # Do not ;-)
-                    # These variables control the execution of 'dumpvar.pl'.
+    # These variables control the execution of 'dumpvar.pl'.
     $dumpvar::hashDepth,
     $dumpvar::arrayDepth,
     $dumpvar::dumpDBFiles,
@@ -986,6 +1031,10 @@ warn(               # Do not ;-)
     $second_time,
   )
   if 0;
+
+foreach my $k (keys (%INC)) {
+	&share(\$main::{'_<'.$filename});
+};
 
 # Command-line + PERLLIB:
 # Save the contents of @INC before they are modified elsewhere.
@@ -1153,6 +1202,17 @@ $post        = []    unless defined $post;
 $pretype     = []    unless defined $pretype;
 $CreateTTY   = 3     unless defined $CreateTTY;
 $CommandSet  = '580' unless defined $CommandSet;
+
+share($rl);
+share($warnLevel);
+share($dieLevel);
+share($signalLevel);
+share($pre);
+share($post);
+share($pretype);
+share($rl);
+share($CreateTTY);
+share($CommandSet);
 
 =pod
 
@@ -1429,6 +1489,11 @@ if ( exists $ENV{PERLDB_RESTART} ) {
     %break_on_load = get_list("PERLDB_ON_LOAD");
     %postponed     = get_list("PERLDB_POSTPONE");
 
+	share(@hist);
+	share(@truehist);
+	share(%break_on_load);
+	share(%postponed);
+
     # restore breakpoints/actions
     my @had_breakpoints = get_list("PERLDB_VISITED");
     for ( 0 .. $#had_breakpoints ) {
@@ -1465,6 +1530,7 @@ to be anyone there to enter commands.
 
 if ($notty) {
     $runnonstop = 1;
+	share($runnonstop);
 }
 
 =pod
@@ -1678,6 +1744,8 @@ and if we can.
     # and a I/O description to keep track of.
     $LINEINFO = $OUT     unless defined $LINEINFO;
     $lineinfo = $console unless defined $lineinfo;
+	# share($LINEINFO); # <- unable to share globs
+	share($lineinfo);   # 
 
 =pod
 
@@ -1745,6 +1813,13 @@ see what's happening in any given command.
 =cut
 
 sub DB {
+
+    # lock the debugger and get the thread id for the prompt
+	lock($DBGR);
+	my $tid;
+	if ($ENV{PERL5DB_THREADED}) {
+		$tid = eval { "[".threads->self->tid."]" };
+	}
 
     # Check for whether we should be running continuously or not.
     # _After_ the perl program is compiled, $single is set to 1:
@@ -2114,7 +2189,7 @@ the new command. This is faster, but perhaps a bit more convoluted.
             # ... and we got a line of command input ...
             defined(
                 $cmd = &readline(
-                        "$pidprompt  DB"
+                        "$pidprompt $tid DB"
                       . ( '<' x $level )
                       . ( $#hist + 1 )
                       . ( '>' x $level ) . " "
@@ -2123,6 +2198,7 @@ the new command. This is faster, but perhaps a bit more convoluted.
           )
         {
 
+			share($cmd);
             # ... try to execute the input as debugger commands.
 
             # Don't stop running.
@@ -2153,6 +2229,8 @@ it up.
             chomp($cmd);    # get rid of the annoying extra newline
             push( @hist, $cmd ) if length($cmd) > 1;
             push( @truehist, $cmd );
+			share(@hist);
+			share(@truehist);
 
             # This is a restart point for commands that didn't arrive
             # via direct user input. It allows us to 'redo PIPE' to
@@ -2461,7 +2539,7 @@ deal with them instead of processing them in-line.
 
                 # All of these commands were remapped in perl 5.8.0;
                 # we send them off to the secondary dispatcher (see below).
-                $cmd =~ /^([aAbBhilLMoOPvwW]\b|[<>\{]{1,2})\s*(.*)/so && do {
+                $cmd =~ /^([aAbBeEhilLMoOPvwW]\b|[<>\{]{1,2})\s*(.*)/so && do {
                     &cmd_wrapper( $1, $2, $line );
                     next CMD;
                 };
@@ -3500,10 +3578,16 @@ arguments with which the subroutine was invoked
 
 sub sub {
 
+	# lock ourselves under threads
+	lock($DBGR);
+
     # Whether or not the autoloader was running, a scalar to put the
     # sub's return value in (if needed), and an array to put the sub's
     # return value in (if needed).
     my ( $al, $ret, @ret ) = "";
+	if ($sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
+		print "creating new thread\n"; 
+	}
 
     # If the last ten characters are C'::AUTOLOAD', note we've traced
     # into AUTOLOAD for $sub.
@@ -4505,6 +4589,53 @@ of new commands.
 sub cmd_stop {    # As on ^C, but not signal-safy.
     $signal = 1;
 }
+
+=head3 C<cmd_e> - threads
+
+Display the current thread id:
+
+	e
+
+This could be how (when implemented) to send commands to this thread id (e cmd)
+or that thread id (e tid cmd).
+
+=cut
+
+sub cmd_e {
+    my $cmd  = shift;
+    my $line = shift;
+	unless (exists($INC{'threads.pm'})) {
+		print "threads not loaded($ENV{PERL5DB_THREADED})
+		please run the debugger with PERL5DB_THREADED=1 set in the environment\n";
+	} else {
+		my $tid = threads->self->tid;
+		print "thread id: $tid\n";
+	}
+} ## end sub cmd_e
+
+=head3 C<cmd_E> - list of thread ids
+
+Display the list of available thread ids:
+
+	E
+
+This could be used (when implemented) to send commands to all threads (E cmd).
+
+=cut
+
+sub cmd_E {
+    my $cmd  = shift;
+    my $line = shift;
+	unless (exists($INC{'threads.pm'})) { 
+		print "threads not loaded($ENV{PERL5DB_THREADED})
+		please run the debugger with PERL5DB_THREADED=1 set in the environment\n";
+	} else {
+		my $tid = threads->self->tid;
+		print "thread ids: ".join(', ', 
+			map { ($tid == $_->tid ? '<'.$_->tid.'>' : $_->tid) } threads->list
+		)."\n"; 
+	}
+} ## end sub cmd_E
 
 =head3 C<cmd_h> - help command (command)
 
@@ -6959,6 +7090,8 @@ B<m> I<expr>        Evals expression in list context, prints methods callable
 B<m> I<class>        Prints methods callable via the given class.
 B<M>        Show versions of loaded modules.
 B<i> I<class>       Prints nested parents of given class.
+B<e>         Display current thread id.
+B<E>         Display all thread ids the current one will be identified: <n>.
 B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
 B<P> Something to do with assertions...
 
@@ -7076,6 +7209,7 @@ I<Data Examination:>     B<expr>     Execute perl code, also see: B<s>,B<n>,B<t>
   B<V> [I<Pk> [I<Vars>]]  List Variables in Package.  Vars can be ~pattern or !pattern.
   B<X> [I<Vars>]       Same as \"B<V> I<current_package> [I<Vars>]\".  B<i> I<class> inheritance tree.
   B<y> [I<n> [I<Vars>]]   List lexicals in higher scope <n>.  Vars same as B<V>.
+  B<e>     Display thread id     B<E> Display all thread ids.
 For more help, type B<h> I<cmd_letter>, or run B<$doccmd perldebug> for all docs.
 END_SUM
 
