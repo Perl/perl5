@@ -1,6 +1,6 @@
 Revision history for Perl extension Cwd.
 
-2.18  (pending, still in beta release)
+2.18  Thu Jun 24 08:22:57 CDT 2004
 
  - Fixed a problem in which abs_path($arg) on some platforms could
    only be called on directories, and died when called on files.  This

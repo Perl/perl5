@@ -1,9 +1,12 @@
 #!./perl
 
-use Cwd;
 BEGIN {
     chdir 't' if -d 't';
+    if ($ENV{PERL_CORE}) {
+	unshift @INC, '../lib';
+    }
 }
+use Cwd;
 
 use Config;
 use strict;
@@ -11,7 +14,7 @@ use warnings;
 use File::Spec;
 use File::Path;
 
-use Test::More tests => 20;
+use Test::More tests => 24;
 
 my $IsVMS = $^O eq 'VMS';
 my $IsMacOS = $^O eq 'MacOS';
@@ -129,7 +132,7 @@ SKIP: {
     skip "no symlinks on this platform", 2 unless $Config{d_symlink};
 
     mkpath([$Test_Dir], 0, 0777);
-    symlink $Test_Dir => "linktest";
+    symlink $Test_Dir, "linktest";
 
     my $abs_path      =  Cwd::abs_path("linktest");
     my $fast_abs_path =  Cwd::fast_abs_path("linktest");
@@ -141,6 +144,18 @@ SKIP: {
     rmtree($test_dirs[0], 0, 0);
     unlink "linktest";
 }
+
+chdir '../ext/Cwd/t' if $ENV{PERL_CORE};
+
+# Make sure we can run abs_path() on files, not just directories
+my $path = 'cwd.t';
+dir_ends_with(Cwd::abs_path($path), 'cwd.t', 'abs_path() can be invoked on a file');
+dir_ends_with(Cwd::fast_abs_path($path), 'cwd.t', 'fast_abs_path() can be invoked on a file');
+
+$path = File::Spec->catfile(File::Spec->updir, 't', $path);
+dir_ends_with(Cwd::abs_path($path), 'cwd.t', 'abs_path() can be invoked on a file');
+dir_ends_with(Cwd::fast_abs_path($path), 'cwd.t', 'fast_abs_path() can be invoked on a file');
+
 
 #############################################
 # These two routines give us sort of a poor-man's cross-platform

@@ -1,5 +1,5 @@
 package Cwd;
-$VERSION = $VERSION = '2.17_03';
+$VERSION = $VERSION = '2.18';
 
 =head1 NAME
 
@@ -146,7 +146,7 @@ C<fast_abs_path()>.
 
 Originally by the perl5-porters.
 
-Now maintained by Ken Williams <KWILLIAMS@cpan.org>
+Maintained by Ken Williams <KWILLIAMS@cpan.org>
 
 =head1 SEE ALSO
 
