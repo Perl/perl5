@@ -2902,8 +2902,6 @@ competing threads can corrupt shared global state.)
                                                               150-151
  ../lib/Math/Trig.t                          26    1   3.85%  25
  ../lib/warnings.t                          470    1   0.21%  429
- op/numconvert.t                           1440   13   0.90%  208 509-510
-                                657-658 665-666 829-830 989-990 1149-1150
 
 The Trig and numconvert failures are caused by the slighly differing
 (from IEEE) floating point implementation of UNICOS.  The warnings
