@@ -633,7 +633,7 @@ sub depend {
     my(@m,$key,$val);
     while (($key,$val) = each %attribs){
 	last unless defined $key;
-	push @m, "$key: $val\n";
+	push @m, "$key : $val\n";
     }
     join "", @m;
 }
@@ -2515,7 +2515,7 @@ $(OBJECT) : $(FIRST_MAKEFILE)
     push @m, q{
 # We take a very conservative approach here, but it\'s worth it.
 # We move Makefile to Makefile.old here to avoid gnu make looping.
-}.$self->{MAKEFILE}.q{ :: Makefile.PL $(CONFIGDEP)
+}.$self->{MAKEFILE}.q{ : Makefile.PL $(CONFIGDEP)
 	}.$self->{NOECHO}.q{echo "Makefile out-of-date with respect to $?"
 	}.$self->{NOECHO}.q{echo "Cleaning current config before rebuilding Makefile..."
 	-}.$self->{NOECHO}.q{$(RM_F) }."$self->{MAKEFILE}.old".q{
