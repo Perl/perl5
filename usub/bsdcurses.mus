@@ -1,6 +1,9 @@
-/* $RCSfile: bsdcurses.mus,v $$Revision: 4.0.1.1 $$Date: 91/11/05 19:04:53 $
+/* $RCSfile: bsdcurses.mus,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:05:28 $
  *
  * $Log:	bsdcurses.mus,v $
+ * Revision 4.0.1.2  92/06/08  16:05:28  lwall
+ * patch20: &getcap eventually dumped core in bsdcurses
+ * 
  * Revision 4.0.1.1  91/11/05  19:04:53  lwall
  * initial checkin
  * 
@@ -476,9 +479,18 @@ END
 CASE int erasechar
 END
 
-CASE char* getcap
-I	char*		str
-END
+    case US_getcap:
+	if (items != 1)
+	    fatal("Usage: &getcap($str)");
+	else {
+	    char* retval;
+	    char*	str =		(char*)		str_get(st[1]);
+	    char output[50], *outputp = output;
+
+	    retval = tgetstr(str, &outputp);
+	    str_set(st[0], (char*) retval);
+	}
+	return sp;
 
     case US_getyx:
 	if (items != 3)

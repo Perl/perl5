@@ -1,7 +1,8 @@
 package bigfloat;
 require "bigint.pl";
-
 # Arbitrary length float math package
+#
+# by Mark Biggar
 #
 # number format
 #   canonical strings have the form /[+-]\d+E[+-]\d+/
@@ -66,14 +67,15 @@ sub norm { #(mantissa, exponent) return fnum_str
 # negation
 sub main'fneg { #(fnum_str) return fnum_str
     local($_) = &'fnorm($_[0]);
-    substr($_,0,1) =~ tr/+-/-+/ if ($_ ne '+0E+0'); # flip sign
+    vec($_,0,8) =^ ord('+') ^ ord('-') unless $_ eq '+0E+0'; # flip sign
+    s/^H/N/;
     $_;
 }
 
 # absolute value
 sub main'fabs { #(fnum_str) return fnum_str
     local($_) = &'fnorm($_[0]);
-    substr($_,0,1) = '+' unless $_ eq 'NaN';                       # mash sign
+    s/^-/+/;		                       # mash sign
     $_;
 }
 
@@ -198,18 +200,13 @@ sub main'fcmp #(fnum_str, fnum_str) return cond_code
     local($x, $y) = (&'fnorm($_[0]),&'fnorm($_[1]));
     if ($x eq "NaN" || $y eq "NaN") {
 	undef;
-    } elsif ($x eq $y) {
-	0;
-    } elsif (ord($x) != ord($y)) {
-	(ord($y) - ord($x));                # based on signs
     } else {
-	local($xm,$xe) = split('E',$x);
-	local($ym,$ye) = split('E',$y);
-	if ($xe ne $ye) {
-	    ($xe - $ye) * (substr($x,0,1).'1');
-	} else {
-	    &bigint'cmp($xm,$ym);           # based on value
-	}
+	ord($y) <=> ord($x)
+	||
+	(  local($xm,$xe,$ym,$ye) = split('E', $x."E$y"),
+	     (($xe <=> $ye) * (substr($x,0,1).'1')
+             || &bigint'cmp($xm,$ym))
+	);
     }
 }
 

@@ -9,6 +9,7 @@
  * that running config.h.SH again will wipe out any changes you've made.
  * For a more permanent change edit config.sh and rerun config.h.SH.
  */
+ /*SUPPRESS 460*/
 
 
 /* EUNICE
@@ -25,11 +26,16 @@
 /*#undef	EUNICE		/**/
 /*#undef	VMS		/**/
 
+/* LOC_SED
+ *     This symbol holds the complete pathname to the sed program.
+ */
+#define LOC_SED "/bin/sed"             /**/
+
 /* ALIGNBYTES
  *	This symbol contains the number of bytes required to align a double.
  *	Usual values are 2, 4, and 8.
  */
-#define ALIGNBYTES 2		/**/
+#define ALIGNBYTES 8		/**/
 
 /* BIN
  *	This symbol holds the name of the directory in which the user wants
@@ -40,7 +46,7 @@
 
 /* BYTEORDER
  *	This symbol contains an encoding of the order of bytes in a long.
- *	Usual values (in octal) are 01234, 04321, 02143, 03412...
+ *	Usual values (in hex) are 0x1234, 0x4321, 0x2143, 0x3412...
  */
 #define BYTEORDER 0x4321		/**/
 
@@ -68,8 +74,16 @@
 /* HAS_BCOPY
  *	This symbol, if defined, indicates that the bcopy routine is available
  *	to copy blocks of memory.  Otherwise you should probably use memcpy().
+ *	If neither is defined, roll your own.
+ */
+/* SAFE_BCOPY
+ *	This symbol, if defined, indicates that the bcopy routine is available
+ *	to copy potentially overlapping copy blocks of bcopy.  Otherwise you
+ *	should probably use memmove() or memcpy().  If neither is defined,
+ *	roll your own.
  */
 #define	HAS_BCOPY		/**/
+#define	SAFE_BCOPY		/**/
 
 /* HAS_BZERO
  *	This symbol, if defined, indicates that the bzero routine is available
@@ -89,8 +103,8 @@
  *		1 = couldn't cast < 0
  *		2 = couldn't cast >= 0x80000000
  */
-/*#undef	CASTNEGFLOAT	/**/
-#define	CASTFLAGS 1	/**/
+#define	CASTNEGFLOAT	/**/
+#define	CASTFLAGS 0	/**/
 
 /* CHARSPRINTF
  *	This symbol is defined if this system declares "char *sprintf()" in
@@ -180,7 +194,7 @@
  *	This symbol, if defined, indicates that the gethostent() routine is
  *	available to lookup host names in some data base or other.
  */
-/*#undef	HAS_GETHOSTENT		/**/
+#define	HAS_GETHOSTENT		/**/
 
 /* HAS_GETPGRP
  *	This symbol, if defined, indicates that the getpgrp() routine is
@@ -232,6 +246,12 @@
 /*#undef	index strchr	/* cultural */
 /*#undef	rindex strrchr	/*  differences? */
 
+/* HAS_ISASCII
+ *	This symbol, if defined, indicates that the isascii routine is available
+ *	to test characters for asciiness.
+ */
+#define	HAS_ISASCII		/**/
+
 /* HAS_KILLPG
  *	This symbol, if defined, indicates that the killpg routine is available
  *	to kill process groups.  If unavailable, you probably should use kill
@@ -256,7 +276,27 @@
  *	to copy blocks of memory.  Otherwise you should probably use bcopy().
  *	If neither is defined, roll your own.
  */
+/* SAFE_MEMCPY
+ *	This symbol, if defined, indicates that the memcpy routine is available
+ *	to copy potentially overlapping copy blocks of memory.  Otherwise you
+ *	should probably use memmove() or bcopy().  If neither is defined,
+ *	roll your own.
+ */
 #define	HAS_MEMCPY		/**/
+/*#undef	SAFE_MEMCPY		/**/
+
+/* HAS_MEMMOVE
+ *	This symbol, if defined, indicates that the memmove routine is available
+ *	to move potentially overlapping blocks of memory.  Otherwise you
+ *	should use bcopy() or roll your own.
+ */
+/*#undef	HAS_MEMMOVE		/**/
+
+/* HAS_MEMSET
+ *	This symbol, if defined, indicates that the memset routine is available
+ *	to set a block of memory to a character.  If undefined, roll your own.
+ */
+#define	HAS_MEMSET		/**/
 
 /* HAS_MKDIR
  *	This symbol, if defined, indicates that the mkdir routine is available
@@ -273,25 +313,25 @@
 
 /* HAS_MSGCTL
  *	This symbol, if defined, indicates that the msgctl() routine is
- *	available to stat symbolic links.
+ *	available to control message passing.
  */
 #define	HAS_MSGCTL		/**/
 
 /* HAS_MSGGET
  *	This symbol, if defined, indicates that the msgget() routine is
- *	available to stat symbolic links.
+ *	available to get messages.
  */
 #define	HAS_MSGGET		/**/
 
 /* HAS_MSGRCV
  *	This symbol, if defined, indicates that the msgrcv() routine is
- *	available to stat symbolic links.
+ *	available to receive messages.
  */
 #define	HAS_MSGRCV		/**/
 
 /* HAS_MSGSND
  *	This symbol, if defined, indicates that the msgsnd() routine is
- *	available to stat symbolic links.
+ *	available to send messages.
  */
 #define	HAS_MSGSND		/**/
 
@@ -326,12 +366,24 @@
  */
 #define	HAS_RENAME		/**/
 
+/* HAS_REWINDDIR
+ *	This symbol, if defined, indicates that the rewindir routine is
+ *	available to rewind directories.
+ */
+#define	HAS_REWINDDIR		/**/
+
 /* HAS_RMDIR
  *	This symbol, if defined, indicates that the rmdir routine is available
  *	to remove directories.  Otherwise you should fork off a new process to
  *	exec /bin/rmdir.
  */
 #define	HAS_RMDIR		/**/
+
+/* HAS_SEEKDIR
+ *	This symbol, if defined, indicates that the seekdir routine is
+ *	available to seek into directories.
+ */
+#define	HAS_SEEKDIR		/**/
 
 /* HAS_SELECT
  *	This symbol, if defined, indicates that the select() subroutine
@@ -347,19 +399,19 @@
 
 /* HAS_SEMCTL
  *	This symbol, if defined, indicates that the semctl() routine is
- *	available to stat symbolic links.
+ *	available to control semaphores.
  */
 #define	HAS_SEMCTL		/**/
 
 /* HAS_SEMGET
  *	This symbol, if defined, indicates that the semget() routine is
- *	available to stat symbolic links.
+ *	available to get semaphores ids.
  */
 #define	HAS_SEMGET		/**/
 
 /* HAS_SEMOP
  *	This symbol, if defined, indicates that the semop() routine is
- *	available to stat symbolic links.
+ *	available to perform semaphore operations.
  */
 #define	HAS_SEMOP		/**/
 
@@ -437,7 +489,7 @@
 
 /* HAS_SHMAT
  *	This symbol, if defined, indicates that the shmat() routine is
- *	available to stat symbolic links.
+ *	available to attach a shared memory segment.
  */
 /* VOID_SHMAT
  *	This symbol, if defined, indicates that the shmat() routine
@@ -449,19 +501,19 @@
 
 /* HAS_SHMCTL
  *	This symbol, if defined, indicates that the shmctl() routine is
- *	available to stat symbolic links.
+ *	available to control a shared memory segment.
  */
 #define	HAS_SHMCTL		/**/
 
 /* HAS_SHMDT
  *	This symbol, if defined, indicates that the shmdt() routine is
- *	available to stat symbolic links.
+ *	available to detach a shared memory segment.
  */
 #define	HAS_SHMDT		/**/
 
 /* HAS_SHMGET
  *	This symbol, if defined, indicates that the shmget() routine is
- *	available to stat symbolic links.
+ *	available to get a shared memory segment id.
  */
 #define	HAS_SHMGET		/**/
 
@@ -519,6 +571,12 @@
  *	to call arbitrary system calls.  If undefined, that's tough.
  */
 #define	HAS_SYSCALL		/**/
+
+/* HAS_TELLDIR
+ *	This symbol, if defined, indicates that the telldir routine is
+ *	available to tell your location in directories.
+ */
+#define	HAS_TELLDIR		/**/
 
 /* HAS_TRUNCATE
  *	This symbol, if defined, indicates that the truncate routine is
@@ -737,9 +795,14 @@
 /*#undef	I_MY_DIR	/**/
 /*#undef	DIRNAMLEN	/**/
 
+/* MYMALLOC
+ *	This symbol, if defined, indicates that we're using our own malloc.
+ */
 /* MALLOCPTRTYPE
  *	This symbol defines the kind of ptr returned by malloc and realloc.
  */
+#define MYMALLOC			/**/
+
 #define MALLOCPTRTYPE char         /**/
 
 

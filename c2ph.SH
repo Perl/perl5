@@ -19,6 +19,7 @@ echo "Extracting c2ph (with variable substitutions)"
 : Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
 : Protect any dollar signs and backticks that you do not want interpreted
 : by putting a backslash in front.  You may delete these comments.
+rm -f c2ph
 $spitshell >c2ph <<!GROK!THIS!
 #!$bin/perl
 #
@@ -36,7 +37,7 @@ $spitshell >>c2ph <<'!NO!SUBS!'
 #   See the usage message for more.  If this isn't enough, read the code.
 #
 
-$RCSID = '$RCSfile: c2ph.SH,v $$Revision: 4.0.1.1 $$Date: 91/11/05 16:02:29 $';
+$RCSID = '$RCSfile: c2ph.SH,v $$Revision: 4.0.1.2 $$Date: 92/06/08 11:56:08 $';
 
 
 ######################################################################

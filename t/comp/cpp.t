@@ -1,6 +1,18 @@
 #!./perl -P
 
-# $Header: cpp.t,v 4.0 91/03/20 01:50:05 lwall Locked $
+# $RCSfile: cpp.t,v $$Revision: 4.0.1.1 $$Date: 92/06/08 15:42:08 $
+
+open(CONFIG,"../config.sh") || die;
+while (<CONFIG>) {
+    if (/^cppstdin/) {
+	if (/^cppstdin='(.*cppstdin)'/ && ! -e $1) {
+	    print "1..0\n";
+	    exit; 		# Can't test till after install, alas.
+	}
+	last;
+    }
+}
+close CONFIG;
 
 print "1..3\n";
 

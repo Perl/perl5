@@ -3,7 +3,7 @@
 ;# Waldemar Kebsch, Federal Republic of Germany, November 1988
 ;# kebsch.pad@nixpbe.UUCP
 ;# Modified March 1990, Feb 1991 to properly handle timezones
-;#  $Id: ctime.pl,v 1.8 91/02/04 18:28:12 hakanson Exp $
+;#  $RCSfile: ctime.pl,v $$Revision: 4.0.1.1 $$Date: 92/06/08 13:38:06 $
 ;#   Marion Hakanson (hakanson@cse.ogi.edu)
 ;#   Oregon Graduate Institute of Science and Technology
 ;#
@@ -24,6 +24,7 @@ sub ctime {
     package ctime;
 
     local($time) = @_;
+    local($[) = 0;
     local($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst);
 
     # Determine what time zone is in effect.

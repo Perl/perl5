@@ -1,4 +1,4 @@
-/* $RCSfile: cmd.c,v $$Revision: 4.0.1.4 $$Date: 91/11/11 16:29:33 $
+/* $RCSfile: cmd.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 12:00:39 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	cmd.c,v $
+ * Revision 4.0.1.5  92/06/08  12:00:39  lwall
+ * patch20: the switch optimizer didn't do anything in subroutines
+ * patch20: removed implicit int declarations on funcions
+ * 
  * Revision 4.0.1.4  91/11/11  16:29:33  lwall
  * patch19: do {$foo ne "bar";} returned wrong value
  * patch19: some earlier patches weren't propagated to alternate 286 code
@@ -34,7 +38,7 @@
 #  include <varargs.h>
 #endif
 
-static STR str_chop;
+static STR strchop;
 
 void grow_dlevel();
 
@@ -81,6 +85,10 @@ VOLATILE int sp;
 tail_recursion_entry:
 #ifdef DEBUGGING
     dlevel = entdlevel;
+    if (debug & 4)
+	deb("mortals = (%d/%d) stack, = (%d/%d)\n",
+	    tmps_max, tmps_base,
+	    savestack->ary_fill, firstsave);
 #endif
 #ifdef TAINT
     tainted = 0;	/* Each statement is presumed innocent */
@@ -575,12 +583,12 @@ until_loop:
 	    match = (retstr->str_cur != 0);
 	    tmps = str_get(retstr);
 	    tmps += retstr->str_cur - match;
-	    str_nset(&str_chop,tmps,match);
+	    str_nset(&strchop,tmps,match);
 	    *tmps = '\0';
 	    retstr->str_nok = 0;
 	    retstr->str_cur = tmps - retstr->str_ptr;
 	    STABSET(retstr);
-	    retstr = &str_chop;
+	    retstr = &strchop;
 	    goto flipmaybe;
 	case CFT_ARRAY:
 	    match = cmd->c_short->str_u.str_useful; /* just to get register */
@@ -728,6 +736,10 @@ until_loop:
 	}
 	goto doswitch;
     case C_CSWITCH:
+	if (multiline) {
+	    cmd = cmd->c_next;			/* can't assume anything */
+	    goto tail_recursion_entry;
+	}
 	match = *(str_get(STAB_STR(cmd->c_stab))) & 255;
       doswitch:
 	match -= cmd->ucmd.scmd.sc_offset;
@@ -942,7 +954,7 @@ until_loop:
 #ifdef DEBUGGING
 #  ifndef I_VARARGS
 /*VARARGS1*/
-deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
+void deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
 char *pat;
 {
     register int i;
@@ -954,7 +966,7 @@ char *pat;
 }
 #  else
 /*VARARGS1*/
-deb(va_alist)
+void deb(va_alist)
 va_dcl
 {
     va_list args;
@@ -973,6 +985,7 @@ va_dcl
 #  endif
 #endif
 
+int
 copyopt(cmd,which)
 register CMD *cmd;
 register CMD *which;

@@ -138,19 +138,15 @@ sub main'bsub { #(num_str, num_str) return num_str
 # GCD -- Euclids algorithm Knuth Vol 2 pg 296
 sub main'bgcd { #(num_str, num_str) return num_str
     local($x,$y) = (&'bnorm($_[0]),&'bnorm($_[1]));
-    if ($x eq 'NaN') {
+    if ($x eq 'NaN' || $y eq 'NaN') {
 	'NaN';
-    }
-    elsif ($y eq 'NaN') {
-	'NaN';
-    }
-    else {
+    } else {
 	($x, $y) = ($y,&'bmod($x,$y)) while $y ne '+0';
 	$x;
     }
 }
 
-# routine to add two base 100000 numbers
+# routine to add two base 1e5 numbers
 #   stolen from Knuth Vol 2 Algorithm A pg 231
 #   there are separate routines to add and sub as per Kunth pg 233
 sub add { #(int_num_array, int_num_array) return int_num_array
@@ -158,22 +154,22 @@ sub add { #(int_num_array, int_num_array) return int_num_array
     $car = 0;
     for $x (@x) {
 	last unless @y || $car;
-	$x -= 100000 if $car = (($x += shift @y + $car) >= 100000);
+	$x -= 1e5 if $car = (($x += shift @y + $car) >= 1e5);
     }
     for $y (@y) {
 	last unless $car;
-	$y -= 100000 if $car = (($y += $car) >= 100000);
+	$y -= 1e5 if $car = (($y += $car) >= 1e5);
     }
     (@x, @y, $car);
 }
 
-# subtract base 100000 numbers -- stolen from Knuth Vol 2 pg 232, $x > $y
+# subtract base 1e5 numbers -- stolen from Knuth Vol 2 pg 232, $x > $y
 sub sub { #(int_num_array, int_num_array) return int_num_array
     local(*sx, *sy) = @_;
     $bar = 0;
     for $sx (@sx) {
 	last unless @y || $bar;
-	$sx += 100000 if $bar = (($sx -= shift @sy + $bar) < 0);
+	$sx += 1e5 if $bar = (($sx -= shift @sy + $bar) < 0);
     }
     @sx;
 }
@@ -195,7 +191,7 @@ sub main'bmul { #(num_str, num_str) return num_str
 	    for $y (@y) {
 		$prod = $x * $y + $prod[$cty] + $car;
 		$prod[$cty++] =
-		    $prod - ($car = int($prod * (1/100000))) * 100000;
+		    $prod - ($car = int($prod * 1e-5)) * 1e5;
 	    }
 	    $prod[$cty] += $car if $car;
 	    $x = shift @prod;
@@ -218,15 +214,15 @@ sub main'bdiv { #(dividend: num_str, divisor: num_str) return num_str
     $srem = $y[0];
     $sr = (shift @x ne shift @y) ? '-' : '+';
     $car = $bar = $prd = 0;
-    if (($dd = int(100000/($y[$#y]+1))) != 1) {
+    if (($dd = int(1e5/($y[$#y]+1))) != 1) {
 	for $x (@x) {
 	    $x = $x * $dd + $car;
-	    $x -= ($car = int($x * (1/100000))) * 100000;
+	    $x -= ($car = int($x * 1e-5)) * 1e5;
 	}
 	push(@x, $car); $car = 0;
 	for $y (@y) {
 	    $y = $y * $dd + $car;
-	    $y -= ($car = int($y * (1/100000))) * 100000;
+	    $y -= ($car = int($y * 1e-5)) * 1e5;
 	}
     }
     else {
@@ -235,20 +231,20 @@ sub main'bdiv { #(dividend: num_str, divisor: num_str) return num_str
     @q = (); ($v2,$v1) = @y[$#y-1,$#y];
     while ($#x > $#y) {
 	($u2,$u1,$u0) = @x[($#x-2)..$#x];
-	$q = (($u0 == $v1) ? 99999 : int(($u0*100000+$u1)/$v1));
-	--$q while ($v2*$q > ($u0*100000+$u1-$q*$v1)*100000+$u2);
+	$q = (($u0 == $v1) ? 99999 : int(($u0*1e5+$u1)/$v1));
+	--$q while ($v2*$q > ($u0*1e5+$u1-$q*$v1)*1e5+$u2);
 	if ($q) {
 	    ($car, $bar) = (0,0);
 	    for ($y = 0, $x = $#x-$#y-1; $y <= $#y; ++$y,++$x) {
 		$prd = $q * $y[$y] + $car;
-		$prd -= ($car = int($prd * (1/100000))) * 100000;
-		$x[$x] += 100000 if ($bar = (($x[$x] -= $prd + $bar) < 0));
+		$prd -= ($car = int($prd * 1e-5)) * 1e5;
+		$x[$x] += 1e5 if ($bar = (($x[$x] -= $prd + $bar) < 0));
 	    }
 	    if ($x[$#x] < $car + $bar) {
 		$car = 0; --$q;
 		for ($y = 0, $x = $#x-$#y-1; $y <= $#y; ++$y,++$x) {
-		    $x[$x] -= 100000
-			if ($car = (($x[$x] += $y[$y] + $car) > 100000));
+		    $x[$x] -= 1e5
+			if ($car = (($x[$x] += $y[$y] + $car) > 1e5));
 		}
 	    }   
 	}
@@ -259,7 +255,7 @@ sub main'bdiv { #(dividend: num_str, divisor: num_str) return num_str
 	if ($dd != 1) {
 	    $car = 0;
 	    for $x (reverse @x) {
-		$prd = $car * 100000 + $x;
+		$prd = $car * 1e5 + $x;
 		$car = $prd - ($tmp = int($prd / $dd)) * $dd;
 		unshift(@d, $tmp);
 	    }

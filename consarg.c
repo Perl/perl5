@@ -1,4 +1,4 @@
-/* $RCSfile: consarg.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 16:21:16 $
+/* $RCSfile: consarg.c,v $$Revision: 4.0.1.4 $$Date: 92/06/08 12:26:27 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	consarg.c,v $
+ * Revision 4.0.1.4  92/06/08  12:26:27  lwall
+ * patch20: new warning for use of x with non-numeric right operand
+ * patch20: modulus with highest bit in left operand set didn't always work
+ * patch20: illegal lvalue message could be followed by core dump
+ * patch20: deleted some minor memory leaks
+ * 
  * Revision 4.0.1.3  91/11/05  16:21:16  lwall
  * patch11: random cleanup
  * patch11: added eval {}
@@ -57,12 +63,14 @@ ARG *limarg;
 	}
 	else {
 	    arg[3].arg_flags = 0;
+	    arg[3].arg_len = 0;
 	    arg[3].arg_type = A_EXPR;
 	    arg[3].arg_ptr.arg_arg = limarg;
 	}
     }
     else {
 	arg[3].arg_flags = 0;
+	arg[3].arg_len = 0;
 	arg[3].arg_type = A_NULL;
 	arg[3].arg_ptr.arg_arg = Nullarg;
     }
@@ -344,7 +352,10 @@ register ARG *arg;
 	str_scat(str,s2);
 	break;
     case O_REPEAT:
-	CHECK12;
+	CHECK2;
+	if (dowarn && !s2->str_nok && !looks_like_number(s2))
+	    warn("Right operand of x is not numeric");
+	CHECK1;
 	i = (int)str_gnum(s2);
 	tmps = str_get(s1);
 	str_nset(str,"",0);
@@ -392,12 +403,14 @@ register ARG *arg;
 	    yyerror("Illegal modulus of constant zero");
 	    return arg;
 	}
-	tmp2 = (long)str_gnum(s1);
+	value = str_gnum(s1);
 #ifndef lint
-	if (tmp2 >= 0)
-	    str_numset(str,(double)(tmp2 % tmplong));
-	else
+	if (value >= 0.0)
+	    str_numset(str,(double)(((unsigned long)value) % tmplong));
+	else {
+	    tmp2 = (long)value;
 	    str_numset(str,(double)((tmplong-((-tmp2 - 1) % tmplong)) - 1));
+	}
 #else
 	tmp2 = tmp2;
 #endif
@@ -847,6 +860,7 @@ register ARG *arg;
 	    (void)sprintf(tokenbuf,
 	      "Illegal expression (%s) as lvalue",opname[arg1->arg_type]);
 	    yyerror(tokenbuf);
+	    return arg;
 	}
 	arg[1].arg_type = A_LEXPR | (arg[1].arg_type & A_DONT);
 	if (arg->arg_type == O_ASSIGN && (arg1[1].arg_flags & AF_ARYOK)) {
@@ -871,6 +885,7 @@ register ARG *arg;
 	(void)sprintf(tokenbuf,
 	  "Illegal item (%s) as lvalue",argname[arg[1].arg_type&A_MASK]);
 	yyerror(tokenbuf);
+	return arg;
     }
     arg[1].arg_type = A_LVAL | (arg[1].arg_type & A_DONT);
 #ifdef DEBUGGING
@@ -897,6 +912,7 @@ ARG *arg;
     return arg;
 }
 
+void
 dehoist(arg,i)
 ARG *arg;
 {
@@ -976,26 +992,14 @@ register ARG *arg;
 	node = arg;
 	arg = op_new(i);
 	tmpstr = arg->arg_ptr.arg_str;
-#ifdef STRUCTCOPY
-	*arg = *node;		/* copy everything except the STR */
-#else
-	(void)bcopy((char *)node, (char *)arg, sizeof(ARG));
-#endif
+	StructCopy(node, arg, ARG);	/* copy everything except the STR */
 	arg->arg_ptr.arg_str = tmpstr;
 	for (j = i; ; ) {
-#ifdef STRUCTCOPY
-	    arg[j] = node[2];
-#else
-	    (void)bcopy((char *)(node+2), (char *)(arg+j), sizeof(ARG));
-#endif
+	    StructCopy(node+2, arg+j, ARG);
 	    arg[j].arg_flags |= AF_ARYOK;
 	    --j;		/* Bug in Xenix compiler */
 	    if (j < 2) {
-#ifdef STRUCTCOPY
-		arg[1] = node[1];
-#else
-		(void)bcopy((char *)(node+1), (char *)(arg+1), sizeof(ARG));
-#endif
+		StructCopy(node+1, arg+1, ARG);
 		free_arg(node);
 		break;
 	    }
@@ -1008,6 +1012,8 @@ register ARG *arg;
     arg[2].arg_flags |= AF_ARYOK;
     arg->arg_type = O_LIST;
     arg->arg_len = i;
+    str_free(arg->arg_ptr.arg_str);
+    arg->arg_ptr.arg_str = Nullstr;
     return arg;
 }
 

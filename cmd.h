@@ -1,4 +1,4 @@
-/* $RCSfile: cmd.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:28:50 $
+/* $RCSfile: cmd.h,v $$Revision: 4.0.1.2 $$Date: 92/06/08 12:01:02 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	cmd.h,v $
+ * Revision 4.0.1.2  92/06/08  12:01:02  lwall
+ * patch20: removed implicit int declarations on funcions
+ * 
  * Revision 4.0.1.1  91/06/07  10:28:50  lwall
  * patch4: new copyright notice
  * patch4: length($`), length($&), length($') now optimized to avoid string copy
@@ -167,3 +170,7 @@ struct compcmd {
 void opt_arg();
 ARG* evalstatic();
 int cmd_exec();
+#ifdef DEBUGGING
+void deb();
+#endif
+int copyopt();

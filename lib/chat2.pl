@@ -108,6 +108,7 @@ sub open_proc { ## public
 		die "Cannot exec @cmd: $!";
 	}
 	close(TTY);
+	$PID{$next} = $pid;
 	$next; # return symbol for switcharound
 }
 
@@ -258,10 +259,15 @@ sub print { ## public
 ## like close $handle
 
 sub close { ## public
+	local($pid);
 	if ($_[0] =~ /$nextpat/) {
+		$pid = $PID{$_[0]};
 	 	*S = shift;
+	} else {
+		$pid = $PID{$next};
 	}
 	close(S);
+	waitpid($pid,0);
 	if (defined $S{"needs_close"}) { # is it a listen socket?
 		local(*NS) = $S{"needs_close"};
 		delete $S{"needs_close"};
