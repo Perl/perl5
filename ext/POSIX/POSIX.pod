@@ -617,7 +617,7 @@ C</[[:graph:]]/> construct instead.
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:lower:]]/> construct instead.  Do B<not> use C</a-z/>.
+C</[[:lower:]]/> construct instead.  Do B<not> use C</[a-z]/>.
 
 =item isprint
 
@@ -636,12 +636,15 @@ C</[[:punct:]]/> construct instead.
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
 C</[[:space:]]/> construct instead, or the C</\s/> construct.
+(Note that C</\s/> and C</[[:space:]]/> are slightly different in that
+C</[[:space:]]/> can normally match a vertical tab, while C</\s/> does
+not.)
 
 =item isupper
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:upper:]]/> construct instead.  Do B<not> use C</A-Z/>.
+C</[[:upper:]]/> construct instead.  Do B<not> use C</[A-Z]/>.
 
 =item isxdigit
 
