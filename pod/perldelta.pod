@@ -160,8 +160,9 @@ the podlators bundle, Pod::LaTeX, Pod::Parser, Term::ANSIColor, Test.
 
 Bug fixes and minor enhancements have been applied to B::Deparse,
 Data::Dumper, IO::Poll, IO::Socket::INET, Math::BigFloat,
-Math::Complex, Math::Trig, Net::protoent, re, SelfLoader, Sys::SysLog,
-Test::Harness, Text::Wrap, UNIVERSAL.
+Math::Complex, Math::Trig, Net::protoent, the re pragma, SelfLoader,
+Sys::SysLog, Test::Harness, Text::Wrap, UNIVERSAL, and the warnings
+pragma.
 
 =item *
 
@@ -209,6 +210,8 @@ C<%INC> now localised in a Safe compartment so that use/require work.
 =item *
 
 The Shell module now has an OO interface.
+
+=item *
 
 =back
 
