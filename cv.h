@@ -11,7 +11,7 @@
  * in sv.h  */
 
 struct xpvcv {
-    char *	xpv_pv;		/* pointer to malloced string */
+    char *	xpv_pv;		/* pointer to malloced string (for prototype) */
     STRLEN	xpv_cur;	/* length of xp_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     IV		xof_off;	/* integer value */
