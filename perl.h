@@ -3067,7 +3067,13 @@ typedef struct am_table_short AMTS;
 #   include <sys/statfs.h>      /* for some statfs() */
 #endif
 #ifdef I_SYS_VFS
-#   include <sys/vfs.h>         /* for some statfs() */
+#  ifdef __sgi
+#    define sv IRIX_sv		/* kludge: IRIX has an sv of its own */
+#  endif
+#    include <sys/vfs.h>	/* for some statfs() */
+#  ifdef __sgi
+#    undef IRIX_sv
+#  endif
 #endif
 #ifdef I_USTAT
 #   include <ustat.h>           /* for ustat() */
