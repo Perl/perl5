@@ -31,7 +31,9 @@ sub process_file {
 	}     
     } elsif ($Config{gccversion} ne '') { 
 	# With the -dM option, gcc outputs every #define it finds
-	unless(open(FH,"$Config{cc} -E -dM $file |")) {
+	my $ccopts = "-E -dM ";
+	$ccopts .= "-traditional-cpp " if $^O eq 'darwin';
+	unless(open(FH,"$Config{cc} $ccopts $file |")) {
             warn "Cannot open '$file'";
             return;
 	}     
