@@ -106,6 +106,8 @@ SKIP: {
 # Check if you are on a tmpfs of some sort.  Building in /tmp sometimes
 # has this problem.  Also building on the ClearCase VOBS filesystem may
 # cause this failure.
+# Darwins UFS doesn't have a ctime concept, and thus is
+# expected to fail this test.
 DIAG
         }
     }
