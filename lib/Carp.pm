@@ -175,7 +175,10 @@ sub longmess {
 	    }
 	    # here's where the error message, $mess, gets constructed
 	    $mess .= "\t$sub " if $error eq "called";
-	    $mess .= "$error at $file line $line\n";
+	    $mess .= "$error at $file line $line";
+	    $mess .= " thread " . Thread->self->tid
+		if exists $main::{'Thread::'};
+	    $mess .= "\n";
 	}
 	# we don't need to print the actual error message again so we can
 	# change this to "called" so that the string "$error at $file line
@@ -254,7 +257,12 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
 	    # relevant error message and return it.   die() doesn't like
 	    # to be given NUL characters (which $msg may contain) so we
 	    # remove them first.
-	    (my $msg = "$error at $file line $line\n") =~ tr/\0//d;
+	    my $msg;
+	    $msg = "$error at $file line $line";
+	    $msg .= " thread " . Thread->self->tid
+		if exists $main::{'Thread::'};
+	    $msg .= "\n";
+	    $msg =~ tr/\0//d;
 	    return $msg;
 	}
     }

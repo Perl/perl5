@@ -1416,6 +1416,9 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
 		      line_mode ? "line" : "chunk", 
 		      (long)IoLINES(GvIOp(PL_last_in_gv)));
 	}
+#ifdef USE_THREADS
+	sv_catpvf(sv, " thread %ld", thr->tid);
+#endif
 	sv_catpv(sv, PL_dirty ? dgd : ".\n");
     }
     return sv;
