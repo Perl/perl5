@@ -175,11 +175,16 @@ Optimised C<map> in scalar context
 
 =back
 
+=head1 Utility Changes
+
+The Perl debugger (F<lib/perl5db.pl>) can now save all debugger commands for
+sourcing later, and can display the parent inheritence tree of a given class.
+
 =head1 Installation and Configuration Improvements
 
 The build process on both VMS and Windows has had several minor improvements
-made. Perl should now build on Windows 95. On Windows Borland's C compiler can
-now compile perl with PerlIO and/or USE_LARGE_FILES enabled.
+made. On Windows Borland's C compiler can now compile perl with PerlIO and/or
+USE_LARGE_FILES enabled.
 
 C<perl.exe> on Windows now has a "Camel" logo icon. The use of a camel with
 the topic of Perl is a trademark of O'Reilly and Associates Inc., and is used
@@ -196,6 +201,14 @@ Perl should build cleanly on Stratus VOS once more.
 More utf8 bugs fixed, notably in how C<chomp>, C<chop>, C<send>, and
 C<syswrite> and interact with utf8 data. Concatenation now works correctly
 when C<use bytes;> is in scope.
+
+Pragmta are now correctly propagated into (?{...}) constructions in regexps.
+Code such as
+
+   my $x = qr{ ... (??{ $x }) ... };
+
+will now (correctly) fail under use strict. (As the inner C<$x> is and
+has always referred to C<$::x>)
 
 The "const in void context" warning has been suppressed for a constant in an
 optimised-away boolean expression such as C<5 || print;>
@@ -218,6 +231,10 @@ but this should not be visible to user code.
 
 Code freeze for the next maintenance release (5.8.5) will be on 30th June
 2004, with release by mid July.
+
+=head1 Platform Specific Problems
+
+This release is known not to build on Windows 95.
 
 =head1 Reporting Bugs
 
