@@ -795,7 +795,6 @@ PP(pp_rv2hv)
 {
     dSP; dTOPss;
     HV *hv;
-    I32 gimme = GIMME_V;
 
     if (SvROK(sv)) {
       wasref:
@@ -1498,7 +1497,7 @@ Perl_do_readline(pTHX)
 	    /* undef TARG, and push that undefined value */
 	    if (type != OP_RCATLINE) {
 		SV_CHECK_THINKFIRST_COW_DROP(TARG);
-		SvOK_off(TARG);
+		(void)SvOK_off(TARG);
 	    }
 	    PUSHTARG;
 	}
@@ -1562,7 +1561,7 @@ Perl_do_readline(pTHX)
 	    if (gimme == G_SCALAR) {
 		if (type != OP_RCATLINE) {
 		    SV_CHECK_THINKFIRST_COW_DROP(TARG);
-		    SvOK_off(TARG);
+		    (void)SvOK_off(TARG);
 		}
 		SPAGAIN;
 		PUSHTARG;
