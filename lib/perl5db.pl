@@ -1722,7 +1722,7 @@ sub eval {
     my $at = $@;
     local $saved[0];		# Preserve the old value of $@
     eval { &DB::save };
-    if (defined($at)) {
+    if ($at) {
 	print $OUT $at;
     } elsif ($onetimeDump eq 'dump') {
 	dumpit($OUT, \@res);
