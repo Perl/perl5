@@ -22,7 +22,6 @@
 *** ERROR: Entity number out of range E<0x100> at line 101 in file t/pod/poderrs.t
 *** ERROR: Entity number out of range E<07777> at line 102 in file t/pod/poderrs.t
 *** ERROR: Entity number out of range E<300> at line 103 in file t/pod/poderrs.t
-*** WARNING: collapsing newlines to blanks at line 113 in file t/pod/poderrs.t
 *** ERROR: malformed link L<> : empty link at line 115 in file t/pod/poderrs.t
 *** WARNING: ignoring leading whitespace in link at line 116 in file t/pod/poderrs.t
 *** WARNING: ignoring trailing whitespace in link at line 117 in file t/pod/poderrs.t
@@ -32,7 +31,6 @@
 *** ERROR: Spurious character(s) after =back at line 130 in file t/pod/poderrs.t
 *** ERROR: Nonempty Z<> at line 144 in file t/pod/poderrs.t
 *** ERROR: Empty X<> at line 146 in file t/pod/poderrs.t
-*** WARNING: No numeric argument for =over at line 148 in file t/pod/poderrs.t
 *** WARNING: preceding non-item paragraph(s) at line 152 in file t/pod/poderrs.t
 *** WARNING: No argument for =item at line 154 in file t/pod/poderrs.t
 *** WARNING: previous =item has no contents at line 156 in file t/pod/poderrs.t
