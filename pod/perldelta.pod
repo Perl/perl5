@@ -530,6 +530,10 @@ Perl compiler and tools.  See L<B>.
 
 A module to pretty print Perl data.  See L<Data::Dumper>.
 
+=item Dumpvalue
+
+A module to dump perl values to the screen. See L<Dumpvalue>.
+
 =item Errno
 
 A module to look up errors more conveniently.  See L<Errno>.
