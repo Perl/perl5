@@ -1,7 +1,7 @@
 package ExtUtils::Install;
 
-use 5.006;
-our(@ISA, @EXPORT, $VERSION);
+use 5.00503;
+use vars qw(@ISA @EXPORT $VERSION);
 $VERSION = 1.29;
 
 use Exporter;
@@ -263,15 +263,15 @@ sub inc_uninstall {
 
 sub run_filter {
     my ($cmd, $src, $dest) = @_;
-    open(my $CMD, "|$cmd >$dest") || die "Cannot fork: $!";
-    open(my $SRC, $src)           || die "Cannot open $src: $!";
+    open(CMD, "|$cmd >$dest") || die "Cannot fork: $!";
+    open(SRC, $src)           || die "Cannot open $src: $!";
     my $buf;
     my $sz = 1024;
-    while (my $len = sysread($SRC, $buf, $sz)) {
-	syswrite($CMD, $buf, $len);
+    while (my $len = sysread(SRC, $buf, $sz)) {
+	syswrite(CMD, $buf, $len);
     }
-    close $SRC;
-    close $CMD or die "Filter command '$cmd' failed for $src";
+    close SRC;
+    close CMD or die "Filter command '$cmd' failed for $src";
 }
 
 sub pm_to_blib {

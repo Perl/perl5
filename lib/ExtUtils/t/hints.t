@@ -13,7 +13,7 @@ chdir 't';
 
 use Test::More tests => 3;
 
-mkdir 'hints';
+mkdir('hints', 0777);
 my $hint_file = "hints/$^O.pl";
 open(HINT, ">$hint_file") || die "Can't write dummy hints file $hint_file: $!";
 print HINT <<'CLOO';

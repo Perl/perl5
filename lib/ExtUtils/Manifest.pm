@@ -4,13 +4,13 @@ require Exporter;
 use Config;
 use File::Find;
 use File::Copy 'copy';
-use File::Spec::Functions qw(splitpath);
+use File::Spec;
 use Carp;
 use strict;
 
-our ($VERSION,@ISA,@EXPORT_OK,
-	    $Is_MacOS,$Is_VMS,
-	    $Debug,$Verbose,$Quiet,$MANIFEST,$DEFAULT_MSKIP);
+use vars qw($VERSION @ISA @EXPORT_OK 
+          $Is_MacOS $Is_VMS 
+          $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
 $VERSION = 1.37_01;
 @ISA=('Exporter');
@@ -26,13 +26,8 @@ $Verbose = defined $ENV{PERL_MM_MANIFEST_VERBOSE} ?
                    $ENV{PERL_MM_MANIFEST_VERBOSE} : 1;
 $Quiet = 0;
 $MANIFEST = 'MANIFEST';
-$DEFAULT_MSKIP = (splitpath($INC{"ExtUtils/Manifest.pm"}))[1]."$MANIFEST.SKIP";
-
-# Really cool fix from Ilya :)
-unless (defined $Config{d_link}) {
-    no warnings;
-    *ln = \&cp;
-}
+$DEFAULT_MSKIP = (File::Spec->splitpath($INC{"ExtUtils/Manifest.pm"}))[1].
+                 "$MANIFEST.SKIP";
 
 sub mkmanifest {
     my $manimiss = 0;
@@ -84,7 +79,7 @@ sub manifind {
     my $wanted = sub {
 	my $name = clean_up_filename($File::Find::name);
 	warn "Debug: diskfile $name\n" if $Debug;
-	return if -d $name;
+	return if -d $_;
 	
         if( $Is_VMS ) {
             $name =~ s#(.*)\.$#\L$1#;
@@ -97,9 +92,7 @@ sub manifind {
     # $File::Find::name is unavailable.
     # Also, it's okay to use / here, because MANIFEST files use Unix-style 
     # paths.
-    find({wanted => $wanted,
-	  no_chdir => 1,
-	 },
+    find({wanted => $wanted},
 	 $Is_MacOS ? ":" : ".");
 
     return $found;
@@ -247,10 +240,10 @@ sub manicopy {
     $how ||= 'cp';
     require File::Path;
     require File::Basename;
-    my(%dirs,$file);
+
     $target = VMS::Filespec::unixify($target) if $Is_VMS;
     File::Path::mkpath([ $target ],! $Quiet,$Is_VMS ? undef : 0755);
-    foreach $file (keys %$read){
+    foreach my $file (keys %$read){
     	if ($Is_MacOS) {
 	    if ($file =~ m!:!) { 
 	   	my $dir = _maccat($target, $file);
@@ -275,7 +268,7 @@ sub cp_if_diff {
     -f $from or carp "$0: $from not found";
     my($diff) = 0;
     local(*F,*T);
-    open(F,"< $from\0") or croak "Can't read $from: $!\n";
+    open(F,"< $from\0") or die "Can't read $from: $!\n";
     if (open(T,"< $to\0")) {
 	while (<F>) { $diff++,last if $_ ne <T>; }
 	$diff++ unless eof(T);
@@ -312,14 +305,27 @@ sub ln {
     my ($srcFile, $dstFile) = @_;
     return &cp if $Is_VMS or ($^O eq 'MSWin32' and Win32::IsWin95());
     link($srcFile, $dstFile);
-    local($_) = $dstFile; # chmod a+r,go-w+X (except "X" only applies to u=x)
+
+    # chmod a+r,go-w+X (except "X" only applies to u=x)
+    local($_) = $dstFile;
     my $mode= 0444 | (stat)[2] & 0700;
     if (! chmod(  $mode | ( $mode & 0100 ? 0111 : 0 ),  $_  )) {
-       unlink $dstFile;
-       return;
+        unlink $dstFile;
+        return;
     }
     1;
 }
+
+unless (defined $Config{d_link}) {
+    # Really cool fix from Ilya :)
+    local $SIG{__WARN__} = sub { 
+        warn @_ unless $_[0] =~ /^Subroutine .* redefined/;
+    };
+    *ln = \&cp;
+}
+
+
+
 
 sub best {
     my ($srcFile, $dstFile) = @_;

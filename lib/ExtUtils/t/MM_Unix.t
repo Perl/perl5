@@ -24,6 +24,7 @@ BEGIN {
 
 BEGIN { use_ok( 'ExtUtils::MM_Unix' ); }
 
+use vars qw($VERSION);
 $VERSION = '0.02';
 use strict;
 use File::Spec;

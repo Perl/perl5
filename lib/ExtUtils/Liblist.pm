@@ -1,8 +1,7 @@
 package ExtUtils::Liblist;
 
 use vars qw($VERSION);
-
-$VERSION = 1.0;
+$VERSION = '1.00';
 
 use File::Spec;
 require ExtUtils::Liblist::Kid;
@@ -11,8 +10,9 @@ require ExtUtils::Liblist::Kid;
 sub lsdir {
   shift;
   my $rex = qr/$_[1]/;
-  opendir my $dir, $_[0];
-  grep /$rex/, readdir $dir;
+  opendir DIR, $_[0];
+  grep /$rex/, readdir DIR;
+  closedir DIR;
 }
 
 __END__

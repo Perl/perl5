@@ -11,8 +11,7 @@ require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
 use vars qw($VERSION);
-
-$VERSION = 1.0;
+$VERSION = '1.00';
 
 use Config;
 use Cwd 'cwd';

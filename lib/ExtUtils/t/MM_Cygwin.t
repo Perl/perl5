@@ -46,7 +46,10 @@ delete $args->{CFLAGS};
 
 # ExtUtils::MM_Cygwin::cflags() calls this, fake the output
 {
-    no warnings 'redefine';
+    local $SIG{__WARN__} = sub { 
+        # no warnings 'redefine';
+        warn @_ unless $_[0] =~ /^Subroutine .* redefined/;
+    };
     sub ExtUtils::MM_Unix::cflags { return $_[1] };
 }
 
@@ -77,6 +80,10 @@ like( $args->manifypods(), qr/pure_all\n\tnoecho/,
 $args->{MAN3PODS} = { foo => 1 };
 my $out = tie *STDOUT, 'FakeOut';
 {
+    local $SIG{__WARN__} = sub {
+        # no warnings 'redefine';
+        warn @_ unless $_[0] =~ /used only once/;
+    };
     no warnings 'once';
     local *MM::perl_script = sub { return };
     my $res = $args->manifypods();
