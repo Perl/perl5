@@ -2,7 +2,7 @@
 
 # $RCSfile: my.t,v $
 
-print "1..33\n";
+print "1..34\n";
 
 sub foo {
     my($a, $b) = @_;
@@ -111,3 +111,14 @@ print "ok 32\n";
 eval { my $x = opth };
 print "not " if $@;
 print "ok 33\n";
+
+
+sub foo3 {
+    ++my $x->{foo};
+    print "not " if defined $x->{bar};
+    ++$x->{bar};
+}
+eval { foo3(); foo3(); };
+print "not " if $@;
+print "ok 34\n";
+

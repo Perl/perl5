@@ -200,7 +200,7 @@ PP(pp_padsv)
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
 	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
-        else if (PL_op->op_private & OPpDEREF) {
+        if (PL_op->op_private & OPpDEREF) {
 	    PUTBACK;
 	    vivify_ref(PAD_SVl(PL_op->op_targ), PL_op->op_private & OPpDEREF);
 	    SPAGAIN;
