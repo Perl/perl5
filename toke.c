@@ -5540,12 +5540,12 @@ S_new_constant(pTHX_ char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
 	STRLEN n_a;
  	sv_catpv(ERRSV, "Propagated");
 	yyerror(SvPV(ERRSV, n_a)); /* Duplicates the message inside eval */
-	POPs ;
+	(void)POPs;
  	res = SvREFCNT_inc(sv);
     }
     else {
  	res = POPs;
- 	SvREFCNT_inc(res);
+ 	(void)SvREFCNT_inc(res);
     }
     
     PUTBACK ;
