@@ -3530,15 +3530,16 @@ void
 Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
     register char *dptr;
-    {
-        /* len is STRLEN which is unsigned, need to copy to signed */
-	IV iv = len;
-	assert(iv >= 0);
-    }
+
     SV_CHECK_THINKFIRST(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
+    }
+    else {
+        /* len is STRLEN which is unsigned, need to copy to signed */
+	IV iv = len;
+	assert(iv >= 0);
     }
     (void)SvUPGRADE(sv, SVt_PV);
 
