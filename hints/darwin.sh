@@ -41,7 +41,9 @@ usenm='true';
 #libc='/usr/lib/libSystem.dylib';
 
 # Optimize.
-optimize='-O3';
+if [ "x$optimize" = 'x' ]; then
+    optimize='-O3'
+fi
 
 # XXX Unclear why we require -pipe and -fno-common here.
 ccflags="${ccflags} -pipe -fno-common"
