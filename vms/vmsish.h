@@ -91,32 +91,14 @@
 #define DONT_DECLARE_STD 1
 
 /* Our own contribution to PerlShr's global symbols . . . */
-#define vmstrnenv		Perl_vmstrnenv
-#define my_trnlnm		Perl_my_trnlnm
 #define my_getenv_len		Perl_my_getenv_len
 #define prime_env_iter	Perl_prime_env_iter
 #define vmssetenv		Perl_vmssetenv
 #if !defined(PERL_IMPLICIT_CONTEXT)
+#define my_trnlnm		Perl_my_trnlnm
+#define vmstrnenv           	Perl_vmstrnenv            
 #define my_setenv		Perl_my_setenv
 #define my_getenv		Perl_my_getenv
-#else
-#define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
-#define my_getenv(a,b)		Perl_my_getenv(aTHX_ a,b)
-#endif
-#define my_crypt		Perl_my_crypt
-#define my_waitpid		Perl_my_waitpid
-#define my_gconvert		Perl_my_gconvert
-#define do_rmdir		Perl_do_rmdir
-#define kill_file		Perl_kill_file
-#define my_mkdir		Perl_my_mkdir
-#define my_chdir		Perl_my_chdir
-#define my_utime		Perl_my_utime
-#define rmsexpand	Perl_rmsexpand
-#define rmsexpand_ts	Perl_rmsexpand_ts
-#define fileify_dirspec	Perl_fileify_dirspec
-#define fileify_dirspec_ts	Perl_fileify_dirspec_ts
-#define pathify_dirspec	Perl_pathify_dirspec
-#define pathify_dirspec_ts	Perl_pathify_dirspec_ts
 #define tounixspec		Perl_tounixspec
 #define tounixspec_ts		Perl_tounixspec_ts
 #define tovmsspec		Perl_tovmsspec
@@ -125,8 +107,46 @@
 #define tounixpath_ts		Perl_tounixpath_ts
 #define tovmspath		Perl_tovmspath
 #define tovmspath_ts		Perl_tovmspath_ts
+#define do_rmdir		Perl_do_rmdir
+#define fileify_dirspec		Perl_fileify_dirspec
+#define fileify_dirspec_ts	Perl_fileify_dirspec_ts
+#define pathify_dirspec		Perl_pathify_dirspec
+#define pathify_dirspec_ts	Perl_pathify_dirspec_ts
+#define trim_unixpath		Perl_trim_unixpath
+#define opendir			Perl_opendir
+#define rmscopy			Perl_rmscopy
+#else
+#define my_trnlnm(a,b,c)	Perl_my_trnlnm(aTHX_ a,b,c)
+#define vmstrnenv(a,b,c,d,e)	Perl_vmstrnenv(aTHX_ a,b,c,d,e)
+#define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
+#define my_getenv(a,b)		Perl_my_getenv(aTHX_ a,b)
+#define tounixspec(a,b)		Perl_tounixspec(aTHX_ a,b)
+#define tounixspec_ts(a,b)	Perl_tounixspec_ts(aTHX_ a,b)
+#define tovmsspec(a,b)		Perl_tovmsspec(aTHX_ a,b)
+#define tovmsspec_t(a,b)	Perl_tovmsspec_ts(aTHX_ a,b)
+#define tounixpath(a,b)		Perl_tounixpath(aTHX_ a,b)
+#define tounixpath_ts(a,b)	Perl_tounixpath_ts(aTHX_ a,b)
+#define tovmspath(a,b)		Perl_tovmspath(aTHX_ a,b)
+#define tovmspath_ts(a,b)	Perl_tovmspath_ts(aTHX_ a,b)
+#define do_rmdir(a)		Perl_do_rmdir(aTHX_ a)
+#define fileify_dirspec(a,b)	Perl_fileify_dirspec(aTHX_ a,b)
+#define fileify_dirspec_ts(a,b)	Perl_fileify_dirspec_ts(aTHX_ a,b)
+#define pathify_dirspec		Perl_pathify_dirspec
+#define pathify_dirspec_ts	Perl_pathify_dirspec_ts
+#define rmsexpand(a,b,c,d)	Perl_rmsexpand(aTHX_ a,b,c,d)
+#define rmsexpand_ts(a,b,c,d)	Perl_rmsexpand_ts(aTHX_ a,b,c,d)
+#define trim_unixpath(a,b,c)	Perl_trim_unixpath(aTHX_ a,b,c)
+#define opendir(a)		Perl_opendir(aTHX_ a)
+#define rmscopy(a,b,c)		Perl_rmscopy(aTHX_ a,b,c)
+#endif
+#define my_crypt		Perl_my_crypt
+#define my_waitpid		Perl_my_waitpid
+#define my_gconvert		Perl_my_gconvert
+#define kill_file		Perl_kill_file
+#define my_mkdir		Perl_my_mkdir
+#define my_chdir		Perl_my_chdir
+#define my_utime		Perl_my_utime
 #define vms_image_init	Perl_vms_image_init
-#define opendir		Perl_opendir
 #define readdir		Perl_readdir
 #define telldir		Perl_telldir
 #define seekdir		Perl_seekdir
@@ -144,7 +164,6 @@
 #define cando_by_name		Perl_cando_by_name
 #define flex_fstat		Perl_flex_fstat
 #define flex_stat		Perl_flex_stat
-#define trim_unixpath		Perl_trim_unixpath
 #define my_vfork		Perl_my_vfork
 #define vms_do_aexec		Perl_vms_do_aexec
 #define vms_do_exec		Perl_vms_do_exec
@@ -157,7 +176,6 @@
 #define my_getpwent		Perl_my_getpwent
 #define my_endpwent		Perl_my_endpwent
 #define my_getlogin		Perl_my_getlogin
-#define rmscopy		Perl_rmscopy
 #define init_os_extras	Perl_init_os_extras
 
 /* Delete if at all possible, changing protections if necessary. */
@@ -627,39 +645,61 @@ void	prime_env_iter (void);
 void	init_os_extras ();
 /* prototype section start marker; `typedef' passes through cpp */
 typedef char  __VMS_PROTOTYPES__;
-int	vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
-int	my_trnlnm (const char *, char *, unsigned long int);
 #if !defined(PERL_IMPLICIT_CONTEXT)
 char *	Perl_my_getenv (const char *, bool);
+int	Perl_vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
+int	Perl_my_trnlnm (const char *, char *, unsigned long int);
+char *	Perl_tounixspec (char *, char *);
+char *	Perl_tounixspec_ts (char *, char *);
+char *	Perl_tovmsspec (char *, char *);
+char *	Perl_tovmsspec_ts (char *, char *);
+char *	Perl_tounixpath (char *, char *);
+char *	Perl_tounixpath_ts (char *, char *);
+char *	Perl_tovmspath (char *, char *);
+char *	Perl_tovmspath_ts (char *, char *);
+int	Perl_do_rmdir (char *);
+char *	Perl_fileify_dirspec (char *, char *);
+char *	Perl_fileify_dirspec_ts (char *, char *);
+char *	Perl_pathify_dirspec (char *, char *);
+char *	Perl_pathify_dirspec_ts (char *, char *);
+char *	Perl_rmsexpand (char *, char *, char *, unsigned);
+char *	Perl_rmsexpand_ts (char *, char *, char *, unsigned);
+int	Perl_trim_unixpath (char *, char*, int);
+DIR *	Perl_opendir (char *);
+int	Perl_rmscopy (char *, char *, int);
 #else
+int	Perl_vmstrnenv (pTHX_ const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
 char *	Perl_my_getenv (pTHX_ const char *, bool);
+int	Perl_my_trnlnm (pTHX_ const char *, char *, unsigned long int);
+char *	Perl_tounixspec (pTHX_ char *, char *);
+char *	Perl_tounixspec_ts (pTHX_ char *, char *);
+char *	Perl_tovmsspec (pTHX_ char *, char *);
+char *	Perl_tovmsspec_ts (pTHX_ char *, char *);
+char *	Perl_tounixpath (pTHX_ char *, char *);
+char *	Perl_tounixpath_ts (pTHX_ char *, char *);
+char *	Perl_tovmspath (pTHX_ char *, char *);
+char *	Perl_tovmspath_ts (pTHX_ char *, char *);
+int	Perl_do_rmdir (pTHX_ char *);
+char *	Perl_fileify_dirspec (pTHX_ char *, char *);
+char *	Perl_fileify_dirspec_ts (pTHX_ char *, char *);
+char *	Perl_pathify_dirspec (pTHX_ char *, char *);
+char *	Perl_pathify_dirspec_ts (pTHX_ char *, char *);
+char *	Perl_rmsexpand (pTHX_ char *, char *, char *, unsigned);
+char *	Perl_rmsexpand_ts (pTHX_ char *, char *, char *, unsigned);
+int	Perl_trim_unixpath (pTHX_ char *, char*, int);
+DIR *	Perl_opendir (pTHX_ char *);
+int	Perl_rmscopy (pTHX_ char *, char *, int);
 #endif
 char *	my_getenv_len (const char *, unsigned long *, bool);
 int	vmssetenv (char *, char *, struct dsc$descriptor_s **);
 char *	my_crypt (const char *, const char *);
 Pid_t	my_waitpid (Pid_t, int *, int);
 char *	my_gconvert (double, int, int, char *);
-int	do_rmdir (char *);
 int	kill_file (char *);
 int	my_mkdir (char *, Mode_t);
 int	my_chdir (char *);
 int	my_utime (char *, struct utimbuf *);
-char *	rmsexpand (char *, char *, char *, unsigned);
-char *	rmsexpand_ts (char *, char *, char *, unsigned);
-char *	fileify_dirspec (char *, char *);
-char *	fileify_dirspec_ts (char *, char *);
-char *	pathify_dirspec (char *, char *);
-char *	pathify_dirspec_ts (char *, char *);
-char *	tounixspec (char *, char *);
-char *	tounixspec_ts (char *, char *);
-char *	tovmsspec (char *, char *);
-char *	tovmsspec_ts (char *, char *);
-char *	tounixpath (char *, char *);
-char *	tounixpath_ts (char *, char *);
-char *	tovmspath (char *, char *);
-char *	tovmspath_ts (char *, char *);
 void	vms_image_init (int *, char ***);
-DIR *	opendir (char *);
 struct dirent *	readdir (DIR *);
 long	telldir (DIR *);
 void	seekdir (DIR *, long);
@@ -679,7 +719,6 @@ int     my_sigprocmask (int, sigset_t *, sigset_t *);
 I32	cando_by_name (I32, Uid_t, char *);
 int	flex_fstat (int, Stat_t *);
 int	flex_stat (const char *, Stat_t *);
-int	trim_unixpath (char *, char*, int);
 int	my_vfork ();
 bool	vms_do_aexec (SV *, SV **, SV **);
 bool	vms_do_exec (char *);
@@ -692,7 +731,6 @@ struct passwd *	my_getpwuid (Uid_t uid);
 struct passwd *	my_getpwent ();
 void	my_endpwent ();
 char *	my_getlogin ();
-int	rmscopy (char *, char *, int);
 typedef char __VMS_SEPYTOTORP__;
 /* prototype section end marker; `typedef' passes through cpp */
 

@@ -41,6 +41,9 @@ START_EXTERN_C
 			{ return &(PL_##v); }
 #define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHXo)		\
 			{ return &(PL_##v); }
+#undef PERLVARIC
+#define PERLVARIC(v,t,i)	const t* Perl_##v##_ptr(pTHXo)		\
+			{ return (const t *)&(PL_##v); }
 #include "perlvars.h"
 
 #undef PERLVAR
