@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.27 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.28 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 sub Define
 {
@@ -127,7 +127,15 @@ If you want your encoding to work with PerlIO, you MUST define this
 method so that it returns 1 when PerlIO is enabled.  Here is an
 example;
 
- sub perlio_ok { exists $INC{"PerlIO/encoding.pm"} }
+ sub perlio_ok { 
+     eval { require PerlIO::encoding };
+     if ($@){
+	 return 0;
+     }else{
+	 return 1;
+     }
+  }
+
 
 By default, this method is defined as follows;
 

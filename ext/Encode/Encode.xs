@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.33 2002/04/22 03:43:05 dankogai Exp $
+ $Id: Encode.xs,v 1.34 2002/04/22 20:27:30 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -23,6 +23,7 @@
 			 return (y)0; /* fool picky compilers */ \
                          }
 /**/
+
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
@@ -280,6 +281,7 @@ SV *	obj
 CODE:
 {
     encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+    require_pv(PERLIO_FILENAME);
     if (hv_exists(get_hv("INC", 0), 
 		  PERLIO_FILENAME, strlen(PERLIO_FILENAME)))
     {

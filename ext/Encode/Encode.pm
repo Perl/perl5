@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.56 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.57 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load 'Encode';
@@ -65,9 +65,8 @@ sub encodings
 }
 
 sub perlio_ok{
-    exists $INC{"PerlIO/encoding.pm"} or return 0;
     my $obj = ref($_[0]) ? $_[0] : find_encoding($_[0]);
-    $obj->can("perlio_ok") and return $obj->perlio_ok() unless $@;
+    $obj->can("perlio_ok") and return $obj->perlio_ok();
     return 0; # safety net
 }
 

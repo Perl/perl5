@@ -3,7 +3,7 @@ package Encode::CN::HZ;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode ();
 use Encode::CN;
@@ -19,8 +19,6 @@ $obj->Define($canon);
 sub needs_lines  { 1 }
 
 sub perlio_ok { 
-    # exists $INC{"PerlIO/encoding.pm"} or return 0;
-    # PerlIO::encoding->VERSION >= 0.03 and return 1;
     return 0; # for the time being
 }
 

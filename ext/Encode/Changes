@@ -1,9 +1,20 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.56 2002/04/22 09:48:07 dankogai Exp dankogai $
+# $Id: Changes,v 1.57 2002/04/22 20:27:30 dankogai Exp dankogai $
 #
 
-$Revision: 1.56 $ $Date: 2002/04/22 09:48:07 $
+$Revision: 1.57 $ $Date: 2002/04/22 20:27:30 $
+! t/JP.t t/KR.t t/perlio.t
+  unless (find PerlIO::Layer 'perlio') ... line is back again.
+  t/JP.t and t/KR.t were supposed to work but maybe '>:utf8' lines
+  need PerlIO.  Sigh....
+! Encode.xs Unicode/Unicode.pm lib/Encode/JP/JIS7.pm t/perlio.t
+  ->perlio_ok now does eval{ require PerlIO::encoding } there so
+  it correctly returns 1 when PerlIO::encoding is yet loaded.
+! Encode.xs
+  perl-current patch #16072 reflected
+
+1.56 2002/04/22 09:48:07 
 ! Encode.pm encoding.pm t/perlio.t t/jperl.t
   New PerlIO::encoding 0.04 compliance met
 
@@ -443,7 +454,7 @@ $Revision: 1.56 $ $Date: 2002/04/22 09:48:07 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/22 09:48:07 $
+1.11  $Date: 2002/04/22 20:27:30 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

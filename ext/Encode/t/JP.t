@@ -12,6 +12,10 @@ BEGIN {
 	print "1..0 # Skip: EBCDIC\n";
 	exit 0;
     }
+    unless (PerlIO::Layer->find('perlio')){
+	print "1..0 # Skip: PerlIO required\n";
+	exit 0;
+    }
     $| = 1;
 }
 use strict;
@@ -53,6 +57,7 @@ for my $charset (qw(jisx0201 jisx0212 jisx0208)){
     is(compare_text($utf, $ref), 0, "$utf eq $ref");
     
     open $src, "<:utf8", $ref or die "$ref : $!";
+    binmode($src);
     $uni = join('', <$src>);
     close $src;
 

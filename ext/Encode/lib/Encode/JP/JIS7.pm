@@ -1,7 +1,7 @@
 package Encode::JP::JIS7;
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -24,9 +24,12 @@ sub new_sequence { $_[0] }
 sub needs_lines { 1 }
 
 sub perlio_ok { 
-    exists $INC{"PerlIO/encoding.pm"} or return 0;
-    PerlIO::encoding->VERSION >= 0.03 and return 1;
-    return 0;
+    eval{ require PerlIO::encoding };
+    if ($@){
+        return 0;
+    }else{
+        return (PerlIO::encoding->VERSION >= 0.03);
+    }
 }
 
 use Encode::CJKConstants qw(:all);

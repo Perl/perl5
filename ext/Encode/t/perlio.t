@@ -12,6 +12,10 @@ BEGIN {
 	print "1..0 # Skip: EBCDIC\n";
 	exit 0;
     }
+    unless (PerlIO::Layer->find('perlio')){
+        print "1..0 # Skip: PerlIO required\n";
+        exit 0;
+    }
     $| = 1;
 }
 
@@ -28,8 +32,6 @@ use Test::More tests => 28;
 our $DEBUG = 0;
 
 use Encode (":all");
-eval { require PerlIO::encoding };
-
 {
     no warnings;
     @ARGV and $DEBUG = shift;

@@ -3,7 +3,7 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.34 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.35 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
@@ -50,8 +50,12 @@ sub new_sequence
 sub needs_lines { 0 };
 
 sub perlio_ok { 
-    exists $INC{"PerlIO/encoding.pm"} or return 0;
-    return 1;
+    eval{ require PerlIO::encoding };
+    if ($@){
+	return 0;
+    }else{
+	return 1;
+    }
 }
 
 
