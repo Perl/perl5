@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar 13 12:23:47 EET 2003 [metaconfig 3.0 PL70]
+# Generated on Fri Mar 14 11:20:02 EET 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -18777,7 +18777,7 @@ $1 ~ /^NSIG$/ { nsig = $2 }
 	dup_num[ndups] = $2
 	ndups++ 
     }
-    else {
+    else if ($2 >= 0) {
 	sig_name[$2] = $1
 	sig_num[$2] = $2
     }

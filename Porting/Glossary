@@ -2147,6 +2147,9 @@ d_vendorbin (vendorbin.U):
 d_vendorlib (vendorlib.U):
 	This variable conditionally defines PERL_VENDORLIB.
 
+d_vendorscript (vendorscript.U):
+	This variable conditionally defines PERL_VENDORSCRIPT.
+
 d_vfork (d_vfork.U):
 	This variable conditionally defines the HAS_VFORK symbol, which
 	indicates the vfork() routine is available.
@@ -2625,6 +2628,27 @@ hostcat (nis.U):
 	On some systems, such as os390, there may be no equivalent
 	command, in which case this variable is unset.
 
+html1dir (html1dir.U):
+	This variable contains the name of the directory in which html
+	source pages are to be put.  This directory is for pages
+	that describe whole programs, not libraries or modules.  It
+	is intended to correspond roughly to section 1 of the Unix
+	manuals.
+
+html1direxp (html1dir.U):
+	This variable is the same as the html1dir variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
+html3dir (html3dir.U):
+	This variable contains the name of the directory in which html
+	source pages are to be put.  This directory is for pages
+	that describe libraries or modules.  It is intended to
+	correspond roughly to section 3 of the Unix manuals.
+
+html3direxp (html3dir.U):
+	This variable is the same as the html3dir variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
 i16size (perlxv.U):
 	This variable is the size of an I16 in bytes.
 
@@ -3041,6 +3065,16 @@ installbin (bin.U):
 	the user is explicitely prompted for it. This variable should always
 	be used in your makefiles for maximum portability.
 
+installhtml1dir (html1dir.U):
+	This variable is really the same as html1direxp, unless you are 
+	using a different installprefix.  For extra portability, you 
+	should only use this variable within your makefiles.
+
+installhtml3dir (html3dir.U):
+	This variable is really the same as html3direxp, unless you are 
+	using a different installprefix.  For extra portability, you 
+	should only use this variable within your makefiles.
+
 installman1dir (man1dir.U):
 	This variable is really the same as man1direxp, unless you are using
 	AFS in which case it points to the read/write location whereas
@@ -3085,10 +3119,39 @@ installsitebin (sitebin.U):
 	a system running AFS, in which case they may differ slightly. You
 	should always use this variable within your makefiles for portability.
 
+installsitehtml1 (sitehtml1.U):
+	This variable is really the same as sitehtml1exp, unless you are using
+	AFS in which case it points to the read/write location whereas
+	html1direxp only points to the read-only access location. For extra
+	portability, you should only use this variable within your makefiles.
+
+installsitehtml3 (sitehtml3.U):
+	This variable is really the same as sitehtml3exp, unless you are using
+	AFS in which case it points to the read/write location whereas
+	html3direxp only points to the read-only access location. For extra
+	portability, you should only use this variable within your makefiles.
+
 installsitelib (sitelib.U):
 	This variable is really the same as sitelibexp but may differ on
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
+
+installsiteman1 (siteman1.U):
+	This variable is really the same as siteman1exp, unless you are using
+	AFS in which case it points to the read/write location whereas
+	man1direxp only points to the read-only access location. For extra
+	portability, you should only use this variable within your makefiles.
+
+installsiteman3 (siteman3.U):
+	This variable is really the same as siteman3exp, unless you are using
+	AFS in which case it points to the read/write location whereas
+	man3direxp only points to the read-only access location. For extra
+	portability, you should only use this variable within your makefiles.
+
+installsitescript (sitescript.U):
+	This variable is usually the same as sitescriptexp, unless you are on
+	a system running AFS, in which case they may differ slightly. You
+	should always use this variable within your makefiles for portability.
 
 installstyle (installstyle.U):
 	This variable describes the "style" of the perl installation.
@@ -3141,8 +3204,33 @@ installvendorbin (vendorbin.U):
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
 
+installvendorhtml1 (vendorhtml1.U):
+	This variable is really the same as vendorhtml1exp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
+
+installvendorhtml3 (vendorhtml3.U):
+	This variable is really the same as vendorhtml3exp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
+
 installvendorlib (vendorlib.U):
 	This variable is really the same as vendorlibexp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
+
+installvendorman1 (vendorman1.U):
+	This variable is really the same as vendorman1exp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
+
+installvendorman3 (vendorman3.U):
+	This variable is really the same as vendorman3exp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
+
+installvendorscript (vendorscript.U):
+	This variable is really the same as vendorscriptexp but may differ on
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
 
@@ -3629,6 +3717,11 @@ perl5 (perl5.U):
 	installed perl5.005 or later suitable for running the script
 	to determine inc_version_list.
 
+perl5 (perl5.U):
+	This variable contains the full path (if any) to a previously
+	installed perl5.005 or later suitable for running the script
+	to determine inc_version_list.
+
 perl (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
@@ -4006,8 +4099,8 @@ sig_count (sig_name.U):
 
 sig_name (sig_name.U):
 	This variable holds the signal names, space separated. The leading
-	SIG in signal name is removed.  A ZERO is prepended to the
-	list.  This is currently not used.
+	SIG in signal name is removed.  A ZERO is prepended to the list.
+	This is currently not used, sig_name_init is used instead.
 
 sig_name_init (sig_name.U):
 	This variable holds the signal names, enclosed in double quotes and
@@ -4018,10 +4111,10 @@ sig_name_init (sig_name.U):
 
 sig_num (sig_name.U):
 	This variable holds the signal numbers, space separated. A ZERO is
-	prepended to the list (corresponding to the fake SIGZERO), and 
-	the list is terminated with a 0.  Those numbers correspond to 
-	the value of the signal listed in the same place within the
-	sig_name list.
+	prepended to the list (corresponding to the fake SIGZERO).
+	Those numbers correspond to  the value of the signal listed
+	in the same place within the sig_name list.
+	This is currently not used, sig_num_init is used instead.
 
 sig_num_init (sig_name.U):
 	This variable holds the signal numbers, enclosed in double quotes and
@@ -4066,6 +4159,36 @@ sitebinexp (sitebin.U):
 	This is the same as the sitebin variable, but is filename expanded at
 	configuration time, for use in your makefiles.
 
+sitehtml1 (sitehtml1.U):
+	This variable contains the name of the directory in which site-specific
+	html source pages are to be put.  It is the responsibility of the
+	Makefile.SH to get the value of this into the proper command.
+	You must be prepared to do the ~name expansion yourself.
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	html pages in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
+
+sitehtml1exp (sitehtml1.U):
+	This variable is the same as the sitehtml1 variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
+sitehtml3 (sitehtml3.U):
+	This variable contains the name of the directory in which site-specific
+	library html source pages are to be put.  It is the responsibility of the
+	Makefile.SH to get the value of this into the proper command.
+	You must be prepared to do the ~name expansion yourself.
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	library html pages in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
+
+sitehtml3exp (sitehtml3.U):
+	This variable is the same as the sitehtml3 variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
 sitelib (sitelib.U):
 	This variable contains the eventual value of the SITELIB symbol,
 	which is the name of the private library for this package.  It may
@@ -4086,6 +4209,36 @@ sitelibexp (sitelib.U):
 	This variable is the ~name expanded version of sitelib, so that you
 	may use it directly in Makefiles or shell scripts.
 
+siteman1 (siteman1.U):
+	This variable contains the name of the directory in which site-specific
+	manual source pages are to be put.  It is the responsibility of the
+	Makefile.SH to get the value of this into the proper command.
+	You must be prepared to do the ~name expansion yourself.
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	man1 pages in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
+
+siteman1exp (siteman1.U):
+	This variable is the same as the siteman1 variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
+siteman3 (siteman3.U):
+	This variable contains the name of the directory in which site-specific
+	library man source pages are to be put.  It is the responsibility of the
+	Makefile.SH to get the value of this into the proper command.
+	You must be prepared to do the ~name expansion yourself.
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	man3 pages in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
+
+siteman3exp (siteman3.U):
+	This variable is the same as the siteman3 variable, but is filename
+	expanded at configuration time, for convenient use in makefiles.
+
 siteprefix (siteprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the user will install add-on packages.
@@ -4094,6 +4247,21 @@ siteprefix (siteprefix.U):
 siteprefixexp (siteprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the user will install add-on packages.  Derived from siteprefix.
+
+sitescript (sitescript.U):
+	This variable holds the name of the directory in which the user wants
+	to put add-on publicly executable files for the package in question.  It
+	is most often a local directory such as /usr/local/bin. Programs using
+	this variable must be prepared to deal with ~name substitution.
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	scripts in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
+
+sitescriptexp (sitescript.U):
+	This is the same as the sitescript variable, but is filename expanded at
+	configuration time, for use in your makefiles.
 
 sizesize (sizesize.U):
 	This variable contains the size of a sizetype in bytes.
@@ -4138,7 +4306,7 @@ spackage (package.U):
 
 spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
-	shell on this system.  It is either cat or a grep -v for # comments.
+	shell on this system.  It is either cat or a grep '-v' for # comments.
 
 srand48_r_proto (d_srand48_r.U):
 	This variable encodes the prototype of srand48_r.
@@ -4367,6 +4535,11 @@ uquadtype (quadtype.U):
 	unsigned int, unsigned long long, uint64_t, or whatever type is
 	used for 64-bit integers.
 
+use5005threads (usethreads.U):
+	This variable conditionally defines the USE_5005THREADS symbol,
+	and indicates that Perl should be built to use the 5.005-based
+	threading implementation.
+
 use64bitall (use64bits.U):
 	This variable conditionally defines the USE_64_BIT_ALL symbol,
 	and indicates that 64-bit integer types should be used
@@ -4537,6 +4710,32 @@ vendorbinexp (vendorbin.U):
 	This variable is the ~name expanded version of vendorbin, so that you
 	may use it directly in Makefiles or shell scripts.
 
+vendorhtml1 (vendorhtml1.U):
+	This variable contains the name of the directory for html 
+	pages.  It may have a ~ on the front.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place their own
+	html pages in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
+
+vendorhtml1exp (vendorhtml1.U):
+	This variable is the ~name expanded version of vendorhtml1, so that you
+	may use it directly in Makefiles or shell scripts.
+
+vendorhtml3 (vendorhtml3.U):
+	This variable contains the name of the directory for html 
+	library pages.  It may have a ~ on the front.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place their own
+	html pages for modules and extensions in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
+
+vendorhtml3exp (vendorhtml3.U):
+	This variable is the ~name expanded version of vendorhtml3, so that you
+	may use it directly in Makefiles or shell scripts.
+
 vendorlib (vendorlib.U):
 	This variable contains the eventual value of the VENDORLIB symbol,
 	which is the name of the private library for this package.
@@ -4555,6 +4754,32 @@ vendorlibexp (vendorlib.U):
 	This variable is the ~name expanded version of vendorlib, so that you
 	may use it directly in Makefiles or shell scripts.
 
+vendorman1 (vendorman1.U):
+	This variable contains the name of the directory for man1 
+	pages.  It may have a ~ on the front.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place their own
+	man1 pages in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
+
+vendorman1exp (vendorman1.U):
+	This variable is the ~name expanded version of vendorman1, so that you
+	may use it directly in Makefiles or shell scripts.
+
+vendorman3 (vendorman3.U):
+	This variable contains the name of the directory for man3 
+	pages.  It may have a ~ on the front.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place their own
+	man3 pages in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
+
+vendorman3exp (vendorman3.U):
+	This variable is the ~name expanded version of vendorman3, so that you
+	may use it directly in Makefiles or shell scripts.
+
 vendorprefix (vendorprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the vendor will install add-on packages.
@@ -4563,6 +4788,19 @@ vendorprefix (vendorprefix.U):
 vendorprefixexp (vendorprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the vendor will install add-on packages.  Derived from vendorprefix.
+
+vendorscript (vendorscript.U):
+	This variable contains the eventual value of the VENDORSCRIPT symbol.
+	It may have a ~ on the front.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place additional
+	executable scripts in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
+
+vendorscriptexp (vendorscript.U):
+	This variable is the ~name expanded version of vendorscript, so that you
+	may use it directly in Makefiles or shell scripts.
 
 version (patchlevel.U):
 	The full version number of this package, such as 5.6.1 (or 5_6_1).
@@ -4622,10 +4860,6 @@ xs_apiversion (xs_apiversion.U):
 	debugging, 64bits, sfio, etc., are not checked for currently,
 	though in principle we could go snooping around in old
 	Config.pm files.
-
-yacc (yacc.U):
-	This variable holds the name of the compiler compiler we
-	want to use in the Makefile. It can be yacc, byacc, or bison -y.
 
 yaccflags (yacc.U):
 	This variable contains any additional yacc flags desired by the

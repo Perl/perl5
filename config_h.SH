@@ -2213,7 +2213,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	etc., where nn is the actual signal number (e.g. NUM37).
  *	The signal number for sig_name[i] is stored in sig_num[i].
  *	The last element is 0 to terminate the list with a NULL.  This
- *	corresponds to the 0 at the end of the sig_num list.
+ *	corresponds to the 0 at the end of the sig_name_init list.
+ *	Note that this variable is initialized from the sig_name_init,
+ *	not from sig_name (which is unused).
  */
 /* SIG_NUM:
  *	This symbol contains a list of signal numbers, in the same order as the
@@ -2227,7 +2229,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	The signal number corresponding to sig_name[i] is sig_number[i].
  *	if (i < NSIG) then sig_number[i] == i.  
  *	The last element is 0, corresponding to the 0 at the end of
- *	the sig_name list.
+ *	the sig_name_init list.
+ *	Note that this variable is initialized from the sig_num_init,
+ *	not from sig_num (which is unused).
  */
 /* SIG_SIZE:
  *	This variable contains the number of elements of the sig_name
