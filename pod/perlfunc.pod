@@ -1896,8 +1896,10 @@ by using the C<Config> module and the values C<d_pwquota>, C<d_pwage>,
 C<d_pwchange>, C<d_pwcomment>, and C<d_pwexpire>.  Shadow password
 files are only supported if your vendor has implemented them in the
 intuitive fashion that calling the regular C library routines gets the
-shadow versions if you're running under privilege.  Those that
-incorrectly implement a separate library call are not supported.
+shadow versions if you're running under privilege or if there exists
+the shadow(3) functions as found in System V ( this includes Solaris
+and Linux.)  Those systems which implement a proprietary shadow password
+facility are unlikely to be supported.
 
 The $members value returned by I<getgr*()> is a space separated list of
 the login names of the members of the group.
