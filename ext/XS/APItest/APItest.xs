@@ -35,24 +35,6 @@ print_long_double()
 #endif
 
 void
-print_nv(val)
-        NV val
-        CODE:
-        printf("%5.3Vf\n",val);
-
-void
-print_iv(val)
-        IV val
-        CODE:
-        printf("%Vd\n",val);
-
-void
-print_uv(val)
-        UV val
-        CODE:
-        printf("%Vu\n",val);
-
-void
 print_int(val)
         int val
         CODE:
