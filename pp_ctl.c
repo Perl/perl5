@@ -1026,7 +1026,10 @@ PP(pp_range)
 {
     if (GIMME == G_ARRAY)
 	return cCONDOP->op_true;
-    return SvTRUEx(PAD_SV(PL_op->op_targ)) ? cCONDOP->op_false : cCONDOP->op_true;
+    if (SvTRUEx(PAD_SV(PL_op->op_targ)))
+	return cCONDOP->op_false;
+    else
+	return cCONDOP->op_true;
 }
 
 PP(pp_flip)
