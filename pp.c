@@ -141,7 +141,7 @@ PP(pp_rv2gv)
 	    GvREFCNT(sv) = 1;
 	    GvSV(sv) = NEWSV(72,0);
 	    GvLINE(sv) = curcop->cop_line;
-	    GvEGV(sv) = sv;
+	    GvEGV(sv) = (GV*)sv;
 	}
     }
     SETs(sv);
@@ -163,7 +163,7 @@ PP(pp_rv2sv)
 	}
     }
     else {
-	GV *gv = sv;
+	GV *gv = (GV*)sv;
 	char *sym;
 
 	if (SvTYPE(gv) != SVt_PVGV) {
@@ -181,7 +181,7 @@ PP(pp_rv2sv)
 	    sym = SvPV(sv, na);
 	    if (op->op_private & HINT_STRICT_REFS)
 		DIE(no_symref, sym, "a SCALAR");
-	    gv = (SV*)gv_fetchpv(sym, TRUE, SVt_PV);
+	    gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV);
 	}
 	sv = GvSV(gv);
     }
@@ -331,6 +331,10 @@ PP(pp_ref)
     char *pv;
 
     sv = POPs;
+
+    if (sv && SvGMAGICAL(sv))
+	mg_get(sv);     
+
     if (!sv || !SvROK(sv))
 	RETPUSHNO;
 
@@ -1232,11 +1236,31 @@ PP(pp_srand)
 {
     dSP;
     I32 anum;
-    Time_t when;
 
     if (MAXARG < 1) {
+#ifdef VMS
+#  include <starlet.h>
+	unsigned int when[2];
+	_ckvmssts(sys$gettim(when));
+	anum = when[0] ^ when[1];
+#else
+#  if defined(I_SYS_TIME) && !defined(PLAN9)
+	struct timeval when;
+	gettimeofday(&when,(struct timezone *) 0);
+	anum = when.tv_sec ^ when.tv_usec;
+#  else
+	Time_t when;
 	(void)time(&when);
 	anum = when;
+#  endif
+#endif
+#if !defined(PLAN9) /* XXX Plan9 assembler chokes on this; fix coming soon  */
+                    /*     17-Jul-1996  bailey@genetics.upenn.edu           */
+	/* What is a good hashing algorithm here? */
+	anum ^= (  (  269 * (U32)getpid())
+	         ^ (26107 * (U32)&when)
+	         ^ (73819 * (U32)stack_sp));
+#endif
     }
     else
 	anum = POPi;
@@ -1789,8 +1813,6 @@ PP(pp_each)
     dSP; dTARGET;
     HV *hash = (HV*)POPs;
     HE *entry;
-    I32 i;
-    char *tmps;
     
     PUTBACK;
     entry = hv_iternext(hash);                        /* might clobber stack_sp */
@@ -1798,10 +1820,7 @@ PP(pp_each)
 
     EXTEND(SP, 2);
     if (entry) {
-	tmps = hv_iterkey(entry, &i);	              /* won't clobber stack_sp */
-	if (!i)
-	    tmps = "";
-	PUSHs(sv_2mortal(newSVpv(tmps, i)));
+	PUSHs(hv_iterkeysv(entry));	              /* won't clobber stack_sp */
 	if (GIMME == G_ARRAY) {
 	    PUTBACK;
 	    sv_setsv(TARG, hv_iterval(hash, entry));  /* might clobber stack_sp */
@@ -1831,14 +1850,12 @@ PP(pp_delete)
     SV *sv;
     SV *tmpsv = POPs;
     HV *hv = (HV*)POPs;
-    char *tmps;
     STRLEN len;
     if (SvTYPE(hv) != SVt_PVHV) {
 	DIE("Not a HASH reference");
     }
-    tmps = SvPV(tmpsv, len);
-    sv = hv_delete(hv, tmps, len,
-	op->op_private & OPpLEAVE_VOID ? G_DISCARD : 0);
+    sv = hv_delete_ent(hv, tmpsv,
+	(op->op_private & OPpLEAVE_VOID ? G_DISCARD : 0), 0);
     if (!sv)
 	RETPUSHUNDEF;
     PUSHs(sv);
@@ -1850,13 +1867,11 @@ PP(pp_exists)
     dSP;
     SV *tmpsv = POPs;
     HV *hv = (HV*)POPs;
-    char *tmps;
     STRLEN len;
     if (SvTYPE(hv) != SVt_PVHV) {
 	DIE("Not a HASH reference");
     }
-    tmps = SvPV(tmpsv, len);
-    if (hv_exists(hv, tmps, len))
+    if (hv_exists_ent(hv, tmpsv, 0))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -1864,23 +1879,22 @@ PP(pp_exists)
 PP(pp_hslice)
 {
     dSP; dMARK; dORIGMARK;
-    register SV **svp;
+    register HE *he;
     register HV *hv = (HV*)POPs;
     register I32 lval = op->op_flags & OPf_MOD;
 
     if (SvTYPE(hv) == SVt_PVHV) {
 	while (++MARK <= SP) {
-	    STRLEN keylen;
-	    char *key = SvPV(*MARK, keylen);
+	    SV *keysv = *MARK;
 
-	    svp = hv_fetch(hv, key, keylen, lval);
+	    he = hv_fetch_ent(hv, keysv, lval, 0);
 	    if (lval) {
-		if (!svp || *svp == &sv_undef)
-		    DIE(no_helem, key);
+		if (!he || HeVAL(he) == &sv_undef)
+		    DIE(no_helem, SvPV(keysv, na));
 		if (op->op_private & OPpLVAL_INTRO)
-		    save_svref(svp);
+		    save_svref(&HeVAL(he));
 	    }
-	    *MARK = svp ? *svp : &sv_undef;
+	    *MARK = he ? HeVAL(he) : &sv_undef;
 	}
     }
     if (GIMME != G_ARRAY) {
@@ -1981,14 +1995,12 @@ PP(pp_anonhash)
 
     while (MARK < SP) {
 	SV* key = *++MARK;
-	char *tmps;
 	SV *val = NEWSV(46, 0);
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else
 	    warn("Odd number of elements in hash list");
-	tmps = SvPV(key,len);
-	(void)hv_store(hv,tmps,len,val,0);
+	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
     XPUSHs((SV*)hv);
@@ -2829,6 +2841,8 @@ PP(pp_unpack)
 	case 'u':
 	    along = (strend - s) * 3 / 4;
 	    sv = NEWSV(42, along);
+	    if (along)
+		SvPOK_on(sv);
 	    while (s < strend && *s > ' ' && *s < 'a') {
 		I32 a, b, c, d;
 		char hunk[4];
@@ -3324,7 +3338,7 @@ PP(pp_split)
     I32 origlimit = limit;
     I32 realarray = 0;
     I32 base;
-    AV *oldstack = stack;
+    AV *oldstack = curstack;
     register REGEXP *rx = pm->op_pmregexp;
     I32 gimme = GIMME;
     I32 oldsave = savestack_ix;
@@ -3347,7 +3361,7 @@ PP(pp_split)
 	av_extend(ary,0);
 	av_clear(ary);
 	/* temporarily switch stacks */
-	SWITCHSTACK(stack, ary);
+	SWITCHSTACK(curstack, ary);
     }
     base = SP - stack_base;
     orig = s;
