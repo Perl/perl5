@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1063\n";
+print "1..1065\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3278,4 +3278,10 @@ ok("a\cBb" =~ /[\cA-\cC]/, '\cB in character class range');
 ok("a\cCbc" =~ /[^\cA-\cB]/, '\cC in negated character class range');
 ok("a\cAb" =~ /(??{"\cA"})/, '\cA in ??{} pattern');
 
-# last test 1063
+# perl #28532: optional zero-width match at end of string is ignored
+ok(("abc" =~ /^abc(\z)?/) && defined($1),
+    'optional zero-width match at end of string');
+ok(("abc" =~ /^abc(\z)??/) && !defined($1),
+    'optional zero-width match at end of string');
+
+# last test 1065

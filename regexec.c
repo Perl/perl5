@@ -3367,7 +3367,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    CHECKPOINT lastcp;
 	
 	    /* We suppose that the next guy does not need
-	       backtracking: in particular, it is of constant length,
+	       backtracking: in particular, it is of constant non-zero length,
 	       and has no parenths to influence future backrefs. */
 	    ln = ARG1(scan);  /* min to match */
 	    n  = ARG2(scan);  /* max to match */
@@ -3386,15 +3386,6 @@ S_regmatch(pTHX_ regnode *prog)
 		minmod = 0;
 		if (ln && regrepeat_hard(scan, ln, &l) < ln)
 		    sayNO;
-		/* if we matched something zero-length we don't need to
-		   backtrack - capturing parens are already defined, so
-		   the caveat in the maximal case doesn't apply
-
-		   XXXX if ln == 0, we can redo this check first time
-		   through the following loop
-		*/
-		if (ln && l == 0)
-		    n = ln;	/* don't backtrack */
 		locinput = PL_reginput;
 		if (HAS_TEXT(next) || JUMPABLE(next)) {
 		    regnode *text_node = next;
@@ -3420,8 +3411,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    c1 = c2 = -1000;
 	    assume_ok_MM:
 		REGCP_SET(lastcp);
-		/* This may be improved if l == 0.  */
-		while (n >= ln || (n == REG_INFTY && ln > 0 && l)) { /* ln overflow ? */
+		while (n >= ln || (n == REG_INFTY && ln > 0)) { /* ln overflow ? */
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||
 			UCHARAT(PL_reginput) == c1 ||
@@ -3452,13 +3442,6 @@ S_regmatch(pTHX_ regnode *prog)
 	    }
 	    else {
 		n = regrepeat_hard(scan, n, &l);
-		/* if we matched something zero-length we don't need to
-		   backtrack, unless the minimum count is zero and we
-		   are capturing the result - in that case the capture
-		   being defined or not may affect later execution
-		*/
-		if (n != 0 && l == 0 && !(paren && ln == 0))
-		    ln = n;	/* don't backtrack */
 		locinput = PL_reginput;
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log,
@@ -4263,7 +4246,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 /*
  - regrepeat_hard - repeatedly match something, report total lenth and length
  *
- * The repeater is supposed to have constant length.
+ * The repeater is supposed to have constant non-zero length.
  */
 
 STATIC I32

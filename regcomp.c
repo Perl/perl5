@@ -1188,7 +1188,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		if (  OP(oscan) == CURLYX && data
 		      && !(data->flags & SF_HAS_PAR)
 		      && !(data->flags & SF_HAS_EVAL)
-		      && !deltanext  ) {
+		      && !deltanext	/* atom is fixed width */
+		      && minnext != 0	/* CURLYM can't handle zero width */
+		) {
 		    /* XXXX How to optimize if data == 0? */
 		    /* Optimize to a simpler form.  */
 		    regnode *nxt = NEXTOPER(oscan) + EXTRA_STEP_2ARGS; /* OPEN */
