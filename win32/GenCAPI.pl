@@ -891,6 +891,225 @@ long         _win32_get_osfhandle(int fd)
 {
     return pPerl->piStdIO->GetOSfhandle(fd);
 }
+
+u_long _win32_htonl (u_long hostlong)
+{
+    return pPerl->piSock->Htonl(hostlong);
+}
+
+u_short _win32_htons (u_short hostshort)
+{
+    return pPerl->piSock->Htons(hostshort);
+}
+
+u_long _win32_ntohl (u_long netlong)
+{
+    return pPerl->piSock->Ntohl(netlong);
+}
+
+u_short _win32_ntohs (u_short netshort)
+{
+    return pPerl->piSock->Ntohs(netshort);
+}
+
+unsigned long _win32_inet_addr (const char * cp)
+{
+    return pPerl->piSock->InetAddr(cp, ErrorNo());
+}
+
+char * _win32_inet_ntoa (struct in_addr in)
+{
+    return pPerl->piSock->InetNtoa(in, ErrorNo());
+}
+
+SOCKET _win32_socket (int af, int type, int protocol)
+{
+    return pPerl->piSock->Socket(af, type, protocol, ErrorNo());
+}
+
+int _win32_bind (SOCKET s, const struct sockaddr *addr, int namelen)
+{
+    return pPerl->piSock->Bind(s, addr, namelen, ErrorNo());
+}
+
+int _win32_listen (SOCKET s, int backlog)
+{
+    return pPerl->piSock->Listen(s, backlog, ErrorNo());
+}
+
+SOCKET _win32_accept (SOCKET s, struct sockaddr *addr, int *addrlen)
+{
+    return pPerl->piSock->Accept(s, addr, addrlen, ErrorNo());
+}
+
+int _win32_connect (SOCKET s, const struct sockaddr *name, int namelen)
+{
+    return pPerl->piSock->Connect(s, name, namelen, ErrorNo());
+}
+
+int _win32_send (SOCKET s, const char * buf, int len, int flags)
+{
+    return pPerl->piSock->Send(s, buf, len, flags, ErrorNo());
+}
+
+int _win32_sendto (SOCKET s, const char * buf, int len, int flags,
+                       const struct sockaddr *to, int tolen)
+{
+    return pPerl->piSock->Sendto(s, buf, len, flags, to, tolen, ErrorNo());
+}
+
+int _win32_recv (SOCKET s, char * buf, int len, int flags)
+{
+    return 0;
+}
+
+int _win32_recvfrom (SOCKET s, char * buf, int len, int flags,
+                         struct sockaddr *from, int * fromlen)
+{
+    return pPerl->piSock->Recvfrom(s, buf, len, flags, from, fromlen, ErrorNo());
+}
+
+int _win32_shutdown (SOCKET s, int how)
+{
+    return pPerl->piSock->Shutdown(s, how, ErrorNo());
+}
+
+int _win32_closesocket (SOCKET s)
+{
+    return 0;
+}
+
+int _win32_ioctlsocket (SOCKET s, long cmd, u_long *argp)
+{
+    return 0;
+}
+
+int _win32_setsockopt (SOCKET s, int level, int optname,
+                           const char * optval, int optlen)
+{
+    return pPerl->piSock->Setsockopt(s, level, optname, optval, optlen, ErrorNo());
+}
+
+int _win32_getsockopt (SOCKET s, int level, int optname, char * optval, int *optlen)
+{
+    return pPerl->piSock->Getsockopt(s, level, optname, optval, optlen, ErrorNo());
+}
+
+int _win32_getpeername (SOCKET s, struct sockaddr *name, int * namelen)
+{
+    return pPerl->piSock->Getpeername(s, name, namelen, ErrorNo());
+}
+
+int _win32_getsockname (SOCKET s, struct sockaddr *name, int * namelen)
+{
+    return pPerl->piSock->Getsockname(s, name, namelen, ErrorNo());
+}
+
+int _win32_gethostname (char * name, int namelen)
+{
+    return pPerl->piSock->Gethostname(name, namelen, ErrorNo());
+}
+
+struct hostent * _win32_gethostbyname(const char * name)
+{
+    return pPerl->piSock->Gethostbyname(name, ErrorNo());
+}
+
+struct hostent * _win32_gethostbyaddr(const char * addr, int len, int type)
+{
+    return pPerl->piSock->Gethostbyaddr(addr, len, type, ErrorNo());
+}
+
+struct protoent * _win32_getprotobyname(const char * name)
+{
+    return pPerl->piSock->Getprotobyname(name, ErrorNo());
+}
+
+struct protoent * _win32_getprotobynumber(int proto)
+{
+    return pPerl->piSock->Getprotobynumber(proto, ErrorNo());
+}
+
+struct servent * _win32_getservbyname(const char * name, const char * proto)
+{
+    return pPerl->piSock->Getservbyname(name, proto, ErrorNo());
+}
+
+struct servent * _win32_getservbyport(int port, const char * proto)
+{
+    return pPerl->piSock->Getservbyport(port, proto, ErrorNo());
+}
+
+int _win32_select (int nfds, Perl_fd_set *rfds, Perl_fd_set *wfds, Perl_fd_set *xfds,
+		  const struct timeval *timeout)
+{
+    return pPerl->piSock->Select(nfds, (char*)rfds, (char*)wfds, (char*)xfds, timeout, ErrorNo());
+}
+
+void _win32_endnetent(void)
+{
+    pPerl->piSock->Endnetent(ErrorNo());
+}
+
+void _win32_endhostent(void)
+{
+    pPerl->piSock->Endhostent(ErrorNo());
+}
+
+void _win32_endprotoent(void)
+{
+    pPerl->piSock->Endprotoent(ErrorNo());
+}
+
+void _win32_endservent(void)
+{
+    pPerl->piSock->Endservent(ErrorNo());
+}
+
+struct netent * _win32_getnetent(void)
+{
+    return pPerl->piSock->Getnetent(ErrorNo());
+}
+
+struct netent * _win32_getnetbyname(char *name)
+{
+    return pPerl->piSock->Getnetbyname(name, ErrorNo());
+}
+
+struct netent * _win32_getnetbyaddr(long net, int type)
+{
+    return pPerl->piSock->Getnetbyaddr(net, type, ErrorNo());
+}
+
+struct protoent *_win32_getprotoent(void)
+{
+    return pPerl->piSock->Getprotoent(ErrorNo());
+}
+
+struct servent *_win32_getservent(void)
+{
+    return pPerl->piSock->Getservent(ErrorNo());
+}
+
+void _win32_sethostent(int stayopen)
+{
+    pPerl->piSock->Sethostent(stayopen, ErrorNo());
+}
+
+void _win32_setnetent(int stayopen)
+{
+    pPerl->piSock->Setnetent(stayopen, ErrorNo());
+}
+
+void _win32_setprotoent(int stayopen)
+{
+    pPerl->piSock->Setprotoent(stayopen, ErrorNo());
+}
+
+void _win32_setservent(int stayopen)
+{
+    pPerl->piSock->Setservent(stayopen, ErrorNo());
+}
 } /* extern "C" */
 EOCODE
 
@@ -962,6 +1181,51 @@ print HDRFILE <<EOCODE;
 #undef win32_utime
 #undef win32_getenv
 
+#undef win32_htonl
+#undef win32_htons
+#undef win32_ntohl
+#undef win32_ntohs
+#undef win32_inet_addr
+#undef win32_inet_ntoa
+
+#undef win32_socket
+#undef win32_bind
+#undef win32_listen
+#undef win32_accept
+#undef win32_connect
+#undef win32_send
+#undef win32_sendto
+#undef win32_recv
+#undef win32_recvfrom
+#undef win32_shutdown
+#undef win32_closesocket
+#undef win32_ioctlsocket
+#undef win32_setsockopt
+#undef win32_getsockopt
+#undef win32_getpeername
+#undef win32_getsockname
+#undef win32_gethostname
+#undef win32_gethostbyname
+#undef win32_gethostbyaddr
+#undef win32_getprotobyname
+#undef win32_getprotobynumber
+#undef win32_getservbyname
+#undef win32_getservbyport
+#undef win32_select
+#undef win32_endhostent
+#undef win32_endnetent
+#undef win32_endprotoent
+#undef win32_endservent
+#undef win32_getnetent
+#undef win32_getnetbyname
+#undef win32_getnetbyaddr
+#undef win32_getprotoent
+#undef win32_getservent
+#undef win32_sethostent
+#undef win32_setnetent
+#undef win32_setprotoent
+#undef win32_setservent
+
 #define win32_errno    _win32_errno
 #define win32_stdin    _win32_stdin
 #define win32_stdout   _win32_stdout
@@ -1032,6 +1296,51 @@ print HDRFILE <<EOCODE;
 #define win32_getenv   _win32_getenv
 #define win32_open_osfhandle _win32_open_osfhandle
 #define win32_get_osfhandle  _win32_get_osfhandle
+
+#define win32_htonl              _win32_htonl
+#define win32_htons              _win32_htons
+#define win32_ntohl              _win32_ntohl
+#define win32_ntohs              _win32_ntohs
+#define win32_inet_addr          _win32_inet_addr
+#define win32_inet_ntoa          _win32_inet_ntoa
+
+#define win32_socket             _win32_socket
+#define win32_bind               _win32_bind
+#define win32_listen             _win32_listen
+#define win32_accept             _win32_accept
+#define win32_connect            _win32_connect
+#define win32_send               _win32_send
+#define win32_sendto             _win32_sendto
+#define win32_recv               _win32_recv
+#define win32_recvfrom           _win32_recvfrom
+#define win32_shutdown           _win32_shutdown
+#define win32_closesocket        _win32_closesocket
+#define win32_ioctlsocket        _win32_ioctlsocket
+#define win32_setsockopt         _win32_setsockopt
+#define win32_getsockopt         _win32_getsockopt
+#define win32_getpeername        _win32_getpeername
+#define win32_getsockname        _win32_getsockname
+#define win32_gethostname        _win32_gethostname
+#define win32_gethostbyname      _win32_gethostbyname
+#define win32_gethostbyaddr      _win32_gethostbyaddr
+#define win32_getprotobyname     _win32_getprotobyname
+#define win32_getprotobynumber   _win32_getprotobynumber
+#define win32_getservbyname      _win32_getservbyname
+#define win32_getservbyport      _win32_getservbyport
+#define win32_select             _win32_select
+#define win32_endhostent         _win32_endhostent
+#define win32_endnetent          _win32_endnetent
+#define win32_endprotoent        _win32_endprotoent
+#define win32_endservent         _win32_endservent
+#define win32_getnetent          _win32_getnetent
+#define win32_getnetbyname       _win32_getnetbyname
+#define win32_getnetbyaddr       _win32_getnetbyaddr
+#define win32_getprotoent        _win32_getprotoent
+#define win32_getservent         _win32_getservent
+#define win32_sethostent         _win32_sethostent
+#define win32_setnetent          _win32_setnetent
+#define win32_setprotoent        _win32_setprotoent
+#define win32_setservent         _win32_setservent
 
 int * 	_win32_errno(void);
 FILE*	_win32_stdin(void);
@@ -1105,6 +1414,55 @@ int	_win32_utime(const char *f, struct utimbuf *t);
 char*   _win32_getenv(const char *name);
 int     _win32_open_osfhandle(long handle, int flags);
 long    _win32_get_osfhandle(int fd);
+
+u_long _win32_htonl (u_long hostlong);
+u_short _win32_htons (u_short hostshort);
+u_long _win32_ntohl (u_long netlong);
+u_short _win32_ntohs (u_short netshort);
+unsigned long _win32_inet_addr (const char * cp);
+char * _win32_inet_ntoa (struct in_addr in);
+
+SOCKET _win32_socket (int af, int type, int protocol);
+int _win32_bind (SOCKET s, const struct sockaddr *addr, int namelen);
+int _win32_listen (SOCKET s, int backlog);
+SOCKET _win32_accept (SOCKET s, struct sockaddr *addr, int *addrlen);
+int _win32_connect (SOCKET s, const struct sockaddr *name, int namelen);
+int _win32_send (SOCKET s, const char * buf, int len, int flags);
+int _win32_sendto (SOCKET s, const char * buf, int len, int flags,
+                       const struct sockaddr *to, int tolen);
+int _win32_recv (SOCKET s, char * buf, int len, int flags);
+int _win32_recvfrom (SOCKET s, char * buf, int len, int flags,
+                         struct sockaddr *from, int * fromlen);
+int _win32_shutdown (SOCKET s, int how);
+int _win32_closesocket (SOCKET s);
+int _win32_ioctlsocket (SOCKET s, long cmd, u_long *argp);
+int _win32_setsockopt (SOCKET s, int level, int optname,
+                           const char * optval, int optlen);
+int _win32_getsockopt (SOCKET s, int level, int optname, char * optval, int *optlen);
+int _win32_getpeername (SOCKET s, struct sockaddr *name, int * namelen);
+int _win32_getsockname (SOCKET s, struct sockaddr *name, int * namelen);
+int _win32_gethostname (char * name, int namelen);
+struct hostent * _win32_gethostbyname(const char * name);
+struct hostent * _win32_gethostbyaddr(const char * addr, int len, int type);
+struct protoent * _win32_getprotobyname(const char * name);
+struct protoent * _win32_getprotobynumber(int proto);
+struct servent * _win32_getservbyname(const char * name, const char * proto);
+struct servent * _win32_getservbyport(int port, const char * proto);
+int _win32_select (int nfds, Perl_fd_set *rfds, Perl_fd_set *wfds, Perl_fd_set *xfds,
+		  const struct timeval *timeout);
+void _win32_endnetent(void);
+void _win32_endhostent(void);
+void _win32_endprotoent(void);
+void _win32_endservent(void);
+struct netent * _win32_getnetent(void);
+struct netent * _win32_getnetbyname(char *name);
+struct netent * _win32_getnetbyaddr(long net, int type);
+struct protoent *_win32_getprotoent(void);
+struct servent *_win32_getservent(void);
+void _win32_sethostent(int stayopen);
+void _win32_setnetent(int stayopen);
+void _win32_setprotoent(int stayopen);
+void _win32_setservent(int stayopen);
 
 #pragma warning(once : 4113)
 EOCODE
