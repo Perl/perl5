@@ -1979,6 +1979,12 @@
 /*#define	HAS_MSG_PROXY	/**/
 /*#define	HAS_SCM_RIGHTS	/**/
 
+/* HAS_SOCKS5_INIT:
+ *	This symbol, if defined, indicates that the socks5_init routine is
+ *	available to initialize SOCKS 5.
+ */
+/*#define HAS_SOCKS5_INIT		/**/
+
 /* HAS_SQRTL:
  *	This symbol, if defined, indicates that the sqrtl routine is
  *	available to do long double square roots.
@@ -2313,6 +2319,12 @@
  *     include <inttypes.h>.
  */
 /*#define   I_INTTYPES                /**/
+
+/* I_LIBUTIL:
+ *	This symbol, if defined, indicates that <libutil.h> exists and
+ *	should be included.
+ */
+/*#define	I_LIBUTIL		/**/
 
 /* I_MACH_CTHREADS:
  *     This symbol, if defined, indicates to the C program that it should
@@ -3146,11 +3158,5 @@
  */
 #define PERL_XS_APIVERSION "5.00563"
 #define PERL_PM_APIVERSION "5.005"
-
-/* I_LIBUTIL:
- *	This symbol, if defined, indicates that <libutil.h> exists and
- *	should be included.
- */
-/*#define	I_LIBUTIL		/**/
 
 #endif
