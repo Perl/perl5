@@ -477,7 +477,7 @@ UTF16 encoded Perl files should now be read correctly.
 
 =item *
 
-The character tables have been updated to new Unicode 3.0 features.
+The character tables have been updated to Unicode 3.0.1.
 
 =item *
 
@@ -505,6 +505,10 @@ theory.
 The C<tr///> operator now works I<slightly> better but is still rather
 broken.  Note that the C<tr///CU> functionality has been removed (but
 see pack('U0', ...)).
+
+=item *
+
+vec() now refuses to deal with characters >255.
 
 =item *
 
