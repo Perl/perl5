@@ -4778,12 +4778,10 @@ PP(pp_split)
 	if (gimme == G_ARRAY)
 	    RETURN;
     }
-    if (iters || !pm->op_pmreplroot) {
-	GETTARGET;
-	PUSHi(iters);
-	RETURN;
-    }
-    RETPUSHUNDEF;
+
+    GETTARGET;
+    PUSHi(iters);
+    RETURN;
 }
 
 PP(pp_lock)
