@@ -3802,6 +3802,7 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
+	I32 orig_keyword = 0;
 	gv = Nullgv;
 	gvp = 0;
 
@@ -3866,6 +3867,7 @@ Perl_yylex(pTHX)
 		}
 	    }
 	    if (ogv) {
+		orig_keyword = tmp;
 		tmp = 0;		/* overridden by import or by GLOBAL */
 	    }
 	    else if (gv && !gvp
@@ -4041,7 +4043,9 @@ Perl_yylex(pTHX)
 
 		/* If followed by a bareword, see if it looks like indir obj. */
 
-		if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') && (tmp = intuit_method(s,gv)))
+		if (!orig_keyword
+			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
+			&& (tmp = intuit_method(s,gv)))
 		    return tmp;
 
 		/* Not a method, so call it a subroutine (if defined) */
