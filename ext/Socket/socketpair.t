@@ -9,7 +9,7 @@ BEGIN {
     require Config; import Config;
     $can_fork = $Config{d_fork} || ($^O eq 'MSWin32' && $Config{useithreads});
 
-    if ($^O eq "hpux" or $Config{'extensions'} !~ /\bSocket\b/ && 
+    if ($^O eq "hpux" or $Config{'extensions'} !~ /\bSocket\b/ &&
         !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";
 	exit 0;
@@ -110,18 +110,25 @@ ok (shutdown(LEFT, SHUT_WR), "shutdown left for writing");
   alarm 60;
 }
 
+my $err = $!;
 $SIG{PIPE} = 'IGNORE';
 {
   local $SIG{ALRM}
     = sub { warn "syswrite to left didn't fail within 3 seconds" };
   alarm 3;
-  is (syswrite (LEFT, "void"), undef, "syswrite to shutdown left should fail");
+  # Split the system call from the is() - is() does IO so
+  # (say) a flush may do a seek which on a pipe may disturb errno
+  my $ans = syswrite (LEFT, "void");
+  $err = $!;
+  is ($ans, undef, "syswrite to shutdown left should fail");
   alarm 60;
 }
 {
-  # This may need skipping on some OSes
+  # This may need skipping on some OSes - restoring value saved above
+  # should help
+  $! = $err;
   ok (($!{EPIPE} or $!{ESHUTDOWN}), '$! should be EPIPE or ESHUTDOWN')
-    or printf "\$\!=%d(%s)\n", $!, $!;
+    or printf "\$\!=%d(%s)\n", $err, $err;
 }
 
 my @gripping = (chr 255, chr 127);
