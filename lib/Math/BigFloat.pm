@@ -74,6 +74,7 @@ sub fnorm; sub fsqrt;
 sub fnorm { #(string) return fnum_str
     local($_) = @_;
     s/\s+//g;                               # strip white space
+    local $^W = 0;	# $4 and $5 below might legitimately be undefined
     if (/^([+-]?)(\d*)(\.(\d*))?([Ee]([+-]?\d+))?$/ && "$2$4" ne '') {
 	&norm(($1 ? "$1$2$4" : "+$2$4"),(($4 ne '') ? $6-length($4) : $6));
     } else {
