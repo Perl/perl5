@@ -105,6 +105,120 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7093] By: jhi                                   on 2000/09/15  03:11:44
+        Log: Fix for the charnames.t failures from Spider Boardman.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  7092] By: jhi                                   on 2000/09/15  00:15:48
+        Log: Botched the #7090 check-in.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7091] By: jhi                                   on 2000/09/14  23:33:24
+        Log: Part of #7081 didn't come through.
+     Branch: perl
+	   ! embed.pl proto.h
+____________________________________________________________________________
+[  7090] By: jhi                                   on 2000/09/14  23:17:39
+        Log: Subject: Re: perl@7078 
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Thu, 14 Sep 2000 19:06:36 -0400
+             Message-Id: <200009142306.TAA20082@leggy.zk3.dec.com>
+     Branch: perl
+	   ! sv.c toke.c
+____________________________________________________________________________
+[  7089] By: jhi                                   on 2000/09/14  23:11:21
+        Log: Small portability tweaks.
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[  7088] By: jhi                                   on 2000/09/14  22:57:23
+        Log: Fake return to pacify picky compilers.
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[  7087] By: jhi                                   on 2000/09/14  22:53:37
+        Log: Subject: [PATCH] utf8.c apidoc
+             From: Simon Cozens <simon@cozens.net>
+             Date: Thu, 14 Sep 2000 23:46:57 +0100
+             Message-ID: <20000914234657.A13953@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! perlapi.c pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[  7086] By: jhi                                   on 2000/09/14  22:40:38
+        Log: We don't need to count the high bit bytes, a boolean is enough. 
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  7085] By: jhi                                   on 2000/09/14  21:20:09
+        Log: Replace #7084 with
+             
+             Subject: Re: perl@7078 
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Thu, 14 Sep 2000 17:09:36 -0400
+             Message-Id: <200009142109.RAA03425@leggy.zk3.dec.com>
+     Branch: perl
+	   ! sv.c utf8.c
+____________________________________________________________________________
+[  7084] By: jhi                                   on 2000/09/14  20:03:34
+        Log: UTF8-encoded version of 256 is 0xc4 0x80; test that a char is
+             convertable to bytes by checking it doesn't go above 0xc3
+             
+             Subject: Re: perl@7078
+             From: Simon Cozens <simon@cozens.net>
+             Date: Thu, 14 Sep 2000 20:59:19 +0100
+             Message-ID: <20000914205919.A11098@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7083] By: jhi                                   on 2000/09/14  19:38:47
+        Log: Subject: Re: perl@7078
+             From: Simon Cozens <simon@cozens.net>
+             Date: Thu, 14 Sep 2000 20:13:09 +0100
+             Message-ID: <20000914201309.A10640@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! t/op/bop.t
+____________________________________________________________________________
+[  7082] By: jhi                                   on 2000/09/14  17:50:44
+        Log: The one that got away.
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[  7081] By: jhi                                   on 2000/09/14  17:45:35
+        Log: Subject: [PATCH perl-5.7.0] continued -Wformat support
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Message-Id: <200009141707.SAA13276@tempest.npl.co.uk>
+             Date: Thu, 14 Sep 2000 18:07:38 +0100 (BST)
+     Branch: perl
+	   ! Porting/pumpkin.pod embed.pl ext/ByteLoader/bytecode.h
+	   ! ext/Devel/Peek/Peek.xs ext/DynaLoader/dl_dlopen.xs
+	   ! ext/Storable/Storable.xs malloc.c perl.c perl.h pp.c proto.h
+	   ! regcomp.c toke.c universal.c
+____________________________________________________________________________
+[  7080] By: jhi                                   on 2000/09/14  17:40:35
+        Log: Problems picked up by AIX cc.
+             
+             Subject: Re: perl@7078 (patch included)
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 14 Sep 2000 18:53:30 +0200
+             Message-Id: <20000914182304.7017.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[  7079] By: jhi                                   on 2000/09/14  17:38:27
+        Log: Subject: File::Find 5.7.0 POD nits
+             From: Rich Morin <rdm@cfcl.com>
+             Date: Wed, 13 Sep 2000 22:03:58 -0700
+             Message-Id: <v042208a0b5e60b3149be@w205.z205158144.scl-ca.dsl.cnc.net>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[  7078] By: jhi                                   on 2000/09/14  14:58:20
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7077] By: jhi                                   on 2000/09/14  14:55:54
         Log: Compilation warnings and an error.
      Branch: perl
