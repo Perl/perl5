@@ -82,15 +82,20 @@ SKIP: {
 	# finish the test.
 	# For others (darwin & freebsd), let the test fail without crashing.
 	my $todo = $^O eq 'netbsd' && $Config{osvers}=~/^1\.6/;
-	kill 'HUP', $$ if !$todo;
+	my $why_todo = "# TODO $^O $Config{osvers} seems to loose blocked signals";
+	if (!$todo) { 
+	  kill 'HUP', $$; 
+	} else {
+	  print "not ok 9 - sigaction SIGHUP ",$why_todo,"\n";
+	  print "not ok 10 - sig mask delayed SIGINT ",$why_todo,"\n";
+	}
 	sleep 1;
 
 	$todo = 1 if ($^O eq 'freebsd')
 		  || ($^O eq 'darwin' && $Config{osvers} lt '6.6');
-	printf "%s 11 -   masked SIGINT received %s\n",
+	printf "%s 11 - masked SIGINT received %s\n",
 	    $sigint_called ? "ok" : "not ok",
-	    $todo ? "# TODO $^O $Config{osvers} seems to loose blocked signals"
-	    : '';
+	    $todo ? $why_todo : '';
 
 	print "ok 12 - signal masks successful\n";
 	
