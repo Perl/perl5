@@ -197,43 +197,33 @@ ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
-ext/Encode/Byte/Byte.pm	Encode extension
-ext/Encode/Byte/Makefile.PL       Encode extension
-ext/Encode/CN/CN.pm		Encode extension
-ext/Encode/CN/Makefile.PL	Encode extension
-ext/Encode/Changes		Change Log
-ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
-ext/Encode/EBCDIC/Makefile.PL     Encode extension
-ext/Encode/Encode.pm	       Mother of all Encode extensions
-ext/Encode/Encode.xs		Encode extension
-ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_PM.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_T.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/encode.h		Encode extension header file
-ext/Encode/JP/JP.pm		Encode extension
-ext/Encode/JP/Makefile.PL	Encode extension
-ext/Encode/KR/KR.pm		Encode extension
-ext/Encode/KR/Makefile.PL		Encode extension
-ext/Encode/MANIFEST		Encode extension
-ext/Encode/Makefile.PL		Encode extension makefile writer
-ext/Encode/README		Encode extension
-ext/Encode/Symbol/Makefile.PL     Encode extension
-ext/Encode/Symbol/Symbol.pm       Encode extension
-ext/Encode/TW/Makefile.PL	Encode extension
-ext/Encode/TW/TW.pm		Encode extension
-ext/Encode/Unicode/Makefile.PL	Encode extension
-ext/Encode/Unicode/Unicode.pm	Encode extension
-ext/Encode/Unicode/Unicode.xs	Encode extension
 ext/Encode/bin/enc2xs	Encode module generator
 ext/Encode/bin/piconv	iconv by perl
 ext/Encode/bin/ucm2table	Table Generator for testing
 ext/Encode/bin/ucmlint	A UCM Lint utility
 ext/Encode/bin/unidump	Unicode Dump like hexdump(1)
+ext/Encode/Byte/Byte.pm	Encode extension
+ext/Encode/Byte/Makefile.PL       Encode extension
+ext/Encode/Changes		Change Log
+ext/Encode/CN/CN.pm		Encode extension
+ext/Encode/CN/Makefile.PL	Encode extension
+ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
+ext/Encode/EBCDIC/Makefile.PL     Encode extension
 ext/Encode/encengine.c		Encode extension
+ext/Encode/Encode.pm	       Mother of all Encode extensions
+ext/Encode/Encode.xs		Encode extension
+ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
+ext/Encode/Encode/encode.h		Encode extension header file
+ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
+ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/_PM.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/_T.e2x		Skeleton file for enc2xs
 ext/Encode/encoding.pm	Perl Pragmactic Module
+ext/Encode/JP/JP.pm		Encode extension
+ext/Encode/JP/Makefile.PL	Encode extension
+ext/Encode/KR/KR.pm		Encode extension
+ext/Encode/KR/Makefile.PL		Encode extension
 ext/Encode/lib/Encode/Alias.pm	        Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
@@ -245,15 +235,16 @@ ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
 ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
+ext/Encode/Makefile.PL		Encode extension makefile writer
+ext/Encode/MANIFEST		Encode extension
+ext/Encode/README		Encode extension
+ext/Encode/Symbol/Makefile.PL     Encode extension
+ext/Encode/Symbol/Symbol.pm       Encode extension
 ext/Encode/t/Aliases.t	Encode extension test
+ext/Encode/t/bogus.ucm	Sample data for ucmlint
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/Encoder.t	Encode::Encoder test
-ext/Encode/t/JP.t		Encode extension test
-ext/Encode/t/KR.t		Encode extension test
-ext/Encode/t/TW.t		Encode extension test
-ext/Encode/t/Unicode.t	Encode extension test
-ext/Encode/t/bogus.ucm	Sample data for ucmlint
 ext/Encode/t/encoding.t	encoding extension test
 ext/Encode/t/fallback.t	Encode extension test
 ext/Encode/t/gb2312.euc	test data
@@ -265,11 +256,17 @@ ext/Encode/t/jisx0208.euc	test data
 ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data
 ext/Encode/t/jisx0212.ref	test data
+ext/Encode/t/JP.t		Encode extension test
 ext/Encode/t/jperl.t	encoding extension test
+ext/Encode/t/KR.t		Encode extension test
 ext/Encode/t/ksc5601.euc	test data
 ext/Encode/t/ksc5601.ref	test data
 ext/Encode/t/perlio.t
+ext/Encode/t/TW.t		Encode extension test
 ext/Encode/t/unibench.pl	Unicode benchmark
+ext/Encode/t/Unicode.t	Encode extension test
+ext/Encode/TW/Makefile.PL	Encode extension
+ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/ucm/8859-1.ucm	Unicode Character Map
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
 ext/Encode/ucm/8859-11.ucm	Unicode Character Map
@@ -358,9 +355,9 @@ ext/Encode/ucm/macHebrew.ucm	Unicode Character Map
 ext/Encode/ucm/macIceland.ucm	Unicode Character Map
 ext/Encode/ucm/macJapanese.ucm	Unicode Character Map
 ext/Encode/ucm/macKorean.ucm	Unicode Character Map
+ext/Encode/ucm/macRoman.ucm	Unicode Character Map
 ext/Encode/ucm/macROMnn.ucm	Unicode Character Map
 ext/Encode/ucm/macRUMnn.ucm	Unicode Character Map
-ext/Encode/ucm/macRoman.ucm	Unicode Character Map
 ext/Encode/ucm/macSami.ucm	Unicode Character Map
 ext/Encode/ucm/macSymbol.ucm	Unicode Character Map
 ext/Encode/ucm/macThai.ucm	Unicode Character Map
@@ -371,6 +368,9 @@ ext/Encode/ucm/posix-bc.ucm	Unicode Character Map
 ext/Encode/ucm/shiftjis.ucm	Unicode Character Map
 ext/Encode/ucm/symbol.ucm	Unicode Character Map
 ext/Encode/ucm/viscii.ucm	Unicode Character Map
+ext/Encode/Unicode/Makefile.PL	Encode extension
+ext/Encode/Unicode/Unicode.pm	Encode extension
+ext/Encode/Unicode/Unicode.xs	Encode extension
 ext/Errno/ChangeLog	See if Errno works
 ext/Errno/Errno.t	See if Errno works
 ext/Errno/Errno_pm.PL	Errno perl module create script
@@ -511,10 +511,10 @@ ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/ops.t		See if Opcode works
 ext/Opcode/Safe.pm		Safe extension Perl module
-ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
-ext/PerlIO/encoding/Makefile.PL	PerlIO::encoding makefile writer
 ext/PerlIO/encoding/encoding.pm	PerlIO::encoding
 ext/PerlIO/encoding/encoding.xs	PerlIO::encoding
+ext/PerlIO/encoding/Makefile.PL	PerlIO::encoding makefile writer
+ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
 ext/PerlIO/PerlIO.t		See if PerlIO works
 ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
@@ -646,21 +646,21 @@ ext/threads/Changes		ithreads
 ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
 ext/threads/shared/Makefile.PL  thread shared variables
+ext/threads/shared/queue.pm	Threadsafe queue.
 ext/threads/shared/README       thread shared variables
 ext/threads/shared/shared.pm    thread shared variables
 ext/threads/shared/shared.xs    thread shared variables
 ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
-ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
 ext/threads/shared/t/av_refs.t	Tests for arrays containing references
+ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
+ext/threads/shared/t/queue.t	thread shared variables
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
-ext/threads/shared/t/queue.t	thread shared variables
 ext/threads/shared/typemap	thread::shared types
-ext/threads/shared/queue.pm	Threadsafe queue.
 ext/threads/t/basic.t		ithreads
 ext/threads/t/end.t		Test end functions
 ext/threads/t/join.t		Testing the join function
@@ -1921,6 +1921,7 @@ myconfig.SH			Prints summary of the current configuration
 NetWare/bat/BldNWExt-Exist.bat	NetWare port
 NetWare/bat/BldNWExt.bat	NetWare port
 NetWare/bat/Buildtype.bat	NetWare port
+NetWare/bat/CWbuild.bat		NetWare port
 NetWare/bat/MPKBuild.bat	NetWare port
 NetWare/bat/Setmpksdk.bat	NetWare port
 NetWare/bat/Setnlmsdk.bat	NetWare port
@@ -1940,10 +1941,12 @@ NetWare/deb.h			NetWare port
 NetWare/dl_netware.xs		NetWare port
 NetWare/intdef.h		NetWare port
 NetWare/interface.c		NetWare port
+NetWare/interface.cpp		NetWare port
 NetWare/interface.h		NetWare port
 NetWare/iperlhost.h		NetWare port
 NetWare/Main.c			NetWare port
 NetWare/Makefile		NetWare port
+NetWare/MP.imp			NetWare port
 NetWare/netware.h		NetWare port
 NetWare/nw5.c			NetWare port
 NetWare/nw5iop.h		NetWare port
@@ -1951,7 +1954,10 @@ NetWare/nw5sck.c		NetWare port
 NetWare/nw5sck.h		NetWare port
 NetWare/nw5thread.c		NetWare port
 NetWare/nw5thread.h		NetWare port
+NetWare/nwhashcls.cpp		NetWare port
+NetWare/nwhashcls.h		NetWare port
 NetWare/Nwmain.c		NetWare port
+NetWare/nwperlhost.h		NetWare port
 NetWare/nwperlsys.c		NetWare port
 NetWare/nwperlsys.h		NetWare port
 NetWare/Nwpipe.c		NetWare port
@@ -1963,6 +1969,9 @@ NetWare/NWTInfo.c		NetWare port
 NetWare/nwtinfo.h		NetWare port
 NetWare/NWUtil.c		NetWare port
 NetWare/nwutil.h		NetWare port
+NetWare/nwvmem.h		NetWare port
+NetWare/perllib.cpp		NetWare port
+NetWare/splittree.pl		NetWare port
 NetWare/t/NWModify.pl		NetWare port
 NetWare/t/NWScripts.pl		NetWare port
 NetWare/t/Readme.txt		NetWare port
@@ -2207,15 +2216,14 @@ README.beos		Notes about BeOS port
 README.bs2000		Notes about BS2000 POSIX port
 README.ce		Notes about WinCE port
 README.cn		About using Perl and Simplified Chinese
-README.jp		About using Perl and Japanese
-README.ko		About using Perl and Korean
-README.tw		About using Perl and Traditional Chinese
 README.cygwin		Notes about Cygwin port
 README.dgux		Notes about DG/UX port
 README.dos		Notes about DOS/DJGPP port
 README.epoc		Notes about EPOC port
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
+README.jp		About using Perl and Japanese
+README.ko		About using Perl and Korean
 README.machten		Notes about Power MachTen port
 README.macos		Notes about Mac OS (Classic)
 README.micro		Notes about microperl
@@ -2229,6 +2237,7 @@ README.qnx		Notes about QNX port
 README.solaris		Notes about Solaris port
 README.threads		Notes about multithreading
 README.tru64		Notes about Tru64
+README.tw		About using Perl and Traditional Chinese
 README.uts		Notes about UTS
 README.vmesa		Notes about VM/ESA port
 README.vms		Notes about installing the VMS port
