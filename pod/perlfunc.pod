@@ -546,7 +546,9 @@ number of characters removed from all its arguments.  It's often used to
 remove the newline from the end of an input record when you're worried
 that the final record may be missing its newline.  When in paragraph
 mode (C<$/ = "">), it removes all trailing newlines from the string.
-If VARIABLE is omitted, it chomps C<$_>.  Example:
+When in slurp mode (C<$/ = undef>) or fixed-length record mode (C<$/> is
+a reference to an integer or the like, see L<perlvar>) chomp() won't
+remove anything.  If VARIABLE is omitted, it chomps C<$_>.  Example:
 
     while (<>) {
 	chomp;	# avoid \n on last field
