@@ -1892,40 +1892,40 @@ $T="ok 660\n";if ($x =~ /(a([abcdefg]+)(?{$y=$^N})de)(?{$z=$^N})/ and $y eq "bc"
 
 # Test the Unicode script classes
 
-print "not " unless chr(0x100) =~ /\p{InLatin}/; # outside Latin-1
+print "not " unless chr(0x100) =~ /\p{IsLatin}/; # outside Latin-1
 print "ok 661\n";
 
-print "not " unless chr(0x212b) =~ /\p{InLatin}/; # Angstrom sign, very outside
+print "not " unless chr(0x212b) =~ /\p{IsLatin}/; # Angstrom sign, very outside
 print "ok 662\n";
 
-print "not " unless chr(0x5d0) =~ /\p{InHebrew}/; # inside HebrewBlock
+print "not " unless chr(0x5d0) =~ /\p{IsHebrew}/; # inside InHebrew
 print "ok 663\n";
 
-print "not " unless chr(0xfb4f) =~ /\p{InHebrew}/; # outside HebrewBlock
+print "not " unless chr(0xfb4f) =~ /\p{IsHebrew}/; # outside InHebrew
 print "ok 664\n";
 
-print "not " unless chr(0xb5) =~ /\p{InGreek}/; # singleton (not in a range)
+print "not " unless chr(0xb5) =~ /\p{IsGreek}/; # singleton (not in a range)
 print "ok 665\n";
 
-print "not " unless chr(0x37a) =~ /\p{InGreek}/; # singleton
+print "not " unless chr(0x37a) =~ /\p{IsGreek}/; # singleton
 print "ok 666\n";
 
-print "not " unless chr(0x386) =~ /\p{InGreek}/; # singleton
+print "not " unless chr(0x386) =~ /\p{IsGreek}/; # singleton
 print "ok 667\n";
 
-print "not " unless chr(0x387) =~ /\P{InGreek}/; # not there
+print "not " unless chr(0x387) =~ /\P{IsGreek}/; # not there
 print "ok 668\n";
 
-print "not " unless chr(0x388) =~ /\p{InGreek}/; # range
+print "not " unless chr(0x388) =~ /\p{IsGreek}/; # range
 print "ok 669\n";
 
-print "not " unless chr(0x38a) =~ /\p{InGreek}/; # range
+print "not " unless chr(0x38a) =~ /\p{IsGreek}/; # range
 print "ok 670\n";
 
-print "not " unless chr(0x38b) =~ /\P{InGreek}/; # not there
+print "not " unless chr(0x38b) =~ /\P{IsGreek}/; # not there
 print "ok 671\n";
 
-print "not " unless chr(0x38c) =~ /\p{InGreek}/; # singleton
+print "not " unless chr(0x38c) =~ /\p{IsGreek}/; # singleton
 print "ok 672\n";
 
 ##
@@ -2232,18 +2232,15 @@ print "# some Unicode properties\n";
 }
 
 {
-    print "not " unless "a" =~ /\p{LowercaseLetter}/;
+    print "not " unless "a" =~ /\p{Lowercase}/;
     print "ok 745\n";
 
-    print "not " if     "A" =~ /\p{
-					Lowercase
-				        Letter
-				  }/x;
+    print "not " if     "A" =~ /\p{Lowercase}/;
     print "ok 746\n";
 }
 
 {
-    print "not " unless "\x{AC00}" =~ /\p{HangulSyllable}/;
+    print "not " unless "\x{AC00}" =~ /\p{HangulSyllables}/;
     print "ok 747\n";
 }
 
