@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.21 $, $Date: 1997/04/23 18:05:19 $)
+perlfaq5 - Files and Formats ($Revision: 1.22 $, $Date: 1997/04/24 22:44:02 $)
 
 =head1 DESCRIPTION
 
@@ -451,8 +451,7 @@ over NFS, so this won't work (at least, not every time) over the net.
 Various schemes involving involving link() have been suggested, but
 these tend to involve busy-wait, which is also subdesirable.
 
-=head2 I still don't get locking.  I just want to increment the number
-in the file.  How can I do this?
+=head2 I still don't get locking.  I just want to increment the number in the file.  How can I do this?
 
 Didn't anyone ever tell you web-page hit counters were useless?
 

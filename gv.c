@@ -275,8 +275,8 @@ I32 autoload;
 	    --nsplit;
 	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
-	    SV *tmpstr = sv_2mortal(newSVpv(HvNAME(curcop->cop_stash), 0));
-	    sv_catpvn(tmpstr, "::SUPER", 7);
+	    SV *tmpstr = sv_2mortal(newSVpvf("%s::SUPER",
+					     HvNAME(curcop->cop_stash)));
 	    stash = gv_stashpvn(SvPVX(tmpstr), SvCUR(tmpstr), TRUE);
 	    DEBUG_o( deb("Treating %s as %s::%s\n",
 			 origname, HvNAME(stash), name) );
@@ -1179,13 +1179,11 @@ int flags;
 	 case copy_amg:
 	   {
 	     SV* ref=SvRV(left);
-	     if (!SvROK(ref) && SvTYPE(ref) <= SVt_PVMG) { /* Just to be
-						      * extra
-						      * causious,
-						      * maybe in some
-						      * additional
-						      * cases sv_setsv
-						      * is safe too */
+	     if (!SvROK(ref) && SvTYPE(ref) <= SVt_PVMG) {
+		/*
+		 * Just to be extra cautious.  Maybe in some
+		 * additional cases sv_setsv is safe, too.
+		 */
 		SV* newref = newSVsv(ref);
 		SvOBJECT_on(newref);
 		SvSTASH(newref) = (HV*)SvREFCNT_inc(SvSTASH(ref));
@@ -1242,7 +1240,7 @@ int flags;
 	       && !(flags & AMGf_unary)) {
 				/* We look for substitution for
 				 * comparison operations and
-				 * concatendation */
+				 * concatenation */
       if (method==concat_amg || method==concat_ass_amg
 	  || method==repeat_amg || method==repeat_ass_amg) {
 	return NULL;		/* Delegate operation to string conversion */
@@ -1298,7 +1296,7 @@ int flags;
 	if (amtp && amtp->fallback >= AMGfallYES) {
 	  DEBUG_o( deb("%s", SvPVX(msg)) );
 	} else {
-	  croak("%S", msg);
+	  croak("%_", msg);
 	}
 	return NULL;
       }

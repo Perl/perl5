@@ -117,7 +117,6 @@
 #define convert			Perl_convert
 #define cop_seqmax		Perl_cop_seqmax
 #define cos_amg			Perl_cos_amg
-#define cpytill			Perl_cpytill
 #define croak			Perl_croak
 #define cryptseen		Perl_cryptseen
 #define cshlen			Perl_cshlen
@@ -138,6 +137,7 @@
 #define debstack		Perl_debstack
 #define debstackptrs		Perl_debstackptrs
 #define dec_amg			Perl_dec_amg
+#define delimcpy		Perl_delimcpy
 #define deprecate		Perl_deprecate
 #define di			Perl_di
 #define die			Perl_die
@@ -383,6 +383,7 @@
 #define my_htonl		Perl_my_htonl
 #define my_lstat		Perl_my_lstat
 #define my_memcmp		Perl_my_memcmp
+#define my_memset		Perl_my_memset
 #define my_ntohl		Perl_my_ntohl
 #define my_pclose		Perl_my_pclose
 #define my_popen		Perl_my_popen

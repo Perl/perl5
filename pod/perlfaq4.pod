@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.18 $, $Date: 1997/04/23 18:04:37 $)
+perlfaq4 - Data Manipulation ($Revision: 1.19 $, $Date: 1997/04/24 22:43:57 $)
 
 =head1 DESCRIPTION
 
@@ -1019,8 +1019,7 @@ Normally, merely accessing a key's value for a nonexistent key does
 I<not> cause that key to be forever there.  This is different than
 awk's behavior.
 
-=head2 How can I make the Perl equivalent of a C structure/C++ class/hash
-or array of hashes or arrays?
+=head2 How can I make the Perl equivalent of a C structure/C++ class/hash or array of hashes or arrays?
 
 Use references (documented in L<perlref>).  Examples of complex data
 structures are given in L<perldsc> and L<perllol>.  Examples of

@@ -304,15 +304,8 @@
 	extern char *memset _((char*, int, int));
 #    endif
 #  endif
-#  define memzero(d,l) memset(d,0,l)
 #else
-#   ifndef memzero
-#	ifdef HAS_BZERO
-#	    define memzero(d,l) bzero(d,l)
-#	else
-#	    define memzero(d,l) my_bzero(d,l)
-#	endif
-#   endif
+#  define memset(d,c,l) my_memset(d,c,l)
 #endif /* HAS_MEMSET */
 
 #if !defined(HAS_MEMMOVE) && !defined(memmove)
@@ -345,6 +338,18 @@
 #	define memcmp 	my_memcmp
 #   endif
 #endif /* HAS_MEMCMP && HAS_SANE_MEMCMP */
+
+#ifndef memzero
+#   ifdef HAS_BZERO
+#	define memzero(d,l) bzero(d,l)
+#   else
+#	ifdef HAS_MEMSET
+#	    define memzero(d,l) memset(d,0,l)
+#	else
+#	    define memzero(d,l) my_bzero(d,l)
+#	endif
+#   endif
+#endif
 
 #ifndef HAS_BCMP
 #   ifndef bcmp

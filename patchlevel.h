@@ -38,7 +38,7 @@
  */
 static	char	*local_patches[] = {
 	NULL
-	,"Dev97A-H - Eight development patches to 5.003_97"
+	,"Dev97A-I - Nine development patches to 5.003_97"
 	,NULL
 };
 

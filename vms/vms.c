@@ -578,7 +578,7 @@ safe_popen(char *cmd, char *mode)
       return Nullfp;
     }
 
-    New(7001,info,1,struct pipe_details);
+    New(1301,info,1,struct pipe_details);
 
     /* create mailbox */
     create_mbx(&chan,&namdsc);
@@ -792,7 +792,7 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
     return NULL;
   }
   if (!outbuf) {
-    if (ts) out = New(7019,outbuf,NAM$C_MAXRSS+1,char);
+    if (ts) out = New(1319,outbuf,NAM$C_MAXRSS+1,char);
     else    outbuf = __rmsexpand_retbuf;
   }
   if ((isunix = (strchr(filespec,'/') != NULL))) {
@@ -1033,7 +1033,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       }
       retlen = dirlen + (addmfd ? 13 : 6);
       if (buf) retspec = buf;
-      else if (ts) New(7009,retspec,retlen+1,char);
+      else if (ts) New(1309,retspec,retlen+1,char);
       else retspec = __fileify_retbuf;
       if (addmfd) {
         dirlen = lastdir - dir;
@@ -1114,7 +1114,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       if (dirnam.nam$l_fnb & NAM$M_EXP_NAME) {
         /* They provided at least the name; we added the type, if necessary, */
         if (buf) retspec = buf;                            /* in sys$parse() */
-        else if (ts) New(7011,retspec,dirnam.nam$b_esl+1,char);
+        else if (ts) New(1311,retspec,dirnam.nam$b_esl+1,char);
         else retspec = __fileify_retbuf;
         strcpy(retspec,esa);
         return retspec;
@@ -1133,7 +1133,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         /* There's more than one directory in the path.  Just roll back. */
         *cp1 = term;
         if (buf) retspec = buf;
-        else if (ts) New(7011,retspec,retlen+7,char);
+        else if (ts) New(1311,retspec,retlen+7,char);
         else retspec = __fileify_retbuf;
         strcpy(retspec,esa);
       }
@@ -1148,7 +1148,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           }
           retlen = dirnam.nam$b_esl - 9; /* esa - '][' - '].DIR;1' */
           if (buf) retspec = buf;
-          else if (ts) New(7012,retspec,retlen+16,char);
+          else if (ts) New(1312,retspec,retlen+16,char);
           else retspec = __fileify_retbuf;
           cp1 = strstr(esa,"][");
           dirlen = cp1 - esa;
@@ -1176,7 +1176,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         }
         else {  /* This is a top-level dir.  Add the MFD to the path. */
           if (buf) retspec = buf;
-          else if (ts) New(7012,retspec,retlen+16,char);
+          else if (ts) New(1312,retspec,retlen+16,char);
           else retspec = __fileify_retbuf;
           cp1 = esa;
           cp2 = retspec;
@@ -1223,7 +1223,7 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
       /* Trap simple rooted lnms, and return lnm:[000000] */
       if (!strcmp(trndir+trnlen-2,".]")) {
         if (buf) retpath = buf;
-        else if (ts) New(7018,retpath,strlen(dir)+10,char);
+        else if (ts) New(1318,retpath,strlen(dir)+10,char);
         else retpath = __pathify_retbuf;
         strcpy(retpath,dir);
         strcat(retpath,":[000000]");
@@ -1263,7 +1263,7 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
         }
       }
       if (buf) retpath = buf;
-      else if (ts) New(7013,retpath,retlen+1,char);
+      else if (ts) New(1313,retpath,retlen+1,char);
       else retpath = __pathify_retbuf;
       strncpy(retpath,dir,retlen-1);
       if (retpath[retlen-2] != '/') { /* If the path doesn't already end */
@@ -1308,7 +1308,7 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
           dir[dirfab.fab$b_fns-1] == '>' ||
           dir[dirfab.fab$b_fns-1] == ':') { /* It's already a VMS 'path' */
         if (buf) retpath = buf;
-        else if (ts) New(7014,retpath,strlen(dir)+1,char);
+        else if (ts) New(1314,retpath,strlen(dir)+1,char);
         else retpath = __pathify_retbuf;
         strcpy(retpath,dir);
         return retpath;
@@ -1365,7 +1365,7 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
       *(dirnam.nam$l_type + 1) = '\0';
       retlen = dirnam.nam$l_type - esa + 2;
       if (buf) retpath = buf;
-      else if (ts) New(7014,retpath,retlen,char);
+      else if (ts) New(1314,retpath,retlen,char);
       else retpath = __pathify_retbuf;
       strcpy(retpath,esa);
       /* $PARSE may have upcased filespec, so convert output to lower
@@ -1403,7 +1403,7 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
           { expand++; cp1 +=2; } /* VMS '...' ==> Unix '/.../' */
       }
     }
-    New(7015,rslt,retlen+2+2*expand,char);
+    New(1315,rslt,retlen+2+2*expand,char);
   }
   else rslt = __tounixspec_retbuf;
   if (strchr(spec,'/') != NULL) {
@@ -1519,7 +1519,7 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
 
   if (path == NULL) return NULL;
   if (buf) rslt = buf;
-  else if (ts) New(7016,rslt,strlen(path)+9,char);
+  else if (ts) New(1316,rslt,strlen(path)+9,char);
   else rslt = __tovmsspec_retbuf;
   if (strpbrk(path,"]:>") ||
       (dirend = strrchr(path,'/')) == NULL) {
@@ -1661,7 +1661,7 @@ static char *do_tovmspath(char *path, char *buf, int ts) {
   if (buf) return buf;
   else if (ts) {
     vmslen = strlen(vmsified);
-    New(7017,cp,vmslen+1,char);
+    New(1317,cp,vmslen+1,char);
     memcpy(cp,vmsified,vmslen);
     cp[vmslen] = '\0';
     return cp;
@@ -1690,7 +1690,7 @@ static char *do_tounixpath(char *path, char *buf, int ts) {
   if (buf) return buf;
   else if (ts) {
     unixlen = strlen(unixified);
-    New(7017,cp,unixlen+1,char);
+    New(1317,cp,unixlen+1,char);
     memcpy(cp,unixified,unixlen);
     cp[unixlen] = '\0';
     return cp;
@@ -1908,7 +1908,7 @@ getredirection(int *ac, char ***av)
      * Allocate and fill in the new argument vector, Some Unix's terminate
      * the list with an extra null pointer.
      */
-    New(7002, argv, item_count+1, char *);
+    New(1302, argv, item_count+1, char *);
     *av = argv;
     for (j = 0; j < item_count; ++j, list_head = list_head->next)
 	argv[j] = list_head->value;
@@ -1995,11 +1995,11 @@ static void add_item(struct list_item **head,
 {
     if (*head == 0)
 	{
-	New(7003,*head,1,struct list_item);
+	New(1303,*head,1,struct list_item);
 	*tail = *head;
 	}
     else {
-	New(7004,(*tail)->next,1,struct list_item);
+	New(1304,(*tail)->next,1,struct list_item);
 	*tail = (*tail)->next;
 	}
     (*tail)->value = value;
@@ -2053,7 +2053,7 @@ unsigned long int zero = 0, sts;
 	char *string;
 	char *c;
 
-	New(7005,string,resultspec.dsc$w_length+1,char);
+	New(1305,string,resultspec.dsc$w_length+1,char);
 	strncpy(string, resultspec.dsc$a_pointer, resultspec.dsc$w_length);
 	string[resultspec.dsc$w_length] = '\0';
 	if (NULL == had_version)
@@ -2403,12 +2403,12 @@ opendir(char *name)
     char dir[NAM$C_MAXRSS+1];
       
     /* Get memory for the handle, and the pattern. */
-    New(7006,dd,1,DIR);
+    New(1306,dd,1,DIR);
     if (do_tovmspath(name,dir,0) == NULL) {
       Safefree((char *)dd);
       return(NULL);
     }
-    New(7007,dd->pattern,strlen(dir)+sizeof "*.*" + 1,char);
+    New(1307,dd->pattern,strlen(dir)+sizeof "*.*" + 1,char);
 
     /* Fill in the fields; mainly playing with the descriptor. */
     (void)sprintf(dd->pattern, "%s*.*",dir);
@@ -2467,7 +2467,7 @@ collectversions(dd)
 
     /* Add the version wildcard, ignoring the "*.*" put on before */
     i = strlen(dd->pattern);
-    New(7008,text,i + e->d_namlen + 3,char);
+    New(1308,text,i + e->d_namlen + 3,char);
     (void)strcpy(text, dd->pattern);
     (void)sprintf(&text[i - 3], "%s;*", e->d_name);
 

@@ -27,7 +27,7 @@
 
 static OP *docatch _((OP *o));
 static OP *doeval _((int gimme));
-static OP *dofindlabel _((OP *op, char *label, OP **opstack));
+static OP *dofindlabel _((OP *op, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
 static I32 dopoptoeval _((I32 startingblock));
 static I32 dopoptolabel _((char *label));
@@ -1545,19 +1545,27 @@ PP(pp_redo)
 static OP* lastgotoprobe;
 
 static OP *
-dofindlabel(op,label,opstack)
+dofindlabel(op,label,opstack,oplimit)
 OP *op;
 char *label;
 OP **opstack;
+OP **oplimit;
 {
     OP *kid;
     OP **ops = opstack;
+    static char too_deep[] = "Target of goto is too deeply nested";
 
+    if (ops >= oplimit)
+	croak(too_deep);
     if (op->op_type == OP_LEAVE ||
 	op->op_type == OP_SCOPE ||
 	op->op_type == OP_LEAVELOOP ||
 	op->op_type == OP_LEAVETRY)
-	    *ops++ = cUNOP->op_first;
+    {
+	*ops++ = cUNOP->op_first;
+	if (ops >= oplimit)
+	    croak(too_deep);
+    }
     *ops = 0;
     if (op->op_flags & OPf_KIDS) {
 	/* First try all the kids at this level, since that's likeliest. */
@@ -1569,15 +1577,12 @@ OP **opstack;
 	for (kid = cUNOP->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == lastgotoprobe)
 		continue;
-	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
-		if (ops > opstack &&
-		  (ops[-1]->op_type == OP_NEXTSTATE ||
-		   ops[-1]->op_type == OP_DBSTATE))
-		    *ops = kid;
-		else
-		    *ops++ = kid;
-	    }
-	    if (op = dofindlabel(kid,label,ops))
+	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
+		(ops == opstack ||
+		 (ops[-1]->op_type != OP_NEXTSTATE &&
+		  ops[-1]->op_type != OP_DBSTATE)))
+		*ops++ = kid;
+	    if (op = dofindlabel(kid, label, ops, oplimit))
 		return op;
 	}
     }
@@ -1597,7 +1602,8 @@ PP(pp_goto)
     OP *retop = 0;
     I32 ix;
     register CONTEXT *cx;
-    OP *enterops[64];
+#define GOTO_DEPTH 64
+    OP *enterops[GOTO_DEPTH];
     char *label;
     int do_dump = (op->op_type == OP_DUMP);
 
@@ -1813,7 +1819,8 @@ PP(pp_goto)
 		gotoprobe = main_root;
 		break;
 	    }
-	    retop = dofindlabel(gotoprobe, label, enterops);
+	    retop = dofindlabel(gotoprobe, label,
+				enterops, enterops + GOTO_DEPTH);
 	    if (retop)
 		break;
 	    lastgotoprobe = gotoprobe;
@@ -2211,7 +2218,7 @@ PP(pp_require)
 		sv_catpv(msg, " (change .h to .ph maybe?)");
 	    if (instr(SvPVX(msg), ".ph "))
 		sv_catpv(msg, " (did you run h2ph?)");
-	    DIE("%S", msg);
+	    DIE("%_", msg);
 	}
 
 	RETPUSHUNDEF;
@@ -2258,7 +2265,8 @@ PP(pp_entereval)
     register CONTEXT *cx;
     dPOPss;
     I32 gimme = GIMME_V, was = sub_generation;
-    char tmpbuf[sizeof(unsigned long) * 3 + 12], *safestr;
+    char tmpbuf[TYPE_DIGITS(long) + 12];
+    char *safestr;
     STRLEN len;
     OP *ret;
 

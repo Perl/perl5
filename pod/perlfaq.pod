@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 1997/04/23 18:11:06 $)
+perlfaq - frequently asked questions about Perl ($Date: 1997/04/24 22:46:06 $)
 
 =head1 DESCRIPTION
 
@@ -123,6 +123,11 @@ in respect of this information or its use.
 =head1 Changes
 
 =over 4
+
+=item 24/April/97
+
+Style and whitespace changes from Chip, new question on reading one
+character at a time from a terminal using POSIX from Tom.
 
 =item 23/April/97
 

@@ -121,12 +121,9 @@ __declspec(thread) struct servent myservent;
 void *
 GetAddress(HINSTANCE hInstance, char *lpFunctionName)
 {
-    char buffer[512];
     FARPROC proc = GetProcAddress(hInstance, lpFunctionName);
-    if(proc == 0) {
-	sprintf(buffer, "Unable to get address of %s in WSock32.dll", lpFunctionName);
-	CROAK(buffer);
-    }
+    if(proc == 0)
+	CROAK("Unable to get address of %s in WSock32.dll", lpFunctionName);
     return proc;
 }
 
@@ -240,7 +237,7 @@ myfdopen(int fd, char *mode)
     /*
      * If we get here, then fd is actually a socket.
      */
-    Newz(1601, fp, 1, FILE);
+    Newz(1310, fp, 1, FILE);
     if(fp == NULL) {
 	errno = ENOMEM;
 	return NULL;

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.11 $, $Date: 1997/03/19 17:23:09 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.12 $, $Date: 1997/04/24 22:43:34 $)
 
 =head1 DESCRIPTION
 
@@ -190,11 +190,12 @@ In "standard terminology" a I<program> has been compiled to physical
 machine code once, and can then be be run multiple times, whereas a
 I<script> must be translated by a program each time it's used.  Perl
 programs, however, are usually neither strictly compiled nor strictly
-interpreted.  They can be compiled to a byte code form (something of a Perl
-virtual machine) or to completely different languages, like C or assembly
-language.  You can't tell just by looking whether the source is destined
-for a pure interpreter, a parse-tree interpreter, a byte code interpreter,
-or a native-code compiler, so it's hard to give a definitive answer here.
+interpreted.  They can be compiled to a byte code form (something of a
+Perl virtual machine) or to completely different languages, like C or
+assembly language.  You can't tell just by looking whether the source
+is destined for a pure interpreter, a parse-tree interpreter, a byte
+code interpreter, or a native-code compiler, so it's hard to give a
+definitive answer here.
 
 =head2 What is a JAPH?
 

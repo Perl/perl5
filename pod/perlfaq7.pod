@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - Perl Language Issues ($Revision: 1.16 $, $Date: 1997/03/19 17:25:23 $)
+perlfaq7 - Perl Language Issues ($Revision: 1.18 $, $Date: 1997/04/24 22:44:14 $)
 
 =head1 DESCRIPTION
 
@@ -169,7 +169,7 @@ own module.  Make sure to change the names appropriately.
 
 	# if using RCS/CVS, this next line may be preferred,
 	# but beware two-digit versions.
-	$VERSION = do{my@r=q$Revision: 1.16 $=~/\d+/g;sprintf '%d.'.'%02d'x$#r,@r};
+	$VERSION = do{my@r=q$Revision: 1.18 $=~/\d+/g;sprintf '%d.'.'%02d'x$#r,@r};
 
 	@ISA         = qw(Exporter);
 	@EXPORT      = qw(&func1 &func2 &func3);
@@ -708,6 +708,8 @@ Use embedded POD to discard it:
     by everyone
 
     =end comment text
+
+    =cut
 
 =head1 AUTHOR AND COPYRIGHT
 

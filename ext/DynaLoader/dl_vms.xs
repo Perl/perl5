@@ -249,7 +249,7 @@ dl_load_file(filespec, flags)
     specdsc.dsc$w_length = strlen(specdsc.dsc$a_pointer);
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "\tVMS-ified filespec is %s\n",
                       specdsc.dsc$a_pointer));
-    New(7901,dlptr,1,struct libref);
+    New(1399,dlptr,1,struct libref);
     dlptr->name.dsc$b_dtype = dlptr->defspec.dsc$b_dtype = DSC$K_DTYPE_T;
     dlptr->name.dsc$b_class = dlptr->defspec.dsc$b_class = DSC$K_CLASS_S;
     sts = sys$filescan(&specdsc,namlst,0);

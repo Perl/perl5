@@ -531,18 +531,18 @@ MAGIC *mg;
 	break;
     case '(':
 	sv_setiv(sv, (IV)gid);
-	sv_setpvf(sv, "%vd", (IV)gid);
+	sv_setpvf(sv, "%Vd", (IV)gid);
 	goto add_groups;
     case ')':
 	sv_setiv(sv, (IV)egid);
-	sv_setpvf(sv, "%vd", (IV)egid);
+	sv_setpvf(sv, "%Vd", (IV)egid);
       add_groups:
 #ifdef HAS_GETGROUPS
 	{
 	    Groups_t gary[NGROUPS];
 	    i = getgroups(NGROUPS,gary);
 	    while (--i >= 0)
-		sv_catpvf(sv, " %vd", (IV)gary[i]);
+		sv_catpvf(sv, " %Vd", (IV)gary[i]);
 	}
 #endif
 	SvIOK_on(sv);	/* what a wonderful hack! */
@@ -627,9 +627,11 @@ MAGIC* mg;
 
 	    while (s < strend) {
 		struct stat st;
-		s = cpytill(tokenbuf, s, strend, ':', &i);
+		s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf,
+			     s, strend, ':', &i);
 		s++;
-		if (*tokenbuf != '/'
+		if (i >= sizeof tokenbuf   /* too long -- assume the worst */
+		      || *tokenbuf != '/'
 		      || (Stat(tokenbuf, &st) == 0 && (st.st_mode & 2)) ) {
 		    MgTAINTEDDIR_on(mg);
 		    return 0;

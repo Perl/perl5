@@ -38,8 +38,8 @@ expression enhancements, Innumerable Unbundled Modules, Compilability
 
 =item NOTES
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 1997/04/23
-18:11:06 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 1997/04/24
+22:46:06 $)
 
 =item DESCRIPTION
 
@@ -76,11 +76,11 @@ authors
 
 =item Changes
 
-23/April/97, 25/March/97, 18/March/97, 17/March/97 Version, Initial
-Release: 11/March/97
+24/April/97, 23/April/97, 25/March/97, 18/March/97, 17/March/97 Version,
+Initial Release: 11/March/97
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.11 $, $Date:
-1997/03/19 17:23:09 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.12 $, $Date:
+1997/04/24 22:43:34 $)
 
 =item DESCRIPTION
 
@@ -176,8 +176,8 @@ MacPerl, Perl5-Porters, NTPerl, Perl-Packrats
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.21 $, $Date: 1997/04/23
-18:04:23 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.22 $, $Date: 1997/04/24
+22:43:42 $)
 
 =item DESCRIPTION
 
@@ -251,8 +251,8 @@ mean?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.18 $, $Date: 1997/04/23
-18:04:37 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.19 $, $Date: 1997/04/24
+22:43:57 $)
 
 =item DESCRIPTION
 
@@ -418,8 +418,8 @@ it?
 =item Why does passing a subroutine an undefined element in a hash create
 it?
 
-=item How can I make the Perl equivalent of a C structure/C++ class/hash
-or array of hashes or arrays?
+=item How can I make the Perl equivalent of a C structure/C++ class/hash or
+array of hashes or arrays?
 
 =item How can I use a reference as a hash key?
 
@@ -445,8 +445,8 @@ or array of hashes or arrays?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.21 $, $Date: 1997/04/23
-18:05:19 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.22 $, $Date: 1997/04/24
+22:44:02 $)
 
 =item DESCRIPTION
 
@@ -488,8 +488,8 @@ filehandles between subroutines?  How do I make an array of filehandles?
 
 =item What can't I just open(FH, ">file.lock")?
 
-=item I still don't get locking.  I just want to increment the number
-in the file.  How can I do this?
+=item I still don't get locking.  I just want to increment the number in
+the file.  How can I do this?
 
 =item How do I randomly update a binary file?
 
@@ -529,7 +529,7 @@ protected files?  Isn't this a bug in Perl?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq6 - Regexps ($Revision: 1.16 $, $Date: 1997/03/25 18:16:56 $)
+=head2 perlfaq6 - Regexps ($Revision: 1.17 $, $Date: 1997/04/24 22:44:10 $)
 
 =item DESCRIPTION
 
@@ -590,8 +590,8 @@ file?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq7 - Perl Language Issues ($Revision: 1.16 $, $Date:
-1997/03/19 17:25:23 $)
+=head2 perlfaq7 - Perl Language Issues ($Revision: 1.18 $, $Date:
+1997/04/24 22:44:14 $)
 
 =item DESCRIPTION
 
@@ -661,8 +661,8 @@ is in scope?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.20 $, $Date: 1997/04/23
-18:11:50 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.21 $, $Date: 1997/04/24
+22:44:19 $)
 
 =item DESCRIPTION
 
@@ -768,6 +768,61 @@ complete?
 search path?
 
 =item How do I add a directory to my include path at runtime?
+
+=back
+
+=item How do I get one key from the terminal at a time, under POSIX?
+
+=item AUTHOR AND COPYRIGHT
+
+=item DESCRIPTION
+
+=over
+
+=item My CGI script runs from the command line but not the browser.  Can
+you help me fix it?
+
+=item How do I remove HTML from a string?
+
+=item How do I extract URLs?
+
+=item How do I download a file from the user's machine?  How do I open a
+file on another machine?
+
+=item How do I make a pop-up menu in HTML?
+
+=item How do I fetch an HTML file?
+
+=item how do I decode or create those %-encodings on the web?
+
+=item How do I redirect to another page?
+
+=item How do I put a password on my web pages?
+
+=item How do I edit my .htpasswd and .htgroup files with Perl?
+
+=item How do I make sure users can't enter values into a form that cause my
+CGI script to do bad things?
+
+=item How do I parse an email header?
+
+=item How do I decode a CGI form?
+
+=item How do I check a valid email address?
+
+=item How do I decode a MIME/BASE64 string?
+
+=item How do I return the user's email address?
+
+=item How do I send/read mail?
+
+=item How do I find out my hostname/domainname/IP address?
+
+=item How do I fetch a news article or the active newsgroups?
+
+=item How do I fetch/put an FTP file?
+
+=item How can I do RPC in Perl?
 
 =back
 

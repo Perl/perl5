@@ -170,7 +170,7 @@ U32 flags;
 	--sv_count;			\
     } while (0)
 
-#define uproot_SV(p)		\
+#define uproot_SV(p)			\
     do {				\
 	(p) = sv_root;			\
 	sv_root = (SV*)SvANY(p);	\
@@ -1712,7 +1712,7 @@ STRLEN *lp;
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
-	sv_setpvf(sv, "%vd", SvIVX(sv));
+	sv_setpvf(sv, "%Vd", SvIVX(sv));
 	errno = olderrno;
 	s = SvEND(sv);
     }
@@ -1887,6 +1887,7 @@ register SV *sstr;
 	}
 	break;
     case SVt_PV:
+    case SVt_PVFM:
 	if (dtype < SVt_PV)
 	    sv_upgrade(dstr, SVt_PV);
 	break;
@@ -3465,7 +3466,7 @@ newSVpvf(const char* pat, ...)
 #else
 /*VARARGS0*/
 SV *
-newSVpvf(sv, pat, va_alist)
+newSVpvf(pat, va_alist)
 const char *pat;
 va_dcl
 #endif
@@ -3482,7 +3483,7 @@ va_dcl
 #else
     va_start(args);
 #endif
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool));
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     return sv;
 }
@@ -4107,7 +4108,7 @@ sv_setpvf(sv, pat, va_alist)
 #else
     va_start(args);
 #endif
-    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool));
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
 }
 
@@ -4129,7 +4130,7 @@ sv_catpvf(sv, pat, va_alist)
 #else
     va_start(args);
 #endif
-    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool));
+    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
 }
 
@@ -4160,20 +4161,31 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
     char *p;
     char *q;
     char *patend;
+    STRLEN origlen;
     I32 svix = 0;
 
     /* no matter what, this is a string now */
-    (void)SvPV_force(sv, na);
+    (void)SvPV_force(sv, origlen);
 
-    /* special-case "" and "%s" */
+    /* special-case "", "%s", and "%_" */
     if (patlen == 0)
 	return;
-    if (patlen == 2 && pat[0] == '%' && pat[1] == 's') {
-	if (args)
-	    sv_catpv(sv, va_arg(*args, char *));
-	else if (svix < svmax)
-	    sv_catsv(sv, *svargs);
-	return;
+    if (patlen == 2 && pat[0] == '%') {
+	switch (pat[1]) {
+	case 's':
+	    if (args)
+		sv_catpv(sv, va_arg(*args, char*));
+	    else if (svix < svmax)
+		sv_catsv(sv, *svargs);
+	    return;
+	case '_':
+	    if (args) {
+		sv_catsv(sv, va_arg(*args, SV*));
+		return;
+	    }
+	    /* See comment on '_' below */
+	    break;
+	}
     }
 
     patend = (char*)pat + patlen;
@@ -4184,6 +4196,7 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	char plus = 0;
 	char intsize = 0;
 	STRLEN width = 0;
+	STRLEN zeros = 0;
 	bool has_precis = FALSE;
 	STRLEN precis = 0;
 
@@ -4191,8 +4204,8 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	STRLEN esignlen = 0;
 
 	char *eptr = Nullch;
-        STRLEN elen = 0;
-	char ebuf[(sizeof(UV) * 3) * 2 + 16]; /* large enough for "%#.#f" */
+	STRLEN elen = 0;
+	char ebuf[TYPE_DIGITS(int) * 2 + 16]; /* large enough for "%#.#f" */
 
 	static char *efloatbuf = Nullch;
 	static STRLEN efloatsize = 0;
@@ -4215,6 +4228,8 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	if (q++ >= patend)
 	    break;
 
+	/* FLAGS */
+
 	while (*q) {
 	    switch (*q) {
 	    case ' ':
@@ -4236,61 +4251,73 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 		q++;
 		continue;
 
-	    case 'l':
-#if 0  /* when quads have better support within Perl */
-		if (intsize == 'l') {
-		    intsize = 'q';
-		    q++;
-		    continue;
-		}
-#endif
-		/* FALL THROUGH */
-	    case 'h':
-	    case 'v':
-		intsize = *q++;
-		continue;
+	    default:
+		break;
+	    }
+	    break;
+	}
 
-	    case '1': case '2': case '3':
-	    case '4': case '5': case '6':
-	    case '7': case '8': case '9':
-		width = 0;
-		while (isDIGIT(*q))
-		    width = width * 10 + (*q++ - '0');
-		continue;
+	/* WIDTH */
 
-	    case '*':
+	switch (*q) {
+	case '1': case '2': case '3':
+	case '4': case '5': case '6':
+	case '7': case '8': case '9':
+	    width = 0;
+	    while (isDIGIT(*q))
+		width = width * 10 + (*q++ - '0');
+	    break;
+
+	case '*':
+	    if (args)
+		i = va_arg(*args, int);
+	    else
+		i = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+	    left |= (i < 0);
+	    width = (i < 0) ? -i : i;
+	    q++;
+	    break;
+	}
+
+	/* PRECISION */
+
+	if (*q == '.') {
+	    q++;
+	    if (*q == '*') {
 		if (args)
 		    i = va_arg(*args, int);
 		else
 		    i = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
-		left ^= (i < 0);
-		width = (i < 0) ? -i : i;
+		precis = (i < 0) ? 0 : i;
 		q++;
-		continue;
+	    }
+	    else {
+		precis = 0;
+		while (isDIGIT(*q))
+		    precis = precis * 10 + (*q++ - '0');
+	    }
+	    has_precis = TRUE;
+	}
 
-	    case '.':
-		q++;
-		if (*q == '*') {
-		    if (args)
-			precis = va_arg(*args, int);
-		    else
-			precis = (svix < svmax) ? SvUVx(svargs[svix++]) : 0;
-		    q++;
-		}
-		else {
-		    precis = 0;
-		    while (isDIGIT(*q))
-			precis = precis * 10 + (*q++ - '0');
-		}
-		has_precis = TRUE;
-		continue;
+	/* SIZE */
 
-	    default:
+	switch (*q) {
+	case 'l':
+#if 0  /* when quads have better support within Perl */
+	    if (*(q + 1) == 'l') {
+		intsize = 'q';
+		q += 2;
 		break;
 	    }
-
+#endif
+	    /* FALL THROUGH */
+	case 'h':
+	case 'V':
+	    intsize = *q++;
 	    break;
 	}
+
+	/* CONVERSION */
 
 	switch (c = *q++) {
 
@@ -4310,21 +4337,24 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	    elen = 1;
 	    goto string;
 
-	case 'S':
-	    if (args) {
-		eptr = SvPVx(va_arg(*args, SV *), elen);
-		goto string;
-	    }
-	    /* FALL THROUGH */
-
 	case 's':
 	    if (args) {
-		eptr = va_arg(*args, char *);
+		eptr = va_arg(*args, char*);
 		elen = strlen(eptr);
 	    }
 	    else if (svix < svmax)
 		eptr = SvPVx(svargs[svix++], elen);
 	    goto string;
+
+	case '_':
+	    /*
+	     * The "%_" hack might have to be changed someday,
+	     * if ISO or ANSI decide to use '_' for something.
+	     * So we keep it hidden from users' code.
+	     */
+	    if (!args)
+		goto unknown;
+	    eptr = SvPVx(va_arg(*args, SV*), elen);
 
 	string:
 	    if (has_precis && elen > precis)
@@ -4332,6 +4362,14 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	    break;
 
 	    /* INTEGERS */
+
+	case 'p':
+	    if (args)
+		uv = (UV)va_arg(*args, void*);
+	    else
+		uv = (svix < svmax) ? (UV)svargs[svix++] : 0;
+	    base = 16;
+	    goto integer;
 
 	case 'D':
 	    intsize = 'l';
@@ -4343,7 +4381,7 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 		case 'h':	iv = (short)va_arg(*args, int); break;
 		default:	iv = va_arg(*args, int); break;
 		case 'l':	iv = va_arg(*args, long); break;
-		case 'v':	iv = va_arg(*args, IV); break;
+		case 'V':	iv = va_arg(*args, IV); break;
 		}
 	    }
 	    else {
@@ -4352,7 +4390,7 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 		case 'h':	iv = (short)iv; break;
 		default:	iv = (int)iv; break;
 		case 'l':	iv = (long)iv; break;
-		case 'v':	break;
+		case 'V':	break;
 		}
 	    }
 	    if (iv >= 0) {
@@ -4367,6 +4405,13 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	    base = 10;
 	    goto integer;
 
+	case 'U':
+	    intsize = 'l';
+	    /* FALL THROUGH */
+	case 'u':
+	    base = 10;
+	    goto uns_integer;
+
 	case 'O':
 	    intsize = 'l';
 	    /* FALL THROUGH */
@@ -4375,14 +4420,8 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	    goto uns_integer;
 
 	case 'X':
-	    intsize = 'l';
-	    /* FALL THROUGH */
 	case 'x':
 	    base = 16;
-	    goto uns_integer;
-
-	case 'u':
-	    base = 10;
 
 	uns_integer:
 	    if (args) {
@@ -4390,7 +4429,7 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
 		default:   uv = va_arg(*args, unsigned); break;
 		case 'l':  uv = va_arg(*args, unsigned long); break;
-		case 'v':  uv = va_arg(*args, UV); break;
+		case 'V':  uv = va_arg(*args, UV); break;
 		}
 	    }
 	    else {
@@ -4399,48 +4438,74 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 		case 'h':	uv = (unsigned short)uv; break;
 		default:	uv = (unsigned)uv; break;
 		case 'l':	uv = (unsigned long)uv; break;
-		case 'v':	break;
+		case 'V':	break;
 		}
 	    }
 
 	integer:
- 	    p = "0123456789abcdef";
 	    eptr = ebuf + sizeof ebuf;
-	    do {
-		unsigned dig = uv % base;
-		*--eptr = p[dig];
-	    } while (uv /= base);
-	    if (alt) {
-		switch (c) {
-		case 'o':
-		    if (*eptr != 0)
-			esignbuf[esignlen++] = '0';
-		    break;
-		case 'x':
+	    switch (base) {
+		unsigned dig;
+	    case 16:
+		p = (c == 'X') ? "0123456789ABCDEF" : "0123456789abcdef";
+		do {
+		    dig = uv & 15;
+		    *--eptr = p[dig];
+		} while (uv >>= 4);
+		if (alt) {
 		    esignbuf[esignlen++] = '0';
-		    esignbuf[esignlen++] = 'x';
-		    break;
+		    esignbuf[esignlen++] = c;  /* 'x' or 'X' */
 		}
+		break;
+	    case 8:
+		do {
+		    dig = uv & 7;
+		    *--eptr = '0' + dig;
+		} while (uv >>= 3);
+		if (alt && *eptr != '0')
+		    *--eptr = '0';
+		break;
+	    default:		/* it had better be ten or less */
+		do {
+		    dig = uv % base;
+		    *--eptr = '0' + dig;
+		} while (uv /= base);
+		break;
 	    }
 	    elen = (ebuf + sizeof ebuf) - eptr;
-	    if (has_precis) {
-		left = FALSE;
-		fill = '0';
-		width = esignlen + precis;
-	    }
+	    if (has_precis && precis > elen)
+		zeros = precis - elen;
 	    break;
 
 	    /* FLOATING POINT */
 
+	case 'F':
+	    c = 'f';		/* maybe %F isn't supported here */
+	    /* FALL THROUGH */
 	case 'e': case 'E':
-	case 'f': case 'F':
+	case 'f':
 	case 'g': case 'G':
 
 	    /* This is evil, but floating point is even more evil */
 
-	    need = width;
-	    if (has_precis && need < precis)
-		need = precis;
+	    if (args)
+		nv = va_arg(*args, double);
+	    else
+		nv = (svix < svmax) ? SvNVx(svargs[svix++]) : 0.0;
+
+	    need = 0;
+	    if (c != 'e' && c != 'E') {
+		i = PERL_INT_MIN;
+		(void)frexp(nv, &i);
+		if (i == PERL_INT_MIN)
+		    need = 400;	/* busted -- be safe */
+		else if (i > 0)
+		    need = BIT_DIGITS(i);
+	    }
+	    need += has_precis ? precis : 6; /* known default */
+	    if (need < width)
+		need = width;
+
 	    need += 20; /* fudge factor */
 	    if (efloatsize < need) {
 		Safefree(efloatbuf);
@@ -4468,10 +4533,6 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 		*--eptr = '#';
 	    *--eptr = '%';
 
-	    if (args)
-		nv = va_arg(*args, double);
-	    else
-		nv = (svix < svmax) ? SvNVx(svargs[svix++]) : 0.0;
 	    (void)sprintf(efloatbuf, eptr, nv);
 
 	    eptr = efloatbuf;
@@ -4489,14 +4550,29 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 
 	    break;
 
+	    /* SPECIAL */
+
+	case 'n':
+	    i = SvCUR(sv) - origlen;
+	    if (args) {
+		int *ip = va_arg(*args, int*);
+		*ip = i;
+	    }
+	    else if (svix < svmax)
+		sv_setuv(svargs[svix++], (UV)i);
+	    continue;	/* not "break" */
+
+	    /* UNKNOWN */
+
 	default:
+      unknown:
 	    /* output mangled stuff without comment */
 	    eptr = p;
 	    elen = q - p;
 	    break;
 	}
 
-	have = esignlen + elen;
+	have = esignlen + zeros + elen;
 	need = (have > width ? have : width);
 	gap = need - have;
 
@@ -4513,6 +4589,10 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	if (esignlen && fill != '0') {
 	    for (i = 0; i < esignlen; i++)
 		*p++ = esignbuf[i];
+	}
+	if (zeros) {
+	    for (i = zeros; i; i--)
+		*p++ = '0';
 	}
 	if (elen) {
 	    memcpy(p, eptr, elen);

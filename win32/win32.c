@@ -341,7 +341,7 @@ do_aspawn(void* really, void** mark, void** arglast)
     SV *sv = (SV*)really;
     SV** pSv = (SV**)mark;
 
-    New(1110, argv, (arglast - mark) + 4, char*);
+    New(1310, argv, (arglast - mark) + 4, char*);
 
     if(sv != Nullsv) {
 	cmd = SvPV(sv, length);
@@ -388,8 +388,8 @@ do_spawn(char *cmd)
 
     /* see if there are shell metacharacters in it */
     if(!HasRedirection(cmd)) {
-	New(1102,argv, strlen(cmd) / 2 + 2, char*);
-	New(1103,cmd2, strlen(cmd) + 1, char);
+	New(1301,argv, strlen(cmd) / 2 + 2, char*);
+	New(1302,cmd2, strlen(cmd) + 1, char);
 	strcpy(cmd2, cmd);
 	a = argv;
 	for (s = cmd2; *s;) {
@@ -473,7 +473,7 @@ opendir(char *filename)
  *  }
  */
     /* Get us a DIR structure */
-    Newz(1501, p, 1, DIR);
+    Newz(1303, p, 1, DIR);
     if(p == NULL)
 	return NULL;
 
@@ -495,7 +495,7 @@ opendir(char *filename)
      * the filenames that we find.
      */
     idx = strlen(FindData.cFileName)+1;
-    New(1502, p->start, idx, char);
+    New(1304, p->start, idx, char);
     if(p->start == NULL) {
 	CROAK("opendir: malloc failed!\n");
     }

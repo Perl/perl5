@@ -377,11 +377,6 @@ register PerlInterpreter *sv_interp;
 		 (long)cxstack_ix + 1);
     }
 
-
-    /* Without SVs, messages must be primitive. */
-    SvREFCNT_dec(mess_sv);
-    mess_sv = &sv_undef;
-
     /* Now absolutely destruct everything, somehow or other, loops or no. */
     last_sv_count = 0;
     SvFLAGS(strtab) |= SVTYPEMASK;		/* don't clean out strtab now */
@@ -433,9 +428,20 @@ register PerlInterpreter *sv_interp;
     if (origfilename)
     	Safefree(origfilename);
     nuke_stacks();
-    hints = 0;			/* Reset hints. Should hints be per-interpreter ? */
+    hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
     
     DEBUG_P(debprofdump());
+
+    /* As the absolutely last thing, free the non-arena SV for mess() */
+
+    if (mess_sv) {
+	/* we know that type >= SVt_PV */
+	SvOOK_off(mess_sv);
+	Safefree(SvPVX(mess_sv));
+	Safefree(SvANY(mess_sv));
+	Safefree(mess_sv);
+	mess_sv = Nullsv;
+    }
 }
 
 void
@@ -1614,15 +1620,19 @@ SV *sv;
     I32 len;
     int retval;
 #if defined(DOSISH) && !defined(OS2) && !defined(atarist)
-#define SEARCH_EXTS ".bat", ".cmd", NULL
+#  define SEARCH_EXTS ".bat", ".cmd", NULL
+#  define MAX_EXT_LEN 4
 #endif
 #ifdef VMS
 #  define SEARCH_EXTS ".pl", ".com", NULL
+#  define MAX_EXT_LEN 4
 #endif
     /* additional extensions to try in each dir if scriptname not found */
 #ifdef SEARCH_EXTS
     char *ext[] = { SEARCH_EXTS };
     int extidx = (strchr(scriptname,'.')) ? -1 : 0; /* has ext already */
+#else
+#  define MAX_EXT_LEN 0
 #endif
 
 #ifdef VMS
@@ -1632,38 +1642,51 @@ SV *sv;
 	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
 	/* The first time through, just add SEARCH_EXTS to whatever we
 	 * already have, so we can check for default file types. */
-	while (deftypes || (!hasdir && my_trnlnm("DCL$PATH",tokenbuf,idx++)) ) {
-	    if (deftypes) { deftypes = 0; *tokenbuf = '\0'; }
-	    strcat(tokenbuf,scriptname);
+	while (deftypes ||
+	       (!hasdir && my_trnlnm("DCL$PATH",tokenbuf,idx++)) )
+	{
+	    if (deftypes) {
+		deftypes = 0;
+		*tokenbuf = '\0';
+	    }
+	    if ((strlen(tokenbuf) + strlen(scriptname)
+		 + MAX_EXT_LEN) >= sizeof tokenbuf)
+		continue;	/* don't search dir with too-long name */
+	    strcat(tokenbuf, scriptname);
 #else  /* !VMS */
     if (dosearch && !strchr(scriptname, '/') && (s = getenv("PATH"))) {
-
 	bufend = s + strlen(s);
-	while (*s) {
-#ifndef DOSISH
-	    s = cpytill(tokenbuf,s,bufend,':',&len);
+	while (s < bufend) {
+#ifndef atarist
+	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
+#ifdef DOSISH
+			 ';',
 #else
-#ifdef atarist
-	    for (len = 0; *s && *s != ',' && *s != ';'; tokenbuf[len++] = *s++);
-	    tokenbuf[len] = '\0';
-#else
-	    for (len = 0; *s && *s != ';'; tokenbuf[len++] = *s++);
-	    tokenbuf[len] = '\0';
+			 ':',
 #endif
-#endif
-	    if (*s)
+			 &len);
+#else  /* atarist */
+	    for (len = 0; *s && *s != ',' && *s != ';'; len++, s++) {
+		if (len < sizeof tokenbuf)
+		    tokenbuf[len] = *s;
+	    }
+	    if (len < sizeof tokenbuf)
+		tokenbuf[len] = '\0';
+#endif /* atarist */
+	    if (s < bufend)
 		s++;
-#ifndef DOSISH
-	    if (len && tokenbuf[len-1] != '/')
-#else
-#ifdef atarist
-	    if (len && ((tokenbuf[len-1] != '\\') && (tokenbuf[len-1] != '/')))
-#else
-	    if (len && tokenbuf[len-1] != '\\')
+	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tokenbuf)
+		continue;	/* don't search dir with too-long name */
+	    if (len
+#if defined(atarist) && !defined(DOSISH)
+		&& tokenbuf[len - 1] != '/'
 #endif
+#if defined(atarist) || defined(DOSISH)
+		&& tokenbuf[len - 1] != '\\'
 #endif
-		(void)strcat(tokenbuf+len,"/");
-	    (void)strcat(tokenbuf+len,scriptname);
+	       )
+		tokenbuf[len++] = '/';
+	    (void)strcpy(tokenbuf + len, scriptname);
 #endif  /* !VMS */
 
 #ifdef SEARCH_EXTS
@@ -1743,7 +1766,7 @@ sed %s -e \"/^[^#]/b\" \
  -e \"/^#[ 	]*undef[ 	]/b\" \
  -e \"/^#[ 	]*endif/b\" \
  -e \"s/^#.*//\" \
- %s | %S -C %S %s",
+ %s | %_ -C %_ %s",
 	  (doextract ? "-e \"1,/^#/d\n\"" : ""),
 #else
 	sv_setpvf(cmd, "\
@@ -1758,7 +1781,7 @@ sed %s -e \"/^[^#]/b\" \
  -e '/^#[ 	]*undef[ 	]/b' \
  -e '/^#[ 	]*endif/b' \
  -e 's/^[ 	]*#.*//' \
- %s | %S -C %S %s",
+ %s | %_ -C %_ %s",
 #ifdef LOC_SED
 	  LOC_SED,
 #else

@@ -3114,7 +3114,7 @@ PP(pp_unpack)
 		    else if (++bytes >= sizeof(UV)) {	/* promote to string */
 			char *t;
 
-			sv = newSVpvf("%0*vu", (int)(sizeof(UV) * 3), auv);
+			sv = newSVpvf("%.*Vu", (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
 			    sv = mul128(sv, *s & 0x7f);
 			    if (!(*s++ & 0x80)) {

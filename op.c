@@ -3153,7 +3153,7 @@ char* p;
 	    gv_efullname3(name = sv_newmortal(), gv, Nullch);
 	sv_setpv(msg, "Prototype mismatch:");
 	if (name)
-	    sv_catpvf(msg, " sub %S", name);
+	    sv_catpvf(msg, " sub %_", name);
 	if (SvPOK(cv))
 	    sv_catpvf(msg, " (%s)", SvPVX(cv));
 	sv_catpv(msg, " vs ");
@@ -3161,7 +3161,7 @@ char* p;
 	    sv_catpvf(msg, "(%s)", p);
 	else
 	    sv_catpv(msg, "none");
-	warn("%S", msg);
+	warn("%_", msg);
     }
 }
 
@@ -3348,7 +3348,7 @@ OP *block;
 	    CV *cv;
 	    HV *hv;
 
-	    sv_setpvf(sv, "%S:%ld-%ld",
+	    sv_setpvf(sv, "%_:%ld-%ld",
 		    GvSV(curcop->cop_filegv),
 		    (long)subline, (long)curcop->cop_line);
 	    gv_efullname3(tmpstr, gv, Nullch);

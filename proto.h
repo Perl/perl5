@@ -43,9 +43,7 @@ I32	my_chsize _((int fd, Off_t length));
 OP*	ck_gvconst _((OP*  o));
 OP*	ck_retarget _((OP* op));
 OP*	convert _((I32 optype, I32 flags, OP* op));
-char*	cpytill _((char* to, char* from, char* fromend, int delim, I32* retlen));
-void	croak _((const char* pat,...))
-		__attribute__((format(printf,1,2),noreturn));
+void	croak _((const char* pat,...)) __attribute__((noreturn));
 void	cv_ckproto _((CV* cv, GV* gv, char* p));
 CV*	cv_clone _((CV* proto));
 SV*	cv_const_sv _((CV* cv));
@@ -65,8 +63,10 @@ I32	debstackptrs _((void));
 void	debprofdump _((void));
 #endif
 I32	debstack _((void));
+char*	delimcpy _((char* to, char* toend, char* from, char* fromend,
+		    int delim, I32* retlen));
 void	deprecate _((char* s));
-OP*	die _((const char* pat,...)) __attribute__((format(printf,1,2)));
+OP*	die _((const char* pat,...));
 OP*	die_where _((char* message));
 void	dounwind _((I32 cxix));
 bool	do_aexec _((SV* really, SV** mark, SV** sp));
@@ -252,6 +252,9 @@ void	my_failure_exit _((void)) __attribute__((noreturn));
 I32	my_lstat _((void));
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32	my_memcmp _((char* s1, char* s2, I32 len));
+#endif
+#if !defined(HAS_MEMSET)
+void*	my_memset _((char* loc, I32 ch, I32 len));
 #endif
 I32	my_pclose _((PerlIO* ptr));
 PerlIO*	my_popen _((char* cmd, char* mode));
@@ -515,7 +518,7 @@ void	utilize _((int aver, I32 floor, OP* version, OP* id, OP* arg));
 void	vivify_defelem _((SV* sv));
 void	vivify_ref _((SV* sv, U32 to_what));
 I32	wait4pid _((int pid, int* statusp, int flags));
-void	warn _((const char* pat,...)) __attribute__((format(printf,1,2)));
+void	warn _((const char* pat,...));
 void	watch _((char** addr));
 I32	whichsig _((char* sig));
 int	yyerror _((char* s));

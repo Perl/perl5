@@ -890,6 +890,12 @@ times than it has returned.  This probably indicates an infinite
 recursion, unless you're writing strange benchmark programs, in which
 case it indicates something else.
 
+=item Delimiter for here document is too long
+
+(F) In a here document construct like C<E<lt>E<lt>FOO>, the label
+C<FOO> is too long for Perl to handle.  You have to be seriously
+twisted to write code that triggers this error.
+
 =item Did you mean &%s instead?
 
 (W) You probably referred to an imported subroutine &FOO as $FOO or some such.
@@ -948,6 +954,13 @@ specifications in either VMS or Unix syntax, it converts them to a
 single form when it must operate on them directly.  Either you've
 passed an invalid file specification to Perl, or you've found a
 case the conversion routines don't handle.  Drat.
+
+=item Excessively long <> operator
+
+(F) The contents of a <> operator may not exceed the maximum size of a
+Perl identifier.  If you're just trying to glob a long list of
+filenames, try using the glob() operator, or put the filenames into a
+variable and glob that.
 
 =item Execution of %s aborted due to compilation errors
 
@@ -1101,9 +1114,9 @@ is now heavily deprecated.
 =item Identifier too long
 
 (F) Perl limits identifiers (names for variables, functions, etc.) to
-252 characters for simple names, somewhat more for compound names (like
-C<$A::B>).  You've exceeded Perl's limits.  Future versions of Perl are
-likely to eliminate these arbitrary limitations.
+about 250 characters for simple names, and somewhat more for compound
+names (like C<$A::B>).  You've exceeded Perl's limits.  Future
+versions of Perl are likely to eliminate these arbitrary limitations.
 
 =item Ill-formed logical name |%s| in prime_env_iter
 
@@ -1580,6 +1593,13 @@ supplied it an uninitialized value.  See L<perlform>.
 =item NULL regexp parameter
 
 (P) The internal pattern matching routines are out of their gourd.
+
+=item Number too long
+
+(F) Perl limits the representation of decimal numbers in programs to about
+about 250 characters.  You've exceeded that length.  Future versions of
+Perl are likely to eliminate this arbitrary limitation.  In the meantime,
+try using scientific notation (e.g. "1e6" instead of "1_000_000").
 
 =item Odd number of elements in hash list
 
@@ -2220,6 +2240,11 @@ or "msg".  See L<perlfunc/semctl>, for example.
 
 (W) The filehandle you're writing to got itself closed sometime before now.
 Check your logic flow.
+
+=item Target of goto is too deeply nested
+
+(F) You tried to use C<goto> to reach a label that was too deeply
+nested for Perl to reach.  Perl is doing you a favor by refusing.
 
 =item tell() on unopened file
 

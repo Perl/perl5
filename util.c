@@ -282,28 +282,35 @@ xstat()
 /* copy a string up to some (non-backslashed) delimiter, if any */
 
 char *
-cpytill(to,from,fromend,delim,retlen)
+delimcpy(to, toend, from, fromend, delim, retlen)
 register char *to;
+register char *toend;
 register char *from;
 register char *fromend;
 register int delim;
 I32 *retlen;
 {
-    char *origto = to;
-
-    for (; from < fromend; from++,to++) {
+    register I32 tolen;
+    for (tolen = 0; from < fromend; from++, tolen++) {
 	if (*from == '\\') {
 	    if (from[1] == delim)
 		from++;
-	    else if (from[1] == '\\')
-		*to++ = *from++;
+	    else {
+		if (to < toend)
+		    *to++ = *from;
+		tolen++;
+		from++;
+	    }
 	}
-	else if (*from == delim)
+	else if (*from == delim) {
+	    if (to < toend)
+		*to = '\0';
 	    break;
-	*to = *from;
+	}
+	if (to < toend)
+	    *to++ = *from;
     }
-    *to = '\0';
-    *retlen = to - origto;
+    *retlen = tolen;
     return from;
 }
 
@@ -1071,6 +1078,23 @@ register I32 len;
     return newaddr;
 }
 
+/* the SV for form() and mess() is not kept in an arena */
+
+static SV *
+mess_alloc()
+{
+    SV *sv;
+    XPVMG *any;
+
+    /* Create as PVMG now, to avoid any upgrading later */
+    New(905, sv, 1, SV);
+    Newz(905, any, 1, XPVMG);
+    SvFLAGS(sv) = SVt_PVMG;
+    SvANY(sv) = (void*)any;
+    SvREFCNT(sv) = 1 << 30; /* practically infinite */
+    return sv;
+}
+
 #ifdef I_STDARG
 char *
 form(const char* pat, ...)
@@ -1088,18 +1112,11 @@ form(pat, va_alist)
 #else
     va_start(args);
 #endif
-    if (mess_sv == &sv_undef) {
-	/* All late-destruction message must be short */
-	vsprintf(tokenbuf, pat, args);
-    }
-    else {
-	if (!mess_sv)
-	    mess_sv = NEWSV(905, 0);
-	sv_vsetpvfn(mess_sv, pat, strlen(pat), &args,
-		    Null(SV**), 0, Null(bool));
-    }
+    if (!mess_sv)
+	mess_sv = mess_alloc();
+    sv_vsetpvfn(mess_sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
-    return (mess_sv == &sv_undef) ? tokenbuf : SvPVX(mess_sv);
+    return SvPVX(mess_sv);
 }
 
 char *
@@ -1110,23 +1127,16 @@ mess(pat, args)
     SV *sv;
     static char dgd[] = " during global destruction.\n";
 
-    if (mess_sv == &sv_undef) {
-	/* All late-destruction message must be short */
-	vsprintf(tokenbuf, pat, *args);
-	if (!tokenbuf[0] && tokenbuf[strlen(tokenbuf) - 1] != '\n')
-	    strcat(tokenbuf, dgd);
-	return tokenbuf;
-    }
     if (!mess_sv)
-	mess_sv = NEWSV(905, 0);
+	mess_sv = mess_alloc();
     sv = mess_sv;
-    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool));
+    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	if (dirty)
 	    sv_catpv(sv, dgd);
 	else {
 	    if (curcop->cop_line)
-		sv_catpvf(sv, " at %S line %ld",
+		sv_catpvf(sv, " at %_ line %ld",
 			  GvSV(curcop->cop_filegv), (long)curcop->cop_line);
 	    if (GvIO(last_in_gv) && IoLINES(GvIOp(last_in_gv))) {
 		bool line_mode = (RsSIMPLE(rs) &&
@@ -1396,7 +1406,7 @@ char *nam, *val;
     STRLEN namlen = strlen(nam);
     STRLEN vallen = strlen(val ? val : "");
 
-    New(9040, envstr, namlen + vallen + 3, char);
+    New(904, envstr, namlen + vallen + 3, char);
     (void)sprintf(envstr,"%s=%s",nam,val);
     if (!vallen) {
         /* An attempt to delete the entry.
@@ -1448,6 +1458,21 @@ register I32 len;
 	while (len--)
 	    *(--to) = *(--from);
     }
+    return retval;
+}
+#endif
+
+#ifndef HAS_MEMSET
+void *
+my_memset(loc,ch,len)
+register char *loc;
+register I32 ch;
+register I32 len;
+{
+    char *retval = loc;
+
+    while (len--)
+	*loc++ = ch;
     return retval;
 }
 #endif
@@ -1792,15 +1817,23 @@ int newfd;
     close(newfd);
     return fcntl(oldfd, F_DUPFD, newfd);
 #else
-    int fdtmp[256];
+#define DUP2_MAX_FDS 256
+    int fdtmp[DUP2_MAX_FDS];
     I32 fdx = 0;
     int fd;
 
     if (oldfd == newfd)
 	return oldfd;
     close(newfd);
-    while ((fd = dup(oldfd)) != newfd && fd >= 0) /* good enough for low fd's */
+    /* good enough for low fd's... */
+    while ((fd = dup(oldfd)) != newfd && fd >= 0) {
+	if (fdx >= DUP2_MAX_FDS) {
+	    close(fd);
+	    fd = -1;
+	    break;
+	}
 	fdtmp[fdx++] = fd;
+    }
     while (fdx > 0)
 	close(fdtmp[--fdx]);
     return fd;
@@ -1967,7 +2000,7 @@ int flags;
 {
     SV *sv;
     SV** svp;
-    char spid[sizeof(int) * 3 + 1];
+    char spid[TYPE_CHARS(int)];
 
     if (!pid)
 	return -1;
@@ -2023,7 +2056,7 @@ int pid;
 int status;
 {
     register SV *sv;
-    char spid[sizeof(int) * 3 + 1];
+    char spid[TYPE_CHARS(int)];
 
     sprintf(spid, "%d", pid);
     sv = *hv_fetch(pidstatus,spid,strlen(spid),TRUE);

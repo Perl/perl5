@@ -46,6 +46,128 @@ And the Keepers of the Patch Pumpkin:
 
 
 -----------------
+Version 5.003_97i
+-----------------
+
+This patch eliminates all known sources of buffer overflow!  (And the
+crowd goes wild.  (Yeah.))  Showstoppers only between here and _98.
+
+ CORE LANGUAGE CHANGES
+
+   (no changes)
+
+ CORE PORTABILITY
+
+  Title:  "Provide memset() if it's missing"
+   From:  Chip Salzenberg
+  Files:  global.sym perl.h proto.h util.c
+
+  Title:  "Don't tell GCC that warn(), croak(), and die() are printf-lik
+   From:  Chip Salzenberg
+  Files:  proto.h
+
+ OTHER CORE CHANGES
+
+  Title:  "Misc. sv_vcatpvfn() fixes"
+   From:  Hugo, Dale, Nick, Hallvard, Chip
+  Files:  gv.c mg.c op.c perl.c pp.c pp_ctl.c sv.c toke.c util.c
+
+  Title:  "Enforce order of sprintf() elements"
+   From:  Chip Salzenberg
+  Files:  sv.c
+
+  Title:  "Guard against long numbers, <<LONG_DELIM, and <long glob>"
+   From:  Chip Salzenberg
+  Files:  global.sym mg.c perl.c pod/perldiag.pod proto.h toke.c util.c
+
+  Title:  "Guard against C<goto> to deeply nested label"
+   From:  Chip Salzenberg
+  Files:  pod/perldiag.pod pp_ctl.c
+
+  Title:  "Guard against overflow in dup2() emulation"
+   From:  Chip Salzenberg
+  Files:  util.c
+
+  Title:  "Win32: Guard against long function names"
+   From:  Chip Salzenberg
+  Files:  win32/win32sck.c
+
+  Title:  "Make mess() always work, by using a non-arena SV"
+   From:  Chip Salzenberg, from idea by Gurusamy Sarathy
+  Files:  perl.c util.c
+
+  Title:  "Fix scalar leak in pp_prtf()"
+   From:  Doug MacEachern
+ Msg-ID:  <199704241706.NAA19140@postman.osf.org>
+   Date:  Thu, 24 Apr 1997 13:06:21 -0400
+  Files:  pp_sys.c
+
+  Title:  "When copying a format line, take only its string value"
+   From:  Chip Salzenberg
+  Files:  sv.c
+
+  Title:  "Undo private patch"
+   From:  Chip Salzenberg
+  Files:  installperl lib/ExtUtils/Install.pm
+
+  Title:  "Fix LEAKTEST numbers"
+   From:  Chip Salzenberg
+  Files:  ext/DynaLoader/dl_vms.xs handy.h os2/os2.c util.c vms/vms.c
+          win32/win32.c win32/win32sck.c
+
+ BUILD PROCESS
+
+  Title:  "Cope with a <db.h> that isn't related to DB"
+   From:  Jarkko Hietaniemi
+ Msg-ID:  <199704241728.UAA09951@alpha.hut.fi>
+   Date:  Thu, 24 Apr 1997 20:28:39 +0300 (EET DST)
+  Files:  Configure
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Always NUL-terminate opsets"
+   From:  Chip Salzenberg
+  Files:  ext/Opcode/Opcode.xs
+
+  Title:  "Don't core dump if my_inet_aton() get a NULL"
+   From:  Chip Salzenberg
+  Files:  ext/Socket/Socket.xs
+
+  Title:  "Handle symlinks, high permission bits in File::Path"
+   From:  Chip Salzenberg
+  Files:  lib/File/Path.pm
+
+  Title:  "Math::{Complex,Trig} update"
+   From:  Gurusamy Sarathy
+ Msg-ID:  <199704242221.BAA30363@alpha.hut.fi>
+   Date:  Fri, 25 Apr 1997 01:21:44 +0300 (EET DST)
+  Files:  lib/Math/Complex.pm lib/Math/Trig.pm pod/roffitall
+          t/lib/complex.t t/lib/trig.t
+
+ TESTS
+
+   (no other changes)
+
+ UTILITIES
+
+  Title:  "Fix buffer overflow in a2p"
+   From:  Chip Salzenberg
+  Files:  x2p/a2py.c
+
+ DOCUMENTATION
+
+  Title:  "FAQ udpate (24-apr-97)"
+   From:  Nathan Torkington <gnat@prometheus.frii.com>
+ Msg-ID:  <199704242247.QAA07010@prometheus.frii.com>
+   Date:  Thu, 24 Apr 1997 16:47:23 -0600 (MDT)
+  Files:  pod/perlfaq*.pod
+
+  Title:  "Document new {,s}printf() behavior"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perlfunc.pod
+
+
+-----------------
 Version 5.003_97h
 -----------------
 

@@ -55,7 +55,7 @@ get_sysinfo(ULONG pid, ULONG flags)
     char *pbuffer;
     ULONG rc, buf_len = QSS_INI_BUFFER;
 
-    New(1022, pbuffer, buf_len, char);
+    New(1322, pbuffer, buf_len, char);
     /* QSS_PROCESS | QSS_MODULE | QSS_SEMAPHORES | QSS_SHARED */
     rc = QuerySysState(flags, pid, pbuffer, buf_len);
     while (rc == ERROR_BUFFER_OVERFLOW) {
@@ -208,7 +208,7 @@ register SV **sp;
     int flag = P_WAIT, trueflag, err, secondtry = 0;
 
     if (sp > mark) {
-	New(401,Argv, sp - mark + 3, char*);
+	New(1301,Argv, sp - mark + 3, char*);
 	a = Argv;
 
 	if (mark < sp && SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
@@ -321,7 +321,7 @@ int execf;
     if (strnEQ(cmd,"/bin/sh",7) && isSPACE(cmd[7])) {
 	STRLEN l = strlen(sh_path);
 	
-	New(4545, news, strlen(cmd) - 7 + l, char);
+	New(1302, news, strlen(cmd) - 7 + l, char);
 	strcpy(news, sh_path);
 	strcpy(news + l, cmd + 7);
 	cmd = news;
@@ -367,7 +367,7 @@ int execf;
 	}
     }
 
-    New(402,Argv, (s - cmd) / 2 + 2, char*);
+    New(1303,Argv, (s - cmd) / 2 + 2, char*);
     Cmd = savepvn(cmd, s-cmd);
     a = Argv;
     for (s = Cmd; *s;) {
@@ -1149,7 +1149,7 @@ Perl_OS2_init(char **env)
 	environ = env;
     }
     if ( (shell = getenv("PERL_SH_DRIVE")) ) {
-	New(404, sh_path, strlen(SH_PATH) + 1, char);
+	New(1304, sh_path, strlen(SH_PATH) + 1, char);
 	strcpy(sh_path, SH_PATH);
 	sh_path[0] = shell[0];
     } else if ( (shell = getenv("PERL_SH_DIR")) ) {
@@ -1157,7 +1157,7 @@ Perl_OS2_init(char **env)
 	if (shell[l-1] == '/' || shell[l-1] == '\\') {
 	    l--;
 	}
-	New(404, sh_path, l + 8, char);
+	New(1304, sh_path, l + 8, char);
 	strncpy(sh_path, shell, l);
 	strcpy(sh_path + l, "/sh.exe");
 	for (i = 0; i < l; i++) {

@@ -130,6 +130,10 @@ typedef unsigned short	U16;
 # define U32_MIN PERL_ULONG_MIN
 #endif
 
+#define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log2(10) =~ 146/485 */
+#define TYPE_DIGITS(T)  BIT_DIGITS(sizeof(T) * 8)
+#define TYPE_CHARS(T)   (TYPE_DIGITS(T) + 2) /* sign, NUL */
+
 #define Ctl(ch) ((ch) & 037)
 
 #define strNE(s1,s2) (strcmp(s1,s2))
@@ -277,7 +281,7 @@ typedef U16 line_t;
 #define Safefree(d)	safexfree((Malloc_t)d)
 #define NEWSV(x,len)	newSV(x,len)
 
-#define MAXXCOUNT 1200
+#define MAXXCOUNT 1400
 long xcount[MAXXCOUNT];
 long lastxcount[MAXXCOUNT];
 

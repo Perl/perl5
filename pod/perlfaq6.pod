@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regexps ($Revision: 1.16 $, $Date: 1997/03/25 18:16:56 $)
+perlfaq6 - Regexps ($Revision: 1.17 $, $Date: 1997/04/24 22:44:10 $)
 
 =head1 DESCRIPTION
 
@@ -138,7 +138,8 @@ on matching balanced text.
 $/ must be a string, not a regular expression.  Awk has to be better
 for something. :-)
 
-Actually, you could do this if you don't mind reading the whole file into
+Actually, you could do this if you don't mind reading the whole file
+into memory:
 
     undef $/;
     @records = split /your_pattern/, <FH>;
@@ -325,9 +326,9 @@ playing hot potato.
 Use the split function:
 
     while (<>) {
-	foreach $word ( split ) {
+	foreach $word ( split ) { 
 	    # do something with $word here
-	}
+	} 
     }
 
 Note that this isn't really a word in the English sense; it's just
@@ -360,7 +361,7 @@ in the previous question:
 If you wanted to do the same thing for lines, you wouldn't need a
 regular expression:
 
-    while (<>) {
+    while (<>) { 
 	$seen{$_}++;
     }
     while ( ($line, $count) = each %seen ) {
@@ -546,19 +547,20 @@ synonymous.  The following set of approaches was offered by Jeffrey
 Friedl, whose article in issue #5 of The Perl Journal talks about this
 very matter.
 
-Let's suppose you have some weird Martian encoding where pairs of ASCII
-uppercase letters encode single Martian letters (i.e. the two bytes
-"CV" make a single Martian letter, as do the two bytes "SG", "VS",
-"XX", etc.). Other bytes represent single characters, just like ASCII.
+Let's suppose you have some weird Martian encoding where pairs of
+ASCII uppercase letters encode single Martian letters (i.e. the two
+bytes "CV" make a single Martian letter, as do the two bytes "SG",
+"VS", "XX", etc.). Other bytes represent single characters, just like
+ASCII.
 
-So, the string of Martian "I am CVSGXX!" uses 12 bytes to encode the nine
-characters 'I', ' ', 'a', 'm', ' ', 'CV', 'SG', 'XX', '!'.
+So, the string of Martian "I am CVSGXX!" uses 12 bytes to encode the
+nine characters 'I', ' ', 'a', 'm', ' ', 'CV', 'SG', 'XX', '!'.
 
 Now, say you want to search for the single character C</GX/>. Perl
-doesn't know about Martian, so it'll find the two bytes "GX" in the
-"I am CVSGXX!"  string, even though that character isn't there: it just
-looks like it is because "SG" is next to "XX", but there's no real "GX".
-This is a big problem.
+doesn't know about Martian, so it'll find the two bytes "GX" in the "I
+am CVSGXX!"  string, even though that character isn't there: it just
+looks like it is because "SG" is next to "XX", but there's no real
+"GX".  This is a big problem.
 
 Here are a few ways, all painful, to deal with it:
 

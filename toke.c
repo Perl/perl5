@@ -50,7 +50,7 @@ static int uni _((I32 f, char *s));
 static char * filter_gets _((SV *sv, PerlIO *fp, STRLEN append));
 static void restore_rsfp _((void *f));
 
-static char too_long[] = "Identifier too long";
+static char ident_too_long[] = "Identifier too long";
 
 static char *linestart;		/* beg. of most recently read line */
 
@@ -4332,7 +4332,7 @@ STRLEN *slp;
     register char *e = d + destlen - 3;  /* two-character token, ending NUL */
     for (;;) {
 	if (d >= e)
-	    croak(too_long);
+	    croak(ident_too_long);
 	if (isALNUM(*s))
 	    *d++ = *s++;
 	else if (*s == '\'' && allow_package && isIDFIRST(s[1])) {
@@ -4374,14 +4374,14 @@ I32 ck_uni;
     if (isDIGIT(*s)) {
 	while (isDIGIT(*s)) {
 	    if (d >= e)
-		croak(too_long);
+		croak(ident_too_long);
 	    *d++ = *s++;
 	}
     }
     else {
 	for (;;) {
 	    if (d >= e)
-		croak(too_long);
+		croak(ident_too_long);
 	    if (isALNUM(*s))
 		*d++ = *s++;
 	    else if (*s == '\'' && isIDFIRST(s[1])) {
@@ -4689,21 +4689,23 @@ register char *s;
     SV *tmpstr;
     char term;
     register char *d;
+    register char *e;
     char *peek;
     int outer = (rsfp && !lex_inwhat);
 
     s += 2;
     d = tokenbuf;
+    e = tokenbuf + sizeof tokenbuf - 1;
     if (!outer)
 	*d++ = '\n';
     for (peek = s; *peek == ' ' || *peek == '\t'; peek++) ;
     if (*peek && strchr("`'\"",*peek)) {
 	s = peek;
 	term = *s++;
-	s = cpytill(d,s,bufend,term,&len);
+	s = delimcpy(d, e, s, bufend, term, &len);
+	d += len;
 	if (s < bufend)
 	    s++;
-	d += len;
     }
     else {
 	if (*s == '\\')
@@ -4712,9 +4714,13 @@ register char *s;
 	    term = '"';
 	if (!isALNUM(*s))
 	    deprecate("bare << to mean <<\"\"");
-	while (isALNUM(*s))
-	    *d++ = *s++;
-    }				/* assuming tokenbuf won't clobber */
+	for (; isALNUM(*s); s++) {
+	    if (d < e)
+		*d++ = *s;
+	}
+    }
+    if (d >= tokenbuf + sizeof tokenbuf - 1)
+	croak("Delimiter for here document is too long");
     *d++ = '\n';
     *d = '\0';
     len = d - tokenbuf;
@@ -4805,15 +4811,17 @@ char *start;
 {
     register char *s = start;
     register char *d;
+    register char *e;
     I32 len;
 
     d = tokenbuf;
-    s = cpytill(d, s+1, bufend, '>', &len);
-    if (s < bufend)
-	s++;
-    else
+    e = tokenbuf + sizeof tokenbuf;
+    s = delimcpy(d, e, s + 1, bufend, '>', &len);
+    if (len >= sizeof tokenbuf)
+	croak("Excessively long <> operator");
+    if (s >= bufend)
 	croak("Unterminated <> operator");
-
+    s++;
     if (*d == '$' && d[1]) d++;
     while (*d && (isALNUM(*d) || *d == '\'' || *d == ':'))
 	d++;
@@ -4956,11 +4964,13 @@ char *start;
 {
     register char *s = start;
     register char *d;
+    register char *e;
     I32 tryiv;
     double value;
     SV *sv;
     I32 floatit;
     char *lastub = 0;
+    static char number_too_long[] = "Number too long";
 
     switch (*s) {
     default:
@@ -5022,6 +5032,7 @@ char *start;
     case '6': case '7': case '8': case '9': case '.':
       decimal:
 	d = tokenbuf;
+	e = tokenbuf + sizeof tokenbuf - 6; /* room for various punctuation */
 	floatit = FALSE;
 	while (isDIGIT(*s) || *s == '_') {
 	    if (*s == '_') {
@@ -5029,19 +5040,22 @@ char *start;
 		    warn("Misplaced _ in number");
 		lastub = ++s;
 	    }
-	    else
+	    else {
+		if (d >= e)
+		    croak(number_too_long);
 		*d++ = *s++;
+	    }
 	}
 	if (dowarn && lastub && s - lastub != 3)
 	    warn("Misplaced _ in number");
 	if (*s == '.' && s[1] != '.') {
 	    floatit = TRUE;
 	    *d++ = *s++;
-	    while (isDIGIT(*s) || *s == '_') {
-		if (*s == '_')
-		    s++;
-		else
-		    *d++ = *s++;
+	    for (; isDIGIT(*s) || *s == '_'; s++) {
+		if (d >= e)
+		    croak(number_too_long);
+		if (*s != '_')
+		    *d++ = *s;
 	    }
 	}
 	if (*s && strchr("eE",*s) && strchr("+-0123456789",s[1])) {
@@ -5050,8 +5064,11 @@ char *start;
 	    *d++ = 'e';		/* At least some Mach atof()s don't grok 'E' */
 	    if (*s == '+' || *s == '-')
 		*d++ = *s++;
-	    while (isDIGIT(*s))
+	    while (isDIGIT(*s)) {
+		if (d >= e)
+		    croak(number_too_long);
 		*d++ = *s++;
+	    }
 	}
 	*d = '\0';
 	sv = NEWSV(92,0);
@@ -5255,7 +5272,7 @@ char *s;
 	where = SvPVX(where_sv);
     }
     msg = sv_2mortal(newSVpv(s, 0));
-    sv_catpvf(msg, " at %S line %ld, ",
+    sv_catpvf(msg, " at %_ line %ld, ",
 	      GvSV(curcop->cop_filegv), (long)curcop->cop_line);
     if (context)
 	sv_catpvf(msg, "near \"%.*s\"\n", contlen, context);
@@ -5268,13 +5285,13 @@ char *s;
         multi_end = 0;
     }
     if (in_eval & 2)
-	warn("%S", msg);
+	warn("%_", msg);
     else if (in_eval)
 	sv_catsv(GvSV(errgv), msg);
     else
 	PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
     if (++error_count >= 10)
-	croak("%S has too many errors.\n", GvSV(curcop->cop_filegv));
+	croak("%_ has too many errors.\n", GvSV(curcop->cop_filegv));
     in_my = 0;
     return 0;
 }
