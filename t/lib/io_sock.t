@@ -32,6 +32,11 @@ BEGIN {
 $| = 1;
 print "1..20\n";
 
+eval {
+    $SIG{ALRM} = sub { die; };
+    alarm 120;
+};
+
 use IO::Socket;
 
 $listen = IO::Socket::INET->new(Listen => 2,

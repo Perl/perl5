@@ -8,7 +8,11 @@ BEGIN {
 
 # don't make this lexical
 $i = 1;
-print "1..23\n";
+
+my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
+my $total_tests = 23;
+if ($Is_EBCDIC) { $total_tests = 20; }
+print "1..$total_tests\n";
 
 sub do_require {
     %INC = ();
@@ -126,7 +130,10 @@ dofile();
 sub dofile { do "bleah.do"; };
 print $x;
 
-# UTF-encoded things
+# UTF-encoded things - skipped on EBCDIC machines
+
+if ($Is_EBCDIC) { exit; }
+
 my $utf8 = chr(0xFEFF);
 
 $i++; do_require(qq(${utf8}print "ok $i\n"; 1;\n));

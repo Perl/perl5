@@ -761,7 +761,7 @@ patterns local to the current package are reset.
 	reset if eof;	    # clear ?? status for next file
     }
 
-This usage is vaguely depreciated, which means it just might possibly
+This usage is vaguely deprecated, which means it just might possibly
 be removed in some distant future version of Perl, perhaps somewhere
 around the year 2168.
 

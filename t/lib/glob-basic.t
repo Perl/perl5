@@ -130,6 +130,10 @@ mkdir "pteerslt", 0777;
 chdir "pteerslt";
 @f_ascii = qw(A.test B.test C.test a.test b.test c.test);
 @f_alpha = qw(A.test a.test B.test b.test C.test c.test);
+if (ord('A') == 193) { # EBCDIC char sets sort lower case before UPPER
+    @f_ascii = sort(@f_ascii);
+    @f_alpha = qw(a.test A.test b.test B.test c.test C.test);
+}
 for (@f_ascii) {
     open T, "> $_";
     close T;

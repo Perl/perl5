@@ -10,7 +10,9 @@ BEGIN {
 }
 
 $| = 1;
-print "1..25\n";
+my $total_tests = 25;
+if (ord('A') == 193) { $total_tests = 24; } # EBCDIC platforms do not warn on UTF-8
+print "1..$total_tests\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
@@ -30,13 +32,21 @@ print "not " unless getc(F) eq "\n";
 print "ok 5\n";
 seek(F,0,0);
 binmode(F,":bytes");
-print "not " unless getc(F) eq chr(0xc4);
+my $chr = chr(0xc4);
+if (ord('A') == 193) { $chr = chr(0x8c); } # EBCDIC
+print "not " unless getc(F) eq $chr;
 print "ok 6\n";
-print "not " unless getc(F) eq chr(0x80);
+$chr = chr(0x80);
+if (ord('A') == 193) { $chr = chr(0x41); } # EBCDIC
+print "not " unless getc(F) eq $chr;
 print "ok 7\n";
-print "not " unless getc(F) eq chr(0xc2);
+$chr = chr(0xc2);
+if (ord('A') == 193) { $chr = chr(0x80); } # EBCDIC
+print "not " unless getc(F) eq $chr;
 print "ok 8\n";
-print "not " unless getc(F) eq chr(0xa3);
+$chr = chr(0xa3);
+if (ord('A') == 193) { $chr = chr(0x44); } # EBCDIC
+print "not " unless getc(F) eq $chr;
 print "ok 9\n";
 print "not " unless getc(F) eq "\n";
 print "ok 10\n";
@@ -70,7 +80,9 @@ print "ok 14\n";
 open F, "a" or die $!; # Not UTF
 $x = <F>;
 chomp($x);
-print "not " unless $x eq chr(196).chr(172);
+$chr = chr(196).chr(172);
+if (ord('A') == 193) { $chr = chr(141).chr(83); } # EBCDIC
+print "not " unless $x eq $chr;
 print "ok 15\n";
 close F;
 
@@ -99,7 +111,7 @@ print "ok 18\n";
 }
 
 { my $x = tell(F);
-    { use bytes; $y += 3;}
+    { use bytes; if (ord('A')==193){$y += 2;}else{$y += 3;}} # EBCDIC ASCII
     print "not ($x,$y) " unless $x == $y;
     print "ok 19\n";
 }
@@ -109,7 +121,9 @@ close F;
 open F, "a" or die $!; # Not UTF
 $x = <F>;
 chomp($x);
-printf "not (%vd) ", $x unless $x eq v196.172.194.130;
+$chr = v196.172.194.130;
+if (ord('A') == 193) { $chr = v141.83.130; } # EBCDIC
+printf "not (%vd) ", $x unless $x eq $chr;
 print "ok 20\n";
 
 open F, "<:utf8", "a" or die $!;
@@ -135,7 +149,9 @@ close F;
 
 open F, "<", "a" or die $!;
 $x = <F>; chomp $x;
-print "not " unless $x eq v196.172.130;
+$chr = v196.172.130;
+if (ord('A') == 193) { $chr = v141.83.130; } # EBCDIC
+print "not " unless $x eq $chr;
 print "ok 23\n";
 
 # Right.
@@ -148,7 +164,7 @@ close F;
 
 open F, "<", "a" or die $!;
 $x = <F>; chomp $x;
-print "not " unless $x eq v196.172.130;
+print "not " unless $x eq $chr;
 print "ok 24\n";
 
 # Now we have a deformed file.

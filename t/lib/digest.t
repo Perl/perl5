@@ -7,10 +7,15 @@ BEGIN {
 
 use Digest;
 
-print "not " unless Digest->MD5->add("abc")->hexdigest eq "900150983cd24fb0d6963f7d28e17f72";
+my $hexdigest = "900150983cd24fb0d6963f7d28e17f72";
+if (ord('A') == 193) { # EBCDIC
+    $hexdigest = "fe4ea0d98f9cd8d1d27f102a93cb0bb0"; # IBM-1047
+}
+
+print "not " unless Digest->MD5->add("abc")->hexdigest eq $hexdigest;
 print "ok 1\n";
 
-print "not " unless Digest->MD5->add("abc")->hexdigest eq "900150983cd24fb0d6963f7d28e17f72";
+print "not " unless Digest->MD5->add("abc")->hexdigest eq $hexdigest;
 print "ok 2\n";
 
 eval {
