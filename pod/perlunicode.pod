@@ -231,7 +231,7 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 =head2 Character encodings for input and output
 
-[XXX: This feature is not yet implemented.]
+See L<Encode>.
 
 =head1 CAVEATS
 

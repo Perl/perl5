@@ -100,10 +100,11 @@ File handles can be marked as accepting Perl's internal encoding of Unicode
 
    open($fh,">:utf8","Uni.txt");
 
-Note for EBCDIC users: the pseudo layer ":utf8" is badly named for you
-since it's not UTF-8 what you will be getting but instead UTF-EBCDIC.
-See http://www.unicode.org/unicode/reports/tr16/ for more information.
-In future release this naming issue may or may not change.
+Note for EBCDIC users: the pseudo layer ":utf8" is erroneously named
+for you since it's not UTF-8 what you will be getting but instead
+UTF-EBCDIC.  See L<perlunicode>, L<utf8>, and
+http://www.unicode.org/unicode/reports/tr16/ for more information.
+In future releases this naming may change.
 
 =item *
 
@@ -199,7 +200,7 @@ C<\s> doesn't.)
 
 =item *
 
-B::Concise, from Stephen McCamant, is a new compiler backend for
+B::Concise, by Stephen McCamant, is a new compiler backend for
 walking the Perl syntax tree, printing concise info about ops.
 The output is highly customisable.
 
@@ -207,8 +208,8 @@ See L<B::Concise> for more information.
 
 =item *
 
-Class::ISA for reporting the search path for a class's ISA tree,
-from Sean Burke, has been added.
+Class::ISA, by Sean Burke, for reporting the search path for a
+class's ISA tree, has been added.
 
 See L<Class::ISA> for more information.
 
@@ -227,7 +228,7 @@ See L<Digest> for more information.
 
 =item *
 
-Digest::MD5 for calculating MD5 digests (checksums), from Gisle Aas,
+Digest::MD5 for calculating MD5 digests (checksums), by Gisle Aas,
 has been added.
 
     use Digest::MD5 'md5_hex';
@@ -243,7 +244,7 @@ See L<Digest::MD5> for more information.
 
 =item *
 
-Encode, from Nick Ing-Simmons, provides a mechanism to translate
+Encode, by Nick Ing-Simmons, provides a mechanism to translate
 between different character encodings.  Support for Unicode,
 ISO-8859-*, ASCII, CP*, KOI8-R, and three variants of EBCDIC are
 compiled in to the module.  Several other encodings (like Japanese,
@@ -287,7 +288,7 @@ See L<Filter::Simple> for more information.
 
 =item *
 
-Filter::Util::Call, from Paul Marquess, provides you with the
+Filter::Util::Call, by Paul Marquess, provides you with the
 framework to write I<Source Filters> in Perl.  For most uses
 the frontend Filter::Simple is to be preferred.
 See L<Filter::Util::Call> for more information.
@@ -309,7 +310,7 @@ and L<Locale::Language> for more information.
 
 =item *
 
-MIME::Base64, from Gisle Aas, allows you to encode data in base64.
+MIME::Base64, by Gisle Aas, allows you to encode data in base64.
 
     use MIME::Base64;
 
@@ -322,7 +323,7 @@ See L<MIME::Base64> for more information.
 
 =item *
 
-MIME::QuotedPrint, from Gisle Aas, allows you to encode data in
+MIME::QuotedPrint, by Gisle Aas, allows you to encode data in
 quoted-printable encoding.
 
     use MIME::QuotedPrint;
@@ -342,7 +343,7 @@ See L<MIME::QuotedPrint> for more information.
 
 =item *
 
-PerlIO::Scalar, from Nick Ing-Simmons, provides the implementation of
+PerlIO::Scalar, by Nick Ing-Simmons, provides the implementation of
 IO to "in memory" Perl scalars as discussed above.  It also serves as
 an example of a loadable layer.  Other future possibilities include
 PerlIO::Array and PerlIO::Code.  See L<PerlIO::Scalar> for more
@@ -350,7 +351,7 @@ information.
 
 =item *
 
-PerlIO::Via, from Nick Ing-Simmons, acts as a PerlIO layer and wraps
+PerlIO::Via, by Nick Ing-Simmons, acts as a PerlIO layer and wraps
 PerlIO layer functionality provided by a class (typically implemented
 in perl code).
 
@@ -362,7 +363,7 @@ to Quoted-Printable.  See L<PerlIO::Via> for more information.
 
 =item *
 
-Pod::Text::Overstrike, from Joe Smith, has been added.
+Pod::Text::Overstrike, by Joe Smith, has been added.
 It converts POD data to formatted overstrike text.
 See L<Pod::Text::Overstrike> for more information.
 
@@ -401,24 +402,25 @@ extracting delimited text sequences from strings.
 
     ($a, $b) = extract_delimited("'never say never', he never said", "'", '');
 
-C<$a> will be "'never say never'", C<$b> will be ', he never said'.
+$a will be "'never say never'", $b will be ', he never said'.
 
 In addition to extract_delimited() there are also extract_bracketed(),
 extract_quotelike(), extract_codeblock(), extract_variable(),
 extract_tagged(), extract_multiple(), gen_delimited_pat(), and
-gen_extract_tagged().  See L<Text::Balanced> for more information.
+gen_extract_tagged().  With these you can implement rather advanced
+parsing algorithms.  See L<Text::Balanced> for more information.
 
 =item *
 
-Tie::RefHash::Nestable, from Edward Avis, allows storing hash references
+Tie::RefHash::Nestable, by Edward Avis, allows storing hash references
 (unlike the standard Tie::Refhash)  The module is contained within
 Tie::RefHash.
 
 =item *
 
-XS::Typemap is a test extension that exercises XS typemaps.
-Nothing gets installed but for extension writers the code is
-worth studying.
+XS::Typemap, by Tim Jenness, is a test extension that exercises XS
+typemaps.  Nothing gets installed but for extension writers the code
+is worth studying.
 
 =back
 
@@ -495,7 +497,7 @@ has been implemented.
 =back
 
 The following modules have been upgraded from the versions at CPAN:
-CPAN, CGI, DB::File, File::Temp, Getopt::Long, Pod::Man, Pod::Text,
+CPAN, CGI, DB_File, File::Temp, Getopt::Long, Pod::Man, Pod::Text,
 Storable, Text-Tabs+Wrap.
 
 =head1 Performance Enhancements
@@ -505,12 +507,13 @@ Storable, Text-Tabs+Wrap.
 =item *
 
 Hashes now use Bob Jenkins "One-at-a-Time" hashing key algorithm
-(http://burtleburtle.net/bob/hash/doobs.html).
-This algorithm is reasonably fast while producing a much better spread
-of values.  Hash values output from the algorithm on a hash of all
-3-char printable ASCII keys comes much closer to passing the DIEHARD
-random number generation tests.  According to perlbench, this change
-has not affected the overall speed of Perl.
+(http://burtleburtle.net/bob/hash/doobs.html).  This algorithm is
+reasonably fast while producing a much better spread of values than
+the old hashing algorithm (originally by Chris Torek, later tweaked by
+Ilya Zakharevich).  Hash values output from the algorithm on a hash of
+all 3-char printable ASCII keys comes much closer to passing the
+DIEHARD random number generation tests.  According to perlbench, this
+change has not affected the overall speed of Perl.
 
 =item *
 
@@ -653,9 +656,9 @@ L<perlbs2000> (for POSIX-BC), and L<perlvmesa> for more information.
 
 =item *
 
-In HP-UX 10.20 Perl threading is now working with the various threading
-packages available for HP-UX.  See L<perlhpux> (or in the source
-distribution, README.hpux) for more information.
+Building perl with -Duseithreads or -Duse5005threads now works under
+HP-UX 10.20 (previously it only worked under 10.30 or later). You will
+need a thread library package installed. See README.hpux.
 
 =item *
 
@@ -777,15 +780,15 @@ and Perl will be built and tested, all in /tmp/perl/build/directory.
 
 =head1 Selected Bug Fixes
 
-Numerous memory leaks and uninitialized memory leaks have been hunted down.
+Numerous memory leaks and uninitialized memory accesses have been hunted down.
 Most importantly anonymous subs used to leak quite a bit.
 
 =over 4
 
 =item *
 
-chop(@list) in list context returned the characters chopped in reverse
-order.  This has been reversed to be in the right order.
+chop(@list) in list context returned the characters chopped in
+reverse order.  This has been reversed to be in the right order.
 
 =item *
 
@@ -863,6 +866,10 @@ Duping socket handles with open(F, ">&MYSOCK") now works under Windows 9x.
 
 =item *
 
+HTML files will be installed in c:\perl\html instead of c:\perl\lib\pod\html
+
+=item *
+
 The makefiles now provide a single switch to bulk-enable all the features
 enabled in ActiveState ActivePerl (a popular binary distribution).
 
@@ -881,7 +888,7 @@ respectively.
 
 =item *
 
-If an attempt to use a (non-blessed) reference as an array element
+If an attempt to use a (non-blessed) reference as an array index
 is made, a warning is given.
 
 =item *
@@ -919,13 +926,67 @@ machines (Perl's malloc is mostly tuned for space).
 
 =head1 Known Problems
 
-Notice that this list doesn't contain problems that were present in
-5.7.0 and still are there, see L<perl570delta> for those.
+Note that unlike other sections in this document (which describe
+changes since 5.7.0) this section is cumulative containing known
+problems for all the 5.7 releases.
+
+=head2 AIX vac 5.0.0.0 May Produce Buggy Code For Perl
+
+The AIX C compiler vac version 5.0.0.0 may produce buggy code,
+resulting in few random tests failing, but when the failing tests
+are run by hand, they succeed.  We suggest upgrading to at least
+vac version 5.0.1.0, that has been known to compile Perl correctly.
+"lslpp -L|grep vac.C" will tell you the vac version.
+
+=head2 lib/ftmp-security tests warn 'system possibly insecure'
+
+Don't panic.  Read INSTALL 'make test' section instead.
+
+=head2 lib/io_multihomed Fails In LP64-Configured HP-UX
+
+The lib/io_multihomed test may hang in HP-UX if Perl has been
+configured to be 64-bit. Because other 64-bit platforms do not hang in
+this test, HP-UX is suspect. All other tests pass in 64-bit HP-UX. The
+test attempts to create and connect to "multihomed" sockets (sockets
+which have multiple IP addresses).
+
+=head2 Test lib/posix Subtest 9 Fails In LP64-Configured HP-UX
+
+If perl is configured with -Duse64bitall, the successful result of the
+subtest 10 of lib/posix may arrive before the successful result of the
+subtest 9, which confuses the test harness so much that it thinks the
+subtest 9 failed.
 
 =head2 lib/b test 19
 
 The test fails in various platforms (PA64 and IA64 are known), but the
 exact cause is still being investigated.
+
+=head2 Linux With Sfio Fails op/misc Test 48
+
+No known fix.
+
+=head2 sigaction test 13 in VMS
+
+The test is known to fail, whether it's because of VMS of because
+of faulty test, is not known.
+
+=head2 sprintf tests 129 and 130
+
+The op/sprintf tests 129 and 130 are known to fail in some platforms.
+Examples include any platform using sfio, and Compaq/Tandem's NonStop-UX.
+The failing platforms do not comply with the ANSI C Standard, line
+19ff on page 134 of ANSI X3.159 1989 to be exact.  (They produce
+something else than "1" and "-1" when formatting 0.6 and -0.6 using
+the printf format "%.0f", most often they produce "0" and "-0".)
+
+=head2  Failure of Thread tests
+
+The subtests 19 and 20 of lib/thr5005.t test are known to fail due to
+fundamental problems in the 5.005 threading implementation. These are
+not new failures--Perl 5.005_0x has the same bugs, but didn't have
+these tests. (Note that support for 5.005-style threading remains
+experimental.)
 
 =head2 Localising a Tied Variable Leaks Memory
 
@@ -939,26 +1000,33 @@ exact cause is still being investigated.
 Code like the above is known to leak memory every time the local()
 is executed.
 
-=head2 sigaction test 13 in VMS
-
-The test is known to fail, whether it's because of VMS of because
-of faulty test, is not known.
-
-=head2 sprintf tests 129 and 130
-
-The op/sprintf tests 129 and 130 are known to fail in some platforms.
-Examples include any platform using sfio, and Tandem's NonStop-UX.
-The failing platforms do not comply with the ANSI C Standard, line
-19ff on page 134 of ANSI X3.159 1989 to be exact.  (They produce
-something else than "1" and "-1" when formatting 0.6 and -0.6 using
-the printf format "%.0f", most often they produce "0" and "-0".)
-
 =head2 Self-tying of Arrays and Hashes Is Forbidden
 
 Self-tying of arrays and hashes is broken in rather deep and
 hard-to-fix ways.  As a stop-gap measure to avoid people from getting
 frustrated at the mysterious results (core dumps, most often) it is
 for now forbidden (you will get a fatal error even from an attempt).
+
+=head2 Building Extensions Can Fail Because Of Largefiles
+
+Some extensions like mod_perl are known to have issues with
+`largefiles', a change brought by Perl 5.6.0 in which file offsets
+default to 64 bits wide, where supported.  Modules may fail to compile
+at all or compile and work incorrectly.  Currently there is no good
+solution for the problem, but Configure now provides appropriate
+non-largefile ccflags, ldflags, libswanted, and libs in the %Config
+hash (e.g., $Config{ccflags_nolargefiles}) so the extensions that are
+having problems can try configuring themselves without the
+largefileness.  This is admittedly not a clean solution, and the
+solution may not even work at all.  One potential failure is whether
+one can (or, if one can, whether it's a good idea) link together at
+all binaries with different ideas about file offsets, all this is
+platform-dependent.
+
+=head2 The Compiler Suite Is Still Experimental
+
+The compiler suite is slowly getting better but is nowhere near
+working order yet.
 
 =head1 Reporting Bugs
 
