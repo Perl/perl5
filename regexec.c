@@ -2394,10 +2394,10 @@ S_regmatch(pTHX_ regnode *prog)
     I32 unwind = 0;
 
     /* used by the trie code */
-    SV                 *sv_accept_buff;  /* accepting states we have traversed */
-    reg_trie_accepted  *accept_buff;     /* "" */
-    reg_trie_data      *trie;            /* what trie are we using right now */
-    U32 accepted = 0;                    /* how many accepting states we have seen*/
+    SV                 *sv_accept_buff = 0;  /* accepting states we have traversed */
+    reg_trie_accepted  *accept_buff = 0;     /* "" */
+    reg_trie_data      *trie;                /* what trie are we using right now */
+    U32 accepted = 0;                        /* how many accepting states we have seen*/
 
 #if 0
     I32 firstcp = PL_savestack_ix;
@@ -2408,7 +2408,7 @@ S_regmatch(pTHX_ regnode *prog)
     SV *dsv1 = PERL_DEBUG_PAD_ZERO(1);
     SV *dsv2 = PERL_DEBUG_PAD_ZERO(2);
 
-    SV *re_debug_flags;
+    SV *re_debug_flags = NULL;
 #endif
 
     GET_RE_DEBUG_FLAGS;
@@ -4581,7 +4581,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     PL_reginput = scan;
 
     DEBUG_r({
-	        SV *re_debug_flags;
+	        SV *re_debug_flags = NULL;
 		SV *prop = sv_newmortal();
                 GET_RE_DEBUG_FLAGS;
                 DEBUG_EXECUTE_r({
