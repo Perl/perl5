@@ -87,3 +87,13 @@ dlerror(void)
 	return buf;
 }
 
+int
+dlclose(void *handle)
+{
+	ULONG rc;
+
+	if ((rc = DosFreeModule((HMODULE)handle)) == 0) return 0;
+
+	retcode = rc;
+	return 2;
+}

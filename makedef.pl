@@ -270,6 +270,7 @@ elsif ($PLATFORM eq 'os2') {
 		    dlopen
 		    dlsym
 		    dlerror
+		    dlclose
 		    my_tmpfile
 		    my_tmpnam
 		    my_flock
