@@ -145,9 +145,8 @@ sub fh_is_fd {
 }
 
 sub xfileno {
-    my ($fh) = @_;
-    return $1 if =~ /\A=?(\d+)\z/;  # deal with $fh just being an fd
-    return fileno $fh;
+    return $1 if $_[0] =~ /\A=?(\d+)\z/;  # deal with fh just being an fd
+    return fileno $_[0];
 }
 
 my $do_spawn = $^O eq 'os2' || $^O eq 'MSWin32';
