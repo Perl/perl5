@@ -730,32 +730,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	FAIL("NULL regexp argument");
 
     PL_regprecomp = savepvn(exp, xend - exp);
-    DEBUG_r(
-	if (!PL_colorset) {
-	    int i = 0;
-	    char *s = PerlEnv_getenv("PERL_RE_COLORS");
-	    
-	    if (s) {
-		PL_colors[0] = s = savepv(s);
-		while (++i < 6) {
-		    s = strchr(s, '\t');
-		    if (s) {
-			*s = '\0';
-			PL_colors[i] = ++s;
-		    }
-		    else
-			PL_colors[i] = "";
-		}
-	    } else {
-		while (i < 6) 
-		    PL_colors[i++] = "";
-	    }
-	    PL_colorset = 1;
-	}
-	);
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sCompiling%s RE `%s%*s%s'\n",
-			  PL_colors[4],PL_colors[5],PL_colors[0],
-			  xend - exp, PL_regprecomp, PL_colors[1]));
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "compiling RE `%*s'\n",
+			  xend - exp, PL_regprecomp));
     PL_regflags = pm->op_pmflags;
     PL_regsawback = 0;
 
@@ -778,6 +754,31 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	return(NULL);
     }
     DEBUG_r(PerlIO_printf(Perl_debug_log, "size %d ", PL_regsize));
+
+    DEBUG_r(
+	if (!PL_colorset) {
+	    int i = 0;
+	    char *s = PerlEnv_getenv("TERMCAP_COLORS");
+	    
+	    PL_colorset = 1;
+	    if (s) {
+		PL_colors[0] = s = savepv(s);
+		while (++i < 4) {
+		    s = strchr(s, '\t');
+		    if (!s) 
+			FAIL("Not enough TABs in TERMCAP_COLORS");
+		    *s = '\0';
+		    PL_colors[i] = ++s;
+		}
+	    } else {
+		while (i < 4) 
+		    PL_colors[i++] = "";
+	    }
+	    /* Reset colors: */
+	    PerlIO_printf(Perl_debug_log, "%s%s%s%s", 
+			  PL_colors[0],PL_colors[1],PL_colors[2],PL_colors[3]);
+	}
+	);
 
     /* Small enough for pointer-storage convention?
        If extralen==0, this means that we will not need long jumps. */
