@@ -48,7 +48,7 @@ The C variable which corresponds to Perl's $^W warning variable.
 */
 
 PERLVAR(Idowarn,	U8)
-PERLVAR(Iutf8locale,	bool)		/* utf8 locale detected */
+PERLVAR(Iwidesyscalls,	bool)		/* unused since 5.8.1 */
 PERLVAR(Idoextract,	bool)
 PERLVAR(Isawampersand,	bool)		/* must save all match strings */
 PERLVAR(Iunsafe,	bool)
@@ -482,7 +482,7 @@ PERLVARI(IOpSpace,I32,0)
 PERLVAR(IOpSlab,I32 *)
 #endif
 
-PERLVAR(Iwantutf8, bool)	/* want utf8 as the default discipline */
+PERLVAR(Iutf8locale,	bool)		/* utf8 locale detected */
 
 PERLVAR(Iutf8_idstart,	SV *)
 PERLVAR(Iutf8_idcont,	SV *)
@@ -494,6 +494,8 @@ PERLVARI(Icheckav_save, AV*, Nullav)	/* save CHECK{}s when compiling */
 PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
 
 PERLVARI(Iin_load_module, int, 0)	/* to prevent recursions in PerlIO_find_layer */
+
+PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).

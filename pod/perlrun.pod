@@ -14,7 +14,7 @@ B<perl>	S<[ B<-sTtuUWX> ]>
 	S<[ B<-x>[I<dir>] ]>
 	S<[ B<-i>[I<extension>] ]>
 	S<[ B<-e> I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
-	S<[ B<-C[:I<boolean>]> ]>
+	S<[ B<-C [I<number/list>] >]> ]>
 
 =head1 DESCRIPTION
 
@@ -265,19 +265,39 @@ is equivalent to
 
 An alternate delimiter may be specified using B<-F>.
 
-=item B<-C[:boolean]>
+=item B<-C [I<number/list>]>
 
-enables Perl to use the Unicode APIs on the target system.  A bare C<-C>
-enables, C<-C:1> also enables, and C<-C:0> disables.
+The C<-C> flag controls some Unicode of the Perl Unicode features.
 
-As of Perl 5.8.1, if C<-C> is used and the locale settings (the LC_ALL,
-LC_CTYPE, and LANG environment variables) indicate a UTF-8 locale,
-the STDIN is expected to be in UTF-8, the STDOUT and STDERR are
-expected to be in UTF-8, and C<:utf8> is the default file open layer.
+As of 5.8.1, the C<-C> can be followed either by a number or a list
+of option letters.
+
+    I    0x0001    STDIN is assumed to be in UTF-8
+    O    0x0002    STDOUT will be in UTF-8
+    E    0x0004    STDERR will be in UTF-8
+    S    0x0007    I + O + E
+    i    0x0008    the default input layer expects UTF-8
+    o    0x0010    the default output layer enforces UTF-8
+    D    0x0018    i + o
+    A    0x0020    the @ARGV elements are supposed to be in UTF-8
+    L    0x0040    normally the IOEio (SD) are unconditional,
+                   the L makes them conditional on the locale environment
+                   variables (the LC_ALL, LC_TYPE, and LANG; in the order
+                   of decreasing precedence)
+
+The C<-C> on its own (not followed by any number or option list) has
+the same effect as <-CSDL>.  In other words, the standard I/O handles
+and the default C<open()> layer are UTF-8-fied B<but> only if the locale
+environment variables indicate a UTF-8 locale.  This behavior follows
+the I<implicit> behaviour of Perl 5.8.0.
+
+You can use C<-C0> to explicitly disable all the above Unicode features.
+
 See L<perluniintro>, L<perlfunc/open>, and L<open> for more information.
-The magic variable C<${^UTF8_LOCALE}> reflects this state,
-see L<perlvar/"${^UTF8_LOCALE}">.  (Another way of setting this
-variable is to set the environment variable PERL_UTF8_LOCALE.)
+
+The magic variable C<${^UNICODE}> reflects the state of this setting,
+see L<perlvar/"${^UNICODE}">.  (Another way of setting this variable
+is to set the environment variable PERL_UNICODE.)
 
 (In Perls earlier than 5.8.1 the C<-C> switch was a Win32-only switch
 that enabled the use of Unicode-aware "wide system call" Win32 APIs.
@@ -1058,7 +1078,7 @@ affect perl on VMS include PERLSHR, PERL_ENV_TABLES, and
 SYS$TIMEZONE_DIFFERENTIAL but are optional and discussed further in
 L<perlvms> and in F<README.vms> in the Perl source distribution.
 
-=item PERL_UTF8_LOCALE
+=item PERL_UNICODE
 
 Equivalent to the B<-C> command-line switch.
 

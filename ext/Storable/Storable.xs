@@ -12,7 +12,7 @@
 #include <perl.h>
 #include <XSUB.h>
 
-#ifndef PERL_VERSION
+#ifndef PATCHLEVEL
 #    include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
 #        include <could_not_find_Perl_patchlevel.h>
