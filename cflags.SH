@@ -135,7 +135,7 @@ for file do
     esac
 
 	if test "X$optdebug" != "X"; then
-		optimize="$optdebug"
+		optimize="$optdebug $optimize"
 	fi
 
 # Add -Wall for the core and core modules iff gcc and not already -Wall
