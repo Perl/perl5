@@ -623,7 +623,7 @@ sub chdir {
 }
 
 sub chown {
-    usage "chown(filename, uid, gid)" if @_ != 3;
+    usage "chown(uid, gid, filename)" if @_ != 3;
     CORE::chown($_[0], $_[1], $_[2]);
 }
 
