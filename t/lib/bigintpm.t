@@ -27,20 +27,32 @@ while (<DATA>) {
                    $try .= "abs \$x;";
                } else {
                    $try .= "\$y = new Math::BigInt \"$args[1]\";";
-                   if ($f eq bcmp){
+                   if ($f eq "bcmp"){
                        $try .= "\$x <=> \$y;";
-                   }elsif ($f eq badd){
+                   }elsif ($f eq "badd"){
                        $try .= "\$x + \$y;";
-                   }elsif ($f eq bsub){
+                   }elsif ($f eq "bsub"){
                        $try .= "\$x - \$y;";
-                   }elsif ($f eq bmul){
+                   }elsif ($f eq "bmul"){
                        $try .= "\$x * \$y;";
-                   }elsif ($f eq bdiv){
+                   }elsif ($f eq "bdiv"){
                        $try .= "\$x / \$y;";
-                   }elsif ($f eq bmod){
+                   }elsif ($f eq "bmod"){
                        $try .= "\$x % \$y;";
-                   }elsif ($f eq bgcd){
+                   }elsif ($f eq "bgcd"){
                        $try .= "Math::BigInt::bgcd(\$x, \$y);";
+                   }elsif ($f eq "blsft"){
+                       $try .= "\$x << \$y;";
+                   }elsif ($f eq "brsft"){
+                       $try .= "\$x >> \$y;";
+                   }elsif ($f eq "band"){
+                       $try .= "\$x & \$y;";
+                   }elsif ($f eq "bior"){
+                       $try .= "\$x | \$y;";
+                   }elsif ($f eq "bxor"){
+                       $try .= "\$x ^ \$y;";
+                   }elsif ($f eq "bnot"){
+                       $try .= "~\$x;";
                    } else { warn "Unknown op"; }
                }
                #print ">>>",$try,"<<<\n";
@@ -311,3 +323,38 @@ abc:+0:NaN
 +3:+2:+1
 +100:+625:+25
 +4096:+81:+1
+&blsft
+abc:abc:NaN
++2:+2:+8
++1:+32:+4294967296
++1:+48:+281474976710656
++8:-2:NaN
+&brsft
+abc:abc:NaN
++8:+2:+2
++4294967296:+32:+1
++281474976710656:+48:+1
++2:-2:NaN
+&band
+abc:abc:NaN
++8:+2:+0
++281474976710656:+0:+0
++281474976710656:+1:+0
++281474976710656:+281474976710656:+281474976710656
+&bior
+abc:abc:NaN
++8:+2:+10
++281474976710656:+0:+281474976710656
++281474976710656:+1:+281474976710657
++281474976710656:+281474976710656:+281474976710656
+&bxor
+abc:abc:NaN
++8:+2:+10
++281474976710656:+0:+281474976710656
++281474976710656:+1:+281474976710657
++281474976710656:+281474976710656:+0
+&bnot
+abc:NaN
++0:-1
++8:-9
++281474976710656:-281474976710657

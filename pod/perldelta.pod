@@ -341,6 +341,11 @@ instead of
 
 	$fullname = File::Spec->catfile($dir1, $dir2, $file);
 
+=item Math::BigInt
+
+The logical operations C<E<lt>E<lt>>, C<E<gt>E<gt>>, C<&>, C<|>
+and C<~> are now supported on bigints.
+
 =item Math::Complex
 
 The accessor methods Re, Im, arg, abs, rho, and theta, can now also
