@@ -134,14 +134,14 @@ if (!$have_time) {
     skip 14
 } else {
  my ($t1, $tf, $t2);
- for my $i (1 .. 9) {
+ for my $i (1 .. 20) {
      $t1 = time();
      $tf = Time::HiRes::time();
      $t2 = 1 + time();
-     last if (($t2 - $t1) <= 1);
+     last if (($t2 - $t1) <= 1) && $t1 <= $tf;
  }
  ok 14, (($t1 <= $tf) && ($tf <= $t2)),
-      "Time::HiRes::time $tf not bracketed by $t1 - $t2";
+      "Time::HiRes::time $tf not bracketed by [$t1, $t2]";
 
 }
 
