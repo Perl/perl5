@@ -695,7 +695,7 @@ In the above I<meaningless> stands for anything: zero, non-zero,
 C<undef>.  A successful system or library call does B<not> set
 the variable to zero.
 
-If used an a string, yields the corresponding system error string.
+If used as a string, yields the corresponding system error string.
 You can assign a number to C<$!> to set I<errno> if, for instance,
 you want C<"$!"> to return the string for error I<n>, or you want
 to set the exit value for the die() operator.  (Mnemonic: What just

@@ -6337,7 +6337,7 @@ thats_really_all_folks:
        /*The big, slow, and stupid way. */
 
       /* Any stack-challenged places. */
-#if defined(EPOC) || 1
+#if defined(EPOC)
       /* EPOC: need to work around SDK features.         *
        * On WINS: MS VC5 generates calls to _chkstk,     *
        * if a "large" stack frame is allocated.          *

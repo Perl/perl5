@@ -966,7 +966,7 @@ PP(pp_pow)
 		    register unsigned int highbit = 8 * sizeof(UV);
 		    register unsigned int lowbit = 0;
 		    register unsigned int diff;
-		    bool odd_power = (power & 1);
+		    bool odd_power = (bool)(power & 1);
 		    while ((diff = (highbit - lowbit) >> 1)) {
 			if (baseuv & ~((1 << (lowbit + diff)) - 1))
 			    lowbit += diff;
