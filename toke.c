@@ -5967,9 +5967,6 @@ start_subparse(I32 is_format, U32 flags)
     av_store(comppad_name, 0, newSVpv("@_", 2));
     curpad[0] = (SV*)newAV();
     SvPADMY_on(curpad[0]);	/* XXX Needed? */
-    CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(compcv));
 #endif /* USE_THREADS */
 
     comppadlist = newAV();

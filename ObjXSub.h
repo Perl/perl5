@@ -1103,8 +1103,6 @@
 #define magic_clearsig      pPerl->Perl_magic_clearsig
 #undef  magic_existspack
 #define magic_existspack    pPerl->Perl_magic_existspack
-#undef  magic_freedefelem
-#define magic_freedefelem   pPerl->Perl_magic_freedefelem
 #undef  magic_freeregexp
 #define magic_freeregexp    pPerl->Perl_magic_freeregexp
 #undef  magic_get

@@ -158,6 +158,8 @@ threadstart(void *arg)
     Safefree(tmps_stack);
     Safefree(ofs);
 
+    SvREFCNT_dec(rs);
+    SvREFCNT_dec(nrs);
     SvREFCNT_dec(statname);
     Safefree(screamfirst);
     Safefree(screamnext);

@@ -377,7 +377,6 @@ magic_clearenv
 magic_clearpack
 magic_clearsig
 magic_existspack
-magic_freedefelem
 magic_freeregexp
 magic_get
 magic_getarylen

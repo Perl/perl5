@@ -164,9 +164,6 @@ perl_construct(register PerlInterpreter *sv_interp)
 	    SvREFCNT(&sv_yes) = (~(U32)0)/2;
 	}
 
-	nrs = newSVpv("\n", 1);
-	rs = SvREFCNT_inc(nrs);
-
 #ifdef PERL_OBJECT
 	/* TODO: */
 	/* sighandlerp = sighandler; */
@@ -185,6 +182,9 @@ perl_construct(register PerlInterpreter *sv_interp)
 	(void)fclose(stdprn);
 #endif
     }
+
+    nrs = newSVpv("\n", 1);
+    rs = SvREFCNT_inc(nrs);
 
     init_stacks(ARGS);
 #ifdef MULTIPLICITY
@@ -428,7 +428,10 @@ perl_destruct(register PerlInterpreter *sv_interp)
     Safefree(ors);	/* $\ */
     ors = Nullch;
 
-    SvREFCNT_dec(nrs);	/* $\ helper */
+    SvREFCNT_dec(rs);	/* $/ */
+    rs = Nullsv;
+
+    SvREFCNT_dec(nrs);	/* $/ helper */
     nrs = Nullsv;
 
     multiline = 0;	/* $* */

@@ -209,7 +209,6 @@ VIRTUAL int	magic_clear_all_env _((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_clearpack	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_clearsig	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_existspack _((SV* sv, MAGIC* mg));
-VIRTUAL int	magic_freedefelem _((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_freeregexp _((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_get	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_getarylen	_((SV* sv, MAGIC* mg));

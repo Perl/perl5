@@ -2905,6 +2905,9 @@ sv_clear(register SV *sv)
     case SVt_PVAV:
 	av_undef((AV*)sv);
 	break;
+    case SVt_PVLV:
+	SvREFCNT_dec(LvTARG(sv));
+	goto freescalar;
     case SVt_PVGV:
 	gp_free((GV*)sv);
 	Safefree(GvNAME(sv));
@@ -2914,7 +2917,6 @@ sv_clear(register SV *sv)
 	   -- JohnPC, 27 Mar 1998 */
 	stash = GvSTASH(sv);
 	/* FALL THROUGH */
-    case SVt_PVLV:
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PVIV:
