@@ -20,13 +20,15 @@ C<IO::Socket> only defines methods for those operations which are common to all
 types of socket. Operations which are specified to a socket in a particular 
 domain have methods defined in sub classes of C<IO::Socket>
 
+C<IO::Socket> will export all functions (and constants) defined by L<Socket>.
+
 =head1 CONSTRUCTOR
 
 =over 4
 
 =item new ( [ARGS] )
 
-Creates a C<IO::Pipe>, which is a reference to a
+Creates a C<IO::Socket>, which is a reference to a
 newly created symbol (see the C<Symbol> package). C<new>
 optionally takes arguments, these arguments are in key-value pairs.
 C<new> only looks for one key C<Domain> which tells new which domain
@@ -81,12 +83,12 @@ with one argument then getsockopt is called, otherwise setsockopt is called.
 
 =item sockdomain
 
-Returns the numerical number for the socket domain type. For example, fir
+Returns the numerical number for the socket domain type. For example, for
 a AF_INET socket the value of &AF_INET will be returned.
 
 =item socktype
 
-Returns the numerical number for the socket type. For example, fir
+Returns the numerical number for the socket type. For example, for
 a SOCK_STREAM socket the value of &SOCK_STREAM will be returned.
 
 =item protocol
@@ -107,14 +109,12 @@ use IO::Handle;
 use Socket 1.3;
 use Carp;
 use strict;
-use vars qw(@ISA @EXPORT_OK $VERSION);
+use vars qw(@ISA $VERSION);
 use Exporter;
 
 @ISA = qw(IO::Handle);
 
-# This one will turn 1.2 => 1.02 and 1.2.3 => 1.0203 and so on ...
-
-$VERSION = do{my @r=(q$Revision: 1.13 $=~/(\d+)/g);sprintf "%d."."%02d"x$#r,@r};
+$VERSION = "1.15";
 
 sub import {
     my $pkg = shift;
@@ -155,12 +155,13 @@ sub configure {
     croak 'IO::Socket: Cannot configure a generic socket'
 	unless defined $domain;
 
-    my $sub = ref(_domain2pkg($domain)) . "::configure";
+    my $class = ref(_domain2pkg($domain));
 
-    goto &{$sub}
-	if(defined &{$sub});
+    croak "IO::Socket: Cannot configure socket in domain '$domain'"
+	unless ref($fh) eq "IO::Socket";
 
-    croak "IO::Socket: Cannot configure socket in domain '$domain' $sub";
+    bless($fh, $class);
+    $fh->configure;
 }
 
 sub socket {
@@ -366,27 +367,6 @@ sub protocol {
     ${*$fh}{'io_socket_protocol'};
 }
 
-sub _addmethod {
-    my $self = shift;
-    my $name;
-
-    foreach $name (@_) {
-	my $n = $name;
-
-	no strict qw(refs);
-
-	*{$n} = sub { 
-		    my $pkg = ref(${*{$_[0]}}{'io_socket_domain'});
-		    my $sub = "${pkg}::${n}";
-		    goto &{$sub} if defined &{$sub};
-		    croak qq{Can't locate object method "$n" via package "$pkg"};
-		}
-		unless defined &{$n};
-    }
-
-}
-
-
 =head1 SUB-CLASSES
 
 =cut
@@ -398,14 +378,13 @@ sub _addmethod {
 package IO::Socket::INET;
 
 use strict;
-use vars qw(@ISA $VERSION);
+use vars qw(@ISA);
 use Socket;
 use Carp;
 use Exporter;
 
 @ISA = qw(IO::Socket);
 
-IO::Socket::INET->_addmethod( qw(sockaddr sockport sockhost peeraddr peerport peerhost));
 IO::Socket::INET->register_domain( AF_INET );
 
 my %socket_type = ( tcp => SOCK_STREAM,
@@ -417,22 +396,45 @@ my %socket_type = ( tcp => SOCK_STREAM,
 C<IO::Socket::INET> provides a constructor to create an AF_INET domain socket
 and some related methods. The constructor can take the following options
 
-    PeerAddr	Remote host address
-    PeerPort	Remote port or service
-    LocalPort	Local host bind	port
-    LocalAddr	Local host bind	address
-    Proto	Protocol name (eg tcp udp etc)
-    Type	Socket type (SOCK_STREAM etc)
+    PeerAddr	Remote host address             <hostname>[:<port>]
+    PeerPort	Remote port or service          <service>[(<no>)] | <no>
+    LocalAddr	Local host bind	address         hostname[:port]
+    LocalPort	Local host bind	port            <service>[(<no>)] | <no>
+    Proto	Protocol name                   "tcp" | "udp" | ...
+    Type	Socket type                     SOCK_STREAM | SOCK_DGRAM | ...
     Listen	Queue size for listen
+    Reuse	Set SO_REUSEADDR before binding
     Timeout	Timeout	value for various operations
 
 
-If Listen is defined then a listen socket is created, else if the socket
-type,   which is derived from the protocol, is SOCK_STREAM then a connect
-is called.
+If C<Listen> is defined then a listen socket is created, else if the
+socket type, which is derived from the protocol, is SOCK_STREAM then
+connect() is called.
 
-Only one of C<Type> or C<Proto> needs to be specified, one will be assumed
-from the other.
+The C<PeerAddr> can be a hostname or the IP-address on the
+"xx.xx.xx.xx" form.  The C<PeerPort> can be a number or a symbolic
+service name.  The service name might be followed by a number in
+parenthesis which is used if the service is not known by the system.
+The C<PeerPort> specification can also be embedded in the C<PeerAddr>
+by preceding it with a ":".
+
+Only one of C<Type> or C<Proto> needs to be specified, one will be
+assumed from the other.  If you specify a symbolic C<PeerPort> port,
+then the constructor will try to derive C<Type> and C<Proto> from
+the service name.
+
+Examples:
+
+   $sock = IO::Socket::INET->new(PeerAddr => 'www.perl.org',
+                                 PeerPort => http(80),
+                                 Proto    => 'tcp');
+
+   $sock = IO::Socket::INET->new(PeerAddr => 'localhost:smtp(25)');
+
+   $sock = IO::Socket::INET->new(Listen    => 5,
+                                 LocalAddr => 'localhost',
+                                 LocalPort => 9000,
+                                 Proto     => 'tcp');
 
 =head2 METHODS
 
@@ -468,7 +470,6 @@ peer host in a text form xx.xx.xx.xx
 =back
 
 =cut
-
 
 sub _sock_info {
   my($addr,$port,$proto) = @_;
@@ -508,7 +509,8 @@ sub _sock_info {
 
 sub _error {
     my $fh = shift;
-    carp join("",ref($fh),": ",@_) if @_;
+    $@ = join("",ref($fh),": ",@_);
+    carp $@ if $^W;
     close($fh)
 	if(defined fileno($fh));
     return undef;
@@ -551,14 +553,19 @@ sub configure {
     ${*$fh}{'io_socket_domain'} = bless \$domain;
 
     $fh->socket(AF_INET, $type, $proto) or
-	return _error($fh);
+	return _error($fh,"$!");
+
+    if ($arg->{Reuse}) {
+	$fh->sockopt(SO_REUSEADDR,1) or
+		return _error($fh);
+    }
 
     $fh->bind($lport || 0, $laddr) or
-	return _error($fh);
+	return _error($fh,"$!");
 
     if(exists $arg->{Listen}) {
 	$fh->listen($arg->{Listen} || 5) or
-	    return _error($fh);
+	    return _error($fh,"$!");
     }
     else {
 	return _error($fh,'Cannot determine remote port')
@@ -569,7 +576,7 @@ sub configure {
 	    	unless(defined $raddr);
 
 	    $fh->connect($rport,$raddr) or
-		return _error($fh);
+		return _error($fh,"$!");
 	}
     }
 
@@ -626,7 +633,6 @@ use Exporter;
 
 @ISA = qw(IO::Socket);
 
-IO::Socket::UNIX->_addmethod(qw(hostpath peerpath));
 IO::Socket::UNIX->register_domain( AF_UNIX );
 
 =head2 IO::Socket::UNIX
@@ -645,11 +651,11 @@ and some related methods. The constructor can take the following options
 
 =item hostpath()
 
-Returns the pathname to the fifo at the local end.
+Returns the pathname to the fifo at the local end
 
 =item peerpath()
 
-Returns the pathanme to the fifo at the peer end.
+Returns the pathanme to the fifo at the peer end
 
 =back
 
@@ -688,32 +694,22 @@ sub configure {
 sub hostpath {
     @_ == 1 or croak 'usage: $fh->hostpath()';
     my $n = $_[0]->sockname || return undef;
-warn length($n);
     (sockaddr_un($n))[0];
 }
 
 sub peerpath {
     @_ == 1 or croak 'usage: $fh->peerpath()';
     my $n = $_[0]->peername || return undef;
-warn length($n);
-my @n = sockaddr_un($n);
-warn join(",",@n);
     (sockaddr_un($n))[0];
 }
+
+=head1 SEE ALSO
+
+L<Socket>, L<IO::Handle>
 
 =head1 AUTHOR
 
 Graham Barr E<lt>F<Graham.Barr@tiuk.ti.com>E<gt>
-
-=head1 REVISION
-
-$Revision: 1.13 $
-
-The VERSION is derived from the revision turning each number after the
-first dot into a 2 digit number so
-
-	Revision 1.8   => VERSION 1.08
-	Revision 1.2.3 => VERSION 1.0203
 
 =head1 COPYRIGHT
 

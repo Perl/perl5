@@ -528,16 +528,20 @@ SV *right;
     register char *dc;
     STRLEN leftlen;
     STRLEN rightlen;
-    register char *lc = SvPV(left, leftlen);
-    register char *rc = SvPV(right, rightlen);
+    register char *lc;
+    register char *rc;
     register I32 len;
     I32 lensave;
-    char *lsave = lc;
-    char *rsave = rc;
+    char *lsave;
+    char *rsave;
 
+    if (sv == left && !SvOK(sv) && !SvGMAGICAL(sv) && SvTYPE(sv) <= SVt_PVMG)
+	sv_setpvn(sv, "", 0);	/* avoid warning on &= etc. */
+    lsave = lc = SvPV(left, leftlen);
+    rsave = rc = SvPV(right, rightlen);
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
-    if (SvOK(sv)) {
+    if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
 	dc = SvPV_force(sv, na);
 	if (SvCUR(sv) < len) {
 	    dc = SvGROW(sv, len + 1);

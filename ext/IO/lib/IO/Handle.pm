@@ -180,12 +180,11 @@ class from C<IO::Handle> and inherit those methods.
 
 Derived from FileHandle.pm by Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>
 
-Version 1.1201 specialized from 1.12 for inclusion in Perl distribution
-
 =cut
 
 require 5.000;
-use vars qw($RCS $VERSION @EXPORT_OK $AUTOLOAD);
+use strict;
+use vars qw($VERSION @EXPORT_OK $AUTOLOAD @ISA);
 use Carp;
 use Symbol;
 use SelectSaver;
@@ -193,8 +192,7 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.1201";
-$RCS = sprintf("%s", q$Revision: 1.15 $ =~ /([\d\.]+)/);
+$VERSION = "1.14";
 
 @EXPORT_OK = qw(
     autoflush
@@ -244,6 +242,7 @@ sub AUTOLOAD {
     $constname =~ s/.*:://;
     my $val = constant($constname);
     defined $val or croak "$constname is not a valid IO::Handle macro";
+    no strict 'refs';
     *$AUTOLOAD = sub { $val };
     goto &$AUTOLOAD;
 }
@@ -270,16 +269,23 @@ sub new_from_fd {
     bless $fh, $class;
 }
 
-#
-# That an IO::Handle is being destroyed does not necessarily mean
-# that the associated filehandle should be closed.  This is because
-# *FOO{FILEHANDLE} may by a synonym for *BAR{FILEHANDLE}.
-#
-# If this IO::Handle really does have the final reference to the
-# given FILEHANDLE, then Perl will close it for us automatically.
-#
-
 sub DESTROY {
+    my ($fh) = @_;
+
+    # During global object destruction, this function may be called
+    # on FILEHANDLEs as well as on the GLOBs that contains them.
+    # Thus the following trickery.  If only the CORE file operators
+    # could deal with FILEHANDLEs, it wouldn't be necessary...
+
+    if ($fh =~ /=FILEHANDLE\(/) {
+	local *TMP = $fh;
+	close(TMP)
+	    if defined fileno(TMP);
+    }
+    else {
+	close($fh)
+	    if defined fileno($fh);
+    }
 }
 
 ################################################

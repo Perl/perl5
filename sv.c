@@ -1949,11 +1949,14 @@ register SV *sstr;
 				    (CvROOT(cv) || CvXSUB(cv)) )
 				warn("Subroutine %s redefined",
 				    GvENAME((GV*)dstr));
-			    SvFAKE_on(cv);
+			    if (SvREFCNT(cv) == 1)
+				SvFAKE_on(cv);
 			}
 		    }
+		    sub_generation++;
 		    if (GvCV(dstr) != (CV*)sref) {
 			GvCV(dstr) = (CV*)sref;
+			GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 			GvASSUMECV_on(dstr);
 		    }
 		    if (curcop->cop_stash != GvSTASH(dstr))
@@ -2897,40 +2900,42 @@ register SV *sv2;
 }
 
 #ifdef USE_LOCALE_COLLATE
-
+/*
+ * Any scalar variable may carry an 'o' magic that contains the
+ * scalar data of the variable transformed to such a format that
+ * a normal memory comparison can be used to compare the data
+ * according to the locale settings.
+ */
 char *
 sv_collxfrm(sv, nxp)
      SV *sv;
      STRLEN *nxp;
 {
-    /* Any scalar variable may carry an 'o' magic that contains the
-     * scalar data of the variable transformed to such a format that
-     * a normal memory comparison can be used to compare the data
-     * according to the locale settings. */
+    MAGIC *mg;
 
-    MAGIC *mg = NULL;
-
-    if (SvMAGICAL(sv)) {
-	mg = mg_find(sv, 'o');
-	if (mg && *(U32*)mg->mg_ptr != collation_ix)
-	    mg = NULL;
-    }
-
-    if (! mg) {
+    mg = SvMAGICAL(sv) ? mg_find(sv, 'o') : NULL;
+    if (!mg || !mg->mg_ptr || *(U32*)mg->mg_ptr != collation_ix) {
 	char *s, *xf;
 	STRLEN len, xlen;
 
+	if (mg)
+	    Safefree(mg->mg_ptr);
 	s = SvPV(sv, len);
 	if ((xf = mem_collxfrm(s, len, &xlen))) {
-	    sv_magic(sv, 0, 'o', 0, 0);
-	    if ((mg = mg_find(sv, 'o'))) {
-		mg->mg_ptr = xf;
-		mg->mg_len = xlen;
+	    if (! mg) {
+		sv_magic(sv, 0, 'o', 0, 0);
+		mg = mg_find(sv, 'o');
+		assert(mg);
 	    }
+	    mg->mg_ptr = xf;
+	    mg->mg_len = xlen;
+	}
+	else {
+	    mg->mg_ptr = NULL;
+	    mg->mg_len = -1;
 	}
     }
-
-    if (mg) {
+    if (mg && mg->mg_ptr) {
 	*nxp = mg->mg_len;
 	return mg->mg_ptr + sizeof(collation_ix);
     }

@@ -1,15 +1,23 @@
 #!./perl
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib' if -d '../lib';
-    require Config; import Config;
-    if ( ($Config{'extensions'} !~ /\bSocket\b/ ||
-          $Config{'extensions'} !~ /\bIO\b/	||
-	  $^O eq 'os2')    &&
-          !(($^O eq 'VMS') && $Config{d_socket})) {
-	print "1..0\n";
-	exit 0;
+    unless(grep /blib/, @INC) {
+	chdir 't' if -d 't';
+	@INC = '../lib' if -d '../lib';
+    }
+}
+
+use Config;
+
+BEGIN {
+    if(-d "lib" && -f "TEST") {
+        if ( ($Config{'extensions'} !~ /\bSocket\b/ ||
+              $Config{'extensions'} !~ /\bIO\b/	||
+	      $^O eq 'os2')    &&
+              !(($^O eq 'VMS') && $Config{d_socket})) {
+	    print "1..0\n";
+	    exit 0;
+        }
     }
 }
 
@@ -25,7 +33,7 @@ $udpb = IO::Socket::INET->new(Proto => 'udp', LocalAddr => 'localhost');
 print "ok 1\n";
 
 $udpa->send("ok 2\n",0,$udpb->sockname);
-$rem = $udpb->recv($buf="",5);
+$udpb->recv($buf="",5);
 print $buf;
 $udpb->send("ok 3\n");
 $udpa->recv($buf="",5);

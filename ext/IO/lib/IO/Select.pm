@@ -1,4 +1,8 @@
 # IO::Select.pm
+#
+# Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
+# software; you can redistribute it and/or modify it under the same terms
+# as Perl itself.
 
 package IO::Select;
 
@@ -47,17 +51,30 @@ will be returned when an event occurs. C<IO::Select> keeps these values in a
 cache which is indexed by the C<fileno> of the handle, so if more than one
 handle with the same C<fileno> is specified then only the last one is cached.
 
+Each handle can be an C<IO::Handle> object, an integer or an array
+reference where the first element is a C<IO::Handle> or an integer.
+
 =item remove ( HANDLES )
 
 Remove all the given handles from the object. This method also works
 by the C<fileno> of the handles. So the exact handles that were added
 need not be passed, just handles that have an equivalent C<fileno>
 
+=item exists ( HANDLE )
+
+Returns a true value (actually the handle itself) if it is present.
+Returns undef otherwise.
+
+=item handles
+
+Return an array of all registered handles.
+
 =item can_read ( [ TIMEOUT ] )
 
-Return an array of handles that are ready for reading. C<TIMEOUT> is the maximum
-amount of time to wait before returning an empty list. If C<TIMEOUT> is
-not given then the call will block.
+Return an array of handles that are ready for reading. C<TIMEOUT> is
+the maximum amount of time to wait before returning an empty list. If
+C<TIMEOUT> is not given and any handles are registered then the call
+will block.
 
 =item can_write ( [ TIMEOUT ] )
 
@@ -65,8 +82,8 @@ Same as C<can_read> except check for handles that can be written to.
 
 =item has_error ( [ TIMEOUT ] )
 
-Same as C<can_read> except check for handles that have an error condition, for
-example EOF.
+Same as C<can_read> except check for handles that have an error
+condition, for example EOF.
 
 =item count ()
 
@@ -74,12 +91,20 @@ Returns the number of handles that the object will check for when
 one of the C<can_> methods is called or the object is passed to
 the C<select> static method.
 
+=item bits()
+
+Return the bit string suitable as argument to the core select() call.
+
+=item bits()
+
+Return the bit string suitable as argument to the core select() call.
+
 =item select ( READ, WRITE, ERROR [, TIMEOUT ] )
 
-C<select> is a static method, that is you call it with the package name
-like C<new>. C<READ>, C<WRITE> and C<ERROR> are either C<undef> or
-C<IO::Select> objects. C<TIMEOUT> is optional and has the same effect as
-before.
+C<select> is a static method, that is you call it with the package
+name like C<new>. C<READ>, C<WRITE> and C<ERROR> are either C<undef>
+or C<IO::Select> objects. C<TIMEOUT> is optional and has the same
+effect as for the core select call.
 
 The result will be an array of 3 elements, each a reference to an array
 which will hold the handles that are ready for reading, writing and have
@@ -120,10 +145,6 @@ listening for more connections on a listen socket
 
 Graham Barr E<lt>F<Graham.Barr@tiuk.ti.com>E<gt>
 
-=head1 REVISION
-
-$Revision: 1.9 $
-
 =head1 COPYRIGHT
 
 Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
@@ -136,13 +157,13 @@ use     strict;
 use     vars qw($VERSION @ISA);
 require Exporter;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.9 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "1.10";
 
 @ISA = qw(Exporter); # This is only so we can do version checking
 
-sub VEC_BITS {0}
-sub FD_COUNT {1}
-sub FIRST_FD {2}
+sub VEC_BITS () {0}
+sub FD_COUNT () {1}
+sub FIRST_FD () {2}
 
 sub new
 {
@@ -159,39 +180,63 @@ sub new
 
 sub add
 {
- my $vec = shift;
- my $f;
-
- $vec->[VEC_BITS] = '' unless defined $vec->[VEC_BITS];
-
- foreach $f (@_)
-  {
-   my $fn = $f =~ /^\d+$/ ? $f : fileno($f);
-   next
-    unless defined $fn;
-   vec($vec->[VEC_BITS],$fn,1) = 1;
-   $vec->[FD_COUNT] += 1
-	unless defined $vec->[$fn+FIRST_FD];
-   $vec->[$fn+FIRST_FD] = $f;
-  }
- $vec->[VEC_BITS] = undef unless $vec->count;
+ shift->_update('add', @_);
 }
+
 
 sub remove
 {
- my $vec = shift;
- my $f;
+ shift->_update('remove', @_);
+}
 
+
+sub exists
+{
+ my $vec = shift;
+ $vec->[$vec->_fileno(shift) + FIRST_FD];
+}
+
+
+sub _fileno
+{
+ my($self, $f) = @_;
+ $f = $f->[0] if ref($f) eq 'ARRAY';
+ ($f =~ /^\d+$/) ? $f : fileno($f);
+}
+
+sub _update
+{
+ my $vec = shift;
+ my $add = shift eq 'add';
+
+ my $bits = $vec->[VEC_BITS];
+ $bits = '' unless defined $bits;
+
+ my $count = 0;
+ my $f;
  foreach $f (@_)
   {
-   my $fn = $f =~ /^\d+$/ ? $f : fileno($f);
-   next
-    unless defined $fn;
-   vec($vec->[VEC_BITS],$fn,1) = 0;
-   $vec->[$fn+FIRST_FD] = undef;
-   $vec->[FD_COUNT] -= 1;
+   my $fn = $vec->_fileno($f);
+   next unless defined $fn;
+   my $i = $fn + FIRST_FD;
+   if ($add) {
+     if (defined $vec->[$i]) {
+	 $vec->[$i] = $f;  # if array rest might be different, so we update
+	 next;
+     }
+     $vec->[FD_COUNT]++;
+     vec($bits, $fn, 1) = 1;
+     $vec->[$i] = $f;
+   } else {      # remove
+     next unless defined $vec->[$i];
+     $vec->[FD_COUNT]--;
+     vec($bits, $fn, 1) = 0;
+     $vec->[$i] = undef;
+   }
+   $count++;
   }
- $vec->[VEC_BITS] = undef unless $vec->count;
+ $vec->[VEC_BITS] = $vec->[FD_COUNT] ? $bits : undef;
+ $count;
 }
 
 sub can_read
@@ -201,7 +246,7 @@ sub can_read
  my $r = $vec->[VEC_BITS];
 
  defined($r) && (select($r,undef,undef,$timeout) > 0)
-    ? _handles($vec, $r)
+    ? handles($vec, $r)
     : ();
 }
 
@@ -212,7 +257,7 @@ sub can_write
  my $w = $vec->[VEC_BITS];
 
  defined($w) && (select(undef,$w,undef,$timeout) > 0)
-    ? _handles($vec, $w)
+    ? handles($vec, $w)
     : ();
 }
 
@@ -223,7 +268,7 @@ sub has_error
  my $e = $vec->[VEC_BITS];
 
  defined($e) && (select(undef,undef,$e,$timeout) > 0)
-    ? _handles($vec, $e)
+    ? handles($vec, $e)
     : ();
 }
 
@@ -231,6 +276,28 @@ sub count
 {
  my $vec = shift;
  $vec->[FD_COUNT];
+}
+
+sub bits
+{
+ my $vec = shift;
+ $vec->[VEC_BITS];
+}
+
+sub as_string  # for debugging
+{
+ my $vec = shift;
+ my $str = ref($vec) . ": ";
+ my $bits = $vec->bits;
+ my $count = $vec->count;
+ $str .= defined($bits) ? unpack("b*", $bits) : "undef";
+ $str .= " $count";
+ my @handles = @$vec;
+ splice(@handles, 0, FIRST_FD);
+ for (@handles) {
+     $str .= " " . (defined($_) ? "$_" : "-");
+ }
+ $str;
 }
 
 sub _max
@@ -254,8 +321,8 @@ sub select
  my @result = ();
 
  my $rb = defined $r ? $r->[VEC_BITS] : undef;
- my $wb = defined $w ? $e->[VEC_BITS] : undef;
- my $eb = defined $e ? $w->[VEC_BITS] : undef;
+ my $wb = defined $w ? $w->[VEC_BITS] : undef;
+ my $eb = defined $e ? $e->[VEC_BITS] : undef;
 
  if(select($rb,$wb,$eb,$t) > 0)
   {
@@ -282,18 +349,20 @@ sub select
  @result;
 }
 
-sub _handles
+
+sub handles
 {
  my $vec = shift;
  my $bits = shift;
  my @h = ();
  my $i;
+ my $max = scalar(@$vec) - 1;
 
- for($i = scalar(@$vec) - 1 ; $i >= FIRST_FD ; $i--)
+ for ($i = FIRST_FD; $i <= $max; $i++)
   {
    next unless defined $vec->[$i];
    push(@h, $vec->[$i])
-      if vec($bits,$i - FIRST_FD,1);
+      if !defined($bits) || vec($bits, $i - FIRST_FD, 1);
   }
  
  @h;

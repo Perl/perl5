@@ -107,13 +107,32 @@
 #define dTOPuv		UV value = TOPu
 #define dPOPuv		UV value = POPu
 
-#define dPOPPOPssrl	SV *right = POPs; SV *left = POPs
-#define dPOPPOPnnrl	double right = POPn; double left = POPn
-#define dPOPPOPiirl	IV right = POPi; IV left = POPi
+#define dPOPXssrl(X)	SV *right = POPs; SV *left = CAT2(X,s)
+#define dPOPXnnrl(X)	double right = POPn; double left = CAT2(X,n)
+#define dPOPXiirl(X)	IV right = POPi; IV left = CAT2(X,i)
 
-#define dPOPTOPssrl	SV *right = POPs; SV *left = TOPs
-#define dPOPTOPnnrl	double right = POPn; double left = TOPn
-#define dPOPTOPiirl	IV right = POPi; IV left = TOPi
+#define USE_LEFT(sv) \
+	(SvOK(sv) || SvGMAGICAL(sv) || !(op->op_flags & OPf_STACKED))
+#define dPOPXnnrl_ul(X)	\
+    double right = POPn;				\
+    SV *leftsv = CAT2(X,s);				\
+    double left = USE_LEFT(leftsv) ? SvNV(leftsv) : 0.0
+#define dPOPXiirl_ul(X) \
+    IV right = POPi;					\
+    SV *leftsv = CAT2(X,s);				\
+    IV left = USE_LEFT(leftsv) ? SvIV(leftsv) : 0
+
+#define dPOPPOPssrl	dPOPXssrl(POP)
+#define dPOPPOPnnrl	dPOPXnnrl(POP)
+#define dPOPPOPnnrl_ul	dPOPXnnrl_ul(POP)
+#define dPOPPOPiirl	dPOPXiirl(POP)
+#define dPOPPOPiirl_ul	dPOPXiirl_ul(POP)
+
+#define dPOPTOPssrl	dPOPXssrl(TOP)
+#define dPOPTOPnnrl	dPOPXnnrl(TOP)
+#define dPOPTOPnnrl_ul	dPOPXnnrl_ul(TOP)
+#define dPOPTOPiirl	dPOPXiirl(TOP)
+#define dPOPTOPiirl_ul	dPOPXiirl_ul(TOP)
 
 #define RETPUSHYES	RETURNX(PUSHs(&sv_yes))
 #define RETPUSHNO	RETURNX(PUSHs(&sv_no))

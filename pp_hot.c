@@ -199,9 +199,9 @@ PP(pp_concat)
     }
     else if (SvGMAGICAL(TARG))
 	mg_get(TARG);
-    else if (!SvOK(TARG)) {
-	s = SvPV_force(TARG, len);
+    else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG) {
 	sv_setpv(TARG, "");	/* Suppress warning. */
+	s = SvPV_force(TARG, len);
     }
     s = SvPV(right,len);
     sv_catpvn(TARG,s,len);
@@ -269,7 +269,7 @@ PP(pp_add)
 {
     dSP; dATARGET; tryAMAGICbin(add,opASSIGN); 
     {
-      dPOPTOPnnrl;
+      dPOPTOPnnrl_ul;
       SETn( left + right );
       RETURN;
     }
@@ -1311,6 +1311,8 @@ PP(pp_iter)
     if (cx->blk_loop.iterix >= (av == curstack ? cx->blk_oldsp : AvFILL(av)))
 	RETPUSHNO;
 
+    SvREFCNT_dec(*cx->blk_loop.itervar);
+
     if (sv = AvARRAY(av)[++cx->blk_loop.iterix])
 	SvTEMP_off(sv);
     else
@@ -1334,7 +1336,8 @@ PP(pp_iter)
 	LvTARGLEN(lv) = 1;
 	sv = (SV*)lv;
     }
-    *cx->blk_loop.itervar = sv;
+
+    *cx->blk_loop.itervar = SvREFCNT_inc(sv);
     RETPUSHYES;
 }
 

@@ -359,6 +359,8 @@ Brand new modules:
     User/grent.pm        Object-oriented wrapper around CORE::getgr*
     User/pwent.pm        Object-oriented wrapper around CORE::getpw*
 
+    lib/Tie/RefHash.pm   Base class for tied hashes with references as keys
+
     UNIVERSAL.pm         Base class for *ALL* classes
 
 =head2 IO
@@ -643,5 +645,4 @@ Constructed by Tom Christiansen, grabbing material with permission
 from innumerable contributors, with kibitzing by more than a few Perl
 porters.
 
-Last update:
-Wed Dec 18 16:18:27 EST 1996
+Last update: Tue Dec 24 16:45:14 EST 1996

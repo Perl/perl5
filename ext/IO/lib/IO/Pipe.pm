@@ -4,7 +4,7 @@ package IO::Pipe;
 
 =head1 NAME
 
-IO::Pipe - supply object methods for pipes
+IO::pipe - supply object methods for pipes
 
 =head1 SYNOPSIS
 
@@ -89,11 +89,7 @@ L<IO::Handle>
 
 =head1 AUTHOR
 
-Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>
-
-=head1 REVISION
-
-$Revision: 1.7 $
+Graham Barr <bodg@tiuk.ti.com>
 
 =head1 COPYRIGHT
 
@@ -104,12 +100,13 @@ as Perl itself.
 =cut
 
 require 5.000;
+use     strict;
 use 	vars qw($VERSION);
 use 	Carp;
 use 	Symbol;
 require IO::Handle;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.7 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "1.08";
 
 sub new {
     my $type = shift;
@@ -165,9 +162,10 @@ sub reader {
     my $pid = $me->_doit(0,@_)
 	if(@_);
 
+    close(${*$me}[1]);
     bless $me, ref($fh);
-    *{*$me} = *{*$fh};		# Alias self to handle
-    bless $fh;			# Really wan't un-bless here
+    *{*$me} = *{*$fh};			# Alias self to handle
+    bless $fh, 'IO::Pipe::DeadEnd';	# Really wan't un-bless here
     ${*$me}{'io_pipe_pid'} = $pid
 	if defined $pid;
 
@@ -181,9 +179,10 @@ sub writer {
     my $pid = $me->_doit(1,@_)
 	if(@_);
 
+    close(${*$me}[0]);
     bless $me, ref($fh);
-    *{*$me} = *{*$fh};		# Alias self to handle
-    bless $fh;			# Really wan't un-bless here
+    *{*$me} = *{*$fh};			# Alias self to handle
+    bless $fh, 'IO::Pipe::DeadEnd';	# Really wan't un-bless here
     ${*$me}{'io_pipe_pid'} = $pid
 	if defined $pid;
 

@@ -107,19 +107,14 @@ free_tmps()
     }
 }
 
-SV *
-save_scalar(gv)
-GV *gv;
+static SV *
+save_scalar_at(sptr)
+SV **sptr;
 {
     register SV *sv;
-    SV *osv = GvSV(gv);
+    SV *osv = *sptr;
 
-    SSCHECK(3);
-    SSPUSHPTR(gv);
-    SSPUSHPTR(osv);
-    SSPUSHINT(SAVEt_SV);
-
-    sv = GvSV(gv) = NEWSV(0,0);
+    sv = *sptr = NEWSV(0,0);
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
 	sv_upgrade(sv, SvTYPE(osv));
 	if (SvGMAGICAL(osv)) {
@@ -141,6 +136,28 @@ GV *gv;
 	localizing = 0;
     }
     return sv;
+}
+
+SV *
+save_scalar(gv)
+GV *gv;
+{
+    SSCHECK(3);
+    SSPUSHPTR(gv);
+    SSPUSHPTR(GvSV(gv));
+    SSPUSHINT(SAVEt_SV);
+    return save_scalar_at(&GvSV(gv));
+}
+
+SV*
+save_svref(sptr)
+SV **sptr;
+{
+    SSCHECK(3);
+    SSPUSHPTR(sptr);
+    SSPUSHPTR(*sptr);
+    SSPUSHINT(SAVEt_SVREF);
+    return save_scalar_at(sptr);
 }
 
 void
@@ -166,42 +183,6 @@ I32 empty;
 	GvGP(gv)->gp_refcnt++;
 	GvINTRO_on(gv);
     }
-}
-
-SV*
-save_svref(sptr)
-SV **sptr;
-{
-    register SV *sv;
-    SV *osv = *sptr;
-
-    SSCHECK(3);
-    SSPUSHPTR(*sptr);
-    SSPUSHPTR(sptr);
-    SSPUSHINT(SAVEt_SVREF);
-
-    sv = *sptr = NEWSV(0,0);
-    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
-	sv_upgrade(sv, SvTYPE(osv));
-	if (SvGMAGICAL(osv)) {
-	    MAGIC* mg;
-	    bool oldtainted = tainted;
-	    mg_get(osv);
-	    if (tainting && tainted && (mg = mg_find(osv, 't'))) {
-		SAVESPTR(mg->mg_obj);
-		mg->mg_obj = osv;
-	    }
-	    SvFLAGS(osv) |= (SvFLAGS(osv) &
-		(SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-	    tainted = oldtainted;
-	}
-	SvMAGIC(sv) = SvMAGIC(osv);
-	SvFLAGS(sv) |= SvMAGICAL(osv);
-	localizing = 1;
-	SvSETMAGIC(sv);
-	localizing = 0;
-    }
-    return sv;
 }
 
 AV *
@@ -450,7 +431,13 @@ I32 base;
         case SAVEt_SV:				/* scalar reference */
 	    value = (SV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-	    sv = GvSV(gv);
+	    ptr = &GvSV(gv);
+	    goto restore_sv;
+        case SAVEt_SVREF:			/* scalar reference */
+	    value = (SV*)SSPOPPTR;
+	    ptr = SSPOPPTR;
+	restore_sv:
+	    sv = *(SV**)ptr;
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
 		SvTYPE(sv) != SVt_PVGV)
 	    {
@@ -460,24 +447,13 @@ I32 base;
 		SvMAGICAL_off(sv);
 		SvMAGIC(sv) = 0;
 	    }
-            SvREFCNT_dec(sv);
-            GvSV(gv) = value;
-	    localizing = 2;
-	    SvSETMAGIC(value);
-	    localizing = 0;
-            break;
-        case SAVEt_SVREF:			/* scalar reference */
-	    ptr = SSPOPPTR;
-	    sv = *(SV**)ptr;
-	    value = (SV*)SSPOPPTR;
-	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
-		SvTYPE(sv) != SVt_PVGV)
+	    else if (SvTYPE(value) >= SVt_PVMG && SvMAGIC(value) &&
+		     SvTYPE(value) != SVt_PVGV)
 	    {
-		(void)SvUPGRADE(value, SvTYPE(sv));
-		SvMAGIC(value) = SvMAGIC(sv);
-		SvFLAGS(value) |= SvMAGICAL(sv);
-		SvMAGICAL_off(sv);
-		SvMAGIC(sv) = 0;
+		SvFLAGS(value) |= (SvFLAGS(value) &
+				   (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+		SvMAGICAL_off(value);
+		SvMAGIC(value) = 0;
 	    }
             SvREFCNT_dec(sv);
 	    *(SV**)ptr = value;
@@ -694,6 +670,8 @@ CONTEXT* cx;
 	if (cx->blk_loop.itervar)
 	    PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%lx\n",
 		(long)cx->blk_loop.itersave);
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERLVAL = 0x%lx\n",
+		(long)cx->blk_loop.iterlval);
 	break;
 
     case CXt_SUBST:

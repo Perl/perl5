@@ -9,6 +9,95 @@ releases.)
 
 
 ----------------
+Version 5.003_16
+----------------
+
+This patch is all bug fixes, library updates, and documentation
+updates.  We'll get to 5.004 RSN, I promise.  :-)
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Fix closures that are not in subroutines"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c
+
+ CORE PORTABILITY
+
+  Title:  "_13: patches for unicos/unicosmk"
+   From:  Dean Roehrich <roehrich@cray.com>
+ Msg-ID:  <199612202038.OAA22805@poplar.cray.com>
+   Date:  Fri, 20 Dec 1996 14:38:50 -0600
+  Files:  Configure MANIFEST hints/unicos.sh hints/unicosmk.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix 'foreach(@ARGV) { while (<>) { push @p,$_ } }'"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  cop.h pp_hot.c scope.c
+
+  Title:  "Eliminate warnings from C< undef $x; $x OP= "foo" >"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  doop.c pp.c pp.h pp_hot.c
+
+  Title:  "Try again to improve method caching"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612240113.UAA09487@monk.mps.ohio-state.edu>
+   Date:  Mon, 23 Dec 1996 20:13:56 -0500 (EST)
+  Files:  gv.c sv.c
+
+  Title:  "Be more careful about 'o' magic memory management"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  mg.c sv.c
+
+  Title:  "Fix bad pointer refs when localized object loses magic"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  scope.c
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Refresh CPAN to 1.09"
+   From:  Andreas Koenig
+  Files:  lib/CPAN.pm
+
+  Title:  "Refresh Net::Ping to 2.02"
+   From:  Russell Mosemann <mose@ccsn.edu>
+  Files:  lib/Net/Ping.pm
+
+  Title:  "Refresh IO to 1.14"
+   From:  Graham Barr
+  Files:  MANIFEST ext/IO/IO.xs ext/IO/README ext/IO/lib/IO/File.pm
+          ext/IO/lib/IO/Handle.pm ext/IO/lib/IO/Pipe.pm
+          ext/IO/lib/IO/Seekable.pm ext/IO/lib/IO/Select.pm
+          ext/IO/lib/IO/Socket.pm t/lib/io_dup.t t/lib/io_pipe.t
+          t/lib/io_sel.t t/lib/io_sock.t t/lib/io_tell.t
+          t/lib/io_udp.t t/lib/io_xs.t
+
+ BUILD PROCESS AND UTILITIES
+
+  Title:  "Don't recurse into subdirs twice on 'make realclean'"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Makefile.SH
+
+  Title:  "Use root EXTERN.h when compiling x2p/malloc.c."
+   From:  Paul Marquess
+  Files:  x2p/Makefile.SH
+
+  Title:  "Fix compilation errors when malloc.c used for x2p"
+   From:  Robin Barker <rmb@cise.npl.co.uk>
+  Files:  malloc.c
+
+ DOCUMENTATION
+
+  Title:  "Edit INSTALL to describe new binary compat setup"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  INSTALL
+
+  Title:  "Update to perllocale.pod"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+  Files:  pod/perllocale.pod
+
+
+----------------
 Version 5.003_15
 ----------------
 

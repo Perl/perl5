@@ -1,3 +1,5 @@
+#
+
 package IO::File;
 
 =head1 NAME
@@ -91,14 +93,11 @@ L<IO::Seekable>
 
 Derived from FileHandle.pm by Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>.
 
-=head1 REVISION
-
-$Revision: 1.5 $
-
 =cut
 
 require 5.000;
-use vars qw($VERSION @EXPORT @EXPORT_OK $AUTOLOAD);
+use strict;
+use vars qw($VERSION @EXPORT @EXPORT_OK $AUTOLOAD @ISA);
 use Carp;
 use Symbol;
 use SelectSaver;
@@ -110,7 +109,7 @@ require DynaLoader;
 
 @ISA = qw(IO::Handle IO::Seekable Exporter DynaLoader);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.5 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "1.06";
 
 @EXPORT = @IO::Seekable::EXPORT;
 

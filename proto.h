@@ -64,8 +64,7 @@ void	debprofdump _((void));
 #endif
 I32	debstack _((void));
 void	deprecate _((char* s));
-OP*	die _((const char* pat,...))
-		__attribute__((format(printf,1,2),noreturn));
+OP*	die _((const char* pat,...)) __attribute__((format(printf,1,2)));
 OP*	die_where _((char* message));
 void	dounwind _((I32 cxix));
 bool	do_aexec _((SV* really, SV** mark, SV** sp));

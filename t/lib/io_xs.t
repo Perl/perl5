@@ -1,13 +1,20 @@
 #!./perl
-$| = 1;
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib' if -d '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bIO\b/ && !($^O eq 'VMS')) {
-	print "1..0\n";
-	exit 0;
+    unless(grep /blib/, @INC) {
+	chdir 't' if -d 't';
+	@INC = '../lib' if -d '../lib';
+    }
+}
+
+use Config;
+
+BEGIN {
+    if(-d "lib" && -f "TEST") {
+        if ($Config{'extensions'} !~ /\bIO\b/ && $^O ne 'VMS') {
+	    print "1..0\n";
+	    exit 0;
+        }
     }
 }
 

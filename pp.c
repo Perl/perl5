@@ -619,7 +619,7 @@ PP(pp_pow)
 {
     dSP; dATARGET; tryAMAGICbin(pow,opASSIGN); 
     {
-      dPOPTOPnnrl;
+      dPOPTOPnnrl_ul;
       SETn( pow( left, right) );
       RETURN;
     }
@@ -629,7 +629,7 @@ PP(pp_multiply)
 {
     dSP; dATARGET; tryAMAGICbin(mult,opASSIGN); 
     {
-      dPOPTOPnnrl;
+      dPOPTOPnnrl_ul;
       SETn( left * right );
       RETURN;
     }
@@ -639,25 +639,24 @@ PP(pp_divide)
 {
     dSP; dATARGET; tryAMAGICbin(div,opASSIGN); 
     {
-      dPOPnv;
-      if (value == 0.0)
+      dPOPPOPnnrl_ul;
+      double value;
+      if (right == 0.0)
 	DIE("Illegal division by zero");
 #ifdef SLOPPYDIVIDE
       /* insure that 20./5. == 4. */
       {
-	double x;
-	I32    k;
-	x =  POPn;
-	if ((double)I_32(x)     == x &&
-	    (double)I_32(value) == value &&
-	    (k = I_32(x)/I_32(value))*I_32(value) == I_32(x)) {
+	IV k;
+	if ((double)I_V(left)  == left &&
+	    (double)I_V(right) == right &&
+	    (k = I_V(left)/I_V(right))*I_V(right) == I_V(left)) {
 	    value = k;
 	} else {
-	    value = x/value;
+	    value = left / right;
 	}
       }
 #else
-      value = POPn / value;
+      value = left / right;
 #endif
       PUSHn( value );
       RETURN;
@@ -682,7 +681,7 @@ PP(pp_modulo)
 	  SETi( left % right );
       }
       else {
-	register double left = TOPn;
+	register double left = USE_LEFT(TOPs) ? SvNV(TOPs) : 0.0;
 	if (left < 0.0)
 	  SETu( (right - (U_V(-left) - 1) % right) - 1 );
 	else
@@ -729,14 +728,19 @@ PP(pp_repeat)
 	    if (SvROK(tmpstr))
 		sv_unref(tmpstr);
 	}
-	SvSetSV(TARG, tmpstr);
-	SvPV_force(TARG, len);
-	if (count >= 1) {
-	    SvGROW(TARG, (count * len) + 1);
-	    if (count > 1)
-		repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);
-	    SvCUR(TARG) *= count;
-	    *SvEND(TARG) = '\0';
+	if (USE_LEFT(tmpstr) || SvTYPE(tmpstr) > SVt_PVMG) {
+	    SvSetSV(TARG, tmpstr);
+	    SvPV_force(TARG, len);
+	    if (count != 1) {
+		if (count < 1)
+		    SvCUR_set(TARG, 0);
+		else {
+		    SvGROW(TARG, (count * len) + 1);
+		    repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);
+		    SvCUR(TARG) *= count;
+		}
+		*SvEND(TARG) = '\0';
+	    }
 	    (void)SvPOK_only(TARG);
 	}
 	else
@@ -751,7 +755,7 @@ PP(pp_subtract)
 {
     dSP; dATARGET; tryAMAGICbin(subtr,opASSIGN); 
     {
-      dPOPTOPnnrl;
+      dPOPTOPnnrl_ul;
       SETn( left - right );
       RETURN;
     }

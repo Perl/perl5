@@ -1200,6 +1200,7 @@ MAGIC* mg;
     return 0;
 }
 
+#ifdef USE_LOCALE_COLLATE
 int
 magic_setcollxfrm(sv,mg)
 SV* sv;
@@ -1209,9 +1210,14 @@ MAGIC* mg;
      * René Descartes said "I think not."
      * and vanished with a faint plop.
      */
-    sv_unmagic(sv, 'o');
+    if (mg->mg_ptr) {
+	Safefree(mg->mg_ptr);
+	mg->mg_ptr = NULL;
+	mg->mg_len = -1;
+    }
     return 0;
 }
+#endif /* USE_LOCALE_COLLATE */
 
 int
 magic_set(sv,mg)

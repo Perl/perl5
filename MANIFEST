@@ -108,6 +108,7 @@ ext/GDBM_File/typemap		GDBM extension interface types
 ext/IO/IO.pm			Top-level interface to IO::* classes
 ext/IO/IO.xs			IO extension external subroutines
 ext/IO/Makefile.PL		IO extension makefile writer
+ext/IO/README			IO extension maintenance notice
 ext/IO/lib/IO/File.pm		IO::File extension Perl module
 ext/IO/lib/IO/Handle.pm		IO::Handle extension Perl module
 ext/IO/lib/IO/Pipe.pm		IO::Pipe extension Perl module
@@ -257,6 +258,7 @@ hints/titanos.sh	Hints for named architecture
 hints/ultrix_4.sh	Hints for named architecture
 hints/umips.sh		Hints for named architecture
 hints/unicos.sh		Hints for named architecture
+hints/unicosmk.sh	Hints for named architecture
 hints/unisysdynix.sh	Hints for named architecture
 hints/utekv.sh		Hints for named architecture
 hints/uts.sh		Hints for named architecture
@@ -601,6 +603,7 @@ t/lib/getopt.t		See if Getopt::Std and Getopt::Long works
 t/lib/hostname.t	See if Sys::Hostname works
 t/lib/io_dup.t		See if dup()-related methods from IO work
 t/lib/io_pipe.t		See if pipe()-related methods from IO work
+t/lib/io_sel.t		See if select()-related methods from IO work
 t/lib/io_sock.t		See if INET socket-related methods from IO work
 t/lib/io_taint.t	See if the untaint method from IO works
 t/lib/io_tell.t		See if seek()/tell()-related methods from IO work
