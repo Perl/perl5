@@ -2,6 +2,22 @@
 
 require 5.003;
 
+my @vars5005 = qw(sv_undef sv_yes sv_no na dowarn
+                 curcop compiling 
+                 tainting tainted stack_base stack_sp sv_arenaroot
+                 curstash DBsub DBsingle debstash
+                 rsfp 
+                 stdingv
+		 defgv
+		 errgv
+		 rsfp_filters
+		 perldb
+		 diehook
+		 dirty
+		 perl_destruct_level
+                );
+
+
 sub readsyms (\%$) {
     my ($syms, $file) = @_;
     %$syms = ();
@@ -140,5 +156,12 @@ print EM <<'END';
 #endif /* EMBED */
 
 #endif /* MULTIPLICITY */
+
+/* perl5.005 names for common perl globals */
 END
 
+for $sym (sort @vars5005) {
+    print EM hide("PL_$sym",$sym);
+}
+
+close(EM);
