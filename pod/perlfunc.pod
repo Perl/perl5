@@ -908,7 +908,12 @@ Equivalent examples:
 
 If the value of EXPR does not end in a newline, the current script line
 number and input line number (if any) are also printed, and a newline
-is supplied.  Hint: sometimes appending C<", stopped"> to your message
+is supplied.  Note that the "input line number" (also known as "chunk")
+is subject to whatever notion of "line" happens to be currently in
+effect, and is also available as the special variable C<$.>.
+See L<perlvar/"$/"> and L<perlvar/"$.">.
+
+Hint: sometimes appending C<", stopped"> to your message
 will cause it to make better sense when the string C<"at foo line 123"> is
 appended.  Suppose you are running script "canasta".
 
