@@ -65,6 +65,7 @@ sub _succeed
 	my ($wantarray,$textref) = splice @_, 0, 2;
 	my ($extrapos, $extralen) = @_>18 ? splice(@_, -2, 2) : (0,0);
 	my ($startlen) = $_[5];
+	my $oppos = $_[6];
 	my $remainderpos = $_[2];
 	if ($wantarray)
 	{
@@ -74,7 +75,7 @@ sub _succeed
 			push @res, substr($$textref,$from,$len);
 		}
 		if ($extralen) {	# CORRECT FILLET
-			my $extra = substr($res[0], $extrapos-$startlen, $extralen, "\n");
+			my $extra = substr($res[0], $extrapos-$oppos, $extralen, "\n");
 			$res[1] = "$extra$res[1]";
 			eval { substr($$textref,$remainderpos,0) = $extra;
 			       substr($$textref,$extrapos,$extralen,"\n")} ;
@@ -757,8 +758,8 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		}
 		my $extrapos = pos($$textref);
 		$$textref =~ m{.*\n}gc;
-		$str1pos = pos($$textref);
-		unless ($$textref =~ m{.*?\n(?=$label\n)}gc) {
+		$str1pos = pos($$textref)--;
+		unless ($$textref =~ m{.*?\n(?=\Q$label\E\n)}gc) {
 			_failmsg qq{Missing here doc terminator ('$label') after "} .
 				     substr($$textref, $startpos, 20) .
 				     q{..."},
@@ -767,7 +768,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 			return;
 		}
 		$rd1pos = pos($$textref);
-		$$textref =~ m{$label\n}gc;
+		$$textref =~ m{\Q$label\E\n}gc;
 		$ld2pos = pos($$textref);
 		return (
 			$startpos,	$oppos-$startpos,	# PREFIX
@@ -800,7 +801,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 	if ($ldel1 =~ /[[(<{]/)
 	{
 		$rdel1 =~ tr/[({</])}>/;
-		_match_bracketed($textref,"",$ldel1,"","",$rdel1)
+		defined(_match_bracketed($textref,"",$ldel1,"","",$rdel1))
 		|| do { pos $$textref = $startpos; return };
 	}
 	else
@@ -835,7 +836,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		if ($ldel2 =~ /[[(<{]/)
 		{
 			pos($$textref)--;	# OVERCOME BROKEN LOOKAHEAD 
-			_match_bracketed($textref,"",$ldel2,"","",$rdel2)
+			defined(_match_bracketed($textref,"",$ldel2,"","",$rdel2))
 			|| do { pos $$textref = $startpos; return };
 		}
 		else
@@ -938,7 +939,7 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 				if (defined($field) && length($field))
 				{
 					if (!$igunk) {
-						$unkpos = pos $$textref
+						$unkpos = $lastpos
 							if length($pref) && !defined($unkpos);
 						if (defined $unkpos)
 						{
