@@ -49,8 +49,6 @@ find(sub {
 	open F, "<$File::Find::name"
 	    or die "Can't open $File::Find::name: $!";
 	my $line;
-	# None of the <netdb.h> _r prototypes are to be used in Tru64.
-	return if $^O eq 'dec_osf' && $_ eq 'netdb.h';
 	while (defined ($line = <F>)) {
 	    if ($line =~ /\b(\w+_r)\b/) {
 		#warn "$1 => $File::Find::name\n";
@@ -64,13 +62,38 @@ find(sub {
 delete $rfuncs{setlocale_r} if $^O eq 'linux';
 
 # delete obsolete (as promised by man pages) symbols
+my $netdb_r_obsolete;
 if ($^O eq 'hpux') {
     delete $rfuncs{crypt_r};
     delete $rfuncs{setlocale_r};
     delete $rfuncs{strerror_r};
+    $netdb_r_obsolete = 1;
 } elsif ($^O eq 'dec_osf') {
     delete $rfuncs{crypt_r};
     delete $rfuncs{strerror_r};
+    $netdb_r_obsolete = 1;
+}
+if ($netdb_r_obsolete) {
+    delete @rfuncs{qw(endhostent_r
+		      endnetent_r
+		      endprotoent_r
+		      endservent_r
+		      gethostbyaddr_r
+		      gethostbyname_r
+		      gethostent_r
+		      getnetbyaddr_r
+		      getnetbyname_r
+		      getnetent_r
+		      getprotobynumber_r
+		      getprotobyname_r
+		      getprotoent_r
+		      getservbyname_r
+		      getservbyport_r
+		      getservent_r
+		      sethostent_r
+		      setnetent_r
+		      setprotoent_r
+		      setservent_r)};
 }
 
 my %syms;
