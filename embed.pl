@@ -98,8 +98,7 @@ sub multon ($$$) {
 }
 sub multoff ($$) {
     my ($sym,$pre) = @_;
-#   hide("$pre$sym", "PL_$sym");
-    return '';
+    return hide("PL_$pre$sym", "PL_$sym");
 }
 
 unlink 'embed.h';
@@ -256,7 +255,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %globvar) {
-    print EM multon($sym,'G','Perl_Vars.');
+    print EM multon($sym,'G','PL_Vars.');
 }
 
 print EM <<'END';

@@ -41,18 +41,18 @@
 #define SPAGAIN		sp = PL_stack_sp
 #define MSPAGAIN	sp = PL_stack_sp; mark = ORIGMARK
 
-#define GETTARGETSTACKED targ = (op->op_flags & OPf_STACKED ? POPs : PAD_SV(op->op_targ))
+#define GETTARGETSTACKED targ = (PL_op->op_flags & OPf_STACKED ? POPs : PAD_SV(PL_op->op_targ))
 #define dTARGETSTACKED SV * GETTARGETSTACKED
 
-#define GETTARGET targ = PAD_SV(op->op_targ)
+#define GETTARGET targ = PAD_SV(PL_op->op_targ)
 #define dTARGET SV * GETTARGET
 
-#define GETATARGET targ = (op->op_flags & OPf_STACKED ? sp[-1] : PAD_SV(op->op_targ))
+#define GETATARGET targ = (PL_op->op_flags & OPf_STACKED ? sp[-1] : PAD_SV(PL_op->op_targ))
 #define dATARGET SV * GETATARGET
 
 #define dTARG SV *targ
 
-#define NORMAL op->op_next
+#define NORMAL PL_op->op_next
 #define DIE return die
 
 #define PUTBACK		PL_stack_sp = sp
@@ -121,7 +121,7 @@
 #define dPOPXiirl(X)	IV right = POPi; IV left = CAT2(X,i)
 
 #define USE_LEFT(sv) \
-	(SvOK(sv) || SvGMAGICAL(sv) || !(op->op_flags & OPf_STACKED))
+	(SvOK(sv) || SvGMAGICAL(sv) || !(PL_op->op_flags & OPf_STACKED))
 #define dPOPXnnrl_ul(X)	\
     double right = POPn;				\
     SV *leftsv = CAT2(X,s);				\
@@ -151,8 +151,8 @@
 #define RETSETNO	RETURNX(SETs(&PL_sv_no))
 #define RETSETUNDEF	RETURNX(SETs(&PL_sv_undef))
 
-#define ARGTARG		op->op_targ
-#define MAXARG		op->op_private
+#define ARGTARG		PL_op->op_targ
+#define MAXARG		PL_op->op_private
 
 #define SWITCHSTACK(f,t) \
     STMT_START {							\
@@ -212,7 +212,7 @@
 #define tryAMAGICun	tryAMAGICunSET
 #define tryAMAGICunSET(meth) tryAMAGICunW(meth,SETs)
 
-#define opASSIGN (op->op_flags & OPf_STACKED)
+#define opASSIGN (PL_op->op_flags & OPf_STACKED)
 #define SETsv(sv)	STMT_START {					\
 		if (opASSIGN) { sv_setsv(TARG, (sv)); SETTARG; }	\
 		else SETs(sv); } STMT_END

@@ -399,7 +399,7 @@ pad_alloc(I32 optype, U32 tmptype)
     PL_curpad = AvARRAY(PL_comppad);
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx alloc %ld for %s\n",
-			  (unsigned long) thr, (unsigned long) curpad,
+			  (unsigned long) thr, (unsigned long) PL_curpad,
 			  (long) retval, op_name[optype]));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx alloc %ld for %s\n",
@@ -415,7 +415,7 @@ pad_sv(PADOFFSET po)
     dTHR;
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx sv %d\n",
-			  (unsigned long) thr, (unsigned long) curpad, po));
+			  (unsigned long) thr, (unsigned long) PL_curpad, po));
 #else
     if (!po)
 	croak("panic: pad_sv po");
@@ -437,7 +437,7 @@ pad_free(PADOFFSET po)
 	croak("panic: pad_free po");
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx free %d\n",
-			  (unsigned long) thr, (unsigned long) curpad, po));
+			  (unsigned long) thr, (unsigned long) PL_curpad, po));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx free %d\n",
 			  (unsigned long) PL_curpad, po));
@@ -458,7 +458,7 @@ pad_swipe(PADOFFSET po)
 	croak("panic: pad_swipe po");
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx swipe %d\n",
-			  (unsigned long) thr, (unsigned long) curpad, po));
+			  (unsigned long) thr, (unsigned long) PL_curpad, po));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx swipe %d\n",
 			  (unsigned long) PL_curpad, po));
@@ -513,10 +513,10 @@ find_threadsv(char *name)
     PADOFFSET key;
     SV **svp;
     /* We currently only handle names of a single character */
-    p = strchr(threadsv_names, *name);
+    p = strchr(PL_threadsv_names, *name);
     if (!p)
 	return NOT_IN_PAD;
-    key = p - threadsv_names;
+    key = p - PL_threadsv_names;
     svp = av_fetch(thr->threadsv, key, FALSE);
     if (!svp) {
 	SV *sv = NEWSV(0, 0);
@@ -537,7 +537,7 @@ find_threadsv(char *name)
 	case '&':
 	case '`':
 	case '\'':
-	    sawampersand = TRUE;
+	    PL_sawampersand = TRUE;
 	    SvREADONLY_on(sv);
 	    /* FALL THROUGH */
 
@@ -1203,7 +1203,7 @@ mod(OP *o, I32 type)
 
 #ifdef USE_THREADS
     case OP_THREADSV:
-	modcount++;	/* XXX ??? */
+	PL_modcount++;	/* XXX ??? */
 	break;
 #endif /* USE_THREADS */
 
@@ -1706,7 +1706,7 @@ fold_constants(register OP *o)
 
     curop = LINKLIST(o);
     o->op_next = 0;
-    op = curop;
+    PL_op = curop;
     CALLRUNOPS();
     sv = *(PL_stack_sp--);
     if (o->op_targ && sv == PAD_SV(o->op_targ))	/* grab pad temp? */
@@ -1769,11 +1769,11 @@ gen_constant_list(register OP *o)
     if (PL_error_count)
 	return o;		/* Don't attempt to run with errors */
 
-    op = curop = LINKLIST(o);
+    PL_op = curop = LINKLIST(o);
     o->op_next = 0;
     pp_pushmark(ARGS);
     CALLRUNOPS();
-    op = curop;
+    PL_op = curop;
     pp_anonlist(ARGS);
     PL_tmps_floor = oldtmps_floor;
 
@@ -2180,7 +2180,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 #ifdef USE_THREADS
 	else if (repl->op_type == OP_THREADSV
 		 && strchr("&`'123456789+",
-			   threadsv_names[repl->op_targ]))
+			   PL_threadsv_names[repl->op_targ]))
 	{
 	    curop = 0;
 	}
@@ -4625,7 +4625,7 @@ ck_shift(OP *o)
 	
 	op_free(o);
 #ifdef USE_THREADS
-	if (!CvUNIQUE(compcv)) {
+	if (!CvUNIQUE(PL_compcv)) {
 	    argop = newOP(OP_PADAV, OPf_REF);
 	    argop->op_targ = 0;		/* curpad[0] is @_ */
 	}
@@ -4910,7 +4910,7 @@ peep(register OP *o)
 	    break;
 	if (!PL_op_seqmax)
 	    PL_op_seqmax++;
-	op = o;
+	PL_op = o;
 	switch (o->op_type) {
 	case OP_NEXTSTATE:
 	case OP_DBSTATE:
@@ -4965,7 +4965,7 @@ peep(register OP *o)
 		OP* pop = o->op_next->op_next;
 		IV i;
 		if (pop->op_type == OP_CONST &&
-		    (op = pop->op_next) &&
+		    (PL_op = pop->op_next) &&
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
 		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF)) &&

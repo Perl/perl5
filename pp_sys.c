@@ -867,7 +867,7 @@ PP(pp_select)
     GV *newdefout, *egv;
     HV *hv;
 
-    newdefout = (op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
+    newdefout = (PL_op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
 
     egv = GvEGV(PL_defoutgv);
     if (!egv)
@@ -995,7 +995,7 @@ PP(pp_enterwrite)
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
 
     IoFLAGS(io) &= ~IOf_DIDTOP;
-    return doform(cv,gv,op->op_next);
+    return doform(cv,gv,PL_op->op_next);
 }
 
 PP(pp_leavewrite)
@@ -1072,7 +1072,7 @@ PP(pp_leavewrite)
 	}
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
-	return doform(cv,gv,op);
+	return doform(cv,gv,PL_op);
     }
 
   forget_top:
@@ -1121,7 +1121,7 @@ PP(pp_prtf)
     SV *sv;
     MAGIC *mg;
 
-    if (op->op_flags & OPf_STACKED)
+    if (PL_op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
     else
 	gv = PL_defoutgv;
@@ -1168,7 +1168,7 @@ PP(pp_prtf)
     }
     else {
 #ifdef USE_LOCALE_NUMERIC
-	if (op->op_private & OPpLOCALE)
+	if (PL_op->op_private & OPpLOCALE)
 	    SET_NUMERIC_LOCAL();
 	else
 	    SET_NUMERIC_STANDARD();
@@ -1235,7 +1235,7 @@ PP(pp_sysread)
     MAGIC *mg;
 
     gv = (GV*)*++MARK;
-    if ((op->op_type == OP_READ || op->op_type == OP_SYSREAD) &&
+    if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD) &&
 	SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
     {
 	SV *sv;
@@ -1270,7 +1270,7 @@ PP(pp_sysread)
     if (!io || !IoIFP(io))
 	goto say_undef;
 #ifdef HAS_SOCKET
-    if (op->op_type == OP_RECV) {
+    if (PL_op->op_type == OP_RECV) {
 	char namebuf[MAXPATHLEN];
 #if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(MPE)
 	bufsize = sizeof (struct sockaddr_in);
@@ -1309,7 +1309,7 @@ PP(pp_sysread)
     if (offset > bufsize) { /* Zero any newly allocated space */
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
-    if (op->op_type == OP_SYSREAD) {
+    if (PL_op->op_type == OP_SYSREAD) {
 	length = PerlLIO_read(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
     }
     else
@@ -1368,7 +1368,7 @@ PP(pp_send)
     MAGIC *mg;
 
     gv = (GV*)*++MARK;
-    if (op->op_type == OP_SYSWRITE &&
+    if (PL_op->op_type == OP_SYSWRITE &&
 	SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
     {
 	SV *sv;
@@ -1396,13 +1396,13 @@ PP(pp_send)
     if (!io || !IoIFP(io)) {
 	length = -1;
 	if (PL_dowarn) {
-	    if (op->op_type == OP_SYSWRITE)
+	    if (PL_op->op_type == OP_SYSWRITE)
 		warn("Syswrite on closed filehandle");
 	    else
 		warn("Send on closed socket");
 	}
     }
-    else if (op->op_type == OP_SYSWRITE) {
+    else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
 	    if (offset < 0) {
@@ -1487,7 +1487,7 @@ PP(pp_sysseek)
     long offset = POPl;
 
     gv = PL_last_in_gv = (GV*)POPs;
-    if (op->op_type == OP_SEEK)
+    if (PL_op->op_type == OP_SEEK)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
 	long n = do_sysseek(gv, offset, whence);
@@ -1507,7 +1507,7 @@ PP(pp_truncate)
 
     SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
-    if (op->op_flags & OPf_SPECIAL) {
+    if (PL_op->op_flags & OPf_SPECIAL) {
 	tmpgv = gv_fetchpv(POPp, FALSE, SVt_PVIO);
     do_ftruncate:
 	TAINT_PROPER("truncate");
@@ -1571,7 +1571,7 @@ PP(pp_ioctl)
     djSP; dTARGET;
     SV *argsv = POPs;
     unsigned int func = U_I(POPn);
-    int optype = op->op_type;
+    int optype = PL_op->op_type;
     char *s;
     IV retval;
     GV *gv = (GV*)POPs;
@@ -1971,7 +1971,7 @@ PP(pp_ssockopt)
 {
     djSP;
 #ifdef HAS_SOCKET
-    int optype = op->op_type;
+    int optype = PL_op->op_type;
     SV *sv;
     int fd;
     unsigned int optname;
@@ -2051,7 +2051,7 @@ PP(pp_getpeername)
 {
     djSP;
 #ifdef HAS_SOCKET
-    int optype = op->op_type;
+    int optype = PL_op->op_type;
     SV *sv;
     int fd;
     GV *gv = (GV*)POPs;
@@ -2125,7 +2125,7 @@ PP(pp_stat)
     I32 gimme;
     I32 max = 13;
 
-    if (op->op_flags & OPf_REF) {
+    if (PL_op->op_flags & OPf_REF) {
 	tmpgv = cGVOP->op_gv;
       do_fstat:
 	if (tmpgv != PL_defgv) {
@@ -2151,8 +2151,8 @@ PP(pp_stat)
 	sv_setpv(PL_statname, SvPV(sv,PL_na));
 	PL_statgv = Nullgv;
 #ifdef HAS_LSTAT
-	PL_laststype = op->op_type;
-	if (op->op_type == OP_LSTAT)
+	PL_laststype = PL_op->op_type;
+	if (PL_op->op_type == OP_LSTAT)
 	    PL_laststatval = PerlLIO_lstat(SvPV(PL_statname, PL_na), &PL_statcache);
 	else
 #endif
@@ -2291,7 +2291,7 @@ PP(pp_ftrowned)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (PL_statcache.st_uid == (op->op_type == OP_FTEOWNED ? PL_euid : PL_uid) )
+    if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ? PL_euid : PL_uid) )
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2473,7 +2473,7 @@ PP(pp_fttty)
     GV *gv;
     char *tmps = Nullch;
 
-    if (op->op_flags & OPf_REF)
+    if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP->op_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
@@ -2513,7 +2513,7 @@ PP(pp_fttext)
     register SV *sv;
     GV *gv;
 
-    if (op->op_flags & OPf_REF)
+    if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP->op_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
@@ -2545,7 +2545,7 @@ PP(pp_fttext)
 	    if (PL_laststatval < 0)
 		RETPUSHUNDEF;
 	    if (S_ISDIR(PL_statcache.st_mode))	/* handle NFS glitch */
-		if (op->op_type == OP_FTTEXT)
+		if (PL_op->op_type == OP_FTTEXT)
 		    RETPUSHNO;
 		else
 		    RETPUSHYES;
@@ -2592,7 +2592,7 @@ PP(pp_fttext)
 	len = PerlLIO_read(i, tbuf, 512);
 	(void)PerlLIO_close(i);
 	if (len <= 0) {
-	    if (S_ISDIR(PL_statcache.st_mode) && op->op_type == OP_FTTEXT)
+	    if (S_ISDIR(PL_statcache.st_mode) && PL_op->op_type == OP_FTTEXT)
 		RETPUSHNO;		/* special case NFS directories */
 	    RETPUSHYES;		/* null file is anything */
 	}
@@ -2615,7 +2615,7 @@ PP(pp_fttext)
 	    odd++;
     }
 
-    if ((odd * 3 > len) == (op->op_type == OP_FTTEXT)) /* allow 1/3 odd */
+    if ((odd * 3 > len) == (PL_op->op_type == OP_FTTEXT)) /* allow 1/3 odd */
 	RETPUSHNO;
     else
 	RETPUSHYES;
@@ -2670,7 +2670,7 @@ PP(pp_chown)
     djSP; dMARK; dTARGET;
     I32 value;
 #ifdef HAS_CHOWN
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -2697,7 +2697,7 @@ PP(pp_unlink)
 {
     djSP; dMARK; dTARGET;
     I32 value;
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -2707,7 +2707,7 @@ PP(pp_chmod)
 {
     djSP; dMARK; dTARGET;
     I32 value;
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -2717,7 +2717,7 @@ PP(pp_utime)
 {
     djSP; dMARK; dTARGET;
     I32 value;
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -3209,7 +3209,7 @@ PP(pp_system)
 	PUSHi(STATUS_CURRENT);
 	RETURN;
     }
-    if (op->op_flags & OPf_STACKED) {
+    if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
 	value = (I32)do_aexec(really, MARK, SP);
     }
@@ -3242,7 +3242,7 @@ PP(pp_exec)
     djSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
 
-    if (op->op_flags & OPf_STACKED) {
+    if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
 	value = (I32)do_aexec(really, MARK, SP);
     }
@@ -3274,7 +3274,7 @@ PP(pp_kill)
     djSP; dMARK; dTARGET;
     I32 value;
 #ifdef HAS_KILL
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -3460,7 +3460,7 @@ PP(pp_gmtime)
 	when = (Time_t)SvIVx(POPs);
 #endif
 
-    if (op->op_type == OP_LOCALTIME)
+    if (PL_op->op_type == OP_LOCALTIME)
 	tmbuf = localtime(&when);
     else
 	tmbuf = gmtime(&when);
@@ -3553,7 +3553,7 @@ PP(pp_shmwrite)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     djSP; dMARK; dTARGET;
-    I32 value = (I32)(do_shmio(op->op_type, MARK, SP) >= 0);
+    I32 value = (I32)(do_shmio(PL_op->op_type, MARK, SP) >= 0);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -3606,7 +3606,7 @@ PP(pp_semget)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     djSP; dMARK; dTARGET;
-    int anum = do_ipcget(op->op_type, MARK, SP);
+    int anum = do_ipcget(PL_op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
 	RETPUSHUNDEF;
@@ -3621,7 +3621,7 @@ PP(pp_semctl)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     djSP; dMARK; dTARGET;
-    int anum = do_ipcctl(op->op_type, MARK, SP);
+    int anum = do_ipcctl(PL_op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
 	RETSETUNDEF;
@@ -3674,7 +3674,7 @@ PP(pp_ghostent)
 {
     djSP;
 #if defined(HAS_GETHOSTBYNAME) || defined(HAS_GETHOSTBYADDR) || defined(HAS_GETHOSTENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETHOST_PROTOS /* XXX Do we need individual probes? */
@@ -3782,7 +3782,7 @@ PP(pp_gnetent)
 {
     djSP;
 #if defined(HAS_GETNETBYNAME) || defined(HAS_GETNETBYADDR) || defined(HAS_GETNETENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETNET_PROTOS /* XXX Do we need individual probes? */
@@ -3869,7 +3869,7 @@ PP(pp_gprotoent)
 {
     djSP;
 #if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;  
 #ifndef HAS_GETPROTO_PROTOS /* XXX Do we need individual probes? */
@@ -3951,7 +3951,7 @@ PP(pp_gservent)
 {
     djSP;
 #if defined(HAS_GETSERVBYNAME) || defined(HAS_GETSERVBYPORT) || defined(HAS_GETSERVENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETSERV_PROTOS /* XXX Do we need individual probes? */
@@ -4150,7 +4150,7 @@ PP(pp_gpwent)
 {
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_GETPWENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register SV *sv;
     struct passwd *pwent;
 
@@ -4282,7 +4282,7 @@ PP(pp_ggrent)
 {
     djSP;
 #if defined(HAS_GROUP) && defined(HAS_GETGRENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;
     struct group *grent;

@@ -1027,14 +1027,14 @@ regmatch(regnode *prog)
 	case EVAL:
 	{
 	    dSP;
-	    OP_4tree *oop = op;
+	    OP_4tree *oop = PL_op;
 	    COP *ocurcop = PL_curcop;
 	    SV **ocurpad = PL_curpad;
 	    SV *ret;
 	    
 	    n = ARG(scan);
-	    op = (OP_4tree*)PL_regdata->data[n];
-	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", op) );
+	    PL_op = (OP_4tree*)PL_regdata->data[n];
+	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", PL_op) );
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 1]);
 
 	    CALLRUNOPS();			/* Scalar context. */
@@ -1047,7 +1047,7 @@ regmatch(regnode *prog)
 		sw = SvTRUE(ret);
 	    } else
 		sv_setsv(save_scalar(PL_replgv), ret);
-	    op = oop;
+	    PL_op = oop;
 	    PL_curpad = ocurpad;
 	    PL_curcop = ocurcop;
 	    break;

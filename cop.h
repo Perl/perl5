@@ -93,7 +93,7 @@ struct block_eval {
 
 #define PUSHEVAL(cx,n,fgv)						\
 	cx->blk_eval.old_in_eval = PL_in_eval;				\
-	cx->blk_eval.old_op_type = op->op_type;				\
+	cx->blk_eval.old_op_type = PL_op->op_type;				\
 	cx->blk_eval.old_name = n;					\
 	cx->blk_eval.old_eval_root = PL_eval_root;				\
 	cx->blk_eval.cur_text = PL_linestr;

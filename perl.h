@@ -1898,15 +1898,15 @@ struct perl_vars {
 };
 
 #ifdef PERL_CORE
-EXT struct perl_vars Perl_Vars;
-EXT struct perl_vars *Perl_VarsPtr INIT(&Perl_Vars);
-#else
+EXT struct perl_vars PL_Vars;
+EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
+#else /* PERL_CORE */
 #if !defined(__GNUC__) || !defined(WIN32)
 EXT
-#endif
-struct perl_vars *Perl_VarsPtr;
-#define Perl_Vars (*((Perl_VarsPtr) ? Perl_VarsPtr : (Perl_VarsPtr =  Perl_GetVars())))
-#endif
+#endif /* WIN32 */
+struct perl_vars *PL_VarsPtr;
+#define PL_Vars (*((PL_VarsPtr) ? PL_VarsPtr : (PL_VarsPtr =  Perl_GetVars())))
+#endif /* PERL_CORE */
 #endif /* PERL_GLOBAL_STRUCT */
 
 #ifdef MULTIPLICITY
@@ -1970,10 +1970,10 @@ typedef void *Thread;
  * If we don't have threads or multiple interpreters
  * these include variables that would have been their struct-s 
  */
-
-#define PERLVAR(var,type) EXT type var;
-#define PERLVARI(var,type,init) EXT type var INIT(init);
-#define PERLVARIC(var,type,init) EXTCONST type var INIT(init);
+                         
+#define PERLVAR(var,type) EXT type PL_##var;
+#define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
+#define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
 
 #ifndef PERL_GLOBAL_STRUCT
 #include "perlvars.h"

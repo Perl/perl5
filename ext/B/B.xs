@@ -558,11 +558,11 @@ threadsv_names()
     PPCODE:
 #ifdef USE_THREADS
 	int i;
-	STRLEN len = strlen(threadsv_names);
+	STRLEN len = strlen(PL_threadsv_names);
 
 	EXTEND(sp, len);
 	for (i = 0; i < len; i++)
-	    PUSHs(sv_2mortal(newSVpv(&threadsv_names[i], 1)));
+	    PUSHs(sv_2mortal(newSVpv(&PL_threadsv_names[i], 1)));
 #endif
 
 

@@ -28,7 +28,7 @@ deb(const char *pat, ...)
     PerlIO_printf(Perl_debug_log, "0x%lx (%s:%ld)\t",
 		  (unsigned long) thr,
 		  SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
-		  (long)curcop->cop_line);
+		  (long)PL_curcop->cop_line);
 #else
     PerlIO_printf(Perl_debug_log, "(%s:%ld)\t",
 	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",

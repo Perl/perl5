@@ -1256,7 +1256,7 @@ die(const char* pat, ...)
 #ifdef USE_THREADS
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: die: curstack = %p, mainstack = %p\n",
-			  thr, curstack, mainstack));
+			  thr, PL_curstack, PL_mainstack));
 #endif /* USE_THREADS */
 
     va_start(args, pat);
@@ -1266,7 +1266,7 @@ die(const char* pat, ...)
 #ifdef USE_THREADS
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: die: message = %s\ndiehook = %p\n",
-			  thr, message, diehook));
+			  thr, message, PL_diehook));
 #endif /* USE_THREADS */
     if (PL_diehook) {
 	/* sv_2cv might call croak() */
@@ -1304,7 +1304,7 @@ die(const char* pat, ...)
 #ifdef USE_THREADS
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 	  "%p: die: restartop = %p, was_in_eval = %d, top_env = %p\n",
-	  thr, restartop, was_in_eval, top_env));
+	  thr, PL_restartop, was_in_eval, PL_top_env));
 #endif /* USE_THREADS */
     if ((!PL_restartop && was_in_eval) || PL_top_env->je_prev)
 	JMPENV_JUMP(3);
@@ -2739,18 +2739,18 @@ new_struct_thread(struct perl_thread *t)
     thr = (Thread) SvPVX(sv);
     /* debug */
     memset(thr, 0xab, sizeof(struct perl_thread));
-    markstack = 0;
-    scopestack = 0;
-    savestack = 0;
-    retstack = 0;
-    dirty = 0;
-    localizing = 0;
+    PL_markstack = 0;
+    PL_scopestack = 0;
+    PL_savestack = 0;
+    PL_retstack = 0;
+    PL_dirty = 0;
+    PL_localizing = 0;
     /* end debug */
 
     thr->oursv = sv;
     init_stacks(ARGS);
 
-    curcop = &compiling;
+    PL_curcop = &PL_compiling;
     thr->cvcache = newHV();
     thr->threadsv = newAV();
     thr->specific = newAV();
@@ -2759,9 +2759,9 @@ new_struct_thread(struct perl_thread *t)
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
 
-    curcop = t->Tcurcop;       /* XXX As good a guess as any? */
-    defstash = t->Tdefstash;   /* XXX maybe these should */
-    curstash = t->Tcurstash;   /* always be set to main? */
+    PL_curcop = t->Tcurcop;       /* XXX As good a guess as any? */
+    PL_defstash = t->Tdefstash;   /* XXX maybe these should */
+    PL_curstash = t->Tcurstash;   /* always be set to main? */
 
 
     /* top_env needs to be non-zero. It points to an area
@@ -2772,60 +2772,60 @@ new_struct_thread(struct perl_thread *t)
        See comments in scope.h    
        Initialize top entry (as in perl.c for main thread)
      */
-    start_env.je_prev = NULL;
-    start_env.je_ret = -1;
-    start_env.je_mustcatch = TRUE;
-    top_env  = &start_env;
+    PL_start_env.je_prev = NULL;
+    PL_start_env.je_ret = -1;
+    PL_start_env.je_mustcatch = TRUE;
+    PL_top_env  = &PL_start_env;
 
-    in_eval = FALSE;
-    restartop = 0;
+    PL_in_eval = FALSE;
+    PL_restartop = 0;
 
-    tainted = t->Ttainted;
-    curpm = t->Tcurpm;         /* XXX No PMOP ref count */
-    nrs = newSVsv(t->Tnrs);
-    rs = SvREFCNT_inc(nrs);
-    last_in_gv = (GV*)SvREFCNT_inc(t->Tlast_in_gv);
-    ofslen = t->Tofslen;
-    ofs = savepvn(t->Tofs, ofslen);
-    defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
-    chopset = t->Tchopset;
-    formtarget = newSVsv(t->Tformtarget);
-    bodytarget = newSVsv(t->Tbodytarget);
-    toptarget = newSVsv(t->Ttoptarget);
+    PL_tainted = t->Ttainted;
+    PL_curpm = t->Tcurpm;         /* XXX No PMOP ref count */
+    PL_nrs = newSVsv(t->Tnrs);
+    PL_rs = SvREFCNT_inc(PL_nrs);
+    PL_last_in_gv = (GV*)SvREFCNT_inc(t->Tlast_in_gv);
+    PL_ofslen = t->Tofslen;
+    PL_ofs = savepvn(t->Tofs, PL_ofslen);
+    PL_defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
+    PL_chopset = t->Tchopset;
+    PL_formtarget = newSVsv(t->Tformtarget);
+    PL_bodytarget = newSVsv(t->Tbodytarget);
+    PL_toptarget = newSVsv(t->Ttoptarget);
 
-    statname = NEWSV(66,0);
-    maxscream = -1;
-    regcompp = FUNC_NAME_TO_PTR(pregcomp);
-    regexecp = FUNC_NAME_TO_PTR(regexec_flags);
-    regindent = 0;
-    reginterp_cnt = 0;
-    lastscream = Nullsv;
-    screamfirst = 0;
-    screamnext = 0;
-    reg_start_tmp = 0;
-    reg_start_tmpl = 0;
+    PL_statname = NEWSV(66,0);
+    PL_maxscream = -1;
+    PL_regcompp = FUNC_NAME_TO_PTR(pregcomp);
+    PL_regexecp = FUNC_NAME_TO_PTR(regexec_flags);
+    PL_regindent = 0;
+    PL_reginterp_cnt = 0;
+    PL_lastscream = Nullsv;
+    PL_screamfirst = 0;
+    PL_screamnext = 0;
+    PL_reg_start_tmp = 0;
+    PL_reg_start_tmpl = 0;
     
     /* Initialise all per-thread SVs that the template thread used */
     svp = AvARRAY(t->threadsv);
     for (i = 0; i <= AvFILLp(t->threadsv); i++, svp++) {
-	if (*svp && *svp != &sv_undef) {
+	if (*svp && *svp != &PL_sv_undef) {
 	    SV *sv = newSVsv(*svp);
 	    av_store(thr->threadsv, i, sv);
-	    sv_magic(sv, 0, 0, &threadsv_names[i], 1);
+	    sv_magic(sv, 0, 0, &PL_threadsv_names[i], 1);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 		"new_struct_thread: copied threadsv %d %p->%p\n",i, t, thr));
 	}
     } 
     thr->threadsvp = AvARRAY(thr->threadsv);
 
-    MUTEX_LOCK(&threads_mutex);
-    nthreads++;
-    thr->tid = ++threadnum;
+    MUTEX_LOCK(&PL_threads_mutex);
+    PL_nthreads++;
+    thr->tid = ++PL_threadnum;
     thr->next = t->next;
     thr->prev = t;
     t->next = thr;
     thr->next->prev = thr;
-    MUTEX_UNLOCK(&threads_mutex);
+    MUTEX_UNLOCK(&PL_threads_mutex);
 
 #ifdef HAVE_THREAD_INTERN
     init_thread_intern(thr);
@@ -2851,7 +2851,7 @@ Perl_huge(void)
 struct perl_vars *
 Perl_GetVars(void)
 {
- return &Perl_Vars;
+ return &PL_Vars;
 }
 #endif
 

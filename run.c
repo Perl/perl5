@@ -19,7 +19,7 @@
 #ifdef PERL_OBJECT
 #define CALLOP this->*op
 #else
-#define CALLOP *op
+#define CALLOP *PL_op
 #endif
 
 int
@@ -27,7 +27,7 @@ runops_standard(void)
 {
     dTHR;
 
-    while ( op = (CALLOP->op_ppaddr)(ARGS) ) ;
+    while ( PL_op = (CALLOP->op_ppaddr)(ARGS) ) ;
 
     TAINT_NOT;
     return 0;
@@ -49,7 +49,7 @@ runops_debug(void)
 {
 #ifdef DEBUGGING
     dTHR;
-    if (!op) {
+    if (!PL_op) {
 	warn("NULL OP IN RUN");
 	return 0;
     }
@@ -60,10 +60,10 @@ runops_debug(void)
 		PerlIO_printf(Perl_debug_log, "WARNING: %lx changed from %lx to %lx\n",
 		    (long)watchaddr, (long)watchok, (long)*watchaddr);
 	    DEBUG_s(debstack());
-	    DEBUG_t(debop(op));
-	    DEBUG_P(debprof(op));
+	    DEBUG_t(debop(PL_op));
+	    DEBUG_P(debprof(PL_op));
 	}
-    } while ( op = (CALLOP->op_ppaddr)(ARGS) );
+    } while ( PL_op = (CALLOP->op_ppaddr)(ARGS) );
 
     TAINT_NOT;
     return 0;

@@ -20,8 +20,8 @@ main(int argc, char **argv, char **env)
 
 #ifdef PERL_GLOBAL_STRUCT
 #define PERLVAR(var,type) /**/
-#define PERLVARI(var,type,init) Perl_Vars.var = init;
-#define PERLVARIC(var,type,init) Perl_Vars.var = init;
+#define PERLVARI(var,type,init) PL_Vars.var = init;
+#define PERLVARIC(var,type,init) PL_Vars.var = init;
 #include "perlvars.h"
 #undef PERLVAR
 #undef PERLVARI

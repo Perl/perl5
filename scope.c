@@ -528,7 +528,7 @@ save_op(void)
 {
     dTHR;
     SSCHECK(2);
-    SSPUSHPTR(op);
+    SSPUSHPTR(PL_op);
     SSPUSHINT(SAVEt_OP);
 }
 
@@ -804,7 +804,7 @@ leave_scope(I32 base)
 	    SvREFCNT_dec(value);
 	    break;
 	case SAVEt_OP:
-	    op = (OP*)SSPOPPTR;
+	    PL_op = (OP*)SSPOPPTR;
 	    break;
 	case SAVEt_HINTS:
 	    if (GvHV(PL_hintgv)) {

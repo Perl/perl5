@@ -124,20 +124,20 @@ perl_construct(register PerlInterpreter *sv_interp)
 #ifdef ALLOC_THREAD_KEY
         ALLOC_THREAD_KEY;
 #else
-	if (pthread_key_create(&thr_key, 0))
+	if (pthread_key_create(&PL_thr_key, 0))
 	    croak("panic: pthread_key_create");
 #endif
-	MUTEX_INIT(&sv_mutex);
+	MUTEX_INIT(&PL_sv_mutex);
 	/*
 	 * Safe to use basic SV functions from now on (though
 	 * not things like mortals or tainting yet).
 	 */
-	MUTEX_INIT(&eval_mutex);
-	COND_INIT(&eval_cond);
-	MUTEX_INIT(&threads_mutex);
-	COND_INIT(&nthreads_cond);
+	MUTEX_INIT(&PL_eval_mutex);
+	COND_INIT(&PL_eval_cond);
+	MUTEX_INIT(&PL_threads_mutex);
+	COND_INIT(&PL_nthreads_cond);
 #ifdef EMULATE_ATOMIC_REFCOUNTS
-	MUTEX_INIT(&svref_mutex);
+	MUTEX_INIT(&PL_svref_mutex);
 #endif /* EMULATE_ATOMIC_REFCOUNTS */
 	
 	thr = init_main_thread();
@@ -255,10 +255,10 @@ perl_destruct(register PerlInterpreter *sv_interp)
 #ifndef FAKE_THREADS
     /* Pass 1 on any remaining threads: detach joinables, join zombies */
   retry_cleanup:
-    MUTEX_LOCK(&threads_mutex);
+    MUTEX_LOCK(&PL_threads_mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "perl_destruct: waiting for %d threads...\n",
-			  nthreads - 1));
+			  PL_nthreads - 1));
     for (t = thr->next; t != thr; t = t->next) {
 	MUTEX_LOCK(&t->mutex);
 	switch (ThrSTATE(t)) {
@@ -268,14 +268,14 @@ perl_destruct(register PerlInterpreter *sv_interp)
 				  "perl_destruct: joining zombie %p\n", t));
 	    ThrSETSTATE(t, THRf_DEAD);
 	    MUTEX_UNLOCK(&t->mutex);
-	    nthreads--;
+	    PL_nthreads--;
 	    /*
 	     * The SvREFCNT_dec below may take a long time (e.g. av
 	     * may contain an object scalar whose destructor gets
 	     * called) so we have to unlock threads_mutex and start
 	     * all over again.
 	     */
-	    MUTEX_UNLOCK(&threads_mutex);
+	    MUTEX_UNLOCK(&PL_threads_mutex);
 	    JOIN(t, &av);
 	    SvREFCNT_dec((SV*)av);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
@@ -291,7 +291,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 	     * deadlock if it panics. It's only a breach of good style
 	     * not a bug since they are unlocks not locks.
 	     */
-	    MUTEX_UNLOCK(&threads_mutex);
+	    MUTEX_UNLOCK(&PL_threads_mutex);
 	    DETACH(t);
 	    MUTEX_UNLOCK(&t->mutex);
 	    goto retry_cleanup;
@@ -306,18 +306,18 @@ perl_destruct(register PerlInterpreter *sv_interp)
     /* We leave the above "Pass 1" loop with threads_mutex still locked */
 
     /* Pass 2 on remaining threads: wait for the thread count to drop to one */
-    while (nthreads > 1)
+    while (PL_nthreads > 1)
     {
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			      "perl_destruct: final wait for %d threads\n",
-			      nthreads - 1));
-	COND_WAIT(&nthreads_cond, &threads_mutex);
+			      PL_nthreads - 1));
+	COND_WAIT(&PL_nthreads_cond, &PL_threads_mutex);
     }
     /* At this point, we're the last thread */
-    MUTEX_UNLOCK(&threads_mutex);
+    MUTEX_UNLOCK(&PL_threads_mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(), "perl_destruct: armageddon has arrived\n"));
-    MUTEX_DESTROY(&threads_mutex);
-    COND_DESTROY(&nthreads_cond);
+    MUTEX_DESTROY(&PL_threads_mutex);
+    COND_DESTROY(&PL_nthreads_cond);
 #endif /* !defined(FAKE_THREADS) */
 #endif /* USE_THREADS */
 
@@ -553,15 +553,15 @@ perl_destruct(register PerlInterpreter *sv_interp)
     
     DEBUG_P(debprofdump());
 #ifdef USE_THREADS
-    MUTEX_DESTROY(&sv_mutex);
-    MUTEX_DESTROY(&eval_mutex);
-    COND_DESTROY(&eval_cond);
+    MUTEX_DESTROY(&PL_sv_mutex);
+    MUTEX_DESTROY(&PL_eval_mutex);
+    COND_DESTROY(&PL_eval_cond);
 
     /* As the penultimate thing, free the non-arena SV for thrsv */
-    Safefree(SvPVX(thrsv));
-    Safefree(SvANY(thrsv));
-    Safefree(thrsv);
-    thrsv = Nullsv;
+    Safefree(SvPVX(PL_thrsv));
+    Safefree(SvANY(PL_thrsv));
+    Safefree(PL_thrsv);
+    PL_thrsv = Nullsv;
 #endif /* USE_THREADS */
     
     /* As the absolutely last thing, free the non-arena SV for mess() */
@@ -923,12 +923,12 @@ print \"  \\@INC:\\n    @INC\\n\";");
     PL_min_intro_pending = 0;
     PL_padix = 0;
 #ifdef USE_THREADS
-    av_store(comppad_name, 0, newSVpv("@_", 2));
-    curpad[0] = (SV*)newAV();
-    SvPADMY_on(curpad[0]);	/* XXX Needed? */
-    CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(compcv));
+    av_store(PL_comppad_name, 0, newSVpv("@_", 2));
+    PL_curpad[0] = (SV*)newAV();
+    SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
+    CvOWNER(PL_compcv) = 0;
+    New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
+    MUTEX_INIT(CvMUTEXP(PL_compcv));
 #endif /* USE_THREADS */
 
     comppadlist = newAV();
@@ -1071,13 +1071,13 @@ perl_run(PerlInterpreter *sv_interp)
     /* do it */
 
     if (PL_restartop) {
-	op = PL_restartop;
+	PL_op = PL_restartop;
 	PL_restartop = 0;
 	CALLRUNOPS();
     }
     else if (PL_main_start) {
 	CvDEPTH(PL_main_cv) = 1;
-	op = PL_main_start;
+	PL_op = PL_main_start;
 	CALLRUNOPS();
     }
 
@@ -1177,13 +1177,13 @@ perl_call_method(char *methname, I32 flags)
 {
     dSP;
     OP myop;
-    if (!op)
-	op = &myop;
+    if (!PL_op)
+	PL_op = &myop;
     XPUSHs(sv_2mortal(newSVpv(methname,0)));
     PUTBACK;
     pp_method(ARGS);
-	if(op == &myop)
-		op = Nullop;
+	if(PL_op == &myop)
+		PL_op = Nullop;
     return perl_call_sv(*PL_stack_sp--, flags);
 }
 
@@ -1201,7 +1201,7 @@ perl_call_sv(SV *sv, I32 flags)
     bool oldcatch = CATCH_GET;
     dJMPENV;
     int ret;
-    OP* oldop = op;
+    OP* oldop = PL_op;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1216,7 +1216,7 @@ perl_call_sv(SV *sv, I32 flags)
 		      (flags & G_ARRAY) ? OPf_WANT_LIST :
 		      OPf_WANT_SCALAR);
     SAVEOP();
-    op = (OP*)&myop;
+    PL_op = (OP*)&myop;
 
     EXTEND(PL_stack_sp, 1);
     *++PL_stack_sp = sv;
@@ -1230,10 +1230,10 @@ perl_call_sv(SV *sv, I32 flags)
 	    * curstash may be meaningless. */
 	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((CV*)sv) != PL_debstash)
 	  && !(flags & G_NODEBUG))
-	op->op_private |= OPpENTERSUB_DB;
+	PL_op->op_private |= OPpENTERSUB_DB;
 
     if (flags & G_EVAL) {
-	cLOGOP->op_other = op;
+	cLOGOP->op_other = PL_op;
 	PL_markstack_ptr--;
 	/* we're trying to emulate pp_entertry() here */
 	{
@@ -1243,10 +1243,10 @@ perl_call_sv(SV *sv, I32 flags)
 	    ENTER;
 	    SAVETMPS;
 	    
-	    push_return(op->op_next);
+	    push_return(PL_op->op_next);
 	    PUSHBLOCK(cx, CXt_EVAL, PL_stack_sp);
 	    PUSHEVAL(cx, 0, 0);
-	    PL_eval_root = op;             /* Only needed so that goto works right. */
+	    PL_eval_root = PL_op;             /* Only needed so that goto works right. */
 	    
 	    PL_in_eval = 1;
 	    if (flags & G_KEEPERR)
@@ -1274,7 +1274,7 @@ perl_call_sv(SV *sv, I32 flags)
 	    /* NOTREACHED */
 	case 3:
 	    if (PL_restartop) {
-		op = PL_restartop;
+		PL_op = PL_restartop;
 		PL_restartop = 0;
 		break;
 	    }
@@ -1291,9 +1291,9 @@ perl_call_sv(SV *sv, I32 flags)
     else
 	CATCH_SET(TRUE);
 
-    if (op == (OP*)&myop)
-	op = pp_entersub(ARGS);
-    if (op)
+    if (PL_op == (OP*)&myop)
+	PL_op = pp_entersub(ARGS);
+    if (PL_op)
 	CALLRUNOPS();
     retval = PL_stack_sp - (PL_stack_base + oldmark);
     if ((flags & G_EVAL) && !(flags & G_KEEPERR))
@@ -1325,7 +1325,7 @@ perl_call_sv(SV *sv, I32 flags)
 	FREETMPS;
 	LEAVE;
     }
-    op = oldop;
+    PL_op = oldop;
     return retval;
 }
 
@@ -1343,7 +1343,7 @@ perl_eval_sv(SV *sv, I32 flags)
     I32 oldscope;
     dJMPENV;
     int ret;
-    OP* oldop = op;
+    OP* oldop = PL_op;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1351,8 +1351,8 @@ perl_eval_sv(SV *sv, I32 flags)
     }
 
     SAVEOP();
-    op = (OP*)&myop;
-    Zero(op, 1, UNOP);
+    PL_op = (OP*)&myop;
+    Zero(PL_op, 1, UNOP);
     EXTEND(PL_stack_sp, 1);
     *++PL_stack_sp = sv;
     oldscope = PL_scopestack_ix;
@@ -1385,7 +1385,7 @@ perl_eval_sv(SV *sv, I32 flags)
 	/* NOTREACHED */
     case 3:
 	if (PL_restartop) {
-	    op = PL_restartop;
+	    PL_op = PL_restartop;
 	    PL_restartop = 0;
 	    break;
 	}
@@ -1399,9 +1399,9 @@ perl_eval_sv(SV *sv, I32 flags)
 	goto cleanup;
     }
 
-    if (op == (OP*)&myop)
-	op = pp_entereval(ARGS);
-    if (op)
+    if (PL_op == (OP*)&myop)
+	PL_op = pp_entereval(ARGS);
+    if (PL_op)
 	CALLRUNOPS();
     retval = PL_stack_sp - (PL_stack_base + oldmark);
     if (!(flags & G_KEEPERR))
@@ -1415,7 +1415,7 @@ perl_eval_sv(SV *sv, I32 flags)
 	FREETMPS;
 	LEAVE;
     }
-    op = oldop;
+    PL_op = oldop;
     return retval;
 }
 
@@ -1852,8 +1852,8 @@ init_interp(void)
 #    undef PERLVARIC
 #    else
 #    define PERLVAR(var,type)
-#    define PERLVARI(var,type,init)	var = init;
-#    define PERLVARIC(var,type,init)	var = init;
+#    define PERLVARI(var,type,init)	PL_##var = init;
+#    define PERLVARIC(var,type,init)	PL_##var = init;
 #    include "intrpvar.h"
 #    ifndef USE_THREADS
 #      include "thrdvar.h"
@@ -2733,7 +2733,7 @@ init_main_thread()
     XPV *xpv;
 
     Newz(53, thr, 1, struct perl_thread);
-    curcop = &compiling;
+    PL_curcop = &PL_compiling;
     thr->cvcache = newHV();
     thr->threadsv = newAV();
     /* thr->threadsvp is set when find_threadsv is called */
@@ -2742,24 +2742,24 @@ init_main_thread()
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
     /* Handcraft thrsv similarly to mess_sv */
-    New(53, thrsv, 1, SV);
+    New(53, PL_thrsv, 1, SV);
     Newz(53, xpv, 1, XPV);
-    SvFLAGS(thrsv) = SVt_PV;
-    SvANY(thrsv) = (void*)xpv;
-    SvREFCNT(thrsv) = 1 << 30;	/* practically infinite */
-    SvPVX(thrsv) = (char*)thr;
-    SvCUR_set(thrsv, sizeof(thr));
-    SvLEN_set(thrsv, sizeof(thr));
-    *SvEND(thrsv) = '\0';	/* in the trailing_nul field */
-    thr->oursv = thrsv;
-    chopset = " \n-";
+    SvFLAGS(PL_thrsv) = SVt_PV;
+    SvANY(PL_thrsv) = (void*)xpv;
+    SvREFCNT(PL_thrsv) = 1 << 30;	/* practically infinite */
+    SvPVX(PL_thrsv) = (char*)thr;
+    SvCUR_set(PL_thrsv, sizeof(thr));
+    SvLEN_set(PL_thrsv, sizeof(thr));
+    *SvEND(PL_thrsv) = '\0';	/* in the trailing_nul field */
+    thr->oursv = PL_thrsv;
+    PL_chopset = " \n-";
 
-    MUTEX_LOCK(&threads_mutex);
-    nthreads++;
+    MUTEX_LOCK(&PL_threads_mutex);
+    PL_nthreads++;
     thr->tid = 0;
     thr->next = thr;
     thr->prev = thr;
-    MUTEX_UNLOCK(&threads_mutex);
+    MUTEX_UNLOCK(&PL_threads_mutex);
 
 #ifdef HAVE_THREAD_INTERN
     init_thread_intern(thr);
@@ -2776,21 +2776,21 @@ init_main_thread()
      * These must come after the SET_THR because sv_setpvn does
      * SvTAINT and the taint fields require dTHR.
      */
-    toptarget = NEWSV(0,0);
-    sv_upgrade(toptarget, SVt_PVFM);
-    sv_setpvn(toptarget, "", 0);
-    bodytarget = NEWSV(0,0);
-    sv_upgrade(bodytarget, SVt_PVFM);
-    sv_setpvn(bodytarget, "", 0);
-    formtarget = bodytarget;
+    PL_toptarget = NEWSV(0,0);
+    sv_upgrade(PL_toptarget, SVt_PVFM);
+    sv_setpvn(PL_toptarget, "", 0);
+    PL_bodytarget = NEWSV(0,0);
+    sv_upgrade(PL_bodytarget, SVt_PVFM);
+    sv_setpvn(PL_bodytarget, "", 0);
+    PL_formtarget = PL_bodytarget;
     thr->errsv = newSVpv("", 0);
     (void) find_threadsv("@");	/* Ensure $@ is initialised early */
 
-    maxscream = -1;
-    regcompp = FUNC_NAME_TO_PTR(pregcomp);
-    regexecp = FUNC_NAME_TO_PTR(regexec_flags);
-    regindent = 0;
-    reginterp_cnt = 0;
+    PL_maxscream = -1;
+    PL_regcompp = FUNC_NAME_TO_PTR(pregcomp);
+    PL_regexecp = FUNC_NAME_TO_PTR(regexec_flags);
+    PL_regindent = 0;
+    PL_reginterp_cnt = 0;
 
     return thr;
 }

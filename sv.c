@@ -1165,7 +1165,7 @@ sv_setiv(register SV *sv, IV i)
 	{
 	    dTHR;
 	    croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
-		  op_desc[op->op_type]);
+		  op_desc[PL_op->op_type]);
 	}
     }
     (void)SvIOK_only(sv);			/* validate number */
@@ -1225,7 +1225,7 @@ sv_setnv(register SV *sv, double num)
 	{
 	    dTHR;
 	    croak("Can't coerce %s to number in %s", sv_reftype(sv,0),
-		  op_name[op->op_type]);
+		  op_name[PL_op->op_type]);
 	}
     }
     SvNVX(sv) = num;
@@ -1288,9 +1288,9 @@ not_a_number(SV *sv)
     }
     *d = '\0';
 
-    if (op)
+    if (PL_op)
 	warn("Argument \"%s\" isn't numeric in %s", tmpbuf,
-		op_name[op->op_type]);
+		op_name[PL_op->op_type]);
     else
 	warn("Argument \"%s\" isn't numeric", tmpbuf);
 }
@@ -2040,9 +2040,9 @@ sv_setsv(SV *dstr, register SV *sstr)
     case SVt_PVHV:
     case SVt_PVCV:
     case SVt_PVIO:
-	if (op)
+	if (PL_op)
 	    croak("Bizarre copy of %s in %s", sv_reftype(sstr, 0),
-		op_name[op->op_type]);
+		op_name[PL_op->op_type]);
 	else
 	    croak("Bizarre copy of %s", sv_reftype(sstr, 0));
 	break;
@@ -4042,7 +4042,7 @@ sv_pvn_force(SV *sv, STRLEN *lp)
 	    else {
 		dTHR;
 		croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
-		    op_name[op->op_type]);
+		    op_name[PL_op->op_type]);
 	    }
 	}
 	else
@@ -4804,10 +4804,10 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	default:
       unknown:
 	    if (!args && PL_dowarn &&
-		  (op->op_type == OP_PRTF || op->op_type == OP_SPRINTF)) {
+		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
 		SV *msg = sv_newmortal();
 		sv_setpvf(msg, "Invalid conversion in %s: ",
-			  (op->op_type == OP_PRTF) ? "printf" : "sprintf");
+			  (PL_op->op_type == OP_PRTF) ? "printf" : "sprintf");
 		if (c)
 		    sv_catpvf(msg, isPRINT(c) ? "\"%%%c\"" : "\"%%\\%03o\"",
 			      c & 0xFF);

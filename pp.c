@@ -141,10 +141,10 @@ PP(pp_scalar)
 PP(pp_padav)
 {
     djSP; dTARGET;
-    if (op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PL_curpad[op->op_targ]);
+    if (PL_op->op_private & OPpLVAL_INTRO)
+	SAVECLEARSV(PL_curpad[PL_op->op_targ]);
     EXTEND(SP, 1);
-    if (op->op_flags & OPf_REF) {
+    if (PL_op->op_flags & OPf_REF) {
 	PUSHs(TARG);
 	RETURN;
     }
@@ -178,9 +178,9 @@ PP(pp_padhv)
     I32 gimme;
 
     XPUSHs(TARG);
-    if (op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PL_curpad[op->op_targ]);
-    if (op->op_flags & OPf_REF)
+    if (PL_op->op_private & OPpLVAL_INTRO)
+	SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+    if (PL_op->op_flags & OPf_REF)
 	RETURN;
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
@@ -231,21 +231,21 @@ PP(pp_rv2gv)
 		    goto wasref;
 	    }
 	    if (!SvOK(sv)) {
-		if (op->op_flags & OPf_REF ||
-		    op->op_private & HINT_STRICT_REFS)
+		if (PL_op->op_flags & OPf_REF ||
+		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(no_usym, "a symbol");
 		if (PL_dowarn)
 		    warn(warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, PL_na);
-	    if (op->op_private & HINT_STRICT_REFS)
+	    if (PL_op->op_private & HINT_STRICT_REFS)
 		DIE(no_symref, sym, "a symbol");
 	    sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV);
 	}
     }
-    if (op->op_private & OPpLVAL_INTRO)
-	save_gp((GV*)sv, !(op->op_flags & OPf_SPECIAL));
+    if (PL_op->op_private & OPpLVAL_INTRO)
+	save_gp((GV*)sv, !(PL_op->op_flags & OPf_SPECIAL));
     SETs(sv);
     RETURN;
 }
@@ -275,25 +275,25 @@ PP(pp_rv2sv)
 		    goto wasref;
 	    }
 	    if (!SvOK(sv)) {
-		if (op->op_flags & OPf_REF ||
-		    op->op_private & HINT_STRICT_REFS)
+		if (PL_op->op_flags & OPf_REF ||
+		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(no_usym, "a SCALAR");
 		if (PL_dowarn)
 		    warn(warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, PL_na);
-	    if (op->op_private & HINT_STRICT_REFS)
+	    if (PL_op->op_private & HINT_STRICT_REFS)
 		DIE(no_symref, sym, "a SCALAR");
 	    gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV);
 	}
 	sv = GvSV(gv);
     }
-    if (op->op_flags & OPf_MOD) {
-	if (op->op_private & OPpLVAL_INTRO)
+    if (PL_op->op_flags & OPf_MOD) {
+	if (PL_op->op_private & OPpLVAL_INTRO)
 	    sv = save_scalar((GV*)TOPs);
-	else if (op->op_private & OPpDEREF)
-	    vivify_ref(sv, op->op_private & OPpDEREF);
+	else if (PL_op->op_private & OPpDEREF)
+	    vivify_ref(sv, PL_op->op_private & OPpDEREF);
     }
     SETs(sv);
     RETURN;
@@ -317,7 +317,7 @@ PP(pp_pos)
 {
     djSP; dTARGET; dPOPss;
 
-    if (op->op_flags & OPf_MOD) {
+    if (PL_op->op_flags & OPf_MOD) {
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
 	    sv_magic(TARG, Nullsv, '.', Nullch, 0);
@@ -354,7 +354,7 @@ PP(pp_rv2cv)
 
     /* We usually try to add a non-existent subroutine in case of AUTOLOAD. */
     /* (But not in defined().) */
-    CV *cv = sv_2cv(TOPs, &stash, &gv, !(op->op_flags & OPf_SPECIAL));
+    CV *cv = sv_2cv(TOPs, &stash, &gv, !(PL_op->op_flags & OPf_SPECIAL));
     if (cv) {
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
@@ -429,7 +429,7 @@ PP(pp_prototype)
 PP(pp_anoncode)
 {
     djSP;
-    CV* cv = (CV*)PL_curpad[op->op_targ];
+    CV* cv = (CV*)PL_curpad[PL_op->op_targ];
     if (CvCLONE(cv))
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
     EXTEND(SP,1);
@@ -658,14 +658,14 @@ PP(pp_trans)
     djSP; dTARG;
     SV *sv;
 
-    if (op->op_flags & OPf_STACKED)
+    if (PL_op->op_flags & OPf_STACKED)
 	sv = POPs;
     else {
 	sv = DEFSV;
 	EXTEND(SP,1);
     }
     TARG = sv_newmortal();
-    PUSHi(do_trans(sv, op));
+    PUSHi(do_trans(sv, PL_op));
     RETURN;
 }
 
@@ -741,7 +741,7 @@ PP(pp_undef)
     djSP;
     SV *sv;
 
-    if (!op->op_private) {
+    if (!PL_op->op_private) {
 	EXTEND(SP, 1);
 	RETPUSHUNDEF;
     }
@@ -965,7 +965,7 @@ PP(pp_repeat)
   djSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
   {
     register I32 count = POPi;
-    if (GIMME == G_ARRAY && op->op_private & OPpREPEAT_DOLIST) {
+    if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
 	I32 items = SP - MARK;
 	I32 max;
@@ -1031,7 +1031,7 @@ PP(pp_left_shift)
     djSP; dATARGET; tryAMAGICbin(lshift,opASSIGN);
     {
       IBW shift = POPi;
-      if (op->op_private & HINT_INTEGER) {
+      if (PL_op->op_private & HINT_INTEGER) {
 	IBW i = TOPi;
 	i = BWi(i) << shift;
 	SETi(BWi(i));
@@ -1050,7 +1050,7 @@ PP(pp_right_shift)
     djSP; dATARGET; tryAMAGICbin(rshift,opASSIGN);
     {
       IBW shift = POPi;
-      if (op->op_private & HINT_INTEGER) {
+      if (PL_op->op_private & HINT_INTEGER) {
 	IBW i = TOPi;
 	i = BWi(i) >> shift;
 	SETi(BWi(i));
@@ -1141,7 +1141,7 @@ PP(pp_slt)
     djSP; tryAMAGICbinSET(slt,0);
     {
       dPOPTOPssrl;
-      int cmp = ((op->op_private & OPpLOCALE)
+      int cmp = ((PL_op->op_private & OPpLOCALE)
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp < 0));
@@ -1154,7 +1154,7 @@ PP(pp_sgt)
     djSP; tryAMAGICbinSET(sgt,0);
     {
       dPOPTOPssrl;
-      int cmp = ((op->op_private & OPpLOCALE)
+      int cmp = ((PL_op->op_private & OPpLOCALE)
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp > 0));
@@ -1167,7 +1167,7 @@ PP(pp_sle)
     djSP; tryAMAGICbinSET(sle,0);
     {
       dPOPTOPssrl;
-      int cmp = ((op->op_private & OPpLOCALE)
+      int cmp = ((PL_op->op_private & OPpLOCALE)
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp <= 0));
@@ -1180,7 +1180,7 @@ PP(pp_sge)
     djSP; tryAMAGICbinSET(sge,0);
     {
       dPOPTOPssrl;
-      int cmp = ((op->op_private & OPpLOCALE)
+      int cmp = ((PL_op->op_private & OPpLOCALE)
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp >= 0));
@@ -1213,7 +1213,7 @@ PP(pp_scmp)
     djSP; dTARGET;  tryAMAGICbin(scmp,0);
     {
       dPOPTOPssrl;
-      int cmp = ((op->op_private & OPpLOCALE)
+      int cmp = ((PL_op->op_private & OPpLOCALE)
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETi( cmp );
@@ -1227,7 +1227,7 @@ PP(pp_bit_and)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (op->op_private & HINT_INTEGER) {
+	if (PL_op->op_private & HINT_INTEGER) {
 	  IBW value = SvIV(left) & SvIV(right);
 	  SETi(BWi(value));
 	}
@@ -1237,7 +1237,7 @@ PP(pp_bit_and)
 	}
       }
       else {
-	do_vop(op->op_type, TARG, left, right);
+	do_vop(PL_op->op_type, TARG, left, right);
 	SETTARG;
       }
       RETURN;
@@ -1250,7 +1250,7 @@ PP(pp_bit_xor)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (op->op_private & HINT_INTEGER) {
+	if (PL_op->op_private & HINT_INTEGER) {
 	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
 	  SETi(BWi(value));
 	}
@@ -1260,7 +1260,7 @@ PP(pp_bit_xor)
 	}
       }
       else {
-	do_vop(op->op_type, TARG, left, right);
+	do_vop(PL_op->op_type, TARG, left, right);
 	SETTARG;
       }
       RETURN;
@@ -1273,7 +1273,7 @@ PP(pp_bit_or)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (op->op_private & HINT_INTEGER) {
+	if (PL_op->op_private & HINT_INTEGER) {
 	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
 	  SETi(BWi(value));
 	}
@@ -1283,7 +1283,7 @@ PP(pp_bit_or)
 	}
       }
       else {
-	do_vop(op->op_type, TARG, left, right);
+	do_vop(PL_op->op_type, TARG, left, right);
 	SETTARG;
       }
       RETURN;
@@ -1337,7 +1337,7 @@ PP(pp_complement)
     {
       dTOPss;
       if (SvNIOKp(sv)) {
-	if (op->op_private & HINT_INTEGER) {
+	if (PL_op->op_private & HINT_INTEGER) {
 	  IBW value = ~SvIV(sv);
 	  SETi(BWi(value));
 	}
@@ -1791,7 +1791,7 @@ PP(pp_substr)
     I32 pos;
     I32 rem;
     I32 fail;
-    I32 lvalue = op->op_flags & OPf_MOD;
+    I32 lvalue = PL_op->op_flags & OPf_MOD;
     char *tmps;
     I32 arybase = PL_curcop->cop_arybase;
     char *repl = 0;
@@ -1891,7 +1891,7 @@ PP(pp_vec)
     register I32 size = POPi;
     register I32 offset = POPi;
     register SV *src = POPs;
-    I32 lvalue = op->op_flags & OPf_MOD;
+    I32 lvalue = PL_op->op_flags & OPf_MOD;
     STRLEN srclen;
     unsigned char *s = (unsigned char*)SvPV(src, srclen);
     unsigned long retnum;
@@ -2037,7 +2037,7 @@ PP(pp_sprintf)
 {
     djSP; dMARK; dORIGMARK; dTARGET;
 #ifdef USE_LOCALE_NUMERIC
-    if (op->op_private & OPpLOCALE)
+    if (PL_op->op_private & OPpLOCALE)
 	SET_NUMERIC_LOCAL();
     else
 	SET_NUMERIC_STANDARD();
@@ -2116,7 +2116,7 @@ PP(pp_ucfirst)
     }
     s = SvPV_force(sv, PL_na);
     if (*s) {
-	if (op->op_private & OPpLOCALE) {
+	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
 	    SvTAINTED_on(sv);
 	    *s = toUPPER_LC(*s);
@@ -2142,7 +2142,7 @@ PP(pp_lcfirst)
     }
     s = SvPV_force(sv, PL_na);
     if (*s) {
-	if (op->op_private & OPpLOCALE) {
+	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
 	    SvTAINTED_on(sv);
 	    *s = toLOWER_LC(*s);
@@ -2173,7 +2173,7 @@ PP(pp_uc)
     if (len) {
 	register char *send = s + len;
 
-	if (op->op_private & OPpLOCALE) {
+	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
 	    SvTAINTED_on(sv);
 	    for (; s < send; s++)
@@ -2205,7 +2205,7 @@ PP(pp_lc)
     if (len) {
 	register char *send = s + len;
 
-	if (op->op_private & OPpLOCALE) {
+	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
 	    SvTAINTED_on(sv);
 	    for (; s < send; s++)
@@ -2253,12 +2253,12 @@ PP(pp_aslice)
     djSP; dMARK; dORIGMARK;
     register SV** svp;
     register AV* av = (AV*)POPs;
-    register I32 lval = op->op_flags & OPf_MOD;
+    register I32 lval = PL_op->op_flags & OPf_MOD;
     I32 arybase = PL_curcop->cop_arybase;
     I32 elem;
 
     if (SvTYPE(av) == SVt_PVAV) {
-	if (lval && op->op_private & OPpLVAL_INTRO) {
+	if (lval && PL_op->op_private & OPpLVAL_INTRO) {
 	    I32 max = -1;
 	    for (svp = MARK + 1; svp <= SP; svp++) {
 		elem = SvIVx(*svp);
@@ -2277,7 +2277,7 @@ PP(pp_aslice)
 	    if (lval) {
 		if (!svp || *svp == &PL_sv_undef)
 		    DIE(no_aelem, elem);
-		if (op->op_private & OPpLVAL_INTRO)
+		if (PL_op->op_private & OPpLVAL_INTRO)
 		    save_aelem(av, elem, svp);
 	    }
 	    *MARK = svp ? *svp : &PL_sv_undef;
@@ -2342,7 +2342,7 @@ PP(pp_delete)
     SV *sv;
     HV *hv;
 
-    if (op->op_private & OPpSLICE) {
+    if (PL_op->op_private & OPpSLICE) {
 	dMARK; dORIGMARK;
 	U32 hvtype;
 	hv = (HV*)POPs;
@@ -2398,7 +2398,7 @@ PP(pp_hslice)
 {
     djSP; dMARK; dORIGMARK;
     register HV *hv = (HV*)POPs;
-    register I32 lval = op->op_flags & OPf_MOD;
+    register I32 lval = PL_op->op_flags & OPf_MOD;
     I32 realhv = (SvTYPE(hv) == SVt_PVHV);
 
     if (realhv || SvTYPE(hv) == SVt_PVAV) {
@@ -2414,7 +2414,7 @@ PP(pp_hslice)
 	    if (lval) {
 		if (!svp || *svp == &PL_sv_undef)
 		    DIE(no_helem, SvPV(keysv, PL_na));
-		if (op->op_private & OPpLVAL_INTRO)
+		if (PL_op->op_private & OPpLVAL_INTRO)
 		    save_helem(hv, keysv, svp);
 	    }
 	    *MARK = svp ? *svp : &PL_sv_undef;
@@ -2451,7 +2451,7 @@ PP(pp_lslice)
     SV **firstlelem = PL_stack_base + POPMARK + 1;
     register SV **firstrelem = lastlelem + 1;
     I32 arybase = PL_curcop->cop_arybase;
-    I32 lval = op->op_flags & OPf_MOD;
+    I32 lval = PL_op->op_flags & OPf_MOD;
     I32 is_something_there = lval;
 
     register I32 max = lastrelem - lastlelem;
@@ -4208,7 +4208,7 @@ PP(pp_split)
 	ary = GvAVn((GV*)pm->op_pmreplroot);
     else if (gimme != G_ARRAY)
 #ifdef USE_THREADS
-	ary = (AV*)curpad[0];
+	ary = (AV*)PL_curpad[0];
 #else
 	ary = GvAVn(PL_defgv);
 #endif /* USE_THREADS */
@@ -4488,10 +4488,10 @@ PP(pp_threadsv)
     djSP;
 #ifdef USE_THREADS
     EXTEND(SP, 1);
-    if (op->op_private & OPpLVAL_INTRO)
-	PUSHs(*save_threadsv(op->op_targ));
+    if (PL_op->op_private & OPpLVAL_INTRO)
+	PUSHs(*save_threadsv(PL_op->op_targ));
     else
-	PUSHs(THREADSV(op->op_targ));
+	PUSHs(THREADSV(PL_op->op_targ));
     RETURN;
 #else
     DIE("tried to access per-thread data in non-threaded perl");

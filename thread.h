@@ -118,7 +118,7 @@
 #ifndef SET_THR
 #define SET_THR(t)					\
     STMT_START {					\
-	if (pthread_setspecific(thr_key, (void *) (t)))	\
+	if (pthread_setspecific(PL_thr_key, (void *) (t)))	\
 	    croak("panic: pthread_setspecific");	\
     } STMT_END
 #endif /* SET_THR */
@@ -128,7 +128,7 @@
 struct perl_thread *getTHR _((void));
 #    define THR getTHR()
 #  else
-#    define THR ((struct perl_thread *) pthread_getspecific(thr_key))
+#    define THR ((struct perl_thread *) pthread_getspecific(PL_thr_key))
 #  endif /* OLD_PTHREADS_API */
 #endif /* THR */
 
@@ -141,7 +141,7 @@ struct perl_thread *getTHR _((void));
  */
 #ifndef dTHR
 #  define dTHR \
-    struct perl_thread *thr = threadnum? THR : (struct perl_thread*)SvPVX(thrsv)
+    struct perl_thread *thr = PL_threadnum? THR : (struct perl_thread*)SvPVX(PL_thrsv)
 #endif /* dTHR */
 
 #ifndef INIT_THREADS
@@ -163,14 +163,14 @@ struct perl_thread *getTHR _((void));
  */
 #define LOCK_SV_MUTEX			\
     STMT_START {			\
-	if (threadnum)			\
-	    MUTEX_LOCK(&sv_mutex);	\
+	if (PL_threadnum)			\
+	    MUTEX_LOCK(&PL_sv_mutex);	\
     } STMT_END
 
 #define UNLOCK_SV_MUTEX			\
     STMT_START {			\
-	if (threadnum)			\
-	    MUTEX_UNLOCK(&sv_mutex);	\
+	if (PL_threadnum)			\
+	    MUTEX_UNLOCK(&PL_sv_mutex);	\
     } STMT_END
 
 #ifndef THREAD_RET_TYPE

@@ -1366,9 +1366,9 @@ amagic_call(SV *left, SV *right, int method, int flags)
     PUSHSTACKi(PERLSI_OVERLOAD);
     ENTER;
     SAVEOP();
-    op = (OP *) &myop;
+    PL_op = (OP *) &myop;
     if (PERLDB_SUB && PL_curstash != PL_debstash)
-	op->op_private |= OPpENTERSUB_DB;
+	PL_op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
     pp_pushmark(ARGS);
 
@@ -1382,7 +1382,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     PUSHs((SV*)cv);
     PUTBACK;
 
-    if (op = pp_entersub(ARGS))
+    if (PL_op = pp_entersub(ARGS))
       CALLRUNOPS();
     LEAVE;
     SPAGAIN;

@@ -1637,8 +1637,8 @@ yylex(void)
 	    PL_nextval[PL_nexttoke].ival = 0;
 	    force_next(',');
 #ifdef USE_THREADS
-	    nextval[nexttoke].opval = newOP(OP_THREADSV, 0);
-	    nextval[nexttoke].opval->op_targ = find_threadsv("\"");
+	    PL_nextval[PL_nexttoke].opval = newOP(OP_THREADSV, 0);
+	    PL_nextval[PL_nexttoke].opval->op_targ = find_threadsv("\"");
 	    force_next(PRIVATEREF);
 #else
 	    force_ident("\"", '$');
@@ -4779,9 +4779,9 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
     PUSHSTACKi(PERLSI_OVERLOAD);
     ENTER;
     SAVEOP();
-    op = (OP *) &myop;
+    PL_op = (OP *) &myop;
     if (PERLDB_SUB && PL_curstash != PL_debstash)
-	op->op_private |= OPpENTERSUB_DB;
+	PL_op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
     pp_pushmark(ARGS);
 
@@ -4792,7 +4792,7 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
     PUSHs(cv);
     PUTBACK;
 
-    if (op = pp_entersub(ARGS))
+    if (PL_op = pp_entersub(ARGS))
       CALLRUNOPS();
     LEAVE;
     SPAGAIN;
@@ -5964,9 +5964,9 @@ start_subparse(I32 is_format, U32 flags)
     PL_padix = 0;
     PL_subline = PL_curcop->cop_line;
 #ifdef USE_THREADS
-    av_store(comppad_name, 0, newSVpv("@_", 2));
-    curpad[0] = (SV*)newAV();
-    SvPADMY_on(curpad[0]);	/* XXX Needed? */
+    av_store(PL_comppad_name, 0, newSVpv("@_", 2));
+    PL_curpad[0] = (SV*)newAV();
+    SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
 #endif /* USE_THREADS */
 
     comppadlist = newAV();
@@ -5977,9 +5977,9 @@ start_subparse(I32 is_format, U32 flags)
     CvPADLIST(PL_compcv) = comppadlist;
     CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outsidecv);
 #ifdef USE_THREADS
-    CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(compcv));
+    CvOWNER(PL_compcv) = 0;
+    New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
+    MUTEX_INIT(CvMUTEXP(PL_compcv));
 #endif /* USE_THREADS */
 
     return oldsavestack_ix;

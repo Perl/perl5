@@ -55,7 +55,7 @@ PP(pp_const)
 
 PP(pp_nextstate)
 {
-    PL_curcop = (COP*)op;
+    PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
@@ -66,7 +66,7 @@ PP(pp_gvsv)
 {
     djSP;
     EXTEND(SP,1);
-    if (op->op_private & OPpLVAL_INTRO)
+    if (PL_op->op_private & OPpLVAL_INTRO)
 	PUSHs(save_scalar(cGVOP->op_gv));
     else
 	PUSHs(GvSV(cGVOP->op_gv));
@@ -118,7 +118,7 @@ PP(pp_sassign)
     djSP; dPOPTOPssrl;
     MAGIC *mg;
 
-    if (op->op_private & OPpASSIGN_BACKWARDS) {
+    if (PL_op->op_private & OPpASSIGN_BACKWARDS) {
 	SV *temp;
 	temp = left; left = right; right = temp;
     }
@@ -180,12 +180,12 @@ PP(pp_padsv)
 {
     djSP; dTARGET;
     XPUSHs(TARG);
-    if (op->op_flags & OPf_MOD) {
-	if (op->op_private & OPpLVAL_INTRO)
-	    SAVECLEARSV(PL_curpad[op->op_targ]);
-        else if (op->op_private & OPpDEREF) {
+    if (PL_op->op_flags & OPf_MOD) {
+	if (PL_op->op_private & OPpLVAL_INTRO)
+	    SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+        else if (PL_op->op_private & OPpDEREF) {
 	    PUTBACK;
-	    vivify_ref(PL_curpad[op->op_targ], op->op_private & OPpDEREF);
+	    vivify_ref(PL_curpad[PL_op->op_targ], PL_op->op_private & OPpDEREF);
 	    SPAGAIN;
 	}
     }
@@ -250,8 +250,8 @@ PP(pp_aelemfast)
 {
     djSP;
     AV *av = GvAV((GV*)cSVOP->op_sv);
-    U32 lval = op->op_flags & OPf_MOD;
-    SV** svp = av_fetch(av, op->op_private, lval);
+    U32 lval = PL_op->op_flags & OPf_MOD;
+    SV** svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);
     EXTEND(SP, 1);
     if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
@@ -281,7 +281,7 @@ PP(pp_pushre)
     SV* sv = sv_newmortal();
     sv_upgrade(sv, SVt_PVLV);
     LvTYPE(sv) = '/';
-    Copy(&op, &LvTARGOFF(sv), 1, OP*);
+    Copy(&PL_op, &LvTARGOFF(sv), 1, OP*);
     XPUSHs(sv);
 #else
     XPUSHs((SV*)op);
@@ -299,7 +299,7 @@ PP(pp_print)
     register PerlIO *fp;
     MAGIC *mg;
 
-    if (op->op_flags & OPf_STACKED)
+    if (PL_op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
     else
 	gv = PL_defoutgv;
@@ -401,7 +401,7 @@ PP(pp_rv2av)
 	av = (AV*)SvRV(sv);
 	if (SvTYPE(av) != SVt_PVAV)
 	    DIE("Not an ARRAY reference");
-	if (op->op_flags & OPf_REF) {
+	if (PL_op->op_flags & OPf_REF) {
 	    PUSHs((SV*)av);
 	    RETURN;
 	}
@@ -409,7 +409,7 @@ PP(pp_rv2av)
     else {
 	if (SvTYPE(sv) == SVt_PVAV) {
 	    av = (AV*)sv;
-	    if (op->op_flags & OPf_REF) {
+	    if (PL_op->op_flags & OPf_REF) {
 		PUSHs((SV*)av);
 		RETURN;
 	    }
@@ -426,8 +426,8 @@ PP(pp_rv2av)
 			goto wasref;
 		}
 		if (!SvOK(sv)) {
-		    if (op->op_flags & OPf_REF ||
-		      op->op_private & HINT_STRICT_REFS)
+		    if (PL_op->op_flags & OPf_REF ||
+		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(no_usym, "an ARRAY");
 		    if (PL_dowarn)
 			warn(warn_uninit);
@@ -436,16 +436,16 @@ PP(pp_rv2av)
 		    RETPUSHUNDEF;
 		}
 		sym = SvPV(sv,PL_na);
-		if (op->op_private & HINT_STRICT_REFS)
+		if (PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(no_symref, sym, "an ARRAY");
 		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
 	    } else {
 		gv = (GV*)sv;
 	    }
 	    av = GvAVn(gv);
-	    if (op->op_private & OPpLVAL_INTRO)
+	    if (PL_op->op_private & OPpLVAL_INTRO)
 		av = save_ary(gv);
-	    if (op->op_flags & OPf_REF) {
+	    if (PL_op->op_flags & OPf_REF) {
 		PUSHs((SV*)av);
 		RETURN;
 	    }
@@ -485,7 +485,7 @@ PP(pp_rv2hv)
 	hv = (HV*)SvRV(sv);
 	if (SvTYPE(hv) != SVt_PVHV && SvTYPE(hv) != SVt_PVAV)
 	    DIE("Not a HASH reference");
-	if (op->op_flags & OPf_REF) {
+	if (PL_op->op_flags & OPf_REF) {
 	    SETs((SV*)hv);
 	    RETURN;
 	}
@@ -493,7 +493,7 @@ PP(pp_rv2hv)
     else {
 	if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) {
 	    hv = (HV*)sv;
-	    if (op->op_flags & OPf_REF) {
+	    if (PL_op->op_flags & OPf_REF) {
 		SETs((SV*)hv);
 		RETURN;
 	    }
@@ -510,8 +510,8 @@ PP(pp_rv2hv)
 			goto wasref;
 		}
 		if (!SvOK(sv)) {
-		    if (op->op_flags & OPf_REF ||
-		      op->op_private & HINT_STRICT_REFS)
+		    if (PL_op->op_flags & OPf_REF ||
+		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(no_usym, "a HASH");
 		    if (PL_dowarn)
 			warn(warn_uninit);
@@ -522,16 +522,16 @@ PP(pp_rv2hv)
 		    RETSETUNDEF;
 		}
 		sym = SvPV(sv,PL_na);
-		if (op->op_private & HINT_STRICT_REFS)
+		if (PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(no_symref, sym, "a HASH");
 		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
 	    } else {
 		gv = (GV*)sv;
 	    }
 	    hv = GvHVn(gv);
-	    if (op->op_private & OPpLVAL_INTRO)
+	    if (PL_op->op_private & OPpLVAL_INTRO)
 		hv = save_hash(gv);
-	    if (op->op_flags & OPf_REF) {
+	    if (PL_op->op_flags & OPf_REF) {
 		SETs((SV*)hv);
 		RETURN;
 	    }
@@ -582,7 +582,7 @@ PP(pp_aassign)
      * special care that assigning the identifier on the left doesn't
      * clobber a value on the right that's used later in the list.
      */
-    if (op->op_private & OPpASSIGN_COMMON) {
+    if (PL_op->op_private & OPpASSIGN_COMMON) {
         for (relem = firstrelem; relem <= lastrelem; relem++) {
             /*SUPPRESS 560*/
             if (sv = *relem) {
@@ -809,7 +809,7 @@ PP(pp_match)
     I32 update_minmatch = 1;
     SV *screamer;
 
-    if (op->op_flags & OPf_STACKED)
+    if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
 	TARG = DEFSV;
@@ -1038,7 +1038,7 @@ do_readline(void)
     STRLEN offset;
     PerlIO *fp;
     register IO *io = GvIO(PL_last_in_gv);
-    register I32 type = op->op_type;
+    register I32 type = PL_op->op_type;
     I32 gimme = GIMME_V;
     MAGIC *mg;
 
@@ -1304,7 +1304,7 @@ PP(pp_enter)
 {
     djSP;
     register PERL_CONTEXT *cx;
-    I32 gimme = OP_GIMME(op, -1);
+    I32 gimme = OP_GIMME(PL_op, -1);
 
     if (gimme == -1) {
 	if (cxstack_ix >= 0)
@@ -1328,8 +1328,8 @@ PP(pp_helem)
     SV **svp;
     SV *keysv = POPs;
     HV *hv = (HV*)POPs;
-    U32 lval = op->op_flags & OPf_MOD;
-    U32 defer = op->op_private & OPpLVAL_DEFER;
+    U32 lval = PL_op->op_flags & OPf_MOD;
+    U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
 
     if (SvTYPE(hv) == SVt_PVHV) {
@@ -1358,14 +1358,14 @@ PP(pp_helem)
 	    PUSHs(lv);
 	    RETURN;
 	}
-	if (op->op_private & OPpLVAL_INTRO) {
+	if (PL_op->op_private & OPpLVAL_INTRO) {
 	    if (HvNAME(hv) && isGV(*svp))
-		save_gp((GV*)*svp, !(op->op_flags & OPf_SPECIAL));
+		save_gp((GV*)*svp, !(PL_op->op_flags & OPf_SPECIAL));
 	    else
 		save_helem(hv, keysv, svp);
 	}
-	else if (op->op_private & OPpDEREF)
-	    vivify_ref(*svp, op->op_private & OPpDEREF);
+	else if (PL_op->op_private & OPpDEREF)
+	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
     }
     sv = (svp ? *svp : &PL_sv_undef);
     /* This makes C<local $tied{foo} = $tied{foo}> possible.
@@ -1389,14 +1389,14 @@ PP(pp_leave)
     PMOP *newpm;
     I32 gimme;
 
-    if (op->op_flags & OPf_SPECIAL) {
+    if (PL_op->op_flags & OPf_SPECIAL) {
 	cx = &cxstack[cxstack_ix];
 	cx->blk_oldpm = PL_curpm;	/* fake block should preserve $1 et al */
     }
 
     POPBLOCK(cx,newpm);
 
-    gimme = OP_GIMME(op, -1);
+    gimme = OP_GIMME(PL_op, -1);
     if (gimme == -1) {
 	if (cxstack_ix >= 0)
 	    gimme = cxstack[cxstack_ix].blk_gimme;
@@ -1564,7 +1564,7 @@ PP(pp_subst)
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
-    if (op->op_flags & OPf_STACKED)
+    if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
 	TARG = DEFSV;
@@ -1958,7 +1958,7 @@ PP(pp_entersub)
     register CV *cv;
     register PERL_CONTEXT *cx;
     I32 gimme;
-    bool hasargs = (op->op_flags & OPf_STACKED) != 0;
+    bool hasargs = (PL_op->op_flags & OPf_STACKED) != 0;
 
     if (!sv)
 	DIE("Not a CODE reference");
@@ -1980,7 +1980,7 @@ PP(pp_entersub)
 		sym = SvPV(sv, PL_na);
 	    if (!sym)
 		DIE(no_usym, "a subroutine");
-	    if (op->op_private & HINT_STRICT_REFS)
+	    if (PL_op->op_private & HINT_STRICT_REFS)
 		DIE(no_symref, sym, "a subroutine");
 	    cv = perl_get_cv(sym, TRUE);
 	    break;
@@ -2034,7 +2034,7 @@ PP(pp_entersub)
     }
 
     gimme = GIMME_V;
-    if ((op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub) && !CvNODEBUG(cv))
+    if ((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub) && !CvNODEBUG(cv))
 	cv = get_db_sub(&sv, cv);
     if (!cv)
 	DIE("No DBsub routine");
@@ -2051,8 +2051,8 @@ PP(pp_entersub)
     if (CvFLAGS(cv) & CVf_LOCKED) {
 	MAGIC *mg;	
 	if (CvFLAGS(cv) & CVf_METHOD) {
-	    if (SP > stack_base + TOPMARK)
-		sv = *(stack_base + TOPMARK + 1);
+	    if (SP > PL_stack_base + TOPMARK)
+		sv = *(PL_stack_base + TOPMARK + 1);
 	    else {
 		MUTEX_UNLOCK(CvMUTEXP(cv));
 		croak("no argument for locked method call");
@@ -2115,7 +2115,7 @@ PP(pp_entersub)
      	 * (3) instead of (2) so we'd have to clone. Would the fact
      	 * that we released the mutex more quickly make up for this?
      	 */
-	if (threadnum &&
+	if (PL_threadnum &&
 	    (svp = hv_fetch(thr->cvcache, (char *)cv, sizeof(cv), FALSE)))
 	{
 	    /* We already have a clone to use */
@@ -2198,7 +2198,7 @@ PP(pp_entersub)
 		AV* av;
 		I32 items;
 #ifdef USE_THREADS
-		av = (AV*)curpad[0];
+		av = (AV*)PL_curpad[0];
 #else
 		av = GvAV(PL_defgv);
 #endif /* USE_THREADS */		
@@ -2239,7 +2239,7 @@ PP(pp_entersub)
 	register I32 items = SP - MARK;
 	AV* padlist = CvPADLIST(cv);
 	SV** svp = AvARRAY(padlist);
-	push_return(op->op_next);
+	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	CvDEPTH(cv)++;
@@ -2289,7 +2289,7 @@ PP(pp_entersub)
 	}
 #ifdef USE_THREADS
 	if (!hasargs) {
-	    AV* av = (AV*)curpad[0];
+	    AV* av = (AV*)PL_curpad[0];
 
 	    items = AvFILLp(av) + 1;
 	    if (items) {
@@ -2374,8 +2374,8 @@ PP(pp_aelem)
     SV** svp;
     I32 elem = POPi;
     AV* av = (AV*)POPs;
-    U32 lval = op->op_flags & OPf_MOD;
-    U32 defer = (op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
+    U32 lval = PL_op->op_flags & OPf_MOD;
+    U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
     SV *sv;
 
     if (elem > 0)
@@ -2398,10 +2398,10 @@ PP(pp_aelem)
 	    PUSHs(lv);
 	    RETURN;
 	}
-	if (op->op_private & OPpLVAL_INTRO)
+	if (PL_op->op_private & OPpLVAL_INTRO)
 	    save_aelem(av, elem, svp);
-	else if (op->op_private & OPpDEREF)
-	    vivify_ref(*svp, op->op_private & OPpDEREF);
+	else if (PL_op->op_private & OPpDEREF)
+	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
     }
     sv = (svp ? *svp : &PL_sv_undef);
     if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */

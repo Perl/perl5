@@ -28,7 +28,7 @@
 #ifdef PERL_OBJECT
 #define CALLOP this->*op
 #else
-#define CALLOP *op
+#define CALLOP *PL_op
 static OP *docatch _((OP *o));
 static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
@@ -108,7 +108,7 @@ PP(pp_regcomp)
 		ReREFCNT_dec(pm->op_pmregexp);
 		pm->op_pmregexp = Null(REGEXP*);	/* crucial if regcomp aborts */
 	    }
-	    if (op->op_flags & OPf_SPECIAL)
+	    if (PL_op->op_flags & OPf_SPECIAL)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
 
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
@@ -134,7 +134,7 @@ PP(pp_regcomp)
 
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
-	cLOGOP->op_first->op_next = op->op_next;
+	cLOGOP->op_first->op_next = PL_op->op_next;
     }
     RETURN;
 }
@@ -568,7 +568,7 @@ PP(pp_grepstart)
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
 	    XPUSHs(&PL_sv_no);
-	RETURNOP(op->op_next->op_next);
+	RETURNOP(PL_op->op_next->op_next);
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
     pp_pushmark(ARGS);				/* push dst */
@@ -590,9 +590,9 @@ PP(pp_grepstart)
     DEFSV = src;
 
     PUTBACK;
-    if (op->op_type == OP_MAPSTART)
+    if (PL_op->op_type == OP_MAPSTART)
 	pp_pushmark(ARGS);			/* push top */
-    return ((LOGOP*)op->op_next)->op_other;
+    return ((LOGOP*)PL_op->op_next)->op_other;
 }
 
 PP(pp_mapstart)
@@ -673,7 +673,7 @@ PP(pp_sort)
     GV *gv;
     CV *cv;
     I32 gimme = GIMME;
-    OP* nextop = op->op_next;
+    OP* nextop = PL_op->op_next;
 
     if (gimme != G_ARRAY) {
 	SP = MARK;
@@ -682,8 +682,8 @@ PP(pp_sort)
 
     ENTER;
     SAVEPPTR(PL_sortcop);
-    if (op->op_flags & OPf_STACKED) {
-	if (op->op_flags & OPf_SPECIAL) {
+    if (PL_op->op_flags & OPf_STACKED) {
+	if (PL_op->op_flags & OPf_SPECIAL) {
 	    OP *kid = cLISTOP->op_first->op_sibling;	/* pass pushmark */
 	    kid = kUNOP->op_first;			/* pass rv2gv */
 	    kid = kUNOP->op_first;			/* pass leave */
@@ -753,7 +753,7 @@ PP(pp_sort)
 	    SAVESPTR(GvSV(PL_secondgv));
 
 	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
-	    if (!(op->op_flags & OPf_SPECIAL)) {
+	    if (!(PL_op->op_flags & OPf_SPECIAL)) {
 		bool hasargs = FALSE;
 		cx->cx_type = CXt_SUB;
 		cx->blk_gimme = G_SCALAR;
@@ -773,7 +773,7 @@ PP(pp_sort)
 	if (max > 1) {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
 	    qsortsv(ORIGMARK+1, max,
-		    (op->op_private & OPpLOCALE)
+		    (PL_op->op_private & OPpLOCALE)
 		    ? FUNC_NAME_TO_PTR(sv_cmp_locale)
 		    : FUNC_NAME_TO_PTR(sv_cmp));
 	}
@@ -789,7 +789,7 @@ PP(pp_range)
 {
     if (GIMME == G_ARRAY)
 	return cCONDOP->op_true;
-    return SvTRUEx(PAD_SV(op->op_targ)) ? cCONDOP->op_false : cCONDOP->op_true;
+    return SvTRUEx(PAD_SV(PL_op->op_targ)) ? cCONDOP->op_false : cCONDOP->op_true;
 }
 
 PP(pp_flip)
@@ -801,13 +801,13 @@ PP(pp_flip)
     }
     else {
 	dTOPss;
-	SV *targ = PAD_SV(op->op_targ);
+	SV *targ = PAD_SV(PL_op->op_targ);
 
-	if ((op->op_private & OPpFLIP_LINENUM)
+	if ((PL_op->op_private & OPpFLIP_LINENUM)
 	  ? (PL_last_in_gv && SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv)))
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(cUNOP->op_first->op_targ), 1);
-	    if (op->op_flags & OPf_SPECIAL) {
+	    if (PL_op->op_flags & OPf_SPECIAL) {
 		sv_setiv(targ, 1);
 		SETs(targ);
 		RETURN;
@@ -869,7 +869,7 @@ PP(pp_flop)
 	dTOPss;
 	SV *targ = PAD_SV(cUNOP->op_first->op_targ);
 	sv_inc(targ);
-	if ((op->op_private & OPpFLIP_LINENUM)
+	if ((PL_op->op_private & OPpFLIP_LINENUM)
 	  ? (PL_last_in_gv && SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv)))
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
@@ -895,19 +895,19 @@ dopoptolabel(char *label)
 	switch (cx->cx_type) {
 	case CXt_SUBST:
 	    if (PL_dowarn)
-		warn("Exiting substitution via %s", op_name[op->op_type]);
+		warn("Exiting substitution via %s", op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
 	    if (PL_dowarn)
-		warn("Exiting subroutine via %s", op_name[op->op_type]);
+		warn("Exiting subroutine via %s", op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
 	    if (PL_dowarn)
-		warn("Exiting eval via %s", op_name[op->op_type]);
+		warn("Exiting eval via %s", op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
 	    if (PL_dowarn)
-		warn("Exiting pseudo-block via %s", op_name[op->op_type]);
+		warn("Exiting pseudo-block via %s", op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
@@ -1011,19 +1011,19 @@ dopoptoloop(I32 startingblock)
 	switch (cx->cx_type) {
 	case CXt_SUBST:
 	    if (PL_dowarn)
-		warn("Exiting substitution via %s", op_name[op->op_type]);
+		warn("Exiting substitution via %s", op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
 	    if (PL_dowarn)
-		warn("Exiting subroutine via %s", op_name[op->op_type]);
+		warn("Exiting subroutine via %s", op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
 	    if (PL_dowarn)
-		warn("Exiting eval via %s", op_name[op->op_type]);
+		warn("Exiting eval via %s", op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
 	    if (PL_dowarn)
-		warn("Exiting pseudo-block via %s", op_name[op->op_type]);
+		warn("Exiting pseudo-block via %s", op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
 	    DEBUG_l( deb("(Found loop #%ld)\n", (long)i));
@@ -1293,7 +1293,7 @@ sortcv(SV *a, SV *b)
     GvSV(PL_firstgv) = a;
     GvSV(PL_secondgv) = b;
     PL_stack_sp = PL_stack_base;
-    op = PL_sortcop;
+    PL_op = PL_sortcop;
     CALLRUNOPS();
     if (PL_stack_sp != PL_stack_base + 1)
 	croak("Sort subroutine didn't return single value");
@@ -1328,12 +1328,12 @@ PP(pp_lineseq)
 
 PP(pp_dbstate)
 {
-    PL_curcop = (COP*)op;
+    PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
 
-    if (op->op_private || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
+    if (PL_op->op_private || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
     {
 	djSP;
 	register CV *cv;
@@ -1359,7 +1359,7 @@ PP(pp_dbstate)
 	hasargs = 0;
 	SPAGAIN;
 
-	push_return(op->op_next);
+	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, SP);
 	PUSHSUB(cx);
 	CvDEPTH(cv)++;
@@ -1388,12 +1388,12 @@ PP(pp_enteriter)
     SAVETMPS;
 
 #ifdef USE_THREADS
-    if (op->op_flags & OPf_SPECIAL)
-	svp = save_threadsv(op->op_targ);	/* per-thread variable */
+    if (PL_op->op_flags & OPf_SPECIAL)
+	svp = save_threadsv(PL_op->op_targ);	/* per-thread variable */
     else
 #endif /* USE_THREADS */
-    if (op->op_targ) {
-	svp = &PL_curpad[op->op_targ];		/* "my" variable */
+    if (PL_op->op_targ) {
+	svp = &PL_curpad[PL_op->op_targ];		/* "my" variable */
 	SAVESPTR(*svp);
     }
     else {
@@ -1406,7 +1406,7 @@ PP(pp_enteriter)
 
     PUSHBLOCK(cx, CXt_LOOP, SP);
     PUSHLOOP(cx, svp, MARK);
-    if (op->op_flags & OPf_STACKED) {
+    if (PL_op->op_flags & OPf_STACKED) {
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
 	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
 	    dPOPss;
@@ -1591,7 +1591,7 @@ PP(pp_last)
     PMOP *newpm;
     SV **mark = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
 
-    if (op->op_flags & OPf_SPECIAL) {
+    if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
 	    DIE("Can't \"last\" outside a block");
@@ -1664,7 +1664,7 @@ PP(pp_next)
     register PERL_CONTEXT *cx;
     I32 oldsave;
 
-    if (op->op_flags & OPf_SPECIAL) {
+    if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
 	    DIE("Can't \"next\" outside a block");
@@ -1689,7 +1689,7 @@ PP(pp_redo)
     register PERL_CONTEXT *cx;
     I32 oldsave;
 
-    if (op->op_flags & OPf_SPECIAL) {
+    if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
 	    DIE("Can't \"redo\" outside a block");
@@ -1766,10 +1766,10 @@ PP(pp_goto)
 #define GOTO_DEPTH 64
     OP *enterops[GOTO_DEPTH];
     char *label;
-    int do_dump = (op->op_type == OP_DUMP);
+    int do_dump = (PL_op->op_type == OP_DUMP);
 
     label = 0;
-    if (op->op_flags & OPf_STACKED) {
+    if (PL_op->op_flags & OPf_STACKED) {
 	SV *sv = POPs;
 
 	/* This egregious kludge implements goto &subroutine */
@@ -1820,7 +1820,7 @@ PP(pp_goto)
 		AV* av;
 		int i;
 #ifdef USE_THREADS
-		av = (AV*)curpad[0];
+		av = (AV*)PL_curpad[0];
 #else
 		av = GvAV(PL_defgv);
 #endif
@@ -1926,7 +1926,7 @@ PP(pp_goto)
 		}
 #ifdef USE_THREADS
 		if (!cx->blk_sub.hasargs) {
-		    AV* av = (AV*)curpad[0];
+		    AV* av = (AV*)PL_curpad[0];
 		    
 		    items = AvFILLp(av) + 1;
 		    if (items) {
@@ -2003,7 +2003,7 @@ PP(pp_goto)
 	else
 	    label = SvPV(sv,PL_na);
     }
-    else if (op->op_flags & OPf_SPECIAL) {
+    else if (PL_op->op_flags & OPf_SPECIAL) {
 	if (! do_dump)
 	    DIE("goto must have label");
     }
@@ -2073,17 +2073,17 @@ PP(pp_goto)
 	/* push wanted frames */
 
 	if (*enterops && enterops[1]) {
-	    OP *oldop = op;
+	    OP *oldop = PL_op;
 	    for (ix = 1; enterops[ix]; ix++) {
-		op = enterops[ix];
+		PL_op = enterops[ix];
 		/* Eventually we may want to stack the needed arguments
 		 * for each op.  For now, we punt on the hard ones. */
-		if (op->op_type == OP_ENTERITER)
+		if (PL_op->op_type == OP_ENTERITER)
 		    DIE("Can't \"goto\" into the middle of a foreach loop",
 			label);
 		(CALLOP->op_ppaddr)(ARGS);
 	    }
-	    op = oldop;
+	    PL_op = oldop;
 	}
     }
 
@@ -2198,10 +2198,10 @@ docatch(OP *o)
 {
     dTHR;
     int ret;
-    OP *oldop = op;
+    OP *oldop = PL_op;
     dJMPENV;
 
-    op = o;
+    PL_op = o;
 #ifdef DEBUGGING
     assert(CATCH_GET == TRUE);
     DEBUG_l(deb("Setting up local jumplevel %p, was %p\n", &cur_env, PL_top_env));
@@ -2210,7 +2210,7 @@ docatch(OP *o)
     switch (ret) {
     default:				/* topmost level handles it */
 	JMPENV_POP;
-	op = oldop;
+	PL_op = oldop;
 	JMPENV_JUMP(ret);
 	/* NOTREACHED */
     case 3:
@@ -2218,7 +2218,7 @@ docatch(OP *o)
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    break;
 	}
-	op = PL_restartop;
+	PL_op = PL_restartop;
 	PL_restartop = 0;
 	/* FALL THROUGH */
     case 0:
@@ -2226,7 +2226,7 @@ docatch(OP *o)
 	break;
     }
     JMPENV_POP;
-    op = oldop;
+    PL_op = oldop;
     return Nullop;
 }
 
@@ -2242,7 +2242,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     I32 gimme = 0;   /* SUSPECT - INITIALZE TO WHAT?  NI-S */
     I32 optype;
     OP dummy;
-    OP *oop = op, *rop;
+    OP *oop = PL_op, *rop;
     char tmpbuf[TYPE_DIGITS(long) + 12 + 10];
     char *safestr;
 
@@ -2267,13 +2267,13 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
 #ifdef OP_IN_REGISTER
     opsave = op;
 #else
-    SAVEPPTR(op);
+    SAVEPPTR(PL_op);
 #endif
     PL_hints = 0;
 
-    op = &dummy;
-    op->op_type = 0;			/* Avoid uninit warning. */
-    op->op_flags = 0;			/* Avoid uninit warning. */
+    PL_op = &dummy;
+    PL_op->op_type = 0;			/* Avoid uninit warning. */
+    PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, 0, compiling.cop_filegv);
     rop = doeval(G_SCALAR, startop);
@@ -2296,7 +2296,7 @@ STATIC OP *
 doeval(int gimme, OP** startop)
 {
     dSP;
-    OP *saveop = op;
+    OP *saveop = PL_op;
     HV *newstash;
     CV *caller;
     AV* comppadlist;
@@ -2332,9 +2332,9 @@ doeval(int gimme, OP** startop)
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
     CvUNIQUE_on(PL_compcv);
 #ifdef USE_THREADS
-    CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(compcv));
+    CvOWNER(PL_compcv) = 0;
+    New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
+    MUTEX_INIT(CvMUTEXP(PL_compcv));
 #endif /* USE_THREADS */
 
     PL_comppad = newAV();
@@ -2345,9 +2345,9 @@ doeval(int gimme, OP** startop)
     PL_min_intro_pending = 0;
     PL_padix = 0;
 #ifdef USE_THREADS
-    av_store(comppad_name, 0, newSVpv("@_", 2));
-    curpad[0] = (SV*)newAV();
-    SvPADMY_on(curpad[0]);	/* XXX Needed? */
+    av_store(PL_comppad_name, 0, newSVpv("@_", 2));
+    PL_curpad[0] = (SV*)newAV();
+    SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
 #endif /* USE_THREADS */
 
     comppadlist = newAV();
@@ -2390,7 +2390,7 @@ doeval(int gimme, OP** startop)
 	PERL_CONTEXT *cx;
 	I32 optype = 0;			/* Might be reset by POPEVAL. */
 
-	op = saveop;
+	PL_op = saveop;
 	if (PL_eval_root) {
 	    op_free(PL_eval_root);
 	    PL_eval_root = Nullop;
@@ -2416,10 +2416,10 @@ doeval(int gimme, OP** startop)
 	SvREFCNT_dec(PL_rs);
 	PL_rs = SvREFCNT_inc(PL_nrs);
 #ifdef USE_THREADS
-	MUTEX_LOCK(&eval_mutex);
-	eval_owner = 0;
-	COND_SIGNAL(&eval_cond);
-	MUTEX_UNLOCK(&eval_mutex);
+	MUTEX_LOCK(&PL_eval_mutex);
+	PL_eval_owner = 0;
+	COND_SIGNAL(&PL_eval_cond);
+	MUTEX_UNLOCK(&PL_eval_mutex);
 #endif /* USE_THREADS */
 	RETPUSHUNDEF;
     }
@@ -2457,12 +2457,12 @@ doeval(int gimme, OP** startop)
 
     CvDEPTH(PL_compcv) = 1;
     SP = PL_stack_base + POPMARK;		/* pop original mark */
-    op = saveop;			/* The caller may need it. */
+    PL_op = saveop;			/* The caller may need it. */
 #ifdef USE_THREADS
-    MUTEX_LOCK(&eval_mutex);
-    eval_owner = 0;
-    COND_SIGNAL(&eval_cond);
-    MUTEX_UNLOCK(&eval_mutex);
+    MUTEX_LOCK(&PL_eval_mutex);
+    PL_eval_owner = 0;
+    COND_SIGNAL(&PL_eval_cond);
+    MUTEX_UNLOCK(&PL_eval_mutex);
 #endif /* USE_THREADS */
 
     RETURNOP(PL_eval_start);
@@ -2493,7 +2493,7 @@ PP(pp_require)
     if (!(name && len > 0 && *name))
 	DIE("Null filename used");
     TAINT_PROPER("require");
-    if (op->op_type == OP_REQUIRE &&
+    if (PL_op->op_type == OP_REQUIRE &&
       (svp = hv_fetch(GvHVn(PL_incgv), name, len, 0)) &&
       *svp != &PL_sv_undef)
 	RETPUSHYES;
@@ -2553,7 +2553,7 @@ PP(pp_require)
     PL_compiling.cop_filegv = gv_fetchfile(tryrsfp ? tryname : name);
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
-	if (op->op_type == OP_REQUIRE) {
+	if (PL_op->op_type == OP_REQUIRE) {
 	    SV *msg = sv_2mortal(newSVpvf("Can't locate %s in @INC", name));
 	    SV *dirmsgsv = NEWSV(0, 0);
 	    AV *ar = GvAVn(PL_incgv);
@@ -2596,7 +2596,7 @@ PP(pp_require)
  
     /* switch to eval mode */
 
-    push_return(op->op_next);
+    push_return(PL_op->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, name, compiling.cop_filegv);
 
@@ -2604,12 +2604,12 @@ PP(pp_require)
 
     PUTBACK;
 #ifdef USE_THREADS
-    MUTEX_LOCK(&eval_mutex);
-    if (eval_owner && eval_owner != thr)
-	while (eval_owner)
-	    COND_WAIT(&eval_cond, &eval_mutex);
-    eval_owner = thr;
-    MUTEX_UNLOCK(&eval_mutex);
+    MUTEX_LOCK(&PL_eval_mutex);
+    if (PL_eval_owner && PL_eval_owner != thr)
+	while (PL_eval_owner)
+	    COND_WAIT(&PL_eval_cond, &PL_eval_mutex);
+    PL_eval_owner = thr;
+    MUTEX_UNLOCK(&PL_eval_mutex);
 #endif /* USE_THREADS */
     return DOCATCH(doeval(G_SCALAR, NULL));
 }
@@ -2652,9 +2652,9 @@ PP(pp_entereval)
     safestr = savepv(tmpbuf);
     SAVEDELETE(PL_defstash, safestr, strlen(safestr));
     SAVEHINTS();
-    PL_hints = op->op_targ;
+    PL_hints = PL_op->op_targ;
 
-    push_return(op->op_next);
+    push_return(PL_op->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, 0, compiling.cop_filegv);
 
@@ -2664,16 +2664,16 @@ PP(pp_entereval)
 	save_lines(GvAV(PL_compiling.cop_filegv), PL_linestr);
     PUTBACK;
 #ifdef USE_THREADS
-    MUTEX_LOCK(&eval_mutex);
-    if (eval_owner && eval_owner != thr)
-	while (eval_owner)
-	    COND_WAIT(&eval_cond, &eval_mutex);
-    eval_owner = thr;
-    MUTEX_UNLOCK(&eval_mutex);
+    MUTEX_LOCK(&PL_eval_mutex);
+    if (PL_eval_owner && PL_eval_owner != thr)
+	while (PL_eval_owner)
+	    COND_WAIT(&PL_eval_cond, &PL_eval_mutex);
+    PL_eval_owner = thr;
+    MUTEX_UNLOCK(&PL_eval_mutex);
 #endif /* USE_THREADS */
     ret = doeval(gimme, NULL);
     if (PERLDB_INTER && was != PL_sub_generation /* Some subs defined here. */
-	&& ret != op->op_next) {	/* Successive compilation. */
+	&& ret != PL_op->op_next) {	/* Successive compilation. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */
     }
     return DOCATCH(ret);
@@ -2688,7 +2688,7 @@ PP(pp_leaveeval)
     I32 gimme;
     register PERL_CONTEXT *cx;
     OP *retop;
-    U8 save_flags = op -> op_flags;
+    U8 save_flags = PL_op -> op_flags;
     I32 optype;
 
     POPBLOCK(cx,newpm);
@@ -2788,12 +2788,12 @@ PP(pp_entertry)
     push_return(cLOGOP->op_other->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, 0, 0);
-    PL_eval_root = op;		/* Only needed so that goto works right. */
+    PL_eval_root = PL_op;		/* Only needed so that goto works right. */
 
     PL_in_eval = 1;
     sv_setpv(ERRSV,"");
     PUTBACK;
-    return DOCATCH(op->op_next);
+    return DOCATCH(PL_op->op_next);
 }
 
 PP(pp_leavetry)

@@ -671,7 +671,7 @@ do_eof(GV *gv)
 	    if (PerlIO_get_cnt(IoIFP(io)) < -1)
 		PerlIO_set_cnt(IoIFP(io),-1);
 	}
-	if (op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
+	if (PL_op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
 	    if (!nextargv(PL_argvgv))	/* get another fp handy */
 		return TRUE;
 	}
@@ -875,7 +875,7 @@ my_stat(ARGSproto)
     IO *io;
     GV* tmpgv;
 
-    if (op->op_flags & OPf_REF) {
+    if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
 	tmpgv = cGVOP->op_gv;
       do_fstat:
@@ -926,7 +926,7 @@ my_lstat(ARGSproto)
 {
     djSP;
     SV *sv;
-    if (op->op_flags & OPf_REF) {
+    if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
 	if (cGVOP->op_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)

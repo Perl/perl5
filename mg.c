@@ -1899,7 +1899,7 @@ sighandler(int sig)
     HV *st;
     SV *sv, *tSv = PL_Sv;
     CV *cv = Nullcv;
-    OP *myop = op;
+    OP *myop = PL_op;
     U32 flags = 0;
     I32 o_save_i = PL_savestack_ix, type;
     XPV *tXpv = PL_Xpv;
@@ -1975,7 +1975,7 @@ cleanup:
 	PL_scopestack_ix -= 1;
     if (flags & 64)
 	SvREFCNT_dec(sv);
-    op = myop;			/* Apparently not needed... */
+    PL_op = myop;			/* Apparently not needed... */
     
     PL_Sv = tSv;			/* Restore global temporaries. */
     PL_Xpv = tXpv;
