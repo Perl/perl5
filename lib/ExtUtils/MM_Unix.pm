@@ -2673,7 +2673,9 @@ sub nicetext {
 
 =item parse_version
 
-parse a file and return what you think is $VERSION in this file set to
+parse a file and return what you think is $VERSION in this file set to.
+It will return the string "undef" if it can't figure out what $VERSION
+is.
 
 =cut
 
@@ -2701,7 +2703,7 @@ sub parse_version {
 	};
 	local($^W) = 0;
 	$result = eval($eval);
-	die "Could not eval '$eval' in $parsefile: $@" if $@;
+	warn "Could not eval '$eval' in $parsefile: $@" if $@;
 	$result = "undef" unless defined $result;
 	last;
     }
