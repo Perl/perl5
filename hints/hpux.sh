@@ -61,7 +61,7 @@
 #
 # Lastly, you may want to include the "-z" HP linker flag so that
 # reading from a NULL pointer causes a SEGV.
-ccflags="$ccflags -D_HPUX_SOURCE -Wl,-z"
+ccflags="$ccflags -D_HPUX_SOURCE"
 
 # Check if you're using the bundled C compiler.  This compiler doesn't support
 # ANSI C (the -Aa flag) nor can it produce shared libraries.  Thus we have
@@ -101,11 +101,14 @@ EOM
     ;;
 esac
 
-# Even if you use gcc, prefer the HP math library over the GNU one.
-
-case "`$cc -v 2>&1`" in
-"*gcc*" ) test -d /lib/pa1.1 && ccflags="$ccflags -L/lib/pa1.1" ;;
-esac
+# Backward compatibility (uselonglong is deprecated).
+case "$uselonglolong" in
+"$define"|true|[yY]*)
+	case "$use64bits" in
+	'') use64bits="$define" ;;
+	esac
+	;;
+esac                          
 
 # Determine the architecture type of this system.
 # Keep leading tab below -- Configure Black Magic -- RAM, 03/02/97
@@ -138,6 +141,68 @@ else
 	    sed -e 's/HP-//' -e 1q`;
 	selecttype='int *'
 fi
+
+case "$use64bits" in
+$define|true|[yY]*)
+    if [ "$xxOsRevMajor" -lt 11 ]; then
+		cat <<EOM >&4
+
+64-bit compilation is not supported on HP-UX $xxOsRevMajor.
+You need at least HP-UX 11.0.
+Cannot continue, aborting.
+
+EOM
+		exit 1
+    fi
+
+    # Without the 64-bit libc we cannot do much.
+    if [ ! -f /lib/pa20_64/libc.sl ]; then
+		cat <<EOM >&4
+
+You do not seem to have the 64-bit libraries in /lib/pa20_64.
+Most importantly, I cannot find /lib/pa20_64/libc.sl.
+Cannot continue, aborting.
+
+EOM
+		exit 1
+    fi
+
+    ccflags="$ccflags +DD64"
+    ldflags="$ldflags +DD64"
+    loclibpth="$loclibpth /lib/pa20_64"
+    libscheck='case "`file $xxx`" in
+*LP64*|*PA-RISC2.0*) ;;
+*) xxx=/no/64-bit$xxx ;;
+esac'
+    ld=/usr/bin/ld
+    ar=/usr/bin/ar
+    full_ar=$ar
+
+    # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
+    case "$ccflags" in
+    *-Aa*)
+	    echo "(Changing from strict ANSI compilation to extended because of 64-bitness)"
+	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
+	    ;;
+    esac    
+
+    set `echo " $libswanted " | sed -e 's@ dl @ @'`
+    libswanted="$*"
+
+    case "`$cc -v 2>&1`" in
+    *gcc*) ccflags="$ccflags -L/lib/pa20_64" ;;
+    esac
+    ;;
+*) loclibpth="$loclibpth /lib/pa1.1"
+    case "`$cc -v 2>&1`" in
+    *gcc*) ccflags="$ccflags -L/lib/pa20_64" ;;
+    esac
+    ;;
+esac
+
+case "`getconf KERNEL_BITS 2>/dev/null`" in
+*64*) ldflags="$ldflags -Wl,+vnocompatwarnings" ;;
+esac
 
 # Remove bad libraries that will cause problems
 # (This doesn't remove libraries that don't actually exist)
@@ -288,69 +353,6 @@ EOM
 	;;
 esac
 EOCBU
-
-# This script UU/use64bits.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
-cat > UU/use64bits.cbu <<'EOCBU'
-case "$use64bits" in
-$define|true|[yY]*)
-	if [ "$xxOsRevMajor" -lt 11 ]; then
-		cat <<EOM >&4
-
-64-bit compilation is not supported on HP-UX $xxOsRevMajor.
-You need at least HP-UX 11.0.
-Cannot continue, aborting.
-
-EOM
-		exit 1
-	fi
-
-	# Without the 64-bit libc we cannot do much.
-	if [ ! -f /lib/pa20_64/libc.sl ]; then
-		cat <<EOM >&4
-
-You do not seem to have the 64-bit libraries in /lib/pa20_64.
-Most importantly, I cannot find /lib/pa20_64/libc.sl.
-Cannot continue, aborting.
-
-EOM
-		exit 1
-	fi
-
-	ld=/usr/bin/ld
-	ar=/usr/bin/ar
-	full_ar=$ar
-
-        # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
-	case "$ccflags" in
-	*-Aa*)
-	    echo "(Changing from strict ANSI compilation to extended because of 64-bitness)"
-	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
-	    ;;
-	esac    
-
-	set `echo " $libswanted " | sed -e 's@ dl @ @'`
-	libswanted="$*"
-
-	;;
-esac
-EOCBU
-
-case "$use64bits" in
-$define|true|[yY]*)
-    glibpth="`echo $glibpth|sed 's: /lib/pa1.1 : /lib/pa20_64 :'`"
-    ccflags="$ccflags +DD64"
-    ldflags="$ldflags +DD64"
-    libscheck='case "`file $xxx`" in
-*LP64*|*PA-RISC2.0*) ;;
-*) xxx=/no/64-bit$xxx ;;
-esac'
-      ;;
-esac
-
-case "`getconf KERNEL_BITS 2>/dev/null`" in
-*64*) ldflags="$ldflags -Wl,+vnocompatwarnings" ;;
-esac
 
 # This script UU/uselfs.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.

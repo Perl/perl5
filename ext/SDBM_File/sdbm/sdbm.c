@@ -39,7 +39,7 @@ extern int errno;
 
 extern Malloc_t malloc proto((MEM_SIZE));
 extern Free_t free proto((Malloc_t));
-extern Off_t lseek(int, Off_t, int);
+
 #endif
 
 /*

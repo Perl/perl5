@@ -45,6 +45,14 @@ constant(char *name, int arg)
 {
     errno = 0;
     switch (*name) {
+    case '_':
+	if (strEQ(name, "_S_IFMT")) /* Yes, _S_IFMT. */
+#ifdef S_IFMT
+	  return S_IFMT;
+#else
+	  goto not_there;
+#endif
+	break;
     case 'F':
 	if (strnEQ(name, "F_", 2)) {
 	    if (strEQ(name, "F_ALLOCSP"))
@@ -414,6 +422,18 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "O_DIRECT"))
+#ifdef O_DIRECT
+	        return O_DIRECT;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_DIRECTORY"))
+#ifdef O_DIRECTORY
+	        return O_DIRECTORY;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "O_DSYNC"))
 #ifdef O_DSYNC
 	        return O_DSYNC;
@@ -447,6 +467,12 @@ constant(char *name, int arg)
 	    if (strEQ(name, "O_NOCTTY"))
 #ifdef O_NOCTTY
 	        return O_NOCTTY;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "O_NOFOLLOW"))
+#ifdef O_NOFOLLOW
+	        return O_NOFOLLOW;
 #else
 	        goto not_there;
 #endif
@@ -486,6 +512,12 @@ constant(char *name, int arg)
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "O_TEMPORARY"))
+#ifdef O_TEMPORARY
+	        return O_TEMPORARY;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "O_TEXT"))
 #ifdef O_TEXT
 	        return O_TEXT;
@@ -520,25 +552,198 @@ constant(char *name, int arg)
 	  goto not_there;
 	break;
     case 'S':
-      if (strEQ(name, "SEEK_CUR"))
+      switch (name[1]) {
+      case '_':
+	if (strEQ(name, "S_ISUID"))
+#ifdef S_ISUID
+	  return S_ISUID;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_ISGID"))
+#ifdef S_ISGID
+	  return S_ISGID;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_ISVTX"))
+#ifdef S_ISVTX
+	  return S_ISVTX;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_ISTXT"))
+#ifdef S_ISTXT
+	  return S_ISTXT;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IFREG"))
+#ifdef S_IFREG
+	  return S_IFREG;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IFDIR"))
+#ifdef S_IFDIR
+	  return S_IFDIR;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IFLNK"))
+#ifdef S_IFLNK
+	  return S_IFLNK;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IFSOCK"))
+#ifdef S_IFSOCK
+	  return S_IFSOCK;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IFBLK"))
+#ifdef S_IFBLK
+	  return S_IFBLK;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IFCHR"))
+#ifdef S_IFCHR
+	  return S_IFCHR;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IFIFO"))
+#ifdef S_IFIFO
+	  return S_IFIFO;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IFWHT"))
+#ifdef S_IFWHT
+	  return S_IFWHT;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_ENFMT"))
+#ifdef S_ENFMT
+	  return S_ENFMT;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IRUSR"))
+#ifdef S_IRUSR
+	  return S_IRUSR;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IWUSR"))
+#ifdef S_IWUSR
+	  return S_IWUSR;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IXUSR"))
+#ifdef S_IXUSR
+	  return S_IXUSR;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IRWXU"))
+#ifdef S_IRWXU
+	  return S_IRWXU;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IRGRP"))
+#ifdef S_IRGRP
+	  return S_IRGRP;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IWGRP"))
+#ifdef S_IWGRP
+	  return S_IWGRP;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IXGRP"))
+#ifdef S_IXGRP
+	  return S_IXGRP;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IRWXG"))
+#ifdef S_IRWXG
+	  return S_IRWXG;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IROTH"))
+#ifdef S_IROTH
+	  return S_IROTH;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IWOTH"))
+#ifdef S_IWOTH
+	  return S_IWOTH;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IXOTH"))
+#ifdef S_IXOTH
+	  return S_IXOTH;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IRWXO"))
+#ifdef S_IRWXO
+	  return S_IRWXO;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IREAD"))
+#ifdef S_IREAD
+	  return S_IREAD;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IWRITE"))
+#ifdef S_IWRITE
+	  return S_IWRITE;
+#else
+	  goto not_there;
+#endif
+	if (strEQ(name, "S_IEXEC"))
+#ifdef S_IEXEC
+	  return S_IEXEC;
+#else
+	  goto not_there;
+#endif
+	break;
+      case 'E':
+	  if (strEQ(name, "SEEK_CUR"))
 #ifdef SEEK_CUR
-	return SEEK_CUR;
+	    return SEEK_CUR;
 #else
-        goto not_there;
+	    return 1;
 #endif
-      if (strEQ(name, "SEEK_END"))
+	if (strEQ(name, "SEEK_END"))
 #ifdef SEEK_END
-	return SEEK_END;
+	    return SEEK_END;
 #else
-        goto not_there;
+	    return 2;
 #endif
-      if (strEQ(name, "SEEK_SET"))
+	if (strEQ(name, "SEEK_SET"))
 #ifdef SEEK_SET
-	return SEEK_SET;
+	    return SEEK_SET;
 #else
-        goto not_there;
+	    return 0;
 #endif
-        break;
+	break;
+      }    
     }
     errno = EINVAL;
     return 0;

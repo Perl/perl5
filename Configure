@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Feb 16 01:07:15 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 17 01:07:48 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -653,6 +653,7 @@ i_sysioctl=''
 i_syssockio=''
 i_syslog=''
 i_sysmman=''
+i_sysmode=''
 i_sysmount=''
 i_sysndir=''
 i_sysparam=''
@@ -944,13 +945,12 @@ inclwanted=''
 groupstype=''
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
-
 : Possible local library directories to search.
 loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
 loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
 
 : general looking path for locating libraries
-glibpth="/usr/lib/large /lib/pa1.1 /lib /usr/lib $xlibpth"
+glibpth="/usr/lib/large /lib /usr/lib $xlibpth"
 glibpth="$glibpth /lib/large /usr/lib/small /lib/small"
 glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
 test -f /usr/shlib/libc.so && glibpth="/usr/shlib $glibpth"
@@ -2611,21 +2611,23 @@ $undef$define) . ./whoa; eval "$var=\$tu";;
 *) eval "$var=$val";;
 esac'
 
+case "$usethreads" in
+$define|true|[yY]*)     dflt='y';;
+*) dflt='n';;
+esac
 cat <<EOM
 
 Perl can be built to take advantage of threads on some systems.
-To do so, Configure must be run with -Dusethreads.
+To do so, Configure can be run with -Dusethreads.
 
 Note that threading is a highly experimental feature, and
 some known race conditions still remain.  If you choose to try
 it, be very sure to not actually deploy it for production
 purposes.  README.threads has more details, and is required
 reading if you enable threads.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
-case "$usethreads" in
-$define|true|[yY]*)     dflt='y';;
-*) dflt='n';;
-esac
 rp='Build a threading Perl?'
 . ./myread
 case "$ans" in
@@ -2719,12 +2721,11 @@ This multiple interpreter support is required for interpreter-based threads.
 EOM
 	val="$define"
 	;;
-*)
-	echo 'Normally you do not need this and you should answer no.'
-	case "$usemultiplicity" in
+*)	case "$usemultiplicity" in
 	$define|true|[yY]*)	dflt='y';;
 	*) dflt='n';;
 	esac
+	echo "If this doesn't make any sense to you, just accept the default '$dflt'."
 	rp='Build Perl for multiplicity?'
 	. ./myread
 	case "$ans" in
@@ -3058,7 +3059,7 @@ int main() {
 	exit(0);
 }
 EOM
-if $cc -o gccvers gccvers.c; then
+if $cc $ldflags -o gccvers gccvers.c; then
 	gccversion=`./gccvers`
 	case "$gccversion" in
 	'') echo "You are not using GNU cc." ;;
@@ -3662,18 +3663,17 @@ case "$firstmakefile" in
 '') firstmakefile='makefile';;
 esac
 
+case "$usesocks" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
 cat <<EOM
 
 Perl can be built to use the SOCKS proxy protocol library.  To do so,
 Configure must be run with -Dusesocks.
 
-Normally you do not need this and you should answer no.
-
+If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
-case "$usesocks" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
 rp='Build Perl for SOCKS?'
 . ./myread
 case "$ans" in
@@ -4284,17 +4284,17 @@ case "$lseeksize:$fpossize" in
 You can have files larger than 2 gigabytes.
 EOM
    val="$define" ;;
-*) cat <<EOM
-
-Perl can be built to understand large files (files larger than 2 gigabytes)
-on some systems.  To do so, Configure must be run with -Duselargefiles.
-
-If this doesn't make any sense to you, just accept the default 'y'.
-EOM
-   case "$uselargefiles" in
+*)    case "$uselargefiles" in
    "$undef"|false|[nN]*) dflt='n' ;;
    *)	dflt='y' ;;
    esac
+   cat <<EOM
+
+Perl can be built to understand large files (files larger than 2 gigabytes)
+on some systems.  To do so, Configure can be run with -Duselargefiles.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
    rp='Try to understand large files, if available?'
    . ./myread
    case "$ans" in
@@ -4407,7 +4407,7 @@ EOM
 cat <<EOM
 
 Perl can be built to take advantage of 64-bit integer types
-on some systems.  To do so, Configure must be run with -Duse64bits.
+on some systems.  To do so, Configure can be run with -Duse64bits.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
@@ -7012,14 +7012,6 @@ fi
 set sqrtl d_sqrtl
 eval $inlibc
 
-cat <<EOM
-
-Perl can be built to take advantage of long doubles which
-(if available) may give more accuracy and range for floating point numbers.
-
-If this doesn't make any sense to you, just accept the default 'n'.
-EOM
-
 case "$ccflags" in
 *-DUSE_LONG_DOUBLE*|*-DUSE_MORE_BITS*) uselongdouble="$define" ;;
 esac
@@ -7028,6 +7020,13 @@ case "$uselongdouble" in
 $define|true|[yY]*)	dflt='y';;
 *) dflt='n';;
 esac
+cat <<EOM
+
+Perl can be built to take advantage of long doubles which
+(if available) may give more accuracy and range for floating point numbers.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
 rp='Try to use long doubles if available?'
 . ./myread
 case "$ans" in
@@ -7069,6 +7068,10 @@ EOM
 	;;
 esac
 
+case "$useperlio" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
 cat <<EOM
 
 Previous version of $package used the standard IO mechanisms as defined
@@ -7079,12 +7082,8 @@ have sfio installed) or regular stdio.  Using PerlIO with sfio may cause
 problems with some extension modules.  Using PerlIO with stdio is safe,
 but it is slower than plain stdio and therefore is not the default.
 
-If this doesn't make any sense to you, just accept the default 'n'.
+If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
-case "$useperlio" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
 rp='Use the experimental PerlIO abstraction layer?'
 . ./myread
 case "$ans" in
@@ -14106,6 +14105,11 @@ eval $setvar
 set syslog.h i_syslog
 eval $inhdr
 
+
+: see if this is a sys/mode.h system
+set sys/mode.h i_sysmode
+eval $inhdr
+
 : see if sys/resource.h has to be included
 set sys/resource.h i_sysresrc
 eval $inhdr
@@ -14949,6 +14953,7 @@ i_sysin='$i_sysin'
 i_sysioctl='$i_sysioctl'
 i_syslog='$i_syslog'
 i_sysmman='$i_sysmman'
+i_sysmode='$i_sysmode'
 i_sysmount='$i_sysmount'
 i_sysndir='$i_sysndir'
 i_sysparam='$i_sysparam'

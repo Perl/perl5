@@ -821,6 +821,10 @@ struct perl_mstats {
  * in the face of half-implementations.)
  */
 
+#ifdef I_SYSMODE
+#include <sys/mode.h>
+#endif
+
 #ifndef S_IFMT
 #   ifdef _S_IFMT
 #	define S_IFMT _S_IFMT
@@ -913,6 +917,30 @@ struct perl_mstats {
 
 #ifndef S_ISGID
 #   define S_ISGID 02000
+#endif
+
+#ifndef S_IRWXU
+#   define S_IRWXU (S_IRUSR|S_IWUSR|S_IXUSR)
+#endif 
+
+#ifndef S_IRWXG
+#   define S_IRWXG (S_IRGRP|S_IWGRP|S_IXGRP)
+#endif 
+
+#ifndef S_IRWXO
+#   define S_IRWXO (S_IROTH|S_IWOTH|S_IXOTH)
+#endif 
+
+#ifndef S_IREAD
+#   define S_IREAD S_IRUSR
+#endif
+
+#ifndef S_IWRITE
+#   define S_IWRITE S_IWUSR
+#endif
+
+#ifndef S_IEXEC
+#   define S_IEXEC S_IXUSR
 #endif
 
 #ifdef ff_next
@@ -2059,9 +2087,9 @@ char *crypt (const char*, const char*);
 #    ifndef getenv
 char *getenv (const char*);
 #    endif /* !getenv */
-#if !defined(EPOC) && !(defined(__hpux) && defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64)
+#    if !defined(EPOC) && !(defined(__hpux) && defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64)
 Off_t lseek (int,Off_t,int);
-#endif
+#    endif
 #  endif /* !DONT_DECLARE_STD */
 char *getlogin (void);
 #endif /* !__cplusplus */
