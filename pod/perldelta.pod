@@ -555,6 +555,11 @@ the <FILEHANDLE> angle bracket operator.
 The command-line options -s and -F are now recognized on the shebang
 (#!) line.
 
+=item *
+
+Use of the C</c> match modifier without an accompanying C</g> modifier
+elicits a new warning: C<Use of /c modifier is meaningless without /g>.
+
 =back
 
 =head1 Modules and Pragmata

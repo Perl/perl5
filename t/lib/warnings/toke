@@ -103,7 +103,9 @@ toke.c	AOK
         $a =  0047777777777 ;
 
     dump() better written as CORE::dump()
-     
+
+    Use of /c modifier is meaningless without /g     
+
     Mandatory Warnings
     ------------------
     Use of "%s" without parentheses is ambiguous	[check_uni]
@@ -738,3 +740,22 @@ no warnings 'misc';
 "bar" =~ /\_/;
 EXPECT
 Unrecognized escape \q passed through at - line 4.
+########
+# toke.c
+# 20020328 mjd@plover.com at behest of jfriedl@yahoo.com
+use warnings 'regexp';
+"foo" =~ /foo/c;
+no warnings 'regexp';
+"foo" =~ /foo/c;
+EXPECT
+Use of /c modifier is meaningless without /g at - line 4.
+########
+# toke.c
+# 20020328 mjd@plover.com at behest of jfriedl@yahoo.com
+use warnings 'regexp';
+$_ = "ab" ; 
+s/ab/ab/c;
+no warnings 'regexp';
+s/ab/ab/c;
+EXPECT
+Use of /c modifier is meaningless without /g at - line 5.

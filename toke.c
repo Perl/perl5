@@ -26,6 +26,7 @@
 #define yylval	PL_yylval
 
 static char ident_too_long[] = "Identifier too long";
+static char c_without_g[] = "Use of /c modifier is meaningless without /g";
 
 static void restore_rsfp(pTHX_ void *f);
 #ifndef PERL_NO_UTF16_FILTER
@@ -6284,6 +6285,13 @@ S_scan_pat(pTHX_ char *start, I32 type)
 	while (*s && strchr("iogcmsx", *s))
 	    pmflag(&pm->op_pmflags,*s++);
     }
+    /* issue a warning if /c is specified,but /g is not */
+    if (ckWARN(WARN_REGEXP) && 
+        (pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL))
+    {
+        Perl_warner(aTHX_ packWARN(WARN_REGEXP), c_without_g);
+    }
+
     pm->op_pmpermflags = pm->op_pmflags;
 
     PL_lex_op = (OP*)pm;
@@ -6330,6 +6338,13 @@ S_scan_subst(pTHX_ char *start)
 	    pmflag(&pm->op_pmflags,*s++);
 	else
 	    break;
+    }
+
+    /* issue a warning if /c is specified,but /g is not */
+    if (ckWARN(WARN_REGEXP) &&
+        (pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL))
+    {
+        Perl_warner(aTHX_ packWARN(WARN_REGEXP), c_without_g);
     }
 
     if (es) {
