@@ -4002,13 +4002,13 @@ Perl_scan_version(pTHX_ char *s, SV *rv)
 	if ( *pos == '.' )
 	{
 	    if ( saw_under )
-		croak(aTHX_ "Invalid version format (underscores before decimal)");
+		Perl_croak(aTHX_ "Invalid version format (underscores before decimal)");
 	    saw_period++ ;
 	    }
 	else if ( *pos == '_' )
 	{
 	    if ( saw_under )
-		croak(aTHX_ "Invalid version format (multiple underscores)");
+		Perl_croak(aTHX_ "Invalid version format (multiple underscores)");
 	    saw_under = 1;
 	}
 	pos++;
@@ -4042,7 +4042,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv)
 		    rev += (*end - '0') * mult;
 		    mult *= 10;
 		    if ( abs(orev) > abs(rev) )
-			croak(aTHX_ "Integer overflow in version");
+			Perl_croak(aTHX_ "Integer overflow in version");
 		}
 	    }
 
