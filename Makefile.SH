@@ -694,7 +694,7 @@ os390|posix-bc)
     fi
     cd x2p
     rm -f y.tab.c
-    yacc a2p.y >/dev/null 2>&1
+    yacc -d a2p.y >/dev/null 2>&1
     if cmp -s y.tab.c a2p.c
     then
         rm -f y.tab.c
