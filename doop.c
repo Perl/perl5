@@ -17,9 +17,7 @@
 #include "perl.h"
 
 #ifndef PERL_MICRO
-#if !defined(NSIG) || defined(M_UNIX) || defined(__unix) || defined(M_XENIX)
 #include <signal.h>
-#endif
 #endif
 
 STATIC I32
