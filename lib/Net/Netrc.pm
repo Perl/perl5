@@ -11,7 +11,7 @@ use strict;
 use FileHandle;
 use vars qw($VERSION);
 
-$VERSION = "2.12"; # $Id: //depot/libnet/Net/Netrc.pm#12 $
+$VERSION = "2.12"; # $Id: //depot/libnet/Net/Netrc.pm#13 $
 
 my %netrc = ();
 
@@ -76,8 +76,11 @@ sub _readrc
 
      s/^\s*//;
      chomp;
-     push(@tok, $+)
-       while(length && s/^("([^"]*)"|(\S+))\s*//);
+
+     while(length && s/^("((?:[^"]+|\\.)*)"|((?:[^\\\s]+|\\.)*))\s*//) {
+       (my $tok = $+) =~ s/\\(.)/$1/g;
+       push(@tok, $tok);
+     }
 
 TOKEN:
      while(@tok)
@@ -332,6 +335,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-$Id: //depot/libnet/Net/Netrc.pm#12 $
+$Id: //depot/libnet/Net/Netrc.pm#13 $
 
 =cut
