@@ -134,8 +134,10 @@ sub FETCH {
         my $t = $Config{ivtype};
         my $s = $Config{ivsize};
         my $f = $t eq 'long' ? 'L!' : $s == 8 ? 'Q': 'I';
-        my $i = unpack($f, pack('C*', map { ord() } 1..$s));
         if ($s == 4 || $s == 8) {
+	    my $i = 0;
+    	    foreach my $c (reverse(2..$s)) { $i |= ord($c); $i <<= 8 }
+	    $i |= ord(1);
             $value = join('', unpack('a'x$s, pack($f, $i)));
         } else {
             $value = '?'x$s;
