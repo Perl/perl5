@@ -16,7 +16,7 @@ struct xpvav {
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 
-    SV**	xav_alloc;	/* pointer to malloced string */
+    SV**	xav_alloc;	/* pointer to beginning of C array of SVs */
     SV*		xav_arylen;
     U8		xav_flags;
 };
