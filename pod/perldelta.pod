@@ -408,9 +408,9 @@ removed/changed in future releases.)
 
 =item *
 
-chomp() and chop() have been demoted back to I<not> being overridable
-because they cannot really be overridden-- the problem is that their
-prototype cannot be expressed and therefore one really cannot write
+chomp() and chop() are now overridable.  Note, however, that their
+prototype (as given by C<prototype("CORE::chomp")> is undefined,
+because it cannot be expressed and therefore one cannot really write
 replacements to override these builtins.
 
 =item *
