@@ -699,6 +699,9 @@ perl_destruct(pTHXx)
     SvFLAGS(PL_fdpid) |= SVTYPEMASK;		/* don't clean out pid table now */
     SvFLAGS(PL_strtab) |= SVTYPEMASK;		/* don't clean out strtab now */
 
+    PL_comppad = Null(PAD*);
+    PL_curpad = Null(SV**);
+
     /* the 2 is for PL_fdpid and PL_strtab */
     while (PL_sv_count > 2 && sv_clean_all())
 	;

@@ -167,6 +167,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	SSCHECK(2);						\
 	SSPUSHPTR((SV*)PL_comppad);				\
 	SSPUSHINT(SAVEt_COMPPAD);				\
+	SvREFCNT_inc(PL_comppad);				\
     } STMT_END
 
 #ifdef USE_ITHREADS
