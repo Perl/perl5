@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
-# $Id: man.t,v 1.2 2002/06/23 19:16:25 eagle Exp $
+# $Id: text.t,v 1.1 2002/06/23 19:16:25 eagle Exp $
 #
-# man.t -- Additional specialized tests for Pod::Man.
+# text.t -- Additional specialized tests for Pod::Text.
 #
 # Copyright 2002 by Russ Allbery <rra@stanford.edu>
 #
@@ -17,14 +17,14 @@ BEGIN {
     }
     unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..3\n";
+    print "1..2\n";
 }
 
 END {
     print "not ok 1\n" unless $loaded;
 }
 
-use Pod::Man;
+use Pod::Text;
 
 $loaded = 1;
 print "ok 1\n";
@@ -38,10 +38,9 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Man->new or die "Cannot create parser\n";
+    my $parser = Pod::Text->new or die "Cannot create parser\n";
     $parser->parse_from_file ('tmp.pod', 'out.tmp');
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
-    while (<TMP>) { last if /^\.TH/ }
     my $output;
     {
         local $/;
@@ -63,34 +62,18 @@ while (<DATA>) {
     $n++;
 }
 
-# Below the marker are bits of POD and corresponding expected nroff output.
-# This is used to test specific features or problems with Pod::Man.  The input
-# and output are separated by lines containing only ###.
+# Below the marker are bits of POD and corresponding expected text output.
+# This is used to test specific features or problems with Pod::Text.  The
+# input and output are separated by lines containing only ###.
 
 __DATA__
-
-###
-=head1 NAME
-
-gcc - GNU project C and C++ compiler
-
-=head1 C++ NOTES
-
-Other mentions of C++.
-###
-.SH "NAME"
-gcc \- GNU project C and C++ compiler
-.SH "\*(C+ NOTES"
-.IX Header " NOTES"
-Other mentions of \*(C+.
-###
 
 ###
 =head1 PERIODS
 
 This C<.> should be quoted.
 ###
-.SH "PERIODS"
-.IX Header "PERIODS"
-This \f(CW\*(C`.\*(C'\fR should be quoted.
+PERIODS
+    This "." should be quoted.
+
 ###
