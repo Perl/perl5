@@ -31,7 +31,7 @@ sub process_file {
 	}     
     } else {
 	unless(open(FH,"< $file")) {
-	    # This file could be a temporay file created by cppstdin
+	    # This file could be a temporary file created by cppstdin
 	    # so only warn under -w, and return
             warn "Cannot open '$file'" if $^W;
             return;
@@ -42,6 +42,24 @@ sub process_file {
 	    if /^\s*#\s*define\s+(E\w+)\s+/;
    }
    close(FH);
+}
+
+my $cppstdin;
+
+sub default_cpp {
+    unless (defined $cppstdin) {
+	use File::Spec;
+	$cppstdin = $Config{cppstdin};
+	my $upup_cppstdin = File::Spec->catfile(File::Spec->updir,
+						File::Spec->updir,
+						"cppstdin");
+	my $cppstdin_is_wrapper =
+	    ($cppstdin eq 'cppstdin'
+		and -f $upup_cppstdin
+		    and -x $upup_cppstdin);
+	$cppstdin = $upup_cppstdin if $cppstdin_is_wrapper;
+    }
+    return "$cppstdin $Config{cppflags} $Config{cppminus}";
 }
 
 sub get_files {
@@ -74,7 +92,7 @@ sub get_files {
 	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
 	} else {
-	    my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
+	    my $cpp = default_cpp();
 	    open(CPPO,"$cpp < errno.c |") or
 		die "Cannot exec $cpp";
 	}
@@ -106,6 +124,10 @@ sub get_files {
 sub write_errno_pm {
     my $err;
 
+    # quick sanity check
+
+    die "No error definitions found" unless keys %err;
+
     # create the CPP input
 
     open(CPPI,"> errno.c") or
@@ -130,7 +152,7 @@ sub write_errno_pm {
 	open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 	    die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
     } else {
-	my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
+	my $cpp = default_cpp();
 	open(CPPO,"$cpp < errno.c |")
 	    or die "Cannot exec $cpp";
     }
