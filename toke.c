@@ -1537,7 +1537,7 @@ S_scan_const(pTHX_ char *start)
 		}
 		continue;
 
- 	    /* \N{latin small letter a} is a named character */
+ 	    /* \N{LATIN SMALL LETTER A} is a named character */
  	    case 'N':
  		++s;
  		if (*s == '{') {
@@ -1568,7 +1568,7 @@ S_scan_const(pTHX_ char *start)
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
 		    }
-		    if (len > e - s + 4) {
+		    if (len > e - s + 4) { /* I _guess_ 4 is \N{} --jhi */
 			char *odest = SvPVX(sv);
 
 			SvGROW(sv, (SvLEN(sv) + len - (e - s + 4)));
