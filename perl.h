@@ -3082,9 +3082,6 @@ typedef struct am_table_short AMTS;
 #   if !defined(Strtol) && defined(HAS_STRTOLL)
 #       define Strtol	strtoll
 #   endif
-#   if !defined(Strtol) && defined(HAS_ATOLL)
-#       define Strtol	atoll
-#   endif
 /* is there atoq() anywhere? */
 #endif
 #if !defined(Strtol) && defined(HAS_STRTOL)
@@ -3093,7 +3090,7 @@ typedef struct am_table_short AMTS;
 #ifndef Atol
 /* It would be more fashionable to use Strtol() to define atol()
  * (as is done for Atoul(), see below) but for backward compatibility
- * we just assume and use atol(). */
+ * we just assume atol(). */
 #   define Atol		atol
 #endif
 
@@ -3113,7 +3110,7 @@ typedef struct am_table_short AMTS;
 #   define Strtoul	strtoul
 #endif
 #ifndef Atoul
-#   define Atoul	Strtoul(s, (char **)NULL, 10)
+#   define Atoul(s)	Strtoul(s, (char **)NULL, 10)
 #endif
 
 #if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)

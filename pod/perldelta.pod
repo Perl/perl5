@@ -2167,6 +2167,10 @@ corresponding bit of $^H as well.
 (F) Compile-time-substitutions (such as overloaded constants and
 character names) were not correctly set up.
 
+=item CORE::%s is not a keyword
+
+(F) The CORE:: namespace is reserved for Perl keywords.
+
 =item defined(@array) is deprecated
 
 (D) defined() is not usually useful on arrays because it checks for an

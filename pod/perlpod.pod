@@ -294,7 +294,7 @@ use the form LE<lt>show this text|fooE<gt> instead.
 
 =item *
 
-The F<L<podchecker|podchecker>> command is provided to check pod syntax
+The B<podchecker> command is provided to check pod syntax
 for errors and warnings. For example, it checks for completely
 blank lines in pod segments and for unknown escape sequences.
 It is still advised to pass it through

@@ -1269,6 +1269,10 @@ character names) were not correctly set up.
 
 (F) The method which overloads "=" is buggy. See L<overload/Copy Constructor>.
 
+=item CORE::%s is not a keyword
+
+(F) The CORE:: namespace is reserved for Perl keywords.
+
 =item Corrupt malloc ptr 0x%lx at 0x%lx
 
 (P) The malloc package that comes with Perl had an internal failure.

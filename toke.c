@@ -3958,7 +3958,8 @@ Perl_yylex(pTHX)
 		s += 2;
 		d = s;
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
-		tmp = keyword(PL_tokenbuf, len);
+		if (!(tmp = keyword(PL_tokenbuf, len)))
+		    Perl_croak(aTHX_ "CORE::%s is not a keyword", PL_tokenbuf);
 		if (tmp < 0)
 		    tmp = -tmp;
 		goto reserved_word;
