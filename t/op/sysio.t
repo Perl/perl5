@@ -6,7 +6,8 @@ chdir('op') || die "sysio.t: cannot look for myself: $!";
 
 open(I, 'sysio.t') || die "sysio.t: cannot find myself: $!";
 
-$reopen = ($^O eq 'VMS' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'dos');
+$reopen = ($^O eq 'VMS' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'dos' ||
+	   $^O eq 'mpeix');
 
 $x = 'abc';
 
