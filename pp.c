@@ -3387,7 +3387,8 @@ PP(pp_chr)
 	tmps = SvPVX(TARG);
 	if (SvCUR(TARG) == 0 || !is_utf8_string((U8*)tmps, SvCUR(TARG)) ||
 	    memEQ(tmps, "\xef\xbf\xbd\0", 4)) {
-	    SvGROW(TARG,3);
+	    SvGROW(TARG, 3);
+	    tmps = SvPVX(TARG);
 	    SvCUR_set(TARG, 2);
 	    *tmps++ = (U8)UTF8_EIGHT_BIT_HI(value);
 	    *tmps++ = (U8)UTF8_EIGHT_BIT_LO(value);
