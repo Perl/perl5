@@ -42,6 +42,7 @@ package Maintainers;
 	'petdance'	=> 'Andy Lester <petdance@cpan.org>',
 	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
+	'rclamp'	=> 'Richard Clamp <rclamp@cpan.org>',
 	'rgarcia'	=> 'Rafael Garcia-Suarez <rgarcia@cpan.org>',
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
@@ -307,6 +308,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'gaas',
 		'FILES'		=> q[ext/MIME/Base64],
+		'CPAN'		=> 1,
+		},
+
+	'Module::CoreList' =>
+		{
+		'MAINTAINER'	=> 'rclamp',
+		'FILES'		=> q[lib/Module/CoreList lib/Module/CoreList.pm],
 		'CPAN'		=> 1,
 		},
 
