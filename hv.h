@@ -89,7 +89,7 @@ struct xpvhv {
 	(hash) = (hash_PeRlHaSh + (hash_PeRlHaSh << 15)); \
     } STMT_END
 
-#ifdef PERL_IN_HV_C
+#if defined (PERL_IN_HV_C) || defined (MOD_PERL)
 #define PERL_HASH_INTERNAL(hash,str,len) \
      STMT_START	{ \
 	register const char *s_PeRlHaSh_tmp = str; \
