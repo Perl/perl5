@@ -122,16 +122,12 @@ Since the path seperators are different on some operating systems ('/'
 on Unix, ':' on MacPerl, etc...) we recommend you use the File::Spec
 modules wherever portability is a concern.
 
-=begin _private
-
 =item *
 
 Actually, on Mac OS, the C<getcwd()>, C<fastgetcwd()> and C<fastcwd()>
 functions  are all aliases for the C<cwd()> function, which, on Mac OS,
 calls `pwd`. Likewise, the C<abs_path()> function is an alias for
 C<fast_abs_path()>.
-
-=end _private
 
 =back
 
