@@ -6780,7 +6780,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	bool left = FALSE;
 	bool vectorize = FALSE;
 	bool vectorarg = FALSE;
-	bool utf = FALSE;
+	bool vec_utf = FALSE;
 	char fill = ' ';
 	char plus = 0;
 	char intsize = 0;
@@ -6918,19 +6918,17 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		vecsv = va_arg(*args, SV*);
 		vecstr = (U8*)SvPVx(vecsv,veclen);
-		utf = DO_UTF8(vecsv);
+		vec_utf = DO_UTF8(vecsv);
 	    }
 	    else if (efix ? efix <= svmax : svix < svmax) {
 		vecsv = svargs[efix ? efix-1 : svix++];
 		vecstr = (U8*)SvPVx(vecsv,veclen);
-		utf = DO_UTF8(vecsv);
+		vec_utf = DO_UTF8(vecsv);
 	    }
 	    else {
 		vecstr = (U8*)"";
 		veclen = 0;
 	    }
-	    if (DO_UTF8(vecsv))
-		is_utf = TRUE;
 	}
 
 	if (asterisk) {
@@ -7099,7 +7097,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		STRLEN ulen;
 		if (!veclen)
 		    continue;
-		if (utf)
+		if (vec_utf)
 		    iv = (IV)utf8_to_uv(vecstr, veclen, &ulen, 0);
 		else {
 		    iv = *vecstr;
@@ -7179,7 +7177,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	vector:
 		if (!veclen)
 		    continue;
-		if (utf)
+		if (vec_utf)
 		    uv = utf8_to_uv(vecstr, veclen, &ulen, 0);
 		else {
 		    uv = *vecstr;
