@@ -1327,7 +1327,7 @@ Perl_to_uni_lower_lc(pTHXo_ U32 c)
 }
 
 #undef  Perl_is_utf8_char
-int
+STRLEN
 Perl_is_utf8_char(pTHXo_ U8 *p)
 {
     return ((CPerlObj*)pPerl)->Perl_is_utf8_char(p);
@@ -3378,18 +3378,18 @@ Perl_bytes_to_utf8(pTHXo_ U8 *s, STRLEN *len)
     return ((CPerlObj*)pPerl)->Perl_bytes_to_utf8(s, len);
 }
 
-#undef  Perl_utf8_to_uv
+#undef  Perl_utf8_to_uv_simple
 UV
-Perl_utf8_to_uv(pTHXo_ U8 *s, STRLEN* retlen)
+Perl_utf8_to_uv_simple(pTHXo_ U8 *s, STRLEN* retlen)
 {
-    return ((CPerlObj*)pPerl)->Perl_utf8_to_uv(s, retlen);
+    return ((CPerlObj*)pPerl)->Perl_utf8_to_uv_simple(s, retlen);
 }
 
-#undef  Perl_utf8_to_uv_chk
+#undef  Perl_utf8_to_uv
 UV
-Perl_utf8_to_uv_chk(pTHXo_ U8 *s, STRLEN curlen, STRLEN* retlen, bool checking)
+Perl_utf8_to_uv(pTHXo_ U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
 {
-    return ((CPerlObj*)pPerl)->Perl_utf8_to_uv_chk(s, curlen, retlen, checking);
+    return ((CPerlObj*)pPerl)->Perl_utf8_to_uv(s, curlen, retlen, flags);
 }
 
 #undef  Perl_uv_to_utf8

@@ -1484,7 +1484,7 @@ PP(pp_complement)
 
 	  send = tmps + len;
 	  while (tmps < send) {
-	    UV c = utf8_to_uv_chk(tmps, 0, &l, UTF8_ALLOW_ANY);
+	    UV c = utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
 	    tmps += UTF8SKIP(tmps);
 	    targlen += UNISKIP(~c);
 	  }
@@ -1493,7 +1493,7 @@ PP(pp_complement)
 	  tmps -= len;
 	  Newz(0, result, targlen + 1, U8);
 	  while (tmps < send) {
-	    UV c = utf8_to_uv_chk(tmps, 0, &l, UTF8_ALLOW_ANY);
+	    UV c = utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
 	    tmps += UTF8SKIP(tmps);
 	    result = uv_to_utf8(result,(UV)~c);
 	  }
@@ -2240,7 +2240,7 @@ PP(pp_ord)
     STRLEN retlen;
 
     if ((*tmps & 0x80) && DO_UTF8(tmpsv))
-	value = utf8_to_uv_chk(tmps, len, &retlen, 0);
+	value = utf8_to_uv(tmps, len, &retlen, 0);
     else
 	value = (UV)(*tmps & 255);
     XPUSHu(value);
@@ -2307,7 +2307,7 @@ PP(pp_ucfirst)
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
-	UV uv = utf8_to_uv_chk(s, slen, &ulen, 0);
+	UV uv = utf8_to_uv(s, slen, &ulen, 0);
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2366,7 +2366,7 @@ PP(pp_lcfirst)
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
-	UV uv = utf8_to_uv_chk(s, slen, &ulen, 0);
+	UV uv = utf8_to_uv(s, slen, &ulen, 0);
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2443,7 +2443,7 @@ PP(pp_uc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv_chk(s, len, &ulen, 0)));
+		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv(s, len, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
@@ -2517,7 +2517,7 @@ PP(pp_lc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv_chk(s, len, &ulen, 0)));
+		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv(s, len, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
@@ -3660,7 +3660,7 @@ PP(pp_unpack)
 	    if (checksum) {
 		while (len-- > 0 && s < strend) {
 		    STRLEN alen;
-		    auint = utf8_to_uv_chk((U8*)s, strend - s, &alen, 0);
+		    auint = utf8_to_uv((U8*)s, strend - s, &alen, 0);
 		    along = alen;
 		    s += along;
 		    if (checksum > 32)
@@ -3674,7 +3674,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
 		    STRLEN alen;
-		    auint = utf8_to_uv_chk((U8*)s, strend - s, &alen, 0);
+		    auint = utf8_to_uv((U8*)s, strend - s, &alen, 0);
 		    along = alen;
 		    s += along;
 		    sv = NEWSV(37, 0);

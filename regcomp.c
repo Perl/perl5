@@ -2884,7 +2884,7 @@ tryagain:
 		default:
 		  normal_default:
 		    if ((*p & 0xc0) == 0xc0 && UTF) {
-			ender = utf8_to_uv_chk((U8*)p, PL_regxend - p,
+			ender = utf8_to_uv((U8*)p, PL_regxend - p,
 					       &numlen, 0);
 			p += numlen;
 		    }
@@ -3639,14 +3639,14 @@ S_regclassutf8(pTHX)
 	namedclass = OOB_NAMEDCLASS;
 	if (!range)
 	    rangebegin = PL_regcomp_parse;
-	value = utf8_to_uv_chk((U8*)PL_regcomp_parse,
+	value = utf8_to_uv((U8*)PL_regcomp_parse,
 			       PL_regxend - PL_regcomp_parse,
 			       &numlen, 0);
 	PL_regcomp_parse += numlen;
 	if (value == '[')
 	    namedclass = regpposixcc(value);
 	else if (value == '\\') {
-	    value = (U32)utf8_to_uv_chk((U8*)PL_regcomp_parse,
+	    value = (U32)utf8_to_uv((U8*)PL_regcomp_parse,
 					PL_regxend - PL_regcomp_parse,
 					&numlen, 0);
 	    PL_regcomp_parse += numlen;

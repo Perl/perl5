@@ -77,7 +77,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 
         ulen = 1;
         /* Need to check this, otherwise 128..255 won't match */
-	c = utf8_to_uv_chk(s, send - s, &ulen, 0);
+	c = utf8_to_uv(s, send - s, &ulen, 0);
         if (c < 0x100 && (ch = tbl[(short)c]) >= 0) {
             matches++;
             if (ch < 0x80)
@@ -125,7 +125,7 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
             STRLEN ulen;
             ulen = 1;
             if (hasutf)
-                c = utf8_to_uv_chk(s, send - s, &ulen, 0);
+                c = utf8_to_uv(s, send - s, &ulen, 0);
             else
                 c = *s;
             if (c < 0x100 && tbl[c] >= 0)
@@ -364,7 +364,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
 		STRLEN ulen;
-		*d++ = (U8)utf8_to_uv_chk(s, send - s, &ulen, 0);
+		*d++ = (U8)utf8_to_uv(s, send - s, &ulen, 0);
 		s += ulen;
 		puv = 0xfeedface;
 		continue;
@@ -405,7 +405,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
 		STRLEN ulen;
-		*d++ = (U8)utf8_to_uv_chk(s, send - s, &ulen, 0);
+		*d++ = (U8)utf8_to_uv(s, send - s, &ulen, 0);
 		s += ulen;
 		continue;
 	    }
@@ -550,9 +550,8 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
     if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */
 	Perl_croak(aTHX_ "Illegal number of bits in vec");
 
-    if (SvUTF8(sv)) {
+    if (SvUTF8(sv))
 	(void) Perl_sv_utf8_downgrade(aTHX_ sv, TRUE);
-    }
 
     offset *= size;	/* turn into bit offset */
     len = (offset + size + 7) / 8;	/* required number of bytes */
@@ -969,10 +968,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	switch (optype) {
 	case OP_BIT_AND:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv_chk((U8*)lc, lulen, &ulen, 0);
+		luc = utf8_to_uv((U8*)lc, lulen, &ulen, 0);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv_chk((U8*)rc, rulen, &ulen, 0);
+		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, 0);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc & ruc;
@@ -984,10 +983,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    break;
 	case OP_BIT_XOR:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv_chk((U8*)lc, lulen, &ulen, 0);
+		luc = utf8_to_uv((U8*)lc, lulen, &ulen, 0);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv_chk((U8*)rc, rulen, &ulen, 0);
+		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, 0);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc ^ ruc;
@@ -996,10 +995,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    goto mop_up_utf;
 	case OP_BIT_OR:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv_chk((U8*)lc, lulen, &ulen, 0);
+		luc = utf8_to_uv((U8*)lc, lulen, &ulen, 0);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv_chk((U8*)rc, rulen, &ulen, 0);
+		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, 0);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc | ruc;

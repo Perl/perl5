@@ -2368,19 +2368,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
@@ -3218,21 +3218,6 @@ Found in file utf8.c
 =item utf8_to_uv
 
 Returns the character value of the first character in the string C<s>
-which is assumed to be in UTF8 encoding; C<retlen> will be set to the
-length, in bytes, of that character, and the pointer C<s> will be
-advanced to the end of the character.
-
-If C<s> does not point to a well-formed UTF8 character, an optional UTF8
-warning is produced.
-
-	U8* s	utf8_to_uv(STRLEN *retlen)
-
-=for hackers
-Found in file utf8.c
-
-=item utf8_to_uv_chk
-
-Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding and no longer than C<curlen>;
 C<retlen> will be set to the length, in bytes, of that character,
 and the pointer C<s> will be advanced to the end of the character.
@@ -3243,7 +3228,22 @@ assumed that the caller will raise a warning, and this function will
 set C<retlen> to C<-1> and return. If C<checking> is not true, an optional UTF8
 warning is produced.
 
-	U8* s	utf8_to_uv_chk(STRLEN curlen, I32 *retlen, I32 checking)
+	U8* s	utf8_to_uv(STRLEN curlen, I32 *retlen, U32 flags)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8_to_uv_simple
+
+Returns the character value of the first character in the string C<s>
+which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+length, in bytes, of that character, and the pointer C<s> will be
+advanced to the end of the character.
+
+If C<s> does not point to a well-formed UTF8 character, zero is
+returned and retlen is set, if possible, to -1.
+
+	U8* s	utf8_to_uv_simple(STRLEN *retlen)
 
 =for hackers
 Found in file utf8.c
