@@ -4291,6 +4291,12 @@ loop control operators described in L<perlsyn> or with C<goto>.
 When C<use locale> is in effect, C<sort LIST> sorts LIST according to the
 current collation locale.  See L<perllocale>.
 
+Perl does B<not> guarantee that sort is stable.  (In a I<stable> sort the
+relative order is preserved for elements where the sort comparison used
+returns that they are equal.)  5.7 happens to use a mergesort, which is
+stable, but 5.6 and earlier used quicksort, which is not.  However, do not
+assume that future perls will continue to use a stable sort such as mergesort.
+
 Examples:
 
     # sort lexically
