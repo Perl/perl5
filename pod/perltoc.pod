@@ -1893,6 +1893,8 @@ string
 
 =item Basic Thread Support
 
+=item A Note about the Examples
+
 =item Creating Threads
 
 =item Giving up control
@@ -3357,8 +3359,8 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regular Expressions ($Revision: 1.11 $, $Date: 2002/05/23
-15:47:37 $)
+=head2 perlfaq6 - Regular Expressions ($Revision: 1.12 $, $Date: 2002/06/01
+22:31:09 $)
 
 =over 4
 
@@ -5278,6 +5280,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Understanding of Numbers
 
+=item Arrays now always interpolate into double-quoted strings [561]
+
 =item Miscellaneous Changes
 
 =back
@@ -5320,7 +5324,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Changed Internals
 
-=item Security Vulnerability Closed
+=item Security Vulnerability Closed [561]
 
 =item New Tests
 
@@ -5340,7 +5344,11 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item ext/threads/t/libc
 
+=item FreeBSD built with ithreads coredumps reading large directories
+
 =item FreeBSD Failing locale Test 117 For ISO8859-15 Locales
+
+=item IRIX fails ext/List/Util/t/shuffle.t
 
 =item Modifying $_ Inside for(..)
 
@@ -5362,17 +5370,21 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Solaris 2.5
 
-=item Stratus VOS
+=item SUPER-UX (NEC SX)
 
 =item Term::ReadKey not working on Win32
 
 =item Failure of Thread (5.005-style) tests
+
+=item Timing problems
 
 =item UNICOS
 
 =item UNICOS/mk
 
 =item UTS
+
+=item VOS (Stratus)
 
 =item VMS
 
@@ -7301,6 +7313,26 @@ DJGPP, Pthreads
 
 =back
 
+=head2 perlfreebsd, README.freebsd - Perl version 5 on FreeBSD systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item core dumps from readdir_r with ithreads
+
+=item $^X doesn't always contain a full path
+
+=item Perl will no more be part of "base FreeBSD"
+
+=back
+
+=item AUTHOR
+
+=back
+
 =head2 perlhpux, README.hpux - Perl version 5 on Hewlett-Packard Unix
 (HP-UX) systems
 
@@ -7369,6 +7401,32 @@ DJGPP, Pthreads
 =over 4
 
 =item Known Problems with Perl on Hurd 
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 perlirix, README.irix - Perl version 5 on Irix systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Building 32-bit
+
+=item Building 64-bot
+
+=item About Compiler Versions
+
+=item Linker Problems
+
+=item Malloc
+
+=item Building with threads
 
 =back
 
@@ -8179,8 +8237,11 @@ SDK 64-bit Compiler, Mingw32 with GCC
 
 Environment Variables, File Globbing, Using perl from the command line,
 Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Notes on 64-bit Windows, Running Perl Scripts, Miscellaneous
-Things
+Extensions, Notes on 64-bit Windows
+
+=item Running Perl Scripts
+
+Miscellaneous Things
 
 =back
 
@@ -10592,7 +10653,8 @@ C<getprotobynumber_r_proto>, C<getprotoent_r_proto>, C<getpwent_r_proto>,
 C<getpwnam_r_proto>, C<getpwuid_r_proto>, C<getservbyname_r_proto>,
 C<getservbyport_r_proto>, C<getservent_r_proto>, C<getspnam_r_proto>,
 C<gidformat>, C<gidsign>, C<gidsize>, C<gidtype>, C<glibpth>, C<gmake>,
-C<gmtime_r_proto>, C<grep>, C<groupcat>, C<groupstype>, C<gzip>
+C<gmtime_r_proto>, C<gnulibc_version>, C<grep>, C<groupcat>, C<groupstype>,
+C<gzip>
 
 =item h
 
@@ -10666,7 +10728,7 @@ C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
 =item p
 
 C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
-C<perl>, C<perl_patchlevel>
+C<perl5>, C<perl>, C<perl_patchlevel>
 
 =item P
 
@@ -10736,7 +10798,7 @@ C<xlibpth>, C<xs_apiversion>
 
 =item y
 
-C<yacc>, C<yaccflags>
+C<yaccflags>
 
 =item z
 
@@ -15453,15 +15515,15 @@ the same terms as Perl itself.
 
 =item as_number()
 
-=item bfac()/blog()
+=item bfac()
+
+=item blog()
 
 =item bround()/round()/bfround()
 
 =back
 
 =item BUGS
-
-perl -Mbigrat -le 'print 1 + 2/3'
 
 =item LICENSE
 
@@ -18847,7 +18909,7 @@ unexpand(1)
 
 =back
 
-=head2 Thread - manipulate threads in Perl
+=head2 Thread - manipulate threads in Perl (for old code only)
 
 =over 4
 
@@ -18873,9 +18935,11 @@ join, eval, detach, equal, tid, flags, done
 
 =back
 
-=head2 Thread::Queue - thread-safe queues
+=head2 Thread::Queue - thread-safe queues (for old code only)
 
 =over 4
+
+=item CAVEAT
 
 =item SYNOPSIS
 
@@ -18889,9 +18953,11 @@ new, enqueue LIST, dequeue, dequeue_nb, pending
 
 =back
 
-=head2 Thread::Semaphore - thread-safe semaphores
+=head2 Thread::Semaphore - thread-safe semaphores (for old code only)
 
 =over 4
+
+=item CAVEAT
 
 =item SYNOPSIS
 
@@ -19460,7 +19526,7 @@ Win32::ExpandEnvironmentStrings(STRING), Win32::FormatMessage(ERRORCODE),
 Win32::FsType(), Win32::FreeLibrary(HANDLE), Win32::GetArchName(),
 Win32::GetChipName(), Win32::GetCwd(), Win32::GetFullPathName(FILENAME),
 Win32::GetLastError(), Win32::GetLongPathName(PATHNAME),
-Win32::GetNextAvailDrive(), Win32::GetOSVersion(),
+Win32::GetNextAvailDrive(), Win32::GetOSVersion(), Win32::GetOSName(),
 Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
 PROCNAME), Win32::GetTickCount(), Win32::InitiateSystemShutdown,
 Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
