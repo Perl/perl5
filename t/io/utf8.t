@@ -229,7 +229,7 @@ print "ok 26\n";
     print $@ =~ /Wide character in print/ ? "ok 27\n" : "not ok 27\n";
 
     undef $@;
-    open F, ">:utf8", ">a";
+    open F, ">:utf8", "a";
     print F chr(0x100);
     close(F);
 
