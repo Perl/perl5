@@ -242,13 +242,13 @@ Afrikaans:af:za:1 15
 Arabic:ar:dz eg sa:6 arabic8
 Brezhoneg Breton:br:fr:1 15
 Bulgarski Bulgarian:bg:bg:5
-Chinese:zh:cn tw:cn.EUC eucCN eucTW euc.CN euc.TW GB2312 tw.EUC
+Chinese:zh:cn tw:cn.EUC eucCN eucTW euc.CN euc.TW Big5 GB2312 tw.EUC
 Hrvatski Croatian:hr:hr:2
 Cymraeg Welsh:cy:cy:1 14 15
 Czech:cs:cz:2
 Dansk Danish:dk:da:1 15
 Nederlands Dutch:nl:be nl:1 15
-English American British:en:au ca gb ie nz us uk:1 15 cp850
+English American British:en:au ca gb ie nz us uk zw:1 15 cp850
 Esperanto:eo:eo:3
 Eesti Estonian:et:ee:4 6 13
 Suomi Finnish:fi:fi:1 15
@@ -271,11 +271,12 @@ Latvian:lv:lv:4 6 13
 Lithuanian:lt:lt:4 6 13
 Macedonian:mk:mk:1 15
 Maltese:mt:mt:3
-Norsk Norwegian:no:no:1 15
+Moldovan:mo:mo:2
+Norsk Norwegian:no no\@nynorsk:no:1 15
 Occitan:oc:es:1 15
 Polski Polish:pl:pl:2
 Rumanian:ro:ro:2
-Russki Russian:ru:ru su ua:5 koi8 koi8r koi8u cp1251
+Russki Russian:ru:ru su ua:5 koi8 koi8r KOI8-R koi8u cp1251
 Serbski Serbian:sr:yu:5
 Slovak:sk:sk:2
 Slovene Slovenian:sl:si:2
@@ -283,10 +284,11 @@ Sqhip Albanian:sq:sq:1 15
 Svenska Swedish:sv:fi se:1 15
 Thai:th:th:11 tis620
 Turkish:tr:tr:9 turkish8
-Yiddish:::1 15
+Yiddish:yi::1 15
 EOF
 
 if ($^O eq 'os390') {
+    # These cause heartburn.  Broken locales?
     $locales =~ s/Svenska Swedish:sv:fi se:1 15\n//;
     $locales =~ s/Thai:th:th:11 tis620\n//;
 }
@@ -326,6 +328,7 @@ sub decode_encodings {
 	    }
 	} else {
 	    push @enc, $_;
+   	    push @enc, "$_.UTF-8";
 	}
     }
     if ($^O eq 'os390') {
@@ -347,32 +350,45 @@ foreach (0..15) {
     trylocale("iso_latin_$_");
 }
 
-foreach my $locale (split(/\n/, $locales)) {
-    my ($locale_name, $language_codes, $country_codes, $encodings) =
-	split(/:/, $locale);
-    my @enc = decode_encodings($encodings);
-    foreach my $loc (split(/ /, $locale_name)) {
-	trylocale($loc);
-	foreach my $enc (@enc) {
-	    trylocale("$loc.$enc");
-	}
-	$loc = lc $loc;
-	foreach my $enc (@enc) {
-	    trylocale("$loc.$enc");
-	}
+$ENV{PATH} = '/bin:/usr/bin';
+
+if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
+    while (<LOCALES>) {
+        chomp;
+	trylocale($_);
     }
-    foreach my $lang (split(/ /, $language_codes)) {
-	trylocale($lang);
-	foreach my $country (split(/ /, $country_codes)) {
-	    my $lc = "${lang}_${country}";
-	    trylocale($lc);
+    close(LOCALES);
+} else {
+
+    # This is going to be slow.
+
+    foreach my $locale (split(/\n/, $locales)) {
+	my ($locale_name, $language_codes, $country_codes, $encodings) =
+	    split(/:/, $locale);
+	my @enc = decode_encodings($encodings);
+	foreach my $loc (split(/ /, $locale_name)) {
+	    trylocale($loc);
 	    foreach my $enc (@enc) {
-		trylocale("$lc.$enc");
+		trylocale("$loc.$enc");
 	    }
-	    my $lC = "${lang}_\U${country}";
-	    trylocale($lC);
+	    $loc = lc $loc;
 	    foreach my $enc (@enc) {
-		trylocale("$lC.$enc");
+		trylocale("$loc.$enc");
+	    }
+	}
+	foreach my $lang (split(/ /, $language_codes)) {
+	    trylocale($lang);
+	    foreach my $country (split(/ /, $country_codes)) {
+		my $lc = "${lang}_${country}";
+		trylocale($lc);
+		foreach my $enc (@enc) {
+		    trylocale("$lc.$enc");
+		}
+		my $lC = "${lang}_\U${country}";
+		trylocale($lC);
+		foreach my $enc (@enc) {
+		    trylocale("$lC.$enc");
+		}
 	    }
 	}
     }
