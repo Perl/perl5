@@ -482,7 +482,7 @@ my_fclose (FILE *pf)
 
 #undef fstat
 int
-my_fstat(int fd, struct stat *sbufptr)
+my_fstat(int fd, Stat_t *sbufptr)
 {
     /* This fixes a bug in fstat() on Windows 9x.  fstat() uses the
      * GetFileType() win32 syscall, which will fail on Windows 9x.
@@ -492,8 +492,13 @@ my_fstat(int fd, struct stat *sbufptr)
      * sbufptr->st_mode.
      */
     int osf;
-    if (!wsock_started || IsWinNT())
+    if (!wsock_started || IsWinNT()) {
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+	return _fstati64(fd, sbufptr);
+#else
 	return fstat(fd, sbufptr);
+#endif
+    }
 
     osf = TO_SOCKET(fd);
     if (osf != -1) {
@@ -512,11 +517,15 @@ my_fstat(int fd, struct stat *sbufptr)
 	    sbufptr->st_nlink = 1;
 	    sbufptr->st_uid = sbufptr->st_gid = sbufptr->st_ino = 0;
 	    sbufptr->st_atime = sbufptr->st_mtime = sbufptr->st_ctime = 0;
-	    sbufptr->st_size = (off_t)0;
+	    sbufptr->st_size = (Off_t)0;
 	    return 0;
 	}
     }
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+    return _fstati64(fd, sbufptr);
+#else
     return fstat(fd, sbufptr);
+#endif
 }
 
 struct hostent *

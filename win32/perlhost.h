@@ -763,14 +763,14 @@ PerlStdIOVprintf(struct IPerlStdIO* piPerl, FILE* pf, const char *format, va_lis
     return win32_vfprintf(pf, format, arglist);
 }
 
-long
+Off_t
 PerlStdIOTell(struct IPerlStdIO* piPerl, FILE* pf)
 {
     return win32_ftell(pf);
 }
 
 int
-PerlStdIOSeek(struct IPerlStdIO* piPerl, FILE* pf, off_t offset, int origin)
+PerlStdIOSeek(struct IPerlStdIO* piPerl, FILE* pf, Off_t offset, int origin)
 {
     return win32_fseek(pf, offset, origin);
 }
@@ -810,12 +810,12 @@ PerlStdIOInitOSExtras(struct IPerlStdIO* piPerl)
 }
 
 int
-PerlStdIOOpenOSfhandle(struct IPerlStdIO* piPerl, long osfhandle, int flags)
+PerlStdIOOpenOSfhandle(struct IPerlStdIO* piPerl, intptr_t osfhandle, int flags)
 {
     return win32_open_osfhandle(osfhandle, flags);
 }
 
-int
+intptr_t
 PerlStdIOGetOSfhandle(struct IPerlStdIO* piPerl, int filenum)
 {
     return win32_get_osfhandle(filenum);
@@ -970,7 +970,7 @@ PerlLIOFlock(struct IPerlLIO* piPerl, int fd, int oper)
 }
 
 int
-PerlLIOFileStat(struct IPerlLIO* piPerl, int handle, struct stat *buffer)
+PerlLIOFileStat(struct IPerlLIO* piPerl, int handle, Stat_t *buffer)
 {
     return win32_fstat(handle, buffer);
 }
@@ -993,14 +993,14 @@ PerlLIOLink(struct IPerlLIO* piPerl, const char*oldname, const char *newname)
     return win32_link(oldname, newname);
 }
 
-long
-PerlLIOLseek(struct IPerlLIO* piPerl, int handle, long offset, int origin)
+Off_t
+PerlLIOLseek(struct IPerlLIO* piPerl, int handle, Off_t offset, int origin)
 {
     return win32_lseek(handle, offset, origin);
 }
 
 int
-PerlLIOLstat(struct IPerlLIO* piPerl, const char *path, struct stat *buffer)
+PerlLIOLstat(struct IPerlLIO* piPerl, const char *path, Stat_t *buffer)
 {
     return win32_stat(path, buffer);
 }
@@ -1042,7 +1042,7 @@ PerlLIOSetmode(struct IPerlLIO* piPerl, int handle, int mode)
 }
 
 int
-PerlLIONameStat(struct IPerlLIO* piPerl, const char *path, struct stat *buffer)
+PerlLIONameStat(struct IPerlLIO* piPerl, const char *path, Stat_t *buffer)
 {
     return win32_stat(path, buffer);
 }

@@ -103,7 +103,8 @@ like( $test_out, qr/ok \d+ - TEST_VERBOSE/, 'TEST_VERBOSE' );
 like( $test_out, qr/All tests successful/, '  successful' );
 is( $?, 0 );
 
-my $dist_test_out = `$make disttest`;
+my $kill_err = $^O eq 'MSWin32' ? '2>&1' : ''; # avoid nmake spew
+my $dist_test_out = `$make disttest $kill_err`;
 is( $?, 0, 'disttest' ) || diag($dist_test_out);
 
 

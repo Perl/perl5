@@ -79,7 +79,11 @@
  *	to include <sys/stat.h> and <sys/types.h> to get any typedef'ed
  *	information.
  */
+#if defined(WIN64) || defined(USE_LARGE_FILES)
+#define Stat_t struct _stati64
+#else
 #define Stat_t struct stat
+#endif
 
 /* USE_STAT_RDEV:
  *	This symbol is defined if this system has a stat structure declaring

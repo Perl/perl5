@@ -254,7 +254,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	
 	ival = SvRV(val);
 	realtype = SvTYPE(ival);
-        (void) sprintf(id, "0x%lx", (unsigned long)ival);
+        (void) sprintf(id, "0x%"UVxf, PTR2UV(ival));
 	idlen = strlen(id);
 	if (SvOBJECT(ival))
 	    realpack = HvNAME(SvSTASH(ival));
@@ -708,7 +708,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	STRLEN i;
 	
 	if (namelen) {
-	    (void) sprintf(id, "0x%lx", (unsigned long)val);
+	    (void) sprintf(id, "0x%"UVxf, PTR2UV(val));
 	    if ((svp = hv_fetch(seenhv, id, (idlen = strlen(id)), FALSE)) &&
 		(sv = *svp) && SvROK(sv) &&
 		(seenentry = (AV*)SvRV(sv)))

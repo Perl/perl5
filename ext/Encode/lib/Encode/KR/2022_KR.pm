@@ -4,7 +4,7 @@ use base 'Encode::Encoding';
 
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 
 my $canon = 'iso-2022-kr';

@@ -81,8 +81,7 @@ my $exit_one = $Is_VMS ? 4 << 8 : 1 << 8;
 is( system(qq{$Perl "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
     'Explicit exit of 1' );
 
-
-$rc = system "lskdfj";
+$rc = system { "lskdfj" } "lskdfj";
 unless( ok($rc == 255 << 8 or $rc == -1 or $rc == 256 or $rc == 512) ) {
     print "# \$rc == $rc\n";
 }

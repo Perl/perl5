@@ -189,7 +189,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
     return hv_fetch_flags (hv, key, klen, lval, flags);
 }
 
-SV**
+STATIC SV**
 S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
 {
     register XPVHV* xhv;
@@ -2031,7 +2031,7 @@ Perl_unshare_hek(pTHX_ HEK *hek)
    hek if non-NULL takes priority over the other 3, else str, len and hash
    are used.  If so, len and hash must both be valid for str.
  */
-void
+STATIC void
 S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
 {
     register XPVHV* xhv;
@@ -2142,7 +2142,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
     return share_hek_flags (str, len, hash, flags);
 }
 
-HEK *
+STATIC HEK *
 S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 {
     register XPVHV* xhv;

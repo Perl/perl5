@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -93,17 +93,17 @@ encoding -  allows you to write your script in non-ascii or non-utf8
   # or you can even do this if your shell supports your native encoding
 
   perl -Mencoding=latin2 -e '...' # Feeling centrally European?
-  perl -Mencoding=euc-ko -e '...' # Korean
+  perl -Mencoding=euc-ko -e '...'
 
   # or from the shebang line
 
   #!/your/path/to/perl -Mencoding="8859-6" # Arabian Nights
-  #!/your/path/to/perl -Mencoding=euc-tw   # Taiwanese
+  #!/your/path/to/perl -Mencoding=euc-tw
 
   # more control
 
   # A simple euc-cn => utf-8 converter
-  use encoding "euc-cn", STDOUT => "utf8";  while(<>){print}; # Chinese
+  use encoding "euc-cn", STDOUT => "utf8";  while(<>){print};
 
   # "no encoding;" supported (but not scoped!)
   no encoding;

@@ -1,9 +1,10 @@
 package Encode::JP::JIS7;
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
-require Encode;
+use Encode qw(:fallbacks);
+
 for my $name ('7bit-jis', 'iso-2022-jp', 'iso-2022-jp-1'){
     my $h2z     = ($name eq '7bit-jis')    ? 0 : 1;
     my $jis0212 = ($name eq 'iso-2022-jp') ? 0 : 1;
@@ -30,28 +31,28 @@ our $DEBUG = 0;
 # decode is identical for all 2022 variants
 #
 
-sub decode
+sub decode($$;$)
 {
     my ($obj,$str,$chk) = @_;
     my $residue = jis_euc(\$str);
     # This is for PerlIO
     $_[1] = $residue if $chk;
     # use perlqq fallback for euc-jp -> utf8
-    return Encode::decode('euc-jp', $str, 0);
+    return Encode::decode('euc-jp', $str, FB_PERLQQ);
 }
 
 #
 # encode is different
 #
 
-sub encode
+sub encode($$;$)
 {
     require Encode::JP::H2Z;
     my ($obj, $utf8, $chk) = @_;
     # empty the input string in the stack so perlio is ok
     $_[1] = '' if $chk;
     my ($h2z, $jis0212) = @$obj{qw(h2z jis0212)};
-    my $octet = Encode::encode('euc-jp', $utf8, 0) ;
+    my $octet = Encode::encode('euc-jp', $utf8, FB_PERLQQ) ;
     $h2z and &Encode::JP::H2Z::h2z(\$octet);
     euc_jis(\$octet, $jis0212);
     return $octet;

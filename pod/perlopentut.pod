@@ -89,7 +89,7 @@ command and open a write-only filehandle leading into that command.
 This lets you write into that handle and have what you write show up on
 that command's standard input.  For example:
 
-    open(PRINTER, "| lpr -Plp1")    || die "cannot fork: $!";
+    open(PRINTER, "| lpr -Plp1")    || die "can't run lpr: $!";
     print PRINTER "stuff\n";
     close(PRINTER)                  || die "can't close lpr: $!";
 
@@ -98,18 +98,20 @@ read-only filehandle leading out of that command.  This lets whatever that
 command writes to its standard output show up on your handle for reading.
 For example:
 
-    open(NET, "netstat -i -n |")    || die "cannot fork: $!";
+    open(NET, "netstat -i -n |")    || die "can't fun netstat: $!";
     while (<NET>) { }               # do something with input
     close(NET)                      || die "can't close netstat: $!";
 
-What happens if you try to open a pipe to or from a non-existent command?
-In most systems, such an C<open> will not return an error. That's
-because in the traditional C<fork>/C<exec> model, running the other
-program happens only in the forked child process, which means that
-the failed C<exec> can't be reflected in the return value of C<open>.
-Only a failed C<fork> shows up there.  See 
-L<perlfaq8/"Why doesn't open() return an error when a pipe open fails?"> 
-to see how to cope with this.  There's also an explanation in L<perlipc>.
+What happens if you try to open a pipe to or from a non-existent
+command?  If possible, Perl will detect the failure and set C<$!> as
+usual.  But if the command contains special shell characters, such as
+C<E<gt>> or C<*>, called 'metacharacters', Perl does not execute the
+command directly.  Instead, Perl runs the shell, which then tries to
+run the command.  This means that it's the shell that gets the error
+indication.  In such a case, the C<open> call will only indicate
+failure if Perl can't even run the shell.  See L<perlfaq8/"How can I
+capture STDERR from an external command?"> to see how to cope with
+this.  There's also an explanation in L<perlipc>.
 
 If you would like to open a bidirectional pipe, the IPC::Open2
 library will handle this for you.  Check out 

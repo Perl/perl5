@@ -28,6 +28,7 @@ use strict;
 use File::Basename;
 use File::Spec;
 use File::Compare;
+use File::Copy;
 use FileHandle;
 
 #use Test::More qw(no_plan);
@@ -50,28 +51,29 @@ open my $fh, "<:utf8", $ufile or die "$ufile : $!";
 my @uline = <$fh>;
 my $utext = join('' => @uline);
 close $fh;
+my $seq = 0;
 
 for my $e (qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/){
     my $sfile = File::Spec->catfile($dir,"$$.sio");
     my $pfile = File::Spec->catfile($dir,"$$.pio");
 
     # first create a file without perlio
-    open $fh, ">", $sfile or die "$sfile :$!";
-    binmode $fh;
-    print $fh &encode($e, $utext, 0);
-    close $fh;
+    dump2file($sfile, &encode($e, $utext, 0));
 
     # then create a file via perlio without autoflush
 	
-# TODO:{
-#        local $TODO = "perlio broken";
-#	todo_skip "$e: !perlio_ok", 1  unless perlio_ok($e);
+ SKIP:{
+	skip "$e: !perlio_ok", 1  unless perlio_ok($e) or $DEBUG;
 	open $fh, ">:encoding($e)", $pfile or die "$sfile : $!";
 	$fh->autoflush(0);
 	print $fh $utext;
 	close $fh;
-	ok(compare($sfile, $pfile) == 0 => ">:encoding($e)");
-#    }
+	$seq++;
+	unless (is(compare($sfile, $pfile), 0 => ">:encoding($e)")){
+	    copy $sfile, "$sfile.$seq";
+	    copy $pfile, "$pfile.$seq";
+	}
+    }
 	
     # this time print line by line.
     # works even for ISO-2022!
@@ -81,24 +83,43 @@ for my $e (qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/){
 	print $fh $l;
     }
     close $fh;
-    is(compare($sfile, $pfile), 0 => ">:encoding($e); line-by-line");
+    $seq++;
+    unless(is(compare($sfile, $pfile), 0
+	      => ">:encoding($e); by lines")){
+	copy $sfile, "$sfile.$seq";
+	copy $pfile, "$pfile.$seq";
+    }
 
-# TODO:{
-#        local $TODO = "perlio broken";
-#	todo_skip "$e: !perlio_ok", 2 unless perlio_ok($e);
+ SKIP:{
+	skip "$e: !perlio_ok", 2 unless perlio_ok($e) or $DEBUG;
 	open $fh, "<:encoding($e)", $pfile or die "$pfile : $!";
 	$fh->autoflush(0);
 	my $dtext = join('' => <$fh>);
 	close $fh;
-	ok($utext eq $dtext, "<:encoding($e)");
+	$seq++;
+	unless(ok($utext eq $dtext, "<:encoding($e)")){
+	    dump2file("$sfile.$seq", $utext);
+	    dump2file("$pfile.$seq", $dtext);
+	}
 	$dtext = '';
 	open $fh, "<:encoding($e)", $pfile or die "$pfile : $!";
 	while(defined(my $l = <$fh>)) {
 	    $dtext .= $l;
 	}
 	close $fh;
-	ok($utext eq $dtext, "<:encoding($e); line-by-line");
-#    }
+	$seq++;
+	unless (ok($utext eq $dtext,  "<:encoding($e); by lines")) {
+	    dump2file("$sfile.$seq", $utext);
+	    dump2file("$pfile.$seq", $dtext);
+	}
+    }
     $DEBUG or unlink ($sfile, $pfile);
 }
 
+sub dump2file{
+    no warnings;
+    open my $fh, ">", $_[0] or die "$_[0]: $!";
+    binmode $fh;
+    print $fh $_[1];
+    close $fh;
+}

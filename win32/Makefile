@@ -1,10 +1,11 @@
 #
 # Makefile to build perl on Windows NT using Microsoft NMAKE.
 # Supported compilers:
-#	Visual C++ 5.x (possibly other versions)
+#	Visual C++ 2.0 through 6.0 (and possibly newer versions)
+#	MS Platform SDK 64-bit compiler and tools **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl57.dll).  Also makes individual DLLs for the XS extensions.
+# (perl58.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -252,6 +253,19 @@ BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_SYS
 PROCESSOR_ARCHITECTURE	= x86
 !ENDIF
 
+!IF "$(WIN64)" == ""
+!IF "$(PROCESSOR_ARCHITEW6432)" != ""
+PROCESSOR_ARCHITECTURE	= $(PROCESSOR_ARCHITEW6432)
+WIN64			= define
+!ELSE
+!IF "$(PROCESSOR_ARCHITECTURE)" == "IA64"
+WIN64			= define
+!ELSE
+WIN64			= undef
+!ENDIF
+!ENDIF
+!ENDIF
+
 !IF "$(USE_5005THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 !ELSE
@@ -334,12 +348,17 @@ OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
 !  ELSE
 OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 !  ENDIF
-LINK_DBG	= -debug -pdb:none
+LINK_DBG	= -debug
 !ELSE
 # -O1 yields smaller code, which turns out to be faster than -O2
 #OPTIMIZE	= -O2 -MD -DNDEBUG
 OPTIMIZE	= -O1 -MD -DNDEBUG
 LINK_DBG	= -release
+!ENDIF
+
+!IF "$(WIN64)" == "define"
+DEFINES		= $(DEFINES) -DWIN64 -DCONSERVATIVE
+OPTIMIZE	= $(OPTIMIZE) -Wp64 -Op
 !ENDIF
 
 !IF "$(USE_PERLCRT)" != "define"
@@ -350,7 +369,12 @@ LIBBASEFILES	= $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
-		version.lib odbc32.lib odbccp32.lib
+		version.lib
+
+# win64 doesn't have some libs
+!IF "$(WIN64)" != "define"
+LIBBASEFILES	= $(LIBBASEFILES) odbc32.lib odbccp32.lib
+!ENDIF
 
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
@@ -394,9 +418,8 @@ $(o).dll:
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-# XXX so why did we change it from perl56 to perl57?
-PERLIMPLIB	= ..\perl57.lib
-PERLDLL		= ..\perl57.dll
+PERLIMPLIB	= ..\perl58.lib
+PERLDLL		= ..\perl58.dll
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
@@ -448,8 +471,13 @@ UTILS		=			\
 MAKE		= nmake -nologo
 MAKE_BARE	= nmake
 
+!IF "$(WIN64)" == "define"
+CFGSH_TMPL	= config.vc64
+CFGH_TMPL	= config_H.vc64
+!ELSE
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
+!ENDIF
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d

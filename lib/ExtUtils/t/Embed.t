@@ -67,7 +67,7 @@ if ($^O eq 'VMS') {
     $inc = File::Spec->catdir($inc,'include');
     push(@cmd,"-I$inc");
     if ($cc eq 'cl') {
-	push(@cmd,'-link',"-libpath:$lib",$Config{'libperl'},$Config{'libc'});
+	push(@cmd,'-link',"-libpath:$lib",$Config{'libperl'},$Config{'libs'});
     }
     else {
 	push(@cmd,"-L$lib",File::Spec->catfile($lib,$Config{'libperl'}),$Config{'libc'});
@@ -78,7 +78,7 @@ if ($^O eq 'VMS') {
    }
    {
     local $SIG{__WARN__} = sub {
-	warn $_[0] unless $_[0] =~ /No library found for -lperl/
+	warn $_[0] unless $_[0] =~ /No library found for .*perl/
     };
     push(@cmd, '-Zlinker', '/PM:VIO')	# Otherwise puts a warning to STDOUT!
 	if $^O eq 'os2' and $Config{ldflags} =~ /(?<!\S)-Zomf\b/;

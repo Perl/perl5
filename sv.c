@@ -8054,6 +8054,25 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	/* SIZE */
 
 	switch (*q) {
+#ifdef WIN32
+	case 'I':			/* Ix, I32x, and I64x */
+#  ifdef WIN64
+	    if (q[1] == '6' && q[2] == '4') {
+		q += 3;
+		intsize = 'q';
+		break;
+	    }
+#  endif
+	    if (q[1] == '3' && q[2] == '2') {
+		q += 3;
+		break;
+	    }
+#  ifdef WIN64
+	    intsize = 'q';
+#  endif
+	    q++;
+	    break;
+#endif
 #if defined(HAS_QUAD) || (defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE))
 	case 'L':			/* Ld */
 	    /* FALL THROUGH */

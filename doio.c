@@ -1163,7 +1163,7 @@ I32 fd;			/* file descriptor */
 Off_t length;		/* length to set file to */
 {
     struct flock fl;
-    struct stat filebuf;
+    Stat_t filebuf;
 
     if (PerlLIO_fstat(fd, &filebuf) < 0)
 	return -1;
