@@ -1063,7 +1063,8 @@ I32 flags;		/* See G_* flags in cop.h */
 	  && (DBcv || (DBcv = GvCV(DBsub)))
 	   /* Try harder, since this may have been a sighandler, thus
 	    * curstash may be meaningless. */
-	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((CV*)sv) != debstash))
+	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((CV*)sv) != debstash)
+	  && !(flags & G_NODEBUG))
 	op->op_private |= OPpENTERSUB_DB;
 
     if (flags & G_EVAL) {

@@ -3,7 +3,7 @@
 # hints file for BSD/OS (adapted from bsd386.sh)
 # Original by Neil Bowers <neilb@khoros.unm.edu>; Tue Oct  4 12:01:34 EDT 1994
 # Updated by Tony Sanders <sanders@bsdi.com>; Sat Aug 23 12:47:45 MDT 1997
-#     Added 3.1 with ELF dynamic libraries
+#     Added 3.1 with ELF dynamic libraries (NOT in 3.1 yet. Estimated for 4.0)
 #     SYSV IPC tested Ok so I re-enabled.
 #
 # To override the compiler on the command line:
@@ -88,14 +88,14 @@ case "$osvers" in
 	libswanted="Xpm Xaw Xmu Xt SM ICE Xext X11 $libswanted"
 	libswanted="rpc curses termcap $libswanted"
 	;;
-3.2*)
-	# ELF dynamic link libraries starting in 3.2
+4.0*)
+	# ELF dynamic link libraries starting in 4.0 (???)
         useshrplib='true'
 	so='so'
 	dlext='so'
 
 	case "$cc" in
-	'')	cc='cc'			# cc is gcc2 in 3.1
+	'')	cc='cc'			# cc is gcc2 in 4.0
 		cccdlflags="-fPIC"
 		ccdlflags=" " ;;
 	esac

@@ -1780,23 +1780,33 @@ PP(pp_entersub)
 
     gimme = GIMME_V;
     if ((op->op_private & OPpENTERSUB_DB) && GvCV(DBsub) && !CvNODEBUG(cv)) {
-	SV *oldsv = sv;
-	sv = GvSV(DBsub);
-	save_item(sv);
-	gv = CvGV(cv);
-	if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
-	     || strEQ(GvNAME(gv), "END") 
-	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
-		 !( (SvTYPE(oldsv) == SVt_PVGV) && (GvCV((GV*)oldsv) == cv)
-		    && (gv = (GV*)oldsv) ))) { /* Use GV from the stack as a fallback. */
-	    /* GV is potentially non-unique, or contain different CV. */
-	    sv_setsv(sv, newRV((SV*)cv));
+	SV *dbsv = GvSV(DBsub);
+
+	if (!PERLDB_SUB_NN) {
+	    GV *gv = CvGV(cv);
+
+	    save_item(dbsv);
+	    if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
+		 || strEQ(GvNAME(gv), "END") 
+		 || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
+		     !( (SvTYPE(sv) == SVt_PVGV) && (GvCV((GV*)sv) == cv)
+			&& (gv = (GV*)sv) ))) {
+		/* Use GV from the stack as a fallback. */
+		/* GV is potentially non-unique, or contain different CV. */
+		sv_setsv(dbsv, newRV((SV*)cv));
+	    }
+	    else {
+		gv_efullname3(dbsv, gv, Nullch);
+	    }
+	} else {
+	    SvUPGRADE(dbsv, SVt_PVIV);
+	    SvIOK_on(dbsv);
+	    SAVEIV(SvIVX(dbsv));
+	    SvIVX(dbsv) = (IV)cv;		/* Do it the quickest way  */
 	}
-	else {
-	    gv_efullname3(sv, gv, Nullch);
-	}
+	if (CvXSUB(cv)) 
+	    curcopdb = curcop;
 	cv = GvCV(DBsub);
-	if (CvXSUB(cv)) curcopdb = curcop;
 	if (!cv)
 	    DIE("No DBsub routine");
     }
