@@ -1564,13 +1564,16 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SV* retval;
     SV* tokenbufsv = sv_2mortal(NEWSV(0,0));
     dSP;
-    HV *stash = gv_stashpvn(pkg, strlen(pkg), FALSE);
+    size_t pkg_len = strlen(pkg);
+    size_t name_len = strlen(name);
+    HV *stash = gv_stashpvn(pkg, pkg_len, FALSE);
     SV* errsv_save;
 
     if (!gv_fetchmeth(stash, "SWASHNEW", 8, -1)) {	/* demand load utf8 */
 	ENTER;
 	errsv_save = newSVsv(ERRSV);
-	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpv(pkg,0), Nullsv);
+	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
+			 Nullsv);
 	if (!SvTRUE(ERRSV))
 	    sv_setsv(ERRSV, errsv_save);
 	SvREFCNT_dec(errsv_save);
@@ -1580,8 +1583,8 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     PUSHSTACKi(PERLSI_MAGIC);
     PUSHMARK(SP);
     EXTEND(SP,5);
-    PUSHs(sv_2mortal(newSVpvn(pkg, strlen(pkg))));
-    PUSHs(sv_2mortal(newSVpvn(name, strlen(name))));
+    PUSHs(sv_2mortal(newSVpvn(pkg, pkg_len)));
+    PUSHs(sv_2mortal(newSVpvn(name, name_len)));
     PUSHs(listsv);
     PUSHs(sv_2mortal(newSViv(minbits)));
     PUSHs(sv_2mortal(newSViv(none)));

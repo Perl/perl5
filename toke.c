@@ -1227,7 +1227,7 @@ S_scan_const(pTHX_ char *start)
 
     const char *leaveit =	/* set of acceptably-backslashed characters */
 	PL_lex_inpat
-	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
+	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxz0123456789[{]} \t\n\r\f\v#"
 	    : "";
 
     if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
@@ -4669,8 +4669,8 @@ Perl_yylex(pTHX)
 	    if (isIDFIRST_lazy_if(s,UTF)) {
 		char *t;
 		for (d = s; isALNUM_lazy_if(d,UTF); d++) ;
-		t = skipspace(d);
-		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
+		for (t=d; *t && isSPACE(*t); t++) ;
+		if ( *t && strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
 		    /* [perl #16184] */
 		    && !(t[0] == '=' && t[1] == '>')
 		) {

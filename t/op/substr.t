@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..179\n";
+print "1..180\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -619,4 +619,15 @@ ok 174, $x eq "\x{100}\x{200}\xFFb";
     ok 178, bar eq 'XXX';
     $foo = '123456789';
     ok 179, bar eq '123456789';
+}
+
+# [perl #29149]
+{
+    my $text  = "0123456789\xED ";
+    utf8::upgrade($text);
+    my $pos = 5;
+    pos($text) = $pos;
+    my $a = substr($text, $pos, $pos);
+    ok 180, substr($text,$pos,1) eq $pos;
+
 }

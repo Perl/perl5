@@ -1195,7 +1195,7 @@ STATIC void	S_del_xpvbm(pTHX_ XPVBM* p);
 STATIC void	S_del_xrv(pTHX_ XRV* p);
 STATIC void	S_sv_unglob(pTHX_ SV* sv);
 STATIC void	S_not_a_number(pTHX_ SV *sv);
-STATIC I32	S_visit(pTHX_ SVFUNC_t f);
+STATIC I32	S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask);
 STATIC void	S_sv_add_backref(pTHX_ SV *tsv, SV *sv);
 STATIC void	S_sv_del_backref(pTHX_ SV *sv);
 #  ifdef DEBUGGING

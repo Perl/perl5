@@ -3205,6 +3205,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		&& (left->op_private & OPpLVAL_INTRO))
 	{
 	    op_free(right);
+	    left->op_flags &= ~(OPf_REF|OPf_SPECIAL);
 	    return left;
 	}
 	curop = list(force_list(left));
@@ -5495,7 +5496,7 @@ Perl_ck_grep(pTHX_ OP *o)
 	OP* k;
 	o = ck_sort(o);
         kid = cLISTOPo->op_first->op_sibling;
-	for (k = cLISTOPo->op_first->op_sibling->op_next; k; k = k->op_next) {
+	for (k = cUNOPx(kid)->op_first; k; k = k->op_next) {
 	    kid = k;
 	}
 	kid->op_next = (OP*)gwop;

@@ -239,8 +239,8 @@ S_del_sv(pTHX_ SV *p)
 	if (!ok) {
 	    if (ckWARN_d(WARN_INTERNAL))	
 	        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-			    "Attempt to free non-arena SV: 0x%"UVxf,
-			    PTR2UV(p));
+			    "Attempt to free non-arena SV: 0x%"UVxf
+                            pTHX__FORMAT, PTR2UV(p) pTHX__VALUE);
 	    return;
 	}
     }
@@ -314,10 +314,11 @@ S_more_sv(pTHX)
     return sv;
 }
 
-/* visit(): call the named function for each non-free SV in the arenas. */
+/* visit(): call the named function for each non-free SV in the arenas
+ * whose flags field matches the flags/mask args. */
 
 STATIC I32
-S_visit(pTHX_ SVFUNC_t f)
+S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask)
 {
     SV* sva;
     SV* sv;
@@ -327,7 +328,10 @@ S_visit(pTHX_ SVFUNC_t f)
     for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
-	    if (SvTYPE(sv) != SVTYPEMASK && SvREFCNT(sv)) {
+	    if (SvTYPE(sv) != SVTYPEMASK
+		    && (sv->sv_flags & mask) == flags
+		    && SvREFCNT(sv))
+	    {
 		(FCALL)(aTHX_ sv);
 		++visited;
 	    }
@@ -362,7 +366,7 @@ void
 Perl_sv_report_used(pTHX)
 {
 #ifdef DEBUGGING
-    visit(do_report_used);
+    visit(do_report_used, 0, 0);
 #endif
 }
 
@@ -422,10 +426,10 @@ void
 Perl_sv_clean_objs(pTHX)
 {
     PL_in_clean_objs = TRUE;
-    visit(do_clean_objs);
+    visit(do_clean_objs, SVf_ROK, SVf_ROK);
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     /* some barnacles may yet remain, clinging to typeglobs */
-    visit(do_clean_named_objs);
+    visit(do_clean_named_objs, SVt_PVGV, SVTYPEMASK);
 #endif
     PL_in_clean_objs = FALSE;
 }
@@ -455,7 +459,7 @@ Perl_sv_clean_all(pTHX)
 {
     I32 cleaned;
     PL_in_clean_all = TRUE;
-    cleaned = visit(do_clean_all);
+    cleaned = visit(do_clean_all, 0,0);
     PL_in_clean_all = FALSE;
     return cleaned;
 }
@@ -5339,8 +5343,8 @@ Perl_sv_free(pTHX_ SV *sv)
 	}
 	if (ckWARN_d(WARN_INTERNAL))
 	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-                        "Attempt to free unreferenced scalar: SV 0x%"UVxf,
-                PTR2UV(sv));
+                        "Attempt to free unreferenced scalar: SV 0x%"UVxf
+                        pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
 	return;
     }
     ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
@@ -5350,8 +5354,8 @@ Perl_sv_free(pTHX_ SV *sv)
     if (SvTEMP(sv)) {
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
-			"Attempt to free temp prematurely: SV 0x%"UVxf,
-			PTR2UV(sv));
+			"Attempt to free temp prematurely: SV 0x%"UVxf
+                        pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
 	return;
     }
 #endif
@@ -5656,8 +5660,7 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 			     s += UTF8SKIP(s);
 		   if (s >= send)
 			s = send;
-                   if (utf8_mg_pos_init(sv, &mg, &cache, 2, lenp, s, start))
-			cache[2] += *offsetp;
+                   utf8_mg_pos_init(sv, &mg, &cache, 2, lenp, s, start);
 	      }
 	      *lenp = s - start;
 	 }
@@ -5750,6 +5753,11 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 
 			cache[0] -= ubackw;
 			*offsetp = cache[0];
+
+			/* Drop the stale "length" cache */
+			cache[2] = 0;
+			cache[3] = 0;
+
 			return;
 		    }
 		}
@@ -5787,6 +5795,9 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 
 	    cache[0] = len;
 	    cache[1] = *offsetp;
+	    /* Drop the stale "length" cache */
+	    cache[2] = 0;
+	    cache[3] = 0;
 	}
 
 	*offsetp = len;
@@ -7524,8 +7535,10 @@ instead.
 char *
 Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
 {
+    sv_pvn_force(sv,lp);
     sv_utf8_downgrade(sv,0);
-    return sv_pvn_force(sv,lp);
+    *lp = SvCUR(sv);
+    return SvPVX(sv);
 }
 
 /* sv_pvutf8 () is now a macro using Perl_sv_2pv_flags();
@@ -7573,8 +7586,10 @@ instead.
 char *
 Perl_sv_pvutf8n_force(pTHX_ SV *sv, STRLEN *lp)
 {
+    sv_pvn_force(sv,lp);
     sv_utf8_upgrade(sv);
-    return sv_pvn_force(sv,lp);
+    *lp = SvCUR(sv);
+    return SvPVX(sv);
 }
 
 /*
