@@ -1,18 +1,28 @@
 #!/bin/sh
 #
-# Written: Nov 1994 Wayne Scott (wscott@ichips.intel.com)
+# Written: Nov 1994 Wayne Scott <wscott@ichips.intel.com>
+#
+# Updated: 1997-8 Jarkko Hietaniemi <jhi@iki.fi>
 #
 # Create the export list for perl.
 # Needed by AIX to do dynamic linking.
 #
-# This simple program relys on 'global.sym' and other *.sym files
-# being up to date with all of the global symbols that a dynamic
-# link library might want to access.
+# This simple program relies on 'global.sym' and few other *.sym files
+# and the *var*.h files being up to date with all of the global
+# symbols that a dynamic link library might want to access.
 #
-# Most symbols have a Perl_ prefix because that's what embed.h sticks
-# in front of them.  Variations depend on binary compatibility with
-# Perl 5.003.
+# Most symbols have a Perl_ or PL_prefix because that's what embed.h
+# sticks in front of them.
 #
+# AIX requires the list of external symbols (variables or functions)
+# that are made available for another executable object file the import.
+# The list is called the export file and it is a simple text file.
+# The first line must be
+#!
+# That is, hash-bang, pound-shout, however you want to call it.
+# The remainder of the file are the names of the symbols, one per line.
+# The file is then given to the system loader (cc/xlc command line)
+# as -bE:export.file.
 
 case $CONFIG in
 '')
@@ -42,10 +52,11 @@ echo "#!" > perl.exp
 # perlio.sym will added below if needed.
 syms="global.sym interp.sym thread.sym"
 
-sed -n '/^[A-Za-z]/ s/^/Perl_/p' $syms                  >> perl.exp
+sed -n '/^[A-Za-z]/ s/^/Perl_/p' $syms                 >> perl.exp
 
-sed -n 's/^PERLVAR.*(G\([^[,]*\).*/Perl_\1/p' perlvars.h >> perl.exp
-sed -n 's/^PERLVAR.*(T\([^[,]*\).*/Perl_\1/p' thrdvar.h  >> perl.exp
+sed -n 's/^PERLVAR.*(G\([^[,]*\).*/PL_\1/p' perlvars.h >> perl.exp
+sed -n 's/^PERLVAR.*(I\([^[,]*\).*/PL_\1/p' intrpvar.h >> perl.exp
+sed -n 's/^PERLVAR.*(T\([^[,]*\).*/PL_\1/p' thrdvar.h  >> perl.exp
 
 # 
 # If we use the PerlIO abstraction layer, add its symbols
