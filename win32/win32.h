@@ -104,6 +104,11 @@ struct tms {
  * real filehandles. XXX Should always be defined (the other version is untested) */
 #define USE_SOCKETS_AS_HANDLES
 
+/* read() and write() aren't transparent for socket handles */
+#define PERL_SOCK_SYSREAD_IS_RECV
+#define PERL_SOCK_SYSWRITE_IS_SEND
+
+
 /* if USE_WIN32_RTL_ENV is not defined, Perl uses direct Win32 calls
  * to read the environment, bypassing the runtime's (usually broken)
  * facilities for accessing the same.  See note in util.c/my_setenv(). */
