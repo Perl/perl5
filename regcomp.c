@@ -2834,10 +2834,11 @@ S_regclassutf8(pTHX)
         if (range) {
 	    if (lastvalue > value)
 		FAIL("invalid [] range in regexp");
-	    if (!SIZE_ONLY)
 #ifdef UV_IS_QUAD
+	    if (!SIZE_ONLY)
                 Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\t%04" PERL_PRIx64 "\n", (UV)lastvalue, (UV)value);
 #else
+	    if (!SIZE_ONLY)
 	        Perl_sv_catpvf(aTHX_ listsv, "%04x\t%04x\n", lastvalue, value);
 #endif
 	    lastvalue = value;
@@ -2851,10 +2852,11 @@ S_regclassutf8(pTHX)
 		range = 1;
 		continue;	/* do it next time */
 	    }
-	    if (!SIZE_ONLY)
 #ifdef UV_IS_QUAD
+	    if (!SIZE_ONLY)
 		Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\n", (UV)value);
 #else
+	    if (!SIZE_ONLY)
 		Perl_sv_catpvf(aTHX_ listsv, "%04x\n", value);
 #endif
 	}

@@ -1405,11 +1405,12 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;
-	if (PL_curcop->cop_line)
 #ifdef IV_IS_QUAD
+	if (PL_curcop->cop_line)
 	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %" PERL_PRId64,
 		      GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
 #else
+	if (PL_curcop->cop_line)
 	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %ld",
 		      GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
 #endif

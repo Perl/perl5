@@ -1188,8 +1188,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    I32 ix;
 
 	    for (ix = 1; ix <= AvFILL(pad_name); ix++) {
-		if (SvPOK(pname[ix]))
 #ifdef IV_IS_QUAD
+		if (SvPOK(pname[ix]))
 		    Perl_dump_indent(aTHX_ level, /* %5d below is enough whitespace. */
 				file, 
 				"%5d. 0x%" PERL_PRIx64 " (%s\"%s\" %" PERL_PRId64 "-%" PERL_PRId64 ")\n",
@@ -1199,6 +1199,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 				(IV)SvNVX(pname[ix]),
 				(IV)SvIVX(pname[ix]));
 #else
+		if (SvPOK(pname[ix]))
 		    Perl_dump_indent(aTHX_ level, /* %5d below is enough whitespace. */
 				file, 
 				"%5d. 0x%lx (%s\"%s\" %ld-%ld)\n",
