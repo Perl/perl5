@@ -69,6 +69,17 @@ Version 5.004_75        5.005 Public Beta, Issue 1
 ----------------
 
 ____________________________________________________________________________
+[  1517] By: gsar                                  on 1998/07/15  08:27:15
+        Log: up patchlevel to 75 (Beta, Issue 1), add podpatch
+             From: abigail@fnx.com
+             Date: Wed, 15 Jul 1998 04:03:44 -0400 (EDT)
+             Message-ID: <19980715080344.21975.qmail@betelgeuse.wayne.fnx.com>
+             Subject: [PATCH 5.004_74] pod/perlop.pod
+     Branch: perl
+	   ! Changes patchlevel.h pod/perlop.pod win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+           ! win32/makefile.mk
+____________________________________________________________________________
 [  1516] By: gsar                                  on 1998/07/15  08:04:24
         Log: From:    abigail@fnx.com
              Date:    Wed, 15 Jul 1998 03:47:56 EDT

@@ -261,3 +261,23 @@ sub compile {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+B::Debug - Walk Perl syntax tree, printing debug info about ops
+
+=head1 SYNOPSIS
+
+	perl -MO=Debug[,OPTIONS] foo.pl
+
+=head1 DESCRIPTION
+
+See F<ext/B/README>.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut

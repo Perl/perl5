@@ -270,3 +270,23 @@ sub walksymtable {
 bootstrap B;
 
 1;
+
+__END__
+
+=head1 NAME
+
+B - The Perl Compiler
+
+=head1 SYNOPSIS
+
+	use B;
+
+=head1 DESCRIPTION
+
+See F<ext/B/README>.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut

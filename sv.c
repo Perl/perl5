@@ -3028,7 +3028,7 @@ sv_free(SV *sv)
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
-	warn("Attempt to free temp prematurely: %s", SvPEEK(sv));
+	warn("Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
 	return;
     }
 #endif

@@ -140,3 +140,23 @@ sub compile {
 #     [The op after a pp_return] Omit
 
 1;
+
+__END__
+
+=head1 NAME
+
+B::Bblock - Walk basic blocks
+
+=head1 SYNOPSIS
+
+	perl -MO=Bblock[,OPTIONS] foo.pl
+
+=head1 DESCRIPTION
+
+See F<ext/B/README>.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut

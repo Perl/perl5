@@ -142,3 +142,23 @@ sub disassemble_fh {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+B::Disassembler - Disassemble Perl bytecode
+
+=head1 SYNOPSIS
+
+	use Disassembler;
+
+=head1 DESCRIPTION
+
+See F<ext/B/B/Disassembler.pm>.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut

@@ -823,7 +823,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 /* EBCDIC:
  *	This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
- *.
+ */
 #$ebcdic	EBCDIC 		/**/
 
 /* I_ARPA_INET:

@@ -130,3 +130,23 @@ sub B::SPECIAL::terse {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+B::Terse - Walk Perl syntax tree, printing terse info about ops
+
+=head1 SYNOPSIS
+
+	perl -MO=Terse[,OPTIONS] foo.pl
+
+=head1 DESCRIPTION
+
+See F<ext/B/README>.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut
