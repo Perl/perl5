@@ -14,7 +14,8 @@ $| = 1;				# flush stdout
 $ENV{LC_ALL}   = 'C';		# Forge English error messages.
 $ENV{LANGUAGE} = 'C';		# Ditto in GNU.
 
-my $Is_VMS = $^O eq 'VMS';
+my $Is_VMS   = $^O eq 'VMS';
+my $Is_Win32 = $^O eq 'MSWin32';
 
 plan(tests => 20);
 
@@ -35,9 +36,9 @@ $exit = system qq{$Perl -le "print q{ok $tnum - split & direct system(EXPR)"}};
 next_test();
 is( $exit, 0, '  exited 0' );
 
-# On VMS you need the quotes around the program or it won't work.
+# On VMS and Win32 you need the quotes around the program or it won't work.
 # On Unix its the opposite.
-my $quote = $Is_VMS ? '"' : '';
+my $quote = $Is_VMS || $Is_Win32 ? '"' : '';
 $tnum = curr_test();
 $exit = system $Perl, '-le', 
                "${quote}print q{ok $tnum - system(PROG, LIST)}${quote}";
@@ -102,8 +103,9 @@ END
 TODO: {
     my $tnum = curr_test();
     if( $^O =~ /Win32/ ) {
-        print "not ok $tnum - exec failure doesn't terminate process # TODO Win32 exec failure waits for user input\n";
-        next_test;
+        print "not ok $tnum - exec failure doesn't terminate process " .
+              "# TODO Win32 exec failure waits for user input\n";
+        next_test();
         last TODO;
     }
 
