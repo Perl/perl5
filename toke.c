@@ -389,7 +389,7 @@ skipspace(register char *s)
 	    oldoldbufptr = oldbufptr = bufptr = s = linestart = SvPVX(linestr);
 	    bufend = SvPVX(linestr) + SvCUR(linestr);
 	    if (preprocess && !in_eval)
-		(void)my_pclose(rsfp);
+		(void)PerlProc_pclose(rsfp);
 	    else if ((PerlIO*)rsfp == PerlIO_stdin())
 		PerlIO_clearerr(rsfp);
 	    else
@@ -1064,7 +1064,7 @@ static char*
 incl_perldb(void)
 {
     if (perldb) {
-	char *pdb = getenv("PERL5DB");
+	char *pdb = PerlENV_getenv("PERL5DB");
 
 	if (pdb)
 	    return pdb;
@@ -1560,7 +1560,7 @@ yylex(void)
 	      fake_eof:
 		if (rsfp) {
 		    if (preprocess && !in_eval)
-			(void)my_pclose(rsfp);
+			(void)PerlProc_pclose(rsfp);
 		    else if ((PerlIO *)rsfp == PerlIO_stdin())
 			PerlIO_clearerr(rsfp);
 		    else

@@ -106,7 +106,7 @@ typedef struct jmpenv JMPENV;
     STMT_START {					\
 	cur_env.je_prev = top_env;			\
 	OP_REG_TO_MEM;					\
-	cur_env.je_ret = Sigsetjmp(cur_env.je_buf, 1);	\
+	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, 1);	\
 	OP_MEM_TO_REG;					\
 	top_env = &cur_env;				\
 	cur_env.je_mustcatch = FALSE;			\
@@ -118,11 +118,11 @@ typedef struct jmpenv JMPENV;
     STMT_START {						\
 	OP_REG_TO_MEM;						\
 	if (top_env->je_prev)					\
-	    Siglongjmp(top_env->je_buf, (v));			\
+	    PerlProc_longjmp(top_env->je_buf, (v));			\
 	if ((v) == 2)						\
-	    exit(STATUS_NATIVE_EXPORT);				\
+	    PerlProc_exit(STATUS_NATIVE_EXPORT);				\
 	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");	\
-	exit(1);						\
+	PerlProc_exit(1);						\
     } STMT_END
    
 #define CATCH_GET	(top_env->je_mustcatch)

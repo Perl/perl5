@@ -204,6 +204,11 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #include "perlio.h"
+#include "perllio.h"
+#include "perlsock.h"
+#include "perlproc.h"
+#include "perlenv.h"
+#include "perldir.h"
 
 #ifdef USE_NEXT_CTYPE
 
@@ -1255,7 +1260,7 @@ Gid_t getegid _((void));
 	if (!(what)) {							\
 	    croak("Assertion failed: file \"%s\", line %d",		\
 		__FILE__, __LINE__);					\
-	    exit(1);							\
+	    PerlProc_exit(1);							\
 	}})
 #endif
 
