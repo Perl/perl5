@@ -739,9 +739,15 @@ If Perl is configured to use the new 'perlio' IO system then
 C<Encode> provides a "layer" (See L<perliol>) which can transform
 data as it is read or written.
 
+Here is how the blind poet would modernise the encoding:
+
     use Encode;
-    open(my $ilyad,'>:encoding(iso-8859-7)','ilyad.greek');
-    print $ilyad @epic;
+    open(my $iliad,'<:encoding(iso-8859-7)','iliad.greek');
+    open(my $utf8,'>:utf8','iliad.utf8');
+    my @epic = <$iliad>;
+    print $utf8 @epic;
+    close($utf8);
+    close($illiad);
 
 In addition the new IO system can also be configured to read/write
 UTF-8 encoded characters (as noted above this is efficient):

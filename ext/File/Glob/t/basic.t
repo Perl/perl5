@@ -84,7 +84,7 @@ if ($^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'os2' or $^
     print "ok 6 # skipped\n";
 }
 else {
-    $dir = "pteerslt";
+    $dir = "pteerslo";
     mkdir $dir, 0;
     @a = bsd_glob("$dir/*", GLOB_ERR);
     #print "\@a = ", array(@a);
@@ -132,8 +132,8 @@ unless ($^O eq "MacOS" || (@a == 1 and $a[0] eq $ENV{HOME})) {
 print "ok 9\n";
 
 # GLOB_ALPHASORT (default) should sort alphabetically regardless of case
-mkdir "pteerslt", 0777;
-chdir "pteerslt";
+mkdir "pteerslo", 0777;
+chdir "pteerslo";
 
 @f_names = qw(Ax.pl Bx.pl Cx.pl aY.pl bY.pl cY.pl);
 @f_alpha = qw(Ax.pl aY.pl Bx.pl bY.pl Cx.pl cY.pl);
@@ -172,4 +172,4 @@ print $ok ? "ok 11\n" : "not ok 11\n";
 
 unlink @f_names;
 chdir "..";
-rmdir "pteerslt";
+rmdir "pteerslo";

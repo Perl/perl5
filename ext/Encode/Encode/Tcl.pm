@@ -78,7 +78,7 @@ sub loadEncoding
      $type = substr($line,0,1);
      last unless $type eq '#';
     }
-   my $class = ref($obj).('::'.(($type eq 'E') ? 'Escape' : 'Table'));
+   my $class = ref($obj).('::'.(($type eq 'H') ? 'HanZi' : ($type eq 'E') ? 'Escape' : 'Table'));
    # carp "Loading $file";
    bless $obj,$class;
    return $obj if $obj->read($fh,$obj->name,$type);
@@ -323,46 +323,152 @@ sub encode
 
  while (length($uni)){
   my $ch = chr(ord(substr($uni,0,1,'')));
-  my $x  = ref($tbl->{$pre}) eq 'Encode::XS'
-	? $tbl->{$pre}->encode($ch,1)
-	: $tbl->{$pre}->{FmUni}->{$ch};
-
-  unless(defined $x){
-   foreach my $e_seq (@$seq){
-    $x = ref($tbl->{$e_seq}) eq 'Encode::XS'
-	? $tbl->{$e_seq}->encode($ch,1)
-	: $tbl->{$e_seq}->{FmUni}->{$ch};
-    $cur = $e_seq and last if defined $x;
-   }
+  my $x;
+  foreach my $e_seq ($std, $pre, @$seq){
+   $x = ref($tbl->{$e_seq}) eq 'Encode::XS'
+    ? $tbl->{$e_seq}->encode($ch,1)
+    : $tbl->{$e_seq}->{FmUni}->{$ch};
+   $cur = $e_seq and last if defined $x;
   }
-  if($x == 0x0d && !($ini eq '' && $fin eq '') && substr($uni,0,1) eq "\x0a")
+  if(ref($tbl->{$cur}) ne 'Encode::XS')
    {
-    $str .= $cur unless $cur eq $pre;
-    $str .= $fin."\x0d\x0a".$ini;
-    substr($uni,0,1,'');
-    $pre = $std;
-    next;
+    my $def = $tbl->{$cur}->{'Def'};
+    my $rep = $tbl->{$cur}->{'Rep'};
+    unless (defined $x){
+     last if ($chk);
+     $x = $def;
+    }
+    $x = pack(&$rep($x),$x);
    }
-  if(ref($tbl->{$cur}) eq 'Encode::XS'){
-   $str .= $cur unless $cur eq $pre;
-   $str .= $x; # "DEF" is lost
-   $pre = $cur;
-   next;
-  }
-  my $def = $tbl->{$cur}->{'Def'};
-  my $rep = $tbl->{$cur}->{'Rep'};
-  unless (defined $x){
-   last if ($chk);
-   $x = $def;
-  }
-  $str .= $cur unless $cur eq $pre;
-  $str .= pack(&$rep($x),$x);
-  $pre = $cur;
+  $str .= $cur eq $pre ? $x : ($pre = $cur).$x;
  }
  $str .= $std unless $cur eq $std;
  $str .= $fin;
  $_[1] = $uni if $chk;
  return $str;
 }
+
+package Encode::Tcl::HanZi;
+use base 'Encode::Encoding';
+
+use Carp;
+
+sub read
+{
+ my ($obj,$fh,$name) = @_;
+ my(%tbl, @seq, $enc);
+ while (<$fh>)
+  {
+   my ($key,$val) = /^(\S+)\s+(.*)$/;
+   $val =~ s/^\{(.*?)\}/$1/g;
+   $val =~ s/\\x([0-9a-f]{2})/chr(hex($1))/ge;
+   if($enc = Encode->getEncoding($key)){
+     $tbl{$val} = ref($enc) eq 'Encode::Tcl' ? $enc->loadEncoding : $enc;
+     push @seq, $val;
+   }else{
+     $obj->{$key} = $val;
+   }
+  }
+ $obj->{'Seq'} = \@seq; # escape sequences
+ $obj->{'Tbl'} = \%tbl; # encoding tables
+ return $obj;
+}
+
+sub decode
+{
+ my ($obj,$str,$chk) = @_;
+ my $tbl = $obj->{'Tbl'};
+ my $seq = $obj->{'Seq'};
+ my $std = $seq->[0];
+ my $cur = $std;
+ my $uni;
+ while (length($str)){
+   my $uch = substr($str,0,1,'');
+   if($uch eq "~"){
+    if($str =~ s/^\cJ//)
+     {
+      next;
+     }
+    elsif($str =~ s/^\~//)
+     {
+      1;
+     }
+    elsif($str =~ s/^([{}])//)
+     {
+      $cur = "~$1";
+      next;
+     }
+    else
+     {
+      $str =~ s/^([^~])//;
+      carp "unknown HanZi escape sequence: ~$1";
+      next;
+     }
+   }
+   if(ref($tbl->{$cur}) eq 'Encode::XS'){
+     $uni .= $tbl->{$cur}->decode($uch);
+     next;
+   }
+   my $ch    = ord($uch);
+   my $rep   = $tbl->{$cur}->{'Rep'};
+   my $touni = $tbl->{$cur}->{'ToUni'};
+   my $x;
+   if (&$rep($ch) eq 'C')
+    {
+     $x = $touni->[0][$ch];
+    }
+   else
+    {
+     $x = $touni->[$ch][ord(substr($str,0,1,''))];
+    }
+   unless (defined $x)
+    {
+     last if $chk;
+     # What do we do here ?
+     $x = '';
+    }
+   $uni .= $x;
+  }
+ $_[1] = $str if $chk;
+ return $uni;
+}
+
+sub encode
+{
+ my ($obj,$uni,$chk) = @_;
+ my $tbl = $obj->{'Tbl'};
+ my $seq = $obj->{'Seq'};
+ my $std = $seq->[0];
+ my $str;
+ my $pre = $std;
+ my $cur = $pre;
+
+ while (length($uni)){
+  my $ch = chr(ord(substr($uni,0,1,'')));
+  my $x;
+  foreach my $e_seq (@$seq){
+   $x = ref($tbl->{$e_seq}) eq 'Encode::XS'
+    ? $tbl->{$e_seq}->encode($ch,1)
+    : $tbl->{$e_seq}->{FmUni}->{$ch};
+   $cur = $e_seq and last if defined $x;
+  }
+  if(ref($tbl->{$cur}) ne 'Encode::XS')
+   {
+    my $def = $tbl->{$cur}->{'Def'};
+    my $rep = $tbl->{$cur}->{'Rep'};
+    unless (defined $x){
+     last if ($chk);
+     $x = $def;
+    }
+    $x = pack(&$rep($x),$x);
+   }
+  $str .= $cur eq $pre ? $x : ($pre = $cur).$x;
+  $str .= '~' if $x eq '~'; # to '~~'
+ }
+ $str .= $std unless $cur eq $std;
+ $_[1] = $uni if $chk;
+ return $str;
+}
+
 1;
 __END__

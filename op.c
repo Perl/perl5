@@ -2952,7 +2952,16 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 	pmop->op_pmpermflags |= PMf_LOCALE;
     pmop->op_pmflags = pmop->op_pmpermflags;
 
-    /* link into pm list */
+ #ifdef USE_ITHREADS
+        {
+                SV* repointer = newSViv(0);
+                av_push(PL_regex_padav,repointer);
+                pmop->op_pmoffset = av_len(PL_regex_padav);
+                PL_regex_pad = AvARRAY(PL_regex_padav);
+        }
+ #endif
+        
+        /* link into pm list */
     if (type != OP_TRANS && PL_curstash) {
 	pmop->op_pmnext = HvPMROOT(PL_curstash);
 	HvPMROOT(PL_curstash) = pmop;
@@ -3197,6 +3206,7 @@ Perl_package(pTHX_ OP *o)
 	op_free(o);
     }
     else {
+	deprecate("\"package\" with no arguments");
 	sv_setpv(PL_curstname,"<none>");
 	PL_curstash = Nullhv;
     }
@@ -4164,9 +4174,10 @@ Perl_cv_undef(pTHX_ CV *cv)
 
 #ifdef USE_ITHREADS
     if (CvFILE(cv) && !CvXSUB(cv)) {
+	/* for XSUBs CvFILE point directly to static memory; __FILE__ */
 	Safefree(CvFILE(cv));
-	CvFILE(cv) = 0;
     }
+    CvFILE(cv) = 0;
 #endif
 
     if (!CvXSUB(cv) && CvROOT(cv)) {

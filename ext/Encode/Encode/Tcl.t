@@ -42,7 +42,7 @@ my %ideodigit = ( # cjk ideograph 'one' to 'ten'
 my @ideodigit = qw(one two three four five six seven eight nine ten);
 
 my $jis = '7bit-jis';
-my $kr  = '7bit-kr';
+my $kr  = 'iso2022-kr';
 my %esc_str;
 
 $esc_str{$jis} = {qw(
@@ -70,8 +70,19 @@ $esc_str{$kr} = {qw(
 my $num_esc = $n * keys(%esc_str);
 foreach (values %esc_str){ $num_esc += $n * keys %$_ }
 
+my $hz = 'HZ'; # HanZi
+
+my @hz_txt = (
+  "~~in GB.~{<:Ky2;S{#,NpJ)l6HK!#~}Bye.~~",
+  "~~in GB.~{<:Ky2;S{#,~}~\cJ~{NpJ)l6HK!#~}Bye.~~",
+  "~~in GB.~\cJ~{<:Ky2;S{#,NpJ)l6HK!#~}~\cJBye.~~",
+);
+
+my $hz_exp = '007e0069006e002000470042002e5df162404e0d6b32'
+ . 'ff0c52ff65bd65bc4eba3002004200790065002e007e';
+
 plan test => $n*@encodings + $n*@encodings*@greek
-  + $n*@encodings*@ideodigit + $num_esc;
+  + $n*@encodings*@ideodigit + $num_esc + $n + @hz_txt;
 
 foreach my $enc (@encodings)
  {
@@ -141,5 +152,33 @@ foreach my $enc (@encodings)
     }
    ok(to_unicode($enc, keys %strings), join('', values %strings),
    "$enc mangled translating to Unicode");
+  }
+}
+
+
+{
+ my $hz_to_unicode = sub
+  {
+   return unpack('H*', pack 'n*', unpack 'U*', decode $hz, shift);
+  };
+
+ my $hz_from_unicode = sub
+  {
+   return encode($hz, pack 'U*', unpack 'n*', pack 'H*', shift);
+  };
+
+ foreach my $enc ($hz)
+  {
+   my $tab = Encode->getEncoding($enc);
+   ok(1,defined($tab),"Could not load $enc");
+
+   ok(&$hz_from_unicode($hz_exp), $hz_txt[0],
+       "$enc mangled translating from Unicode");
+
+   foreach my $str (@hz_txt)
+    {
+     ok(&$hz_to_unicode($str), $hz_exp,
+      "$enc mangled translating to Unicode");
+    }
   }
 }

@@ -11,7 +11,9 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(charinfo
 		    charblock charscript
 		    charblocks charscripts
-		    charinrange);
+		    charinrange
+		    compexcl
+		    casefold casespec);
 
 use Carp;
 
@@ -22,7 +24,7 @@ Unicode::UCD - Unicode character database
 =head1 SYNOPSIS
 
     use Unicode::UCD 'charinfo';
-    my %charinfo   = charinfo($codepoint);
+    my $charinfo   = charinfo($codepoint);
 
     use Unicode::UCD 'charblock';
     my $charblock  = charblock($codepoint);
@@ -41,6 +43,9 @@ my $UNICODEFH;
 my $BLOCKSFH;
 my $SCRIPTSFH;
 my $VERSIONFH;
+my $COMPEXCLFH;
+my $CASEFOLDFH;
+my $CASESPECFH;
 
 sub openunicode {
     my ($rfh, @path) = @_;
@@ -63,10 +68,10 @@ sub openunicode {
 
     use Unicode::UCD 'charinfo';
 
-    my %charinfo = charinfo(0x41);
+    my $charinfo = charinfo(0x41);
 
-charinfo() returns a hash that has the following fields as defined
-by the Unicode standard:
+charinfo() returns a reference to a hash that has the following fields
+as defined by the Unicode standard:
 
     key
 
@@ -89,7 +94,7 @@ by the Unicode standard:
     block            block the character belongs to (used in \p{In...})
     script           script the character belongs to 
 
-If no match is found, an empty hash is returned.
+If no match is found, a reference to an empty hash is returned.
 
 The C<block> property is the same as as returned by charinfo().  It is
 not defined in the Unicode Character Database proper (Chapter 4 of the
@@ -98,9 +103,7 @@ of TUS3).  Similarly for the C<script> property.
 
 Note that you cannot do (de)composition and casing based solely on the
 above C<decomposition> and C<lower>, C<upper>, C<title>, properties,
-you will need also the I<Composition Exclusions>, I<Case Folding>, and
-I<SpecialCasing> tables, available as files F<CompExcl.txt>,
-F<CaseFold.txt>, and F<SpecCase.txt> in the Perl distribution.
+you will need also the compexcl(), casefold(), and casespec() functions.
 
 =cut
 
@@ -140,7 +143,7 @@ sub charinfo {
 	    if ($prop{code} eq $hexk) {
 		$prop{block}  = charblock($code);
 		$prop{script} = charscript($code);
-		return %prop;
+		return \%prop;
 	    }
 	}
     }
@@ -188,9 +191,7 @@ sub charinrange {
 
 With a B<code point argument> charblock() returns the block the character
 belongs to, e.g.  C<Basic Latin>.  Note that not all the character
-positions within all blocks are defined.  A <code point argument>
-is either a decimal or a hexadecimal scalar, or "U+" followed
-by hexadecimals.
+positions within all blocks are defined.
 
 If supplied with an argument that can't be a code point, charblock()
 tries to do the opposite and interpret the argument as a character
@@ -250,9 +251,7 @@ sub charblock {
     my $ranges     = charscript('Thai');
 
 With a B<code point argument> charscript() returns the script the
-character belongs to, e.g.  C<Latin>, C<Greek>, C<Han>.  A <code point
-argument> is either a decimal or a hexadecimal scalar, or "U+"
-followed by hexadecimals.
+character belongs to, e.g.  C<Latin>, C<Greek>, C<Han>.
 
 If supplied with an argument that can't be a code point, charscript()
 tries to do the opposite and interpret the argument as a character
@@ -308,16 +307,16 @@ sub charscript {
 
     use Unicode::UCD 'charblocks';
 
-    my %charblocks = charblocks();
+    my $charblocks = charblocks();
 
-charblocks() returns a hash with the known block names as the keys,
-and the code point ranges (see L</charblock>) as the values.
+charblocks() returns a reference to a hash with the known block names
+as the keys, and the code point ranges (see L</charblock>) as the values.
 
 =cut
 
 sub charblocks {
-    _charblocks() unless @BLOCKS;
-    return %BLOCKS;
+    _charblocks() unless %BLOCKS;
+    return \%BLOCKS;
 }
 
 =head2 charscripts
@@ -332,8 +331,8 @@ and the code point ranges (see L</charscript>) as the values.
 =cut
 
 sub charscripts {
-    _charscripts() unless @SCRIPTS;
-    return %SCRIPTS;
+    _charscripts() unless %SCRIPTS;
+    return \%SCRIPTS;
 }
 
 =head2 Blocks versus Scripts
@@ -368,6 +367,11 @@ There are a few cases where there exists both a script and a block by
 the same name, in these cases the block version has C<Block> appended:
 C<\p{InKatakana}> is the script, C<\p{InKatakanaBlock}> is the block.
 
+=head2 Code Point Arguments
+
+A <code point argument> is either a decimal or a hexadecimal scalar,
+or "U+" followed by hexadecimals.
+
 =head2 charinrange
 
 In addition to using the C<\p{In...}> and C<\P{In...}> constructs, you
@@ -381,6 +385,191 @@ by L</charblocks> and </charscripts> by using charinrange():
     print "looks like hiragana\n" if charinrange($range, $code);
 
 =cut
+
+=head2 compexcl
+
+    use Unicode::UCD 'compexcl';
+
+    my $compexcl = compexcl("09dc");
+
+The compexcl() returns the composition exclusion (that is, if the
+character cannot be decomposed) of the character specified by a B<code
+point argument>.
+
+If there is a composition exclusion for the character, true is
+returned.  Otherwise, false is returned.
+
+=cut
+
+my %COMPEXCL;
+
+sub _compexcl {
+    unless (%COMPEXCL) {
+	if (openunicode(\$COMPEXCLFH, "CompExcl.txt")) {
+	    while (<$COMPEXCLFH>) {
+		if (/^([0-9A-F]+) \# /) {
+		    my $code = hex($1);
+		    $COMPEXCL{$code} = undef;
+		}
+	    }
+	    close($COMPEXCLFH);
+	}
+    }
+}
+
+sub compexcl {
+    my $arg  = shift;
+    my $code = _getcode($arg);
+
+    _compexcl() unless %COMPEXCL;
+
+    return exists $COMPEXCL{$code};
+}
+
+=head2 casefold
+
+    use Unicode::UCD 'casefold';
+
+    my %casefold = casefold("09dc");
+
+The casefold() returns the locale-independent case folding of the
+character specified by a B<code point argument>.
+
+If there is a case folding for that character, a reference to a hash
+with the following fields is returned:
+
+    key
+
+    code             code point with at least four hexdigits
+    status           "C", "F", "S", or "I"
+    mapping          one or more codes separated by spaces
+
+The meaning of the I<status> is as follows:
+
+   C                 common case folding, common mappings shared
+                     by both simple and full mappings
+   F                 full case folding, mappings that cause strings
+                     to grow in length. Multiple characters are separated
+                     by spaces
+   S                 simple case folding, mappings to single characters
+                     where different from F
+   I                 special case for dotted uppercase I and
+                     dotless lowercase i
+                     - If this mapping is included, the result is
+                       case-insensitive, but dotless and dotted I's
+                       are not distinguished
+                     - If this mapping is excluded, the result is not
+                       fully case-insensitive, but dotless and dotted
+                       I's are distinguished
+
+If there is no case folding for that character, C<undef> is returned.
+
+For more information about case mappings see
+http://www.unicode.org/unicode/reports/tr21/
+
+=cut
+
+my %CASEFOLD;
+
+sub _casefold {
+    unless (%CASEFOLD) {
+	if (openunicode(\$CASEFOLDFH, "CaseFold.txt")) {
+	    while (<$CASEFOLDFH>) {
+		if (/^([0-9A-F]+); ([CFSI]); ([0-9A-F]+(?: [0-9A-F]+)*);/) {
+		    my $code = hex($1);
+		    $CASEFOLD{$code} = { code    => $1,
+					 status  => $2,
+					 mapping => $3 };
+		}
+	    }
+	    close($CASEFOLDFH);
+	}
+    }
+}
+
+sub casefold {
+    my $arg  = shift;
+    my $code = _getcode($arg);
+
+    _casefold() unless %CASEFOLD;
+
+    return $CASEFOLD{$code};
+}
+
+=head2 casespec
+
+    use Unicode::UCD 'casespec';
+
+    my %casespec = casespec("09dc");
+
+The casespec() returns the potentially locale-dependent case mapping
+of the character specified by a B<code point argument>.  The mapping
+may change the length of the string (which the basic Unicode case
+mappings as returned by charinfo() never do).
+
+If there is a case folding for that character, a reference to a hash
+with the following fields is returned:
+
+    key
+
+    code             code point with at least four hexdigits
+    lower            lowercase
+    title            titlecase
+    upper            uppercase
+    condition        condition list (may be undef)
+
+The C<condition> is optional.  Where present, it consists of one or
+more I<locales> or I<contexts>, separated by spaces (other than as
+used to separate elements, spaces are to be ignored).  A condition
+list overrides the normal behavior if all of the listed conditions are
+true.  Case distinctions in the condition list are not significant.
+Conditions preceded by "NON_" represent the negation of the condition
+
+A I<locale> is defined as a 2-letter ISO 3166 country code, possibly
+followed by a "_" and a 2-letter ISO language code (, possibly followed
+by a "_" and a variant code).  You can find the list of those codes
+in L<Locale::Country> and L<Locale::Language>.
+
+A I<context> is one of the following choices:
+
+    FINAL            The letter is not followed by a letter of
+                     general category L (e.g. Ll, Lt, Lu, Lm, or Lo)
+    MODERN           The mapping is only used for modern text
+    AFTER_i          The last base character was "i" 0069
+
+For more information about case mappings see
+http://www.unicode.org/unicode/reports/tr21/
+
+=cut
+
+my %CASESPEC;
+
+sub _casespec {
+    unless (%CASESPEC) {
+	if (openunicode(\$CASESPECFH, "SpecCase.txt")) {
+	    while (<$CASESPECFH>) {
+		if (/^([0-9A-F]+); ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; (\w+(?: \w+)*)?/) {
+		    my $code = hex($1);
+		    $CASESPEC{$code} = { code      => $1,
+					 lower     => $2,
+					 title     => $3,
+					 upper     => $4,
+					 condition => $5 };
+		}
+	    }
+	    close($CASESPECFH);
+	}
+    }
+}
+
+sub casespec {
+    my $arg  = shift;
+    my $code = _getcode($arg);
+
+    _casespec() unless %CASESPEC;
+
+    return $CASESPEC{$code};
+}
 
 =head2 Unicode::UCD::UnicodeVersion
 

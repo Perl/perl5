@@ -84,7 +84,7 @@ use of the first array element) is deprecated starting from Perl 5.8.0
 and will be removed in Perl 5.10.0, and the feature will be
 implemented differently.  Not only is the current interface rather
 ugly, but the current implementation slows down normal array and hash
-use quite noticeably. The 'fields' pragma interface will remain
+use quite noticeably. The C<fields> pragma interface will remain
 available.
 
 The syntaxes C<@a->[...]> and  C<@h->{...}> have now been deprecated.
@@ -92,6 +92,11 @@ The syntaxes C<@a->[...]> and  C<@h->{...}> have now been deprecated.
 The suidperl is also considered to be too much a risk to continue
 maintaining and the suidperl code is likely to be removed in a future
 release.
+
+The C<package;> syntax (C<package> without an argument has been
+deprecated.  Its semantics were never that clear and its
+implementation even less so.  If you have used that feature to
+disallow all but fully qualified variables, C<use strict;> instead.
 
 =head1 Core Enhancements
 
@@ -717,6 +722,11 @@ Compac C V6.4-005 on OpenVMS Alpha 7.2.1
   [.lib]vmsish............................FAILED on test 13
   [.op]misc...............................FAILED on test 49
   Failed 6/401 tests, 92.77% okay.
+
+=head2 Win32
+
+In multi-CPU boxes there are some problems with the I/O buffering:
+some output may appear twice.
 
 =head2 Localising a Tied Variable Leaks Memory
 

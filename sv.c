@@ -9693,6 +9693,19 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_statusvalue_vms	= proto_perl->Istatusvalue_vms;
 #endif
 
+        /* Clone the regex array */
+        PL_regex_padav = newAV();
+        {
+                I32 len = av_len((AV*)proto_perl->Iregex_padav);
+                SV** regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
+                for(i = 0; i <= len; i++) {                             
+                        av_push(PL_regex_padav,
+                            newSViv((IV)re_dup((REGEXP*) SvIV(regexen[i])) ));
+                }
+        }
+        PL_regex_pad = AvARRAY(PL_regex_padav);
+        
+
     /* shortcuts to various I/O objects */
     PL_stdingv		= gv_dup(proto_perl->Istdingv, param);
     PL_stderrgv		= gv_dup(proto_perl->Istderrgv, param);

@@ -475,6 +475,11 @@ PERLVAR(Inumeric_radix_sv,	SV *)	/* The radix separator if not '.' */
 
 #endif
 
+#if defined(USE_ITHREADS)
+PERLVAR(Iregex_pad,     SV**)    /* All regex objects */
+PERLVAR(Iregex_padav,   AV*)    /* All regex objects */
+#endif
+
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */

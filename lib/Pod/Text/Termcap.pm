@@ -1,18 +1,18 @@
 # Pod::Text::Termcap -- Convert POD data to ASCII text with format escapes.
-# $Id: Termcap.pm,v 1.0 2000/12/25 12:52:48 eagle Exp $
+# $Id: Termcap.pm,v 1.1 2001/07/10 11:04:36 eagle Exp $
 #
 # Copyright 1999 by Russ Allbery <rra@stanford.edu>
 #
-# This program is free software; you can redistribute it and/or modify it
+# This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
 # This is a simple subclass of Pod::Text that overrides a few key methods to
-# output the right termcap escape sequences for formatted text on the
-# current terminal type.
+# output the right termcap escape sequences for formatted text on the current
+# terminal type.
 
-############################################################################
+##############################################################################
 # Modules and declarations
-############################################################################
+##############################################################################
 
 package Pod::Text::Termcap;
 
@@ -27,16 +27,15 @@ use vars qw(@ISA $VERSION);
 
 @ISA = qw(Pod::Text);
 
-# Don't use the CVS revision as the version, since this module is also in
-# Perl core and too many things could munge CVS magic revision strings.
-# This number should ideally be the same as the CVS revision in podlators,
-# however.
-$VERSION = 1.00;
+# Don't use the CVS revision as the version, since this module is also in Perl
+# core and too many things could munge CVS magic revision strings.  This
+# number should ideally be the same as the CVS revision in podlators, however.
+$VERSION = 1.01;
 
 
-############################################################################
+##############################################################################
 # Overrides
-############################################################################
+##############################################################################
 
 # In the initialization method, grab our terminal characteristics as well as
 # do all the stuff we normally do.
@@ -105,9 +104,9 @@ sub wrap {
 }
 
 
-############################################################################
+##############################################################################
 # Module return value and documentation
-############################################################################
+##############################################################################
 
 1;
 __END__
@@ -140,6 +139,13 @@ L<Pod::Text|Pod::Text>, L<Pod::Parser|Pod::Parser>
 
 =head1 AUTHOR
 
-Russ Allbery E<lt>rra@stanford.eduE<gt>.
+Russ Allbery <rra@stanford.edu>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1999 by Russ Allbery <rra@stanford.edu>.
+
+This program is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut

@@ -10,15 +10,17 @@ sub in_locale { $^H & $locale::hint_bits }
 
 sub _get_locale_encoding {
     unless (defined $locale_encoding) {
-	eval { use I18N::Langinfo qw(langinfo CODESET) };
+	eval { require I18N::Langinfo;
+	       import I18N::Langinfo qw(langinfo CODESET) };
 	unless ($@) {
 	    $locale_encoding = langinfo(CODESET);
 	}
+	my $country_language;
         if (not $locale_encoding && in_locale()) {
-	    if ($ENV{LC_ALL} =~ /^[^.]+\.([^.]+)$/) {
-		$locale_encoding = $1;
-	    } elsif ($ENV{LANG} =~ /^[^.]+\.([^.]+)$/) {
-		$locale_encoding = $1;
+	    if ($ENV{LC_ALL} =~ /^([^.]+)\.([^.]+)$/) {
+		($country_language, $locale_encoding) = ($1, $2);
+	    } elsif ($ENV{LANG} =~ /^([^.]+)\.([^.]+)$/) {
+		($country_language, $locale_encoding) = ($1, $2);
 	    }
 	} else {
 	    # Could do heuristics based on the country and language
@@ -27,6 +29,19 @@ sub _get_locale_encoding {
 	    # TODO: get a database of Language -> Encoding mappings
 	    # (the Estonian database would be excellent!)
 	    # --jhi
+	}
+	if (defined $locale_encoding &&
+	    $locale_encoding eq 'euc' &&
+	    defined $country_language) {
+	    if ($country_language =~ /^ja_JP|japan(?:ese)?$/i) {
+		$locale_encoding = 'eucjp';
+	    } elsif ($country_language =~ /^ko_KR|korea(?:n)?$/i) {
+		$locale_encoding = 'euckr';
+	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)?$/i) {
+		$locale_encoding = 'euctw';
+	    }
+	    croak "Locale encoding 'euc' too ambiguous"
+		if $locale_encoding eq 'euc';
 	}
     }
 }
@@ -50,7 +65,11 @@ sub import {
 		    unless defined $locale_encoding;
 		croak "Cannot figure out an encoding to use"
 		    unless defined $locale_encoding;
-		$layer = "encoding($locale_encoding)";
+		if ($locale_encoding =~ /^utf-?8$/i) {
+		    $layer = "utf8";
+		} else {
+		    $layer = "encoding($locale_encoding)";
+		}
 	    }
 	    unless(PerlIO::Layer::->find($layer)) {
 		carp("Unknown discipline layer '$layer'");
@@ -65,6 +84,9 @@ sub import {
 	}
 	elsif ($type eq 'OUT') {
 	    $out = join(' ',@val);
+	}
+	elsif ($type eq 'INOUT') {
+	    $in = $out = join(' ',@val);
 	}
 	else {
 	    croak "Unknown discipline class '$type'";
@@ -83,6 +105,7 @@ open - perl pragma to set default disciplines for input and output
 =head1 SYNOPSIS
 
     use open IN => ":crlf", OUT => ":raw";
+    use open INOUT => ":utf8";
 
 =head1 DESCRIPTION
 
@@ -117,14 +140,16 @@ everywhere if PerlIO is enabled.
 
 =head1 IMPLEMENTATION DETAILS
 
-There is a class method in C<PerlIO::Layer> C<find> which is implemented as XS code.
-It is called by C<import> to validate the layers:
+There is a class method in C<PerlIO::Layer> C<find> which is
+implemented as XS code.  It is called by C<import> to validate the
+layers:
 
    PerlIO::Layer::->find("perlio")
 
-The return value (if defined) is a Perl object, of class C<PerlIO::Layer> which is
-created by the C code in F<perlio.c>.  As yet there is nothing useful you can do with the
-object at the perl level.
+The return value (if defined) is a Perl object, of class
+C<PerlIO::Layer> which is created by the C code in F<perlio.c>.  As
+yet there is nothing useful you can do with the object at the perl
+level.
 
 =head1 SEE ALSO
 

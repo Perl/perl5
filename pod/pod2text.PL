@@ -39,7 +39,7 @@ print OUT <<'!NO!SUBS!';
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
-# This program is free software; you can redistribute it and/or modify it
+# This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
 # The driver script for Pod::Text, Pod::Text::Termcap, and Pod::Text::Color,
@@ -243,7 +243,14 @@ L<Pod::Text::Termcap|Pod::Text::Termcap>, L<Pod::Parser|Pod::Parser>
 
 =head1 AUTHOR
 
-Russ Allbery E<lt>rra@stanford.eduE<gt>.
+Russ Allbery <rra@stanford.edu>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>.
+
+This program is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut
 !NO!SUBS!

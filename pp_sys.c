@@ -4323,10 +4323,10 @@ PP(pp_gmtime)
     else
 	tmbuf = gmtime(&when);
 
-    EXTEND(SP, 9);
-    EXTEND_MORTAL(9);
     if (GIMME != G_ARRAY) {
 	SV *tsv;
+        EXTEND(SP, 1);
+        EXTEND_MORTAL(1);
 	if (!tmbuf)
 	    RETPUSHUNDEF;
 	tsv = Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %d",
@@ -4340,7 +4340,9 @@ PP(pp_gmtime)
 	PUSHs(sv_2mortal(tsv));
     }
     else if (tmbuf) {
-	PUSHs(sv_2mortal(newSViv(tmbuf->tm_sec)));
+        EXTEND(SP, 9);
+        EXTEND_MORTAL(9);
+        PUSHs(sv_2mortal(newSViv(tmbuf->tm_sec)));
 	PUSHs(sv_2mortal(newSViv(tmbuf->tm_min)));
 	PUSHs(sv_2mortal(newSViv(tmbuf->tm_hour)));
 	PUSHs(sv_2mortal(newSViv(tmbuf->tm_mday)));
