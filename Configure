@@ -3610,7 +3610,7 @@ false)
 esac
 
 case "$cppstdin" in
-"$wrapper") ;;
+"$wrapper"|'cppstdin') ;;
 *) $rm -f $wrapper;;
 esac
 $rm -f testcpp.c testcpp.out

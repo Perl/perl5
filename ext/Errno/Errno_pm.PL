@@ -54,9 +54,9 @@ sub default_cpp {
 						File::Spec->updir,
 						"cppstdin");
 	my $cppstdin_is_wrapper =
-	    $cppstdin eq 'cppstdin'
+	    ($cppstdin eq 'cppstdin'
 		and -f $upup_cppstdin
-		    and -x $upup_cppstdin;
+		    and -x $upup_cppstdin);
 	$cppstdin = $upup_cppstdin if $cppstdin_is_wrapper;
     }
     return "$cppstdin $Config{cppflags} $Config{cppminus}";
@@ -123,6 +123,10 @@ sub get_files {
 
 sub write_errno_pm {
     my $err;
+
+    # quick sanity check
+
+    die "No error definitions found" unless keys %err;
 
     # create the CPP input
 
