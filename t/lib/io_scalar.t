@@ -10,7 +10,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..9\n";
+print "1..10\n";
 
 my $fh;
 my $var = "ok 2\n";
@@ -32,4 +32,10 @@ print "not " if eof($fh);
 print "ok 8\n";
 print "not " unless <$fh> eq "foo\n";
 print "ok 9\n";
-
+# Test multiple consecutive writes to $var
+$var = "";
+seek($fh, 0, 0);
+print $fh "Fred and Wilma ";
+print $fh "Flintstone";
+print "not " unless $var eq "Fred and Wilma Flintstone";
+print "ok 10\n";
