@@ -3,9 +3,18 @@
    perlvars.h and thrdvar.h.  Any changes made here will be lost!
 */
 
-#if defined(PERL_OBJECT)
-
 /* declare accessor functions for Perl variables */
+
+#if defined(PERL_OBJECT) || defined (PERL_CAPI)
+
+#if defined(PERL_OBJECT)
+#  undef  aTHXo
+#  define aTHXo			pPerl
+#  undef  aTHXo_
+#  define aTHXo_		aTHXo,
+#  undef  _aTHXo
+#  define _aTHXo		,aTHXo
+#endif /* PERL_OBJECT */
 
 START_EXTERN_C
 
@@ -13,11 +22,11 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#define PERLVAR(v,t)	EXTERN_C t* Perl_##v##_ptr(void *p);
+#define PERLVAR(v,t)	EXTERN_C t* Perl_##v##_ptr(pTHXo);
 #define PERLVARA(v,n,t)	typedef t PL_##v##_t[n];			\
-			EXTERN_C PL_##v##_t* Perl_##v##_ptr(void *p);
+			EXTERN_C PL_##v##_t* Perl_##v##_ptr(pTHXo);
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
-#define PERLVARIC(v,t,i) PERLVAR(v,t)
+#define PERLVARIC(v,t,i) PERLVAR(v, const t)
 
 #include "thrdvar.h"
 #include "intrpvar.h"
@@ -30,5 +39,5 @@ START_EXTERN_C
 
 END_EXTERN_C
 
-#endif /* PERL_OBJECT */
+#endif /* PERL_OBJECT || PERL_CAPI */
 

@@ -870,7 +870,7 @@ PP(pp_sort)
 		    (void)SvREFCNT_inc(cv); /* in preparation for POPSUB */
 	    }
 	    PL_sortcxix = cxstack_ix;
-	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(sortcv));
+	    qsortsv((myorigmark+1), max, sortcv);
 
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
@@ -884,19 +884,13 @@ PP(pp_sort)
 	    qsortsv(ORIGMARK+1, max,
  		    (PL_op->op_private & OPpSORT_NUMERIC)
 			? ( (PL_op->op_private & OPpSORT_INTEGER)
-			    ? ( overloading
-				? FUNC_NAME_TO_PTR(amagic_i_ncmp)
-				: FUNC_NAME_TO_PTR(sv_i_ncmp))
-			    : ( overloading
-				? FUNC_NAME_TO_PTR(amagic_ncmp)
-				: FUNC_NAME_TO_PTR(sv_ncmp)))
+			    ? ( overloading ? amagic_i_ncmp : sv_i_ncmp)
+			    : ( overloading ? amagic_ncmp : sv_ncmp))
 			: ( (PL_op->op_private & OPpLOCALE)
 			    ? ( overloading
-				? FUNC_NAME_TO_PTR(amagic_cmp_locale)
-				: FUNC_NAME_TO_PTR(sv_cmp_locale_static))
-			    : ( overloading
-				? FUNC_NAME_TO_PTR(amagic_cmp)
-		    : FUNC_NAME_TO_PTR(sv_cmp_static) )));
+				? amagic_cmp_locale
+				: sv_cmp_locale_static)
+			    : ( overloading ? amagic_cmp : sv_cmp_static)));
 	    if (PL_op->op_private & OPpSORT_REVERSE) {
 		SV **p = ORIGMARK+1;
 		SV **q = ORIGMARK+max;
@@ -2427,7 +2421,7 @@ S_docatch(pTHX_ OP *o)
 #endif
     PL_op = o;
  redo_body:
-    CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_docatch_body));
+    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_docatch_body));
     switch (ret) {
     case 0:
 	break;

@@ -4,6 +4,7 @@
  * modify it under the same terms as Perl itself.
  */
 
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"

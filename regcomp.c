@@ -41,6 +41,8 @@
 #  define Perl_regnext my_regnext
 #  define Perl_save_re_context my_save_re_context
 #  define Perl_reginitcolors my_reginitcolors 
+
+#  define PERL_NO_GET_CONTEXT
 #endif 
 
 /*SUPPRESS 112*/
@@ -81,7 +83,11 @@
 #define PERL_IN_REGCOMP_C
 #include "perl.h"
 
-#ifndef PERL_IN_XSUB_RE
+#ifdef PERL_IN_XSUB_RE
+#  if defined(PERL_CAPI) || defined(PERL_OBJECT)
+#    include "XSUB.h"
+#  endif
+#else
 #  include "INTERN.h"
 #endif
 
@@ -461,7 +467,8 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		if (ckWARN(WARN_UNSAFE) && (minnext + deltanext == 0) 
 		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
-		    Perl_warner(aTHX_ WARN_UNSAFE, "Strange *+?{} on zero-length expression");
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"Strange *+?{} on zero-length expression");
 		min += minnext * mincount;
 		is_inf_internal |= (maxcount == REG_INFTY 
 				    && (minnext + deltanext) > 0

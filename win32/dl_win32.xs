@@ -24,6 +24,8 @@ calls.
 #include <windows.h>
 #include <string.h>
 
+#define PERL_NO_GET_CONTEXT
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "win32.h"

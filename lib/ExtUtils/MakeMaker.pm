@@ -1226,6 +1226,9 @@ currently used by MakeMaker but may be handy in Makefile.PLs.
 
 =item CAPI
 
+[This attribute is obsolete in Perl 5.6.  PERL_OBJECT builds are C-compatible
+by default.]
+
 Switch to force usage of the Perl C API even when compiling for PERL_OBJECT.
 
 Note that this attribute is passed through to any recursive build,

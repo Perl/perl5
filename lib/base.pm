@@ -56,7 +56,7 @@ sub import {
 	    # Only ignore "Can't locate" errors from our eval require.
 	    # Other fatal errors (syntax etc) must be reported.
 	    die if $@ && $@ !~ /^Can't locate .*? at \(eval /;
-	    unless (defined %{"$base\::"}) {
+	    unless (%{"$base\::"}) {
 		require Carp;
 		Carp::croak("Base class package \"$base\" is empty.\n",
 			    "\t(Perhaps you need to 'use' the module ",

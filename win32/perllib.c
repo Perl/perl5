@@ -771,7 +771,7 @@ PerlSockGethostbyname(struct IPerlSock*, const char* name)
 struct hostent*
 PerlSockGethostent(struct IPerlSock*)
 {
-    dPERLOBJ;
+    dTHXo;
     croak("gethostent not implemented!\n");
     return NULL;
 }
@@ -946,7 +946,7 @@ PerlSockSocket(struct IPerlSock*, int af, int type, int protocol)
 int
 PerlSockSocketpair(struct IPerlSock*, int domain, int type, int protocol, int* fds)
 {
-    dPERLOBJ;
+    dTHXo;
     croak("socketpair not implemented!\n");
     return 0;
 }
@@ -1102,7 +1102,7 @@ PerlProcKill(struct IPerlProc*, int pid, int sig)
 int
 PerlProcKillpg(struct IPerlProc*, int pid, int sig)
 {
-    dPERLOBJ;
+    dTHXo;
     croak("killpg not implemented!\n");
     return 0;
 }
@@ -1249,24 +1249,6 @@ struct IPerlProc perlProc =
 
 //#include "perlhost.h"
 
-static DWORD g_TlsAllocIndex;
-BOOL SetPerlInterpreter(CPerlObj* pPerl)
-{
-    return TlsSetValue(g_TlsAllocIndex, pPerl);
-}
-
-EXTERN_C CPerlObj* GetPerlInterpreter(PerlInterpreter* sv_interp)
-{
-    if(GetCurrentThreadId() == (DWORD)sv_interp)
-	return (CPerlObj*)TlsGetValue(g_TlsAllocIndex);
-    return NULL;
-}
-
-CPerlObj* GetPerlInter(void)
-{
-    return (CPerlObj*)TlsGetValue(g_TlsAllocIndex);
-}
-
 
 EXTERN_C void perl_get_host_info(IPerlMemInfo* perlMemInfo,
 			IPerlEnvInfo* perlEnvInfo, IPerlStdIOInfo* perlStdIOInfo,
@@ -1321,7 +1303,7 @@ EXTERN_C PerlInterpreter* perl_alloc_using(IPerlMem* pMem,
     if(pPerl)
     {
 	SetPerlInterpreter(pPerl);
-	return (PerlInterpreter*)GetCurrentThreadId();
+	return (PerlInterpreter*)pPerl;
     }
     SetPerlInterpreter(NULL);
     return NULL;
@@ -1349,7 +1331,7 @@ EXTERN_C PerlInterpreter* perl_alloc(void)
     if(pPerl)
     {
 	SetPerlInterpreter(pPerl);
-	return (PerlInterpreter*)GetCurrentThreadId();
+	return (PerlInterpreter*)pPerl;
     }
     SetPerlInterpreter(NULL);
     return NULL;
@@ -1357,7 +1339,7 @@ EXTERN_C PerlInterpreter* perl_alloc(void)
 
 EXTERN_C void perl_construct(PerlInterpreter* sv_interp)
 {
-    CPerlObj* pPerl = GetPerlInterpreter(sv_interp);
+    CPerlObj* pPerl = (CPerlObj*)sv_interp;
     try
     {
 	pPerl->perl_construct();
@@ -1373,7 +1355,7 @@ EXTERN_C void perl_construct(PerlInterpreter* sv_interp)
 
 EXTERN_C void perl_destruct(PerlInterpreter* sv_interp)
 {
-    CPerlObj* pPerl = GetPerlInterpreter(sv_interp);
+    CPerlObj* pPerl = (CPerlObj*)sv_interp;
     try
     {
 	pPerl->perl_destruct();
@@ -1385,7 +1367,7 @@ EXTERN_C void perl_destruct(PerlInterpreter* sv_interp)
 
 EXTERN_C void perl_free(PerlInterpreter* sv_interp)
 {
-    CPerlObj* pPerl = GetPerlInterpreter(sv_interp);
+    CPerlObj* pPerl = (CPerlObj*)sv_interp;
     try
     {
 	pPerl->perl_free();
@@ -1398,7 +1380,7 @@ EXTERN_C void perl_free(PerlInterpreter* sv_interp)
 
 EXTERN_C int perl_run(PerlInterpreter* sv_interp)
 {
-    CPerlObj* pPerl = GetPerlInterpreter(sv_interp);
+    CPerlObj* pPerl = (CPerlObj*)sv_interp;
     int retVal;
     try
     {
@@ -1422,7 +1404,7 @@ EXTERN_C int perl_run(PerlInterpreter* sv_interp)
 EXTERN_C int perl_parse(PerlInterpreter* sv_interp, void (*xsinit)(CPerlObj*), int argc, char** argv, char** env)
 {
     int retVal;
-    CPerlObj* pPerl = GetPerlInterpreter(sv_interp);
+    CPerlObj* pPerl = (CPerlObj*)sv_interp;
     try
     {
 	retVal = pPerl->perl_parse(xs_init, argc, argv, env);
@@ -1452,7 +1434,21 @@ HANDLE g_w32_perldll_handle;
 extern HANDLE w32_perldll_handle;
 #endif /* PERL_OBJECT */
 
-DllExport int
+static DWORD g_TlsAllocIndex;
+
+EXTERN_C DllExport bool
+SetPerlInterpreter(void *interp)
+{
+    return TlsSetValue(g_TlsAllocIndex, interp);
+}
+
+EXTERN_C DllExport void*
+GetPerlInterpreter(void)
+{
+    return TlsGetValue(g_TlsAllocIndex);
+}
+
+EXTERN_C DllExport int
 RunPerl(int argc, char **argv, char **env)
 {
     int exitstatus;
@@ -1520,10 +1516,9 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	setmode( fileno( stderr ), O_BINARY );
 	_fmode = O_BINARY;
 #endif
-#ifdef PERL_OBJECT
 	g_TlsAllocIndex = TlsAlloc();
 	DisableThreadLibraryCalls(hModule);
-#else
+#ifndef PERL_OBJECT
 	w32_perldll_handle = hModule;
 #endif
 	break;
@@ -1532,9 +1527,7 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	 * process termination or call to FreeLibrary.
 	 */
     case DLL_PROCESS_DETACH:
-#ifdef PERL_OBJECT
 	TlsFree(g_TlsAllocIndex);
-#endif
 	break;
 
 	/* The attached process creates a new thread. */

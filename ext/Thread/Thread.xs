@@ -1,3 +1,4 @@
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -324,6 +325,7 @@ static Signal_t handle_thread_signal (int sig);
 static Signal_t
 handle_thread_signal(int sig)
 {
+    dTHXo;
     unsigned char c = (unsigned char) sig;
     /*
      * We're not really allowed to call fprintf in a signal handler

@@ -51,16 +51,20 @@ VIRTUAL MAGIC*	Perl_condpair_magic(pTHX_ SV *sv);
 #endif
 VIRTUAL OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o);
 VIRTUAL void	Perl_croak(pTHX_ const char* pat, ...) __attribute__((noreturn));
+VIRTUAL void	Perl_vcroak(pTHX_ const char* pat, va_list* args) __attribute__((noreturn));
 #if defined(PERL_IMPLICIT_CONTEXT)
 VIRTUAL void	Perl_croak_nocontext(const char* pat, ...) __attribute__((noreturn));
 VIRTUAL OP*	Perl_die_nocontext(const char* pat, ...);
+VIRTUAL void	Perl_deb_nocontext(const char* pat, ...);
 VIRTUAL char*	Perl_form_nocontext(const char* pat, ...);
 VIRTUAL void	Perl_warn_nocontext(const char* pat, ...);
+VIRTUAL void	Perl_warner_nocontext(U32 err, const char* pat, ...);
 VIRTUAL SV*	Perl_newSVpvf_nocontext(const char* pat, ...);
 VIRTUAL void	Perl_sv_catpvf_nocontext(SV* sv, const char* pat, ...);
 VIRTUAL void	Perl_sv_setpvf_nocontext(SV* sv, const char* pat, ...);
 VIRTUAL void	Perl_sv_catpvf_mg_nocontext(SV* sv, const char* pat, ...);
 VIRTUAL void	Perl_sv_setpvf_mg_nocontext(SV* sv, const char* pat, ...);
+VIRTUAL int	Perl_fprintf_nocontext(PerlIO* stream, const char* fmt, ...);
 #endif
 VIRTUAL void	Perl_cv_ckproto(pTHX_ CV* cv, GV* gv, char* p);
 VIRTUAL CV*	Perl_cv_clone(pTHX_ CV* proto);
@@ -78,6 +82,7 @@ VIRTUAL U32*	Perl_get_opargs(pTHX);
 VIRTUAL PPADDR_t*	Perl_get_ppaddr(pTHX);
 VIRTUAL I32	Perl_cxinc(pTHX);
 VIRTUAL void	Perl_deb(pTHX_ const char* pat, ...);
+VIRTUAL void	Perl_vdeb(pTHX_ const char* pat, va_list* args);
 VIRTUAL void	Perl_deb_growlevel(pTHX);
 VIRTUAL void	Perl_debprofdump(pTHX);
 VIRTUAL I32	Perl_debop(pTHX_ OP* o);
@@ -86,6 +91,7 @@ VIRTUAL I32	Perl_debstackptrs(pTHX);
 VIRTUAL char*	Perl_delimcpy(pTHX_ char* to, char* toend, char* from, char* fromend, int delim, I32* retlen);
 VIRTUAL void	Perl_deprecate(pTHX_ char* s);
 VIRTUAL OP*	Perl_die(pTHX_ const char* pat, ...);
+VIRTUAL OP*	Perl_vdie(pTHX_ const char* pat, va_list* args);
 VIRTUAL OP*	Perl_die_where(pTHX_ char* message, STRLEN msglen);
 VIRTUAL void	Perl_dounwind(pTHX_ I32 cxix);
 VIRTUAL bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp);
@@ -142,6 +148,7 @@ VIRTUAL PADOFFSET	Perl_find_threadsv(pTHX_ const char *name);
 VIRTUAL OP*	Perl_force_list(pTHX_ OP* arg);
 VIRTUAL OP*	Perl_fold_constants(pTHX_ OP* arg);
 VIRTUAL char*	Perl_form(pTHX_ const char* pat, ...);
+VIRTUAL char*	Perl_vform(pTHX_ const char* pat, va_list* args);
 VIRTUAL void	Perl_free_tmps(pTHX);
 VIRTUAL OP*	Perl_gen_constant_list(pTHX_ OP* o);
 #if !defined(HAS_GETENV_LEN)
@@ -397,13 +404,11 @@ VIRTUAL SV*	Perl_newSVnv(pTHX_ NV n);
 VIRTUAL SV*	Perl_newSVpv(pTHX_ const char* s, STRLEN len);
 VIRTUAL SV*	Perl_newSVpvn(pTHX_ const char* s, STRLEN len);
 VIRTUAL SV*	Perl_newSVpvf(pTHX_ const char* pat, ...);
+VIRTUAL SV*	Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args);
 VIRTUAL SV*	Perl_newSVrv(pTHX_ SV* rv, const char* classname);
 VIRTUAL SV*	Perl_newSVsv(pTHX_ SV* old);
 VIRTUAL OP*	Perl_newUNOP(pTHX_ I32 type, I32 flags, OP* first);
 VIRTUAL OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, I32 whileline, OP* expr, OP* block, OP* cont);
-#if defined(USE_THREADS)
-VIRTUAL struct perl_thread*	Perl_new_struct_thread(pTHX_ struct perl_thread *t);
-#endif
 VIRTUAL PERL_SI*	Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems);
 VIRTUAL PerlIO*	Perl_nextargv(pTHX_ GV* gv);
 VIRTUAL char*	Perl_ninstr(pTHX_ const char* big, const char* bigend, const char* little, const char* lend);
@@ -434,6 +439,9 @@ VIRTUAL void	perl_destruct(PerlInterpreter* sv_interp);
 VIRTUAL void	perl_free(PerlInterpreter* sv_interp);
 VIRTUAL int	perl_run(PerlInterpreter* sv_interp);
 VIRTUAL int	perl_parse(PerlInterpreter* sv_interp, XSINIT_t xsinit, int argc, char** argv, char** env);
+#if defined(USE_THREADS)
+VIRTUAL struct perl_thread*	Perl_new_struct_thread(pTHX_ struct perl_thread *t);
+#endif
 #endif
 VIRTUAL void	Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr);
 VIRTUAL I32	Perl_call_argv(pTHX_ const char* sub_name, I32 flags, char** argv);
@@ -559,6 +567,7 @@ VIRTUAL void	Perl_sv_add_arena(pTHX_ char* ptr, U32 size, U32 flags);
 VIRTUAL int	Perl_sv_backoff(pTHX_ SV* sv);
 VIRTUAL SV*	Perl_sv_bless(pTHX_ SV* sv, HV* stash);
 VIRTUAL void	Perl_sv_catpvf(pTHX_ SV* sv, const char* pat, ...);
+VIRTUAL void	Perl_sv_vcatpvf(pTHX_ SV* sv, const char* pat, va_list* args);
 VIRTUAL void	Perl_sv_catpv(pTHX_ SV* sv, const char* ptr);
 VIRTUAL void	Perl_sv_catpvn(pTHX_ SV* sv, const char* ptr, STRLEN len);
 VIRTUAL void	Perl_sv_catsv(pTHX_ SV* dsv, SV* ssv);
@@ -599,6 +608,7 @@ VIRTUAL void	Perl_sv_replace(pTHX_ SV* sv, SV* nsv);
 VIRTUAL void	Perl_sv_report_used(pTHX);
 VIRTUAL void	Perl_sv_reset(pTHX_ char* s, HV* stash);
 VIRTUAL void	Perl_sv_setpvf(pTHX_ SV* sv, const char* pat, ...);
+VIRTUAL void	Perl_sv_vsetpvf(pTHX_ SV* sv, const char* pat, va_list* args);
 VIRTUAL void	Perl_sv_setiv(pTHX_ SV* sv, IV num);
 VIRTUAL void	Perl_sv_setpviv(pTHX_ SV* sv, IV num);
 VIRTUAL void	Perl_sv_setuv(pTHX_ SV* sv, UV num);
@@ -645,7 +655,9 @@ VIRTUAL void	Perl_vivify_defelem(pTHX_ SV* sv);
 VIRTUAL void	Perl_vivify_ref(pTHX_ SV* sv, U32 to_what);
 VIRTUAL I32	Perl_wait4pid(pTHX_ int pid, int* statusp, int flags);
 VIRTUAL void	Perl_warn(pTHX_ const char* pat, ...);
+VIRTUAL void	Perl_vwarn(pTHX_ const char* pat, va_list* args);
 VIRTUAL void	Perl_warner(pTHX_ U32 err, const char* pat, ...);
+VIRTUAL void	Perl_vwarner(pTHX_ U32 err, const char* pat, va_list* args);
 VIRTUAL void	Perl_watch(pTHX_ char** addr);
 VIRTUAL I32	Perl_whichsig(pTHX_ char* sig);
 VIRTUAL int	Perl_yyerror(pTHX_ char* s);
@@ -679,10 +691,12 @@ VIRTUAL struct perl_vars *	Perl_GetVars(pTHX);
 VIRTUAL int	Perl_runops_standard(pTHX);
 VIRTUAL int	Perl_runops_debug(pTHX);
 VIRTUAL void	Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...);
+VIRTUAL void	Perl_sv_vcatpvf_mg(pTHX_ SV* sv, const char* pat, va_list* args);
 VIRTUAL void	Perl_sv_catpv_mg(pTHX_ SV *sv, const char *ptr);
 VIRTUAL void	Perl_sv_catpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len);
 VIRTUAL void	Perl_sv_catsv_mg(pTHX_ SV *dstr, SV *sstr);
 VIRTUAL void	Perl_sv_setpvf_mg(pTHX_ SV *sv, const char* pat, ...);
+VIRTUAL void	Perl_sv_vsetpvf_mg(pTHX_ SV* sv, const char* pat, va_list* args);
 VIRTUAL void	Perl_sv_setiv_mg(pTHX_ SV *sv, IV i);
 VIRTUAL void	Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv);
 VIRTUAL void	Perl_sv_setuv_mg(pTHX_ SV *sv, UV u);
@@ -694,6 +708,7 @@ VIRTUAL void	Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len);
 VIRTUAL MGVTBL*	Perl_get_vtbl(pTHX_ int vtbl_id);
 VIRTUAL char*	Perl_pv_display(pTHX_ SV *sv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim);
 VIRTUAL void	Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...);
+VIRTUAL void	Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args);
 VIRTUAL void	Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv);
 VIRTUAL void	Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv);
 VIRTUAL void	Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, char *name, HV *sv);
@@ -703,6 +718,7 @@ VIRTUAL void	Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, PMOP *pm);
 VIRTUAL void	Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim);
 VIRTUAL void	Perl_magic_dump(pTHX_ MAGIC *mg);
 VIRTUAL void*	Perl_default_protect(pTHX_ int *excpt, protect_body_t body, ...);
+VIRTUAL void*	Perl_vdefault_protect(pTHX_ int *excpt, protect_body_t body, va_list *args);
 VIRTUAL void	Perl_reginitcolors(pTHX);
 VIRTUAL char*	Perl_sv_2pv_nolen(pTHX_ SV* sv);
 VIRTUAL char*	Perl_sv_pv(pTHX_ SV *sv);
@@ -955,9 +971,6 @@ STATIC SV*	S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level);
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_mess_alloc(pTHX);
-STATIC void	S_do_croak(pTHX_ const char *pat, va_list *args) __attribute__((noreturn));
-STATIC void	S_do_warn(pTHX_ const char *pat, va_list *args);
-STATIC OP*	S_do_die(pTHX_ const char *pat, va_list *args);
 #  if defined(LEAKTEST)
 STATIC void	S_xstat(pTHX_ int);
 #  endif

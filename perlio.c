@@ -7,6 +7,8 @@
  *
  */
 
+#if !defined(PERL_IMPLICIT_SYS)
+
 #define VOIDUSED 1
 #include "config.h"
 
@@ -559,4 +561,6 @@ PerlIO_sprintf(char *s, int n, const char *fmt,...)
  return result;
 }
 #endif
+
+#endif /* !PERL_IMPLICIT_SYS */
 

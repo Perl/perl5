@@ -47,14 +47,27 @@ INST_VER	*= \5.00557
 INST_ARCH	*= \$(ARCHNAME)
 
 #
+# XXX WARNING! This option currently undergoing changes.  May be broken.
+#
 # uncomment to enable threads-capabilities
 #
 #USE_THREADS	*= define
 
 #
+# XXX WARNING! This option currently undergoing changes.  May be broken.
+#
 # uncomment to enable multiple interpreters
 #
 #USE_MULTI	*= define
+
+#
+# XXX WARNING! This option currently undergoing changes.  May be broken.
+#
+# uncomment next line if you want to use the perl object
+# Currently, this cannot be enabled if you ask for threads above, or
+# if you are using GCC or EGCS.
+#
+#USE_OBJECT	*= define
 
 #
 # uncomment exactly one of the following
@@ -69,15 +82,6 @@ INST_ARCH	*= \$(ARCHNAME)
 CCTYPE		*= BORLAND
 # mingw32/egcs or mingw32/gcc
 #CCTYPE		*= GCC
-
-#
-# XXX Do not enable.  This is currently undergoing a rewrite and will
-# NOT work.
-# uncomment next line if you want to use the perl object
-# Currently, this cannot be enabled if you ask for threads above, or
-# if you are using GCC or EGCS.
-#
-#OBJECT		*= -DPERL_OBJECT
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -123,7 +127,7 @@ CCTYPE		*= BORLAND
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all
 # extensions if you change the default.  Currently, this cannot be enabled
-# if you ask for PERL_OBJECT above.
+# if you ask for USE_OBJECT above.
 #
 #PERL_MALLOC	*= define
 
@@ -134,7 +138,7 @@ CCTYPE		*= BORLAND
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-CCHOME		*= C:\bc5
+CCHOME		*= d:\bc5
 #CCHOME		*= $(MSVCDIR)
 #CCHOME		*= D:\packages\mingw32
 CCINCDIR	*= $(CCHOME)\include
@@ -149,8 +153,7 @@ CCLIBDIR	*= $(CCHOME)\lib
 # We don't enable this by default because we want the modules to get fixed
 # instead of clinging to shortcuts like this one.
 #
-#BUILDOPT	*= -DPERL_POLLUTE
-#BUILDOPT	*= -DPERL_IMPLICIT_CONTEXT
+#BUILDOPT	+= -DPERL_POLLUTE
 
 #
 # specify semicolon-separated list of extra directories that modules will
@@ -168,7 +171,7 @@ EXTRALIBDIRS	*=
 # set this to your email address (perl will guess a value from
 # from your loginname and your hostname, which may not be right)
 #
-#EMAIL		*= 
+#EMAIL		*=
 
 ##
 ## Build configuration ends.
@@ -183,7 +186,7 @@ D_CRYPT		= define
 CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 .ENDIF
 
-.IF "$(OBJECT)" != ""
+.IF "$(USE_OBJECT)" == "define"
 PERL_MALLOC	!= undef
 USE_THREADS	!= undef
 USE_MULTI	!= undef
@@ -194,14 +197,22 @@ PERL_MALLOC	*= undef
 USE_THREADS	*= undef
 USE_MULTI	*= undef
 
+
+.IF "$(USE_MULTI)$(USE_THREADS)$(USE_OBJECT)" != ""
+BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
+.ENDIF
+
+
 .IMPORT .IGNORE : PROCESSOR_ARCHITECTURE
 
 PROCESSOR_ARCHITECTURE *= x86
 
-.IF "$(OBJECT)" != ""
+.IF "$(USE_OBJECT)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-object
 .ELIF "$(USE_THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
+.ELIF "$(USE_MULTI)" == "define"
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
 .ELSE
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 .ENDIF
@@ -240,7 +251,7 @@ IMPLIB		= implib -c
 RUNTIME		= -D_RTLDLL
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
-DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
+DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -P
@@ -278,7 +289,7 @@ a = .a
 #
 RUNTIME		=
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
-DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
+DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -xc++
@@ -314,7 +325,7 @@ LIB32		= $(LINK32) -lib
 RUNTIME		= -MD
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
-DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(BUILDOPT) $(CRYPT_FLAG)
+DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -TP -GX
@@ -348,7 +359,9 @@ OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug -pdb:none
 .ELSE
 .IF "$(CFG)" == "Optimize"
-OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
+# -O1 yields smaller code, which turns out to be faster than -O2
+#OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -O1 $(RUNTIME) -DNDEBUG
 .ELSE
 OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 .ENDIF
@@ -373,11 +386,12 @@ LIBOUT_FLAG	= /out:
 
 .ENDIF
 
-.IF "$(OBJECT)" != ""
+.IF "$(USE_OBJECT)" == "define"
 OPTIMIZE	+= $(CXX_FLAG)
+BUILDOPT	+= -DPERL_OBJECT
 .ENDIF
 
-CFLAGS_O	= $(CFLAGS) $(OBJECT)
+CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
 #################### do not edit below this line #######################
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
@@ -470,7 +484,7 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-.IF "$(OBJECT)" == "-DPERL_OBJECT"
+.IF "$(USE_OBJECT)" == "define"
 PERLIMPLIB	= ..\libperlcore$(a)
 .ELSE
 PERLIMPLIB	= ..\libperl$(a)
@@ -486,14 +500,12 @@ PERL95EXE	= ..\perl95.exe
 
 .ENDIF
 
-.IF "$(OBJECT)" == "-DPERL_OBJECT"
+.IF "$(USE_OBJECT)" == "define"
 PERLIMPLIB	*= ..\perlcore$(a)
 PERLDLL		= ..\perlcore.dll
-CAPILIB		= $(COREDIR)\perlCAPI$(a)
 .ELSE
 PERLIMPLIB	*= ..\perl$(a)
 PERLDLL		= ..\perl.dll
-CAPILIB		=
 .ENDIF
 
 XCOPY		= xcopy /f /r /i /d
@@ -518,6 +530,7 @@ MICROCORE_SRC	=		\
 		..\mg.c		\
 		..\op.c		\
 		..\perl.c	\
+		..\perlapi.c	\
 		..\perly.c	\
 		..\pp.c		\
 		..\pp_ctl.c	\
@@ -534,11 +547,13 @@ MICROCORE_SRC	=		\
 		..\utf8.c	\
 		..\util.c
 
+EXTRACORE_SRC	+= perllib.c
+
 .IF "$(PERL_MALLOC)" == "define"
 EXTRACORE_SRC	+= ..\malloc.c
 .ENDIF
 
-.IF "$(OBJECT)" == ""
+.IF "$(USE_OBJECT)" != "define"
 EXTRACORE_SRC	+= ..\perlio.c
 .ENDIF
 
@@ -565,11 +580,6 @@ PERL95_SRC	+= .\$(CRYPT_SRC)
 
 DLL_SRC		= $(DYNALOADER).c
 
-
-.IF "$(OBJECT)" == ""
-DLL_SRC		+= perllib.c
-.ENDIF
-
 X2P_SRC		=		\
 		..\x2p\a2p.c	\
 		..\x2p\hash.c	\
@@ -593,6 +603,7 @@ CORE_NOCFG_H	=		\
 		..\op.h		\
 		..\opcode.h	\
 		..\perl.h	\
+		..\perlapi.h	\
 		..\perlsdio.h	\
 		..\perlsfio.h	\
 		..\perly.h	\
@@ -631,12 +642,7 @@ X2P_OBJ		= $(X2P_SRC:db:+$(o))
 PERLDLL_OBJ	= $(CORE_OBJ)
 PERLEXE_OBJ	= perlmain$(o)
 
-.IF "$(OBJECT)" == ""
 PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
-.ELSE
-PERLEXE_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
-PERL95_OBJ	+= DynaLoadmt$(o)
-.ENDIF
 
 .IF "$(USE_SETARGV)" != ""
 SETARGV_OBJ	= setargv$(o)
@@ -705,17 +711,12 @@ EXTENSION_DLL	=		\
 		$(DUMPER_DLL)	\
 		$(PEEK_DLL)	\
 		$(B_DLL)	\
+		$(RE_DLL)	\
+		$(THREAD_DLL)	\
 		$(BYTELOADER_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
-
-# re.dll doesn't build with PERL_OBJECT yet
-.IF "$(OBJECT)" == ""
-EXTENSION_DLL	+=		\
-		$(THREAD_DLL)	\
-		$(RE_DLL)
-.ENDIF
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -729,7 +730,7 @@ CFG_VARS	=					\
 		"INST_ARCH=$(INST_ARCH)"		\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
-		"ccflags=$(OPTIMIZE:s/"/\"/) $(DEFINES) $(OBJECT)"	\
+		"ccflags=$(OPTIMIZE:s/"/\"/) $(DEFINES) $(BUILDOPT)"	\
 		"cf_email=$(EMAIL)"			\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
@@ -754,7 +755,7 @@ CFG_VARS	=					\
 #
 
 all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) \
-	$(CAPILIB) $(X2P) $(EXTENSION_DLL) $(EXTENSION_PM)
+	$(X2P) $(EXTENSION_DLL) $(EXTENSION_PM)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -838,7 +839,7 @@ $(PERL95_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym makedef.pl
-	$(MINIPERL) -w makedef.pl $(OPTIMIZE) $(DEFINES) $(OBJECT) \
+	$(MINIPERL) -w makedef.pl $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(PERLDLL_OBJ)
@@ -865,9 +866,6 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ)
 	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(PERLDLL_OBJ:s,\,\\))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
-
-perl.def  : $(MINIPERL) makeperldef.pl
-	$(MINIPERL) -I..\lib makeperldef.pl $(NULL) > perl.def
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
@@ -960,30 +958,6 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B) && $(XSUBPP) dl_win32.xs > $(*B).c
 	$(XCOPY) $(EXTDIR)\$(*B)\dlutils.c .
-
-.IF "$(OBJECT)" == "-DPERL_OBJECT"
-
-perlCAPI.cpp : $(MINIPERL)
-	$(MINIPERL) GenCAPI.pl $(COREDIR)
-
-perlCAPI$(o) : perlCAPI.cpp
-.IF "$(CCTYPE)" == "BORLAND"
-	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
-.ELIF "$(CCTYPE)" == "GCC"
-	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
-.ELSE
-	$(CC) $(CFLAGS_O) $(RUNTIME) -UPERLDLL -c \
-	    $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
-.ENDIF
-
-$(CAPILIB) : perlCAPI.cpp perlCAPI$(o)
-.IF "$(CCTYPE)" == "BORLAND"
-	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) +perlCAPI$(o)
-.ELSE
-	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) perlCAPI$(o)
-.ENDIF
-
-.ENDIF
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
@@ -1154,7 +1128,6 @@ clean :
 	-@erase $(MINIPERL)
 	-@erase perlglob$(o)
 	-@erase perlmain$(o)
-	-@erase perlCAPI.cpp
 	-@erase config.w32
 	-@erase /f config.h
 	-@erase $(GLOBEXE)
@@ -1165,7 +1138,7 @@ clean :
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
 	-@erase $(X2P_OBJ)
-	-@erase ..\*$(o) ..\*$(a) ..\*.exp *$(o) *$(a) *.exp
+	-@erase ..\*$(o) ..\*$(a) ..\*.exp *$(o) *$(a) *.exp *.res
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk

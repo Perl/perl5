@@ -61,10 +61,8 @@ perl_alloc(void)
 {
     PerlInterpreter *my_perl;
 
-#if !defined(PERL_IMPLICIT_CONTEXT)
-    PL_curinterp = 0;
-#endif
     New(53, my_perl, 1, PerlInterpreter);
+    PERL_SET_INTERP(my_perl);
     return my_perl;
 }
 #endif /* PERL_OBJECT */
@@ -79,11 +77,6 @@ perl_construct(pTHXx)
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
     
-#ifndef PERL_OBJECT
-    if (!(PL_curinterp = my_perl))
-	return;
-#endif
-
 #ifdef MULTIPLICITY
     Zero(my_perl, 1, PerlInterpreter);
 #endif
@@ -117,7 +110,7 @@ perl_construct(pTHXx)
 	thr = init_main_thread();
 #endif /* USE_THREADS */
 
-	PL_protect = FUNC_NAME_TO_PTR(Perl_default_protect); /* for exceptions */
+	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
 
 	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
@@ -218,11 +211,6 @@ perl_destruct(pTHXx)
     Thread t;
     dTHX;
 #endif /* USE_THREADS */
-
-#if !defined(PERL_OBJECT) && !defined(PERL_IMPLICIT_CONTEXT)
-    if (!(PL_curinterp = my_perl))
-	return;
-#endif
 
 #ifdef USE_THREADS
 #ifndef FAKE_THREADS
@@ -568,14 +556,10 @@ perl_destruct(pTHXx)
 void
 perl_free(pTHXx)
 {
-#ifdef PERL_OBJECT
-	Safefree(this);
+#if defined(PERL_OBJECT)
+    Safefree(this);
 #else
-#  if !defined(PERL_IMPLICIT_CONTEXT)
-    if (!(PL_curinterp = my_perl))
-	return;
-#  endif
-    Safefree(my_perl);
+    Safefree(aTHXx);
 #endif
 }
 
@@ -604,11 +588,6 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     Perl_croak(aTHX_ "suidperl is no longer needed since the kernel can now execute\n\
 setuid perl scripts securely.\n");
 #endif
-#endif
-
-#if !defined(PERL_OBJECT) && !defined(PERL_IMPLICIT_CONTEXT)
-    if (!(PL_curinterp = my_perl))
-	return 255;
 #endif
 
 #if defined(__DYNAMIC__) && (defined(NeXT) || defined(__NeXT__))
@@ -647,7 +626,7 @@ setuid perl scripts securely.\n");
     oldscope = PL_scopestack_ix;
     PL_dowarn = G_WARN_OFF;
 
-    CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_parse_body), env, xsinit);
+    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_parse_body), env, xsinit);
     switch (ret) {
     case 0:
 	return 0;
@@ -948,7 +927,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)
-    init_os_extras(aTHX);
+    init_os_extras();
 #endif
 
 #ifdef USE_SOCKS
@@ -1017,15 +996,10 @@ perl_run(pTHXx)
     dTHX;
 #endif
 
-#if !defined(PERL_OBJECT) && !defined(PERL_IMPLICIT_CONTEXT)
-    if (!(PL_curinterp = my_perl))
-	return 255;
-#endif
-
     oldscope = PL_scopestack_ix;
 
  redo_body:
-    CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_run_body), oldscope);
+    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_run_body), oldscope);
     switch (ret) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
@@ -1280,7 +1254,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	PL_markstack_ptr++;
 
   redo_body:
-	CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_call_body), (OP*)&myop, FALSE);
+	CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_call_body), (OP*)&myop, FALSE);
 	switch (ret) {
 	case 0:
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
@@ -1402,7 +1376,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	myop.op_flags |= OPf_SPECIAL;
 
  redo_body:
-    CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_call_body), (OP*)&myop, TRUE);
+    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_call_body), (OP*)&myop, TRUE);
     switch (ret) {
     case 0:
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
@@ -1907,8 +1881,8 @@ S_init_interp(pTHX)
 #      define PERLVARI(var,type,init)	my_perl->var = init;
 #      define PERLVARIC(var,type,init)	my_perl->var = init;
 #    else
-#      define PERLVARI(var,type,init)	PL_curinterp->var = init;
-#      define PERLVARIC(var,type,init)	PL_curinterp->var = init;
+#      define PERLVARI(var,type,init)	PERL_GET_INTERP->var = init;
+#      define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
 #    endif
 #    include "intrpvar.h"
 #    ifndef USE_THREADS
@@ -2900,13 +2874,14 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 STATIC struct perl_thread *
 S_init_main_thread(pTHX)
 {
-#ifndef PERL_IMPLICIT_CONTEXT
+#if !defined(PERL_IMPLICIT_CONTEXT)
     struct perl_thread *thr;
 #endif
     XPV *xpv;
 
     Newz(53, thr, 1, struct perl_thread);
     PL_curcop = &PL_compiling;
+    thr->interp = PERL_GET_INTERP;
     thr->cvcache = newHV();
     thr->threadsv = newAV();
     /* thr->threadsvp is set when find_threadsv is called */
@@ -2961,11 +2936,11 @@ S_init_main_thread(pTHX)
     (void) find_threadsv("@");	/* Ensure $@ is initialised early */
 
     PL_maxscream = -1;
-    PL_regcompp = FUNC_NAME_TO_PTR(Perl_pregcomp);
-    PL_regexecp = FUNC_NAME_TO_PTR(Perl_regexec_flags);
-    PL_regint_start = FUNC_NAME_TO_PTR(Perl_re_intuit_start);
-    PL_regint_string = FUNC_NAME_TO_PTR(Perl_re_intuit_string);
-    PL_regfree = FUNC_NAME_TO_PTR(Perl_pregfree);
+    PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);
+    PL_regexecp = MEMBER_TO_FPTR(Perl_regexec_flags);
+    PL_regint_start = MEMBER_TO_FPTR(Perl_re_intuit_start);
+    PL_regint_string = MEMBER_TO_FPTR(Perl_re_intuit_string);
+    PL_regfree = MEMBER_TO_FPTR(Perl_pregfree);
     PL_regindent = 0;
     PL_reginterp_cnt = 0;
 
@@ -2986,7 +2961,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
 	SAVEFREESV(cv);
-	CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_call_list_body), cv);
+	CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_call_list_body), cv);
 	switch (ret) {
 	case 0:
 	    (void)SvPV(atsv, len);

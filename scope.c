@@ -19,9 +19,19 @@
 void *
 Perl_default_protect(pTHX_ int *excpt, protect_body_t body, ...)
 {
+    void *ret;
+    va_list args;
+    va_start(args, body);
+    ret = vdefault_protect(excpt, body, &args);
+    va_end(args);
+    return ret;
+}
+
+void *
+Perl_vdefault_protect(pTHX_ int *excpt, protect_body_t body, va_list *args)
+{
     dTHR;
     dJMPENV;
-    va_list args;
     int ex;
     void *ret;
 
@@ -30,11 +40,8 @@ Perl_default_protect(pTHX_ int *excpt, protect_body_t body, ...)
     JMPENV_PUSH(ex);
     if (ex)
 	ret = NULL;
-    else {
-	va_start(args, body);
-	ret = CALL_FPTR(body)(aTHX_ args);
-	va_end(args);
-    }
+    else
+	ret = CALL_FPTR(body)(aTHX_ *args);
     *excpt = ex;
     JMPENV_POP;
     return ret;

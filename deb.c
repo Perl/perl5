@@ -16,12 +16,36 @@
 #define PERL_IN_DEB_C
 #include "perl.h"
 
+#if defined(PERL_IMPLICIT_CONTEXT)
+void
+Perl_deb_nocontext(const char *pat, ...)
+{
+#ifdef DEBUGGING
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    vdeb(pat, &args);
+    va_end(args);
+#endif /* DEBUGGING */
+}
+#endif
+
 void
 Perl_deb(pTHX_ const char *pat, ...)
 {
 #ifdef DEBUGGING
-    dTHR;
     va_list args;
+    va_start(args, pat);
+    vdeb(pat, &args);
+    va_end(args);
+#endif /* DEBUGGING */
+}
+
+void
+Perl_vdeb(pTHX_ const char *pat, va_list *args)
+{
+#ifdef DEBUGGING
+    dTHR;
     register I32 i;
     GV* gv = PL_curcop->cop_filegv;
 
@@ -37,10 +61,7 @@ Perl_deb(pTHX_ const char *pat, ...)
 #endif /* USE_THREADS */
     for (i=0; i<PL_dlevel; i++)
 	PerlIO_printf(Perl_debug_log, "%c%c ",PL_debname[i],PL_debdelim[i]);
-
-    va_start(args, pat);
-    (void) PerlIO_vprintf(Perl_debug_log,pat,args);
-    va_end( args );
+    (void) PerlIO_vprintf(Perl_debug_log, pat, *args);
 #endif /* DEBUGGING */
 }
 

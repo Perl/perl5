@@ -38,12 +38,13 @@ typedef struct _dir_struc
 	struct direct dirstr;		// Directory structure to return
 } DIR;
 
+#if 0		/* these have moved to win32iop.h */
 DIR *		win32_opendir(char *filename);
 struct direct *	win32_readdir(DIR *dirp);
 long		win32_telldir(DIR *dirp);
 void		win32_seekdir(DIR *dirp,long loc);
 void		win32_rewinddir(DIR *dirp);
 int		win32_closedir(DIR *dirp);
-
+#endif
 
 #endif //_INC_DIRENT

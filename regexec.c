@@ -39,6 +39,8 @@
 /* *These* symbols are masked to allow static link. */
 #  define Perl_pregexec my_pregexec
 #  define Perl_reginitcolors my_reginitcolors 
+
+#  define PERL_NO_GET_CONTEXT
 #endif 
 
 /*SUPPRESS 112*/
@@ -76,6 +78,12 @@
 #include "EXTERN.h"
 #define PERL_IN_REGEXEC_C
 #include "perl.h"
+
+#ifdef PERL_IN_XSUB_RE
+#  if defined(PERL_CAPI) || defined(PERL_OBJECT)
+#    include "XSUB.h"
+#  endif
+#endif
 
 #include "regcomp.h"
 

@@ -44,15 +44,19 @@ Perl_my_chsize
 Perl_condpair_magic
 Perl_convert
 Perl_croak
+Perl_vcroak
 Perl_croak_nocontext
 Perl_die_nocontext
+Perl_deb_nocontext
 Perl_form_nocontext
 Perl_warn_nocontext
+Perl_warner_nocontext
 Perl_newSVpvf_nocontext
 Perl_sv_catpvf_nocontext
 Perl_sv_setpvf_nocontext
 Perl_sv_catpvf_mg_nocontext
 Perl_sv_setpvf_mg_nocontext
+Perl_fprintf_nocontext
 Perl_cv_ckproto
 Perl_cv_clone
 Perl_cv_const_sv
@@ -69,6 +73,7 @@ Perl_get_opargs
 Perl_get_ppaddr
 Perl_cxinc
 Perl_deb
+Perl_vdeb
 Perl_deb_growlevel
 Perl_debprofdump
 Perl_debop
@@ -77,6 +82,7 @@ Perl_debstackptrs
 Perl_delimcpy
 Perl_deprecate
 Perl_die
+Perl_vdie
 Perl_die_where
 Perl_dounwind
 Perl_do_aexec
@@ -125,6 +131,7 @@ Perl_find_threadsv
 Perl_force_list
 Perl_fold_constants
 Perl_form
+Perl_vform
 Perl_free_tmps
 Perl_gen_constant_list
 Perl_getenv_len
@@ -358,11 +365,11 @@ Perl_newSVnv
 Perl_newSVpv
 Perl_newSVpvn
 Perl_newSVpvf
+Perl_vnewSVpvf
 Perl_newSVrv
 Perl_newSVsv
 Perl_newUNOP
 Perl_newWHILEOP
-Perl_new_struct_thread
 Perl_new_stackinfo
 Perl_nextargv
 Perl_ninstr
@@ -391,6 +398,7 @@ perl_destruct
 perl_free
 perl_run
 perl_parse
+Perl_new_struct_thread
 Perl_call_atexit
 Perl_call_argv
 Perl_call_method
@@ -511,6 +519,7 @@ Perl_sv_add_arena
 Perl_sv_backoff
 Perl_sv_bless
 Perl_sv_catpvf
+Perl_sv_vcatpvf
 Perl_sv_catpv
 Perl_sv_catpvn
 Perl_sv_catsv
@@ -549,6 +558,7 @@ Perl_sv_replace
 Perl_sv_report_used
 Perl_sv_reset
 Perl_sv_setpvf
+Perl_sv_vsetpvf
 Perl_sv_setiv
 Perl_sv_setpviv
 Perl_sv_setuv
@@ -591,7 +601,9 @@ Perl_vivify_defelem
 Perl_vivify_ref
 Perl_wait4pid
 Perl_warn
+Perl_vwarn
 Perl_warner
+Perl_vwarner
 Perl_watch
 Perl_whichsig
 Perl_yyerror
@@ -616,10 +628,12 @@ Perl_GetVars
 Perl_runops_standard
 Perl_runops_debug
 Perl_sv_catpvf_mg
+Perl_sv_vcatpvf_mg
 Perl_sv_catpv_mg
 Perl_sv_catpvn_mg
 Perl_sv_catsv_mg
 Perl_sv_setpvf_mg
+Perl_sv_vsetpvf_mg
 Perl_sv_setiv_mg
 Perl_sv_setpviv_mg
 Perl_sv_setuv_mg
@@ -631,6 +645,7 @@ Perl_sv_usepvn_mg
 Perl_get_vtbl
 Perl_pv_display
 Perl_dump_indent
+Perl_dump_vindent
 Perl_do_gv_dump
 Perl_do_gvgv_dump
 Perl_do_hv_dump
@@ -640,6 +655,7 @@ Perl_do_pmop_dump
 Perl_do_sv_dump
 Perl_magic_dump
 Perl_default_protect
+Perl_vdefault_protect
 Perl_reginitcolors
 Perl_sv_2pv_nolen
 Perl_sv_pv

@@ -46,14 +46,6 @@ CPerlObj::Init(void)
 {
 }
 
-int
-CPerlObj::fprintf(PerlIO *stream, const char *format, ...)
-{
-    va_list(arglist);
-    va_start(arglist, format);
-    return PerlIO_vprintf(stream, format, arglist);
-}
-
 #ifdef WIN32		/* XXX why are these needed? */
 bool
 Perl_do_exec(char *cmd)
@@ -69,3 +61,12 @@ CPerlObj::do_aspawn(void *vreally, void **vmark, void **vsp)
 #endif  /* WIN32 */
 
 #endif   /* PERL_OBJECT */
+
+int
+Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
+{
+    dTHX;
+    va_list(arglist);
+    va_start(arglist, format);
+    return PerlIO_vprintf(stream, format, arglist);
+}

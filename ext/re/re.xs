@@ -3,6 +3,7 @@
 #  define DEBUGGING
 #endif
 
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -25,11 +26,11 @@ static void
 deinstall(pTHX)
 {
     dTHR;
-    PL_regexecp = FUNC_NAME_TO_PTR(Perl_regexec_flags);
-    PL_regcompp = FUNC_NAME_TO_PTR(Perl_pregcomp);
-    PL_regint_start = FUNC_NAME_TO_PTR(Perl_re_intuit_start);
-    PL_regint_string = FUNC_NAME_TO_PTR(Perl_re_intuit_string);
-    PL_regfree = FUNC_NAME_TO_PTR(Perl_pregfree);
+    PL_regexecp = Perl_regexec_flags;
+    PL_regcompp = Perl_pregcomp;
+    PL_regint_start = Perl_re_intuit_start;
+    PL_regint_string = Perl_re_intuit_string;
+    PL_regfree = Perl_pregfree;
 
     if (!oldfl)
 	PL_debug &= ~R_DB;

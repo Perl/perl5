@@ -1,3 +1,4 @@
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -68,6 +69,7 @@
 static int
 my_inet_aton(register const char *cp, struct in_addr *addr)
 {
+	dTHX;
 	register U32 val;
 	register int base;
 	register char c;

@@ -1,11 +1,14 @@
 #ifdef WIN32
 #define _POSIX_
 #endif
+
+#define PERL_NO_GET_CONTEXT
+
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
-#ifdef PERL_OBJECT	/* XXX _very_ temporary hacks */
+#if defined(PERL_OBJECT) || defined(PERL_CAPI)
 #  undef signal
 #  undef open
 #  undef setmode

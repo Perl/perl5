@@ -226,7 +226,7 @@ PERLVAR(Ihe_root,	HE *)		/* free he list--shared by interpreters */
 PERLVAR(Inice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
 
-PERLVARI(Irunops,	runops_proc_t,	FUNC_NAME_TO_PTR(RUNOPS_DEFAULT))
+PERLVARI(Irunops,	runops_proc_t,	MEMBER_TO_FPTR(RUNOPS_DEFAULT))
 
 PERLVARA(Itokenbuf,256,	char)
 
@@ -382,12 +382,12 @@ PERLVAR(Icred_mutex,	perl_mutex)	/* altered credentials in effect */
 
 #endif /* USE_THREADS */
 
-#ifdef PERL_OBJECT
-PERLVARI(IMem,		IPerlMem*,  NULL)
-PERLVARI(IEnv,		IPerlEnv*,  NULL)
-PERLVARI(IStdIO,	IPerlStdIO*, NULL)
-PERLVARI(ILIO,		IPerlLIO*,  NULL)
-PERLVARI(IDir,		IPerlDir*,  NULL)
-PERLVARI(ISock,		IPerlSock*, NULL)
-PERLVARI(IProc,		IPerlProc*, NULL)
+#if defined(PERL_IMPLICIT_SYS)
+PERLVARI(IMem,		struct IPerlMem*,  NULL)
+PERLVARI(IEnv,		struct IPerlEnv*,  NULL)
+PERLVARI(IStdIO,	struct IPerlStdIO*, NULL)
+PERLVARI(ILIO,		struct IPerlLIO*,  NULL)
+PERLVARI(IDir,		struct IPerlDir*,  NULL)
+PERLVARI(ISock,		struct IPerlSock*, NULL)
+PERLVARI(IProc,		struct IPerlProc*, NULL)
 #endif
