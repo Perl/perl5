@@ -119,6 +119,7 @@ run_byacc:	FORCE check_byacc
 	$(BYACC) a2p.y
 	rm -f a2p.c
 	sed -e 's/(yyn = yydefred\[yystate\])/((yyn = yydefred[yystate]))/' \
+	    -e 's/(yys = getenv("YYDEBUG"))/((yys = getenv("YYDEBUG")))/' \
 	    -e 's/^yyerrlab://' \
 	    -e 's/^    goto yyerrlab;//' \
 	    -e 's/^yynewerror://' \
