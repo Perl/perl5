@@ -1,14 +1,21 @@
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
+BEGIN {
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
+    }
+}
+
 unless( eval { require File::Spec } ) {
     print "1..0 # Skip Need File::Spec to run this test\n";
-    exit(0);
+    exit 0;
+}
+
+if( $^O eq 'VMS' && $] <= 5.00503 ) {
+    print "1..0 # Skip test will hang on older VMS perls\n";
+    exit 0;
 }
 
 my $test_num = 1;
@@ -47,12 +54,24 @@ my %Tests = (
 
 print "1..".keys(%Tests)."\n";
 
+chdir 't';
 my $lib = File::Spec->catdir(qw(lib Test Simple sample_tests));
 while( my($test_name, $exit_codes) = each %Tests ) {
     my($exit_code) = $exit_codes->[$IsVMS ? 1 : 0];
 
+    my $Perl = $^X;
+
+    if( $^O eq 'VMS' ) {
+        # VMS can't use its own $^X in a system call until almost 5.8
+        $Perl = "MCR $^X" if $] < 5.007003;
+
+        # Quiet noisy 'SYS$ABORT'.  'hushed' only exists in 5.6 and up,
+        # but it doesn't do any harm on eariler perls.
+        $Perl .= q{ -"Mvmsish=hushed"};
+    }
+
     my $file = File::Spec->catfile($lib, $test_name);
-    my $wait_stat = system(qq{$^X -"I../lib" -"I../t/lib" $file});
+    my $wait_stat = system(qq{$Perl -"I../blib/lib" -"I../lib" -"I../t/lib" $file});
     my $actual_exit = $wait_stat >> 8;
 
     My::Test::ok( $actual_exit == $exit_code, 

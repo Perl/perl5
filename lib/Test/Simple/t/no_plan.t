@@ -1,6 +1,11 @@
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ('../lib', 'lib');
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
 }
 
 # Can't use Test.pm, that's a 5.005 thing.
@@ -26,7 +31,6 @@ package main;
 
 require Test::Simple;
 
-push @INC, '../t/lib';
 require Test::Simple::Catch;
 my($out, $err) = Test::Simple::Catch::caught();
 

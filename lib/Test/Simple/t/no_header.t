@@ -1,11 +1,9 @@
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
+    }
 }
-
-# STDOUT must be unbuffered else our prints might come out after
-# Test::More's.
-$| = 1;
 
 use Test::Builder;
 

@@ -1278,6 +1278,8 @@ lib/Test/Simple.pm              Basic utility for writing tests
 lib/Test/Simple/Changes		Test::Simple changes
 lib/Test/Simple/README		Test::Simple README
 lib/Test/Simple/t/Builder.t     Test::Builder tests
+lib/Test/Simple/t/buffer.t      Test::Builder buffering test
+lib/Test/Simple/t/diag.t        Test::More diag() test
 lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t       Test::Simple test
 lib/Test/Simple/t/fail-like.t   Test::More test, like() failures

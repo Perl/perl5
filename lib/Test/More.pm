@@ -11,23 +11,25 @@ use Test::Builder;
 # actually happened.
 sub _carp {
     my($file, $line) = (caller(1))[1,2];
-    warn @_, sprintf " at $file line $line\n";
+    warn @_, " at $file line $line\n";
 }
 
 
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.33';
+$VERSION = '0.41';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
-             is isnt like is_deeply
-             skip todo
+             is isnt like unlike is_deeply
+             cmp_ok
+             skip todo todo_skip
              pass fail
              eq_array eq_hash eq_set
              $TODO
              plan
              can_ok  isa_ok
+             diag
             );
 
 my $Test = Test::Builder->new;
@@ -38,7 +40,7 @@ sub _export_to_level
 {
       my $pkg = shift;
       my $level = shift;
-      (undef) = shift;                  # XXX redundant arg
+      (undef) = shift;                  # redundant arg
       my $callpkg = caller($level);
       $pkg->export($callpkg, @_);
 }
@@ -64,7 +66,14 @@ Test::More - yet another framework for writing test scripts
 
   is  ($this, $that,    $test_name);
   isnt($this, $that,    $test_name);
-  like($this, qr/that/, $test_name);
+
+  # Rather than print STDERR "# here's what went wrong\n"
+  diag("here's what went wrong");
+
+  like  ($this, qr/that/, $test_name);
+  unlike($this, qr/that/, $test_name);
+
+  cmp_ok($this, '==', $that, $test_name);
 
   is_deeply($complex_structure1, $complex_structure2, $test_name);
 
@@ -102,13 +111,15 @@ Test::More - yet another framework for writing test scripts
 
 =head1 DESCRIPTION
 
-If you're just getting started writing tests, have a look at
+B<STOP!> If you're just getting started writing tests, have a look at
 Test::Simple first.  This is a drop in replacement for Test::Simple
 which you can switch to once you get the hang of basic testing.
 
-This module provides a very wide range of testing utilities.  Various
-ways to say "ok", facilities to skip tests, test future features
-and compare complicated data structures.
+The purpose of this module is to provide a wide range of testing
+utilities.  Various ways to say "ok" with better diagnostics,
+facilities to skip tests, test future features and compare complicated
+data structures.  While you can do almost anything with a simple
+C<ok()> function, it doesn't provide good diagnostic output.
 
 
 =head2 I love it when a plan comes together
@@ -320,27 +331,7 @@ sub is ($$;$) {
 }
 
 sub isnt ($$;$) {
-    my($this, $that, $name) = @_;
-
-    my $test;
-    {
-        local $^W = 0;   # so isnt(undef, undef) works quietly.
-        $test = $this ne $that;
-    }
-
-    my $ok = $Test->ok($test, $name);
-
-    unless( $ok ) {
-        $that = defined $that ? "'$that'" : 'undef';
-
-        $Test->diag(sprintf <<DIAGNOSTIC, $that);
-it should not be %s
-but it is.
-DIAGNOSTIC
-
-    }
-
-    return $ok;
+    $Test->isnt_eq(@_);
 }
 
 *isn't = \&isnt;
@@ -380,6 +371,59 @@ sub like ($$;$) {
     $Test->like(@_);
 }
 
+
+=item B<unlike>
+
+  unlike( $this, qr/that/, $test_name );
+
+Works exactly as like(), only it checks if $this B<does not> match the
+given pattern.
+
+=cut
+
+sub unlike {
+    $Test->unlike(@_);
+}
+
+
+=item B<cmp_ok>
+
+  cmp_ok( $this, $op, $that, $test_name );
+
+Halfway between ok() and is() lies cmp_ok().  This allows you to
+compare two arguments using any binary perl operator.
+
+    # ok( $this eq $that );
+    cmp_ok( $this, 'eq', $that, 'this eq that' );
+
+    # ok( $this == $that );
+    cmp_ok( $this, '==', $that, 'this == that' );
+
+    # ok( $this && $that );
+    cmp_ok( $this, '&&', $that, 'this || that' );
+    ...etc...
+
+Its advantage over ok() is when the test fails you'll know what $this
+and $that were:
+
+    not ok 1
+    #     Failed test (foo.t at line 12)
+    #     '23'
+    #         &&
+    #     undef
+
+Its also useful in those cases where you are comparing numbers and
+is()'s use of C<eq> will interfere:
+
+    cmp_ok( $big_hairy_number, '==', $another_big_hairy_number );
+
+=cut
+
+sub cmp_ok($$$;$) {
+    $Test->cmp_ok(@_);
+}
+
+
 =item B<can_ok>
 
   can_ok($module, @methods);
@@ -400,15 +444,30 @@ is almost exactly like saying:
 only without all the typing and with a better interface.  Handy for
 quickly testing an interface.
 
+No matter how many @methods you check, a single can_ok() call counts
+as one test.  If you desire otherwise, use:
+
+    foreach my $meth (@methods) {
+        can_ok('Foo', $meth);
+    }
+
 =cut
 
 sub can_ok ($@) {
     my($proto, @methods) = @_;
     my $class= ref $proto || $proto;
 
+    unless( @methods ) {
+        my $ok = $Test->ok( 0, "$class->can(...)" );
+        $Test->diag('    can_ok() called with no methods');
+        return $ok;
+    }
+
     my @nok = ();
     foreach my $method (@methods) {
         my $test = "'$class'->can('$method')";
+        local($!, $@);  # don't interfere with caller's $@
+                        # eval sometimes resets $!
         eval $test || push @nok, $method;
     }
 
@@ -418,7 +477,7 @@ sub can_ok ($@) {
     
     my $ok = $Test->ok( !@nok, $name );
 
-    $Test->diag(map "$class->can('$_') failed\n", @nok);
+    $Test->diag(map "    $class->can('$_') failed\n", @nok);
 
     return $ok;
 }
@@ -426,6 +485,7 @@ sub can_ok ($@) {
 =item B<isa_ok>
 
   isa_ok($object, $class, $object_name);
+  isa_ok($ref,    $type,  $ref_name);
 
 Checks to see if the given $object->isa($class).  Also checks to make
 sure the object was defined in the first place.  Handy for this sort
@@ -440,6 +500,10 @@ where you'd otherwise have to write
     ok( defined $obj && $obj->isa('Some::Module') );
 
 to safeguard against your test script blowing up.
+
+It works on references, too:
+
+    isa_ok( $array_ref, 'ARRAY' );
 
 The diagnostics of this test normally just refer to 'the object'.  If
 you'd like them to be more specific, you can supply an $object_name
@@ -459,14 +523,37 @@ sub isa_ok ($$;$) {
     elsif( !ref $object ) {
         $diag = "$obj_name isn't a reference";
     }
-    elsif( !$object->isa($class) ) {
-        $diag = "$obj_name isn't a '$class'";
+    else {
+        # We can't use UNIVERSAL::isa because we want to honor isa() overrides
+        local($@, $!);  # eval sometimes resets $!
+        my $rslt = eval { $object->isa($class) };
+        if( $@ ) {
+            if( $@ =~ /^Can't call method "isa" on unblessed reference/ ) {
+                if( !UNIVERSAL::isa($object, $class) ) {
+                    my $ref = ref $object;
+                    $diag = "$obj_name isn't a '$class' its a '$ref'";
+                }
+            } else {
+                die <<WHOA;
+WHOA! I tried to call ->isa on your object and got some weird error.
+This should never happen.  Please contact the author immediately.
+Here's the error.
+$@
+WHOA
+            }
+        }
+        elsif( !$rslt ) {
+            my $ref = ref $object;
+            $diag = "$obj_name isn't a '$class' its a '$ref'";
+        }
     }
+            
+      
 
     my $ok;
     if( $diag ) {
         $ok = $Test->ok( 0, $name );
-        $Test->diag("$diag\n");
+        $Test->diag("    $diag\n");
     }
     else {
         $ok = $Test->ok( 1, $name );
@@ -500,6 +587,47 @@ sub pass (;$) {
 sub fail (;$) {
     $Test->ok(0, @_);
 }
+
+=back
+
+=head2 Diagnostics
+
+If you pick the right test function, you'll usually get a good idea of
+what went wrong when it failed.  But sometimes it doesn't work out
+that way.  So here we have ways for you to write your own diagnostic
+messages which are safer than just C<print STDERR>.
+
+=over 4
+
+=item B<diag>
+
+  diag(@diagnostic_message);
+
+Prints a diagnostic message which is guaranteed not to interfere with
+test output.  Handy for this sort of thing:
+
+    ok( grep(/foo/, @users), "There's a foo user" ) or
+        diag("Since there's no foo, check that /etc/bar is set up right");
+
+which would produce:
+
+    not ok 42 - There's a foo user
+    #     Failed test (foo.t at line 52)
+    # Since there's no foo, check that /etc/bar is set up right.
+
+You might remember C<ok() or diag()> with the mnemonic C<open() or
+die()>.
+
+B<NOTE> The exact formatting of the diagnostic output is still
+changing, but it is guaranteed that whatever you throw at it it won't
+interfere with the test.
+
+=cut
+
+sub diag {
+    $Test->diag(@_);
+}
+
 
 =back
 
@@ -538,6 +666,7 @@ sub use_ok ($;@) {
 
     my $pack = caller;
 
+    local($@,$!);   # eval sometimes interferes with $!
     eval <<USE;
 package $pack;
 require $module;
@@ -549,8 +678,8 @@ USE
     unless( $ok ) {
         chomp $@;
         $Test->diag(<<DIAGNOSTIC);
-Tried to use '$module'.
-Error:  $@
+    Tried to use '$module'.
+    Error:  $@
 DIAGNOSTIC
 
     }
@@ -571,6 +700,7 @@ sub require_ok ($) {
 
     my $pack = caller;
 
+    local($!, $@); # eval sometimes interferes with $!
     eval <<REQUIRE;
 package $pack;
 require $module;
@@ -581,8 +711,8 @@ REQUIRE
     unless( $ok ) {
         chomp $@;
         $Test->diag(<<DIAGNOSTIC);
-#     Tried to require '$module'.
-#     Error:  $@
+    Tried to require '$module'.
+    Error:  $@
 DIAGNOSTIC
 
     }
@@ -594,9 +724,6 @@ DIAGNOSTIC
 
 =head2 Conditional tests
 
-B<WARNING!> The following describes an I<experimental> interface that
-is subject to change B<WITHOUT NOTICE>!  Use at your peril.
-
 Sometimes running a test under certain conditions will cause the
 test script to die.  A certain function or method isn't implemented
 (such as fork() on MacOS), some resource isn't available (like a 
@@ -604,7 +731,8 @@ net connection) or a module isn't available.  In these cases it's
 necessary to skip tests, or declare that they are supposed to fail
 but will work in the future (a todo test).
 
-For more details on skip and todo tests see L<Test::Harness>.
+For more details on the mechanics of skip and todo tests see
+L<Test::Harness>.
 
 The way Test::More handles this is with a named block.  Basically, a
 block of tests which can be skipped over or made todo.  It's best if I
@@ -641,10 +769,16 @@ are in the block so the total number of tests comes out right (unless
 you're using C<no_plan>, in which case you can leave $how_many off if
 you like).
 
-You'll typically use this when a feature is missing, like an optional
-module is not installed or the operating system doesn't have some
-feature (like fork() or symlinks) or maybe you need an Internet
-connection and one isn't available.
+Its perfectly safe to nest SKIP blocks.
+
+Tests are skipped when you B<never> expect them to B<ever> pass.  Like
+an optional module is not installed or the operating system doesn't
+have some feature (like fork() or symlinks) or maybe you need an
+Internet connection and one isn't available.
+
+You don't skip tests which are failing because there's a bug in your
+program.  For that you use TODO.  Read on.
+
 
 =for _Future
 See L</Why are skip and todo so weird?>
@@ -674,7 +808,7 @@ sub skip {
 =item B<TODO: BLOCK>
 
     TODO: {
-        local $TODO = $why;
+        local $TODO = $why if $condition;
 
         ...normal testing code goes here...
     }
@@ -707,6 +841,45 @@ Once a todo test starts succeeding, simply move it outside the block.
 When the block is empty, delete it.
 
 
+=item B<todo_skip>
+
+    TODO: {
+        todo_skip $why, $how_many if $condition;
+
+        ...normal testing code...
+    }
+
+With todo tests, its best to have the tests actually run.  That way
+you'll know when they start passing.  Sometimes this isn't possible.
+Often a failing test will cause the whole program to die or hang, even
+inside an C<eval BLOCK> with and using C<alarm>.  In these extreme
+cases you have no choice but to skip over the broken tests entirely.
+
+The syntax and behavior is similar to a C<SKIP: BLOCK> except the
+tests will be marked as failing but todo.  Test::Harness will
+interpret them as passing.
+
+=cut
+
+sub todo_skip {
+    my($why, $how_many) = @_;
+
+    unless( defined $how_many ) {
+        # $how_many can only be avoided when no_plan is in use.
+        _carp "todo_skip() needs to know \$how_many tests are in the block"
+          unless $Test::Builder::No_Plan;
+        $how_many = 1;
+    }
+
+    for( 1..$how_many ) {
+        $Test->todo_skip($why);
+    }
+
+    local $^W = 0;
+    last TODO;
+}
+
+
 =back
 
 =head2 Comparison functions
@@ -728,6 +901,9 @@ Similar to is(), except that if $this and $that are hash or array
 references, it does a deep comparison walking each data structure to
 see if they are equivalent.  If the two structures are different, it
 will display the place where they start differing.
+
+Barrie Slaymaker's Test::Differences module provides more in-depth
+functionality along these lines, and it plays well with Test::More.
 
 B<NOTE> Display of scalar refs is not quite 100%
 
@@ -793,6 +969,7 @@ sub _format_stack {
     $out .= "$vars[0] = $vals[0]\n";
     $out .= "$vars[1] = $vals[1]\n";
 
+    $out =~ s/^/    /msg;
     return $out;
 }
 
@@ -925,8 +1102,37 @@ sub eq_set  {
     return eq_array( [sort _bogus_sort @$a1], [sort _bogus_sort @$a2] );
 }
 
+=back
+
+
+=head2 Extending and Embedding Test::More
+
+Sometimes the Test::More interface isn't quite enough.  Fortunately,
+Test::More is built on top of Test::Builder which provides a single,
+unified backend for any test library to use.  This means two test
+libraries which both use Test::Builder B<can be used together in the
+same program>.
+
+If you simply want to do a little tweaking of how the tests behave,
+you can access the underlying Test::Builder object like so:
+
+=over 4
+
+=item B<builder>
+
+    my $test_builder = Test::More->builder;
+
+Returns the Test::Builder object underlying Test::More for you to play
+with.
+
+=cut
+
+sub builder {
+    return Test::Builder->new;
+}
 
 =back
+
 
 =head1 NOTES
 
@@ -938,30 +1144,18 @@ Test::More is B<explicitly> tested all the way back to perl 5.004.
 
 =item Making your own ok()
 
-This will not do what you mean:
+If you are trying to extend Test::More, don't.  Use Test::Builder
+instead.
 
-    sub my_ok {
-        ok( @_ );
-    }
-
-    my_ok( 2 + 2 == 5, 'Basic addition' );
-
-since ok() takes it's arguments as scalars, it will see the length of
-@_ (2) and always pass the test.  You want to do this instead:
-
-    sub my_ok {
-        ok( $_[0], $_[1] );
-    }
-
-The other functions act similarly.
-
-=item The eq_* family have some caveats.
+=item The eq_* family has some caveats.
 
 =item Test::Harness upgrades
 
 no_plan and todo depend on new Test::Harness features and fixes.  If
-you're going to distribute tests that use no_plan your end-users will
-have to upgrade Test::Harness to the latest one on CPAN.
+you're going to distribute tests that use no_plan or todo your
+end-users will have to upgrade Test::Harness to the latest one on
+CPAN.  If you avoid no_plan and TODO tests, the stock Test::Harness
+will work fine.
 
 If you simply depend on Test::More, it's own dependencies will cause a
 Test::Harness upgrade.
@@ -990,7 +1184,11 @@ L<Test::Simple> if all this confuses you and you just want to write
 some tests.  You can upgrade to Test::More later (its forward
 compatible).
 
-L<Test> for a similar testing module.
+L<Test::Differences> for more ways to test complex data structures.
+And it plays well with Test::More.
+
+L<Test> is the old testing module.  Its main benefit is that it has
+been distributed with Perl since 5.004_05.
 
 L<Test::Harness> for details on how your test results are interpreted
 by Perl.
@@ -1004,9 +1202,9 @@ L<SelfTest> is another approach to embedded testing.
 
 =head1 AUTHORS
 
-Michael G Schwern E<lt>schwern@pobox.comE<gt> with much inspiration from
-Joshua Pritikin's Test module and lots of discussion with Barrie
-Slaymaker and the perl-qa gang.
+Michael G Schwern E<lt>schwern@pobox.comE<gt> with much inspiration
+from Joshua Pritikin's Test module and lots of help from Barrie
+Slaymaker, Tony Bowden, chromatic and the perl-qa gang.
 
 
 =head1 COPYRIGHT
@@ -1016,7 +1214,7 @@ Copyright 2001 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
 This program is free software; you can redistribute it and/or 
 modify it under the same terms as Perl itself.
 
-See L<http://www.perl.com/perl/misc/Artistic.html>
+See F<http://www.perl.com/perl/misc/Artistic.html>
 
 =cut
 

@@ -1,8 +1,10 @@
 #!perl -w
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
+    }
 }
 
 # Can't use Test.pm, that's a 5.005 thing.
