@@ -141,7 +141,7 @@ MGVTBL svtable = {MEMBER_TO_FPTR(shared_sv_fetch_mg),
 MODULE = threads::shared		PACKAGE = threads::shared		
 
 
-PROTOTYPES: DISABLE
+PROTOTYPES: ENABLE
 
 
 SV*
@@ -194,6 +194,7 @@ _thrcnt_dec(ref)
 void 
 unlock_enabled(ref)
 	SV* ref
+	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
 	if(SvROK(ref))
@@ -219,6 +220,7 @@ lock_enabled(ref)
 void
 cond_wait_enabled(ref)
 	SV* ref
+	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
 	int locks;
@@ -239,6 +241,7 @@ cond_wait_enabled(ref)
 
 void cond_signal_enabled(ref)
 	SV* ref
+	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
 	if(SvROK(ref))
@@ -251,6 +254,7 @@ void cond_signal_enabled(ref)
 
 void cond_broadcast_enabled(ref)
 	SV* ref
+	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
 	if(SvROK(ref))
