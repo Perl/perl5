@@ -434,8 +434,6 @@ ext/SDBM_File/sdbm/dba.c		SDBM kit
 ext/SDBM_File/sdbm/dbd.c		SDBM kit
 ext/SDBM_File/sdbm/dbe.1		SDBM kit
 ext/SDBM_File/sdbm/dbe.c		SDBM kit
-ext/SDBM_File/sdbm/dbm.c		SDBM kit
-ext/SDBM_File/sdbm/dbm.h		SDBM kit
 ext/SDBM_File/sdbm/dbu.c		SDBM kit
 ext/SDBM_File/sdbm/grind		SDBM kit
 ext/SDBM_File/sdbm/hash.c		SDBM kit
