@@ -330,6 +330,7 @@ LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]
 utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com 
 utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.lib.ExtUtils]xsubpp.com
+utils4 = [.utils]enc2xs.com [.utils]piconv.com
 
 .ifdef NOX2P
 all : base extras archcorefiles preplibrary perlpods
@@ -346,7 +347,7 @@ extras : dynext libmods utils podxform extra.pods
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
-utils : $(utils1) $(utils2) $(utils3)
+utils : $(utils1) $(utils2) $(utils3) $(utils4)
 	@ $(NOOP)
 podxform : [.lib.pod]pod2text.com [.lib.pod]pod2html.com [.lib.pod]pod2latex.com [.lib.pod]pod2man.com [.lib.pod]podchecker.com [.lib.pod]pod2usage.com [.lib.pod]podselect.com
 	@ $(NOOP)
@@ -518,6 +519,9 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 [.utils]dprofpp.com : [.utils]dprofpp.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
+[.utils]enc2xs.com : [.utils]enc2xs.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) $(MMS$SOURCE)
+
 [.utils]h2ph.com : [.utils]h2ph.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
@@ -534,6 +538,9 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 [.lib]perlcc.com : [.utils]perlcc.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 	Copy/Log [.utils]perlcc.com $(MMS$TARGET)
+
+[.utils]piconv.com : [.utils]piconv.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) $(MMS$SOURCE)
 
 [.utils]pl2pm.com : [.utils]pl2pm.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
