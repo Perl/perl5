@@ -2161,6 +2161,8 @@ Perl_sighandler(int sig)
     U32 flags = 0;
     I32 o_save_i = PL_savestack_ix;
     XPV *tXpv = PL_Xpv;
+    sigjmp_buf jmp;
+    Sighandler_t handler;
 
 #if defined(WIN32) && defined(PERL_IMPLICIT_CONTEXT)
     PERL_SET_THX(aTHXo);	/* fake TLS, see above */
@@ -2223,9 +2225,26 @@ Perl_sighandler(int sig)
     PUSHs(sv);
     PUTBACK;
 
-    call_sv((SV*)cv, G_DISCARD);
+    call_sv((SV*)cv, G_DISCARD|G_EVAL);
 
     POPSTACK;
+    if (SvTRUE(ERRSV)) {
+#ifdef HAS_SIGACTION
+	/* Handler "died", for example to get out of a restart-able read().
+	 * Before we re-do that on its behalf re-enable the signal which was
+	 * blocked by the system when we entered.
+	 */
+	sigset_t set;
+	sigemptyset(&set);
+	sigaddset(&set,sig);
+	sigprocmask(SIG_UNBLOCK, &set, NULL);
+#else
+	/* Not clear if this will work */
+	(void)rsignal(sig, SIG_IGN);
+	(void)rsignal(sig, PL_sighandlerp);
+#endif
+	Perl_die(aTHX_ Nullch);
+    }
 cleanup:
     if (flags & 1)
 	PL_savestack_ix -= 8; /* Unprotect save in progress. */

@@ -36,7 +36,7 @@
 #define SAVEt_PADSV		35
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
-#define SCOPE_SAVES_SIGNAL_MASK 1
+#define SCOPE_SAVES_SIGNAL_MASK 0
 #endif
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
