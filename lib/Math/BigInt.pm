@@ -2197,7 +2197,7 @@ sub broot
     $x->badd($org / ($x ** 2)); 
     $x->bdiv($divider);
     }
-    #print $x ** $y," org ",$org,"\n";
+  #print $x ** $y," org ",$org,"\n";
   # correct overshot
   while ($x ** $y < $org)
     {
@@ -3119,8 +3119,14 @@ appropriate information.
 	div_scale	Fallback acccuracy for div
 			40
 
-It is currently not supported to set the configuration parameters by passing
-a hash ref to C<config()>.
+The following values can be set by passing config a reference to a hash:
+
+	trap_inf trap_nan
+        upgrade downgrade precision accuracy round_mode div_scale
+
+Example:
+	
+	$new_cfg = Math::BigInt->config( { trap_inf => 1, precision => 5 } );
 
 =head2 accuracy
 

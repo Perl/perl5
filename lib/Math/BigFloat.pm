@@ -712,6 +712,7 @@ sub blog
   delete $x->{_a}; delete $x->{_p};
   # need to disable $upgrade in BigInt, to avoid deep recursion
   local $Math::BigInt::upgrade = undef;
+  local $Math::BigFloat::downgrade = undef;
 
   # upgrade $x if $x is not a BigFloat (handle BigInt input)
   if (!$x->isa('Math::BigFloat'))
@@ -725,6 +726,7 @@ sub blog
   # and if a different base was requested, convert it
   if (defined $base)
     {
+    $base = Math::BigFloat->new($base) unless $base->isa('Math::BigFloat');
     # not ln, but some other base
     $x->bdiv( $base->copy()->blog(undef,$scale), $scale );
     }

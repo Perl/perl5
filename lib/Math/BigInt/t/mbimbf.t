@@ -32,7 +32,7 @@ BEGIN
   print "# INC = @INC\n";
 
   plan tests => 679 
-    + 22;		# own tests
+    + 23;		# own tests
   }
 
 use Math::BigInt 1.63;
@@ -92,4 +92,12 @@ foreach my $class (qw/Math::BigInt Math::BigFloat/)
 				# so the return value of that operation should
 				# be 42, not undef
   ok ($x->accuracy(),42);	# so $x should still have A = 42
+  $class->accuracy(undef);	# reset for further tests
+  $class->precision(undef);
   }
+
+# bug with flog(Math::BigFloat,Math::BigInt)
+$x = Math::BigFloat->new(100);
+$x = $x->blog(Math::BigInt->new(10));
+
+ok ($x,2);
