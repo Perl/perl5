@@ -49,7 +49,7 @@ sub profile {
 	my $t_start = new Benchmark;
         open( R, "$perl \"$opt_d\" $test |" ) || warn "$0: Can't run. $!\n";
 	@results = <R>;
-	close R;
+	close R or warn "Could not close: $!";
 	my $t_total = timediff( new Benchmark, $t_start );
 
 	if( $opt_v ){

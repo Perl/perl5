@@ -15,7 +15,7 @@ my $devnull = File::Spec->devnull;
 
 open(TRY, '>Io_argv1.tmp') || (die "Can't open temp file: $!");
 print TRY "a line\n";
-close TRY;
+close TRY or die "Could not close: $!";
 
 $x = runperl(
     prog	=> 'while (<>) { print $., $_; }',
@@ -50,9 +50,9 @@ is($y, "1a line\n2a line\n3a line\n", '<> from @ARGV');
 
 
 open(TRY, '>Io_argv1.tmp') or die "Can't open temp file: $!";
-close TRY;
+close TRY or die "Could not close: $!";
 open(TRY, '>Io_argv2.tmp') or die "Can't open temp file: $!";
-close TRY;
+close TRY or die "Could not close: $!";
 @ARGV = ('Io_argv1.tmp', 'Io_argv2.tmp');
 $^I = '_bak';   # not .bak which confuses VMS
 $/ = undef;
@@ -67,7 +67,7 @@ open(TRY, '<Io_argv1.tmp') or die "Can't open temp file: $!";
 print while <TRY>;
 open(TRY, '<Io_argv2.tmp') or die "Can't open temp file: $!";
 print while <TRY>;
-close TRY;
+close TRY or die "Could not close: $!";
 undef $^I;
 
 ok( eof TRY );
@@ -95,7 +95,7 @@ ok( eof(),      'eof() true after closing ARGV' );
 
 {
     local $/;
-    open F, 'Io_argv1.tmp' or die;
+    open F, 'Io_argv1.tmp' or die "Could not open Io_argv1.tmp: $!";
     <F>;	# set $. = 1
     is( <F>, undef );
 
@@ -108,7 +108,7 @@ ok( eof(),      'eof() true after closing ARGV' );
     open F, $devnull or die;	# restart cycle again
     ok( defined(<F>) );
     is( <F>, undef );
-    close F;
+    close F or die "Could not close: $!";
 }
 
 END { unlink 'Io_argv1.tmp', 'Io_argv1.tmp_bak', 'Io_argv2.tmp', 'Io_argv2.tmp_bak' }

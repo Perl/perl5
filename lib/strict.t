@@ -31,7 +31,7 @@ foreach (sort glob($^O eq 'MacOS' ? ":lib::strict:*" : "lib/strict/*")) {
         local $/ = undef;
         @prgs = (@prgs, split "\n########\n", <F>) ;
     }
-    close F ;
+    close F or die "Could not close: $!" ;
 }
 
 undef $/;
@@ -59,7 +59,7 @@ for (@prgs){
     	    push @temps, $filename ;
 	    open F, ">$filename" or die "Cannot open $filename: $!\n" ;
 	    print F $code ;
-	    close F ;
+	    close F or die "Could not close: $!" ;
 	}
 	shift @files ;
 	$prog = shift @files ;
@@ -67,7 +67,7 @@ for (@prgs){
     }
     open TEST, ">$tmpfile";
     print TEST $prog,"\n";
-    close TEST;
+    close TEST or die "Could not close: $!";
     my $results = $Is_MSWin32 ?
 	              `.\\perl -I../lib $switch $tmpfile 2>&1` :
                   $^O eq 'NetWare' ?

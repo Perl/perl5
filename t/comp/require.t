@@ -27,7 +27,7 @@ sub write_file {
     binmode REQ;
     use bytes;
     print REQ @_;
-    close REQ;
+    close REQ or die "Could not close $f: $!";
 }
 
 eval {require 5.005};

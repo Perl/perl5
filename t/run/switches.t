@@ -77,7 +77,7 @@ INIT  { print "block 3\n"; }
 	print "block 4\n";
 END   { print "block 5\n"; }
 SWTEST
-    close $f;
+    close $f or die "Could not close: $!";
     $r = runperl(
 	switches	=> [ '-c' ],
 	progfile	=> $filename,
@@ -122,7 +122,7 @@ SKIP: {
 #!perl -s
 print $x
 SWTEST
-    close $f;
+    close $f or die "Could not close: $!";
     $r = runperl(
 	switches    => [ '-s' ],
 	progfile    => $filename,
@@ -142,7 +142,7 @@ package swtest;
 sub import { print map "<$_>", @_ }
 1;
 SWTESTPM
-    close $f;
+    close $f or die "Could not close: $!";
     $r = runperl(
 	switches    => [ '-Mswtest' ],
 	prog	    => '1',

@@ -19,7 +19,7 @@ my $russki = "koi8r$$";
 if (open(GRK, ">$grk")) {
     # alpha beta gamma in ISO 8859-7
     print GRK "\xe1\xe2\xe3";
-    close GRK;
+    close GRK or die "Could not close: $!";
 }
 
 {
@@ -30,7 +30,7 @@ if (open(GRK, ">$grk")) {
     print "ok 2\n";
     print $o readline($i);
     print "ok 3\n";
-    close($o);
+    close($o) or die "Could not close: $!";
     close($i);
 }
 
@@ -49,7 +49,7 @@ if (open(UTF, "<$utf")) {
     print "ok 6\n";
     print $o readline($i);
     print "ok 7\n";
-    close($o);
+    close($o) or die "Could not close: $!";
     close($i);
 }
 
@@ -76,7 +76,7 @@ if (!defined $warn) {
 
 if (open(RUSSKI, ">$russki")) {
     print RUSSKI "\x3c\x3f\x78";
-    close RUSSKI;
+    close RUSSKI or die "Could not close: $!";
     open(RUSSKI, "$russki");
     binmode(RUSSKI, ":raw");
     my $buf1;

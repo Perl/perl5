@@ -61,31 +61,31 @@ unshift @INC, '.';
 
 if (open(DO, ">$$.16")) {
     print DO "ok(1, 'do in scalar context') if defined wantarray && not wantarray\n";
-    close DO;
+    close DO or die "Could not close: $!";
 }
 
 my $a = do "$$.16";
 
 if (open(DO, ">$$.17")) {
     print DO "ok(1, 'do in list context') if defined wantarray &&     wantarray\n";
-    close DO;
+    close DO or die "Could not close: $!";
 }
 
 my @a = do "$$.17";
 
 if (open(DO, ">$$.18")) {
     print DO "ok(1, 'do in void context') if not defined wantarray\n";
-    close DO;
+    close DO or die "Could not close: $!";
 }
 
 do "$$.18";
 
 # bug ID 20010920.007
 eval qq{ do qq(a file that does not exist); };
-ok( !$@ );
+ok( !$@, "do on a non-existing file, first try" );
 
 eval qq{ do uc qq(a file that does not exist); };
-ok( !$@ );
+ok( !$@, "do on a non-existing file, second try"  );
 
 END {
     1 while unlink("$$.16", "$$.17", "$$.18");
