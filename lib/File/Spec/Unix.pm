@@ -1,7 +1,7 @@
 package File::Spec::Unix;
 
 use strict;
-our($VERSION);
+use vars qw($VERSION);
 
 $VERSION = '1.4';
 
@@ -127,8 +127,9 @@ sub rootdir {
 
 =item tmpdir
 
-Returns a string representation of the first writable directory
-from the following list or "" if none are writable:
+Returns a string representation of the first writable directory from
+the following list or the current directory if none from the list are
+writable:
 
     $ENV{TMPDIR}
     /tmp
@@ -139,14 +140,15 @@ is tainted, it is not used.
 =cut
 
 my $tmpdir;
-sub tmpdir {
+sub _tmpdir {
     return $tmpdir if defined $tmpdir;
-    my @dirlist = ($ENV{TMPDIR}, "/tmp");
+    my $self = shift;
+    my @dirlist = @_;
     {
 	no strict 'refs';
 	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
             require Scalar::Util;
-	    shift @dirlist if Scalar::Util::tainted($ENV{TMPDIR});
+	    @dirlist = grep { ! Scalar::Util::tainted($_) } @dirlist;
 	}
     }
     foreach (@dirlist) {
@@ -154,8 +156,14 @@ sub tmpdir {
 	$tmpdir = $_;
 	last;
     }
-    $tmpdir = File::Spec->curdir unless defined $tmpdir;
+    $tmpdir = $self->curdir unless defined $tmpdir;
+    $tmpdir = defined $tmpdir && $self->canonpath($tmpdir);
     return $tmpdir;
+}
+
+sub tmpdir {
+    return $tmpdir if defined $tmpdir;
+    $tmpdir = _tmpdir( $ENV{TMPDIR}, "/tmp" );
 }
 
 =item updir

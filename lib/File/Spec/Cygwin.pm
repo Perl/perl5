@@ -1,3 +1,4 @@
+
 package File::Spec::Cygwin;
 
 use strict;
@@ -7,41 +8,6 @@ require File::Spec::Unix;
 $VERSION = '1.0';
 
 @ISA = qw(File::Spec::Unix);
-
-sub canonpath {
-    my($self,$path) = @_;
-    $path =~ s|\\|/|g;
-    return $self->SUPER::canonpath($path);
-}
-
-sub file_name_is_absolute {
-    my ($self,$file) = @_;
-    return 1 if $file =~ m{^([a-z]:)?[\\/]}is; # C:/test
-    return $self->SUPER::file_name_is_absolute($file);
-}
-
-my $tmpdir;
-sub tmpdir {
-    return $tmpdir if defined $tmpdir;
-    my @dirlist = ($ENV{TMPDIR}, "/tmp", 'C:/temp');
-    {
-	no strict 'refs';
-	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
-            require Scalar::Util;
-	    shift @dirlist if Scalar::Util::tainted($ENV{TMPDIR});
-	}
-    }
-    foreach (@dirlist) {
-	next unless defined && -d && -w _;
-	$tmpdir = $_;
-	last;
-    }
-    $tmpdir = File::Spec->curdir unless defined $tmpdir;
-    return $tmpdir;
-}
-
-1;
-__END__
 
 =head1 NAME
 
@@ -59,3 +25,59 @@ the semantics.
 
 This module is still in beta.  Cygwin-knowledgeable folks are invited
 to offer patches and suggestions.
+
+=cut
+
+=pod
+
+=item canonpath
+
+Any C<\> (backslashes) are converted to C</> (forward slashes),
+and then File::Spec::Unix canonpath() is called on the result.
+
+=cut
+
+sub canonpath {
+    my($self,$path) = @_;
+    $path =~ s|\\|/|g;
+    return $self->SUPER::canonpath($path);
+}
+
+=pod
+
+=item file_name_is_absolute
+
+True is returned if the file name begins with C<drive_letter:>,
+and if not, File::Spec::Unix file_name_is_absolute() is called.
+
+=cut
+
+
+sub file_name_is_absolute {
+    my ($self,$file) = @_;
+    return 1 if $file =~ m{^([a-z]:)?[\\/]}is; # C:/test
+    return $self->SUPER::file_name_is_absolute($file);
+}
+
+=item tmpdir (override)
+
+Returns a string representation of the first existing directory
+from the following list:
+
+    $ENV{TMPDIR}
+    /tmp
+    C:/temp
+
+Since Perl 5.8.0, if running under taint mode, and if the environment
+variables are tainted, they are not used.
+
+=cut
+
+my $tmpdir;
+sub tmpdir {
+    return $tmpdir if defined $tmpdir;
+    my $self = shift;
+    $tmpdir = $self->_tmpdir( $ENV{TMPDIR}, "/tmp", 'C:/temp' );
+}
+
+1;

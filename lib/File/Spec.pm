@@ -1,9 +1,9 @@
 package File::Spec;
 
 use strict;
-our(@ISA, $VERSION);
+use vars qw(@ISA $VERSION);
 
-$VERSION = 0.83 ;
+$VERSION = 0.84 ;
 
 my %module = (MacOS   => 'Mac',
 	      MSWin32 => 'Win32',
@@ -125,10 +125,10 @@ Returns a string representation of the root directory.
 =item tmpdir
 
 Returns a string representation of the first writable directory from a
-list of possible temporary directories.  Returns "" if no writable
-temporary directories are found.  The list of directories checked
-depends on the platform; e.g. File::Spec::Unix checks $ENV{TMPDIR} and
-/tmp.
+list of possible temporary directories.  Returns the current directory
+if no writable temporary directories are found.  The list of directories
+checked depends on the platform; e.g. File::Spec::Unix checks $ENV{TMPDIR}
+(unless taint is on) and /tmp.
 
     $tmpdir = File::Spec->tmpdir();
 

@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.1';
+$VERSION = '1.2';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -29,27 +29,31 @@ sub path {
     return @path;
 }
 
+=pod
+
+=item tmpdir
+
+Returns a string representation of the first existing directory
+from the following list:
+
+    $ENV{TMPDIR}
+    $ENV{TEMP}
+    $ENV{TMP}
+    /tmp
+    /
+
+Since Perl 5.8.0, if running under taint mode, and if the environment
+variables are tainted, they are not used.
+
+=cut
+
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
     my $self = shift;
-    my @dirlist = ( @ENV{qw(TMPDIR TEMP TMP)}, qw(/tmp /) );
-    {
-	no strict 'refs';
-	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
-	    require Scalar::Util;
-	    @dirlist = grep { ! Scalar::Util::tainted $_ } @dirlist;
-	}
-    }
-    foreach (@dirlist) {
-	next unless defined && -d;
-	$tmpdir = $_;
-	last;
-    }
-    $tmpdir = File::Spec->curdir unless defined $tmpdir;
-    $tmpdir =~ s:\\:/:g;
-    $tmpdir = $self->canonpath($tmpdir);
-    return $tmpdir;
+    $tmpdir = $self->_tmpdir( @ENV{qw(TMPDIR TEMP TMP)},
+			      '/tmp',
+			      '/'  );
 }
 
 =item canonpath

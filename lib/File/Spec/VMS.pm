@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.2';
+$VERSION = '1.4';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -278,21 +278,8 @@ is tainted, it is not used.
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    my @dirlist = ('sys$scratch:', $ENV{TMPDIR});
-    {
-	no strict 'refs';
-	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
-            require Scalar::Util;
-	    pop @dirlist if Scalar::Util::tainted($ENV{TMPDIR});
-	}
-    }
-    foreach (@dirlist) {
-	next unless defined && -d && -w _;
-	$tmpdir = $_;
-	last;
-    }
-    $tmpdir = File::Spec->curdir unless defined $tmpdir;
-    return $tmpdir;
+    my $self = shift;
+    $tmpdir = $self->_tmpdir( 'sys$scratch:', $ENV{TMPDIR} );
 }
 
 =item updir (override)
