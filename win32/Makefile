@@ -91,6 +91,8 @@ INST_VER	= \5.00551
 
 #
 # set the install locations of the compiler include/libraries
+# Some versions of Visual C don't define MSVCDIR in the environment,
+# so you may have to set CCHOME explicitly.
 #
 #CCHOME		= f:\msvc20
 CCHOME		= $(MSVCDIR)
