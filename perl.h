@@ -443,10 +443,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   define USE_REENTRANT_API
 #endif
 
-/* Tru64/Digital UNIX/DEC OSF/1 and Win32 have naturally
- * threadsafe libraries, no need to use any _r variants. */
+/* Win32 has naturally threadsafe libraries,
+ * no need to use any _r variants. */
 #ifdef USE_REENTRANT_API
-#   if (defined(__osf__) && defined(__alpha)) || defined(WIN32)
+#   ifdef WIN32
 #       undef USE_REEENTRANT_API
 #   endif
 #endif
