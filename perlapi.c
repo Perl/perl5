@@ -3731,6 +3731,20 @@ Perl_sv_2pv(pTHXo_ SV* sv, STRLEN* lp)
     return ((CPerlObj*)pPerl)->Perl_sv_2pv(sv, lp);
 }
 
+#undef  Perl_sv_2pvutf8
+char*
+Perl_sv_2pvutf8(pTHXo_ SV* sv, STRLEN* lp)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_2pvutf8(sv, lp);
+}
+
+#undef  Perl_sv_2pvbyte
+char*
+Perl_sv_2pvbyte(pTHXo_ SV* sv, STRLEN* lp)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_2pvbyte(sv, lp);
+}
+
 #undef  Perl_sv_2uv
 UV
 Perl_sv_2uv(pTHXo_ SV* sv)
@@ -3764,6 +3778,20 @@ char*
 Perl_sv_pvn(pTHXo_ SV *sv, STRLEN *len)
 {
     return ((CPerlObj*)pPerl)->Perl_sv_pvn(sv, len);
+}
+
+#undef  Perl_sv_pvutf8n
+char*
+Perl_sv_pvutf8n(pTHXo_ SV *sv, STRLEN *len)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvutf8n(sv, len);
+}
+
+#undef  Perl_sv_pvbyten
+char*
+Perl_sv_pvbyten(pTHXo_ SV *sv, STRLEN *len)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvbyten(sv, len);
 }
 
 #undef  Perl_sv_true
@@ -4042,6 +4070,20 @@ char*
 Perl_sv_pvn_force(pTHXo_ SV* sv, STRLEN* lp)
 {
     return ((CPerlObj*)pPerl)->Perl_sv_pvn_force(sv, lp);
+}
+
+#undef  Perl_sv_pvutf8n_force
+char*
+Perl_sv_pvutf8n_force(pTHXo_ SV* sv, STRLEN* lp)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvutf8n_force(sv, lp);
+}
+
+#undef  Perl_sv_pvbyten_force
+char*
+Perl_sv_pvbyten_force(pTHXo_ SV* sv, STRLEN* lp)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvbyten_force(sv, lp);
 }
 
 #undef  Perl_sv_reftype
@@ -4803,11 +4845,39 @@ Perl_sv_2pv_nolen(pTHXo_ SV* sv)
     return ((CPerlObj*)pPerl)->Perl_sv_2pv_nolen(sv);
 }
 
+#undef  Perl_sv_2pvutf8_nolen
+char*
+Perl_sv_2pvutf8_nolen(pTHXo_ SV* sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_2pvutf8_nolen(sv);
+}
+
+#undef  Perl_sv_2pvbyte_nolen
+char*
+Perl_sv_2pvbyte_nolen(pTHXo_ SV* sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_2pvbyte_nolen(sv);
+}
+
 #undef  Perl_sv_pv
 char*
 Perl_sv_pv(pTHXo_ SV *sv)
 {
     return ((CPerlObj*)pPerl)->Perl_sv_pv(sv);
+}
+
+#undef  Perl_sv_pvutf8
+char*
+Perl_sv_pvutf8(pTHXo_ SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvutf8(sv);
+}
+
+#undef  Perl_sv_pvbyte
+char*
+Perl_sv_pvbyte(pTHXo_ SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvbyte(sv);
 }
 
 #undef  Perl_sv_force_normal

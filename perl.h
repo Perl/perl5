@@ -1470,10 +1470,6 @@ typedef struct ptr_tbl PTR_TBL_t;
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
 #endif
 
-#ifndef PERL_SYS_INIT3
-#  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
-#endif
-
 #ifndef MAXPATHLEN
 #  ifdef PATH_MAX
 #    ifdef _POSIX_PATH_MAX
@@ -1598,7 +1594,12 @@ typedef pthread_key_t	perl_key;
 #define PERL_EXIT_EXPECTED	0x01
 
 #ifndef MEMBER_TO_FPTR
-#define MEMBER_TO_FPTR(name)		name
+#  define MEMBER_TO_FPTR(name)		name
+#endif
+
+/* format to use for version numbers in file/directory names */
+#ifndef PERL_FS_VER_FMT
+#  define PERL_FS_VER_FMT	"%"UVuf".%"UVuf".%"UVuf
 #endif
 
 /* This defines a way to flush all output buffers.  This may be a
@@ -2422,7 +2423,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_STRICT_REFS	0x00000002
 /* #define HINT_notused4	0x00000004 */
 #define HINT_UTF8		0x00000008
-/* #define HINT_notused10	0x00000010 */
+#define HINT_BYTE		0x00000010
 				/* Note: 20,40,80 used for NATIVE_HINTS */
 
 #define HINT_BLOCK_SCOPE	0x00000100

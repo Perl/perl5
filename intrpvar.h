@@ -25,7 +25,7 @@ PERLVAR(Iwarnhook,	SV *)
 
 /* switches */
 PERLVAR(Iminus_c,	bool)
-PERLVARA(Ipatchlevel,10,char)
+PERLVAR(Ipatchlevel,	SV *)
 PERLVAR(Ilocalpatches,	char **)
 PERLVARI(Isplitstr,	char *,	" ")
 PERLVAR(Ipreprocess,	bool)
@@ -170,7 +170,6 @@ PERLVAR(Isys_intern,	struct interp_intern)
 /* more statics moved here */
 PERLVARI(Igeneration,	int,	100)	/* from op.c */
 PERLVAR(IDBcv,		CV *)		/* from perl.c */
-PERLVAR(Iarchpat_auto,	char*)		/* from perl.c */
 
 PERLVARI(Iin_clean_objs,bool,    FALSE)	/* from sv.c */
 PERLVARI(Iin_clean_all,	bool,    FALSE)	/* from sv.c */

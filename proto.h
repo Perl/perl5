@@ -602,11 +602,15 @@ PERL_CALLCONV IV	Perl_sv_2iv(pTHX_ SV* sv);
 PERL_CALLCONV SV*	Perl_sv_2mortal(pTHX_ SV* sv);
 PERL_CALLCONV NV	Perl_sv_2nv(pTHX_ SV* sv);
 PERL_CALLCONV char*	Perl_sv_2pv(pTHX_ SV* sv, STRLEN* lp);
+PERL_CALLCONV char*	Perl_sv_2pvutf8(pTHX_ SV* sv, STRLEN* lp);
+PERL_CALLCONV char*	Perl_sv_2pvbyte(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV UV	Perl_sv_2uv(pTHX_ SV* sv);
 PERL_CALLCONV IV	Perl_sv_iv(pTHX_ SV* sv);
 PERL_CALLCONV UV	Perl_sv_uv(pTHX_ SV* sv);
 PERL_CALLCONV NV	Perl_sv_nv(pTHX_ SV* sv);
 PERL_CALLCONV char*	Perl_sv_pvn(pTHX_ SV *sv, STRLEN *len);
+PERL_CALLCONV char*	Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *len);
+PERL_CALLCONV char*	Perl_sv_pvbyten(pTHX_ SV *sv, STRLEN *len);
 PERL_CALLCONV I32	Perl_sv_true(pTHX_ SV *sv);
 PERL_CALLCONV void	Perl_sv_add_arena(pTHX_ char* ptr, U32 size, U32 flags);
 PERL_CALLCONV int	Perl_sv_backoff(pTHX_ SV* sv);
@@ -681,6 +685,11 @@ PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char* s);
 PERL_CALLCONV UV	Perl_to_utf8_lower(pTHX_ U8 *p);
 PERL_CALLCONV UV	Perl_to_utf8_upper(pTHX_ U8 *p);
 PERL_CALLCONV UV	Perl_to_utf8_title(pTHX_ U8 *p);
+PERL_CALLCONV STRLEN	Perl_sv_len_utf8(pTHX_ SV* sv);
+PERL_CALLCONV void	Perl_sv_pos_u2b(pTHX_ SV* sv, I32* offsetp, I32* lenp);
+PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV* sv, I32* offsetp);
+PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV* sv, STRLEN* lp);
+PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV* sv, STRLEN* lp);
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ char* f);
 #endif
@@ -794,6 +803,10 @@ PERL_CALLCONV void	Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void 
 PERL_CALLCONV void	Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl);
 #endif
 
+PERL_CALLCONV char*	Perl_sv_2pvutf8_nolen(pTHX_ SV* sv);
+PERL_CALLCONV char*	Perl_sv_2pvbyte_nolen(pTHX_ SV* sv);
+PERL_CALLCONV char*	Perl_sv_pvutf8(pTHX_ SV *sv);
+PERL_CALLCONV char*	Perl_sv_pvbyte(pTHX_ SV *sv);
 #if defined(PERL_OBJECT)
 protected:
 #else

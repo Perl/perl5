@@ -29,7 +29,6 @@
 #include <sys/file.h>
 #endif
 
-#define HOP(pos,off) (IN_UTF8 ? utf8_hop(pos, off) : (pos + off))
 
 /* Hot code. */
 
