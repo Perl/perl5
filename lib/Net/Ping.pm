@@ -15,7 +15,7 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.28";
+$VERSION = "2.29";
 
 # Constants
 
@@ -104,7 +104,7 @@ sub new
 
   $self->{"local_addr"} = undef;              # Don't bind by default
 
-  $self->{"tcp_econnrefused"} = undef;        # Default Connection refused behavior
+  $self->{"econnrefused"} = undef;            # Default Connection refused behavior
 
   $self->{"seq"} = 0;                         # For counting packets
   if ($self->{"proto"} eq "udp")              # Open a socket
@@ -217,15 +217,20 @@ sub source_verify
     ($source_verify = ((defined $self) && (ref $self)) ? shift() : $self);
 }
 
-# Description: Set whether or not the tcp connect
-# behavior should enforce remote service availability
-# as well as reachability.
+# Description: Set whether or not the connect
+# behavior should enforce remote service
+# availability as well as reachability.
+
+sub service_check
+{
+  my $self = shift;
+  $self->{"econnrefused"} = 1 unless defined
+    ($self->{"econnrefused"} = shift());
+}
 
 sub tcp_service_check
 {
-  my $self = shift;
-  $self->{"tcp_econnrefused"} = 1 unless defined
-    ($self->{"tcp_econnrefused"} = shift());
+  service_check(@_);
 }
 
 # Description: allows the module to use milliseconds as returned by
@@ -286,7 +291,7 @@ sub ping
   croak("Timeout must be greater than 0 seconds") if $timeout <= 0;
 
   $ip = inet_aton($host);
-  return(undef) unless defined($ip);      # Does host exist?
+  return () unless defined($ip);      # Does host exist?
 
   # Dispatch to the appropriate routine.
   $ping_time = &time();
@@ -472,7 +477,7 @@ sub ping_tcp
 
   $! = 0;
   $ret = $self -> tcp_connect( $ip, $timeout);
-  if (!$self->{"tcp_econnrefused"} &&
+  if (!$self->{"econnrefused"} &&
       $! == ECONNREFUSED) {
     $ret = 1;  # "Connection refused" means reachable
   }
@@ -515,13 +520,18 @@ sub tcp_connect
     # start the connection attempt
     if (!connect($self->{"fh"}, $saddr)) {
       if ($! == ECONNREFUSED) {
-        $ret = 1 unless $self->{"tcp_econnrefused"};
-      } else {
+        $ret = 1 unless $self->{"econnrefused"};
+      } elsif ($! != EINPROGRESS) {
         # EINPROGRESS is the expected error code after a connect()
-        # on a non-blocking socket
-        croak("tcp connect error - $!") if $! != EINPROGRESS;
-
-        # wait for connection completion
+        # on a non-blocking socket.  But if the kernel immediately
+        # determined that this connect() will never work,
+        # Simply respond with "unreachable" status.
+        # (This can occur on some platforms with errno
+        # EHOSTUNREACH or ENETUNREACH.)
+        return 0;
+      } else {
+        # Got the expected EINPROGRESS.
+        # Just wait for connection completion...
         my ($wbits, $wout);
         $wout = $wbits = "";
         vec($wbits, $self->{"fh"}->fileno, 1) = 1;
@@ -546,7 +556,7 @@ sub tcp_connect
             sysread($self->{"fh"},$char,1);
             $! = ECONNREFUSED if ($! == EAGAIN && $^O =~ /cygwin/i);
 
-            $ret = 1 if (!$self->{"tcp_econnrefused"}
+            $ret = 1 if (!$self->{"econnrefused"}
                          && $! == ECONNREFUSED);
           }
         } else {
@@ -756,8 +766,6 @@ sub open
 # of time.  Return the result of our efforts.
 
 use constant UDP_FLAGS => 0; # Nothing special on send or recv
-# XXX - Use concept by rdw @ perlmonks
-# http://perlmonks.thepen.com/42898.html
 sub ping_udp
 {
   my ($self,
@@ -781,16 +789,26 @@ sub ping_udp
   $saddr = sockaddr_in($self->{"port_num"}, $ip);
   $self->{"seq"} = ($self->{"seq"} + 1) % 256;    # Increment sequence
   $msg = chr($self->{"seq"}) . $self->{"data"};   # Add data if any
-  send($self->{"fh"}, $msg, UDP_FLAGS, $saddr);   # Send it
+  # Have to connect() and send() instead of sendto()
+  # in order to pick up on the ECONNREFUSED setting
+  # from recv() or double send() errno as utilized in
+  # the concept by rdw @ perlmonks.  See:
+  # http://perlmonks.thepen.com/42898.html
+  connect($self->{"fh"}, $saddr);                 # Tie destination to socket
+  send($self->{"fh"}, $msg, UDP_FLAGS);           # Send it
 
   $rbits = "";
   vec($rbits, $self->{"fh"}->fileno(), 1) = 1;
   $ret = 0;                   # Default to unreachable
   $done = 0;
+  my $retrans = 0.01;
   $finish_time = &time() + $timeout;       # Ping needs to be done by then
   while (!$done && $timeout > 0)
   {
-    $nfound = select($rbits, undef, undef, $timeout); # Wait for response
+    $timeout = $retrans if $timeout > $retrans;
+    $retrans*= 1.2; # Exponential backoff
+    $nfound  = select($rbits, undef, undef, $timeout); # Wait for response
+    my $why = $!;
     $timeout = $finish_time - &time();   # Get remaining time
 
     if (!defined($nfound))  # Hmm, a strange error
@@ -801,21 +819,48 @@ sub ping_udp
     elsif ($nfound)         # A packet is waiting
     {
       $from_msg = "";
-      $from_saddr = recv($self->{"fh"}, $from_msg, 1500, UDP_FLAGS)
-        or last; # For example an unreachable host will make recv() fail.
-      ($from_port, $from_ip) = sockaddr_in($from_saddr);
-      if (!$source_verify ||
-          (($from_ip eq $ip) &&        # Does the packet check out?
-           ($from_port == $self->{"port_num"}) &&
-           ($from_msg eq $msg)))
-      {
-        $ret = 1;       # It's a winner
+      $from_saddr = recv($self->{"fh"}, $from_msg, 1500, UDP_FLAGS);
+      if (!$from_saddr) {
+        # For example an unreachable host will make recv() fail.
+        if (!$self->{"econnrefused"} &&
+            $! == ECONNREFUSED) {
+          # "Connection refused" means reachable
+          # Good, continue
+          $ret = 1;
+        }
         $done = 1;
+      } else {
+        ($from_port, $from_ip) = sockaddr_in($from_saddr);
+        if (!$source_verify ||
+            (($from_ip eq $ip) &&        # Does the packet check out?
+             ($from_port == $self->{"port_num"}) &&
+             ($from_msg eq $msg)))
+        {
+          $ret = 1;       # It's a winner
+          $done = 1;
+        }
       }
     }
-    else                    # Oops, timed out
+    elsif ($timeout <= 0)              # Oops, timed out
     {
       $done = 1;
+    }
+    else
+    {
+      # Send another in case the last one dropped
+      if (send($self->{"fh"}, $msg, UDP_FLAGS)) {
+        # Another send worked?  The previous udp packet
+        # must have gotten lost or is still in transit.
+        # Hopefully this new packet will arrive safely.
+      } else {
+        if (!$self->{"econnrefused"} &&
+            $! == ECONNREFUSED) {
+          # "Connection refused" means reachable
+          # Good, continue
+          $ret = 1;
+        }
+        $done = 1;
+      }
     }
   }
   return $ret;
@@ -953,7 +998,7 @@ sub ack
     if (my $host = shift) {
       # Host passed as arg
       if (exists $self->{"bad"}->{$host}) {
-        if (!$self->{"tcp_econnrefused"} &&
+        if (!$self->{"econnrefused"} &&
             $self->{"bad"}->{ $host } &&
             (($! = ECONNREFUSED)>0) &&
             $self->{"bad"}->{ $host } eq "$!") {
@@ -1025,7 +1070,7 @@ sub ack
           delete $self->{"syn"}->{$fd};
           vec($self->{"wbits"}, $fd, 1) = 0;
           vec($wbits, $fd, 1) = 0;
-          if (!$self->{"tcp_econnrefused"} &&
+          if (!$self->{"econnrefused"} &&
               $self->{"bad"}->{ $entry->[0] } &&
               (($! = ECONNREFUSED)>0) &&
               $self->{"bad"}->{ $entry->[0] } eq "$!") {
@@ -1043,7 +1088,7 @@ sub ack
             sysread($entry->[2],$char,1);
             # Store the excuse why the connection failed.
             $self->{"bad"}->{$entry->[0]} = $!;
-            if (!$self->{"tcp_econnrefused"} &&
+            if (!$self->{"econnrefused"} &&
                 (($! == ECONNREFUSED) ||
                  ($! == EAGAIN && $^O =~ /cygwin/i))) {
               # "Connection refused" means reachable
@@ -1126,7 +1171,7 @@ sub ack_unfork {
           # Connection attempt to remote host is done
           delete $self->{"syn"}->{$pid};
           if (!$how || # If there was no error connecting
-              (!$self->{"tcp_econnrefused"} &&
+              (!$self->{"econnrefused"} &&
                $how == ECONNREFUSED)) {  # "Connection refused" means reachable
             if ($host && $entry->[0] ne $host) {
               # A good connection, but not the host we need.
@@ -1355,9 +1400,9 @@ This only affects udp and icmp protocol pings.
 
 This is enabled by default.
 
-=item $p->tcp_service_check( { 0 | 1 } );
+=item $p->service_check( { 0 | 1 } );
 
-Set whether or not the tcp connect behavior should enforce
+Set whether or not the connect behavior should enforce
 remote service availability as well as reachability.  Normally,
 if the remote server reported ECONNREFUSED, it must have been
 reachable because of the status packet that it reported.
@@ -1371,10 +1416,17 @@ and unresponsive to any clients connecting, but if the kernel
 throws the ACK packet, it is considered alive anyway.  To
 really determine if the server is responding well would be
 application specific and is beyond the scope of Net::Ping.
+For udp protocol, enabling this option demands that the
+remote server replies with the same udp data that it was sent
+as defined by the udp echo service.
 
-This only affects "tcp" and "syn" protocols.
+This affects the "udp", "tcp", and "syn" protocols.
 
 This is disabled by default.
+
+=item $p->tcp_service_check( { 0 | 1 } );
+
+Depricated method, but does the same as service_check() method.
 
 =item $p->hires( { 0 | 1 } );
 
@@ -1517,6 +1569,16 @@ Or install it RPM Style:
 
   rpm -ih RPMS/noarch/perl-Net-Ping-xxxx.rpm
 
+=head1 BUGS
+
+For a list of known issues, visit:
+
+https://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-Ping
+
+To report a new bug, visit:
+
+https://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-Ping
+
 =head1 AUTHORS
 
   Current maintainer:
@@ -1543,5 +1605,7 @@ Copyright (c) 2001, Colin McMillen.  All rights reserved.
 
 This program is free software; you may redistribute it and/or
 modify it under the same terms as Perl itself.
+
+$Id: Ping.pm,v 1.75 2003/04/12 20:51:17 rob Exp $
 
 =cut

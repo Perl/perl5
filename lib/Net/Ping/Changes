@@ -1,6 +1,26 @@
 CHANGES
 -------
 
+2.29  Apr 12 15:00 2003
+	- Implement "double send()" concept for udp pings.
+	  See: <http://perlmonks.thepen.com/42898.html>
+	  Thanks to rdw @ perlmonks.
+	- Send multiple udp packets in case of loss.
+	- Exponential backoff code swiped from Net::DNS
+	  Thanks to mike@fuhr.org (Michael Fuhr).
+	- Also allows to capture udp ECONNREFUSED condition.
+	- Rename tcp_service_check method to service_check.
+	- Allow demo/fping -s to force service check.
+	  Idea by ralijani@yahoo.com (REZA Alijani)
+	- Fix return from ping to be compatible with wantarray
+	  when the host doesn't even resolve.
+	- Add udp proto test to test suite.
+	- VMS patch from Craig Berry to pre-check echo.
+	- Apply bleadperl patch (change #18904)
+	- Apply bleadperl patch as explained:
+	http://www.xray.mpe.mpg.de/mailing-lists/perl5-
+	porters/2003-03/msg00992.html
+
 2.28  Jan 23 18:00 2003
 	- No new features.  Bug fixes only.
 	- Fixed ICMP_STRUCT to work on Big Endian platforms.
