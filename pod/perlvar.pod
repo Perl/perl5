@@ -1107,7 +1107,7 @@ and B<-C> filetests are based on this value.
 
 Reflects if taint mode is on or off.  1 for on (the program was run with
 B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
-B<-t> or B<-TU>).
+B<-t> or B<-TU>).  This variable is read-only.
 
 =item $PERL_VERSION
 
