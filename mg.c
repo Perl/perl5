@@ -1735,7 +1735,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	            PL_compiling.cop_warnings = pWARN_NONE;
 		    break;
 		}
-                if (isWARN_on(sv, WARN_ALL)) {
+                if (isWARN_on(sv, WARN_ALL) && !isWARNf_on(sv, WARN_ALL)) {
 	            PL_compiling.cop_warnings = pWARN_ALL;
 	            PL_dowarn |= G_WARN_ONCE ;
 	        }	
