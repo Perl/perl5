@@ -2141,7 +2141,7 @@ S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
 #ifdef DEBUGGING
     static char* exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
-	  "ATTRTERM", "TERMBLOCK"
+	  "ATTRTERM", "TERMBLOCK", "TERMORDORDOR"
 	};
 #endif
 

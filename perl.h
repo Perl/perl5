@@ -3182,6 +3182,7 @@ typedef enum {
     XATTRTERM,
     XTERMBLOCK,
     XTERMORDORDOR /* evil hack */
+    /* update exp_name[] in toke.c if adding to this enum */
 } expectation;
 
 enum {		/* pass one of these to get_vtbl */
