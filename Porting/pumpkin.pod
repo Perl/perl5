@@ -488,16 +488,13 @@ some patches so that byacc dynamically allocates space, rather than
 having fixed limits.  This patch is handled by the F<perly.fixer>
 script.  Depending on the nature of the changes to F<perly.y>, you may
 or may not have to hand-edit the patch to apply correctly.  If you do,
-you should include the edited patch in the new distribution.  If you
-have byacc-1.9, the patch won't apply cleanly.  Changes to the printf
-output statements mean the patch won't apply cleanly.  Long ago I
-started to fix F<perly.fixer> to detect this, but I never completed the
-task.
+you should include the edited patch in the new distribution.  (If you
+have byacc-1.9, the patch won't apply cleanly, notably changes to the printf
+output statements.  F<perly.fixer> could be fixed to detect this.)
 
 If C<perly.c> or C<perly.h> changes, make sure you run C<perl vms/vms_yfix.pl> 
-to update the corresponding VMS files.  This could be taken care of by 
-the regen_all target in the Unix Makefile.  See also 
-L<VMS-specific updates>.
+to update the corresponding VMS files.  The run_byacc target in the Unix
+Makefile takes care of this.  See also L<VMS-specific updates>.
 
 Some additional notes from Larry on this:
 
@@ -507,7 +504,7 @@ Don't forget to regenerate perly_c.diff.
     mv y.tab.c perly.c
     patch perly.c <perly_c.diff
     # manually apply any failed hunks
-    diff -c perly.c.orig perly.c >perly_c.diff
+    diff -u perly.c.orig perly.c >perly_c.diff
 
 One chunk of lines that often fails begins with
 
