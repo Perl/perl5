@@ -3395,7 +3395,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
         sv_force_normal_flags(sv, 0);
     }
 
-    if (PL_encoding)
+    if (PL_encoding && !(flags & SV_UTF8_NO_ENCODING))
         sv_recode_to_utf8(sv, PL_encoding);
     else { /* Assume Latin-1/EBCDIC */
 	 /* This function could be much more efficient if we

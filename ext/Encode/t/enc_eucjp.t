@@ -1,5 +1,5 @@
-# This is the twin of enc_eucjp.t, the only difference is that
-# this has "use encoding 'utf8'".
+# This is the twin of enc_utf8.t, the only difference is that
+# this has "use encoding 'euc-jp'".
 
 BEGIN {
     require Config; import Config;
@@ -17,7 +17,7 @@ BEGIN {
     }
 }
 
-use encoding 'utf8';
+use encoding 'euc-jp';
 
 my @c = (127, 128, 255, 256);
 
@@ -40,7 +40,7 @@ for my $i (0..$#c) {
   binmode(F, ":utf8");
   my $c = <F>;
   my $o = ord($c);
-  print $o == $c[$i] ? "ok $t - utf8 I/O $c[$i]\n" : "not ok $t - utf8 I/O $c[$$i]: $o != $c[$i]\n";
+  print $o == $c[$i] ? "ok $t - utf8 I/O $c[$i]\n" : "not ok $t - utf8 I/O $c[$i]: $o != $c[$i]\n";
   $t++;
 }
 

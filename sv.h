@@ -1030,6 +1030,7 @@ otherwise.
 #define SV_IMMEDIATE_UNREF	1
 #define SV_GMAGIC		2
 #define SV_COW_DROP_PV		4
+#define SV_UTF8_NO_ENCODING	8
 
 /* We are about to replace the SV's current value. So if it's copy on write
    we need to normalise it. Use the SV_COW_DROP_PV flag hint to say that

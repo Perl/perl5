@@ -29,8 +29,7 @@ sub import {
 	Carp::croak("Unknown encoding '$name'");
     }
     unless ($arg{Filter}) {
-	${^ENCODING} = $enc # this is all you need, actually.
-	    unless $name =~ /^(?:utf-?(?:8|16|32)|ucs-?(?:2|4))(?:[bl]e)?$/i;
+	${^ENCODING} = $enc;
 	$HAS_PERLIO or return 1;
 	for my $h (qw(STDIN STDOUT)){
 	    if ($arg{$h}){

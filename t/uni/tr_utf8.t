@@ -62,7 +62,6 @@ is($str, $hiragana, "s/// # hiragana -> katakana");
   # [perl 16843]
   my $line = 'abcdefghijklmnopqrstuvwxyz$0123456789';
   $line =~ tr/bcdeghijklmnprstvwxyz$02578/בצדעגהיײקלמנפּרסטװשכיזשױתײחא/;
-#  is($line, "aבצדעfגהיײקלמנoפqּרסuטװשכיזש1ױ34ת6ײח9", "[perl #16843]");
-   ok(1, "TODO: Encode 1.84 broke the test for perl #16843");
+  is($line, "aבצדעfגהיײקלמנoפqּרסuטװשכיזש1ױ34ת6ײח9", "[perl #16843]");
 }
 __END__
