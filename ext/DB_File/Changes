@@ -259,6 +259,16 @@
 1.69 3rd August 1999
 
    * fixed a bug in push -- DB_APPEND wasn't working properly.
+
    * Fixed the R_SETCURSOR bug introduced in 1.68
+
    * Added a new Perl variable $DB_File::db_ver
    
+1.70 4th August 1999
+
+   * Initialise $DB_File::db_ver and $DB_File::db_version with
+     GV_ADD|GV_ADDMULT -- bug spotted by Nick Ing-Simmons.
+
+   * Added a BOOT check to test for equivalent versions of db.h &
+     libdb.a/so.
+

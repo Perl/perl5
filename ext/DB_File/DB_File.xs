@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 3rd August 1999
- version 1.69
+ last modified 4th August 1999
+ version 1.70
 
  All comments/suggestions/problems are welcome
 
@@ -74,9 +74,10 @@
         1.69 -  fixed a bug in push -- DB_APPEND wasn't working properly.
 		Fixed the R_SETCURSOR bug introduced in 1.68
 		Added a new Perl variable $DB_File::db_ver 
-
-
-
+        1.70 -  Initialise $DB_File::db_ver and $DB_File::db_version with 
+		GV_ADD|GV_ADDMULT -- bug spotted by Nick Ing-Simmons.
+		Added a BOOT check to test for equivalent versions of db.h &
+		libdb.a/so.
 
 */
 
@@ -441,13 +442,20 @@ u_int		flags ;
 static void
 GetVersionInfo(pTHX)
 {
-    SV * version_sv = perl_get_sv("DB_File::db_version", TRUE) ;
-    SV * ver_sv = perl_get_sv("DB_File::db_ver", TRUE) ;
+    SV * version_sv = perl_get_sv("DB_File::db_version", GV_ADD|GV_ADDMULTI) ;
+    SV * ver_sv = perl_get_sv("DB_File::db_ver", GV_ADD|GV_ADDMULTI) ;
 #ifdef DB_VERSION_MAJOR
     int Major, Minor, Patch ;
 
     (void)db_version(&Major, &Minor, &Patch) ;
 
+    /* Check that the versions of db.h and libdb.a are the same */
+    if (Major != DB_VERSION_MAJOR || Minor != DB_VERSION_MINOR 
+		|| Patch != DB_VERSION_PATCH)
+	croak("\nDB_File needs compatible versions of libdb & db.h\n\tyou have db.h version %d.%d.%d and libdb version %d.%d.%d\n",  
+		DB_VERSION_MAJOR, DB_VERSION_MINOR, DB_VERSION_PATCH, 
+		Major, Minor, Patch) ;
+    
     /* check that libdb is recent enough  -- we need 2.3.4 or greater */
     if (Major == 2 && (Minor < 3 || (Minor ==  3 && Patch < 4)))
 	croak("DB_File needs Berkeley DB 2.3.4 or greater, you have %d.%d.%d\n",
