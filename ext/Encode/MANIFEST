@@ -70,7 +70,7 @@ t/jisx0212.ref	test data
 t/jperl.t	encoding extension test
 t/ksc5601.euc	test data
 t/ksc5601.ref	test data
-t/perlio.t
+t/perlio.t	encoding extension test
 t/unibench.pl	Unicode benchmark
 ucm/8859-1.ucm	Unicode Character Map
 ucm/8859-10.ucm	Unicode Character Map
@@ -91,8 +91,8 @@ ucm/adobeStdenc.ucm	Unicode Character Map
 ucm/adobeSymbol.ucm	Unicode Character Map
 ucm/adobeZdingbat.ucm	Unicode Character Map
 ucm/ascii.ucm	Unicode Character Map
+ucm/big5-eten.ucm	Unicode Character Map
 ucm/big5-hkscs.ucm	Unicode Character Map
-ucm/big5.ucm	Unicode Character Map
 ucm/cp037.ucm	Unicode Character Map
 ucm/cp1006.ucm	Unicode Character Map
 ucm/cp1026.ucm	Unicode Character Map

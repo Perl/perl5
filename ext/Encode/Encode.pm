@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.51 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load 'Encode';
@@ -261,6 +261,16 @@ sub predefine_encodings{
 require Encode::Encoding;
 @Encode::XS::ISA = qw(Encode::Encoding);
 
+# This is very dodgy - PerlIO::encoding does "use Encode" and  _BEFORE_ it gets a
+# chance to set its VERSION we potentially delete it from %INC so it will be re-loaded
+# NI-S
+eval {
+    require PerlIO::encoding;
+    unless (PerlIO::encoding->VERSION >= 0.02){
+	delete $INC{"PerlIO/encoding.pm"};
+    }
+};
+# warn $@ if $@;
 
 1;
 
@@ -552,12 +562,12 @@ out.  for FB_XX you can import via C<use Encode qw(:fallbacks)> for
 generic bitmask constants, you can import via
  C<use Encode qw(:fallback_all)>.
 
-                       FB_DEFAULT FB_CROAK FB_QUIET FB_WARN  FB_PERLQQ
-  DIE_ON_ERR     0x0001             X
-  WARN_ON_ERR    0x0002                                X
-  RETURN_ON_ERR  0x0004                      X         X
-  LEAVE_SRC      0x0008
-  PERLQQ         0x0100                                        X
+                     FB_DEFAULT FB_CROAK FB_QUIET FB_WARN  FB_PERLQQ
+ DIE_ON_ERR    0x0001             X
+ WARN_ON_ER    0x0002                               X
+ RETURN_ON_ERR 0x0004                      X        X
+ LEAVE_SRC     0x0008
+ PERLQQ        0x0100                                        X
 
 =head2 Unemplemented fallback schemes
 

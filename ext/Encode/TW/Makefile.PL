@@ -2,7 +2,7 @@ use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
 
-my %tables = (big5_t	=> ['big5.ucm',
+my %tables = (big5_t	=> ['big5-eten.ucm',
 			    'big5-hkscs.ucm',
 			    'macChintrad.ucm',
 			    'cp950.ucm'],

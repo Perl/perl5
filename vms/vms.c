@@ -2200,7 +2200,7 @@ static PerlIO *
 safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
 {
     static int handler_set_up = FALSE;
-    unsigned long int sts, flags=1;  /* nowait - gnu c doesn't allow &1 */
+    unsigned long int sts, flags = CLI$M_NOWAIT;
     unsigned int table = LIB$K_CLI_GLOBAL_SYM;
     int j, wait = 0;
     char *p, mode[10], symbol[MAX_DCL_SYMBOL+1], *vmspipe;
@@ -2471,7 +2471,11 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
     info->next=open_pipes;  /* prepend to list */
     open_pipes=info;
     _ckvmssts(sys$setast(1));
-    _ckvmssts(lib$spawn(&vmspipedsc, &nl_desc, &nl_desc, &flags,
+    /* Omit arg 2 (input file) so the child will get the parent's SYS$INPUT
+     * and SYS$COMMAND.  vmspipe.com will redefine SYS$INPUT, but we'll still
+     * have SYS$COMMAND if we need it.
+     */
+    _ckvmssts(lib$spawn(&vmspipedsc, 0, &nl_desc, &flags,
                       0, &info->pid, &info->completion,
                       0, popen_completion_ast,info,0,0,0));
 

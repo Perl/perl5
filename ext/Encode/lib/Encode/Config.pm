@@ -2,7 +2,7 @@
 # Demand-load module list
 #
 package Encode::Config;
-our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use strict;
 
@@ -131,7 +131,7 @@ unless (ord("A") == 193){
 	 'cp949'              => 'Encode::KR',
 	 'MacKorean'          => 'Encode::KR',
 
-	 'big5'               => 'Encode::TW',
+	 'big5-eten'          => 'Encode::TW',
 	 'big5-hkscs'         => 'Encode::TW',
 	 'cp950'              => 'Encode::TW',
 	 'MacChineseTrad'     => 'Encode::TW',

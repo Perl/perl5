@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.29 2002/04/19 05:36:43 dankogai Exp $
+ $Id: Encode.xs,v 1.30 2002/04/20 09:58:23 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -22,10 +22,10 @@
 			 return (y)0; /* fool picky compilers */ \
                          }
 /**/
-UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
-UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
+UNIMPLEMENTED(_encoded_utf8_to_bytes, I32);
+UNIMPLEMENTED(_encoded_bytes_to_utf8, I32);
 
-    void
+void
 Encode_XSEncoding(pTHX_ encode_t * enc)
 {
     dSP;
@@ -122,7 +122,8 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	    if (dir == enc->f_utf8) {
 		STRLEN clen;
 		UV ch =
-		    utf8n_to_uvuni(s+slen, (SvCUR(src)-slen), &clen, UTF8_ALLOW_ANY|UTF8_CHECK_ONLY);
+		    utf8n_to_uvuni(s+slen, (SvCUR(src)-slen),
+				   &clen, UTF8_ALLOW_ANY|UTF8_CHECK_ONLY);
 		if (check & ENCODE_DIE_ON_ERR) {
 		    Perl_croak(
 			aTHX_ "\"\\N{U+%" UVxf "}\" does not map to %s, %d",
@@ -179,9 +180,9 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		}
 	    }
 	    /* settle variables when fallback */
-	    d   = (U8*)SvEND(dst);
-	    dlen = SvLEN(dst)-ddone-1;
-	    s   = (U8*)SvPVX(src) + sdone;
+	    d    = (U8 *)SvEND(dst);
+            dlen = SvLEN(dst) - ddone - 1;
+	    s    = (U8*)SvPVX(src) + sdone;
 	    slen = tlen - sdone;
 	    break;
 
