@@ -16,7 +16,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.17_01';
+$VERSION = '1.18_01';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -482,7 +482,8 @@ sub constants {
 	      INSTALLSITEARCH INSTALLBIN INSTALLSCRIPT PERL_LIB
 	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC
-	      PERL_INC PERL FULLPERL PERLRUN PERLRUNINST TEST_LIBS 
+	      PERL_INC PERL FULLPERL PERLRUN FULLPERLRUN PERLRUNINST 
+              FULLPERLRUNINST TEST_LIBS 
               FULL_AR PERL_CORE NOOP NOECHO
 
 	      / ) {
@@ -1455,10 +1456,11 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 =item init_main
 
 Initializes AR, AR_STATIC_ARGS, BASEEXT, CONFIG, DISTNAME, DLBASE,
-EXE_EXT, FULLEXT, FULLPERL, INST_*, INSTALL*, INSTALLDIRS, LD,
-LIB_EXT, LIBPERL_A, MAP_TARGET, NAME, OBJ_EXT, PARENT_NAME, PERL,
-PERL_ARCHLIB, PERL_INC, PERL_LIB, PERL_SRC, PERLRUN, PERLRUNINST,
-PREFIX, TEST_LIBS, VERSION, VERSION_FROM, VERSION_SYM, XS_VERSION.
+EXE_EXT, FULLEXT, FULLPERL, FULLPERLRUN, FULLPERLRUNINST, INST_*,
+INSTALL*, INSTALLDIRS, LD, LIB_EXT, LIBPERL_A, MAP_TARGET, NAME,
+OBJ_EXT, PARENT_NAME, PERL, PERL_ARCHLIB, PERL_INC, PERL_LIB,
+PERL_SRC, PERLRUN, PERLRUNINST, PREFIX, TEST_LIBS, VERSION,
+VERSION_FROM, VERSION_SYM, XS_VERSION.
 
 =cut
 
@@ -1833,64 +1835,14 @@ usually solves this kind of problem.
     # XS_VERSION macro that defaults to VERSION:
     $self->{XS_VERSION} ||= $self->{VERSION};
 
-    # --- Initialize Perl Binary Locations
-
-    # Find Perl 5. The only contract here is that both 'PERL' and 'FULLPERL'
-    # will be working versions of perl 5.
-    my ($component,@defpath);
-    foreach $component ($self->{PERL_SRC}, $self->path(), 
-                        $Config::Config{binexp}) 
-    {
-	push @defpath, $component if defined $component;
-    }
-
-    # Build up a set of file names (not command names).
-    my $thisperl = File::Spec->canonpath($^X);
-    $thisperl .= $Config{exe_ext} unless $thisperl =~ m/$Config{exe_ext}$/i;
-    my @perls = ('perl', 'perl5', "perl$Config{version}");
-    @perls = ($thisperl, (map $_.=$Config{exe_ext}, @perls));
-
-    # miniperl has priority over all but the cannonical perl when in the
-    # core.  Otherwise its a last resort.
-    my $miniperl = "miniperl$Config{exe_ext}";
-    if( $self->{PERL_CORE} ) {
-        splice @perls, 1, 0, $miniperl;
-    }
-    else {
-        push @perls, $miniperl;
-    }
-
-    $self->{PERL} ||=
-        $self->find_perl(5.0, \@perls, \@defpath, $Verbose );
-    # don't check if perl is executable, maybe they have decided to
-    # supply switches with perl
-
-    # Define 'FULLPERL' to be a non-miniperl (used in test: target)
-    ($self->{FULLPERL} = $self->{PERL}) =~ s/miniperl/perl/i
-	unless ($self->{FULLPERL});
-
-    # Are we building the core?
-    $self->{PERL_CORE} = 0 unless exists $self->{PERL_CORE};
-
-    # How do we run perl?
-    $self->{PERLRUN}  = $self->{PERL_CORE} ? $self->{PERL} : $self->{FULLPERL};
-    $self->{PERLRUN} .= qq{ "-I\$(PERL_LIB)"} if $self->{UNINSTALLED_PERL};
-
-    # How do we run perl when installing libraries?
-    $self->{PERLRUNINST} = qq{$self->{PERLRUN} "-I\$(INST_ARCHLIB)" "-I\$(INST_LIB)"};
-
     # What extra library dirs do we need when running the tests?
     # Make sure these are absolute paths in case the test chdirs.
-    $self->{TEST_LIBS}   .= join '', 
-                            map { ' "-I'.File::Spec->rel2abs($_).'"' } 
-                                $self->{INST_ARCHLIB}, $self->{INST_LIB};
+    $self->{TEST_LIBS} .= join '', 
+                          map { ' "-I'.File::Spec->rel2abs($_).'"' } 
+                               $self->{INST_ARCHLIB}, $self->{INST_LIB};
 
-    # When building the core, we need to add some helper libs since
-    # perl's @INC won't work (we're not installed yet).
-    foreach my $targ (qw(PERLRUN PERLRUNINST TEST_LIBS)) {
-        $self->{$targ} .= ' "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)"'
-          if $self->{PERL_CORE};
-    }
+    # --- Initialize Perl Binary Locations
+    $self->init_PERL;
 }
 
 =item init_others
@@ -1962,6 +1914,79 @@ sub init_others {	# --- Initialize Other Attributes
     $self->{UMASK_NULL} ||= "umask 0";
     $self->{DEV_NULL} ||= "> /dev/null 2>&1";
 }
+
+=item init_PERL
+
+    $self->init_PERL;
+
+Called by init_main.  Sets up PERL, FULLPERL, PERLRUN, PERLRUNINST,
+FULLPERLRUN and FULLPERLRUNINST.
+
+    PERL is allowed to be miniperl
+    FULLPERL must be a complete perl
+
+    *PERLRUN contains everything necessary to run perl, find it's
+         libraries, etc...
+
+    *PERLRUNINST is *PERLRUN + everything necessary to find the
+         modules being built.
+
+=cut
+
+sub init_PERL {
+    my($self) = shift;
+
+    my @defpath = ();
+    foreach my $component ($self->{PERL_SRC}, $self->path(), 
+                           $Config::Config{binexp}) 
+    {
+	push @defpath, $component if defined $component;
+    }
+
+    # Build up a set of file names (not command names).
+    my $thisperl = File::Spec->canonpath($^X);
+    $thisperl .= $Config{exe_ext} unless $thisperl =~ m/$Config{exe_ext}$/i;
+    my @perls = ($thisperl);
+    push @perls, map { "$_$Config{exe_ext}" }
+                     ('perl', 'perl5', "perl$Config{version}");
+
+    # miniperl has priority over all but the cannonical perl when in the
+    # core.  Otherwise its a last resort.
+    my $miniperl = "miniperl$Config{exe_ext}";
+    if( $self->{PERL_CORE} ) {
+        splice @perls, 1, 0, $miniperl;
+    }
+    else {
+        push @perls, $miniperl;
+    }
+
+    $self->{PERL} ||=
+        $self->find_perl(5.0, \@perls, \@defpath, $Verbose );
+    # don't check if perl is executable, maybe they have decided to
+    # supply switches with perl
+
+    # Define 'FULLPERL' to be a non-miniperl (used in test: target)
+    ($self->{FULLPERL} = $self->{PERL}) =~ s/miniperl/perl/i
+	unless $self->{FULLPERL};
+
+    # Are we building the core?
+    $self->{PERL_CORE} = 0 unless exists $self->{PERL_CORE};
+
+    # How do we run perl?
+    foreach my $perl (qw(PERL FULLPERL)) {
+        $self->{$perl.'RUN'}  = "\$($perl)";
+
+        # Make sure perl can find itself before it's installed.
+        $self->{$perl.'RUN'} .= q{ "-I$(PERL_LIB)" "-I$(PERL_ARCHLIB)"} 
+          if $self->{UNINSTALLED_PERL} || $self->{PERL_CORE};
+
+        $self->{$perl.'RUNINST'} = 
+          q{$(PERLRUN) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)"};
+    }
+
+    return 1;
+}
+
 
 =item install (o)
 
@@ -3298,12 +3323,15 @@ test :: \$(TEST_TYPE)
     push(@m, "\n");
 
     push(@m, "test_dynamic :: pure_all\n");
-    push(@m, $self->test_via_harness('$(PERLRUN)', '$(TEST_FILES)')) if $tests;
-    push(@m, $self->test_via_script('$(PERLRUN)', '$(TEST_FILE)')) if -f "test.pl";
+    push(@m, $self->test_via_harness('$(FULLPERLRUN)', '$(TEST_FILES)')) 
+      if $tests;
+    push(@m, $self->test_via_script('$(FULLPERLRUN)', '$(TEST_FILE)')) 
+      if -f "test.pl";
     push(@m, "\n");
 
     push(@m, "testdb_dynamic :: pure_all\n");
-    push(@m, $self->test_via_script('$(PERLRUN) $(TESTDB_SW)', '$(TEST_FILE)'));
+    push(@m, $self->test_via_script('$(FULLPERLRUN) $(TESTDB_SW)', 
+                                    '$(TEST_FILE)'));
     push(@m, "\n");
 
     # Occasionally we may face this degenerate target:

@@ -22,7 +22,8 @@ $Is_VMS = $^O eq 'VMS';
 require VMS::Filespec if $Is_VMS;
 
 $Debug = $ENV{PERL_MM_MANIFEST_DEBUG} || 0;
-$Verbose = 1;
+$Verbose = defined $ENV{PERL_MM_MANIFEST_VERBOSE} ?
+                   $ENV{PERL_MM_MANIFEST_VERBOSE} : 1;
 $Quiet = 0;
 $MANIFEST = 'MANIFEST';
 $DEFAULT_MSKIP = (splitpath($INC{"ExtUtils/Manifest.pm"}))[1]."$MANIFEST.SKIP";

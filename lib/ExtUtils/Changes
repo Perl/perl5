@@ -1,3 +1,17 @@
+5.54_01 Sat Mar 30 02:32:44 EST 2002
+    [[ New Features ]]
+    * Added FULLPERLRUN and FULLPERLRUNINST
+
+    [[ Bug Fixes ]]
+    - hint files were made a little too noisy in 5.53_01
+
+    [[ Test Fixes ]]
+    - mtime appears to be broken on Tru64 5.6.0
+    - basic.t was finding the wrong perl in the core
+
+5.53_02 Fri Mar 29 04:47:44 EST 2002
+    - Adjusted for Perl core.  Synced into bleadperl.
+
 5.53_01 Fri Mar 29 00:13:02 EST 2002
     [[ Bug Fixes ]]
     - Removed duplicate NAME macro definition
@@ -147,7 +161,7 @@
 5.48_04 Mon Jan 21 19:28:38 EST 2002
     - No longer requiring Test::More
     - Now tested to work with a clean 5.6.1
-    - Stripped out $Revision: 1.25 $ based $VERSIONs.
+    - Stripped out $Revision: 1.27 $ based $VERSIONs.
     - Rolled in patches from p5p, vmsperl & VOS (14325, 14338, 14360, 14364)
     * hint files now run in a safer context.  Only $self is available.
     - ExtUtils::testlib now provides absolute paths into @INC.

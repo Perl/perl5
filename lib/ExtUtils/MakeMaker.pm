@@ -2,10 +2,10 @@ BEGIN {require 5.004;}
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.53_01";
+$VERSION = "5.54_01";
 $Version_OK = "5.49";   # Makefiles older than $Version_OK will die
                         # (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.19 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.23 $, 10)) =~ s/\s+$//;
 
 require Exporter;
 use Config;
@@ -117,8 +117,9 @@ sub full_setup {
 
     AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION
     C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
-    EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE FULLPERL FUNCLIST H 
-    IMPORTS
+    EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE 
+    FULLPERL FULLPERLRUN FULLPERLRUNINST
+    FUNCLIST H IMPORTS
     INC INCLUDE_EXT INSTALLARCHLIB INSTALLBIN INSTALLDIRS
     INSTALLMAN1DIR
     INSTALLMAN3DIR INSTALLPRIVLIB INSTALLSCRIPT INSTALLSITEARCH
@@ -171,7 +172,7 @@ sub full_setup {
     push @Overridable, qw[
 
  dir_target libscan makeaperl needs_linking perm_rw perm_rwx
- subdir_x test_via_harness test_via_script
+ subdir_x test_via_harness test_via_script init_PERL
                          ];
 
     push @MM_Sections, qw[
@@ -616,11 +617,12 @@ sub _run_hintfile {
     local($self) = shift;       # make $self available to the hint file.
     my($hint_file) = shift;
 
+    local $@;
     print STDERR "Processing hints file $hint_file\n";
-    local($!, $@);
-    do "./$hint_file";
-    print STDERR "Couldn't open hint file: $!" if $!;
-    print STDERR $@ if $@;
+    my $ret = do "./$hint_file";
+    unless( defined $ret ) {
+        print STDERR $@ if $@;
+    }
 }
 
 sub mv_all_methods {
@@ -1254,7 +1256,15 @@ that will be produced for the MAP_TARGET.
 
 =item FULLPERL
 
-Perl binary able to run this extension.
+Perl binary able to run this extension, load XS modules, etc...
+
+=item FULLPERLRUN
+
+Like PERLRUN, except it uses FULLPERL.
+
+=item FULLPERLRUNINST
+
+Like PERLRUNINST, except it uses FULLPERL.
 
 =item FUNCLIST
 
@@ -1555,14 +1565,14 @@ of memory allocations, etc.
 
 =item PERLRUN
 
-Use this instead of $(PERL) or $(FULLPERL) when you wish to run perl.
-It will set up extra necessary flags for you.
+Use this instead of $(PERL) when you wish to run perl.  It will set up
+extra necessary flags for you.
 
 =item PERLRUNINST
 
-Use this instead of $(PERL) or $(FULLPERL) when you wish to run
-perl to work with modules.  It will add things like -I$(INST_ARCH)
-and other necessary flags.
+Use this instead of $(PERL) when you wish to run perl to work with
+modules.  It will add things like -I$(INST_ARCH) and other necessary
+flags so perl can see the modules you're about to install.
 
 =item PERL_SRC
 
@@ -1751,7 +1761,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.19 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.23 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

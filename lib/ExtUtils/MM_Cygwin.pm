@@ -60,7 +60,7 @@ qq[POD2MAN = \$(PERL) -we '%m=\@ARGV;for (keys %m){' \\\n],
 q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
  $self->{MAKEFILE}, q[";' \\
 -e 'print "Manifying $$m{$$_}\n"; $$m{$$_} =~ s/::/./g;' \\
--e 'system(qq[$$^X ].q["-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" $(POD2MAN_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
+-e 'system(qq[$(PERLRUN) $(POD2MAN_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
 -e 'chmod(oct($(PERM_RW))), $$m{$$_} or warn "chmod $(PERM_RW) $$m{$$_}: $$!\n";}'
 ];
     push @m, "\nmanifypods : pure_all ";

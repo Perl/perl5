@@ -962,10 +962,10 @@ lib/ExtUtils/MY.pm              MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/t/Big-Fat-Dummy/lib/Big/Fat/Dummy.pm     MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
-lib/ExtUtils/t/Big-Fat-Dummy/t/compile.t              MakeMaker dummy module
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
+lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
 lib/ExtUtils/t/hints.t          See if hint files are honored.
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
