@@ -8,6 +8,8 @@ BEGIN {
 use warnings;
 use Test::More tests => 8;
 use vars qw( $Term::Complete::complete $complete );
+my $restore;
+
 
 SKIP: {
     skip('PERL_SKIP_TTY_TEST', 8) if $ENV{PERL_SKIP_TTY_TEST};
@@ -18,7 +20,9 @@ SKIP: {
     if (defined $TTY) {
 	open(TTY, $TTY)               or die "open $TTY failed: $!";
 	skip("$TTY not a tty", 8)     if defined $TTY && ! -t TTY;
-    }
+	$restore = `stty -g`;
+	skip("Can't reliably restore $TTY", 8) if $?;
+	}
 
 use_ok( 'Term::Complete' );
 
@@ -65,6 +69,9 @@ like( $$out, qr/prompt:frobn/, 'prompt is okay' );
 # now remove the prompt and we should be okay
 $$out =~ s/prompt://g;
 is( $$out, get_expected('frobn', 'frobnitz' ), 'works with new $complete' );
+`stty $restore`;
+
+} # end of SKIP, end of tests
 
 # easier than matching space characters
 sub get_expected {
@@ -110,6 +117,3 @@ sub PRINT {
 	my $self = shift;
 	($$self .= join('', @_)) =~ s/\s+/./gm;
 }
-
-} # end of SKIP, end of tests
-
