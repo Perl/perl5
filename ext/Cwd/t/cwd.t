@@ -66,10 +66,10 @@ SKIP: {
 	my $getcwd     = getcwd;
 	my $fastcwd    = fastcwd;
 	my $fastgetcwd = fastgetcwd;
-	is(cwd(),       $start, 'cwd()');
-	is(getcwd(),    $start, 'getcwd()');
-	is(fastcwd(),   $start, 'fastcwd()');
-	is(fastgetcwd(),$start, 'fastgetcwd()');
+	is($cwd,        $start, 'cwd()');
+	is($getcwd,     $start, 'getcwd()');
+	is($fastcwd,    $start, 'fastcwd()');
+	is($fastgetcwd, $start, 'fastgetcwd()');
     }
 }
 
