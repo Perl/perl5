@@ -22,6 +22,7 @@
 #include <fcntl.h>
 
 #define PERLIO_NOT_STDIO 0
+
 #include "EXTERN.h"
 #include "perl.h"
 

@@ -1493,12 +1493,20 @@ IV
 PerlIOStdio_close(PerlIO *f)
 {
  dTHX;
+#ifdef HAS_SOCKET
  int optval, optlen = sizeof(int);
+#endif
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
  return(
+#ifdef HAS_SOCKET
    (getsockopt(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (char *)&optval, &optlen) < 0) ?
        PerlSIO_fclose(stdio) :
-       close(PerlIO_fileno(f)));
+       close(PerlIO_fileno(f))
+#else
+   PerlSIO_fclose(stdio)
+#endif
+     );
+
 }
 
 IV
