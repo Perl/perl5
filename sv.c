@@ -2402,26 +2402,37 @@ Convert the PV of an SV to its UTF8-encoded form.
 void
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
-    char *s, *t;
-    bool hibit;
+    char *s, *t, *e;
+    int  hibit = 0;
 
     if (!sv || !SvPOK(sv) || SvUTF8(sv))
 	return;
 
     /* This function could be much more efficient if we had a FLAG in SVs
      * to signal if there are any hibit chars in the PV.
+     * Given that there isn't make loop fast as possible
      */
-    for (s = t = SvPVX(sv), hibit = FALSE; t < SvEND(sv) && !hibit; t++)
-	if (*t & 0x80)
-	    hibit = TRUE;
+    s = SvPVX(sv);
+    e = SvEND(sv);
+    t = s;
+    while (t < e) {
+	if ((hibit = *t++ & 0x80))
+	    break;
+    }
 
     if (hibit) {
-	STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
+	STRLEN len;
+	if (SvREADONLY(sv) && SvFAKE(sv)) {
+	    sv_force_normal(sv);
+	    s = SvPVX(sv);
+	}
+	len = SvCUR(sv) + 1; /* Plus the \0 */
 	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
 	SvCUR(sv) = len - 1;
+	if (SvLEN(sv) != 0)
+	    Safefree(s); /* No longer using what was there before. */
 	SvLEN(sv) = len; /* No longer know the real size. */
 	SvUTF8_on(sv);
-	Safefree(s); /* No longer using what was there before. */
     }
 }
 
@@ -2484,6 +2495,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
 {
     if (SvPOK(sv)) {
         char *c;
+        char *e;
         bool has_utf = FALSE;
         if (!sv_utf8_downgrade(sv, TRUE))
 	    return FALSE;
@@ -2494,8 +2506,8 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
         c = SvPVX(sv);
 	if (!is_utf8_string((U8*)c, SvCUR(sv)+1))
 	    return FALSE;
-
-        while (c < SvEND(sv)) {
+        e = SvEND(sv);
+        while (c < e) {
             if (*c++ & 0x80) {
 		SvUTF8_on(sv);
 		break;
@@ -3179,27 +3191,42 @@ Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRL
 /*
 =for apidoc sv_catsv
 
-Concatenates the string from SV C<ssv> onto the end of the string in SV
-C<dsv>.  Handles 'get' magic, but not 'set' magic.  See C<sv_catsv_mg>.
+Concatenates the string from SV C<ssv> onto the end of the string in
+SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  Handles 'get' magic, but
+not 'set' magic.  See C<sv_catsv_mg>.
 
-=cut
-*/
+=cut */
 
 void
 Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 {
-    char *s;
-    STRLEN len;
+    char *spv;
+    STRLEN slen;
     if (!sstr)
 	return;
-    if ((s = SvPV(sstr, len))) {
-	if (DO_UTF8(sstr)) {
-	    sv_utf8_upgrade(dstr);
-	    sv_catpvn(dstr,s,len);
-	    SvUTF8_on(dstr);
+    if ((spv = SvPV(sstr, slen))) {
+	bool dutf8 = DO_UTF8(dstr);
+	bool sutf8 = DO_UTF8(sstr);
+
+	if (dutf8 == sutf8)
+	    sv_catpvn(dstr,spv,slen);
+	else {
+	    if (dutf8) {
+		SV* cstr = newSVsv(sstr);
+		char *cpv;
+		STRLEN clen;
+
+		sv_utf8_upgrade(cstr);
+		cpv = SvPV(cstr,clen);
+		sv_catpvn(dstr,cpv,clen);
+		sv_2mortal(cstr);
+	    }
+	    else {
+		sv_utf8_upgrade(dstr);
+		sv_catpvn(dstr,spv,slen);
+		SvUTF8_on(dstr);
+	    }
 	}
-	else
-	    sv_catpvn(dstr,s,len);
     }
 }
 

@@ -2241,17 +2241,11 @@ PP(pp_sprintf)
 PP(pp_ord)
 {
     djSP; dTARGET;
-    UV value;
-    SV *tmpsv = POPs;
+    SV *argsv = POPs;
     STRLEN len;
-    U8 *tmps = (U8*)SvPVx(tmpsv, len);
-    STRLEN retlen;
+    U8 *s = (U8*)SvPVx(argsv, len);
 
-    if ((*tmps & 0x80) && DO_UTF8(tmpsv))
-	value = utf8_to_uv(tmps, len, &retlen, 0);
-    else
-	value = (UV)(*tmps & 255);
-    XPUSHu(value);
+    XPUSHu(DO_UTF8(argsv) ? utf8_to_uv_simple(s, 0) : (*s & 0xff));
     RETURN;
 }
 
@@ -5032,7 +5026,7 @@ PP(pp_split)
     AV *ary;
     register IV limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
-    bool doutf8 = DO_UTF8(sv);
+    bool do_utf8 = DO_UTF8(sv);
     STRLEN len;
     register char *s = SvPV(sv, len);
     char *strend = s + len;
@@ -5041,7 +5035,8 @@ PP(pp_split)
     register SV *dstr;
     register char *m;
     I32 iters = 0;
-    I32 maxiters = (strend - s) + 10;
+    STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (strend - s);
+    I32 maxiters = slen + 10;
     I32 i;
     char *orig;
     I32 origlimit = limit;
@@ -5135,7 +5130,7 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (doutf8)
+	    if (do_utf8)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 
@@ -5157,7 +5152,7 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (doutf8)
+	    if (do_utf8)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    s = m;
@@ -5182,12 +5177,12 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
-		if (doutf8)
+		if (do_utf8)
 		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
-		s = m + (doutf8 ? SvCUR(csv) : len);
+		s = m + (do_utf8 ? SvCUR(csv) : len);
 	    }
 	}
 	else {
@@ -5201,17 +5196,17 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
-		if (doutf8)
+		if (do_utf8)
 		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
-		s = m + (doutf8 ? SvCUR(csv) : len); /* Fake \n at the end */
+		s = m + (do_utf8 ? SvCUR(csv) : len); /* Fake \n at the end */
 	    }
 	}
     }
     else {
-	maxiters += (strend - s) * rx->nparens;
+	maxiters += slen * rx->nparens;
 	while (s < strend && --limit
 /*	       && (!rx->check_substr 
 		   || ((s = CALLREG_INTUIT_START(aTHX_ rx, sv, s, strend,
@@ -5232,7 +5227,7 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (doutf8)
+	    if (do_utf8)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    if (rx->nparens) {
@@ -5247,7 +5242,7 @@ PP(pp_split)
 			dstr = NEWSV(33, 0);
 		    if (make_mortal)
 			sv_2mortal(dstr);
-		    if (doutf8)
+		    if (do_utf8)
 			(void)SvUTF8_on(dstr);
 		    XPUSHs(dstr);
 		}
@@ -5268,7 +5263,7 @@ PP(pp_split)
 	sv_setpvn(dstr, s, l);
 	if (make_mortal)
 	    sv_2mortal(dstr);
-	if (doutf8)
+	if (do_utf8)
 	    (void)SvUTF8_on(dstr);
 	XPUSHs(dstr);
 	iters++;
