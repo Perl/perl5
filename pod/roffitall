@@ -67,6 +67,7 @@ toroff=`
     $mandir/perlguts.1	\
     $mandir/perlcall.1	\
     $mandir/perlopentut.1	\
+    $mandir/perlthrtut.1	\
     $mandir/perlhist.1	\
     $mandir/perldelta.1	\
     $mandir/perl5004delta.1	\

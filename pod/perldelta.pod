@@ -695,6 +695,8 @@ L<perlopentut> gives a tutorial on using open().
 
 L<perlreftut> gives a tutorial on references.
 
+L<perlthrtut> gives a tutorial on threads.
+
 =head1 New Diagnostics
 
 =over
