@@ -399,7 +399,7 @@ Sys::Hostname module (which is part of the standard perl distribution),
 you can probably try using something like this:
 
     use Sys::Hostname;
-    $address = sprintf('%s@%s', getpwuid($<), hostname);
+    $address = sprintf('%s@%s', scalar getpwuid($<), hostname);
 
 Company policies on mail address can mean that this generates addresses
 that the company's mail system will not accept, so you should ask for
