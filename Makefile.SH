@@ -23,9 +23,10 @@ case "$d_dosuid" in
 *) suidperl='';;
 esac
 
+linklibperl='$(LIBPERL)'
 case "$useshrplib" in
 true)
-    pldlflags="$cccdlflags"
+	pldlflags="$cccdlflags"
 	# NeXT-4 specific stuff.  Can't we do this in the hint file?
 	case "${osname}${osvers}" in
 	next4*)
@@ -33,8 +34,11 @@ true)
 		-compatibility_version 1 -current_version $(PATCHLEVEL) \
 		-prebind -seg1addr 0x27000000 -install_name $(SHRPDIR)/$@'
 		;;
+	sunos*)
+		linklibperl="-lperl"
+		;;
 	esac
-    ;;
+	;;
 *)	pldlflags=''
 	;;
 esac
@@ -98,6 +102,7 @@ CCDLFLAGS = $ccdlflags
 DLSUFFIX = .$dlext
 PLDLFLAGS = $pldlflags
 LIBPERL = $libperl
+LLIBPERL= $linklibperl
 SHRPENV = $shrpenv
 
 dynamic_ext = $dynamic_list
@@ -267,17 +272,17 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 # The Module used here must not depend on Config or any extensions.
 
 miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
-	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(LIBPERL) $(libs)
+	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(LLIBPERL) $(libs)
 	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
 
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
+	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
+	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
