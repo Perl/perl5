@@ -374,7 +374,7 @@ pod16 = [.lib.pod]perlmodlib.pod [.lib.pod]perlmodstyle.pod [.lib.pod]perlmpeix.
 pod17 = [.lib.pod]perlnewmod.pod [.lib.pod]perlnumber.pod [.lib.pod]perlobj.pod [.lib.pod]perlop.pod [.lib.pod]perlopentut.pod
 pod18 = [.lib.pod]perlos2.pod [.lib.pod]perlos390.pod [.lib.pod]perlos400.pod [.lib.pod]perlothrtut.pod [.lib.pod]perlpacktut.pod
 pod19 = [.lib.pod]perlplan9.pod [.lib.pod]perlpod.pod [.lib.pod]perlpodspec.pod [.lib.pod]perlport.pod [.lib.pod]perlqnx.pod
-pod20 = [.lib.pod]perlre.pod [.lib.pod]perlref.pod [.lib.pod]perlreftut.pod [.lib.pod]perlrequick.pod [.lib.pod]perlretut.pod
+pod20 = [.lib.pod]perlre.pod [.lib.pod]perlref.pod [.lib.pod]perlreftut.pod [.lib.pod]perlrequick.pod [.lib.pod]perlretut.pod [.lib.pod]perlreref.pod
 pod21 = [.lib.pod]perlrun.pod [.lib.pod]perlsec.pod [.lib.pod]perlsolaris.pod [.lib.pod]perlstyle.pod [.lib.pod]perlsub.pod
 pod22 = [.lib.pod]perlsyn.pod [.lib.pod]perlthrtut.pod [.lib.pod]perltie.pod [.lib.pod]perltoc.pod [.lib.pod]perltodo.pod
 pod23 = [.lib.pod]perltooc.pod [.lib.pod]perltoot.pod [.lib.pod]perltrap.pod [.lib.pod]perltru64.pod [.lib.pod]perltw.pod
@@ -1025,6 +1025,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ)
 [.lib.pod]perlretut.pod : [.pod]perlretut.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
+
+[.lib.pod]perlreref.pod : [.pod]perlreref.pod
+     @ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+     Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 
 [.lib.pod]perlrun.pod : [.pod]perlrun.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
