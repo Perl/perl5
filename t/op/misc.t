@@ -570,11 +570,14 @@ aba\ba\b
 # the bug depends on in the internal state of the locale
 # settings and pragma/locale messes up that state pretty badly.
 # We need a "fresh run".
+BEGIN {
+    eval { require POSIX };
+    if ($@) {
+	exit(0); # running minitest?
+    }
+}
 use Config;
 my $have_setlocale = $Config{d_setlocale} eq 'define';
-eval {
-    require POSIX;
-};
 $have_setlocale = 0 if $@;
 # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
 # and mingw32 uses said silly CRT
