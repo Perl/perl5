@@ -163,7 +163,7 @@ Perl defines the following zero-width assertions:
     \B	Match a non-(word boundary)
     \A	Match at only beginning of string
     \Z	Match at only end of string (or before newline at the end)
-    \G	Match only where previous m//g left off
+    \G	Match only where previous m//g left off (works only with /g)
 
 A word boundary (C<\b>) is defined as a spot between two characters that
 has a C<\w> on one side of it and a C<\W> on the other side of it (in
@@ -173,9 +173,10 @@ represents backspace rather than a word boundary.)  The C<\A> and C<\Z> are
 just like "^" and "$" except that they won't match multiple times when the
 C</m> modifier is used, while "^" and "$" will match at every internal line
 boundary.  To match the actual end of the string, not ignoring newline,
-you can use C<\Z(?!\n)>.  The C<\G> assertion can be used to mix global
-matches (using C<m//g>) and non-global ones, as described in
+you can use C<\Z(?!\n)>.  The C<\G> assertion can be used to chain global
+matches (using C<m//g>), as described in
 L<perlop/"Regexp Quote-Like Operators">.
+
 It is also useful when writing C<lex>-like scanners, when you have several
 regexps which you want to match against consequent substrings of your
 string, see the previous reference.

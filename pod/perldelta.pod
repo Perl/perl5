@@ -350,15 +350,25 @@ of course, or if you want a seed other than the default.
 Functions documented in the Camel to default to $_ now in
 fact do, and all those that do are so documented in L<perlfunc>.
 
-=item C<m//g> does not trigger a pos() reset on failure
+=item C<m//g> does not reset search position on failure
 
-The C<m//g> match iteration construct used to reset the iteration
-when it failed to match (so that the next C<m//g> match would start at
-the beginning of the string).  You now have to explicitly do a
-C<pos $str = 0;> to reset the "last match" position, or modify the
-string in some way.  This change makes it practical to chain C<m//g>
-matches together in conjunction with ordinary matches using the C<\G>
-zero-width assertion.  See L<perlop> and L<perlre>.
+The C<m//g> match iteration construct used to reset its target string's
+search position (which is visible through the C<pos> operator) when a
+match failed; as a result, the next C<m//g> match would start at the
+beginning of the string).  With Perl 5.004, the search position must be
+reset explicitly, as with C<pos $str = 0;>, or by modifying the target
+string.  This change in Perl makes it possible to chain matches together
+in conjunction with the C<\G> zero-width assertion.  See L<perlop> and
+L<perlre>.
+
+Here is an illustration of what it takes to get the old behavior:
+
+    for ( qw(this and that are not what you think you got) ) {
+        while ( /(\w*t\w*)/g ) { print "t word is: $1\n" }
+        pos = 0;  # REQUIRED FOR 5.004
+        while ( /(\w*a\w*)/g ) { print "a word is: $1\n" }
+        print "\n";
+    }
 
 =item C<m//x> ignores whitespace before ?*+{}
 

@@ -701,7 +701,10 @@ matches.  (In other words, it remembers where it left off last time and
 restarts the search at that point.  You can actually find the current
 match position of a string or set it using the pos() function--see
 L<perlfunc/pos>.)  Note that you can use this feature to stack C<m//g>
-matches or intermix C<m//g> matches with C<m/\G.../>.
+matches or intermix C<m//g> matches with C<m/\G.../g>.  Note that
+the C<\G> zero-width assertion is not supported without the C</g>
+modifier; currently, without C</g>, C<\G> behaves just like C<\A>, but
+that's accidental and may change in the future.
 
 If you modify the string in any way, the match position is reset to the
 beginning.  Examples:
@@ -724,7 +727,7 @@ beginning.  Examples:
         print "1: '";
         print $1 while /(o)/g; print "', pos=", pos, "\n";
         print "2: '";
-        print $1 if /\G(q)/;   print "', pos=", pos, "\n";
+        print $1 if /\G(q)/g;  print "', pos=", pos, "\n";
         print "3: '";
         print $1 while /(p)/g; print "', pos=", pos, "\n";
     }
