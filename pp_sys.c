@@ -1195,7 +1195,7 @@ PP(pp_sysread)
     MAGIC *mg;
 
     gv = (GV*)*++MARK;
-    if (op->op_type == OP_READ &&
+    if ((op->op_type == OP_READ || op->op_type == OP_SYSREAD) &&
 	SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
     {
 	SV *sv;
