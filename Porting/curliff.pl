@@ -18,7 +18,6 @@ my @FILES = qw(
 	       win32/Makefile
 	       win32/makefile.mk
 	       wince/compile-all.bat
-	       wince/README.compile
 	       wince/README.perlce
 	       wince/registry.bat
 	       );
