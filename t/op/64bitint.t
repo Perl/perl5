@@ -3,7 +3,7 @@
 BEGIN {
 	eval { my $q = pack "q", 0 };
 	if ($@) {
-		print "1..0\n# no 64-bit types\n";
+		print "1..0\n# Skip: no 64-bit types\n";
 		exit(0);
 	}
 	chdir 't' if -d 't';
@@ -16,7 +16,7 @@ BEGIN {
 # 32+ bit integers don't cause noise
 no warnings qw(overflow portable);
 
-print "1..52\n";
+print "1..55\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
@@ -278,5 +278,20 @@ print "ok 51\n";
 
 print "not " unless (sprintf "%u", ~0)    eq '18446744073709551615';
 print "ok 52\n";
+
+# If the 53..55 fail you have problems in the parser's string->int conversion,
+# see toke.c:scan_num().
+
+$q = -9223372036854775808;
+print "not " unless "$q" eq "-9223372036854775808";
+print "ok 53\n";
+
+$q =  9223372036854775807;
+print "not " unless "$q" eq "9223372036854775807";
+print "ok 54\n";
+
+$q = 18446744073709551615;
+print "not " unless "$q" eq "18446744073709551615";
+print "ok 55\n";
 
 # eof
