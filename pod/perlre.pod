@@ -360,7 +360,7 @@ everything before the matched string.  And C<$'> returns everything
 after the matched string.
 
 The numbered variables ($1, $2, $3, etc.) and the related punctuation
-set (C<<$+>, C<$&>, C<$`>, and C<$'>) are all dynamically scoped
+set (C<$+>, C<$&>, C<$`>, and C<$'>) are all dynamically scoped
 until the end of the enclosing block or until the next successful
 match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
 
