@@ -320,6 +320,18 @@ $x = $mbi->new(-123401); $x->{_a} = 4; ok ($x->bneg(),123401);
 $mbf->round_mode('even');
 $x = $mbf->new('740.7')->fdiv('6',4,undef,'zero'); ok ($x,'123.4');
 
+$x = $mbi->new('123456'); $y = $mbi->new('123456'); $y->{_a} = 6;
+ok ($x->bdiv($y),1); ok ($x->{_a},6);			# carried over
+
+$x = $mbi->new('123456'); $y = $mbi->new('123456'); $x->{_a} = 6;
+ok ($x->bdiv($y),1); ok ($x->{_a},6);			# carried over
+
+$x = $mbi->new('123456'); $y = $mbi->new('223456'); $y->{_a} = 6;
+ok ($x->bdiv($y),0); ok ($x->{_a},6);			# carried over
+
+$x = $mbi->new('123456'); $y = $mbi->new('223456'); $x->{_a} = 6;
+ok ($x->bdiv($y),0); ok ($x->{_a},6);			# carried over
+
 ###############################################################################
 # test that bop(0) does the same than bop(undef)
 
@@ -386,10 +398,10 @@ my $warn = ''; $SIG{__WARN__} = sub { $warn = shift; };
 # these should warn, since '3.17' is a NaN in BigInt and thus >= returns undef
 $warn = ''; eval "\$z = 3.17 <= \$y"; ok ($z, 1);
 print "# Got: '$warn'\n" unless
-ok ($warn =~ /^Use of uninitialized value in numeric le \(<=\) at/);	
+ok ($warn =~ /^Use of uninitialized value (in numeric le \(<=\) |)at/);	
 $warn = ''; eval "\$z = \$y >= 3.17"; ok ($z, 1);
 print "# Got: '$warn'\n" unless
-ok ($warn =~ /^Use of uninitialized value in numeric ge \(>=\) at/);	
+ok ($warn =~ /^Use of uninitialized value (in numeric ge \(>=\) |)at/);	
 
 # XXX TODO breakage:
 # $z = $y->copy()->bmul($u,2,0,'odd'); ok ($z,31000);
@@ -639,12 +651,14 @@ ok ($params[0],$x);				# self
   @params = $x->_find_round_parameters(undef,-2);
   ok (scalar @params,1);			# error, A and P defined
   ok ($params[0],$x);				# self
+  ok ($x->is_nan(),1);				# and must be NaN
 
   ${"$mbi\::accuracy"} = undef;
   ${"$mbi\::precision"} = 1;
   @params = $x->_find_round_parameters(1,undef);
   ok (scalar @params,1);			# error, A and P defined
   ok ($params[0],$x);				# self
+  ok ($x->is_nan(),1);				# and must be NaN
  
   ${"$mbi\::precision"} = undef;		# reset
 }

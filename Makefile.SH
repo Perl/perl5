@@ -746,13 +746,13 @@ extra.pods: miniperl$(EXE_EXT)
 	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
 
 extras.make: perl$(EXE_EXT)
-	-@test -s extras.lst && $(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
+	-@test -s extras.lst && PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
 
 extras.test: perl$(EXE_EXT)
-	-@test -s extras.lst && $(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e '@ARGV&&test(@ARGV)' `cat extras.lst`
+	-@test -s extras.lst && PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&test(@ARGV)' `cat extras.lst`
 
 extras.install: perl$(EXE_EXT)
-	-@test -s extras.lst && $(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
+	-@test -s extras.lst && PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib $(LDLIBPTH) ./perl -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
 
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man install.html
@@ -1034,7 +1034,7 @@ makedepend: makedepend.SH config.sh
 	test_tty test-tty _test_tty test_notty test-notty _test_notty \
 	utest ucheck test.utf8 check.utf8 test.torture torturetest \
 	test.third check.third utest.third ucheck.third test_notty.third \
-	test.deparse test_notty.deparse test_harness \
+	test.deparse test_notty.deparse test_harness test_harness_notty \
 	minitest coretest
 
 # Cannot delegate rebuilding of t/perl to make
@@ -1053,10 +1053,10 @@ test_prep: test_prep_pre miniperl$(EXE_EXT) perl$(EXE_EXT) $(dynamic_ext) $(TEST
 	PERL=./perl $(MAKE) _test_prep
 
 _test_tty:
-	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) $(TESTFILE) $(TEST_ARGS) </dev/tty
+	cd t && $(PERL_DEBUG) $(LDLIBPTH) $(PERL) $(TESTFILE) $(TEST_ARGS) </dev/tty
 
 _test_notty:
-	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) $(TESTFILE) $(TEST_ARGS)
+	cd t && $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) $(PERL) $(TESTFILE) $(TEST_ARGS)
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
@@ -1132,6 +1132,9 @@ minitest: miniperl$(EXE_EXT) lib/re.pm
 
 test_harness: test_prep
 	PERL=./perl $(MAKE) TESTFILE=harness _test
+
+test_harness_notty: test_prep
+	PERL=./perl HARNESS_NOTTY=1 $(MAKE) TESTFILE=harness _test
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.

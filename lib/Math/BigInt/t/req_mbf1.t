@@ -1,6 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 
-# check that simple requiring BigInt works
+# check that simple requiring BigFloat and then bone() works
 
 use strict;
 use Test;
@@ -9,7 +9,7 @@ BEGIN
   {
   $| = 1;
   # to locate the testing files
-  my $location = $0; $location =~ s/require.t//i;
+  my $location = $0; $location =~ s/req_mbf1.t//i;
   if ($ENV{PERL_CORE})
     {
     # testing with the core distribution
@@ -31,11 +31,7 @@ BEGIN
   plan tests => 1;
   } 
 
-my ($x);
-
-require Math::BigInt; $x = Math::BigInt->new(1); ++$x;
-
-ok ($x||'undef',2);
+require Math::BigFloat; my $x = Math::BigFloat->bone(); ok ($x,1);
 
 # all tests done
 

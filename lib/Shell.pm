@@ -4,9 +4,9 @@ use strict;
 use warnings;
 our($capture_stderr, $VERSION, $AUTOLOAD);
 
-$VERSION = '0.4';
+$VERSION = '0.5';
 
-sub new { bless \$VERSION, shift } # Nothing better to bless
+sub new { bless \my $foo, shift }
 sub DESTROY { }
 
 sub import {

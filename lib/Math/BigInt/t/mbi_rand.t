@@ -14,7 +14,7 @@ BEGIN
   unshift @INC, $location; # to locate the testing files
   chdir 't' if -d 't';
   $count = 128;
-  plan tests => $count*2;
+  plan tests => $count*4;
   }
 
 use Math::BigInt;
@@ -48,17 +48,25 @@ for (my $i = 0; $i < $count; $i++)
   # print "# A $A\n# B $B\n";
   if ($A->is_zero() || $B->is_zero())
     {
-    ok (1,1); ok (1,1); next;
+    for (1..4) { ok (1,1); } next;
     }
   # check that int(A/B)*B + A % B == A holds for all inputs
   # $X = ($A/$B)*$B + 2 * ($A % $B) - ($A % $B);
   ($ADB,$AMB) = $A->copy()->bdiv($B);
-  print "# ". join(' ',Math::BigInt::Calc->_base_len()),"\n"
+  print "# ". join(' ',Math::BigInt::Calc->_base_len()),"\n".
+        "# tried $ADB * $B + $two*$AMB - $AMB\n"
    unless ok ($ADB*$B+$two*$AMB-$AMB,$As);
+  ok ($ADB*$B/$B,$ADB);
   # swap 'em and try this, too
   # $X = ($B/$A)*$A + $B % $A;
   ($ADB,$AMB) = $B->copy()->bdiv($A);
-  print "# ". join(' ',Math::BigInt::Calc->_base_len()),"\n"
+  #print "check: $ADB $AMB";
+  print "# ". join(' ',Math::BigInt::Calc->_base_len()),"\n".
+        "# tried $ADB * $A + $two*$AMB - $AMB\n"
    unless ok ($ADB*$A+$two*$AMB-$AMB,$Bs);
+  #print "$ADB * $A = ",$ADB * $A,"\n";
+  #print " +$two * $AMB = ",$ADB * $A + $two * $AMB,"\n";
+  #print " -$AMB = ",$ADB * $A + $two * $AMB - $AMB,"\n";
+  ok ($ADB*$A/$A,$ADB);
   }
 

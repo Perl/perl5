@@ -1302,6 +1302,7 @@ lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
 lib/Math/BigInt/t/bigintpm.inc	Shared tests for bigintpm.t and sub_mbi.t
 lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
 lib/Math/BigInt/t/bigints.t	See if BigInt.pm works
+lib/Math/BigInt/t/biglog.t	Test the log function
 lib/Math/BigInt/t/calling.t	Test calling conventions
 lib/Math/BigInt/t/config.t	Test Math::BigInt->config()
 lib/Math/BigInt/t/constant.t	Test Math::BigInt/BigFloat under :constant
@@ -1311,20 +1312,31 @@ lib/Math/BigInt/t/isa.t		Test for Math::BigInt inheritance
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precision and fallback, round_mode
 lib/Math/BigInt/t/mbi_rand.t	Test Math::BigInt randomly
+lib/Math/BigInt/t/req_mbf0.t	test: require Math::BigFloat; ->bzero();
+lib/Math/BigInt/t/req_mbf1.t	test: require Math::BigFloat; ->bone();
+lib/Math/BigInt/t/req_mbfa.t	test: require Math::BigFloat; ->bnan();
+lib/Math/BigInt/t/req_mbfi.t	test: require Math::BigFloat; ->binf();
+lib/Math/BigInt/t/req_mbfn.t	test: require Math::BigFloat; ->new();
+lib/Math/BigInt/t/req_mbfw.t	require Math::BigFloat; import ( with => );
 lib/Math/BigInt/t/require.t	Test if require Math::BigInt works
 lib/Math/BigInt/t/sub_mbf.t	Empty subclass test of BigFloat
 lib/Math/BigInt/t/sub_mbi.t	Empty subclass test of BigInt
 lib/Math/BigInt/t/sub_mif.t	Test A & P with subclasses using mbimbf.inc
+lib/Math/BigInt/t/trap.t	Test whether trap_nan and trap_inf work
+lib/Math/BigInt/t/upgradef.t	Test if use Math::BigFloat(); under upgrade works
 lib/Math/BigInt/t/upgrade.inc	Actual tests for upgrade.t
 lib/Math/BigInt/t/upgrade.t	Test if use Math::BigInt(); under upgrade works
-lib/Math/BigInt/t/upgradef.t	Test if use Math::BigFloat(); under upgrade works
-lib/Math/BigInt/t/use.t		Test if use Math::BigInt(); works
 lib/Math/BigInt/t/use_lib1.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_lib2.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_lib3.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_lib4.t	Test combinations of Math::BigInt and BigFloat
+lib/Math/BigInt/t/use_mbfw.t	use BigFloat w/ with and lib at the same time
+lib/Math/BigInt/t/use.t		Test if use Math::BigInt(); works
 lib/Math/BigInt/t/with_sub.t	Test use Math::BigFloat with => package
 lib/Math/BigInt/Trace.pm	bignum tracing
+lib/Math/BigRat/t/bigratup.t	test under $Math::BigInt::upgrade
+lib/Math/BigRat/t/requirer.t	see if require works properly
+lib/Math/BigRat/t/trap.t	see if trap_nan and trap_inf work
 lib/Math/BigRat.pm		Math::BigRat
 lib/Math/BigRat/t/bigfltpm.inc		Math::BigRat test
 lib/Math/BigRat/t/bigfltrt.t		Math::BigRat test

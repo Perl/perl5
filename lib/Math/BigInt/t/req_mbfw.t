@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# check that simple requiring BigInt works
+# check that requiring BigFloat and then calling import() works
 
 use strict;
 use Test;
@@ -9,7 +9,7 @@ BEGIN
   {
   $| = 1;
   # to locate the testing files
-  my $location = $0; $location =~ s/require.t//i;
+  my $location = $0; $location =~ s/req_mbfw.t//i;
   if ($ENV{PERL_CORE})
     {
     # testing with the core distribution
@@ -28,14 +28,18 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 1;
+  plan tests => 3;
   } 
 
-my ($x);
+# normal require that calls import automatically (we thus have MBI afterwards)
+require Math::BigFloat; my $x = Math::BigFloat->new(1);  ++$x; ok ($x,2);
 
-require Math::BigInt; $x = Math::BigInt->new(1); ++$x;
+ok (Math::BigFloat->config()->{with}, 'Math::BigInt' );
 
-ok ($x||'undef',2);
+# now override
+Math::BigFloat->import ( with => 'Math::BigInt::Subclass' );
+
+ok (Math::BigFloat->config()->{with}, 'Math::BigInt::Subclass' );
 
 # all tests done
 

@@ -30,7 +30,7 @@ while (<DATA>)
       {
       @args = split(/:/,$_,99); $ans = pop(@args);
       }
-    $try = "\$x = new $class \"$args[0]\";";
+    $try = "\$x = $class->new('$args[0]');";
     if ($f eq "fnorm")
       {
         $try .= "\$x;";
@@ -71,20 +71,30 @@ while (<DATA>)
         $try .= "$setup; \$x->ffround($args[1]);";
       } elsif ($f eq "fsqrt") {
         $try .= "$setup; \$x->fsqrt();";
-      } elsif ($f eq "flog") {
-        $try .= "$setup; \$x->flog();";
       } elsif ($f eq "ffac") {
         $try .= "$setup; \$x->ffac();";
+      } elsif ($f eq "flog") {
+        if ($args[1] ne '')
+          {
+          $try .= "\$y = $class->new($args[1]);";
+          $try .= "$setup; \$x->flog(\$y);";
+          }
+        else
+          {
+          $try .= "$setup; \$x->flog();";
+          }
       }
     else
       {
-      $try .= "\$y = new $class \"$args[1]\";";
+      $try .= "\$y = $class->new(\"$args[1]\");";
       if ($f eq "fcmp") {
         $try .= '$x <=> $y;';
       } elsif ($f eq "facmp") {
         $try .= '$x->facmp($y);';
       } elsif ($f eq "fpow") {
         $try .= '$x ** $y;';
+      } elsif ($f eq "froot") {
+        $try .= "$setup; \$x->froot(\$y);";
       } elsif ($f eq "fadd") {
         $try .= '$x + $y;';
       } elsif ($f eq "fsub") {
@@ -229,6 +239,12 @@ $class->precision(-3); $x = $class->new(12); $x->fsqrt(); ok ($x,'3.464');
   ok ($ans,"$class 4 5");
 }
 
+#############################################################################
+# is_one('-') (broken until v1.64)
+
+ok ($class->new(-1)->is_one(),0);
+ok ($class->new(-1)->is_one('-'),1);
+
 1; # all done
 
 ###############################################################################
@@ -245,28 +261,36 @@ sub ok_undef
 __DATA__
 $div_scale = 40;
 &flog
-0:NaN
--1:NaN
--2:NaN
-1:0
+0::NaN
+-1::NaN
+-2::NaN
+# base > 0, base != 1
+2:-1:NaN
+2:0:NaN
+2:1:NaN
+# log(1) is always 1, regardless of $base
+1::0
+1:1:0
+1:2:0
 # this is too slow for the testsuite
 #2:0.6931471805599453094172321214581765680755
 #2.718281828:0.9999999998311266953289851340574956564911
 #$div_scale = 20;
 #2.718281828:0.99999999983112669533
-# too slow, too (or hangs?)
+# too slow, too 
 #123:4.8112184355
 $div_scale = 14;
 #10:0:2.302585092994
 #1000:0:6.90775527898214
 #100:0:4.60517018598809
-2:0:0.69314718055995
+2::0.69314718055995
 #3.1415:0:1.14470039286086
+# too slow
 #12345:0:9.42100640177928
 #0.001:0:-6.90775527898214
 # reset for further tests
 $div_scale = 40;
-1:0
+1::0
 &frsft
 NaNfrsft:2:NaN
 0:2:0
@@ -327,6 +351,11 @@ fnormNaN:NaN
 0.000000001:0
 0.0000000001:0
 0.00000000001:0
+0.12345:0
+0.123456:0
+0.1234567:0
+0.12345678:0
+0.123456789:0
 &finf
 1:+:inf
 2:-:-inf
@@ -1178,6 +1207,55 @@ Nanfac:NaN
 10:3628800
 11:39916800
 12:479001600
+&froot
+# sqrt()
++0:2:0
++1:2:1
+-1:2:NaN
+# -$x ** (1/2) => -$y, but not in froot()
+-123.456:2:NaN
++inf:2:inf
+-inf:2:NaN
+2:2:1.41421356237309504880168872420969807857
+-2:2:NaN
+4:2:2
+9:2:3
+16:2:4
+100:2:10
+123.456:2:11.11107555549866648462149404118219234119
+15241.38393:2:123.4559999756998444766131352122991626468
+1.44:2:1.2
+12:2:3.464101615137754587054892683011744733886
+0.49:2:0.7
+0.0049:2:0.07
+# invalid ones
+1:NaN:NaN
+-1:NaN:NaN
+0:NaN:NaN
+-inf:NaN:NaN
++inf:NaN:NaN
+NaN:0:NaN
+NaN:2:NaN
+NaN:inf:NaN
+NaN:inf:NaN
+12:-inf:NaN
+12:inf:NaN
++0:0:NaN
++1:0:NaN
+-1:0:NaN
+-2:0:NaN
+-123.45:0:NaN
++inf:0:NaN
+12:1:12
+-12:1:NaN
+8:-1:NaN
+-8:-1:NaN
+# cubic root
+8:3:2
+-8:3:NaN
+# fourths root
+16:4:2
+81:4:3
 &fsqrt
 +0:0
 -1:NaN
@@ -1202,6 +1280,8 @@ nanfsqrt:NaN
 144e20:120000000000
 # proved to be an endless loop under 7-9
 12:3.464101615137754587054892683011744733886
+0.49:0.7
+0.0049:0.07
 &is_nan
 123:0
 abc:1
@@ -1340,6 +1420,11 @@ abc:NaN
 -51:-51
 -51.2:-52
 12.2:12
+0.12345:0
+0.123456:0
+0.1234567:0
+0.12345678:0
+0.123456789:0
 &fceil
 0:0
 abc:NaN
