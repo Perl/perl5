@@ -1161,26 +1161,6 @@ repeatedly, like C</x/> or C<m!x!>.
     # perl5 prints: perl5
 
 
-=item * Regular Expression
-
-Under perl4 and upto version 5.003, a failed C<m//g> match used to
-reset the internal iterator, so that subsequent C<m//g> match attempts
-began from the beginning of the string.  In perl version 5.004 and later,
-failed C<m//g> matches do not reset the iterator position (which can be
-found using the C<pos()> function--see L<perlfunc/pos>).
-
-    $test = "foop";
-    for (1..3) {
-        print $1 while ($test =~ /(o)/g);
-        # pos $test = 0;     # to get old behavior
-    }
-
-    # perl4     prints: oooooo
-    # perl5.004 prints: oo
-
-You may always reset the iterator yourself as shown in the commented line
-to get the old behavior.
-
 =back
 
 =head2 Subroutine, Signal, Sorting Traps
