@@ -167,7 +167,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
     STRLEN c;
 
     if (!len)
-	len = strlen(s);
+	len = strlen((char *)s);
     send = s + len;
 
     while (x < send) {
