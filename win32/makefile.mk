@@ -209,7 +209,7 @@ IMPLIB		= implib -c
 # Options
 #
 RUNTIME		= -D_RTLDLL
-INCLUDES	= -I.\include -I. -I.. -I"$(CCINCDIR)"
+INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
 DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE

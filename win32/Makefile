@@ -196,7 +196,7 @@ LIB32		= $(LINK32) -lib
 #
 
 RUNTIME		= -MD
-INCLUDES	= -I.\include -I. -I..
+INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
