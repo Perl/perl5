@@ -404,7 +404,7 @@ for my $f (@seenf) {
 	size_t	_${f}_size;
 EOF
 	    push @size, <<EOF;
-	PL_reentrant_buffer->_${f}_size = 256; /* Make something up. */
+	PL_reentrant_buffer->_${f}_size = REENTRANTSMALLSIZE;
 EOF
 	    pushinitfree $f;
 	    pushssif $endif;
@@ -472,6 +472,8 @@ EOF
 		push @size, <<EOF;
 #   if defined(HAS_SYSCONF) && defined($sc) && !defined(__GLIBC__)
 	PL_reentrant_buffer->_${g}_size = sysconf($sc);
+	if (PL_reentrant_buffer->_getgrent_size == -1)
+		PL_reentrant_buffer->_getgrent_size = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->_${g}_size = SIABUFSIZ;
@@ -479,7 +481,7 @@ EOF
 #           ifdef __sgi
 	PL_reentrant_buffer->_${g}_size = BUFSIZ;
 #           else
-	PL_reentrant_buffer->_${g}_size = 256;
+	PL_reentrant_buffer->_${g}_size = REENTRANTUSUALSIZE;
 #           endif
 #       endif
 #   endif 
@@ -515,7 +517,7 @@ EOF
 EOF
 	    push @size, <<EOF;
 #if   !($D)
-	PL_reentrant_buffer->_${g}_size = 2048; /* Any better ideas? */
+	PL_reentrant_buffer->_${g}_size = REENTRANTUSUALSIZE;
 #endif
 EOF
 	    push @init, <<EOF;
@@ -691,6 +693,8 @@ print <<EOF;
 void
 Perl_reentrant_size(pTHX) {
 #ifdef USE_REENTRANT_API
+#define REENTRANTSMALLSIZE	 256	/* Make something up. */
+#define REENTRANTUSUALSIZE	4096	/* Make something up. */
 @size
 #endif /* USE_REENTRANT_API */
 }
