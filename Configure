@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Aug  4 23:16:51 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Aug  5 00:21:09 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3190,7 +3190,9 @@ case "$gccversion" in
 esac
 case "$gccversion" in
 '') gccosandvers='' ;;
-*) gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed 's!.*/[^-]*-[^-]*-\([^/]*\)/'$gccversion'/specs'$!\1!'`
+*) gccshortvers=`echo "$gccversion"|sed 's/ .*//'`
+   gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed "s!.*/[^-/]*-[^-/]*-\([^-/]*\)/$gccshortvers/specs!\1!"`
+   gccshortvers=''
    case "$gccosandvers" in
    $osname) gccosandvers='' ;; # linux gccs seem to have no linux osvers, grr
    $osname$osvers) ;; # looking good
