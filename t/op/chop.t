@@ -175,11 +175,11 @@ foreach (keys %chop) {
 
 # chop and chomp can't be lvalues
 eval 'chop($x) = 1;';
-print $@ =~ /Can\'t modify.*chop.*in.*assignment/ ? "ok 48\n" : "not ok 48\n";
+ok($@ =~ /Can\'t modify.*chop.*in.*assignment/);
 eval 'chomp($x) = 1;';
-print $@ =~ /Can\'t modify.*chom?p.*in.*assignment/ ? "ok 49\n" : "not ok 49\n";
+ok($@ =~ /Can\'t modify.*chom?p.*in.*assignment/);
 eval 'chop($x, $y) = (1, 2);';
-print $@ =~ /Can\'t modify.*chop.*in.*assignment/ ? "ok 50\n" : "not ok 50\n";
+ok($@ =~ /Can\'t modify.*chop.*in.*assignment/);
 eval 'chomp($x, $y) = (1, 2);';
-print $@ =~ /Can\'t modify.*chom?p.*in.*assignment/ ? "ok 51\n" : "not ok 51\n";
+ok($@ =~ /Can\'t modify.*chom?p.*in.*assignment/);
 
