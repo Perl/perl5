@@ -1098,6 +1098,9 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	STRLEN dulen = 0;
 	I32 ulen;
 
+	if (optype != OP_BIT_AND)
+	    dc = SvGROW(sv, leftlen+rightlen+1);
+
 	switch (optype) {
 	case OP_BIT_AND:
 	    while (lulen && rulen) {
