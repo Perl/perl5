@@ -192,7 +192,7 @@ sub list_eq ($$) {
     # This should be about the biggest thing possible on an IEEE double
     my $big = eval '2**1023';
 
-    skip "Couldn't generate 2**1023 - got error '$@'"
+    skip "Couldn't generate 2**1023 - got error '$@'", 3
       unless defined $big and $big != $big / 2;
 
     eval { $x = pack 'w', $big };
