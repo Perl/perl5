@@ -13,38 +13,26 @@ perl_version=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $src/patchlevel.h`
 perl_subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $src/patchlevel.h`
 version="${perl_revision}.${perl_version}.${perl_subversion}"
 
+# This was previously used in all but causes three cases
+# (no -Ddprefix=, -Dprefix=/usr, -Dprefix=/some/thing/else)
+# but that caused too much grief.
+# vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
+
 # BSD paths
 case "$prefix" in
-  '')
-    # Default install; use non-system directories
-    prefix='/usr/local'; # Built-in perl uses /usr
-    siteprefix='/usr/local';
-    vendorprefix='/usr'; usevendorprefix='define';
-
-    # Where to put modules.
-    sitelib="/Library/Perl/${version}"; # FIXME: Want "/Network/Perl/${version}" also
-    vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
-    ;;
-
-  '/usr')
-    # We are building/replacing the built-in perl
-    siteprefix='/usr/local';
-    vendorprefix='/usr/local'; usevendorprefix='define';
-
-    # Where to put modules.
-    sitelib="/Library/Perl/${version}"; # FIXME: Want "/Network/Perl/${version}" also
-    vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
-    ;;
-
-  *)
-    # Anything else; use non-system directories
-    ;;
-
+  ''|'/usr')
+	# Default install; use non-system directories
+	prefix='/usr/local'; # Built-in perl uses /usr
+	siteprefix=''/usr/local';
+	# Where to put modules.
+	sitelib="/Library/Perl/${version}"; # FIXME: Want "/Network/Perl/${version}" also
+	# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
+	man1dir='/usr/share/man/man1';
+	man3dir='/usr/share/man/man3';
+	;;
+  *)	# Anything else; use non-system directories
+	;;
 esac
-
-# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
-man1dir="${prefix}/share/man/man1";
-man3dir="${prefix}/share/man/man3";
 
 ##
 # Tool chain settings
