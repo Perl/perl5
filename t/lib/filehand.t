@@ -4,8 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bFileHandle\b/
-        && $Config{'osname'} ne 'VMS') {
+    if ($Config{'extensions'} !~ /\bFileHandle\b/ && $^O ne 'VMS') {
 	print "1..0\n";
 	exit 0;
     }
@@ -25,6 +24,12 @@ $fh = new FileHandle "TEST", O_RDONLY and print "ok 2\n";
 $buffer = <$fh>;
 print $buffer eq "#!./perl\n" ? "ok 3\n" : "not ok 3\n";
 
-ungetc STDIN 65;
-CORE::read(STDIN, $buf,1);
+if ($^O eq 'VMS') {
+    ungetc $fh 65;
+    CORE::read($fh, $buf,1);
+}
+else {
+    ungetc STDIN 65;
+    CORE::read(STDIN, $buf,1);
+}
 print $buf eq 'A' ? "ok 4\n" : "not ok 4\n";
