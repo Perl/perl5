@@ -1,6 +1,6 @@
 package Net::Ping;
 
-# $Id: Ping.pm,v 1.27 2002/04/02 02:01:21 rob Exp $
+# $Id: Ping.pm,v 1.31 2002/04/11 16:45:06 rob Exp $
 
 require 5.002;
 require Exporter;
@@ -16,12 +16,12 @@ use Errno qw(ECONNREFUSED);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.14";
+$VERSION = "2.16";
 
 # Constants
 
 $def_timeout = 5;           # Default timeout to wait for a reply
-$def_proto = "udp";         # Default protocol to use for pinging
+$def_proto = "tcp";         # Default protocol to use for pinging
 $max_datasize = 1024;       # Maximum data bytes in a packet
 # The data we exchange with the server for the stream protocol
 $pingstring = "pingschwingping!\n";
@@ -598,7 +598,6 @@ sub ping_udp
       $ret,               # The return value
       $msg,               # Message to be echoed
       $finish_time,       # Time ping should be finished
-      $ping_time,         # Time ping took to complete
       $done,              # Set to 1 when we are done pinging
       $rbits,             # Read bits, filehandles for reading
       $nfound,            # Number of ready filehandles found
@@ -617,7 +616,6 @@ sub ping_udp
   vec($rbits, $self->{"fh"}->fileno(), 1) = 1;
   $ret = 0;                   # Default to unreachable
   $done = 0;
-  $ping_time = $timeout;
   $finish_time = &time() + $timeout;       # Ping needs to be done by then
   while (!$done && $timeout > 0)
   {
@@ -648,8 +646,7 @@ sub ping_udp
       $done = 1;
     }
   }
-  $ping_time -= $timeout;
-  return wantarray ? ($ret, $ping_time) : $ret;
+  return $ret;
 }
 
 # Description:  Close the connection unless we are using the tcp
@@ -670,7 +667,7 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.27 2002/04/02 02:01:21 rob Exp $
+$Id: Ping.pm,v 1.31 2002/04/11 16:45:06 rob Exp $
 
 =head1 SYNOPSIS
 
