@@ -47,9 +47,9 @@ typedef struct _OVERLAPPED {
 
 #endif
 #endif //_WINDOWS_
-#ifndef __GNUC__
+// #ifndef __GNUC__
 #include <winsock.h>
-#endif
+// #endif
 
 #define  ENOTSOCK	WSAENOTSOCK
 #undef   HOST_NOT_FOUND

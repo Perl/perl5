@@ -35,6 +35,7 @@
 #define PerlIO FILE
 #endif
 
+#include <sys/stat.h>
 #include "EXTERN.h"
 #include "perl.h"
 
@@ -46,7 +47,6 @@ extern CPerlObj* pPerl;
 
 #include "Win32iop.h"
 #include <fcntl.h>
-#include <sys/stat.h>
 #ifndef __GNUC__
 /* assert.h conflicts with #define of assert in perl.h */
 #include <assert.h>
@@ -245,9 +245,10 @@ get_emd_part(char **prev_path, char *trailing_path, ...)
 	Renew(*prev_path, newsize, char);
 	(*prev_path)[oldsize-1] = ';';
 	strcpy(&(*prev_path)[oldsize], mod_name);
+	return *prev_path;
     }
 
-    return *prev_path;
+    return Nullch;
 }
 
 char *
@@ -294,6 +295,12 @@ win32_get_sitelib(char *pl)
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/$]/lib";  */
     sprintf(pathstr, "site/%s/lib", pl);
     str1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
+    if (!str1 && strlen(pl) == 7) {
+	/* pl may have been SUBVERSION-specific; try again without
+	 * SUBVERSION */
+	sprintf(pathstr, "site/%.5s/lib", pl);
+	str1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
+    }
 
     /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
     path2 = &SvPVX(sv2);
@@ -1313,10 +1320,14 @@ win32_uname(struct utsname *name)
 	char *arch;
 	GetSystemInfo(&info);
 
+#ifdef __MINGW32__
+	switch (info.DUMMYUNIONNAME.DUMMYSTRUCTNAME.wProcessorArchitecture) {
+#else
 #ifdef __BORLANDC__
 	switch (info.u.s.wProcessorArchitecture) {
 #else
 	switch (info.wProcessorArchitecture) {
+#endif
 #endif
 	case PROCESSOR_ARCHITECTURE_INTEL:
 	    arch = "x86"; break;
