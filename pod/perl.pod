@@ -224,52 +224,120 @@ Okay, that's I<definitely> enough hype.
 Perl is available for most operating systems, including virtually
 all Unix-like platforms.
 
-As of May 1999, the following platforms are able to build Perl
-from the standard source code distribution available at
-http://www.perl.com/CPAN/src/index.html
+As of early March 2000 (the Perl release 5.6.0), the following
+platforms are able to build Perl from the standard source code
+distribution available at http://www.perl.com/CPAN/src/index.html
 
-        AIX             Linux           SCO ODT/OSR
-        A/UX            MachTen         Solaris
-        BeOS            MPE/iX          SunOS
-        BSD/OS          NetBSD          SVR4
-        DG/UX           NextSTEP        Tru64 UNIX      3)
-        DomainOS        OpenBSD         Ultrix                  
-        DOS DJGPP 1)    OpenSTEP        UNICOS                  
-        DYNIX/ptx       OS/2            VMS                     
-        FreeBSD         OS390     2)    VOS 
-        HP-UX           PowerMAX        Windows 3.1     1)      
-        Hurd            QNX             Windows 95      1) 4)   
-        IRIX                            Windows 98      1) 4)   
-                                        Windows NT      1) 4)
+	AIX
+	DOS DJGPP 1)
+	FreeBSD
+	HP-UX
+	IRIX
+	Linux
+	MachTen
+	MPE/iX
+	NetBSD
+	OpenBSD
+	OS/2
+	Rhapsody/Darwin 2)
+	Solaris
+	Tru64 UNIX      3)
+	UNICOS
+	UNICOS/mk
+	VMS
+	VOS
+	Windows 3.1     1)
+	Windows 95      1) 4)
+	Windows 98      1) 4)
+	Windows NT      1) 4)
 
         1) in DOS mode either the DOS or OS/2 ports can be used
-        2) formerly known as MVS
-        3) formerly known as Digital UNIX and before that DEC OSF/1     
+        2) NEW in 5.6.0: the BSD/NeXT-based UNIX of Mac OS X
+        3) formerly known as Digital UNIX and before that DEC OSF/1
         4) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
 
-The following platforms have been known to build Perl from source,
-but we haven't been able to verify their status for the current release,
-either because the hardware/software platforms are rare or
-because we don't have an active champion on these platforms--or both.
+The following platforms worked for the previous major release,
+5.005_04 being the latest (as of March 2000) maintenance release, but
+we didn't manage to test these in time for the 5.6.0 release of Perl.
+There is a very good chance that these will work just fine with 5.6.0.
 
-        3b1             FPS             Plan 9
-        AmigaOS         GENIX           PowerUX
-        ConvexOS        Greenhills      RISC/os         
-        CX/UX           ISC             Stellar         
-        DC/OSx          MachTen 68k     SVR2            
-        DDE SMES        MiNT            TI1500          
-        DOS EMX         MPC             TitanOS         
-        Dynix           NEWS-OS         UNICOS/mk       
-        EP/IX           Opus            Unisys Dynix    
-        ESIX    			Unixware        
+	A/UX
+	BeOS
+	BSD/OS
+	DG/UX
+	DYNIX/ptx
+	DomainOS
+	Hurd
+	NextSTEP
+	OpenSTEP
+	PowerMAX
+	QNX
+	SCO ODT/OSR	
+	SunOS
+	SVR4
+	Ultrix
 
-Support for the following platforms is planned for the next major
-Perl release.
+The following platform worked for the previous major release, 5.005_04
+being the latest (as of early March 2000) maintenance release of that,
+but unfortunately the Unicode changes in 5.6.0 broke the port.  This
+will be fixed in a future Perl release.
 
-        BS2000
+	OS390	1)
+
+	1) Previously known as MVS, or OpenEdition MVS.
+
+Strongly related to the OS390 platform by also being EBCDIC-based
+mainframe platforms are the
+
+	BS2000
+	VM/ESA
+
+platforms.  They are related by not working in 5.6.0, unfortunately.
+Contact the mailing list perl-mvs@perl.org for more details.
+
+MacOS (Classic, pre-X) is kind of 5.6.0-ready: building from the
+source does work with the 5.6.0, but you need more than just the Perl
+5.6 source code.  Contact the mailing list macperl-porters@macperl.org
+for more more information.
+
+The following platforms have been known to build Perl from source in
+the past, but we haven't been able to verify their status for the
+current release, either because the hardware/software platforms are
+rare or because we don't have an active champion on these
+platforms--or both.
+
+	3b1
+	AmigaOS
+	ConvexOS
+	CX/UX
+	DC/OSx
+	DDE SMES
+	DOS EMX
+	Dynix
+	EP/IX
+	ESIX
+	FPS
+	GENIX
+	Greenhills
+	ISC
+	MachTen 68k
+	MiNT
+	MPC
+	NEWS-OS
+	Opus
+	Plan 9
+	PowerUX
+	RISC/os
+	Stellar
+	SVR2
+	TI1500
+	TitanOS
+	Unisys Dynix
+	Unixware
+
+Support for the following platform is planned for a future Perl release.
+
 	Netware
-	Rhapsody
-        VM/ESA
 
 The following platforms have their own source code distributions and
 binaries available via http://www.perl.com/CPAN/ports/index.html.
@@ -277,7 +345,6 @@ binaries available via http://www.perl.com/CPAN/ports/index.html.
 				Perl release
 
 	AS/400			5.003
-	MacOS			5.004
 	Netware			5.003_07
 	Tandem Guardian		5.004
 
