@@ -40,9 +40,11 @@ BEGIN {
 
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
+my $Is_NetWare = $^O eq 'NetWare';
 my $Is_Dos = $^O eq 'dos';
 my $Invoke_Perl = $Is_VMS ? 'MCR Sys$Disk:[]Perl.' :
-                  $Is_MSWin32 ? '.\perl' : './perl';
+                  ($Is_MSWin32 ? '.\perl' :
+                  ($Is_NetWare ? 'perl' : './perl'));
 my @MoreEnv = qw/IFS CDPATH ENV BASH_ENV/;
 
 if ($Is_VMS) {
@@ -99,7 +101,7 @@ sub test ($$;$) {
 }
 
 # We need an external program to call.
-my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : "./echo$$");
+my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : ($Is_NetWare ? "echo$$" : "./echo$$"));
 END { unlink $ECHO }
 open PROG, "> $ECHO" or die "Can't create $ECHO: $!";
 print PROG 'print "@ARGV\n"', "\n";
@@ -120,7 +122,7 @@ print "1..174\n";
 
     test 1, eval { `$echo 1` } eq "1\n";
 
-    if ($Is_MSWin32 || $Is_VMS || $Is_Dos) {
+    if ($Is_MSWin32 || $Is_NetWare || $Is_VMS || $Is_Dos) {
 	print "# Environment tainting tests skipped\n";
 	for (2..5) { print "ok $_\n" }
     }
@@ -144,7 +146,7 @@ print "1..174\n";
     }
 
     my $tmp;
-    if ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32 || $Is_Dos) {
+    if ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32 || $Is_NetWare || $Is_Dos) {
 	print "# all directories are writeable\n";
     }
     else {

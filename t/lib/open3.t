@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
     if (!$Config{'d_fork'}
        # open2/3 supported on win32 (but not Borland due to CRT bugs)
-       && ($^O ne 'MSWin32' || $Config{'cc'} =~ /^bcc/i))
+       && (($^O ne 'MSWin32' && $^O ne 'NetWare') || $Config{'cc'} =~ /^bcc/i))
     {
 	print "1..0\n";
 	exit 0;
@@ -34,7 +34,7 @@ sub ok {
 }
 
 sub cmd_line {
-	if ($^O eq 'MSWin32') {
+	if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
 		my $cmd = shift;
 		$cmd =~ tr/\r\n//d;
 		$cmd =~ s/"/\\"/g;

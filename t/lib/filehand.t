@@ -72,7 +72,7 @@ if ($^O eq 'dos')
 
 ($rd,$wr) = FileHandle::pipe;
 
-if ($^O eq 'VMS' || $^O eq 'os2' || $^O eq 'amigaos' || $^O eq 'MSWin32' ||
+if ($^O eq 'VMS' || $^O eq 'os2' || $^O eq 'amigaos' || $^O eq 'MSWin32' || $^O eq 'NetWare' ||
     $Config{d_fork} ne 'define') {
   $wr->autoflush;
   $wr->printf("ok %d\n",11);

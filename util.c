@@ -1454,7 +1454,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 
 #ifdef USE_ENVIRON_ARRAY
        /* VMS' and EPOC's my_setenv() is in vms.c and epoc.c */
-#if !defined(WIN32)
+#if !defined(WIN32) && !defined(NETWARE)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
 {
@@ -1508,7 +1508,7 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 #endif  /* PERL_USE_SAFE_PUTENV */
 }
 
-#else /* WIN32 */
+#else /* WIN32 || NETWARE */
 
 void
 Perl_my_setenv(pTHX_ char *nam,char *val)
@@ -1525,7 +1525,7 @@ Perl_my_setenv(pTHX_ char *nam,char *val)
     Safefree(envstr);
 }
 
-#endif /* WIN32 */
+#endif /* WIN32 || NETWARE */
 
 I32
 Perl_setenv_getix(pTHX_ char *nam)
@@ -1786,7 +1786,7 @@ VTOH(vtohl,long)
 PerlIO *
 Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 {
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(OS2) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(OS2) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL) && !defined(NETWARE)
     int p[2];
     register I32 This, that;
     register Pid_t pid;
@@ -2283,7 +2283,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(MACOS_TRADITIONAL)
+#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(NETWARE)) && !defined(MACOS_TRADITIONAL)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
@@ -2345,7 +2345,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     }
 #endif
 }
-#endif /* !DOSISH || OS2 || WIN32 */
+#endif /* !DOSISH || OS2 || WIN32 || NETWARE */
 
 void
 /*SUPPRESS 590*/

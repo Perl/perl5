@@ -50,9 +50,12 @@ while (@ARGV) {
     $define{$1} = $2 if ($flag =~ /^-D(\w+)=(.+)$/);
     $CCTYPE   = $1 if ($flag =~ /^CCTYPE=(\w+)$/);
     $PLATFORM = $1 if ($flag =~ /^PLATFORM=(\w+)$/);
+	if ($PLATFORM eq 'netware') {
+		$FILETYPE = $1 if ($flag =~ /^FILETYPE=(\w+)$/);
+	}
 }
 
-my @PLATFORM = qw(aix win32 os2 MacOS);
+my @PLATFORM = qw(aix win32 os2 MacOS netware);
 my %PLATFORM;
 @PLATFORM{@PLATFORM} = ();
 
@@ -72,7 +75,7 @@ my $perlio_sym  = "perlio.sym";
 if ($PLATFORM eq 'aix') {
     # Nothing for now.
 }
-elsif ($PLATFORM eq 'win32') {
+elsif ($PLATFORM eq 'win32' || $PLATFORM eq 'netware') {
     $CCTYPE = "MSVC" unless defined $CCTYPE;
     foreach ($thrdvar_h, $intrpvar_h, $perlvars_h, $global_sym,
 		$pp_sym, $globvar_sym, $perlio_sym) {
@@ -86,7 +89,7 @@ elsif ($PLATFORM eq 'MacOS') {
     }
 }
 
-unless ($PLATFORM eq 'win32' || $PLATFORM eq 'MacOS') {
+unless ($PLATFORM eq 'win32' || $PLATFORM eq 'MacOS' || $PLATFORM eq 'netware') {
     open(CFG,$config_sh) || die "Cannot open $config_sh: $!\n";
     while (<CFG>) {
 	if (/^(?:ccflags|optimize)='(.+)'$/) {
@@ -172,6 +175,17 @@ elsif ($PLATFORM eq 'aix') {
     } else {
 	print "#!\n";
     }
+}
+elsif ($PLATFORM eq 'netware') {
+	if ($FILETYPE eq 'def') {
+	print "LIBRARY Perl57\n";
+	print "DESCRIPTION 'Perl interpreter for NetWare'\n";
+	print "EXPORTS\n";
+	}
+	if ($define{PERL_IMPLICIT_SYS}) {
+	output_symbol("perl_get_host_info");
+	output_symbol("perl_alloc_override");
+	}
 }
 
 my %skip;
@@ -348,7 +362,56 @@ elsif ($PLATFORM eq 'MacOS') {
 		    Perl_sys_intern_init
 		    )];
 }
-
+elsif ($PLATFORM eq 'netware') {
+	skip_symbols [qw(
+			PL_statusvalue_vms
+			PL_archpat_auto
+			PL_cryptseen
+			PL_DBcv
+			PL_generation
+			PL_lastgotoprobe
+			PL_linestart
+			PL_modcount
+			PL_pending_ident
+			PL_sortcxix
+			PL_sublex_info
+			PL_timesbuf
+			main
+			Perl_ErrorNo
+			Perl_GetVars
+			Perl_do_exec3
+			Perl_do_ipcctl
+			Perl_do_ipcget
+			Perl_do_msgrcv
+			Perl_do_msgsnd
+			Perl_do_semop
+			Perl_do_shmio
+			Perl_dump_fds
+			Perl_init_thread_intern
+			Perl_my_bzero
+			Perl_my_htonl
+			Perl_my_ntohl
+			Perl_my_swap
+			Perl_my_chsize
+			Perl_same_dirent
+			Perl_setenv_getix
+			Perl_unlnk
+			Perl_watch
+			Perl_safexcalloc
+			Perl_safexmalloc
+			Perl_safexfree
+			Perl_safexrealloc
+			Perl_my_memcmp
+			Perl_my_memset
+			PL_cshlen
+			PL_cshname
+			PL_opsave
+			Perl_do_exec
+			Perl_getenv_len
+			Perl_my_pclose
+			Perl_my_popen
+			)];
+}
 
 unless ($define{'DEBUGGING'}) {
     skip_symbols [qw(
@@ -870,12 +933,153 @@ elsif ($PLATFORM eq 'MacOS') {
 
     close MACSYMS;
 }
+elsif ($PLATFORM eq 'netware') {
+foreach my $symbol (qw(
+			boot_DynaLoader
+			Perl_init_os_extras
+			Perl_thread_create
+			Perl_nw5_init
+			RunPerl
+			AllocStdPerl
+			FreeStdPerl
+			do_spawn2
+			do_aspawn
+			nw_uname
+			nw_stdin
+			nw_stdout
+			nw_stderr
+			nw_feof
+			nw_ferror
+			nw_fopen
+			nw_fclose
+			nw_clearerr
+			nw_getc
+			nw_fgets
+			nw_fputc
+			nw_fputs
+			nw_fflush
+			nw_ungetc
+			nw_fileno
+			nw_fdopen
+			nw_freopen
+			nw_fread
+			nw_fwrite
+			nw_setbuf
+			nw_setvbuf
+			nw_vfprintf
+			nw_ftell
+			nw_fseek
+			nw_rewind
+			nw_tmpfile
+			nw_fgetpos
+			nw_fsetpos
+			nw_dup
+			nw_access
+			nw_chmod
+			nw_chsize
+			nw_close
+			nw_dup2
+			nw_flock
+			nw_isatty
+			nw_link
+			nw_lseek
+			nw_stat
+			nw_mktemp
+			nw_open
+			nw_read
+			nw_rename
+			nw_setmode
+			nw_unlink
+			nw_utime
+			nw_write
+			nw_chdir
+			nw_rmdir
+			nw_closedir
+			nw_opendir
+			nw_readdir
+			nw_rewinddir
+			nw_seekdir
+			nw_telldir
+			nw_htonl
+			nw_htons
+			nw_ntohl
+			nw_ntohs
+			nw_accept
+			nw_bind
+			nw_connect
+			nw_endhostent
+			nw_endnetent
+			nw_endprotoent
+			nw_endservent
+			nw_gethostbyaddr
+			nw_gethostbyname
+			nw_gethostent
+			nw_gethostname
+			nw_getnetbyaddr
+			nw_getnetbyname
+			nw_getnetent
+			nw_getpeername
+			nw_getprotobyname
+			nw_getprotobynumber
+			nw_getprotoent
+			nw_getservbyname
+			nw_getservbyport
+			nw_getservent
+			nw_getsockname
+			nw_getsockopt
+			nw_inet_addr
+			nw_listen
+			nw_socket
+			nw_recv
+			nw_recvfrom
+			nw_select
+			nw_send
+			nw_sendto
+			nw_sethostent
+			nw_setnetent
+			nw_setprotoent
+			nw_setservent
+			nw_shutdown
+			nw_crypt
+			nw_execvp
+			nw_kill
+			nw_Popen
+			nw_Pclose
+			nw_Pipe
+			nw_times
+			nw_waitpid
+			nw_getpid
+			nw_spawnvp
+			nw_os_id
+			nw_open_osfhandle
+			nw_get_osfhandle
+			nw_abort
+			nw_sleep
+			nw_wait
+			nw_dynaload
+			nw_strerror
+			fnFpSetMode
+			fnInsertHashListAddrs
+			fnGetHashListAddrs
+			Perl_deb
+			   ))
+    {
+	try_symbol($symbol);
+    }
+}
 
 # Now all symbols should be defined because
 # next we are going to output them.
 
 foreach my $symbol (sort keys %export) {
     output_symbol($symbol);
+}
+
+if ($PLATFORM eq 'netware') {
+	# This may not be the right way to do.  This is to make sure
+	# that the last symbol will not contain a comma else
+	# Watcom linker cribs
+	print "\tdummy\n";
 }
 
 sub emit_symbol {
@@ -919,6 +1123,9 @@ sub output_symbol {
     elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'MacOS') {
 	print "$symbol\n";
     }
+	elsif ($PLATFORM eq 'netware') {
+	print "\t$symbol,\n";
+	}
 }
 
 1;

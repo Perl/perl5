@@ -12,17 +12,18 @@ use Config;
 print "1..58\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
+$Is_NetWare = $^O eq 'NetWare';
 $Is_Dos = $^O eq 'dos';
-$Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32;
+$Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32 || $Is_NetWare;
 $Is_Cygwin = $^O eq 'cygwin';
-chop($cwd = ($Is_MSWin32 ? `cd` : `pwd`));
+chop($cwd = (($Is_MSWin32 || $Is_NetWare) ? `cd` : `pwd`));
 
 $DEV = `ls -l /dev` unless $Is_Dosish or $Is_Cygwin;
 
 unlink "Op.stat.tmp";
 if (open(FOO, ">Op.stat.tmp")) {
   # hack to make Apollo update link count:
-  $junk = `ls Op.stat.tmp` unless ($Is_MSWin32 || $Is_Dos);
+  $junk = `ls Op.stat.tmp` unless ($Is_MSWin32 || $Is_NetWare || $Is_Dos);
 
   ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat(FOO);
@@ -32,7 +33,7 @@ if (open(FOO, ">Op.stat.tmp")) {
   else {
     print "# res=$res, nlink=$nlink.\nnot ok 1\n";
   }
-  if ($Is_MSWin32 or $Is_Cygwin or $Is_Dos || ($mtime && $mtime == $ctime)) {
+  if ($Is_MSWin32 or $Is_NetWare or $Is_Cygwin or $Is_Dos || ($mtime && $mtime == $ctime)) {
     print "ok 2\n";
   }
   else {
@@ -85,7 +86,7 @@ else {
 print "#4	:$mtime: should != :$ctime:\n";
 
 unlink "Op.stat.tmp" or print "# unlink failed: $!\n";
-if ($Is_MSWin32) {  open F, '>Op.stat.tmp' and close F }
+if ($Is_MSWin32 || $Is_NetWare) {  open F, '>Op.stat.tmp' and close F }
 else             { `touch Op.stat.tmp` }
 
 if (-z 'Op.stat.tmp') {print "ok 5\n";} else {print "not ok 5\n";}
@@ -141,7 +142,7 @@ if (-e 'Op.stat.tmp') {print "ok 27\n";} else {print "not ok 27\n";}
 unlink 'Op.stat.tmp2';
 if (! -e 'Op.stat.tmp2') {print "ok 28\n";} else {print "not ok 28\n";}
 
-if ($Is_MSWin32 || $Is_Dos)
+if ($Is_MSWin32 || $Is_NetWare || $Is_Dos)
     {print "ok 29\n";}
 elsif ($DEV !~ /\nc.* (\S+)\n/)
     {print "ok 29\n";}
@@ -151,7 +152,7 @@ else
     {print "not ok 29\n";}
 if (! -c '.') {print "ok 30\n";} else {print "not ok 30\n";}
 
-if ($Is_MSWin32 || $Is_Dos)
+if ($Is_MSWin32 || $Is_NetWare || $Is_Dos)
     {print "ok 31\n";}
 elsif ($DEV !~ /\ns.* (\S+)\n/)
     {print "ok 31\n";}
@@ -161,7 +162,7 @@ else
     {print "not ok 31\n";}
 if (! -S '.') {print "ok 32\n";} else {print "not ok 32\n";}
 
-if ($Is_MSWin32 || $Is_Dos)
+if ($Is_MSWin32 || $Is_NetWare || $Is_Dos)
     {print "ok 33\n";}
 elsif ($DEV !~ /\nb.* (\S+)\n/)
     {print "ok 33\n";}
@@ -205,7 +206,7 @@ tty_test:
 # may not be available (at, cron  rsh etc), the PERL_SKIP_TTY_TEST env var
 # can be set to skip the tests that need a tty.
 unless($ENV{PERL_SKIP_TTY_TEST}) {
-    if ($Is_MSWin32) {
+    if ($Is_MSWin32 || $Is_NetWare) {
 	print "ok 36\n";
 	print "ok 37\n";
     }
@@ -236,7 +237,7 @@ else {
     print "ok 39\n";
 }
 open(null,"/dev/null");
-if (! -t null || -e '/xenix' || $^O eq 'machten' || $Is_MSWin32)
+if (! -t null || -e '/xenix' || $^O eq 'machten' || $Is_MSWin32 || $Is_NetWare)
 	{print "ok 40\n";} else {print "not ok 40\n";}
 close(null);
 

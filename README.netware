@@ -1,0 +1,304 @@
+This file is written in the POD format.  If you are reading it thro'
+a text editor, ignore the words like =head1, =over etc.
+
+=head1 Name
+
+Perl for NetWare5.x
+
+=head1 Description
+
+This file gives the instructions for building Perl5.6.1 for NetWare5.x.
+Please read and understand the terms under which this software is distributed.
+
+
+=head1 Build
+
+This section describes the steps to be performed to build a Perl NLM and other associated
+NLMs.
+
+=head2 Tools & SDK
+
+The build requires Watcom 11.x compiler and linker.  NetWare SDK, available at L<http://developer.novell.com/ndk/>,  is required.
+Apart from NetWare SDK, "NLM & NetWare Libraries for C" and "NetWare Server Protocol Libraries for C"
+are also required.  This is also available at the above mentioned site.
+Microsoft Visual C++ version 4.2 or later is also required.
+
+Currently the interpreter builds only with Watcom, we do have plans of making this work with
+CodeWarrior as well.
+
+=head2 Setup
+
+The build process is dependent on the location of the NetWare SDK.  Once the required software
+is installed, the build environment has to be setup.  The following batch files setup 
+the environment.
+
+I<Buildtype.bat> - This sets the build type to release or debug.
+
+I<SetNWBld.bat>  - This sets the NetWare SDK path, Compiler & other tools path & MPK SDK path.
+
+I<MPKBuild.bat>  - This is required only it we are building multi-processor enabled NLMs.
+
+These batch files are under NetWare\bat folder.  These batch files call a couple of other
+batch files to setup the environment.  Invoking the batch file with I</now> will show the 
+current settings and I</h> or I</?> gives the usage help.
+
+=head2 Make
+
+The makefile is located under the NetWare folder.  Type nmake at the WinNT command prompt. 
+The make process runs only under WinNT shell.  The makefile makes use of miniperl.exe to 
+run some of the Perl scripts.  Please run nmake from win32 folder which builds miniperl.exe before
+running nmake from NetWare folder.  The build process can be stopped after miniperl.exe is created.
+
+Currently the follwing two build types are tested on NetWare
+
+=over 4
+
+=item *
+
+USE_MULTI, USE_ITHREADS & USE_IMP_SYS defined
+
+=item *
+
+USE_MULTI & USE_IMP_SYS defined and USE_ITHREADS not defined
+
+=back
+
+=head2 Interpreter
+
+Once miniperl.exe creation is over, run nmake from the NetWare folder. This will build the 
+Perl interpreter for NetWare as I<perl.nlm>.  This is copied under the I<Release> folder if you
+are doing a release build else will be copied under I<Debug> folder for debug builds.
+
+=head2 Extensions
+
+The make process also creates the Perl extensions which are called NLPs (NetWare Loadable Perl).
+
+=head1 Install
+
+Installing NetWare Perl on Windows doesn't make any sense.  To install, type I<nmake nwinstall>. This
+will copy the binaries and module files to a NetWare server.  The makefile, by default sets the 
+drive letter to I<i:> which should be mapped to the I<sys> volume of a NetWare server.  The Perl 
+interpreter, I<perl.nlm>, is copied under I<sys:\perl\system> folder. Copy I<perl.nlm> to 
+I<sys:\system> folder. Before running I<nmake nwinstall>, make sure the NetWare server on which 
+the files have to go is mapped to the drive letter I<i:>.
+
+=head1 Build new extensions
+
+To build extensions other than standard extensions, NetWare Perl has to be installed on Windows as well.
+This can be done by invoking I<nmake install> on the Windows NT command prompt.  This will copy all
+the *.pm files and other required files.  Documentation files are not copied. This has be done after 
+installing Perl for Windows. Once this is done, to build any extension, do the following
+
+=over 4
+
+=item *
+perl -II<path to NetWare lib dir> -II<path to lib> Makefile.pl
+
+Ex: perl -Ic:/perl/5.6.1/lib/NetWare-multi-thread -Ic:\perl\5.6.1\lib MakeFile.pl
+
+=item *
+nmake
+
+=item *
+nmake install
+
+
+Install will copy the files into the Windows machine where NetWare Perl is installed, these files
+have to be copied to the NetWare server manually.  Alternatively, pass I<INSTALLSITELIB=i:\perl\lib>
+as an input to makefile.pl above.  Where I<i:> is the mapped drive to the sys: volume of the 
+server where Perl on NetWare is installed.  Now saying I<nmake install>, will copy the files 
+to the server.
+ 
+
+=back
+
+=head1 Known Issues
+
+=item * 
+
+With USE_ITHREADS not defined, backtick seems to be having some problems.
+
+=item *
+
+The utility scripts (pod2html.pl, pod2man.pl, perldoc.pl etc.) are not yet ported to work on NetWare.
+
+=item *
+
+Also fork() is not currently implemented.
+
+=head1 Acknowledgements
+
+For the porting purpose, the PerlHost of Win32 port was used as reference and NetWare portions are
+added. Also the makefile for Win32 is used as a reference to create the makefile for NetWare build.
+Additionally the make process for NetWare port uses miniperl.exe to run scripts during the make and
+installation process.
+
+=head1 Author
+
+Guruprasad S (sguruprasad@novell.com)
+
+=head1 Date
+
+=over 4
+
+=item *
+
+Created - 18th Jan 2001
+
+=item *
+
+Modified -  16th April 2001
+
+=back
+This file is written in the POD format.  If you are reading it thro'
+a text editor, ignore the words like =head1, =over etc.
+
+=head1 Name
+
+Perl for NetWare5.x
+
+=head1 Description
+
+This file gives the instructions for building Perl5.6.1 for NetWare5.x.
+Please read and understand the terms under which this software is distributed.
+
+
+=head1 Build
+
+This section describes the steps to be performed to build a Perl NLM and other associated
+NLMs.
+
+=head2 Tools & SDK
+
+The build requires Watcom 11.x compiler and linker.  NetWare SDK, available at L<http://developer.novell.com/ndk/>,  is required.
+Apart from NetWare SDK, "NLM & NetWare Libraries for C" and "NetWare Server Protocol Libraries for C"
+are also required.  This is also available at the above mentioned site.
+Microsoft Visual C++ version 4.2 or later is also required.
+
+Currently the interpreter builds only with Watcom, we do have plans of making this work with
+CodeWarrior as well.
+
+=head2 Setup
+
+The build process is dependent on the location of the NetWare SDK.  Once the required software
+is installed, the build environment has to be setup.  The following batch files setup 
+the environment.
+
+I<Buildtype.bat> - This sets the build type to release or debug.
+
+I<SetNWBld.bat>  - This sets the NetWare SDK path, Compiler & other tools path & MPK SDK path.
+
+I<MPKBuild.bat>  - This is required only it we are building multi-processor enabled NLMs.
+
+These batch files are under NetWare\bat folder.  These batch files call a couple of other
+batch files to setup the environment.  Invoking the batch file with I</now> will show the 
+current settings and I</h> or I</?> gives the usage help.
+
+=head2 Make
+
+The makefile is located under the NetWare folder.  Type nmake at the WinNT command prompt. 
+The make process runs only under WinNT shell.  The makefile makes use of miniperl.exe to 
+run some of the Perl scripts.  Please run nmake from win32 folder which builds miniperl.exe before
+running nmake from NetWare folder.  The build process can be stopped after miniperl.exe is created.
+
+Currently the follwing two build types are tested on NetWare
+
+=over 4
+
+=item *
+
+USE_MULTI, USE_ITHREADS & USE_IMP_SYS defined
+
+=item *
+
+USE_MULTI & USE_IMP_SYS defined and USE_ITHREADS not defined
+
+=back
+
+=head2 Interpreter
+
+Once miniperl.exe creation is over, run nmake from the NetWare folder. This will build the 
+Perl interpreter for NetWare as I<perl.nlm>.  This is copied under the I<Release> folder if you
+are doing a release build else will be copied under I<Debug> folder for debug builds.
+
+=head2 Extensions
+
+The make process also creates the Perl extensions which are called NLPs (NetWare Loadable Perl).
+
+=head1 Install
+
+Installing NetWare Perl on Windows doesn't make any sense.  To install, type I<nmake nwinstall>. This
+will copy the binaries and module files to a NetWare server.  The makefile, by default sets the 
+drive letter to I<i:> which should be mapped to the I<sys> volume of a NetWare server.  The Perl 
+interpreter, I<perl.nlm>, is copied under I<sys:\perl\system> folder. Copy I<perl.nlm> to 
+I<sys:\system> folder. Before running I<nmake nwinstall>, make sure the NetWare server on which 
+the files have to go is mapped to the drive letter I<i:>.
+
+=head1 Build new extensions
+
+To build extensions other than standard extensions, NetWare Perl has to be installed on Windows as well.
+This can be done by invoking I<nmake install> on the Windows NT command prompt.  This will copy all
+the *.pm files and other required files.  Documentation files are not copied. This has be done after 
+installing Perl for Windows. Once this is done, to build any extension, do the following
+
+=over 4
+
+=item *
+perl -II<path to NetWare lib dir> -II<path to lib> Makefile.pl
+
+Ex: perl -Ic:/perl/5.6.1/lib/NetWare-multi-thread -Ic:\perl\5.6.1\lib MakeFile.pl
+
+=item *
+nmake
+
+=item *
+nmake install
+
+
+Install will copy the files into the Windows machine where NetWare Perl is installed, these files
+have to be copied to the NetWare server manually.  Alternatively, pass I<INSTALLSITELIB=i:\perl\lib>
+as an input to makefile.pl above.  Where I<i:> is the mapped drive to the sys: volume of the 
+server where Perl on NetWare is installed.  Now saying I<nmake install>, will copy the files 
+to the server.
+ 
+
+=back
+
+=head1 Known Issues
+
+=item * 
+
+With USE_ITHREADS not defined, backtick seems to be having some problems.
+
+=item *
+
+The utility scripts (pod2html.pl, pod2man.pl, perldoc.pl etc.) are not yet ported to work on NetWare.
+
+=item *
+
+Also fork() is not currently implemented.
+
+=head1 Acknowledgements
+
+For the porting purpose, the PerlHost of Win32 port was used as reference and NetWare portions are
+added. Also the makefile for Win32 is used as a reference to create the makefile for NetWare build.
+Additionally the make process for NetWare port uses miniperl.exe to run scripts during the make and
+installation process.
+
+=head1 Author
+
+Guruprasad S (sguruprasad@novell.com)
+
+=head1 Date
+
+=over 4
+
+=item *
+
+Created - 18th Jan 2001
+
+=item *
+
+Modified -  16th April 2001
+
+=back

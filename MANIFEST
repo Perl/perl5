@@ -17,6 +17,55 @@ INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 Makefile.micro		microperl Makefile
+NetWare/CLIBsdio.h	Netware port
+NetWare/CLIBstr.h	Netware port
+NetWare/CLIBstuf.c	Netware port
+NetWare/CLIBstuf.h	Netware port
+NetWare/Main.c	Netware port
+NetWare/Makefile	Netware port
+NetWare/NWTInfo.c	Netware port
+NetWare/NWUtil.c	Netware port
+NetWare/Nwmain.c	Netware port
+NetWare/Nwpipe.c	Netware port
+NetWare/bat/BldNWExt.bat	Netware port
+NetWare/bat/Buildtype.bat	Netware port
+NetWare/bat/MPKBuild.bat	Netware port
+NetWare/bat/SetNWBld.bat	Netware port
+NetWare/bat/Setmpksdk.bat	Netware port
+NetWare/bat/Setnlmsdk.bat	Netware port
+NetWare/bat/Setwatcom.bat	Netware port
+NetWare/bat/ToggleD2.bat	Netware port
+NetWare/bat/ToggleXDC.bat	Netware port
+NetWare/config.wc	Netware port
+NetWare/config_H.wc	Netware port
+NetWare/config_h.PL	Netware port
+NetWare/config_sh.PL	Netware port
+NetWare/deb.h	Netware port
+NetWare/dl_netware.xs	Netware port
+NetWare/intdef.h	Netware port
+NetWare/interface.c	Netware port
+NetWare/interface.h	Netware port
+NetWare/iperlhost.h	Netware port
+NetWare/netware.h	Netware port
+NetWare/nw5.c	Netware port
+NetWare/nw5iop.h	Netware port
+NetWare/nw5sck.c	Netware port
+NetWare/nw5sck.h	Netware port
+NetWare/nw5thread.c	Netware port
+NetWare/nw5thread.h	Netware port
+NetWare/nwperlsys.c	Netware port
+NetWare/nwperlsys.h	Netware port
+NetWare/nwpipe.h	Netware port
+NetWare/nwplglob.c	Netware port
+NetWare/nwplglob.h	Netware port
+NetWare/nwtinfo.h	Netware port
+NetWare/nwutil.h	Netware port
+NetWare/t/NWModify.pl	Netware port
+NetWare/t/NWScripts.pl	Netware port
+NetWare/t/Readme.txt	Netware port
+NetWare/testnlm/echo/echo.c	Netware port
+NetWare/testnlm/type/type.c	Netware port
+NetWare/win32ish.h	Netware port
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
@@ -52,6 +101,7 @@ README.macos		Notes about Mac OS (Classic)
 README.micro		Notes about microperl
 README.mint		Notes about Atari MiNT port
 README.mpeix		Notes about MPE/iX port
+README.netware	Netware port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
@@ -744,6 +794,7 @@ lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Liblist.pm	Locates libraries
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
+lib/ExtUtils/MM_NW5.pm	Netware port
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS

@@ -29,7 +29,7 @@ $x->close;
 $x = new IO::File "< ./__taint__$$" || die("Cannot open ./__taint__$$\n");
 chop($unsafe = <$x>);
 eval { kill 0 * $unsafe };
-print "not " if $^O ne 'MSWin32' and ($@ !~ /^Insecure/o);
+print "not " if ((($^O ne 'MSWin32') && ($^O ne 'NetWare')) and ($@ !~ /^Insecure/o));
 print "ok 1\n";
 $x->close;
 

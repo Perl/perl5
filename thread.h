@@ -7,6 +7,9 @@
 #ifdef WIN32
 #  include <win32thread.h>
 #else
+#ifdef NETWARE
+#  include <nw5thread.h>
+#else
 #  ifdef OLD_PTHREADS_API /* Here be dragons. */
 #    define DETACH(t) \
     STMT_START {						\
@@ -54,6 +57,7 @@
 #    define pthread_mutexattr_default NULL
 #    define pthread_condattr_default  NULL
 #  endif
+#endif	/* NETWARE */
 #endif
 
 #ifndef PTHREAD_CREATE

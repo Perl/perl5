@@ -817,14 +817,24 @@ perl_free(pTHXx)
 #if defined(PERL_OBJECT)
     PerlMem_free(this);
 #else
-#  if defined(WIN32)
+#  if defined(WIN32) || defined(NETWARE)
 #  if defined(PERL_IMPLICIT_SYS)
-    void *host = w32_internal_host;
-    if (PerlProc_lasthost()) {
+    #ifdef NETWARE
+		void *host = nw_internal_host;
+	#else
+		void *host = w32_internal_host;
+	#endif
+	#ifndef NETWARE
+	if (PerlProc_lasthost()) {
 	PerlIO_cleanup();
-    }
+	}
+	#endif
     PerlMem_free(aTHXx);
-    win32_delete_internal_host(host);
+	#ifdef NETWARE
+		nw5_delete_internal_host(host);
+	#else
+		win32_delete_internal_host(host);
+	#endif
 #else
     PerlIO_cleanup();
     PerlMem_free(aTHXx);

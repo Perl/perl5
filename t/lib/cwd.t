@@ -30,7 +30,7 @@ eval { fastcwd };
 # Must find an external pwd (or equivalent) command.
 
 my $pwd_cmd =
-    ($^O eq "MSWin32") ? "cd" : (grep { -x && -f } map { "$_/pwd" }
+    ($^O eq "MSWin32" || $^O eq "NetWare") ? "cd" : (grep { -x && -f } map { "$_/pwd" }
 			       split m/$Config{path_sep}/, $ENV{PATH})[0];
 
 if ($^O eq 'VMS') { $pwd_cmd = 'SHOW DEFAULT'; }
@@ -38,7 +38,7 @@ if ($^O eq 'VMS') { $pwd_cmd = 'SHOW DEFAULT'; }
 if (defined $pwd_cmd) {
     chomp(my $start = `$pwd_cmd`);
     # Win32's cd returns native C:\ style
-    $start =~ s,\\,/,g if $^O eq 'MSWin32';
+    $start =~ s,\\,/,g if ($^O eq 'MSWin32' || $^O eq "NetWare");
     # DCL SHOW DEFAULT has leading spaces
     $start =~ s/^\s+// if $^O eq 'VMS';
     if ($?) {

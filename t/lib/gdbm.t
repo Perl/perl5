@@ -30,7 +30,7 @@ my $Dfile = "Op.dbmx.pag";
 if (! -e $Dfile) {
 	($Dfile) = <Op.dbmx*>;
 }
-if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'dos') {
+if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'dos') {
     print "ok 2 # Skipped: different file permission semantics\n";
 }
 else {

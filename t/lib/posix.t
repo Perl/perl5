@@ -17,6 +17,7 @@ $| = 1;
 print "1..27\n";
 
 $Is_W32 = $^O eq 'MSWin32';
+$Is_NetWare = $^O eq 'NetWare';
 $Is_Dos = $^O eq 'dos';
 
 $testfd = open("TEST", O_RDONLY, 0) and print "ok 1\n";

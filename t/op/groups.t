@@ -10,7 +10,7 @@ sub quit {
     exit 0;
 }
 
-quit() if $^O eq 'MSWin32' or $^O =~ /lynxos/i;
+quit() if (($^O eq 'MSWin32' || $^O eq 'NetWare') or $^O =~ /lynxos/i);
 
 # We have to find a command that prints all (effective
 # and real) group names (not ids).  The known commands are:

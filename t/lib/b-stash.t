@@ -30,6 +30,7 @@ chomp($a = `$^X $path "-MB::Stash" "-Mwarnings" -e1`);
 $a = join ',', sort split /,/, $a;
 $a =~ s/-u(PerlIO|open)(?:::\w+)?,//g if defined $Config{'useperlio'} and $Config{'useperlio'} eq 'define';
 $a =~ s/-uWin32,// if $^O eq 'MSWin32';
+$a =~ s/-uNetWare,// if $^O eq 'NetWare';
 $a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
 $a =~ s/-uCwd,// if $^O eq 'cygwin';
   $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'

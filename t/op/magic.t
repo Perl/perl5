@@ -21,11 +21,12 @@ sub ok {
 }
 
 $Is_MSWin32 = $^O eq 'MSWin32';
+$Is_NetWare = $^O eq 'NetWare';
 $Is_VMS     = $^O eq 'VMS';
 $Is_Dos   = $^O eq 'dos';
 $Is_os2   = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
-$PERL = ($Is_MSWin32 ? '.\perl' : './perl');
+$PERL = ($Is_MSWin32 ? '.\perl' : ($Is_NetWare ? 'perl' : './perl'));
 
 print "1..41\n";
 
@@ -39,7 +40,7 @@ open(FOO,'ajslkdfpqjsjfk');
 ok 2, $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
-if ($Is_MSWin32 || $Is_Dos) {
+if ($Is_MSWin32 || $Is_NetWare || $Is_Dos) {
     ok "3 # skipped",1;
     ok "4 # skipped",1;
 }
@@ -211,7 +212,7 @@ else {
 
 # test case-insignificance of %ENV (these tests must be enabled only
 # when perl is compiled with -DENV_IS_CASELESS)
-if ($Is_MSWin32) {
+if ($Is_MSWin32 || $Is_NetWare) {
     %ENV = ();
     $ENV{'Foo'} = 'bar';
     $ENV{'fOo'} = 'baz';

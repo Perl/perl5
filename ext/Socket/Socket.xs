@@ -39,6 +39,11 @@
 # include "sockadapt.h"
 #endif
 
+#ifdef NETWARE
+NETDB_DEFINE_CONTEXT
+NETINET_DEFINE_CONTEXT
+#endif
+
 #ifdef I_SYSUIO
 # include <sys/uio.h>
 #endif

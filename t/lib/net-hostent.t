@@ -41,7 +41,7 @@ print "ok 5\n";
 # VMS returns "LOCALHOST" under tcp/ip services V4.1 ECO 2, possibly others
 # OS/390 returns localhost.YADDA.YADDA
 
-if ($^O eq 'MSWin32' or $^O eq 'cygwin') {
+if ($^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'cygwin') {
   print "ok $_ # skipped on win32\n" for (6,7);
 } else {
   my $in_alias;

@@ -342,6 +342,7 @@ AUTOSRAND:
     for (1..5) {
 	my $PERL = (($^O eq 'VMS') ? "MCR $^X"
 		    : ($^O eq 'MSWin32') ? '.\perl'
+		    : ($^O eq 'NetWare') ? 'perl'
 		    : './perl');
 	$pid = open PERL, qq[$PERL -e "print rand"|];
 	die "Couldn't pipe from perl: $!" unless defined $pid;

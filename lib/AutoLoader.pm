@@ -12,7 +12,7 @@ BEGIN {
     require Exporter;
     @EXPORT = @EXPORT = ();
     @EXPORT_OK = @EXPORT_OK = qw(AUTOLOAD);
-    $is_dosish = $^O eq 'dos' || $^O eq 'os2' || $^O eq 'MSWin32';
+    $is_dosish = $^O eq 'dos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare';
     $is_epoc = $^O eq 'epoc';
     $is_vms = $^O eq 'VMS';
     $is_macos = $^O eq 'MacOS';
@@ -57,7 +57,11 @@ AUTOLOAD {
 		unless ($filename =~ m|^/|s) {
 		    if ($is_dosish) {
 			unless ($filename =~ m{^([a-z]:)?[\\/]}is) {
-			     $filename = "./$filename";
+			     if ($^O ne 'NetWare') {
+					$filename = "./$filename";
+				} else {
+					$filename = "$filename";
+				}
 			}
 		    }
 		    elsif ($is_epoc) {

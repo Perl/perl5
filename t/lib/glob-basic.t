@@ -44,7 +44,7 @@ print "ok 2\n";
 
 # look up the user's home directory
 # should return a list with one item, and not set ERROR
-if ($^O ne 'MSWin32' && $^O ne 'VMS') {
+if ($^O ne 'MSWin32' && $^O ne 'NetWare' && $^O ne 'VMS') {
   eval {
     ($name, $home) = (getpwuid($>))[0,7];
     1;
@@ -71,14 +71,14 @@ print "ok 4\n";
 # should return an empty list
 # XXX since errfunc is NULL on win32, this test is not valid there
 @a = bsd_glob("asdfasdf", 0);
-if ($^O ne 'MSWin32' and scalar @a != 0) {
+if (($^O ne 'MSWin32' && $^O ne 'NetWare') and scalar @a != 0) {
     print "# |@a|\nnot ";
 }
 print "ok 5\n";
 
 # check bad protections
 # should return an empty list, and set ERROR
-if ($^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'os2' or $^O eq 'VMS'
+if ($^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'os2' or $^O eq 'VMS'
     or $^O eq 'cygwin' or Cwd::cwd() =~ m#^$Config{'afsroot'}#s or not $>)
 {
     print "ok 6 # skipped\n";

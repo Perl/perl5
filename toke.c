@@ -4195,7 +4195,11 @@ Perl_yylex(pTHX)
 			loc = PerlIO_tell(PL_rsfp);
 			(void)PerlIO_seek(PL_rsfp, 0L, 0);
 		    }
+#ifdef NETWARE
+			if (PerlLIO_setmode(PL_rsfp, O_TEXT) != -1) {
+#else
 		    if (PerlLIO_setmode(PerlIO_fileno(PL_rsfp), O_TEXT) != -1) {
+#endif	/* NETWARE */
 #ifdef PERLIO_IS_STDIO /* really? */
 #  if defined(__BORLANDC__)
 			/* XXX see note in do_binmode() */

@@ -604,7 +604,11 @@ typedef int		(*LPLIOOpen3)(struct IPerlLIO*, const char*, int, int);
 typedef int		(*LPLIORead)(struct IPerlLIO*, int, void*, unsigned int);
 typedef int		(*LPLIORename)(struct IPerlLIO*, const char*,
 			    const char*);
+#ifdef NETWARE
+typedef int		(*LPLIOSetmode)(struct IPerlLIO*, FILE*, int);
+#else
 typedef int		(*LPLIOSetmode)(struct IPerlLIO*, int, int);
+#endif	/* NETWARE */
 typedef int		(*LPLIONameStat)(struct IPerlLIO*, const char*,
 			    struct stat*);
 typedef char*		(*LPLIOTmpnam)(struct IPerlLIO*, char*);

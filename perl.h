@@ -360,15 +360,15 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  */
 
 /* define this once if either system, instead of cluttering up the src */
-#if defined(MSDOS) || defined(atarist) || defined(WIN32)
+#if defined(MSDOS) || defined(atarist) || defined(WIN32) || defined(NETWARE)
 #define DOSISH 1
 #endif
 
-#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined( EPOC)
+#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined( EPOC) || defined(NETWARE)
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) || defined(__DGUX) || defined( EPOC) || defined(__QNX__)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) || defined(__DGUX) || defined( EPOC) || defined(__QNX__) || defined(NETWARE)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -777,6 +777,9 @@ typedef struct perl_mstats perl_mstats_t;
 #   endif
 # endif
 # ifdef I_NETDB
+#  ifdef NETWARE
+#   include<stdio.h>
+#  endif
 #  include <netdb.h>
 # endif
 # ifndef ENOTSOCK
@@ -1788,6 +1791,9 @@ typedef struct ptr_tbl PTR_TBL_t;
     * atomic.h everywhere */
 #  define EMULATE_ATOMIC_REFCOUNTS
 #  endif
+#  ifdef NETWARE
+#   include <nw5thread.h>
+#  else
 #  ifdef FAKE_THREADS
 #    include "fakethr.h"
 #  else
@@ -1818,10 +1824,15 @@ typedef pthread_key_t	perl_key;
 #      endif /* OS2 */
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
+#endif	/* NETWARE */
 #endif /* USE_THREADS || USE_ITHREADS */
 
 #ifdef WIN32
 #  include "win32.h"
+#endif
+
+#ifdef NETWARE
+#  include "netware.h"
 #endif
 
 #ifdef VMS
@@ -3596,7 +3607,9 @@ typedef struct am_table_short AMTS;
 
 #ifndef PERL_MICRO
 #   ifndef PERL_OLD_SIGNALS
-#       define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#		ifndef PERL_ASYNC_CHECK
+#			define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#		endif
 #   endif
 #endif
 
