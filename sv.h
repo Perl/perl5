@@ -72,13 +72,46 @@ struct io {
 #define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
+#ifdef USE_THREADS
+
+#  ifndef EMULATE_ATOMIC_REFCOUNTS
+#    include "atomic.h"
+#  endif
+
+#  ifdef EMULATE_ATOMIC_REFCOUNTS
+#    define ATOMIC_INC(count) STMT_START {	\
+	MUTEX_LOCK(&svref_mutex);		\
+	++count;				\
+	MUTEX_UNLOCK(&svref_mutex);		\
+     } STMT_END
+#    define ATOMIC_DEC_AND_TEST(res,count) 	\
+	MUTEX_LOCK(&svref_mutex);		\
+	res = (--count == 0);			\
+	MUTEX_UNLOCK(&svref_mutex);		\
+     } STMT_END
+#  else
+#    define ATOMIC_INC(count) atomic_inc(&count)
+#    define ATOMIC_DEC_AND_TEST(res,count) (res = atomic_dec_and_test(&count))
+#  endif /* EMULATE_ATOMIC_REFCOUNTS */
+#else
+#  define ATOMIC_INC(count) (++count)
+#  define ATOMIC_DEC_AND_TEST(res, count) (res = --count)
+#endif /* USE_THREADS */
+
 #ifdef __GNUC__
-#  define SvREFCNT_inc(sv) ({SV* nsv=(SV*)(sv); if(nsv) ++SvREFCNT(nsv); nsv;})
+#  define SvREFCNT_inc(sv)		\
+    ({					\
+	SV *nsv = (SV*)(sv);		\
+	if (nsv)			\
+	     ATOMIC_INC(SvREFCNT(nsv));	\
+	nsv;				\
+    })
 #else
 #  if defined(CRIPPLED_CC) || defined(USE_THREADS)
 #    define SvREFCNT_inc(sv) sv_newref((SV*)sv)
 #  else
-#    define SvREFCNT_inc(sv) ((Sv=(SV*)(sv)), (Sv && ++SvREFCNT(Sv)), (SV*)Sv)
+#    define SvREFCNT_inc(sv)	\
+	((Sv=(SV*)(sv)), (Sv && ATOMIC_INC(SvREFCNT(Sv))), (SV*)Sv)
 #  endif
 #endif
 

@@ -130,6 +130,9 @@ perl_construct(register PerlInterpreter *sv_interp)
 	COND_INIT(&eval_cond);
 	MUTEX_INIT(&threads_mutex);
 	COND_INIT(&nthreads_cond);
+#ifdef EMULATE_ATOMIC_REFCOUNTS
+	MUTEX_INIT(&svref_mutex);
+#endif /* EMULATE_ATOMIC_REFCOUNTS */
 	
 	thr = init_main_thread();
 #endif /* USE_THREADS */
