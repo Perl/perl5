@@ -795,6 +795,7 @@ PP(pp_rv2hv)
 {
     dSP; dTOPss;
     HV *hv;
+    I32 gimme = GIMME_V;
 
     if (SvROK(sv)) {
       wasref:
@@ -808,7 +809,7 @@ PP(pp_rv2hv)
 	    RETURN;
 	}
 	else if (LVRET) {
-	    if (GIMME != G_SCALAR)
+	    if (gimme != G_ARRAY)
 		Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
 	    SETs((SV*)hv);
 	    RETURN;
@@ -825,7 +826,7 @@ PP(pp_rv2hv)
 		RETURN;
 	    }
 	    else if (LVRET) {
-		if (GIMME == G_SCALAR)
+		if (gimme != G_ARRAY)
 		    Perl_croak(aTHX_ "Can't return hash to lvalue"
 			       " scalar context");
 		SETs((SV*)hv);
@@ -850,7 +851,7 @@ PP(pp_rv2hv)
 			DIE(aTHX_ PL_no_usym, "a HASH");
 		    if (ckWARN(WARN_UNINITIALIZED))
 			report_uninit();
-		    if (GIMME == G_ARRAY) {
+		    if (gimme == G_ARRAY) {
 			SP--;
 			RETURN;
 		    }
@@ -885,7 +886,7 @@ PP(pp_rv2hv)
 		RETURN;
 	    }
 	    else if (LVRET) {
-		if (GIMME == G_SCALAR)
+		if (gimme != G_ARRAY)
 		    Perl_croak(aTHX_ "Can't return hash to lvalue"
 			       " scalar context");
 		SETs((SV*)hv);
@@ -894,12 +895,15 @@ PP(pp_rv2hv)
 	}
     }
 
-    if (GIMME == G_ARRAY) { /* array wanted */
+    if (gimme == G_ARRAY) { /* array wanted */
 	*PL_stack_sp = (SV*)hv;
 	return do_kv();
     }
-    else {
+    else if (gimme == G_SCALAR) {
 	dTARGET;
+	if (SvRMAGICAL(hv) && mg_find((SV *)hv, PERL_MAGIC_tied))
+	    Perl_croak(aTHX_ "Can't provide tied hash usage; "
+		       "use keys(%%hash) to test if empty");
 	if (HvFILL(hv))
             Perl_sv_setpvf(aTHX_ TARG, "%"IVdf"/%"IVdf,
 			   (IV)HvFILL(hv), (IV)HvMAX(hv) + 1);
@@ -907,8 +911,8 @@ PP(pp_rv2hv)
 	    sv_setiv(TARG, 0);
 	
 	SETTARG;
-	RETURN;
     }
+    RETURN;
 }
 
 STATIC void
