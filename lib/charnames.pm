@@ -16,7 +16,7 @@ my %alias1 = (
 		# Convenience.
 		'LF'			=> 'LINE FEED (LF)',
 		'FF'			=> 'FORM FEED (FF)',
-		'CR'			=> 'CARRIAGE RETURN (LF)',
+		'CR'			=> 'CARRIAGE RETURN (CR)',
 		'NEL'			=> 'NEXT LINE (NEL)',
 	        # More convenience.  For futher convencience,
 	        # it is suggested some way using using the NamesList
