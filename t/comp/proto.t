@@ -19,7 +19,7 @@ BEGIN {
 
 use strict;
 
-print "1..123\n";
+print "1..124\n";
 
 my $i = 1;
 
@@ -343,6 +343,7 @@ sub sub_array (&@) {
 
 @array = (qw(O K)," ", $i++);
 sub_array { lc shift } @array;
+sub_array { lc shift } ('O', 'K', ' ', $i++);
 print "\n";
 
 ##
