@@ -7838,7 +7838,7 @@ case "$use64bits" in
 #ifdef I_INTTYPES
 #include <inttypes.h>
 #endif
-int64_t foo() { int64_t x; x = 7; return x; }'
+int64_t foo() { int64_t x; x = 7; return x; }
 EOCP
 	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
 		val="$define"
