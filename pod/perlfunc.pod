@@ -4066,7 +4066,7 @@ documentation.
 =item semop KEY,OPSTRING
 
 Calls the System V IPC function semop to perform semaphore operations
-such as signaling and waiting.  OPSTRING must be a packed array of
+such as signalling and waiting.  OPSTRING must be a packed array of
 semop structures.  Each semop structure can be generated with
 C<pack("sss", $semnum, $semop, $semflag)>.  The number of semaphore
 operations is implied by the length of OPSTRING.  Returns true if
