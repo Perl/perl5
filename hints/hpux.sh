@@ -92,12 +92,15 @@ EOM
 	cppminus='-'
 	cpplast='-'
     fi
-    # For HP's ANSI C compiler, up to "+O3" is safe for everything
-    # except shared libraries (PIC code).  Max safe for PIC is "+O2".
-    # Setting both causes innocuous warnings.
-    #optimize='+O3'
-    #cccdlflags='+z +O2'
-    optimize='-O'
+    case "$optimize" in
+	# For HP's ANSI C compiler, up to "+O3" is safe for everything
+	# except shared libraries (PIC code).  Max safe for PIC is "+O2".
+	# Setting both causes innocuous warnings.
+	'')	optimize='-O'
+		#optimize='+O3'
+		#cccdlflags='+z +O2'
+		;;
+    esac
     cc=cc
     ;;
 esac
