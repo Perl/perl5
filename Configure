@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jun 13 21:24:27 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Jun 13 21:32:05 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1057,7 +1057,7 @@ libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
 : set usethreads on the Configure command line to enable threads.
-:usereentrant='undef'
+usereentrant='undef'
 : full support for void wanted by default
 defvoidused=15
 
