@@ -47,14 +47,15 @@ sub import {
     s/^&//, $export_cache->{$_} = 1
       foreach (@$exports, @{"$pkg\::EXPORT_OK"});
   }
-  my $heavy = $Verbose || $Debug;
-  unless ($heavy) {
-    # Try very hard not to use {} and hence have to  enter scope on the foreach
-    # We bomb out of the loop with last as soon as heavy is set.
+  my $heavy;
+  # Try very hard not to use {} and hence have to  enter scope on the foreach
+  # We bomb out of the loop with last as soon as heavy is set.
+  if ($args or $fail) {
     ($heavy = (/\W/ or $args and not exists $export_cache->{$_}
-              or @$fail and $_ eq $fail->[0]
-              or (@{"$pkg\::EXPORT_OK"} and $_ eq ${"$pkg\::EXPORT_OK"}[0])))
-    and last
+               or @$fail and $_ eq $fail->[0])) and last
+                 foreach (@_);
+  } else {
+    ($heavy = /\W/) and last
       foreach (@_);
   }
   return export $pkg, $callpkg, ($args ? @_ : ()) if $heavy;
