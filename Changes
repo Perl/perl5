@@ -103,6 +103,110 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6932] By: jhi                                   on 2000/08/30  23:40:07
+        Log: Mention UNTIE in perldelta.  Still needs documenting
+             in perltie et alia.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6931] By: jhi                                   on 2000/08/30  23:36:02
+        Log: Subject: [PATCH] Don't use big-Oh when talking about lower bounds.
+             From: <abigail@foad.org>
+             Date: Wed, 30 Aug 2000 19:28:07 -0400
+             Message-ID: <20000830232807.305.qmail@foad.org>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6930] By: jhi                                   on 2000/08/30  23:32:40
+        Log: Update to Unicode 3.0.1.
+     Branch: perl
+	   + lib/unicode/BidiMirr.txt lib/unicode/CaseFold.txt
+	   + lib/unicode/PropList.txt lib/unicode/README.perl
+	   + lib/unicode/UCD301.html lib/unicode/Unicode.301
+	   - lib/unicode/Props.txt lib/unicode/UCD300.html
+	   - lib/unicode/Unicode.300 lib/unicode/Unicode3.html
+	   ! (edit 257 files)
+____________________________________________________________________________
+[  6929] By: jhi                                   on 2000/08/30  22:38:18
+        Log: Heap decorruption.
+             
+             Subject: [PATCH] Fix for miniperl coredump on Solaris with -Duselongdouble
+             From: Alan Burlison <Alan.Burlison@uk.sun.com>
+             Date: Wed, 30 Aug 2000 22:39:52 +0100
+             Message-ID: <39AD7F28.A06533CF@uk.sun.com>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  6928] By: jhi                                   on 2000/08/30  22:29:34
+        Log: Retract the dummy test, skip the security tests (instead of failing),
+             explain what the warnings mean.
+     Branch: perl
+	   ! INSTALL lib/File/Temp.pm t/lib/ftmp-security.t
+____________________________________________________________________________
+[  6927] By: jhi                                   on 2000/08/30  22:14:13
+        Log: Change the internal implementation of sort() to be mergesort
+             instead of quicksort, from John Linderman <jpl@research.att.com>.
+             Gives us better worst case, better average case, and stability.
+             What's there not to like?  (Small fixes for threaded builds
+             were required).
+     Branch: perl
+	   ! pod/perldelta.pod pp_ctl.c t/op/runlevel.t
+____________________________________________________________________________
+[  6926] By: jhi                                   on 2000/08/30  20:55:20
+        Log: A better fix for the Socket building problem from Craig Berry.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  6925] By: jhi                                   on 2000/08/30  20:20:25
+        Log: Subject: [PATCH] Re: UNTIE method 
+             From: Nick Ing-Simmons <nik@tiuk.ti.com>
+             Date: Wed, 30 Aug 2000 18:26:55 +0100 (BST)
+             Message-Id: <200008301726.SAA01114@mikado.tiuk.ti.com>
+     Branch: perl
+	   ! pp_sys.c t/op/tie.t
+____________________________________________________________________________
+[  6924] By: jhi                                   on 2000/08/30  20:17:11
+        Log: Subject: Re: not OK, 6919 on Alpha VMS V 7.1 w/ DECC 6.0-001
+             From: "Craig A. Berry" <craig.berry@psinetcs.com>
+             Date: Wed, 30 Aug 2000 15:03:14 -0500
+             Message-Id: <4.3.2.7.2.20000830144622.028fe7a8@exchi01>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  6923] By: jhi                                   on 2000/08/30  20:15:18
+        Log: Subject: [PATCH perl@6889] fix Storable on VMS by fixing my_fwrite()
+             From: "Craig A. Berry" <craig.berry@psinetcs.com>
+             Date: Wed, 30 Aug 2000 13:30:36 -0500
+             Message-Id: <4.3.2.7.2.20000830130617.02b8b968@exchi01>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  6922] By: jhi                                   on 2000/08/30  19:54:43
+        Log: Better options for rsync.
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[  6921] By: jhi                                   on 2000/08/30  19:40:16
+        Log: Subject: [ID 20000830.036] [DOC] chom?p %hash not documented
+             From: Rick Delaney <rick@consumercontact.com>
+             Date: Wed, 30 Aug 2000 15:36:55 -0400 (EDT)
+             Message-Id: <Pine.UW2.4.10.10008301535210.1949-100000@consumer>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  6920] By: jhi                                   on 2000/08/30  19:36:40
+        Log: Subject: [PATCH 6889] add a few ldbl formats to configure.com
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 29 Aug 2000 17:36:00 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008291720260.502507-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  6919] By: jhi                                   on 2000/08/30  14:52:02
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6918] By: jhi                                   on 2000/08/30  14:48:34
         Log: NVs not necessarily doubles, as pointed out by Yitzchak.
      Branch: perl
