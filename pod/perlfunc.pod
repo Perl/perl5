@@ -3506,12 +3506,13 @@ with the wrong number of RANDBITS.)
 =item read FILEHANDLE,SCALAR,LENGTH
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE.  Returns the number of bytes actually read,
-C<0> at end of file, or undef if there was an error.  SCALAR will be grown
-or shrunk to the length actually read.  An OFFSET may be specified to
-place the read data at some other place than the beginning of the
-string.  This call is actually implemented in terms of stdio's fread(3)
-call.  To get a true read(2) system call, see C<sysread>.
+specified FILEHANDLE.  Returns the number of bytes actually read, C<0>
+at end of file, or undef if there was an error.  SCALAR will be grown
+or shrunk to the length actually read.  If SCALAR needs growing, the
+new bytes will be zero bytes.  An OFFSET may be specified to place
+the read data into some other place in SCALAR than the beginning.
+The call is actually implemented in terms of stdio's fread(3) call.
+To get a true read(2) system call, see C<sysread>.
 
 =item readdir DIRHANDLE
 
