@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jul 30 05:31:00 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Jul 30 05:36:10 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6810,6 +6810,7 @@ case "$extras" in
 	;;
 *)	echo "(Saving the list of extras for later...)"
 	echo $extras > ../extras.lst
+	val="$extras"
 	;;
 esac
 set extras
