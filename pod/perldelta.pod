@@ -266,6 +266,17 @@ See L<Tie::Array>.
 Several missing hooks have been added.  There is also a new base class for
 TIEARRAY implementations.  See L<Tie::Array>.
 
+=head2 4th argument to substr
+
+substr() can now both return and replace in one operation.  The optional
+4th argument is the replacement string.  See L<perlfunc/substr>.
+
+=head2 Negative LENGTH argument to splice
+
+Splice() with a negative LENGTH argument now work similar to what the
+LENGTH did for substr().  Previously a negative LENGTH was treated as
+0.  See L<perlfunc/splice>.
+
 
 =head1 Supported Platforms
 
