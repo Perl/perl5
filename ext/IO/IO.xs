@@ -136,7 +136,7 @@ io_blocking(InputStream f, int block)
 
 MODULE = IO	PACKAGE = IO::Seekable	PREFIX = f
 
-SV *
+void
 fgetpos(handle)
 	InputStream	handle
     CODE:
@@ -181,7 +181,7 @@ fsetpos(handle, pos)
 
 MODULE = IO	PACKAGE = IO::File	PREFIX = f
 
-SV *
+void
 new_tmpfile(packname = "IO::File")
     char *		packname
     PREINIT:

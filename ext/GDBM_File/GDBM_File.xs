@@ -42,12 +42,14 @@ typedef datum datum_value ;
 
 typedef void (*FATALFUNC)();
 
+#ifndef GDBM_FAST
 static int
 not_here(char *s)
 {
     croak("GDBM_File::%s not implemented on this architecture", s);
     return -1;
 }
+#endif
 
 /* GDBM allocates the datum with system malloc() and expects the user
  * to free() it.  So we either have to free() it immediately, or have
@@ -220,7 +222,7 @@ gdbm_TIEHASH(dbtype, name, read_write, mode, fatal_func = (FATALFUNC)croak)
 	    GDBM_FILE  	dbp ;
 
 	    RETVAL = NULL ;
-	    if (dbp =  gdbm_open(name, GDBM_BLOCKSIZE, read_write, mode, fatal_func)) {
+	    if ((dbp =  gdbm_open(name, GDBM_BLOCKSIZE, read_write, mode, fatal_func))) {
 	        RETVAL = (GDBM_File)safemalloc(sizeof(GDBM_File_type)) ;
     	        Zero(RETVAL, 1, GDBM_File_type) ;
 		RETVAL->dbp = dbp ;

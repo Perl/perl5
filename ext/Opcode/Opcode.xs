@@ -325,7 +325,7 @@ PPCODE:
 void
 opset(...)
 CODE:
-    int i, j;
+    int i;
     SV *bitspec, *opset;
     char *bitmap;
     STRLEN len, on;

@@ -3172,7 +3172,7 @@ localeconv()
 #ifdef HAS_LOCALECONV
 	struct lconv *lcbuf;
 	RETVAL = newHV();
-	if (lcbuf = localeconv()) {
+	if ((lcbuf = localeconv())) {
 	    /* the strings */
 	    if (lcbuf->decimal_point && *lcbuf->decimal_point)
 		hv_store(RETVAL, "decimal_point", 13,
@@ -3515,7 +3515,7 @@ SysRet
 nice(incr)
 	int		incr
 
-int
+void
 pipe()
     PPCODE:
 	int fds[2];
@@ -3558,7 +3558,7 @@ tcsetpgrp(fd, pgrp_id)
 	int		fd
 	pid_t		pgrp_id
 
-int
+void
 uname()
     PPCODE:
 #ifdef HAS_UNAME
@@ -3692,7 +3692,7 @@ strtoul(str, base = 0)
 		PUSHs(&PL_sv_undef);
 	}
 
-SV *
+void
 strxfrm(src)
 	SV *		src
     CODE:
@@ -3827,7 +3827,10 @@ mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
     OUTPUT:
 	RETVAL
 
-char *
+#XXX: if $xsubpp::WantOptimize is always the default
+#     sv_setpv(TARG, ...) could be used rather than
+#     ST(0) = sv_2mortal(newSVpv(...))
+void
 strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	char *		fmt
 	int		sec

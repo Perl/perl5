@@ -82,8 +82,6 @@ DeadCode(pTHX)
 			    }
 			}
 			else if (SvTYPE(pad[j]) >= SVt_PV && SvLEN(pad[j])) {
-			    int db_len = SvLEN(pad[j]);
-			    SV *db_sv = pad[j];
 			    levels++;
 			    levelm += SvLEN(pad[j])/SvREFCNT(pad[j]);
 				/* Dump(pad[j],4); */
@@ -383,7 +381,7 @@ PPCODE:
 
 # PPCODE needed since by default it is void
 
-SV *
+void
 SvREFCNT_dec(sv)
 SV *	sv
 PPCODE:
