@@ -211,18 +211,18 @@ sub walksymtable {
     my ($symref, $method, $recurse, $prefix) = @_;
     my $sym;
     my $ref;
-    no strict 'vars';
-    local(*glob);
+    my $fullname;
+    no strict 'refs';
     $prefix = '' unless defined $prefix;
     while (($sym, $ref) = each %$symref) {
-	*glob = "*main::".$prefix.$sym;
+        $fullname = "*main::".$prefix.$sym;
 	if ($sym =~ /::$/) {
 	    $sym = $prefix . $sym;
 	    if ($sym ne "main::" && $sym ne "<none>::" && &$recurse($sym)) {
-		walksymtable(\%glob, $method, $recurse, $sym);
+               walksymtable(\%$fullname, $method, $recurse, $sym);
 	    }
 	} else {
-	    svref_2object(\*glob)->EGV->$method();
+           svref_2object(\*$fullname)->$method();
 	}
     }
 }
