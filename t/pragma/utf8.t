@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..60\n";
+print "1..61\n";
 
 my $test = 1;
 
@@ -265,4 +265,7 @@ sub ok {
 	$test++;				# 60
 
     }
+
+    ok "\x{ab}" =~ /^\x{ab}$/, 1;
+    $test++;					# 61
 }

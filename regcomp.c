@@ -2606,7 +2606,7 @@ tryagain:
 				FAIL("Missing right brace on \\x{}");
 			    else if (UTF) {
 				numlen = 1;	/* allow underscores */
-				ender = (UV)scan_hex(p + 1, e - p, &numlen);
+				ender = (UV)scan_hex(p + 1, e - p - 1, &numlen);
 				/* numlen is generous */
 				if (numlen + len >= 127) {
 				    p--;

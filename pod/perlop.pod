@@ -788,8 +788,8 @@ If "'" is the delimiter, no interpolation is performed on the PATTERN.
 
 PATTERN may contain variables, which will be interpolated (and the
 pattern recompiled) every time the pattern search is evaluated, except
-for when the delimiter is a single quote.  (Note that C<$)> and C<$|>
-might not be interpolated because they look like end-of-string tests.)
+for when the delimiter is a single quote.  (Note that C<$(>, C<$)>, and
+C<$|> are not interpolated because they look like end-of-string tests.)
 If you want such a pattern to be compiled only once, add a C</o> after
 the trailing delimiter.  This avoids expensive run-time recompilations,
 and is useful when the value you are interpolating won't change over
