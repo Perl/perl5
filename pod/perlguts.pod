@@ -2255,34 +2255,34 @@ to one character.
 To fix this, some people formed Unicode, Inc. and
 produced a new character set containing all the characters you can
 possibly think of and more. There are several ways of representing these
-characters, and the one Perl uses is called UTF8. UTF8 uses
+characters, and the one Perl uses is called UTF-8. UTF-8 uses
 a variable number of bytes to represent a character, instead of just
 one. You can learn more about Unicode at http://www.unicode.org/
 
-=head2 How can I recognise a UTF8 string?
+=head2 How can I recognise a UTF-8 string?
 
-You can't. This is because UTF8 data is stored in bytes just like
-non-UTF8 data. The Unicode character 200, (C<0xC8> for you hex types)
+You can't. This is because UTF-8 data is stored in bytes just like
+non-UTF-8 data. The Unicode character 200, (C<0xC8> for you hex types)
 capital E with a grave accent, is represented by the two bytes
 C<v196.172>. Unfortunately, the non-Unicode string C<chr(196).chr(172)>
 has that byte sequence as well. So you can't tell just by looking - this
 is what makes Unicode input an interesting problem.
 
 The API function C<is_utf8_string> can help; it'll tell you if a string
-contains only valid UTF8 characters. However, it can't do the work for
+contains only valid UTF-8 characters. However, it can't do the work for
 you. On a character-by-character basis, C<is_utf8_char> will tell you
-whether the current character in a string is valid UTF8.
+whether the current character in a string is valid UTF-8.
 
-=head2 How does UTF8 represent Unicode characters?
+=head2 How does UTF-8 represent Unicode characters?
 
-As mentioned above, UTF8 uses a variable number of bytes to store a
+As mentioned above, UTF-8 uses a variable number of bytes to store a
 character. Characters with values 1...128 are stored in one byte, just
 like good ol' ASCII. Character 129 is stored as C<v194.129>; this
 continues up to character 191, which is C<v194.191>. Now we've run out of
 bits (191 is binary C<10111111>) so we move on; 192 is C<v195.128>. And
 so it goes on, moving to three bytes at character 2048.
 
-Assuming you know you're dealing with a UTF8 string, you can find out
+Assuming you know you're dealing with a UTF-8 string, you can find out
 how long the first character in it is with the C<UTF8SKIP> macro:
 
     char *utf = "\305\233\340\240\201";
@@ -2292,12 +2292,12 @@ how long the first character in it is with the C<UTF8SKIP> macro:
     utf += len;
     len = UTF8SKIP(utf); /* len is 3 here */
 
-Another way to skip over characters in a UTF8 string is to use
+Another way to skip over characters in a UTF-8 string is to use
 C<utf8_hop>, which takes a string and a number of characters to skip
 over. You're on your own about bounds checking, though, so don't use it
 lightly.
 
-All bytes in a multi-byte UTF8 character will have the high bit set,
+All bytes in a multi-byte UTF-8 character will have the high bit set,
 so you can test if you need to do something special with this
 character like this (the UTF8_IS_INVARIANT() is a macro that tests
 whether the byte can be encoded as a single byte even in UTF-8):
@@ -2306,7 +2306,7 @@ whether the byte can be encoded as a single byte even in UTF-8):
     UV uv;	/* Note: a UV, not a U8, not a char */
 
     if (!UTF8_IS_INVARIANT(*utf))
-        /* Must treat this as UTF8 */
+        /* Must treat this as UTF-8 */
         uv = utf8_to_uv(utf);
     else
         /* OK to treat this character as a byte */
@@ -2314,7 +2314,7 @@ whether the byte can be encoded as a single byte even in UTF-8):
 
 You can also see in that example that we use C<utf8_to_uv> to get the
 value of the character; the inverse function C<uv_to_utf8> is available
-for putting a UV into UTF8:
+for putting a UV into UTF-8:
 
     if (!UTF8_IS_INVARIANT(uv))
         /* Must treat this as UTF8 */
@@ -2324,14 +2324,14 @@ for putting a UV into UTF8:
         *utf8++ = uv;
 
 You B<must> convert characters to UVs using the above functions if
-you're ever in a situation where you have to match UTF8 and non-UTF8
-characters. You may not skip over UTF8 characters in this case. If you
-do this, you'll lose the ability to match hi-bit non-UTF8 characters;
-for instance, if your UTF8 string contains C<v196.172>, and you skip
-that character, you can never match a C<chr(200)> in a non-UTF8 string.
+you're ever in a situation where you have to match UTF-8 and non-UTF-8
+characters. You may not skip over UTF-8 characters in this case. If you
+do this, you'll lose the ability to match hi-bit non-UTF-8 characters;
+for instance, if your UTF-8 string contains C<v196.172>, and you skip
+that character, you can never match a C<chr(200)> in a non-UTF-8 string.
 So don't do that!
 
-=head2 How does Perl store UTF8 strings?
+=head2 How does Perl store UTF-8 strings?
 
 Currently, Perl deals with Unicode strings and non-Unicode strings
 slightly differently. If a string has been identified as being UTF-8
@@ -2348,8 +2348,8 @@ C<length>, C<substr> and other string handling operations will have
 undesirable results.
 
 The problem comes when you have, for instance, a string that isn't
-flagged is UTF8, and contains a byte sequence that could be UTF8 -
-especially when combining non-UTF8 and UTF8 strings.
+flagged is UTF-8, and contains a byte sequence that could be UTF-8 -
+especially when combining non-UTF-8 and UTF-8 strings.
 
 Never forget that the C<SVf_UTF8> flag is separate to the PV value; you
 need be sure you don't accidentally knock it off while you're
@@ -2366,7 +2366,7 @@ manipulating SVs. More specifically, you cannot expect to do this:
 
 The C<char*> string does not tell you the whole story, and you can't
 copy or reconstruct an SV just by copying the string value. Check if the
-old SV has the UTF8 flag set, and act accordingly:
+old SV has the UTF-8 flag set, and act accordingly:
 
     p = SvPV(sv, len);
     frobnicate(p);
@@ -2375,17 +2375,17 @@ old SV has the UTF8 flag set, and act accordingly:
         SvUTF8_on(nsv);
 
 In fact, your C<frobnicate> function should be made aware of whether or
-not it's dealing with UTF8 data, so that it can handle the string
+not it's dealing with UTF-8 data, so that it can handle the string
 appropriately.
 
 Since just passing an SV to an XS function and copying the data of
-the SV is not enough to copy the UTF8 flags, even less right is just
+the SV is not enough to copy the UTF-8 flags, even less right is just
 passing a C<char *> to an XS function.
 
-=head2 How do I convert a string to UTF8?
+=head2 How do I convert a string to UTF-8?
 
-If you're mixing UTF8 and non-UTF8 strings, you might find it necessary
-to upgrade one of the strings to UTF8. If you've got an SV, the easiest
+If you're mixing UTF-8 and non-UTF-8 strings, you might find it necessary
+to upgrade one of the strings to UTF-8. If you've got an SV, the easiest
 way to do this is:
 
     sv_utf8_upgrade(sv);
@@ -2399,7 +2399,7 @@ If you do this in a binary operator, you will actually change one of the
 strings that came into the operator, and, while it shouldn't be noticeable
 by the end user, it can cause problems.
 
-Instead, C<bytes_to_utf8> will give you a UTF8-encoded B<copy> of its
+Instead, C<bytes_to_utf8> will give you a UTF-8-encoded B<copy> of its
 string argument. This is useful for having the data available for
 comparisons and so on, without harming the original SV. There's also
 C<utf8_to_bytes> to go the other way, but naturally, this will fail if
@@ -2414,27 +2414,27 @@ Not really. Just remember these things:
 
 =item *
 
-There's no way to tell if a string is UTF8 or not. You can tell if an SV
-is UTF8 by looking at is C<SvUTF8> flag. Don't forget to set the flag if
-something should be UTF8. Treat the flag as part of the PV, even though
+There's no way to tell if a string is UTF-8 or not. You can tell if an SV
+is UTF-8 by looking at is C<SvUTF8> flag. Don't forget to set the flag if
+something should be UTF-8. Treat the flag as part of the PV, even though
 it's not - if you pass on the PV to somewhere, pass on the flag too.
 
 =item *
 
-If a string is UTF8, B<always> use C<utf8_to_uv> to get at the value,
+If a string is UTF-8, B<always> use C<utf8_to_uv> to get at the value,
 unless C<UTF8_IS_INVARIANT(*s)> in which case you can use C<*s>.
 
 =item *
 
-When writing a character C<uv> to a UTF8 string, B<always> use
+When writing a character C<uv> to a UTF-8 string, B<always> use
 C<uv_to_utf8>, unless C<UTF8_IS_INVARIANT(uv))> in which case
 you can use C<*s = uv>.
 
 =item *
 
-Mixing UTF8 and non-UTF8 strings is tricky. Use C<bytes_to_utf8> to get
-a new string which is UTF8 encoded. There are tricks you can use to
-delay deciding whether you need to use a UTF8 string until you get to a
+Mixing UTF-8 and non-UTF-8 strings is tricky. Use C<bytes_to_utf8> to get
+a new string which is UTF-8 encoded. There are tricks you can use to
+delay deciding whether you need to use a UTF-8 string until you get to a
 high character - C<HALF_UPGRADE> is one of those.
 
 =back

@@ -728,9 +728,9 @@ On POSIX systems, you can detect this condition this way:
 
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is C<"A"> in either ASCII or Unicode, and
-chr(0x263a) is a Unicode smiley face.  Note that characters from 127
-to 255 (inclusive) are by default not encoded in Unicode for backward
-compatibility reasons (but see L<encoding>).
+chr(0x263a) is a Unicode smiley face.  Note that characters from 128
+to 255 (inclusive) are by default not encoded in UTF-8 Unicode for
+backward compatibility reasons (but see L<encoding>).
 
 If NUMBER is omitted, uses C<$_>.
 
@@ -2984,10 +2984,10 @@ C<STDERR> using various methods:
     print STDOUT "stdout 2\n";
     print STDERR "stderr 2\n";
 
-If you specify C<< '<&=X' >>, where C<X> is a number or a filehandle,
-then Perl will do an equivalent of C's C<fdopen> of that file
-descriptor (and not call L<dup(2)>); this is more parsimonious
-of file descriptors.  For example:
+If you specify C<< '<&=X' >>, where C<X> is a file descriptor number
+or a filehandle, then Perl will do an equivalent of C's C<fdopen> of
+that file descriptor (and not call L<dup(2)>); this is more
+parsimonious of file descriptors.  For example:
 
     # open for input, reusing the fileno of $fd
     open(FILEHANDLE, "<&=$fd")
@@ -3005,18 +3005,19 @@ or
 
     open(FH, ">>&=OLDFH")
 
-Being parsimonious on filehandles is useful (besides being
-parsimonious) also for example when something is dependent
-on the file descriptors, like for example locking using flock().
-If you do just a C<< open(A, '>>&B') >>, the filehandle A will not
-have the file descriptor as B has, and therefore flock(A) will
-not flock(B), and vice versa.  But with C<< open(A, '>>&=B') >>
-the filehandles will share the same file descriptor.
+Being parsimonious on filehandles is also useful (besides being
+parsimonious) for example when something is dependent on file
+descriptors, like for example locking using flock().  If you do just
+C<< open(A, '>>&B') >>, the filehandle A will not have the same file
+descriptor as B, and therefore flock(A) will not flock(B), and vice
+versa.  But with C<< open(A, '>>&=B') >> the filehandles will share
+the same file descriptor.
 
-Note that if Perl is using the standard C libraries' fdopen() then on
-many UNIX systems, fdopen() is known to fail when file descriptors
-exceed a certain value, typically 255. If you need more file
-descriptors than that, consider rebuilding Perl to use the C<PerlIO>.
+Note that if you are using Perls older than 5.8.0, Perl will be using
+the standard C libraries' fdopen() to implement the "=" functionality.
+On many UNIX systems fdopen() fails when file descriptors exceed a
+certain value, typically 255.  For Perls 5.8.0 and later, PerlIO is
+most often the default.
 
 You can see whether Perl has been compiled with PerlIO or not by
 running C<perl -V> and looking for C<useperlio=> line.  If C<useperlio>
@@ -3535,12 +3536,13 @@ equal $foo).
 
 =item *
 
-If the pattern begins with a C<U>, the resulting string will be treated
-as Unicode-encoded. You can force UTF8 encoding on in a string with an
-initial C<U0>, and the bytes that follow will be interpreted as Unicode
-characters. If you don't want this to happen, you can begin your pattern
-with C<C0> (or anything else) to force Perl not to UTF8 encode your
-string, and then follow this with a C<U*> somewhere in your pattern.
+If the pattern begins with a C<U>, the resulting string will be
+treated as UTF-8-encoded Unicode. You can force UTF-8 encoding on in a
+string with an initial C<U0>, and the bytes that follow will be
+interpreted as Unicode characters. If you don't want this to happen,
+you can begin your pattern with C<C0> (or anything else) to force Perl
+not to UTF-8 encode your string, and then follow this with a C<U*>
+somewhere in your pattern.
 
 =item *
 
@@ -6311,10 +6313,10 @@ extend the string with sufficiently many zero bytes.   It is an error
 to try to write off the beginning of the string (i.e. negative OFFSET).
 
 The string should not contain any character with the value > 255 (which
-can only happen if you're using UTF8 encoding).  If it does, it will be
-treated as something which is not UTF8 encoded.  When the C<vec> was
+can only happen if you're using UTF-8 encoding).  If it does, it will be
+treated as something which is not UTF-8 encoded.  When the C<vec> was
 assigned to, other parts of your program will also no longer consider the
-string to be UTF8 encoded.  In other words, if you do have such characters
+string to be UTF-8 encoded.  In other words, if you do have such characters
 in your string, vec() will operate on the actual byte string, and not the
 conceptual character string.
 

@@ -2977,7 +2977,7 @@ Found in file sv.h
 =item SvPOK_only
 
 Tells an SV that it is a string and disables all other OK bits.
-Will also turn off the UTF8 status.
+Will also turn off the UTF-8 status.
 
 	void	SvPOK_only(SV* sv)
 
@@ -2987,7 +2987,7 @@ Found in file sv.h
 =item SvPOK_only_UTF8
 
 Tells an SV that it is a string and disables all other OK bits,
-and leaves the UTF8 status as it was.
+and leaves the UTF-8 status as it was.
 
 	void	SvPOK_only_UTF8(SV* sv)
 
@@ -3330,7 +3330,7 @@ Found in file sv.h
 
 =item SvUTF8_off
 
-Unsets the UTF8 status of an SV.
+Unsets the UTF-8 status of an SV.
 
 	void	SvUTF8_off(SV *sv)
 
@@ -3339,7 +3339,7 @@ Found in file sv.h
 
 =item SvUTF8_on
 
-Turn on the UTF8 status of an SV (the data is not changed, just the flag).
+Turn on the UTF-8 status of an SV (the data is not changed, just the flag).
 Do not use frivolously.
 
 	void	SvUTF8_on(SV *sv)
@@ -3443,7 +3443,7 @@ Found in file sv.c
 =item sv_2pvbyte
 
 Return a pointer to the byte-encoded representation of the SV, and set *lp
-to its length.  May cause the SV to be downgraded from UTF8 as a
+to its length.  May cause the SV to be downgraded from UTF-8 as a
 side-effect.
 
 Usually accessed via the C<SvPVbyte> macro.
@@ -3456,7 +3456,7 @@ Found in file sv.c
 =item sv_2pvbyte_nolen
 
 Return a pointer to the byte-encoded representation of the SV.
-May cause the SV to be downgraded from UTF8 as a side-effect.
+May cause the SV to be downgraded from UTF-8 as a side-effect.
 
 Usually accessed via the C<SvPVbyte_nolen> macro.
 
@@ -3467,8 +3467,8 @@ Found in file sv.c
 
 =item sv_2pvutf8
 
-Return a pointer to the UTF8-encoded representation of the SV, and set *lp
-to its length.  May cause the SV to be upgraded to UTF8 as a side-effect.
+Return a pointer to the UTF-8-encoded representation of the SV, and set *lp
+to its length.  May cause the SV to be upgraded to UTF-8 as a side-effect.
 
 Usually accessed via the C<SvPVutf8> macro.
 
@@ -3479,8 +3479,8 @@ Found in file sv.c
 
 =item sv_2pvutf8_nolen
 
-Return a pointer to the UTF8-encoded representation of the SV.
-May cause the SV to be upgraded to UTF8 as a side-effect.
+Return a pointer to the UTF-8-encoded representation of the SV.
+May cause the SV to be upgraded to UTF-8 as a side-effect.
 
 Usually accessed via the C<SvPVutf8_nolen> macro.
 
@@ -3546,8 +3546,8 @@ Found in file sv.c
 =item sv_catpv
 
 Concatenates the string onto the end of the string which is in the SV.
-If the SV has the UTF8 status set, then the bytes appended should be
-valid UTF8.  Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
+If the SV has the UTF-8 status set, then the bytes appended should be
+valid UTF-8.  Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 
 	void	sv_catpv(SV* sv, const char* ptr)
 
@@ -3581,8 +3581,8 @@ Found in file sv.c
 =item sv_catpvn
 
 Concatenates the string onto the end of the string which is in the SV.  The
-C<len> indicates number of bytes to copy.  If the SV has the UTF8
-status set, then the bytes appended should be valid UTF8.
+C<len> indicates number of bytes to copy.  If the SV has the UTF-8
+status set, then the bytes appended should be valid UTF-8.
 Handles 'get' magic, but not 'set' magic.  See C<sv_catpvn_mg>.
 
 	void	sv_catpvn(SV* sv, const char* ptr, STRLEN len)
@@ -3593,8 +3593,8 @@ Found in file sv.c
 =item sv_catpvn_flags
 
 Concatenates the string onto the end of the string which is in the SV.  The
-C<len> indicates number of bytes to copy.  If the SV has the UTF8
-status set, then the bytes appended should be valid UTF8.
+C<len> indicates number of bytes to copy.  If the SV has the UTF-8
+status set, then the bytes appended should be valid UTF-8.
 If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<dsv> if
 appropriate, else not. C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
 in terms of this function.
@@ -3888,7 +3888,7 @@ Found in file sv.c
 =item sv_len_utf8
 
 Returns the number of characters in the string in an SV, counting wide
-UTF8 bytes as a single character. Handles magic and type coercion.
+UTF-8 bytes as a single character. Handles magic and type coercion.
 
 	STRLEN	sv_len_utf8(SV* sv)
 
@@ -3973,7 +3973,7 @@ Found in file sv.c
 =item sv_pos_b2u
 
 Converts the value pointed to by offsetp from a count of bytes from the
-start of the string, to a count of the equivalent number of UTF8 chars.
+start of the string, to a count of the equivalent number of UTF-8 chars.
 Handles magic and type coercion.
 
 	void	sv_pos_b2u(SV* sv, I32* offsetp)
@@ -3983,7 +3983,7 @@ Found in file sv.c
 
 =item sv_pos_u2b
 
-Converts the value pointed to by offsetp from a count of UTF8 chars from
+Converts the value pointed to by offsetp from a count of UTF-8 chars from
 the start of the string, to a count of the equivalent number of bytes; if
 lenp is non-zero, it does the same to lenp, but this time starting from
 the offset, rather than from the start of the string. Handles magic and
@@ -4532,7 +4532,7 @@ Found in file sv.c
 
 =item sv_utf8_downgrade
 
-Attempt to convert the PV of an SV from UTF8-encoded to byte encoding.
+Attempt to convert the PV of an SV from UTF-8-encoded to byte encoding.
 This may not be possible if the PV contains non-byte encoding characters;
 if this is the case, either returns false or, if C<fail_ok> is not
 true, croaks.
@@ -4550,7 +4550,7 @@ Found in file sv.c
 
 =item sv_utf8_encode
 
-Convert the PV of an SV to UTF8-encoded, but then turn off the C<SvUTF8>
+Convert the PV of an SV to UTF-8-encoded, but then turn off the C<SvUTF8>
 flag so that it looks like octets again. Used as a building block
 for encode_utf8 in Encode.xs
 
@@ -4561,7 +4561,7 @@ Found in file sv.c
 
 =item sv_utf8_upgrade
 
-Convert the PV of an SV to its UTF8-encoded form.
+Convert the PV of an SV to its UTF-8-encoded form.
 Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear.
@@ -4576,7 +4576,7 @@ Found in file sv.c
 
 =item sv_utf8_upgrade_flags
 
-Convert the PV of an SV to its UTF8-encoded form.
+Convert the PV of an SV to its UTF-8-encoded form.
 Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
@@ -4637,7 +4637,7 @@ Found in file sv.c
 
 =item bytes_from_utf8
 
-Converts a string C<s> of length C<len> from UTF8 into byte encoding.
+Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
 Unlike <utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
 the newly-created string, and updates C<len> to contain the new
 length.  Returns the original string if no conversion occurs, C<len>
@@ -4654,11 +4654,11 @@ Found in file utf8.c
 
 =item bytes_to_utf8
 
-Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
+Converts a string C<s> of length C<len> from ASCII into UTF-8 encoding.
 Returns a pointer to the newly-created string, and sets C<len> to
 reflect the new length.
 
-If you want to convert to UTF8 from other encodings than ASCII,
+If you want to convert to UTF-8 from other encodings than ASCII,
 see sv_recode_to_utf8().
 
 NOTE: this function is experimental and may change or be
@@ -4712,9 +4712,9 @@ Found in file utf8.c
 =item is_utf8_string
 
 Returns true if first C<len> bytes of the given string form a valid
-UTF8 string, false otherwise.  Note that 'a valid UTF8 string' does
-not mean 'a string that contains code points above 0x7F encoded in
-UTF8' because a valid ASCII string is a valid UTF8 string.
+UTF-8 string, false otherwise.  Note that 'a valid UTF-8 string' does
+not mean 'a string that contains code points above 0x7F encoded in UTF-8'
+because a valid ASCII string is a valid UTF-8 string.
 
 	bool	is_utf8_string(U8 *s, STRLEN len)
 
@@ -4895,7 +4895,7 @@ Found in file utf8.c
 =item utf8n_to_uvchr
 
 Returns the native character value of the first character in the string C<s>
-which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
 Allows length and flags to be passed to low level routine.
@@ -4909,10 +4909,10 @@ Found in file utf8.c
 
 Bottom level UTF-8 decode routine.
 Returns the unicode code point value of the first character in the string C<s>
-which is assumed to be in UTF8 encoding and no longer than C<curlen>;
+which is assumed to be in UTF-8 encoding and no longer than C<curlen>;
 C<retlen> will be set to the length, in bytes, of that character.
 
-If C<s> does not point to a well-formed UTF8 character, the behaviour
+If C<s> does not point to a well-formed UTF-8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
 it is assumed that the caller will raise a warning, and this function
 will silently just set C<retlen> to C<-1> and return zero.  If the
@@ -4932,7 +4932,7 @@ Found in file utf8.c
 
 =item utf8_distance
 
-Returns the number of UTF8 characters between the UTF-8 pointers C<a>
+Returns the number of UTF-8 characters between the UTF-8 pointers C<a>
 and C<b>.
 
 WARNING: use only if you *know* that the pointers point inside the
@@ -4970,7 +4970,7 @@ Found in file utf8.c
 
 =item utf8_to_bytes
 
-Converts a string C<s> of length C<len> from UTF8 into byte encoding.
+Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string, and
 updates len to contain the new length.
 Returns zero on failure, setting C<len> to -1.
@@ -4986,10 +4986,10 @@ Found in file utf8.c
 =item utf8_to_uvchr
 
 Returns the native character value of the first character in the string C<s>
-which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
-If C<s> does not point to a well-formed UTF8 character, zero is
+If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
 	UV	utf8_to_uvchr(U8 *s, STRLEN* retlen)
@@ -5000,13 +5000,13 @@ Found in file utf8.c
 =item utf8_to_uvuni
 
 Returns the Unicode code point of the first character in the string C<s>
-which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
 This function should only be used when returned UV is considered
 an index into the Unicode semantic tables (e.g. swashes).
 
-If C<s> does not point to a well-formed UTF8 character, zero is
+If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
 	UV	utf8_to_uvuni(U8 *s, STRLEN* retlen)
@@ -5016,7 +5016,7 @@ Found in file utf8.c
 
 =item uvchr_to_utf8
 
-Adds the UTF8 representation of the Native codepoint C<uv> to the end
+Adds the UTF-8 representation of the Native codepoint C<uv> to the end
 of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
@@ -5034,7 +5034,7 @@ Found in file utf8.c
 
 =item uvuni_to_utf8_flags
 
-Adds the UTF8 representation of the Unicode codepoint C<uv> to the end
+Adds the UTF-8 representation of the Unicode codepoint C<uv> to the end
 of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,

@@ -1579,7 +1579,7 @@ PP(pp_sysread)
     }
     if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTES) {
 	buffer = SvPVutf8_force(bufsv, blen);
-	/* UTF8 may not have been set if they are all low bytes */
+	/* UTF-8 may not have been set if they are all low bytes */
 	SvUTF8_on(bufsv);
     }
     else {

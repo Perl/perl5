@@ -504,7 +504,7 @@ Yet another way would be to use the Devel::Peek module:
 
     perl -MDevel::Peek -e 'Dump(chr(0x100))'
 
-That shows the UTF8 flag in FLAGS and both the UTF-8 bytes
+That shows the C<UTF8> flag in FLAGS and both the UTF-8 bytes
 and Unicode characters in C<PV>.  See also later in this document
 the discussion about the C<utf8::is_utf8()> function.
 
@@ -638,7 +638,7 @@ C<$string>.  If the flag is off, the bytes in the scalar are interpreted
 as a single byte encoding.  If the flag is on, the bytes in the scalar
 are interpreted as the (multi-byte, variable-length) UTF-8 encoded code
 points of the characters.  Bytes added to an UTF-8 encoded string are
-automatically upgraded to UTF-8.  If mixed non-UTF8 and UTF-8 scalars
+automatically upgraded to UTF-8.  If mixed non-UTF-8 and UTF-8 scalars
 are merged (double-quoted interpolation, explicit concatenation, and
 printf/sprintf parameter substitution), the result will be UTF-8 encoded
 as if copies of the byte strings were upgraded to UTF-8: for example,

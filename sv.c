@@ -3266,7 +3266,7 @@ Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 =for apidoc sv_2pvbyte_nolen
 
 Return a pointer to the byte-encoded representation of the SV.
-May cause the SV to be downgraded from UTF8 as a side-effect.
+May cause the SV to be downgraded from UTF-8 as a side-effect.
 
 Usually accessed via the C<SvPVbyte_nolen> macro.
 
@@ -3284,7 +3284,7 @@ Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv)
 =for apidoc sv_2pvbyte
 
 Return a pointer to the byte-encoded representation of the SV, and set *lp
-to its length.  May cause the SV to be downgraded from UTF8 as a
+to its length.  May cause the SV to be downgraded from UTF-8 as a
 side-effect.
 
 Usually accessed via the C<SvPVbyte> macro.
@@ -3302,8 +3302,8 @@ Perl_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
 /*
 =for apidoc sv_2pvutf8_nolen
 
-Return a pointer to the UTF8-encoded representation of the SV.
-May cause the SV to be upgraded to UTF8 as a side-effect.
+Return a pointer to the UTF-8-encoded representation of the SV.
+May cause the SV to be upgraded to UTF-8 as a side-effect.
 
 Usually accessed via the C<SvPVutf8_nolen> macro.
 
@@ -3320,8 +3320,8 @@ Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
 /*
 =for apidoc sv_2pvutf8
 
-Return a pointer to the UTF8-encoded representation of the SV, and set *lp
-to its length.  May cause the SV to be upgraded to UTF8 as a side-effect.
+Return a pointer to the UTF-8-encoded representation of the SV, and set *lp
+to its length.  May cause the SV to be upgraded to UTF-8 as a side-effect.
 
 Usually accessed via the C<SvPVutf8> macro.
 
@@ -3395,7 +3395,7 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 /*
 =for apidoc sv_utf8_upgrade
 
-Convert the PV of an SV to its UTF8-encoded form.
+Convert the PV of an SV to its UTF-8-encoded form.
 Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear.
@@ -3405,7 +3405,7 @@ use the Encode extension for that.
 
 =for apidoc sv_utf8_upgrade_flags
 
-Convert the PV of an SV to its UTF8-encoded form.
+Convert the PV of an SV to its UTF-8-encoded form.
 Forces the SV to string form if it is not already.
 Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
@@ -3475,7 +3475,7 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 /*
 =for apidoc sv_utf8_downgrade
 
-Attempt to convert the PV of an SV from UTF8-encoded to byte encoding.
+Attempt to convert the PV of an SV from UTF-8-encoded to byte encoding.
 This may not be possible if the PV contains non-byte encoding characters;
 if this is the case, either returns false or, if C<fail_ok> is not
 true, croaks.
@@ -3518,7 +3518,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 /*
 =for apidoc sv_utf8_encode
 
-Convert the PV of an SV to UTF8-encoded, but then turn off the C<SvUTF8>
+Convert the PV of an SV to UTF-8-encoded, but then turn off the C<SvUTF8>
 flag so that it looks like octets again. Used as a building block
 for encode_utf8 in Encode.xs
 
@@ -4335,15 +4335,15 @@ Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
 =for apidoc sv_catpvn
 
 Concatenates the string onto the end of the string which is in the SV.  The
-C<len> indicates number of bytes to copy.  If the SV has the UTF8
-status set, then the bytes appended should be valid UTF8.
+C<len> indicates number of bytes to copy.  If the SV has the UTF-8
+status set, then the bytes appended should be valid UTF-8.
 Handles 'get' magic, but not 'set' magic.  See C<sv_catpvn_mg>.
 
 =for apidoc sv_catpvn_flags
 
 Concatenates the string onto the end of the string which is in the SV.  The
-C<len> indicates number of bytes to copy.  If the SV has the UTF8
-status set, then the bytes appended should be valid UTF8.
+C<len> indicates number of bytes to copy.  If the SV has the UTF-8
+status set, then the bytes appended should be valid UTF-8.
 If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<dsv> if
 appropriate, else not. C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
 in terms of this function.
@@ -4465,8 +4465,8 @@ Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
 =for apidoc sv_catpv
 
 Concatenates the string onto the end of the string which is in the SV.
-If the SV has the UTF8 status set, then the bytes appended should be
-valid UTF8.  Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
+If the SV has the UTF-8 status set, then the bytes appended should be
+valid UTF-8.  Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 
 =cut */
 
@@ -5369,7 +5369,7 @@ Perl_sv_len(pTHX_ register SV *sv)
 =for apidoc sv_len_utf8
 
 Returns the number of characters in the string in an SV, counting wide
-UTF8 bytes as a single character. Handles magic and type coercion.
+UTF-8 bytes as a single character. Handles magic and type coercion.
 
 =cut
 */
@@ -5568,7 +5568,7 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 /*
 =for apidoc sv_pos_u2b
 
-Converts the value pointed to by offsetp from a count of UTF8 chars from
+Converts the value pointed to by offsetp from a count of UTF-8 chars from
 the start of the string, to a count of the equivalent number of bytes; if
 lenp is non-zero, it does the same to lenp, but this time starting from
 the offset, rather than from the start of the string. Handles magic and
@@ -5648,7 +5648,7 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 =for apidoc sv_pos_b2u
 
 Converts the value pointed to by offsetp from a count of bytes from the
-start of the string, to a count of the equivalent number of UTF8 chars.
+start of the string, to a count of the equivalent number of UTF-8 chars.
 Handles magic and type coercion.
 
 =cut

@@ -42,7 +42,7 @@ S_do_trans_simple(pTHX_ SV *sv)
     s = (U8*)SvPV(sv, len);
     send = s + len;
 
-    /* First, take care of non-UTF8 input strings, because they're easy */
+    /* First, take care of non-UTF-8 input strings, because they're easy */
     if (!SvUTF8(sv)) {
 	while (s < send) {
 	    if ((ch = tbl[*s]) >= 0) {

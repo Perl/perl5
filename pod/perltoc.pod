@@ -1389,7 +1389,7 @@ file?
 
 =item Are Perl regexes DFAs or NFAs?  Are they POSIX compliant?
 
-=item What's wrong with using grep or map in a void context?
+=item What's wrong with using grep in a void context?
 
 =item How can I match strings with multibyte characters?
 
@@ -1971,7 +1971,7 @@ width, size, order of arguments, sqrt EXPR, sqrt, srand EXPR, srand, stat
 FILEHANDLE, stat EXPR, stat, study SCALAR, study, sub NAME BLOCK, sub NAME
 (PROTO) BLOCK, sub NAME : ATTRS BLOCK, sub NAME (PROTO) : ATTRS BLOCK,
 substr EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
-EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
+EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall NUMBER, LIST, sysopen
 FILEHANDLE,FILENAME,MODE, sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
 FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
 FILEHANDLE,POSITION,WHENCE, system LIST, system PROGRAM LIST, syswrite
@@ -2156,7 +2156,8 @@ LIST, write FILEHANDLE, write EXPR, write, y///
 C<=head1 I<Heading Text>>, C<=head2 I<Heading Text>>, C<=head3 I<Heading
 Text>>, C<=head4 I<Heading Text>>, C<=over I<indentlevel>>, C<=item
 I<stuff...>>, C<=back>, C<=cut>, C<=pod>, C<=begin I<formatname>>, C<=end
-I<formatname>>, C<=for I<formatname> I<text...>>
+I<formatname>>, C<=for I<formatname> I<text...>>, C<=encoding
+I<encodingname>>
 
 =item Formatting Codes
 
@@ -2193,7 +2194,8 @@ notes
 =item Pod Commands
 
 "=head1", "=head2", "=head3", "=head4", "=pod", "=cut", "=over", "=item",
-"=back", "=begin formatname", "=end formatname", "=for formatname text..."
+"=back", "=begin formatname", "=end formatname", "=for formatname text...",
+"=encoding encodingname"
 
 =item Pod Formatting Codes
 
@@ -2380,7 +2382,7 @@ IO::Handle->input_record_separator(EXPR), $INPUT_RECORD_SEPARATOR, $RS, $/,
 HANDLE->autoflush(EXPR), $OUTPUT_AUTOFLUSH, $|,
 IO::Handle->output_field_separator EXPR, $OUTPUT_FIELD_SEPARATOR, $OFS, $,,
 IO::Handle->output_record_separator EXPR, $OUTPUT_RECORD_SEPARATOR, $ORS,
-$\, $LIST_SEPARATOR, $", $SUBSCRIPT_SEPARATOR, $SUBSEP, $;, $OFMT, $#,
+$\, $LIST_SEPARATOR, $", $SUBSCRIPT_SEPARATOR, $SUBSEP, $;, $#,
 HANDLE->format_page_number(EXPR), $FORMAT_PAGE_NUMBER, $%,
 HANDLE->format_lines_per_page(EXPR), $FORMAT_LINES_PER_PAGE, $=,
 HANDLE->format_lines_left(EXPR), $FORMAT_LINES_LEFT, $-, @LAST_MATCH_START,
@@ -4480,13 +4482,13 @@ A, p, d, s, n, r, f, M, o, j, x
 
 =item What B<is> Unicode, anyway?
 
-=item How can I recognise a UTF8 string?
+=item How can I recognise a UTF-8 string?
 
-=item How does UTF8 represent Unicode characters?
+=item How does UTF-8 represent Unicode characters?
 
-=item How does Perl store UTF8 strings?
+=item How does Perl store UTF-8 strings?
 
-=item How do I convert a string to UTF8?
+=item How do I convert a string to UTF-8?
 
 =item Is there anything else I need to know?
 
@@ -4684,7 +4686,8 @@ dMARK, dORIGMARK, dSP, EXTEND, MARK, ORIGMARK, POPi, POPl, POPn, POPp,
 POPpbytex, POPpx, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu,
 PUTBACK, SP, SPAGAIN, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XSRETURN,
 XSRETURN_IV, XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF,
-XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES
+XSRETURN_UV, XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF,
+XST_mYES
 
 =item SV Flags
 
@@ -4696,12 +4699,12 @@ get_sv, looks_like_number, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv,
 newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv,
 SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off,
 SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIsCOW,
-SvIsCOW_shared_hash, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp,
-SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX,
-SvNVx, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
+SvIsCOW_shared_hash, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK, SvNIOKp,
+SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx,
+SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
 SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
-SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX, SvPV_force, SvPV_force_nomg,
+SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on,
 SvTRUE, SvTYPE, SvUNLOCK, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on,
@@ -4729,10 +4732,10 @@ sv_vsetpvfn
 =item Unicode Support
 
 bytes_from_utf8, bytes_to_utf8, ibcmp_utf8, is_utf8_char, is_utf8_string,
-pv_uni_display, sv_cat_decode, sv_recode_to_utf8, sv_uni_display,
-to_utf8_case, to_utf8_fold, to_utf8_lower, to_utf8_title, to_utf8_upper,
-utf8n_to_uvchr, utf8n_to_uvuni, utf8_distance, utf8_hop, utf8_length,
-utf8_to_bytes, utf8_to_uvchr, utf8_to_uvuni, uvchr_to_utf8,
+is_utf8_string_loc, pv_uni_display, sv_cat_decode, sv_recode_to_utf8,
+sv_uni_display, to_utf8_case, to_utf8_fold, to_utf8_lower, to_utf8_title,
+to_utf8_upper, utf8n_to_uvchr, utf8n_to_uvuni, utf8_distance, utf8_hop,
+utf8_length, utf8_to_bytes, utf8_to_uvchr, utf8_to_uvuni, uvchr_to_utf8,
 uvuni_to_utf8_flags
 
 =item Variables created by C<xsubpp> and C<xsubpp> internal functions
@@ -5326,7 +5329,7 @@ goto(LABEL) and friends
 
 =item Mmap for input
 
-=item Byte to/from UTF8 and UTF8 to/from local conversion
+=item Byte to/from UTF-8 and UTF-8 to/from local conversion
 
 =item Add sockatmark support
 
@@ -7424,6 +7427,8 @@ a), b), c), d), a), b), c), d)
 
 =item The IBM ANSI C Compiler
 
+=item The usenm option
+
 =item Using GNU's gcc for building perl
 
 =item Using Large Files with Perl
@@ -7567,6 +7572,8 @@ R4 x86, R4 PPC
 =item Using Perl in "native" BS2000
 
 =item Floating point anomalies on BS2000
+
+=item Using PerlIO and different encodings on ASCII and EBCDIC partitions
 
 =back
 
@@ -7919,6 +7926,8 @@ op/lexassign.t, pragma/warnings.t
 =item Cocoa
 
 =back
+
+=item Starting From Scratch
 
 =item AUTHOR
 
@@ -8490,6 +8499,8 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 
 =back
 
+=item SunOS 4.x
+
 =item AUTHOR
 
 =item LAST MODIFIED
@@ -8850,6 +8861,8 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =item HISTORY
 
+=item CAVEATS
+
 =item SEE ALSO
 
 =back
@@ -8992,6 +9005,8 @@ semantics
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item LIMITATIONS
 
 =item SEE ALSO
 
@@ -14753,6 +14768,8 @@ lock_value, unlock_value
 
 B<lock_hash>, B<unlock_hash>
 
+B<hash_seed>
+
 =over 4
 
 =item CAVEATS
@@ -16052,7 +16069,7 @@ stringify, bstr(), bdiv, Modifying and =, bpow
 
 =item DESCRIPTION
 
-Canonical notation, Input, Output
+Input, Output
 
 =item METHODS
 
@@ -17420,13 +17437,15 @@ unix, stdio, perlio, crlf, utf8, bytes, raw, pop
 
 =back
 
-=head2 PerlIO::scalar - support module for in-memory IO.
+=head2 PerlIO::scalar - in-memory IO, scalar IO
 
 =over 4
 
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item IMPLEMENTATION NOTE
 
 =back
 
@@ -19038,6 +19057,8 @@ C<Storable::is_retrieving>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item BUGS
 
 =back
 
