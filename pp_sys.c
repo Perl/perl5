@@ -1665,7 +1665,10 @@ PP(pp_sysread)
     }
     if (DO_UTF8(bufsv)) {
 	/* convert offset-as-chars to offset-as-bytes */
-	offset = utf8_hop((U8 *)buffer,offset) - (U8 *) buffer;
+	if (offset >= (int)blen)
+	    offset += SvCUR(bufsv) - blen;
+	else
+	    offset = utf8_hop((U8 *)buffer,offset) - (U8 *) buffer;
     }
  more_bytes:
     bufsize = SvCUR(bufsv);
