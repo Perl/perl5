@@ -14,6 +14,14 @@ use strict;
 
 my $debug = 1;
 
+sub debug {
+    print @_ if $debug;
+}
+
+sub debugf {
+    printf @_ if $debug;
+}
+
 my $have_setlocale = 0;
 eval {
     require POSIX;
@@ -221,39 +229,68 @@ exit unless $have_setlocale;
 
 # Find locales.
 
+debug "# Scanning for locales...\n";
+
+# Note that it's okay that some languages have their native names
+# capitalized here even though that's not "right".  They are lowercased
+# anyway later during the scanning process (and besides, some clueless
+# vendor might have them capitalized errorneously anyway).
+
 my $locales = <<EOF;
+Afrikaans:af:za:1 15
 Arabic:ar:dz eg sa:6 arabic8
-Bulgarian:bg:bg:5
-Chinese:zh:cn tw:cn.EUC eucCN eucTW euc.CN euc.TW tw.EUC
-Croation:hr:hr:2
+Brezhoneg Breton:br:fr:1 15
+Bulgarski Bulgarian:bg:bg:5
+Català Catalan:ca:es:1 15
+Chinese:zh:cn tw:cn.EUC eucCN eucTW euc.CN euc.TW GB2312 tw.EUC
+Hrvatski Croatian:hr:hr:2
+Cymraeg Welsh:cy:cy:1 14 15
 Czech:cs:cz:2
-Danish:dk:da:1
-Dutch:nl:nl:1
-English American British:en:au ca gb ie nz us uk:1 cp850
-Estonian:et:ee:1
-Finnish:fi:fi:1
-French:fr:be ca ch fr:1
-German:de:de at ch:1
-Greek:el:gr:7 g8
+Dansk Danish:dk:da:1 15
+Nederlands Dutch:nl:be nl:1 15
+English American British:en:au ca gb ie nz us uk:1 15 cp850
+Esperanto:eo:eo:3
+Eesti Estonian:et:ee:4 6 13
+Suomi Finnish:fi:fi:1 15
+Flamish::fl:1 15
+français French:fr:be ca ch fr lu:1 15
+Deutsch German:de:at be ch de lu:1 15
+Euskaraz Basque:eu:es fr:1 15
+Gáidhlig Gaelic:gd:gb uk:1 14 15
+Galego Galician:gl:es:1 15
+Ellada Greek:el:gr:7 g8
+Føroyskt Faroese:fo:fo:1 15
+Frysk:fy:nl:1 15
+Greenlandic:kl:gl:4 6
 Hebrew:iw:il:8 hebrew8
 Hungarian:hu:hu:2
-Icelandic:is:is:1
-Italian:it:it:1
-Japanese:ja:jp:euc eucJP jp.EUC sjis
+Íslensku Icelandic:is:is:1 15
+Indonesian:in:id:1 15
+Gaeilge Irish:ga:IE:1 14 15
+Italiano Italian:it:ch it:1 15
+Nihongo Japanese:ja:jp:euc eucJP jp.EUC sjis
 Korean:ko:kr:
-Latin:la:va:1
-Latvian:lv:lv:1
-Lithuanian:lt:lt:1
-Polish:pl:pl:2
-Portuguese:po:po br:1
+Sámi Lappish:::4 6 13
+Latine Latin:la:va:1 15
+Latvian:lv:lv:4 6 13
+Lithuanian:lt:lt:4 6 13
+Macedonian:mk:mk:1 15
+Maltese:mt:mt:3
+norsk Norwegian:no:no:1
+Occitan:oc:es:1 15
+Polski Polish:pl:pl:2
+Português Portuguese:po:po br:1 15
 Rumanian:ro:ro:2
-Russian:ru:ru su:5 koi8 koi8r koi8u cp1251
+Russki Russian:ru:ru su ua:5 koi8 koi8r koi8u cp1251
+Serbski Serbian:sr:yu:5
 Slovak:sk:sk:2
-Slovene:sl:si:2
-Spanish:es:ar bo cl co cr ec es gt mx ni pa pe py sv uy ve:1
-Swedish:sv:se:1
-Thai:th:th:tis620
+Slovene Slovenian:sl:si:2
+Espanõl Spanish:es:ar bo cl co cr do ec es gt hn mx ni pa pe py sv uy ve:1 15
+Sqhip:sq:sq:1 15
+Swedish:sv:fi se:1 15
+Thai:th:th:11 tis620
 Turkish:tr:tr:9 turkish8
+Yiddish:::1 15
 EOF
 
 my @Locale;
@@ -334,14 +371,6 @@ foreach my $locale (split(/\n/, $locales)) {
 
 @Locale = sort @Locale;
 
-sub debug {
-    print @_ if $debug;
-}
-
-sub debugf {
-    printf @_ if $debug;
-}
-
 debug "# Locales = @Locale\n";
 
 my %Problem;
@@ -406,111 +435,220 @@ foreach $Locale (@Locale) {
 
     if (@Neoalpha == 0) {
 	# If we have no Neoalphas the remaining tests are no-ops.
-	debug "# no Neoalpha, skipping tests 99..103 for locale '$Locale'\n";
-	next;
-    }
+	debug "# no Neoalpha, skipping tests 99..102 for locale '$Locale'\n";
+    } else {
 
-    # Test \w.
+	# Test \w.
     
-    debug "# testing 99 with locale '$Locale'\n";
-    {
-	my $word = join('', @Neoalpha);
+	debug "# testing 99 with locale '$Locale'\n";
+	{
+	    my $word = join('', @Neoalpha);
 
-	$word =~ /^(\w+)$/;
+	    $word =~ /^(\w+)$/;
 
-	if ($1 ne $word) {
-	    $Problem{99}{$Locale} = 1;
-	    debug "# failed 99 ($1 vs $word)\n";
+	    if ($1 ne $word) {
+		$Problem{99}{$Locale} = 1;
+		debug "# failed 99 ($1 vs $word)\n";
+	    }
+	}
+
+	# Cross-check whole character set.
+
+	debug "# testing 100 with locale '$Locale'\n";
+	for (map { chr } 0..255) {
+	    if ((/\w/ and /\W/) or (/\d/ and /\D/) or (/\s/ and /\S/)) {
+		$Problem{100}{$Locale} = 1;
+		debug "# failed 100 for chr(", ord(), ")\n";
+	    }
+	}
+
+	# Test for read-only scalars' locale vs non-locale comparisons.
+
+	debug "# testing 101 with locale '$Locale'\n";
+	{
+	    no locale;
+	    $a = "qwerty";
+	    {
+		use locale;
+		if ($a cmp "qwerty") {
+		    $Problem{101}{$Locale} = 1;
+		    debug "# failed 101\n";
+		}
+	    }
+	}
+
+	debug "# testing 102 with locale '$Locale'\n";
+	{
+	    my ($from, $to, $lesser, $greater,
+		@test, %test, $test, $yes, $no, $sign);
+
+	    for (0..9) {
+		# Select a slice.
+		$from = int(($_*@Alnum_)/10);
+		$to = $from + int(@Alnum_/10);
+		$to = $#Alnum_ if ($to > $#Alnum_);
+		$lesser  = join('', @Alnum_[$from..$to]);
+		# Select a slice one character on.
+		$from++; $to++;
+		$to = $#Alnum_ if ($to > $#Alnum_);
+		$greater = join('', @Alnum_[$from..$to]);
+		($yes, $no, $sign) = ($lesser lt $greater
+				      ? ("    ", "not ", 1)
+				      : ("not ", "    ", -1));
+		# all these tests should FAIL (return 0).
+		# Exact lt or gt cannot be tested because
+		# in some locales, say, eacute and E may test equal.
+		@test = 
+		    (
+		     $no.'    ($lesser  le $greater)',  # 1
+		     'not      ($lesser  ne $greater)', # 2
+		     '         ($lesser  eq $greater)', # 3
+		     $yes.'    ($lesser  ge $greater)', # 4
+		     $yes.'    ($lesser  ge $greater)', # 5
+		     $yes.'    ($greater le $lesser )', # 7
+		     'not      ($greater ne $lesser )', # 8
+		     '         ($greater eq $lesser )', # 9
+		     $no.'     ($greater ge $lesser )', # 10
+		     'not (($lesser cmp $greater) == -$sign)' # 12
+		     );
+		@test{@test} = 0 x @test;
+		$test = 0;
+		for my $ti (@test) {
+		    $test{$ti} = eval $ti;
+		    $test ||= $test{$ti}
+		}
+		if ($test) {
+		    $Problem{102}{$Locale} = 1;
+		    debug "# failed 102 at:\n";
+		    debug "# lesser  = '$lesser'\n";
+		    debug "# greater = '$greater'\n";
+		    debug "# lesser cmp greater = ",
+		          $lesser cmp $greater, "\n";
+		    debug "# greater cmp lesser = ",
+		          $greater cmp $lesser, "\n";
+		    debug "# (greater) from = $from, to = $to\n";
+		    for my $ti (@test) {
+			debugf("# %-40s %-4s", $ti,
+			       $test{$ti} ? 'FAIL' : 'ok');
+			if ($ti =~ /\(\.*(\$.+ +cmp +\$[^\)]+)\.*\)/) {
+			    debugf("(%s == %4d)", $1, eval $1);
+			}
+			debug "\n#";
+		    }
+
+		    last;
+		}
+	    }
 	}
     }
 
-    # Cross-check whole character set.
+    use locale;
 
-    debug "# testing 100 with locale '$Locale'\n";
-    for (map { chr } 0..255) {
-	if ((/\w/ and /\W/) or (/\d/ and /\D/) or (/\s/ and /\S/)) {
-	    $Problem{100}{$Locale} = 1;
-	    debug "# failed 100\n";
-	    last;
-	}
+    my ($x, $y) = (1.23, 1.23);
+
+    my $a = "$x";
+    printf ''; # printf used to reset locale to "C"
+    my $b = "$y";
+
+    debug "# testing 103 with locale '$Locale'\n";
+    unless ($a eq $b) {
+	$Problem{103}{$Locale} = 1;
+	debug "# failed 103\n";
     }
 
-    # Test for read-only scalars' locale vs non-locale comparisons.
+    my $c = "$x";
+    my $z = sprintf ''; # sprintf used to reset locale to "C"
+    my $d = "$y";
 
-    debug "# testing 101 with locale '$Locale'\n";
+    debug "# 103..107: a = $a, b = $b, c = $c, d = $d, Locale = $Locale\n";
+
+    debug "# testing 104 with locale '$Locale'\n";
+    unless ($c eq $d) {
+	$Problem{104}{$Locale} = 1;
+	debug "# failed 104\n";
+    }
+
+    my $w = 0;
+    local $SIG{__WARN__} = sub { $w++ };
+    local $^W = 1;
+
+    # the == (among other things) used to warn for locales
+    # that had something else than "." as the radix character
+
+    debug "# testing 105 with locale '$Locale'\n";
+    unless ($c == 1.23) {
+	$Problem{105}{$Locale} = 1;
+	debug "# failed 105\n";
+    }
+
+    debug "# testing 106 with locale '$Locale'\n";
+    unless ($c == $x) {
+	$Problem{106}{$Locale} = 1;
+	debug "# failed 106\n";
+    }
+
+    debug "# testing 107 with locale '$Locale'\n";
+    unless ($c == $d) {
+	$Problem{107}{$Locale} = 1;
+	debug "# failed 107\n";
+    }
+
     {
 	no locale;
-	$a = "qwerty";
-	{
-	    use locale;
-	    if ($a cmp "qwerty") {
-		$Problem{101}{$Locale} = 1;
-		debug "# failed 101\n";
-	    }
+	
+	my $e = "$x";
+
+	debug "# 108..110: e = $e, Locale = $Locale\n";
+
+        debug "# testing 108 with locale '$Locale'\n";
+	unless ($e == 1.23) {
+	    $Problem{108}{$Locale} = 1;
+	    debug "# failed 108\n";
+	}
+
+        debug "# testing 109 with locale '$Locale'\n";
+	unless ($e == $x) {
+	    $Problem{109}{$Locale} = 1;
+	    debug "# failed 109\n";
+	}
+
+        debug "# testing 110 with locale '$Locale'\n";
+	unless ($e == $c) {
+	    $Problem{110}{$Locale} = 1;
+	    debug "# failed 110\n";
 	}
     }
 
-    debug "# testing 102 with locale '$Locale'\n";
-    {
-	my ($from, $to, $lesser, $greater,
-	    @test, %test, $test, $yes, $no, $sign);
+    debug "# testing 111 with locale '$Locale'\n";
+    unless ($w == 0) {
+	$Problem{110}{$Locale} = 1;
+	debug "# failed 111\n";
+    }
 
-	for (0..9) {
-	    # Select a slice.
-	    $from = int(($_*@Alnum_)/10);
-	    $to = $from + int(@Alnum_/10);
-	    $to = $#Alnum_ if ($to > $#Alnum_);
-	    $lesser  = join('', @Alnum_[$from..$to]);
-	    # Select a slice one character on.
-	    $from++; $to++;
-	    $to = $#Alnum_ if ($to > $#Alnum_);
-	    $greater = join('', @Alnum_[$from..$to]);
-	    ($yes, $no, $sign) = ($lesser lt $greater
-				  ? ("    ", "not ", 1)
-				  : ("not ", "    ", -1));
-	    # all these tests should FAIL (return 0).
-	    # Exact lt or gt cannot be tested because
-	    # in some locales, say, eacute and E may test equal.
-	    @test = 
-		(
-		 $no.'    ($lesser  le $greater)',  # 1
-		 'not      ($lesser  ne $greater)', # 2
-		 '         ($lesser  eq $greater)', # 3
-		 $yes.'    ($lesser  ge $greater)', # 4
-		 $yes.'    ($lesser  ge $greater)', # 5
-		 $yes.'    ($greater le $lesser )', # 7
-		 'not      ($greater ne $lesser )', # 8
-		 '         ($greater eq $lesser )', # 9
-		 $no.'     ($greater ge $lesser )', # 10
-		 'not (($lesser cmp $greater) == -$sign)' # 12
-		 );
-	    @test{@test} = 0 x @test;
-	    $test = 0;
-	    for my $ti (@test) { $test{$ti} = eval $ti ; $test ||= $test{$ti} }
-	    if ($test) {
-		$Problem{102}{$Locale} = 1;
-		debug "# failed 102 at:\n";
-		debug "# lesser  = '$lesser'\n";
-		debug "# greater = '$greater'\n";
-		debug "# lesser cmp greater = ", $lesser cmp $greater, "\n";
-		debug "# greater cmp lesser = ", $greater cmp $lesser, "\n";
-		debug "# (greater) from = $from, to = $to\n";
-		for my $ti (@test) {
-		    debugf("# %-40s %-4s", $ti,
-			   $test{$ti} ? 'FAIL' : 'ok');
-		    if ($ti =~ /\(\.*(\$.+ +cmp +\$[^\)]+)\.*\)/) {
-			debugf("(%s == %4d)", $1, eval $1);
-		    }
-		    debug "\n#";
-		}
+    my $f = "1.23";
 
-		last;
-	    }
-	}
+    debug "# 112..114: f = $f, locale = $Locale\n";
+
+    debug "# testing 112 with locale '$Locale'\n";
+    unless ($f == 1.23) {
+	$Problem{112}{$Locale} = 1;
+	debug "# failed 112\n";
+    }
+
+    debug "# testing 113 with locale '$Locale'\n";
+    unless ($f == $x) {
+	$Problem{113}{$Locale} = 1;
+	debug "# failed 113\n";
+    }
+
+    debug "# testing 114 with locale '$Locale'\n";
+    unless ($f == $c) {
+	$Problem{114}{$Locale} = 1;
+	debug "# failed 114\n";
     }
 }
 
-foreach (99..102) {
+foreach (99..114) {
     if ($Problem{$_}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
@@ -524,7 +662,7 @@ foreach (99..102) {
 
 my $didwarn = 0;
 
-foreach (102..102) {
+foreach (99..114) {
     if ($Problem{$_}) {
 	my @f = sort keys %{ $Problem{$_} };
 	my $f = join(" ", @f);
@@ -571,72 +709,6 @@ if ($didwarn) {
 {
     use locale;
 
-    my ($x, $y) = (1.23, 1.23);
-
-    my $a = "$x";
-    printf ''; # printf used to reset locale to "C"
-    my $b = "$y";
-
-    print "not " unless $a eq $b;
-    print "ok 103\n";
-
-    my $c = "$x";
-    my $z = sprintf ''; # sprintf used to reset locale to "C"
-    my $d = "$y";
-
-    print "not " unless $c eq $d;
-    print "ok 104\n";
-
-    my $w = 0;
-    local $SIG{__WARN__} = sub { $w++ };
-    local $^W = 1;
-
-    # the == (among other things) used to warn for locales
-    # that had something else than "." as the radix character
-
-    print "not " unless $c == 1.23;
-    print "ok 105\n";
-
-    print "not " unless $c == $x;
-    print "ok 106\n";
-
-    print "not " unless $c == $d;
-    print "ok 107\n";
-
-    debug "# 103..107: a = $a, b = $b, c = $c, d = $d\n";
-
-    {
-	no locale;
-	
-	my $e = "$x";
-
-	print "not " unless $e == 1.23;
-	print "ok 108\n";
-
-	print "not " unless $e == $x;
-	print "ok 109\n";
-
-	print "not " unless $e == $c;
-	print "ok 110\n";
-
-	debug "# 108..110: e = $e\n";
-    }
-
-    print "not " unless $w == 0;
-    print "ok 111\n";
-
-    my $f = "1.23";
-
-    print "not " unless $f == 1.23;
-    print "ok 112\n";
-
-    print "not " unless $f == $x;
-    print "ok 113\n";
-
-    print "not " unless $f == $c;
-    print "ok 114\n";
-
-    debug "# 112..114: f = $f\n";
 }
 
 # eof
