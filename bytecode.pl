@@ -1,6 +1,6 @@
 BEGIN {
   push @INC, './lib';
-  require 'regen.pl';
+  require 'regen_lib.pl';
 }
 use strict;
 my %alias_to = (

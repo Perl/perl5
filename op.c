@@ -4868,10 +4868,9 @@ Perl_ck_eval(pTHX_ OP *o)
 	    o->op_flags &= ~OPf_KIDS;
 	    op_null(o);
 	}
-	else if (kid->op_type == OP_LINESEQ) {
+	else if (kid->op_type == OP_LINESEQ || kid->op_type == OP_STUB) {
 	    LOGOP *enter;
 
-	    kid->op_next = o->op_next;
 	    cUNOPo->op_first = 0;
 	    op_free(o);
 

@@ -409,6 +409,10 @@ case "$LD_LIBRARY_PATH" in
 "$old_LD_LIBRARY_PATH") ;;
 *) echo "LD_LIBRARY_PATH is now $LD_LIBRARY_PATH." >& 4 ;;
 esac
+case "$LD_LIBRARY_PATH" in
+'') ;;
+* ) export LD_LIBRARY_PATH ;;
+esac
 
 #
 # Unset temporary variables no more needed.

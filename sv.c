@@ -2890,6 +2890,16 @@ uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
     return ptr;
 }
 
+/* sv_2pv() is now a macro using Perl_sv_2pv_flags();
+ * this function provided for binary compatibility only
+ */
+
+char *
+Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
+{
+    return sv_2pv_flags(sv, lp, SV_GMAGIC);
+}
+
 /*
 =for apidoc sv_2pv_flags
 
@@ -3348,6 +3358,17 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     }
 }
 
+/* sv_utf8_upgrade() is now a macro using sv_utf8_upgrade_flags();
+ * this function provided for binary compatibility only
+ */
+
+
+STRLEN
+Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
+{
+    return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
+}
+
 /*
 =for apidoc sv_utf8_upgrade
 
@@ -3527,6 +3548,16 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
         }
     }
     return TRUE;
+}
+
+/* sv_setsv() is now a macro using Perl_sv_setsv_flags();
+ * this function provided for binary compatibility only
+ */
+
+void
+Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
+{
+    sv_setsv_flags(dstr, sstr, SV_GMAGIC);
 }
 
 /*
@@ -4266,6 +4297,16 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
     SvIVX(sv) += delta;
 }
 
+/* sv_catpvn() is now a macro using Perl_sv_catpvn_flags();
+ * this function provided for binary compatibility only
+ */
+
+void
+Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
+{
+    sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
+}
+
 /*
 =for apidoc sv_catpvn
 
@@ -4316,6 +4357,16 @@ Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRL
 {
     sv_catpvn(sv,ptr,len);
     SvSETMAGIC(sv);
+}
+
+/* sv_catsv() is now a macro using Perl_sv_catsv_flags();
+ * this function provided for binary compatibility only
+ */
+
+void
+Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
+{
+    sv_catsv_flags(dstr, sstr, SV_GMAGIC);
 }
 
 /*
@@ -7198,6 +7249,21 @@ Perl_sv_nv(pTHX_ register SV *sv)
     return sv_2nv(sv);
 }
 
+/* sv_pv() is now a macro using SvPV_nolen();
+ * this function provided for binary compatibility only
+ */
+
+char *
+Perl_sv_pv(pTHX_ SV *sv)
+{
+    STRLEN n_a;
+
+    if (SvPOK(sv))
+	return SvPVX(sv);
+
+    return sv_2pv(sv, &n_a);
+}
+
 /*
 =for apidoc sv_pv
 
@@ -7230,6 +7296,16 @@ Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
 	return SvPVX(sv);
     }
     return sv_2pv_flags(sv, lp, 0);
+}
+
+/* sv_pvn_force() is now a macro using Perl_sv_pvn_force_flags();
+ * this function provided for binary compatibility only
+ */
+
+char *
+Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
+{
+    return sv_pvn_force_flags(sv, lp, SV_GMAGIC);
 }
 
 /*
@@ -7290,6 +7366,17 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
     return SvPVX(sv);
 }
 
+/* sv_pvbyte () is now a macro using Perl_sv_2pv_flags();
+ * this function provided for binary compatibility only
+ */
+
+char *
+Perl_sv_pvbyte(pTHX_ SV *sv)
+{
+    sv_utf8_downgrade(sv,0);
+    return sv_pv(sv);
+}
+
 /*
 =for apidoc sv_pvbyte
 
@@ -7326,6 +7413,17 @@ Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
 {
     sv_utf8_downgrade(sv,0);
     return sv_pvn_force(sv,lp);
+}
+
+/* sv_pvutf8 () is now a macro using Perl_sv_2pv_flags();
+ * this function provided for binary compatibility only
+ */
+
+char *
+Perl_sv_pvutf8(pTHX_ SV *sv)
+{
+    sv_utf8_upgrade(sv);
+    return sv_pv(sv);
 }
 
 /*
@@ -7794,6 +7892,44 @@ Perl_sv_tainted(pTHX_ SV *sv)
     return FALSE;
 }
 
+/*
+=for apidoc sv_setpviv
+
+Copies an integer into the given SV, also updating its string value.
+Does not handle 'set' magic.  See C<sv_setpviv_mg>.
+
+=cut
+*/
+
+void
+Perl_sv_setpviv(pTHX_ SV *sv, IV iv)
+{
+    char buf[TYPE_CHARS(UV)];
+    char *ebuf;
+    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
+
+    sv_setpvn(sv, ptr, ebuf - ptr);
+}
+
+/*
+=for apidoc sv_setpviv_mg
+
+Like C<sv_setpviv>, but also handles 'set' magic.
+
+=cut
+*/
+
+void
+Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv)
+{
+    char buf[TYPE_CHARS(UV)];
+    char *ebuf;
+    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
+
+    sv_setpvn(sv, ptr, ebuf - ptr);
+    SvSETMAGIC(sv);
+}
+
 #if defined(PERL_IMPLICIT_CONTEXT)
 
 /* pTHX_ magic can't cope with varargs, so this is a no-context
@@ -8082,6 +8218,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN zeros = 0;
 	bool has_precis = FALSE;
 	STRLEN precis = 0;
+	I32 osvix = svix;
 	bool is_utf8 = FALSE;  /* is this item utf8?   */
 #ifdef HAS_LDBL_SPRINTF_BUG
 	/* This is to try to fix a bug with irix/nonstop-ux/powerux and
@@ -8833,7 +8970,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	default:
       unknown:
-	    vectorize = FALSE;
 	    if (!args && ckWARN(WARN_PRINTF) &&
 		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
 		SV *msg = sv_newmortal();
@@ -8865,6 +9001,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    p += elen;
 	    *p = '\0';
 	    SvCUR(sv) = p - SvPVX(sv);
+	    svix = osvix;
 	    continue;	/* not "break" */
 	}
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 BEGIN {
     # Get function prototypes
-    require 'regen.pl';
+    require 'regen_lib.pl';
 }
 
 $opcode_new = 'opcode.h-new';

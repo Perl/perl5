@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..994\n";
+print "1..996\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3145,5 +3145,18 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
 	"[perl #21411] (??{ .. }) corrupts split's stack")
 }
 
-# last test 994
+{
+    ok("\x{100}\n" =~ /\x{100}\n$/, "UTF8 length cache and fbm_compile");  
+}
 
+{
+    package Str;
+    use overload q/""/ => sub { ${$_[0]}; };
+    sub new { my ($c, $v) = @_; bless \$v, $c; }
+
+    package main;
+    $_ = Str->new("a\x{100}/\x{100}b");
+    ok(join(":", /\b(.)\x{100}/g) eq "a:/", "re_intuit_start and PL_bostr");
+}
+
+# last test 996

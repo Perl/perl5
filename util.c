@@ -357,8 +357,12 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     I32 rarest = 0;
     U32 frequency = 256;
 
-    if (flags & FBMcf_TAIL)
+    if (flags & FBMcf_TAIL) {
+	MAGIC *mg = SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
 	sv_catpvn(sv, "\n", 1);		/* Taken into account in fbm_instr() */
+	if (mg && mg->mg_len >= 0)
+	    mg->mg_len++;
+    }
     s = (U8*)SvPV_force(sv, len);
     (void)SvUPGRADE(sv, SVt_PVBM);
     if (len == 0)		/* TAIL might be on a zero-length string. */
