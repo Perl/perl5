@@ -1076,10 +1076,10 @@ PP(pp_repeat)
 	    SP -= items;
     }
     else {	/* Note: mark already snarfed by pp_list */
-	SV *tmpstr;
+	SV *tmpstr = POPs;
 	STRLEN len;
+	bool isutf = DO_UTF8(tmpstr);
 
-	tmpstr = POPs;
 	SvSetSV(TARG, tmpstr);
 	SvPV_force(TARG, len);
 	if (count != 1) {
@@ -1092,7 +1092,10 @@ PP(pp_repeat)
 	    }
 	    *SvEND(TARG) = '\0';
 	}
-	(void)SvPOK_only(TARG);
+	if (isutf)
+	    (void)SvPOK_only_UTF8(TARG);
+	else
+	    (void)SvPOK_only(TARG);
 	PUSHTARG;
     }
     RETURN;
@@ -2008,12 +2011,12 @@ PP(pp_substr)
 	RETPUSHUNDEF;
     }
     else {
-        if (utfcurlen) {
+	if (utfcurlen)
 	    sv_pos_u2b(sv, &pos, &rem);
-	    SvUTF8_on(TARG);
-	}
 	tmps += pos;
 	sv_setpvn(TARG, tmps, rem);
+	if (utfcurlen)
+	    SvUTF8_on(TARG);
 	if (repl)
 	    sv_insert(sv, pos, rem, repl, repl_len);
 	else if (lvalue) {		/* it's an lvalue! */
@@ -2026,7 +2029,7 @@ PP(pp_substr)
 				"Attempt to use reference as lvalue in substr");
 		}
 		if (SvOK(sv))		/* is it defined ? */
-		    (void)SvPOK_only(sv);
+		    (void)SvPOK_only_UTF8(sv);
 		else
 		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
 	    }
@@ -2209,7 +2212,6 @@ PP(pp_chr)
     tmps = SvPVX(TARG);
     *tmps++ = value;
     *tmps = '\0';
-    SvUTF8_off(TARG);				/* decontaminate */
     (void)SvPOK_only(TARG);
     XPUSHs(TARG);
     RETURN;
@@ -2542,7 +2544,7 @@ PP(pp_quotemeta)
 	}
 	*d = '\0';
 	SvCUR_set(TARG, d - SvPVX(TARG));
-	(void)SvPOK_only(TARG);
+	(void)SvPOK_only_UTF8(TARG);
     }
     else
 	sv_setpvn(TARG, s, len);
@@ -3231,7 +3233,7 @@ PP(pp_reverse)
 		*up++ = *down;
 		*down-- = tmp;
 	    }
-	    (void)SvPOK_only(TARG);
+	    (void)SvPOK_only_UTF8(TARG);
 	}
 	SP = MARK + 1;
 	SETTARG;

@@ -819,7 +819,7 @@ Perl_str_to_version(pTHX_ SV *sv)
     NV nshift = 1.0;
     STRLEN len;
     char *start = SvPVx(sv,len);
-    bool utf = SvUTF8(sv);
+    bool utf = SvUTF8(sv) ? TRUE : FALSE;
     char *end = start + len;
     while (start < end) {
 	I32 skip;
