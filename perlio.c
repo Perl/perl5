@@ -83,7 +83,6 @@
 			(*tab->callback) args;			\
 		else						\
 			PerlIOBase_ ## base args;		\
-		SETERRNO(EINVAL, LIB_INVARG);			\
 	}							\
 	else							\
 		SETERRNO(EBADF, SS_IVCHAN)
@@ -94,7 +93,8 @@
 		PerlIO_funcs *tab = PerlIOBase(f)->tab; 	\
 		if (tab && tab->callback)			\
 			(*tab->callback) args;			\
-		SETERRNO(EINVAL, LIB_INVARG);			\
+		else						\
+			SETERRNO(EINVAL, LIB_INVARG);		\
 	}							\
 	else							\
 		SETERRNO(EBADF, SS_IVCHAN)
@@ -524,15 +524,17 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
     if (PerlIOValid(f)) {
 	PerlIO_funcs *tab = PerlIOBase(f)->tab;
-	PerlIO *new;
 	PerlIO_debug("fdupopen f=%p param=%p\n",(void*)f,(void*)param);
-	new = (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX),f,param, flags);
-	return new;
+	if (tab && tab->Dup)
+	     return (*tab->Dup)(aTHX_ PerlIO_allocate(aTHX), f, param, flags);
+	else {
+	     return PerlIOBase_dup(aTHX_ PerlIO_allocate(aTHX), f, param, flags);
+	}
     }
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return NULL;
-    }
+    else
+	 SETERRNO(EBADF, SS_IVCHAN);
+
+    return NULL;
 }
 
 void
@@ -855,7 +857,7 @@ PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
 
 XS(XS_PerlIO__Layer__NoWarnings)
 {
-    /* This is used as a %SIG{__WARN__} handler to supress warnings 
+    /* This is used as a %SIG{__WARN__} handler to supress warnings
        during loading of layers.
      */
     dXSARGS;
@@ -1153,7 +1155,8 @@ PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab, const char *mode, SV *arg)
 	    *f = l;
 	    PerlIO_debug("PerlIO_push f=%p %s %s %p\n", (void*)f, tab->name,
 			(mode) ? mode : "(Null)", (void*)arg);
-	    if ((*l->tab->Pushed) (aTHX_ f, mode, arg, tab) != 0) {
+	    if (*l->tab->Pushed &&
+		(*l->tab->Pushed) (aTHX_ f, mode, arg, tab) != 0) {
 		PerlIO_pop(aTHX_ f);
 		return NULL;
 	    }
@@ -1163,8 +1166,9 @@ PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab, const char *mode, SV *arg)
 	/* Pseudo-layer where push does its own stack adjust */
 	PerlIO_debug("PerlIO_push f=%p %s %s %p\n", (void*)f, tab->name,
 		     (mode) ? mode : "(Null)", (void*)arg);
-	if ((*tab->Pushed) (aTHX_ f, mode, arg, tab) != 0) {
-	    return NULL;
+	if (tab->Pushed &&
+	    (*tab->Pushed) (aTHX_ f, mode, arg, tab) != 0) {
+	     return NULL;
 	}
     }
     return f;
@@ -1323,8 +1327,13 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 int
 PerlIO__close(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Close) (aTHX_ f);
+    if (PerlIOValid(f)) {
+	PerlIO_funcs *tab = PerlIOBase(f)->tab;
+	if (tab && tab->Close)
+	    return (*tab->Close)(aTHX_ f);
+	else
+	    return PerlIOBase_close(aTHX_ f);
+    }
     else {
 	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
@@ -1334,21 +1343,10 @@ PerlIO__close(pTHX_ PerlIO *f)
 int
 Perl_PerlIO_close(pTHX_ PerlIO *f)
 {
-    int code = -1;
-
-    if (PerlIOValid(f)) {
-	 PerlIO_funcs *tab = PerlIOBase(f)->tab;
-
-	 if (tab && tab->Close) {
-	      code = (*tab->Close)(aTHX_ f);
-	      while (*f) {
-		   PerlIO_pop(aTHX_ f);
-	      }
-	 }
-	 else
-	      PerlIOBase_close(aTHX_ f);
+    int code = PerlIO__close(aTHX_ f);
+    while (PerlIOValid(f)) {
+	PerlIO_pop(aTHX_ f);
     }
-
     return code;
 }
 
@@ -1526,8 +1524,13 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    PerlIO_debug("openn(%s,'%s','%s',%d,%x,%o,%p,%d,%p)\n",
 			 tab->name, layers, mode, fd, imode, perm,
 			 (void*)f, narg, (void*)args);
-	    f = (*tab->Open) (aTHX_ tab, layera, n, mode, fd, imode, perm,
-			      f, narg, args);
+	    if (tab->Open)
+		 f = (*tab->Open) (aTHX_ tab, layera, n, mode, fd, imode, perm,
+				   f, narg, args);
+	    else {
+		 SETERRNO(EINVAL, LIB_INVARG);
+		 f = NULL;
+	    }
 	    if (f) {
 		if (n + 1 < layera->cur) {
 		    /*
@@ -1651,7 +1654,7 @@ PerlIO_isutf8(PerlIO *f)
 	  return (PerlIOBase(f)->flags & PERLIO_F_UTF8) != 0;
      else
 	  SETERRNO(EBADF, SS_IVCHAN);
-     
+
      return -1;
 }
 
@@ -1862,8 +1865,11 @@ PerlIORaw_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	       PerlIO *old, int narg, SV **args)
 {
     PerlIO_funcs *tab = PerlIO_default_btm();
-    return (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
-			 old, narg, args);
+    if (tab && tab->Open)
+	 return (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
+			      old, narg, args);
+    SETERRNO(EINVAL, LIB_INVARG);
+    return NULL;
 }
 
 PerlIO_funcs PerlIO_raw = {
@@ -2064,14 +2070,29 @@ PerlIOBase_noop_fail(pTHX_ PerlIO *f)
 IV
 PerlIOBase_close(pTHX_ PerlIO *f)
 {
-    IV code = 0;
-    PerlIO *n = PerlIONext(f);
-    if (PerlIO_flush(f) != 0)
-	code = -1;
-    if (PerlIOValid(n) && (*PerlIOBase(n)->tab->Close)(aTHX_ n) != 0)
-	code = -1;
-    PerlIOBase(f)->flags &=
-	~(PERLIO_F_CANREAD | PERLIO_F_CANWRITE | PERLIO_F_OPEN);
+    IV code = -1;
+    if (PerlIOValid(f)) {
+	PerlIO *n = PerlIONext(f);
+	code = PerlIO_flush(f);
+	PerlIOBase(f)->flags &=
+	   ~(PERLIO_F_CANREAD | PERLIO_F_CANWRITE | PERLIO_F_OPEN);
+	while (PerlIOValid(n)) {
+	    PerlIO_funcs *tab = PerlIOBase(n)->tab;
+	    if (tab && tab->Close) {
+		if ((*tab->Close)(aTHX_ n) != 0)
+		    code = -1;
+		break;
+	    }
+	    else {
+		PerlIOBase(n)->flags &=
+		    ~(PERLIO_F_CANREAD | PERLIO_F_CANWRITE | PERLIO_F_OPEN);
+	    }
+	    n = PerlIONext(n);
+	}
+    }
+    else {
+	SETERRNO(EBADF, SS_IVCHAN);
+    }
     return code;
 }
 
@@ -2135,16 +2156,21 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
     PerlIO *nexto = PerlIONext(o);
     if (PerlIOValid(nexto)) {
 	PerlIO_funcs *tab = PerlIOBase(nexto)->tab;
-	f = (*tab->Dup)(aTHX_ f, nexto, param, flags);
+	if (tab && tab->Dup)
+	    f = (*tab->Dup)(aTHX_ f, nexto, param, flags);
+	else
+	    f = PerlIOBase_dup(aTHX_ f, nexto, param, flags);
     }
     if (f) {
 	PerlIO_funcs *self = PerlIOBase(o)->tab;
-	SV *arg = Nullsv;
+	SV *arg;
 	char buf[8];
 	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",
 		     self->name, (void*)f, (void*)o, (void*)param);
-	if (self->Getarg) {
-	    arg = (*self->Getarg)(aTHX_ o,param,flags);
+	if (self->Getarg)
+	    arg = (*self->Getarg)(aTHX_ o, param, flags);
+	else {
+	    arg = Nullsv;
 	}
 	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
 	if (arg) {
@@ -2738,11 +2764,11 @@ static int
 PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
 {
     /* XXX this could use PerlIO_canset_fileno() and
-     * PerlIO_set_fileno() support from Configure 
+     * PerlIO_set_fileno() support from Configure
      */
 #  if defined(__GLIBC__)
     /* There may be a better way for GLIBC:
-    	- libio.h defines a flag to not close() on cleanup 
+    	- libio.h defines a flag to not close() on cleanup
      */	
     f->_fileno = -1;
     return 1;
@@ -2754,7 +2780,7 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
      *      long __pad[16];
      *  };
      *
-     * It turns out that the fd is stored in the top 32 bits of 
+     * It turns out that the fd is stored in the top 32 bits of
      * file->__pad[4]. The lower 32 bits contain flags. file->pad[5] appears
      * to contain a pointer or offset into another structure. All the
      * remaining fields are zero.
@@ -2764,9 +2790,9 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     f->__pad[4] |= 0xffffffff00000000L;
     assert(fileno(f) == 0xffffffff);
 #    else /* !defined(_LP64) */
-    /* _file is just a unsigned char :-( 
-       Not clear why we dup() rather than using -1 
-       even if that would be treated as 0xFF - so will 
+    /* _file is just a unsigned char :-(
+       Not clear why we dup() rather than using -1
+       even if that would be treated as 0xFF - so will
        a dup fail ...
      */
     f->_file = PerlLIO_dup(fileno(f));
@@ -2777,24 +2803,24 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     f->__fileL = 0xff;
     return 1;
    /* Next one ->_file seems to be a reasonable fallback, i.e. if
-      your platform does not have special entry try this one.       
+      your platform does not have special entry try this one.
       [For OSF only have confirmation for Tru64 (alpha)
       but assume other OSFs will be similar.]
-    */    
+    */
 #  elif defined(_AIX) || defined(__osf__) || defined(__irix__)
     f->_file = -1;
     return 1;
 #  elif defined(__FreeBSD__)
     /* There may be a better way on FreeBSD:
-        - we could insert a dummy func in the _close function entry 
-	f->_close = (int (*)(void *)) dummy_close; 
+        - we could insert a dummy func in the _close function entry
+	f->_close = (int (*)(void *)) dummy_close;
      */
     f->_file = -1;
     return 1;
 #  elif defined(__CYGWIN__)
     /* There may be a better way on CYGWIN:
-        - we could insert a dummy func in the _close function entry 
-	f->_close = (int (*)(void *)) dummy_close; 
+        - we could insert a dummy func in the _close function entry
+	f->_close = (int (*)(void *)) dummy_close;
      */
     f->_file = -1;
     return 1;
@@ -2811,9 +2837,9 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     return 1;
 #  else
 #if 0
-    /* Sarathy's code did this - we fall back to a dup/dup2 hack 
+    /* Sarathy's code did this - we fall back to a dup/dup2 hack
        (which isn't thread safe) instead
-     */  
+     */
 #    error "Don't know how to set FILE.fileno on your platform"
 #endif
     return 0;
@@ -2836,25 +2862,25 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	int saveerr = 0;
 	int dupfd = 0;
 #ifdef SOCKS5_VERSION_NAME
-    	/* Socks lib overrides close() but stdio isn't linked to 
-	   that library (though we are) - so we must call close() 
-	   on sockets on stdio's behalf. 
-	 */   
+    	/* Socks lib overrides close() but stdio isn't linked to
+	   that library (though we are) - so we must call close()
+	   on sockets on stdio's behalf.
+	 */
     	int optval;
     	Sock_size_t optlen = sizeof(int);
     	if (getsockopt(fd, SOL_SOCKET, SO_TYPE, (void *) &optval, &optlen) == 0) {
             socksfd = 1;
-	    invalidate = 1;  
+	    invalidate = 1;
     	}
 #endif
     	if (PerlIOUnix_refcnt_dec(fd) > 0) {
 	    /* File descriptor still in use */
 	    invalidate = 1;
 	    socksfd = 0;
-	}    
+	}
 	if (invalidate) {
-   	    /* For STD* handles don't close the stdio at all 
-	       this is because we have shared the FILE * too 
+   	    /* For STD* handles don't close the stdio at all
+	       this is because we have shared the FILE * too
    	     */
 	    if (stdio == stdin) {
 	    	/* Some stdios are buggy fflush-ing inputs */
@@ -2863,24 +2889,24 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	    else if (stdio == stdout || stdio == stderr) {
 	    	return PerlIO_flush(f);
 	    }
-            /* Tricky - must fclose(stdio) to free memory but not close(fd) 
-	       Use Sarathy's trick from maint-5.6 to invalidate the 
-	       fileno slot of the FILE * 
-	    */ 
+            /* Tricky - must fclose(stdio) to free memory but not close(fd)
+	       Use Sarathy's trick from maint-5.6 to invalidate the
+	       fileno slot of the FILE *
+	    */
 	    result = PerlIO_flush(f);
 	    saveerr = errno;
     	    if (!(invalidate = PerlIOStdio_invalidate_fileno(aTHX_ stdio))) {
 	    	dupfd = PerlLIO_dup(fd);
 	    }
-	} 
+	}
         result = PerlSIO_fclose(stdio);
-	/* We treat error from stdio as success if we invalidated 
-	   errno may NOT be expected EBADF 
+	/* We treat error from stdio as success if we invalidated
+	   errno may NOT be expected EBADF
 	 */
 	if (invalidate && result != 0) {
 	    errno = saveerr;
 	    result = 0;
-	} 
+	}
 	if (socksfd) {
 	    /* in SOCKS case let close() determine return value */
 	    result = close(fd);
@@ -2890,7 +2916,7 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	    close(dupfd);
 	}
 	return result;
-    } 
+    }
 }
 
 SSize_t
@@ -3662,7 +3688,7 @@ PerlIOBuf_tell(pTHX_ PerlIO *f)
      * b->posn is file position where b->buf was read, or will be written
      */
     Off_t posn = b->posn;
-    if ((PerlIOBase(f)->flags & PERLIO_F_APPEND) && 
+    if ((PerlIOBase(f)->flags & PERLIO_F_APPEND) &&
         (PerlIOBase(f)->flags & PERLIO_F_WRBUF)) {
 #if 1
     	/* As O_APPEND files are normally shared in some sense it is better
@@ -3670,7 +3696,7 @@ PerlIOBuf_tell(pTHX_ PerlIO *f)
 	 */  	
 	PerlIO_flush(f);
 #else	
-        /* when file is NOT shared then this is sufficient */ 
+        /* when file is NOT shared then this is sufficient */
 	PerlIO_seek(PerlIONext(f),0, SEEK_END);
 #endif
 	posn = b->posn = PerlIO_tell(PerlIONext(f));

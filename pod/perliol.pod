@@ -675,6 +675,48 @@ The application (or layer above) must ensure they are consistent.
 
 =back
 
+=head2 Implementing PerlIO Layers
+
+If you are creating a PerlIO layer, you may want to be lazy, in other
+words, implement only the methods that interest you.  The other methods
+you can either replace with the "blank" methods
+
+    PerlIOBase_noop_ok
+    PerlIOBase_noop_fail
+
+(which do nothing, and return zero and -1, respectively) or for
+certain methods you may assume a default behaviour by using a NULL
+method.  The default behaviour is either to use the corresponding
+PerlIOBase method, or silently return success (return zero), or to
+fail (set errno and return -1 or NULL).  The following table
+summarizes the behaviour:
+
+    method      behaviour with NULL
+
+    Clearerr    PerlIOBase_clearerr
+    Close       PerlIOBase_close
+    Dup         FAILURE
+    Eof         PerlIOBase_eof
+    Error       PerlIOBase_error
+    Fileno      PerlIOBase_fileno
+    Fill        FAILURE
+    Flush       SUCCESS
+    Getarg	FAILURE
+    Get_base    FAILURE
+    Get_bufsiz  FAILURE
+    Get_cnt     FAILURE
+    Get_ptr     FAILURE
+    Open        FAILURE
+    Popped	SUCCESS
+    Pushed	SUCCESS
+    Read        PerlIOBase_read
+    Seek        FAILURE
+    Set_cnt     FAILURE
+    Set_ptrcnt  FAILURE
+    Setlinebuf  PerlIOBase_setlinebuf
+    Tell        FAILURE
+    Unread      PerlIOBase_unread
+    Write       FAILURE
 
 =head2 Core Layers
 
