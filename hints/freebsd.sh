@@ -68,9 +68,11 @@ case "$osvers" in
 	;;
 #
 # 2.2 and above have phkmalloc(3).
+# don't use -lmalloc (maybe there's an old one from 1.1.5.1 floating around)
 2.2*)
  	usevfork='true'
 	usemymalloc='n'
+	libswanted=`echo $libswanted | sed 's/ malloc / /'`
 	d_dosuid='define'
 	d_setregid='define'
 	d_setreuid='define'
@@ -81,6 +83,7 @@ case "$osvers" in
 # Guesses at what will be needed after 2.2
 *)	usevfork='true'
 	usemymalloc='n'
+	libswanted=`echo $libswanted | sed 's/ malloc / /'`
 	;;
 esac
 
