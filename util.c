@@ -4025,7 +4025,11 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
     return s;
 }
 
-#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET)
+#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) && defined(AF_INET) && defined(PF_INET) && defined(SOCK_DGRAM)
+#   define EMULATE_SOCKETPAIR_UDP
+#endif
+
+#ifdef EMULATE_SOCKETPAIR_UDP
 static int
 S_socketpair_udp (int fd[2]) {
     dTHX;
@@ -4191,8 +4195,10 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
         return -1;
     }
 
+#ifdef EMULATE_SOCKETPAIR_UDP
     if (type == SOCK_DGRAM)
         return S_socketpair_udp (fd);
+#endif
 
     listener = PerlSock_socket (AF_INET, type, 0);
     if (listener == -1)
