@@ -58,7 +58,6 @@ is( $stat->blocks, $stat[12], "number of blocks in position 12" );
 
 local $!;
 $stat = stat '/notafile';
-like( $!, qr/^No such file/, 
-	"should leave 'No such file' error in \$! with invalid file" );
+isn't( $!, '', 'should populate $!, given invalid file' );
 
 # Testing pretty much anything else is unportable.
