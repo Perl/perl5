@@ -49,7 +49,8 @@ use Exporter ();
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
 	 class cstring cchar svref_2object compile_stats comppadlist hash
-	 threadsv_names main_cv init_av opnumber);
+	 threadsv_names main_cv init_av opnumber
+	 AVf_REAL HEf_SVKEY);
 use B::Asmdata qw(@specialsv_name);
 
 use FileHandle;
@@ -102,8 +103,6 @@ sub walk_and_save_optree {
 # uncast -1 (the printf format is %d so we can't tweak it), we have
 # to "know" that op_seq is a U16 and use 65535. Ugh.
 my $op_seq = 65535;
-
-sub define HEf_SVKEY   () { -2 }
 
 # Look this up here so we can do just a number compare
 # rather than looking up the name of every BASEOP in B::OP
