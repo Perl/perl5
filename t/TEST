@@ -254,7 +254,7 @@ EOT
 
 open HACK, '.\\perl $pl2c $test_executable |';
 # cl.exe prints the name of the .c file on stdout (\%^\$^#)
-while(<HACK>) {m/^\w+\.[cC]\$/ && next;print}
+while(<HACK>) {m/^\\w+\\.[cC]\$/ && next;print}
 open HACK, '$test_executable |';
 while(<HACK>) {print}
 EOT
