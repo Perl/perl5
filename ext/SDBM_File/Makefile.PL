@@ -34,14 +34,14 @@ $(MYEXTLIB): sdbm/Makefile
 EOT
 	} elsif ($Config{'make'} =~ /nmake/i) {
 	    #
-	    return <<'EOT';
+	    return <<EOT;
 $(MYEXTLIB): sdbm/Makefile
 	cd sdbm
 	$(MAKE) all
 	cd ..
 EOT
 	} 
-  } elsif ($^O ne 'VMS') {
+} elsif ($^O ne 'VMS') {
     '
 $(MYEXTLIB): sdbm/Makefile
 	cd sdbm && $(MAKE) all
