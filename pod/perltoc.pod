@@ -1176,7 +1176,9 @@ perlopentut.pod, perlreftut.pod, perltootc.pod
 =item New Diagnostics
 
 /%s/: Unrecognized escape \\%c passed through, Unrecognized escape \\%c
-passed through, Missing command in piped open
+passed through, Missing command in piped open, defined(@array) is
+deprecated (and not really meaningful), defined(%hash) is deprecated (and
+not really meaningful)
 
 =item Obsolete Diagnostics
 
@@ -2527,7 +2529,7 @@ LIMIT specified
 
 =item DESCRIPTION
 
-Not all Perl programs have to be portable, The vast majority of Perl I<is>
+Not all Perl programs have to be portable, Nearly all of Perl already I<is>
 portable
 
 =item ISSUES
@@ -2647,12 +2649,10 @@ wait, waitpid PID,FLAGS
 
 =item CHANGES
 
-v1.42, 22 May 1999Added notes about tests, sprintf/printf, and epoch
-offsets.
-=item v1.41, 19 May 1999, v1.40, 11 April 1999, v1.39, 11 February 1999,
-v1.38, 31 December 1998, v1.37, 19 December 1998, v1.36, 9 September 1998,
-v1.35, 13 August 1998, v1.33, 06 August 1998, v1.32, 05 August 1998, v1.30,
-03 August 1998, v1.23, 10 July 1998
+v1.43, 24 May 1999, v1.42, 22 May 1999, v1.41, 19 May 1999, v1.40, 11 April
+1999, v1.39, 11 February 1999, v1.38, 31 December 1998, v1.37, 19 December
+1998, v1.36, 9 September 1998, v1.35, 13 August 1998, v1.33, 06 August
+1998, v1.32, 05 August 1998, v1.30, 03 August 1998, v1.23, 10 July 1998
 
 =item AUTHORS / CONTRIBUTORS
 
@@ -3214,6 +3214,14 @@ method, locked
 
 =item AUTHOR
 
+=head2 caller - inherit pragmatic attributes from the context of the caller
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+encoding
+
 =head2 constant - Perl pragma to declare constants
 
 =item SYNOPSIS
@@ -3674,8 +3682,7 @@ label, stash, filegv, cop_seq, arybase, line
 main_cv, init_av, main_root, main_start, comppadlist, sv_undef, sv_yes,
 sv_no, amagic_generation, walkoptree(OP, METHOD), walkoptree_debug(DEBUG),
 walksymtable(SYMREF, METHOD, RECURSE), svref_2object(SV), ppname(OPNUM),
-hash(STR), cast_I32(I), minus_c, cstring(STR), class(OBJ), threadsv_names,
-byteload_fh(FILEHANDLE)
+hash(STR), cast_I32(I), minus_c, cstring(STR), class(OBJ), threadsv_names
 
 =item AUTHOR
 
@@ -3980,7 +3987,11 @@ B<-On>, B<-D>, B<-Do>, B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-m>
 
 =item DIRECT ACCESS TO THE PARAMETER LIST:
 
+=item FETCHING THE PARAMETER LIST AS A HASH:
+
 =item SAVING THE STATE OF THE SCRIPT TO A FILE:
+
+=item RETRIEVING CGI ERRORS
 
 =item USING THE FUNCTION-ORIENTED INTERFACE
 
@@ -4131,7 +4142,7 @@ B<path_translated()>, B<remote_host()>, B<script_name()>Return the script
 name as a partial URL, for self-refering
 scripts, B<referer()>, B<auth_type ()>, B<server_name ()>, B<virtual_host
 ()>, B<server_software ()>, B<remote_user ()>, B<user_name ()>,
-B<request_method()>
+B<request_method()>, B<content_type()>, B<http()>, B<https()>
 
 =item USING NPH SCRIPTS
 
@@ -4416,11 +4427,13 @@ module
 Scalar (C<'$'> or C<'*$'>), Array (C<'@'> or C<'*@'>), Hash (C<'%'> or
 C<'*%'>), Class (C<'Class_Name'> or C<'*Class_Name'>)
 
+=item Initializing with C<new>
+
 =back
 
 =item EXAMPLES
 
-Example 1, Example 2
+Example 1, Example 2, Example 3
 
 =item Author and Modification History
 

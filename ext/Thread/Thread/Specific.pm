@@ -18,7 +18,7 @@ C<key_create> returns a unique thread-specific key.
 sub import {
     use attrs qw(locked method);
     require fields;
-    fields->import(@_);
+    fields::->import(@_);
 }	
 
 sub key_create {

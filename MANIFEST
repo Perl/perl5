@@ -529,6 +529,7 @@ lib/CGI/Apache.pm	Support for Apache's Perl module
 lib/CGI/Carp.pm		Log server errors with helpful context
 lib/CGI/Cookie.pm	Interface to Netscape Cookies
 lib/CGI/Fast.pm		Support for FastCGI (persistent server process)
+lib/CGI/Pretty.pm	Output nicely formatted HTML
 lib/CGI/Push.pm		Support for server push
 lib/CGI/Switch.pm	Simple interface for multiple server types
 lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
@@ -1082,6 +1083,7 @@ t/io/fs.t		See if directory manipulations work
 t/io/inplace.t		See if inplace editing works
 t/io/iprefix.t		See if inplace editing works with prefixes
 t/io/open.t		See if open works
+t/io/openpid.t		See if open works for subprocesses
 t/io/pipe.t		See if secure pipes work
 t/io/print.t		See if print commands work
 t/io/read.t		See if read works
@@ -1411,7 +1413,6 @@ win32/makefile.mk	Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/makemain.pl	Win32 port
 win32/makeperldef.pl	Win32 port
 win32/perlglob.c	Win32 port
-win32/perlhost.h	Perl host implementation
 win32/perllib.c		Win32 port
 win32/pod.mak		Win32 port
 win32/runperl.c		Win32 port

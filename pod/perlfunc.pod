@@ -881,10 +881,17 @@ doesn't I<necessarily> indicate an exceptional condition: C<pop>
 returns C<undef> when its argument is an empty array, I<or> when the
 element to return happens to be C<undef>.
 
-You may also use C<defined> to check whether a subroutine exists, by
-saying C<defined &func> without parentheses.  On the other hand, use
-of C<defined> upon aggregates (hashes and arrays) is not guaranteed to
-produce intuitive results, and should probably be avoided.
+You may also use C<defined(&func)> to check whether subroutine C<&func>
+has ever been defined.  The return value is unaffected by any forward
+declarations of C<&foo>.
+
+Use of C<defined> on aggregates (hashes and arrays) is deprecated.  It
+used to report whether memory for that aggregate has ever been
+allocated.  This behavior may disappear in future versions of Perl.
+You should instead use a simple test for size:
+
+    if (@an_array) { print "has array elements\n" }
+    if (%a_hash)   { print "has hash members\n"   }
 
 When used on a hash element, it tells you whether the value is defined,
 not whether the key exists in the hash.  Use L</exists> for the latter
@@ -913,14 +920,6 @@ it's an admission that it couldn't give you an honest answer.  So you
 should use C<defined> only when you're questioning the integrity of what
 you're trying to do.  At other times, a simple comparison to C<0> or C<""> is
 what you want.
-
-Use of C<defined> on aggregates (hashes and arrays) is deprecated.  It
-used to report whether memory for that aggregate has ever been
-allocated.  This behavior may disappear in future versions of Perl.
-You should instead use a simple test for size:
-
-    if (@an_array) { print "has array elements\n" }
-    if (%a_hash)   { print "has hash members\n"   }
 
 See also L</undef>, L</exists>, L</ref>.
 

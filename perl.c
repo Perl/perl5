@@ -1088,6 +1088,8 @@ S_run_body(pTHX_ va_list args)
 	CALLRUNOPS(aTHX);
     }
 
+    my_exit(0);
+    /* NOTREACHED */
     return NULL;
 }
 

@@ -111,7 +111,7 @@ sub inherit  # called by base.pm
 {
     my($derived, $base) = @_;
 
-    if (defined %{"$derived\::FIELDS"}) {
+    if (keys %{"$derived\::FIELDS"}) {
 	 require Carp;
          Carp::croak("Inherited %FIELDS can't override existing %FIELDS");
     } else {
@@ -132,7 +132,7 @@ sub _dump  # sometimes useful for debugging
 {
    for my $pkg (sort keys %attr) {
       print "\n$pkg";
-      if (defined @{"$pkg\::ISA"}) {
+      if (@{"$pkg\::ISA"}) {
          print " (", join(", ", @{"$pkg\::ISA"}), ")";
       }
       print "\n";

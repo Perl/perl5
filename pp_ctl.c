@@ -2817,7 +2817,7 @@ S_doopen_pmc(pTHX_ const char *name, const char *mode)
     STRLEN namelen = strlen(name);
     PerlIO *fp;
 
-    if (namelen > 3 && strcmp(name + namelen - 3, ".pm") == 0) {
+    if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
 	SV *pmcsv = Perl_newSVpvf(aTHX_ "%s%c", name, 'c');
 	char *pmc = SvPV_nolen(pmcsv);
 	Stat_t pmstat;

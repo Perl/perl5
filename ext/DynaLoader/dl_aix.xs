@@ -77,19 +77,18 @@ typedef struct Module {
  * We keep a list of all loaded modules to be able to call the fini
  * handlers at atexit() time.
  */
-static ModulePtr modList;
+static ModulePtr modList;		/* XXX threadead */
 
 /*
  * The last error from one of the dl* routines is kept in static
  * variables here. Each error is returned only once to the caller.
  */
-static char errbuf[BUFSIZ];
-static int errvalid;
+static char errbuf[BUFSIZ];		/* XXX threadead */
+static int errvalid;			/* XXX threadead */
 
 static void caterr(char *);
 static int readExports(ModulePtr);
 static void terminate(void);
-static void *findMain(void);
 
 static char *strerror_failed   = "(strerror failed)";
 static char *strerror_r_failed = "(strerror_r failed)";
@@ -155,16 +154,14 @@ char *strerrorcpy(char *str, int err) {
 void *dlopen(char *path, int mode)
 {
 	register ModulePtr mp;
-	static void *mainModule;
+	static int inited;			/* XXX threadead */
 
 	/*
 	 * Upon the first call register a terminate handler that will
-	 * close all libraries. Also get a reference to the main module
-	 * for use with loadbind.
+	 * close all libraries.
 	 */
-	if (!mainModule) {
-		if ((mainModule = findMain()) == NULL)
-			return NULL;
+	if (!inited) {
+		inited++;
 		atexit(terminate);
 	}
 	/*
@@ -222,7 +219,12 @@ void *dlopen(char *path, int mode)
 	mp->refCnt = 1;
 	mp->next = modList;
 	modList = mp;
-	if (loadbind(0, mainModule, mp->entry) == -1) {
+	/*
+	 * Assume anonymous exports come from the module this dlopen
+	 * is linked into, that holds true as long as dlopen and all
+	 * of the perl core are in the same shared object.
+	 */
+	if (loadbind(0, (void *)dlopen, mp->entry) == -1) {
 		dlclose(mp);
 		errvalid++;
 		strcpy(errbuf, "loadbind: ");
@@ -524,52 +526,6 @@ static int readExports(ModulePtr mp)
 	while(ldclose(ldp) == FAILURE)
 		;
 	return 0;
-}
-
-/*
- * Find the main modules entry point. This is used as export pointer
- * for loadbind() to be able to resolve references to the main part.
- */
-static void * findMain(void)
-{
-	struct ld_info *lp;
-	char *buf;
-	int size = 4*1024;
-	int i;
-	void *ret;
-
-	if ((buf = safemalloc(size)) == NULL) {
-		errvalid++;
-		strcpy(errbuf, "findMain: ");
-		strerrorcat(errbuf, errno);
-		return NULL;
-	}
-	while ((i = loadquery(L_GETINFO, buf, size)) == -1 && errno == ENOMEM) {
-		safefree(buf);
-		size += 4*1024;
-		if ((buf = safemalloc(size)) == NULL) {
-			errvalid++;
-			strcpy(errbuf, "findMain: ");
-			strerrorcat(errbuf, errno);
-			return NULL;
-		}
-	}
-	if (i == -1) {
-		errvalid++;
-		strcpy(errbuf, "findMain: ");
-		strerrorcat(errbuf, errno);
-		safefree(buf);
-		return NULL;
-	}
-	/*
-	 * The first entry is the main module. The entry point
-	 * returned by load() does actually point to the data
-	 * segment origin.
-	 */
-	lp = (struct ld_info *)buf;
-	ret = lp->ldinfo_dataorg;
-	safefree(buf);
-	return ret;
 }
 
 /* dl_dlopen.xs

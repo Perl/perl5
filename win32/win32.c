@@ -1439,14 +1439,10 @@ win32_uname(struct utsname *name)
 	char *arch;
 	GetSystemInfo(&info);
 
-#ifdef __MINGW32__
-	switch (info.DUMMYUNIONNAME.DUMMYSTRUCTNAME.wProcessorArchitecture) {
-#else
-#ifdef __BORLANDC__
+#if defined(__BORLANDC__) || defined(__MINGW32__)
 	switch (info.u.s.wProcessorArchitecture) {
 #else
 	switch (info.wProcessorArchitecture) {
-#endif
 #endif
 	case PROCESSOR_ARCHITECTURE_INTEL:
 	    arch = "x86"; break;
@@ -2126,6 +2122,9 @@ win32_popen(const char *command, const char *mode)
 	win32_close(oldfd);
 
 	sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
+
+	/* set process id so that it can be returned by perl's open() */
+	PL_forkprocess = childpid;
     }
 
     /* we have an fd, return a file stream */

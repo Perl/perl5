@@ -232,20 +232,6 @@ for ($i = 0; $i < @optype - 1; $i++) {
     printf BYTERUN_H "    OPt_%s,\t\t/* %d */\n", $optype[$i], $i;
 }
 printf BYTERUN_H "    OPt_%s\t\t/* %d */\n};\n\n", $optype[$i], $i;
-print BYTERUN_H <<'EOT';
-EXT int PL_optype_size[]
-#ifdef DOINIT
-= {
-EOT
-for ($i = 0; $i < @optype - 1; $i++) {
-    printf BYTERUN_H "    sizeof(%s),\n", $optype[$i], $i;
-}
-printf BYTERUN_H "    sizeof(%s)\n}\n", $optype[$i], $i;
-print BYTERUN_H <<'EOT';
-#endif /* DOINIT */
-;
-
-EOT
 
 print BYTERUN_H <<'EOT';
 EXT void byterun(pTHXo_ struct bytestream bs);
