@@ -156,7 +156,6 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 
 
 #else
-#ifdef OLD_PTHREADS_API
 	{
 	  static pthread_attr_t attr;
 	  static int attr_inited = 0;
@@ -169,12 +168,12 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 #  ifdef PTHREAD_ATTR_SETDETACHSTATE
             PTHREAD_ATTR_SETDETACHSTATE(&attr, attr_joinable);
 #  endif
-
+#ifdef OLD_PTHREADS_API
 	  pthread_create( &thread->thr, attr, Perl_thread_run, (void *)thread);
-	}
 #else
-	pthread_create( &thread->thr, (pthread_attr_t*)NULL, Perl_thread_run, (void *)thread);
+	  pthread_create( &thread->thr, &attr, Perl_thread_run, (void *)thread);
 #endif
+	}
 #endif
 	MUTEX_UNLOCK(&create_mutex);	
 
