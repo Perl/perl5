@@ -135,85 +135,18 @@ sub _getcode {
     return;
 }
 
-sub han_charname {
-    my $arg  = shift;
-    my $code = _getcode($arg);
-    croak __PACKAGE__, "::han_charname: unknown code '$arg'"
-	unless defined $code;
-    croak __PACKAGE__, "::han_charname: outside CJK Unified Ideographs '$arg'"
-        unless 0x3400  <= $code && $code <= 0x4DB5  
-            || 0x4E00  <= $code && $code <= 0x9FA5  
-            || 0x20000 <= $code && $code <= 0x2A6D6;
-    sprintf "CJK UNIFIED IDEOGRAPH-%04X", $code;
+use Lingua::KO::Hangul::Util;
+
+sub hangul_decomp { # internal: called from charinfo
+  my @tmp = decomposeHangul(shift);
+  return
+    @tmp == 2 ? sprintf("%04X %04X",      @tmp) :
+    @tmp == 3 ? sprintf("%04X %04X %04X", @tmp) :
+      undef;
 }
 
-my @JamoL = ( # Leading Consonant (HANGUL CHOSEONG)
-    "G", "GG", "N", "D", "DD", "R", "M", "B", "BB",
-    "S", "SS", "", "J", "JJ", "C", "K", "T", "P", "H",
-  );
-
-my @JamoV = ( # Medium Vowel (HANGUL JUNGSEONG)
-    "A", "AE", "YA", "YAE", "EO", "E", "YEO", "YE", "O",
-    "WA", "WAE", "OE", "YO", "U", "WEO", "WE", "WI",
-    "YU", "EU", "YI", "I",
-  );
-
-my @JamoT = ( # Trailing Consonant (HANGUL JONGSEONG)
-    "", "G", "GG", "GS", "N", "NJ", "NH", "D", "L", "LG", "LM",
-    "LB", "LS", "LT", "LP", "LH", "M", "B", "BS",
-    "S", "SS", "NG", "J", "C", "K", "T", "P", "H",
-  );
-
-my %HangulConst = (
-   SBase  => 0xAC00,
-   LBase  => 0x1100,
-   VBase  => 0x1161,
-   TBase  => 0x11A7,
-   LCount => 19,     # scalar @JamoL
-   VCount => 21,     # scalar @JamoV
-   TCount => 28,     # scalar @JamoT
-   NCount => 588,    # VCount * TCount
-   SCount => 11172,  # LCount * NCount
-   Final  => 0xD7A3, # SBase -1 + SCount
-  );
-
-sub hangul_charname {
-    my $arg  = shift;
-    my $code = _getcode($arg);
-    croak __PACKAGE__, "::hangul_charname: unknown code '$arg'"
-	unless defined $code;
-    croak __PACKAGE__, "::hangul_charname: outside Hangul Syllables '$arg'"
-        unless $HangulConst{SBase} <= $code && $code <= $HangulConst{Final};
-    my $SIndex = $code - $HangulConst{SBase};
-    my $LIndex = int( $SIndex / $HangulConst{NCount});
-    my $VIndex = int(($SIndex % $HangulConst{NCount}) / $HangulConst{TCount});
-    my $TIndex =      $SIndex % $HangulConst{TCount};
-    return join('',
-        "HANGUL SYLLABLE ",
-        $JamoL[$LIndex],
-        $JamoV[$VIndex],
-        $JamoT[$TIndex],
-      );
-}
-
-sub hangul_decomp {
-    my $arg  = shift;
-    my $code = _getcode($arg);
-    croak __PACKAGE__, "::hangul_decomp: unknown code '$arg'"
-	unless defined $code;
-    croak __PACKAGE__, "::hangul_decomp: outside Hangul Syllables '$arg'"
-        unless $HangulConst{SBase} <= $code && $code <= $HangulConst{Final};
-    my $SIndex = $code - $HangulConst{SBase};
-    my $LIndex = int( $SIndex / $HangulConst{NCount});
-    my $VIndex = int(($SIndex % $HangulConst{NCount}) / $HangulConst{TCount});
-    my $TIndex =      $SIndex % $HangulConst{TCount};
-
-    return join(" ",
-        sprintf("%04X", $HangulConst{LBase} + $LIndex),
-        sprintf("%04X", $HangulConst{VBase} + $VIndex),
-      $TIndex ?
-        sprintf("%04X", $HangulConst{TBase} + $TIndex) : (),
-    );
+sub han_charname { # internal: called from charinfo
+    return sprintf("CJK UNIFIED IDEOGRAPH-%04X", shift);
 }
 
 my @CharinfoRanges = (
@@ -224,7 +157,7 @@ my @CharinfoRanges = (
 # CJK Ideographs
   [ 0x4E00,   0x9FA5,   \&han_charname,   undef  ],
 # Hangul Syllables
-  [ 0xAC00,   0xD7A3,   \&hangul_charname, \&hangul_decomp  ],
+  [ 0xAC00,   0xD7A3,   \&getHangulName,  \&hangul_decomp ],
 # Non-Private Use High Surrogates
   [ 0xD800,   0xDB7F,   undef,   undef  ],
 # Private Use High Surrogates
