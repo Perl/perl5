@@ -24,6 +24,7 @@ sub _mkdirs {
 BEGIN {
     if ($^O eq 'MacOS')
     {
+	$MacPerl::Architecture = $MacPerl::Architecture; # shhhhh
 	$blib = ":blib:";
 	$blib_lib = ":blib:lib:";
 	$blib_arch = ":blib:lib:$MacPerl::Architecture:";
