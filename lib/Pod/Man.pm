@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.0 2000/03/06 10:16:31 eagle Exp $
+# $Id: Man.pm,v 1.1 2000/03/16 22:00:36 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.00;
+$VERSION = 1.01;
 
 
 ############################################################################
@@ -669,11 +669,14 @@ sub cmd_back {
 # An individual list item.  Emit an index entry for anything that's
 # interesting, but don't emit index entries for things like bullets and
 # numbers.  rofficate bullets too while we're at it (so for nice output, use
-# * for your lists rather than o or . or - or some other thing).
+# * for your lists rather than o or . or - or some other thing).  Newlines
+# in an item title are turned into spaces since *roff can't handle them
+# embedded.
 sub cmd_item {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    s/\s*\n\s*/ /g;
     my $index;
     if (/\w/ && !/^\w[.\)]\s*$/) {
         $index = $_;

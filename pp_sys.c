@@ -1616,11 +1616,11 @@ PP(pp_send)
     bufsv = *++MARK;
     buffer = SvPV(bufsv, blen);
 #if Size_t_size > IVSIZE
-    length = SvNVx(*++MARK);
+    length = (Size_t)SvNVx(*++MARK);
 #else
-    length = SvIVx(*++MARK);
+    length = (Size_t)SvIVx(*++MARK);
 #endif
-    if ((Size_t)length < 0)
+    if ((SSize_t)length < 0)
 	DIE(aTHX_ "Negative length");
     SETERRNO(0,0);
     io = GvIO(gv);
