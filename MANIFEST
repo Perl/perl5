@@ -1167,7 +1167,10 @@ t/lib/filepath.t	See if File::Path works
 t/lib/filespec.t	See if File::Spec works
 t/lib/findbin.t		See if FindBin works
 t/lib/gdbm.t		See if GDBM_File works
-t/lib/getopt.t		See if Getopt::Std and Getopt::Long works
+t/lib/getopt.t		See if Getopt::Std and Getopt::Long work
+t/lib/gol-basic.t	See if Getopt::Long works
+t/lib/gol-compat.t	See if Getopt::Long works
+t/lib/gol-linkage.t	See if Getopt::Long works
 t/lib/h2ph.h		Test header file for h2ph
 t/lib/h2ph.pht		Generated output from h2ph.h by h2ph, for comparison
 t/lib/h2ph.t		See if h2ph works like it should

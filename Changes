@@ -79,6 +79,241 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4117] By: jhi                                   on 1999/09/09  18:24:30
+        Log: Remove ill-designed %B introduced by change #4111.
+     Branch: cfgperl
+	   ! sv.c t/op/sprintf.t
+____________________________________________________________________________
+[  4116] By: jhi                                   on 1999/09/09  15:56:52
+        Log: perldeltify change #4115.
+     Branch: cfgperl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  4115] By: jhi                                   on 1999/09/09  15:48:56
+        Log: From: "John L. Allen" <allen@grumman.com> 
+             To: perl5-porters@perl.org 
+             Subject: [ID 19990901.003] Time::Local should not croak on "out-of-range" days
+             Date: Wed, 1 Sep 1999 13:33:39 -0400 (EDT) 
+             Message-Id: <199909011733.NAA17356@gateway.grumman.com> 
+     Branch: cfgperl
+	   ! lib/Time/Local.pm
+____________________________________________________________________________
+[  4114] By: jhi                                   on 1999/09/09  15:42:30
+        Log: From: "Daniel S. Lewart" <lewart@www.cvm.uiuc.edu>
+             To: perl5-porters@perl.org
+             Subject: [ID 19990909.003] MAXINT redefined warning on HP-UX 10.20
+             Date: Thu, 9 Sep 1999 10:33:37 -0500 (CDT)
+             Message-Id: <199909091533.KAA01242@www.cvm.uiuc.edu>
+     Branch: cfgperl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  4113] By: jhi                                   on 1999/09/09  10:17:45
+        Log: From: paul.marquess@bt.com
+             To: gsar@ActiveState.com
+             Cc: perl5-porters@perl.org
+             Subject: [PATCH 5.005_61] DB_File 1.71
+             Date: Thu, 9 Sep 1999 11:20:13 +0100
+             Message-ID: <5104D4DBC598D211B5FE0000F8FE7EB202D49BBE@mbtlipnt02.btlabs.bt.co.uk>
+     Branch: cfgperl
+	   + ext/DB_File/version.c
+	   ! MANIFEST ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/Makefile.PL ext/DB_File/dbinfo ext/DB_File/typemap
+	   ! t/lib/db-btree.t
+____________________________________________________________________________
+[  4112] By: jhi                                   on 1999/09/09  09:05:32
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: perl5-porters@perl.org (Mailing list Perl5)
+             Subject: [PATCH 5.005_58] Fix interaction of (?p{}) and (?>)
+             Date: Thu, 9 Sep 1999 04:40:11 -0400 (EDT)
+             Message-Id: <199909090840.EAA26471@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[  4111] By: jhi                                   on 1999/09/09  07:50:07
+        Log: %#b in particular and %B in general were kaputt.
+     Branch: cfgperl
+	   ! sv.c t/op/sprintf.t
+____________________________________________________________________________
+[  4110] By: jhi                                   on 1999/09/09  07:29:17
+        Log: Tidy up 64-bit situation in perldelta.
+     Branch: cfgperl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  4109] By: jhi                                   on 1999/09/09  07:26:53
+        Log: Clear up PL_regcc issues.
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: perl5-porters@perl.org (Mailing list Perl5)
+             Subject: [PATCH 5.005_60] Another regexec.c unobfuscation
+             Date: Thu, 9 Sep 1999 02:49:49 -0400 (EDT)
+             Message-Id: <199909090649.CAA26119@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+	   ! regexec.c
+____________________________________________________________________________
+[  4108] By: gsar                                  on 1999/09/08  20:52:51
+        Log: avoid ass_u_ming uppercase types are not user objects (spotted
+             by Kurt Starsinic)
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.pm
+____________________________________________________________________________
+[  4107] By: gsar                                  on 1999/09/08  20:35:18
+        Log: From: akim@epita.fr (DEMAILLE Akim)
+             Date: Wed, 8 Sep 1999 18:18:44 +0200 (CEST)
+             Message-Id: <m11OkQm-003A4IC@beyrouth.lrde.epita.fr>
+             Subject: [ID 19990908.014] s2p does not quote @
+     Branch: perl
+	   ! x2p/s2p.PL
+____________________________________________________________________________
+[  4106] By: gsar                                  on 1999/09/08  20:25:12
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  !> (integrate 30 files)
+____________________________________________________________________________
+[  4105] By: jhi                                   on 1999/09/08  09:02:37
+        Log: Minor touches at the [:class:] description.
+     Branch: cfgperl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[  4104] By: jhi                                   on 1999/09/08  08:57:58
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: Mailing list Perl5 <perl5-porters@perl.org>
+             Subject: [PATCH 5.005_58] Fix debugging output for REx
+             Date: Wed, 8 Sep 1999 05:02:02 -0400
+             Message-ID: <19990908050201.A17682@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+	   ! regcomp.c
+____________________________________________________________________________
+[  4103] By: gsar                                  on 1999/09/08  00:53:50
+        Log: fix memory leak in C<sub f { split ' ', "a b" } f() while 1>
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  4102] By: gsar                                  on 1999/09/08  00:52:50
+        Log: fix memory leak in C<sub f { @_ = 1 } f() while 1>
+     Branch: perl
+	   ! cop.h pp_hot.c
+____________________________________________________________________________
+[  4101] By: gsar                                  on 1999/09/07  17:25:07
+        Log: various fixups for windows
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h op.c perlapi.c proto.h
+	   ! win32/Makefile win32/makefile.mk xsutils.c
+____________________________________________________________________________
+[  4100] By: jhi                                   on 1999/09/07  12:49:15
+        Log: Fix pointer casts.
+             
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             To: perl5-porters@perl.org
+             Subject: [ID 19990907.004] [PATCH perl5.005_61] compiler warnings with
+             -Duse64bits
+             Date: Tue, 7 Sep 1999 12:30:18 +0100 (BST)
+             Message-Id: <199909071130.MAA11435@tempest.npl.co.uk>
+     Branch: cfgperl
+	   ! doio.c dump.c ext/B/B.xs ext/B/typemap
+	   ! ext/ByteLoader/bytecode.h ext/Devel/DProf/DProf.xs
+	   ! ext/DynaLoader/dl_dlopen.xs ext/ODBM_File/ODBM_File.xs
+	   ! ext/POSIX/POSIX.xs lib/ExtUtils/typemap malloc.c perl.h pp.c
+	   ! pp_ctl.c pp_hot.c pp_sys.c sv.c
+____________________________________________________________________________
+[  4099] By: jhi                                   on 1999/09/07  10:29:04
+        Log: Add sig/pid/uid size and sign probes.
+     Branch: metaconfig
+	   + U/typedefs/gidsign.U U/typedefs/gidsize.U U/typedefs/pidsign.U
+	   + U/typedefs/pidsize.U U/typedefs/uidsign.U U/typedefs/uidsize.U
+____________________________________________________________________________
+[  4098] By: jhi                                   on 1999/09/07  10:27:06
+        Log: Band-aid until we've got %{Uid_t} or something similar
+             for sv_catpvfn().
+     Branch: cfgperl
+	   ! taint.c
+____________________________________________________________________________
+[  4097] By: jhi                                   on 1999/09/07  09:41:23
+        Log: Fix a printf thinko: now quads must have the ll L q prefix.
+             (in other words, a bare %d is an int/unsigned)
+     Branch: cfgperl
+	   ! pp_sys.c sv.c t/op/64bit.t
+____________________________________________________________________________
+[  4096] By: jhi                                   on 1999/09/07  07:36:17
+        Log: HP-UX 10.20 and gcc 2.8.1 break UINT32_MAX.
+             
+             From: "Daniel S. Lewart" <lewart@www.cvm.uiuc.edu>
+             To: perl5-porters@perl.org
+             Subject: [ID 19990906.007] Not OK: perl 5.00561 on PA-RISC1.1 10.20
+             Date: Mon, 6 Sep 1999 21:18:12 -0500 (CDT)
+             Message-Id: <199909070218.VAA29232@www.cvm.uiuc.edu>
+     Branch: cfgperl
+	   ! hints/hpux.sh perl.h
+____________________________________________________________________________
+[  4095] By: gsar                                  on 1999/09/06  20:47:02
+        Log: applied suggested patch with suitable test to detect MSVC
+             From: "Vishal Bhatia" <vishalb@my-deja.com>
+             Date: Wed, 11 Aug 1999 01:43:28 -0700
+             Message-ID: <GFCJELIOGEENAAAA@my-deja.com>
+             Subject: compiler on  win32
+     Branch: perl
+	   ! ext/B/B/C.pm
+____________________________________________________________________________
+[  4094] By: jhi                                   on 1999/09/06  20:34:44
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> ext/B/B/Bytecode.pm lib/Test/Harness.pm t/TEST t/UTEST
+	  !> t/harness t/pragma/sub_lval.t utils/Makefile utils/perlcc.PL
+____________________________________________________________________________
+[  4093] By: jhi                                   on 1999/09/06  20:33:43
+        Log: Fix UV_SIZEOF to UVSIZE; change the overflow tests
+             so that they overflow also on 64-bit platforms.
+     Branch: cfgperl
+	   ! t/pragma/warn/toke t/pragma/warn/util toke.c util.c
+____________________________________________________________________________
+[  4092] By: gsar                                  on 1999/09/06  20:16:58
+        Log: support bytecode and C backends in perlcc (patch suggested
+             by Tom Hughes <tom@compton.au>); s/-opt/-noopt/ and make the
+             C backend the default; describe new switches in pod; introduce
+             PERLCC_OPTS and s/COMPILE_TIMEOUT/PERLCC_TIMEOUT/;
+             s/COMPILE_TEST/HARNESS_COMPILE_TEST/; document these %ENV
+             entries
+     Branch: perl
+	   ! ext/B/B/Bytecode.pm lib/Test/Harness.pm t/TEST t/UTEST
+	   ! t/harness utils/Makefile utils/perlcc.PL
+____________________________________________________________________________
+[  4091] By: jhi                                   on 1999/09/06  19:10:41
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> t/pragma/sub_lval.t
+	  !> (integrate 52 files)
+____________________________________________________________________________
+[  4090] By: gsar                                  on 1999/09/06  19:09:06
+        Log: propagate changed error text
+     Branch: perl
+	   ! t/pragma/sub_lval.t
+____________________________________________________________________________
+[  4089] By: gsar                                  on 1999/09/06  18:54:43
+        Log: sprintf doc tweak (from Ian Phillipps <ian@dial.pipex.com>)
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4088] By: gsar                                  on 1999/09/06  18:52:10
+        Log: From: paul.marquess@bt.com
+             Date: Sun, 5 Sep 1999 15:11:08 +0100 
+             Message-ID: <5104D4DBC598D211B5FE0000F8FE7EB202D49BAB@mbtlipnt02.btlabs.bt.co.uk>
+             Subject: [PATCH 5.005_61] Another patch for Lexical Warnings
+     Branch: perl
+	   ! pp_sys.c t/pragma/warn/doio t/pragma/warn/op
+	   ! t/pragma/warn/pp_hot t/pragma/warn/pp_sys
+	   ! t/pragma/warn/regcomp t/pragma/warn/sv t/pragma/warn/toke
+	   ! t/pragma/warn/universal t/pragma/warn/utf8 t/pragma/warn/util
+	   ! toke.c
+____________________________________________________________________________
+[  4087] By: gsar                                  on 1999/09/06  18:06:06
+        Log: change#3612 is buggy when quotemeta argument matches target
+             (hope this is the last of the optimized-OP_SASSIGN bugs)
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 5 Sep 1999 06:07:42 -0400 (EDT)
+             Message-Id: <199909051007.GAA06423@monk.mps.ohio-state.edu>
+             Subject: Re: [BUG: quotemeta]
+     Branch: perl
+	   ! Changes op.c t/op/lex_assign.t
+____________________________________________________________________________
 [  4086] By: gsar                                  on 1999/09/06  17:57:52
         Log: misc tweaks
      Branch: perl
