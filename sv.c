@@ -8872,7 +8872,7 @@ S_gv_share(pTHX_ SV *sstr)
     }
     else {
         /* CvPADLISTs cannot be shared */
-        if (!CvXSUB(GvCV(gv))) {
+        if (!SvREADONLY(GvCV(gv)) && !CvXSUB(GvCV(gv))) {
             GvUNIQUE_off(gv);
         }
     }
@@ -9056,6 +9056,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
             if ((share = gv_share(sstr))) {
                 del_SV(dstr);
                 dstr = share;
+                ptr_table_store(PL_ptr_table, sstr, dstr);
 #if 0
                 PerlIO_printf(Perl_debug_log, "sv_dup: sharing %s::%s\n",
                               HvNAME(GvSTASH(share)), GvNAME(share));
