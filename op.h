@@ -236,7 +236,7 @@ struct pmop {
     OP *	op_pmreplstart;
     PMOP *	op_pmnext;		/* list of all scanpats */
 #ifdef USE_ITHREADS
-    I32         op_pmoffset;
+    IV          op_pmoffset;
 #else
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
