@@ -104,6 +104,8 @@ here and in commands:
     X<index>	An index entry
     Z<>         A zero-width character
 
+=back
+
 That's it.  The intent is simplicity, not power.  I wanted paragraphs
 to look like paragraphs (block format), so that they stand out
 visually, and so that I could run them through fmt easily to reformat
