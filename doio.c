@@ -417,8 +417,8 @@ nextargv(register GV *gv)
     int filedev;
     int fileino;
 #endif
-    int fileuid;
-    int filegid;
+    Uid_t fileuid;
+    Gid_t filegid;
 
     if (!PL_argvoutgv)
 	PL_argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
