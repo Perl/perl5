@@ -8,7 +8,10 @@ BEGIN {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
+    # Makes testing easier.
+    $ENV{PERLIO} = 'stdio' if exists $ENV{PERLIO} && $ENV{PERLIO} eq '';
     if (exists $ENV{PERLIO} && $ENV{PERLIO} !~ /^(stdio|perlio|mmap)$/) {
+	# We are not prepared for anything else.
 	print "1..0 # PERLIO='$ENV{PERLIO}' unknown\n";
 	exit 0;
     }
@@ -27,6 +30,16 @@ SKIP: {
 
     sub check {
 	my ($result, $expected, $id) = @_;
+	# An interesting dance follows where we try to make the following
+	# IO layer stack setups to compare equal:
+	#
+	# PERLIO     UNIX-like       DOS-like
+	#
+	# none or "" stdio           unix crlf
+	# stdio      stdio           stdio
+	# perlio     unix perlio     unix perlio
+	# mmap       unix mmap       unix mmap
+	#
 	if ($NONSTDIO) {
 	    # Get rid of "unix".
 	    shift @$result if $result->[0] eq "unix";

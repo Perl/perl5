@@ -224,6 +224,8 @@ This can be used to see the effect of/bugs in the various layers e.g.
   PERLIO=stdio  ./perl harness
   PERLIO=perlio ./perl harness
 
+For the various value of PERLIO see L<perlrun/PERLIO>.
+
 =head2 Querying the layers of filehandle
 
 The following returns the B<names> of the PerlIO layers on a filehandle.
@@ -236,20 +238,15 @@ C<perlio>.  Under C<stdio> the platform specific low-level I/O (like
 C<unix>) is not part of the stack, but under C<perlio> (and the
 experimental C<mmap>) it is.
 
-In platforms of DOS progeny (Win32 being the most prominent) the
-lowest level layers are C<unix crlf>, meaning that Perl first uses the
-UNIX-style low-level fd layer, and then on top of that a layer that
-handles the CRLF translation.
-
 The following table summarizes the default layers on UNIX-like and
 DOS-like platforms and depending on the setting of the C<$ENV{PERLIO}>:
 
- PERLIO   UNIX-like       DOS-like
+ PERLIO     UNIX-like       DOS-like
  
- none     stdio           unix crlf
- stdio    stdio           stdio
- perlio   unix perlio     unix perlio
- mmap     unix mmap       unix mmap
+ none or "" stdio           unix crlf
+ stdio      stdio           stdio
+ perlio     unix perlio     unix perlio
+ mmap       unix mmap       unix mmap
 
 By default the layers from the input side of the filehandle is
 returned, to get the output side use the optional C<output> argument:
