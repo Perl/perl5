@@ -29,6 +29,16 @@ sub ok {
     print "${not}ok " . ($Base + $offset) . " - $text\n";
 }
 
+# The two skips later on in these tests refer to this quote from the
+# pod/perl583delta.pod:
+#
+# =head1 Platform Specific Problems
+# 
+# The regression test ext/threads/shared/t/wait.t fails on early RedHat 9
+# and HP-UX 10.20 due to bugs in their threading implementations.
+# RedHat users should see https://rhn.redhat.com/errata/RHBA-2003-136.html
+# and consider upgrading their glibc.
+
 sub forko (&$$); # To prevent deadlock from underlying pthread_* bugs (as in
                  # stock RH9 glibc/NPTL) or from our own errors, we run tests
                  # in separately forked and alarmed processes.
@@ -195,16 +205,23 @@ SYNC_SHARED: {
   sub ctw_fail {
     my $to = shift;
 
-    $test =~ /twain/ ? lock($lock) : lock($cond);
-    ok(1,1, "$test: obtained initial lock");
-    my $ok;
-    for ($test) {
-      $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
-      $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
-      $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-      die "$test: unknown test\n"; 
+    if ($^O eq "hpux" && $Config{osvers} <= 10.20) {
+      # The lock obtaining would pass, but the wait will not.
+      ok(1,1, "$test: obtained initial lock");
+      ok(2,0, "# SKIP see perl583delta");
     }
-    ok(2,!defined($ok), "$test: timeout");
+    else {
+      $test =~ /twain/ ? lock($lock) : lock($cond);
+      ok(1,1, "$test: obtained initial lock");
+      my $ok;
+      for ($test) {
+	$ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
+	$ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
+	$ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
+	die "$test: unknown test\n"; 
+      }
+      ok(2,!defined($ok), "$test: timeout");
+    }
   }
 
 } # -- SYNCH_SHARED block
@@ -322,16 +339,23 @@ SYNCH_REFS: {
   sub ctw_fail2 {
     my $to = shift;
 
-    $test =~ /twain/ ? lock($lock) : lock($cond);
-    ok(1,1, "$test: obtained initial lock");
-    my $ok;
-    for ($test) {
-      $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
-      $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
-      $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-      die "$test: unknown test\n"; 
+    if ($^O eq "hpux" && $Config{osvers} <= 10.20) {
+      # The lock obtaining would pass, but the wait will not.
+      ok(1,1, "$test: obtained initial lock");
+      ok(2,0, "# SKIP see perl583delta");
+      }
+    else {
+      $test =~ /twain/ ? lock($lock) : lock($cond);
+      ok(1,1, "$test: obtained initial lock");
+      my $ok;
+      for ($test) {
+	$ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
+	$ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
+	$ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
+	die "$test: unknown test\n"; 
+      }
+      ok(2,!$ok, "$test: timeout");
     }
-    ok(2,!$ok, "$test: timeout");
   }
 
 } # -- SYNCH_REFS block
