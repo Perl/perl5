@@ -119,7 +119,7 @@ user's I<wanted()> function are still tainted.
 
 See above. This should be set using the C<qr> quoting operator.
 The default is set to  C<qr|^([-+@\w./]+)$|>. 
-Note that the parantheses which are vital.
+Note that the parantheses are vital.
 
 =item C<untaint_skip>
 
