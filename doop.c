@@ -1008,6 +1008,8 @@ Perl_do_chomp(pTHX_ register SV *sv)
     STRLEN len;
     STRLEN n_a;
     char *s;
+    char *temp_buffer = NULL;
+    SV* svrecode = Nullsv;
 
     if (RsSNARF(PL_rs))
 	return 0;
@@ -1043,6 +1045,18 @@ Perl_do_chomp(pTHX_ register SV *sv)
         if (SvREADONLY(sv))
             Perl_croak(aTHX_ PL_no_modify);
     }
+
+    if (PL_encoding) {
+	if (!SvUTF8(sv)) {
+	/* XXX, here sv is utf8-ized as a side-effect!
+	   If encoding.pm is used properly, almost string-generating
+	   operations, including literal strings, chr(), input data, etc.
+	   should have been utf8-ized already, right?
+	*/
+	    sv_recode_to_utf8(sv, PL_encoding);
+	}
+    }
+
     s = SvPV(sv, len);
     if (s && len) {
 	s += --len;
@@ -1057,8 +1071,43 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	    }
 	}
 	else {
-	    STRLEN rslen;
+	    STRLEN rslen, rs_charlen;
 	    char *rsptr = SvPV(PL_rs, rslen);
+
+	    rs_charlen = SvUTF8(PL_rs)
+		? sv_len_utf8(PL_rs)
+		: rslen;
+
+	    if (SvUTF8(PL_rs) != SvUTF8(sv)) {
+		/* Assumption is that rs is shorter than the scalar.  */
+		if (SvUTF8(PL_rs)) {
+		    /* RS is utf8, scalar is 8 bit.  */
+		    bool is_utf8 = TRUE;
+		    temp_buffer = (char*)bytes_from_utf8((U8*)rsptr,
+							 &rslen, &is_utf8);
+		    if (is_utf8) {
+			/* Cannot downgrade, therefore cannot possibly match
+			 */
+			assert (temp_buffer == rsptr);
+			temp_buffer = NULL;
+			goto nope;
+		    }
+		    rsptr = temp_buffer;
+		}
+		else if (PL_encoding) {
+		    /* RS is 8 bit, encoding.pm is used.
+		     * Do not recode PL_rs as a side-effect. */
+		   svrecode = newSVpvn(rsptr, rslen);
+		   sv_recode_to_utf8(svrecode, PL_encoding);
+		   rsptr = SvPV(svrecode, rslen);
+		   rs_charlen = sv_len_utf8(svrecode);
+		}
+		else {
+		    /* RS is 8 bit, scalar is utf8.  */
+		    temp_buffer = (char*)bytes_to_utf8((U8*)rsptr, &rslen);
+		    rsptr = temp_buffer;
+		}
+	    }
 	    if (rslen == 1) {
 		if (*s != *rsptr)
 		    goto nope;
@@ -1071,7 +1120,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 		s -= rslen - 1;
 		if (memNE(s, rsptr, rslen))
 		    goto nope;
-		count += rslen;
+		count += rs_charlen;
 	    }
 	}
 	s = SvPV_force(sv, n_a);
@@ -1081,6 +1130,11 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	SvSETMAGIC(sv);
     }
   nope:
+
+    if (svrecode)
+	 SvREFCNT_dec(svrecode);
+
+    Safefree(temp_buffer);
     return count;
 }
 

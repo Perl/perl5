@@ -2406,6 +2406,7 @@ PP(pp_complement)
 	      *result = '\0';
 	      result -= nchar;
 	      sv_setpvn(TARG, (char*)result, nchar);
+	      SvUTF8_off(TARG);
 	  }
 	  Safefree(result);
 	  SETs(TARG);
