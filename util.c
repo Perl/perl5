@@ -2134,7 +2134,7 @@ wait4pid(int pid, int *statusp, int flags)
     if (!HAS_WAITPID_RUNTIME)
 	goto hard_way;
 #  endif
-    return waitpid(pid,statusp,flags);
+    return PerlProc_waitpid(pid,statusp,flags);
 #endif
 #if !defined(HAS_WAITPID) && defined(HAS_WAIT4)
     return wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));

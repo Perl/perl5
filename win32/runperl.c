@@ -582,7 +582,7 @@ public:
     };
     virtual int Kill(int pid, int sig)
     {
-	return kill(pid, sig);
+	return win32_kill(pid, sig);
     };
     virtual int Killpg(int pid, int sig)
     {
@@ -626,6 +626,10 @@ public:
     virtual int Wait(int *status)
     {
 	return win32_wait(status);
+    };
+    virtual int Waitpid(int pid, int *status, int flags)
+    {
+	return win32_waitpid(pid, status, flags);
     };
     virtual Sighandler_t Signal(int sig, Sighandler_t subcode)
     {

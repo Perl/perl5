@@ -788,7 +788,7 @@
  *	This symbol, if defined, indicates that the waitpid routine is
  *	available to wait for child process.
  */
-/*#define HAS_WAITPID	/**/
+#define HAS_WAITPID	/**/
 
 /* HAS_WCSTOMBS:
  *	This symbol, if defined, indicates that the wcstombs routine is
@@ -1615,12 +1615,6 @@
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE 8		/**/
 #endif
-
-/* HAS_MKSTEMP:
- *	This symbol, if defined, indicates that the mkstemp routine is
- *	available to create and open a unique temporary file.
- */
-/*#define HAS_MKSTEMP		/**/
 
 /* HAS_SETGROUPS:
  *	This symbol, if defined, indicates that the setgroups() routine is

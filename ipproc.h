@@ -40,6 +40,7 @@ public:
     virtual int Sleep(unsigned int) = 0;
     virtual int Times(struct tms *timebuf) = 0;
     virtual int Wait(int *status) = 0;
+    virtual int Waitpid(int pid, int *status, int flags) = 0;
     virtual Sighandler_t Signal(int sig, Sighandler_t subcode) = 0;
 #ifdef WIN32
     virtual void GetSysMsg(char*& msg, DWORD& dwLen, DWORD dwErr) = 0;

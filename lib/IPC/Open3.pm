@@ -10,7 +10,7 @@ require Exporter;
 use Carp;
 use Symbol 'qualify';
 
-$VERSION	= 1.0101;
+$VERSION	= 1.0102;
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open3);
 
@@ -66,6 +66,7 @@ C<cat -v> and continually read and write a line from it.
 # &open3: Marc Horowitz <marc@mit.edu>
 # derived mostly from &open2 by tom christiansen, <tchrist@convex.com>
 # fixed for 5.001 by Ulrich Kunitz <kunitz@mai-koeln.com>
+# ported to Win32 by Ron Schmidt, Merrill Lynch almost ended my career
 #
 # $Id: open3.pl,v 1.1 1993/11/23 06:26:15 marc Exp $
 #
@@ -119,7 +120,7 @@ sub xclose {
     close $_[0] or croak "$Me: close($_[0]) failed: $!";
 }
 
-my $do_spawn = $^O eq 'os2';
+my $do_spawn = $^O eq 'os2' || $^O eq 'MSWin32';
 
 sub _open3 {
     local $Me = shift;
@@ -267,10 +268,12 @@ sub spawn_with_handles {
 	$fd->{handle}->fdopen($saved{fileno $fd->{open_as}} || $fd->{open_as},
 			      $fd->{mode});
     }
-    # Stderr may be redirected below, so we save the err text:
-    foreach $fd (@$close_in_child) {
-	fcntl($fd, Fcntl::F_SETFD(), 1) or push @errs, "fcntl $fd: $!"
-	    unless $saved{fileno $fd};	# Do not close what we redirect!
+    unless ($^O eq 'MSWin32') {
+	# Stderr may be redirected below, so we save the err text:
+	foreach $fd (@$close_in_child) {
+	    fcntl($fd, Fcntl::F_SETFD(), 1) or push @errs, "fcntl $fd: $!"
+		unless $saved{fileno $fd}; # Do not close what we redirect!
+	}
     }
 
     unless (@errs) {

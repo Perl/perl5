@@ -111,6 +111,7 @@ static BOOL		has_redirection(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
 static char *		get_emd_part(char *leading, char *trailing, ...);
+static void		remove_dead_process(HANDLE deceased);
 
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 static DWORD	w32_platform = (DWORD)-1;
@@ -840,10 +841,30 @@ chown(const char *path, uid_t owner, gid_t group)
     return 0;
 }
 
-int
-kill(int pid, int sig)
+static void
+remove_dead_process(HANDLE deceased)
 {
+#ifndef USE_RTL_WAIT
+    int child;
+    for (child = 0 ; child < w32_num_children ; ++child) {
+	if (w32_child_pids[child] == deceased) {
+	    Copy(&w32_child_pids[child+1], &w32_child_pids[child],
+		 (w32_num_children-child-1), HANDLE);
+	    w32_num_children--;
+	    break;
+	}
+    }
+#endif
+}
+
+DllExport int
+win32_kill(int pid, int sig)
+{
+#ifdef USE_RTL_WAIT
     HANDLE hProcess= OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
+#else
+    HANDLE hProcess = (HANDLE) pid;
+#endif
 
     if (hProcess == NULL) {
 	croak("kill process failed!\n");
@@ -852,6 +873,10 @@ kill(int pid, int sig)
 	if (!TerminateProcess(hProcess, sig))
 	    croak("kill process failed!\n");
 	CloseHandle(hProcess);
+
+	/* WaitForMultipleObjects() on a pid that was killed returns error
+	 * so if we know the pid is gone we remove it from process list */
+	remove_dead_process(hProcess);
     }
     return 0;
 }
@@ -1047,6 +1072,24 @@ win32_utime(const char *filename, struct utimbuf *times)
 
     CloseHandle(handle);
     return rc;
+}
+
+DllExport int
+win32_waitpid(int pid, int *status, int flags)
+{
+    int rc;
+    if (pid == -1) 
+      return win32_wait(status);
+    else {
+      rc = cwait(status, pid, WAIT_CHILD);
+    /* cwait() returns differently on Borland */
+#ifdef __BORLANDC__
+    if (status)
+	*status =  (((*status >> 8) & 0xff) | ((*status << 8) & 0xff00));
+#endif
+      remove_dead_process((HANDLE)pid);
+    }
+    return rc >= 0 ? pid : rc;                
 }
 
 DllExport int
@@ -1666,10 +1709,6 @@ win32_pclose(FILE *pf)
     return _pclose(pf);
 #else
 
-#ifndef USE_RTL_WAIT
-    int child;
-#endif
-
     int childpid, status;
     SV *sv;
 
@@ -1687,16 +1726,7 @@ win32_pclose(FILE *pf)
     win32_fclose(pf);
     SvIVX(sv) = 0;
 
-#ifndef USE_RTL_WAIT
-    for (child = 0 ; child < w32_num_children ; ++child) {
-	if (w32_child_pids[child] == (HANDLE)childpid) {
-	    Copy(&w32_child_pids[child+1], &w32_child_pids[child],
-		 (w32_num_children-child-1), HANDLE);
-	    w32_num_children--;
-	    break;
-	}
-    }
-#endif
+    remove_dead_process((HANDLE)childpid);
 
     /* wait for the child */
     if (cwait(&status, childpid, WAIT_CHILD) == -1)
