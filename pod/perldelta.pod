@@ -158,7 +158,7 @@ strings.  See L<perlfunc/"pack">.
 
 =head2 pack() format modifier '_' supported
 
-The new format type modifer '_' is useful for packing and unpacking
+The new format type modifer '!' is useful for packing and unpacking
 native shorts, ints, and longs.  See L<perlfunc/"pack">.
 
 =head2 $^X variables may now have names longer than one character
