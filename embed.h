@@ -1094,8 +1094,10 @@
 #define ao			S_ao
 #define depcom			S_depcom
 #define incl_perldb		S_incl_perldb
+#if 0
 #define utf16_textfilter	S_utf16_textfilter
 #define utf16rev_textfilter	S_utf16rev_textfilter
+#endif
 #  if defined(CRIPPLED_CC)
 #define uni			S_uni
 #  endif
@@ -2521,8 +2523,10 @@
 #define ao(a)			S_ao(aTHX_ a)
 #define depcom()		S_depcom(aTHX)
 #define incl_perldb()		S_incl_perldb(aTHX)
+#if 0
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
 #define utf16rev_textfilter(a,b,c)	S_utf16rev_textfilter(aTHX_ a,b,c)
+#endif
 #  if defined(CRIPPLED_CC)
 #define uni(a,b)		S_uni(aTHX_ a,b)
 #  endif
@@ -4904,10 +4908,12 @@
 #define depcom			S_depcom
 #define S_incl_perldb		CPerlObj::S_incl_perldb
 #define incl_perldb		S_incl_perldb
+#if 0
 #define S_utf16_textfilter	CPerlObj::S_utf16_textfilter
 #define utf16_textfilter	S_utf16_textfilter
 #define S_utf16rev_textfilter	CPerlObj::S_utf16rev_textfilter
 #define utf16rev_textfilter	S_utf16rev_textfilter
+#endif
 #  if defined(CRIPPLED_CC)
 #define S_uni			CPerlObj::S_uni
 #define uni			S_uni

@@ -1217,8 +1217,10 @@ STATIC SV*	S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV
 STATIC int	S_ao(pTHX_ int toketype);
 STATIC void	S_depcom(pTHX);
 STATIC char*	S_incl_perldb(pTHX);
+#if 0
 STATIC I32	S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 STATIC I32	S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
+#endif
 #  if defined(CRIPPLED_CC)
 STATIC int	S_uni(pTHX_ I32 f, char *s);
 #  endif

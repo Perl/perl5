@@ -298,8 +298,6 @@ STATIC void
 S_cl_and(pTHX_ struct regnode_charclass_class *cl,
 	 struct regnode_charclass_class *and_with)
 {
-    int value;
-
     if (!(and_with->flags & ANYOF_CLASS)
 	&& !(cl->flags & ANYOF_CLASS)
 	&& (and_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
@@ -323,8 +321,6 @@ S_cl_and(pTHX_ struct regnode_charclass_class *cl,
 STATIC void
 S_cl_or(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with)
 {
-    int value;
-
     if (or_with->flags & ANYOF_INVERT) {
 	/* We do not use
 	 * (B1 | CL1) | (!B2 & !CL2) = (B1 | !B2 & !CL2) | (CL1 | (!B2 & !CL2))
@@ -602,7 +598,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    && !ANYOF_BITMAP_TEST(data->start_class, *STRING(scan))
 		    && (!(data->start_class->flags & ANYOF_FOLD)
 			|| !ANYOF_BITMAP_TEST(data->start_class,
-					      PL_fold[*STRING(scan)])))
+					      PL_fold[*(U8*)STRING(scan)])))
 		    compat = 0;
 		ANYOF_CLASS_ZERO(data->start_class);
 		ANYOF_BITMAP_ZERO(data->start_class);
@@ -644,7 +640,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		if (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE)) 
 		    && !ANYOF_BITMAP_TEST(data->start_class, *STRING(scan))
 		    && !ANYOF_BITMAP_TEST(data->start_class, 
-					  PL_fold[*STRING(scan)]))
+					  PL_fold[*(U8*)STRING(scan)]))
 		    compat = 0;
 		ANYOF_CLASS_ZERO(data->start_class);
 		ANYOF_BITMAP_ZERO(data->start_class);
@@ -771,9 +767,9 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    Perl_warner(aTHX_ WARN_REGEXP,
 				"Strange *+?{} on zero-length expression");
 		min += minnext * mincount;
-		is_inf_internal |= (maxcount == REG_INFTY 
-				    && (minnext + deltanext) > 0
-				   || deltanext == I32_MAX);
+		is_inf_internal |= ((maxcount == REG_INFTY 
+				     && (minnext + deltanext) > 0)
+				    || deltanext == I32_MAX);
 		is_inf |= is_inf_internal;
 		delta += (minnext + deltanext) * maxcount - minnext * mincount;
 
@@ -1326,9 +1322,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     dTHR;
     register regexp *r;
     regnode *scan;
-    SV **longest;
-    SV *longest_fixed;
-    SV *longest_float;
     regnode *first;
     I32 flags;
     I32 minlen = 0;
@@ -2874,7 +2867,6 @@ S_regclass(pTHX)
     register I32 lastvalue = OOB_CHAR8;
     register I32 range = 0;
     register regnode *ret;
-    register I32 def;
     I32 numlen;
     I32 namedclass;
     char *rangebegin;
@@ -3704,7 +3696,6 @@ S_regtail(pTHX_ regnode *p, regnode *val)
     dTHR;
     register regnode *scan;
     register regnode *temp;
-    register I32 offset;
 
     if (SIZE_ONLY)
 	return;
@@ -3773,7 +3764,7 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 {
 #ifdef DEBUGGING
     register U8 op = EXACT;	/* Arbitrary non-END op. */
-    register regnode *next, *onode;
+    register regnode *next;
 
     while (op != END && (!last || node < last)) {
 	/* While that wasn't END last time... */

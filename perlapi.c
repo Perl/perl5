@@ -3909,6 +3909,8 @@ Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+#if 0
+#endif
 #  if defined(CRIPPLED_CC)
 #  endif
 #  if defined(PERL_CR_FILTER)

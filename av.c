@@ -60,7 +60,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 {
     dTHR;			/* only necessary if we have to extend stack */
     MAGIC *mg;
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;
 	ENTER;
 	SAVETMPS;
@@ -241,8 +241,6 @@ SV**
 Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 {
     SV** ary;
-    U32  fill;
-
 
     if (!av)
 	return 0;
@@ -419,7 +417,7 @@ Perl_av_clear(pTHX_ register AV *av)
 	    ary[key] = &PL_sv_undef;
 	}
     }
-    if (key = AvARRAY(av) - AvALLOC(av)) {
+    if ((key = AvARRAY(av) - AvALLOC(av))) {
 	AvMAX(av) += key;
 	SvPVX(av) = (char*)AvALLOC(av);
     }
@@ -481,7 +479,7 @@ Perl_av_push(pTHX_ register AV *av, SV *val)
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
 
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
@@ -517,7 +515,7 @@ Perl_av_pop(pTHX_ register AV *av)
 	return &PL_sv_undef;
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;    
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
@@ -562,7 +560,7 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
 
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
@@ -621,7 +619,7 @@ Perl_av_shift(pTHX_ register AV *av)
 	return &PL_sv_undef;
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
@@ -671,7 +669,7 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
 	Perl_croak(aTHX_ "panic: null array");
     if (fill < 0)
 	fill = -1;
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;            
 	ENTER;
 	SAVETMPS;

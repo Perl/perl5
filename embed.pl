@@ -2453,8 +2453,10 @@ s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
 s	|int	|ao		|int toketype
 s	|void	|depcom
 s	|char*	|incl_perldb
+#if 0
 s	|I32	|utf16_textfilter|int idx|SV *sv|int maxlen
 s	|I32	|utf16rev_textfilter|int idx|SV *sv|int maxlen
+#endif
 #  if defined(CRIPPLED_CC)
 s	|int	|uni		|I32 f|char *s
 #  endif

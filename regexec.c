@@ -1274,10 +1274,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     register char *s;
     register regnode *c;
     register char *startpos = stringarg;
-    register I32 tmp;
     I32 minlen;		/* must match at least this many chars */
     I32 dontbother = 0;	/* how many characters not to try at end */
-    I32 start_shift = 0;		/* Offset of the start to find
+    /* I32 start_shift = 0; */		/* Offset of the start to find
 					 constant substr. */		/* CC */
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
     I32 scream_pos = -1;		/* Internal iterator of scream. */
@@ -1466,7 +1465,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    prog->anchored_substr ? prog->anchored_offset : prog->float_max_offset;
 	I32 back_min = 
 	    prog->anchored_substr ? prog->anchored_offset : prog->float_min_offset;
-	I32 delta = back_max - back_min;
 	char *last = HOPc(strend,	/* Cannot start after this */
 			  -(I32)(CHR_SVLEN(must)
 				 - (SvTAIL(must) != 0) + back_min));
@@ -1516,7 +1514,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	}
 	goto phooey;
     }
-    else if (c = prog->regstclass) {
+    else if ((c = prog->regstclass)) {
 	if (minlen && PL_regkind[(U8)OP(prog->regstclass)] != EXACT)
 	    /* don't bother with what can't match */
 	    strend = HOPc(strend, -(minlen - 1));
@@ -1527,7 +1525,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	dontbother = 0;
 	if (prog->float_substr != Nullsv) {	/* Trim the end. */
 	    char *last;
-	    I32 oldpos = scream_pos;
 
 	    if (flags & REXEC_SCREAM) {
 		last = screaminstr(sv, prog->float_substr, s - strbeg,
@@ -1894,12 +1891,12 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (!nextchr && locinput >= PL_regeol || nextchr == '\n')
+	    if ((!nextchr && locinput >= PL_regeol) || nextchr == '\n')
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case REG_ANY:
-	    if (!nextchr && locinput >= PL_regeol || nextchr == '\n')
+	    if ((!nextchr && locinput >= PL_regeol) || nextchr == '\n')
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
@@ -2765,7 +2762,7 @@ S_regmatch(pTHX_ regnode *prog)
 			*PL_reglastparen = n;
 			scan = next;
 			/*SUPPRESS 560*/
-			if (n = (c1 == BRANCH ? NEXT_OFF(next) : ARG(next)))
+			if ((n = (c1 == BRANCH ? NEXT_OFF(next) : ARG(next))))
 			    next += n;
 			else
 			    next = NULL;
@@ -3609,7 +3606,6 @@ S_reginclassutf8(pTHX_ regnode *f, U8 *p)
     if (swash_fetch(sv, p))
 	match = TRUE;
     else if (flags & ANYOF_FOLD) {
-	I32 cf;
 	U8 tmpbuf[UTF8_MAXLEN];
 	if (flags & ANYOF_LOCALE) {
 	    PL_reg_flags |= RF_tainted;

@@ -79,7 +79,6 @@ PERL_SI *
 Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
 {
     PERL_SI *si;
-    PERL_CONTEXT *cxt;
     New(56, si, 1, PERL_SI);
     si->si_stack = newAV();
     AvREAL_off(si->si_stack);

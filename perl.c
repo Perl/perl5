@@ -243,7 +243,7 @@ perl_construct(pTHXx)
     {
 	U8 *s;
 	PL_patchlevel = NEWSV(0,4);
-	SvUPGRADE(PL_patchlevel, SVt_PVNV);
+	(void)SvUPGRADE(PL_patchlevel, SVt_PVNV);
 	if (PERL_REVISION > 127 || PERL_VERSION > 127 || PERL_SUBVERSION > 127)
 	    SvGROW(PL_patchlevel, UTF8_MAXLEN*3+1);
 	s = (U8*)SvPVX(PL_patchlevel);
@@ -373,7 +373,7 @@ perl_destruct(pTHXx)
 #ifdef DEBUGGING
     {
 	char *s;
-	if (s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL")) {
+	if ((s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL"))) {
 	    int i = atoi(s);
 	    if (destruct_level < i)
 		destruct_level = i;
@@ -729,7 +729,7 @@ perl_destruct(pTHXx)
 	    }
 	}
 	/* we know that type >= SVt_PV */
-	SvOOK_off(PL_mess_sv);
+	(void)SvOOK_off(PL_mess_sv);
 	Safefree(SvPVX(PL_mess_sv));
 	Safefree(SvANY(PL_mess_sv));
 	Safefree(PL_mess_sv);
@@ -935,7 +935,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'W':
 	case 'X':
 	case 'w':
-	    if (s = moreswitches(s))
+	    if ((s = moreswitches(s)))
 		goto reswitch;
 	    break;
 
@@ -1905,7 +1905,7 @@ Perl_magicname(pTHX_ char *sym, char *name, I32 namlen)
 {
     register GV *gv;
 
-    if (gv = gv_fetchpv(sym,TRUE, SVt_PV))
+    if ((gv = gv_fetchpv(sym,TRUE, SVt_PV)))
 	sv_magic(GvSV(gv), (SV*)gv, 0, name, namlen);
 }
 
@@ -2414,7 +2414,6 @@ STATIC void
 S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 {
     dTHR;
-    register char *s;
 
     *fdscript = -1;
 
@@ -2666,7 +2665,9 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 STATIC void
 S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 {
+#ifdef IAMSUID
     int which;
+#endif
 
     /* do we need to emulate setuid on scripts? */
 
@@ -2933,7 +2934,8 @@ S_find_beginning(pTHX)
 		while (isDIGIT(s2[-1]) || strchr("-._", s2[-1])) s2--;
 		if (strnEQ(s2-4,"perl",4))
 		    /*SUPPRESS 530*/
-		    while (s = moreswitches(s)) ;
+		    while ((s = moreswitches(s)))
+			;
 	    }
 	}
     }
@@ -3073,7 +3075,6 @@ S_init_predump_symbols(pTHX)
 {
     dTHR;
     GV *tmpgv;
-    GV *othergv;
     IO *io;
 
     sv_setpvn(get_sv("\"", TRUE), " ", 1);
@@ -3125,7 +3126,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 		argc--,argv++;
 		break;
 	    }
-	    if (s = strchr(argv[0], '=')) {
+	    if ((s = strchr(argv[0], '='))) {
 		*s++ = '\0';
 		sv_setpv(GvSV(gv_fetchpv(argv[0]+1,TRUE, SVt_PV)),s);
 	    }
@@ -3142,17 +3143,17 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     PL_formtarget = PL_bodytarget;
 
     TAINT;
-    if (tmpgv = gv_fetchpv("0",TRUE, SVt_PV)) {
+    if ((tmpgv = gv_fetchpv("0",TRUE, SVt_PV))) {
 	sv_setpv(GvSV(tmpgv),PL_origfilename);
 	magicname("0", "0", 1);
     }
-    if (tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))
+    if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV)))
 #ifdef OS2
 	sv_setpv(GvSV(tmpgv), os2_execname());
 #else
 	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
 #endif
-    if (PL_argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV)) {
+    if ((PL_argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV))) {
 	GvMULTI_on(PL_argvgv);
 	(void)gv_AVadd(PL_argvgv);
 	av_clear(GvAVn(PL_argvgv));
@@ -3163,7 +3164,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 		sv_utf8_upgrade(sv);
 	}
     }
-    if (PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV)) {
+    if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
 	HV *hv;
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
@@ -3199,7 +3200,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #endif
     }
     TAINT_NOT;
-    if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
+    if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV)))
 	sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
 }
 
