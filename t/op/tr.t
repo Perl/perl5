@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, "../lib";
 }
 
-print "1..8\n";
+print "1..15\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -61,3 +61,50 @@ print "ok 7\n";
 $x =~ tr/A/B/;
 print "not " if $x ne 256.66.258 or length $x != 3;
 print "ok 8\n";
+
+{
+use utf8;
+
+# 9 - changing UTF8 characters in a UTF8 string, same length.
+$l = chr(300); $r = chr(400);
+$x = 200.300.400;
+$x =~ tr/\x{12c}/\x{190}/;
+printf "not (%vd) ", $x if $x ne 200.400.400 or length $x != 3;
+print "ok 9\n";
+
+# 10 - changing UTF8 characters in UTF8 string, more bytes.
+$x = 200.300.400;
+$x =~ tr/\x{12c}/\x{be8}/;
+printf "not (%vd) ", $x if $x ne 200.3048.400 or length $x != 3;
+print "ok 10\n";
+
+# 11 - introducing UTF8 characters to non-UTF8 string.
+$x = 100.125.60;
+$x =~ tr/\x{64}/\x{190}/;
+printf "not (%vd) ", $x if $x ne 400.125.60 or length $x != 3;
+print "ok 11\n";
+
+# 12 - removing UTF8 characters from UTF8 string
+$x = 400.125.60;
+$x =~ tr/\x{190}/\x{64}/;
+printf "not (%vd) ", $x if $x ne 100.125.60 or length $x != 3;
+print "ok 12\n";
+
+# 13 - counting UTF8 chars in UTF8 string
+$x = 400.125.60.400;
+$y = $x =~ tr/\x{190}/\x{190}/;
+print "not " if $y != 2;
+print "ok 13\n";
+
+# 14 - counting non-UTF8 chars in UTF8 string
+$x = 60.400.125.60.400;
+$y = $x =~ tr/\x{3c}/\x{3c}/;
+print "not " if $y != 2;
+print "ok 14\n";
+
+# 15 - counting UTF8 chars in non-UTF8 string
+$x = 200.125.60;
+$y = $x =~ tr/\x{190}/\x{190}/;
+print "not " if $y != 0;
+print "ok 15\n";
+}

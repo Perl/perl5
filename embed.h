@@ -846,14 +846,12 @@
 #define avhv_index		S_avhv_index
 #endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
-#define do_trans_CC_simple	S_do_trans_CC_simple
-#define do_trans_CC_count	S_do_trans_CC_count
-#define do_trans_CC_complex	S_do_trans_CC_complex
-#define do_trans_UU_simple	S_do_trans_UU_simple
-#define do_trans_UU_count	S_do_trans_UU_count
-#define do_trans_UU_complex	S_do_trans_UU_complex
-#define do_trans_UC_trivial	S_do_trans_UC_trivial
-#define do_trans_CU_trivial	S_do_trans_CU_trivial
+#define do_trans_simple		S_do_trans_simple
+#define do_trans_count		S_do_trans_count
+#define do_trans_complex	S_do_trans_complex
+#define do_trans_simple_utf8	S_do_trans_simple_utf8
+#define do_trans_count_utf8	S_do_trans_count_utf8
+#define do_trans_complex_utf8	S_do_trans_complex_utf8
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #define gv_init_sv		S_gv_init_sv
@@ -1105,6 +1103,7 @@
 #define sublex_push		S_sublex_push
 #define sublex_start		S_sublex_start
 #define filter_gets		S_filter_gets
+#define find_in_my_stash	S_find_in_my_stash
 #define new_constant		S_new_constant
 #define ao			S_ao
 #define depcom			S_depcom
@@ -2289,14 +2288,12 @@
 #define avhv_index(a,b,c)	S_avhv_index(aTHX_ a,b,c)
 #endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
-#define do_trans_CC_simple(a)	S_do_trans_CC_simple(aTHX_ a)
-#define do_trans_CC_count(a)	S_do_trans_CC_count(aTHX_ a)
-#define do_trans_CC_complex(a)	S_do_trans_CC_complex(aTHX_ a)
-#define do_trans_UU_simple(a)	S_do_trans_UU_simple(aTHX_ a)
-#define do_trans_UU_count(a)	S_do_trans_UU_count(aTHX_ a)
-#define do_trans_UU_complex(a)	S_do_trans_UU_complex(aTHX_ a)
-#define do_trans_UC_trivial(a)	S_do_trans_UC_trivial(aTHX_ a)
-#define do_trans_CU_trivial(a)	S_do_trans_CU_trivial(aTHX_ a)
+#define do_trans_simple(a)	S_do_trans_simple(aTHX_ a)
+#define do_trans_count(a)	S_do_trans_count(aTHX_ a)
+#define do_trans_complex(a)	S_do_trans_complex(aTHX_ a)
+#define do_trans_simple_utf8(a)	S_do_trans_simple_utf8(aTHX_ a)
+#define do_trans_count_utf8(a)	S_do_trans_count_utf8(aTHX_ a)
+#define do_trans_complex_utf8(a)	S_do_trans_complex_utf8(aTHX_ a)
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #define gv_init_sv(a,b)		S_gv_init_sv(aTHX_ a,b)
@@ -2547,6 +2544,7 @@
 #define sublex_push()		S_sublex_push(aTHX)
 #define sublex_start()		S_sublex_start(aTHX)
 #define filter_gets(a,b,c)	S_filter_gets(aTHX_ a,b,c)
+#define find_in_my_stash(a,b)	S_find_in_my_stash(aTHX_ a,b)
 #define new_constant(a,b,c,d,e,f)	S_new_constant(aTHX_ a,b,c,d,e,f)
 #define ao(a)			S_ao(aTHX_ a)
 #define depcom()		S_depcom(aTHX)
@@ -4479,22 +4477,18 @@
 #define avhv_index		S_avhv_index
 #endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
-#define S_do_trans_CC_simple	CPerlObj::S_do_trans_CC_simple
-#define do_trans_CC_simple	S_do_trans_CC_simple
-#define S_do_trans_CC_count	CPerlObj::S_do_trans_CC_count
-#define do_trans_CC_count	S_do_trans_CC_count
-#define S_do_trans_CC_complex	CPerlObj::S_do_trans_CC_complex
-#define do_trans_CC_complex	S_do_trans_CC_complex
-#define S_do_trans_UU_simple	CPerlObj::S_do_trans_UU_simple
-#define do_trans_UU_simple	S_do_trans_UU_simple
-#define S_do_trans_UU_count	CPerlObj::S_do_trans_UU_count
-#define do_trans_UU_count	S_do_trans_UU_count
-#define S_do_trans_UU_complex	CPerlObj::S_do_trans_UU_complex
-#define do_trans_UU_complex	S_do_trans_UU_complex
-#define S_do_trans_UC_trivial	CPerlObj::S_do_trans_UC_trivial
-#define do_trans_UC_trivial	S_do_trans_UC_trivial
-#define S_do_trans_CU_trivial	CPerlObj::S_do_trans_CU_trivial
-#define do_trans_CU_trivial	S_do_trans_CU_trivial
+#define S_do_trans_simple	CPerlObj::S_do_trans_simple
+#define do_trans_simple		S_do_trans_simple
+#define S_do_trans_count	CPerlObj::S_do_trans_count
+#define do_trans_count		S_do_trans_count
+#define S_do_trans_complex	CPerlObj::S_do_trans_complex
+#define do_trans_complex	S_do_trans_complex
+#define S_do_trans_simple_utf8	CPerlObj::S_do_trans_simple_utf8
+#define do_trans_simple_utf8	S_do_trans_simple_utf8
+#define S_do_trans_count_utf8	CPerlObj::S_do_trans_count_utf8
+#define do_trans_count_utf8	S_do_trans_count_utf8
+#define S_do_trans_complex_utf8	CPerlObj::S_do_trans_complex_utf8
+#define do_trans_complex_utf8	S_do_trans_complex_utf8
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #define S_gv_init_sv		CPerlObj::S_gv_init_sv
@@ -4953,6 +4947,8 @@
 #define sublex_start		S_sublex_start
 #define S_filter_gets		CPerlObj::S_filter_gets
 #define filter_gets		S_filter_gets
+#define S_find_in_my_stash	CPerlObj::S_find_in_my_stash
+#define find_in_my_stash	S_find_in_my_stash
 #define S_new_constant		CPerlObj::S_new_constant
 #define new_constant		S_new_constant
 #define S_ao			CPerlObj::S_ao

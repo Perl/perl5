@@ -2199,14 +2199,12 @@ s	|I32	|avhv_index	|AV* av|SV* sv|U32 hash
 #endif
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
-s	|I32	|do_trans_CC_simple	|SV *sv
-s	|I32	|do_trans_CC_count	|SV *sv
-s	|I32	|do_trans_CC_complex	|SV *sv
-s	|I32	|do_trans_UU_simple	|SV *sv
-s	|I32	|do_trans_UU_count	|SV *sv
-s	|I32	|do_trans_UU_complex	|SV *sv
-s	|I32	|do_trans_UC_trivial	|SV *sv
-s	|I32	|do_trans_CU_trivial	|SV *sv
+s	|I32	|do_trans_simple	|SV *sv
+s	|I32	|do_trans_count		|SV *sv
+s	|I32	|do_trans_complex	|SV *sv
+s	|I32	|do_trans_simple_utf8	|SV *sv
+s	|I32	|do_trans_count_utf8	|SV *sv
+s	|I32	|do_trans_complex_utf8	|SV *sv
 #endif
 
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
