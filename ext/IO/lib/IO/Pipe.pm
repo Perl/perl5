@@ -14,7 +14,7 @@ our($VERSION);
 use Carp;
 use Symbol;
 
-$VERSION = "1.121";
+$VERSION = "1.122";
 
 sub new {
     my $type = shift;

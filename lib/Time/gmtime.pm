@@ -14,7 +14,7 @@ BEGIN {
 			$tm_isdst
 		    );
     %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
-    $VERSION     = 1.01;
+    $VERSION     = 1.02;
 }
 use vars      @EXPORT_OK;
 

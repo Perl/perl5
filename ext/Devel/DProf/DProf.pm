@@ -188,7 +188,7 @@ sub DB {
 use XSLoader ();
 
 # Underscore to allow older Perls to access older version from CPAN
-$Devel::DProf::VERSION = '20000000.00_00';  # this version not authorized by
+$Devel::DProf::VERSION = '20000000.00_01';  # this version not authorized by
 				     # Dean Roehrich. See "Changes" file.
 
 XSLoader::load 'Devel::DProf', $Devel::DProf::VERSION;
