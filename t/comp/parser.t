@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 20 );
+plan( tests => 21 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -88,3 +88,12 @@ is( $@, '', 'PL_lex_brackstack' );
 ${a}{ ${a}[ @{b}{
 ${a}{
 }
+
+# Bug #21575
+# ensure that the second print statement works, by playing a bit
+# with the test output.
+my %data = ( foo => "\n" );
+print "#";
+print(
+$data{foo});
+pass();
