@@ -586,6 +586,12 @@ Some error messages will be different.
 
 =item * Discontinuance
 
+In Perl 4, if in list context the delimiters to the first argument of
+C<split()> were C<??>, the result would be placed in C<@_> as well as
+being returned.   Perl 5 has more respect for your subroutine arguments.
+
+=item * Discontinuance
+
 Some bugs may have been inadvertently removed.  :-)
 
 =back
