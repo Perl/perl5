@@ -1,6 +1,8 @@
 #!./perl
 
+my $file;
 BEGIN {
+	$file = $0;
 	chdir 't' if -d 't';
 	@INC = '../lib';
 }
@@ -34,14 +36,14 @@ is( $path, $files, 'termcap_path() should find default files' );
 
 SKIP: {
 	# this is ugly, but -f $0 really *ought* to work
-	skip("-f $0 fails, some tests difficult now", 2) unless -f $0;
+	skip("-f $file fails, some tests difficult now", 2) unless -f $file;
 
-	$ENV{TERMCAP} = $ENV{TERMPATH} = $0;
-	ok( grep($0, Term::Cap::termcap_path()), 
+	$ENV{TERMCAP} = $ENV{TERMPATH} = $file;
+	ok( grep($file, Term::Cap::termcap_path()), 
 		'termcap_path() should find file from $ENV{TERMCAP}' );
 
 	$ENV{TERMCAP} = (grep { $^O eq $_ } qw( os2 MSWin32 dos )) ? 'a:/' : '/';
-	ok( grep($0, Term::Cap::termcap_path()), 
+	ok( grep($file, Term::Cap::termcap_path()), 
 		'termcap_path() should find file from $ENV{TERMPATH}' );
 }
 
@@ -100,11 +102,13 @@ $ENV{TERMCAP} = '';
 eval { $t = Term::Cap->Tgetent($vals) };
 isn't( $@, '', 'Tgetent() should catch bad termcap file' );
 
-# if there's no valid termcap file found, it should croak
+# if there's no valid termcap file found, it should croak 
+# (an empty string in $ENV{TERMPATH} and $ENV{TERM} counts as 'not found')
 $vals->{TERM} = '';
-$ENV{TERMPATH} = $0;
+$ENV{TERMPATH} = '';
+$ENV{TERMCAP} = '|:';
 eval { $t = Term::Cap->Tgetent($vals) };
-like( $@, qr/failed termcap lookup/, 'Tgetent() should dies with bad termcap' );
+like( $@, qr/failed termcap lookup/, 'Tgetent() should die with bad termcap' );
 
 SKIP: {
 	skip( "Can't write 'tcout' file for tests", 8 ) unless $writable;
