@@ -6,7 +6,7 @@ use strict;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.44';
+$VERSION = '0.45';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -578,7 +578,11 @@ sub _div_use_mul
       # between 1 and MAX_VAL (e.g. one element) and rem is not wanted.
       if (!wantarray)
         {
-        $x->[0] = int($x->[-1] / $yorg->[-1]);
+        # fit's into one Perl scalar, so result can be computed directly
+        # cannot use int() here, because it rounds wrongly on some systems
+        #$x->[0] = int($x->[-1] / $yorg->[-1]);
+        # round to 8 digits, then truncate result to integer
+        $x->[0] = int ( sprintf ("%.8f", $x->[-1] / $yorg->[-1]) );
         splice(@$x,1);			# keep single element
         return $x;
         }
@@ -775,7 +779,11 @@ sub _div_use_div
       # between 1 and MAX_VAL (e.g. one element) and rem is not wanted.
       if (!wantarray)
         {
-        $x->[0] = int($x->[-1] / $yorg->[-1]);
+        # fit's into one Perl scalar, so result can be computed directly
+        # cannot use int() here, because it rounds wrongly on some systems
+        #$x->[0] = int($x->[-1] / $yorg->[-1]);
+        # round to 8 digits, then truncate result to integer
+        $x->[0] = int ( sprintf ("%.8f", $x->[-1] / $yorg->[-1]) );
         splice(@$x,1);			# keep single element
         return $x;
         }
