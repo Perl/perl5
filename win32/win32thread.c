@@ -15,7 +15,7 @@ Perl_alloc_thread_key(void)
 }
 
 void
-init_thread_intern(struct thread *thr)
+Perl_set_thread_self(struct thread *thr)
 {
 #ifdef USE_THREADS
     /* GetCurrentThread() retrurns a pseudo handle, need

@@ -2843,6 +2843,10 @@ init_main_thread()
 
 #ifdef HAVE_THREAD_INTERN
     init_thread_intern(thr);
+#endif
+
+#ifdef SET_THREAD_SELF
+    SET_THREAD_SELF(thr);
 #else
     thr->self = pthread_self();
 #endif /* HAVE_THREAD_INTERN */

@@ -105,12 +105,12 @@ typedef THREAD_RET_TYPE thread_func_t(void *);
 START_EXTERN_C
 void Perl_alloc_thread_key _((void));
 int Perl_thread_create _((struct thread *thr, thread_func_t *fn));
-void Perl_init_thread_intern _((struct thread *thr));
+void Perl_set_thread_self _((struct thread *thr));
 END_EXTERN_C
 
 #define INIT_THREADS NOOP
 #define ALLOC_THREAD_KEY Perl_alloc_thread_key()
-#define INIT_THREAD_INTERN(thr) Perl_init_thread_intern(thr)
+#define SET_THREAD_SELF(thr) Perl_set_thread_self(thr)
 
 #define JOIN(t, avp)							\
     STMT_START {							\

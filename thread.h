@@ -309,6 +309,7 @@ typedef struct condpair {
 #undef	chopset
 #undef	formtarget
 #undef	bodytarget
+#undef  start_env
 #undef	toptarget
 #undef	top_env
 #undef	runlevel
