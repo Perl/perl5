@@ -3125,11 +3125,10 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
     }
 #endif /* IAMSUID */
     if (!PL_rsfp) {
-/* PSz 16 Sep 03  Keep neat error message */
-        
-            Perl_croak(aTHX_ "Can't open perl script \"%s\": %s%s\n",
-                       CopFILE(PL_curcop), Strerror(errno),
-		       ".  Use -S to search $PATH for it");
+	/* PSz 16 Sep 03  Keep neat error message */
+	Perl_croak(aTHX_ "Can't open perl script \"%s\": %s%s\n",
+		CopFILE(PL_curcop), Strerror(errno),
+		".\nUse -S to search $PATH for it.");
     }
 }
 
