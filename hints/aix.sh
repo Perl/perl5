@@ -5,7 +5,7 @@
 #	  Jarkko Hietaniemi <jhi@iki.fi>.
 # AIX 4.3.x LP64 build by Steven Hirsch <hirschs@btv.ibm.com>
 # Merged on Mon Feb  6 10:22:35 EST 1995 by
-#   Andy Dougherty  <doughera@lafcol.lafayette.edu>
+#   Andy Dougherty  <doughera@lafayette.edu>
 
 #
 # Contact dfavor@corridor.com for any of the following:
@@ -51,13 +51,21 @@ esac
 # Intuiting the existence of system calls under AIX is difficult,
 # at best; the safest technique is to find them empirically.
 
-# AIX 4.3.* and above default to using nm for symbol extraction
+# AIX 4.3.* and above default to letting Configure test if nm
+# extraction will work.
 case "$osvers" in
    3.*|4.1.*|4.2.*)
-      usenm='undef'
+      case "$usenm" in
+	  '') usenm='undef'
+	  esac
+      case "$usenativedlopen" in
+	  '') usenativedlopen='false'
+	  esac
       ;;
    *)
-      usenm='true'
+      case "$usenativedlopen" in
+	  '') usenativedlopen='true'
+	  esac
       ;;
 esac
 
@@ -113,7 +121,7 @@ case "$osvers" in
     ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
     case "$cc" in
      *gcc*) ;;
-     *) ccflags="$ccflags -qmaxmem=16384" ;;
+     *) ccflags="$ccflags -qmaxmem=16384 -qnoansialias" ;;
     esac
     nm_opt='-B'
     ;;
@@ -126,22 +134,84 @@ d_setreuid='undef'
 # Changes for dynamic linking by Wayne Scott <wscott@ichips.intel.com>
 #
 # Tell perl which symbols to export for dynamic linking.
+cccdlflags='none'	# All AIX code is position independent
+   cc_type=xlc		# do not export to config.sh
 case "$cc" in
-*gcc*) ccdlflags='-Xlinker' ;;
-*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | awk '{print $2}'`
+*gcc*)
+   cc_type=gcc
+   ccdlflags='-Xlinker'
+   if [ "X$gccversion" = "X" ]; then
+     # Done too late in Configure if hinted
+     gccversion=`$cc --version | sed 's/.*(GCC) *//`
+     fi
+   ;;
+*) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -v '\.msg\.[A-Za-z_]*\.' | awk '{print $1,$2}'`
    case "$ccversion" in
+     '') ccversion=`lslpp -L | grep 'IBM C and C++ Compilers LUM$'`
+	 ;;
+     *.*.*.*.*.*.*)		# Ahhrgg, more than one C compiler installed
+	 first_cc_path=`which ${cc:-cc}`
+	 case "$first_cc_path" in
+	   *vac*)
+	     cc_type=vac ;;
+	   /usr/bin/cc)		# Check the symlink
+	     if [ -h $first_cc_path ] ; then
+	       ls -l $first_cc_path > reflect
+	       if grep -i vac reflect >/dev/null 2>&1 ; then
+		 cc_type=vac
+		 fi
+	       rm -f reflect
+	       fi
+	     ;;
+	   esac
+	 ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -i $cc_type | head -1`
+	 ;;
+     vac*.*.*.*)
+         cc_type=vac
+	 ;;
+     esac
+   ccversion=`echo "$ccversion" | awk '{print $2}'`
+   case "$ccversion" in
+     3.6.6.0)
+	optimize='none'
+	;;
      4.4.0.0|4.4.0.1|4.4.0.2)
-	echo >&4 "*** This C compiler ($ccversion) is outdated."
-	echo >&4 "*** Please upgrade to at least 4.4.0.3."
+	cat >&4 <<EOF
+***
+*** This C compiler ($ccversion) is outdated.
+***
+*** Please upgrade to at least 4.4.0.3.
+***
+EOF
+	;;
+     5.0.0.0)
+	cat >&4 <<EOF
+***
+*** This C compiler ($ccversion) is known to have too many optimizer
+*** bugs to compile a working Perl.
+***
+*** Consider upgrading your C compiler, or getting the GNU cc (gcc).
+***
+*** Cannot continue, aborting.
+EOF
+	exit 1
+	;;
+     5.0.1.0)
+	cat >&4 <<EOF
+***
+*** This C compiler ($ccversion) is known to have optimizer problems
+*** when compiling regcomp.c.
+***
+*** Disabling optimization for that file but consider upgrading
+*** your C compiler.
+***
+EOF
+regcomp_cflags='optimize='
 	;;
      esac
 esac
 # the required -bE:$installarchlib/CORE/perl.exp is added by
 # libperl.U (Configure) later.
-
-case "$ldlibpthname" in
-'') ldlibpthname=LIBPATH ;;
-esac
 
 # The first 3 options would not be needed if dynamic libs. could be linked
 # with the compiler instead of ld.
@@ -149,20 +219,70 @@ esac
 # -bE:$(BASEEXT).exp	    Export these symbols.  This file contains only one
 #			    symbol: boot_$(EXP)	 can it be auto-generated?
 case "$osvers" in
-3*) 
-    lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -e _nostart -lc"
-    ;;
-*) 
-    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -b noentry -lc"
-    ;;
+    3*) 
+	lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -e _nostart -lc"
+	;;
+    *) 
+	lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:\$(PERL_INC)/perl.exp -bE:\$(BASEEXT).exp -bnoentry -lc"
+	;;
+    esac
+
+case "$use64bitall" in
+    $define|true|[yY]*) use64bitint="$define" ;;
+    esac
+
+case "$usemorebits" in
+    $define|true|[yY]*) use64bitint="$define"; uselongdouble="$define" ;;
+    esac
+
+case $cc_type in
+    vac|xlc)
+	case "$uselongdouble" in
+	    $define|true|[yY]*)
+		ccflags="$ccflags -qlongdouble"
+		libswanted="c128 $libswanted"
+		lddlflags=`echo "$lddlflags " | sed -e 's/ -lc / -lc128 -lc /'`
+		;;
+	    esac
+    esac
+
+case "$cc" in
+*gcc*) ;;
+cc*|xlc*) # cc should've been set by line 116 or so if empty.
+	if test ! -x /usr/bin/$cc -a -x /usr/vac/bin/$cc; then
+		case ":$PATH:" in
+		*:/usr/vac/bin:*) ;;
+		*) if test ! -x /QOpenSys/usr/bin/$cc; then
+			# The /QOpenSys/usr/bin/$cc saves us if we are
+			# building natively in OS/400 PASE.
+			cat >&4 <<EOF
+
+***
+*** You either implicitly or explicitly specified an IBM C compiler,
+*** but you do not seem to have one in /usr/bin, but you seem to have
+*** the VAC installed in /usr/vac, but you do not have the /usr/vac/bin
+*** in your PATH.  I suggest adding that and retrying Configure.
+***
+EOF
+			exit 1
+		   fi 
+		   ;;
+		esac
+	fi
+	;;
 esac
+
+case "$ldlibpthname" in
+'') ldlibpthname=LIBPATH ;;
+esac
+
 # AIX 4.2 (using latest patchlevels on 20001130) has a broken bind
 # library (getprotobyname and getprotobynumber are outversioned by
 # the same calls in libc, at least for xlc version 3...
 case "`oslevel`" in
-    4.2.1.*)  # Test for xlc version too, should we?
+    4.2.1.*)
       case "$ccversion" in    # Don't know if needed for gcc
-          3.1.4.*)    # libswanted "bind ... c ..." => "... c bind ..."
+          3.1.4.*|5.0.2.*)    # libswanted "bind ... c ..." => "... c bind ..."
               set `echo X "$libswanted "| sed -e 's/ bind\( .*\) \([cC]\) / \1 \2 bind /'`
               shift
               libswanted="$*"
@@ -178,7 +298,21 @@ case "$usethreads" in
 $define|true|[yY]*)
 	ccflags="$ccflags -DNEED_PTHREAD_INIT"
 	case "$cc" in
-	gcc) ;;
+	*gcc*)
+	    ccflags="-D_THREAD_SAFE $ccflags"
+	    echo "GCC $gccversion disabling some _r functions" >&4
+	    case "$gccversion" in
+		3*) d_drand48_r='undef'
+		    d_endgrent_r='undef'
+		    d_endpwent_r='undef'
+		    d_getgrent_r='undef'
+		    d_getpwent_r='undef'
+		    d_random_r='undef'
+		    d_srand48_r='undef'
+		    d_strerror_r='undef'
+		    ;;
+		esac
+	    ;;
 	cc_r) ;;
 	cc|xl[cC]_r) 
 	    echo >&4 "Switching cc to cc_r because of POSIX threads."
@@ -186,6 +320,10 @@ $define|true|[yY]*)
 	    # (e.g. pragma/overload core dumps)	 Let's suspect xlC_r, too.
 	    # --jhi@iki.fi
 	    cc=cc_r
+
+	    case "`oslevel`" in
+		4.2.1.*) i_crypt='undef' ;;
+		esac
 	    ;;
 	'') 
 	    cc=cc_r
@@ -210,11 +348,11 @@ EOM
 	lddlflags="$*"
 
 	# Insert pthreads to libswanted, before any libc or libC.
-	set `echo X "$libswanted "| sed -e 's/ \([cC]\) / pthreads \1 /'`
+	set `echo X "$libswanted "| sed -e 's/ \([cC]_r\) / pthreads \1 /'`
 	shift
 	libswanted="$*"
 	# Insert pthreads to lddlflags, before any libc or libC.
-	set `echo X "$lddlflags " | sed -e 's/ \(-l[cC]\) / -lpthreads \1 /'`
+	set `echo X "$lddlflags " | sed -e 's/ \(-l[cC]_r\) / -lpthreads \1 /'`
 	shift
 	lddlflags="$*"
 
@@ -227,9 +365,17 @@ EOCBU
 cat > UU/uselargefiles.cbu <<'EOCBU'
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
+    # Configure should take care of use64bitint and use64bitall being
+    # defined before uselargefiles.cbu is consulted.
+    if test X"$use64bitint:$quadtype" = X"$define:long" -o X"$use64bitall" = Xdefine; then
+# Keep these at the left margin.
+ccflags_uselargefiles="`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
+ldflags_uselargefiles="`getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
+    else
 # Keep these at the left margin.
 ccflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
 ldflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
+    fi
 	# _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
 	# insert(?) *something* to $ldflags so that later (in Configure) evaluating
 	# $ldflags causes a newline after the '-b64' (the result of the getconf).
@@ -241,8 +387,13 @@ ldflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	# Therefore the line re-evaluating ldflags_uselargefiles: it seems to fix
 	# the whatever it was that AIX managed to break. --jhi
 	ldflags_uselargefiles="`echo $ldflags_uselargefiles`"
+    if test X"$use64bitint:$quadtype" = X"$define:long" -o X"$use64bitall" = Xdefine; then
+# Keep this at the left margin.
+libswanted_uselargefiles="`getconf XBS5_LP64_OFF64_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+    else
 # Keep this at the left margin.
 libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+    fi
 	case "$ccflags_uselargefiles$ldflags_uselargefiles$libs_uselargefiles" in
 	'');;
 	*) ccflags="$ccflags $ccflags_uselargefiles"
@@ -252,20 +403,18 @@ libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@
 	esac
 	case "$gccversion" in
 	'') ;;
-	*)
-	cat >&4 <<EOM
-
-*** Warning: gcc in AIX might not work with the largefile support of Perl
-*** (default since 5.6.0), this combination hasn't been tested.
-*** I will try, though.
-
-EOM
-	# Remove xlc-spefific -qflags.
-        ccflags="`echo $ccflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
-        ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
-	echo >&4 "(using ccflags $ccflags)"
-	echo >&4 "(using ldflags $ldflags)"
-        ;; 
+	*) # Remove xlc-spefific -qflags.
+	   ccflags="`echo $ccflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
+	   ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
+	   # Move xld-spefific -bflags.
+	   ccflags="`echo $ccflags | sed -e 's@ -b@ -Wl,-b@g'`"
+	   ldflags="`echo ' '$ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
+	   lddlflags="`echo ' '$lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
+	   ld='gcc'
+	   echo >&4 "(using ccflags   $ccflags)"
+	   echo >&4 "(using ldflags   $ldflags)"
+	   echo >&4 "(using lddlflags $lddlflags)"
+	   ;; 
         esac
         ;;
 esac
@@ -378,9 +527,6 @@ EOM
 	    ''|64*) archname64=64all ;;
 	    esac
 	    longsize="8"
-	    # Don't try backwards compatibility
-	    bincompat="$undef"
-	    d_bincompat5005="$undef"
 	    qacflags=''
 	    qaldflags=''
 	    qalibs=''
@@ -389,36 +535,66 @@ EOM
 esac
 EOCBU
 
-cat > UU/uselongdouble.cbu <<'EOCBU'
-# This script UU/uselongdouble.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use long doubles.
-case "$uselongdouble" in
-$define|true|[yY]*)
-        case "$cc" in
-        *gcc*) ;;
-        *) ccflags="$ccflags -qlongdouble" ;;
-        esac
-	# The explicit cc128, xlc128, xlC128 are not needed,
-	# the -qlongdouble should do the trick. --jhi
-	d_Gconvert='sprintf((b),"%.*llg",(n),(x))'
+if test $usenativedlopen = 'true'
+then
+    ccflags="$ccflags -DUSE_NATIVE_DLOPEN"
+    case "$cc" in
+      *gcc*) ldflags="$ldflags -Wl,-brtl" ;;
+      *)     ldflags="$ldflags -brtl" ;;
+      esac
+else
+    case `oslevel` in
+	4.2.*)	;;	# libC_r has broke gettimeofday
+        *)  # If the C++ libraries, libC and libC_r, are available we will
+	    # prefer them over the vanilla libc, because the libC contain
+	    # loadAndInit() and terminateAndUnload() which work correctly
+	    # with C++ statics while libc load() and unload() do not. See
+	    # ext/DynaLoader/dl_aix.xs. The C-to-C_r switch is done by
+	    # usethreads.cbu, if needed.
+	    if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
+		# Cify libswanted.
+		set `echo X "$libswanted "| sed -e 's/ c / C c /'`
+		shift
+		libswanted="$*"
+		# Cify lddlflags.
+		set `echo X "$lddlflags "| sed -e 's/ -lc / -lC -lc /'`
+		shift
+		lddlflags="$*"
+	    fi
+	esac
+fi
+
+case "$PASE" in
+define)
+	case "$prefix" in
+	'') prefix=/QOpenSys/perl ;;
+	esac
+	cat >&4 <<EOF
+
+***
+*** You seem to be compiling in AIX for the OS/400 PASE environment.
+*** I'm not going to use the AIX bind, nsl, and possible util libraries, then.
+*** I'm also not going to install perl as /usr/bin/perl.
+*** Perl will be installed under $prefix.
+*** For instructions how to install this build from AIX to PASE,
+*** see the file README.os400.  Accept the "aix" for the question
+*** about "Operating system name".
+***
+EOF
+	set `echo " $libswanted " | sed -e 's@ bind @ @' -e 's@ nsl @ @' -e 's@ util @ @'`
+	shift
+	libswanted="$*"
+	installusrbinperl="$undef"
+
+	# V5R1 doesn't have this (V5R2 does), without knowing
+	# which one we have it's safer to be pessimistic.
+	# Cwd will work fine even without fchdir(), but if
+	# V5R1 tries to use code compiled assuming fchdir(),
+	# lots of grief will issue forth from Cwd.
+	case "$d_fchdir" in
+	'') d_fchdir="$undef" ;;
+	esac
 	;;
 esac
-EOCBU
-
-# If the C++ libraries, libC and libC_r, are available we will prefer them
-# over the vanilla libc, because the libC contain loadAndInit() and
-# terminateAndUnload() which work correctly with C++ statics while libc
-# load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
-# The C-to-C_r switch is done by usethreads.cbu, if needed.
-if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
-    # Cify libswanted.
-    set `echo X "$libswanted "| sed -e 's/ c / C c /'`
-    shift
-    libswanted="$*"
-    # Cify lddlflags.
-    set `echo X "$lddlflags "| sed -e 's/ -lc / -lC -lc /'`
-    shift
-    lddlflags="$*"
-fi
 
 # EOF

@@ -400,6 +400,7 @@ hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture
 hints/amigaos.sh	Hints for named architecture
 hints/apollo.sh		Hints for named architecture
+hints/atheos.sh		Hints for named architecture
 hints/aux_3.sh		Hints for named architecture
 hints/beos.sh		Hints for named architecture
 hints/broken-db.msg	Warning message for systems with broken DB library
@@ -449,6 +450,7 @@ hints/openbsd.sh	Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
 hints/os390.sh		Hints for named architecture
+hints/os400.sh		Hints for named architecture
 hints/posix-bc.sh	Hints for named architecture
 hints/powerux.sh	Hints for named architecture
 hints/qnx.sh		Hints for named architecture
@@ -464,8 +466,10 @@ hints/solaris_2.sh	Hints for named architecture
 hints/stellar.sh	Hints for named architecture
 hints/sunos_4_0.sh	Hints for named architecture
 hints/sunos_4_1.sh	Hints for named architecture
+hints/super-ux.sh	Hints for named architecture
 hints/svr4.sh		Hints for named architecture
 hints/svr5.sh		Hints for named architecture
+hints/t001.c		Test case for gcc bug
 hints/ti1500.sh		Hints for named architecture
 hints/titanos.sh	Hints for named architecture
 hints/ultrix_4.sh	Hints for named architecture
@@ -477,6 +481,7 @@ hints/utekv.sh		Hints for named architecture
 hints/uts.sh		Hints for named architecture
 hints/uwin.sh		Hints for named architecture
 hints/vmesa.sh		Hints for named architecture
+hints/vos.sh		Hints for named architecture
 hv.c			Hash value code
 hv.h			Hash value header
 INSTALL			Detailed installation instructions

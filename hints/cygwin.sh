@@ -23,7 +23,10 @@ so='dll'
 libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
 # - eliminate -lm, symlink to libcygwin.a
 libswanted=`echo " $libswanted " | sed -e 's/ m / /g'`
-libswanted="$libswanted cygipc"
+# - add libgdbm_compat $libswanted
+# - libcygipc doesn't work much at all with
+#   the Perl SysV IPC tests so not adding it --jhi 2003-08-09
+libswanted="$libswanted gdbm_compat"
 test -z "$optimize" && optimize='-O2'
 ccflags="$ccflags -DPERL_USE_SAFE_PUTENV"
 # - otherwise i686-cygwin
@@ -33,10 +36,6 @@ archname='cygwin'
 # - otherwise -fpic
 cccdlflags=' '
 ld='ld2'
-
-# optional(ish)
-# - perl malloc needs to be unpolluted
-bincompat5005='undef'
 
 # Win9x problem with non-blocking read from a closed pipe
 d_eofnblk='define'

@@ -1,5 +1,5 @@
 # hints/ultrix_4.sh
-# Last updated by Andy Dougherty  <doughera@lafcol.lafayette.edu>
+# Last updated by Andy Dougherty  <doughera@lafayette.edu>
 # Fri Feb 10 10:04:51 EST 1995
 #
 # Use   Configure -Dcc=gcc   to use gcc.
@@ -16,7 +16,7 @@ case "$optimize" in
 esac
 
 # Some users have reported Configure runs *much* faster if you 
-# replace all occurences of /bin/sh by /bin/sh5
+# replace all occurrences of /bin/sh by /bin/sh5
 # Something like:
 #   sed 's!/bin/sh!/bin/sh5!g' Configure > Configure.sh5
 # Then run "sh5 Configure.sh5 [your options]"
@@ -68,3 +68,7 @@ d_dirnamlen='define'
 # Ultrix can mmap only character devices, not regular files,
 # which is rather useless state of things for Perl.
 d_mmap='undef'
+
+# There simply isn't dynaloading in Ultrix.
+usedl='undef'
+

@@ -9,7 +9,7 @@
 #     Len Johnson <lenjay@ibm.net>
 #     Bud Huff  <BAHUFF@us.oracle.com>
 #     Peter Prymmer <pvhp@forte.com>
-#     Andy Dougherty  <doughera@lafcol.lafayette.edu>
+#     Andy Dougherty  <doughera@lafayette.edu>
 #     Tim Bunce  <Tim.Bunce@ig.co.uk>
 #
 #  as well as the authors of the aix.sh file
@@ -123,14 +123,23 @@ case "$ldlibpthname" in
 '') ldlibpthname=LIBPATH ;;
 esac
 
+# The folowing should always be used
+d_oldpthreads='define'
+
 # Header files to include.
-# You can override these with Configure -Ui_time -Ui_systime.
+# You can override these with Configure -Ui_time -Ui_systime -Dd_pthread_atfork.
 case "$i_time" in
 '') i_time='define' ;;
 esac
 case "$i_systime" in
 '') i_systime='define' ;;
 esac
+case "$d_pthread_atfork" in
+'') d_pthread_atfork='undef' ;;
+esac
+case "$d_pthread_atfork" in                                                  
+'') d_pthread_atfork='undef' ;;                                              
+esac                                                                         
 
 # (from aix.sh)
 # uname -m output is too specific and not appropriate here
@@ -203,3 +212,16 @@ EOWARN
     fi
 fi
 
+# Most of the time gcvt() seems to work fine but
+# sometimes values like 0.1, 0.2, come out as "10", "20",
+# a trivial Perl demonstration snippet is 'print 0.1'.
+# The -W 0,float(ieee) seems to be the switch breaking gcvt().
+# sprintf() seems to get things right(er).
+gconvert_preference=sprintf
+
+cat >config.arch<<'__CONFIG_ARCH__'
+# The '-W 0,float(ieee)' cannot be used during Configure as ldflags.
+
+ccflags="$ccflags -W 0,float(ieee)"
+
+__CONFIG_ARCH__
