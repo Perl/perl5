@@ -1821,6 +1821,8 @@ PP(pp_subst)
     STRLEN len;
     int force_on_match = 0;
     I32 oldsave = PL_savestack_ix;
+    bool do_utf8;
+    STRLEN slen;
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
@@ -1831,6 +1833,7 @@ PP(pp_subst)
 	EXTEND(SP,1);
     }
     PL_reg_sv = TARG;
+    do_utf8 = DO_UTF8(PL_reg_sv);
     if (SvFAKE(TARG) && SvREADONLY(TARG))
 	sv_force_normal(TARG);
     if (SvREADONLY(TARG)
@@ -1853,9 +1856,10 @@ PP(pp_subst)
 	DIE(aTHX_ "panic: pp_subst");
 
     strend = s + len;
-    maxiters = 2*(strend - s) + 10;	/* We can match twice at each
-					   position, once with zero-length,
-					   second time with non-zero. */
+    slen = do_utf8 ? utf8_length(s, strend) : len;
+    maxiters = 2 * slen + 10;	/* We can match twice at each
+				   position, once with zero-length,
+				   second time with non-zero. */
 
     if (!rx->prelen && PL_curpm) {
 	pm = PL_curpm;
