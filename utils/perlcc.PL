@@ -178,6 +178,7 @@ sub parse_argv {
         'static',       # Dirty hack to enable -shared/-static
         'shared',       # Create a shared library (--shared for compat.)
 	'log:s',        # where to log compilation process information
+        'Wb:s',         # pass (comma-sepearated) options to backend
         'testsuite',    # try to be nice to testsuite
     );
 
@@ -284,6 +285,11 @@ sub compile_cstyle {
     my $lose = 0;
     my ($cfh);
     my $testsuite = '';
+    my $addoptions = opt(Wb);
+
+    if( $addoptions ) {
+        $addoptions .= ',' if $addoptions !~ m/,$/;
+    }
 
     if (opt(testsuite)) {
         my $bo = join '', @begin_output;
@@ -324,7 +330,7 @@ sub compile_cstyle {
 
     # This has to do the write itself, so we can't keep a lock. Life
     # sucks.
-    my $command = "$BinPerl $taint -MO=$Backend,$testsuite$max_line_len$stash,-o$cfile $Input";
+    my $command = "$BinPerl $taint -MO=$Backend,$addoptions$testsuite$max_line_len$stash,-o$cfile $Input";
     vprint 1, "Compiling...";
     vprint 1, "Calling $command";
 
@@ -356,7 +362,7 @@ sub cc_harness_msvc {
     $link .= " -libpath:".$_ for split /\s+/, opt(L);
     my @mods = split /-?u /, $stash;
     $link .= " ".ExtUtils::Embed::ldopts("-std", \@mods);
-    $link .= " perl57.lib msvcrt.lib";
+    $link .= " perl57.lib kernel32.lib msvcrt.lib";
     vprint 3, "running $Config{cc} $compile";
     system("$Config{cc} $compile");
     vprint 3, "running $Config{ld} $link";
