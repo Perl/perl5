@@ -220,12 +220,15 @@ from the base path to the destination path:
     $rel_path = File::Spec->abs2rel( $path ) ;
     $rel_path = File::Spec->abs2rel( $path, $base ) ;
 
-If $base is not present or '', then L<cwd()|Cwd> is used. If $base is relative, 
-then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()|Cwd>.
+If $base is not present or '', then L<cwd()|Cwd> is used. If $base is
+relative, then it is converted to absolute form using
+L</rel2abs()>. This means that it is taken to be relative to
+L<cwd()|Cwd>.
 
-On systems with the concept of a volume, this assumes that both paths 
-are on the $destination volume, and ignores the $base volume. 
+On systems with the concept of a volume, this assumes that both paths
+are on the $destination volume, and ignores the $base volume.  If this
+assumption may be wrong (like in VMS), trying to "unify" the paths
+abs2rel() results in nonsense.
 
 On systems that have a grammar that indicates filenames, this ignores the 
 $base filename as well. Otherwise all path components are assumed to be

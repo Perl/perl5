@@ -343,8 +343,10 @@ relative, then it is converted to absolute form using
 L</rel2abs()>. This means that it is taken to be relative to
 L<cwd()|Cwd>.
 
-On systems with the concept of a volume, this assumes that both paths 
-are on the $destination volume, and ignores the $base volume. 
+On systems with the concept of a volume, this assumes that both paths
+are on the $destination volume, and ignores the $base volume.  If this
+assumption may be wrong (like in VMS), trying to "unify" the paths with
+abs2rel() results in nonsense.
 
 On systems that have a grammar that indicates filenames, this ignores the 
 $base filename as well. Otherwise all path components are assumed to be
@@ -374,7 +376,7 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-        $base = $self->cwd();
+        $base = $self->_cwd();
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
@@ -418,9 +420,10 @@ Converts a relative path to an absolute path.
     $abs_path = File::Spec->rel2abs( $path ) ;
     $abs_path = File::Spec->rel2abs( $path, $base ) ;
 
-If $base is not present or '', then L<cwd()|Cwd> is used. If $base is relative, 
-then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()|Cwd>.
+If $base is not present or '', then L<cwd()|Cwd> is used. If $base is
+relative, then it is converted to absolute form using
+L</rel2abs()>. This means that it is taken to be relative to
+L<cwd()|Cwd>.
 
 On systems with the concept of a volume, this assumes that both paths 
 are on the $base volume, and ignores the $path volume. 
@@ -446,7 +449,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
         # Figure out the effective $base and clean it up.
         if ( !defined( $base ) || $base eq '' ) {
-	    $base = $self->cwd();
+	    $base = $self->_cwd();
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;
@@ -470,10 +473,10 @@ L<File::Spec>
 
 =cut
 
-# Internal routine to File::Spec, no point in publicly documenting
-# this interface since it's the standard Cwd interface.  Some of the
-# platform-specific File::Spec subclasses use this.
-sub cwd {
+# Internal routine to File::Spec, no point in making this public since
+# it is the standard Cwd interface.  Most of the platform-specific
+# File::Spec subclasses use this.
+sub _cwd {
     require Cwd;
     Cwd::cwd();
 }

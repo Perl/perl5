@@ -287,7 +287,7 @@ sub catpath {
 
 sub abs2rel {
     my($self,$path,$base) = @_;
-    $base = $self->cwd() unless defined $base and length $base;
+    $base = $self->_cwd() unless defined $base and length $base;
 
     for ($path, $base) {
       $_ = $self->canonpath($self->rel2abs($_));
@@ -296,7 +296,7 @@ sub abs2rel {
     my ($base_volume, $base_directories) = $self->splitpath($base, 1);
 
     if ($path_volume and not $base_volume) {
-        ($base_volume) = $self->splitpath($self->cwd);
+        ($base_volume) = $self->splitpath($self->_cwd);
     }
 
     # Can't relativize across volumes
@@ -326,7 +326,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
 
         if ( !defined( $base ) || $base eq '' ) {
-            $base = $self->cwd() ;
+            $base = $self->_cwd() ;
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;
