@@ -23,19 +23,21 @@ die "Patchlevel of perl ($patchlevel)",
 my $usage =
 "Usage:  installman --man1dir=/usr/wherever --man1ext=1
                    --man3dir=/usr/wherever --man3ext=3
+		   --batchlimit=40
 	           --notify --verbose --silent --help
 	Defaults are:
 	man1dir = $Config{'installman1dir'};
 	man1ext = $Config{'man1ext'};
 	man3dir = $Config{'installman3dir'};
 	man3ext = $Config{'man3ext'};
+        batchlimit is maximum number of pod files per invocation of pod2man
 	--notify  (or -n) just lists commands that would be executed.
         --verbose (or -V) report all progress.
         --silent  (or -S) be silent. Only report errors.\n";
 
 my %opts;
 GetOptions( \%opts,
-            qw( man1dir=s man1ext=s man3dir=s man3ext=s
+            qw( man1dir=s man1ext=s man3dir=s man3ext=s batchlimit=i
                 notify n help silent S verbose V)) 
 	|| die $usage;
 die $usage if $opts{help};
@@ -48,6 +50,7 @@ $opts{man3dir} = $Config{'installman3dir'}
     unless defined($opts{man3dir}); 
 $opts{man3ext} = $Config{'man3ext'}
     unless defined($opts{man3ext}); 
+$opts{batchlimit} ||= 40;
 $opts{silent} ||= $opts{S};
 $opts{notify} ||= $opts{n};
 $opts{verbose} ||= $opts{V} || $opts{notify};
@@ -71,24 +74,12 @@ runpod2man('pod', $opts{man1dir}, $opts{man1ext});
 runpod2man('lib', $opts{man3dir}, $opts{man3ext});
 
 # Install the pods embedded in the installed scripts
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'c2ph');
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'h2ph');
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'h2xs');
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'perlcc');
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'perldoc');
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'perlbug');
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'pl2pm');
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'splain');
-runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'dprofpp');
-runpod2man('x2p', $opts{man1dir}, $opts{man1ext}, 's2p');
-runpod2man('x2p', $opts{man1dir}, $opts{man1ext}, 'a2p.pod');
-runpod2man('x2p', $opts{man1dir}, $opts{man1ext}, 'find2perl');
-runpod2man('pod', $opts{man1dir}, $opts{man1ext}, 'pod2man');
-runpod2man('pod', $opts{man1dir}, $opts{man1ext}, 'pod2html');
-runpod2man('pod', $opts{man1dir}, $opts{man1ext}, 'pod2text');
-runpod2man('pod', $opts{man1dir}, $opts{man1ext}, 'pod2usage');
-runpod2man('pod', $opts{man1dir}, $opts{man1ext}, 'podchecker');
-runpod2man('pod', $opts{man1dir}, $opts{man1ext}, 'podselect');
+runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'c2ph', 'h2ph', 'h2xs',
+	   'perlcc', 'perldoc', 'perlbug', 'pl2pm', 'splain', 'dprofpp');
+runpod2man('x2p', $opts{man1dir}, $opts{man1ext}, 's2p', 'a2p.pod',
+	   'find2perl');
+runpod2man('pod', $opts{man1dir}, $opts{man1ext}, 'pod2man', 'pod2html',
+	   'pod2text', 'pod2usage', 'podchecker', 'podselect');
 
 # It would probably be better to have this page linked
 # to the c2ph man page.  Or, this one could say ".so man1/c2ph.1",
@@ -98,9 +89,9 @@ runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'pstruct');
 runpod2man('lib/ExtUtils', $opts{man1dir}, $opts{man1ext}, 'xsubpp');
 
 sub runpod2man {
-    # $script is script name if we are installing a manpage embedded 
-    # in a script, undef otherwise
-    my($poddir, $mandir, $manext, $script) = @_;
+    # @script is scripts names if we are installing manpages embedded 
+    # in scripts, () otherwise
+    my($poddir, $mandir, $manext, @script) = @_;
 
     my($downdir); # can't just use .. when installing xsubpp manpage
 
@@ -109,8 +100,12 @@ sub runpod2man {
     my($builddir) = Cwd::getcwd();
 
     if ($mandir eq ' ' or $mandir eq '') {
-	warn "Skipping installation of ",
-	    ($script ? "$poddir/$script man page" : "$poddir man pages"), ".\n";
+	if (@script) {
+	    warn "Skipping installation of $poddir/$_ man page.\n"
+		foreach @script;
+	} else {
+	    warn "Skipping installation of $poddir man pages.\n";
+	}
 	return;
     }
 
@@ -134,13 +129,14 @@ sub runpod2man {
     # Make a list of all the .pm and .pod files in the directory.  We will
     # always run pod2man from the lib directory and feed it the full pathname
     # of the pod.  This might be useful for pod2man someday.
-    if ($script) {
-	@modpods = ($script);
+    if (@script) {
+	@modpods = @script;
     }
     else {
 	@modpods = ();
 	File::Find::find(\&lsmodpods, '.');
     }
+    my @to_process;
     foreach my $mod (@modpods) {
 	my $manpage = $mod;
 	my $tmp;
@@ -159,14 +155,24 @@ sub runpod2man {
 	}
 	$tmp = "${mandir}/${manpage}.tmp";
 	$manpage = "${mandir}/${manpage}.${manext}";
-	if (&cmd("$pod2man $mod > $tmp") == 0 && !$opts{notify} && -s $tmp) {
-	    if (rename($tmp, $manpage)) {
-		$packlist->{$manpage} = { type => 'file' };
-		next;
+	push @to_process, [$mod, $tmp, $manpage];
+    }
+    # Don't do all pods in same command to avoid busting command line limits
+    while (my @this_batch = splice @to_process, 0, $opts{batchlimit}) {
+	my $cmd = join " ", $pod2man, map "$$_[0] $$_[1]", @this_batch;
+	if (&cmd($cmd) == 0 && !$opts{notify}) {
+	    foreach (@this_batch) {
+		my (undef, $tmp, $manpage) = @$_;
+		if (-s $tmp) {
+		    if (rename($tmp, $manpage)) {
+			$packlist->{$manpage} = { type => 'file' };
+			next;
+		    }
+		}
+		unless ($opts{notify}) {
+		    unlink($tmp);
+		}
 	    }
-	}
-	unless ($opts{notify}) {
-	    unlink($tmp);
 	}
     }
     chdir "$builddir" || die "Unable to cd back to $builddir directory!\n$!\n";
