@@ -472,7 +472,18 @@ sub seq_b { return $_[0]{alt} ? "``$_[1]''" : $_[1] }
 sub seq_f { return $_[0]{alt} ? "\"$_[1]\"" : $_[1] }
 sub seq_i { return '*' . $_[1] . '*' }
 sub seq_c {
-    return $_[0]{alt} ? "``$_[1]''" : "$_[0]{LQUOTE}$_[1]$_[0]{RQUOTE}"
+    return $_[0]{alt}
+        ? "``$_[1]''"
+	: $_[0]{LQUOTE} eq '"' &&
+	  $_[1] =~ /^\s*(?:   # Some heuristics to avoid some overquoting
+	    (['`"]).*\1                           # already quoted 
+	    |\$+[\^#]?\S(\[.*\]|\{.*\})?          # control or punct var?
+	    |[\$#\@%&*]+[:'\w]+(\[.*\]|\{.*\})?   # a "plain" var or func?
+	    |[\$#\@%&*]*[:'\w]+(->)?\(\s*[^\s,]\s*\) # a call, 0 or 1 args?
+	    |[:'\w]+                              # a word
+	    )\s*\z/x
+	    ? $_[1]
+	    : "$_[0]{LQUOTE}$_[1]$_[0]{RQUOTE}"
 }
 
 # The complicated one.  Handle links.  Since this is plain text, we can't
