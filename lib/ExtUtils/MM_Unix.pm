@@ -1,7 +1,7 @@
 package ExtUtils::MM_Unix;
 
-$VERSION = substr q$Revision: 1.101 $, 10;
-# $Id: MM_Unix.pm,v 1.101 1996/06/23 20:51:18 k Exp k $
+$VERSION = substr q$Revision: 1.105 $, 10;
+# $Id: MM_Unix.pm,v 1.105 1996/07/08 20:51:18 k Exp k $
 
 require Exporter;
 use Config;
@@ -97,12 +97,12 @@ sub catdir {
     my @args = @_;
     for (@args) {
 	# append a slash to each argument unless it has one there
-	$_ .= "/" unless substr($_,length($_)-1,1) eq "/";
+	$_ .= "/" if $_ eq '' or substr($_,-1) ne "/";
     }
     my $result = join('', @args);
     # remove a trailing slash unless we are root
-    substr($result,length($result)-1,1) = ""
-	if length($result) > 1 && substr($result,length($result)-1,1) eq "/";
+    substr($result,-1) = ""
+	if length($result) > 1 && substr($result,-1) eq "/";
     $result;
 }
 
@@ -227,10 +227,11 @@ sub ExtUtils::MM_Unix::xsubpp_version ;
 
 package ExtUtils::MM_Unix;
 
-#use SelfLoader;
+use SelfLoader;
 
 1;
-#__DATA__
+
+__DATA__
 
 =head2 SelfLoaded methods
 
@@ -249,7 +250,7 @@ sub c_o {
     my(@m);
     push @m, '
 .c$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
+	$(CCCMD) $(MAB) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
 
 .C$(OBJ_EXT):
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.C
@@ -564,16 +565,13 @@ makemakerdflt: all
 
 # Where is the Config information that we are using/depend on
 CONFIGDEP = \$(PERL_ARCHLIB)/Config.pm \$(PERL_INC)/config.h
-};
 
-    my @parentdir = split(/::/, $self->{PARENT_NAME});
-    push @m, q{
 # Where to put things:
-INST_LIBDIR      = }. $self->catdir('$(INST_LIB)',@parentdir)        .q{
-INST_ARCHLIBDIR  = }. $self->catdir('$(INST_ARCHLIB)',@parentdir)    .q{
+INST_LIBDIR      = $self->{INST_LIBDIR}
+INST_ARCHLIBDIR  = $self->{INST_ARCHLIBDIR}
 
-INST_AUTODIR     = }. $self->catdir('$(INST_LIB)','auto','$(FULLEXT)')       .q{
-INST_ARCHAUTODIR = }. $self->catdir('$(INST_ARCHLIB)','auto','$(FULLEXT)')   .q{
+INST_AUTODIR     = $self->{INST_AUTODIR}
+INST_ARCHAUTODIR = $self->{INST_ARCHAUTODIR}
 };
 
     if ($self->has_link_code()) {
@@ -991,7 +989,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     }
     $ldfrom = "-all $ldfrom -none" if ($^O eq 'dec_osf');
     push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ $(LDDLFLAGS) '.$ldfrom.
-		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
+		' $(OTHERLDFLAGS) $(MAB) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
     push @m, '
 	$(CHMOD) 755 $@
 ';
@@ -1149,8 +1147,8 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     foreach $name ($self->lsdir($self->curdir)){
 	next if $name eq $self->curdir or $name eq $self->updir or $ignore{$name};
 	next unless $self->libscan($name);
+	next if -l $name; # We do not support symlinks at all
 	if (-d $name){
-	    next if -l $name; # We do not support symlinks at all
 	    $dir{$name} = $name if (-f $self->catfile($name,"Makefile.PL"));
 	} elsif ($name =~ /\.xs$/){
 	    my($c); ($c = $name) =~ s/\.xs$/.c/;
@@ -1224,7 +1222,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	    }
 	    my($path, $prefix) = ($File::Find::name, '$(INST_LIBDIR)');
 	    my($striplibpath,$striplibname);
-	    $prefix =  '$(INST_LIB)' if (($striplibpath = $path) =~ s:^(\W*)lib\W:$1:);
+	    $prefix =  '$(INST_LIB)' if (($striplibpath = $path) =~ s:^(\W*)lib\W:$1:i);
 	    ($striplibname,$striplibpath) = fileparse($striplibpath);
 	    my($inst) = $self->catfile($prefix,$striplibpath,$striplibname);
 	    local($_) = $inst; # for backwards compatibility
@@ -1475,6 +1473,13 @@ EOM
     }
     $self->{INST_ARCHLIB} ||= $self->catdir($self->curdir,"blib","arch");
     $self->{INST_BIN} ||= $self->catdir($self->curdir,'blib','bin');
+
+    # We need to set up INST_LIBDIR before init_libscan() for VMS
+    my @parentdir = split(/::/, $self->{PARENT_NAME});
+    $self->{INST_LIBDIR} = $self->catdir('$(INST_LIB)',@parentdir);
+    $self->{INST_ARCHLIBDIR} = $self->catdir('$(INST_ARCHLIB)',@parentdir);
+    $self->{INST_AUTODIR} = $self->catdir('$(INST_LIB)','auto','$(FULLEXT)');
+    $self->{INST_ARCHAUTODIR} = $self->catdir('$(INST_ARCHLIB)','auto','$(FULLEXT)');
 
     # INST_EXE is deprecated, should go away March '97
     $self->{INST_EXE} ||= $self->catdir($self->curdir,'blib','script');
@@ -1965,6 +1970,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
     $linkcmd = join ' ', "\$(CC)",
 	    grep($_, @Config{qw(large split ldflags ccdlflags)});
     $linkcmd =~ s/\s+/ /g;
+    $linkcmd =~ s,(perl\.exp),\$(PERL_INC)/$1,;
 
     # Which *.a files could we make use of...
     local(%static);
@@ -2366,6 +2372,8 @@ sub path {
     my $path = $ENV{PATH};
     $path =~ s:\\:/:g if $Is_OS2;
     my @path = split $path_sep, $path;
+    foreach(@path) { $_ = '.' if $_ eq '' }
+    @path;
 }
 
 =item perl_script
@@ -2601,14 +2609,14 @@ sub static_lib {
     my(@m);
     push(@m, <<'END');
 $(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)/.exists
-	$(RM_RF) $@
 END
     # If this extension has it's own library (eg SDBM_File)
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
     push(@m, "\t$self->{CP} \$(MYEXTLIB) \$\@\n") if $self->{MYEXTLIB};
 
     push @m,
-q{	$(AR) $(AR_STATIC_ARGS) $@ $(OBJECT) && $(RANLIB) $@
+q{	$(RM_RF) $@
+	$(AR) $(AR_STATIC_ARGS) $@ $(OBJECT) && $(RANLIB) $@
 	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)/extralibs.ld
 	$(CHMOD) 755 $@
 };
@@ -3102,7 +3110,7 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
     '
 .xs$(OBJ_EXT):
 	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs >xstmp.c && mv xstmp.c $*.c
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
+	$(CCCMD) $(MAB) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
 ';
 }
 
