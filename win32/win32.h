@@ -27,7 +27,9 @@ typedef long long __int64;
 /* GCC does not do __declspec() - render it a nop 
  * and turn on options to avoid importing data 
  */
+#ifndef __declspec
 #  define __declspec(x)
+#endif
 #  ifndef PERL_OBJECT
 #    define PERL_GLOBAL_STRUCT
 #    define MULTIPLICITY
@@ -213,7 +215,9 @@ struct mgvtbl {								\
 
 typedef long		uid_t;
 typedef long		gid_t;
+#ifndef _environ
 #define _environ	environ
+#endif
 #define flushall	_flushall
 #define fcloseall	_fcloseall
 

@@ -3798,7 +3798,7 @@ PP(pp_unpack)
 		char hunk[4];
 
 		hunk[3] = '\0';
-		len = (*s++ - ' ') & 077;
+		len = uudmap[*s++] & 077;
 		while (len > 0) {
 		    if (s < strend && ISUUCHAR(*s))
 			a = uudmap[*s++] & 077;
