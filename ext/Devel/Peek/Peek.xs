@@ -141,7 +141,7 @@ PPCODE:
     SV *dumpop = perl_get_sv("Devel::Peek::dump_ops", FALSE);
     I32 save_dumpindent = PL_dumpindent;
     PL_dumpindent = 2;
-    do_sv_dump(0, PerlIO_stderr(), sv, 0, 4, dumpop && SvTRUE(dumpop), pv_lim);
+    do_sv_dump(0, PerlIO_stderr(), sv, 0, lim, dumpop && SvTRUE(dumpop), pv_lim);
     PL_dumpindent = save_dumpindent;
 }
 

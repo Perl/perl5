@@ -57,7 +57,8 @@ C<CV>.  Devel::Peek also supplies C<SvREFCNT()>, C<SvREFCNT_inc()>, and
 C<SvREFCNT_dec()> which can query, increment, and decrement reference
 counts on SVs.  This document will take a passive, and safe, approach
 to data debugging and for that it will describe only the C<Dump()>
-function.
+function.  For format of output of mstats() see
+L<perldebug/Using C<$ENV{PERL_DEBUG_MSTATS}>>.
 
 Function C<DumpArray()> allows dumping of multiple values (useful when you
 need to analize returns of functions).
@@ -83,7 +84,7 @@ expect to see it well-thumbed.
 
 Let's begin by looking a simple scalar which is holding a string.
 
-        use Devel::Peek 'Dump';
+        use Devel::Peek;
         $a = "hello";
         Dump $a;
 
@@ -112,7 +113,7 @@ end-of-string marker).
 
 If the scalar contains a number the raw SV will be leaner.
 
-        use Devel::Peek 'Dump';
+        use Devel::Peek;
         $a = 42;
         Dump $a;
 
@@ -132,7 +133,7 @@ see what is in the scalar.
 
 If the scalar from the previous example had an extra reference:
 
-        use Devel::Peek 'Dump';
+        use Devel::Peek;
         $a = 42;
         $b = \$a;
         Dump $a;
@@ -152,7 +153,7 @@ instead of C<$a>.
 
 This shows what a reference looks like when it references a simple scalar.
 
-        use Devel::Peek 'Dump';
+        use Devel::Peek;
         $a = 42;
         $b = \$a;
         Dump $b;
@@ -183,7 +184,7 @@ address may change during lifetime of an SV.
 
 This shows what a reference to an array looks like.
 
-        use Devel::Peek 'Dump';
+        use Devel::Peek;
         $a = [42];
         Dump $a;
 
@@ -258,7 +259,7 @@ report tree).
 
 The following shows the raw form of a reference to a hash.
 
-        use Devel::Peek 'Dump';
+        use Devel::Peek;
         $a = {hello=>42};
         Dump $a;
 
@@ -293,7 +294,7 @@ The C<Dump()> function, by default, dumps up to 4 elements from a
 toplevel array or hash.  This number can be increased by supplying a
 second argument to the function.
 
-        use Devel::Peek 'Dump';
+        use Devel::Peek;
         $a = [10,11,12,13,14];
         Dump $a;
 
