@@ -4,7 +4,7 @@ perlapio - perl's IO abstraction interface.
 
 =head1 SYNOPSIS
 
-    #define PERLIO_NOT_STDIO 0    /* For co-existance with stdio only */
+    #define PERLIO_NOT_STDIO 0    /* For co-existence with stdio only */
     #include <perlio.h>           /* Usually via #include <perl.h> */
 
     PerlIO *PerlIO_stdin(void);
@@ -112,10 +112,10 @@ The USE_PERLIO implementation is described in L<perliol>.
 =back
 
 Because "perlio.h" is a thing layer (for efficiency) the semantics of these functions are
-somewhat dependant on the the underlying implementation. Where these variations are
+somewhat dependent on the the underlying implementation. Where these variations are
 understood they are noted below.
 
-Unless otherwise noted functions returns 0 on sucess, or a negative value (usually
+Unless otherwise noted, functions return 0 on success, or a negative value (usually
 C<EOF> which is usually -1) and set C<errno> on error.
 
 =over 4
@@ -130,11 +130,11 @@ values.
 
 =item B<PerlIO_open(path, mode)>, B<PerlIO_fdopen(fd,mode)>
 
-These correspond to fopen()/fdopen() arguments are the same.
-Returns C<NULL> and sets C<errno> if there is an error.
-There may be implementation limit on number of open handles, which may
+These correspond to fopen()/fdopen() and the arguments are the same.
+Return C<NULL> and set C<errno> if there is an error.
+There may be an implementation limit on the number of open handles, which may
 be lower than the limit on the number of open files - C<errno> may
-not be when C<NULL> is returned if this limnit is exceeded.
+not be set when C<NULL> is returned if this limnit is exceeded.
 
 =item B<PerlIO_reopen(path,mode,f)
 
@@ -187,7 +187,7 @@ certain, and then only if it is the last character that was read from the handle
 
 This corresponds to getc().
 Despite the c in the name only byte range 0..0xFF is supported.
-Returns the charactr read or -1 (C<EOF>) on error.
+Returns the character read or -1 (C<EOF>) on error.
 
 =item B<PerlIO_eof(f)>
 
@@ -204,7 +204,7 @@ Returns a true/false indication of whether there has been an IO error on the han
 =item B<PerlIO_fileno(f)>
 
 This corresponds to fileno(), note that on some platforms,
-the meaning of "fileno" may not match Unix. Returns -1 if the handle has not
+the meaning of "fileno" may not match Unix. Returns -1 if the handle has no
 open descriptor associated with it.
 
 =item B<PerlIO_clearerr(f)>
@@ -235,7 +235,7 @@ as stdio's C<off_t>.
 This corresponds to ftell().
 Returns the current file position, or (Off_t) -1 on error.
 May just return value system "knows" without making a system call or checking
-the underlying file descriptior (so use on shared file descriptors is not
+the underlying file descriptor (so use on shared file descriptors is not
 safe without a PerlIO_seek()). Return value is of type C<Off_t> which is a perl Configure
 value which may not be same  as stdio's C<off_t>.
 
@@ -243,7 +243,7 @@ value which may not be same  as stdio's C<off_t>.
 
 These correspond (loosely) to fgetpos() and fsetpos(). Rather than stdio's Fpos_t
 they expect a "Perl Scalar Value" to be passed. What is stored there should
-be considered opaque. They layout of the data may vary from handle to handle.
+be considered opaque. The layout of the data may vary from handle to handle.
 When not using stdio or if platform does not have the stdio calls then they are
 implemented in terms of PerlIO_tell() and PerlIO_seek().
 
@@ -259,7 +259,7 @@ This corresponds to rewind(). It is usually defined as being
 
 This corresponds to tmpfile(), i.e., returns an anonymous
 PerlIO  or NULL on error.
-The system will attempt to automatically be delete then file when closed.
+The system will attempt to automatically delete the file when closed.
 On Unix the file is usually C<unlink>-ed just after
 it is created so it does not matter how it gets closed. On other systems the file may
 only be deleted if closed via PerlIO_close() and/or the program exits via C<exit>.
@@ -271,7 +271,7 @@ than ad. hoc. schemes.
 
 This corresponds to setlinebuf().
 Does not return a value. What constitutes a "line" is implementation
-dependant but usually means that writing "\n" flushes the buffer.
+dependent but usually means that writing "\n" flushes the buffer.
 What happens with things like "this\nthat" is uncertain.
 (Perl core uses it I<only> when "dumping"; it has nothing to do with $| auto-flush.)
 
@@ -293,7 +293,7 @@ default at some point).  That prevents "perlio.h" from attempting to
 #define stdio functions onto PerlIO functions.
 
 XS code is probably better using "typemap" if it expects FILE * arguments.
-The standard typemap will be adjusted to comprehend and changes in this area.
+The standard typemap will be adjusted to comprehend any changes in this area.
 
 =over 4
 
@@ -308,7 +308,7 @@ as in fopen/freopen.
 
 =item B<PerlIO_exportFILE(f,flags)>
 
-Given an PerlIO * return a 'native' FILE * suitable for
+Given a PerlIO * return a 'native' FILE * suitable for
 passing to code expecting to be compiled and linked with
 ANSI C I<stdio.h>.
 
@@ -378,7 +378,7 @@ Set pointer into buffer, and a count of bytes still in the
 buffer. Should be used only to set
 pointer to within range implied by previous calls
 to C<PerlIO_get_ptr> and C<PerlIO_get_cnt>. The two values I<must> be consistent
-with each other (implementartion may only use one or the other or may require both).
+with each other (implementation may only use one or the other or may require both).
 
 =item B<PerlIO_canset_cnt(f)>
 
@@ -452,7 +452,7 @@ Portable cases are:
 and
     PerlIO_binmode(f,ptype,O_TEXT,":crlf");
 
-On Unix these calls probably haver no effect what so ever.
+On Unix these calls probably have no effect whatsoever.
 Elsewhere they alter "\n" to CR,LF translation and possibly cause a special
 text "end of file" indicator to be written or honoured on read. The effect of
 making the call after doing any IO to the handle depends on the implementation. (It may be
