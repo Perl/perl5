@@ -632,7 +632,7 @@ T_OPAQUE_array( a,b,c)
   int b
   int c
  PREINIT:
-  int array[2];
+  int array[3];
  CODE:
   array[0] = a;
   array[1] = b;
