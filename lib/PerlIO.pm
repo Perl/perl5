@@ -33,8 +33,10 @@ PerlIO - On demand loader for PerlIO layers and root of PerlIO::* name space
 
 =head1 SYNOPSIS
 
-  open($fh,">:crlf","my.txt")
-  open($fh,">:raw","his.jpg")
+  open($fh,">:crlf", "my.txt"); # portably open a text file for writing
+
+  open($fh,"<","his.jpg");      # portably open a binary file for reading
+  binmode($fh);
 
   Shell:
     PERLIO=perlio perl ....
@@ -107,6 +109,8 @@ on output perl will warn if a "wide" character is written
 to a such a stream.
 
 =item raw
+
+B<Note that the explicit use of the C<raw> layer is deprecated.>
 
 A pseudo-layer which performs two functions (which is messy, but
 necessary to maintain compatibility with non-PerlIO builds of Perl
