@@ -32,6 +32,123 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8148] By: jhi                                   on 2000/12/17  18:39:16
+        Log: Subject: [PATCH] Fcntl constants speedup
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 17 Dec 2000 16:29:24 +0000
+             Message-ID: <20001217162924.E97668@plum.flirble.org>
+             
+             Use IVs for the Fcntl constants instead of NVs.
+     Branch: perl
+	   ! ext/Fcntl/Fcntl.pm ext/Fcntl/Fcntl.xs t/op/goto_xs.t
+____________________________________________________________________________
+[  8147] By: jhi                                   on 2000/12/17  18:33:41
+        Log: Add test for #8145 (binmode() warning), add warning for
+             ioctl() and sockpair(), document them. (fileno() cannot
+             be tripwired with the same kind of warning because
+             'defined fileno($foo)' seems to be an idiom.)
+     Branch: perl
+	   ! pod/perldiag.pod pp_sys.c t/pragma/warn/pp_sys
+____________________________________________________________________________
+[  8146] By: gsar                                  on 2000/12/17  18:09:08
+        Log: update Changes
+     Branch: maint-5.6/perl
+	   ! Changes
+____________________________________________________________________________
+[  8145] By: jhi                                   on 2000/12/17  17:39:35
+        Log: Subject: [PATCH] Re: The long awaited feature ...
+             From: Simon Cozens <simon@cozens.net>
+             Date: Sun, 17 Dec 2000 12:31:56 +0000
+             Message-ID: <20001217123156.A3891@deep-dark-truthful-mirror.perlhacker.org>
+             
+             Add a warning to binmode() about using bad filehandles
+             (can happen e.g. if someone forgets the filehandle argument)
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  8144] By: jhi                                   on 2000/12/17  17:33:48
+        Log: Subject: [patch perl@8133] Typo in my Net::Ping doc patch :(
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Sun, 17 Dec 2000 17:08:10 +0000 (GMT)
+             Message-ID: <Pine.LNX.4.10.10012171700010.3834-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[  8143] By: jhi                                   on 2000/12/17  05:31:37
+        Log: Polymorphic regexps.
+             
+             Fixes at least the bugs 20001028.003 (both of them...) and
+             20001108.001.  The bugs 20001114.001 and 20001205.014 seem
+             also to be fixed by now, probably already before this patch.
+     Branch: perl
+	   ! embed.h embed.pl mg.c objXSUB.h pp_ctl.c pp_hot.c proto.h
+	   ! regcomp.c regcomp.h regcomp.sym regexec.c regnodes.h sv.c
+	   ! t/op/utf8decode.t t/pragma/utf8.t
+____________________________________________________________________________
+[  8142] By: jhi                                   on 2000/12/16  17:16:05
+        Log: Subject: [patch perl@8102] dos/djgpp update
+             From: Laszlo Molnar <ml1050@freemail.hu>
+             Date: Sat, 16 Dec 2000 01:40:52 +0100
+             Message-ID: <20001216014052.A335@freemail.hu>
+     Branch: perl
+	   ! djgpp/config.over t/base/commonsense.t
+____________________________________________________________________________
+[  8141] By: jhi                                   on 2000/12/16  17:09:27
+        Log: Few uncheckedin files.
+     Branch: perl
+	   ! global.sym perlapi.c pod/perlapi.pod pod/perlintern.pod
+____________________________________________________________________________
+[  8140] By: nick                                  on 2000/12/15  22:14:31
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 53 files)
+____________________________________________________________________________
+[  8139] By: jhi                                   on 2000/12/15  19:49:49
+        Log: One more IVUV tweak from Nicholas Clark.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8138] By: jhi                                   on 2000/12/15  19:17:06
+        Log: Return of the IVUV-preservation, now seems to be happy even
+             in Digital UNIX (the broken strtoul brokenness detection
+             seems to have been the fly in the ointment).
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com embed.h embed.pl epoc/config.sh
+	   ! objXSUB.h op.c perl.h pp.c pp_hot.c proto.h sv.c sv.h
+	   ! t/lib/peek.t t/op/cmp.t t/op/numconvert.t uconfig.h
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  8137] By: jhi                                   on 2000/12/15  18:12:14
+        Log: Metaconfig unit change for #8136.
+     Branch: metaconfig
+	   ! U/modified/d_strtoul.U
+     Branch: metaconfig/U/perl
+	   ! d_strtoull.U d_strtouq.U
+____________________________________________________________________________
+[  8136] By: jhi                                   on 2000/12/15  18:11:35
+        Log: I don't think it's sensible or portable to test the strtou*
+             on /^-/ strings.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  8135] By: jhi                                   on 2000/12/15  17:18:49
+        Log: Metaconfig unit change for #8134.
+     Branch: metaconfig
+	   ! U/modified/d_strtoul.U
+____________________________________________________________________________
+[  8134] By: jhi                                   on 2000/12/15  17:14:13
+        Log: If longsize is 8 we don't need a LL suffix for integer constants.x
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  8133] By: jhi                                   on 2000/12/15  16:00:23
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8132] By: jhi                                   on 2000/12/15  15:44:16
         Log: Some compilers get huffy if you do not cast a const pointer
              to a non-const when assigning.
