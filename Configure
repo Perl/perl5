@@ -1682,7 +1682,7 @@ EOM
 	$test -d /usr/include/minix && osname=minix
 	if $test -d /MachTen; then
 		osname=machten 
-		if $test -x /sbin/version; then
+		if $test -x /sbin/version -o -d /MachTen_Folder; then
 			osvers=`/sbin/version | $awk '{print $2}' | 
 			$sed -e 's/[A-Za-z]$//'`
 		elif $test -x /usr/etc/version; then
@@ -10290,7 +10290,7 @@ d_pwchange='$d_pwchange'
 d_pwclass='$d_pwclass'
 d_pwcomment='$d_pwcomment'
 d_pwexpire='$d_pwexpire'
-d_pwgecos='$d_pwquota'
+d_pwgecos='$d_pwgecos'
 d_pwquota='$d_pwquota'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'

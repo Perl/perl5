@@ -113,6 +113,8 @@ patch' entry in patchlevel.h.
 Watch for announcements of maintenance subversions in
 comp.lang.perl.announce.
 
+The first rule of maintenance work is "First, do no harm."
+
 =head2 Why such a complicated scheme?
 
 Two reasons, really.  At least.
@@ -223,6 +225,11 @@ units, which tends to be complicated operations.  But be careful, this
 can quickly spiral out of control.  Running metaconfig is not really
 hard.
 
+Finally, the sample files in the F<Porting/> subdirectory are
+generated automatically by the script F<U/mksample> included 
+with the metaconfig units.  See L<"run metaconfig"> below for
+information on obtaining the metaconfig units.
+
 =head1 How to Make a Distribution
 
 There really ought to be a 'make dist' target, but there isn't.
@@ -275,16 +282,16 @@ change the appropriate metaconfig units instead, and regenerate Configure.
 
 	metaconfig -m
 
-will regenerate Configure and config_h.SH.  More information on
-obtaining and running metaconfig is in the F<U/README> file that comes
-with Perl's metaconfig units.  Perl's metaconfig units should be
-available the same place you found this file.  On CPAN, look under my
-directory F<authors/id/ANDYD/> for a file such as F<5.003_07-02.U.tar.gz>.
-That file should be unpacked in your main perl source directory.  It
-contains the files needed to run B<metaconfig> to reproduce Perl's
-Configure script.  (Those units are for 5.003_07.  There have been
-changes since then; please contact me if you want more recent
-versions, and I will try to point you in the right direction.)
+will regenerate Configure and config_h.SH.  Much more information
+on obtaining and running metaconfig is in the F<U/README> file
+that comes with Perl's metaconfig units.  Perl's metaconfig units
+should be available on CPAN.  A set of units that will work with
+perl5.005 is in the file F<mc_units-5.005_00-01.tar.gz> under
+http://www.perl.com/CPAN/authors/id/ANDYD/ .  The mc_units tar file
+should be unpacked in your main perl source directory.  Note: those
+units were for use with 5.005.  There may have been changes since then.
+Check for later versions or contact perl5-porters@perl.org to obtain a
+pointer to the current version.
 
 Alternatively, do consider if the F<*ish.h> files might be a better
 place for your changes.
@@ -299,17 +306,7 @@ program for this.  You can also use
 Both commands will also list extra files in the directory that are not
 listed in MANIFEST.
 
-The MANIFEST is normally sorted, with one exception.  Perl includes
-both a F<Configure> script and a F<configure> script.  The
-F<configure> script is a front-end to the main F<Configure>, but
-is there to aid folks who use autoconf-generated F<configure> files
-for other software.  The problem is that F<Configure> and F<configure>
-are the same on case-insensitive file systems, so I deliberately put
-F<configure> first in the MANIFEST so that the extraction of
-F<Configure> will overwrite F<configure> and leave you with the
-correct script.  (The F<configure> script must also have write
-permission for this to work, so it's the only file in the distribution
-I normally have with write permission.)
+The MANIFEST is normally sorted.
 
 If you are using metaconfig to regenerate Configure, then you should note
 that metaconfig actually uses MANIFEST.new, so you want to be sure
@@ -322,14 +319,15 @@ learned how to use the full suite of tools in the dist distribution.
 All the tests in the t/ directory ought to be executable.  The
 main makefile used to do a 'chmod t/*/*.t', but that resulted in
 a self-modifying distribution--something some users would strongly
-prefer to avoid.  Probably, the F<t/TEST> script should check for this
-and do the chmod if needed, but it doesn't currently.
+prefer to avoid.  The F<t/TEST> script will check for this
+and do the chmod if needed, but the tests still ought to be
+executable.
 
 In all, the following files should probably be executable:
 
     Configure
     configpm
-    configure
+    configure.gnu
     embed.pl
     installperl
     installman
@@ -342,7 +340,6 @@ In all, the following files should probably be executable:
     *.SH
     vms/ext/Stdio/test.pl
     vms/ext/filespec.t
-    vms/fndvers.com
     x2p/*.SH
 
 Other things ought to be readable, at least :-).
@@ -357,18 +354,43 @@ permissions for system files; something like that might be appropriate.
 =head2 Run Configure
 
 This will build a config.sh and config.h.  You can skip this if you haven't
-changed Configure or config_h.SH at all.
+changed Configure or config_h.SH at all.  I use the following command
 
-=head2 Update config_H
+    sh Configure -Dprefix=/opt/perl -Doptimize=-O -Dusethreads \
+	-Dcf_by='yourname' \
+	-Dcf_email='yourname@yourhost.yourplace.com' \
+	-Dperladmin='yourname@yourhost.yourplace.com' \
+	-Dmydomain='.yourplace.com' \
+	-Dmyhostname='yourhost' \
+	-des
 
-The config_H file is provided to help those folks who can't run Configure.
-It is important to keep it up-to-date.  If you have changed config_h.SH,
-those changes must be reflected in config_H as well.  (The name config_H was
-chosen to distinguish the file from config.h even on case-insensitive file
-systems.)  Simply edit the existing config_H file; keep the first few
-explanatory lines and then copy your new config.h below.
+=head2 Update Porting/config.sh and Porting/config_H
 
-It may also be necessary to update vms/config.vms and
+[XXX 
+This section needs revision.  We're currently working on easing
+the task of keeping the vms, win32, and plan9 config.sh info
+up-to-date.  The plan is to use keep up-to-date 'canned' config.sh
+files in the appropriate subdirectories and then generate 'canned'
+config.h files for vms, win32, etc. from the generic config.sh file.
+This is to ease maintenance.  When Configure gets updated, the parts
+sometimes get scrambled around, and the changes in config_H can
+sometimes be very hard to follow.  config.sh, on the other hand, can
+safely be sorted, so it's easy to track (typically very small) changes
+to config.sh and then propoagate them to a canned 'config.h' by any
+number of means, including a perl script in win32/ or carrying 
+config.sh and config_h.SH to a Unix system and running sh
+config_h.SH.)
+XXX]
+
+The Porting/config.sh and Porting/config_H files are provided to
+help those folks who can't run Configure.  It is important to keep
+them up-to-date.  If you have changed config_h.SH, those changes must
+be reflected in config_H as well.  (The name config_H was chosen to
+distinguish the file from config.h even on case-insensitive file systems.)
+Simply edit the existing config_H file; keep the first few explanatory
+lines and then copy your new config.h below.
+
+It may also be necessary to update win32/config.?c, vms/config.vms and
 plan9/config.plan9, though you should be quite careful in doing so if
 you are not familiar with those systems.  You might want to issue your
 patch with a promise to quickly issue a follow-up that handles those
@@ -391,13 +413,13 @@ task.
 
 Some additional notes from Larry on this:
 
-Don't forget to regenerate perly.c.diff.
+Don't forget to regenerate perly_c.diff.
 
     byacc -d perly.y
     mv y.tab.c perly.c
-    patch perly.c <perly.c.diff
+    patch perly.c <perly_c.diff
     # manually apply any failed hunks
-    diff -c2 perly.c.orig perly.c >perly.c.diff
+    diff -c2 perly.c.orig perly.c >perly_c.diff
 
 One chunk of lines that often fails begins with
 
@@ -1148,12 +1170,13 @@ described in F<INSTALL>.  AFS users also are treated specially.
 We should probably duplicate the metaconfig prefix stuff for an
 install prefix.
 
-=item Configure -Dsrcdir=/blah/blah
+=item Configure -Dsrc=/blah/blah
 
 We should be able to emulate B<configure --srcdir>.  Tom Tromey
 tromey@creche.cygnus.com has submitted some patches to
-the dist-users mailing list along these lines.  Eventually, they ought
-to get folded back into the main distribution.
+the dist-users mailing list along these lines.  They have been folded
+back into the main distribution, but various parts of the perl
+Configure/build/install process still assume src='.'.
 
 =item Hint file fixes
 
@@ -1251,12 +1274,6 @@ Get some of the Macintosh stuff folded back into the main distribution.
 Maybe include a replacement function that doesn't lose data in rare
 cases of coercion between string and numerical values.
 
-=item long long
-
-Can we support C<long long> on systems where C<long long> is larger
-than what we've been using for C<IV>?  What if you can't C<sprintf>
-a C<long long>?
-
 =item Improve makedepend
 
 The current makedepend process is clunky and annoyingly slow, but it
@@ -1293,4 +1310,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.13.1 1998/04/24 12:03:17 doughera Released $
+$Id: pumpkin.pod,v 1.22 1998/07/22 16:33:55 doughera Released $

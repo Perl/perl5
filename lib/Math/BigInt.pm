@@ -76,8 +76,8 @@ sub external { #(int_num_array) return num_str
 # Negate input value.
 sub bneg { #(num_str) return num_str
     local($_) = &bnorm(@_);
-    vec($_,0,8) ^= ord('+') ^ ord('-') unless $_ eq '+0';
-    s/^H/N/;
+    return $_ if $_ eq '+0' or $_ eq 'NaN';
+    vec($_,0,8) ^= ord('+') ^ ord('-');
     $_;
 }
 
@@ -100,7 +100,7 @@ sub bcmp { #(num_str, num_str) return cond_code
     } elsif ($y eq 'NaN') {
 	undef;
     } else {
-	&cmp($x,$y);
+	&cmp($x,$y) <=> 0;
     }
 }
 

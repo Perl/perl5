@@ -10,6 +10,12 @@
 #
 # With thanks to Tom Horsley for the seed code.
 
+# Todo:
+# patchls should probably be enhanced to record Index: names and delay
+# processing the name till either a patch or another Index: is seen.
+# If the following patch has the same base name as the Index then
+# ignore the index. Otherwise Index:'s the don't have the leading path
+# confuse patchls when -pN is used.
 
 use Getopt::Std;
 use Text::Wrap qw(wrap $columns);

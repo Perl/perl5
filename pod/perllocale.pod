@@ -169,15 +169,23 @@ combination of language, country or territory, and codeset.  Read on for
 hints on the naming of locales: not all systems name locales as in the
 example.
 
-If no second argument is provided, the function returns a string naming
-the current locale for the category.  You can use this value as the
-second argument in a subsequent call to setlocale().  If a second
-argument is given and it corresponds to a valid locale, the locale for
-the category is set to that value, and the function returns the
-now-current locale value.  You can then use this in yet another call to
-setlocale().  (In some implementations, the return value may sometimes
-differ from the value you gave as the second argument--think of it as
-an alias for the value you gave.)
+If no second argument is provided and the category is something else
+than LC_ALL, the function returns a string naming the current locale
+for the category.  You can use this value as the second argument in a
+subsequent call to setlocale().
+
+If no second argument is provided and the category is LC_ALL, the
+result is implementation-dependent.  It may be a string of
+concatenated locales names (separator also implementation-dependent)
+or a single locale name.  Please consult your L<setlocale(3)> for
+details.
+
+If a second argument is given and it corresponds to a valid locale,
+the locale for the category is set to that value, and the function
+returns the now-current locale value.  You can then use this in yet
+another call to setlocale().  (In some implementations, the return
+value may sometimes differ from the value you gave as the second
+argument--think of it as an alias for the value you gave.)
 
 As the example shows, if the second argument is an empty string, the
 category's locale is returned to the default specified by the
@@ -210,10 +218,12 @@ I<SEE ALSO> section).  If that fails, try the following command lines:
 and see whether they list something resembling these
 
         en_US.ISO8859-1     de_DE.ISO8859-1     ru_RU.ISO8859-5
+        en_US.iso88591      de_DE.iso88591      ru_RU.iso88595
         en_US               de_DE               ru_RU
         en                  de                  ru
         english             german              russian
         english.iso88591    german.iso88591     russian.iso88595
+        english.roman8                          russian.koi8r
 
 Sadly, even though the calling interface for setlocale() has
 been standardized, names of locales and the directories where the
@@ -368,11 +378,12 @@ with a single parameter--see L<The setlocale function>.)
 
 localeconv() takes no arguments, and returns B<a reference to> a hash.
 The keys of this hash are variable names for formatting, such as
-C<decimal_point> and C<thousands_sep>.   The values are the corresponding,
-er, values.  See L<POSIX (3)/localeconv> for a longer example listing
-the categories an implementation might be expected to provide; some
-provide more and others fewer, however.  You don't need an explicit C<use
-locale>, because localeconv() always observes the current locale.
+C<decimal_point> and C<thousands_sep>.  The values are the
+corresponding, er, values.  See L<POSIX (3)/localeconv> for a longer
+example listing the categories an implementation might be expected to
+provide; some provide more and others fewer.  You don't need an
+explicit C<use locale>, because localeconv() always observes the
+current locale.
 
 Here's a simple-minded example program that rewrites its command-line
 parameters as integers correctly formatted in the current locale:
@@ -387,13 +398,29 @@ parameters as integers correctly formatted in the current locale:
 
         # Apply defaults if values are missing
         $thousands_sep = ',' unless $thousands_sep;
-        $grouping = 3 unless $grouping;
+
+	# grouping and mon_grouping are packed lists
+	# of small integers (characters) telling the
+	# grouping (thousand_seps and mon_thousand_seps
+	# being the group dividers) of numbers and
+	# monetary quantities.  The integers' meanings:
+	# 255 means no more grouping, 0 means repeat
+	# the previous grouping, 1-254 means use that
+	# as the current grouping.  Grouping goes from
+	# right to left (low to high digits).  In the
+	# below we cheat slightly by never using anything
+	# else than the first grouping (whatever that is).
+	if ($grouping) {
+	    @grouping = unpack("C*", $grouping);
+	} else {
+	    @grouping = (3);
+	}
 
         # Format command line params for current locale
         for (@ARGV) {
             $_ = int;    # Chop non-integer part
             1 while
-            s/(\d)(\d{$grouping}($|$thousands_sep))/$1$thousands_sep$2/;
+            s/(\d)(\d{$grouping[0]}($|$thousands_sep))/$1$thousands_sep$2/;
             print "$_";
         }
         print "\n";

@@ -238,6 +238,13 @@ functionality.
 
 =cut
 
+# evaluate something in a clean lexical environment
+sub _doeval { eval shift }
+
+#
+# put any lexicals at file scope AFTER here
+#
+
 use Carp;
 use Exporter;
 @ISA=(Exporter);
@@ -280,7 +287,7 @@ sub real  { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $r              ; }
 sub timediff {
     my($a, $b) = @_;
     my @r;
-    for ($i=0; $i < @$a; ++$i) {
+    for (my $i=0; $i < @$a; ++$i) {
 	push(@r, $a->[$i] - $b->[$i]);
     }
     bless \@r;
@@ -297,12 +304,12 @@ sub timestr {
     $style ||= $defaultstyle;
     $style = ($ct>0) ? 'all' : 'noc' if $style eq 'auto';
     my $s = "@t $style"; # default for unknown style
-    $s=sprintf("%2d wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU secs)",
+    $s=sprintf("%2d wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU)",
 			    @t,$t) if $style eq 'all';
-    $s=sprintf("%$f CPU secs (%$f usr + %$f sys)",
-			    $pt,$pu,$ps) if $style eq 'noc';
-    $s=sprintf("%$f CPU secs (%$f cusr %$f csys)",
-			    $ct,$cu,$cs) if $style eq 'nop';
+    $s=sprintf("%2d wallclock secs (%$f usr + %$f sys = %$f CPU)",
+			    $r,$pu,$ps,$pt) if $style eq 'noc';
+    $s=sprintf("%2d wallclock secs (%$f cusr + %$f csys = %$f CPU)",
+			    $r,$cu,$cs,$ct) if $style eq 'nop';
     $s .= sprintf(" @ %$f/s (n=$n)", $n / ( $pu + $ps )) if $n;
     $s;
 }
@@ -329,10 +336,15 @@ sub runloop {
 	last if $pack ne $curpack;
     }
 
-    my $subcode = (ref $c eq 'CODE')
-	? "sub { package $pack; my(\$_i)=$n; while (\$_i--){&\$c;} }"
-	: "sub { package $pack; my(\$_i)=$n; while (\$_i--){$c;} }";
-    my $subref  = eval $subcode;
+    my ($subcode, $subref);
+    if (ref $c eq 'CODE') {
+	$subcode = "sub { for (1 .. $n) { local \$_; package $pack; &\$c; } }";
+        $subref  = eval $subcode;
+    }
+    else {
+	$subcode = "sub { for (1 .. $n) { local \$_; package $pack; $c;} }";
+        $subref  = _doeval($subcode);
+    }
     croak "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
     print STDERR "runloop $n '$subcode'\n" if $debug;
 

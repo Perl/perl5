@@ -2,7 +2,7 @@
 
 # $RCSfile: eval.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:48 $
 
-print "1..22\n";
+print "1..23\n";
 
 eval 'print "ok 1\n";';
 
@@ -71,4 +71,11 @@ eval {
   print   $b eq 'S' ? "ok 21\n" : "# $b\nnot ok 21\n";
   eval $a;
   print   $b eq 'V' ? "ok 22\n" : "# $b\nnot ok 22\n";
+
+  $b = 'wrong';
+  $x = sub {
+     my $b = "right";
+     print eval('"$b"') eq $b ? "ok 23\n" : "not ok 23\n";
+  };
+  &$x();
 }

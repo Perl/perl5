@@ -11,7 +11,15 @@ use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
 	    @ISA @EXPORT @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.1601";
+$VERSION = "1.1602";
+
+# Some experimental versions of OS/2 build have broken $?
+my $ignore_exitcode = $ENV{HARNESS_IGNORE_EXITCODE};
+
+my $files_in_dir = $ENV{HARNESS_FILELEAK_IN_DIR};
+
+my $tests_skipped = 0;
+my $subtests_skipped = 0;
 
 @ISA=('Exporter');
 @EXPORT= qw(&runtests);
@@ -40,6 +48,8 @@ format STDOUT =
 $verbose = 0;
 $switches = "-w";
 
+sub globdir { opendir DIRH, shift; my @f = readdir DIRH; closedir DIRH; @f }
+
 sub runtests {
     my(@tests) = @_;
     local($|) = 1;
@@ -56,6 +66,7 @@ sub runtests {
 
     if ($^O eq 'VMS') { $switches =~ s/-(\S*[A-Z]\S*)/"-$1"/g }
 
+    my @dir_files = globdir $files_in_dir if defined $files_in_dir;
     my $t_start = new Benchmark;
     while ($test = shift(@tests)) {
 	$te = $test;
@@ -123,7 +134,7 @@ sub runtests {
 	    }
 	}
 	$fh->close; # must close to reap child resource values
-	my $wstatus = $?;
+	my $wstatus = $ignore_exitcode ? 0 : $?;	# Can trust $? ?
 	my $estatus;
 	$estatus = ($^O eq 'VMS'
 		       ? eval 'use vmsish "status"; $estatus = $?'
@@ -172,6 +183,7 @@ sub runtests {
 		print "ok\n";
 	    } else {
 		print "skipping test on this platform\n";
+		$tests_skipped++;
 	    }
 	    $good++;
 	} elsif ($max) {
@@ -204,6 +216,18 @@ sub runtests {
 				    estat => '', wstat => '',
 				  };
 	}
+	$subtests_skipped += $skipped;
+	if (defined $files_in_dir) {
+	    my @new_dir_files = globdir $files_in_dir;
+	    if (@new_dir_files != @dir_files) {
+		my %f;
+		@f{@new_dir_files} = (1) x @new_dir_files;
+		delete @f{@dir_files};
+		my @f = sort keys %f;
+		print "LEAKED FILES: @f\n";
+		@dir_files = @new_dir_files;
+	    }
+	}
     }
     my $t_total = timediff(new Benchmark, $t_start);
     
@@ -218,6 +242,16 @@ sub runtests {
     $bonusmsg = (" ($totbonus subtest".($totbonus>1?'s':'').
 	       " UNEXPECTEDLY SUCCEEDED)")
 	if $totbonus;
+    if ($tests_skipped) {
+	$bonusmsg .= ", $tests_skipped test" . ($tests_skipped != 1 ? 's' : '') .
+			' skipped';
+    }
+    if ($subtests_skipped) {
+	$bonusmsg .= ($tests_skipped ? ', plus ' : ', '). 
+			"$subtests_skipped subtest"
+			. ($subtests_skipped != 1 ? 's' : '') .
+			" skipped";
+    }
     if ($bad == 0 && $totmax) {
 	print "All tests successful$bonusmsg.\n";
     } elsif ($total==0){
@@ -235,6 +269,8 @@ sub runtests {
 	  write;
 	}
 	if ($bad) {
+	    $bonusmsg =~ s/^,\s*//;
+	    print "$bonusmsg.\n" if $bonusmsg;
 	    die "Failed $bad/$total test scripts, $pct% okay.$subpct\n";
 	}
     }
@@ -398,6 +434,21 @@ If not all tests were successful, the script dies with one of the
 above messages.
 
 =back
+
+=head1 ENVIRONMENT
+
+Setting C<HARNESS_IGNORE_EXITCODE> makes harness ignore the exit status
+of child processes.
+
+If C<HARNESS_FILELEAK_IN_DIR> is set to the name of a directory, harness
+will check after each test whether new files appeared in that directory,
+and report them as
+
+  LEAKED FILES: scr.tmp 0 my.db
+
+If relative, directory name is with respect to the current directory at
+the moment runtests() was called.  Putting absolute path into 
+C<HARNESS_FILELEAK_IN_DIR> may give more predicatable results.
 
 =head1 SEE ALSO
 
