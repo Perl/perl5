@@ -10,24 +10,28 @@ README.tru64 - Perl version 5 on Tru64 (formerly known as Digital UNIX formerly 
 
 This document describes various features of HP's (formerly Compaq's,
 formerly Digital's) Unix operating system (Tru64) that will affect
-how Perl version 5 is configured, compiled and/or runs.
+how Perl version 5 (hereafter just Perl) is configured, compiled
+and/or runs.
 
 =head2 Compiling Perl 5 on Tru64
 
 The recommended compiler to use in Tru64 is the native C compiler.
 The native compiler produces much faster code (the speed difference is
 noticeable: several dozen percentages) and also more correct code: if
-you are considering using the GNU C compiler you should use the gcc
-2.95.3 since all older gcc releases are known to produce broken code
-when compiling Perl.  One manifestation of this brokenness is the
-lib/sdbm test dumping core; another is the op/regexp and op/pat,
-or ext/Storable tests dumping core (depending on the GCC release).
+you are considering using the GNU C compiler you should use at the
+very least the release of 2.95.3 since all older gcc releases are
+known to produce broken code when compiling Perl.  One manifestation
+of this brokenness is the lib/sdbm test dumping core; another is many
+of the op/regexp and op/pat, or ext/Storable tests dumping core
+(the exact pattern of failures depending on the GCC release and
+optimization flags).
 
 =head2 Using Large Files with Perl on Tru64
 
 In Tru64 Perl is automatically able to use large files, that is,
 files larger than 2 gigabytes, there is no need to use the Configure
--Duselargefiles option as described in INSTALL.
+-Duselargefiles option as described in INSTALL (though using the option
+is harmless).
 
 =head2 Threaded Perl on Tru64
 
@@ -44,9 +48,11 @@ to work properly with threads.
 
 =head2 Long Doubles on Tru64
 
-You cannot Configure Perl to use long doubles unless you have at
-least Tru64 V5.0, the long double support simply wasn't functional
-enough before that.
+You cannot Configure Perl to use long doubles unless you have at least
+Tru64 V5.0, the long double support simply wasn't functional enough
+before that.  Perl's Configure will override attempts to use the long
+doubles (you can notice this by Configure finding out that the modfl()
+function does not work as it should).
 
 At the time of this writing (June 2002), there is a known bug in the
 Tru64 libc printing of long doubles when not using "e" notation.
@@ -79,9 +85,9 @@ and when compiling the POSIX extension
                 return HUGE_VAL;
     -------------------^
 
-The exact line numbers may vary between Perl releases.
-The warnings are benign and can be ignored: in later C compiler
-releases the warnings should be gone.
+The exact line numbers may vary between Perl releases.  The warnings
+are benign and can be ignored: in later C compiler releases the warnings
+should be gone.
 
 When the file F<pp_sys.c> is being compiled you may (depending on the
 operating system release) see an additional compiler flag being used:
@@ -111,8 +117,8 @@ If you get an error like
     Can't load '.../OSF1/lib/perl5/5.8.0/alpha-dec_osf/auto/IO/IO.so' for module IO: Unresolved symbol in .../lib/perl5/5.8.0/alpha-dec_osf/auto/IO/IO.so: sockatmark at .../lib/perl5/5.8.0/alpha-dec_osf/XSLoader.pm line 75.
 
 you need to either recompile your Perl in Tru64 4.0D or upgrade your
-Tru64 4.0D: the sockatmark() system call was added in Tru64 4.0F, and
-the IO extension refers that symbol.
+Tru64 4.0D to at least 4.0F: the sockatmark() system call was
+added in Tru64 4.0F, and the IO extension refers that symbol.
 
 =head1 AUTHOR
 

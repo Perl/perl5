@@ -2614,6 +2614,19 @@ Perl_yylex(pTHX)
 			sv_setpvn(x, ipath, ipathend - ipath);
 			SvSETMAGIC(x);
 		    }
+		    else {
+			STRLEN blen;
+			STRLEN llen;
+			char *bstart = SvPV(CopFILESV(PL_curcop),blen);
+			char *lstart = SvPV(x,llen);
+			if (llen < blen) {
+			    bstart += blen - llen;
+			    if (strnEQ(bstart, lstart, llen) &&	bstart[-1] == '/') {
+				sv_setpvn(x, ipath, ipathend - ipath);
+				SvSETMAGIC(x);
+			    }
+			}
+		    }
 		    TAINT_NOT;	/* $^X is always tainted, but that's OK */
 		}
 #endif /* ARG_ZERO_IS_SCRIPT */

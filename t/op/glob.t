@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..9\n";
+print "1..10\n";
 
 @oops = @ops = <op/*>;
 
@@ -70,4 +70,10 @@ else {
 my $f=0;
 $ok="ok 9\n";
 $ok="not ok 9\n", undef $f while $x = $f||$f;
-print $ok
+print $ok;
+
+# Better check that glob actually returned some entries
+{
+   my $not = (scalar @oops > 0) ? '' : 'not ';
+   print "${not}ok 10\n";
+}

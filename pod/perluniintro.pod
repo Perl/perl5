@@ -150,7 +150,7 @@ character set.  Otherwise, it uses UTF-8.
 
 A user of Perl does not normally need to know nor care how Perl
 happens to encode its internal strings, but it becomes relevant when
-outputting Unicode strings to a stream without a discipline--one with
+outputting Unicode strings to a stream without a PerlIO layer -- one with
 the "default" encoding.  In such a case, the raw bytes used internally
 (the native character set or UTF-8, as appropriate for each string)
 will be used, and a "Wide character" warning will be issued if those
@@ -165,7 +165,7 @@ as a warning:
 
      Wide character in print at ...
 
-To output UTF-8, use the C<:utf8> output discipline.  Prepending
+To output UTF-8, use the C<:utf8> output layer.  Prepending
 
       binmode(STDOUT, ":utf8");
 
@@ -328,7 +328,7 @@ and on already open streams, use C<binmode()>:
     binmode(STDOUT, ":encoding(shift_jis)");
 
 The matching of encoding names is loose: case does not matter, and
-many encodings have several aliases.  Note that C<:utf8> discipline
+many encodings have several aliases.  Note that the C<:utf8> layer
 must always be specified exactly like that; it is I<not> subject to
 the loose matching of encoding names.
 
@@ -340,7 +340,7 @@ module.
 Reading in a file that you know happens to be encoded in one of the
 Unicode or legacy encodings does not magically turn the data into
 Unicode in Perl's eyes.  To do that, specify the appropriate
-discipline when opening files
+layer when opening files
 
     open(my $fh,'<:utf8', 'anything');
     my $line_of_unicode = <$fh>;
@@ -348,10 +348,10 @@ discipline when opening files
     open(my $fh,'<:encoding(Big5)', 'anything');
     my $line_of_unicode = <$fh>;
 
-The I/O disciplines can also be specified more flexibly with
+The I/O layers can also be specified more flexibly with
 the C<open> pragma.  See L<open>, or look at the following example.
 
-    use open ':utf8'; # input and output default discipline will be UTF-8
+    use open ':utf8'; # input and output default layer will be UTF-8
     open X, ">file";
     print X chr(0x100), "\n";
     close X;
@@ -359,7 +359,7 @@ the C<open> pragma.  See L<open>, or look at the following example.
     printf "%#x\n", ord(<Y>); # this should print 0x100
     close Y;
 
-With the C<open> pragma you can use the C<:locale> discipline
+With the C<open> pragma you can use the C<:locale> layer
 
     $ENV{LC_ALL} = $ENV{LANG} = 'ru_RU.KOI8-R';
     # the :locale will probe the locale environment variables like LC_ALL
@@ -371,7 +371,7 @@ With the C<open> pragma you can use the C<:locale> discipline
     printf "%#x\n", ord(<I>), "\n"; # this should print 0xc1
     close I;
 
-or you can also use the C<':encoding(...)'> discipline
+or you can also use the C<':encoding(...)'> layer
 
     open(my $epic,'<:encoding(iso-8859-7)','iliad.greek');
     my $line_of_unicode = <$epic>;
@@ -381,8 +381,8 @@ converts data from the specified encoding when it is read in from the
 stream.  The result is always Unicode.
 
 The L<open> pragma affects all the C<open()> calls after the pragma by
-setting default disciplines.  If you want to affect only certain
-streams, use explicit disciplines directly in the C<open()> call.
+setting default layers.  If you want to affect only certain
+streams, use explicit layers directly in the C<open()> call.
 
 You can switch encodings on an already opened stream by using
 C<binmode()>; see L<perlfunc/binmode>.
@@ -392,7 +392,7 @@ C<open()> and C<binmode()>, only with the C<open> pragma.  The
 C<:utf8> and C<:encoding(...)> methods do work with all of C<open()>,
 C<binmode()>, and the C<open> pragma.
 
-Similarly, you may use these I/O disciplines on output streams to
+Similarly, you may use these I/O layers on output streams to
 automatically convert Unicode to the specified encoding when it is
 written to the stream. For example, the following snippet copies the
 contents of the file "text.jis" (encoded as ISO-2022-JP, aka JIS) to
@@ -415,7 +415,7 @@ C<seek()> and C<tell()> operate on byte counts, as do C<sysread()>
 and C<sysseek()>.
 
 Notice that because of the default behaviour of not doing any
-conversion upon input if there is no default discipline,
+conversion upon input if there is no default layer,
 it is easy to mistakenly write code that keeps on expanding a file
 by repeatedly encoding the data:
 
@@ -484,7 +484,7 @@ Peeking At Perl's Internal Encoding
 Normal users of Perl should never care how Perl encodes any particular
 Unicode string (because the normal ways to get at the contents of a
 string with Unicode--via input and output--should always be via
-explicitly-defined I/O disciplines). But if you must, there are two
+explicitly-defined I/O layers). But if you must, there are two
 ways of looking behind the scenes.
 
 One way of peeking inside the internal encoding of Unicode characters

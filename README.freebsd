@@ -15,10 +15,10 @@ version 5 (hereafter just Perl) is compiled and/or runs.
 
 When perl is configured to use ithreads, it will use re-entrant library calls
 in preference to non-re-entrant versions.  There is a bug in FreeBSD's
-C<readdir_r> function that can cause a SEGV when reading large directories.
-A patch is available
+C<readdir_r> function in versions 4.5 and earlier that can cause a SEGV when
+reading large directories. A patch for FreeBSD libc is available
 (see http://www.freebsd.org/cgi/query-pr.cgi?pr=misc/30631 )
-and will hopefully be integrated into FreeBSD 4.6.
+which has been integrated into FreeBSD 4.6.
 
 =head2 $^X doesn't always contain a full path in FreeBSD
 
@@ -30,9 +30,9 @@ result of reading this symlink is can be wrong in certain circumstances
 In these cases perl will fall back to the old behaviour of using C's
 argv[0] value for C<$^X>.
 
-=head2 Perl will no more be part of "base FreeBSD"
+=head2 Perl will no longer be part of "base FreeBSD"
 
-Not as bad as it sounds--what is means is that Perl will no more be
+Not as bad as it sounds--what this means is that Perl will no longer be
 part of the B<kernel build system> of FreeBSD.  Perl will still very
 probably be part of the "default install", and in any case the latest
 version will be in the ports system.  The first FreeBSD version this

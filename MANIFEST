@@ -492,7 +492,7 @@ ext/MIME/Base64/Changes		MIME::Base64 extension
 ext/MIME/Base64/Makefile.PL	MIME::Base64 extension
 ext/MIME/Base64/QuotedPrint.pm	MIME::Base64 extension
 ext/MIME/Base64/t/base64.t	See whether MIME::Base64 works
-ext/MIME/Base64/t/qp.t		See whether MIME::QuotedPrint works
+ext/MIME/Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME/Base64/t/unicode.t	See whether MIME::Base64 works
 ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
@@ -1220,6 +1220,7 @@ lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
+lib/Math/BigInt/t/bare_mif.t	Rounding tests under BareCalc
 lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and sub_mbf.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
@@ -1349,7 +1350,7 @@ lib/NEXT/t/actual.t		NEXT
 lib/NEXT/t/actuns.t		NEXT
 lib/NEXT/t/next.t		NEXT
 lib/NEXT/t/unseen.t		NEXT
-lib/open.pm			Pragma to specify default I/O disciplines
+lib/open.pm			Pragma to specify default I/O layers
 lib/open.t			See if the open pragma works
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)

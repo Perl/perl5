@@ -147,6 +147,28 @@ $x = Math::BigInt->new(1200); $y = $class->new($x);
 ok ($y,1200); ok ($x,1200);
 
 ###############################################################################
+# Really huge, big, ultra-mega-biggy-monster exponents
+# Technically, the exponents should not be limited (they are BigInts), but
+# practically there are a few places were they are limited to a Perl scalar.
+# This is sometimes for speed, sometimes because otherwise the number wouldn't
+# fit into your memory (just think of 1e123456789012345678901234567890 + 1!)
+# anyway. We don't test everything here, but let's make sure it just basically
+# works.
+
+my $monster = '1e1234567890123456789012345678901234567890';
+
+# new
+ok ($class->new($monster)->bsstr(),
+                '1e+1234567890123456789012345678901234567890');
+# cmp
+ok ($class->new($monster) > 0,1);
+
+# sub/mul 
+ok ($class->new($monster)->bsub( $monster),0);
+ok ($class->new($monster)->bmul(2)->bsstr(),
+                '2e+1234567890123456789012345678901234567890');
+
+###############################################################################
 # zero,inf,one,nan
 
 $x = $class->new(2); $x->fzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
@@ -193,6 +215,42 @@ $class->accuracy(undef); $class->precision(undef); # reset for further tests
 $try = '@args' . " = $class" . "::objectify(2,$class,4,5);".'join(" ",@args);';
 $ans = eval $try;
 ok ($ans,"$class 4 5");
+
+###############################################################################
+# test whether an opp calls objectify properly or not (or at least does what
+# it should do given non-objects, w/ or w/o objectify())
+
+ok ($class->new(123)->badd(123),246);
+ok ($class->badd(123,321),444);
+ok ($class->badd(123,$class->new(321)),444);
+
+ok ($class->new(123)->bsub(122),1);
+ok ($class->bsub(321,123),198);
+ok ($class->bsub(321,$class->new(123)),198);
+
+ok ($class->new(123)->bmul(123),15129);
+ok ($class->bmul(123,123),15129);
+ok ($class->bmul(123,$class->new(123)),15129);
+
+ok ($class->new(15129)->bdiv(123),123);
+ok ($class->bdiv(15129,123),123);
+ok ($class->bdiv(15129,$class->new(123)),123);
+
+ok ($class->new(15131)->bmod(123),2);
+ok ($class->bmod(15131,123),2);
+ok ($class->bmod(15131,$class->new(123)),2);
+
+ok ($class->new(2)->bpow(16),65536);
+ok ($class->bpow(2,16),65536);
+ok ($class->bpow(2,$class->new(16)),65536);
+
+ok ($class->new(2**15)->brsft(1),2**14);
+ok ($class->brsft(2**15,1),2**14);
+ok ($class->brsft(2**15,$class->new(1)),2**14);
+
+ok ($class->new(2**13)->blsft(1),2**14);
+ok ($class->blsft(2**13,1),2**14);
+ok ($class->blsft(2**13,$class->new(1)),2**14);
 
 1; # all done
 

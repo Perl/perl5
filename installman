@@ -139,6 +139,7 @@ sub pod2man {
 	my $tmp;
 	# Skip .pm files that have corresponding .pod files, and Functions.pm.
 	next if (($tmp = $mod) =~ s/\.pm$/.pod/ && -f $tmp);
+	next if $mod =~ m:/t/:; # no pods from test directories 
 	next if ($manpage eq 'Pod/Functions.pm'); #### Used only by pod itself
 
 	# Convert name from  File/Basename.pm to File::Basename.3 format,

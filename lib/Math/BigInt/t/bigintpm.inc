@@ -343,8 +343,8 @@ print "# For '$try'\n" if (!ok "$ans" , "ok" );
 ###############################################################################
 # bool
 
-$x = Math::BigInt->new(1); if ($x) { ok (1,1); } else { ok($x,'to be true') }
-$x = Math::BigInt->new(0); if (!$x) { ok (1,1); } else { ok($x,'to be false') }
+$x = $class->new(1); if ($x) { ok (1,1); } else { ok($x,'to be true') }
+$x = $class->new(0); if (!$x) { ok (1,1); } else { ok($x,'to be false') }
 
 ###############################################################################
 # objectify()
@@ -382,6 +382,42 @@ ok ($args[1],4); ok (ref($args[1]),$args[0]);
 ok ($args[2],5); ok (ref($args[2]),$args[0]);
 ok ($args[3],6); ok (ref($args[3]),'');
 ok ($args[4],7); ok (ref($args[4]),'');
+
+###############################################################################
+# test whether an opp calls objectify properly or not (or at least does what
+# it should do given non-objects, w/ or w/o objectify())
+
+ok ($class->new(123)->badd(123),246);
+ok ($class->badd(123,321),444);
+ok ($class->badd(123,$class->new(321)),444);
+
+ok ($class->new(123)->bsub(122),1);
+ok ($class->bsub(321,123),198);
+ok ($class->bsub(321,$class->new(123)),198);
+
+ok ($class->new(123)->bmul(123),15129);
+ok ($class->bmul(123,123),15129);
+ok ($class->bmul(123,$class->new(123)),15129);
+
+ok ($class->new(15129)->bdiv(123),123);
+ok ($class->bdiv(15129,123),123);
+ok ($class->bdiv(15129,$class->new(123)),123);
+
+ok ($class->new(15131)->bmod(123),2);
+ok ($class->bmod(15131,123),2);
+ok ($class->bmod(15131,$class->new(123)),2);
+
+ok ($class->new(2)->bpow(16),65536);
+ok ($class->bpow(2,16),65536);
+ok ($class->bpow(2,$class->new(16)),65536);
+
+ok ($class->new(2**15)->brsft(1),2**14);
+ok ($class->brsft(2**15,1),2**14);
+ok ($class->brsft(2**15,$class->new(1)),2**14);
+
+ok ($class->new(2**13)->blsft(1),2**14);
+ok ($class->blsft(2**13,1),2**14);
+ok ($class->blsft(2**13,$class->new(1)),2**14);
 
 ###############################################################################
 # test for floating-point input (other tests in bnorm() below)
@@ -517,15 +553,14 @@ ok ($x, 23456);
  ok ($x,$y);
 
 
-###############################################################################
-# see if mul shortcut for small numbers works
+  #############################################################################
+  # see if mul shortcut for small numbers works
 
-$x = '9' x $bl;
-$x = $class->new($x); 
-# 999 * 999 => 998 . 001, 9999*9999 => 9998 . 0001
-ok ($x*$x, '9' x ($bl-1) . '8' . '0' x ($bl-1) . '1');
-
- }
+  $x = '9' x $bl;
+  $x = $class->new($x); 
+  # 999 * 999 => 998 . 001, 9999*9999 => 9998 . 0001
+  ok ($x*$x, '9' x ($bl-1) . '8' . '0' x ($bl-1) . '1');
+}
 
 ###############################################################################
 # bug with rest "-0" in div, causing further div()s to fail
@@ -535,8 +570,9 @@ $x = $class->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
 ok ($y,'0'); is_valid($y);	# $y not '-0'
 
 ###############################################################################
-# bug in $x->bmod($y) if $x < 0 and $y > 0
+# bug in $x->bmod($y)
 
+# if $x < 0 and $y > 0
 $x = $class->new('-629'); ok ($x->bmod(5033),4404);
 
 ###############################################################################

@@ -904,7 +904,7 @@ sub _acmp
 
   my ($c,$cx,$cy) = @_;
 
-  # fast comp based on array elements
+  # fast comp based on number of array elements (aka pseudo-length)
   my $lxy = scalar @$cx - scalar @$cy;
   return -1 if $lxy < 0;				# already differs, ret
   return 1 if $lxy > 0;					# ditto

@@ -165,12 +165,9 @@ Perl is configured to use PerlIO as its IO system (which is now the
 default).
 
 The C<open> pragma serves as one of the interfaces to declare default
-"layers" for all I/O.
-
-The C<open> pragma is used to declare one or more default layers for
-I/O operations.  Any open(), readpipe() (aka qx//) and similar
-operators found within the lexical scope of this pragma will use the
-declared defaults.
+"layers" (also known as "disciplines") for all I/O. Any open(),
+readpipe() (aka qx//) and similar operators found within the lexical
+scope of this pragma will use the declared defaults.
 
 With the C<IN> subpragma you can declare the default layers
 of input streams, and with the C<OUT> subpragma you can declare

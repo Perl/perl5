@@ -1012,8 +1012,8 @@ between the variants.
 =item ${^OPEN}
 
 An internal variable used by PerlIO.  A string in two parts, separated
-by a C<\0> byte, the first part is the input disciplines, the second
-part is the output disciplines.
+by a C<\0> byte, the first part describes the input layers, the second
+part describes the output layers.
 
 =item $PERLDB
 
