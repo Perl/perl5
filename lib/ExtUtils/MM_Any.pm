@@ -582,7 +582,8 @@ metafile:
 MAKE_FRAG
 
     my $prereq_pm = '';
-    while( my($mod, $ver) = each %{$self->{PREREQ_PM}} ) {
+    foreach my $mod ( sort { lc $a cmp lc $b } keys %{$self->{PREREQ_PM}} ) {
+        my $ver = $self->{PREREQ_PM}{$mod};
         $prereq_pm .= sprintf "    %-30s %s\n", "$mod:", $ver;
     }
     
