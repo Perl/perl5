@@ -188,6 +188,7 @@ case "$cppstdin" in
     *-Aa*)
 	cpprun="${cc:-cc} -E -Aa"
 	cppstdin="$cpprun"
+	cppminus='-'
 	;;
     esac
     ;;

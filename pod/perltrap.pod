@@ -921,6 +921,10 @@ Probably a bug.
 
 Perl4-to-Perl5 traps involving precedence order.
 
+Perl 4 has almost the same precedence rules as Perl 5 for the operators
+that they both have.  Perl 4 however, seems to have had some
+inconsistencies that made the behavior differ from what was documented.
+
 =over 5
 
 =item * Precedence
@@ -996,12 +1000,33 @@ treats C<$::> as main C<package>
 
 =item * Precedence
 
-concatenation precedence over filetest operator?
+perl4 had buggy precedence for the file test operators vis-a-vis
+the assignment operators.  Thus, although the precedence table
+for perl4 leads one to believe C<-e $foo .= "q"> should parse as
+C<((-e $foo) .= "q")>, it actually parses as C<(-e ($foo .= "q"))>.
+In perl5, the precedence is as documented.
 
     -e $foo .= "q"
 
     # perl4 prints: no output
     # perl5 prints: Can't modify -e in concatenation
+
+=item * Precedence
+
+In perl4, keys(), each() and values() were special high-precedence operators
+that operated on a single hash, but in perl5, they are regular named unary
+operators.  As documented, named unary operators have lower precedence
+than the arithmetic and concatenation operators C<+ - .>, but the perl4
+variants of these operators actually bind tighter than C<+ - .>.
+Thus, for:
+
+    %foo = 1..10;
+    print keys %foo - 1
+
+    # perl4 prints: 4
+    # perl5 prints: Type of arg 1 to keys must be hash (not subtraction)
+
+The perl4 behavior was probably more useful, if less consistent.
 
 =back
 
