@@ -80,8 +80,8 @@
 #else  /* USE_STDIO_PTR */
 
 #define PerlIO_has_cntptr(f)		0
-#define PerlIO_get_cnt(f)		abort()
-#define PerlIO_get_ptr(f)		abort()
+#define PerlIO_get_cnt(f)		(abort(),0)
+#define PerlIO_get_ptr(f)		(abort(),0)
 #define PerlIO_set_cnt(f,c)		abort()
 #define PerlIO_set_ptrcnt(f,p,c)	abort()
 
@@ -98,8 +98,8 @@
 #define PerlIO_get_bufsiz(f)		FILE_bufsiz(f)       
 #else
 #define PerlIO_has_base(f)		0
-#define PerlIO_get_base(f)		abort()
-#define PerlIO_get_bufsiz(f)		abort()
+#define PerlIO_get_base(f)		(abort(),0)
+#define PerlIO_get_bufsiz(f)		(abort(),0)
 #endif
 #else /* PERLIO_IS_STDIO */
 #ifdef PERL_CORE
@@ -113,6 +113,32 @@
  * Strong denial of stdio - make all stdio calls (we can think of) errors
  */
 #include "nostdio.h"
+#undef fprintf
+#undef tmpfile
+#undef fclose
+#undef fopen
+#undef vfprintf
+#undef fgetc
+#undef fputc
+#undef fputs
+#undef ungetc
+#undef fread
+#undef fwrite
+#undef fgetpos
+#undef fseek
+#undef fsetpos
+#undef ftell
+#undef rewind
+#undef fdopen
+#undef popen
+#undef pclose
+#undef getw
+#undef putw
+#undef freopen
+#undef setbuf
+#undef setvbuf
+#undef fscanf
+#undef fgets
 #define fprintf    _CANNOT _fprintf_
 #define stdin      _CANNOT _stdin_
 #define stdout     _CANNOT _stdout_
@@ -173,6 +199,32 @@
 #include "nostdio.h"
 #undef FILE
 #define FILE			PerlIO 
+#undef fprintf
+#undef tmpfile
+#undef fclose
+#undef fopen
+#undef vfprintf
+#undef fgetc
+#undef fputc
+#undef fputs
+#undef ungetc
+#undef fread
+#undef fwrite
+#undef fgetpos
+#undef fseek
+#undef fsetpos
+#undef ftell
+#undef rewind
+#undef fdopen
+#undef popen
+#undef pclose
+#undef getw
+#undef putw
+#undef freopen
+#undef setbuf
+#undef setvbuf
+#undef fscanf
+#undef fgets
 #define fprintf			PerlIO_printf
 #define stdin			PerlIO_stdin()
 #define stdout			PerlIO_stdout()

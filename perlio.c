@@ -35,6 +35,13 @@ PerlIO_init()
  */
 }
 
+#undef PerlIO_tmpfile
+PerlIO *
+PerlIO_tmpfile()
+{
+ return tmpfile();
+}
+
 #else /* PERLIO_IS_STDIO */
 
 #ifdef USE_SFIO
@@ -158,12 +165,14 @@ PerlIO *f;
 char *ptr;
 int cnt;
 {
+#ifdef FILE_bufsiz
  char *e = (char *)(FILE_base(f) + FILE_bufsiz(f));
  int ec  = e - ptr;
  if (ptr > e)
   warn("Setting ptr %p > base %p\n",ptr, FILE_base(f)+FILE_bufsiz(f));
  if (cnt != ec)
   warn("Setting cnt to %d, ptr implies %d\n",cnt,ec);
+#endif
 #if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE)
  FILE_ptr(f) = (STDCHAR *) ptr;
 #else
