@@ -6,6 +6,7 @@
 #      License or the Artistic License, as specified in the README file.
 #
 package B::CC;
+use Config;
 use strict;
 use B qw(main_start main_root class comppadlist peekop svref_2object
 	timing_info init_av sv_undef amagic_generation 
@@ -223,7 +224,8 @@ sub save_or_restore_lexical_state {
 		next unless ref($lex);
 		${$lexstate{$bblock}}{$lex->{iv}} = $lex->{flags} ;
 	}
-    }else{
+    }
+    else {
     	foreach my $lex (@pad) {
 	    next unless ref($lex);
 	    my $old_flags=${$lexstate{$bblock}}{$lex->{iv}}  ;
@@ -586,9 +588,16 @@ sub pp_padsv {
 sub pp_const {
     my $op = shift;
     my $sv = $op->sv;
-    my $obj = $constobj{$$sv};
-    if (!defined($obj)) {
-	$obj = $constobj{$$sv} = new B::Stackobj::Const ($sv);
+    my $obj;
+    # constant could be in the pad (under useithreads)
+    if ($$sv) {
+	$obj = $constobj{$$sv};
+	if (!defined($obj)) {
+	    $obj = $constobj{$$sv} = new B::Stackobj::Const ($sv);
+	}
+    }
+    else {
+	$obj = $pad[$op->targ];
     }
     push(@stack, $obj);
     return $op->next;
@@ -656,10 +665,17 @@ sub pp_sort {
     write_back_stack();
     doop($op);
     return $op->next;
-}              
+}
+
 sub pp_gv {
     my $op = shift;
-    my $gvsym = $op->gv->save;
+    my $gvsym;
+    if ($Config{useithreads}) {
+	$gvsym = $pad[$op->padix]->as_sv;
+    }
+    else {
+	$gvsym = $op->gv->save;
+    }
     write_back_stack();
     runtime("XPUSHs((SV*)$gvsym);");
     return $op->next;
@@ -667,7 +683,13 @@ sub pp_gv {
 
 sub pp_gvsv {
     my $op = shift;
-    my $gvsym = $op->gv->save;
+    my $gvsym;
+    if ($Config{useithreads}) {
+	$gvsym = $pad[$op->padix]->as_sv;
+    }
+    else {
+	$gvsym = $op->gv->save;
+    }
     write_back_stack();
     if ($op->private & OPpLVAL_INTRO) {
 	runtime("XPUSHs(save_scalar($gvsym));");
@@ -679,7 +701,13 @@ sub pp_gvsv {
 
 sub pp_aelemfast {
     my $op = shift;
-    my $gvsym = $op->gv->save;
+    my $gvsym;
+    if ($Config{useithreads}) {
+	$gvsym = $pad[$op->padix]->as_sv;
+    }
+    else {
+	$gvsym = $op->gv->save;
+    }
     my $ix = $op->private;
     my $flag = $op->flags & OPf_MOD;
     write_back_stack();

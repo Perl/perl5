@@ -8,6 +8,7 @@
 
 package B::Deparse;
 use Carp 'cluck', 'croak';
+use Config;
 use B qw(class main_root main_start main_cv svref_2object opnumber
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL
@@ -251,18 +252,19 @@ sub walk_sub {
     walk_tree($op, sub {
 	my $op = shift;
 	if ($op->name eq "gv") {
+	    my $gv = $self->maybe_padgv($op);
 	    if ($op->next->name eq "entersub") {
-		next if $self->{'subs_done'}{$ {$op->gv}}++;
-		next if class($op->gv->CV) eq "SPECIAL";
-		$self->todo($op->gv, $op->gv->CV, 0);
-		$self->walk_sub($op->gv->CV);
+		next if $self->{'subs_done'}{$$gv}++;
+		next if class($gv->CV) eq "SPECIAL";
+		$self->todo($gv, $gv->CV, 0);
+		$self->walk_sub($gv->CV);
 	    } elsif ($op->next->name eq "enterwrite"
 		     or ($op->next->name eq "rv2gv"
 			 and $op->next->next->name eq "enterwrite")) {
-		next if $self->{'forms_done'}{$ {$op->gv}}++;
-		next if class($op->gv->FORM) eq "SPECIAL";
-		$self->todo($op->gv, $op->gv->FORM, 1);
-		$self->walk_sub($op->gv->FORM);
+		next if $self->{'forms_done'}{$$gv}++;
+		next if class($gv->FORM) eq "SPECIAL";
+		$self->todo($gv, $gv->FORM, 1);
+		$self->walk_sub($gv->FORM);
 	    }
 	}
     });
@@ -455,7 +457,7 @@ sub deparse_format {
 	$op = $op->sibling; # skip nextstate
 	my @exprs;
 	$kid = $op->first->sibling; # skip pushmark
-	push @text, $kid->sv->PV;
+	push @text, $self->const_sv($kid)->PV;
 	$kid = $kid->sibling;
 	for (; not null $kid; $kid = $kid->sibling) {
 	    push @exprs, $self->deparse($kid, 0);
@@ -984,7 +986,7 @@ sub pp_require {
     if (class($op) eq "UNOP" and $op->first->name eq "const"
 	and $op->first->private & OPpCONST_BARE)
     {
-	my $name = $op->first->sv->PV;
+	my $name = $self->const_sv($op->first)->PV;
 	$name =~ s[/][::]g;
 	$name =~ s/\.pm//g;
 	return "require($name)";
@@ -1008,6 +1010,7 @@ sub pp_scalar {
 sub padval {
     my $self = shift;
     my $targ = shift;
+    #cluck "curcv was undef" unless $self->{curcv};
     return (($self->{'curcv'}->PADLIST->ARRAY)[1]->ARRAY)[$targ];
 }
 
@@ -1537,7 +1540,7 @@ sub pp_truncate {
     my $fh;
     if ($op->flags & OPf_SPECIAL) {
 	# $kid is an OP_CONST
-	$fh = $kid->sv->PV;
+	$fh = $self->const_sv($kid)->PV;
     } else {
 	$fh = $self->deparse($kid, 6);
         $fh = "+$fh" if not $parens and substr($fh, 0, 1) eq "(";
@@ -1876,22 +1879,37 @@ sub pp_threadsv {
     return $self->maybe_local($op, $cx, "\$" .  $threadsv_names[$op->targ]);
 }    
 
+sub maybe_padgv {
+    my $self = shift;
+    my $op = shift;
+    my $gv;
+    if ($Config{useithreads}) {
+	$gv = $self->padval($op->padix);
+    }
+    else {
+	$gv = $op->gv;
+    }
+    return $gv;
+}
+
 sub pp_gvsv {
     my $self = shift;
     my($op, $cx) = @_;
-    return $self->maybe_local($op, $cx, "\$" . $self->gv_name($op->gv));
+    my $gv = $self->maybe_padgv($op);
+    return $self->maybe_local($op, $cx, "\$" . $self->gv_name($gv));
 }
 
 sub pp_gv {
     my $self = shift;
     my($op, $cx) = @_;
-    return $self->gv_name($op->gv);
+    my $gv = $self->maybe_padgv($op);
+    return $self->gv_name($gv);
 }
 
 sub pp_aelemfast {
     my $self = shift;
     my($op, $cx) = @_;
-    my $gv = $op->gv;
+    my $gv = $self->maybe_padgv($op);
     return "\$" . $self->gv_name($gv) . "[" . $op->private . "]";
 }
 
@@ -1927,7 +1945,7 @@ sub pp_rv2av {
     my($op, $cx) = @_;
     my $kid = $op->first;
     if ($kid->name eq "const") { # constant list
-	my $av = $kid->sv;
+	my $av = $self->const_sv($kid);
 	return "(" . join(", ", map(const($_), $av->ARRAY)) . ")";
     } else {
 	return $self->maybe_local($op, $cx, $self->rv2x($op, $cx, "\@"));
@@ -2083,13 +2101,13 @@ sub method {
     }
     $obj = $self->deparse($obj, 24);
     if ($meth->name eq "method_named") {
-	$meth = $meth->sv->PV;
+	$meth = $self->const_sv($meth)->PV;
     } else {
 	$meth = $meth->first;
 	if ($meth->name eq "const") {
 	    # As of 5.005_58, this case is probably obsoleted by the
 	    # method_named case above
-	    $meth = $meth->sv->PV; # needs to be bare
+	    $meth = $self->const_sv($meth)->PV; # needs to be bare
 	} else {
 	    $meth = $self->deparse($meth, 1);
 	}
@@ -2202,7 +2220,7 @@ sub pp_entersub {
 	$amper = "&";
 	$kid = "{" . $self->deparse($kid, 0) . "}";
     } elsif ($kid->first->name eq "gv") {
-	my $gv = $kid->first->gv;
+	my $gv = $self->maybe_padgv($kid->first);
 	if (class($gv->CV) ne "SPECIAL") {
 	    $proto = $gv->CV->PV if $gv->CV->FLAGS & SVf_POK;
 	}
@@ -2347,13 +2365,23 @@ sub const {
     }
 }
 
+sub const_sv {
+    my $self = shift;
+    my $op = shift;
+    my $sv = $op->sv;
+    # the constant could be in the pad (under useithreads)
+    $sv = $self->padval($op->targ) unless $$sv;
+    return $sv;
+}
+
 sub pp_const {
     my $self = shift;
     my($op, $cx) = @_;
 #    if ($op->private & OPpCONST_BARE) { # trouble with `=>' autoquoting 
-#	return $op->sv->PV;
+#	return $self->const_sv($op)->PV;
 #    }
-    return const($op->sv);
+    my $sv = $self->const_sv($op);
+    return const($sv);
 }
 
 sub dq {
@@ -2361,7 +2389,7 @@ sub dq {
     my $op = shift;
     my $type = $op->name;
     if ($type eq "const") {
-	return uninterp(escape_str(unback($op->sv->PV)));
+	return uninterp(escape_str(unback($self->const_sv($op)->PV)));
     } elsif ($type eq "concat") {
 	return $self->dq($op->first) . $self->dq($op->last);
     } elsif ($type eq "uc") {
@@ -2650,7 +2678,7 @@ sub re_dq {
     my $op = shift;
     my $type = $op->name;
     if ($type eq "const") {
-	return uninterp($op->sv->PV);
+	return uninterp($self->const_sv($op)->PV);
     } elsif ($type eq "concat") {
 	return $self->re_dq($op->first) . $self->re_dq($op->last);
     } elsif ($type eq "uc") {
