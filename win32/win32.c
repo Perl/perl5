@@ -30,9 +30,6 @@
 #include <stdarg.h>
 #include <float.h>
 
-#define CROAK croak
-#define WARN warn
-
 #define EXECF_EXEC 1
 #define EXECF_SPAWN 2
 #define EXECF_SPAWN_NOWAIT 3
@@ -168,156 +165,12 @@ my_popen(char *cmd, char *mode)
 #else
 #define fixcmd(x)
 #endif
-
-#if 1
-/* was #ifndef PERLDLL, but the #else stuff doesn't work on NT
- * GSAR 97/03/13
- */
     fixcmd(cmd);
 #ifdef __BORLANDC__ /* workaround a Borland stdio bug */
     win32_fflush(stdout);
     win32_fflush(stderr);
 #endif
     return win32_popen(cmd, mode);
-#else
-/*
- * There seems to be some problems for the _popen call in a DLL
- * this trick at the moment seems to work but it is never test
- * on NT yet
- *
- */ 
-#	ifdef __cplusplus
-#define EXT_C_FUNC	extern "C"
-#	else
-#define EXT_C_FUNC	extern
-#	endif
-
-    EXT_C_FUNC int __cdecl _set_osfhnd(int fh, long value);
-    EXT_C_FUNC void __cdecl _lock_fhandle(int);
-    EXT_C_FUNC void __cdecl _unlock_fhandle(int);
-
-    BOOL	fSuccess;
-    PerlIO	*pf;		/* to store the _popen return value */
-    int		tm = 0;		/* flag indicating tDllExport or binary mode */
-    int		fhNeeded, fhInherited, fhDup;
-    int		ineeded, iinherited;
-    DWORD	dwDup;
-    int		phdls[2];	/* I/O handles for pipe */
-    HANDLE	hPIn, hPOut, hPErr,
-		hSaveStdin, hSaveStdout, hSaveStderr,
-		hPNeeded, hPInherited, hPDuped;
-     
-    /* first check for errors in the arguments */
-    if ( (cmd == NULL) || (mode == NULL)
-	 || ((*mode != 'w') && (*mode != _T('r'))) )
-	goto error1;
-
-    if ( *(mode + 1) == _T('t') )
-	tm = O_TEXT;
-    else if ( *(mode + 1) == _T('b') )
-	tm = O_BINARY;
-    else
-	tm = (*mode == 'w' ? O_BINARY : O_TEXT);
-
-
-    fixcmd(cmd);
-    if (&win32stdio != pIOSubSystem)
-	return win32_popen(cmd, mode);
-
-#ifdef EFG
-    if ( _pipe( phdls, 1024, tm ) == -1 )
-#else
-    if ( win32_pipe( phdls, 1024, tm ) == -1 )
-#endif
-	goto error1;
-
-    /* save the current situation */
-    hSaveStdin = GetStdHandle(STD_INPUT_HANDLE); 
-    hSaveStdout = GetStdHandle(STD_OUTPUT_HANDLE); 
-    hSaveStderr = GetStdHandle(STD_ERROR_HANDLE); 
-
-    if (*mode == _T('w')) {
-	ineeded = 1;
-	dwDup	= STD_INPUT_HANDLE;
-	iinherited = 0;
-    }
-    else {
-	ineeded = 0;
-	dwDup	= STD_OUTPUT_HANDLE;
-	iinherited = 1;
-    }
-
-    fhNeeded = phdls[ineeded];
-    fhInherited = phdls[iinherited];
-
-    fSuccess = DuplicateHandle(GetCurrentProcess(), 
-			       (HANDLE) stolen_get_osfhandle(fhNeeded), 
-			       GetCurrentProcess(), 
-			       &hPNeeded, 
-			       0, 
-			       FALSE,       /* not inherited */ 
-			       DUPLICATE_SAME_ACCESS); 
-
-    if (!fSuccess)
-	goto error2;
-
-    fhDup = stolen_open_osfhandle((long) hPNeeded, tm);
-    win32_dup2(fhDup, fhNeeded);
-    win32_close(fhDup);
-
-#ifdef AAA
-    /* Close the Out pipe, child won't need it */
-    hPDuped = (HANDLE) stolen_get_osfhandle(fhNeeded);
-
-    _lock_fhandle(fhNeeded);
-    _set_osfhnd(fhNeeded, (long)hPNeeded); /* put in ours duplicated one */
-    _unlock_fhandle(fhNeeded);
-
-    CloseHandle(hPDuped);	/* close the handle first */
-#endif
-
-    if (!SetStdHandle(dwDup, (HANDLE) stolen_get_osfhandle(fhInherited)))
-	goto error2;
-
-    /*
-     * make sure the child see the same stderr as the calling program
-     */
-    if (!SetStdHandle(STD_ERROR_HANDLE,
-		      (HANDLE)stolen_get_osfhandle(win32_fileno(win32_stderr()))))
-	goto error2;
-
-    pf = win32_popen(cmd, mode);	/* ask _popen to do the job */
-
-    /* restore to where we were */
-    SetStdHandle(STD_INPUT_HANDLE, hSaveStdin);
-    SetStdHandle(STD_OUTPUT_HANDLE, hSaveStdout);
-    SetStdHandle(STD_ERROR_HANDLE, hSaveStderr);
-
-    /* we don't need it any more, that's for the child */
-    win32_close(fhInherited);
-
-    if (NULL == pf) {
-	/* something wrong */
-	win32_close(fhNeeded);
-	goto error1;
-    }
-    else {
-	/*
-	 * here we steal the file handle in pf and stuff ours in
-	 */
-	win32_dup2(fhNeeded, win32_fileno(pf));
-	win32_close(fhNeeded);
-    }
-    return (pf);
-
-error2:
-    win32_close(fhNeeded);
-    win32_close(fhInherited);
-
-error1:
-    return (NULL);
-
-#endif
 }
 
 long
@@ -566,7 +419,7 @@ opendir(char *filename)
     idx = strlen(FindData.cFileName)+1;
     New(1304, p->start, idx, char);
     if(p->start == NULL) {
-	CROAK("opendir: malloc failed!\n");
+	croak("opendir: malloc failed!\n");
     }
     strcpy(p->start, FindData.cFileName);
 /*  if(downcase)
@@ -586,7 +439,7 @@ opendir(char *filename)
 	 */
 	Renew(p->start, idx+len+1, char);
 	if(p->start == NULL) {
-	    CROAK("opendir: malloc failed!\n");
+	    croak("opendir: malloc failed!\n");
 	}
 	strcpy(&p->start[idx], FindData.cFileName);
 /*	if (downcase) 
@@ -725,11 +578,11 @@ kill(int pid, int sig)
     HANDLE hProcess= OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
 
     if (hProcess == NULL) {
-	CROAK("kill process failed!\n");
+	croak("kill process failed!\n");
     }
     else {
 	if (!TerminateProcess(hProcess, sig))
-	    CROAK("kill process failed!\n");
+	    croak("kill process failed!\n");
 	CloseHandle(hProcess);
     }
     return 0;
@@ -743,7 +596,7 @@ kill(int pid, int sig)
 int
 ioctl(int i, unsigned int u, char *data)
 {
-    CROAK("ioctl not implemented!\n");
+    croak("ioctl not implemented!\n");
     return -1;
 }
 #endif
@@ -1363,13 +1216,13 @@ win32_free(void *block)
 }
 
 int
-stolen_open_osfhandle(long handle, int flags)
+win32_open_osfhandle(long handle, int flags)
 {
     return pIOSubSystem->pfn_open_osfhandle(handle, flags);
 }
 
 long
-stolen_get_osfhandle(int fd)
+win32_get_osfhandle(int fd)
 {
     return pIOSubSystem->pfn_get_osfhandle(fd);
 }

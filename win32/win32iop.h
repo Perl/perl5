@@ -104,13 +104,11 @@ EXT void*	win32_calloc(size_t numitems, size_t size);
 EXT void*	win32_realloc(void *block, size_t size);
 EXT void	win32_free(void *block);
 
-
-
 /*
  * these two are win32 specific but still io related
  */
-int		stolen_open_osfhandle(long handle, int flags);
-long		stolen_get_osfhandle(int fd);
+EXT int		win32_open_osfhandle(long handle, int flags);
+EXT long	win32_get_osfhandle(int fd);
 
 
 EXT PWIN32_IOSUBSYSTEM	SetIOSubSystem(void	*piosubsystem);
@@ -187,8 +185,8 @@ END_EXTERN_C
 #define eof(fd)			win32_eof(fd)
 #define read(fd,b,s)		win32_read(fd,b,s)
 #define write(fd,b,s)		win32_write(fd,b,s)
-#define _open_osfhandle		stolen_open_osfhandle
-#define _get_osfhandle		stolen_get_osfhandle
+#define _open_osfhandle		win32_open_osfhandle
+#define _get_osfhandle		win32_get_osfhandle
 #define spawnvp			win32_spawnvp
 #define mkdir			win32_mkdir
 #define rmdir			win32_rmdir

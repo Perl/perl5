@@ -1,5 +1,3 @@
-
-
 #define WIN32_LEAN_AND_MEAN
 #include <stdio.h>
 extern int my_fclose(FILE *pf);
@@ -64,7 +62,7 @@ dummy_globalmode(int mode)
     return o;
 }
 
-#if defined(_DLL) || defined(__BORLANDC__)
+#if defined(_DLL) || !defined(_MSC_VER)
 /* It may or may not be fixed (ok on NT), but DLL runtime
    does not export the functions used in the workround
 */
@@ -73,17 +71,11 @@ dummy_globalmode(int mode)
 
 #if defined(_WIN32) && !defined(WIN95_OSFHANDLE_FIXED) && defined(_M_IX86)
 
-#	ifdef __cplusplus
-#define EXT_C_FUNC	extern "C"
-#	else
-#define EXT_C_FUNC	extern
-#	endif
-
-EXT_C_FUNC int __cdecl _alloc_osfhnd(void);
-EXT_C_FUNC int __cdecl _set_osfhnd(int fh, long value);
-EXT_C_FUNC void __cdecl _lock_fhandle(int);
-EXT_C_FUNC void __cdecl _unlock_fhandle(int);
-EXT_C_FUNC void __cdecl _unlock(int);
+EXTERN_C int __cdecl _alloc_osfhnd(void);
+EXTERN_C int __cdecl _set_osfhnd(int fh, long value);
+EXTERN_C void __cdecl _lock_fhandle(int);
+EXTERN_C void __cdecl _unlock_fhandle(int);
+EXTERN_C void __cdecl _unlock(int);
 
 #if	(_MSC_VER >= 1000)
 typedef struct	{
@@ -96,7 +88,7 @@ typedef struct	{
 #endif  /* defined (_MT) && !defined (DLL_FOR_WIN32S) */
 }	ioinfo;
 
-EXT_C_FUNC ioinfo * __pioinfo[];
+EXTERN_C ioinfo * __pioinfo[];
 
 #define IOINFO_L2E			5
 #define IOINFO_ARRAY_ELTS	(1 << IOINFO_L2E)
@@ -117,7 +109,7 @@ extern char _osfile[];
 #define _FH_LOCKS          (_LAST_STREAM_LOCK+1)	/* Table of fh locks */
 
 /***
-*int _patch_open_osfhandle(long osfhandle, int flags) - open C Runtime file handle
+*int my_open_osfhandle(long osfhandle, int flags) - open C Runtime file handle
 *
 *Purpose:
 *       This function allocates a free C Runtime file handle and associates
@@ -137,7 +129,7 @@ extern char _osfile[];
 *
 *******************************************************************************/
 
-int
+static int
 my_open_osfhandle(long osfhandle, int flags)
 {
     int fh;
@@ -174,27 +166,11 @@ my_open_osfhandle(long osfhandle, int flags)
 
     return fh;			/* return handle */
 }
-#else
 
-int __cdecl
-my_open_osfhandle(long osfhandle, int flags)
-{
-    return _open_osfhandle(osfhandle, flags);
-}
+#define _open_osfhandle my_open_osfhandle
 #endif	/* _M_IX86 */
 
-long
-my_get_osfhandle( int filehandle )
-{
-    return _get_osfhandle(filehandle);
-}
-
-#ifdef __BORLANDC__
-#define _chdir chdir
-#endif
-
 /* simulate flock by locking a range on the file */
-
 
 #define LK_ERR(f,i)	((f) ? (i = 0) : (errno = GetLastError()))
 #define LK_LEN		0xffff0000
@@ -206,7 +182,7 @@ my_flock(int fd, int oper)
     int i = -1;
     HANDLE fh;
 
-    fh = (HANDLE)my_get_osfhandle(fd);
+    fh = (HANDLE)_get_osfhandle(fd);
     memset(&o, 0, sizeof(o));
 
     switch(oper) {
@@ -289,8 +265,8 @@ WIN32_IOSUBSYSTEM	win32stdio = {
     read,		/* (*pfunc_read)(int fd, void *buf, unsigned int cnt); */
     write,		/* (*pfunc_write)(int fd, const void *buf, unsigned int cnt); */
     dummy_globalmode,	/* (*pfunc_globalmode)(int mode) */
-    my_open_osfhandle,
-    my_get_osfhandle,
+    _open_osfhandle,
+    _get_osfhandle,
     spawnvp,
     mkdir,
     rmdir,
