@@ -3437,9 +3437,9 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    CV *cv;
 	    HV *hv;
 
-	    sv_setpvf(sv, "%_:%ld-%ld", GvSV(curcop->cop_filegv),
-		    (long)(subline < 0 ? -subline : subline),
-		    (long)curcop->cop_line);
+	    sv_setpvf(sv, "%_:%ld-%ld",
+		    GvSV(curcop->cop_filegv),
+		    (long)subline, (long)curcop->cop_line);
 	    gv_efullname3(tmpstr, gv, Nullch);
 	    hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
 	    if (!db_postponed) {
