@@ -72,7 +72,7 @@ $
 $!  And do it
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
 $   Define/User Perlshr Sys$Disk:[-]PerlShr.Exe
-$   MCR Sys$Disk:[]Perl.
+$   MCR Sys$Disk:[]Perl. "''p1'" "''p2'" "''p3'" "''p4'" "''p5'" "''p6'"
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
 # Modified for VMS 30-Sep-1994  Charles Bailey  bailey@genetics.upenn.edu
@@ -92,18 +92,19 @@ foreach $file (@exclist) { $skip{$file}++; }
 
 $| = 1;
 
-#if ($ARGV[0] eq '-v') {
+@ARGV = grep($_,@ARGV);  # remove empty elements due to "''p1'" syntax
+
+if ($ARGV[0] eq '-v') {
     $verbose = 1;
-#    shift;
-#}
+    shift;
+}
 
 chdir 't' if -f 't/TEST';
 
 if ($ARGV[0] eq '') {
-    @files = split(/[ \n]/, `\$ testdir [...]*.t;`);
-    foreach (@files) {
-      $fname = $_;
-      $fname =~ s/.*\]([\w\$\-]+\.T);.*/$1/;
+    foreach (<[.*]*.t>) {
+      s/.*[\[.]t./[./;
+      ($fname = $_) =~ s/.*\]//;
       if ($skip{"\L$fname"}) { push(@skipped,$_); }
       else { push(@ARGV,$_); }
     }
@@ -112,7 +113,7 @@ if ($ARGV[0] eq '') {
 if (@skipped) {
   print "The following tests were skipped because they rely extensively on\n";
   print " Unixisms not compatible with the current version of perl for VMS:\n";
-  print "\t",join("\n\t",@skipped);
+  print "\t",join("\n\t",@skipped),"\n\n";
 }
 
 $bad = 0;
@@ -124,7 +125,7 @@ while ($test = shift) {
     }
     $te = $test;
     chop($te);
-    print "$te" . '.' x (15 - length($te)) . "\n";
+    $te .= '.' x (24 - length($te));
 	open(script,"$test") || die "Can't run $test.\n";
 	$_ = <script>;
 	close(script);
@@ -138,7 +139,8 @@ while ($test = shift) {
     $next = 0;
     while (<results>) {
 	if ($verbose) {
-	    print $_;
+	    print "$te$_";
+	    $te = '';
 	}
 	unless (/^#/) {
 	    if (/^1\.\.([0-9]+)/) {
@@ -160,11 +162,11 @@ while ($test = shift) {
     }
     $next = $next - 1;
     if ($ok && $next == $max) {
-	print "ok\n";
+	print "${te}ok\n";
 	$good = $good + 1;
     } else {
 	$next += 1;
-	print "FAILED on test $next\n";
+	print "${te}FAILED on test $next\n";
 	$bad = $bad + 1;
 	$_ = $test;
 	if (/^base/) {
