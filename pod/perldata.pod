@@ -336,8 +336,9 @@ In fact, an identifier within such curlies is forced to be a string,
 as is any simple identifier within a hash subscript.  Neither need
 quoting.  Our earlier example, C<$days{'Feb'}> can be written as
 C<$days{Feb}> and the quotes will be assumed automatically.  But
-anything more complicated in the subscript will be interpreted as
-an expression.
+anything more complicated in the subscript will be interpreted as an
+expression.  This means for example that C<$version{2.0}++> is
+equivalent to C<$version{2}++>, not to C<$version{'2.0'}++>.
 
 =head3 Version Strings
 
