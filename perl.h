@@ -113,7 +113,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -1375,7 +1375,7 @@ EXT struct thread *	thr;		/* Currently executing (fake) thread */
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
 #if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
-#if !defined(DONT_DECLARE_STD) || (defined(__svr4__) && defined(__GNUC__) && defined(sun))
+#if !defined(DONT_DECLARE_STD) || (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || defined(__sgi)
 extern char **	environ;	/* environment variables supplied via exec */
 #endif
 #else
