@@ -213,22 +213,30 @@ inet_ntoa(ip_address_sv)
 	STRLEN addrlen;
 	struct in_addr addr;
 	char * addr_str;
-	char * ip_address = SvPV(ip_address_sv,addrlen);
+	char * ip_address;
+	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
+	     croak("Wide character in Socket::ntoa");
+	ip_address = SvPV(ip_address_sv,addrlen);
 	if (addrlen != sizeof(addr)) {
 	    croak("Bad arg length for %s, length is %d, should be %d",
 			"Socket::inet_ntoa",
 			addrlen, sizeof(addr));
 	}
-
 	Copy( ip_address, &addr, sizeof addr, char );
 #if defined(__hpux) && defined(__GNUC__) && defined(USE_64_BIT_INT)
-        /* GCC on HP_UX breaks the call to inet_ntoa, // sky*/
-	addr_str = (char *) malloc(16);
-	sprintf(addr_str, "%d.%d.%d.%d", ((addr.s_addr >> 24) & 0xFF) , ((addr.s_addr >> 16) & 0xFF), ((addr.s_addr >> 8) & 0xFF), (addr.s_addr  & 0xFF));
+        /* GCC on HP_UX breaks the call to inet_ntoa --sky */
+	New(1138, addr_str, 4 * 3 + 3 + 1, char);
+	sprintf(addr_str, "%d.%d.%d.%d",
+		((addr.s_addr >> 24) & 0xFF),
+		((addr.s_addr >> 16) & 0xFF),
+		((addr.s_addr >>  8) & 0xFF),
+		( addr.s_addr        & 0xFF));
+	ST(0) = sv_2mortal(newSVpvn(addr_str, strlen(addr_str)));
+	Safefree(addr_str);
 #else
 	addr_str = inet_ntoa(addr);
-#endif
 	ST(0) = sv_2mortal(newSVpvn(addr_str, strlen(addr_str)));
+#endif
 	}
 
 void
