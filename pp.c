@@ -2131,8 +2131,9 @@ PP(pp_delete)
 
     if (op->op_private & OPpSLICE) {
 	dMARK; dORIGMARK;
+	U32 hvtype;
 	hv = (HV*)POPs;
-	U32 hvtype = SvTYPE(hv);
+	hvtype = SvTYPE(hv);
 	while (++MARK <= SP) {
 	    if (hvtype == SVt_PVHV)
 		sv = hv_delete_ent(hv, *MARK, discard, 0);
@@ -2153,9 +2154,12 @@ PP(pp_delete)
     else {
 	SV *keysv = POPs;
 	hv = (HV*)POPs;
-	if (SvTYPE(hv) != SVt_PVHV)
+	if (SvTYPE(hv) == SVt_PVHV)
+	    sv = hv_delete_ent(hv, keysv, discard, 0);
+	else if (SvTYPE(hv) == SVt_PVAV)
+	    sv = avhv_delete_ent((AV*)hv, keysv, discard, 0);
+	else
 	    DIE("Not a HASH reference");
-	sv = hv_delete_ent(hv, keysv, discard, 0);
 	if (!sv)
 	    sv = &sv_undef;
 	if (!discard)
@@ -2197,7 +2201,7 @@ PP(pp_hslice)
 		he = hv_fetch_ent(hv, keysv, lval, 0);
 		svp = he ? &HeVAL(he) : 0;
 	    } else {
-		svp = avhv_fetch_ent((AV*)hv, keysv, lval);
+		svp = avhv_fetch_ent((AV*)hv, keysv, lval, 0);
 	    }
 	    if (lval) {
 		if (!he || HeVAL(he) == &sv_undef)

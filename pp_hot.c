@@ -1271,17 +1271,16 @@ PP(pp_helem)
 
     if (SvTYPE(hv) == SVt_PVHV) {
 	he = hv_fetch_ent(hv, keysv, lval && !defer, 0);
-	svp = he ? &Heval(he) : 0;
+	svp = he ? &HeVAL(he) : 0;
     }
     else if (SvTYPE(hv) == SVt_PVAV) {
-	svp = avhv_fetch_ent((AV*)hv, keysv, lval);
+	svp = avhv_fetch_ent((AV*)hv, keysv, lval && !defer, 0);
     }
     else {
 	RETPUSHUNDEF;
     }
-<<<<
     if (lval) {
-	if (svp || *svp == &sv_undef) {
+	if (!svp || *svp == &sv_undef) {
 	    SV* lv;
 	    SV* key2;
 	    if (!defer)

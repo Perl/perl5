@@ -507,6 +507,35 @@ I32 lval;
 }
 
 SV**
+avhv_fetch_ent(av, keysv, lval, hash)
+AV *av;
+SV *keysv;
+I32 lval;
+U32 hash;
+{
+    SV **keys, **indsvp;
+    HE *he;
+    I32 ind;
+    
+    keys = av_fetch(av, 0, FALSE);
+    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
+	croak("Can't coerce array into hash");
+    he = hv_fetch_ent((HV*)SvRV(*keys), keysv, FALSE, hash);
+    if (he) {
+	ind = SvIV(HeVAL(he));
+	if (ind < 1)
+	    croak("Bad index while coercing array into hash");
+    } else {
+	if (!lval)
+	    return 0;
+	
+	ind = AvFILL(av) + 1;
+	hv_store_ent((HV*)SvRV(*keys), keysv, newSViv(ind), 0);
+    }
+    return av_fetch(av, ind, lval);
+}
+
+SV**
 avhv_store(av, key, klen, val, hash)
 AV *av;
 char *key;
@@ -530,6 +559,20 @@ U32 hash;
 	hv_store((HV*)SvRV(*keys), key, klen, newSViv(ind), hash);
     }
     return av_store(av, ind, val);
+}
+
+bool
+avhv_exists_ent(av, keysv, hash)
+AV *av;
+SV *keysv;
+U32 hash;
+{
+    SV **keys;
+    
+    keys = av_fetch(av, 0, FALSE);
+    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
+	croak("Can't coerce array into hash");
+    return hv_exists_ent((HV*)SvRV(*keys), keysv, hash);
 }
 
 bool
@@ -563,6 +606,41 @@ I32 flags;
     if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
 	croak("Can't coerce array into hash");
     sv = hv_delete((HV*)SvRV(*keys), key, klen, 0);
+    if (!sv)
+	return Nullsv;
+    ind = SvIV(sv);
+    if (ind < 1)
+	croak("Bad index while coercing array into hash");
+    svp = av_fetch(av, ind, FALSE);
+    if (!svp)
+	return Nullsv;
+    if (flags & G_DISCARD) {
+	sv = Nullsv;
+	SvREFCNT_dec(*svp);
+    } else {
+	sv = sv_2mortal(*svp);
+    }
+    *svp = &sv_undef;
+    return sv;
+}
+
+/* avhv_delete_ent leaks. Caller can re-index and compress if so desired. */
+SV *
+avhv_delete_ent(av, keysv, flags, hash)
+AV *av;
+SV *keysv;
+I32 flags;
+U32 hash;
+{
+    SV **keys;
+    SV *sv;
+    SV **svp;
+    I32 ind;
+    
+    keys = av_fetch(av, 0, FALSE);
+    if (!keys || !SvROK(*keys) || SvTYPE(SvRV(*keys)) != SVt_PVHV)
+	croak("Can't coerce array into hash");
+    sv = hv_delete_ent((HV*)SvRV(*keys), keysv, 0, hash);
     if (!sv)
 	return Nullsv;
     ind = SvIV(sv);

@@ -886,7 +886,7 @@ PerlInterpreter *sv_interp;
 	if (perldb && DBsingle)
 	    sv_setiv(DBsingle, 1); 
 	if (restartav)
-	    calllist(restartav);
+	    call_list(oldscope, restartav);
     }
 
     /* do it */

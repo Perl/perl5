@@ -816,16 +816,6 @@ db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_H
 	OUTPUT:	
 	    RETVAL
 
->>>> ORIGINAL VERSION
-BOOT:
-    newXS("DB_File::TIEARRAY", XS_DB_File_db_TIEHASH, file);
-
-==== THEIR VERSION
-==== YOUR VERSION
-BOOT:
-    newXS("DB_File::TIEARRAY", XS_DB_File_TIEHASH, file);
-
-<<<<
 int
 db_DESTROY(db)
 	DB_File		db

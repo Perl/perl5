@@ -3123,7 +3123,7 @@ yylex()
 	    in_my = TRUE;
 	    s = skipspace(s);
 	    if (isIDFIRST(*s)) {
-		s = scan_word(s, tokenbuf, TRUE, &len);
+		s = scan_word(s, tokenbuf, sizeof tokenbuf, TRUE, &len);
 		in_my_stash = gv_stashpv(tokenbuf, FALSE);
 		if (!in_my_stash) {
 		    char tmpbuf[1024];
