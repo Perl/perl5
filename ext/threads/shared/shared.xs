@@ -308,6 +308,8 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
     if (sv && SvTYPE(ssv) < SvTYPE(sv)) {
 	SHARED_CONTEXT;
 	sv_upgrade(ssv, SvTYPE(*psv));
+	if (SvTYPE(ssv) == SVt_PVAV)	/* #24061 */
+	    AvREAL_on(ssv);
 	CALLER_CONTEXT;
     }
 
@@ -436,6 +438,12 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	if (target) {
 	    SV *tmp;
 	    SHARED_CONTEXT;
+	    /* #24255: sv_setsv() (via sv_unref_flags()) may cause a
+	     * deferred free with sv_2mortal(). Ensure that the free_tmps
+	     * is done within this inpterpreter. DAPM.
+	     */
+	    ENTER;
+	    SAVETMPS;
 	    tmp = newRV(SHAREDSvPTR(target));
 	    sv_setsv_nomg(SHAREDSvPTR(shared), tmp);
 	    SvREFCNT_dec(tmp);
@@ -444,6 +452,8 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	      SvOBJECT_on(SHAREDSvPTR(target));
 	      SvSTASH(SHAREDSvPTR(target)) = (HV*)fake_stash;
 	    }
+	    FREETMPS;
+	    LEAVE;
 	    CALLER_CONTEXT;
 	}
 	else {
