@@ -7106,6 +7106,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
     char *c;
     void (*dptr) (void*);
     void (*dxptr) (pTHXo_ void*);
+    OP *o;
 
     Newz(54, nss, max, ANY);
 
@@ -7232,7 +7233,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 		case OP_LEAVE:
 		case OP_SCOPE:
 		case OP_LEAVEWRITE:
-		    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+		    TOPPTR(nss,ix) = ptr;
+		    o = (OP*)ptr;
+		    OpREFCNT_inc(o);
 		    break;
 		default:
 		    TOPPTR(nss,ix) = Nullop;
@@ -7575,7 +7578,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_main_cv		= cv_dup_inc(proto_perl->Imain_cv);
     PL_main_root	= OpREFCNT_inc(proto_perl->Imain_root);
     PL_main_start	= proto_perl->Imain_start;
-    PL_eval_root	= OpREFCNT_inc(proto_perl->Ieval_root);
+    PL_eval_root	= proto_perl->Ieval_root;
     PL_eval_start	= proto_perl->Ieval_start;
 
     /* runtime control stuff */

@@ -528,7 +528,7 @@ a given module works on a given platform.
 
 =item Mailing list: cpan-testers@perl.org
 
-=item Testing results: C<http://testers.cpan.org/>
+=item Testing results: http://testers.cpan.org/
 
 =back
 
@@ -654,21 +654,41 @@ Also see:
 
 =over 4
 
-=item The djgpp environment for DOS, C<http://www.delorie.com/djgpp/>
+=item *
 
-=item The EMX environment for DOS, OS/2, etc. C<emx@iaehv.nl>,
-C<http://www.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/index.html> or
-C<ftp://hobbes.nmsu.edu/pub/os2/dev/emx>
+The djgpp environment for DOS, http://www.delorie.com/djgpp/
+and L<perldos>.
 
-=item Build instructions for Win32, L<perlwin32>.
+=item *
 
-=item The ActiveState Pages, C<http://www.activestate.com/>
+The EMX environment for DOS, OS/2, etc. emx@iaehv.nl,
+http://www.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/index.html or
+ftp://hobbes.nmsu.edu/pub/os2/dev/emx.  Also L<perlos2>.
 
-=item The Cygwin environment for Win32; F<README.cygwin> (installed 
-as L<perlcygwin>), C<http://sourceware.cygnus.com/cygwin/>
+=item *
 
-=item The U/WIN environment for Win32,
-C<http://www.research.att.com/sw/tools/uwin/>
+Build instructions for Win32 in L<perlwin32>, or under the Cygnus environment
+in L<perlcygwin>.  
+
+=item *
+
+The C<Win32::*> modules in L<Win32>.
+
+=item *
+
+The ActiveState Pages, http://www.activestate.com/
+
+=item *
+
+The Cygwin environment for Win32; F<README.cygwin> (installed 
+as L<perlcygwin>), http://sourceware.cygnus.com/cygwin/
+
+=item *
+
+The U/WIN environment for Win32,
+<http://www.research.att.com/sw/tools/uwin/
+
+=item Build instructions for OS/2, L<perlos2>
 
 
 =back
@@ -742,17 +762,23 @@ Also see:
 
 =over 4
 
-=item The MacPerl Pages, C<http://www.macperl.com/>.
+=item *
 
-=item The MacPerl mailing lists, C<http://www.macperl.org/>.
+The MacPerl Pages, http://www.macperl.com/ .
 
-=item MacPerl Module Porters, C<http://pudge.net/mmp/>.
+=item *
+
+The MacPerl mailing lists, http://www.macperl.org/ .
+
+=item *
+
+MacPerl Module Porters, http://pudge.net/mmp/ .
 
 =back
 
 =head2 VMS
 
-Perl on VMS is discussed in F<vms/perlvms.pod> in the perl distribution.
+Perl on VMS is discussed in L<perlvms> in the perl distribution.
 Perl on VMS can accept either VMS- or Unix-style file
 specifications as in either of the following:
 
@@ -844,13 +870,19 @@ Also see:
 
 =over 4
 
-=item F<README.vms> (installed as L<README_vms>), L<perlvms>
+=item *
 
-=item vmsperl list, C<majordomo@perl.org>
+F<README.vms> (installed as L<README_vms>), L<perlvms>
 
-Put the words C<subscribe vmsperl> in message body.
+=item *
 
-=item vmsperl on the web, C<http://www.sidhe.org/vmsperl/index.html>
+vmsperl list, majordomo@perl.org
+
+(Put the words C<subscribe vmsperl> in message body.)
+
+=item *
+
+vmsperl on the web, http://www.sidhe.org/vmsperl/index.html
 
 =back
 
@@ -883,7 +915,7 @@ ftp.stratus.com.
 
 The value of C<$^O> on VOS is "VOS".  To determine the architecture that
 you are running on without resorting to loading all of C<%Config> you
-can examine the content of the C<@INC> array like so:
+can examine the content of the @INC array like so:
 
     if ($^O =~ /VOS/) {
         print "I'm on a Stratus box!\n";
@@ -909,16 +941,22 @@ Also see:
 
 =over 4
 
-=item F<README.vos>
+=item *
 
-=item VOS mailing list
+F<README.vos>
+
+=item *
+
+The VOS mailing list.
 
 There is no specific mailing list for Perl on VOS.  You can post
 comments to the comp.sys.stratus newsgroup, or subscribe to the general
 Stratus mailing list.  Send a letter with "Subscribe Info-Stratus" in
 the message body to majordomo@list.stratagy.com.
 
-=item VOS Perl on the web at C<http://ftp.stratus.com/pub/vos/vos.html>
+=item *
+
+VOS Perl on the web at http://ftp.stratus.com/pub/vos/vos.html
 
 =back
 
@@ -931,6 +969,7 @@ Character Code Set ID 0037 for OS/400 and either 1047 or POSIX-BC for S/390
 systems).  On the mainframe perl currently works under the "Unix system
 services for OS/390" (formerly known as OpenEdition), VM/ESA OpenEdition, or
 the BS200 POSIX-BC system (BS2000 is supported in perl 5.6 and greater).
+See L<perlos390> for details.  
 
 As of R2.5 of USS for OS/390 and Version 2.3 of VM/ESA these Unix
 sub-systems do not support the C<#!> shebang trick for script invocation.
@@ -999,15 +1038,22 @@ Also see:
 
 =over 4
 
-=item F<README.os390>, F<README.posix-bc>, F<README.vmesa>
+=item *
 
-=item perl-mvs list
+*
+
+L<perlos390>, F<README.os390>, F<README.posix-bc>, F<README.vmesa>
+
+=item *
 
 The perl-mvs@perl.org list is for discussion of porting issues as well as
 general usage issues for all EBCDIC Perls.  Send a message body of
 "subscribe perl-mvs" to majordomo@perl.org.
 
-=item AS/400 Perl information at C<http://as400.rochester.ibm.com/>
+=item  *
+
+AS/400 Perl information at
+ttp://as400.rochester.ibm.com/
 as well as on CPAN in the F<ports/> directory.
 
 =back
@@ -1138,23 +1184,33 @@ See also:
 
 =over 4
 
-=item Amiga, F<README.amiga> (installed as L<perlamiga>).
+=item *
 
-=item Atari, F<README.mint> and Guido Flohr's web page
-C<http://stud.uni-sb.de/~gufl0000/>
+Amiga, F<README.amiga> (installed as L<perlamiga>).
 
-=item Be OS, F<README.beos>
+=item *
 
-=item HP 300 MPE/iX, F<README.mpeix> and Mark Bixby's web page
-C<http://www.cccd.edu/~markb/perlix.html>
+Atari, F<README.mint> and Guido Flohr's web page
+http://stud.uni-sb.de/~gufl0000/
 
-=item Novell Netware
+=item *
+
+Be OS, F<README.beos>
+
+=item *
+
+HP 300 MPE/iX, F<README.mpeix> and Mark Bixby's web page
+http://www.cccd.edu/~markb/perlix.html
+
+=item *
 
 A free perl5-based PERL.NLM for Novell Netware is available in
-precompiled binary and source code form from C<http://www.novell.com/>
+precompiled binary and source code form from http://www.novell.com/
 as well as from CPAN.
 
-=item Plan 9, F<README.plan9>
+=item 
+
+Plan 9, F<README.plan9>
 
 =back
 
@@ -1700,6 +1756,11 @@ Not useful. (S<RISC OS>)
 
 =over 4
 
+=item v1.47, 22 March 2000
+
+Various cleanups from Tom Christiansen, including migration of 
+long platform listings from L<perl>.
+
 =item v1.46, 12 February 2000
 
 Updates for VOS and MPE/iX. (Peter Prymmer)  Other small changes.
@@ -1908,7 +1969,7 @@ binaries available via http://www.perl.com/CPAN/ports/index.html:
 	Tandem Guardian		5.004
 
 The following platforms have only binaries available via
-http://www.perl.com/CPAN/ports/index.html:
+http://www.perl.com/CPAN/ports/index.html :
 
 				Perl release
 
@@ -1920,6 +1981,11 @@ Although we do suggest that you always build your own Perl from
 the source code, both for maximal configurability and for security,
 in case you are in a hurry you can check
 http://www.perl.com/CPAN/ports/index.html for binary distributions.
+
+=head1 SEE ALSO
+
+L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlhpux>, L<perlos2>,
+L<perlos390>, L<perlwin32>, L<perlvms>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 
@@ -1961,4 +2027,4 @@ This document is maintained by Chris Nandor
 
 =head1 VERSION
 
-Version 1.46, last modified 12 February 2000
+Version 1.47, last modified 22 March 2000

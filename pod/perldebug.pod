@@ -68,7 +68,7 @@ You may change the pager which is used via C<O pager=...> command.
 =item p expr
 
 Same as C<print {$DB::OUT} expr> in the current package.  In particular,
-because this is just Perl's own B<print> function, this means that nested
+because this is just Perl's own C<print> function, this means that nested
 data structures and objects are not dumped, unlike with the C<x> command.
 
 The C<DB::OUT> filehandle is opened to F</dev/tty>, regardless of
@@ -211,7 +211,7 @@ breakpoint on the line about to be executed.  If a condition
 is specified, it's evaluated each time the statement is reached: a
 breakpoint is taken only if the condition is true.  Breakpoints may
 only be set on lines that begin an executable statement.  Conditions
-don't use B<if>:
+don't use C<if>:
 
     b 237 $x > 30
     b 237 ++$count237 < 11
@@ -416,7 +416,7 @@ Run the debugger command, piping DB::OUT into your current pager.
 
 =item ||dbcmd
 
-Same as C<|dbcmd> but DB::OUT is temporarily B<select>ed as well.
+Same as C<|dbcmd> but DB::OUT is temporarily C<select>ed as well.
 
 =item = [alias value]
 
@@ -934,8 +934,11 @@ L<perlrun>.
 You cannot get stack frame information or in any fashion debug functions
 that were not compiled by Perl, such as those from C or C++ extensions.
 
-If you alter your @_ arguments in a subroutine (such as with B<shift>
-or B<pop>, the stack backtrace will not show the original values.
+If you alter your @_ arguments in a subroutine (such as with C<shift>
+or C<pop>, the stack backtrace will not show the original values.
+
+The debugger does not currently work in conjunction with the B<-W>
+command-line switch, because it itself is not free of warnings.
 
 If you're in a slow syscall (like C<wait>ing, C<accept>ing, or C<read>ing
 from your keyboard or a socket) and haven't set up your own C<$SIG{INT}>
