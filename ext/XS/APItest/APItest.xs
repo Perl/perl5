@@ -5,6 +5,8 @@
 
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
 
+#define UTF8KLEN(sv, len)   (SvUTF8(sv) ? -(I32)len : (I32)len)
+
 bool
 exists(hash, key_sv)
 	PREINIT:
@@ -15,7 +17,7 @@ exists(hash, key_sv)
 	SV *key_sv
 	CODE:
 	key = SvPV(key_sv, len);
-	RETVAL = hv_exists(hash, key, SvUTF8(key_sv) ? -len : len);
+	RETVAL = hv_exists(hash, key, UTF8KLEN(key_sv, len));
         OUTPUT:
         RETVAL
 
@@ -30,8 +32,7 @@ delete(hash, key_sv)
 	CODE:
 	key = SvPV(key_sv, len);
 	/* It's already mortal, so need to increase reference count.  */
-	RETVAL = SvREFCNT_inc(hv_delete(hash, key,
-					SvUTF8(key_sv) ? -len : len, 0));
+	RETVAL = SvREFCNT_inc(hv_delete(hash, key, UTF8KLEN(key_sv, len), 0));
         OUTPUT:
         RETVAL
 
@@ -73,7 +74,7 @@ store(hash, key_sv, value)
 	CODE:
 	key = SvPV(key_sv, len);
 	copy = newSV(0);
-	result = hv_store(hash, key, SvUTF8(key_sv) ? -len : len, copy, 0);
+	result = hv_store(hash, key, UTF8KLEN(key_sv, len), copy, 0);
 	SvSetMagicSV(copy, value);
 	if (!result) {
 	    SvREFCNT_dec(copy);
@@ -97,7 +98,7 @@ fetch(hash, key_sv)
 	SV *key_sv
 	CODE:
 	key = SvPV(key_sv, len);
-	result = hv_fetch(hash, key, SvUTF8(key_sv) ? -len : len, 0);
+	result = hv_fetch(hash, key, UTF8KLEN(key_sv, len), 0);
 	if (!result) {
 	    XSRETURN_EMPTY;
 	}

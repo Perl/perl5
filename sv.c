@@ -8255,7 +8255,7 @@ F0convert(NV nv, char *endbuf, STRLEN *len)
 	nv = -nv;
     if (nv < UV_MAX) {
 	nv += 0.5;
-	uv = nv;
+	uv = (UV)nv;
 	if (uv & 1 && uv == nv)
 	    uv--;			/* Round to even */
 	do {
@@ -8349,7 +8349,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	pp = pat + 2;
 	while (*pp >= '0' && *pp <= '9')
 	    digits = 10 * digits + (*pp++ - '0');
-	if (pp - pat == patlen - 1) {
+	if (pp - pat == (int)patlen - 1) {
 	    NV nv;
 
 	    if (args)
@@ -8760,23 +8760,23 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    else if (args) {
 		switch (intsize) {
 		case 'h':	iv = (short)va_arg(*args, int); break;
-		default:	iv = va_arg(*args, int); break;
 		case 'l':	iv = va_arg(*args, long); break;
 		case 'V':	iv = va_arg(*args, IV); break;
+		default:	iv = va_arg(*args, int); break;
 #ifdef HAS_QUAD
 		case 'q':	iv = va_arg(*args, Quad_t); break;
 #endif
 		}
 	    }
 	    else {
-		iv = SvIVx(argsv);
+		IV tiv = SvIVx(argsv); /* work around GCC bug #13488 */
 		switch (intsize) {
-		case 'h':	iv = (short)iv; break;
-		default:	break;
-		case 'l':	iv = (long)iv; break;
-		case 'V':	break;
+		case 'h':	iv = (short)tiv; break;
+		case 'l':	iv = (long)tiv; break;
+		case 'V':
+		default:	iv = tiv; break;
 #ifdef HAS_QUAD
-		case 'q':	iv = (Quad_t)iv; break;
+		case 'q':	iv = (Quad_t)tiv; break;
 #endif
 		}
 	    }
@@ -8844,23 +8844,23 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    else if (args) {
 		switch (intsize) {
 		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
-		default:   uv = va_arg(*args, unsigned); break;
 		case 'l':  uv = va_arg(*args, unsigned long); break;
 		case 'V':  uv = va_arg(*args, UV); break;
+		default:   uv = va_arg(*args, unsigned); break;
 #ifdef HAS_QUAD
-		case 'q':  uv = va_arg(*args, Quad_t); break;
+		case 'q':  uv = va_arg(*args, Uquad_t); break;
 #endif
 		}
 	    }
 	    else {
-		uv = SvUVx(argsv);
+		UV tuv = SvUVx(argsv); /* work around GCC bug #13488 */
 		switch (intsize) {
-		case 'h':	uv = (unsigned short)uv; break;
-		default:	break;
-		case 'l':	uv = (unsigned long)uv; break;
-		case 'V':	break;
+		case 'h':	uv = (unsigned short)tuv; break;
+		case 'l':	uv = (unsigned long)tuv; break;
+		case 'V':
+		default:	uv = tuv; break;
 #ifdef HAS_QUAD
-		case 'q':	uv = (Quad_t)uv; break;
+		case 'q':	uv = (Uquad_t)tuv; break;
 #endif
 		}
 	    }
