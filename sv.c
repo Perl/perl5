@@ -4964,7 +4964,19 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
 	SvREFCNT_dec(av);           /* for sv_magic */
     }
-    av_push(av,sv);
+    if (AvFILLp(av) >= AvMAX(av)) {
+        SV **svp = AvARRAY(av);
+        I32 i = AvFILLp(av);
+        while (i >= 0) {
+            if (svp[i] == &PL_sv_undef) {
+                svp[i] = sv;        /* reuse the slot */
+                return;
+            }
+            i--;
+        }
+        av_extend(av, AvFILLp(av)+1);
+    }
+    AvARRAY(av)[++AvFILLp(av)] = sv; /* av_push() */
 }
 
 /* delete a back-reference to ourselves from the backref magic associated
