@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.56 $, $Date: 2004/11/03 22:47:56 $)
+perlfaq4 - Data Manipulation ($Revision: 1.61 $, $Date: 2005/03/11 16:27:53 $)
 
 =head1 DESCRIPTION
 
@@ -389,7 +389,7 @@ integers (inclusive), For example: C<random_int_in(50,120)>.
 
 =head2 How do I find the day or week of the year?
 
-The localtime function returns the day of the week.  Without an
+The localtime function returns the day of the year.  Without an
 argument localtime uses the current time.
 
     $day_of_year = (localtime)[7];
@@ -422,6 +422,7 @@ Use the following simple functions:
     sub get_century    {
 	return int((((localtime(shift || time))[5] + 1999))/100);
     }
+    
     sub get_millennium {
 	return 1+int((((localtime(shift || time))[5] + 1899))/1000);
     }
@@ -454,26 +455,29 @@ and Date::Manip modules from CPAN.
 
 =head2 How can I find the Julian Day?
 
-Use the Time::JulianDay module (part of the Time-modules bundle
-available from CPAN.)
+(contributed by brian d foy and Dave Cross)
 
-Before you immerse yourself too deeply in this, be sure to verify that
-it is the I<Julian> Day you really want.  Are you interested in a way
-of getting serial days so that you just can tell how many days they
-are apart or so that you can do also other date arithmetic?  If you
-are interested in performing date arithmetic, this can be done using
-modules Date::Manip or Date::Calc.
+You can use the Time::JulianDay module available on CPAN.  Ensure that
+you really want to find a Julian day, though, as many people have
+different ideas about Julian days.  See
+http://www.hermetic.ch/cal_stud/jdn.htm for instance.
 
-There is too many details and much confusion on this issue to cover in
-this FAQ, but the term is applied (correctly) to a calendar now
-supplanted by the Gregorian Calendar, with the Julian Calendar failing
-to adjust properly for leap years on centennial years (among other
-annoyances).  The term is also used (incorrectly) to mean: [1] days in
-the Gregorian Calendar; and [2] days since a particular starting time
-or `epoch', usually 1970 in the Unix world and 1980 in the
-MS-DOS/Windows world.  If you find that it is not the first meaning
-that you really want, then check out the Date::Manip and Date::Calc
-modules.  (Thanks to David Cassell for most of this text.)
+You can also try the DateTime module, which can convert a date/time
+to a Julian Day.
+
+  $ perl -MDateTime -le'print DateTime->today->jd'
+  2453401.5
+
+Or the modified Julian Day
+
+  $ perl -MDateTime -le'print DateTime->today->mjd'
+  53401
+
+Or even the day of the year (which is what some people think of as a
+Julian day)
+
+  $ perl -MDateTime -le'print DateTime->today->doy'
+  31
 
 =head2 How do I find yesterday's date?
 
@@ -597,9 +601,6 @@ quoting and readability problems, but it is possible.  To interpolate
 a subroutine call (in list context) into a string:
 
     print "My sub returned @{[mysub(1,2,3)]} that time.\n";
-
-See also ``How can I expand variables in text strings?'' in this
-section of the FAQ.
 
 =head2 How do I find matching/nesting anything?
 
@@ -804,7 +805,7 @@ case transformations:
 =head2 How can I split a [character] delimited string except when inside [character]?
 
 Several modules can handle this sort of pasing---Text::Balanced,
-Text::CVS, Text::CVS_XS, and Text::ParseWords, among others.
+Text::CSV, Text::CSV_XS, and Text::ParseWords, among others.
 
 Take the example case of trying to split a string that is
 comma-separated into its different fields. You can't use C<split(/,/)>
@@ -938,31 +939,27 @@ you can use this kind of thing:
 
 =head2 How do I find the soundex value of a string?
 
-Use the standard Text::Soundex module distributed with Perl.
-Before you do so, you may want to determine whether `soundex' is in
-fact what you think it is.  Knuth's soundex algorithm compresses words
-into a small space, and so it does not necessarily distinguish between
-two words which you might want to appear separately.  For example, the
-last names `Knuth' and `Kant' are both mapped to the soundex code K530.
-If Text::Soundex does not do what you are looking for, you might want
-to consider the String::Approx module available at CPAN.
+(contributed by brian d foy)
+
+You can use the Text::Soundex module. If you want to do fuzzy or close
+matching, you might also try the String::Approx, and Text::Metaphone,
+and Text::DoubleMetaphone modules.
 
 =head2 How can I expand variables in text strings?
 
-Let's assume that you have a string like:
+Let's assume that you have a string that contains placeholder
+variables.
 
     $text = 'this has a $foo in it and a $bar';
 
-If those were both global variables, then this would
-suffice:
+You can use a substitution with a double evaluation.  The
+first /e turns C<$1> into C<$foo>, and the second /e turns
+C<$foo> into its value.  You may want to wrap this in an
+C<eval>: if you try to get the value of an undeclared variable
+while running under C<use strict>, you get a fatal error.
 
-    $text =~ s/\$(\w+)/${$1}/g;  # no /e needed
-
-But since they are probably lexicals, or at least, they could
-be, you'd have to do this:
-
-    $text =~ s/(\$\w+)/$1/eeg;
-    die if $@;			# needed /ee, not /e
+    eval { $text =~ s/(\$\w+)/$1/eeg };
+    die if $@;
 
 It's probably better in the general case to treat those
 variables as entries in some special hash.  For example:
@@ -972,9 +969,6 @@ variables as entries in some special hash.  For example:
 	bar  => 19,
     );
     $text =~ s/\$(\w+)/$user_defs{$1}/g;
-
-See also ``How do I expand function calls in a string?'' in this section
-of the FAQ.
 
 =head2 What's wrong with always quoting "$vars"?
 
@@ -2088,8 +2082,8 @@ the PDL module from CPAN instead--it makes number-crunching easy.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
-All rights reserved.
+Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.18 $, $Date: 2004/11/03 22:54:08 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.22 $, $Date: 2005/03/27 07:19:01 $)
 
 =head1 DESCRIPTION
 
@@ -54,8 +54,8 @@ count as though they were quoted:
 
     This                    is like this
     ------------            ---------------
-    $foo{line}              $foo{"line"}
-    bar => stuff            "bar" => stuff
+    $foo{line}              $foo{'line'}
+    bar => stuff            'bar' => stuff
 
 The final semicolon in a block is optional, as is the final comma in a
 list.  Good style (see L<perlstyle>) says to put them in except for
@@ -176,20 +176,26 @@ If you're looking for something a bit more rigorous, try L<perltoot>.
 
 =head2 How do I create a module?
 
-A module is a package that lives in a file of the same name.  For
-example, the Hello::There module would live in Hello/There.pm.  For
-details, read L<perlmod>.  You'll also find L<Exporter> helpful.  If
-you're writing a C or mixed-language module with both C and Perl, then
-you should study L<perlxstut>.
+(contributed by brian d foy)
 
-The C<h2xs> program will create stubs for all the important stuff for you:
+L<perlmod>, L<perlmodlib>, L<perlmodstyle> explain modules
+in all the gory details. L<perlnewmod> gives a a brief
+overview of the process along with a couple of suggestions
+about style.
 
-  % h2xs -XA -n My::Module
+If you need to include C code or C library interfaces in
+your module, you'll need h2xs.  h2xs will create the module
+distribution structure and the initial interface files
+you'll need.  L<perlxs> and L<perlxstut> explain the details.
 
-The C<-X> switch tells C<h2xs> that you are not using C<XS> extension
-code.  The C<-A> switch tells C<h2xs> that you are not using the
-AutoLoader, and the C<-n> switch specifies the name of the module.
-See L<h2xs> for more details.
+If you don't need to use C code, other tools such as
+ExtUtils::ModuleMaker and Module::Starter, can help you
+create a skeleton module distribution.
+
+You may also want to see Sam Tregar's "Writing Perl Modules
+for CPAN" ( http://apress.com/book/bookDisplay.html?bID=14 )
+which is the best hands-on guide to creating module
+distributions.
 
 =head2 How do I create a class?
 
@@ -736,18 +742,22 @@ not necessarily the same as the one in which you were compiled):
 =head2 How can I comment out a large block of perl code?
 
 You can use embedded POD to discard it.  Enclose the blocks you want
-to comment out in POD markers, for example C<=for nobody> and C<=cut>
-(which marks ends of POD blocks).
+to comment out in POD markers.  The <=begin> directive marks a section
+for a specific formatter.  Use the C<comment> format, which no formatter
+should claim to understand (by policy).  Mark the end of the block
+with <=end>.
 
     # program is here
 
-    =for nobody
+    =begin comment
 
     all of this stuff
 
     here will be ignored
     by everyone
 
+	=end comment
+	
     =cut
 
     # program continues
@@ -886,6 +896,8 @@ you probably only want to use hard references.
 
 =head2 What does "bad interpreter" mean?
 
+(contributed by brian d foy)
+
 The "bad interpreter" message comes from the shell, not perl.  The
 actual message may vary depending on your platform, shell, and locale
 settings.
@@ -895,7 +907,10 @@ line in your perl script (the "shebang" line) does not contain the
 right path to perl (or any other program capable of running scripts). 
 Sometimes this happens when you move the script from one machine to
 another and each machine has a different path to perl---/usr/bin/perl
-versus /usr/local/bin/perl for instance.
+versus /usr/local/bin/perl for instance. It may also indicate
+that the source machine has CRLF line terminators and the 
+destination machine has LF only: the shell tries to find 
+/usr/bin/perl<CR>, but can't.
 
 If you see "bad interpreter: Permission denied", you need to make your
 script executable.
@@ -911,8 +926,8 @@ where you expect it so you need to adjust your shebang line.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
-All rights reserved.
+Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.

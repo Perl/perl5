@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 2004/10/05 22:15:44 $)
+perlfaq - frequently asked questions about Perl ($Date: 2005/03/27 07:21:21 $)
 
 =head1 DESCRIPTION
 
@@ -119,7 +119,7 @@ Which version of Perl should I use?
 
 =item *
 
-What are perl4 and perl5?
+What are perl4, perl5, or perl6?
 
 =item *
 
@@ -317,10 +317,6 @@ How can I use X or Tk with Perl?
 
 =item *
 
-How can I generate simple menus without using CGI or Tk?
-
-=item *
-
 How can I make my Perl program run faster?
 
 =item *
@@ -377,7 +373,7 @@ Where can I learn about linking C with Perl? [h2xs, xsubpp]
 
 =item *
 
-I've read perlembed, perlguts, etc., but I can't embed perl in
+I've read perlembed, perlguts, etc., but I can't embed perl in my C program; what am I doing wrong?
 
 =item *
 
@@ -724,6 +720,10 @@ How do I count the number of lines in a file?
 =item *
 
 How can I use Perl's C<-i> option from within a program?
+
+=item *
+
+How can I copy a file?
 
 =item *
 

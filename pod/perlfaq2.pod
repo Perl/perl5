@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.29 $, $Date: 2004/10/25 18:37:23 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.31 $, $Date: 2005/01/31 15:54:44 $)
 
 =head1 DESCRIPTION
 
@@ -313,6 +313,11 @@ Recommended books on (or mostly on) Perl follow.
 
 =item Tutorials
 
+	Beginning Perl
+	by James Lee
+	ISBN 1-59059-391-X [2nd edition August 2004]
+	http://apress.com/book/bookDisplay.html?bID=344
+
 	Elements of Programming with Perl
 	by Andrew L. Johnson
 	ISBN 1-884777-80-5 [1st edition October 1999]
@@ -353,6 +358,11 @@ Recommended books on (or mostly on) Perl follow.
 
 =item Task-Oriented
 
+	Writing Perl Modules for CPAN
+	by Sam Tregar
+	ISBN 1-59059-018-X [1st edition Aug 2002]
+	http://apress.com/book/bookDisplay.html?bID=14
+
 	The Perl Cookbook
 	by Tom Christiansen and Nathan Torkington
 	    with foreword by Larry Wall
@@ -364,30 +374,40 @@ Recommended books on (or mostly on) Perl follow.
 	ISBN 0-201-41975-0 [1st edition 1998]
 	http://www.awl.com/
 
+	Real World SQL Server Administration with Perl
+	by Linchi Shea
+	ISBN 1-59059-097-X [1st edition July 2003]
+	http://apress.com/book/bookDisplay.html?bID=171
+
 =item Special Topics
 
+	Perl 6 Now: The Core Ideas Illustrated with Perl 5
+	by Scott Walters
+	ISBN 1-59059-395-2 [1st edition December 2004
+	http://apress.com/book/bookDisplay.html?bID=355
+	
 	Mastering Regular Expressions
 	by Jeffrey E. F. Friedl
 	ISBN 0-596-00289-0 [2nd edition July 2002]
 	http://www.oreilly.com/catalog/regex2/
 
-    Network Programming with Perl
+	Network Programming with Perl
 	by Lincoln Stein
 	ISBN 0-201-61571-1 [1st edition 2001]
 	http://www.awlonline.com/
 
-    Object Oriented Perl
+	Object Oriented Perl
 	Damian Conway
 	    with foreword by Randal L. Schwartz
 	ISBN 1-884777-79-1 [1st edition August 1999]
 	http://www.manning.com/Conway/
 
-    Data Munging with Perl
+	Data Munging with Perl
 	Dave Cross
 	ISBN 1-930110-00-6 [1st edition 2001]
 	http://www.manning.com/cross
 
-    Mastering Perl/Tk
+	Mastering Perl/Tk
 	by Steve Lidie and Nancy Walsh
 	ISBN 1-56592-716-8 [1st edition January 2002]
 	http://www.oreilly.com/catalog/mastperltk/
@@ -523,8 +543,8 @@ the I<What is CPAN?> question earlier in this document.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2001 Tom Christiansen and Nathan Torkington.
-All rights reserved.
+Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.

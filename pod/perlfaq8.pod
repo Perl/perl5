@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.22 $, $Date: 2004/10/05 22:13:49 $)
+perlfaq8 - System Interaction ($Revision: 1.23 $, $Date: 2005/01/03 18:43:37 $)
 
 =head1 DESCRIPTION
 
@@ -1252,8 +1252,8 @@ but other times it is not.  Modern programs C<use Socket;> instead.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2003 Tom Christiansen and Nathan Torkington.
-All rights reserved.
+Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.

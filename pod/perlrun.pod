@@ -140,8 +140,10 @@ Perl program and a Perl library file.
 
 =item Macintosh
 
-A Macintosh perl program will have the appropriate Creator and
-Type, so that double-clicking them will invoke the perl application.
+Under "Classic" MacOS, a perl program will have the appropriate Creator and
+Type, so that double-clicking them will invoke the MacPerl application.
+Under Mac OS X, clickable apps can be made from any C<#!> script using Wil
+Sanchez' DropScript utility: http://www.wsanchez.net/software/ .
 
 =item VMS
 
@@ -401,7 +403,7 @@ as it executes, the way that C<sh -x> provides for shell scripts,
 you can't use Perl's B<-D> switch.  Instead do this
 
   # If you have "env" utility
-  env=PERLDB_OPTS="NonStop=1 AutoTrace=1 frame=2" perl -dS program
+  env PERLDB_OPTS="NonStop=1 AutoTrace=1 frame=2" perl -dS program
 
   # Bourne shell syntax
   $ PERLDB_OPTS="NonStop=1 AutoTrace=1 frame=2" perl -dS program

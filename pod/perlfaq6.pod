@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.27 $, $Date: 2004/11/03 22:52:16 $)
+perlfaq6 - Regular Expressions ($Revision: 1.31 $, $Date: 2005/03/27 07:17:28 $)
 
 =head1 DESCRIPTION
 
@@ -518,73 +518,130 @@ See the module String::Approx available from CPAN.
 
 =head2 How do I efficiently match many regular expressions at once?
 
-The following is extremely inefficient:
+( contributed by brian d foy )
 
-    # slow but obvious way
-    @popstates = qw(CO ON MI WI MN);
-    while (defined($line = <>)) {
-	for $state (@popstates) {
-	    if ($line =~ /\b$state\b/i) {
-		print $line;
-		last;
-	    }
-	}
-    }
+Avoid asking Perl to compile a regular expression every time 
+you want to match it.  In this example, perl must recompile
+the regular expression for every iteration of the foreach()
+loop since it has no way to know what $pattern will be.
 
-That's because Perl has to recompile all those patterns for each of
-the lines of the file.  As of the 5.005 release, there's a much better
-approach, one which makes use of the new C<qr//> operator:
+    @patterns = qw( foo bar baz );
+    
+    LINE: while( <> ) 
+    	{
+		foreach $pattern ( @patterns ) 
+			{
+	    	print if /\b$pattern\b/i;
+	    	next LINE;
+	   		}
+		}
 
-    # use spiffy new qr// operator, with /i flag even
-    use 5.005;
-    @popstates = qw(CO ON MI WI MN);
-    @poppats   = map { qr/\b$_\b/i } @popstates;
-    while (defined($line = <>)) {
-	for $patobj (@poppats) {
-	    print $line if $line =~ /$patobj/;
-	}
-    }
+The qr// operator showed up in perl 5.005.  It compiles a
+regular expression, but doesn't apply it.  When you use the
+pre-compiled version of the regex, perl does less work. In
+this example, I inserted a map() to turn each pattern into
+its pre-compiled form.  The rest of the script is the same,
+but faster.
+
+    @patterns = map { qr/\b$_\b/i } qw( foo bar baz );
+
+    LINE: while( <> ) 
+    	{
+		foreach $pattern ( @patterns ) 
+			{
+	    	print if /\b$pattern\b/i;
+	    	next LINE;
+	   		}
+		}
+		
+In some cases, you may be able to make several patterns into
+a single regular expression.  Beware of situations that require
+backtracking though.
+
+	$regex = join '|', qw( foo bar baz );
+
+    LINE: while( <> ) 
+    	{
+		print if /\b(?:$regex)\b/i;
+		}
+
+For more details on regular expression efficiency, see Mastering
+Regular Expressions by Jeffrey Freidl.  He explains how regular
+expressions engine work and why some patterns are surprisingly
+inefficient.  Once you understand how perl applies regular 
+expressions, you can tune them for individual situations.
 
 =head2 Why don't word-boundary searches with C<\b> work for me?
 
-Two common misconceptions are that C<\b> is a synonym for C<\s+> and
-that it's the edge between whitespace characters and non-whitespace
-characters.  Neither is correct.  C<\b> is the place between a C<\w>
-character and a C<\W> character (that is, C<\b> is the edge of a
-"word").  It's a zero-width assertion, just like C<^>, C<$>, and all
-the other anchors, so it doesn't consume any characters.  L<perlre>
-describes the behavior of all the regex metacharacters.
+(contributed by brian d foy)
 
-Here are examples of the incorrect application of C<\b>, with fixes:
+Ensure that you know what \b really does: it's the boundary between a
+word character, \w, and something that isn't a word character. That
+thing that isn't a word character might be \W, but it can also be the
+start or end of the string.
 
-    "two words" =~ /(\w+)\b(\w+)/;	    # WRONG
-    "two words" =~ /(\w+)\s+(\w+)/;	    # right
+It's not (not!) the boundary between whitespace and non-whitespace,
+and it's not the stuff between words we use to create sentences.
 
-    " =matchless= text" =~ /\b=(\w+)=\b/;   # WRONG
-    " =matchless= text" =~ /=(\w+)=/;       # right
+In regex speak, a word boundary (\b) is a "zero width assertion",
+meaning that it doesn't represent a character in the string, but a
+condition at a certain position.
 
-Although they may not do what you thought they did, C<\b> and C<\B>
-can still be quite useful.  For an example of the correct use of
-C<\b>, see the example of matching duplicate words over multiple
-lines.
+For the regular expression, /\bPerl\b/, there has to be a word
+boundary before the "P" and after the "l".  As long as something other
+than a word character precedes the "P" and succeeds the "l", the
+pattern will match. These strings match /\bPerl\b/.
 
-An example of using C<\B> is the pattern C<\Bis\B>.  This will find
-occurrences of "is" on the insides of words only, as in "thistle", but
-not "this" or "island".
+	"Perl"    # no word char before P or after l
+	"Perl "   # same as previous (space is not a word char)
+	"'Perl'"  # the ' char is not a word char
+	"Perl's"  # no word char before P, non-word char after "l"
+
+These strings do not match /\bPerl\b/.
+
+	"Perl_"   # _ is a word char!
+	"Perler"  # no word char before P, but one after l
+	
+You don't have to use \b to match words though.  You can look for
+non-word characters surrrounded by word characters.  These strings
+match the pattern /\b'\b/.
+
+	"don't"   # the ' char is surrounded by "n" and "t"
+	"qep'a'"  # the ' char is surrounded by "p" and "a"
+	
+These strings do not match /\b'\b/.
+
+	"foo'"    # there is no word char after non-word '
+	
+You can also use the complement of \b, \B, to specify that there
+should not be a word boundary.
+
+In the pattern /\Bam\B/, there must be a word character before the "a"
+and after the "m". These patterns match /\Bam\B/:
+
+	"llama"   # "am" surrounded by word chars
+	"Samuel"  # same
+	
+These strings do not match /\Bam\B/
+
+	"Sam"      # no word boundary before "a", but one after "m"
+	"I am Sam" # "am" surrounded by non-word chars
+
 
 =head2 Why does using $&, $`, or $' slow my program down?
 
-Once Perl sees that you need one of these variables anywhere in
-the program, it provides them on each and every pattern match.
-The same mechanism that handles these provides for the use of $1, $2,
-etc., so you pay the same price for each regex that contains capturing
-parentheses.  If you never use $&, etc., in your script, then regexes
-I<without> capturing parentheses won't be penalized. So avoid $&, $',
-and $` if you can, but if you can't, once you've used them at all, use
-them at will because you've already paid the price.  Remember that some
-algorithms really appreciate them.  As of the 5.005 release.  the $&
-variable is no longer "expensive" the way the other two are.
+(contributed by Anno Siegel)
 
+Once Perl sees that you need one of these variables anywhere in the
+program, it provides them on each and every pattern match.  That means
+that on every pattern match the entire string will be copied, part of
+it to $`, part to $&, and part to $'.  Thus the penalty is most severe
+with long strings and patterns that match often.  Avoid $&, $', and $`
+if you can, but if you can't, once you've used them at all, use them
+at will because you've already paid the price. Remember that some
+algorithms really appreciate them.  As of the 5.005 release, the $&
+variable is no longer "expensive" the way the other two are.
+       
 =head2 What good is C<\G> in a regular expression?
 
 You use the C<\G> anchor to start the next match on the same
@@ -800,8 +857,8 @@ in L<perlre>.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
-All rights reserved.
+Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.

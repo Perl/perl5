@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.16 $, $Date: 2004/10/30 12:20:59 $)
+perlfaq9 - Networking ($Revision: 1.19 $, $Date: 2005/01/21 12:14:12 $)
 
 =head1 DESCRIPTION
 
@@ -227,6 +227,10 @@ through proxies:
 
 =head2 How do I automate an HTML form submission?
 
+If you are doing something complex, such as moving through many pages
+and forms or a web site, you can use C<WWW::Mechanize>.  See its
+documentation for all the details.
+
 If you're submitting values using the GET method, create a URL and encode
 the form using the C<query_form> method:
 
@@ -348,35 +352,42 @@ the Mail::Header module from CPAN (part of the MailTools package).
 
 =head2 How do I decode a CGI form?
 
-You use a standard module, probably CGI.pm.  Under no circumstances
-should you attempt to do so by hand!
+(contributed by brian d foy)
 
-You'll see a lot of CGI programs that blindly read from STDIN the number
-of bytes equal to CONTENT_LENGTH for POSTs, or grab QUERY_STRING for
-decoding GETs.  These programs are very poorly written.  They only work
-sometimes.  They typically forget to check the return value of the read()
-system call, which is a cardinal sin.  They don't handle HEAD requests.
-They don't handle multipart forms used for file uploads.  They don't deal
-with GET/POST combinations where query fields are in more than one place.
-They don't deal with keywords in the query string.
+Use the CGI.pm module that comes with Perl.  It's quick,
+it's easy, and it actually does quite a bit of work to
+ensure things happen correctly.  It handles GET, POST, and
+HEAD requests, multipart forms, multivalued fields, query
+string and message body combinations, and many other things
+you probably don't want to think about.
 
-In short, they're bad hacks.  Resist them at all costs.  Please do not be
-tempted to reinvent the wheel.  Instead, use the CGI.pm or CGI_Lite.pm
-(available from CPAN), or if you're trapped in the module-free land
-of perl1 .. perl4, you might look into cgi-lib.pl (available from
-http://cgi-lib.stanford.edu/cgi-lib/ ).
+It doesn't get much easier: the CGI module automatically
+parses the input and makes each value available through the
+C<param()> function.
 
-Make sure you know whether to use a GET or a POST in your form.
-GETs should only be used for something that doesn't update the server.
-Otherwise you can get mangled databases and repeated feedback mail
-messages.  The fancy word for this is ``idempotency''.  This simply
-means that there should be no difference between making a GET request
-for a particular URL once or multiple times.  This is because the
-HTTP protocol definition says that a GET request may be cached by the
-browser, or server, or an intervening proxy.  POST requests cannot be
-cached, because each request is independent and matters.  Typically,
-POST requests change or depend on state on the server (query or update
-a database, send mail, or purchase a computer).
+	use CGI qw(:standard);
+	
+	my $total = param( "price" ) + param( "shipping" );
+	
+	my @items = param( "item ); # multiple values, same field name
+	
+If you want an object-oriented approach, CGI.pm can do that too.
+
+	use CGI;
+	
+	my $cgi = CGI->new();
+	
+	my $total = $cgi->param( "price" ) + $cgi->param( "shipping" );
+	
+	my @items = $cgi->param( "item" );
+
+You might also try CGI::Minimal which is a lightweight version
+of the same thing.  Other CGI::* modules on CPAN might work better
+for you, too.
+
+Many people try to write their own decoder (or copy one from
+another program) and then run into one of the many "gotchas"
+of the task.  It's much easier and less hassle to use CGI.pm.
 
 =head2 How do I check a valid mail address?
 
@@ -632,8 +643,8 @@ an RPC stub generator and includes an RPC::ONC module.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2002 Tom Christiansen and Nathan Torkington.
-All rights reserved.
+Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.

@@ -736,8 +736,8 @@ Scalar true/false result never tainted.
 Subpatterns, either delivered as a list-context result or as $1 etc.
 are tainted if C<use locale> is in effect, and the subpattern regular
 expression contains C<\w> (to match an alphanumeric character), C<\W>
-(non-alphanumeric character), C<\s> (white-space character), or C<\S>
-(non white-space character).  The matched-pattern variable, $&, $`
+(non-alphanumeric character), C<\s> (whitespace character), or C<\S>
+(non whitespace character).  The matched-pattern variable, $&, $`
 (pre-match), $' (post-match), and $+ (last match) are also tainted if
 C<use locale> is in effect and the regular expression contains C<\w>,
 C<\W>, C<\s>, or C<\S>.

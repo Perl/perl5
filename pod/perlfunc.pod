@@ -1200,8 +1200,7 @@ A deprecated form of subroutine call.  See L<perlsub>.
 =item do EXPR
 
 Uses the value of EXPR as a filename and executes the contents of the
-file as a Perl script.  Its primary use is to include subroutines
-from a Perl subroutine library.
+file as a Perl script.
 
     do 'stat.pl';
 
@@ -1210,7 +1209,7 @@ is just like
     eval `cat stat.pl`;
 
 except that it's more efficient and concise, keeps track of the current
-filename for error messages, searches the @INC libraries, and updates
+filename for error messages, searches the @INC directories, and updates
 C<%INC> if the file is found.  See L<perlvar/Predefined Names> for these
 variables.  It also differs in that code evaluated with C<do FILENAME>
 cannot see lexicals in the enclosing scope; C<eval STRING> does.  It's the
@@ -2112,13 +2111,13 @@ integer which you can decode using unpack with the C<i> (or C<I>) format.
 
 An example testing if Nagle's algorithm is turned on on a socket:
 
-    use Socket;
+    use Socket qw(:all);
 
     defined(my $tcp = getprotobyname("tcp"))
 	or die "Could not determine the protocol number for tcp";
-    # my $tcp = Socket::IPPROTO_TCP; # Alternative
-    my $packed = getsockopt($socket, $tcp, Socket::TCP_NODELAY)
-	or die "Could not query TCP_NODELAY SOCKEt option: $!";
+    # my $tcp = IPPROTO_TCP; # Alternative
+    my $packed = getsockopt($socket, $tcp, TCP_NODELAY)
+	or die "Could not query TCP_NODELAY socket option: $!";
     my $nodelay = unpack("I", $packed);
     print "Nagle's algorithm is turned ", $nodelay ? "off\n" : "on\n";
 
@@ -2258,7 +2257,7 @@ See also L</map> for a list composed of the results of the BLOCK or EXPR.
 =item hex
 
 Interprets EXPR as a hex string and returns the corresponding value.
-(To convert strings that might start with either 0, 0x, or 0b, see
+(To convert strings that might start with either C<0>, C<0x>, or C<0b>, see
 L</oct>.)  If EXPR is omitted, uses C<$_>.
 
     print hex '0xAf'; # prints '175'
@@ -2266,7 +2265,8 @@ L</oct>.)  If EXPR is omitted, uses C<$_>.
 
 Hex strings may only represent integers.  Strings that would cause
 integer overflow trigger a warning.  Leading whitespace is not stripped,
-unlike oct().
+unlike oct(). To present something as hex, look into L</printf>,
+L</sprintf>, or L</unpack>.
 
 =item import
 
@@ -2995,7 +2995,7 @@ Examples:
 	}
     }
 
-See L<perliol/> for detailed info on PerlIO.
+See L<perliol> for detailed info on PerlIO.
 
 You may also, in the Bourne shell tradition, specify an EXPR beginning
 with C<< '>&' >>, in which case the rest of the string is interpreted
