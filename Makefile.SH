@@ -597,7 +597,7 @@ install.html: all installhtml
 
 run_byacc:	FORCE
 	$(BYACC) -d perly.y
-	-chmod 664 perly.c
+	-chmod 664 perly.c perly.h
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
 	sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
 	    -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
