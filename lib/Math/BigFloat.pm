@@ -327,6 +327,7 @@ Math::BigFloat - Arbitrary length float math package
   $f->fsub(NSTR) return NSTR            subtraction
   $f->fmul(NSTR) return NSTR            multiplication
   $f->fdiv(NSTR[,SCALE]) returns NSTR   division to SCALE places
+  $f->fmod(NSTR) returns NSTR           modular remainder
   $f->fneg() return NSTR                negation
   $f->fabs() return NSTR                absolute value
   $f->fcmp(NSTR) return CODE            compare undef,<0,=0,>0
