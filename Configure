@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Aug 25 19:47:58 EEST 2003 [metaconfig 3.0 PL70]
+# Generated on Thu Sep 18 08:54:57 EEST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7354,9 +7354,9 @@ eval $inhdr
 : is a C symbol defined?
 csym='tlook=$1;
 case "$3" in
--v) tf=libc.tmp; tc=""; tdc="";;
--a) tf=libc.tmp; tc="[0]"; tdc="[]";;
-*) tlook="^$1\$"; tf=libc.list; tc=""; tdc="()";;
+-v) tf=libc.tmp; tdc="";;
+-a) tf=libc.tmp; tdc="[]";;
+*) tlook="^$1\$"; tf=libc.list; tdc="()";;
 esac;
 tx=yes;
 case "$reuseval-$4" in
@@ -7370,16 +7370,15 @@ yes)
 		if $contains $tlook $tf >/dev/null 2>&1; then
 			tval=true;
 		elif $test "$mistrustnm" = compile -o "$mistrustnm" = run; then
-			echo "int main() { extern void *$1$tdc; if (&$1$tc) return(0); else return(1); }" > try.c;
+			echo "void *(*(p()))$tdc { extern void *$1$tdc; return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
 			$cc -o try $optimize $ccflags $ldflags try.c >/dev/null 2>&1 $libs && tval=true;
-			$test "$mistrustnm" = run -a -x try && { $run ./try >/dev/null 2>&1 || tval=false; };
-			$rm -f try try.c core;
+			$test "$mistrustnm" = run -a -x try && { $run ./try$_exe >/dev/null 2>&1 || tval=false; };
+			$rm -f try$_exe try.c core core.* try.core;
 		fi;
 	else
-		echo "#include <stdio.h>" > try.c;
-		echo "int main() { extern void *$1$tdc; if(&$1$tc) return(0); else return(1); }" > try.c;
+		echo "void *(*(p()))$tdc { extern void *$1$tdc; return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
 		$cc -o try $optimize $ccflags $ldflags try.c $libs >/dev/null 2>&1 && tval=true;
-		$rm -f try try.c;
+		$rm -f try$_exe try.c;
 	fi;
 	;;
 *)
