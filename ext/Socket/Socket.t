@@ -13,7 +13,7 @@ BEGIN {
 	
 use Socket;
 
-print "1..13\n";
+print "1..14\n";
 
 if (socket(T,PF_INET,SOCK_STREAM,6)) {
   print "ok 1\n";
@@ -101,3 +101,5 @@ print ((inet_ntoa(v10.10.10.10) eq '10.10.10.10') ? "ok 11\n" : "not ok 11\n");
     print (($addr eq v10.10.10.10) ? "ok 13\n" : "not ok 13\n");
 }
 				     
+eval { inet_ntoa(v10.20.30.400) };
+print (($@ =~ /^Wide character in Socket::inet_ntoa at/) ? "ok 14\n" : "not ok 14\n");

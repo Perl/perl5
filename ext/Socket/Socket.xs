@@ -215,7 +215,7 @@ inet_ntoa(ip_address_sv)
 	char * addr_str;
 	char * ip_address;
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
-	     croak("Wide character in Socket::ntoa");
+	     croak("Wide character in Socket::inet_ntoa");
 	ip_address = SvPV(ip_address_sv,addrlen);
 	if (addrlen != sizeof(addr)) {
 	    croak("Bad arg length for %s, length is %d, should be %d",
