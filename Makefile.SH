@@ -299,7 +299,8 @@ CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
 
 CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $<`
 
-private = preplibrary lib/Config.pm lib/ExtUtils/Miniperl.pm
+CONFIGPM = lib/Config.pm lib/Config_heavy.pl
+private = preplibrary $(CONFIGPM) lib/ExtUtils/Miniperl.pm
 
 # Files to be built with variable substitution before miniperl
 # is available.
@@ -372,10 +373,10 @@ compile: all
 	cd x2p; $(MAKE) compile;
 	cd pod; $(MAKE) compile;
 
-translators:	miniperl$(EXE_EXT) lib/Config.pm FORCE
+translators:	miniperl$(EXE_EXT) $(CONFIGPM) FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
 
-utilities:	miniperl$(EXE_EXT) lib/Config.pm $(plextract) lib/lib.pm FORCE
+utilities:	miniperl$(EXE_EXT) $(CONFIGPM) $(plextract) lib/lib.pm FORCE
 	@echo " "; echo "	Making utilities"; cd utils; $(LDLIBPTH) $(MAKE) all
 
 
@@ -728,7 +729,7 @@ sperl$(OBJ_EXT): perl.c $(h)
 # We need to autosplit in two steps because VOS can't handle so many args
 #
 .PHONY: preplibrary
-preplibrary: miniperl$(EXE_EXT) lib/Config.pm lib/lib.pm $(PREPLIBRARY_LIBPERL)
+preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
 	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
@@ -740,11 +741,11 @@ preplibrary: miniperl$(EXE_EXT) lib/Config.pm lib/lib.pm $(PREPLIBRARY_LIBPERL)
 # Take care to avoid modifying lib/Config.pm without reason
 # (If trying to create a new port and having problems with the configpm script,
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
-lib/Config.pm: config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
-	$(LDLIBPTH) ./miniperl -Ilib configpm configpm.tmp
-	sh mv-if-diff configpm.tmp $@
+$(CONFIGPM): config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
+	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=lib/Config_heavy.pl configpm.tmp
+	sh mv-if-diff configpm.tmp lib/Config.pm
 
-lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl lib/Config.pm
+lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl $(CONFIGPM)
 	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
 	sh mv-if-diff minimod.tmp $@
 	-touch lib/ExtUtils/Miniperl.pm
@@ -752,18 +753,18 @@ lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl$(EXE_EXT) minimod.pl lib/Confi
 lib/re.pm: ext/re/re.pm
 	cp ext/re/re.pm ext/re/re.tmp && sh mv-if-diff ext/re/re.tmp lib/re.pm
 
-$(plextract):	miniperl$(EXE_EXT) lib/Config.pm x2p/s2p
+$(plextract):	miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p
 	@-rm -f $@
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 
-x2p/s2p: miniperl$(EXE_EXT) lib/Config.pm x2p/s2p.PL
+x2p/s2p: miniperl$(EXE_EXT) $(CONFIGPM) x2p/s2p.PL
 	cd x2p; $(LDLIBPTH) $(MAKE) s2p
 
-lib/lib.pm:	miniperl$(EXE_EXT) lib/Config.pm
+lib/lib.pm:	miniperl$(EXE_EXT) $(CONFIGPM)
 	@-rm -f $@
 	$(LDLIBPTH) ./miniperl -Ilib lib/lib_pm.PL
 
-$(unidatafiles): miniperl$(EXE_EXT) lib/Config.pm lib/unicore/mktables
+$(unidatafiles): miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
 	cd lib/unicore && $(LDLIBPTH) ../../miniperl -I../../lib mktables -w
 
 extra.pods: miniperl$(EXE_EXT)

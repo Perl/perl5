@@ -447,7 +447,7 @@ MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
 WPERLEXE	= ..\wperl.exe
 GLOBEXE		= ..\perlglob.exe
-CONFIGPM	= ..\lib\Config.pm
+CONFIGPM	= ..\lib\Config.pm ..\Config_heavy.pl
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
 

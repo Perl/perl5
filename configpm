@@ -17,9 +17,10 @@ my %Extensions = map {($_,$_)}
 
 # allowed opts as well as specifies default and initial values
 my %Allowed_Opts = (
-    'cross'    => '', # --cross=PALTFORM - crosscompiling for PLATFORM
-    'glossary' => 1,  # --no-glossary  - no glossary file inclusion, 
+    'cross'    => '', # --cross=PLATFORM - crosscompiling for PLATFORM
+    'glossary' => 1,  # --no-glossary  - no glossary file inclusion,
                       #                  for compactness
+    'heavy' => '',   # pathname of the Config_heavy.pl file
 );
 
 sub opts {
@@ -44,7 +45,7 @@ sub opts {
 
 my %Opts = opts();
 
-my $Config_PM;
+my ($Config_PM, $Config_heavy);
 my $Glossary = $ARGV[1] || 'Porting/Glossary';
 
 if ($Opts{cross}) {
@@ -56,9 +57,27 @@ if ($Opts{cross}) {
 else {
   $Config_PM = $ARGV[0] || 'lib/Config.pm';
 }
-
+if ($Opts{heavy}) {
+  $Config_heavy = $Opts{heavy};
+}
+else {
+  ($Config_heavy = $Config_PM) =~ s!\.pm$!_heavy.pl!;
+  die "Can't automatically determine name for Config_heavy.pl from '$Config_PM'"
+    if $Config_heavy eq $Config_PM;
+}
 
 open CONFIG, ">$Config_PM" or die "Can't open $Config_PM: $!\n";
+open CONFIG_HEAVY, ">$Config_heavy" or die "Can't open $Config_heavy: $!\n";
+
+print CONFIG_HEAVY <<'ENDOFBEG';
+# This file was created by configpm when Perl was built. Any changes
+# made to this file will be lost the next time perl is built.
+
+package Config;
+use strict;
+# use warnings; Pulls in Carp
+# use vars pulls in Carp
+ENDOFBEG
 
 my $myver = sprintf "v%vd", $^V;
 
@@ -239,32 +258,33 @@ if ($s == 4 || $s == 8) {
 my \$i = 0;
 foreach my \$c ($list) { \$i |= ord(\$c); \$i <<= 8 }
 \$i |= ord(1);
-my \$byteorder = join('', unpack('$format', pack('$f', \$i)));
+our \$byteorder = join('', unpack('$format', pack('$f', \$i)));
 EOT
 } else {
-    $byteorder_code = "my \$byteorder = '?'x$s;\n";
+    $byteorder_code = "our \$byteorder = '?'x$s;\n";
 }
+print CONFIG $byteorder_code;
 
-print CONFIG @non_v, "\n";
+print CONFIG_HEAVY @non_v, "\n";
 
 # copy config summary format from the myconfig.SH script
-print CONFIG "our \$summary : unique = <<'!END!';\n";
+print CONFIG_HEAVY "our \$summary : unique = <<'!END!';\n";
 open(MYCONFIG,"<myconfig.SH") || die "open myconfig.SH failed: $!";
 1 while defined($_ = <MYCONFIG>) && !/^Summary of/;
-do { print CONFIG $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
+do { print CONFIG_HEAVY $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
 close(MYCONFIG);
 
 # NB. as $summary is unique, we need to copy it in a lexical variable
 # before expanding it, because may have been made readonly if a perl
 # interpreter has been cloned.
 
-print CONFIG "\n!END!\n", $byteorder_code, <<'EOT';
+print CONFIG_HEAVY "\n!END!\n", <<'EOT';
 my $summary_expanded;
 
 sub myconfig {
     return $summary_expanded if $summary_expanded;
     ($summary_expanded = $summary) =~ s{\$(\w+)}
-		 { my $c = $Config{$1}; defined($c) ? $c : 'undef' }ge;
+		 { my $c = $Config::Config{$1}; defined($c) ? $c : 'undef' }ge;
     $summary_expanded;
 }
 
@@ -272,11 +292,11 @@ local *_ = \my $a;
 $_ = <<'!END!';
 EOT
 
-print CONFIG join("", @v_fast, sort @v_others);
+print CONFIG_HEAVY join("", @v_fast, sort @v_others);
 
-print CONFIG <<'EOT';
+print CONFIG_HEAVY <<'EOT';
 !END!
-s/(byteorder=)(['"]).*?\2/$1$2$byteorder$2/m;
+s/(byteorder=)(['"]).*?\2/$1$2$Config::byteorder$2/m;
 our $Config_SH : unique = $_;
 
 our $Config_SH_expanded : unique = "\n$_" . << 'EOVIRTUAL';
@@ -286,7 +306,7 @@ foreach my $prefix (qw(ccflags ldflags)) {
     my $value = fetch_string ({}, $prefix);
     my $withlargefiles = fetch_string ({}, $prefix . "_uselargefiles");
     $value =~ s/\Q$withlargefiles\E\b//;
-    print CONFIG "${prefix}_nolargefiles='$value'\n";
+    print CONFIG_HEAVY "${prefix}_nolargefiles='$value'\n";
 }
 
 foreach my $prefix (qw(libs libswanted)) {
@@ -307,16 +327,16 @@ foreach my $prefix (qw(libs libswanted)) {
 	    $value = join(' ', @libswanted);
 	}
     }
-    print CONFIG "${prefix}_nolargefiles='$value'\n";
+    print CONFIG_HEAVY "${prefix}_nolargefiles='$value'\n";
 }
 
-print CONFIG "EOVIRTUAL\n";
+print CONFIG_HEAVY "EOVIRTUAL\n";
 
-print CONFIG $fetch_string;
+print CONFIG_HEAVY $fetch_string;
 
 print CONFIG <<'ENDOFEND';
 
-sub FETCH { 
+sub FETCH {
     my($self, $key) = @_;
 
     # check for cached value (which may be undef so we use exists not defined)
@@ -324,7 +344,9 @@ sub FETCH {
 
     return $self->fetch_string($key);
 }
- 
+ENDOFEND
+
+print CONFIG_HEAVY <<'ENDOFEND';
 my $prevpos = 0;
 
 sub FIRSTKEY {
@@ -380,13 +402,21 @@ sub config_vars {
 	    print map "$_$lnend", @matches ? @matches : "$qry: not found"		if !$notag;
 	    print map { s/\w+=//; "$_$lnend" } @matches ? @matches : "$qry: not found"	if  $notag;
 	} else {
-	    my $v = (exists $Config{$qry}) ? $Config{$qry} : 'UNKNOWN';
+	    my $v = (exists $Config::Config{$qry}) ? $Config::Config{$qry}
+						   : 'UNKNOWN';
 	    $v = 'undef' unless defined $v;
 	    print "${prfx}'${v}'$lnend";
 	}
     }
 }
 
+# Called by the real AUTOLOAD
+sub launcher {
+    undef &AUTOLOAD;
+    goto \&$Config::AUTOLOAD;
+}
+
+1;
 ENDOFEND
 
 if ($^O eq 'os2') {
@@ -426,8 +456,13 @@ my $fast_config = join '', map { "    $_,\n" }
 
 print CONFIG sprintf <<'ENDOFTIE', $fast_config;
 
-# avoid Config..Exporter..UNIVERSAL search for DESTROY then AUTOLOAD
 sub DESTROY { }
+
+sub AUTOLOAD {
+    require 'config_heavy.pl';
+    goto \&launcher;
+    die "&Config::AUTOLOAD failed on $Config::AUTOLOAD";
+}
 
 tie %%Config, 'Config', {
 %s
@@ -635,6 +670,7 @@ outside of it.
 
 ENDOFTAIL
 
+close(CONFIG_HEAVY);
 close(CONFIG);
 close(GLOS);
 close(CONFIG_POD);
