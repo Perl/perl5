@@ -95,6 +95,71 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6676] By: jhi                                   on 2000/08/17  14:44:02
+        Log: Add perlebcdic from Peter Prymmer, regen toc.
+     Branch: perl
+	   + pod/perlebcdic.pod
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[  6675] By: jhi                                   on 2000/08/17  14:41:52
+        Log: perldebtut 1.10 from Richard Foley, plus Celsius and Fahrenheit.
+     Branch: perl
+	   ! pod/perldebtut.pod
+____________________________________________________________________________
+[  6674] By: jhi                                   on 2000/08/17  14:29:43
+        Log: Get -DLEAKTEST to compile (not necessarily to work, mind)
+             
+             Subject: [ID 20000724.006] -DLEAKTEST problem
+             From: Gregory Martin Pfeil <pfeilgm@technomadic.org>
+             Date: Tue, 25 Jul 2000 00:36:32 -0500
+             Message-Id: <20000725003632.A26186@www.llamacom.com>
+             
+             Reminder sent
+             
+             Subject: [PATCH bleadperl@6647] -DLEAKTEST compile error      
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 17 Aug 2000 15:23:42 +0100
+             Message-Id: <200008171423.PAA06749@crypt.compulink.co.uk>
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  6673] By: jhi                                   on 2000/08/17  04:07:10
+        Log: Subject: Re: [PATCH]Re: Questions about Math::BigFloat
+             From: John Peacock <JPeacock@UnivPress.com>
+             Date: Tue, 01 Aug 2000 09:38:12 -0400
+             Message-ID: <3986D2C4.54B78FE4@UnivPress.com>
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm t/lib/bigfltpm.t
+____________________________________________________________________________
+[  6672] By: jhi                                   on 2000/08/17  03:04:35
+        Log: Subject: [PATCH] Cwd.pm now uses strict
+             From: Tim Jenness <timj@jach.hawaii.edu>
+             Date: Wed, 16 Aug 2000 16:42:35 -1000 (HST)
+             Message-ID: <Pine.LNX.4.21.0008161639510.1135-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  6671] By: jhi                                   on 2000/08/17  02:16:35
+        Log: Make $Config{byteorder} more magical so that it is
+             dynamically computed: nice for 'fat binaries'.
+             
+             Subject: [PATCH]: default byteorder
+             From: Wilfredo Sánchez <wsanchez@apple.com>
+             Date: Mon, 31 Jul 2000 19:45:31 -0700
+             Message-Id: <200008010245.TAA04459@ns1.abstrata.com>
+     Branch: perl
+	   ! configpm
+____________________________________________________________________________
+[  6670] By: gsar                                  on 2000/08/17  01:22:21
+        Log: move WNOHANG definition to where other such things are
+     Branch: perl
+	   ! win32/win32.h
+____________________________________________________________________________
+[  6669] By: jhi                                   on 2000/08/17  01:19:17
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6668] By: jhi                                   on 2000/08/17  01:16:29
         Log: Doc nits spotted by Richard Soderberg.
      Branch: perl
