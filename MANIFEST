@@ -1185,6 +1185,7 @@ pod/perltoot.pod	Tom's object-oriented tutorial
 pod/perltootc.pod	Tom's object-oriented tutorial (more on class data)
 pod/perltrap.pod	Trap info
 pod/perlunicode.pod	Unicode support info
+pod/perlutil.pod	Accompanying utilities explained
 pod/perlvar.pod		Variable info
 pod/perlxs.pod		XS api info
 pod/perlxstut.pod	XS tutorial

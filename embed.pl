@@ -1081,8 +1081,8 @@ my %apidocs;
 my %gutsdocs;
 my %docfuncs;
 
-sub autodoc ($) { # parse a file and extract documentation info
-    my($fh) = @_;
+sub autodoc ($$) { # parse a file and extract documentation info
+    my($fh,$file) = @_;
     my($in, $doc);
 
 FUNC:
@@ -1100,14 +1100,14 @@ DOC:
 	    $docs = "\n$docs" if $docs and $docs !~ /^\n/;
 	    if ($flags =~ /m/) {
 		if ($flags =~ /A/) {
-		    $apidocs{$name} = [$flags, $docs, $ret, @args];
+		    $apidocs{$name} = [$flags, $docs, $ret, $file, @args];
 		}
 		else {
-		    $gutsdocs{$name} = [$flags, $docs, $ret, @args];
+		    $gutsdocs{$name} = [$flags, $docs, $ret, $file, @args];
 		}
 	    }
 	    else {
-		$docfuncs{$name} = [$flags, $docs, $ret, @args];
+		$docfuncs{$name} = [$flags, $docs, $ret, $file, @args];
 	    }
 	    if ($doc =~ /^=for/) {
 		$in = $doc;
@@ -1119,7 +1119,7 @@ DOC:
 
 sub docout ($$$) { # output the docs for one function
     my($fh, $name, $docref) = @_;
-    my($flags, $docs, $ret, @args) = @$docref;
+    my($flags, $docs, $ret, $file, @args) = @$docref;
 
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n" 
 	if $flags =~ /p/;
@@ -1137,12 +1137,13 @@ sub docout ($$$) { # output the docs for one function
 	print $fh "(" . join(", ", @args) . ")";
 	print $fh "\n\n";
     }
+    print $fh "=for hackers\nFound in file $file\n\n";
 }
 
 my $file;
 for $file (glob('*.c'), glob('*.h')) {
     open F, "< $file" or die "Cannot open $file for docs: $!\n";
-    autodoc(\*F);
+    autodoc(\*F,$file);
     close F or die "Error closing $file: $!\n";
 }
 
@@ -1159,10 +1160,12 @@ walk_table {	# load documented functions into approriate hash
 	if ($flags =~ /A/) {
 	    my $docref = delete $docfuncs{$func};
 	    warn "no docs for $func\n" unless $docref and @$docref;
-	    $apidocs{$func} = [$docref->[0] . 'A', $docref->[1], $retval, @args];
+	    $apidocs{$func} = [$docref->[0] . 'A', $docref->[1], $retval,
+			       $docref->[3], @args];
 	} else {
 	    my $docref = delete $docfuncs{$func};
-	    $gutsdocs{$func} = [$docref->[0], $docref->[1], $retval, @args];
+	    $gutsdocs{$func} = [$docref->[0], $docref->[1], $retval,
+				$docref->[3], @args];
 	}
     }
     return "";

@@ -31,7 +31,7 @@ about this project can be found at:
 
 A recent net or commercial release of Cygwin is required.
 
-At the time this document was written, Cygwin 1.1.1 was current.
+At the time this document was last updated, Cygwin 1.1.2 was current.
 
 B<NOTE:> At this point, minimal effort has been made to provide
 compatibility with old (beta) Cygwin releases.  The focus has been to
@@ -137,6 +137,11 @@ see the glibc README for more details.
 The MD5 port was done by Andy Piper:
 
   ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/porters/Okhapkin_Sergey/libcrypt.tgz
+
+There is also a Linux compatible 56 bit DES crypt port by Corinna
+Vinschen:
+
+  ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/porters/Vinschen_Corinna/V1.1.1/crypt-1.0.tar.gz
 
 =item * C<-lgdbm> (C<use GDBM_File>)
 
@@ -353,7 +358,10 @@ these options, these tests will fail:
 =head2 Hard Links
 
 FAT partitions do not support hard links (whereas NTFS does), in which
-case Cygwin implements link() by copying the file.  These tests will fail:
+case Cygwin implements link() by copying the file.  On remote (network)
+drives Cygwin's stat() always sets C<st_nlink> to 1, so the link count
+for remote directories and files is not available.  In both cases,
+these tests will fail:
 
   Failed Test           List of failed
   ------------------------------------
@@ -431,7 +439,9 @@ printable characters except these:
 
   : * ? " < > |
 
-File names are case insensitive, but case preserving.
+File names are case insensitive, but case preserving.  A pathname
+that contains a backslash is a Win32 pathname (and not subject to the
+translations applied to POSIX style pathnames).
 
 =item * Text/Binary
 
@@ -450,13 +460,13 @@ The text/binary issue is covered at length in the Cygwin documentation.
 
 =item * F<.exe>
 
-The Cygwin stat() makes the F<.exe> extension transparent by looking for
-F<foo.exe> when you ask for F<foo> (unless a F<foo> also exists).  Cygwin
-does not require a F<.exe> extension, but I<gcc> adds it automatically
-when building a program.  However, when accessing an executable as a
-normal file (e.g., I<cp> in a makefile) the F<.exe> is not transparent.
-The I<install> included with Cygwin automatically appends a F<.exe>
-when necessary.
+The Cygwin stat(), lstat() and readlink() functions make the F<.exe>
+extension transparent by looking for F<foo.exe> when you ask for F<foo>
+(unless a F<foo> also exists).  Cygwin does not require a F<.exe>
+extension, but I<gcc> adds it automatically when building a program.
+However, when accessing an executable as a normal file (e.g., I<cp>
+in a makefile) the F<.exe> is not transparent.  The I<install> included
+with Cygwin automatically appends a F<.exe> when necessary.
 
 =item * chown()
 
@@ -558,6 +568,7 @@ be kept as clean as possible.
                         - require MM_Cygwin.pm
   lib/ExtUtils/MM_Cygwin.pm
                         - canonpath, cflags, manifypods, perl_archive
+  lib/File/Find.pm      - on remote drives stat() always sets st_nlink to 1
   lib/File/Spec/Unix.pm - preserve //unc
   lib/perl5db.pl        - use stdin not /dev/tty
   utils/perlcc.PL       - DynaLoader.a in compile, -DUSEIMPORTLIB
@@ -586,4 +597,4 @@ Teun Burgers <burgers@ecn.nl>.
 
 =head1 HISTORY
 
-Last updated: 5 May 2000
+Last updated: 20 June 2000

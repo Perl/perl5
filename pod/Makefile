@@ -16,60 +16,24 @@ REALPERL = ../perl
 
 POD = \
 	perl.pod	\
-	perldelta.pod	\
 	perl5004delta.pod	\
 	perl5005delta.pod	\
-	perldata.pod	\
-	perlsyn.pod	\
-	perlop.pod	\
-	perlre.pod	\
-	perlrun.pod	\
-	perlfunc.pod	\
-	perlopentut.pod	\
-	perlvar.pod	\
-	perlsub.pod	\
-	perlmod.pod	\
-	perlmodlib.pod	\
-	perlmodinstall.pod	\
-	perlnewmod.pod	\
-	perlfork.pod	\
-	perlform.pod	\
-	perllocale.pod	\
-	perlref.pod	\
-	perlreftut.pod	\
-	perldsc.pod	\
-	perllol.pod	\
+	perl56delta.pod	\
+	perlapi.pod	\
+	perlapio.pod	\
+	perlbook.pod	\
 	perlboot.pod	\
-	perltoot.pod	\
-	perltootc.pod	\
-	perlobj.pod	\
-	perltie.pod	\
 	perlbot.pod	\
-	perlipc.pod	\
-	perlthrtut.pod	\
+	perlcall.pod	\
+	perlcompile.pod	\
+	perldata.pod	\
 	perldbmfilter.pod	\
 	perldebguts.pod	\
 	perldebug.pod	\
-	perlnumber.pod	\
+	perldelta.pod	\
 	perldiag.pod	\
-	perlsec.pod	\
-	perltrap.pod	\
-	perlport.pod	\
-	perlstyle.pod	\
-	perlpod.pod	\
-	perlbook.pod	\
+	perldsc.pod	\
 	perlembed.pod	\
-	perlapio.pod	\
-	perlxs.pod	\
-	perlxstut.pod	\
-	perlguts.pod	\
-	perlcall.pod	\
-	perlcompile.pod	\
-	perltodo.pod	\
-	perlapi.pod	\
-	perlintern.pod	\
-	perlhack.pod	\
-	perlhist.pod	\
 	perlfaq.pod	\
 	perlfaq1.pod	\
 	perlfaq2.pod	\
@@ -80,64 +44,71 @@ POD = \
 	perlfaq7.pod	\
 	perlfaq8.pod	\
 	perlfaq9.pod	\
-	perltoc.pod
+	perlfilter.pod	\
+	perlfork.pod	\
+	perlform.pod	\
+	perlfunc.pod	\
+	perlguts.pod	\
+	perlhack.pod	\
+	perlhist.pod	\
+	perlintern.pod	\
+	perlipc.pod	\
+	perllexwarn.pod	\
+	perllocale.pod	\
+	perllol.pod	\
+	perlmod.pod	\
+	perlmodinstall.pod	\
+	perlmodlib.pod	\
+	perlnewmod.pod	\
+	perlnumber.pod	\
+	perlobj.pod	\
+	perlop.pod	\
+	perlopentut.pod	\
+	perlpod.pod	\
+	perlport.pod	\
+	perlre.pod	\
+	perlref.pod	\
+	perlreftut.pod	\
+	perlrequick.pod	\
+	perlretut.pod	\
+	perlrun.pod	\
+	perlsec.pod	\
+	perlstyle.pod	\
+	perlsub.pod	\
+	perlsyn.pod	\
+	perlthrtut.pod	\
+	perltie.pod	\
+	perltoc.pod	\
+	perltodo.pod	\
+	perltoot.pod	\
+	perltootc.pod	\
+	perltrap.pod	\
+	perlunicode.pod	\
+	perlutil.pod	\
+	perlvar.pod	\
+	perlxs.pod	\
+	perlxstut.pod
 
 MAN = \
 	perl.man	\
-	perldelta.man	\
 	perl5004delta.man	\
 	perl5005delta.man	\
-	perldata.man	\
-	perlsyn.man	\
-	perlop.man	\
-	perlre.man	\
-	perlrun.man	\
-	perlfunc.man	\
-	perlopentut.man	\
-	perlvar.man	\
-	perlsub.man	\
-	perlmod.man	\
-	perlmodlib.man	\
-	perlmodinstall.man	\
-	perlnewmod.man	\
-	perlfork.man	\
-	perlform.man	\
-	perllocale.man	\
-	perlref.man	\
-	perlreftut.man	\
-	perldsc.man	\
-	perllol.man	\
+	perl56delta.man	\
+	perlapi.man	\
+	perlapio.man	\
+	perlbook.man	\
 	perlboot.man	\
-	perltoot.man	\
-	perltootc.man	\
-	perlobj.man	\
-	perltie.man	\
 	perlbot.man	\
-	perlipc.man	\
-	perlthrtut.man	\
+	perlcall.man	\
+	perlcompile.man	\
+	perldata.man	\
 	perldbmfilter.man	\
 	perldebguts.man	\
 	perldebug.man	\
-	perlnumber.man	\
+	perldelta.man	\
 	perldiag.man	\
-	perlsec.man	\
-	perltrap.man	\
-	perlport.man	\
-	perlstyle.man	\
-	perlpod.man	\
-	perlbook.man	\
+	perldsc.man	\
 	perlembed.man	\
-	perlapio.man	\
-	perlxs.man	\
-	perlxstut.man	\
-	perlguts.man	\
-	perlcall.man	\
-	perlcompile.man	\
-	perltodo.man	\
-	perlapi.man	\
-	perlintern.man	\
-	perlhack.man	\
-	perlhist.man	\
 	perlfaq.man	\
 	perlfaq1.man	\
 	perlfaq2.man	\
@@ -148,64 +119,71 @@ MAN = \
 	perlfaq7.man	\
 	perlfaq8.man	\
 	perlfaq9.man	\
-	perltoc.man
+	perlfilter.man	\
+	perlfork.man	\
+	perlform.man	\
+	perlfunc.man	\
+	perlguts.man	\
+	perlhack.man	\
+	perlhist.man	\
+	perlintern.man	\
+	perlipc.man	\
+	perllexwarn.man	\
+	perllocale.man	\
+	perllol.man	\
+	perlmod.man	\
+	perlmodinstall.man	\
+	perlmodlib.man	\
+	perlnewmod.man	\
+	perlnumber.man	\
+	perlobj.man	\
+	perlop.man	\
+	perlopentut.man	\
+	perlpod.man	\
+	perlport.man	\
+	perlre.man	\
+	perlref.man	\
+	perlreftut.man	\
+	perlrequick.man	\
+	perlretut.man	\
+	perlrun.man	\
+	perlsec.man	\
+	perlstyle.man	\
+	perlsub.man	\
+	perlsyn.man	\
+	perlthrtut.man	\
+	perltie.man	\
+	perltoc.man	\
+	perltodo.man	\
+	perltoot.man	\
+	perltootc.man	\
+	perltrap.man	\
+	perlunicode.man	\
+	perlutil.man	\
+	perlvar.man	\
+	perlxs.man	\
+	perlxstut.man
 
 HTML = \
 	perl.html	\
-	perldelta.html	\
 	perl5004delta.html	\
 	perl5005delta.html	\
-	perldata.html	\
-	perlsyn.html	\
-	perlop.html	\
-	perlre.html	\
-	perlrun.html	\
-	perlfunc.html	\
-	perlopentut.html	\
-	perlvar.html	\
-	perlsub.html	\
-	perlmod.html	\
-	perlmodlib.html	\
-	perlmodinstall.html	\
-	perlnewmod.html	\
-	perlfork.html	\
-	perlform.html	\
-	perllocale.html	\
-	perlref.html	\
-	perlreftut.html	\
-	perldsc.html	\
-	perllol.html	\
+	perl56delta.html	\
+	perlapi.html	\
+	perlapio.html	\
+	perlbook.html	\
 	perlboot.html	\
-	perltoot.html	\
-	perltootc.html	\
-	perlobj.html	\
-	perltie.html	\
 	perlbot.html	\
-	perlipc.html	\
-	perlthrtut.html	\
+	perlcall.html	\
+	perlcompile.html	\
+	perldata.html	\
 	perldbmfilter.html	\
 	perldebguts.html	\
 	perldebug.html	\
-	perlnumber.html	\
+	perldelta.html	\
 	perldiag.html	\
-	perlsec.html	\
-	perltrap.html	\
-	perlport.html	\
-	perlstyle.html	\
-	perlpod.html	\
-	perlbook.html	\
+	perldsc.html	\
 	perlembed.html	\
-	perlapio.html	\
-	perlxs.html	\
-	perlxstut.html	\
-	perlguts.html	\
-	perlcall.html	\
-	perlcompile.html	\
-	perltodo.html	\
-	perlapi.html	\
-	perlintern.html	\
-	perlhack.html	\
-	perlhist.html	\
 	perlfaq.html	\
 	perlfaq1.html	\
 	perlfaq2.html	\
@@ -215,65 +193,73 @@ HTML = \
 	perlfaq6.html	\
 	perlfaq7.html	\
 	perlfaq8.html	\
-	perlfaq9.html
+	perlfaq9.html	\
+	perlfilter.html	\
+	perlfork.html	\
+	perlform.html	\
+	perlfunc.html	\
+	perlguts.html	\
+	perlhack.html	\
+	perlhist.html	\
+	perlintern.html	\
+	perlipc.html	\
+	perllexwarn.html	\
+	perllocale.html	\
+	perllol.html	\
+	perlmod.html	\
+	perlmodinstall.html	\
+	perlmodlib.html	\
+	perlnewmod.html	\
+	perlnumber.html	\
+	perlobj.html	\
+	perlop.html	\
+	perlopentut.html	\
+	perlpod.html	\
+	perlport.html	\
+	perlre.html	\
+	perlref.html	\
+	perlreftut.html	\
+	perlrequick.html	\
+	perlretut.html	\
+	perlrun.html	\
+	perlsec.html	\
+	perlstyle.html	\
+	perlsub.html	\
+	perlsyn.html	\
+	perlthrtut.html	\
+	perltie.html	\
+	perltodo.html	\
+	perltoot.html	\
+	perltootc.html	\
+	perltrap.html	\
+	perlunicode.html	\
+	perlutil.html	\
+	perlvar.html	\
+	perlxs.html	\
+	perlxstut.html
+
 # not perltoc.html
 
 TEX = \
 	perl.tex	\
-	perldelta.tex	\
 	perl5004delta.tex	\
 	perl5005delta.tex	\
-	perldata.tex	\
-	perlsyn.tex	\
-	perlop.tex	\
-	perlre.tex	\
-	perlrun.tex	\
-	perlfunc.tex	\
-	perlopentut.tex	\
-	perlvar.tex	\
-	perlsub.tex	\
-	perlmod.tex	\
-	perlmodlib.tex	\
-	perlmodinstall.tex	\
-	perlnewmod.tex	\
-	perlfork.tex	\
-	perlform.tex	\
-	perllocale.tex	\
-	perlref.tex	\
-	perlreftut.tex	\
-	perldsc.tex	\
-	perllol.tex	\
+	perl56delta.tex	\
+	perlapi.tex	\
+	perlapio.tex	\
+	perlbook.tex	\
 	perlboot.tex	\
-	perltoot.tex	\
-	perltootc.tex	\
-	perlobj.tex	\
-	perltie.tex	\
 	perlbot.tex	\
-	perlipc.tex	\
-	perlthrtut.tex	\
+	perlcall.tex	\
+	perlcompile.tex	\
+	perldata.tex	\
 	perldbmfilter.tex	\
 	perldebguts.tex	\
 	perldebug.tex	\
-	perlnumber.tex	\
+	perldelta.tex	\
 	perldiag.tex	\
-	perlsec.tex	\
-	perltrap.tex	\
-	perlport.tex	\
-	perlstyle.tex	\
-	perlpod.tex	\
-	perlbook.tex	\
+	perldsc.tex	\
 	perlembed.tex	\
-	perlapio.tex	\
-	perlxs.tex	\
-	perlxstut.tex	\
-	perlguts.tex	\
-	perlcall.tex	\
-	perlcompile.tex	\
-	perltodo.tex	\
-	perlapi.tex	\
-	perlintern.tex	\
-	perlhack.tex	\
-	perlhist.tex	\
 	perlfaq.tex	\
 	perlfaq1.tex	\
 	perlfaq2.tex	\
@@ -284,7 +270,50 @@ TEX = \
 	perlfaq7.tex	\
 	perlfaq8.tex	\
 	perlfaq9.tex	\
-	perltoc.tex
+	perlfilter.tex	\
+	perlfork.tex	\
+	perlform.tex	\
+	perlfunc.tex	\
+	perlguts.tex	\
+	perlhack.tex	\
+	perlhist.tex	\
+	perlintern.tex	\
+	perlipc.tex	\
+	perllexwarn.tex	\
+	perllocale.tex	\
+	perllol.tex	\
+	perlmod.tex	\
+	perlmodinstall.tex	\
+	perlmodlib.tex	\
+	perlnewmod.tex	\
+	perlnumber.tex	\
+	perlobj.tex	\
+	perlop.tex	\
+	perlopentut.tex	\
+	perlpod.tex	\
+	perlport.tex	\
+	perlre.tex	\
+	perlref.tex	\
+	perlreftut.tex	\
+	perlrequick.tex	\
+	perlretut.tex	\
+	perlrun.tex	\
+	perlsec.tex	\
+	perlstyle.tex	\
+	perlsub.tex	\
+	perlsyn.tex	\
+	perlthrtut.tex	\
+	perltie.tex	\
+	perltoc.tex	\
+	perltodo.tex	\
+	perltoot.tex	\
+	perltootc.tex	\
+	perltrap.tex	\
+	perlunicode.tex	\
+	perlutil.tex	\
+	perlvar.tex	\
+	perlxs.tex	\
+	perlxstut.tex
 
 man:	pod2man $(MAN)
 
