@@ -59,7 +59,6 @@ static void del_xpv _((XPV* p));
 static void del_xrv _((XRV* p));
 static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
-static void sv_check_thinkfirst _((SV *sv));
 
 #ifndef PURIFY
 static void *my_safemalloc(MEM_SIZE size);
@@ -71,7 +70,7 @@ typedef void (*SVFUNC) _((SV*));
 
 #endif /* PERL_OBJECT */
 
-#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_check_thinkfirst(sv)
+#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)
 
 #ifdef PURIFY
 
@@ -1002,11 +1001,6 @@ sv_setiv(register SV *sv, IV i)
 	break;
 
     case SVt_PVGV:
-	if (SvFAKE(sv)) {
-	    sv_unglob(sv);
-	    break;
-	}
-	/* FALL THROUGH */
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -1062,11 +1056,6 @@ sv_setnv(register SV *sv, double num)
 	break;
 
     case SVt_PVGV:
-	if (SvFAKE(sv)) {
-	    sv_unglob(sv);
-	    break;
-	}
-	/* FALL THROUGH */
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -1810,13 +1799,6 @@ sv_setsv(SV *dstr, register SV *sstr)
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
 
-    if (dtype == SVt_PVGV && (SvFLAGS(dstr) & SVf_FAKE)) {
-        sv_unglob(dstr);     /* so fake GLOB won't perpetuate */
-	sv_setpvn(dstr, "", 0);
-        (void)SvPOK_only(dstr);
-        dtype = SvTYPE(dstr);
-    }
-
     SvAMAGIC_off(dstr);
 
     /* There's a lot of redundancy below but we're going for speed here */
@@ -1949,9 +1931,9 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    }
 	}
 	if (stype == SVt_PVLV)
-	    SvUPGRADE(dstr, SVt_PVNV);
+	    (void)SvUPGRADE(dstr, SVt_PVNV);
 	else
-	    SvUPGRADE(dstr, stype);
+	    (void)SvUPGRADE(dstr, stype);
     }
 
     sflags = SvFLAGS(sstr);
@@ -2183,12 +2165,7 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
 	(void)SvOK_off(sv);
 	return;
     }
-    if (SvTYPE(sv) >= SVt_PV) {
-	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
-	    sv_unglob(sv);
-    }
-    else
-	sv_upgrade(sv, SVt_PV);
+    (void)SvUPGRADE(sv, SVt_PV);
 
     SvGROW(sv, len + 1);
     dptr = SvPVX(sv);
@@ -2217,12 +2194,7 @@ sv_setpv(register SV *sv, register const char *ptr)
 	return;
     }
     len = strlen(ptr);
-    if (SvTYPE(sv) >= SVt_PV) {
-	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
-	    sv_unglob(sv);
-    }
-    else 
-	sv_upgrade(sv, SVt_PV);
+    (void)SvUPGRADE(sv, SVt_PV);
 
     SvGROW(sv, len + 1);
     Move(ptr,SvPVX(sv),len+1,char);
@@ -2266,8 +2238,8 @@ sv_usepvn_mg(register SV *sv, register char *ptr, register STRLEN len)
     SvSETMAGIC(sv);
 }
 
-STATIC void
-sv_check_thinkfirst(register SV *sv)
+void
+sv_force_normal(register SV *sv)
 {
     if (SvREADONLY(sv)) {
 	dTHR;
@@ -2276,6 +2248,8 @@ sv_check_thinkfirst(register SV *sv)
     }
     if (SvROK(sv))
 	sv_unref(sv);
+    else if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
+	sv_unglob(sv);
 }
     
 void
@@ -3176,12 +3150,7 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
     I32 i;
 
     SV_CHECK_THINKFIRST(sv);
-    if (SvTYPE(sv) >= SVt_PV) {
-	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
-	    sv_unglob(sv);
-    }
-    else
-	sv_upgrade(sv, SVt_PV);
+    (void)SvUPGRADE(sv, SVt_PV);
 
     SvSCREAM_off(sv);
 
@@ -4016,27 +3985,17 @@ sv_pvn_force(SV *sv, STRLEN *lp)
 {
     char *s;
 
-    if (SvREADONLY(sv)) {
-	dTHR;
-	if (PL_curcop != &PL_compiling)
-	    croak(PL_no_modify);
-    }
+    if (SvTHINKFIRST(sv) && !SvROK(sv))
+	sv_force_normal(sv);
     
     if (SvPOK(sv)) {
 	*lp = SvCUR(sv);
     }
     else {
 	if (SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM) {
-	    if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV) {
-		sv_unglob(sv);
-		s = SvPVX(sv);
-		*lp = SvCUR(sv);
-	    }
-	    else {
-		dTHR;
-		croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
-		    PL_op_name[PL_op->op_type]);
-	    }
+	    dTHR;
+	    croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
+		PL_op_name[PL_op->op_type]);
 	}
 	else
 	    s = sv_2pv(sv, lp);

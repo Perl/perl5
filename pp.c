@@ -792,15 +792,8 @@ PP(pp_undef)
     if (!sv)
 	RETPUSHUNDEF;
 
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv)) {
-	    dTHR;
-	    if (PL_curcop != &PL_compiling)
-		croak(PL_no_modify);
-	}
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    if (SvTHINKFIRST(sv))
+	sv_force_normal(sv);
 
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -817,9 +810,12 @@ PP(pp_undef)
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALL THROUGH */
     case SVt_PVFM:
-	{ GV* gv = (GV*)SvREFCNT_inc(CvGV((CV*)sv));
-	  cv_undef((CV*)sv);
-	  CvGV((CV*)sv) = gv; }   /* let user-undef'd sub keep its identity */
+	{
+	    /* let user-undef'd sub keep its identity */
+	    GV* gv = (GV*)SvREFCNT_inc(CvGV((CV*)sv));
+	    cv_undef((CV*)sv);
+	    CvGV((CV*)sv) = gv;
+	}
 	break;
     case SVt_PVGV:
 	if (SvFAKE(sv))
@@ -1037,12 +1033,6 @@ PP(pp_repeat)
 	STRLEN len;
 
 	tmpstr = POPs;
-	if (TARG == tmpstr && SvTHINKFIRST(tmpstr)) {
-	    if (SvREADONLY(tmpstr) && PL_curcop != &PL_compiling)
-		DIE("Can't x= to readonly value");
-	    if (SvROK(tmpstr))
-		sv_unref(tmpstr);
-	}
 	SvSetSV(TARG, tmpstr);
 	SvPV_force(TARG, len);
 	if (count != 1) {

@@ -742,12 +742,8 @@ leave_scope(I32 base)
 	    sv = *(SV**)ptr;
 	    /* Can clear pad variable in place? */
 	    if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
-		if (SvTHINKFIRST(sv)) {
-		    if (SvREADONLY(sv))
-			croak("panic: leave_scope clearsv");
-		    if (SvROK(sv))
-			sv_unref(sv);
-		}
+		if (SvTHINKFIRST(sv))
+		    sv_force_normal(sv);
 		if (SvMAGICAL(sv))
 		    mg_free(sv);
 

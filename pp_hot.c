@@ -733,16 +733,10 @@ PP(pp_aassign)
 	    }
 	    break;
 	default:
-	    if (SvTHINKFIRST(sv)) {
-		if (SvREADONLY(sv) && PL_curcop != &PL_compiling) {
-		    if (!SvIMMORTAL(sv))
-			DIE(PL_no_modify);
-		    if (relem <= lastrelem)
-			relem++;
-		    break;
-		}
-		if (SvROK(sv))
-		    sv_unref(sv);
+	    if (SvIMMORTAL(sv)) {
+		if (relem <= lastrelem)
+		    relem++;
+		break;
 	    }
 	    if (relem <= lastrelem) {
 		sv_setsv(sv, *relem);

@@ -868,6 +868,7 @@
 #define sv_derived_from		Perl_sv_derived_from
 #define sv_dump			Perl_sv_dump
 #define sv_eq			Perl_sv_eq
+#define sv_force_normal		Perl_sv_force_normal
 #define sv_free			Perl_sv_free
 #define sv_free_arenas		Perl_sv_free_arenas
 #define sv_gets			Perl_sv_gets
@@ -2013,7 +2014,6 @@
 #define sv_catpvn_mg		CPerlObj::Perl_sv_catpvn_mg
 #define sv_catsv		CPerlObj::Perl_sv_catsv
 #define sv_catsv_mg		CPerlObj::Perl_sv_catsv_mg
-#define sv_check_thinkfirst	CPerlObj::Perl_sv_check_thinkfirst
 #define sv_chop			CPerlObj::Perl_sv_chop
 #define sv_clean_all		CPerlObj::Perl_sv_clean_all
 #define sv_clean_objs		CPerlObj::Perl_sv_clean_objs
@@ -2026,6 +2026,7 @@
 #define sv_derived_from		CPerlObj::Perl_sv_derived_from
 #define sv_dump			CPerlObj::Perl_sv_dump
 #define sv_eq			CPerlObj::Perl_sv_eq
+#define sv_force_normal		CPerlObj::Perl_sv_force_normal
 #define sv_free			CPerlObj::Perl_sv_free
 #define sv_free_arenas		CPerlObj::Perl_sv_free_arenas
 #define sv_gets			CPerlObj::Perl_sv_gets

@@ -227,7 +227,6 @@ my @staticfuncs = qw(
     del_xrv
     sv_mortalgrow
     sv_unglob
-    sv_check_thinkfirst
     avhv_index_sv
     do_report_used
     do_clean_objs

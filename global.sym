@@ -515,6 +515,7 @@ sv_dec
 sv_derived_from
 sv_dump
 sv_eq
+sv_force_normal
 sv_free
 sv_free_arenas
 sv_gets
