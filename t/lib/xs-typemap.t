@@ -9,7 +9,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 78 }
+BEGIN { plan tests => 84 }
 
 use strict;
 use warnings;
@@ -241,20 +241,35 @@ ok( $@ );
 print "# T_OPAQUEPTR\n";
 
 $t = 22;
-$ptr = T_OPAQUEPTR_IN( $t );
-ok( T_OPAQUEPTR_OUT($ptr), $t);
+my $p = T_OPAQUEPTR_IN( $t );
+ok( T_OPAQUEPTR_OUT($p), $t);
+
+# T_OPAQUEPTR with a struct
+print "# T_OPAQUEPTR with a struct\n";
+
+my @test = (5,6,7);
+$p = T_OPAQUEPTR_IN_struct(@test);
+my @result = T_OPAQUEPTR_OUT_struct($p);
+ok(scalar(@result),scalar(@test));
+for (0..$#test) {
+  ok($result[$_], $test[$_]);
+}
 
 # T_OPAQUE
 print "# T_OPAQUE\n";
 
 $t = 48;
-$ptr = T_OPAQUE_IN( $t );
-ok(T_OPAQUEPTR_OUT_short( $ptr ), $t);
+$p = T_OPAQUE_IN( $t );
+ok(T_OPAQUEPTR_OUT_short( $p ), $t); # Test using T_OPAQUEPTR
+ok(T_OPAQUE_OUT( $p ), $t );         # Test using T_OPQAQUE
 
 # T_OPAQUE_array
+print "# A packed  array\n";
+
 my @opq = (2,4,8);
 my $packed = T_OPAQUE_array(@opq);
 my @uopq = unpack("i*",$packed);
+ok(scalar(@uopq), scalar(@opq));
 for (0..$#opq) {
   ok( $uopq[$_], $opq[$_]);
 }

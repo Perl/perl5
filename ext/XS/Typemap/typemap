@@ -16,3 +16,4 @@ intOpq          T_IV
 intOpq   *      T_OPAQUEPTR
 shortOPQ          T_OPAQUE
 shortOPQ *      T_OPAQUEPTR
+astruct *       T_OPAQUEPTR

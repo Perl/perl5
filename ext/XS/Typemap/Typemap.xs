@@ -27,6 +27,15 @@ typedef int intArray; /* T_ARRAY */
 typedef short shortOPQ;   /* T_OPAQUE */
 typedef int intOpq;   /* T_OPAQUEPTR */
 
+/* A structure to test T_OPAQUEPTR */
+struct t_opaqueptr {
+  int a;
+  int b;
+  double c;
+};
+
+typedef struct t_opaqueptr astruct;
+
 /* Some static memory for the tests */
 I32 anint;
 intRef anintref;
@@ -554,16 +563,21 @@ NOT YET
 
 =item T_OPAQUEPTR
 
-This can be used to store a pointer in the string component of the
-SV. Unlike T_PTR which stores the pointer in an IV that can be
-printed, here the representation of the pointer is irrelevant and the
-bytes themselves are just stored in the SV. If the pointer is
-represented by 4 bytes then those 4 bytes are stored in the SV (and
-length() will report a value of 4). This makes use of the fact that a
-perl scalar can store arbritray data in its PV component.
+This can be used to store bytes in the string component of the
+SV. Here the representation of the data is irrelevant to perl and the
+bytes themselves are just stored in the SV. It is assumed that the C
+variable is a pointer (the bytes are copied from that memory
+location).  If the pointer is pointing to something that is
+represented by 8 bytes then those 8 bytes are stored in the SV (and
+length() will report a value of 8). This entry is similar to T_OPAQUE.
 
-In principal the unpack() command can be used to convert the pointer
-to a number.
+In principal the unpack() command can be used to convert the bytes
+back to a number (if the underlying type is known to be a number).
+
+This entry can be used to store a C structure (the number
+of bytes to be copied is calculated using the C C<sizeof> function)
+and can be used as an alternative to T_PTRREF without having to worry
+about a memory leak (since Perl will clean up the SV).
 
 =cut
 
@@ -592,18 +606,46 @@ T_OPAQUEPTR_OUT_short( ptr )
  OUTPUT:
   RETVAL
 
+# Test it with a structure
+astruct *
+T_OPAQUEPTR_IN_struct( a,b,c )
+  int a
+  int b
+  double c
+ PREINIT:
+  struct t_opaqueptr test;
+ CODE:
+  test.a = a;
+  test.b = b;
+  test.c = c;
+  RETVAL = &test;
+ OUTPUT:
+  RETVAL
+
+void
+T_OPAQUEPTR_OUT_struct( test )
+  astruct * test
+ PPCODE:
+  XPUSHs(sv_2mortal(newSViv(test->a)));
+  XPUSHs(sv_2mortal(newSViv(test->b)));
+  XPUSHs(sv_2mortal(newSVnv(test->c)));
+
+
 =item T_OPAQUE
 
-This can be used to store pointers to non-pointer types in an SV. It
-is similar to T_OPAQUEPTR except that the typemap retrieves the
-pointer itself rather than assuming that it is to be given a
-pointer. This approach hides the pointer as a byte stream in the
-string part of the SV rather than making the actual pointer value
-available to Perl.
+This can be used to store data from non-pointer types in the string
+part of an SV. It is similar to T_OPAQUEPTR except that the
+typemap retrieves the pointer directly rather than assuming it
+is being supplied. For example if an integer is imported into
+Perl using T_OPAQUE rather than T_IV the underlying bytes representing the integer will be stored in the SV but the actual integer value will not be
+available. i.e. The data is opaque to perl.
 
-There is no reason to use T_OPAQUE to pass the data to C. Use
-T_OPAQUEPTR to do that since once the pointer is stored in the SV
-T_OPAQUE and T_OPAQUEPTR are identical.
+The data may be retrieved using the C<unpack> function if the
+underlying type of the byte stream is known.
+
+T_OPAQUE supports input and output of simple types.
+T_OPAQUEPTR can be used to pass these bytes back into C if a pointer
+is acceptable.
 
 =cut
 
@@ -612,6 +654,14 @@ T_OPAQUE_IN( val )
   int val
  CODE:
   RETVAL = (shortOPQ)val;
+ OUTPUT:
+  RETVAL
+
+IV
+T_OPAQUE_OUT( val )
+  shortOPQ val
+ CODE:
+  RETVAL = (IV)val;
  OUTPUT:
   RETVAL
 
