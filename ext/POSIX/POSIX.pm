@@ -827,7 +827,14 @@ sub fork {
 sub getcwd
 {
     usage "getcwd()" if @_ != 0;
-    chop($cwd = `pwd`);
+    if ($^O eq 'MSWin32') {
+	# this perhaps applies to everyone else also?
+	require Cwd;
+	$cwd = &Cwd::cwd;
+    }
+    else {
+	chop($cwd = `pwd`);
+    }
     $cwd;
 }
 

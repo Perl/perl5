@@ -440,7 +440,7 @@ CORE_H = ..\av.h	\
 	.\include\sys\socket.h	\
 	.\win32.h
 
-DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File attrs Thread B
+DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B
 STATIC_EXT=DynaLoader
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
@@ -449,6 +449,7 @@ FCNTL=$(EXTDIR)\Fcntl\Fcntl
 OPCODE=$(EXTDIR)\Opcode\Opcode
 SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
 IO=$(EXTDIR)\IO\IO
+POSIX=$(EXTDIR)\POSIX\POSIX
 ATTRS=$(EXTDIR)\attrs\attrs
 THREAD=$(EXTDIR)\Thread\Thread
 B=$(EXTDIR)\B\B
@@ -458,6 +459,7 @@ FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
 OPCODE_DLL=..\lib\auto\Opcode\Opcode.dll
 SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
 IO_DLL=..\lib\auto\IO\IO.dll
+POSIX_DLL=..\lib\auto\POSIX\POSIX.dll
 ATTRS_DLL=..\lib\auto\attrs\attrs.dll
 THREAD_DLL=..\lib\auto\Thread\Thread.dll
 B_DLL=..\lib\auto\B\B.dll
@@ -469,6 +471,7 @@ DYNALOADMODULES=	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
+	$(POSIX_DLL)	\
 	$(ATTRS_DLL)	\
 	$(THREAD_DLL)	\
 	$(B_DLL)
@@ -697,6 +700,11 @@ $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
+$(POSIX_DLL): $(PERLEXE) $(POSIX).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
 $(IO_DLL): $(PERLEXE) $(IO).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -744,9 +752,9 @@ distclean: clean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL) $(B_DLL)
+		$(OPCODE_DLL) $(POSIX_DLL) $(ATTRS_DLL) $(THREAD_DLL) $(B_DLL)
 	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c $(ATTRS).c $(THREAD).c $(B).c
+		$(DYNALOADER).c $(POSIX).c $(ATTRS).c $(THREAD).c $(B).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
@@ -758,14 +766,20 @@ distclean: clean
 	-rmdir /s /q ..\lib\auto || rmdir /s ..\lib\auto
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 
-install : all doc utils
+install : all installbare installutils installhtml
+
+installbare :
 	$(PERLEXE) ..\installperl
 .IF "$(PERL95EXE)" != ""
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 .ENDIF
+
+installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
 	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
+
+installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
 
 inst_lib : $(CONFIGPM)
