@@ -4,7 +4,7 @@
 # grep() and map() tests
 #
 
-print "1..34\n";
+print "1..37\n";
 
 $test = 1;
 
@@ -140,6 +140,25 @@ sub ok {
         map {"${_}x"} @_;
     };
     ok join("-",add_an_x(1,2,3,4)), "1x-2x-3x-4x";
+    $test++;
 }
 
+{
+    my $gimme;
+
+    sub gimme {
+	my $want = wantarray();
+	if (defined $want) {
+	    $gimme = $want ? 'list' : 'scalar';
+	} else {
+	    $gimme = 'void';
+	}
+    }
+
+    my @list = 0..9;
+
+    undef $gimme; gimme for @list;      ok($gimme, 'void');   $test++;
+    undef $gimme; grep { gimme } @list; ok($gimme, 'scalar'); $test++;
+    undef $gimme; map { gimme } @list;  ok($gimme, 'list');   $test++;
+}
 
