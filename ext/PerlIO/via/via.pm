@@ -26,7 +26,7 @@ to Perl.
 One example module, L<PerlIO::via::QuotedPrint>, is included with Perl
 5.8.0, and more example modules are available from CPAN, such as
 L<PerlIO::via::StripHTML> and L<PerlIO::via::Base64>.  The
-PerlIO::via::StripHTML for instance, allows you to say:
+PerlIO::via::StripHTML module for instance, allows you to say:
 
 	use PerlIO::via::StripHTML;
 	open( my $fh, "<:via(StripHTML)", "index.html" );
@@ -49,8 +49,8 @@ PerlIO::via:: namespace, so that they can easily be located on CPAN and use
 the default namespace feature of the PerlIO::via module itself.
 
 Please note that this is an area of recent development in Perl and that the
-interface described here is therefor still subject to change (and hopefully
-better documentation and more examples).
+interface described here is therefore still subject to change (and hopefully
+will have better documentation and more examples).
 
 In the method descriptions below I<$fh> will be
 a reference to a glob which can be treated as a perl file handle.
@@ -178,7 +178,7 @@ a PerlIO layer can look, as simple example is included here.
 
 =head2 Example - a Hexadecimal Handle
 
-Given the following module, PerlIO::via::Hex.pm:
+Given the following module, PerlIO::via::Hex :
 
     package PerlIO::via::Hex;
 
