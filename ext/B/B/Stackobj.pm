@@ -165,7 +165,7 @@ sub B::Stackobj::Padsv::new {
     bless {
 	type => $type,
 	flags => VALID_SV | $extra_flags,
-	sv => "curpad[$ix]",
+	sv => "PL_curpad[$ix]",
 	iv => "$iname",
 	nv => "$dname"
     }, $class;
@@ -270,7 +270,7 @@ sub B::Stackobj::Bool::new {
 sub B::Stackobj::Bool::write_back {
     my $obj = shift;
     return if $obj->{flags} & VALID_SV;
-    $obj->{sv} = "($obj->{iv} ? &sv_yes : &sv_no)";
+    $obj->{sv} = "($obj->{iv} ? &PL_sv_yes : &PL_sv_no)";
     $obj->{flags} |= VALID_SV;
 }
 

@@ -975,7 +975,7 @@ main(int argc, char **argv, char **env)
  
     perl_init_i18nl10n(1);
 
-    if (!do_undump) {
+    if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
 	    exit(1);
@@ -983,8 +983,8 @@ main(int argc, char **argv, char **env)
     }
 
 #ifdef CSH
-    if (!cshlen) 
-      cshlen = strlen(cshname);
+    if (!PL_cshlen) 
+      PL_cshlen = strlen(PL_cshname);
 #endif
 
 #ifdef ALLOW_PERL_OPTIONS
@@ -1009,8 +1009,8 @@ main(int argc, char **argv, char **env)
 	exit( exitstatus );
 
     sv_setpv(GvSV(gv_fetchpv("0", TRUE, SVt_PV)), argv[0]);
-    main_cv = compcv;
-    compcv = 0;
+    PL_main_cv = PL_compcv;
+    PL_compcv = 0;
 
     exitstatus = perl_init();
     if (exitstatus)
@@ -1096,9 +1096,9 @@ sub save_main {
     warn "done main optree, walking symtable for extras\n" if $debug_cv;
     save_unused_subs(@unused_sub_packages);
 
-    $init->add(sprintf("main_root = s\\_%x;", ${main_root()}),
-	       sprintf("main_start = s\\_%x;", ${main_start()}),
-	       "curpad = AvARRAY($curpad_sym);");
+    $init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
+	       sprintf("PL_main_start = s\\_%x;", ${main_start()}),
+	       "PL_curpad = AvARRAY($curpad_sym);");
     output_boilerplate();
     print "\n";
     output_all("perl_init");

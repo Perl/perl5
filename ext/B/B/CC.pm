@@ -332,7 +332,7 @@ sub reload_lexicals {
 }
 my $curcop = new B::Shadow (sub {
     my $opsym = shift->save;
-    runtime("curcop = (COP*)$opsym;");
+    runtime("PL_curcop = (COP*)$opsym;");
 });
 
 #
@@ -399,7 +399,7 @@ sub load_pad {
 	my $name = "tmp$ix";
 	my $class = class($namesv);
 	if (!defined($namesv) || $class eq "SPECIAL") {
-	    # temporaries have &sv_undef instead of a PVNV for a name
+	    # temporaries have &PL_sv_undef instead of a PVNV for a name
 	    $flags = VALID_SV|TEMPORARY|REGISTER;
 	} else {
 	    if ($namesv->PV =~ /^\$(.*)_([di])(r?)$/) {
@@ -418,7 +418,7 @@ sub load_pad {
 					    "i_$name", "d_$name");
 	declare("IV", $type == T_INT ? "i_$name = 0" : "i_$name");
 	declare("double", $type == T_DOUBLE ? "d_$name = 0" : "d_$name");
-	debug sprintf("curpad[$ix] = %s\n", $pad[$ix]->peek) if $debug_pad;
+	debug sprintf("PL_curpad[$ix] = %s\n", $pad[$ix]->peek) if $debug_pad;
     }
 }
 
@@ -445,7 +445,7 @@ sub write_label {
 sub loadop {
     my $op = shift;
     my $opsym = $op->save;
-    runtime("op = $opsym;") unless $know_op;
+    runtime("PL_op = $opsym;") unless $know_op;
     return $opsym;
 }
 
@@ -479,7 +479,7 @@ sub pp_stub {
     if ($gimme != 1) {
 	# XXX Change to push a constant sv_undef Stackobj onto @stack
 	write_back_stack();
-	runtime("if ($gimme != G_ARRAY) XPUSHs(&sv_undef);");
+	runtime("if ($gimme != G_ARRAY) XPUSHs(&PL_sv_undef);");
     }
     return $op->next;
 }
@@ -542,9 +542,9 @@ sub pp_padsv {
     if ($op->flags & OPf_MOD) {
 	my $private = $op->private;
 	if ($private & OPpLVAL_INTRO) {
-	    runtime("SAVECLEARSV(curpad[$ix]);");
+	    runtime("SAVECLEARSV(PL_curpad[$ix]);");
 	} elsif ($private & OPpDEREF) {
-	    runtime(sprintf("vivify_ref(curpad[%d], %d);",
+	    runtime(sprintf("vivify_ref(PL_curpad[%d], %d);",
 			    $ix, $private & OPpDEREF));
 	    $pad[$ix]->invalidate;
 	}
@@ -569,7 +569,7 @@ sub pp_nextstate {
     @stack = ();
     debug(sprintf("%s:%d\n", $op->filegv->SV->PV, $op->line)) if $debug_lineno;
     runtime("TAINT_NOT;") unless $omit_taint;
-    runtime("sp = stack_base + cxstack[cxstack_ix].blk_oldsp;");
+    runtime("sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;");
     if ($freetmps_each_bblock || $freetmps_each_loop) {
 	$need_freetmps = 1;
     } else {
@@ -620,7 +620,7 @@ sub pp_aelemfast {
     my $flag = $op->flags & OPf_MOD;
     write_back_stack();
     runtime("svp = av_fetch(GvAV($gvsym), $ix, $flag);",
-	    "PUSHs(svp ? *svp : &sv_undef);");
+	    "PUSHs(svp ? *svp : &PL_sv_undef);");
     return $op->next;
 }
 
@@ -868,7 +868,7 @@ sub pp_sassign {
 	if ($backwards) {
 	    my $src = pop @stack;
 	    my $type = $src->{type};
-	    runtime("if (tainting && tainted) TAINT_NOT;");
+	    runtime("if (PL_tainting && PL_tainted) TAINT_NOT;");
 	    if ($type == T_INT) {
 		runtime sprintf("sv_setiv(TOPs, %s);", $src->as_int);
 	    } elsif ($type == T_DOUBLE) {
@@ -946,7 +946,7 @@ sub pp_entersub {
     write_back_lexicals(REGISTER|TEMPORARY);
     write_back_stack();
     my $sym = doop($op);
-    runtime("if (op != ($sym)->op_next) op = (*op->op_ppaddr)(ARGS);");
+    runtime("if (PL_op != ($sym)->op_next) PL_op = (*PL_op->op_ppaddr)(ARGS);");
     runtime("SPAGAIN;");
     $know_op = 0;
     invalidate_lexicals(REGISTER|TEMPORARY);
@@ -965,7 +965,7 @@ sub pp_leavewrite {
     my $sym = doop($op);
     # XXX Is this the right way to distinguish between it returning
     # CvSTART(cv) (via doform) and pop_return()?
-    runtime("if (op) op = (*op->op_ppaddr)(ARGS);");
+    runtime("if (PL_op) PL_op = (*PL_op->op_ppaddr)(ARGS);");
     runtime("SPAGAIN;");
     $know_op = 0;
     invalidate_lexicals(REGISTER|TEMPORARY);
@@ -1037,7 +1037,7 @@ sub pp_grepwhile {
     # around that, we hack op_next to be our own op (purely because we
     # know it's a non-NULL pointer and can't be the same as op_other).
     $init->add("((LOGOP*)$sym)->op_next = $sym;");
-    runtime(sprintf("if (op == ($sym)->op_next) goto %s;", label($next)));
+    runtime(sprintf("if (PL_op == ($sym)->op_next) goto %s;", label($next)));
     $know_op = 0;
     return $op->other;
 }
@@ -1074,7 +1074,7 @@ sub pp_range {
 	# We need to save our UNOP structure since pp_flop uses
 	# it to find and adjust out targ. We don't need it ourselves.
 	$op->save;
-	runtime sprintf("if (SvTRUE(curpad[%d])) goto %s;",
+	runtime sprintf("if (SvTRUE(PL_curpad[%d])) goto %s;",
 			$op->targ, label($op->false));
 	unshift(@bblock_todo, $op->false);
     }
@@ -1098,19 +1098,19 @@ sub pp_flip {
     my $ix = $op->targ;
     my $rangeix = $op->first->targ;
     runtime(($op->private & OPpFLIP_LINENUM) ?
-	    "if (last_in_gv && SvIV(TOPs) == IoLINES(GvIOp(last_in_gv))) {"
+	    "if (PL_last_in_gv && SvIV(TOPs) == IoLINES(GvIOp(PL_last_in_gv))) {"
 	  : "if (SvTRUE(TOPs)) {");
-    runtime("\tsv_setiv(curpad[$rangeix], 1);");
+    runtime("\tsv_setiv(PL_curpad[$rangeix], 1);");
     if ($op->flags & OPf_SPECIAL) {
-	runtime("sv_setiv(curpad[$ix], 1);");
+	runtime("sv_setiv(PL_curpad[$ix], 1);");
     } else {
-	runtime("\tsv_setiv(curpad[$ix], 0);",
+	runtime("\tsv_setiv(PL_curpad[$ix], 0);",
 		"\tsp--;",
 		sprintf("\tgoto %s;", label($op->first->false)));
     }
     runtime("}",
-	  qq{sv_setpv(curpad[$ix], "");},
-	    "SETs(curpad[$ix]);");
+	  qq{sv_setpv(PL_curpad[$ix], "");},
+	    "SETs(PL_curpad[$ix]);");
     $know_op = 0;
     return $op->next;
 }
@@ -1237,7 +1237,7 @@ sub pp_subst {
     my $sym = doop($op);
     my $replroot = $op->pmreplroot;
     if ($$replroot) {
-	runtime sprintf("if (op == ((PMOP*)(%s))->op_pmreplroot) goto %s;",
+	runtime sprintf("if (PL_op == ((PMOP*)(%s))->op_pmreplroot) goto %s;",
 			$sym, label($replroot));
 	$op->pmreplstart->save;
 	push(@bblock_todo, $replroot);
@@ -1257,7 +1257,7 @@ sub pp_substcont {
 #    my $pmopsym = objsym($pmop);
     my $pmopsym = $pmop->save; # XXX can this recurse?
     warn "pmopsym = $pmopsym\n";#debug
-    runtime sprintf("if (op == ((PMOP*)(%s))->op_pmreplstart) goto %s;",
+    runtime sprintf("if (PL_op == ((PMOP*)(%s))->op_pmreplstart) goto %s;",
 		    $pmopsym, label($pmop->pmreplstart));
     invalidate_lexicals();
     return $pmop->next;
@@ -1382,9 +1382,9 @@ sub cc_main {
 
     return if $errors;
     if (!defined($module)) {
-	$init->add(sprintf("main_root = s\\_%x;", ${main_root()}),
-		   "main_start = $start;",
-		   "curpad = AvARRAY($curpad_sym);");
+	$init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
+		   "PL_main_start = $start;",
+		   "PL_curpad = AvARRAY($curpad_sym);");
     }
     output_boilerplate();
     print "\n";
@@ -1404,14 +1404,14 @@ XS(boot_$cmodule)
     perl_init();
     ENTER;
     SAVETMPS;
-    SAVESPTR(curpad);
-    SAVESPTR(op);
-    curpad = AvARRAY($curpad_sym);
-    op = $start;
+    SAVESPTR(PL_curpad);
+    SAVESPTR(PL_op);
+    PL_curpad = AvARRAY($curpad_sym);
+    PL_op = $start;
     pp_main(ARGS);
     FREETMPS;
     LEAVE;
-    ST(0) = &sv_yes;
+    ST(0) = &PL_sv_yes;
     XSRETURN(1);
 }
 EOT
