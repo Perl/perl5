@@ -476,8 +476,14 @@ PerlIO_pop(pTHX_ PerlIO *f)
   {
    PerlIO_debug("PerlIO_pop f=%p %s\n",f,l->tab->name);
    if (l->tab->Popped)
-    (*l->tab->Popped)(f);
-   *f = l->next;
+    {
+     /* If popped returns non-zero do not free its layer structure
+        it has either done so itself, or it is shared and still in use
+      */
+     if ((*l->tab->Popped)(f) != 0)
+      return;
+    }
+   *f = l->next;;
    PerlMemShared_free(l);
   }
 }
