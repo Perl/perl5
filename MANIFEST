@@ -1075,6 +1075,8 @@ lib/I18N/LangTags/ChangeLog	I18N::LangTags
 lib/I18N/LangTags/List.pm	List of tags for human languages
 lib/I18N/LangTags/README	I18N::LangTags
 lib/I18N/LangTags/test.pl	See if I18N::LangTags works
+lib/if.pm			For "use if"
+lib/if.t			Tests for "use if"
 lib/importenv.pl		Perl routine to get environment into variables
 lib/integer.pm			For "use integer"
 lib/integer.t			For "use integer" testing
