@@ -1453,7 +1453,7 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 
 		STORE_SCALAR(pv, len);
 		TRACEME(("ok (scalar 0x%"UVxf" '%s', length = %"IVdf")",
-			 PTR2UV(sv), SvPVX(sv), len));
+			 PTR2UV(sv), SvPVX(sv), (IV)len));
 
 	} else if (flags & SVp_NOK) {		/* SvNOKp(sv) => double */
 		NV nv = SvNV(sv);
