@@ -2669,6 +2669,16 @@ sub elem {
     #
     $idx =~ s/^\((.*)\)$/$1/ if $self->{'parens'};
 
+    # Hash-element braces will autoquote a bareword inside themselves.
+    # We need to make sure that C<$hash{warn()}> doesn't come out as
+    # C<$hash{warn}>, which has a quite different meaning. Currently
+    # B::Deparse will always quote strings, even if the string was a
+    # bareword in the original (i.e. the OPpCONST_BARE flag is ignored
+    # for constant strings.) So we can cheat slightly here - if we see
+    # a bareword, we know that it is supposed to be a function call.
+    #
+    $idx =~ s/^([A-Za-z_]\w*)$/$1()/;
+
     return "\$" . $array . $left . $idx . $right;
 }
 
