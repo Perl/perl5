@@ -1064,7 +1064,7 @@ sub pp_return {
     write_back_lexicals(REGISTER|TEMPORARY);
     write_back_stack();
     doop($op);
-    runtime("PUTBACK;", "return (PL_op)?PL_op->op_next:0;");
+    runtime("PUTBACK;", "return PL_op;");
     $know_op = 0;
     return $op->next;
 }
@@ -1357,7 +1357,7 @@ sub cc {
 	    $need_freetmps = 0;
 	}
 	if (!$$op) {
-	    runtime("PUTBACK;","return (PL_op)?PL_op->op_next:0;");
+	    runtime("PUTBACK;","return PL_op;");
 	} elsif ($done{$$op}) {
 	    runtime(sprintf("goto %s;", label($op)));
 	}
