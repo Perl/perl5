@@ -267,6 +267,10 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 	    /* Allow dumping */
 	    n = scan + (*OPERAND(scan) + 2 - 1)/sizeof(regnode) + 2;
 	    while (n <= stop) {
+		/* Purify reports a benign UMR here sometimes, because we
+		 * don't initialize the OP() slot of a node when that node
+		 * is occupied by just the trailing null of the string in
+		 * an EXACT node */
 		if (regkind[(U8)OP(n)] != NOTHING || OP(n) == NOTHING) {
 		    OP(n) = OPTIMIZED;
 		    NEXT_OFF(n) = 0;
