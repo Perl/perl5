@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Mar  8 17:00:48 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Fri Mar  8 23:12:53 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -11805,9 +11805,33 @@ $rm -f reflect
 set d_procselfexe
 eval $setvar
 
+: see whether the pthread_atfork exists
+$cat >try.c <<EOP
+#include <pthread.h>
+#include <stdio.h>
+int main() {
+#ifdef  PTHREAD_ATFORK
+        pthread_atfork(NULL,NULL,NULL);
+#endif
+}
+EOP
+
 : see if pthread_atfork exists
-set pthread_atfork d_pthread_atfork
-eval $inlibc
+set try -DPTHREAD_ATFORK
+if eval $compile; then
+    val="$define"
+else
+    val="$undef"
+fi
+case "$usethreads" in
+$define)
+        case "$val" in
+        $define) echo 'pthread_atfork found.' >&4        ;;
+        *)       echo 'pthread_atfork NOT found.' >&4    ;;
+        esac
+esac
+set d_pthread_atfork
+eval $setvar
 
 
 : see whether the various POSIXish _yields exist
