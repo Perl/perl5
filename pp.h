@@ -143,6 +143,18 @@
 #define dPOPTOPiirl	dPOPXiirl(TOP)
 #define dPOPTOPiirl_ul	dPOPXiirl_ul(TOP)
 
+#define TOPIOKbin (SvIOK(TOPs) && SvIOK(*(sp-1)))
+#define tryIVIVbin(op) \
+	if (TOPIOKbin) { \
+		dPOPTOPiirl_ul; \
+		NV result = (NV)left op (NV)right; \
+		if (result >= (NV)IV_MIN && result <= (NV)IV_MAX) \
+			SETi( left op right ); \
+		else \
+			SETn( result ); \
+		RETURN; \
+	}
+
 #define RETPUSHYES	RETURNX(PUSHs(&PL_sv_yes))
 #define RETPUSHNO	RETURNX(PUSHs(&PL_sv_no))
 #define RETPUSHUNDEF	RETURNX(PUSHs(&PL_sv_undef))

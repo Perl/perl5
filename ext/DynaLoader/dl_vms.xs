@@ -112,6 +112,7 @@ dl_set_error(sts,stv)
     vmssts  stv;
 {
     vmssts vec[3];
+    dTHX;
 
     vec[0] = stv ? 2 : 1;
     vec[1] = sts;  vec[2] = stv;
@@ -121,6 +122,7 @@ dl_set_error(sts,stv)
 static unsigned int
 findsym_handler(void *sig, void *mech)
 {
+    dTHX;
     unsigned long int myvec[8],args, *usig = (unsigned long int *) sig;
     /* Be paranoid and assume signal vector passed in might be readonly */
     myvec[0] = args = usig[0] > 10 ? 9 : usig[0] - 1;
