@@ -669,7 +669,7 @@ before Perl has seen that such a package exists.  It's wisest to make
 sure your packages are all defined before you start using them, which
 will be taken care of if you use the C<use> statement instead of
 C<require>.  If not, make sure to use arrow notation (eg,
-C<Guru->find("Samy")>) instead.  Object notation is explained in
+C<Guru-E<gt>find("Samy")>) instead.  Object notation is explained in
 L<perlobj>.
 
 =head2 How can I find out my current package?
