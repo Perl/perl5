@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..11\n";
+print "1..8\n";
 
 @oops = @ops = <op/*>;
 
@@ -55,23 +55,6 @@ print $i == 2 ? "ok 7\n" : "not ok 7\n";
 
 # ... while ($var = glob(...)) should test definedness not truth
 
-# Create a file called "0"
-print open(F, ">0") ? "ok 8\n" : "not ok 8 # $!\n";
-close F;
-
-my $ok = "not ok 9\n";
-
-# ... while ($var = glob(...)) should test definedness not truth
-
-my $ok = "not ok 11\n";
-$ok = "ok 11\n" while my $var = glob("0");
+my $ok = "not ok 8\n";
+$ok = "ok 8\n" while my $var = glob("0");
 print $ok;
-$ok = "ok 9\n" while my $var = glob("0");
-print $ok;
-
-print unlink("0") ? "ok 10\n" : "not ok 10\n";
-
-END {
-    1 while unlink "0";
-}
-
