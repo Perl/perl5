@@ -47,7 +47,7 @@ Anod	|void	|perl_free	|PerlInterpreter* interp
 Anod	|int	|perl_run	|PerlInterpreter* interp
 Anod	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
-Anp	|bool	|doing_taint	|int argc|const char** argv|const char** env
+Anp	|bool	|doing_taint	|int argc|char** argv|char** env
 #if defined(USE_ITHREADS)
 Anod	|PerlInterpreter*|perl_clone|PerlInterpreter* interp|UV flags
 #  if defined(PERL_IMPLICIT_SYS)
@@ -292,7 +292,7 @@ Ap	|I32	|ibcmp		|const char* a|const char* b|I32 len
 Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
 Apd	|I32	|ibcmp_utf8	|const char* a|char **pe1|UV l1|bool u1|const char* b|char **pe2|UV l2|bool u2
 p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
-p	|void	|init_argv_symbols|int argc|const char **argv
+p	|void	|init_argv_symbols|int argc|char **argv
 p	|void	|init_debugger
 Ap	|void	|init_stacks
 Ap	|void	|init_tm	|struct tm *ptm
@@ -572,7 +572,7 @@ Ap	|void	|reentrant_free
 Anp	|void*	|reentrant_retry|const char*|...
 #endif
 Ap	|void	|call_atexit	|ATEXIT_t fn|void *ptr
-Apd	|I32	|call_argv	|const char* sub_name|I32 flags|const char** argv
+Apd	|I32	|call_argv	|const char* sub_name|I32 flags|char** argv
 Apd	|I32	|call_method	|const char* methname|I32 flags
 Apd	|I32	|call_pv	|const char* sub_name|I32 flags
 Apd	|I32	|call_sv	|SV* sv|I32 flags

@@ -26,7 +26,7 @@ PERL_CALLCONV int	perl_destruct(PerlInterpreter* interp);
 PERL_CALLCONV void	perl_free(PerlInterpreter* interp);
 PERL_CALLCONV int	perl_run(PerlInterpreter* interp);
 PERL_CALLCONV int	perl_parse(PerlInterpreter* interp, XSINIT_t xsinit, int argc, char** argv, char** env);
-PERL_CALLCONV bool	Perl_doing_taint(int argc, const char** argv, const char** env);
+PERL_CALLCONV bool	Perl_doing_taint(int argc, char** argv, char** env);
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PerlInterpreter*	perl_clone(PerlInterpreter* interp, UV flags);
 #  if defined(PERL_IMPLICIT_SYS)
@@ -269,7 +269,7 @@ PERL_CALLCONV I32	Perl_ibcmp(pTHX_ const char* a, const char* b, I32 len);
 PERL_CALLCONV I32	Perl_ibcmp_locale(pTHX_ const char* a, const char* b, I32 len);
 PERL_CALLCONV I32	Perl_ibcmp_utf8(pTHX_ const char* a, char **pe1, UV l1, bool u1, const char* b, char **pe2, UV l2, bool u2);
 PERL_CALLCONV bool	Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective);
-PERL_CALLCONV void	Perl_init_argv_symbols(pTHX_ int argc, const char **argv);
+PERL_CALLCONV void	Perl_init_argv_symbols(pTHX_ int argc, char **argv);
 PERL_CALLCONV void	Perl_init_debugger(pTHX);
 PERL_CALLCONV void	Perl_init_stacks(pTHX);
 PERL_CALLCONV void	Perl_init_tm(pTHX_ struct tm *ptm);
@@ -548,7 +548,7 @@ PERL_CALLCONV void	Perl_reentrant_free(pTHX);
 PERL_CALLCONV void*	Perl_reentrant_retry(const char*, ...);
 #endif
 PERL_CALLCONV void	Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr);
-PERL_CALLCONV I32	Perl_call_argv(pTHX_ const char* sub_name, I32 flags, const char** argv);
+PERL_CALLCONV I32	Perl_call_argv(pTHX_ const char* sub_name, I32 flags, char** argv);
 PERL_CALLCONV I32	Perl_call_method(pTHX_ const char* methname, I32 flags);
 PERL_CALLCONV I32	Perl_call_pv(pTHX_ const char* sub_name, I32 flags);
 PERL_CALLCONV I32	Perl_call_sv(pTHX_ SV* sv, I32 flags);

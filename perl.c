@@ -1222,7 +1222,7 @@ STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
     int argc = PL_origargc;
-    const char **argv = PL_origargv;
+    char **argv = PL_origargv;
     const char *scriptname = NULL;
     VOL bool dosearch = FALSE;
     const char *validarg = "";
@@ -1986,7 +1986,7 @@ Performs a callback to the specified Perl sub.  See L<perlcall>.
 */
 
 I32
-Perl_call_argv(pTHX_ const char *sub_name, I32 flags, register const char **argv)
+Perl_call_argv(pTHX_ const char *sub_name, I32 flags, register char **argv)
 
           		/* See G_* flags in cop.h */
                      	/* null terminated arg list */
@@ -3812,7 +3812,7 @@ S_init_ids(pTHX)
  * before even the options are parsed, so PL_tainting has
  * not been initialized properly.  */
 bool
-Perl_doing_taint(int argc, const char *argv[], const char *envp[])
+Perl_doing_taint(int argc, char *argv[], char *envp[])
 {
 #ifndef PERL_IMPLICIT_SYS
     /* If we have PERL_IMPLICIT_SYS we can't call getuid() et alia
@@ -4020,7 +4020,7 @@ S_init_predump_symbols(pTHX)
 }
 
 void
-Perl_init_argv_symbols(pTHX_ register int argc, register const char **argv)
+Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 {
     char *s;
     argc--,argv++;	/* skip name of script */
