@@ -8,6 +8,657 @@ or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
 ----------------
+Version 5.003_07
+----------------
+
+This patch was primarily to fix bugs or include little things I missed
+in 5.003_06.  5.003_07 is intended to be stable enough to merit serious
+testing with an eye towards eventual release as 5.004.
+
+If it doesn't work for you, try
+
+	LC_ALL=C; export LC_ALL
+
+for Bourne shell users, or 
+
+	setenv LC_ALL C
+
+for C-shell users.  Some versions of IRIX are reported to have
+problems with sort when the locale is other than C.  This manifests
+as an infinite loop in the ./miniperl configpm step.
+
+The details are described below.  A very brief summary is:
+
+o Visible Changes to Core Functionality
+
+   -Support for BER compressed integers.  See perlfunc.pod for
+    documentation on the 'w' option.
+
+   -untaint support added to IO extension.
+    
+o Changes in Core Internals
+
+   -Perl's realloc is once again called 'Myremalloc' (with -DHIDEMYMALLOC),
+    as it was pre-5.003_01.  Again, this is for binary compatibility
+    with 5.003.  (5.003_06 erroneously called it Myrealloc.)
+
+   -Getopt::Long updated to version 2.4.
+
+o Configure and build enhancements
+
+   -improved SCO hints.  Actually these are unconfirmed guesses, but
+    they may be right.
+
+   -OS/2 and Plan9 updates.
+
+o Bug fixes
+
+    -print sort (4,1,3,2);
+
+    -group numbers are integers again.
+
+    -other things.  See the specific changes for details.
+
+o Specific Changes
+
+Here are the specific file-by-file changes.
+
+Index: Changes
+
+    Updated for 5.003_07.
+
+    Fixed a spelling error.
+
+Index: Configure
+
+    Detect GNU libc (thanks, Skimo!) and avoid nm if we have GNU libc.
+    Since the GNU libc test requires compiling and linking a test
+    program, the dependencies have been altered and lots of pieces of
+    Configure have moved around unchanged.  The patch is big but the
+    effect is little.
+
+    Allow for both <sys/select.h> and <time.h> in fd_set tests.
+    Systems which don't allow both (e.g. SCO) have to turn off one
+    or the other in the hints file for now.
+
+Index: INSTALL
+
+    Warn about re-using config.sh version-specific values.
+
+Index: MANIFEST
+
+    Date: Tue, 8 Oct 1996 22:24:48 -0400
+    From: "Randy J. Ray" <rjray@uswest.com>
+    Subject: PATCH: untaint method for IO::Handle, 5.003_06 version
+
+    This is a re-post of my patch to Graham's IO library to add a method in
+    IO::Handle called "untaint", that sets the IOf_UNTAINT flag on an object
+    that is of or inherits from IO::Handle. With this flag set, data read from
+    said handle is not tainted, whether running under -T, suid or sgid.
+
+    This patch adds the method to IO.xs, adds documentation and warning to the
+    pod of IO/Handle.pm, creates a new test in t/lib called io_taint.t, and
+    adds mention of the new file to MANIFEST.
+
+    Add mention of t/lib/io_taint.t
+
+    Date: Wed, 9 Oct 1996 22:29:44 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    os2/Changes added.
+
+Index: Makefile.SH
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    All the executable targets are moved into the same chunk with
+	shared library target, which is delegated to
+	$osname/Makefile.SHs if found.
+    config.h should depend on config_h.SH.
+
+    Remove mkmanifest target, since it will generate incorrectly
+    sorted MANIFEST file, I would imagine (I haven't checked).
+
+Index: README.os2
+
+    New version.
+
+Index: config_H
+
+    Update SH_PATH comment.
+
+Index: config_h.SH
+
+    Update SH_PATH comment.
+
+Index: ext/IO/IO.xs
+
+    Date: Tue, 8 Oct 1996 22:24:48 -0400
+    From: "Randy J. Ray" <rjray@uswest.com>
+    Subject: PATCH: untaint method for IO::Handle, 5.003_06 version
+
+    This is a re-post of my patch to Graham's IO library to add a method in
+    IO::Handle called "untaint", that sets the IOf_UNTAINT flag on an object
+    that is of or inherits from IO::Handle. With this flag set, data read from
+    said handle is not tainted, whether running under -T, suid or sgid.
+
+    This patch adds the method to IO.xs, adds documentation and warning to the
+    pod of IO/Handle.pm, creates a new test in t/lib called io_taint.t, and
+    adds mention of the new file to MANIFEST.
+
+    Add method "untaint" into class IO::Handle
+
+Index: ext/IO/lib/IO/Handle.pm
+
+    Date: Tue, 8 Oct 1996 22:24:48 -0400
+    From: "Randy J. Ray" <rjray@uswest.com>
+    Subject: PATCH: untaint method for IO::Handle, 5.003_06 version
+
+    This is a re-post of my patch to Graham's IO library to add a method in
+    IO::Handle called "untaint", that sets the IOf_UNTAINT flag on an object
+    that is of or inherits from IO::Handle. With this flag set, data read from
+    said handle is not tainted, whether running under -T, suid or sgid.
+
+    This patch adds the method to IO.xs, adds documentation and warning to the
+    pod of IO/Handle.pm, creates a new test in t/lib called io_taint.t, and
+    adds mention of the new file to MANIFEST.
+
+    Document IO::Handle::untaint and give warning about the bad
+    things it can do.
+
+Index: ext/SDBM_File/sdbm/sdbm.h
+
+    Change Myrealloc to Myremalloc to conform to 5.003's version.
+    I left in the Mycalloc since malloc.c now includes a calloc,
+    and we might need to hide it.
+
+Index: gv.c
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Better error message for overload.
+
+Index: hints/os2.sh
+
+    Date: Wed, 9 Oct 1996 22:29:44 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Some optimization (speedup in loading GNU utilities with some
+	memory present - 32M should be quite enough).
+    Test for revision of EMX, and setting fork()ing appropriately.
+    libc was in .../st/... instead of mt.
+    README.os2 is installed as pod/perlos2.pod.
+
+Index: hints/sco.sh
+
+    Don't include <sys/select.h> along with <time.h>.
+
+Index: installperl
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Restore timestamps under OS/2 (needed for binary install).
+
+Index: lib/Cwd.pm
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Use builtin methods if present under OS/2 (maybe should be
+    done outside of OS/2 too?).
+
+Index: lib/ExtUtils/MM_Unix.pm
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Made `use strict'-clean even in parts shadowed by Autoloading.
+
+Index: lib/ExtUtils/typemap
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    `bool' entry added.
+
+Index: lib/ExtUtils/xsubpp
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Logic for processing RETVAL documented (at last!).
+
+Index: lib/File/Copy.pm
+
+    Date: Thu, 10 Oct 1996 00:42:29 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+    Subject: Cleanup after new test
+
+    Below are patches for File::Copy (copying to filehandles was just
+    plain broken under OS/2 and VMS)
+
+Index: lib/FindBin.pm
+
+    Date: Fri, 20 Sep 1996 15:04:04 +0200
+    From: Gisle Aas <aas@bergen.sn.no>
+    Subject: Documentation patch to the FindBin module
+
+Index: lib/Getopt/Long.pm
+
+    Update to version 2.4.
+
+Index: lib/lib.pm
+
+    Date: Thu, 10 Oct 1996 14:22:05 -0400
+    From: "Brent B. Powers" <powers@ml.com>
+    Subject: Re: patch for lib.pm
+
+    Ignore undefined entries.
+
+Index: lib/newgetopt.pl
+
+    Updated to version 2.4 to match Getopt::Long.
+
+Index: makedepend.SH
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    weed out perl_exp.SH, config_h.SH
+    (They have these funny names to avoid names like perl.exp.SH
+    with more than two '.'  Such names are illegal on some systems.)
+
+Index: mg.c
+
+    Date: Thu, 10 Oct 1996 14:33:08 +0000 ()
+    From: Chip Salzenberg <chip@atlantic.net>
+    Subject: Re: Group fix for 5.003_06
+
+    The group problems recently experienced are due to a small error
+    introduced in 5.003_06.  This patch is required to fix the bug:
+
+Index: os2/Changes
+
+    Date: Wed, 9 Oct 1996 22:29:44 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    sys/un.h is not very useful without Merlin toolkit.
+    updates for fork()ing.
+
+    Date: Wed, 9 Oct 1996 22:29:44 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    added.
+
+Index: os2/Makefile.SHs
+
+    Date: Wed, 9 Oct 1996 22:29:44 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Convoluted process to create chimera executables added.
+    aout_clean is done automatically on clean.
+
+Index: os2/OS2/ExtAttr/t/os2_ea.t
+
+    Date: Wed, 9 Oct 1996 22:29:44 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Use `unlink' where appropriate.
+
+Index: os2/diff.configure
+
+    Updated.
+
+Index: os2/os2.c
+
+    Date: Wed, 9 Oct 1996 22:29:44 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    /bin/sh is translated to the configured value of location of sh.exe.
+    popen() used even if we can fork (as we do now).
+    builtins added for the sake of path manipulation.
+
+Index: os2/os2ish.h
+
+    Date: Wed, 9 Oct 1996 22:29:44 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    sys/un.h is not very useful without Merlin toolkit.
+    updates for fork()ing.
+
+Index: patchlevel.h
+
+    Change to subversion 7.
+
+Index: perl.c
+
+    Date: Wed, 9 Oct 1996 19:03:41 +0000
+    From: Tim Bunce <Tim.Bunce@ig.co.uk>
+    Subject: Infinte loop with perl_destruct_level and $SIG{__WARN__}
+
+    I've just started using purify on a perl with DBD::Oracle linked in
+    (the number of uninitialised memory reads in the Oracle libraries
+    is frightning!).
+
+    If perl_destruct_level and $SIG{__WARN__} are set then I see a range
+    of problems typified by this example and folowed by a core dump:
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Copywrite of OS/2 port now has \n\n.
+    Now deletes -e file (again!) if compilation is interrupted.
+
+Index: perl.h
+
+    Change Myrealloc to Myremalloc to conform to 5.003's version.
+    I left in the Mycalloc since malloc.c now includes a calloc,
+    and we might need to hide it.
+
+Index: plan9/aperl
+
+    Updated for 5.003_07
+
+Index: plan9/arpa/inet.h
+
+    Updated for 5.003_07
+
+Index: plan9/buildinfo
+
+    Updated for 5.003_07
+
+Index: plan9/config.plan9
+
+    Updated for 5.003_07
+
+Index: plan9/exclude
+
+    Updated for 5.003_07
+
+Index: plan9/fndvers
+
+    Updated for 5.003_07
+
+Index: plan9/genconfig.pl
+
+    Updated for 5.003_07
+
+Index: plan9/mkfile
+
+    Updated for 5.003_07
+
+Index: plan9/myconfig.plan9
+
+    Updated for 5.003_07
+
+Index: plan9/perlplan9.doc
+
+    Updated for 5.003_07
+
+Index: plan9/perlplan9.pod
+
+    Updated for 5.003_07
+
+Index: plan9/plan9.c
+
+    Updated for 5.003_07
+
+Index: plan9/plan9ish.h
+
+    Updated for 5.003_07
+
+Index: plan9/setup.rc
+
+    Updated for 5.003_07
+
+Index: plan9/versnum
+
+    Updated for 5.003_07
+
+Index: pod/perldiag.pod
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    mention that malloc in berkeley DB is broken, and PERL_BADFREE.
+    OS/2-specific messages added.
+
+Index: pod/perlfunc.pod
+
+    Date: 20 Sep 1996 13:17:14 +0200
+    From: Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+    Subject: Re: Patch for ASN.1 compressed integer in pack/unpack
+
+Index: pod/perli18n.pod
+
+    Updated version with high bits intact.
+
+Index: pod/perlop.pod
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Crossrefs corrected.
+
+Index: pod/perltrap.pod
+
+    Clarified that warn() _always_ printed to STDERR, both in perl4
+    and perl5.
+
+Index: pod/perlvar.pod
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    $^E under OS/2.
+
+Index: pp.c
+
+    Date: 20 Sep 1996 13:17:14 +0200
+    From: Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+    Subject: Re: Patch for ASN.1 compressed integer in pack/unpack
+
+Index: pp_sys.c
+
+    Date: Wed, 9 Oct 1996 19:07:24 GMT
+    From: Chris Faylor <cgf@bbc.com>
+
+    The problem is that SCO apparently needs to have a file opened
+    with write privileges for chsize to work correctly.
+
+Index: sv.c
+
+    Date: Tue, 08 Oct 1996 23:54:47 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: Re: Sorting lists of integers doesn't always work
+
+    >> >       print sort (4,1,2,3);
+    >> >
+    >> > actually prints "4123", i.e. doesn't actually sort.   Bug?  Feature?
+
+    This broke between 5.001n and 5.002.  There was a long winded thread
+    about sorting undefs in some order (rather than coredumping) around
+    the 5.002beta times (search for "bogorefs" in the subject-line on
+    p5p archive for details). Larry added in some code that presumes that
+    the private flags are set by the time qsort() is called:
+
+    Unfortunately, sv_2pv() does not set the POKp flag, so the above
+    code breaks!  Here's a patch against 5.00306.
+
+Index: t/lib/anydbm.t
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    File mode under OS/2 is not what you expect. However, this has
+    nothing to do with databases, _and_ there is a test
+    for this in stat.t (which dutifully fails). There is
+    no point to consider this behaviour as a bug in
+    database code.
+    So OS/2 is special-cased in these tests.
+
+Index: t/lib/db-btree.t
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    File mode under OS/2 is not what you expect. However, this has
+    nothing to do with databases, _and_ there is a test
+    for this in stat.t (which dutifully fails). There is
+    no point to consider this behaviour as a bug in
+    database code.
+    So OS/2 is special-cased in these tests.
+
+Index: t/lib/db-hash.t
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    File mode under OS/2 is not what you expect. However, this has
+    nothing to do with databases, _and_ there is a test
+    for this in stat.t (which dutifully fails). There is
+    no point to consider this behaviour as a bug in
+    database code.
+    So OS/2 is special-cased in these tests.
+
+Index: t/lib/db-recno.t
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    File mode under OS/2 is not what you expect. However, this has
+    nothing to do with databases, _and_ there is a test
+    for this in stat.t (which dutifully fails). There is
+    no point to consider this behaviour as a bug in
+    database code.
+    So OS/2 is special-cased in these tests.
+
+Index: t/lib/gdbm.t
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    File mode under OS/2 is not what you expect. However, this has
+    nothing to do with databases, _and_ there is a test
+    for this in stat.t (which dutifully fails). There is
+    no point to consider this behaviour as a bug in
+    database code.
+    So OS/2 is special-cased in these tests.
+
+Index: t/lib/io_pipe.t
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    Better error message on dying.
+
+Index: t/lib/io_taint.t
+
+    Date: Tue, 8 Oct 1996 22:24:48 -0400
+    From: "Randy J. Ray" <rjray@uswest.com>
+    Subject: PATCH: untaint method for IO::Handle, 5.003_06 version
+
+    This is a re-post of my patch to Graham's IO library to add a method in
+    IO::Handle called "untaint", that sets the IOf_UNTAINT flag on an object
+    that is of or inherits from IO::Handle. With this flag set, data read from
+    said handle is not tainted, whether running under -T, suid or sgid.
+
+    This patch adds the method to IO.xs, adds documentation and warning to the
+    pod of IO/Handle.pm, creates a new test in t/lib called io_taint.t, and
+    adds mention of the new file to MANIFEST.
+
+    Test suite for the untaint method of class IO::Handle.
+
+Index: t/lib/ndbm.t
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    File mode under OS/2 is not what you expect. However, this has
+    nothing to do with databases, _and_ there is a test
+    for this in stat.t (which dutifully fails). There is
+    no point to consider this behaviour as a bug in
+    database code.
+    So OS/2 is special-cased in these tests.
+
+Index: t/lib/odbm.t
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    File mode under OS/2 is not what you expect. However, this has
+    nothing to do with databases, _and_ there is a test
+    for this in stat.t (which dutifully fails). There is
+    no point to consider this behaviour as a bug in
+    database code.
+    So OS/2 is special-cased in these tests.
+
+Index: t/lib/sdbm.t
+
+    Date: Wed, 9 Oct 1996 22:30:38 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    File mode under OS/2 is not what you expect. However, this has
+    nothing to do with databases, _and_ there is a test
+    for this in stat.t (which dutifully fails). There is
+    no point to consider this behaviour as a bug in
+    database code.
+    So OS/2 is special-cased in these tests.
+
+Index: t/lib/socket.t
+
+    Date: Thu, 10 Oct 1996 01:09:59 -0400
+    From: Spider Boardman <spider@orb.nashua.nh.us>
+    Subject: Re: 5.003_06 is available (results on ULTRIX)
+
+    fix t/lib/socket.t to treat TCP like the stream protocol it is
+    rather than expecting it behave rationally in all cases.
+
+Index: t/op/pack.t
+
+    Date: 20 Sep 1996 13:17:14 +0200
+    From: Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+    Subject: Re: Patch for ASN.1 compressed integer in pack/unpack
+
+Index: t/op/sort.t
+
+    Date: Wed, 09 Oct 1996 00:41:27 -0400
+    From: Gurusamy Sarathy <gsar@engin.umich.edu>
+    Subject: more t/op/sort.t tests
+
+Index: util.c
+
+    Date: Wed, 9 Oct 1996 22:32:22 -0400 (EDT)
+    From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+
+    uses my_syspopen, my_syspclose ifdef OS2. my_pclose is defined
+    as my_syspclose ifdef OS2 and can FORK (as OS2 does).
+
+Index: x2p/Makefile.SH
+
+    Date: Wed, 9 Oct 96 16:00:29 edt
+    From: Norton Allen <nort@bottesini.harvard.edu>
+    Subject: Re: sh Configure?
+
+    Extract x2p/Makefile.SH and x2p/cflags.SH correctly down
+    in the x2p directory, even if $0 isn't set to the full
+    pathname of the file being extracted.
+
+Index: x2p/cflags.SH
+
+    Date: Wed, 9 Oct 96 16:00:29 edt
+    From: Norton Allen <nort@bottesini.harvard.edu>
+    Subject: Re: sh Configure?
+
+    Extract x2p/Makefile.SH and x2p/cflags.SH correctly down
+    in the x2p directory, even if $0 isn't set to the full
+    pathname of the file being extracted.
+
+
+----------------
 Version 5.003_06
 ----------------
 This patch was primarily to fix bugs, improve the documentation,
@@ -18,7 +669,7 @@ o Visible Changes to Core Functionality
 
    -Significantly improved support _with documentation_ for
     locales, including LC_COLLATE.  See the new pod/perli18n.pod.
-    Thanks to Jarkkko Hietaniemi.
+    Thanks to Jarkko Hietaniemi.
 
    -new version of Math::Complex, with test suite.  Ought to be
     backwards compatible, but check it out if you use Math::Complex.
