@@ -1,7 +1,5 @@
 #!../../miniperl
 
-# Create the equivalence mappings.
-
 $UnicodeData = "UnicodeData-Latest.txt";
 
 # Note: we try to keep filenames unique within first 8 chars.  Using
@@ -303,6 +301,8 @@ END
     }
     $out;
 }
+
+# Create the equivalence mappings.
 
 open(UNICODEDATA, $UnicodeData) || die "$0: $UnicodeData: $!\n";
 

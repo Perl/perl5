@@ -28,12 +28,10 @@ Configure
     make configuring+building away from source directory work (VPATH et al)
     _r support
     cross-compilation configuring
-    mmap support
     POSIX 1003.1 1996 Edition support
 
 Locales
-    locales across packages
-    decimal separator (3,1415927 is Europeanese for an approximation of pi)
+    locales across packages?
 
 Regexen
    POSIX [=bar=] and [.zap.] would nice too but there's no API for them
