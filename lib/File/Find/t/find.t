@@ -51,12 +51,23 @@ BEGIN {
 
 cleanup();
 
-find({wanted => sub { print "ok 1\n" if $_ eq 'commonsense.t'; } },
+$::count_commonsense = 0;
+find({wanted => sub { ++$::count_commonsense if $_ eq 'commonsense.t'; } },
    File::Spec->curdir);
+if ($::count_commonsense == 1) {
+  print "ok 1\n";
+} else {
+  print "not ok 1 # found $::count_commonsense files named 'commonsense.t'\n";
+}
 
-finddepth({wanted => sub { print "ok 2\n" if $_ eq 'commonsense.t'; } },
+$::count_commonsense = 0;
+finddepth({wanted => sub { ++$::count_commonsense if $_ eq 'commonsense.t'; } },
 	File::Spec->curdir);
-
+if ($::count_commonsense == 1) {
+  print "ok 2\n";
+} else {
+  print "not ok 2 # found $::count_commonsense files named 'commonsense.t'\n";
+}
 
 my $case = 2;
 my $FastFileTests_OK = 0;
