@@ -133,6 +133,8 @@ expr	: term
 		{ $$ = $1; }
 	| expr term
 		{ $$ = oper2(OCONCAT,$1,$2); }
+	| expr '?' expr ':' expr
+		{ $$ = oper3(OCOND,$1,$3,$5); }
 	| variable ASGNOP cond
 		{ $$ = oper3(OASSIGN,$2,$1,$3);
 			if ((ops[$1].ival & 255) == OFLD)
@@ -162,8 +164,6 @@ term	: variable
 		{ $$ = oper2(OPOW,$1,$3); }
 	| term IN VAR
 		{ $$ = oper2(ODEFINED,aryrefarg($3),$1); }
-	| cond '?' expr ':' expr
-		{ $$ = oper3(OCOND,$1,$3,$5); }
 	| variable INCR
 		{ $$ = oper1(OPOSTINCR,$1); }
 	| variable DECR
