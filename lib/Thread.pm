@@ -313,6 +313,10 @@ sub unimplement {
 
 BEGIN {
     if ($ithreads) {
+	if ($othreads) {
+	    require Carp;
+	    Carp::croak("This Perl has both ithreads and 5005threads (serious malconfiguration)");
+	}
 	XSLoader::load 'threads';
 	for my $m (qw(new join detach yield self tid equal)) {
 	    no strict 'refs';
@@ -330,7 +334,7 @@ BEGIN {
 	unimplement(qw(unlock));
     } else {
 	require Carp;
-	Carp::croak("This Perl has neither ithreads not 5005threads");
+	Carp::croak("This Perl has neither ithreads nor 5005threads");
     }
 }
 
