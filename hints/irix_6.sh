@@ -79,6 +79,8 @@ pp_ctl_cflags='optimize=-O'
 	esac
 
 	ld=ld
+	# perl's malloc can return improperly aligned buffer
+	usemymalloc='undef'
 	# NOTE: -L/usr/lib32 -L/lib32 are automatically selected by the linker
 	ldflags=' -L/usr/local/lib32 -L/usr/local/lib'
 	cccdlflags=' '
@@ -105,7 +107,9 @@ pp_ctl_cflags='optimize=-O'
 	;;
 esac
 
-# We don't want these libraries.  Anyone know why?
+# We don't want these libraries.
+# Socket networking is in libc, these are not installed by default,
+# and just slow perl down. (scotth@sgi.com)
 set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
 shift
 libswanted="$*"
@@ -128,9 +132,9 @@ libswanted="$*"
 # you need is in libc.  You do also need '-lbsd' if you choose not
 # to use the -D_BSD_* defines.  Note that as of 6.2 the only
 # difference between '-lmalloc' and '-lc' malloc is the debugging
-# and control calls. -- scotth@sgi.com
+# and control calls, which aren't used by perl. -- scotth@sgi.com
 
-set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /' -e 's/ PW / /'`
+set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /' -e 's/ PW / /' -e 's/ malloc / /'`
 shift
 libswanted="$*"
 

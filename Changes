@@ -78,6 +78,15 @@ Version 5.005           Production release
 -------------
 
 ____________________________________________________________________________
+[  1646] By: gsar                                  on 1998/07/22  21:00:44
+        Log: Update perldelta and Changes; refresh perltoc; newer perlembed.pod
+             from Jon Orwant <orwant@media.mit.edu>; update guts documentation
+             to reflect PL_* changes; is this *it* for 5.005?
+     Branch: perl
+	   ! Changes README.win32 patchlevel.h pod/perlcall.pod
+	   ! pod/perldelta.pod pod/perlembed.pod pod/perlguts.pod
+           ! pod/perltoc.pod pod/perlxs.pod
+____________________________________________________________________________
 [  1645] By: gsar                                  on 1998/07/22  19:37:41
         Log: don't use qualify() in class methods
              From:    Albert Dvornik <bert@genscan.com>
