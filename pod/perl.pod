@@ -265,7 +265,9 @@ Perl developers, please write to <F<perl-thanks@perl.org>>.
 
 The B<-w> switch produces some lovely diagnostics.
 
-See L<perldiag> for explanations of all Perl's diagnostics.
+See L<perldiag> for explanations of all Perl's diagnostics.  The C<use
+diagnostics> pragma automatically turns Perl's normally terse warnings
+and errors into these longer forms.
 
 Compilation errors will tell you the line number of the error, with an
 indication of the next token or token type that was to be examined.

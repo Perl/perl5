@@ -23,7 +23,7 @@ Now you can.
 The tie() function binds a variable to a class (package) that will provide
 the implementation for access methods for that variable.  Once this magic
 has been performed, accessing a tied variable automatically triggers
-method calls in the proper class.  All of the complexity of the class is
+method calls in the proper class.  The complexity of the class is
 hidden behind magic methods calls.  The method names are in ALL CAPS,
 which is a convention that Perl uses to indicate that they're called
 implicitly rather than explicitly--just like the BEGIN() and END()

@@ -19,7 +19,7 @@ as well as Windows NT, Plan 9, VMS, QNX, OS/2, and the Amiga.
 
 Binary distributions for various platforms can be found
 http://www.perl.com/CPAN/ports/ directory.  Some of these ports (especially
-the ones that are not part of the standard sources) may behave differently
+the ones not part of the standard sources) may behave differently
 than what is documented in the standard source documentation.  These
 differences can be either positive (e.g. extensions for the features of the
 particular platform that are not supported in the source release of perl)
@@ -27,7 +27,7 @@ or negative (e.g. might be based upon a less current source release of perl).
 
 A useful FAQ for Win32 Perl users is:
 http://www.endcontsw.com/people/evangelo/Perl_for_Win32_FAQ.html
-[This FAQ is seriously outdated as of Jan 1998--it is only relevant to
+[This FAQ is seriously outdated as of May 1998--it is only relevant to
 the perl that ActiveState distributes, especially where it describes
 various inadequacies and differences with the standard perl extension
 build support.]
@@ -119,13 +119,13 @@ Certainly not.  Larry expects that he'll be certified before Perl is.
 
 =head2 Where can I get information on Perl?
 
-The complete Perl documentation is available with the perl
-distribution.  If you have perl installed locally, you probably have
-the documentation installed as well: type C<man perl> if you're on a
-system resembling Unix.  This will lead you to other important man
-pages.  If you're not on a Unix system, access to the documentation
-will be different; for example, it might be only in HTML format.  But
-all proper perl installations have fully-accessible documentation.
+The complete Perl documentation is available with the perl distribution.
+If you have perl installed locally, you probably have the documentation
+installed as well: type C<man perl> if you're on a system resembling Unix.
+This will lead you to other important man pages, including how to set your
+$MANPATH.  If you're not on a Unix system, access to the documentation
+will be different; for example, it might be only in HTML format.  But all
+proper perl installations have fully-accessible documentation.
 
 You might also try C<perldoc perl> in case your system doesn't
 have a proper man command, or it's been misinstalled.  If that doesn't
@@ -135,10 +135,6 @@ If all else fails, consult the CPAN/doc directory, which contains the
 complete documentation in various formats, including native pod,
 troff, html, and plain text.  There's also a web page at
 http://www.perl.com/perl/info/documentation.html that might help.
-
-It's also worth noting that there's a PDF version of the complete
-documentation for perl available in the CPAN/authors/id/BMIDD
-directory.
 
 Many good books have been written about Perl -- see the section below
 for more details.
@@ -150,14 +146,18 @@ following groups:
 
     comp.lang.perl.announce 		Moderated announcement group
     comp.lang.perl.misc     		Very busy group about Perl in general
+    comp.lang.perl.moderated            Moderated discussion group
     comp.lang.perl.modules  		Use and development of Perl modules
     comp.lang.perl.tk           	Using Tk (and X) from Perl
 
     comp.infosystems.www.authoring.cgi 	Writing CGI scripts for the Web.
 
+Actually, the moderated group hasn't passed yet, but we're
+keeping our fingers crossed.
+
 There is also USENET gateway to the mailing list used by the crack
 Perl development team (perl5-porters) at
-news://genetics.upenn.edu/perl.porters-gw/ .
+news://news.perl.com/perl.porters-gw/ .
 
 =head2 Where should I post source code?
 
@@ -166,6 +166,10 @@ but feel free to cross-post to comp.lang.perl.misc.  If you want to
 cross-post to alt.sources, please make sure it follows their posting
 standards, including setting the Followup-To header line to NOT
 include alt.sources; see their FAQ for details.
+
+If you're just looking for software, first use Alta Vista, Deja News, and
+search CPAN.  This is faster and more productive than just posting
+a request.
 
 =head2 Perl Books
 
@@ -182,71 +186,104 @@ fourth printing.
 	Authors: Larry Wall, Tom Christiansen, and Randal Schwartz
         ISBN 1-56592-149-6      (English)
         ISBN 4-89052-384-7      (Japanese)
-	(French and German translations in progress)
+	(French, German, and Italian translations also available)
 
 Note that O'Reilly books are color-coded: turquoise (some would call
 it teal) covers indicate perl5 coverage, while magenta (some would
 call it pink) covers indicate perl4 only.  Check the cover color
 before you buy!
 
+If you're already a hard-core systems programmer, then the Camel Book
+might suffice for you to learn Perl from.  But if you're not, check
+out I<Learning Perl> by Randal and Tom.  The second edition of "Llama
+Book" has a blue cover, and is updated for the 5.004 release of Perl.
+
+If you're not an accidental programmer, but a more serious and possibly
+even degreed computer scientist who doesn't need as much hand-holding as
+we try to provide in the Llama or its defurred cousin the Gecko, please
+check out the delightful book, I<Perl: The Programmer's Companion>,
+written by Nigel Chapman.
+
+You can order O'Reilly books diretly from O'Reilly & Associates,
+1-800-998-9938.  Local/overseas is 1-707-829-0515.  If you can
+locate an O'Reilly order form, you can also fax to 1-707-829-0104.
+See http://www.ora.com/ on the Web.
+
 What follows is a list of the books that the FAQ authors found personally
 useful.  Your mileage may (but, we hope, probably won't) vary.
 
-If you're already a hard-core systems programmer, then the Camel Book
-just might suffice for you to learn Perl from.  But if you're not,
-check out the "Llama Book".  It currently doesn't cover perl5, but the
-2nd edition is nearly done and should be out by summer 97:
+Recommended books on (or muchly on) Perl are the following.  
+Those marked with a star may be ordered from O'Reilly.
 
-    Learning Perl (the Llama Book):
-	Author: Randal Schwartz, with intro by Larry Wall
-        ISBN 1-56592-042-2      (English)
-        ISBN 4-89502-678-1      (Japanese)
-        ISBN 2-84177-005-2      (French)
-        ISBN 3-930673-08-8      (German)
+=over
 
-Another stand-out book in the turquoise O'Reilly Perl line is the "Hip
-Owls" book.  It covers regular expressions inside and out, with quite a
-bit devoted exclusively to Perl:
+=item References
 
-    Mastering Regular Expressions (the Cute Owls Book):
-	Author: Jeffrey Friedl
-	ISBN 1-56592-257-3
+    *Programming Perl
+	by Larry Wall, Tom Christiansen, and Randal L. Schwartz
 
-You can order any of these books from O'Reilly & Associates,
-1-800-998-9938.  Local/overseas is 1-707-829-0515.  If you can locate
-an O'Reilly order form, you can also fax to 1-707-829-0104.  See
-http://www.ora.com/ on the Web.
+    *Perl 5 Desktop Reference
+        By Johan Vromans
 
-Recommended Perl books that are not from O'Reilly are the following:
+=item Tutorials
+		
+    *Learning Perl [2nd edition]
+	by Randal L. Schwartz and Tom Christiansen
 
-   Cross-Platform Perl, (for Unix and Windows NT)
-       Author: Eric F. Johnson
-       ISBN: 1-55851-483-X
+    *Learning Perl on Win32 Systems
+	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
+	    with foreword by Larry Wall
 
-   How to Set up and Maintain a World Wide Web Site, (2nd edition)
-	Author: Lincoln Stein, M.D., Ph.D.
-	ISBN: 0-201-63462-7
+    Perl: The Programmer's Companion
+	by Nigel Chapman
 
-   CGI Programming in C & Perl,
-	Author: Thomas Boutell
-	ISBN: 0-201-42219-0
+    Cross-Platform Perl 
+	by Eric F. Johnson
 
-Note that some of these address specific application areas (e.g. the
-Web) and are not general-purpose programming books.
+    MacPerl: Power and Ease 
+	by Vicki Brown and Chris Nandor, foreword by Matthias Neeracher
+
+=item Task-Oriented
+
+    *The Perl Cookbook
+	by Tom Christiansen and Nathan Torkington
+	    with foreword by Larry Wall
+
+    Perl5 Interactive Course [2nd edition]
+	by Jon Orwant
+
+    *Advanced Perl Programming 
+	by Sriram Srinivasan
+
+    Effective Perl Programming 
+	by Joseph Hall
+
+=item Special Topics
+
+    *Mastering Regular Expressions
+	by Jeffrey Friedl
+
+    How to Set up and Maintain a World Wide Web Site [2nd edition]
+	by Lincoln Stein
+
+=back
 
 =head2 Perl in Magazines
 
-The Perl Journal is the first and only magazine dedicated to Perl.
-It is published (on paper, not online) quarterly by Jon Orwant
-(orwant@tpj.com), editor.  Subscription information is at http://tpj.com
-or via email to subscriptions@tpj.com.
+The first and only periodical devoted to All Things Perl, I<The
+Perl Journal> contains tutorials, demonstrations, case studies,
+announcements, contests, and much more.  TPJ has columns on web
+development, databases, Win32 Perl, graphical programming, regular
+expressions, and networking, and sponsors the Obfuscated Perl Contest.
+It is published quarterly by Jon Orwant.  See http://www.tpj.com/ or
+send mail to subscriptions@tpj.com.
 
-Beyond this, two other magazines that frequently carry high-quality
-articles on Perl are Web Techniques (see
-http://www.webtechniques.com/) and Unix Review
-(http://www.unixreview.com/).  Randal Schwartz's Web Technique's
-columns are available on the web at
-http://www.stonehenge.com/merlyn/WebTechniques/ .
+Beyond this, magazines that frequently carry high-quality articles
+on Perl are I<Web Techniques> (see http://www.webtechniques.com/),
+I<Performance Computing> at www.performance-computing.com, and Usenix's
+newsletter/magazine to its members, I<login:>, at http://www.usenix.org/.
+Randal's Web Technique's columns are available on the web at
+http://www.stonehenge.com/merlyn/WebTechniques/.
 
 =head2 Perl on the Net: FTP and WWW Access
 
@@ -297,13 +334,13 @@ for information on subscribing.
 =item NTPerl
 
 This list is used to discuss issues involving Win32 Perl 5 (Windows NT
-and Win95). Subscribe by emailing ListManager@ActiveWare.com with the
+and Win95). Subscribe by mailing ListManager@ActiveWare.com with the
 message body:
 
     subscribe Perl-Win32-Users
 
 The list software, also written in perl, will automatically determine
-your address, and subscribe you automatically.  To unsubscribe, email
+your address, and subscribe you automatically.  To unsubscribe, mail
 the following in the message body to the same address like so:
 
     unsubscribe Perl-Win32-Users
@@ -314,7 +351,7 @@ to join or leave this list.
 =item Perl-Packrats
 
 Discussion related to archiving of perl materials, particularly the
-Comprehensive Perl Archive Network (CPAN). Subscribe by emailing
+Comprehensive Perl Archive Network (CPAN). Subscribe by mailing
 majordomo@cis.ufl.edu:
 
     subscribe perl-packrats
@@ -348,13 +385,14 @@ let perlfaq-suggestions@perl.com know.
 
 =head2 Perl Training
 
-While some large training companies offer their own courses on Perl,
-you may prefer to contact individuals near and dear to the heart of
-Perl development.  Two well-known members of the Perl development team
-who offer such things are Tom Christiansen <perl-classes@perl.com>
-and Randal Schwartz <perl-training-info@stonehenge.com>, plus their
-respective minions, who offer a variety of professional tutorials
-and seminars on Perl.  These courses include large public seminars,
+While some large training companies offer their own courses on
+Perl, you may prefer to contact individuals near and dear to the
+heart of Perl development.  Two well-known members of the Perl
+development team head companies which offer such things are
+Tom Christiansen <perl-classes@perl.com> and Randal Schwartz
+<perl-training-info@stonehenge.com>, plus their respective
+minions, who offer a variety of professional tutorials and
+seminars on Perl.  These courses include large public seminars,
 private corporate training, and fly-ins to Colorado and Oregon.
 See http://www.perl.com/perl/info/training.html for more details.
 
@@ -406,8 +444,8 @@ For more information, contact the The Perl Clinic:
 =head2 Where do I send bug reports?
 
 If you are reporting a bug in the perl interpreter or the modules
-shipped with perl, use the perlbug program in the perl distribution or
-email your report to perlbug@perl.com.
+shipped with perl, use the I<perlbug> program in the perl distribution or
+mail your report to perlbug@perl.com.
 
 If you are posting a bug with a non-standard port (see the answer to
 "What platforms is Perl available for?"), a binary distribution, or a
@@ -415,9 +453,17 @@ non-standard module (such as Tk, CGI, etc), then please see the
 documentation that came with it to determine the correct place to post
 bugs.
 
-Read the perlbug man page (perl5.004 or later) for more information.
+Read the perlbug(1) man page (perl5.004 or later) for more information.
 
 =head2 What is perl.com?  perl.org?  The Perl Institute?
+
+The perl.com domain is Tom Christiansen's domain.  He created it as a
+public service long before perl.org came about.  Despite the name, it's a
+pretty non-commercial site meant to be a clearinghouse for information
+about all things Perlian, accepting no paid advertisements, bouncy
+happy gifs, or silly java applets on its pages.  The Perl Home Page at
+http://www.perl.com/ is currently hosted on a T3 line courtesy of Songline
+Systems, a software-oriented subsidiary of O'Reilly and Associates.
 
 perl.org is the official vehicle for The Perl Institute.  The motto of
 TPI is "helping people help Perl help people" (or something like
@@ -425,12 +471,6 @@ that).  It's a non-profit organization supporting development,
 documentation, and dissemination of perl.  Current directors of TPI
 include Larry Wall, Tom Christiansen, and Randal Schwartz, whom you
 may have heard of somewhere else around here.
-
-The perl.com domain is Tom Christiansen's domain.  He created it as a
-public service long before perl.org came about.  It's the original PBS
-of the Perl world, a clearinghouse for information about all things
-Perlian, accepting no paid advertisements, glossy gifs, or (gasp!)
-java applets on its pages.
 
 =head2 How do I learn about object-oriented Perl programming?
 
@@ -440,5 +480,18 @@ while L<perlbot> has some excellent tips and tricks.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997 Tom Christiansen and Nathan Torkington.
-All rights reserved.  See L<perlfaq> for distribution information.
+Copyright (c) 1997, 1998 Tom Christiansen and Nathan Torkington.
+All rights reserved.
+
+When included as part of the Standard Version of Perl, or as part of
+its complete documentation whether printed or otherwise, this work
+may be distributed only under the terms of Perl's Artistic License.
+Any distribution of this file or derivatives thereof I<outside>
+of that package require that special arrangements be made with
+copyright holder.
+
+Irrespective of its distribution, all code examples in this file
+are hereby placed into the public domain.  You are permitted and
+encouraged to use this code in your own programs for fun
+or for profit as you see fit.  A simple comment in the code giving
+credit would be courteous but is not required.

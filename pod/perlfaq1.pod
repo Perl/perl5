@@ -77,6 +77,8 @@ To avoid the "what language is perl5?" confusion, some people prefer to
 simply use "perl" to refer to the latest version of perl and avoid using
 "perl5" altogether.  It's not really that big a deal, though.
 
+See L<perlhist> for a history of Perl revisions.
+
 =head2 How stable is Perl?
 
 Production releases, which incorporate bug fixes and new functionality,
@@ -92,10 +94,10 @@ and the rare new keyword).
 
 =head2 Is Perl difficult to learn?
 
-Perl is easy to start learning -- and easy to keep learning.  It looks
-like most programming languages you're likely to have had experience
+No, Perl is easy to start learning -- and easy to keep learning.  It looks
+like most programming languages you're likely to have experience
 with, so if you've ever written an C program, an awk script, a shell
-script, or even an Excel macro, you're already part way there.
+script, or even BASIC program, you're already part way there.
 
 Most tasks only require a small subset of the Perl language.  One of
 the guiding mottos for Perl development is "there's more than one way
@@ -220,7 +222,7 @@ sometimes helpful to point out that delivery times may be reduced
 using Perl, as compared to other languages.
 
 If you have a project which has a bottleneck, especially in terms of
-translation, or testing, Perl almost certainly will provide a viable,
+translation or testing, Perl almost certainly will provide a viable,
 and quick solution.  In conjunction with any persuasion effort, you
 should not fail to point out that Perl is used, quite extensively, and
 with extremely reliable and valuable results, at many large computer
@@ -245,5 +247,18 @@ behind).  Several important bugs were fixed from the 5.000 through
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997 Tom Christiansen and Nathan Torkington.
-All rights reserved.  See L<perlfaq> for distribution information.
+Copyright (c) 1997, 1998 Tom Christiansen and Nathan Torkington.
+All rights reserved.
+
+When included as part of the Standard Version of Perl, or as part of
+its complete documentation whether printed or otherwise, this work
+may be distributed only under the terms of Perl's Artistic License.
+Any distribution of this file or derivatives thereof I<outside>
+of that package require that special arrangements be made with
+copyright holder.
+
+Irrespective of its distribution, all code examples in this file
+are hereby placed into the public domain.  You are permitted and
+encouraged to use this code in your own programs for fun
+or for profit as you see fit.  A simple comment in the code giving
+credit would be courteous but is not required.
