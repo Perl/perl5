@@ -772,7 +772,7 @@ int	my_vfork ();
 bool	Perl_vms_do_exec (pTHX_ char *);
 unsigned long int	Perl_do_aspawn (pTHX_ void *, void **, void **);
 unsigned long int	Perl_do_spawn (pTHX_ char *);
-FILE *  my_fdopen (int, char *);
+FILE *  my_fdopen (int, const char *);
 int     my_fclose (FILE *);
 int	my_fwrite (void *, size_t, size_t, FILE *);
 int	Perl_my_flush (pTHX_ FILE *);
