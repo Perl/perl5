@@ -2078,9 +2078,9 @@ or equivalently,
 
     @foo = grep {!/^#/} @bar;    # weed out comments
 
-Note that, because C<$_> is a reference into the list value, it can
-be used to modify the elements of the array.  While this is useful and
-supported, it can cause bizarre results if the LIST is not a named array.
+Note that C<$_> is an alias to the list value, so it can be used to
+modify the elements of the LIST.  While this is useful and supported,
+it can cause bizarre results if the elements of LIST are not variables.
 Similarly, grep returns aliases into the original list, much as a for
 loop's index variable aliases the list elements.  That is, modifying an
 element of a list returned by grep (for example, in a C<foreach>, C<map>
@@ -2462,9 +2462,9 @@ is just a funny way to write
 	$hash{getkey($_)} = $_;
     }
 
-Note that, because C<$_> is a reference into the list value, it can
-be used to modify the elements of the array.  While this is useful and
-supported, it can cause bizarre results if the LIST is not a named array.
+Note that C<$_> is an alias to the list value, so it can be used to
+modify the elements of the LIST.  While this is useful and supported,
+it can cause bizarre results if the elements of LIST are not variables.
 Using a regular C<foreach> loop for this purpose would be clearer in
 most cases.  See also L</grep> for an array composed of those items of
 the original list for which the BLOCK or EXPR evaluates to true.
