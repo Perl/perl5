@@ -14,7 +14,7 @@ BEGIN {
 
 my $tmp = "via$$";
 
-use Test::More tests => 11;
+use Test::More tests => 13;
 
 my $fh;
 my $a = join("", map { chr } 0..255) x 10;
@@ -38,14 +38,32 @@ is($a, $b, 'compare original data with filtered version');
     local $SIG{__WARN__} = sub { $warnings = join '', @_ };
 
     use warnings 'layer';
+
+    # Find fd number we should be using
+    my $fd = open($fh,">$tmp") && fileno($fh);
+    print $fh "Hello\n";
+    close($fh);
+
     ok( ! open($fh,">Via(Unknown::Module)", $tmp), 'open Via Unknown::Module will fail');
     like( $warnings, qr/^Cannot find package 'Unknown::Module'/,  'warn about unknown package' );
+
+    # Now open normally again to see if we get right fileno
+    my $fd2 = open($fh,"<$tmp") && fileno($fh);
+    is($fd2,$fd,"Wrong fd number after failed open");
+
+    my $data = <$fh>;
+
+    is($data,"Hello\n","File clobbered by failed open");
+
+    close($fh);
+
+
 
     $warnings = '';
     no warnings 'layer';
     ok( ! open($fh,">Via(Unknown::Module)", $tmp), 'open Via Unknown::Module will fail');
     is( $warnings, "",  "don't warn about unknown package" );
-}    
+}
 
 END {
     1 while unlink $tmp;

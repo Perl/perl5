@@ -1,13 +1,13 @@
 package PerlIO::encoding;
 use strict;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 our $DEBUG = 0;
 $DEBUG and warn __PACKAGE__, " called by ", join(", ", caller), "\n";
 
 #
-# Now these are all done in encoding.xs DO NOT COMMENT'em out!
+# Equivalent of these are done in encoding.xs - do not uncomment them.
 #
-# use Encode qw(:fallbacks);
+# use Encode ();
 # our $check;
 
 use XSLoader ();

@@ -154,6 +154,13 @@ typedef struct {
     IV oneword;			/* Emergency buffer */
 } PerlIOBuf;
 
+extern int PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode,
+		    PerlIO_list_t *layers, IV n, IV max);
+extern int PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names);
+extern void PerlIO_list_free(pTHX_ PerlIO_list_t *list);
+extern PerlIO_funcs *PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, PerlIO_funcs *def);
+
+
 extern SV *PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param);
 extern PerlIO *PerlIOBuf_open(pTHX_ PerlIO_funcs *self,
 			      PerlIO_list_t *layers, IV n,
