@@ -3961,7 +3961,7 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 		 pos++;
 	}
 	SvPOK_on(sv);
-	sv_magicext(sv,NULL,PERL_MAGIC_vstring,NULL,(const char*)start, pos-start);
+	sv_magic(sv,NULL,PERL_MAGIC_vstring,(const char*)start, pos-start);
 	SvRMAGICAL_on(sv);
     }
     return s;
