@@ -13,14 +13,6 @@ plan(tests => 31);
 
 my $IsVMS = $^O eq 'VMS';
 
-my ($saved_sys_login);
-BEGIN {
-    $saved_sys_login = $ENV{'SYS$LOGIN'} if $^O eq 'VMS'
-}
-END {
-    $ENV{'SYS$LOGIN'} = $saved_sys_login if $^O eq 'VMS';
-}
-
 # Might be a little early in the testing process to start using these,
 # but I can't think of a way to write this test without them.
 use File::Spec::Functions qw(:DEFAULT splitdir rel2abs splitpath);
@@ -36,10 +28,11 @@ my $Cwd = abs_path;
 # Let's get to a known position
 SKIP: {
     my ($vol,$dir) = splitpath(abs_path,1);
-    skip("Already in t/", 2) if (splitdir($dir))[-1] eq ($IsVMS ? 'T' : 't');
+    my $test_dir = $IsVMS ? 'T' : 't';
+    skip("Already in t/", 2) if (splitdir($dir))[-1] eq $test_dir;
 
-    ok( chdir('t'),     'chdir("t")');
-    is( abs_path, catdir($Cwd, 't'),       '  abs_path() agrees' );
+    ok( chdir($test_dir),     'chdir($test_dir)');
+    is( abs_path, catdir($Cwd, $test_dir),    '  abs_path() agrees' );
 }
 
 $Cwd = abs_path;
@@ -67,38 +60,55 @@ sub check_env {
 
 
         # Check the deprecated chdir(undef) feature.
-#line 60
+#line 64
         ok( chdir(undef),           "chdir(undef) w/ only \$ENV{$key} set" );
         is( abs_path, $ENV{$key},   '  abs_path() agrees' );
         is( $warning,  <<WARNING,   '  got uninit & deprecation warning' );
-Use of uninitialized value in chdir at $0 line 60.
-Use of chdir('') or chdir(undef) as chdir() is deprecated at $0 line 60.
+Use of uninitialized value in chdir at $0 line 64.
+Use of chdir('') or chdir(undef) as chdir() is deprecated at $0 line 64.
 WARNING
 
         chdir($Cwd);
 
         # Ditto chdir('').
         $warning = '';
-#line 72
+#line 76
         ok( chdir(''),              "chdir('') w/ only \$ENV{$key} set" );
         is( abs_path, $ENV{$key},   '  abs_path() agrees' );
         is( $warning,  <<WARNING,   '  got deprecation warning' );
-Use of chdir('') or chdir(undef) as chdir() is deprecated at $0 line 72.
+Use of chdir('') or chdir(undef) as chdir() is deprecated at $0 line 76.
 WARNING
 
         chdir($Cwd);
     }
 }
 
+my %Saved_Env = ();
 sub clean_env {
-    foreach (@magic_envs) {
-        delete $ENV{$_} unless $IsVMS && $_ eq 'HOME' && !$Config{'d_setenv'};
+    foreach my $env (@magic_envs) {
+        $Saved_Env{$env} = $ENV{$env};
+
+        # Can't actually delete SYS$ stuff on VMS.
+        next if $IsVMS && $env eq 'SYS$LOGIN';
+        next if $IsVMS && $env eq 'HOME' && !$Config{'d_setenv'};
+
+        # On VMS, %ENV is many layered.
+        delete $ENV{$env} while exists $ENV{$env};
     }
+
     # The following means we won't really be testing for non-existence,
     # but in Perl we can only delete from the process table, not the job 
     # table.
     $ENV{'SYS$LOGIN'} = '' if $IsVMS;
 }
+
+END {
+    no warnings 'uninitialized';
+
+    # Restore the environment for VMS (and doesn't hurt for anyone else)
+    @ENV{@magic_envs} = @Saved_Env{@magic_envs};
+}
+
 
 foreach my $key (@magic_envs) {
     # We're going to be using undefs a lot here.
