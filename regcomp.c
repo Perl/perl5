@@ -3896,7 +3896,7 @@ S_regclassutf8(pTHX)
 	AV *av = newAV();
 	av_push(av, rv);
 	av_push(av, listsv);
-	rv = newRV_inc((SV*)av);
+	rv = newRV_noinc((SV*)av);
 #else
 	SvREFCNT_dec(listsv);
 #endif
@@ -4472,16 +4472,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	while (--n >= 0) {
 	    switch (r->data->what[n]) {
 	    case 's':
-#ifdef DEBUGGING
-	        {
-		    SV *rv = (SV*)r->data->data[n];
-		    AV *av = (AV*)SvRV((SV*)rv);
-		    SV *sw = *av_fetch(av, 0, FALSE);
-		    SV *lv = *av_fetch(av, 1, FALSE);
-		    SvREFCNT_dec(sw);
-		    SvREFCNT_dec(lv);
-		}
-#endif
 		SvREFCNT_dec((SV*)r->data->data[n]);
 		break;
 	    case 'f':
