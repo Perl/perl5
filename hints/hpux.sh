@@ -290,8 +290,43 @@ EOM
 esac
 EOCBU
 
+# This script UU/use64bits.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/use64bits.cbu <<'EOCBU'
+case "$ccflags" in
+*+DD64*) # Been here, done this (via uselfs.cbu, most likely.)
+   ;;
+*) case "$use64bits" in
+$define|true|[yY]*)
+	    if [ "$xxOsRevMajor" -lt 11 ]; then
+		cat <<EOM >&4
+64-bit compilation is not supported on HP-UX $xxOsRevMajor.
+You need at least HP-UX 11.0.
+Cannot continue, aborting.
+EOM
+		exit 1
+	    fi
+	    if [ ! -f /lib/pa20_64/libc.sl ]; then
+		cat <<EOM >&4
+You do not seem to have the 64-bit libraries in /lib/pa20_64.
+Most importantly, I cannot find /lib/pa20_64/libc.sl.
+Cannot continue, aborting.
+EOM
+		exit 1
+	    fi
+	    ccflags="$ccflags +DD64"
+	    ldflags="$ldflags +DD64"
+	    ld=/usr/bin/ld
+	    set `echo " $libswanted " | sed -e 's@ dl @ @'`
+	    libswanted="$*"
+	    glibpth="/lib/pa20_64"
+   esac
+   ;;
+esac
+EOCBU
+
 # Existence of the 64-bit libraries dictating whether to use large files?
-# Twisted?  You betcha.
+# Twisted?  Yes, very.
 test -f /lib/pa20_64/libc.sl || uselargefiles="$undef"
 
 # This script UU/uselfs.cbu will get 'called-back' by Configure 
@@ -336,41 +371,4 @@ $define|true|[yY]*)
 	;;
 esac
 EOCBU
-
-# This script UU/use64bits.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
-cat > UU/use64bits.cbu <<'EOCBU'
-case "$ccflags" in
-*+DD64*) # Been here, done this (via uselfs.cbu, most likely.)
-   ;;
-*) case "$use64bits" in
-$define|true|[yY]*)
-	    if [ "$xxOsRevMajor" -lt 11 ]; then
-		cat <<EOM >&4
-64-bit compilation is not supported on HP-UX $xxOsRevMajor.
-You need at least HP-UX 11.0.
-Cannot continue, aborting.
-EOM
-		exit 1
-	    fi
-	    if [ ! -f /lib/pa20_64/libc.sl ]; then
-		cat <<EOM >&4
-You do not seem to have the 64-bit libraries in /lib/pa20_64.
-Most importantly, I cannot find /lib/pa20_64/libc.sl.
-Cannot continue, aborting.
-EOM
-		exit 1
-	    fi
-	    ccflags="$ccflags +DD64"
-	    ldflags="$ldflags +DD64"
-	    ld=/usr/bin/ld
-	    set `echo " $libswanted " | sed -e 's@ dl @ @'`
-	    libswanted="$*"
-	    glibpth="/lib/pa20_64"
-   esac
-   ;;
-esac
-EOCBU
-
-
 

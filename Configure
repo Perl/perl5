@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jan 31 21:17:50 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Mon Jan 31 22:19:42 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -2065,7 +2065,8 @@ $eunicefix tr
 : Try to determine whether config.sh was made on this system
 case "$config_sh" in
 '')
-myuname=`( ($uname -a) 2>/dev/null || hostname) 2>&1`
+myuname=`$uname -a 2>/dev/null`
+$test -z "$myuname" && myuname=`hostname 2>/dev/null`
 # tr '[A-Z]' '[a-z]' would not work in EBCDIC
 # because the A-Z/a-z are not consecutive.
 myuname=`echo $myuname | $sed -e 's/^[^=]*=//' -e 's/\///g' | \
@@ -3675,42 +3676,42 @@ $define)
 esac
 for thislib in $libswanted; do
 	
-	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`;
-		$test -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
-		echo "Found -l$thislib (shared)."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+	libname="$thislib"
+	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`; $test -f "$xxx"; then
+		if $test -a "X$ignore_versioned_solibs" = "X"; then
+			xxx=/ignored/$xxx
+		else
+			libstyle=shared
+		fi
 	elif xxx=`./loc lib$thislib.$so X $libpth` ; $test -f "$xxx"; then
-		echo "Found -l$thislib (shared)."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=shared
 	elif xxx=`./loc lib$thislib$_a X $libpth`; $test -f "$xxx"; then
-		echo "Found -l$thislib."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=static
 	elif xxx=`./loc $thislib$_a X $libpth`; $test -f "$xxx"; then
-		echo "Found -l$thislib."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
-		esac
+		libstyle=static
 	elif xxx=`./loc lib${thislib}_s$_a X $libpth`; $test -f "$xxx"; then
-		echo "Found -l${thislib}_s."
-		case " $dflt " in
-		*"-l$thislib "*);;
-		*) dflt="$dflt -l${thislib}_s";;
-		esac
+		libstyle=static
+		libname=${thislib}_s
 	elif xxx=`./loc Slib$thislib$_a X $xlibpth`; $test -f "$xxx"; then
-		echo "Found -l$thislib."
+		libstyle="static"
+	fi
+	if $test -f "$xxx"; then
+		if test X"$osname" = Xhpux -a -f /lib/pa20_64/libc.sl; then
+			case "`file $xxx`" in
+			*LP64*) ;;
+			*) xxx=/non/64/bit/$xxx ;;
+			esac
+		fi
+	fi
+	if $test -f "$xxx"; then
+		case "$libstyle" in
+		shared) echo "Found -l$libname (shared)." ;;
+		static) echo "Found -l$libname." ;;
+		*)      echo "Found -l$libname ($libstyle)." ;;
+		esac
 		case " $dflt " in
 		*"-l$thislib "*);;
-		*) dflt="$dflt -l$thislib";;
+		*) dflt="$dflt -l$libname";;
 		esac
 	else
 		echo "No -l$thislib."
@@ -12347,7 +12348,7 @@ EOCP
 	fi
 fi
 
-if $test X"$sPRId64" = X -a X"$i_inttypes.h" = X"$define" -a X"$quadtype" = Xint64_t; then
+if $test X"$sPRId64" = X -a X"$i_inttypes" = X"$define" -a X"$quadtype" = Xint64_t; then
 	$cat >try.c <<'EOCP'
 #include <sys/types.h>
 #include <inttypes.h>
