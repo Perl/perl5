@@ -1388,6 +1388,10 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	 char, regexp);
     if (r == NULL)
 	FAIL("regexp out of space");
+#ifdef DEBUGGING
+    /* avoid reading uninitialized memory in DEBUGGING code in study_chunk() */
+    Zero(r, sizeof(regexp) + (unsigned)PL_regsize * sizeof(regnode), char);
+#endif
     r->refcnt = 1;
     r->prelen = xend - exp;
     r->precomp = PL_regprecomp;
