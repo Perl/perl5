@@ -170,11 +170,11 @@ sub init_others
  $self->{'LD'}     = $Config{'ld'} || 'link';
  $self->{'AR'}     = $Config{'ar'} || 'lib';
  $self->{'LDLOADLIBS'} ||= $Config{'libs'};
+ # -Lfoo must come first for Borland, so we put it in LDDLFLAGS
  if ($BORLAND) {
      my $libs = $self->{'LDLOADLIBS'};
      my $libpath = '';
-     $libs = " $libs ";
-     while ($libs =~ s/\s(("?)-L.+?\2)\s/ /g) {
+     while ($libs =~ s/(?:^|\s)(("?)-L.+?\2)(?:\s|$)/ /) {
          $libpath .= ' ' if length $libpath;
          $libpath .= $1;
      }

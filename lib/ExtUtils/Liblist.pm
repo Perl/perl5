@@ -279,7 +279,7 @@ sub _win32_ext {
 	    next;
 	}
 
-	my($found_lib)=0;
+	my $found_lib = 0;
 	foreach $thispth (@searchpath, @libpath){
 	    unless (-f ($fullname="$thispth\\$_")) {
 		warn "'$thislib' not found as '$fullname'\n" if $verbose;
@@ -293,10 +293,14 @@ sub _win32_ext {
 	}
 
 	# do another pass with (or without) leading 'lib' if they used -l
-	if (!$found_lib and $thislib =~ /^-l/) {
-	    if ($GC)	{ s/^lib//i }
-	    else	{ $_ = "lib$_" }
-	    goto LOOKAGAIN unless $secondpass++;
+	if (!$found_lib and $thislib =~ /^-l/ and !$secondpass++) {
+	    if ($GC) {
+		goto LOOKAGAIN if s/^lib//i;
+	    }
+	    elsif (!/^lib/i) {
+		$_ = "lib$_";
+		goto LOOKAGAIN;
+	    }
 	}
 
 	# give up
@@ -670,6 +674,10 @@ C<-lfoo> still happens as appropriate (depending on compiler being used,
 as reflected by C<$Config{cc}>), but the entries are not verified to be
 valid files or directories.
 
+An entry that matches C</:search/i> reenables searching for
+the libraries specified after it.  You can put it at the end to
+enable searching for default libraries specified by C<$Config{libs}>.
+
 =item *
 
 The libraries specified may be a mixture of static libraries and
@@ -697,7 +705,7 @@ to protect the spaces.
 
 Since this module is most often used only indirectly from extension
 C<Makefile.PL> files, here is an example C<Makefile.PL> entry to add
-a set of libraries to the build process for an extension:
+a library to the build process for an extension:
 
         LIBS => ['-lgl']
 
@@ -707,6 +715,11 @@ C<$Config{libpth}>.
 
 When using a compiler other than GCC, the above entry will search for
 C<gl.lib> (followed by C<libgl.lib>).
+
+If the library happens to be in a location not in C<$Config{libpth}>,
+you need:
+
+        LIBS => ['-Lc:\gllibs -lgl']
 
 Here is a less often used example:
 
@@ -722,7 +735,9 @@ When using the Visual C compiler, the second item is returned as
 C<-libpath:d:\mesalibs mesa.lib user32.lib>.
 
 When using the Borland compiler, the second item is returned as
-C<-Ld:\mesalibs mesa.lib user32.lib>.
+C<-Ld:\mesalibs mesa.lib user32.lib>, and MakeMaker takes care of
+moving the C<-Ld:\mesalibs> to the correct place in the linker
+command line.
 
 =back
 
