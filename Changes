@@ -93,6 +93,66 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6380] By: gsar                                  on 2000/07/12  07:31:00
+        Log: get sprintf.t to adjust properly for 3-digit exponents
+     Branch: perl
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[  6379] By: gsar                                  on 2000/07/12  06:40:04
+        Log: change#6174 needs corresponding change in win32/config_h.PL,
+             which grovels through config_h.SH to find the config.h name
+     Branch: perl
+	   ! win32/config_h.PL
+____________________________________________________________________________
+[  6378] By: jhi                                   on 2000/07/12  05:03:59
+        Log: Do the cc sanity check both before the hints and
+             after the cc selction.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/modified/Oldconfig.U U/modified/cc.U
+     Branch: metaconfig/U/perl
+	   + Checkcc.U
+____________________________________________________________________________
+[  6377] By: jhi                                   on 2000/07/12  02:49:22
+        Log: Fix nits noticed by Boston.pm.
+     Branch: cfgperl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[  6376] By: jhi                                   on 2000/07/11  21:22:13
+        Log: Configure cosmetics and perldelta.
+     Branch: cfgperl
+	   ! Configure config_h.SH pod/perldelta.pod
+     Branch: metaconfig
+	   ! U/modified/cc.U
+____________________________________________________________________________
+[  6375] By: gsar                                  on 2000/07/11  21:17:35
+        Log: windows build tweaks (op/sprintf.t still fails tests 120-121, 149)
+     Branch: perl
+	   ! t/op/sprintf.t win32/Makefile win32/makefile.mk
+	   ! win32/win32sck.c
+____________________________________________________________________________
+[  6374] By: gsar                                  on 2000/07/11  20:48:50
+        Log: tweak for build failure under multiplicity
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  6373] By: gsar                                  on 2000/07/11  20:37:23
+        Log: integrate cfgperl changes#6325..6373 into mainline
+             (NOTE: today's batch of integrations still untested)
+     Branch: perl
+	  +> ext/DynaLoader/hints/netbsd.pl
+	   ! Changes
+	  !> (integrate 26 files)
+____________________________________________________________________________
+[  6372] By: jhi                                   on 2000/07/11  20:30:36
+        Log: Reintroduce perlbook (updated for Mk III), introduce perlposix-bc,
+             regen perltoc.
+     Branch: cfgperl
+	   + pod/perlbook.pod
+	   ! MANIFEST pod/Makefile.SH pod/buildtoc.PL pod/perl.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
 [  6371] By: jhi                                   on 2000/07/11  20:08:56
         Log: Minor cleanups on the booklist.
      Branch: cfgperl
