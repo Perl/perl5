@@ -694,6 +694,31 @@ length (1 to 6 bytes, current character allocations require 4 bytes),
 byteorder independent encoding.  For ASCII, UTF-8 is transparent
 (and we really do mean 7-bit ASCII, not any 8-bit encoding).
 
+The following table is from Unicode 3.1.
+
+ Code Points            1st Byte  2nd Byte  3rd Byte  4th Byte
+
+   U+0000..U+007F       00..7F   
+   U+0080..U+07FF       C2..DF    80..BF   
+   U+0800..U+0FFF       E0        A0..BF    80..BF  
+   U+1000..U+FFFF       E1..EF    80..BF    80..BF  
+  U+10000..U+3FFFF      F0        90..BF    80..BF    80..BF
+  U+40000..U+FFFFF      F1..F3    80..BF    80..BF    80..BF
+ U+100000..U+10FFFF     F4        80..8F    80..BF    80..BF
+
+Or, another way to look at it, as bits:
+
+ Code Points                    1st Byte   2nd Byte  3rd Byte  4th Byte
+
+                    0aaaaaaa     0aaaaaaa
+            00000bbbbbaaaaaa     110bbbbb  10aaaaaa
+            ccccbbbbbbaaaaaa     1110cccc  10bbbbbb  10aaaaaa
+  00000dddccccccbbbbbbaaaaaa     11110ddd  10cccccc  10bbbbbb  10aaaaaa
+
+As you can see, the continuation bytes all begin with C<10>, and the
+leading bits of the start byte tells how many bytes the are in the
+encoded character.
+
 =item UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
 
 UTF-16 is a 2 or 4 byte encoding.  The Unicode code points

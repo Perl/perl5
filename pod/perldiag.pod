@@ -3844,6 +3844,14 @@ about.
 
 (W) You did C<use re;> without any arguments.   That isn't very useful.
 
+=item Useless use of sort in scalar context
+
+(W void) You used sort in scalar context, as in :
+
+    my $x = sort @y;
+
+This is not very useful, and perl currently optimizes this away.
+
 =item Useless use of %s with no values
 
 (W syntax) You used the push() or unshift() function with no arguments

@@ -55,8 +55,8 @@ sub _parse_section {
     # section.  If there is no section and the name contains spaces, also
     # guess that it's an old section link.
     my ($page, $section) = split (/\s*\/\s*/, $link, 2);
-    $section =~ s/^"\s*(.*?)\s*"$/$1/;
-    if ($page =~ / / && !defined ($section)) {
+    $section =~ s/^"\s*(.*?)\s*"$/$1/ if $section;
+    if ($page && $page =~ / / && !defined ($section)) {
         $section = $page;
         $page = undef;
     } else {

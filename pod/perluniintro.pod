@@ -236,11 +236,19 @@ for doing conversions between those encodings:
 
 Normally writing out Unicode data
 
-    print chr(0x100), "\n";
+    print FH chr(0x100), "\n";
 
-will print out the raw UTF-8 bytes.
+will print out the raw UTF-8 bytes, but you will get a warning
+out of that if you use C<-w> or C<use warnings>.  To avoid the
+warning open the stream explicitly in UTF-8:
 
-But reading in correctly formed UTF-8 data will not magically turn
+    open FH, ">:utf8", "file";
+
+and on already open streams use C<binmode()>:
+
+    binmode(STDOUT, ":utf8");
+
+Reading in correctly formed UTF-8 data will not magically turn
 the data into Unicode in Perl's eyes.
 
 You can use either the C<':utf8'> I/O discipline when opening files
@@ -251,11 +259,11 @@ You can use either the C<':utf8'> I/O discipline when opening files
 The I/O disciplines can also be specified more flexibly with
 the C<open> pragma; see L<open>:
 
-    use open ':utf8'; # input and output will be UTF-8
-    open X, ">utf8";
-    print X chr(0x100), "\n"; # this would have been UTF-8 without the pragma
+    use open ':utf8'; # input and output default discipline will be UTF-8
+    open X, ">file";
+    print X chr(0x100), "\n";
     close X;
-    open Y, "<utf8";
+    open Y, "<file";
     printf "%#x\n", ord(<Y>); # this should print 0x100
     close Y;
 
@@ -329,7 +337,8 @@ by repeatedly encoding it in UTF-8:
     close F;
 
 If you run this code twice, the contents of the F<file> will be twice
-UTF-8 encoded.  A C<use open ':utf8'> would have avoided the bug.
+UTF-8 encoded.  A C<use open ':utf8'> would have avoided the bug, or
+explicitly opening also the F<file> for input as UTF-8.
 
 =head2 Special Cases
 

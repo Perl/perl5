@@ -31,6 +31,369 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13102] By: jhi                                   on 2001/11/19  19:17:14
+        Log: The runops_debug needs to be present always, otherwise
+             places like AIX which need an explicit symbol export list
+             will croak when trying to build Devel::Peek (which uses
+             the runops_debug).
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 13101] By: jhi                                   on 2001/11/19  19:06:48
+        Log: Subject: [PATCH: perl@13050] VMS specific cleanup and strictness for tie_sdbm.t
+             From: PPrymmer@factset.com 
+             Date: Mon, 19 Nov 2001 11:34:22 -0500
+             Message-ID: <OF8BFCD922.9F513397-ON85256B09.005AAA90@55.25.11>
+     Branch: perl
+	   ! lib/Memoize/t/tie_sdbm.t
+____________________________________________________________________________
+[ 13100] By: jhi                                   on 2001/11/19  18:57:11
+        Log: Retract #13088: it seems that unless dump.c is extensively
+             reorganized as to what symbols it shows, when, and to whom,
+             we are stuck with having the dump.o symbols in the libperl
+             and thusly in the main Perl binary.
+     Branch: perl
+	   ! embedvar.h perlapi.h perlvars.h
+____________________________________________________________________________
+[ 13099] By: jhi                                   on 2001/11/19  18:02:14
+        Log: The _uni_display should not be in dump.c since they
+             are used under normal operation (S_not_a_number()).
+     Branch: perl
+	   ! dump.c embed.h embed.pl global.sym proto.h utf8.c
+____________________________________________________________________________
+[ 13098] By: jhi                                   on 2001/11/19  17:37:26
+        Log: Protect sv_dump() from being included unless DEBUGGING,
+             as noticed by Ilya.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 13097] By: jhi                                   on 2001/11/19  15:11:41
+        Log: Pending further investigation skip the tell() tests.
+             The tell() is okay on Solaris, HP-UX and Tru64, but fails
+             (by returning too much) in Linux.
+     Branch: perl
+	   ! t/io/utf8.t
+____________________________________________________________________________
+[ 13096] By: jhi                                   on 2001/11/19  14:28:57
+        Log: Retract #13082 until a better solution is found:
+             statics break ithreads.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 13095] By: jhi                                   on 2001/11/19  14:24:33
+        Log: Figures 1 and 2 for UTF-8.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13094] By: jhi                                   on 2001/11/19  14:09:34
+        Log: Subject: [PATCH] new warning "Useless use of sort in scalar context"
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 19 Nov 2001 13:26:45 +0100                 
+             Message-ID: <20011119132645.A15034@rafael>
+     Branch: perl
+	   ! op.c pod/perldiag.pod t/lib/warnings/op
+____________________________________________________________________________
+[ 13093] By: jhi                                   on 2001/11/19  14:07:20
+        Log: Subject: [PATCH t/op/closure.t] A little extra debugging output
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Mon, 19 Nov 2001 03:11:12 -0500                 
+             Message-ID: <20011119031112.E786@blackrider>
+     Branch: perl
+	   ! t/op/closure.t
+____________________________________________________________________________
+[ 13092] By: jhi                                   on 2001/11/19  14:05:21
+        Log: Subject: [PATCH MANIFEST t/op/or.t] Double FETCH test
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 19 Nov 2001 03:42:56 -0500
+             Message-ID: <20011119034256.I786@blackrider>
+     Branch: perl
+	   + t/op/or.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13091] By: jhi                                   on 2001/11/19  13:50:45
+        Log: Subject: [PATCH] io_poll.t vms/test.com tweaks
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 18 Nov 2001 14:33:48 -0600
+             Message-Id: <a05101001b81db38899ea@[172.16.52.1]>
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_poll.t vms/test.com
+____________________________________________________________________________
+[ 13090] By: jhi                                   on 2001/11/19  13:49:28
+        Log: Subject: [PATCH] ExtUtils::Install - use File::Spec instead of ExtUtils::MakeMaker
+             From: Dave Rolsky <autarch@urth.org>
+             Date: Mon, 19 Nov 2001 00:07:28 -0600 (CST)
+             Message-ID: <Pine.LNX.4.40.0111190006040.4213-100000@urth.org>
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[ 13089] By: jhi                                   on 2001/11/19  13:48:35
+        Log: Subject: [PATCH] ExtUtils::Install - use File::Spec instead of ExtUtils::MakeMaker
+             From: Dave Rolsky <autarch@urth.org>
+             Date: Mon, 19 Nov 2001 00:07:28 -0600 (CST) 
+             Message-ID: <Pine.LNX.4.40.0111190006040.4213-100000@urth.org>
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 13088] By: jhi                                   on 2001/11/19  13:44:49
+        Log: The runops_dbg should not be needed.
+     Branch: perl
+	   ! embedvar.h perlapi.h perlvars.h pod/perlapi.pod
+____________________________________________________________________________
+[ 13087] By: jhi                                   on 2001/11/19  13:28:22
+        Log: do_spawn() cleanup from Charles Lane.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 13086] By: jhi                                   on 2001/11/19  13:22:26
+        Log: Update the list of tests.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 13085] By: jhi                                   on 2001/11/18  21:57:23
+        Log: Subject: [PATCH t/lib/warnings/sv] Re: [ID 20011116.125] $a = undef; print "$a\n"; does not warn
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 16 Nov 2001 17:37:04 -0500
+             Message-ID: <20011116173703.L30160@blackrider>
+     Branch: perl
+	   ! t/lib/warnings/sv
+____________________________________________________________________________
+[ 13084] By: jhi                                   on 2001/11/18  21:38:50
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 13083] By: jhi                                   on 2001/11/18  21:37:06
+        Log: Integrate perlio; win32 sync.
+     Branch: perl
+	  !> perlio.c win32/win32io.c
+____________________________________________________________________________
+[ 13082] By: jhi                                   on 2001/11/18  19:13:06
+        Log: (retracted by #13096)
+             Debugging would be badly skewed by a malloc per regex dump.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 13081] By: nick                                  on 2001/11/18  19:08:40
+        Log: Win32 layer has a dup which needs to match new prototype.
+     Branch: perlio
+	   ! win32/win32io.c
+____________________________________________________________________________
+[ 13080] By: nick                                  on 2001/11/18  19:05:02
+        Log: Wrong way to get stdio mode used.
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 13079] By: jhi                                   on 2001/11/18  18:59:28
+        Log: Retract #13048: that introduced a malloc() (through savepvn())
+             to *every* m//, which killed the performance quite badly.
+     Branch: perl
+	   ! pp_hot.c regcomp.c regcomp.h regexp.h t/op/re_tests
+____________________________________________________________________________
+[ 13078] By: jhi                                   on 2001/11/18  17:37:31
+        Log: Pass 1 at perldelta.pod: sort the section contents
+             together, drop all but the 5.7.2 known problems,
+             leave the 5.7.1 security note since that's the
+             fullest explanation (update the date on that).
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13077] By: jhi                                   on 2001/11/18  17:07:12
+        Log: Retract 11635: close 20011113.110, reopen 20010809.028.
+             
+             Tiny problem in the test for 20011113.110: I hope
+             'my $x= [("foo") x 1]' was never going to produce [qw(foo foo)] :-)
+     Branch: perl
+	   ! pp.c t/op/repeat.t
+____________________________________________________________________________
+[ 13076] By: jhi                                   on 2001/11/18  16:46:11
+        Log: All of syswrite/send/sendto need to return character counts,
+             and character counts from the offset, not the beginning of
+             the scalar.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 13075] By: jhi                                   on 2001/11/18  16:39:32
+        Log: Integrate PerlIO: duping fixes.
+     Branch: perl
+	  !> doio.c ext/Encode/Encode.xs ext/PerlIO/Scalar/Scalar.xs
+	  !> ext/PerlIO/Via/Via.xs ext/PerlIO/t/scalar.t perlio.c perlio.h
+	  !> perliol.h sv.c
+____________________________________________________________________________
+[ 13074] By: jhi                                   on 2001/11/18  16:34:29
+        Log: syswrite() was still returning byte counts, not character counts.
+     Branch: perl
+	   ! pp_sys.c t/io/utf8.t
+____________________________________________________________________________
+[ 13073] By: jhi                                   on 2001/11/18  16:16:17
+        Log: Add test for sysread().
+     Branch: perl
+	   ! t/io/utf8.t
+____________________________________________________________________________
+[ 13072] By: nick                                  on 2001/11/18  16:15:31
+        Log: Allow dup'ing of PerlIO::Scalar etc.
+     Branch: perlio
+	   ! doio.c ext/Encode/Encode.xs ext/PerlIO/Scalar/Scalar.xs
+	   ! ext/PerlIO/Via/Via.xs ext/PerlIO/t/scalar.t perlio.c perlio.h
+	   ! perliol.h sv.c
+____________________________________________________________________________
+[ 13071] By: jhi                                   on 2001/11/18  16:12:32
+        Log: Prepend a null byte to the test set.
+     Branch: perl
+	   ! t/io/utf8.t
+____________________________________________________________________________
+[ 13070] By: jhi                                   on 2001/11/18  15:13:57
+        Log: Document how "no utf8;" can become handy.
+     Branch: perl
+	   ! lib/utf8.pm
+____________________________________________________________________________
+[ 13069] By: jhi                                   on 2001/11/18  14:05:23
+        Log: Integrate perlio; force the inclusion of the PL_runops_*
+     Branch: perl
+	  !> embedvar.h hv.c perlapi.h perlvars.h pod/perlapi.pod
+____________________________________________________________________________
+[ 13068] By: nick                                  on 2001/11/18  13:23:33
+        Log: embed.pl generated changes I forgot to include
+     Branch: perlio
+	   ! embedvar.h perlapi.h pod/perlapi.pod
+____________________________________________________________________________
+[ 13067] By: nick                                  on 2001/11/18  12:50:19
+        Log: Force inclusion of both Perl_runops_* in perl itself,
+             so they are available for Peek.xs etc.
+     Branch: perlio
+	   ! perlvars.h
+____________________________________________________________________________
+[ 13066] By: nick                                  on 2001/11/18  11:00:34
+        Log: Integrate mainline - a few Devel::Peak fails.
+     Branch: perlio
+	  +> (branch 29 files)
+	   - ext/Thread/Thread.pm lib/Benchmark.t
+	   - lib/Lingua/KO/Hangul/Util.pm lib/Lingua/KO/Hangul/Util/Changes
+	   - lib/Lingua/KO/Hangul/Util/README
+	   - lib/Lingua/KO/Hangul/Util/t/test.t lib/Unicode/Normalize.pm
+	   - lib/Unicode/Normalize/Changes lib/Unicode/Normalize/README
+	   - lib/Unicode/Normalize/t/norm.t lib/Unicode/Normalize/t/test.t
+	   - vms/ext/vmsish.pm vms/ext/vmsish.t
+	   ! hv.c
+	  !> (integrate 389 files)
+____________________________________________________________________________
+[ 13065] By: jhi                                   on 2001/11/18  01:22:25
+        Log: Start working on perldelta.  This is not yet any sort of
+             editing; just concatenating perl570delta, perl571delta,
+             and perl572delta.  Any sorting not done, any duplicate
+             removal not done, any removal or update of obsolete items
+             not done, any changes since 5.7.2 not included.  So there.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13064] By: jhi                                   on 2001/11/17  22:22:47
+        Log: Banish "use utf8".
+     Branch: perl
+	   ! pod/perlre.pod pod/perlretut.pod pod/perlunicode.pod
+____________________________________________________________________________
+[ 13063] By: jhi                                   on 2001/11/17  17:53:38
+        Log: Tweak from Charles Lane.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 13062] By: jhi                                   on 2001/11/17  15:35:22
+        Log: Integrate change #13058 from maintperl;
+             change#12559 breaks things on Win9x because command.com doesn't
+             grok dquotes at all; disable all the system() smarts for
+             command.com
+     Branch: perl
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 13061] By: ams                                   on 2001/11/17  13:46:11
+        Log: Subject: [PATCH lib/Term/Cap.pm] Sync with CPAN version
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Sat, 17 Nov 2001 14:05:02 +0000 (GMT)
+             Message-Id: <Pine.LNX.4.33.0111171356190.13024-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 13060] By: ams                                   on 2001/11/17  09:49:10
+        Log: Subject: [PATCH9 File/Find.pm doc nits
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sat, 17 Nov 2001 11:41:51 +0100 (CET)
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 13059] By: ams                                   on 2001/11/17  09:38:38
+        Log: Subject: [PATCH] Benchmark.pm nit
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sat, 17 Nov 2001 11:29:23 +0100 (CET)
+     Branch: perl
+	   ! lib/Benchmark.pm
+____________________________________________________________________________
+[ 13058] By: gsar                                  on 2001/11/17  03:50:49
+        Log: change#12559 breaks things on Win9x because command.com doesn't
+             grok dquotes at all; disable all the system() smarts for
+             command.com
+     Branch: maint-5.6/perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 13057] By: ams                                   on 2001/11/16  20:30:03
+        Log: Subject: [PATCH] lib/Unicode/UCD.t @INC oddity
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 16 Nov 2001 16:28:45 -0500 (EST)
+             Message-Id: <Pine.SOL.4.10.10111161625070.7245-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! lib/Unicode/UCD.t
+____________________________________________________________________________
+[ 13056] By: jhi                                   on 2001/11/16  19:18:21
+        Log: Subject: [Patch Perl@13023] VMS system() warning
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Fri, 16 Nov 2001 15:20:11 EST
+             Message-Id: <011116152009.39eb8@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 13055] By: jhi                                   on 2001/11/16  19:03:39
+        Log: It's neither-nor, and protect against the impossible.
+     Branch: perl
+	   ! lib/Thread.pm
+____________________________________________________________________________
+[ 13054] By: jhi                                   on 2001/11/16  18:37:30
+        Log: 5005threads didn't work because $Thread::VERSION wasn't
+             visible.  Oops.
+     Branch: perl
+	   ! ext/Thread/Makefile.PL lib/Thread.pm
+____________________________________________________________________________
+[ 13053] By: jhi                                   on 2001/11/16  17:08:15
+        Log: Robustness against Linux using something else than gcc;
+             based on
+             
+             Subject: [ID 20011116.124] perl 5.6.1 with Intel's icc on RedHat Linux 7.2
+             From: Charles Randall <cfriv@yahoo.com>
+             Date: Fri, 16 Nov 2001 09:31:57 -0800 (PST)
+             Message-Id: <20011116173157.2322.qmail@web20904.mail.yahoo.com>
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[ 13052] By: ams                                   on 2001/11/16  16:46:39
+        Log: Subject: Re: [h.m.brand@hccnet.nl: Installman problems]
+             From: Russ Allbery <rra@stanford.edu>
+             Date: 16 Nov 2001 09:44:21 -0800
+             Message-Id: <yln11mwqyy.fsf@windlord.stanford.edu>
+     Branch: perl
+	   ! lib/Pod/ParseLink.pm
+____________________________________________________________________________
+[ 13051] By: jhi                                   on 2001/11/16  15:26:41
+        Log: Update perluniintro on the UTF-8 output matters
+             (that -w will warn unless the stream is explicitly UTF-8-ified).
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13050] By: jhi                                   on 2001/11/16  15:08:52
+        Log: Adding new files to MANIFEST is nice.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13049] By: jhi                                   on 2001/11/16  15:04:45
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13048] By: jhi                                   on 2001/11/16  14:46:17
         Log: Subject: Re: [PATCH regcomp.[ch], regexp.h, pp_hot.c, t/op/re_tests] lazy $& and \Z fix
              From: "Jeff 'japhy' Pinyan" <jeffp@crusoe.net> 

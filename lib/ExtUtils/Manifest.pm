@@ -75,29 +75,29 @@ sub manifind {
 }
 
 sub fullcheck {
-    _manicheck(3);
+    _manicheck({check_files => 1, check_MANIFEST => 1});
 }
 
 sub manicheck {
-    return @{(_manicheck(1))[0]};
+    return @{(_manicheck({check_files => 1}))[0]};
 }
 
 sub filecheck {
-    return @{(_manicheck(2))[1]};
+    return @{(_manicheck({check_MANIFEST => 1}))[1]};
 }
 
 sub skipcheck {
-    _manicheck(6);
+    _manicheck({check_MANIFEST => 1, warn_on_skip => 1});
 }
 
 sub _manicheck {
-    my($arg) = @_;
+    my($p) = @_;
     my $read = maniread();
     my $found = manifind();
     my $file;
     my $dosnames=(defined(&Dos::UseLFN) && Dos::UseLFN()==0);
     my(@missfile,@missentry);
-    if ($arg & 1){
+    if ($p->{check_files}){
 	foreach $file (sort keys %$read){
 	    warn "Debug: manicheck checking from $MANIFEST $file\n" if $Debug;
             if ($dosnames){
@@ -111,13 +111,12 @@ sub _manicheck {
 	    }
 	}
     }
-    if ($arg & 2){
+    if ($p->{check_MANIFEST}){
 	$read ||= {};
 	my $matches = _maniskip();
-	my $skipwarn = $arg & 4;
 	foreach $file (sort keys %$found){
 	    if (&$matches($file)){
-		warn "Skipping $file\n" if $skipwarn;
+		warn "Skipping $file\n" if $p->{warn_on_skip};
 		next;
 	    }
 	    warn "Debug: manicheck checking from disk $file\n" if $Debug;

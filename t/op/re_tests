@@ -537,7 +537,7 @@ a$	b\na\n	y	$-[0]	2
 a\Z	b\na	y	$-[0]	2
 a\z	b\na	y	$-[0]	2
 a$	b\na	y	$-[0]	2
-'a\Z'm	a\nb\n	n	-	-
+'a\Z'm	a\nb\n	bn	-	-
 'a\z'm	a\nb\n	n	-	-
 'a$'m	a\nb\n	y	$-[0]	0
 'a\Z'm	b\na\n	y	$-[0]	2
@@ -555,7 +555,7 @@ aa$	b\naa\n	y	$-[0]	2
 aa\Z	b\naa	y	$-[0]	2
 aa\z	b\naa	y	$-[0]	2
 aa$	b\naa	y	$-[0]	2
-'aa\Z'm	aa\nb\n	n	-	-
+'aa\Z'm	aa\nb\n	bn	-	-
 'aa\z'm	aa\nb\n	n	-	-
 'aa$'m	aa\nb\n	y	$-[0]	0
 'aa\Z'm	b\naa\n	y	$-[0]	2
@@ -609,7 +609,7 @@ ab$	b\nab\n	y	$-[0]	2
 ab\Z	b\nab	y	$-[0]	2
 ab\z	b\nab	y	$-[0]	2
 ab$	b\nab	y	$-[0]	2
-'ab\Z'm	ab\nb\n	n	-	-
+'ab\Z'm	ab\nb\n	bn	-	-
 'ab\z'm	ab\nb\n	n	-	-
 'ab$'m	ab\nb\n	y	$-[0]	0
 'ab\Z'm	b\nab\n	y	$-[0]	2
@@ -663,7 +663,7 @@ abb$	b\nabb\n	y	$-[0]	2
 abb\Z	b\nabb	y	$-[0]	2
 abb\z	b\nabb	y	$-[0]	2
 abb$	b\nabb	y	$-[0]	2
-'abb\Z'm	abb\nb\n	n	-	-
+'abb\Z'm	abb\nb\n	bn	-	-
 'abb\z'm	abb\nb\n	n	-	-
 'abb$'m	abb\nb\n	y	$-[0]	0
 'abb\Z'm	b\nabb\n	y	$-[0]	2

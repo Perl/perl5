@@ -1850,6 +1850,9 @@ Adp	|UV	|utf8n_to_uvchr	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
 Adp	|UV	|utf8n_to_uvuni	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
 Apd	|U8*	|uvchr_to_utf8	|U8 *d|UV uv
 Apd	|U8*	|uvuni_to_utf8	|U8 *d|UV uv
+Ap	|char*	|pv_uni_display	|SV *dsv|U8 *spv|STRLEN len \
+				|STRLEN pvlim|UV flags
+Ap	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
@@ -1908,9 +1911,6 @@ Apd	|void	|sv_usepvn_mg	|SV *sv|char *ptr|STRLEN len
 Ap	|MGVTBL*|get_vtbl	|int vtbl_id
 p	|char*	|pv_display	|SV *dsv|char *pv|STRLEN cur|STRLEN len \
 				|STRLEN pvlim
-Ap	|char*	|pv_uni_display	|SV *dsv|U8 *spv|STRLEN len \
-				|STRLEN pvlim|UV flags
-Ap	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
 Afp	|void	|dump_indent	|I32 level|PerlIO *file|const char* pat|...
 Ap	|void	|dump_vindent	|I32 level|PerlIO *file|const char* pat \
 				|va_list *args

@@ -311,7 +311,6 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define REG_SEEN_EVAL		 8
 #define REG_SEEN_CANY		16
 #define REG_SEEN_SANY		REG_SEEN_CANY /* src bckwrd cmpt */
-#define REG_SEEN_SEOL		32
 
 START_EXTERN_C
 

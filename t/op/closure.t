@@ -4,6 +4,7 @@
 #   Original written by Ulrich Pfeifer on 2 Jan 1997.
 #   Greatly extended by Tom Phoenix <rootbeer@teleport.com> on 28 Jan 1997.
 #
+#   Run with -debug for debugging output.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -16,7 +17,9 @@ print "1..171\n";
 
 my $test = 1;
 sub test (&) {
-  print ((&{$_[0]})?"ok $test\n":"not ok $test\n");
+  my $ok = &{$_[0]};
+  print $ok ? "ok $test\n" : "not ok $test\n";
+  printf "# Failed at line %d\n", (caller)[2] unless $ok;
   $test++;
 }
 
@@ -234,14 +237,14 @@ test {
 
 	  $code = "# This is a test script built by t/op/closure.t\n\n";
 
-	  $code .= <<"DEBUG_INFO" if $debugging;
-# inner_type: $inner_type 
+	  print <<"DEBUG_INFO" if $debugging;
+# inner_type:     $inner_type 
 # where_declared: $where_declared 
-# within: $within
-# nc_attempt: $nc_attempt
-# call_inner: $call_inner
-# call_outer: $call_outer
-# undef_outer: $undef_outer
+# within:         $within
+# nc_attempt:     $nc_attempt
+# call_inner:     $call_inner
+# call_outer:     $call_outer
+# undef_outer:    $undef_outer
 DEBUG_INFO
 
 	  $code .= <<"END_MARK_ONE";
@@ -262,9 +265,9 @@ END_MARK_TWO
 {
     my \$test = $test;
     sub test (&) {
-      my \$result = &{\$_[0]};
-      print "not " unless \$result;
-      print "ok \$test\\n";
+      my \$ok = &{\$_[0]};
+      print \$ok ? "ok \$test\n" : "not ok \$test\n";
+      printf "# Failed at line %d\n", (caller)[2] unless \$ok;
       \$test++;
     }
 }
@@ -499,7 +502,7 @@ END
 	    }
 	  }
 	  printf "not ok: exited with error code %04X\n", $? if $?;
-	  print "-" x 30, "\n" if $debugging;
+	  print '#', "-" x 30, "\n" if $debugging;
 
 	}	# End of foreach $within
       }	# End of foreach $where_declared

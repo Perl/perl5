@@ -1024,6 +1024,9 @@ Perl_scalar(pTHX_ OP *o)
 	}
 	WITH_THR(PL_curcop = &PL_compiling);
 	break;
+    case OP_SORT:
+	if (ckWARN(WARN_VOID))
+	    Perl_warner(aTHX_ WARN_VOID, "Useless use of sort in scalar context");
     }
     return o;
 }

@@ -1,13 +1,11 @@
 package Thread;
 
-$VERSION = '2.00';
-
 use strict;
 
-our $ithreads;
-our $othreads;
+our($VERSION, $ithreads, $othreads);
 
 BEGIN {
+    $VERSION = '2.00';
     use Config;
     $ithreads = $Config{useithreads};
     $othreads = $Config{use5005threads};
@@ -15,7 +13,7 @@ BEGIN {
 
 require Exporter;
 use XSLoader ();
-our($VERSION, @ISA, @EXPORT, @EXPORT_OK);
+our(@ISA, @EXPORT, @EXPORT_OK);
 
 @ISA = qw(Exporter);
 
@@ -315,6 +313,10 @@ sub unimplement {
 
 BEGIN {
     if ($ithreads) {
+	if ($othreads) {
+	    require Carp;
+	    Carp::croak("This Perl has both ithreads and 5005threads (serious malconfiguration)");
+	}
 	XSLoader::load 'threads';
 	for my $m (qw(new join detach yield self tid equal)) {
 	    no strict 'refs';
@@ -332,7 +334,7 @@ BEGIN {
 	unimplement(qw(unlock));
     } else {
 	require Carp;
-	Carp::croak("This Perl has neither ithreads not 5005threads");
+	Carp::croak("This Perl has neither ithreads nor 5005threads");
     }
 }
 

@@ -143,35 +143,6 @@ Perl_pv_display(pTHX_ SV *dsv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 }
 
 char *
-Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
-{
-    int truncated = 0;
-    char *s, *e;
-
-    sv_setpvn(dsv, "", 0);
-    for (s = (char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
-	 UV u;
-	 if (pvlim && SvCUR(dsv) >= pvlim) {
-	      truncated++;
-	      break;
-	 }
-	 u = utf8_to_uvchr((U8*)s, 0);
-	 Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
-    }
-    if (truncated)
-	 sv_catpvn(dsv, "...", 3);
-    
-    return SvPVX(dsv);
-}
-
-char *
-Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
-{
-  return Perl_pv_uni_display(aTHX_ dsv, (U8*)SvPVX(ssv), SvCUR(ssv),
-			     pvlim, flags);
-}
-
-char *
 Perl_sv_peek(pTHX_ SV *sv)
 {
     SV *t = sv_newmortal();
