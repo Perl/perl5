@@ -103,6 +103,7 @@ Usage $0: [switches]
             name.
   -p        Don't install the pod files. [This will break use diagnostics;]
   -netware  Install correctly on a Netware server.
+  -destdir  Prefix installation directories by this string.
 EOT
 	exit;
     }
