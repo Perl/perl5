@@ -4240,6 +4240,10 @@ extern void moncontrol(int);
 #   define PERL_BLOCKSIG_UNBLOCK(set)	NOOP
 #endif
 
+/* Use instead of abs() since abs() forces its argument to be an int,
+ * but also beware since evaluates its argument thrice. */
+#define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"

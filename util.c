@@ -3778,7 +3778,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv)
  			orev = rev;
  			rev += (*s - '0') * mult;
  			mult /= 10;
- 			if ( abs(orev) > abs(rev) )
+ 			if ( PERL_ABS(orev) > PERL_ABS(rev) )
  			    Perl_croak(aTHX_ "Integer overflow in version");
  			s++;
  		    }
@@ -3788,7 +3788,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv)
  			orev = rev;
  			rev += (*end - '0') * mult;
  			mult *= 10;
- 			if ( abs(orev) > abs(rev) )
+ 			if ( PERL_ABS(orev) > PERL_ABS(rev) )
  			    Perl_croak(aTHX_ "Integer overflow in version");
  		    }
  		} 
@@ -3907,11 +3907,11 @@ Perl_vnumify(pTHX_ SV *vs)
 	return sv;
     }
     digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
-    Perl_sv_setpvf(aTHX_ sv,"%d.",abs(digit));
+    Perl_sv_setpvf(aTHX_ sv,"%d.", PERL_ABS(digit));
     for ( i = 1 ; i <= len ; i++ )
     {
 	digit = SvIVX(*av_fetch((AV *)vs, i, 0));
-	Perl_sv_catpvf(aTHX_ sv,"%03d",abs(digit));
+	Perl_sv_catpvf(aTHX_ sv,"%03d", PERL_ABS(digit));
     }
     if ( len == 0 )
 	 Perl_sv_catpv(aTHX_ sv,"000");
@@ -3989,8 +3989,8 @@ Perl_vcmp(pTHX_ SV *lsv, SV *rsv)
 	I32 right = SvIV(*av_fetch((AV *)rsv,i,0));
 	bool lbeta = left  < 0 ? 1 : 0;
 	bool rbeta = right < 0 ? 1 : 0;
-	left  = abs(left);
-	right = abs(right);
+	left  = PERL_ABS(left);
+	right = PERL_ABS(right);
 	if ( left < right || (left == right && lbeta && !rbeta) )
 	    retval = -1;
 	if ( left > right || (left == right && rbeta && !lbeta) )

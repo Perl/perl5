@@ -1236,7 +1236,7 @@ PP(pp_divide)
                     }
                     RETURN;
                 } /* tried integer divide but it was not an integer result */
-            } /* else (abs(result) < 1.0) or (both UVs in range for NV) */
+            } /* else (PERL_ABS(result) < 1.0) or (both UVs in range for NV) */
         } /* left wasn't SvIOK */
     } /* right wasn't SvIOK */
 #endif /* PERL_TRY_UV_DIVIDE */
@@ -2483,9 +2483,7 @@ PP(pp_i_modulo_1)
 	  dPOPTOPiirl;
 	  if (!right)
 	       DIE(aTHX_ "Illegal modulus zero");
-	  if (right < 0)
-	       right = -right;
-	  SETi( left % right );
+	  SETi( left % PERL_ABS(right) );
 	  RETURN;
      }
 #endif
@@ -2522,8 +2520,7 @@ PP(pp_i_modulo)
 			 PL_ppaddr[OP_I_MODULO] =
 			     &Perl_pp_i_modulo_1;
 		    /* Make certain we work right this time, too. */
-		    if (right < 0)
-			 right = -right;
+		    right = PERL_ABS(right);
 	       }
 	  }
 #endif
