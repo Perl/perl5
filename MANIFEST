@@ -887,6 +887,7 @@ op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
 opcode.pl		Opcode header generatore
+opnames.h		Automatically generated opcode header
 os2/Changes		Changelog for OS/2 port
 os2/Makefile.SHs	Shared library generation for OS/2
 os2/OS2/ExtAttr/Changes		EA access module

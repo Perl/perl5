@@ -79,6 +79,53 @@ Version 5.005_60        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3901] By: gsar                                  on 1999/08/02  18:51:18
+        Log: integrate cfgperl contents
+     Branch: perl
+	  !> INSTALL README pod/perldelta.pod
+____________________________________________________________________________
+[  3900] By: jhi                                   on 1999/08/02  18:46:21
+        Log: Update README and INSTALL; partly based on the message
+             
+             From: "John L. Allen" <allen@grumman.com>
+             To: Jarkko Hietaniemi <jhi@iki.fi>
+             cc: perl5-porters@perl.org
+             Subject: Re: Perl Installation Problem
+             Date: Thu, 29 Jul 1999 14:55:05 -0400 (EDT)
+             Message-ID: <Pine.SOL.3.91.990729144440.1035A-100000@gateway.grumman.com>
+             
+             and private email from Andy Dougherty.
+     Branch: cfgperl
+	   ! INSTALL README
+____________________________________________________________________________
+[  3899] By: jhi                                   on 1999/08/02  18:36:35
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> op.c
+____________________________________________________________________________
+[  3898] By: jhi                                   on 1999/08/02  18:34:49
+        Log: Update PERL_BINCOMPAT_5005; update 64-bitness.
+     Branch: cfgperl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  3897] By: gsar                                  on 1999/08/02  18:18:37
+        Log: optimizations could sometimes bypass bareword check
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  3896] By: jhi                                   on 1999/08/02  18:18:34
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes makedef.pl patchlevel.h win32/Makefile
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[  3895] By: gsar                                  on 1999/08/02  17:22:40
+        Log: up patchlevel etc.
+     Branch: perl
+	   ! Changes patchlevel.h win32/Makefile win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
 [  3894] By: gsar                                  on 1999/08/02  17:12:31
         Log: integrate change#3893, make it conditional on bincompat5005
      Branch: perl
