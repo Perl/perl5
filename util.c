@@ -1584,7 +1584,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
    *(s+(nlen+1+vlen)) = '\0'
 
 #ifdef USE_ENVIRON_ARRAY
-       /* VMS' and EPOC's my_setenv() is in vms.c and epoc.c */
+       /* VMS' my_setenv() is in vms.c */
 #if !defined(WIN32) && !defined(NETWARE)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
@@ -1632,7 +1632,7 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
     my_setenv_format(environ[i], nam, nlen, val, vlen);
 
 #else   /* PERL_USE_SAFE_PUTENV */
-#   if defined(__CYGWIN__)
+#   if defined(__CYGWIN__) || defined( EPOC)
     setenv(nam, val, 1);
 #   else
     char *new_env;

@@ -124,8 +124,3 @@ Perl_init_os_extras(void)
   newXS("EPOC::getcwd", epoc_getcwd, file);
 }
 
-void
-Perl_my_setenv(pTHX_ char *nam,char *val) {
-
-  setenv( nam, val, 1);
-}

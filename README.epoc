@@ -68,6 +68,12 @@ EPOC:
 
 =over 4
 
+=item * 
+
+socket IO is only implemented poorly. You can only use sysread and
+syswrite on them. The commands read, write, print, <> do not work for
+sockets. This may change iff epocemx supports sockets.
+
 =item *
 
 kill, alarm and signals. Do not try to use them. This may be
