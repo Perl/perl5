@@ -36,6 +36,9 @@ to continue using pseudo-hashes but not to see the deprecation warnings, add:
 
     no warnings 'deprecated';
 
+Or you can continue to use the L<fields> pragma, but please don't any
+more expect the data structures are pseudohashes.
+
 =head2 5.005-style threads really are deprecated
 
 5.005-style threads (activated by C<use Thread;>) were deprecated in Perl

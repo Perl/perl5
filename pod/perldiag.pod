@@ -3088,6 +3088,7 @@ definition.
 
 (D deprecated)  Pseudo-hashes were deprecated in Perl 5.8.0 and they
 will be removed in Perl 5.10.0, see L<perl58delta> for more details.
+You can continue to use the C<fields> pragma.
 
 =item Quantifier in {,} bigger than %d in regex;
 
