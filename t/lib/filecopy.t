@@ -3,12 +3,13 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    push @INC, "::lib:$MacPerl::Architecture" if $^O eq 'MacOS';
 }
 
 $| = 1;
 
 my @pass = (0,1);
-my $tests = 11;
+my $tests = $^O eq 'MacOS' ? 14 : 11;
 printf "1..%d\n", $tests * scalar(@pass);
 
 use File::Copy;
@@ -82,22 +83,65 @@ for my $pass (@pass) {
   print "# foo=`$foo'\nnot " unless $foo eq sprintf "ok %d\n", 3+$loopconst;
   printf "ok %d\n", 9+$loopconst;
 
-  copy "file-$$", "lib";
-  open(R, "lib/file-$$") or die; $foo = <R>; close(R);
-  print "not " unless $foo eq sprintf "ok %d\n", 3+$loopconst;
-  printf "ok %d\n", 10+$loopconst;
-  unlink "lib/file-$$" or die "unlink: $!";
+  if ($^O eq 'MacOS') {
+	
+    copy "file-$$", "lib";	
+    open(R, ":lib:file-$$") or die; $foo = <R>; close(R);
+    print "not " unless $foo eq sprintf "ok %d\n", 3+$loopconst;
+    printf "ok %d\n", 10+$loopconst;
+    unlink ":lib:file-$$" or die "unlink: $!";
+	
+    copy "file-$$", ":lib";	
+    open(R, ":lib:file-$$") or die; $foo = <R>; close(R);
+    print "not " unless $foo eq sprintf "ok %d\n", 3+$loopconst;
+    printf "ok %d\n", 11+$loopconst;
+    unlink ":lib:file-$$" or die "unlink: $!";
+	
+    copy "file-$$", ":lib:";	
+    open(R, ":lib:file-$$") or die; $foo = <R>; close(R);
+    print "not " unless $foo eq sprintf "ok %d\n", 3+$loopconst;
+    printf "ok %d\n", 12+$loopconst;
+    unlink ":lib:file-$$" or die "unlink: $!";
+	
+    unless (-e 'lib:') { # make sure there's no volume called 'lib'
+	undef $@;
+	eval { (copy "file-$$", "lib:") || die "'lib:' is not a volume name"; };
+	print "# Died: $@";
+	print "not " unless ( $@ =~ m|'lib:' is not a volume name| );
+    }
+    printf "ok %d\n", 13+$loopconst;
 
-  move "file-$$", "lib";
-  open(R, "lib/file-$$") or die "open lib/file-$$: $!"; $foo = <R>; close(R);
-  print "not " unless $foo eq sprintf("ok %d\n", 3+$loopconst)
-      and not -e "file-$$";;
-  printf "ok %d\n", 11+$loopconst;
-  unlink "lib/file-$$" or die "unlink: $!";
+    move "file-$$", ":lib:";
+    open(R, ":lib:file-$$") or die "open :lib:file-$$: $!"; $foo = <R>; close(R);
+    print "not " unless $foo eq sprintf("ok %d\n", 3+$loopconst)
+        and not -e "file-$$";;
+    printf "ok %d\n", 14+$loopconst;
+    unlink ":lib:file-$$" or die "unlink: $!";
+  
+  } else {
+    
+    copy "file-$$", "lib";
+    open(R, "lib/file-$$") or die; $foo = <R>; close(R);
+    print "not " unless $foo eq sprintf "ok %d\n", 3+$loopconst;
+    printf "ok %d\n", 10+$loopconst;
+    unlink "lib/file-$$" or die "unlink: $!";
+
+    move "file-$$", "lib";
+    open(R, "lib/file-$$") or die "open lib/file-$$: $!"; $foo = <R>; close(R);
+    print "not " unless $foo eq sprintf("ok %d\n", 3+$loopconst)
+        and not -e "file-$$";;
+    printf "ok %d\n", 11+$loopconst;
+    unlink "lib/file-$$" or die "unlink: $!";
+  
+  }
 }
 
 
 END {
     1 while unlink "file-$$";
-    1 while unlink "lib/file-$$";
+    if ($^O eq 'MacOS') {
+        1 while unlink ":lib:file-$$";
+    } else {
+        1 while unlink "lib/file-$$";
+    }
 }

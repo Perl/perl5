@@ -11,6 +11,7 @@ use 5.6.0;
 use strict;
 use warnings;
 use Carp;
+use File::Spec;
 our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
 sub copy;
 sub syscopy;
@@ -22,7 +23,7 @@ sub mv;
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.03';
+$VERSION = '2.04';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -31,16 +32,19 @@ require Exporter;
 
 $Too_Big = 1024 * 1024 * 2;
 
-sub _catname { #  Will be replaced by File::Spec when it arrives
+sub _catname {
     my($from, $to) = @_;
     if (not defined &basename) {
 	require File::Basename;
 	import  File::Basename 'basename';
     }
-    if ($^O eq 'VMS')  { $to = VMS::Filespec::vmspath($to) . basename($from); }
-    elsif ($^O eq 'MacOS') { $to =~ s/^([^:]+)$/:$1/; $to .= ':' . basename($from); }
-    elsif ($to =~ m|\\|)   { $to .= '\\' . basename($from); }
-    else                   { $to .= '/' . basename($from); }
+
+    if ($^O eq 'MacOS') {
+	# a partial dir name that's valid only in the cwd (e.g. 'tmp')
+	$to = ':' . $to if $to !~ /:/;
+    }
+
+    return File::Spec->catfile($to, basename($from));
 }
 
 sub copy {
@@ -369,6 +373,34 @@ it sets C<$!>, deletes the output file, and returns 0.
 
 All functions return 1 on success, 0 on failure.
 $! will be set if an error was encountered.
+
+=head1 NOTES
+
+=over 4
+
+=item *
+
+On Mac OS (Classic), the path separator is ':', not '/', and the 
+current directory is denoted as ':', not '.'. You should be careful 
+about specifying relative pathnames. While a full path always begins 
+with a volume name, a relative pathname should always begin with a 
+':'.  If specifying a volume name only, a trailing ':' is required.
+
+E.g.
+
+  copy("file1", "tmp");        # creates the file 'tmp' in the current directory
+  copy("file1", ":tmp:");      # creates :tmp:file1
+  copy("file1", ":tmp");       # same as above
+  copy("file1", "tmp");        # same as above, if 'tmp' is a directory (but don't do   
+                               # that, since it may cause confusion, see example #1)
+  copy("file1", "tmp:file1");  # error, since 'tmp:' is not a volume
+  copy("file1", ":tmp:file1"); # ok, partial path
+  copy("file1", "DataHD:");    # creates DataHD:file1
+  
+  move("MacintoshHD:fileA", "DataHD:fileB"); # moves (don't copies) files from one 
+                                             # volume to another
+
+=back
 
 =head1 AUTHOR
 

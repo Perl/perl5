@@ -6,7 +6,7 @@
 
 package IO::Dir;
 
-use 5.003_26;
+use 5.6.0;
 
 use strict;
 use Carp;
@@ -16,6 +16,7 @@ use IO::File;
 our(@ISA, $VERSION, @EXPORT_OK);
 use Tie::Hash;
 use File::stat;
+use File::Spec;
 
 @ISA = qw(Tie::Hash Exporter);
 $VERSION = "1.03";
@@ -44,6 +45,9 @@ sub open {
     my ($dh, $dirname) = @_;
     return undef
 	unless opendir($dh, $dirname);
+    # a dir name should always have a ":" in it; assume dirname is
+    # in current directory
+    $dirname = ':' .  $dirname if ( ($^O eq 'MacOS') && ($dirname !~ /:/) );
     ${*$dh}{io_dir_path} = $dirname;
     1;
 }
@@ -103,18 +107,18 @@ sub NEXTKEY {
 
 sub EXISTS {
     my($dh,$key) = @_;
-    -e ${*$dh}{io_dir_path} . "/" . $key;
+    -e File::Spec->catfile(${*$dh}{io_dir_path}, $key);
 }
 
 sub FETCH {
     my($dh,$key) = @_;
-    &lstat(${*$dh}{io_dir_path} . "/" . $key);
+    &lstat(File::Spec->catfile(${*$dh}{io_dir_path}, $key));
 }
 
 sub STORE {
     my($dh,$key,$data) = @_;
     my($atime,$mtime) = ref($data) ? @$data : ($data,$data);
-    my $file = ${*$dh}{io_dir_path} . "/" . $key;
+    my $file = File::Spec->catfile(${*$dh}{io_dir_path}, $key);
     unless(-e $file) {
 	my $io = IO::File->new($file,O_CREAT | O_RDWR);
 	$io->close if $io;
@@ -125,7 +129,7 @@ sub STORE {
 sub DELETE {
     my($dh,$key) = @_;
     # Only unlink if unlink-ing is enabled
-    my $file = ${*$dh}{io_dir_path} . "/" . $key;
+    my $file = File::Spec->catfile(${*$dh}{io_dir_path}, $key);
 
     return 0
 	unless ${*$dh}{io_dir_unlink};
