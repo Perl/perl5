@@ -2400,10 +2400,11 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	/* PL_origalen is set in perl_parse(). */
 	s = SvPV_force(sv,len);
-	if (len >= (STRLEN)PL_origalen) {
-	    /* Longer than original, will be truncated. */
-	    Copy(s, PL_origargv[0], PL_origalen, char);
-	    PL_origargv[0][PL_origalen] = 0;
+	if (len >= (STRLEN)PL_origalen-1) {
+	    /* Longer than original, will be truncated. We assume that
+             * PL_origalen bytes are available. */
+	    Copy(s, PL_origargv[0], PL_origalen-1, char);
+	    PL_origargv[0][PL_origalen-1] = 0;
 	}
 	else {
 	    /* Shorter than original, will be padded. */
