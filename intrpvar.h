@@ -525,6 +525,8 @@ PERLVARI(Ippid,		IV,		0)
 
 PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
+PERLVARI(Ihash_seed_set, bool, FALSE)		/* Hash initialized? */
+
 PERLVAR(IDBassertion,   SV *)
 
 PERLVARI(Icv_has_eval, I32, 0) /* PL_compcv includes an entereval or similar */
