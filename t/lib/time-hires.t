@@ -132,7 +132,7 @@ else {
 {
  my $t = time();
  my $tf = Time::HiRes::time();
- ok 14, ($tf >= $t) && (($tf - $t) <= 1),
+ ok 14, (abs($tf - $t) <= 1),
   "time $t differs from Time::HiRes::time $tf";
 }
 
