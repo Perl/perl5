@@ -2957,8 +2957,7 @@ tests have been added.
                                                               331 333 337 339
  ../ext/IO/lib/IO/t/io_unix.t                 5    4  80.00%  2-5
  ../ext/Storable/t/downgrade.t   12  3072   169   12   7.10%  14-15 46-47 78-79
-                                                              110-111 137 143
-                                                              150 161
+                                                              110-111 150 161
  ../lib/ExtUtils/t/Constant.t   121 30976    48   48 100.00%  1-48
  ../lib/ExtUtils/t/Embed.t                    9    9 100.00%  1-9
  op/pat.t                                   910    7   0.77%  665 776 785 832-
