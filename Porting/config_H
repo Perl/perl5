@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Apr 21 19:21:41 BST 2004
+ * Configuration time: Fri Jul 16 20:59:18 BST 2004
  * Configured by     : yourname
  * Target system     : linux bagpuss.unfortu.net 2.4.19-rmk4 #3 fri oct 25 21:57:55 bst 2002 armv4l unknown 
  */
@@ -1338,8 +1338,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.8.4/armv4l-linux"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.8.4/armv4l-linux"		/**/
+#define ARCHLIB "/opt/perl/lib/5.8.5/armv4l-linux"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.8.5/armv4l-linux"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1399,8 +1399,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.8.4"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.8.4"		/**/
+#define PRIVLIB "/opt/perl/lib/5.8.5"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.8.5"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1417,8 +1417,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.8.4/armv4l-linux"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.8.4/armv4l-linux"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.8.5/armv4l-linux"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.8.5/armv4l-linux"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1440,8 +1440,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.8.4"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.8.4"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.8.5"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.8.5"		/**/
 #define SITELIB_STEM "/opt/perl/lib/site_perl"		/**/
 
 /* PERL_VENDORARCH:
