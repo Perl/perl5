@@ -107,7 +107,7 @@ sdbm_STORE(db, key, value, flags = DBM_REPLACE)
 int
 sdbm_DELETE(db, key)
 	SDBM_File	db
-	datum		key
+	datum_key	key
 
 int
 sdbm_EXISTS(db,key)
