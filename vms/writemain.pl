@@ -36,6 +36,7 @@ print OUT <<'EOH';
 static void
 xs_init()
 {
+    dXSUB_SYS;
 EOH
 
 if (@ARGV) {

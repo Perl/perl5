@@ -69,6 +69,7 @@ cat << 'EOP'
 static void
 xs_init()
 {
+  dXSUB_SYS;
 EOP
 
 if test X"$args" != "X" ; then
