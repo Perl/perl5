@@ -322,6 +322,7 @@ ext/POSIX/typemap		POSIX extension interface types
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
 ext/SDBM_File/SDBM_File.xs	SDBM extension external subroutines
+ext/SDBM_File/hints/dec_osf.pl	Hint for SDBM_File for named architecture
 ext/SDBM_File/sdbm/CHANGES		SDBM kit
 ext/SDBM_File/sdbm/COMPARE		SDBM kit
 ext/SDBM_File/sdbm/Makefile.PL		SDBM kit
