@@ -966,6 +966,8 @@ END_EXTERN_C
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_patleave
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
+#undef  PL_ppid
+#define PL_ppid			(*Perl_Gppid_ptr(NULL))
 #undef  PL_runops_dbg
 #define PL_runops_dbg		(*Perl_Grunops_dbg_ptr(NULL))
 #undef  PL_runops_std

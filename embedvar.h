@@ -1375,6 +1375,7 @@
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
 #define PL_op_mutex		(PL_Vars.Gop_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
+#define PL_ppid			(PL_Vars.Gppid)
 #define PL_runops_dbg		(PL_Vars.Grunops_dbg)
 #define PL_runops_std		(PL_Vars.Grunops_std)
 #define PL_sharehook		(PL_Vars.Gsharehook)
@@ -1393,6 +1394,7 @@
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gpatleave		PL_patleave
+#define PL_Gppid		PL_ppid
 #define PL_Grunops_dbg		PL_runops_dbg
 #define PL_Grunops_std		PL_runops_std
 #define PL_Gsharehook		PL_sharehook

@@ -769,6 +769,12 @@ The process number of the Perl running this script.  You should
 consider this variable read-only, although it will be altered
 across fork() calls.  (Mnemonic: same as shells.)
 
+Note for Linux users: on Linux, the C functions C<getpid()> and
+C<getppid()> return different values from different threads. In order to
+be portable, this behavior is not reflected by C<$$>, whose value remains
+consistent across threads. If you want to call the underlying C<getpid()>,
+consider using C<Inline::C> or another way to call a C library function.
+
 =item $REAL_USER_ID
 
 =item $UID
