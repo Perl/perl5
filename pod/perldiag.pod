@@ -3546,6 +3546,14 @@ a package qualifier, e.g. C<&our()>, or C<Foo::our()>.
 defined.  It was interpreted as a "" or a 0, but maybe it was a mistake.
 To suppress this warning assign a defined value to your variables.
 
+To help you figure out what was undefined, perl tells you what operation
+you used the undefined value in.  Note, however, that perl optimizes your
+program and the operation displayed in the warning may not necessarily
+appear literally in your program.  For example, C<"that $foo"> is
+usually optimized into C<"that " . $foo>, and the warning will refer to
+the C<concatenation (.)> operator, even though there is no C<.> in your
+program.
+
 =item Value of %s can be "0"; test with defined()
 
 (W misc) In a conditional expression, you used <HANDLE>, <*> (glob),
