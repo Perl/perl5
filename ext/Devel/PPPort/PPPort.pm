@@ -161,7 +161,7 @@ require DynaLoader;
 use strict;
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK $data );
 
-$VERSION = "2.011";
+$VERSION = "2.011_01";
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT =  qw();

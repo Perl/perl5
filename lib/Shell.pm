@@ -6,7 +6,7 @@ use File::Spec::Functions;
 
 our($capture_stderr, $VERSION, $AUTOLOAD);
 
-$VERSION = '0.5.1';
+$VERSION = '0.5.2';
 
 sub new { bless \my $foo, shift }
 sub DESTROY { }

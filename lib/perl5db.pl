@@ -3,7 +3,7 @@ package DB;
 use IO::Handle;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.21;
+$VERSION = 1.21_01;
 $header  = "perl5db.pl version $VERSION";
 
 # It is crucial that there is no lexicals in scope of `eval ""' down below
