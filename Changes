@@ -28,6 +28,202 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19727] By: jhi                                   on 2003/06/09  18:53:58
+        Log: Integrate:
+             [ 19723]
+             one of the Net::Ping time-dependent tests fails sporadically
+             when the response from localhost is "too quick"
+             
+             [ 19724]
+             mark 450_service.t#18 as a todo test on windows
+             
+             [ 19725]
+             In the debugger, flush stdout/stderr before the prompt is printed
+             Subject: Re: [PATCH] Perlbug #15228
+             From: Alex Vandiver <alexmv@MIT.EDU>
+             Date: 04 Jun 2003 04:50:10 -0400
+             Message-Id: <1054716610.21402.45.camel@supox>
+             
+             [ 19726]
+             Possible fix for the problems in EBCDIC from Sadahiro Tomoyuki.
+     Branch: maint-5.8/perl
+	  !> ext/Unicode/Normalize/Normalize.pm
+	  !> lib/Net/Ping/t/250_ping_hires.t lib/Net/Ping/t/450_service.t
+	  !> lib/perl5db.pl
+____________________________________________________________________________
+[ 19722] By: jhi                                   on 2003/06/09  17:52:25
+        Log: Integrate:
+             [ 19705]
+             Work in non core env.
+             
+             [ 19706]
+             Remove warnings from tests.
+             
+             [ 19707]
+             Last patch broke this slightly because INC was wrong.
+             
+             [ 19708]
+             Major (internal) change to make it much more easy to embed
+             threaded perl because we don't use our own TLS for the current
+             thread info, but instead use PL_modglobal. Should make the
+             mod_perl2 team (Hi Stas!) happy. Should also be more robust.
+             
+             [ 19709]
+             More symbol scan logic from Alan Burlison.
+             
+             [ 19710]
+             Regen Configure et al.
+             
+             [ 19712]
+             Subject: Re: forwarded you a test result
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Sun, 8 Jun 2003 11:04:43 +0900
+             Message-Id: <92344ED4-9955-11D7-8DFA-000393AE4244@dan.co.jp>
+             
+             [ 19714]
+             Subject: [PATCH] pack.t tweak for non-IEEE VMS systems
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 08 Jun 2003 16:49:43 -0500
+             Message-ID: <3EE3AF77.7060302@mac.com>
+             
+             [ 19715]
+             Support blessed shared references.
+             
+             [ 19717]
+             windows: fix memory leak in %ENV handling (shows up as a
+             leak even in the simplest fork() loop, because perl_construct()
+             now does the equivalent of %ENV assignments using mg_set())
+             
+             [ 19719]
+             Subject: [PATCH: perl@19683] fix ups for perlivp on VMS plus more symbols for utils
+             From: PPrymmer@factset.com
+             Date: Mon, 9 Jun 2003 09:57:43 -0400
+             Message-ID: <OFBA811434.A612F1C0-ON85256D40.004B5ECC-85256D40.004CB24D@factset.com>
+             
+             [ 19720]
+             fix for perlio.t failures on windows (from Dan Kogai)
+             
+             [ 19721]
+             Subject: [PATCH] ExtUtils::MakeMaker 6.10_06 (plus FAQ update)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 7 Jun 2003 01:16:32 -0700
+             Message-ID: <20030607081632.GA16228@windhund.schwern.org>
+             
+             (and regen Configure et al)
+     Branch: maint-5.8/perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+	  !> (integrate 26 files)
+____________________________________________________________________________
+[ 19704] By: jhi                                   on 2003/06/07  05:24:27
+        Log: Integrate:
+             [ 19685]
+             Align the 'graph' property definition with the proposed
+             Unicode UTS #18 update (v7).
+             
+             [ 19686]
+             On closer reading the proposed UTS#18 update required
+             even more changes.
+             
+             [ 19687]
+             Subject: Re: [MacOS X] consider useshrplib='false' by default
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 4 Jun 2003 11:33:29 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.53.0306041128350.15343@maxwell.phys.lafayette.edu>
+             
+             [ 19688]
+             Prevent a potential null pointer dereference.
+             Noticed by Ryan Koga <rkoga@caida.org> in
+             Message-ID: <Pine.BSF.4.44.0306031659090.1489-100000@login.caida.org>
+             
+             [ 19689]
+             Upgrade to Time::HiRes 1.48.
+             
+             [ 19690]
+             z/OS threads tweak from Brian De Pradine.
+             
+             [ 19691]
+             Even more getspecific patches from Brian De Pradine;
+             macrofy the construct.
+             
+             [ 19692]
+             z/OS makedepend fix from Peter Prymmer;
+             still needed as reported by Brian De Pradine.
+             
+             [ 19693]
+             SKIP label was missing.
+             
+             [ 19694]
+             Subject: [PATCH] RE: maint @ 19683
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Thu, 5 Jun 2003 17:16:58 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D904046564@hotel.npl.co.uk>
+             
+             (skipped the MIME::Base64 part, leaving that to Gisle)
+             
+             [ 19695]
+             Subject: [PATCH] Re: SPUG:-s option doesn't always work!
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Wed, 04 Jun 2003 00:08:32 -0700
+             Message-ID: <wrZ3+gzkg2iX092yn@efn.org>
+             
+             [ 19696]
+             Perl *is* 100% 64bit compliant on HP-UX 11.00 and up (as long
+             as the compiler supports it)
+             
+             [ 19697]
+             Oops, Joe's edits had been undone by #19682.
+             
+             [ 19698]
+             Clarify that => doesn't quote compound identifiers.
+             
+             [ 19699]
+             Subject: [patch] L<perlguts/"API LISTING"> is now L<perlapi>
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 05 Jun 2003 10:10:36 +1000
+             Message-ID: <3EDE8A7C.2080302@stason.org>
+             
+             Subject: [patch] perlguts authors dup
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 05 Jun 2003 10:14:12 +1000
+             Message-ID: <3EDE8B54.6090808@stason.org>
+             
+             [ 19700]
+             Minor grammatical nit.
+             
+             [ 19701]
+             Complement to change #19698 :
+             add also this information (=> and curly braces doesn't
+             quote compound identifiers) to the strict manpage.
+             As an experiment in documentation, add a "HISTORY" section
+             to the strict manpage.
+             
+             [ 19702]
+             Upgrade to Time::Local 1.06, by Dave Rolsky
+             
+             [ 19703]
+             Subject: [PATCH] ExtUtils::MakeMaker 6.10_04 -> 6.10_05
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 6 Jun 2003 18:41:45 -0700
+             Message-ID: <20030607014145.GB12031@windhund.schwern.org>
+     Branch: maint-5.8/perl
+	  !> (integrate 42 files)
+____________________________________________________________________________
+[ 19697] By: jhi                                   on 2003/06/06  13:22:52
+        Log: Oops, Joe's edits had been undone by #19682.
+     Branch: maint-5.8/perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 19684] By: jhi                                   on 2003/06/04  05:40:24
+        Log: Change entries from the wrong branches.
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 19683] By: jhi                                   on 2003/06/04  05:28:27
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19682] By: jhi                                   on 2003/06/04  05:22:46
         Log: Integrate:
              [ 19654]
