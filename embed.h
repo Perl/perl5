@@ -1177,6 +1177,7 @@
 #define ck_spair		Perl_ck_spair
 #define ck_split		Perl_ck_split
 #define ck_subr			Perl_ck_subr
+#define ck_substr		Perl_ck_substr
 #define ck_svconst		Perl_ck_svconst
 #define ck_trunc		Perl_ck_trunc
 #define pp_aassign		Perl_pp_aassign
@@ -2628,6 +2629,7 @@
 #define ck_spair(a)		Perl_ck_spair(aTHX_ a)
 #define ck_split(a)		Perl_ck_split(aTHX_ a)
 #define ck_subr(a)		Perl_ck_subr(aTHX_ a)
+#define ck_substr(a)		Perl_ck_substr(aTHX_ a)
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
 #define pp_aassign()		Perl_pp_aassign(aTHX)
@@ -5098,6 +5100,8 @@
 #define ck_split		Perl_ck_split
 #define Perl_ck_subr		CPerlObj::Perl_ck_subr
 #define ck_subr			Perl_ck_subr
+#define Perl_ck_substr		CPerlObj::Perl_ck_substr
+#define ck_substr		Perl_ck_substr
 #define Perl_ck_svconst		CPerlObj::Perl_ck_svconst
 #define ck_svconst		Perl_ck_svconst
 #define Perl_ck_trunc		CPerlObj::Perl_ck_trunc
