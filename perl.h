@@ -4362,6 +4362,13 @@ typedef struct am_table_short AMTS;
 	Zero(my_cxtp, 1, my_cxt_t);					\
 	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
 
+/* Clones the per-interpreter data. */
+#define MY_CXT_CLONE \
+	dMY_CXT_SV;							\
+	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
+	Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
+	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */
 #define MY_CXT		(*my_cxtp)
@@ -4381,6 +4388,7 @@ typedef struct am_table_short AMTS;
 #define dMY_CXT_SV	dNOOP
 #define dMY_CXT		dNOOP
 #define MY_CXT_INIT	NOOP
+#define MY_CXT_CLONE	NOOP
 #define MY_CXT		my_cxt
 
 #define pMY_CXT		void
