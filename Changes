@@ -103,6 +103,36 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6937] By: jhi                                   on 2000/08/31  04:26:23
+        Log: sscanf() may be the only way to read long doubles from strings.
+     Branch: metaconfig/U/perl
+	   ! longdblfio.U
+     Branch: perl
+	   ! Configure config_h.SH perl.h util.c
+____________________________________________________________________________
+[  6936] By: jhi                                   on 2000/08/31  04:18:19
+        Log: The #6929 was too skimpy.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  6935] By: jhi                                   on 2000/08/31  02:47:07
+        Log: Subject: Re: typos in pods
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Wed, 30 Aug 2000 19:25:34 -0700
+             Message-ID: <eIcr5gzkg25X092yn@efn.org>
+     Branch: perl
+	   ! lib/CPAN.pm lib/Pod/Checker.pm pod/perlmodlib.PL
+____________________________________________________________________________
+[  6934] By: jhi                                   on 2000/08/31  02:42:55
+        Log: Missed one Unicode file.
+     Branch: perl
+	   + lib/unicode/UCDFF301.html
+____________________________________________________________________________
+[  6933] By: jhi                                   on 2000/08/30  23:42:27
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6932] By: jhi                                   on 2000/08/30  23:40:07
         Log: Mention UNTIE in perldelta.  Still needs documenting
              in perltie et alia.
