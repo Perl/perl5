@@ -1376,7 +1376,7 @@ SV **sp;
     }
     else
     {
-	I32 i = SvIV(astr);
+	IV i = SvIV(astr);
 	a = (char *)i;		/* ouch */
     }
     SETERRNO(0,0);

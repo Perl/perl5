@@ -383,16 +383,13 @@ morecore(bucket)
 #ifndef atarist /* on the atari we dont have to worry about this */
   	op = (union overhead *)sbrk(0);
 #  ifndef I286
-#    ifdef PACK_MALLOC
-  	if ((u_int)op & 0x7ff)
-  		(void)sbrk(slack = 2048 - ((u_int)op & 0x7ff));
-#    else
-  	if ((u_int)op & 0x3ff)
-  		(void)sbrk(slack = 1024 - ((u_int)op & 0x3ff));
-#    endif
+  	if ((UV)op & (0x7FF >> CHUNK_SHIFT)) {
+	    slack = (0x800 >> CHUNK_SHIFT) - ((UV)op & (0x7FF >> CHUNK_SHIFT));
+	    (void)sbrk(slack);
 #    if defined(DEBUGGING_MSTATS)
-	sbrk_slack += slack;
+	    sbrk_slack += slack;
 #    endif
+	}
 #  else
 	/* The sbrk(0) call on the I286 always returns the next segment */
 #  endif
@@ -427,11 +424,11 @@ morecore(bucket)
 	 */
 #ifndef I286
 #  ifdef PACK_MALLOC
-	if ((u_int)op & 0x7ff)
+	if ((UV)op & 0x7FF)
 		croak("panic: Off-page sbrk");
 #  endif
-  	if ((u_int)op & 7) {
-  		op = (union overhead *)(((MEM_SIZE)op + 8) &~ 7);
+  	if ((UV)op & 7) {
+  		op = (union overhead *)(((UV)op + 8) & ~7);
   		nblks--;
   	}
 #else

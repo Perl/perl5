@@ -1093,7 +1093,8 @@ char *prog;
 		sayNO;
 	    break;
 	default:
-	    PerlIO_printf(PerlIO_stderr(), "%x %d\n",(unsigned)scan,scan[1]);
+	    PerlIO_printf(PerlIO_stderr(), "%lx %d\n",
+			  (unsigned long)scan, scan[1]);
 	    FAIL("regexp memory corruption");
 	}
 	scan = next;
