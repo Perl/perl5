@@ -32,6 +32,425 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8325] By: jhi                                   on 2001/01/05  00:53:18
+        Log: Subject: Re: [patch bug 20010103.019] Re: perl@8269: failure to build on NT 4.0.1381 with MSVC (fwd)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 4 Jan 2001 14:20:15 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101041406420.492782-100000@aspara.forte.com>
+             
+             plus a couple more tailing whitespace removals.
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[  8324] By: jhi                                   on 2001/01/05  00:47:39
+        Log: Add some Unicode chop() tests.
+     Branch: perl
+	   ! t/op/chop.t
+____________________________________________________________________________
+[  8323] By: jhi                                   on 2001/01/05  00:47:23
+        Log: Unify UTF-8 malformedness handling.
+     Branch: perl
+	   ! doop.c pp.c sv.c toke.c utf8.c utf8.h
+____________________________________________________________________________
+[  8322] By: jhi                                   on 2001/01/04  22:21:54
+        Log: The new $issymlink was unknown to Mksymlinks.
+     Branch: metaconfig/U/perl
+	   ! Mksymlinks.U issymlink.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  8321] By: jhi                                   on 2001/01/04  21:51:05
+        Log: The test didn't work under the core test framework.
+     Branch: perl
+	   ! t/lib/st-lock.t
+____________________________________________________________________________
+[  8320] By: jhi                                   on 2001/01/04  21:14:22
+        Log: DB3 NDBM/ODBM emulation tweaks from Stanislav Brabec <utx@penguin.cz>.
+     Branch: perl
+	   ! INSTALL ext/NDBM_File/NDBM_File.xs ext/ODBM_File/ODBM_File.xs
+____________________________________________________________________________
+[  8319] By: jhi                                   on 2001/01/04  20:46:17
+        Log: Typo in #8312 when manually appying a problematic patch fragment.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  8318] By: jhi                                   on 2001/01/04  20:43:01
+        Log: The $sh_c didn't fly.
+     Branch: metaconfig
+	   ! U/compline/ccflags.U U/compline/d_keepsig.U U/modified/Head.U
+	   ! U/modified/Loc.U U/modified/myhostname.U
+	   ! U/modified/spitshell.U
+     Branch: metaconfig/U/perl
+	   ! issymlink.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  8317] By: jhi                                   on 2001/01/04  19:58:01
+        Log: AIX builtin test -h is broken, changes based on
+             
+             Subject: [PATCH] 8297. Symlink stuff breaks on AIX 4 bsh
+             Date: Tue, 02 Jan 2001 11:24:39 +0100
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Message-Id: <20010102093747.A6F7.H.M.BRAND@hccnet.nl>
+     Branch: metaconfig
+	   + U/modified/spitshell.U
+	   ! U/compline/ccflags.U U/compline/d_keepsig.U U/modified/Head.U
+	   ! U/modified/Loc.U U/modified/myhostname.U
+     Branch: metaconfig/U/perl
+	   ! Mksymlinks.U issymlink.U
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  8316] By: jhi                                   on 2001/01/04  19:02:22
+        Log: Subject: [PATCH] Re: New attempt on hints/solaris_2.sh
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Message-ID: <Pine.SOL.4.10.10101031518320.28840-100000@maxwell.phys.lafayette.edu>
+             Date: Wed, 3 Jan 2001 15:36:06 -0500 (EST)
+             
+             Beware of GNU ld.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  8315] By: jhi                                   on 2001/01/04  18:56:48
+        Log: From: Lupe Christoph <lupe@lupe-christoph.de>
+             Subject: Re: [PATCH 5.7.1/Configure] failure to set src='.'
+             Date: Wed, 3 Jan 2001 07:58:51 +0100
+             Message-ID: <20010103075851.P4594@alanya.lupe-christoph.de>
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  8314] By: jhi                                   on 2001/01/04  18:54:07
+        Log: Subject: Re: [PATCH @8269] Continue blocks and B::Deparse
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Wed,  3 Jan 2001 13:48:04 -0800 (PST)
+             Message-ID: <14931.40265.379608.910008@soda.csua.berkeley.edu>
+             
+             Doc tweak on #8313.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  8313] By: jhi                                   on 2001/01/04  18:52:27
+        Log: Subject: [PATCH @8269] Continue blocks and B::Deparse
+             Date: Wed,  3 Jan 2001 13:31:53 -0800 (PST)
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Message-ID: <14931.37732.62835.279605@soda.csua.berkeley.edu>
+             
+             Make the peephole optimizer to bypass more null ops and
+             and rewrite the deparse handling of continue blocks.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm op.c op.h t/lib/b.t
+____________________________________________________________________________
+[  8312] By: jhi                                   on 2001/01/04  18:47:39
+        Log: Upgrade to Storable 1.0.7, from Raphael Manfredi.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/Makefile.PL
+	   ! ext/Storable/Storable.pm ext/Storable/Storable.xs
+	   ! t/lib/st-lock.t
+____________________________________________________________________________
+[  8311] By: jhi                                   on 2001/01/04  18:36:08
+        Log: Add a new MakeMaker variable PM_FILTER that defines a Unix
+             filter to be run on each .pm during the pm_to_blib() phase,
+             a fixed version of
+             
+             Subject: PATCH (blead 8269) ExtUtils::MakeMaker
+             From: Raphael Manfredi <Raphael_Manfredi@pobox.com>
+             Date: Wed, 03 Jan 2001 22:01:30 +0100
+             Message-ID: <5296.978555690@nice.ram.loc>
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MM_Win32.pm
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  8310] By: jhi                                   on 2001/01/04  18:32:54
+        Log: Subject: [PATCH 5.[67].1]; as Re: [PATCH 5.6.1-TRIAL1 and @8223]; was Re: Perlbug 20000322.006 status update
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Tue, 2 Jan 2001 15:35:03 GMT
+             Message-Id: <200101021535.PAA15161@tempest.npl.co.uk>
+     Branch: perl
+	   ! README.amiga lib/CPAN.pm lib/Win32.pod pod/perl56delta.pod
+	   ! pod/perlrequick.pod
+____________________________________________________________________________
+[  8309] By: jhi                                   on 2001/01/04  18:29:07
+        Log: Subject: Re: [patch] static-ize XS()
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Mon, 1 Jan 2001 15:26:01 -0800 (PST)
+             Message-ID: <Pine.LNX.4.10.10101011523560.3379-100000@mojo.covalent.net>
+             
+             Provide prototypes for the XS functions.
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[  8308] By: jhi                                   on 2001/01/04  18:27:44
+        Log: Subject: [patch] typemap =~ s/croak/Perl_croak/
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Mon, 1 Jan 2001 11:41:57 -0800 (PST)
+             Message-ID: <Pine.LNX.4.10.10101011139570.3379-100000@mojo.covalent.net>
+     Branch: perl
+	   ! lib/ExtUtils/typemap
+____________________________________________________________________________
+[  8307] By: jhi                                   on 2001/01/04  18:25:25
+        Log: Subject: Re: [patch] MM_Unix cpprun shortcut
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Wed, 3 Jan 2001 20:09:57 -0800 (PST)
+             Message-ID: <Pine.LNX.4.10.10101032009330.280-100000@mojo.covalent.net>
+             
+             Add a .c.i: MakeMaker make rule to create cpreprocessed outputs.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  8306] By: jhi                                   on 2001/01/04  18:23:00
+        Log: Subject: [PATCH perl@8269] Corrections for Perl_yylex_r (used by a reentrant parser as Bison)
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Thu, 4 Jan 2001 12:47:10 +0100 
+             Message-ID: <5930DC161690D21196670090271575470370111A@madt009a.siemens.es>
+             
+             The toke.c part only, patching embed.h and proto.h is futile.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8305] By: jhi                                   on 2001/01/04  18:05:51
+        Log: Subject: [PATCH perl@8269] scanning two hex-constants fails on EBCDIC environment (script length.t)
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Thu, 4 Jan 2001 17:50:12 +0100 
+             Message-ID: <5930DC161690D211966700902715754703738AA6@madt009a.siemens.es>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8304] By: jhi                                   on 2001/01/04  18:03:26
+        Log: Subject: [PATCH perl@8269]
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Thu, 4 Jan 2001 12:53:39 +0100 
+             Message-ID: <5930DC161690D211966700902715754703701130@madt009a.siemens.es>
+             
+             If running byacc write-enable also perly.h.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  8303] By: jhi                                   on 2001/01/04  15:40:49
+        Log: Rewrite pp_concat() in terms of sv_catsv().
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  8302] By: nick                                  on 2001/01/03  22:43:22
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> ext/Encode/Encode.xs sv.c utf8.c
+____________________________________________________________________________
+[  8301] By: jhi                                   on 2001/01/02  23:40:26
+        Log: Variable naming tweak.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8300] By: jhi                                   on 2001/01/02  23:40:02
+        Log: Use the UTF8_XXX macros in is_utf8_char(), a performance nit
+             in is_utf8_string().
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  8299] By: jhi                                   on 2001/01/02  22:14:40
+        Log: Integrate perlio.
+     Branch: perl
+	  !> pp.c pp_hot.c win32/Makefile
+____________________________________________________________________________
+[  8298] By: nick                                  on 2001/01/02  22:03:06
+        Log: Turn SvUTF8 off if not required in pp_chr and pp_stringify.
+     Branch: perlio
+	   ! pp.c pp_hot.c
+____________________________________________________________________________
+[  8297] By: jhi                                   on 2001/01/02  04:26:28
+        Log: Signedness nit.
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[  8296] By: nick                                  on 2001/01/01  23:49:36
+        Log: Add Encode and correct Filter/Util/Call in nmake Makefile
+     Branch: perlio
+	   ! win32/Makefile
+____________________________________________________________________________
+[  8295] By: jhi                                   on 2001/01/01  23:05:48
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs pp_hot.c
+	  !> t/lib/encode.t
+____________________________________________________________________________
+[  8294] By: nick                                  on 2001/01/01  22:48:34
+        Log: Integrate mainline
+     Branch: perlio
+	   ! pp_hot.c t/lib/encode.t
+	  !> (integrate 65 files)
+____________________________________________________________________________
+[  8293] By: nick                                  on 2001/01/01  21:58:50
+        Log: More rigor in UTF-8-ness of Encode's toUnicode
+             XS export some of the utf8 internal functions.
+             Test some of the functions.
+             Fix pp_concat() bug shown by said tests.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs pp_hot.c
+	   ! t/lib/encode.t
+____________________________________________________________________________
+[  8292] By: jhi                                   on 2001/01/01  18:11:44
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs ext/Encode/compile
+	  !> ext/Encode/encengine.c ext/Encode/encode.h
+____________________________________________________________________________
+[  8291] By: jhi                                   on 2001/01/01  18:10:58
+        Log: Podify README.mpeix (a new version from the web),
+             add a dummy NAME to Carp::Heavy, regen toc.
+     Branch: perl
+	   ! README.mpeix lib/Carp/Heavy.pm pod/buildtoc.PL pod/perl.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  8290] By: nick                                  on 2001/01/01  17:43:47
+        Log: Loose the "Loading..." warning.
+             Another bug in fallback support
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/encengine.c
+____________________________________________________________________________
+[  8289] By: jhi                                   on 2001/01/01  00:01:57
+        Log: Bump up Larry's copyright.
+     Branch: perl
+	   ! EXTERN.h INTERN.h README av.c av.h cop.h cv.h deb.c doio.c
+	   ! doop.c dump.c ext/DynaLoader/dl_dld.xs form.h gv.c gv.h
+	   ! handy.h hv.c hv.h mg.c mg.h op.c op.h perl.c perl.h perly.y
+	   ! pp.c pp.h pp_ctl.c pp_hot.c pp_sys.c regcomp.c regexec.c run.c
+	   ! scope.c sv.c sv.h toke.c utf8.c utf8.h util.c util.h
+	   ! x2p/EXTERN.h x2p/INTERN.h x2p/a2p.c x2p/a2p.h x2p/a2p.y
+	   ! x2p/a2py.c x2p/hash.c x2p/hash.h x2p/proto.h x2p/str.c
+	   ! x2p/str.h x2p/util.c x2p/util.h x2p/walk.c
+____________________________________________________________________________
+[  8288] By: nick                                  on 2000/12/31  21:27:53
+        Log: Fix .ucm reading - forgot a chr()
+             Start of .ucm write (for .enc to .ucm)
+     Branch: perlio
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[  8287] By: jhi                                   on 2000/12/31  18:15:56
+        Log: Comment away a diagnostic message as noted by Craig A. Berry
+             (the unexpected message was confusing testing)
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  8286] By: jhi                                   on 2000/12/31  18:14:51
+        Log: Subject: [PATCH perl@8269] ext/Encode/Makefile.PL line shortening
+             Date: Sun, 31 Dec 2000 11:17:37 -0600
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Message-Id: <5.0.2.1.0.20001230195844.025636c0@exchi01>
+     Branch: perl
+	   ! ext/Encode/Makefile.PL
+____________________________________________________________________________
+[  8285] By: nick                                  on 2000/12/31  18:11:54
+        Log: Start of support of ICU-style .ucm files:
+             - teach compile how to read a .ucm file
+             - first guess at how to represent fallbacks in "tries".
+             - use fallbacks if check == 0
+             - new return code to indicate we used one.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs ext/Encode/compile
+	   ! ext/Encode/encengine.c ext/Encode/encode.h
+____________________________________________________________________________
+[  8284] By: jhi                                   on 2000/12/31  18:04:41
+        Log: Pacify picky VMS compiler.
+             
+             Subject: perl@8269, whiny Compaq C compiler, unsigned expressions
+             From: "Craig A. Berry" <craig.berry@psinetcs.com>
+             Date: Sat, 30 Dec 2000 18:10:02 -0600
+             Message-Id: <200012310010.CAA09719@tiku.hut.fi>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8283] By: jhi                                   on 2000/12/31  16:11:47
+        Log: Wrong alarm: cygwin's getpwuid() is just fine (from Gerrit P. Haase)
+     Branch: perl
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[  8282] By: jhi                                   on 2000/12/31  15:26:11
+        Log: Integrate perlio.
+     Branch: perl
+	  !> makedef.pl opcode.pl os2/os2.c perlio.c
+____________________________________________________________________________
+[  8281] By: nick                                  on 2000/12/31  10:06:15
+        Log: Tweak perlio.c so that makedef.pl-exported perlsio_binmode()
+             is available to be exported
+     Branch: perlio
+	   ! makedef.pl perlio.c
+____________________________________________________________________________
+[  8280] By: nick                                  on 2000/12/31  09:41:26
+        Log: Ilya's OS2 patch (testing for damage on Win32)
+     Branch: perlio
+	   ! makedef.pl opcode.pl os2/os2.c
+____________________________________________________________________________
+[  8279] By: jhi                                   on 2000/12/30  21:52:07
+        Log: Test nits.
+     Branch: perl
+	   ! t/lib/syslfs.t t/op/lfs.t
+____________________________________________________________________________
+[  8278] By: jhi                                   on 2000/12/30  21:47:49
+        Log: Subject: Re: [ID 20001229.001] Not OK: perl v5.7.0 +DEVEL8221 on i686-linux 2.4.0-test13pre4-ac2 -2 (UNINSTALLED)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 30 Dec 2000 22:35:37 +0100
+             Message-ID: <m3vgs1a8ye.fsf@ak-71.mind.de>
+             
+             The 32-bit wraparound test wasn't quite right.
+     Branch: perl
+	   ! t/lib/syslfs.t t/op/lfs.t
+____________________________________________________________________________
+[  8277] By: jhi                                   on 2000/12/30  21:33:44
+        Log: Subject: [PATCH] open() example in perlfunc.pod 
+             From: Karsten Sperling <s_sperli@ira.uka.de>
+             Date: Sat, 30 Dec 2000 22:27:09 +0100
+             Message-ID: <"iraun1.ira.0090801:001230.213049"@ira.uka.de>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  8276] By: jhi                                   on 2000/12/30  20:32:40
+        Log: Not quite that many tests yet.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  8275] By: jhi                                   on 2000/12/30  20:26:58
+        Log: Integrate perlio.
+     Branch: perl
+	  !> toke.c
+____________________________________________________________________________
+[  8274] By: jhi                                   on 2000/12/30  20:24:56
+        Log: Signedness nit.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  8273] By: jhi                                   on 2000/12/30  20:15:46
+        Log: Add a test case for 20000731.001 which was fixed by the #8267.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  8272] By: nick                                  on 2000/12/30  19:47:51
+        Log: Tweak for MULTIPLICITY/USE_PERLIO
+     Branch: perlio
+	   ! toke.c
+____________________________________________________________________________
+[  8271] By: nick                                  on 2000/12/30  19:46:45
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/unicode/distinct.pm
+	  !> Changes MANIFEST doop.c embed.h embed.pl mg.c op.c op.h
+	  !> patchlevel.h perl.h pod/perlapi.pod pp.c pp_ctl.c pp_hot.c
+	  !> proto.h regcomp.c regcomp.h regexec.c sv.c t/op/split.t utf8.c
+____________________________________________________________________________
+[  8270] By: jhi                                   on 2000/12/30  19:39:50
+        Log: Subject: RE: perl@8269
+             From: "Richard Soderberg" <rs@crystalflame.net>
+             Date: Sat, 30 Dec 2000 11:36:27 -0800
+             Message-ID: <NAEKLNAAHLMBPMPNBMLEIEAKCKAA.rs@crystalflame.net>
+             
+             A missing aTHX_.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8269] By: jhi                                   on 2000/12/30  18:55:48
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8268] By: jhi                                   on 2000/12/30  17:18:40
         Log: Add a test for Unicode split //.  The #8267 was the cure.
      Branch: perl
