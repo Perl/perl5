@@ -167,8 +167,12 @@ sub import {
 }
 
 sub unimport {
-  my $callpkg = caller;
-  eval "package $callpkg; sub AUTOLOAD;";
+    my $callpkg = caller;
+
+    no strict 'refs';
+    my $symname = $callpkg . '::AUTOLOAD';
+    undef *{ $symname } if \&{ $symname } == \&AUTOLOAD;
+    *{ $symname } = \&{ $symname };
 }
 
 1;
