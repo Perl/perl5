@@ -1,0 +1,25 @@
+#!./perl
+
+# $Header: io.print,v 1.0 87/12/18 13:12:55 root Exp $
+
+print "1..11\n";
+
+print stdout "ok 1\n";
+print "ok 2\n","ok 3\n","ok 4\n","ok 5\n";
+
+open(foo,">-");
+print foo "ok 6\n";
+
+printf "ok %d\n",7;
+printf("ok %d\n",8);
+
+@a = ("ok %d%c",9,ord("\n"));
+printf @a;
+
+$a[1] = 10;
+printf stdout @a;
+
+$, = ' ';
+$\ = "\n";
+
+print "ok","11";

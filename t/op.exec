@@ -1,0 +1,12 @@
+#!./perl
+
+# $Header: op.exec,v 1.0 87/12/18 13:13:26 root Exp $
+
+$| = 1;				# flush stdout
+print "1..4\n";
+
+system "echo ok \\1";		# shell interpreted
+system "echo ok 2";		# split and directly called
+system "echo", "ok", "3";	# directly called
+
+exec "echo","ok","4";

@@ -1,0 +1,83 @@
+
+			Perl Kit, Version 1.0
+
+		    Copyright (c) 1987, Larry Wall
+
+You may copy the perl kit in whole or in part as long as you don't try to
+make money off it, or pretend that you wrote it.
+--------------------------------------------------------------------------
+
+Perl is a language that combines some of the features of C, sed, awk and shell.
+See the manual page for more hype.
+
+Perl will probably not run on machines with a small address space.
+
+Please read all the directions below before you proceed any further, and
+then follow them carefully.  Failure to do so may void your warranty. :-)
+
+After you have unpacked your kit, you should have all the files listed
+in MANIFEST.
+
+Installation
+
+1)  Run Configure.  This will figure out various things about your system.
+    Some things Configure will figure out for itself, other things it will
+    ask you about.  It will then proceed to make config.h, config.sh, and
+    Makefile.
+
+    You might possibly have to trim # comments from the front of Configure
+    if your sh doesn't handle them, but all other # comments will be taken
+    care of.
+
+    (If you don't have sh, you'll have to copy the sample file config.H to
+    config.h and edit the config.h to reflect your system's peculiarities.)
+
+2)  Glance through config.h to make sure system dependencies are correct.
+    Most of them should have been taken care of by running the Configure script.
+
+    If you have any additional changes to make to the C definitions, they
+    can be done in the Makefile, or in config.h.  Bear in mind that they will
+    get undone next time you run Configure.
+
+3)  make depend
+
+    This will look for all the includes and modify Makefile accordingly.
+    Configure will offer to do this for you.
+
+4)  make
+
+    This will attempt to make perl in the current directory.
+
+5)  make test
+
+    This will run the regression tests on the perl you just made.
+    If it doesn't say "All tests successful" then something went wrong.
+    See the README in the t subdirectory.
+
+6)  make install
+
+    This will put perl into a public directory (normally /usr/local/bin).
+    It will also try to put the man pages in a reasonable place.  It will not
+    nroff the man page, however.  You may need to be root to do this.  If
+    you are not root, you must own the directories in question and you should
+    ignore any messages about chown not working.
+
+7)  Read the manual entry before running perl.
+
+8)  Go down to the x2p directory and do a "make depend, a "make" and a
+    "make install" to create the awk to perl and sed to perl translators.
+
+9)  IMPORTANT!  Help save the world!  Communicate any problems and suggested
+    patches to me, lwall@jpl-devvax.jpl.nasa.gov (Larry Wall), so we can
+    keep the world in sync.  If you have a problem, there's someone else
+    out there who either has had or will have the same problem.
+
+    If possible, send in patches such that the patch program will apply them.
+    Context diffs are the best, then normal diffs.  Don't send ed scripts--
+    I've probably changed my copy since the version you have.
+
+    Watch for perl patches in comp.sources.bugs.  Patches will generally be
+    in a form usable by the patch program.  If you are just now bringing up
+    perl and aren't sure how many patches there are, write to me and I'll
+    send any you don't have.  Your current patch level is shown in patchlevel.h.
+

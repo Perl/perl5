@@ -1,0 +1,68 @@
+#!./perl
+
+# $Header: TEST,v 1.0 87/12/18 13:11:34 root Exp $
+
+# This is written in a peculiar style, since we're trying to avoid
+# most of the constructs we'll be testing for.
+
+if ($ARGV[0] eq '-v') {
+    $verbose = 1;
+    shift;
+}
+
+if ($ARGV[0] eq '') {
+    @ARGV = split(/[ \n]/,`echo base.* comp.* cmd.* io.* op.*`);
+}
+
+$bad = 0;
+while ($test = shift) {
+    print "$test...";
+    open(results,"$test|") || (print "can't run.\n");
+    $ok = 0;
+    while (<results>) {
+	if ($verbose) {
+	    print $_;
+	}
+	unless (/^#/) {
+	    if (/^1\.\.([0-9]+)/) {
+		$max = $1;
+		$next = 1;
+		$ok = 1;
+	    } else {
+		if (/^ok (.*)/ && $1 == $next) {
+		    $next = $next + 1;
+		} else {
+		    $ok = 0;
+		}
+	    }
+	}
+    }
+    $next = $next - 1;
+    if ($ok && $next == $max) {
+	print "ok\n";
+    } else {
+	$next += 1;
+	print "FAILED on test $next\n";
+	$bad = $bad + 1;
+	$_ = $test;
+	if (/^base/) {
+	    die "Failed a basic test--cannot continue.";
+	}
+    }
+}
+
+if ($bad == 0) {
+    if ($ok) {
+	print "All tests successful.\n";
+    } else {
+	die "FAILED--no tests were run for some reason.";
+    }
+} else {
+    if ($bad == 1) {
+	die "Failed 1 test.";
+    } else {
+	die "Failed $bad tests.";
+    }
+}
+($user,$sys,$cuser,$csys) = times;
+print sprintf("u=%g  s=%g  cu=%g  cs=%g\n",$user,$sys,$cuser,$csys);

@@ -1,0 +1,38 @@
+#!./perl
+
+# $Header: op.subst,v 1.0 87/12/18 13:14:30 root Exp $
+
+print "1..7\n";
+
+$x = 'foo';
+$_ = "x";
+s/x/\$x/;
+print "#1\t:$_: eq :\$x:\n";
+if ($_ eq '$x') {print "ok 1\n";} else {print "not ok 1\n";}
+
+$_ = "x";
+s/x/$x/;
+print "#2\t:$_: eq :foo:\n";
+if ($_ eq 'foo') {print "ok 2\n";} else {print "not ok 2\n";}
+
+$_ = "x";
+s/x/\$x $x/;
+print "#3\t:$_: eq :\$x foo:\n";
+if ($_ eq '$x foo') {print "ok 3\n";} else {print "not ok 3\n";}
+
+$a = 'abcdef';
+$b = 'cd';
+$a =~ s'(b${b}e)'\n$1';
+print "#4\t:$1: eq :bcde:\n";
+print "#4\t:$a: eq :a\\n\$1f:\n";
+if ($1 eq 'bcde' && $a eq 'a\n$1f') {print "ok 4\n";} else {print "not ok 4\n";}
+
+$a = 'abacada';
+if (($a =~ s/a/x/g) == 4 && $a eq 'xbxcxdx')
+    {print "ok 5\n";} else {print "not ok 5\n";}
+
+if (($a =~ s/a/y/g) == 0 && $a eq 'xbxcxdx')
+    {print "ok 6\n";} else {print "not ok 6\n";}
+
+if (($a =~ s/b/y/g) == 1 && $a eq 'xyxcxdx')
+    {print "ok 7\n";} else {print "not ok 7\n";}

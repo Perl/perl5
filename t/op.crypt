@@ -1,0 +1,12 @@
+#!./perl
+
+# $Header: op.crypt,v 1.0 87/12/18 13:13:17 root Exp $
+
+print "1..2\n";
+
+# this evaluates entirely at compile time!
+if (crypt('uh','oh') eq 'ohPnjpYtoi1NU') {print "ok 1\n";} else {print "not ok 1\n";}
+
+# this doesn't.
+$uh = 'uh';
+if (crypt($uh,'oh') eq 'ohPnjpYtoi1NU') {print "ok 2\n";} else {print "not ok 2\n";}

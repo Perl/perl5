@@ -1,0 +1,29 @@
+#!./perl
+
+# $Header: op.stat,v 1.0 87/12/18 13:14:27 root Exp $
+
+print "1..4\n";
+
+open(foo, ">Op.stat.tmp");
+
+($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+    $blksize,$blocks) = stat(foo);
+if ($nlink == 1) {print "ok 1\n";} else {print "not ok 1\n";}
+if ($mtime && $mtime == $ctime) {print "ok 2\n";} else {print "not ok 2\n";}
+
+print foo "Now is the time for all good men to come to.\n";
+close(foo);
+
+$base = time;
+while (time == $base) {}
+
+`rm -f Op.stat.tmp2; ln Op.stat.tmp Op.stat.tmp2; chmod 644 Op.stat.tmp`;
+
+($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+    $blksize,$blocks) = stat('Op.stat.tmp');
+
+if ($nlink == 2) {print "ok 3\n";} else {print "not ok 3\n";}
+if ($mtime && $mtime != $ctime) {print "ok 4\n";} else {print "not ok 4\n";}
+print "#4	:$mtime: != :$ctime:\n";
+
+`rm -f Op.stat.tmp Op.stat.tmp2`;

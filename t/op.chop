@@ -1,0 +1,21 @@
+#!./perl
+
+# $Header: op.chop,v 1.0 87/12/18 13:13:11 root Exp $
+
+print "1..2\n";
+
+# optimized
+
+$_ = 'abc';
+$c = do foo();
+if ($c . $_ eq 'cab') {print "ok 1\n";} else {print "not ok 1\n";}
+
+# unoptimized
+
+$_ = 'abc';
+$c = chop($_);
+if ($c . $_ eq 'cab') {print "ok 2\n";} else {print "not ok 2\n";}
+
+sub foo {
+    chop;
+}

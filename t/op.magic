@@ -1,0 +1,27 @@
+#!./perl
+
+# $Header: op.magic,v 1.0 87/12/18 13:13:54 root Exp $
+
+print "1..4\n";
+
+$| = 1;		# command buffering
+
+$ENV{'foo'} = 'hi there';
+if (`echo \$foo` eq "hi there\n") {print "ok 1\n";} else {print "not ok 1\n";}
+
+$! = 0;
+open(foo,'ajslkdfpqjsjfkslkjdflksd');
+if ($! == 2) {print "ok 2\n";} else {print "not ok 2\n";}
+
+$SIG{'INT'} = 'ok3';
+kill 2,$$;
+$SIG{'INT'} = 'IGNORE';
+kill 2,$$;
+print "ok 4\n";
+$SIG{'INT'} = 'DEFAULT';
+kill 2,$$;
+print "not ok\n";
+
+sub ok3 {
+    print "ok 3\n" if pop(@_) eq 'INT';
+}

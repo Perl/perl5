@@ -1,0 +1,1007 @@
+''' Beginning of part 2
+''' $Header: perl.man.2,v 1.0 87/12/18 16:18:41 root Exp $
+'''
+''' $Log:	perl.man.2,v $
+''' Revision 1.0  87/12/18  16:18:41  root
+''' Initial revision
+''' 
+'''
+.Ip "goto LABEL" 8 6
+Finds the statement labeled with LABEL and resumes execution there.
+Currently you may only go to statements in the main body of the program
+that are not nested inside a do {} construct.
+This statement is not implemented very efficiently, and is here only to make
+the sed-to-perl translator easier.
+Use at your own risk.
+.Ip "hex(EXPR)" 8 2
+Returns the decimal value of EXPR interpreted as an hex string.
+(To interpret strings that might start with 0 or 0x see oct().)
+.Ip "index(STR,SUBSTR)" 8 4
+Returns the position of SUBSTR in STR, based at 0, or whatever you've
+set the $[ variable to.
+If the substring is not found, returns one less than the base, ordinarily -1.
+.Ip "int(EXPR)" 8 3
+Returns the integer portion of EXPR.
+.Ip "join(EXPR,LIST)" 8 8
+.Ip "join(EXPR,ARRAY)" 8
+Joins the separate strings of LIST or ARRAY into a single string with fields
+separated by the value of EXPR, and returns the string.
+Example:
+.nf
+    
+    $_ = join(\|':', $login,$passwd,$uid,$gid,$gcos,$home,$shell);
+
+.fi
+See
+.IR split .
+.Ip "keys(ASSOC_ARRAY)" 8 6
+Returns a normal array consisting of all the keys of the named associative
+array.
+The keys are returned in an apparently random order, but it is the same order
+as either the values() or each() function produces (given that the associative array
+has not been modified).
+Here is yet another way to print your environment:
+.nf
+
+.ne 5
+	@keys = keys(ENV);
+	@values = values(ENV);
+	while ($#keys >= 0) {
+		print pop(keys),'=',pop(values),"\n";
+	}
+
+.fi
+.Ip "kill LIST" 8 2
+Sends a signal to a list of processes.
+The first element of the list must be the (numerical) signal to send.
+LIST may be an array, in which case you may wish to use the unshift
+command to put the signal on the front of the array.
+Returns the number of processes successfully signaled.
+Note: in order to use the value you must put the whole thing in parentheses:
+.nf
+
+	$cnt = (kill 9,$child1,$child2);
+
+.fi
+.Ip "last LABEL" 8 8
+.Ip "last" 8
+The
+.I last
+command is like the
+.I break
+statement in C (as used in loops); it immediately exits the loop in question.
+If the LABEL is omitted, the command refers to the innermost enclosing loop.
+The
+.I continue
+block, if any, is not executed:
+.nf
+
+.ne 4
+	line: while (<stdin>) {
+		last line if /\|^$/;	# exit when done with header
+		.\|.\|.
+	}
+
+.fi
+.Ip "localtime(EXPR)" 8 4
+Converts a time as returned by the time function to a 9-element array with
+the time analyzed for the local timezone.
+Typically used as follows:
+.nf
+
+.ne 3
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)
+       = localtime(time);
+
+.fi
+All array elements are numeric.
+.Ip "log(EXPR)" 8 3
+Returns logarithm (base e) of EXPR.
+.Ip "next LABEL" 8 8
+.Ip "next" 8
+The
+.I next
+command is like the
+.I continue
+statement in C; it starts the next iteration of the loop:
+.nf
+
+.ne 4
+	line: while (<stdin>) {
+		next line if /\|^#/;	# discard comments
+		.\|.\|.
+	}
+
+.fi
+Note that if there were a
+.I continue
+block on the above, it would get executed even on discarded lines.
+If the LABEL is omitted, the command refers to the innermost enclosing loop.
+.Ip "length(EXPR)" 8 2
+Returns the length in characters of the value of EXPR.
+.Ip "link(OLDFILE,NEWFILE)" 8 2
+Creates a new filename linked to the old filename.
+Returns 1 for success, 0 otherwise.
+.Ip "oct(EXPR)" 8 2
+Returns the decimal value of EXPR interpreted as an octal string.
+(If EXPR happens to start off with 0x, interprets it as a hex string instead.)
+The following will handle decimal, octal and hex in the standard notation:
+.nf
+
+	$val = oct($val) if $val =~ /^0/;
+
+.fi
+.Ip "open(FILEHANDLE,EXPR)" 8 8
+.Ip "open(FILEHANDLE)" 8
+.Ip "open FILEHANDLE" 8
+Opens the file whose filename is given by EXPR, and associates it with
+FILEHANDLE.
+If EXPR is omitted, the string variable of the same name as the FILEHANDLE
+contains the filename.
+If the filename begins with \*(L">\*(R", the file is opened for output.
+If the filename begins with \*(L">>\*(R", the file is opened for appending.
+If the filename begins with \*(L"|\*(R", the filename is interpreted
+as a command to which output is to be piped, and if the filename ends
+with a \*(L"|\*(R", the filename is interpreted as command which pipes
+input to us.
+(You may not have a command that pipes both in and out.)
+On non-pipe opens, the filename '\-' represents either stdin or stdout, as
+appropriate.
+Open returns 1 upon success, '' otherwise.
+Examples:
+.nf
+    
+.ne 3
+    $article = 100;
+    open article || die "Can't find article $article";
+    while (<article>) {\|.\|.\|.
+
+    open(log, '>>/usr/spool/news/twitlog'\|);
+
+    open(article, "caeser <$article |"\|);		# decrypt article
+
+    open(extract, "|sort >/tmp/Tmp$$"\|);		# $$ is our process#
+
+.fi
+.Ip "ord(EXPR)" 8 3
+Returns the ascii value of the first character of EXPR.
+.Ip "pop ARRAY" 8 6
+.Ip "pop(ARRAY)" 8
+Pops and returns the last value of the array, shortening the array by 1.
+''' $tmp = $ARRAY[$#ARRAY--]
+.Ip "print FILEHANDLE LIST" 8 9
+.Ip "print LIST" 8
+.Ip "print" 8
+Prints a string or comma-separated list of strings.
+If FILEHANDLE is omitted, prints by default to standard output (or to the
+last selected output channel\*(--see select()).
+If LIST is also omitted, prints $_ to stdout.
+LIST may also be an array value.
+To set the default output channel to something other than stdout use the select operation.
+.Ip "printf FILEHANDLE LIST" 8 9
+.Ip "printf LIST" 8
+Equivalent to a "print FILEHANDLE sprintf(LIST)".
+.Ip "push(ARRAY,EXPR)" 8 7
+Treats ARRAY (@ is optional) as a stack, and pushes the value of EXPR
+onto the end of ARRAY.
+The length of ARRAY increases by 1.
+Has the same effect as
+.nf
+
+    $ARRAY[$#ARRAY+1] = EXPR;
+
+.fi
+but is more efficient.
+.Ip "redo LABEL" 8 8
+.Ip "redo" 8
+The
+.I redo
+command restarts the loop block without evaluating the conditional again.
+The
+.I continue
+block, if any, is not executed.
+If the LABEL is omitted, the command refers to the innermost enclosing loop.
+This command is normally used by programs that want to lie to themselves
+about what was just input:
+.nf
+
+.ne 16
+	# a simpleminded Pascal comment stripper
+	# (warning: assumes no { or } in strings)
+	line: while (<stdin>) {
+		while (s|\|({.*}.*\|){.*}|$1 \||) {}
+		s|{.*}| \||;
+		if (s|{.*| \||) {
+			$front = $_;
+			while (<stdin>) {
+				if (\|/\|}/\|) {	# end of comment?
+					s|^|$front{|;
+					redo line;
+				}
+			}
+		}
+		print;
+	}
+
+.fi
+.Ip "rename(OLDNAME,NEWNAME)" 8 2
+Changes the name of a file.
+Returns 1 for success, 0 otherwise.
+.Ip "reset EXPR" 8 3
+Generally used in a
+.I continue
+block at the end of a loop to clear variables and reset ?? searches
+so that they work again.
+The expression is interpreted as a list of single characters (hyphens allowed
+for ranges).
+All string variables beginning with one of those letters are set to the null
+string.
+If the expression is omitted, one-match searches (?pattern?) are reset to
+match again.
+Always returns 1.
+Examples:
+.nf
+
+.ne 3
+    reset 'X';	\h'|2i'# reset all X variables
+    reset 'a-z';\h'|2i'# reset lower case variables
+    reset;	\h'|2i'# just reset ?? searches
+
+.fi
+.Ip "s/PATTERN/REPLACEMENT/g" 8 3
+Searches a string for a pattern, and if found, replaces that pattern with the
+replacement text and returns the number of substitutions made.
+Otherwise it returns false (0).
+The \*(L"g\*(R" is optional, and if present, indicates that all occurences
+of the pattern are to be replaced.
+Any delimiter may replace the slashes; if single quotes are used, no
+interpretation is done on the replacement string.
+If no string is specified via the =~ or !~ operator,
+the $_ string is searched and modified.
+(The string specified with =~ must be a string variable or array element,
+i.e. an lvalue.)
+If the pattern contains a $ that looks like a variable rather than an
+end-of-string test, the variable will be interpolated into the pattern at
+run-time.
+See also the section on regular expressions.
+Examples:
+.nf
+
+    s/\|\e\|bgreen\e\|b/mauve/g;		# don't change wintergreen
+
+    $path \|=~ \|s|\|/usr/bin|\|/usr/local/bin|;
+
+    s/Login: $foo/Login: $bar/; # run-time pattern
+
+    s/\|([^ \|]*\|) *\|([^ \|]*\|)\|/\|$2 $1/;	# reverse 1st two fields
+
+.fi
+(Note the use of $ instead of \|\e\| in the last example.  See section
+on regular expressions.)
+.Ip "seek(FILEHANDLE,POSITION,WHENCE)" 8 3
+Randomly positions the file pointer for FILEHANDLE, just like the fseek()
+call of stdio.
+Returns 1 upon success, 0 otherwise.
+.Ip "select(FILEHANDLE)" 8 3
+Sets the current default filehandle for output.
+This has two effects: first, a
+.I write
+or a
+.I print
+without a filehandle will default to this FILEHANDLE.
+Second, references to variables related to output will refer to this output
+channel.
+For example, if you have to set the top of form format for more than
+one output channel, you might do the following:
+.nf
+
+.ne 4
+    select(report1);
+    $^ = 'report1_top';
+    select(report2);
+    $^ = 'report2_top';
+
+.fi
+Select happens to return TRUE if the file is currently open and FALSE otherwise,
+but this has no effect on its operation.
+.Ip "shift(ARRAY)" 8 6
+.Ip "shift ARRAY" 8
+.Ip "shift" 8
+Shifts the first value of the array off, shortening the array by 1 and
+moving everything down.
+If ARRAY is omitted, shifts the ARGV array.
+See also unshift().
+.Ip "sleep EXPR" 8 6
+.Ip "sleep" 8
+Causes the script to sleep for EXPR seconds, or forever if no EXPR.
+May be interrupted by sending the process a SIGALARM.
+Returns the number of seconds actually slept.
+.Ip "split(/PATTERN/,EXPR)" 8 8
+.Ip "split(/PATTERN/)" 8
+.Ip "split" 8
+Splits a string into an array of strings, and returns it.
+If EXPR is omitted, splits the $_ string.
+If PATTERN is also omitted, splits on whitespace (/[\ \et\en]+/).
+Anything matching PATTERN is taken to be a delimiter separating the fields.
+(Note that the delimiter may be longer than one character.)
+Trailing null fields are stripped, which potential users of pop() would
+do well to remember.
+A pattern matching the null string will split into separate characters.
+.sp
+Example:
+.nf
+
+.ne 5
+	open(passwd, '/etc/passwd');
+	while (<passwd>) {
+.ie t \{\
+		($login, $passwd, $uid, $gid, $gcos, $home, $shell) = split(\|/\|:\|/\|);
+'br\}
+.el \{\
+		($login, $passwd, $uid, $gid, $gcos, $home, $shell)
+			= split(\|/\|:\|/\|);
+'br\}
+		.\|.\|.
+	}
+
+.fi
+(Note that $shell above will still have a newline on it.  See chop().)
+See also
+.IR join .
+.Ip "sprintf(FORMAT,LIST)" 8 4
+Returns a string formatted by the usual printf conventions.
+The * character is not supported.
+.Ip "sqrt(EXPR)" 8 3
+Return the square root of EXPR.
+.Ip "stat(FILEHANDLE)" 8 6
+.Ip "stat(EXPR)" 8
+Returns a 13-element array giving the statistics for a file, either the file
+opened via FILEHANDLE, or named by EXPR.
+Typically used as follows:
+.nf
+
+.ne 3
+    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+       $atime,$mtime,$ctime,$blksize,$blocks)
+           = stat($filename);
+
+.fi
+.Ip "substr(EXPR,OFFSET,LEN)" 8 2
+Extracts a substring out of EXPR and returns it.
+First character is at offset 0, or whatever you've set $[ to.
+.Ip "system LIST" 8 6
+Does exactly the same thing as \*(L"exec LIST\*(R" except that a fork
+is done first, and the parent process waits for the child process to complete.
+Note that argument processing varies depending on the number of arguments.
+See exec.
+.Ip "tell(FILEHANDLE)" 8 6
+.Ip "tell" 8
+Returns the current file position for FILEHANDLE.
+If FILEHANDLE is omitted, assumes the file last read.
+.Ip "time" 8 4
+Returns the number of seconds since January 1, 1970.
+Suitable for feeding to gmtime() and localtime().
+.Ip "times" 8 4
+Returns a four-element array giving the user and system times, in seconds, for this
+process and the children of this process.
+.sp
+    ($user,$system,$cuser,$csystem) = times;
+.sp
+.Ip "tr/SEARCHLIST/REPLACEMENTLIST/" 8 5
+.Ip "y/SEARCHLIST/REPLACEMENTLIST/" 8
+Translates all occurences of the characters found in the search list with
+the corresponding character in the replacement list.
+It returns the number of characters replaced.
+If no string is specified via the =~ or !~ operator,
+the $_ string is translated.
+(The string specified with =~ must be a string variable or array element,
+i.e. an lvalue.)
+For
+.I sed
+devotees,
+.I y
+is provided as a synonym for
+.IR tr .
+Examples:
+.nf
+
+    $ARGV[1] \|=~ \|y/A-Z/a-z/;	\h'|3i'# canonicalize to lower case
+
+    $cnt = tr/*/*/;		\h'|3i'# count the stars in $_
+
+.fi
+.Ip "umask(EXPR)" 8 3
+Sets the umask for the process and returns the old one.
+.Ip "unlink LIST" 8 2
+Deletes a list of files.
+LIST may be an array.
+Returns the number of files successfully deleted.
+Note: in order to use the value you must put the whole thing in parentheses:
+.nf
+
+	$cnt = (unlink 'a','b','c');
+
+.fi
+.Ip "unshift(ARRAY,LIST)" 8 4
+Does the opposite of a shift.
+Prepends list to the front of the array, and returns the number of elements
+in the new array.
+.nf
+
+	unshift(ARGV,'-e') unless $ARGV[0] =~ /^-/;
+
+.fi
+.Ip "values(ASSOC_ARRAY)" 8 6
+Returns a normal array consisting of all the values of the named associative
+array.
+The values are returned in an apparently random order, but it is the same order
+as either the keys() or each() function produces (given that the associative array
+has not been modified).
+See also keys() and each().
+.Ip "write(FILEHANDLE)" 8 6
+.Ip "write(EXPR)" 8
+.Ip "write(\|)" 8
+Writes a formatted record (possibly multi-line) to the specified file,
+using the format associated with that file.
+By default the format for a file is the one having the same name is the
+filehandle, but the format for the current output channel (see
+.IR select )
+may be set explicitly
+by assigning the name of the format to the $~ variable.
+.sp
+Top of form processing is handled automatically:
+if there is insufficient room on the current page for the formatted 
+record, the page is advanced, a special top-of-page format is used
+to format the new page header, and then the record is written.
+By default the top-of-page format is \*(L"top\*(R", but it
+may be set to the
+format of your choice by assigning the name to the $^ variable.
+.sp
+If FILEHANDLE is unspecified, output goes to the current default output channel,
+which starts out as stdout but may be changed by the
+.I select
+operator.
+If the FILEHANDLE is an EXPR, then the expression is evaluated and the
+resulting string is used to look up the name of the FILEHANDLE at run time.
+For more on formats, see the section on formats later on.
+.Sh "Subroutines"
+A subroutine may be declared as follows:
+.nf
+
+    sub NAME BLOCK
+
+.fi
+.PP
+Any arguments passed to the routine come in as array @_,
+that is ($_[0], $_[1], .\|.\|.).
+The return value of the subroutine is the value of the last expression
+evaluated.
+There are no local variables\*(--everything is a global variable.
+.PP
+A subroutine is called using the
+.I do
+operator.
+(CAVEAT: For efficiency reasons recursive subroutine calls are not currently
+supported.
+This restriction may go away in the future.  Then again, it may not.)
+.nf
+
+.ne 12
+Example:
+
+	sub MAX {
+		$max = pop(@_);
+		while ($foo = pop(@_)) {
+			$max = $foo \|if \|$max < $foo;
+		}
+		$max;
+	}
+
+	.\|.\|.
+	$bestday = do MAX($mon,$tue,$wed,$thu,$fri);
+
+.ne 21
+Example:
+
+	# get a line, combining continuation lines
+	#  that start with whitespace
+	sub get_line {
+		$thisline = $lookahead;
+		line: while ($lookahead = <stdin>) {
+			if ($lookahead \|=~ \|/\|^[ \^\e\|t]\|/\|) {
+				$thisline \|.= \|$lookahead;
+			}
+			else {
+				last line;
+			}
+		}
+		$thisline;
+	}
+
+	$lookahead = <stdin>;	# get first line
+	while ($_ = get_line(\|)) {
+		.\|.\|.
+	}
+
+.fi
+.nf
+.ne 6
+Use array assignment to name your formal arguments:
+
+	sub maybeset {
+		($key,$value) = @_;
+		$foo{$key} = $value unless $foo{$key};
+	}
+
+.fi
+.Sh "Regular Expressions"
+The patterns used in pattern matching are regular expressions such as
+those used by
+.IR egrep (1).
+In addition, \ew matches an alphanumeric character and \eW a nonalphanumeric.
+Word boundaries may be matched by \eb, and non-boundaries by \eB.
+The bracketing construct \|(\ .\|.\|.\ \|) may also be used, $<digit>
+matches the digit'th substring, where digit can range from 1 to 9.
+(You can also use the old standby \e<digit> in search patterns,
+but $<digit> also works in replacement patterns and in the block controlled
+by the current conditional.)
+$+ returns whatever the last bracket match matched.
+$& returns the entire matched string.
+Up to 10 alternatives may given in a pattern, separated by |, with the
+caveat that \|(\ .\|.\|.\ |\ .\|.\|.\ \|) is illegal.
+Examples:
+.nf
+    
+	s/\|^\|([^ \|]*\|) \|*([^ \|]*\|)\|/\|$2 $1\|/;	# swap first two words
+
+.ne 5
+	if (/\|Time: \|(.\|.\|):\|(.\|.\|):\|(.\|.\|)\|/\|) {
+		$hours = $1;
+		$minutes = $2;
+		$seconds = $3;
+	}
+
+.fi
+By default, the ^ character matches only the beginning of the string, and
+.I perl
+does certain optimizations with the assumption that the string contains
+only one line.
+You may, however, wish to treat a string as a multi-line buffer, such that
+the ^ will match after any newline within the string.
+At the cost of a little more overhead, you can do this by setting the variable
+$* to 1.
+Setting it back to 0 makes
+.I perl
+revert to its old behavior.
+.Sh "Formats"
+Output record formats for use with the
+.I write
+operator may declared as follows:
+.nf
+
+.ne 3
+    format NAME =
+    FORMLIST
+    .
+
+.fi
+If name is omitted, format \*(L"stdout\*(R" is defined.
+FORMLIST consists of a sequence of lines, each of which may be of one of three
+types:
+.Ip 1. 4
+A comment.
+.Ip 2. 4
+A \*(L"picture\*(R" line giving the format for one output line.
+.Ip 3. 4
+An argument line supplying values to plug into a picture line.
+.PP
+Picture lines are printed exactly as they look, except for certain fields
+that substitute values into the line.
+Each picture field starts with either @ or ^.
+The @ field (not to be confused with the array marker @) is the normal
+case; ^ fields are used
+to do rudimentary multi-line text block filling.
+The length of the field is supplied by padding out the field
+with multiple <, >, or | characters to specify, respectively, left justfication,
+right justification, or centering.
+If any of the values supplied for these fields contains a newline, only
+the text up to the newline is printed.
+The special field @* can be used for printing multi-line values.
+It should appear by itself on a line.
+.PP
+The values are specified on the following line, in the same order as
+the picture fields.
+They must currently be either string variable names or string literals (or
+pseudo-literals).
+Currently you can separate values with spaces, but commas may be placed
+between values to prepare for possible future versions in which full expressions
+are allowed as values.
+.PP
+Picture fields that begin with ^ rather than @ are treated specially.
+The value supplied must be a string variable name which contains a text
+string.
+.I Perl
+puts as much text as it can into the field, and then chops off the front
+of the string so that the next time the string variable is referenced,
+more of the text can be printed.
+Normally you would use a sequence of fields in a vertical stack to print
+out a block of text.
+If you like, you can end the final field with .\|.\|., which will appear in the
+output if the text was too long to appear in its entirety.
+.PP
+Since use of ^ fields can produce variable length records if the text to be
+formatted is short, you can suppress blank lines by putting the tilde (~)
+character anywhere in the line.
+(Normally you should put it in the front if possible.)
+The tilde will be translated to a space upon output.
+.PP
+Examples:
+.nf
+.lg 0
+.cs R 25
+
+.ne 10
+# a report on the /etc/passwd file
+format top =
+\&                        Passwd File
+Name                Login    Office   Uid   Gid Home
+------------------------------------------------------------------
+\&.
+format stdout =
+@<<<<<<<<<<<<<<<<<< @||||||| @<<<<<<@>>>> @>>>> @<<<<<<<<<<<<<<<<<
+$name               $login   $office $uid $gid  $home
+\&.
+
+.ne 29
+# a report from a bug report form
+format top =
+\&                        Bug Reports
+@<<<<<<<<<<<<<<<<<<<<<<<     @|||         @>>>>>>>>>>>>>>>>>>>>>>>
+$system;                      $%;         $date
+------------------------------------------------------------------
+\&.
+format stdout =
+Subject: @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+\&         $subject
+Index: @<<<<<<<<<<<<<<<<<<<<<<<<<<<< ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+\&       $index                        $description
+Priority: @<<<<<<<<<< Date: @<<<<<<< ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+\&          $priority         $date    $description
+From: @<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+\&      $from                          $description
+Assigned to: @<<<<<<<<<<<<<<<<<<<<<< ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+\&             $programmer             $description
+\&~                                    ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+\&                                     $description
+\&~                                    ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+\&                                     $description
+\&~                                    ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+\&                                     $description
+\&~                                    ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+\&                                     $description
+\&~                                    ^<<<<<<<<<<<<<<<<<<<<<<<...
+\&                                     $description
+\&.
+
+.cs R
+.lg
+It is possible to intermix prints with writes on the same output channel,
+but you'll have to handle $\- (lines left on the page) yourself.
+.fi
+.PP
+If you are printing lots of fields that are usually blank, you should consider
+using the reset operator between records.
+Not only is it more efficient, but it can prevent the bug of adding another
+field and forgetting to zero it.
+.Sh "Predefined Names"
+The following names have special meaning to
+.IR perl .
+I could have used alphabetic symbols for some of these, but I didn't want
+to take the chance that someone would say reset "a-zA-Z" and wipe them all
+out.
+You'll just have to suffer along with these silly symbols.
+Most of them have reasonable mnemonics, or analogues in one of the shells.
+.Ip $_ 8
+The default input and pattern-searching space.
+The following pairs are equivalent:
+.nf
+
+.ne 2
+	while (<>) {\|.\|.\|.	# only equivalent in while!
+	while ($_ = <>) {\|.\|.\|.
+
+.ne 2
+	/\|^Subject:/
+	$_ \|=~ \|/\|^Subject:/
+
+.ne 2
+	y/a-z/A-Z/
+	$_ =~ y/a-z/A-Z/
+
+.ne 2
+	chop
+	chop($_)
+
+.fi 
+(Mnemonic: underline is understood in certain operations.)
+.Ip $. 8
+The current input line number of the last file that was read.
+Readonly.
+(Mnemonic: many programs use . to mean the current line number.)
+.Ip $/ 8
+The input record separator, newline by default.
+Works like awk's RS variable, including treating blank lines as delimiters
+if set to the null string.
+If set to a value longer than one character, only the first character is used.
+(Mnemonic: / is used to delimit line boundaries when quoting poetry.)
+.Ip $, 8
+The output field separator for the print operator.
+Ordinarily the print operator simply prints out the comma separated fields
+you specify.
+In order to get behavior more like awk, set this variable as you would set
+awk's OFS variable to specify what is printed between fields.
+(Mnemonic: what is printed when there is a , in your print statement.)
+.Ip $\e 8
+The output record separator for the print operator.
+Ordinarily the print operator simply prints out the comma separated fields
+you specify, with no trailing newline or record separator assumed.
+In order to get behavior more like awk, set this variable as you would set
+awk's ORS variable to specify what is printed at the end of the print.
+(Mnemonic: you set $\e instead of adding \en at the end of the print.
+Also, it's just like /, but it's what you get \*(L"back\*(R" from perl.)
+.Ip $# 8
+The output format for printed numbers.
+This variable is a half-hearted attempt to emulate awk's OFMT variable.
+There are times, however, when awk and perl have differing notions of what
+is in fact numeric.
+Also, the initial value is %.20g rather than %.6g, so you need to set $#
+explicitly to get awk's value.
+(Mnemonic: # is the number sign.)
+.Ip $% 8
+The current page number of the currently selected output channel.
+(Mnemonic: % is page number in nroff.)
+.Ip $= 8
+The current page length (printable lines) of the currently selected output
+channel.
+Default is 60.
+(Mnemonic: = has horizontal lines.)
+.Ip $\- 8
+The number of lines left on the page of the currently selected output channel.
+(Mnemonic: lines_on_page - lines_printed.)
+.Ip $~ 8
+The name of the current report format for the currently selected output
+channel.
+(Mnemonic: brother to $^.)
+.Ip $^ 8
+The name of the current top-of-page format for the currently selected output
+channel.
+(Mnemonic: points to top of page.)
+.Ip $| 8
+If set to nonzero, forces a flush after every write or print on the currently
+selected output channel.
+Default is 0.
+Note that stdout will typically be line buffered if output is to the
+terminal and block buffered otherwise.
+Setting this variable is useful primarily when you are outputting to a pipe,
+such as when you are running a perl script under rsh and want to see the
+output as it's happening.
+(Mnemonic: when you want your pipes to be piping hot.)
+.Ip $$ 8
+The process number of the
+.I perl
+running this script.
+(Mnemonic: same as shells.)
+.Ip $? 8
+The status returned by the last backtick (``) command.
+(Mnemonic: same as sh and ksh.)
+.Ip $+ 8 4
+The last bracket matched by the last search pattern.
+This is useful if you don't know which of a set of alternative patterns
+matched.
+For example:
+.nf
+
+    /Version: \|(.*\|)|Revision: \|(.*\|)\|/ \|&& \|($rev = $+);
+
+.fi
+(Mnemonic: be positive and forward looking.)
+.Ip $* 8 2
+Set to 1 to do multiline matching within a string, 0 to assume strings contain
+a single line.
+Default is 0.
+(Mnemonic: * matches multiple things.)
+.Ip $0 8
+Contains the name of the file containing the
+.I perl
+script being executed.
+The value should be copied elsewhere before any pattern matching happens, which
+clobbers $0.
+(Mnemonic: same as sh and ksh.)
+.Ip $[ 8 2
+The index of the first element in an array, and of the first character in
+a substring.
+Default is 0, but you could set it to 1 to make
+.I perl
+behave more like
+.I awk
+(or Fortran)
+when subscripting and when evaluating the index() and substr() functions.
+(Mnemonic: [ begins subscripts.)
+.Ip $! 8 2
+The current value of errno, with all the usual caveats.
+(Mnemonic: What just went bang?)
+.Ip @ARGV 8 3
+The array ARGV contains the command line arguments intended for the script.
+Note that $#ARGV is the generally number of arguments minus one, since
+$ARGV[0] is the first argument, NOT the command name.
+See $0 for the command name.
+.Ip $ENV{expr} 8 2
+The associative array ENV contains your current environment.
+Setting a value in ENV changes the environment for child processes.
+.Ip $SIG{expr} 8 2
+The associative array SIG is used to set signal handlers for various signals.
+Example:
+.nf
+
+.ne 12
+	sub handler {	# 1st argument is signal name
+		($sig) = @_;
+		print "Caught a SIG$sig--shutting down\n";
+		close(log);
+		exit(0);
+	}
+
+	$SIG{'INT'} = 'handler';
+	$SIG{'QUIT'} = 'handler';
+	...
+	$SIG{'INT'} = 'DEFAULT';	# restore default action
+	$SIG{'QUIT'} = 'IGNORE';	# ignore SIGQUIT
+
+.fi
+.SH ENVIRONMENT
+.I Perl
+currently uses no environment variables, except to make them available
+to the script being executed, and to child processes.
+However, scripts running setuid would do well to execute the following lines
+before doing anything else, just to keep people honest:
+.nf
+
+.ne 3
+    $ENV{'PATH'} = '/bin:/usr/bin';    # or whatever you need
+    $ENV{'SHELL'} = '/bin/sh' if $ENV{'SHELL'};
+    $ENV{'IFS'} = '' if $ENV{'IFS'};
+
+.fi
+.SH AUTHOR
+Larry Wall <lwall@jpl-devvax.Jpl.Nasa.Gov>
+.SH FILES
+/tmp/perl\-eXXXXXX	temporary file for
+.B \-e
+commands.
+.SH SEE ALSO
+a2p	awk to perl translator
+.br
+s2p	sed to perl translator
+.SH DIAGNOSTICS
+Compilation errors will tell you the line number of the error, with an
+indication of the next token or token type that was to be examined.
+(In the case of a script passed to
+.I perl
+via
+.B \-e
+switches, each
+.B \-e
+is counted as one line.)
+.SH TRAPS
+Accustomed awk users should take special note of the following:
+.Ip * 4 2
+Semicolons are required after all simple statements in perl.  Newline
+is not a statement delimiter.
+.Ip * 4 2
+Curly brackets are required on ifs and whiles.
+.Ip * 4 2
+Variables begin with $ or @ in perl.
+.Ip * 4 2
+Arrays index from 0 unless you set $[.
+Likewise string positions in substr() and index().
+.Ip * 4 2
+You have to decide whether your array has numeric or string indices.
+.Ip * 4 2
+You have to decide whether you want to use string or numeric comparisons.
+.Ip * 4 2
+Reading an input line does not split it for you.  You get to split it yourself
+to an array.
+And split has different arguments.
+.Ip * 4 2
+The current input line is normally in $_, not $0.
+It generally does not have the newline stripped.
+($0 is initially the name of the program executed, then the last matched
+string.)
+.Ip * 4 2
+The current filename is $ARGV, not $FILENAME.
+NR, RS, ORS, OFS, and OFMT have equivalents with other symbols.
+FS doesn't have an equivalent, since you have to be explicit about
+split statements.
+.Ip * 4 2
+$<digit> does not refer to fields--it refers to substrings matched by the last
+match pattern.
+.Ip * 4 2
+The print statement does not add field and record separators unless you set
+$, and $\e.
+.Ip * 4 2
+You must open your files before you print to them.
+.Ip * 4 2
+The range operator is \*(L"..\*(R", not comma.
+(The comma operator works as in C.)
+.Ip * 4 2
+The match operator is \*(L"=~\*(R", not \*(L"~\*(R".
+(\*(L"~\*(R" is the one's complement operator.)
+.Ip * 4 2
+The concatenation operator is \*(L".\*(R", not the null string.
+(Using the null string would render \*(L"/pat/ /pat/\*(R" unparseable,
+since the third slash would be interpreted as a division operator\*(--the
+tokener is in fact slightly context sensitive for operators like /, ?, and <.
+And in fact, . itself can be the beginning of a number.)
+.Ip * 4 2
+The \ennn construct in patterns must be given as [\ennn] to avoid interpretation
+as a backreference.
+.Ip * 4 2
+Next, exit, and continue work differently.
+.Ip * 4 2
+When in doubt, run the awk construct through a2p and see what it gives you.
+.PP
+Cerebral C programmers should take note of the following:
+.Ip * 4 2
+Curly brackets are required on ifs and whiles.
+.Ip * 4 2
+You should use \*(L"elsif\*(R" rather than \*(L"else if\*(R"
+.Ip * 4 2
+Break and continue become last and next, respectively.
+.Ip * 4 2
+There's no switch statement.
+.Ip * 4 2
+Variables begin with $ or @ in perl.
+.Ip * 4 2
+Printf does not implement *.
+.Ip * 4 2
+Comments begin with #, not /*.
+.Ip * 4 2
+You can't take the address of anything.
+.Ip * 4 2
+Subroutines are not reentrant.
+.Ip * 4 2
+ARGV must be capitalized.
+.Ip * 4 2
+The \*(L"system\*(R" calls link, unlink, rename, etc. return 1 for success, not 0.
+.Ip * 4 2
+Signal handlers deal with signal names, not numbers.
+.PP
+Seasoned sed programmers should take note of the following:
+.Ip * 4 2
+Backreferences in substitutions use $ rather than \e.
+.Ip * 4 2
+The pattern matching metacharacters (, ), and | do not have backslashes in front.
+.SH BUGS
+.PP
+You can't currently dereference array elements inside a double-quoted string.
+You must assign them to a temporary and interpolate that.
+.PP
+Associative arrays really ought to be first class objects.
+.PP
+Recursive subroutines are not currently supported, due to the way temporary
+values are stored in the syntax tree.
+.PP
+Arrays ought to be passable to subroutines just as strings are.
+.PP
+The array literal consisting of one element is currently misinterpreted, i.e.
+.nf
+
+	@array = (123);
+
+.fi
+doesn't work right.
+.PP
+.I Perl
+actually stands for Pathologically Eclectic Rubbish Lister, but don't tell
+anyone I said that.
+.rn }` ''

@@ -1,0 +1,11 @@
+#!./perl
+
+# $Header: op.push,v 1.0 87/12/18 13:14:10 root Exp $
+
+print "1..2\n";
+
+@x = (1,2,3);
+push(@x,@x);
+if (join(x,':') eq '1:2:3:1:2:3') {print "ok 1\n";} else {print "not ok 1\n";}
+push(x,4);
+if (join(x,':') eq '1:2:3:1:2:3:4') {print "ok 2\n";} else {print "not ok 2\n";}
