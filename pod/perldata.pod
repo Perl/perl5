@@ -11,6 +11,28 @@ associative arrays of scalars, known as "hashes".  Normal arrays are
 indexed by number, starting with 0.  (Negative subscripts count from
 the end.)  Hash arrays are indexed by string.
 
+Values are usually referred to by name (or through a named reference).
+The first character of the name tells you to what sort of data
+structure it refers.  The rest of the name tells you the particular
+value to which it refers.  Most often, it consists of a single
+I<identifier>, that is, a string beginning with a letter or underscore,
+and containing letters, underscores, and digits.  In some cases, it
+may be a chain of identifiers, separated by C<::> (or by C<'>, but
+that's deprecated); all but the last are interpreted as names of
+packages, in order to locate the namespace in which to look
+up the final identifier (see L<perlmod/Packages> for details).
+It's possible to substutite for a simple identifier an expression
+which produces a reference to the value at runtime; this is
+described in more detail below, and in L<perlref>.
+
+There are also special variables whose names don't follow these
+rules, so that they don't accidentally collide with one of your
+normal variables.  Strings which match parenthesized parts of a
+regular expression are saved under names containing only digits after
+the C<$> (see L<perlop> and L<perlre>).  In addition, several special
+variables which provide windows into the inner working of Perl have names
+containing punctuation characters (see L<perlvar>).
+
 Scalar values are always named with '$', even when referring to a scalar
 that is part of an array.  It works like the English word "the".  Thus
 we have:
@@ -122,7 +144,7 @@ declare a scalar variable to be of type "string", or of type "number", or
 type "filehandle", or anything else.  Perl is a contextually polymorphic
 language whose scalars can be strings, numbers, or references (which
 includes objects).  While strings and numbers are considered pretty
-much same thing for nearly all purposes, references are strongly-typed
+much the same thing for nearly all purposes, references are strongly-typed
 uncastable pointers with built-in reference-counting and destructor
 invocation.
 
@@ -141,7 +163,7 @@ defined() operator to determine whether the value is defined or not.
 To find out whether a given string is a valid non-zero number, it's usually
 enough to test it against both numeric 0 and also lexical "0" (although
 this will cause B<-w> noises).  That's because strings that aren't
-numbers count as 0, just as the do in I<awk>:
+numbers count as 0, just as they do in I<awk>:
 
     if ($str == 0 && $str ne "0")  {
 	warn "That doesn't look like a number";
@@ -166,7 +188,7 @@ there is (ordinarily) a 0th element.)  Assigning to C<$#days> changes the
 length of the array.  Shortening an array by this method destroys
 intervening values.  Lengthening an array that was previously shortened
 I<NO LONGER> recovers the values that were in those elements.  (It used to
-in Perl 4, but we had to break this make to make sure destructors were
+in Perl 4, but we had to break this to make sure destructors were
 called when expected.)  You can also gain some measure of efficiency by
 preextending an array that is going to get big.  (You can also extend
 an array by assigning to an element that is off the end of the array.)
@@ -230,14 +252,14 @@ your trailing quote, the error will not be reported until Perl finds
 another line containing the quote character, which may be much further
 on in the script.  Variable substitution inside strings is limited to
 scalar variables, arrays, and array slices.  (In other words,
-identifiers beginning with $ or @, followed by an optional bracketed
+names beginning with $ or @, followed by an optional bracketed
 expression as a subscript.)  The following code segment prints out "The
 price is $100."
 
     $Price = '$100';	# not interpreted
     print "The price is $Price.\n";	# interpreted
 
-As in some shells, you can put curly brackets around the identifier to
+As in some shells, you can put curly brackets around the name to
 delimit it from following alphanumerics.  In fact, an identifier
 within such curlies is forced to be a string, as is any single
 identifier within a hash subscript.  Our earlier example,
@@ -254,7 +276,7 @@ in the subscript will be interpreted as an expression.
 Note that a
 single-quoted string must be separated from a preceding word by a
 space, since single quote is a valid (though deprecated) character in
-an identifier (see L<perlmod/Packages>).
+a variable name (see L<perlmod/Packages>).
 
 Two special literals are __LINE__ and __FILE__, which represent the
 current line number and filename at that point in your program.  They
@@ -457,8 +479,9 @@ key/value pairs.  That's why it's good to use references sometimes.
 
 It is often more readable to use the C<=E<gt>> operator between key/value
 pairs.  The C<=E<gt>> operator is mostly just a more visually distinctive
-synonym for a comma, but it also quotes its left-hand operand, which makes
-it nice for initializing hashes:
+synonym for a comma, but it also arranges for its left-hand operand to be
+interpreted as a string, if it's a bareword which would be a legal identifier.
+This makes it nice for initializing hashes:
 
     %map = (
 		 red   => 0x00f,
