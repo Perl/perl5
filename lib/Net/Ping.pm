@@ -5,22 +5,24 @@ require Exporter;
 
 use strict;
 use vars qw(@ISA @EXPORT $VERSION
-            $def_timeout $def_proto $max_datasize $pingstring $hires $source_verify $syn_forking);
+            $def_timeout $def_proto $def_factor
+            $max_datasize $pingstring $hires $source_verify $syn_forking);
 use Fcntl qw( F_GETFL F_SETFL O_NONBLOCK );
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW PF_INET SOL_SOCKET
                inet_aton inet_ntoa sockaddr_in );
-use POSIX qw( ECONNREFUSED EINPROGRESS EAGAIN WNOHANG );
+use POSIX qw( ECONNREFUSED ECONNRESET EINPROGRESS EAGAIN WNOHANG );
 use FileHandle;
 use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.29";
+$VERSION = "2.30";
 
 # Constants
 
 $def_timeout = 5;           # Default timeout to wait for a reply
 $def_proto = "tcp";         # Default protocol to use for pinging
+$def_factor = 1.2;          # Default exponential backoff rate.
 $max_datasize = 1024;       # Maximum data bytes in a packet
 # The data we exchange with the server for the stream protocol
 $pingstring = "pingschwingping!\n";
@@ -103,7 +105,7 @@ sub new
   }
 
   $self->{"local_addr"} = undef;              # Don't bind by default
-
+  $self->{"retrans"} = $def_factor;           # Default exponential backoff rate
   $self->{"econnrefused"} = undef;            # Default Connection refused behavior
 
   $self->{"seq"} = 0;                         # For counting packets
@@ -231,6 +233,16 @@ sub service_check
 sub tcp_service_check
 {
   service_check(@_);
+}
+
+# Description: Set exponential backoff for retransmission.
+# Should be > 1 to retain exponential properties.
+# If set to 0, retransmissions are disabled.
+
+sub retrans
+{
+  my $self = shift;
+  $self->{"retrans"} = shift;
 }
 
 # Description: allows the module to use milliseconds as returned by
@@ -387,7 +399,7 @@ sub ping_icmp
   $finish_time = &time() + $timeout;      # Must be done by this time
   while (!$done && $timeout > 0)          # Keep trying if we have time
   {
-    $nfound = select($rbits, undef, undef, $timeout); # Wait for packet
+    $nfound = select((my $rout=$rbits), undef, undef, $timeout); # Wait for packet
     $timeout = $finish_time - &time();    # Get remaining time
     if (!defined($nfound))                # Hmm, a strange error
     {
@@ -397,13 +409,17 @@ sub ping_icmp
     elsif ($nfound)                     # Got a packet from somewhere
     {
       $recv_msg = "";
+      $from_pid = -1;
+      $from_seq = -1;
       $from_saddr = recv($self->{"fh"}, $recv_msg, 1500, ICMP_FLAGS);
       ($from_port, $from_ip) = sockaddr_in($from_saddr);
       ($from_type, $from_subcode) = unpack("C2", substr($recv_msg, 20, 2));
-      if ($from_type == ICMP_ECHOREPLY){
-        ($from_pid, $from_seq) = unpack("n3", substr($recv_msg, 24, 4));
+      if ($from_type == ICMP_ECHOREPLY) {
+        ($from_pid, $from_seq) = unpack("n3", substr($recv_msg, 24, 4))
+          if length $recv_msg >= 28;
       } else {
-        ($from_pid, $from_seq) = unpack("n3", substr($recv_msg, 52, 4));
+        ($from_pid, $from_seq) = unpack("n3", substr($recv_msg, 52, 4))
+          if length $recv_msg >= 56;
       }
       $self->{"from_ip"} = $from_ip;
       $self->{"from_type"} = $from_type;
@@ -777,6 +793,8 @@ sub ping_udp
       $ret,               # The return value
       $msg,               # Message to be echoed
       $finish_time,       # Time ping should be finished
+      $flush,             # Whether socket needs to be disconnected
+      $connect,           # Whether socket needs to be connected
       $done,              # Set to 1 when we are done pinging
       $rbits,             # Read bits, filehandles for reading
       $nfound,            # Number of ready filehandles found
@@ -789,12 +807,36 @@ sub ping_udp
   $saddr = sockaddr_in($self->{"port_num"}, $ip);
   $self->{"seq"} = ($self->{"seq"} + 1) % 256;    # Increment sequence
   $msg = chr($self->{"seq"}) . $self->{"data"};   # Add data if any
+
+  if ($self->{"connected"}) {
+    if ($self->{"connected"} ne $saddr) {
+      # Still connected to wrong destination.
+      # Need to flush out the old one.
+      $flush = 1;
+    }
+  } else {
+    # Not connected yet.
+    # Need to connect() before send()
+    $connect = 1;
+  }
+
   # Have to connect() and send() instead of sendto()
   # in order to pick up on the ECONNREFUSED setting
   # from recv() or double send() errno as utilized in
   # the concept by rdw @ perlmonks.  See:
   # http://perlmonks.thepen.com/42898.html
-  connect($self->{"fh"}, $saddr);                 # Tie destination to socket
+  if ($flush) {
+    # Need to socket() again to flush the descriptor
+    # This will disconnect from the old saddr.
+    socket($self->{"fh"}, PF_INET, SOCK_DGRAM,
+           $self->{"proto_num"});
+  }
+  # Connect the socket if it isn't already connected
+  # to the right destination.
+  if ($flush || $connect) {
+    connect($self->{"fh"}, $saddr);               # Tie destination to socket
+    $self->{"connected"} = $saddr;
+  }
   send($self->{"fh"}, $msg, UDP_FLAGS);           # Send it
 
   $rbits = "";
@@ -802,12 +844,16 @@ sub ping_udp
   $ret = 0;                   # Default to unreachable
   $done = 0;
   my $retrans = 0.01;
+  my $factor = $self->{"retrans"};
   $finish_time = &time() + $timeout;       # Ping needs to be done by then
   while (!$done && $timeout > 0)
   {
-    $timeout = $retrans if $timeout > $retrans;
-    $retrans*= 1.2; # Exponential backoff
-    $nfound  = select($rbits, undef, undef, $timeout); # Wait for response
+    if ($factor > 1)
+    {
+      $timeout = $retrans if $timeout > $retrans;
+      $retrans*= $factor; # Exponential backoff
+    }
+    $nfound  = select((my $rout=$rbits), undef, undef, $timeout); # Wait for response
     my $why = $!;
     $timeout = $finish_time - &time();   # Get remaining time
 
@@ -823,7 +869,8 @@ sub ping_udp
       if (!$from_saddr) {
         # For example an unreachable host will make recv() fail.
         if (!$self->{"econnrefused"} &&
-            $! == ECONNREFUSED) {
+            ($! == ECONNREFUSED ||
+             $! == ECONNRESET)) {
           # "Connection refused" means reachable
           # Good, continue
           $ret = 1;
@@ -1606,6 +1653,6 @@ Copyright (c) 2001, Colin McMillen.  All rights reserved.
 This program is free software; you may redistribute it and/or
 modify it under the same terms as Perl itself.
 
-$Id: Ping.pm,v 1.75 2003/04/12 20:51:17 rob Exp $
+$Id: Ping.pm,v 1.81 2003/04/18 04:16:03 rob Exp $
 
 =cut

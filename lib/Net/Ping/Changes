@@ -1,6 +1,18 @@
 CHANGES
 -------
 
+3.30  Apr 18 14:00 2003
+	- Fix select() bug for UDP and ICMP protocols
+	  in case packet comes from wrong source or seq.
+	- Allow UDP ping to different IP addresses
+	  without instantiating a new object.
+	- Add retrans() method to customize or disable
+	  backoff factor for udp pings.
+	  Thanks Torgny.Hofstedt@sevenlevels.se
+	- Let ECONNRESET be considered reachable for
+	  UDP pings.  Now it works for cygwin.
+	  Spot by jhi@iki.fi (Jarkko Hietaniemi).
+
 2.29  Apr 12 15:00 2003
 	- Implement "double send()" concept for udp pings.
 	  See: <http://perlmonks.thepen.com/42898.html>
