@@ -1823,6 +1823,7 @@ static size_t page_size = 0;
 IV
 PerlIOMmap_map(PerlIO *f)
 {
+ dTHX;
  PerlIOMmap *m = PerlIOSelf(f,PerlIOMmap);
  PerlIOBuf  *b = &m->base;
  IV flags = PerlIOBase(f)->flags;
@@ -1841,8 +1842,40 @@ PerlIOMmap_map(PerlIO *f)
      if (len > 0)
       {
        Off_t posn;
-       if (!page_size)
+       if (!page_size) {
+#if defined(HAS_SYSCONF) && (defined(_SC_PAGESIZE) || defined(_SC_PAGE_SIZE))
+	   {
+	       SETERRNO(0,SS$_NORMAL);
+#   ifdef _SC_PAGESIZE
+	       page_size = sysconf(_SC_PAGESIZE);
+#   else
+	       page_size = sysconf(_SC_PAGE_SIZE);
+#   endif 
+	       if ((long)page_size < 0) {
+		   if (errno) {
+		       SV *error = ERRSV;
+		       char *msg;
+		       STRLEN n_a;
+		       (void)SvUPGRADE(error, SVt_PV);
+		       msg = SvPVx(error, n_a);
+		       Perl_croak("panic: sysconf: %s", msg);
+		   }
+		   else
+		       Perl_croak("panic: sysconf: pagesize unknown");
+	       }
+	   }
+#else
+#   ifdef HAS_GETPAGESIZE
         page_size = getpagesize();
+#   else
+#       if defined(I_SYS_PARAM) && defined(PAGESIZE)
+        page_size = PAGESIZE; /* compiletime, bad */
+#       endif
+#   endif
+#endif
+	if ((IV)page_size <= 0)
+	    Perl_croak("panic: bad pagesize %"IVdf, (IV)page_size);
+       }
        if (b->posn < 0)
         {
          /* This is a hack - should never happen - open should have set it ! */
