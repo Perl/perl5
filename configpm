@@ -527,12 +527,26 @@ close(GLOS);
 # Now create Cross.pm if needed
 if ($opts{cross}) {
   open CROSS, ">lib/Cross.pm" or die "Can not open >lib/Cross.pm: $!";
-  print CROSS <<"EOS";
-sub BEGIN {
-  \@INC = map {/\\blib\\b/?(do{local \$_=\$_;s/\\blib\\b/xlib\\/$opts{cross}/;\$_},\$_):(\$_)} \@INC;
+  my $cross = <<'EOS';
+# typical invocation:
+#   perl -MCross Makefile.PL
+#   perl -MCross=wince -V:cc
+package Cross;
+
+sub import {
+  my ($package,$platform) = @_;
+  unless (defined $platform) {
+    # if $platform is not specified, then use last one when
+    # 'configpm; was invoked with --cross option
+    $platform = '***replace-marker***';
+  }
+  @INC = map {/\blib\b/?(do{local $_=$_;s/\blib\b/xlib\/$platform/;$_},$_):($_)} @INC;
 }
+
 1;
 EOS
+  $cross =~ s/\*\*\*replace-marker\*\*\*/$opts{cross}/g;
+  print CROSS $cross;
   close CROSS;
 }
 

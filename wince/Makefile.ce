@@ -428,6 +428,10 @@ BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_SYS
 BUILDOPT	= $(BUILDOPT) -DUSE_PERLIO
 !ENDIF
 
+!IF "$(CROSS_NAME)" == ""
+CROSS_NAME	= wince
+!ENDIF
+
 # new option - automatically defined in perl.h...
 #BUILDOPT        = $(BUILDOPT) -DUSE_ENVIRON_ARRAY
 
@@ -757,7 +761,7 @@ $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 $(CONFIGPM): config.h ..\config.sh ..\minimod.pl
 	cd .. && $(HPERL) configpm
-	cd .. && $(HPERL) configpm --cross=wince --no-glossary
+	cd .. && $(HPERL) configpm --cross=$(CROSS_NAME) --no-glossary
 	-mkdir $(COREDIR)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
@@ -1026,7 +1030,7 @@ $(DLLDIR)\DynaLoader.obj
 {$(SRCDIR)/wince}.c{$(DLLDIR)}.obj:
     $(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ $<
 
-perldll.def : $(HPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ...\makedef.pl
+perldll.def : $(HPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 	$(HPERL) -w ..\makedef.pl PLATFORM=wince $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) -DPERL_DLL=$(PERLDLL) > perldll.def
 
@@ -1107,6 +1111,11 @@ hostminiperl: ..\miniperl.exe
 ..\miniperl.exe:
 	cd ../win32
 	set PATH=$(CCHOME)\bin;$(PATH)
-	$(MAKE) -f Makefile "CCHOME=$(MSVCDIR)" "CCINCDIR=$(CCHOME)\include" "CCLIBDIR=$(CCHOME)\lib" "INCLUDE=$(CCHOME)\include" "LIB=$(CCHOME)\lib" "LINK_FLAGS=" ..\config.h ..\miniperl.exe
+	$(MAKE) -f Makefile "CCHOME=$(MSVCDIR)" "CCINCDIR=$(CCHOME)\include" "CCLIBDIR=$(CCHOME)\lib" "INCLUDE=$(CCHOME)\include" "LIB=$(CCHOME)\lib" "LINK_FLAGS=" .\config.h ..\miniperl.exe
 	cd ../wince
 
+host-install:
+	perl -MConfig -MExtUtils::Install -we "install({'../lib/CORE', qq#$$Config{installprefixexp}/xlib/$(CROSS_NAME)/CORE#},1)"
+	perl -MConfig -MExtUtils::Install -we "install({'../xlib/$(CROSS_NAME)', qq#$$Config{installprefixexp}/xlib/$(CROSS_NAME)#},1)"
+	perl -MConfig -MFile::Copy -we "copy qq#./$(MACHINE)/perl$(PV).lib#, qq#$$Config{installprefixexp}/xlib/$(CROSS_NAME)/CORE#"
+	perl -MConfig -MFile::Copy -we "copy qq#../lib/Cross.pm#, qq#$$Config{installprefixexp}/lib#"

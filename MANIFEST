@@ -2746,7 +2746,6 @@ wince/cecopy-lib.pl			WinCE port
 wince/compile.bat			WinCE port
 wince/comp.pl				WinCE port
 wince/config.ce				WinCE port
-wince/config.h				WinCE port
 wince/config_H.ce			WinCE port
 wince/config_h.PL			WinCE port
 wince/config_sh.PL			WinCE port
