@@ -9,7 +9,7 @@ BEGIN {
     $| = 1;
 }
 
-print "1..90\n";
+print "1..91\n";
 
 $a = {};
 bless $a, "Bob";
@@ -49,7 +49,7 @@ package main;
   sub test {
       print "not " unless $_[0];
       print "ok ", $i++;
-      print "# at ", (caller)[1], ", line ", (caller)[2] unless $_[0];
+      print " # at ", (caller)[1], ", line ", (caller)[2] unless $_[0];
       print "\n";
   }
 }
@@ -67,6 +67,8 @@ test $a->isa("Human");
 test ! $a->isa("Male");
 
 test ! $a->isa('Programmer');
+
+test $a->isa("HASH");
 
 test $a->can("eat");
 test ! $a->can("sleep");
