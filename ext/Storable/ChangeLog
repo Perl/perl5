@@ -1,3 +1,10 @@
+Thu Oct  3 08:57:22 IST 2002   Abhijit Menon-Sen <ams@wiw.org>
+
+    Version 2.05
+
+        Adds support for CODE references from Slaven Rezic
+        <slaven.rezic@berlin.de>.
+
 Fri Jun  7 23:55:41 BST 2002   Nicholas Clark
 
     Version 2.04
