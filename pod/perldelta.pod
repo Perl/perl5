@@ -146,7 +146,7 @@ available.
 
 =item *
 
-The syntaxes C<< @a->[...] >> and  C<< %h->{...}>> have now been deprecated.
+The syntaxes C<< @a->[...] >> and  C<< %h->{...} >> have now been deprecated.
 
 =item *
 
@@ -685,7 +685,7 @@ more extensive than Test::Simple, by Michael Schwern.  See L<Test::More>.
 
 =item *
 
-C<Test::Simple> has the- basic utilities for writing tests, by Michael
+C<Test::Simple> has basic utilities for writing tests, by Michael
 Schwern.   See L<Test::Simple>.
 
 =item *
@@ -966,8 +966,8 @@ command line) is much more like that of the UNIX C compiler, cc.
 
 =item *
 
-C<perlivp> is a new utility for doing Installation Verification
-Procedure after installing Perl.
+C<perlivp> is a new Installation Verification Procedure utility
+for running any time after installing Perl.
 
 =item *
 
@@ -1011,9 +1011,6 @@ perldebtut is a Perl debugging tutorial.
 =item *
 
 perlebcdic contains considerations for running Perl on EBCDIC platforms.
-Note that unfortunately EBCDIC platforms that used to be supported back 
-in Perl 5.005 are still unsupported by Perl 5.8.0; the plan, however, is 
-to bring them back to the fold.  
 
 =item *
 
@@ -1041,11 +1038,6 @@ practices gathered over the years.
 perlpodspec is a more formal specification of the pod format,
 mainly of interest for writers of pod applications, not to
 people writing in pod.
-
-=item *
-
-perlposix-bc explains using Perl on the POSIX-BC platform
-(an EBCDIC mainframe platform).
 
 =item *
 
@@ -2255,37 +2247,15 @@ many more tests than there used to be.
 
 Here are the known failures from some compiler/platform combinations.
 
-DEC C V5.3-006 on OpenVMS VAX V6.2
-
-  [-.ext.list.util.t]tainted..............FAILED on test 3
-  [-.ext.posix]sigaction..................FAILED on test 7
-  [-.ext.time.hires]hires.................FAILED on test 14
-  [-.lib.file.find]taint..................FAILED on test 17
-  [-.lib.math.bigint.t]bigintpm...........FAILED on test 1183
-  [-.lib.test.simple.t]exit...............FAILED on test 1
-  [.lib]vmsish............................FAILED on test 13
-  [.op]sprintf............................FAILED on test 12
-  Failed 8/399 tests, 91.23% okay.
-
-DEC C V6.0-001 on OpenVMS Alpha V7.2-1 and
-Compaq C V6.2-008 on OpenVMS Alpha V7.1
-
-  [-.ext.list.util.t]tainted..............FAILED on test 3 
-  [-.lib.file.find]taint..................FAILED on test 17
-  [-.lib.test.simple.t]exit...............FAILED on test 1
-  [.lib]vmsish............................FAILED on test 13
-  Failed 4/399 tests, 92.48% okay.
-
-Compaq C V6.4-005 on OpenVMS Alpha 7.2.1
-
-  [-.ext.b]showlex........................FAILED on test 1
-  [-.ext.list.util.t]tainted..............FAILED on test 3
-  [-.lib.file.find]taint..................FAILED on test 17 
-  [-.lib.test.simple.t]exit...............FAILED on test 1
-  [.lib]vmsish............................FAILED on test 13
-  [.op]misc...............................FAILED on test 49
-  Failed 6/401 tests, 92.77% okay.
-
+Compaq C V6.2-009 on OpenVMS Alpha V7.3
+ 
+  [.run]switches..........................FAILED on test 1
+  [-.ext.posix.t]posix....................FAILED on test 10
+  [-.ext.time.hires]hires.................FAILED on test 17
+  [-.lib]db...............................FAILED on test 24
+  [-.lib.net]hostent......................FAILED on test 5
+  [-.lib.pod.t]basic......................FAILED on test 10
+  
 =head2 Win32
 
 In multi-CPU boxes there are some problems with the I/O buffering:
@@ -2303,6 +2273,13 @@ some output may appear twice.
 Code like the above is known to leak memory every time the local()
 is executed.
 
+=head2 Localising Tied Arrays and Hashes Is Broken
+
+    local %tied_array;
+
+doesn't work as one would expect: the old value is restored
+incorrectly.
+
 =head2 Self-tying of Arrays and Hashes Is Forbidden
 
 Self-tying of arrays and hashes is broken in rather deep and
@@ -2314,6 +2291,10 @@ for now forbidden (you will get a fatal error even from an attempt).
 
 This limitation will hopefully be fixed in future.  (Subroutine
 attributes work fine for tieing, see L<Attribute::Handlers>).
+
+One way to run into this limitation is to have a loop variable with
+attributes within a loop: the tie is called only once, not for each
+iteration of the loop.
 
 =head2 Building Extensions Can Fail Because Of Largefiles
 
@@ -2330,6 +2311,13 @@ solution may not even work at all.  One potential failure is whether
 one can (or, if one can, whether it's a good idea) link together at
 all binaries with different ideas about file offsets, all this is
 platform-dependent.
+
+=head2 Unicode Support on EBCDIC Still Spotty
+
+Though mostly working, Unicode support still has problem spots on
+EBCDIC platforms.  One such known spot are the C<\p{}> and C<\P{}>
+regular expression constructs for code points less than 256: the
+pP are testing for Unicode code points, not knowing about EBCDIC.
 
 =head2 The Compiler Suite Is Still Experimental
 
