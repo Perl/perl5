@@ -29,6 +29,11 @@ sub path {
     return @path;
 }
 
+sub cwd {
+    # In OS/2 the "require Cwd" is unnecessary bloat.
+    return Cwd::sys_cwd();
+}
+
 =pod
 
 =item tmpdir
