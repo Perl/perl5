@@ -681,6 +681,11 @@ list overrides the normal behavior if all of the listed conditions are
 true.  Case distinctions in the condition list are not significant.
 Conditions preceded by "NON_" represent the negation of the condition
 
+Note that when there are multiple case folding definitions for a
+single code point because of different locales, the value returned by
+casespec() is a hash reference which has the locales as the keys and
+hash references as described above as the values.
+
 A I<locale> is defined as a 2-letter ISO 3166 country code, possibly
 followed by a "_" and a 2-letter ISO language code (possibly followed
 by a "_" and a variant code).  You can find the lists of those codes,
@@ -705,12 +710,49 @@ sub _casespec {
 	if (openunicode(\$CASESPECFH, "SpecCase.txt")) {
 	    while (<$CASESPECFH>) {
 		if (/^([0-9A-F]+); ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; (\w+(?: \w+)*)?/) {
-		    my $code = hex($1);
-		    $CASESPEC{$code} = { code      => $1,
-					 lower     => $2,
-					 title     => $3,
-					 upper     => $4,
-					 condition => $5 };
+		    my ($hexcode, $lower, $title, $upper, $condition) =
+			($1, $2, $3, $4, $5);
+		    my $code = hex($hexcode);
+		    if (exists $CASESPEC{$code}) {
+			if (exists $CASESPEC{$code}->{code}) {
+			    my ($oldlower,
+				$oldtitle,
+				$oldupper,
+				$oldcondition) =
+				    @{$CASESPEC{$code}}{qw(lower
+							   title
+							   upper
+							   condition)};
+			    my ($oldlocale) =
+				($oldcondition =~ /^([a-z][a-z](?:_\S+)?)/);
+			    if (defined $oldlocale) {
+				delete $CASESPEC{$code};
+				$CASESPEC{$code}->{$oldlocale} =
+				{ code      => $hexcode,
+				  lower     => $oldlower,
+				  title     => $oldtitle,
+				  upper     => $oldupper,
+				  condition => $oldcondition };
+			    } else {
+				warn __PACKAGE__, ": SpecCase.txt:", $., ": No oldlocale for 0x$hexcode\n"
+			    }
+			}
+			my ($locale) =
+			    ($condition =~ /^([a-z][a-z](?:_\S+)?)/);
+			$CASESPEC{$code}->{$locale} =
+			{ code      => $hexcode,
+			  lower     => $lower,
+			  title     => $title,
+			  upper     => $upper,
+			  condition => $condition };
+		    } else {
+			$CASESPEC{$code} =
+			{ code      => $hexcode,
+			  lower     => $lower,
+			  title     => $title,
+			  upper     => $upper,
+			  condition => $condition };
+		    }
 		}
 	    }
 	    close($CASESPECFH);
