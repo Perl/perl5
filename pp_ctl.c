@@ -1015,6 +1015,16 @@ PP(pp_flop)
 
 /* Control. */
 
+static char *context_name[] = {
+    "pseudo-block",
+    "subroutine",
+    "eval",
+    "loop",
+    "substitution",
+    "block",
+    "format"
+};
+
 STATIC I32
 S_dopoptolabel(pTHX_ char *label)
 {
@@ -1025,30 +1035,16 @@ S_dopoptolabel(pTHX_ char *label)
 	cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting substitution via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_SUB:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting subroutine via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_FORMAT:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting format via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_EVAL:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting eval via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting pseudo-block via %s",
-			OP_NAME(PL_op));
-	    return -1;
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
+			context_name[CxTYPE(cx)], OP_NAME(PL_op));
+	    if (CxTYPE(cx) == CXt_NULL)
+		return -1;
+	    break;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
 	      strNE(label, cx->blk_loop.label) ) {
@@ -1160,30 +1156,16 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting substitution via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_SUB:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting subroutine via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_FORMAT:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting format via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_EVAL:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting eval via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting pseudo-block via %s",
-			OP_NAME(PL_op));
-	    return -1;
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
+			context_name[CxTYPE(cx)], OP_NAME(PL_op));
+	    if ((CxTYPE(cx)) == CXt_NULL)
+		return -1;
+	    break;
 	case CXt_LOOP:
 	    DEBUG_l( Perl_deb(aTHX_ "(Found loop #%ld)\n", (long)i));
 	    return i;
