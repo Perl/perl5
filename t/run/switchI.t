@@ -10,16 +10,24 @@ BEGIN {
     plan(4);
 }
 
-ok(grep { $_ eq 'Bla' } @INC);
+my $Is_MacOS = $^O eq 'MacOS';
+my $Is_VMS   = $^O eq 'VMS';
+my $lib;
+
+$lib = $Is_MacOS ? ':Bla:' : 'Bla';
+ok(grep { $_ eq $lib } @INC);
 SKIP: {
-  skip 'Double colons not allowed in dir spec', 1 if $^O eq 'VMS';
-  ok(grep { $_ eq 'Foo::Bar' } @INC);
+  skip 'Double colons not allowed in dir spec', 1 if $Is_VMS;
+  $lib = $Is_MacOS ? 'Foo::Bar:' : 'Foo::Bar';
+  ok(grep { $_ eq $lib } @INC);
 }
 
-fresh_perl_is('print grep { $_ eq "Bla2" } @INC', 'Bla2',
+$lib = $Is_MacOS ? ':Bla2:' : 'Bla2';
+fresh_perl_is("print grep { \$_ eq '$lib' } \@INC", $lib,
 	      { switches => ['-IBla2'] }, '-I');
 SKIP: {
-  skip 'Double colons not allowed in dir spec', 1 if $^O eq 'VMS';
-  fresh_perl_is('print grep { $_ eq "Foo::Bar2" } @INC', 'Foo::Bar2',
+  skip 'Double colons not allowed in dir spec', 1 if $Is_VMS;
+  $lib = $Is_MacOS ? 'Foo::Bar2:' : 'Foo::Bar2';
+  fresh_perl_is("print grep { \$_ eq '$lib' } \@INC", $lib,
 	        { switches => ['-IFoo::Bar2'] }, '-I with colons');
 }

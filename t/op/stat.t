@@ -55,7 +55,7 @@ SKIP: {
 
 SKIP: {
   skip "mtime and ctime not reliable", 2
-    if $Is_MSWin32 or $Is_NetWare or $Is_Cygwin or $Is_Dos;
+    if $Is_MSWin32 or $Is_NetWare or $Is_Cygwin or $Is_Dos or $Is_MacOS;
 
   ok( $mtime,           'mtime' );
   is( $mtime, $ctime,   'mtime == ctime' );

@@ -804,7 +804,8 @@ no ${module6} ;
 print "ok";
 EOM
 
-my $a = `$Perl "-I." $Inc -e "no ${module6}; print q{ok}"`;
+my $str = $^O eq 'MacOS' ? "'ok'" : "q{ok}";
+my $a = `$Perl "-I." $Inc -e "no ${module6}; print $str"`;
 ok(29, ($? >>8) == 0);
 chomp( $a ) if $^O eq 'VMS';
 ok(30, $a eq 'ok');

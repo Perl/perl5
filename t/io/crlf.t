@@ -35,7 +35,7 @@ if (find PerlIO::Layer 'perlio') {
   eval 'use PerlIO::scalar';
   skip(q/miniperl cannnot load PerlIO::scalar/)
       if $@ =~ /dynamic loading not available/;
-  my $fcontents = join "", map {"$_\r\n"} "a".."zzz";
+  my $fcontents = join "", map {"$_\015\012"} "a".."zzz";
   open my $fh, "<:crlf", \$fcontents;
   local $/ = "xxx";
   local $_ = <$fh>;

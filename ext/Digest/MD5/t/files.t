@@ -28,10 +28,10 @@ de2c149900efee0fbb39ad87dea68a43  MD5.xs
 EOT
 } elsif ("\n" eq "\015") { # MacOS
     $EXPECT = <<EOT;
-d286d6c6a61e44e88d1deba9954ce37a  Changes
-6c950a0211a5a28f023bb482037698cd  README
-d31c9aefa1a9e40beda9fff1e1d9c02d  MD5.pm
-df178436ead9d354d63089fa0e01af27  MD5.xs
+48ce3d9c310bd3173f6fe0a336f349cf  Changes
+53a0461b093f6c9d3e03d31f7133e62c  README
+7dcff59ab5cb7ad4998fb518047b2e59  MD5.pm
+10542966f7609cb13816dc6a18527775  MD5.xs
 754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT
 } else {

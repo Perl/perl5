@@ -374,7 +374,7 @@ __END__
 >%vs,%d<	>[1, 2, 3]<	>1,2<
 >%v_<	>''<	>%v_ INVALID<
 >%v#x<	>''<	>%v#x INVALID<
->%v02x<	>"foo\n"<	>66.6f.6f.0a<
+>%v02x<	>"foo\012"<	>66.6f.6f.0a<
 >%V-%s<		>["Hello"]<	>%V-Hello INVALID<
 >%K %d %d<	>[13, 29]<	>%K 13 29 INVALID<
 >%*.*K %d<	>[13, 29, 76]<	>%*.*K 13 INVALID<
