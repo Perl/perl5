@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.9 90/10/15 17:59:41 lwall Locked $
+/* $Header: perl.h,v 3.0.1.10 90/11/10 01:44:13 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.10  90/11/10  01:44:13  lwall
+ * patch38: more msdos/os2 upgrades
+ * 
  * Revision 3.0.1.9  90/10/15  17:59:41  lwall
  * patch29: some machines didn't like unsigned C preprocessor values
  * 
@@ -623,7 +626,7 @@ EXT bool tainted INIT(FALSE);		/* using variables controlled by $< */
 #ifndef MSDOS
 #define TMPPATH "/tmp/perl-eXXXXXX"
 #else
-#define TMPPATH "/tmp/plXXXXXX"
+#define TMPPATH "plXXXXXX"
 #endif /* MSDOS */
 EXT char *e_tmpname;
 EXT FILE *e_fp INIT(Nullfp);

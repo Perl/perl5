@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.9 90/10/15 16:46:13 lwall Locked $
+/* $Header: eval.c,v 3.0.1.10 90/11/10 01:33:22 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.10  90/11/10  01:33:22  lwall
+ * patch38: random cleanup
+ * patch38: couldn't return from sort routine
+ * patch38: added hooks for unexec()
+ * patch38: added alarm function
+ * 
  * Revision 3.0.1.9  90/10/15  16:46:13  lwall
  * patch29: added caller
  * patch29: added scalar
@@ -848,11 +854,9 @@ register int sp;
 	goto array_return;
     case O_REVERSE:
 	if (gimme == G_ARRAY)
-	    sp = do_reverse(str,
-	      gimme,arglast);
+	    sp = do_reverse(arglast);
 	else
-	    sp = do_sreverse(str,
-	      gimme,arglast);
+	    sp = do_sreverse(str, arglast);
 	goto array_return;
     case O_WARN:
 	if (arglast[2] - arglast[1] != 1) {
@@ -1117,7 +1121,7 @@ register int sp;
     case O_RETURN:
 	tmps = "_SUB_";		/* just fake up a "last _SUB_" */
 	optype = O_LAST;
-	if (curcsv->wantarray == G_ARRAY) {
+	if (curcsv && curcsv->wantarray == G_ARRAY) {
 	    lastretstr = Nullstr;
 	    lastspbase = arglast[1];
 	    lastsize = arglast[2] - arglast[1];
@@ -1171,7 +1175,7 @@ register int sp;
 	    goto_targ = Nullch;		/* just restart from top */
 	if (optype == O_DUMP) {
 	    do_undump = 1;
-	    abort();
+	    my_unexec();
 	}
 	longjmp(top_env, 1);
     case O_INDEX:
@@ -1355,6 +1359,18 @@ register int sp;
 	anum = (int) *tmps;
 	value = (double) (anum & 255);
 #endif
+	goto donumset;
+    case O_ALARM:
+	if (maxarg < 1)
+	    tmps = str_get(stab_val(defstab));
+	else
+	    tmps = str_get(st[1]);
+	if (!tmps)
+	    tmps = "0";
+	anum = alarm((unsigned int)atoi(tmps));
+	if (anum < 0)
+	    goto say_undef;
+	value = (double)anum;
 	goto donumset;
     case O_SLEEP:
 	if (maxarg < 1)

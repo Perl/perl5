@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.8 90/10/15 16:04:04 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.9 90/11/10 01:14:31 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.9  90/11/10  01:14:31  lwall
+ * patch38: random cleanup
+ * patch38: optimized join('',...)
+ * patch38: printf cleaned up
+ * 
  * Revision 3.0.1.8  90/10/15  16:04:04  lwall
  * patch29: @ENV = () now works
  * patch29: added caller
@@ -399,9 +404,15 @@ int *arglast;
 	str_sset(str,*st++);
     else
 	str_set(str,"");
-    for (; items > 0; items--,st++) {
-	str_ncat(str,delim,delimlen);
-	str_scat(str,*st);
+    if (delimlen) {
+	for (; items > 0; items--,st++) {
+	    str_ncat(str,delim,delimlen);
+	    str_scat(str,*st);
+	}
+    }
+    else {
+	for (; items > 0; items--,st++)
+	    str_scat(str,*st);
     }
     STABSET(str);
 }
@@ -465,9 +476,9 @@ int *arglast;
 	    break;
 	case 'X':
 	  shrink:
-	    str->str_cur -= len;
-	    if (str->str_cur < 0)
+	    if (str->str_cur < len)
 		fatal("X outside of string");
+	    str->str_cur -= len;
 	    str->str_ptr[str->str_cur] = '\0';
 	    break;
 	case 'x':
@@ -651,6 +662,7 @@ register STR **sarg;
 {
     register char *s;
     register char *t;
+    register char *f;
     bool dolong;
     char ch;
     static STR *sargnull = &str_no;
@@ -662,49 +674,46 @@ register STR **sarg;
 
     str_set(str,"");
     len--;			/* don't count pattern string */
-    origs = s = str_get(*sarg);
+    origs = t = s = str_get(*sarg);
     send = s + (*sarg)->str_cur;
     sarg++;
-    for ( ; s < send; len--) {
+    for ( ; ; len--) {
 	if (len <= 0 || !*sarg) {
 	    sarg = &sargnull;
 	    len = 0;
 	}
-	dolong = FALSE;
-	for (t = s; t < send && *t != '%'; t++) ;
+	for ( ; t < send && *t != '%'; t++) ;
 	if (t >= send)
-	    break;		/* not enough % patterns, oh well */
-	for (t++; *sarg && t < send && t != s; t++) {
+	    break;		/* end of format string, ignore extra args */
+	f = t;
+	*buf = '\0';
+	xs = buf;
+	dolong = FALSE;
+	for (t++; t < send; t++) {
 	    switch (*t) {
 	    default:
 		ch = *(++t);
 		*t = '\0';
-		(void)sprintf(buf,s);
-		s = t;
-		*(t--) = ch;
+		(void)sprintf(xs,f);
 		len++;
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9': 
-	    case '.': case '#': case '-': case '+':
-		break;
+	    case '.': case '#': case '-': case '+': case ' ':
+		continue;
 	    case 'l':
 		dolong = TRUE;
-		break;
+		continue;
 	    case 'c':
 		ch = *(++t);
 		*t = '\0';
 		xlen = (int)str_gnum(*(sarg++));
-		if (strEQ(t-2,"%c")) {	/* some printfs fail on null chars */
-		    *buf = xlen;
-		    str_ncat(str,s,t - s - 2);
-		    str_ncat(str,buf,1);  /* so handle simple case */
-		    *buf = '\0';
+		if (strEQ(f,"%c")) { /* some printfs fail on null chars */
+		    *xs = xlen;
+		    xs[1] = '\0';
 		}
 		else
-		    (void)sprintf(buf,s,xlen);
-		s = t;
-		*(t--) = ch;
+		    (void)sprintf(xs,f,xlen);
 		break;
 	    case 'D':
 		dolong = TRUE;
@@ -713,11 +722,9 @@ register STR **sarg;
 		ch = *(++t);
 		*t = '\0';
 		if (dolong)
-		    (void)sprintf(buf,s,(long)str_gnum(*(sarg++)));
+		    (void)sprintf(xs,f,(long)str_gnum(*(sarg++)));
 		else
-		    (void)sprintf(buf,s,(int)str_gnum(*(sarg++)));
-		s = t;
-		*(t--) = ch;
+		    (void)sprintf(xs,f,(int)str_gnum(*(sarg++)));
 		break;
 	    case 'X': case 'O':
 		dolong = TRUE;
@@ -727,18 +734,14 @@ register STR **sarg;
 		*t = '\0';
 		value = str_gnum(*(sarg++));
 		if (dolong)
-		    (void)sprintf(buf,s,U_L(value));
+		    (void)sprintf(xs,f,U_L(value));
 		else
-		    (void)sprintf(buf,s,U_I(value));
-		s = t;
-		*(t--) = ch;
+		    (void)sprintf(xs,f,U_I(value));
 		break;
 	    case 'E': case 'e': case 'f': case 'G': case 'g':
 		ch = *(++t);
 		*t = '\0';
-		(void)sprintf(buf,s,str_gnum(*(sarg++)));
-		s = t;
-		*(t--) = ch;
+		(void)sprintf(xs,f,str_gnum(*(sarg++)));
 		break;
 	    case 's':
 		ch = *(++t);
@@ -756,37 +759,27 @@ register STR **sarg;
 		    xlen = strlen(tokenbuf);
 		    str_free(tmpstr);
 		}
-		if (strEQ(t-2,"%s")) {	/* some printfs fail on >128 chars */
-		    *buf = '\0';
-		    str_ncat(str,s,t - s - 2);
-		    *t = ch;
-		    str_ncat(str,xs,xlen);  /* so handle simple case */
-		}
-		else {
-		    if (origs == xs) {		/* sprintf($s,...$s...) */
-			strcpy(tokenbuf+64,s);
-			s = tokenbuf+64;
-			*t = ch;
-		    }
-		    (void)sprintf(buf,s,xs);
-		}
 		sarg++;
-		s = t;
-		*(t--) = ch;
+		if (strEQ(f,"%s")) {	/* some printfs fail on >128 chars */
+		    break;		/* so handle simple case */
+		}
+		strcpy(tokenbuf+64,f);	/* sprintf($s,...$s...) */
+		*t = ch;
+		(void)sprintf(buf,tokenbuf+64,xs);
+		xs = buf;
 		break;
 	    }
-	}
-	if (s < t && t >= send) {
-	    str_cat(str,s);
+	    /* end of switch, copy results */
+	    *t = ch;
+	    xlen = strlen(xs);
+	    STR_GROW(str, str->str_cur + (f - s) + len + 1);
+	    str_ncat(str, s, f - s);
+	    str_ncat(str, xs, xlen);
 	    s = t;
-	    break;
+	    break;		/* break from for loop */
 	}
-	str_cat(str,buf);
     }
-    if (*s) {
-	(void)sprintf(buf,s,0,0,0,0);
-	str_cat(str,buf);
-    }
+    str_ncat(str, s, t - s);
     STABSET(str);
 }
 

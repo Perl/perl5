@@ -1,4 +1,4 @@
-/* $Header: os2.c,v 3.0.1.1 90/10/15 17:49:55 lwall Locked $
+/* $Header: os2.c,v 3.0.1.2 90/11/10 01:42:38 lwall Locked $
  *
  *    (C) Copyright 1989, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	os2.c,v $
+ * Revision 3.0.1.2  90/11/10  01:42:38  lwall
+ * patch38: more msdos/os2 upgrades
+ * 
  * Revision 3.0.1.1  90/10/15  17:49:55  lwall
  * patch29: Initial revision
  * 
@@ -50,7 +53,7 @@ int syscall()
 int chdir(char *path)
 {
   if ( path[0] != 0 && path[1] == ':' )
-    DosSelectDisk(tolower(path[0]) - '@');
+    DosSelectDisk(toupper(path[0]) - '@');
 
   DosChDir(path, 0L);
 }

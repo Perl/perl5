@@ -35,7 +35,7 @@ chdir '/usr/include' || die "Can't cd /usr/include";
 %isatype = ('char',1,'short',1,'int',1,'long',1);
 
 foreach $file (@ARGV) {
-    ($outfile = $file) =~ s/\.h$/.ph/;
+    ($outfile = $file) =~ s/\.h$/.ph/ || next;
     print "$file -> $outfile\n";
     if ($file =~ m|^(.*)/|) {
 	$dir = $1;

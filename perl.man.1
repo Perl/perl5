@@ -1,7 +1,10 @@
 .rn '' }`
-''' $Header: perl_man.1,v 3.0.1.9 90/10/20 02:14:24 lwall Locked $
+''' $Header: perl_man.1,v 3.0.1.10 90/11/10 01:45:16 lwall Locked $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 3.0.1.10  90/11/10  01:45:16  lwall
+''' patch38: random cleanup
+''' 
 ''' Revision 3.0.1.9  90/10/20  02:14:24  lwall
 ''' patch37: fixed various typos in man page
 ''' 
@@ -631,7 +634,7 @@ into strings.
 In addition, the token __END__ may be used to indicate the logical end of the
 script before the actual end of file.
 Any following text is ignored (but may be read via the DATA filehandle).
-The two control characters ^D and ^Z are synomyms for __END__.
+The two control characters ^D and ^Z are synonyms for __END__.
 .PP
 A word that doesn't have any other interpretation in the grammar will be
 treated as if it had single quotes around it.
@@ -997,7 +1000,7 @@ or
 switch.)
 .PP
 A declaration can be put anywhere a command can, but has no effect on the
-execution of the primary sequence of commands--declarations all take effect
+execution of the primary sequence of commands\(*--declarations all take effect
 at compile time.
 Typically all the declarations are put at the beginning or the end of the script.
 .PP

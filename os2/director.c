@@ -5,16 +5,19 @@
  *  MS-DOS.  Written by Michael Rendell ({uunet,utai}michael@garfield),
  *  August 1897
  *  Ported to OS/2 by Kai Uwe Rommel
- *  December 1989
+ *  December 1989, February 1990
+ *  Change for HPFS support, October 1990
  */
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/dir.h>
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
+#include <ctype.h>
 
 #define INCL_NOPM
 #include <os2.h>
@@ -29,6 +32,7 @@ static void free_dircontents(struct _dircontents *);
 static HDIR hdir;
 static USHORT count;
 static FILEFINDBUF find;
+static BOOL lower;
 
 
 DIR *opendir(char *name)
@@ -125,7 +129,6 @@ struct direct *readdir(DIR * dirp)
   dp.d_namlen = dp.d_reclen =
     strlen(strcpy(dp.d_name, dirp -> dd_cp -> _d_entry));
 
-  strlwr(dp.d_name);		       /* JF */
   dp.d_ino = 0;
 
   dp.d_size = dirp -> dd_cp -> _d_size;
@@ -176,12 +179,52 @@ static void free_dircontents(struct _dircontents * dp)
 }
 
 
+static int IsFileSystemFAT(char *dir)
+{
+  USHORT nDrive;
+  ULONG lMap;
+  BYTE bData[64], bName[3];
+  USHORT cbData;
+
+  if ( _osmode == DOS_MODE )
+    return TRUE;
+  else
+  {
+    /* We separate FAT and HPFS file systems here.
+     * Filenames read from a FAT system are converted to lower case
+     * while the case of filenames read from a HPFS (and other future
+     * file systems, like Unix-compatibles) is preserved.
+     */
+
+    if ( isalpha(dir[0]) && (dir[1] == ':') )
+      nDrive = toupper(dir[0]) - '@';
+    else
+      DosQCurDisk(&nDrive, &lMap);
+
+    bName[0] = (char) (nDrive + '@');
+    bName[1] = ':';
+    bName[2] = 0;
+
+    cbData = sizeof(bData);
+
+    if ( !DosQFSAttach(bName, 0U, 1U, bData, &cbData, 0L) )
+      return !strcmp(bData + (*(USHORT *) (bData + 2) + 7), "FAT");
+    else
+      return FALSE;
+
+    /* End of this ugly code */
+  }
+}
+
+
 static char *getdirent(char *dir)
 {
   int done;
 
   if (dir != NULL)
   {				       /* get first entry */
+    lower = IsFileSystemFAT(dir);
+
     hdir = HDIR_CREATE;
     count = 1;
     done = DosFindFirst(dir, &hdir, attributes,
@@ -189,6 +232,9 @@ static char *getdirent(char *dir)
   }
   else				       /* get next entry */
     done = DosFindNext(hdir, &find, sizeof(find), &count);
+
+  if ( lower )
+    strlwr(find.achName);
 
   if (done == 0)
     return find.achName;

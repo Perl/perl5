@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.12 90/10/20 02:04:18 lwall Locked $
+/* $Header: doio.c,v 3.0.1.13 90/11/10 01:17:37 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.13  90/11/10  01:17:37  lwall
+ * patch38: -e _ was wrong if last stat failed
+ * patch38: more msdos/os2 upgrades
+ * 
  * Revision 3.0.1.12  90/10/20  02:04:18  lwall
  * patch37: split out separate Sys V IPC features
  * 
@@ -111,6 +115,8 @@
 #ifdef I_FCNTL
 #include <fcntl.h>
 #endif
+
+int laststatval = -1;
 
 bool
 do_open(stab,name,len)
@@ -598,10 +604,14 @@ STR *argstr;
     if (optype == O_IOCTL)
 	retval = ioctl(fileno(stio->ifp), func, s);
     else
+#ifdef MSDOS
+	fatal("fcntl is not implemented");
+#else
 #ifdef I_FCNTL
 	retval = fcntl(fileno(stio->ifp), func, s);
 #else
 	fatal("fcntl is not implemented");
+#endif
 #endif
 #else /* lint */
     retval = 0;
@@ -625,7 +635,6 @@ int *arglast;
     register ARRAY *ary = stack;
     register int sp = arglast[0] + 1;
     int max = 13;
-    register int i;
 
     if ((arg[1].arg_type & A_MASK) == A_WORD) {
 	tmpstab = arg[1].arg_ptr.arg_stab;
@@ -635,19 +644,22 @@ int *arglast;
 	    if (!stab_io(tmpstab) || !stab_io(tmpstab)->ifp ||
 	      fstat(fileno(stab_io(tmpstab)->ifp),&statcache) < 0) {
 		max = 0;
+		laststatval = -1;
 	    }
 	}
+	else if (laststatval < 0)
+	    max = 0;
     }
     else {
 	str_sset(statname,ary->ary_array[sp]);
 	statstab = Nullstab;
 #ifdef LSTAT
 	if (arg->arg_type == O_LSTAT)
-	    i = lstat(str_get(statname),&statcache);
+	    laststatval = lstat(str_get(statname),&statcache);
 	else
 #endif
-	    i = stat(str_get(statname),&statcache);
-	if (i < 0)
+	    laststatval = stat(str_get(statname),&statcache);
+	if (laststatval < 0)
 	    max = 0;
     }
 
@@ -941,23 +953,23 @@ STR *str;
 	if (stio && stio->ifp) {
 	    statstab = arg[1].arg_ptr.arg_stab;
 	    str_set(statname,"");
-	    return fstat(fileno(stio->ifp), &statcache);
+	    return (laststatval = fstat(fileno(stio->ifp), &statcache));
 	}
 	else {
 	    if (arg[1].arg_ptr.arg_stab == defstab)
-		return 0;
+		return laststatval;
 	    if (dowarn)
 		warn("Stat on unopened file <%s>",
 		  stab_name(arg[1].arg_ptr.arg_stab));
 	    statstab = Nullstab;
 	    str_set(statname,"");
-	    return -1;
+	    return (laststatval = -1);
 	}
     }
     else {
 	statstab = Nullstab;
 	str_sset(statname,str);
-	return stat(str_get(str),&statcache);
+	return (laststatval = stat(str_get(str),&statcache));
     }
 }
 

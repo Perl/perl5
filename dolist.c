@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.10 90/10/15 16:19:48 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.11 90/11/10 01:29:49 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.11  90/11/10  01:29:49  lwall
+ * patch38: temp string values are now copied less often
+ * patch38: sort parameters are now in the right package
+ * 
  * Revision 3.0.1.10  90/10/15  16:19:48  lwall
  * patch29: added caller
  * patch29: added scalar reverse
@@ -376,11 +380,10 @@ int *arglast;
 	    for (m = s; m < strend && !isspace(*m); m++) ;
 	    if (m >= strend)
 		break;
-	    if (realarray)
-		dstr = Str_new(30,m-s);
-	    else
-		dstr = str_static(&str_undef);
+	    dstr = Str_new(30,m-s);
 	    str_nset(dstr,s,m-s);
+	    if (!realarray)
+		str_2static(dstr);
 	    (void)astore(ary, ++sp, dstr);
 	    for (s = m + 1; s < strend && isspace(*s); s++) ;
 	}
@@ -391,11 +394,10 @@ int *arglast;
 	    m++;
 	    if (m >= strend)
 		break;
-	    if (realarray)
-		dstr = Str_new(30,m-s);
-	    else
-		dstr = str_static(&str_undef);
+	    dstr = Str_new(30,m-s);
 	    str_nset(dstr,s,m-s);
+	    if (!realarray)
+		str_2static(dstr);
 	    (void)astore(ary, ++sp, dstr);
 	    s = m;
 	}
@@ -420,11 +422,10 @@ int *arglast;
 		    for (m = s; m < strend && *m != i; m++) ;
 		if (m >= strend)
 		    break;
-		if (realarray)
-		    dstr = Str_new(30,m-s);
-		else
-		    dstr = str_static(&str_undef);
+		dstr = Str_new(30,m-s);
 		str_nset(dstr,s,m-s);
+		if (!realarray)
+		    str_2static(dstr);
 		(void)astore(ary, ++sp, dstr);
 		s = m + 1;
 	    }
@@ -436,11 +437,10 @@ int *arglast;
 		    spat->spat_short)) )
 #endif
 	    {
-		if (realarray)
-		    dstr = Str_new(31,m-s);
-		else
-		    dstr = str_static(&str_undef);
+		dstr = Str_new(31,m-s);
 		str_nset(dstr,s,m-s);
+		if (!realarray)
+		    str_2static(dstr);
 		(void)astore(ary, ++sp, dstr);
 		s = m + i;
 	    }
@@ -459,21 +459,19 @@ int *arglast;
 		strend = s + (strend - m);
 	    }
 	    m = spat->spat_regexp->startp[0];
-	    if (realarray)
-		dstr = Str_new(32,m-s);
-	    else
-		dstr = str_static(&str_undef);
+	    dstr = Str_new(32,m-s);
 	    str_nset(dstr,s,m-s);
+	    if (!realarray)
+		str_2static(dstr);
 	    (void)astore(ary, ++sp, dstr);
 	    if (spat->spat_regexp->nparens) {
 		for (i = 1; i <= spat->spat_regexp->nparens; i++) {
 		    s = spat->spat_regexp->startp[i];
 		    m = spat->spat_regexp->endp[i];
-		    if (realarray)
-			dstr = Str_new(33,m-s);
-		    else
-			dstr = str_static(&str_undef);
+		    dstr = Str_new(33,m-s);
 		    str_nset(dstr,s,m-s);
+		    if (!realarray)
+			str_2static(dstr);
 		    (void)astore(ary, ++sp, dstr);
 		}
 	    }
@@ -487,11 +485,10 @@ int *arglast;
     if (iters > maxiters)
 	fatal("Split loop");
     if (s < strend || origlimit) {	/* keep field after final delim? */
-	if (realarray)
-	    dstr = Str_new(34,strend-s);
-	else
-	    dstr = str_static(&str_undef);
+	dstr = Str_new(34,strend-s);
 	str_nset(dstr,s,strend-s);
+	if (!realarray)
+	    str_2static(dstr);
 	(void)astore(ary, ++sp, dstr);
 	iters++;
     }
@@ -554,11 +551,9 @@ int *arglast;
     register int len;
 
     /* These must not be in registers: */
-    char achar;
     short ashort;
     int aint;
     long along;
-    unsigned char auchar;
     unsigned short aushort;
     unsigned int auint;
     unsigned long aulong;
@@ -1296,9 +1291,7 @@ int *arglast;
 }
 
 int
-do_reverse(str,gimme,arglast)
-STR *str;
-int gimme;
+do_reverse(arglast)
 int *arglast;
 {
     STR **st = stack->ary_array;
@@ -1317,9 +1310,8 @@ int *arglast;
 }
 
 int
-do_sreverse(str,gimme,arglast)
+do_sreverse(str,arglast)
 STR *str;
-int gimme;
 int *arglast;
 {
     STR **st = stack->ary_array;
@@ -1343,6 +1335,7 @@ int *arglast;
 }
 
 static CMD *sortcmd;
+static HASH *sortstash = Null(HASH*);
 static STAB *firststab = Nullstab;
 static STAB *secondstab = Nullstab;
 
@@ -1391,14 +1384,17 @@ int *arglast;
 		fatal("Undefined subroutine \"%s\" in sort", stab_name(stab));
 	    if (!sortstack) {
 		sortstack = anew(Nullstab);
+		astore(sortstack, 0, Nullstr);
+		aclear(sortstack);
 		sortstack->ary_flags = 0;
 	    }
 	    oldstack = stack;
 	    stack = sortstack;
 	    tmps_base = tmps_max;
-	    if (!firststab) {
+	    if (sortstash != stab_stash(stab)) {
 		firststab = stabent("a",TRUE);
 		secondstab = stabent("b",TRUE);
+		sortstash = stab_stash(stab);
 	    }
 	    oldfirst = stab_val(firststab);
 	    oldsecond = stab_val(secondstab);
@@ -1485,7 +1481,7 @@ int *arglast;
 	while (!str->str_nok && str->str_cur <= final->str_cur &&
 	    strNE(str->str_ptr,tmps) ) {
 	    (void)astore(ary, ++sp, str);
-	    str = str_static(str);
+	    str = str_2static(str_smake(str));
 	    str_inc(str);
 	}
 	if (strEQ(str->str_ptr,tmps))
@@ -1537,9 +1533,9 @@ int *arglast;
       str_2static(str_nmake((double)csv->curcmd->c_line)) );
     if (!maxarg)
 	return sp;
-    str = str_static(&str_undef);
+    str = Str_new(49,0);
     stab_fullname(str, csv->stab);
-    (void)astore(stack,++sp, str);
+    (void)astore(stack,++sp, str_2static(str));
     (void)astore(stack,++sp,
       str_2static(str_nmake((double)csv->hasargs)) );
     (void)astore(stack,++sp,

@@ -2,9 +2,12 @@
  * kit sizes from getting too big.
  */
 
-/* $Header: evalargs.xc,v 3.0.1.7 90/10/15 16:48:11 lwall Locked $
+/* $Header: evalargs.xc,v 3.0.1.8 90/11/10 01:35:49 lwall Locked $
  *
  * $Log:	evalargs.xc,v $
+ * Revision 3.0.1.8  90/11/10  01:35:49  lwall
+ * patch38: array slurps are now faster and take less memory
+ * 
  * Revision 3.0.1.7  90/10/15  16:48:11  lwall
  * patch29: non-existent array values no longer cause core dumps
  * patch29: added caller
@@ -245,11 +248,16 @@
 			    astore(stack, sp, Nullstr);
 			    st = stack->ary_array;
 			}
-			st[sp] = str_static(&str_undef);
-			if (str_gets(st[sp],fp,0) == Nullch) {
+			str = st[sp] = Str_new(56,80);
+			if (str_gets(str,fp,0) == Nullch) {
 			    sp--;
 			    break;
 			}
+			if (str->str_len - str->str_cur > 20) {
+			    str->str_len = str->str_cur+1;
+			    Renew(str->str_ptr, str->str_len, char);
+			}
+			str_2static(str);
 		    }
 		}
 		statusvalue = mypclose(fp);
@@ -299,7 +307,7 @@
 	    if (anum > 1)		/* assign to scalar */
 		gimme = G_SCALAR;	/* force context to scalar */
 	    if (gimme == G_ARRAY)
-		str = str_static(&str_undef);
+		str = Str_new(57,0);
 	    ++sp;
 	    fp = Nullfp;
 	    if (stab_io(last_in_stab)) {
@@ -369,6 +377,7 @@
 		record_separator = old_record_separator;
 		if (gimme == G_ARRAY) {
 		    --sp;
+		    str_2static(str);
 		    goto array_return;
 		}
 		break;
@@ -394,11 +403,16 @@
 			goto keepgoing;		/* unmatched wildcard? */
 		}
 		if (gimme == G_ARRAY) {
+		    if (str->str_len - str->str_cur > 20) {
+			str->str_len = str->str_cur+1;
+			Renew(str->str_ptr, str->str_len, char);
+		    }
+		    str_2static(str);
 		    if (++sp > stack->ary_max) {
 			astore(stack, sp, Nullstr);
 			st = stack->ary_array;
 		    }
-		    str = str_static(&str_undef);
+		    str = Str_new(58,80);
 		    goto keepgoing;
 		}
 	    }
