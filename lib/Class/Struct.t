@@ -66,7 +66,7 @@ isa_ok $obj->c, 'aClass';
 is $obj->c->meth(), 42;
 
 
-my $obj = MyOther->new;
+$obj = MyOther->new;
 isa_ok $obj, 'MyOther';
 
 $obj->s('foo');
