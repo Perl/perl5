@@ -1304,6 +1304,9 @@ scalar_mod_type(OP *o, I32 type)
     case OP_CONCAT:
     case OP_SUBST:
     case OP_TRANS:
+    case OP_READ:
+    case OP_SYSREAD:
+    case OP_RECV:
     case OP_ANDASSIGN:	/* may work later */
     case OP_ORASSIGN:	/* may work later */
 	return TRUE;
@@ -4974,7 +4977,7 @@ peep(register OP *o)
 
 	case OP_PADAV:
 	    if (o->op_next->op_type == OP_RV2AV
-		&& (o->op_next->op_flags && OPf_REF))
+		&& (o->op_next->op_flags & OPf_REF))
 	    {
 		null(o->op_next);
 	       	o->op_next = o->op_next->op_next;
@@ -4983,7 +4986,7 @@ peep(register OP *o)
 	
 	case OP_PADHV:
 	    if (o->op_next->op_type == OP_RV2HV
-		&& (o->op_next->op_flags && OPf_REF))
+		&& (o->op_next->op_flags & OPf_REF))
 	    {
 		null(o->op_next);
 	       	o->op_next = o->op_next->op_next;
