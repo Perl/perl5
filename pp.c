@@ -4870,6 +4870,7 @@ PP(pp_split)
 	else {
 	    if (!AvREAL(ary)) {
 		AvREAL_on(ary);
+		AvREIFY_off(ary);
 		for (i = AvFILLp(ary); i >= 0; i--)
 		    AvARRAY(ary)[i] = &PL_sv_undef;	/* don't free mere refs */
 	    }
