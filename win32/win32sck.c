@@ -9,6 +9,7 @@
  */
 
 #define WIN32IO_IS_STDIO
+#define WIN32SCK_IS_STDSCK
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "EXTERN.h"
@@ -18,50 +19,6 @@
 #include <sys/stat.h>
 #include <assert.h>
 #include <io.h>
-
-#undef htonl
-#undef htons
-#undef ntohl
-#undef ntohs
-#undef inet_addr
-#undef inet_ntoa
-#undef socket
-#undef bind
-#undef listen
-#undef accept
-#undef connect
-#undef send
-#undef sendto
-#undef recv
-#undef recvfrom
-#undef shutdown
-#undef closesocket
-#undef ioctlsocket
-#undef setsockopt
-#undef getsockopt
-#undef getpeername
-#undef getsockname
-#undef gethostname
-#undef gethostbyname
-#undef gethostbyaddr
-#undef getprotobyname
-#undef getprotobynumber
-#undef getservbyname
-#undef getservbyport
-#undef select
-#undef endhostent
-#undef endnetent
-#undef endprotoent
-#undef endservent
-#undef getnetent
-#undef getnetbyname
-#undef getnetbyaddr
-#undef getprotoent
-#undef getservent
-#undef sethostent
-#undef setnetent
-#undef setprotoent
-#undef setservent
 
 /* thanks to Beverly Brown	(beverly@datacube.com) */
 #ifdef USE_SOCKETS_AS_HANDLES
@@ -292,13 +249,15 @@ win32_recvfrom(SOCKET s, char *buf, int len, int flags, struct sockaddr *from, i
 
 /* select contributed by Vincent R. Slyngstad (vrs@ibeam.intel.com) */
 int
-win32_select(int nfds, int* rd, int* wr, int* ex, const struct timeval* timeout)
+win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const struct timeval* timeout)
 {
-    long r;
-    int dummy = 0;
+    int r;
+#ifdef USE_SOCKETS_AS_HANDLES
+    Perl_fd_set dummy;
     int i, fd, bit, offset;
-    FD_SET nrd, nwr, nex,*prd,*pwr,*pex;
+    FD_SET nrd, nwr, nex, *prd, *pwr, *pex;
 
+    PERL_FD_ZERO(&dummy);
     if (!rd)
 	rd = &dummy, prd = NULL;
     else
@@ -317,13 +276,11 @@ win32_select(int nfds, int* rd, int* wr, int* ex, const struct timeval* timeout)
     FD_ZERO(&nex);
     for (i = 0; i < nfds; i++) {
 	fd = TO_SOCKET(i);
-	bit = 1L<<(i % (sizeof(int)*8));
-	offset = i / (sizeof(int)*8);
-	if (rd[offset] & bit)
+	if (PERL_FD_ISSET(i,rd))
 	    FD_SET(fd, &nrd);
-	if (wr[offset] & bit)
+	if (PERL_FD_ISSET(i,wr))
 	    FD_SET(fd, &nwr);
-	if (ex[offset] & bit)
+	if (PERL_FD_ISSET(i,ex))
 	    FD_SET(fd, &nex);
     }
 
@@ -331,21 +288,16 @@ win32_select(int nfds, int* rd, int* wr, int* ex, const struct timeval* timeout)
 
     for (i = 0; i < nfds; i++) {
 	fd = TO_SOCKET(i);
-	bit = 1L<<(i % (sizeof(int)*8));
-	offset = i / (sizeof(int)*8);
-	if (rd[offset] & bit) {
-	    if (!__WSAFDIsSet(fd, &nrd))
-		rd[offset] &= ~bit;
-	}
-	if (wr[offset] & bit) {
-	    if (!__WSAFDIsSet(fd, &nwr))
-		wr[offset] &= ~bit;
-	}
-	if (ex[offset] & bit) {
-	    if (!__WSAFDIsSet(fd, &nex))
-		ex[offset] &= ~bit;
-	}
+	if (PERL_FD_ISSET(i,rd) && !FD_ISSET(fd, &nrd))
+	    PERL_FD_CLR(i,rd);
+	if (PERL_FD_ISSET(i,wr) && !FD_ISSET(fd, &nwr))
+	    PERL_FD_CLR(i,wr);
+	if (PERL_FD_ISSET(i,ex) && !FD_ISSET(fd, &nex))
+	    PERL_FD_CLR(i,ex);
     }
+#else
+    SOCKET_TEST_ERROR(r = select(nfds, rd, wr, ex, timeout));
+#endif
     return r;
 }
 
