@@ -1,4 +1,4 @@
-#!/l/local/bin/perl -wspi.bak
+#!/usr/bin/perl -wspi.bak
 
 #
 # reads a perforce style diff on stdin and outputs appropriate headers
