@@ -829,17 +829,23 @@ the mg_type field is changed to be the lowercase letter.
 =head2 Understanding the Magic of Tied Hashes and Arrays
 
 Tied hashes and arrays are magical beasts of the 'P' magic type.
-Proper usage of the array and hash access functions on them requires
-understanding a few caveats.
+
+WARNING: As of the 5.004 release, proper usage of the array and hash
+access functions requires understanding a few caveats.  Some
+of these caveats are actually considered bugs in the API, to be fixed
+in later releases, and are bracketed with [MAYCHANGE] below. If
+you find yourself actually applying such information in this section, be
+aware that the behavior may change in the future, umm, without warning.
 
 The C<av_store> function, when given a tied array argument, merely
 copies the magic of the array onto the value to be "stored", using
 C<mg_copy>.  It may also return NULL, indicating that the value did not
-actually need to be stored in the array.  After a call to C<av_store> on
-a tied array, the caller will usually need to call C<mg_set(val)> to
-actually invoke the perl level "STORE" method on the TIEARRAY object.  If
-C<av_store> did return NULL, a call to C<SvREFCNT_dec(val)> will also be
-usually necessary to avoid a memory leak.
+actually need to be stored in the array.  [MAYCHANGE] After a call to
+C<av_store> on a tied array, the caller will usually need to call
+C<mg_set(val)> to actually invoke the perl level "STORE" method on the
+TIEARRAY object.  If C<av_store> did return NULL, a call to
+C<SvREFCNT_dec(val)> will also be usually necessary to avoid a memory
+leak. [/MAYCHANGE]
 
 The previous paragraph is applicable verbatim to tied hash access using the
 C<hv_store> and C<hv_store_ent> functions as well.
@@ -847,26 +853,28 @@ C<hv_store> and C<hv_store_ent> functions as well.
 C<av_fetch> and the corresponding hash functions C<hv_fetch> and
 C<hv_fetch_ent> actually return an undefined mortal value whose magic
 has been initialized using C<mg_copy>.  Note the value so returned does not
-need to be deallocated, as it is already mortal.  But you will need to
-call C<mg_get()> on the returned value in order to actually invoke the
-perl level "FETCH" method on the underlying TIE object.  Similarly,
+need to be deallocated, as it is already mortal.  [MAYCHANGE] But you will
+need to call C<mg_get()> on the returned value in order to actually invoke
+the perl level "FETCH" method on the underlying TIE object.  Similarly,
 you may also call C<mg_set()> on the return value after possibly assigning
 a suitable value to it using C<sv_setsv>,  which will invoke the "STORE"
-method on the TIE object.
+method on the TIE object. [/MAYCHANGE]
 
+[MAYCHANGE]
 In other words, the array or hash fetch/store functions don't really
 fetch and store actual values in the case of tied arrays and hashes.  They
 merely call C<mg_copy> to attach magic to the values that were meant to be
 "stored" or "fetched".  Later calls to C<mg_get> and C<mg_set> actually
 do the job of invoking the TIE methods on the underlying objects.  Thus
-the magic mechanism actually implements a kind of lazy access to arrays
+the magic mechanism currently implements a kind of lazy access to arrays
 and hashes.
 
 Currently (as of perl version 5.004), use of the hash and array access
 functions requires the user to be aware of whether they are operating on
-"normal" hashes and arrays, or on their tied variants.  A simpler API
-interface that provides transparent access to both tied and normal data
-types may be available in future versions.
+"normal" hashes and arrays, or on their tied variants.  The API may be
+changed to provide more transparent access to both tied and normal data
+types in future versions.
+[/MAYCHANGE]
 
 You would do well to understand that the TIEARRAY and TIEHASH interfaces
 are mere sugar to invoke some perl method calls while using the uniform hash
