@@ -390,12 +390,14 @@ START_EXTERN_C
 #define PL_nthreads_cond	(*Perl_Inthreads_cond_ptr(aTHXo))
 #undef  PL_nullstash
 #define PL_nullstash		(*Perl_Inullstash_ptr(aTHXo))
+#undef  PL_numeric_compat1
+#define PL_numeric_compat1	(*Perl_Inumeric_compat1_ptr(aTHXo))
 #undef  PL_numeric_local
 #define PL_numeric_local	(*Perl_Inumeric_local_ptr(aTHXo))
 #undef  PL_numeric_name
 #define PL_numeric_name		(*Perl_Inumeric_name_ptr(aTHXo))
-#undef  PL_numeric_radix
-#define PL_numeric_radix	(*Perl_Inumeric_radix_ptr(aTHXo))
+#undef  PL_numeric_radix_sv
+#define PL_numeric_radix_sv	(*Perl_Inumeric_radix_sv_ptr(aTHXo))
 #undef  PL_numeric_standard
 #define PL_numeric_standard	(*Perl_Inumeric_standard_ptr(aTHXo))
 #undef  PL_ofmt

@@ -577,18 +577,18 @@ Perl_set_numeric_radix(pTHX)
     lc = localeconv();
     if (lc && lc->decimal_point) {
 	if (lc->decimal_point[0] == '.' && lc->decimal_point[1] == 0) {
-	    SvREFCNT_dec(PL_numeric_radix);
-	    PL_numeric_radix = 0;
+	    SvREFCNT_dec(PL_numeric_radix_sv);
+	    PL_numeric_radix_sv = Nullsv;
 	}
 	else {
-	    if (PL_numeric_radix)
-		sv_setpv(PL_numeric_radix, lc->decimal_point);
+	    if (PL_numeric_radix_sv)
+		sv_setpv(PL_numeric_radix_sv, lc->decimal_point);
 	    else
-		PL_numeric_radix = newSVpv(lc->decimal_point, 0);
+		PL_numeric_radix_sv = newSVpv(lc->decimal_point, 0);
 	}
     }
     else
-	PL_numeric_radix = 0;
+	PL_numeric_radix_sv = Nullsv;
 # endif /* HAS_LOCALECONV */
 #endif /* USE_LOCALE_NUMERIC */
 }

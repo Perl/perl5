@@ -153,6 +153,7 @@ Perl_hv_undef
 Perl_ibcmp
 Perl_ibcmp_locale
 Perl_init_stacks
+Perl_init_tm
 Perl_instr
 Perl_is_uni_alnum
 Perl_is_uni_alnumc
@@ -221,6 +222,7 @@ Perl_mg_length
 Perl_mg_magical
 Perl_mg_set
 Perl_mg_size
+Perl_mini_mktime
 Perl_moreswitches
 Perl_my_atof
 Perl_my_bcopy
@@ -236,6 +238,7 @@ Perl_my_popen
 Perl_my_popen_list
 Perl_my_setenv
 Perl_my_stat
+Perl_my_strftime
 Perl_my_swap
 Perl_my_htonl
 Perl_my_ntohl

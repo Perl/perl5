@@ -585,7 +585,7 @@ perl_destruct(pTHXx)
 #ifdef USE_LOCALE_NUMERIC
     Safefree(PL_numeric_name);
     PL_numeric_name = Nullch;
-    SvREFCNT_dec(PL_numeric_radix);
+    SvREFCNT_dec(PL_numeric_radix_sv);
 #endif
 
     /* clear utf8 character classes */

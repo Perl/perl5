@@ -2533,7 +2533,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	    ) {
 #ifdef USE_LOCALE_NUMERIC
 	    if (specialradix)
-		s += SvCUR(PL_numeric_radix);
+		s += SvCUR(PL_numeric_radix_sv);
 	    else
 #endif
 		s++;
@@ -2549,7 +2549,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	    ) {
 #ifdef USE_LOCALE_NUMERIC
 	if (specialradix)
-	    s += SvCUR(PL_numeric_radix);
+	    s += SvCUR(PL_numeric_radix_sv);
 	else
 #endif
 	    s++;
@@ -9081,7 +9081,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_numeric_name	= SAVEPV(proto_perl->Inumeric_name);
     PL_numeric_standard	= proto_perl->Inumeric_standard;
     PL_numeric_local	= proto_perl->Inumeric_local;
-    PL_numeric_radix	= sv_dup_inc(proto_perl->Inumeric_radix);
+    PL_numeric_radix_sv	= sv_dup_inc(proto_perl->Inumeric_radix_sv);
 #endif /* !USE_LOCALE_NUMERIC */
 
     /* utf8 character classes */

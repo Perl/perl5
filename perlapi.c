@@ -1097,6 +1097,13 @@ Perl_init_stacks(pTHXo)
     ((CPerlObj*)pPerl)->Perl_init_stacks();
 }
 
+#undef  Perl_init_tm
+void
+Perl_init_tm(pTHXo_ struct tm *ptm)
+{
+    ((CPerlObj*)pPerl)->Perl_init_tm(ptm);
+}
+
 #undef  Perl_instr
 char*
 Perl_instr(pTHXo_ const char* big, const char* little)
@@ -1588,6 +1595,13 @@ Perl_mg_size(pTHXo_ SV* sv)
     return ((CPerlObj*)pPerl)->Perl_mg_size(sv);
 }
 
+#undef  Perl_mini_mktime
+void
+Perl_mini_mktime(pTHXo_ struct tm *pm)
+{
+    ((CPerlObj*)pPerl)->Perl_mini_mktime(pm);
+}
+
 #undef  Perl_moreswitches
 char*
 Perl_moreswitches(pTHXo_ char* s)
@@ -1705,6 +1719,13 @@ I32
 Perl_my_stat(pTHXo)
 {
     return ((CPerlObj*)pPerl)->Perl_my_stat();
+}
+
+#undef  Perl_my_strftime
+char *
+Perl_my_strftime(pTHXo_ char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
+{
+    return ((CPerlObj*)pPerl)->Perl_my_strftime(fmt, sec, min, hour, mday, mon, year, wday, yday, isdst);
 }
 #if defined(MYSWAP)
 
@@ -3329,9 +3350,9 @@ Perl_swash_init(pTHXo_ char* pkg, char* name, SV* listsv, I32 minbits, I32 none)
 
 #undef  Perl_swash_fetch
 UV
-Perl_swash_fetch(pTHXo_ SV *sv, U8 *ptr)
+Perl_swash_fetch(pTHXo_ SV *sv, U8 *ptr, bool do_utf8)
 {
-    return ((CPerlObj*)pPerl)->Perl_swash_fetch(sv, ptr);
+    return ((CPerlObj*)pPerl)->Perl_swash_fetch(sv, ptr, do_utf8);
 }
 
 #undef  Perl_taint_env
