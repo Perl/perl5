@@ -50,7 +50,7 @@ close $p4;
 my $tempdir;
 print "Differences ...\n";
 for my $a (@action) {
-  $tempdir ||= tempdir( "tmp-XXXX", CLEANUP => 1 );
+  $tempdir ||= tempdir( "tmp-XXXX", CLEANUP => 1, TMPDIR => 1 );
   my($action,$file,$prefix) = @$a;
   my($path,$basename,$number) = $file =~ m|\Q$prefix\E/(.+/)?([^/]+)#(\d+)|;
   die "Panic: Could not parse file[$file]" unless $number;
