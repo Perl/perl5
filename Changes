@@ -79,6 +79,178 @@ Version 5.005_58        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3674] By: jhi                                   on 1999/07/15  14:26:03
+        Log: Fix the bin/oct/hex constant overflow tests for
+             long long platforms.
+     Branch: cfgperl
+           ! t/pragma/warn/util
+____________________________________________________________________________
+[  3673] By: jhi                                   on 1999/07/14  21:59:11
+        Log: Fixed AIX dynamic loading and AIX shared Perl library.
+             Tested in: AIX 4.1.5 cc+useshrplib+usethreads, 4.1.5 cc,
+             4.1.5 gcc+useshrplib+usethreads, 4.3.1 cc+useshrplib.
+             Hijacked win32/makedef.pl for more general purpose export
+             list building, now it is used (as toplevel makedef.pl)
+             for win32 and AIX (perl_exp.SH made unnecessary).
+             Because the export lists are now correct in AIX, no more linker
+             warnings about "Exported symbol not defined" should appear.
+     Branch: cfgperl
+           + makedef.pl
+           - perl_exp.SH win32/makedef.pl
+	   ! MANIFEST Makefile.SH ext/DynaLoader/DynaLoader_pm.PL
+	   ! ext/DynaLoader/dl_aix.xs hints/aix.sh win32/Makefile
+           ! win32/makefile.mk
+____________________________________________________________________________
+[  3672] By: gsar                                  on 1999/07/14  17:12:13
+        Log: minor efficiency tweak
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  3671] By: jhi                                   on 1999/07/14  16:22:39
+        Log: The regexec.c change of #3606 caused a core dump in fbm_instr()
+             if its caller re_intuit_start() was entered with strend == strpos
+             because end_shift ended up as -1.  The patch ain't necessarily
+             correct but least the core dump is avoided.
+     Branch: cfgperl
+           ! regexec.c
+____________________________________________________________________________
+[  3670] By: jhi                                   on 1999/07/13  07:59:09
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	   - XSlock.h win32/GenCAPI.pl win32/TEST win32/autosplit.pl
+           - win32/genxsdef.pl win32/makemain.pl win32/makeperldef.pl
+          !> (integrate 67 files)
+____________________________________________________________________________
+[  3669] By: gsar                                  on 1999/07/12  06:14:54
+        Log: fixups for sundry warnings about function pointers
+     Branch: perl
+	   ! ext/re/re.xs intrpvar.h op.c perl.c perl.h pp_ctl.c scope.h
+	   ! sv.c thrdvar.h util.c win32/Makefile win32/makefile.mk
+           ! win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  3668] By: gsar                                  on 1999/07/12  04:11:58
+        Log: tweaks for win32/borland
+     Branch: perl
+           ! t/pragma/locale.t win32/makedef.pl win32/makefile.mk
+____________________________________________________________________________
+[  3667] By: gsar                                  on 1999/07/12  01:55:15
+        Log: yet more cleanups of the PERL_OBJECT, MULTIPLICITY and USE_THREADS
+             builds; passing the implicit context is unified among the three
+             flavors; PERL_IMPLICIT_CONTEXT is auto-enabled under all three
+             flavors (see the top of perl.h) for testing; all varargs functions
+             foo() have a va_list-taking variant vfoo() for generating the
+             context-free versions; the PERL_OBJECT build should now be
+             hyper-compatible with CPAN extensions (C++ is totally out of
+             the picture)
+             
+             result has only been tested on Windows
+             
+             TODO: write docs on the THX rationale and idiomatic usage of
+             the Perl API
+     Branch: perl
+	   - XSlock.h win32/GenCAPI.pl win32/TEST win32/autosplit.pl
+           - win32/genxsdef.pl win32/makemain.pl win32/makeperldef.pl
+	   ! MANIFEST XSUB.h bytecode.pl deb.c dump.c embed.h embed.pl
+	   ! embedvar.h ext/B/B.xs ext/ByteLoader/ByteLoader.xs
+	   ! ext/ByteLoader/byterun.c ext/Data/Dumper/Dumper.xs
+	   ! ext/Devel/Peek/Peek.xs ext/Fcntl/Fcntl.xs ext/IO/IO.xs
+	   ! ext/Opcode/Opcode.xs ext/POSIX/POSIX.xs
+	   ! ext/SDBM_File/SDBM_File.xs ext/Socket/Socket.xs
+	   ! ext/Thread/Thread.xs ext/attrs/attrs.xs ext/re/re.xs
+	   ! global.sym globals.c intrpvar.h iperlsys.h
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_Win32.pm
+	   ! lib/ExtUtils/MakeMaker.pm lib/ExtUtils/xsubpp lib/base.pm
+	   ! lib/warning.pm malloc.c objXSUB.h perl.c perl.h perlapi.c
+	   ! perlapi.h perlio.c pp_sys.c proto.h regcomp.c regexec.c
+	   ! scope.c sv.c thrdvar.h util.c win32/Makefile win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/config_h.PL
+	   ! win32/dl_win32.xs win32/include/dirent.h
+	   ! win32/include/sys/socket.h win32/makedef.pl win32/makefile.mk
+	   ! win32/perllib.c win32/runperl.c win32/win32.c win32/win32.h
+           ! win32/win32iop.h win32/win32sck.c
+____________________________________________________________________________
+[  3666] By: jhi                                   on 1999/07/11  22:00:13
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+          !> op.c t/op/lex_assign.t
+____________________________________________________________________________
+[  3665] By: jhi                                   on 1999/07/11  21:59:01
+        Log: More manual sync.
+     Branch: cfgperl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  3664] By: gsar                                  on 1999/07/11  19:11:07
+        Log: change#3612 was buggy and failed to build Tk; applied Ilya's
+             remedy and related tests via private mail
+     Branch: perl
+           ! op.c t/op/lex_assign.t
+____________________________________________________________________________
+[  3663] By: jhi                                   on 1999/07/11  15:04:37
+        Log: Manual synchronization with Sarathy (some files
+             had drifted apart for no apparent reason), plus
+             I had a typo in dl_vms.xs Sarathy had fixed.
+     Branch: cfgperl
+           ! ext/DynaLoader/dl_vms.xs pod/perldelta.pod pp.c pp_sys.c
+____________________________________________________________________________
+[  3662] By: jhi                                   on 1999/07/10  12:23:21
+        Log: Change t/pragma/warn oct()/hex() overflow tests to use %Config
+             to adapt to the underlying platform (the binary, 0b1..., test
+             was broken in 64-bit platforms).  Also change "hex" in the
+             warning messages to "hexadecimal" to match "binary" and "octal".
+     Branch: cfgperl
+           ! pod/perldiag.pod t/pragma/warn/util util.c
+____________________________________________________________________________
+[  3661] By: jhi                                   on 1999/07/08  21:54:55
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+          +> perlapi.c perlapi.h
+          !> (integrate 43 files)
+____________________________________________________________________________
+[  3660] By: gsar                                  on 1999/07/08  18:47:35
+        Log: more PERL_OBJECT cleanups (changes still untested on Unix!)
+     Branch: perl
+           + perlapi.c perlapi.h
+	   ! MANIFEST XSUB.h emacs/ptags embed.h embed.pl embedvar.h
+	   ! ext/Opcode/Opcode.xs global.sym globals.c intrpvar.h
+	   ! iperlsys.h mg.c miniperlmain.c objXSUB.h perl.c perl.h perly.c
+	   ! pp.c pp_ctl.c pp_hot.c proto.h regcomp.c regcomp.h regexec.c
+	   ! scope.c scope.h sv.c thrdvar.h toke.c util.c win32/GenCAPI.pl
+	   ! win32/Makefile win32/makedef.pl win32/perllib.c win32/win32.c
+           ! win32/win32.h
+____________________________________________________________________________
+[  3659] By: gsar                                  on 1999/07/08  18:41:45
+        Log: sundry cleanups for clean build on windows
+     Branch: perl
+           ! doio.c regcomp.c regcomp.h t/io/openpid.t utf8.c
+____________________________________________________________________________
+[  3658] By: gsar                                  on 1999/07/08  01:24:25
+        Log: fixes for logical bugs in the lexwarn patch; other tweaks to avoid
+             type mismatch problems
+     Branch: perl
+	   ! doio.c gv.c op.c pp.c regcomp.c regexec.c run.c sv.c
+           ! t/pragma/warn/op toke.c utf8.c util.c
+____________________________________________________________________________
+[  3657] By: jhi                                   on 1999/07/07  23:01:16
+        Log: Integrate with Sarathy.  perldiag.pod required manual editing.
+     Branch: cfgperl
+           ! pod/perldiag.pod
+	  !> Changes configure.com ext/B/B/Deparse.pm
+	  !> ext/ByteLoader/Makefile.PL ext/Fcntl/Fcntl.xs
+	  !> ext/IO/lib/IO/File.pm gv.c iperlsys.h lib/ExtUtils/MM_VMS.pm
+	  !> lib/File/Basename.pm lib/File/Spec/VMS.pm perlsfio.h
+	  !> t/base/rs.t t/lib/io_multihomed.t t/lib/textfill.t
+	  !> t/lib/textwrap.t t/op/filetest.t t/op/mkdir.t
+          !> t/pragma/overload.t thread.h vms/vms.c
+____________________________________________________________________________
+[  3656] By: gsar                                  on 1999/07/07  21:04:38
+        Log: integrate cfgperl contents
+     Branch: perl
+	  +> lib/unicode/Is/ASCII.pl lib/unicode/Is/Cntrl.pl
+	  +> lib/unicode/Is/Graph.pl lib/unicode/Is/Punct.pl
+          +> lib/unicode/Is/Word.pl lib/unicode/Is/XDigit.pl
+           ! Changes
+          !> (integrate 45 files)
+____________________________________________________________________________
 [  3655] By: gsar                                  on 1999/07/07  18:55:45
         Log: filetest.t and ByteLoader build tweaks from Peter Prymmer
              <pvhp@forte.com>
