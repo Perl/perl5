@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu May 20 09:56:03 EET DST 1999
+ * Configuration time: Sat May 22 00:43:12 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2213,6 +2213,8 @@
  *	This symbol, if defined, tells that to flush
  *	all pending stdio output one must loop through all
  *	the stdio file handles stored in an array and fflush them.
+ *	Note that if fflushNULL is defined, fflushall will not
+ *	even be probed for and will be left undefined.
  */
 #define	FFLUSH_NULL 		/**/
 /*#define	FFLUSH_ALL 		/ **/
