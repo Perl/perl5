@@ -1557,6 +1557,7 @@ EOM
 	: Half the following guesses are probably wrong... If you have better
 	: tests or hints, please send them to doughera@lafcol.lafayette.edu
 	: The metaconfig authors would also appreciate a copy...
+	$test -f /lynx.os && osname=lynxos
 	$test -f /irix && osname=irix
 	$test -f /xenix && osname=sco_xenix
 	$test -f /dynix && osname=dynix

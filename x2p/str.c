@@ -317,7 +317,11 @@ register FILE *fp;
 	
 	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
 	FILE_ptr(fp) = ptr;
+#if defined(__Lynx__)
+	i = _fillbuf(fp);		/* get more characters */
+#else
 	i = _filbuf(fp);		/* get more characters */
+#endif
 	cnt = FILE_cnt(fp);
 	ptr = FILE_ptr(fp);		/* reregisterize cnt and ptr */
 
