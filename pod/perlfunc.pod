@@ -301,7 +301,7 @@ X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
 Example:
 
     while (<>) {
-	chop;
+	chomp;
 	next unless -f $_;	# ignore specials
 	#...
     }
@@ -630,23 +630,11 @@ characters removed is returned.
 =item chop
 
 Chops off the last character of a string and returns the character
-chopped.  It's used primarily to remove the newline from the end of an
-input record, but is much more efficient than C<s/\n//> because it neither
+chopped.  It is much more efficient than C<s/.$//s> because it neither
 scans nor copies the string.  If VARIABLE is omitted, chops C<$_>.
-Example:
-
-    while (<>) {
-	chop;	# avoid \n on last field
-	@array = split(/:/);
-	#...
-    }
-
 If VARIABLE is a hash, it chops the hash's values, but not its keys.
 
-You can actually chop anything that's an lvalue, including an assignment:
-
-    chop($cwd = `pwd`);
-    chop($answer = <STDIN>);
+You can actually chop anything that's an lvalue, including an assignment.
 
 If you chop a list, each element is chopped.  Only the value of the
 last C<chop> is returned.
@@ -4443,13 +4431,12 @@ Example:
 
     open(PASSWD, '/etc/passwd');
     while (<PASSWD>) {
-	($login, $passwd, $uid, $gid,
+        chomp;
+        ($login, $passwd, $uid, $gid,
          $gcos, $home, $shell) = split(/:/);
 	#...
     }
 
-(Note that $shell above will still have a newline on it.  See L</chop>,
-L</chomp>, and L</join>.)
 
 =item sprintf FORMAT, LIST
 

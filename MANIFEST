@@ -1477,6 +1477,18 @@ t/lib/ph.t		See if h2ph works
 t/lib/posix.t		See if POSIX works
 t/lib/safe1.t		See if Safe works
 t/lib/safe2.t		See if Safe works
+t/lib/sample-tests/bailout              Test data for Test::Harness
+t/lib/sample-tests/combined             Test data for Test::Harness
+t/lib/sample-tests/descriptive          Test data for Test::Harness
+t/lib/sample-tests/duplicates           Test data for Test::Harness
+t/lib/sample-tests/header_at_end        Test data for Test::Harness
+t/lib/sample-tests/no_nums              Test data for Test::Harness
+t/lib/sample-tests/simple               Test data for Test::Harness
+t/lib/sample-tests/simple_fail          Test data for Test::Harness
+t/lib/sample-tests/skip                 Test data for Test::Harness
+t/lib/sample-tests/skip_all             Test data for Test::Harness
+t/lib/sample-tests/todo                 Test data for Test::Harness
+t/lib/sample-tests/with_comments        Test data for Test::Harness
 t/lib/sdbm.t		See if SDBM_File works
 t/lib/searchdict.t	See if Search::Dict works
 t/lib/selectsaver.t	See if SelectSaver works
@@ -1502,6 +1514,7 @@ t/lib/st-utf8.t		See if Storable works
 t/lib/symbol.t		See if Symbol works
 t/lib/syslfs.t		See if large files work for sysio
 t/lib/syslog.t		See if Sys::Syslog works
+t/lib/test-harness.t    See if Test::Harness works
 t/lib/textfill.t	See if Text::Wrap::fill works
 t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works

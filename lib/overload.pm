@@ -974,7 +974,7 @@ would would lead to a memory leak.
 Both these problems can be cured.  Say, if we want to overload hash
 dereference on a reference to an object which is I<implemented> as a
 hash itself, the only problem one has to circumvent is how to access
-this I<actual> hash (as opposed to the I<virtual> exhibited by
+this I<actual> hash (as opposed to the I<virtual> hash exhibited by the
 overloaded dereference operator).  Here is one possible fetching routine:
 
   sub access_hash {
@@ -986,7 +986,7 @@ overloaded dereference operator).  Here is one possible fetching routine:
     $out;
   }
 
-To move creation of the tied hash on each access, one may an extra
+To remove creation of the tied hash on each access, one may an extra
 level of indirection which allows a non-circular structure of references:
 
   package two_refs1;
@@ -1023,10 +1023,10 @@ level of indirection which allows a non-circular structure of references:
     $a->[$key];
   }
 
-Now if $baz is overloaded like this, then C<$bar> is a reference to a
+Now if $baz is overloaded like this, then C<$baz> is a reference to a
 reference to the intermediate array, which keeps a reference to an
 actual array, and the access hash.  The tie()ing object for the access
-hash is also a reference to a reference to the actual array, so
+hash is a reference to a reference to the actual array, so
 
 =over
 
@@ -1113,7 +1113,7 @@ inside such a method it is not necessary to pretty-print the
 I<components> $a and $b of an object.  In the above subroutine
 C<"[$meth $a $b]"> is a catenation of some strings and components $a
 and $b.  If these components use overloading, the catenation operator
-will look for an overloaded operator C<.>, if not present, it will
+will look for an overloaded operator C<.>; if not present, it will
 look for an overloaded operator C<"">.  Thus it is enough to use
 
   use overload nomethod => \&wrap, '""' => \&str;
@@ -1216,7 +1216,7 @@ mutator methods (C<++>, C<-=> and so on), does not do deep copying
 (not required without mutators!), and implements only those arithmetic
 operations which are used in the example.
 
-To implement most arithmetic operations is easy, one should just use
+To implement most arithmetic operations is easy; one should just use
 the tables of operations, and change the code which fills %subr to
 
   my %subr = ( 'n' => sub {$_[0]} );
@@ -1238,7 +1238,7 @@ special to make C<+=> and friends work, except filling C<+=> entry of
 way to know that the implementation of C<'+='> does not mutate
 the argument, compare L<Copy Constructor>).
 
-To implement a copy constructor, add C<'=' => \&cpy> to C<use overload>
+To implement a copy constructor, add C<< '=' => \&cpy >> to C<use overload>
 line, and code (this code assumes that mutators change things one level
 deep only, so recursive copying is not needed):
 
