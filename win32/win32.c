@@ -1094,8 +1094,9 @@ win32_kill(int pid, int sig)
 	    	}
 		break;
 	    default:
-		/* We fake signals to pseudo-processes using Win32 message queue */
-		if (PostThreadMessage(-pid,WM_USER,sig,0)) {
+	      /* We fake signals to pseudo-processes using Win32
+	       * message queue.  In Win9X the pids are negative already. */
+	      if (PostThreadMessage(IsWin95() ? pid : -pid,WM_USER,sig,0)) {
 		    /* It might be us ... */
 		    PERL_ASYNC_CHECK();
 		    return 0;

@@ -104,6 +104,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_ENTERITER, loop var is per-thread */
 				/*  On pushre, re is /\s+/ imp. by split " " */
 				/*  On regcomp, "use re 'eval'" was in scope */
+				/*  On OP_READLINE, was <$filehandle> */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST

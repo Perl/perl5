@@ -12,7 +12,9 @@ use vars qw($VERSION @ISA $PACKAGE
 
 @ISA = qw(Exporter Math::BigFloat);
 
-$VERSION = 0.02;
+$VERSION = 0.03;
+
+use overload; 		# inherit overload from BigInt
 
 # Globals
 $accuracy = $precision = undef;
@@ -33,5 +35,10 @@ sub new
         $self->{'_custom'} = 1; # make sure this never goes away
         return $self;
 }
+
+BEGIN
+  {
+  *objectify = \&Math::BigInt::objectify;
+  }
 
 1;

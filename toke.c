@@ -6744,7 +6744,8 @@ intro_sym:
 			    newUNOP(OP_RV2SV, 0,
 				newGVOP(OP_GV, 0, gv)));
 	    }
-	    PL_lex_op->op_flags |= OPf_SPECIAL;
+	    if (!readline_overriden)
+		PL_lex_op->op_flags |= OPf_SPECIAL;
 	    /* we created the ops in PL_lex_op, so make yylval.ival a null op */
 	    yylval.ival = OP_NULL;
 	}

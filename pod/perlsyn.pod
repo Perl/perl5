@@ -230,9 +230,10 @@ which is Perl short-hand for the more explicitly written version:
 	# now process $line
     }
 
-Note that if there were a C<continue> block on the above code, it would get
-executed even on discarded lines.  This is often used to reset line counters 
-or C<?pat?> one-time matches.
+Note that if there were a C<continue> block on the above code, it would
+get executed only on lines discarded by the regex (since redo skips the
+continue block). A continue block is often used to reset line counters
+or C<?pat?> one-time matches:
 
     # inspired by :1,$g/fred/s//WILMA/
     while (<>) {

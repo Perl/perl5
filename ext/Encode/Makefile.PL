@@ -93,11 +93,9 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-       if ($^O eq 'VMS' ) { # quote to preserve case
-           $str .= qq{\n\t\$(PERL) compile -"O" -o \$\@ -f $table.fnm\n\n};
-       } else {
-           $str .= qq{\n\t\$(PERL) compile -O -o \$\@ -f $table.fnm\n\n};
-       }
+        $str .= $^O eq 'VMS' # In VMS quote to preserve case
+            ? qq{\n\t\$(PERL) compile -"Q" -"O" -o \$\@ -f $table.fnm\n\n}
+            : qq{\n\t\$(PERL) compile -Q -O -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
 	foreach my $file (@{$tables{$table}})

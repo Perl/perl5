@@ -614,6 +614,7 @@ PERL_CALLCONV void	Perl_set_numeric_local(pTHX);
 PERL_CALLCONV void	Perl_set_numeric_radix(pTHX);
 PERL_CALLCONV void	Perl_set_numeric_standard(pTHX);
 PERL_CALLCONV void	Perl_require_pv(pTHX_ const char* pv);
+PERL_CALLCONV void	Perl_pack_cat(pTHX_ SV *cat, char *pat, char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags);
 PERL_CALLCONV void	Perl_pidgone(pTHX_ Pid_t pid, int status);
 PERL_CALLCONV void	Perl_pmflag(pTHX_ U16* pmfl, int ch);
 PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP* pm, OP* expr, OP* repl);
@@ -824,6 +825,7 @@ PERL_CALLCONV I32	Perl_unlnk(pTHX_ char* f);
 #if defined(USE_5005THREADS)
 PERL_CALLCONV void	Perl_unlock_condpair(pTHX_ void* svv);
 #endif
+PERL_CALLCONV I32	Perl_unpack_str(pTHX_ char *pat, char *patend, char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags);
 PERL_CALLCONV void	Perl_unsharepvn(pTHX_ const char* sv, I32 len, U32 hash);
 PERL_CALLCONV void	Perl_unshare_hek(pTHX_ HEK* hek);
 PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* id, OP* arg);
@@ -1104,6 +1106,10 @@ STATIC void	S_doencodes(pTHX_ SV* sv, char* s, I32 len);
 STATIC SV*	S_mul128(pTHX_ SV *sv, U8 m);
 STATIC SV*	S_is_an_int(pTHX_ char *s, STRLEN l);
 STATIC int	S_div128(pTHX_ SV *pnum, bool *done);
+STATIC char *	S_next_symbol(pTHX_ char *pat, char *patend);
+STATIC I32	S_find_count(pTHX_ char **ppat, char *patend, int *star);
+STATIC char *	S_group_end(pTHX_ char *pat, char *patend, char ender);
+STATIC I32	S_measure_struct(pTHX_ char *pat, char *patend);
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1334,6 +1340,7 @@ PERL_CALLCONV void	Perl_sv_catsv_flags(pTHX_ SV* dsv, SV* ssv, I32 flags);
 PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_flags(pTHX_ SV *sv, I32 flags);
 PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
+PERL_CALLCONV void	Perl_sv_copypv(pTHX_ SV* dsv, SV* ssv);
 PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value);
 PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
 

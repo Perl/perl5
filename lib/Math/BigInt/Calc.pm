@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.20';
+$VERSION = '0.23';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -330,6 +330,13 @@ sub _add
   # This routine clobbers up array x, but not y.
  
   my ($c,$x,$y) = @_;
+
+  return $x if (@$y == 1) && $y->[0] == 0;		# $x + 0 => $x
+  if ((@$x == 1) && $x->[0] == 0)			# 0 + $y => $y->copy
+    {
+    # twice as slow as $x = [ @$y ], but necc. to retain $x as ref :(
+    @$x = @$y; return $x;		
+    }
  
   # for each in Y, add Y to X and carry. If after that, something is left in
   # X, foreach in X add carry to X and then return X, carry
@@ -419,17 +426,24 @@ sub _mul_use_mul
   # modifies first arg, second need not be different from first
   my ($c,$xv,$yv) = @_;
 
-  # shortcut for two very short numbers
-  # +0 since part maybe string '00001' from new()
+  # shortcut for two very short numbers (improved by Nathan Zook)
   # works also if xv and yv are the same reference
-  if ((@$xv == 1) && (@$yv == 1)
-   && (length($xv->[0]+0) <= $BASE_LEN2)
-   && (length($yv->[0]+0) <= $BASE_LEN2))
-   {
-   $xv->[0] *= $yv->[0];
-   return $xv;
-   }
-  
+  if ((@$xv == 1) && (@$yv == 1))
+    {
+    if (($xv->[0] *= $yv->[0]) >= $MBASE)
+       {
+       $xv->[0] = $xv->[0] - ($xv->[1] = int($xv->[0] * $RBASE)) * $MBASE;
+       };
+    return $xv;
+    }
+  # shortcut for result == 0
+  if ( ((@$xv == 1) && ($xv->[0] == 0)) ||
+       ((@$yv == 1) && ($yv->[0] == 0)) )
+    {
+    @$xv = (0);
+    return $xv;
+    }
+
   # since multiplying $x with $x fails, make copy in this case
   $yv = [@$xv] if "$xv" eq "$yv";	# same references?
   if ($LEN_CONVERT != 0)
@@ -487,16 +501,25 @@ sub _mul_use_div
   # modifies first arg, second need not be different from first
   my ($c,$xv,$yv) = @_;
  
-  # shortcut for two very short numbers
-  # +0 since part maybe string '00001' from new()
+  # shortcut for two very short numbers (improved by Nathan Zook)
   # works also if xv and yv are the same reference
-  if ((@$xv == 1) && (@$yv == 1)
-   && (length($xv->[0]+0) <= $BASE_LEN2)
-   && (length($yv->[0]+0) <= $BASE_LEN2))
-   {
-   $xv->[0] *= $yv->[0];
-   return $xv;
-   }
+  if ((@$xv == 1) && (@$yv == 1))
+    {
+    if (($xv->[0] *= $yv->[0]) >= $MBASE)
+        {
+        $xv->[0] =
+            $xv->[0] - ($xv->[1] = int($xv->[0] / $MBASE)) * $MBASE;
+        };
+    return $xv;
+    }
+  # shortcut for result == 0
+  if ( ((@$xv == 1) && ($xv->[0] == 0)) ||
+       ((@$yv == 1) && ($yv->[0] == 0)) )
+    {
+    @$xv = (0);
+    return $xv;
+    }
+
  
   # since multiplying $x with $x fails, make copy in this case
   $yv = [@$xv] if "$xv" eq "$yv";	# same references?
@@ -541,7 +564,7 @@ sub _div_use_mul
 
   if (@$x == 1 && @$yorg == 1)
     {
-    # shortcut, $y is smaller than $x
+    # shortcut, $yorg and $x are two small numbers
     if (wantarray)
       {
       my $r = [ $x->[0] % $yorg->[0] ];
@@ -554,6 +577,12 @@ sub _div_use_mul
       return $x; 
       }
     }
+  #if (@$yorg == 1)
+  #  {
+  #  # shortcut, $y is < $BASE
+  #
+  #  }
+
 
   my $y = [ @$yorg ];
   if ($LEN_CONVERT != 0)
@@ -663,7 +692,7 @@ sub _div_use_div
 
   if (@$x == 1 && @$yorg == 1)
     {
-    # shortcut, $y is smaller than $x
+    # shortcut, $yorg and $x are two small numbers
     if (wantarray)
       {
       my $r = [ $x->[0] % $yorg->[0] ];
@@ -676,6 +705,11 @@ sub _div_use_div
       return $x; 
       }
     }
+#  if (@$yorg == 1)
+#    {
+#    # shortcut, $y is < $BASE
+#
+#    }
 
   my $y = [ @$yorg ];
   if ($LEN_CONVERT != 0)
@@ -1122,7 +1156,50 @@ sub _pow
   $cx;
   }
 
-sub _sqrt1
+sub _fac
+  {
+  # factorial of $x
+  # ref to array, return ref to array
+  my ($c,$cx) = @_;
+
+  if ((@$cx == 1) && ($cx->[0] <= 2))
+    {
+    $cx->[0] = 1 * ($cx->[0]||1); # 0,1 => 1, 2 => 2
+    return $cx;
+    }
+
+  # go forward until $base is exceeded
+  # limit is either $x or $base (x == 100 means as result too high)
+  my $steps = 100; $steps = $cx->[0] if @$cx == 1;
+  my $r = 2; my $cf = 3; my $step = 1; my $last = $r;
+  while ($r < $BASE && $step < $steps)
+    {
+    $last = $r; $r *= $cf++; $step++;
+    }
+  if ((@$cx == 1) && ($step == $cx->[0]))
+    {
+    # completely done
+    $cx = [$last];
+    return $cx;
+    }
+  my $n = _copy($c,$cx);
+  $cx = [$last];
+
+  #$cx = _one();
+  while (!(@$n == 1 && $n->[0] == $step))
+    {
+    _mul($c,$cx,$n); _dec($c,$n);
+    }
+  $cx;
+  }
+
+use constant DEBUG => 0;
+
+my $steps = 0;
+
+sub steps { $steps };
+
+sub _sqrt
   {
   # square-root of $x
   # ref to array, return ref to array
@@ -1135,31 +1212,68 @@ sub _sqrt1
     return $x;
     } 
   my $y = _copy($c,$x);
-  my $l = _len($c,$x) / 2;	# hopefully _len/2 is < $BASE
-  # my $l2 = [ _len($c,$x) / 2 ];	# old way: hopefully _len/2 is < $BASE
+  # hopefully _len/2 is < $BASE, the -1 is to always undershot the guess
+  # since our guess will "grow"
+  my $l = int((_len($c,$x)-1) / 2);	
 
-  splice @$x,0; $x->[0] = 1; 	# keep ref($x), but modify it
-
-  # old way
-  # _lsft($c,$x,$l2,10);
+  my $lastelem = $x->[-1];	# for guess
+  my $elems = scalar @$x - 1;
+  # not enough digits, but could have more?
+  if ((length($lastelem) <= 3) && ($elems > 1))	
+    {
+    # right-align with zero pad
+    my $len = length($lastelem) & 1;
+    print "$lastelem => " if DEBUG;
+    $lastelem .= substr($x->[-2] . '0' x $BASE_LEN,0,$BASE_LEN);
+    # former odd => make odd again, or former even to even again
+    $lastelem = $lastelem / 10 if (length($lastelem) & 1) != $len;	
+    print "$lastelem\n" if DEBUG;
+    }
 
   # construct $x (instead of _lsft($c,$x,$l,10)
   my $r = $l % $BASE_LEN;	# 10000 00000 00000 00000 ($BASE_LEN=5)
   $l = int($l / $BASE_LEN);
-  $x->[$l--] = int('1' . '0' x $r);
-  $x->[$l--] = 0 while ($l >= 0);
+  print "l =  $l " if DEBUG;
+  
+  splice @$x,$l; 		# keep ref($x), but modify it
  
+  # we make the first part of the guess not '1000...0' but int(sqrt($lastelem))
+  # that gives us:
+  # 14400 00000 => sqrt(14400) => 120
+  # 144000 000000 => sqrt(144000) => 379
+
+  # $x->[$l--] = int('1' . '0' x $r);			# old way of guessing
+  print "$lastelem (elems $elems) => " if DEBUG;
+  $lastelem = $lastelem / 10 if ($elems & 1 == 1);		# odd or even?
+  my $g = sqrt($lastelem); $g =~ s/\.//;			# 2.345 => 2345
+  $r -= 1 if $elems & 1 == 0;					# 70 => 7
+
+  # padd with zeros if result is too short
+  $x->[$l--] = int(substr($g . '0' x $r,0,$r+1));
+  print "now ",$x->[-1] if DEBUG;
+  print " would have been ", int('1' . '0' x $r),"\n" if DEBUG;
+  
+  # If @$x > 1, we could compute the second elem of the guess, too, to create
+  # an even better guess. Not implemented yet.
+  $x->[$l--] = 0 while ($l >= 0);	# all other digits of guess are zero
+ 
+  print "start x= ",${_str($c,$x)},"\n" if DEBUG;
   my $two = _two();
   my $last = _zero();
   my $lastlast = _zero();
+  $steps = 0 if DEBUG;
   while (_acmp($c,$last,$x) != 0 && _acmp($c,$lastlast,$x) != 0)
     {
+    $steps++ if DEBUG;
     $lastlast = _copy($c,$last);
     $last = _copy($c,$x);
     _add($c,$x, _div($c,_copy($c,$y),$x));
     _div($c,$x, $two );
+    print "      x= ",${_str($c,$x)},"\n" if DEBUG;
     }
+  print "\nsteps in sqrt: $steps, " if DEBUG;
   _dec($c,$x) if _acmp($c,$y,_mul($c,_copy($c,$x),$x)) < 0;	# overshot? 
+  print " final ",$x->[-1],"\n" if DEBUG;
   $x;
   }
 
@@ -1347,6 +1461,16 @@ sub _from_bin
   # convert a hex number to decimal (ref to string, return ref to array)
   my ($c,$bs) = @_;
 
+  # instead of converting 8 bit at a time, it is faster to convert the
+  # number to hex, and then call _from_hex.
+
+  my $hs = $$bs;
+  $hs =~ s/^[+-]?0b//;					# remove sign and 0b
+  my $l = length($hs);					# bits
+  $hs = '0' x (8-($l % 8)) . $hs if ($l % 8) != 0;	# padd left side w/ 0
+  my $h = unpack('H*', pack ('B*', $hs));		# repack as hex
+  return $c->_from_hex(\('0x'.$h));
+ 
   my $mul = _one();
   my $m = [ 0x100 ];				# 8 bit at a time
   my $x = _zero();
@@ -1466,6 +1590,7 @@ slow) fallback routines to emulate these:
 
 	_mod(obj,obj)	Return remainder of div of the 1st by the 2nd object
 	_sqrt(obj)	return the square root of object (truncate to int)
+	_fac(obj)	return factorial of object 1 (1*2*3*4..)
 	_pow(obj,obj)	return object 1 to the power of object 2
 	_gcd(obj,obj)	return Greatest Common Divisor of two objects
 	

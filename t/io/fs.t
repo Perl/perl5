@@ -39,7 +39,9 @@ my $needs_fh_reopen =
     # Not needed on HPFS, but needed on HPFS386 ?!
     || $^O eq 'os2';
 
-plan tests => 32;
+$needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
+
+plan tests => 36;
 
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
@@ -249,7 +251,14 @@ SKIP: {
 
     ok(-z "Iofs.tmp",    "truncation to zero bytes");
 
+#these steps are necessary to check if file is really truncated
+#On Win95, FH is updated, but file properties aren't
     open(FH, ">Iofs.tmp") or die "Can't create Iofs.tmp";
+    print FH "x\n" x 200;
+    close FH;
+
+
+       open(FH, ">>Iofs.tmp") or die "Can't open Iofs.tmp for appending";
 
     binmode FH;
     select FH;
@@ -265,8 +274,8 @@ SKIP: {
     if ($needs_fh_reopen) {
 	close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
     }
-
-    is(-s "Iofs.tmp", 200, "fh resize to 200 working");
+       
+    is(-s "Iofs.tmp", 200, "fh resize to 200 working (filename check)");
 
     ok(truncate(FH, 0), "fh resize to zero");
 
@@ -274,8 +283,13 @@ SKIP: {
 	close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
     }
 
-    ok(-z "Iofs.tmp", "fh resize to zero working");
+    ok(-z "Iofs.tmp", "fh resize to zero working (filename check)");
 
+       ok(truncate(FH, 200), "fh resize to 200");
+       is(-s FH, 200, "fh resize to 200 working (FH check)");
+
+       ok(truncate(FH, 0), "fh resize to 0");
+       ok(-z FH, "fh resize to 0 working (FH check)");
     close FH;
 }
 

@@ -149,7 +149,7 @@ ok ($x->copy()->round(5),'123.46');
 ok ($x->copy()->round(4),'123.5');
 ok ($x->copy()->round(5,2),'NaN');
 ok ($x->copy()->round(undef,-2),'123.46');
-ok ($x->copy()->round(undef,2),100);
+ok ($x->copy()->round(undef,2),120);
 
 $x = $mbi->new('123');
 ok ($x->round(5,2),'NaN');
@@ -265,7 +265,9 @@ $y = $mbi->new(12345);
 $z = $u->copy()->bmul($y,2,undef,'odd'); ok ($z,31000);
 $z = $u->copy()->bmul($y,3,undef,'odd'); ok ($z,30900);
 $z = $u->copy()->bmul($y,undef,0,'odd'); ok ($z,30863);
-$z = $u->copy()->bmul($y,undef,1,'odd'); ok ($z,30860);
+$z = $u->copy()->bmul($y,undef,1,'odd'); ok ($z,30863);
+$z = $u->copy()->bmul($y,undef,2,'odd'); ok ($z,30860);
+$z = $u->copy()->bmul($y,undef,3,'odd'); ok ($z,30900);
 $z = $u->copy()->bmul($y,undef,-1,'odd'); ok ($z,30862.5);
 
 # breakage:
@@ -392,8 +394,12 @@ $x = $mbi->new(12345); $x->{_a} = 5;
 $x->bround(6);                  # must be no-op
 ok ($x,'12345');
 
-$x = $mbf->new('0.0061'); $x->bfround(-2);
-ok ($x,'0.01');
+$x = $mbf->new('0.0061'); $x->bfround(-2); ok ($x,'0.01');
+$x = $mbf->new('0.004'); $x->bfround(-2);  ok ($x,'0.00');
+$x = $mbf->new('0.005'); $x->bfround(-2);  ok ($x,'0.00');
+
+$x = $mbf->new('12345'); $x->bfround(2); ok ($x,'12340');
+$x = $mbf->new('12340'); $x->bfround(2); ok ($x,'12340');
 
 # MBI::bfround should clear A for negative P
 $x = $mbi->new('1234'); $x->accuracy(3); $x->bfround(-2);
@@ -572,11 +578,16 @@ foreach (qw/new bsqrt/)
   print "# Tried: '$try'\n" if !ok ($rc, 'NaN');
   }
 
+# see if $x->bsub(0) really rounds
+$x = $mbi->new(123); $mbi->accuracy(2); $x->bsub(0);
+ok ($x,120);
+$mbi->accuracy(undef);
+
 ###############################################################################
 # test whether shortcuts returning zero/one preserve A and P
 
 my ($ans1,$f,$a,$p,$xp,$yp,$xa,$ya,$try,$ans,@args);
-my $CALC = Math::BigInt::_core_lib();
+my $CALC = Math::BigInt->config()->{lib};
 while (<DATA>)
   {
   chop;
@@ -619,7 +630,7 @@ while (<DATA>)
   $a = $xa || $ya; $p = $xp || $yp;
 
   # print "Check a=$a p=$p\n";
-  print "# Tried: '$try'\n";
+  # print "# Tried: '$try'\n";
   ok ($x->{_a}, $a) && ok_undef ($x->{_p}) if $a ne ''; 
   ok ($x->{_p}, $p) && ok_undef ($x->{_a}) if $p ne ''; 
   }
@@ -671,7 +682,6 @@ sub is_valid
 # the A or P of the result is calculated automatically
 __DATA__
 &badd
-# bsub uses badd anyway, so it should be right
 123,,:123,,:246
 123,3,:0,,:123
 123,,-3:0,,:123

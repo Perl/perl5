@@ -1,5 +1,25 @@
+Changes in version 2.28
+-----------------------
+
+* When an option is specified more than once, a warning is generated
+  if perl is run with -w. This is a correction to 2.27, where it would
+  unconditionally die.
+
+  An example of duplicate specification is GetOptions('foo', 'foo'),
+  but also GetOptions('foo=s', 'foo') and GetOptions('Foo', 'foo')
+  (the latter only when ignore_case is in effect).
+
 Changes in version 2.27
 -----------------------
+
+* You can now specify integer options to take an optional argument.
+  that defaults to a specific value. E.g.,  GetOptions('foo:5' => \$var)
+  will allow $var to get the value 5 when no value was specified with
+  the -foo option on the command line.
+
+  Instead of a value, a '+' may be specified. E.g.,
+  GetOptions('foo:+' => \$var) will allow $var to be incremented when
+  no value was specified with the -foo option on the command line.
 
 * Fix several problems with internal and external use of 'die' and
   signal handlers.
@@ -14,9 +34,20 @@ Changes in version 2.27
 * Eliminated the use of autoloading. Autoloading kept generating
   problems during development, and when using perlcc.
 
+* Avoid errors on references when an option is found in error, e.g.
+  GetOptions('fo$@#' => \$var).
+  Thanks to Wolfgang Laun <Wolfgang.Laun@alcatel.at>.
+
+* When an option is specified more than once, an error is now
+  generated. E.g., GetOptions('foo', 'foo').
+  Thanks to Wolfgang Laun <Wolfgang.Laun@alcatel.at>.
+
 * Lots of internal restructoring to make room for extensions.
 
 * Redesigned the regression tests.
+
+* Enhance the documentation to prevent common misunderstandings about
+  single character options.
 
 Changes in version 2.26
 -----------------------

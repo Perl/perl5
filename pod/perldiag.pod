@@ -187,7 +187,7 @@ know which context to supply to the right side.
 (F) When C<vec> is called in an lvalue context, the second argument must be
 greater than or equal to zero.
 
-=item Attempt to access to key '%_' in fixed hash
+=item Attempt to access key '%_' in fixed hash
 
 (F) A hash has been marked as READONLY at the C level to turn it
 into a "record" with a fixed set of keys. The failing code
@@ -1559,6 +1559,11 @@ version of Perl, and this should not happen anyway.
 (F) Unlike with "next" or "last", you're not allowed to goto an
 unspecified destination.  See L<perlfunc/goto>.
 
+=item %s-group starts with a count
+
+(F) In pack/unpack a ()-group started with a count.  A count is
+supposed to follow something: a template character or a ()-group.
+
 =item %s had compilation errors
 
 (F) The final summary message when a C<perl -c> fails.
@@ -2307,6 +2312,12 @@ supplied.  See L<perlform>.
 (A) You've accidentally run your script through the Bourne shell instead
 of Perl.  Check the #! line, or manually feed your script into Perl
 yourself.
+
+=item %s not allowed in length fields
+
+(F) The count in the (un)pack template may be replaced by C<[TEMPLATE]> only if
+C<TEMPLATE> always matches the same amount of packed bytes.  Redesign
+the template.
 
 =item no UTC offset information; assuming local time is UTC
 
@@ -4017,6 +4028,13 @@ explicitly quoting the word in a manner appropriate for its context of
 use, or using a different name altogether.  The warning can be
 suppressed for subroutine names by either adding a C<&> prefix, or using
 a package qualifier, e.g. C<&our()>, or C<Foo::our()>.
+
+=item Use of tainted arguments in %s is deprecated
+
+(W taint) You have supplied C<system()> or C<exec()> with multiple 
+arguments and at least one of them is tainted.  This used to be allowed
+but will become a fatal error in a future version of perl.  Untaint your
+arguments.  See L<perlsec>.
 
 =item Use of uninitialized value%s
 

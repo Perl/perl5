@@ -509,10 +509,8 @@ Set the level of debug information for this object. If C<VALUE> is not given
 then the current state is returned. Otherwise the state is changed to 
 C<VALUE> and the previous state returned. 
 
-Set the level of debug information for this object. If no argument is
-given then the current state is returned. Otherwise the state is
-changed to C<$value>and the previous state returned.  Different packages
-may implement different levels of debug but, a  non-zero value result in
+Different packages
+may implement different levels of debug but a non-zero value results in 
 copies of all commands and responses also being sent to STDERR.
 
 If C<VALUE> is C<undef> then the debug level will be set to the default
@@ -626,7 +624,7 @@ Returns a reference to a list containing the lines, or I<undef> upon failure.
 =head1 EXPORTS
 
 C<Net::Cmd> exports six subroutines, five of these, C<CMD_INFO>, C<CMD_OK>,
-C<CMD_MORE>, C<CMD_REJECT> and C<CMD_ERROR> ,correspond to possible results
+C<CMD_MORE>, C<CMD_REJECT> and C<CMD_ERROR>, correspond to possible results
 of C<response> and C<status>. The sixth is C<CMD_PENDING>.
 
 =head1 AUTHOR

@@ -1,5 +1,14 @@
 #include this file into another for subclass testing
 
+# This file is nearly identical to bigintpm.t, except that certain results
+# are _requird_ to be different due to "upgrading" or "promoting" to BigFloat.
+# The reverse is not true, any unmarked results can be either BigInt or
+# BigFloat, depending on how good the internal optimization is.
+
+# Plaese note that the testcount goes up by two for each extra result marked
+# with ^, since then we test whether it has the proper class and that it left
+# the upgrade variable alone.
+
 my $version = ${"$class\::VERSION"};
 
 ##############################################################################
@@ -53,9 +62,9 @@ while (<DATA>)
 
   @args = split(/:/,$_,99); $ans = pop(@args);
   $expected_class = $class;
-  if ($ans =~ /(.*?)=(.*)/)
+  if ($ans =~ /\^$/)
     {
-    $expected_class = $2; $ans = $1;
+    $expected_class = $ECL; $ans =~ s/\^$//;
     }
   $try = "\$x = $class->new(\"$args[0]\");";
   if ($f eq "bnorm")
@@ -182,312 +191,16 @@ while (<DATA>)
     {
     # print "try: $try ans: $ans1 $ans\n";
     print "# Tried: '$try'\n" if !ok ($ans1, $ans);
-    ok (ref($ans),$expected_class) if $expected_class ne $class;
+    if ($expected_class ne $class)
+      {
+      ok (ref($ans1),$expected_class);	# also checks that it really is ref!
+      ok ($Math::BigInt::upgrade,'Math::BigFloat');	# still okay?
+      }
     }
   # check internal state of number objects
   is_valid($ans1,$f) if ref $ans1; 
   } # endwhile data tests
 close DATA;
-
-# test some more
-@a = ();
-for (my $i = 1; $i < 10; $i++) 
-  {
-  push @a, $i;
-  }
-ok "@a", "1 2 3 4 5 6 7 8 9";
-
-# test whether self-multiplication works correctly (result is 2**64)
-$try = "\$x = $class->new('4294967296');";
-$try .= '$a = $x->bmul($x);';
-$ans1 = eval $try;
-print "# Tried: '$try'\n" if !ok ($ans1, $class->new(2) ** 64);
-# test self-pow
-$try = "\$x = $class->new(10);";
-$try .= '$a = $x->bpow($x);';
-$ans1 = eval $try;
-print "# Tried: '$try'\n" if !ok ($ans1, $class->new(10) ** 10);
-
-# test whether op destroys args or not (should better not)
-
-$x = $class->new(3);
-$y = $class->new(4);
-$z = $x & $y;
-ok ($x,3);
-ok ($y,4);
-ok ($z,0);
-$z = $x | $y;
-ok ($x,3);
-ok ($y,4);
-ok ($z,7);
-$x = $class->new(1);
-$y = $class->new(2);
-$z = $x | $y;
-ok ($x,1);
-ok ($y,2);
-ok ($z,3);
-
-$x = $class->new(5);
-$y = $class->new(4);
-$z = $x ^ $y;
-ok ($x,5);
-ok ($y,4);
-ok ($z,1);
-
-$x = $class->new(-5); $y = -$x;
-ok ($x, -5);
-
-$x = $class->new(-5); $y = abs($x);
-ok ($x, -5);
-
-# check whether overloading cmp works
-$try = "\$x = $class->new(0);";
-$try .= "\$y = 10;";
-$try .= "'false' if \$x ne \$y;";
-$ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "false" ); 
-
-# we cant test for working cmpt with other objects here, we would need a dummy
-# object with stringify overload for this. see Math::String tests as example
-
-###############################################################################
-# check reversed order of arguments
-
-$try = "\$x = $class->new(10); \$x = 2 ** \$x;";
-$try .= "'ok' if \$x == 1024;"; $ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class->new(10); \$x = 2 * \$x;";
-$try .= "'ok' if \$x == 20;"; $ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class->new(10); \$x = 2 + \$x;";
-$try .= "'ok' if \$x == 12;"; $ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class\->new(10); \$x = 2 - \$x;";
-$try .= "'ok' if \$x == -8;"; $ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class\->new(10); \$x = 20 / \$x;";
-$try .= "'ok' if \$x == 2;"; $ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class\->new(3); \$x = 20 % \$x;";
-$try .= "'ok' if \$x == 2;"; $ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class\->new(7); \$x = 20 & \$x;";
-$try .= "'ok' if \$x == 4;"; $ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class\->new(7); \$x = 0x20 | \$x;";
-$try .= "'ok' if \$x == 0x27;"; $ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class\->new(7); \$x = 0x20 ^ \$x;";
-$try .= "'ok' if \$x == 0x27;"; $ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-###############################################################################
-# check badd(4,5) form
-
-$try = "\$x = $class\->badd(4,5);";
-$try .= "'ok' if \$x == 9;";
-$ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-###############################################################################
-# check undefs: NOT DONE YET
-
-###############################################################################
-# bool
-
-$x = Math::BigInt->new(1); if ($x) { ok (1,1); } else { ok($x,'to be true') }
-$x = Math::BigInt->new(0); if (!$x) { ok (1,1); } else { ok($x,'to be false') }
-
-###############################################################################
-# objectify()
-
-@args = Math::BigInt::objectify(2,4,5);
-ok (scalar @args,3);		# $class, 4, 5
-ok ($args[0],$class);
-ok ($args[1],4);
-ok ($args[2],5);
-
-@args = Math::BigInt::objectify(0,4,5);
-ok (scalar @args,3);		# $class, 4, 5
-ok ($args[0],$class);
-ok ($args[1],4);
-ok ($args[2],5);
-
-@args = Math::BigInt::objectify(2,4,5);
-ok (scalar @args,3);		# $class, 4, 5
-ok ($args[0],$class);
-ok ($args[1],4);
-ok ($args[2],5);
-
-@args = Math::BigInt::objectify(2,4,5,6,7);
-ok (scalar @args,5);		# $class, 4, 5, 6, 7
-ok ($args[0],$class);
-ok ($args[1],4); ok (ref($args[1]),$args[0]);
-ok ($args[2],5); ok (ref($args[2]),$args[0]);
-ok ($args[3],6); ok (ref($args[3]),'');
-ok ($args[4],7); ok (ref($args[4]),'');
-
-@args = Math::BigInt::objectify(2,$class,4,5,6,7);
-ok (scalar @args,5);		# $class, 4, 5, 6, 7
-ok ($args[0],$class);
-ok ($args[1],4); ok (ref($args[1]),$args[0]);
-ok ($args[2],5); ok (ref($args[2]),$args[0]);
-ok ($args[3],6); ok (ref($args[3]),'');
-ok ($args[4],7); ok (ref($args[4]),'');
-
-###############################################################################
-# test for floating-point input (other tests in bnorm() below)
-
-$z = 1050000000000000;          # may be int on systems with 64bit?
-$x = $class->new($z); ok ($x->bsstr(),'105e+13');	# not 1.05e+15
-$z = 1e+129;			# definitely a float (may fail on UTS)
-# don't compare to $z, since some Perl versions stringify $z into something
-# like '1.e+129' or something equally ugly
-$x = $class->new($z); ok ($x->bsstr(),'1e+129');
-
-###############################################################################
-# prime number tests, also test for **= and length()
-# found on: http://www.utm.edu/research/primes/notes/by_year.html
-
-# ((2^148)-1)/17
-$x = $class->new(2); $x **= 148; $x++; $x = $x / 17;
-ok ($x,"20988936657440586486151264256610222593863921");
-ok ($x->length(),length "20988936657440586486151264256610222593863921");
-
-# MM7 = 2^127-1
-$x = $class->new(2); $x **= 127; $x--;
-ok ($x,"170141183460469231731687303715884105727");
-
-$x = $class->new('215960156869840440586892398248');
-($x,$y) = $x->length();
-ok ($x,30); ok ($y,0);
-
-$x = $class->new('1_000_000_000_000');
-($x,$y) = $x->length();
-ok ($x,13); ok ($y,0);
-
-# I am afraid the following is not yet possible due to slowness
-# Also, testing for 2 meg output is a bit hard ;)
-#$x = $class->new(2); $x **= 6972593; $x--;
-
-# 593573509*2^332162+1 has exactly 1,000,000 digits
-# takes about 24 mins on 300 Mhz, so cannot be done yet ;)
-#$x = $class->new(2); $x **= 332162; $x *= "593573509"; $x++;
-#ok ($x->length(),1_000_000);
-
-###############################################################################
-# inheritance and overriding of _swap
-
-$x = Math::Foo->new(5);
-$x = $x - 8;		# 8 - 5 instead of 5-8
-ok ($x,3);
-ok (ref($x),'Math::Foo');
-
-$x = Math::Foo->new(5);
-$x = 8 - $x;		# 5 - 8 instead of 8 - 5
-ok ($x,-3);
-ok (ref($x),'Math::Foo');
-
-###############################################################################
-# Test whether +inf eq inf
-# This tried to test whether BigInt inf equals Perl inf. Unfortunately, Perl
-# hasn't (before 5.7.3 at least) a consistent way to say inf, and some things
-# like 1e100000 crash on some platforms. So simple test for the string 'inf'
-$x = $class->new('+inf'); ok ($x,'inf');
-
-###############################################################################
-###############################################################################
-# the followin tests only make sense with Math::BigInt::Calc or BareCalc
-
-exit if $CALC !~ /^Math::BigInt::(Calc|BareCalc)$/; # for Pari et al.
-
-###############################################################################
-# check proper length of internal arrays
-
-my $bl = $CL->_base_len();
-my $BASE = '9' x $bl;
-my $MAX = $BASE;
-$BASE++;
-
-$x = $class->new($MAX); is_valid($x);	# f.i. 9999
-$x += 1; ok ($x,$BASE); is_valid($x); 	# 10000
-$x -= 1; ok ($x,$MAX); is_valid($x);	# 9999 again
-
-###############################################################################
-# check numify
-
-$x = $class->new($BASE-1);     ok ($x->numify(),$BASE-1); 
-$x = $class->new(-($BASE-1));  ok ($x->numify(),-($BASE-1)); 
-
-# +0 is to protect from 1e15 vs 100000000 (stupid to_string aaaarglburblll...)
-$x = $class->new($BASE);       ok ($x->numify()+0,$BASE+0); 	
-$x = $class->new(-$BASE);      ok ($x->numify(),-$BASE);
-$x = $class->new( -($BASE*$BASE*1+$BASE*1+1) ); 
-ok($x->numify(),-($BASE*$BASE*1+$BASE*1+1)); 
-
-###############################################################################
-# test bug in _digits with length($c[-1]) where $c[-1] was "00001" instead of 1
-
-$x = $class->new($BASE-2); $x++; $x++; $x++; $x++;
-if ($x > $BASE) { ok (1,1) } else { ok ("$x < $BASE","$x > $BASE"); }
-
-$x = $class->new($BASE+3); $x++;
-if ($x > $BASE) { ok (1,1) } else { ok ("$x > $BASE","$x < $BASE"); }
-
-# test for +0 instead of int(): 
-$x = $class->new($MAX); ok ($x->length(), length($MAX));
-
-###############################################################################
-# bug in sub where number with at least 6 trailing zeros after any op failed
-
-$x = $class->new(123456); $z = $class->new(10000); $z *= 10; $x -= $z;
-ok ($z, 100000);
-ok ($x, 23456);
-
-###############################################################################
-# bug in shortcut in mul()
-
-# construct a number with a zero-hole of BASE_LEN_SMALL
-{
- my @bl = $CL->_base_len(); my $bl = $bl[4];
-
- $x = '1' x $bl . '0' x $bl . '1' x $bl . '0' x $bl;
- $y = '1' x (2*$bl);
- $x = $class->new($x)->bmul($y);
- # result is 123..$bl .  $bl x (3*bl-1) . $bl...321 . '0' x $bl
- $y = ''; my $d = '';
- for (my $i = 1; $i <= $bl; $i++)
-   {
-   $y .= $i; $d = $i.$d;
-   }
- $y .= $bl x (3*$bl-1) . $d . '0' x $bl;
- ok ($x,$y);
-
-
-###############################################################################
-# see if mul shortcut for small numbers works
-
-$x = '9' x $bl;
-$x = $class->new($x); 
-# 999 * 999 => 998 . 001, 9999*9999 => 9998 . 0001
-ok ($x*$x, '9' x ($bl-1) . '8' . '0' x ($bl-1) . '1');
-
- }
-
-###############################################################################
-# bug with rest "-0" in div, causing further div()s to fail
-
-$x = $class->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
-
-ok ($y,'0'); is_valid($y);	# $y not '-0'
 
 # all tests done
 
@@ -511,18 +224,20 @@ sub ok_undef
 
 sub is_valid
   {
-  my ($x,$f) = @_;
+  my ($x,$f,$c) = @_;
+
+  # The checks here are loosened a bit to allow BigInt or BigFloats to pass
 
   my $e = 0;			# error?
   # ok as reference? 
-  $e = 'Not a reference to Math::BigInt' if !ref($x);
+  # $e = "Not a reference to $c" if (ref($x) || '') ne $c;
 
   # has ok sign?
   $e = "Illegal sign $x->{sign} (expected: '+', '-', '-inf', '+inf' or 'NaN'"
    if $e eq '0' && $x->{sign} !~ /^(\+|-|\+inf|-inf|NaN)$/;
 
   $e = "-0 is invalid!" if $e ne '0' && $x->{sign} eq '-' && $x == 0;
-  $e = $CALC->_check($x->{value}) if $e eq '0';
+  #$e = $CALC->_check($x->{value}) if $e eq '0';
 
   # test done, see if error did crop up
   ok (1,1), return if ($e eq '0');
@@ -568,13 +283,6 @@ NaNneg:0
 +inf:1
 -inf:0
 NaNneg:0
-&is_int
--inf:0
-+inf:0
-NaNis_int:0
-1:1
-0:1
-123e12:1
 &is_odd
 abc:0
 0:0
@@ -587,6 +295,13 @@ abc:0
 2:0
 120:0
 121:1
+&is_int
+NaN:0
+inf:0
+-inf:0
+1:1
+12:1
+123e12:1
 &is_even
 abc:0
 0:1
@@ -631,6 +346,7 @@ NaN:inf:
 NaN:-inf:
 &bnorm
 123:123
+12.3:12.3^
 # binary input
 0babc:NaN
 0b123:NaN
@@ -749,8 +465,8 @@ _123_:NaN
 -0_0_1E+0_0_2:-100
 E1:NaN
 E23:NaN
-1.23E1:NaN
-1.23E-1:NaN
+1.23E1:12.3^
+1.23E-1:0.123^
 # bug with two E's in number beeing valid
 1e2e3:NaN
 1e2r:NaN
@@ -802,9 +518,9 @@ E23:NaN
 -1010E1:-10100
 1234.00:1234
 # non-integer numbers
--1010E-2:NaN
--1.01E+1:NaN
--1.01E-1:NaN
+-1010E-2:-10.1^
+-1.01E+1:-10.1^
+-1.01E-1:-0.101^
 &bnan
 1:NaN
 2:NaN
@@ -853,10 +569,6 @@ abc:abc:NaN
 +12:2:10:1200
 +1234:-3:10:NaN
 1234567890123:12:10:1234567890123000000000000
--3:1:2:-6
--5:1:2:-10
--2:1:2:-4
--102533203:1:2:-205066406
 &brsft
 abc:abc:NaN
 +8:+2:2
@@ -875,27 +587,6 @@ abc:abc:NaN
 1230000000000:10:10:123
 09876123456789067890:12:10:9876123
 1234561234567890123:13:10:123456
-820265627:1:2:410132813
-# test shifting negative numbers in base 2
--15:1:2:-8
--14:1:2:-7
--13:1:2:-7
--12:1:2:-6
--11:1:2:-6
--10:1:2:-5
--9:1:2:-5
--8:1:2:-4
--7:1:2:-4
--6:1:2:-3
--5:1:2:-3
--4:1:2:-2
--3:1:2:-2
--2:1:2:-1
--1:1:2:-1
--1640531254:2:2:-410132814
--1640531254:1:2:-820265627
--820265627:1:2:-410132814
--205066405:1:2:-102533203
 &bsstr
 1e+34:1e+34
 123.456E3:123456e+0
@@ -1024,6 +715,9 @@ baddNaN:+inf:NaN
 -123456789:987654321:864197532
 -123456789:-987654321:-1111111110
 +123456789:-987654321:-864197532
+#2:2.5:4.5^
+#-123:-1.5:-124.5^
+#-1.2:1:-0.2^
 &bsub
 abc:abc:NaN
 abc:+0:NaN
@@ -1136,7 +830,7 @@ NaNmul:-inf:NaN
 9:5:1,4
 9:4:2,1
 # inf handling and general remainder
-5:8:0,5
+5:8:0.625,5
 0:8:0,0
 11:2:5,1
 11:-2:-5,-1
@@ -1201,9 +895,8 @@ inf:0:inf
 -1:-1:1
 1:-1:-1
 -1:1:-1
-1:2:0
+1:2:0.5^
 2:1:2
-1:26:0
 1000000000:9:111111111
 2000000000:9:222222222
 3000000000:9:333333333
@@ -1231,18 +924,21 @@ inf:0:inf
 -5:3:-1
 4:3:1
 4:-3:-1
-1:3:0
-1:-3:0
--2:-3:0
--2:3:0
-8:3:2
--8:3:-2
+1:3:0.3333333333333333333333333333333333333333
+1:-3:-0.3333333333333333333333333333333333333333
+-2:-3:0.6666666666666666666666666666666666666667
+-2:3:-0.6666666666666666666666666666666666666667
+#8:5:1.6^
+#-8:5:-1.6^
+8:5:1
+-8:5:-1
 14:-3:-4
 -14:3:-4
 -14:-3:4
 14:3:4
 # bug in Calc with '99999' vs $BASE-1
 10000000000000000000000000000000000000000000000000000000000000000000000000000000000:10000000375084540248994272022843165711074:999999962491547381984643365663244474111576
+12:24:0.5^
 &bmod
 # inf handling, see table in doc
 0:inf:0
@@ -1603,24 +1299,24 @@ abc:12:NaN
 -123:3
 215960156869840440586892398248:30
 &bsqrt
-145:12
-144:12
-143:11
+145:12.04159457879229548012824103037860805243^
+144:12^
+143:11.95826074310139802112984075619561661399^
 16:4
-170:13
+170:13.03840481040529742916594311485836883306^
 169:13
-168:12
+168:12.96148139681572046193193487217599331541^
 4:2
-3:1
-2:1
+3:1.732050807568877293527446341505872366943^
+2:1.41421356237309504880168872420969807857^
 9:3
-12:3
+12:3.464101615137754587054892683011744733886^
 256:16
 100000000:10000
 4000000000000:2000000
-152399026:12345
+152399026:12345.00004050222755607815159966235881398^
 152399025:12345
-152399024:12344
+152399024:12344.99995949777231103967404745303741942^
 1:1
 0:0
 -2:NaN

@@ -303,14 +303,6 @@ properly on error.
 This is possible to do, but would be pretty messy to implement, as it
 would rely on even more sed hackery in F<perly.fixer>.
 
-=head2 pack for IV, UVs, NVs, and long doubles
-
-j, J, g, G?
-
-=head2 pack "(stuff)*"
-
-That's to say, C<pack "(sI)40"> would be the same as C<pack "sI"x40>
-
 =head2 bitfields in pack
 
 =head2 Cross compilation

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 1477;
+plan tests => 5619;
 
 use strict;
 use warnings;
@@ -711,3 +711,161 @@ foreach (
     eval { my $t=unpack("P*", "abc") };
     like($@, qr/P must have an explicit size/);
 }
+
+{   # Grouping constructs
+    my (@a, @b);
+    @a = unpack '(SL)',   pack 'SLSLSL', 67..90;
+    is("@a", "67 68");
+    @a = unpack '(SL)3',   pack 'SLSLSL', 67..90;
+    @b = (67..72);
+    is("@a", "@b");
+    @a = unpack '(SL)3',   pack 'SLSLSLSL', 67..90;
+    is("@a", "@b");
+    @a = unpack '(SL)[3]', pack 'SLSLSLSL', 67..90;
+    is("@a", "@b");
+    @a = unpack '(SL)[2] SL', pack 'SLSLSLSL', 67..90;
+    is("@a", "@b");
+    @a = unpack 'A/(SL)',  pack 'ASLSLSLSL', 3, 67..90;
+    is("@a", "@b");
+    @a = unpack 'A/(SL)SL',  pack 'ASLSLSLSL', 2, 67..90;
+    is("@a", "@b");
+    @a = unpack '(SL)*',   pack 'SLSLSLSL', 67..90;
+    @b = (67..74);
+    is("@a", "@b");
+    @a = unpack '(SL)*SL',   pack 'SLSLSLSL', 67..90;
+    is("@a", "@b");
+    eval { @a = unpack '(*SL)',   '' };
+    like($@, qr/\(\)-group starts with a count/);
+    eval { @a = unpack '(3SL)',   '' };
+    like($@, qr/\(\)-group starts with a count/);
+    eval { @a = unpack '([3]SL)',   '' };
+    like($@, qr/\(\)-group starts with a count/);
+    eval { @a = pack '(*SL)' };
+    like($@, qr/\(\)-group starts with a count/);
+    @a = unpack '(SL)3 SL',   pack '(SL)4', 67..74;
+    is("@a", "@b");
+    @a = unpack '(SL)3 SL',   pack '(SL)[4]', 67..74;
+    is("@a", "@b");
+    @a = unpack '(SL)3 SL',   pack '(SL)*', 67..74;
+    is("@a", "@b");
+}
+
+{  # Repeat count [SUBEXPR]
+   my @codes = qw( x A Z a c C B b H h s v n S i I l V N L p P f F d
+		   s! S! i! I! l! L! j J);
+   my $G;
+   if (eval { pack 'q', 1 } ) {
+     push @codes, qw(q Q);
+   } else {
+     push @codes, qw(c C);	# Keep the count the same
+   }
+   if (eval { pack 'D', 1 } ) {
+     push @codes, 'D';
+   } else {
+     push @codes, 'd';	# Keep the count the same
+   }
+
+   my %val;
+   @val{@codes} = map { / [Xx]  (?{ undef })
+			| [AZa] (?{ 'something' })
+			| C     (?{ 214 })
+			| c     (?{ 114 })
+			| [Bb]  (?{ '101' })
+			| [Hh]  (?{ 'b8' })
+			| [svnSiIlVNLqQjJ]  (?{ 10111 })
+			| [FfDd]  (?{ 1.36514538e67 })
+			| [pP]  (?{ "try this buffer" })
+			/x; $^R } @codes;
+   my @end = (0x12345678, 0x23456781, 0x35465768, 0x15263748);
+   my $end = "N4";
+
+   for my $type (@codes) {
+     my @list = $val{$type};
+     @list = () unless defined $list[0];
+     for my $count ('', '3', '[11]') {
+       my $c = 1;
+       $c = $1 if $count =~ /(\d+)/;
+       my @list1 = @list;
+       @list1 = (@list1) x $c unless $type =~ /[XxAaZBbHhP]/;
+       for my $groupend ('', ')2', ')[8]') {
+	   my $groupbegin = ($groupend ? '(' : '');
+	   $c = 1;
+	   $c = $1 if $groupend =~ /(\d+)/;
+	   my @list2 = (@list1) x $c;
+
+	   my $junk1 = "$groupbegin $type$count $groupend";
+	   # print "# junk1=$junk1\n";
+	   my $p = pack $junk1, @list2;
+	   my $half = int( (length $p)/2 );
+	   for my $move ('', "X$half", "X!$half", 'x1', 'x!8', "x$half") {
+	     my $junk = "$junk1 $move";
+	     # print "# junk='$junk', list=(@list2)\n";
+	     $p = pack "$junk $end", @list2, @end;
+	     my @l = unpack "x[$junk] $end", $p;
+	     is(scalar @l, scalar @end);
+	     is("@l", "@end", "skipping x[$junk]");
+	   }
+       }
+     }
+   }
+}
+
+# / is recognized after spaces in scalar context
+# XXXX no spaces are allowed in pack...  In pack only before the slash...
+is(scalar unpack('A /A Z20', pack 'A/A* Z20', 'bcde', 'xxxxx'), 'bcde');
+is(scalar unpack('A /A /A Z20', '3004bcde'), 'bcde');
+
+{ # X! and x!
+  my $t = 'C[3]  x!8 C[2]';
+  my @a = (0x73..0x77);
+  my $p = pack($t, @a);
+  is($p, "\x73\x74\x75\0\0\0\0\0\x76\x77");
+  my @b = unpack $t, $p;
+  is(scalar @b, scalar @a);
+  is("@b", "@a", 'x!8');
+  $t = 'x[5] C[6] X!8 C[2]';
+  @a = (0x73..0x7a);
+  $p = pack($t, @a);
+  is($p, "\0\0\0\0\0\x73\x74\x75\x79\x7a");
+  @b = unpack $t, $p;
+  @a = (0x73..0x75, 0x79, 0x7a, 0x79, 0x7a);
+  is(scalar @b, scalar @a);
+  is("@b", "@a");
+}
+
+{ # struct {char c1; double d; char cc[2];}
+  my $t = 'C x![d] d C[2]';
+  my @a = (173, 1.283476517e-45, 42, 215);
+  my $p = pack $t, @a;
+  ok( length $p);
+  my @b = unpack "$t X[$t] $t", $p;	# Extract, step back, extract again
+  is(scalar @b, 2 * scalar @a);
+  is("@b", "@a @a");
+
+  my $warning;
+  local $SIG{__WARN__} = sub {
+      $warning = $_[0];
+  };
+  @b = unpack "x[C] x[$t] X[$t] X[C] $t", "$p\0";
+
+  is($warning, undef);
+  is(scalar @b, scalar @a);
+  is("@b", "@a");
+}
+
+is(length(pack("j", 0)), $Config{ivsize});
+is(length(pack("J", 0)), $Config{uvsize});
+is(length(pack("F", 0)), $Config{nvsize});
+
+numbers ('j', -2147483648, -1, 0, 1, 2147483647);
+numbers ('J', 0, 1, 2147483647, 2147483648, 4294967295);
+numbers ('F', -(2**34), -1, 0, 1, 2**34);
+SKIP: {
+    my $t = eval { unpack("D*", pack("D", 12.34)) };
+
+    skip "Long doubles not in use", 56 if $@ =~ /Invalid type in pack/;
+
+    is(length(pack("D", 0)), $Config{longdblsize});
+    numbers ('D', -(2**34), -1, 0, 1, 2**34);
+}
+

@@ -72,14 +72,7 @@ PP(pp_pushmark)
 PP(pp_stringify)
 {
     dSP; dTARGET;
-    STRLEN len;
-    char *s;
-    s = SvPV(TOPs,len);
-    sv_setpvn(TARG,s,len);
-    if (SvUTF8(TOPs))
-	SvUTF8_on(TARG);
-    else
-	SvUTF8_off(TARG);
+    sv_copypv(TARG,TOPs);
     SETTARG;
     RETURN;
 }

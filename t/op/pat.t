@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..854\n";
+print "1..855\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1422,16 +1422,21 @@ print "ok 247\n";
 	    print "ok $test\n"; $test++;
 	}
 	print "# IsASCII\n";
-	if ($code le '00007f') {
-	    print "not " unless $char =~ /\p{IsASCII}/;
-	    print "ok $test\n"; $test++;
-	    print "not " if     $char =~ /\P{IsASCII}/;
-	    print "ok $test\n"; $test++;
+	if (ord("A") == 193) {
+	    print "ok $test # Skip: in EBCDIC\n"; $test++;
+	    print "ok $test # Skip: in EBCDIC\n"; $test++;
 	} else {
-	    print "not " if     $char =~ /\p{IsASCII}/;
-	    print "ok $test\n"; $test++;
-	    print "not " unless $char =~ /\P{IsASCII}/;
-	    print "ok $test\n"; $test++;
+	    if ($code le '00007f') {
+		print "not " unless $char =~ /\p{IsASCII}/;
+		print "ok $test\n"; $test++;
+		print "not " if     $char =~ /\P{IsASCII}/;
+		print "ok $test\n"; $test++;
+	    } else {
+		print "not " if     $char =~ /\p{IsASCII}/;
+		print "ok $test\n"; $test++;
+		print "not " unless $char =~ /\P{IsASCII}/;
+		print "ok $test\n"; $test++;
+	    }
 	}
 	print "# IsCntrl\n";
 	if ($class =~ /^C/) {
@@ -1928,20 +1933,26 @@ print "ok 671\n";
 print "not " unless chr(0x38c) =~ /\p{IsGreek}/; # singleton
 print "ok 672\n";
 
+if (ord("A") == 65) {
 ##
 ## Test [:cntrl:]...
 ##
 ## Should probably put in tests for all the POSIX stuff, but not sure how to
 ## guarantee a specific locale......
 ##
-$AllBytes = join('', map { chr($_) } 0..255);
-($x = $AllBytes) =~ s/[[:cntrl:]]//g;
-if ($x ne join('', map { chr($_) } 0x20..0x7E, 0x80..0xFF)) { print "not " };
-print "ok 673\n";
+    $AllBytes = join('', map { chr($_) } 0..255);
+    ($x = $AllBytes) =~ s/[[:cntrl:]]//g;
+    if ($x ne join('', map { chr($_) } 0x20..0x7E, 0x80..0xFF)) {
+	print "not ";
+    }
+    print "ok 673\n";
 
-($x = $AllBytes) =~ s/[^[:cntrl:]]//g;
-if ($x ne join('', map { chr($_) } 0..0x1F, 0x7F)) { print "not " };
-print "ok 674\n";
+    ($x = $AllBytes) =~ s/[^[:cntrl:]]//g;
+    if ($x ne join('', map { chr($_) } 0..0x1F, 0x7F)) { print "not " }
+    print "ok 674\n";
+} else {
+    print "ok $_ # Skip: EBCDIC\n" for 673..674;
+}
 
 # With /s modifier UTF8 chars were interpreted as bytes
 {
@@ -2279,7 +2290,7 @@ print "# some Unicode properties\n";
     print "not " unless "a\x{100}" =~ /A/i;
     print "ok 754\n";
 
-    print "not " unless "A\x{100}" =~ /A/i;
+    print "not " unless "A\x{100}" =~ /a/i;
     print "ok 755\n";
 
     print "not " unless "a\x{100}" =~ /a/i;
@@ -2303,7 +2314,7 @@ print "# some Unicode properties\n";
     print "not " unless "a\x{100}" =~ /A\x{100}/i;
     print "ok 762\n";
 
-    print "not " unless "A\x{100}" =~ /A\x{100}/i;
+    print "not " unless "A\x{100}" =~ /a\x{100}/i;
     print "ok 763\n";
 
     print "not " unless "a\x{100}" =~ /a\x{100}/i;
@@ -2315,7 +2326,7 @@ print "# some Unicode properties\n";
     print "not " unless "a\x{100}" =~ /[A]/i;
     print "ok 766\n";
 
-    print "not " unless "A\x{100}" =~ /[A]/i;
+    print "not " unless "A\x{100}" =~ /[a]/i;
     print "ok 767\n";
 
     print "not " unless "a\x{100}" =~ /[a]/i;
@@ -2661,4 +2672,20 @@ print "# some Unicode properties\n";
     print "A\x{200}\x{300}B" =~ /(?<=A..)B/ ? "ok 852\n" : "not ok 852\n";
     print "\x{400}AB"        =~ /(?<=\x{400}.)B/ ? "ok 853\n" : "not ok 853\n";
     print "\x{500\x{600}}B"  =~ /(?<=\x{500}.)B/ ? "ok 854\n" : "not ok 854\n";
+}
+
+{
+    print "# [ID 20020124.005]\n";
+
+    # Fixed by #14795.
+
+    $char = "\x{f00f}";
+    $x = "$char b $char";
+
+    $x =~ s{($char)}{
+	"c" =~ /d/;
+	"x";
+    }ge;
+
+    print $x eq "x b x" ? "ok 855\n" : "not ok 855\n";
 }

@@ -16,7 +16,7 @@ BEGIN
   {
   my $additional = 0;
   $additional = 27 if $Math::BigInt::Calc::VERSION > 0.18;
-  plan tests => 71 + $additional;
+  plan tests => 80 + $additional;
   }
 
 # testing of Math::BigInt::Calc, primarily for interface/api and not for the
@@ -123,6 +123,19 @@ $x = $C->_new(\"123"); $y = $C->_new(\"1111");
 
 # _num
 $x = $C->_new(\"12345"); $x = $C->_num($x); ok (ref($x)||'',''); ok ($x,12345);
+
+# _sqrt
+$x = $C->_new(\"144"); ok (${$C->_str($C->_sqrt($x))},'12');
+
+# _fac
+$x = $C->_new(\"0"); ok (${$C->_str($C->_fac($x))},'1');
+$x = $C->_new(\"1"); ok (${$C->_str($C->_fac($x))},'1');
+$x = $C->_new(\"2"); ok (${$C->_str($C->_fac($x))},'2');
+$x = $C->_new(\"3"); ok (${$C->_str($C->_fac($x))},'6');
+$x = $C->_new(\"4"); ok (${$C->_str($C->_fac($x))},'24');
+$x = $C->_new(\"5"); ok (${$C->_str($C->_fac($x))},'120');
+$x = $C->_new(\"10"); ok (${$C->_str($C->_fac($x))},'3628800');
+$x = $C->_new(\"11"); ok (${$C->_str($C->_fac($x))},'39916800');
 
 # _inc
 $x = $C->_new(\"1000"); $C->_inc($x); ok (${$C->_str($x)},'1001');

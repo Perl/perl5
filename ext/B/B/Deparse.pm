@@ -19,7 +19,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber cstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.62;
+$VERSION = 0.63;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -106,6 +106,10 @@ use warnings ();
 # - our() declarations
 # - *all* the known bugs are now listed in the BUGS section
 # - comprehensive test mechanism (TEST -deparse)
+# Changes between 0.62 and 0.63 (mostly by Rafael Garcia-Suarez)
+# - bug-fixes
+# - new switch -P
+# - support for command-line switches (-l, -0, etc.)
 
 # Todo:
 #  (See also BUGS section at the end of this file)
@@ -2169,7 +2173,7 @@ sub mapop {
     $kid = $kid->sibling;
     for (; !null($kid); $kid = $kid->sibling) {
 	$expr = $self->deparse($kid, 6);
-	push @exprs, $expr if $expr;
+	push @exprs, $expr if defined $expr;
     }
     return $self->maybe_parens_func($name, $code . join(", ", @exprs), $cx, 5);
 }
@@ -3027,7 +3031,7 @@ sub re_uninterp_extended {
             | \#[^\n]*            #     (skip over comments)
             )
           | [\$\@]
-            (?!\||\)|\(|$)
+            (?!\||\)|\(|$|\s)
           | \\[uUlLQE]
           )
 

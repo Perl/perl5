@@ -151,7 +151,7 @@ after the debugger completes its own initialization.)
 After the rc file is read, the debugger reads the PERLDB_OPTS
 environment variable and uses it to set debugger options. The
 contents of this variable are treated as if they were the argument
-of an C<O ...> debugger command (q.v. in L<perldebug/Options>).
+of an C<o ...> debugger command (q.v. in L<perldebug/Options>).
 
 =head3 Debugger internal variables
 In addition to the file and subroutine-related variables mentioned above,
@@ -240,9 +240,9 @@ information.  For example, contrast this expression trace:
  main::bar((eval 170):2):
  42
 
-with this one, once the C<O>ption C<frame=2> has been set:
+with this one, once the C<o>ption C<frame=2> has been set:
 
-   DB<4> O f=2
+   DB<4> o f=2
                 frame = '2'
    DB<5> t print foo() * bar()
  3:      foo() * bar()

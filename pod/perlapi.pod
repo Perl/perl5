@@ -646,6 +646,32 @@ Found in file perl.c
 
 =back
 
+=head1 Functions in file pp_pack.c
+
+
+=over 8
+
+=item pack_cat
+
+The engine implementing pack() Perl function.
+
+	void	pack_cat(SV *cat, char *pat, char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
+
+=for hackers
+Found in file pp_pack.c
+
+=item unpack_str
+
+The engine implementing unpack() Perl function.
+
+	I32	unpack_str(char *pat, char *patend, char *s, char *strbeg, char *strend, char **new_s, I32 ocnt, U32 flags)
+
+=for hackers
+Found in file pp_pack.c
+
+
+=back
+
 =head1 Global Variables
 
 =over 8
@@ -2869,21 +2895,21 @@ Like C<SvPV_nolen>, but converts sv to utf8 first if necessary.
 =for hackers
 Found in file sv.h
 
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
 =item SvPVX
 
 Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 	char*	SvPVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item SvPVx
-
-A version of C<SvPV> which guarantees to evaluate sv only once.
-
-	char*	SvPVx(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
@@ -3479,6 +3505,21 @@ memory comparison can be used to compare the data according to the locale
 settings.
 
 	char*	sv_collxfrm(SV* sv, STRLEN* nxp)
+
+=for hackers
+Found in file sv.c
+
+=item sv_copypv
+
+Copies a stringified representation of the source SV into the
+destination SV.  Automatically performs any necessary mg_get and
+coercion of numeric values into strings.  Guaranteed to preserve 
+UTF-8 flag even from overloaded objects.  Similar in nature to
+sv_2pv[_flags] but operates directly on an SV instead of just the 
+string.  Mostly uses sv_2pv_flags to do its work, except when that 
+would lose the UTF-8'ness of the PV.
+
+	void	sv_copypv(SV* dsv, SV* ssv)
 
 =for hackers
 Found in file sv.c

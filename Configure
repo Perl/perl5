@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 21 08:33:08 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Mon Feb 25 17:50:42 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1706,7 +1706,7 @@ rm -f .echotmp
 echo " "
 if test -f "$rsrc/MANIFEST"; then
 	echo "First let's make sure your kit is complete.  Checking..." >&4
-	awk '$1 !~ /PACK[A-Z]+/ {print $1}' "$rsrc/MANIFEST" | split
+	awk '$1 !~ /PACK[A-Z]+/ {print $1}' "$rsrc/MANIFEST" | (split -l 50 2>/dev/null || split -50)
 	rm -f missing
 	tmppwd=`pwd`
 	for filelist in x??; do
@@ -15692,7 +15692,7 @@ $cat >>signal_cmd <<'EOS'
 
 set signal
 if eval $compile_ok; then
-	$run ./signal$_exe | $sort -n -k 2 | $uniq | $awk -f signal.awk >signal.lst
+	$run ./signal$_exe | ($sort -n -k 2 2>/dev/null || $sort -n +1) | $uniq | $awk -f signal.awk >signal.lst
 else
 	echo "(I can't seem be able to compile the whole test program)" >&4
 	echo "(I'll try it in little pieces.)" >&4
@@ -16680,7 +16680,9 @@ eval $find_extensions
 # Special case:  Add in threads/shared since it is not picked up by the
 # recursive find above (and adding in general recursive finding breaks
 # SDBM_File/sdbm).  A.D.  10/25/2001.
-known_extensions="$known_extensions threads/shared"
+# Encode::JP needs an explicit mention for the same reason
+# --jhi 2002-02-23
+known_extensions="$known_extensions threads/shared Encode/JP"
 set X $nonxs_extensions
 shift
 nonxs_extensions="$*"

@@ -1,4 +1,8 @@
-#!/usr/bin/perl -w
+package Math::BigFloat;
+
+# 
+# Mike grinned. 'Two down, infinity to go' - Mike Nostrus in Before and After
+#
 
 # The following hash values are internally used:
 #   _e: exponent (BigInt)
@@ -8,9 +12,7 @@
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-package Math::BigFloat;
-
-$VERSION = '1.27';
+$VERSION = '1.29';
 require 5.005;
 use Exporter;
 use Math::BigInt qw/objectify/;
@@ -18,6 +20,7 @@ use Math::BigInt qw/objectify/;
 
 use strict;
 use vars qw/$AUTOLOAD $accuracy $precision $div_scale $round_mode $rnd_mode/;
+use vars qw/$upgrade $downgrade/;
 my $class = "Math::BigFloat";
 
 use overload
@@ -43,6 +46,9 @@ $accuracy   = undef;
 $precision  = undef;
 $div_scale  = 40;
 
+$upgrade = undef;
+$downgrade = undef;
+
 ##############################################################################
 # the old code had $rnd_mode, so we need to support it, too
 
@@ -62,13 +68,15 @@ BEGIN { tie $rnd_mode, 'Math::BigFloat'; }
   # valid method aliases for AUTOLOAD
   my %methods = map { $_ => 1 }  
    qw / fadd fsub fmul fdiv fround ffround fsqrt fmod fstr fsstr fpow fnorm
-        fint facmp fcmp fzero fnan finf finc fdec flog
+        fint facmp fcmp fzero fnan finf finc fdec flog ffac
 	fceil ffloor frsft flsft fone flog
       /;
   # valid method's that can be hand-ed up (for AUTOLOAD)
   my %hand_ups = map { $_ => 1 }  
    qw / is_nan is_inf is_negative is_positive
         accuracy precision div_scale round_mode fneg fabs babs fnot
+        objectify
+	bone binf bnan bzero
       /;
 
   sub method_alias { return exists $methods{$_[0]||''}; } 
@@ -86,7 +94,7 @@ sub new
   # sign  => sign (+/-), or "NaN"
 
   my ($class,$wanted,@r) = @_;
- 
+
   # avoid numify-calls by not using || on $wanted!
   return $class->bzero() if !defined $wanted;	# default to 0
   return $wanted->copy() if UNIVERSAL::isa($wanted,'Math::BigFloat');
@@ -130,88 +138,40 @@ sub new
     $self->{_e} -= CORE::length($$mfv) if CORE::length($$mfv) != 0; 		
     $self->{sign} = $$mis;
     }
-  # print "mbf new ",join(' ',@r),"\n";
+  # print "mbf new $self->{sign} $self->{_m} e $self->{_e}\n";
   $self->bnorm()->round(@r);		# first normalize, then round
   }
 
-sub bnan
+sub _bnan
   {
-  # create a bigfloat 'NaN', if given a BigFloat, set it to 'NaN'
+  # used by parent class bone() to initialize number to 1
   my $self = shift;
-  $self = $class if !defined $self;
-  if (!ref($self))
-    {
-    my $c = $self; $self = {}; bless $self, $c;
-    }
   $self->{_m} = Math::BigInt->bzero();
   $self->{_e} = Math::BigInt->bzero();
-  $self->{sign} = $nan;
-  $self->{_a} = undef; $self->{_p} = undef;
-  $self;
   }
 
-sub binf
+sub _binf
   {
-  # create a bigfloat '+-inf', if given a BigFloat, set it to '+-inf'
+  # used by parent class bone() to initialize number to 1
   my $self = shift;
-  my $sign = shift; $sign = '+' if !defined $sign || $sign ne '-';
-
-  $self = $class if !defined $self;
-  if (!ref($self))
-    {
-    my $c = $self; $self = {}; bless $self, $c;
-    }
   $self->{_m} = Math::BigInt->bzero();
   $self->{_e} = Math::BigInt->bzero();
-  $self->{sign} = $sign.'inf';
-  $self->{_a} = undef; $self->{_p} = undef;
-  $self;
   }
 
-sub bone
+sub _bone
   {
-  # create a bigfloat '+-1', if given a BigFloat, set it to '+-1'
+  # used by parent class bone() to initialize number to 1
   my $self = shift;
-  my $sign = shift; $sign = '+' if !defined $sign || $sign ne '-';
-
-  $self = $class if !defined $self;
-  if (!ref($self))
-    {
-    my $c = $self; $self = {}; bless $self, $c;
-    }
   $self->{_m} = Math::BigInt->bone();
   $self->{_e} = Math::BigInt->bzero();
-  $self->{sign} = $sign;
-  if (@_ > 0)
-    {
-    $self->{_a} = $_[0]
-     if (defined $self->{_a} && defined $_[0] && $_[0] > $self->{_a});
-    $self->{_p} = $_[1]
-     if (defined $self->{_p} && defined $_[1] && $_[1] < $self->{_p});
-    }
-  return $self;
   }
 
-sub bzero
+sub _bzero
   {
-  # create a bigfloat '+0', if given a BigFloat, set it to 0
+  # used by parent class bone() to initialize number to 1
   my $self = shift;
-  $self = $class if !defined $self;
-  if (!ref($self))
-    {
-    my $c = $self; $self = {}; bless $self, $c;
-    }
   $self->{_m} = Math::BigInt->bzero();
   $self->{_e} = Math::BigInt->bone();
-  $self->{sign} = '+';
-  if (@_ > 0)
-    {
-    $self->{_a} = $_[0]
-     if (defined $self->{_a} && defined $_[0] && $_[0] > $self->{_a});
-    $self->{_p} = $_[1]
-     if (defined $self->{_p} && defined $_[1] && $_[1] < $self->{_p});
-    }
-  return $self;
   }
 
 ##############################################################################
@@ -337,7 +297,7 @@ sub bcmp
     return +1 if $x->{sign} eq '+inf';
     return -1 if $x->{sign} eq '-inf';
     return -1 if $y->{sign} eq '+inf';
-    return +1 if $y->{sign} eq '-inf';
+    return +1;
     }
 
   # check sign for speed first
@@ -356,9 +316,7 @@ sub bcmp
   my $lym = $y->{_m}->length();
   my $lx = $lxm + $x->{_e};
   my $ly = $lym + $y->{_e};
-  # print "x $x y $y lx $lx ly $ly\n";
-  my $l = $lx - $ly; $l = -$l if $x->{sign} eq '-';
-  # print "$l $x->{sign}\n";
+  my $l = $lx - $ly; $l->bneg() if $x->{sign} eq '-';
   return $l <=> 0 if $l != 0;
   
   # lengths (corrected by exponent) are equal
@@ -376,7 +334,7 @@ sub bcmp
     }
   my $rc = $xm->bcmp($ym);
   $rc = -$rc if $x->{sign} eq '-';		# -124 < -123
-  return $rc <=> 0;
+  $rc <=> 0;
   }
 
 sub bacmp 
@@ -392,7 +350,7 @@ sub bacmp
     return undef if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
     return 0 if ($x->is_inf() && $y->is_inf());
     return 1 if ($x->is_inf() && !$y->is_inf());
-    return -1 if (!$x->is_inf() && $y->is_inf());
+    return -1;
     }
 
   # shortcut 
@@ -407,9 +365,7 @@ sub bacmp
   my $lym = $y->{_m}->length();
   my $lx = $lxm + $x->{_e};
   my $ly = $lym + $y->{_e};
-  # print "x $x y $y lx $lx ly $ly\n";
   my $l = $lx - $ly;
-  # print "$l $x->{sign}\n";
   return $l <=> 0 if $l != 0;
   
   # lengths (corrected by exponent) are equal
@@ -425,8 +381,7 @@ sub bacmp
     {
     $xm = $x->{_m}->copy()->blsft(-$diff,10);
     }
-  my $rc = $xm->bcmp($ym);
-  return $rc <=> 0;
+  $xm->bcmp($ym) <=> 0;
   }
 
 sub badd 
@@ -435,17 +390,18 @@ sub badd
   # return result as BFLOAT
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
+  #print "mbf badd $x $y\n";
   # inf and NaN handling
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
     {
     # NaN first
     return $x->bnan() if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
-    # inf handline
+    # inf handling
     if (($x->{sign} =~ /^[+-]inf$/) && ($y->{sign} =~ /^[+-]inf$/))
       {
-      # + and + => +, - and - => -, + and - => 0, - and + => 0
-      return $x->bzero() if $x->{sign} ne $y->{sign};
-      return $x;
+      # +inf++inf or -inf+-inf => same, rest is NaN
+      return $x if $x->{sign} eq $y->{sign};
+      return $x->bnan();
       }
     # +-inf + something => +inf
     # something +-inf => +-inf
@@ -571,7 +527,7 @@ sub bdec
 
 sub blog
   {
-  my ($self,$x,$base,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(2,@_);
+  my ($self,$x,$base,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(2,@_);
 
   # http://www.efunda.com/math/taylor_series/logarithmic.cfm?search_string=log
 
@@ -579,38 +535,88 @@ sub blog
   #              _                               _
   # taylor:     |    u    1   u^3   1   u^5       |
   # ln (x)  = 2 |   --- + - * --- + - * --- + ... |  x > 0
-  #             |_   v    3    v    5   v        _|
+  #             |_   v    3   v^3   5   v^5      _|
 
-  return $x->bzero(@r) if $x->is_one();
-  return $x->bone(@r) if $x->bcmp($base) == 0;
+  # we need to limit the accuracy to protect against overflow
+  my $fallback = 0;
+  my $scale = 0;
+  my @params = $x->_find_round_parameters($a,$p,$r);
 
-  my $d = $r[0] || $self->accuracy() || 40;
-  $d += 2;					# 2 more for rounding
- 
-  my $u = $x->copy(); $u->bdec();
-  my $v = $x->copy(); $v->binc();
+  # no rounding at all, so must use fallback
+  if (scalar @params == 1)
+    {
+    # simulate old behaviour
+    $params[1] = $self->div_scale();	# and round to it as accuracy
+    $scale = $params[1]+4; 		# at least four more for proper round
+    $params[3] = $r;			# round mode by caller or undef
+    $fallback = 1;			# to clear a/p afterwards
+    }
+  else
+    {
+    # the 4 below is empirical, and there might be cases where it is not
+    # enough...
+    $scale = abs($params[1] || $params[2]) + 4;	# take whatever is defined
+    }
 
-  $x->bdec()->bdiv($v,$d); 			# first term: u/v
+  return $x->bzero(@params) if $x->is_one();
+  return $x->bnan() if $x->{sign} ne '+' || $x->is_zero();
+  #return $x->bone('+',@params) if $x->bcmp($base) == 0;
 
-  $u *= $u; $v *= $v;
-  my $below = $v->copy()->bmul($v);
-  my $over = $u->copy()->bmul($u);
+  # when user set globals, they would interfere with our calculation, so
+  # disable then and later re-enable them
+  no strict 'refs';
+  my $abr = "$self\::accuracy"; my $ab = $$abr; $$abr = undef;
+  my $pbr = "$self\::precision"; my $pb = $$pbr; $$pbr = undef;
+  # we also need to disable any set A or P on $x (_find_round_parameters took
+  # them already into account), since these would interfere, too
+  delete $x->{_a}; delete $x->{_p};
+  # need to disable $upgrade in BigInt, to aoid deep recursion
+  local $Math::BigInt::upgrade = undef;
+  
+  my $v = $x->copy(); $v->binc();		# v = x+1
+  $x->bdec(); my $u = $x->copy();		# u = x-1; x = x-1
+
+  $x->bdiv($v,$scale); 				# first term: u/v
+
+  my $below = $v->copy();
+  my $over = $u->copy();
+  $u *= $u; $v *= $v;				# u^2, v^2
+  $below->bmul($v);				# u^3, v^3
+  $over->bmul($u);
   my $factor = $self->new(3); my $two = $self->new(2);
 
   my $diff = $self->bone();
-  my $limit = $self->new("1E-". ($d-1)); my $last;
+  my $limit = $self->new("1E-". ($scale-1)); my $last;
   # print "diff $diff limit $limit\n";
-  while ($diff > $limit)
+  while ($diff->bcmp($limit) > 0)
     {
-    print "$x $over $below $factor\n";
+    #print "$x $over $below $factor\n";
     $diff = $x->copy()->bsub($last)->babs();
-    print "diff $diff $limit\n";
+    #print "diff $diff $limit\n";
     $last = $x->copy();
-    $x += $over->copy()->bdiv($below->copy()->bmul($factor),$d);
+    $x += $over->copy()->bdiv($below->copy()->bmul($factor),$scale);
     $over *= $u; $below *= $v; $factor->badd($two);
     }
   $x->bmul($two);
-  return $x->round(@r);
+  
+  # shortcut to not run trough _find_round_parameters again
+  if (defined $params[1])
+    {
+    $x->bround($params[1],$params[3]);		# then round accordingly
+    }
+  else
+    {
+    $x->bfround($params[2],$params[3]);		# then round accordingly
+    }
+  if ($fallback)
+    {
+    # clear a/p after round, since user did not request it
+    $x->{_a} = undef; $x->{_p} = undef;
+    }
+  # restore globals
+  $$abr = $ab; $$pbr = $pb;
+
+  $x;
   }
 
 sub blcm 
@@ -637,25 +643,37 @@ sub bgcd
   $x;
   }
 
+###############################################################################
+# is_foo methods (is_negative, is_positive are inherited from BigInt)
+
+sub is_int
+  {
+  # return true if arg (BFLOAT or num_str) is an integer
+  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+
+  return 1 if ($x->{sign} =~ /^[+-]$/) &&	# NaN and +-inf aren't
+    $x->{_e}->{sign} eq '+';			# 1e-1 => no integer
+  0;
+  }
+
 sub is_zero
   {
-  # return true if arg (BFLOAT or num_str) is zero (array '+', '0')
+  # return true if arg (BFLOAT or num_str) is zero
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
   return 1 if $x->{sign} eq '+' && $x->{_m}->is_zero();
-  return 0;
+  0;
   }
 
 sub is_one
   {
-  # return true if arg (BFLOAT or num_str) is +1 (array '+', '1')
-  # or -1 if signis given
+  # return true if arg (BFLOAT or num_str) is +1 or -1 if signis given
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
   my $sign = shift || ''; $sign = '+' if $sign ne '-';
   return 1
    if ($x->{sign} eq $sign && $x->{_e}->is_zero() && $x->{_m}->is_one()); 
-  return 0;
+  0;
   }
 
 sub is_odd
@@ -663,9 +681,9 @@ sub is_odd
   # return true if arg (BFLOAT or num_str) is odd or false if even
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
   
-  return 0 if $x->{sign} !~ /^[+-]$/;			# NaN & +-inf aren't
-  return 1 if ($x->{_e}->is_zero() && $x->{_m}->is_odd()); 
-  return 0;
+  return 1 if ($x->{sign} =~ /^[+-]$/) &&		# NaN & +-inf aren't
+    ($x->{_e}->is_zero() && $x->{_m}->is_odd()); 
+  0;
   }
 
 sub is_even
@@ -674,9 +692,9 @@ sub is_even
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
   return 0 if $x->{sign} !~ /^[+-]$/;			# NaN & +-inf aren't
-  return 1 if $x->{_m}->is_zero();			# 0e1 is even
-  return 1 if ($x->{_e}->is_zero() && $x->{_m}->is_even()); # 123.45 is never
-  return 0;
+  return 1 if ($x->{_e}->{sign} eq '+' 			# 123.45 is never
+     && $x->{_m}->is_even()); 				# but 1200 is
+  0;
   }
 
 sub bmul 
@@ -685,14 +703,12 @@ sub bmul
   # (BINT or num_str, BINT or num_str) return BINT
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
-  # print "mbf bmul $x->{_m}e$x->{_e} $y->{_m}e$y->{_e}\n";
   return $x->bnan() if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
 
-  # handle result = 0
-  return $x->bzero() if $x->is_zero() || $y->is_zero();
   # inf handling
   if (($x->{sign} =~ /^[+-]inf$/) || ($y->{sign} =~ /^[+-]inf$/))
     {
+    return $x->bnan() if $x->is_zero() || $y->is_zero(); 
     # result will always be +-inf:
     # +inf * +/+inf => +inf, -inf * -/-inf => +inf
     # +inf * -/-inf => -inf, -inf * +/+inf => -inf
@@ -700,6 +716,8 @@ sub bmul
     return $x->binf() if ($x->{sign} =~ /^-/ && $y->{sign} =~ /^-/);
     return $x->binf('-');
     }
+  # handle result = 0
+  return $x->bzero() if $x->is_zero() || $y->is_zero();
 
   # aEb * cEd = (a*c)E(b+d)
   $x->{_m}->bmul($y->{_m});
@@ -715,22 +733,14 @@ sub bdiv
   # (BFLOAT,BFLOAT) (quo,rem) or BINT (only rem)
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
-  # x / +-inf => 0, reminder x
-  return wantarray ? ($x->bzero(),$x->copy()) : $x->bzero()
-   if $y->{sign} =~ /^[+-]inf$/;
+  return $self->_div_inf($x,$y)
+   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
 
-  # NaN if x == NaN or y == NaN or x==y==0
-  return wantarray ? ($x->bnan(),bnan()) : $x->bnan()
-   if (($x->is_nan() || $y->is_nan()) ||
-      ($x->is_zero() && $y->is_zero()));
-
-  # 5 / 0 => +inf, -6 / 0 => -inf
-  return wantarray
-   ? ($x->binf($x->{sign}),$self->bnan()) : $x->binf($x->{sign})
-   if ($x->{sign} =~ /^[+-]$/ && $y->is_zero());
-
-  # x== 0 or y == 1 or y == -1
+  # x== 0 # also: or y == 1 or y == -1
   return wantarray ? ($x,$self->bzero()) : $x if $x->is_zero();
+
+  # upgrade 
+  return $upgrade->bdiv($x,$y,$a,$p,$r) if defined $upgrade;
 
   # we need to limit the accuracy to protect against overflow
   my $fallback = 0;
@@ -757,6 +767,13 @@ sub bdiv
   $scale = $ly if $ly > $scale;
   my $diff = $ly - $lx;
   $scale += $diff if $diff > 0;		# if lx << ly, but not if ly << lx!
+    
+  # make copy of $x in case of list context for later reminder calculation
+  my $rem;
+  if (wantarray && !$y->is_one())
+    {
+    $rem = $x->copy();
+    }
 
   $x->{sign} = $x->{sign} ne $y->sign() ? '-' : '+'; 
 
@@ -792,11 +809,9 @@ sub bdiv
   
   if (wantarray)
     {
-    my $rem;
     if (!$y->is_one())
       {
-      $rem = $x->copy();
-      $rem->bmod($y,$params[1],$params[2],$params[3]);
+      $rem->bmod($y,$params[1],$params[2],$params[3]);	# copy already done
       }
     else
       {
@@ -852,7 +867,7 @@ sub bmod
     $x->blsft($shifty,10);		# 123 => 1230, $y->{_m} is already 25
     }
   # $ym is now mantissa of $y based on exponent 0
-  
+
   my $shiftx = 0;			# correct _e of $x by this
   if ($x->{_e}->{sign} eq '-')		# has digits after dot
     {
@@ -871,6 +886,8 @@ sub bmod
   $x->{_e}->bsub($shifty) if $shifty != 0;
   
   # now mantissas are equalized, exponent of $x is adjusted, so calc result
+#  $ym->{sign} = '-' if $neg; # bmod() will make the correction for us
+
   $x->{_m}->bmod($ym);
 
   $x->{sign} = '+' if $x->{_m}->is_zero();		# fix sign for -0
@@ -923,16 +940,19 @@ sub bsqrt
   # disable then and later re-enable them
   no strict 'refs';
   my $abr = "$self\::accuracy"; my $ab = $$abr; $$abr = undef;
-  $abr = "$self\::precision"; my $pb = $$abr; $$abr = undef;
+  my $pbr = "$self\::precision"; my $pb = $$pbr; $$pbr = undef;
   # we also need to disable any set A or P on $x (_find_round_parameters took
   # them already into account), since these would interfere, too
   delete $x->{_a}; delete $x->{_p};
+  # need to disable $upgrade in BigInt, to aoid deep recursion
+  local $Math::BigInt::upgrade = undef;
 
   my $xas = $x->as_number();
   my $gs = $xas->copy()->bsqrt();	# some guess
+
   if (($x->{_e}->{sign} ne '-')		# guess can't be accurate if there are
 					# digits after the dot
-   && ($xas->bcmp($gs * $gs) == 0))	# guess hit the nail on the head?
+   && ($xas->bacmp($gs * $gs) == 0))	# guess hit the nail on the head?
     {
     # exact result
     $x->{_m} = $gs; $x->{_e} = Math::BigInt->bzero(); $x->bnorm();
@@ -950,6 +970,7 @@ sub bsqrt
       # clear a/p after round, since user did not request it
       $x->{_a} = undef; $x->{_p} = undef;
       }
+    ${"$self\::accuracy"} = $ab; ${"$self\::precision"} = $pb;
     return $x;
     }
   $gs = $self->new( $gs );		# BigInt to BigFloat
@@ -957,7 +978,7 @@ sub bsqrt
   my $lx = $x->{_m}->length();
   $scale = $lx if $scale < $lx;
   my $e = $self->new("1E-$scale");	# make test variable
-  return $x->bnan() if $e->sign() eq 'NaN';
+#  return $x->bnan() if $e->sign() eq 'NaN';
 
   my $y = $x->copy();
   my $two = $self->new(2);
@@ -966,17 +987,12 @@ sub bsqrt
   $y = $self->new($y) unless $y->isa('Math::BigFloat'); 
 
   my $rem;
-#  my $steps = 0;
   while ($diff >= $e)
     {
-#    return $x->bnan() if $gs->is_zero();
-
     $rem = $y->copy()->bdiv($gs,$scale)->badd($gs)->bdiv($two,$scale);
     $diff = $rem->copy()->bsub($gs)->babs();
     $gs = $rem->copy();
-#    $steps++;
     }
-#  print "steps $steps\n";
   # copy over to modify $x
   $x->{_m} = $rem->{_m}; $x->{_e} = $rem->{_e};
   
@@ -995,8 +1011,37 @@ sub bsqrt
     $x->{_a} = undef; $x->{_p} = undef;
     }
   # restore globals
-  ${"$self\::accuracy"} = $ab; ${"$self\::precision"} = $pb;
+  $$abr = $ab; $$pbr = $pb;
   $x;
+  }
+
+sub bfac
+  {
+  # (BINT or num_str, BINT or num_str) return BINT
+  # compute factorial numbers
+  # modifies first argument
+  my ($self,$x,@r) = objectify(1,@_);
+
+  return $x->bnan() if $x->{sign} ne '+';	# inf, NnN, <0 etc => NaN
+  return $x->bone(@r) if $x->is_zero() || $x->is_one();		# 0 or 1 => 1
+
+  return $x->bnan() if $x->{_e}->{sign} ne '+';	# digits after dot?
+  
+  # use BigInt's bfac() for faster calc
+  $x->{_m}->blsft($x->{_e},10);		# un-norm m
+  $x->{_e}->bzero();			# norm $x again
+  $x->{_m}->bfac();			# factorial
+  $x->bnorm();
+ 
+  #my $n = $x->copy();
+  #$x->bone();
+  #my $f = $self->new(2);
+  #while ($f->bacmp($n) < 0)
+  #  {
+  #  $x->bmul($f); $f->binc();
+  #  }
+  #$x->bmul($f);					# last step
+  $x->round(@r);				# round
   }
 
 sub bpow 
@@ -1093,7 +1138,7 @@ sub bfround
     return $x->bzero() if $scale < $zad;
     if ($scale == $zad)			# for 0.006, scale -3 and trunc
       {
-      $scale = -$len-1;
+      $scale = -$len;
       }
     else
       {
@@ -1114,29 +1159,31 @@ sub bfround
     {
     # 123 => 100 means length(123) = 3 - $scale (2) => 1
 
-    # calculate digits before dot
-    my $dbt = $x->{_m}->length(); $dbt += $x->{_e} if $x->{_e}->sign() eq '-';
-    # if not enough digits before dot, round to zero
-    return $x->bzero() if ($scale > $dbt) && ($dbt < 0);
-    # scale always >= 0 here
-    if ($dbt == 0)
-      {
-      # 0.49->bfround(1): scale == 1, dbt == 0: => 0.0
-      # 0.51->bfround(0): scale == 0, dbt == 0: => 1.0
-      # 0.5->bfround(0):  scale == 0, dbt == 0: => 0
-      # 0.05->bfround(0): scale == 0, dbt == 0: => 0
-      # print "$scale $dbt $x->{_m}\n";
-      $scale = -$x->{_m}->length();
-      }
-    elsif ($dbt > 0)
-      {
-      # correct by subtracting scale
-      $scale = $dbt - $scale;
-      }
+    my $dbt = $x->{_m}->length(); 
+    # digits before dot 
+    my $dbd = $dbt + $x->{_e}; 
+    # should be the same, so treat it as this 
+    $scale = 1 if $scale == 0; 
+    # shortcut if already integer 
+    return $x if $scale == 1 && $dbt <= $dbd; 
+    # maximum digits before dot 
+    ++$dbd;
+
+    if ($scale > $dbd) 
+       { 
+       # not enough digits before dot, so round to zero 
+       return $x->bzero; 
+       }
+    elsif ( $scale == $dbd )
+       { 
+       # maximum 
+       $scale = -$dbt; 
+       } 
     else
-      {
-      $scale = $x->{_m}->length() - $scale;
-      }
+       { 
+       $scale = $dbd - $scale; 
+       }
+
     }
   # print "using $scale for $x->{_m} with '$mode'\n";
   # pass sign to bround for rounding modes '+inf' and '-inf'
@@ -1257,12 +1304,11 @@ sub DESTROY
 
 sub AUTOLOAD
   {
-  # make fxxx and bxxx work
-  # my $self = $_[0];
+  # make fxxx and bxxx both work by selectively mapping fxxx() to MBF::bxxx()
+  # or falling back to MBI::bxxx()
   my $name = $AUTOLOAD;
 
   $name =~ s/.*:://;	# split package
-  #print "$name\n";
   no strict 'refs';
   if (!method_alias($name))
     {
@@ -1283,7 +1329,7 @@ sub AUTOLOAD
     return &{'Math::BigInt'."::$name"}(@_);
     }
   my $bname = $name; $bname =~ s/^f/b/;
-  *{$class."\:\:$name"} = \&$bname;
+  *{$class."::$name"} = \&$bname;
   &$bname;	# uses @_
   }
 
@@ -1337,20 +1383,28 @@ sub parts
 sub import
   {
   my $self = shift;
-  for ( my $i = 0; $i < @_ ; $i++ )
+  my $l = scalar @_; my $j = 0; my @a = @_;
+  for ( my $i = 0; $i < $l ; $i++, $j++)
     {
     if ( $_[$i] eq ':constant' )
       {
       # this rest causes overlord er load to step in
       # print "overload @_\n";
       overload::constant float => sub { $self->new(shift); }; 
-      splice @_, $i, 1; last;
+      splice @a, $j, 1; $j--;
+      }
+    elsif ($_[$i] eq 'upgrade')
+      {
+      # this causes upgrading
+      $upgrade = $_[$i+1];              # or undef to disable
+      my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
+      splice @a, $j, $s; $j -= $s;
       }
     }
   # any non :constant stuff is handled by our parent, Exporter
   # even if @_ is empty, to give it a chance
-  $self->SUPER::import(@_);      	# for subclasses
-  $self->export_to_level(1,$self,@_);	# need this, too
+  $self->SUPER::import(@a);      	# for subclasses
+  $self->export_to_level(1,$self,@a);	# need this, too
   }
 
 sub bnorm
@@ -1434,30 +1488,41 @@ Math::BigFloat - Arbitrary size floating point math package
 
   use Math::BigFloat;
 
-  # Number creation	
-  $x = Math::BigInt->new($str);	# defaults to 0
-  $nan  = Math::BigInt->bnan(); # create a NotANumber
-  $zero = Math::BigInt->bzero();# create a "+0"
+  # Number creation
+  $x = Math::BigFloat->new($str);	# defaults to 0
+  $nan  = Math::BigFloat->bnan();	# create a NotANumber
+  $zero = Math::BigFloat->bzero();	# create a +0
+  $inf = Math::BigFloat->binf();	# create a +inf
+  $inf = Math::BigFloat->binf('-');	# create a -inf
+  $one = Math::BigFloat->bone();	# create a +1
+  $one = Math::BigFloat->bone('-');	# create a -1
 
   # Testing
-  $x->is_zero();		# return whether arg is zero or not
-  $x->is_nan();			# return whether arg is NaN or not
+  $x->is_zero();		# true if arg is +0
+  $x->is_nan();			# true if arg is NaN
   $x->is_one();			# true if arg is +1
   $x->is_one('-');		# true if arg is -1
   $x->is_odd();			# true if odd, false for even
   $x->is_even();		# true if even, false for odd
   $x->is_positive();		# true if >= 0
   $x->is_negative();		# true if <  0
-  $x->is_inf(sign)		# true if +inf or -inf (sign default '+')
+  $x->is_inf(sign);		# true if +inf, or -inf (default is '+')
+
   $x->bcmp($y);			# compare numbers (undef,<0,=0,>0)
   $x->bacmp($y);		# compare absolutely (undef,<0,=0,>0)
   $x->sign();			# return the sign, either +,- or NaN
+  $x->digit($n);		# return the nth digit, counting from right
+  $x->digit(-$n);		# return the nth digit, counting from left 
 
   # The following all modify their first argument:
-
+  
   # set 
   $x->bzero();			# set $i to 0
   $x->bnan();			# set $i to NaN
+  $x->bone();                   # set $x to +1
+  $x->bone('-');                # set $x to -1
+  $x->binf();                   # set $x to inf
+  $x->binf('-');                # set $x to -inf
 
   $x->bneg();			# negation
   $x->babs();			# absolute value
@@ -1485,18 +1550,23 @@ Math::BigFloat - Arbitrary size floating point math package
   $x->bior($y);			# bit-wise inclusive or
   $x->bxor($y);			# bit-wise exclusive or
   $x->bnot();			# bit-wise not (two's complement)
-  
+ 
+  $x->bsqrt();			# calculate square-root
+  $x->bfac();			# factorial of $x (1*2*3*4*..$x)
+ 
   $x->bround($N); 		# accuracy: preserver $N digits
   $x->bfround($N);		# precision: round to the $Nth digit
 
   # The following do not modify their arguments:
-
   bgcd(@values);		# greatest common divisor
   blcm(@values);		# lowest common multiplicator
   
   $x->bstr();			# return string
   $x->bsstr();			# return string in scientific notation
-  
+ 
+  $x->bfloor();			# return integer less or equal than $x
+  $x->bceil();			# return integer greater or equal than $x
+ 
   $x->exponent();		# return exponent as BigInt
   $x->mantissa();		# return mantissa as BigInt
   $x->parts();			# return (mantissa,exponent) as BigInt

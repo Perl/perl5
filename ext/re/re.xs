@@ -7,6 +7,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+START_EXTERN_C
+
 extern regexp*	my_regcomp (pTHX_ char* exp, char* xend, PMOP* pm);
 extern I32	my_regexec (pTHX_ regexp* prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
@@ -16,6 +18,8 @@ extern char*	my_re_intuit_start (pTHX_ regexp *prog, SV *sv, char *strpos,
 				    char *strend, U32 flags,
 				    struct re_scream_pos_data_s *data);
 extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
+
+END_EXTERN_C
 
 #define MY_CXT_KEY "re::_guts" XS_VERSION
 

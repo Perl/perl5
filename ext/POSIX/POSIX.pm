@@ -889,22 +889,61 @@ for (values %EXPORT_TAGS) {
 }
 
 @EXPORT_OK = qw(
-    closedir opendir readdir rewinddir
-    fcntl open
-    getgrgid getgrnam
-    atan2 cos exp log sin sqrt
-    getpwnam getpwuid
-    kill
-    fileno getc printf rename sprintf
-    abs exit rand srand system
-    chmod mkdir stat umask
-    times
-    wait waitpid
-    gmtime localtime time
-    alarm chdir chown close fork getlogin getppid getpgrp link
-	pipe read rmdir sleep unlink write
-    utime
-    nice
+		abs
+		alarm
+		atan2
+		chdir
+		chmod
+		chown
+		close
+		closedir
+		cos
+		exit
+		exp
+		fcntl
+		fileno
+		fork
+		getc
+		getgrgid
+		getgrnam
+		getlogin
+		getpgrp
+		getppid
+		getpwnam
+		getpwuid
+		gmtime
+		isatty
+		kill
+		link
+		localtime
+		log
+		mkdir
+		nice
+		open
+		opendir
+		pipe
+		printf
+		rand
+		read
+		readdir
+		rename
+		rewinddir
+		rmdir
+		sin
+		sleep
+		sprintf
+		sqrt
+		srand
+		stat
+		system
+		time
+		times
+		umask
+		unlink
+		utime
+		wait
+		waitpid
+		write
 );
 
 require Exporter;

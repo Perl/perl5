@@ -1,5 +1,11 @@
 package Unicode::Normalize;
 
+BEGIN {
+    if (ord("A") == 193) {
+	die "Unicode::Normalize not ported to EBCDIC\n";
+    }
+}
+
 use 5.006;
 use strict;
 use warnings;
@@ -145,6 +151,16 @@ a composition exclusion.
 C<NFC>, C<NFD>, C<NFKC>, C<NFKD>: by default.
 
 C<normalize> and other some functions: on request.
+
+=head2 TODO
+
+Unicode::Normalize has not been ported to EBCDIC.  The code mostly
+would work just fine but a decision needs to be made: how the module
+should work in EBCDIC?  Should the low 256 characters be understood as
+Unicode or as EBCDIC code points?  Should one be chosen or should
+there be a way to do either?  Or should such translation be left
+outside the module for the user to do, for example by using
+Encode::from_to()?
 
 =head1 AUTHOR
 

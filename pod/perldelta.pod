@@ -449,6 +449,16 @@ pop(), push(), shift(), splice(), unshift().
 
 =item *
 
+C<pack() / unpack()> now can group template letters with C<()> and then
+apply repetition/count modifiers on the groups.
+
+=item *
+
+C<pack() / unpack()> can now process the Perl internal numeric types:
+IVs, UVs, NVs-- and also long doubles, if supported by the platform.
+
+=item *
+
 C<pack('U0a*', ...)> can now be used to force a string to UTF8.
 
 =item *
@@ -482,6 +492,15 @@ little brother of C<-T>: instead of dieing on taint violations,
 lexical warnings are given.  B<This is only meant as a temporary
 debugging aid while securing the code of old legacy applications.
 This is not a substitute for -T.>
+
+=item *
+
+In other taint news, the C<exec LIST> and C<system LIST> have now been
+considered too risky (think C<exec @ARGV>: it can start any program
+with any arguments), and now the said forms cause a warning.
+You should carefully launder the arguments to guarantee their
+validity.  In future releases of Perl the forms will become fatal
+errors so consider starting laundering now.
 
 =item *
 
@@ -2264,6 +2283,14 @@ respectively.
 
 =item *
 
+perl5db.pl has been modified to present a more consistent commands
+interface, via (CommandSet=580).  perl5db.t was also added to test the
+changes, and as a placeholder for further tests.
+
+See L<perldebug>
+
+=item *
+
 If an attempt to use a (non-blessed) reference as an array index
 is made, a warning is given.
 
@@ -2569,6 +2596,13 @@ Numerous numerical test failures
 These tests fail because of yet unresolved floating point inaccuracies.
 
 =back
+
+=head2 UNICOS and UNICOS/mk
+
+The io/fs test #31 is failing because in UNICOS and UNICOS/mk
+truncate() cannot be used to grow the size of filehandles, only
+to reduce the size.  The workaround is to truncate files instead
+of filehandles.
 
 =head2 UTS
 

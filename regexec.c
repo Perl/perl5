@@ -959,8 +959,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		to_utf8_lower((U8*)m, tmpbuf1, &ulen1);
 		to_utf8_upper((U8*)m, tmpbuf2, &ulen2);
 
-		c1 = utf8_to_uvuni(tmpbuf1, 0);
-		c2 = utf8_to_uvuni(tmpbuf2, 0);
+		c1 = utf8_to_uvchr(tmpbuf1, 0);
+		c2 = utf8_to_uvchr(tmpbuf2, 0);
 	    }
 	    else {
 		c1 = *(U8*)m;
@@ -984,9 +984,10 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	     * text of the node.  The c1 and c2 are the first
 	     * characters (though in Unicode it gets a bit
 	     * more complicated because there are more cases
-	     * than just upper and lower: one is really supposed
-	     * to use the so-called folding case for case-insensitive
-	     * matching (called "loose matching" in Unicode).  */
+	     * than just upper and lower: one needs to use
+	     * the so-called folding case for case-insensitive
+	     * matching (called "loose matching" in Unicode).
+	     * ibcmp_utf8() will do just that. */
 
 	    if (do_utf8) {
 	        UV c, f;
@@ -4259,9 +4260,6 @@ S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, registe
 		if (swash_fetch(sw, p, do_utf8))
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
-		    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
-		    STRLEN tmplen;
-
 		    if (!match && lenp && av) {
 		        I32 i;
 		      
@@ -4278,12 +4276,10 @@ S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, registe
 			}
 		    }
 		    if (!match) {
+		        U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+			STRLEN tmplen;
+
 		        to_utf8_fold(p, tmpbuf, &tmplen);
-			if (swash_fetch(sw, tmpbuf, do_utf8))
-			    match = TRUE;
-		    }
-		    if (!match) {
-		        to_utf8_upper(p, tmpbuf, &tmplen);
 			if (swash_fetch(sw, tmpbuf, do_utf8))
 			    match = TRUE;
 		    }

@@ -3104,9 +3104,8 @@ the converted values.  Typically, each converted value looks
 like its machine-level representation.  For example, on 32-bit machines
 a converted integer may be represented by a sequence of 4 bytes.
 
-The TEMPLATE is a
-sequence of characters that give the order and type of values, as
-follows:
+The TEMPLATE is a sequence of characters that give the order and type
+of values, as follows:
 
     a	A string with arbitrary binary data, will be null padded.
     A	A text (ASCII) string, will be space padded.
@@ -3152,8 +3151,18 @@ follows:
 	   integer values _and_ if Perl has been compiled to support those.
            Causes a fatal error otherwise.)
 
+    j   A signed integer value (a Perl internal integer, IV).
+    J   An unsigned integer value (a Perl internal unsigned integer, UV).
+
     f	A single-precision float in the native format.
     d	A double-precision float in the native format.
+
+    F	A floating point value in the native native format
+           (a Perl internal floating point value, NV).
+    D	A long double-precision float in the native format.
+	  (Long doubles are available only if your system supports long
+	   double values _and_ if Perl has been compiled to support those.
+           Causes a fatal error otherwise.)
 
     p	A pointer to a null-terminated string.
     P	A pointer to a structure (fixed-length string).
@@ -3170,6 +3179,7 @@ follows:
     x	A null byte.
     X	Back up a byte.
     @	Null fill to absolute position.
+    (	Start of a ()-group.
 
 The following rules apply:
 
@@ -3179,11 +3189,20 @@ The following rules apply:
 
 Each letter may optionally be followed by a number giving a repeat
 count.  With all types except C<a>, C<A>, C<Z>, C<b>, C<B>, C<h>,
-C<H>, and C<P> the pack function will gobble up that many values from
-the LIST.  A C<*> for the repeat count means to use however many items are
-left, except for C<@>, C<x>, C<X>, where it is equivalent
-to C<0>, and C<u>, where it is equivalent to 1 (or 45, what is the
-same).
+C<H>, C<@>, C<x>, C<X> and C<P> the pack function will gobble up that
+many values from the LIST.  A C<*> for the repeat count means to use
+however many items are left, except for C<@>, C<x>, C<X>, where it is
+equivalent to C<0>, and C<u>, where it is equivalent to 1 (or 45, what
+is the same).  A numeric repeat count may optionally be enclosed in
+brackets, as in C<pack 'C[80]', @arr>.
+
+One can replace the numeric repeat count by a template enclosed in brackets;
+then the packed length of this template in bytes is used as a count.
+For example, C<x[L]> skips a long (it skips the number of bytes in a long);
+the template C<$t X[$t] $t> unpack()s twice what $t unpacks.
+If the template in brackets contains alignment commands (such as C<x![d]>),
+its packed length is calculated as if the start of the template has the maximal
+possible alignment.
 
 When used with C<Z>, C<*> results in the addition of a trailing null
 byte (so the packed result will be one longer than the byte C<length>
@@ -3272,11 +3291,10 @@ The C</> template character allows packing and unpacking of strings where
 the packed structure contains a byte count followed by the string itself.
 You write I<length-item>C</>I<string-item>.
 
-The I<length-item> can be any C<pack> template letter,
-and describes how the length value is packed.
-The ones likely to be of most use are integer-packing ones like
-C<n> (for Java strings), C<w> (for ASN.1 or SNMP)
-and C<N> (for Sun XDR).
+The I<length-item> can be any C<pack> template letter, and describes
+how the length value is packed.  The ones likely to be of most use are
+integer-packing ones like C<n> (for Java strings), C<w> (for ASN.1 or
+SNMP) and C<N> (for Sun XDR).
 
 The I<string-item> must, at present, be C<"A*">, C<"a*"> or C<"Z*">.
 For C<unpack> the length of the string is obtained from the I<length-item>,
@@ -3323,7 +3341,7 @@ not support long longs.)
 
 =item *
 
-The integer formats C<s>, C<S>, C<i>, C<I>, C<l>, and C<L>
+The integer formats C<s>, C<S>, C<i>, C<I>, C<l>, C<L>, C<j>, and C<J>
 are inherently non-portable between processors and operating systems
 because they obey the native byteorder and endianness.  For example a
 4-byte integer 0x12345678 (305419896 decimal) would be ordered natively
@@ -3398,6 +3416,24 @@ could know where the bytes are going to or coming from.  Therefore
 C<pack> (and C<unpack>) handle their output and input as flat
 sequences of bytes.
 
+=item *
+
+A ()-group is a sub-TEMPLATE enclosed in parentheses.  A group may
+take a repeat count, both as postfix, and via the C</> template
+character.
+
+=item *
+
+C<x> and C<X> accept C<!> modifier.  In this case they act as
+alignment commands: they jump forward/back to the closest position
+aligned at a multiple of C<count> bytes.  For example, to pack() or
+unpack() C's C<struct {char c; double d; char cc[2]}> one may need to
+use the template C<C x![d] d C[2]>; this assumes that doubles must be
+aligned on the double's size.
+ 
+For alignment commands C<count> of 0 is equivalent to C<count> of 1;
+both result in no-ops.
+  
 =item *
 
 A comment in a TEMPLATE starts with C<#> and goes to the end of line.

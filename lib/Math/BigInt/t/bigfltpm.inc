@@ -1,4 +1,7 @@
 #include this file into another test for subclass testing...
+
+ok ($class->config()->{lib},$CL);
+
 while (<DATA>)
   {
   chop;
@@ -52,11 +55,11 @@ while (<DATA>)
         $try .= "\$x->numify();";
       } elsif ($f eq "length") {
         $try .= "\$x->length();";
-      # some unary ops (test the bxxx form, since that is done by AUTOLOAD)
+      # some unary ops (test the fxxx form, since that is done by AUTOLOAD)
       } elsif ($f =~ /^f(nan|sstr|neg|floor|ceil|abs)$/) {
         $try .= "\$x->f$1();";
       # some is_xxx test function	
-      } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan)$/) {
+      } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan|int)$/) {
         $try .= "\$x->$f();";
       } elsif ($f eq "as_number") {
         $try .= '$x->as_number();';
@@ -70,14 +73,16 @@ while (<DATA>)
         $try .= "$setup; \$x->ffround($args[1]);";
       } elsif ($f eq "fsqrt") {
         $try .= "$setup; \$x->fsqrt();";
+      } elsif ($f eq "flog") {
+        $try .= "$setup; \$x->flog();";
+      } elsif ($f eq "ffac") {
+        $try .= "$setup; \$x->ffac();";
       }
     else
       {
       $try .= "\$y = new $class \"$args[1]\";";
       if ($f eq "fcmp") {
         $try .= '$x <=> $y;';
-      } elsif ($f eq "flog") {
-        $try .= '$x->flog($y);';
       } elsif ($f eq "facmp") {
         $try .= '$x->facmp($y);';
       } elsif ($f eq "fpow") {
@@ -90,6 +95,8 @@ while (<DATA>)
         $try .= '$x * $y;';
       } elsif ($f eq "fdiv") {
         $try .= "$setup; \$x / \$y;";
+      } elsif ($f eq "fdiv-list") {
+        $try .= "$setup; join(',',\$x->fdiv(\$y));";
       } elsif ($f eq "frsft") {
         $try .= '$x >> $y;';
       } elsif ($f eq "flsft") {
@@ -140,14 +147,7 @@ $x = Math::BigInt->new(1200); $y = $class->new($x);
 ok ($y,1200); ok ($x,1200);
 
 ###############################################################################
-# fdiv() in list context
-
-$x = $class->bzero(); ($x,$y) = $x->fdiv(0);
-ok ($x,'NaN'); ok ($y,'NaN');
-
-# fdiv() in list context
-$x = $class->bzero(); ($x,$y) = $x->fdiv(1);
-ok ($x,0); ok ($y,0);
+# zero,inf,one,nan
 
 $x = $class->new(2); $x->fzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
 $x = $class->new(2); $x->finf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
@@ -168,11 +168,18 @@ $x = $class->new(12); $class->precision(0); $x->fsqrt(); ok ($x,'3');
 $class->precision(-3); $x = $class->new(12); $x->fsqrt(); ok ($x,'3.464');
 
 # A and P set => NaN
-$class->accuracy(4); $x = $class->new(12); $x->fsqrt(3); ok ($x,'NaN');
+${${class}.'::accuracy'} = 4; $x = $class->new(12); $x->fsqrt(3); ok ($x,'NaN');
 # supplied arg overrides set global
 $class->precision(undef); $x = $class->new(12); $x->fsqrt(3); ok ($x,'3.46');
 
 $class->accuracy(undef); $class->precision(undef); # reset for further tests
+
+###############################################################################
+# can we call objectify (broken until v1.52)
+
+$try = '@args' . " = $class" . "::objectify(2,$class,4,5);".'join(" ",@args);';
+$ans = eval $try;
+ok ($ans,"$class 4 5");
 
 1; # all done
 
@@ -188,19 +195,31 @@ sub ok_undef
   }
 
 __DATA__
-#&flog
-#$div_scale = 14;
-#10:0:2.30258509299405
+$div_scale = 40;
+&flog
+0:NaN
+-1:NaN
+-2:NaN
+1:0
+# this is too slow for the testsuite
+#2.718281828:0.9999999998311266953289851340574956564911
+#$div_scale = 20;
+#2.718281828:0.99999999983112669533
+1:0
+# too slow, too (or hangs?)
+#123:4.8112184355
+# $div_scale = 14;
+#10:0:2.302585092994
 #1000:0:6.90775527898214
 #100:0:4.60517018598809
 #2:0:0.693147180559945
 #3.1415:0:1.14470039286086
 #12345:0:9.42100640177928
 #0.001:0:-6.90775527898214
-## reset for further tests
-#$div_scale = 40;
+# reset for further tests
+$div_scale = 40;
 &frsft
-#NaNfrsft:NaN
+NaNfrsft:2:NaN
 0:2:0
 1:1:0.5
 2:1:1
@@ -208,7 +227,7 @@ __DATA__
 123:1:61.5
 32:3:4
 &flsft
-#NaNflsft:NaN
+NaNflsft:0:NaN
 2:1:4
 4:3:32
 5:3:40
@@ -740,8 +759,8 @@ fincNaN:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
-+inf:-inf:0
--inf:+inf:0
++inf:-inf:NaN
+-inf:+inf:NaN
 +inf:+inf:inf
 -inf:-inf:-inf
 baddNaN:+inf:NaN
@@ -789,8 +808,8 @@ abc:+0:NaN
 +0:abc:NaN
 +inf:-inf:inf
 -inf:+inf:-inf
-+inf:+inf:0
--inf:-inf:0
++inf:+inf:NaN
+-inf:-inf:NaN
 baddNaN:+inf:NaN
 baddNaN:+inf:NaN
 +inf:baddNaN:NaN
@@ -880,6 +899,11 @@ NaNmul:-inf:NaN
 +99999999999:+9:899999999991
 6:120:720
 10:10000:100000
+&fdiv-list
+0:0:NaN,NaN
+0:1:0,0
+9:4:2.25,1
+9:5:1.8,4
 &fdiv
 $div_scale = 40; $round_mode = 'even'
 abc:abc:NaN
@@ -975,10 +999,10 @@ inf:-5:0
 -inf:-5:0
 5:5:0
 -5:-5:0
-inf:inf:0
--inf:-inf:0
--inf:inf:0
-inf:-inf:0
+inf:inf:NaN
+-inf:-inf:NaN
+-inf:inf:NaN
+inf:-inf:NaN
 8:0:8
 inf:0:inf
 # exceptions to reminder rule
@@ -1041,6 +1065,19 @@ abc:1:abc:NaN
 1230:2.5:0
 123.4:2.5:0.9
 123e1:25:5
+&ffac
+Nanfac:NaN
+-1:NaN
+0:1
+1:1
+2:2
+3:6
+4:24
+5:120
+6:720
+10:3628800
+11:39916800
+12:479001600
 &fsqrt
 +0:0
 -1:NaN
@@ -1062,6 +1099,7 @@ nanfsqrt:NaN
 # sqrt(1.44) = 1.2, sqrt(e10) = e5 => 12e4
 1.44E10:120000
 2e10:141421.356237309504880168872420969807857
+144e20:120000000000
 # proved to be an endless loop under 7-9
 12:3.464101615137754587054892683011744733886
 &is_nan
@@ -1097,6 +1135,18 @@ abc:0
 123.45:0
 -123.45:0
 2:0
+&is_int
+NaNis_int:0
+0:1
+1:1
+2:1
+-2:1
+-1:1
+-inf:0
++inf:0
+123.4567:0
+-0.1:0
+-0.002:0
 &is_even
 abc:0
 0:1
@@ -1111,6 +1161,11 @@ abc:0
 -inf:0
 123.456:0
 -123.456:0
+0.01:0
+-0.01:0
+120:1
+1200:1
+-1200:1
 &is_positive
 0:1
 1:1

@@ -4031,11 +4031,21 @@ PP(pp_system)
     int pp[2];
     I32 did_pipes = 0;
 
-    if (SP - MARK == 1) {
-	if (PL_tainting) {
-	    (void)SvPV_nolen(TOPs);      /* stringify for taint check */
-	    TAINT_ENV();
+    if (PL_tainting) {
+	TAINT_ENV();
+	while (++MARK <= SP) {
+	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
+	    if (PL_tainted) 
+		break;
+	}
+	MARK = ORIGMARK;
+	/* XXX Remove warning at end of deprecation cycle --RD 2002-02  */
+	if (SP - MARK == 1) {
 	    TAINT_PROPER("system");
+	}
+	else if (ckWARN(WARN_TAINT)) {
+	    Perl_warner(aTHX_ WARN_TAINT, 
+		"Use of tainted arguments in %s is deprecated", "system");
 	}
     }
     PERL_FLUSHALL_FOR_CHILD;
@@ -4044,16 +4054,6 @@ PP(pp_system)
 	 Pid_t childpid;
 	 int status;
 	 Sigsave_t ihand,qhand;     /* place to save signals during system() */
-	
-	 if (PL_tainting) {
-	     SV *cmd = NULL;
-	     if (PL_op->op_flags & OPf_STACKED)
-		cmd = *(MARK + 1);
-	     else if (SP - MARK != 1)
-		cmd = *SP;
-	     if (cmd && *(SvPV_nolen(cmd)) != '/')
-		TAINT_ENV();
-	 }
 
 	 if (PerlProc_pipe(pp) >= 0)
 	      did_pipes = 1;
@@ -4155,6 +4155,23 @@ PP(pp_exec)
     I32 value;
     STRLEN n_a;
 
+    if (PL_tainting) {
+	TAINT_ENV();
+	while (++MARK <= SP) {
+	    (void)SvPV_nolen(*MARK);      /* stringify for taint check */
+	    if (PL_tainted) 
+		break;
+	}
+	MARK = ORIGMARK;
+	/* XXX Remove warning at end of deprecation cycle --RD 2002-02  */
+	if (SP - MARK == 1) {
+	    TAINT_PROPER("exec");
+	}
+	else if (ckWARN(WARN_TAINT)) {
+	    Perl_warner(aTHX_ WARN_TAINT, 
+		"Use of tainted arguments in %s is deprecated", "exec");
+	}
+    }
     PERL_FLUSHALL_FOR_CHILD;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
@@ -4174,11 +4191,6 @@ PP(pp_exec)
 #  endif
 #endif
     else {
-	if (PL_tainting) {
-	    (void)SvPV_nolen(*SP);      /* stringify for taint check */
-	    TAINT_ENV();
-	    TAINT_PROPER("exec");
-	}
 #ifdef VMS
 	value = (I32)vms_do_exec(SvPVx(sv_mortalcopy(*SP), n_a));
 #else

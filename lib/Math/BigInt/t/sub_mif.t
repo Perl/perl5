@@ -13,9 +13,9 @@ BEGIN
   my $location = $0; $location =~ s/sub_mif.t//i;
   if ($ENV{PERL_CORE})
     {
-    @INC = qw(../t/lib);               # testing with the core distribution
+    @INC = qw(../t/lib); 		# testing with the core distribution
     }
-  unshift @INC, '../lib';      # for testing manually
+  unshift @INC, '../lib';	# for testing manually
   if (-d 't')
     {
     chdir 't';
@@ -27,8 +27,8 @@ BEGIN
     unshift @INC, $location;
     }
   print "# INC = @INC\n";
-  
-  plan tests => 428;
+
+  plan tests => 435;
   }
 
 use Math::BigInt::Subclass;

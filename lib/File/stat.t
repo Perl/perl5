@@ -16,10 +16,10 @@ BEGIN {
     $hasst = 0 unless $Config{'i_sysstat'} eq 'define';
     unless ($hasst) { plan skip_all => "no sys/stat.h"; exit 0 }
     our @stat = stat "TEST"; # This is the function stat.
-    unless (@stat) { print "1..0 # Skip: no file TEST\n"; exit 0 }
+    unless (@stat) { plan skip_all => "1..0 # Skip: no file TEST"; exit 0 }
 }
 
-plan tests => 16;
+plan tests => 19;
 
 use_ok( 'File::stat' );
 
@@ -55,6 +55,20 @@ is( $stat->ctime, $stat[10], "change time in position 10" );
 is( $stat->blksize, $stat[11], "IO block size in position 11" );
 
 is( $stat->blocks, $stat[12], "number of blocks in position 12" );
+
+SKIP: {
+	local *STAT;
+	skip(2, "Could not open file: $!") unless open(STAT, 'TEST');
+	ok( File::stat::stat('STAT'), '... should be able to find filehandle' );
+
+	package foo;
+	local *STAT = *main::STAT;
+	main::ok( my $stat2 = File::stat::stat('STAT'), 
+		'... and filehandle in another package' );
+	close STAT;
+
+	main::is( "@$stat", "@$stat2", '... and must match normal stat' );
+}
 
 local $!;
 $stat = stat '/notafile';

@@ -1,4 +1,9 @@
 package Encode::Tcl;
+BEGIN {
+    if (ord("A") == 193) {
+	die "Encode::JP not supported on EBCDIC\n";
+    }
+}
 use strict;
 our $VERSION = do {my @r=(q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r};
 use Encode qw(find_encoding);

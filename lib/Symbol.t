@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 10;
+use Test::More tests => 14;
 
 BEGIN { $_ = 'foo'; }  # because Symbol used to clobber $_
 
@@ -26,6 +26,27 @@ ungensym $sym1;
 
 $sym1 = $sym2 = undef;
 
+# Test geniosym()
+
+use Symbol qw(geniosym);
+
+$sym1 = geniosym;
+like( $sym1, qr/=IO\(/, 'got an IO ref' );
+
+$FOO = 'Eymascalar';
+*FOO = $sym1;
+
+is( $sym1, *FOO{IO}, 'assigns into glob OK' );
+
+is( $FOO, 'Eymascalar', 'leaves scalar alone' );
+
+{
+    local $^W=1;		# 5.005 compat.
+    my $warn;
+    local $SIG{__WARN__} = sub { $warn .= "@_" };
+    readline FOO;
+    like( $warn, qr/unopened filehandle/, 'warns like an unopened filehandle' );
+}
 
 # Test qualify()
 package foo;

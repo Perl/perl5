@@ -15,6 +15,12 @@ Symbol - manipulate Perl symbols and their names
 
     ungensym $sym;      # no effect
 
+    # localize *FOO IO handle but not $FOO, %FOO, etc.
+    my $save_fooio = *FOO{IO} || geniosym;
+    *FOO = geniosym;
+    use_foo();
+    *FOO{IO} = $save_fooio;
+
     print qualify("x"), "\n";              # "Test::x"
     print qualify("x", "FOO"), "\n"        # "FOO::x"
     print qualify("BAR::x"), "\n";         # "BAR::x"
@@ -42,6 +48,10 @@ For backward compatibility with older implementations that didn't
 support anonymous globs, C<Symbol::ungensym> is also provided.
 But it doesn't do anything.
 
+C<Symbol::geniosym> creates an anonymous IO handle.  This can be
+assigned into an existing glob without affecting the non-IO portions
+of the glob.
+
 C<Symbol::qualify> turns unqualified symbol names into qualified
 variable names (e.g. "myvar" -E<gt> "MyPackage::myvar").  If it is given a
 second parameter, C<qualify> uses it as the default package;
@@ -68,7 +78,7 @@ BEGIN { require 5.005; }
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(gensym ungensym qualify qualify_to_ref);
-@EXPORT_OK = qw(delete_package);
+@EXPORT_OK = qw(delete_package geniosym);
 
 $VERSION = 1.04;
 
@@ -87,6 +97,13 @@ sub gensym () {
     my $ref = \*{$genpkg . $name};
     delete $$genpkg{$name};
     $ref;
+}
+
+sub geniosym () {
+    my $sym = gensym();
+    # force the IO slot to be filled
+    select(select $sym);
+    *$sym{IO};
 }
 
 sub ungensym ($) {}
