@@ -11,6 +11,12 @@ if ($^O eq 'MSWin32') {
     exit(0);
 }
 
+if ($^O eq 'MacOS') {
+    # XXX the system tests could be written to use ./perl and so work on Win32
+    print "1..0 # Mostly useless tests for Mac OS\n";
+    exit(0);
+}
+
 print "1..8\n";
 
 if ($^O ne 'os2') {

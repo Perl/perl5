@@ -1,6 +1,6 @@
 ##
 # Rhapsody (Mac OS X Server) hints
-# Wilfredo Sanchez <wsanchez@apple.com>
+# Wilfredo Sanchez <wsanchez@mit.edu>
 ##
 
 ##
@@ -52,7 +52,6 @@ cccdlflags='';
 lddlflags="${ldflags} -bundle -undefined suppress";
 ldlibpthname='DYLD_LIBRARY_PATH';
 useshrplib='true';
-base_address='0x4be00000';
 
 ##
 # System libraries
@@ -64,4 +63,7 @@ usevfork='true';
 # malloc works
 usemymalloc='n';
 
+# HFS+ will throw "make depend" into confusion since
+# Makefile and makefile are the same.
+firstmakefile=GNUmakefile;
 

@@ -86,18 +86,10 @@
 #   include <strings.h>
 #endif
 
-#if !defined(HAS_BCOPY) || defined(__cplusplus)
-#   define bcopy(s1,s2,l) memcpy(s2,s1,l)
-#endif
-#if !defined(HAS_BZERO) || defined(__cplusplus)
-#   define bzero(s,l) memset(s,0,l)
-#endif
-
 #if !defined(HAS_STRCHR) && defined(HAS_INDEX) && !defined(strchr)
 #define strchr index
 #define strrchr rindex
 #endif
-
 
 #ifdef I_TIME
 #   include <time.h>

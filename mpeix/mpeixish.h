@@ -137,3 +137,5 @@
 #undef PRPASSWD
 #undef PWAGE
 #undef PWCOMMENT
+
+#define ITIMER_REAL 0

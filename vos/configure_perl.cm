@@ -8,7 +8,8 @@
 &end_parameters
 &echo command_lines
 &
-&if (file_info config.&version&.def date_modified) > (file_info config.&version&.h date_modified)
+&if (file_info config.&version&.def date_modified) >= &+
+    (file_info config.&version&.h date_modified)
 &then &do
 !copy_file config.&version&.def config.def -delete
 &

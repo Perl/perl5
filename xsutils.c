@@ -231,10 +231,9 @@ usage:
 	HV *stash = Nullhv;
 	switch (SvTYPE(sv)) {
 	case SVt_PVCV:
-	    if (CvGV(sv) && isGV(CvGV(sv)) && GvSTASH(CvGV(sv)) &&
-			    HvNAME(GvSTASH(CvGV(sv))))
+	    if (CvGV(sv) && isGV(CvGV(sv)) && GvSTASH(CvGV(sv)))
 		stash = GvSTASH(CvGV(sv));
-	    else if (/* !CvANON(sv) && */ CvSTASH(sv) && HvNAME(CvSTASH(sv)))
+	    else if (/* !CvANON(sv) && */ CvSTASH(sv))
 		stash = CvSTASH(sv);
 	    break;
 	case SVt_PVMG:
@@ -242,7 +241,7 @@ usage:
 		break;
 	    /*FALLTHROUGH*/
 	case SVt_PVGV:
-	    if (GvGP(sv) && GvESTASH((GV*)sv) && HvNAME(GvESTASH((GV*)sv)))
+	    if (GvGP(sv) && GvESTASH((GV*)sv))
 		stash = GvESTASH((GV*)sv);
 	    break;
 	default:

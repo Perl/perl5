@@ -95,6 +95,7 @@
 
 */
 
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"  
 #include "perl.h"
 #include "XSUB.h"
@@ -135,8 +136,18 @@
  * boo, hiss. */
 #undef  dNOOP
 #define dNOOP extern int Perl___notused
+/* Ditto for dXSARGS. */
+#undef  dXSARGS
+#define dXSARGS				\
+	dSP; dMARK;			\
+	I32 ax = mark - PL_stack_base + 1;	\
+	I32 items = sp - mark
 
 #endif
+
+/* avoid -Wall; DB_File xsubs never make use of `ix' setup for ALIASes */
+#undef dXSI32
+#define dXSI32 dNOOP
 
 /* If Perl has been compiled with Threads support,the symbol op will
    be defined here. This clashes with a field name in db.h, so get rid of it.
@@ -1703,11 +1714,13 @@ db_EXISTS(db, key)
 	OUTPUT:
 	  RETVAL
 
-int
+void
 db_FETCH(db, key, flags=0)
 	DB_File		db
 	DBTKEY		key
 	u_int		flags
+	PREINIT:
+	int RETVAL;
 	CODE:
 	{
             DBT		value ;
@@ -1730,9 +1743,11 @@ db_STORE(db, key, value, flags=0)
 	  CurrentDB = db ;
 
 
-int
+void
 db_FIRSTKEY(db)
 	DB_File		db
+	PREINIT:
+	int RETVAL;
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1746,10 +1761,12 @@ db_FIRSTKEY(db)
 	    OutputKey(ST(0), key) ;
 	}
 
-int
+void
 db_NEXTKEY(db, key)
 	DB_File		db
 	DBTKEY		key
+	PREINIT:
+	int RETVAL;
 	CODE:
 	{
 	    DBT		value ;
@@ -1806,10 +1823,12 @@ unshift(db, ...)
 	OUTPUT:
 	    RETVAL
 
-I32
+void
 pop(db)
 	DB_File		db
 	ALIAS:		POP = 1
+	PREINIT:
+	I32 RETVAL;
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1833,10 +1852,12 @@ pop(db)
 	    }
 	}
 
-I32
+void
 shift(db)
 	DB_File		db
 	ALIAS:		SHIFT = 1
+	PREINIT:
+	I32 RETVAL;
 	CODE:
 	{
 	    DBT		value ;

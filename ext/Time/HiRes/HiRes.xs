@@ -270,6 +270,9 @@ alarm(fseconds,finterval=0)
 	uinterval = finterval * 1000000;
 	RETVAL = ualarm (useconds, uinterval);
 
+	OUTPUT:
+	RETVAL
+
 #endif
 
 #ifdef HAS_GETTIMEOFDAY

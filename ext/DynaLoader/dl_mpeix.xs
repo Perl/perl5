@@ -51,7 +51,7 @@ dl_load_file(filename, flags=0)
     PREINIT:
     char                buf[PATH_MAX + 3];
     p_mpe_dld           obj = NULL;
-    int                 i;
+
     CODE:
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,
 flags));

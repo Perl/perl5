@@ -55,9 +55,11 @@ esac
 case "$osvers" in
    3.*|4.1.*|4.2.*)
       usenm='undef'
+      usenativedlopen='false'
       ;;
    *)
       usenm='true'
+      usenativedlopen='true'
       ;;
 esac
 
@@ -197,7 +199,7 @@ esac
 # library (getprotobyname and getprotobynumber are outversioned by
 # the same calls in libc, at least for xlc version 3...
 case "`oslevel`" in
-    4.2.1.*)  # Test for xlc version too, should we?
+    4.2.1.*)
       case "$ccversion" in    # Don't know if needed for gcc
           3.1.4.*)    # libswanted "bind ... c ..." => "... c bind ..."
               set `echo X "$libswanted "| sed -e 's/ bind\( .*\) \([cC]\) / \1 \2 bind /'`
@@ -302,12 +304,12 @@ EOM
         ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
         # Move xld-spefific -bflags.
         ccflags="`echo $ccflags | sed -e 's@ -b@ -Wl,-b@g'`"
-        ldflags="`echo $ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
+        ldflags="`echo ' '$ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
         ld='gcc'
         lddlflags="`echo $lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
-       echo >&4 "(using ccflags   $ccflags)"
-       echo >&4 "(using ldflags   $ldflags)"
-       echo >&4 "(using lddlflags $lddlflags)"
+        echo >&4 "(using ccflags   $ccflags)"
+        echo >&4 "(using ldflags   $ldflags)"
+        echo >&4 "(using lddlflags $lddlflags)"
         ;; 
         esac
         ;;
@@ -444,20 +446,26 @@ $define|true|[yY]*)
 esac
 EOCBU
 
-# If the C++ libraries, libC and libC_r, are available we will prefer them
-# over the vanilla libc, because the libC contain loadAndInit() and
-# terminateAndUnload() which work correctly with C++ statics while libc
-# load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
-# The C-to-C_r switch is done by usethreads.cbu, if needed.
-if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
-    # Cify libswanted.
-    set `echo X "$libswanted "| sed -e 's/ c / C c /'`
-    shift
-    libswanted="$*"
-    # Cify lddlflags.
-    set `echo X "$lddlflags "| sed -e 's/ -lc / -lC -lc /'`
-    shift
-    lddlflags="$*"
+if test $usenativedlopen = 'true'
+then
+        ccflags="$ccflags -DUSE_NATIVE_DLOPEN"
+	ldflags="$ldflags -brtl"
+else
+    # If the C++ libraries, libC and libC_r, are available we will prefer them
+    # over the vanilla libc, because the libC contain loadAndInit() and
+    # terminateAndUnload() which work correctly with C++ statics while libc
+    # load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
+    # The C-to-C_r switch is done by usethreads.cbu, if needed.
+    if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
+	# Cify libswanted.
+	set `echo X "$libswanted "| sed -e 's/ c / C c /'`
+	shift
+	libswanted="$*"
+	# Cify lddlflags.
+	set `echo X "$lddlflags "| sed -e 's/ -lc / -lC -lc /'`
+	shift
+	lddlflags="$*"
+    fi
 fi
 
 # EOF

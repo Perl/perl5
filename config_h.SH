@@ -3267,12 +3267,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
  */
+/* USE_REENTRANT_API:
+ *	This symbol, if defined, indicates that Perl should
+ *	try to use the various _r versions of library functions.
+ *	This is extremely experimental.
+ */
 #$use5005threads	USE_5005THREADS		/**/
 #$useithreads	USE_ITHREADS		/**/
 #if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
 #define		USE_THREADS		/* until src is revised*/
 #endif
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
+#$usereentrant	USE_REENTRANT_API	/**/
 
 /* PERL_VENDORARCH:
  *	If defined, this symbol contains the name of a private library.

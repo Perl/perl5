@@ -234,7 +234,7 @@ bsd_glob(const char *pattern, int flags,
 	 * colon specially, so it looks for files beginning "C:" in
 	 * the current directory. To fix this, change the pattern to
 	 * add an explicit "./" at the start (just after the drive
-	 * letter and colon - ie change to "C:./*").
+	 * letter and colon - ie change to "C:./").
 	 */
 	if (isalpha(pattern[0]) && pattern[1] == ':' &&
 	    pattern[2] != BG_SEP && pattern[2] != BG_SEP2 &&

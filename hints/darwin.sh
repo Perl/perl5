@@ -1,6 +1,6 @@
 ##
 # Darwin (Mac OS) hints
-# Wilfredo Sanchez <wsanchez@apple.com>
+# Wilfredo Sanchez <wsanchez@mit.edu>
 ##
 
 ##
@@ -72,7 +72,7 @@ usemymalloc='n';
 # Locales aren't feeling well.
 LC_ALL=C; export LC_ALL;
 
-# The HFS+ will throw "make depend" into confusion since
+# HFS+ will throw "make depend" into confusion since
 # Makefile and makefile are the same.
 firstmakefile=GNUmakefile;
 

@@ -1636,7 +1636,7 @@ Perl_my_atof(pTHXo_ const char *s)
 {
     return ((CPerlObj*)pPerl)->Perl_my_atof(s);
 }
-#if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
+#if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 
 #undef  Perl_my_bcopy
 char*

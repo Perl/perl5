@@ -195,8 +195,6 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    return 0;
     }
 
-    if (!HvNAME(stash))
-        Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
     if ((level > 100) || (level < -100))
 	Perl_croak(aTHX_ "Recursive inheritance detected while looking for method '%s' in package '%s'",
 	      name, HvNAME(stash));
@@ -1077,7 +1075,7 @@ Perl_gv_check(pTHX_ HV *stash)
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
-		(gv = (GV*)HeVAL(entry)) && (hv = GvHV(gv)) && HvNAME(hv))
+		(gv = (GV*)HeVAL(entry)) && (hv = GvHV(gv)))
 	    {
 		if (hv != PL_defstash && hv != stash)
 		     gv_check(hv);              /* nested package */

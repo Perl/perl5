@@ -3215,12 +3215,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 #endif
 
 		if (intro) {
-		    GP *gp;
-		    gp_free((GV*)dstr);
 		    GvINTRO_off(dstr);	/* one-shot flag */
-		    Newz(602,gp, 1, GP);
-		    GvGP(dstr) = gp_ref(gp);
-		    GvSV(dstr) = NEWSV(72,0);
 		    GvLINE(dstr) = CopLINE(PL_curcop);
 		    GvEGV(dstr) = (GV*)dstr;
 		}
@@ -8164,8 +8159,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	}
 	HvPMROOT((HV*)dstr)	= HvPMROOT((HV*)sstr);		/* XXX */
 	HvNAME((HV*)dstr)	= SAVEPV(HvNAME((HV*)sstr));
-    if(HvNAME((HV*)dstr))
-        av_push(PL_clone_callbacks,dstr);
+	if(HvNAME((HV*)dstr))
+	    av_push(PL_clone_callbacks, dstr);
 	break;
     case SVt_PVFM:
 	SvANY(dstr)	= new_XPVFM();

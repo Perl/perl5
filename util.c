@@ -2085,7 +2085,7 @@ Perl_unlnk(pTHX_ char *f)	/* unlink all versions of a file */
 #endif
 
 /* this is a drop-in replacement for bcopy() */
-#if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
+#if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 char *
 Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 {
@@ -4941,14 +4941,16 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
     char name[MAXPATHLEN] = { 0 }, *s;
     STRLEN pathlen, namelen;
 
+    /* Don't use strlen() to avoid running off the end. */
+    s = memchr(path, '\0', MAXPATHLEN);
+    pathlen = s ? s - path : MAXPATHLEN;
+
 #ifdef HAS_REALPATH
+
     /* Be paranoid about the use of realpath(),
      * it is an infamous source of buffer overruns. */
 
-    /* Is the source buffer too long?
-     * Don't use strlen() to avoid running off the end. */
-    s = memchr(path, '\0', MAXPATHLEN);
-    pathlen = s ? s - path : MAXPATHLEN;
+    /* Is the source buffer too long? */
     if (pathlen == MAXPATHLEN) {
         Perl_warn(aTHX_ "sv_realpath: realpath(\"%s\"): %c= (MAXPATHLEN = %d)",
                   path, s ? '=' : '>', MAXPATHLEN);
@@ -4978,6 +4980,7 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
 
     return TRUE;
 #else
+    {
     DIR *parent;
     Direntry_t *dp;
     char dotdots[MAXPATHLEN] = { 0 };
@@ -5080,6 +5083,7 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
     SvPOK_only(sv);
 
     return TRUE;
+    }
 #endif
 #else
     return FALSE;

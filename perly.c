@@ -1509,9 +1509,7 @@ yyloop:
         if (yyerrflag > 0)  --yyerrflag;
         goto yyloop;
     }
-    if (
-((yyn = yyrindex[yystate])) && 
-(yyn += yychar) >= 0 &&
+    if ((yyn = yyrindex[yystate]) && (yyn += yychar) >= 0 &&
             yyn <= YYTABLESIZE && yycheck[yyn] == yychar)
     {
         yyn = yytable[yyn];
@@ -1519,12 +1517,12 @@ yyloop:
     }
     if (yyerrflag) goto yyinrecovery;
 #ifdef lint
-    goto yynewerror;
+
 #endif
 
     yyerror("syntax error");
 #ifdef lint
-    goto yyerrlab;
+
 #endif
 
     ++yynerrs;

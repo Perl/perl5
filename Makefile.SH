@@ -48,7 +48,6 @@ true)
 			     -compatibility_version 1 \
 			     -current_version \
 				${api_version}.${api_subversion} \
-			     -image_base 0x4be00000 \
 			     -install_name \$(shrpdir)/\$@"
 		;;
 	cygwin*)

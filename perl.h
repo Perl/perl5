@@ -225,8 +225,20 @@ struct perl_thread;
 #  define CALLPROTECT CALL_FPTR(PL_protect)
 #endif
 
+#ifdef HASATTRIBUTE
+#  define PERL_UNUSED_DECL __attribute__((unused))
+#else
+#  define PERL_UNUSED_DECL
+#endif
+
+/* gcc -Wall:
+ * for silencing unused variables that are actually used most of the time,
+ * but we cannot quite get rid of, such `ax' in PPCODE+noargs xsubs
+ */
+#define PERL_UNUSED_VAR(var) if (0) var = var
+
 #define NOOP (void)0
-#define dNOOP extern int Perl___notused __attribute__ ((unused))
+#define dNOOP extern int Perl___notused PERL_UNUSED_DECL
 
 #ifndef pTHX
 #  define pTHX		void
@@ -256,6 +268,15 @@ struct perl_thread;
 #  define aTHXx		my_perl
 #  define aTHXx_	aTHXx,
 #  define dTHXx		dTHX
+#endif
+
+/* Under PERL_IMPLICIT_SYS (used in Windows for fork emulation)
+ * PerlIO_foo() expands to PL_StdIO->pFOO(PL_StdIO, ...).
+ * dTHXs is therefore needed for all functions using PerlIO_foo(). */
+#ifdef PERL_IMPLICIT_SYS
+#  define dTHXs		dTHX
+#else
+#  define dTHXs		dNOOP
 #endif
 
 #undef START_EXTERN_C
@@ -3736,6 +3757,14 @@ int flock(int fd, int op);
 
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
 
+/* to let user control profiling */
+#ifdef PERL_GPROF_CONTROL
+extern void moncontrol(int);
+#define PERL_GPROF_MONCONTROL(x) moncontrol(x)
+#else
+#define PERL_GPROF_MONCONTROL(x)
+#endif
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
@@ -3779,6 +3808,8 @@ int flock(int fd, int op);
    I_SYSUIO
    HAS_STRUCT_MSGHDR
    HAS_STRUCT_CMSGHDR
+
+   USE_REENTRANT_API
 
    so that Configure picks them up. */
 

@@ -197,6 +197,10 @@ constant(char *name, int arg)
     errno = EINVAL;
     return 0;
 
+    if (0) {
+        goto not_there; /* -Wall */
+    }
+
 not_there:
     errno = ENOENT;
     return 0;

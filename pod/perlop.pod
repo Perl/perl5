@@ -658,12 +658,14 @@ any pair of delimiters you choose.
     Customary  Generic        Meaning	     Interpolates
 	''	 q{}	      Literal		  no
 	""	qq{}	      Literal		  yes
-	``	qx{}	      Command		  yes (unless '' is delimiter)
+	``	qx{}	      Command		  yes*
 		qw{}	     Word list		  no
-	//	 m{}	   Pattern match	  yes (unless '' is delimiter)
-		qr{}	      Pattern		  yes (unless '' is delimiter)
-		 s{}{}	    Substitution	  yes (unless '' is delimiter)
+	//	 m{}	   Pattern match	  yes*
+		qr{}	      Pattern		  yes*
+		 s{}{}	    Substitution	  yes*
 		tr{}{}	  Transliteration	  no (but see below)
+
+	* unless the delimiter is ''.
 
 Non-bracketing delimiters use the same character fore and aft, but the four
 sorts of brackets (round, angle, square, curly) will all nest, which means
@@ -692,9 +694,8 @@ from the next line.  This allows you to write:
     s {foo}  # Replace foo
       {bar}  # with bar.
 
-For constructs that do interpolate, variables beginning with "C<$>"
-or "C<@>" are interpolated, as are the following escape sequences.  Within
-a transliteration, the first eleven of these sequences may be used.
+The following escape sequences are available in constructs that interpolate
+and in transliterations.
 
     \t		tab             (HT, TAB)
     \n		newline         (NL)
@@ -708,6 +709,9 @@ a transliteration, the first eleven of these sequences may be used.
     \x{263a}	wide hex char	(SMILEY)
     \c[		control char    (ESC)
     \N{name}	named char
+
+The following escape sequences are available in constructs that interpolate
+but not in transliterations.
 
     \l		lowercase next char
     \u		uppercase next char
@@ -733,6 +737,16 @@ and prefer a CR+LF (C<"\015\012"> or C<"\cM\cJ">) for line terminators,
 and although they often accept just C<"\012">, they seldom tolerate just
 C<"\015">.  If you get in the habit of using C<"\n"> for networking,
 you may be burned some day.
+
+For constructs that do interpolate, variables beginning with "C<$>"
+or "C<@>" are interpolated.  Subscripted variables such as C<$a[3]> or
+C<$href->{key}[0]> are also interpolated, as are array and hash slices.
+But method calls such as C<$obj->meth> are not.
+
+Interpolating an array or slice interpolates the elements in order,
+separated by the value of C<$">, so is equivalent to interpolating
+C<join $", @array>.    "Punctuation" arrays such as C<@+> are only
+interpolated if the name is enclosed in braces C<@{+}>.
 
 You cannot include a literal C<$> or C<@> within a C<\Q> sequence. 
 An unescaped C<$> or C<@> interpolates the corresponding variable, 

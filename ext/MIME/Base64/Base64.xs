@@ -191,7 +191,7 @@ decode_base64(sv)
 		if (PL_dowarn) warn("Premature padding of base64 data");
 		break;
             }
-	    /* printf("c0=%d,c1=%d,c2=%d,c3=%d\n", c[0],c[1],c[2],c[3]);/**/
+	    /* printf("c0=%d,c1=%d,c2=%d,c3=%d\n", c[0],c[1],c[2],c[3]);*/
 
 	    *r++ = (c[0] << 2) | ((c[1] & 0x30) >> 4);
 

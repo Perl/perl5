@@ -19,7 +19,9 @@ use IO::Dir qw(DIR_UNLINK);
 
 print "1..10\n";
 
-$dot = new IO::Dir ".";
+my $DIR = $^O eq 'MacOS' ? ":" : ".";
+
+$dot = new IO::Dir $DIR;
 print defined($dot) ? "ok" : "not ok", " 1\n";
 
 @a = sort <*>;
@@ -41,7 +43,7 @@ open(FH,'>X') || die "Can't create x";
 print FH "X";
 close(FH);
 
-tie %dir, IO::Dir, ".";
+tie %dir, IO::Dir, $DIR;
 my @files = keys %dir;
 
 # I hope we do not have an empty dir :-)
@@ -55,7 +57,7 @@ delete $dir{'X'};
 
 print -f 'X' ? "ok" : "not ok", " 8\n";
 
-tie %dirx, IO::Dir, ".", DIR_UNLINK;
+tie %dirx, IO::Dir, $DIR, DIR_UNLINK;
 
 my $statx = $dirx{'X'};
 print defined($statx) && UNIVERSAL::isa($statx,'File::stat') && $statx->size == 1

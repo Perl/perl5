@@ -25,11 +25,21 @@ __strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -
 	int		wday
 	int		yday
 	int		isdst
+
+    PREINIT:
+    char *buf = NULL;
+
     CODE:
-	{
-	    char *buf = my_strftime(fmt, sec, min, hour, mday, mon, year, wday, yday, isdst);
-	    if (buf) {
-		ST(0) = sv_2mortal(newSVpv(buf, 0));
-		Safefree(buf);
-	    }
-	}
+    #XXX: an sv_strftime() that can make use of the TARG would faster
+    buf = my_strftime(fmt, sec, min, hour, mday, mon, year, wday, yday, isdst);
+    if (buf) {
+        RETVAL = buf;
+    }
+
+    OUTPUT:
+    RETVAL
+
+    CLEANUP:
+    if (buf) {
+        Safefree(buf);
+    }

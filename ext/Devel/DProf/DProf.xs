@@ -513,7 +513,7 @@ check_depth(pTHX_ void *foo)
 
 XS(XS_DB_sub)
 {
-    dXSARGS;
+    dMARK;
     dORIGMARK;
     SV *Sub = GvSV(PL_DBsub);		/* name of current sub */
 
