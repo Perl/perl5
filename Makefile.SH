@@ -619,20 +619,21 @@ CHMOD_W = chmod +w
 # To force them to be regenerated, type
 #	make regen_headers
 
-AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h pp.sym embed.h \
-		embedvar.h global.sym pod/perlintern.pod pod/perlapi.pod \
+AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h pp.sym proto.h \
+		embed.h embedvar.h global.sym \
+		pod/perlintern.pod pod/perlapi.pod \
 		objXSUB.h perlapi.h perlapi.c ext/ByteLoader/byterun.h \
 		ext/ByteLoader/byterun.c ext/B/B/Asmdata.pm regnodes.h \
 		warnings.h lib/warnings.pm
 
 regen_headers:	FORCE
-	$(CHMOD_W) $(AUTOGEN_FILES)
-	perl keywords.pl
-	perl opcode.pl
-	perl embed.pl
-	perl bytecode.pl
-	perl regcomp.pl
-	perl warnings.pl
+	-$(CHMOD_W) $(AUTOGEN_FILES)
+	-perl keywords.pl
+	-perl opcode.pl
+	-perl embed.pl
+	-perl bytecode.pl
+	-perl regcomp.pl
+	-perl warnings.pl
 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will
