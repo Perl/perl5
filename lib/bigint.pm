@@ -145,7 +145,7 @@ sub import
   if ($trace)
     {
     require Math::BigInt::Trace; $class = 'Math::BigInt::Trace';
-    print STDERR "Loading $class";
+#    print STDERR "Loading $class";
     }
   else
     {
