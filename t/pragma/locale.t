@@ -452,6 +452,9 @@ foreach $Locale (@Locale) {
     if (@Neoalpha == 0) {
 	# If we have no Neoalphas the remaining tests are no-ops.
 	debug "# no Neoalpha, skipping tests 99..102 for locale '$Locale'\n";
+	foreach (99..102) {
+	    push @{$Okay{$_}}, $Locale;
+	}
     } else {
 
 	# Test \w.

@@ -138,7 +138,7 @@ CCTYPE		*= BORLAND
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-CCHOME		*= C:\bc5
+CCHOME		*= d:\bc5
 #CCHOME		*= $(MSVCDIR)
 #CCHOME		*= D:\packages\mingw32
 CCINCDIR	*= $(CCHOME)\include
@@ -264,7 +264,7 @@ OPTIMIZE	= -O2 $(RUNTIME)
 LINK_DBG	= 
 .ENDIF
 
-CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(LOCDEFS) \
+CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o

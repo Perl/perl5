@@ -333,6 +333,7 @@ sub emit_symbol {
 
 sub output_symbol {
     my $symbol = shift;
+    $symbol = "_$symbol" if $CCTYPE eq 'BORLAND';
     print "\t$symbol\n";
 # XXX: binary compatibility between compilers is an exercise
 # in frustration :-(
