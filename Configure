@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jul 29 23:50:22 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Jul 30 00:08:11 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3270,8 +3270,8 @@ If you decide to do so, you will be able to continue using most
 of the extensions that were compiled for Perl 5.005.
 
 EOM
-	case "$d_bincompat5005" in
-	"$undef") dflt=n ;;
+	case "$bincompat5005$d_bincompat5005" in
+	*"$undef"*) dflt=n ;;
 	*) dflt=y ;;
 	esac
 	rp='Binary compatibility with Perl 5.005?'
