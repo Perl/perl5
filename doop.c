@@ -463,6 +463,7 @@ do_chop(register SV *astr, register SV *sv)
 {
     STRLEN len;
     char *s;
+    dTHR;
     
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;

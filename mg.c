@@ -1149,6 +1149,7 @@ magic_setpos(SV *sv, MAGIC *mg)
     SSize_t pos;
     STRLEN len;
     STRLEN ulen;
+    dTHR;
 
     mg = 0;
     
@@ -1166,7 +1167,7 @@ magic_setpos(SV *sv, MAGIC *mg)
     }
     len = SvPOK(lsv) ? SvCUR(lsv) : sv_len(lsv);
 
-    WITH_THR(pos = SvIV(sv) - PL_curcop->cop_arybase);
+    pos = SvIV(sv) - PL_curcop->cop_arybase;
 
     if (IN_UTF8) {
 	ulen = sv_len_utf8(lsv);

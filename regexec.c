@@ -2456,7 +2456,8 @@ reginclass(register char *p, register I32 c)
 
 STATIC bool
 reginclassutf8(regnode *f, U8 *p)
-{
+{                                           
+    dTHR;
     char flags = ARG1(f);
     bool match = FALSE;
     SV *sv = (SV*)PL_regdata->data[ARG2(f)];
@@ -2493,7 +2494,8 @@ reginclassutf8(regnode *f, U8 *p)
 
 STATIC char *
 reghop(unsigned char *s, I32 off)
-{
+{                               
+    dTHR;
     if (off >= 0) {
 	while (off-- && s < (U8*)PL_regeol)
 	    s += UTF8SKIP(s);
@@ -2515,6 +2517,7 @@ reghop(unsigned char *s, I32 off)
 STATIC char *
 reghopmaybe(unsigned char *s, I32 off)
 {
+    dTHR;
     if (off >= 0) {
 	while (off-- && s < (U8*)PL_regeol)
 	    s += UTF8SKIP(s);

@@ -206,6 +206,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 STATIC void
 scan_commit(scan_data_t *data)
 {
+    dTHR;
     STRLEN l = CHR_SVLEN(data->last_found);
     STRLEN old_l = CHR_SVLEN(*data->longest);
     
@@ -2245,6 +2246,7 @@ regclassutf8(void)
     I32 n;
     SV *listsv;
     U8 flags = 0;
+    dTHR;
 
     if (*PL_regcomp_parse == '^') {	/* Complement of range. */
 	PL_regnaughty++;
@@ -2543,6 +2545,7 @@ reganode(U8 op, U32 arg)
 STATIC void
 reguni(UV uv, char* s, I32* lenp)
 {
+    dTHR;
     if (SIZE_ONLY) {
 	char tmpbuf[10];
 	*lenp = uv_to_utf8(tmpbuf, uv) - tmpbuf;
@@ -3104,7 +3107,8 @@ re_croak2(const char* pat1,const char* pat2,...)
 
 void
 save_re_context(void)
-{
+{                   
+    dTHR;
     SAVEPPTR(PL_bostr);
     SAVEPPTR(PL_regprecomp);		/* uncompiled string. */
     SAVEI32(PL_regnpar);		/* () count. */
