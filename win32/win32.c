@@ -636,7 +636,7 @@ win32_opendir(char *filename)
 	return NULL;
 
     /* check to see if filename is a directory */
-    if (win32_stat(filename, &sbuf) < 0)
+    if (win32_stat(filename, &sbuf) < 0 || !S_ISDIR(sbuf.st_mode))
 	return NULL;
 
     /* Get us a DIR structure */
