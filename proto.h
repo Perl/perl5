@@ -779,6 +779,7 @@ PERL_CALLCONV void	Perl_sv_setpviv(pTHX_ SV* sv, IV num);
 PERL_CALLCONV void	Perl_sv_setuv(pTHX_ SV* sv, UV num);
 PERL_CALLCONV void	Perl_sv_setnv(pTHX_ SV* sv, NV num);
 PERL_CALLCONV SV*	Perl_sv_setref_iv(pTHX_ SV* rv, const char* classname, IV iv);
+PERL_CALLCONV SV*	Perl_sv_setref_uv(pTHX_ SV* rv, const char* classname, UV uv);
 PERL_CALLCONV SV*	Perl_sv_setref_nv(pTHX_ SV* rv, const char* classname, NV nv);
 PERL_CALLCONV SV*	Perl_sv_setref_pv(pTHX_ SV* rv, const char* classname, void* pv);
 PERL_CALLCONV SV*	Perl_sv_setref_pvn(pTHX_ SV* rv, const char* classname, char* pv, STRLEN n);
