@@ -592,7 +592,8 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    svp = av_fetch(keys, i, FALSE);
 		    keysv = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
 		    key = SvPV(keysv, keylen);
-		    svp = hv_fetch((HV*)ival, key, keylen, 0);
+		    svp = hv_fetch((HV*)ival, key,
+                                   SvUTF8(keysv) ? -keylen : keylen, 0);
 		    hval = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
 		}
 		else {
@@ -605,15 +606,16 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		klen = keylen;
 
 		if (do_utf8) {
-		    char *okey = SvPVX(retval) + SvCUR(retval);
+		    STRLEN ocur;
 		    I32 nlen;
 
 		    sv_catsv(retval, totpad);
 		    sv_catsv(retval, ipad);
+                    ocur = SvCUR(retval);
 		    nlen = esc_q_utf8(aTHX_ retval, key, klen);
 
 		    sname = newSVsv(iname);
-		    sv_catpvn(sname, okey, nlen);
+		    sv_catpvn(sname, SvPVX(retval) + ocur, nlen);
 		    sv_catpvn(sname, "}", 1);
 		}
 		else {
