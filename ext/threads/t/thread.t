@@ -54,6 +54,7 @@ sub dorecurse {
 {
     # test that sleep lets other thread run
     my $t = threads->new(\&dorecurse, "ok 11\n");
+    threads->yield; # help out non-preemptive thread implementations
     sleep 1;
     print "ok 12\n";
     $t->join();
