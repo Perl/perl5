@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..770\n";
+print "1..786\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2290,6 +2290,55 @@ print "# some Unicode properties\n";
 
     print "not " unless "A\x{100}" =~ /A/i;
     print "ok 757\n";
+
+    print "not " unless "\x{101}a" =~ /\x{100}/i;
+    print "ok 758\n";
+
+    print "not " unless "\x{100}a" =~ /\x{100}/i;
+    print "ok 759\n";
+
+    print "not " unless "\x{101}a" =~ /\x{101}/i;
+    print "ok 760\n";
+
+    print "not " unless "\x{100}a" =~ /\x{101}/i;
+    print "ok 761\n";
+
+    print "not " unless "a\x{100}" =~ /A\x{100}/i;
+    print "ok 762\n";
+
+    print "not " unless "A\x{100}" =~ /A\x{100}/i;
+    print "ok 763\n";
+
+    print "not " unless "a\x{100}" =~ /a\x{100}/i;
+    print "ok 764\n";
+
+    print "not " unless "A\x{100}" =~ /A\x{100}/i;
+    print "ok 765\n";
+
+    print "not " unless "a\x{100}" =~ /[A]/i;
+    print "ok 766\n";
+
+    print "not " unless "A\x{100}" =~ /[A]/i;
+    print "ok 767\n";
+
+    print "not " unless "a\x{100}" =~ /[a]/i;
+    print "ok 768\n";
+
+    print "not " unless "A\x{100}" =~ /[A]/i;
+    print "ok 769\n";
+
+    print "not " unless "\x{101}a" =~ /[\x{100}]/i;
+    print "ok 770\n";
+
+    print "not " unless "\x{100}a" =~ /[\x{100}]/i;
+    print "ok 771\n";
+
+    print "not " unless "\x{101}a" =~ /[\x{101}]/i;
+    print "ok 772\n";
+
+    print "not " unless "\x{100}a" =~ /[\x{101}]/i;
+    print "ok 773\n";
+
 }
 
 {
@@ -2299,30 +2348,29 @@ print "# some Unicode properties\n";
     my $lower = "\N{LATIN SMALL LETTER A WITH GRAVE}";
     my $UPPER = "\N{LATIN CAPITAL LETTER A WITH GRAVE}";
 
-    print $lower =~ m/$UPPER/i   ? "ok 758\n" : "not ok 758\n";
-    print $UPPER =~ m/$lower/i   ? "ok 759\n" : "not ok 759\n";
-    print $lower =~ m/[$UPPER]/i ? "ok 760\n" : "not ok 760\n";
-    print $UPPER =~ m/[$lower]/i ? "ok 761\n" : "not ok 761\n";
+    print $lower =~ m/$UPPER/i   ? "ok 774\n" : "not ok 774\n";
+    print $UPPER =~ m/$lower/i   ? "ok 775\n" : "not ok 775\n";
+    print $lower =~ m/[$UPPER]/i ? "ok 776\n" : "not ok 776\n";
+    print $UPPER =~ m/[$lower]/i ? "ok 777\n" : "not ok 777\n";
 
     print "# GREEK LETTER ALPHA WITH VRACHY\n";
 
     $lower = "\N{GREEK CAPITAL LETTER ALPHA WITH VRACHY}";
     $UPPER = "\N{GREEK SMALL LETTER ALPHA WITH VRACHY}";
 
-    print $lower =~ m/$UPPER/i   ? "ok 762\n" : "not ok 762\n";
-    print $UPPER =~ m/$lower/i   ? "ok 763\n" : "not ok 763\n";
-    print $lower =~ m/[$UPPER]/i ? "ok 764\n" : "not ok 764\n";
-    print $UPPER =~ m/[$lower]/i ? "ok 765\n" : "not ok 765\n";
+    print $lower =~ m/$UPPER/i   ? "ok 778\n" : "not ok 778\n";
+    print $UPPER =~ m/$lower/i   ? "ok 779\n" : "not ok 779\n";
+    print $lower =~ m/[$UPPER]/i ? "ok 780\n" : "not ok 780\n";
+    print $UPPER =~ m/[$lower]/i ? "ok 781\n" : "not ok 781\n";
 
     print "# LATIN LETTER Y WITH DIAERESIS\n";
 
     $lower = "\N{LATIN CAPITAL LETTER Y WITH DIAERESIS}";
     $UPPER = "\N{LATIN SMALL LETTER Y WITH DIAERESIS}";
-
-    print $lower =~ m/$UPPER/i   ? "ok 766\n" : "not ok 766\n";
-    print $UPPER =~ m/$lower/i   ? "ok 767\n" : "not ok 767\n";
-    print $lower =~ m/[$UPPER]/i ? "ok 768\n" : "not ok 768\n";
-    print $UPPER =~ m/[$lower]/i ? "ok 769\n" : "not ok 769\n";
+    print $lower =~ m/$UPPER/i   ? "ok 782\n" : "not ok 782\n";
+    print $UPPER =~ m/$lower/i   ? "ok 783\n" : "not ok 783\n";
+    print $lower =~ m/[$UPPER]/i ? "ok 784\n" : "not ok 784\n";
+    print $UPPER =~ m/[$lower]/i ? "ok 785\n" : "not ok 785\n";
 }
 
 {
@@ -2338,6 +2386,6 @@ print "# some Unicode properties\n";
     my $char = "\N{COMBINING GREEK PERISPOMENI}";
     my $code = sprintf "%04x", ord($char);
 
-    # Before #13843 this was failing.
-    print "_:$char:_" =~ m/_:$SIGMA:_/i ? "not ok 770\n" : "ok 770\n";
+    # Before #13843 this was failing by matching falsely.
+    print "_:$char:_" =~ m/_:$SIGMA:_/i ? "not ok 786\n" : "ok 786\n";
 }

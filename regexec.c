@@ -970,7 +970,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		if (c1 == c2)
 		    while (s <= e) {
 			if ( utf8_to_uvchr((U8*)s, &len) == c1
-			     && (ln == 1 ||
+			     && (ln == len ||
 				 ibcmp_utf8(s, do_utf8,  strend - s,
 					    m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
@@ -981,7 +981,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		    while (s <= e) {
 			UV c = utf8_to_uvchr((U8*)s, &len);
 			if ( (c == c1 || c == c2)
-			     && (ln == 1 ||
+			     && (ln == len ||
 				 ibcmp_utf8(s, do_utf8, strend - s,
 					    m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
@@ -2232,10 +2232,10 @@ S_regmatch(pTHX_ regnode *prog)
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 	    if (do_utf8 != (UTF!=0)) {
-		/* The target and the pattern have differing "utf8ness". */
+		/* The target and the pattern have differing utf8ness. */
 		char *l = locinput;
 		char *e = s + ln;
-		STRLEN len;
+		STRLEN ulen;
 
 		if (do_utf8) {
 		    /* The target is utf8, the pattern is not utf8. */
@@ -2243,9 +2243,9 @@ S_regmatch(pTHX_ regnode *prog)
 			if (l >= PL_regeol)
 			     sayNO;
 			if (NATIVE_TO_UNI(*(U8*)s) !=
-			    utf8_to_uvchr((U8*)l, &len))
+			    utf8_to_uvchr((U8*)l, &ulen))
 			     sayNO;
-			l += len;
+			l += ulen;
 			s ++;
 		    }
 		}
@@ -2255,9 +2255,9 @@ S_regmatch(pTHX_ regnode *prog)
 			if (l >= PL_regeol)
 			    sayNO;
 			if (NATIVE_TO_UNI(*((U8*)l)) !=
-			    utf8_to_uvchr((U8*)s, &len))
+			    utf8_to_uvchr((U8*)s, &ulen))
 			    sayNO;
-			s += len;
+			s += ulen;
 			l ++;
 		    }
 		}
@@ -2265,7 +2265,7 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    /* The target and the pattern have the same "utf8ness". */
+	    /* The target and the pattern have the same utf8ness. */
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr)
 		sayNO;
@@ -2283,25 +2283,84 @@ S_regmatch(pTHX_ regnode *prog)
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 
-	    if (do_utf8) {
+	    {
 		char *l = locinput;
-		char *e;
-		STRLEN ulen;
-		U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
-		e = s + ln;
-		while (s < e) {
-		    if (l >= PL_regeol)
-			sayNO;
-		    toLOWER_utf8((U8*)l, tmpbuf, &ulen);
-		    if (memNE(s, (char*)tmpbuf, ulen))
-		        sayNO;
-		    s += UTF8SKIP(s);
-		    l += ulen;
+		char *e = s + ln;
+		U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+
+		if (do_utf8 != (UTF!=0)) {
+		     /* The target and the pattern have differing utf8ness. */
+		     STRLEN ulen1, ulen2;
+		     UV cs, cl;
+
+		     if (do_utf8) {
+			  /* The target is utf8, the pattern is not utf8. */
+			  while (s < e) {
+			       if (l >= PL_regeol)
+				    sayNO;
+
+			       cs = to_uni_fold(NATIVE_TO_UNI(*(U8*)s),
+						(U8*)s, &ulen1);
+			       cl = utf8_to_uvchr((U8*)l, &ulen2);
+
+			       if (cs != cl) {
+				    cl = to_uni_fold(cl, (U8*)l, &ulen2);
+				    if (ulen1 != ulen2 || cs != cl)
+					 sayNO;
+			       }
+			       l += ulen1;
+			       s ++;
+			  }
+		     }
+		     else {
+			  /* The target is not utf8, the pattern is utf8. */
+			  while (s < e) {
+			       if (l >= PL_regeol)
+				    sayNO;
+
+			       cs = utf8_to_uvchr((U8*)s, &ulen1);
+
+			       cl = to_uni_fold(NATIVE_TO_UNI(*(U8*)l),
+						(U8*)l, &ulen2);
+
+			       if (cs != cl) {
+				    cs = to_uni_fold(cs, (U8*)s, &ulen1);
+				    if (ulen1 != ulen2 || cs != cl)
+					 sayNO;
+			       }
+			       l ++;
+			       s += ulen1;
+			  }
+		     }
+		     locinput = l;
+		     nextchr = UCHARAT(locinput);
+		     break;
 		}
-		locinput = l;
-		nextchr = UCHARAT(locinput);
-		break;
+
+		if (do_utf8 && UTF) {
+		     /* Both the target and the pattern are utf8. */
+		     STRLEN ulen;
+		     
+		     while (s < e) {
+			  if (l >= PL_regeol)
+			       sayNO;
+			  if (UTF8SKIP(s) != UTF8SKIP(l) ||
+			      memNE(s, (char*)l, UTF8SKIP(s))) {
+			       to_utf8_fold((U8*)l, tmpbuf, &ulen);
+			       if (UTF8SKIP(s) != ulen ||
+				   memNE(s, (char*)tmpbuf, ulen))
+				    sayNO;
+			  }
+			  l += UTF8SKIP(l);
+			  s += UTF8SKIP(s);
+		     }
+		     locinput = l;
+		     nextchr = UCHARAT(locinput);
+		     break;
+		}
 	    }
+
+	    /* Neither the target and the pattern are utf8. */
 
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr &&
