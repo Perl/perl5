@@ -3,6 +3,11 @@
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
+	require Config; import Config;
+	if ($Config{extensions} !~ /\bList\/Util\b/) {
+	    print "1..0 # Skip: List::Util was not built\n";
+	    exit 0;
+	}
 }
 
 use lib qw(blib/lib blib/arch);
