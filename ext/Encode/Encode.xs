@@ -576,7 +576,15 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	if (check) {
 	    sdone = SvCUR(src) - (slen+sdone);
 	    if (sdone) {
+#if 1
+		/* FIXME: A Move() is dangerous - PV could be mmap'ed readonly
+		   SvOOK would be ideal - but sv_backoff does not understand SvLEN == 0
+		   type SVs and sv_clear() calls it ...
+		 */
+		sv_setpvn(src,s+slen,sdone);
+#else
 		Move(s + slen, SvPVX(src), sdone , U8);
+#endif
 	    }
 	    SvCUR_set(src, sdone);
 	}
