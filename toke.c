@@ -2656,6 +2656,11 @@ Perl_yylex(pTHX)
     case '#':
     case '\n':
 	if (PL_lex_state != LEX_NORMAL || (PL_in_eval && !PL_rsfp)) {
+	    if (*s == '#' && s == PL_linestart && PL_in_eval && !PL_rsfp) {
+		/* handle eval qq[#line 1 "foo"\n ...] */
+		CopLINE_dec(PL_curcop);
+		incline(s);
+	    }
 	    d = PL_bufend;
 	    while (s < d && *s != '\n')
 		s++;

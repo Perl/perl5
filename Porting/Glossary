@@ -1052,6 +1052,11 @@ d_pause (d_pause.U):
 	indicates to the C program that the pause() routine is available
 	to suspend a process until a signal is received.
 
+d_perl_otherlibdirs (otherlibdirs.U):
+	This variable conditionally defines PERL_OTHERLIBDIRS, which
+	contains a colon-separated set of paths for the perl binary to
+	include in @INC.  See also otherlibdirs.
+
 d_phostname (d_gethname.U):
 	This variable conditionally defines the HAS_PHOSTNAME symbol, which
 	contains the shell command which, when fed to popen(), may be
@@ -2756,6 +2761,16 @@ osvers (Oldconfig.U):
 	to keep, e.g. if 4.1.1, 4.1.2, and 4.1.3 are essentially the
 	same for this package, hints files might just be os_4.0 or
 	os_4.1, etc., not keeping separate files for each little release.
+
+otherlibdirs (otherlibdirs.U):
+	This variable contains a colon-separated set of paths for the perl
+	binary to search for additional library files or modules.
+	These directories will be tacked to the end of @INC.
+	Perl will automatically search below each path for version-
+	and architecture-specific directories.  See inc_version_list
+	for more details.
+	A value of ' ' means 'none' and is used to preserve this value
+	for the next run through Configure.
 
 package (package.U):
 	This variable contains the name of the package being constructed.
