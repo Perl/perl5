@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jun 20 08:47:08 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Jun 20 22:37:47 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -15900,7 +15900,6 @@ else
 		$test "$silent" || sleep 1
 	fi
 fi
-$rm -f ccsym* Cppsym.*
 
 : see if this is a termio system
 val="$undef"
