@@ -1313,7 +1313,6 @@ lib/Locale/Maketext/Guts.pm	Locale::Maketext
 lib/Locale/Maketext.pm		Locale::Maketext
 lib/Locale/Maketext.pod		Locale::Maketext documentation
 lib/Locale/Maketext/README	Locale::Maketext
-lib/Locale/Maketext/META.yml	Locale::Maketext
 lib/Locale/Maketext/t/00about.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/01make.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/02get.t	See if Locale::Maketext works
