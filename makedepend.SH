@@ -18,6 +18,10 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
+case "$osname" in
+amigaos) cat=/bin/cat ;; # must be absolute
+esac
+
 echo "Extracting makedepend (with variable substitutions)"
 rm -f makedepend
 $spitshell >makedepend <<!GROK!THIS!
