@@ -707,6 +707,7 @@ CFG_VARS	=					\
 		"INST_ARCH=$(INST_ARCH)"		\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
+		"ld=$(LINK32)"				\
 		"ccflags=-nologo -Gf -W3 $(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
 		"cf_email=$(EMAIL)"	 		\
 		"d_crypt=$(D_CRYPT)"			\
