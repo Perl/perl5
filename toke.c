@@ -1245,7 +1245,7 @@ S_scan_const(pTHX_ char *start)
 		    char *e = d++;
 		    while (e-- > c)
 			*(e + 1) = *e;
-		    *c = 0xff;
+		    *c = (char)0xff;
 		    /* mark the range as done, and continue */
 		    dorange = FALSE;
 		    didrange = TRUE;
