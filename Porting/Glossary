@@ -616,6 +616,10 @@ d_getcwd (d_getcwd.U):
 	indicates to the C program that the getcwd() routine is available
 	to get the current working directory.
 
+d_getespwnam (d_getespwnam.U):
+	This variable conditionally defines HAS_GETESPWNAM if getespwnam() is
+	available to retrieve enchanced (shadow) password entries by name.
+
 d_getfsstat (d_getfsstat.U):
 	This variable conditionally defines the HAS_GETFSSTAT symbol, which
 	indicates to the C program that the getfsstat() routine is available.
@@ -734,6 +738,10 @@ d_getprotoprotos (d_getprotoprotos.U):
 	which indicates to the C program that <netdb.h> supplies
 	prototypes for the various getproto*() functions.  
 	See also netdbtype.U for probing for various netdb types.
+
+d_getprpwnam (d_getprpwnam.U):
+	This variable conditionally defines HAS_GETPRPWNAM if getprpwnam() is
+	available to retrieve protected (shadow) password entries by name.
 
 d_getpwent (d_getpwent.U):
 	This variable conditionally defines the HAS_GETPWENT symbol, which
@@ -2009,6 +2017,10 @@ i_niin (i_niin.U):
 i_poll (i_poll.U):
 	This variable conditionally defines the I_POLL symbol, and indicates
 	whether a C program should include <poll.h>.
+
+i_prot (i_prot.U):
+	This variable conditionally defines the I_PROT symbol, and indicates
+	whether a C program should include <prot.h>.
 
 i_pthread (i_pthread.U):
 	This variable conditionally defines the I_PTHREAD symbol,

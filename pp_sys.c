@@ -21,13 +21,18 @@
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
  * Not just Solaris: at least HP-UX, IRIX, Linux.
- * the API is from SysV. --jhi */
-#ifdef __hpux__
+ * The API is from SysV.
+ *
+ * There are at least two more shadow interfaces,
+ * see the comments in pp_gpwent().
+ *
+ * --jhi */
+#   ifdef __hpux__
 /* There is a MAXINT coming from <shadow.h> <- <hpsecurity.h> <- <values.h>
  * and another MAXINT from "perl.h" <- <sys/param.h>. */ 
-#undef MAXINT
-#endif
-#include <shadow.h>
+#       undef MAXINT
+#   endif
+#   include <shadow.h>
 #endif
 
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
@@ -195,7 +200,7 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 #endif
 
 #if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_EACCESS)
-#   if defined(I_SYS_SECURITY)
+#   ifdef I_SYS_SECURITY
 #       include <sys/security.h>
 #   endif
 #   ifdef ACC_SELF
@@ -4786,7 +4791,7 @@ PP(pp_gpwent)
      * There are at least two other shadow password APIs.  Many platforms
      * seem to contain more than one interface for accessing the shadow
      * password databases, possibly for compatibility reasons.
-     * The getsp*() is tby far he simplest one, the other two interfaces
+     * The getsp*() is by far he simplest one, the other two interfaces
      * are much more complicated, but also very similar to each other.
      *
      * <sys/types.h>
@@ -4794,7 +4799,8 @@ PP(pp_gpwent)
      * <prot.h>
      * struct pr_passwd *getprpw*();
      * The password is in
-     * char getprpw*(...).ufld.fd_encrypt[AUTH_MAX_CIPHERTEXT_LENGTH]
+     * char getprpw*(...).ufld.fd_encrypt[]
+     * Mention HAS_GETPRPWNAM here so that Configure probes for it.
      *
      * <sys/types.h>
      * <sys/security.h>
@@ -4802,24 +4808,29 @@ PP(pp_gpwent)
      * struct es_passwd *getespw*();
      * The password is in
      * char *(getespw*(...).ufld.fd_encrypt)
+     * Mention HAS_GETESPWNAM here so that Configure probes for it.
      *
-     * XXX Configure test needed for getprpwnam XXX
-     * XXX Configure test needed for getespwnam XXX
+     * Mention I_PROT here so that Configure probes for it.
      *
      * In HP-UX for getprpw*() the manual page claims that one should include
      * <hpsecurity.h> instead of <sys/security.h>, but that is not needed
      * if one includes <shadow.h> as that includes <hpsecurity.h>,
      * and pp_sys.c already includes <shadow.h> if there is such.
+     *
+     * Note that <sys/security.h> is already probed for, but currently
+     * it is only included in special cases.
      * 
      * In Digital UNIX/Tru64 if using the getespw*() (which seems to be
      * be preferred interface, even though also the getprpw*() interface
      * is available) one needs to link with -lsecurity -ldb -laud -lm.
+     * One also needs to call set_auth_parameters() in main() before
+     * doing anything else, whether one is using getespw*() or getprpw*().
+     *
+     * Note that accessing the shadow databases can be magnitudes
+     * slower than accessing the standard databases.
      *
      * --jhi
      */
-#   ifdef HAS_GETSPNAM
-    struct spwd   *spwent = NULL;
-#   endif
 
     switch (which) {
     case OP_GPWNAM:
@@ -4858,17 +4869,44 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_name);
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+	SvPOK_off(sv);
+	/* If we have getspnam(), we try to dig up the shadow
+	 * password.  If we are underprivileged, the shadow
+	 * interface will set the errno to EACCES or similar,
+	 * and return a null pointer.  If this happens, we will
+	 * use the dummy password (usually "*" or "x") from the
+	 * standard password database.
+	 *
+	 * In theory we could skip the shadow call completely
+	 * if euid != 0 but in practice we cannot know which
+	 * security measures are guarding the shadow databases
+	 * on a random platform.
+	 *
+	 * Resist the urge to use additional shadow interfaces.
+	 * Divert the urge to writing an extension instead.
+	 *
+	 * --jhi */
 #   ifdef HAS_GETSPNAM
-	spwent = getspnam(pwent->pw_name);
-	if (spwent)
-	    sv_setpv(sv, spwent->sp_pwdp);
-	else
-	    sv_setpv(sv, pwent->pw_passwd);
-#   else
-	sv_setpv(sv, pwent->pw_passwd);
+	{
+	    struct spwd *spwent;
+	    int saverrno; /* Save and restore errno so that
+			   * underprivileged attempts seem
+			   * to have never made the unsccessful
+			   * attempt to retrieve the shadow password. */
+
+	    saverrno = errno;
+	    spwent = getspnam(pwent->pw_name);
+	    errno = saverrno;
+	    if (spwent && spwent->sp_pwdp)
+		sv_setpv(sv, spwent->sp_pwdp);
+	}
 #   endif
+	if (!SvPOK(sv)) /* Use the standard password, then. */
+	    sv_setpv(sv, pwent->pw_passwd);
+
 #   ifndef INCOMPLETE_TAINTS
-	/* passwd is tainted because user himself can diddle with it. */
+	/* passwd is tainted because user himself can diddle with it.
+	 * admittedly not much and in a very limited way, but nevertheless. */
 	SvTAINTED_on(sv);
 #   endif
 
@@ -4885,7 +4923,11 @@ PP(pp_gpwent)
 #   else
 	sv_setuv(sv, (UV)pwent->pw_gid);
 #   endif
-	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
+	/* pw_change, pw_quota, and pw_age are mutually exclusive--
+	 * because of the poor interface of the Perl getpw*(),
+	 * not because there's some standard/convention saying so.
+	 * A better interface would have been to return a hash,
+	 * but we are accursed by our history, alas. --jhi.  */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   ifdef PWCHANGE
 	sv_setiv(sv, (IV)pwent->pw_change);
@@ -4899,7 +4941,8 @@ PP(pp_gpwent)
 #       endif
 #   endif
 
-	/* pw_class and pw_comment are mutually exclusive. */
+	/* pw_class and pw_comment are mutually exclusive--.
+	 * see the above note for pw_change, pw_quota, and pw_age. */
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   ifdef PWCLASS
 	sv_setpv(sv, pwent->pw_class);
