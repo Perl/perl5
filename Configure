@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Dec 28 04:17:47 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Dec 29 20:23:06 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -165,11 +165,6 @@ esac
 test -d UU || mkdir UU
 cd UU && rm -f ./*
 
-if test -f "/system/gnu_library/bin/ar.pm"; then
-     _exe=".pm"
-else
-     _exe=""
-fi
 
 ccname=''
 ccversion=''
@@ -1039,6 +1034,10 @@ if test -f /etc/unixtovms; then
 fi
 if test -f /etc/unixtovms.exe; then
 	eunicefix=/etc/unixtovms.exe
+fi
+
+if test -f "/system/gnu_library/bin/ar.pm"; then
+     _exe=".pm"
 fi
 
 i_whoami=''
@@ -2161,12 +2160,14 @@ case "$egrep" in
 egrep)
 	echo "Substituting grep for egrep."
 	egrep=$grep
+	_egrep=$grep
 	;;
 esac
 case "$ln" in
 ln)
 	echo "Substituting cp for ln."
 	ln=$cp
+	_ln=$cp
 	;;
 esac
 case "$make" in
@@ -2188,6 +2189,7 @@ gmake)	;;
 		# and prefer it over the system make.
 		echo "Substituting gmake for make."
 		make=$gmake
+		_make=$gmake
 	fi
 	;;
 esac
@@ -10052,7 +10054,7 @@ int main()
 		ret = read(pd[0], buf, 1);	/* Should read EOF */
 		alarm(0);
 		sprintf(string, "%d\n", ret);
-		write(3, string, strlen(string));
+		write(4, string, strlen(string));
 		exit(0);
 	}
 
@@ -10066,7 +10068,7 @@ EOCP
 	set try
 	if eval $compile_ok; then
 		echo "$startsh" >mtry
-		echo "$run ./try >try.out 2>try.ret 3>try.err || exit 4" >>mtry
+		echo "$run ./try >try.out 2>try.ret 4>try.err || exit 4" >>mtry
 		chmod +x mtry
 		./mtry >/dev/null 2>&1
 		case $? in

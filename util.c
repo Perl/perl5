@@ -30,6 +30,12 @@
 #  include <sys/wait.h>
 #endif
 
+#ifdef HAS_SELECT
+# ifdef I_SYS_SELECT
+#  include <sys/select.h>
+# endif
+#endif
+
 #define FLUSH
 
 #ifdef LEAKTEST

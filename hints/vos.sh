@@ -10,16 +10,14 @@
 
 # C compiler and default options.
 cc=gcc
-ccflags="-D_BSD_SOURCE -D_POSIX_C_SOURCE=199509L"
+ccflags="-D_SVID_SOURCE -D_POSIX_C_SOURCE=199509L -I."
 
 # Make command.
 make="/system/gnu_library/bin/gmake"
+_make="/system/gnu_library/bin/gmake"
 
 # Architecture name
 archname="hppa1.1"
-
-# POSIX commands are here.
-# paths="/system/gnu_library/bin"
 
 # Executable suffix.
 # No, this is not a typo.  The ".pm" really is the native
@@ -43,6 +41,7 @@ locincpth="$locincpth /system/stcp/include_library/arpa"
 locincpth="$locincpth /system/stcp/include_library/net"
 locincpth="$locincpth /system/stcp/include_library/netinet"
 locincpth="$locincpth /system/stcp/include_library/protocols"
+locincpth="$locincpth /system/include_library/sysv"
 usrinc="/system/include_library"
 
 # Where to install perl5.
@@ -68,3 +67,7 @@ yacc="/system/gnu_library/bin/bison"
 
 # VOS doesn't have (or need) a pager, but perl needs one.
 pager="/system/gnu_library/bin/cat.pm"
+
+# VOS has a bug that causes _exit() to flush all files.
+# This confuses the tests.  Make 'em happy here.
+fflushNULL=define

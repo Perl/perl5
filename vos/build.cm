@@ -32,6 +32,12 @@
       &return 1
       &end
 &
+&if &compiler& = gcc & &version& = alpha
+&then &do
+      &display_line build: "-compiler gcc" is incompatible with "-version alpha"
+      &return 1
+      &end
+&
 & Set up the appropriate directory suffix for each architecture.
 &
 &if &cpu& = mc68020
@@ -47,6 +53,10 @@
 &then &set_string obj2 .68k
 &else &set_string obj2 &obj&
 &
+&if &cpu& = mc68020
+&then &set_string bindsize -size large
+&else &set_string bindsize ''
+&
 &if &compiler& = cc
 &then &do
 &set_string cpu -processor &cpu&
@@ -57,27 +67,14 @@
 &set_string s .o
 &end
 &
-& If requested, compile the source code.
-&
-&if &recompile& = 0
-&then &goto CHECK_REBIND
-&
-&if &version& = alpha
-&then !set_library_paths include << < &POSIX&>incl &+
-     (master_disk)>system>include_library
-&else !set_library_paths include << < &+
-     (master_disk)>system>stcp>include_library &+
-     (master_disk)>system>include_library
-&
-&if (exists *.obj -link)
-&then !unlink *.obj -no_ask -brief
-&
 & Suppress several harmless compiler warning and advice messages.
 & Use -list -show_include all -show_macros both_ways when debugging.
 &
+&set_string cflags -D_SVID_SOURCE -D_POSIX_C_SOURCE=199506L -DPERL_CORE -O4
+&
 &if &compiler& = cc
-&then &set_string cflags '-O4 -D_POSIX_C_SOURCE=199506L -DPERL_CORE -u'
-&else &set_string cflags '-O4 -D_POSIX_C_SOURCE=199506L -DPERL_CORE -c'
+&then &set_string cflags &cflags& '-u'
+&else &set_string cflags &cflags& '-c'
 &
 & The following is a work-around for stcp-1437,8,9
 &
@@ -89,9 +86,35 @@
 &else &set_string diag ''
 &
 & The following is a work-around for stcp-1570 and GCC.
+& (and for some perl errors that only cc finds)
 &
 &if &compiler& = gcc
 &then &set_string diag &diag& -w
+&else &set_string diag &diag& -w1
+&
+&if &version& = alpha
+&then !set_library_paths include << < &POSIX&>incl &+
+     (master_disk)>system>include_library
+&else !set_library_paths include << < &+
+     (master_disk)>system>stcp>include_library &+
+     (master_disk)>system>include_library>sysv &+
+     (master_disk)>system>include_library
+&
+&if &compiler& = gcc
+&then !set_library_paths command '(current_dir)' &+
+     (master_disk)>system>gnu_library>bin &+
+     (master_disk)>system>command_library
+&else !set_library_paths command '(current_dir)' &+
+     (master_disk)>system>command_library
+&
+& If requested, compile the source code.
+&
+&if &recompile& = 0
+&then &goto CHECK_REBIND
+&
+& Some of the compiler invocations need more VM than
+& the defaults allow. Raise the limits.
+!update_process_cmd_limits -initial_total_limit 100000000 -no_ask
 &
 !&compiler& <<av.c &diag& &cpu& &cflags& -o av&s&
 &if (command_status) ^= 0 &then &return
@@ -168,6 +191,8 @@
 &if (command_status) ^= 0 &then &return
 !&compiler& <<sv.c &diag& &cpu& &cflags& -o sv&s&
 &if (command_status) ^= 0 &then &return
+!&compiler& <<sharedsv.c &diag& &cpu& &cflags& -o sharedsv&s&
+&if (command_status) ^= 0 &then &return
 !&compiler& <<taint.c &diag& &cpu& &cflags& -o taint&s&
 &if (command_status) ^= 0 &then &return
 !&compiler& <<toke.c &diag& &cpu& &cflags& -o toke&s&
@@ -189,10 +214,11 @@
 &if &compiler& = gcc
 &then &do
  !delete_file perl.a
- !ar rc perl.a av.o deb.o doio.o doop.o dump.o globals.o gv.o hv.o mg.o &+
- op.o perl.o perlapi.o perlio.o perly.o pp.o pp_ctl.o pp_hot.o pp_sys.o &+
- regcomp.o regexec.o run.o scope.o sv.o taint.o toke.o universal.o utf8.o &+
- util.o xsutils.o
+ !ar rc perl.a av.o deb.o doio.o doop.o dump.o globals.o gv.o hv.o locale.o &+
+ mg.o numeric.o op.o perl.o perlapi.o perlio.o perly.o pp.o pp_ctl.o &+
+ pp_hot.o pp_pack.o pp_sort.o pp_sys.o regcomp.o regexec.o run.o scope.o &+
+ sharedsv.o sv.o taint.o toke.o universal.o utf8.o util.o xsutils.o
+ !delete_file *.o -no_ask -brief
 &end
 &else &do
  !&compiler& <<miniperlmain.c &diag& &cpu& &cflags& -o miniperlmain&s&
@@ -235,6 +261,7 @@
      &stcp_objlib&>net &+
      &stcp_objlib&>sbsd &+
      &stcp_objlib&>socket &+
+     &posix_objlib&>sysv &+
      &posix_objlib&>bsd &+
      &posix_objlib& &+
      &c_objlib& &objlib&
@@ -249,9 +276,8 @@
  &if &version& = alpha
  &then !bind -control <perl.bind vos_dummies &+
      &tcp_objlib&>tcp_runtime &tcp_objlib&>tcp_gethost &+
-     &cpu& -target_module &tgt_mod& -map
+     &cpu& -target_module &tgt_mod& &bindsize& -map
  &else !bind -control <perl.bind &cpu& -target_module &tgt_mod& -map
  &if (command_status) ^= 0 &then &return
 &end
 !delete_file *&s& -no_ask -brief
-!unlink *&s& -no_ask -brief
