@@ -82,7 +82,7 @@ PP(pp_regcomp)
     SV *tmpstr;
     STRLEN len;
     MAGIC *mg = Null(MAGIC*);
-    
+
     tmpstr = POPs;
 
     /* prevent recompiling under /o and ithreads. */
@@ -172,7 +172,7 @@ PP(pp_substcont)
     SV *nsv = Nullsv;
     REGEXP *old = PM_GETRE(pm);
     if(old != rx) {
-	if(old) 
+	if(old)
 	    ReREFCNT_dec(old);
 	PM_SETRE(pm,rx);
     }
@@ -240,7 +240,7 @@ PP(pp_substcont)
     }
     cx->sb_m = m = rx->startp[0] + orig;
     if (m > s) {
-	if (DO_UTF8(dstr) && !SvUTF8(cx->sb_targ)) 
+	if (DO_UTF8(dstr) && !SvUTF8(cx->sb_targ))
 	    sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
 	else
 	    sv_catpvn(dstr, s, m-s);
@@ -356,7 +356,7 @@ PP(pp_formline)
     bool targ_is_utf8 = FALSE;
     SV * nsv = Nullsv;
     OP * parseres = 0;
-    char *fmt;
+    const char *fmt;
     bool oneline;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
@@ -383,7 +383,7 @@ PP(pp_formline)
 
     for (;;) {
 	DEBUG_f( {
-	    char *name = "???";
+	    const char *name = "???";
 	    arg = -1;
 	    switch (*fpc) {
 	    case FF_LITERAL:	arg = fpc[1]; name = "LITERAL";	break;
@@ -403,7 +403,7 @@ PP(pp_formline)
 	    case FF_MORE:	name = "MORE";		break;
 	    case FF_LINEMARK:	name = "LINEMARK";	break;
 	    case FF_END:	name = "END";		break;
-            case FF_0DECIMAL:	name = "0DECIMAL";	break;
+	    case FF_0DECIMAL:	name = "0DECIMAL";	break;
 	    case FF_LINESNGL:	name = "LINESNGL";	break;
 	    }
 	    if (arg >= 0)
@@ -682,7 +682,7 @@ PP(pp_formline)
 	    item = s = SvPV(sv, len);
 	    itemsize = len;
 	    if ((item_is_utf8 = DO_UTF8(sv)))
-		itemsize = sv_len_utf8(sv);	    
+		itemsize = sv_len_utf8(sv);
 	    if (itemsize) {
 		bool chopped = FALSE;
 		gotsome = TRUE;
@@ -748,7 +748,7 @@ PP(pp_formline)
 	    gotsome = TRUE;
 	    value = SvNV(sv);
 	    /* overflow evidence */
-	    if (num_overflow(value, fieldsize, arg)) { 
+	    if (num_overflow(value, fieldsize, arg)) {
 	        arg = fieldsize;
 		while (arg--)
 		    *t++ = '#';
@@ -909,7 +909,7 @@ PP(pp_mapwhile)
 	     * irrelevant.  --jhi */
             if (shift < count)
                 shift = count; /* Avoid shifting too often --Ben Tilly */
-	
+
 	    EXTEND(SP,shift);
 	    src = SP;
 	    dst = (SP += shift);
@@ -924,7 +924,7 @@ PP(pp_mapwhile)
 	    while (items-- > 0)
 		*dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs);
 	}
-	else { 
+	else {
 	    /* scalar context: we don't care about which values map returns
 	     * (we use undef here). And so we certainly don't want to do mortal
 	     * copies of meaningless values. */
@@ -990,9 +990,9 @@ PP(pp_flip)
     else {
 	dTOPss;
 	SV *targ = PAD_SV(PL_op->op_targ);
- 	int flip = 0;
+	int flip = 0;
 
- 	if (PL_op->op_private & OPpFLIP_LINENUM) {
+	if (PL_op->op_private & OPpFLIP_LINENUM) {
 	    if (GvIO(PL_last_in_gv)) {
 		flip = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
 	    }
@@ -1000,10 +1000,10 @@ PP(pp_flip)
 		GV *gv = gv_fetchpv(".", TRUE, SVt_PV);
 		if (gv && GvSV(gv)) flip = SvIV(sv) == SvIV(GvSV(gv));
 	    }
- 	} else {
- 	    flip = SvTRUE(sv);
- 	}
- 	if (flip) {
+	} else {
+	    flip = SvTRUE(sv);
+	}
+	if (flip) {
 	    sv_setiv(PAD_SV(cUNOP->op_first->op_targ), 1);
 	    if (PL_op->op_flags & OPf_SPECIAL) {
 		sv_setiv(targ, 1);
@@ -1113,7 +1113,7 @@ PP(pp_flop)
 
 /* Control. */
 
-static char *context_name[] = {
+static const char *context_name[] = {
     "pseudo-block",
     "subroutine",
     "eval",
@@ -1332,7 +1332,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	if (message) {
 	    if (PL_in_eval & EVAL_KEEPERR) {
-		static char prefix[] = "\t(in cleanup) ";
+                static const char prefix[] = "\t(in cleanup) ";
 		SV *err = ERRSV;
 		char *e = Nullch;
 		if (!SvPOK(err))
@@ -1608,7 +1608,7 @@ PP(pp_caller)
 PP(pp_reset)
 {
     dSP;
-    char *tmps;
+    const char *tmps;
     STRLEN n_a;
 
     if (MAXARG < 1)
@@ -2078,11 +2078,11 @@ PP(pp_redo)
 }
 
 STATIC OP *
-S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
+S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 {
     OP *kid = Nullop;
     OP **ops = opstack;
-    static char too_deep[] = "Target of goto is too deeply nested";
+    static const char too_deep[] = "Target of goto is too deeply nested";
 
     if (ops >= oplimit)
 	Perl_croak(aTHX_ too_deep);
@@ -2138,11 +2138,10 @@ PP(pp_goto)
     register PERL_CONTEXT *cx;
 #define GOTO_DEPTH 64
     OP *enterops[GOTO_DEPTH];
-    char *label;
-    int do_dump = (PL_op->op_type == OP_DUMP);
-    static char must_have_label[] = "goto must have label";
+    const char *label = 0;
+    const bool do_dump = (PL_op->op_type == OP_DUMP);
+    static const char must_have_label[] = "goto must have label";
 
-    label = 0;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *sv = POPs;
 	STRLEN n_a;
@@ -2191,7 +2190,7 @@ PP(pp_goto)
 	    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs) {
 		/* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
-		
+
 		items = AvFILLp(av) + 1;
 		EXTEND(SP, items+1); /* @_ could have been extended. */
 		Copy(AvARRAY(av), SP + 1, items, SV*);
@@ -2351,7 +2350,7 @@ PP(pp_goto)
 		     */
 		    SV *sv = GvSV(PL_DBsub);
 		    CV *gotocv;
-		
+
 		    save_item(sv);
 		    if (PERLDB_SUB_NN) {
 			int type = SvTYPE(sv);
@@ -2860,7 +2859,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	PERL_CONTEXT *cx;
 	I32 optype = 0;			/* Might be reset by POPEVAL. */
 	STRLEN n_a;
-	
+
 	PL_op = saveop;
 	if (PL_eval_root) {
 	    op_free(PL_eval_root);
@@ -3353,7 +3352,7 @@ PP(pp_require)
     PL_encoding = Nullsv;
 
     op = DOCATCH(doeval(gimme, NULL, Nullcv, PL_curcop->cop_seq));
-    
+
     /* Restore encoding. */
     PL_encoding = encoding;
 
@@ -3808,7 +3807,7 @@ S_doparseform(pTHX_ SV *sv)
     sv_magic(sv, Nullsv, PERL_MAGIC_fm, Nullch, 0);
     SvCOMPILED_on(sv);
 
-    if (unchopnum && repeat) 
+    if (unchopnum && repeat)
         DIE(aTHX_ "Repeated format line will never terminate (~~ and @#)");
     return 0;
 }

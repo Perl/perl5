@@ -982,14 +982,14 @@ STATIC int	S_magic_methcall(pTHX_ SV *sv, MAGIC *mg, char *meth, I32 f, int n, S
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 STATIC I32	S_list_assignment(pTHX_ OP *o);
-STATIC void	S_bad_type(pTHX_ I32 n, char *t, char *name, OP *kid);
+STATIC void	S_bad_type(pTHX_ I32 n, const char *t, const char *name, OP *kid);
 STATIC void	S_cop_free(pTHX_ COP *cop);
 STATIC OP*	S_modkids(pTHX_ OP *o, I32 type);
 STATIC void	S_no_bareword_allowed(pTHX_ OP *o);
 STATIC OP*	S_no_fh_allowed(pTHX_ OP *o);
 STATIC OP*	S_scalarboolean(pTHX_ OP *o);
-STATIC OP*	S_too_few_arguments(pTHX_ OP *o, char* name);
-STATIC OP*	S_too_many_arguments(pTHX_ OP *o, char* name);
+STATIC OP*	S_too_few_arguments(pTHX_ OP *o, const char* name);
+STATIC OP*	S_too_many_arguments(pTHX_ OP *o, const char* name);
 STATIC OP*	S_newDEFSVOP(pTHX);
 STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp);
 STATIC void	S_simplify_sort(pTHX_ OP *o);
@@ -1063,7 +1063,7 @@ STATIC void*	S_docatch_body(pTHX);
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 STATIC void*	S_vdocatch_body(pTHX_ va_list args);
 #endif
-STATIC OP*	S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit);
+STATIC OP*	S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit);
 STATIC OP*	S_doparseform(pTHX_ SV *sv);
 STATIC bool	S_num_overflow(NV value, I32 fldsize, I32 frcsize);
 STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock);
@@ -1119,7 +1119,7 @@ STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t*, struct regnode_charclass_
 STATIC void	S_cl_and(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class *and_with);
 STATIC void	S_cl_or(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with);
 STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t*, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags);
-STATIC I32	S_add_data(pTHX_ struct RExC_state_t*, I32 n, char *s);
+STATIC I32	S_add_data(pTHX_ struct RExC_state_t*, I32 n, const char *s);
 STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...) __attribute__((noreturn));
 STATIC I32	S_regpposixcc(pTHX_ struct RExC_state_t*, I32 value);
 STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t*);
@@ -1232,14 +1232,14 @@ STATIC char*	S_scan_trans(pTHX_ char *start);
 STATIC char*	S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp);
 STATIC char*	S_skipspace(pTHX_ char *s);
 STATIC char*	S_swallow_bom(pTHX_ U8 *s);
-STATIC void	S_checkcomma(pTHX_ char *s, char *name, char *what);
-STATIC void	S_force_ident(pTHX_ char *s, int kind);
+STATIC void	S_checkcomma(pTHX_ char *s, char *name, const char *what);
+STATIC void	S_force_ident(pTHX_ const char *s, int kind);
 STATIC void	S_incline(pTHX_ char *s);
 STATIC int	S_intuit_method(pTHX_ char *s, GV *gv);
 STATIC int	S_intuit_more(pTHX_ char *s);
 STATIC I32	S_lop(pTHX_ I32 f, int x, char *s);
 STATIC void	S_missingterm(pTHX_ char *s);
-STATIC void	S_no_op(pTHX_ char *what, char *s);
+STATIC void	S_no_op(pTHX_ const char *what, char *s);
 STATIC void	S_set_csh(pTHX);
 STATIC I32	S_sublex_done(pTHX);
 STATIC I32	S_sublex_push(pTHX);
@@ -1248,11 +1248,11 @@ STATIC char *	S_filter_gets(pTHX_ SV *sv, PerlIO *fp, STRLEN append);
 STATIC HV *	S_find_in_my_stash(pTHX_ const char *pkgname, I32 len);
 STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv, const char *type);
 #  if defined(DEBUGGING)
-STATIC int	S_tokereport(pTHX_ char *s, I32 rv);
+STATIC int	S_tokereport(pTHX_ const char *s, I32 rv);
 #  endif
 STATIC int	S_ao(pTHX_ int toketype);
 STATIC void	S_depcom(pTHX);
-STATIC char*	S_incl_perldb(pTHX);
+STATIC const char*	S_incl_perldb(pTHX);
 #if 0
 STATIC I32	S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 STATIC I32	S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);

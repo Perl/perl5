@@ -2543,7 +2543,7 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
     /* This message really ought to be max 23 lines.
      * Removed -h because the user already knows that option. Others? */
 
-    static char *usage_msg[] = {
+    static const char *usage_msg[] = {
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
 "-C[number/list] enables the listed Unicode features",
@@ -2599,7 +2599,7 @@ Perl_get_debug_opts(pTHX_ char **s)
 int
 Perl_get_debug_opts_flags(pTHX_ char **s, int flags)
 {
-    static char *usage_msgd[] = {
+    static const char *usage_msgd[] = {
       " Debugging flag values: (see also -d)",
       "  p  Tokenizing and parsing (with v, displays parse stack)",
       "  s  Stack snapshots (with v, displays all stacks)",
@@ -2629,7 +2629,7 @@ Perl_get_debug_opts_flags(pTHX_ char **s, int flags)
     int i = 0;
     if (isALPHA(**s)) {
 	/* if adding extra options, remember to update DEBUG_MASK */
-	static char debopts[] = "psltocPmfrxu HXDSTRJvC";
+	static const char debopts[] = "psltocPmfrxu HXDSTRJvC";
 
 	for (; isALNUM(**s); (*s)++) {
 	    char *d = strchr(debopts,**s);

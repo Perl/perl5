@@ -156,7 +156,7 @@ Perl_debstack(pTHX)
 
 
 #ifdef DEBUGGING
-static char * si_names[] = {
+static const char * si_names[] = {
     "UNKNOWN",
     "UNDEF",
     "MAIN",

@@ -1027,14 +1027,14 @@ s	|int	|magic_methcall	|SV *sv|MAGIC *mg|char *meth|I32 f \
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 s	|I32	|list_assignment|OP *o
-s	|void	|bad_type	|I32 n|char *t|char *name|OP *kid
+s	|void	|bad_type	|I32 n|const char *t|const char *name|OP *kid
 s	|void	|cop_free	|COP *cop
 s	|OP*	|modkids	|OP *o|I32 type
 s	|void	|no_bareword_allowed|OP *o
 s	|OP*	|no_fh_allowed	|OP *o
 s	|OP*	|scalarboolean	|OP *o
-s	|OP*	|too_few_arguments|OP *o|char* name
-s	|OP*	|too_many_arguments|OP *o|char* name
+s	|OP*	|too_few_arguments|OP *o|const char* name
+s	|OP*	|too_many_arguments|OP *o|const char* name
 s	|OP*	|newDEFSVOP
 s	|OP*	|new_logop	|I32 type|I32 flags|OP **firstp|OP **otherp
 s	|void	|simplify_sort	|OP *o
@@ -1108,7 +1108,7 @@ s	|void*	|docatch_body
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 s	|void*	|vdocatch_body	|va_list args
 #endif
-s	|OP*	|dofindlabel	|OP *o|char *label|OP **opstack|OP **oplimit
+s	|OP*	|dofindlabel	|OP *o|const char *label|OP **opstack|OP **oplimit
 s	|OP*	|doparseform	|SV *sv
 sn	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
 s	|I32	|dopoptoeval	|I32 startingblock
@@ -1170,7 +1170,7 @@ Es	|void	|cl_or		|struct RExC_state_t*|struct regnode_charclass_class *cl \
 Es	|I32	|study_chunk	|struct RExC_state_t*|regnode **scanp|I32 *deltap \
 				|regnode *last|struct scan_data_t *data \
 				|U32 flags
-Es	|I32	|add_data	|struct RExC_state_t*|I32 n|char *s
+Es	|I32	|add_data	|struct RExC_state_t*|I32 n|const char *s
 rs	|void|re_croak2	|const char* pat1|const char* pat2|...
 Es	|I32	|regpposixcc	|struct RExC_state_t*|I32 value
 Es	|void	|checkposixcc	|struct RExC_state_t*
@@ -1286,14 +1286,14 @@ s	|char*	|scan_word	|char *s|char *dest|STRLEN destlen \
 				|int allow_package|STRLEN *slp
 s	|char*	|skipspace	|char *s
 s	|char*	|swallow_bom	|U8 *s
-s	|void	|checkcomma	|char *s|char *name|char *what
-s	|void	|force_ident	|char *s|int kind
+s	|void	|checkcomma	|char *s|char *name|const char *what
+s	|void	|force_ident	|const char *s|int kind
 s	|void	|incline	|char *s
 s	|int	|intuit_method	|char *s|GV *gv
 s	|int	|intuit_more	|char *s
 s	|I32	|lop		|I32 f|int x|char *s
 s	|void	|missingterm	|char *s
-s	|void	|no_op		|char *what|char *s
+s	|void	|no_op		|const char *what|char *s
 s	|void	|set_csh
 s	|I32	|sublex_done
 s	|I32	|sublex_push
@@ -1303,11 +1303,11 @@ s	|HV *	|find_in_my_stash|const char *pkgname|I32 len
 s	|SV*	|new_constant	|const char *s|STRLEN len|const char *key|SV *sv \
 				|SV *pv|const char *type
 #  if defined(DEBUGGING)
-s	|int	|tokereport	|char *s|I32 rv
+s	|int	|tokereport	|const char *s|I32 rv
 #  endif
 s	|int	|ao		|int toketype
 s	|void	|depcom
-s	|char*	|incl_perldb
+s	|const char*|incl_perldb
 #if 0
 s	|I32	|utf16_textfilter|int idx|SV *sv|int maxlen
 s	|I32	|utf16rev_textfilter|int idx|SV *sv|int maxlen

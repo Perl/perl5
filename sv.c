@@ -1633,7 +1633,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 #endif
 	    Renew(s,newlen,char);
 	}
-        else {
+	else {
 	    /* sv_force_normal_flags() must not try to unshare the new
 	       PVX we allocate below. AMS 20010713 */
 	    if (SvREADONLY(sv) && SvFAKE(sv)) {
@@ -1646,7 +1646,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	    }
 	}
 	SvPV_set(sv, s);
-        SvLEN_set(sv, newlen);
+	SvLEN_set(sv, newlen);
     }
     return s;
 }
@@ -7614,7 +7614,7 @@ char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-	char *name = HvNAME(SvSTASH(sv));
+        const char *name = HvNAME(SvSTASH(sv));
 	return name ? name : "__ANON__";
     }
     else {
