@@ -104,27 +104,41 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 /* Tests if some arbitrary number of bytes begins in a valid UTF-8 character.
  * The actual number of bytes in the UTF-8 character will be returned if it
  * is valid, otherwise 0. */
-int
+STRLEN
 Perl_is_utf8_char(pTHX_ U8 *s)
 {
     U8 u = *s;
-    int slen, len;
+    STRLEN slen, len;
+    UV uv, ouv;
 
-    if (!(u & 0x80))
+    if (u <= 0x7f)
 	return 1;
 
-    if (!(u & 0x40))
+    if (u >= 0x80 && u <= 0xbf)
 	return 0;
 
     len = UTF8SKIP(s);
 
+    if (len < 2 || (u >= 0xc0 && u <= 0xfd && s[1] < 0x80))
+	return 0;
+
     slen = len - 1;
     s++;
+    uv = u;
+    ouv = uv;
     while (slen--) {
 	if ((*s & 0xc0) != 0x80)
 	    return 0;
+	uv = (uv << 6) | (*s & 0x3f);
+	if (uv < ouv)
+	    return 0;
+	ouv = uv;
 	s++;
     }
+
+    if (UTF8LEN(uv) < len)
+	return 0;
+
     return len;
 }
 
@@ -140,16 +154,20 @@ string, false otherwise.
 bool
 Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 {
-    U8* x=s;
-    U8* send=s+len;
-    int c;
+    U8* x = s;
+    U8* send = s + len;
+    STRLEN c;
+
     while (x < send) {
         c = is_utf8_char(x);
+	if (!c)
+	    return FALSE;
         x += c;
-        if (!c || x > send)
-            return 0;
+        if (x > send)
+            return FALSE;
     }
-    return 1;
+
+    return TRUE;
 }
 
 /*

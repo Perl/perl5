@@ -182,7 +182,7 @@ _is_utf8(sv, ...)
 	{
 	  SV *	check = items == 2 ? ST(1) : Nullsv;
 	  if (SvPOK(sv)) {
-	    RETVAL = SvUTF8(sv);
+	    RETVAL = SvUTF8(sv) ? 1 : 0;
 	    if (RETVAL &&
 		SvTRUE(check) &&
 		!is_utf8_string((U8*)SvPVX(sv), SvCUR(sv)))
