@@ -578,8 +578,12 @@ destination, C<nitems> is the number of items, and C<type> is the type.
 =for apidoc Am|void|StructCopy|type src|type dest|type
 This is an architecture-independent macro to copy one structure to another.
 
-=cut
-*/
+=for apidoc Am|void|Poison|void* dest|int nitems|type
+
+Fill up memory with a pattern (byte 0xAB over and over again) that
+hopefully catches attempts to access uninitialized memory.
+
+=cut */
 
 #ifndef lint
 
@@ -623,6 +627,8 @@ extern long lastxycount[MAXXCOUNT][MAXYCOUNT];
 #define Copy(s,d,n,t)	(void)memcpy((char*)(d),(char*)(s), (n) * sizeof(t))
 #define Zero(d,n,t)	(void)memzero((char*)(d), (n) * sizeof(t))
 
+#define Poison(d,n,t)	(void)memset((char*)(d), 0xAB, (n) * sizeof(t))
+
 #else /* lint */
 
 #define New(x,v,n,s)	(v = Null(s *))
@@ -632,6 +638,7 @@ extern long lastxycount[MAXXCOUNT][MAXYCOUNT];
 #define Move(s,d,n,t)
 #define Copy(s,d,n,t)
 #define Zero(d,n,t)
+#define Poison(d,n,t)
 #define Safefree(d)	(d) = (d)
 
 #endif /* lint */

@@ -2291,6 +2291,11 @@ Alternatively edit the init file interactively via:
 Note: you can define up to 20 conversion shortcuts in the gdb
 section.
 
+=item *
+
+If you see in a debugger a memory area mysteriously full of 0xabababab,
+you may be seeing the effect of the Poison() macro, see L<perlclib>.
+
 =back
 
 =head2 CONCLUSION

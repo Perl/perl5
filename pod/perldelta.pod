@@ -898,8 +898,8 @@ C<Storable> gives persistence to Perl data structures by allowing the
 storage and retrieval of Perl data to and from files in a fast and
 compact binary format.  Because in effect Storable does serialisation
 of Perl data structues, with it you can also clone deep, hierarchical
-datastructures.  Storable was created by Raphael Manfredi but it is
-now maintained by the Perl development team.  Storable has been
+datastructures.  Storable was originally created by Raphael Manfredi,
+but it is now maintained by Abhijit Menon-Sen.  Storable has been
 enhanced to understand the two new hash features, Unicode keys and
 restricted hashes.  See L<Storable>.
 
@@ -1870,7 +1870,9 @@ The autouse pragma didn't work for Multi::Part::Function::Names.
 =item *
 
 caller() could cause core dumps in certain situations.  Carp was sometimes
-affected by this problem.
+affected by this problem.  In particular, caller() now returns a
+subroutine name of C<(unknown)> for subroutines that have been removed
+from the symbol table.
 
 =item *
 

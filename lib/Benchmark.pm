@@ -549,7 +549,7 @@ sub timeit {
     if ($cache && exists $cache{$cache_key} ) {
 	$wn = $cache{$cache_key};
     } else {
-	$wn = &runloop($n, ref( $code ) ? sub { undef } : '' );
+	$wn = &runloop($n, ref( $code ) ? sub { } : '' );
 	# Can't let our baseline have any iterations, or they get subtracted
 	# out of the result.
 	$wn->[5] = 0;

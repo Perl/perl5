@@ -13,56 +13,59 @@ sub DEFAULT_OFF () { 2 }
 
 my $tree = {
 
-'all' => {
-       	'io'  		=> { 	'pipe' 		=> DEFAULT_OFF,
-       				'unopened'	=> DEFAULT_OFF,
-       				'closed'	=> DEFAULT_OFF,
-       				'newline'	=> DEFAULT_OFF,
-       				'exec'		=> DEFAULT_OFF,
-       				'layer'		=> DEFAULT_OFF,
-			   },
-       	'syntax'	=> { 	'ambiguous'	=> DEFAULT_OFF,
-			     	'semicolon'	=> DEFAULT_OFF,
-			     	'precedence'	=> DEFAULT_OFF,
-			     	'bareword'	=> DEFAULT_OFF,
-			     	'reserved'	=> DEFAULT_OFF,
-				'digit'		=> DEFAULT_OFF,
-			     	'parenthesis'	=> DEFAULT_OFF,
-       	 			'printf'	=> DEFAULT_OFF,
-       	 			'prototype'	=> DEFAULT_OFF,
-       	 			'qw'		=> DEFAULT_OFF,
-			   },
-       	'severe'	=> { 	'inplace'	=> DEFAULT_ON,
-	 			'internal'	=> DEFAULT_ON,
-         			'debugging'	=> DEFAULT_ON,
-         			'malloc'	=> DEFAULT_ON,
-	 		   },
-        'deprecated'	=> DEFAULT_OFF,
-       	'void'		=> DEFAULT_OFF,
-       	'recursion'	=> DEFAULT_OFF,
-       	'redefine'	=> DEFAULT_OFF,
-       	'numeric'	=> DEFAULT_OFF,
-        'uninitialized'	=> DEFAULT_OFF,
-       	'once'		=> DEFAULT_OFF,
-       	'misc'		=> DEFAULT_OFF,
-       	'regexp'	=> DEFAULT_OFF,
-       	'glob'		=> DEFAULT_OFF,
-       	'y2k'		=> DEFAULT_OFF,
-       	'untie'		=> DEFAULT_OFF,
-	'substr'	=> DEFAULT_OFF,
-	'taint'		=> DEFAULT_OFF,
-	'signal'	=> DEFAULT_OFF,
-	'closure'	=> DEFAULT_OFF,
-	'overflow'	=> DEFAULT_OFF,
-	'portable'	=> DEFAULT_OFF,
-	'utf8'		=> DEFAULT_OFF,
-       	'exiting'	=> DEFAULT_OFF,
-       	'pack'		=> DEFAULT_OFF,
-       	'unpack'	=> DEFAULT_OFF,
-       	 #'default'	=> DEFAULT_ON,
-  	}
+'all' => [ 5.008, {
+	'io'		=> [ 5.008, { 	
+				'pipe' 		=> [ 5.008, DEFAULT_OFF],
+       				'unopened'	=> [ 5.008, DEFAULT_OFF],
+       				'closed'	=> [ 5.008, DEFAULT_OFF],
+       				'newline'	=> [ 5.008, DEFAULT_OFF],
+       				'exec'		=> [ 5.008, DEFAULT_OFF],
+       				'layer'		=> [ 5.008, DEFAULT_OFF],
+			   }],
+     	'syntax'	=> [ 5.008, { 	
+				'ambiguous'	=> [ 5.008, DEFAULT_OFF],
+			     	'semicolon'	=> [ 5.008, DEFAULT_OFF],
+			     	'precedence'	=> [ 5.008, DEFAULT_OFF],
+			     	'bareword'	=> [ 5.008, DEFAULT_OFF],
+			     	'reserved'	=> [ 5.008, DEFAULT_OFF],
+				'digit'		=> [ 5.008, DEFAULT_OFF],
+			     	'parenthesis'	=> [ 5.008, DEFAULT_OFF],
+       	 			'printf'	=> [ 5.008, DEFAULT_OFF],
+       	 			'prototype'	=> [ 5.008, DEFAULT_OFF],
+       	 			'qw'		=> [ 5.008, DEFAULT_OFF],
+			   }],
+       	'severe'	=> [ 5.008, { 	
+				'inplace'	=> [ 5.008, DEFAULT_ON],
+	 			'internal'	=> [ 5.008, DEFAULT_ON],
+         			'debugging'	=> [ 5.008, DEFAULT_ON],
+         			'malloc'	=> [ 5.008, DEFAULT_ON],
+	 		   }],
+        'deprecated'	=> [ 5.008, DEFAULT_OFF],
+       	'void'		=> [ 5.008, DEFAULT_OFF],
+       	'recursion'	=> [ 5.008, DEFAULT_OFF],
+       	'redefine'	=> [ 5.008, DEFAULT_OFF],
+       	'numeric'	=> [ 5.008, DEFAULT_OFF],
+        'uninitialized'	=> [ 5.008, DEFAULT_OFF],
+       	'once'		=> [ 5.008, DEFAULT_OFF],
+       	'misc'		=> [ 5.008, DEFAULT_OFF],
+       	'regexp'	=> [ 5.008, DEFAULT_OFF],
+       	'glob'		=> [ 5.008, DEFAULT_OFF],
+       	'y2k'		=> [ 5.008, DEFAULT_OFF],
+       	'untie'		=> [ 5.008, DEFAULT_OFF],
+	'substr'	=> [ 5.008, DEFAULT_OFF],
+	'taint'		=> [ 5.008, DEFAULT_OFF],
+	'signal'	=> [ 5.008, DEFAULT_OFF],
+	'closure'	=> [ 5.008, DEFAULT_OFF],
+	'overflow'	=> [ 5.008, DEFAULT_OFF],
+	'portable'	=> [ 5.008, DEFAULT_OFF],
+	'utf8'		=> [ 5.008, DEFAULT_OFF],
+       	'exiting'	=> [ 5.008, DEFAULT_OFF],
+       	'pack'		=> [ 5.008, DEFAULT_OFF],
+       	'unpack'	=> [ 5.008, DEFAULT_OFF],
+       	'threads'	=> [ 5.008, DEFAULT_OFF],
+       	 #'default'	=> [ 5.008, DEFAULT_ON ],
+  	}],
 } ;
-
 
 ###########################################################################
 sub tab {
@@ -75,7 +78,48 @@ sub tab {
 
 my %list ;
 my %Value ;
+my %ValueToName ;
+my %NameToValue ;
 my $index ;
+
+my %v_list = () ;
+
+sub valueWalk
+{
+    my $tre = shift ;
+    my @list = () ;
+    my ($k, $v) ;
+
+    foreach $k (sort keys %$tre) {
+	$v = $tre->{$k};
+	die "duplicate key $k\n" if defined $list{$k} ;
+	die "Value associated with key '$k' is not an ARRAY reference"
+	    if !ref $v || ref $v ne 'ARRAY' ;
+
+	my ($ver, $rest) = @{ $v } ;
+	push @{ $v_list{$ver} }, $k;
+	
+	if (ref $rest)
+	  { valueWalk ($rest) }
+
+    }
+
+}
+
+sub orderValues
+{
+    my $index = 0;
+    foreach my $ver ( sort { $a <=> $b } keys %v_list ) {
+        foreach my $name (@{ $v_list{$ver} } ) {
+	    $ValueToName{ $index } = [ uc $name, $ver ] ;
+	    $NameToValue{ uc $name } = $index ++ ;
+        }
+    }
+
+    return $index ;
+}
+
+###########################################################################
 
 sub walk
 {
@@ -86,10 +130,17 @@ sub walk
     foreach $k (sort keys %$tre) {
 	$v = $tre->{$k};
 	die "duplicate key $k\n" if defined $list{$k} ;
-	$Value{$index} = uc $k ;
-        push @{ $list{$k} }, $index ++ ;
-	if (ref $v)
-	  { push (@{ $list{$k} }, walk ($v)) }
+	#$Value{$index} = uc $k ;
+	die "Can't find key '$k'"
+	    if ! defined $NameToValue{uc $k} ;
+        push @{ $list{$k} }, $NameToValue{uc $k} ;
+	die "Value associated with key '$k' is not an ARRAY reference"
+	    if !ref $v || ref $v ne 'ARRAY' ;
+	
+	my ($ver, $rest) = @{ $v } ;
+	if (ref $rest)
+	  { push (@{ $list{$k} }, walk ($rest)) }
+
 	push @list, @{ $list{$k} } ;
     }
 
@@ -121,20 +172,33 @@ sub printTree
 {
     my $tre = shift ;
     my $prefix = shift ;
-    my $indent = shift ;
     my ($k, $v) ;
 
     my $max = (sort {$a <=> $b} map { length $_ } keys %$tre)[-1] ;
+    my @keys = sort keys %$tre ;
 
-    $prefix .= " " x $indent ;
-    foreach $k (sort keys %$tre) {
+    while ($k = shift @keys) {
 	$v = $tre->{$k};
-	print $prefix . "|\n" ;
-	print $prefix . "+- $k" ;
-	if (ref $v)
+	die "Value associated with key '$k' is not an ARRAY reference"
+	    if !ref $v || ref $v ne 'ARRAY' ;
+	
+        my $offset ;
+	if ($tre ne $tree) {
+	    print $prefix . "|\n" ;
+	    print $prefix . "+- $k" ;
+	    $offset = ' ' x ($max + 4) ;
+	}
+	else {
+	    print $prefix . "$k" ;
+	    $offset = ' ' x ($max + 1) ;
+	}
+
+	my ($ver, $rest) = @{ $v } ;
+	if (ref $rest)
 	{
-	    print " " . "-" x ($max - length $k ) . "+\n" ;
-	    printTree ($v, $prefix . "|" , $max + $indent - 1)
+	    my $bar = @keys ? "|" : " ";
+	    print " -" . "-" x ($max - length $k ) . "+\n" ;
+	    printTree ($rest, $prefix . $bar . $offset )
 	}
 	else
 	  { print "\n" }
@@ -181,8 +245,7 @@ sub mkOct
 
 if (@ARGV && $ARGV[0] eq "tree")
 {
-    #print "  all -+\n" ;
-    printTree($tree, "   ", 4) ;
+    printTree($tree, "    ") ;
     exit ;
 }
 
@@ -222,19 +285,27 @@ my $offset = 0 ;
 
 $index = $offset ;
 #@{ $list{"all"} } = walk ($tree) ;
-walk ($tree) ;
+valueWalk ($tree) ;
+my $index = orderValues();
 
 die <<EOM if $index > 255 ;
 Too many warnings categories -- max is 255
     rewrite packWARN* & unpackWARN* macros 
 EOM
 
+walk ($tree) ;
+
 $index *= 2 ;
 my $warn_size = int($index / 8) + ($index % 8 != 0) ;
 
 my $k ;
-foreach $k (sort { $a <=> $b } keys %Value) {
-    print WARN tab(5, "#define WARN_$Value{$k}"), "$k\n" ;
+my $last_ver = 0;
+foreach $k (sort { $a <=> $b } keys %ValueToName) {
+    my ($name, $version) = @{ $ValueToName{$k} };
+    print WARN "\n/* Warnings Categories added in Perl $version */\n\n"
+        if $last_ver != $version ;
+    print WARN tab(5, "#define WARN_$name"), "$k\n" ;
+    $last_ver = $version ;
 }
 print WARN "\n" ;
 
@@ -341,13 +412,19 @@ while (<DATA>) {
 
 #$list{'all'} = [ $offset .. 8 * ($warn_size/2) - 1 ] ;
 
-#my %Keys = map {lc $Value{$_}, $_} keys %Value ;
-
+$last_ver = 0;
 print PM "%Offsets = (\n" ;
-foreach my $k (sort { $a <=> $b } keys %Value) {
-    my $v = lc $Value{$k} ;
+foreach my $k (sort { $a <=> $b } keys %ValueToName) {
+    my ($name, $version) = @{ $ValueToName{$k} };
+    $name = lc $name;
     $k *= 2 ;
-    print PM tab(4, "    '$v'"), "=> $k,\n" ;
+    if ( $last_ver != $version ) {
+        print PM "\n";
+        print PM tab(4, "    # Warnings Categories added in Perl $version");
+        print PM "\n\n";
+    }
+    print PM tab(4, "    '$name'"), "=> $k,\n" ;
+    $last_ver = $version;
 }
 
 print PM "  );\n\n" ;
@@ -390,6 +467,7 @@ close PM ;
 
 __END__
 
+# !!!!!!!   DO NOT EDIT THIS FILE   !!!!!!!
 # This file was created by warnings.pl
 # Any changes made here will be lost.
 #
@@ -661,4 +739,5 @@ sub warnif
 
     carp($message) ;
 }
+
 1;

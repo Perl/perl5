@@ -3121,7 +3121,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     SvCUR_set(sv, sizeof(struct perl_thread));
     thr = (Thread) SvPVX(sv);
 #ifdef DEBUGGING
-    memset(thr, 0xab, sizeof(struct perl_thread));
+    Poison(thr, 1, struct perl_thread);
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
