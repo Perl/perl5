@@ -181,6 +181,11 @@ sub ceil {
     return $num;
 }
 
+# See:
+#
+# http://www-groups.dcs.st-andrews.ac.uk/~history/HistTopics/Prime_numbers.html
+#
+
 sub findgteprime { # find the smallest prime integer greater than or equal to
     use integer;
 
@@ -188,15 +193,20 @@ sub findgteprime { # find the smallest prime integer greater than or equal to
     return 2 if $num <= 2;
 
     $num++ unless $num % 2;
-
-    my $max = int sqrt $num;
+    my $i;
+    my $sqrtnum = int sqrt $num;
+    my $sqrtnumsquared = $sqrtnum * $sqrtnum;
 
   NUM:
     for (;; $num += 2) {
-	for ($i = 3; $i <= $max; $i += 2) {
-	    next NUM unless $num % $i;
+	if ($sqrtnumsquared < $num) {
+	    $sqrtnum++;
+	    $sqrtnumsquared = $sqrtnum * $sqrtnum;
 	}
-	return $num;
+        for ($i = 3; $i <= $sqrtnum; $i += 2) {
+            next NUM unless $num % $i;
+        }
+        return $num;
     }
 }
 
