@@ -833,12 +833,14 @@ if (open(my $CaseFold, "CaseFold.txt")) {
     my %Fold;
 
     while (<$CaseFold>) {
+	# Skip status 'S', simple case folding
 	next unless /^([0-9A-Fa-f]+)\s*;\s*([CFI])\s*;\s*([0-9A-Fa-f]+(?: [0-9A-Fa-f]+)*)\s*;/;
 
 	my ($code, $status, $fold) = ($1, $2, $3);
 
 	if ($status eq 'C') { # Common: one-to-one folding
-	    append(\@Fold, $code, $fold);
+	    # No append() since several codes may fold into one.
+	    push @Fold, [ $code, $code, $fold ];
 	} else { # F: full, or I: dotted uppercase I -> dotless lowercase I
 	    $Fold{hex($code)} = $fold;
 	}

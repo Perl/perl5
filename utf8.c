@@ -1651,7 +1651,7 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 }
 
 /*
-=for apidoc A|I32|ibcmp_utf8|const char *s1|bool u1|const char *s2|bool u2|register I32 len
+=for apidoc A|I32|ibcmp_utf8|const char *s1|bool u1|register I32 len1|const char *s2|bool u2|register I32 len2
 
 Return true if the strings s1 and s2 differ case-insensitively, false
 if not (if they are equal case-insensitively).  If u1 is true, the

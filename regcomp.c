@@ -3985,6 +3985,17 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
 				   (UV)value);
 		    if (FOLD) {
+			 U8 tmpbuf [UTF8_MAXLEN+1];
+			 U8 foldbuf[UTF8_MAXLEN_FOLD+1];
+			 STRLEN foldlen;
+			 UV f;
+
+			 uvchr_to_utf8(tmpbuf, value);
+			 f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+
+			 if (f != value)
+			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", f);
+
 			 if (value == UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA) {
 			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
 					     (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA);
