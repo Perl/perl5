@@ -36,6 +36,9 @@ my $Ignore_Exitcode = $ENV{HARNESS_IGNORE_EXITCODE};
 
 my $Files_In_Dir = $ENV{HARNESS_FILELEAK_IN_DIR};
 
+my $Running_In_Perl_Tree = 0;
+++$Running_In_Perl_Tree if -d "../t" and -f "../sv.c";
+
 my $Strap = Test::Harness::Straps->new;
 
 @ISA = ('Exporter');
@@ -599,7 +602,11 @@ sub _mk_leader {
     chomp($te);
     $te =~ s/\.\w+$/./;
 
-    if ($^O eq 'VMS') { $te =~ s/^.*\.t\./\[.t./s; }
+    if ($^O eq 'VMS') {
+	$te =~ s/^.*\.t\./\[.t./s;
+    }
+    $te =~ s,\\,/,g if $^O eq 'MSWin32';
+    $te =~ s,^\.\./,/, if $Running_In_Perl_Tree;
     my $blank = (' ' x 77);
     my $leader = "$te" . '.' x ($width - length($te));
     my $ml = "";
@@ -625,12 +632,15 @@ sub _leader_width {
     foreach (@_) {
         my $suf    = /\.(\w+)$/ ? $1 : '';
         my $len    = length;
+	$len -= 2 if $Running_In_Perl_Tree and m{^\.\.[/\\]};
         my $suflen = length $suf;
         $maxlen    = $len    if $len    > $maxlen;
         $maxsuflen = $suflen if $suflen > $maxsuflen;
     }
-    # + 3 : we want three dots between the test name and the "ok"
-    return $maxlen + 3 - $maxsuflen;
+    # we want three dots between the test name and the "ok" for
+    # typical lengths, and just two dots if longer than 30 characters
+    $maxlen -= $maxsuflen;
+    return $maxlen + ($maxlen >= 30 ? 2 : 3);
 }
 
 
