@@ -1196,7 +1196,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
     for (i = 1; i < lim; i++)
 	amt.table[i] = Nullcv;
     for (; i < NofAMmeth; i++) {
-	char *cooky = PL_AMG_names[i];
+	char *cooky = (char*)PL_AMG_names[i];
 	/* Human-readable form, for debugging: */
 	char *cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
 	STRLEN l = strlen(cooky);
