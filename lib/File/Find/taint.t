@@ -24,6 +24,16 @@ else                   { print "1..27\n";  }
 use File::Find;
 use File::Spec;
 use Cwd;
+use Config;
+
+# Remove insecure directories from PATH
+my @path;
+my $sep = $Config{path_sep};
+foreach my $dir (split(/$sep/,$ENV{'PATH'}))
+ {
+  push(@path,$dir) unless (stat $dir)[2] & 0002;
+ }
+$ENV{'PATH'} = join($sep,@path);
 
 my $NonTaintedCwd = $^O eq 'MSWin32' || $^O eq 'cygwin';
 
