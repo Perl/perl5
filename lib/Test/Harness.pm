@@ -243,14 +243,17 @@ sub runtests {
 	       " UNEXPECTEDLY SUCCEEDED)")
 	if $totbonus;
     if ($tests_skipped) {
-	$bonusmsg .= ", $tests_skipped test" . ($tests_skipped != 1 ? 's' : '') .
-			' skipped';
+	$bonusmsg .= ", $tests_skipped test" . ($tests_skipped != 1 ? 's' : '');
+	if ($subtests_skipped) {
+	    $bonusmsg .= " and $subtests_skipped subtest"
+			 . ($subtests_skipped != 1 ? 's' : '');
+	}
+	$bonusmsg .= ' skipped';
     }
-    if ($subtests_skipped) {
-	$bonusmsg .= ($tests_skipped ? ', plus ' : ', '). 
-			"$subtests_skipped subtest"
-			. ($subtests_skipped != 1 ? 's' : '') .
-			" skipped";
+    elsif ($subtests_skipped) {
+	$bonusmsg .= ", $subtests_skipped subtest"
+	             . ($subtests_skipped != 1 ? 's' : '')
+		     . " skipped";
     }
     if ($bad == 0 && $totmax) {
 	print "All tests successful$bonusmsg.\n";

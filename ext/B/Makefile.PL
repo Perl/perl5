@@ -18,7 +18,7 @@ WriteMakefile(
     VERSION	=> "a5",
     MAN3PODS => {},
     clean	=> {
-	FILES		=> "perl$e byteperl$e *$o B.c *~"
+	FILES		=> "perl$e byteperl$e *$o B.c defsubs.h *~"
     }
 );   
 

@@ -104,11 +104,11 @@ use warning 'io' ;
 exec "lskdjfalksdjfdjfkls","" ;
 EXPECT
 OPTION regex
-Can't exec "lskdjfalksdjfdjfkls": .+ at - line 3.
+Can't exec "lskdjfalksdjfdjfkls": .+
 ########
 # doio.c
 use warning 'io' ;
 exec "lskdjfalksdjfdjfkls", "abc" ;
 EXPECT
 OPTION regex
-Can't exec "lskdjfalksdjfdjfkls": .+ at - line 3.
+Can't exec "lskdjfalksdjfdjfkls": .+
