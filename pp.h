@@ -64,37 +64,37 @@
 #define TOPl		((long)SvIV(TOPs))
 
 /* Go to some pains in the rare event that we must extend the stack. */
-#define EXTEND(p,n)	do { if (stack_max - p < (n)) {		  	    \
+#define EXTEND(p,n)	STMT_START { if (stack_max - p < (n)) {		  	    \
 			    sp = stack_grow(sp,p, (int) (n));		    \
-			} } while (0)
+			} } STMT_END
 
 /* Same thing, but update mark register too. */
-#define MEXTEND(p,n)	do {if (stack_max - p < (n)) {			    \
+#define MEXTEND(p,n)	STMT_START {if (stack_max - p < (n)) {			    \
 			    int markoff = mark - stack_base;		    \
 			    sp = stack_grow(sp,p,(int) (n));		    \
 			    mark = stack_base + markoff;		    \
-			} } while (0)
+			} } STMT_END
 
 #define PUSHs(s)	(*++sp = (s))
-#define PUSHTARG	do { SvSETMAGIC(TARG); PUSHs(TARG); } while (0)
-#define PUSHp(p,l)	do { sv_setpvn(TARG, (p), (l)); PUSHTARG; } while (0)
-#define PUSHn(n)	do { sv_setnv(TARG, (double)(n)); PUSHTARG; } while (0)
-#define PUSHi(i)	do { sv_setiv(TARG, (IV)(i)); PUSHTARG; } while (0)
+#define PUSHTARG	STMT_START { SvSETMAGIC(TARG); PUSHs(TARG); } STMT_END
+#define PUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); PUSHTARG; } STMT_END
+#define PUSHn(n)	STMT_START { sv_setnv(TARG, (double)(n)); PUSHTARG; } STMT_END
+#define PUSHi(i)	STMT_START { sv_setiv(TARG, (IV)(i)); PUSHTARG; } STMT_END
 
-#define XPUSHs(s)	do { EXTEND(sp,1); (*++sp = (s)); } while (0)
-#define XPUSHTARG	do { SvSETMAGIC(TARG); XPUSHs(TARG); } while (0)
-#define XPUSHp(p,l)	do { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } while (0)
-#define XPUSHn(n)	do { sv_setnv(TARG, (double)(n)); XPUSHTARG; } while (0)
-#define XPUSHi(i)	do { sv_setiv(TARG, (IV)(i)); XPUSHTARG; } while (0)
+#define XPUSHs(s)	STMT_START { EXTEND(sp,1); (*++sp = (s)); } STMT_END
+#define XPUSHTARG	STMT_START { SvSETMAGIC(TARG); XPUSHs(TARG); } STMT_END
+#define XPUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } STMT_END
+#define XPUSHn(n)	STMT_START { sv_setnv(TARG, (double)(n)); XPUSHTARG; } STMT_END
+#define XPUSHi(i)	STMT_START { sv_setiv(TARG, (IV)(i)); XPUSHTARG; } STMT_END
 
 #define SETs(s)		(*sp = s)
-#define SETTARG		do { SvSETMAGIC(TARG); SETs(TARG); } while (0)
-#define SETp(p,l)	do { sv_setpvn(TARG, (p), (l)); SETTARG; } while (0)
-#define SETn(n)		do { sv_setnv(TARG, (double)(n)); SETTARG; } while (0)
-#define SETi(i)		do { sv_setiv(TARG, (IV)(i)); SETTARG; } while (0)
+#define SETTARG		STMT_START { SvSETMAGIC(TARG); SETs(TARG); } STMT_END
+#define SETp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); SETTARG; } STMT_END
+#define SETn(n)		STMT_START { sv_setnv(TARG, (double)(n)); SETTARG; } STMT_END
+#define SETi(i)		STMT_START { sv_setiv(TARG, (IV)(i)); SETTARG; } STMT_END
 
 #ifdef OVERLOAD
-#define SETsv(sv)	do { sv_setsv(TARG, (sv)); SETTARG; } while (0)
+#define SETsv(sv)	STMT_START { sv_setsv(TARG, (sv)); SETTARG; } STMT_END
 #endif /* OVERLOAD */
 
 #define dTOPss		SV *sv = TOPs
@@ -136,7 +136,7 @@
 #define AMGf_assign	4
 #define AMGf_unary	8
 
-#define tryAMAGICbinW(meth,assign,set) do { \
+#define tryAMAGICbinW(meth,assign,set) STMT_START { \
           if (amagic_generation) { \
 	    SV* tmpsv; \
 	    SV* right= *(sp); SV* left= *(sp-1);\
@@ -148,7 +148,7 @@
 	       SPAGAIN;	\
 	       (void)POPs; set(tmpsv); RETURN; } \
 	  } \
-	} while (0)
+	} STMT_END
 
 #define tryAMAGICbin(meth,assign) tryAMAGICbinW(meth,assign,SETsv)
 #define tryAMAGICbinSET(meth,assign) tryAMAGICbinW(meth,assign,SETs)
@@ -158,7 +158,7 @@
 #define AMG_CALLbinL(left,right,meth) \
             amagic_call(left,right,CAT2(meth,_amg),AMGf_noright)
 
-#define tryAMAGICunW(meth,set) do { \
+#define tryAMAGICunW(meth,set) STMT_START { \
           if (amagic_generation) { \
 	    SV* tmpsv; \
 	    SV* arg= *(sp); \
@@ -167,7 +167,7 @@
 	       SPAGAIN;	\
 	       set(tmpsv); RETURN; } \
 	  } \
-	} while (0)
+	} STMT_END
 
 #define tryAMAGICun(meth) tryAMAGICunW(meth,SETsv)
 #define tryAMAGICunSET(meth) tryAMAGICunW(meth,SETs)
@@ -178,11 +178,11 @@
  * information by hand */
 
 
-#define RvDEEPCP(rv) do { SV* ref=SvRV(rv);      \
+#define RvDEEPCP(rv) STMT_START { SV* ref=SvRV(rv);      \
   if (SvREFCNT(ref)>1) {                 \
     SvREFCNT_dec(ref);                   \
     SvRV(rv)=AMG_CALLun(rv,copy);        \
-  } } while (0)
+  } } STMT_END
 #else
 
 #define tryAMAGICbin(a,b)
