@@ -283,14 +283,6 @@ Creates a new AV.  The reference count is set to 1.
 =for hackers
 Found in file av.c
 
-=item Nullav
-
-Null AV pointer.
-
-
-=for hackers
-Found in file av.h
-
 =item sortsv
 
 Sort an array. Here is an example:
@@ -575,14 +567,6 @@ NOTE: the perl_ form of this function is deprecated.
 
 =for hackers
 Found in file perl.c
-
-=item Nullcv
-
-Null CV pointer.
-
-
-=for hackers
-Found in file cv.h
 
 
 =back
@@ -924,15 +908,12 @@ Found in file gv.c
 
 =over 8
 
-=item HEf_SVKEY
+=item Nullav
 
-This flag, used in the length slot of hash entries and magic structures,
-specifies the structure contains an C<SV*> pointer where a C<char*> pointer
-is to be expected. (For information only--not to be used).
-
+Null AV pointer.
 
 =for hackers
-Found in file hv.h
+Found in file av.h
 
 =item Nullch
 
@@ -940,6 +921,20 @@ Null character pointer.
 
 =for hackers
 Found in file handy.h
+
+=item Nullcv
+
+Null CV pointer.
+
+=for hackers
+Found in file cv.h
+
+=item Nullhv
+
+Null HV pointer.
+
+=for hackers
+Found in file hv.h
 
 =item Nullsv
 
@@ -967,6 +962,15 @@ NOTE: the perl_ form of this function is deprecated.
 
 =for hackers
 Found in file perl.c
+
+=item HEf_SVKEY
+
+This flag, used in the length slot of hash entries and magic structures,
+specifies the structure contains an C<SV*> pointer where a C<char*> pointer
+is to be expected. (For information only--not to be used).
+
+=for hackers
+Found in file hv.h
 
 =item HeHASH
 
@@ -1355,14 +1359,6 @@ Creates a new HV.  The reference count is set to 1.
 =for hackers
 Found in file hv.c
 
-=item Nullhv
-
-Null HV pointer.
-
-
-=for hackers
-Found in file hv.h
-
 
 =back
 
@@ -1520,6 +1516,16 @@ has been loaded.
 =for hackers
 Found in file sv.h
 
+=item SvUNLOCK
+
+Releases a mutual exclusion lock on sv if a suitable module
+has been loaded.
+
+	void	SvUNLOCK(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 
 =back
 
@@ -1564,20 +1570,6 @@ The XSUB-writer's interface to the C C<malloc> function, with
 cast.
 
 	void	Newc(int id, void* ptr, int nitems, type, cast)
-
-=for hackers
-Found in file handy.h
-
-=item NEWSV
-
-Creates a new SV.  A non-zero C<len> parameter indicates the number of
-bytes of preallocated string space the SV should have.  An extra byte for a
-tailing NUL is also reserved.  (SvPOK is not set for the SV even if string
-space is allocated.)  The reference count for the new SV is set to 1.
-C<id> is an integer id between 0 and 1299 (used to identify leaks).
-
-
-	SV*	NEWSV(int id, STRLEN len)
 
 =for hackers
 Found in file handy.h
@@ -2445,6 +2437,15 @@ handled by C<xsubpp>.
 =for hackers
 Found in file XSUB.h
 
+=item XSRETURN_EMPTY
+
+Return an empty list from an XSUB immediately.
+
+		XSRETURN_EMPTY;
+
+=for hackers
+Found in file XSUB.h
+
 =item XSRETURN_IV
 
 Return an integer from an XSUB immediately.  Uses C<XST_mIV>.
@@ -2682,6 +2683,19 @@ SV is B<not> incremented.
 
 =for hackers
 Found in file sv.c
+
+=item NEWSV
+
+Creates a new SV.  A non-zero C<len> parameter indicates the number of
+bytes of preallocated string space the SV should have.  An extra byte for a
+tailing NUL is also reserved.  (SvPOK is not set for the SV even if string
+space is allocated.)  The reference count for the new SV is set to 1.
+C<id> is an integer id between 0 and 1299 (used to identify leaks).
+
+	SV*	NEWSV(int id, STRLEN len)
+
+=for hackers
+Found in file handy.h
 
 =item newSV
 
@@ -3444,17 +3458,6 @@ Found in file sv.h
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item SvUNLOCK
-
-Releases a mutual exclusion lock on sv if a suitable module
-has been loaded.
-
-
-	void	SvUNLOCK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -5349,16 +5352,6 @@ Found in file XSUB.h
 
 Macro to declare an XSUB and its C parameter list.  This is handled by
 C<xsubpp>.
-
-=for hackers
-Found in file XSUB.h
-
-=item XSRETURN_EMPTY
-
-Return an empty list from an XSUB immediately.
-
-
-		XSRETURN_EMPTY;
 
 =for hackers
 Found in file XSUB.h
