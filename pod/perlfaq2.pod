@@ -18,7 +18,7 @@ is in a standard Internet format (a gzipped archive in POSIX tar format).
 Perl builds and runs on a bewildering number of platforms.  Virtually
 all known and current Unix derivatives are supported (Perl's native
 platform), as are other systems like VMS, DOS, OS/2, Windows,
-QNX, BeOS, OS X, MPE/iX and the Amiga. 
+QNX, BeOS, OS X, MPE/iX and the Amiga.
 
 Binary distributions for some proprietary platforms, including
 Apple systems, can be found http://www.cpan.org/ports/ directory.
@@ -78,7 +78,7 @@ part of the output of
 
     % perl -V
 
-You might also want to check out 
+You might also want to check out
 L<perlfaq8/"How do I keep my own module/library directory?">.
 
 =head2 I grabbed the sources and tried to compile but gdbm/dynamic loading/malloc/linking/... failed.  How do I make it work?
@@ -100,11 +100,11 @@ http://www.cpan.org/ and there is the CPAN Multiplexer at
 http://www.perl.com/CPAN/CPAN.html which will choose a mirror near you
 via DNS.  See http://www.perl.com/CPAN (without a slash at the
 end) for how this process works. Also, http://mirror.cpan.org/
-has a nice interface to the http://www.cpan.org/MIRRORED.BY 
-mirror directory. 
+has a nice interface to the http://www.cpan.org/MIRRORED.BY
+mirror directory.
 
 See the CPAN FAQ at http://www.cpan.org/misc/cpan-faq.html for
-answers to the most frequently asked questions about CPAN 
+answers to the most frequently asked questions about CPAN
 including how to become a mirror.
 
 CPAN/path/... is a naming convention for files available on CPAN
@@ -114,7 +114,7 @@ instance, if you're using ftp://ftp.funet.fi/pub/languages/perl/CPAN
 as your CPAN site, the file CPAN/misc/japh is downloadable as
 ftp://ftp.funet.fi/pub/languages/perl/CPAN/misc/japh .
 
-Considering that there are close to two thousand existing modules in 
+Considering that there are close to two thousand existing modules in
 the archive, one probably exists to do nearly anything you can think of.
 Current categories under CPAN/modules/by-category/ include Perl core
 modules; development support; operating system interfaces; networking,
@@ -126,7 +126,7 @@ compression; image manipulation; mail and news; control flow
 utilities; filehandle and I/O; Microsoft Windows modules; and
 miscellaneous modules.
 
-See http://www.cpan.org/modules/00modlist.long.html or 
+See http://www.cpan.org/modules/00modlist.long.html or
 http://search.cpan.org/ for a more complete list of modules by category.
 
 
@@ -148,7 +148,7 @@ You might also try C<perldoc perl> in case your system doesn't
 have a proper man command, or it's been misinstalled.  If that doesn't
 work, try looking in /usr/local/lib/perl5/pod for documentation.
 
-If all else fails, consult http://perldoc.cpan.org/ or 
+If all else fails, consult http://perldoc.cpan.org/ or
 http://www.perldoc.com/ both offer the complete documentation
 in html format.
 
@@ -196,7 +196,7 @@ see their FAQ (http://www.faqs.org/faqs/alt-sources-intro/) for details.
 
 If you're just looking for software, first use Google
 (http://www.google.com), Deja (http://www.deja.com), and
-CPAN Search (http://search.cpan.org).  This is faster and more 
+CPAN Search (http://search.cpan.org).  This is faster and more
 productive than just posting a request.
 
 =head2 Perl Books
@@ -219,17 +219,16 @@ The companion volume to the Camel containing thousands
 of real-world examples, mini-tutorials, and complete programs is:
 
     The Perl Cookbook (the "Ram Book"):
-	by Tom Christiansen and Nathan Torkington, 
+	by Tom Christiansen and Nathan Torkington,
 	    with Foreword by Larry Wall
 	ISBN 1-56592-243-3 [1st Edition August 1998]
 	http://perl.oreilly.com/cookbook/
 
 If you're already a hard-core systems programmer, then the Camel Book
-might suffice for you to learn Perl from.  If you're not, check
-out
+might suffice for you to learn Perl from.  If you're not, check out
 
     Learning Perl (the "Llama Book"):
-	by Randal Schwartz and Tom Christiansen 
+	by Randal Schwartz and Tom Christiansen
 		    with Foreword by Larry Wall
 	ISBN 1-56592-284-0 [2nd Edition July 1997]
 	http://www.oreilly.com/catalog/lperl2/
@@ -250,7 +249,7 @@ Addison-Wesley (http://www.awlonline.com/) and Manning
 such as Object Oriented Programming with Perl by Damian Conway and
 Network Programming with Perl by Lincoln Stein.
 
-An excellent technical book discounter is Bookpool at 
+An excellent technical book discounter is Bookpool at
 http://www.bookpool.com/ where a 30% discount or more is not unusual.
 
 What follows is a list of the books that the FAQ authors found personally
@@ -312,7 +311,7 @@ Recommended books on (or mostly on) Perl follow.
 	ISBN 1-881957-32-2 [1st edition May 1998]
 	http://www.macperl.com/ptf_book/
 
-=item Task-Oriented 
+=item Task-Oriented
 
     The Perl Cookbook
 	by Tom Christiansen and Nathan Torkington
@@ -320,12 +319,12 @@ Recommended books on (or mostly on) Perl follow.
 	ISBN 1-56592-243-3 [1st edition August 1998]
 	http://www.oreilly.com/catalog/cookbook/
 
-    Effective Perl Programming 
+    Effective Perl Programming
 	by Joseph Hall
 	ISBN 0-201-41975-0 [1st edition 1998]
 	http://www.awl.com/
 
-    
+
 =item Special Topics
 
     Mastering Regular Expressions
@@ -348,7 +347,7 @@ Recommended books on (or mostly on) Perl follow.
         Dave Cross
         ISBN 1930110006 [1st edition 2001]
         http://www.manning.com/cross
- 
+
     Learning Perl/Tk
         by Nancy Walsh
 	ISBN 1-56592-314-6 [1st edition January 1999]
@@ -395,7 +394,7 @@ following list is I<not> the complete list of CPAN mirrors
   ftp://cpan.if.usp.br/pub/mirror/CPAN/
 
 One may also use xx.cpan.org where "xx" is the 2-letter country code
-for your domain; e.g. Australia would use au.cpan.org. 
+for your domain; e.g. Australia would use au.cpan.org.
 
 =head2 What mailing lists are there for Perl?
 
@@ -407,7 +406,7 @@ subscription information.
 
 =head2 Archives of comp.lang.perl.misc
 
-Have you tried Deja or AltaVista?  Those are the 
+Have you tried Deja or AltaVista?  Those are the
 best archives.  Just look up "*perl*" as a newsgroup.
 
     http://www.deja.com/dnquery.xp?QRY=&DBS=2&ST=PS&defaultOp=AND&LNG=ALL&format=terse&showsort=date&maxhits=25&subjects=&groups=*perl*&authors=&fromdate=&todate=
@@ -487,16 +486,16 @@ Read the perlbug(1) man page (perl5.004 or later) for more information.
 
 =head2 What is perl.com? Perl Mongers? pm.org? perl.org?
 
-The Perl Home Page at http://www.perl.com/ is currently hosted on a 
-T3 line courtesy of Songline Systems, a software-oriented subsidiary of 
-O'Reilly and Associates. Other starting points include 
+The Perl Home Page at http://www.perl.com/ is currently hosted on a
+T3 line courtesy of Songline Systems, a software-oriented subsidiary of
+O'Reilly and Associates. Other starting points include
 
     http://language.perl.com/
     http://conference.perl.com/
     http://reference.perl.com/
 
 Perl Mongers is an advocacy organization for the Perl language.  For
-details, see the Perl Mongers web site at http://www.perlmongers.org/.
+details, see the Perl Mongers web site at http://www.perl.org/.
 
 Perl Mongers use the pm.org domain for services related to Perl user
 groups.  See the Perl user group web site at http://www.pm.org/ for more
@@ -516,7 +515,7 @@ and there are many other sub-domains for special topics, such as
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-1999 Tom Christiansen and Nathan Torkington.
+Copyright (c) 1997-2001 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 When included as an integrated part of the Standard Distribution
