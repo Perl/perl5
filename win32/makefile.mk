@@ -397,7 +397,7 @@ LINK_FLAGS	+= -L"$(CCLIBDIR)\Release"
 .ELIF "$(CCTYPE)" == "GCC"
 
 CC		= gcc
-LINK32		= gcc
+LINK32		= g++
 .IF "$(USE_GCC_V3_2)" == "define"
 LINK32		= g++
 .END
