@@ -1,4 +1,22 @@
 $! SUBCONFIGURE.COM - build a config.sh for VMS Perl.
+$!
+$! Note for folks from other platforms changing things in here:
+$!   Fancy changes (based on compiler capabilities or VMS version or
+$!   whatever) are tricky, so go ahead and punt on those.
+$!
+$!   Simple changes, though (say, always setting something to 1, or undef,
+$!   or something like that) are straightforward. Adding a new item for the
+$!   ultimately created config.sh requires adding two lines to this file.
+$!
+$!   First, a line in the format:
+$!     $ perl_foo = "bar"
+$!   after the line tagged ##ADD NEW CONSTANTS HERE##. Replace foo with the
+$!   variable name as it appears in config.sh.
+$!
+$!   Second, add a line in the format:
+$!     $ WC "foo='" + perl_foo + "'"
+$!   after the line tagged ##WRITE NEW CONSTANTS HERE##. Careful of the
+$!   quoting, as it can be tricky. 
 $! 
 $! This .COM file expects to be called by configure.com, and thus expects
 $! a few symbols in the environment. Notably:
@@ -36,6 +54,8 @@ $
 $ hwname = f$getsyi("HW_NAME")
 $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
+$!
+$! ##ADD NEW CONSTANTS HERE##
 $ perl_package="''package'"
 $ perl_baserev = "''baserev'"
 $ cc_defines=""
@@ -62,6 +82,7 @@ $ perl_d_pwpasswd="define"
 $ perl_d_setpwent="define"
 $ perl_d_getpwent="define"
 $ perl_d_endpwent="define"
+$ perl_ebcdic="undef"
 $ perl_hintfile=""
 $ perl_shrplib="define"
 $ perl_usemymalloc=mymalloc
@@ -346,6 +367,11 @@ $ perl_arch="VMS_VAX"
 $ perl_archname="VMS_VAX"
 $ perl_alignbytes="8"
 $ ENDIF
+$ if ("''Use_Threads'".eqs."T")
+$ THEN
+$ perl_arch = "''perl_arch'-thread"
+$ perl_archname = "''perl_archname'-thread"
+$ ENDIF
 $ perl_osvers=f$edit(osvers, "TRIM")
 $ LocalPerlVer = "5_" + Perl_PATCHLEVEL + perl_subversion
 $!
@@ -388,12 +414,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   ON ERROR THEN CONTINUE
 $   ON WARNING THEN CONTINUE
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   DEASSIGN SYS$OUTPUT
 $   DEASSIGN SYS$ERROR
@@ -430,14 +456,14 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   ON ERROR THEN CONTINUE
 $   ON WARNING THEN CONTINUE
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
-$!   link temp
+$!   link temp.obj
 $   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
 $   DEASSIGN SYS$OUTPUT
 $   DEASSIGN SYS$ERROR
@@ -471,7 +497,7 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   ON ERROR THEN CONTINUE
 $   ON WARNING THEN CONTINUE
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   teststatus = f$extract(9,1,$status)
 $   if (teststatus.nes."1")
 $   THEN
@@ -482,9 +508,9 @@ $     ON ERROR THEN CONTINUE
 $     ON WARNING THEN CONTINUE
 $     If (Needs_Opt.eqs."Yes")
 $     THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $     else
-$       link temp
+$       link temp.obj
 $     endif
 $     teststatus = f$extract(9,1,$status)
 $     DEASSIGN SYS$OUTPUT
@@ -529,12 +555,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -578,18 +604,18 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
 $   DEASSIGN SYS$OUTPUT
@@ -624,12 +650,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
 $   DEASSIGN SYS$OUTPUT
@@ -666,12 +692,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
 $   DEASSIGN SYS$OUTPUT
@@ -708,7 +734,7 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
 $   DEASSIGN SYS$ERROR
@@ -740,7 +766,7 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
 $   DEASSIGN SYS$ERROR
@@ -769,7 +795,7 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
 $   DEASSIGN SYS$ERROR
@@ -814,7 +840,7 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
 $   DEASSIGN SYS$ERROR
@@ -850,7 +876,7 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   savedstatus = $status
 $   teststatus = f$extract(9,1,savedstatus)
 $   if (teststatus.nes."1")
@@ -861,9 +887,9 @@ $     DEASSIGN SYS$ERROR
 $   ELSE
 $     If (Needs_Opt.eqs."Yes")
 $     THEN
-$       link temp,temp/opt
+$       link temp.obj,temp.opt/opt
 $     else
-$       link temp
+$       link temp.obj
 $     endif
 $     savedstatus = $status
 $     teststatus = f$extract(9,1,savedstatus)
@@ -897,7 +923,7 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   savedstatus = $status
 $   teststatus = f$extract(9,1,savedstatus)
 $   if (teststatus.nes."1")
@@ -908,9 +934,9 @@ $     DEASSIGN SYS$ERROR
 $   ELSE
 $     If (Needs_Opt.eqs."Yes")
 $     THEN
-$       link temp,temp/opt
+$       link temp.obj,temp.opt/opt
 $     else
-$       link temp
+$       link temp.obj
 $     endif
 $     savedstatus = $status
 $     teststatus = f$extract(9,1,savedstatus)
@@ -942,12 +968,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   savedstatus = $status
 $   teststatus = f$extract(9,1,savedstatus)
@@ -981,12 +1007,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1024,12 +1050,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1070,12 +1096,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1116,12 +1142,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1162,12 +1188,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1208,12 +1234,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1254,12 +1280,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1300,12 +1326,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1346,12 +1372,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1392,12 +1418,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1438,12 +1464,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1484,12 +1510,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1530,12 +1556,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1576,12 +1602,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
@@ -1617,7 +1643,7 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
 $   DEASSIGN SYS$ERROR
@@ -1652,7 +1678,7 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   on error then continue
 $   on warning then continue
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   teststatus = f$extract(9,1,$status)
 $   DEASSIGN SYS$OUTPUT
 $   DEASSIGN SYS$ERROR
@@ -1688,12 +1714,12 @@ $   DEFINE SYS$ERROR _NLA0:
 $   DEFINE SYS$OUTPUT _NLA0:
 $   ON ERROR THEN CONTINUE
 $   ON WARNING THEN CONTINUE
-$   'Checkcc' temp
+$   'Checkcc' temp.c
 $   If (Needs_Opt.eqs."Yes")
 $   THEN
-$     link temp,temp/opt
+$     link temp.obj,temp.opt/opt
 $   else
-$     link temp
+$     link temp.obj
 $   endif
 $   OPEN/WRITE TEMPOUT [-.uu]tempout.lis
 $   DEASSIGN SYS$OUTPUT
@@ -2276,6 +2302,7 @@ $ WC "d_getsent='" + perl_d_getsent + "'"
 $ WC "d_sethent='" + perl_d_sethent + "'"
 $ WC "d_setnent='" + perl_d_setsent + "'"
 $ WC "d_setpent='" + perl_d_setpent + "'"
+$ WC "ebcdic='" + perl_ebcdic + "'"
 $ WC "d_setsent='" + perl_d_setsent + "'"
 $ WC "d_gethostprotos='" + perl_d_gethostprotos + "'"
 $ WC "d_getnetprotos='" + perl_d_getnetprotos + "'"
@@ -2300,10 +2327,12 @@ $ WC "extensions='" + perl_extensions + "'"
 $ WC "d_mknod='" + perl_d_mknod + "'"
 $ WC "devtype='" + perl_devtype + "'"
 $!
+$! ##WRITE NEW CONSTANTS HERE##
+$!
 $ Close CONFIGSH
 $
 $! Okay, we've gotten here. Build munchconfig and run it
-$ 'Perl_CC' munchconfig
+$ 'Perl_CC' munchconfig.c
 $ If (Needs_Opt.eqs."Yes")
 $ THEN
 $   open/write OPTCHAN []munchconfig.opt
@@ -2313,10 +2342,10 @@ $     write OPTCHAN "Gnu_CC:[000000]gcclib.olb/library"
 $   endif
 $   write OPTCHAN "Sys$Share:VAXCRTL/Share"
 $   Close OPTCHAN
-$   link munchconfig,munchconfig/opt
+$   link munchconfig.obj,munchconfig.opt/opt
 $   delete munchconfig.opt;*
 $ else
-$   link munchconfig
+$   link munchconfig.obj
 $ endif
 $ WRITE_RESULT "Writing config.h"
 $ !

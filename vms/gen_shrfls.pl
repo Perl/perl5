@@ -277,7 +277,7 @@ while (<DATA>) {
   print "Adding $key to \%$array list\n" if $debug > 1;
   ${$array}{$key}++;
 }
-if ($debugging_enabled and ($isvaxc or $isgcc)) { $vars{'colors'}++ }
+if ($debugging_enabled and $isgcc) { $vars{'colors'}++ }
 foreach (split /\s+/, $extnames) {
   my($pkgname) = $_;
   $pkgname =~ s/::/__/g;

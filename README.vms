@@ -191,21 +191,21 @@ POD2MAN :== $PERL_ROOT:[000000]PERL POD2MAN
 
 * Installing Perl into DCLTABLES
 
-Courtesy of Brad  Hughes:
+Execute the following command file to define PERL as a DCL command.
+You'll need CMKRNL priv to install the new dcltables.exe.
 
-Put the following, modified to reflect where your .exe is, in PERL.CLD:
-
+$ create perl.cld
+!
+! modify to reflect location of your perl.exe
+!
 define verb perl
-image perl_root:[exe]perl.exe
-cliflags (foreign)
-
-and then
-
+  image perl_root:[000000]perl.exe
+  cliflags (foreign)
+$!
 $ set command perl /table=sys$common:[syslib]dcltables.exe -
  /output=sys$common:[syslib]dcltables.exe
 $ install replace sys$common:[syslib]dcltables.exe
-
-and you don't need perl :== $perl_root:[exe]perl.exe.
+$ exit
 
 * Changing compile-time things
 

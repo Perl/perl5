@@ -256,12 +256,29 @@ newthread (SV *startsv, AV *initargs, char *classname)
     err = 0;
     if (!attr_inited) {
 	attr_inited = 1;
+#ifdef OLD_PTHREADS_API
+	err = pthread_attr_create(&attr);
+#else
 	err = pthread_attr_init(&attr);
+#endif
+#ifdef OLD_PTHREADS_API
+#ifdef VMS
+/* This is available with the old pthreads API, but only with */
+/* DecThreads (VMS and Digital Unix) */
+	if (err == 0)
+	    err = pthread_attr_setdetach_np(&attr, ATTR_JOINABLE);
+#endif
+#else
 	if (err == 0)
 	    err = pthread_attr_setdetachstate(&attr, ATTR_JOINABLE);
+#endif
     }
     if (err == 0)
+#ifdef OLD_PTHREADS_API
+	err = pthread_create(&thr->self, attr, threadstart, (void*) thr);
+#else
 	err = pthread_create(&thr->self, &attr, threadstart, (void*) thr);
+#endif
     /* Go */
     MUTEX_UNLOCK(&thr->mutex);
 #endif

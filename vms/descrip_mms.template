@@ -199,13 +199,9 @@ THREAD = THREAD
 .ifdef OLDTHREADED
 THREADDEF = 
 THREAD = THREAD
-.ifdef LIBS2
-LIBS2 = $(LIBS2),sys$share:cma$lib_shr/share,cma$rtl/share
-.else
-LIBS2 = sys$share:cma$lib_shr/share,cma$rtl/share
-.endif
+THRLIBS1 = sys$share:cma$lib_shr/share|sys$share:cma$rtl/share
 .ifdef __AXP__
-LIBS2 = $(LIBS2),sys$share:cma$open_lib_shr/share,cma$open_rtl/share
+THRLIBS2 = sys$share:cma$open_lib_shr/share|sys$share:cma$open_rtl/share
 .endif
 .endif
 
@@ -264,13 +260,25 @@ extobj = $(myextobj)
 LIBS2=
 .endif
 
+.ifdef THRLIBS1
+.else
+THRLIBS1=
+.endif
+
+.ifdef THRLIBS2
+.else
+THRLIBS2=
+.endif
+
+FULLLIBS2 = $(LIBS2)|$(THRLIBS1)|$(THRLIBS2)
+
 #### End of system configuration section. ####
 
 
 h1 = EXTERN.h, INTERN.h, XSUB.h, av.h, bytecode.h, byterun.h, config.h, cop.h, cv.h
 h2 = embed.h, form.h, gv.h, handy.h, hv.h, keywords.h, mg.h, op.h, thread.h
 h3 = opcode.h, patchlevel.h, perl.h, perly.h, pp.h, proto.h, regcomp.h
-h4 = regexp.h, scope.h, sv.h, vmsish.h, util.h, perlsdio.h
+h4 = regexp.h, scope.h, sv.h, vmsish.h, util.h, perlsdio.h, perlio.h
 h5 = embedvar.h, intrpvar.h, perlvars.h, thrdvar.h, iperlsys.h
 h = $(h1), $(h2), $(h3), $(h4), $(h5) $(SOCKHLIS) $(THREADH)
 
@@ -291,7 +299,7 @@ ac2 = $(ARCHCORE)config.h $(ARCHCORE)cop.h $(ARCHCORE)cv.h $(ARCHCORE)embed.h
 ac3 = $(ARCHCORE)form.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
 ac4 = $(ARCHCORE)keywords.h $(ARCHCORE)mg.h $(ARCHCORE)op.h $(ARCHCORE)opcode.h
 ac5 = $(ARCHCORE)patchlevel.h $(ARCHCORE)perl.h $(ARCHCORE)perly.h $(ARCHCORE)thread.h $(ARCHCORE)iperlsys.h
-ac6 = $(ARCHCORE)pp.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h $(ARCHCORE)perlsdio.h
+ac6 = $(ARCHCORE)pp.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h $(ARCHCORE)perlsdio.h $(ARCHCORE)perlio.h
 ac7 = $(ARCHCORE)regexp.h $(ARCHCORE)scope.h $(ARCHCORE)sv.h $(ARCHCORE)util.h
 ac8  = $(ARCHCORE)embedvar.h $(ARCHCORE)intrpvar.h $(ARCHCORE)perlvars.h $(ARCHCORE)thrdvar.h
 ac9  = $(ARCHCORE)vmsish.h $(ARCHCORE)$(DBG)libperl$(OLB) $(ARCHCORE)perlshr_attr.opt
@@ -1085,7 +1093,7 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 
 printconfig :
         @ @[.vms]make_command $(MMS) $(MMSQUALIFIERS) $(MMSTARGETS)
-        @ @[.vms]myconfig "$(CC)" "$(CFLAGS)" "$(LINKFLAGS)" "$(LIBS1)" "$(LIBS2)" "$(SOCKLIB)" "$(EXT)" "$(DBG)"
+        @ @[.vms]myconfig "$(CC)" "$(CFLAGS)" "$(LINKFLAGS)" "$(LIBS1)" "$(FULLLIBS2)" "$(SOCKLIB)" "$(EXT)" "$(DBG)"
 
 .ifdef SOCKET
 
@@ -1100,7 +1108,7 @@ printconfig :
 
 vmsish.h : $(SOCKH)
 
-$(SOCKOBJ) : $(SOCKC) EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+$(SOCKOBJ) : $(SOCKC) EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h perlio.h
 
 $(SOCKC) : [.vms]$(SOCKC)
 	Copy/Log/NoConfirm [.vms]$(SOCKC) []$(SOCKC)
@@ -1251,6 +1259,9 @@ $(ARCHCORE)iperlsys.h : iperlsys.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)perlsdio.h : perlsdio.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)perlio.h : perlio.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)perlvars.h : perlvars.h
@@ -1435,7 +1446,7 @@ vms.c : [.vms]vms.c
 	Copy/Log/Noconfirm [.vms]vms.c []
 
 $(CRTL) : $(MAKEFILE)
-	@ @[.vms]genopt "$(CRTL)/Write" "|" "$(LIBS1)|$(LIBS2)|$(SOCKLIB)"
+	@ @[.vms]genopt "$(CRTL)/Write" "|" "$(LIBS1)|$(FULLLIBS2)|$(SOCKLIB)"
 
 
 cleanlis :
