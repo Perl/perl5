@@ -100,6 +100,33 @@ while (<CFG>) {
 }
 close(CFG);
 
+# perl.h logic duplication begins
+
+if ($define{USE_ITHREADS}) {
+    if (!$define{MULTIPLICITY} && !defined{PERL_OBJECT}) {
+        $define{MULTIPLICITY} = 1;
+    }
+}
+
+$define{PERL_IMPLICIT_CONTEXT} ||=
+    $define{USE_ITHREADS} ||
+    $define{USE_THREADS}  ||
+    $define{MULTIPLICITY} ;
+
+if ($define{PERL_CAPI}) {
+    delete $define{PERL_OBJECT};
+    $define{MULTIPLICITY} = 1; 
+    $define{PERL_IMPLICIT_CONTEXT} = 1;
+    $define{PERL_IMPLICIT_SYS}     = 1;
+}
+
+if ($define{PERL_OBJECT}) {
+    $define{PERL_IMPLICIT_CONTEXT} = 1;
+    $define{PERL_IMPLICIT_SYS}     = 1;
+}
+
+# perl.h logic duplication ends
+
 if ($PLATFORM eq 'win32') {
     warn join(' ',keys %define)."\n";
     print "LIBRARY Perl56\n";
@@ -472,7 +499,13 @@ for my $syms (@syms) {
 # variables
 
 if ($define{'PERL_OBJECT'} || $define{'MULTIPLICITY'}) {
-    for my $f ($perlvars_h, $intrpvar_h, $thrdvar_h) {
+    for my $f ($perlvars_h) {
+	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
+	emit_symbols $glob;
+	$glob = readvar($f);
+	emit_symbols $glob;
+    }
+    for my $f ($intrpvar_h, $thrdvar_h) {
 	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
 	emit_symbols $glob;
     }

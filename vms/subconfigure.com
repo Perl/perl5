@@ -63,6 +63,7 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_getcwd = "undef"
 $ perl_d_nv_preserves_uv = "define"
 $ perl_d_fs_data_s = "undef"
 $ perl_d_getmnt = "undef"
@@ -1998,6 +1999,78 @@ $     perl_d_mkstemp="define"
 $   ENDIF
 $ WRITE_RESULT "d_mkstemp is ''perl_d_mkstemp'"
 $!
+$! Check for mkstemps
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "mkstemps(""foo"", 1);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp.obj,temp.opt/opt
+$   else
+$     link temp.obj
+$   endif
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_mkstemps="undef"
+$   ELSE
+$     perl_d_mkstemps="define"
+$   ENDIF
+$ WRITE_RESULT "d_mkstemps is ''perl_d_mkstemps'"
+$!
+$! Check for mkstemp
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "int main()
+$ WS "{"
+$ WS "mkdtemp(""foo"");
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp.obj,temp.opt/opt
+$   else
+$     link temp.obj
+$   endif
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_mkdtemp="undef"
+$   ELSE
+$     perl_d_mkdtemp="define"
+$   ENDIF
+$ WRITE_RESULT "d_mkdtemp is ''perl_d_mkdtemp'"
+$!
 $! Check for setvbuf
 $!
 $ OS
@@ -3617,6 +3690,8 @@ $ WC "d_longlong='" + perl_d_longlong + "'"
 $ WC "uselonglong='" + perl_d_longlong + "'"
 $ WC "longlongsize='" + perl_longlongsize + "'"
 $ WC "d_mkstemp='" + perl_d_mkstemp + "'"
+$ WC "d_mkstemps='" + perl_d_mkstemps + "'"
+$ WC "d_mkdtemp='" + perl_d_mkdtemp + "'"
 $ WC "d_setvbuf='" + perl_d_setvbuf + "'"
 $ WC "d_setenv='" + perl_d_setenv + "'"
 $ WC "d_endhent='" + perl_d_endhent + "'"
@@ -3757,6 +3832,7 @@ $   WC "quadtype='" + perl_quadtype + "'"
 $   WC "uquadtype='" + perl_uquadtype + "'" 
 $ ENDIF
 $ WC "d_fs_data_s='" + perl_d_fs_data_s + "'" 
+$ WC "d_getcwd='" + perl_d_getcwd + "'"
 $ WC "d_getmnt='" + perl_d_getmnt + "'"
 $ WC "d_sqrtl='" + perl_d_sqrtl + "'"
 $ WC "d_statfs_f_flags='" + perl_d_statfs_f_flags + "'"

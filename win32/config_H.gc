@@ -293,6 +293,12 @@
  */
 /*#define HAS_LSTAT		/**/
 
+/* HAS_MADVISE:
+ *	This symbol, if defined, indicates that the madvise routine is
+ *	available to hint about the expected access behavior.
+ */
+/*#define HAS_MADVISE		/**/
+
 /* HAS_MBLEN:
  *	This symbol, if defined, indicates that the mblen routine is available
  *	to find the number of bytes in a multibye character.
@@ -344,6 +350,12 @@
  */
 #define HAS_MKDIR		/**/
 
+/* HAS_MKDTEMP:
+ *	This symbol, if defined, indicates that the mkdtemp routine is
+ *	available to exclusively create a uniquely named temporary directory.
+ */
+/*#define HAS_MKDTEMP		/**/
+
 /* HAS_MKFIFO:
  *	This symbol, if defined, indicates that the mkfifo routine is
  *	available to create FIFOs. Otherwise, mknod should be able to
@@ -351,6 +363,20 @@
  *	super-user privileges which mkfifo will not.
  */
 /*#define HAS_MKFIFO		/**/
+
+/* HAS_MKSTEMP:
+ *	This symbol, if defined, indicates that the mkstemp routine is
+ *	available to exclusively create and open a uniquely named
+ *	temporary file.
+ */
+/*#define HAS_MKSTEMP		/**/
+
+/* HAS_MKSTEMPS:
+ *	This symbol, if defined, indicates that the mkstemps routine is
+ *	available to exclusively create and open a uniquely named
+ *	(with a suffix) temporary file.
+ */
+/*#define HAS_MKSTEMPS		/**/
 
 /* HAS_MKTIME:
  *	This symbol, if defined, indicates that the mktime routine is
@@ -1361,6 +1387,12 @@
  */
 #define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
 
+/* HAS_GETCWD:
+ *	This symbol, if defined, indicates that the getcwd routine is
+ *	available to get the current working directory.
+ */
+/*#define HAS_GETCWD		/**/
+  
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
  *	available for sequential access of the group database.

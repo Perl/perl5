@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Jan 26 09:55:17 EET 2000
+ * Configuration time: Wed Feb  9 21:48:10 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -361,6 +361,18 @@
  *	available.
  */
 #define HAS_MKTIME		/**/
+
+/* HAS_MSYNC:
+ *	This symbol, if defined, indicates that the msync system call is
+ *	available to synchronize a mapped file.
+ */
+#define HAS_MSYNC		/**/
+
+/* HAS_MUNMAP:
+ *	This symbol, if defined, indicates that the munmap system call is
+ *	available to unmap a region, usually mapped by mmap().
+ */
+#define HAS_MUNMAP		/**/
 
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
@@ -1086,8 +1098,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.5.640/alpha-dec_osf-thread-multi"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.5.640/alpha-dec_osf-thread-multi"		/**/
+#define ARCHLIB "/opt/perl/lib/5.5.650/alpha-dec_osf-thread-multi"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.5.650/alpha-dec_osf-thread-multi"		/**/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -1370,6 +1382,12 @@
  */
 #define Gconvert(x,n,t,b) gcvt((x),(n),(b))
 
+/* HAS_GETCWD:
+ *	This symbol, if defined, indicates that the getcwd routine is
+ *	available to get the current working directory.
+ */
+#define HAS_GETCWD		/**/
+
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
  *	available for sequential access of the group database.
@@ -1418,7 +1436,7 @@
  */
 #define HAS_GETHOSTNAME	/**/
 #define HAS_UNAME		/**/
-#undef HAS_PHOSTNAME
+/*#define HAS_PHOSTNAME	/ **/
 #ifdef HAS_PHOSTNAME
 #define PHOSTNAME ""	/* How to get the host name */
 #endif
@@ -1577,6 +1595,19 @@
 #define HAS_NTOHL		/**/
 #define HAS_NTOHS		/**/
 
+/* HAS_ICONV:
+ *	This symbol, if defined, indicates that the iconv routine is
+ *	available to do character set conversions.
+ */
+/*#define HAS_ICONV		/ **/
+
+/* HAS_INT64_T:
+ *     This symbol will defined if the C compiler supports int64_t.
+ *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	<sys/types.h> is enough.
+ */
+/*#define     HAS_INT64_T               / **/
+
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
  *	is available.
@@ -1630,6 +1661,39 @@
  *	to locate characters within a C string.
  */
 #define HAS_MEMCHR	/**/
+
+/* HAS_MKDTEMP:
+ *	This symbol, if defined, indicates that the mkdtemp routine is
+ *	available to exclusively create a uniquely named temporary directory.
+ */
+/*#define HAS_MKDTEMP		/ **/
+
+/* HAS_MKSTEMP:
+ *	This symbol, if defined, indicates that the mkstemp routine is
+ *	available to exclusively create and open a uniquely named
+ *	temporary file.
+ */
+#define HAS_MKSTEMP		/**/
+
+/* HAS_MKSTEMPS:
+ *	This symbol, if defined, indicates that the mkstemps routine is
+ *	available to excluslvely create and open a uniquely named
+ *	(with a suffix) temporary file.
+ */
+/*#define HAS_MKSTEMPS		/ **/
+
+/* Mmap_t:
+ *	This symbol holds the return type of the mmap() system call
+ *	(and simultaneously the type of the first argument).
+ *	Usually set to 'void *' or 'cadd_t'.
+ */
+#define Mmap_t void *	/**/
+
+/* HAS_MPROTECT:
+ *	This symbol, if defined, indicates that the mprotect system call is
+ *	available to modify the access protection of a memory mapped file.
+ */
+#define HAS_MPROTECT		/**/
 
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is
@@ -2164,6 +2228,12 @@
 #define I_GRP		/**/
 #define GRPASSWD	/**/
 
+/* I_ICONV:
+ *	This symbol, if defined, indicates that <iconv.h> exists and
+ *	should be included.
+ */
+#define	I_ICONV		/**/
+
 /* I_INTTYPES:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <inttypes.h>.
@@ -2264,6 +2334,12 @@
  */
 /*#define	I_SOCKS		/ **/
 
+/* I_SYSLOG:
+ *	This symbol, if defined, indicates that <syslog.h> exists and
+ *	should be included.
+ */
+#define	I_SYSLOG		/**/
+
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
  *	should be included.
@@ -2322,7 +2398,13 @@
  *	for a C initialization string.  See the inc_version_list entry
  *	in Porting/Glossary for more details.
  */
-#define PERL_INC_VERSION_LIST ""		/**/
+#define PERL_INC_VERSION_LIST 0		/**/
+
+/* INSTALL_USR_BIN_PERL:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ * 	also as /usr/bin/perl.
+ */
+#define INSTALL_USR_BIN_PERL	/**/
 
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
@@ -2562,8 +2644,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.5.640"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.5.640"		/**/
+#define PRIVLIB "/opt/perl/lib/5.5.650"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.5.650"		/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -2661,8 +2743,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.5.640/alpha-dec_osf-thread-multi"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.5.640/alpha-dec_osf-thread-multi"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.5.650/alpha-dec_osf-thread-multi"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.5.650/alpha-dec_osf-thread-multi"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2679,8 +2761,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.5.640"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.5.640"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.5.650"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.5.650"		/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -2766,7 +2848,7 @@
  *	be used when available.
  */
 #ifndef USE_LONG_LONG
-/*#define	USE_LONG_LONG		/ **/
+#define	USE_LONG_LONG		/**/
 #endif
 
 /* USE_MORE_BITS:
@@ -2781,7 +2863,7 @@
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
-#ifndef MULTIPLICTY
+#ifndef MULTIPLICITY
 #define	MULTIPLICITY		/**/
 #endif
 
@@ -2851,5 +2933,40 @@
 #define void int		/* is void to be avoided? */
 #define M_VOID			/* Xenix strikes again */
 #endif
+
+/* PERL_XS_APIVERSION:
+ *	This variable contains the version of the oldest perl binary
+ *	compatible with the present perl.  perl.c:incpush() and
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.5.650/alpha-dec_osf-thread-multi for older
+ *	directories across major versions back to xs_apiversion.
+ *	This is only useful if you have a perl library directory tree
+ *	structured like the default one.
+ *	See INSTALL for how this works.
+ *	The versioned site_perl directory was introduced in 5.005,
+ *	so that is the lowest possible value.
+ *	Since this can depend on compile time options (such as
+ *	bincompat) it is set by Configure.  Other non-default sources
+ *	of potential incompatibility, such as multiplicity, threads,
+ *	debugging, 64bits, sfio, etc., are not checked for currently,
+ *	though in principle we could go snooping around in old
+ *	Config.pm files.
+ */
+/* PERL_PM_APIVERSION:
+ *	This variable contains the version of the oldest perl
+ *	compatible with the present perl.  (That is, pure perl modules
+ *	written for pm_apiversion will still work for the current
+ *	version).  perl.c:incpush() and lib/lib.pm will automatically
+ *	search in /opt/perl/lib/site_perl/5.5.650 for older directories across major versions
+ *	back to pm_apiversion.  This is only useful if you have a perl
+ *	library directory tree structured like the default one.  The
+ *	versioned site_perl library was introduced in 5.005, so that's
+ *	the default setting for this variable.  It's hard to imagine
+ *	it changing before Perl6.  It is included here for symmetry
+ *	with xs_apiveprsion -- the searching algorithms will
+ *	(presumably) be similar.
+ *	See the INSTALL file for how this works.
+ */
+#define PERL_XS_APIVERSION "5.5.650"
+#define PERL_PM_APIVERSION "5.005"
 
 #endif
