@@ -139,21 +139,26 @@ sub static_ext {
     @Extensions;
 }
 
+sub _escape {
+    my $arg = shift;
+    $$arg =~ s/([\(\)])/\\$1/g;
+}
+
 sub _ldflags {
     my $ldflags = $Config{ldflags};
-    $ldflags =~ s/([\(\)])/\\$1/g;
+    _escape(\$ldflags);
     return $ldflags;
 }
 
 sub _ccflags {
     my $ccflags = $Config{ccflags};
-    $ccflags =~ s/([\(\)])/\\$1/g;
+    _escape(\$ccflags);
     return $ccflags;
 }
 
 sub _ccdlflags {
     my $ccdlflags = $Config{ccdlflags};
-    $ccdlflags =~ s/([\(\)])/\\$1/g;
+    _escape(\$ccdlflags);
     return $ccdlflags;
 }
 
