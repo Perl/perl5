@@ -705,7 +705,7 @@ _mopup:
 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
-	-rm -f perl.exp ext.libs extra.pods
+	-rm -f perl.exp ext.libs extra.pods opmini.o
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
 	rm -f perl suidperl miniperl $(LIBPERL) libperl.* microperl
