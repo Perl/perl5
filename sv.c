@@ -9404,7 +9404,7 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
     New(0, ret->offsets, 2*len+1, U32);
     Copy(r->offsets, ret->offsets, 2*len+1, U32);
 
-    ret->precomp        = SAVEPV(r->precomp);
+    ret->precomp        = SAVEPVN(r->precomp, r->prelen);
     ret->refcnt         = r->refcnt;
     ret->minlen         = r->minlen;
     ret->prelen         = r->prelen;
@@ -9416,7 +9416,7 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
     ret->sublen         = r->sublen;
 
     if (RX_MATCH_COPIED(ret))
-	ret->subbeg  = SAVEPV(r->subbeg);
+	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
     else
 	ret->subbeg = Nullch;
 

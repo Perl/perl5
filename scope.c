@@ -763,8 +763,8 @@ Perl_leave_scope(pTHX_ I32 base)
 		 * mg_get() in save_scalar_at() croaked */
 		SvMAGIC(value) = 0;
 	    }
-	    SvREFCNT_dec(sv);
 	    *(SV**)ptr = value;
+	    SvREFCNT_dec(sv);
 	    PL_localizing = 2;
 	    SvSETMAGIC(value);
 	    PL_localizing = 0;
