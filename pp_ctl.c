@@ -3555,7 +3555,7 @@ S_doparseform(pTHX_ SV *sv)
 
     /* estimate the buffer size needed */
     for (base = s; s <= send; s++) {
-	if (*s == '\n' || *s == '@' || *s == '^')
+	if (*s == '\n' || *s == '\0' || *s == '@' || *s == '^')
 	    maxops += 10;
     }
     s = base;
