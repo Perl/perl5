@@ -457,7 +457,7 @@ sub globUsage {			# glob ref, name
 
 Dumpvalue - provides screen dump of Perl data.
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
   use Dumpvalue;
   my $dumper = new Dumpvalue;
