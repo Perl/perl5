@@ -245,6 +245,15 @@ case "X$optimize" in
 	;;
 esac
 
+if [ "X$usethreads" != "X" ]; then
+    ccflags="-DUSE_THREADS -Zmt $ccflags"
+    cppflags="-DUSE_THREADS -Zmt $cppflags"
+    aout_ccflags="-DUSE_THREADS $aout_ccflags"
+    aout_cppflags="-DUSE_THREADS $aout_cppflags"
+    aout_lddlflags="-Zmt $aout_lddlflags"
+    aout_ldflags="-Zmt $aout_ldflags"
+fi
+
 # The next two are commented. pdksh handles #!, extproc gives no path part.
 # sharpbang='extproc '
 # shsharp='false'

@@ -965,8 +965,8 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #endif         
 
 /* 
- * USE_THREADS needs to be after unixish.h as <pthread.h> includes <sys/signal.h>
- * which defines NSIG - which will stop inclusion of <signal.h>
+ * USE_THREADS needs to be after unixish.h as <pthread.h> includes
+ * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
  * this results in many functions being undeclared which bothers C++
  * May make sense to have threads after "*ish.h" anyway
  */
@@ -978,11 +978,15 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #    ifdef WIN32
 #      include <win32thread.h>
 #    else
-#      include <pthread.h>
+#      ifdef OS2
+#        include "os2thread.h"
+#      else
+#        include <pthread.h>
 typedef pthread_t perl_os_thread;
 typedef pthread_mutex_t perl_mutex;
 typedef pthread_cond_t perl_cond;
 typedef pthread_key_t perl_key;
+#      endif /* OS2 */
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
 #endif /* USE_THREADS */

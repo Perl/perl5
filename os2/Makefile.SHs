@@ -8,7 +8,8 @@
 
 $spitshell >>Makefile <<!GROK!THIS!
 
-AOUT_CCCMD	= \$(CC) $aout_ccflags $optimize
+AOUT_OPTIMIZE = $optimize
+AOUT_CCCMD	= \$(CC) $aout_ccflags \$(AOUT_OPTIMIZE)
 AOUT_AR		= $aout_ar
 AOUT_OBJ_EXT	= $aout_obj_ext
 AOUT_LIB_EXT	= $aout_lib_ext
@@ -47,16 +48,6 @@ perl5.def: perl.linkexp
 	echo CODE LOADONCALL				>>$@
 	echo DATA LOADONCALL NONSHARED MULTIPLE		>>$@
 	echo EXPORTS					>>$@
-	echo '  "ctermid"'				>>$@
-	echo '  "get_sysinfo"'				>>$@
-	echo '  "Perl_OS2_init"'			>>$@
-	echo '  "OS2_Perl_data"'			>>$@
-	echo '  "dlopen"'				>>$@
-	echo '  "dlsym"'				>>$@
-	echo '  "dlerror"'				>>$@
-	echo '  "my_tmpfile"'				>>$@
-	echo '  "my_tmpnam"'				>>$@
-	echo '  "my_flock"'				>>$@
 !NO!SUBS!
 
 if [ ! -z "$myttyname" ] ; then
@@ -78,7 +69,7 @@ perl.exports: perl.exp EXTERN.h perl.h
 		awk '{if ($$2 == "") print $$1}' | sort | uniq > $@
 
 perl.linkexp: perl.exports perl.map
-	cat perl.exports perl.map | sort | uniq -d | sed -e 's/\w\+/  "\0"/' > perl.linkexp
+	cat perl.exports os2/os2.sym perl.map | sort | uniq -d | sed -e 's/\w\+/  "\0"/' > perl.linkexp
 
 # We link miniperl statically, since .DLL depends on $(DYNALOADER) 
 
@@ -88,7 +79,7 @@ perl.map miniperl: $(obj) perl$(OBJ_EXT) miniperlmain$(OBJ_EXT)
 	rm miniperl.map
 	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
 
-depend: os2ish.h dlfcn.h 
+depend: os2ish.h dlfcn.h os2thread.h os2.c
 
 # Stupid make? Needed...
 os2$(OBJ_EXT) : os2.c
@@ -100,6 +91,9 @@ dl_os2.c: os2/dl_os2.c os2ish.h
 	cp $< $@
 
 os2ish.h: os2/os2ish.h
+	cp $< $@
+
+os2thread.h: os2/os2thread.h
 	cp $< $@
 
 dlfcn.h: os2/dlfcn.h
