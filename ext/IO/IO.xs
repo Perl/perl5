@@ -420,20 +420,24 @@ sockatmark (sock)
    InputStream sock
    PROTOTYPE: $
    PREINIT:
-     int fd,flag=0;
+     int fd;
    CODE:
    {
      fd = PerlIO_fileno(sock);
 #ifdef HAS_SOCKATMARK
-     flag = sockatmark(fd);
+     RETVAL = sockatmark(fd);
 #else
 #   ifdef SIOCATMARK
-     if (ioctl(fd, SIOCATMARK, &flag) != 0)
-       XSRETURN_UNDEF;
+     {
+       int flag = 0;
+
+       if (ioctl(fd, SIOCATMARK, &flag) != 0)
+	 XSRETURN_UNDEF;
 #   else
-     not_here("IO::Socket::atmark");
-#  endif
-     RETVAL = flag;
+       not_here("IO::Socket::atmark");
+#   endif
+       RETVAL = flag;
+     }
 #endif
    }
    OUTPUT:
