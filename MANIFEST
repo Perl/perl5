@@ -1082,7 +1082,6 @@ lib/CPAN/SIGNATURE		CPAN signature
 lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/mirroredby.t		See if CPAN::Mirrored::By works
 lib/CPAN/t/Nox.t		See if CPAN::Nox works
-lib/CPAN/t/signature.t		CPAN signature test
 lib/CPAN/t/vcmp.t		See if CPAN the module works
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
