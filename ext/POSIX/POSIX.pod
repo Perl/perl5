@@ -1342,8 +1342,8 @@ To parse a string $str as a floating point number use
 
 The second returned item and $! can be used to check for valid input:
 
-    if (($str eq '') || ($n_unparsed != 0) || !$!) {
-        die "Non-numeric input $str" . $! ? ": $!\n" : "\n";
+    if (($str eq '') || ($n_unparsed != 0) || $!) {
+        die "Non-numeric input $str" . ($! ? ": $!\n" : "\n");
     }
 
 When called in a scalar context strtod returns the parsed number.
