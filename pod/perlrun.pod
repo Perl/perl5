@@ -284,11 +284,15 @@ be skipped.
 
 runs the program under the Perl debugger.  See L<perldebug>.
 
-=item B<-d:>I<foo>
+=item B<-d:>I<foo[=bar,baz]>
 
 runs the program under the control of a debugging, profiling, or
 tracing module installed as Devel::foo. E.g., B<-d:DProf> executes
-the program using the Devel::DProf profiler.  See L<perldebug>.
+the program using the Devel::DProf profiler.  As with the B<-M>
+flag, options may be passed to the Devel::foo package where they
+will be received and interpreted by the Devel::foo::import routine.
+The comma-separated list of options must follow a C<=> character.
+See L<perldebug>.
 
 =item B<-D>I<letters>
 
