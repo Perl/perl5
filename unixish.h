@@ -109,14 +109,14 @@
 #ifndef PERL_SYS_INIT
 #ifdef PERL_SCO5
 /* this should be set in a hint file, not here */
-#  define PERL_SYS_INIT(c,v)	fpsetmask(0)
+#  define PERL_SYS_INIT(c,v)	fpsetmask(0); MALLOC_INIT
 #else
-#  define PERL_SYS_INIT(c,v)
+#  define PERL_SYS_INIT(c,v)	MALLOC_INIT
 #endif
 #endif
 
 #ifndef PERL_SYS_TERM
-#define PERL_SYS_TERM()
+#define PERL_SYS_TERM()		MALLOC_TERM
 #endif
 
 #define BIT_BUCKET "/dev/null"

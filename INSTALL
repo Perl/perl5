@@ -445,35 +445,24 @@ some of the main things you can change.
 
 =head2 Binary Compatibility With Earlier Versions of Perl 5
 
-If you have dynamically loaded extensions that you built under
-perl 5.003 and that you wish to continue to use with perl 5.004, then you
-need to ensure that 5.004 remains binary compatible with 5.003.
+For Perl 5.004 it was possible to be binary compatible with 5.003.
+Starting from Perl 5.005 this is no more possible because there were
+many deep and far-reaching changes to the language internals.
 
-Starting with Perl 5.003, all functions in the Perl C source code have
-been protected by default by the prefix Perl_ (or perl_) so that you
-may link with third-party libraries without fear of namespace
-collisions.  This change broke compatibility with version 5.002, so
-installing 5.003 or 5.004 over 5.002 or earlier will force you to
-re-build and install all of your dynamically loadable extensions.
-(The standard extensions supplied with Perl are handled
+If you have dynamically loaded extensions that you built under perl
+5.003 or 5.004 and the so-called 'bincompat3' mode (the default mode)
+and that you wish to continue to use with perl 5.005, you may need to
+reinstall the extensions.
+
+Background: starting with Perl 5.003, all functions in the Perl C
+source code have been protected by default by the prefix Perl_ (or
+perl_) so that you may link with third-party libraries without fear of
+namespace collisions.  This change broke compatibility with version
+5.002, so installing 5.003 or 5.004 over 5.002 or earlier will force
+you to re-build and install all of your dynamically loadable
+extensions.  (The standard extensions supplied with Perl are handled
 automatically).  You can turn off this namespace protection by adding
 -DNO_EMBED to your ccflags variable in config.sh.
-
-Perl 5.003's namespace protection was incomplete, but this has
-been fixed in 5.004.  However, some sites may need to maintain
-complete binary compatibility with Perl 5.003.  If you are building
-Perl for such a site, then when Configure asks if you want binary
-compatibility, answer "y".
-
-On the other hand, if you are embedding perl into another application
-and want the maximum namespace protection, then you probably ought to
-answer "n" when Configure asks if you want binary compatibility, or
-disable it from the Configure command line with
-
-	sh Configure -Ud_bincompat3
-
-The default answer of "y" to maintain binary compatibility is probably
-appropriate for almost everyone.
 
 In a related issue, old extensions may possibly be affected by the
 changes in the Perl language in the current release.  Please see

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..51\n";
+print "1..52\n";
 
 # Test glob operations.
 
@@ -231,12 +231,16 @@ $bar = "ok 48";
 local(*bar) = *bar;
 print "$bar\n";
 
+$var = "ok 49";
+$_   = \$var;
+print $$_,"\n";
+
 package FINALE;
 
 {
-    $ref3 = bless ["ok 51\n"];		# package destruction
-    my $ref2 = bless ["ok 50\n"];	# lexical destruction
-    local $ref1 = bless ["ok 49\n"];	# dynamic destruction
+    $ref3 = bless ["ok 52\n"];		# package destruction
+    my $ref2 = bless ["ok 51\n"];	# lexical destruction
+    local $ref1 = bless ["ok 50\n"];	# dynamic destruction
     1;					# flush any temp values on stack
 }
 

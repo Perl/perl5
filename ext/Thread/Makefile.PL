@@ -1,2 +1,6 @@
 use ExtUtils::MakeMaker;
-WriteMakefile(NAME => "Thread");
+WriteMakefile(
+	NAME => 'Thread',
+	VERSION_FROM => 'Thread.pm'
+	);
+

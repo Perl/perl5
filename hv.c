@@ -216,6 +216,29 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
     return 0;
 }
 
+static void
+hv_magic_check (hv, needs_copy, needs_store)
+HV *hv;
+bool *needs_copy;
+bool *needs_store;
+{
+    MAGIC *mg = SvMAGIC(hv);
+    *needs_copy = FALSE;
+    *needs_store = TRUE;
+    while (mg) {
+	if (isUPPER(mg->mg_type)) {
+	    *needs_copy = TRUE;
+	    switch (mg->mg_type) {
+	    case 'P':
+	    case 'I':
+	    case 'S':
+		*needs_store = FALSE;
+	    }
+	}
+	mg = mg->mg_moremagic;
+    }
+}
+
 SV**
 hv_store(HV *hv, char *key, U32 klen, SV *val, register U32 hash)
 {
@@ -229,15 +252,14 @@ hv_store(HV *hv, char *key, U32 klen, SV *val, register U32 hash)
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
-	mg_copy((SV*)hv, val, key, klen);
-	if (!xhv->xhv_array
-	    && (SvMAGIC(hv)->mg_moremagic
-		|| (SvMAGIC(hv)->mg_type != 'E'
-#ifdef OVERLOAD
-		    && SvMAGIC(hv)->mg_type != 'A'
-#endif /* OVERLOAD */
-		    )))
-	    return 0;
+	bool needs_copy;
+	bool needs_store;
+	hv_magic_check (hv, &needs_copy, &needs_store);
+	if (needs_copy) {
+	    mg_copy((SV*)hv, val, key, klen);
+	    if (!xhv->xhv_array && !needs_store)
+		return 0;
+	}
     }
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -295,20 +317,19 @@ hv_store_ent(HV *hv, SV *keysv, SV *val, register U32 hash)
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
 	dTHR;
-	bool save_taint = tainted;
-	if (tainting)
-	    tainted = SvTAINTED(keysv);
-	keysv = sv_2mortal(newSVsv(keysv));
-	mg_copy((SV*)hv, val, (char*)keysv, HEf_SVKEY);
-	TAINT_IF(save_taint);
-	if (!xhv->xhv_array
-	    && (SvMAGIC(hv)->mg_moremagic
-		|| (SvMAGIC(hv)->mg_type != 'E'
-#ifdef OVERLOAD
-		    && SvMAGIC(hv)->mg_type != 'A'
-#endif /* OVERLOAD */
-		    )))
-	  return Nullhe;
+ 	bool needs_copy;
+ 	bool needs_store;
+ 	hv_magic_check (hv, &needs_copy, &needs_store);
+ 	if (needs_copy) {
+ 	    bool save_taint = tainted;
+ 	    if (tainting)
+ 		tainted = SvTAINTED(keysv);
+ 	    keysv = sv_2mortal(newSVsv(keysv));
+ 	    mg_copy((SV*)hv, val, (char*)keysv, HEf_SVKEY);
+ 	    TAINT_IF(save_taint);
+ 	    if (!xhv->xhv_array && !needs_store)
+ 		return Nullhe;
+ 	}
     }
 
     key = SvPV(keysv, klen);

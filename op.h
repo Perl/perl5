@@ -131,8 +131,8 @@ typedef U32 PADOFFSET;
 /* Private for OP_SORT, OP_PRTF, OP_SPRINTF, string cmp'n, and case changers */
 #define OPpLOCALE		64	/* Use locale */
 
-/* Private for OP_SPECIFIC */
-#define OPpPM_NOT_CONST		64	/* Not constant enough for pmruntime */
+/* Private for OP_THREADSV */
+#define OPpDONE_SVREF		64	/* Been through newSVREF once */
 
 struct op {
     BASEOP

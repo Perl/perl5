@@ -110,6 +110,7 @@ eg/van/vanish		A program to put files in a trashcan
 eg/who			A sample who program
 eg/wrapsuid		A setuid script wrapper generator
 emacs/cperl-mode.el	An alternate perl-mode
+emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
 embed.pl		Produces embed.h
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
@@ -730,6 +731,7 @@ t/op/arith.t		See if arithmetic works
 t/op/array.t		See if array operations work
 t/op/assignwarn.t	See if OP= operators warn correctly for undef targets
 t/op/auto.t		See if autoincrement et all work
+t/op/avhv.t		See if pseudo-hashes work
 t/op/bop.t		See if bitops work
 t/op/chop.t		See if chop works
 t/op/closure.t		See if closures work

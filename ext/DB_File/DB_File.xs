@@ -52,6 +52,11 @@
 #include "perl.h"
 #include "XSUB.h"
 
+/* Being the Berkeley DB we prefer the <sys/cdefs.h> (which will be
+ * shortly #included by the <db.h>) __attribute__ to the possibly
+ * already defined __attribute__, for example by GNUC or by Perl. */
+#undef __attribute__
+
 #include <db.h>
 /* #ifdef DB_VERSION_MAJOR */
 /* #include <db_185.h> */

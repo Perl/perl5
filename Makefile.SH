@@ -557,6 +557,9 @@ Makefile: Makefile.SH ./config.sh
 distcheck: FORCE
 	perl '-MExtUtils::Manifest=&fullcheck' -e 'fullcheck()'
 
+etags:
+	sh emacs/ptags
+
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
 !NO!SUBS!

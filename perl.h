@@ -1058,7 +1058,7 @@ union any {
 };
 
 #ifdef USE_THREADS
-#define ARGSproto struct thread *thr
+#define ARGSproto struct perl_thread *thr
 #else
 #define ARGSproto void
 #endif /* USE_THREADS */
@@ -1343,6 +1343,14 @@ typedef Sighandler_t Sigsave_t;
 # define RUNOPS_DEFAULT runops_standard
 #endif
 
+#ifdef MYMALLOC
+#  define MALLOC_INIT MUTEX_INIT(&malloc_mutex)
+#  define MALLOC_TERM MUTEX_DESTROY(&malloc_mutex)
+#else
+#  define MALLOC_INIT
+#  define MALLOC_TERM
+#endif
+
 /*
  * These need prototyping here because <proto.h> isn't
  * included until after runops is initialised.
@@ -1362,18 +1370,18 @@ int runops_debug _((void));
 /* global state */
 EXT PerlInterpreter *	curinterp;	/* currently running interpreter */
 #ifdef USE_THREADS
-EXT perl_key		thr_key;	/* For per-thread struct thread ptr */
+EXT perl_key		thr_key;	/* For per-thread struct perl_thread* */
 EXT perl_mutex		sv_mutex;	/* Mutex for allocating SVs in sv.c */
 EXT perl_mutex		malloc_mutex;	/* Mutex for malloc */
 EXT perl_mutex		eval_mutex;	/* Mutex for doeval */
 EXT perl_cond		eval_cond;	/* Condition variable for doeval */
-EXT struct thread *	eval_owner;	/* Owner thread for doeval */
+EXT struct perl_thread *	eval_owner;	/* Owner thread for doeval */
 EXT int			nthreads;	/* Number of threads currently */
 EXT perl_mutex		threads_mutex;	/* Mutex for nthreads and thread list */
 EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
 EXT char *		threadsv_names INIT(THREADSV_NAMES);
 #ifdef FAKE_THREADS
-EXT struct thread *	thr;		/* Currently executing (fake) thread */
+EXT struct perl_thread *	thr;	/* Currently executing (fake) thread */
 #endif
 #endif /* USE_THREADS */
 
@@ -1959,7 +1967,7 @@ IEXT SV *	Imess_sv;
 
 #ifdef USE_THREADS
 /* threads stuff */
-IEXT SV *	Ithrsv;		/* holds struct thread for main thread */
+IEXT SV *	Ithrsv;		/* holds struct perl_thread for main thread */
 #endif /* USE_THREADS */
 
 #undef IEXT
@@ -2295,6 +2303,10 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
  * Remap printf 
  */
 #define printf PerlIO_stdoutf
+#endif
+
+#ifndef PERL_SCRIPT_MODE
+#define PERL_SCRIPT_MODE "r"
 #endif
 
 #ifndef PERL_SCRIPT_MODE

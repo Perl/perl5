@@ -2,7 +2,7 @@
 #define _WIN32THREAD_H
 typedef struct win32_cond { LONG waiters; HANDLE sem; } perl_cond;
 typedef DWORD perl_key;
-typedef HANDLE perl_thread;
+typedef HANDLE perl_os_thread;
 
 #ifndef DONT_USE_CRITICAL_SECTION
 
@@ -109,7 +109,7 @@ typedef THREAD_RET_TYPE thread_func_t(void *);
 START_EXTERN_C
 
 #if defined(PERLDLL) && (!defined(__BORLANDC__) || defined(_DLL))
-extern __declspec(thread) struct thread *Perl_current_thread;
+extern __declspec(thread) struct perl_thread *Perl_current_thread;
 #define SET_THR(t)   		(Perl_current_thread = t)
 #define THR			Perl_current_thread
 #else
@@ -118,10 +118,10 @@ extern __declspec(thread) struct thread *Perl_current_thread;
 #endif
 
 void Perl_alloc_thread_key _((void));
-int Perl_thread_create _((struct thread *thr, thread_func_t *fn));
-void Perl_set_thread_self _((struct thread *thr));
-struct thread *Perl_getTHR _((void));
-void Perl_setTHR _((struct thread *t));
+int Perl_thread_create _((struct perl_thread *thr, thread_func_t *fn));
+void Perl_set_thread_self _((struct perl_thread *thr));
+struct perl_thread *Perl_getTHR _((void));
+void Perl_setTHR _((struct perl_thread *t));
 
 END_EXTERN_C
 
