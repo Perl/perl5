@@ -167,6 +167,13 @@ However this is highly depending on the underlying thread implmentation.
 
 This will return a list of all non joined, non detached threads.
 
+=item async BLOCK;
+
+C<async> creates a thread to execute the block immediately following
+it.  This block is treated as an anonymous sub, and so must have a
+semi-colon after the closing brace. Like C<threads-&gt;new>, C<async>
+returns a thread object.
+
 =back
 
 =head1 WARNINGS
