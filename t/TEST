@@ -24,6 +24,7 @@ if ($#ARGV >= 0) {
 	$bytecompile = 1 if $1 eq 'bytecompile';
 	$compile = 1 if $1 eq 'compile';
 	$taintwarn = 1 if $1 eq 'taintwarn';
+	$ENV{PERL_CORE_MINITEST} = 1 if $1 eq 'minitest';
 	if ($1 =~ /^deparse(,.+)?$/) {
 	    $deparse = 1;
 	    $deparse_opts = $1;
