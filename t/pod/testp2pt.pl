@@ -48,8 +48,17 @@ if ($^O eq 'VMS') { # clean up directory spec
     $INSTDIR =~ s#/000000/#/#;
 }
 
-$INSTDIR = (dirname $INSTDIR) if ((File::Spec->splitdir($INSTDIR))[-1] eq 'pod');
-$INSTDIR = (dirname $INSTDIR) if ((File::Spec->splitdir($INSTDIR))[-1] eq 't');
+if ($^O eq 'VMS') {
+  # File::Spec::VMS::splitdir doesn't work on Unix syntax filespecs, but
+  # on VMS syntax filespecs dirname returns (as documented) the directory
+  # part of the path (NOT the parent directory, as is assumed in this script).
+  $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
+  $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
+}
+else {
+  $INSTDIR = (dirname $INSTDIR) if ((File::Spec->splitdir($INSTDIR))[-1] eq 'pod');
+  $INSTDIR = (dirname $INSTDIR) if ((File::Spec->splitdir($INSTDIR))[-1] eq 't');
+}
 
 my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
                    catfile($INSTDIR, 'scripts'),
