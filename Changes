@@ -28,6 +28,136 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20616] By: jhi                                   on 2003/08/11  12:25:29
+        Log: Advertise the PerlIO::via UTF8 method.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20615] By: jhi                                   on 2003/08/11  12:23:17
+        Log: Integrate:
+             [ 20611]
+             Typo fix from Boris Zentner.
+             
+             [ 20612]
+             VC6 warning: result still unsigned.
+             
+             [ 20614]
+             Allow via layer to affect the PERLIO_F_UTF8 flag.
+     Branch: maint-5.8/perl
+	  !> ext/PerlIO/via/via.pm ext/PerlIO/via/via.xs pod/perlfaq5.pod
+	  !> regexec.c
+____________________________________________________________________________
+[ 20610] By: jhi                                   on 2003/08/11  06:37:13
+        Log: Integrate:
+             [ 20607]
+             Subject: Re: killing for vital signs [PATCH]
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Sun, 10 Aug 2003 15:44:33 -0400 (EDT)
+             Message-Id: <200308101944.PAA96547@raptor.research.att.com>
+             
+             [ 20608]
+             Explain the 'Wide character in print' a bit more.
+             
+             [ 20609]
+             Subject: [perl #23273] warnings in Unicode::UCD
+             From: Lukas Mai (via RT) <perlbug-followup@perl.org>
+             Date: 10 Aug 2003 22:37:41 -0000
+             Message-ID: <rt-23273-62473.18.6967347513833@rt.perl.org>
+     Branch: maint-5.8/perl
+	  !> lib/Unicode/UCD.pm lib/Unicode/UCD.t pod/perldiag.pod
+	  !> pod/perlfunc.pod pod/perlipc.pod
+____________________________________________________________________________
+[ 20606] By: jhi                                   on 2003/08/10  20:43:47
+        Log: Integrate:
+             [ 20604]
+             Clarify the format checking instructions.
+             
+             [ 20605]
+             gcc -ansi -pedantic cleanup; and a seemingly forgotten
+             sv_placeholder hunk.
+     Branch: maint-5.8/perl
+	  !> Porting/pumpkin.pod perl.h sv.h
+____________________________________________________________________________
+[ 20603] By: jhi                                   on 2003/08/10  19:48:42
+        Log: Retract #20597, too many resulting core dumps.
+     Branch: maint-5.8/perl
+	   ! pad.c t/op/closure.t
+____________________________________________________________________________
+[ 20601] By: jhi                                   on 2003/08/10  19:38:36
+        Log: Two different test harnesses, mmmm. 
+     Branch: maint-5.8/perl
+	   ! t/op/closure.t
+____________________________________________________________________________
+[ 20600] By: jhi                                   on 2003/08/10  18:32:49
+        Log: Regen perlapi, perltoc.
+     Branch: maint-5.8/perl
+	   ! pod/perlapi.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 20599] By: jhi                                   on 2003/08/10  18:32:16
+        Log: Advertise perlreref.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20598] By: jhi                                   on 2003/08/10  18:29:12
+        Log: Integrate:
+             [ 20586]
+             Subject: [PATCH perlmodinstall.pod] Installation on Win32
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 8 Aug 2003 18:35:51 -0700
+             Message-ID: <20030809013550.GS1587@windhund.schwern.org>
+             
+             [ 20587]
+             hv_fetch_{ent,flags} failed to set HvHASKFLAGS on a hash where a
+             normal key was replaced by its UTF-8 equivalent. This caused the
+             "Storable problem" RT3 users reported under RH9.
+             
+             [ 20588]
+             Update Jon Orwant's email address as he wants it,
+             drop TPJ URL; upate also Doug MacEachern's address.
+             
+             [ 20589]
+             Subject: [PATCH t/lib/1_compile.t] Removing tested modules
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 9 Aug 2003 13:36:59 -0700
+             Message-ID: <20030809203659.GB24919@windhund.schwern.org>
+             
+             [ 20593]
+             Add the perlreref manpage, by Iain Truskett
+             (regular expressions quick reference.)
+             Regenerate the table of contents.
+             
+             [ 20594]
+             Further tweaks on perlreref.pod (by Iain Truskett)
+             
+             [ 20595]
+             One more PL_csighandlerp.
+             
+             [ 20596]
+             Try simple workaround for the POSIX autosplit.ix warning.
+             
+             [ 20597]
+             Subject: Re: [perl #23265] Nested anonymous subs
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Sun, 10 Aug 2003 01:35:30 +0100
+             Message-ID: <20030810003530.GB6547@fdgroup.com>
+     Branch: maint-5.8/perl
+	  +> pod/perlreref.pod
+	  !> MANIFEST ext/POSIX/POSIX.pm ext/POSIX/POSIX.xs hv.c pad.c
+	  !> pod/buildtoc.PL pod/perl.pod pod/perlembed.pod
+	  !> pod/perlmodinstall.pod pod/perltoc.pod t/lib/1_compile.t
+	  !> t/op/closure.t
+____________________________________________________________________________
+[ 20585] By: jhi                                   on 2003/08/09  18:06:11
+        Log: Reintroduce the U_32-ification to pad.c,
+             suggested by Dave Mitchell.
+     Branch: maint-5.8/perl
+	   ! pad.c
+____________________________________________________________________________
+[ 20582] By: jhi                                   on 2003/08/09  08:52:37
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20581] By: jhi                                   on 2003/08/09  08:45:18
         Log: Update on the cygwin situation.  (I'm wishfully thinking
              that the sigaction.t failure was fixed by (blead) #20565.)
