@@ -336,6 +336,7 @@ the strings?).
 	  5.5.650	2000-Feb-08	5.6 beta1
 	  5.5.660	2000-Feb-22	5.6 beta2
 	  5.5.670	2000-Feb-29	5.6 beta3
+	  5.6.0-RC1	2000-Mar-09	5.6 release candidate 1
 
 =head2 SELECTED RELEASE SIZES
 

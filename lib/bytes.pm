@@ -32,7 +32,7 @@ bytes - Perl pragma to force byte semantics rather than character semantics
 =head1 DESCRIPTION
 
 WARNING: The implementation of Unicode support in Perl is incomplete.
-Expect sudden and unannounced changes!
+See L<perlunicode> for the exact details.
 
 The C<use bytes> pragma disables character semantics for the rest of the
 lexical scope in which it appears.  C<no bytes> can be used to reverse
