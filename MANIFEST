@@ -248,6 +248,7 @@ ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/encoding.t		Encode extension test
 ext/Encode/t/gb2312.euc	test data
 ext/Encode/t/gb2312.ref	test data
+ext/Encode/t/grow.t		Buffer size growth test
 ext/Encode/t/jisx0208.euc	test data
 ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data
