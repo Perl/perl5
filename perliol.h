@@ -58,6 +58,7 @@ struct _PerlIO_funcs {
 #define PERLIO_K_DUMMY		0x00000010
 #define PERLIO_K_UTF8		0x00008000
 #define PERLIO_K_DESTRUCT	0x00010000
+#define PERLIO_K_MULTIARG	0x00020000
 
 /*--------------------------------------------------------------------------------------*/
 struct _PerlIO {

@@ -208,7 +208,10 @@ PerlIO *
 PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	     int imode, int perm, PerlIO *old, int narg, SV **args)
 {
-    if (narg == 1) {
+    if (narg) {
+	if (narg > 1) {
+	    Perl_croak(aTHX_ "More than one argument to open");
+	}
 	if (*args == &PL_sv_undef)
 	    return PerlIO_tmpfile();
 	else {
@@ -1283,6 +1286,9 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    /*
 	     * Found that layer 'n' can do opens - call it
 	     */
+	    if (narg > 1 && !(tab->kind & PERLIO_K_MULTIARG)) {
+		Perl_croak(aTHX_ "More than one argument to open(,':%s')",tab->name);
+	    }
 	    PerlIO_debug("openn(%s,'%s','%s',%d,%x,%o,%p,%d,%p)\n",
 			 tab->name, layers, mode, fd, imode, perm, f, narg,
 			 args);
