@@ -14,7 +14,8 @@ ccflags="-D_SVID_SOURCE -D_POSIX_C_SOURCE=199509L"
 
 # Make command.
 make="/system/gnu_library/bin/gmake"
-_make="/system/gnu_library/bin/gmake"
+# indented to not put it into config.sh
+  _make="/system/gnu_library/bin/gmake"
 
 # Architecture name
 archname="hppa1.1"
@@ -74,3 +75,10 @@ fflushNULL=define
 
 # VOS has a link() function but it is a dummy.
 d_link="undef"
+
+# VOS does not have truncate() but we supply one in vos.c
+d_truncate="define"
+archobjs="vos.o"
+
+# Help gmake find vos.c
+test -h vos.c || ln -s vos/vos.c vos.c

@@ -2437,6 +2437,7 @@ vos/install_perl.cm		VOS command macro to install perl after building
 vos/Makefile			A helper for maintaining the config.*.* in UNIX
 vos/perl.bind			VOS bind control file
 vos/test_vos_dummies.c		Test program for "vos_dummies.c"
+vos/vos.c			VOS emulations for missing POSIX functions
 vos/vosish.h			VOS-specific header file
 vos/vos_dummies.c		Wrappers to soak up undefined functions
 warnings.h			The warning numbers
