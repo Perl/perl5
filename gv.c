@@ -558,7 +558,9 @@ I32 sv_type;
     /* By this point we should have a stash and a name */
 
     if (!stash) {
-	if (add) {
+	if (!add)
+	    return Nullgv;
+	if (add & ~2) {
 	    char sv_type_char = ((sv_type == SVt_PV) ? '$'
 				 : (sv_type == SVt_PVAV) ? '@'
 				 : (sv_type == SVt_PVHV) ? '%'
@@ -567,16 +569,15 @@ I32 sv_type;
 		warn("Global symbol \"%c%s\" requires explicit package name",
 		     sv_type_char, name);
 	    else
-		warn("Global symbol \"%s\" requires explicit package name", name);
-	    ++error_count;
-	    stash = curstash ? curstash : defstash;	/* avoid core dumps */
-	    add_gvflags = ((sv_type == SVt_PV) ? GVf_IMPORTED_SV
-			   : (sv_type == SVt_PVAV) ? GVf_IMPORTED_AV
-			   : (sv_type == SVt_PVHV) ? GVf_IMPORTED_HV
-			   : 0);
+		warn("Global symbol \"%s\" requires explicit package name",
+		     name);
 	}
-	else
-	    return Nullgv;
+	++error_count;
+	stash = curstash ? curstash : defstash;	/* avoid core dumps */
+	add_gvflags = ((sv_type == SVt_PV) ? GVf_IMPORTED_SV
+		       : (sv_type == SVt_PVAV) ? GVf_IMPORTED_AV
+		       : (sv_type == SVt_PVHV) ? GVf_IMPORTED_HV
+		       : 0);
     }
 
     if (!SvREFCNT(stash))	/* symbol table under destruction */

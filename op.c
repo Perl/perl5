@@ -3968,17 +3968,16 @@ register OP *op;
 	  "Can't use bareword (\"%s\") as %s ref while \"strict refs\" in use",
 		      name, badthing);
 	}
-	kid->op_type = OP_GV;
+	/*
+	 * This is a little tricky.  We only want to add the symbol if we
+	 * didn't add it in the lexer.  Otherwise we get duplicate strict
+	 * warnings.  But if we didn't add it in the lexer, we must at
+	 * least pretend like we wanted to add it even if it existed before,
+	 * or we get possible typo warnings.  OPpCONST_ENTERED says
+	 * whether the lexer already added THIS instance of this symbol.
+	 */
 	iscv = (op->op_type == OP_RV2CV) * 2;
-	for (gv = 0; !gv; iscv++) {
-	    /*
-	     * This is a little tricky.  We only want to add the symbol if we
-	     * didn't add it in the lexer.  Otherwise we get duplicate strict
-	     * warnings.  But if we didn't add it in the lexer, we must at
-	     * least pretend like we wanted to add it even if it existed before,
-	     * or we get possible typo warnings.  OPpCONST_ENTERED says
-	     * whether the lexer already added THIS instance of this symbol.
-	     */
+	do {
 	    gv = gv_fetchpv(name,
 		iscv | !(kid->op_private & OPpCONST_ENTERED),
 		iscv
@@ -3990,9 +3989,12 @@ register OP *op;
 			    : op->op_type == OP_RV2HV
 				? SVt_PVHV
 				: SVt_PVGV);
+	} while (!gv && !(kid->op_private & OPpCONST_ENTERED) && !iscv++);
+	if (gv) {
+	    kid->op_type = OP_GV;
+	    SvREFCNT_dec(kid->op_sv);
+	    kid->op_sv = SvREFCNT_inc(gv);
 	}
-	SvREFCNT_dec(kid->op_sv);
-	kid->op_sv = SvREFCNT_inc(gv);
     }
     return op;
 }
