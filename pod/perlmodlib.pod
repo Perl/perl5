@@ -98,10 +98,6 @@ Compute arithmetic in integer instead of double
 
 Request less of something from the compiler
 
-=item lib
-
-Manipulate @INC at compile time
-
 =item locale
 
 Use and avoid POSIX locales for built-in operations
@@ -145,6 +141,10 @@ Predeclare global variable names (obsolete)
 =item warnings
 
 Control optional warnings
+
+=item warnings::register
+
+Warnings import function
 
 =back
 
@@ -219,6 +219,10 @@ Show lexical variables used in functions or files
 =item B::Stackobj
 
 Helper module for CC backend
+
+=item B::Stash
+
+Show what stashes are loaded
 
 =item B::Terse
 
@@ -315,6 +319,10 @@ Supply object methods for directory handles
 =item Dumpvalue
 
 Provides screen dump of Perl data.
+
+=item Encode
+
+Character encodings
 
 =item English
 
@@ -572,6 +580,10 @@ Module to convert pod files to HTML
 
 Objects representing POD input paragraphs, commands, etc.
 
+=item Pod::LaTeX
+
+Convert Pod data to formatted Latex
+
 =item Pod::Man
 
 Convert POD data to formatted *roff input
@@ -635,6 +647,10 @@ Run shell commands transparently within perl
 =item Socket
 
 Load the C socket.h defines and structure manipulators 
+
+=item Storable
+
+Persistency for perl data structures
 
 =item Symbol
 
@@ -775,7 +791,7 @@ Most importantly, CPAN includes around a thousand unbundled modules,
 some of which require a C compiler to build.  Major categories of
 modules are:
 
-=over
+=over 4
 
 =item *
 Language Extensions and Documentation Tools
@@ -845,7 +861,7 @@ Miscellaneous Modules
 Registered CPAN sites as of this writing include the following.
 You should try to choose one close to you:
 
-=over
+=over 4
 
 =item Africa
 

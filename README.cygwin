@@ -27,11 +27,11 @@ platforms.  They run thanks to the Cygwin library which provides the UNIX
 system calls and environment these programs expect.  More information
 about this project can be found at:
 
-  http://sources.redhat.com/cygwin/
+  http://www.cygwin.com/
 
 A recent net or commercial release of Cygwin is required.
 
-At the time this document was last updated, Cygwin 1.1.4 was current.
+At the time this document was last updated, Cygwin 1.1.5 was current.
 
 B<NOTE:> At this point, minimal effort has been made to provide
 compatibility with old (beta) Cygwin releases.  The focus has been to
@@ -500,12 +500,11 @@ be kept as clean as possible.
 
 =item Documentation
 
-  INSTALL README.cygwin
+  INSTALL README.cygwin README.win32 MANIFEST
   Changes Changes5.005 Changes5.004 Changes5.6
-  AUTHORS MAINTAIN MANIFEST README.win32
-  pod/buildtoc.PL pod/perl.pod pod/perl5004delta.pod pod/perl56delta.pod
-  pod/perlfaq3.pod pod/perlhist.pod pod/perlmodlib.pod pod/perlport.pod
-  pod/perltoc.pod
+  pod/perl.pod pod/perlport.pod pod/perlfaq3.pod
+  pod/perldelta.pod pod/perl5004delta.pod pod/perl56delta.pod
+  pod/perlhist.pod pod/perlmodlib.pod pod/buildtoc.PL pod/perltoc.pod
 
 =item Build, Configure, Make, Install
 
@@ -543,9 +542,7 @@ be kept as clean as possible.
   perl.h                - binmode
   doio.c                - win9x can not rename a file when it is open
   pp_sys.c              - do not define h_errno, pp_system with spawn
-  mg.c                  - environ WORKAROUND
-  unixish.h             - environ WORKAROUND
-  util.c                - environ WORKAROUND
+  util.c                - use setenv
 
 =item Compiled Module Source
 
@@ -588,7 +585,7 @@ and security contexts are required.
 =head1 AUTHORS
 
 Charles Wilson <cwilson@ece.gatech.edu>,
-Eric Fifer <efifer@sanwaint.com>,
+Eric Fifer <egf7@columbia.edu>,
 alexander smishlajev <als@turnhere.com>,
 Steven Morlock <newspost@morlock.net>,
 Sebastien Barre <Sebastien.Barre@utc.fr>,
@@ -596,4 +593,4 @@ Teun Burgers <burgers@ecn.nl>.
 
 =head1 HISTORY
 
-Last updated: 15 August 2000
+Last updated: 7 November 2000

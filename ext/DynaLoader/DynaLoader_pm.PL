@@ -34,6 +34,8 @@ $VERSION = 1.04;	# avoid typo warning
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
 
+use Config;
+
 # The following require can't be removed during maintenance
 # releases, sadly, because of the risk of buggy code that does 
 # require Carp; Carp::croak "..."; without brackets dying 
@@ -60,14 +62,6 @@ sub dl_load_flags { 0x00 }
 # ($dl_dlext, $dlsrc)
 #         = @Config::Config{'dlext', 'dlsrc'};
 EOT
-
-
-if (!$ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
-    print OUT <<EOT;
-use Config;
-
-EOT
-}
 
 print OUT "  (\$dl_dlext, \$dlsrc) = (",
           to_string($Config::Config{'dlext'}), ",",
@@ -107,8 +101,7 @@ if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
     if (!$ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
         my $dl_library_path = dquoted_comma_list(@dl_library_path);
         print OUT <<EOT;
-# This list has been expanded in Perl build time.
-# (%Config expanded, %ENV not)
+# The below \@dl_library_path has been expanded (%Config) in Perl build time.
 
 \@dl_library_path = ($dl_library_path);
 
@@ -126,32 +119,38 @@ EOT
 }
 
 my $ldlibpthname;
+my $ldlibpthname_defined;
 my $pthsep;
 
 if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
-    $ldlibpthname = qq('$Config::Config{ldlibpthname}');
-    $pthsep       = qq('$Config::Config{path_sep}');
+    $ldlibpthname         = $Config::Config{ldlibpthname};
+    $ldlibpthname_defined = defined $Config::Config{ldlibpthname} ? 1 : 0;
+    $pthsep               = $Config::Config{path_sep};
 }
 else {
-    $ldlibpthname = q($Config::Config{ldlibpthname});
-    $pthsep       = q($Config::Config{path_sep});
+    $ldlibpthname         = q($Config::Config{ldlibpthname});
+    $ldlibpthname_defined = q(defined $Config::Config{ldlibpthname});
+    $pthsep               = q($Config::Config{path_sep});
     print OUT <<EOT;
-my \$ldlibpthname = $ldlibpthname;
-my \$pthsep       = $pthsep;
+my \$ldlibpthname         = $ldlibpthname;
+my \$ldlibpthname_defined = $ldlibpthname_defined;
+my \$pthsep               = $pthsep;
 
 EOT
 }
 
-
-my $env_dl_library_path = <<EOT;
-if (exists \$ENV{$ldlibpthname} && \$ENV{$ldlibpthname} ne '') {
-    push(\@dl_library_path, split(/\$pthsep/, \$ENV{$ldlibpthname}));
+my $env_dl_library_path = <<'EOT';
+if ($ldlibpthname_defined &&
+    exists $ENV{$ldlibpthname}) {
+    push(@dl_library_path, split(/$pthsep/, $ENV{$ldlibpthname}));
 }
 
 # E.g. HP-UX supports both its native SHLIB_PATH *and* LD_LIBRARY_PATH.
 
-if ($ldlibpthname ne 'LD_LIBRARY_PATH' && exists \$ENV{LD_LIBRARY_PATH}) {
-    push(\@dl_library_path, split(/\$pthsep/, \$ENV{LD_LIBRARY_PATH}));
+if ($ldlibpthname_defined &&
+    $ldlibpthname ne 'LD_LIBRARY_PATH' &&
+    exists $ENV{LD_LIBRARY_PATH}) {
+    push(@dl_library_path, split(/$pthsep/, $ENV{LD_LIBRARY_PATH}));
 }
 EOT
 
@@ -171,8 +170,8 @@ EOT
 if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS} && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
     my $dl_library_path = dquoted_comma_list(@dl_library_path);
     print OUT <<EOT;
-# This list has been expanded in Perl build time.
-# (%Config expanded, %ENV expanded)
+# The below \@dl_library_path has been expanded (%Config, %ENV)
+# in Perl build time.
 
 \@dl_library_path = ($dl_library_path);
 
@@ -265,7 +264,7 @@ sub bootstrap {
     croak("Can't locate loadable object for module $module in \@INC (\@INC contains: @INC)")
 	unless $file;	# wording similar to error from 'require'
 
-    $file = uc($file) if $Is_VMS && $Config{d_vms_case_sensitive_symbols};
+    $file = uc($file) if $Is_VMS && $Config::Config{d_vms_case_sensitive_symbols};
     my $bootname = "boot_$module";
     $bootname =~ s/\W/_/g;
     @dl_require_symbols = ($bootname);
@@ -393,7 +392,7 @@ print OUT <<'EOT';
         #  (this is a more complicated issue than it first appears)
         if (m:/: && -d $_) {   push(@dirs, $_); next; }
 
-        # VMS: we may be using native VMS directry syntax instead of
+        # VMS: we may be using native VMS directory syntax instead of
         # Unix emulation, so check this as well
         if ($Is_VMS && /[:>\]]/ && -d $_) {   push(@dirs, $_); next; }
 

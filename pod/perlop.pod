@@ -798,7 +798,7 @@ the trailing delimiter.  This avoids expensive run-time recompilations,
 and is useful when the value you are interpolating won't change over
 the life of the script.  However, mentioning C</o> constitutes a promise
 that you won't change the variables in the pattern.  If you change them,
-Perl won't even notice.  See also L<"qr//">.
+Perl won't even notice.  See also L<"qr/STRING/imosx">.
 
 If the PATTERN evaluates to the empty string, the last
 I<successfully> matched regular expression is used instead.
@@ -1338,7 +1338,7 @@ their results are the same, we consider them individually.  For different
 quoting constructs, Perl performs different numbers of passes, from
 one to five, but these passes are always performed in the same order.
 
-=over
+=over 4
 
 =item Finding the end
 
@@ -1392,7 +1392,7 @@ used in parsing.
 The next step is interpolation in the text obtained, which is now
 delimiter-independent.  There are four different cases.
 
-=over
+=over 4
 
 =item C<<<'EOF'>, C<m''>, C<s'''>, C<tr///>, C<y///>
 
@@ -1842,8 +1842,8 @@ integer>, if you take the C<sqrt(2)>, you'll still get C<1.4142135623731>
 or so.
 
 Used on numbers, the bitwise operators ("&", "|", "^", "~", "<<",
-and ">>") always produce integral results.  (But see also L<Bitwise
-String Operators>.)  However, C<use integer> still has meaning for
+and ">>") always produce integral results.  (But see also 
+L<Bitwise String Operators>.)  However, C<use integer> still has meaning for
 them.  By default, their results are interpreted as unsigned integers, but
 if C<use integer> is in effect, their results are interpreted
 as signed integers.  For example, C<~0> usually evaluates to a large

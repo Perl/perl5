@@ -1,19 +1,19 @@
 #!/usr/bin/perl -w
-# 
+#
 # Basic test suite for Tie::RefHash and Tie::RefHash::Nestable.
-# 
+#
 # The testing is in two parts: first, run lots of tests on both a tied
 # hash and an ordinary un-tied hash, and check they give the same
 # answer.  Then there are tests for those cases where the tied hashes
 # should behave differently to normal hashes, that is, when using
 # references as keys.
-# 
+#
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '.'; 
+    @INC = '.';
     push @INC, '../lib';
-}    
+}
 
 use strict;
 use Tie::RefHash;
@@ -28,8 +28,9 @@ my $ref = []; my $ref1 = [];
 # on a tied hash and on a normal hash, and checking that the results
 # are the same.  This does of course assume that Perl hashes are not
 # buggy :-)
-# 
+#
 my @tests = standard_hash_tests();
+
 my @ordinary_results = runtests(\@tests, undef);
 foreach my $class ('Tie::RefHash', 'Tie::RefHash::Nestable') {
     my @tied_results = runtests(\@tests, $class);
@@ -39,13 +40,13 @@ foreach my $class ('Tie::RefHash', 'Tie::RefHash::Nestable') {
     foreach my $i (0 .. $#ordinary_results) {
         my ($or, $ow, $oe) = @{$ordinary_results[$i]};
         my ($tr, $tw, $te) = @{$tied_results[$i]};
-        
+
         my $ok = 1;
         local $^W = 0;
         $ok = 0 if (defined($or) != defined($tr)) or ($or ne $tr);
         $ok = 0 if (defined($ow) != defined($tw)) or ($ow ne $tw);
         $ok = 0 if (defined($oe) != defined($te)) or ($oe ne $te);
-        
+
         if (not $ok) {
             print STDERR
               "failed for $class: $tests[$i]\n",
@@ -66,7 +67,7 @@ foreach my $class ('Tie::RefHash', 'Tie::RefHash::Nestable') {
 
 # Now test Tie::RefHash's special powers
 my (%h, $h);
-eval { $h = tie %h, 'Tie::RefHash' };
+$h = eval { tie %h, 'Tie::RefHash' };
 warn $@ if $@;
 test(not $@);
 test(ref($h) eq 'Tie::RefHash');
@@ -96,7 +97,7 @@ undef $h;
 untie %h;
 
 # And now Tie::RefHash::Nestable's differences from Tie::RefHash.
-eval { $h = tie %h, 'Tie::RefHash::Nestable' };
+$h = eval { tie %h, 'Tie::RefHash::Nestable' };
 warn $@ if $@;
 test(not $@);
 test(ref($h) eq 'Tie::RefHash::Nestable');
@@ -113,14 +114,20 @@ test((keys %h)[0] eq $ref);
 test((keys %{$h{$ref}}) == 1);
 test((keys %{$h{$ref}})[0] eq $ref1);
 
+
 die "expected to run $numtests tests, but ran ", $currtest - 1
   if $currtest - 1 != $numtests;
+
+@tests = ();
+undef $ref;
+undef $ref1;
+
 exit();
 
 
 # Print 'ok X' if true, 'not ok X' if false
 # Uses global $currtest.
-# 
+#
 sub test {
     my $t = shift;
     print 'not ' if not $t;
@@ -128,7 +135,7 @@ sub test {
 }
 
 
-# Wrapper for Data::Dumper to 'dump' a scalar as an EXPR string. 
+# Wrapper for Data::Dumper to 'dump' a scalar as an EXPR string.
 sub dumped {
     my $s = shift;
     my $d = Dumper($s);
@@ -141,7 +148,7 @@ sub dumped {
 # Crudely dump a hash into a canonical string representation (because
 # hash keys can appear in any order, Data::Dumper may give different
 # strings for the same hash).
-# 
+#
 sub dumph {
     my $h = shift;
     my $r = '';
@@ -152,24 +159,24 @@ sub dumph {
 }
 
 # Run the tests and give results.
-# 
+#
 # Parameters: reference to list of tests to run
 #             name of class to use for tied hash, or undef if not tied
-# 
+#
 # Returns: list of [R, W, E] tuples, one for each test.
 # R is the return value from running the test, W any warnings it gave,
 # and E any exception raised with 'die'.  E and W will be tidied up a
 # little to remove irrelevant details like line numbers :-)
-# 
+#
 # Will also run a few of its own 'ok N' tests.
-# 
+#
 sub runtests {
     my ($tests, $class) = @_;
     my @r;
 
     my (%h, $h);
     if (defined $class) {
-        eval { $h = tie %h, $class };
+        $h = eval { tie %h, $class };
         warn $@ if $@;
         test(not $@);
         test(ref($h) eq $class);
@@ -180,7 +187,11 @@ sub runtests {
         my ($result, $warning, $exception);
         local $SIG{__WARN__} = sub { $warning .= $_[0] };
         $result = scalar(eval $_);
-        $exception = $@ if $@;
+        if ($@)
+         {
+          die "$@:$_" unless defined $class;
+          $exception = $@;
+         }
 
         foreach ($warning, $exception) {
             next if not defined;
@@ -204,14 +215,14 @@ sub runtests {
 
 # Things that should work just the same for an ordinary hash and a
 # Tie::RefHash.
-# 
+#
 # Each test is a code string to be eval'd, it should do something with
 # %h and give a scalar return value.  The global $ref and $ref1 may
 # also be used.
-# 
+#
 # One thing we don't test is that the ordering from 'keys', 'values'
 # and 'each' is the same.  You can't reasonably expect that.
-# 
+#
 sub standard_hash_tests {
     my @r;
 
@@ -219,17 +230,16 @@ sub standard_hash_tests {
     my $STD_TESTS = <<'END'
     join $;, sort keys %h;
     join $;, sort values %h;
-    { my ($v, %tmp); %tmp{$v}++ while (defined($v = each %h)); dumph(\%tmp) }
-    { my ($k, $v, %tmp); $tmp{"$k$;$v"}++ while (($k, $v) = each %h); dumph(\%t
-mp) }
+    { my ($v, %tmp); $tmp{$v}++ while (defined($v = each %h)); dumph(\%tmp) }
+    { my ($k, $v, %tmp); $tmp{"$k$;$v"}++ while (($k, $v) = each %h); dumph(\%tmp) }
 END
   ;
-    
+
     # Tests on the existence of the element 'foo'
     my $FOO_TESTS = <<'END'
     defined $h{foo};
     exists $h{foo};
-    $h{foo};    
+    $h{foo};
 END
   ;
 
@@ -268,12 +278,10 @@ END
   ;
         }
     }
-    
+
     # Test hash slices
     my @slicetests;
     @slicetests = split /\n/, <<'END'
-    @h{} = ();
-    @h{} = ('a');
     @h{'b'} = ();
     @h{'c'} = ('d');
     @h{'e'} = ('f', 'g');
@@ -290,7 +298,7 @@ END
     }
 
     # Test CLEAR
-    push @r, 'clear %h', split(/\n/, $STD_TESTS);
+    push @r, '%h = ();', split(/\n/, $STD_TESTS);
 
     return @r;
 }

@@ -78,8 +78,8 @@ The 5.0 release is, essentially, a ground-up rewrite of the original
 perl source code from releases 1 through 4.  It has been modularized,
 object-oriented, tweaked, trimmed, and optimized until it almost doesn't
 look like the old code.  However, the interface is mostly the same, and
-compatibility with previous releases is very high. See L<perltrap/"Perl4
-to Perl5 Traps">.
+compatibility with previous releases is very high. 
+See L<perltrap/"Perl4 to Perl5 Traps">.
 
 To avoid the "what language is perl5?" confusion, some people prefer to
 simply use "perl" to refer to the latest version of perl and avoid using

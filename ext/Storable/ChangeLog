@@ -1,3 +1,14 @@
+Sun Nov  5 18:23:48 MET 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Version 1.0.6.
+
+	Fixed severe "object lost" bug for STORABLE_freeze returns,
+	when refs to lexicals, taken within the hook, were to be
+	serialized by Storable.  Enhanced the t/recurse.t test to
+	stress hook a little more with refs to lexicals.
+
 Thu Oct 26 19:14:38 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:

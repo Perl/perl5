@@ -651,6 +651,13 @@ If you're getting this error from a here-document, you may have included
 unseen whitespace before or after your closing tag. A good programmer's
 editor will have a way to help you find these characters.
 
+=item Can't find %s property definition %s 
+
+(F) You may have tried to use C<\p> which means a Unicode property for
+example \p{Lu} is all uppercase letters.  Escape the C<\p>, either
+C<\\p> (just the C<\p>) or by C<\Q\p> (the rest of the string, until
+possible C<\E>).
+
 =item Can't fork
 
 (F) A fatal error occurred while trying to fork while opening a
@@ -1086,7 +1093,7 @@ on I<Mastering Regular Expressions>.)
 to check the return value of your socket() call?  See
 L<perlfunc/connect>.
 
-=item constant(%s): %s
+=item Constant(%s)%s: %s
 
 (F) The parser found inconsistencies either while attempting to define
 an overloaded constant, or when trying to find the character name
@@ -1116,8 +1123,8 @@ workarounds.
 
 =item Copy method did not return a reference
 
-(F) The method which overloads "=" is buggy. See L<overload/Copy
-Constructor>.
+(F) The method which overloads "=" is buggy. See 
+L<overload/Copy Constructor>.
 
 =item CORE::%s is not a keyword
 
@@ -1660,8 +1667,8 @@ shows in the regular expression about where the problem was discovered.
 
 (W syntax) You've run afoul of the rule that says that any list operator
 followed by parentheses turns into a function, with all the list
-operators arguments found inside the parentheses.  See L<perlop/Terms
-and List Operators (Leftward)>.
+operators arguments found inside the parentheses.  See 
+L<perlop/Terms and List Operators (Leftward)>.
 
 =item Invalid %s attribute: %s
 
@@ -3242,7 +3249,7 @@ will deny it.
 The function indicated isn't implemented on this architecture, according
 to the probings of Configure.
 
-=item The stat preceding C<-l _> wasn't an lstat
+=item The stat preceding %s wasn't an lstat
 
 (F) It makes no sense to test the current stat buffer for symbolic
 linkhood if the last stat that wrote to the stat buffer already went

@@ -34,7 +34,9 @@ eval {
 # and mingw32 uses said silly CRT
 $have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
 
-print "1..", ($have_setlocale ? 116 : 98), "\n";
+my $last = $have_setlocale ? 116 : 98;
+
+print "1..$last\n";
 
 use vars qw(&LC_ALL);
 
@@ -276,7 +278,7 @@ Norsk Norwegian:no no\@nynorsk:no:1 15
 Occitan:oc:es:1 15
 Polski Polish:pl:pl:2
 Rumanian:ro:ro:2
-Russki Russian:ru:ru su ua:5 koi8 koi8r KOI8-R koi8u cp1251
+Russki Russian:ru:ru su ua:5 koi8 koi8r KOI8-R koi8u cp1251 cp866
 Serbski Serbian:sr:yu:5
 Slovak:sk:sk:2
 Slovene Slovenian:sl:si:2
@@ -350,7 +352,14 @@ foreach (0..15) {
     trylocale("iso_latin_$_");
 }
 
-$ENV{PATH} = '/bin:/usr/bin';
+# Sanitize the environment so that we can run the external 'locale'
+# program without the taint mode getting grumpy.
+
+# $ENV{PATH} is special in VMS.
+delete $ENV{PATH} if $^O ne 'VMS' or $Config{d_setenv};
+
+# Other subversive stuff.
+delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
 if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
     while (<LOCALES>) {
@@ -395,6 +404,8 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
 }
 
 setlocale(LC_ALL, "C");
+
+sub utf8locale { $_[0] =~ /utf-?8/i }
 
 @Locale = sort @Locale;
 
@@ -486,7 +497,10 @@ foreach $Locale (@Locale) {
 
 	# Test \w.
     
-	{
+	if (utf8locale($Locale)) {
+	    # Until the polymorphic regexen arrive.
+	    debug "# skipping UTF-8 locale '$Locale'\n";
+	} else {
 	    my $word = join('', @Neoalpha);
 
 	    $word =~ /^(\w+)$/;
@@ -639,6 +653,9 @@ foreach $Locale (@Locale) {
     }
 
     debug "# testing 115 with locale '$Locale'\n";
+    # Does taking lc separately differ from taking
+    # the lc "in-line"?  (This was the bug 19990704.002, change #3568.)
+    # The bug was in the caching of the 'o'-magic.
     {
 	use locale;
 
@@ -662,7 +679,13 @@ foreach $Locale (@Locale) {
     }
 
     debug "# testing 116 with locale '$Locale'\n";
-    {
+    # Does lc of an UPPER (if different from the UPPER) match
+    # case-insensitively the UPPER, and does the UPPER match
+    # case-insensitively the lc of the UPPER.  And vice versa.
+    if (utf8locale($Locale)) {
+        # Until the polymorphic regexen arrive.
+        debug "# skipping UTF-8 locale '$Locale'\n";
+    } else {
 	use locale;
 
 	my @f = ();
@@ -677,15 +700,16 @@ foreach $Locale (@Locale) {
 	    push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
 	}
 	tryneoalpha($Locale, 116, @f == 0);
-	print "# testing 116 failed for locale '$Locale' for characters @f\n"
-            if @f;
+        if (@f) {
+	    print "# failed 116 locale '$Locale' characters @f\n"
+        }
     }
 
 }
 
 # Recount the errors.
 
-foreach (99..116) {
+foreach (99..$last) {
     if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
@@ -701,7 +725,7 @@ foreach (99..116) {
 
 my $didwarn = 0;
 
-foreach (99..116) {
+foreach (99..$last) {
     if ($Problem{$_}) {
 	my @f = sort keys %{ $Problem{$_} };
 	my $f = join(" ", @f);
@@ -726,17 +750,18 @@ EOW
     }
 }
 
-# Tell which locales were okay.
+# Tell which locales were okay and which were not.
 
 if ($didwarn) {
-    my @s;
+    my (@s, @F);
     
     foreach my $l (@Locale) {
 	my $p = 0;
-	foreach my $t (102..116) {
+	foreach my $t (102..$last) {
 	    $p++ if $Problem{$t}{$l};
 	}
 	push @s, $l if $p == 0;
+      push @F, $l unless $p == 0;
     }
     
     if (@s) {
@@ -748,7 +773,19 @@ if ($didwarn) {
             "#\t", $s, "\n#\n",
 	    "# tested okay.\n#\n",
     } else {
-        warn "# None of your locales was fully okay.\n";
+        warn "# None of your locales were fully okay.\n";
+    }
+
+    if (@F) {
+        my $F = join(" ", @F);
+        $F =~ s/(.{50,60}) /$1\n#\t/g;
+
+        warn
+          "# The following locales\n#\n",
+            "#\t", $F, "\n#\n",
+          "# had problems.\n#\n",
+    } else {
+        warn "# None of your locales were broken.\n";
     }
 }
 

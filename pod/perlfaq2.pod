@@ -80,8 +80,8 @@ part of the output of
 
     % perl -V
 
-You might also want to check out L<perlfaq8/"How do I keep my own
-module/library directory?">.
+You might also want to check out 
+L<perlfaq8/"How do I keep my own module/library directory?">.
 
 =head2 I grabbed the sources and tried to compile but gdbm/dynamic loading/malloc/linking/... failed.  How do I make it work?
 
@@ -247,7 +247,7 @@ useful.  Your mileage may (but, we hope, probably won't) vary.
 
 Recommended books on (or mostly on) Perl follow.
 
-=over
+=over 4
 
 =item References
 

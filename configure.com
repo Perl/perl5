@@ -2367,8 +2367,8 @@ $ echo "you might, for example, want to build GDBM_File instead of"
 $ echo "SDBM_File if you have the GDBM library built on your machine."
 $ echo ""
 $ echo "Which modules do you want to build into perl?"
-$! dflt = "Fcntl Errno File::Glob IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
-$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname"
+$! we need to add Byteloader to this list:
+$ dflt = "re Fcntl Encode Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname"
 $ IF Using_Dec_C .OR. using_cxx
 $ THEN
 $   dflt = dflt + " POSIX"
@@ -3475,6 +3475,54 @@ $ CS
 $ tmp = "fcntl"
 $ GOSUB inlibc
 $ d_fcntl = tmp
+$!
+$! Check for fcntl locking capability
+$!
+$ echo4 "Checking if fcntl-based file locking works... "
+$ tmp = "undef"
+$ IF d_fcntl .EQS. "define"
+$ THEN
+$   OS
+$   WS "#include <stdio.h>"
+$   WS "#if defined(__DECC) || defined(__DECCXX)"
+$   WS "#include <stdlib.h>"
+$   WS "#endif"
+$   WS "#include <fcntl.h>"
+$   WS "#include <unistd.h>"
+$   WS "int main() {"
+$   WS "#if defined(F_SETLK) && defined(F_SETLKW)"
+$   WS "     struct flock flock;"
+$   WS "     int retval, fd;"
+$   WS "     fd = open(""try.c"", O_RDONLY);"
+$   WS "     flock.l_type = F_RDLCK;"
+$   WS "     flock.l_whence = SEEK_SET;"
+$   WS "     flock.l_start = flock.l_len = 0;"
+$   WS "     retval = fcntl(fd, F_SETLK, &flock);"
+$   WS "     close(fd);"
+$   WS "     (retval < 0 ? printf(""undef\n"") : printf(""define\n""));"
+$   WS "#else"
+$   WS "     printf(""undef\n"");"
+$   WS "#endif"
+$   WS "}"
+$   CS
+$   GOSUB link_ok
+$   IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
+$   THEN
+$     GOSUB just_mcr_it
+$     IF tmp .EQS. "define"
+$     THEN
+$       echo4 "Yes, it seems to work."
+$     ELSE
+$       echo4 "Nope, it didn't work."
+$     ENDIF
+$   ELSE
+$     echo4 "I'm unable to compile the test program, so I'll assume not."
+$     tmp = "undef"
+$   ENDIF
+$ ELSE
+$   echo4 "Nope, since you don't even have fcntl()."
+$ ENDIF
+$ d_fcntl_can_lock = tmp
 $!
 $! Check for memchr
 $!
@@ -4753,6 +4801,7 @@ $ WC "d_eunice='undef'"
 $ WC "d_fchmod='undef'"
 $ WC "d_fchown='undef'"
 $ WC "d_fcntl='" + d_fcntl + "'"
+$ WC "d_fcntl_can_lock='" + d_fcntl_can_lock + "'"
 $ WC "d_fd_set='" + d_fd_set + "'"
 $ WC "d_fgetpos='define'"
 $ WC "d_flexfnam='define'"

@@ -571,9 +571,9 @@ scripts inherently insecure.  Perl gives you a number of options
 The IPC::Open2 module (part of the standard perl distribution) is an
 easy-to-use approach that internally uses pipe(), fork(), and exec() to do
 the job.  Make sure you read the deadlock warnings in its documentation,
-though (see L<IPC::Open2>).  See L<perlipc/"Bidirectional Communication
-with Another Process"> and L<perlipc/"Bidirectional Communication with
-Yourself">
+though (see L<IPC::Open2>).  See 
+L<perlipc/"Bidirectional Communication with Another Process"> and 
+L<perlipc/"Bidirectional Communication with Yourself">
 
 You may also use the IPC::Open3 module (part of the standard perl
 distribution), but be warned that it has a different order of

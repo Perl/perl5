@@ -25,6 +25,7 @@ libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
 libswanted=`echo " $libswanted " | sed -e 's/ m / /g'`
 libswanted="$libswanted cygipc"
 test -z "$optimize" && optimize='-O2'
+ccflags="$ccflags -DPERL_USE_SAFE_PUTENV"
 # - otherwise i686-cygwin
 archname='cygwin'
 

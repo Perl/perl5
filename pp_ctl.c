@@ -211,6 +211,21 @@ PP(pp_substcont)
     cx->sb_m = m = rx->startp[0] + orig;
     sv_catpvn(dstr, s, m-s);
     cx->sb_s = rx->endp[0] + orig;
+    { /* Update the pos() information. */
+	SV *sv = cx->sb_targ;
+	MAGIC *mg;
+	I32 i;
+	if (SvTYPE(sv) < SVt_PVMG)
+	    SvUPGRADE(sv, SVt_PVMG);
+	if (!(mg = mg_find(sv, 'g'))) {
+	    sv_magic(sv, Nullsv, 'g', Nullch, 0);
+	    mg = mg_find(sv, 'g');
+	}
+	i = m - orig;
+	if (DO_UTF8(sv))
+	    sv_pos_b2u(sv, &i);
+	mg->mg_len = i;
+    }
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmreplstart);

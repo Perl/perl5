@@ -1129,7 +1129,7 @@ one match at a given position is possible.  This section describes the
 notion of better/worse for combining operators.  In the description
 below C<S> and C<T> are regular subexpressions.
 
-=over
+=over 4
 
 =item C<ST>
 

@@ -2520,8 +2520,32 @@ Perl_yylex(pTHX)
 	    goto retry;
 	}
 	do {
-	    bool bof;
-	    bof = PL_rsfp && (PerlIO_tell(PL_rsfp) == 0); /* *Before* read! */
+	    bool bof = PL_rsfp ? TRUE : FALSE;
+	    if (bof) {
+#ifdef PERLIO_IS_STDIO
+#  ifdef __GNU_LIBRARY__
+#    if __GNU_LIBRARY__ == 1 /* Linux glibc5 */
+#      define FTELL_FOR_PIPE_IS_BROKEN
+#    endif
+#  else
+#    ifdef __GLIBC__
+#      if __GLIBC__ == 1 /* maybe some glibc5 release had it like this? */
+#        define FTELL_FOR_PIPE_IS_BROKEN
+#      endif
+#    endif
+#  endif
+#endif
+#ifdef FTELL_FOR_PIPE_IS_BROKEN
+		/* This loses the possibility to detect the bof
+		 * situation on perl -P when the libc5 is being used.
+		 * Workaround?  Maybe attach some extra state to PL_rsfp?
+		 */
+		if (!PL_preprocess)
+		    bof = PerlIO_tell(PL_rsfp) == 0;
+#else
+		bof = PerlIO_tell(PL_rsfp) == 0;
+#endif
+	    }
 	    s = filter_gets(PL_linestr, PL_rsfp, 0);
 	    if (s == Nullch) {
 	      fake_eof:
@@ -5198,7 +5222,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"exit"))		return -KEY_exit;
 	    if (strEQ(d,"eval"))		return KEY_eval;
 	    if (strEQ(d,"exec"))		return -KEY_exec;
-	    if (strEQ(d,"each"))		return KEY_each;
+           if (strEQ(d,"each"))                return -KEY_each;
 	    break;
 	case 5:
 	    if (strEQ(d,"elsif"))		return KEY_elsif;
@@ -5342,7 +5366,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	break;
     case 'k':
 	if (len == 4) {
-	    if (strEQ(d,"keys"))		return KEY_keys;
+           if (strEQ(d,"keys"))                return -KEY_keys;
 	    if (strEQ(d,"kill"))		return -KEY_kill;
 	}
 	break;
@@ -5424,11 +5448,11 @@ Perl_keyword(pTHX_ register char *d, I32 len)
     case 'p':
 	switch (len) {
 	case 3:
-	    if (strEQ(d,"pop"))			return KEY_pop;
+           if (strEQ(d,"pop"))                 return -KEY_pop; 
 	    if (strEQ(d,"pos"))			return KEY_pos;
 	    break;
 	case 4:
-	    if (strEQ(d,"push"))		return KEY_push;
+           if (strEQ(d,"push"))                return -KEY_push;
 	    if (strEQ(d,"pack"))		return -KEY_pack;
 	    if (strEQ(d,"pipe"))		return -KEY_pipe;
 	    break;
@@ -5535,7 +5559,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	case 'h':
 	    switch (len) {
 	    case 5:
-		if (strEQ(d,"shift"))		return KEY_shift;
+               if (strEQ(d,"shift"))           return -KEY_shift;
 		break;
 	    case 6:
 		if (strEQ(d,"shmctl"))		return -KEY_shmctl;
@@ -5564,7 +5588,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	case 'p':
 	    if (strEQ(d,"split"))		return KEY_split;
 	    if (strEQ(d,"sprintf"))		return -KEY_sprintf;
-	    if (strEQ(d,"splice"))		return KEY_splice;
+           if (strEQ(d,"splice"))              return -KEY_splice;
 	    break;
 	case 'q':
 	    if (strEQ(d,"sqrt"))		return -KEY_sqrt;
@@ -5644,7 +5668,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"unlink"))		return -KEY_unlink;
 	    break;
 	case 7:
-	    if (strEQ(d,"unshift"))		return KEY_unshift;
+           if (strEQ(d,"unshift"))             return -KEY_unshift;
 	    if (strEQ(d,"ucfirst"))		return -KEY_ucfirst;
 	    break;
 	}
@@ -5749,14 +5773,23 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
 	SV *msg;
 	
-	why1 = "%^H is not consistent";
 	why2 = strEQ(key,"charnames")
-	       ? " (missing \"use charnames ...\"?)"
+	       ? "(possibly a missing \"use charnames ...\")"
 	       : "";
-	why3 = "";
+	msg = Perl_newSVpvf(aTHX_ "Constant(%s) unknown: %s", 
+			    (type ? type: "undef"), why2);
+
+	/* This is convoluted and evil ("goto considered harmful")
+	 * but I do not understand the intricacies of all the different
+	 * failure modes of %^H in here.  The goal here is to make
+	 * the most probable error message user-friendly. --jhi */
+
+	goto msgdone;
+
     report:
-	msg = Perl_newSVpvf(aTHX_ "constant(%s): %s%s%s", 
+	msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s", 
 			    (type ? type: "undef"), why1, why2, why3);
+    msgdone:
 	yyerror(SvPVX(msg));
  	SvREFCNT_dec(msg);
   	return sv;

@@ -229,8 +229,6 @@ goes under C<($DJDIR)/lib/perl5/pod>.
 
 =head2 Prerequisites
 
-=over 4
-
 For building and installing non-XS modules, all you need is a working
 perl under DJGPP.  Non-XS modules do not require re-linking the perl
 binary, and so are simpler to build and install.
@@ -247,11 +245,7 @@ an XS extension module.  In addition, you will have to have built your
 perl binary from the source distribution so that all of the components
 of the perl binary are available for the required link step.
 
-=back
-
 =head2 Unpacking CPAN Modules
-
-=over 4
 
 First, download the module package from CPAN (e.g., the "Comma Separated
 Value" text package, Text-CSV-0.01.tar.gz).  Then expand the contents of
@@ -278,14 +272,10 @@ to unpack and expand these files.  For example:
 This will create the new directory C<($DJDIR)/Text-CSV-0.01>, filling
 it with the source for this module.
 
-=back
-
 =head2 Building Non-XS Modules
 
 To build a non-XS module, you can use the standard module-building
 instructions distributed with perl modules.
-
-=over 4
 
     perl Makefile.PL
     make
@@ -296,15 +286,11 @@ This is sufficient because non-XS modules install only ".pm" files and
 (sometimes) pod and/or man documentation.  No re-linking of the perl
 binary is needed to build, install or use non-XS modules.
 
-=back
-
 =head2 Building XS Modules
 
 To build an XS module, you must use the standard module-building
 instructions distributed with perl modules *PLUS* three extra
 instructions specific to the DJGPP "static link" build environment.
-
-=over 4
 
     set FNCASE=y
     perl Makefile.PL
@@ -332,8 +318,6 @@ and what module was installed.  you can view this information at any time
 by using the command:
 
         perl -S perldoc perllocal
-
-=back
 
 =head1 AUTHOR
 

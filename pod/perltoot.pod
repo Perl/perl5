@@ -1700,7 +1700,7 @@ as with any other local().
 It would be nice to combine Alias with
 something like Class::Struct or Class::MethodMaker.
 
-=head2 NOTES
+=head1 NOTES
 
 =head2 Object Terminology
 

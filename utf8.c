@@ -215,7 +215,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (unexpected non-continuation byte 0x%02"UVxf" after byte 0x%02"UVxf")",
-			s[1], uv);
+			(UV)s[1], uv);
 	goto malformed;
     }
     

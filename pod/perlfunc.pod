@@ -91,7 +91,7 @@ functions, like some keywords and named operators)
 arranged by category.  Some functions appear in more
 than one place.
 
-=over
+=over 4
 
 =item Functions for SCALARs or strings
 
@@ -2348,8 +2348,8 @@ it succeeded, false otherwise.  See the example in L<perlipc/"Sockets: Client/Se
 =item local EXPR
 
 You really probably want to be using C<my> instead, because C<local> isn't
-what most people think of as "local".  See L<perlsub/"Private Variables
-via my()"> for details.
+what most people think of as "local".  See 
+L<perlsub/"Private Variables via my()"> for details.
 
 A local modifies the listed variables to be local to the enclosing
 block, file, or eval.  If more than one value is listed, the list must
@@ -4265,9 +4265,9 @@ Examples:
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means
 if you're in the C<main> package and type
-  
+
     @articles = sort {$b <=> $a} @files;
-  
+
 then C<$a> and C<$b> are C<$main::a> and C<$main::b> (or C<$::a> and C<$::b>),
 but if you're in the C<FooPack> package, it's the same as typing
 
