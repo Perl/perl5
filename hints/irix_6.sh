@@ -2,31 +2,37 @@
 #
 # original from Krishna Sethuraman, krishna@sgi.com
 #
-# Updated Mon Jul 22 14:52:25 EDT 1996
+# Modified Mon Jul 22 14:52:25 EDT 1996
 # 	Andy Dougherty <doughera@lafcol.lafayette.edu>
 # 	with help from Dean Roehrich <roehrich@cray.com>.
 #   cc -n32 update info from Krishna Sethuraman, krishna@sgi.com.
 #       additional update from Scott Henry, scotth@sgi.com
 
-#       Futzed with by John Stoffel <jfs@fluent.com> on 4/24/1997
-#         - assumes 'cc -n32' by default
-#         - tries to check for various compiler versions and do the right 
-#           thing when it can
-#         - warnings turned off (-n32 messages):
-#            1116 - non-void function should return a value
-#            1048 - cast between pointer-to-object and pointer-to-function
-#            1042 - operand types are incompatible
+# Futzed with by John Stoffel <jfs@fluent.com> on 4/24/1997
+#    - assumes 'cc -n32' by default
+#    - tries to check for various compiler versions and do the right 
+#      thing when it can
+#    - warnings turned off (-n32 messages):
+#       1116 - non-void function should return a value
+#       1048 - cast between pointer-to-object and pointer-to-function
+#       1042 - operand types are incompatible
+
+# Tweaked by Chip Salzenberg <chip@perl.com> on 5/13/97
+#    - don't assume 'cc -n32' if the n32 libm.so is missing
 
 # Use   sh Configure -Dcc='cc -n32' to try compiling with -n32.
 #     or -Dcc='cc -n32 -mips3' (or -mips4) to force (non)portability
 # Don't bother with -n32 unless you have the 7.1 or later compilers.
 #     But there's no quick and light-weight way to check in 6.2.
 
-# Let's assume we want to use 'cc -n32' by default
+# Let's assume we want to use 'cc -n32' by default, unless the
+# necessary libm is missing (which has happened at least twice)
 case "$cc" in
 '')
-    cc='cc -n32'
-    ;;
+    if test -f /usr/lib32/libm.so
+    then
+	cc='cc -n32'
+    fi ;;
 esac
 
 # Check for which compiler we're using
