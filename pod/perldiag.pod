@@ -1128,10 +1128,9 @@ instead.
 =item Cleanup skipped %d active threads
 
 (W) When using threaded Perl, the main thread exited while there were
-still other threads running.  This is not a good sign: you should either
-explicitly join the threads, or let the threads detach themselves, or
-somehow be certain that all the non-main threads have finished.  See
-L<threads>.
+still other threads running.  This is not a good sign: you should
+either explicitly join the threads, or somehow be certain that all
+the non-main threads have finished.  See L<threads>.
 
 =item close() on unopened filehandle %s
 
