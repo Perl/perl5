@@ -13,7 +13,6 @@ Unicode support
 	- a way to set default disciplines for all handle constructors:
 	    use open IN => ":any", OUT => ":utf8", SYS => ":utf16"
     eliminate need for "use utf8;"
-    autoload utf8_heavy.pl's swash routines in swash_init()
     autoload byte.pm when byte:: is seen by the parser
     check uv_to_utf8() calls for buffer overflow
     (see also "Locales", "Regexen", and "Miscellaneous")

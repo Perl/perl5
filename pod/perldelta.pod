@@ -2678,6 +2678,12 @@ operating system libraries is buggy: the %j format numbers the days of
 a month starting from zero, which, while being logical to programmers,
 will cause the subtests 19 to 27 of the lib/posix test may fail.
 
+=head2 Tru64 (aka Digital UNIX, aka DEC OSF/1) lib/sdbm test failure with gcc
+
+If compiled with gcc 2.95 the lib/sdbm test will fail (dump core).
+The cure is to use the vendor cc, it comes with the operating system
+and produces good code.
+
 =head2 UNICOS/mk CC failures during Configure run
 
 In UNICOS/mk the following errors may appear during the Configure run:
