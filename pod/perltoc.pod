@@ -361,16 +361,16 @@ lock, log EXPR, log, lstat EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST,
 mkdir FILENAME,MASK, mkdir FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS,
 msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my EXPR :
 ATTRIBUTES, next LABEL, next, no Module LIST, oct EXPR, oct, open
-FILEHANDLE,MODE,LIST, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
-DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, our EXPR : ATTRIBUTES, pack
-TEMPLATE,LIST, package NAMESPACE, package, pipe READHANDLE,WRITEHANDLE, pop
-ARRAY, pop, pos SCALAR, pos, print FILEHANDLE LIST, print LIST, print,
-printf FILEHANDLE FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION,
-push ARRAY,LIST, q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/,
-quotemeta EXPR, quotemeta, rand EXPR, rand, read
-FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
-DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR, recv
-SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
+FILEHANDLE,EXPR, open FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST,
+open FILEHANDLE, opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, our EXPR
+: ATTRIBUTES, pack TEMPLATE,LIST, package NAMESPACE, package, pipe
+READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
+LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
+LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/, qq/STRING/,
+qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR,
+rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH,
+readdir DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR,
+recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
 OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
 return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
 STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
@@ -3903,18 +3903,19 @@ SvROK_on, SvRV, SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
 SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype, SVt_IV,
 SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
 SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv,
-sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_mg, sv_catpv_mg, sv_catsv,
-sv_catsv_mg, sv_chop, sv_clear, sv_cmp, sv_cmp_locale, sv_dec,
-sv_derived_from, sv_eq, sv_free, sv_gets, sv_grow, sv_inc, sv_insert,
-sv_isa, sv_isobject, sv_len, sv_len_utf8, sv_magic, sv_mortalcopy,
-sv_newmortal, sv_pvn_force, sv_pvutf8n_force, sv_reftype, sv_replace,
-sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
-sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
-sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
-sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg,
-sv_true, sv_unmagic, sv_unref, sv_unref_flags, sv_upgrade, sv_usepvn,
-sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode,
-sv_utf8_upgrade, sv_vcatpvfn, sv_vsetpvfn, THIS, toLOWER, toUPPER,
+sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_flags, sv_catpvn_mg,
+sv_catpv_mg, sv_catsv, sv_catsv_flags, sv_catsv_mg, sv_chop, sv_clear,
+sv_cmp, sv_cmp_locale, sv_dec, sv_derived_from, sv_eq, sv_free, sv_gets,
+sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_len, sv_len_utf8,
+sv_magic, sv_mortalcopy, sv_newmortal, sv_pvn_force, sv_pvn_force_flags,
+sv_pvutf8n_force, sv_reftype, sv_replace, sv_rvweaken, sv_setiv,
+sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg,
+sv_setpviv, sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpv_mg,
+sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setref_uv,
+sv_setsv, sv_setsv_flags, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_true,
+sv_unmagic, sv_unref, sv_unref_flags, sv_upgrade, sv_usepvn, sv_usepvn_mg,
+sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade,
+sv_utf8_upgrade_flags, sv_vcatpvfn, sv_vsetpvfn, THIS, toLOWER, toUPPER,
 utf8n_to_uvchr, utf8n_to_uvuni, utf8_distance, utf8_hop, utf8_length,
 utf8_to_bytes, utf8_to_uvchr, utf8_to_uvuni, uvchr_to_utf8, uvuni_to_utf8,
 warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY,
@@ -4220,7 +4221,7 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Update POSIX.pm for 1003.1-2
 
-=head2 Retargetable installation
+=item Retargetable installation
 
 =item POSIX emulation on non-POSIX systems
 
@@ -4244,9 +4245,9 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Compile to real threaded code
 
-=head2 Structured types
+=item Structured types
 
-=head2 Modifiable $1 et al.
+=item Modifiable $1 et al.
 
 =item Procedural interfaces for IO::*, etc.
 
@@ -4356,11 +4357,11 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item format BOTTOM
 
-=head2 report HANDLE
+=item report HANDLE
 
 =item Generalised want()/caller())
 
-=head2 Named prototypes
+=item Named prototypes
 
 =item Built-in globbing
 
@@ -4471,9 +4472,13 @@ DEFINES, USE_MULTI = define, #PERL_MALLOC = define, CFG = Debug
 
 =item PERL_DESTRUCT_LEVEL
 
+=item Gprof Profiling
+
+-a, -b, -e routine, -f routine, -s, -z
+
 =item Pixie Profiling
 
--h, -l, -p[rodecures], -h[eavy], -i[nvocations], -l[ines], -testcoverage,
+-h, -l, -p[rocedures], -h[eavy], -i[nvocations], -l[ines], -testcoverage,
 -z[ero]
 
 =item CONCLUSION
@@ -4539,6 +4544,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Security Vulnerability Closed
 
 =item Incompatible Changes
+
+=item Future Deprecations
 
 =item Core Enhancements
 
@@ -5681,13 +5688,11 @@ finally close()d
 
 =over 4
 
-=item Prerequisites
+=item Build Prerequisites
 
 =item Getting the perl source
 
 =item Making
-
-	remember to use a hefty wad of stack (I use 2000000)
 
 =item Testing
 
@@ -5862,6 +5867,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building
+
+=item Testing
+
+=item Installation
+
+=back
+
+=item BUILDING AND INSTALLING MODULES
+
+=over 4
+
+=item Building Prerequisites
+
+=item Unpacking CPAN Modules
+
+=item Building Non-XS Modules
+
+=item Building XS Modules
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -5923,6 +5972,8 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =item Portability Between PA-RISC Versions
 
+=item Itanium Processor Family
+
 =item Building Dynamic Extensions on HP-UX
 
 =item The HP ANSI C Compiler
@@ -5938,6 +5989,8 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item NFS filesystems and utime(2)
 
 =item perl -P and //
+
+=item Kernel parameters (maxdsiz)
 
 =back
 
@@ -5988,11 +6041,15 @@ op/lexassign.t, pragma/warnings.t
 
 =head2 perlmpeix, README.mpeix - Perl/iX for HP e3000 MPE
 
-=head1 SYNOPSIS
-
 =over 4
 
+=item SYNOPSIS
+
+=item NOTE
+
 =item What's New
+
+=item Welcome
 
 =item System Requirements
 
@@ -6000,13 +6057,24 @@ op/lexassign.t, pragma/warnings.t
 
 =item Distribution Contents Highlights
 
-README, public_html/feedback.cgi,  4,  6
+README, INSTALL, LIBSHP3K, PERL, .cpan/, lib/, man/,
+public_html/feedback.cgi, src/perl-5.6.0-mpe
+
+=item How to Compile Perl/iX
+
+ 4,  6
 
 =item Getting Started with Perl/iX
 
 =item MPE/iX Implementation Considerations
 
+=item Known Bugs Under Investigation
+
+=item To-Do List
+
 =item Change History
+
+=item Author
 
 =back
 
@@ -6388,6 +6456,33 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 
 =back
 
+=head2 perltru64, README.tru64 - Perl version 5 on Tru64 (formerly known as
+Digital UNIX formerly known as DEC OSF/1) systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Compiling Perl 5 on Tru64
+
+=item Using Large Files with Perl on Tru64
+
+=item Threaded Perl on Tru64
+
+=item 64-bit Perl on Tru64
+
+=item Warnings about floating-point overflow when compiling Perl on Tru64
+
+=back
+
+=item Testing Perl on Tru64
+
+=item AUTHOR
+
+=back
+
 =head2 perlvmesa, README.vmesa - building and installing Perl for VM/ESA.
 
 =over 4
@@ -6404,20 +6499,9 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 
 =item Configure
 
-Don't turn on the compiler optimization flag "-O".  There's a bug in the
-compiler (APAR PQ18812) that generates some bad code the optimizer is on,
-As VM/ESA doesn't fully support the fork() API programs relying on this
-call will not work. I've replaced fork()/exec() with spawn() and the
-standalone exec() with spawn(). This has a side effect when opening unnamed
-pipes in a shell script: there is no child process generated under
-
 =item testing anomalies
 
 =item Usage Hints
-
-When using perl on VM/ESA please keep in mind that the EBCDIC and ASCII
-character sets are different.  Perl builtin functions that may behave
-differently under EBCDIC are mentioned in the perlport.pod document.
 
 =back
 
@@ -6543,6 +6627,48 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
+
+=back
+
+=head2 perlwin32 - Perl under Win32
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
+
+=item Building
+
+=item Testing
+
+=item Installation
+
+=item Usage Hints
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Running Perl Scripts, Miscellaneous Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
 
 =back
 
@@ -8377,13 +8503,9 @@ C<byacc>, C<byteorder>
 C<c>, C<castflags>, C<cat>, C<cc>, C<cccdlflags>, C<ccdlflags>, C<ccflags>,
 C<ccflags_uselargefiles>, C<ccname>, C<ccsymbols>, C<ccversion>, C<cf_by>,
 C<cf_email>, C<cf_time>, C<charsize>, C<chgrp>, C<chmod>, C<chown>,
-C<clocktype>, C<comm>, C<compress>
-
-=item C
-
-C<CONFIGDOTSH>, C<contains>, C<cp>, C<cpio>, C<cpp>, C<cpp_stuff>,
-C<cppccsymbols>, C<cppflags>, C<cpplast>, C<cppminus>, C<cpprun>,
-C<cppstdin>, C<cppsymbols>, C<crosscompile>, C<cryptlib>, C<csh>
+C<clocktype>, C<comm>, C<compress>, C<contains>, C<cp>, C<cpio>, C<cpp>,
+C<cpp_stuff>, C<cppccsymbols>, C<cppflags>, C<cpplast>, C<cppminus>,
+C<cpprun>, C<cppstdin>, C<cppsymbols>, C<crosscompile>, C<cryptlib>, C<csh>
 
 =item d
 
@@ -9292,6 +9414,45 @@ test_f file
 =item BUGS
 
 =item SEE ALSO 
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::Constant - generate XS code to import C header constants
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USAGE
+
+IV, UV, NV, PV, PVN
+
+=item FUNCTIONS
+
+=back
+
+C_stringify NAME
+
+constant_types
+
+memEQ_clause NAME, CHECKED_AT, INDENT
+
+return_clause VALUE, TYPE, INDENT, MACRO
+
+params WHAT
+
+C_constant SUBNAME, DEFAULT_TYPE, TYPES, INDENT, NAMELEN, ITEM.., name,
+type, value, macro
+
+XS_constant PACKAGE, TYPES, SUBNAME, C_SUBNAME
+
+autoload PACKAGE, VERSION
+
+=over 4
 
 =item AUTHOR
 
@@ -10733,6 +10894,49 @@ locale
 
 =back
 
+=head2 I18N::LangTags - functions for dealing with RFC3066-style language
+tags
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+the function is_language_tag($lang1)
+
+the function extract_language_tags($whatever)
+
+the function same_language_tag($lang1, $lang2)
+
+the function similarity_language_tag($lang1, $lang2)
+
+the function is_dialect_of($lang1, $lang2)
+
+the function super_languages($lang1)
+
+the function locale2language_tag($locale_identifier)
+
+the function encode_language_tag($lang1)
+
+the function alternate_language_tags($lang1)
+
+=over 4
+
+=item ABOUT LOWERCASING
+
+=item ABOUT UNICODE PLAINTEXT LANGUAGE TAGS
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=item AUTHOR
+
+=back
+
 =head2 IO - load various IO modules
 
 =over 4
@@ -11587,6 +11791,101 @@ http://lcweb.loc.gov/standards/iso639-2/langhome.html
 =item AUTHOR
 
 =item COPYRIGHT
+
+=back
+
+=head2 Locale::Maketext -- framework for localization
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item QUICK OVERVIEW
+
+=item METHODS
+
+=over 4
+
+=item Construction Methods
+
+$lh = YourProjClass->get_handle( ...langtags... ) || die "lg-handle?";, $lh
+= YourProjClass->get_handleB<()> || die "lg-handle?";, $lh =
+YourProjClass::langname->new();, $lh->init();,
+YourProjClass->fallback_languages(),
+YourProjClass->fallback_language_classes()
+
+=item The "maketext" Method
+
+$lh->fail_with I<or> $lh->fail_with(I<PARAM>), $lh->failure_handler_auto
+
+=item Utility Methods
+
+$language->quant($number, $singular), $language->quant($number, $singular,
+$plural), $language->quant($number, $singular, $plural, $negative),
+$language->numf($number), $language->sprintf($format, @items),
+$language->language_tag(), $language->encoding()
+
+=item Language Handle Attributes and Internals
+
+=back
+
+=item LANGUAGE CLASS HIERARCHIES
+
+=item ENTRIES IN EACH LEXICON
+
+=item BRACKET NOTATION
+
+=item AUTO LEXICONS
+
+=item CONTROLLING LOOKUP FAILURE
+
+=item HOW TO USE MAKETEXT
+
+=item SEE ALSO
+
+=item COPYRIGHT AND DISCLAIMER
+
+=item AUTHOR
+
+=back
+
+=head2 Locale::Maketext::TPJ13 -- article about software localization
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Localization and Perl: gettext breaks, Maketext fixes
+
+=over 4
+
+=item A Localization Horror Story: It Could Happen To You
+
+=item The Linguistic View
+
+=item Breaking gettext
+
+=item Replacing gettext
+
+=item Buzzwords: Abstraction and Encapsulation
+
+=item Buzzword: Isomorphism
+
+=item Buzzword: Inheritance
+
+=item Buzzword: Concision
+
+=item The Devil in the Details
+
+=item The Proof in the Pudding: Localizing Web Sites
+
+=item References
+
+=back
 
 =back
 

@@ -169,6 +169,7 @@ if (-d "pod") {
     perlos2             
     perlos390           
     perlsolaris
+    perltru64
     perlvmesa
     perlvms             
     perlvos             
@@ -190,6 +191,7 @@ if (-d "pod") {
     perlos2             
     perlos390           
     perlsolaris
+    perltru64
     perlvmesa
     perlvms             
     perlvos             

@@ -57,6 +57,7 @@ README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
 README.solaris		Notes about Solaris port
 README.threads		Notes about multithreading
+README.tru64		Notes about Tru64
 README.vmesa		Notes about VM/ESA port
 README.vms		Notes about installing the VMS port
 README.vos		Notes about Stratus VOS port
