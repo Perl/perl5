@@ -3052,7 +3052,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 	if (mg->mg_type == type) {
 	    MGVTBL* vtbl = mg->mg_virtual;
 	    *mgp = mg->mg_moremagic;
-	    if (vtbl && (vtbl->svt_free != NULL))
+	    if (vtbl && vtbl->svt_free)
 		CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
 		if (mg->mg_len >= 0)

@@ -37,8 +37,10 @@ CPerlObj::operator new(size_t nSize, IPerlMem *pvtbl)
 {
     if(pvtbl)
 	return pvtbl->pMalloc(pvtbl, nSize);
-
+#ifndef __MINGW32__
+    /* operator new is supposed to throw std::bad_alloc */
     return NULL;
+#endif
 }
 
 void

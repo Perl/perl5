@@ -66,7 +66,11 @@
 int _CRT_glob = 0;
 #endif
 
-#ifdef __BORLANDC__
+#if defined(__MINGW32__)
+#  define _stat stat
+#endif
+
+#if defined(__BORLANDC__)
 #  define _stat stat
 #  define _utimbuf utimbuf
 #endif
@@ -2553,7 +2557,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     return spawnvp(mode, cmdname, (char * const *)argv);
 #else
     dTHXo;
-    DWORD ret;
+    int ret;
     void* env;
     char* dir;
     STARTUPINFO StartupInfo;
@@ -2630,12 +2634,15 @@ RETRY:
     if (mode == P_NOWAIT) {
 	/* asynchronous spawn -- store handle, return PID */
 	w32_child_handles[w32_num_children] = ProcessInformation.hProcess;
-	ret = w32_child_pids[w32_num_children] = ProcessInformation.dwProcessId;
+	w32_child_pids[w32_num_children] = ProcessInformation.dwProcessId;
+	ret = (int)ProcessInformation.dwProcessId;
 	++w32_num_children;
     }
     else  {
+	DWORD status;
 	WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
-	GetExitCodeProcess(ProcessInformation.hProcess, &ret);
+	GetExitCodeProcess(ProcessInformation.hProcess, &status);
+	ret = (int)status;
 	CloseHandle(ProcessInformation.hProcess);
     }
 
@@ -2646,7 +2653,7 @@ RETVAL:
     PerlEnv_free_childdir(dir);
     Safefree(cmd);
     Safefree(fullcmd);
-    return (int)ret;
+    return ret;
 #endif
 }
 

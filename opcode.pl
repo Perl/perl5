@@ -129,7 +129,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 END
 
 for (@ops) {
-    print "\tPerl_pp_$_,\n";
+    print "\tMEMBER_TO_FPTR(Perl_pp_$_),\n";
 }
 
 print <<END;
@@ -148,7 +148,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 END
 
 for (@ops) {
-    print "\t", &tab(3, "Perl_$check{$_},"), "/* $_ */\n";
+    print "\t", &tab(3, "MEMBER_TO_FPTR(Perl_$check{$_}),"), "\t/* $_ */\n";
 }
 
 print <<END;

@@ -325,7 +325,7 @@ LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 \
 		-lmingw32 -lgcc -lmoldname $(LIBC) -lkernel32
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -g -O2 $(RUNTIME) -DDEBUGGING
+OPTIMIZE	= -g $(RUNTIME) -DDEBUGGING
 LINK_DBG	= -g
 .ELSE
 OPTIMIZE	= -g -O2 $(RUNTIME)
@@ -896,7 +896,7 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ)
 	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
-                --dllname perl.dll \
+                --dllname $(PERLDLL:b).dll \
                 --def perldll.def \
                 --base-file perl.base \
                 --output-exp perl.exp
