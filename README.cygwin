@@ -179,14 +179,15 @@ Undefining this symbol forces Perl to be compiled statically.
 By default Perl uses the malloc() included with the Perl source.  If you
 want to force Perl to build with the system malloc() undefine this symbol.
 
+=item * C<-Uuseperlio>
+
+Undefining this symbol disables the PerlIO abstraction, which is now the
+default.
+
 =item * C<-Dusemultiplicity>
 
 Multiplicity is required when embedding Perl in a C program and using
 more than one interpreter instance.  This works with the Cygwin port.
-
-=item * C<-Duseperlio>
-
-The PerlIO abstraction works with the Cygwin port.
 
 =item * C<-Duse64bitint>
 
