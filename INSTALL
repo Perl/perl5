@@ -238,6 +238,20 @@ defaults from then on.
 After it runs, Configure will perform variable substitution on all the
 *.SH files and offer to run make depend.
 
+=head2 Disabling older versions of Perl
+
+Configure will search for binary compatible versions of previously
+installed perl binaries in the tree that is specified as target tree
+and these will be used by the perl being built.
+
+To disable use of older perl modules, even completely valid pure perl
+modules, you can specify to not include the pathes found:
+
+       sh Configure -Dinc_version_list=none ...
+
+When using the newer perl, you can add these pathes again in the
+$PERL5LIB environment variable or with perl's -I runtime option.
+
 =head2 Altering config.sh variables for C compiler switches etc.
 
 For most users, all of the Configure defaults are fine.  Configure
