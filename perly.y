@@ -42,7 +42,7 @@ dep(void)
 #endif /* !OEMVS && !__OPEN_VM && !POSIX_BC */
 
 #ifdef USE_PURE_BISON
-#define YYLEX_PARAM (&yychar)
+#define YYLEXPARAM (&yychar)
 #endif
 %}
 
