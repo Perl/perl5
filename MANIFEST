@@ -563,6 +563,7 @@ ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
+ext/POSIX/t/is.t		See if POSIX isxxx() work
 ext/POSIX/t/posix.t		See if POSIX works
 ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
 ext/POSIX/t/taint.t		See if POSIX works with taint

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..77\n";
+print "1..78\n";
 
 eval 'print "ok 1\n";';
 
@@ -241,6 +241,12 @@ print $@;
     $@ = 5;
     eval q{};
     print length($@) ? "not ok 46\t# \$\@ = '$@'\n" : "ok 46\n";
+}
+# [perl #9728] used to dump core
+{
+   $eval = eval 'sub { eval "sub { %S }" }';
+   $eval->({});
+   print "ok 47\n";
 }
 
 # DAPM Nov-2002. Perl should now capture the full lexical context during
