@@ -2479,8 +2479,12 @@ PP(pp_accept)
     GV *ggv;
     register IO *nstio;
     register IO *gstio;
-    struct sockaddr saddr;	/* use a struct to avoid alignment problems */
-    Sock_size_t len = sizeof saddr;
+    char namebuf[MAXPATHLEN];
+#if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(MPE) || defined(__QNXNTO__)
+    Sock_size_t len = sizeof (struct sockaddr_in);
+#else
+    Sock_size_t len = sizeof namebuf;
+#endif
     int fd;
 
     ggv = (GV*)POPs;
@@ -2496,7 +2500,7 @@ PP(pp_accept)
 	goto nuts;
 
     nstio = GvIOn(ngv);
-    fd = PerlSock_accept(PerlIO_fileno(IoIFP(gstio)), (struct sockaddr *)&saddr, &len);
+    fd = PerlSock_accept(PerlIO_fileno(IoIFP(gstio)), (struct sockaddr *) namebuf, &len);
     if (fd < 0)
 	goto badexit;
     if (IoIFP(nstio))
@@ -2515,14 +2519,14 @@ PP(pp_accept)
 #endif
 
 #ifdef EPOC
-    len = sizeof saddr;          /* EPOC somehow truncates info */
+    len = sizeof (struct sockaddr_in); /* EPOC somehow truncates info */
     setbuf( IoIFP(nstio), NULL); /* EPOC gets confused about sockets */
 #endif
 #ifdef __SCO_VERSION__
-    len = sizeof saddr;          /* OpenUNIX 8 somehow truncates info */
+    len = sizeof (struct sockaddr_in); /* OpenUNIX 8 somehow truncates info */
 #endif
 
-    PUSHp((char *)&saddr, len);
+    PUSHp(namebuf, len);
     RETURN;
 
 nuts:
