@@ -625,13 +625,17 @@ PP(pp_aassign)
 	    av_extend(ary, lastrelem - relem);
 	    i = 0;
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
+		SV **didstore;
 		sv = NEWSV(28,0);
 		assert(*relem);
 		sv_setsv(sv,*relem);
 		*(relem++) = sv;
-		(void)av_store(ary,i++,sv);
-		if (magic)
+		didstore = av_store(ary,i++,sv);
+		if (magic) {
 		    mg_set(sv);
+		    if (!didstore)
+			SvREFCNT_dec(sv);
+		}
 		TAINT_NOT;
 	    }
 	    break;
@@ -644,6 +648,7 @@ PP(pp_aassign)
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
 		    STRLEN len;
+		    HE *didstore;
 		    if (*relem)
 			sv = *(relem++);
 		    else
@@ -652,9 +657,12 @@ PP(pp_aassign)
 		    if (*relem)
 			sv_setsv(tmpstr,*relem);	/* value */
 		    *(relem++) = tmpstr;
-		    (void)hv_store_ent(hash,sv,tmpstr,0);
-		    if (magic)
+		    didstore = hv_store_ent(hash,sv,tmpstr,0);
+		    if (magic) {
 			mg_set(tmpstr);
+			if (!didstore)
+			    SvREFCNT_dec(tmpstr);
+		    }
 		    TAINT_NOT;
 		}
 		if (relem == lastrelem)
