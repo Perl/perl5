@@ -56,13 +56,22 @@ struct xpvhv {
  * (a) the hashed data being interpreted as "unsigned char" (new since 5.8,
  *     a "char" can be either signed or signed, depending on the compiler)
  * (b) catering for old code that uses a "char"
+ *
  * The "hash seed" feature was added in Perl 5.8.1 to perturb the results
  * to avoid "algorithmic complexity attacks".
+ *
+ * If USE_HASH_SEED is defined, hash randomisation is done by default
+ * If USE_HASH_SEED_EXPLICIT is defined, hash randomisation is done
+ * only if the environment variable PERL_HASH_SEED is set.
+ * For maximal control, one can define PERL_HASH_SEED.
+ * (see also erl.c:perl_parse()).
  */
-#if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
-#   define PERL_HASH_SEED	PL_hash_seed
-#else
-#   define PERL_HASH_SEED	0
+#ifndef PERL_HASH_SEED
+#   if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
+#       define PERL_HASH_SEED	PL_hash_seed
+#   else
+#       define PERL_HASH_SEED	0
+#   endif
 #endif
 #define PERL_HASH(hash,str,len) \
      STMT_START	{ \
