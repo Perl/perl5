@@ -396,7 +396,6 @@ our $foo;
 EXPECT
 "our" variable $foo redeclared at - line 9.
 	(Did you mean "local" instead of "our"?)
-Name "Foo::foo" used only once: possible typo at - line 11.
 ########
 
 --FILE-- abc

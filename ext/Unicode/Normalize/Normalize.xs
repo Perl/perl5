@@ -146,10 +146,10 @@ void sv_cat_decompHangul (SV* sv, UV uv)
 MODULE = Unicode::Normalize	PACKAGE = Unicode::Normalize
 
 SV*
-decompose(arg, compat)
+decompose(arg, compat = &PL_sv_no)
     SV * arg
     SV * compat
-  PROTOTYPE: $
+  PROTOTYPE: $;$
   PREINIT:
     UV uv;
     SV *src, *dst;
@@ -275,7 +275,7 @@ compose(arg)
 
     s = (U8*)SvPV(src, srclen);
     e = s + srclen;
-    dstlen = srclen + 1; /* equal or shorter, XXX */
+    dstlen = srclen + 1;
     dst = newSV(dstlen);
     (void)SvPOK_only(dst);
     SvUTF8_on(dst);
@@ -317,6 +317,16 @@ compose(arg)
 	/* S + C + S => S-S + C would be also blocked. */
 		if( uvComp && ! isExclusion(uvComp) && preCC <= curCC)
 		{
+		    STRLEN leftcur, rightcur, dstcur;
+		    leftcur  = UNISKIP(uvComp);
+		    rightcur = UNISKIP(uvS) + UNISKIP(uv);
+
+		    if (leftcur > rightcur) {
+			dstcur = d - (U8*)SvPVX(dst);
+			dstlen += leftcur - rightcur;
+			d = (U8*)SvGROW(dst,dstlen) + dstcur;
+		    }
+
 		    /* preCC not changed to curCC */
 		    uvS = uvComp;
 	        } else if (! curCC && p < e) { /* blocked */
@@ -328,15 +338,15 @@ compose(arg)
 	    }
 	}
 	d = uvuni_to_utf8(d, uvS); /* starter (composed or not) */
-	if((tmplen = t - tmp_start)) { /* uncomposed combining char */
+	tmplen = t - tmp_start;
+	if (tmplen) { /* uncomposed combining char */
 	    t = (U8*)SvPVX(tmp);
 	    while(tmplen--) *d++ = *t++;
 	}
 	uvS = uv;
     } /* for */
-    e = d; /* end of dst */
-    d = (U8*)SvPVX(dst);
-    SvCUR_set(dst, e - d);
+
+    SvCUR_set(dst, d - (U8*)SvPVX(dst));
     RETVAL = dst;
   OUTPUT:
     RETVAL

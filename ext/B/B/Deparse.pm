@@ -21,6 +21,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
 $VERSION = 0.62;
 use strict;
+use vars qw/$AUTOLOAD/;
 use warnings ();
 
 # Changes between 0.50 and 0.51:
@@ -951,89 +952,13 @@ sub maybe_my {
 
 # pp_padany -- does not exist after parsing
 
-sub pp_enter { # see also leave
-    carp "unexpected OP_ENTER";
-    return "XXX";
-}
-
-sub pp_pushmark { # see also list
-    carp "unexpected OP_PUSHMARK";
-    return "XXX";
-}
-
-sub pp_leavesub { # see also deparse_sub
-    carp "unexpected OP_LEAVESUB";
-    return "XXX";
-}
-
-sub pp_leavewrite { # see also deparse_format
-    carp "unexpected OP_LEAVEWRITE";
-    return "XXX";
-}
-
-sub pp_method { # see also entersub
-    carp "unexpected OP_METHOD";
-    return "XXX";
-}
-
-sub pp_regcmaybe { # see also regcomp
-    carp "unexpected OP_REGCMAYBE";
-    return "XXX";
-}
-
-sub pp_regcreset { # see also regcomp
-    carp "unexpected OP_REGCRESET";
-    return "XXX";
-}
-
-sub pp_substcont { # see also subst
-    carp "unexpected OP_SUBSTCONT";
-    return "XXX";
-}
-
-sub pp_grepstart { # see also grepwhile
-    carp "unexpected OP_GREPSTART";
-    return "XXX";
-}
-
-sub pp_mapstart { # see also mapwhile
-    carp "unexpected OP_MAPSTART";
-    return "XXX";
-}
-
-sub pp_method_named {
-    carp "unexpected OP_METHOD_NAMED";
-    return "XXX";
-}
-
-sub pp_flip { # see also flop
-    carp "unexpected OP_FLIP";
-    return "XXX";
-}
-
-sub pp_iter { # see also leaveloop
-    carp "unexpected OP_ITER";
-    return "XXX";
-}
-
-sub pp_enteriter { # see also leaveloop
-    carp "unexpected OP_ENTERITER";
-    return "XXX";
-}
-
-sub pp_enterloop { # see also leaveloop
-    carp "unexpected OP_ENTERLOOP";
-    return "XXX";
-}
-
-sub pp_leaveeval { # see also entereval
-    carp "unexpected OP_LEAVEEVAL";
-    return "XXX";
-}
-
-sub pp_entertry { # see also leavetry
-    carp "unexpected OP_ENTERTRY";
-    return "XXX";
+sub AUTOLOAD {
+    if ($AUTOLOAD =~ s/^.*::pp_//) {
+	warn "unexpected OP_".uc $AUTOLOAD;
+	return "XXX";
+    } else {
+	die "Undefined subroutine $AUTOLOAD called";
+    }
 }
 
 # $root should be the op which represents the root of whatever
@@ -2859,9 +2784,9 @@ sub check_proto {
     my $doneok = 0;
     my @reals;
     # An unbackslashed @ or % gobbles up the rest of the args
-    $proto =~ s/([^\\]|^)([@%])(.*)$/$1$2/;
+    1 while $proto =~ s/(?<!\\)([@%])[^\]]+$/$1/;
     while ($proto) {
-	$proto =~ s/^ *([\\]?[\$\@&%*]|;)//;
+	$proto =~ s/^(\\?[\$\@&%*]|\\\[[\$\@&%*]+\]|;)//;
 	my $chr = $1;
 	if ($chr eq "") {
 	    return "&" if @args;
@@ -2899,19 +2824,21 @@ sub check_proto {
 		      return "&";
 		  }
 	    } elsif (substr($chr, 0, 1) eq "\\") {
-		$chr = substr($chr, 1);
+		$chr =~ tr/\\[]//d;
 		if ($arg->name =~ /^s?refgen$/ and
 		    !null($real = $arg->first) and
-		    ($chr eq "\$" && is_scalar($real->first)
-		     or ($chr eq "\@"
+		    ($chr =~ /\$/ && is_scalar($real->first)
+		     or ($chr =~ /@/
+			 && class($real->first->sibling) ne 'NULL'
 			 && $real->first->sibling->name
 			 =~ /^(rv2|pad)av$/)
-		     or ($chr eq "%"
+		     or ($chr =~ /%/
+			 && class($real->first->sibling) ne 'NULL'
 			 && $real->first->sibling->name
 			 =~ /^(rv2|pad)hv$/)
-		     #or ($chr eq "&" # This doesn't work
+		     #or ($chr =~ /&/ # This doesn't work
 		     #   && $real->first->name eq "rv2cv")
-		     or ($chr eq "*"
+		     or ($chr =~ /\*/
 			 && $real->first->name eq "rv2gv")))
 		  {
 		      push @reals, $self->deparse($real, 6);

@@ -24,7 +24,12 @@ closedir(OP);
 ## This range will have to adjust as the number of tests expands,
 ## as it's counting the number of .t files in src/t
 ##
-if (@D > 100 && @D < 120) { print "ok 2\n"; } else { print "not ok 2\n"; }
+my ($min, $max) = (115, 135);
+if (@D > $min && @D < $max) { print "ok 2\n"; }
+else {
+    printf "not ok 2 # counting op/*.t, expect $min < %d < $max files\n",
+      scalar @D;
+}
 
 @R = sort @D;
 @G = sort <op/*.t>;

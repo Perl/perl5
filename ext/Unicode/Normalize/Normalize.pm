@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 our $PACKAGE = __PACKAGE__;
 
 require Exporter;
@@ -22,24 +22,24 @@ our %EXPORT_TAGS = ( all => [ @EXPORT, @EXPORT_OK ] );
 
 bootstrap Unicode::Normalize $VERSION;
 
-use constant CANON  => 0;
 use constant COMPAT => 1;
 
-sub NFD  ($) { reorder(decompose($_[0], CANON )) }
+sub NFD  ($) { reorder(decompose($_[0])) }
 sub NFKD ($) { reorder(decompose($_[0], COMPAT)) }
 
-sub NFC  ($) { compose(reorder(decompose($_[0], CANON ))) }
+sub NFC  ($) { compose(reorder(decompose($_[0]))) }
 sub NFKC ($) { compose(reorder(decompose($_[0], COMPAT))) }
 
 sub normalize($$)
 {
-  my $form = shift;
-  $form =~ s/^NF//;
-  $form eq 'D'  ? NFD ($_[0]) :
-  $form eq 'C'  ? NFC ($_[0]) :
-  $form eq 'KD' ? NFKD($_[0]) :
-  $form eq 'KC' ? NFKC($_[0]) :
-    croak $PACKAGE."::normalize: invalid form name: $form";
+    my $form = shift;
+    $form =~ s/^NF//;
+    return
+	$form eq 'D'  ? NFD ($_[0]) :
+	$form eq 'C'  ? NFC ($_[0]) :
+	$form eq 'KD' ? NFKD($_[0]) :
+	$form eq 'KC' ? NFKC($_[0]) :
+      croak $PACKAGE."::normalize: invalid form name: $form";
 }
 
 1;
@@ -69,7 +69,7 @@ Unicode::Normalize - normalized forms of Unicode text
 
 =head1 DESCRIPTION
 
-=head2 Normalization
+=head2 Normalization Forms
 
 =over 4
 
@@ -107,7 +107,7 @@ As C<$form_name>, one of the following names must be given.
 
 These functions are interface of character data used internally.
 If you want only to get unicode normalization forms, 
-you need not to call them by yourself.
+you doesn't need call them by yourself.
 
 =over 4
 
@@ -123,7 +123,7 @@ If it is not decomposable, returns undef.
 
 =item C<$uv_composite = getComposite($uv_here, $uv_next)>
 
-If the couple of two characters here and next (as codepoints) is composable
+If two characters here and next (as codepoints) are composable
 (including Hangul Jamo/Syllables and Exclusions),
 returns the codepoint of the composite.
 
