@@ -70,8 +70,7 @@
 #define PL_modcount		(vTHX->Tmodcount)
 #define PL_na			(vTHX->Tna)
 #define PL_nrs			(vTHX->Tnrs)
-#define PL_ofs			(vTHX->Tofs)
-#define PL_ofslen		(vTHX->Tofslen)
+#define PL_ofs_sv		(vTHX->Tofs_sv)
 #define PL_op			(vTHX->Top)
 #define PL_opsave		(vTHX->Topsave)
 #define PL_protect		(vTHX->Tprotect)
@@ -341,8 +340,7 @@
 #define PL_origargv		(PERL_GET_INTERP->Iorigargv)
 #define PL_origenviron		(PERL_GET_INTERP->Iorigenviron)
 #define PL_origfilename		(PERL_GET_INTERP->Iorigfilename)
-#define PL_ors			(PERL_GET_INTERP->Iors)
-#define PL_orslen		(PERL_GET_INTERP->Iorslen)
+#define PL_ors_sv		(PERL_GET_INTERP->Iors_sv)
 #define PL_osname		(PERL_GET_INTERP->Iosname)
 #define PL_pad_reset_pending	(PERL_GET_INTERP->Ipad_reset_pending)
 #define PL_padix		(PERL_GET_INTERP->Ipadix)
@@ -621,8 +619,7 @@
 #define PL_origargv		(vTHX->Iorigargv)
 #define PL_origenviron		(vTHX->Iorigenviron)
 #define PL_origfilename		(vTHX->Iorigfilename)
-#define PL_ors			(vTHX->Iors)
-#define PL_orslen		(vTHX->Iorslen)
+#define PL_ors_sv		(vTHX->Iors_sv)
 #define PL_osname		(vTHX->Iosname)
 #define PL_pad_reset_pending	(vTHX->Ipad_reset_pending)
 #define PL_padix		(vTHX->Ipadix)
@@ -775,8 +772,7 @@
 #define PL_modcount		(aTHXo->interp.Tmodcount)
 #define PL_na			(aTHXo->interp.Tna)
 #define PL_nrs			(aTHXo->interp.Tnrs)
-#define PL_ofs			(aTHXo->interp.Tofs)
-#define PL_ofslen		(aTHXo->interp.Tofslen)
+#define PL_ofs_sv		(aTHXo->interp.Tofs_sv)
 #define PL_op			(aTHXo->interp.Top)
 #define PL_opsave		(aTHXo->interp.Topsave)
 #define PL_protect		(aTHXo->interp.Tprotect)
@@ -1038,8 +1034,7 @@
 #define PL_origargv		(aTHXo->interp.Iorigargv)
 #define PL_origenviron		(aTHXo->interp.Iorigenviron)
 #define PL_origfilename		(aTHXo->interp.Iorigfilename)
-#define PL_ors			(aTHXo->interp.Iors)
-#define PL_orslen		(aTHXo->interp.Iorslen)
+#define PL_ors_sv		(aTHXo->interp.Iors_sv)
 #define PL_osname		(aTHXo->interp.Iosname)
 #define PL_pad_reset_pending	(aTHXo->interp.Ipad_reset_pending)
 #define PL_padix		(aTHXo->interp.Ipadix)
@@ -1319,8 +1314,7 @@
 #define PL_Iorigargv		PL_origargv
 #define PL_Iorigenviron		PL_origenviron
 #define PL_Iorigfilename	PL_origfilename
-#define PL_Iors			PL_ors
-#define PL_Iorslen		PL_orslen
+#define PL_Iors_sv		PL_ors_sv
 #define PL_Iosname		PL_osname
 #define PL_Ipad_reset_pending	PL_pad_reset_pending
 #define PL_Ipadix		PL_padix
@@ -1469,8 +1463,7 @@
 #define PL_modcount		(aTHX->Tmodcount)
 #define PL_na			(aTHX->Tna)
 #define PL_nrs			(aTHX->Tnrs)
-#define PL_ofs			(aTHX->Tofs)
-#define PL_ofslen		(aTHX->Tofslen)
+#define PL_ofs_sv		(aTHX->Tofs_sv)
 #define PL_op			(aTHX->Top)
 #define PL_opsave		(aTHX->Topsave)
 #define PL_protect		(aTHX->Tprotect)
@@ -1606,8 +1599,7 @@
 #define PL_Tmodcount		PL_modcount
 #define PL_Tna			PL_na
 #define PL_Tnrs			PL_nrs
-#define PL_Tofs			PL_ofs
-#define PL_Tofslen		PL_ofslen
+#define PL_Tofs_sv		PL_ofs_sv
 #define PL_Top			PL_op
 #define PL_Topsave		PL_opsave
 #define PL_Tprotect		PL_protect

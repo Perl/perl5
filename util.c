@@ -3643,8 +3643,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_nrs = newSVsv(t->Tnrs);
     PL_rs = SvREFCNT_inc(PL_nrs);
     PL_last_in_gv = Nullgv;
-    PL_ofslen = t->Tofslen;
-    PL_ofs = savepvn(t->Tofs, PL_ofslen);
+    PL_ofs_sv = SvREFCNT_inc(PL_ofs_sv);
     PL_defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
     PL_chopset = t->Tchopset;
     PL_bodytarget = newSVsv(t->Tbodytarget);
@@ -3961,7 +3960,7 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
     if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
 	if (name && *name)
 	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for %sput",
-			name, 
+			name,
 			(op == OP_phoney_INPUT_ONLY ? "in" : "out"));
 	else
 	    Perl_warner(aTHX_ WARN_IO, "Filehandle opened only for %sput",

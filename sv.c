@@ -5706,7 +5706,7 @@ as a reversal of C<newSVrv>.  The C<cflags> argument can contain
 C<SV_IMMEDIATE_UNREF> to force the reference count to be decremented
 (otherwise the decrementing is conditional on the reference count being
 different from one or the reference being a readonly SV).
-See C<SvROK_off>.  
+See C<SvROK_off>.
 
 =cut
 */
@@ -5736,7 +5736,7 @@ Perl_sv_unref_flags(pTHX_ SV *sv, U32 flags)
 Unsets the RV status of the SV, and decrements the reference count of
 whatever was being referenced by the RV.  This can almost be thought of
 as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
-being zero.  See C<SvROK_off>.  
+being zero.  See C<SvROK_off>.
 
 =cut
 */
@@ -7948,8 +7948,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_laststype	= proto_perl->Ilaststype;
     PL_mess_sv		= Nullsv;
 
-    PL_orslen		= proto_perl->Iorslen;
-    PL_ors		= SAVEPVN(proto_perl->Iors, PL_orslen);
+    PL_ors_sv		= sv_dup_inc(proto_perl->Iors_sv);
     PL_ofmt		= SAVEPV(proto_perl->Iofmt);
 
     /* interpreter atexit processing */
@@ -8232,8 +8231,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_nrs		= sv_dup_inc(proto_perl->Tnrs);
     PL_rs		= sv_dup_inc(proto_perl->Trs);
     PL_last_in_gv	= gv_dup(proto_perl->Tlast_in_gv);
-    PL_ofslen		= proto_perl->Tofslen;
-    PL_ofs		= SAVEPVN(proto_perl->Tofs, PL_ofslen);
+    PL_ofs_sv		= sv_dup_inc(proto_perl->Tofs_sv);
     PL_defoutgv		= gv_dup_inc(proto_perl->Tdefoutgv);
     PL_chopset		= proto_perl->Tchopset;	/* XXX never deallocated */
     PL_toptarget	= sv_dup_inc(proto_perl->Ttoptarget);

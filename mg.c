@@ -444,10 +444,6 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	return 0;
-    case ',':
-	return (STRLEN)PL_ofslen;
-    case '\\':
-	return (STRLEN)PL_orslen;
     }
     magic_get(sv,mg);
     if (!SvPOK(sv) && SvNIOK(sv)) {
@@ -719,10 +715,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0 );
 	break;
     case ',':
-	sv_setpvn(sv,PL_ofs,PL_ofslen);
 	break;
     case '\\':
-	sv_setpvn(sv,PL_ors,PL_orslen);
 	break;
     case '#':
 	sv_setpv(sv,PL_ofmt);
@@ -1817,21 +1811,24 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_rs = SvREFCNT_inc(PL_nrs);
 	break;
     case '\\':
-	if (PL_ors)
-	    Safefree(PL_ors);
+	if (PL_ors_sv)
+	    SvREFCNT_dec(PL_ors_sv);
 	if (SvOK(sv) || SvGMAGICAL(sv)) {
-	    s = SvPV(sv,PL_orslen);
-	    PL_ors = savepvn(s,PL_orslen);
+	    PL_ors_sv = newSVsv(sv);
 	}
 	else {
-	    PL_ors = Nullch;
-	    PL_orslen = 0;
+	    PL_ors_sv = Nullsv;
 	}
 	break;
     case ',':
-	if (PL_ofs)
-	    Safefree(PL_ofs);
-	PL_ofs = savepv(SvPV(sv, PL_ofslen));
+	if (PL_ofs_sv)
+	    SvREFCNT_dec(PL_ofs_sv);
+	if (SvOK(sv) || SvGMAGICAL(sv)) {
+	    PL_ofs_sv = newSVsv(sv);
+	}
+	else {
+	    PL_ofs_sv = Nullsv;
+	}
 	break;
     case '#':
 	if (PL_ofmt)
