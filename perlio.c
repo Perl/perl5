@@ -2446,21 +2446,25 @@ PerlIO_importFILE(FILE *stdio, int fl)
 	/* We need to probe to see how we can open the stream
 	   so start with read/write and then try write and read
 	   we dup() so that we can fclose without loosing the fd.
+
+	   Note that the errno value set by a failing fdopen
+	   varies between stdio implementations.
 	 */
 	int fd = PerlLIO_dup(fileno(stdio));
 	char *mode = "r+";
 	FILE *f2 = fdopen(fd, mode);
 	PerlIOStdio *s;
-	if (!f2 && errno == EINVAL) {
+	if (!f2) {
 	    mode = "w";
 	    f2 = fdopen(fd, mode);
 	}
-	if (!f2 && errno == EINVAL) {
+	if (!f2) {
 	    mode = "r";
 	    f2 = fdopen(fd, mode);
 	}
 	if (!f2) {
 	    /* Don't seem to be able to open */
+	    PerlLIO_close(fd);
 	    return f;
 	}
 	fclose(f2);
