@@ -324,13 +324,19 @@ sub utf_to_utf {
     &_utf_to_utf;
 }
 
+use Carp;
+
 sub from_to
 {
  my ($string,$from,$to,$check) = @_;
  my $f = __PACKAGE__->getEncoding($from);
+ croak("Unknown encoding '$from'") unless $f;
  my $t = __PACKAGE__->getEncoding($to);
+ croak("Unknown encoding '$to'") unless $t;
  my $uni = $f->toUnicode($string,$check);
+ return undef if ($check && length($string));
  $string = $t->fromUnicode($uni,$check);
+ return undef if ($check && length($uni));
  return length($_[0] = $string);
 }
 
@@ -361,8 +367,11 @@ sub getEncoding
  my ($class,$name) = @_;
  unless (exists $encoding{$name})
   {
-   my $file = __FILE__;
-   $file =~ s#\.pm$#/$name.enc#;
+   my $file;
+   foreach my $dir (@INC)
+    {
+     last if -f ($file = "$dir/Encode/$name.enc");
+    }
    if (open(my $fh,$file))
     {
      my $type;
@@ -376,7 +385,7 @@ sub getEncoding
      $encoding{$name} = $class->read($fh,$name,$type);
     }
   }
- return $encoding{$name} if exists $encoding{$name};
+ return $encoding{$name};
 }
 
 package Encode::Unicode;
@@ -455,28 +464,37 @@ sub representation
 
 sub toUnicode
 {
- my ($obj,$str) = @_;
+ my ($obj,$str,$chk) = @_;
  my $rep   = $obj->{'Rep'};
  my $touni = $obj->{'ToUni'};
  my $uni   = '';
  while (length($str))
   {
    my $ch = ord(substr($str,0,1,''));
+   my $x;
    if (&$rep($ch) eq 'C')
     {
-     $uni .= $touni->[0][$ch];
+     $x = $touni->[0][$ch];
     }
    else
     {
-     $uni .= $touni->[$ch][ord(substr($str,0,1,''))];
+     $x = $touni->[$ch][ord(substr($str,0,1,''))];
     }
+   unless (defined $x)
+    {
+     last if $chk;
+     # What do we do here ?
+     $x = '';
+    }
+   $uni .= $x;
   }
+ $_[1] = $str if $chk;
  return $uni;
 }
 
 sub fromUnicode
 {
- my ($obj,$uni) = @_;
+ my ($obj,$uni,$chk) = @_;
  my $fmuni = $obj->{'FmUni'};
  my $str   = '';
  my $def   = $obj->{'Def'};
@@ -484,9 +502,14 @@ sub fromUnicode
   {
    my $ch = substr($uni,0,1,'');
    my $x  = $fmuni->{$ch};
-   $x = $def unless defined $x;
-   $str  .= $x;
+   unless (defined $x)
+    {
+     last if ($chk);
+     $x = $def;
+    }
+   $str .= $x;
   }
+ $_[1] = $uni if $chk;
  return $str;
 }
 
