@@ -46,8 +46,8 @@ a[b-d]	aac	y	$&	ac
 a[-b]	a-	y	$&	a-
 a[b-]	a-	y	$&	a-
 a[b-a]	-	c	-	Invalid [] range "b-a" before HERE mark in regex m/a[b-a << HERE ]/
-a[]b	-	c	-	Unmatched [ before HERE mark in regex m/a[ << HERE ]b/ at (eval 96) line 1, <TESTS> line 49.
-a[	-	c	-	Unmatched [ before HERE mark in regex m/a[ << HERE / at (eval 97) line 1, <TESTS> line 50.
+a[]b	-	c	-	Unmatched [ before HERE mark in regex m/a[ << HERE ]b/
+a[	-	c	-	Unmatched [ before HERE mark in regex m/a[ << HERE /
 a]	a]	y	$&	a]
 a[]]b	a]b	y	$&	a]b
 a[^bc]d	aed	y	$&	aed
@@ -95,21 +95,21 @@ a[\S]b	a-b	y	-	-
 ab|cd	abc	y	$&	ab
 ab|cd	abcd	y	$&	ab
 ()ef	def	y	$&-$1	ef-
-*a	-	c	-	Quantifier follows nothing before HERE mark in regex m/* << HERE a/ at (eval 192) line 1, <TESTS> line 98.
-(*)b	-	c	-	Quantifier follows nothing before HERE mark in regex m/(* << HERE )b/ at (eval 193) line 1, <TESTS> line 99.
+*a	-	c	-	Quantifier follows nothing before HERE mark in regex m/* << HERE a/
+(*)b	-	c	-	Quantifier follows nothing before HERE mark in regex m/(* << HERE )b/
 $b	b	n	-	-
 a\	-	c	-	Search pattern not terminated
 a\(b	a(b	y	$&-$1	a(b-
 a\(*b	ab	y	$&	ab
 a\(*b	a((b	y	$&	a((b
 a\\b	a\b	y	$&	a\b
-abc)	-	c	-	Unmatched ) before HERE mark in regex m/abc) << HERE / at (eval 205) line 1, <TESTS> line 106.
-(abc	-	c	-	Unmatched ( before HERE mark in regex m/( << HERE abc/ at (eval 206) line 1, <TESTS> line 107.
+abc)	-	c	-	Unmatched ) before HERE mark in regex m/abc) << HERE /
+(abc	-	c	-	Unmatched ( before HERE mark in regex m/( << HERE abc/
 ((a))	abc	y	$&-$1-$2	a-a-a
 (a)b(c)	abc	y	$&-$1-$2	abc-a-c
 a+b+c	aabbabc	y	$&	abc
 a{1,}b{1,}c	aabbabc	y	$&	abc
-a**	-	c	-	Nested quantifiers before HERE mark in regex m/a** << HERE / at (eval 215) line 1, <TESTS> line 112.
+a**	-	c	-	Nested quantifiers before HERE mark in regex m/a** << HERE /
 a.+?c	abcabc	y	$&	abc
 (a+|b)*	ab	y	$&-$1	ab-b
 (a+|b){0,}	ab	y	$&-$1	ab-b
@@ -117,7 +117,7 @@ a.+?c	abcabc	y	$&	abc
 (a+|b){1,}	ab	y	$&-$1	ab-b
 (a+|b)?	ab	y	$&-$1	a-a
 (a+|b){0,1}	ab	y	$&-$1	a-a
-)(	-	c	-	Unmatched ) before HERE mark in regex m/) << HERE (/ at (eval 230) line 1, <TESTS> line 120.
+)(	-	c	-	Unmatched ) before HERE mark in regex m/) << HERE (/
 [^ab]*	cde	y	$&	cde
 abc		n	-	-
 a*		y	$&	
@@ -219,8 +219,8 @@ a[-]?c	ac	y	$&	ac
 'a[-b]'i	A-	y	$&	A-
 'a[b-]'i	A-	y	$&	A-
 'a[b-a]'i	-	c	-	Invalid [] range "b-a" before HERE mark in regex m/a[b-a << HERE ]/
-'a[]b'i	-	c	-	Unmatched [ before HERE mark in regex m/a[ << HERE ]b/ at (eval 431) line 1, <TESTS> line 222.
-'a['i	-	c	-	Unmatched [ before HERE mark in regex m/a[ << HERE / at (eval 432) line 1, <TESTS> line 223.
+'a[]b'i	-	c	-	Unmatched [ before HERE mark in regex m/a[ << HERE ]b/
+'a['i	-	c	-	Unmatched [ before HERE mark in regex m/a[ << HERE /
 'a]'i	A]	y	$&	A]
 'a[]]b'i	A]B	y	$&	A]B
 'a[^bc]d'i	AED	y	$&	AED
@@ -232,21 +232,21 @@ a[-]?c	ac	y	$&	ac
 'ab|cd'i	ABC	y	$&	AB
 'ab|cd'i	ABCD	y	$&	AB
 '()ef'i	DEF	y	$&-$1	EF-
-'*a'i	-	c	-	Quantifier follows nothing before HERE mark in regex m/* << HERE a/ at (eval 455) line 1, <TESTS> line 235.
-'(*)b'i	-	c	-	Quantifier follows nothing before HERE mark in regex m/(* << HERE )b/ at (eval 456) line 1, <TESTS> line 236.
+'*a'i	-	c	-	Quantifier follows nothing before HERE mark in regex m/* << HERE a/
+'(*)b'i	-	c	-	Quantifier follows nothing before HERE mark in regex m/(* << HERE )b/
 '$b'i	B	n	-	-
 'a\'i	-	c	-	Search pattern not terminated
 'a\(b'i	A(B	y	$&-$1	A(B-
 'a\(*b'i	AB	y	$&	AB
 'a\(*b'i	A((B	y	$&	A((B
 'a\\b'i	A\B	y	$&	A\B
-'abc)'i	-	c	-	Unmatched ) before HERE mark in regex m/abc) << HERE / at (eval 468) line 1, <TESTS> line 243.
-'(abc'i	-	c	-	Unmatched ( before HERE mark in regex m/( << HERE abc/ at (eval 469) line 1, <TESTS> line 244.
+'abc)'i	-	c	-	Unmatched ) before HERE mark in regex m/abc) << HERE /
+'(abc'i	-	c	-	Unmatched ( before HERE mark in regex m/( << HERE abc/
 '((a))'i	ABC	y	$&-$1-$2	A-A-A
 '(a)b(c)'i	ABC	y	$&-$1-$2	ABC-A-C
 'a+b+c'i	AABBABC	y	$&	ABC
 'a{1,}b{1,}c'i	AABBABC	y	$&	ABC
-'a**'i	-	c	-	Nested quantifiers before HERE mark in regex m/a** << HERE / at (eval 478) line 1, <TESTS> line 249.
+'a**'i	-	c	-	Nested quantifiers before HERE mark in regex m/a** << HERE /
 'a.+?c'i	ABCABC	y	$&	ABC
 'a.*?c'i	ABCABC	y	$&	ABC
 'a.{0,5}?c'i	ABCABC	y	$&	ABC
@@ -257,7 +257,7 @@ a[-]?c	ac	y	$&	ac
 '(a+|b)?'i	AB	y	$&-$1	A-A
 '(a+|b){0,1}'i	AB	y	$&-$1	A-A
 '(a+|b){0,1}?'i	AB	y	$&-$1	-
-')('i	-	c	-	Unmatched ) before HERE mark in regex m/) << HERE (/ at (eval 499) line 1, <TESTS> line 260.
+')('i	-	c	-	Unmatched ) before HERE mark in regex m/) << HERE (/
 '[^ab]*'i	CDE	y	$&	CDE
 'abc'i		n	-	-
 'a*'i		y	$&	
@@ -397,10 +397,10 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 '(ab)\d\1'i	ab4Ab	y	$1	ab
 foo\w*\d{4}baz	foobar1234baz	y	$&	foobar1234baz
 a(?{})b	cabd	y	$&	ab
-a(?{)b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced before HERE mark in regex m/a(?{ << HERE )b/ at (eval 780) line 1, <TESTS> line 400.
-a(?{{})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced before HERE mark in regex m/a(?{ << HERE {})b/ at (eval 781) line 1, <TESTS> line 401.
+a(?{)b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced before HERE mark in regex m/a(?{ << HERE )b/
+a(?{{})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced before HERE mark in regex m/a(?{ << HERE {})b/
 a(?{}})b	-	c	-	
-a(?{"{"})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced before HERE mark in regex m/a(?{ << HERE "{"})b/ at (eval 783) line 1, <TESTS> line 403.
+a(?{"{"})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced before HERE mark in regex m/a(?{ << HERE "{"})b/
 a(?{"\{"})b	cabd	y	$&	ab
 a(?{"{"}})b	-	c	-	Unmatched right curly bracket
 a(?{$bl="\{"}).b	caxbd	y	$bl	{
@@ -441,7 +441,7 @@ x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ^(\(+)?blah(?(1)(\)))$	blah	y	($2)	()
 ^(\(+)?blah(?(1)(\)))$	blah)	n	-	-
 ^(\(+)?blah(?(1)(\)))$	(blah	n	-	-
-(?(1?)a|b)	a	c	-	Switch condition not recognized before HERE mark in regex m/(?(1? << HERE )a|b)/ at (eval 868) line 1, <TESTS> line 444.
+(?(1?)a|b)	a	c	-	Switch condition not recognized before HERE mark in regex m/(?(1? << HERE )a|b)/
 (?(1)a|b|c)	a	c	-	Switch (?(condition)... contains too many branches
 (?(?{0})a|b)	a	n	-	-
 (?(?{0})b|a)	a	y	$&	a
@@ -473,7 +473,7 @@ $(?<=^(a))	a	y	$1	a
 ([[:]+)	a:[b]:	y	$1	:[
 ([[=]+)	a=[b]=	y	$1	=[
 ([[.]+)	a.[b].	y	$1	.[
-[a[:xyz:	-	c	-	Unmatched [ before HERE mark in regex m/[ << HERE a[:xyz:/ at (eval 950) line 1, <TESTS> line 476.
+[a[:xyz:	-	c	-	Unmatched [ before HERE mark in regex m/[ << HERE a[:xyz:/
 [a[:xyz:]	-	c	-	POSIX class [:xyz:] unknown before HERE mark in regex m/[a[:xyz:] << HERE /
 [a[:]b[:c]	abc	y	$&	abc
 ([a[:xyz:]b]+)	pbaq	c	-	POSIX class [:xyz:] unknown before HERE mark in regex m/([a[:xyz:] << HERE b]+)/
