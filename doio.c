@@ -307,8 +307,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 #endif
 			    goto say_false;
 			}
-			if (IoIFP(thatio)) {
-			    that_fp = IoIFP(thatio);
+			if ((that_fp = IoIFP(thatio))) {
 			    /* Flush stdio buffer before dup. --mjd
 			     * Unfortunately SEEK_CURing 0 seems to
 			     * be optimized away on most platforms;
@@ -329,10 +328,10 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			    fd = PerlIO_fileno(that_fp);
 			    /* When dup()ing STDIN, STDOUT or STDERR
 			     * explicitly set appropriate access mode */
-			    if (IoIFP(thatio) == PerlIO_stdout()
-				|| IoIFP(thatio) == PerlIO_stderr())
+			    if (that_fp == PerlIO_stdout()
+				|| that_fp == PerlIO_stderr())
 			        IoTYPE(io) = IoTYPE_WRONLY;
-			    else if (IoIFP(thatio) == PerlIO_stdin())
+			    else if (that_fp == PerlIO_stdin())
                                 IoTYPE(io) = IoTYPE_RDONLY;
 			    /* When dup()ing a socket, say result is
 			     * one as well */
