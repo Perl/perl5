@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..722\n";
+print "1..730\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2133,15 +2133,11 @@ print "# some Unicode properties\n";
     # Dashes, underbars, case.
     print "not " unless "\x80" =~ /\p{in-latin1_SUPPLEMENT}/;
     print "ok 716\n";
-}
 
-{
     # Complement, leading and trailing whitespace.
     print "not " unless "\x80" =~ /\P{  ^  In Latin 1 Supplement  }/;
     print "ok 717\n";
-}
 
-{
     # No ^In, dashes, case.
     print "not " unless "\x80" =~ /\p{latin-1-supplement}/;
     print "ok 718\n";
@@ -2150,19 +2146,37 @@ print "# some Unicode properties\n";
 {
     print "not " unless "a" =~ /\pL/;
     print "ok 719\n";
-}
 
-{
     print "not " unless "a" =~ /\p{IsLl}/;
     print "ok 720\n";
-}
 
-{
-    print "not " unless "A" =~ /\pL/;
+    print "not " if     "a" =~ /\p{IsLu}/;
     print "ok 721\n";
-}
 
-{
-    print "not " unless "A" =~ /\p{IsLu}/;
+    print "not " unless "A" =~ /\pL/;
     print "ok 722\n";
+
+    print "not " unless "A" =~ /\p{IsLu}/;
+    print "ok 723\n";
+
+    print "not " if     "A" =~ /\p{IsLl}/;
+    print "ok 724\n";
+
+    print "not " if     "a" =~ /\PL/;
+    print "ok 725\n";
+
+    print "not " if     "a" =~ /\P{IsLl}/;
+    print "ok 726\n";
+
+    print "not " unless "a" =~ /\P{IsLu}/;
+    print "ok 727\n";
+
+    print "not " if     "A" =~ /\PL/;
+    print "ok 728\n";
+
+    print "not " if     "A" =~ /\P{IsLu}/;
+    print "ok 729\n";
+
+    print "not " unless "A" =~ /\P{IsLl}/;
+    print "ok 730\n";
 }
