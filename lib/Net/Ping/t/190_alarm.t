@@ -12,6 +12,10 @@ BEGIN {
     print "1..0 \# Skip: alarm borks on $^O $^X $] ?\n";
     exit;
   }
+  unless (getservbyname('echo', 'tcp')) {
+    print "1..0 \# Skip: no echo port\n";
+    exit;
+  }
 }
 
 use strict;
