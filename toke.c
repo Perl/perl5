@@ -7423,8 +7423,8 @@ S_swallow_bom(pTHX_ U8 *s)
 #ifndef PERL_NO_UTF16_FILTER
 	    s += 2;
 	    filter_add(S_utf16rev_textfilter, NULL);
-	    New(898, news, (PL_bufend - s) * 3 / 2 + 1, U8);
-	    PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - s);
+	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
+	    PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - (char*)s);
 	    s = news;
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding");
@@ -7436,8 +7436,8 @@ S_swallow_bom(pTHX_ U8 *s)
 #ifndef PERL_NO_UTF16_FILTER
 	    U8 *news;
 	    filter_add(S_utf16_textfilter, NULL);
-	    New(898, news, (PL_bufend - s) * 3 / 2 + 1, U8);
-	    PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - s);
+	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
+	    PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - (char*)s);
 	    s = news;
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding");
