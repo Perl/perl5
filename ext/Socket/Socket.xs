@@ -602,7 +602,7 @@ constant(char *name, int arg)
 #endif
 	if (strEQ(name, "SCM_CREDENTIALS"))
 #ifdef SCM_CREDENTIALS
-	    return SCM_CREDENTIALSS;
+	    return SCM_CREDENTIALS;
 #else
 	    goto not_there;
 #endif
