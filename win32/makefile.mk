@@ -29,7 +29,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	*= \5.00471
+INST_VER	*= \5.00472
 
 #
 # uncomment to enable threads-capabilities
@@ -176,7 +176,7 @@ IMPLIB		= implib -c
 # Options
 #
 RUNTIME		= -D_RTLDLL
-INCLUDES	= -I.\include -I. -I.. -I$(CCINCDIR)
+INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
 DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
@@ -215,7 +215,7 @@ a = .a
 # Options
 #
 RUNTIME		=
-INCLUDES	= -I.\include -I. -I..
+INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
@@ -250,7 +250,7 @@ LIB32		= $(LINK32) -lib
 #
 
 RUNTIME		= -MD
-INCLUDES	= -I.\include -I. -I..
+INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE

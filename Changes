@@ -69,6 +69,460 @@ Version 5.004_71        Developer release working toward 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1451] By: gsar                                  on 1998/07/12  07:01:26
+        Log: generic Configure mods and HAS_GROUP additions to help MiNT/MPEix/MVS
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sat, 11 Jul 1998 17:51:07 +0300 (EET DST)
+             Message-Id: <199807111451.RAA27010@alpha.hut.fi>
+             Subject: M3 "generic" parts
+     Branch: perl
+	   ! Configure Makefile.SH config_h.SH ext/POSIX/POSIX.xs
+	   ! ext/SDBM_File/sdbm/sdbm.h lib/ExtUtils/MM_Unix.pm
+	   ! makedepend.SH mv-if-diff perl.h plan9/plan9ish.h pp_sys.c
+	   ! unixish.h vms/subconfigure.com vms/vmsish.h win32/config_H.bc
+           ! win32/config_H.gc x2p/Makefile.SH
+____________________________________________________________________________
+[  1450] By: gsar                                  on 1998/07/12  06:38:27
+        Log: various tweaks for PERL_OBJECT build & test
+     Branch: perl
+	   ! globals.c iperlsys.h win32/GenCAPI.pl win32/Makefile
+           ! win32/makefile.mk win32/win32.c win32/win32iop.h
+____________________________________________________________________________
+[  1449] By: gsar                                  on 1998/07/12  06:29:23
+        Log: From:    andreas.koenig@kulturbox.de (Andreas J. Koenig)
+             Date:    12 Jul 1998 08:22:16 +0200
+             Message-Id: <sfck95jtwpz.fsf@dubravka.in-berlin.de>
+             Subject: [5.004_71] Patch: let CPAN.pm work with threaded perl
+     Branch: perl
+           ! lib/CPAN.pm lib/SelfLoader.pm
+____________________________________________________________________________
+[  1448] By: gsar                                  on 1998/07/12  05:10:50
+        Log: make RE engine threadsafe; -Dusethreads builds, tests on Solaris,
+             and runs regexes in 1000s of threads without crashing; also fixed
+             statcache not being thread-local
+     Branch: perl
+	   ! embed.h embedvar.h ext/Thread/Thread.xs ext/re/re.xs
+	   ! intrpvar.h op.c perl.c pp_ctl.c regcomp.c regexec.c sv.c
+           ! t/lib/thread.t thrdvar.h util.c
+____________________________________________________________________________
+[  1447] By: gsar                                  on 1998/07/12  02:40:45
+        Log: From:    Hugo van der Sanden <hv@crypt0.demon.co.uk>
+             Date:    Sun, 12 Jul 1998 03:23:04 +0200
+             Message-Id: <l03130300b1cdbff87621@[194.222.64.89]>
+             Subject: Re: perlbug doesn't check that save succeeded
+     Branch: perl
+           ! utils/perlbug.PL
+____________________________________________________________________________
+[  1446] By: gsar                                  on 1998/07/12  02:39:24
+        Log: be generous about CRs
+             From:    larry@wall.org (Larry Wall)
+             Date:    Sat, 11 Jul 1998 17:54:21 PDT
+             Message-Id: <199807120054.RAA19550@wall.org>
+             Subject: [PATCH _71] CRs et al 
+     Branch: perl
+           ! toke.c
+____________________________________________________________________________
+[  1445] By: gsar                                  on 1998/07/12  02:11:16
+        Log: fix pp_caller() to fully traverse stacklevels
+     Branch: perl
+           ! objpp.h pp_ctl.c proto.h t/op/runlevel.t
+____________________________________________________________________________
+[  1444] By: gsar                                  on 1998/07/11  23:43:37
+        Log: add patch, along with all the missing bits, and doc tweaks
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 9 Jul 1998 18:47:25 -0400 (EDT)
+             Message-Id: <199807092247.SAA06314@monk.mps.ohio-state.edu>
+             Subject: Re: [PATCH 5.004_71] Secure RE update
+     Branch: perl
+	   ! ObjXSub.h embed.h embedvar.h ext/Opcode/Opcode.pm ext/re/re.pm
+	   ! global.sym globals.c interp.sym intrpvar.h op.c opcode.h
+	   ! opcode.pl pp_ctl.c pp_proto.h regcomp.c sv.c t/op/misc.t
+           ! t/op/pat.t t/op/subst.t
+____________________________________________________________________________
+[  1443] By: gsar                                  on 1998/07/11  23:08:14
+        Log: tweak to get BSDI to build IPC/SysV
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: 11 Jul 1998 16:26:44 +0300
+             Message-ID: <oeeww9kecx7.fsf@alpha.hut.fi>
+             Subject: Re: NOT OK: perl5.004_71 on BSDI 3.1
+     Branch: perl
+           ! ext/IPC/SysV/SysV.xs
+____________________________________________________________________________
+[  1442] By: gsar                                  on 1998/07/11  23:03:39
+        Log: fix closures in optimized C<for (1..5)> (only the tests are in this
+             change, the pp_hot.c fix accidentally went in change#1441)
+     Branch: perl
+           ! t/op/closure.t
+____________________________________________________________________________
+[  1441] By: gsar                                  on 1998/07/11  22:35:40
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 11 Jul 1998 18:21:21 -0400 (EDT)
+             Message-Id: <199807112221.SAA03221@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_71] Update os2's OS2::Process
+     Branch: perl
+	   ! os2/OS2/Process/Makefile.PL os2/OS2/Process/Process.pm
+           ! os2/OS2/Process/Process.xs pp_hot.c
+____________________________________________________________________________
+[  1440] By: gsar                                  on 1998/07/11  19:41:59
+        Log: From: andreas.koenig@kulturbox.de (Andreas J. Koenig)
+             Date: 11 Jul 1998 17:00:21 +0200
+             Message-ID: <sfc1zrsxwje.fsf@dubravka.in-berlin.de>
+             Subject: [perl5.004_71] Patch: change MakeMaker default compress --> gzip
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  1439] By: gsar                                  on 1998/07/11  19:36:58
+        Log: export newRV_noinc on win32, deprecate AvFILL in favor of av_len()
+     Branch: perl
+           ! pod/perlguts.pod win32/makedef.pl
+____________________________________________________________________________
+[  1438] By: gsar                                  on 1998/07/11  19:14:21
+        Log: applied patch for perlfunc tweaks, removed reference to system qsort()
+             From: abigail@fnx.com
+             Date: Sat, 11 Jul 1998 04:20:54 -0400 (EDT)
+             Message-ID: <19980711082054.2184.qmail@betelgeuse.wayne.fnx.com>
+             Subject: [PATCH 5.004_71] pod/perlfunc.pod
+     Branch: perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  1437] By: gsar                                  on 1998/07/11  19:05:00
+        Log: From: abigail@fnx.com
+             Date: Sat, 11 Jul 1998 04:09:57 -0400 (EDT)
+             Message-ID: <19980711080957.2106.qmail@betelgeuse.wayne.fnx.com>
+             Subject: [PATCH 5.004_71] pod/pod2man.PL
+     Branch: perl
+           ! pod/pod2man.PL
+____________________________________________________________________________
+[  1436] By: gsar                                  on 1998/07/11  18:58:03
+        Log: more complete version of change#1421
+             From: Stephen McCamant <alias@mcs.com>
+             Date: Fri, 10 Jul 1998 23:46:46 -0500 (CDT)
+             Message-ID: <13734.58994.735473.859218@alias-2.pr.mcs.net>
+             Subject: [PATCH] Re: B::Deparse for(1..100000)
+     Branch: perl
+           ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  1435] By: gsar                                  on 1998/07/11  18:54:42
+        Log: win32 fixes for VC 6.0 nits
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs win32/Makefile win32/makefile.mk
+           ! win32/win32.h
+____________________________________________________________________________
+[  1434] By: gsar                                  on 1998/07/11  18:45:32
+        Log: s/AVHV/pseudo-hash/ (via PM)
+             From: Gisle Aas <gisle@aas.no>
+             Date: 11 Jul 1998 00:16:53 +0200
+             Message-ID: <m3hg0pbbca.fsf@furu.g.aas.no>
+             Subject: [PATCH] trivial fields.pm doc patch
+     Branch: perl
+           ! lib/fields.pm
+____________________________________________________________________________
+[  1433] By: gsar                                  on 1998/07/11  18:43:11
+        Log: From: Laszlo Molnar <molnarl@cdata.tvnet.hu>
+             Date: Fri, 10 Jul 1998 23:12:11 +0200
+             Message-ID: <19980710231211.A161@cdata.tvnet.hu>
+             Subject: [PATCH _71] dos-djgpp update
+     Branch: perl
+           ! Configure djgpp/config.over djgpp/djgppsed.sh djgpp/fixpmain
+____________________________________________________________________________
+[  1432] By: gsar                                  on 1998/07/11  18:41:00
+        Log: applied patch, reformatted long lines in places
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Fri, 10 Jul 1998 23:11:30 +0000
+             Message-Id: <v03110703b1cc32a02438@[195.95.102.91]>
+             Subject: [PATCH 5.004_71] Re: Document "count exceeded" regular expression
+             warning
+     Branch: perl
+           ! pod/perldiag.pod regexec.c
+____________________________________________________________________________
+[  1431] By: gsar                                  on 1998/07/11  18:29:18
+        Log: From: "John L. Allen" <allen@grumman.com>
+             Date: Fri, 10 Jul 1998 13:57:01 -0400 (EDT)
+             Message-ID: <Pine.SOL.3.91.980710134236.15717A-100000@gateway.grumman.com>
+             Subject: [PATCH]: _71 & _04 - Make AIX hints preserve ccflags as per docs
+     Branch: perl
+           ! hints/aix.sh
+____________________________________________________________________________
+[  1430] By: TimBunce                              on 1998/07/11  18:15:09
+        Log: Title:  "Fix string substitution returncode problem"
+             From:  Dominic Dunlop <domo@vo.lu>, Gurusamy Sarathy <gsar@engin.umich.edu>
+             Msg-ID:  <199805271236.IAA28213@aatma.engin.umich.edu>,
+             <v03110700b191a557f041@[195.95.102.114]>
+             Files:  pp_hot.c
+     Branch: maint-5.004/perl
+           ! pp_hot.c
+____________________________________________________________________________
+[  1429] By: gsar                                  on 1998/07/11  18:07:52
+        Log: applied patch, tweaked doc and code that does labels/indentation
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 9 Jul 1998 21:39:40 -0400 (EDT)
+             Message-Id: <199807100139.VAA08617@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_71] perldebug.pod and RE
+     Branch: perl
+           ! pod/perldebug.pod regcomp.c regexec.c
+____________________________________________________________________________
+[  1428] By: TimBunce                              on 1998/07/11  17:45:56
+        Log: Assorted patches:
+             
+             Title:  "makerel now reads local patch list from patchlevel.h"
+             Files:  patchlevel.h Porting/makerel
+             
+             Title:  "pod/pod2man.PL"
+             From:  abigail@fnx.com
+             Msg-ID:  <19980711080957.2106.qmail@betelgeuse.wayne.fnx.com>
+             Files:  pod/pod2man.PL
+             
+             Title:  "Clarify taint example in re.pm"
+             From:  Tom Phoenix <rootbeer@teleport.com>
+             Msg-ID:  <Pine.GSO.3.96.980623155803.3227X-100000@user2.teleport.com>
+             Files:  lib/re.pm
+             
+             Title:  "Anohter ptags improvement"
+             From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Msg-ID:  <199807070059.UAA28815@monk.mps.ohio-state.edu>
+             Files:  emacs/ptags
+             
+             Title:  "_71 & _04 - Make AIX hints preserve ccflags as per docs"
+             From:  "John L. Allen" <allen@grumman.com>
+             Msg-ID:  <Pine.SOL.3.91.980710134236.15717A-100000@gateway.grumman.com>
+             Files:  hints/aix.sh
+     Branch: maint-5.004/perl
+	   ! Porting/makerel emacs/ptags hints/aix.sh lib/re.pm
+           ! patchlevel.h pod/pod2man.PL
+____________________________________________________________________________
+[  1427] By: gsar                                  on 1998/07/11  17:04:47
+        Log: make Liblist return consistently backslashed paths
+     Branch: perl
+           ! lib/ExtUtils/Liblist.pm
+____________________________________________________________________________
+[  1426] By: gsar                                  on 1998/07/11  16:53:56
+        Log: don't 'touch a2p.c', it might readonly (via PM)
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 10 Jul 98 17:19:54 BST
+             Message-Id: <20430.9807101619@tempest.cise.npl.co.uk>
+     Branch: perl
+           ! x2p/Makefile.SH
+____________________________________________________________________________
+[  1425] By: TimBunce                              on 1998/07/11  16:42:26
+        Log: Title:  "Add newCONSTSUB (from 5.005_70)"
+             Files:  embed.h proto.h global.sym op.c
+     Branch: maint-5.004/perl
+           ! embed.h global.sym op.c proto.h
+____________________________________________________________________________
+[  1424] By: TimBunce                              on 1998/07/11  16:20:21
+        Log: Title:  "Assorted fixes for Sys::Syslog.pm"
+             From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>, Sean Robinson
+             <ROBINSON_S@sc.maricopa.edu>, Tim.Bunce@ig.co.uk
+             Msg-ID:  <01IXGLISWJ7Q0001B6@sc.maricopa.edu>,
+             <199805270939.KAA08453@toad.ig.co.uk>,
+             <E0yeHPI-00047D-00@taurus.cus.cam.ac.uk>
+             Files:  lib/Sys/Syslog.pm
+     Branch: maint-5.004/perl
+           ! lib/Sys/Syslog.pm
+____________________________________________________________________________
+[  1423] By: TimBunce                              on 1998/07/11  15:53:37
+        Log: Assorted patches:
+             
+             Title:  "umask: die if EXPR & 0700 else return undef"
+             From:  Chip Salzenberg <chip@perl.org>, Jarkko Hietaniemi <jhi@cc.hut.fi>,
+             Jarkko Hietaniemi <jhi@iki.fi>, Malcolm Beattie
+             <mbeattie@sable.ox.ac.uk>, Tim.Bunce@ig.co.uk (Tim Bunce),
+             kstar@chapin.ed, kstar@chapin.edu@ig.co.uk ()
+             Msg-ID:  <199805291520.QAA01615@sable.ox.ac.uk>,
+             <199805291549.SAA01439@alpha.hut.fi>,
+             <199805291608.RAA29283@toad.ig.co.uk>,
+             <19980530105129.A24006@O2.chapin.edu>,
+             <19980608133037.A8793@perlsupport.com>
+             Files:  pod/perldiag.pod pod/perlfunc.pod pp_sys.c
+             
+             Title:  "File name DynaLoader.pm.PL is 8.3 unfriendly"
+             From:  Laszlo Molnar <molnarl@cdata.tvnet.hu>
+             Msg-ID:  <19980610005417.G162@cdata.tvnet.hu>
+             Files:  MANIFEST ext/DynaLoader/Makefile.PL
+     Branch: maint-5.004/perl
+          +> ext/DynaLoader/DynaLoader_pm.PL
+           - ext/DynaLoader/DynaLoader.pm.PL
+	   ! MANIFEST ext/DynaLoader/Makefile.PL pod/perldiag.pod
+           ! pod/perlfunc.pod pp_sys.c
+____________________________________________________________________________
+[  1421] By: gsar                                  on 1998/07/11  02:54:02
+        Log: From: Gisle Aas <gisle@aas.no>
+             Subject: [PATCH] B::Deparse for(1..100000)
+             Date: 10 Jul 1998 14:04:44 +0200
+             Message-ID: <m3n2ahx677.fsf@furu.g.aas.no>
+     Branch: perl
+           ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  1420] By: gsar                                  on 1998/07/11  02:28:18
+        Log: add 'clean' target for ext/re
+     Branch: perl
+           ! ext/re/Makefile.PL
+____________________________________________________________________________
+[  1419] By: gsar                                  on 1998/07/11  02:20:32
+        Log: From: Tom Hughes <thh@cyberscience.com>
+             Date: 10 Jul 1998 10:25:18 +0100
+             Message-ID: <yekn2ai5a81.fsf@elva.cyberscience.com>
+             Subject: [5.004_71] Patch: svr4 hints updates for Unixware
+     Branch: perl
+           ! hints/svr4.sh
+____________________________________________________________________________
+[  1418] By: gsar                                  on 1998/07/11  02:19:12
+        Log: move op/ipc{msg,sem}.t into lib/ipc_sysv.t
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 10 Jul 1998 13:08:08 +0300 (EET DST)
+             Message-Id: <199807101008.NAA10817@alpha.hut.fi>
+             Subject: Re: make minitest does not work out of the box - test subset
+             needs pruning
+     Branch: perl
+           + t/lib/ipc_sysv.t
+           - t/op/ipcmsg.t t/op/ipcsem.t
+           ! MANIFEST
+____________________________________________________________________________
+[  1417] By: gsar                                  on 1998/07/11  02:14:16
+        Log: disable CR croaking (via #define, default off) in lieu of more
+             complete fix
+     Branch: perl
+           ! toke.c
+____________________________________________________________________________
+[  1416] By: gsar                                  on 1998/07/11  02:06:11
+        Log: added patch, made linking with setargv a build option
+             From: "Douglas Lankshear" <dougl@ActiveState.com>
+             Date: Thu, 9 Jul 1998 09:51:42 -0700
+             Message-ID: <000101bdab59$d9602dc0$a32fa8c0@tau.Active>
+             Subject: [PATCH 5.004_71]
+     Branch: perl
+           ! perl.c pp_sys.c win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  1415] By: gsar                                  on 1998/07/11  01:47:19
+        Log: From: Tom Hughes <thh@cyberscience.com>
+             Date: 10 Jul 1998 09:01:12 +0100
+             Message-ID: <yekr9zu5e47.fsf@elva.cyberscience.com>
+             Subject: [5.004_71] Patch: Fix perl_exp.SH for Unixware
+     Branch: perl
+           ! perl_exp.SH
+____________________________________________________________________________
+[  1414] By: gsar                                  on 1998/07/11  01:45:45
+        Log: make lib/re.pm a prereq for minitest
+     Branch: perl
+           ! Makefile.SH
+____________________________________________________________________________
+[  1413] By: gsar                                  on 1998/07/11  01:40:56
+        Log: add patch (via PM)
+             From: Stephen McCamant <alias@mcs.com>
+             Date: Fri, 10 Jul 1998 01:14:11 -0500 (CDT)
+             Message-ID: <13733.45251.47363.431138@alias-2.pr.mcs.net>
+             Subject: Big B::Deparse update
+     Branch: perl
+           ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  1412] By: gsar                                  on 1998/07/11  00:25:17
+        Log: add perlport.pod v1.23 from Chris Nandor <pudge@pobox.com>
+     Branch: perl
+           + pod/perlport.pod
+           ! pod/perl.pod
+____________________________________________________________________________
+[  1411] By: gsar                                  on 1998/07/10  21:53:06
+        Log: make binmode(STDIN) not whine
+             From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Thu, 09 Jul 1998 16:51:27 -0700
+             Message-Id: <3.0.5.32.19980709165127.00a692e0@ous.edu>
+             Subject: [PATCH 5.004_70] Fix up binmode() for VMS
+     Branch: perl
+           ! vms/vms.c
+____________________________________________________________________________
+[  1410] By: gsar                                  on 1998/07/10  21:50:57
+        Log: CPAN-1.39 update
+             From: koenig@kulturbox.de (Andreas J. Koenig)
+             Date: 10 Jul 1998 00:45:36 +0200
+             Message-ID: <sfcbtqytzhr.fsf@dubravka.in-berlin.de>
+             Subject: Re: perl5.004_71 hit the stands this morn
+     Branch: perl
+           ! MANIFEST lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+____________________________________________________________________________
+[  1409] By: gsar                                  on 1998/07/10  21:45:10
+        Log: manually apply patch with conflicts
+             From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Thu, 09 Jul 1998 12:08:33 -0700
+             Message-Id: <3.0.5.32.19980709120833.009eb100@ous.edu>
+             Subject: [PATCH 5.004_70] Updated duble-quotes in config.h/config.pm patch
+     Branch: perl
+           ! configpm
+____________________________________________________________________________
+[  1408] By: gsar                                  on 1998/07/10  21:36:54
+        Log: From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date: Thu, 9 Jul 1998 11:58:30 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980709115556.24236D-100000@newton.phys>
+             Subject: Re: perldelta.pod [PATCH]
+     Branch: perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  1407] By: gsar                                  on 1998/07/10  21:35:13
+        Log: From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date: Thu, 9 Jul 1998 11:26:03 -0400 (EDT)
+             Subject: [PATCH 5.004_71] Allow static build of IPC::SysV
+             Message-Id: <Pine.SUN.3.96.980709112507.24236B-100000@newton.phys>
+     Branch: perl
+           ! ext/IPC/SysV/Makefile.PL
+____________________________________________________________________________
+[  1406] By: gsar                                  on 1998/07/10  21:33:30
+        Log: manually apply patch with conflicts
+             From: kstar@chapin.edu
+             Message-ID: <19980709093621.B7857@O2.chapin.edu>
+             Date: Thu, 9 Jul 1998 09:36:21 -0400
+             Subject: Re: [PATCH] 5.004_70 installperl and docs
+     Branch: perl
+           ! installperl
+____________________________________________________________________________
+[  1405] By: gsar                                  on 1998/07/10  21:28:29
+        Log: misc tweaks to docs and qsortsv() warning
+     Branch: perl
+           ! Changes pod/perldelta.pod pod/perlsub.pod pp_ctl.c
+____________________________________________________________________________
+[  1404] By: gsar                                  on 1998/07/10  21:23:53
+        Log: add more correct version of change#1350 (as yet untested)
+             From: joshua.pritikin@db.com
+             Date: Thu, 9 Jul 1998 09:22:46 -0400
+             Message-Id: <H00000e50008f277@MHS>
+             Subject: Re: [PATCH _70] cache missing methods
+     Branch: perl
+           ! embedvar.h gv.c interp.sym intrpvar.h perlvars.h
+____________________________________________________________________________
+[  1403] By: gsar                                  on 1998/07/10  20:46:12
+        Log: add win32_rename() that does what docs say
+     Branch: perl
+	   ! win32/GenCAPI.pl win32/makedef.pl win32/perlhost.h
+           ! win32/win32.c win32/win32iop.h
+____________________________________________________________________________
+[  1402] By: gsar                                  on 1998/07/10  20:19:18
+        Log: inet_aton() should do DNS lookup only if arg isn't a dotted-quad
+             (suggested by Philippe.Simonet@swisscom.com)
+     Branch: perl
+           ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[  1401] By: gsar                                  on 1998/07/10  03:24:45
+        Log: undo change#1379 (order of tests *is* significant)
+     Branch: perl
+           ! t/lib/posix.t
+____________________________________________________________________________
+[  1400] By: nick                                  on 1998/07/09  17:43:14
+        Log: Integrate mainline (_071-ish)
+     Branch: ansiperl
+	  +> ext/Data/Dumper/Changes ext/Data/Dumper/Dumper.pm
+	  +> ext/Data/Dumper/Dumper.xs ext/Data/Dumper/Makefile.PL
+	  +> ext/Data/Dumper/Todo ext/IPC/SysV/ChangeLog
+	  +> ext/IPC/SysV/MANIFEST ext/IPC/SysV/Makefile.PL
+	  +> ext/IPC/SysV/Msg.pm ext/IPC/SysV/README
+	  +> ext/IPC/SysV/Semaphore.pm ext/IPC/SysV/SysV.pm
+	  +> ext/IPC/SysV/SysV.xs ext/IPC/SysV/t/msg.t ext/IPC/SysV/t/sem.t
+	  +> ext/re/Makefile.PL ext/re/re.pm ext/re/re.xs pp_proto.h
+          +> t/io/iprefix.t t/lib/dumper-ovl.t t/lib/dumper.t
+          !> (integrate 145 files)
+
+----------------
+Version 5.004_71
+----------------
+
+____________________________________________________________________________
 [  1399] By: gsar                                  on 1998/07/09  12:15:12
         Log: update Changes, perlhist.pod, beginnings of perldelta.pod
      Branch: perl
