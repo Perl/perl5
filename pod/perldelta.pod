@@ -95,7 +95,7 @@ change will probably break backward compatibility with compiled
 modules.  The change was made to make Perl more compliant with other
 applications like mod_perl which are using the AIX native interface.
 
-=head2 Attributes for C<my> variables now handled at run-time.
+=head2 Attributes for C<my> variables now handled at run-time
 
 The C<my EXPR : ATTRS> syntax now applies variable attributes at
 run-time.  (Subroutine and C<our> variables still get attributes applied
@@ -157,6 +157,13 @@ for better use: now they stand for long double (if supported by the
 platform) and NV (Perl internal floating point type).  (They used
 to be aliases for d/f, but you never knew that.)
 
+=head2 glob() now returns filenames in alphabetical order
+
+The list of filenames from glob() (or <...>) is now by default sorted
+alphabetically to be csh-compliant (which is what happened before
+in most UNIX platforms).  (bsd_glob() does still sort platform
+natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.) [561]
+
 =head2 Deprecations
 
 =over 4
@@ -193,31 +200,7 @@ any C<\w> character.
 
 =item *
 
-The list of filenames from glob() (or <...>) is now by default sorted
-alphabetically to be csh-compliant (which is what happened before
-in most UNIX platforms).  (bsd_glob() does still sort platform
-natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.) [561]
-
-=item *
-
 The *glob{FILEHANDLE} is deprecated, use *glob{IO} instead.
-
-=item *
-
-Spurious syntax errors generated in certain situations, when glob()
-caused File::Glob to be loaded for the first time, have been fixed. [561]
-
-=item *
-
-Although "you shouldn't do that", it was possible to write code that
-depends on Perl's hashed key order (Data::Dumper does this).  The new
-algorithm "One-at-a-Time" produces a different hashed key order.
-More details are in L</"Performance Enhancements">.
-
-=item *
-
-lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
-In future releases this may become a fatal error.
 
 =item *
 
@@ -241,16 +224,16 @@ source code level, this shouldn't be that drastic a change.
 
 =item *
 
-Previous versions of perl and some readings of some sections of Camel III
-implied that the C<:raw> "discipline" was the inverse of  C<:crlf>.
+Previous versions of perl and some readings of some sections of Camel
+III implied that the C<:raw> "discipline" was the inverse of C<:crlf>.
 Turning off "clrfness" is no longer enough to make a stream truly
-binary. So the PerlIO C<:raw> layer (or "discipline", to use the
-Camel book's older terminology) is now formally defined as being
-equivalent to binmode(FH) - which is in turn defined as doing whatever
-is necessary to pass each byte as-is without any translation.
-In particular binmode(FH) - and hence C<:raw> - will now turn off both CRLF
-and UTF-8  translation and remove other layers (e.g. :encoding()) which
-would modify byte stream.
+binary. So the PerlIO C<:raw> layer (or "discipline", to use the Camel
+book's older terminology) is now formally defined as being equivalent
+to binmode(FH) - which is in turn defined as doing whatever is
+necessary to pass each byte as-is without any translation.  In
+particular binmode(FH) - and hence C<:raw> - will now turn off both
+CRLF and UTF-8 translation and remove other layers (e.g. :encoding())
+which would modify byte stream.
 
 =item *
 
@@ -303,8 +286,8 @@ release.
 
 =item *
 
-The C<exec LIST> and C<system LIST> operations will produce fatal
-errors on tainted data in some future release.
+The C<exec LIST> and C<system LIST> operations now produce warnings on
+tainted data and in some future release they will produce fatal errors.
 
 =item *
 
@@ -592,6 +575,23 @@ L<perlembed>.
 =item *
 
 Formats now support zero-padded decimal fields.
+
+=item *
+
+Although "you shouldn't do that", it was possible to write code that
+depends on Perl's hashed key order (Data::Dumper does this).  The new
+algorithm "One-at-a-Time" produces a different hashed key order.
+More details are in L</"Performance Enhancements">.
+
+=item *
+
+lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
+In future releases this may become a fatal error.
+
+=item *
+
+Spurious syntax errors generated in certain situations, when glob()
+caused File::Glob to be loaded for the first time, have been fixed. [561]
 
 =item *
 
