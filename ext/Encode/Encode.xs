@@ -467,10 +467,10 @@ MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Method_
 PROTOTYPES: ENABLE
 
 void
-Method_decode(obj,src,check = 0)
+Method_decode(obj,src,check = FALSE)
 SV *	obj
 SV *	src
-int	check
+bool	check
 CODE:
  {
   encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
@@ -480,10 +480,10 @@ CODE:
  }
 
 void
-Method_encode(obj,src,check = 0)
+Method_encode(obj,src,check = FALSE)
 SV *	obj
 SV *	src
-int	check
+bool	check
 CODE:
  {
   encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
