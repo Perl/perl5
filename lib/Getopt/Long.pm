@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pl,v 2.22 2000-03-05 21:08:03+01 jv Exp $
+# RCS Status      : $Id: GetoptLong.pl,v 2.24 2000-03-14 21:28:52+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Mar  5 21:08:55 2000
-# Update Count    : 720
+# Last Modified On: Tue Mar 14 21:28:40 2000
+# Update Count    : 721
 # Status          : Released
 
 ################ Copyright ################
@@ -36,7 +36,7 @@ BEGIN {
     require 5.004;
     use Exporter ();
     use vars     qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = "2.21";
+    $VERSION     = "2.22";
 
     @ISA         = qw(Exporter);
     @EXPORT      = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
@@ -108,12 +108,12 @@ __END__
 
 ################ AutoLoading subroutines ################
 
-# RCS Status      : $Id: GetoptLongAl.pl,v 2.25 2000-03-05 21:08:03+01 jv Exp $
+# RCS Status      : $Id: GetoptLongAl.pl,v 2.26 2000-03-14 21:32:05+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Fri Mar 27 11:50:30 1998
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Mar  4 16:33:02 2000
-# Update Count    : 49
+# Last Modified On: Tue Mar 14 21:09:46 2000
+# Update Count    : 50
 # Status          : Released
 
 sub GetOptions {
@@ -137,7 +137,7 @@ sub GetOptions {
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
-		  'GetOptionsAl $Revision: 2.25 $ ',
+		  'GetOptionsAl $Revision: 2.26 $ ',
 		  "\n  ",
 		  "ARGV: (@ARGV)",
 		  "\n  ",
@@ -229,17 +229,21 @@ sub GetOptions {
 		    if ( $c eq '!' ) {
 			$opctl{"no$_"} = $c;
 			warn ("Ignoring '!' modifier for short option $_\n");
-			$c = '';
+			$opctl{$_} = $bopctl{$_} = '';
 		    }
-		    $opctl{$_} = $bopctl{$_} = $c;
+		    else {
+			$opctl{$_} = $bopctl{$_} = $c;
+		    }
 		}
 		else {
 		    $_ = lc ($_) if $ignorecase;
 		    if ( $c eq '!' ) {
 			$opctl{"no$_"} = $c;
-			$c = '';
+			$opctl{$_} = ''
 		    }
-		    $opctl{$_} = $c;
+		    else {
+			$opctl{$_} = $c;
+		    }
 		}
 		if ( defined $a ) {
 		    # Note alias.
@@ -1179,7 +1183,11 @@ The argument specification can be
 
 The option does not take an argument and may be negated, i.e. prefixed
 by "no". E.g. C<"foo!"> will allow C<--foo> (a value of 1 will be
-assigned) and C<--nofoo> (a value of 0 will be assigned).
+assigned) and C<--nofoo> (a value of 0 will be assigned). If the
+option has aliases, this applies to the aliases as well.
+
+Using negation on a single letter option when bundling is in effect is
+pointless and will result in a warning.
 
 =item +
 
