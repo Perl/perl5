@@ -283,15 +283,15 @@ print "ok 52\n";
 # see toke.c:scan_num().
 
 $q = -9223372036854775808;
-print "not " unless "$q" eq "-9223372036854775808";
+print "# $q ne\n# -9223372036854775808\nnot " unless "$q" eq "-9223372036854775808";
 print "ok 53\n";
 
 $q =  9223372036854775807;
-print "not " unless "$q" eq "9223372036854775807";
+print "# $q ne\n# 9223372036854775807\nnot " unless "$q" eq "9223372036854775807";
 print "ok 54\n";
 
 $q = 18446744073709551615;
-print "not " unless "$q" eq "18446744073709551615";
+print "# $q ne\n# 18446744073709551615\nnot " unless "$q" eq "18446744073709551615";
 print "ok 55\n";
 
 # eof
