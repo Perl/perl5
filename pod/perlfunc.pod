@@ -290,8 +290,8 @@ X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
     -g	File has setgid bit set.
     -k	File has sticky bit set.
 
-    -T	File is a text file.
-    -B	File is a binary file (opposite of -T).
+    -T	File is an ASCII text file.
+    -B	File is a "binary" file (opposite of -T).
 
     -M	Age of file in days when script started.
     -A	Same for access time.
