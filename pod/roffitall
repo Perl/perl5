@@ -180,14 +180,22 @@ fi
 #psroff -t -man -rC1 -rD1 -rF1 > $tmp/PerlDoc.ps 2>$tmp/PerlTOC.raw
 #nroff -man -rC1 -rD1 -rF1 > $tmp/PerlDoc.txt 2>$tmp/PerlTOC.nr.raw
 
+# First, create the raw data
 run="$cmd -rC1 -rD1 -rF1 >$tmp/PerlDoc.$ext 2>$tmp/PerlTOC.$ext.raw"
 echo "$me: running $run"
 eval $run $toroff
+
+#Now create the TOC
 echo "$me: parsing TOC"
 ./rofftoc $tmp/PerlTOC.$ext.raw > $tmp/PerlTOC.tmp.man
 run="$cmd $tmp/PerlTOC.tmp.man >$tmp/PerlTOC.$ext"
 echo "$me: running $run"
 eval $run
+
+# Finally, recreate the Doc, without the blank page 0
+run="$cmd -rC1 -rD1 >$tmp/PerlDoc.$ext 2>$tmp/PerlTOC.$ext.raw"
+echo "$me: running $run"
+eval $run $toroff
 rm -f $tmp/PerlTOC.tmp.man $tmp/PerlTOC.$ext.raw
 echo "$me: leaving you with $tmp/PerlDoc.$ext and $tmp/PerlTOC.$ext"
 

@@ -58,7 +58,7 @@ define a foreign command to invoke this image.
 Perl extensions are packages which provide both XS and Perl code
 to add new functionality to perl.  (XS is a meta-language which
 simplifies writing C code which interacts with Perl, see
-L<perlapi> for more details.)  The Perl code for an
+L<perlxs> for more details.)  The Perl code for an
 extension is treated like any other library module - it's
 made available in your script through the appropriate
 C<use> or C<require> statement, and usually defines a Perl

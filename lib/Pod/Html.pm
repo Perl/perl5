@@ -916,7 +916,7 @@ sub process_over {
 # process_back - process a pod back tag and convert it to HTML format.
 #
 sub process_back {
-    warn "$0: $podfile: unexpected =back directive in paragraph $paragraph.  ignorning.\n"
+    warn "$0: $podfile: unexpected =back directive in paragraph $paragraph.  ignoring.\n"
 	unless $listlevel;
     return unless $listlevel;
 
