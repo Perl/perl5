@@ -266,7 +266,7 @@
  * It would fail if the key were bogus, but if the key were bogus then
  * Really Bad Things would be happening anyway. --dan */
 #if (defined(__ALPHA) && (__VMS_VER >= 70000000)) || \
-    (defined(__alpha) && defined(__osf__)) /* Available only on >= 4.0 */
+    (defined(__alpha) && defined(__osf__) && !defined(__GNUC__)) /* Available only on >= 4.0 */
 #  define HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP /* Configure test needed */
 #endif
 
