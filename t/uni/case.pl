@@ -95,7 +95,13 @@ sub casetest {
 	    #
 	    # The uppercase exceptions are identical.
 	    #
-	    if ($i =~ /^(0149|01F0|1E96|1E97|1E98|1E99|1E9A)$/) {
+	    # The lowercase has one more:
+	    #
+	    #         Unicode   Unicode+EBCDIC  
+	    #
+	    # 0130 -> 0069 0307 (00D1 0307)
+	    #
+	    if ($i =~ /^(0130|0149|01F0|1E96|1E97|1E98|1E99|1E9A)$/) {
 		$e =~ s/004E/002B/; # N
 		$e =~ s/004A/00A2/; # J
 		$e =~ s/0048/00E7/; # H
@@ -103,6 +109,7 @@ sub casetest {
 		$e =~ s/0057/00EF/; # W
 		$e =~ s/0059/00DF/; # Y
 		$e =~ s/0041/00A0/; # A
+		$e =~ s/0069/00D1/; # i
 	    }
 	    # We have to map the output, not the input, because
 	    # pack/unpack U has been EBCDICified, too, it would
