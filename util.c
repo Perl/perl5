@@ -404,6 +404,19 @@ char *lend;
     return Nullch;
 }
 
+/* Initialize the fold[] array. */
+int
+perl_init_fold()
+{
+  int i;
+
+  for (i = 0; i < 256; i++) {
+    if (isUPPER(i)) fold[i] = toLOWER(i);
+    else if (isLOWER(i)) fold[i] = toUPPER(i);
+    else fold[i] = i;
+  }
+}
+
 /* Initialize locale (and the fold[] array).*/
 int
 perl_init_i18nl10n(printwarn)	
@@ -415,38 +428,169 @@ perl_init_i18nl10n(printwarn)
      *    0 = fallback to C locale,
      *   -1 = fallback to C locale failed
      */
-#if defined(HAS_SETLOCALE) && defined(LC_CTYPE)
-    char * lang     = getenv("LANG");
+#if defined(HAS_SETLOCALE)
     char * lc_all   = getenv("LC_ALL");
     char * lc_ctype = getenv("LC_CTYPE");
-    int i;
+    char * lc_collate = getenv("LC_COLLATE");
+    char * lang       = getenv("LANG");
+    int setlocale_failure = 0;
 
-    if (setlocale(LC_CTYPE, "") == NULL && (lc_all || lc_ctype || lang)) {
-	char *doit;
+#define SETLOCALE_LC_CTYPE   0x01
+#define SETLOCALE_LC_COLLATE 0x02
+    
+#ifdef LC_CTYPE
+    if (setlocale(LC_CTYPE, "")   == 0)
+      setlocale_failure |= SETLOCALE_LC_CTYPE;
+#endif
+
+#ifdef LC_COLLATE
+    if (setlocale(LC_COLLATE, "") == 0)
+      setlocale_failure |= SETLOCALE_LC_COLLATE;
+    else
+      lc_collate_active = 1;
+#endif
+    
+    if (setlocale_failure && (lc_all || lang)) {
+	char *perl_badlang;
 
 	if (printwarn > 1 || 
-	      printwarn && (!(doit = getenv("PERL_BADLANG")) || atoi(doit))) {
-	    PerlIO_printf(PerlIO_stderr(), "warning: setlocale(LC_CTYPE, \"\") failed.\n");
+	    printwarn &&
+	    (!(perl_badlang = getenv("PERL_BADLANG")) || atoi(perl_badlang))) {
+	  
+	  PerlIO_printf(PerlIO_stderr(),
+			"perl: warning: Setting locale failed for the categories:\n\t");
+#ifdef LC_CTYPE
+	  if (setlocale_failure & SETLOCALE_LC_CTYPE)
 	    PerlIO_printf(PerlIO_stderr(),
-	      "warning: LC_ALL = \"%s\", LC_CTYPE = \"%s\", LANG = \"%s\",\n",
-	      lc_all   ? lc_all   : "(null)",
-	      lc_ctype ? lc_ctype : "(null)",
-	      lang     ? lang     : "(null)"
+			  "LC_CTYPE ");
+#endif
+#ifdef LC_COLLATE
+	  if (setlocale_failure & SETLOCALE_LC_COLLATE)
+	    PerlIO_printf(PerlIO_stderr(),
+			  "LC_COLLATE ");
+#endif
+	  PerlIO_printf(PerlIO_stderr(),
+			"\n");
+
+	    PerlIO_printf(PerlIO_stderr(),
+			"perl: warning: Please check that your locale settings:\n");
+
+	  PerlIO_printf(PerlIO_stderr(),
+			"\tLC_ALL = %c%s%c,\n",
+			lc_all ? '"' : '(',
+			lc_all ? lc_all : "unset",
+			  lc_all ? '"' : ')'
 	      );
-	    PerlIO_printf(PerlIO_stderr(), "warning: falling back to the \"C\" locale.\n");
-	}
+#ifdef LC_CTYPE
+	  if (setlocale_failure & SETLOCALE_LC_CTYPE)
+	    PerlIO_printf(PerlIO_stderr(),
+			  "\tLC_CTYPE = %c%s%c,\n",
+			  lc_ctype ? '"' : '(',
+			  lc_ctype ? lc_ctype : "unset",
+			  lc_ctype ? '"' : ')'
+			  );
+#endif
+#ifdef LC_COLLATE
+	  if (setlocale_failure & SETLOCALE_LC_COLLATE)
+	    PerlIO_printf(PerlIO_stderr(),
+			  "\tLC_COLLATE = %c%s%c,\n",
+			  lc_collate ? '"' : '(',
+			  lc_collate ? lc_collate : "unset",
+			  lc_collate ? '"' : ')'
+			  );
+#endif
+	  PerlIO_printf(PerlIO_stderr(),
+			"\tLANG = %c%s%c\n",
+			lang ? '"' : ')',
+			lang ? lang : "unset",
+			lang ? '"' : ')'
+			);
+
+	  PerlIO_printf(PerlIO_stderr(),
+			"    are supported and installed on your system.\n");
+
 	ok = 0;
-	if (setlocale(LC_CTYPE, "C") == NULL)
+	  
+	}
+#ifdef LC_ALL
+	if (setlocale_failure) {
+	  PerlIO_printf(PerlIO_stderr(),
+			"perl: warning: Falling back to the \"C\" locale.\n");
+	  if (setlocale(LC_ALL, "C") == NULL) {
 	    ok = -1;
+	    PerlIO_printf(PerlIO_stderr(),
+			  "perl: warning: Failed to fall back to the \"C\" locale.\n");
+    }
+    }
+#else
+	PerlIO_printf(PerlIO_stderr(),
+		      "perl: warning: Cannot fall back to the \"C\" locale.\n");
+#endif
     }
 
-    for (i = 0; i < 256; i++) {
-	if (isUPPER(i)) fold[i] = toLOWER(i);
-	else if (isLOWER(i)) fold[i] = toUPPER(i);
-	else fold[i] = i;
-    }
-#endif
+    if (setlocale_failure & SETLOCALE_LC_CTYPE == 0)
+      perl_init_fold();
+
+#endif /* #if defined(HAS_SETLOCALE) */
+
     return ok;
+}
+
+char *
+mem_collxfrm(m, n, nx)	/* mem_collxfrm() does strxfrm() for (data,size) */
+     const char *m;	/* "strings", that is, transforms normal eight-bit */
+     const Size_t n;	/* data into a format that can be memcmp()ed to get */
+     Size_t * nx;	/* 'the right' result for each locale. */
+{			/* Uses strxfrm() but handles embedded NULs. */
+  char * mx = 0;
+
+#ifdef HAS_STRXFRM
+  Size_t ma;
+
+  /* the expansion factor of 16 has been seen with strxfrm() */
+  ma = (lc_collate_active ? 16 : 1) * n + 1;
+
+#define RENEW_mx()			\
+  do {					\
+	ma = 2 * ma + 1;		\
+	Renew(mx, ma, char);		\
+	if (mx == 0) 			\
+	  goto out;			\
+  } while (0)
+
+  New(171, mx, ma, char);
+
+  if (mx) {
+    Size_t xc, dx;
+    int xok;
+
+    for (*nx = 0, xc = 0; xc < n; ) {
+      if (m[xc] == 0)
+	do {
+	  if (*nx == ma)
+	    RENEW_mx();
+	  mx[*nx++] = m[xc++];
+	} while (xc < n && m[xc] == 0);
+      else {
+	do {
+	  dx = strxfrm(mx + *nx, m + xc, ma - *nx);
+	  if (dx + *nx > ma) {
+	    RENEW_mx();
+	    xok = 0;
+	  } else
+	    xok = 1;
+	} while (!xok);
+	xc += strlen(mx + *nx);
+	*nx += dx;
+      }
+    }
+  }
+
+out:
+
+#endif /* HAS_STRXFRM */
+
+  return mx;
 }
 
 void
