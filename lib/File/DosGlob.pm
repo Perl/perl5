@@ -6,21 +6,6 @@
 
 package File::DosGlob;
 
-unless (caller) {
-    $| = 1;
-    while (@ARGV) {
-	#
-	# We have to do this one by one for compatibility reasons.
-	# If an arg doesn't match anything, we are supposed to return
-	# the original arg.  I know, it stinks, eh?
-	#
-	my $arg = shift;
-	my @m = doglob(1,$arg);
-	print (@m ? join("\0", sort @m) : $arg);
-	print "\0" if @ARGV;
-    }
-}
-
 sub doglob {
     my $cond = shift;
     my @retval = ();
@@ -159,8 +144,6 @@ __END__
 
 File::DosGlob - DOS like globbing and then some
 
-perlglob.bat - a more capable perlglob.exe replacement
-
 =head1 SYNOPSIS
 
     require 5.004;
@@ -173,14 +156,11 @@ perlglob.bat - a more capable perlglob.exe replacement
     
     # from the command line (overrides only in main::)
     > perl -MFile::DosGlob=glob -e "print <../pe*/*p?>"
-    
-    > perlglob ../pe*/*p?
 
 =head1 DESCRIPTION
 
 A module that implements DOS-like globbing with a few enhancements.
-This file is also a portable replacement for perlglob.exe.  It
-is largely compatible with perlglob.exe (the M$ setargv.obj
+It is largely compatible with perlglob.exe (the M$ setargv.obj
 version) in all but one respect--it understands wildcards in
 directory components.
 
@@ -190,17 +170,6 @@ Note that all path components are case-insensitive, and that
 backslashes and forward slashes are both accepted, and preserved.
 You may have to double the backslashes if you are putting them in
 literally, due to double-quotish parsing of the pattern by perl.
-
-When invoked as a program, it will print null-separated filenames
-to standard output.
-
-While one may replace perlglob.exe with this, usage by overriding
-CORE::glob via importation should be much more efficient, because
-it avoids launching a separate process, and is therefore strongly
-recommended.  Note that it is currently possible to override
-builtins like glob() only on a per-package basis, not "globally".
-Thus, every namespace that wants to override glob() must explicitly
-request the override.  See L<perlsub>.
 
 Extending it to csh patterns is left as an exercise to the reader.
 
@@ -245,6 +214,8 @@ Initial version (GSAR 20-FEB-97)
 =head1 SEE ALSO
 
 perl
+
+perlglob.bat
 
 =cut
 

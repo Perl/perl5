@@ -268,14 +268,17 @@ be seen by Perl.
 
 The OUTPUT: keyword will also allow an output parameter to
 be mapped to a matching piece of code rather than to a
-typemap.
+typemap.  The following duplicates the behavior of the
+typemap:
 
      bool_t
      rpcb_gettime(host,timep)
           char *host
           time_t &timep
           OUTPUT:
-          timep sv_setnv(ST(1), (double)timep);
+          timep SvSetMagicNV(ST(1), (double)timep);
+
+See L<perlguts> for details about C<SvSetMagicNV()>.
 
 =head2 The CODE: Keyword
 

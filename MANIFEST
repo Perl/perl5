@@ -426,6 +426,7 @@ lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 lib/Text/Soundex.pm	Perl module to implement Soundex
 lib/Text/Tabs.pm	Do expand and unexpand
 lib/Text/Wrap.pm	Paragraph formatter
+lib/Tie/Array.pm	Base class for tied arrays
 lib/Tie/Hash.pm		Base class for tied hashes
 lib/Tie/RefHash.pm	Base class for tied hashes with references as keys
 lib/Tie/Scalar.pm	Base class for tied scalars
@@ -604,6 +605,7 @@ pod/perlfaq9.pod	Frequently Asked Questions, Part 9
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
+pod/perlhist.pod	The Perl history records
 pod/perlipc.pod		IPC info
 pod/perllocale.pod	Locale support info
 pod/perllol.pod		How to use lists of lists
@@ -735,7 +737,9 @@ t/lib/soundex.t		See if Soundex works
 t/lib/symbol.t		See if Symbol works
 t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap works
-t/lib/timelocal.t	See if Time::Local works
+t/lib/tie-push.t	Test for Tie::Array
+t/lib/tie-stdarray.t	Test for Tie::StdArray
+t/lib/tie-stdpush.t	Test for Tie::StdArray
 t/lib/thread.t		Basic test of threading (skipped if no threads) 
 t/lib/trig.t		See if Math::Trig works
 t/op/append.t		See if . works
@@ -800,6 +804,7 @@ t/op/substr.t		See if substr works
 t/op/sysio.t		See if sysread and syswrite work
 t/op/taint.t		See if tainting works
 t/op/tie.t		See if tie/untie functions work
+t/op/tiearray.t		See if tied arrays work
 t/op/time.t		See if time functions work
 t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
@@ -871,6 +876,7 @@ win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/TEST		Win32 port
 win32/autosplit.pl	Win32 port
 win32/bin/network.pl	Win32 port
+win32/bin/perlglob.pl	glob() support
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake
 win32/bin/search.pl	Win32 port

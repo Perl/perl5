@@ -183,7 +183,8 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 
     if (av) {
 	SV** svp = AvARRAY(av);
-	I32 items = AvFILL(av) + 1;
+	/* NOTE: No support for tied ISA */
+	I32 items = AvFILLp(av) + 1;
 	while (items--) {
 	    SV* sv = *svp++;
 	    HV* basestash = gv_stashsv(sv, FALSE);
@@ -582,7 +583,8 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	    AV* av = GvAVn(gv);
 	    GvMULTI_on(gv);
 	    sv_magic((SV*)av, (SV*)gv, 'I', Nullch, 0);
-	    if (add & 2 && strEQ(nambeg,"AnyDBM_File::ISA") && AvFILL(av) == -1)
+	    /* NOTE: No support for tied ISA */
+	    if (add & 2 && strEQ(nambeg,"AnyDBM_File::ISA") && AvFILLp(av) == -1)
 	    {
 		char *pname;
 		av_push(av, newSVpv(pname = "NDBM_File",0));

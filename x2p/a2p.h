@@ -9,10 +9,35 @@
  */
 
 #define VOIDUSED 1
+
+#ifdef WIN32
+#define _INC_WIN32_PERL5	/* kludge around win32 stdio layer */
+#endif
+
 #ifdef VMS
 #  include "config.h"
 #else
 #  include "../config.h"
+#endif
+
+#ifdef WIN32
+#undef USE_STDIO_PTR		/* XXX fast gets won't work, must investigate */
+#  ifndef STANDARD_C
+#    define STANDARD_C
+#  endif
+#  if defined(__BORLANDC__)
+#    pragma warn -ccc
+#    pragma warn -rch
+#    pragma warn -sig
+#    pragma warn -pia
+#    pragma warn -par
+#    pragma warn -aus
+#    pragma warn -use
+#    pragma warn -csu
+#    pragma warn -pro
+#  elif defined(_MSC_VER)
+#  elif defined(__MINGW32__)
+#  endif
 #endif
 
 #if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)

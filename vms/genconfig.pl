@@ -67,17 +67,17 @@ package='perl5'
 CONFIG='true'
 cf_time='$time'
 cf_by='$cf_by'
-ccdlflags=''
-cccdlflags=''
-mab=''
+ccdlflags='undef'
+cccdlflags='undef'
+mab='undef'
 libpth='/sys\$share /sys\$library'
 ld='Link'
 lddlflags='/Share'
-ranlib=''
-ar=''
+ranlib='undef'
+ar='undef'
 eunicefix=':'
 hint='none'
-hintfile=''
+hintfile='undef'
 useshrplib='define'
 usemymalloc='n'
 usevfork='true'
@@ -167,12 +167,23 @@ foreach (@ARGV) {
     print OUT "d_sockpair=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "d_gethent=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "d_select=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "i_netdb=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_niin=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_neterrno=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_gethbadd=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "gethbadd_addr_type=",$dosock ? "'char *'\n" : "'undef'\n";
+    print OUT "gethbadd_alen_type=",$dosock ? "'int'\n" : "'undef'\n";
+
     if ($dosock and $cctype eq 'decc' and $ccflags =~ /DECCRTL_SOCKETS/) {
-      print OUT "selecttype=fd_set\n";
+      print OUT "selecttype='fd_set'\n";
+      print OUT "d_getnbadd='define'\n";
+      print OUT "getnbadd_net_type='long'\n";
     }
-    else { print OUT "selecttype=int\n"; }
+    else {
+      print OUT "selecttype='int'\n";
+      print OUT "d_getnbadd='undef'\n";
+      print OUT "getnbadd_net_type='undef'\n";
+    }
 
     if ($cctype eq 'decc') { $rtlhas  = 'define'; print OUT "useposix='true'\n";  }
     else                   { $rtlhas  = 'undef';  print OUT "useposix='false'\n"; }

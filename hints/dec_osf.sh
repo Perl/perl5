@@ -102,7 +102,9 @@ case "$optimize" in
 	*gcc*)	
 		optimize='-O3'				;;
 	*)	case "$_DEC_cc_style" in
-		new)	optimize='-O4'			;;
+		new)	optimize='-O4'
+			ccflags="$ccflags -fprm d -ieee"
+			;;
 		old)	optimize='-O2 -Olimit 3200'	;;
 	    	esac
 		ccflags="$ccflags -D_INTRINSICS"
@@ -110,6 +112,17 @@ case "$optimize" in
 	esac
 	;;
 esac
+
+# Make glibpth agree with the compiler suite.  Note that /shlib
+# is not here.  That's on purpose.  Even though that's where libc
+# really lives from V4.0 on, the linker (and /sbin/loader) won't
+# look there by default.  The sharable /sbin utilities were all
+# built with "-Wl,-rpath,/shlib" to get around that.  This makes
+# no attempt to figure out the additional location(s) searched by
+# gcc, since not all versions of gcc are easily coerced into
+# revealing that information.
+glibpth="/usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc"
+glibpth="$glibpth /usr/lib /usr/local/lib /var/shlib"
 
 # dlopen() is in libc
 libswanted="`echo $libswanted | sed -e 's/ dl / /'`"
@@ -165,14 +178,27 @@ case "$optimize" in
 esac
 
 if [ "X$usethreads" != "X" ]; then
-    ccflags="-DUSE_THREADS $ccflags"
-    optimize="-pthread $optimize"
-    ldflags="-pthread $ldflags"
-    set `echo X "$libswanted "| sed -e 's/ c / pthread c_r /'`
-    shift
-    libswanted="$*"
+    # Threads interfaces changed with V4.0.
+    case "$_DEC_uname_r" in
+    *[123].*)	libswanted="$libswanted pthreads mach exc c_r"
+		ccflags="-DUSE_THREADS -threads $ccflags"
+		;;
+    *)		libswanted="$libswanted pthread exc"
+    		ccflags="-DUSE_THREADS -pthread $ccflags"
+		;;
+    esac
     usemymalloc='n'
 fi
+
+#
+# Make embedding in things like INN and Apache more memory friendly.
+# Keep it overridable on the Configure command line, though, so that
+# "-Uuseshrplib" prevents this default.
+#
+
+case "$_DEC_cc_style.$useshrplib" in
+	new.)	useshrplib="$define"	;;
+esac
 
 #
 # Unset temporary variables no more needed.
@@ -183,6 +209,22 @@ unset _DEC_uname_r
     
 #
 # History:
+#
+# perl5.004_57:
+#
+#	19-Dec-1997 Spider Boardman <spider@Orb.Nashua.NH.US>
+#
+#	* Newer Digial UNIX compilers enforce signaling for NaN without
+#	  -ieee.  Added -fprm d at the same time since it's friendlier for
+#	  embedding.
+#
+#	* Fixed the library search path to match cc, ld, and /sbin/loader.
+#
+#	* Default to building -Duseshrplib on newer systems.  -Uuseshrplib
+#	  still overrides.
+#
+#	* Fix -pthread additions for useshrplib.  ld has no -pthread option.
+#
 #
 # perl5.004_04:
 #

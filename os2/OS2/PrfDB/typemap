@@ -11,4 +11,4 @@ T_PVNULL
 #############################################################################
 OUTPUT
 T_PVNULL
-	sv_setpv((SV*)$arg, $var);
+	SvSetMagicPV((SV*)$arg, $var);

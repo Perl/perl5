@@ -499,54 +499,44 @@ VIRTUAL char*	screaminstr _((SV* bigsv, SV* littlesv, I32 start_shift, I32 end_s
 #ifndef VMS
 VIRTUAL I32	setenv_getix _((char* nam));
 #endif
-VIRTUAL void	setdefout _((GV* gv));
-VIRTUAL char*	sharepvn _((char* sv, I32 len, U32 hash));
-VIRTUAL HEK*	share_hek _((char* sv, I32 len, U32 hash));
-VIRTUAL Signal_t sighandler _((int sig));
-VIRTUAL SV**	stack_grow _((SV** sp, SV**p, int n));
-VIRTUAL I32	start_subparse _((I32 is_format, U32 flags));
-VIRTUAL void	sub_crush_depth _((CV* cv));
-VIRTUAL bool	sv_2bool _((SV* sv));
-VIRTUAL CV*	sv_2cv _((SV* sv, HV** st, GV** gvp, I32 lref));
-VIRTUAL IO*	sv_2io _((SV* sv));
-VIRTUAL IV	sv_2iv _((SV* sv));
-VIRTUAL SV*	sv_2mortal _((SV* sv));
-VIRTUAL double	sv_2nv _((SV* sv));
-VIRTUAL char*	sv_2pv _((SV* sv, STRLEN* lp));
-VIRTUAL UV	sv_2uv _((SV* sv));
-VIRTUAL IV	sv_iv _((SV* sv));
-VIRTUAL UV	sv_uv _((SV* sv));
-VIRTUAL double	sv_nv _((SV* sv));
-VIRTUAL char *	sv_pvn _((SV *, STRLEN *));
-VIRTUAL I32	sv_true _((SV *));
-VIRTUAL void	sv_add_arena _((char* ptr, U32 size, U32 flags));
-VIRTUAL int	sv_backoff _((SV* sv));
-VIRTUAL SV*	sv_bless _((SV* sv, HV* stash));
-VIRTUAL void	sv_catpvf _((SV* sv, const char* pat, ...));
-VIRTUAL void	sv_catpv _((SV* sv, char* ptr));
-VIRTUAL void	sv_catpvn _((SV* sv, char* ptr, STRLEN len));
-VIRTUAL void	sv_catsv _((SV* dsv, SV* ssv));
-VIRTUAL void	sv_chop _((SV* sv, char* ptr));
-VIRTUAL void	sv_clean_all _((void));
-VIRTUAL void	sv_clean_objs _((void));
-VIRTUAL void	sv_clear _((SV* sv));
-VIRTUAL I32	sv_cmp _((SV* sv1, SV* sv2));
-VIRTUAL I32	sv_cmp_locale _((SV* sv1, SV* sv2));
+VIRTUAL int	magic_setdefelem _((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setenv	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setfm	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setisa	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setglob	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setmglob	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setnkeys	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setpack	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setpos	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setsig	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setsubstr	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_settaint	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setuvar	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_setvec	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_set_all_env _((SV* sv, MAGIC* mg));
+VIRTUAL U32	magic_sizepack	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_wipepack	_((SV* sv, MAGIC* mg));
+VIRTUAL void	magicname _((char* sym, char* name, I32 namlen));
+VIRTUAL int	main _((int argc, char** argv, char** env));
+VIRTUAL void	markstack_grow _((void));
 #ifdef USE_LOCALE_COLLATE
-VIRTUAL char*	sv_collxfrm _((SV* sv, STRLEN* nxp));
+VIRTUAL char*	mem_collxfrm _((const char* s, STRLEN len, STRLEN* xlen));
 #endif
-VIRTUAL OP*	sv_compile_2op _((SV* sv, OP** startp, char* code, AV** avp));
-VIRTUAL void	sv_dec _((SV* sv));
-VIRTUAL void	sv_dump _((SV* sv));
-VIRTUAL bool	sv_derived_from _((SV* sv, char* name));
-VIRTUAL I32	sv_eq _((SV* sv1, SV* sv2));
-VIRTUAL void	sv_free _((SV* sv));
-VIRTUAL void	sv_free_arenas _((void));
-VIRTUAL char*	sv_gets _((SV* sv, PerlIO* fp, I32 append));
-#ifndef DOSISH
-VIRTUAL char*	sv_grow _((SV* sv, I32 newlen));
-#else
-VIRTUAL char*	sv_grow _((SV* sv, unsigned long newlen));
+VIRTUAL char*	mess _((const char* pat, va_list* args));
+VIRTUAL int	mg_clear _((SV* sv));
+VIRTUAL int	mg_copy _((SV* , SV* , char* , I32));
+VIRTUAL MAGIC*	mg_find _((SV* sv, int type));
+VIRTUAL int	mg_free _((SV* sv));
+VIRTUAL int	mg_get _((SV* sv));
+VIRTUAL U32	mg_len _((SV* sv));
+VIRTUAL void	mg_magical _((SV* sv));
+VIRTUAL int	mg_set _((SV* sv));
+VIRTUAL I32	mg_size _((SV* sv));
+VIRTUAL OP*	mod _((OP* o, I32 type));
+VIRTUAL char*	moreswitches _((char* s));
+VIRTUAL OP*	my _((OP* o));
+#if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
+VIRTUAL char*	my_bcopy _((char* from, char* to, I32 len));
 #endif
 VIRTUAL void	sv_inc _((SV* sv));
 VIRTUAL void	sv_insert _((SV* bigsv, STRLEN offset, STRLEN len, char* little, STRLEN littlelen));
@@ -596,27 +586,42 @@ VIRTUAL I32	unlnk _((char* f));
 #ifdef USE_THREADS
 VIRTUAL void	unlock_condpair _((void* svv));
 #endif
-VIRTUAL void	unsharepvn _((char* sv, I32 len, U32 hash));
-VIRTUAL void	unshare_hek _((HEK* hek));
-VIRTUAL void	utilize _((int aver, I32 floor, OP* version, OP* id, OP* arg));
-VIRTUAL void	vivify_defelem _((SV* sv));
-VIRTUAL void	vivify_ref _((SV* sv, U32 to_what));
-VIRTUAL I32	wait4pid _((int pid, int* statusp, int flags));
-VIRTUAL void	warn _((const char* pat,...));
-VIRTUAL void	watch _((char** addr));
-VIRTUAL I32	whichsig _((char* sig));
-VIRTUAL int	yyerror _((char* s));
-VIRTUAL int	yylex _((void));
-VIRTUAL int	yyparse _((void));
-VIRTUAL int	yywarn _((char* s));
-
-#ifndef MYMALLOC
-VIRTUAL Malloc_t safemalloc _((MEM_SIZE nbytes));
-VIRTUAL Malloc_t safecalloc _((MEM_SIZE elements, MEM_SIZE size));
-VIRTUAL Malloc_t saferealloc _((Malloc_t where, MEM_SIZE nbytes));
-VIRTUAL Free_t   safefree _((Malloc_t where));
+VIRTUAL void	my_unexec _((void));
+VIRTUAL OP*	newANONLIST _((OP* o));
+VIRTUAL OP*	newANONHASH _((OP* o));
+VIRTUAL OP*	newANONSUB _((I32 floor, OP* proto, OP* block));
+VIRTUAL OP*	newASSIGNOP _((I32 flags, OP* left, I32 optype, OP* right));
+VIRTUAL OP*	newCONDOP _((I32 flags, OP* expr, OP* trueop, OP* falseop));
+VIRTUAL void	newFORM _((I32 floor, OP* o, OP* block));
+VIRTUAL OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* scalar, OP* expr, OP*block, OP*cont));
+VIRTUAL OP*	newLOGOP _((I32 optype, I32 flags, OP* left, OP* right));
+VIRTUAL OP*	newLOOPEX _((I32 type, OP* label));
+VIRTUAL OP*	newLOOPOP _((I32 flags, I32 debuggable, OP* expr, OP* block));
+VIRTUAL OP*	newNULLLIST _((void));
+VIRTUAL OP*	newOP _((I32 optype, I32 flags));
+VIRTUAL void	newPROG _((OP* o));
+VIRTUAL OP*	newRANGE _((I32 flags, OP* left, OP* right));
+VIRTUAL OP*	newSLICEOP _((I32 flags, OP* subscript, OP* list));
+VIRTUAL OP*	newSTATEOP _((I32 flags, char* label, OP* o));
+VIRTUAL CV*	newSUB _((I32 floor, OP* o, OP* proto, OP* block));
+VIRTUAL CV*	newXS _((char* name, void (*subaddr)(CV* cv), char* filename));
+VIRTUAL AV*	newAV _((void));
+VIRTUAL OP*	newAVREF _((OP* o));
+VIRTUAL OP*	newBINOP _((I32 type, I32 flags, OP* first, OP* last));
+VIRTUAL OP*	newCVREF _((I32 flags, OP* o));
+VIRTUAL OP*	newGVOP _((I32 type, I32 flags, GV* gv));
+VIRTUAL GV*	newGVgen _((char* pack));
+VIRTUAL OP*	newGVREF _((I32 type, OP* o));
+VIRTUAL OP*	newHVREF _((OP* o));
+VIRTUAL HV*	newHV _((void));
+VIRTUAL IO*	newIO _((void));
+VIRTUAL OP*	newLISTOP _((I32 type, I32 flags, OP* first, OP* last));
+VIRTUAL OP*	newPMOP _((I32 type, I32 flags));
+VIRTUAL OP*	newPVOP _((I32 type, I32 flags, char* pv));
+VIRTUAL SV*	newRV _((SV* ref));
+#if !defined(__GNUC__) && (defined(CRIPPLED_CC) || defined(USE_THREADS))
+VIRTUAL SV*	newRV_noinc _((SV *));
 #endif
-
 #ifdef LEAKTEST
 VIRTUAL Malloc_t safexmalloc _((I32 x, MEM_SIZE size));
 VIRTUAL Malloc_t safexcalloc _((I32 x, MEM_SIZE elements, MEM_SIZE size));

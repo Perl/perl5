@@ -76,7 +76,8 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00454"   /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00456"  /**/
+
 
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
@@ -372,6 +373,20 @@
  *	available to poll active file descriptors.
  */
 #undef HAS_POLL		/**/
+
+/* HAS_PTHREAD_YIELD:
+ *	This symbol, if defined, indicates that the pthread_yield routine is
+ *	available to yield the execution of the current thread.
+ *	VMS: pthread_yield_np is there, but we won't worry for now since it's
+ *	set up already as sched_yield.
+ */
+#undef HAS_PTHREAD_YIELD	/**/
+
+/* HAS_SCHED_YIELD:
+ *	This symbol, if defined, indicates that the sched_yield routine is
+ *	available to yield the execution of the current thread.
+ */
+#define HAS_SCHED_YIELD	/**/
 
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
@@ -1757,6 +1772,12 @@
  */
 #undef	USE_SFIO		/**/
 
+/* PTHREADS_CREATED_JOINABLE:
+ *	This symbol, if defined, indicates that pthreads are created
+ *	in the joinable (aka undetached) state.
+ */
+#define	PTHREADS_CREATED_JOINABLE		/**/
+
 /* Sigjmp_buf:
  * This is the buffer type to be used with Sigsetjmp and Siglongjmp.
  */
@@ -1871,6 +1892,41 @@
  */
 #define HAS_GETHOSTENT		/**/      /* config-skip */
 
+/* HAS_GETHBADD:
+ *	This symbol, if defined, indicates that the gethostbyaddr routine is
+ *	available to lookup host names by their IP addresses.
+ */
+#define HAS_GETHBADD		/**/      /* config-skip */
+
+/* Gethbadd_addr_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to gethostbyaddr().
+ */
+#define Gethbadd_addr_t		char *	/**/ /* config-skip */
+
+/* Gethbadd_alen_t:
+ *	This symbol holds the type used for the 2nd argument
+ *	to gethostbyaddr().
+ */
+#define Gethbadd_alen_t		int	/**/  /* config-skip */
+
+#ifdef DECCRTL_SOCKETS
+/* HAS_GETNBADD:
+ *	This symbol, if defined, indicates that the getnetbyaddr routine is
+ *	available to lookup networks by their IP addresses.
+ */
+#define HAS_GETNBADD		/**/      /* config-skip */
+
+/* Gethbadd_net_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to getnetbyaddr().
+ */
+#define Getnbadd_net_t		long	/**/ /* config-skip */
+#else
+#undef HAS_GETNBADD		/**/          /* config-skip */
+#undef Getnbadd_net_t		long	/**/ /* config-skip */
+#endif
+
 /* VMS: In general, TCP/IP header files should be included from
  * sockadapt.h, instead of here, in order to keep the TCP/IP code
  * together as much as possible.
@@ -1880,6 +1936,12 @@
  *	include <netinet/in.h>. Otherwise, you may try <sys/in.h>.
  */
 #undef I_NETINET_IN	/**/              /* config-skip */
+
+/* I_NETDB:
+ *	This symbol, if defined, indicates that <netdb.h> exists and 
+ *	should be included.
+ */
+#undef I_NETDB		/**/              /* config-skip */
 
 /* I_NET_ERRNO:
  *	This symbol, if defined, indicates that <net/errno.h> exists and 
@@ -1900,8 +1962,11 @@
 #undef HAS_SOCKETPAIR	/**/          /* config-skip */
 #undef HAS_GETHOSTENT		/**/      /* config-skip */
 #undef I_NETINET_IN	/**/              /* config-skip */
+#undef I_NETDB	/**/                  /* config-skip */
 #undef I_NET_ERRNO		/**/          /* config-skip */
 #undef HAS_SELECT	/**/              /* config-skip */
+#undef HAS_GETHBADD		/**/          /* config-skip */
+#undef HAS_GETNBADD		/**/          /* config-skip */
 
 #endif /* !VMS_DO_SOCKETS */
 

@@ -57,7 +57,9 @@ calculate the length by using C<sv_setpv> or by specifying 0 as the second
 argument to C<newSVpv>.  Be warned, though, that Perl will determine the
 string's length by using C<strlen>, which depends on the string terminating
 with a NUL character.  The arguments of C<sv_setpvf> are processed like
-C<sprintf>, and the formatted output becomes the value.
+C<sprintf>, and the formatted output becomes the value.  The C<sv_set*()>
+functions are not generic enough to operate on values that have "magic".
+See L<Magic Virtual Tables> later in this document.
 
 All SVs that will contain strings should, but need not, be terminated
 with a NUL character.  If it is not NUL-terminated there is a risk of
@@ -130,7 +132,9 @@ using C<strlen>.  In the second, you specify the length of the string
 yourself.  The third function processes its arguments like C<sprintf> and
 appends the formatted output.  The fourth function extends the string
 stored in the first SV with the string stored in the second SV.  It also
-forces the second SV to be interpreted as a string.
+forces the second SV to be interpreted as a string.  The C<sv_cat*()>
+functions are not generic enough to operate on values that have "magic".
+See L<Magic Virtual Tables> later in this document.
 
 If you know the name of a scalar variable, you can get a pointer to its SV
 by using the following:
@@ -830,6 +834,17 @@ Typically only using the magic on objects blessed into the same class
 as the extension is sufficient.  For '~' magic, it may also be
 appropriate to add an I32 'signature' at the top of the private data
 area and check that.
+
+Also note that most of the C<sv_set*()> functions that modify scalars do
+B<not> invoke 'set' magic on their targets.  This must be done by the user
+either by calling the C<SvSETMAGIC()> macro after calling these functions,
+or by using one of the C<SvSetMagic*()> macros.  Similarly, generic C code
+must call the C<SvGETMAGIC()> macro to invoke any 'get' magic if they use
+an SV obtained from external sources in functions that don't handle magic.
+L<API LISTING> later in this document identifies such macros and functions.
+For example, calls to the C<sv_cat*()> functions typically need to be
+followed by C<SvSETMAGIC()>, but they don't need a prior C<SvGETMAGIC()>
+since their implementation handles 'get' magic.
 
 =head2 Finding Magic
 
@@ -2324,28 +2339,29 @@ Opening bracket for arguments on a callback.  See C<PUTBACK> and L<perlcall>.
 =item PUSHi
 
 Push an integer onto the stack.  The stack must have room for this element.
-See C<XPUSHi>.
+Handles 'set' magic.  See C<XPUSHi>.
 
 	PUSHi(int d)
 
 =item PUSHn
 
 Push a double onto the stack.  The stack must have room for this element.
-See C<XPUSHn>.
+Handles 'set' magic.  See C<XPUSHn>.
 
 	PUSHn(double d)
 
 =item PUSHp
 
 Push a string onto the stack.  The stack must have room for this element.
-The C<len> indicates the length of the string.  See C<XPUSHp>.
+The C<len> indicates the length of the string.  Handles 'set' magic.  See
+C<XPUSHp>.
 
 	PUSHp(char *c, int len )
 
 =item PUSHs
 
-Push an SV onto the stack.  The stack must have room for this element.  See
-C<XPUSHs>.
+Push an SV onto the stack.  The stack must have room for this element.  Does
+not handle 'set' magic.  See C<XPUSHs>.
 
 	PUSHs(sv)
 
@@ -2492,30 +2508,39 @@ of the SV is unaffected.
 
 	SV*	sv_bless _((SV* sv, HV* stash));
 
+=item SvCatMagicPV
+
+=item SvCatMagicPVN
+
+=item SvCatMagicSV
+
 =item sv_catpv
 
 Concatenates the string onto the end of the string which is in the SV.
+Handles 'get' magic, but not 'set' magic.  See C<SvCatMagicPV>.
 
 	void	sv_catpv _((SV* sv, char* ptr));
 
 =item sv_catpvn
 
 Concatenates the string onto the end of the string which is in the SV.  The
-C<len> indicates number of bytes to copy.
+C<len> indicates number of bytes to copy.  Handles 'get' magic, but not
+'set' magic.  See C<SvCatMagicPVN).
 
 	void	sv_catpvn _((SV* sv, char* ptr, STRLEN len));
 
 =item sv_catpvf
 
 Processes its arguments like C<sprintf> and appends the formatted output
-to an SV.
+to an SV.  Handles 'get' magic, but not 'set' magic.  C<SvSETMAGIC()> must
+typically be called after calling this function to handle 'set' magic.
 
 	void	sv_catpvf _((SV* sv, const char* pat, ...));
 
 =item sv_catsv
 
 Concatenates the string from SV C<ssv> onto the end of the string in SV
-C<dsv>.
+C<dsv>.  Handles 'get' magic, but not 'set' magic.  See C<SvCatMagicSV).
 
 	void	sv_catsv _((SV* dsv, SV* ssv));
 
@@ -2558,6 +2583,13 @@ Returns a boolean indicating whether the strings in the two SVs are
 identical.
 
 	I32	sv_eq _((SV* sv1, SV* sv2));
+
+=item SvGETMAGIC
+
+Invokes C<mg_get> on an SV if it has 'get' magic.  This macro evaluates
+its argument more than once.
+
+	void	SvGETMAGIC( SV *sv )
 
 =item SvGROW
 
@@ -2776,7 +2808,7 @@ Checks the B<private> setting.  Use C<SvPOK>.
 
 Returns a pointer to the string in the SV, or a stringified form of the SV
 if the SV does not contain a string.  If C<len> is C<na> then Perl will
-handle the length on its own.
+handle the length on its own.  Handles 'get' magic.
 
 	char * SvPV (SV* sv, int len )
 
@@ -2828,6 +2860,13 @@ Dereferences an RV to return the SV.
 
 	SV*	SvRV (SV* sv);
 
+=item SvSETMAGIC
+
+Invokes C<mg_set> on an SV if it has 'set' magic.  This macro evaluates
+its argument more than once.
+
+	void	SvSETMAGIC( SV *sv )
+
 =item SvTAINT
 
 Taints an SV if tainting is enabled
@@ -2857,35 +2896,102 @@ Marks an SV as tainted.
 
 	SvTAINTED_on (SV* sv);
 
+=item SvSetMagicIV
+
+A macro that calls C<sv_setiv>, and invokes 'set' magic on the SV.
+May evaluate arguments more than once.
+
+	void	SvSetMagicIV (SV* sv, IV num)
+
+=item SvSetMagicNV
+
+A macro that calls C<sv_setnv>, and invokes 'set' magic on the SV.
+May evaluate arguments more than once.
+
+	void	SvSetMagicNV (SV* sv, double num)
+
+=item SvSetMagicPV
+
+A macro that calls C<sv_setpv>, and invokes 'set' magic on the SV.
+May evaluate arguments more than once.
+
+	void	SvSetMagicPV (SV* sv, char *ptr)
+
+=item SvSetMagicPVIV
+
+A macro that calls C<sv_setpviv>, and invokes 'set' magic on the SV.
+May evaluate arguments more than once.
+
+	void	SvSetMagicPVIV (SV* sv, IV num)
+
+=item SvSetMagicPVN
+
+A macro that calls C<sv_setpvn>, and invokes 'set' magic on the SV.
+May evaluate arguments more than once.
+
+	void	SvSetMagicPVN (SV* sv, char* ptr, STRLEN len)
+
+=item SvSetMagicSV
+
+Same as C<SvSetSV>, but also invokes 'set' magic on the SV.
+May evaluate arguments more than once.
+
+	void	SvSetMagicSV (SV* dsv, SV* ssv)
+
+=item SvSetMagicSV_nosteal
+
+Same as C<SvSetSV_nosteal>, but also invokes 'set' magic on the SV.
+May evaluate arguments more than once.
+
+	void	SvSetMagicSV_nosteal (SV* dsv, SV* ssv)
+
+=item SvSetMagicUV
+
+A macro that calls C<sv_setuv>, and invokes 'set' magic on the SV.
+May evaluate arguments more than once.
+
+	void	SvSetMagicUV (SV* sv, UV num)
+
 =item sv_setiv
 
-Copies an integer into the given SV.
+Copies an integer into the given SV.  Does not handle 'set' magic.
+See C<SvSetMagicIV>.
 
 	void	sv_setiv _((SV* sv, IV num));
 
 =item sv_setnv
 
-Copies a double into the given SV.
+Copies a double into the given SV.  Does not handle 'set' magic.
+See C<SvSetMagicNV>.
 
 	void	sv_setnv _((SV* sv, double num));
 
 =item sv_setpv
 
 Copies a string into an SV.  The string must be null-terminated.
+Does not handle 'set' magic.  See C<SvSetMagicPV>.
 
 	void	sv_setpv _((SV* sv, char* ptr));
+
+=item sv_setpviv
+
+Copies an integer into the given SV, also updating its string value.
+Does not handle 'set' magic.  See C<SvSetMagicPVIV>.
+
+	void	sv_setpviv _((SV* sv, IV num));
 
 =item sv_setpvn
 
 Copies a string into an SV.  The C<len> parameter indicates the number of
-bytes to be copied.
+bytes to be copied.  Does not handle 'set' magic.  See C<SvSetMagicPVN>.
 
 	void	sv_setpvn _((SV* sv, char* ptr, STRLEN len));
 
 =item sv_setpvf
 
 Processes its arguments like C<sprintf> and sets an SV to the formatted
-output.
+output.  Does not handle 'set' magic.  C<SvSETMAGIC()> must typically
+be called after calling this function to handle 'set' magic.
 
 	void	sv_setpvf _((SV* sv, const char* pat, ...));
 
@@ -2938,12 +3044,35 @@ a reference count of 1.
 
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
 
+=item SvSetSV
+
+Calls C<sv_setsv> if dsv is not the same as ssv.  May evaluate arguments
+more than once.
+
+	void	SvSetSV (SV* dsv, SV* ssv)
+
+=item SvSetSV_nosteal
+
+Calls a non-destructive version of C<sv_setsv> if dsv is not the same as ssv.
+May evaluate arguments more than once.
+
+	void	SvSetSV_nosteal (SV* dsv, SV* ssv)
+
 =item sv_setsv
 
 Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
-The source SV may be destroyed if it is mortal.
+The source SV may be destroyed if it is mortal.  Does not handle 'set' magic.
+See the macro forms C<SvSetSV>, C<SvSetSV_nosteal>, C<SvSetMagicSV> and
+C<SvSetMagicSV_nosteal>.
 
 	void	sv_setsv _((SV* dsv, SV* ssv));
+
+=item sv_setuv
+
+Copies an unsigned integer into the given SV.  Does not handle 'set' magic.
+See C<SvSetMagicUV>.
+
+	void	sv_setuv _((SV* sv, UV num));
 
 =item SvSTASH
 
@@ -2982,7 +3111,7 @@ Double type flag for scalars.  See C<svtype>.
 =item SvTRUE
 
 Returns a boolean indicating whether Perl would evaluate the SV as true or
-false, defined or undefined.
+false, defined or undefined.  Does not handle 'get' magic.
 
 	int SvTRUE (SV* sv)
 
@@ -3020,6 +3149,8 @@ as a reversal of C<newSVrv>.  See C<SvROK_off>.
 
 	void    sv_unref _((SV* sv));
 
+=item SvUseMagicPVN
+
 =item sv_usepvn
 
 Tells an SV to use C<ptr> to find its string value.  Normally the string is
@@ -3027,7 +3158,8 @@ stored inside the SV but sv_usepvn allows the SV to use an outside string.
 The C<ptr> should point to memory that was allocated by C<malloc>.  The
 string length, C<len>, must be supplied.  This function will realloc the
 memory pointed to by C<ptr>, so that pointer should not be freed or used by
-the programmer after giving it to sv_usepvn.
+the programmer after giving it to sv_usepvn.  Does not handle 'set' magic.
+See C<SvUseMagicPVN>.
 
 	void	sv_usepvn _((SV* sv, char* ptr, STRLEN len));
 
@@ -3060,28 +3192,29 @@ function the same way you use the C C<printf> function.  See C<croak()>.
 
 =item XPUSHi
 
-Push an integer onto the stack, extending the stack if necessary.  See
-C<PUSHi>.
+Push an integer onto the stack, extending the stack if necessary.  Handles
+'set' magic. See C<PUSHi>.
 
 	XPUSHi(int d)
 
 =item XPUSHn
 
-Push a double onto the stack, extending the stack if necessary.  See
-C<PUSHn>.
+Push a double onto the stack, extending the stack if necessary.  Handles 'set'
+magic.  See C<PUSHn>.
 
 	XPUSHn(double d)
 
 =item XPUSHp
 
 Push a string onto the stack, extending the stack if necessary.  The C<len>
-indicates the length of the string.  See C<PUSHp>.
+indicates the length of the string.  Handles 'set' magic.  See C<PUSHp>.
 
 	XPUSHp(char *c, int len)
 
 =item XPUSHs
 
-Push an SV onto the stack, extending the stack if necessary.  See C<PUSHs>.
+Push an SV onto the stack, extending the stack if necessary.  Does not
+handle 'set' magic.  See C<PUSHs>.
 
 	XPUSHs(sv)
 
@@ -3204,8 +3337,8 @@ Jeff Okamoto <F<okamoto@corp.hp.com>>
 
 With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
-Bowers, Matthew Green, Tim Bunce, Spider Boardman, Ulrich Pfeifer, and
-Stephen McCamant.
+Bowers, Matthew Green, Tim Bunce, Spider Boardman, Ulrich Pfeifer,
+Stephen McCamant, and Gurusamy Sarathy.
 
 API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 

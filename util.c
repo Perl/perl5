@@ -14,6 +14,7 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+#include "perlmem.h"
 
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
@@ -2013,7 +2014,7 @@ rsignal_restore(int signo, Sigsave_t *save)
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS)
 I32
-my_pclose(FILE *ptr)
+my_pclose(PerlIO *ptr)
 {
     Sigsave_t hstat, istat, qstat;
     int status;
@@ -2543,7 +2544,7 @@ new_struct_thread(struct perl_thread *t)
     
     /* Initialise all per-thread SVs that the template thread used */
     svp = AvARRAY(t->threadsv);
-    for (i = 0; i <= AvFILL(t->threadsv); i++, svp++) {
+    for (i = 0; i <= AvFILLp(t->threadsv); i++, svp++) {
 	if (*svp && *svp != &sv_undef) {
 	    SV *sv = newSVsv(*svp);
 	    av_store(thr->threadsv, i, sv);

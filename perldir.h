@@ -2,18 +2,6 @@
 #define H_PERLDIR 1
 
 #ifdef PERL_OBJECT
-
-#include "ipdir.h"
-
-#define PerlDir_mkdir(name, mode) piDir->MKdir((name), (mode), ErrorNo())
-#define PerlDir_chdir(name) piDir->Chdir((name), ErrorNo())
-#define PerlDir_rmdir(name) piDir->Rmdir((name), ErrorNo())
-#define PerlDir_close(dir) piDir->Close((dir), ErrorNo())
-#define PerlDir_open(name) piDir->Open((name), ErrorNo())
-#define PerlDir_read(dir) piDir->Read((dir), ErrorNo())
-#define PerlDir_rewind(dir) piDir->Rewind((dir), ErrorNo())
-#define PerlDir_seek(dir, loc) piDir->Seek((dir), (loc), ErrorNo())
-#define PerlDir_tell(dir) piDir->Tell((dir), ErrorNo())
 #else
 #define PerlDir_mkdir(name, mode) mkdir((name), (mode))
 #define PerlDir_chdir(name) chdir((name))

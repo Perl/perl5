@@ -140,7 +140,8 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) \
+	|| defined(__DGUX)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -977,7 +978,7 @@ typedef union any ANY;
 typedef I32 (*filter_t) _((int, SV *, int));
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
 #define FILTER_DATA(idx)	   (AvARRAY(rsfp_filters)[idx])
-#define FILTER_ISREADER(idx)	   (idx >= AvFILL(rsfp_filters))
+#define FILTER_ISREADER(idx)	   (idx >= AvFILLp(rsfp_filters))
 
 #ifdef DOSISH
 # if defined(OS2)
@@ -1449,7 +1450,9 @@ int runops_debug _((void));
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
 #if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
-#if !defined(DONT_DECLARE_STD) || (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || defined(__sgi)
+#if !defined(DONT_DECLARE_STD) \
+	|| (defined(__svr4__) && defined(__GNUC__) && defined(sun)) \
+	|| defined(__sgi) || defined(__DGUX)
 extern char **	environ;	/* environment variables supplied via exec */
 #endif
 #else
@@ -1848,7 +1851,7 @@ EXT MGVTBL vtbl_sigelem =	{magic_getsig,
 					magic_setsig,
 					0,	magic_clearsig,
 							0};
-EXT MGVTBL vtbl_pack =	{0,	0,	0,	magic_wipepack,
+EXT MGVTBL vtbl_pack =	{0,	0,	magic_sizepack,	magic_wipepack,
 							0};
 EXT MGVTBL vtbl_packelem =	{magic_getpack,
 				magic_setpack,

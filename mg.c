@@ -190,6 +190,37 @@ mg_len(SV *sv)
     return len;
 }
 
+I32
+mg_size(SV *sv)
+{
+    MAGIC* mg;
+    I32 len;
+    
+    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+	MGVTBL* vtbl = mg->mg_virtual;
+	if (vtbl && vtbl->svt_len) {
+	    MGS mgs;
+	    ENTER;
+	    /* omit MGf_GSKIP -- not changed here */
+	    len = (*vtbl->svt_len)(sv, mg);
+	    LEAVE;
+	    return len;
+	}
+    }
+
+    switch(SvTYPE(sv)) {
+	case SVt_PVAV:
+	    len = AvFILLp((AV *) sv); /* Fallback to non-tied array */
+	    return len;
+	case SVt_PVHV:
+	    /* FIXME */
+	default:
+	    croak("Size magic not implemented");
+	    break;
+    }
+    return 0;
+}
+
 int
 mg_clear(SV *sv)
 {
@@ -895,8 +926,9 @@ magic_setisa(SV *sv, MAGIC *mg)
 
     stash = GvSTASH(mg->mg_obj);
     svp = AvARRAY((AV*)sv);
-    
-    for (fill = AvFILL((AV*)sv); fill >= 0; fill--, svp++) {
+                
+    /* NOTE: No support for tied ISA */
+    for (fill = AvFILLp((AV*)sv); fill >= 0; fill--, svp++) {
 	HV *basestash = gv_stashsv(*svp, FALSE);
 
 	if (!basestash) {
@@ -950,6 +982,33 @@ magic_setnkeys(SV *sv, MAGIC *mg)
 	LvTARG(sv) = Nullsv;	/* Don't allow a ref to reassign this. */
     }
     return 0;
+}          
+
+static int
+magic_methcall(MAGIC *mg, char *meth, I32 flags, int n, SV *val)
+{
+    dSP;
+
+    PUSHMARK(sp);
+    EXTEND(sp, n);
+    PUSHs(mg->mg_obj);
+    if (n > 1) { 
+	if (mg->mg_ptr) {
+	    if (mg->mg_length >= 0)
+		PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_length)));
+	    else if (mg->mg_length == HEf_SVKEY)
+		PUSHs((SV*)mg->mg_ptr);
+	}
+	else if (mg->mg_type == 'p') {
+	    PUSHs(sv_2mortal(newSViv(mg->mg_length)));
+	}
+    }
+    if (n > 2) {
+	PUSHs(val);
+    }
+    PUTBACK;
+
+    return perl_call_method(meth, flags);
 }
 
 STATIC int
@@ -959,21 +1018,10 @@ magic_methpack(SV *sv, MAGIC *mg, char *meth)
 
     ENTER;
     SAVETMPS;
-    PUSHMARK(sp);
-    EXTEND(sp, 2);
-    PUSHs(mg->mg_obj);
-    if (mg->mg_ptr) {
-	if (mg->mg_length >= 0)
-	    PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_length)));
-	else if (mg->mg_length == HEf_SVKEY)
-	    PUSHs((SV*)mg->mg_ptr);
-    }
-    else if (mg->mg_type == 'p')
-	PUSHs(sv_2mortal(newSViv(mg->mg_length)));
-    PUTBACK;
 
-    if (perl_call_method(meth, G_SCALAR))
+    if (magic_methcall(mg, meth, G_SCALAR, 2, NULL)) {
 	sv_setsv(sv, *stack_sp--);
+    }
 
     FREETMPS;
     LEAVE;
@@ -991,25 +1039,10 @@ magic_getpack(SV *sv, MAGIC *mg)
 
 int
 magic_setpack(SV *sv, MAGIC *mg)
-{
-    dSP;
-
-    PUSHMARK(sp);
-    EXTEND(sp, 3);
-    PUSHs(mg->mg_obj);
-    if (mg->mg_ptr) {
-	if (mg->mg_length >= 0)
-	    PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_length)));
-	else if (mg->mg_length == HEf_SVKEY)
-	    PUSHs((SV*)mg->mg_ptr);
-    }
-    else if (mg->mg_type == 'p')
-	PUSHs(sv_2mortal(newSViv(mg->mg_length)));
-    PUSHs(sv);
-    PUTBACK;
-
-    perl_call_method("STORE", G_SCALAR|G_DISCARD);
-
+{   
+    ENTER;
+    magic_methcall(mg, "STORE", G_SCALAR|G_DISCARD, 3, sv);
+    LEAVE;
     return 0;
 }
 
@@ -1019,6 +1052,24 @@ magic_clearpack(SV *sv, MAGIC *mg)
     return magic_methpack(sv,mg,"DELETE");
 }
 
+
+U32
+magic_sizepack(SV *sv, MAGIC *mg)
+{         
+    dTHR;
+    U32 retval = 0;
+
+    ENTER;
+    SAVETMPS;
+    if (magic_methcall(mg, "FETCHSIZE", G_SCALAR, 2, NULL)) {
+	sv = *stack_sp--;
+	retval = (U32) SvIV(sv)-1;
+    }
+    FREETMPS;
+    LEAVE;
+    return retval;
+}
+
 int magic_wipepack(SV *sv, MAGIC *mg)
 {
     dSP;
@@ -1026,9 +1077,9 @@ int magic_wipepack(SV *sv, MAGIC *mg)
     PUSHMARK(sp);
     XPUSHs(mg->mg_obj);
     PUTBACK;
-
+    ENTER;
     perl_call_method("CLEAR", G_SCALAR|G_DISCARD);
-
+    LEAVE;
     return 0;
 }
 
@@ -1238,7 +1289,7 @@ magic_getdefelem(SV *sv, MAGIC *mg)
 		targ = HeVAL(he);
 	}
 	else {
-	    AV* av = (AV*)LvTARG(sv);
+	    AV* av = (AV*)LvTARG(sv); 
 	    if ((I32)LvTARGOFF(sv) <= AvFILL(av))
 		targ = AvARRAY(av)[LvTARGOFF(sv)];
 	}
@@ -1842,7 +1893,7 @@ sighandler(int sig)
 
     oldstack = curstack;
     if (curstack != signalstack)
-	AvFILL(signalstack) = 0;
+	AvFILLp(signalstack) = 0;
     SWITCHSTACK(curstack, signalstack);
 
     if(psig_name[sig]) {

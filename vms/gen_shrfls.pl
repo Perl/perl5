@@ -39,7 +39,7 @@ require 5.000;
 
 $debug = $ENV{'GEN_SHRFLS_DEBUG'};
 
-print "gen_shrfls.pl Rev. 03-Nov-1997\n" if $debug;
+print "gen_shrfls.pl Rev. 14-Dec-1997\n" if $debug;
 
 if ($ARGV[0] eq '-f') {
   open(INP,$ARGV[1]) or die "Can't read input file $ARGV[1]: $!\n";
@@ -399,8 +399,6 @@ __END__
 
 # Oddball cases, so we can keep the perl.h scan above simple
 rcsid=vars      # declared in perl.c
-regarglen=vars  # declared in regcomp.h
-regdummy=vars   # declared in regcomp.h
 regkind=vars    # declared in regcomp.h
 simple=vars     # declared in regcomp.h
 varies=vars     # declared in regcomp.h

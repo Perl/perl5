@@ -516,62 +516,48 @@ PP(pp_tie)
     SV **mark = stack_base + ++*markstack_ptr;	/* reuse in entersub */
     I32 markoff = mark - stack_base - 1;
     char *methname;
-#ifdef ORIGINAL_TIE
-    BINOP myop;
-    bool oldcatch = CATCH_GET;
-#endif
+    int how = 'P';
 
-    varsv = mark[0];
-    if (SvTYPE(varsv) == SVt_PVHV)
-	methname = "TIEHASH";
-    else if (SvTYPE(varsv) == SVt_PVAV)
-	methname = "TIEARRAY";
-    else if (SvTYPE(varsv) == SVt_PVGV)
-	methname = "TIEHANDLE";
-    else
-	methname = "TIESCALAR";
+    varsv = mark[0];  
+    switch(SvTYPE(varsv)) {
+	case SVt_PVHV:
+	    methname = "TIEHASH";
+	    break;
+	case SVt_PVAV:
+	    methname = "TIEARRAY";
+	    break;
+	case SVt_PVGV:
+	    methname = "TIEHANDLE";
+	    how = 'q';
+	    break;
+	default:
+	    methname = "TIESCALAR";
+	    how = 'q';
+	    break;
+    }
 
-    stash = gv_stashsv(mark[1], FALSE);
-    if (!stash || !(gv = gv_fetchmethod(stash, methname)))
-	DIE("Can't locate object method \"%s\" via package \"%s\"",
-		methname, SvPV(mark[1],na));
-
-#ifdef ORIGINAL_TIE
-    Zero(&myop, 1, BINOP);
-    myop.op_last = (OP *) &myop;
-    myop.op_next = Nullop;
-    myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
-    CATCH_SET(TRUE);
-
-    ENTER;
-    SAVEOP();
-    op = (OP *) &myop;
-    if (PERLDB_SUB && curstash != debstash)
-	op->op_private |= OPpENTERSUB_DB;
-
-    XPUSHs((SV*)GvCV(gv));
-    PUTBACK;
-
-    if (op = pp_entersub(ARGS))
-        CALLRUNOPS();
+    if (sv_isobject(mark[1])) {
+	ENTER;
+	perl_call_method(methname, G_SCALAR);
+    } 
+    else {
+	/* Not clear why we don't call perl_call_method here too.
+	 * perhaps to get different error message ?
+	 */
+	stash = gv_stashsv(mark[1], FALSE);
+	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
+	    DIE("Can't locate object method \"%s\" via package \"%s\"",
+		 methname, SvPV(mark[1],na));                   
+	}
+	ENTER;
+	perl_call_sv((SV*)GvCV(gv), G_SCALAR);
+    }
     SPAGAIN;
 
-    CATCH_SET(oldcatch);
-#else
-    ENTER;
-    perl_call_sv((SV*)GvCV(gv), G_SCALAR);
-    SPAGAIN;
-#endif	
     sv = TOPs;
     if (sv_isobject(sv)) {
-	if (SvTYPE(varsv) == SVt_PVHV || SvTYPE(varsv) == SVt_PVAV) {
-	    sv_unmagic(varsv, 'P');
-	    sv_magic(varsv, sv, 'P', Nullch, 0);
-	}
-	else {
-	    sv_unmagic(varsv, 'q');
-	    sv_magic(varsv, sv, 'q', Nullch, 0);
-	}
+	sv_unmagic(varsv, how);            
+	sv_magic(varsv, sv, how, Nullch, 0);
     }
     LEAVE;
     SP = stack_base + markoff;
@@ -583,8 +569,7 @@ PP(pp_untie)
 {
     djSP;
     SV * sv ;
-
-    sv = POPs;
+    sv = POPs;          
 
     if (dowarn) {
         MAGIC * mg ;
@@ -625,7 +610,6 @@ PP(pp_tied)
             RETURN ;
 	}
     }
-
     RETPUSHUNDEF;
 }
 
@@ -637,10 +621,6 @@ PP(pp_dbmopen)
     HV* stash;
     GV *gv;
     SV *sv;
-#ifdef ORIGINAL_TIE
-    BINOP myop;
-    bool oldcatch = CATCH_GET;
-#endif	
 
     hv = (HV*)POPs;
 
@@ -655,24 +635,9 @@ PP(pp_dbmopen)
 	    DIE("No dbm on this machine");
     }
 
-#ifdef ORIGINAL_TIE
-    Zero(&myop, 1, BINOP);
-    myop.op_last = (OP *) &myop;
-    myop.op_next = Nullop;
-    myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
-    CATCH_SET(TRUE);
-
-    ENTER;
-    SAVEOP();
-    op = (OP *) &myop;
-    if (PERLDB_SUB && curstash != debstash)
-	op->op_private |= OPpENTERSUB_DB;
-    PUTBACK;
-    pp_pushmark(ARGS);
-#else
     ENTER;
     PUSHMARK(sp);
-#endif	
+
     EXTEND(sp, 5);
     PUSHs(sv);
     PUSHs(left);
@@ -681,51 +646,26 @@ PP(pp_dbmopen)
     else
 	PUSHs(sv_2mortal(newSViv(O_RDWR)));
     PUSHs(right);
-#ifdef ORIGINAL_TIE
-    PUSHs((SV*)GvCV(gv));
-    PUTBACK;
-
-    if (op = pp_entersub(ARGS))
-        CALLRUNOPS();
-#else
     PUTBACK;
     perl_call_sv((SV*)GvCV(gv), G_SCALAR);
-#endif	
     SPAGAIN;
 
     if (!sv_isobject(TOPs)) {
 	sp--;
-#ifdef ORIGINAL_TIE
-	op = (OP *) &myop;
-	PUTBACK;
-	pp_pushmark(ARGS);
-#else
 	PUSHMARK(sp);
-#endif	
-
 	PUSHs(sv);
 	PUSHs(left);
 	PUSHs(sv_2mortal(newSViv(O_RDONLY)));
 	PUSHs(right);
-#ifdef ORIGINAL_TIE
-	PUSHs((SV*)GvCV(gv));
-#endif	
 	PUTBACK;
-
-#ifdef ORIGINAL_TIE
-	if (op = pp_entersub(ARGS))
-	    CALLRUNOPS();
-#else
 	perl_call_sv((SV*)GvCV(gv), G_SCALAR);
-#endif	
 	SPAGAIN;
     }
 
-#ifdef ORIGINAL_TIE
-    CATCH_SET(oldcatch);
-#endif	
-    if (sv_isobject(TOPs))
+    if (sv_isobject(TOPs)) {
+	sv_unmagic((SV *) hv, 'P');            
 	sv_magic((SV*)hv, TOPs, 'P', Nullch, 0);
+    }
     LEAVE;
     RETURN;
 }
@@ -927,7 +867,7 @@ PP(pp_getc)
     if (!gv)
 	gv = argvgv;
 
-    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	I32 gimme = GIMME_V;
 	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
@@ -1145,7 +1085,7 @@ PP(pp_prtf)
     else
 	gv = defoutgv;
 
-    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	if (MARK == ORIGMARK) {
 	    MEXTEND(SP, 1);
 	    ++MARK;
@@ -1255,7 +1195,7 @@ PP(pp_sysread)
 
     gv = (GV*)*++MARK;
     if ((op->op_type == OP_READ || op->op_type == OP_SYSREAD) &&
-	SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
+	SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
     {
 	SV *sv;
 	
@@ -3641,7 +3581,9 @@ PP(pp_ghostent)
 #if defined(HAS_GETHOSTENT) && !defined(DONT_DECLARE_STD)
     struct hostent *PerlSock_gethostbyname(const char *);
     struct hostent *PerlSock_gethostbyaddr(const Gethbadd_addr_t, Gethbadd_alen_t, int);
+#ifndef PerlSock_gethostent
     struct hostent *PerlSock_gethostent(void);
+#endif
 #endif
     struct hostent *hent;
     unsigned long len;
@@ -3821,7 +3763,9 @@ PP(pp_gprotoent)
 #ifndef DONT_DECLARE_STD
     struct protoent *PerlSock_getprotobyname(const char *);
     struct protoent *PerlSock_getprotobynumber(int);
+#ifndef PerlSock_getprotoent
     struct protoent *PerlSock_getprotoent(void);
+#endif
 #endif
     struct protoent *pent;
 
@@ -3891,7 +3835,9 @@ PP(pp_gservent)
 #ifndef DONT_DECLARE_STD
     struct servent *PerlSock_getservbyname(const char *, const char *);
     struct servent *PerlSock_getservbynumber();
+#ifndef PerlSock_getservent
     struct servent *PerlSock_getservent(void);
+#endif
 #endif
     struct servent *sent;
 
