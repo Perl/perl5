@@ -1016,12 +1016,12 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		        c = utf8_to_uvchr((U8*)s, &len);
 
 			/* Handle some of the three Greek sigmas cases.
-			  * Note that not all the possible combinations
-			  * are handled here: some of them are handled
-			  * handled by the standard folding rules, and
-			  * some of them (the character class or ANYOF
-			  * cases) are handled during compiletime in
-			  * regexec.c:S_regclass(). */
+			 * Note that not all the possible combinations
+			 * are handled here: some of them are handled
+			 * by the standard folding rules, and some of
+			 * them (the character class or ANYOF cases)
+			 * are handled during compiletime in
+			 * regexec.c:S_regclass(). */
 			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
