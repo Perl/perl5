@@ -335,16 +335,7 @@ not_here(char *s)
     return -1;
 }
 
-#define PERL_constant_NOTFOUND	1
-#define PERL_constant_NOTDEF	2
-#define PERL_constant_ISIV	3
-#define PERL_constant_ISNO	4
-#define PERL_constant_ISNV	5
-#define PERL_constant_ISPV	6
-#define PERL_constant_ISPVN	7
-#define PERL_constant_ISUNDEF	8
-#define PERL_constant_ISUV	9
-#define PERL_constant_ISYES	10
+#include "constants.c"
 
 /* These were implemented in the old "constant" subroutine. They are actually
    macros that take an integer argument and return an integer result.  */
@@ -512,8 +503,6 @@ __END__
   }
   return PERL_constant_NOTFOUND;
 }
-
-#include "constants.c"
 
 static void
 restore_sigmask(sigset_t *ossetp)
