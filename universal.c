@@ -71,7 +71,7 @@ int level;
 	}
     }
 
-    return &sv_no;
+    return boolSV(strEQ(name, "UNIVERSAL"));
 }
 
 bool
