@@ -37,6 +37,7 @@ while (<PW>) {
     chomp;
     my @s = split /:/;
     my ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s) = @s;
+    next if /^\+/; # ignore NIS includes
     if (@s) {
 	push @{ $seen{$name_s} }, $.;
     } else {

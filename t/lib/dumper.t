@@ -9,6 +9,8 @@ BEGIN {
 }
 
 use Data::Dumper;
+use Config;
+my $Is_ebcdic = defined($Config{'ebcdic'}) && $Config{'ebcdic'} eq 'define';
 
 $Data::Dumper::Pad = "#";
 my $TMAX;
@@ -234,11 +236,20 @@ EOT
 
 ############# 43
 ##
+if (!$Is_ebcdic) {
 $WANT = <<'EOT';
 #$VAR1 = {
 #  "abc\0'\efg" => "mno\0"
 #};
 EOT
+}
+else {
+$WANT = <<'EOT';
+#$VAR1 = {
+#  "\201\202\203\340\360'\340\205\206\207" => "\224\225\226\340\360"
+#};
+EOT
+}
 
 $foo = { "abc\000\'\efg" => "mno\000" };
 {
@@ -444,6 +455,7 @@ EOT
   
 ############# 85
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #%kennels = (
 #  First => \'Fido',
@@ -456,6 +468,21 @@ EOT
 #);
 #%mutts = %kennels;
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#%kennels = (
+#  Second => \'Wags',
+#  First => \'Fido'
+#);
+#@dogs = (
+#  ${$kennels{First}},
+#  ${$kennels{Second}},
+#  \%kennels
+#);
+#%mutts = %kennels;
+EOT
+}
 
   TEST q(
 	 $d = Data::Dumper->new([\\%kennel, \\@dogs, $mutts],
@@ -483,6 +510,7 @@ EOT
   
 ############# 97
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #%kennels = (
 #  First => \'Fido',
@@ -495,7 +523,21 @@ EOT
 #);
 #%mutts = %kennels;
 EOT
-
+}
+else {
+  $WANT = <<'EOT';
+#%kennels = (
+#  Second => \'Wags',
+#  First => \'Fido'
+#);
+#@dogs = (
+#  ${$kennels{First}},
+#  ${$kennels{Second}},
+#  \%kennels
+#);
+#%mutts = %kennels;
+EOT
+}
   
   TEST q($d->Reset; $d->Dump);
   if ($XS) {
@@ -504,7 +546,8 @@ EOT
 
 ############# 103
 ##
-  $WANT = <<'EOT';
+if (!$Is_ebcdic) {
+ $WANT = <<'EOT';
 #@dogs = (
 #  'Fido',
 #  'Wags',
@@ -516,6 +559,21 @@ EOT
 #%kennels = %{$dogs[2]};
 #%mutts = %{$dogs[2]};
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#@dogs = (
+#  'Fido',
+#  'Wags',
+#  {
+#    Second => \$dogs[1],
+#    First => \$dogs[0]
+#  }
+#);
+#%kennels = %{$dogs[2]};
+#%mutts = %{$dogs[2]};
+EOT
+}
 
   TEST q(
 	 $d = Data::Dumper->new([\\@dogs, \\%kennel, $mutts],
@@ -539,6 +597,7 @@ EOT
 
 ############# 115
 ##
+if (!$Is_ebcdic) {
   $WANT = <<'EOT';
 #@dogs = (
 #  'Fido',
@@ -553,6 +612,23 @@ EOT
 #  Second => \'Wags'
 #);
 EOT
+}
+else {
+  $WANT = <<'EOT';
+#@dogs = (
+#  'Fido',
+#  'Wags',
+#  {
+#    Second => \'Wags',
+#    First => \'Fido'
+#  }
+#);
+#%kennels = (
+#  Second => \'Wags',
+#  First => \'Fido'
+#);
+EOT
+}
 
   TEST q(
 	 $d = Data::Dumper->new( [\@dogs, \%kennel], [qw(*dogs *kennels)] );
