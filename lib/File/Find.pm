@@ -550,6 +550,8 @@ sub _find_opt {
 		$cwd = "$cwd:" unless ($cwd =~ /:$/); # for safety
 
 		if ($top_item eq $File::Find::current_dir) {
+                  # avoid empty name after return to '/'
+                  $name = '/' unless length( $name );
 		    $abs_dir = $cwd;
 		}
 		else {
