@@ -3,9 +3,10 @@
    A more ambitious set of possible symbols can be found in
    sfio.h (inside an _cplusplus gard).
 */
-#if !defined(_STDIO_H) && !defined(FILE) && !defined(_STDIO_INCLUDED)
+#if !defined(_STDIO_H) && !defined(FILE) && !defined(_STDIO_INCLUDED) && !defined(__STDIO_LOADED)
 #define _STDIO_H
 #define _STDIO_INCLUDED
+#define __STDIO_LOADED
 struct _FILE;
 #define FILE struct _FILE
 #endif
