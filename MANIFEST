@@ -1477,7 +1477,6 @@ t/lib/Test/qr.t	See if Test works
 t/lib/Test/skip.t	See if Test works
 t/lib/Test/success.t	See if Test works
 t/lib/Test/todo.t	See if Test works
-t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
 t/lib/attrhand.t	See if Attribute::Handlers works
@@ -2038,3 +2037,4 @@ x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
 xsutils.c		Additional bundled package methods not in UNIVERSAL::
+lib/Text/Abbrev/t/abbrev.t	Text::Abbrev
