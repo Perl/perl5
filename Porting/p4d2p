@@ -36,7 +36,7 @@ USAGE
 }
 
 my ($cur, $match);
-$cur = m<^==== //depot/(.+?)\#\d+.* ====$> ... m<^(\@\@.+\@\@|\*+)$>;
+$cur = m<^==== //depot/(.+?)\#\d+.* ====( \w+)?$> ... m<^(\@\@.+\@\@|\*+)$>;
 
 $match = $1;
 
@@ -71,7 +71,7 @@ if ($cur) {
 	}
     }
     # see if we hit another patch (i.e. previous patch was empty)
-    elsif (m<^==== //depot/(.+?)\#\d+.* ====$>) {
+    elsif (m<^==== //depot/(.+?)\#\d+.* ====( \w+)?$>) {
 	$file = $match = $1;
     }
     # suppress all other lines in the header
