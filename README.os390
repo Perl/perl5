@@ -58,6 +58,9 @@ from source to eliminate any such trouble.  You might also find GNU make
 (as well as Perl and Apache) in the red-piece/book "Open Source Software 
 for OS/390 UNIX", SG24-5944-00 from IBM.
 
+You might also want to have GNU groff for OS/390 installed before
+running the `make install` step for Perl.
+
 There is a syntax error in the /usr/include/sys/socket.h header file
 that IBM supplies with USS V2R7, V2R8, and possibly V2R9.  The problem with
 the header file is that near the definition of the SO_REUSEPORT constant
@@ -143,10 +146,13 @@ re extraction of the source tar ball.
 
 =item *
 
-This port doesn't support dynamic loading.  Although OS/390 has support 
-for DLLs via dllload(), there are some differences that cause problems 
-for Perl.  (We need a volunteer to write a ext/DynaLoader/dl_dllload.xs 
-file).
+This port will support dynamic loading, but it is not selected by
+default.  If you would like to experiment with dynamic loading then
+be sure to specify -Dusedl in the arguments to the Configure script.
+See the comments in hints/os390.sh for more information on dynamic loading.
+If you build with dynamic loading then you will need to add the
+$archlibexp/CORE directory to your LIBPATH environment variable in order
+for perl to work.  See the config.sh file for the value of $archlibexp.
 
 =item *
 
@@ -260,6 +266,12 @@ from an account with write access to the directory entry for /tmp.
 
 =back
 
+=head2 installation anomalies
+
+The installman script will try to run on OS/390.  There will be fewer errors
+if you have a roff utility installed.  You can obtain GNU groff from the 
+Redbook SG24-5944-00 ftp site.
+
 =head2 Usage Hints
 
 When using perl on OS/390 please keep in mind that the EBCDIC and ASCII
@@ -321,8 +333,10 @@ Pure pure (that is non xs) modules may be installed via the usual:
     make test
     make install
 
-You can also build xs based extensions to Perl for OS/390 but will need 
-to follow the instructions in ExtUtils::MakeMaker for building 
+If you built perl with dynamic loading capability then that would also
+be the way to build xs based extensions.  However, if you built perl with
+the default static linking you can still build xs based extensions for OS/390 
+but you will need to follow the instructions in ExtUtils::MakeMaker for building 
 statically linked perl binaries.  In the simplest configurations building
 a static perl + xs extension boils down to:
 
@@ -337,12 +351,21 @@ In most cases people have reported better results with GNU make rather
 than the system's /bin/make program, whether for plain modules or for
 xs based extensions.
 
+If the make process encounters trouble with either compilation or
+linking then try setting the _C89_CCMODE to 1.  Assuming sh is your
+login shell then run:
+
+    export _C89_CCMODE=1
+
+If tcsh is your login shell then use the setenv command.
+
 =head1 AUTHORS
 
 David Fiander and Peter Prymmer with thanks to Dennis Longnecker
 and William Raffloer for valuable reports, LPAR and PTF feedback.
 Thanks to Mike MacIsaac and Egon Terwedow for SG24-5944-00.
 Thanks to Ignasi Roca for pointing out the floating point problems.
+Thanks to John Goodyear for dynamic loading help.
 
 =head1 SEE ALSO
 
@@ -386,6 +409,8 @@ This document was podified for the 5.005_03 release of Perl 11 March 1999.
 Updated 12 November 2000 for the 5.7.1 release of Perl.
 
 Updated 15 January 2001 for the 5.7.1 release of Perl.
+
+Updated 24 January 2001 to mention dynamic loading.
 
 =cut
 

@@ -25,6 +25,7 @@ use overload
 '|'	=>	sub {new Math::BigInt &bior},
 '^'	=>	sub {new Math::BigInt &bxor},
 '~'	=>	sub {new Math::BigInt &bnot},
+'int'	=>	sub { shift },
 
 qw(
 ""	stringify

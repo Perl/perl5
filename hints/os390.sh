@@ -84,23 +84,37 @@ define)
     case "$useshrplib" in
     '') useshrplib='true' ;;
     esac
-    case "$dlext" in
-    '') dlext='dll' ;;
-    esac
     case "$dlsrc" in
     '') dlsrc='dl_dllload.xs' ;;
     esac
-    so='dll'
-    libperl='libperl.dll'
+    # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
+    case "`uname -v`x`uname -r`" in
+    02x0[89].*|02x1[0-9].*|[0-9][3-9]x*) 
+        so='so'
+        case "$dlext" in
+        '') dlext='so' ;;
+        esac
+        ;;
+    *) 
+        so='dll'
+        case "$dlext" in
+        '') dlext='dll' ;;
+        esac
+        ;;
+    esac
+    libperl="libperl.$so"
     ccflags="$ccflags -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -Wc,dll"
     cccdlflags='-c -Wc,dll,EXPORTALL'
     # You might add '-Wl,EDIT=NO' to get rid of the symbol
-    # information at the end of the executable.
-    #
-    # The following will need to be modified for the installed libperl.x
+    # information at the end of the executable (=> smaller binaries).
+    # Do so with -Dldflags='-Wl,EDIT=NO'.
+    case "$ldflags" in
+    '') ldflags='' ;;
+    esac
+    # The following will need to be modified for the installed libperl.x.
+    # The modification to Config.pm is done by the installperl script after the build and test.
     ccdlflags="-W l,dll `pwd`/libperl.x"
-    ldflags=''
-    lddlflags='-W l,dll'
+    lddlflags="-W l,dll `pwd`/libperl.x"
     ;;
 esac
 # even on static builds using LIBPATH should be OK.
@@ -140,7 +154,14 @@ esac
 # other things.  Unfortunately, cppflags occurs too late to be of 
 # value external to the script.  This may need to be revisited 
 # under a compiler other than c89.
+case "$usedl" in
+define)
+echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_SHR_ENVIRON -E -Wc,NOLOC ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
+    ;;
+*)
 echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -E -Wc,NOLOC ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
+    ;;
+esac
 
 #
 # Note that Makefile.SH employs a bare yacc command to generate 
