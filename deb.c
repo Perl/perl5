@@ -27,12 +27,20 @@ void
 deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
     char *pat;
 {
+    dTHR;
     register I32 i;
     GV* gv = curcop->cop_filegv;
 
+#ifdef USE_THREADS
+    PerlIO_printf(Perl_debug_log,"0x%lx (%s:%ld)\t",
+		  (unsigned long) thr,
+		  SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
+		  (long)curcop->cop_line);
+#else
     PerlIO_printf(Perl_debug_log, "(%s:%ld)\t",
 	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
 	(long)curcop->cop_line);
+#endif /* USE_THREADS */
     for (i=0; i<dlevel; i++)
 	PerlIO_printf(Perl_debug_log, "%c%c ",debname[i],debdelim[i]);
     PerlIO_printf(Perl_debug_log, pat,a1,a2,a3,a4,a5,a6,a7,a8);
@@ -51,13 +59,21 @@ deb(pat, va_alist)
     va_dcl
 #  endif
 {
+    dTHR;
     va_list args;
     register I32 i;
     GV* gv = curcop->cop_filegv;
 
+#ifdef USE_THREADS
+    PerlIO_printf(Perl_debug_log, "0x%lx (%s:%ld)\t",
+		  (unsigned long) thr,
+		  SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
+		  (long)curcop->cop_line);
+#else
     PerlIO_printf(Perl_debug_log, "(%s:%ld)\t",
 	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
 	(long)curcop->cop_line);
+#endif /* USE_THREADS */
     for (i=0; i<dlevel; i++)
 	PerlIO_printf(Perl_debug_log, "%c%c ",debname[i],debdelim[i]);
 
@@ -82,6 +98,7 @@ deb_growlevel()
 I32
 debstackptrs()
 {
+    dTHR;
     PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
 	(unsigned long)curstack, (unsigned long)stack_base,
 	(long)*markstack_ptr, (long)(stack_sp-stack_base),
@@ -95,6 +112,7 @@ debstackptrs()
 I32
 debstack()
 {
+    dTHR;
     I32 top = stack_sp - stack_base;
     register I32 i = top - 30;
     I32 *markscan = markstack;
@@ -106,7 +124,12 @@ debstack()
 	if (*markscan >= i)
 	    break;
 
+#ifdef USE_THREADS
+    PerlIO_printf(Perl_debug_log, i ? "0x%lx    =>  ...  " : "0x%lx    =>  ",
+		  (unsigned long) thr);
+#else
     PerlIO_printf(Perl_debug_log, i ? "    =>  ...  " : "    =>  ");
+#endif /* USE_THREADS */
     if (stack_base[0] != &sv_undef || stack_sp < stack_base)
 	PerlIO_printf(Perl_debug_log, " [STACK UNDERFLOW!!!]\n");
     do {

@@ -52,6 +52,10 @@
 # endif
 #endif
 
+#ifdef USE_THREADS
+#include <pthread.h>
+#endif
+
 /*
  * SOFT_CAST can be used for args to prototyped functions to retain some
  * type checking; it only casts if the compiler does not know prototypes.
@@ -988,6 +992,12 @@ union any {
     void	(*any_dptr) _((void*));
 };
 
+#ifdef USE_THREADS
+#define ARGSproto struct thread *
+#else
+#define ARGSproto void
+#endif /* USE_THREADS */
+
 /* Work around some cygwin32 problems with importing global symbols */
 #if defined(CYGWIN32) && defined(DLLIMPORT) 
 #   include "cw32imp.h"
@@ -1291,6 +1301,18 @@ typedef Sighandler_t Sigsave_t;
 
 /* global state */
 EXT PerlInterpreter *	curinterp;	/* currently running interpreter */
+#ifdef USE_THREADS
+EXT pthread_key_t	thr_key;	/* For per-thread struct thread ptr */
+EXT pthread_mutex_t	sv_mutex;	/* Mutex for allocating SVs in sv.c */
+EXT pthread_mutex_t	malloc_mutex;	/* Mutex for malloc */
+EXT pthread_mutex_t	eval_mutex;	/* Mutex for doeval */
+EXT pthread_cond_t	eval_cond;	/* Condition variable for doeval */
+EXT struct thread *	eval_owner;	/* Owner thread for doeval */
+EXT int			nthreads;	/* Number of threads currently */
+EXT pthread_mutex_t	nthreads_mutex;	/* Mutex for nthreads */
+EXT pthread_cond_t	nthreads_cond;	/* Condition variable for nthreads */
+#endif /* USE_THREADS */
+
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
 #if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
 #ifndef DONT_DECLARE_STD
@@ -1901,6 +1923,7 @@ struct interpreter {
 };
 #endif
 
+#include "thread.h"
 #include "pp.h"
 
 #ifdef __cplusplus
@@ -1976,6 +1999,9 @@ EXT MGVTBL vtbl_fm =	{0,	magic_setfm,
 EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
+#ifdef USE_THREADS
+EXT MGVTBL vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
+#endif /* USE_THREADS */
 EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
 					0,	0,	magic_freedefelem};
 
@@ -2015,6 +2041,11 @@ EXT MGVTBL vtbl_pos;
 EXT MGVTBL vtbl_bm;
 EXT MGVTBL vtbl_fm;
 EXT MGVTBL vtbl_uvar;
+
+#ifdef USE_THREADS
+EXT MGVTBL vtbl_mutex;
+#endif /* USE_THREADS */
+
 EXT MGVTBL vtbl_defelem;
 
 #ifdef USE_LOCALE_COLLATE

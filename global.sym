@@ -255,6 +255,7 @@ vtbl_glob
 vtbl_isa
 vtbl_isaelem
 vtbl_mglob
+vtbl_mutex
 vtbl_nkeys
 vtbl_pack
 vtbl_packelem
@@ -372,6 +373,7 @@ ck_split
 ck_subr
 ck_svconst
 ck_trunc
+condpair_magic
 convert
 croak
 cv_ckproto
@@ -492,6 +494,7 @@ hv_undef
 ibcmp
 ibcmp_locale
 ingroup
+init_stacks
 instr
 intro_my
 intuit_more
@@ -521,6 +524,7 @@ magic_getsig
 magic_gettaint
 magic_getuvar
 magic_len
+magic_mutexfree
 magic_nextpack
 magic_set
 magic_setamagic

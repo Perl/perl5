@@ -172,9 +172,11 @@ U32 flags;
 
 #define uproot_SV(p)			\
     do {				\
+	MUTEX_LOCK(&sv_mutex);		\
 	(p) = sv_root;			\
 	sv_root = (SV*)SvANY(p);	\
 	++sv_count;			\
+	MUTEX_UNLOCK(&sv_mutex);	\
     } while (0)
 
 #define new_SV(p)			\
@@ -1120,8 +1122,11 @@ IV i;
     case SVt_PVCV:
     case SVt_PVFM:
     case SVt_PVIO:
-	croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
-	    op_desc[op->op_type]);
+	{
+	    dTHR;
+	    croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
+		  op_desc[op->op_type]);
+	}
     }
     (void)SvIOK_only(sv);			/* validate number */
     SvIVX(sv) = i;
@@ -1179,8 +1184,11 @@ double num;
     case SVt_PVCV:
     case SVt_PVFM:
     case SVt_PVIO:
-	croak("Can't coerce %s to number in %s", sv_reftype(sv,0),
-	    op_name[op->op_type]);
+	{
+	    dTHR;
+	    croak("Can't coerce %s to number in %s", sv_reftype(sv,0),
+		  op_name[op->op_type]);
+	}
     }
     SvNVX(sv) = num;
     (void)SvNOK_only(sv);			/* validate number */
@@ -1191,6 +1199,7 @@ static void
 not_a_number(sv)
 SV *sv;
 {
+    dTHR;
     char tmpbuf[64];
     char *d = tmpbuf;
     char *s;
@@ -1312,6 +1321,7 @@ register SV *sv;
 	SvIVX(sv) = asIV(sv);
     }
     else  {
+	dTHR;
 	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	return 0;
@@ -1460,6 +1470,7 @@ register SV *sv;
 	SvNVX(sv) = atof(SvPVX(sv));
     }
     else  {
+	dTHR;
 	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	return 0.0;
@@ -1717,6 +1728,7 @@ STRLEN *lp;
 	s = SvEND(sv);
     }
     else {
+	dTHR;
 	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	*lp = 0;
@@ -1781,6 +1793,7 @@ register SV *sv;
     if (SvROK(sv)) {
 #ifdef OVERLOAD
       {
+	dTHR;
 	SV* tmpsv;
 	if (SvAMAGIC(sv) && (tmpsv = AMG_CALLun(sv,bool_)))
 	  return SvTRUE(tmpsv);
@@ -1789,11 +1802,11 @@ register SV *sv;
       return SvRV(sv) != 0;
     }
     if (SvPOKp(sv)) {
-	register XPV* Xpv;
-	if ((Xpv = (XPV*)SvANY(sv)) &&
-		(*Xpv->xpv_pv > '0' ||
-		Xpv->xpv_cur > 1 ||
-		(Xpv->xpv_cur && *Xpv->xpv_pv != '0')))
+	register XPV* Xpvtmp;
+	if ((Xpvtmp = (XPV*)SvANY(sv)) &&
+		(*Xpvtmp->xpv_pv > '0' ||
+		Xpvtmp->xpv_cur > 1 ||
+		(Xpvtmp->xpv_cur && *Xpvtmp->xpv_pv != '0')))
 	    return 1;
 	else
 	    return 0;
@@ -1820,6 +1833,7 @@ sv_setsv(dstr,sstr)
 SV *dstr;
 register SV *sstr;
 {
+    dTHR;
     register U32 sflags;
     register int dtype;
     register int stype;
@@ -1963,6 +1977,7 @@ register SV *sstr;
     if (sflags & SVf_ROK) {
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
+		dTHR;
 		SV *sref = SvREFCNT_inc(SvRV(sstr));
 		SV *dref = 0;
 		int intro = GvINTRO(dstr);
@@ -2386,6 +2401,7 @@ I32 namlen;
     if (!obj || obj == sv || how == '#')
 	mg->mg_obj = obj;
     else {
+	dTHR;
 	mg->mg_obj = SvREFCNT_inc(obj);
 	mg->mg_flags |= MGf_REFCOUNTED;
     }
@@ -2443,6 +2459,11 @@ I32 namlen;
     case 'l':
 	mg->mg_virtual = &vtbl_dbline;
 	break;
+#ifdef USE_THREADS
+    case 'm':
+	mg->mg_virtual = &vtbl_mutex;
+	break;
+#endif /* USE_THREADS */
 #ifdef USE_LOCALE_COLLATE
     case 'o':
         mg->mg_virtual = &vtbl_collxfrm;
@@ -2661,6 +2682,7 @@ register SV *sv;
 
     if (SvOBJECT(sv)) {
 	if (defstash) {		/* Still have a symbol table? */
+	    dTHR;
 	    dSP;
 	    GV* destructor;
 
@@ -3413,6 +3435,7 @@ register SV *sv;
 static void
 sv_mortalgrow()
 {
+    dTHR;
     tmps_max += (tmps_max < 512) ? 128 : 512;
     Renew(tmps_stack, tmps_max, SV*);
 }
@@ -3421,6 +3444,7 @@ SV *
 sv_mortalcopy(oldstr)
 SV *oldstr;
 {
+    dTHR;
     register SV *sv;
 
     new_SV(sv);
@@ -3438,6 +3462,7 @@ SV *oldstr;
 SV *
 sv_newmortal()
 {
+    dTHR;
     register SV *sv;
 
     new_SV(sv);
@@ -3456,6 +3481,7 @@ SV *
 sv_2mortal(sv)
 register SV *sv;
 {
+    dTHR;
     if (!sv)
 	return sv;
     if (SvREADONLY(sv) && curcop != &compiling)
@@ -3545,6 +3571,7 @@ SV *
 newRV(ref)
 SV *ref;
 {
+    dTHR;
     register SV *sv;
 
     new_SV(sv);
@@ -3861,9 +3888,11 @@ STRLEN *lp;
 		s = SvPVX(sv);
 		*lp = SvCUR(sv);
 	    }
-	    else
+	    else {
+		dTHR;
 		croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
 		    op_name[op->op_type]);
+	    }
 	}
 	else
 	    s = sv_2pv(sv, lp);
@@ -3960,6 +3989,7 @@ newSVrv(rv, classname)
 SV *rv;
 char *classname;
 {
+    dTHR;
     SV *sv;
 
     new_SV(sv);
@@ -4026,6 +4056,7 @@ sv_bless(sv,stash)
 SV* sv;
 HV* stash;
 {
+    dTHR;
     SV *ref;
     if (!SvROK(sv))
         croak("Can't bless non-reference value");
@@ -4872,6 +4903,11 @@ SV* sv;
 	PerlIO_printf(Perl_debug_log, "  DEPTH = %ld\n", (long)CvDEPTH(sv));
 	PerlIO_printf(Perl_debug_log, "  PADLIST = 0x%lx\n", (long)CvPADLIST(sv));
 	PerlIO_printf(Perl_debug_log, "  OUTSIDE = 0x%lx\n", (long)CvOUTSIDE(sv));
+#ifdef USE_THREADS
+	PerlIO_printf(Perl_debug_log, "  MUTEXP = 0x%lx\n", (long)CvMUTEXP(sv));
+	PerlIO_printf(Perl_debug_log, "  CONDP = 0x%lx\n", (long)CvCONDP(sv));
+	PerlIO_printf(Perl_debug_log, "  OWNER = 0x%lx\n", (long)CvOWNER(sv));
+#endif /* USE_THREADS */
 	if (type == SVt_PVFM)
 	    PerlIO_printf(Perl_debug_log, "  LINES = %ld\n", (long)FmLINES(sv));
 	break;

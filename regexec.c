@@ -89,6 +89,7 @@ static CHECKPOINT
 regcppush(parenfloor)
 I32 parenfloor;
 {
+    dTHR;
     int retval = savestack_ix;
     int i = (regsize - parenfloor) * 3;
     int p;
@@ -110,6 +111,7 @@ I32 parenfloor;
 static char *
 regcppop()
 {
+    dTHR;
     I32 i = SSPOPINT;
     U32 paren = 0;
     char *input;
@@ -863,6 +865,7 @@ char *prog;
 		*reglastparen = n;
 	    break;
 	case CURLYX: {
+		dTHR;	    
 		CURCUR cc;
 		CHECKPOINT cp = savestack_ix;
 		cc.oldcc = regcc;

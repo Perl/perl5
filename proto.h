@@ -13,7 +13,7 @@ bool	Gv_AMupdate _((HV* stash));
 OP*	append_elem _((I32 optype, OP* head, OP* tail));
 OP*	append_list _((I32 optype, LISTOP* first, LISTOP* last));
 I32	apply _((I32 type, SV** mark, SV** sp));
-void	assertref _((OP* op));
+void	assertref _((OP* o));
 SV*	avhv_delete _((AV *ar, char* key, U32 klen, I32 flags));
 SV*	avhv_delete_ent _((AV *ar, SV* keysv, I32 flags, U32 hash));
 bool	avhv_exists _((AV *ar, char* key, U32 klen));
@@ -52,8 +52,11 @@ U32	cast_ulong _((double f));
 I32	my_chsize _((int fd, Off_t length));
 #endif
 OP*	ck_gvconst _((OP*  o));
-OP*	ck_retarget _((OP* op));
-OP*	convert _((I32 optype, I32 flags, OP* op));
+OP*	ck_retarget _((OP* o));
+#ifdef USE_THREADS
+MAGIC *	condpair_magic _((SV *sv));
+#endif
+OP*	convert _((I32 optype, I32 flags, OP* o));
 void	croak _((const char* pat,...)) __attribute__((noreturn));
 void	cv_ckproto _((CV* cv, GV* gv, char* p));
 CV*	cv_clone _((CV* proto));
@@ -68,7 +71,7 @@ I32	filter_read _((int idx, SV* buffer, int maxlen));
 I32	cxinc _((void));
 void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
 void	deb_growlevel _((void));
-I32	debop _((OP* op));
+I32	debop _((OP* o));
 I32	debstackptrs _((void));
 #ifdef DEBUGGING
 void	debprofdump _((void));
@@ -91,7 +94,7 @@ I32	do_ipcctl _((I32 optype, SV** mark, SV** sp));
 I32	do_ipcget _((I32 optype, SV** mark, SV** sp));
 #endif
 void	do_join _((SV* sv, SV* del, SV** mark, SV** sp));
-OP*	do_kv _((void));
+OP*	do_kv _((ARGSproto));
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 I32	do_msgrcv _((SV** mark, SV** sp));
 I32	do_msgsnd _((SV** mark, SV** sp));
@@ -134,7 +137,7 @@ OP*	force_list _((OP* arg));
 OP*	fold_constants _((OP* arg));
 char*	form _((const char* pat, ...));
 void	free_tmps _((void));
-OP*	gen_constant_list _((OP* op));
+OP*	gen_constant_list _((OP* o));
 void	gp_free _((GV* gv));
 GP*	gp_ref _((GP* gp));
 GV*	gv_AVadd _((GV* gv));
@@ -179,6 +182,7 @@ void	hv_undef _((HV* tb));
 I32	ibcmp _((char* a, char* b, I32 len));
 I32	ibcmp_locale _((char* a, char* b, I32 len));
 I32	ingroup _((I32 testgid, I32 effective));
+void	init_stacks _((ARGSproto));
 U32	intro_my _((void));
 char*	instr _((char* big, char* little));
 bool	io_close _((IO* io));
@@ -188,7 +192,7 @@ I32	keyword _((char* d, I32 len));
 void	leave_scope _((I32 base));
 void	lex_end _((void));
 void	lex_start _((SV* line));
-OP*	linklist _((OP* op));
+OP*	linklist _((OP* o));
 OP*	list _((OP* o));
 OP*	listkids _((OP* o));
 OP*	localize _((OP* arg, I32 lexical));
@@ -208,6 +212,9 @@ int	magic_getsig	_((SV* sv, MAGIC* mg));
 int	magic_gettaint	_((SV* sv, MAGIC* mg));
 int	magic_getuvar	_((SV* sv, MAGIC* mg));
 U32	magic_len	_((SV* sv, MAGIC* mg));
+#ifdef USE_THREADS
+int	magic_mutexfree	_((SV* sv, MAGIC* mg));
+#endif /* USE_THREADS */
 int	magic_nextpack	_((SV* sv, MAGIC* mg, SV* key));
 int	magic_set	_((SV* sv, MAGIC* mg));
 #ifdef OVERLOAD
@@ -249,9 +256,12 @@ int	mg_get _((SV* sv));
 U32	mg_len _((SV* sv));
 void	mg_magical _((SV* sv));
 int	mg_set _((SV* sv));
-OP*	mod _((OP* op, I32 type));
+OP*	mod _((OP* o, I32 type));
 char*	moreswitches _((char* s));
-OP*	my _((OP* op));
+#ifdef USE_THREADS
+void	mutex_unlock _((void *m));
+#endif /* USE_THREADS */
+OP*	my _((OP* o));
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char*	my_bcopy _((char* from, char* to, I32 len));
 #endif
@@ -260,7 +270,7 @@ char*	my_bzero _((char* loc, I32 len));
 #endif
 void	my_exit _((U32 status)) __attribute__((noreturn));
 void	my_failure_exit _((void)) __attribute__((noreturn));
-I32	my_lstat _((void));
+I32	my_lstat _((ARGSproto));
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32	my_memcmp _((char* s1, char* s2, I32 len));
 #endif
@@ -270,30 +280,30 @@ void*	my_memset _((char* loc, I32 ch, I32 len));
 I32	my_pclose _((PerlIO* ptr));
 PerlIO*	my_popen _((char* cmd, char* mode));
 void	my_setenv _((char* nam, char* val));
-I32	my_stat _((void));
+I32	my_stat _((ARGSproto));
 #ifdef MYSWAP
 short	my_swap _((short s));
 long	my_htonl _((long l));
 long	my_ntohl _((long l));
 #endif
 void	my_unexec _((void));
-OP*	newANONLIST _((OP* op));
-OP*	newANONHASH _((OP* op));
+OP*	newANONLIST _((OP* o));
+OP*	newANONHASH _((OP* o));
 OP*	newANONSUB _((I32 floor, OP* proto, OP* block));
 OP*	newASSIGNOP _((I32 flags, OP* left, I32 optype, OP* right));
 OP*	newCONDOP _((I32 flags, OP* expr, OP* trueop, OP* falseop));
-void	newFORM _((I32 floor, OP* op, OP* block));
+void	newFORM _((I32 floor, OP* o, OP* block));
 OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* scalar, OP* expr, OP*block, OP*cont));
 OP*	newLOGOP _((I32 optype, I32 flags, OP* left, OP* right));
 OP*	newLOOPEX _((I32 type, OP* label));
 OP*	newLOOPOP _((I32 flags, I32 debuggable, OP* expr, OP* block));
 OP*	newNULLLIST _((void));
 OP*	newOP _((I32 optype, I32 flags));
-void	newPROG _((OP* op));
+void	newPROG _((OP* o));
 OP*	newRANGE _((I32 flags, OP* left, OP* right));
 OP*	newSLICEOP _((I32 flags, OP* subscript, OP* list));
 OP*	newSTATEOP _((I32 flags, char* label, OP* o));
-CV*	newSUB _((I32 floor, OP* op, OP* proto, OP* block));
+CV*	newSUB _((I32 floor, OP* o, OP* proto, OP* block));
 CV*	newXS _((char* name, void (*subaddr)(CV* cv), char* filename));
 #ifdef DEPRECATED
 CV*	newXSUB _((char* name, I32 ix, I32 (*subaddr)(int,int,int), char* filename));
@@ -331,7 +341,7 @@ PerlIO*	nextargv _((GV* gv));
 char*	ninstr _((char* big, char* bigend, char* little, char* lend));
 OP*	oopsCV _((OP* o));
 void	op_free _((OP* arg));
-void	package _((OP* op));
+void	package _((OP* o));
 PADOFFSET	pad_alloc _((I32 optype, U32 tmptype));
 PADOFFSET	pad_allocmy _((char* name));
 PADOFFSET	pad_findmy _((char* name));
@@ -342,7 +352,7 @@ SV*	pad_sv _((PADOFFSET po));
 void	pad_free _((PADOFFSET po));
 void	pad_reset _((void));
 void	pad_swipe _((PADOFFSET po));
-void	peep _((OP* op));
+void	peep _((OP* o));
 PerlInterpreter*	perl_alloc _((void));
 I32	perl_call_argv _((char* subname, I32 flags, char** argv));
 I32	perl_call_method _((char* methname, I32 flags));
@@ -371,20 +381,20 @@ int	perl_run _((PerlInterpreter* sv_interp));
 void	pidgone _((int pid, int status));
 void	pmflag _((U16* pmfl, int ch));
 OP*	pmruntime _((OP* pm, OP* expr, OP* repl));
-OP*	pmtrans _((OP* op, OP* expr, OP* repl));
+OP*	pmtrans _((OP* o, OP* expr, OP* repl));
 OP*	pop_return _((void));
 void	pop_scope _((void));
 OP*	prepend_elem _((I32 optype, OP* head, OP* tail));
-void	push_return _((OP* op));
+void	push_return _((OP* o));
 void	push_scope _((void));
 regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
-OP*	ref _((OP* op, I32 type));
-OP*	refkids _((OP* op, I32 type));
+OP*	ref _((OP* o, I32 type));
+OP*	refkids _((OP* o, I32 type));
 void	regdump _((regexp* r));
 I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, I32 safebase));
 void	pregfree _((struct regexp* r));
 char*	regnext _((char* p));
-void	regprop _((SV* sv, char* op));
+void	regprop _((SV* sv, char* o));
 void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 char*	rninstr _((char* big, char* bigend, char* little, char* lend));
 Sighandler_t rsignal _((int, Sighandler_t));
@@ -409,7 +419,7 @@ void	save_delete _((HV* hv, char* key, I32 klen));
 void	save_destructor _((void (*f)(void*), void* p));
 #endif /* titan */
 void	save_freesv _((SV* sv));
-void	save_freeop _((OP* op));
+void	save_freeop _((OP* o));
 void	save_freepv _((char* pv));
 void	save_gp _((GV* gv, I32 empty));
 HV*	save_hash _((GV* gv));
@@ -428,9 +438,9 @@ void	save_sptr _((SV** sptr));
 SV*	save_svref _((SV** sptr));
 OP*	sawparens _((OP* o));
 OP*	scalar _((OP* o));
-OP*	scalarkids _((OP* op));
+OP*	scalarkids _((OP* o));
 OP*	scalarseq _((OP* o));
-OP*	scalarvoid _((OP* op));
+OP*	scalarvoid _((OP* o));
 UV	scan_hex _((char* start, I32 len, I32* retlen));
 char*	scan_num _((char* s));
 UV	scan_oct _((char* start, I32 len, I32* retlen));

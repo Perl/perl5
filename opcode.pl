@@ -82,13 +82,13 @@ END
 # Emit function declarations.
 
 for (sort keys %ckname) {
-    print "OP *\t", &tab(3,$_),"_((OP* op));\n";
+    print "OP *\t", &tab(3,$_),"_((OP* o));\n";
 }
 
 print "\n";
 
 for (@ops) {
-    print "OP *\t", &tab(3, "pp_\L$_"), "_((void));\n";
+    print "OP *\t", &tab(3, "pp_\L$_"), "_((ARGSproto));\n";
 }
 
 # Emit ppcode switch array.

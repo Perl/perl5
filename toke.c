@@ -350,6 +350,7 @@ static char *
 skipspace(s)
 register char *s;
 {
+    dTHR;
     if (lex_formbrack && lex_brackets <= lex_formbrack) {
 	while (s < bufend && (*s == ' ' || *s == '\t'))
 	    s++;
@@ -531,11 +532,11 @@ register char *s;
 int kind;
 {
     if (s && *s) {
-	OP* op = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
-	nextval[nexttoke].opval = op;
+	OP* o = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
+	nextval[nexttoke].opval = o;
 	force_next(WORD);
 	if (kind) {
-	    op->op_private = OPpCONST_ENTERED;
+	    o->op_private = OPpCONST_ENTERED;
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
 	       GSAR 96-10-12 */
@@ -1226,6 +1227,7 @@ EXT int yychar;		/* last token */
 int
 yylex()
 {
+    dTHR;
     register char *s;
     register char *d;
     register I32 tmp;
@@ -1243,7 +1245,8 @@ yylex()
 	    return PRIVATEREF;
 	}
 
-	if (!strchr(tokenbuf,':') && (tmp = pad_findmy(tokenbuf))) {
+	if (!strchr(tokenbuf,':')
+	    && (tmp = pad_findmy(tokenbuf)) != NOT_IN_PAD) {
 	    if (last_lop_op == OP_SORT &&
 		tokenbuf[0] == '$' &&
 		(tokenbuf[1] == 'a' || tokenbuf[1] == 'b')
@@ -4606,6 +4609,7 @@ void
 hoistmust(pm)
 register PMOP *pm;
 {
+    dTHR;
     if (!pm->op_pmshort && pm->op_pmregexp->regstart &&
 	(!pm->op_pmregexp->regmust || pm->op_pmregexp->reganch & ROPT_ANCH)
        ) {
@@ -4647,7 +4651,7 @@ scan_trans(start)
 char *start;
 {
     register char* s;
-    OP *op;
+    OP *o;
     short *tbl;
     I32 squash;
     I32 delete;
@@ -4677,7 +4681,7 @@ char *start;
     }
 
     New(803,tbl,256,short);
-    op = newPVOP(OP_TRANS, 0, (char*)tbl);
+    o = newPVOP(OP_TRANS, 0, (char*)tbl);
 
     complement = delete = squash = 0;
     while (*s == 'c' || *s == 'd' || *s == 's') {
@@ -4689,9 +4693,9 @@ char *start;
 	    squash = OPpTRANS_SQUASH;
 	s++;
     }
-    op->op_private = delete|squash|complement;
+    o->op_private = delete|squash|complement;
 
-    lex_op = op;
+    lex_op = o;
     yylval.ival = OP_TRANS;
     return s;
 }
@@ -4700,6 +4704,7 @@ static char *
 scan_heredoc(s)
 register char *s;
 {
+    dTHR;
     SV *herewas;
     I32 op_type = OP_SCALAR;
     I32 len;
@@ -4856,10 +4861,10 @@ char *start;
 	    (void)strcpy(d,"ARGV");
 	if (*d == '$') {
 	    I32 tmp;
-	    if (tmp = pad_findmy(d)) {
-		OP *op = newOP(OP_PADSV, 0);
-		op->op_targ = tmp;
-		lex_op = (OP*)newUNOP(OP_READLINE, 0, newUNOP(OP_RV2GV, 0, op));
+	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
+		OP *o = newOP(OP_PADSV, 0);
+		o->op_targ = tmp;
+		lex_op = (OP*)newUNOP(OP_READLINE, 0, newUNOP(OP_RV2GV, 0, o));
 	    }
 	    else {
 		GV *gv = gv_fetchpv(d+1,TRUE, SVt_PV);
@@ -4883,6 +4888,7 @@ static char *
 scan_str(start)
 char *start;
 {
+    dTHR;
     SV *sv;
     char *tmps;
     register char *s = start;
@@ -5108,6 +5114,7 @@ static char *
 scan_formline(s)
 register char *s;
 {
+    dTHR;
     register char *eol;
     register char *t;
     SV *stuff = newSVpv("",0);
@@ -5188,6 +5195,7 @@ start_subparse(is_format, flags)
 I32 is_format;
 U32 flags;
 {
+    dTHR;
     I32 oldsavestack_ix = savestack_ix;
     CV* outsidecv = compcv;
     AV* comppadlist;
@@ -5214,6 +5222,9 @@ U32 flags;
     comppad = newAV();
     comppad_name = newAV();
     comppad_name_fill = 0;
+#ifdef USE_THREADS
+    av_store(comppad_name, 0, newSVpv("@_", 2));
+#endif /* USE_THREADS */
     min_intro_pending = 0;
     av_push(comppad, Nullsv);
     curpad = AvARRAY(comppad);
@@ -5227,6 +5238,13 @@ U32 flags;
 
     CvPADLIST(compcv) = comppadlist;
     CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc((SV*)outsidecv);
+#ifdef USE_THREADS
+    CvOWNER(compcv) = 0;
+    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    MUTEX_INIT(CvMUTEXP(compcv));
+    New(666, CvCONDP(compcv), 1, pthread_cond_t);
+    COND_INIT(CvCONDP(compcv));
+#endif /* USE_THREADS */
 
     return oldsavestack_ix;
 }
@@ -5235,6 +5253,7 @@ int
 yywarn(s)
 char *s;
 {
+    dTHR;
     --error_count;
     in_eval |= 2;
     yyerror(s);
@@ -5246,6 +5265,7 @@ int
 yyerror(s)
 char *s;
 {
+    dTHR;
     char *where = NULL;
     char *context = NULL;
     int contlen = -1;

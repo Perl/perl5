@@ -1162,6 +1162,7 @@ die(pat, va_alist)
     va_dcl
 #endif
 {
+    dTHR;
     va_list args;
     char *message;
     I32 oldrunlevel = runlevel;
@@ -1229,6 +1230,7 @@ croak(pat, va_alist)
     va_dcl
 #endif
 {
+    dTHR;
     va_list args;
     char *message;
     HV *stash;
@@ -1242,6 +1244,9 @@ croak(pat, va_alist)
 #endif
     message = mess(pat, &args);
     va_end(args);
+#ifdef USE_THREADS
+    DEBUG_L(fprintf(stderr, "croak: 0x%lx %s", (unsigned long) thr, message));
+#endif /* USE_THREADS */
     if (diehook) {
 	/* sv_2cv might call croak() */
 	SV *olddiehook = diehook;
@@ -1263,6 +1268,7 @@ croak(pat, va_alist)
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
+<<<<
 
 	    LEAVE;
 	}
@@ -1302,6 +1308,7 @@ warn(pat,va_alist)
 
     if (warnhook) {
 	/* sv_2cv might call warn() */
+	dTHR;
 	SV *oldwarnhook = warnhook;
 	ENTER;
 	SAVESPTR(warnhook);
@@ -2285,6 +2292,56 @@ I32 *retlen;
     return retval;
 }
 
+#ifdef USE_THREADS
+#ifdef OLD_PTHREADS_API
+struct thread *
+getTHR _((void))
+{
+    pthread_addr_t t;
+
+    if (pthread_getspecific(thr_key, &t))
+	croak("panic: pthread_getspecific");
+    return (struct thread *) t;
+}
+#endif /* OLD_PTHREADS_API */
+
+MAGIC *
+condpair_magic(sv)
+SV *sv;
+{
+    MAGIC *mg;
+    
+    SvUPGRADE(sv, SVt_PVMG);
+    mg = mg_find(sv, 'm');
+    if (!mg) {
+	condpair_t *cp;
+
+	New(53, cp, 1, condpair_t);
+	MUTEX_INIT(&cp->mutex);
+	COND_INIT(&cp->owner_cond);
+	COND_INIT(&cp->cond);
+	cp->owner = 0;
+	MUTEX_LOCK(&sv_mutex);
+	mg = mg_find(sv, 'm');
+	if (mg) {
+	    /* someone else beat us to initialising it */
+	    MUTEX_UNLOCK(&sv_mutex);
+	    MUTEX_DESTROY(&cp->mutex);
+	    COND_DESTROY(&cp->owner_cond);
+	    COND_DESTROY(&cp->cond);
+	    Safefree(cp);
+	}
+	else {
+	    sv_magic(sv, Nullsv, 'm', 0, 0);
+	    mg = SvMAGIC(sv);
+	    mg->mg_ptr = (char *)cp;
+	    mg->mg_len = sizeof(cp);
+	    MUTEX_UNLOCK(&sv_mutex);
+	}
+    }
+    return mg;
+}
+#endif /* USE_THREADS */
 
 #ifdef HUGE_VAL
 /*

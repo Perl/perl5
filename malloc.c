@@ -287,6 +287,7 @@ malloc(nbytes)
 #endif
 #endif /* PERL_CORE */
 
+	MUTEX_LOCK(&malloc_mutex);
 	/*
 	 * Convert amount of memory requested into
 	 * closest block size stored in hash buckets
@@ -317,6 +318,7 @@ malloc(nbytes)
   	if (nextf[bucket] == NULL)    
   		morecore(bucket);
   	if ((p = (union overhead *)nextf[bucket]) == NULL) {
+		MUTEX_UNLOCK(&malloc_mutex);
 #ifdef PERL_CORE
 		if (!nomemok) {
 		    PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
@@ -354,6 +356,7 @@ malloc(nbytes)
 	p->ov_rmagic = RMAGIC;
   	*((u_int *)((caddr_t)p + nbytes - RSLOP)) = RMAGIC;
 #endif
+	MUTEX_UNLOCK(&malloc_mutex);
   	return ((Malloc_t)(p + CHUNK_SHIFT));
 }
 
@@ -511,6 +514,7 @@ free(mp)
 #endif
 		return;				/* sanity */
 	}
+	MUTEX_LOCK(&malloc_mutex);
 #ifdef RCHECK
   	ASSERT(op->ov_rmagic == RMAGIC);
 	if (OV_INDEX(op) <= MAX_SHORT_BUCKET)
@@ -521,6 +525,7 @@ free(mp)
   	size = OV_INDEX(op);
 	op->ov_next = nextf[size];
   	nextf[size] = op;
+	MUTEX_UNLOCK(&malloc_mutex);
 }
 
 /*
@@ -568,6 +573,7 @@ realloc(mp, nbytes)
 #endif
 #endif /* PERL_CORE */
 
+	MUTEX_LOCK(&malloc_mutex);
 	op = (union overhead *)((caddr_t)cp 
 				- sizeof (union overhead) * CHUNK_SHIFT);
 	i = OV_INDEX(op);
@@ -632,8 +638,10 @@ realloc(mp, nbytes)
 		}
 #endif
 		res = cp;
+		MUTEX_UNLOCK(&malloc_mutex);
 	}
 	else {
+		MUTEX_UNLOCK(&malloc_mutex);
 		if ((res = (char*)malloc(nbytes)) == NULL)
 			return (NULL);
 		if (cp != res)			/* common optimization */

@@ -50,6 +50,18 @@
 #define av_store		Perl_av_store
 #define av_undef		Perl_av_undef
 #define av_unshift		Perl_av_unshift
+#define avhv_delete		Perl_avhv_delete
+#define avhv_delete_ent		Perl_avhv_delete_ent
+#define avhv_exists		Perl_avhv_exists
+#define avhv_exists_ent		Perl_avhv_exists_ent
+#define avhv_fetch		Perl_avhv_fetch
+#define avhv_fetch_ent		Perl_avhv_fetch_ent
+#define avhv_iterinit		Perl_avhv_iterinit
+#define avhv_iternext		Perl_avhv_iternext
+#define avhv_iternextsv		Perl_avhv_iternextsv
+#define avhv_iterval		Perl_avhv_iterval
+#define avhv_store		Perl_avhv_store
+#define avhv_store_ent		Perl_avhv_store_ent
 #define band_amg		Perl_band_amg
 #define bind_match		Perl_bind_match
 #define block_end		Perl_block_end
@@ -264,6 +276,7 @@
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
 #define in_my			Perl_in_my
+#define in_my_stash		Perl_in_my_stash
 #define inc_amg			Perl_inc_amg
 #define ingroup			Perl_ingroup
 #define instr			Perl_instr
@@ -1295,6 +1308,7 @@
 #define preambleav		(curinterp->Ipreambleav)
 #define preambled		(curinterp->Ipreambled)
 #define preprocess		(curinterp->Ipreprocess)
+#define restartav		(curinterp->Irestartav)
 #define restartop		(curinterp->Irestartop)
 #define rightgv			(curinterp->Irightgv)
 #define rs			(curinterp->Irs)
@@ -1449,6 +1463,7 @@
 #define Ipreambleav		preambleav
 #define Ipreambled		preambled
 #define Ipreprocess		preprocess
+#define Irestartav		restartav
 #define Irestartop		restartop
 #define Irightgv		rightgv
 #define Irs			rs
@@ -1612,6 +1627,7 @@
 #define preambleav		Perl_preambleav
 #define preambled		Perl_preambled
 #define preprocess		Perl_preprocess
+#define restartav		Perl_restartav
 #define restartop		Perl_restartop
 #define rightgv			Perl_rightgv
 #define rs			Perl_rs

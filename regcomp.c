@@ -58,6 +58,10 @@
 #include "INTERN.h"
 #include "regcomp.h"
 
+#ifdef USE_THREADS
+#undef op
+#endif /* USE_THREADS */
+
 #ifdef MSDOS
 # if defined(BUGGY_MSC6)
  /* MSC 6.00A breaks on op/regexp.t test 85 unless we turn this off */
@@ -1590,14 +1594,14 @@ regexp *r;
 - regprop - printable representation of opcode
 */
 void
-regprop(sv, op)
+regprop(sv, o)
 SV *sv;
-char *op;
+char *o;
 {
     register char *p = 0;
 
     sv_setpv(sv, ":");
-    switch (OP(op)) {
+    switch (OP(o)) {
     case BOL:
 	p = "BOL";
 	break;
@@ -1659,19 +1663,19 @@ char *op;
 	p = "NBOUNDL";
 	break;
     case CURLY:
-	sv_catpvf(sv, "CURLY {%d,%d}", ARG1(op), ARG2(op));
+	sv_catpvf(sv, "CURLY {%d,%d}", ARG1(o), ARG2(o));
 	break;
     case CURLYX:
-	sv_catpvf(sv, "CURLYX {%d,%d}", ARG1(op), ARG2(op));
+	sv_catpvf(sv, "CURLYX {%d,%d}", ARG1(o), ARG2(o));
 	break;
     case REF:
-	sv_catpvf(sv, "REF%d", ARG1(op));
+	sv_catpvf(sv, "REF%d", ARG1(o));
 	break;
     case OPEN:
-	sv_catpvf(sv, "OPEN%d", ARG1(op));
+	sv_catpvf(sv, "OPEN%d", ARG1(o));
 	break;
     case CLOSE:
-	sv_catpvf(sv, "CLOSE%d", ARG1(op));
+	sv_catpvf(sv, "CLOSE%d", ARG1(o));
 	p = NULL;
 	break;
     case STAR:

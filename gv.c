@@ -420,6 +420,7 @@ char *nambeg;
 I32 add;
 I32 sv_type;
 {
+    dTHR;
     register char *name = nambeg;
     register GV *gv = 0;
     GV**gvp;
@@ -820,6 +821,7 @@ GV *gv;
 IO *
 newIO()
 {
+    dTHR;
     IO *io;
     GV *iogv;
 
@@ -836,6 +838,7 @@ void
 gv_check(stash)
 HV* stash;
 {
+    dTHR;
     register HE *entry;
     register I32 i;
     register GV *gv;
@@ -963,6 +966,7 @@ bool
 Gv_AMupdate(stash)
 HV* stash;
 {
+  dTHR;  
   GV** gvp;
   HV* hv;
   GV* gv;
@@ -1126,6 +1130,7 @@ SV* right;
 int method;
 int flags; 
 {
+  dTHR;
   MAGIC *mg; 
   CV *cv; 
   CV **cvp=NULL, **ocvp=NULL;
@@ -1325,6 +1330,7 @@ int flags;
 	|| inc_dec_ass) RvDEEPCP(left);
   }
   {
+    dTHR;
     dSP;
     BINOP myop;
     SV* res;
@@ -1342,7 +1348,7 @@ int flags;
     if (perldb && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
-    pp_pushmark();
+    pp_pushmark(ARGS);
 
     EXTEND(sp, notfound + 5);
     PUSHs(lr>0? right: left);
@@ -1354,7 +1360,7 @@ int flags;
     PUSHs((SV*)cv);
     PUTBACK;
 
-    if (op = pp_entersub())
+    if (op = pp_entersub(ARGS))
       runops();
     LEAVE;
     SPAGAIN;

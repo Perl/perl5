@@ -100,6 +100,7 @@ I32 lval;
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
+	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
 	    Sv = sv;
@@ -511,6 +512,7 @@ U32 klen;
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
+	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen); 
 	    magic_existspack(sv, mg_find(sv, 'p'));

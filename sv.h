@@ -131,6 +131,10 @@ struct io {
 #define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
 
+#ifdef USE_THREADS
+#define SVp_SYNC	0x10000000	/* Synchronised CV or an SV lock */
+#endif /* USE_THREADS */
+
 struct xrv {
     SV *	xrv_rv;		/* pointer to another SV */
 };

@@ -27,7 +27,7 @@
 
 static OP *docatch _((OP *o));
 static OP *doeval _((int gimme));
-static OP *dofindlabel _((OP *op, char *label, OP **opstack, OP **oplimit));
+static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
 static I32 dopoptoeval _((I32 startingblock));
 static I32 dopoptolabel _((char *label));
@@ -533,8 +533,8 @@ PP(pp_grepstart)
 	RETURNOP(op->op_next->op_next);
     }
     stack_sp = stack_base + *markstack_ptr + 1;
-    pp_pushmark();				/* push dst */
-    pp_pushmark();				/* push src */
+    pp_pushmark(ARGS);				/* push dst */
+    pp_pushmark(ARGS);				/* push src */
     ENTER;					/* enter outer scope */
 
     SAVETMPS;
@@ -549,7 +549,7 @@ PP(pp_grepstart)
 
     PUTBACK;
     if (op->op_type == OP_MAPSTART)
-	pp_pushmark();				/* push top */
+	pp_pushmark(ARGS);			/* push top */
     return ((LOGOP*)op->op_next)->op_other;
 }
 
@@ -849,6 +849,7 @@ static I32
 dopoptolabel(label)
 char *label;
 {
+    dTHR;
     register I32 i;
     register CONTEXT *cx;
 
@@ -895,6 +896,7 @@ dowantarray()
 I32
 block_gimme()
 {
+    dTHR;
     I32 cxix;
 
     cxix = dopoptosub(cxstack_ix);
@@ -917,6 +919,7 @@ static I32
 dopoptosub(startingblock)
 I32 startingblock;
 {
+    dTHR;
     I32 i;
     register CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
@@ -937,6 +940,7 @@ static I32
 dopoptoeval(startingblock)
 I32 startingblock;
 {
+    dTHR;
     I32 i;
     register CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
@@ -956,6 +960,7 @@ static I32
 dopoptoloop(startingblock)
 I32 startingblock;
 {
+    dTHR;
     I32 i;
     register CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
@@ -989,6 +994,7 @@ void
 dounwind(cxix)
 I32 cxix;
 {
+    dTHR;
     register CONTEXT *cx;
     SV **newsp;
     I32 optype;
@@ -1022,6 +1028,7 @@ OP *
 die_where(message)
 char *message;
 {
+    dTHR;
     if (in_eval) {
 	I32 cxix;
 	register CONTEXT *cx;
@@ -1120,7 +1127,7 @@ PP(pp_entersubr)
 	mark++;
     }
     *sp = cv;
-    return pp_entersub();
+    return pp_entersub(ARGS);
 }
 #endif
 
@@ -1226,6 +1233,7 @@ sortcv(a, b)
 const void *a;
 const void *b;
 {
+    dTHR;
     SV * const *str1 = (SV * const *)a;
     SV * const *str2 = (SV * const *)b;
     I32 oldsaveix = savestack_ix;
@@ -1264,9 +1272,54 @@ const void *b;
     return sv_cmp_locale(*(SV * const *)a, *(SV * const *)b);
 }
 
+#ifdef USE_THREADS
+static void
+unlock_condpair(svv)
+void *svv;
+{
+    dTHR;
+    MAGIC *mg = mg_find((SV*)svv, 'm');
+    
+    if (!mg)
+	croak("panic: unlock_condpair unlocking non-mutex");
+    MUTEX_LOCK(MgMUTEXP(mg));
+    if (MgOWNER(mg) != thr)
+	croak("panic: unlock_condpair unlocking mutex that we don't own");
+    MgOWNER(mg) = 0;
+    COND_SIGNAL(MgOWNERCONDP(mg));
+    MUTEX_UNLOCK(MgMUTEXP(mg));
+}
+#endif /* USE_THREADS */
+
 PP(pp_reset)
 {
     dSP;
+#ifdef USE_THREADS
+    dTOPss;
+    MAGIC *mg;
+    
+    if (MAXARG < 1)
+	croak("reset requires mutex argument with USE_THREADS");
+    if (SvROK(sv)) {
+	/*
+	 * Kludge to allow lock of real objects without requiring
+	 * to pass in every type of argument by explicit reference.
+	 */
+	sv = SvRV(sv);
+    }
+    mg = condpair_magic(sv);
+    MUTEX_LOCK(MgMUTEXP(mg));
+    if (MgOWNER(mg) == thr)
+	MUTEX_UNLOCK(MgMUTEXP(mg));
+    else {
+	while (MgOWNER(mg))
+	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
+	MgOWNER(mg) = thr;
+	MUTEX_UNLOCK(MgMUTEXP(mg));
+	save_destructor(unlock_condpair, sv);
+    }
+    RETURN;
+#else
     char *tmps;
 
     if (MAXARG < 1)
@@ -1276,6 +1329,7 @@ PP(pp_reset)
     sv_reset(tmps, curcop->cop_stash);
     PUSHs(&sv_yes);
     RETURN;
+#endif /* USE_THREADS */
 }
 
 PP(pp_lineseq)
@@ -1634,8 +1688,8 @@ PP(pp_redo)
 static OP* lastgotoprobe;
 
 static OP *
-dofindlabel(op,label,opstack,oplimit)
-OP *op;
+dofindlabel(o,label,opstack,oplimit)
+OP *o;
 char *label;
 OP **opstack;
 OP **oplimit;
@@ -1646,24 +1700,24 @@ OP **oplimit;
 
     if (ops >= oplimit)
 	croak(too_deep);
-    if (op->op_type == OP_LEAVE ||
-	op->op_type == OP_SCOPE ||
-	op->op_type == OP_LEAVELOOP ||
-	op->op_type == OP_LEAVETRY)
+    if (o->op_type == OP_LEAVE ||
+	o->op_type == OP_SCOPE ||
+	o->op_type == OP_LEAVELOOP ||
+	o->op_type == OP_LEAVETRY)
     {
-	*ops++ = cUNOP->op_first;
+	*ops++ = cUNOPo->op_first;
 	if (ops >= oplimit)
 	    croak(too_deep);
     }
     *ops = 0;
-    if (op->op_flags & OPf_KIDS) {
+    if (o->op_flags & OPf_KIDS) {
 	/* First try all the kids at this level, since that's likeliest. */
-	for (kid = cUNOP->op_first; kid; kid = kid->op_sibling) {
+	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
 		    kCOP->cop_label && strEQ(kCOP->cop_label, label))
 		return kid;
 	}
-	for (kid = cUNOP->op_first; kid; kid = kid->op_sibling) {
+	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == lastgotoprobe)
 		continue;
 	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
@@ -1671,8 +1725,8 @@ OP **oplimit;
 		 (ops[-1]->op_type != OP_NEXTSTATE &&
 		  ops[-1]->op_type != OP_DBSTATE)))
 		*ops++ = kid;
-	    if (op = dofindlabel(kid, label, ops, oplimit))
-		return op;
+	    if (o = dofindlabel(kid, label, ops, oplimit))
+		return o;
 	}
     }
     *ops = 0;
@@ -1939,7 +1993,7 @@ PP(pp_goto)
 	    OP *oldop = op;
 	    for (ix = 1; enterops[ix]; ix++) {
 		op = enterops[ix];
-		(*op->op_ppaddr)();
+		(*op->op_ppaddr)(ARGS);
 	    }
 	    op = oldop;
 	}
@@ -2097,12 +2151,21 @@ static OP *
 doeval(gimme)
 int gimme;
 {
+    dTHR;
     dSP;
     OP *saveop = op;
     HV *newstash;
     CV *caller;
     AV* comppadlist;
 
+#ifdef USE_THREADS
+    MUTEX_LOCK(&eval_mutex);
+    if (eval_owner && eval_owner != thr)
+	while (eval_owner)
+	    COND_WAIT(&eval_cond, &eval_mutex);
+    eval_owner = thr;
+    MUTEX_UNLOCK(&eval_mutex);
+#endif /* USE_THREADS */
     in_eval = 1;
 
     PUSHMARK(SP);
@@ -2122,10 +2185,20 @@ int gimme;
     compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)compcv, SVt_PVCV);
     CvUNIQUE_on(compcv);
+#ifdef USE_THREADS
+    CvOWNER(compcv) = 0;
+    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    MUTEX_INIT(CvMUTEXP(compcv));
+    New(666, CvCONDP(compcv), 1, pthread_cond_t);
+    COND_INIT(CvCONDP(compcv));
+#endif /* USE_THREADS */
 
     comppad = newAV();
     comppad_name = newAV();
     comppad_name_fill = 0;
+#ifdef USE_THREADS
+    av_store(comppad_name, 0, newSVpv("@_", 2));
+#endif /* USE_THREADS */
     min_intro_pending = 0;
     av_push(comppad, Nullsv);
     curpad = AvARRAY(comppad);
@@ -2218,8 +2291,14 @@ int gimme;
     /* compiled okay, so do it */
 
     CvDEPTH(compcv) = 1;
-
     SP = stack_base + POPMARK;		/* pop original mark */
+#ifdef USE_THREADS
+    MUTEX_LOCK(&eval_mutex);
+    eval_owner = 0;
+    COND_SIGNAL(&eval_cond);
+    MUTEX_UNLOCK(&eval_mutex);
+#endif /* USE_THREADS */
+
     RETURNOP(eval_start);
 }
 
