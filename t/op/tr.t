@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..71\n";
+print "1..72\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -174,7 +174,7 @@ print (( eval '$1 =~ tr/abcd//' == 3) ? '' : 'not ', "ok 27\n");
 print ((eval '"123" =~ tr/12//' == 2) ? '' : 'not ', "ok 28\n");
 
 # 29: test lhs bad if updating
-eval '"123" =~ tr/1/1/';
+eval '"123" =~ tr/1/2/';
 print (($@ =~ m|^Can't modify constant item in transliteration \(tr///\)|)
        ? '' : 'not ', "ok 29\n");
 
@@ -397,3 +397,7 @@ foreach (keys %a) {
   tr/N/n/;
   print +($_ eq 'n' ? '' : "not ") . "ok 71\n";
 }
+
+# 72: counting on a constant
+$x = eval '"1213" =~ tr/1/1/';
+print $@ || $x != 2 ? "not ok 72\n" : "ok 72\n";

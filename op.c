@@ -2936,6 +2936,9 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    if (!squash)
 		o->op_private |= OPpTRANS_IDENTICAL;
 	}
+	else if (!squash && rlen == tlen && memEQ((char*)t, (char*)r, tlen)) {
+	    o->op_private |= OPpTRANS_IDENTICAL;
+	}
 	for (i = 0; i < 256; i++)
 	    tbl[i] = -1;
 	for (i = 0, j = 0; i < tlen; i++,j++) {
