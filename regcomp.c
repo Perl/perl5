@@ -1065,11 +1065,12 @@ reg(I32 paren, I32 *flagp)
 		    rx->data->data[n+1] = (void*)av;
 		    rx->data->data[n+2] = (void*)sop;
 		    SvREFCNT_dec(sv);
+		} else {		/* First pass */
+		    if (tainted)
+			FAIL("Eval-group in insecure regular expression");
 		}
 		
 		nextchar();
-		if (tainted)
-		    FAIL("Eval-group in insecure regular expression");
 		return reganode(EVAL, n);
 	    }
 	    case '(':

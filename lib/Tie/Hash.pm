@@ -110,7 +110,7 @@ sub new {
 
 sub TIEHASH {
     my $pkg = shift;
-    if (defined &{"{$pkg}::new"}) {
+    if (defined &{"${pkg}::new"}) {
 	carp "WARNING: calling ${pkg}->new since ${pkg}->TIEHASH is missing"
 	    if $^W;
 	$pkg->new(@_);

@@ -225,6 +225,10 @@ write linker options files for dynamic extension
 
 add blib/* directories to @INC
 
+=item Fatal
+
+make errors in builtins or Perl functions fatal
+
 =item Fcntl
 
 load the C Fcntl.h defines

@@ -4,7 +4,7 @@
 # various typeglob tests
 #
 
-print "1..11\n";
+print "1..13\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -57,3 +57,11 @@ if (defined $baa) {
   print ref(\$baa) eq 'GLOB' ? "ok 11\n" : "not ok 11\n";
 }
 
+# nested package globs
+# NOTE:  It's probably OK if these semantics change, because the
+#        fact that %X::Y:: is stored in %X:: isn't documented.
+#        (I hope.)
+
+{ package Foo::Bar }
+print exists $Foo::{'Bar::'} ? "ok 12\n" : "not ok 12\n";
+print $Foo::{'Bar::'} eq '*Foo::Bar::' ? "ok 13\n" : "not ok 13\n";

@@ -935,11 +935,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     /* now that script is parsed, we can modify record separator */
     SvREFCNT_dec(rs);
     rs = SvREFCNT_inc(nrs);
-#ifdef USE_THREADS
-    sv_setsv(THREADSV(find_threadsv("/")), rs); 
-#else
-    sv_setsv(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), rs);
-#endif /* USE_THREADS */
+    sv_setsv(perl_get_sv("/", TRUE), rs);
     if (do_undump)
 	my_unexec();
 
@@ -2509,12 +2505,7 @@ init_predump_symbols(void)
     GV *tmpgv;
     GV *othergv;
 
-#ifdef USE_THREADS
-    sv_setpvn(THREADSV(find_threadsv("\"")), " ", 1);
-#else
-    sv_setpvn(GvSV(gv_fetchpv("\"", TRUE, SVt_PV)), " ", 1);
-#endif /* USE_THREADS */
-
+    sv_setpvn(perl_get_sv("\"", TRUE), " ", 1);
     stdingv = gv_fetchpv("STDIN",TRUE, SVt_PVIO);
     GvMULTI_on(stdingv);
     IoIFP(GvIOp(stdingv)) = PerlIO_stdin();
@@ -2708,7 +2699,7 @@ incpush(char *p, int addsubdirs)
 	return;
 
     if (addsubdirs) {
-	subdir = newSV(0);
+	subdir = NEWSV(55,0);
 	if (!archpat_auto) {
 	    STRLEN len = (sizeof(ARCHNAME) + strlen(patchlevel)
 			  + sizeof("//auto"));
@@ -2724,7 +2715,7 @@ incpush(char *p, int addsubdirs)
 
     /* Break at all separators */
     while (p && *p) {
-	SV *libdir = newSV(0);
+	SV *libdir = NEWSV(55,0);
 	char *s;
 
 	/* skip any consecutive separators */

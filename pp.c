@@ -360,9 +360,54 @@ PP(pp_prototype)
     SV *ret;
 
     ret = &sv_undef;
+    if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
+	char *s = SvPVX(TOPs);
+	if (strnEQ(s, "CORE::", 6)) {
+	    int code;
+	    
+	    code = keyword(s + 6, SvCUR(TOPs) - 6);
+	    if (code < 0) {	/* Overridable. */
+#define MAX_ARGS_OP ((sizeof(I32) - 1) * 2)
+		int i = 0, n = 0, seen_question = 0;
+		I32 oa;
+		char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
+
+		while (i < MAXO) {	/* The slow way. */
+		    if (strEQ(s + 6, op_name[i]) || strEQ(s + 6, op_desc[i]))
+			goto found;
+		    i++;
+		}
+		goto nonesuch;		/* Should not happen... */
+	      found:
+		oa = opargs[i] >> OASHIFT;
+		while (oa) {
+		    if (oa & OA_OPTIONAL) {
+			seen_question = 1;
+			str[n++] = ';';
+		    } else if (seen_question) 
+			goto set;	/* XXXX system, exec */
+		    if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF 
+			&& (oa & (OA_OPTIONAL - 1)) <= OA_HVREF) {
+			str[n++] = '\\';
+		    }
+		    /* What to do with R ((un)tie, tied, (sys)read, recv)? */
+		    str[n++] = ("?$@@%&*$")[oa & (OA_OPTIONAL - 1)];
+		    oa = oa >> 4;
+		}
+		str[n++] = '\0';
+		ret = sv_2mortal(newSVpv(str, n - 1));
+	    } else if (code)		/* Non-Overridable */
+		goto set;
+	    else {			/* None such */
+	      nonesuch:
+		croak("Cannot find an opnumber for \"%s\"", s+6);
+	    }
+	}
+    }
     cv = sv_2cv(TOPs, &stash, &gv, FALSE);
     if (cv && SvPOK(cv))
 	ret = sv_2mortal(newSVpv(SvPVX(cv), SvCUR(cv)));
+  set:
     SETs(ret);
     RETURN;
 }
@@ -1866,7 +1911,7 @@ PP(pp_vec)
 	}
     }
 
-    sv_setiv(TARG, (IV)retnum);
+    sv_setuv(TARG, (UV)retnum);
     PUSHs(TARG);
     RETURN;
 }

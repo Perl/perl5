@@ -1162,6 +1162,7 @@ mod(OP *o, I32 type)
 	/* FALL THROUGH */
     case OP_GV:
     case OP_AV2ARYLEN:
+	hints |= HINT_BLOCK_SCOPE;
     case OP_SASSIGN:
     case OP_AELEMFAST:
 	modcount++;
@@ -1587,7 +1588,6 @@ localize(OP *o, I32 lex)
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else {
-	scalar(o);
 	if (dowarn && bufptr > oldbufptr && bufptr[-1] == ',') {
 	    char *s;
 	    for (s = bufptr; *s && (isALNUM(*s) || strchr("@$%, ",*s)); s++) ;
@@ -1644,6 +1644,12 @@ fold_constants(register OP *o)
     case OP_LCFIRST:
     case OP_UC:
     case OP_LC:
+    case OP_SLT:
+    case OP_SGT:
+    case OP_SLE:
+    case OP_SGE:
+    case OP_SCMP:
+
 	if (o->op_private & OPpLOCALE)
 	    goto nope;
     }
@@ -2973,10 +2979,14 @@ newLOOPEX(I32 type, OP *label)
     dTHR;
     OP *o;
     if (type != OP_GOTO || label->op_type == OP_CONST) {
-	o = newPVOP(type, 0, savepv(
-		label->op_type == OP_CONST
-		    ? SvPVx(((SVOP*)label)->op_sv, na)
-		    : "" ));
+	/* "last()" means "last" */
+	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
+	    o = newOP(type, OPf_SPECIAL);
+	else {
+	    o = newPVOP(type, 0, savepv(label->op_type == OP_CONST
+					? SvPVx(((SVOP*)label)->op_sv, na)
+					: ""));
+	}
 	op_free(label);
     }
     else {
@@ -4598,9 +4608,10 @@ ck_subr(OP *o)
 		    goto wrapref;
 		{
 		    OP* kid = o2;
-		    o2 = newUNOP(OP_RV2GV, 0, kid);
-		    o2->op_sibling = kid->op_sibling;
+		    OP* sib = kid->op_sibling;
 		    kid->op_sibling = 0;
+		    o2 = newUNOP(OP_RV2GV, 0, kid);
+		    o2->op_sibling = sib;
 		    prev->op_sibling = o;
 		}
 		goto wrapref;

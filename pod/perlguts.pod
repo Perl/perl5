@@ -34,17 +34,19 @@ An SV can be created and loaded with one command.  There are four types of
 values that can be loaded: an integer value (IV), a double (NV), a string,
 (PV), and another scalar (SV).
 
-The five routines are:
+The six routines are:
 
     SV*  newSViv(IV);
     SV*  newSVnv(double);
     SV*  newSVpv(char*, int);
+    SV*  newSVpvn(char*, int);
     SV*  newSVpvf(const char*, ...);
     SV*  newSVsv(SV*);
 
-To change the value of an *already-existing* SV, there are six routines:
+To change the value of an *already-existing* SV, there are seven routines:
 
     void  sv_setiv(SV*, IV);
+    void  sv_setuv(SV*, UV);
     void  sv_setnv(SV*, double);
     void  sv_setpv(SV*, char*);
     void  sv_setpvn(SV*, char*, int)
@@ -52,14 +54,14 @@ To change the value of an *already-existing* SV, there are six routines:
     void  sv_setsv(SV*, SV*);
 
 Notice that you can choose to specify the length of the string to be
-assigned by using C<sv_setpvn> or C<newSVpv>, or you may allow Perl to
-calculate the length by using C<sv_setpv> or by specifying 0 as the second
-argument to C<newSVpv>.  Be warned, though, that Perl will determine the
-string's length by using C<strlen>, which depends on the string terminating
-with a NUL character.  The arguments of C<sv_setpvf> are processed like
-C<sprintf>, and the formatted output becomes the value.  The C<sv_set*()>
-functions are not generic enough to operate on values that have "magic".
-See L<Magic Virtual Tables> later in this document.
+assigned by using C<sv_setpvn>, C<newSVpvn>, or C<newSVpv>, or you may
+allow Perl to calculate the length by using C<sv_setpv> or by specifying
+0 as the second argument to C<newSVpv>.  Be warned, though, that Perl will
+determine the string's length by using C<strlen>, which depends on the
+string terminating with a NUL character.  The arguments of C<sv_setpvf>
+are processed like C<sprintf>, and the formatted output becomes the value.
+The C<sv_set*()> functions are not generic enough to operate on values
+that have "magic".  See L<Magic Virtual Tables> later in this document.
 
 All SVs that will contain strings should, but need not, be terminated
 with a NUL character.  If it is not NUL-terminated there is a risk of
@@ -2123,13 +2125,14 @@ SV is B<not> incremented.
 
 	SV*     newRV_noinc _((SV* ref));
 
-=item newSV
+=item NEWSV
 
 Creates a new SV.  The C<len> parameter indicates the number of bytes of
 preallocated string space the SV should have.  The reference count for the
-new SV is set to 1.
+new SV is set to 1.  C<id> is an integer id between 0 and 1299 (used to
+identify leaks).
 
-	SV*	newSV _((STRLEN len));
+	SV*	NEWSV _((int id, STRLEN len));
 
 =item newSViv
 
@@ -2151,6 +2154,14 @@ Creates a new SV and copies a string into it.  The reference count for the
 SV is set to 1.  If C<len> is zero then Perl will compute the length.
 
 	SV*	newSVpv _((char* s, STRLEN len));
+
+=item newSVpvn
+
+Creates a new SV and copies a string into it.  The reference count for the
+SV is set to 1.  If C<len> is zero then Perl will create a zero length 
+string.
+
+	SV*	newSVpvn _((char* s, STRLEN len));
 
 =item newSVrv
 

@@ -490,6 +490,7 @@ newSVREF
 newSViv
 newSVnv
 newSVpv
+newSVpvn
 newSVpvf
 newSVrv
 newSVsv

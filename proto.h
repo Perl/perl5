@@ -342,6 +342,7 @@ OP*	newSVOP _((I32 type, I32 flags, SV* sv));
 SV*	newSViv _((IV i));
 SV*	newSVnv _((double n));
 SV*	newSVpv _((char* s, STRLEN len));
+SV*	newSVpvn _((char* s, STRLEN len));
 SV*	newSVpvf _((const char* pat, ...));
 SV*	newSVrv _((SV* rv, char* classname));
 SV*	newSVsv _((SV* old));
