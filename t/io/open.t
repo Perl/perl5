@@ -228,6 +228,7 @@ SKIP: {
     skip "This perl uses perlio", 1 if $Config{useperlio};
     skip "This system doesn't understand EINVAL", 1 unless exists $!{EINVAL};
 
+    no warnings 'io';
     ok( !open(F,'>',\my $s) && $!{EINVAL}, 'open(reference) raises EINVAL' );
 }
 
