@@ -25,6 +25,11 @@ linked.
 
 See L<perlxstut> for a tutorial on the whole extension creation process.
 
+Note: For many extensions, Dave Beazley's SWIG system provides a
+significantly more convenient mechanism for creating the XS glue
+code. See L<http://www.cs.utah.edu/~beazley/SWIG> for more 
+information.
+
 =head2 On The Road
 
 Many of the examples which follow will concentrate on creating an interface
