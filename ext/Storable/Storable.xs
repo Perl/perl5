@@ -58,7 +58,7 @@
 #include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #include <XSUB.h>
 
-#if 0
+#if 1
 #define DEBUGME /* Debug mode, turns assertions on as well */
 #define DASSERT /* Assertion mode */
 #endif
@@ -272,6 +272,39 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
 
 #define MY_VERSION "Storable(" XS_VERSION ")"
 
+
+/*
+ * Conditional UTF8 support.
+ *
+ */
+#ifdef SvUTF8_on
+#define STORE_UTF8STR(pv, len)	STORE_PV_LEN(pv, len, SX_UTF8STR, SX_LUTF8STR)
+#define HAS_UTF8_SCALARS
+#ifdef HeKUTF8
+#define HAS_UTF8_HASHES
+#define HAS_UTF8_ALL
+#else
+/* 5.6 perl has utf8 scalars but not hashes */
+#endif
+#else
+#define SvUTF8(sv) 0
+#define STORE_UTF8STR(pv, len) CROAK(("panic: storing UTF8 in non-UTF8 perl"))
+#endif
+#ifndef HAS_UTF8_ALL
+#define UTF8_CROAK() CROAK(("Cannot retrieve UTF8 data in non-UTF8 perl"))
+#endif
+
+#ifdef HvPLACEHOLDERS
+#define HAS_RESTRICTED_HASHES
+#else
+#define HVhek_PLACEHOLD	0x200
+#define RESTRICTED_HASH_CROAK() CROAK(("Cannot retrieve restricted hash"))
+#endif
+
+#ifdef HvHASKFLAGS
+#define HAS_HASH_KEY_FLAGS
+#endif
+
 /*
  * Fields s_tainted and s_dirty are prefixed with s_ because Perl's include
  * files remap tainted and dirty when threading is enabled.  That's bad for
@@ -293,6 +326,12 @@ typedef struct stcxt {
 	int s_tainted;		/* true if input source is tainted, at retrieve time */
 	int forgive_me;		/* whether to be forgiving... */
 	int canonical;		/* whether to store hashes sorted by key */
+#ifndef HAS_RESTRICTED_HASHES
+        int derestrict;         /* whether to downgrade restrcted hashes */
+#endif
+#ifndef HAS_UTF8_ALL
+        int use_bytes;         /* whether to bytes-ify utf8 */
+#endif
 	int s_dirty;		/* context is dirty due to CROAK() -- can be cleaned */
 	int membuf_ro;		/* true means membuf is read-only and msaved is rw */
 	struct extendable keybuf;	/* for hash key retrieval */
@@ -658,15 +697,23 @@ static stcxt_t *Context_ptr = &Context;
 static char old_magicstr[] = "perl-store";	/* Magic number before 0.6 */
 static char magicstr[] = "pst0";			/* Used as a magic number */
 
+
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
+#define STORABLE_BIN_MINOR	5		/* Binary minor "version" */
+
+/* If we aren't 5.7.3 or later, we won't be writing out files that use the
+ * new flagged hash introdued in 2.5, so put 2.4 in the binary header to
+ * maximise ease of interoperation with older Storables.
+ * Could we write 2.3s if we're on 5.005_03? NWC
+ */
 #if (PATCHLEVEL <= 6)
-#define STORABLE_BIN_MINOR	4		/* Binary minor "version" */
+#define STORABLE_BIN_WRITE_MINOR	4
 #else 
 /* 
  * As of perl 5.7.3, utf8 hash key is introduced.
  * So this must change -- dankogai
 */
-#define STORABLE_BIN_MINOR	5		/* Binary minor "version" */
+#define STORABLE_BIN_WRITE_MINOR	5
 #endif /* (PATCHLEVEL <= 6) */
 
 /*
@@ -729,19 +776,6 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 } while (0)
 
 #define STORE_SCALAR(pv, len)	STORE_PV_LEN(pv, len, SX_SCALAR, SX_LSCALAR)
-
-/*
- * Conditional UTF8 support.
- * On non-UTF8 perls, UTF8 strings are returned as normal strings.
- *
- */
-#ifdef SvUTF8_on
-#define STORE_UTF8STR(pv, len)	STORE_PV_LEN(pv, len, SX_UTF8STR, SX_LUTF8STR)
-#else
-#define SvUTF8(sv) 0
-#define STORE_UTF8STR(pv, len) CROAK(("panic: storing UTF8 in non-UTF8 perl"))
-#define SvUTF8_on(sv) CROAK(("Cannot retrieve UTF8 data in non-UTF8 perl"))
-#endif
 
 /*
  * Store undef in arrays and hashes without recursing through store().
@@ -1202,6 +1236,12 @@ static void init_retrieve_context(stcxt_t *cxt, int optype, int is_tainted)
 	cxt->optype = optype;
 	cxt->s_tainted = is_tainted;
 	cxt->entry = 1;					/* No recursion yet */
+#ifndef HAS_RESTRICTED_HASHES
+        cxt->derestrict = -1;		/* Fetched from perl if needed */
+#endif
+#ifndef HAS_UTF8_ALL
+        cxt->use_bytes = -1;		/* Fetched from perl if needed */
+#endif
 }
 
 /*
@@ -1902,12 +1942,21 @@ sortcmp(const void *a, const void *b)
  */
 static int store_hash(stcxt_t *cxt, HV *hv)
 {
-	I32 len = HvTOTALKEYS(hv);
+	I32 len = 
+#ifdef HAS_RESTRICTED_HASHES
+            HvTOTALKEYS(hv);
+#else
+            HvKEYS(hv);
+#endif
 	I32 i;
 	int ret = 0;
 	I32 riter;
 	HE *eiter;
-        int flagged_hash = ((SvREADONLY(hv) || HvHASKFLAGS(hv)) ? 1 : 0);
+        int flagged_hash = ((SvREADONLY(hv)
+#ifdef HAS_HASH_KEY_FLAGS
+                             || HvHASKFLAGS(hv)
+#endif
+                                ) ? 1 : 0);
         unsigned char hash_flags = (SvREADONLY(hv) ? SHV_RESTRICTED : 0);
 
         if (flagged_hash) {
@@ -1969,7 +2018,11 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 		TRACEME(("using canonical order"));
 
 		for (i = 0; i < len; i++) {
+#ifdef HAS_RESTRICTED_HASHES
 			HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+#else
+			HE *he = hv_iternext(hv);
+#endif
 			SV *key = hv_iterkeysv(he);
 			av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
 		}
@@ -2015,6 +2068,12 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 
 			keyval = SvPV(key, keylen_tmp);
                         keylen = keylen_tmp;
+#ifdef HAS_UTF8_HASHES
+                        /* If you build without optimisation on pre 5.6
+                           then nothing spots that SvUTF8(key) is always 0,
+                           so the block isn't optimised away, at which point
+                           the linker dislikes the reference to
+                           bytes_from_utf8.  */
 			if (SvUTF8(key)) {
                             const char *keysave = keyval;
                             bool is_utf8 = TRUE;
@@ -2039,6 +2098,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
                                 flags |= SHV_K_UTF8;
                             }
                         }
+#endif
 
                         if (flagged_hash) {
                             PUTMARK(flags);
@@ -2072,7 +2132,11 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			char *key;
 			I32 len;
                         unsigned char flags;
+#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
                         HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+#else
+                        HE *he = hv_iternext(hv);
+#endif
 			SV *val = (he ? hv_iterval(hv, he) : 0);
                         SV *key_sv = NULL;
                         HEK *hek;
@@ -2111,10 +2175,12 @@ static int store_hash(stcxt_t *cxt, HV *hv)
                             flags |= SHV_K_ISSV;
                         } else {
                             /* Regular string key. */
+#ifdef HAS_HASH_KEY_FLAGS
                             if (HEK_UTF8(hek))
                                 flags |= SHV_K_UTF8;
                             if (HEK_WASUTF8(hek))
                                 flags |= SHV_K_WASUTF8;
+#endif
                             key = HEK_KEY(hek);
                         }
 			/*
@@ -3011,7 +3077,7 @@ static int magic_write(stcxt_t *cxt)
 	 * introduced, for instance, but when backward compatibility is preserved.
 	 */
 
-	PUTMARK((unsigned char) STORABLE_BIN_MINOR);
+	PUTMARK((unsigned char) STORABLE_BIN_WRITE_MINOR);
 
 	if (use_network_order)
 		return 0;						/* Don't bother with byte ordering */
@@ -4098,15 +4164,25 @@ static SV *retrieve_scalar(stcxt_t *cxt, char *cname)
  */
 static SV *retrieve_utf8str(stcxt_t *cxt, char *cname)
 {
-	SV *sv;
+    SV *sv;
 
-	TRACEME(("retrieve_utf8str"));
+    TRACEME(("retrieve_utf8str"));
 
-	sv = retrieve_scalar(cxt, cname);
-	if (sv)
-		SvUTF8_on(sv);
+    sv = retrieve_scalar(cxt, cname);
+    if (sv) {
+#ifdef HAS_UTF8_SCALARS
+        SvUTF8_on(sv);
+#else
+        if (cxt->use_bytes < 0)
+            cxt->use_bytes
+                = (SvTRUE(perl_get_sv("Storable::drop_utf8", TRUE))
+                   ? 1 : 0);
+        if (cxt->use_bytes == 0)
+            UTF8_CROAK();
+#endif
+    }
 
-	return sv;
+    return sv;
 }
 
 /*
@@ -4117,15 +4193,24 @@ static SV *retrieve_utf8str(stcxt_t *cxt, char *cname)
  */
 static SV *retrieve_lutf8str(stcxt_t *cxt, char *cname)
 {
-	SV *sv;
+    SV *sv;
 
-	TRACEME(("retrieve_lutf8str"));
+    TRACEME(("retrieve_lutf8str"));
 
-	sv = retrieve_lscalar(cxt, cname);
-	if (sv)
-		SvUTF8_on(sv);
-
-	return sv;
+    sv = retrieve_lscalar(cxt, cname);
+    if (sv) {
+#ifdef HAS_UTF8_SCALARS
+        SvUTF8_on(sv);
+#else
+        if (cxt->use_bytes < 0)
+            cxt->use_bytes
+                = (SvTRUE(perl_get_sv("Storable::drop_utf8", TRUE))
+                   ? 1 : 0);
+        if (cxt->use_bytes == 0)
+            UTF8_CROAK();
+#endif
+    }
+    return sv;
 }
 
 /*
@@ -4434,10 +4519,21 @@ static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
     int hash_flags;
 
     GETMARK(hash_flags);
-	TRACEME(("retrieve_flag_hash (#%d)", cxt->tagnum));
+    TRACEME(("retrieve_flag_hash (#%d)", cxt->tagnum));
     /*
      * Read length, allocate table.
      */
+
+#ifndef HAS_RESTRICTED_HASHES
+    if (hash_flags & SHV_RESTRICTED) {
+        if (cxt->derestrict < 0)
+            cxt->derestrict
+                = (SvTRUE(perl_get_sv("Storable::downgrade_restricted", TRUE))
+                   ? 1 : 0);
+        if (cxt->derestrict == 0)
+            RESTRICTED_HASH_CROAK();
+    }
+#endif
 
     RLEN(len);
     TRACEME(("size = %d, flags = %d", len, hash_flags));
@@ -4464,8 +4560,10 @@ static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
             return (SV *) 0;
 
         GETMARK(flags);
+#ifdef HAS_RESTRICTED_HASHES
         if ((hash_flags & SHV_RESTRICTED) && (flags & SHV_K_LOCKED))
             SvREADONLY_on(sv);
+#endif
 
         if (flags & SHV_K_ISSV) {
             /* XXX you can't set a placeholder with an SV key.
@@ -4493,10 +4591,22 @@ static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
                 sv = &PL_sv_undef;
 		store_flags |= HVhek_PLACEHOLD;
 	    }
-            if (flags & SHV_K_UTF8)
+            if (flags & SHV_K_UTF8) {
+#ifdef HAS_UTF8_HASHES
                 store_flags |= HVhek_UTF8;
+#else
+                if (cxt->use_bytes < 0)
+                    cxt->use_bytes
+                        = (SvTRUE(perl_get_sv("Storable::drop_utf8", TRUE))
+                           ? 1 : 0);
+                if (cxt->use_bytes == 0)
+                    UTF8_CROAK();
+#endif
+            }
+#ifdef HAS_UTF8_HASHES
             if (flags & SHV_K_WASUTF8)
 		store_flags |= HVhek_WASUTF8;
+#endif
 
             RLEN(size);						/* Get key size */
             KBUFCHK(size);					/* Grow hash key read pool if needed */
@@ -4510,12 +4620,20 @@ static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
              * Enter key/value pair into hash table.
              */
 
+#ifdef HAS_RESTRICTED_HASHES
             if (hv_store_flags(hv, kbuf, size, sv, 0, flags) == 0)
                 return (SV *) 0;
+#else
+            if (!(store_flags & HVhek_PLACEHOLD))
+                if (hv_store(hv, kbuf, size, sv, 0) == 0)
+                    return (SV *) 0;
+#endif
 	}
     }
+#ifdef HAS_RESTRICTED_HASHES
     if (hash_flags & SHV_RESTRICTED)
         SvREADONLY_on(hv);
+#endif
 
     TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
 
@@ -4765,10 +4883,14 @@ magic_ok:
 		version_major > STORABLE_BIN_MAJOR ||
 			(version_major == STORABLE_BIN_MAJOR &&
 			version_minor > STORABLE_BIN_MINOR)
-	)
+            ) {
+            	TRACEME(("but I am version is %d.%d", STORABLE_BIN_MAJOR,
+                         STORABLE_BIN_MINOR));
+
 		CROAK(("Storable binary image v%d.%d more recent than I am (v%d.%d)",
 			version_major, version_minor,
 			STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR));
+        }
 
 	/*
 	 * If they stored using network order, there's no byte ordering
@@ -4782,6 +4904,8 @@ magic_ok:
 	GETMARK(c);
 	READ(buf, c);						/* Not null-terminated */
 	buf[c] = '\0';						/* Is now */
+
+	TRACEME(("byte order '%s'", buf));
 
 	if (strcmp(buf, byteorder))
 		CROAK(("Byte order is not compatible"));
