@@ -373,3 +373,5 @@ __END__
 >%vp<	>''<	>%vp INVALID<
 >%vs,%d<	>[1, 2, 3]<	>1,2<
 >%v_<	>''<	>%v_ INVALID<
+>%v#x<	>''<	>%v#x INVALID<
+>%v02x<	>"foo\n"<	>66.6f.6f.0a< 

@@ -8330,6 +8330,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	\d+\$              explicit format parameter index
 	[-+ 0#]+           flags
 	v|\*(\d+\$)?v      vector with optional (optionally specified) arg
+	0		   flag (as above): repeated to allow "v02" 	
 	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
 	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
 	[hlqLV]            size
@@ -8395,6 +8396,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 
 	if (!asterisk)
+	    if( *q == '0' ) 
+		fill = *q++;
 	    EXPECT_NUMBER(q, width);
 
 	if (vectorize) {
