@@ -964,8 +964,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		if (aint >= 128)	/* fake up signed chars */
 		    aint -= 256;
 		if (!checksum) {
-		    sv = newSViv((IV)aint);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((IV)aint)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aint;
@@ -995,8 +994,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    auint = *s++ & 255;
-		    sv = newSViv((IV)auint);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((IV)auint)));
 		}
 	    }
 	    break;
@@ -1021,8 +1019,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		along = alen;
 		s += along;
 		if (!checksum) {
-		    sv = newSVuv((UV)auint);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSVuv((UV)auint)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)auint;
@@ -1046,8 +1043,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK(ashort, s);
 		s += sizeof(short);
 		if (!checksum) {
-		    sv = newSViv((IV)ashort);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((IV)ashort)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)ashort;
@@ -1077,8 +1073,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 #endif
 		s += SIZE16;
 		if (!checksum) {
-		    sv = newSViv((IV)ai16);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((IV)ai16)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)ai16;
@@ -1102,8 +1097,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK(aushort, s);
 		s += sizeof(unsigned short);
 		if (!checksum) {
-		    sv = newSViv((UV)aushort);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((UV)aushort)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aushort;
@@ -1139,8 +1133,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    au16 = vtohs(au16);
 #endif
 		if (!checksum) {
-		    sv = newSViv((UV)au16);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((UV)au16)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)au16;
@@ -1171,8 +1164,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    ai16 = (I16)vtohs((U16)ai16);
 #endif
 		if (!checksum) {
-		    sv = newSViv((IV)ai16);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((IV)ai16)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)ai16;
@@ -1196,8 +1188,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK(aint, i);
 		s += sizeof(int);
 		if (!checksum) {
-		    sv = newSViv((IV)aint);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((IV)aint)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aint;
@@ -1221,8 +1212,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK(auint, i);
 		s += sizeof(unsigned int);
 		if (!checksum) {
-		    sv = newSVuv((UV)auint);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSVuv((UV)auint)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)auint;
@@ -1251,8 +1241,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 #endif
 		s += IVSIZE;
 		if (!checksum) {
-		    sv = newSViv(aiv);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv(aiv)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aiv;
@@ -1281,8 +1270,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 #endif
 		s += UVSIZE;
 		if (!checksum) {
-		    sv = newSVuv(auv);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSVuv(auv)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)auv;
@@ -1306,8 +1294,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK(along, l);
 		s += sizeof(long);
 		if (!checksum) {
-		    sv = newSViv((IV)along);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((IV)along)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)along;
@@ -1337,8 +1324,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 #endif
 		s += SIZE32;
 		if (!checksum) {
-		    sv = newSViv((IV)ai32);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((IV)ai32)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)ai32;
@@ -1362,8 +1348,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK(aulong, l);
 		s += sizeof(unsigned long);
 		if (!checksum) {
-		    sv = newSVuv((UV)aulong);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSVuv((UV)aulong)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aulong;
@@ -1399,8 +1384,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    au32 = vtohl(au32);
 #endif
 		 if (!checksum) {
-		     sv = newSVuv((UV)au32);
-		     PUSHs(sv_2mortal(sv));
+		     PUSHs(sv_2mortal(newSVuv((UV)au32)));
 		 }
 		 else if (checksum > bits_in_uv)
 		     cdouble += (NV)au32;
@@ -1431,8 +1415,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    ai32 = (I32)vtohl((U32)ai32);
 #endif
 		if (!checksum) {
-		    sv = newSViv((IV)ai32);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSViv((IV)ai32)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)ai32;
@@ -1472,8 +1455,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    /* UTF8_IS_XXXXX not right here - using constant 0x80 */
 		    if ((U8)(*s++) < 0x80) {
 			bytes = 0;
-			sv = newSVuv(auv);
-			PUSHs(sv_2mortal(sv));
+			PUSHs(sv_2mortal(newSVuv(auv)));
 			len--;
 			auv = 0;
 		    }
@@ -1538,11 +1520,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    s += sizeof(Quad_t);
 		}
 		if (!checksum) {
-                    if (aquad >= IV_MIN && aquad <= IV_MAX)
-		        sv = newSViv((IV)aquad);
-                    else
-                        sv = newSVnv((NV)aquad);
-                    PUSHs(sv_2mortal(sv));
+                    PUSHs(sv_2mortal((aquad >= IV_MIN && aquad <= IV_MAX) ?
+				     newSViv((IV)aquad) : newSVnv((NV)aquad)));
                 }
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aquad;
@@ -1569,11 +1548,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    s += sizeof(Uquad_t);
 		}
 		if (!checksum) {
-		    if (auquad <= UV_MAX)
-			sv = newSVuv((UV)auquad);
-		    else
-			sv = newSVnv((NV)auquad);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal((auquad <= UV_MAX) ?
+				     newSVuv((UV)auquad) : newSVnv((NV)auquad)));
 		}
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)auquad;
@@ -1598,8 +1574,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK_N(afloat, float);
 		s += sizeof(float);
 		if (!checksum) {
-		    sv = newSVnv((NV)afloat);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSVnv((NV)afloat)));
 		}
 		else {
 		    cdouble += afloat;
@@ -1621,8 +1596,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK_N(adouble, double);
 		s += sizeof(double);
 		if (!checksum) {
-		    sv = newSVnv((NV)adouble);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSVnv((NV)adouble)));
 		}
 		else {
 		    cdouble += adouble;
@@ -1644,8 +1618,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK_N(anv, NV);
 		s += NVSIZE;
 		if (!checksum) {
-		    sv = newSVnv(anv);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSVnv(anv)));
 		}
 		else {
 		    cdouble += anv;
@@ -1668,8 +1641,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		DO_BO_UNPACK_N(aldouble, long double);
 		s += LONG_DOUBLESIZE;
 		if (!checksum) {
-		    sv = newSVnv((NV)aldouble);
-		    PUSHs(sv_2mortal(sv));
+		    PUSHs(sv_2mortal(newSVnv((NV)aldouble)));
 		}
 		else {cdouble += aldouble;
 		}
