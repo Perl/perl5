@@ -27,10 +27,10 @@ Malloc_t
 safemalloc(size)
 MEM_SIZE size;
 {
-    char *ptr;
-    Malloc_t malloc();
+    Malloc_t ptr;
 
-    ptr = (char *) malloc(size?size:1);	/* malloc(0) is NASTY on our system */
+    /* malloc(0) is NASTY on some systems */
+    ptr = malloc(size ? size : 1);
 #ifdef DEBUGGING
     if (debug & 128)
 	fprintf(stderr,"0x%x: (%05d) malloc %d bytes\n",ptr,an++,size);
@@ -48,14 +48,13 @@ MEM_SIZE size;
 
 Malloc_t
 saferealloc(where,size)
-char *where;
+Malloc_t where;
 MEM_SIZE size;
 {
-    char *ptr;
-    Malloc_t realloc();
+    Malloc_t ptr;
 
-    ptr = (char *)
-		realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
+    /* realloc(0) is NASTY on some systems */
+    ptr = realloc(where, size ? size : 1);
 #ifdef DEBUGGING
     if (debug & 128) {
 	fprintf(stderr,"0x%x: (%05d) rfree\n",where,an++);
@@ -73,9 +72,9 @@ MEM_SIZE size;
 
 /* safe version of free */
 
-void
+Free_t
 safefree(where)
-char *where;
+Malloc_t where;
 {
 #ifdef DEBUGGING
     if (debug & 128)
