@@ -1623,16 +1623,6 @@ C<$ENV{ENV}> or C<$ENV{BASH_ENV}> are derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
 
-=item In string, @%s now must be written as \@%s
-
-(F) It used to be that Perl would try to guess whether you wanted an
-array interpolated or a literal @.  It did this when the string was
-first used at runtime.  Now strings are parsed at compile time, and
-ambiguous instances of @ must be disambiguated, either by prepending a
-backslash to indicate a literal, or by declaring (or using) the array
-within the program before the string (lexically).  (Someday it will
-simply assume that an unbackslashed @ interpolates an array.)
-
 =item Integer overflow in %s number
 
 (W overflow) The hexadecimal, octal or binary number you have specified
