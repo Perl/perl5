@@ -130,8 +130,16 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	if(thread->interp) {
 	    dTHXa(thread->interp);
 	    ithread*        current_thread;
+#ifdef OEMVS
+	    void *ptr;
+#endif
 	    PERL_SET_CONTEXT(thread->interp);
+#ifdef OEMVS
+	    PERL_THREAD_GETSPECIFIC(self_key,ptr);
+            current_thread = (ithread *) ptr;
+#else
 	    PERL_THREAD_GETSPECIFIC(self_key,current_thread);
+#endif
 	    PERL_THREAD_SETSPECIFIC(self_key,thread);
 
 
