@@ -69,6 +69,12 @@ static void restore_rsfp _((void *f));
 #include <sys/file.h>
 #endif
 
+/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
+#ifdef I_UNISTD
+#  include <unistd.h> /* Needed for execv() */
+#endif
+
+
 #ifdef ff_next
 #undef ff_next
 #endif
@@ -4539,7 +4545,7 @@ register char *s;
     if (!rsfp) {
 	d = s;
 	while (s < bufend &&
-	  (*s != term || bcmp(s,tokenbuf,len) != 0) ) {
+	  (*s != term || memcmp(s,tokenbuf,len) != 0) ) {
 	    if (*s++ == '\n')
 		curcop->cop_line++;
 	}
@@ -4572,7 +4578,7 @@ register char *s;
 	      (I32)curcop->cop_line,sv);
 	}
 	bufend = SvPVX(linestr) + SvCUR(linestr);
-	if (*s == term && bcmp(s,tokenbuf,len) == 0) {
+	if (*s == term && memcmp(s,tokenbuf,len) == 0) {
 	    s = bufend - 1;
 	    *s = ' ';
 	    sv_catsv(linestr,herewas);
