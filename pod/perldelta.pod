@@ -244,24 +244,7 @@ stat(2) might lie, while access(2) knows better.
 
 =head1 Utility Changes
 
-=head2 New Modules
-
-=over
-
 Todo.
-
-=back
-
-=head2 Changes in existing modules
-
-=over
-
-=item Exporter
-
-Exporter::expand() takes an import list and returns the expanded
-list of names.
-
-=back
 
 =head1 Documentation Changes
 
