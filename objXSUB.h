@@ -2349,26 +2349,6 @@
 #undef  custom_op_desc
 #define custom_op_desc		Perl_custom_op_desc
 #endif
-#if defined(PERL_CUSTOM_OPS)
-#undef  Perl_custom_op_name
-#define Perl_custom_op_name	pPerl->Perl_custom_op_name
-#undef  custom_op_name
-#define custom_op_name		Perl_custom_op_name
-#undef  Perl_custom_op_desc
-#define Perl_custom_op_desc	pPerl->Perl_custom_op_desc
-#undef  custom_op_desc
-#define custom_op_desc		Perl_custom_op_desc
-#endif
-#if defined(PERL_CUSTOM_OPS)
-#undef  Perl_custom_op_name
-#define Perl_custom_op_name	pPerl->Perl_custom_op_name
-#undef  custom_op_name
-#define custom_op_name		Perl_custom_op_name
-#undef  Perl_custom_op_desc
-#define Perl_custom_op_desc	pPerl->Perl_custom_op_desc
-#undef  custom_op_desc
-#define custom_op_desc		Perl_custom_op_desc
-#endif
 #if defined(PERL_OBJECT)
 #else
 #endif

@@ -877,14 +877,6 @@
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
 #endif
-#if defined(PERL_CUSTOM_OPS)
-#define custom_op_name		Perl_custom_op_name
-#define custom_op_desc		Perl_custom_op_desc
-#endif
-#if defined(PERL_CUSTOM_OPS)
-#define custom_op_name		Perl_custom_op_name
-#define custom_op_desc		Perl_custom_op_desc
-#endif
 #if defined(PERL_OBJECT)
 #else
 #endif
@@ -2399,14 +2391,6 @@
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_clear()	Perl_sys_intern_clear(aTHX)
 #define sys_intern_init()	Perl_sys_intern_init(aTHX)
-#endif
-#if defined(PERL_CUSTOM_OPS)
-#define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
-#define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
-#endif
-#if defined(PERL_CUSTOM_OPS)
-#define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
-#define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #endif
 #if defined(PERL_CUSTOM_OPS)
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
@@ -4720,18 +4704,6 @@
 #define sys_intern_clear	Perl_sys_intern_clear
 #define Perl_sys_intern_init	CPerlObj::Perl_sys_intern_init
 #define sys_intern_init		Perl_sys_intern_init
-#endif
-#if defined(PERL_CUSTOM_OPS)
-#define Perl_custom_op_name	CPerlObj::Perl_custom_op_name
-#define custom_op_name		Perl_custom_op_name
-#define Perl_custom_op_desc	CPerlObj::Perl_custom_op_desc
-#define custom_op_desc		Perl_custom_op_desc
-#endif
-#if defined(PERL_CUSTOM_OPS)
-#define Perl_custom_op_name	CPerlObj::Perl_custom_op_name
-#define custom_op_name		Perl_custom_op_name
-#define Perl_custom_op_desc	CPerlObj::Perl_custom_op_desc
-#define custom_op_desc		Perl_custom_op_desc
 #endif
 #if defined(PERL_CUSTOM_OPS)
 #define Perl_custom_op_name	CPerlObj::Perl_custom_op_name
