@@ -1606,6 +1606,7 @@ p	|void	|save_hints
 p	|void	|save_hptr	|HV** hptr
 p	|void	|save_I16	|I16* intp
 p	|void	|save_I32	|I32* intp
+p	|void	|save_I8	|I8* bytep
 p	|void	|save_int	|int* intp
 p	|void	|save_item	|SV* item
 p	|void	|save_iv	|IV* iv

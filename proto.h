@@ -559,6 +559,7 @@ PERL_CALLCONV void	Perl_save_hints(pTHX);
 PERL_CALLCONV void	Perl_save_hptr(pTHX_ HV** hptr);
 PERL_CALLCONV void	Perl_save_I16(pTHX_ I16* intp);
 PERL_CALLCONV void	Perl_save_I32(pTHX_ I32* intp);
+PERL_CALLCONV void	Perl_save_I8(pTHX_ I8* bytep);
 PERL_CALLCONV void	Perl_save_int(pTHX_ int* intp);
 PERL_CALLCONV void	Perl_save_item(pTHX_ SV* item);
 PERL_CALLCONV void	Perl_save_iv(pTHX_ IV* iv);

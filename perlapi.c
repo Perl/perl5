@@ -3441,6 +3441,13 @@ Perl_save_I32(pTHXo_ I32* intp)
     ((CPerlObj*)pPerl)->Perl_save_I32(intp);
 }
 
+#undef  Perl_save_I8
+void
+Perl_save_I8(pTHXo_ I8* bytep)
+{
+    ((CPerlObj*)pPerl)->Perl_save_I8(bytep);
+}
+
 #undef  Perl_save_int
 void
 Perl_save_int(pTHXo_ int* intp)

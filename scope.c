@@ -405,6 +405,16 @@ Perl_save_I16(pTHX_ I16 *intp)
 }
 
 void
+Perl_save_I8(pTHX_ I8 *bytep)
+{
+    dTHR;
+    SSCHECK(3);
+    SSPUSHINT(*bytep);
+    SSPUSHPTR(bytep);
+    SSPUSHINT(SAVEt_I8);
+}
+
+void
 Perl_save_iv(pTHX_ IV *ivp)
 {
     dTHR;
@@ -750,6 +760,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_I16:				/* I16 reference */
 	    ptr = SSPOPPTR;
 	    *(I16*)ptr = (I16)SSPOPINT;
+	    break;
+	case SAVEt_I8:				/* I8 reference */
+	    ptr = SSPOPPTR;
+	    *(I8*)ptr = (I8)SSPOPINT;
 	    break;
 	case SAVEt_IV:				/* IV reference */
 	    ptr = SSPOPPTR;

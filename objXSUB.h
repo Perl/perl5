@@ -2727,6 +2727,10 @@
 #define Perl_save_I32		pPerl->Perl_save_I32
 #undef  save_I32
 #define save_I32		Perl_save_I32
+#undef  Perl_save_I8
+#define Perl_save_I8		pPerl->Perl_save_I8
+#undef  save_I8
+#define save_I8			Perl_save_I8
 #undef  Perl_save_int
 #define Perl_save_int		pPerl->Perl_save_int
 #undef  save_int

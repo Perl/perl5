@@ -561,6 +561,7 @@
 #define save_hptr		Perl_save_hptr
 #define save_I16		Perl_save_I16
 #define save_I32		Perl_save_I32
+#define save_I8			Perl_save_I8
 #define save_int		Perl_save_int
 #define save_item		Perl_save_item
 #define save_iv			Perl_save_iv
@@ -1957,6 +1958,7 @@
 #define save_hptr(a)		Perl_save_hptr(aTHX_ a)
 #define save_I16(a)		Perl_save_I16(aTHX_ a)
 #define save_I32(a)		Perl_save_I32(aTHX_ a)
+#define save_I8(a)		Perl_save_I8(aTHX_ a)
 #define save_int(a)		Perl_save_int(aTHX_ a)
 #define save_item(a)		Perl_save_item(aTHX_ a)
 #define save_iv(a)		Perl_save_iv(aTHX_ a)
@@ -3834,6 +3836,8 @@
 #define save_I16		Perl_save_I16
 #define Perl_save_I32		CPerlObj::Perl_save_I32
 #define save_I32		Perl_save_I32
+#define Perl_save_I8		CPerlObj::Perl_save_I8
+#define save_I8			Perl_save_I8
 #define Perl_save_int		CPerlObj::Perl_save_int
 #define save_int		Perl_save_int
 #define Perl_save_item		CPerlObj::Perl_save_item

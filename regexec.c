@@ -1632,12 +1632,12 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %"IVdf"\n",
 			  (IV)(PL_stack_sp - PL_stack_base));
 	    ));
-	SAVEINT(cxstack[cxstack_ix].blk_oldsp);
+	SAVEI32(cxstack[cxstack_ix].blk_oldsp);
 	cxstack[cxstack_ix].blk_oldsp = PL_stack_sp - PL_stack_base;
 	/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
 	SAVETMPS;
 	/* Apparently this is not needed, judging by wantarray. */
-	/* SAVEINT(cxstack[cxstack_ix].blk_gimme);
+	/* SAVEI8(cxstack[cxstack_ix].blk_gimme);
 	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
 
 	if (PL_reg_sv) {

@@ -479,6 +479,7 @@ Perl_save_hints
 Perl_save_hptr
 Perl_save_I16
 Perl_save_I32
+Perl_save_I8
 Perl_save_int
 Perl_save_item
 Perl_save_iv
