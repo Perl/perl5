@@ -1,24 +1,24 @@
-package TieHash;
+package Tie::Hash;
 
 =head1 NAME
 
-TieHash, TieHash::Std - base class definitions for tied hashes
+Tie::Hash, Tie::StdHash - base class definitions for tied hashes
 
 =head1 SYNOPSIS
 
     package NewHash;
-    require TieHash;
+    require Tie::Hash;
     
-    @ISA = (TieHash);
+    @ISA = (Tie::Hash);
     
     sub DELETE { ... }		# Provides needed method
     sub CLEAR { ... }		# Overrides inherited method
     
     
     package NewStdHash;
-    require TieHash;
+    require Tie::Hash;
     
-    @ISA = (TieHash::Std);
+    @ISA = (Tie::StdHash);
     
     # All methods provided by default, define only those needing overrides
     sub DELETE { ... }
@@ -32,20 +32,23 @@ TieHash, TieHash::Std - base class definitions for tied hashes
 =head1 DESCRIPTION
 
 This module provides some skeletal methods for hash-tying classes. See
-L<perlfunc/tie> for a list of the functions required in order to tie a hash
-to a package. The basic B<TieHash> package provides a C<new> method, as well
-as methods C<TIEHASH>, C<EXISTS> and C<CLEAR>. The B<TieHash::Std> package
-provides most methods required for hashes in L<perlfunc/tie>. It inherits from
-B<TieHash>, and causes tied hashes to behave exactly like standard hashes,
-allowing for selective overloading of methods. The B<new> method is provided
-as grandfathering in the case a class forgets to include a B<TIEHASH> method.
+L<perltie> for a list of the functions required in order to tie a hash
+to a package. The basic B<Tie::Hash> package provides a C<new> method, as well
+as methods C<TIEHASH>, C<EXISTS> and C<CLEAR>. The B<Tie::StdHash> package
+provides most methods required for hashes in L<perltie>. It inherits from
+B<Tie::Hash>, and causes tied hashes to behave exactly like standard hashes,
+allowing for selective overloading of methods. The C<new> method is provided
+as grandfathering in the case a class forgets to include a C<TIEHASH> method.
 
 For developers wishing to write their own tied hashes, the required methods
-are:
+are briefly defined below. See the L<perltie> section for more detailed
+descriptive, as well as example code:
+
+=over
 
 =item TIEHASH classname, LIST
 
-The method invoked by the command C<tie %hash, class>. Associates a new
+The method invoked by the command C<tie %hash, classname>. Associates a new
 hash instance with the specified class. C<LIST> would represent additional
 arguments (along the lines of L<AnyDBM_File> and compatriots) needed to
 complete the association.
@@ -82,18 +85,16 @@ Clear all values from the tied hash I<this>.
 
 =head1 CAVEATS
 
-The L<perlfunc/tie> documentation includes a method called C<DESTROY> as
-a necessary method for tied hashes. Neither B<TieHash> nor B<TieHash::Std>
-define a default for this method.
-
-The C<CLEAR> method provided by these two packages is not listed in the
-L<perlfunc/tie> section.
+The L<perltie> documentation includes a method called C<DESTROY> as
+a necessary method for tied hashes. Neither B<Tie::Hash> nor B<Tie::StdHash>
+define a default for this method. This is a standard for class packages,
+but may be omitted in favor of a simple default.
 
 =head1 MORE INFORMATION
 
 The packages relating to various DBM-related implemetations (F<DB_File>,
 F<NDBM_File>, etc.) show examples of general tied hashes, as does the
-L<Config> module. While these do not utilize B<TieHash>, they serve as
+L<Config> module. While these do not utilize B<Tie::Hash>, they serve as
 good working examples.
 
 =cut
@@ -138,12 +139,12 @@ sub CLEAR {
     }
 }
 
-# The TieHash::Std package implements standard perl hash behaviour.
+# The Tie::StdHash package implements standard perl hash behaviour.
 # It exists to act as a base class for classes which only wish to
 # alter some parts of their behaviour.
 
-package TieHash::Std;
-@ISA = qw(TieHash);
+package Tie::StdHash;
+@ISA = qw(Tie::Hash);
 
 sub TIEHASH  { bless {}, $_[0] }
 sub STORE    { $_[0]->{$_[1]} = $_[2] }
