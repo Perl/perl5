@@ -12,7 +12,7 @@ print strong("Version "),$CGI::VERSION,p;
 print h1("File Upload Example"),
     'This example demonstrates how to prompt the remote user to
     select a remote file for uploading. ',
-    strong("This feature only works with Netscape 2.0 browsers."),
+    strong("This feature only works with Netscape 2.0 or greater, or IE 4.0 or greater."),
     p,
     'Select the ',cite('browser'),' button to choose a text file
     to upload.  When you press the submit button, this script

@@ -10,9 +10,6 @@ BEGIN {
 }
 
 BEGIN {$| = 1; print "1..20\n"; }
-BEGIN {$eol = "\n"   if $^O eq 'VMS';
-       $eol = "\r\n" if $Config{ebcdic} eq 'define';
-       $eol = "\cM\cJ" unless defined $eol; }
 END {print "not ok 1\n" unless $loaded;}
 use CGI (':standard','-no_debug','*h3','start_table');
 $loaded = 1;
@@ -40,10 +37,10 @@ test(7,h1({-align=>'CENTER'},['fred','agnes']) eq
     local($") = '-'; 
     test(8,h1('fred','agnes','maura') eq '<H1>fred-agnes-maura</H1>',"open/close tag \$\" interpolation");
 }
-test(9,header() eq "Content-Type: text/html${eol}${eol}","header()");
-test(10,header(-type=>'image/gif') eq "Content-Type: image/gif${eol}${eol}","header()");
-test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks${eol}Content-Type: image/gif${eol}${eol}","header()");
-test(12,header(-nph=>1) eq "HTTP/1.0 200 OK${eol}Content-Type: text/html${eol}${eol}","header()");
+test(9,header() eq "Content-Type: text/html\015\012\015\012","header()");
+test(10,header(-type=>'image/gif') eq "Content-Type: image/gif\015\012\015\012","header()");
+test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks\015\012Content-Type: image/gif\015\012\015\012","header()");
+test(12,header(-nph=>1) eq "HTTP/1.0 200 OK\015\012Content-Type: text/html\015\012\015\012","header()");
 test(13,start_html() ."\n" eq <<END,"start_html()");
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <HTML><HEAD><TITLE>Untitled Document</TITLE>
@@ -63,8 +60,8 @@ test(15,start_html(-Title=>'The world of foo') ."\n" eq <<END,"start_html()");
 END
     ;
 test(16,($cookie=cookie(-name=>'fred',-value=>['chocolate','chip'],-path=>'/')) eq 
-     'fred=chocolate&chip; path=/',"cookie()");
-test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; path=/${eol}Date:.*${eol}Content-Type: text/html${eol}${eol}!s,
+     'fred=chocolate&chip; domain=localhost; path=/',"cookie()");
+test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; domain=localhost; path=/\015\012Date:.*\015\012Content-Type: text/html\015\012\015\012!s,
      "header(-cookie)");
 test(18,start_h3 eq '<H3>');
 test(19,end_h3 eq '</H3>');
