@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1055\n";
+print "1..1056\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3255,5 +3255,11 @@ for (120 .. 130) {
     }
 }
 
-# last test 1055
+# perl #25269: panic: pp_match start/end pointers
+ok("a-bc" eq eval {
+	my($x, $y) = "bca" =~ /^(?=.*(a)).*(bc)/;
+	"$x-$y";
+}, 'captures can move backwards in string');
+
+# last test 1056
 
