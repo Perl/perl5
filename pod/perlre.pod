@@ -169,7 +169,8 @@ In addition, Perl defines the following:
     \D	Match a non-digit character
     \pP	Match P, named property.  Use \p{Prop} for longer names.
     \PP	Match non-P
-    \X	Match eXtended Unicode "combining character sequence", \pM\pm*
+    \X	Match eXtended Unicode "combining character sequence",
+        equivalent to C<(?:\PM\pM*)>
     \C	Match a single C char (octet) even under utf8.
 
 A C<\w> matches a single alphanumeric character, not a whole

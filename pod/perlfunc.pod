@@ -2343,7 +2343,8 @@ C<'w+'>, C<'a'>, and C<'a+'>.
 
 If the filename begins with C<'|'>, the filename is interpreted as a
 command to which output is to be piped, and if the filename ends with a
-C<'|'>, the filename is interpreted See L<perlipc/"Using open() for IPC">
+C<'|'>, the filename is interpreted as a command which pipes output to
+us.  See L<perlipc/"Using open() for IPC">
 for more examples of this.  (You are not allowed to C<open()> to a command
 that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
 and L<perlipc/"Bidirectional Communication"> for alternatives.)
