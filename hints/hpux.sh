@@ -45,7 +45,9 @@ ldflags="$ldflags -D_HPUX_SOURCE"
 toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
 
 cc=${cc:-cc}
-ar=${ar:-/usr/bin/ar}
+
+ar=/usr/bin/ar	# Yes, truly override.  We do not want the GNU ar.
+full_ar=$ar	# I repeat, no GNU ar.  arrr.
 
 case `$cc -v 2>&1`"" in
     *gcc*)  ccisgcc="$define" ;;
