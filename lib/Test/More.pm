@@ -18,7 +18,7 @@ sub _carp {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.41';
+$VERSION = '0.42';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
              is isnt like unlike is_deeply
@@ -198,7 +198,7 @@ sub import {
 =head2 Test names
 
 By convention, each test is assigned a number in order.  This is
-largely done automatically for you.  However, its often very useful to
+largely done automatically for you.  However, it's often very useful to
 assign a name to each test.  Which would you rather see:
 
   ok 4
@@ -215,7 +215,7 @@ The later gives you some idea of what failed.  It also makes it easier
 to find the test in your script, simply search for "simple
 exponential".
 
-All test functions take a name argument.  Its optional, but highly
+All test functions take a name argument.  It's optional, but highly
 suggested that you use it.
 
 
@@ -412,7 +412,7 @@ and $that were:
     #         &&
     #     undef
 
-Its also useful in those cases where you are comparing numbers and
+It's also useful in those cases where you are comparing numbers and
 is()'s use of C<eq> will interfere:
 
     cmp_ok( $big_hairy_number, '==', $another_big_hairy_number );
@@ -472,7 +472,7 @@ sub can_ok ($@) {
     }
 
     my $name;
-    $name = @methods == 1 ? "$class->can($methods[0])" 
+    $name = @methods == 1 ? "$class->can('$methods[0]')" 
                           : "$class->can(...)";
     
     my $ok = $Test->ok( !@nok, $name );
@@ -531,7 +531,7 @@ sub isa_ok ($$;$) {
             if( $@ =~ /^Can't call method "isa" on unblessed reference/ ) {
                 if( !UNIVERSAL::isa($object, $class) ) {
                     my $ref = ref $object;
-                    $diag = "$obj_name isn't a '$class' its a '$ref'";
+                    $diag = "$obj_name isn't a '$class' it's a '$ref'";
                 }
             } else {
                 die <<WHOA;
@@ -544,7 +544,7 @@ WHOA
         }
         elsif( !$rslt ) {
             my $ref = ref $object;
-            $diag = "$obj_name isn't a '$class' its a '$ref'";
+            $diag = "$obj_name isn't a '$class' it's a '$ref'";
         }
     }
             

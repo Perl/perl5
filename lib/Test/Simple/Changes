@@ -1,5 +1,13 @@
 Revision history for Perl extension Test::Simple
 
+0.42  Wed Mar  6 15:00:24 EST 2002
+    - Setting Test::Builder->current_test() now works (see what happens
+      when you forget to test things?)
+    - The change in is()'s undef/'' handling in 0.34 was an API change, 
+      but I forgot to declare it as such.
+    - The apostrophilic jihad attacks!  Philip Newtons patch for
+      grammar mistakes in the doc's.
+
 0.41  Mon Dec 17 22:45:20 EST 2001
     * chromatic added diag()
     - Internal eval()'s sometimes interfering with $@ and $!.  Fixed.
@@ -26,7 +34,8 @@ Revision history for Perl extension Test::Simple
     - Little glitch in the test suite.  No actual bug.
 
 0.34  Tue Nov 27 15:43:56 EST 2001
-    * Empty string no longer matches undef in is() and isnt().
+    * **API CHANGE** Empty string no longer matches undef in is() 
+      and isnt().
     * Added isnt_eq and isnt_num to Test::Builder.
 
 0.33  Mon Oct 22 21:05:47 EDT 2001

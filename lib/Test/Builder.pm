@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION $CLASS);
-$VERSION = '0.11';
+$VERSION = '0.12';
 $CLASS = __PACKAGE__;
 
 my $IsVMS = $^O eq 'VMS';
@@ -934,6 +934,11 @@ sub current_test {
 
     if( defined $num ) {
         $Curr_Test = $num;
+        if( $num > @Test_Results ) {
+            for ($#Test_Results..$num-1) {
+                $Test_Results[$_] = 1;
+            }
+        }
     }
     return $Curr_Test;
 }
