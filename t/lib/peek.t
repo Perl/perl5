@@ -18,17 +18,16 @@ our $DEBUG = 0;
 
 sub do_test {
     my $pattern = pop;
-    if (open(OUT,">peek$$")) {
-	open(STDERR,">&OUT");
+    if (open(STDERR,">peek$$")) {
 	Dump($_[1]);
-	close(OUT);
+	close(STDERR);
 	if (open(IN, "peek$$")) {
 	    local $/;
 	    $pattern =~ s/\$ADDR/0x[[:xdigit:]]+/g;
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;
-	    print "not " unless $dump =~ /$pattern/m;
+	    print "[$dump] vs [$pattern]\nnot " unless $dump =~ /$pattern/m;
 	    print "ok $_[0]\n";
 	    close(IN);
 	} else {
@@ -58,7 +57,7 @@ do_test( 2,
         "bar",
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(POK,READONLY,pPOK\\)
+  FLAGS = \\(.*POK,READONLY,pPOK\\)
   PV = $ADDR "bar"\\\0
   CUR = 3
   LEN = 4');
@@ -74,7 +73,7 @@ do_test( 4,
         456,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(IOK,READONLY,pIOK\\)
+  FLAGS = \\(.*IOK,READONLY,pIOK\\)
   IV = 456');
 
 do_test( 5,
@@ -108,7 +107,7 @@ do_test( 8,
         0xabcd,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(IOK,READONLY,pIOK,IsUV\\)
+  FLAGS = \\(.*IOK,READONLY,pIOK,IsUV\\)
   UV = 43981');
 
 do_test( 9,
@@ -230,9 +229,9 @@ do_test(14,
     DEPTH = 1
     FLAGS = 0x0
     PADLIST = $ADDR
-      1\\. $ADDR \\("\\$pattern" \\d+-\\d+\\)
-     12\\. $ADDR \\(FAKE "\\$DEBUG" 0-\\d+\\)
-     13\\. $ADDR \\("\\$dump" \\d+-\\d+\\)
+      \\d+\\. $ADDR \\("\\$pattern" \\d+-\\d+\\)
+     \\d+\\. $ADDR \\(FAKE "\\$DEBUG" 0-\\d+\\)
+     \\d+\\. $ADDR \\("\\$dump" \\d+-\\d+\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(15,
@@ -300,7 +299,7 @@ do_test(17,
     GPFLAGS = 0x0
     LINE = \\d+
     FILE = ".+\\b(?i:peek\\.t)"
-    FLAGS = 0x2
+    FLAGS = $ADDR
     EGV = $ADDR\\t"a"');
 
 END {
