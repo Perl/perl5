@@ -853,7 +853,7 @@ lib/Exporter.t			See if Exporter works
 lib/Exporter/Heavy.pm		Complicated routines for Exporter
 lib/ExtUtils.t			See if extutils work
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
-lib/ExtUtils/Command.pm		See if ExtUtils::Command works (Win32 only)
+lib/ExtUtils/Command.t		See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
 lib/ExtUtils/inst		Give information about installed extensions
