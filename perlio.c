@@ -51,7 +51,7 @@
 #include "XSUB.h"
 
 /* Call the callback or PerlIOBase, and return failure. */
-#define PERL_PERLIO_BASE(f, callback, base, failure, args) 	\
+#define Perl_PerlIO_or_Base(f, callback, base, failure, args) 	\
 	if (PerlIOValid(f)) {					\
 		PerlIO_funcs *tab = PerlIOBase(f)->tab; 	\
 		if (tab && tab->callback)			\
@@ -64,7 +64,7 @@
 	return failure
 
 /* Call the callback or fail, and return failure. */
-#define PERL_PERLIO_FAIL(f, callback, failure, args) 		\
+#define Perl_PerlIO_or_fail(f, callback, failure, args) 	\
 	if (PerlIOValid(f)) {					\
 		PerlIO_funcs *tab = PerlIOBase(f)->tab; 	\
 		if (tab && tab->callback)			\
@@ -76,7 +76,7 @@
 	return failure
 
 /* Call the callback or PerlIOBase, and be void. */
-#define PERL_PERLIO_VOID_BASE(f, callback, base, args) 		\
+#define Perl_PerlIO_or_Base_void(f, callback, base, args) 	\
 	if (PerlIOValid(f)) {					\
 		PerlIO_funcs *tab = PerlIOBase(f)->tab; 	\
 		if (tab && tab->callback)			\
@@ -89,7 +89,7 @@
 		SETERRNO(EBADF, SS_IVCHAN)
 
 /* Call the callback or fail, and be void. */
-#define PERL_PERLIO_VOID_FAIL(f, callback, args) 		\
+#define Perl_PerlIO_or_fail_void(f, callback, args) 		\
 	if (PerlIOValid(f)) {					\
 		PerlIO_funcs *tab = PerlIOBase(f)->tab; 	\
 		if (tab && tab->callback)			\
@@ -1355,7 +1355,7 @@ Perl_PerlIO_close(pTHX_ PerlIO *f)
 int
 Perl_PerlIO_fileno(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_BASE(f, Fileno, fileno, -1, (aTHX_ f));
+     Perl_PerlIO_or_Base(f, Fileno, fileno, -1, (aTHX_ f));
 }
 
 static const char *
@@ -1551,31 +1551,31 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 SSize_t
 Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
-     PERL_PERLIO_BASE(f, Read, read, -1, (aTHX_ f, vbuf, count));
+     Perl_PerlIO_or_Base(f, Read, read, -1, (aTHX_ f, vbuf, count));
 }
 
 SSize_t
 Perl_PerlIO_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-     PERL_PERLIO_BASE(f, Unread, unread, -1, (aTHX_ f, vbuf, count));
+     Perl_PerlIO_or_Base(f, Unread, unread, -1, (aTHX_ f, vbuf, count));
 }
 
 SSize_t
 Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-     PERL_PERLIO_FAIL(f, Write, -1, (aTHX_ f, vbuf, count));
+     Perl_PerlIO_or_fail(f, Write, -1, (aTHX_ f, vbuf, count));
 }
 
 int
 Perl_PerlIO_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
-     PERL_PERLIO_FAIL(f, Seek, -1, (aTHX_ f, offset, whence));
+     Perl_PerlIO_or_fail(f, Seek, -1, (aTHX_ f, offset, whence));
 }
 
 Off_t
 Perl_PerlIO_tell(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_FAIL(f, Tell, -1, (aTHX_ f));
+     Perl_PerlIO_or_fail(f, Tell, -1, (aTHX_ f));
 }
 
 int
@@ -1641,7 +1641,7 @@ PerlIOBase_flush_linebuf(pTHX)
 int
 Perl_PerlIO_fill(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_FAIL(f, Fill, -1, (aTHX_ f));
+     Perl_PerlIO_or_fail(f, Fill, -1, (aTHX_ f));
 }
 
 int
@@ -1658,25 +1658,25 @@ PerlIO_isutf8(PerlIO *f)
 int
 Perl_PerlIO_eof(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_BASE(f, Eof, eof, -1, (aTHX_ f));
+     Perl_PerlIO_or_Base(f, Eof, eof, -1, (aTHX_ f));
 }
 
 int
 Perl_PerlIO_error(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_BASE(f, Error, error, -1, (aTHX_ f));
+     Perl_PerlIO_or_Base(f, Error, error, -1, (aTHX_ f));
 }
 
 void
 Perl_PerlIO_clearerr(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_VOID_BASE(f, Clearerr, clearerr, (aTHX_ f));
+     Perl_PerlIO_or_Base_void(f, Clearerr, clearerr, (aTHX_ f));
 }
 
 void
 Perl_PerlIO_setlinebuf(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_VOID_BASE(f, Setlinebuf, setlinebuf, (aTHX_ f));
+     Perl_PerlIO_or_Base_void(f, Setlinebuf, setlinebuf, (aTHX_ f));
 }
 
 int
@@ -1746,37 +1746,37 @@ PerlIO_canset_cnt(PerlIO *f)
 STDCHAR *
 Perl_PerlIO_get_base(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_FAIL(f, Get_base, NULL, (aTHX_ f));
+     Perl_PerlIO_or_fail(f, Get_base, NULL, (aTHX_ f));
 }
 
 int
 Perl_PerlIO_get_bufsiz(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_FAIL(f, Get_bufsiz, -1, (aTHX_ f));
+     Perl_PerlIO_or_fail(f, Get_bufsiz, -1, (aTHX_ f));
 }
 
 STDCHAR *
 Perl_PerlIO_get_ptr(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_FAIL(f, Get_ptr, NULL, (aTHX_ f));
+     Perl_PerlIO_or_fail(f, Get_ptr, NULL, (aTHX_ f));
 }
 
 int
 Perl_PerlIO_get_cnt(pTHX_ PerlIO *f)
 {
-     PERL_PERLIO_FAIL(f, Get_cnt, -1, (aTHX_ f));
+     Perl_PerlIO_or_fail(f, Get_cnt, -1, (aTHX_ f));
 }
 
 void
 Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, int cnt)
 {
-     PERL_PERLIO_VOID_FAIL(f, Set_ptrcnt, (aTHX_ f, NULL, cnt));
+     Perl_PerlIO_or_fail_void(f, Set_ptrcnt, (aTHX_ f, NULL, cnt));
 }
 
 void
 Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, int cnt)
 {
-     PERL_PERLIO_VOID_FAIL(f, Set_ptrcnt, (aTHX_ f, ptr, cnt));
+     Perl_PerlIO_or_fail_void(f, Set_ptrcnt, (aTHX_ f, ptr, cnt));
 }
 
 
