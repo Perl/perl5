@@ -8,6 +8,7 @@ my $count;
 BEGIN
   {
   $| = 1;
+  if ($^O eq 'os390') { print "1..0\n"; exit(0) } # test takes too long there
   unshift @INC, '../lib'; # for running manually
   my $location = $0; $location =~ s/mbi_rand.t//;
   unshift @INC, $location; # to locate the testing files

@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-$VERSION = '1.33';
+$VERSION = '1.34';
 require 5.005;
 use Exporter;
 use File::Spec;

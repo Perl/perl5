@@ -1387,6 +1387,9 @@ abc:5:NaN
 ## bmodinv Error cases / useless use of function
 3:-5:NaN
 inf:5:NaN
+5:inf:NaN
+-inf:5:NaN
+5:-inf:NaN
 &bmodpow
 # format: number:exponent:modulus:result
 # bmodpow Data errors
@@ -1956,6 +1959,7 @@ NaNas_hex:NaN
 -0:0b0
 1:0b1
 0b1010111101010101010110110110110110101:0b1010111101010101010110110110110110101
+0x123456789123456789:0b100100011010001010110011110001001000100100011010001010110011110001001
 +inf:inf
 -inf:-inf
 NaNas_bin:NaN

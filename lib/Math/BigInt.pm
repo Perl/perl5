@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.58';
+$VERSION = '1.59';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -1419,38 +1419,41 @@ sub bmodinv
          || $num->is_zero()				# or num == 0
 	 || $num->{sign} !~ /^[+-]$/			# or num NaN, inf, -inf
         );
-  return $num                        # i.e., NaN or some kind of infinity,
-      if ($num->{sign} !~ /^[+-]$/);
+
+  # put least residue into $num if $num was negative, and thus make it positive
+  $num->bmod($mod) if $num->{sign} eq '-';
 
   if ($CALC->can('_modinv'))
     {
-    $num->{value} = $CALC->_modinv($mod->{value});
+    $num->{value} = $CALC->_modinv($num->{value},$mod->{value});
+    $num->bnan() if !defined $num->{value} ;            # in case there was no
     return $num;
     }
-
-  # the remaining case, nonpositive case, $num < 0, is addressed below.
 
   my ($u, $u1) = ($self->bzero(), $self->bone());
   my ($a, $b) = ($mod->copy(), $num->copy());
 
-  # put least residue into $b if $num was negative
-  $b->bmod($mod) if $b->{sign} eq '-';
-
+  # first step need always be done since $num (and thus $b) is never 0
+  # Note that the loop is aligned so that the check occurs between #2 and #1
+  # thus saving us one step #2 at the loop end. Typical loop count is 1. Even
+  # a case with 28 loops still gains about 3% with this layout.
+  my $q;
+  ($a, $q, $b) = ($b, $a->bdiv($b));                    # step #1
   # Euclid's Algorithm
   while (!$b->is_zero())
     {
-    ($a, my $q, $b) = ($b, $a->copy()->bdiv($b));
-    ($u, $u1) = ($u1, $u - $u1 * $q);
+    ($u, $u1) = ($u1, $u->bsub($u1->copy()->bmul($q))); # step #2
+    ($a, $q, $b) = ($b, $a->bdiv($b));                  # step #1 again
     }
 
   # if the gcd is not 1, then return NaN!  It would be pointless to
-  # have called bgcd first, because we would then be performing the
-  # same Euclidean Algorithm *twice*
+  # have called bgcd to check this first, because we would then be performing
+  # the same Euclidean Algorithm *twice*
   return $num->bnan() unless $a->is_one();
 
-  $u->bmod($mod);
-  $num->{value} = $u->{value};
-  $num->{sign} = $u->{sign};
+  $u1->bmod($mod);
+  $num->{value} = $u1->{value};
+  $num->{sign} = $u1->{sign};
   $num;
   }
 
@@ -1474,20 +1477,14 @@ sub bmodpow
     return $num->bnan();
     }
 
- my $exp1 = $exp->copy();
- if ($exp->{sign} eq '-')
-    {
-    $exp1->babs();
-    $num->bmodinv ($mod);
-    # return $num if $num->{sign} !~ /^[+-]/; 	# see next check
-    }
+  $num->bmodinv ($mod) if ($exp->{sign} eq '-');
 
-  # check num for valid values (also NaN if there was no inverse)
+  # check num for valid values (also NaN if there was no inverse but $exp < 0)
   return $num->bnan() if $num->{sign} !~ /^[+-]$/;
 
   if ($CALC->can('_modpow'))
     {
-    # $exp and $mod are positive, result is also positive
+    # $mod is positive, sign on $exp is ignored, result also positive
     $num->{value} = $CALC->_modpow($num->{value},$exp->{value},$mod->{value});
     return $num;
     }
@@ -1496,18 +1493,22 @@ sub bmodpow
   return $num->bzero() if $mod->is_one();
   return $num->bone() if $num->is_zero() or $num->is_one();
 
-  $num->bmod($mod);		# if $x is large, make it smaller first
-  my $acc = $num->copy(); $num->bone();	# keep ref to $num
+  # $num->bmod($mod);           # if $x is large, make it smaller first
+  my $acc = $num->copy();	# but this is not really faster...
 
-  while( !$exp1->is_zero() )
+  $num->bone(); # keep ref to $num
+
+  my $expbin = $exp->as_bin(); $expbin =~ s/^[-]?0b//; # ignore sign and prefix
+  my $len = length($expbin);
+  while (--$len >= 0)
     {
-    if( $exp1->is_odd() )
+    if( substr($expbin,$len,1) eq '1')
       {
       $num->bmul($acc)->bmod($mod);
       }
     $acc->bmul($acc)->bmod($mod);
-    $exp1->brsft( 1, 2);      		# remove last (binary) digit
     }
+
   $num;
   }
 
@@ -1594,15 +1595,14 @@ sub bpow
 #    }
 
   my $pow2 = $self->__one();
-  my $y1 = $class->new($y);
-  my $two = $self->new(2);
-  while (!$y1->is_one())
+  my $y_bin = $y->as_bin(); $y_bin =~ s/^0b//;
+  my $len = length($y_bin);
+  while (--$len > 0)
     {
-    $pow2->bmul($x) if $y1->is_odd();
-    $y1->bdiv($two);
+    $pow2->bmul($x) if substr($y_bin,$len,1) eq '1';	# is odd?
     $x->bmul($x);
     }
-  $x->bmul($pow2) unless $pow2->is_one();
+  $x->bmul($pow2);
   $x->round(@r);
   }
 
@@ -2494,12 +2494,19 @@ sub as_hex
     }
   else
     {
-    my $x1 = $x->copy()->babs(); my $xr;
-    my $x10000 = Math::BigInt->new (0x10000);
+    my $x1 = $x->copy()->babs(); my ($xr,$x10000,$h);
+    if ($] >= 5.006)
+      {
+      $x10000 = Math::BigInt->new (0x10000); $h = 'h4';
+      }
+    else
+      {
+      $x10000 = Math::BigInt->new (0x1000); $h = 'h3';
+      }
     while (!$x1->is_zero())
       {
       ($x1, $xr) = bdiv($x1,$x10000);
-      $es .= unpack('h4',pack('v',$xr->numify()));
+      $es .= unpack($h,pack('v',$xr->numify()));
       }
     $es = reverse $es;
     $es =~ s/^[0]+//; 	# strip leading zeros
@@ -2524,12 +2531,19 @@ sub as_bin
     }
   else
     {
-    my $x1 = $x->copy()->babs(); my $xr;
-    my $x10000 = Math::BigInt->new (0x10000);
+    my $x1 = $x->copy()->babs(); my ($xr,$x10000,$b);
+    if ($] >= 5.006)
+      {
+      $x10000 = Math::BigInt->new (0x10000); $b = 'b16';
+      }
+    else
+      {
+      $x10000 = Math::BigInt->new (0x1000); $b = 'b12';
+      }
     while (!$x1->is_zero())
       {
       ($x1, $xr) = bdiv($x1,$x10000);
-      $es .= unpack('b16',pack('v',$xr->numify()));
+      $es .= unpack($b,pack('v',$xr->numify()));
       }
     $es = reverse $es; 
     $es =~ s/^[0]+//; 	# strip leading zeros
@@ -2962,7 +2976,7 @@ numbers.
 
 =head2 bmodinv
 
-  bmodinv($num,$mod);          # modular inverse (no OO style)
+  $num->bmodinv($mod);		# modular inverse
 
 Returns the inverse of C<$num> in the given modulus C<$mod>.  'C<NaN>' is
 returned unless C<$num> is relatively prime to C<$mod>, i.e. unless
@@ -2970,7 +2984,7 @@ C<bgcd($num, $mod)==1>.
 
 =head2 bmodpow
 
-  bmodpow($num,$exp,$mod);     # modular exponentation ($num**$exp % $mod)
+  $num->bmodpow($exp,$mod);	# modular exponentation ($num**$exp % $mod)
 
 Returns the value of C<$num> taken to the power C<$exp> in the modulus
 C<$mod> using binary exponentation.  C<bmodpow> is far superior to
