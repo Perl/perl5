@@ -235,9 +235,8 @@ sub FETCH {
 	no strict 'refs';
         return $! == &$errname;
     }
-    require Carp;
-    Carp::confess("No errno $errname");
-} 
+    return "";
+}
 
 sub STORE {
     require Carp;
@@ -252,7 +251,6 @@ sub NEXTKEY {
     while(($k,$v) = each %Errno::) {
 	my $proto = prototype("Errno::$k");
 	last if (defined($proto) && $proto eq "");
-	
     }
     $k
 }
@@ -287,8 +285,8 @@ C<Errno> defines and conditionally exports all the error constants
 defined in your system C<errno.h> include file. It has a single export
 tag, C<:POSIX>, which will export all POSIX defined error numbers.
 
-C<Errno> also makes C<%!> magic such that each element of C<%!> has a non-zero
-value only if C<$!> is set to that value, eg
+C<Errno> also makes C<%!> magic such that each element of C<%!> has a
+non-zero value only if C<$!> is set to that value, eg
 
     use Errno;
     
@@ -299,6 +297,10 @@ value only if C<$!> is set to that value, eg
             warn "This path is barred: $!";
         } 
     } 
+
+If a specified constant C<EFOO> doesn't exist on the system, C<$!{EFOO}>
+has a false value.  You may use C<exists $!{EFOO}> to check whether the
+constant is available on the system.
 
 =head1 AUTHOR
 
