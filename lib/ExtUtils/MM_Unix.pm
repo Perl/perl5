@@ -2895,13 +2895,18 @@ sub processPL {
     return "" unless $self->{PL_FILES};
     my(@m, $plfile);
     foreach $plfile (sort keys %{$self->{PL_FILES}}) {
+        my $list = ref($self->{PL_FILES}->{$plfile})
+		? $self->{PL_FILES}->{$plfile}
+		: [$self->{PL_FILES}->{$plfile}];
+	foreach $target (@$list) {
 	push @m, "
-all :: $self->{PL_FILES}->{$plfile}
+all :: $target
 	$self->{NOECHO}\$(NOOP)
 
-$self->{PL_FILES}->{$plfile} :: $plfile
-	\$(PERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) $plfile
+$target :: $plfile
+	\$(PERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) $plfile $target
 ";
+	}
     }
     join "", @m;
 }
