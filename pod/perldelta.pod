@@ -50,6 +50,12 @@ it to make some sense, it is forbidden.
 
 =item *
 
+A reference to a reference now stringify as "REF(0x81485ec)" instead
+of "SCALAR(0x81485ec)" in order to be more consistent with the return
+value of ref().
+
+=item *
+
 The very dusty examples in the eg/ directory have been removed.
 Suggestions for new shiny examples welcome but the main issue is that
 the examples need to be documented, tested and (most importantly)
