@@ -31,8 +31,8 @@ pod:lib/Mac/Resources.pm		Resource Manager
 pod:lib/Mac/Gestalt.pm			Gestalt Manager
 pod:lib/Mac/Processes.pm		Process Manager
 pod:lib/Mac/Apps/Launch.pm		Launch/Quit Processes
-pod:lib/Mac/AppleEvents.pm		AppleEvent Manager
-pod:lib/Mac/AppleEvents/Simple.pm	Simple Interface to AppleEvents
+pod:lib/Mac/AppleEvents.pm		Apple Event Manager
+pod:lib/Mac/AppleEvents/Simple.pm	Simple Interface to Apple Events
 pod:lib/Mac/OSA.pm			Open Scripting Architecture
 pod:lib/Mac/OSA/Simple.pm		Simple Interface to OSA
 pod:lib/Mac/Notification.pm		Notification Manager
