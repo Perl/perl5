@@ -139,11 +139,10 @@ Fatal - replace functions with equivalents which succeed or die
 =head1 DESCRIPTION
 
 C<Fatal> provides a way to conveniently replace functions which normally
-return a false value when they fail with equivalents which halt execution
+return a false value when they fail with equivalents which raise exceptions
 if they are not successful.  This lets you use these functions without
-having to test their return values explicitly on each call.   Errors are
-reported via C<die>, so you can trap them using C<$SIG{__DIE__}> if you
-wish to take some action before the program exits.
+having to test their return values explicitly on each call.  Exceptions
+can be caught using C<eval{}>.  See L<perlfunc> and L<perlvar> for details.
 
 The do-or-die equivalents are set up simply by calling Fatal's
 C<import> routine, passing it the names of the functions to be
