@@ -15,11 +15,10 @@
 #include "perl.h"
 #include "patchlevel.h"
 
-/* Omit -- it causes too much grief on mixed systems.
+/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-*/
 
 dEXT char rcsid[] = "perl.c\nPatch level: ###\n";
 
@@ -33,10 +32,6 @@ dEXT char rcsid[] = "perl.c\nPatch level: ###\n";
 #ifdef DOSUID
 #undef DOSUID
 #endif
-#endif
-
-#ifndef OSNAME
-#define OSNAME "unknown"
 #endif
 
 static void find_beginning _((void));
@@ -2123,6 +2118,9 @@ init_perllib()
 	    incpush(getenv("PERLLIB"));
     }
 
+/* Use the ~-expanded versions of APPLIB (undocumented),
+    ARCHLIB PRIVLIB SITEARCH SITELIB and OLDARCHLIB
+*/
 #ifdef APPLLIB_EXP
     incpush(APPLLIB_EXP);
 #endif
