@@ -62,10 +62,10 @@ as the implicit argument of a B<print> statement.
 
 =item B<private-names>
 
-This option warns on each use of a variable or subroutine name that
-lives in a non-current package but begins with an underscore ("_").
-Warnings aren't issued for the special case of the single character
-name "_" by itself (e.g. $_ and @_).
+This option warns on each use of any variable, subroutine or
+method name that lives in a non-current package but begins with
+an underscore ("_"). Warnings aren't issued for the special case
+of the single character name "_" by itself (e.g. $_ and @_).
 
 =item B<undefined-subs>
 
