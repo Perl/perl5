@@ -481,6 +481,7 @@ lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
 lib/Math/Trig.pm	A simple interface to complex trigonometry
+lib/Math/Trig/Radial.pm	Spherical and cylindrical trigonometry
 lib/Net/Ping.pm		Hello, anybody home?
 lib/Net/hostent.pm	By-name interface to Perl's builtin gethost*
 lib/Net/netent.pm	By-name interface to Perl's builtin getnet*
