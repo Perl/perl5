@@ -1920,6 +1920,10 @@ Assuming that you don't care about IEEE notations like "NaN" or
    if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/)
 			{ print "a C float\n" }
 
+Or you could check out the L<Data::Types|Data::Types> module on the CPAN,
+which exports functions that validate data types using these and other regular
+expressions.
+
 If you're on a POSIX system, Perl's supports the C<POSIX::strtod>
 function.  Its semantics are somewhat cumbersome, so here's a C<getnum>
 wrapper function for more convenient access.  This function takes
@@ -1943,9 +1947,9 @@ if you just want to say, ``Is this a float?''
 
     sub is_numeric { defined getnum($_[0]) } 
 
-Or you could check out the String::Scanf module on CPAN instead.  The
-POSIX module (part of the standard Perl distribution) provides the
-C<strtod> and C<strtol> for converting strings to double and longs,
+Or you could check out the L<String::Scanf|String::Scanf> module on the CPAN
+instead. The POSIX module (part of the standard Perl distribution) provides
+the C<strtod> and C<strtol> for converting strings to double and longs,
 respectively.
 
 =head2 How do I keep persistent data across program calls?
