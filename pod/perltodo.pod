@@ -867,6 +867,10 @@ That's, uh, F<podchecker>
 
 =head2 Cache precompiled modules
 
+=head2 "or" tests defined, not truth
+
+See C<dor> and C<//>
+
 =head1 Deprecated Wishes
 
 These are items which used to be in the todo file, but have been
@@ -908,7 +912,7 @@ We have shared hash keys, which perform the same job.
 
 =head2 Add compression modules
 
-The compression modules are a little heavy; meanwhile, Nick Clark is
+The compression modules are a little heavy; meanwhile, Nicholas Clark is
 working on experimental pragmata to do transparent decompression on
 input.
 
@@ -935,10 +939,6 @@ See the Perl Power Tools. ( http://language.perl.com/ppt/ )
 =head2 my $Package::variable
 
 Use C<our> instead.
-
-=head2 "or" tests defined, not truth
-
-Suggesting this on P5P B<will> cause a boring and interminable flamewar.
 
 =head2 "class"-based lexicals
 
