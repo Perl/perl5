@@ -72,6 +72,10 @@ add_by_name('File::Spec::Functions');	# put this back
 
 delete_by_prefix('Attribute::Handlers');# we test this, and we have demos
 
+delete_by_prefix('Net::FTP::');		# Net::FTP is tested.
+
+# In this case we could rely on the fake Socket layer the libnet tests
+# use but frankly I think in this case we might as well let it be.
 delete_by_prefix('Net::') unless has_extension('Socket');
 
 sub using_feature {
@@ -174,6 +178,12 @@ Memoize::NDBM_File
 Memoize::SDBM_File
 Memoize::Storable
 NDBM_File
+Net::Config
+Net::FTP
+Net::Netrc
+Net::NNTP
+Net::SMTP
+Net::Time
 ODBM_File
 Pod::Checker
 Pod::Find
