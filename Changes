@@ -95,6 +95,54 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6635] By: jhi                                   on 2000/08/15  15:27:21
+        Log: Use -Dusedevel; regen Configure and the respective Porting stuff.
+     Branch: metaconfig
+	   ! U/mkglossary U/mksample
+     Branch: metaconfig/U/perl
+	   ! Devel.U
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[  6634] By: jhi                                   on 2000/08/15  14:11:55
+        Log: Don't blow limited stacks, a lower number is enough to
+             tickle the lookbehind limit.
+             
+             Subject: [ID 20000815.007] Not OK: perl@6627 +SUIDMAIL on powerpc-machten 4.1.4 (UNINSTALLED) [PATCH]
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Tue, 15 Aug 2000 13:51:24 +0200
+             Message-Id: <p04320400b5bedcedaf22@[192.168.1.4]>
+     Branch: perl
+	   ! t/op/regmesg.t
+____________________________________________________________________________
+[  6633] By: jhi                                   on 2000/08/15  14:01:46
+        Log: Subject: [ID 20000815.005] [PATCH] perldoc not looking in the right place for script pod
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 15 Aug 2000 12:10:50 +0100
+             Message-Id: <E13OecM-0006nF-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[  6632] By: jhi                                   on 2000/08/15  13:58:48
+        Log: make ok etc also for win32.
+             
+             Subject: [ID 20000814.008] Not OK: perl v5.6.0 (6620) on MSWin32-x86 4.0 (UNINSTALLED)
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Mon, 14 Aug 2000 22:42:06 -0700 (PDT)
+             Message-Id: <Pine.BSF.4.21.0008142240280.3888-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[  6631] By: jhi                                   on 2000/08/15  13:45:03
+        Log: Update (kinda) to Test 1.14, from Joshua Pritikin.
+     Branch: perl
+	   ! lib/Test.pm
+____________________________________________________________________________
+[  6630] By: jhi                                   on 2000/08/15  03:25:09
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6629] By: jhi                                   on 2000/08/15  03:23:53
         Log: magic_regdatum_set() is void, not int.
      Branch: perl
