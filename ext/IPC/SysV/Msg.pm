@@ -11,7 +11,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = "1.01";
+$VERSION = "1.00_00";
 
 {
     package IPC::Msg::stat;
