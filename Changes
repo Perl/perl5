@@ -28,6 +28,223 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.6		Maintenance release working toward v5.8.6
 --------------
 ____________________________________________________________________________
+[ 23539] By: nicholas                              on 2004/11/25  22:21:23
+        Log: Integrate:
+             [ 23532]
+             Subject: [perl #3242] [PATCH]No error on assignment to $> 
+             From: "Steve Peters via RT" <perlbug-followup@perl.org>
+             Date: 21 Nov 2004 04:38:09 -0000
+             Message-ID: <rt-3.0.11-3242-100676.6.32723019025057@perl.org>
+             
+             [ 23533]
+             Subject: [patch pod/perlipc] use POSIX; w/o () is a bad idea
+             From: Stas Bekman <stas@stason.org>
+             Date: Wed, 24 Nov 2004 11:25:14 -0500
+             Message-ID: <41A4B5EA.3020804@stason.org>
+             
+             [ 23534]
+             Subject: RC1 pod fix #anchor
+             From: Stas Bekman <stas@stason.org>
+             Date: Wed, 24 Nov 2004 10:57:21 -0500
+             Message-ID: <41A4AF61.9080408@stason.org>
+     Branch: maint-5.8/perl
+	  !> pod/perlipc.pod pod/perlrun.pod pod/perlvar.pod
+____________________________________________________________________________
+[ 23530] By: nicholas                              on 2004/11/23  22:49:13
+        Log: Integrate:
+             [ 23518]
+             Subject: [perl #32486] error in documentation for POSIX::pipe 
+             From: chris@ex-parrot.com (via RT) <perlbug-followup@perl.org>
+             Date: 18 Nov 2004 18:09:54 -0000
+             Message-ID: <rt-3.0.11-32486-100537.1.04456486825399@perl.org>
+             
+             [ 23527]
+             Subject: Re: [perl #32486] error in documentation for POSIX::pipe
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 19 Nov 2004 14:28:56 -0500
+             Message-ID: <20041119192856.GA4769@windhund.schwern.org>
+     Branch: maint-5.8/perl
+	  !> ext/POSIX/POSIX.pod
+____________________________________________________________________________
+[ 23529] By: nicholas                              on 2004/11/23  15:17:07
+        Log: Integrate:
+             [ 23507]
+             Subject: SuSE's perl safe_putenf diff
+             From: Michael Schroeder <Michael.Schroeder@informatik.uni-erlangen.de>
+             Date: Thu, 11 Nov 2004 15:54:43 +0100
+             Message-ID: <20041111145443.GA1854@immd4.informatik.uni-erlangen.de>
+             
+             slightly reworked to make the PL_use_safe_putenv variable fit in
+             the current framework. This patch turns on the use of safe putenv
+             for any application that embeds a perl interpreter.
+     Branch: maint-5.8/perl
+	  !> embedvar.h mg.c miniperlmain.c perl.c perlapi.h perlvars.h
+	  !> util.c
+____________________________________________________________________________
+[ 23524] By: nicholas                              on 2004/11/22  15:20:18
+        Log: Back out 23348 from maint, epnding a better way to upgrade DynaLoader's
+             version number without causing subtle breakages.
+     Branch: maint-5.8/perl
+	   ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[ 23522] By: nicholas                              on 2004/11/20  16:14:02
+        Log: Integrate:
+             [ 23495]
+             Subject: [PATCH] Small documentation fix to ExtUtils::Constant
+             Date: Fri, 12 Nov 2004 11:15:47 -0600
+             From: steve@fisharerojo.org
+             Message-ID: <20041112171547.GA8011@kirk.dsl-verizon.net>
+             
+             [ 23517]
+             Bump version number
+     Branch: maint-5.8/perl
+	  !> lib/ExtUtils/Constant.pm
+____________________________________________________________________________
+[ 23521] By: nicholas                              on 2004/11/20  15:20:12
+        Log: Integrate:
+             [ 23513]
+             Fix deparsing of reversed sort and descending sorts,
+             due to the recent optimisations on this part of the optree.
+             
+             [ 23514]
+             Fix deparsing of reversed foreach loops,
+             plus a bug in the previous commit
+             
+             [ 23516]
+             Remaining nit in the deparsing of reversed foreach loops
+     Branch: maint-5.8/perl
+	  !> ext/B/B/Deparse.pm ext/B/t/deparse.t
+____________________________________________________________________________
+[ 23515] By: nicholas                              on 2004/11/18  21:15:15
+        Log: Subject: Re: Proposed patch for perldelta.pod for 5.8.6-RC1
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Message-Id: <E1CUUFq-00006L-H7@virgo.cus.cam.ac.uk>
+             Date: Wed, 17 Nov 2004 18:10:06 +0000
+     Branch: maint-5.8/perl
+	   ! pod/perl586delta.pod
+____________________________________________________________________________
+[ 23512] By: nicholas                              on 2004/11/17  14:50:18
+        Log: Integrate:
+             [ 23465]
+             Reformulate an error
+             (so the error message given by "perl -M" is a bit more
+             meaningful, as Jarkko pointed out)
+     Branch: maint-5.8/perl
+	  !> perl.c pod/perldiag.pod
+____________________________________________________________________________
+[ 23511] By: nicholas                              on 2004/11/17  13:45:34
+        Log: Integrate:
+             [ 23506]
+             Subject: [PATCH] perl5db.pl POD cleanup
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Fri, 12 Nov 2004 12:41:33 +0800
+             Message-ID: <20041112044133.GA92924@aut.dyndns.org>
+             
+             [ 23508]
+             Fix a couple of typos.
+             
+             [ 23509]
+             PerlFAQ sync.
+     Branch: maint-5.8/perl
+	  !> hv.c lib/perl5db.pl pod/perlfaq3.pod pod/perlfaq4.pod
+	  !> pod/perlfaq6.pod pod/perlfaq7.pod utf8.c
+____________________________________________________________________________
+[ 23504] By: nicholas                              on 2004/11/16  21:29:19
+        Log: Oops. They didn't want to get here. Pesky stowaways.
+     Branch: maint-5.8/perl
+	   - pod/perl590delta.pod pod/perl591delta.pod pod/perl592delta.pod
+____________________________________________________________________________
+[ 23503] By: nicholas                              on 2004/11/16  21:28:30
+        Log: Integrate:
+             [ 23494]
+             Add some descriptive text from Larry to op.c on how optrees are built
+             
+             [ 23496]
+             Subject: [perl #32419] Spelling fixes for perl@23492 
+             Date: 12 Nov 2004 16:14:49 -0000
+             From: Richard Soderberg (via RT) <perlbug-followup@perl.org>
+             Message-ID: <rt-3.0.11-32419-100173.13.0717895191322@perl.org>
+             
+             [ 23500]
+             Subject: [PATCH] s/hierachy/hierarchy/
+             Date: Mon, 15 Nov 2004 15:59:14 -0700
+             From: "Larry Shatzer Jr." <larrysh@cpan.org>
+             Message-ID: <20041115225913.GA22373@zippy.zyx.net>
+     Branch: maint-5.8/perl
+	  +> pod/perl590delta.pod pod/perl591delta.pod pod/perl592delta.pod
+	  !> ext/B/B.pm ext/Time/HiRes/Makefile.PL op.c perlio.h
+	  !> pod/perl573delta.pod pod/perl58delta.pod pod/perlapi.pod
+	  !> pod/perlapio.pod pod/perldata.pod pod/perldebtut.pod
+	  !> pod/perlipc.pod pod/perlport.pod pod/perlre.pod
+	  !> pod/perlretut.pod pod/perlrun.pod pod/perlsub.pod
+	  !> pod/perlthrtut.pod pod/perltodo.pod pod/perltooc.pod
+____________________________________________________________________________
+[ 23502] By: nicholas                              on 2004/11/16  14:20:15
+        Log: Disarm the maint branch
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 23493] By: nicholas                              on 2004/11/11  14:50:27
+        Log: This is RC1
+     Branch: maint-5.8/perl
+	   ! patchlevel.h pod/perlhist.pod
+____________________________________________________________________________
+[ 23488] By: nicholas                              on 2004/11/08  21:35:33
+        Log: Integrate:
+             [ 23487]
+             No more late changes, dammit
+     Branch: maint-5.8/perl
+	  !> ext/B/t/optree_concise.t
+____________________________________________________________________________
+[ 23486] By: nicholas                              on 2004/11/08  13:35:28
+        Log: Integrate:
+             [ 23485]
+             Subject: Re: optree tests and VMS progress (no really)
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Sun, 7 Nov 2004 23:24:15 -0800
+             Message-ID: <20041108072415.GA3928@efn.org>
+     Branch: maint-5.8/perl
+	  !> ext/B/t/OptreeCheck.pm
+____________________________________________________________________________
+[ 23484] By: nicholas                              on 2004/11/07  13:53:14
+        Log: Integrate:
+             [ 23481]
+             Subject: Re: optree tests and VMS progress (no really)
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Message-ID: <cfe85dfa041105235723398fe2@mail.gmail.com>
+             Date: Sat, 6 Nov 2004 00:57:13 -0700
+     Branch: maint-5.8/perl
+	  !> ext/B/t/OptreeCheck.pm ext/B/t/optree_check.t
+	  !> ext/B/t/optree_concise.t
+____________________________________________________________________________
+[ 23483] By: nicholas                              on 2004/11/07  13:18:19
+        Log: Integrate:
+             [ 23482]
+             document regcomp.c/regexec.c's dual life under ext/re/
+     Branch: maint-5.8/perl
+	  !> regcomp.c regexec.c
+____________________________________________________________________________
+[ 23480] By: nicholas                              on 2004/11/05  22:48:41
+        Log: Cargo cult 5.8.6 upgrade
+     Branch: maint-5.8/perl
+	   ! Cross/config.sh-arm-linux META.yml NetWare/Makefile README.os2
+	   ! README.vms epoc/createpkg.pl patchlevel.h plan9/config.plan9
+	   ! pod/perl585delta.pod vos/build.cm vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! vos/install_perl.cm win32/Makefile win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/config_H.vc64
+	   ! win32/makefile.mk wince/Makefile.ce
+____________________________________________________________________________
+[ 23479] By: nicholas                              on 2004/11/05  22:01:13
+        Log: Update perldelta
+     Branch: maint-5.8/perl
+	   ! pod/perl586delta.pod
+____________________________________________________________________________
+[ 23478] By: nicholas                              on 2004/11/05  21:24:11
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 23477] By: nicholas                              on 2004/11/05  21:03:42
         Log: Integrate:
              [ 23475]
