@@ -117,11 +117,6 @@ Currently the %ENV entries are always byte strings.
 The regexp optimiser is not optional. It should configurable to be, to allow
 its performance to be measured, and its bugs to be easily demonstrated.
 
-=head2 common suffices/prefices in regexps (trie optimization)
-
-Currently, the user has to optimize C<foo|far> and C<foo|goo> into
-C<f(?:oo|ar)> and C<[fg]oo> by hand; this could be done automatically.
-
 =head1 POD
 
 =head2 POD -> HTML conversion still sucks
