@@ -1,5 +1,5 @@
 package File::Find;
-require 5.000;
+require 5.005;
 require Exporter;
 require Cwd;
 
@@ -300,7 +300,7 @@ sub _find_opt {
     Proc_Top_Item:
     foreach my $TOP (@_) {
         my $top_item = $TOP;
-        $top_item =~ s|/$||;
+        $top_item =~ s|/$||  unless $top_item eq '/';
         $Is_Dir= 0;
         
         if ($follow) {
@@ -388,6 +388,7 @@ sub _find_dir($$$) {
     my ($subcount,$sub_nlink);
     my $SE= [];
     my $dir_name= $p_dir;
+    my $dir_pref= ( $p_dir eq '/' ? '/' : "$p_dir/" );
     my $dir_rel= '.';      # directory name relative to current directory
 
     local ($dir, $name, $prune, *DIR);
@@ -429,12 +430,16 @@ sub _find_dir($$$) {
 		$udir = $1 if $dir_rel =~ m|$untaint_pat|;
 		unless (defined $udir) {
 		    if ($untaint_skip == 0) {
-			die "directory ($p_dir/) $dir_rel is still tainted";
+			die "directory ("
+			    . ($p_dir ne '/' ? $p_dir : '')
+			    . "/) $dir_rel is still tainted";
 		    }
 		}
 	    }
 	    unless (chdir $udir) {
-		warn "Can't cd to ($p_dir/) $udir : $!\n";
+		warn "Can't cd to ("
+		    . ($p_dir ne '/' ? $p_dir : '')
+		    . "/) $udir : $!\n";
 		next;
 	    }
 	    $CdLvl++;
@@ -455,7 +460,7 @@ sub _find_dir($$$) {
 	    for my $FN (@filenames) {
 		next if $FN =~ /^\.{1,2}$/;
 		
-		$name = "$dir_name/$FN";
+		$name = $dir_pref . $FN;
 		$_ = ($no_chdir ? $name : $FN);
 		&$wanted_callback;
 	    }
@@ -471,7 +476,7 @@ sub _find_dir($$$) {
 		    # Seen all the subdirs?
 		    # check for directoriness.
 		    # stat is faster for a file in the current directory
-		    $sub_nlink = (lstat ($no_chdir ? "$dir_name/$FN" : $FN))[3];
+		    $sub_nlink = (lstat ($no_chdir ? $dir_pref . $FN : $FN))[3];
 
 		    if (-d _) {
 			--$subcount;
@@ -479,12 +484,13 @@ sub _find_dir($$$) {
 			push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
 		    }
 		    else {
-			$name = "$dir_name/$FN";
+			$name = $dir_pref . $FN;
 			$_= ($no_chdir ? $name : $FN);
 			&$wanted_callback;
 		    }
 		}
-		else { $name = "$dir_name/$FN";
+		else {
+		    $name = $dir_pref . $FN;
 		    $_= ($no_chdir ? $name : $FN);
 		    &$wanted_callback;
 		}
@@ -505,7 +511,8 @@ sub _find_dir($$$) {
 		    unless  chdir '../' x ($CdLvl-$Level);
 		$CdLvl = $Level;
 	    }
-	    $dir_name = "$p_dir/$dir_rel";
+	    $dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
+	    $dir_pref = "$dir_name/";
 	}
     }
 }
@@ -525,6 +532,8 @@ sub _find_dir_symlnk($$$) {
     my $new_loc;
     my $SE = [];
     my $dir_name = $p_dir;
+    my $dir_pref = ( $p_dir   eq '/' ? '/' : "$p_dir/" );
+    my $loc_pref = ( $dir_loc eq '/' ? '/' : "$dir_loc/" );
     my $dir_rel = '.';		# directory name relative to current directory
 
     local ($dir, $name, $fullname, $prune, *DIR);
@@ -595,7 +604,7 @@ sub _find_dir_symlnk($$$) {
 	    next if $FN =~ /^\.{1,2}$/;
 
 	    # follow symbolic links / do an lstat
-	    $new_loc= Follow_SymLink("$dir_loc/$FN");
+	    $new_loc = Follow_SymLink($loc_pref.$FN);
 
 	    # ignore if invalid symlink
 	    next unless defined $new_loc;
@@ -605,7 +614,7 @@ sub _find_dir_symlnk($$$) {
 	    }
 	    else {
 		$fullname = $new_loc;
-		$name = "$dir_name/$FN";
+		$name = $dir_pref . $FN;
 		$_ = ($no_chdir ? $name : $FN);
 		&$wanted_callback;
 	    }
@@ -621,7 +630,9 @@ sub _find_dir_symlnk($$$) {
     continue {
 	if (defined($SE = pop @Stack)) {
 	    ($dir_loc, $p_dir, $dir_rel) = @$SE;
-	    $dir_name = "$p_dir/$dir_rel";
+	    $dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
+	    $dir_pref = "$dir_name/";
+	    $loc_pref = "$dir_loc/";
 	}
     }
 }
