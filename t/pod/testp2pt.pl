@@ -32,6 +32,7 @@ BEGIN {
        require Pod::PlainText;
        @ISA = qw( Pod::PlainText );
     }
+    require VMS::Filespec if $^O eq 'VMS';
 }
 
 ## Hardcode settings for TERMCAP and COLUMNS so we can try to get
@@ -41,6 +42,8 @@ BEGIN {
 sub catfile(@) { File::Spec->catfile(@_); }
 
 my $INSTDIR = abs_path(dirname $0);
+$INSTDIR = VMS::Filespec::unixpath($INSTDIR) if $^O eq 'VMS';
+$INSTDIR =~ s#/$## if $^O eq 'VMS';
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'xtra');
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
