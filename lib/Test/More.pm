@@ -13,7 +13,7 @@ BEGIN {
 }
 
 require Exporter;
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw($VERSION @ISA @EXPORT $TODO);
 $VERSION = '0.18';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
