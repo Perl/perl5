@@ -1657,9 +1657,9 @@ or deciphering someone else's hexadecimal Unicode regexp is about as
 much fun as programming in machine code.  So another way to specify
 Unicode characters is to use the S<B<named character> > escape
 sequence C<\N{name}>.  C<name> is a name for the Unicode character, as
-specified in the Unicode standard, or "U+" followed by the hexadecimal
-code of the character.  For instance, if we wanted to represent or
-match the astrological sign for the planet Mercury, we could use
+specified in the Unicode standard.  For instance, if we wanted to
+represent or match the astrological sign for the planet Mercury, we
+could use
 
     use utf8;              # We will be doing Unicode processing
     use charnames ":full"; # use named chars with Unicode full names
