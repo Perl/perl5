@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jan 19 14:08:44 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Thu Jan 21 00:01:12 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -580,6 +580,7 @@ i_machcthr=''
 i_malloc=''
 i_math=''
 i_memory=''
+i_mntent=''
 i_ndbm=''
 i_netdb=''
 i_neterrno=''
@@ -11717,6 +11718,10 @@ fi
 set math.h i_math
 eval $inhdr
 
+: see if this is a mntent.h system
+set mntent.h i_mntent
+eval $inhdr
+
 : see if ndbm.h is available
 set ndbm.h t_ndbm
 eval $inhdr
@@ -12819,6 +12824,7 @@ i_machcthr='$i_machcthr'
 i_malloc='$i_malloc'
 i_math='$i_math'
 i_memory='$i_memory'
+i_mntent='$i_mntent'
 i_ndbm='$i_ndbm'
 i_netdb='$i_netdb'
 i_neterrno='$i_neterrno'

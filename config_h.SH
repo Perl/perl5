@@ -2144,6 +2144,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$i_inttypes   I_INTTYPES                /**/
 #$d_int64t     HAS_INT64_T               /**/
 
+/* I_MNTENT:
+ *	This symbol, if defined, indicates that <mntent.h> exists and
+ *	should be included.
+ */
+#$i_mntent	I_MNTENT		/**/
+
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
  *	should be included.
