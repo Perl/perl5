@@ -91,7 +91,7 @@ my %expect = (
     'Foo::Bar::Baz' => 'b1:1,b2:2,b3:3,foo:4,bar:5,baz:6',
 );
 
-print "1..", int(keys %expect)+24, "\n";
+print "1..", int(keys %expect)+25, "\n";
 
 my $testno = 0;
 
@@ -257,16 +257,16 @@ package main;
 {
     my $x = Test::FooBar->new( a => 1, b => 2);
 
+    $testno++;
     print ref $x eq 'Test::FooBar' ? "ok $testno\n" : "not ok $testno\n";
-    $testno++;
 
+    $testno++;
     print exists $x->{a} ? "ok $testno\n" : "not ok $testno\n";
-    $testno++;
 	
+    $testno++;
     print exists $x->{b} ? "ok $testno\n" : "not ok $testno\n";
-    $testno++;
 
-    print keys %$x == 3 ? "ok $testno\n" : "not ok $testno\n";
     $testno++;
+    print keys %$x == 3 ? "ok $testno\n" : "not ok $testno\n";
 }
 
