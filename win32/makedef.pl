@@ -252,6 +252,9 @@ win32_read
 win32_write
 win32_spawnvpe
 win32_spawnle
+win32_mkdir
+win32_rmdir
+win32_chdir
 win32_htons
 win32_ntohs
 win32_htonl

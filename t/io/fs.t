@@ -9,6 +9,9 @@ BEGIN {
 
 use Config;
 
+# avoid win32 (for now)
+do { print "1..0\n"; exit(0); } if $^O eq 'MSWin32';
+
 print "1..26\n";
 
 $wd = (($^O eq 'MSWin32') ? `cd` : `pwd`);

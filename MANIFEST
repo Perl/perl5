@@ -17,6 +17,7 @@ Porting/Glossary	Glossary of config.sh variables
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 README			The Instructions
 README.amiga		Notes about AmigaOS port
+README.cygwin32		Notes about Cygwin32 port
 README.os2		Notes about OS/2 port
 README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
@@ -33,6 +34,11 @@ config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
 cop.h			Control operator header
 cv.h			Code value header
+cygwin32/cw32imp.h	Cygwin32 port
+cygwin32/gcc2		Cygwin32 port
+cygwin32/ld2		Cygwin32 port
+cygwin32/perlgcc	Cygwin32 port
+cygwin32/perlld		Cygwin32 port
 deb.c			Debugging routines
 doio.c			I/O operations
 doop.c			Support code for various operations
@@ -112,6 +118,7 @@ ext/DynaLoader/DynaLoader.pm	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/dl_aix.xs	AIX implementation
+ext/DynaLoader/dl_cygwin32.xs	Cygwin32 implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
@@ -231,6 +238,7 @@ hints/broken-db.msg	Warning message for systems with broken DB library
 hints/bsdos.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture
 hints/cxux.sh		Hints for named architecture
+hints/cygwin32.sh	Hints for named architecture
 hints/dcosx.sh		Hints for named architecture
 hints/dec_osf.sh	Hints for named architecture
 hints/dgux.sh		Hints for named architecture
@@ -351,6 +359,7 @@ lib/IPC/Open3.pm	Open a three-ended pipe!
 lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
+lib/Math/Trig.pm	A simple interface to complex trigonometry
 lib/Net/Ping.pm		Hello, anybody home?
 lib/Net/hostent.pm	By-name interface to Perl's built-in gethost*
 lib/Net/netent.pm	By-name interface to Perl's built-in getnet*
@@ -676,6 +685,7 @@ t/lib/symbol.t		See if Symbol works
 t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap works
 t/lib/timelocal.t	See if Time::Local works
+t/lib/trig.t		See if Math::Trig works
 t/op/append.t		See if . works
 t/op/arith.t		See if arithmetic works
 t/op/array.t		See if array operations work
@@ -818,6 +828,7 @@ win32/VC-2.0/modules.mak	Win32 port
 win32/VC-2.0/perl.mak		Win32 port
 win32/VC-2.0/perldll.mak	Win32 port
 win32/VC-2.0/perlglob.mak	Win32 port
+win32/VC-2.0/pod.mak		Win32 port
 win32/autosplit.pl	Win32 port
 win32/bin/network.pl	Win32 port
 win32/bin/pl2bat.bat	Win32 port
@@ -846,6 +857,7 @@ win32/perldll.mak	Win32 port
 win32/perlglob.c	Win32 port
 win32/perlglob.mak	Win32 port
 win32/perllib.c		Win32 port
+win32/pod.mak		Win32 port
 win32/runperl.c		Win32 port
 win32/splittree.pl	Win32 port
 win32/win32.c		Win32 port

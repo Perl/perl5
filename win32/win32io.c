@@ -16,7 +16,7 @@ extern "C" {
 #include <assert.h>
 #include <errno.h>
 #include <process.h>
-
+#include <direct.h>
 #include "win32iop.h"
 
 /*
@@ -231,6 +231,9 @@ WIN32_IOSUBSYSTEM	win32stdio = {
     my_open_osfhandle,
     my_get_osfhandle,
     spawnvpe,
+    _mkdir,
+    _rmdir,
+    _chdir,
     87654321L,		/* end of structure */
 };
 

@@ -2278,7 +2278,7 @@ register char **env;
 	HV *hv;
 	GvMULTI_on(envgv);
 	hv = GvHVn(envgv);
-	hv_clear(hv);
+	hv_magic(hv, envgv, 'E');
 #ifndef VMS  /* VMS doesn't have environ array */
 	/* Note that if the supplied env parameter is actually a copy
 	   of the global environ then it may now point to free'd memory
@@ -2287,16 +2287,13 @@ register char **env;
 	*/
 	if (!env)
 	    env = environ;
-	if (env != environ) {
+	if (env != environ)
 	    environ[0] = Nullch;
-	    hv_magic(hv, envgv, 'E');
-	}
 	for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
 	    sv = newSVpv(s--,0);
-	    sv_magic(sv, sv, 'e', *env, s - *env);
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';
 	}
@@ -2304,7 +2301,6 @@ register char **env;
 #ifdef DYNAMIC_ENV_FETCH
 	HvNAME(hv) = savepv(ENV_HV_NAME);
 #endif
-	hv_magic(hv, envgv, 'E');
     }
     TAINT_NOT;
     if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))

@@ -195,8 +195,7 @@ code and therefore the difference might end up being E<lt> 0.
 
 =head1 AUTHORS
 
-Jarkko Hietaniemi E<lt>F<Jarkko.Hietaniemi@hut.fi>E<gt>,
-Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>
+Jarkko Hietaniemi <F<jhi@iki.fi>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>
 
 =head1 MODIFICATION HISTORY
 

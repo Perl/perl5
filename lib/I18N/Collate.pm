@@ -47,10 +47,10 @@ European character set.
 
 # I18N::Collate.pm
 #
-# Author:	Jarkko Hietaniemi <Jarkko.Hietaniemi@hut.fi>
+# Author:	Jarkko Hietaniemi <F<jhi@iki.fi>>
 #		Helsinki University of Technology, Finland
 #
-# Acks:		Guy Decoux <decoux@moulon.inra.fr> understood
+# Acks:		Guy Decoux <F<decoux@moulon.inra.fr>> understood
 #		overloading magic much deeper than I and told
 #		how to cut the size of this code by more than half.
 #		(my first version did overload all of lt gt eq le ge cmp)

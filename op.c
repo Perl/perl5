@@ -811,17 +811,13 @@ OP *op;
 	for (kid = cUNOP->op_first->op_sibling; kid; kid = kid->op_sibling)
 	    scalarvoid(kid);
 	break;
+
     case OP_NULL:
 	if (op->op_targ == OP_NEXTSTATE || op->op_targ == OP_DBSTATE)
 	    curcop = ((COP*)op);		/* for warning below */
 	if (op->op_flags & OPf_STACKED)
 	    break;
-
-    case OP_REQUIRE:
-	/* since all requires must return a value, they're never void */
-	op->op_flags &= ~OPf_WANT;
-	return scalar(op);
-
+	/* FALL THROUGH */
     case OP_ENTERTRY:
     case OP_ENTER:
     case OP_SCALAR:
@@ -837,6 +833,10 @@ OP *op;
 	for (kid = cLISTOP->op_first; kid; kid = kid->op_sibling)
 	    scalarvoid(kid);
 	break;
+    case OP_REQUIRE:
+	/* since all requires must return a value, they're never void */
+	op->op_flags &= ~OPf_WANT;
+	return scalar(op);
     case OP_SPLIT:
 	if ((kid = ((LISTOP*)op)->op_first) && kid->op_type == OP_PUSHRE) {
 	    if (!kPMOP->op_pmreplroot)
@@ -3185,17 +3185,14 @@ CV* cv;
 	else if (type == OP_PADSV) {
 	    AV* pad = (AV*)(AvARRAY(CvPADLIST(cv))[1]);
 	    sv = pad ? AvARRAY(pad)[o->op_targ] : Nullsv;
-	    if (!sv)
+	    if (!sv || (!SvREADONLY(sv) && SvREFCNT(sv) > 1))
 		return Nullsv;
-	    if (!SvREADONLY(sv)) {
-		if (SvREFCNT(sv) > 1)
-		    return Nullsv;
-		SvREADONLY_on(sv);
-	    }
 	}
 	else
 	    return Nullsv;
     }
+    if (sv)
+	SvREADONLY_on(sv);
     return sv;
 }
 

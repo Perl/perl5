@@ -23,6 +23,7 @@ void Perl_DJGPP_init();
 
 #ifdef WIN32
 #define HAS_UTIME
+#define HAS_KILL
 #endif
 
 /*

@@ -94,9 +94,9 @@ ok 13, (keys %h)[0] eq "foo\034bar", (keys %h)[0];
 }
 
 # $?, $@, $$
-system "$PERL -e 'exit(0)'";
+system qq[$PERL -e "exit(0)"];
 ok 15, $? == 0, $?;
-system "$PERL -e 'exit(1)'";
+system qq[$PERL -e "exit(1)"];
 ok 16, $? != 0, $?;
 
 eval { die "foo\n" };

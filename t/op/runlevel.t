@@ -258,7 +258,7 @@ package main;
 open FH, ">&STDOUT";
 tie *FH, TEST;
 print FH "OK\n";
-print "DONE\n";
+print STDERR "DONE\n";
 EXPECT
 PRINT CALLED
 DONE

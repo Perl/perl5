@@ -983,6 +983,11 @@ union any {
     void	(*any_dptr) _((void*));
 };
 
+/* Work around some cygwin32 problems with importing global symbols */
+#if defined(CYGWIN32) && defined(DLLIMPORT) 
+#   include "cw32imp.h"
+#endif
+
 #include "regexp.h"
 #include "sv.h"
 #include "util.h"

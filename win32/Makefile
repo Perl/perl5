@@ -220,16 +220,8 @@ $(OPCODE_DLL): $(OPCODE).c $(PERLDLL)
 	$(MAKE) -f $(*B).mak CFG="$(*B) - Win32 $(CFG)"
 
 doc: $(PERLEXE)
-	$(PERLEXE) $(POD2HTML).PL
-	$(PERLEXE) $(POD2MAN).PL
-	$(PERLEXE) $(POD2LATEX).PL
-	$(PERLEXE) $(POD2TEXT).PL
-	$(PERLEXE) $(PL2BAT) $(POD2HTML)
-	$(PERLEXE) $(PL2BAT) $(POD2MAN)
-	$(PERLEXE) $(PL2BAT) $(POD2LATEX)
-	$(PERLEXE) $(PL2BAT) $(POD2TEXT)
         cd $(PODDIR)
-        $(PERLEXE) pod2html.bat *.pod
+        nmake -f ../win32/pod.mak
         cd ..\win32
 
 utils: $(PERLEXE)

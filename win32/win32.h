@@ -52,15 +52,6 @@ extern FILE *myfdopen(int, char *);
 
 #define  OP_BINARY	_O_BINARY	/* Mistake in in pp_sys.c. */
 
-#undef   mkdir
-#define  mkdir(nm, md)	_mkdir(nm)	/* For UNIX compatibility. */
-
-#undef   chdir
-#define  chdir(nm)	_chdir(nm)	
-
-#undef   rmdir
-#define  rmdir(nm)	_rmdir(nm)
-
 #undef	 pipe
 #define  pipe(fd)	win32_pipe((fd), 512, _O_BINARY) /* the pipe call is a bit different */
 

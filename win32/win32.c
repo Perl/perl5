@@ -345,7 +345,7 @@ do_aspawn(void* really, void** mark, void** arglast)
     SV *sv = (SV*)really;
     SV** pSv = (SV**)mark;
 
-    New(1110, argv, (arglast - mark) + 3, char*);
+    New(1110, argv, (arglast - mark) + 4, char*);
 
     if(sv != Nullsv) {
 	cmd = SvPV(sv, length);
@@ -356,8 +356,8 @@ do_aspawn(void* really, void** mark, void** arglast)
 	argv[index++] = "/c";
     }
 
-    while(pSv <= (SV**)arglast) {
-	sv = *pSv++;
+    while(++pSv <= (SV**)arglast) {
+	sv = *pSv;
 	strPtr = SvPV(sv, length);
 	if(strPtr != NULL && *strPtr != '\0')
 	    argv[index++] = strPtr;
@@ -369,8 +369,12 @@ do_aspawn(void* really, void** mark, void** arglast)
 
     Safefree(argv);
 
-    /* set statusvalue the perl variable $? */
-    return (statusvalue = status*256);
+    if (status < 0) {
+	if (dowarn)
+	    warn("Can't spawn \"%s\": %s", cmd, strerror(errno));
+	status = 255 << 8;
+    }
+    return (status);
 }
 
 int
@@ -421,9 +425,13 @@ do_spawn(char *cmd)
 			       "/x",
 			       "/c", cmd, (char*)0, environ);
     }
-
-    /* set statusvalue the perl variable $? */
-    return (statusvalue = status*256);
+    if (status < 0) {
+	if (dowarn)
+	    warn("Can't spawn \"%s\": %s", needToTry ? shell : argv[0],
+		 strerror(errno));
+	status = 255 << 8;
+    }
+    return (status);
 }
 
 
@@ -1033,6 +1041,21 @@ win32_write(int fd, const char *buf, unsigned int cnt)
     return pIOSubSystem->pfnwrite(fd, buf, cnt);
 }
 
+DllExport int
+win32_mkdir(const char *dir, int mode)
+{
+    return pIOSubSystem->pfnmkdir(dir); /* just ignore mode */
+}
+DllExport int
+win32_rmdir(const char *dir)
+{
+    return pIOSubSystem->pfnrmdir(dir);
+}
+DllExport int
+win32_chdir(const char *dir)
+{
+    return pIOSubSystem->pfnchdir(dir);
+}
 DllExport int
 win32_spawnvpe(int mode, const char *cmdname,
 	       const char *const *argv, const char *const *envp)

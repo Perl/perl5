@@ -60,10 +60,10 @@ And now whenever either of those variables is accessed, its current
 system priority is retrieved and returned.  If those variables are set,
 then the process's priority is changed!
 
-We'll use Jarkko Hietaniemi <F<Jarkko.Hietaniemi@hut.fi>>'s
-BSD::Resource class (not included) to access the PRIO_PROCESS, PRIO_MIN,
-and PRIO_MAX constants from your system, as well as the getpriority() and
-setpriority() system calls.  Here's the preamble of the class.
+We'll use Jarkko Hietaniemi <F<jhi@iki.fi>>'s BSD::Resource class (not
+included) to access the PRIO_PROCESS, PRIO_MIN, and PRIO_MAX constants
+from your system, as well as the getpriority() and setpriority() system
+calls.  Here's the preamble of the class.
 
     package Nice;
     use Carp;

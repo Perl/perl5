@@ -581,27 +581,20 @@ MAGIC* mg;
 {
     register char *s;
     char *ptr;
-    STRLEN len;
+    STRLEN len, klen;
     I32 i;
 
     s = SvPV(sv,len);
-    ptr = MgPV(mg);
+    ptr = MgPV(mg,klen);
     my_setenv(ptr, s);
 
 #ifdef DYNAMIC_ENV_FETCH
      /* We just undefd an environment var.  Is a replacement */
      /* waiting in the wings? */
     if (!len) {
-	HE *envhe;
-	SV *keysv;
-	if (mg->mg_len == HEf_SVKEY)
-	    keysv = (SV *)mg->mg_ptr;
-	else
-	    keysv = newSVpv(mg->mg_ptr, mg->mg_len);
-	if ((envhe = hv_fetch_ent(GvHVn(envgv), keysv, FALSE, 0)))
-	    s = SvPV(HeVAL(envhe), len);
-	if (mg->mg_len != HEf_SVKEY)
-	    SvREFCNT_dec(keysv);
+	SV **valp;
+	if ((valp = hv_fetch(GvHVn(envgv), ptr, klen, FALSE)))
+	    s = SvPV(*valp, len);
     }
 #endif
 
@@ -611,7 +604,7 @@ MAGIC* mg;
     if (tainting) {
 	MgTAINTEDDIR_off(mg);
 #ifdef VMS
-	if (s && strnEQ(ptr, "DCL$PATH", 8)) {
+	if (s && klen == 8 && strEQ(ptr, "DCL$PATH")) {
 	    char pathbuf[256], eltbuf[256], *cp, *elt = s;
 	    struct stat sbuf;
 	    int i = 0, j = 0;
@@ -636,7 +629,7 @@ MAGIC* mg;
 	    } while (my_trnlnm(s, pathbuf, i++) && (elt = pathbuf));
 	}
 #endif /* VMS */
-	if (s && strEQ(ptr,"PATH")) {
+	if (s && klen == 4 && strEQ(ptr,"PATH")) {
 	    char *strend = s + len;
 
 	    while (s < strend) {
@@ -661,7 +654,7 @@ magic_clearenv(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    my_setenv(MgPV(mg),Nullch);
+    my_setenv(MgPV(mg,na),Nullch);
     return 0;
 }
 
@@ -672,7 +665,7 @@ MAGIC* mg;
 {
     I32 i;
     /* Are we fetching a signal entry? */
-    i = whichsig(MgPV(mg));
+    i = whichsig(MgPV(mg,na));
     if (i) {
     	if(psig_ptr[i])
     	    sv_setsv(sv,psig_ptr[i]);
@@ -697,7 +690,7 @@ MAGIC* mg;
 {
     I32 i;
     /* Are we clearing a signal entry? */
-    i = whichsig(MgPV(mg));
+    i = whichsig(MgPV(mg,na));
     if (i) {
     	if(psig_ptr[i]) {
     	    SvREFCNT_dec(psig_ptr[i]);
@@ -720,7 +713,7 @@ MAGIC* mg;
     I32 i;
     SV** svp;
 
-    s = MgPV(mg);
+    s = MgPV(mg,na);
     if (*s == '_') {
 	if (strEQ(s,"__DIE__"))
 	    svp = &diehook;
@@ -771,8 +764,11 @@ MAGIC* mg;
 	    *svp = 0;
     }
     else {
-    	if(hints & HINT_STRICT_REFS)
-    		die(no_symref,s,"a subroutine");
+	/*
+	 * We should warn if HINT_STRICT_REFS, but without
+	 * access to a known hint bit in a known OP, we can't
+	 * tell whether HINT_STRICT_REFS is in force or not.
+	 */
 	if (!strchr(s,':') && !strchr(s,'\'')) {
 	    sprintf(tokenbuf, "main::%s",s);
 	    sv_setpv(sv,tokenbuf);
@@ -958,7 +954,7 @@ MAGIC* mg;
     gv = DBline;
     i = SvTRUE(sv);
     svp = av_fetch(GvAV(gv),
-		     atoi(MgPV(mg)), FALSE);
+		     atoi(MgPV(mg,na)), FALSE);
     if (svp && SvIOKp(*svp) && (o = (OP*)SvSTASH(*svp)))
 	o->op_private = i;
     else
@@ -1200,7 +1196,7 @@ SV* sv;
     }
     else {
 	AV* av = (AV*)LvTARG(sv);
-	if (LvTARGLEN(sv) < 0 && (I32)LvTARGOFF(sv) > AvFILL(av))
+	if ((I32)LvTARGLEN(sv) < 0 && (I32)LvTARGOFF(sv) > AvFILL(av))
 	    LvTARG(sv) = Nullsv;	/* array can't be extended */
 	else {
 	    SV** svp = av_fetch(av, LvTARGOFF(sv), TRUE);

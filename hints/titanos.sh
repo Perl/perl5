@@ -1,6 +1,6 @@
 # Hints file (perl 4.019) for Kubota Pacific's Titan 3000 Series Machines.
 # Created by: JT McDuffie (jt@kpc.com)  26 DEC 1991
-# p5ed by: Jarkko Hietaniemi <jhi@hut.fi> Aug 27 1994
+# p5ed by: Jarkko Hietaniemi <jhi@iki.fi> Aug 27 1994
 #  NOTE:   You should run Configure with tcsh (yes, tcsh).
 # Comments by Andy Dougherty <doughera@lafcol.lafayette.edu> 28 Mar 1995
 alignbytes="8"

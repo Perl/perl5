@@ -72,7 +72,7 @@ sub test ($$;$) {
 }
 
 # We need an external program to call.
-my $ECHO = "./echo$$";
+my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : "./echo$$");
 END { unlink $ECHO }
 open PROG, "> $ECHO" or die "Can't create $ECHO: $!";
 print PROG 'print "@ARGV\n"', "\n";
@@ -87,18 +87,23 @@ print "1..112\n";
 {
     $ENV{'DCL$PATH'} = '' if $Is_VMS;
 
-    $ENV{PATH} = $TAINT;
-    $ENV{IFS} = " \t\n";
-    test 1, eval { `$echo 1` } eq '';
-    test 2, $@ =~ /^Insecure \$ENV{PATH}/, $@;
+    if ($Is_MSWin32) {
+	print "# PATH/IFS tainting tests skipped\n";
+	for (1..4) { print "ok $_\n" }
+    }
+    else {
+	$ENV{PATH} = $TAINT;
+	$ENV{IFS} = " \t\n";
+	test 1, eval { `$echo 1` } eq '';
+	test 2, $@ =~ /^Insecure \$ENV{PATH}/, $@;
 
-    $ENV{PATH} = '';
-    $ENV{IFS} = $TAINT;
-    test 3, eval { `$echo 1` } eq '';
-    test 4, $@ =~ /^Insecure \$ENV{IFS}/, $@;
-
+	$ENV{PATH} = '';
+	$ENV{IFS} = $TAINT;
+	test 3, eval { `$echo 1` } eq '';
+	test 4, $@ =~ /^Insecure \$ENV{IFS}/, $@;
+    }
     my $tmp;
-    if ($^O eq 'os2' || $^O eq 'amigaos') {
+    if ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32) {
 	print "# all directories are writeable\n";
     }
     else {

@@ -51,6 +51,9 @@ int	(*pfnopenmode)(int mode);
 int	(*pfn_open_osfhandle)(long handle, int flags);
 long	(*pfn_get_osfhandle)(int fd);
 int	(*pfnspawnvpe)(int mode, const char *cmdname, const char *const *argv, const char *const *envp);
+int	(*pfnmkdir)(const char *path);
+int	(*pfnrmdir)(const char *path);
+int	(*pfnchdir)(const char *path);
 int		signature_end;
 } WIN32_IOSUBSYSTEM; 
 

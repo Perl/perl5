@@ -38,6 +38,7 @@
  */
 static	char	*local_patches[] = {
 	NULL
+	,"Dev97A - First development patch to 5.003_97"
 	,NULL
 };
 

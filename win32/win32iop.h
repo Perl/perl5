@@ -58,6 +58,9 @@ EXT int		win32_write(int fd, const void *buf, unsigned int cnt);
 EXT int		win32_spawnvpe(int mode, const char *cmdname,
 			       const char *const *argv, const char *const *envp);
 EXT int		win32_spawnle(int mode, const char *cmdname, const char *,...);
+EXT int		win32_mkdir(const char *dir, int mode);
+EXT int		win32_rmdir(const char *dir);
+EXT int		win32_chdir(const char *dir);
 
 /*
  * these two are win32 specific but still io related
@@ -129,6 +132,9 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #define _get_osfhandle		stolen_get_osfhandle
 #define spawnvpe		win32_spawnvpe
 #define spawnle			win32_spawnle
+#define mkdir			win32_mkdir
+#define rmdir			win32_rmdir
+#define chdir			win32_chdir
 #endif /* WIN32IO_IS_STDIO */
 
 #endif /* WIN32IOP_H */

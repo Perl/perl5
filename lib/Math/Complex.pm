@@ -5,26 +5,41 @@
 # -- Jarkko Hietaniemi, March 1997
 
 require Exporter;
-package Math::Complex; @ISA = qw(Exporter);
+package Math::Complex;
 
 use strict;
 
-use vars qw(@EXPORT $package $display
+use vars qw($VERSION @ISA
+	    @EXPORT %EXPORT_TAGS
+	    $package $display
 	    $pi $i $ilog10 $logn %logn);
 
-@EXPORT = qw(
-	pi i Re Im arg
-	sqrt exp log ln
-	log10 logn cbrt root
-	tan
-	cosec csc sec cotan cot
-	asin acos atan
-	acosec acsc asec acotan acot
-	sinh cosh tanh
-	cosech csch sech cotanh coth
-	asinh acosh atanh
-	acosech acsch asech acotanh acoth
-	cplx cplxe
+@ISA = qw(Exporter);
+
+$VERSION = 1.01;
+
+my @trig = qw(
+	      pi
+	      tan
+	      csc cosec sec cot cotan
+	      asin acos atan
+	      acsc acosec asec acot acotan
+	      sinh cosh tanh
+	      csch cosech sech coth cotanh
+	      asinh acosh atanh
+	      acsch acosech asech acoth acotanh
+	     );
+
+@EXPORT = (qw(
+	     i Re Im arg
+	     sqrt exp log ln
+	     log10 logn cbrt root
+	     cplx cplxe
+	     ),
+	   @trig);
+
+%EXPORT_TAGS = (
+    'trig' => [@trig],
 );
 
 use overload
@@ -236,7 +251,7 @@ sub multiply {
 # Die on division by zero.
 #
 sub divbyzero {
-    warn $package . '::' . "$_[0]: Division by zero.\n";
+    warn "$_[0]: Division by zero.\n";
     warn "(Because in the definition of $_[0], $_[1] is 0)\n"
 	if (defined $_[1]);
     my @up = caller(1);
@@ -1002,6 +1017,7 @@ Math::Complex - complex numbers and associated mathematical functions
 =head1 SYNOPSIS
 
 	use Math::Complex;
+	
 	$z = Math::Complex->make(5, 6);
 	$t = 4 - 3*i + $z;
 	$j = cplxe(1, 2*pi/3);
@@ -1195,32 +1211,32 @@ numbers:
 
 	tan(z) = sin(z) / cos(z)
 
-	 csc(z) = 1 / sin(z)
-	 sec(z) = 1 / cos(z)
+	csc(z) = 1 / sin(z)
+	sec(z) = 1 / cos(z)
 	cot(z) = 1 / tan(z)
 
 	asin(z) = -i * log(i*z + sqrt(1-z*z))
 	acos(z) = -i * log(z + sqrt(z*z-1))
 	atan(z) = i/2 * log((i+z) / (i-z))
 
-	 acsc(z) = asin(1 / z)
-	 asec(z) = acos(1 / z)
+	acsc(z) = asin(1 / z)
+	asec(z) = acos(1 / z)
 	acot(z) = -i/2 * log((i+z) / (z-i))
 
 	sinh(z) = 1/2 (exp(z) - exp(-z))
 	cosh(z) = 1/2 (exp(z) + exp(-z))
 	tanh(z) = sinh(z) / cosh(z) = (exp(z) - exp(-z)) / (exp(z) + exp(-z))
 
-	 csch(z) = 1 / sinh(z)
-	 sech(z) = 1 / cosh(z)
+	csch(z) = 1 / sinh(z)
+	sech(z) = 1 / cosh(z)
 	coth(z) = 1 / tanh(z)
 	
 	asinh(z) = log(z + sqrt(z*z+1))
 	acosh(z) = log(z + sqrt(z*z-1))
 	atanh(z) = 1/2 * log((1+z) / (1-z))
 
-	 acsch(z) = asinh(1 / z)
-	 asech(z) = acosh(1 / z)
+	acsch(z) = asinh(1 / z)
+	asech(z) = acosh(1 / z)
 	acoth(z) = atanh(1 / z) = 1/2 * log((1+z) / (z-1))
 
 I<log>, I<csc>, I<cot>, I<acsc>, I<acot>, I<csch>, I<coth>,
@@ -1324,6 +1340,32 @@ Here are some examples:
 
 	$k = exp(i * 2*pi/3);
 	print "$j - $k = ", $j - $k, "\n";
+
+=head1 CAVEATS
+
+The division (/) and the following functions
+
+	tan
+	sec
+	csc
+	cot
+	atan
+	acot
+	tanh
+	sech
+	csch
+	coth
+	atanh
+	asech
+	acsch
+	acoth
+
+cannot be computed for all arguments because that would mean dividing
+by zero. These situations cause fatal runtime errors looking like this
+
+	cot(0): Division by zero.
+	(Because in the definition of cot(0), sin(0) is 0)
+	Died at ...
 
 =head1 BUGS
 

@@ -4,12 +4,17 @@ specially designed to be readable as is.
 
 =head1 NAME
 
-perlwin32 - Perl under WindowsNT [XXX and perhaps under Windows95]
+perlwin32 - Perl under Win32
 
 =head1 SYNOPSIS
 
 These are instructions for building Perl under WindowsNT (versions
-3.51 or 4.0), using Visual C++.
+3.51 or 4.0), using Visual C++ (versions 2.0 through 5.0).  Currently,
+this port may also build under Windows95, but you can expect problems
+stemming from the unmentionable command shell that infests that
+platform.  Note this caveat is only about B<building> perl.  Once
+built, you should be able to B<use> it on either Win32 platform (modulo
+the problems arising from the inferior command shell).
 
 =head1 DESCRIPTION
 
@@ -37,7 +42,11 @@ port of Perl to Win32 platforms.  The resulting Perl requires no
 additional software to run (other than what came with your operating
 system).  Currently, this port is only capable of using Microsoft's
 Visual C++ compiler.  The ultimate goal is to support the other major
-compilers that can be used on the platforms.
+compilers that can be used to build Win32 applications.
+
+This port currently supports MakeMaker (the set of modules that
+is used to build extensions to perl).  Therefore, you should be
+able to build and install most extensions found in the CPAN sites.
 
 =head2 Setting Up
 
@@ -47,7 +56,8 @@ compilers that can be used on the platforms.
 
 Use the default "cmd" shell that comes with NT.  In particular, do
 *not* use the 4DOS/NT shell.  The Makefile has commands that are not
-compatible with that shell.
+compatible with that shell.  You are mostly on your own if you can
+muster the temerity to attempt this with Windows95.
 
 =item *
 
@@ -128,34 +138,25 @@ PATH environment variable to C:\PERL\BIN (or D:\FOO\PERL\BIN).
 =head2 Testing
 
 Type "nmake test".  This will run most of the tests from the
-testsuite (many tests will be skipped, and some tests will fail).
-Most failures are due to UNIXisms in the standard perl testsuite.
+testsuite (many tests will be skipped, and a few tests may fail).
 
-To get a more detailed breakdown of the tests that failed, say:
+To get a more detailed breakdown of the tests that failed, 
+you may want to say:
 
        cd ..\t
        .\perl harness
 
-This should produce a summary very similar to the following:
+This should produce a summary of the failed tests.  Currently, the
+only known failure is lib\findbin.t:
 
     Failed Test  Status Wstat Total Fail  Failed  List of failed
     ------------------------------------------------------------------------------
-    io/fs.t                      26   16  61.54%  1-5, 7-11, 16-18, 23-25
-    lib/anydbm.t                 12    1   8.33%  2
     lib/findbin.t                 1    1 100.00%  1
-    lib/sdbm.t                   12    1   8.33%  2
-    op/magic.t                   28    1   3.57%  16
-    op/mkdir.t                    7    2  28.57%  3, 7
-    op/runlevel.t                 8    1  12.50%  4
-    op/stat.t                    56    3   5.36%  2-3, 20
-    op/taint.t                   98   20  20.41%  1-6, 14, 16, 19-21, 24, 26, 35-3
-    pragma/locale.t              98   40  40.82%  1, 13-14, 21-27, 33, 39, 45-53,
-    Failed 10/149 test scripts, 93.29% okay. 86/3871 subtests failed, 97.78% okay.
+    Failed 1/151 test scripts, 99.34% okay. 1/3902 subtests failed, 99.97% okay.
 
 
 Check if any additional tests other than the ones shown here
-failed.  The standard testsuite will ultimately be modified so
-that the testsuite avoids running irrelevant tests on Win32.
+failed, and report them as described under L<BUGS AND CAVEATS>.
 
 =head1 BUGS AND CAVEATS
 
@@ -166,9 +167,9 @@ utilities/modules, and supported perl functionality.  Specifically,
 functionality that supports the Win32 environment may ultimately
 be supported as either core modules or extensions.
 
-Many tests from the standard testsuite either fail or produce different
-results under this port.  Most of the problems fall under one of these
-categories
+If you have had prior exposure to Perl on Unix platforms, this port
+may exhibit behavior different from what is documented.  Most of the 
+differences fall under one of these categories.
 
 =over 8
 
@@ -181,9 +182,10 @@ platforms, and some fields may be completely bogus.
 =item *
 
 The following functions are currently unavailable: C<fork()>, C<exec()>,
-C<dump()>, C<kill()>, C<chown()>, C<link()>, C<symlink()>, C<chroot()>,
+C<dump()>, C<chown()>, C<link()>, C<symlink()>, C<chroot()>,
 C<setpgrp()>, C<getpgrp()>, C<setpriority()>, C<getpriority()>,
-C<syscall()>, C<fcntl()>, C<flock()>.  This list is possibly incomplete.
+C<syscall()>, C<fcntl()>, C<flock()>.  This list is possibly very
+incomplete.
 
 =item *
 
@@ -201,7 +203,10 @@ when used to call interactive commands, is ill-defined.
 
 =item *
 
-C<$!> doesn't work reliably yet.
+C<$?> ends up with the exitstatus of the subprocess (this is different
+from Unix, where the exitstatus is actually given by "$? >> 8").
+Failure to spawn() the subprocess is indicated by setting $? to 
+"255<<8".  This is subject to change.
 
 =item *
 
@@ -259,7 +264,7 @@ at the time.
 Nick Ing-Simmons and Gurusamy Sarathy have made numerous and
 sundry hacks since then.
 
-Last updated: 19 March 1997
+Last updated: 04 April 1997
 
 =cut
 

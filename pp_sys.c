@@ -3991,7 +3991,7 @@ PP(pp_gpwent)
 PP(pp_spwent)
 {
     dSP;
-#ifdef HAS_PASSWD
+#if defined(HAS_PASSWD) && !defined(CYGWIN32)
     setpwent();
     RETPUSHYES;
 #else

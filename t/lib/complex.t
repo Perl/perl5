@@ -2,19 +2,21 @@
 
 # $RCSfile$
 #
-# Regression tests for the new Math::Complex pacakge
-# -- Raphael Manfredi, Septemeber 1996
-# -- Jarkko Hietaniemi Manfredi, March 1997
+# Regression tests for the Math::Complex pacakge
+# -- Raphael Manfredi, September 1996
+# -- Jarkko Hietaniemi, March 1997
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
+
 use Math::Complex;
 
 $test = 0;
 $| = 1;
 @script = ();
-my $eps = 1e-4; # for example root() is quite bad
+my $eps = 1e-11;
 
 while (<DATA>) {
 	s/^\s+//;

@@ -16,7 +16,7 @@ To save space, and to give due honor to those who have made Perl 5.004
 what is is today, here are some of the more common names in the Changes
 file, and their current addresses (as of March 1997):
 
-    Gisle Aas           <aas@aas.no>
+    Gisle Aas           <gisle@aas.no>
     Kenneth Albanowski  <kjahds@kjahds.com>
     Charles Bailey      <bailey@hmivax.humgen.upenn.edu>
     Graham Barr         <gbarr@ti.com>
@@ -24,10 +24,12 @@ file, and their current addresses (as of March 1997):
     Tim Bunce           <Tim.Bunce@ig.co.uk>
     Tom Christiansen    <tchrist@perl.com>
     Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
+    M. J. T. Guy        <mjtg@cus.cam.ac.uk>
     Gurusamy Sarathy    <gsar@engin.umich.edu>
     Jarkko Hietaniemi   <jhi@iki.fi>
     Nick Ing-Simmons    <nik@tiuk.ti.com>
     Andreas Koenig      <a.koenig@mind.de>
+    Doug MacEachern     <dougm@opengroup.org>
     Paul Marquess       <pmarquess@bfsec.bt.co.uk>
     Jeff Okamoto        <okamoto@hpcc123.corp.hp.com>
     Ulrich Pfeifer      <pfeifer@charly.informatik.uni-dortmund.de>
@@ -40,6 +42,133 @@ And the Keepers of the Patch Pumpkin:
 
     Andy Dougherty      <doughera@lafcol.lafayette.edu>
     Chip Salzenberg     <chip@pobox.com>
+
+
+-------------------
+ Version 5.003_97a
+-------------------
+
+This release gets a letter instead of a full subversion because I'm
+planning on making 5.003_98 the second public beta.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Fix AUTOLOAD, or kill me"
+   From:  Chip Salzenberg
+  Files:  gv.c pp.c t/op/method.t
+
+ CORE PORTABILITY
+
+  Title:  "Add support for Cygwin32 (GNU-Win32) -- very low impact"
+   From:  John Cerney <j-cerney1@ti.com>
+ Msg-ID:  <199704030821.JAA08762@pluto.tiuk.ti.com>
+   Date:  Thu, 3 Apr 1997 09:21:17 +0100
+  Files:  MANIFEST README.cygwin32 cygwin32/cw32imp.h cygwin32/gcc2
+          cygwin32/ld2 cygwin32/perlgcc cygwin32/perlld
+          ext/DynaLoader/dl_cygwin32.xs hints/cygwin32.sh perl.h
+          pp_sys.c
+
+  Title:  "Win32 update (six patches)"
+   From:  Gurusamy Sarathy
+  Files:  MANIFEST README.win32 dosish.h t/io/fs.t t/io/tell.t
+          t/lib/io_tell.t t/op/magic.t t/op/mkdir.t t/op/runlevel.t
+          t/op/stat.t t/op/taint.t win32/Makefile win32/VC-2.0/pod.mak
+          win32/makedef.pl win32/pod.mak win32/win32.c win32/win32.h
+          win32/win32io.c win32/win32io.h win32/win32iop.h
+
+  Title:  "AmigaOS update"
+   From:  Norbert Pueschel
+ Msg-ID:  <77724828@Armageddon.meb.uni-bonn.de>
+   Date:  Thu, 03 Apr 1997 16:16:51 +0200
+  Files:  README.amiga hints/amigaos.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix const-sub-related panic on C<sub foo { my $x; 0 } foo>"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Fix warning for useless C<1..2>"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Minor cleanups"
+   From:  Gurusamy Sarathy
+ Msg-ID:  <199704040056.TAA22253@aatma.engin.umich.edu>
+   Date:  Thu, 03 Apr 1997 19:56:57 -0500
+  Files:  mg.c mg.h perl.c
+
+  Title:  "Eliminate unreliable warning with %SIG and strict refs"
+   From:  Chip Salzenberg
+  Files:  mg.c
+
+  Title:  "Fix impossible test in vivification"
+   From:  Chip Salzenberg
+  Files:  mg.c
+
+  Title:  "runlevel is I32, not int"
+   From:  Roderick Schertler
+ Msg-ID:  <2848.860109823@eeyore.ibcinc.com>
+   Date:  Thu, 03 Apr 1997 18:23:43 -0500
+  Files:  pp_ctl.c util.c
+
+ BUILD PROCESS
+
+  Title:  "Re: shared lib compilation problem with miniperl5.003_97"
+   From:  Andy Dougherty
+ Msg-ID:  <Pine.SOL.3.95q.970404124326.647K-100000@fractal.lafayette.ed
+   Date:  Fri, 04 Apr 1997 13:02:23 -0500 (EST)
+  Files:  Makefile.SH
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Math::Trig, based on (and from an author of) Math::Complex"
+   From:  Chip Salzenberg
+  Files:  MANIFEST lib/Math/Complex.pm lib/Math/Trig.pm
+          pod/perldelta.pod t/lib/complex.t t/lib/trig.t
+
+  Title:  "Update AutoLoader and docs; support C<use AutoLoader 'AUTOLOAD'>"
+   From:  Chip Salzenberg and Tim Bunce
+  Files:  lib/AutoLoader.pm
+
+  Title:  "CPAN & TRL-Gnu"
+   From:  Achim Bohnet <ach@rosat.mpe-garching.mpg.de>
+ Msg-ID:  <9704040809.AA26143@o09.rosat.mpe-garching.mpg.de>
+   Date:  Fri, 04 Apr 1997 10:09:03 +0200
+  Files:  lib/CPAN.pm
+
+  Title:  "Limit @ISA to actual DBM in AnyDBM"
+   From:  Chip Salzenberg
+  Files:  lib/AnyDBM_File.pm
+
+  Title:  "Don't use $4 when it might be undef"
+   From:  Chip Salzenberg
+  Files:  lib/bigfloat.pl
+
+ TESTS
+
+  Title:  "Make *dbm tests work with Win32"
+   From:  Chip Salzenberg
+  Files:  t/lib/anydbm.t t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t
+          t/lib/sdbm.t
+
+ UTILITIES
+
+   (no changes)
+
+ DOCUMENTATION
+
+  Title:  "Update INSTALL"
+   From:  Andy Dougherty
+  Files:  INSTALL
+
+  Title:  "Pod style"
+   From:  Nathan Torkington <gnat@prometheus.frii.com>
+  Files:  pod/perlcall.pod pod/perldata.pod pod/perldebug.pod
+          pod/perldiag.pod pod/perlform.pod pod/perlfunc.pod
+          pod/perlipc.pod pod/perllocale.pod pod/perlmod.pod
+          pod/perlop.pod pod/perlre.pod pod/perlrun.pod
+          pod/perlstyle.pod pod/perltoc.pod pod/perlvar.pod
 
 
 ------------------
@@ -291,7 +420,7 @@ And the Keepers of the Patch Pumpkin:
   Files:  perl.h pp_sys.c
 
   Title:  "Eliminate unused dummy variable"
-   From:  Doug MacEachern <dougm@opengroup.org>
+   From:  Doug MacEachern
  Msg-ID:  <199703270123.UAA25454@postman.osf.org>
    Date:  Wed, 26 Mar 1997 20:23:14 -0500
   Files:  lib/ExtUtils/Embed.pm unixish.h writemain.SH
@@ -529,7 +658,7 @@ And the Keepers of the Patch Pumpkin:
   Files:  lib/Pod/Text.pm
 
   Title:  "Exporting UNIVERSAL::can"
-   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+   From:  "M.J.T. Guy"
  Msg-ID:  <E0w9DwX-0000Zr-00@taurus.cus.cam.ac.uk>
    Date:  Mon, 24 Mar 1997 17:54:01 +0000
   Files:  lib/UNIVERSAL.pm
@@ -579,13 +708,13 @@ And the Keepers of the Patch Pumpkin:
   Files:  pod/perldelta.pod
 
   Title:  "pods for subroutine argument autovivication"
-   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+   From:  "M.J.T. Guy"
  Msg-ID:  <E0w9489-0005YT-00@ursa.cus.cam.ac.uk>
    Date:  Mon, 24 Mar 1997 07:25:21 +0000
   Files:  pod/perldelta.pod pod/perlsub.pod
 
   Title:  "Missing item in perldiag"
-   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+   From:  "M.J.T. Guy"
  Msg-ID:  <E0w8jVZ-0005va-00@ursa.cus.cam.ac.uk>
    Date:  Sun, 23 Mar 1997 09:24:09 +0000
   Files:  pod/perldiag.pod
@@ -756,7 +885,7 @@ And the Keepers of the Patch Pumpkin:
           x2p/util.c
 
   Title:  "Warn about missing -DMULTIPLICITY if likely a problem"
-   From:  Doug MacEachern <dougm@opengroup.org>
+   From:  Doug MacEachern
  Msg-ID:  <199703192345.SAA15070@postman.osf.org>
    Date:  Wed, 19 Mar 1997 18:45:53 -0500
   Files:  perl.c
@@ -834,7 +963,7 @@ And the Keepers of the Patch Pumpkin:
   Files:  lib/File/Path.pm
 
   Title:  "Fix typo in -l*perl* pattern"
-   From:  Doug MacEachern <dougm@opengroup.org>
+   From:  Doug MacEachern
  Msg-ID:  <199703110414.XAA12884@berlin.atlantic.net>
    Date:  Mon, 10 Mar 1997 22:58:38 -0500
   Files:  lib/ExtUtils/Embed.pm
@@ -865,7 +994,7 @@ And the Keepers of the Patch Pumpkin:
   Files:  lib/Carp.pm
 
   Title:  "Re: NUL in die and other messages"
-   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+   From:  "M.J.T. Guy"
  Msg-ID:  <E0w815V-0005xs-00@ursa.cus.cam.ac.uk>
    Date:  Fri, 21 Mar 1997 09:58:17 +0000
   Files:  lib/Carp.pm
@@ -875,7 +1004,7 @@ And the Keepers of the Patch Pumpkin:
   Files:  lib/Pod/Functions.pm
 
   Title:  "Fix typos in IO::Socket documentation"
-   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+   From:  "M.J.T. Guy"
  Msg-ID:  <E0w75po-0003yh-00@taurus.cus.cam.ac.uk>
    Date:  Tue, 18 Mar 1997 20:50:16 +0000
   Files:  ext/IO/lib/IO/Socket.pm
@@ -920,7 +1049,7 @@ And the Keepers of the Patch Pumpkin:
   Files:  pod/perldelta.pod
 
   Title:  "Re: Embedding success with _93 "
-   From:  Doug MacEachern <dougm@opengroup.org>
+   From:  Doug MacEachern
  Msg-ID:  <199703112255.RAA22775@postman.osf.org>
    Date:  Tue, 11 Mar 1997 17:55:05 -0500
   Files:  pod/perldelta.pod
@@ -968,7 +1097,7 @@ And the Keepers of the Patch Pumpkin:
   Files:  pod/perlcall.pod pod/perlguts.pod pod/perlxstut.pod
 
   Title:  "Document return from do FILE"
-   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+   From:  "M.J.T. Guy"
  Msg-ID:  <E0w70DK-0001yJ-00@ursa.cus.cam.ac.uk>
    Date:  Tue, 18 Mar 1997 14:50:10 +0000
   Files:  pod/perlfunc.pod
@@ -1022,7 +1151,7 @@ Me, now:
   Files:  op.c pod/perldelta.pod pod/perlsub.pod pod/perltrap.pod
 
   Title:  "Support READ and GETC for tied handles"
-   From:  Doug MacEachern <dougm@opengroup.org>
+   From:  Doug MacEachern
  Msg-ID:  <199703090019.TAA32591@postman.osf.org>
    Date:  Sat, 08 Mar 1997 19:19:38 -0500
   Files:  pod/perldelta.pod pod/perltie.pod pp_sys.c t/op/misc.t
@@ -1096,7 +1225,7 @@ Me, now:
  LIBRARY AND EXTENSIONS
 
   Title:  "Carp with multiple arguments"
-   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+   From:  "M.J.T. Guy"
  Msg-ID:  <E0w3STZ-0007RW-00@taurus.cus.cam.ac.uk>
    Date:  Sat, 8 Mar 1997 20:12:17 +0000
   Files:  lib/Carp.pm
@@ -1501,7 +1630,7 @@ This is (should be?  must be!) the public beta of 5.004.
   Files:  lib/IPC/Open3.pm
 
   Title:  "Follow up on elimination of $` $& $' in libraries"
-   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+   From:  "M.J.T. Guy"
  Msg-ID:  <E0w0Sqc-00046E-00@ursa.cus.cam.ac.uk>
    Date:  Fri, 28 Feb 1997 13:59:42 +0000
   Files:  lib/Getopt/Long.pm lib/diagnostics.pm
@@ -1513,7 +1642,7 @@ This is (should be?  must be!) the public beta of 5.004.
   Files:  lib/ExtUtils/MakeMaker.pm
 
   Title:  "Allow explicit '-lperl' in link arguments"
-   From:  Doug MacEachern <dougm@opengroup.org>
+   From:  Doug MacEachern
  Msg-ID:  <199702271625.LAA25402@postman.osf.org>
    Date:  Thu, 27 Feb 1997 11:25:04 -0500
   Files:  lib/ExtUtils/Embed.pm
@@ -3227,7 +3356,7 @@ significant changes:
   Files:  MANIFEST pod/roffitall pod/rofftoc
 
   Title:  "Re: documentation correction (i.e. patch) for perlsyn.pod"
-   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+   From:  "M.J.T. Guy"
  Msg-ID:  <E0vilLh-0000M6-00@ursa.cus.cam.ac.uk>
    Date:  Fri, 10 Jan 1997 18:06:37 +0000
   Files:  pod/perlsyn.pod
@@ -3304,7 +3433,7 @@ updates, and expanded tests.  This is good stuff.  "I love you, man!"
   Files:  perly.c perly.c.diff perly.y
 
   Title:  "plug for safe/opcode leaks"
-   From:  Doug MacEachern <dougm@osf.org>
+   From:  Doug MacEachern
  Msg-ID:  <199701072220.RAA02117@postman.osf.org>
    Date:  Tue, 07 Jan 1997 17:20:46 -0500
   Files:  op.c
@@ -3485,7 +3614,7 @@ Here's a list of the more significant changes...
   Files:  op.c pod/perldiag.pod
 
   Title:  "5.003_18: perl_{con,des}truct fixes"
-   From:  Doug MacEachern <dougm@osf.org>
+   From:  Doug MacEachern
  Msg-ID:  <199701032042.PAA06766@postman.osf.org>
    Date:  Fri, 03 Jan 1997 15:42:04 -0500
   Files:  perl.c perl.h pod/perlembed.pod pod/perltoc.pod t/op/sysio.t

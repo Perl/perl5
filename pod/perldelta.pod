@@ -703,6 +703,11 @@ And these functions are now exported:
     sinh cosh tanh cotanh asinh acosh atanh acotanh
     cplx cplxe
 
+=head2 Math::Trig
+
+This module provides a simpler interface to parts of Math::Complex for
+those who need trigonometric functions only for real numbers.
+
 =head2 DB_File
 
 There have been quite a few changes made to DB_File. Here are a few of
