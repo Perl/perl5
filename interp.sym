@@ -58,7 +58,7 @@ in_eval
 incgv
 initav
 inplace
-intern
+sys_intern
 last_in_gv
 lastfd
 lastscream

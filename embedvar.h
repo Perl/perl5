@@ -127,7 +127,7 @@
 #define incgv			(curinterp->Iincgv)
 #define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
-#define intern			(curinterp->Iintern)
+#define sys_intern		(curinterp->Isys_intern)
 #define lastfd			(curinterp->Ilastfd)
 #define lastscream		(curinterp->Ilastscream)
 #define lastsize		(curinterp->Ilastsize)
@@ -247,7 +247,7 @@
 #define Iincgv			incgv
 #define Iinitav			initav
 #define Iinplace		inplace
-#define Iintern			intern
+#define Isys_intern		sys_intern
 #define Ilastfd			lastfd
 #define Ilastscream		lastscream
 #define Ilastsize		lastsize
@@ -428,7 +428,7 @@
 #define incgv			Perl_incgv
 #define initav			Perl_initav
 #define inplace			Perl_inplace
-#define intern			Perl_intern
+#define sys_intern		Perl_sys_intern
 #define lastfd			Perl_lastfd
 #define lastscream		Perl_lastscream
 #define lastsize		Perl_lastsize

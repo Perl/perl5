@@ -158,7 +158,7 @@ PERLVARI(Iexitlistlen,	I32, 0)				/* length of same */
 PERLVAR(Imodglobal,	HV *)				/* per-interp module data */
 
 #ifdef HAVE_INTERP_INTERN
-PERLVAR(Iintern,	struct interp_intern)		/* platform internals */
+PERLVAR(Isys_intern,	struct interp_intern)		/* platform internals */
 #endif
 
 #ifdef USE_THREADS

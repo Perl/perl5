@@ -230,14 +230,14 @@ struct interp_intern {
 #endif
 };
 
-#define w32_perlshell_tokens	(intern.w32_perlshell_tokens)
-#define w32_perlshell_vec	(intern.w32_perlshell_vec)
-#define w32_perlshell_items	(intern.w32_perlshell_items)
-#define w32_fdpid		(intern.w32_fdpid)
+#define w32_perlshell_tokens	(sys_intern.w32_perlshell_tokens)
+#define w32_perlshell_vec	(sys_intern.w32_perlshell_vec)
+#define w32_perlshell_items	(sys_intern.w32_perlshell_items)
+#define w32_fdpid		(sys_intern.w32_fdpid)
 
 #ifndef USE_RTL_WAIT
-#  define w32_num_children	(intern.w32_num_children)
-#  define w32_child_pids	(intern.w32_child_pids)
+#  define w32_num_children	(sys_intern.w32_num_children)
+#  define w32_child_pids	(sys_intern.w32_child_pids)
 #endif
 
 /* 
