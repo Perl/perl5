@@ -3749,7 +3749,7 @@ PP(pp_aslice)
     }
     if (GIMME != G_ARRAY) {
 	MARK = ORIGMARK;
-	*++MARK = *SP;
+	*++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
 	SP = MARK;
     }
     RETURN;
@@ -3949,7 +3949,7 @@ PP(pp_hslice)
     }
     if (GIMME != G_ARRAY) {
 	MARK = ORIGMARK;
-	*++MARK = *SP;
+	*++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
 	SP = MARK;
     }
     RETURN;
