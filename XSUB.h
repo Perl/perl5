@@ -382,9 +382,9 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #    define putenv		PerlEnv_putenv
 #    define getenv		PerlEnv_getenv
 #    define uname		PerlEnv_uname
-#    define stdin		PerlSIO_stdin()
-#    define stdout		PerlSIO_stdout()
-#    define stderr		PerlSIO_stderr()
+#    define stdin		PerlSIO_stdin
+#    define stdout		PerlSIO_stdout
+#    define stderr		PerlSIO_stderr
 #    define fopen		PerlIO_open
 #    define fclose		PerlIO_close
 #    define feof		PerlIO_eof
