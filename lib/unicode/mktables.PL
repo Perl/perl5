@@ -324,8 +324,8 @@ print INID <<EOH;
 EOH
 
 # Order doesn't matter but let's prettyprint anyway.
-foreach my $in (sort { $InId{$a} cmp $InId{$b} } keys %InId) {
-    print INID "'$in' => $InId{$in},\n";
+foreach my $in (sort { $InId{$a} <=> $InId{$b} } keys %InId) {
+    printf INID "%-40s => %2d,\n", "'$in'", $InId{$in};
 }
 
 print INID ");\n";

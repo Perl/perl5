@@ -38,7 +38,7 @@ sub SWASHNEW {
 	|| do "$file.pl"
 	|| do "$encoding/$file.pl"
 	|| do "$encoding/Is/${type}.pl"
-	|| croak("Can't find $encoding character property definition via $caller->$type or $file.pl");
+	|| croak("Can't find $encoding character property \"$type\"");
 
     $| = 1;
 

@@ -628,6 +628,13 @@ found in the PATH did not have correct permissions.
 (F) A string of a form C<CORE::word> was given to prototype(), but there
 is no builtin with the name C<word>.
 
+=item Can't find %s character property "%s"
+
+(F) You used C<\p{}> or C<\P{}> but the character property by that name
+could not be find.  Maybe you mispelled the name of the property
+(remember that the names of character properties consist only of
+alphanumeric characters), or maybe you forgot the C<Is> or C<In> prefix?
+
 =item Can't find label %s
 
 (F) You said to goto a label that isn't mentioned anywhere that it's
