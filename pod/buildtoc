@@ -34,6 +34,11 @@ podset(@pods);
 find \&getpods => qw(../lib ../ext);
 sub getpods {
     if (/\.p(od|m)$/) { 
+	my $tmp;
+	# Skip .pm files that have corresponding .pod files, and Functions.pm.
+	return if (($tmp = $_) =~ s/\.pm$/.pod/ && -f $tmp);
+	return if ($_ eq '../lib/Pod/Functions.pm');####Used only by pod itself
+
 	my $file = $File::Find::name;
 	die "tut $name" if $file =~ /TUT/;
 	unless (open (F, "< $_\0")) {
@@ -119,7 +124,7 @@ podset( @modules[ sort { $modname[$a] cmp $modname[$b] } 0 .. $#modules ] );
 
 	=head1 AUTHOR
 
-	Larry Wall E<lt><F<lwall\@sems.com>E<gt>, with the help of oodles 
+	Larry Wall E<lt>F<lwall\@sems.com>E<gt>, with the help of oodles 
 	of other folks.
 
 
