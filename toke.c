@@ -6954,8 +6954,12 @@ Perl_scan_num(pTHX_ char *start)
 	   conversion at all.
 	*/
 	tryuv = U_V(value);
-	if (!floatit && (NV)tryuv == value)
-	    sv_setuv(sv, tryuv);
+	if (!floatit && (NV)tryuv == value) {
+	    if (tryuv <= IV_MAX)
+		sv_setiv(sv, (IV)tryuv);
+	    else
+		sv_setuv(sv, tryuv);
+	}
 	else
 	    sv_setnv(sv, value);
 	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
