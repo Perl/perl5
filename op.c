@@ -3305,7 +3305,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 
 	/* Fake up a method call to import/unimport */
 	meth = aver ? newSVpvn("import",6) : newSVpvn("unimport", 8);;
-	sv_upgrade(meth, SVt_PVIV);
+	(void)SvUPGRADE(meth, SVt_PVIV);
 	(void)SvIOK_on(meth);
 	PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
