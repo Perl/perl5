@@ -1,9 +1,20 @@
 Revision history for Perl extension Time::HiRes.
 
+1.46
+	- do not create files in blib directories under core
+	  (perl change #19160, from rgs)
+	- detypo s/VTLARM/VTARLM/ (perl change #19328, from mjd)
+
+1.45
+	- guarantee that $xdefine in HiRes.t is always defined
+	  (perl change #19109, from IlyaZ)
+	- a cleaner way to detect PERL_CORE (perl change #19111,
+	  from IlyaZ)
+
 1.44
 	- add hints/irix.pl to turn off overly POSIX flags that
 	  cause hide struct timespec to be hidden (and compilation
-	  to fail)
+	  to fail) (bleadperl change #19085)
 	- documentation tweaks
 
 1.43

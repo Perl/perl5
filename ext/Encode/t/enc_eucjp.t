@@ -1,4 +1,4 @@
-# $Id: enc_eucjp.t,v 1.3 2003/02/20 14:42:34 dankogai Exp $
+# $Id: enc_eucjp.t,v 1.4 2003/04/24 17:43:16 dankogai Exp $
 # This is the twin of enc_utf8.t .
 
 BEGIN {
@@ -30,6 +30,7 @@ print "1.." . (scalar @c + 1) . "\n";
 my @f;
 
 for my $i (0..$#c) {
+  no warnings 'pack';
   push @f, "f$i";
   open(F, ">f$i") or die "$0: failed to open 'f$i' for writing: $!";
   binmode(F, ":utf8");

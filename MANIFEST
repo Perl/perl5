@@ -1538,6 +1538,7 @@ lib/Test/Harness/t/base.t	Test::Harness test
 lib/Test/Harness/t/callback.t	Test::Harness test
 lib/Test/Harness/t/nonumbers.t	Test::Harness test
 lib/Test/Harness/t/ok.t		Test::Harness test
+lib/Test/Harness/t/pod.t	Test::Harness test
 lib/Test/Harness/t/strap-analyze.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap.t		Test::Harness::Straps test
 lib/Test/Harness/t/test-harness.t	Test::Harness test
@@ -2506,6 +2507,7 @@ t/lib/sample-tests/skip			Test data for Test::Harness
 t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
 t/lib/sample-tests/skipall		Test data for Test::Harness
 t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
+t/lib/sample-tests/switches		Test data for Test::Harness
 t/lib/sample-tests/taint		Test data for Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
 t/lib/sample-tests/todo_inline		Test data for Test::Harness

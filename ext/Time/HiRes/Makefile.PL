@@ -48,8 +48,8 @@ sub my_updir {
 BEGIN {
     eval { require File::Spec };
     if ($@) {
-	*File::Spec::catdir = \&my_catdir;
-	*File::Spec::updir  = \&my_updir;
+	*File::Spec::catdir  = \&my_catdir;
+	*File::Spec::updir   = \&my_updir;
 	*File::Spec::catfile = \&my_catfile;
     }
 }

@@ -15,7 +15,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.44';
+$VERSION = '1.46';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -288,7 +288,7 @@ The interval is always what you put in using setitimer().
 
   use Time::HiRes qw ( setitimer ITIMER_VIRTUAL time );
 
-  $SIG{VTLARM} = sub { print time, "\n" };
+  $SIG{VTALRM} = sub { print time, "\n" };
   setitimer(ITIMER_VIRTUAL, 10, 2.5);
 
 =head1 C API
