@@ -2038,7 +2038,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
     }
     while (isSPACE(*s))
 	s++;
-    if (s >= send || sawinf)
+    if (s >= send)
 	return numtype;
     if (len == 10 && memEQ(sbegin, "0 but true", 10))
 	return IS_NUMBER_TO_INT_BY_ATOL;
