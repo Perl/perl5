@@ -21,7 +21,7 @@ print "ok 4\n";
 print "not " unless j(splice(@a,5,1,5)) eq "5" && j(@a) eq j(0..11);
 print "ok 5\n";
 
-print "not " unless j(splice(@a, 20, 0, 12, 13)) eq "" && j(@a) eq j(0..13);
+print "not " unless j(splice(@a, @a, 0, 12, 13)) eq "" && j(@a) eq j(0..13);
 print "ok 6\n";
 
 print "not " unless j(splice(@a, -@a, @a, 1, 2, 3)) eq j(0..13) && j(@a) eq j(1..3);

@@ -3311,6 +3311,14 @@ See L<perlfunc/sort>.
 (F) A sort comparison subroutine may not return a list value with more
 or less than one element.  See L<perlfunc/sort>.
 
+=item splice() offset past end of array
+
+(W misc) You attempted to specify an offset that was past the end of
+the array passed to splice(). Splicing will instead commence at the end
+of the array, rather than past it. If this isn't what you want, try
+explicitly pre-extending the array by assigning $#array = $offset. See
+L<perlfunc/splice>.
+
 =item Split loop
 
 (P) The split was looping infinitely.  (Obviously, a split shouldn't
