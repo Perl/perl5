@@ -2120,6 +2120,7 @@ PP(pp_goto)
 	    /* Now do some callish stuff. */
 	    SAVETMPS;
 	    if (CvXSUB(cv)) {
+#ifdef PERL_XSUB_OLDSTYLE
 		if (CvOLDSTYLE(cv)) {
 		    I32 (*fp3)_((int,int,int));
 		    while (SP > mark) {
@@ -2132,7 +2133,9 @@ PP(pp_goto)
 				   items);
 		    SP = PL_stack_base + items;
 		}
-		else {
+		else
+#endif /* PERL_XSUB_OLDSTYLE */
+		{
 		    SV **newsp;
 		    I32 gimme;
 

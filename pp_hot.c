@@ -2093,16 +2093,15 @@ PP(pp_entersub)
     case SVt_PVGV:
 	if (!(cv = GvCVu((GV*)sv)))
 	    cv = sv_2cv(sv, &stash, &gv, TRUE);
-	break;
+	if (cv)
+	    break;
+	DIE("Not a CODE reference");
     }
 
     ENTER;
     SAVETMPS;
 
   retry:
-    if (!cv)
-	DIE("Not a CODE reference");
-
     if (!CvROOT(cv) && !CvXSUB(cv)) {
 	GV* autogv;
 	SV* sub_name;
@@ -2110,29 +2109,34 @@ PP(pp_entersub)
 	/* anonymous or undef'd function leaves us no recourse */
 	if (CvANON(cv) || !(gv = CvGV(cv)))
 	    DIE("Undefined subroutine called");
+
 	/* autoloaded stub? */
 	if (cv != GvCV(gv)) {
 	    cv = GvCV(gv);
-	    goto retry;
 	}
 	/* should call AUTOLOAD now? */
-	if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+	else if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
 				   FALSE)))
 	{
 	    cv = GvCV(autogv);
-	    goto retry;
 	}
 	/* sorry */
-	sub_name = sv_newmortal();
-	gv_efullname3(sub_name, gv, Nullch);
-	DIE("Undefined subroutine &%s called", SvPVX(sub_name));
+	else {
+	    sub_name = sv_newmortal();
+	    gv_efullname3(sub_name, gv, Nullch);
+	    DIE("Undefined subroutine &%s called", SvPVX(sub_name));
+	}
+	if (!cv)
+	    DIE("Not a CODE reference");
+	goto retry;
     }
 
     gimme = GIMME_V;
-    if ((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub) && !CvNODEBUG(cv))
+    if ((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub) && !CvNODEBUG(cv)) {
 	cv = get_db_sub(&sv, cv);
-    if (!cv)
-	DIE("No DBsub routine");
+	if (!cv)
+	    DIE("No DBsub routine");
+    }
 
 #ifdef USE_THREADS
     /*
@@ -2268,6 +2272,7 @@ PP(pp_entersub)
 #endif /* USE_THREADS */
 
     if (CvXSUB(cv)) {
+#ifdef PERL_XSUB_OLDSTYLE
 	if (CvOLDSTYLE(cv)) {
 	    I32 (*fp3)_((int,int,int));
 	    dMARK;
@@ -2284,7 +2289,9 @@ PP(pp_entersub)
 			   items);
 	    PL_stack_sp = PL_stack_base + items;
 	}
-	else {
+	else
+#endif /* PERL_XSUB_OLDSTYLE */
+	{
 	    I32 markix = TOPMARK;
 
 	    PUTBACK;
@@ -2310,9 +2317,8 @@ PP(pp_entersub)
 		    PUTBACK ;		    
 		}
 	    }
-	    if (PL_curcopdb) {		/* We assume that the first
-					   XSUB in &DB::sub is the
-					   called one. */
+	    /* We assume first XSUB in &DB::sub is the called one. */
+	    if (PL_curcopdb) {
 		SAVESPTR(PL_curcop);
 		PL_curcop = PL_curcopdb;
 		PL_curcopdb = NULL;
