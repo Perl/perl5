@@ -207,7 +207,8 @@ and will be removed in Perl 5.10.0, and the feature will be
 implemented differently.  Not only is the current interface rather
 ugly, but the current implementation slows down normal array and hash
 use quite noticeably. The C<fields> pragma interface will remain
-available.
+available.  The I<restricted hashes> interface is expected to
+be the replacement interface (see L<Hash::Util>).
 
 =item *
 
@@ -624,6 +625,15 @@ runtime.  See L<Encode>.
 
 Any encoding supported by Encode module is also available to the
 ":encoding()" layer if PerlIO is used.
+
+=item *
+
+C<Hash::Util> is the interface to the new I<restricted hashes>
+feature.  A restricted hash is restricted to a certain set of keys,
+no keys outside the set can be added.  Also individual keys can be
+restricted so that the key cannot be deleted and the value cannot be
+changed.  (Implemented by Jeffrey Friedl, Nick Ing-Simmons, and
+Michael Schwern.)
 
 =item *
 
