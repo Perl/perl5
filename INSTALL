@@ -1925,6 +1925,14 @@ things like:  exec, `backquoted command`, system, open("|...") or
 open("...|").  All these mean that Perl is trying to run some
 external program.
 
+=item Timing problems
+
+Several tests in the test suite check timing functions, such as sleep(),
+and see if they return in a reasonable amount of time.  If your system is
+quite busy and doesn't return quickly enough, these tests might fail.
+If possible, try running the tests again with the system under a
+lighter load.
+
 =item Out of memory
 
 On some systems, particularly those with smaller amounts of RAM, some
