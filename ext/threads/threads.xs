@@ -84,6 +84,7 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
   	SV*      obj;
 	SV*		temp_store;
 	PerlInterpreter *current_perl;
+	CLONE_PARAMS clone_param;
 
 	MUTEX_LOCK(&create_mutex);  
 	obj_ref = newSViv(0);
@@ -93,23 +94,7 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 	PerlIO_flush((PerlIO*)NULL);
 	current_perl = PERL_GET_CONTEXT;	
 
-	/*
-	 * here we put the values of params and function to call onto
-	 * namespace, this is so perl will properly clone them when we
-	 * call perl_clone.
-	 */
 
-	temp_store = Perl_get_sv(current_perl, "threads::paramtempstore",
-				 TRUE | GV_ADDMULTI);
-	Perl_sv_setsv_flags(current_perl, temp_store,params, SV_GMAGIC);
-	params = NULL;
-	temp_store = NULL;
-
-	temp_store = Perl_get_sv(current_perl, "threads::calltempstore",
-				 TRUE | GV_ADDMULTI);
-	Perl_sv_setsv_flags(current_perl,temp_store, init_function, SV_GMAGIC);
-	init_function = NULL;
-	temp_store = NULL;
 
 	temp_store = Perl_get_sv(current_perl, "threads::origthread", TRUE | GV_ADDMULTI);
 	sv_setiv(temp_store,PTR2IV(current_perl));
@@ -117,36 +102,29 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 
 	
 #ifdef WIN32
-	thread->interp = perl_clone(current_perl, 4);
+	thread->interp = perl_clone(current_perl, CLONEf_KEEP_PTR_TABLE | CLONEf_CLONE_HOST);
 #else
-	thread->interp = perl_clone(current_perl, 0);
+	thread->interp = perl_clone(current_perl, CLONEf_KEEP_PTR_TABLE);
 #endif
+	
 
-	thread->init_function = newSVsv(Perl_get_sv(thread->interp,
-						    "threads::calltempstore",FALSE));
-	thread->params = newSVsv(Perl_get_sv(thread->interp,
-					     "threads::paramtempstore",FALSE));
+	clone_param.flags = 0;	
+	thread->init_function = Perl_sv_dup(thread->interp, init_function, &clone_param);
+	if(SvREFCNT(thread->init_function) == 0) {
+	    SvREFCNT_inc(thread->init_function);
+	}	
+
+	thread->params = Perl_sv_dup(thread->interp,params, &clone_param);
+	SvREFCNT_inc(thread->params);
+	SvTEMP_off(thread->init_function);
+	ptr_table_free(PL_ptr_table);
+	PL_ptr_table = NULL;
+	
 
 
-
-	/*
-	 * And here we make sure we clean up the data we put in the
-	 * namespace of iThread, both in the new and the calling
-	 * inteprreter */
-
-	temp_store = Perl_get_sv(thread->interp, "threads::paramtempstore",FALSE);
-	Perl_sv_setsv_flags(thread->interp,temp_store, &PL_sv_undef, SV_GMAGIC);
-
-	temp_store = Perl_get_sv(thread->interp,"threads::calltempstore",FALSE);
-	Perl_sv_setsv_flags(thread->interp,temp_store, &PL_sv_undef, SV_GMAGIC);
 
 	PERL_SET_CONTEXT(current_perl);
 
-	temp_store = Perl_get_sv(current_perl,"threads::paramtempstore",FALSE);
-	Perl_sv_setsv_flags(current_perl, temp_store, &PL_sv_undef, SV_GMAGIC);
-
-	temp_store = Perl_get_sv(current_perl,"threads::calltempstore",FALSE);
-	Perl_sv_setsv_flags(current_perl, temp_store, &PL_sv_undef, SV_GMAGIC);
 
 	/* let's init the thread */
 
