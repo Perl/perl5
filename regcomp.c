@@ -4411,10 +4411,11 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
     if (k == EXACT) {
         SV *dsv = sv_2mortal(newSVpvn("", 0));
-	char *s    = 0 ?
+	bool do_utf8 = PL_reg_match_utf8;
+	char *s    = do_utf8 ?
 	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60, 0) :
 	  STRING(o);
-	STRLEN len = 0 ?
+	STRLEN len = do_utf8 ?
 	  strlen(s) :
 	  STR_LEN(o);
 	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>",
