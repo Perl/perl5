@@ -968,7 +968,7 @@ PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab, const char *mode, SV *arg)
 {
     PerlIOl *l = NULL;
     Newc('L',l,tab->size,char,PerlIOl);
-    if (l) {
+    if (l && f) {
 	Zero(l, tab->size, char);
 	l->next = *f;
 	l->tab = tab;
@@ -1052,7 +1052,7 @@ int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 {
     int code = 0;
-    if (names) {
+    if (f && names) {
 	PerlIO_list_t *layers = PerlIO_list_alloc(aTHX);
 	code = PerlIO_parse_layers(aTHX_ layers, names);
 	if (code == 0) {
