@@ -7433,13 +7433,33 @@ echo " "
 if $test -d /usr/bin -a "X$installbin" != X/usr/bin; then
 	$cat <<EOM
 Many scripts expect perl to be installed as /usr/bin/perl.
-I can install the perl you are about to compile also as /usr/bin/perl
-(in addition to $installbin/perl).
+
+If you want to, I can install the perl you are about to compile
+as /usr/bin/perl (in addition to $bin/perl).
 EOM
-	case "$installusrbinperl" in
-	"$undef"|[nN]*)	dflt='n';;
-	*)		dflt='y';;
-	esac
+	if test -f /usr/bin/perl; then
+	    $cat <<EOM
+
+However, please note that because you already have a /usr/bin/perl,
+overwriting that with a new Perl would very probably cause problems.
+Therefore I'm assuming you don't want to do that (unless you insist).
+
+EOM
+	    case "$installusrbinperl" in
+	    "$define"|[yY]*)	dflt='y';;
+	    *)		 	dflt='n';;
+	    esac
+	else
+	    $cat <<EOM
+
+Since you don't have a /usr/bin/perl I'm assuming creating one is okay. 
+
+EOM
+	    case "$installusrbinperl" in
+	    "$undef"|[nN]*)	dflt='n';;
+	    *)		 	dflt='y';;
+	    esac
+    	fi
 	rp="Do you want to install perl as /usr/bin/perl?"
 	. ./myread
 	case "$ans" in
