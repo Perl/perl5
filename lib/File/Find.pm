@@ -95,7 +95,6 @@ sub find {
 		my $fixtopdir = $topdir;
 		$fixtopdir =~ s,/$,, ;
 		$fixtopdir =~ s/\.dir$// if $Is_VMS;
-		$fixtopdir =~ s/\\dir$// if $Is_NT;
 		&finddir($wanted,$fixtopdir,$topnlink);
 	    }
 	    else {
@@ -162,7 +161,6 @@ sub finddir {
 		    next if $prune;
 		    if (chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
-			$name =~ s/\\dir$// if $Is_NT;
 			&finddir($wanted,$name,$nlink);
 			chdir '..';
 		    }
@@ -191,7 +189,6 @@ sub finddepth {
 		my $fixtopdir = $topdir;
 		$fixtopdir =~ s,/$,, ;
 		$fixtopdir =~ s/\.dir$// if $Is_VMS;
-		$fixtopdir =~ s/\\dir$// if $Is_NT;
 		&finddepthdir($wanted,$fixtopdir,$topnlink);
 		($dir,$_) = ($topdir,'.');
 		$name = $topdir;
@@ -257,7 +254,6 @@ sub finddepthdir {
 		    --$subcount;
 		    if (chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
-			$name =~ s/\\dir$// if $Is_NT;
 			&finddepthdir($wanted,$name,$nlink);
 			chdir '..';
 		    }
@@ -282,13 +278,9 @@ if ($^O eq 'VMS') {
   $Is_VMS = 1;
   $dont_use_nlink = 1;
 }
-if ($^O =~ m:^mswin32:i) {
-  $Is_NT = 1;
-  $dont_use_nlink = 1;
-}
 
 $dont_use_nlink = 1
-    if $^O eq 'os2' || $^O eq 'msdos' || $^O eq 'amigaos';
+    if $^O eq 'os2' || $^O eq 'msdos' || $^O eq 'amigaos' || $^O eq 'MSWin32';
 
 1;
 
