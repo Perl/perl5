@@ -98,7 +98,6 @@ ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs		Fcntl extension external subroutines
-ext/Fcntl/MANIFEST		Fcntl extension file list
 ext/Fcntl/Makefile.PL		Fcntl extension makefile writer
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
@@ -249,7 +248,10 @@ lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
 lib/English.pm		Readable aliases for short variables
 lib/Env.pm		Map environment into ordinary variables
 lib/Exporter.pm		Exporter base class
+lib/ExtUtils/Liblist.pm	Locates libraries
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
+lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
+lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/File/Basename.pm	A module to emulate the basename program
