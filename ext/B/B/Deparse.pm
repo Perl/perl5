@@ -94,6 +94,8 @@ use warnings ();
 # - added more control of expanding control structures
 
 # Todo:
+#  (See also BUGS section at the end of this file)
+#
 # - finish tr/// changes
 # - add option for even more parens (generalize \&foo change)
 # - left/right context
@@ -113,7 +115,7 @@ use warnings ();
 # - here-docs?
 
 # Tests that will always fail:
-# comp/redef.t -- all (redefinition happens at compile time)
+# (see t/TEST for the short list)
 
 # Object fields (were globals):
 #
@@ -3169,10 +3171,13 @@ sub double_delim {
     }
 }
 
+# Only used by tr///, so backslashes hyphens
 sub pchr { # ASCII
     my($n) = @_;
     if ($n == ord '\\') {
 	return '\\\\';
+    } elsif ($n == ord "-") {
+	return "\\-";
     } elsif ($n >= ord(' ') and $n <= ord('~')) {
 	return chr($n);
     } elsif ($n == ord "\a") {
@@ -3215,12 +3220,10 @@ sub collapse {
     return $str;
 }
 
-# XXX This has trouble with hyphens in the replacement (tr/bac/-AC/),
-# and backslashes.
-
 sub tr_decode_byte {
     my($table, $flags) = @_;
-    my(@table) = unpack("s256", $table);
+    my(@table) = unpack("s*", $table);
+    splice @table, 0x100, 1;   # Just flags presence of element 0x101
     my($c, $tr, @from, @to, @delfrom, $delhyphen);
     if ($table[ord "-"] != -1 and 
 	$table[ord("-") - 1] == -1 || $table[ord("-") + 1] == -1)
@@ -3234,7 +3237,7 @@ sub tr_decode_byte {
 	    $delhyphen = 1;
 	}
     }
-    for ($c = 0; $c < 256; $c++) {
+    for ($c = 0; $c < @table; $c++) {
 	$tr = $table[$c];
 	if ($tr >= 0) {
 	    push @from, $c; push @to, $tr;
@@ -3266,6 +3269,8 @@ sub tr_chr {
     my $x = shift;
     if ($x == ord "-") {
 	return "\\-";
+    } elsif ($x == ord "\\") {
+	return "\\\\";
     } else {
 	return chr $x;
     }
@@ -3981,10 +3986,6 @@ will not reflect this.
 
 =item *
 
-tr/// doesn't correctly handle wide characters
-
-=item *
-
 C<sort foo (1, 2, 3)> comes out as C<sort (foo 1, 2, 3)>, which
 causes perl to issue a warning.
 
@@ -4001,13 +4002,24 @@ Examples that fail include:
     use constant E2BIG => ($!=7);
     use constant x=>\$x; print x
 
+=item *
+
+An input file that uses source filtering probably won't be deparsed into
+runnable code, because it will still include the B<use> declaration
+for the source filtering module, even though the code that is
+produced is already ordinary Perl which shouldn't be filtered again.
+
+=item *
+
+There are probably many more bugs on non-ASCII platforms (EBCDIC).
+
 =back
 
 =head1 AUTHOR
 
 Stephen McCamant <smcc@CSUA.Berkeley.EDU>, based on an earlier
 version by Malcolm Beattie <mbeattie@sable.ox.ac.uk>, with
-contributions from Gisle Aas, James Duncan, Albert Dvornik, Hugo van
-der Sanden, Gurusamy Sarathy, and Nick Ing-Simmons.
+contributions from Gisle Aas, James Duncan, Albert Dvornik, Robin
+Houston, Hugo van der Sanden, Gurusamy Sarathy, and Nick Ing-Simmons.
 
 =cut
