@@ -5068,7 +5068,7 @@ Perl_save_re_context(pTHX)
 
     {
 	/* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
-	int i;
+	U32 i;
 	GV *mgv;
 	REGEXP *rx;
 	char digits[16];
