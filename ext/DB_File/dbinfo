@@ -4,10 +4,10 @@
 #			  a database file
 #
 # Author:	Paul Marquess  <Paul.Marquess@btinternet.com>
-# Version: 	1.02 
-# Date		20th August 1999
+# Version: 	1.03 
+# Date		17th September 2000
 #
-#     Copyright (c) 1998 Paul Marquess. All rights reserved.
+#     Copyright (c) 1998-2000 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -28,7 +28,8 @@ my %Data =
 				  4	=> "Unknown",
 				  5	=> "2.0.0 -> 2.3.0",
 				  6	=> "2.3.1 -> 2.7.7",
-				  7	=> "3.0.0 or greater",
+				  7	=> "3.0.x",
+				  8	=> "3.1.x or greater",
 				}
 			},
 	0x061561 => 	{
@@ -40,7 +41,8 @@ my %Data =
         			  3     => "1.86",
         			  4     => "2.0.0 -> 2.1.0",
         			  5     => "2.2.6 -> 2.7.7",
-        			  6     => "3.0.0 or greater",
+        			  6     => "3.0.x",
+        			  7     => "3.1.x or greater",
 				}
 			},
 	0x042253 => 	{
