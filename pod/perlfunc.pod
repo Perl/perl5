@@ -71,7 +71,7 @@ there, not the list construction version of the comma.  That means it
 was never a list to start with.
 
 In general, functions in Perl that serve as wrappers for system calls
-of the same name (like C<chown(2)>, C<fork(2)>, C<closedir(2)>, etc.) all return
+of the same name (like chown(2), fork(2), closedir(2), etc.) all return
 true when they succeed and C<undef> otherwise, as is usually mentioned
 in the descriptions below.  This is different from the C interfaces,
 which return C<-1> on failure.  Exceptions to this rule are C<wait()>,
@@ -320,7 +320,7 @@ If VALUE is omitted, uses C<$_>.
 
 =item accept NEWSOCKET,GENERICSOCKET
 
-Accepts an incoming socket connect, just as the C<accept(2)> system call
+Accepts an incoming socket connect, just as the accept(2) system call
 does.  Returns the packed address if it succeeded, FALSE otherwise.
 See example in L<perlipc/"Sockets: Client/Server Communication">.
 
@@ -339,24 +339,24 @@ starting a new one.  The returned value is the amount of time remaining
 on the previous timer.
 
 For delays of finer granularity than one second, you may use Perl's
-C<syscall()> interface to access C<setitimer(2)> if your system supports it,
+C<syscall()> interface to access setitimer(2) if your system supports it,
 or else see L</select()>.  It is usually a mistake to intermix C<alarm()>
 and C<sleep()> calls.
 
 If you want to use C<alarm()> to time out a system call you need to use an
 C<eval()>/C<die()> pair.  You can't rely on the alarm causing the system call to
-fail with C<$!> set to EINTR because Perl sets up signal handlers to
+fail with C<$!> set to C<EINTR> because Perl sets up signal handlers to
 restart system calls on some systems.  Using C<eval()>/C<die()> always works,
 modulo the caveats given in L<perlipc/"Signals">.
 
     eval {
-	local $SIG{ALRM} = sub { die "alarm\n" };	# NB: \n required
+	local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
 	alarm $timeout;
 	$nread = sysread SOCKET, $buffer, $size;
 	alarm 0;
     };
     if ($@) {
-	die unless $@ eq "alarm\n";	# propagate unexpected errors
+	die unless $@ eq "alarm\n";   # propagate unexpected errors
     	# timed out
     }
     else {
@@ -458,7 +458,8 @@ successfully changed.  See also L</oct>, if all you have is a string.
 
     $cnt = chmod 0755, 'foo', 'bar';
     chmod 0755, @executables;
-    $mode = '0644'; chmod $mode, 'foo';      # !!! sets mode to --w----r-T
+    $mode = '0644'; chmod $mode, 'foo';      # !!! sets mode to
+                                             # --w----r-T
     $mode = '0644'; chmod oct($mode), 'foo'; # this is better
     $mode = 0644;   chmod $mode, 'foo';      # this is best
 
@@ -659,7 +660,7 @@ function, or use this relation:
 
 =item crypt PLAINTEXT,SALT
 
-Encrypts a string exactly like the C<crypt(3)> function in the C library
+Encrypts a string exactly like the crypt(3) function in the C library
 (assuming that you actually have a version there that has not been
 extirpated as a potential munition).  This can prove useful for checking
 the password file for lousy passwords, amongst other things.  Only the
@@ -922,11 +923,12 @@ You might like to use C<do> to read in a program configuration
 file.  Manual error checking can be done this way:
 
     # read in config files: system first, then user 
-    for $file ('/share/prog/defaults.rc", "$ENV{HOME}/.someprogrc") {
+    for $file ("/share/prog/defaults.rc",
+               "$ENV{HOME}/.someprogrc") {
 	unless ($return = do $file) {
-	    warn "couldn't parse $file: $@"         if $@;
-	    warn "couldn't do $file: $!"            unless defined $return;
-	    warn "couldn't run $file"               unless $return;
+	    warn "couldn't parse $file: $@" if $@;
+	    warn "couldn't do $file: $!"    unless defined $return;
+	    warn "couldn't run $file"       unless $return;
 	}
     }
 
@@ -937,7 +939,7 @@ use the B<undump> program to turn your core dump into an executable binary
 after having initialized all your variables at the beginning of the
 program.  When the new binary is executed it will begin by executing a
 C<goto LABEL> (with all the restrictions that C<goto> suffers).  Think of
-it as a goto with an intervening core dump and reincarnation.  If LABEL
+it as a goto with an intervening core dump and reincarnation.  If C<LABEL>
 is omitted, restarts the program from the top.  WARNING: Any files
 opened at the time of the dump will NOT be open any more when the
 program is reincarnated, with possible resulting confusion on the part
@@ -986,7 +988,7 @@ reading all the elements from the hash, or by evaluating C<keys HASH> or
 C<values HASH>.  If you add or delete elements of a hash while you're
 iterating over it, you may get entries skipped or duplicated, so don't.
 
-The following prints out your environment like the C<printenv(1)> program,
+The following prints out your environment like the printenv(1) program,
 only in a different order:
 
     while (($key,$value) = each %ENV) {
@@ -1103,14 +1105,16 @@ installed.  You can use the C<local $SIG{__DIE__}> construct for this
 purpose, as shown in this example:
 
     # a very private exception trap for divide-by-zero
-    eval { local $SIG{'__DIE__'}; $answer = $a / $b; }; warn $@ if $@;
+    eval { local $SIG{'__DIE__'}; $answer = $a / $b; };
+    warn $@ if $@;
 
 This is especially significant, given that C<__DIE__> hooks can call
 C<die()> again, which has the effect of changing their error messages:
 
     # __DIE__ hooks may modify error messages
     {
-       local $SIG{'__DIE__'} = sub { (my $x = $_[0]) =~ s/foo/bar/g; die $x };
+       local $SIG{'__DIE__'} =
+              sub { (my $x = $_[0]) =~ s/foo/bar/g; die $x };
        eval { die "foo lives here" };
        print $@ if $@;                # prints "bar lives here"
     }
@@ -1157,7 +1161,7 @@ can use one of these styles to avoid the warning:
     { exec ('foo') }; print STDERR "couldn't exec foo: $!";
 
 If there is more than one argument in LIST, or if LIST is an array
-with more than one value, calls C<execvp(3)> with the arguments in LIST.
+with more than one value, calls execvp(3) with the arguments in LIST.
 If there is only one scalar argument or an array with one element in it,
 the argument is checked for shell metacharacters, and if there are any,
 the entire argument is passed to the system's command shell for parsing
@@ -1195,7 +1199,8 @@ shell expanding wildcards or splitting up words with whitespace in them.
 
     @args = ( "echo surprise" );
 
-    system @args;               # subject to shell escapes if @args == 1
+    system @args;               # subject to shell escapes
+                                # if @args == 1
     system { $args[0] } @args;  # safe even with one-arg list
 
 The first version, the one without the indirect object, ran the I<echo>
@@ -1259,7 +1264,7 @@ If EXPR is omitted, gives C<exp($_)>.
 
 =item fcntl FILEHANDLE,FUNCTION,SCALAR
 
-Implements the C<fcntl(2)> function.  You'll probably have to say
+Implements the fcntl(2) function.  You'll probably have to say
 
     use Fcntl;
 
@@ -1279,7 +1284,7 @@ exempt from the normal B<-w> warnings on improper numeric
 conversions.
 
 Note that C<fcntl()> will produce a fatal error if used on a machine that
-doesn't implement C<fcntl(2)>.
+doesn't implement fcntl(2).
 
 =item fileno FILEHANDLE
 
@@ -1297,9 +1302,9 @@ same underlying descriptor:
 
 =item flock FILEHANDLE,OPERATION
 
-Calls C<flock(2)>, or an emulation of it, on FILEHANDLE.  Returns TRUE for
+Calls flock(2), or an emulation of it, on FILEHANDLE.  Returns TRUE for
 success, FALSE on failure.  Produces a fatal error if used on a machine
-that doesn't implement C<flock(2)>, C<fcntl(2)> locking, or C<lockf(3)>.  C<flock()>
+that doesn't implement flock(2), fcntl(2) locking, or lockf(3).  C<flock()>
 is Perl's portable file locking interface, although it locks only entire
 files, not records.
 
@@ -1322,16 +1327,16 @@ waiting for the lock (check the return status to see if you got it).
 To avoid the possibility of mis-coordination, Perl flushes FILEHANDLE
 before (un)locking it.
 
-Note that the emulation built with C<lockf(3)> doesn't provide shared
+Note that the emulation built with lockf(3) doesn't provide shared
 locks, and it requires that FILEHANDLE be open with write intent.  These
-are the semantics that C<lockf(3)> implements.  Most (all?) systems
-implement C<lockf(3)> in terms of C<fcntl(2)> locking, though, so the
+are the semantics that lockf(3) implements.  Most (all?) systems
+implement lockf(3) in terms of fcntl(2) locking, though, so the
 differing semantics shouldn't bite too many people.
 
 Note also that some versions of C<flock()> cannot lock things over the
 network; you would need to use the more system-specific C<fcntl()> for
-that.  If you like you can force Perl to ignore your system's C<flock(2)>
-function, and so provide its own C<fcntl(2)>-based emulation, by passing
+that.  If you like you can force Perl to ignore your system's flock(2)
+function, and so provide its own fcntl(2)-based emulation, by passing
 the switch C<-Ud_flock> to the F<Configure> program when you configure
 perl.
 
@@ -1361,7 +1366,7 @@ See also L<DB_File> for other flock() examples.
 
 =item fork
 
-Does a C<fork(2)> system call.  Returns the child pid to the parent process,
+Does a fork(2) system call.  Returns the child pid to the parent process,
 C<0> to the child process, or C<undef> if the fork is unsuccessful.
 
 Note: unflushed buffers remain unflushed in both processes, which means
@@ -1493,7 +1498,7 @@ Returns the packed sockaddr address of other end of the SOCKET connection.
 Returns the current process group for the specified PID.  Use
 a PID of C<0> to get the current process group for the
 current process.  Will raise an exception if used on a machine that
-doesn't implement C<getpgrp(2)>.  If PID is omitted, returns process
+doesn't implement getpgrp(2).  If PID is omitted, returns process
 group of current process.  Note that the POSIX version of C<getpgrp()>
 does not accept a PID argument, so only C<PID==0> is truly portable.
 
@@ -1505,7 +1510,7 @@ Returns the process id of the parent process.
 
 Returns the current priority for a process, a process group, or a user.
 (See L<getpriority(2)>.)  Will raise a fatal exception if used on a
-machine that doesn't implement C<getpriority(2)>.
+machine that doesn't implement getpriority(2).
 
 =item getpwnam NAME
 
@@ -1603,7 +1608,7 @@ field may be C<$change> or C<$age>, fields that have to do with password
 aging.  In some systems the C<$comment> field may be C<$class>.  The C<$expire>
 field, if present, encodes the expiration period of the account or the
 password.  For the availability and the exact meaning of these fields
-in your system, please consult your C<getpwnam(3)> documentation and your
+in your system, please consult your getpwnam(3) documentation and your
 F<pwd.h> file.  You can also find out from within Perl which meaning
 your C<$quota> and C<$comment> fields have and whether you have the C<$expire>
 field by using the C<Config> module and the values C<d_pwquota>, C<d_pwage>,
@@ -1674,16 +1679,16 @@ years since 1900, that is, C<$year> is C<123> in year 2023, I<not> simply the la
 
 If EXPR is omitted, does C<gmtime(time())>.
 
-In scalar context, returns the C<ctime(3)> value:
+In scalar context, returns the ctime(3) value:
 
     $now_string = gmtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
 Also see the C<timegm()> function provided by the C<Time::Local> module,
-and the C<strftime(3)> function available via the POSIX module.
+and the strftime(3) function available via the POSIX module.
 
 This scalar value is B<not> locale dependent, see L<perllocale>, but
 instead a Perl builtin.  Also see the C<Time::Local> module, and the
-C<strftime(3)> and C<mktime(3)> function available via the POSIX module.  To
+strftime(3) and mktime(3) function available via the POSIX module.  To
 get somewhat similar but locale dependent date strings, set up your
 locale environment variables appropriately (please see L<perllocale>)
 and try for example:
@@ -1728,7 +1733,7 @@ will be able to tell that this routine was called first.
 
 =item grep EXPR,LIST
 
-This is similar in spirit to, but not the same as, C<grep(1)>
+This is similar in spirit to, but not the same as, grep(1)
 and its relatives.  In particular, it is not limited to using
 regular expressions.
 
@@ -1747,7 +1752,7 @@ Note that, because C<$_> is a reference into the list value, it can be used
 to modify the elements of the array.  While this is useful and
 supported, it can cause bizarre results if the LIST is not a named
 array.  Similarly, grep returns aliases into the original list,
-much like the way that a for loops's index variable aliases the list
+much like the way that a for loop's index variable aliases the list
 elements.  That is, modifying an element of a list returned by grep
 (for example, in a C<foreach>, C<map()> or another C<grep()>)
 actually modifies the element in the original list.
@@ -1794,7 +1799,7 @@ or the C<POSIX::floor> or C<POSIX::ceil> functions, would serve you better.
 
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
 
-Implements the C<ioctl(2)> function.  You'll probably have to say
+Implements the ioctl(2) function.  You'll probably have to say
 
     require "ioctl.ph";	# probably in /usr/local/lib/perl/ioctl.ph
 
@@ -1991,13 +1996,13 @@ years since 1900, that is, C<$year> is C<123> in year 2023, and I<not> simply th
 
 If EXPR is omitted, uses the current time (C<localtime(time)>).
 
-In scalar context, returns the C<ctime(3)> value:
+In scalar context, returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
 This scalar value is B<not> locale dependent, see L<perllocale>, but
 instead a Perl builtin.  Also see the C<Time::Local> module, and the
-C<strftime(3)> and C<mktime(3)> function available via the POSIX module.  To
+strftime(3) and mktime(3) function available via the POSIX module.  To
 get somewhat similar but locale dependent date strings, set up your
 locale environment variables appropriately (please see L<perllocale>)
 and try for example:
@@ -2068,7 +2073,7 @@ it returns FALSE and sets C<$!> (errno).
 
 =item msgctl ID,CMD,ARG
 
-Calls the System V IPC function C<msgctl(2)>.  You'll probably have to say
+Calls the System V IPC function msgctl(2).  You'll probably have to say
 
     use IPC::SysV;
 
@@ -2080,7 +2085,7 @@ C<IPC::SysV> and C<IPC::Semaphore::Msg> documentation.
 
 =item msgget KEY,FLAGS
 
-Calls the System V IPC function C<msgget(2)>.  Returns the message queue
+Calls the System V IPC function msgget(2).  Returns the message queue
 id, or the undefined value if there is an error.  See also C<IPC::SysV>
 and C<IPC::SysV::Msg> documentation.
 
@@ -2171,7 +2176,7 @@ textfiles, since they have variable length records.  See the B<-i>
 switch in L<perlrun> for a better approach.
 
 The prefix and the filename may be separated with spaces.
-These various prefixes correspond to the C<fopen(3)> modes of C<'r'>, C<'r+'>, C<'w'>,
+These various prefixes correspond to the fopen(3) modes of C<'r'>, C<'r+'>, C<'w'>,
 C<'w+'>, C<'a'>, and C<'a+'>.
 
 If the filename begins with C<'|'>, the filename is interpreted as a
@@ -2313,7 +2318,7 @@ Closing any piped filehandle causes the parent process to wait for the
 child to finish, and returns the status value in C<$?>.
 
 The filename passed to open will have leading and trailing
-whitespace deleted, and the normal redirection chararacters
+whitespace deleted, and the normal redirection characters
 honored.  This property, known as "magic open", 
 can often be used to good effect.  A user could specify a filename of
 F<"rsh cat file |">, or you could change certain filenames as needed:
@@ -2396,9 +2401,10 @@ follows:
 
     i	A signed integer value.
     I	An unsigned integer value.
-	  (This 'integer' is _at_least_ 32 bits wide.  Its exact size
-	   depends on what a local C compiler calls 'int', and may
-	   even be larger than the 'long' described in the next item.)
+	  (This 'integer' is _at_least_ 32 bits wide.  Its exact
+           size depends on what a local C compiler calls 'int',
+           and may even be larger than the 'long' described in
+           the next item.)
 
     l	A signed long value.
     L	An unsigned long value.
@@ -2421,9 +2427,9 @@ follows:
     u	A uuencoded string.
 
     w	A BER compressed integer.  Its bytes represent an unsigned
-	integer in base 128, most significant digit first, with as few
-	digits as possible.  Bit eight (the high bit) is set on each
-	byte except the last.
+	integer in base 128, most significant digit first, with as
+        few digits as possible.  Bit eight (the high bit) is set
+        on each byte except the last.
 
     x	A null byte.
     X	Back up a byte.
@@ -2661,8 +2667,8 @@ specified FILEHANDLE.  Returns the number of bytes actually read,
 C<0> at end of file, or undef if there was an error.  SCALAR will be grown
 or shrunk to the length actually read.  An OFFSET may be specified to
 place the read data at some other place than the beginning of the
-string.  This call is actually implemented in terms of stdio's C<fread(3)>
-call.  To get a true C<read(2)> system call, see C<sysread()>.
+string.  This call is actually implemented in terms of stdio's fread(3)
+call.  To get a true read(2) system call, see C<sysread()>.
 
 =item readdir DIRHANDLE
 
@@ -2832,7 +2838,7 @@ modules does not risk altering your namespace.
 
 In other words, if you try this:
 
-        require Foo::Bar; 	# a splendid bareword 
+        require Foo::Bar;    # a splendid bareword 
 
 The require function will actually look for the "F<Foo/Bar.pm>" file in the 
 directories specified in the C<@INC> array.
@@ -2840,9 +2846,9 @@ directories specified in the C<@INC> array.
 But if you try this:
 
         $class = 'Foo::Bar';
-        require $class; 	# $class is not a bareword
+        require $class;	     # $class is not a bareword
     #or
-        require "Foo::Bar"; # not a bareword because of the ""
+        require "Foo::Bar";  # not a bareword because of the ""
 
 The require function will look for the "F<Foo::Bar>" file in the @INC array and 
 will complain about not finding "F<Foo::Bar>" there. In this case you can do:
@@ -2961,7 +2967,7 @@ unpredictable and non-portable.  Use C<sysseek()> instead.
 
 On some systems you have to do a seek whenever you switch between reading
 and writing.  Amongst other things, this may have the effect of calling
-stdio's C<clearerr(3)>.  A WHENCE of C<1> (C<SEEK_CUR>) is useful for not moving
+stdio's clearerr(3).  A WHENCE of C<1> (C<SEEK_CUR>) is useful for not moving
 the file position:
 
     seek(TEST,0,1);
@@ -2976,7 +2982,8 @@ If that doesn't work (some stdios are particularly cantankerous), then
 you may need something more like this:
 
     for (;;) {
-	for ($curpos = tell(FILE); $_ = <FILE>; $curpos = tell(FILE)) {
+	for ($curpos = tell(FILE); $_ = <FILE>;
+             $curpos = tell(FILE)) {
 	    # search for some stuff and put it into files
 	}
 	sleep($for_a_while);
@@ -3020,7 +3027,7 @@ methods, preferring to write the last example as:
 
 =item select RBITS,WBITS,EBITS,TIMEOUT
 
-This calls the C<select(2)> system call with the bit masks specified, which
+This calls the select(2) system call with the bit masks specified, which
 can be constructed using C<fileno()> and C<vec()>, along these lines:
 
     $rin = $win = $ein = '';
@@ -3115,15 +3122,15 @@ See L<perlipc/"UDP: Message Passing"> for examples.
 
 Sets the current process group for the specified PID, C<0> for the current
 process.  Will produce a fatal error if used on a machine that doesn't
-implement C<setpgrp(2)>.  If the arguments are omitted, it defaults to
+implement setpgrp(2).  If the arguments are omitted, it defaults to
 C<0,0>.  Note that the POSIX version of C<setpgrp()> does not accept any
 arguments, so only setpgrp C<0,0> is portable.
 
 =item setpriority WHICH,WHO,PRIORITY
 
 Sets the current priority for a process, a process group, or a user.
-(See C<setpriority(2)>.)  Will produce a fatal error if used on a machine
-that doesn't implement C<setpriority(2)>.
+(See setpriority(2).)  Will produce a fatal error if used on a machine
+that doesn't implement setpriority(2).
 
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
 
@@ -3180,9 +3187,9 @@ See also C<IPC::SysV> documentation.
 Shuts down a socket connection in the manner indicated by HOW, which
 has the same interpretation as in the system call of the same name.
 
-    shutdown(SOCKET, 0);                # I/we have stopped reading data
-    shutdown(SOCKET, 1);                # I/we have stopped writing data
-    shutdown(SOCKET, 2);                # I/we have stopped using this socket
+    shutdown(SOCKET, 0);    # I/we have stopped reading data
+    shutdown(SOCKET, 1);    # I/we have stopped writing data
+    shutdown(SOCKET, 2);    # I/we have stopped using this socket
 
 This is useful with sockets when you want to tell the other
 side you're done writing but not done reading, or vice versa.
@@ -3219,7 +3226,7 @@ however, because your process might not be scheduled right away in a
 busy multitasking system.
 
 For delays of finer granularity than one second, you may use Perl's
-C<syscall()> interface to access C<setitimer(2)> if your system supports it,
+C<syscall()> interface to access setitimer(2) if your system supports it,
 or else see L</select()> above.
 
 See also the POSIX module's C<sigpause()> function.
@@ -3483,7 +3490,8 @@ Example:
 
     open(PASSWD, '/etc/passwd');
     while (<PASSWD>) {
-	($login, $passwd, $uid, $gid, $gcos,$home, $shell) = split(/:/);
+	($login, $passwd, $uid, $gid,
+         $gcos, $home, $shell) = split(/:/);
 	#...
     }
 
@@ -3542,8 +3550,9 @@ and the conversion letter:
    0       use zeros, not spaces, to right-justify
    #       prefix non-zero octal with "0", non-zero hex with "0x"
    number  minimum field width
-   .number "precision": digits after decimal point for floating-point,
-           max length for string, minimum length for integer
+   .number "precision": digits after decimal point for
+           floating-point, max length for string, minimum length
+           for integer
    l       interpret integer as C type "long" or "unsigned long"
    h       interpret integer as C type "short" or "unsigned short"
 
@@ -3701,7 +3710,7 @@ Note that if you have to look for strings that you don't know till
 runtime, you can build an entire loop as a string and C<eval()> that to
 avoid recompiling all your patterns all the time.  Together with
 undefining C<$/> to input entire files as one record, this can be very
-fast, often faster than specialized programs like C<fgrep(1)>.  The following
+fast, often faster than specialized programs like fgrep(1).  The following
 scans a list of files (C<@files>) for a list of words (C<@words>), and prints
 out the names of those files that contain a match:
 
@@ -3845,7 +3854,7 @@ into that kind of thing.
 =item sysread FILEHANDLE,SCALAR,LENGTH
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE, using the system call C<read(2)>.  It bypasses
+specified FILEHANDLE, using the system call read(2).  It bypasses
 stdio, so mixing this with other kinds of reads, C<print()>, C<write()>,
 C<seek()>, or C<tell()> can cause confusion because stdio usually buffers
 data.  Returns the number of bytes actually read, C<0> at end of file,
@@ -3861,7 +3870,7 @@ the result of the read is appended.
 
 =item sysseek FILEHANDLE,POSITION,WHENCE
 
-Sets FILEHANDLE's system position using the system call C<lseek(2)>.  It
+Sets FILEHANDLE's system position using the system call lseek(2).  It
 bypasses stdio, so mixing this with reads (other than C<sysread()>),
 C<print()>, C<write()>, C<seek()>, or C<tell()> may cause confusion.  FILEHANDLE may
 be an expression whose value gives the name of the filehandle.  The
@@ -3925,7 +3934,7 @@ See L<perlop/"`STRING`"> and L</exec> for details.
 =item syswrite FILEHANDLE,SCALAR,LENGTH
 
 Attempts to write LENGTH bytes of data from variable SCALAR to the
-specified FILEHANDLE, using the system call C<write(2)>.  It bypasses
+specified FILEHANDLE, using the system call write(2).  It bypasses
 stdio, so mixing this with reads (other than C<sysread())>, C<print()>,
 C<write()>, C<seek()>, or C<tell()> may cause confusion because stdio usually
 buffers data.  Returns the number of bytes actually written, or C<undef>
@@ -4070,9 +4079,9 @@ If EXPR is omitted, uses C<$_>.
 Sets the umask for the process to EXPR and returns the previous value.
 If EXPR is omitted, merely returns the current umask.
 
-If C<umask(2)> is not implemented on your system and you are trying to
+If umask(2) is not implemented on your system and you are trying to
 restrict access for I<yourself> (i.e., (EXPR & 0700) > 0), produces a
-fatal error at run time.  If C<umask(2)> is not implemented and you are
+fatal error at run time.  If umask(2) is not implemented and you are
 not trying to restrict access for yourself, returns C<undef>.
 
 Remember that a umask is a number, usually given in octal; it is I<not> a
@@ -4093,7 +4102,7 @@ instance, return from a subroutine, assign to a variable or pass as a
 parameter.  Examples:
 
     undef $foo;
-    undef $bar{'blurfl'};             # Compare to: delete $bar{'blurfl'};
+    undef $bar{'blurfl'};      # Compare to: delete $bar{'blurfl'};
     undef @ary;
     undef %hash;
     undef &mysub;
@@ -4291,10 +4300,12 @@ in the same way on big-endian or little-endian machines.
     vec($foo,  8,  8) = 0x50;		# 'PerlPerlP'
     vec($foo,  9,  8) = 0x65;		# 'PerlPerlPe'
     vec($foo, 20,  4) = 2;		# 'PerlPerlPe'   . "\x02"
-    vec($foo, 21,  4) = 7;		# 'PerlPerlPer'  # 'r' is "\x72"
+    vec($foo, 21,  4) = 7;		# 'PerlPerlPer'
+                                        # 'r' is "\x72"
     vec($foo, 45,  2) = 3;		# 'PerlPerlPer'  . "\x0c"
     vec($foo, 93,  1) = 1;		# 'PerlPerlPer'  . "\x2c"
-    vec($foo, 94,  1) = 1;		# 'PerlPerlPerl' # 'l' is "\x6c"
+    vec($foo, 94,  1) = 1;		# 'PerlPerlPerl'
+                                        # 'l' is "\x6c"
 
 To transform a bit vector into a string or array of 0's and 1's, use these:
 
@@ -4320,8 +4331,8 @@ status is returned in C<$?>.  If you say
     waitpid(-1,&WNOHANG);
 
 then you can do a non-blocking wait for any process.  Non-blocking wait
-is available on machines supporting either the C<waitpid(2)> or
-C<wait4(2)> system calls.  However, waiting for a particular pid with
+is available on machines supporting either the waitpid(2) or
+wait4(2) system calls.  However, waiting for a particular pid with
 FLAGS of C<0> is implemented everywhere.  (Perl emulates the system call
 by remembering the status values of processes that have exited but have
 not been harvested by the Perl script yet.)

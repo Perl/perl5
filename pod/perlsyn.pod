@@ -8,7 +8,7 @@ A Perl script consists of a sequence of declarations and statements.
 The only things that need to be declared in Perl are report formats
 and subroutines.  See the sections below for more information on those
 declarations.  All uninitialized user-created objects are assumed to
-start with a null or 0 value until they are defined by some explicit
+start with a C<null> or C<0> value until they are defined by some explicit
 operation such as assignment.  (Though you can get warnings about the
 use of undefined values if you like.)  The sequence of statements is
 executed just once, unlike in B<sed> and B<awk> scripts, where the
@@ -23,7 +23,7 @@ mandatory default like it is in B<sed> and B<awk>.)
 
 Perl is, for the most part, a free-form language.  (The only
 exception to this is format declarations, for obvious reasons.) Comments
-are indicated by the "#" character, and extend to the end of the line.  If
+are indicated by the C<"#"> character, and extend to the end of the line.  If
 you attempt to use C</* */> C-style comments, it will be interpreted
 either as division or pattern matching, depending on the context, and C++
 C<//> comments just look like a null regular expression, so don't do
@@ -33,7 +33,7 @@ A declaration can be put anywhere a statement can, but has no effect on
 the execution of the primary sequence of statements--declarations all
 take effect at compile time.  Typically all the declarations are put at
 the beginning or the end of the script.  However, if you're using
-lexically-scoped private variables created with my(), you'll have to make sure
+lexically-scoped private variables created with C<my()>, you'll have to make sure
 your format or subroutine definition is within the same block scope
 as the my if you expect to be able to access those private variables.
 
@@ -83,10 +83,10 @@ modifiers are:
 
 The C<if> and C<unless> modifiers have the expected semantics,
 presuming you're a speaker of English.  The C<foreach> modifier is an
-iterator:  For each value in EXPR, it aliases $_ to the value and
+iterator:  For each value in EXPR, it aliases C<$_> to the value and
 executes the statement.  The C<while> and C<until> modifiers have the
-usual "while loop" semantics (conditional evaluated first), except
-when applied to a do-BLOCK (or to the now-deprecated do-SUBROUTINE
+usual "C<while> loop" semantics (conditional evaluated first), except
+when applied to a C<do>-BLOCK (or to the now-deprecated C<do>-SUBROUTINE
 statement), in which case the block executes once before the
 conditional is evaluated.  This is so that you can write loops like:
 
@@ -99,14 +99,14 @@ See L<perlfunc/do>.  Note also that the loop control statements described
 later will I<NOT> work in this construct, because modifiers don't take
 loop labels.  Sorry.  You can always put another block inside of it
 (for C<next>) or around it (for C<last>) to do that sort of thing.
-For next, just double the braces:
+For C<next>, just double the braces:
 
     do {{
 	next if $x == $y;
 	# do something here
     }} until $x++ > $z;
 
-For last, you have to be more elaborate:
+For C<last>, you have to be more elaborate:
 
     LOOP: { 
 	    do {
@@ -154,7 +154,7 @@ C<if> an C<else> goes with.  If you use C<unless> in place of C<if>,
 the sense of the test is reversed.
 
 The C<while> statement executes the block as long as the expression is
-true (does not evaluate to the null string or 0 or "0").  The LABEL is
+true (does not evaluate to the null string (C<"">) or C<0> or C<"0")>.  The LABEL is
 optional, and if present, consists of an identifier followed by a colon.
 The LABEL identifies the loop for the loop control statements C<next>,
 C<last>, and C<redo>.  If the LABEL is omitted, the loop control statement
@@ -296,7 +296,7 @@ refer to it.)
 The C<foreach> keyword is actually a synonym for the C<for> keyword, so
 you can use C<foreach> for readability or C<for> for brevity.  (Or because
 the Bourne shell is more familiar to you than I<csh>, so writing C<for>
-comes more naturally.)  If VAR is omitted, $_ is set to each value.
+comes more naturally.)  If VAR is omitted, C<$_> is set to each value.
 If any element of LIST is an lvalue, you can modify it by modifying VAR
 inside the loop.  That's because the C<foreach> loop index variable is
 an implicit alias for each item in the list that you're looping over.
@@ -375,7 +375,7 @@ structures.
 	$nothing = 1;
     }
 
-There is no official switch statement in Perl, because there are
+There is no official C<switch> statement in Perl, because there are
 already several ways to write the equivalent.  In addition to the
 above, you could write
 
@@ -399,7 +399,7 @@ or
 	$nothing = 1;
     }
 
-or formatted so it stands out more as a "proper" switch statement:
+or formatted so it stands out more as a "proper" C<switch> statement:
 
     SWITCH: {
 	/^abc/ 	    && do {
@@ -439,8 +439,8 @@ or even, horrors,
     else
 	{ $nothing = 1 }
 
-A common idiom for a switch statement is to use C<foreach>'s aliasing to make
-a temporary assignment to $_ for convenient matching:
+A common idiom for a C<switch> statement is to use C<foreach>'s aliasing to make
+a temporary assignment to C<$_> for convenient matching:
 
     SWITCH: for ($where) {
 		/In Card Names/     && do { push @flags, '-e'; last; };
@@ -471,7 +471,7 @@ Or
 
 Or if you are certainly that all the C<&&> clauses are true, you can use
 something like this, which "switches" on the value of the
-HTTP_USER_AGENT envariable.
+C<HTTP_USER_AGENT> envariable.
 
     #!/usr/bin/perl 
     # pick out jargon file page based on browser
@@ -490,37 +490,37 @@ HTTP_USER_AGENT envariable.
 That kind of switch statement only works when you know the C<&&> clauses
 will be true.  If you don't, the previous C<?:> example should be used.
 
-You might also consider writing a hash instead of synthesizing a switch
+You might also consider writing a hash instead of synthesizing a C<switch>
 statement.
 
 =head2 Goto
 
 Although not for the faint of heart, Perl does support a C<goto> statement.
 A loop's LABEL is not actually a valid target for a C<goto>;
-it's just the name of the loop.  There are three forms: goto-LABEL,
-goto-EXPR, and goto-&NAME.
+it's just the name of the loop.  There are three forms: C<goto>-LABEL,
+C<goto>-EXPR, and C<goto>-&NAME.
 
-The goto-LABEL form finds the statement labeled with LABEL and resumes
+The C<goto>-LABEL form finds the statement labeled with LABEL and resumes
 execution there.  It may not be used to go into any construct that
-requires initialization, such as a subroutine or a foreach loop.  It
+requires initialization, such as a subroutine or a C<foreach> loop.  It
 also can't be used to go into a construct that is optimized away.  It
 can be used to go almost anywhere else within the dynamic scope,
 including out of subroutines, but it's usually better to use some other
-construct such as last or die.  The author of Perl has never felt the
-need to use this form of goto (in Perl, that is--C is another matter).
+construct such as C<last> or C<die>.  The author of Perl has never felt the
+need to use this form of C<goto> (in Perl, that is--C is another matter).
 
-The goto-EXPR form expects a label name, whose scope will be resolved
-dynamically.  This allows for computed gotos per FORTRAN, but isn't
+The C<goto>-EXPR form expects a label name, whose scope will be resolved
+dynamically.  This allows for computed C<goto>s per FORTRAN, but isn't
 necessarily recommended if you're optimizing for maintainability:
 
     goto ("FOO", "BAR", "GLARCH")[$i];
 
-The goto-&NAME form is highly magical, and substitutes a call to the
+The C<goto>-&NAME form is highly magical, and substitutes a call to the
 named subroutine for the currently running subroutine.  This is used by
-AUTOLOAD() subroutines that wish to load another subroutine and then
+C<AUTOLOAD()> subroutines that wish to load another subroutine and then
 pretend that the other subroutine had been called in the first place
-(except that any modifications to @_ in the current subroutine are
-propagated to the other subroutine.)  After the C<goto>, not even caller()
+(except that any modifications to C<@_> in the current subroutine are
+propagated to the other subroutine.)  After the C<goto>, not even C<caller()>
 will be able to tell that this routine was called first.
 
 In almost all cases like this, it's usually a far, far better idea to use the
@@ -568,7 +568,7 @@ ignored by both the compiler and the translators.
     =cut back
     print "got $a\n";
 
-You probably shouldn't rely upon the warn() being podded out forever.
+You probably shouldn't rely upon the C<warn()> being podded out forever.
 Not all pod translators are well-behaved in this regard, and perhaps
 the compiler will become pickier.
 
@@ -580,7 +580,7 @@ of code.
 Much like the C preprocessor, Perl can process line directives.  Using
 this, one can control Perl's idea of filenames and line numbers in
 error or warning messages (especially for strings that are processed
-with eval()).  The syntax for this mechanism is the same as for most
+with C<eval()>).  The syntax for this mechanism is the same as for most
 C preprocessors: it matches the regular expression
 C</^#\s*line\s+(\d+)\s*(?:\s"([^"]*)")?/> with C<$1> being the line
 number for the next line, and C<$2> being the optional filename
