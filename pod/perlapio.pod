@@ -321,6 +321,8 @@ C<PerlIO_close()> on the returned PerlIO *.
 The PerlIO is set to textmode. Use PerlIO_binmode if this is
 not the desired mode.
 
+This is B<not> the reverse of PerlIO_exportFILE().
+
 =item B<PerlIO_exportFILE(f,mode)>
 
 Given a PerlIO * create a 'native' FILE * suitable for passing to code
@@ -334,6 +336,7 @@ pushing a new :stdio "layer" onto the PerlIO *), which may affect future
 PerlIO operations on the original PerlIO *.
 You should not call C<fclose()> on the file unless you call
 C<PerlIO_releaseFILE()> to disassociate it from the PerlIO *.
+(Do not use PerlIO_importFILE() for doing the disassociation.)
 
 Calling this function repeatedly will create a FILE * on each call
 (and will push an :stdio layer each time as well).
@@ -343,6 +346,9 @@ Calling this function repeatedly will create a FILE * on each call
 Calling PerlIO_releaseFILE informs PerlIO that all use of FILE * is
 complete. It is removed from the list of 'exported' FILE *s, and the
 associated PerlIO * should revert to its original behaviour.
+
+Use this to disassociate a file from a PerlIO * that was associated
+using PerlIO_exportFILE().
 
 =item B<PerlIO_findFILE(f)>
 

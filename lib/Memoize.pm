@@ -8,10 +8,10 @@
 # same terms as Perl itself.  If in doubt, 
 # write to mjd-perl-memoize+@plover.com for a license.
 #
-# Version 1.00 $Revision: 1.18 $ $Date: 2001/06/24 17:16:47 $
+# Version 1.01 $Revision: 1.18 $ $Date: 2001/06/24 17:16:47 $
 
 package Memoize;
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 # Compile-time constants
 sub SCALAR () { 0 } 
@@ -167,8 +167,6 @@ sub memoize {
   $wrapper			# Return just memoized version
 }
 
-use warnings::register;
-
 # This function tries to load a tied hash class and tie the hash to it.
 sub _my_tie {
   my ($context, $hash, $options) = @_;
@@ -179,7 +177,7 @@ sub _my_tie {
   
   return unless defined $shortopt && $shortopt eq 'TIE';
   carp("TIE option to memoize() is deprecated; use HASH instead")
-      if warnings::enabled('deprecated');
+      if $^W;
 
   my @args = ref $fullopt ? @$fullopt : ();
   shift @args;
@@ -363,7 +361,7 @@ Memoize - Make functions faster by trading space for time
 
 =head1 SYNOPSIS
 
-        # This is the documentation for Memoize 1.00
+        # This is the documentation for Memoize 1.01
 	use Memoize;
 	memoize('slow_function');
 	slow_function(arguments);    # Is faster than it was before

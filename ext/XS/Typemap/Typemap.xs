@@ -795,10 +795,17 @@ T_STDIO_open( file )
   RETVAL
 
 SysRet
-T_STDIO_close( stream )
-  FILE * stream
+T_STDIO_close( f )
+  PerlIO * f
+ PREINIT:
+  FILE * stream;
  CODE:
+  /* Get the FILE* */
+  stream = PerlIO_findFILE( f );  
   RETVAL = xsfclose( stream );
+  /* Release the FILE* from the PerlIO system so that we do
+     not close the file twice */
+  PerlIO_releaseFILE(f,stream);
  OUTPUT:
   RETVAL
 

@@ -815,6 +815,10 @@ Perl interface to IEEE Std 1003.1
 
 On demand loader for PerlIO layers and root of PerlIO::* name space
 
+=item PerlIO::via::QuotedPrint
+
+PerlIO layer for quoted-printable strings
+
 =item Pod::Checker
 
 Check pod documents for syntax errors
@@ -1005,11 +1009,11 @@ Manipulate threads in Perl (for old code only)
 
 =item Thread::Queue
 
-Thread-safe queues (for old code only)
+Thread-safe queues
 
 =item Thread::Semaphore
 
-Thread-safe semaphores (for old code only)
+Thread-safe semaphores
 
 =item Tie::Array
 

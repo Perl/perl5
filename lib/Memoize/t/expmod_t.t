@@ -27,14 +27,21 @@ if (-e '.fast') {
 print "1..15\n";
 $| = 1;
 
+# (1)
 ++$n; print "ok $n\n";
 
+# (2)
 require Memoize::Expire;
 ++$n; print "ok $n\n";
 
 sub close_enough {
 #  print "Close enough? @_[0,1]\n";
-  abs($_[0] - $_[1]) <= 1;
+  abs($_[0] - $_[1]) <= 2;
+}
+
+sub very_close {
+#  print "Close enough? @_[0,1]\n";
+  abs($_[0] - $_[1]) <= 0.01;
 }
 
 my $t0;
@@ -56,15 +63,17 @@ sub now {
   time;
 }
 
-tie my %cache => 'Memoize::Expire', LIFETIME => 10;
+tie my %cache => 'Memoize::Expire', LIFETIME => 15;
 memoize 'now',
     SCALAR_CACHE => [HASH => \%cache ],
     LIST_CACHE => 'FAULT'
     ;
 
+# (3)
 ++$n; print "ok $n\n";
 
 
+# (4-6)
 # T
 start_timer();
 for (1,2,3) {
@@ -72,45 +81,56 @@ for (1,2,3) {
   ++$n;
   print "not " unless close_enough($when{$_}, time());
   print "ok $n\n";
-  sleep 4 if $_ < 3;
+  sleep 6 if $_ < 3;
   $DEBUG and print "# ", time()-$t0, "\n";
 }
-# values will now expire at T=10, 14, 18
-# it is now T=8
+# values will now expire at T=15, 21, 27
+# it is now T=12
 
-# T+8
+# T+12
 for (1,2,3) {
   $again{$_} = now($_); # Should be the same as before, because of memoization
 }
 
-# T+8
+# (7-9)
+# T+12
 foreach (1,2,3) {
   ++$n;
-  print "not " unless close_enough($when{$_}, $again{$_});
-  print "ok $n\n";
+  if (very_close($when{$_}, $again{$_})) {
+    print "ok $n\n";
+  } else {
+    print "not ok $n # expected $when{$_}, got $again{$_}\n";
+  }
 }
 
-wait_until(12);  # now(1) expires
+# (10)
+wait_until(18);  # now(1) expires
 print "not " unless close_enough(time, $again{1} = now(1));
 ++$n; print "ok $n\n";
 
-# T+12
+# (11-12)
+# T+18
 foreach (2,3) {			# Should not have expired yet.
   ++$n;
-  print "not " unless close_enough(scalar(now($_)), $again{$_});
+  print "not " unless now($_) == $again{$_};
   print "ok $n\n";
 }
 
-wait_until(16);  # now(2) expires
+wait_until(24);  # now(2) expires
 
-# T+16
+# (13)
+# T+24
 print "not " unless close_enough(time, $again{2} = now(2));
 ++$n; print "ok $n\n";
 
-# T+16
+# (14-15)
+# T+24
 foreach (1,3) {  # 1 is good again because it was recomputed after it expired
   ++$n;
-  print "not " unless close_enough(scalar(now($_)), $again{$_});
-  print "ok $n\n";
+  if (very_close(scalar(now($_)), $again{$_})) {
+    print "ok $n\n";
+  } else {
+    print "not ok $n # expected $when{$_}, got $again{$_}\n";
+  }
 }
 

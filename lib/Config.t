@@ -10,7 +10,7 @@ use_ok('Config');
 
 # Some (safe?) bets.
 
-ok(keys %Config > 900, "Config has more than 900 entries");
+ok(keys %Config > 500, "Config has more than 500 entries");
 
 ok(each %Config);
 

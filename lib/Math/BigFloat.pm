@@ -1992,7 +1992,7 @@ Math::BigFloat - Arbitrary size floating point math package
   $x->precision();		# return P of $x (or global, if P of $x undef)
   $x->precision($n);		# set P of $x to $n
   $x->accuracy();		# return A of $x (or global, if A of $x undef)
-  $x->accuracy($n);		# set P $x to $n
+  $x->accuracy($n);		# set A $x to $n
 
   Math::BigFloat->precision();	# get/set global P for all BigFloat objects
   Math::BigFloat->accuracy();	# get/set global A for all BigFloat objects

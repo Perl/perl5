@@ -651,9 +651,11 @@ ext/Thread/list.tx		Test getting list of all threads
 ext/Thread/lock.tx		Test lock primitive
 ext/Thread/Makefile.PL		Thread extension makefile writer
 ext/Thread/Notes		Thread notes
+ext/Thread/Queue.pmx		Threadsafe queue
 ext/Thread/queue.tx		Test Thread::Queue module
 ext/Thread/README		Thread README
 ext/Thread/README.threads		Notes about multithreading
+ext/Thread/Semaphore.pmx	Threadsafe semaphore
 ext/Thread/specific.tx		Test thread-specific user data
 ext/Thread/sync.tx		Test thread synchronisation
 ext/Thread/sync2.tx		Test thread synchronisation
@@ -670,9 +672,7 @@ ext/threads/Changes		ithreads
 ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
 ext/threads/shared/Makefile.PL	thread shared variables
-ext/threads/shared/queue.pm	Threadsafe queue.
 ext/threads/shared/README	thread shared variables
-ext/threads/shared/semaphore.pm	Threadsafe semaphore
 ext/threads/shared/shared.pm	thread shared variables
 ext/threads/shared/shared.xs	thread shared variables
 ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
@@ -682,8 +682,6 @@ ext/threads/shared/t/cond.t	Test condition variables
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t Tests for disabled share on variables.
-ext/threads/shared/t/queue.t	thread shared variables
-ext/threads/shared/t/semaphore.t	test semaphore
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
@@ -1528,8 +1526,10 @@ lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
 lib/Thread.pm			Thread extensions frontend
-lib/Thread/Queue.pm		Thread synchronised queue objects
-lib/Thread/Semaphore.pm		Thread semaphore objects
+lib/Thread/Queue.pm		Threadsafe queue
+lib/Thread/Queue.t		See if threadsafe queue works
+lib/Thread/Semaphore.pm         Threadsafe semaphore
+lib/Thread/Semaphore.t          See if threadsafe semaphore works
 lib/Tie/Array.pm		Base class for tied arrays
 lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE

@@ -116,7 +116,7 @@ C<lock(\$a)> is equivalent to C<lock($a)>, while C<lock(\\$a)> is not.
 
 Note that you cannot explicitly unlock a variable; you can only wait
 for the lock to go out of scope. If you need more fine-grained
-control, see L<threads::shared::semaphore>.
+control, see L<Thread::Semaphore>.
 
 =item cond_wait VARIABLE
 
@@ -181,6 +181,11 @@ Does not support splice on arrays!
 Taking references to the elements of shared arrays and hashes does not
 autovivify the elements, and neither does slicing a shared array/hash
 over non-existent indices/keys autovivify the elements.
+
+share() allows you to C<share $hashref->{key}> without giving any error
+message.  But the C<$hashref->{key}> is B<not> shared, causing the error
+"locking can only be used on shared values" to occur when you attempt to
+C<lock $hasref->{key}>.
 
 =head1 AUTHOR
 

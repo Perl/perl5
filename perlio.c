@@ -337,6 +337,7 @@ PerlIO_init(pTHX)
     sfset(sfstdout, SF_SHARE, 0);
 }
 
+/* This is not the reverse of PerlIO_exportFILE(), PerlIO_releaseFILE() is. */
 PerlIO *
 PerlIO_importFILE(FILE *stdio, const char *mode)
 {
@@ -3038,6 +3039,8 @@ PerlIO_funcs PerlIO_stdio = {
 #endif                          /* USE_STDIO_PTR */
 };
 
+/* Note that calls to PerlIO_exportFILE() are reversed using
+ * PerlIO_releaseFILE(), not importFILE. */
 FILE *
 PerlIO_exportFILE(PerlIO * f, const char *mode)
 {
@@ -3085,6 +3088,7 @@ PerlIO_findFILE(PerlIO *f)
     return PerlIO_exportFILE(f, Nullch);
 }
 
+/* Use this to reverse PerlIO_exportFILE calls. */
 void
 PerlIO_releaseFILE(PerlIO *p, FILE *f)
 {

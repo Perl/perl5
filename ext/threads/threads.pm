@@ -65,6 +65,14 @@ sub async (&;@) {
     return threads->new($cref,@_);
 }
 
+sub object {
+    return undef unless @_ > 1;
+    foreach (threads->list) {
+        return $_ if $_->tid == $_[1];
+    }
+    return undef;
+}
+
 $threads::threads = 1;
 
 bootstrap threads $VERSION;
@@ -97,6 +105,7 @@ threads - Perl extension allowing use of interpreter based threads from perl
     $thread->detach();
 
     $thread = threads->self();
+    $thread = threads->object( $tid );
 
     $thread->tid();
     threads->tid();
@@ -121,12 +130,13 @@ important to note that variables are not shared between threads, all
 variables are per default thread local.  To use shared variables one
 must use threads::shared.
 
-It is also important to note that you must enable threads by
-doing C<use threads> as early as possible and that it is not possible
-to enable threading inside an eval "";  In particular, if you are
-intending to share variables with threads::shared, you must
-C<use threads> before you C<use threads::shared> and threads will emit
-a warning if you do it the other way around.
+It is also important to note that you must enable threads by doing
+C<use threads> as early as possible in the script itself and that it
+is not possible to enable threading inside an C<eval "">, C<do>,
+C<require>, or C<use>.  In particular, if you are intending to share
+variables with threads::shared, you must C<use threads> before you
+C<use threads::shared> and C<threads> will emit a warning if you do
+it the other way around.
 
 =over
 
@@ -166,6 +176,12 @@ new thread that's created.
 NB the class method C<< threads->tid() >> is a quick way to get the
 current thread id if you don't have your thread object handy.
 
+=item threads->object( tid )
+
+This will return the thread object for the thread associated with the
+specified tid.  Returns undef if there is no thread associated with the tid
+or no tid is specified or the specified tid is undef.
+
 =item threads->yield();
 
 This is a suggestion to the OS to let this thread yield CPU time to other
@@ -201,7 +217,7 @@ exit from the main thread.
 
 =back
 
-=head1 BUGS / TODO
+=head1 TODO
 
 The current implementation of threads has been an attempt to get
 a correct threading system working that could be built on, 
@@ -212,6 +228,8 @@ also the cost of returning values can be large. These are areas
 were there most likely will be work done to optimize what data
 that needs to be cloned.
 
+=head1 BUGS
+
 =over
 
 =item Parent-Child threads.
@@ -219,8 +237,8 @@ that needs to be cloned.
 On some platforms it might not be possible to destroy "parent"
 threads while there are still existing child "threads".
 
-This will be possibly be fixed in later versions of perl.
-
+This will possibly be fixed in later versions of perl.
+  
 =item tid is I32
 
 The thread id is a 32 bit integer, it can potentially overflow.
@@ -232,7 +250,18 @@ When you return an object the entire stash that the object is blessed
 as well.  This will lead to a large memory usage.  The ideal situation
 would be to detect the original stash if it existed.
 
+=item Creating threads inside BEGIN blocks
+
+Creating threads inside BEGIN blocks (or during the compilation phase
+in general) does not work.  (In Windows, trying to use fork() inside
+BEGIN blocks is an equally losing proposition, since it has been
+implemented in very much the same way as threads.)
+
 =item PERL_OLD_SIGNALS are not threadsafe, will not be.
+
+If your Perl has been built with PERL_OLD_SIGNALS (one has
+to explicitly add that symbol to ccflags, see C<perl -V>),
+signal handling is not threadsafe.
 
 =back
 
