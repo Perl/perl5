@@ -91,7 +91,7 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 	obj = newSVrv(obj_ref, class);
 	sv_setiv(obj, (IV)thread);
 	SvREADONLY_on(obj);
-
+	PerlIO_flush((PerlIO*)NULL);
 	current_perl = PERL_GET_CONTEXT;	
 
 	/*
