@@ -788,14 +788,16 @@ and leaves the UTF8 status as it was.
 #define IoFLAGS(sv)	((XPVIO*)  SvANY(sv))->xio_flags
 
 /* IoTYPE(sv) is a single character telling the type of I/O connection. */
-#define IoTYPE_RDONLY	'<'
-#define IoTYPE_WRONLY	'>'
-#define IoTYPE_RDWR	'+'
-#define IoTYPE_APPEND 	'a'
-#define IoTYPE_PIPE	'|'
-#define IoTYPE_STD	'-'	/* stdin or stdout */
-#define IoTYPE_SOCKET	's'
-#define IoTYPE_CLOSED	' '
+#define IoTYPE_RDONLY		'<'
+#define IoTYPE_WRONLY		'>'
+#define IoTYPE_RDWR		'+'
+#define IoTYPE_APPEND 		'a'
+#define IoTYPE_PIPE		'|'
+#define IoTYPE_STD		'-'	/* stdin or stdout */
+#define IoTYPE_SOCKET		's'
+#define IoTYPE_CLOSED		' '
+#define IoTYPE_IMPLICIT		'I'	/* stdin or stdout or stderr */
+#define IoTYPE_NUMERIC		'#'	/* fdopen */
 
 /*
 =for apidoc Am|bool|SvTAINTED|SV* sv
