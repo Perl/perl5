@@ -6684,8 +6684,10 @@ Perl_scan_num(pTHX_ char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
-#if (defined(USE_64_BIT_INT) && (!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || \
-   (!defined(USE_64_BIT_INT) && (!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
+#if ( defined(USE_64_BIT_INT) && \
+	(!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || \
+    (!defined(USE_64_BIT_INT) && \
+        (!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
     IV tryiv;				/* used to see if it can be an IV */
 #endif
     NV value;				/* number read, as a double */
