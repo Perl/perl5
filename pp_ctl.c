@@ -1820,7 +1820,7 @@ PP(pp_return)
 	    /* Unassume the success we assumed earlier. */
 	    SV *nsv = cx->blk_eval.old_namesv;
 	    (void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
-	    DIE(aTHX_ "%s did not return a true value", SvPVX(nsv));
+	    DIE(aTHX_ "%"SVf" did not return a true value", nsv);
 	}
 	break;
     case CXt_FORMAT:
@@ -2112,7 +2112,7 @@ PP(pp_goto)
 			goto retry;
 		    tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, Nullch);
-		    DIE(aTHX_ "Goto undefined subroutine &%s",SvPVX(tmpstr));
+		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"",tmpstr);
 		}
 		DIE(aTHX_ "Goto undefined subroutine");
 	    }
@@ -3367,7 +3367,7 @@ PP(pp_leaveeval)
 	/* Unassume the success we assumed earlier. */
 	SV *nsv = cx->blk_eval.old_namesv;
 	(void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
-	retop = Perl_die(aTHX_ "%s did not return a true value", SvPVX(nsv));
+	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", nsv);
 	/* die_where() did LEAVE, or we won't be here */
     }
     else {

@@ -762,7 +762,6 @@ PP(pp_tie)
     char *methname;
     int how = PERL_MAGIC_tied;
     U32 items;
-    STRLEN n_a;
 
     varsv = *++MARK;
     switch(SvTYPE(varsv)) {
@@ -809,8 +808,8 @@ PP(pp_tie)
 	 */
 	stash = gv_stashsv(*MARK, FALSE);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
-	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%s\"",
-		 methname, SvPV(*MARK,n_a));
+	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
+		 methname, *MARK);
 	}
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
