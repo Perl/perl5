@@ -1476,7 +1476,7 @@ while expr "X\$ans" : "X!" >/dev/null; do
 		y)
 			echo "*** Substitution done -- please confirm."
 			xxxm="\$ans"
-			ans=\`echo $n "\$ans$c" | tr $trnl ' '\`
+			ans=\`echo $n "\$ans$c" | tr '$trnl' ' '\`
 			xxxm="\$ans"
 			ans=!
 			;;
