@@ -577,13 +577,17 @@ recognized by the C preprocessor such as "if", "else", or "define".)
 
 enables rudimentary switch parsing for switches on the command
 line after the program name but before any filename arguments (or before
-a B<-->).  Any switch found there is removed from @ARGV and sets the
+an argument of B<-->).  This means you can have switches with two leading
+dashes (B<--help>).  Any switch found there is removed from @ARGV and sets the
 corresponding variable in the Perl program.  The following program
 prints "1" if the program is invoked with a B<-xyz> switch, and "abc"
 if it is invoked with B<-xyz=abc>.
 
     #!/usr/bin/perl -s
     if ($xyz) { print "$xyz\n" }
+
+Do note that B<--help> creates the variable ${-help}, which is not compliant
+with C<strict refs>.
 
 =item B<-S>
 
