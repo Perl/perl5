@@ -1097,6 +1097,7 @@
 #define sv_2inuv_non_preserve	S_sv_2inuv_non_preserve
 #define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
 #  endif
+#define expect_number		S_expect_number
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni		S_check_uni
@@ -2566,6 +2567,7 @@
 #define sv_2inuv_non_preserve(a,b)	S_sv_2inuv_non_preserve(aTHX_ a,b)
 #define sv_2iuv_non_preserve(a,b)	S_sv_2iuv_non_preserve(aTHX_ a,b)
 #  endif
+#define expect_number(a)	S_expect_number(aTHX_ a)
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni()		S_check_uni(aTHX)
@@ -4991,6 +4993,8 @@
 #define S_sv_2iuv_non_preserve	CPerlObj::S_sv_2iuv_non_preserve
 #define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
 #  endif
+#define S_expect_number		CPerlObj::S_expect_number
+#define expect_number		S_expect_number
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define S_check_uni		CPerlObj::S_check_uni

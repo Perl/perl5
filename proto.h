@@ -1217,6 +1217,7 @@ STATIC void	S_del_sv(pTHX_ SV *p);
 STATIC int	S_sv_2inuv_non_preserve(pTHX_ SV *sv, I32 numtype);
 STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *sv, I32 numtype);
 #  endif
+STATIC I32	S_expect_number(pTHX_ char** pattern);
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

@@ -2477,6 +2477,7 @@ s	|void	|del_sv	|SV *p
 s      |int    |sv_2inuv_non_preserve  |SV *sv|I32 numtype
 s      |int    |sv_2iuv_non_preserve   |SV *sv|I32 numtype
 #  endif
+s	|I32	|expect_number	|char** pattern
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
