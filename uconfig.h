@@ -1053,8 +1053,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define ARCHLIB "/usr/local/lib/perl5/5.6/unknown"		/ **/
-/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.6/unknown"		/ **/
+/*#define ARCHLIB "/usr/local/lib/perl5/5.7/unknown"		/ **/
+/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.7/unknown"		/ **/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -2031,7 +2031,7 @@
 /*#define USE_STDIO_PTR 	/ **/
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	((fp)->_IO_read_ptr)
-# STDIO_PTR_LVALUE 		/**/
+/*#define STDIO_PTR_LVALUE 		/ **/
 #define FILE_cnt(fp)	((fp)->_IO_read_end - (fp)->_IO_read_ptr)
 /*#define STDIO_CNT_LVALUE 		/ **/
 /*#define STDIO_PTR_LVAL_SETS_CNT	/ **/
@@ -2099,13 +2099,7 @@
  *	This symbol, if defined, indicates that the strtoq routine is
  *	available to convert strings to long longs (quads).
  */
-# HAS_STRTOQ		/**/
-
-/* HAS_STRTOQ:
- *	This symbol, if defined, indicates that the strtoq routine is
- *	available to convert strings to long longs (quads).
- */
-# HAS_STRTOQ		/**/
+/*#define HAS_STRTOQ		/ **/
 
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
@@ -2729,7 +2723,7 @@
 #endif
 #define	NVSIZE		8		/**/
 #undef	NV_PRESERVES_UV
-#define	NV_PRESERVES_UV_BITS	
+#define	NV_PRESERVES_UV_BITS	define
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
@@ -2784,8 +2778,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/usr/local/lib/perl5/5.6"		/**/
-#define PRIVLIB_EXP "/usr/local/lib/perl5/5.6"		/**/
+#define PRIVLIB "/usr/local/lib/perl5/5.7"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl5/5.7"		/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -3089,8 +3083,8 @@
  *	This symbol contains the ~name expanded version of PERL_VENDORARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define PERL_VENDORARCH ""		/ **/
-/*#define PERL_VENDORARCH_EXP ""		/ **/
+# PERL_VENDORARCH ""		/**/
+# PERL_VENDORARCH_EXP ""		/**/
 
 /* PERL_VENDORLIB_EXP:
  *	This symbol contains the ~name expanded version of VENDORLIB, to be used
@@ -3199,18 +3193,6 @@
  */
 #define STDCHAR char	/**/
 
-/* HAS_STRTOUL:
- *	This symbol, if defined, indicates that the strtoul routine is
- *	available to provide conversion of strings to unsigned long.
- */
-/*#define HAS_STRTOUL	/ **/
-
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR char	/**/
-
 /* HAS__FWALK:
  *	This symbol, if defined, indicates that the _fwalk system call is
  *	available to apply a function to all the file handles.
@@ -3229,7 +3211,7 @@
  *	available to write a file's modified data and attributes to
  *	permanent storage.
  */
-# HAS_FSYNC		/**/
+/*#define HAS_FSYNC		/ **/
 
 /* HAS_SBRK_PROTO:
  *	This symbol, if defined, indicates that the system provides
