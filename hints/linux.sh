@@ -56,33 +56,6 @@ if test -L /lib/libc.so.6; then
     libc=/lib/$libc
 fi
 
-# glibc 2.2.90 and above apparently change stdio streams so Perl's
-# direct buffer manipulation no longer works.  The Configure tests
-# should be changed to correctly detect this, but until then,
-# the following check should at least let perl compile and run.
-# (This quick fix should be updated before 5.8.1.)
-# Since we just computed libc above, we'll use it here.  A typical 
-# value looks like libc='/lib/libc-2.0.6.so'
-# To be defensive, reject all unknown versions > 2.2.9.
-# A. Dougherty, May. 30, 2002
-case "$libc" in
-*-2.[01]*)  ;;
-*-2.2.so) ;;
-*-2.2.[0-9].*) ;;
-*)  # Honor a command-line override
-    if test -z "$d_stdstdio"; then
-	d_stdstdio="$undef"
-	cat <<'EOM' >&4
-
-Disabling perl's stdio buffer snooping.  This will generate a harmless
-	    *** WHOA THERE!!! ***
-message in Configure.  Accept the recommended value.
-Read hints/linux.sh for further information.
-EOM
-    fi
-    ;;
-esac
-
 # Configure may fail to find lstat() since it's a static/inline
 # function in <sys/stat.h>.
 d_lstat=define

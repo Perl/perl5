@@ -2537,6 +2537,11 @@ gmtime_r_proto (d_gmtime_r.U):
 	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gmtime_r
 	is defined.
 
+gnulibc_version (d_gnulibc.U):
+	This variable contains the version number of the GNU C library.
+	It is usually something like '2.2.5'.  It is a plain '' if this
+	is not the GNU C library, or if the version is unknown.
+
 grep (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the grep program.  After Configure runs,
