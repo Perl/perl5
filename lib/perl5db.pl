@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.9906;
+$VERSION = 0.9907;
 $header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -157,7 +157,6 @@ warn (			# Do not ;-)
       $dumpvar::quoteHighBit,  
       $dumpvar::printUndef,    
       $dumpvar::globPrint,     
-      $readline::Tk_toloop,    
       $dumpvar::usageOnly,
       @ARGS,
       $Carp::CarpLevel,
@@ -189,7 +188,6 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 HighBit	=> \$dumpvar::quoteHighBit,
 		 undefPrint	=> \$dumpvar::printUndef,
 		 globPrint	=> \$dumpvar::globPrint,
-		 tkRunning	=> \$readline::Tk_toloop,
 		 UsageOnly	=> \$dumpvar::usageOnly,     
 		 frame          => \$frame,
 		 AutoTrace      => \$trace,
@@ -212,6 +210,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  signalLevel	=> \&signalLevel,
 		  warnLevel	=> \&warnLevel,
 		  dieLevel	=> \&dieLevel,
+		  tkRunning	=> \&tkRunning,
 		 );
 
 %optionRequire = (
@@ -1357,15 +1356,13 @@ sub setterm {
     } else {
 	$term = new Term::ReadLine 'perldb', $IN, $OUT;
 
-	$readline::rl_basic_word_break_characters .= "[:" 
-	  if defined $readline::rl_basic_word_break_characters 
-	    and index($readline::rl_basic_word_break_characters, ":") == -1;
-	$readline::rl_special_prefixes = 
-	  $readline::rl_special_prefixes = '$@&%';
-	$readline::rl_completer_word_break_characters =
-	  $readline::rl_completer_word_break_characters . '$@&%';
-	$readline::rl_completion_function = 
-	  $readline::rl_completion_function = \&db_complete; 
+	$rl_attribs = $term->Attribs;
+	$rl_attribs->{basic_word_break_characters} .= '-:+/*,[])}' 
+	  if defined $rl_attribs->{basic_word_break_characters} 
+	    and index($rl_attribs->{basic_word_break_characters}, ":") == -1;
+	$rl_attribs->{special_prefixes} = '$@&%';
+	$rl_attribs->{completer_word_break_characters} .= '$@&%';
+	$rl_attribs->{completion_function} = \&db_complete; 
     }
     $LINEINFO = $OUT unless defined $LINEINFO;
     $lineinfo = $console unless defined $lineinfo;
@@ -1522,6 +1519,15 @@ sub ReadLine {
 	$rl = shift if @_;
     }
     $rl;
+}
+
+sub tkRunning {
+    if ($ {$term->Features}{tkRunning}) {
+        return $term->tkRunning(@_);
+    } else {
+	print $OUT "tkRunning not supported by current ReadLine package.\n";
+	0;
+    }
 }
 
 sub NonStop {
@@ -1990,12 +1996,10 @@ sub db_complete {
       $out = "=$val ";
     }
     # Default to value if one completion, to question if many
-    $readline::rl_completer_terminator_character 
-      = $readline::rl_completer_terminator_character
-	= (@out == 1 ? $out : '? ');
+    $rl_attribs->{completer_terminator_character} = (@out == 1 ? $out : '? ');
     return sort @out;
   }
-  return &readline::rl_filename_list($text); # filenames
+  return $term->filename_list($text); # filenames
 }
 
 sub end_report { print $OUT "Use `q' to quit and `R' to restart. `h q' for details.\n" }
