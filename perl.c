@@ -1041,7 +1041,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     AV* comppadlist;
     register SV *sv;
     register char *s;
-    char *popts, *cddir = Nullch;
+    char *cddir = Nullch;
 
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvn("",0);		/* first used for -I flags */
@@ -1271,14 +1271,15 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #ifndef SECURE_INTERNAL_GETENV
         !PL_tainting &&
 #endif
-	(popts = PerlEnv_getenv("PERL5OPT")))
+	(s = PerlEnv_getenv("PERL5OPT")))
     {
-    	s = savepv(popts);
+    	char *popt = s;
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T')
 	    PL_tainting = TRUE;
 	else {
+	    char *popt_copy = Nullch;
 	    while (s && *s) {
 	        char *d;
 		while (isSPACE(*s))
@@ -1295,6 +1296,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		    Perl_croak(aTHX_ "Illegal switch in PERL5OPT: -%c", *s);
 		while (++s && *s) {
 		    if (isSPACE(*s)) {
+			if (!popt_copy) {
+			    popt_copy = SvPVX(sv_2mortal(newSVpv(popt,0)));
+			    s = popt_copy + (s - popt);
+			    d = popt_copy + (d - popt);
+			}
 		        *s++ = '\0';
 			break;
 		    }
