@@ -302,14 +302,13 @@ I32 *retlen;
 		from++;
 	    }
 	}
-	else if (*from == delim) {
-	    if (to < toend)
-		*to = '\0';
+	else if (*from == delim)
 	    break;
-	}
 	if (to < toend)
 	    *to++ = *from;
     }
+    if (to < toend)
+	*to = '\0';
     *retlen = tolen;
     return from;
 }
