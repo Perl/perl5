@@ -745,8 +745,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 }
 
 /* We know what class REx starts with.  Try to find this position... */
-static char *
-find_byclass(regexp * prog, regnode *c, char *s, char *strend, char *startpos, I32 norun)
+STATIC char *
+S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *startpos, I32 norun)
 {
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 	char *m;
@@ -1221,11 +1221,8 @@ find_byclass(regexp * prog, regnode *c, char *s, char *strend, char *startpos, I
 	    }
 	    break;
 	default:
-	    {
-		dTHX;
-		Perl_croak(aTHX_ "panic: unknown regstclass %d", (int)OP(c));
-		break;
-	    }
+	    Perl_croak(aTHX_ "panic: unknown regstclass %d", (int)OP(c));
+	    break;
 	}
 	return 0;
       got_it:
