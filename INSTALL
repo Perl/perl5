@@ -1048,16 +1048,16 @@ versions of perl under L<Building a shared libperl.so Perl library>.
 
 =head2 Extensions
 
+Perl ships with a number of standard extensions.  These are contained
+in the ext/ subdirectory.
+
 By default, Configure will offer to build every extension which appears
 to be supported.  For example, Configure will offer to build GDBM_File
 only if it is able to find the gdbm library.  (See examples below.)
-B, DynaLoader, Fcntl, IO, and attrs are always built by default.
 Configure does not contain code to test for POSIX compliance, so POSIX
 is always built by default as well.  If you wish to skip POSIX, you can
 set the Configure variable useposix=false either in a hint file or from
-the Configure command line.  Similarly, the Opcode extension is always
-built by default, but you can skip it by setting the Configure variable
-useopcode=false either in a hint file for from the command line.
+the Configure command line.
 
 If you unpack any additional extensions in the ext/ directory before
 running Configure, then Configure will offer to build those additional
@@ -1078,22 +1078,17 @@ DynaLoader extension; you should just build the stub dl_none.xs
 version.  (Configure will suggest this as the default.)
 
 In summary, here are the Configure command-line variables you can set
-to turn off each extension:
+to turn off various extensions.  All others are included by default.
 
-    B			(Always included by default)
     DB_File		i_db
     DynaLoader		(Must always be included as a static extension)
-    Fcntl		(Always included by default)
     GDBM_File		i_gdbm
-    IO			(Always included by default)
     NDBM_File		i_ndbm
     ODBM_File		i_dbm
     POSIX		useposix
-    SDBM_File		(Always included by default)
     Opcode		useopcode
     Socket		d_socket
     Threads		use5005threads
-    attrs		(Always included by default)
 
 Thus to skip the NDBM_File extension, you can use
 
@@ -1115,7 +1110,7 @@ adding libgdbm) Configure will still offer your old choices of extensions
 for the default answer, but it will also point out the discrepancy to
 you.
 
-Finally, if you have dynamic loading (most modern Unix systems do)
+Finally, if you have dynamic loading (most modern systems do)
 remember that these extensions do not increase the size of your perl
 executable, nor do they impact start-up time, so you probably might as
 well build all the ones that will work on your system.
@@ -2309,4 +2304,3 @@ the same terms as perl itself, with the following additional request:
 If you are distributing a modified version of perl (perhaps as part of
 a larger package) please B<do> modify these installation instructions
 and the contact information to match your distribution.
-
