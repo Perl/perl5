@@ -115,18 +115,13 @@ sub connect {
 		$err = $! || (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
 		$@ = "connect: timeout";
 	    }
-	    elsif(!connect($sock,$addr)) {
-		if ($!{EISCONN}) {
-		    # Some systems (e.g. Digital UNIX/Tru64) fail to
-		    # re-connect() to an already open socket and set
-		    # errno to EISCONN (Socket is already connected)
-		    # for such an attempt.
-		    $err = 0;
-		} else {
-		    # But in other cases, there is no redemption.
-		    $err = $!;
-		    $@ = "connect: $!";
-		}
+	    elsif(!connect($sock,$addr) && not $!{EISCONN}) {
+		# Some systems (e.g. Digital UNIX/Tru64) fail to
+		# re-connect() to an already open socket and set
+		# errno to EISCONN (Socket is already connected)
+		# for such an attempt.
+		$err = $!;
+		$@ = "connect: $!";
 	    }
 	}
 	else {
