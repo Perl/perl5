@@ -2527,7 +2527,7 @@ Perl_moreswitches(pTHX_ char *s)
 		sv_catpvn(sv, start, s-start);
 		sv_catpv(sv, " split(/,/,q{");
 		sv_catpv(sv, ++s);
-		sv_catpv(sv,    "})");
+		sv_catpv(sv, "})");
 	    }
 	    s += strlen(s);
 	    my_setenv("PERL5DB", SvPV(sv, PL_na));
@@ -2648,9 +2648,10 @@ Perl_moreswitches(pTHX_ char *s)
                     Perl_croak(aTHX_ "Module name required with -%c option",
 			       s[-1]);
 		sv_catpvn(sv, start, s-start);
-		sv_catpv(sv, " split(/,/,q{");
+		sv_catpv(sv, " split(/,/,q");
+		sv_catpvn(sv, "\0)", 1);        /* Use NUL as q//-delimiter. */
 		sv_catpv(sv, ++s);
-		sv_catpv(sv,    "})");
+		sv_catpvn(sv,  "\0)", 2);
 	    }
 	    s += strlen(s);
 	    if (!PL_preambleav)
