@@ -120,12 +120,12 @@ Migrated from cccd.edu to bixby.org.
 =head1 Welcome to Perl/iX
 
 This is the official home page for the HP e3000 MPE/iX
-(http://www.hp.com/go/e3000) port of the Perl scripting
-language (http://www.perl.com/) which gives you all of the power of C,
+( http://www.hp.com/go/e3000 ) port of the Perl scripting
+language ( http://www.perl.com/ ) which gives you all of the power of C,
 awk, sed, and sh in a single language. Check here for the latest news,
 implemented functionality, known bugs, to-do list, etc. Status reports
 about major milestones will also be posted to the HP3000-L mailing list
-(http://www.lsoft.com/scripts/wl.exe?SL1=HP3000-L&H=RAVEN.UTC.EDU) and
+( http://www.lsoft.com/scripts/wl.exe?SL1=HP3000-L&H=RAVEN.UTC.EDU ) and
 its associated gatewayed newsgroup comp.sys.hp.mpe.
 
 I'm doing this port because I can't live without Perl on the Unix
@@ -133,12 +133,12 @@ machines that I administer, and I want to have the same power
 available to me on MPE.
 
 Please send your comments, questions, and bug reports directly to me,
-Mark Bixby (http://www.bixby.org/mark/), by e-mailing to
+Mark Bixby ( http://www.bixby.org/mark/ ), by e-mailing to
 mark@bixby.org. Or just post them to HP3000-L.
 
 The platform I'm using to do this port is an HP 3000 957RX running
 MPE/iX 6.0 and using the GNU gcc C compiler
-(http://jazz.external.hp.com/src/gnu/gnuframe.html).
+( http://jazz.external.hp.com/src/gnu/gnuframe.html ).
 
 The combined porting wisdom from all of my ports can be found in my
 MPE/iX Porting Guide (http://www.bixby.org/mark/porting.html).
@@ -175,9 +175,9 @@ to _getenv_libc.
 =item *
 
 If you will be compiling Perl/iX yourself, you will also need
-Syslog/iX (http://www.bixby.org/mark/syslogix.html) and the
+Syslog/iX ( http://www.bixby.org/mark/syslogix.html ) and the
 /BIND/PUB/include and /BIND/PUB/lib portions of BIND/iX
-(http://www.bixby.org/mark/bindix.html).
+( http://www.bixby.org/mark/bindix.html ).
 
 =back
 
@@ -388,9 +388,9 @@ equivalent symbolic link) as the first line.  Use the chmod command to
 make sure that your script has execute permission. Run your script!
 
 Be sure to take a look at the CPAN module list
-(http://www.cpan.org/CPAN.html). A wide variety of free Perl software
+( http://www.cpan.org/CPAN.html ). A wide variety of free Perl software
 is available.  You can automatically download these packages by using
-the CPAN module (http://theoryx5.uwinnipeg.ca/CPAN/data/perl/CPAN.html).
+the CPAN module ( http://theoryx5.uwinnipeg.ca/CPAN/data/perl/CPAN.html ).
 
 =head1 MPE/iX Implementation Considerations
 

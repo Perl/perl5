@@ -71,7 +71,7 @@ A port of dmake for Windows is available from:
     http://www.cpan.org/authors/id/GSAR/dmake-4.1pl1-win32.zip
 
 (This is a fixed version of the original dmake sources obtained from
-http://www.wticorp.com/.  As of version 4.1PL1, the original
+http://www.wticorp.com/  As of version 4.1PL1, the original
 sources did not build as shipped and had various other problems.
 A patch is included in the above fixed version.)
 
@@ -199,8 +199,8 @@ enable the appropriate option in the makefile.  des_fcrypt() is not
 bundled with the distribution due to US Government restrictions
 on the export of cryptographic software.  Nevertheless, this routine
 is part of the "libdes" library (written by Eric Young) which is widely
-available worldwide, usually along with SSLeay (for example, 
-"ftp://ftp.funet.fi/pub/crypt/mirrors/dsi/libdes/").  Set CRYPT_SRC to the
+available worldwide, usually along with SSLeay ( for example, 
+ftp://ftp.funet.fi/pub/crypt/mirrors/dsi/libdes/ ).  Set CRYPT_SRC to the
 name of the file that implements des_fcrypt().  Alternatively, if
 you have built a library that contains des_fcrypt(), you can set
 CRYPT_LIB to point to the library name.  The location above contains

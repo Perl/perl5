@@ -206,8 +206,8 @@ interpreter.  ``A core module'' is one that ships with Perl.
 =head2 Keeping in sync
 
 The source code to the Perl interpreter, in its different versions, is
-kept in a repository managed by a revision control system (which is
-currently the Perforce program, see http://perforce.com/).  The
+kept in a repository managed by a revision control system ( which is
+currently the Perforce program, see http://perforce.com/ ).  The
 pumpkings and a few others have access to the repository to check in
 changes.  Periodically the pumpking for the development version of Perl
 will release a new version, so the rest of the porters can see what's
@@ -481,9 +481,15 @@ for reference.
 
 =over 4
 
-There are three (3) remote administrative interfaces for modifying bug status, category, etc.  In all cases an admin must be first registered with the Perlbug database by sending an email request to richard@perl.org or bugmongers@perl.org.  
+There are three (3) remote administrative interfaces for modifying bug
+status, category, etc.  In all cases an admin must be first registered
+with the Perlbug database by sending an email request to
+richard@perl.org or bugmongers@perl.org.
 
-The main requirement is the willingness to classify, (with the emphasis on closing where possible :), outstanding bugs.  Further explanation can be garnered from the web at http://bugs.perl.org/, or by asking on the admin mailing list at: bugmongers@perl.org
+The main requirement is the willingness to classify, (with the
+emphasis on closing where possible :), outstanding bugs.  Further
+explanation can be garnered from the web at http://bugs.perl.org/ , or
+by asking on the admin mailing list at: bugmongers@perl.org
 
 For more info on the web see
 
@@ -538,7 +544,7 @@ patching a core module and there's an author listed, send the author a
 copy (see L<Patching a core module>).  This lets other porters review
 your patch, which catches a surprising number of errors in patches.
 Either use the diff program (available in source code form from
-I<ftp://ftp.gnu.org/pub/gnu/>), or use Johan Vromans' I<makepatch>
+ftp://ftp.gnu.org/pub/gnu/ , or use Johan Vromans' I<makepatch>
 (available from I<CPAN/authors/id/JV/>).  Unified diffs are preferred,
 but context diffs are accepted.  Do not send RCS-style diffs or diffs
 without context lines.  More information is given in the
@@ -555,15 +561,15 @@ To report a bug in Perl, use the program I<perlbug> which comes with
 Perl (if you can't get Perl to work, send mail to the address
 I<perlbug@perl.org> or I<perlbug@perl.com>).  Reporting bugs through
 I<perlbug> feeds into the automated bug-tracking system, access to
-which is provided through the web at I<http://bugs.perl.org/>.  It
+which is provided through the web at http://bugs.perl.org/ .  It
 often pays to check the archives of the perl5-porters mailing list to
 see whether the bug you're reporting has been reported before, and if
 so whether it was considered a bug.  See above for the location of
 the searchable archives.
 
-The CPAN testers (I<http://testers.cpan.org/>) are a group of
+The CPAN testers ( http://testers.cpan.org/ ) are a group of
 volunteers who test CPAN modules on a variety of platforms.  Perl Labs
-(I<http://labs.perl.org/>) automatically tests Perl source releases on
+( http://labs.perl.org/ ) automatically tests Perl source releases on
 platforms and gives feedback to the CPAN testers mailing list.  Both
 efforts welcome volunteers.
 
@@ -615,7 +621,7 @@ wanting to go about Perl development.
 =item The perl5-porters FAQ
 
 This is posted to perl5-porters at the beginning on every month, and
-should be available from http://perlhacker.org/p5p-faq; alternatively,
+should be available from http://perlhacker.org/p5p-faq ; alternatively,
 you can get the FAQ emailed to you by sending mail to
 C<perl5-porters-faq@perl.org>. It contains hints on reading
 perl5-porters, information on how perl5-porters works and how Perl

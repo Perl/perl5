@@ -16,9 +16,9 @@ books on Perl.
 These are instructions for building Perl from source.  Most people can
 simply download a pre-compiled distribution from the VOS anonymous FTP
 site.  If you are running VOS Release 14.2.0 or earlier, download Perl
-from ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html.  If you are
+from ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html  If you are
 running VOS Release 14.3.0 or later, download Perl from
-ftp://ftp.stratus.com/pub/vos/posix/ga/ga.html.  Instructions for
+ftp://ftp.stratus.com/pub/vos/posix/ga/ga.html  Instructions for
 unbundling the Perl distribution file are at
 ftp://ftp.stratus.com/pub/vos/utility/utility.html
 
@@ -115,7 +115,7 @@ perl.
 Note that there are two different implementations of POSIX.1
 support on VOS.  There is an alpha version of POSIX that is
 available from the Stratus anonymous ftp site
-(ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html).  There
+( ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html ).  There
 is a generally-available version of POSIX that comes with VOS
 Release 14.3.0 or higher.  This port of POSIX will compile and
 bind with either version of POSIX.

@@ -185,7 +185,7 @@ following groups:
 
 There is also a Usenet gateway to Perl mailing lists sponsored by perl.org at 
 nntp://nntp.perl.org, or a web interface to the same lists at
-http://nntp.perl.org/group/.  Other groups are listed at 
+http://nntp.perl.org/group/ .  Other groups are listed at 
 http://lists.perl.org/
 
 =head2 Where should I post source code?
@@ -194,11 +194,11 @@ You should post source code to whichever group is most appropriate, but
 feel free to cross-post to comp.lang.perl.misc.  If you want to cross-post
 to alt.sources, please make sure it follows their posting standards,
 including setting the Followup-To header line to NOT include alt.sources;
-see their FAQ (http://www.faqs.org/faqs/alt-sources-intro/) for details.
+see their FAQ ( http://www.faqs.org/faqs/alt-sources-intro/ ) for details.
 
 If you're just looking for software, first use Google
-(http://www.google.com), Google's usenet search interface
-(http://groups.google.com),  and CPAN Search (http://search.cpan.org).  
+( http://www.google.com/ ), Google's usenet search interface
+( http://groups.google.com/ ),  and CPAN Search ( http://search.cpan.org/ ).
 This is faster and more productive than just posting a request.
 
 =head2 Perl Books
@@ -255,8 +255,8 @@ If you are more at home in Windows the following is available
 	ISBN 1-56592-324-3 [1st edition August 1997]
 	http://www.oreilly.com/catalog/lperlwin/
 
-Addison-Wesley (http://www.awlonline.com/) and Manning
-(http://www.manning.com/) are also publishers of some fine Perl books
+Addison-Wesley ( http://www.awlonline.com/ ) and Manning
+( http://www.manning.com/ ) are also publishers of some fine Perl books
 such as I<Object Oriented Programming with Perl> by Damian Conway and
 I<Network Programming with Perl> by Lincoln Stein.
 

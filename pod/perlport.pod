@@ -797,7 +797,7 @@ and L<perldos>.
 
 The EMX environment for DOS, OS/2, etc. emx@iaehv.nl,
 http://www.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/index.html or
-ftp://hobbes.nmsu.edu/pub/os2/dev/emx.  Also L<perlos2>.
+ftp://hobbes.nmsu.edu/pub/os2/dev/emx/  Also L<perlos2>.
 
 =item *
 

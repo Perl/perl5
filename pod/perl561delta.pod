@@ -3625,7 +3625,7 @@ warning.  And in Perl 5.005, this special treatment will cease.
 
 If you find what you think is a bug, you might check the
 articles recently posted to the comp.lang.perl.misc newsgroup.
-There may also be information at http://www.perl.com/, the Perl
+There may also be information at http://www.perl.com/ , the Perl
 Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>

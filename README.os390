@@ -421,7 +421,7 @@ L<INSTALL>, L<perlport>, L<perlebcdic>, L<ExtUtils::MakeMaker>.
 
 =head2 Mailing list for Perl on OS/390
 
-The Perl Institute (http://www.perl.org/) maintains a perl-mvs
+The Perl Institute ( http://www.perl.org/ ) maintains a perl-mvs
 mailing list of interest to all folks building and/or
 using perl on all EBCDIC platforms (not just OS/390).
 To subscribe, send a message of:

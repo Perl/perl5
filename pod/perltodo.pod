@@ -716,7 +716,7 @@ Added in 5.7.1
 
 =head2 Mailing list archives
 
-http://lists.perl.org/, http://archive.develooper.com/
+http://lists.perl.org/ , http://archive.develooper.com/
 
 =head2 Bug tracking
 

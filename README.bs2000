@@ -184,7 +184,7 @@ L<INSTALL>, L<perlport>.
 
 =head2 Mailing list
 
-The Perl Institute (http://www.perl.org/) maintains a perl-mvs mailing
+The Perl Institute ( http://www.perl.org/ ) maintains a perl-mvs mailing
 list of interest to all folks building and/or using perl on EBCDIC
 platforms.  To subscribe, send a message of:
 

@@ -514,7 +514,7 @@ Storable, Text-Tabs+Wrap.
 =item *
 
 Hashes now use Bob Jenkins "One-at-a-Time" hashing key algorithm
-(http://burtleburtle.net/bob/hash/doobs.html).  This algorithm is
+( http://burtleburtle.net/bob/hash/doobs.html ).  This algorithm is
 reasonably fast while producing a much better spread of values than
 the old hashing algorithm (originally by Chris Torek, later tweaked by
 Ilya Zakharevich).  Hash values output from the algorithm on a hash of
@@ -1046,8 +1046,8 @@ working order yet.
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at http://bugs.perl.org.  There may also be
-information at http://www.perl.com/perl/, the Perl Home Page.
+bug database at http://bugs.perl.org/  There may also be
+information at http://www.perl.com/perl/ , the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down
