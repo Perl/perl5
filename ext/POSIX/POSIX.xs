@@ -1212,7 +1212,7 @@ sigaction(sig, optaction, oldaction = 0)
 	    sigfillset(&sset);
 	    RETVAL=sigprocmask(SIG_BLOCK, &sset, &osset);
 	    if(RETVAL == -1)
-		XSRETURN(1);
+               XSRETURN_UNDEF;
 	    ENTER;
 	    /* Restore signal mask no matter how we exit this block. */
 	    SAVEDESTRUCTOR(restore_sigmask, &osset);
@@ -1232,7 +1232,7 @@ sigaction(sig, optaction, oldaction = 0)
 		}
 		RETVAL = sigaction(sig, (struct sigaction *)0, & oact);
 		if(RETVAL == -1)
-		    XSRETURN(1);
+                   XSRETURN_UNDEF;
 		/* Get back the mask. */
 		svp = hv_fetch(oldaction, "MASK", 4, TRUE);
 		if (sv_isa(*svp, "POSIX::SigSet")) {
@@ -1294,6 +1294,8 @@ sigaction(sig, optaction, oldaction = 0)
 		 * essentially meaningless anyway.
 		 */
 		RETVAL = sigaction(sig, & act, (struct sigaction *)0);
+               if(RETVAL == -1)
+                   XSRETURN_UNDEF;
 	    }
 
 	    LEAVE;
