@@ -608,8 +608,12 @@ sub _is_safe {
   # Check to see whether owner is neither superuser (or a system uid) nor me
   # Use the real uid from the $< variable
   # UID is in [4]
-  if ( $info[4] > File::Temp->top_system_uid() && $info[4] != $<) {
-    carp "Directory owned neither by root nor the current user";
+  if ($info[4] > File::Temp->top_system_uid() && $info[4] != $<) {
+
+    Carp::cluck(sprintf "uid=$info[4] topuid=%s \$<=$< path='$path'",
+		File::Temp->top_system_uid());
+
+    carp "Directory owned neither by root nor the current user.";
     return 0;
   }
 

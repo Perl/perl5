@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Fri Aug 18 04:57:25 EET DST 2000
+ * Configuration time: Fri Sep  1 21:11:01 EET DST 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1983,6 +1983,12 @@
 /*#define	HAS_MSG_PROXY	/ **/
 #define	HAS_SCM_RIGHTS	/**/
 
+/* HAS_SOCKS5_INIT:
+ *	This symbol, if defined, indicates that the socks5_init routine is
+ *	available to initialize SOCKS 5.
+ */
+/*#define HAS_SOCKS5_INIT		/ **/
+
 /* HAS_SQRTL:
  *	This symbol, if defined, indicates that the sqrtl routine is
  *	available to do long double square roots.
@@ -2318,6 +2324,12 @@
  */
 /*#define   I_INTTYPES                / **/
 
+/* I_LIBUTIL:
+ *	This symbol, if defined, indicates that <libutil.h> exists and
+ *	should be included.
+ */
+/*#define	I_LIBUTIL		/ **/
+
 /* I_MACH_CTHREADS:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <mach/cthreads.h>.
@@ -2516,8 +2528,18 @@
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'g') for output.
  */
+/* PERL_PRIeldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'e') for output.
+ */
+/* PERL_SCNfldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'f') for input.
+ */
 #define PERL_PRIfldbl	"f"	/**/
 #define PERL_PRIgldbl	"g"	/**/
+#define PERL_PRIeldbl	"e"	/**/
+#define PERL_SCNfldbl	"f"	/**/
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.
@@ -3150,11 +3172,5 @@
  */
 #define PERL_XS_APIVERSION "5.7.0"
 #define PERL_PM_APIVERSION "5.005"
-
-/* I_LIBUTIL:
- *	This symbol, if defined, indicates that <libutil.h> exists and
- *	should be included.
- */
-/*#define	I_LIBUTIL		/ **/
 
 #endif

@@ -2524,8 +2524,18 @@
  *	This symbol, if defined, contains the string used by stdio to
  *	format long doubles (format 'g') for output.
  */
+/* PERL_PRIeldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'e') for output.
+ */
+/* PERL_SCNfldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'f') for input.
+ */
 #define PERL_PRIfldbl	"Lf"	/**/
 #define PERL_PRIgldbl	"Lg"	/**/
+#define PERL_PRIeldbl	$sPRIeldbl	/**/
+# PERL_SCNfldbl	$sSCNfldbl	/**/
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.

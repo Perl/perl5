@@ -204,7 +204,8 @@ Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
     return uv;
 }
 
-/* utf8_distance(a,b) is intended to be a - b in pointer arithmetic */
+/* utf8_distance(a,b) returns the number of UTF8 characters between
+   the pointers a and b							*/
 
 I32
 Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
@@ -247,40 +248,46 @@ Perl_utf8_hop(pTHX_ U8 *s, I32 off)
 }
 
 /*
-=for apidoc Am|U8 *|utf8_to_bytes|U8 *s|STRLEN len
+=for apidoc Am|U8 *|utf8_to_bytes|U8 *s|STRLEN *len
 
-Converts a string C<s> of length C<len> from UTF8 into ASCII encoding.
-Unlike C<bytes_to_utf8>, this over-writes the original string.
-Returns zero on failure after converting as much as possible.
+Converts a string C<s> of length C<len> from UTF8 into byte encoding.
+Unlike C<bytes_to_utf8>, this over-writes the original string, and
+updates len to contain the new length.
+Returns zero on failure leaving the string and len unchanged
 
 =cut
 */
 
 U8 *
-Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN len)
+Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN *len)
 {
     dTHR;
     U8 *send;
     U8 *d;
     U8 *save;
 
-    send = s + len;
+    send = s + *len;
     d = save = s;
+
+    /* ensure valid UTF8 and chars < 256 before updating string */
+    while (s < send) {
+	U8 c = *s++;
+        if (c >= 0x80 &&
+	    ( (s >= send) || ((*s++ & 0xc0) != 0x80) || ((c & 0xfe) != 0xc2)))
+	    return 0;    
+    }
+    s = save;
     while (s < send) {
         if (*s < 0x80)
             *d++ = *s++;
         else {
             I32 ulen;
-            UV uv = utf8_to_uv(s, &ulen);
-            if (uv > 255) {
-                *d = '\0';
-                return 0;
-            }
+            *d++ = (U8)utf8_to_uv(s, &ulen);
             s += ulen;
-            *d++ = (U8)uv;
         }
     }
     *d = '\0';
+    *len = d - save;
     return save;
 }
 

@@ -1018,6 +1018,11 @@ references can be weakened.
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
+=item Character > 255 in vec()
+
+(F) You applied the vec() function to a UTF8 string which contained
+a character > 255.   vec() currently only operates on characters < 256.
+
 =item chmod() mode argument is missing initial 0
 
 (W chmod) A novice will sometimes say
@@ -1683,6 +1688,16 @@ silently ignored.
 (F) Your machine apparently doesn't implement ioctl(), which is pretty
 strange for a machine that supports C.
 
+=item `%s' is not a code reference
+
+(W) The second (fourth, sixth, ...) argument of overload::constant needs
+to be a code reference. Either an anonymous subroutine, or a reference
+to a subroutine.
+
+=item `%s' is not an overloadable type
+
+(W) You tried to overload a constant type the overload package is unaware of.
+
 =item junk on end of regexp
 
 (P) The regular expression parser is confused.
@@ -2204,6 +2219,11 @@ future version.
 L<perlport> for more on portability concerns.
 
 See also L<perlport> for writing portable code.
+
+=item Odd number of arguments for overload::constant
+
+(W) The call to overload::constant contained an odd number of arguments.
+The arguments should come in pairs.
 
 =item Odd number of elements in hash assignment
 

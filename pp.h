@@ -147,7 +147,7 @@ used, guarantees that there is room for at least C<nitems> to be pushed
 onto the stack.
 
 =for apidoc Am|void|PUSHs|SV* sv
-Push an SV onto the stack.  The stack must have room for this element. 
+Push an SV onto the stack.  The stack must have room for this element.
 Does not handle 'set' magic.  See C<XPUSHs>.
 
 =for apidoc Am|void|PUSHp|char* str|STRLEN len
@@ -185,7 +185,7 @@ Push an integer onto the stack, extending the stack if necessary.  Handles
 'set' magic. See C<PUSHi>.
 
 =for apidoc Am|void|XPUSHu|UV uv
-Push an unsigned integer onto the stack, extending the stack if necessary. 
+Push an unsigned integer onto the stack, extending the stack if necessary.
 See C<PUSHu>.
 
 =cut
@@ -342,10 +342,13 @@ See C<PUSHu>.
 	    { dTARGETSTACKED; 						\
 		{ dSP; tryAMAGICunW(meth,FORCE_SETs,shift,RETURN);}}}
 
-#define setAGAIN(ref) sv = arg = ref;					\
-  if (!SvROK(ref))							\
+#define setAGAIN(ref) sv = ref;							\
+  if (!SvROK(ref))								\
       Perl_croak(aTHX_ "Overloaded dereference did not return a reference");	\
-  goto am_again;
+  if (ref != arg && SvRV(ref) != SvRV(arg)) {					\
+      arg = ref;								\
+      goto am_again;								\
+  }
 
 #define tryAMAGICunDEREF(meth) tryAMAGICunW(meth,setAGAIN,0,(void)0)
 

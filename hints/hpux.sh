@@ -105,9 +105,13 @@ EOM
     ;;
 esac
 
+cc=${cc:-cc}
+
 case `$cc -v 2>&1`"" in
 *gcc*) ccisgcc="$define" ;;
-*) ccisgcc='' ;;
+*) ccisgcc=''
+   ccversion=`which cc | xargs what | grep Compiler | awk '{print $2}'`
+   ;;
 esac
 
 # Determine the architecture type of this system.

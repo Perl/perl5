@@ -701,8 +701,8 @@ See the discussion of pack() above.
 
 As of perl 5.005_03 the letter range regular expression such as 
 [A-Z] and [a-z] have been especially coded to not pick up gap 
-characters.  For example, characters such as 'ô' C<o WITH CIRCUMFLEX> 
-(or E<ocirc>) that lie between I and J would not be matched by the 
+characters.  For example, characters such as E<ocirc> C<o WITH CIRCUMFLEX> 
+that lie between I and J would not be matched by the 
 regular expression range C</[H-K]/>.  
 
 If you do want to match the alphabet gap characters in a single octet 
@@ -844,12 +844,12 @@ for drive, that is:
 
 The property of lower case before uppercase letters in EBCDIC is
 even carried to the Latin 1 EBCDIC pages such as 0037 and 1047.
-An example would be that 'Ë' (or E<Euml>) C<E WITH DIAERESIS> (203) comes 
-before 'ë' (or E<euml>) C<e WITH DIAERESIS> (235) on and ASCII machine, but 
+An example would be that E<Euml> C<E WITH DIAERESIS> (203) comes 
+before E<euml> C<e WITH DIAERESIS> (235) on an ASCII machine, but 
 the latter (83) comes before the former (115) on an EBCDIC machine.  
-(Astute readers will note that the upper case version of 'ß' (or E<szlig>) 
+(Astute readers will note that the upper case version of E<szlig> 
 C<SMALL LETTER SHARP S> is simply "SS" and that the upper case version of 
-'^?' (or E<yuml>) C<y WITH DIAERESIS> is not in the 0..255 range but it is 
+E<yuml> C<y WITH DIAERESIS> is not in the 0..255 range but it is 
 at U+x0178 in Unicode, or C<"\x{178}"> in a Unicode enabled Perl).
 
 The sort order will cause differences between results obtained on
@@ -875,8 +875,8 @@ and include Latin-1 characters then apply:
     s/ß/SS/g; 
 
 then sort().  Do note however that such Latin-1 manipulation does not 
-address the '^?' (or E<yuml>) C<y WITH DIAERESIS> character that will 
-remain at code point 255 on ASCII machines, but 223 on most EBCDIC machines 
+address the E<yuml> C<y WITH DIAERESIS> character that will remain at 
+code point 255 on ASCII machines, but 223 on most EBCDIC machines 
 where it will sort to a place less than the EBCDIC numerals.  With a 
 Unicode enabled Perl you might try:
 
@@ -1010,7 +1010,8 @@ translation difficulties.  In particular one popular nroff implementation
 was known to strip accented characters to their unaccented counterparts 
 while attempting to view this document through the B<pod2man> program 
 (for example, you may see a plain C<y> rather than one with a diaeresis 
-as in C<^?> or E<yuml> ).
+as in E<yuml>).  Another nroff truncated the resultant man page at
+the first occurence of 8 bit characters.
 
 Not all shells will allow multiple C<-e> string arguments to perl to
 be concatenated together properly as recipes 2, 3, and 4 might seem
@@ -1018,11 +1019,13 @@ to imply.
 
 Perl does not yet work with any Unicode features on EBCDIC platforms.
 
+=head1 SEE ALSO
+
+L<perllocale>, L<perlfunc>.
+
 =head1 REFERENCES
 
 http://anubis.dkuug.dk/i18n/charmaps
-
-L<perllocale>, L<perlfunc>.
 
 http://www.unicode.org/
 
@@ -1047,10 +1050,10 @@ ISSN 1523-0309; Multilingual Computing Inc. Sandpoint ID, USA.
 
 =head1 AUTHOR
 
-Peter Prymmer E<lt>pvhp@best.comE<gt> wrote this in 1999 and 2000 
+Peter Prymmer pvhp@best.com wrote this in 1999 and 2000 
 with CCSID 0819 and 0037 help from Chris Leach and 
-AndrE<eacute> Pirard E<lt>A.Pirard@ulg.ac.beE<gt> as well as POSIX-BC 
-help from Thomas Dorner E<lt>Thomas.Dorner@start.deE<gt>.
+AndrE<eacute> Pirard A.Pirard@ulg.ac.be as well as POSIX-BC 
+help from Thomas Dorner Thomas.Dorner@start.de.
 Thanks also to Philip Newton and Vickie Cooper.  Trademarks, registered 
 trademarks, service marks and registered service marks used in this 
 document are the property of their respective owners.

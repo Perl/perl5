@@ -5093,6 +5093,7 @@ A class implementing a hash should have the following methods:
     FIRSTKEY this
     NEXTKEY this, lastkey
     DESTROY this
+    UNTIE this
 
 A class implementing an ordinary array should have the following methods:
 
@@ -5109,6 +5110,7 @@ A class implementing an ordinary array should have the following methods:
     SPLICE this, offset, length, LIST
     EXTEND this, count
     DESTROY this
+    UNTIE this
 
 A class implementing a file handle should have the following methods:
 
@@ -5121,6 +5123,7 @@ A class implementing a file handle should have the following methods:
     PRINTF this, format, LIST
     CLOSE this
     DESTROY this
+    UNTIE this
 
 A class implementing a scalar should have the following methods:
 
@@ -5128,6 +5131,7 @@ A class implementing a scalar should have the following methods:
     FETCH this,
     STORE this, value
     DESTROY this
+    UNTIE this
 
 Not all methods indicated above need be implemented.  See L<perltie>,
 L<Tie::Hash>, L<Tie::Array>, L<Tie::Scalar>, and L<Tie::Handle>.
@@ -5507,6 +5511,9 @@ If the selected element is outside the string, the value 0 is returned.
 If an element off the end of the string is written to, Perl will first
 extend the string with sufficiently many zero bytes.   It is an error
 to try to write off the beginning of the string (i.e. negative OFFSET).
+
+The string must not contain any character with value > 255 (which
+can only happen if you're using UTF8 encoding).
 
 Strings created with C<vec> can also be manipulated with the logical
 operators C<|>, C<&>, C<^>, and C<~>.  These operators will assume a bit

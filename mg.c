@@ -292,7 +292,8 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	if (isUPPER(mg->mg_type)) {
 	    sv_magic(nsv,
-		     mg->mg_type == 'P' ? SvTIED_obj(sv, mg) : mg->mg_obj,
+		     mg->mg_type == 'P' ? SvTIED_obj(sv, mg) :
+		     (mg->mg_type == 'D' && mg->mg_obj) ? sv : mg->mg_obj,
 		     toLOWER(mg->mg_type), key, klen);
 	    count++;
 	}

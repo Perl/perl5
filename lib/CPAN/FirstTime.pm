@@ -16,7 +16,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.41 $, 10;
+$VERSION = substr q$Revision: 1.43 $, 10;
 
 =head1 NAME
 
@@ -177,12 +177,13 @@ disable the cache scanning with 'never'.
     print qq{
 
 To speed up the initial CPAN shell startup, it is possible to use
-Storable or FreezeThaw to create an cache of metadata. If no
-serializer is avaiable, the normal index mechanism will be used.
+Storable to create an cache of metadata. If Storable is not available,
+the normal index mechanism will be used. This feature is still
+considered experimantal and not recommended for production use.
 
 };
 
-    defined($default = $CPAN::Config->{cache_metadata}) or $default = 1;
+    defined($default = $CPAN::Config->{cache_metadata}) or $default = 0;
     do {
         $ans = prompt("Cache metadata (yes/no)?", ($default ? 'yes' : 'no'));
     } while ($ans !~ /^\s*[yn]/i);

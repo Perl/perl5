@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Aug 31 07:18:29 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Sep  2 18:40:07 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -160,6 +160,8 @@ esac
 test -d UU || mkdir UU
 cd UU && rm -f ./*
 
+ccname=''
+ccversion=''
 ccsymbols=''
 cppccsymbols=''
 cppsymbols=''
@@ -598,7 +600,6 @@ fflushNULL=''
 fflushall=''
 fpossize=''
 fpostype=''
-ccname=''
 gccosandvers=''
 gccversion=''
 gidformat=''
@@ -729,16 +730,16 @@ libsfiles=''
 libsfound=''
 libspath=''
 lns=''
-d_PRIEldbl=''
-d_PRIFldbl=''
-d_PRIGldbl=''
+d_PRIEUldbl=''
+d_PRIFUldbl=''
+d_PRIGUldbl=''
 d_PRIeldbl=''
 d_PRIfldbl=''
 d_PRIgldbl=''
 d_SCNfldbl=''
-sPRIEldbl=''
-sPRIFldbl=''
-sPRIGldbl=''
+sPRIEUldbl=''
+sPRIFUldbl=''
+sPRIGUldbl=''
 sPRIeldbl=''
 sPRIfldbl=''
 sPRIgldbl=''
@@ -827,13 +828,13 @@ u8type=''
 uvsize=''
 uvtype=''
 ivdformat=''
-nvEformat=''
-nvFformat=''
-nvGformat=''
+nvEUformat=''
+nvFUformat=''
+nvGUformat=''
 nveformat=''
 nvfformat=''
 nvgformat=''
-uvXformat=''
+uvXUformat=''
 uvoformat=''
 uvuformat=''
 uvxformat=''
@@ -845,13 +846,13 @@ privlib=''
 privlibexp=''
 prototype=''
 ptrsize=''
-d_PRIX64=''
+d_PRIXU64=''
 d_PRId64=''
 d_PRIi64=''
 d_PRIo64=''
 d_PRIu64=''
 d_PRIx64=''
-sPRIX64=''
+sPRIXU64=''
 sPRId64=''
 sPRIi64=''
 sPRIo64=''
@@ -969,6 +970,8 @@ if test -f /etc/unixtovms.exe; then
 fi
 
 i_whoami=''
+ccname=''
+ccversion=''
 : set useposix=false in your hint file to disable the POSIX extension.
 useposix=true
 : set useopcode=false in your hint file to disable the Opcode extension.
@@ -1782,7 +1785,7 @@ $define|true|[yY]*) ;;
     This is an UNSTABLE DEVELOPMENT release.
     The version of this $package distribution is $xversion, that is, odd,
     (as opposed to even) and that signifies a development release.
-    If you want a maintenance release, you want an even-numbered version.)
+    If you want a maintenance release, you want an even-numbered version.
 
     Do ***NOT*** install this into production use.
     Data corruption and crashes are possible.
@@ -3105,12 +3108,15 @@ EOI
 	;;
 esac
 : Detect OS2.  The p_ variable is set above in the Head.U unit.
+: Note that this also -- wrongly -- detects e.g. dos-djgpp, which also uses
+: semicolon as a patch separator
 case "$p_" in
 :) ;;
 *)
 	$cat <<'EOI'
 I have the feeling something is not exactly right, however...don't tell me...
 lemme think...does HAL ring a bell?...no, of course, you're only running OS/2!
+(Or you may be running DOS with DJGPP.)
 EOI
 	echo exit 0 >os2
 	;;
@@ -4047,8 +4053,8 @@ for thisincl in $inclwanted; do
 	if $test -d $thisincl; then
 		if $test x$thisincl != x$usrinc; then
 			case "$dflt" in
-			*$thisincl*);;
-			*) dflt="$dflt -I$thisincl";;
+                        *" -I$thisincl "*);;
+                        *) dflt="$dflt -I$thisincl ";;
 			esac
 		fi
 	fi
@@ -4084,6 +4090,7 @@ esac
 case "$dflt" in
 ''|' ') dflt=none;;
 esac
+
 $cat <<EOH
 
 Your C compiler may want other flags.  For this question you should include
@@ -5276,6 +5283,82 @@ EOM
 	;;
 esac
 
+: check for length of double
+echo " "
+case "$doublesize" in
+'')
+	echo "Checking to see how big your double precision numbers are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof(double));
+    exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		doublesize=`./try`
+		echo "Your double is $doublesize bytes long."
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a double precision number (in bytes)?"
+		. ./myread
+		doublesize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
+
+: check for long doubles
+echo " "
+echo "Checking to see if you have long double..." >&4
+echo 'int main() { long double x = 7.0; }' > try.c
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have long double."
+else
+	val="$undef"
+	echo "You do not have long double."
+fi
+$rm try.*
+set d_longdbl
+eval $setvar
+
+: check for length of long double
+case "${d_longdbl}${longdblsize}" in
+$define)
+	echo " "
+	echo "Checking to see how big your long doubles are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(long double));
+}
+EOCP
+	set try
+	set try
+	if eval $compile; then
+		longdblsize=`./try$exe_ext`
+		echo "Your long doubles are $longdblsize bytes long."
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
+		rp="What is the size of a long double (in bytes)?"
+		. ./myread
+		longdblsize="$ans"
+	fi
+	if $test "X$doublesize" = "X$longdblsize"; then
+		echo "(That isn't any different from an ordinary double.)"
+	fi	
+	;;
+esac
+$rm -f try.* try
+
 : determine the architecture name
 echo " "
 if xxx=`./loc arch blurfl $pth`; $test -f "$xxx"; then
@@ -5334,13 +5417,14 @@ case "$use64bitint$use64bitall" in
 *"$define"*)
 	case "$archname64" in
 	'')
+		echo "This architecture is naturally 64-bit, not changing architecture name." >&4
 		;;
 	*)
 		case "$use64bitint" in
 		"$define") echo "64 bit integers selected." >&4 ;;
 		esac
 		case "$use64bitall" in
-		"$define") echo "64 bit memory model selected." >&4 ;;
+		"$define") echo "Maximal 64 bitness selected." >&4 ;;
 		esac
 		case "$archname" in
 	        *-$archname64*) echo "...and architecture name already has $archname64." >&4
@@ -5355,13 +5439,20 @@ esac
 case "$uselongdouble" in
 $define)
 	echo "Long doubles selected." >&4
-	case "$archname" in
-        *-ld*) echo "...and architecture name already has -ld." >&4
-                ;;
-        *)      archname="$archname-ld"
-                echo "...setting architecture name to $archname." >&4
-                ;;
-        esac
+	case "$longdblsize" in
+	$doublesize)
+		"...but long doubles are equal to doubles, not changing architecture name." >&4
+		;;
+	*)
+		case "$archname" in
+	        *-ld*) echo "...and architecture name already has -ld." >&4
+	                ;;
+	        *)      archname="$archname-ld"
+	                echo "...setting architecture name to $archname." >&4
+        	        ;;
+	        esac
+		;;
+	esac
 	;;
 esac
 
@@ -7536,82 +7627,6 @@ fi
 set qgcvt d_qgcvt
 eval $inlibc
 
-: check for length of double
-echo " "
-case "$doublesize" in
-'')
-	echo "Checking to see how big your double precision numbers are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof(double));
-    exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		doublesize=`./try`
-		echo "Your double is $doublesize bytes long."
-	else
-		dflt='8'
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a double precision number (in bytes)?"
-		. ./myread
-		doublesize="$ans"
-	fi
-	;;
-esac
-$rm -f try.c try
-
-: check for long doubles
-echo " "
-echo "Checking to see if you have long double..." >&4
-echo 'int main() { long double x = 7.0; }' > try.c
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have long double."
-else
-	val="$undef"
-	echo "You do not have long double."
-fi
-$rm try.*
-set d_longdbl
-eval $setvar
-
-: check for length of long double
-case "${d_longdbl}${longdblsize}" in
-$define)
-	echo " "
-	echo "Checking to see how big your long doubles are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("%d\n", sizeof(long double));
-}
-EOCP
-	set try
-	set try
-	if eval $compile; then
-		longdblsize=`./try$exe_ext`
-		echo "Your long doubles are $longdblsize bytes long."
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)" >&4
-		rp="What is the size of a long double (in bytes)?"
-		. ./myread
-		longdblsize="$ans"
-	fi
-	if $test "X$doublesize" = "X$longdblsize"; then
-		echo "(That isn't any different from an ordinary double.)"
-	fi	
-	;;
-esac
-$rm -f try.* try
-
 echo " "
 
 if $test X"$d_longdbl" = X"$define"; then
@@ -7633,7 +7648,7 @@ EOCP
 		case "$yyy" in
 		123.456)
 			sPRIfldbl='"f"'; sPRIgldbl='"g"'; sPRIeldbl='"e"';
-                	sPRIFldbl='"F"'; sPRIGldbl='"G"'; sPRIEldbl='"E"';
+                	sPRIFUldbl='"F"'; sPRIGUldbl='"G"'; sPRIEUldbl='"E"';
 			echo "We will use %f."
 			;;
 		esac
@@ -7655,7 +7670,7 @@ EOCP
 		case "$yyy" in
 		123.456)
 			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
-                	sPRIFldbl='"llF"'; sPRIGldbl='"llG"'; sPRIEldbl='"llE"';
+                	sPRIFUldbl='"llF"'; sPRIGUldbl='"llG"'; sPRIEUldbl='"llE"';
 			echo "We will use %llf."
 			;;
 		esac
@@ -7677,7 +7692,7 @@ EOCP
 		case "$yyy" in
 		123.456)
 			sPRIfldbl='"Lf"'; sPRIgldbl='"Lg"'; sPRIeldbl='"Le"';
-                	sPRIFldbl='"LF"'; sPRIGldbl='"LG"'; sPRIEldbl='"LE"';
+                	sPRIFUldbl='"LF"'; sPRIGUldbl='"LG"'; sPRIEUldbl='"LE"';
 			echo "We will use %Lf."
 			;;
 		esac
@@ -7699,7 +7714,7 @@ EOCP
 		case "$yyy" in
 		123.456)
 			sPRIfldbl='"lf"'; sPRIgldbl='"lg"'; sPRIeldbl='"le"';
-                	sPRIFldbl='"lF"'; sPRIGldbl='"lG"'; sPRIEldbl='"lE"';
+                	sPRIFUldbl='"lF"'; sPRIGUldbl='"lG"'; sPRIEUldbl='"lE"';
 			echo "We will use %lf."
 			;;
 		esac
@@ -7718,11 +7733,11 @@ fi # d_longdbl
 
 case "$sPRIfldbl" in
 '')	d_PRIfldbl="$undef"; d_PRIgldbl="$undef"; d_PRIeldbl="$undef"; 
-	d_PRIFldbl="$undef"; d_PRIGldbl="$undef"; d_PRIEldbl="$undef"; 
+	d_PRIFUldbl="$undef"; d_PRIGUldbl="$undef"; d_PRIEUldbl="$undef"; 
 	d_SCNfldbl="$undef";
 	;;
 *)	d_PRIfldbl="$define"; d_PRIgldbl="$define"; d_PRIeldbl="$define"; 
-	d_PRIFldbl="$define"; d_PRIGldbl="$define"; d_PRIEldbl="$define"; 
+	d_PRIFUldbl="$define"; d_PRIGUldbl="$define"; d_PRIEUldbl="$define"; 
 	d_SCNfldbl="$define";
 	;;
 esac
@@ -7835,17 +7850,22 @@ int main()
 	Gconvert((DOUBLETYPE)-100000.0, 8, 0, buf); 
 	checkit("-100000", buf);
 
+	Gconvert((DOUBLETYPE)123.456, 8, 0, buf); 
+	checkit("123.456", buf);
+
 	exit(0);
 }
 EOP
 case "$d_Gconvert" in
 gconvert*) xxx_list='gconvert gcvt sprintf' ;;
 gcvt*) xxx_list='gcvt gconvert sprintf' ;;
-*) xxx_list='sprintf gconvert gcvt' ;;
+sprintf*) xxx_list='sprintf gconvert gcvt' ;;
+*) xxx_list='gconvert gcvt sprintf' ;;
 esac
 
 case "$d_longdbl$uselongdouble$d_PRIgldbl" in
 "$define$define$define")
+    # for long doubles prefer first qgcvt, then sprintf
     xxx_list="`echo $xxx_list|sed s/sprintf//`" 
     xxx_list="sprintf $xxx_list"
     case "$d_qgcvt" in
@@ -10419,7 +10439,6 @@ EOP
 esac
 
 
-
 : check for off64_t
 echo " "
 echo "Checking to see if you have off64_t..." >&4
@@ -12705,14 +12724,14 @@ val=$undef
 set tebcdic
 if eval $compile_ok; then
 	if ./tebcdic; then
-		echo "You have EBCDIC." >&4
+		echo "You seem to speak EBCDIC." >&4
 		val="$define"
 	else
-		echo "Nope, no EBCDIC, probably ASCII or some ISO Latin." >&4
+		echo "Nope, no EBCDIC, probably ASCII or some ISO Latin. Or UTF8." >&4
 	fi
 else
 	echo "I'm unable to compile the test program." >&4
-	echo "I'll assume ASCII or some ISO Latin." >&4
+	echo "I'll assume ASCII or some ISO Latin. Or UTF8." >&4
 fi
 $rm -f tebcdic.c tebcdic
 set ebcdic
@@ -13120,7 +13139,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"d"'; sPRIi64='"i"'; sPRIu64='"u"';
-                	sPRIo64='"o"'; sPRIx64='"x"'; sPRIX64='"X"';
+                	sPRIo64='"o"'; sPRIx64='"x"'; sPRIXU64='"X"';
 			echo "We will use %d."
 			;;
 		esac
@@ -13142,7 +13161,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"ld"'; sPRIi64='"li"'; sPRIu64='"lu"';
-                	sPRIo64='"lo"'; sPRIx64='"lx"'; sPRIX64='"lX"';
+                	sPRIo64='"lo"'; sPRIx64='"lx"'; sPRIXU64='"lX"';
 			echo "We will use %ld."
 			;;
 		esac
@@ -13165,7 +13184,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64=PRId64; sPRIi64=PRIi64; sPRIu64=PRIu64;
-                	sPRIo64=PRIo64; sPRIx64=PRIx64; sPRIX64=PRIX64;
+                	sPRIo64=PRIo64; sPRIx64=PRIx64; sPRIXU64=PRIXU64;
 			echo "We will use the C9X style."
 			;;
 		esac
@@ -13177,7 +13196,7 @@ if $test X"$sPRId64" = X -a X"$quadtype" = X"long long"; then
 #include <sys/types.h>
 #include <stdio.h>
 int main() {
-  long long q = 12345678901LL; /* AIX cc requires the LL prefix. */
+  long long q = 12345678901LL; /* AIX cc requires the LL suffix. */
   printf("%lld\n", q);
 }
 EOCP
@@ -13187,7 +13206,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"lld"'; sPRIi64='"lli"'; sPRIu64='"llu"';
-                	sPRIo64='"llo"'; sPRIx64='"llx"'; sPRIX64='"llX"';
+                	sPRIo64='"llo"'; sPRIx64='"llx"'; sPRIXU64='"llX"';
 			echo "We will use the %lld style."
 			;;
 		esac
@@ -13209,7 +13228,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"Ld"'; sPRIi64='"Li"'; sPRIu64='"Lu"';
-                	sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIX64='"LX"';
+                	sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIXU64='"LX"';
 			echo "We will use %Ld."
 			;;
 		esac
@@ -13231,7 +13250,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64='"qd"'; sPRIi64='"qi"'; sPRIu64='"qu"';
-                	sPRIo64='"qo"'; sPRIx64='"qx"'; sPRIX64='"qX"';
+                	sPRIo64='"qo"'; sPRIx64='"qx"'; sPRIXU64='"qX"';
 			echo "We will use %qd."
 			;;
 		esac
@@ -13248,10 +13267,10 @@ fi
 
 case "$sPRId64" in
 '')	d_PRId64="$undef"; d_PRIi64="$undef"; d_PRIu64="$undef"; 
-	d_PRIo64="$undef"; d_PRIx64="$undef"; d_PRIX64="$undef"; 
+	d_PRIo64="$undef"; d_PRIx64="$undef"; d_PRIXU64="$undef"; 
 	;;
 *)	d_PRId64="$define"; d_PRIi64="$define"; d_PRIu64="$define"; 
-	d_PRIo64="$define"; d_PRIx64="$define"; d_PRIX64="$define"; 
+	d_PRIo64="$define"; d_PRIx64="$define"; d_PRIXU64="$define"; 
 	;;
 esac
 
@@ -13264,21 +13283,21 @@ if $test X"$ivsize" = X8; then
 	uvuformat="$sPRIu64"
 	uvoformat="$sPRIo64"
 	uvxformat="$sPRIx64"
-	uvXformat="$sPRIX64"
+	uvXUformat="$sPRIXU64"
 else
 	if $test X"$ivsize" = X"$longsize"; then
 		ivdformat='"ld"'
 		uvuformat='"lu"'
 		uvoformat='"lo"'
 		uvxformat='"lx"'
-		uvXformat='"lX"'
+		uvXUformat='"lX"'
 	else
 		if $test X"$ivsize" = X"$intsize"; then
 			ivdformat='"d"'
 			uvuformat='"u"'
 			uvoformat='"o"'
 			uvxformat='"x"'
-			uvXformat='"X"'
+			uvXUformat='"X"'
 		else
 			: far out
 			if $test X"$ivsize" = X"$shortsize"; then
@@ -13286,7 +13305,7 @@ else
 				uvuformat='"hu"'
 				uvoformat='"ho"'
 				uvxformat='"hx"'
-				uvXformat='"hX"'
+				uvXUformat='"hX"'
 			fi
 		fi
 	fi
@@ -13296,16 +13315,16 @@ if $test X"$uselongdouble" = X"$define" -a X"$d_longdbl" = X"$define" -a X"$d_PR
 	nveformat="$sPRIeldbl"
 	nvfformat="$sPRIfldbl"
 	nvgformat="$sPRIgldbl"
-	nvEformat="$sPRIEldbl"
-	nvFformat="$sPRIFldbl"
-	nvGformat="$sPRIGldbl"
+	nvEUformat="$sPRIEUldbl"
+	nvFUformat="$sPRIFUldbl"
+	nvGUformat="$sPRIGUldbl"
 else
 	nveformat='"e"'
 	nvfformat='"f"'
 	nvgformat='"g"'
-	nvEformat='"E"'
-	nvFformat='"F"'
-	nvGformat='"G"'
+	nvEUformat='"E"'
+	nvFUformat='"F"'
+	nvGUformat='"G"'
 fi
 
 case "$ivdformat" in
@@ -13586,12 +13605,15 @@ case "$pager" in
 	dflt=''
 	case "$pg" in
 	/*) dflt=$pg;;
+	[a-zA-Z]:/*) dflt=$pg;;
 	esac
 	case "$more" in
 	/*) dflt=$more;;
+	[a-zA-Z]:/*) dflt=$more;;
 	esac
 	case "$less" in
 	/*) dflt=$less;;
+	[a-zA-Z]:/*) dflt=$less;;
 	esac
 	case "$dflt" in
 	'') dflt=/usr/ucb/more;;
@@ -15414,6 +15436,7 @@ ccflags='$ccflags'
 ccflags_uselargefiles='$ccflags_uselargefiles'
 ccname='$ccname'
 ccsymbols='$ccsymbols'
+ccversion='$ccversion'
 cf_by='$cf_by'
 cf_email='$cf_email'
 cf_time='$cf_time'
@@ -15440,10 +15463,10 @@ crosscompile='$crosscompile'
 cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
-d_PRIEldbl='$d_PRIEldbl'
-d_PRIFldbl='$d_PRIFldbl'
-d_PRIGldbl='$d_PRIGldbl'
-d_PRIX64='$d_PRIX64'
+d_PRIEUldbl='$d_PRIEUldbl'
+d_PRIFUldbl='$d_PRIFUldbl'
+d_PRIGUldbl='$d_PRIGUldbl'
+d_PRIXU64='$d_PRIXU64'
 d_PRId64='$d_PRId64'
 d_PRIeldbl='$d_PRIeldbl'
 d_PRIfldbl='$d_PRIfldbl'
@@ -15968,9 +15991,9 @@ nm_opt='$nm_opt'
 nm_so_opt='$nm_so_opt'
 nonxs_ext='$nonxs_ext'
 nroff='$nroff'
-nvEformat='$nvEformat'
-nvFformat='$nvFformat'
-nvGformat='$nvGformat'
+nvEUformat='$nvEUformat'
+nvFUformat='$nvFUformat'
+nvGUformat='$nvGUformat'
 nveformat='$nveformat'
 nvfformat='$nvfformat'
 nvgformat='$nvgformat'
@@ -16017,10 +16040,10 @@ revision='$revision'
 rm='$rm'
 rmail='$rmail'
 runnm='$runnm'
-sPRIEldbl='$sPRIEldbl'
-sPRIFldbl='$sPRIFldbl'
-sPRIGldbl='$sPRIGldbl'
-sPRIX64='$sPRIX64'
+sPRIEUldbl='$sPRIEUldbl'
+sPRIFUldbl='$sPRIFUldbl'
+sPRIGUldbl='$sPRIGUldbl'
+sPRIXU64='$sPRIXU64'
 sPRId64='$sPRId64'
 sPRIeldbl='$sPRIeldbl'
 sPRIfldbl='$sPRIfldbl'
@@ -16137,7 +16160,7 @@ usevendorprefix='$usevendorprefix'
 usevfork='$usevfork'
 usrinc='$usrinc'
 uuname='$uuname'
-uvXformat='$uvXformat'
+uvXUformat='$uvXUformat'
 uvoformat='$uvoformat'
 uvsize='$uvsize'
 uvtype='$uvtype'
@@ -16247,7 +16270,7 @@ EOM
 	. UU/myread
 	case "$ans" in
 	y*)
-		$make depend && echo "Now you must run a $make."
+		$make depend && echo "Now you must run '$make'."
 		;;
 	*)
 		echo "You must run '$make depend' then '$make'."

@@ -36,7 +36,7 @@ Perl history in brief, by Larry Wall:
 
 Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
 Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
-Sarathy, Graham Barr.
+Sarathy, Graham Barr, Jarkko Hietaniemi.
 
 =head2 PUMPKIN?
 
@@ -340,6 +340,10 @@ the strings?).
 	  5.6.0-RC2	2000-Mar-14	release candidate 2
 	  5.6.0-RC3	2000-Mar-21	release candidate 3
 	  5.6.0		2000-Mar-22
+
+ Sarathy  5.6.1         2000-***-**	The 5.6 maintenance track.
+
+ Jarkko   5.7.0         2000-Sep-02 	The 5.7 track: Development.
 
 =head2 SELECTED RELEASE SIZES
 

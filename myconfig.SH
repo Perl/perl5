@@ -34,13 +34,11 @@ Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL
     config_args='$config_args'
     hint=$hint, useposix=$useposix, d_sigaction=$d_sigaction
     usethreads=$usethreads use5005threads=$use5005threads useithreads=$useithreads usemultiplicity=$usemultiplicity
-    useperlio=$useperlio d_sfio=$d_sfio uselargefiles=$uselargefiles 
-    use64bitint=$use64bitint use64bitall=$use64bitall uselongdouble=$uselongdouble usesocks=$usesocks
+    useperlio=$useperlio d_sfio=$d_sfio uselargefiles=$uselargefiles usesocks=$usesocks
+    use64bitint=$use64bitint use64bitall=$use64bitall uselongdouble=$uselongdouble
   Compiler:
-    cc='$cc', optimize='$optimize', gccversion=$gccversion, gccosandvers=$gccosandvers
-    cppflags='$cppflags'
-    ccflags ='$ccflags'
-    stdchar='$stdchar', d_stdstdio=$d_stdstdio, usevfork=$usevfork
+    cc='$cc', ccflags ='$ccflags', optimize='$optimize', cppflags='$cppflags'
+    ccversion='$ccversion', gccversion='$gccversion', gccosandvers='$gccosandvers'
     intsize=$intsize, longsize=$longsize, ptrsize=$ptrsize, doublesize=$doublesize, byteorder=$byteorder
     d_longlong=$d_longlong, longlongsize=$longlongsize, d_longdbl=$d_longdbl, longdblsize=$longdblsize
     ivtype='$ivtype', ivsize=$ivsize, nvtype='$nvtype', nvsize=$nvsize, Off_t='$lseektype', lseeksize=$lseeksize
