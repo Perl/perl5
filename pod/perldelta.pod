@@ -7,31 +7,132 @@ perldelta - what is new for perl v5.8.2
 This document describes differences between the 5.8.1 release and
 the 5.8.2 release.
 
+If you are upgrading from an earlier release such as 5.6.1, first read
+the L<perl58delta>, which describes differences between 5.6.0 and
+5.8.0, and the L<perl581delta>, which describes differences between
+5.8.0 and 5.8.1.
+
 =head1 Incompatible Changes
+
+We believe none.
 
 =head1 Core Enhancements
 
+=head2 Hash Randomisation
+
+The hash randomisation introduced with 5.8.1 has been amended. It
+transpired that although the implementation introduced in 5.8.1 was source
+compatible with 5.8.0, it was not binary compatible in certain cases. 5.8.2
+contains an improved implementation which is both source and binary
+compatible with both 5.8.0 and 5.8.1, and remains robust against the form of
+attack which prompted the change for 5.8.1.
+
+We are grateful to the Debian project for their input in this area.
+See L<perlsec/"Algorithmic Complexity Attacks"> for the original
+rationale behind this change.
+
+=head2 Threading
+
+Several memory leaks associated with variables shared between threads
+have been fixed.
+
 =head1 Modules and Pragmata
 
-=head1 Utility Changes
+=head2 Updated Modules And Pragmata
 
-=head1 New Documentation
+The following modules and pragmata have been updated since Perl 5.8.0:
 
-=head1 Performance Enhancements
+=over 4
 
-=head1 Installation and Configuration Improvements
+=item Devel::PPPort
+
+=item Digest::MD5
+
+=item ExtUtils::MakeMaker
+
+Now able to generate a SIGNATURE file if Module::Signature is installed.
+(work completed as part of The Perl Foundation's grant to Autrijus Tang)
+
+=item I18N::LangTags
+
+=item libnet
+
+=item MIME::Base64
+
+=item Pod::Perldoc
+
+=item strict
+
+Documentation improved
+
+=item Tie::Hash
+
+Documentation improved
+
+=item Time::HiRes
+
+=item Unicode::Collate
+
+=item Unicode::Normalize
+
+=item UNIVERSAL
+
+=back
 
 =head1 Selected Bug Fixes
 
-=head1 New or Changed Diagnostics
+C<require> should now behave correctly when repeated attempts are made
+to load a file which fails.
+
+The tokenizer now recovers properly after an unknown filetest operator.
 
 =head1 Changed Internals
 
-=head1 New Tests
+Fixes have been made to the embedding implementation to initialise more
+interpreter variables when several interpreters are run without
+-DMULTIPLICITY
 
-=head1 Known Problems
+dup2() now uses the PerlLIO abstraction layer
 
 =head1 Platform Specific Problems
+
+Dynamic linker flags have been tweaked for Solaris and OS X, which should
+solve problems seen while building some XS modules.
+
+Bugs in OS/2 sockets and tmpfile have been fixed.
+
+In OS X C<setreuid> and friends are troublesome - perl will now work
+around their problems as best possible.
+
+=head1 Future Directions
+
+Starting with 5.8.3 I intend to make more frequent maintenance releases,
+with a smaller number of changes in each. The intent is to propagate
+bug fixes out to stable releases more rapidly and make upgrading stable
+releases less of an upheaval. Hopefully this will give end users more
+flexibility in their choice of upgrade timing, and allow them easier
+assessment of the impact of upgrades. The current plan is for code freezes
+as follows
+
+=over 4
+
+=item *
+
+5.8.3 23:59:59, Wednesday December 31st 2003
+
+=item *
+
+5.8.4 23:59:59, Wednesday March 31st 2004
+
+=item *
+
+5.8.5 23:59:59, Wednesday June 30th 2004
+
+=back
+
+with the release following soon after, when testing is complete.
+
+See L<perl581delta/"Future Directions"> for more soothsaying.
 
 =head1 Reporting Bugs
 
