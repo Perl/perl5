@@ -2485,7 +2485,7 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     }
 }
 
-IV
+Off_t
 PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
@@ -3061,18 +3061,18 @@ PerlIOStdio_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     return got;
 }
 
-IV
+Off_t
 PerlIOStdio_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    return PerlSIO_fseek(stdio, offset, whence);
+    return fseek(stdio, offset, whence);
 }
 
 Off_t
 PerlIOStdio_tell(pTHX_ PerlIO *f)
 {
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    return PerlSIO_ftell(stdio);
+    return ftell(stdio);
 }
 
 IV
@@ -3713,7 +3713,7 @@ PerlIOBuf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     return written;
 }
 
-IV
+Off_t
 PerlIOBuf_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
     IV code;
@@ -3912,7 +3912,7 @@ PerlIOPending_close(pTHX_ PerlIO *f)
     return PerlIO_close(f);
 }
 
-IV
+Off_t
 PerlIOPending_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
     /*

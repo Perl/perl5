@@ -33,7 +33,7 @@ struct _PerlIO_funcs {
      SSize_t(*Read) (pTHX_ PerlIO *f, void *vbuf, Size_t count);
      SSize_t(*Unread) (pTHX_ PerlIO *f, const void *vbuf, Size_t count);
      SSize_t(*Write) (pTHX_ PerlIO *f, const void *vbuf, Size_t count);
-    IV (*Seek) (pTHX_ PerlIO *f, Off_t offset, int whence);
+     Off_t (*Seek) (pTHX_ PerlIO *f, Off_t offset, int whence);
      Off_t(*Tell) (pTHX_ PerlIO *f);
     IV (*Close) (pTHX_ PerlIO *f);
     /* Stdio-like buffered IO functions */
@@ -176,7 +176,7 @@ extern PerlIO *PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, in
 extern SSize_t PerlIOBuf_read(pTHX_ PerlIO *f, void *vbuf, Size_t count);
 extern SSize_t PerlIOBuf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
 extern SSize_t PerlIOBuf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
-extern IV PerlIOBuf_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
+extern Off_t PerlIOBuf_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
 extern Off_t PerlIOBuf_tell(pTHX_ PerlIO *f);
 extern IV PerlIOBuf_close(pTHX_ PerlIO *f);
 extern IV PerlIOBuf_flush(pTHX_ PerlIO *f);
