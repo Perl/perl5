@@ -7,12 +7,13 @@ perlre - Perl regular expressions
 This page describes the syntax of regular expressions in Perl.  For a
 description of how to I<use> regular expressions in matching
 operations, plus various examples of the same, see discussion
-of C<m//>, C<s///>, C<qr//> and C<??> in L<perlop/Regexp Quote-Like Operators>.
+of C<m//>, C<s///>, C<qr//> and C<??> in L<perlop/"Regexp Quote-Like Operators">.
 
 The matching operations can have various modifiers.  The modifiers
 that relate to the interpretation of the regular expression inside
-are listed below.  For the modifiers that alter the way regular expression
-is used by Perl, see L<perlop/Regexp Quote-Like Operators>.
+are listed below.  For the modifiers that alter the way a regular expression
+is used by Perl, see L<perlop/"Regexp Quote-Like Operators"> and 
+L<perlop/"Gory details of parsing quoted constructs">.
 
 =over 4
 
@@ -898,6 +899,8 @@ part of this regular expression needs to be converted explicitly
 =head2 SEE ALSO
 
 L<perlop/"Regexp Quote-Like Operators">.
+
+L<perlop/"Gory details of parsing quoted constructs">.
 
 L<perlfunc/pos>.
 
