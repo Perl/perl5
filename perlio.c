@@ -2632,16 +2632,32 @@ PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 SSize_t
 PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-    FILE *s = PerlIOSelf(f, PerlIOStdio)->stdio;
-    STDCHAR *buf = ((STDCHAR *) vbuf) + count - 1;
     SSize_t unread = 0;
-    while (count > 0) {
-	int ch = *buf-- & 0xff;
-	if (PerlSIO_ungetc(ch, s) != ch)
-	    break;
-	unread++;
-	count--;
+    FILE *s = PerlIOSelf(f, PerlIOStdio)->stdio;
+
+    if (PerlIO_fast_gets(f)) {
+	STDCHAR *buf = ((STDCHAR *) vbuf) + count;
+	STDCHAR *base = PerlIO_get_base(f);
+	SSize_t cnt   = PerlIO_get_cnt(f);
+	STDCHAR *ptr  = PerlIO_get_ptr(f);
+	SSize_t avail = ptr - base;
+	if (avail > 0) {
+	    if (avail > count) {
+		avail = count;
+	    }
+	    ptr -= avail;
+	    Move(buf-avail,ptr,avail,STDCHAR);
+	    count -= avail;
+	    unread += avail;
+	    PerlIO_set_ptrcnt(f,ptr,cnt+avail);
+	}
     }
+
+    if (count > 0) {
+	unread += PerlIOBase_unread(aTHX_ f, vbuf, count);
+    }
+    if (PerlSIO_feof(s) && unread >= 0)
+	PerlSIO_clearerr(s);
     return unread;
 }
 
@@ -2689,24 +2705,6 @@ PerlIOStdio_flush(pTHX_ PerlIO *f)
 	    errno = err;
 #endif
     }
-    return 0;
-}
-
-IV
-PerlIOStdio_fill(pTHX_ PerlIO *f)
-{
-    FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    int c;
-    /*
-     * fflush()ing read-only streams can cause trouble on some stdio-s
-     */
-    if ((PerlIOBase(f)->flags & PERLIO_F_CANWRITE)) {
-	if (PerlSIO_fflush(stdio) != 0)
-	    return EOF;
-    }
-    c = PerlSIO_fgetc(stdio);
-    if (c == EOF || PerlSIO_ungetc(c, stdio) != c)
-	return EOF;
     return 0;
 }
 
@@ -2807,7 +2805,61 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 #endif                          /* STDIO_CNT_LVALUE */
 }
 
+
 #endif
+
+IV
+PerlIOStdio_fill(pTHX_ PerlIO *f)
+{
+    FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
+    int c;
+    /*
+     * fflush()ing read-only streams can cause trouble on some stdio-s
+     */
+    if ((PerlIOBase(f)->flags & PERLIO_F_CANWRITE)) {
+	if (PerlSIO_fflush(stdio) != 0)
+	    return EOF;
+    }
+    c = PerlSIO_fgetc(stdio);
+    if (c == EOF)
+	return EOF;
+
+#if (defined(STDIO_PTR_LVALUE) && (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
+    if (PerlIO_fast_gets(f)) {
+	/* Fake ungetc() to the real buffer in case system's ungetc
+	   goes elsewhere
+	 */
+	STDCHAR *base = (STDCHAR*)PerlSIO_get_base(stdio);
+	SSize_t cnt   = PerlSIO_get_cnt(stdio);
+	STDCHAR *ptr  = (STDCHAR*)PerlSIO_get_ptr(stdio);
+	if (ptr == base+1) {
+	    *--ptr = (STDCHAR) c;
+	    PerlIOStdio_set_ptrcnt(aTHX_ f,ptr,cnt+1);
+	    if (PerlSIO_feof(stdio))
+		PerlSIO_clearerr(stdio);
+	    return 0;
+	}
+    }
+#endif
+
+#if defined(VMS)
+    /* An ungetc()d char is handled separately from the regular
+     * buffer, so we stuff it in the buffer ourselves.
+     * Should never get called as should hit code above
+     */
+    *(--((*stdio)->_ptr)) = (unsigned char) c;
+    (*stdio)->_cnt++;
+#else
+    /* If buffer snoop scheme above fails fall back to
+       using ungetc (but why did "fill" get called?).
+     */
+    if (PerlSIO_ungetc(c, stdio) != c)
+	return EOF;
+#endif
+    return 0;
+}
+
+
 
 PerlIO_funcs PerlIO_stdio = {
     "stdio",
@@ -3161,6 +3213,9 @@ PerlIOBuf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	    unread += avail;
 	    PerlIOBase(f)->flags &= ~PERLIO_F_EOF;
 	}
+    }
+    if (count > 0) {
+	unread += PerlIOBase_unread(aTHX_ f, vbuf, count);
     }
     return unread;
 }
