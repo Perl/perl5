@@ -170,11 +170,12 @@ At run-time you can use C<chr()>:
 
 Naturally, C<ord()> will do the reverse: turn a character to a code point.
 
-Note that C<\x..>, C<\x{..}> and C<chr(...)> for arguments less than
-0x100 (decimal 256) will generate an eight-bit character for backward
-compatibility with older Perls.  For arguments of 0x100 or more,
-Unicode will always be produced.  If you want UTF-8 always, use
-C<pack("U", ...)> instead of C<\x..>, C<\x{..}>, or C<chr()>.
+Note that C<\x..> (no C<{}> and only two hexadecimal digits), C<\x{...}>
+and C<chr(...)> for arguments less than 0x100 (decimal 256) will
+generate an eight-bit character for backward compatibility with older
+Perls.  For arguments of 0x100 or more, Unicode will always be
+produced.  If you want UTF-8 always, use C<pack("U", ...)> instead of
+C<\x..>, C<\x{...}>, or C<chr()>.
 
 You can also use the C<charnames> pragma to invoke characters
 by name in doublequoted strings:
@@ -186,6 +187,10 @@ And, as mentioned above, you can also C<pack()> numbers into Unicode
 characters:
 
    my $georgian_an  = pack("U", 0x10a0);
+
+Note that both C<\x{...}> and C<\N{...}> are compile-time string
+constants: you cannot use variables in them.  if you want similar
+run-time functionality, use C<chr()> and C<charnames::vianame()>.
 
 =head2 Handling Unicode
 
