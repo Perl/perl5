@@ -28,6 +28,300 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20958] By: jhi                                   on 2003/08/30  18:55:20
+        Log: Integrate:
+             [ 20956]
+             This is probably a wrong fix for
+             [perl #23645] tell with perlio on appended files
+             but maybe this gets NI-S agitated enough to present the correct fix :-)
+             
+             [ 20957]
+             Fewer naked char constants.
+     Branch: maint-5.8/perl
+	  !> doio.c perlio.c sv.h t/io/tell.t
+____________________________________________________________________________
+[ 20955] By: jhi                                   on 2003/08/30  17:17:57
+        Log: Integrate:
+             [ 20952]
+             Tweak XSLoader.t.
+             XSLoader is supposed to work even for extensions that
+             are statically linked. So only check that the extension we
+             test for is actually available. (This test is not supposed
+             to be run by miniperl.)
+             
+             [ 20953]
+             In maint unpack is ($$), not ($;$).
+             
+             [ 20954]
+             A new try at
+             
+             Subject: [PATCH] maint / blead tweaks in perlio.c for Cygwin
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Thu, 28 Aug 2003 08:18:51 +0200
+             Message-ID: <4157199551.20030828081851@familiehaase.de>
+             
+             (this time Cygwin only)
+     Branch: maint-5.8/perl
+	  !> ext/DynaLoader/t/XSLoader.t perlio.c
+____________________________________________________________________________
+[ 20953] By: jhi                                   on 2003/08/30  17:02:07
+        Log: In maint unpack is ($$), not ($;$).
+     Branch: maint-5.8/perl
+	   ! t/op/cproto.t
+____________________________________________________________________________
+[ 20951] By: jhi                                   on 2003/08/30  06:51:09
+        Log: Integrate:
+             [ 20950]
+             Something went wrong in change #20929;
+             linux 2.4.18-bf2.4 didn't like it:
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-08/msg01992.html
+             and similar failure pattern also seen in Solaris 8.
+     Branch: maint-5.8/perl
+	  !> perlio.c
+____________________________________________________________________________
+[ 20949] By: jhi                                   on 2003/08/30  06:09:31
+        Log: Integrate:
+             [ 20948]
+             Setup @INC.
+     Branch: maint-5.8/perl
+	  !> t/op/cproto.t
+____________________________________________________________________________
+[ 20947] By: jhi                                   on 2003/08/30  06:07:56
+        Log: Integrate:
+             [ 20940]
+             Add a new test, to ensure that we don't unexpectedly change
+             prototypes of builtins.
+             
+             [ 20941]
+             Subject: [patch sv.h api doc] SvTAINTED_on does its craft only under -T
+             From: Stas Bekman <stas@stason.org>
+             Date: Fri, 29 Aug 2003 17:11:41 -0700
+             Message-ID: <3F4FEBBD.8000901@stason.org>
+             
+             [ 20942]
+             Subject: [PATCH: perl@20898] fix File::Spec->abs2rel() to return absolute $path more often for VMS
+             From: PPrymmer@factset.com
+             Date: Sat, 30 Aug 2003 00:57:28 -0400
+             Message-ID: <OFD8AE5D6D.EA3FBE7D-ON85256D92.001A31FE-85256D92.001B3BE5@factset.com>
+             
+             [ 20943]
+             Missed from #20942.
+             
+             [ 20944]
+             Subject: [PATCH] XSLoader nits and tests
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 29 Aug 2003 22:55:07 -0700
+             Message-ID: <20030830055507.GI25970@windhund.schwern.org>
+             
+             [ 20945]
+             Make XSLoader.t more robust (and sdbm.t more verbose)
+             
+             [ 20946]
+             Tabify and re-sort MANIFEST.
+     Branch: maint-5.8/perl
+	  +> ext/DynaLoader/t/XSLoader.t t/op/cproto.t
+	  !> MANIFEST ext/DynaLoader/XSLoader_pm.PL ext/SDBM_File/t/sdbm.t
+	  !> lib/File/Spec.pm lib/File/Spec/VMS.pm lib/File/Spec/t/Spec.t
+	  !> pod/perlapi.pod sv.h
+____________________________________________________________________________
+[ 20939] By: jhi                                   on 2003/08/29  20:28:49
+        Log: Integrate:
+             [ 20935]
+             Tiny doc tweak from Shannon -jj Behrens.
+             
+             [ 20936]
+             Some perluniintro tweaks.
+             
+             [ 20937]
+             Subject: [PATCH] Re: all 9007199254740992s are equal, but some are more equal than others
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 27 Aug 2003 22:59:55 +0100
+             Message-ID: <20030827225955.E558@plum.flirble.org>
+     Branch: maint-5.8/perl
+	  !> pod/perluniintro.pod pp.c
+____________________________________________________________________________
+[ 20934] By: jhi                                   on 2003/08/29  15:12:24
+        Log: Integrate:
+             [ 20927]
+             MPE/iX gcc 3.3.1 changes from Mark Klein and Mark Bixby.
+             
+             [ 20928]
+             Subject: RE: [PATCH] Pod::InputObjects performance de-pessimization
+             From: marek.rouchal@infineon.com
+             Date: Wed, 27 Aug 2003 17:25:28 +0200
+             Message-ID: <9843A649BAD7FB4686F6FCBC840D600E08381508@mucse001.eu.infineon.com>
+             
+             PodParser-1.25 prerelease.
+             
+             [ 20929]
+             Subject: [PATCH] maint / blead tweaks in perlio.c for Cygwin
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Thu, 28 Aug 2003 08:18:51 +0200
+             Message-ID: <4157199551.20030828081851@familiehaase.de>
+             
+             (changed so that the 'b' is always appended)
+             
+             [ 20930]
+             Subject: [PATCH op.c] Perl_newCONSTSUB() related memory leaks
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Thu, 28 Aug 2003 21:47:22 +0200
+             Message-ID: <006301c36d9d$335976a0$e400a8c0@R2D2>
+             
+             [ 20931]
+             Some Ultrix test dodgings.
+             
+             [ 20932]
+             Better skip() explicit number of tests, test counts getting
+             out of sync less likely that way.
+             
+             (in the change #20989 podchecker.PL changes were ignored since
+             the maint change #18402 is missing from the blead)
+     Branch: maint-5.8/perl
+	  !> ext/DynaLoader/dl_mpeix.xs lib/Pod/Checker.pm lib/Pod/Find.pm
+	  !> lib/Pod/InputObjects.pm lib/Pod/Parser.pm mpeix/mpeix.c op.c
+	  !> perlio.c pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL
+	  !> t/base/num.t t/op/arith.t t/op/pack.t t/pod/find.t
+	  !> t/pod/poderrs.xr
+____________________________________________________________________________
+[ 20926] By: jhi                                   on 2003/08/28  16:45:10
+        Log: Integrate:
+             [ 20920]
+             Add the valgrindpp.pl script from Marcus Holland-Moritz.
+             
+             [ 20921]
+             Configure is doing fine in Ultrix, operator error.
+             
+             [ 20922]
+             Add caveats and tests for Symbol::delete_package().
+             
+             [ 20923]
+             Subject: Re: Another oddity in lib/ExtUtils/MakeMaker/Tutorial.pod
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 27 Aug 2003 15:05:20 -0700
+             Message-ID: <20030827220520.GD7300@windhund.schwern.org>
+             
+             [ 20924]
+             Subject: [PATCH] Quieten more warnings in Deparse.pm
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Thu, 28 Aug 2003 00:13:59 +0200
+             Message-ID: <20030827221359.GE28396@pjcj.net>
+             
+             [ 20925]
+             Subject: [PATCH] valgrindpp.pl
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Thu, 28 Aug 2003 09:43:49 +0200
+             Message-ID: <002701c36d38$1edb71c0$ae4eeed9@R2D2>
+     Branch: maint-5.8/perl
+	  +> Porting/valgrindpp.pl
+	  !> MANIFEST ext/B/B/Deparse.pm hints/ultrix_4.sh
+	  !> lib/ExtUtils/MakeMaker/Tutorial.pod lib/Symbol.pm lib/Symbol.t
+____________________________________________________________________________
+[ 20919] By: jhi                                   on 2003/08/27  13:46:42
+        Log: Integrate:
+             [ 20913]
+             Integrate two DJGPP portability patches from the 5.6.2 branch :
+             
+             [20859]
+             Two portability patches for DJGPP from Richard Dawe
+             <rich@phekda.freeserve.co.uk>.
+             Message-Id: <E19qfNh-0000Zq-00@phekda.freeserve.co.uk>
+             
+             [20911]
+             Don't uppercase automatically all environment variables on DJGPP.
+             (reported by Richard Dawe, this breaks portability of Unix
+             scripts.) Don't change the behaviour on plain MS/DOS.
+     Branch: maint-5.8/perl
+	  !> djgpp/djgppsed.sh dosish.h perl.c
+____________________________________________________________________________
+[ 20918] By: jhi                                   on 2003/08/27  13:15:45
+        Log: Integrate:
+             [ 20907]
+             Maintainer catch from Rafael.
+             
+             [ 20908]
+             Subject: [PATCH] minor File::Spec testing cleanup
+             From: Ken Williams <ken@mathforum.org>
+             Date: Thu, 21 Aug 2003 22:47:51 -0500
+             Message-Id: <67C30B63-D453-11D7-8495-003065F6D85A@mathforum.org>
+             
+             [ 20910]
+             Change the internal prototype of the pop() and shift() builtins
+             to (;\@), to reflect that their array argument is optional.
+             
+             [ 20912]
+             perlapi.pod tweaks, based on :
+             Subject: misdocumented return value for sv_setref*
+             From: Joe Schaefer <joe+perl@sunstarsys.com>
+             Date: 12 Aug 2003 13:21:42 -0400
+             Message-ID: <m3adae94gp.fsf@sol.sunstarsys.com>
+             
+             [ 20916]
+             Ultrix tweaks: <string.h> must not be included twice
+             (otherwise one gets prototype conflicts between the <string.h>
+             and proto.h because Ultrix thinks e.g. Perl_ninstr has been
+             define in <string.h>...); and Configure misprobes some features.
+             
+             [ 20917]
+             Subject: disturbing, disruptive typo in Tutorial.pod [PATCH]
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Wed, 27 Aug 2003 08:10:12 -0400 (EDT)
+             Message-Id: <200308271210.IAA23907@raptor.research.att.com>
+             
+             Subject: typo in pod/perlnewmod.pod [PATCH]
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Wed, 27 Aug 2003 09:07:12 -0400 (EDT)
+             Message-Id: <200308271307.JAA46955@raptor.research.att.com>
+             
+             Subject: [PATCH] document the location of byacc
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Wed, 27 Aug 2003 14:26:50 +0100
+             Message-ID: <20030827132650.GA23144@fdgroup.com>
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pl Porting/pumpkin.pod ext/POSIX/POSIX.xs
+	  !> ext/SDBM_File/sdbm/sdbm.c ext/SDBM_File/sdbm/sdbm.h
+	  !> ext/Socket/Socket.xs hints/ultrix_4.sh
+	  !> lib/ExtUtils/MakeMaker/Tutorial.pod
+	  !> lib/File/Spec/t/rel2abs2rel.t opcode.h opcode.pl perl.h
+	  !> pod/perlapi.pod pod/perlnewmod.pod sv.c
+____________________________________________________________________________
+[ 20906] By: jhi                                   on 2003/08/26  09:38:57
+        Log: Integrate:
+             [ 20899]
+             [perl #23577] fix syscall() prototype description in
+             perlfunc.pod, as suggested by Lukas Mai.
+             
+             [ 20900]
+             More memory lane.
+             
+             [ 20901]
+             Subject: Re: [PATCH] valgrind and /#/x
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Tue, 26 Aug 2003 08:11:07 +0300
+             Message-ID: <20030826051107.GA1086@ratsnest.hole>
+             
+             [ 20902]
+             CGI::Carp from CGI.pm 3.00 was missing.
+             
+             [ 20903]
+             PerlIO on EBCDIC on BS2000 advice from Thomas Dorner.
+             (This information looks interesting enough to be mentioned
+             elsewhere, too.)
+             
+             [ 20904]
+             No dynaloading at all in Ultrix.
+             
+             [ 20905]
+             Take a cutdown version of the change #20903 also to perlebcdic.
+     Branch: maint-5.8/perl
+	  !> README.bs2000 hints/ultrix_4.sh lib/CGI/Carp.pm
+	  !> pod/perlebcdic.pod pod/perlfunc.pod regcomp.c t/op/re_tests
+	  !> t/run/fresh_perl.t toke.c
+____________________________________________________________________________
+[ 20898] By: jhi                                   on 2003/08/25  19:59:49
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20897] By: jhi                                   on 2003/08/25  19:56:08
         Log: Integrate:
              [ 20886]
