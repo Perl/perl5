@@ -679,14 +679,16 @@ clean:		_tidy _mopup
 realclean:	_realcleaner _mopup
 	@echo "Note that make realclean does not delete config.sh or Policy.sh"
 
-clobber:	_realcleaner _mopup
+_clobber:
 	rm -f config.sh cppstdin Policy.sh
-	-@rm -f Obsolete Wanted
+
+clobber:	_realcleaner _mopup _clobber
 
 distclean:	clobber
 
 # Like distclean but also removes emacs backups and *.orig.
-veryclean:	_verycleaner _mopup clobber
+veryclean:	_verycleaner _mopup _clobber
+	-@rm -f Obsolete Wanted
 
 # Do not 'make _mopup' directly.
 _mopup:
