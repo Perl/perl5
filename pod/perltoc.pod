@@ -2573,6 +2573,8 @@ module (sometimes unnecessary), B<INSTALL> the module
 
 =back
 
+=item PORTABILITY
+
 =item HEY
 
 =item AUTHOR
@@ -3891,7 +3893,7 @@ A, p, d, s, n, r, f, m, o, j, x
 
 =over
 
-=item Formatted Printing of IVs and UVs
+=item Formatted Printing of IVs, UVs, and NVs
 
 =item Source Documentation
 
@@ -4601,46 +4603,70 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
-=head2 perldelta - what's new for perl v5.8.0
+=head2 perldelta - what's new for perl v5.7.0
 
 =over
 
 =item DESCRIPTION
 
+=item Security Vulnerability Closed
+
+=item Incompatible Changes
+
 =item Core Enhancements
 
 =item Modules and Pragmata
 
+=over
+
+=item New Modules
+
+=item Updated And Improved Modules and Pragmata
+
+=back
+
 =item Utility Changes
 
-=item Improved Documentation
+=item New Documentation
 
-=item Performance enhancements
+=item Performance Enhancements
 
 =item Installation and Configuration Improvements
 
 =over
 
-=item gcc automatically tried if 'cc' does not seem to be working
+=item Generic Improvements
 
 =back
 
-=item Platform specific changes
+=item Selected Bug Fixes
 
-=item Significant bug fixes
+sort() arguments are now compiled in the right wantarray context (they were
+accidentally using the context of the sort() itself)
+
+=over
+
+=item Platform Specific Changes and Fixes
+
+=back
 
 =item New or Changed Diagnostics
 
-(perhaps you forgot to load "%s"?), Ambiguous range in transliteration
-operator
-
-=item New tests
-
-=item Incompatible Changes
+=item Changed Internals
 
 =item Known Problems
 
-=item Obsolete Diagnostics
+=over
+
+=item Unicode Support Still Far From Perfect
+
+=item EBCDIC Still A Lost Platform
+
+=item Building Extensions Can Fail Because Of Largefiles
+
+In string, @%s now must be written as \@%s
+
+=back
 
 =item Reporting Bugs
 
@@ -6584,8 +6610,11 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =item DESCRIPTION
 
-use warnings::register, warnings::enabled([$category]),
-warnings::warn([$category,] $message)
+use warnings::register, warnings::enabled(), warnings::enabled($category),
+warnings::enabled($object), warnings::warn($message),
+warnings::warn($category, $message), warnings::warn($object, $message),
+warnings::warnif($message), warnings::warnif($category, $message),
+warnings::warnif($object, $message)
 
 =back
 
@@ -6816,7 +6845,7 @@ bytecode
 
 =item DESCRIPTION
 
-=item AUTHOR
+=item AUTHORS
 
 =back
 
@@ -6843,14 +6872,15 @@ bytecode
 =item OPTIONS
 
 B<-ofilename>, B<-afilename>, B<-->, B<-f>, B<-fcompress-nullops>,
-B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-fstrip-syntax-tree>,
-B<-On>, B<-D>, B<-Do>, B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-m>
+B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-On>, B<-D>, B<-Do>,
+B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-Ppackage>    Stores package in the
+output.    =back
 
 =item EXAMPLES
 
 =item BUGS
 
-=item AUTHOR
+=item AUTHORS
 
 =back
 
@@ -7144,14 +7174,15 @@ STYLE ] ), cmpthese ( RESULTSHASHREF ), countit(TIME, CODE), disablecache (
 =item OPTIONS
 
 B<-ofilename>, B<-afilename>, B<-->, B<-f>, B<-fcompress-nullops>,
-B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-fstrip-syntax-tree>,
-B<-On>, B<-D>, B<-Do>, B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-m>
+B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-On>, B<-D>, B<-Do>,
+B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-Ppackage>    Stores package in the
+output.    =back
 
 =item EXAMPLES
 
 =item BUGS
 
-=item AUTHOR
+=item AUTHORS
 
 =back
 
@@ -7938,7 +7969,8 @@ C<myhostname>, C<myuname>
 
 C<n>, C<netdb_hlen_type>, C<netdb_host_type>, C<netdb_name_type>,
 C<netdb_net_type>, C<nm>, C<nm_opt>, C<nm_so_opt>, C<nonxs_ext>, C<nroff>,
-C<nvsize>, C<nvtype>
+C<nveformat>, C<nvEformat>, C<nvfformat>, C<nvFformat>, C<nvgformat>,
+C<nvGformat>, C<nvsize>, C<nvtype>
 
 =item o
 
@@ -7998,7 +8030,7 @@ C<uselongdouble>, C<usemorebits>, C<usemultiplicity>, C<usemymalloc>,
 C<usenm>, C<useopcode>, C<useperlio>, C<useposix>, C<usesfio>,
 C<useshrplib>, C<usesocks>, C<usethreads>, C<usevendorprefix>, C<usevfork>,
 C<usrinc>, C<uuname>, C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>,
-C<uvxformat>
+C<uvxformat>, C<uvXformat>
 
 =item v
 
@@ -9563,6 +9595,8 @@ catpath
 
 =over
 
+=item PORTABILITY
+
 =item SYNOPSIS
 
 =item DESCRIPTION
@@ -10572,7 +10606,17 @@ cylindrical_to_spherical, spherical_to_cartesian, spherical_to_cylindrical
 
 =item SYNOPSIS
 
-=item DESCRIPTION
+C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
+
+=item DIAGNOSTICS
+
+=over
+
+=item C<ndbm store returned -1, errno 22, key "..." at ...>
+
+=back
+
+=item BUGS AND WARNINGS
 
 =back
 
@@ -10687,7 +10731,17 @@ functions
 
 =item SYNOPSIS
 
-=item DESCRIPTION
+C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>
+
+=item DIAGNOSTICS
+
+=over
+
+=item C<odbm store returned -1, errno 22, key "..." at ...>
+
+=back
+
+=item BUGS AND WARNINGS
 
 =back
 
@@ -12130,6 +12184,58 @@ INADDR_LOOPBACK, INADDR_NONE, sockaddr_in PORT, ADDRESS, sockaddr_in
 SOCKADDR_IN, pack_sockaddr_in PORT, IP_ADDRESS, unpack_sockaddr_in
 SOCKADDR_IN, sockaddr_un PATHNAME, sockaddr_un SOCKADDR_UN,
 pack_sockaddr_un PATH, unpack_sockaddr_un SOCKADDR_UN
+
+=back
+
+=head2 Storable - persistency for perl data structures
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item MEMORY STORE
+
+=item SPEED
+
+=item CANONICAL REPRESENTATION
+
+=item ERROR REPORTING
+
+=item WIZARDS ONLY
+
+=over
+
+=item Hooks
+
+C<STORABLE_freeze> I<obj>, I<cloning>, C<STORABLE_thaw> I<obj>, I<cloning>,
+I<serialized>, ..
+
+=item Predicates
+
+C<Storable::last_op_in_netorder>, C<Storable::is_storing>,
+C<Storable::is_retrieving>
+
+=item Recursion
+
+=item Deep Cloning
+
+=back
+
+=item EXAMPLES
+
+=item WARNING
+
+=item BUGS
+
+=item CREDITS
+
+=item TRANSLATIONS
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
