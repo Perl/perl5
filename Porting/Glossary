@@ -538,7 +538,7 @@ d_fpathconf (d_pathconf.U):
 d_fpos64_t (io64.U):
 	This symbol will be defined if the C compiler supports fpos64_t.
 
-d_fs_data_s (d_statfs.U):
+d_fs_data_s (d_fs_data_s.U):
 	This variable conditionally defines the HAS_STRUCT_FS_DATA symbol,
 	which indicates that the struct fs_data is supported.
 
@@ -615,6 +615,11 @@ d_getlogin (d_getlogin.U):
 	This variable conditionally defines the HAS_GETLOGIN symbol, which
 	indicates to the C program that the getlogin() routine is available
 	to get the login name.
+
+d_getmnt (d_getmnt.U):
+	This variable conditionally defines the HAS_GETMNT symbol, which
+	indicates to the C program that the getmnt() routine is available
+	to retrieve one or more mount info blocks by filename.
 
 d_getmntent (d_getmntent.U):
 	This variable conditionally defines the HAS_GETMNTENT symbol, which
@@ -1331,17 +1336,13 @@ d_statblks (d_statblks.U):
 	if this system has a stat structure declaring
 	st_blksize and st_blocks.
 
-d_statfs (d_statfs.U):
-	This variable conditionally defines the HAS_STATFS symbol, which
-	indicates to the C program that the statfs() routine is available.
-
-d_statfs_f_flags (d_statfs.U):
+d_statfs_f_flags (d_statfs_f_flags.U):
 	This variable conditionally defines the HAS_STRUCT_STATFS_F_FLAGS
 	symbol, which indicates to struct statfs from has f_flags member.
 	This kind of struct statfs is coming from sys/mount.h (BSD),
 	not from sys/statfs.h (SYSV).
 
-d_statfs_s (d_statfs.U):
+d_statfs_s (d_statfs_s.U):
 	This variable conditionally defines the HAS_STRUCT_STATFS symbol,
 	which indicates that the struct statfs is supported.
 

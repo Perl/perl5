@@ -3234,18 +3234,6 @@ typedef struct am_table_short AMTS;
 #   define PERL_MOUNT_NOSUID M_NOSUID
 #endif
 
-#ifdef HAS_STRUCT_STATFS
-#   define PERL_STRUCT_STATFS statfs
-#   ifdef HAS_STRUCT_STATFS_F_FLAGS
-#       define PERL_STRUCT_STATFS_FLAGS(s) s.f_flags
-#   endif
-#else
-#   ifdef HAS_STRUCT_FS_DATA
-#       define PERL_STRUCT_STATFS statfs
-#       define PERL_STRUCT_STATFS_FLAGS(s) s.fd_req.flags
-#   endif
-#endif
-
 #endif /* IAMSUID */
 
 /* and finally... */

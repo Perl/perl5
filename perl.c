@@ -2194,10 +2194,10 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
     int check_okay = 0; /* able to do all the required sys/libcalls */
     int on_nosuid  = 0; /* the fd is on a nosuid fs */
 /*
- * Preferred order: fstatvfs(), fstatfs(), ustat()+statfs(), getmntent().
+ * Preferred order: fstatvfs(), fstatfs(), ustat()+getmnt(), getmntent().
  * fstatvfs() is UNIX98.
  * fstatfs() is 4.3 BSD.
- * ustat()+statfs() is pre-4.3 BSD.
+ * ustat()+getmnt() is pre-4.3 BSD.
  * getmntent() is O(number-of-mounted-filesystems) and can hang on
  * an irrelevant filesystem while trying to reach the right one.
  */
@@ -2208,21 +2208,26 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
     on_nosuid  = check_okay && (stfs.f_flag  & ST_NOSUID);
 #   else
 #       ifdef PERL_MOUNT_NOSUID
-#           if defined(HAS_FSTATFS) && defined(HAS_STRUCT_STATFS_F_FLAGS)
+#           if defined(HAS_FSTATFS) && \
+	       defined(HAS_STRUCT_STATFS) && \
+	       defined(HAS_STRUCT_STATFS_F_FLAGS)
     struct statfs  stfs;
     check_okay = fstatfs(fd, &stfs)  == 0;
     on_nosuid  = check_okay && (stfs.f_flags & PERL_MOUNT_NOSUID);
 #           else
 #               if defined(HAS_FSTAT) && \
 		   defined(HAS_USTAT) && \
-		   defined(HAS_STATFS) && \
-		   defined(HAS_STRUCT_FS_DATA) /* no struct statfs */
+		   defined(HAS_GETMNT) && \
+		   defined(HAS_STRUCT_FS_DATA) &&
+		   defined(NOSTAT_ONE)
     struct stat fdst;
     if (fstat(fd, &fdst) == 0) {
 	struct ustat us;
 	if (ustat(fdst.st_dev, &us) == 0) {
 	    struct fs_data fsd;
-	    if (statfs(PL_origfilename, &fsd) == 0) {
+	    /* NOSTAT_ONE here because we're not examining fields which
+	     * vary between that case and STAT_ONE. */
+            if (getmnt((int*)0, &fsd, (int)0, NOSTAT_ONE, us.f_fname) == 0) {
 		size_t cmplen = sizeof(us.f_fname);
 		if (sizeof(fsd.fd_req.path) < cmplen)
 		    cmplen = sizeof(fsd.fd_req.path);
@@ -2235,8 +2240,8 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 	    }
 	}
     }
-#               endif /* fstat+ustat+statfs */
-#           endif /* statfs */
+#               endif /* fstat+ustat+getmnt */
+#           endif /* fstatfs */
 #       else
 #           if defined(HAS_GETMNTENT) && \
 	       defined(HAS_HASMNTOPT) && \
@@ -2260,7 +2265,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
     }
     if (mtab)
 	fclose(mtab);
-#           endif /* getmntent */
+#           endif /* getmntent+hasmntopt */
 #       endif /* PERL_MOUNT_NOSUID: fstatfs or fstat+ustat+statfs */
 #   endif /* statvfs */
 
@@ -3214,5 +3219,4 @@ read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen)
     sv_chop(PL_e_script, nl);
     return 1;
 }
-
 

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Oct 27 16:30:21 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Wed Oct 27 20:27:00 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -353,6 +353,7 @@ d_fgetpos=''
 d_flexfnam=''
 d_flock=''
 d_fork=''
+d_fs_data_s=''
 d_fseeko=''
 d_fsetpos=''
 d_fstatfs=''
@@ -371,6 +372,7 @@ d_phostname=''
 d_uname=''
 d_gethostprotos=''
 d_getlogin=''
+d_getmnt=''
 d_getmntent=''
 d_getnbyaddr=''
 d_getnbyname=''
@@ -513,8 +515,6 @@ sockethdr=''
 socketlib=''
 d_sqrtl=''
 d_statblks=''
-d_fs_data_s=''
-d_statfs=''
 d_statfs_f_flags=''
 d_statfs_s=''
 d_fstatvfs=''
@@ -8700,44 +8700,8 @@ eval $inhdr
 set sys/types.h i_systypes
 eval $inhdr
 
-: see if this is a sys/vfs.h system
-set sys/vfs.h i_sysvfs
-eval $inhdr
 
-: see if this is a sys/statfs.h system
-set sys/statfs.h i_sysstatfs
-eval $inhdr
-
-
-: see if statfs exists
-set statfs d_statfs
-eval $inlibc
-
-echo "Checking to see if your system supports struct statfs..." >&4
-set d_statfs_s statfs $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
-eval $hasstruct
-case "$d_statfs_s" in
-"$define")      echo "Yup, it does."     >&4 ;;
-*)              echo "Nope, it doesn't." >&4 ;;
-esac
-
-: see if struct statfs knows about f_flags
-case "$d_statfs_s" in
-define)	
-	echo "Checking to see if your struct statfs has f_flags field..." >&4
-	set d_statfs_f_flags statfs f_flags $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
-	eval $hasfield
-	;;
-*)	val="$undef"
-	set d_statfs_f_flags
-	eval $setvar
-	;;
-esac
-case "$d_statfs_f_flags" in
-"$define")      echo "Yup, it does."     >&4 ;;
-*)              echo "Nope, it doesn't." >&4 ;;
-esac
-
+echo " "
 echo "Checking to see if your system supports struct fs_data..." >&4
 set d_fs_data_s fs_data $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h
 eval $hasstruct
@@ -8885,6 +8849,10 @@ eval $hasproto
 
 : see if getlogin exists
 set getlogin d_getlogin
+eval $inlibc
+
+: see if getmnt exists
+set getmnt d_getmnt
 eval $inlibc
 
 : see if getmntent exists
@@ -10406,6 +10374,44 @@ eval $inhdr
 echo " "
 set d_statblks stat st_blocks $i_sysstat sys/stat.h
 eval $hasfield
+
+: see if this is a sys/vfs.h system
+set sys/vfs.h i_sysvfs
+eval $inhdr
+
+: see if this is a sys/statfs.h system
+set sys/statfs.h i_sysstatfs
+eval $inhdr
+
+
+echo " "
+echo "Checking to see if your system supports struct statfs..." >&4
+set d_statfs_s statfs $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
+eval $hasstruct
+case "$d_statfs_s" in
+"$define")      echo "Yup, it does."     >&4 ;;
+*)              echo "Nope, it doesn't." >&4 ;;
+esac
+
+
+
+: see if struct statfs knows about f_flags
+case "$d_statfs_s" in
+define)	
+	echo " "
+	echo "Checking to see if your struct statfs has f_flags field..." >&4
+	set d_statfs_f_flags statfs f_flags $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
+	eval $hasfield
+	;;
+*)	val="$undef"
+	set d_statfs_f_flags
+	eval $setvar
+	;;
+esac
+case "$d_statfs_f_flags" in
+"$define")      echo "Yup, it does."     >&4 ;;
+*)              echo "Nope, it doesn't." >&4 ;;
+esac
 
 : see if _ptr and _cnt from stdio act std
 echo " "
@@ -13665,6 +13671,7 @@ d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_gethostprotos='$d_gethostprotos'
 d_getlogin='$d_getlogin'
+d_getmnt='$d_getmnt'
 d_getmntent='$d_getmntent'
 d_getnbyaddr='$d_getnbyaddr'
 d_getnbyname='$d_getnbyname'
@@ -13813,7 +13820,6 @@ d_socket='$d_socket'
 d_sockpair='$d_sockpair'
 d_sqrtl='$d_sqrtl'
 d_statblks='$d_statblks'
-d_statfs='$d_statfs'
 d_statfs_f_flags='$d_statfs_f_flags'
 d_statfs_s='$d_statfs_s'
 d_statvfs='$d_statvfs'

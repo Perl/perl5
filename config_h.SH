@@ -2192,6 +2192,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_endspent HAS_ENDSPENT		/**/
 
+/* HAS_STRUCT_FS_DATA:
+ *	This symbol, if defined, indicates that the struct fs_data
+ *	to do statfs() is supported.
+ */
+#$d_fs_data_s HAS_STRUCT_FS_DATA	/**/
+
 /* HAS_FSEEKO:
  *	This symbol, if defined, indicates that the fseeko routine is
  *	available to fseek beyond 32 bits (useful for ILP32 hosts).
@@ -2208,6 +2214,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
 #$d_ftello HAS_FTELLO		/**/
+
+/* HAS_GETMNT:
+ *	This symbol, if defined, indicates that the getmnt routine is
+ *	available to get filesystem mount info by filename.
+ */
+#$d_getmnt HAS_GETMNT		/**/
 
 /* HAS_GETMNTENT:
  *	This symbol, if defined, indicates that the getmntent routine is
@@ -2278,31 +2290,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_sqrtl HAS_SQRTL		/**/
 
-/* HAS_STATFS:
- *	This symbol, if defined, indicates that the statfs routine is
- *	available to stat filesystems by filenames.
- */
-/* HAS_STRUCT_STATFS:
- *	This symbol, if defined, indicates that the struct statfs
- *	to do statfs() is supported.
- */
-/* HAS_STRUCT_FS_DATA:
- *	This symbol, if defined, indicates that the struct fs_data
- *	to do statfs() is supported.
- */
 /* HAS_STRUCT_STATFS_F_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
  *	the filesystem containing the file.
  *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
  *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
- *	have statfs() and struct statfs, they have ustat() and statfs()
- *	with struct fs_data.
+ *	have statfs() and struct statfs, they have ustat() and getmnt()
+ *	with struct ustat and struct fs_data.
  */
-#$d_statfs HAS_STATFS		/**/
-#$d_statfs_s HAS_STRUCT_STATFS	/**/
-#$d_fs_data_s HAS_STRUCT_FS_DATA	/**/
 #$d_statfs_f_flags HAS_STRUCT_STATFS_F_FLAGS		/**/
+
+/* HAS_STRUCT_STATFS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	to do statfs() is supported.
+ */
+#$d_statfs_s HAS_STRUCT_STATFS	/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
