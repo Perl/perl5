@@ -58,11 +58,13 @@
 # and it is called GEM. Many of the options we are going to use depend
 # on the compiler style.
 
+cc=${cc:-cc}
+
 # do NOT, I repeat, *NOT* take away the leading tabs
 # Configure Black Magic (TM)
 	# reset
 	_DEC_cc_style=
-case "$cc" in
+case "`$cc -v 2>&1 | grep cc`" in
 *gcc*)	;; # pass
 *)	# compile something small: taint.c is fine for this.
     	# the main point is the '-v' flag of 'cc'.
@@ -80,7 +82,7 @@ case "$cc" in
 esac
 
 # be nauseatingly ANSI
-case "$cc" in
+case "`$cc -v 2>&1 | grep gcc`" in
 *gcc*)	ccflags="$ccflags -ansi"
 	;;
 *)	ccflags="$ccflags -std"
@@ -93,7 +95,7 @@ esac
 # we want optimisation
 
 case "$optimize" in
-'')	case "$cc" in 
+'')	case "`$cc -v 2>&1 | grep gcc`" in
 	*gcc*)	
 		optimize='-O3'				;;
 	*)	case "$_DEC_cc_style" in
@@ -207,17 +209,19 @@ pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-        # Threads interfaces changed with V4.0.
-        case "`uname -r`" in
-        *[123].*)
-	    libswanted="$libswanted pthreads mach exc c_r"
-  	    ccflags="-threads $ccflags"
+	# Threads interfaces changed with V4.0.
+	case "`$cc -v 2>&1 | grep gcc`" in
+	*gcc*)ccflags="-D_REENTRANT $ccflags" ;;
+	*)  case "`uname -r`" in
+	    *[123].*)	ccflags="-threads $ccflags" ;;
+	    *)          ccflags="-pthread $ccflags" ;;
+	    esac
 	    ;;
-        *)
-	    libswanted="$libswanted pthread exc"
-    	    ccflags="-pthread $ccflags"
-	    ;;
-        esac
+	esac    
+	case "`uname -r`" in
+	*[123].*) libswanted="$libswanted pthreads mach exc c_r" ;;
+	*)        libswanted="$libswanted pthread exc" ;;
+	esac
 
         usemymalloc='n'
 	;;
@@ -359,5 +363,3 @@ unset _DEC_cc_style
 #	* Set -Olimit to 3200 because perl_yylex.c got too big
 #	  for the optimizer.
 #
-
-

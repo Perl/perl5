@@ -95,7 +95,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	Perl_croak_nocontext("panic: malloc");
 #endif
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) malloc %ld bytes\n",ptr,PL_an++,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) malloc %ld bytes\n",PTR2UV(ptr),PL_an++,(long)size));
     if (ptr != Nullch)
 	return ptr;
     else if (PL_nomemok)
@@ -139,8 +139,8 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #endif
     ptr = PerlMem_realloc(where,size);
 
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) rfree\n",where,PL_an++));
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) rfree\n",PTR2UV(where),PL_an++));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) realloc %ld bytes\n",PTR2UV(ptr),PL_an++,(long)size));
 
     if (ptr != Nullch)
 	return ptr;
@@ -160,7 +160,7 @@ Free_t
 Perl_safesysfree(Malloc_t where)
 {
     dTHX;
-    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(char *) where,PL_an++));
+    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) free\n",PTR2UV(where),PL_an++));
     if (where) {
 	/*SUPPRESS 701*/
 	PerlMem_free(where);
@@ -188,7 +188,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
     size *= count;
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) calloc %ld x %ld bytes\n",ptr,PL_an++,(long)count,(long)size));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05d) calloc %ld x %ld bytes\n",PTR2UV(ptr),PL_an++,(long)count,(long)size));
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
 	return ptr;
@@ -1555,8 +1555,8 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     else
 	message = SvPV(msv,msglen);
 
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%lx %s",
-			  (unsigned long) thr, message));
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s",
+			  PTR2UV(thr), message));
 
     if (PL_diehook) {
 	/* sv_2cv might call Perl_croak() */
@@ -1742,7 +1742,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 
     if (ckDEAD(err)) {
 #ifdef USE_THREADS
-        DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%lx %s", (unsigned long) thr, message));
+        DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s", PTR2UV(thr), message));
 #endif /* USE_THREADS */
         if (PL_diehook) {
             /* sv_2cv might call Perl_croak() */
@@ -2581,7 +2581,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     if (!pid)
 	return -1;
     if (pid > 0) {
-	sprintf(spid, "%d", pid);
+	sprintf(spid, "%"IVdf, (IV)pid);
 	svp = hv_fetch(PL_pidstatus,spid,strlen(spid),FALSE);
 	if (svp && *svp != &PL_sv_undef) {
 	    *statusp = SvIVX(*svp);
@@ -2597,7 +2597,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	    pid = atoi(hv_iterkey(entry,(I32*)statusp));
 	    sv = hv_iterval(PL_pidstatus,entry);
 	    *statusp = SvIVX(sv);
-	    sprintf(spid, "%d", pid);
+	    sprintf(spid, "%"IVdf, (IV)pid);
 	    (void)hv_delete(PL_pidstatus,spid,strlen(spid),G_DISCARD);
 	    return pid;
 	}
@@ -2637,7 +2637,7 @@ Perl_pidgone(pTHX_ Pid_t pid, int status)
     register SV *sv;
     char spid[TYPE_CHARS(int)];
 
-    sprintf(spid, "%d", pid);
+    sprintf(spid, "%"IVdf, (IV)pid);
     sv = *hv_fetch(PL_pidstatus,spid,strlen(spid),TRUE);
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = status;

@@ -450,12 +450,14 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     SvFLAGS(sv) |= tmptype;
     PL_curpad = AvARRAY(PL_comppad);
 #ifdef USE_THREADS
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx alloc %ld for %s\n",
-			  (unsigned long) thr, (unsigned long) PL_curpad,
+    DEBUG_X(PerlIO_printf(Perl_debug_log,
+			  "0x%"UVxf" Pad 0x%"UVxf" alloc %ld for %s\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad),
 			  (long) retval, PL_op_name[optype]));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx alloc %ld for %s\n",
-			  (unsigned long) PL_curpad,
+    DEBUG_X(PerlIO_printf(Perl_debug_log,
+			  "Pad 0x%"UVxf" alloc %ld for %s\n",
+			  PTR2UV(PL_curpad),
 			  (long) retval, PL_op_name[optype]));
 #endif /* USE_THREADS */
     return (PADOFFSET)retval;
@@ -466,13 +468,14 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
 {
     dTHR;
 #ifdef USE_THREADS
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx sv %d\n",
-			  (unsigned long) thr, (unsigned long) PL_curpad, po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log,
+			  "0x%"UVxf" Pad 0x%"UVxf" sv %d\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad), po));
 #else
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_sv po");
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx sv %d\n",
-			  (unsigned long) PL_curpad, po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" sv %d\n",
+			  PTR2UV(PL_curpad), po));
 #endif /* USE_THREADS */
     return PL_curpad[po];		/* eventually we'll turn this into a macro */
 }
@@ -488,11 +491,12 @@ Perl_pad_free(pTHX_ PADOFFSET po)
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_free po");
 #ifdef USE_THREADS
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx free %d\n",
-			  (unsigned long) thr, (unsigned long) PL_curpad, po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log,
+			  "0x%"UVxf" Pad 0x%"UVxf" free %d\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad), po));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx free %d\n",
-			  (unsigned long) PL_curpad, po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" free %d\n",
+			  PTR2UV(PL_curpad), po));
 #endif /* USE_THREADS */
     if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef)
 	SvPADTMP_off(PL_curpad[po]);
@@ -509,11 +513,12 @@ Perl_pad_swipe(pTHX_ PADOFFSET po)
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_swipe po");
 #ifdef USE_THREADS
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx swipe %d\n",
-			  (unsigned long) thr, (unsigned long) PL_curpad, po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log,
+			  "0x%"UVxf" Pad 0x%"UVxf" swipe %d\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad), po));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx swipe %d\n",
-			  (unsigned long) PL_curpad, po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" swipe %d\n",
+			  PTR2UV(PL_curpad), po));
 #endif /* USE_THREADS */
     SvPADTMP_off(PL_curpad[po]);
     PL_curpad[po] = NEWSV(1107,0);
@@ -538,11 +543,12 @@ Perl_pad_reset(pTHX)
     if (AvARRAY(PL_comppad) != PL_curpad)
 	Perl_croak(aTHX_ "panic: pad_reset curpad");
 #ifdef USE_THREADS
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx reset\n",
-			  (unsigned long) thr, (unsigned long) PL_curpad));
+    DEBUG_X(PerlIO_printf(Perl_debug_log,
+			  "0x%"UVxf" Pad 0x%"UVxf" reset\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad)));
 #else
-    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx reset\n",
-			  (unsigned long) PL_curpad));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" reset\n",
+			  PTR2UV(PL_curpad)));
 #endif /* USE_THREADS */
     if (!PL_tainting) {	/* Can't mix tainted and non-tainted temporaries. */
 	for (po = AvMAX(PL_comppad); po > PL_padix_floor; po--) {
@@ -3846,13 +3852,14 @@ cv_dump(CV *cv)
     SV** ppad;
     I32 ix;
 
-    PerlIO_printf(Perl_debug_log, "\tCV=0x%lx (%s), OUTSIDE=0x%lx (%s)\n",
-		  cv,
+    PerlIO_printf(Perl_debug_log,
+		  "\tCV=0x%"UVxf" (%s), OUTSIDE=0x%"UVxf" (%s)\n",
+		  PTR2UV(cv),
 		  (CvANON(cv) ? "ANON"
 		   : (cv == PL_main_cv) ? "MAIN"
 		   : CvUNIQUE(cv) ? "UNIQUE"
 		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "UNDEFINED"),
-		  outside,
+		  PTR2UV(outside),
 		  (!outside ? "null"
 		   : CvANON(outside) ? "ANON"
 		   : (outside == PL_main_cv) ? "MAIN"
@@ -3869,12 +3876,13 @@ cv_dump(CV *cv)
 
     for (ix = 1; ix <= AvFILLp(pad_name); ix++) {
 	if (SvPOK(pname[ix]))
-	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%lx (%s\"%s\" %ld-%ld)\n",
-			  ix, ppad[ix],
+	    PerlIO_printf(Perl_debug_log,
+			  "\t%4d. 0x%"UVxf" (%s\"%s\" %"IVdf"-%"IVdf")\n",
+			  ix, PTR2UV(ppad[ix]),
 			  SvFAKE(pname[ix]) ? "FAKE " : "",
 			  SvPVX(pname[ix]),
-			  (long)I_32(SvNVX(pname[ix])),
-			  (long)SvIVX(pname[ix]));
+			  (IV)I_32(SvNVX(pname[ix])),
+			  SvIVX(pname[ix]));
     }
 }
 #endif /* DEBUG_CLOSURES */

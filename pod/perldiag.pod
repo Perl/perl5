@@ -636,7 +636,7 @@ Something like this will reproduce the error:
 (F) You called C<perl -x/foo/bar>, but C</foo/bar> is not a directory
 that you can chdir to, possibly because it doesn't exist.
 
-=item Can't check filesystem of script "%s"
+=item Can't check filesystem of script "%s" for nosuid
 
 (P) For some reason you can't check the filesystem of the script for nosuid.
 
@@ -2360,6 +2360,10 @@ was string.
 =item panic: yylex
 
 (P) The lexer got into a bad state while processing a case modifier.
+
+=item panic: %s
+
+(P) An internal error.
 
 =item Parentheses missing around "%s" list
 

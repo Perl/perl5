@@ -159,7 +159,7 @@ PPCODE:
     PL_dumpindent = 2;
 
     for (i=1; i<items; i++) {
-	PerlIO_printf(Perl_debug_log, "Elt No. %ld  0x%lx\n", i - 1, ST(i));
+	PerlIO_printf(Perl_debug_log, "Elt No. %ld  0x%"UVxf"\n", i - 1, PTR2UV(ST(i)));
 	do_sv_dump(0, Perl_debug_log, ST(i), 0, lim, dumpop && SvTRUE(dumpop), pv_lim);
     }
     PL_dumpindent = save_dumpindent;

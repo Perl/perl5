@@ -61,7 +61,11 @@ case "$osvers" in
 esac
 
 so="a"
-dlext="o"
+# AIX itself uses .o (libc.o) but we prefer compatibility
+# with the rest of the world and with rest of the scripting
+# languages (Tcl, Python) and related systems (SWIG).
+# Stephanie Beals <bealzy@us.ibm.com>
+dlext="so"
 
 # Trying to set this breaks the POSIX.c compilation
 
@@ -230,7 +234,7 @@ EOCBU
 # terminateAndUnload() which work correctly with C++ statics while libc
 # load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
 # The C-to-C_r switch is done by usethreads.cbu, if needed.
-if test -f /lib/libC.a -a X"$gccversion" = X; then
+if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
     # Cify libswanted.
     set `echo X "$libswanted "| sed -e 's/ c / C c /'`
     shift

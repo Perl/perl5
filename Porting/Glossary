@@ -202,6 +202,10 @@ compress (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
+CONFIGDOTSH (Oldsyms.U):
+	This is set to 'true' in config.sh so that a shell script
+	sourcing config.sh can tell if it has been sourced already.
+
 contains (contains.U):
 	This variable holds the command to do a grep with a proper return
 	status.  On most sane systems it is simply "grep".  On insane systems
@@ -372,10 +376,6 @@ d_closedir (d_closedir.U):
 	This variable conditionally defines HAS_CLOSEDIR if closedir() is
 	available.
 
-d_cmsghdr_s (d_socket.U):
-	This variable conditionally defines the HAS_STRUCT_CMSGHDR symbol,
-	which indicates that the the struct cmsghdr is supported.
-
 d_const (d_const.U):
 	This variable conditionally defines the HASCONST symbol, which
 	indicates to the C program that this C compiler knows about the
@@ -534,6 +534,10 @@ d_fpathconf (d_pathconf.U):
 d_fpos64_t (io64.U):
 	This symbol will be defined if the C compiler supports fpos64_t.
 
+d_fs_data_s (d_fs_data_s.U):
+	This variable conditionally defines the HAS_STRUCT_FS_DATA symbol,
+	which indicates that the struct fs_data is supported.
+
 d_fseeko (d_fseeko.U):
 	This variable conditionally defines the HAS_FSEEKO symbol, which
 	indicates to the C program that the fseeko() routine is available.
@@ -542,7 +546,7 @@ d_fsetpos (d_fsetpos.U):
 	This variable conditionally defines HAS_FSETPOS if fsetpos() is
 	available to set the file position indicator.
 
-d_fstatfs (d_statfs.U):
+d_fstatfs (d_fstatfs.U):
 	This variable conditionally defines the HAS_FSTATFS symbol, which
 	indicates to the C program that the fstatfs() routine is available.
 
@@ -608,10 +612,15 @@ d_getlogin (d_getlogin.U):
 	indicates to the C program that the getlogin() routine is available
 	to get the login name.
 
+d_getmnt (d_getmnt.U):
+	This variable conditionally defines the HAS_GETMNT symbol, which
+	indicates to the C program that the getmnt() routine is available
+	to retrieve one or more mount info blocks by filename.
+
 d_getmntent (d_getmntent.U):
 	This variable conditionally defines the HAS_GETMNTENT symbol, which
 	indicates to the C program that the getmntent() routine is available
-	to iterate through mounted files.
+	to iterate through mounted files to get their mount info.
 
 d_getnbyaddr (d_getnbyad.U):
 	This variable conditionally defines the HAS_GETNETBYADDR symbol, which
@@ -797,10 +806,6 @@ d_lstat (d_lstat.U):
 	This variable conditionally defines HAS_LSTAT if lstat() is
 	available to do file stats on symbolic links.
 
-d_madvise (d_madvise.U):
-	This variable conditionally defines HAS_MADVISE if madvise() is
-	available to map a file into memory.
-
 d_mblen (d_mblen.U):
 	This variable conditionally defines the HAS_MBLEN symbol, which
 	indicates to the C program that the mblen() routine is available
@@ -854,14 +859,6 @@ d_mktime (d_mktime.U):
 	This variable conditionally defines the HAS_MKTIME symbol, which
 	indicates to the C program that the mktime() routine is available.
 
-d_mmap (d_mmap.U):
-	This variable conditionally defines HAS_MMAP if mmap() is
-	available to map a file into memory.
-
-d_mprotect (d_mprotect.U):
-	This variable conditionally defines HAS_MPROTECT if mprotect() is
-	available to modify the access protection of a memory mapped file.
-
 d_msg (d_msg.U):
 	This variable conditionally defines the HAS_MSG symbol, which
 	indicates that the entire msg*(2) library is present.
@@ -899,10 +896,6 @@ d_msgget (d_msgget.U):
 	This variable conditionally defines the HAS_MSGGET symbol, which
 	indicates to the C program that the msgget() routine is available.
 
-d_msghdr_s (d_socket.U):
-	This variable conditionally defines the HAS_STRUCT_MSGHDR symbol,
-	which indicates that the struct msghdr is supported.
-
 d_msgrcv (d_msgrcv.U):
 	This variable conditionally defines the HAS_MSGRCV symbol, which
 	indicates to the C program that the msgrcv() routine is available.
@@ -910,14 +903,6 @@ d_msgrcv (d_msgrcv.U):
 d_msgsnd (d_msgsnd.U):
 	This variable conditionally defines the HAS_MSGSND symbol, which
 	indicates to the C program that the msgsnd() routine is available.
-
-d_msync (d_msync.U):
-	This variable conditionally defines HAS_MSYNC if msync() is
-	available to synchronize a mapped file.
-
-d_munmap (d_munmap.U):
-	This variable conditionally defines HAS_MUNMAP if munmap() is
-	available to unmap a region mapped by mmap().
 
 d_mymalloc (mallocsrc.U):
 	This variable conditionally defines MYMALLOC in case other parts
@@ -1076,14 +1061,6 @@ d_readlink (d_readlink.U):
 	indicates to the C program that the readlink() routine is available
 	to read the value of a symbolic link.
 
-d_readv (d_readv.U):
-	This variable conditionally defines the HAS_READV symbol, which
-	indicates to the C program that the readv() routine is available.
-
-d_recvmsg (d_socket.U):
-	This variable conditionally defines the HAS_RECVMSG symbol,
-	which indicates that the recvmsg is supported.
-
 d_rename (d_rename.U):
 	This variable conditionally defines the HAS_RENAME symbol, which
 	indicates to the C program that the rename() routine is available
@@ -1152,10 +1129,6 @@ d_semget (d_semget.U):
 d_semop (d_semop.U):
 	This variable conditionally defines the HAS_SEMOP symbol, which
 	indicates to the C program that the semop() routine is available.
-
-d_sendmsg (d_socket.U):
-	This variable conditionally defines the HAS_SENDMSG symbol,
-	which indicates that the sendmsg is supported.
 
 d_setegid (d_setegid.U):
 	This variable conditionally defines the HAS_SETEGID symbol, which
@@ -1314,20 +1287,24 @@ d_sockpair (d_socket.U):
 	This variable conditionally defines the HAS_SOCKETPAIR symbol, which
 	indicates that the BSD socketpair() is supported.
 
+d_sqrtl (d_sqrtl.U):
+	This variable conditionally defines the HAS_SQRTL symbol, which
+	indicates to the C program that the sqrtl() routine is available.
+
 d_statblks (d_statblks.U):
 	This variable conditionally defines USE_STAT_BLOCKS
 	if this system has a stat structure declaring
 	st_blksize and st_blocks.
 
-d_statfs (d_statfs.U):
-	This variable conditionally defines the HAS_STATFS symbol, which
-	indicates to the C program that the statfs() routine is available.
-
-d_statfsflags (d_statfs.U):
-	This variable conditionally defines the HAS_STRUCT_STATFS_FLAGS
+d_statfs_f_flags (d_statfs_f_flags.U):
+	This variable conditionally defines the HAS_STRUCT_STATFS_F_FLAGS
 	symbol, which indicates to struct statfs from has f_flags member.
 	This kind of struct statfs is coming from sys/mount.h (BSD),
 	not from sys/statfs.h (SYSV).
+
+d_statfs_s (d_statfs_s.U):
+	This variable conditionally defines the HAS_STRUCT_STATFS symbol,
+	which indicates that the struct statfs is supported.
 
 d_statvfs (d_statvfs.U):
 	This variable conditionally defines the HAS_STATVFS symbol, which
@@ -1483,6 +1460,13 @@ d_union_semun (d_union_semun.U):
 	This variable conditionally defines HAS_UNION_SEMUN if the
 	union semun is defined by including <sys/sem.h>.
 
+d_ustat (d_ustat.U):
+	This variable conditionally defines HAS_USTAT if ustat() is
+	available to query file system statistics by dev_t.
+
+d_vendorbin (vendorbin.U):
+	This variable conditionally defines PERL_VENDORBIN.
+
 d_vendorlib (vendorlib.U):
 	This variable conditionally defines PERL_VENDORLIB.
 
@@ -1532,10 +1516,6 @@ d_wctomb (d_wctomb.U):
 	This variable conditionally defines the HAS_WCTOMB symbol, which
 	indicates to the C program that the wctomb() routine is available
 	to convert a wide character to a multibyte.
-
-d_writev (d_writev.U):
-	This variable conditionally defines the HAS_WRITEV symbol, which
-	indicates to the C program that the writev() routine is available.
 
 d_xenix (Guess.U):
 	This variable conditionally defines the symbol XENIX, which alerts
@@ -1928,10 +1908,6 @@ i_sysioctl (i_sysioctl.U):
 	indicates to the C program that <sys/ioctl.h> exists and should
 	be included.
 
-i_sysmman (i_sysmman.U):
-	This variable conditionally defines the I_SYS_MMAN symbol, and
-	indicates whether a C program should include <sys/mman.h>.
-
 i_sysmount (i_sysmount.U):
 	This variable conditionally defines the I_SYSMOUNT symbol,
 	and indicates whether a C program should include <sys/mount.h>.
@@ -1966,6 +1942,10 @@ i_sysstat (i_sysstat.U):
 	This variable conditionally defines the I_SYS_STAT symbol,
 	and indicates whether a C program should include <sys/stat.h>.
 
+i_sysstatfs (i_sysstatfs.U):
+	This variable conditionally defines the I_SYSSTATFS symbol,
+	and indicates whether a C program should include <sys/statfs.h>.
+
 i_sysstatvfs (i_sysstatvfs.U):
 	This variable conditionally defines the I_SYSSTATVFS symbol,
 	and indicates whether a C program should include <sys/statvfs.h>.
@@ -1996,6 +1976,10 @@ i_sysun (i_sysun.U):
 	to the C program that it should include <sys/un.h> to get UNIX
 	domain socket definitions.
 
+i_sysvfs (i_sysvfs.U):
+	This variable conditionally defines the I_SYSVFS symbol,
+	and indicates whether a C program should include <sys/vfs.h>.
+
 i_syswait (i_syswait.U):
 	This variable conditionally defines I_SYS_WAIT, which indicates
 	to the C program that it should include <sys/wait.h>.
@@ -2017,6 +2001,10 @@ i_time (i_time.U):
 i_unistd (i_unistd.U):
 	This variable conditionally defines the I_UNISTD symbol, and indicates
 	whether a C program should include <unistd.h>.
+
+i_ustat (i_ustat.U):
+	This variable conditionally defines the I_USTAT symbol, and indicates
+	whether a C program should include <ustat.h>.
 
 i_utime (i_utime.U):
 	This variable conditionally defines the I_UTIME symbol, and indicates
@@ -2102,6 +2090,11 @@ installsitearch (sitearch.U):
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
 
+installsitebin (sitebin.U):
+	This variable is usually the same as sitebinexp, unless you are on
+	a system running AFS, in which case they may differ slightly. You
+	should always use this variable within your makefiles for portability.
+
 installsitelib (sitelib.U):
 	This variable is really the same as sitelibexp but may differ on
 	those systems using AFS. For extra portability, only this variable
@@ -2129,6 +2122,11 @@ installusrbinperl (instubperl.U):
 	This variable tells whether Perl should be installed also as
 	/usr/bin/perl in addition to
 	$installbin/perl
+
+installvendorbin (vendorbin.U):
+	This variable is really the same as vendorbinexp but may differ on
+	those systems using AFS. For extra portability, only this variable
+	should be used in makefiles.
 
 installvendorlib (vendorlib.U):
 	This variable is really the same as vendorlibexp but may differ on
@@ -2365,11 +2363,6 @@ mkdir (Loc.U):
 	full pathname (if any) of the mkdir program.  After Configure runs,
 	the value is reset to a plain "mkdir" and is not useful.
 
-mmaptype (d_mmap.U):
-	This symbol contains the type of pointer returned by mmap()
-	(and simultaneously the type of the first argument).
-	It can be 'void *' or 'caddr_t'.
-
 models (models.U):
 	This variable contains the list of memory models supported by this
 	system.  Possible component values are none, split, unsplit, small,
@@ -2531,6 +2524,24 @@ path_sep (Unix.U):
 perl (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
+
+PERL_APIVERSION (Oldsyms.U):
+	This value is manually set in patchlevel.h and is used
+	to set the Configure apiversion variable.
+
+PERL_REVISION (Oldsyms.U):
+	In a Perl version number such as 5.6.2, this is the 5.
+	This value is manually set in patchlevel.h
+
+PERL_SUBVERSION (Oldsyms.U):
+	In a Perl version number such as 5.6.2, this is the 2.
+	Values greater than 50 represent potentially unstable
+	development subversions.
+	This value is manually set in patchlevel.h
+
+PERL_VERSION (Oldsyms.U):
+	In a Perl version number such as 5.6.2, this is the 6.
+	This value is manually set in patchlevel.h
 
 perladmin (perladmin.U):
 	Electronic mail address of the perl5 administrator.
@@ -2778,6 +2789,16 @@ sitearch (sitearch.U):
 sitearchexp (sitearch.U):
 	This variable is the ~name expanded version of sitearch, so that you
 	may use it directly in Makefiles or shell scripts.
+
+sitebin (sitebin.U):
+	This variable holds the name of the directory in which the user wants
+	to put add-on publicly executable files for the package in question.  It
+	is most often a local directory such as /usr/local/bin. Programs using
+	this variable must be prepared to deal with ~name substitution.
+
+sitebinexp (sitebin.U):
+	This is the same as the sitebin variable, but is filename expanded at
+	configuration time, for use in your makefiles.
 
 sitelib (sitelib.U):
 	This variable contains the eventual value of the SITELIB symbol,
@@ -3135,6 +3156,18 @@ usrinc (usrinc.U):
 uuname (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
+
+vendorbin (vendorbin.U):
+	This variable contains the eventual value of the VENDORBIN symbol,
+	which is the name of the private directory for exuctables for this package.
+	It may have a ~ on the front. It is up to the makefile to eventually create
+	this directory while performing installation (with ~ substitution).
+	Vendors who distribute perl binaries may place their own
+	extensions and modules in this directory.
+
+vendorbinexp (vendorbin.U):
+	This variable is the ~name expanded version of vendorbin, so that you
+	may use it directly in Makefiles or shell scripts.
 
 vendorlib (vendorlib.U):
 	This variable contains the eventual value of the VENDORLIB symbol,

@@ -2819,8 +2819,8 @@ PP(pp_require)
 			loader = *av_fetch((AV *)SvRV(loader), 0, TRUE);
 		    }
 
-		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%lx/%s",
-				   SvANY(loader), name);
+		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%"UVxf"/%s",
+				   PTR2UV(SvANY(loader)), name);
 		    tryname = SvPVX(namesv);
 		    tryrsfp = 0;
 

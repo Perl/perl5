@@ -42,8 +42,9 @@ Perl_runops_debug(pTHX)
     do {
 	if (PL_debug) {
 	    if (PL_watchaddr != 0 && *PL_watchaddr != PL_watchok)
-		PerlIO_printf(Perl_debug_log, "WARNING: %lx changed from %lx to %lx\n",
-		    (long)PL_watchaddr, (long)PL_watchok, (long)*PL_watchaddr);
+		PerlIO_printf(Perl_debug_log,
+			      "WARNING: %"UVxf" changed from %"UVxf" to %"UVxf"\n",
+			      PTR2UV(PL_watchaddr), PTR2UV(PL_watchok), (UV)*PL_watchaddr);
 	    DEBUG_s(debstack());
 	    DEBUG_t(debop(PL_op));
 	    DEBUG_P(debprof(PL_op));
@@ -94,8 +95,8 @@ Perl_watch(pTHX_ char **addr)
     dTHR;
     PL_watchaddr = addr;
     PL_watchok = *addr;
-    PerlIO_printf(Perl_debug_log, "WATCHING, %lx is currently %lx\n",
-	(long)PL_watchaddr, (long)PL_watchok);
+    PerlIO_printf(Perl_debug_log, "WATCHING, %"UVxf" is currently %"UVxf"\n",
+	PTR2UV(PL_watchaddr), PTR2UV(PL_watchok));
 #endif	/* DEBUGGING */
 }
 

@@ -186,7 +186,8 @@ S_del_sv(pTHX_ SV *p)
 	if (!ok) {
 	    if (ckWARN_d(WARN_INTERNAL))	
 	        Perl_warner(aTHX_ WARN_INTERNAL,
-		       "Attempt to free non-arena SV: 0x%lx", (unsigned long)p);
+			    "Attempt to free non-arena SV: 0x%"UVxf,
+			    PTR2UV(p));
 	    return;
 	}
     }
@@ -1206,7 +1207,8 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 
 #ifdef HAS_64K_LIMIT
     if (newlen >= 0x10000) {
-	PerlIO_printf(Perl_debug_log, "Allocation too large: %lx\n", newlen);
+	PerlIO_printf(Perl_debug_log,
+		      "Allocation too large: %"UVxf"\n", (UV)newlen);
 	my_exit(1);
     }
 #endif /* HAS_64K_LIMIT */
@@ -1500,11 +1502,11 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    (void)SvNOK_on(sv);
 	    (void)SvIOK_on(sv);
 #if defined(USE_LONG_DOUBLE)
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
-				  (unsigned long)sv, SvNVX(sv)));
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2nv(%" PERL_PRIgldbl ")\n",
+				  PTR2UV(sv), SvNVX(sv)));
 #else
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
-				  (unsigned long)sv, SvNVX(sv)));
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2nv(%g)\n",
+				  PTR2UV(sv), SvNVX(sv)));
 #endif
 	    if (SvNVX(sv) < (NV)IV_MAX + 0.5)
 		SvIVX(sv) = I_V(SvNVX(sv));
@@ -1542,8 +1544,8 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    sv_upgrade(sv, SVt_IV);
 	return 0;
     }
-    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2iv(%ld)\n",
-	(unsigned long)sv,(long)SvIVX(sv)));
+    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2iv(%"IVdf")\n",
+	PTR2UV(sv),SvIVX(sv)));
     return SvIsUV(sv) ? (IV)SvUVX(sv) : SvIVX(sv);
 }
 
@@ -1638,11 +1640,13 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    (void)SvNOK_on(sv);
 	    (void)SvIOK_on(sv);
 #if defined(USE_LONG_DOUBLE)
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
-				  (unsigned long)sv, SvNVX(sv)));
+	    DEBUG_c(PerlIO_printf(Perl_debug_log,
+				  "0x%"UVxf" 2nv(%" PERL_PRIgldbl ")\n",
+				  PTR2UV(sv), SvNVX(sv)));
 #else
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
-				  (unsigned long)sv, SvNVX(sv)));
+	    DEBUG_c(PerlIO_printf(Perl_debug_log,
+				  "0x%"UVxf" 2nv(%g)\n",
+				  PTR2UV(sv), SvNVX(sv)));
 #endif
 	    if (SvNVX(sv) < -0.5) {
 		SvIVX(sv) = I_V(SvNVX(sv));
@@ -1699,8 +1703,8 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	return 0;
     }
 
-    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2uv(%lu)\n",
-	(unsigned long)sv,SvUVX(sv)));
+    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2uv(%"UVuf")\n",
+	(UV)sv,SvUVX(sv)));
     return SvIsUV(sv) ? SvUVX(sv) : (UV)SvIVX(sv);
 }
 
@@ -1756,15 +1760,16 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #if defined(USE_LONG_DOUBLE)
 	DEBUG_c({
 	    RESTORE_NUMERIC_STANDARD();
-	    PerlIO_printf(Perl_debug_log, "0x%lx num(%" PERL_PRIgldbl ")\n",
-			  (unsigned long)sv, SvNVX(sv));
+	    PerlIO_printf(Perl_debug_log,
+			  "0x%"UVxf" num(%" PERL_PRIgldbl ")\n",
+			  PTR2UV(sv), SvNVX(sv));
 	    RESTORE_NUMERIC_LOCAL();
 	});
 #else
 	DEBUG_c({
 	    RESTORE_NUMERIC_STANDARD();
-	    PerlIO_printf(Perl_debug_log, "0x%lx num(%g)\n",
-			  (unsigned long)sv, SvNVX(sv));
+	    PerlIO_printf(Perl_debug_log, "0x%"UVxf" num(%g)\n",
+			  PTR2UV(sv), SvNVX(sv));
 	    RESTORE_NUMERIC_LOCAL();
 	});
 #endif
@@ -1795,15 +1800,15 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #if defined(USE_LONG_DOUBLE)
     DEBUG_c({
 	RESTORE_NUMERIC_STANDARD();
-	PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
-		      (unsigned long)sv, SvNVX(sv));
+	PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2nv(%" PERL_PRIgldbl ")\n",
+		      PTR2UV(sv), SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
     });
 #else
     DEBUG_c({
 	RESTORE_NUMERIC_STANDARD();
-	PerlIO_printf(Perl_debug_log, "0x%lx 1nv(%g)\n",
-		      (unsigned long)sv, SvNVX(sv));
+	PerlIO_printf(Perl_debug_log, "0x%"UVxf" 1nv(%g)\n",
+		      PTR2UV(sv), SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
     });
 #endif
@@ -2199,8 +2204,8 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     *lp = s - SvPVX(sv);
     SvCUR_set(sv, *lp);
     SvPOK_on(sv);
-    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2pv(%s)\n",
-			  (unsigned long)sv,SvPVX(sv)));
+    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2pv(%s)\n",
+			  PTR2UV(sv),SvPVX(sv)));
     return SvPVX(sv);
 
   tokensave:
@@ -3466,7 +3471,8 @@ Perl_sv_free(pTHX_ SV *sv)
     if (SvTEMP(sv)) {
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ WARN_DEBUGGING,
-			"Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
+			"Attempt to free temp prematurely: SV 0x%"UVxf,
+			PTR2UV(sv));
 	return;
     }
 #endif
@@ -3845,11 +3851,11 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     bp = (STDCHAR*)SvPVX(sv) + append;  /* move these two too to registers */
     ptr = (STDCHAR*)PerlIO_get_ptr(fp);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-	"Screamer: entering, ptr=%ld, cnt=%ld\n",(long)ptr,(long)cnt));
+	"Screamer: entering, ptr=%"UVuf", cnt=%ld\n",PTR2UV(ptr),(long)cnt));
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-	"Screamer: entering: FILE * thinks ptr=%ld, cnt=%ld, base=%ld\n",
-	       (long)PerlIO_get_ptr(fp), (long)PerlIO_get_cnt(fp), 
-	       (long)(PerlIO_has_base(fp) ? PerlIO_get_base(fp) : 0)));
+	"Screamer: entering: FILE * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
+	       PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp), 
+	       PTR2UV(PerlIO_has_base(fp) ? PerlIO_get_base(fp) : 0)));
     for (;;) {
       screamer:
 	if (cnt > 0) {
@@ -3879,24 +3885,25 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	}
 
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: going to getc, ptr=%ld, cnt=%ld\n",(long)ptr,(long)cnt));
+			      "Screamer: going to getc, ptr=%"UVuf", cnt=%ld\n",
+			      PTR2UV(ptr),(long)cnt));
 	PerlIO_set_ptrcnt(fp, ptr, cnt); /* deregisterize cnt and ptr */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: pre: FILE * thinks ptr=%ld, cnt=%ld, base=%ld\n",
-	    (long)PerlIO_get_ptr(fp), (long)PerlIO_get_cnt(fp), 
-	    (long)(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
+	    "Screamer: pre: FILE * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
+	    PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp), 
+	    PTR2UV(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
 	/* This used to call 'filbuf' in stdio form, but as that behaves like 
 	   getc when cnt <= 0 we use PerlIO_getc here to avoid introducing
 	   another abstraction.  */
 	i   = PerlIO_getc(fp);		/* get more characters */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: post: FILE * thinks ptr=%ld, cnt=%ld, base=%ld\n",
-	    (long)PerlIO_get_ptr(fp), (long)PerlIO_get_cnt(fp), 
-	    (long)(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
+	    "Screamer: post: FILE * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
+	    PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp), 
+	    PTR2UV(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
 	cnt = PerlIO_get_cnt(fp);
 	ptr = (STDCHAR*)PerlIO_get_ptr(fp);	/* reregisterize cnt and ptr */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: after getc, ptr=%ld, cnt=%ld\n",(long)ptr,(long)cnt));
+	    "Screamer: after getc, ptr=%"UVuf", cnt=%ld\n",PTR2UV(ptr),(long)cnt));
 
 	if (i == EOF)			/* all done for ever? */
 	    goto thats_really_all_folks;
@@ -3920,12 +3927,12 @@ thats_really_all_folks:
     if (shortbuffered)
 	cnt += shortbuffered;
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
-	    "Screamer: quitting, ptr=%ld, cnt=%ld\n",(long)ptr,(long)cnt));
+	    "Screamer: quitting, ptr=%"UVuf", cnt=%ld\n",PTR2UV(ptr),(long)cnt));
     PerlIO_set_ptrcnt(fp, ptr, cnt);	/* put these back or we're in trouble */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-	"Screamer: end: FILE * thinks ptr=%ld, cnt=%ld, base=%ld\n",
-	(long)PerlIO_get_ptr(fp), (long)PerlIO_get_cnt(fp), 
-	(long)(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
+	"Screamer: end: FILE * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
+	PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp), 
+	PTR2UV(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
     *bp = '\0';
     SvCUR_set(sv, bp - (STDCHAR*)SvPVX(sv));	/* set length */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
@@ -4628,8 +4635,8 @@ Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 	if (!SvPOK(sv)) {
 	    SvPOK_on(sv);		/* validate pointer */
 	    SvTAINT(sv);
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2pv(%s)\n",
-		(unsigned long)sv,SvPVX(sv)));
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2pv(%s)\n",
+				  PTR2UV(sv),SvPVX(sv)));
 	}
     }
     return SvPVX(sv);
@@ -5624,7 +5631,7 @@ do_clean_named_objs(pTHXo_ SV *sv)
 static void
 do_clean_all(pTHXo_ SV *sv)
 {
-    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%lx\n", sv) );)
+    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) );)
     SvFLAGS(sv) |= SVf_BREAK;
     SvREFCNT_dec(sv);
 }

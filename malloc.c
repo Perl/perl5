@@ -1025,16 +1025,17 @@ Perl_malloc(register size_t nbytes)
 	}
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log,
-			      "0x%lx: (%05lu) malloc %ld bytes\n",
-			      (unsigned long)(p+1), (unsigned long)(PL_an++),
+			      "0x%"UVxf": (%05lu) malloc %ld bytes\n",
+			      PTR2UV(p+1), (unsigned long)(PL_an++),
 			      (long)size));
 
 	/* remove from linked list */
 #if defined(RCHECK)
 	if ((PTR2UV(p)) & (MEM_ALIGNBYTES - 1)) {
 	    dTHXo;
-	    PerlIO_printf(PerlIO_stderr(), "Corrupt malloc ptr 0x%lx at 0x%lx\n",
-		(unsigned long)*((int*)p),(unsigned long)p);
+	    PerlIO_printf(PerlIO_stderr(),
+			  "Corrupt malloc ptr 0x%lx at 0x%"UVxf"\n",
+			  (unsigned long)*((int*)p),PTR2UV(p));
 	}
 #endif
   	nextf[bucket] = p->ov_next;
@@ -1475,8 +1476,8 @@ Perl_mfree(void *mp)
 #endif 
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log, 
-			      "0x%lx: (%05lu) free\n",
-			      (unsigned long)cp, (unsigned long)(PL_an++)));
+			      "0x%"UVxf": (%05lu) free\n",
+			      PTR2UV(cp), (unsigned long)(PL_an++)));
 
 	if (cp == NULL)
 		return;
@@ -1661,8 +1662,8 @@ Perl_realloc(void *mp, size_t nbytes)
 #endif
 		res = cp;
 		DEBUG_m(PerlIO_printf(Perl_debug_log, 
-			      "0x%lx: (%05lu) realloc %ld bytes inplace\n",
-			      (unsigned long)res,(unsigned long)(PL_an++),
+			      "0x%"UVxf": (%05lu) realloc %ld bytes inplace\n",
+			      PTR2UV(res),(unsigned long)(PL_an++),
 			      (long)size));
 	} else if (incr == 1 && (cp - M_OVERHEAD == last_op) 
 		   && (onb > (1 << LOG_OF_MIN_ARENA))) {
@@ -1697,8 +1698,8 @@ Perl_realloc(void *mp, size_t nbytes)
 	} else {
 	  hard_way:
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
-			      "0x%lx: (%05lu) realloc %ld bytes the hard way\n",
-			      (unsigned long)cp,(unsigned long)(PL_an++),
+			      "0x%"UVxf": (%05lu) realloc %ld bytes the hard way\n",
+			      PTR2UV(cp),(unsigned long)(PL_an++),
 			      (long)size));
 	    if ((res = (char*)Perl_malloc(nbytes)) == NULL)
 		return (NULL);
@@ -1969,8 +1970,8 @@ Perl_sbrk(int size)
       }
     }
 
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "sbrk malloc size %ld (reqsize %ld), left size %ld, give addr 0x%lx\n",
-		    size, reqsize, Perl_sbrk_oldsize, got));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "sbrk malloc size %ld (reqsize %ld), left size %ld, give addr 0x%"UVxf"\n",
+		    size, reqsize, Perl_sbrk_oldsize, PTR2UV(got)));
 
     return (void *)got;
 }

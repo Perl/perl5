@@ -891,7 +891,7 @@ STATIC I32	S_regmatch(pTHX_ regnode *prog);
 STATIC I32	S_regrepeat(pTHX_ regnode *p, I32 max);
 STATIC I32	S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp);
 STATIC I32	S_regtry(pTHX_ regexp *prog, char *startpos);
-STATIC bool	S_reginclass(pTHX_ char *p, I32 c);
+STATIC bool	S_reginclass(pTHX_ regnode *p, I32 c);
 STATIC bool	S_reginclassutf8(pTHX_ regnode *f, U8* p);
 STATIC CHECKPOINT	S_regcppush(pTHX_ I32 parenfloor);
 STATIC char*	S_regcppop(pTHX);

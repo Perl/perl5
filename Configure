@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Oct  3 02:41:02 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Wed Oct 27 21:32:42 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -353,8 +353,10 @@ d_fgetpos=''
 d_flexfnam=''
 d_flock=''
 d_fork=''
+d_fs_data_s=''
 d_fseeko=''
 d_fsetpos=''
+d_fstatfs=''
 d_ftello=''
 d_ftime=''
 d_gettimeod=''
@@ -370,6 +372,7 @@ d_phostname=''
 d_uname=''
 d_gethostprotos=''
 d_getlogin=''
+d_getmnt=''
 d_getmntent=''
 d_getnbyaddr=''
 d_getnbyname=''
@@ -408,7 +411,6 @@ longdblsize=''
 d_longlong=''
 longlongsize=''
 d_lstat=''
-d_madvise=''
 d_mblen=''
 d_mbstowcs=''
 d_mbtowc=''
@@ -420,16 +422,11 @@ d_memset=''
 d_mkdir=''
 d_mkfifo=''
 d_mktime=''
-d_mmap=''
-mmaptype=''
-d_mprotect=''
 d_msg=''
 d_msgctl=''
 d_msgget=''
 d_msgrcv=''
 d_msgsnd=''
-d_msync=''
-d_munmap=''
 d_nice=''
 d_open3=''
 d_fpathconf=''
@@ -448,7 +445,6 @@ d_rewinddir=''
 d_seekdir=''
 d_telldir=''
 d_readlink=''
-d_readv=''
 d_rename=''
 d_rmdir=''
 d_safebcpy=''
@@ -495,25 +491,21 @@ d_shmdt=''
 d_shmget=''
 d_sigaction=''
 d_sigsetjmp=''
-d_cmsghdr_s=''
 d_msg_ctrunc=''
 d_msg_dontroute=''
 d_msg_oob=''
 d_msg_peek=''
 d_msg_proxy=''
-d_msghdr_s=''
 d_oldsock=''
-d_recvmsg=''
 d_scm_rights=''
-d_sendmsg=''
 d_socket=''
 d_sockpair=''
 sockethdr=''
 socketlib=''
+d_sqrtl=''
 d_statblks=''
-d_fstatfs=''
-d_statfs=''
-d_statfsflags=''
+d_statfs_f_flags=''
+d_statfs_s=''
 d_fstatvfs=''
 d_statvfs=''
 d_stdio_cnt_lval=''
@@ -554,6 +546,7 @@ d_umask=''
 d_semctl_semid_ds=''
 d_semctl_semun=''
 d_union_semun=''
+d_ustat=''
 d_vfork=''
 usevfork=''
 d_voidsig=''
@@ -565,7 +558,6 @@ d_wait4=''
 d_waitpid=''
 d_wcstombs=''
 d_wctomb=''
-d_writev=''
 dlext=''
 cccdlflags=''
 ccdlflags=''
@@ -639,7 +631,6 @@ i_bsdioctl=''
 i_sysfilio=''
 i_sysioctl=''
 i_syssockio=''
-i_sysmman=''
 i_sysmount=''
 i_sysndir=''
 i_sysparam=''
@@ -647,12 +638,14 @@ i_sysresrc=''
 i_syssecrt=''
 i_sysselct=''
 i_sysstat=''
+i_sysstatfs=''
 i_sysstatvfs=''
 i_systimes=''
 i_systypes=''
 d_iovec_s=''
 i_sysuio=''
 i_sysun=''
+i_sysvfs=''
 i_syswait=''
 i_sgtty=''
 i_termio=''
@@ -662,6 +655,7 @@ i_systimek=''
 i_time=''
 timeincl=''
 i_unistd=''
+i_ustat=''
 i_utime=''
 i_values=''
 i_stdarg=''
@@ -794,6 +788,9 @@ sig_num_init=''
 installsitearch=''
 sitearch=''
 sitearchexp=''
+installsitebin=''
+sitebin=''
+sitebinexp=''
 installsitelib=''
 sitelib=''
 sitelibexp=''
@@ -831,9 +828,12 @@ usesocks=''
 d_oldpthreads=''
 usethreads=''
 incpath=''
-mips=''
 mips_type=''
 usrinc=''
+d_vendorbin=''
+installvendorbin=''
+vendorbin=''
+vendorbinexp=''
 d_vendorlib=''
 installvendorlib=''
 vendorlib=''
@@ -6536,6 +6536,23 @@ else
 	installsitearch="$sitearchexp"
 fi
 
+: determine where add-on public executables go
+case "$sitebin" in
+'')	dflt=$siteprefix/bin ;;
+*)  	dflt=$sitebin ;;
+esac
+fn=d~
+rp='Pathname where the add-on public executables should be installed?'
+. ./getfile
+sitebin="$ans"
+sitebinexp="$ansexp"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsitebin=`echo $sitebinexp | sed "s#^$prefix#$installprefix#"`
+else
+	installsitebin="$sitebinexp"
+fi
+
 cat <<EOM
 
 Perl can be built to take advantage of long doubles which
@@ -6602,6 +6619,28 @@ y|Y)
 esac
 set useperlio
 eval $setvar 
+
+case "$vendorprefix" in
+'')	d_vendorbin="$undef"
+	vendorbin=''
+	vendorbinexp=''
+	;;
+*)	d_vendorbin="$define"
+	: determine where vendor-supplied executables go.
+	dflt=$vendorprefix/bin
+	fn=d~+
+	rp='Pathname for the vendor-supplied executables directory?'
+	. ./getfile
+	vendorbin="$ans"
+	vendorbinexp="$ansexp"
+	: Change installation prefix, if necessary.
+	if $test X"$prefix" != X"$installprefix"; then
+		installvendorbin=`echo $vendorbinexp | $sed "s#^$prefix#$installprefix#"`
+	else
+		installvendorbin="$vendorbinexp"
+	fi
+	;;
+esac
 
 : Check how to convert floats to strings.
 if test "X$d_Gconvert" = X; then
@@ -7659,147 +7698,6 @@ eval $inlibc
 set chsize d_chsize
 eval $inlibc
 
-hasfield='varname=$1; struct=$2; field=$3; shift; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-echo "int main () { struct $struct foo; foo.$field = 0; }" >> try.c;
-if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-	val="$define";
-else
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm -f try.c try.o'
-
-: see if this is a sys/uio.h system
-set sys/uio.h i_sysuio
-eval $inhdr
-
-echo "Checking to see if your system supports struct iovec..." >&4
-set d_iovec_s iovec iov_base $i_sysuio sys/uio.h
-eval $hasfield
-case "$d_iovec_s" in
-"$define")      echo "Yup, it does." >&4
-                ;;
-*)              echo "Nope, it doesn't." >&4
-                ;;
-esac
-
-socketlib=''
-sockethdr=''
-: see whether socket exists
-echo " "
-$echo $n "Hmm... $c" >&4
-if set socket val -f d_socket; eval $csym; $val; then
-	echo "Looks like you have Berkeley networking support." >&4
-	d_socket="$define"
-	if set setsockopt val -f; eval $csym; $val; then
-		d_oldsock="$undef"
-	else
-		echo "...but it uses the old BSD 4.1c interface, rather than 4.2." >&4
-		d_oldsock="$define"
-	fi
-else
-	if $contains socklib libc.list >/dev/null 2>&1; then
-		echo "Looks like you have Berkeley networking support." >&4
-		d_socket="$define"
-		: we will have to assume that it supports the 4.2 BSD interface
-		d_oldsock="$undef"
-	else
-		echo "You don't have Berkeley networking in libc$_a..." >&4
-		if test "X$d_socket" = "X$define"; then
-		   echo "...but you seem to believe that you have sockets." >&4
-		else
-			for net in net socket
-			do
-				if test -f /usr/lib/lib$net$_a; then
-					( ($nm $nm_opt /usr/lib/lib$net$_a | eval $nm_extract) ||  \
-					$ar t /usr/lib/lib$net$_a) 2>/dev/null >> libc.list
-					if $contains socket libc.list >/dev/null 2>&1; then
-						d_socket="$define"
-						socketlib="-l$net"
-						case "$net" in
-						net)
-							echo "...but the Wollongong group seems to have hacked it in." >&4
-							sockethdr="-I/usr/netinclude"
-							;;
-						esac
-						echo "Found Berkeley sockets interface in lib$net." >& 4 
-						if $contains setsockopt libc.list >/dev/null 2>&1; then
-							d_oldsock="$undef"
-						else
-							echo "...using the old BSD 4.1c interface, rather than 4.2." >&4
-							d_oldsock="$define"
-						fi
-						break
-					fi
-				fi
-			done
-			if test "X$d_socket" != "X$define"; then
-			   echo "or anywhere else I see." >&4
-			   d_socket="$undef"
-			   d_oldsock="$undef"
-			fi
-		fi
-	fi
-fi
-
-: see if socketpair exists
-set socketpair d_sockpair
-eval $inlibc
-
-
-echo " "
-echo "Checking the availability of certain socket constants..." >& 4
-for ENUM in MSG_CTRUNC MSG_DONTROUTE MSG_OOB MSG_PEEK MSG_PROXY SCM_RIGHTS; do
-	enum=`$echo $ENUM|./tr '[A-Z]' '[a-z]'`
-	$cat >try.c <<EOF
-#include <sys/types.h>
-#include <sys/socket.h>
-int main() {
-    int i = $ENUM;
-}
-EOF
-	val="$undef"
-	set try; if eval $compile; then
-		val="$define"
-	fi
-	set d_${enum}; eval $setvar
-	$rm -f try.c try
-done
-
-set sendmsg d_sendmsg
-eval $inlibc
-
-set recvmsg d_recvmsg
-eval $inlibc
-
-echo " "
-$echo $n "Checking to see if your system supports struct msghdr...$c" >&4
-set d_msghdr_s msghdr msg_name define sys/types.h $d_socket sys/socket.h $i_sysuio sys/uio.h
-eval $hasfield
-case "$d_msghdr_s" in
-"$define")      echo "Yup, it does." >&4
-                ;;
-*)              echo "Nope, it doesn't." >&4
-                ;;
-esac
-
-$echo $n "Checking to see if your system supports struct cmsghdr...$c" >&4
-set d_cmsghdr_s cmsghdr cmsg_len define sys/types.h $d_socket sys/socket.h $i_sysuio sys/uio.h
-eval $hasfield
-case "$d_cmsghdr_s" in
-"$define")      echo "Yup, it does." >&4
-                ;;
-*)              echo "Nope, it doesn't." >&4
-                ;;
-esac
-
 : check for const keyword
 echo " "
 echo 'Checking to see if your C compiler knows about "const"...' >&4
@@ -8393,6 +8291,107 @@ eval $inlibc
 set fcntl d_fcntl
 eval $inlibc
 
+hasfield='varname=$1; struct=$2; field=$3; shift; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+echo "int main () { struct $struct foo; char* bar; bar = (char*)foo.$field; }" >> try.c;
+set try;
+if eval $compile; then
+	val="$define";
+else
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c try.o'
+
+socketlib=''
+sockethdr=''
+: see whether socket exists
+echo " "
+$echo $n "Hmm... $c" >&4
+if set socket val -f d_socket; eval $csym; $val; then
+	echo "Looks like you have Berkeley networking support." >&4
+	d_socket="$define"
+	if set setsockopt val -f; eval $csym; $val; then
+		d_oldsock="$undef"
+	else
+		echo "...but it uses the old BSD 4.1c interface, rather than 4.2." >&4
+		d_oldsock="$define"
+	fi
+else
+	if $contains socklib libc.list >/dev/null 2>&1; then
+		echo "Looks like you have Berkeley networking support." >&4
+		d_socket="$define"
+		: we will have to assume that it supports the 4.2 BSD interface
+		d_oldsock="$undef"
+	else
+		echo "You don't have Berkeley networking in libc$_a..." >&4
+		if test "X$d_socket" = "X$define"; then
+		   echo "...but you seem to believe that you have sockets." >&4
+		else
+			for net in net socket
+			do
+				if test -f /usr/lib/lib$net$_a; then
+					( ($nm $nm_opt /usr/lib/lib$net$_a | eval $nm_extract) ||  \
+					$ar t /usr/lib/lib$net$_a) 2>/dev/null >> libc.list
+					if $contains socket libc.list >/dev/null 2>&1; then
+						d_socket="$define"
+						socketlib="-l$net"
+						case "$net" in
+						net)
+							echo "...but the Wollongong group seems to have hacked it in." >&4
+							sockethdr="-I/usr/netinclude"
+							;;
+						esac
+						echo "Found Berkeley sockets interface in lib$net." >& 4 
+						if $contains setsockopt libc.list >/dev/null 2>&1; then
+							d_oldsock="$undef"
+						else
+							echo "...using the old BSD 4.1c interface, rather than 4.2." >&4
+							d_oldsock="$define"
+						fi
+						break
+					fi
+				fi
+			done
+			if test "X$d_socket" != "X$define"; then
+			   echo "or anywhere else I see." >&4
+			   d_socket="$undef"
+			   d_oldsock="$undef"
+			fi
+		fi
+	fi
+fi
+
+: see if socketpair exists
+set socketpair d_sockpair
+eval $inlibc
+
+
+echo " "
+echo "Checking the availability of certain socket constants..." >& 4
+for ENUM in MSG_CTRUNC MSG_DONTROUTE MSG_OOB MSG_PEEK MSG_PROXY SCM_RIGHTS; do
+	enum=`$echo $ENUM|./tr '[A-Z]' '[a-z]'`
+	$cat >try.c <<EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+int main() {
+    int i = $ENUM;
+}
+EOF
+	val="$undef"
+	set try; if eval $compile; then
+		val="$define"
+	fi
+	set d_${enum}; eval $setvar
+	$rm -f try.c try
+done
+
 : see if sys/select.h has to be included
 set sys/select.h i_sysselct
 eval $inhdr
@@ -8617,13 +8616,23 @@ $rm -f try.*
 set d_fpos64_t
 eval $setvar
 
-: see if fseeko exists
-set fseeko d_fseeko
-eval $inlibc
-
-: see if fsetpos exists
-set fsetpos d_fsetpos
-eval $inlibc
+hasstruct='varname=$1; struct=$2; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+echo "int main () { struct $struct foo; }" >> try.c;
+set try;
+if eval $compile; then
+	val="$define";
+else
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c try.o'
 
 : see if this is a sys/param system
 set sys/param.h i_sysparam
@@ -8633,18 +8642,32 @@ eval $inhdr
 set sys/mount.h i_sysmount
 eval $inhdr
 
+: see if sys/types.h has to be included
+set sys/types.h i_systypes
+eval $inhdr
 
-: see if statfs exists
-set statfs d_statfs
+
+echo " "
+echo "Checking to see if your system supports struct fs_data..." >&4
+set d_fs_data_s fs_data $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h
+eval $hasstruct
+case "$d_fs_data_s" in
+"$define")      echo "Yup, it does."     >&4 ;;
+*)              echo "Nope, it doesn't." >&4 ;;
+esac
+
+: see if fseeko exists
+set fseeko d_fseeko
 eval $inlibc
+
+: see if fsetpos exists
+set fsetpos d_fsetpos
+eval $inlibc
+
 
 : see if fstatfs exists
 set fstatfs d_fstatfs
 eval $inlibc
-
-: see if statfs knows about mount flags
-set d_statfsflags statfs f_flags $i_sysparam sys/param.h $i_sysmount sys/mount.h
-eval $hasfield
 
 
 : see if statvfs exists
@@ -8772,6 +8795,10 @@ eval $hasproto
 
 : see if getlogin exists
 set getlogin d_getlogin
+eval $inlibc
+
+: see if getmnt exists
+set getmnt d_getmnt
 eval $inlibc
 
 : see if getmntent exists
@@ -9116,10 +9143,6 @@ eval $inlibc
 set lstat d_lstat
 eval $inlibc
 
-: see if madvise exists
-set madvise d_madvise
-eval $inlibc
-
 : see if mblen exists
 set mblen d_mblen
 eval $inlibc
@@ -9162,37 +9185,6 @@ eval $inlibc
 
 : see if mktime exists
 set mktime d_mktime
-eval $inlibc
-
-: see if this is a sys/mman.h system
-set sys/mman.h i_sysmman
-eval $inhdr
-
-: see if mmap exists
-set mmap d_mmap
-eval $inlibc
-: see what shmat returns
-: default to something harmless
-mmaptype='void *'
-case "$i_sysmman$d_mmap" in
-"$define$define")
-	$cat >mmap.c <<'END'
-#include <sys/mman.h>
-void *mmap();
-END
-	if $cc $ccflags -c mmap.c >/dev/null 2>&1; then
-		mmaptype='void *'
-	else
-		mmaptype='caddr_t'
-	fi
-	echo "and it returns ($mmaptype)." >&4
-	;;
-esac
-
-
-
-: see if mprotect exists
-set mprotect d_mprotect
 eval $inlibc
 
 : see if msgctl exists
@@ -9246,14 +9238,6 @@ else
 fi
 set d_msg
 eval $setvar
-
-: see if msync exists
-set msync d_msync
-eval $inlibc
-
-: see if munmap exists
-set munmap d_munmap
-eval $inlibc
 
 : see if nice exists
 set nice d_nice
@@ -9506,10 +9490,6 @@ eval $inlibc
 
 : see if readlink exists
 set readlink d_readlink
-eval $inlibc
-
-: see if readv exists
-set readv d_readv
 eval $inlibc
 
 : see if rename exists
@@ -10281,14 +10261,60 @@ set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
 
+: see if sqrtl exists
+set sqrtl d_sqrtl
+eval $inlibc
+
 : see if sys/stat.h is available
 set sys/stat.h i_sysstat
 eval $inhdr
 
+
 : see if stat knows about block sizes
 echo " "
+echo "Checking to see if your struct stat has st_blocks field..." >&4
 set d_statblks stat st_blocks $i_sysstat sys/stat.h
 eval $hasfield
+
+
+: see if this is a sys/vfs.h system
+set sys/vfs.h i_sysvfs
+eval $inhdr
+
+
+: see if this is a sys/statfs.h system
+set sys/statfs.h i_sysstatfs
+eval $inhdr
+
+
+echo " "
+echo "Checking to see if your system supports struct statfs..." >&4
+set d_statfs_s statfs $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
+eval $hasstruct
+case "$d_statfs_s" in
+"$define")      echo "Yup, it does."     >&4 ;;
+*)              echo "Nope, it doesn't." >&4 ;;
+esac
+
+
+
+: see if struct statfs knows about f_flags
+case "$d_statfs_s" in
+define)	
+	echo " "
+	echo "Checking to see if your struct statfs has f_flags field..." >&4
+	set d_statfs_f_flags statfs f_flags $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
+	eval $hasfield
+	;;
+*)	val="$undef"
+	set d_statfs_f_flags
+	eval $setvar
+	;;
+esac
+case "$d_statfs_f_flags" in
+"$define")      echo "Yup, it does."     >&4 ;;
+*)              echo "Nope, it doesn't." >&4 ;;
+esac
 
 : see if _ptr and _cnt from stdio act std
 echo " "
@@ -10563,10 +10589,6 @@ eval $inlibc
 set tcsetpgrp d_tcsetpgrp
 eval $inlibc
 
-: see if sys/types.h has to be included
-set sys/types.h i_systypes
-eval $inhdr
-
 : see if prototype for telldir is available
 echo " "
 set d_telldirproto telldir $i_systypes sys/types.h $i_dirent dirent.h
@@ -10668,6 +10690,10 @@ eval $setvar
 
 : see if umask exists
 set umask d_umask
+eval $inlibc
+
+: see if ustat exists
+set ustat d_ustat
 eval $inlibc
 
 : backward compatibility for d_hvfork
@@ -10827,10 +10853,6 @@ eval $inlibc
 
 : see if wctomb exists
 set wctomb d_wctomb
-eval $inlibc
-
-: see if writev exists
-set writev d_writev
 eval $inlibc
 
 : preserve RCS keywords in files with variable substitution, grrr
@@ -13047,12 +13069,30 @@ eval $inhdr
 set sys/statvfs.h i_sysstatvfs
 eval $inhdr
 
+: see if this is a sys/uio.h system
+set sys/uio.h i_sysuio
+eval $inhdr
+
+echo "Checking to see if your system supports struct iovec..." >&4
+set d_iovec_s iovec iov_base $i_sysuio sys/uio.h
+eval $hasfield
+case "$d_iovec_s" in
+"$define")      echo "Yup, it does." >&4
+                ;;
+*)              echo "Nope, it doesn't." >&4
+                ;;
+esac
+
 : see if this is a sys/un.h system
 set sys/un.h i_sysun
 eval $inhdr
 
 : see if this is a syswait system
 set sys/wait.h i_syswait
+eval $inhdr
+
+: see if this is a ustat.h system
+set ustat.h i_ustat
 eval $inhdr
 
 : see if this is an utime system
@@ -13493,7 +13533,6 @@ d_chown='$d_chown'
 d_chroot='$d_chroot'
 d_chsize='$d_chsize'
 d_closedir='$d_closedir'
-d_cmsghdr_s='$d_cmsghdr_s'
 d_const='$d_const'
 d_crypt='$d_crypt'
 d_csh='$d_csh'
@@ -13529,6 +13568,7 @@ d_flock='$d_flock'
 d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
 d_fpos64_t='$d_fpos64_t'
+d_fs_data_s='$d_fs_data_s'
 d_fseeko='$d_fseeko'
 d_fsetpos='$d_fsetpos'
 d_fstatfs='$d_fstatfs'
@@ -13543,6 +13583,7 @@ d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_gethostprotos='$d_gethostprotos'
 d_getlogin='$d_getlogin'
+d_getmnt='$d_getmnt'
 d_getmntent='$d_getmntent'
 d_getnbyaddr='$d_getnbyaddr'
 d_getnbyname='$d_getnbyname'
@@ -13584,7 +13625,6 @@ d_lockf='$d_lockf'
 d_longdbl='$d_longdbl'
 d_longlong='$d_longlong'
 d_lstat='$d_lstat'
-d_madvise='$d_madvise'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
@@ -13596,8 +13636,6 @@ d_memset='$d_memset'
 d_mkdir='$d_mkdir'
 d_mkfifo='$d_mkfifo'
 d_mktime='$d_mktime'
-d_mmap='$d_mmap'
-d_mprotect='$d_mprotect'
 d_msg='$d_msg'
 d_msg_ctrunc='$d_msg_ctrunc'
 d_msg_dontroute='$d_msg_dontroute'
@@ -13606,11 +13644,8 @@ d_msg_peek='$d_msg_peek'
 d_msg_proxy='$d_msg_proxy'
 d_msgctl='$d_msgctl'
 d_msgget='$d_msgget'
-d_msghdr_s='$d_msghdr_s'
 d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
-d_msync='$d_msync'
-d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
 d_off64_t='$d_off64_t'
@@ -13635,8 +13670,6 @@ d_pwpasswd='$d_pwpasswd'
 d_pwquota='$d_pwquota'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
-d_readv='$d_readv'
-d_recvmsg='$d_recvmsg'
 d_rename='$d_rename'
 d_rewinddir='$d_rewinddir'
 d_rmdir='$d_rmdir'
@@ -13653,7 +13686,6 @@ d_semctl_semid_ds='$d_semctl_semid_ds'
 d_semctl_semun='$d_semctl_semun'
 d_semget='$d_semget'
 d_semop='$d_semop'
-d_sendmsg='$d_sendmsg'
 d_setegid='$d_setegid'
 d_seteuid='$d_seteuid'
 d_setgrent='$d_setgrent'
@@ -13689,9 +13721,10 @@ d_sigaction='$d_sigaction'
 d_sigsetjmp='$d_sigsetjmp'
 d_socket='$d_socket'
 d_sockpair='$d_sockpair'
+d_sqrtl='$d_sqrtl'
 d_statblks='$d_statblks'
-d_statfs='$d_statfs'
-d_statfsflags='$d_statfsflags'
+d_statfs_f_flags='$d_statfs_f_flags'
+d_statfs_s='$d_statfs_s'
 d_statvfs='$d_statvfs'
 d_stdio_cnt_lval='$d_stdio_cnt_lval'
 d_stdio_ptr_lval='$d_stdio_ptr_lval'
@@ -13726,6 +13759,8 @@ d_tzname='$d_tzname'
 d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
+d_ustat='$d_ustat'
+d_vendorbin='$d_vendorbin'
 d_vendorlib='$d_vendorlib'
 d_vfork='$d_vfork'
 d_void_closedir='$d_void_closedir'
@@ -13737,7 +13772,6 @@ d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
 d_wcstombs='$d_wcstombs'
 d_wctomb='$d_wctomb'
-d_writev='$d_writev'
 d_xenix='$d_xenix'
 date='$date'
 db_hashtype='$db_hashtype'
@@ -13822,7 +13856,6 @@ i_sysfile='$i_sysfile'
 i_sysfilio='$i_sysfilio'
 i_sysin='$i_sysin'
 i_sysioctl='$i_sysioctl'
-i_sysmman='$i_sysmman'
 i_sysmount='$i_sysmount'
 i_sysndir='$i_sysndir'
 i_sysparam='$i_sysparam'
@@ -13831,6 +13864,7 @@ i_syssecrt='$i_syssecrt'
 i_sysselct='$i_sysselct'
 i_syssockio='$i_syssockio'
 i_sysstat='$i_sysstat'
+i_sysstatfs='$i_sysstatfs'
 i_sysstatvfs='$i_sysstatvfs'
 i_systime='$i_systime'
 i_systimek='$i_systimek'
@@ -13838,11 +13872,13 @@ i_systimes='$i_systimes'
 i_systypes='$i_systypes'
 i_sysuio='$i_sysuio'
 i_sysun='$i_sysun'
+i_sysvfs='$i_sysvfs'
 i_syswait='$i_syswait'
 i_termio='$i_termio'
 i_termios='$i_termios'
 i_time='$i_time'
 i_unistd='$i_unistd'
+i_ustat='$i_ustat'
 i_utime='$i_utime'
 i_values='$i_values'
 i_varargs='$i_varargs'
@@ -13860,9 +13896,11 @@ installprefixexp='$installprefixexp'
 installprivlib='$installprivlib'
 installscript='$installscript'
 installsitearch='$installsitearch'
+installsitebin='$installsitebin'
 installsitelib='$installsitelib'
 installstyle='$installstyle'
 installusrbinperl='$installusrbinperl'
+installvendorbin='$installvendorbin'
 installvendorlib='$installvendorlib'
 intsize='$intsize'
 known_extensions='$known_extensions'
@@ -13908,10 +13946,8 @@ man3dir='$man3dir'
 man3direxp='$man3direxp'
 man3ext='$man3ext'
 medium='$medium'
-mips='$mips'
 mips_type='$mips_type'
 mkdir='$mkdir'
-mmaptype='$mmaptype'
 models='$models'
 modetype='$modetype'
 more='$more'
@@ -14002,6 +14038,8 @@ sig_num_init='$sig_num_init'
 signal_t='$signal_t'
 sitearch='$sitearch'
 sitearchexp='$sitearchexp'
+sitebin='$sitebin'
+sitebinexp='$sitebinexp'
 sitelib='$sitelib'
 sitelibexp='$sitelibexp'
 siteprefix='$siteprefix'
@@ -14067,6 +14105,8 @@ usevendorprefix='$usevendorprefix'
 usevfork='$usevfork'
 usrinc='$usrinc'
 uuname='$uuname'
+vendorbin='$vendorbin'
+vendorbinexp='$vendorbinexp'
 vendorlib='$vendorlib'
 vendorlibexp='$vendorlibexp'
 vendorprefix='$vendorprefix'

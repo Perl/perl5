@@ -376,18 +376,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_mktime HAS_MKTIME		/**/
 
-/* HAS_MSYNC:
- *	This symbol, if defined, indicates that the msync system call is
- *	available to synchronize a mapped file.
- */
-#$d_msync HAS_MSYNC		/**/
-
-/* HAS_MUNMAP:
- *	This symbol, if defined, indicates that the munmap system call is
- *	available to unmap a region, usually mapped by mmap().
- */
-#$d_munmap HAS_MUNMAP		/**/
-
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
  *	available.
@@ -1789,18 +1777,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_memchr HAS_MEMCHR	/**/
 
-/* HAS_MMAP:
- *	This symbol, if defined, indicates that the mmap system call is
- *	available to map a file into memory.
- */
-/* Mmap_t:
- *	This symbol holds the return type of the mmap() system call
- *	(and simultaneously the type of the first argument).
- *	Usually set to 'void *' or 'cadd_t'.
- */
-#$d_mmap HAS_MMAP		/**/
-#define Mmap_t $mmaptype	/**/
-
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is
  *	supported (IPC mechanism based on message queues).
@@ -1907,26 +1883,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	Checking just with #ifdef might not be enough because this symbol
  *	has been known to be an enum.
  */
-/* HAS_SENDMSG:
- *	This symbol, if defined, indicates that the sendmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_RECVMSG:
- *	This symbol, if defined, indicates that the recvmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_MSGHDR:
- *	This symbol, if defined, indicates that the struct msghdr
- *	(BSD 4.3 or 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_CMSGHDR:
- *	This symbol, if defined, indicates that the struct cmsghdr
- *	(BSD 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
 #$d_socket	HAS_SOCKET		/**/
 #$d_sockpair	HAS_SOCKETPAIR	/**/
 #$d_msg_ctrunc	HAS_MSG_CTRUNC	/**/
@@ -1935,10 +1891,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_msg_peek	HAS_MSG_PEEK	/**/
 #$d_msg_proxy	HAS_MSG_PROXY	/**/
 #$d_scm_rights	HAS_SCM_RIGHTS	/**/
-#$d_sendmsg	HAS_SENDMSG	/**/
-#$d_recvmsg	HAS_RECVMSG	/**/
-#$d_msghdr_s	HAS_STRUCT_MSGHDR	/**/
-#$d_cmsghdr_s	HAS_STRUCT_CMSGHDR	/**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -2080,12 +2032,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that <sys/uio.h> exists and
  *	should be included.
  */
-/* HAS_STRUCT_IOVEC:
- *	This symbol, if defined, indicates that the struct iovec
- *	to do scatter writes/gather reads is supported.
- */
 #$i_sysuio	I_SYSUIO		/**/
-#$d_iovec_s	HAS_STRUCT_IOVEC		/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -2192,21 +2139,38 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_endspent HAS_ENDSPENT		/**/
 
+/* HAS_STRUCT_FS_DATA:
+ *	This symbol, if defined, indicates that the struct fs_data
+ *	to do statfs() is supported.
+ */
+#$d_fs_data_s HAS_STRUCT_FS_DATA	/**/
+
 /* HAS_FSEEKO:
  *	This symbol, if defined, indicates that the fseeko routine is
  *	available to fseek beyond 32 bits (useful for ILP32 hosts).
  */
 #$d_fseeko HAS_FSEEKO		/**/
 
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to stat filesystems by file descriptors.
+ */
+#$d_fstatfs HAS_FSTATFS		/**/
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
 #$d_ftello HAS_FTELLO		/**/
 
+/* HAS_GETMNT:
+ *	This symbol, if defined, indicates that the getmnt routine is
+ *	available to get filesystem mount info by filename.
+ */
+#$d_getmnt HAS_GETMNT		/**/
+
 /* HAS_GETMNTENT:
  *	This symbol, if defined, indicates that the getmntent routine is
- *	available to iterate through mounted file systems.
+ *	available to iterate through mounted file systems to get their info.
  */
 #$d_getmntent HAS_GETMNTENT		/**/
 
@@ -2236,25 +2200,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_ldbl_dig HAS_LDBL_DIG 	/* */
 
-/* HAS_MADVISE:
- *	This symbol, if defined, indicates that the madvise system call is
- *	available to map a file into memory.
- */
-#$d_madvise HAS_MADVISE		/**/
-
-/* HAS_MPROTECT:
- *	This symbol, if defined, indicates that the mprotect system call is
- *	available to modify the access protection of a memory mapped file.
- */
-#$d_mprotect HAS_MPROTECT		/**/
-
-/* HAS_READV:
- *	This symbol, if defined, indicates that the readv routine is
- *	available to do gather reads.  You will also need <sys/uio.h>
- *	and there I_SYSUIO.
- */
-#$d_readv HAS_READV		/**/
-
 /* HAS_SETSPENT:
  *	This symbol, if defined, indicates that the setspent system call is
  *	available to initialize the scan of SysV shadow password entries.
@@ -2267,23 +2212,32 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_sfio	USE_SFIO		/**/
 
-/* HAS_FSTATFS:
- *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to stat filesystems of file descriptors.
+/* HAS_SQRTL:
+ *	This symbol, if defined, indicates that the sqrtl routine is
+ *	available to do long double square roots.
  */
-/* HAS_STRUCT_STATFS_FLAGS:
+#$d_sqrtl HAS_SQRTL		/**/
+
+/* HAS_STRUCT_STATFS_F_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
- *	the filesystem holding the file.
- *	This kind of struct statfs is coming from sys/mount.h (BSD),
- *	not from sys/statfs.h (SYSV).
+ *	the filesystem containing the file.
+ *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
+ *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
+ *	have statfs() and struct statfs, they have ustat() and getmnt()
+ *	with struct ustat and struct fs_data.
  */
-#$d_fstatfs HAS_FSTATFS		/**/
-#$d_statfsflags HAS_STRUCT_STATFS_FLAGS		/**/
+#$d_statfs_f_flags HAS_STRUCT_STATFS_F_FLAGS		/**/
+
+/* HAS_STRUCT_STATFS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	to do statfs() is supported.
+ */
+#$d_statfs_s HAS_STRUCT_STATFS	/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
- *	available to stat filesystems of file descriptors.
+ *	available to stat filesystems by file descriptors.
  */
 #$d_fstatvfs HAS_FSTATVFS		/**/
 
@@ -2295,11 +2249,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_telldirproto	HAS_TELLDIR_PROTO	/**/
 
-/* HAS_WRITEV:
- *	This symbol, if defined, indicates that the writev routine is
- *	available to do scatter writes.
+/* HAS_USTAT:
+ *	This symbol, if defined, indicates that the ustat system call is
+ *	available to query file system statistics by dev_t.
  */
-#$d_writev HAS_WRITEV		/**/
+#$d_ustat HAS_USTAT		/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -2376,23 +2330,34 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_socks	I_SOCKS		/**/
 
-/* I_SYS_MMAN:
- *	This symbol, if defined, indicates that <sys/mman.h> exists and
- *	should be included.
- */
-#$i_sysmman	I_SYS_MMAN		/**/
-
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
  *	should be included.
  */
 #$i_sysmount	I_SYS_MOUNT		/**/
 
+/* I_SYS_STATFS:
+ *	This symbol, if defined, indicates that <sys/statfs.h> exists.
+ */
+#$i_sysstatfs	I_SYS_STATFS		/**/
+
 /* I_SYS_STATVFS:
  *	This symbol, if defined, indicates that <sys/statvfs.h> exists and
  *	should be included.
  */
 #$i_sysstatvfs	I_SYS_STATVFS		/**/
+
+/* I_SYS_VFS:
+ *	This symbol, if defined, indicates that <sys/vfs.h> exists and
+ *	should be included.
+ */
+#$i_sysvfs	I_SYS_VFS		/**/
+
+/* I_USTAT:
+ *	This symbol, if defined, indicates that <ustat.h> exists and
+ *	should be included.
+ */
+#$i_ustat	I_USTAT		/**/
 
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.

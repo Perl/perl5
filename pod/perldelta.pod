@@ -893,7 +893,25 @@ EPOC is is now supported (on Psion 5).
 
 =head2 DOS
 
-[TODO - Laszlo Molnar <laszlo.molnar@eth.ericsson.se>]
+=over 4
+
+=item *
+
+Perl now works with djgpp 2.02 (and 2.03 alpha).
+
+=item *
+
+Environment variable names are not converted to uppercase any more.
+
+=item *
+
+Wrong exit code from backticks now fixed.
+
+=item *
+
+This port is still using its own builtin globbing.
+
+=back
 
 =head2 OS/2
 
