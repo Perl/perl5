@@ -33,7 +33,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	*= \5.00563
+INST_VER	*= \5.00564
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -51,7 +51,7 @@ INST_ARCH	*= \$(ARCHNAME)
 #
 # uncomment to enable threads-capabilities
 #
-#USE_THREADS	*= define
+#USE_5005THREADS	*= define
 
 #
 # XXX WARNING! This option currently undergoing changes.  May be broken.
@@ -228,16 +228,16 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 
 .IF "$(USE_OBJECT)" == "define"
 PERL_MALLOC	!= undef
-USE_THREADS	!= undef
+USE_5005THREADS	!= undef
 USE_MULTI	!= undef
 USE_IMP_SYS	!= define
 .ENDIF
 
 PERL_MALLOC	*= undef
 
-USE_THREADS	*= undef
+USE_5005THREADS	*= undef
 
-.IF "$(USE_THREADS)" == "define"
+.IF "$(USE_5005THREADS)" == "define"
 USE_ITHREADS	!= undef
 .ENDIF
 
@@ -246,7 +246,7 @@ USE_OBJECT	*= undef
 USE_ITHREADS	*= undef
 USE_IMP_SYS	*= undef
 
-.IF "$(USE_MULTI)$(USE_THREADS)$(USE_OBJECT)" != "undefundefundef"
+.IF "$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" != "undefundefundef"
 BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
 .ENDIF
 
@@ -264,12 +264,16 @@ PROCESSOR_ARCHITECTURE *= x86
 
 .IF "$(USE_OBJECT)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-object
-.ELIF "$(USE_THREADS)" == "define"
+.ELIF "$(USE_5005THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 .ELIF "$(USE_MULTI)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
 .ELSE
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
+.ENDIF
+
+.IF "$(USE_OBJECT)" == "define"
+ARCHNAME	= $(ARCHNAME)-thread
 .ENDIF
 
 # Visual Studio 98 specific
@@ -644,7 +648,7 @@ WIN32_SRC	=		\
 		.\win32.c	\
 		.\win32sck.c
 
-.IF "$(USE_THREADS)" == "define"
+.IF "$(USE_5005THREADS)" == "define"
 WIN32_SRC	+= .\win32thread.c 
 .ENDIF
 
@@ -843,7 +847,9 @@ CFG_VARS	=					\
 		static_ext=$(STATIC_EXT)	~	\
 		dynamic_ext=$(DYNAMIC_EXT)	~	\
 		nonxs_ext=$(NONXS_EXT)		~	\
-		usethreads=$(USE_THREADS)	~	\
+		use5005threads=$(USE_5005THREADS)	~	\
+		useithreads=$(USE_ITHREADS)	~	\
+		usethreads=$(USE_5005THREADS)	~	\
 		usemultiplicity=$(USE_MULTI)	~	\
 		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/)		~	\
 		optimize=$(OPTIMIZE)

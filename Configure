@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Dec 22 14:18:58 EST 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Jan  7 16:14:30 EST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -862,6 +862,8 @@ usenm=''
 useperlio=''
 usesocks=''
 d_oldpthreads=''
+use5005threads=''
+useithreads=''
 usethreads=''
 incpath=''
 mips_type=''
@@ -1888,6 +1890,7 @@ comm
 cp
 echo
 expr
+find
 grep
 ls
 make
@@ -1909,11 +1912,14 @@ date
 egrep
 gzip
 less
+line
 ln
 more
 nm
 nroff
+perl
 pg
+sendmail
 test
 uname
 zip
@@ -2205,12 +2211,14 @@ EOM
 			osvers="$2.$3"
 		fi
 	fi
-       $test -f /sys/posix.dll &&
-	       $test -f /usr/bin/what &&
-	       set X `/usr/bin/what /sys/posix.dll` &&
-	       $test "$3" = UWIN &&
-	       osname=uwin &&
-	       osvers="$5"
+
+	$test -f /sys/posix.dll &&
+		$test -f /usr/bin/what &&
+		set X `/usr/bin/what /sys/posix.dll` &&
+		$test "$3" = UWIN &&
+		osname=uwin &&
+		osvers="$5"
+
 	if $test -f $uname; then
 		set X $myuname
 		shift
@@ -2260,6 +2268,12 @@ EOM
 			*) osvers=$tmp;;
 			esac
 			;;
+		bsd386) osname=bsd386
+			osvers=`$uname -r`
+			;;
+		cygwin*) osname=cygwin
+			osvers="$3"
+			;;
 		*dc.osx) osname=dcosx
 			osvers="$3"
 			;;
@@ -2304,17 +2318,17 @@ EOM
 			*) osname=newsos ;;
 			esac
 			;;
-		bsd386) osname=bsd386
-			osvers=`$uname -r`
+		next*) osname=next ;;
+		POSIX-BC | posix-bc ) osname=posix-bc
+			osvers="$3"
 			;;
-                POSIX-BC | posix-bc ) osname=posix-bc
-                        osvers="$3"
-                        ;;
 		powerux | power_ux | powermax_os | powermaxos | \
 		powerunix | power_unix) osname=powerux
 			osvers="$3"
 			;;
-		next*) osname=next ;;
+		qnx) osname=qnx
+			osvers="$4"
+			;;
 		solaris) osname=solaris
 			case "$3" in
 			5*) osvers=`echo $3 | $sed 's/^5/2/g'` ;;
@@ -2353,12 +2367,6 @@ EOM
 			osvers="$4"
 			;;
 		uts) osname=uts
-			osvers="$3"
-			;;
-		qnx) osname=qnx
-			osvers="$4"
-			;;
-		cygwin*) osname=cygwin
 			osvers="$3"
 			;;
 		$2) case "$osname" in
@@ -2660,11 +2668,52 @@ esac
 rp='Build a threading Perl?'
 . ./myread
 case "$ans" in
-y|Y)    val="$define" ;;     
+y|Y)    val="$define" ;;
 *)      val="$undef" ;;
 esac
 set usethreads
-eval $setvar 
+eval $setvar
+
+case "$usethreads" in
+$define)
+	$cat <<EOM
+
+As of 5.5.64, Perl has two different internal threading implementations,
+the 5.005 version (5005threads) and an interpreter-based version
+(ithreads) that has one interpreter per thread.  Both are very 
+experimental.  This arrangement exists to help developers work out
+which one is better.
+EOM
+	: Default to ithreads unless overridden on command line or with
+	: old config.sh
+	dflt='y'
+	case "$use5005threads" in
+		$define|true|[yY]*) dflt='n';;
+	esac
+	case "$useithreads" in
+		$undef|false|[nN]*) dflt='n';;
+	esac
+	rp='Use interpreter-based ithreads?'
+	. ./myread
+	case "$ans" in
+	y|Y)    val="$define" ;;
+	*)      val="$undef" ;;
+	esac
+	set useithreads
+	eval $setvar
+	: Now set use5005threads to the opposite value.
+	case "$useithreads" in
+	$define) val="$undef" ;;
+	*) val="$define" ;;
+	esac
+	set use5005threads
+	eval $setvar
+	;;
+*)
+	useithreads="$undef"
+	use5005threads="$undef"
+	;;
+esac
 
 case "$d_oldpthreads" in
 '')	: Configure tests would be welcome here.  For now, assume undef.
@@ -2689,7 +2738,7 @@ case "$usethreads" in
  Assuming POSIX threads, then.)
 EOM
 	fi
-    ;;
+	;;
 esac
 
 cat <<EOM
@@ -4622,15 +4671,10 @@ $echo $n " patchlevel $patchlevel" $c
 test 0 -eq "$subversion" || $echo $n " subversion $subversion" $c
 echo ".)"
 
-if test 0 -eq "$subversion"; then
-	version=`LC_ALL=C; export LC_ALL; \
-		 echo $baserev $patchlevel | \
-		 $awk '{ printf "%.3f\n", $1 + $2/1000.0 }'`
-else
-	version=`LC_ALL=C; export LC_ALL; \
-		 echo $baserev $patchlevel $subversion | \
-		 $awk '{ printf "%.5f\n", $1 + $2/1000.0 + $3/100000.0 }'`
-fi
+version=`LC_ALL=C; export LC_ALL; \
+	 echo $baserev $patchlevel $subversion | \
+	 $awk '{ printf "%.6f\n", $1 + $2/1000.0 + $3/1000000.0 }' | \
+	 sed -e 's/0*$//'`
 
 : determine installation style
 : For now, try to deduce it from prefix unless it is already set.
@@ -14846,8 +14890,10 @@ uidtype='$uidtype'
 uname='$uname'
 uniq='$uniq'
 uquadtype='$uquadtype'
+use5005threads='$use5005threads'
 use64bits='$use64bits'
 usedl='$usedl'
+useithreads='$useithreads'
 uselargefiles='$uselargefiles'
 uselongdouble='$uselongdouble'
 uselonglong='$uselonglong'

@@ -604,6 +604,20 @@ line so that the hint files can make appropriate adjustments.
 
 The default is to compile without thread support.
 
+As of v5.5.64, perl has two different internal threads implementations.
+The 5.005 version (5005threads) and an interpreter-based implementation
+(ithreads) with one interpreter per thread.  By default, Configure selects
+ithreads if -Dusethreads is specified.  However, you can select the old
+5005threads behavior instead by either
+
+	sh Configure -Dusethreads -Duse5005threads
+
+or by
+	sh Configure -Dusethreads -Uuseithreads
+
+Eventually (by perl v5.6.0) this internal confusion ought to disappear,
+and these options may disappear as well.
+
 =head2 Selecting File IO mechanisms
 
 Previous versions of perl used the standard IO mechanisms as defined in

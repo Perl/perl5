@@ -1646,8 +1646,9 @@ fflushall (fflushall.U):
 	even be probed for and will be left undefined.
 
 find (Loc.U):
-	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the find program.  After Configure runs,
+	the value is reset to a plain "find" and is not useful.
 
 firstmakefile (Unix.U):
 	This variable defines the first file searched by make.  On unix,
@@ -1723,6 +1724,8 @@ groupcat (nis.U):
 	This variable contains a command that produces the text of the
 	/etc/group file.  This is normally "cat /etc/group", but can be
 	"ypcat group" when NIS is used.
+	On some systems, such as os390, there may be no equivalent
+	command, in which case this variable is unset.
 
 groupstype (groupstype.U):
 	This variable defines Groups_t to be something like gid_t, int, 
@@ -1751,6 +1754,8 @@ hostcat (nis.U):
 	This variable contains a command that produces the text of the
 	/etc/hosts file.  This is normally "cat /etc/hosts", but can be
 	"ypcat hosts" when NIS is used.
+	On some systems, such as os390, there may be no equivalent
+	command, in which case this variable is unset.
 
 huge (models.U):
 	This variable contains a flag which will tell the C compiler and loader
@@ -2274,8 +2279,9 @@ libswanted (Myinit.U):
 	ahead of ucb or bsd libraries for SVR4.
 
 line (Loc.U):
-	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the line program.  After Configure runs,
+	the value is reset to a plain "line" and is not useful.
 
 lint (Loc.U):
 	This variable is defined but not used by Configure.
@@ -2583,6 +2589,8 @@ passcat (nis.U):
 	This variable contains a command that produces the text of the
 	/etc/passwd file.  This is normally "cat /etc/passwd", but can be
 	"ypcat passwd" when NIS is used.
+	On some systems, such as os390, there may be no equivalent
+	command, in which case this variable is unset.
 
 patchlevel (patchlevel.U):
 	The patchlevel level of this package.
@@ -2593,8 +2601,9 @@ path_sep (Unix.U):
 	used to separate elements in the command shell search PATH.
 
 perl (Loc.U):
-	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the perl program.  After Configure runs,
+	the value is reset to a plain "perl" and is not useful.
 
 perladmin (perladmin.U):
 	Electronic mail address of the perl5 administrator.
@@ -2808,8 +2817,9 @@ selecttype (selecttype.U):
 	have select(), naturally.
 
 sendmail (Loc.U):
-	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the sendmail program.  After Configure runs,
+	the value is reset to a plain "sendmail" and is not useful.
 
 sh (sh.U):
 	This variable contains the full pathname of the shell used
@@ -2942,9 +2952,6 @@ siteprefix (siteprefix.U):
 siteprefixexp (siteprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the user will install add-on packages.  Derived from siteprefix.
-
-sizesize (sizesize.U):
-	This variable contains the size of a sizetype in bytes.
 
 sizetype (sizetype.U):
 	This variable defines sizetype to be something like size_t, 
@@ -3179,14 +3186,24 @@ uquadtype (quadtype.U):
 	unsigned int, unsigned long long, uint64_t, or whatever type is
 	used for 64-bit integers.
 
+use5005threads (usethreads.U):
+	This variable conditionally defines the USE_5005THREADS symbol,
+	and indicates that Perl should be built to use the 5.005-based
+	threading implementation.
+
 use64bits (use64bits.U):
 	This variable conditionally defines the USE_64_BITS symbol,
-	and indicates that explicit 64-bit interfaces should be used
+	and indicates that 64-bit integer types should be used
 	when available.
 
 usedl (dlsrc.U):
 	This variable indicates if the the system supports dynamic
 	loading of some sort.  See also dlsrc and dlobj.
+
+useithreads (usethreads.U):
+	This variable conditionally defines the USE_ITHREADS symbol,
+	and indicates that Perl should be built to use the interpreter-based
+	threading implementation.
 
 uselargefiles (uselfs.U):
 	This variable conditionally defines the USE_LARGE_FILES symbol,
