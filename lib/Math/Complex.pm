@@ -73,8 +73,12 @@ my %DISPLAY_FORMAT = ('style' => 'cartesian',
 my $eps            = 1e-14;		# Epsilon
 
 my $Inf;
-unless ($^O eq 'unicos') { # Unicos gets a fatal runtime error
+# Unicos gets a fatal runtime error without -h matherr=errno in ccflags
+unless ($^O eq 'unicos') {
+    my $e = $!;
     $Inf = CORE::exp(CORE::exp(30));
+    $! = $e; # Clear ERANGE.
+    undef $Inf unless $Inf =~ /^inf$/; # Inf INF inf
 }
 $Inf = "Inf" if !defined $Inf || !$Inf > 0;
 
