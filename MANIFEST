@@ -37,7 +37,6 @@ Todo			The Wishlist
 Todo.5.005		What needs doing before 5.005 release
 XSLock.h		Include file for extensions built with PERL_OBJECT defined
 XSUB.h			Include file for extension subroutines
-atomic.h		Atomic refcount handling for multi-threading
 av.c			Array value code
 av.h			Array value header
 beos/nm.c		BeOS port

@@ -1115,6 +1115,10 @@ typedef I32 (*filter_t) _((int, SV *, int));
  */
 
 #ifdef USE_THREADS
+   /* pending resolution of licensing issues, we avoid the erstwhile
+    * atomic.h everywhere */
+#  define EMULATE_ATOMIC_REFCOUNTS
+
 #  ifdef FAKE_THREADS
 #    include "fakethr.h"
 #  else

@@ -74,10 +74,6 @@ struct io {
 
 #ifdef USE_THREADS
 
-#  ifndef EMULATE_ATOMIC_REFCOUNTS
-#    include "atomic.h"
-#  endif
-
 #  ifdef EMULATE_ATOMIC_REFCOUNTS
 #    define ATOMIC_INC(count) STMT_START {	\
 	MUTEX_LOCK(&svref_mutex);		\
