@@ -3203,10 +3203,20 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     }
     memset(&StartupInfo,0,sizeof(StartupInfo));
     StartupInfo.cb = sizeof(StartupInfo);
+    memset(&tbl,0,sizeof(tbl));
     PerlEnv_get_child_IO(&tbl);
-    StartupInfo.hStdInput  = tbl.childStdIn;
-    StartupInfo.hStdOutput = tbl.childStdOut;
-    StartupInfo.hStdError  = tbl.childStdErr;
+    StartupInfo.dwFlags		= tbl.dwFlags;
+    StartupInfo.dwX		= tbl.dwX; 
+    StartupInfo.dwY		= tbl.dwY; 
+    StartupInfo.dwXSize		= tbl.dwXSize; 
+    StartupInfo.dwYSize		= tbl.dwYSize; 
+    StartupInfo.dwXCountChars	= tbl.dwXCountChars; 
+    StartupInfo.dwYCountChars	= tbl.dwYCountChars; 
+    StartupInfo.dwFillAttribute	= tbl.dwFillAttribute; 
+    StartupInfo.wShowWindow	= tbl.wShowWindow; 
+    StartupInfo.hStdInput	= tbl.childStdIn;
+    StartupInfo.hStdOutput	= tbl.childStdOut;
+    StartupInfo.hStdError	= tbl.childStdErr;
     if (StartupInfo.hStdInput != INVALID_HANDLE_VALUE &&
 	StartupInfo.hStdOutput != INVALID_HANDLE_VALUE &&
 	StartupInfo.hStdError != INVALID_HANDLE_VALUE)

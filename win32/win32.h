@@ -302,6 +302,23 @@ typedef struct {
     HANDLE	childStdIn;
     HANDLE	childStdOut;
     HANDLE	childStdErr;
+    /*
+     * the following correspond to the fields of the same name
+     * in the STARTUPINFO structure. Embedders can use these to
+     * control the spawning process' look.
+     * Example - to hide the window of the spawned process:
+     *    dwFlags = STARTF_USESHOWWINDOW;
+     *	  wShowWindow = SW_HIDE;
+     */
+    DWORD	dwFlags;
+    DWORD	dwX; 
+    DWORD	dwY; 
+    DWORD	dwXSize; 
+    DWORD	dwYSize; 
+    DWORD	dwXCountChars; 
+    DWORD	dwYCountChars; 
+    DWORD	dwFillAttribute;
+    WORD	wShowWindow; 
 } child_IO_table;
 
 DllExport void		win32_get_child_IO(child_IO_table* ptr);
