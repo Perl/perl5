@@ -3,7 +3,7 @@ require SelfLoader;
 @ISA = qw(SelfLoader);
 @EXPORT = 'AUTOLOAD';
 $JUST_STUBS = 1;
-$VERSION = '1.02';
+$VERSION = 1.03;
 sub Version {$VERSION}
 
 # Use as
@@ -34,13 +34,17 @@ sub stub {
     
     $mod_file = "$lib/$mod_file.pm";
     $fh = "${module}::DATA";
+    my (@BEFORE_DATA, @AFTER_DATA);
+    @DATA = @STUBS = ();
 
     open($fh,$mod_file) || die "Unable to open $mod_file";
+    local $/ = "\n";
     while(defined ($line = <$fh>) and $line !~ m/^__DATA__/) {
 	push(@BEFORE_DATA,$line);
 	$line =~ /use\s+SelfLoader/ && $found_selfloader++;
     }
-    $line =~ m/^__DATA__/ || die "$mod_file doesn't contain a __DATA__ token";
+    (defined ($line) && $line =~ m/^__DATA__/)
+      || die "$mod_file doesn't contain a __DATA__ token";
     $found_selfloader || 
 	print 'die "\'use SelfLoader;\' statement NOT FOUND!!\n"',"\n";
     $self->_load_stubs($module);

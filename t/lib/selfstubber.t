@@ -1,0 +1,198 @@
+#!./perl -w
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+use strict;
+use Devel::SelfStubber;
+
+my $runperl = './perl';
+
+print "1..7\n";
+
+my @cleanup;
+
+END {
+  foreach my $file (reverse @cleanup) {
+    unlink $file or warn "unlink $file failed: $!" while -f $file;
+    rmdir $file or warn "rmdir $file failed: $!" if -d $file;
+  }
+}
+
+my $inlib = "SSI-$$";
+mkdir $inlib, 0777 or die $!;
+push @cleanup, $inlib;
+
+while (<DATA>) {
+  if (/^\#{16,}\s+(.*)/) {
+    my $file = "$inlib/$1";
+    push @cleanup, $file;
+    open FH, ">$file" or die $!;
+  } else {
+    print FH;
+  }
+}
+close FH;
+
+{
+  my $file = "A-$$";
+  push @cleanup, $file;
+  open FH, ">$file" or die $!;
+  select FH;
+  Devel::SelfStubber->stub('Child', $inlib);
+  select STDOUT;
+  print "ok 1\n";
+  close FH or die $!;
+
+  open FH, $file or die $!;
+  my @A = <FH>;
+
+  if (@A == 1 && $A[0] =~ /^\s*sub\s+Child::foo\s*;\s*$/) {
+    print "ok 2\n";
+  } else {
+    print "not ok 2\n";
+    print "# $_" foreach (@A);
+  }
+}
+
+{
+  my $file = "B-$$";
+  push @cleanup, $file;
+  open FH, ">$file" or die $!;
+  select FH;
+  Devel::SelfStubber->stub('Proto', $inlib);
+  select STDOUT;
+  print "ok 3\n"; # Checking that we did not die horribly.
+  close FH or die $!;
+
+  open FH, $file or die $!;
+  my @B = <FH>;
+
+  if (@B == 1 && $B[0] =~ /^\s*sub\s+Proto::bar\s*\(\$\$\);\s*$/) {
+    print "ok 4\n";
+  } else {
+    print "not ok 4\n";
+    print "# $_" foreach (@B);
+  }
+
+  close FH or die $!;
+}
+
+# "wrong" and "right" may change if SelfLoader is changed.
+my %wrong = ( Parent => 'Parent', Child => 'Parent' );
+my %right = ( Parent => 'Parent', Child => 'Child' );
+my @module = qw(Parent Child)
+;
+sub fail {
+  my ($left, $right) = @_;
+  while (my ($key, $val) = each %$left) {
+    # warn "$key $val $$right{$key}";
+    return 1
+      unless $val eq $$right{$key};
+  }
+  return;
+}
+
+sub faildump {
+  my ($expect, $got) = @_;
+  foreach (sort keys %$expect) {
+    print "# $_ expect '$$expect{$_}' got '$$got{$_}'\n";
+  }
+}
+
+# Now test that the module tree behaves "wrongly" as expected
+
+foreach my $module (@module) {
+  my $file = "$module--$$";
+  push @cleanup, $file;
+  open FH, ">$file" or die $!;
+  print FH "use $module;
+print ${module}->foo;
+";
+  close FH or die $!;
+}
+
+{
+  my %output;
+  foreach my $module (@module) {
+    ($output{$module} = `$runperl -I $inlib $module--$$`)
+      =~ s/\'s foo//;
+  }
+
+  if (&fail (\%wrong, \%output)) {
+    print "not ok 5\n", &faildump (\%wrong, \%output);
+  } else {
+    print "ok 5\n";
+  }
+}
+
+my $lib="SSO-$$";
+mkdir $lib, 0777 or die $!;
+push @cleanup, $lib;
+$Devel::SelfStubber::JUST_STUBS=0;
+
+undef $/;
+foreach my $module (@module) {
+  my $file = "$lib/$module.pm";
+  open FH, "$inlib/$module.pm" or die $!;
+  my $contents = <FH>;
+  close FH or die $!;
+  push @cleanup, $file;
+  open FH, ">$file" or die $!;
+  select FH;
+  if ($contents =~ /__DATA__/) {
+    # This will die for any module with no  __DATA__
+    Devel::SelfStubber->stub($module, $inlib);
+  } else {
+    print $contents;
+  }
+  select STDOUT;
+  close FH or die $!;
+}
+print "ok 6\n";
+
+{
+  my %output;
+  foreach my $module (@module) {
+    ($output{$module} = `$runperl -I $lib $module--$$`)
+      =~ s/\'s foo//;
+  }
+
+  if (&fail (\%right, \%output)) {
+    print "not ok 7\n", &faildump (\%right, \%output);
+  } else {
+    print "ok 7\n";
+  }
+}
+
+__DATA__
+################ Parent.pm
+package Parent;
+
+sub foo {
+  return __PACKAGE__;
+}
+1;
+__END__
+################ Child.pm
+package Child;
+require Parent;
+@ISA = 'Parent';
+use SelfLoader;
+
+1;
+__DATA__
+sub foo {
+  return __PACKAGE__;
+}
+__END__
+################ Proto.pm
+package Proto;
+use SelfLoader;
+
+1;
+__DATA__
+sub bar ($$) {
+}
