@@ -25,6 +25,9 @@ sub convert_n_test {
     # expected
     my $expect = <DATA>;
     $expect =~ s/\[PERLADMIN\]/$Config::Config{perladmin}/;
+    if (ord("A") == 193) { # EBCDIC.
+	$expect =~ s/item_mat%3c%21%3e/item_mat%4c%5a%6e/;
+    }
 
     # result
     open my $in, $outfile or die "cannot open $outfile: $!";
