@@ -119,6 +119,58 @@ value of FILL or READ.
 
 =back
 
+=head2 Example - a Hexadecimal Handle
+
+Given the following module, Hex.pm:
+
+    package Hex;
+
+    sub PUSHED
+    {
+     my ($class,$mode) = @_;
+     # When writing we buffer the data
+     my $write = '';
+     return bless \$write,$class;
+    }
+
+    sub FILL
+    {
+     my ($obj,$fh) = @_;
+     my $line = <$fh>;
+     return (defined $line) ? pack("H*", $line) : undef;
+     return undef;
+    }
+
+    sub WRITE
+    {
+     my ($obj,$buf,$fh) = @_;
+     $$obj .= unpack("H*", $buf);
+     return length($buf);
+    }
+
+    sub FLUSH
+    {
+     my ($obj,$fh) = @_;
+     print $fh $$obj or return -1;
+     $$obj = '';
+     return 0;
+    }
+
+    1;
+
+the following code opens up an output handle that will convert any
+output to hexadecimal dump of the output bytes: for example "A" will
+be converted to "41" (on ASCII-based machines, on EBCDIC platforms
+the "A" will become "c1")
+
+    use Hex;
+    open(my $fh, ">:Via(Hex)", "foo.hex");
+
+and the following code will read the hexdump in and convert it
+on the fly back into bytes:
+
+    open(my $fh, "<:Via(Hex)", "foo.hex");
+
 =cut
 
 
