@@ -78,6 +78,351 @@ Version 5.005_03        Third maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[  3198] By: gbarr                                 on 1999/03/28  22:21:49
+        Log: redo #3193 which #3195 undid
+     Branch: maint-5.005/perl
+           ! pod/perlhist.pod
+____________________________________________________________________________
+[  3197] By: gbarr                                 on 1999/03/28  21:04:04
+        Log: Updated CPAN.pm to 1.48
+     Branch: maint-5.005/perl
+           ! lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+____________________________________________________________________________
+[  3196] By: gbarr                                 on 1999/03/28  17:21:27
+        Log: AIX hints update from Jarkko
+     Branch: maint-5.005/perl
+           ! hints/aix.sh
+____________________________________________________________________________
+[  3195] By: jhi                                   on 1999/03/28  16:42:54
+        Log: Update perlhist on 5_03.
+     Branch: maint-5.005/perl
+           ! pod/perlhist.pod
+____________________________________________________________________________
+[  3193] By: gsar                                  on 1999/03/28  09:46:29
+        Log: =end needs matching =begin (or installhtml will croak)
+     Branch: maint-5.005/perl
+           ! pod/perlhist.pod
+____________________________________________________________________________
+[  3192] By: gsar                                  on 1999/03/28  09:10:15
+        Log: update pod/Makefile
+     Branch: maint-5.005/perl
+           ! pod/Makefile
+____________________________________________________________________________
+[  3191] By: gsar                                  on 1999/03/28  08:43:47
+        Log: integrate change#3180 from mainline
+             
+             fix bogus OPf_REF context for the BLOCK in C<grep BLOCK @foo>
+             (sometimes caused bizarreness in the BLOCK)
+     Branch: maint-5.005/perl
+          +> t/op/grep.t
+          !> MANIFEST op.c
+____________________________________________________________________________
+[  3190] By: gsar                                  on 1999/03/28  08:29:51
+        Log: integrate change#3147 from mainline
+             
+             warn about newfangled vfork() caveats
+     Branch: maint-5.005/perl
+           ! Configure
+____________________________________________________________________________
+[  3189] By: gsar                                  on 1999/03/28  08:22:00
+        Log: various pod niggles
+     Branch: maint-5.005/perl
+	   ! pod/perl.pod pod/perldebug.pod pod/perldiag.pod
+           ! pod/perlfunc.pod pod/perlhist.pod
+____________________________________________________________________________
+[  3188] By: gsar                                  on 1999/03/28  07:37:43
+        Log: integrate binary compatible variant of change#3098 from mainline
+     Branch: maint-5.005/perl
+           ! op.c perl.h t/base/lex.t toke.c
+____________________________________________________________________________
+[  3187] By: gsar                                  on 1999/03/28  07:31:16
+        Log: regularize CAPI declarations (CAPI extensions now build under
+             the Borland compiler)
+     Branch: maint-5.005/perl
+           ! win32/GenCAPI.pl
+____________________________________________________________________________
+[  3186] By: gsar                                  on 1999/03/28  07:26:33
+        Log: ensure XS_LOCKS stuff happens *before* XSUB is entered under
+             -DPERL_CAPI
+     Branch: maint-5.005/perl
+           ! XSlock.h win32/GenCAPI.pl win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  3185] By: gbarr                                 on 1999/03/28  06:37:41
+        Log: integrate change #2846 from mainline
+             
+             a modified version of suggested patch for pack template 'Z'; added docs
+             From: "Valeriy E. Ushakov" <uwe@ptc.spbu.ru>
+             Date: Mon, 16 Jun 1997 03:00:31 +0400 (MSD)
+             Message-ID: <%lOHpzIuGV@snark.ptc.spbu.ru>
+             Subject: lack of pack/unpack letter with useful symmetry for C null delimited strings
+     Branch: maint-5.005/perl
+           ! pod/perldelta.pod pod/perlfunc.pod pp.c
+          !> t/op/pack.t
+____________________________________________________________________________
+[  3184] By: gbarr                                 on 1999/03/28  06:35:50
+        Log: integrate change # 3160 from mainline
+             
+             better description of OP_UNSTACK (s/unstack/iteration finalizer/)
+     Branch: maint-5.005/perl
+           ! opcode.h opcode.pl
+____________________________________________________________________________
+[  3182] By: gbarr                                 on 1999/03/28  03:40:28
+        Log: Integrate changes #3067 and #3106 from mainline
+             
+             exempt $foo::a,$foo::b from warnings only if sort() was seen in package foo
+             From: Graham Barr <gbarr@ti.com>
+             Date: Wed, 3 Mar 1999 17:23:56 -0600
+             Message-ID: <19990303172356.F7442@dal.asp.ti.com>
+             Subject: Re: 'use strict' doesn't work for one-letter variables
+             
+             change#3067 failed package.t due to needless creation of $a and $b;
+             fixed to do that only for C<sort BLOCK|CODE @foo>, not C<sort(@foo)>
+     Branch: maint-5.005/perl
+           ! gv.c op.c t/pragma/warn-1global
+____________________________________________________________________________
+[  3179] By: gsar                                  on 1999/03/28  02:14:04
+        Log: fix thread segfault when passing large number of arguments to child
+             a la C<Thread->new($foo, 1..1000)>
+     Branch: maint-5.005/perl
+           ! ext/Thread/Thread.xs t/lib/thread.t
+____________________________________________________________________________
+[  3178] By: gbarr                                 on 1999/03/28  01:39:23
+        Log: fix $Config{'usethreads'} typo in perlthrtut
+             
+             From: Ian Maloney <szhmf9@wsblob.ubs.com>
+             Date: Thu, 25 Mar 1999 16:40:14 +0100 (MET)
+             Message-Id: <199903251540.QAA02439@wsblob.>
+             Subject: perlthrtut documentation error
+     Branch: maint-5.005/perl
+           ! pod/perlthrtut.pod
+____________________________________________________________________________
+[  3177] By: gbarr                                 on 1999/03/28  01:09:59
+        Log: Integrate #2910 from mainline
+             
+             slurping an empty file should return '' rather than undef, with
+             commensurate effects on ARGV processing
+     Branch: maint-5.005/perl
+           ! pod/perldelta.pod pp_hot.c sv.h
+          !> t/io/argv.t
+____________________________________________________________________________
+[  3176] By: gbarr                                 on 1999/03/28  00:00:30
+        Log: Integrate relevant doc changes from mainline
+     Branch: maint-5.005/perl
+          !> (integrate 34 files)
+____________________________________________________________________________
+[  3175] By: gbarr                                 on 1999/03/27  19:20:32
+        Log: Integrated #2352 and #2397 from mainline
+             
+             Implement $^C to allow perl access to -c flag - I think this 
+             was agreed once...
+             
+             Update docs and English.pm for $^C
+     Branch: maint-5.005/perl
+           ! gv.c mg.c
+          !> lib/English.pm
+____________________________________________________________________________
+[  3174] By: gbarr                                 on 1999/03/27  18:21:01
+        Log: Update Copyright year
+     Branch: maint-5.005/perl
+	   ! EXTERN.h INTERN.h README av.c av.h cop.h cv.h deb.c doio.c
+	   ! doop.c dump.c form.h gv.c gv.h handy.h hv.c hv.h mg.c mg.h
+	   ! op.c op.h perl.h perly.y pp.c pp.h pp_ctl.c pp_hot.c pp_sys.c
+	   ! regcomp.c regexec.c run.c scope.c sv.c sv.h toke.c util.c
+           ! util.h
+____________________________________________________________________________
+[  3173] By: gbarr                                 on 1999/03/27  18:19:47
+        Log: Update Test.pm to VERSION 1.122 from CPAN
+     Branch: maint-5.005/perl
+           ! lib/Test.pm
+____________________________________________________________________________
+[  3154] By: jhi                                   on 1999/03/24  21:40:51
+        Log: Reword the shared library search path (LD_LIBRARY_PATH) info
+             based on suggestions from Andy Dougherty.
+     Branch: maint-5.005/perl
+           ! INSTALL
+____________________________________________________________________________
+[  3146] By: jhi                                   on 1999/03/24  09:20:14
+        Log: Bring in changes #2808 and #2812 (from mainline perl)
+             that enhance the perlbug checklist.
+     Branch: maint-5.005/perl
+           ! utils/perlbug.PL
+____________________________________________________________________________
+[  3130] By: jhi                                   on 1999/03/23  22:02:23
+        Log: Don't use config.msg to remind about the
+             LD_LIBRARY_PATH because Makefile.SH takes
+             care of that.
+             
+             Use shrplib in DEC O^W^Digital U^W^WTru64 UNIX.
+             This used to be the default but in some MT or another it
+             was dropped because of some transient error or another.
+     Branch: maint-5.005/perl
+           ! Configure hints/dec_osf.sh
+____________________________________________________________________________
+[  3122] By: jhi                                   on 1999/03/19  21:12:14
+        Log: Describe the new Benchmark feature in more detail.
+     Branch: cfgperl
+           ! pod/perldelta.pod
+     Branch: maint-5.005/perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  3121] By: jhi                                   on 1999/03/19  08:16:12
+        Log: AVAILABILITY tuning.
+     Branch: cfgperl
+           ! pod/perl.pod
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  3119] By: jhi                                   on 1999/03/17  14:33:43
+        Log: More Apollo fixes.
+     Branch: maint-5.005/perl
+           ! README.apollo hints/apollo.sh t/lib/io_udp.t
+____________________________________________________________________________
+[  3118] By: jhi                                   on 1999/03/16  17:23:39
+        Log: Nada.
+     Branch: maint-5.005/perl
+           ! README.apollo
+____________________________________________________________________________
+[  3117] By: jhi                                   on 1999/03/16  17:18:49
+        Log: Apollo DomainOS AVAILABILITY.
+     Branch: cfgperl
+           ! pod/perl.pod
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  3116] By: jhi                                   on 1999/03/16  17:14:00
+        Log: Apollo DomainOS patch
+             From: Johann Klasek <jk@auto.tuwien.ac.at>
+             Subject: Re: DomainPerl
+             Date: Tue, 16 Mar 1999 17:46:32 +0100
+             Message-ID: <19990316174632.A19759@euklid.auto.tuwien.ac.at>
+     Branch: maint-5.005/perl
+           + README.apollo apollo/netinet/in.h
+           ! MANIFEST hints/apollo.sh
+____________________________________________________________________________
+[  3115] By: jhi                                   on 1999/03/16  14:23:54
+        Log: From: Paul Marquess <pmarquess@bfsec.bt.co.uk>
+             To: Gurusamy Sarathy <gsar@activestate.com>,
+             Graham Barr <gbarr@pobox.com>
+             Cc: Perl5 Porters <perl5-porters@perl.org>,
+             "Paul.Marquess" <Paul.Marquess@btinternet.com>
+             Subject: [PATCH 5.005_56 & 5.005_03_T6] Upgrade DB_File to version 1.65
+             Date: Sun, 14 Mar 1999 14:43:57 -0000
+             Message-Id: <199903141841.NAA17040@defender.perl.org>
+     Branch: maint-5.005/perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+           ! ext/DB_File/DB_File.xs ext/DB_File/typemap
+____________________________________________________________________________
+[  3114] By: jhi                                   on 1999/03/16  12:42:20
+        Log: Mention Rhapsody in 5.005_5X perldelta,
+             and in Rhapsody and Netware in 5.005_0X and 5.005_5X
+             *planned* AVAILABILITY.
+     Branch: cfgperl
+           ! pod/perl.pod pod/perldelta.pod
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  3113] By: jhi                                   on 1999/03/16  10:38:53
+        Log: perldelta niggling.
+     Branch: cfgperl
+           ! pod/perldelta.pod
+     Branch: maint-5.005/perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  3111] By: jhi                                   on 1999/03/16  10:28:10
+        Log: AVAILABILITY update: still mention PowerUX,
+             Novell Netware now has sources available.
+     Branch: cfgperl
+           ! pod/perl.pod
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  3105] By: jhi                                   on 1999/03/12  15:54:57
+        Log: Recognize the NetBSD packages collection.
+     Branch: maint-5.005/perl
+           ! hints/netbsd.sh
+____________________________________________________________________________
+[  3104] By: jhi                                   on 1999/03/12  09:07:04
+        Log: From: pvhp@forte.com (Peter Prymmer)
+             To: jhi@iki.fi, perl-mvs@perl.org, perlbug@perl.com
+             Subject: [PATCH MT6,_56] was Re: Not OK: perl 5.00503 +MAINT_TRIAL_6 on os390 06.00 (UNINSTALLED)
+             Date: Thu, 11 Mar 99 14:24:54 PST
+             Message-Id: <9903112224.AA24346@forte.com>
+     Branch: maint-5.005/perl
+           ! README.os390 t/lib/posix.t
+____________________________________________________________________________
+[  3102] By: jhi                                   on 1999/03/10  11:01:20
+        Log: From: pvhp@forte.com (Peter Prymmer)
+             To: perl5-porters@perl.org
+             Subject: [5.005_03-MT6]Patch: time passes
+             Date: Tue, 9 Mar 99 18:42:17 PST
+             Message-Id: <9903100242.AA29057@forte.com>
+     Branch: maint-5.005/perl
+           ! perl.c
+____________________________________________________________________________
+[  3101] By: jhi                                   on 1999/03/10  10:30:15
+        Log: From: Mark-Jason Dominus <mjd@plover.com>
+             To: perl5-porters@perl.com
+             Subject: Minor fix to perlfunc.pod
+             Date: Mon, 08 Mar 1999 20:05:53 -0500
+             Message-ID: <19990309010553.13757.qmail@plover.com>
+     Branch: maint-5.005/perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  3094] By: jhi                                   on 1999/03/06  16:16:15
+        Log: From: Mark Kettenis <kettenis@wins.uva.nl>
+             To: jhi@iki.fi
+             Subject: Oops
+             Date: Sat, 6 Mar 1999 17:15:35 +0100 (CET)
+             Message-Id: <199903061615.RAA00207@delius.kettenis.nl>
+     Branch: maint-5.005/perl
+           ! README.hurd
+____________________________________________________________________________
+[  3093] By: jhi                                   on 1999/03/06  15:59:46
+        Log: From: Mark Kettenis <kettenis@wins.uva.nl>
+             To: jhi@iki.fi
+             Subject: New Hurd README
+             Date: Sat, 6 Mar 1999 16:46:12 +0100 (CET)
+             Message-Id: <199903061601.RAA00185@delius.kettenis.nl>
+     Branch: maint-5.005/perl
+           ! README.hurd
+____________________________________________________________________________
+[  3092] By: jhi                                   on 1999/03/06  12:52:06
+        Log: From: Paul_Green@stratus.com
+             To: perl5-porters@perl.org
+             Cc: jhi@iki.fi, Paul_Green@stratus.com
+             Subject: [PATCH 5.005_03-MAINT_TRIAL_6]: platform: vos -- updates to VOS port of Perl5
+             Date: Fri, 5 Mar 1999 18:08:49 -0500 
+             Message-ID: <1D1A4EF7AD4DD211A80D00A0C9D7DB665A035A@exna1.stratus.com>
+     Branch: maint-5.005/perl
+           ! vos/config.h vos/config_h.SH_orig
+____________________________________________________________________________
+[  3091] By: jhi                                   on 1999/03/06  12:42:21
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             To: perl5-porters@perl.org, vmsperl@perl.org
+             Subject: [PATCH 5.005_03-MT6]VMS build patch
+             Date: Fri, 05 Mar 1999 12:36:19 -0800
+             Message-Id: <3.0.6.32.19990305123619.02d326a0@ous.edu>
+     Branch: maint-5.005/perl
+           ! vms/subconfigure.com
+____________________________________________________________________________
+[  3090] By: gsar                                  on 1999/03/06  04:40:03
+        Log: integrate change#3089 from mainline
+             
+             tolerate CRs after options
+     Branch: maint-5.005/perl
+          !> perl.c
+____________________________________________________________________________
+[  3086] By: gbarr                                 on 1999/03/05  01:48:05
+        Log: #3085 was a bit premature, this is MT6 as 2 files were
+             missing from MANIFEST
+     Branch: maint-5.005/perl
+           ! MANIFEST
+____________________________________________________________________________
+[  3085] By: gbarr                                 on 1999/03/05  01:41:06
+        Log: Trial release 6
+     Branch: maint-5.005/perl
+           ! Changes
+____________________________________________________________________________
 [  3084] By: gbarr                                 on 1999/03/05  01:34:07
         Log: Don't process - as a file in Errno_pm.PL
              
