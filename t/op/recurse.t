@@ -49,24 +49,24 @@ sub takeuchi {
 	    : $_[2];
 }
 
-is(gcd(1147, 1271), 31, "gcd(1147, 1271)");
+is(gcd(1147, 1271), 31, "gcd(1147, 1271) == 31");
 
-is(gcd(1908, 2016), 36, "gcd(1908, 2016)");
+is(gcd(1908, 2016), 36, "gcd(1908, 2016) == 36");
 
-is(factorial(10), 3628800, "factorial(10)");
+is(factorial(10), 3628800, "factorial(10) == 3628800");
 
-is(factorial(factorial(3)), 720, "factorial(factorial(3))");
+is(factorial(factorial(3)), 720, "factorial(factorial(3)) == 720");
 
-is(fibonacci(10), 89, "fibonacci(10)");
+is(fibonacci(10), 89, "fibonacci(10) == 89");
 
-is(fibonacci(fibonacci(7)), 17711, "fibonacci(fibonacci(7))");
+is(fibonacci(fibonacci(7)), 17711, "fibonacci(fibonacci(7)) == 17711");
 
 my @ack = qw(1 2 3 4 2 3 4 5 3 5 7 9 5 13 29 61);
 
 for my $x (0..3) { 
     for my $y (0..3) {
 	my $a = ackermann($x, $y);
-	is($a, shift(@ack), "ackermann($x, y)");
+	is($a, shift(@ack), "ackermann($x, $y) == $a");
     }
 }
 
