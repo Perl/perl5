@@ -932,7 +932,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,const char *mode,int narg, SV **a
        if (handler)
         {
          def    = newAV();
-         av_push(def,handler);
+         av_push(def,SvREFCNT_inc(handler));
          av_push(def,&PL_sv_undef);
          incdef = 0;
         }
