@@ -2886,3 +2886,98 @@ get_specialsv_list(void)
 {
  return PL_specialsv_list;
 }
+
+
+MGVTBL*
+get_vtbl(int vtbl_id)
+{
+    MGVTBL* result = Null(MGVTBL*);
+
+    switch(vtbl_id) {
+    case want_vtbl_sv:
+	result = &vtbl_sv;
+	break;
+    case want_vtbl_env:
+	result = &vtbl_env;
+	break;
+    case want_vtbl_envelem:
+	result = &vtbl_envelem;
+	break;
+    case want_vtbl_sig:
+	result = &vtbl_sig;
+	break;
+    case want_vtbl_sigelem:
+	result = &vtbl_sigelem;
+	break;
+    case want_vtbl_pack:
+	result = &vtbl_pack;
+	break;
+    case want_vtbl_packelem:
+	result = &vtbl_packelem;
+	break;
+    case want_vtbl_dbline:
+	result = &vtbl_dbline;
+	break;
+    case want_vtbl_isa:
+	result = &vtbl_isa;
+	break;
+    case want_vtbl_isaelem:
+	result = &vtbl_isaelem;
+	break;
+    case want_vtbl_arylen:
+	result = &vtbl_arylen;
+	break;
+    case want_vtbl_glob:
+	result = &vtbl_glob;
+	break;
+    case want_vtbl_mglob:
+	result = &vtbl_mglob;
+	break;
+    case want_vtbl_nkeys:
+	result = &vtbl_nkeys;
+	break;
+    case want_vtbl_taint:
+	result = &vtbl_taint;
+	break;
+    case want_vtbl_substr:
+	result = &vtbl_substr;
+	break;
+    case want_vtbl_vec:
+	result = &vtbl_vec;
+	break;
+    case want_vtbl_pos:
+	result = &vtbl_pos;
+	break;
+    case want_vtbl_bm:
+	result = &vtbl_bm;
+	break;
+    case want_vtbl_fm:
+	result = &vtbl_fm;
+	break;
+    case want_vtbl_uvar:
+	result = &vtbl_uvar;
+	break;
+#ifdef USE_THREADS
+    case want_vtbl_mutex:
+	result = &vtbl_mutex;
+	break;
+#endif
+    case want_vtbl_defelem:
+	result = &vtbl_defelem;
+	break;
+    case want_vtbl_regexp:
+	result = &vtbl_regexp;
+	break;
+    case want_vtbl_collxfrm:
+	result = &vtbl_collxfrm;
+	break;
+    case want_vtbl_amagic:
+	result = &vtbl_amagic;
+	break;
+    case want_vtbl_amagicelem:
+	result = &vtbl_amagicelem;
+	break;
+    }
+    return result;
+}
+

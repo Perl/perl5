@@ -375,6 +375,8 @@
 #define get_opargs        CPerlObj::Perl_get_opargs
 #undef  get_specialsv_list
 #define get_specialsv_list CPerlObj::Perl_get_specialsv_list
+#undef  get_vtbl
+#define get_vtbl          CPerlObj::Perl_get_vtbl
 #undef  getlogin
 #define getlogin          CPerlObj::getlogin
 #undef  gp_free
