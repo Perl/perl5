@@ -289,6 +289,11 @@ ext/Opcode/Opcode.pm		Opcode extension Perl module
 ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/Safe.pm		Safe extension Perl module
+ext/Opcode/t/Opcode.t		See if Opcode works
+ext/Opcode/t/ops.t		See if Opcode works
+ext/Safe/t/safe1.t		See if Safe works
+ext/Safe/t/safe2.t		See if Safe works
+ext/Safe/t/safe3.t		See if Safe works
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
@@ -1521,13 +1526,10 @@ t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
 t/lib/open2.t		See if IPC::Open2 works
 t/lib/open3.t		See if IPC::Open3 works
-t/lib/ops.t		See if Opcode works
 t/lib/parsewords.t	See if Text::ParseWords works
 t/lib/peek.t		See if Devel::Peek works
 t/lib/ph.t		See if h2ph works
 t/lib/posix.t		See if POSIX works
-t/lib/safe1.t		See if Safe works
-t/lib/safe2.t		See if Safe works
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/bignum		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
