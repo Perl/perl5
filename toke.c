@@ -2033,16 +2033,16 @@ yylex()
 			close = term;
 			if (open == close)
 			    for (t++; t < bufend; t++) {
-				if (*t == '\\' && t+1 < bufend && term != '\\')
+				if (*t == '\\' && t+1 < bufend && open != '\\')
 				    t++;
-				else if (*t == term)
+				else if (*t == open)
 				    break;
 			    }
 			else
 			    for (t++; t < bufend; t++) {
-				if (*t == '\\' && t+1 < bufend && term != '\\')
+				if (*t == '\\' && t+1 < bufend)
 				    t++;
-				else if (*t == term && --brackets <= 0)
+				else if (*t == close && --brackets <= 0)
 				    break;
 				else if (*t == open)
 				    brackets++;
@@ -4968,13 +4968,13 @@ char *start;
 	    for (; s < bufend; s++,to++) {
 		if (*s == '\n' && !rsfp)
 		    curcop->cop_line++;
-		if (*s == '\\' && s+1 < bufend && term != '\\') {
-		    if (s[1] == term)
+		if (*s == '\\' && s+1 < bufend) {
+		    if ((s[1] == multi_open) || (s[1] == multi_close))
 			s++;
 		    else
 			*to++ = *s++;
 		}
-		else if (*s == term && --brackets <= 0)
+		else if (*s == multi_close && --brackets <= 0)
 		    break;
 		else if (*s == multi_open)
 		    brackets++;
