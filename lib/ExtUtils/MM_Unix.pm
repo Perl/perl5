@@ -384,6 +384,11 @@ sub cflags {
             $self->{OPTIMIZE} =~ s/-TP(\s|$)//;
         }
     }
+
+    if ($self->{POLLUTE}) {
+	$self->{CCFLAGS} .= ' -DPERL_POLLUTE ';
+    }
+
     return $self->{CFLAGS} = qq{
 CCFLAGS = $self->{CCFLAGS}
 OPTIMIZE = $self->{OPTIMIZE}

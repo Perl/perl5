@@ -21,7 +21,11 @@ None known at this time.
 Release 5.005 grandfathered old global symbol names by providing preprocessor
 macros for extension source compatibility.  As of release 5.006, these
 preprocessor definitions are not available by default.  You need to explicitly
-compile perl with C<-DPERL_POLLUTE> in order to get these definitions.
+compile perl with C<-DPERL_POLLUTE> in order to get these definitions. For
+extensions that are still using the old symbols, this option can be
+specified via MakeMaker:
+
+	perl Makefile.PL POLLUTE=1
 
 =item C<PERL_POLLUTE_MALLOC>
 

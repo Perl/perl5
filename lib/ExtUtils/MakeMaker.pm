@@ -249,7 +249,7 @@ sub full_setup {
     LINKTYPE MAKEAPERL MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
     NAME NEEDS_LINKING NOECHO NORECURS NO_VC OBJECT OPTIMIZE PERL PERLMAINCC
     PERL_ARCHLIB PERL_LIB PERL_SRC PERM_RW PERM_RWX
-    PL_FILES PM PMLIBDIRS PPM_INSTALL_EXEC PPM_INSTALL_SCRIPT PREFIX
+    PL_FILES PM PMLIBDIRS POLLUTE PPM_INSTALL_EXEC PPM_INSTALL_SCRIPT PREFIX
     PREREQ_PM SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
@@ -445,11 +445,13 @@ sub ExtUtils::MakeMaker::new {
 	}
 	if ($self->{PARENT}) {
 	    $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
-	    if (exists $self->{PARENT}->{CAPI}
-		and not exists $self->{CAPI})
-	    {
-		# inherit, but only if already unspecified
-		$self->{CAPI} = $self->{PARENT}->{CAPI};
+	    foreach my $opt (qw(CAPI POLLUTE)) {
+		if (exists $self->{PARENT}->{$opt}
+		    and not exists $self->{$opt})
+		    {
+			# inherit, but only if already unspecified
+			$self->{$opt} = $self->{PARENT}->{$opt};
+		    }
 	    }
 	}
     } else {
@@ -1616,6 +1618,18 @@ Ref to array of subdirectories containing library files.  Defaults to
 they contain will be installed in the corresponding location in the
 library.  A libscan() method can be used to alter the behaviour.
 Defining PM in the Makefile.PL will override PMLIBDIRS.
+
+=item POLLUTE
+
+Release 5.005 grandfathered old global symbol names by providing preprocessor
+macros for extension source compatibility.  As of release 5.006, these
+preprocessor definitions are not available by default.  The POLLUTE flag
+specifies that the old names should still be defined:
+
+  perl Makefile.PL POLLUTE=1
+
+Please inform the module author if this is necessary to successfully install
+a module under 5.006 or later.
 
 =item PPM_INSTALL_EXEC
 
