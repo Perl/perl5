@@ -739,6 +739,9 @@ PERL_CALLCONV void	Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, O
 PERL_CALLCONV OP *	Perl_my_attrs(pTHX_ OP *o, OP *attrs);
 PERL_CALLCONV void	Perl_boot_core_xsutils(pTHX);
 #if defined(USE_ITHREADS)
+PERL_CALLCONV PERL_CONTEXT*	Perl_cx_dup(pTHX_ PERL_CONTEXT* cx, I32 ix, I32 max);
+PERL_CALLCONV PERL_SI*	Perl_si_dup(pTHX_ PERL_SI* si);
+PERL_CALLCONV ANY*	Perl_ss_dup(pTHX_ ANY* ss, I32 ix, I32 max);
 PERL_CALLCONV HE*	Perl_he_dup(pTHX_ HE* e, bool shared);
 PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ REGEXP* r);
 PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type);

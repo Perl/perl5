@@ -6164,15 +6164,16 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cx, I32 ix, I32 max)
 
     /* create anew and remember what it is */
     Newz(56, ncx, max + 1, PERL_CONTEXT);
-    ptr_table_store(PL_ptr_table, si, nsi);
+    ptr_table_store(PL_ptr_table, cx, ncx);
 
+    /* XXX todo */
     /* ... */
 
     return ncx;
 }
 
 PERL_SI *
-Perl_stackinfo_dup(pTHX_ PERL_SI *si)
+Perl_si_dup(pTHX_ PERL_SI *si)
 {
     PERL_SI *nsi;
 
@@ -6193,17 +6194,18 @@ Perl_stackinfo_dup(pTHX_ PERL_SI *si)
     nsi->si_cxmax	= si->si_cxmax;
     nsi->si_cxstack	= cx_dup(si->si_cxstack, si->si_cxix, si->si_cxmax);
     nsi->si_type	= si->si_type;
-    nsi->si_prev	= stackinfo_dup(si->si_prev);
-    nsi->si_next	= stackinfo_dup(si->si_next);
+    nsi->si_prev	= si_dup(si->si_prev);
+    nsi->si_next	= si_dup(si->si_next);
     nsi->si_markoff	= si->si_markoff;
 
     return nsi;
 }
 
 ANY *
-Perl_savestack_dup(pTHX_ ANY *ss, I32 ix, I32 max)
+Perl_ss_dup(pTHX_ ANY *ss, I32 ix, I32 max)
 {
-    /* ... */
+    /* XXX todo */
+    return NULL;
 }
 
 PerlInterpreter *
@@ -6640,10 +6642,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	}
 
 	/* next PUSHMARK() sets *(PL_markstack_ptr+1) */
-	PL_markstack_max = proto_perl->Tmarkstack_max;
-	Newz(54, PL_markstack, PL_markstack_max, I32);
-	PL_markstack_ptr	= PL_markstack + (proto_perl->Tmarkstack
-						  - proto_perl->Tmarkstack_ptr);
+	i = proto_perl->Tmarkstack_max - proto_perl->Tmarkstack;
+	Newz(54, PL_markstack, i, I32);
+	PL_markstack_max	= PL_markstack + (proto_perl->Tmarkstack_max
+						  - proto_perl->Tmarkstack);
+	PL_markstack_ptr	= PL_markstack + (proto_perl->Tmarkstack_ptr
+						  - proto_perl->Tmarkstack);
 	Copy(proto_perl->Tmarkstack, PL_markstack,
 	     PL_markstack_ptr - PL_markstack + 1, I32);
 
@@ -6659,9 +6663,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_savestack_ix		= proto_perl->Tsavestack_ix;
 	PL_savestack_max	= proto_perl->Tsavestack_max;
 	/*Newz(54, PL_savestack, PL_savestack_max, ANY);*/
-	PL_savestack		= savestack_dup(proto_perl->Tsavestack,
-						PL_savestack_ix,
-						PL_savestack_max);
+	PL_savestack		= ss_dup(proto_perl->Tsavestack,
+					 PL_savestack_ix,
+					 PL_savestack_max);
 
 	/* next push_return() sets PL_retstack[PL_retstack_ix]
 	 * NOTE: unlike the others! */
@@ -6670,8 +6674,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	Newz(54, PL_retstack, PL_retstack_max, OP*);
 	Copy(proto_perl->Tretstack, PL_retstack, PL_retstack_ix, I32);
 
-	/* NOTE: stackinfo_dup() looks at PL_markstack */
-	PL_curstackinfo		= stackinfo_dup(proto_perl->Tcurstackinfo);
+	/* NOTE: si_dup() looks at PL_markstack */
+	PL_curstackinfo		= si_dup(proto_perl->Tcurstackinfo);
 
 	/* PL_curstack		= PL_curstackinfo->si_stack; */
 	PL_curstack		= av_dup(proto_perl->Tcurstack);

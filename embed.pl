@@ -1773,6 +1773,9 @@ p	|void	|newMYSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block
 p	|OP *	|my_attrs	|OP *o|OP *attrs
 p	|void	|boot_core_xsutils
 #if defined(USE_ITHREADS)
+p	|PERL_CONTEXT*|cx_dup	|PERL_CONTEXT* cx|I32 ix|I32 max
+p	|PERL_SI*|si_dup	|PERL_SI* si
+p	|ANY*	|ss_dup		|ANY* ss|I32 ix|I32 max
 p	|HE*	|he_dup		|HE* e|bool shared
 p	|REGEXP*|re_dup		|REGEXP* r
 p	|PerlIO*|fp_dup		|PerlIO* fp|char type

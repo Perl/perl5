@@ -369,6 +369,9 @@ unless ($define{'USE_ITHREADS'})
   skip_symbols [qw(
 PL_ptr_table
 Perl_dirp_dup
+Perl_cx_dup
+Perl_si_dup
+Perl_ss_dup
 Perl_fp_dup
 Perl_gp_dup
 Perl_he_dup

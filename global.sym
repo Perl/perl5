@@ -675,6 +675,9 @@ Perl_newATTRSUB
 Perl_newMYSUB
 Perl_my_attrs
 Perl_boot_core_xsutils
+Perl_cx_dup
+Perl_si_dup
+Perl_ss_dup
 Perl_he_dup
 Perl_re_dup
 Perl_fp_dup
