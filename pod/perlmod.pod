@@ -488,8 +488,8 @@ Ithreads work by cloning the data tree so that no data is shared
 between different threads. These threads can be used using the threads
 module or by doing fork() on win32 (fake fork() support). When a
 thread is cloned all Perl data is cloned, however non-Perl data cannot
-be cloned automatically.  Perl after 5.7.2 has support for the
-C<CLONE> keyword.  In C<CLONE> you can do whatever you need to do,
+be cloned automatically.  Perl after 5.7.2 has support for the C<CLONE> 
+special subroutine .  In C<CLONE> you can do whatever you need to do,
 like for example handle the cloning of non-Perl data, if necessary.
 C<CLONE> will be executed once for every package that has it defined
 (or inherits it).  It will be called in the context of the new thread,
