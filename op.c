@@ -4245,6 +4245,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	/* transfer PL_compcv to cv */
 	cv_undef(cv);
 	CvFLAGS(cv) = CvFLAGS(PL_compcv);
+	if (!CvWEAKOUTSIDE(cv))
+	    SvREFCNT_dec(CvOUTSIDE(cv));
 	CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
 	CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(PL_compcv);
 	CvOUTSIDE(PL_compcv) = 0;

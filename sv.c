@@ -10518,7 +10518,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    break;
 	case SAVEt_COMPPAD:
 	    av = (AV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = av_dup(av, param);
+	    TOPPTR(nss,ix) = av_dup_inc(av, param);
 	    break;
 	case SAVEt_PADSV:
 	    longval = (long)POPLONG(ss,ix);

@@ -1020,8 +1020,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_COMPPAD:
 	    PL_comppad = (PAD*)SSPOPPTR;
-	    if (PL_comppad)
+	    if (PL_comppad) {
 		PL_curpad = AvARRAY(PL_comppad);
+		SvREFCNT_dec(PL_comppad);
+	    }		    
 	    else
 		PL_curpad = Null(SV**);
 	    break;
