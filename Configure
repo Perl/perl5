@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Feb  9 04:05:32 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Feb  9 04:26:02 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3697,12 +3697,9 @@ esac
 for thislib in $libswanted; do
 	
 	libname="$thislib"
-	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`; $test -f "$xxx"; then
-		if $test "X$ignore_versioned_solibs" = "X"; then
-			xxx=/ignored$xxx
-		else
-			libstyle=shared
-		fi
+	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`
+	   $test -f "$xxx" -a "X$ignore_versioned_solibs" = "X" ; then
+		libstyle=shared
 	elif xxx=`./loc lib$thislib.$so X $libpth` ; $test -f "$xxx"; then
 		libstyle=shared
 	elif xxx=`./loc lib$thislib$_a X $libpth`; $test -f "$xxx"; then
@@ -5380,9 +5377,9 @@ case "$ans" in
 esac
 case "$inc_version_list" in
 ''|' ') 
-	inc_version_list_init='""';;
+	inc_version_list_init='0';;
 *)	inc_version_list_init=`echo $inc_version_list |
-		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/"/'`
+		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/",0/'`
 	;;
 esac
 $rm -f getverlist
