@@ -72,14 +72,17 @@ close(fh);
 open(fh,'>a') || die "Can't create a";
 close(fh);
 
+my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+    $blksize,$blocks);
+
 SKIP: { 
     skip("no link", 4) unless $has_link;
 
     ok(link('a','b'), "link a b");
     ok(link('b','c'), "link b c");
 
-    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-	$blksize,$blocks) = stat('c');
+    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+     $blksize,$blocks) = stat('c');
 
     if ($Config{dont_use_nlink}) {
 	pass("Skip - dont_use_nlink");
@@ -101,8 +104,8 @@ is(chmod($newmode,'a'), 1, "chmod succeeding");
 SKIP: {
     skip("no link", 9) unless $has_link;
 
-    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-	$blksize,$blocks) = stat('c');
+    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+     $blksize,$blocks) = stat('c');
 
     is($mode & 0777, $newmode, "chmod going through");
 
@@ -133,15 +136,14 @@ SKIP: {
      $blksize,$blocks) = stat('x');
 
     is($ino, undef, "ino of removed file x should be undef");
-
-    # Assumed that if link() exists, so does rename().
-    is(rename('a','b'), 1, "rename a b");
-
-    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-     $blksize,$blocks) = stat('a');
-
-    is($ino, undef, "ino of renamed file a should be undef");
 }
+
+is(rename('a','b'), 1, "rename a b");
+
+($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
+ $blksize,$blocks) = stat('a');
+
+is($ino, undef, "ino of renamed file a should be undef");
 
 $delta = $accurate_timestamps ? 1 : 2;	# Granularity of time on the filesystem
 chmod 0777, 'b';
@@ -182,10 +184,10 @@ if ($wd =~ m#$Config{'afsroot'}/# ||
 	fail("atime $atime mtime $mtime");
     }
 } elsif ($^O eq 'beos') {
-    if ($atime == 500000001) {
-        pass("atime (mtime not updated)");
+    if ($mtime == 500000001) {
+        pass("mtime (atime not updated)");
     } else {
-	fail("atime $atime (mtime not updated)");
+	fail("mtime $mtime (atime not updated)");
     }
 } else {
     fail("atime/mtime");
@@ -199,8 +201,6 @@ is($ino, undef, "ino of unlinked file b should be undef");
 unlink 'c';
 
 chdir $wd || die "Can't cd back to $wd";
-
-unlink 'c';
 
 # Yet another way to look for links (perhaps those that cannot be
 # created by perl?).  Hopefully there is an ls utility in your
@@ -288,7 +288,7 @@ if ($^O eq 'cygwin') {
     
     # this works on win32 only, because fs isn't casesensitive
     ok(-e 'X', "rename working");
-    
+
     unlink 'X';
     chdir $wd || die "Can't cd back to $wd";
 }
