@@ -149,7 +149,7 @@ elsif ($with_utf16) {
 		unlink($u);
 		if (open(A, $a)) {
 		    if (open(U, ">$u")) {
-			print U pack("$f", 0xFEFF);
+			print U pack("$f", 0xFEFF) if $b;
 			while (<A>) {
 			    print U pack("$f*", unpack("C*", $_));
 			}
@@ -248,6 +248,9 @@ EOT
  	open(SCRIPT,"<$test") or die "Can't run $test.\n";
  	$_ = <SCRIPT>;
  	close(SCRIPT) unless ($type eq 'deparse');
+	if ($with_utf16) {
+	    $_ =~ tr/\0//d;
+	}
  	if (/#!.*\bperl.*\s-\w*([tT])/) {
  	    $switch = qq{"-$1"};
  	}
