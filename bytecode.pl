@@ -34,12 +34,12 @@ EOT
 my $perl_header;
 ($perl_header = $c_header) =~ s{[/ ]?\*/?}{#}g;
 
-unlink "byterun.c", "byterun.h", "lib/B/Asmdata.pm";
+unlink "byterun.c", "byterun.h", "ext/B/Asmdata.pm";
 
 #
 # Start with boilerplate for Asmdata.pm
 #
-open(ASMDATA_PM, ">lib/B/Asmdata.pm") or die "Asmdata.pm: $!";
+open(ASMDATA_PM, ">ext/B/Asmdata.pm") or die "Asmdata.pm: $!";
 print ASMDATA_PM $perl_header, <<'EOT';
 package B::Asmdata;
 use Exporter;
