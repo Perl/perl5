@@ -1,11 +1,13 @@
 use strict;
-use Test::More ();
 use Config;
-if ($Config{'useithreads'}) {
-  Test::More->import( tests => 53 );
-}
-else {
-  Test::More->import(skip_all => "no useithreads");
+BEGIN {
+    require Test::More;
+    if ($Config{'useithreads'}) {
+	Test::More->import( tests => 53 );
+    }
+    else {
+	Test::More->import(skip_all => "no useithreads");
+    }
 }
 
 
