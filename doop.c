@@ -537,7 +537,8 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 	SvTAINTED_on(sv);
 }
 
-/* XXX SvUTF8 support missing! */
+/* currently converts input to bytes if needed and croaks if a character
+   > 255 is encountered							*/
 UV
 Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 {
@@ -549,6 +550,16 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 	return retnum;
     if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */ 
 	Perl_croak(aTHX_ "Illegal number of bits in vec");
+
+    if (SvUTF8(sv)) {
+	if (Perl_utf8_to_bytes(aTHX_ (U8*) s, &srclen)) {
+	    SvUTF8_off(sv);
+	    SvCUR_set(sv, srclen);
+	}
+	else
+	    Perl_croak(aTHX_ "Character > 255 in vec()");
+    }
+
     offset *= size;	/* turn into bit offset */
     len = (offset + size + 7) / 8;	/* required number of bytes */
     if (len > srclen) {
@@ -670,7 +681,8 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
     return retnum;
 }
 
-/* XXX SvUTF8 support missing! */
+/* currently converts input to bytes if needed and croaks if a character
+   > 255 is encountered							*/
 void
 Perl_do_vecset(pTHX_ SV *sv)
 {
@@ -686,6 +698,15 @@ Perl_do_vecset(pTHX_ SV *sv)
     if (!targ)
 	return;
     s = (unsigned char*)SvPV_force(targ, targlen);
+    if (SvUTF8(targ)) {
+	if (Perl_utf8_to_bytes(aTHX_ (U8*) s, &targlen)) {
+	/*  SvUTF8_off(targ);   SvPOK_only below ensures this  */
+	    SvCUR_set(targ, targlen);
+	}
+	else
+	    Perl_croak(aTHX_ "Character > 255 in vec()");
+    }
+
     (void)SvPOK_only(targ);
     lval = SvUV(sv);
     offset = LvTARGOFF(sv);

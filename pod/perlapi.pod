@@ -3115,11 +3115,12 @@ Found in file utf8.c
 
 =item utf8_to_bytes
 
-Converts a string C<s> of length C<len> from UTF8 into ASCII encoding.
-Unlike C<bytes_to_utf8>, this over-writes the original string.
-Returns zero on failure after converting as much as possible.
+Converts a string C<s> of length C<len> from UTF8 into byte encoding.
+Unlike C<bytes_to_utf8>, this over-writes the original string, and
+updates len to contain the new length.
+Returns zero on failure leaving the string and len unchanged
 
-	U8 *	utf8_to_bytes(U8 *s, STRLEN len)
+	U8 *	utf8_to_bytes(U8 *s, STRLEN *len)
 
 =for hackers
 Found in file utf8.c

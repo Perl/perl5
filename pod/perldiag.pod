@@ -1043,6 +1043,11 @@ references can be weakened.
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
+=item Character > 255 in vec()
+
+(F) You applied the vec() function to a UTF8 string which contained
+a character > 255.   vec() currently only operates on characters < 256.
+
 =item chmod() mode argument is missing initial 0
 
 (W chmod) A novice will sometimes say

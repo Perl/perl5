@@ -3359,7 +3359,7 @@ Perl_utf8_hop(pTHXo_ U8 *s, I32 off)
 
 #undef  Perl_utf8_to_bytes
 U8*
-Perl_utf8_to_bytes(pTHXo_ U8 *s, STRLEN len)
+Perl_utf8_to_bytes(pTHXo_ U8 *s, STRLEN *len)
 {
     return ((CPerlObj*)pPerl)->Perl_utf8_to_bytes(s, len);
 }

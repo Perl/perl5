@@ -814,7 +814,7 @@ PERL_CALLCONV U8*	Perl_utf16_to_utf8(pTHX_ U8* p, U8 *d, I32 bytelen, I32 *newle
 PERL_CALLCONV U8*	Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8 *d, I32 bytelen, I32 *newlen);
 PERL_CALLCONV I32	Perl_utf8_distance(pTHX_ U8 *a, U8 *b);
 PERL_CALLCONV U8*	Perl_utf8_hop(pTHX_ U8 *s, I32 off);
-PERL_CALLCONV U8*	Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN len);
+PERL_CALLCONV U8*	Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len);
 PERL_CALLCONV U8*	Perl_bytes_to_utf8(pTHX_ U8 *s, STRLEN *len);
 PERL_CALLCONV UV	Perl_utf8_to_uv(pTHX_ U8 *s, I32* retlen);
 PERL_CALLCONV U8*	Perl_uv_to_utf8(pTHX_ U8 *d, UV uv);
