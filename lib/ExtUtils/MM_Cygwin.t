@@ -11,7 +11,7 @@ BEGIN {
 	if ($^O =~ /cygwin/i) {
 		plan tests => 17;
 	} else {
-		plan skip_all => 'Test irrelevant outside of Cygwin';
+		plan skip_all => "This is not $^O";
 	}
 }
 
