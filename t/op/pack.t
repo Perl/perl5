@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 14621;
+plan tests => 14627;
 
 use strict;
 use warnings;
@@ -1806,4 +1806,19 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(pack("Z*/Z"), "1\0\0", "pack Z*/Z makes an extended string");
     is(pack("Z*/Z", ""), "1\0\0", "pack Z*/Z makes an extended string");
     is(pack("Z*/a", ""), "0\0", "pack Z*/a makes an extended string");
+}
+{
+    # unpack("A*", $unicode) strips general unicode spaces
+    is(unpack("A*", "ab \n\xa0 \0"), "ab \n\xa0", 
+       'normal A* strip leaves \xa0');
+    is(unpack("U0C0A*", "ab \n\xa0 \0"), "ab \n\xa0", 
+       'normal A* strip leaves \xa0 even if it got upgraded for technical reasons');
+    is(unpack("A*", pack("a*(U0U)a*", "ab \n", 0xa0, " \0")), "ab",
+       'upgraded strings A* removes \xa0');
+    is(unpack("A*", pack("a*(U0UU)a*", "ab \n", 0xa0, 0x1680, " \0")), "ab",
+       'upgraded strings A* removes all unicode whitespace');
+    is(unpack("A5", pack("a*(U0U)a*", "ab \n", 0x1680, "def", "ab")), "ab",
+       'upgraded strings A5 removes all unicode whitespace');
+    is(unpack("A*", pack("U", 0x1680)), "",
+       'upgraded strings A* with nothing left');
 }

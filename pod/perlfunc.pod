@@ -3425,7 +3425,7 @@ count should not be more than 65.
 
 The C<a>, C<A>, and C<Z> types gobble just one value, but pack it as a
 string of length count, padding with nulls or spaces as necessary.  When
-unpacking, C<A> strips trailing spaces and nulls, C<Z> strips everything
+unpacking, C<A> strips trailing whitespace and nulls, C<Z> strips everything
 after the first null, and C<a> returns data verbatim.
 
 If the value-to-pack is too long, it is truncated.  If too long and an

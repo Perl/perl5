@@ -1373,9 +1373,19 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 	    } else if (datumtype == 'A') {
 		/* 'A' strips both nulls and spaces */
 		char *ptr;
-		for (ptr = s+len-1; ptr >= s; ptr--)
-		    if (*ptr != 0 && !isSPACE(*ptr)) break;
-		ptr++;
+		if (utf8 && (symptr->flags & FLAG_WAS_UTF8)) {
+		    for (ptr = s+len-1; ptr >= s; ptr--)
+			if (*ptr != 0 && !UTF8_IS_CONTINUATION(*ptr) &&
+			    !is_utf8_space(ptr)) break;
+		    if (ptr >= s) ptr += UTF8SKIP(ptr);
+		    else ptr++;
+		    if (ptr > s+len) 
+			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+		} else {
+		    for (ptr = s+len-1; ptr >= s; ptr--)
+			if (*ptr != 0 && !isSPACE(*ptr)) break;
+		    ptr++;
+		}
 		sv = newSVpvn(s, ptr-s);
 	    } else sv = newSVpvn(s, len);
 
