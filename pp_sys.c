@@ -3738,7 +3738,12 @@ PP(pp_wait)
     int argflags;
 
     childpid = wait4pid(-1, &argflags, 0);
+#  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
+    /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
+    STATUS_NATIVE_SET((childpid && childpid != -1) ? argflags : -1);
+#  else
     STATUS_NATIVE_SET((childpid > 0) ? argflags : -1);
+#  endif
     XPUSHi(childpid);
     RETURN;
 #else
@@ -3757,7 +3762,12 @@ PP(pp_waitpid)
     optype = POPi;
     childpid = TOPi;
     childpid = wait4pid(childpid, &argflags, optype);
+#  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
+    /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
+    STATUS_NATIVE_SET((childpid && childpid != -1) ? argflags : -1);
+#  else
     STATUS_NATIVE_SET((childpid > 0) ? argflags : -1);
+#  endif
     SETi(childpid);
     RETURN;
 #else

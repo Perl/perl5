@@ -1654,7 +1654,7 @@ win32_waitpid(int pid, int *status, int flags)
 		    *status = (int)((waitcode & 0xff) << 8);
 		    retval = (int)w32_pseudo_child_pids[child];
 		    remove_dead_pseudo_process(child);
-		    return retval;
+		    return -retval;
 		}
 	    }
 	    else
@@ -1720,7 +1720,7 @@ win32_wait(int *status)
 		*status = (int)((exitcode & 0xff) << 8);
 		retval = (int)w32_pseudo_child_pids[i];
 		remove_dead_pseudo_process(i);
-		return retval;
+		return -retval;
 	    }
 	}
     }
