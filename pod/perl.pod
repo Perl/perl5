@@ -373,9 +373,9 @@ Perl developers, please write to perl-thanks@perl.org .
  a2p	awk to perl translator
  s2p	sed to perl translator
 
- http://www.perl.com/       the Perl Home Page
+ http://www.perl.org/       the Perl Home Page
+ http://www.perl.com/       Perl articles (O'Reilly Media)
  http://www.cpan.org/       the Comprehensive Perl Archive
- http://www.perl.org/       Perl Mongers (Perl user groups)
 
 =head1 DIAGNOSTICS
 
