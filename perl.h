@@ -1162,9 +1162,9 @@ typedef NVTYPE NV;
 #       define Perl_modf(x,y) ((long double)modf((double)(x),(double*)(y)))
 #   endif
 #   ifdef HAS_FREXPL
-#       define Perl_frexp(x) frexpl(x)
+#       define Perl_frexp(x,y) frexpl(x,y)
 #   else
-#       define Perl_frexp(x) ((long double)frexp((double)(x)))
+#       define Perl_frexp(x,y) ((long double)frexp((double)(x),y))
 #   endif
 #   ifdef HAS_ISNANL
 #       define Perl_isnan(x) isnanl(x)
@@ -1187,7 +1187,7 @@ typedef NVTYPE NV;
 #   define Perl_floor floor
 #   define Perl_fmod fmod
 #   define Perl_modf(x,y) modf(x,y)
-#   define Perl_frexp(x) frexp(x)
+#   define Perl_frexp(x,y) frexp(x,y)
 #   ifdef HAS_ISNAN
 #       define Perl_isnan(x) isnan(x)
 #   else
