@@ -952,6 +952,7 @@ lib/IPC/Open3.pm		Open a three-ended pipe!
 lib/IPC/Open3.t			See if IPC::Open3 works
 lib/IPC/SysV.t			See if IPC::SysV works
 lib/less.pm			For "use less"
+lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
 lib/Lingua/KO/Hangul/Util/Changes	Lingua::KO::Hangul::Util
 lib/Lingua/KO/Hangul/Util/README	Lingua::KO::Hangul::Util

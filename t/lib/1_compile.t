@@ -284,6 +284,7 @@ constant
 diagnostics
 fields
 integer
+less
 locale
 ops
 overload
