@@ -41,6 +41,11 @@ print $obj->str, "\n";
 $obj->set("テスト文字列");
 print $obj->str, "\n";
 
+# I have tested and found "unless $^O eq 'freebsd'" is not
+# necessary but I will leave it for the sake of Enache -- dankogai
+# Please do not move this to a point after the comparison -- Craig Berry
+close STDOUT unless $^O eq 'freebsd';
+
 my $cmp = compare_text($file0, $file1);
 is($cmp, 0, "encoding vs. STDOUT");
 
@@ -53,9 +58,6 @@ while(<STDIN>){
     is ($cmp[$i++], $_, "encoding vs. STDIN - $i");
 }
 
-# I have tested and found "unless $^O eq 'freebsd'" is not
-# necessary but I will leave it for the sake of Enache -- dankogai
-close STDOUT unless $^O eq 'freebsd';
 unlink $file1 unless $cmp;
 __END__
 
