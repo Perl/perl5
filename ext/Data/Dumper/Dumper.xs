@@ -4,7 +4,7 @@
 
 #ifndef PERL_VERSION
 #include "patchlevel.h"
-#defined PERL_VERSION PATCHLEVEL
+#define PERL_VERSION PATCHLEVEL
 #endif
 
 #if PERL_VERSION < 5
