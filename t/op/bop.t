@@ -9,7 +9,7 @@ BEGIN {
     unshift @INC, '../lib';
 }
 
-print "1..30\n";
+print "1..35\n";
 
 # numerics
 print ((0xdead & 0xbeef) == 0x9ead ? "ok 1\n" : "not ok 1\n");
@@ -81,3 +81,16 @@ print "ok 27\n" if sprintf("%vd", v4095 ^ v801) eq 3294;
 print "ok 28\n" if sprintf("%vd", v4095.801.4095 & v801.4095) eq '801.801';
 print "ok 29\n" if sprintf("%vd", v4095.801.4095 | v801.4095) eq '4095.4095.4095';
 print "ok 30\n" if sprintf("%vd", v801.4095 ^ v4095.801.4095) eq '3294.3294.4095';
+#
+print "ok 31\n" if sprintf("%vd", v120.v300 & v200.v400) eq '72.256';
+print "ok 32\n" if sprintf("%vd", v120.v300 | v200.v400) eq '248.444';
+print "ok 33\n" if sprintf("%vd", v120.v300 ^ v200.v400) eq '176.188';
+#
+my $a = v120.300;
+my $b = v200.400;
+$a ^= $b;
+print "ok 34\n" if sprintf("%vd", $a) eq '176.188';
+my $a = v120.300;
+my $b = v200.400;
+$a |= $b;
+print "ok 35\n" if sprintf("%vd", $a) eq '248.444';
