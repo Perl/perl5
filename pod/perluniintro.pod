@@ -276,8 +276,8 @@ C<Latin 2>, or C<iso8859-2>, and so forth.  With just
 
     use encoding;
 
-first the environment variable C<PERL_ENCODING> will be consulted,
-and if that doesn't exist, ISO 8859-1 (Latin 1) will be assumed.
+the environment variable C<PERL_ENCODING> will be consulted,
+but if that doesn't exist, the encoding pragma fails.
 
 The C<Encode> module knows about many encodings and it has interfaces
 for doing conversions between those encodings:
