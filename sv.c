@@ -4278,8 +4278,15 @@ Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
     if (!ssv)
 	return;
     if ((spv = SvPV(ssv, slen))) {
-	bool sutf8 = DO_UTF8(ssv);
-	bool dutf8;
+	/*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
+	    gcc version 2.95.2 20000220 (Debian GNU/Linux) for
+	    Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously 
+	    get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though 
+	    dsv->sv_flags doesn't have that bit set.
+		Andy Dougherty  12 Oct 2001
+	*/
+	I32 sutf8 = DO_UTF8(ssv);
+	I32 dutf8;
 
 	if (SvGMAGICAL(dsv) && (flags & SV_GMAGIC))
 	    mg_get(dsv);
