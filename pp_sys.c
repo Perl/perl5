@@ -4769,39 +4769,37 @@ PP(pp_gpwent)
 #ifdef HAS_PASSWD
     I32 which = PL_op->op_type;
     register SV *sv;
-    struct passwd *pwent;
     STRLEN n_a;
-#if defined(HAS_GETSPENT) || defined(HAS_GETSPNAM)
-    struct spwd *spwent = NULL;
-#endif
-
-    if (which == OP_GPWNAM)
-	pwent = getpwnam(POPpx);
-    else if (which == OP_GPWUID)
-	pwent = getpwuid(POPi);
-    else
-#ifdef HAS_GETPWENT
-	pwent = (struct passwd *)getpwent();
-#else
-	DIE(aTHX_ PL_no_func, "getpwent");
-#endif
-
+    struct passwd *pwent  = NULL;
+/* We do not use HAS_GETSPENT in pp_gpwent() but leave it here in the case
+ * somebody wants to write an XS to access the shadow passwords. --jhi */
 #ifdef HAS_GETSPNAM
-    if (which == OP_GPWNAM) {
-	if (pwent)
-	    spwent = getspnam(pwent->pw_name);
-    }
-#  ifdef HAS_GETSPUID /* AFAIK there isn't any anywhere. --jhi */ 
-    else if (which == OP_GPWUID) {
-	if (pwent)
-	    spwent = getspnam(pwent->pw_name);
-    }
-#  endif
-#  ifdef HAS_GETSPENT
-    else
-	spwent = (struct spwd *)getspent();
-#  endif
+    struct spwd   *spwent = NULL;
 #endif
+
+    switch (which) {
+    case OP_GPWNAM:
+	pwent  = getpwnam(POPpx);
+#ifdef HAS_GETSPNAM
+	if (pwent)
+	    spwent = getspnam(pwent->pw_name);
+#endif
+	break;
+    case OP_GPWUID:
+	pwent = getpwuid((Uid_t)POPi);
+	break;
+    case OP_GPWENT:
+#ifdef HAS_GETPWENT
+	pwent  = getpwent();
+#else
+	DIE(aTHX_ PL_no_fun, "getpwent");
+#endif
+#ifdef HAS_GETSPNAM
+	if (pwent)
+	    spwent = getspnam(pwent->pw_name);
+#endif
+	break;
+    }
 
     EXTEND(SP, 10);
     if (GIMME != G_ARRAY) {
@@ -4825,7 +4823,7 @@ PP(pp_gpwent)
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWPASSWD
-#   if defined(HAS_GETSPENT) || defined(HAS_GETSPNAM)
+#   ifdef HAS_GETSPNAM
       if (spwent)
               sv_setpv(sv, spwent->sp_pwdp);
       else
