@@ -913,6 +913,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     MAGIC*	magic;
     HV*		stash;
 
+    if (mt != SVt_PV && SvREADONLY(sv) && SvFAKE(sv)) {
+	sv_force_normal(sv);
+    }
+
     if (SvTYPE(sv) == mt)
 	return TRUE;
 
@@ -981,9 +985,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    mt = SVt_PVNV;
 	break;
     case SVt_PVIV:
-	if (SvREADONLY(sv) && SvFAKE(sv)) {
-	    sv_force_normal(sv);
-	}
 	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
