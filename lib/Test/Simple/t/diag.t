@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 
 my $Test = Test::More->builder;
 
@@ -17,8 +17,10 @@ my $Test = Test::More->builder;
 my $output;
 tie *FAKEOUT, 'FakeOut', \$output;
 
-# force diagnostic output to a filehandle, glad I added this to Test::Builder :)
+# force diagnostic output to a filehandle, glad I added this to
+# Test::Builder :)
 my @lines;
+my $ret;
 {
     local $TODO = 1;
     $Test->todo_output(\*FAKEOUT);
@@ -28,7 +30,7 @@ my @lines;
     push @lines, $output;
     $output = '';
 
-    diag("multiple\n", "lines");
+    $ret = diag("multiple\n", "lines");
     push @lines, split(/\n/, $output);
 }
 
@@ -36,14 +38,16 @@ is( @lines, 3,              'diag() should send messages to its filehandle' );
 like( $lines[0], '/^#\s+/', '    should add comment mark to all lines' );
 is( $lines[0], "# a single line\n",   '    should send exact message' );
 is( $output, "# multiple\n# lines\n", '    should append multi messages');
+ok( !$ret, 'diag returns false' );
 
 {
-    local $TODO = 1;
+    $Test->failure_output(\*FAKEOUT);
     $output = '';
-    diag("# foo");
+    $ret = diag("# foo");
 }
+$Test->failure_output(\*STDERR);
 is( $output, "# # foo\n",   "diag() adds a # even if there's one already" );
-
+ok( !$ret,  'diag returns false' );
 
 package FakeOut;
 

@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION $CLASS);
-$VERSION = '0.12';
+$VERSION = '0.14';
 $CLASS = __PACKAGE__;
 
 my $IsVMS = $^O eq 'VMS';
@@ -54,9 +54,6 @@ Test::Builder - Backend for building test libraries
 
 
 =head1 DESCRIPTION
-
-I<THIS IS ALPHA GRADE SOFTWARE>  Meaning the underlying code is well
-tested, yet the interface is subject to change.
 
 Test::Simple and Test::More have proven to be popular testing modules,
 but they're not always flexible enough.  Test::Builder provides the a
@@ -152,6 +149,12 @@ sub plan {
             die "You said to run 0 tests!  You've got to run something.\n";
         }
     }
+    else {
+        require Carp;
+        my @args = grep { defined } ($cmd, $arg);
+        Carp::croak("plan() doesn't understand @args");
+    }
+        
 }
 
 =item B<expected_tests>
@@ -239,7 +242,8 @@ sub ok {
     my($self, $test, $name) = @_;
 
     unless( $Have_Plan ) {
-        die "You tried to run a test without a plan!  Gotta have a plan.\n";
+        require Carp;
+        Carp::croak("You tried to run a test without a plan!  Gotta have a plan.");
     }
 
     $Curr_Test++;
@@ -354,7 +358,7 @@ sub _is_diag {
         }
     }
 
-    $self->diag(sprintf <<DIAGNOSTIC, $got, $expect);
+    return $self->diag(sprintf <<DIAGNOSTIC, $got, $expect);
          got: %s
     expected: %s
 DIAGNOSTIC
@@ -443,25 +447,57 @@ sub unlike {
     $self->_regex_ok($this, $regex, '!~', $name);
 }
 
+=item B<maybe_regex>
+
+  $Test->maybe_regex(qr/$regex/);
+  $Test->maybe_regex('/$regex/');
+
+Convenience method for building testing functions that take regular
+expressions as arguments, but need to work before perl 5.005.
+
+Takes a quoted regular expression produced by qr//, or a string
+representing a regular expression.
+
+Returns a Perl value which may be used instead of the corresponding
+regular expression, or undef if it's argument is not recognised.
+
+For example, a version of like(), sans the useful diagnostic messages,
+could be written as:
+
+  sub laconic_like {
+      my ($self, $this, $regex, $name) = @_;
+      my $usable_regex = $self->maybe_regex($regex);
+      die "expecting regex, found '$regex'\n"
+          unless $usable_regex;
+      $self->ok($this =~ m/$usable_regex/, $name);
+  }
+
+=cut
+
+
+sub maybe_regex {
+	my ($self, $regex) = @_;
+    my $usable_regex = undef;
+    if( ref $regex eq 'Regexp' ) {
+        $usable_regex = $regex;
+    }
+    # Check if it looks like '/foo/'
+    elsif( my($re, $opts) = $regex =~ m{^ /(.*)/ (\w*) $ }sx ) {
+        $usable_regex = length $opts ? "(?$opts)$re" : $re;
+    };
+    return($usable_regex)
+};
+
 sub _regex_ok {
     my($self, $this, $regex, $cmp, $name) = @_;
 
     local $Level = $Level + 1;
 
     my $ok = 0;
-    my $usable_regex;
-    if( ref $regex eq 'Regexp' ) {
-        $usable_regex = $regex;
-    }
-    # Check if it looks like '/foo/'
-    elsif( my($re, $opts) = $regex =~ m{^ /(.*)/ (\w*) $ }sx ) {
-        $usable_regex = "(?$opts)$re";
-    }
-    else {
+    my $usable_regex = $self->maybe_regex($regex);
+    unless (defined $usable_regex) {
         $ok = $self->ok( 0, $name );
-
         $self->diag("    '$regex' doesn't look much like a regex to me.");
-
         return $ok;
     }
 
@@ -524,7 +560,7 @@ sub _cmp_diag {
     
     $got    = defined $got    ? "'$got'"    : 'undef';
     $expect = defined $expect ? "'$expect'" : 'undef';
-    $self->diag(sprintf <<DIAGNOSTIC, $got, $type, $expect);
+    return $self->diag(sprintf <<DIAGNOSTIC, $got, $type, $expect);
     %s
         %s
     %s
@@ -564,7 +600,8 @@ sub skip {
     $why ||= '';
 
     unless( $Have_Plan ) {
-        die "You tried to run tests without a plan!  Gotta have a plan.\n";
+        require Carp;
+        Carp::croak("You tried to run tests without a plan!  Gotta have a plan.");
     }
 
     $Curr_Test++;
@@ -598,7 +635,8 @@ sub todo_skip {
     $why ||= '';
 
     unless( $Have_Plan ) {
-        die "You tried to run tests without a plan!  Gotta have a plan.\n";
+        require Carp;
+        Carp::croak("You tried to run tests without a plan!  Gotta have a plan.");
     }
 
     $Curr_Test++;
@@ -607,7 +645,7 @@ sub todo_skip {
 
     my $out = "not ok";
     $out   .= " $Curr_Test" if $self->use_numbers;
-    $out   .= " # TODO $why\n";
+    $out   .= " # TODO & SKIP $why\n";
 
     $Test->_print($out);
 
@@ -765,6 +803,14 @@ already.
 
 We encourage using this rather than calling print directly.
 
+Returns false.  Why?  Because diag() is often used in conjunction with
+a failing test (C<ok() || diag()>) it "passes through" the failure.
+
+    return ok(...) || diag(...);
+
+=for blame transfer
+Mark Fowler <mark@twoshortplanks.com>
+
 =cut
 
 sub diag {
@@ -776,6 +822,7 @@ sub diag {
 
     # Escape each line with a #.
     foreach (@msgs) {
+        $_ = 'undef' unless defined;
         s/^/# /gms;
     }
 
@@ -785,6 +832,8 @@ sub diag {
     my $fh = $self->todo ? $self->todo_output : $self->failure_output;
     local($\, $", $,) = (undef, ' ', '');
     print $fh @msgs;
+
+    return 0;
 }
 
 =begin _private
@@ -808,6 +857,15 @@ sub _print {
 
     local($\, $", $,) = (undef, ' ', '');
     my $fh = $self->output;
+
+    # Escape each line after the first with a # so we don't
+    # confuse Test::Harness.
+    foreach (@msgs) {
+        s/\n(.)/\n# $1/sg;
+    }
+
+    push @msgs, "\n" unless $msgs[-1] =~ /\n\Z/;
+
     print $fh @msgs;
 }
 
@@ -933,9 +991,16 @@ sub current_test {
     my($self, $num) = @_;
 
     if( defined $num ) {
+
+        unless( $Have_Plan ) {
+            require Carp;
+            Carp::croak("Can't change the current test number without a plan!");
+        }
+
         $Curr_Test = $num;
         if( $num > @Test_Results ) {
-            for ($#Test_Results..$num-1) {
+            my $start = @Test_Results ? $#Test_Results : 0;
+            for ($start..$num-1) {
                 $Test_Results[$_] = 1;
             }
         }

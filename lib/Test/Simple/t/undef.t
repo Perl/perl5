@@ -1,12 +1,18 @@
+#!/usr/bin/perl -w
+
 BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't';
-        @INC = '../lib';
+        @INC = ('../lib', 'lib');
+    }
+    else {
+        unshift @INC, 't/lib';
     }
 }
 
 use strict;
-use Test::More tests => 12;
+use Test::More tests => 14;
+use TieOut;
 
 BEGIN { $^W = 1; }
 
@@ -41,3 +47,14 @@ eq_hash ( { foo => undef, bar => { baz => undef, moo => 23 } },
 is( $warnings, '',          'eq_hash()   no warnings' );
 
 
+my $tb = Test::More->builder;
+
+use TieOut;
+my $caught = tie *CATCH, 'TieOut';
+my $old_fail = $tb->failure_output;
+$tb->failure_output(\*CATCH);
+diag(undef);
+$tb->failure_output($old_fail);
+
+is( $caught->read, "# undef\n" );
+is( $warnings, '',          'diag(undef)  no warnings' );

@@ -1427,6 +1427,7 @@ lib/Test/Simple/Changes		Test::Simple changes
 lib/Test/Simple/README		Test::Simple README
 lib/Test/Simple/t/buffer.t      Test::Builder buffering test
 lib/Test/Simple/t/Builder.t     Test::Builder tests
+lib/Test/Simple/t/curr_test.t   Test::Builder->curr_test tests
 lib/Test/Simple/t/diag.t        Test::More diag() test
 lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t       Test::Simple test
@@ -1436,6 +1437,7 @@ lib/Test/Simple/t/fail.t        Test::Simple test, test failures
 lib/Test/Simple/t/filehandles.t Test::Simple test, STDOUT can be played with
 lib/Test/Simple/t/import.t      Test::More test, importing functions
 lib/Test/Simple/t/is_deeply.t   Test::More test, is_deeply()
+lib/Test/Simple/t/maybe_regex.t Test::Builder->maybe_regex() tests
 lib/Test/Simple/t/missing.t     Test::Simple test, missing tests
 lib/Test/Simple/t/More.t        Test::More test, basic stuff
 lib/Test/Simple/t/no_ending.t   Test::Builder test, no_ending()
@@ -1449,6 +1451,7 @@ lib/Test/Simple/t/plan_skip_all.t       Test::More test, plan() w/skip_all
 lib/Test/Simple/t/simple.t      Test::Simple test, basic stuff
 lib/Test/Simple/t/skip.t        Test::More test, SKIP tests
 lib/Test/Simple/t/skipall.t     Test::More test, skip all tests
+lib/Test/Simple/t/strays.t      Test::Builder stray newline checks
 lib/Test/Simple/t/todo.t        Test::More test, TODO tests
 lib/Test/Simple/t/undef.t       Test::More test, undefs don't cause warnings
 lib/Test/Simple/t/useing.t      Test::More test, compile test
