@@ -4243,7 +4243,7 @@ extern void moncontrol(int);
 #endif
 
 /* Use instead of abs() since abs() forces its argument to be an int,
- * but also beware since evaluates its argument thrice. */
+ * but also beware since this evaluates its argument twice, so no x++. */
 #define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
 
 /* and finally... */
