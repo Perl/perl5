@@ -79,6 +79,117 @@ Version 5.005_58        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3796] By: gsar                                  on 1999/07/27  09:23:42
+        Log: regenerate win32/config_H.?c
+     Branch: perl
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  3795] By: gsar                                  on 1999/07/27  09:02:31
+        Log: From: Tye McQueen <tye@metronet.com>
+             Date: Mon, 26 Jul 1999 19:19:22 -0500 (CDT)
+             Message-Id: <199907270019.AA08223@metronet.com>
+             Subject: Patch pl2bat.pl so batch file can fail
+     Branch: perl
+	   ! win32/bin/pl2bat.pl
+____________________________________________________________________________
+[  3794] By: gsar                                  on 1999/07/27  08:59:58
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 26 Jul 1999 01:09:00 -0400 (EDT)
+             Message-Id: <199907260509.BAA26303@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_57] decrease memory footprint of standard modules
+     Branch: perl
+	   ! configpm ext/POSIX/POSIX.pm lib/AutoLoader.pm
+	   ! lib/SelfLoader.pm
+____________________________________________________________________________
+[  3793] By: gsar                                  on 1999/07/27  08:19:16
+        Log: support -DPERL_BINCOMPAT_5005, still needs a Configure test
+             (from Andy Dougherty)
+     Branch: perl
+	   ! embed.h embed.pl
+____________________________________________________________________________
+[  3792] By: gsar                                  on 1999/07/27  08:04:19
+        Log: recognize more constructs such as C<$-> in pod (from Russ Allbery
+             and Brad Appleton)
+     Branch: perl
+	   ! lib/Pod/Parser.pm
+____________________________________________________________________________
+[  3791] By: gsar                                  on 1999/07/27  07:50:54
+        Log: cover case where CLK_TCK is a float, not integer (from
+             alexander smishlajev <als@turnhere.com>)
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.xs
+____________________________________________________________________________
+[  3790] By: gsar                                  on 1999/07/27  07:45:08
+        Log: provide MakeMaker attribute PERL_MALLOC_OK that allows extensions
+             to call Perl_malloc() as malloc() (from Ilya Zakharevich)
+     Branch: perl
+	   ! ext/SDBM_File/Makefile.PL lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MakeMaker.pm os2/OS2/REXX/Makefile.PL perl.h
+____________________________________________________________________________
+[  3789] By: jhi                                   on 1999/07/27  07:44:55
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> lib/Pod/Text/Color.pm lib/Pod/Text/Termcap.pm
+	  !> MANIFEST doio.c embed.h embed.pl ext/B/B/CC.pm
+	  !> ext/SDBM_File/sdbm/sdbm.h global.sym lib/Pod/Html.pm
+	  !> lib/Pod/Text.pm objXSUB.h opcode.h opcode.pl perlapi.c
+	  !> pod/perldiag.pod pod/perlfunc.pod pod/pod2text.PL pp_sys.c
+	  !> proto.h t/comp/proto.t t/io/open.t
+____________________________________________________________________________
+[  3788] By: gsar                                  on 1999/07/27  07:29:59
+        Log: replace Pod::Text with Pod::SimpleText v0.01 (thanks
+             to Russ Allbery <rra@stanford.edu>); s/Simple// and
+             s/pod2txt/pod2text/ etc.
+     Branch: perl
+	   + lib/Pod/Text/Color.pm lib/Pod/Text/Termcap.pm
+	   ! MANIFEST lib/Pod/Text.pm pod/pod2text.PL
+____________________________________________________________________________
+[  3787] By: gsar                                  on 1999/07/27  06:48:40
+        Log: From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 16 Jun 1999 14:40:09 -0400 (EDT)
+             Message-Id: <Pine.GSU.4.05.9906161435390.248-100000@newton.phys>
+             Subject: Re: [ID 19990608.003] my_bcopy problem; Unixware 2.0.3
+     Branch: perl
+	   ! ext/SDBM_File/sdbm/sdbm.h
+____________________________________________________________________________
+[  3786] By: gsar                                  on 1999/07/27  06:30:09
+        Log: applied suggested patch; added missing prototype changes to
+             opcode.pl along with documentation typos (feature still needs
+             to be described in perlopentut.pod and summarized in
+             perldelta.pod)
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 17 Jun 1999 00:39:34 -0400 (EDT)
+             Message-Id: <199906170439.AAA18154@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.00557] 3-arg open
+     Branch: perl
+	   ! doio.c embed.h embed.pl global.sym objXSUB.h opcode.h
+	   ! opcode.pl perlapi.c pod/perldiag.pod pod/perlfunc.pod pp_sys.c
+	   ! proto.h t/comp/proto.t t/io/open.t
+____________________________________________________________________________
+[  3785] By: gsar                                  on 1999/07/27  04:36:39
+        Log: don't quit if =head* wasn't found (suggested by Roland Bauer
+             <roland.bauer@fff.at>)
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[  3784] By: gsar                                  on 1999/07/27  03:56:17
+        Log: change#3762 wasn't needed
+     Branch: perl
+	   ! ext/B/B/CC.pm
+____________________________________________________________________________
+[  3783] By: jhi                                   on 1999/07/26  19:08:21
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes makedef.pl patchlevel.h pod/perlfunc.pod pp_ctl.c
+	  !> toke.c utils/dprofpp.PL win32/Makefile win32/config_H.bc
+	  !> win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
+[  3782] By: gsar                                  on 1999/07/26  18:16:50
+        Log: update Changes, patchlevel &c.
+     Branch: perl
+	   ! Changes patchlevel.h win32/Makefile win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
 [  3781] By: gsar                                  on 1999/07/26  17:54:47
         Log: a more correct fix for change#2744
              From: Stephen McCamant <smccam@uclink4.berkeley.edu>

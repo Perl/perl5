@@ -1,8 +1,13 @@
 =head1 NAME
 
-perldelta - what's new for perl v5.6 (as of v5.5.58)
+perldelta - what's new for perl v5.6 (as of v5.005_58)
 
 =head1 DESCRIPTION
+
+This is an unsupported alpha release, meant for intrepid Perl developers
+only.  The included sources may not even build correctly on some platforms.
+Subscribing to perl5-porters is the best way to monitor and contribute
+to the progress of development releases (see www.perl.org for info).
 
 This document describes differences between the 5.005 release and this one.
 
@@ -10,7 +15,7 @@ This document describes differences between the 5.005 release and this one.
 
 =head2 Perl Source Incompatibilities
 
-None known at this time.
+TODO
 
 =head2 C Source Incompatibilities
 
@@ -26,6 +31,24 @@ extensions still using the old symbols, this option can be
 specified via MakeMaker:
 
     perl Makefile.PL POLLUTE=1
+
+=item C<PERL_IMPLICIT_CONTEXT>
+
+This new build option provides a set of macros for all API functions
+such that an implicit interpreter/thread context argument is passed to
+every API function.  As a result of this, something like C<sv_setsv(foo,bar)>
+amounts to a macro invocation that actually translates to
+C<Perl_sv_setsv(my_perl,foo,bar)>.  While this is generally expected
+to not have any significant source compatibility issues, the difference
+between a macro and a real function call will need to be considered.
+
+Note that the above issue is not relevant to the default build of
+Perl, whose interfaces continue to match those of prior versions
+(but subject to the other options described here).
+
+For testing purposes, the 5.005_58 release automatically enables
+PERL_IMPLICIT_CONTEXT whenever Perl is built with -Dusethreads or
+-Dusemultiplicity.
 
 =item C<PERL_POLLUTE_MALLOC>
 
@@ -81,8 +104,13 @@ from the change.
 
 =head2 Binary Incompatibilities
 
-This release is not binary compatible with the 5.005 release or its
-maintenance versions.
+The default build of this release can be made binary compatible with the
+5.005 release or its maintenance versions.  Add -DPERL_BINCOMPAT_5005
+to ccflags in config.sh to achieve this.  See INSTALL for further
+information about adding build flags to config.sh.
+
+The usethreads or usemultiplicity builds are B<not> binary compatible
+with the corresponding builds in 5.005.
 
 =head1 Core Changes
 
@@ -170,6 +198,11 @@ strings.  See L<perlfunc/"pack">.
 
 The new format type modifier '!' is useful for packing and unpacking
 native shorts, ints, and longs.  See L<perlfunc/"pack">.
+
+=head2 pack() and unpack() support counted strings
+
+The template character '#' can be used to specify a counted string
+type to be packed or unpacked.  See L<perlfunc/"pack">.
 
 =head2 $^X variables may now have names longer than one character
 
@@ -312,6 +345,20 @@ Verify operations that access pad objects (lexicals and temporaries).
 =head2 Modules
 
 =over 4
+
+=item ByteLoader
+
+The ByteLoader is a dedication extension to generate and run
+Perl bytecode.  See L<ByteLoader>.
+
+=item B
+
+The Perl Compiler suite has been extensively reworked for this
+release.
+
+=item Devel::DProf
+
+Devel::DProf, a Perl source code profiler has been added.
 
 =item Dumpvalue
 
