@@ -99,7 +99,8 @@ if ($^O eq 'VMS') {
      $srclib = File::Spec::->catfile($lib, $srclib);
      if (-f $srclib) {
        unlink $testlib if -f $testlib;
-       my $lncmd = "$Config{'ln'} $srclib $testlib";
+       my $ln_or_cp = $Config{'ln'} || $Config{'cp'};
+       my $lncmd = "$ln_or_cp $srclib $testlib";
        #print "# $lncmd\n";
        $libperl_copied = 1	unless system($lncmd);
      }
