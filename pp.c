@@ -4036,6 +4036,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #define ISUUCHAR(ch)    (memchr(PL_uuemap, (ch), sizeof(PL_uuemap)-1) || (ch) == ' ')
 #endif
 
+
 PP(pp_unpack)
 {
     dSP;
@@ -4046,7 +4047,7 @@ PP(pp_unpack)
     STRLEN llen;
     STRLEN rlen;
     register char *pat = SvPV(left, llen);
-#if 0
+#ifdef PACKED_IS_OCTETS
     /* Packed side is assumed to be octets - so force downgrade if it
        has been UTF-8 encoded by accident
      */
@@ -5180,8 +5181,10 @@ PP(pp_pack)
 	    patcopy++;
 	    continue;
         }
+#ifndef PACKED_IS_OCTETS
 	if (datumtype == 'U' && pat == patcopy+1)
 	    SvUTF8_on(cat);
+#endif
 	if (datumtype == '#') {
 	    while (pat < patend && *pat != '\n')
 		pat++;
