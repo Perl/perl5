@@ -1,6 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.76';
+$VERSION = '1.76_01';
+$VERSION = eval $VERSION;
 # $Id: CPAN.pm,v 1.412 2003/07/31 14:53:04 k Exp $
 
 # only used during development:
@@ -2187,7 +2188,7 @@ sub get_basic_credentials {
     return unless $proxy;
     if ($USER && $PASSWD) {
     } elsif (defined $CPAN::Config->{proxy_user} &&
-        defined $CPAN::Config->{proxy_pass}) {
+             defined $CPAN::Config->{proxy_pass}) {
         $USER = $CPAN::Config->{proxy_user};
         $PASSWD = $CPAN::Config->{proxy_pass};
     } else {
@@ -2211,6 +2212,21 @@ sub get_basic_credentials {
     }
     return($USER,$PASSWD);
 }
+
+# mirror(): Its purpose is to deal with proxy authentication. When we
+# call SUPER::mirror, we relly call the mirror method in
+# LWP::UserAgent. LWP::UserAgent will then call
+# $self->get_basic_credentials or some equivalent and this will be
+# $self->dispatched to our own get_basic_credentials method.
+
+# Our own get_basic_credentials sets $USER and $PASSWD, two globals.
+
+# 407 stands for HTTP_PROXY_AUTHENTICATION_REQUIRED. Which means
+# although we have gone through our get_basic_credentials, the proxy
+# server refuses to connect. This could be a case where the username or
+# password has changed in the meantime, so I'm trying once again without
+# $USER and $PASSWD to give the get_basic_credentials routine another
+# chance to set $USER and $PASSWD.
 
 sub mirror {
     my($self,$url,$aslocal) = @_;
@@ -5427,7 +5443,7 @@ sub cpan_file {
                 }
                 return "Contact Author $fullname <$email>";
             } else {
-                return "UserID $userid";
+                return "Contact Author $userid (Email address not available)";
             }
         } else {
             return "N/A";
