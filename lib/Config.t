@@ -205,7 +205,8 @@ is($Config{sig_num_init}  =~ tr/,/,/, $Config{sig_size}, "sig_num_init size");
 is($Config{sig_name_init} =~ tr/,/,/, $Config{sig_size}, "sig_name_init size");
 
 # Test the troublesome virtual stuff
-my @virtual = qw(byteorder ccflags_nolargefiles);
+my @virtual = qw(byteorder ccflags_nolargefiles ldflags_nolargefiles
+		 libs_nolargefiles libswanted_nolargefiles);
 
 foreach my $pain (@virtual) {
   # No config var is named with anything that is a regexp metachar

@@ -299,11 +299,11 @@ sub fetch_virtual {
 		    my @libs = grep { /^-l(.+)/ &&
                                       not exists $lflibswanted{$1} }
 		                    split(' ', $Config{libs});
-		    $Config{libs} = join(' ', @libs);
+		    $value = join(' ', @libs);
 		} elsif ($new_key =~ /^libswanted_/) {
 		    my @libswanted = grep { not exists $lflibswanted{$_} }
 		                          split(' ', $Config{libswanted});
-		    $Config{libswanted} = join(' ', @libswanted);
+		    $value = join(' ', @libswanted);
 		}
 	    }
 	}
