@@ -1075,6 +1075,9 @@ typedef UVTYPE UV;
 #endif
   
 #ifdef USE_LONG_DOUBLE
+#  if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE == DOUBLESIZE
+#      define LONG_DOUBLE_EQUALS_DOUBLE
+#  endif
 #  if !(defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE))
 #     undef USE_LONG_DOUBLE /* Ouch! */
 #  endif
@@ -1184,13 +1187,9 @@ typedef NVTYPE NV;
 /* e.g. libsunmath doesn't have modfl and frexpl as of mid-March 2000 */
 #   ifdef HAS_MODFL
 #       define Perl_modf(x,y) modfl(x,y)
-#   else
-#       define Perl_modf(x,y) ((long double)modf((double)(x),(double*)(y)))
 #   endif
 #   ifdef HAS_FREXPL
 #       define Perl_frexp(x,y) frexpl(x,y)
-#   else
-#       define Perl_frexp(x,y) ((long double)frexp((double)(x),y))
 #   endif
 #   ifdef HAS_ISNANL
 #       define Perl_isnan(x) isnanl(x)

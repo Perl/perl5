@@ -1889,11 +1889,24 @@ PP(pp_int)
 	SETi(iv);
       }
       else {
-	if (value >= 0.0)
-	  (void)Perl_modf(value, &value);
+	  if (value >= 0.0) {
+#if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
+	      (void)Perl_modf(value, &value);
+#else
+	      double tmp = (double)value;
+	      (void)Perl_modf(tmp, &tmp);
+	      value = (NV)tmp;
+#endif
+	  }
 	else {
-	  (void)Perl_modf(-value, &value);
-	  value = -value;
+#if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
+	    (void)Perl_modf(-value, &value);
+	    value = -value;
+#else
+	    double tmp = (double)value;
+	    (void)Perl_modf(-tmp, &tmp);
+	    value = -(NV)tmp;
+#endif
 	}
 	iv = I_V(value);
 	if (iv == value)
