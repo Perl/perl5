@@ -2467,8 +2467,8 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_INTEGER		0x00000001
 #define HINT_STRICT_REFS	0x00000002
 /* #define HINT_notused4	0x00000004 */
-#define HINT_UTF8		0x00000008
-#define HINT_BYTE		0x00000010
+#define HINT_BYTE		0x00000008
+/* #define HINT_notused10	0x00000010 */
 				/* Note: 20,40,80 used for NATIVE_HINTS */
 
 #define HINT_BLOCK_SCOPE	0x00000100
@@ -2487,6 +2487,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_RE_EVAL		0x00200000
 
 #define HINT_FILETEST_ACCESS	0x00400000
+#define HINT_UTF8		0x00800000
 
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))

@@ -116,8 +116,6 @@ PP(pp_regcomp)
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
 	    if (DO_UTF8(tmpstr))
 		pm->op_pmdynflags |= PMdf_UTF8;
-	    else
-		pm->op_pmdynflags &= ~PMdf_UTF8;
 	    pm->op_pmregexp = CALLREGCOMP(aTHX_ t, t + len, pm);
 	    PL_reginterp_cnt = 0;		/* XXXX Be extra paranoid - needed
 					   inside tie/overload accessors.  */
