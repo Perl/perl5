@@ -64,9 +64,14 @@ sub runtests {
 
     # pass -I flags to children
     my $old5lib = $ENV{PERL5LIB};
-    local($ENV{'PERL5LIB'}) = join($Config{path_sep}, @INC);
 
-    if ($^O eq 'VMS') { $switches =~ s/-(\S*[A-Z]\S*)/"-$1"/g }
+    # VMS has a 255-byte limit on the length of %ENV entries, so
+    # toss the ones that involve perl_root, the install location
+    # for VMS
+    local($ENV{'PERL5LIB'}) = join($Config{path_sep}, grep {!/perl_root/i;} @INC) if $^O eq 'VMS';
+    local($ENV{'PERL5LIB'}) = join($Config{path_sep}, @INC) unless $^O eq 'VMS';
+
+    if ($^O eq 'VMS') { $switches =~ s/-(\S*[A-Z]\S*)/"-$1"/g;}
 
     my @dir_files = globdir $files_in_dir if defined $files_in_dir;
     my $t_start = new Benchmark;
