@@ -150,8 +150,9 @@ sub prompt ($;$) {
 sub eval_in_subdirs {
     my($self) = @_;
     my($dir);
-    use Cwd 'cwd';
+    use Cwd qw(cwd abs_path);
     my $pwd = cwd();
+    local @INC = map eval {abs_path($_)} || $_, @INC;
 
     foreach $dir (@{$self->{DIR}}){
 	my($abs) = $self->catdir($pwd,$dir);
@@ -335,6 +336,7 @@ sub ExtUtils::MakeMaker::new {
 
     check_hints($self);
 
+    my %configure_att;         # record &{$self->{CONFIGURE}} attributes
     my(%initial_att) = %$self; # record initial attributes
 
     my($prereq);
@@ -374,7 +376,8 @@ sub ExtUtils::MakeMaker::new {
 
     if (defined $self->{CONFIGURE}) {
 	if (ref $self->{CONFIGURE} eq 'CODE') {
-	    $self = { %$self, %{&{$self->{CONFIGURE}}}};
+	    %configure_att = %{&{$self->{CONFIGURE}}};
+	    $self = { %$self, %configure_att };
 	} else {
 	    Carp::croak "Attribute 'CONFIGURE' to WriteMakefile() not a code reference\n";
 	}
@@ -420,6 +423,8 @@ sub ExtUtils::MakeMaker::new {
 		    }
 	    }
 	}
+	my @fm = grep /^FIRST_MAKEFILE=/, @ARGV;
+	parse_args($self,@fm) if @fm;
     } else {
 	parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
     }
@@ -480,6 +485,27 @@ END
 	$v =~ tr/\n/ /s;
 	push @{$self->{RESULT}}, "#	$key => $v";
     }
+    undef %initial_att;        # free memory
+
+    if (defined $self->{CONFIGURE}) {
+       push @{$self->{RESULT}}, <<END;
+
+#   MakeMaker 'CONFIGURE' Parameters:
+END
+        if (scalar(keys %configure_att) > 0) {
+            foreach $key (sort keys %configure_att){
+               my($v) = neatvalue($configure_att{$key});
+               $v =~ s/(CODE|HASH|ARRAY|SCALAR)\([\dxa-f]+\)/$1\(...\)/;
+               $v =~ tr/\n/ /s;
+               push @{$self->{RESULT}}, "#     $key => $v";
+            }
+        }
+        else
+        {
+           push @{$self->{RESULT}}, "# no values returned";
+        }
+        undef %configure_att;  # free memory
+    }
 
     # turn the SKIP array into a SKIPHASH hash
     my (%skip,$skip);
@@ -520,14 +546,20 @@ END
 }
 
 sub WriteEmptyMakefile {
-  if (-f 'Makefile.old') {
-    chmod 0666, 'Makefile.old';
-    unlink 'Makefile.old' or warn "unlink Makefile.old: $!";
-  }
-  rename 'Makefile', 'Makefile.old' or warn "rename Makefile Makefile.old: $!"
-    if -f 'Makefile';
-  open MF, '> Makefile' or die "open Makefile for write: $!";
-  print MF <<'EOP';
+    Carp::croak "WriteEmptyMakefile: Need even number of args" if @_ % 2;
+    local $SIG{__WARN__} = \&warnhandler;
+
+    my %att = @_;
+    my $self = MM->new(\%att);
+    if (-f "$self->{MAKEFILE}.old") {
+      chmod 0666, "$self->{MAKEFILE}.old";
+      unlink "$self->{MAKEFILE}.old" or warn "unlink $self->{MAKEFILE}.old: $!";
+    }
+    rename $self->{MAKEFILE}, "$self->{MAKEFILE}.old"
+      or warn "rename $self->{MAKEFILE} $self->{MAKEFILE}.old: $!"
+        if -f $self->{MAKEFILE};
+    open MF, '>', $self->{MAKEFILE} or die "open $self->{MAKEFILE} for write: $!";
+    print MF <<'EOP';
 all:
 
 clean:
@@ -539,7 +571,7 @@ makemakerdflt:
 test:
 
 EOP
-  close MF or die "close Makefile for write: $!";
+    close MF or die "close $self->{MAKEFILE} for write: $!";
 }
 
 sub check_manifest {

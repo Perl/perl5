@@ -58,29 +58,6 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
     } STMT_END
 #else
 #  if defined(USE_ITHREADS)
-
-/* this is called in parent before the fork() */
-void
-Perl_atfork_lock(void)
-{
-    /* locks must be held in locking order (if any) */
-#ifdef MYMALLOC
-    MUTEX_LOCK(&PL_malloc_mutex);
-#endif
-    OP_REFCNT_LOCK;
-}
-
-/* this is called in both parent and child after the fork() */
-void
-Perl_atfork_unlock(void)
-{
-    /* locks must be released in same order as in S_atfork_lock() */
-#ifdef MYMALLOC
-    MUTEX_UNLOCK(&PL_malloc_mutex);
-#endif
-    OP_REFCNT_UNLOCK;
-}
-
 #  define INIT_TLS_AND_INTERP \
     STMT_START {				\
 	if (!PL_curinterp) {			\
@@ -3463,7 +3440,8 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    } /* else what? */
 	}
 #endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
-	for (; *env; env++) {
+	if (env)
+	  for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
@@ -3473,7 +3451,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    sv = newSVpv(s--,0);
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';
-	}
+	  }
 #ifdef NEED_ENVIRON_DUP_FOR_MODIFY
 	if (dup_env_base) {
 	    char **dup_env;

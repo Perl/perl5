@@ -3,11 +3,12 @@ package UnicodeCD;
 use strict;
 use warnings;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 require Exporter;
 
 our @ISA = qw(Exporter);
+
 our @EXPORT_OK = qw(charinfo
 		    charblock charscript
 		    charblocks charscripts
@@ -32,9 +33,24 @@ UnicodeCD - Unicode character database
     use UnicodeCD 'charscript';
     my $charscript = charblock($codepoint);
 
+    use UnicodeCD 'charblocks';
+    my $charblocks = charblocks();
+
+    use UnicodeCD 'charscripts';
+    my %charscripts = charscripts();
+
+    use UnicodeCD qw(charscript charinrange);
+    my $range = charscript($script);
+    print "looks like $script\n" if charinrange($range, $codepoint);
+
+    use UnicodeCD 'compexcl';
+    my $compexcl = compexcl($codepoint);
+
+    my $unicode_version = UnicodeCD::UnicodeVersion();
+
 =head1 DESCRIPTION
 
-The Unicode module offers a simple interface to the Unicode Character
+The UnicodeCD module offers a simple interface to the Unicode Character
 Database.
 
 =cut
@@ -119,17 +135,134 @@ sub _getcode {
     return;
 }
 
+sub han_charname {
+    my $arg  = shift;
+    my $code = _getcode($arg);
+    croak __PACKAGE__, "::han_charname: unknown code '$arg'"
+	unless defined $code;
+    croak __PACKAGE__, "::han_charname: outside CJK Unified Ideographs '$arg'"
+        unless 0x3400  <= $code && $code <= 0x4DB5  
+            || 0x4E00  <= $code && $code <= 0x9FA5  
+            || 0x20000 <= $code && $code <= 0x2A6D6;
+    sprintf "CJK UNIFIED IDEOGRAPH-%04X", $code;
+}
+
+my @JamoL = ( # Leading Consonant (HANGUL CHOSEONG)
+    "G", "GG", "N", "D", "DD", "R", "M", "B", "BB",
+    "S", "SS", "", "J", "JJ", "C", "K", "T", "P", "H",
+  );
+
+my @JamoV = ( # Medium Vowel (HANGUL JUNGSEONG)
+    "A", "AE", "YA", "YAE", "EO", "E", "YEO", "YE", "O",
+    "WA", "WAE", "OE", "YO", "U", "WEO", "WE", "WI",
+    "YU", "EU", "YI", "I",
+  );
+
+my @JamoT = ( # Trailing Consonant (HANGUL JONGSEONG)
+    "", "G", "GG", "GS", "N", "NJ", "NH", "D", "L", "LG", "LM",
+    "LB", "LS", "LT", "LP", "LH", "M", "B", "BS",
+    "S", "SS", "NG", "J", "C", "K", "T", "P", "H",
+  );
+
+my %HangulConst = (
+   SBase  => 0xAC00,
+   LBase  => 0x1100,
+   VBase  => 0x1161,
+   TBase  => 0x11A7,
+   LCount => 19,     # scalar @JamoL
+   VCount => 21,     # scalar @JamoV
+   TCount => 28,     # scalar @JamoT
+   NCount => 588,    # VCount * TCount
+   SCount => 11172,  # LCount * NCount
+   Final  => 0xD7A3, # SBase -1 + SCount
+  );
+
+sub hangul_charname {
+    my $arg  = shift;
+    my $code = _getcode($arg);
+    croak __PACKAGE__, "::hangul_charname: unknown code '$arg'"
+	unless defined $code;
+    croak __PACKAGE__, "::hangul_charname: outside Hangul Syllables '$arg'"
+        unless $HangulConst{SBase} <= $code && $code <= $HangulConst{Final};
+    my $SIndex = $code - $HangulConst{SBase};
+    my $LIndex = int( $SIndex / $HangulConst{NCount});
+    my $VIndex = int(($SIndex % $HangulConst{NCount}) / $HangulConst{TCount});
+    my $TIndex =      $SIndex % $HangulConst{TCount};
+    return join('',
+        "HANGUL SYLLABLE ",
+        $JamoL[$LIndex],
+        $JamoV[$VIndex],
+        $JamoT[$TIndex],
+      );
+}
+
+sub hangul_decomp {
+    my $arg  = shift;
+    my $code = _getcode($arg);
+    croak __PACKAGE__, "::hangul_decomp: unknown code '$arg'"
+	unless defined $code;
+    croak __PACKAGE__, "::hangul_decomp: outside Hangul Syllables '$arg'"
+        unless $HangulConst{SBase} <= $code && $code <= $HangulConst{Final};
+    my $SIndex = $code - $HangulConst{SBase};
+    my $LIndex = int( $SIndex / $HangulConst{NCount});
+    my $VIndex = int(($SIndex % $HangulConst{NCount}) / $HangulConst{TCount});
+    my $TIndex =      $SIndex % $HangulConst{TCount};
+
+    return join(" ",
+        sprintf("%04X", $HangulConst{LBase} + $LIndex),
+        sprintf("%04X", $HangulConst{VBase} + $VIndex),
+      $TIndex ?
+        sprintf("%04X", $HangulConst{TBase} + $TIndex) : (),
+    );
+}
+
+my @CharinfoRanges = (
+# block name
+# [ first, last, coderef to name, coderef to decompose ],
+# CJK Ideographs Extension A
+  [ 0x3400,   0x4DB5,   \&han_charname,   undef  ],
+# CJK Ideographs
+  [ 0x4E00,   0x9FA5,   \&han_charname,   undef  ],
+# Hangul Syllables
+  [ 0xAC00,   0xD7A3,   \&hangul_charname, \&hangul_decomp  ],
+# Non-Private Use High Surrogates
+  [ 0xD800,   0xDB7F,   undef,   undef  ],
+# Private Use High Surrogates
+  [ 0xDB80,   0xDBFF,   undef,   undef  ],
+# Low Surrogates
+  [ 0xDC00,   0xDFFF,   undef,   undef  ],
+# The Private Use Area
+  [ 0xE000,   0xF8FF,   undef,   undef  ],
+# CJK Ideographs Extension B
+  [ 0x20000,  0x2A6D6,  \&han_charname,   undef  ],
+# Plane 15 Private Use Area
+  [ 0xF0000,  0xFFFFD,  undef,   undef  ],
+# Plane 16 Private Use Area
+  [ 0x100000, 0x10FFFD, undef,   undef  ],
+);
+
 sub charinfo {
     my $arg  = shift;
     my $code = _getcode($arg);
     croak __PACKAGE__, "::charinfo: unknown code '$arg'"
 	unless defined $code;
-    my $hexk = sprintf("%04X", $code);
-
+    my $hexk = sprintf("%06X", $code);
+    my($rcode,$rname,$rdec);
+    foreach my $range (@CharinfoRanges){
+      if ($range->[0] <= $code && $code <= $range->[1]) {
+        $rcode = $hexk;
+	$rcode =~ s/^0+//;
+	$rcode =  sprintf("%04X", hex($rcode));
+        $rname = $range->[2] ? $range->[2]->($code) : '';
+        $rdec  = $range->[3] ? $range->[3]->($code) : '';
+        $hexk  = sprintf("%06X", $range->[0]); # replace by the first
+        last;
+      }
+    }
     openunicode(\$UNICODEFH, "Unicode.txt");
     if (defined $UNICODEFH) {
-	use Search::Dict;
-	if (look($UNICODEFH, "$hexk;") >= 0) {
+	use Search::Dict 1.02;
+	if (look($UNICODEFH, "$hexk;", { xfrm => sub { $_[0] =~ /^([^;]+);(.+)/; sprintf "%06X;$2", hex($1) } } ) >= 0) {
 	    my $line = <$UNICODEFH>;
 	    chomp $line;
 	    my %prop;
@@ -140,9 +273,16 @@ sub charinfo {
 		     mirrored unicode10 comment
 		     upper lower title
 		    )} = split(/;/, $line, -1);
+	    $hexk =~ s/^0+//;
+	    $hexk =  sprintf("%04X", hex($hexk));
 	    if ($prop{code} eq $hexk) {
 		$prop{block}  = charblock($code);
 		$prop{script} = charscript($code);
+		if(defined $rname){
+                    $prop{code} = $rcode;
+                    $prop{name} = $rname;
+                    $prop{decomposition} = $rdec;
+                }
 		return \%prop;
 	    }
 	}
@@ -377,12 +517,12 @@ or "U+" followed by hexadecimals.
 In addition to using the C<\p{In...}> and C<\P{In...}> constructs, you
 can also test whether a code point is in the I<range> as returned by
 L</charblock> and L</charscript> or as the values of the hash returned
-by L</charblocks> and </charscripts> by using charinrange():
+by L</charblocks> and L</charscripts> by using charinrange():
 
     use UnicodeCD qw(charscript charinrange);
 
     $range = charscript('Hiragana');
-    print "looks like hiragana\n" if charinrange($range, $code);
+    print "looks like hiragana\n" if charinrange($range, $codepoint);
 
 =cut
 
@@ -393,8 +533,8 @@ by L</charblocks> and </charscripts> by using charinrange():
     my $compexcl = compexcl("09dc");
 
 The compexcl() returns the composition exclusion (that is, if the
-character cannot be decomposed) of the character specified by a B<code
-point argument>.
+character should not be produced during a precomposition) of the 
+character specified by a B<code point argument>.
 
 If there is a composition exclusion for the character, true is
 returned.  Otherwise, false is returned.
@@ -420,6 +560,8 @@ sub _compexcl {
 sub compexcl {
     my $arg  = shift;
     my $code = _getcode($arg);
+    croak __PACKAGE__, "::compexcl: unknown code '$arg'"
+	unless defined $code;
 
     _compexcl() unless %COMPEXCL;
 
@@ -490,6 +632,8 @@ sub _casefold {
 sub casefold {
     my $arg  = shift;
     my $code = _getcode($arg);
+    croak __PACKAGE__, "::casefold: unknown code '$arg'"
+	unless defined $code;
 
     _casefold() unless %CASEFOLD;
 
@@ -526,16 +670,16 @@ true.  Case distinctions in the condition list are not significant.
 Conditions preceded by "NON_" represent the negation of the condition
 
 A I<locale> is defined as a 2-letter ISO 3166 country code, possibly
-followed by a "_" and a 2-letter ISO language code (, possibly followed
-by a "_" and a variant code).  You can find the list of those codes
-in L<Locale::Country> and L<Locale::Language>.
+followed by a "_" and a 2-letter ISO language code (possibly followed
+by a "_" and a variant code).  You can find the lists of those codes,
+see L<Locale::Country> and L<Locale::Language>.
 
 A I<context> is one of the following choices:
 
     FINAL            The letter is not followed by a letter of
                      general category L (e.g. Ll, Lt, Lu, Lm, or Lo)
     MODERN           The mapping is only used for modern text
-    AFTER_i          The last base character was "i" 0069
+    AFTER_i          The last base character was "i" (U+0069)
 
 For more information about case mappings see
 http://www.unicode.org/unicode/reports/tr21/
@@ -565,6 +709,8 @@ sub _casespec {
 sub casespec {
     my $arg  = shift;
     my $code = _getcode($arg);
+    croak __PACKAGE__, "::casespec: unknown code '$arg'"
+	unless defined $code;
 
     _casespec() unless %CASESPEC;
 

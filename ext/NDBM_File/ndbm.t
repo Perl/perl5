@@ -40,7 +40,7 @@ my $Dfile = "Op.dbmx.pag";
 if (! -e $Dfile) {
 	($Dfile) = <Op.dbmx*>;
 }
-if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare') {
+if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'MacOS') {
     print "ok 2 # Skipped: different file permission semantics\n";
 }
 else {
@@ -137,7 +137,7 @@ print ($h{'foo'} eq '' ? "ok 11\n" : "not ok 11\n");
 print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
 
 untie %h;
-unlink 'Op.dbmx.dir', $Dfile;
+unlink <Op.dbmx*>, $Dfile;
 
 {
    # sub-class test

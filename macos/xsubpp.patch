@@ -1,0 +1,474 @@
+diff -ru :perl:lib:ExtUtils: :perl.new:lib:ExtUtils:xsubpp
+--- :perl:lib:ExtUtils:xsubpp	Mon Feb 19 17:07:32 2001
++++ :perl.new:lib:ExtUtils:xsubpp	Mon Feb 19 15:31:31 2001
+@@ -173,7 +173,13 @@
+ ($dir, $filename) = $ARGV[0] =~ m#(.*)/(.*)#
+ 	or ($dir, $filename) = $ARGV[0] =~ m#(.*)\\(.*)#
+ 	or ($dir, $filename) = $ARGV[0] =~ m#(.*[>\]])(.*)#
++	or ($dir, $filename) = $ARGV[0] =~ m#(.*):(.*)#
+ 	or ($dir, $filename) = ('.', $ARGV[0]);
++	
++$Is_MacOS = $^O eq 'MacOS';
++if ($Is_MacOS && $dir eq '.') {
++     $dir = ":";
++}
+ chdir($dir);
+ $pwd = cwd();
+ 
+@@ -209,9 +215,21 @@
+ foreach $typemap (@tm) {
+     die "Can't find $typemap in $pwd\n" unless -r $typemap;
+ }
+-unshift @tm, qw(../../../../lib/ExtUtils/typemap ../../../lib/ExtUtils/typemap
++if ($Is_MacOS) { my @tmp;
++    foreach (qw(:::: ::: :: :)) {
++    	push @tmp, "$_:lib:ExtUtils:typemap";
++    	push @tmp, "$_:macos:lib:ExtUtils:typemap";
++    	push @tmp, "$_:Mac:typemap";
++    	push @tmp, "$_:macos:ext:Mac:typemap";
++    	push @tmp, "$_:typemap";
++    }
++    unshift @tm, @tmp, "typemap";
++} else {
++    unshift @tm, qw(../../../../lib/ExtUtils/typemap ../../../lib/ExtUtils/typemap
+                 ../../lib/ExtUtils/typemap ../../../typemap ../../typemap
+                 ../typemap typemap);
++}
++
+ foreach $typemap (@tm) {
+     next unless -e $typemap ;
+     # skip directories, binary files etc.
+@@ -364,7 +382,7 @@
+     print("#line ", $line_no[@line_no - @line -1], " \"$filename\"\n")
+ 	if $WantLineNumbers && !/^\s*#\s*line\b/ && !/^#if XSubPPtmp/;
+     for (;  defined($_) && !/^$BLOCK_re/o;  $_ = shift(@line)) {
+-	print "$_\n";
++	XS_process("$_\n");
+     }
+     print "$xsubpp::counter::SECTION_END_MARKER\n" if $WantLineNumbers;
+ }
+@@ -746,7 +764,85 @@
+     $lastline_no = $. ;
+  
+ }
+- 
++
++sub XS_PUSH_handler
++{
++    my($type, $value, $xpush) = @_;
++    if ($xpush) {
++    	print "\tEXTEND(sp, 1);\n";
++    } 
++    print "\t++sp;\n";
++    &generate_output($type, 0, "($value)", "*sp", 1);
++    "";
++}
++
++sub XS_OUTPUT_handler
++{
++    my($type, $value, $arg) = @_;
++    
++    &generate_output($type, 0, "($value)", 0, 0, $arg);
++    "";
++}
++
++sub XS_INPUT_handler
++{
++    my($type, $var, $arg) = @_;
++    &generate_init($type, 0, $var, 0, 0, $arg, 1);
++    "";
++}
++
++
++sub XS_POP_handler
++{
++    my($type, $var, $pop) = @_;
++    &generate_init($type, 0, $var, "TOPs", 1);
++    print "\tPOPs;\n" if $pop;
++    "";
++}
++
++sub SplitArgs 
++{
++    my(@bits,@pieces,$item);
++    @bits = split /,/, $_[0];
++    while (@bits) {
++    	$item .= "," if $item;
++	$item .= shift @bits;
++	if (tr/(// == tr/)// 
++	 && tr/{// == tr/}// 
++	 && tr/[// == tr/]// 
++	 && !(tr/"// & 1) 
++	 && !(tr/'// & 1)
++	) {
++	    push @pieces, $item;
++	    $item = "";
++	}
++    }
++    @pieces;
++}
++
++sub XS_process 
++{
++    my($text) = @_;
++    
++    while (length($text)) {
++	if ($text =~ s/^.*\bXS_PUSH\(([^,]+),\s*(.*)\)\s*;?.*\n?//) {
++ 	    XS_PUSH_handler($1, $2, 0);
++	} elsif ($text =~ s/^.*\bXS_XPUSH\(([^,]+),\s*(.*)\)\s*;?.*\n?//) {
++	    XS_PUSH_handler($1, $2, 1);
++	} elsif ($text =~ s/^.*\bXS_OUTPUT\((.*)\)\s*;?.*\n?//) {
++	    XS_OUTPUT_handler(SplitArgs($1));
++	} elsif ($text =~ s/^.*\bXS_INPUT\((.*)\)\s*;?.*\n?//) {
++	    XS_INPUT_handler(SplitArgs($1));
++	} elsif ($text =~ s/^.*\bXS_POP\(([^,]+),\s*(.*)\)\s*;?.*\n?//) {
++	    XS_POP_handler($1, $2, 1);
++	} elsif ($text =~ s/^.*\bXS_TOP\(([^,]+),\s*(.*)\)\s*;?.*\n?//) {
++	    XS_POP_handler($1, $2, 0);
++	} elsif ($text =~ s/^(.*\n?)//) {
++	    print $1;
++	}
++    }
++}
++
+ sub PopFile()
+ {
+     return 0 unless $XSStack[-1]{type} eq 'file' ;
+@@ -861,8 +957,8 @@
+         my $podstartline = $.;
+     	do {
+ 	    if (/^=cut\s*$/) {
+-		print("/* Skipped embedded POD. */\n");
+-		printf("#line %d \"$filename\"\n", $. + 1)
++		XS_process("/* Skipped embedded POD. */\n");
++		XS_process(sprintf("#line %d \"$filename\"\n", $. + 1))
+ 		  if $WantLineNumbers;
+ 		next firstmodule
+ 	    }
+@@ -880,7 +976,7 @@
+     if ($OBJ) {
+         s/#if(?:def\s|\s+defined)\s*(\(__cplusplus\)|__cplusplus)/#if defined(__cplusplus) && !defined(PERL_OBJECT)/;
+     }
+-    print $_;
++    XS_process($_);
+ }
+ &Exit unless defined $_;
+ 
+@@ -949,6 +1045,185 @@
+     1;
+ }
+ 
++sub indent {
++     my($line) = @_;
++     my($indent) = 0;
++     
++     for (;;) {
++     	if ($line =~ s/^( +)//) { $indent += length $1;         next; }
++     	if ($line =~ s/^\t//)   { $indent += 8 - ($indent & 7); next; }
++	last;
++     }
++     $indent;
++}
++
++sub handle_struct 
++{   
++    # extract return type, function name and arguments
++    my($deref, $structpack) = /(\**)\s*(\S+)/;
++    my($handle) = ($^O eq "MacOS") && ($deref eq "**");
++    $deref =~ s/\*$/->/;
++    $deref =~ s/\*/\[0\]/g;
++    $deref ||= ".";
++    my($structtype) = $structpack;
++
++    # a struct definition needs at least 2 lines
++    blurt ("Error: Struct definition too short '$structpack'"), next PARAGRAPH
++	unless @line ;
++
++    ($clean_struct_name = $structpack) =~ s/^$Prefix//;
++    $Full_struct_name = "${Packid}_$clean_struct_name";
++    if ($Is_VMS) { $Full_struct_name = $SymSet->addsym($Full_struct_name); }
++
++    # Check for duplicate function definition
++    for $tmp (@XSStack) {
++	next unless defined $tmp->{functions}{$Full_struct_name};
++	Warn("Warning: duplicate struct definition '$clean_struct_name' detected");
++	last;
++    }
++
++    # print struct function header
++    print Q<<"EOF";
++#XS(XS_${Full_struct_name})
++#[[
++#    dXSARGS;
++#    dXSI32;
++#    if (items < 1 || items > 2)
++#       croak("Usage: %s(STRUCT [, VALUE])", GvNAME(CvGV(cv)));
++#    SP -= items;
++EOF
++
++    # Now do a block of some sort.
++
++    &check_cpp;
++    my($structinput, $structoutput, $structindir, $structoutdir);
++    my(@field, @fieldindir, @fieldoutdir, @input, @output);
++    $structindir = $structoutdir = line_directive();
++    $_ = "";
++    while (defined $_) {
++    	$_ = shift @line while /^\s*$/;
++	my($fieldindir) = line_directive();
++	my($fieldoutdir)= $fieldindir;
++    	my($indent,$fieldtype,$fieldname) = 
++		m|^(\s*)(\S.*\S)\s*\b(\w+)\s*;?\s*(?:/\*.*\*/)?$|;
++	$indent = indent $indent;
++	$fieldtype = TidyType $fieldtype;
++	my($input, $output);
++	my $var = "STRUCT$deref$fieldname";
++	$_ = shift @line;
++	while (/ALIAS|READ_ONLY|INPUT:|OUTPUT:/) {
++	    if (/ALIAS\s*(.*)/) {
++	    	$var = $1;
++		$_ = shift @line;
++	    } elsif (/READ_ONLY/) {
++		$fieldindir = line_directive();
++		$input = "$_";
++		$_ = shift @line;
++	    } elsif (/INPUT/) {
++	    	last unless ($_ = shift @line);
++		$fieldindir = line_directive();
++		while (indent($_) > $indent && !/ALIAS|READ_ONLY|INPUT:|OUTPUT:/) {
++		    $input .= "$_\n";
++		    $_ = shift @line;
++		}
++	    } else {
++	    	last unless ($_ = shift @line);
++		$fieldoutdir = line_directive();
++		while (indent($_) > $indent && !/ALIAS|READ_ONLY|INPUT:|OUTPUT:/) {
++		    $output .= "$_\n";
++		    $_ = shift @line;
++		}
++	    }
++	}
++	if ($fieldname eq "STRUCT") {
++	    $structindir = $fieldindir;
++	    $structoutdir= $fieldoutdir;
++	    $structtype  = $fieldtype;
++	    $arg         = "ST(0)";
++	    $structinput = eval "qq\a$input\a";
++	    $structoutput= eval "qq\a$output\a";
++	} else {
++	    if ($input =~ /READ_ONLY/) {
++	    	$input = "\tcroak(\"$var is read-only\");\n";
++	    } elsif ($input) {
++	    	$arg = "ST(1)";
++		$input = eval "qq\a$input\a";
++	    } else {
++	    	$input = "\tXS_INPUT($fieldtype, $var, ST(1));";
++	    }
++	    if ($output) {
++	    	$arg = "*sp";
++		$output = "\tPUSHs(sv_newmortal());\n" . eval "qq\a$output\a";
++	    } else {
++	    	$output = "\tXS_PUSH($fieldtype, $var);";
++	    }
++	    push @field, $fieldname;
++	    push @fieldindir, $fieldindir;
++	    push @fieldoutdir, $fieldoutdir;
++	    push @input, $input; 
++	    push @output, $output;
++	}
++    }
++    print Q<<"EOF";
++#    [[
++#	$structtype STRUCT;
++EOF
++    print "\tchar STRUCT_state;\n" if $handle;
++    print "\n$structindir";
++    XS_process($structinput || "\tXS_INPUT($structtype, STRUCT, ST(0));");
++    print "\n\tSTRUCT_state = HGetState((Handle)STRUCT); HLock((Handle)STRUCT);\n" if ($handle);
++    print Q<<"EOF";
++#	if (items == 1) [[ /* Get field */
++#	    switch (ix) [[
++EOF
++    for (0..$#field) {
++  	print Q<<"EOF";
++#	    case $_:	  /* $field[$_] */
++EOF
++ 	print $fieldoutdir[$_];
++	XS_process($output[$_]);
++	print Q<<"EOF";
++#		break;
++EOF
++    }
++    print Q<<"EOF";
++#	    ]]
++#	]] else [[ 	   /* Set field */
++#	    switch (ix) [[
++EOF
++    for (0..$#field) {
++  	print Q<<"EOF";
++#	    case $_:	  /* $field[$_] */
++EOF
++ 	print $fieldindir[$_];
++	XS_process($input[$_]);
++	print Q<<"EOF";
++#		break;
++EOF
++    }
++    print Q<<"EOF";
++#	    ]]
++EOF
++    print $structoutdir;
++    XS_process($structoutput || "\tXS_OUTPUT($structtype, STRUCT, ST(0))\n");
++    print Q<<"EOF";
++#	]]
++EOF
++    print "\tHSetState((Handle)STRUCT, STRUCT_state);\n" if $handle;
++    print Q<<"EOF";
++#    ]]
++#    XSRETURN(1);
++#]]
++#
++EOF
++    for (0..$#field) {
++	push(@InitFileCode, Q<<"EOF");
++#        cv = newXS(\"${structpack}::$field[$_]\", XS_$Full_struct_name, file);
++#        XSANY.any_i32 = $_ ; 
++EOF
++    }
++}
++
+ PARAGRAPH:
+ while (fetch_para()) {
+     # Print initial preprocessor statements and blank lines
+@@ -1040,7 +1315,11 @@
+         next PARAGRAPH ;
+     }
+ 
+-
++    if (s/^STRUCT\s*//) {
++    	handle_struct();
++	next PARAGRAPH;
++    }
++    
+     # extract return type, function name and arguments
+     ($ret_type) = TidyType($_);
+     $RETVAL_no_return = 1 if $ret_type =~ s/^NO_OUTPUT\s+//;
+@@ -1285,7 +1564,7 @@
+ 		    $processing_arg_with_types = 1;
+ 		    INPUT_handler() ;
+ 		}
+-		print $deferred;
++		XS_process($deferred);
+ 
+         process_keyword("INIT|ALIAS|ATTRS|PROTOTYPE|INTERFACE_MACRO|INTERFACE|C_ARGS") ;
+ 
+@@ -1338,7 +1617,7 @@
+ 
+ 	# all OUTPUT done, so now push the return value on the stack
+ 	if ($gotRETVAL && $RETVAL_code) {
+-	    print "\t$RETVAL_code\n";
++	    XS_process("\t$RETVAL_code\n");
+ 	} elsif ($gotRETVAL || $wantRETVAL) {
+ 	    my $t = $WantOptimize && $targetable{$type_kind{$ret_type}};
+ 	    my $var = 'RETVAL';
+@@ -1574,6 +1853,14 @@
+     }
+ }
+ 
++sub line_directive
++{
++    # work out the line number
++    my $line_no = $line_no[@line_no - @line -1] ;
++ 
++    return "#line $line_no \"$filename\"\n" ;
++}
++
+ sub Warn
+ {
+     # work out the line number
+@@ -1595,12 +1882,12 @@
+ }
+ 
+ sub generate_init {
+-    local($type, $num, $var) = @_;
+-    local($arg) = "ST(" . ($num - 1) . ")";
++    local($type, $num, $var, $arg, $immed) = @_;
+     local($argoff) = $num - 1;
+     local($ntype);
+     local($tk);
+ 
++    $arg ||= "ST(" . ($num - 1) . ")";
+     $type = TidyType($type) ;
+     blurt("Error: '$type' not in typemap"), return 
+ 	unless defined($type_kind{$type});
+@@ -1656,17 +1943,18 @@
+     } else {
+ 	    die "panic: do not know how to handle this branch for function pointers"
+ 	      if $name_printed;
+-	    eval qq/print "$expr;\\n"/;
++	    eval qq/XS_process "$expr;\\n"/;
+ 	    warn $@   if  $@;
+     }
+ }
+ 
+ sub generate_output {
+-    local($type, $num, $var, $do_setmagic, $do_push) = @_;
+-    local($arg) = "ST(" . ($num - ($num != 0)) . ")";
++    local($type, $num, $var, $do_setmagic, $do_push, $arg, $mortalize) = @_;
+     local($argoff) = $num - 1;
+     local($ntype);
+ 
++    $mortalize ||= $var eq 'RETVAL';
++    $arg ||= "ST(" . ($num - ($num != 0)) . ")";
+     $type = TidyType($type) ;
+     if ($type =~ /^array\(([^,]*),(.*)\)/) {
+ 	    print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1));\n";
+@@ -1695,30 +1983,30 @@
+ 		warn $@   if  $@;
+ 		print "\t\tSvSETMAGIC(ST(ix_$var));\n" if $do_setmagic;
+ 	    }
+-	    elsif ($var eq 'RETVAL') {
++	    elsif ($mortalize) {
+ 		if ($expr =~ /^\t\$arg = new/) {
+ 		    # We expect that $arg has refcnt 1, so we need to
+ 		    # mortalize it.
+ 		    eval "print qq\a$expr\a";
+ 		    warn $@   if  $@;
+-		    print "\tsv_2mortal(ST($num));\n";
+-		    print "\tSvSETMAGIC(ST($num));\n" if $do_setmagic;
++		    print "\tsv_2mortal($arg);\n";
++		    print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
+ 		}
+ 		elsif ($expr =~ /^\s*\$arg\s*=/) {
+ 		    # We expect that $arg has refcnt >=1, so we need
+ 		    # to mortalize it!
+ 		    eval "print qq\a$expr\a";
+ 		    warn $@   if  $@;
+-		    print "\tsv_2mortal(ST(0));\n";
+-		    print "\tSvSETMAGIC(ST(0));\n" if $do_setmagic;
++		    print "\tsv_2mortal($arg);\n";
++		    print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
+ 		}
+ 		else {
+ 		    # Just hope that the entry would safely write it
+ 		    # over an already mortalized value. By
+ 		    # coincidence, something like $arg = &sv_undef
+ 		    # works too.
+-		    print "\tST(0) = sv_newmortal();\n";
+-		    eval "print qq\a$expr\a";
++		    print "\t$arg = sv_newmortal();\n";
++		    eval "XS_process qq\a$expr\a";
+ 		    warn $@   if  $@;
+ 		    # new mortals don't have set magic
+ 		}
+@@ -1730,8 +2018,8 @@
+ 		warn $@   if  $@;
+ 		print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
+ 	    }
+-	    elsif ($arg =~ /^ST\(\d+\)$/) {
+-		eval "print qq\a$expr\a";
++	    else {
++		eval "XS_process qq\a$expr\a";
+ 		warn $@   if  $@;
+ 		print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
+ 	    }

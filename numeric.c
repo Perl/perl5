@@ -350,7 +350,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 Recognise (or not) a number.  The type of the number is returned
 (0 if unrecognised), otherwise it is a bit-ORed combination of
 IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
-IS_NUMBER_NEG, IS_NUMBER_INFINITY (defined in perl.h).
+IS_NUMBER_NEG, IS_NUMBER_INFINITY, IS_NUMBER_NAN (defined in perl.h).
 
 If the value of the number can fit an in UV, it is returned in the *valuep
 IS_NUMBER_IN_UV will be set to indicate that *valuep is valid, IS_NUMBER_IN_UV
@@ -376,6 +376,7 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
   const char max_mod_10 = UV_MAX % 10;
   int numtype = 0;
   int sawinf = 0;
+  int sawnan = 0;
 
   while (s < send && isSPACE(*s))
     s++;
@@ -512,12 +513,21 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
       s++;
     }
     sawinf = 1;
-  } else /* Add test for NaN here.  */
+  } else if (*s == 'N' || *s == 'n') {
+    /* XXX TODO: There are signaling NaNs and quiet NaNs. */
+    s++; if (s == send || (*s != 'A' && *s != 'a')) return 0;
+    s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+    s++;
+    sawnan = 1;
+  } else
     return 0;
 
   if (sawinf) {
     numtype &= IS_NUMBER_NEG; /* Keep track of sign  */
     numtype |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
+  } else if (sawnan) {
+    numtype &= IS_NUMBER_NEG; /* Keep track of sign  */
+    numtype |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
   } else if (s < send) {
     /* we can have an optional exponent part */
     if (*s == 'e' || *s == 'E') {
@@ -539,7 +549,7 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
   while (s < send && isSPACE(*s))
     s++;
   if (s >= send)
-  return numtype;
+    return numtype;
   if (len == 10 && memEQ(pv, "0 but true", 10)) {
     if (valuep)
       *valuep = 0;

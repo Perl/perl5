@@ -1226,7 +1226,7 @@ EOP
 			  *dbline = $main::{'_<' . $file};
 			  next unless %dbline or $postponed_file{$file};
 			  (push @hard, $file), next 
-			    if $file =~ /^\(eval \d+\)$/;
+			    if $file =~ /^\(\w*eval/;
 			  my @add;
 			  @add = %{$postponed_file{$file}}
 			    if $postponed_file{$file};

@@ -104,11 +104,6 @@ extern int h_errno;
 #  endif
 #endif
 
-/* Put this after #includes because fork and vfork prototypes may conflict. */
-#ifndef HAS_VFORK
-#   define vfork fork
-#endif
-
 #ifdef HAS_CHSIZE
 # ifdef my_chsize  /* Probably #defined to Perl_my_chsize in embed.h */
 #   undef my_chsize
@@ -3874,13 +3869,9 @@ PP(pp_fork)
     Pid_t childpid;
     GV *tmpgv;
 
-#   if defined(USE_ITHREADS) && !defined(HAS_PTHREAD_ATFORK)
-	Perl_croak(aTHX_ "No pthread_atfork() -- fork() too unsafe");
-#   endif
-
     EXTEND(SP, 1);
     PERL_FLUSHALL_FOR_CHILD;
-    childpid = fork();
+    childpid = PerlProc_fork();
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
@@ -3991,7 +3982,7 @@ PP(pp_system)
 	 
 	 if (PerlProc_pipe(pp) >= 0)
 	      did_pipes = 1;
-	 while ((childpid = vfork()) == -1) {
+	 while ((childpid = PerlProc_fork()) == -1) {
 	      if (errno != EAGAIN) {
 		   value = -1;
 		   SP = ORIGMARK;
@@ -4019,7 +4010,7 @@ PP(pp_system)
 	      (void)rsignal_restore(SIGQUIT, &qhand);
 #endif
 	      STATUS_NATIVE_SET(result == -1 ? -1 : status);
-	      do_execfree();	/* free any memory child malloced on vfork */
+	      do_execfree();	/* free any memory child malloced on fork */
 	      SP = ORIGMARK;
 	      if (did_pipes) {
 		   int errkid;

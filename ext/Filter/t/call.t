@@ -32,6 +32,7 @@ my $module4  = "MyTest4" ;
 my $module5  = "MyTest5" ;
 my $nested   = "nested" ;
 my $block   = "block" ;
+my $redir   = $^O eq 'MacOS' ? "" : "2>&1";
 
 # Test error cases
 ##################
@@ -49,8 +50,8 @@ sub import { filter_add(bless []) }
 1 ;
 EOM
  
-my $a = `$Perl "-I." $Inc -e "use ${module} ;"  2>&1` ;
-ok(1, (($? >>8) != 0 or (($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'mpeix') && $? != 0))) ;
+my $a = `$Perl "-I." $Inc -e "use ${module} ;"  $redir` ;
+ok(1, (($? >>8) != 0 or (($^O eq 'MSWin32' || $^O eq 'MacOS' || $^O eq 'NetWare' || $^O eq 'mpeix') && $? != 0))) ;
 ok(2, $a =~ /^Can't locate object method "filter" via package "MyTest"/) ;
  
 # no reference parameter in filter_add
@@ -66,8 +67,8 @@ sub import { filter_add() }
 1 ;
 EOM
  
-$a = `$Perl "-I." $Inc -e "use ${module} ;"  2>&1` ;
-ok(3, (($? >>8) != 0 or (($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'mpeix') && $? != 0))) ;
+$a = `$Perl "-I." $Inc -e "use ${module} ;"  $redir` ;
+ok(3, (($? >>8) != 0 or (($^O eq 'MSWin32' || $^O eq 'MacOS' || $^O eq 'NetWare' || $^O eq 'mpeix') && $? != 0))) ;
 #ok(4, $a =~ /^usage: filter_add\(ref\) at ${module}.pm/) ;
 ok(4, $a =~ /^Not enough arguments for Filter::Util::Call::filter_add/) ;
  
@@ -118,7 +119,7 @@ EOF
 
 EOM
 
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(5, ($? >>8) == 0) ;
 ok(6, $a eq <<EOM) ;
 I am $here
@@ -167,7 +168,7 @@ EOF
  
 EOM
  
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(7, ($? >>8) == 0) ;
 ok(8, $a eq <<EOM) ;
 I am $here
@@ -282,7 +283,7 @@ EOF
  
 EOM
 
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(9, ($? >>8) == 0) ;
 ok(10, $a eq <<EOM) ;
 I'm feeling used!
@@ -344,7 +345,7 @@ EOF
  
 EOM
  
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(11, ($? >>8) == 0) ;
 ok(12, $a eq <<EOM) ;
 some letters PQRPQR PQR PQR
@@ -403,7 +404,7 @@ EOF
  
 EOM
  
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(13, ($? >>8) == 0) ;
 ok(14, $a eq <<EOM) ;
 some letters PQRPQR PQR PQR
@@ -463,7 +464,7 @@ F
  
 EOM
  
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(15, ($? >>8) == 0) ;
 ok(16, $a eq <<EOM) ;
 don't cut me in half
@@ -510,7 +511,7 @@ writeFile($filename, <<EOM, $string ) ;
 use $block ;
 EOM
  
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(17, ($? >>8) == 0) ;
 ok(18, $a eq <<EOM) ;
 hello mum
@@ -558,7 +559,7 @@ EOM
 print "We are in DIR\n" ;
 EOM
  
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(19, ($? >>8) == 0) ;
 ok(20, $a eq <<EOM) ;
 We are in $here
@@ -609,7 +610,7 @@ I am HERE
 HERE today gone tomorrow\n" ;
 EOM
  
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(21, ($? >>8) == 0) ;
 ok(22, $a eq <<EOM) ;
 
@@ -659,7 +660,7 @@ I'm HERE
 HERE today gone tomorrow\n" ;
 EOM
  
-$a = `$Perl "-I." $Inc $filenamebin  2>&1` ;
+$a = `$Perl "-I." $Inc $filenamebin  $redir` ;
 ok(23, ($? >>8) == 0) ;
 ok(24, $a eq <<EOM) ;
 
@@ -713,7 +714,7 @@ I'm HERE
 HERE today gone tomorrow
 EOM
  
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(25, ($? >>8) == 0) ;
 ok(26, $a eq <<EOM) ;
 THERE THERE
@@ -769,7 +770,7 @@ I'm HERE
 HERE today gone tomorrow
 EOM
  
-$a = `$Perl "-I." $Inc $filename  2>&1` ;
+$a = `$Perl "-I." $Inc $filename  $redir` ;
 ok(27, ($? >>8) == 0) ;
 ok(28, $a eq <<EOM) ;
 THERE THERE

@@ -271,8 +271,8 @@ server, or perhaps check some of the other FAQs referenced above.
 
 The HTTPD::UserAdmin and HTTPD::GroupAdmin modules provide a
 consistent OO interface to these files, regardless of how they're
-stored.  Databases may be text, dbm, Berkley DB or any database with a
-DBI compatible driver.  HTTPD::UserAdmin supports files used by the
+stored.  Databases may be text, dbm, Berkeley DB or any database with
+a DBI compatible driver.  HTTPD::UserAdmin supports files used by the
 `Basic' and `Digest' authentication schemes.  Here's an example:
 
     use HTTPD::UserAdmin ();

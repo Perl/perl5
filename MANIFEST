@@ -225,6 +225,7 @@ ext/Encode/Encode/dingbats.enc	Encoding tables
 ext/Encode/Encode/dingbats.ucm	Encoding tables
 ext/Encode/Encode/EncodeFormat.pod	Encoding table format
 ext/Encode/Encode/euc-cn.enc	Encoding tables
+ext/Encode/Encode/euc-jp-0212.enc	Encoding tables
 ext/Encode/Encode/euc-jp.enc	Encoding tables
 ext/Encode/Encode/euc-kr.enc	Encoding tables
 ext/Encode/Encode/gb12345.enc	Encoding tables
@@ -1514,6 +1515,8 @@ lib/warnings.t			See if warning controls work
 lib/warnings/register.pm	For "use warnings::register"
 lib/Win32.pod			Documentation for Win32 extras
 locale.c			locale-specific utility functions
+macos/MacPerlTests.cmd	MacOS ports
+macos/xsubpp.patch	MacOS ports
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
@@ -1647,6 +1650,7 @@ os2/os2ish.h			Header for OS/2
 os2/os2thread.h			pthread-like typedefs
 os2/os2_base.t			Additional tests for builtin methods
 os2/perl2cmd.pl			Corrects installed binaries under OS/2
+os2/perlrexx.c			Support perl interpreter embedded in REXX
 patchlevel.h			The current patch level of perl
 perl.c				main()
 perl.h				Global declarations
@@ -2232,8 +2236,8 @@ win32/perlhost.h		Perl "host" implementation
 win32/perllib.c			Win32 port
 win32/pod.mak			Win32 port
 win32/runperl.c			Win32 port
-win32/sncfnmcs.pl		Win32 port
 win32/splittree.pl		Win32 port
+win32/sync_ext.pl		Win32 port
 win32/vdir.h			Perl "host" virtual directory manager
 win32/vmem.h			Perl "host" memory manager
 win32/win32.c			Win32 port

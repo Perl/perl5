@@ -21,6 +21,7 @@ $Is_W32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
 $Is_Dos = $^O eq 'dos';
 $Is_MPE = $^O eq 'mpeix';
+$Is_MacOS = $^O eq 'MacOS';
 
 $testfd = open("TEST", O_RDONLY, 0) and print "ok 1\n";
 read($testfd, $buffer, 9) if $testfd > 2;
@@ -33,14 +34,14 @@ if ($Is_Dos) {
         print "ok $_ # skipped, no pipe() support on dos\n";
     }
 } else {
-@fds = POSIX::pipe();
-print $fds[0] > $testfd ? "ok 4\n" : "not ok 4\n";
-CORE::open($reader = \*READER, "<&=".$fds[0]);
-CORE::open($writer = \*WRITER, ">&=".$fds[1]);
-print $writer "ok 5\n";
-close $writer;
-print <$reader>;
-close $reader;
+    @fds = POSIX::pipe();
+    print $fds[0] > $testfd ? "ok 4\n" : "not ok 4\n";
+    CORE::open($reader = \*READER, "<&=".$fds[0]);
+    CORE::open($writer = \*WRITER, ">&=".$fds[1]);
+    print $writer "ok 5\n";
+    close $writer;
+    print <$reader>;
+    close $reader;
 }
 
 if ($Is_W32 || $Is_Dos) {
@@ -49,37 +50,55 @@ if ($Is_W32 || $Is_Dos) {
     }
 }
 else {
-$sigset = new POSIX::SigSet 1,3;
-delset $sigset 1;
-if (!ismember $sigset 1) { print "ok 6\n" }
-if (ismember $sigset 3) { print "ok 7\n" }
-$mask = new POSIX::SigSet &SIGINT;
-$action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
-sigaction(&SIGHUP, $action);
-$SIG{'INT'} = 'SigINT';
-kill 'HUP', $$;
-sleep 1;
-print "ok 11\n";
+    $sigset = new POSIX::SigSet 1, 3;
+    delset $sigset 1;
+    if (!ismember $sigset 1) { print "ok 6\n" }
+    if ( ismember $sigset 3) { print "ok 7\n" }
+    
+    if ($Is_MacOS) {
+	for (8..11) {
+	    print "ok $_ # skipped, no kill() support on Mac OS\n";
+	}
+    }
+    else {
+	$mask = new POSIX::SigSet &SIGINT;
+	$action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
+	sigaction(&SIGHUP, $action);
+	$SIG{'INT'} = 'SigINT';
+	kill 'HUP', $$;
+	sleep 1;
+	print "ok 11\n";
+	
+	sub SigHUP {
+	    print "ok 8\n";
+	    kill 'INT', $$;
+	    sleep 2;
+	    print "ok 9\n";
+	}
 
-sub SigHUP {
-    print "ok 8\n";
-    kill 'INT', $$;
-    sleep 2;
-    print "ok 9\n";
-}
-
-sub SigINT {
-    print "ok 10\n";
-}
+        sub SigINT {
+	    print "ok 10\n";
+	}
+    }
 }
 
 if ($Is_MPE) {
     print "ok 12 # skipped, _POSIX_OPEN_MAX is inaccurate on MPE\n"
 } else {
-    print &_POSIX_OPEN_MAX > $fds[1] ? "ok 12\n" : "not ok 12\n"
+    if (&_POSIX_OPEN_MAX) {
+	print &_POSIX_OPEN_MAX > $fds[1] ? "ok 12\n" : "not ok 12\n";
+    } else {
+	print "ok 12 # _POSIX_OPEN_MAX undefined ($fds[1])\n";
+    }
 }
 
-print getcwd() =~ m#[/\\]t$# ? "ok 13\n" : "not ok 13\n";
+my $pat;
+if ($Is_MacOS) {
+    $pat = qr/:t:$/;
+} else {
+    $pat = qr#/t$#;
+}
+print getcwd() =~ $pat ? "ok 13\n" : "not ok 13\n";
 
 # Check string conversion functions.
 
@@ -152,8 +171,9 @@ try_strftime(27, "Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
 }
 
 $| = 0;
-# The following line assumes buffered output, which may be not true with EMX:
-print '@#!*$@(!@#$' unless ($^O eq 'os2' || $^O eq 'uwin' || $^O eq 'os390' ||
+# The following line assumes buffered output, which may be not true:
+print '@#!*$@(!@#$' unless ($Is_MacOS || $^O eq 'os2' ||
+                            $^O eq 'uwin' || $^O eq 'os390' ||
 			    (defined $ENV{PERLIO} &&
 			     $ENV{PERLIO} eq 'unix' &&
 			     $Config::Config{useperlio}));

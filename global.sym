@@ -233,6 +233,9 @@ Perl_my_bzero
 Perl_my_exit
 Perl_my_failure_exit
 Perl_my_fflush_all
+Perl_my_fork
+Perl_atfork_lock
+Perl_atfork_unlock
 Perl_my_lstat
 Perl_my_memcmp
 Perl_my_memset

@@ -296,6 +296,8 @@ elsif ($PLATFORM eq 'os2') {
 		    ctermid
 		    get_sysinfo
 		    Perl_OS2_init
+		    Perl_OS2_init3
+		    Perl_OS2_term
 		    OS2_Perl_data
 		    dlopen
 		    dlsym

@@ -274,6 +274,7 @@ if ($OS2::is_aout) {
         $preconfig{$_} = $v eq 'undef' ? undef : $v;
     }
 }
+$preconfig{d_fork} = undef unless $OS2::can_fork; # Some funny cases can't
 sub TIEHASH { bless {%preconfig} }
 ENDOFSET
 } else {

@@ -496,6 +496,9 @@ PERL_CALLCONV char*	Perl_my_bzero(char* loc, I32 len);
 PERL_CALLCONV void	Perl_my_exit(pTHX_ U32 status) __attribute__((noreturn));
 PERL_CALLCONV void	Perl_my_failure_exit(pTHX) __attribute__((noreturn));
 PERL_CALLCONV I32	Perl_my_fflush_all(pTHX);
+PERL_CALLCONV Pid_t	Perl_my_fork(void);
+PERL_CALLCONV void	Perl_atfork_lock(void);
+PERL_CALLCONV void	Perl_atfork_unlock(void);
 PERL_CALLCONV I32	Perl_my_lstat(pTHX);
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 PERL_CALLCONV I32	Perl_my_memcmp(const char* s1, const char* s2, I32 len);

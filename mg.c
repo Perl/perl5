@@ -2120,11 +2120,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    break;
 	    }
 	    /* can grab env area too? */
-	    if (PL_origenviron && (PL_origenviron[0] == s + 1
-#ifdef OS2
-				|| (PL_origenviron[0] == s + 9 && (s += 8))
-#endif
-	       )) {
+	    if (PL_origenviron && (PL_origenviron[0] == s + 1)) {
 		my_setenv("NoNe  SuCh", Nullch);
 					    /* force copy of environment */
 		for (i = 0; PL_origenviron[i]; i++)

@@ -966,8 +966,8 @@ C function any time a scalar's value is used or changed.  The C<MAGIC>'s
 C<mg_ptr> field points to a C<ufuncs> structure:
 
     struct ufuncs {
-        I32 (*uf_val)(IV, SV*);
-        I32 (*uf_set)(IV, SV*);
+        I32 (*uf_val)(pTHX_ IV, SV*);
+        I32 (*uf_set)(pTHX_ IV, SV*);
         IV uf_index;
     };
 

@@ -9,7 +9,7 @@ use vars (qw($VERSION @ISA @EXPORT @EXPORT_OK $ntest $TestLevel), #public-ish
 	  qw($TESTOUT $ONFAIL %todo %history $planned @FAILDETAIL)#private-ish
          );
 
-$VERSION = '1.17_00';
+$VERSION = '1.18';
 require Exporter;
 @ISA=('Exporter');
 
@@ -63,6 +63,9 @@ Test - provides a simple framework for writing test scripts
   skip($feature_is_missing, ...);    #do platform specific test
 
 =head1 DESCRIPTION
+
+B<STOP!> If you are writing a new test, we I<highly suggest> you use
+the new Test::Simple and Test::More modules instead.
 
 L<Test::Harness|Test::Harness> expects to see particular output when it
 executes tests.  This module aims to make writing proper test scripts just
@@ -435,6 +438,8 @@ Implement noplan().
 L<Test::Simple>, L<Test::More>, L<Test::Harness>, L<Devel::Cover>
 
 L<Test::Unit> is an interesting alternative testing library.
+
+L<Pod::Tests> and L<SelfTest> let you embed tests in code.
 
 
 =head1 AUTHOR

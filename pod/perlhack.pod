@@ -354,7 +354,7 @@ from Andreas König to have better control over the patching process.
 
 =over 4
 
-=item It's easier
+=item It's easier to rsync the source tree
 
 Since you don't have to apply the patches yourself, you are sure all
 files in the source tree are in the right state.
@@ -382,7 +382,7 @@ more ... (see Sarathy's remark).
 
 =over 4
 
-=item It's easier
+=item It's easier to rsync the patches
 
 If you have more than one machine that you want to keep in track with
 bleadperl, it's easier to rsync the patches only once and then apply
@@ -1381,7 +1381,7 @@ similar output to L<B::Debug|B::Debug>.
             }
         }
 
-< finish this later >
+# finish this later #
 
 =head2 Patching
 
@@ -1839,7 +1839,7 @@ need to do too, if you don't want to see the "global leaks":
 Depending on your platform there are various of profiling Perl.
 
 There are two commonly used techniques of profiling executables:
-E<statistical time-sampling> and E<basic-block counting>.
+I<statistical time-sampling> and I<basic-block counting>.
 
 The first method takes periodically samples of the CPU program
 counter, and since the program counter can be correlated with the code
@@ -1853,11 +1853,11 @@ can be alleviated by running the code for longer (in general this is a
 good idea for profiling), the second problem is usually kept in guard
 by the profiling tools themselves.
 
-The second method divides up the generated code into E<basic blocks>.
+The second method divides up the generated code into I<basic blocks>.
 Basic blocks are sections of code that are entered only in the
 beginning and exited only at the end.  For example, a conditional jump
 starts a basic block.  Basic block profiling usually works by
-E<instrumenting> the code by adding E<enter basic block #nnnn>
+I<instrumenting> the code by adding I<enter basic block #nnnn>
 book-keeping code to the generated code.  During the execution of the
 code the basic block counters are then updated appropriately.  The
 caveat is that the added extra code can skew the results: again, the
@@ -1913,7 +1913,7 @@ formats, see your own local documentation of gprof.
 
 =head2 GCC gcov Profiling
 
-Starting from GCC 3.0 E<basic block profiling> is officially available
+Starting from GCC 3.0 I<basic block profiling> is officially available
 for the GNU CC.
 
 You can build a profiled version of perl called F<perl.gcov> by
@@ -1951,7 +1951,7 @@ and its section titled "8. gcov: a Test Coverage Program"
 
 Pixie is a profiling tool available on IRIX and Tru64 (aka Digital
 UNIX aka DEC OSF/1) platforms.  Pixie does its profiling using
-E<basic-block counting>.
+I<basic-block counting>.
 
 You can build a profiled version of perl called F<perl.pixie> by
 invoking the make target "perl.pixie" (what is required is that Perl

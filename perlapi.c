@@ -1678,6 +1678,30 @@ Perl_my_fflush_all(pTHXo)
     return ((CPerlObj*)pPerl)->Perl_my_fflush_all();
 }
 
+#undef  Perl_my_fork
+Pid_t
+Perl_my_fork()
+{
+    dTHXo;
+    return ((CPerlObj*)pPerl)->Perl_my_fork();
+}
+
+#undef  Perl_atfork_lock
+void
+Perl_atfork_lock()
+{
+    dTHXo;
+    ((CPerlObj*)pPerl)->Perl_atfork_lock();
+}
+
+#undef  Perl_atfork_unlock
+void
+Perl_atfork_unlock()
+{
+    dTHXo;
+    ((CPerlObj*)pPerl)->Perl_atfork_unlock();
+}
+
 #undef  Perl_my_lstat
 I32
 Perl_my_lstat(pTHXo)

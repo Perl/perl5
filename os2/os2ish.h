@@ -210,30 +210,55 @@ int pthread_create(pthread_t *tid, const pthread_attr_t *attr,
 #endif /* USE_THREADS */
  
 void Perl_OS2_init(char **);
+void Perl_OS2_init3(char **envp, void **excH, int flags);
+void Perl_OS2_term(void **excH, int exitstatus, int flags);
 
-/* XXX This code hideously puts env inside: */
+/* The code without INIT3 hideously puts env inside: */
 
+/* These ones should be in the same block as PERL_SYS_TERM() */
 #ifdef PERL_CORE
-#  define PERL_SYS_INIT3(argcp, argvp, envp) STMT_START {	\
+
+#  define PERL_SYS_INIT3(argcp, argvp, envp)	\
+  { void *xreg[2];				\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
-    Perl_OS2_init(*envp);	} STMT_END
-#  define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
+    Perl_OS2_init3(*envp, xreg, 0)
+
+#  define PERL_SYS_INIT(argcp, argvp)  {	\
+  { void *xreg[2];				\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
-    Perl_OS2_init(NULL);	} STMT_END
+    Perl_OS2_init3(NULL, xreg, 0)
+
 #else  /* Compiling embedded Perl or Perl extension */
-#  define PERL_SYS_INIT3(argcp, argvp, envp) STMT_START {	\
-    Perl_OS2_init(*envp);	} STMT_END
-#  define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
-    Perl_OS2_init(NULL);	} STMT_END
+
+#  define PERL_SYS_INIT3(argcp, argvp, envp)	\
+  { void *xreg[2];				\
+    Perl_OS2_init3(*envp, xreg, 0)
+#  define PERL_SYS_INIT(argcp, argvp)	{	\
+  { void *xreg[2];				\
+    Perl_OS2_init3(NULL, xreg, 0)
 #endif
+
+#define FORCE_EMX_DEINIT_EXIT		1
+#define FORCE_EMX_DEINIT_CRT_TERM	2
+#define FORCE_EMX_DEINIT_RUN_ATEXIT	4
+
+#define PERL_SYS_TERM2(xreg,flags)					\
+  Perl_OS2_term(xreg, 0, flags);					\
+  MALLOC_TERM
+
+#define PERL_SYS_TERM1(xreg)						\
+     Perl_OS2_term(xreg, 0, FORCE_EMX_DEINIT_RUN_ATEXIT)
+
+/* This one should come in pair with PERL_SYS_INIT() and in the same block */
+#define PERL_SYS_TERM()							\
+     PERL_SYS_TERM1(xreg);						\
+  }
 
 #ifndef __EMX__
 #  define PERL_CALLCONV _System
 #endif
-
-#define PERL_SYS_TERM()		MALLOC_TERM
 
 /* #define PERL_SYS_TERM() STMT_START {	\
     if (Perl_HAB_set) WinTerminate(Perl_hab);	} STMT_END */

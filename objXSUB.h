@@ -909,6 +909,18 @@
 #define Perl_my_fflush_all	pPerl->Perl_my_fflush_all
 #undef  my_fflush_all
 #define my_fflush_all		Perl_my_fflush_all
+#undef  Perl_my_fork
+#define Perl_my_fork		pPerl->Perl_my_fork
+#undef  my_fork
+#define my_fork			Perl_my_fork
+#undef  Perl_atfork_lock
+#define Perl_atfork_lock	pPerl->Perl_atfork_lock
+#undef  atfork_lock
+#define atfork_lock		Perl_atfork_lock
+#undef  Perl_atfork_unlock
+#define Perl_atfork_unlock	pPerl->Perl_atfork_unlock
+#undef  atfork_unlock
+#define atfork_unlock		Perl_atfork_unlock
 #undef  Perl_my_lstat
 #define Perl_my_lstat		pPerl->Perl_my_lstat
 #undef  my_lstat

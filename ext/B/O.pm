@@ -39,6 +39,7 @@ sub import {
 		die $compilesub;
 	    }
 
+           local ($\,$",$,) = (undef,' ','');
 	    &$compilesub();
 
 	    close STDERR if $veryquiet;

@@ -1,8 +1,9 @@
 =comment
 
-Synchronize filename cases.
-This script takes two arguments - first and second extensions to synchronize
-filename cases with.
+Synchronize filename cases for extensions.
+
+This script takes two arguments - first and second extensions to
+synchronize filename cases with.
 
 There may be specified following options:
   --verbose    <== say everything what is going on
@@ -12,7 +13,7 @@ There may be specified following options:
 Every such option can be specified with an optional "no" prefix to negate it.
 
 Typically, it is invoked as:
-  perl sync-fnamescase.pl c obj --verbose
+  perl sync_ext.pl c obj --verbose
 
 =cut
 

@@ -4481,6 +4481,10 @@ characters at each point it matches that way.  For example:
 
 produces the output 'h:i:t:h:e:r:e'.
 
+Using the empty pattern C<//> specifically matches the null string, and is
+not be confused with the use of C<//> to mean "the last successful pattern
+match".
+
 Empty leading (or trailing) fields are produced when there positive width
 matches at the beginning (or end) of the string; a zero-width match at the
 beginning (or end) of the string does not produce an empty field.  For
@@ -4540,6 +4544,11 @@ Example:
 	#...
     }
 
+As with regular pattern matching, any capturing parentheses that are not
+matched in a C<split()> will be set to C<undef> when returned:
+
+    @fields = split /(A)|B/, "1A2B3";
+    # @fields is (1, 'A', 2, undef, 3)
 
 =item sprintf FORMAT, LIST
 

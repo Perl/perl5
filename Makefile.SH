@@ -45,9 +45,10 @@ true)
 		;;
 	rhapsody*|darwin*)
 		shrpldflags="${ldflags} -dynamiclib \
-			     -compatibility_version 1 \
+                            -compatibility_version \
+				${api_revision}.${api_version}.${api_subversion} \
 			     -current_version \
-				${api_version}.${api_subversion} \
+				${revision}.${patchlevel}.${subversion} \
 			     -install_name \$(shrpdir)/\$@"
 		;;
 	cygwin*)
@@ -217,6 +218,12 @@ SHELL = $sh
 # how to tr(anslate) newlines
 TRNL = '$trnl'
 
+OPTIMIZE = $optimize
+
+EXTRAS = $extras
+
+INSTALLPREFIXEXP = $prefix
+
 !GROK!THIS!
 # not used by Makefile but by installperl;
 # mentioned here so that metaconfig picks these up
@@ -227,9 +234,9 @@ TRNL = '$trnl'
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'
 
-CCCMD    = `sh $(shellflags) cflags $(LIBPERL) $@`
+CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $(LIBPERL) $@`
 
-CCCMDSRC = `sh $(shellflags) cflags $(LIBPERL) $<`
+CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $(LIBPERL) $<`
 
 private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 
@@ -298,7 +305,7 @@ lintflags = -hbvxac
 
 .PHONY: all compile translators utilities
 
-all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext)
+all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. 'make test' to run test suite."
 
@@ -657,7 +664,23 @@ extra.pods: miniperl
 	    cd pod ; $(LNS) ../$$x "perl"$$nx".pod" ; cd .. ; \
 	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
 	done
+	-@rm -f pod/perlvms.pod
 	-@test -f vms/perlvms.pod && cd pod && $(LNS) ../vms/perlvms.pod perlvms.pod && cd .. && echo "pod/perlvms.pod" >> extra.pods
+
+extras.prep: perl
+	@echo "CPAN needs to be configured..."
+	@echo
+	-@test -f extras.lst || touch extras.lst
+
+extras.make: extras.prep
+	$(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e 'make(@ARGV)' `cat extras.lst`
+
+extras.test: extras.prep
+	$(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e 'test(@ARGV)' `cat extras.lst`
+
+extras.install: extras.prep
+	-@test -f extras.lst || touch extras.lst
+	$(LDLIBPTH) PATH=`pwd`:${PATH} PERL5LIB=`pwd`/lib ./perl -Ilib -MCPAN -e 'install(@ARGV)' `cat extras.lst`
 
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man installman install.html installhtml
@@ -686,6 +709,7 @@ install.perl:	all installperl
 	else :; \
 	fi
 	$(LDLIBPTH) ./perl installperl $(INSTALLFLAGS) $(STRIPFLAGS)
+	$(MAKE) extras.install
 
 install.man:	all installman
 	$(LDLIBPTH) ./perl installman $(INSTALLFLAGS)
@@ -851,7 +875,7 @@ realclean:	_realcleaner _mopup
 
 _clobber:
 	-@rm -f Cross/run-* Cross/to-* Cross/from-*
-	rm -f config.sh cppstdin Policy.sh
+	rm -f config.sh cppstdin Policy.sh extras.lst
 
 clobber:	_realcleaner _mopup _clobber
 
@@ -946,7 +970,7 @@ depend: makedepend
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
-.PHONY: test check test_prep _test_prep \
+.PHONY: test check test_prep test_prep_nodll test_prep_pre _test_prep \
 	test_tty test-tty _test_tty test_notty test-notty _test_notty \
 	utest ucheck test.utf8 check.utf8 \
 	test.third check.third utest.third ucheck.third test_notty.third \
@@ -956,25 +980,31 @@ makedepend: makedepend.SH config.sh
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
 
-_test_prep: $(PERL)$(EXE_EXT)
+TESTFILE=TEST
+
+_test_prep:
 	cd t && (rm -f $(PERL)$(EXE_EXT); $(LNS) ../$(PERL)$(EXE_EXT) $(PERL)$(EXE_EXT))
 
-test_prep: miniperl ./perl$(EXE_EXT) preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
+# Architecture-neutral stuff:
+
+test_prep_pre: preplibrary utilities $(nonxs_ext)
+
+test_prep: test_prep_pre miniperl ./perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
 	PERL=./perl $(MAKE) _test_prep
 
 _test_tty:
-	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) TEST $(TEST_ARGS) </dev/tty
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) $(TESTFILE) $(TEST_ARGS) </dev/tty
 
 _test_notty:
-	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) TEST $(TEST_ARGS)
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) $(TESTFILE) $(TEST_ARGS)
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
 _test:
 	if (true </dev/tty) >/dev/null 2>&1; then \
-	  $(MAKE) TEST_ARGS=$(TEST_ARGS) _test_tty   ; \
+	  $(MAKE) TEST_ARGS=$(TEST_ARGS) TESTFILE=$(TESTFILE) _test_tty   ; \
 	else \
-	  $(MAKE) TEST_ARGS=$(TEST_ARGS) _test_notty ; \
+	  $(MAKE) TEST_ARGS=$(TEST_ARGS) TESTFILE=$(TESTFILE) _test_notty ; \
 	fi
 	@echo "Ran tests" > t/rantests
 
@@ -998,7 +1028,7 @@ test-notty:	test_notty
 
 # Targets for Third Degree testing.
 
-test_prep.third: test_prep perl.third
+test_prep.third: test_prep perl.third perl.third$(EXE_EXT)
 	PERL=./perl.third $(MAKE) _test_prep
 
 test.third check.third:	test_prep.third perl.third
@@ -1025,6 +1055,11 @@ minitest: miniperl lib/re.pm
 	@echo "to build lib/Config.pm."
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& $(LDLIBPTH) ./perl TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t </dev/tty
+
+# Test via harness
+
+test_harness: test_prep
+	PERL=./perl $(MAKE) TESTFILE=harness _test
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.

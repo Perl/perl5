@@ -358,6 +358,7 @@ typedef struct re_scream_pos_data_s
  *   p - Pad for (?{EVAL} item
  *   s - swash for unicode-style character class
  * 20010712 mjd@plover.com
+ * (Remember to update re_dup() and pregfree() if you add any items.)
  */
 struct reg_data {
     U32 count;
