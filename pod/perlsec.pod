@@ -30,14 +30,14 @@ program more secure than the corresponding C program.
 
 You may not use data derived from outside your program to affect something
 else outside your program--at least, not by accident.  All command-line
-arguments, environment variables, and file input are marked as "tainted".
-Tainted data may not be used directly or indirectly in any command that
-invokes a sub-shell, nor in any command that modifies files, directories,
-or processes.  Any variable set within an expression that has previously
-referenced a tainted value itself becomes tainted, even if it is logically
-impossible for the tainted value to influence the variable.  Because
-taintedness is associated with each scalar value, some elements of an
-array can be tainted and others not.
+arguments, environment variables, locale information (see L<perllocale>),
+and file input are marked as "tainted".  Tainted data may not be used
+directly or indirectly in any command that invokes a sub-shell, nor in any
+command that modifies files, directories, or processes.  Any variable set
+within an expression that has previously referenced a tainted value itself
+becomes tainted, even if it is logically impossible for the tainted value
+to influence the variable.  Because taintedness is associated with each
+scalar value, some elements of an array can be tainted and others not.
 
 For example:
 
@@ -107,10 +107,10 @@ mechanism is by referencing sub-patterns from a regular expression match.
 Perl presumes that if you reference a substring using $1, $2, etc., that
 you knew what you were doing when you wrote the pattern.  That means using
 a bit of thought--don't just blindly untaint anything, or you defeat the
-entire mechanism.  It's better to verify that the variable has only
-good characters (for certain values of "good") rather than checking
-whether it has any bad characters.  That's because it's far too easy to
-miss bad characters that you never thought of.  
+entire mechanism.  It's better to verify that the variable has only good
+characters (for certain values of "good") rather than checking whether it
+has any bad characters.  That's because it's far too easy to miss bad
+characters that you never thought of.
 
 Here's a test to make sure that the data contains nothing but "word"
 characters (alphabetics, numerics, and underscores), a hyphen, an at sign,
@@ -130,6 +130,14 @@ is that when untainting, you must be exceedingly careful with your patterns.
 Laundering data using regular expression is the I<ONLY> mechanism for
 untainting dirty data, unless you use the strategy detailed below to fork
 a child of lesser privilege.
+
+The example does not untaint $data if C<use locale> is in effect,
+because the characters matched by C<\w> are determined by the locale.
+Perl considers that locale definitions are untrustworthy because they
+contain data from outside the program.  If you are writing a
+locale-aware program, and want to launder data with a regular expression
+containing C<\w>, put C<no locale> ahead of the expression in the same
+block.  See L<perllocale/SECURITY> for further discussion and examples.
 
 =head2 Cleaning Up Your Path
 

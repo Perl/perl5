@@ -1544,7 +1544,7 @@ C<continue> block, if any, is not executed:
 
 Returns an lowercased version of EXPR.  This is the internal function
 implementing the \L escape in double-quoted strings.  
-Should respect any POSIX setlocale() settings.
+Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
 
 If EXPR is omitted, uses $_.
 
@@ -1554,7 +1554,7 @@ If EXPR is omitted, uses $_.
 
 Returns the value of EXPR with the first character lowercased.  This is
 the internal function implementing the \l escape in double-quoted strings.
-Should respect any POSIX setlocale() settings.
+Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
 
 If EXPR is omitted, uses $_.
 
@@ -2106,8 +2106,10 @@ you will have to use a block returning its value instead:
 
 =item printf FORMAT, LIST
 
-Equivalent to a "print FILEHANDLE sprintf(FORMAT, LIST)".  The first argument
-of the list will be interpreted as the printf format.
+Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>.  The first argument
+of the list will be interpreted as the printf format.  If C<use locale> is
+in effect, the character used for the decimal point in formatted real numbers
+is affected by the LC_NUMERIC locale.  See L<perllocale>.
 
 =item prototype FUNCTION
 
@@ -2141,8 +2143,11 @@ Generalized quotes.  See L<perlop>.
 
 =item quotemeta 
 
-Returns the value of EXPR with with all regular expression
-metacharacters backslashed.  This is the internal function implementing
+Returns the value of EXPR with with all non-alphanumeric
+characters backslashed.  (That is, all characters not matching
+C</[A-Za-z_0-9]/> will be preceded by a backslash in the
+returned string, regardless of any locale settings.)
+This is the internal function implementing
 the \Q escape in double-quoted strings.
 
 If EXPR is omitted, uses $_.
@@ -2674,6 +2679,9 @@ the subroutine not via @_ but as the package global variables $a and
 $b (see example below).  They are passed by reference, so don't
 modify $a and $b.  And don't try to declare them as lexicals either.
 
+When C<use locale> is in effect, C<sort LIST> sorts LIST according to the
+current collation locale.  See L<perllocale>.
+
 Examples:
 
     # sort lexically
@@ -2888,7 +2896,10 @@ Returns a string formatted by the usual printf conventions of the C
 language.  See L<sprintf(3)> or L<printf(3)> on your system for details.
 (The * character for an indirectly specified length is not
 supported, but you can get the same effect by interpolating a variable
-into the pattern.)  Some C libraries' implementations of sprintf() can
+into the pattern.)  If C<use locale> is
+in effect, the character used for the decimal point in formatted real numbers
+is affected by the LC_NUMERIC locale.  See L<perllocale>.
+Some C libraries' implementations of sprintf() can
 dump core when fed ludicrous arguments.
 
 =item sqrt EXPR
@@ -3243,7 +3254,7 @@ on your system.
 
 Returns an uppercased version of EXPR.  This is the internal function
 implementing the \U escape in double-quoted strings.
-Should respect any POSIX setlocale() settings.
+Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
 
 If EXPR is omitted, uses $_.
 
@@ -3253,7 +3264,7 @@ If EXPR is omitted, uses $_.
 
 Returns the value of EXPR with the first character uppercased.  This is
 the internal function implementing the \u escape in double-quoted strings.
-Should respect any POSIX setlocale() settings.
+Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
 
 If EXPR is omitted, uses $_.
 

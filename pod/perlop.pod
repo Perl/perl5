@@ -290,6 +290,9 @@ to the right argument.
 Binary "cmp" returns -1, 0, or 1 depending on whether the left argument is stringwise
 less than, equal to, or greater than the right argument.
 
+"lt", "le", "ge", "gt" and "cmp" use the collation (sort) order specified
+by the current locale if C<use locale> is in effect.  See L<perllocale>.
+
 =head2 Bitwise And
 
 Binary "&" returns its operators ANDed together bit by bit.
@@ -580,6 +583,9 @@ are interpolated, as are the following sequences:
     \E		end case modification
     \Q		quote regexp metacharacters till \E
 
+If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
+and <\U> is taken from the current locale.  See L<perllocale>.
+
 Patterns are subject to an additional level of interpretation as a
 regular expression.  This is done as a second pass, after variables are
 interpolated, so that regular expressions may be incorporated into the
@@ -619,6 +625,8 @@ C<!~> operator, the $_ string is searched.  (The string specified with
 C<=~> need not be an lvalue--it may be the result of an expression
 evaluation, but remember the C<=~> binds rather tightly.)  See also
 L<perlre>.
+See L<perllocale> for discussion of additional considerations which apply
+when C<use locale> is in effect.
 
 Options are:
 
@@ -769,6 +777,8 @@ at run-time.  If you want the pattern compiled only once the first time
 the variable is interpolated, use the C</o> option.  If the pattern
 evaluates to a null string, the last successfully executed regular
 expression is used instead.  See L<perlre> for further explanation on these.
+See L<perllocale> for discussion of additional considerations which apply
+when C<use locale> is in effect.
 
 Options are:
 

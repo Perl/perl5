@@ -72,7 +72,14 @@ separated by commas.  The expressions are all evaluated in a list context
 before the line is processed, so a single list expression could produce
 multiple list elements.  The expressions may be spread out to more than
 one line if enclosed in braces.  If so, the opening brace must be the first
-token on the first line.
+token on the first line.  If an expression evaluates to a number with a
+decimal part, and if the corresponding picture specifies that the decimal
+part should appear in the output (that is, any picture except multiple "#"
+characters B<without> an embedded "."), the character used for the decimal
+point is B<always> determined by the current LC_NUMERIC locale.  This
+means that, if, for example, the run-time environment happens to specify a
+German locale, "," will be used instead of the default ".".  See
+L<perllocale> and L<"WARNINGS"> for more information.
 
 Picture fields that begin with ^ rather than @ are treated specially.
 With a # field, the field is blanked out if the value is undefined.  For
@@ -306,10 +313,20 @@ is to printf(), do this:
  END
     print $string;
 
-=head1 WARNING
+=head1 WARNINGS
 
 Lexical variables (declared with "my") are not visible within a
 format unless the format is declared within the scope of the lexical
 variable.  (They weren't visible at all before version 5.001.)  Furthermore,
 lexical aliases will not be compiled correctly: see
 L<perlfunc/my> for other issues.
+
+Formats are the only part of Perl which unconditionally use information
+from a program's locale; if a program's environment specifies an
+LC_NUMERIC locale, it is always used to specify the decimal point
+character in formatted output.  Perl ignores all other aspects of locale
+handling unless the C<use locale> pragma is in effect.  Formatted output
+cannot be controlled by C<use locale> because the pragma is tied to the
+block structure of the program, and, for historical reasons, formats
+exist outside that block structure.  See L<perllocale> for further
+discussion of locale handling.
