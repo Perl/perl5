@@ -62,11 +62,25 @@ of sections:
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)
 
-Additional documentation for Perl modules is available in the
-F</usr/local/man/> directory.  Some of this is distributed standard with
-Perl, but you'll also find third-party modules there.  You should be able
-to view this with your man(1) program by including the proper directories
-in the appropriate start-up files.  To find out where these are, type:
+By default, all of the above manpages are installed in the 
+F</usr/local/man/> directory.  
+
+Extensive additional documentation for Perl modules is available, and  
+it's B<important> to note that the default configuration for perl will 
+place this additional documentation in the F</usr/local/lib/perl5/man> 
+directory, or in the directory named B<"man">, inside the default perl
+library directory, also known as C<@INC>.
+
+Some of this additional documentation is distributed standard with
+Perl, but you'll also find documentation for third-party modules there.  
+You should be able to view this with your man(1) program by including 
+the proper directories in the appropriate start-up files, or simply in
+the UNIX environment variable, $MANPATH.  To find out where the 
+configuration has installed these additional sections, type:
+
+    perl -V:man3dir
+
+for the location of the default manpages, type:
 
     perl -V:man.dir
 
