@@ -408,6 +408,9 @@ if ($opt_f) {
    my $perlfunc = shift @found;
    open(PFUNC, $perlfunc) or die "Can't open $perlfunc: $!";
 
+   # Functions like -r, -e, etc. are listed under `-X'.
+   my $search_string = ($opt_f =~ /^-[rwxoRWXOeszfdlpSbctugkTBMAC]$/) ? 'I<-X' : $opt_f ;
+
    # Skip introduction
    while (<PFUNC>) {
        last if /^=head2 Alphabetical Listing of Perl Functions/;
@@ -417,7 +420,7 @@ if ($opt_f) {
    my $found = 0;
    my @pod;
    while (<PFUNC>) {
-       if (/^=item\s+\Q$opt_f\E\b/o)  {
+       if (/^=item\s+\Q$search_string\E\b/o)  {
 	   $found = 1;
        } elsif (/^=item/) {
 	   last if $found > 1;
