@@ -1915,6 +1915,44 @@ refers to the last.
 
 =back
 
+=head2 Creating and calling an anonymous subroutine in C
+
+As we've already shown, L<perl_call_sv> can be used to invoke an
+anonymous subroutine.  However, our example showed how Perl script
+invoking an XSUB to preform this operation.  Let's see how it can be
+done inside our C code:
+
+   SV *perl_eval(char *string, int croak_on_error)
+   {
+       dSP;
+       SV *sv = newSVpv(string,0);
+
+       PUSHMARK(sp);
+       perl_eval_sv(sv, G_SCALAR);
+       SvREFCNT_dec(sv);
+
+       SPAGAIN;
+       sv = POPs;
+       PUTBACK;
+
+       if (croak_on_error && SvTRUE(GvSV(errgv)))
+	     croak(SvPV(GvSV(errgv),na));
+
+       return sv;
+   }
+
+ ...
+
+ SV *cvrv = perl_eval("sub { print 'You will not find me cluttering any namespace!' }", TRUE);
+
+ ...
+
+ perl_call_sv(cvrv, G_VOID|G_NOARGS);
+
+L<perl_eval_sv> is used to compile the anonymous subroutine, which can
+then be POPed off the stack.  Once this code reference is in hand, it
+can be mixed in with all the previous examples we've shown.
+
 =head1 SEE ALSO
 
 L<perlxs>, L<perlguts>, L<perlembed>

@@ -326,6 +326,36 @@ I<SvPV()> to create a string:
    a = 9.859600
    a = Just Another Perl Hacker
 
+In the example above, we've created a global variable to temporarily
+store the computed value of our eval'd expression.  It is also
+possible and in most cases a better strategy to fetch the return value
+from L<perl_eval_sv> instead.  Example:
+
+   SV *perl_eval(char *string, int croak_on_error)
+   {
+       dSP;
+       SV *sv = newSVpv(string,0);
+
+       PUSHMARK(sp);
+       perl_eval_sv(sv, G_SCALAR);
+       SvREFCNT_dec(sv);
+
+       SPAGAIN;
+       sv = POPs;
+       PUTBACK;
+
+       if (croak_on_error && SvTRUE(GvSV(errgv)))
+	     croak(SvPV(GvSV(errgv),na));
+
+       return sv;
+   }
+   ...
+   SV *val = perl_eval("reverse 'rekcaH lreP rehtonA tsuJ'", TRUE);
+   printf("%s\n", SvPV(val,na));
+   ...
+
+This way, we avoid namespace pollution by not creating global
+variables and we've simplified our code as well.
 
 =head2 Performing Perl pattern matches and substitutions from your C program
 
