@@ -1706,9 +1706,14 @@ PP(pp_entersub)
 
 	    if (sv == &sv_yes)		/* unfound import, ignore */
 		RETURN;
-	    if (!SvOK(sv))
+	    if (SvGMAGICAL(sv)) {
+		mg_get(sv);
+		sym = SvPOKp(sv) ? SvPVX(sv) : Nullch;
+	    }
+	    else
+		sym = SvPV(sv, na);
+	    if (!sym)
 		DIE(no_usym, "a subroutine");
-	    sym = SvPV(sv,na);
 	    if (op->op_private & HINT_STRICT_REFS)
 		DIE(no_symref, sym, "a subroutine");
 	    cv = perl_get_cv(sym, TRUE);
