@@ -344,8 +344,8 @@ EOT_EOT
 # d                    <0> unstack s ->e
 EONT_EONT
 
-checkOptree ( name	=> '-exec -e foreach (1..10) {print "foo $_"}',
-	      prog	=> 'foreach (1..10) {print "foo $_"}',
+checkOptree ( name	=> '-exec -e foreach (1..10) {print qq{foo $_}}',
+	      prog	=> 'foreach (1..10) {print qq{foo $_}}',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <0> enter 
@@ -435,8 +435,8 @@ EOT_EOT
 # h  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
-checkOptree ( name	=> '-e use constant j => "junk"; print j',
-	      prog	=> 'use constant j => "junk"; print j',
+checkOptree ( name	=> '-e use constant j => qq{junk}; print j',
+	      prog	=> 'use constant j => qq{junk}; print j',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <0> enter 
