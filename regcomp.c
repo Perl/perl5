@@ -1306,8 +1306,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			} else {
 			    /* start offset must point into the last copy */
 			    data->last_start_min += minnext * (mincount - 1);
-			    data->last_start_max += is_inf ? 0 : (maxcount - 1)
-				* (minnext + data->pos_delta);
+			    data->last_start_max += is_inf ? I32_MAX
+				: (maxcount - 1) * (minnext + data->pos_delta);
 			}
 		    }
 		    /* It is counted once already... */
@@ -2218,7 +2218,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    vFAIL("Sequence (?{...}) not terminated or not {}-balanced");
 		}
 		if (!SIZE_ONLY) {
-		    AV *av;
+		    PAD *pad;
 		
 		    if (RExC_parse - 1 - s)
 			sv = newSVpvn(s, RExC_parse - 1 - s);
@@ -2227,7 +2227,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 
 		    ENTER;
 		    Perl_save_re_context(aTHX);
-		    rop = sv_compile_2op(sv, &sop, "re", &av);
+		    rop = sv_compile_2op(sv, &sop, "re", &pad);
 		    sop->op_private |= OPpREFCOUNTED;
 		    /* re_dup will OpREFCNT_inc */
 		    OpREFCNT_set(sop, 1);
@@ -2236,7 +2236,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    n = add_data(pRExC_state, 3, "nop");
 		    RExC_rx->data->data[n] = (void*)rop;
 		    RExC_rx->data->data[n+1] = (void*)sop;
-		    RExC_rx->data->data[n+2] = (void*)av;
+		    RExC_rx->data->data[n+2] = (void*)pad;
 		    SvREFCNT_dec(sv);
 		}
 		else {						/* First pass */
@@ -3304,25 +3304,27 @@ tryagain:
     /* If the encoding pragma is in effect recode the text of
      * any EXACT-kind nodes. */
     if (PL_encoding && PL_regkind[(U8)OP(ret)] == EXACT) {
-	 STRLEN oldlen = STR_LEN(ret);
-	 SV *sv        = sv_2mortal(newSVpvn(STRING(ret), oldlen));
+	STRLEN oldlen = STR_LEN(ret);
+	SV *sv        = sv_2mortal(newSVpvn(STRING(ret), oldlen));
 
-	 if (RExC_utf8)
-	      SvUTF8_on(sv);
-	 if (sv_utf8_downgrade(sv, TRUE)) {
-	      char *s       = sv_recode_to_utf8(sv, PL_encoding);
-	      STRLEN newlen = SvCUR(sv);
-	 
-	      if (!SIZE_ONLY) {
-		   DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
-					 (int)oldlen, STRING(ret),
-					 (int)newlen, s));
-		   Copy(s, STRING(ret), newlen, char);
-		   STR_LEN(ret) += newlen - oldlen;
-		   RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
-	      } else
-		   RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
-	 }
+	if (RExC_utf8)
+	    SvUTF8_on(sv);
+	if (sv_utf8_downgrade(sv, TRUE)) {
+	    char *s       = sv_recode_to_utf8(sv, PL_encoding);
+	    STRLEN newlen = SvCUR(sv);
+
+	    if (SvUTF8(sv))
+		RExC_utf8 = 1;
+	    if (!SIZE_ONLY) {
+		DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
+				      (int)oldlen, STRING(ret),
+				      (int)newlen, s));
+		Copy(s, STRING(ret), newlen, char);
+		STR_LEN(ret) += newlen - oldlen;
+		RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
+	    } else
+		RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
+	}
     }
 
     return(ret);
@@ -4918,9 +4920,8 @@ Perl_pregfree(pTHX_ struct regexp *r)
     }
     if (r->data) {
 	int n = r->data->count;
-	AV* new_comppad = NULL;
-	AV* old_comppad;
-	SV** old_curpad;
+	PAD* new_comppad = NULL;
+	PAD* old_comppad;
 
 	while (--n >= 0) {
           /* If you add a ->what type here, update the comment in regcomp.h */
@@ -4937,22 +4938,16 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	    case 'o':
 		if (new_comppad == NULL)
 		    Perl_croak(aTHX_ "panic: pregfree comppad");
-		old_comppad = PL_comppad;
-		old_curpad = PL_curpad;
-		/* Watch out for global destruction's random ordering. */
-		if (SvTYPE(new_comppad) == SVt_PVAV) {
-		    PL_comppad = new_comppad;
-		    PL_curpad = AvARRAY(new_comppad);
-		}
-		else
-		    PL_curpad = NULL;
-
+		PAD_SAVE_LOCAL(old_comppad,
+		    /* Watch out for global destruction's random ordering. */
+		    (SvTYPE(new_comppad) == SVt_PVAV) ?
+		    		new_comppad : Null(PAD *)
+		);
 		if (!OpREFCNT_dec((OP_4tree*)r->data->data[n])) {
                     op_free((OP_4tree*)r->data->data[n]);
 		}
 
-		PL_comppad = old_comppad;
-		PL_curpad = old_curpad;
+		PAD_RESTORE_LOCAL(old_comppad);
 		SvREFCNT_dec((SV*)new_comppad);
 		new_comppad = NULL;
 		break;

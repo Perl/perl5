@@ -3763,7 +3763,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	    Perl_croak(aTHX_ "Can't undef active subroutine");
 	ENTER;
 
-	PAD_SAVE_SETNULLPAD;
+	PAD_SAVE_SETNULLPAD();
 
 	op_free(CvROOT(cv));
 	CvROOT(cv) = Nullop;

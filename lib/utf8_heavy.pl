@@ -149,8 +149,10 @@ sub SWASHNEW {
 	no warnings;
 	$extras = join '', grep /^[^0-9a-fA-F]/, @tmp;
 	$list = join '',
-	    sort { hex $a <=> hex $b }
-	    grep {/^([0-9a-fA-F]+)/ and not $seen{$1}++} @tmp; # XXX doesn't do ranges right
+	    map  { $_->[1] }
+	    sort { $a->[0] <=> $b->[0] }
+	    map  { /^([0-9a-fA-F]+)/; [ hex($1), $_ ] }
+	    grep { /^([0-9a-fA-F]+)/ and not $seen{$1}++ } @tmp; # XXX doesn't do ranges right
     }
 
     if ($none) {

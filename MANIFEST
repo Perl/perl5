@@ -203,41 +203,42 @@ ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
-ext/Encode/bin/enc2xs	Encode module generator
-ext/Encode/bin/piconv	iconv by perl
+ext/Encode/bin/enc2xs		Encode module generator
+ext/Encode/bin/piconv		iconv by perl
 ext/Encode/bin/ucm2table	Table Generator for testing
-ext/Encode/bin/ucmlint	A UCM Lint utility
-ext/Encode/bin/unidump	Unicode Dump like hexdump(1)
-ext/Encode/Byte/Byte.pm Encode extension
-ext/Encode/Byte/Makefile.PL	  Encode extension
+ext/Encode/bin/ucmlint		A UCM Lint utility
+ext/Encode/bin/ucmsort		A UCM sort utility
+ext/Encode/bin/unidump		Unicode Dump like hexdump(1)
+ext/Encode/Byte/Byte.pm		Encode extension
+ext/Encode/Byte/Makefile.PL	Encode extension
 ext/Encode/Changes		Change Log
 ext/Encode/CN/CN.pm		Encode extension
 ext/Encode/CN/Makefile.PL	Encode extension
-ext/Encode/EBCDIC/EBCDIC.pm	  Encode extension
-ext/Encode/EBCDIC/Makefile.PL	  Encode extension
+ext/Encode/EBCDIC/EBCDIC.pm	Encode extension
+ext/Encode/EBCDIC/Makefile.PL	Encode extension
 ext/Encode/encengine.c		Encode extension
-ext/Encode/Encode.pm	       Mother of all Encode extensions
+ext/Encode/Encode.pm		Mother of all Encode extensions
 ext/Encode/Encode.xs		Encode extension
-ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/Changes.e2x	Skeleton file for enc2xs
 ext/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/encode.h		Encode extension header file
+ext/Encode/Encode/encode.h	Encode extension header file
 ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_PM.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_T.e2x		Skeleton file for enc2xs
-ext/Encode/encoding.pm	Perl Pragmactic Module
+ext/Encode/Encode/README.e2x	Skeleton file for enc2xs
+ext/Encode/Encode/_PM.e2x	Skeleton file for enc2xs
+ext/Encode/Encode/_T.e2x	Skeleton file for enc2xs
+ext/Encode/encoding.pm		Perl Pragmactic Module
 ext/Encode/JP/JP.pm		Encode extension
 ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
-ext/Encode/KR/Makefile.PL		Encode extension
-ext/Encode/lib/Encode/Alias.pm		Encode extension
+ext/Encode/KR/Makefile.PL	Encode extension
+ext/Encode/lib/Encode/Alias.pm	Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
-ext/Encode/lib/Encode/Config.pm		Encode configuration module
-ext/Encode/lib/Encode/Encoder.pm	       OO Encoder
+ext/Encode/lib/Encode/Config.pm	Encode configuration module
+ext/Encode/lib/Encode/Encoder.pm       OO Encoder
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
 ext/Encode/lib/Encode/Guess.pm	Encode Extension
-ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
+ext/Encode/lib/Encode/JP/H2Z.pm	Encode extension
 ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/MIME/Header.pm	Encode extension
@@ -246,37 +247,38 @@ ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
 ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
-ext/Encode/Symbol/Makefile.PL	  Encode extension
-ext/Encode/Symbol/Symbol.pm	  Encode extension
-ext/Encode/t/Aliases.t	test script
-ext/Encode/t/at-cn.t	test script
-ext/Encode/t/at-tw.t	test script
+ext/Encode/Symbol/Makefile.PL	Encode extension
+ext/Encode/Symbol/Symbol.pm	Encode extension
+ext/Encode/t/Aliases.t		test script
+ext/Encode/t/at-cn.t		test script
+ext/Encode/t/at-tw.t		test script
 ext/Encode/t/big5-eten.enc	test data
 ext/Encode/t/big5-eten.utf	test data
 ext/Encode/t/big5-hkscs.enc	test data
 ext/Encode/t/big5-hkscs.utf	test data
-ext/Encode/t/CJKT.t	test script
-ext/Encode/t/Encode.t	test script
-ext/Encode/t/Encoder.t	test script
-ext/Encode/t/encoding.t test script
-ext/Encode/t/fallback.t test script
-ext/Encode/t/gb2312.enc test data
-ext/Encode/t/gb2312.utf test data
-ext/Encode/t/grow.t	test script
-ext/Encode/t/guess.t	test script
+ext/Encode/t/CJKT.t		test script
+ext/Encode/t/Encode.t		test script
+ext/Encode/t/Encoder.t		test script
+ext/Encode/t/encoding.t		test script
+ext/Encode/t/fallback.t		test script
+ext/Encode/t/gb2312.enc		test data
+ext/Encode/t/gb2312.utf		test data
+ext/Encode/t/grow.t		test script
+ext/Encode/t/guess.t		test script
 ext/Encode/t/jisx0201.enc	test data
 ext/Encode/t/jisx0201.utf	test data
 ext/Encode/t/jisx0208.enc	test data
 ext/Encode/t/jisx0208.utf	test data
 ext/Encode/t/jisx0212.enc	test data
 ext/Encode/t/jisx0212.utf	test data
-ext/Encode/t/jperl.t	test script
+ext/Encode/t/jperl.t		test script
 ext/Encode/t/ksc5601.enc	test data
 ext/Encode/t/ksc5601.utf	test data
 ext/Encode/t/mime-header.t	test script
-ext/Encode/t/perlio.t	test script
+ext/Encode/t/perlio.t		test script
+ext/Encode/t/rt.pl		test script
 ext/Encode/t/unibench.pl	benchmark script
-ext/Encode/t/Unicode.t	test script
+ext/Encode/t/Unicode.t		test script
 ext/Encode/TW/Makefile.PL	Encode extension
 ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/ucm/8859-1.ucm	Unicode Character Map
@@ -424,6 +426,7 @@ ext/I18N/Langinfo/Makefile.PL	I18N::Langinfo
 ext/IO/ChangeLog		IO perl module change log
 ext/IO/hints/sco.pl		Hint for IO for named architecture
 ext/IO/IO.pm			Top-level interface to IO::* classes
+ext/IO/lib/IO/t/IO.t	See if IO works
 ext/IO/IO.xs			IO extension external subroutines
 ext/IO/lib/IO/Dir.pm		IO directory reading package
 ext/IO/lib/IO/File.pm		IO file handle package
@@ -708,6 +711,7 @@ ext/Time/HiRes/HiRes.pm		Time::HiRes extension
 ext/Time/HiRes/HiRes.t		Test for Time::HiRes
 ext/Time/HiRes/HiRes.xs		Time::HiRes extension
 ext/Time/HiRes/Makefile.PL	Time::HiRes extension
+ext/Time/HiRes/typemap		Time::HiRes extension
 ext/Unicode/Normalize/Changes	Unicode::Normalize
 ext/Unicode/Normalize/Makefile.PL	Unicode::Normalize
 ext/Unicode/Normalize/mkheader	Unicode::Normalize
@@ -1330,14 +1334,18 @@ lib/Net/NNTP.pm			libnet
 lib/Net/Ping.pm			Hello, anybody home?
 lib/Net/Ping/Changes		Net::Ping
 lib/Net/Ping/README		Net::Ping
-lib/Net/Ping/t/100_load.t		Ping Net::Ping
-lib/Net/Ping/t/110_icmp_inst.t		Ping Net::Ping
-lib/Net/Ping/t/120_udp_inst.t		Ping Net::Ping
-lib/Net/Ping/t/130_tcp_inst.t		Ping Net::Ping
+lib/Net/Ping/t/100_load.t	Ping Net::Ping
+lib/Net/Ping/t/110_icmp_inst.t	Ping Net::Ping
+lib/Net/Ping/t/120_udp_inst.t	Ping Net::Ping
+lib/Net/Ping/t/130_tcp_inst.t	Ping Net::Ping
 lib/Net/Ping/t/140_stream_inst.t	Ping Net::Ping
-lib/Net/Ping/t/200_ping_tcp.t		Ping Net::Ping
-lib/Net/Ping/t/250_ping_hires.t		Ping Net::Ping
+lib/Net/Ping/t/150_syn_inst.t	Ping Net::Ping
+lib/Net/Ping/t/200_ping_tcp.t	Ping Net::Ping
+lib/Net/Ping/t/250_ping_hires.t	Ping Net::Ping
 lib/Net/Ping/t/300_ping_stream.t	Ping Net::Ping
+lib/Net/Ping/t/300_ping_stream.t	Ping Net::Ping
+lib/Net/Ping/t/400_ping_syn.t	Ping Net::Ping
+lib/Net/Ping/t/450_service.t	Ping Net::Ping
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works

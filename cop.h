@@ -112,7 +112,7 @@ struct block_sub {
     long	olddepth;
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
-    PAD		oldcurpad;
+    PAD		*oldcomppad;
 };
 
 #define PUSHSUB(cx)							\
@@ -214,7 +214,7 @@ struct block_loop {
     OP *	last_op;
 #ifdef USE_ITHREADS
     void *	iterdata;
-    PAD		oldcurpad;
+    PAD		*oldcomppad;
 #else
     SV **	itervar;
 #endif

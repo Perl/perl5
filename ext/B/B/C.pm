@@ -1615,6 +1615,15 @@ EOT
     }
 EOT
     }
+    else {
+	print <<EOT;
+    if ((tmpgv = gv_fetchpv("0",TRUE, SVt_PV))) {/* $0 */
+        tmpsv = GvSV(tmpgv);
+        sv_setpv(tmpsv, argv[0]);
+        SvSETMAGIC(tmpsv);
+    }
+EOT
+    }
 
     print <<'EOT';
     if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))) {/* $^X */

@@ -149,8 +149,9 @@ To find out I<all> modules installed on your system, including
 those without documentation or outside the standard release,
 just do this:
 
-    % find `perl -e 'print "@INC"'` -name '*.pm' -print
+    % find `perl -Te 'print "@INC"'` -name '*.pm' -print
 
+(The -T is here to prevent '.' from being listed in @INC.)
 They should all have their own documentation installed and accessible
 via your system man(1) command.  If you do not have a B<find>
 program, you can use the Perl B<find2perl> program instead, which
@@ -158,6 +159,11 @@ generates Perl code as output you can run through perl.  If you
 have a B<man> program but it doesn't find your modules, you'll have
 to fix your manpath.  See L<perl> for details.  If you have no
 system B<man> command, you might try the B<perldoc> program.
+
+Note also that the command C<perldoc perllocal> gives you a (possibly
+incomplete) list of the modules that have been further installed on
+your system. (The perllocal.pod file is updated by the standard MakeMaker
+install process.)
 
 =head2 Extension Modules
 

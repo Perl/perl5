@@ -182,7 +182,7 @@ sub list_eq ($$) {
     my $inf = eval '2**10000';
 
     skip "Couldn't generate infinity - got error '$@'"
-      unless defined $inf and $inf == $inf / 2;
+      unless defined $inf and $inf == $inf / 2 and $inf + 1 == $inf;
 
     eval { $x = pack 'w', $inf };
     like ($@, qr/^Cannot compress integer/);

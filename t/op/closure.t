@@ -13,7 +13,7 @@ BEGIN {
 
 use Config;
 
-print "1..172\n";
+print "1..173\n";
 
 my $test = 1;
 sub test (&) {
@@ -514,3 +514,16 @@ END
 BEGIN { $vanishing_pad = sub { eval $_[0] } }
 $some_var = 123;
 test { $vanishing_pad->( '$some_var' ) == 123 };
+
+# this coredumped on <= 5.8.0 because evaling the closure caused
+# an SvFAKE to be added to the outer anon's pad, which was then grown.
+my $outer;
+sub {
+    my $x;
+    $x = eval 'sub { $outer }';
+    $x->();
+    $a = [ 99 ];
+    $x->();
+}->();
+test {1};
+

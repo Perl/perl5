@@ -457,7 +457,7 @@ PP(pp_die)
     }
     else {
 	tmpsv = TOPs;
-        tmps = (SvROK(tmpsv) && PL_in_eval) ? Nullch : SvPV(tmpsv, len);
+        tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, len);
     }
     if (!tmps || !len) {
   	SV *error = ERRSV;
@@ -3711,7 +3711,7 @@ PP(pp_mkdir)
      * -d, chdir(), chmod(), chown(), chroot(), fcntl()?,
      * (mkdir()), opendir(), rename(), rmdir(), stat(). --jhi */
     if (len > 1 && tmps[len-1] == '/') {
-	while (tmps[len] == '/' && len > 1)
+	while (tmps[len-1] == '/' && len > 1)
 	    len--;
 	tmps = savepvn(tmps, len);
 	copy = TRUE;

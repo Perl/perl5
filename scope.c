@@ -460,8 +460,9 @@ void
 Perl_save_padsv(pTHX_ PADOFFSET off)
 {
     SSCHECK(4);
+    ASSERT_CURPAD_ACTIVE("save_padsv");
     SSPUSHPTR(PL_curpad[off]);
-    SSPUSHPTR(PL_curpad);
+    SSPUSHPTR(PL_comppad);
     SSPUSHLONG((long)off);
     SSPUSHINT(SAVEt_PADSV);
 }
@@ -534,6 +535,7 @@ Perl_save_freepv(pTHX_ char *pv)
 void
 Perl_save_clearsv(pTHX_ SV **svp)
 {
+    ASSERT_CURPAD_ACTIVE("save_clearsv");
     SSCHECK(2);
     SSPUSHLONG((long)(svp-PL_curpad));
     SSPUSHINT(SAVEt_CLEARSV);
@@ -849,8 +851,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_FREEOP:
 	    ptr = SSPOPPTR;
-	    if (PL_comppad)
-		PL_curpad = AvARRAY(PL_comppad);
+	    ASSERT_CURPAD_LEGAL("SAVEt_FREEOP"); /* XXX DAPM tmp */
 	    op_free((OP*)ptr);
 	    break;
 	case SAVEt_FREEPV:
@@ -862,10 +863,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    sv = *(SV**)ptr;
 
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		"Pad [0x%"UVxf"] clearsv: %ld sv=0x%"UVxf"<%"IVdf"> %s\n",
-		PTR2UV(PL_curpad), (long)((SV **)ptr-PL_curpad),
-		PTR2UV(sv),
-		(IV)SvREFCNT(sv),
+	     "Pad 0x%"UVxf"[0x%"UVxf"] clearsv: %ld sv=0x%"UVxf"<%"IVdf"> %s\n",
+		PTR2UV(PL_comppad), PTR2UV(PL_curpad),
+		(long)((SV **)ptr-PL_curpad), PTR2UV(sv), (IV)SvREFCNT(sv),
 		(SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) ? "clear" : "abandon"
 	    ));
 
@@ -990,7 +990,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    *(I32*)&PL_hints = (I32)SSPOPINT;
 	    break;
 	case SAVEt_COMPPAD:
-	    PL_comppad = (AV*)SSPOPPTR;
+	    PL_comppad = (PAD*)SSPOPPTR;
 	    if (PL_comppad)
 		PL_curpad = AvARRAY(PL_comppad);
 	    else
@@ -1001,7 +1001,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		PADOFFSET off = (PADOFFSET)SSPOPLONG;
 		ptr = SSPOPPTR;
 		if (ptr)
-		    ((PAD)ptr)[off] = (SV*)SSPOPPTR;
+		    AvARRAY((PAD*)ptr)[off] = (SV*)SSPOPPTR;
 	    }
 	    break;
 	default:

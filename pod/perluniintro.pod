@@ -398,9 +398,9 @@ written to the stream. For example, the following snippet copies the
 contents of the file "text.jis" (encoded as ISO-2022-JP, aka JIS) to
 the file "text.utf8", encoded as UTF-8:
 
-    open(my $nihongo, '<:encoding(iso2022-jp)', 'text.jis');
-    open(my $unicode, '>:utf8',                 'text.utf8');
-    while (<$nihongo>) { print $unicode }
+    open(my $nihongo, '<:encoding(iso-2022-jp)', 'text.jis');
+    open(my $unicode, '>:utf8',                  'text.utf8');
+    while (<$nihongo>) { print $unicode $_ }
 
 The naming of encodings, both by the C<open()> and by the C<open>
 pragma, is similar to the C<encoding> pragma in that it allows for

@@ -1674,17 +1674,18 @@ S_scan_const(pTHX_ char *start)
     *d = '\0';
     SvCUR_set(sv, d - SvPVX(sv));
     if (SvCUR(sv) >= SvLEN(sv))
-      Perl_croak(aTHX_ "panic: constant overflowed allocated space");
+	Perl_croak(aTHX_ "panic: constant overflowed allocated space");
 
     SvPOK_on(sv);
     if (PL_encoding && !has_utf8) {
-        sv_recode_to_utf8(sv, PL_encoding);
-        has_utf8 = TRUE;
+	sv_recode_to_utf8(sv, PL_encoding);
+	if (SvUTF8(sv))
+	    has_utf8 = TRUE;
     }
     if (has_utf8) {
 	SvUTF8_on(sv);
 	if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
-		PL_sublex_info.sub_op->op_private |=
+	    PL_sublex_info.sub_op->op_private |=
 		    (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
 	}
     }
@@ -4648,10 +4649,14 @@ Perl_yylex(pTHX)
 		char *t;
 		for (d = s; isALNUM_lazy_if(d,UTF); d++) ;
 		t = skipspace(d);
-		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE))
+		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
+		    /* [perl #16184] */
+		    && !(t[0] == '=' && t[1] == '>')
+		) {
 		    Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
 			   "Precedence problem: open %.*s should be open(%.*s)",
-			    d-s,s, d-s,s);
+			    d - s, s, d - s, s);
+		}
 	    }
 	    LOP(OP_OPEN,XTERM);
 
@@ -7028,6 +7033,9 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	sv_catpvn(sv, s, 1);
     if (has_utf8)
 	SvUTF8_on(sv);
+    else if (PL_encoding)
+	sv_recode_to_utf8(sv, PL_encoding);
+
     PL_multi_end = CopLINE(PL_curcop);
     s++;
 

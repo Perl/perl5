@@ -30,7 +30,7 @@ Found in file pad.h
 Access the SV at offset po in the saved current pad in the given
 context block structure (can be used as an lvalue).
 
-	PAD *	CX_CURPAD_SV(struct context, PADOFFSET po)
+	SV *	CX_CURPAD_SV(struct context, PADOFFSET po)
 
 =for hackers
 Found in file pad.h
@@ -113,6 +113,25 @@ Clone a padlist.
 =for hackers
 Found in file pad.h
 
+=item PAD_RESTORE_LOCAL
+
+Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
+
+	void	PAD_RESTORE_LOCAL(PAD *opad)
+
+=for hackers
+Found in file pad.h
+
+=item PAD_SAVE_LOCAL
+
+Save the current pad to the local variable opad, then make the
+current pad equal to npad
+
+	void	PAD_SAVE_LOCAL(PAD *opad, PAD *npad)
+
+=for hackers
+Found in file pad.h
+
 =item PAD_SAVE_SETNULLPAD
 
 Save the current pad then set it to null.
@@ -162,15 +181,6 @@ For internal use only.
 =for hackers
 Found in file pad.h
 
-=item PAD_UPDATE_CURPAD
-
-Set PL_curpad from the value of PL_comppad.
-
-	void	PAD_UPDATE_CURPAD()
-
-=for hackers
-Found in file pad.h
-
 =item SAVECLEARSV	
 
 Clear the pointed to pad value on scope exit. (ie the runtime action of 'my')
@@ -184,19 +194,11 @@ Found in file pad.h
 
 save PL_comppad and PL_curpad
 
+
+
+
+
 	void	SAVECOMPPAD()
-
-=for hackers
-Found in file pad.h
-
-=item SAVEFREEOP	
-
-Free the op on scope exit. At the same time, reset PL_curpad
-
-
-
-
-	void	SAVEFREEOP	(OP *o)
 
 =for hackers
 Found in file pad.h
@@ -205,6 +207,7 @@ Found in file pad.h
 
 Save a pad slot (used to restore after an iteration)
 
+XXX DAPM it would make more sense to make the arg a PADOFFSET
 	void	SAVEPADSV	(PADOFFSET po)
 
 =for hackers
@@ -350,7 +353,7 @@ but that is really the callers pad (a slot of which is allocated by
 every entersub).
 
 The CvPADLIST AV has does not have AvREAL set, so REFCNT of component items
-is managed "manual" (mostly in op.c) rather than normal av.c rules.
+is managed "manual" (mostly in pad.c) rather than normal av.c rules.
 The items in the AV are not SVs as for a normal AV, but other AVs:
 
 0'th Entry of the CvPADLIST is an AV which represents the "names" or rather
@@ -366,7 +369,10 @@ C<PL_comppad_name> is set the the the names AV.
 C<PL_comppad> is set the the frame AV for the frame CvDEPTH == 1.
 C<PL_curpad> is set the body of the frame AV (i.e. AvARRAY(PL_comppad)).
 
-Itterating over the names AV itterates over all possible pad
+During execution, C<PL_comppad> and C<PL_curpad> refer to the live
+frame of the currently executing sub.
+
+Iterating over the names AV iterates over all possible pad
 items. Pad slots that are SVs_PADTMP (targets/GVs/constants) end up having
 &PL_sv_undef "names" (see pad_alloc()).
 

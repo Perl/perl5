@@ -212,8 +212,12 @@ CODE:
     reducecop = CvSTART(cv);
     SAVESPTR(CvROOT(cv)->op_ppaddr);
     CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
+#ifdef PAD_SET_CUR
+    PAD_SET_CUR(CvPADLIST(cv),1);
+#else
     SAVESPTR(PL_curpad);
     PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
+#endif
     SAVETMPS;
     SAVESPTR(PL_op);
     ret = ST(1);
@@ -256,8 +260,12 @@ CODE:
     reducecop = CvSTART(cv);
     SAVESPTR(CvROOT(cv)->op_ppaddr);
     CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
+#ifdef PAD_SET_CUR
+    PAD_SET_CUR(CvPADLIST(cv),1);
+#else
     SAVESPTR(PL_curpad);
     PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
+#endif
     SAVETMPS;
     SAVESPTR(PL_op);
     CATCH_SET(TRUE);
@@ -286,20 +294,16 @@ CODE:
     int index;
     struct op dmy_op;
     struct op *old_op = PL_op;
-    SV *my_pad[2];
-    SV **old_curpad = PL_curpad;
 
     /* We call pp_rand here so that Drand01 get initialized if rand()
        or srand() has not already been called
     */
-    my_pad[1] = sv_newmortal();
     memzero((char*)(&dmy_op), sizeof(struct op));
-    dmy_op.op_targ = 1;
+    /* we let pp_rand() borrow the TARG allocated for this XS sub */
+    dmy_op.op_targ = PL_op->op_targ;
     PL_op = &dmy_op;
-    PL_curpad = (SV **)&my_pad;
     (void)*(PL_ppaddr[OP_RAND])(aTHX);
     PL_op = old_op;
-    PL_curpad = old_curpad;
     for (index = items ; index > 1 ; ) {
 	int swap = (int)(Drand01() * (double)(index--));
 	SV *tmp = ST(swap);

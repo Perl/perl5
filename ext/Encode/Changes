@@ -1,9 +1,66 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.77 2002/10/06 03:27:02 dankogai Exp dankogai $
+# $Id: Changes,v 1.80 2002/10/21 20:39:09 dankogai Exp dankogai $
 #
 
-$Revision: 1.77 $ $Date: 2002/10/06 03:27:02 $
+$Revision: 1.80 $ $Date: 2002/10/21 20:39:09 $
+! Encode.xs t/mime-header.t
+  Even more patches from NI-XS regarding Encode::utf8->decode().
+  And one more test to t/mime-header.t to prove it
+  Message-Id: <E183i0Y-0003mo-00@mserv1c.vianw.co.uk>
+
+1.79 2002/10/21 06:05:37
+! Encode.xs
+  Further patches from NI-XS.  Encode::utf8->decode() now checks the
+  value of utf8 flag of the argument.  As a result, the fix to
+  lib/Encode/MIME/Header.pm is no longer neccessary but since it did
+  no harm (even speedwise) I'll leave it unreverted.
+! ucm/cp949.ucm ucm/cp950.ucm
+  U+20AC EURO SIGN
+  U+00AE REGISTERED SIGN
+  were missing as a result of 1.78. Discovered by Moriyama-san.
+  Moriyama-san has also developed a test script that compares
+  (en|de)coded results to the corresponding Win32 API result and
+  all cp9?? maps are now verified.
+  Message-Id: <20021021025220.3AED.MSYK@mtg.biglobe.ne.jp>
+
+1.78 2002/10/20 15:44:00
+! lib/Encode/MIME/Header.pm
+  fixed so that it works with new Encode::utf8
+! Encode.pm Encode.xs
+  Encode::utf8 is now in Encode.xs by Nick In-XS.  This allows
+  :encoding(UTF-8) to handle partial chars at end of buffers
+  correctly.
+  Message-Id: <20021020134935.2079.3@bactrian.ni-s.u-net.com>
+! lib/Encode/Supported.pod
+  More nitpickings applied.
++ t/rt.pl MANIFEST
+! t/CJKT.t
+  Moriyama-san has discovered a serious bug in t/CJKT.t; its roundtrip
+  tests were completely useless.  To redeem that and get the peace of
+  mind again, I wrote t/rt.pl to test ALL '|0' ENTRIES in all
+  ucm/*.ucm Since this script takes too long to finish (30 seconds on
+  PIII-800MHz, FreeBSD), it is deliberately excluded from 'make test'
+  but you can easily run that by either renaming it or:
+    perl -Mblib t/rt.pl
+  Message-Id: <20021019065420.0C48.MSYK@mtg.biglobe.ne.jp>
+! ucm/cp936.ucm ucm/cp949.ucm ucm/cp950.ucm
+  Other CJKT cp9?? also updated according to the URI below;
+  http://www.microsoft.com/typography/unicode/cscp.htm
++ bin/ucmsort MANIFEST
+  ucmsort is a crude utility that sorts CHARMAP entries in UCM files
+  to proper order.  intended for hardcore develpers only.
+! ucm/cp932.ucm JP/JP.pm AUTHORS
+  CP932 mapping which was based upon the mapping file at unicode.org 
+  was found obsolete by MORIYAMA Masayuki msyk@mtg.biglobe.ne.jp>.  He
+  has also supplied the patch so he was added to AUTHORS.
+! lib/Encode/Supported.pod
+  ISO-8859-11 != TIS 620
+              == TIS 620 + \xA0 (&nbsp;)
+  Message-Id:
+  <DC504E9C3384054C8506D3E6BB012460810D23@bsebe001.americas.nokia.com>
+
+1.77 2002/10/06 03:27:02
 ! t/jperl.t
   * Modified to accomodate up and comming patch by Inaba-san that
     will fix tr/// needing eval qq{}
@@ -717,7 +774,7 @@ $Revision: 1.77 $ $Date: 2002/10/06 03:27:02 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/10/06 03:27:02 $
+1.11  $Date: 2002/10/21 20:39:09 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

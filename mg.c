@@ -1846,32 +1846,37 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	DEBUG_x(dump_all());
 	break;
     case '\005':  /* ^E */
-	 if (*(mg->mg_ptr+1) == '\0') {
+	if (*(mg->mg_ptr+1) == '\0') {
 #ifdef MACOS_TRADITIONAL
-	      gMacPerl_OSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	    gMacPerl_OSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 #else
 #  ifdef VMS
-	      set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	    set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #  else
 #    ifdef WIN32
-	      SetLastError( SvIV(sv) );
+	    SetLastError( SvIV(sv) );
 #    else
 #      ifdef OS2
-	      os2_setsyserrno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	    os2_setsyserrno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #      else
-	      /* will anyone ever use this? */
-	      SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
+	    /* will anyone ever use this? */
+	    SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
 #      endif
 #    endif
 #  endif
 #endif
-	 }
-	 else if (strEQ(mg->mg_ptr+1, "NCODING")) {
-	     if (PL_encoding)
-	         sv_setsv(PL_encoding, sv);
-	     else
-	         PL_encoding = newSVsv(sv);
-	 }
+	}
+	else if (strEQ(mg->mg_ptr+1, "NCODING")) {
+	    if (PL_encoding)
+		SvREFCNT_dec(PL_encoding);
+	    if (SvOK(sv) || SvGMAGICAL(sv)) {
+		PL_encoding = newSVsv(sv);
+	    }
+	    else {
+		PL_encoding = Nullsv;
+	    }
+	}
+	break;
     case '\006':	/* ^F */
 	PL_maxsysfd = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;

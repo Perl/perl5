@@ -1,4 +1,14 @@
 
+1.806 22nd October 2002
+
+   * Fixed problem when trying to build with a multi-threaded perl.
+
+   * Tidied up the recursion detetion code.
+
+   * merged core patch 17844 - missing dTHX declarations.
+
+   * merged core patch 17838 
+
 1.805 1st September 2002
 
    * Added support to allow DB_File to build with Berkeley DB 4.1.X
