@@ -2548,7 +2548,9 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART
+#if !defined(USE_PERLIO) || defined(PERL_OLD_SIGNALS)
     act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
 #endif
 #ifdef SA_NOCLDWAIT
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
@@ -2580,7 +2582,9 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
 #ifdef SA_RESTART
+#if !defined(USE_PERLIO) || defined(PERL_OLD_SIGNALS)
     act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
+#endif
 #endif
 #ifdef SA_NOCLDWAIT
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
