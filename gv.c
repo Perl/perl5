@@ -1,7 +1,7 @@
 /*    gv.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -837,12 +837,15 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 
     /* set up magic where warranted */
     if (len > 1) {
+#ifndef EBCDIC
 	if (*name > 'V' ) {
 	    /* Nothing else to do.
 	       The compiler will probably turn the switch statement into a
 	       branch table. Make sure we avoid even that small overhead for
 	       the common case of lower case variable names.  */
-	} else {
+	} else
+#endif
+	{
 	    const char *name2 = name + 1;
 	    switch (*name) {
 	    case 'A':
@@ -1832,36 +1835,37 @@ bool
 Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 {
     if (len > 1) {
+	const char *name1 = name + 1;
 	switch (*name) {
 	case 'I':
-	    if (len == 3 && strEQ(name, "ISA"))
+	    if (len == 3 && name1[1] == 'S' && name[2] == 'A')
 		goto yes;
 	    break;
 	case 'O':
-	    if (len == 8 && strEQ(name, "OVERLOAD"))
+	    if (len == 8 && strEQ(name1, "VERLOAD"))
 		goto yes;
 	    break;
 	case 'S':
-	    if (len == 3 && strEQ(name, "SIG"))
+	    if (len == 3 && name[1] == 'I' && name[2] == 'G')
 		goto yes;
 	    break;
 	    /* Using ${^...} variables is likely to be sufficiently rare that
 	       it seems sensible to avoid the space hit of also checking the
 	       length.  */
 	case '\017':   /* ${^OPEN} */
-	    if (strEQ(name, "\017PEN"))
+	    if (strEQ(name1, "PEN"))
 		goto yes;
 	    break;
 	case '\024':   /* ${^TAINT} */
-	    if (strEQ(name, "\024AINT"))
+	    if (strEQ(name1, "AINT"))
 		goto yes;
 	    break;
 	case '\025':	/* ${^UNICODE} */
-	    if (strEQ(name, "\025NICODE"))
+	    if (strEQ(name1, "NICODE"))
 		goto yes;
 	    break;
 	case '\027':   /* ${^WARNING_BITS} */
-	    if (strEQ(name, "\027ARNING_BITS"))
+	    if (strEQ(name1, "ARNING_BITS"))
 		goto yes;
 	    break;
 	case '1':
