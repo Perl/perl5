@@ -629,7 +629,6 @@
 #define setenv_getix		Perl_setenv_getix
 #endif
 #define setdefout		Perl_setdefout
-#define sharepvn		Perl_sharepvn
 #define share_hek		Perl_share_hek
 #define sighandler		Perl_sighandler
 #define stack_grow		Perl_stack_grow
@@ -2147,7 +2146,6 @@
 #define setenv_getix(a)		Perl_setenv_getix(aTHX_ a)
 #endif
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
-#define sharepvn(a,b,c)		Perl_sharepvn(aTHX_ a,b,c)
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
 #define sighandler		Perl_sighandler
 #define stack_grow(a,b,c)	Perl_stack_grow(aTHX_ a,b,c)

@@ -1640,11 +1640,15 @@ Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
     sv_magic((SV*)hv, (SV*)gv, how, Nullch, 0);
 }
 
+#if 0 /* use the macro from hv.h instead */
+
 char*	
 Perl_sharepvn(pTHX_ const char *sv, I32 len, U32 hash)
 {
     return HEK_KEY(share_hek(sv, len, hash));
 }
+
+#endif
 
 /* possibly free a shared string if no one has access to it
  * len and hash must both be valid for str.

@@ -1714,7 +1714,6 @@ Ap	|char*	|screaminstr	|SV* bigsv|SV* littlesv|I32 start_shift \
 p	|I32	|setenv_getix	|char* nam
 #endif
 p	|void	|setdefout	|GV* gv
-Ap	|char*	|sharepvn	|const char* sv|I32 len|U32 hash
 p	|HEK*	|share_hek	|const char* sv|I32 len|U32 hash
 np	|Signal_t |sighandler	|int sig
 Ap	|SV**	|stack_grow	|SV** sp|SV**p|int n
