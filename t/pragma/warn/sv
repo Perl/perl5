@@ -32,6 +32,8 @@
 
   Undefined value assigned to typeglob
 
+  Reference is already weak			[Perl_sv_rvweaken] <<TODO
+
   Mandatory Warnings
   ------------------
   Malformed UTF-8 character [sv_pos_b2u]

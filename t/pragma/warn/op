@@ -99,6 +99,10 @@
      /---/ should probably be written as "---"
         join(/---/, @foo);
 
+    %s() called too early to check prototype		[Perl_peep]
+        fred() ; sub fred ($$) {}
+
+
     Mandatory Warnings 
     ------------------
     Prototype mismatch:		[cv_ckproto]
@@ -794,3 +798,13 @@ use warnings 'syntax' ;
 join /---/, 'x', 'y', 'z';
 EXPECT
 /---/ should probably be written as "---" at - line 3.
+########
+# op.c [Perl_peep]
+use warnings 'unsafe' ;
+fred() ; 
+sub fred ($$) {}
+no warnings 'unsafe' ;
+joe() ; 
+sub joe ($$) {}
+EXPECT
+main::fred() called too early to check prototype at - line 3.

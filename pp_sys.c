@@ -1565,8 +1565,8 @@ PP(pp_sysread)
 	    length = -1;
     }
     if (length < 0) {
-	if (IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
-	    || IoIFP(io) == PerlIO_stderr())
+	if ((IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
+	    || IoIFP(io) == PerlIO_stderr()) && ckWARN(WARN_IO))
 	{
 	    SV* sv = sv_newmortal();
 	    gv_efullname3(sv, gv, Nullch);

@@ -96,6 +96,31 @@ toke.c	AOK
     \x%.*s will produce malformed UTF-8 character; use \x{%.*s} for that
         use utf8 ; 
 	$_ = "\xffe"
+
+    Unrecognized escape \\%c passed through
+        $a = "\m" ;
+
+    %s number > %s non-portable
+        my $a =  0b011111111111111111111111111111110 ;
+        $a =  0b011111111111111111111111111111111 ;
+        $a =  0b111111111111111111111111111111111 ;
+        $a =  0x0fffffffe ;
+        $a =  0x0ffffffff ;
+        $a =  0x1ffffffff ;
+        $a =  0037777777776 ;
+        $a =  0037777777777 ;
+        $a =  0047777777777 ;
+
+    Integer overflow in binary number
+        my $a =  0b011111111111111111111111111111110 ;
+        $a =  0b011111111111111111111111111111111 ;
+        $a =  0b111111111111111111111111111111111 ;
+        $a =  0x0fffffffe ;
+        $a =  0x0ffffffff ;
+        $a =  0x1ffffffff ;
+        $a =  0037777777776 ;
+        $a =  0037777777777 ;
+        $a =  0047777777777 ;
      
     Mandatory Warnings
     ------------------
@@ -524,3 +549,63 @@ Operator or semicolon missing before *foo at - line 8.
 Ambiguous use of * resolved as operator * at - line 8.
 Operator or semicolon missing before *foo at - line 10.
 Ambiguous use of * resolved as operator * at - line 10.
+########
+# toke.c
+use warnings 'unsafe' ;
+my $a = "\m" ;
+no warnings 'unsafe' ;
+$a = "\m" ;
+EXPECT
+Unrecognized escape \m passed through at - line 3.
+########
+# toke.c
+use warnings 'portable' ;
+my $a =  0b011111111111111111111111111111110 ;
+   $a =  0b011111111111111111111111111111111 ;
+   $a =  0b111111111111111111111111111111111 ;
+   $a =  0x0fffffffe ;
+   $a =  0x0ffffffff ;
+   $a =  0x1ffffffff ;
+   $a =  0037777777776 ;
+   $a =  0037777777777 ;
+   $a =  0047777777777 ;
+no warnings 'portable' ;
+   $a =  0b011111111111111111111111111111110 ;
+   $a =  0b011111111111111111111111111111111 ;
+   $a =  0b111111111111111111111111111111111 ;
+   $a =  0x0fffffffe ;
+   $a =  0x0ffffffff ;
+   $a =  0x1ffffffff ;
+   $a =  0037777777776 ;
+   $a =  0037777777777 ;
+   $a =  0047777777777 ;
+EXPECT
+Binary number > 0b11111111111111111111111111111111 non-portable at - line 5.
+Hexadecimal number > 0xffffffff non-portable at - line 8.
+Octal number > 037777777777 non-portable at - line 11.
+########
+# toke.c
+use warnings 'overflow' ;
+my $a =  0b011111111111111111111111111111110 ;
+   $a =  0b011111111111111111111111111111111 ;
+   $a =  0b111111111111111111111111111111111 ;
+   $a =  0x0fffffffe ;
+   $a =  0x0ffffffff ;
+   $a =  0x1ffffffff ;
+   $a =  0037777777776 ;
+   $a =  0037777777777 ;
+   $a =  0047777777777 ;
+no warnings 'overflow' ;
+   $a =  0b011111111111111111111111111111110 ;
+   $a =  0b011111111111111111111111111111111 ;
+   $a =  0b111111111111111111111111111111111 ;
+   $a =  0x0fffffffe ;
+   $a =  0x0ffffffff ;
+   $a =  0x1ffffffff ;
+   $a =  0037777777776 ;
+   $a =  0037777777777 ;
+   $a =  0047777777777 ;
+EXPECT
+Integer overflow in binary number at - line 5.
+Integer overflow in hexadecimal number at - line 8.
+Integer overflow in octal number at - line 11.

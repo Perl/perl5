@@ -15,13 +15,13 @@
      <<<<<< Add a test when somethig actually calls utf16_to_utf8
 
 __END__
-# utf8.c
+# utf8.c [utf8_to_uv]
 use utf8 ;
 my $a = ord "\x80" ;
 EXPECT
 Malformed UTF-8 character at - line 3.
 ########
-# utf8.c
+# utf8.c [utf8_to_uv]
 use utf8 ;
 my $a = ord "\x80" ;
 {
@@ -35,13 +35,13 @@ Malformed UTF-8 character at - line 3.
 \x80 will produce malformed UTF-8 character; use \x{80} for that at - line 6.
 Malformed UTF-8 character at - line 6.
 ########
-# utf8.c
+# utf8.c [utf8_to_uv]
 use utf8 ;
 my $a = ord "\xf080" ;
 EXPECT
 Malformed UTF-8 character at - line 3.
 ########
-# utf8.c
+# utf8.c [utf8_to_uv]
 use utf8 ;
 my $a = ord "\xf080" ;
 {

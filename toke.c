@@ -6582,9 +6582,8 @@ Perl_scan_num(pTHX_ char *start)
 			    dTHR;
 			    overflowed = TRUE;
 			    n = (NV) u;
-			    if (ckWARN_d(WARN_UNSAFE))
-				Perl_warner(aTHX_ ((shift == 3) ?
-						   WARN_OCTAL : WARN_UNSAFE),
+			    if (ckWARN_d(WARN_OVERFLOW))
+				Perl_warner(aTHX_ WARN_OVERFLOW,
 					    "Integer overflow in %s number",
 					    base);
 			} else
@@ -6613,8 +6612,8 @@ Perl_scan_num(pTHX_ char *start)
 	    sv = NEWSV(92,0);
 	    if (overflowed) {
 		dTHR;
-		if (ckWARN(WARN_UNSAFE) && n > 4294967295.0)
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN(WARN_PORTABLE) && n > 4294967295.0)
+		    Perl_warner(aTHX_ WARN_PORTABLE,
 				"%s number > %s non-portable",
 				Base, max);
 		sv_setnv(sv, n);
@@ -6622,8 +6621,8 @@ Perl_scan_num(pTHX_ char *start)
 	    else {
 #if UV_SIZEOF > 4
 		dTHR;
-		if (ckWARN(WARN_UNSAFE) && u > 0xffffffff)
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN(WARN_PORTABLE) && u > 0xffffffff)
+		    Perl_warner(aTHX_ WARN_PORTABLE,
 				"%s number > %s non-portable",
 				Base, max);
 #endif
