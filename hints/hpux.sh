@@ -119,9 +119,9 @@ case `$cc -v 2>&1`"" in
 	    cppminus='-'
 	    cppstdin='cc -E -Aa -D__STDC_EXT__'
 	    cpprun=$cppstdin
-	    case "$d_casti32" in
-		"") d_casti32='undef' ;;
-		esac
+#	    case "$d_casti32" in
+#		"") d_casti32='undef' ;;
+#		esac
 	    ;;
     esac
 
