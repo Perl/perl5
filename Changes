@@ -34,6 +34,97 @@ Version v5.6.2
 --------------
 
 ____________________________________________________________________________
+[ 21726] By: rgs                                   on 2003/11/15  11:13:59
+        Log: This is perl 5.6.2.
+     Branch: maint-5.6
+	   ! perl-5.6.2/patchlevel.h perl-5.6.2/pod/perlhist.pod
+____________________________________________________________________________
+[ 21724] By: rgs                                   on 2003/11/14  13:33:00
+        Log: Subject: [PATCH 5.6.2RC1] VMS test tweaks
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 14 Nov 2003 08:29:33 -0600
+             Message-Id: <6.0.0.22.2.20031113171900.0315ee68@dcichiexc1>
+     Branch: maint-5.6
+	   ! perl-5.6.2/t/pod/find.t perl-5.6.2/vms/ext/filespec.t
+____________________________________________________________________________
+[ 21722] By: rgs                                   on 2003/11/13  21:30:29
+        Log: Grab perlmodlib.PL from bleadperl, adapt it to 5.6.
+             Regenerate perlmodlib.pod and perltoc.pod.
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perlmodlib.PL perl-5.6.2/pod/perlmodlib.pod
+	   ! perl-5.6.2/pod/perltoc.pod
+____________________________________________________________________________
+[ 21716] By: rgs                                   on 2003/11/13  20:18:25
+        Log: Fix a couple of compilation warnings about unused variables.
+     Branch: maint-5.6
+	   ! perl-5.6.2/doop.c perl-5.6.2/op.c perl-5.6.2/perl.c
+	   ! perl-5.6.2/regexec.c perl-5.6.2/sv.c perl-5.6.2/toke.c
+	   ! perl-5.6.2/util.c
+____________________________________________________________________________
+[ 21711] By: rgs                                   on 2003/11/12  21:56:13
+        Log: Attempt to fix a Darwin-specific problem : use re 'debug' fails,
+             saying that Perl_deb wasn't found. So link deb.o statically.
+     Branch: maint-5.6
+	   ! perl-5.6.2/ext/re/Makefile.PL
+____________________________________________________________________________
+[ 21707] By: rgs                                   on 2003/11/12  08:27:41
+        Log: Subject: [PATCH 5.6.2RC1] sdbm build fix for VMS
+             From: Craig Berry <craigberry@mac.com>
+             Date: Tue, 11 Nov 2003 17:51:10 -0600
+             Message-ID: <1395948.1068594670512.JavaMail.craigberry@mac.com>
+     Branch: maint-5.6
+	   ! perl-5.6.2/ext/SDBM_File/sdbm/Makefile.PL
+____________________________________________________________________________
+[ 21705] By: rgs                                   on 2003/11/11  21:14:01
+        Log: Perldelta modernization (or, rewrite history)
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perldelta.pod
+____________________________________________________________________________
+[ 21698] By: rgs                                   on 2003/11/10  21:26:19
+        Log: Tests that may fail in db-recno.t (for Mac OS X) (from bleadperl)
+     Branch: maint-5.6
+	   ! perl-5.6.2/t/lib/db-recno.t
+____________________________________________________________________________
+[ 21696] By: rgs                                   on 2003/11/09  22:31:26
+        Log: Delete MakeMaker's META.yml file.
+             (Currently the PAUSE indexer takes into account META files
+             if and only if there's only one META file in a distribution.)
+     Branch: maint-5.6
+	   - perl-5.6.2/lib/ExtUtils/META.yml
+	   ! perl-5.6.2/MANIFEST
+____________________________________________________________________________
+[ 21695] By: rgs                                   on 2003/11/09  22:20:36
+        Log: Add a .PHONY target in the makefile for "make install", for
+             case-insensitive filesystems.
+     Branch: maint-5.6
+	   ! perl-5.6.2/Makefile.SH
+____________________________________________________________________________
+[ 21692] By: rgs                                   on 2003/11/09  11:14:30
+        Log: Get perlhist.pod from blead.
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perlhist.pod
+____________________________________________________________________________
+[ 21690] By: rgs                                   on 2003/11/09  10:44:30
+        Log: More reasons for skipping the IPC::SysV message test.
+     Branch: maint-5.6
+	   ! perl-5.6.2/ext/IPC/SysV/t/msg.t
+____________________________________________________________________________
+[ 21689] By: rgs                                   on 2003/11/09  10:18:30
+        Log: A warning test is known to fail on Darwin.
+     Branch: maint-5.6
+	   ! perl-5.6.2/t/pragma/warn/pp_hot
+____________________________________________________________________________
+[ 21688] By: rgs                                   on 2003/11/09  10:17:12
+        Log: Post-RC1.
+     Branch: maint-5.6
+	   ! perl-5.6.2/patchlevel.h
+____________________________________________________________________________
+[ 21686] By: rgs                                   on 2003/11/08  14:07:22
+        Log: This is RC1.
+             Update Changes.
+     Branch: maint-5.6
+	   ! perl-5.6.2/Changes perl-5.6.2/patchlevel.h
+____________________________________________________________________________
 [ 21685] By: rgs                                   on 2003/11/08  13:48:05
         Log: Configure hints upgrade from blead.
      Branch: maint-5.6
