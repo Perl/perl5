@@ -1242,14 +1242,18 @@ sub EastAsianWidth_txt()
 
     while (<IN>)
     {
-	next unless /^[0-9A-Fa-f]+;/;
+	next unless /^[0-9A-Fa-f]+(\.\.[0-9A-Fa-f]+)?;/;
 	s/#.*//;
 	s/\s+$//;
 
-	my ($hexcode, $pv) = split(/\s*;\s*/);
-        my $code = hex($hexcode);
+	my ($hexcodes, $pv) = split(/\s*;\s*/);
         $EAW{$pv} ||= Table->New(Is => "EastAsianWidth$pv");
-        $EAW{$pv}->Append($code);
+      my ($start, $end) = split(/\.\./, $hexcodes);
+      if (defined $end) {
+        $EAW{$pv}->AppendRange(hex($start), hex($end));
+      } else {
+        $EAW{$pv}->Append(hex($start));
+      }
     }
     close IN;
 
