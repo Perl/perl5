@@ -2867,27 +2867,27 @@ mode you specify should match the mode of the original filehandle.
 IO buffers.) If you use the 3 arg form then you can pass either a number,
 the name of a filehandle or the normal "reference to a glob".
 
-Here is a script that saves, redirects, and restores STDOUT and
-STDERR:
+Here is a script that saves, redirects, and restores C<STDOUT> and
+C<STDERR> using various methods:
 
     #!/usr/bin/perl
-    open(my $oldout, ">&", \*STDOUT);
-    open(OLDERR, ">&STDERR");
+    open my $oldout, ">&STDOUT"     or die "Can't dup STDOUT: $!";
+    open OLDERR,     ">&", \*STDERR or die "Can't dup STDERR: $!";
+ 
+    open STDOUT, '>', "foo.out" or die "Can't redirect STDOUT: $!";
+    open STDERR, ">&STDOUT"     or die "Can't dup STDOUT: $!";
 
-    open(STDOUT, '>', "foo.out") || die "Can't redirect stdout";
-    open(STDERR, ">&STDOUT")     || die "Can't dup stdout";
-
-    select(STDERR); $| = 1;	# make unbuffered
-    select(STDOUT); $| = 1;	# make unbuffered
+    select STDERR; $| = 1;	# make unbuffered
+    select STDOUT; $| = 1;	# make unbuffered
 
     print STDOUT "stdout 1\n";	# this works for
     print STDERR "stderr 1\n"; 	# subprocesses too
 
-    close(STDOUT);
-    close(STDERR);
+    close STDOUT;
+    close STDERR;
 
-    open(STDOUT, ">&OLDOUT");
-    open(STDERR, ">&OLDERR");
+    open STDOUT, ">&", $oldout or die "Can't dup \$oldout: $!";
+    open STDERR, ">&OLDERR"    or die "Can't dup OLDERR: $!";
 
     print STDOUT "stdout 2\n";
     print STDERR "stderr 2\n";
