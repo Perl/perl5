@@ -1,9 +1,17 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 }
+
+# symbolic references used later
+use strict qw( vars subs );
+
+# @DB::dbline values have both integer and string components (Benjamin Goldberg)
+use Scalar::Util qw( dualvar );
+my $dualfalse = dualvar(0, 'false');
+my $dualtrue = dualvar(1, 'true');
 
 use Test::More tests => 106;
 
@@ -198,6 +206,7 @@ SKIP: {
 
 	my $db = DB->loadfile($file);
 	like( $db, qr!$file\z!, '... should find loaded file from partial name');
+
 	is( *DB::dbline, *{ "_<$db" } , 
 		'... should set *DB::dbline to associated glob');
 	is( $DB::filename, $db, '... should set $DB::filename to file name' );
@@ -207,9 +216,12 @@ SKIP: {
 
 # test DB::lineevents()
 {
+	use vars qw( *baz );
+
 	local $DB::filename = 'baz';
 	local *baz = *{ "main::_<baz" };
-	@baz = ( 1 .. 5 );
+	
+	@baz = map { dualvar(1, $_) } qw( one two three four five );
 	%baz = (
 		1 => "foo\0bar",
 		3 => "boo\0far",
@@ -219,7 +231,7 @@ SKIP: {
 	is( scalar keys %ret, 3, 'DB::lineevents() should pick up defined lines' );
 
 	# array access in DB::lineevents() starts at element 1, not 0
-	is( join(' ', @{ $ret{1} }), '2 foo bar', '... should stash data in hash');
+	is( join(' ', @{ $ret{1} }), 'two foo bar', '... should stash data in hash');
 }
 
 # test DB::set_break()
@@ -233,7 +245,7 @@ SKIP: {
 		4 => "\0abc",
 	);
 
-	*DB::dbline = [ 0, 1, 0, 0, 1 ];
+	*DB::dbline = [ $dualfalse, $dualtrue, $dualfalse, $dualfalse, $dualtrue ];
 
 	local %DB::sub = (
 		'main::foo'	=> 'foo:1-4',
@@ -268,7 +280,7 @@ SKIP: {
 # test DB::set_tbreak()
 {
 	local ($DB::lineno, *DB::dbline, $DB::package);
-	*DB::dbline = [ 0, 1, 0, 0, 1 ];
+	*DB::dbline = [ $dualfalse, $dualtrue, $dualfalse, $dualfalse, $dualtrue ];
 
 	DB->set_tbreak(1);
 	is( $DB::dbline{1}, ';9', 'DB::set_tbreak() should set tbreak condition' );
@@ -300,7 +312,7 @@ SKIP: {
 		'bar::bar'	=> 'foo:10-16',
 	);
 
-	$foo[11] = 1;
+	$foo[11] = $dualtrue;
 
 	is( DB::_find_subline('TEST::foo'), 11, 
 		'DB::_find_subline() should find fully qualified sub' );
@@ -312,7 +324,7 @@ SKIP: {
 	is( DB::_find_subline('bar'), 11, 
 		'... should resolve unqualified name with $DB::package, if defined' );
 	
-	$foo[11] = 0;
+	$foo[11] = $dualfalse;
 
 	is( DB::_find_subline('TEST::foo'), 15, 
 		'... should increment past lines with no events' );
@@ -378,7 +390,7 @@ SKIP: {
 		2 => "\0abc",
 	);
 
-	*DB::dbline = [ 0, 0, 1, 1 ];
+	*DB::dbline = [ $dualfalse, $dualfalse, $dualtrue, $dualtrue ];
 
 	DB->set_action(2, 'def');
 	is( $DB::dbline{2}, "\0def", 
@@ -407,7 +419,7 @@ SKIP: {
 	);
 
 	%DB::dbline = %lines;
-	*DB::dbline = [ 1, 1, 1, 1 ];
+	*DB::dbline = [ ($dualtrue) x 4 ];
 
 	DB->clr_actions(1 .. 4);
 
