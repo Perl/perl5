@@ -341,8 +341,8 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 #
 # various targets
 !IF "$(USE_OBJECT)" == "define"
-PERLIMPLIB	= ..\perlcore.lib
-PERLDLL		= ..\perlcore.dll
+PERLIMPLIB	= ..\perl56.lib
+PERLDLL		= ..\perl56.dll
 !ELSE
 PERLIMPLIB	= ..\perl.lib
 PERLDLL		= ..\perl.dll

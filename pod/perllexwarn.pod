@@ -314,8 +314,8 @@ The experimental features need bottomed out.
     the module should be revisited.
 
   octal
-    'octal' controls illegal octal characters warning but 'unsafe'
-    illegal hexadecimal and binary characters warning.  
+    'octal' controls illegal octal characters warning, but 'unsafe' controls
+    illegal hexadecimal and binary characters warnings.
 
 =head1 SEE ALSO
 

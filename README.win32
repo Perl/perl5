@@ -206,7 +206,7 @@ instructions carefully.
 Type "dmake" (or "nmake" if you are using that make).
 
 This should build everything.  Specifically, it will create perl.exe,
-perl.dll (or perlcore.dll), and perlglob.exe at the perl toplevel, and
+perl.dll (or perl56.dll), and perlglob.exe at the perl toplevel, and
 various other extension dll's under the lib\auto directory.  If the build
 fails for any reason, make sure you have done the previous steps correctly.
 

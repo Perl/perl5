@@ -11,9 +11,8 @@
  *   "It all comes from here, the stench and the peril."  --Frodo
  */
 
-/* toke.c
- *
- * This file is the tokenizer for Perl.  It's closely linked to the
+/*
+ * This file is the lexer for Perl.  It's closely linked to the
  * parser, perly.y.  
  *
  * The main routine is yylex(), which returns the next token.
@@ -109,7 +108,7 @@ int* yychar_pointer = NULL;
 
 /*
  * Convenience functions to return different tokens and prime the
- * tokenizer for the next token.  They all take an argument.
+ * lexer for the next token.  They all take an argument.
  *
  * TOKEN        : generic token (used for '(', DOLSHARP, etc)
  * OPERATOR     : generic operator
@@ -126,7 +125,7 @@ int* yychar_pointer = NULL;
  * BAop         : bitwise and
  * SHop         : shift operator
  * PWop         : power operator
- * PMop         : matching operator
+ * PMop         : pattern-matching operator
  * Aop          : addition-level operator
  * Mop          : multiplication-level operator
  * Eop          : equality-testing operator
@@ -274,7 +273,6 @@ S_missingterm(pTHX_ char *s)
 
 /*
  * Perl_deprecate
- * Warns that something is deprecated.  Duh.
  */
 
 void
@@ -287,8 +285,7 @@ Perl_deprecate(pTHX_ char *s)
 
 /*
  * depcom
- * Deprecate a comma-less variable list.  Called from three places
- * in the tokenizer.
+ * Deprecate a comma-less variable list.
  */
 
 STATIC void
@@ -298,8 +295,8 @@ S_depcom(pTHX)
 }
 
 /*
- * text filters for win32 carriage-returns, utf16-to-utf8 and
- * utf16-to-utf8-reversed, whatever that is.
+ * experimental text filters for win32 carriage-returns, utf16-to-utf8 and
+ * utf16-to-utf8-reversed.
  */
 
 #ifdef WIN32
@@ -346,8 +343,8 @@ S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 
 /*
  * Perl_lex_start
- * Initialize variables.  Called by perl.c.  It uses the Perl stack
- * to save its state (for recursive calls to the parser).
+ * Initialize variables.  Uses the Perl save_stack to save its state (for
+ * recursive calls to the parser).
  */
 
 void
@@ -417,8 +414,8 @@ Perl_lex_start(pTHX_ SV *line)
 
 /*
  * Perl_lex_end
- * Tidy up.  Called from pp_ctl.c in the sv_compile_2op(), doeval(),
- * and pp_leaveeval() subroutines.
+ * Finalizer for lexing operations.  Must be called when the parser is
+ * done with the lexer.
  */
 
 void
@@ -433,8 +430,8 @@ Perl_lex_end(pTHX)
  * or pinball tables.  Its name is short for "increment line".  It
  * increments the current line number in PL_curcop->cop_line and checks
  * to see whether the line starts with a comment of the form
- *    # line 500
- * If so, it sets the current line number to the number in the comment.
+ *    # line 500 "foo.pm"
+ * If so, it sets the current line number and file to the values in the comment.
  */
 
 STATIC void
@@ -521,8 +518,10 @@ S_skipspace(pTHX_ register char *s)
 	    return s;
 
 	/* try to recharge the buffer */
-	if ((s = filter_gets(PL_linestr, PL_rsfp, (prevlen = SvCUR(PL_linestr)))) == Nullch) {
-	  /* end of file.  Add on the -p or -n magic */
+	if ((s = filter_gets(PL_linestr, PL_rsfp,
+			     (prevlen = SvCUR(PL_linestr)))) == Nullch)
+	{
+	    /* end of file.  Add on the -p or -n magic */
 	    if (PL_minus_n || PL_minus_p) {
 		sv_setpv(PL_linestr,PL_minus_p ?
 			 ";}continue{print or die qq(-p destination: $!\\n)" :
@@ -534,7 +533,8 @@ S_skipspace(pTHX_ register char *s)
 		sv_setpv(PL_linestr,";");
 
 	    /* reset variables for next time we lex */
-	    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = s = PL_linestart = SvPVX(PL_linestr);
+	    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = s = PL_linestart
+		= SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 
 	    /* Close the filehandle.  Could be from -P preprocessor,
@@ -673,11 +673,11 @@ S_lop(pTHX_ I32 f, expectation x, char *s)
 
 /*
  * S_force_next
- * When the tokenizer realizes it knows the next token (for instance,
+ * When the lexer realizes it knows the next token (for instance,
  * it is reordering tokens for the parser) then it can call S_force_next
- * to make the current token be the next one.  It will also set 
- * PL_nextval, and possibly PL_expect to ensure the lexer handles the
- * token correctly.
+ * to know what token to return the next time the lexer is called.  Caller
+ * will need to set PL_nextval[], and possibly PL_expect to ensure the lexer
+ * handles the token correctly.
  */
 
 STATIC void 
@@ -705,7 +705,7 @@ S_force_next(pTHX_ I32 type)
  *       a keyword (do this if the word is a label, e.g. goto FOO)
  *   int allow_pack : if true, : characters will also be allowed (require,
  *       use, etc. do this)
- *   int allow_initial_tick : used by the "sub" tokenizer only.
+ *   int allow_initial_tick : used by the "sub" lexer only.
  */
 
 STATIC char *
@@ -740,12 +740,11 @@ S_force_word(pTHX_ register char *start, int token, int check_keyword, int allow
 
 /*
  * S_force_ident
- * Called when the tokenizer wants $foo *foo &foo etc, but the program
+ * Called when the lexer wants $foo *foo &foo etc, but the program
  * text only contains the "foo" portion.  The first argument is a pointer
  * to the "foo", and the second argument is the type symbol to prefix.
  * Forces the next token to be a "WORD".
- * Creates the symbol if it didn't already exist (through the gv_fetchpv
- * call).
+ * Creates the symbol if it didn't already exist (via gv_fetchpv()).
  */
 
 STATIC void
@@ -960,7 +959,8 @@ S_sublex_push(pTHX)
     PL_linestr = PL_lex_stuff;
     PL_lex_stuff = Nullsv;
 
-    PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart = SvPVX(PL_linestr);
+    PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
+	= SvPVX(PL_linestr);
     PL_bufend += SvCUR(PL_linestr);
     SAVEFREESV(PL_linestr);
 
@@ -1127,10 +1127,10 @@ S_scan_const(pTHX_ char *start)
 	? (PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
 	: UTF;
     I32 thisutf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
-	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
+	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ?
+						OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
 	: UTF;
-    /* leaveit is the set of acceptably-backslashed characters */
-    char *leaveit =
+    char *leaveit =			/* set of acceptably-backslashed characters */
 	PL_lex_inpat
 	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
 	    : "";
@@ -1145,8 +1145,8 @@ S_scan_const(pTHX_ char *start)
 		I32 max;			/* last character in range */
 
 		i = d - SvPVX(sv);		/* remember current offset */
-		SvGROW(sv, SvLEN(sv) + 256);	/* expand the sv -- there'll never be more'n 256 chars in a range for it to grow by */
-		d = SvPVX(sv) + i;		/* restore d after the grow potentially has changed the ptr */
+		SvGROW(sv, SvLEN(sv) + 256);	/* never more than 256 chars in a range */
+		d = SvPVX(sv) + i;		/* refresh d after realloc */
 		d -= 2;				/* eat the first char and the - */
 
 		min = (U8)*d;			/* first char in range */
@@ -1437,7 +1437,6 @@ S_scan_const(pTHX_ char *start)
 /* S_intuit_more
  * Returns TRUE if there's more to the expression (e.g., a subscript),
  * FALSE otherwise.
- * This is the one truly awful dwimmer necessary to conflate C and sed.
  *
  * It deals with "$foo[3]" and /$foo[3]/ and /$foo[0123456789$]+/
  *
@@ -1453,6 +1452,8 @@ S_scan_const(pTHX_ char *start)
  *      /$foo[-3]/ and /$foo[$bar]/ as well as /$foo[$\d]+/
  * anything else returns TRUE
  */
+
+/* This is the one truly awful dwimmer necessary to conflate C and sed. */
 
 STATIC int
 S_intuit_more(pTHX_ register char *s)
