@@ -483,7 +483,6 @@ MAGIC *mg;
 	break;
     case '?':
 	{
-	    /* dTHR; */ /* unneeded, and breaks SunOS 4.1.3 pre-ANSI cc */
 	    sv_setiv(sv, (IV)STATUS_CURRENT);
 #ifdef COMPLEX_STATUS
 	    LvTARGOFF(sv) = statusvalue;

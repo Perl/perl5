@@ -2043,7 +2043,6 @@ register SV *sstr;
     if (sflags & SVf_ROK) {
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
-		/* dTHR; */ /* unneeded, and breaks SunOS 4.1.3 pre-ANSI cc */
 		SV *sref = SvREFCNT_inc(SvRV(sstr));
 		SV *dref = 0;
 		int intro = GvINTRO(dstr);
