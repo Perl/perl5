@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.4 90/03/12 16:28:42 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.5 90/03/27 15:39:03 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.5  90/03/27  15:39:03  lwall
+ * patch16: MSDOS support
+ * patch16: support for machines that can't cast negative floats to unsigned ints
+ * patch16: sprintf($s,...,$s,...) didn't work
+ * 
  * Revision 3.0.1.4  90/03/12  16:28:42  lwall
  * patch13: pack of ascii strings could call str_ncat() with negative length
  * patch13: printf("%s", *foo) was busted
@@ -40,6 +45,10 @@
 extern unsigned char fold[];
 
 int wantarray;
+
+#ifdef BUGGY_MSC
+ #pragma function(memcmp)
+#endif /* BUGGY_MSC */
 
 int
 do_subst(str,arg,sp)
@@ -289,6 +298,9 @@ nope:
     stack->ary_array[++sp] = arg->arg_ptr.arg_str;
     return sp;
 }
+#ifdef BUGGY_MSC
+ #pragma intrinsic(memcmp)
+#endif /* BUGGY_MSC */
 
 int
 do_trans(str,arg)
@@ -448,7 +460,7 @@ int *arglast;
 	case 'I':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		auint = (unsigned int)str_gnum(fromstr);
+		auint = U_I(str_gnum(fromstr));
 		str_ncat(str,(char*)&auint,sizeof(unsigned int));
 	    }
 	    break;
@@ -472,7 +484,7 @@ int *arglast;
 	case 'L':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aulong = (unsigned long)str_gnum(fromstr);
+		aulong = U_L(str_gnum(fromstr));
 		str_ncat(str,(char*)&aulong,sizeof(unsigned long));
 	    }
 	    break;
@@ -511,10 +523,11 @@ register STR **sarg;
     char *xs;
     int xlen;
     double value;
+    char *origs;
 
     str_set(str,"");
     len--;			/* don't count pattern string */
-    s = str_get(*sarg);
+    origs = s = str_get(*sarg);
     send = s + (*sarg)->str_cur;
     sarg++;
     for ( ; s < send; len--) {
@@ -578,19 +591,10 @@ register STR **sarg;
 		ch = *(++t);
 		*t = '\0';
 		value = str_gnum(*(sarg++));
-#if defined(sun) && !defined(sparc)
-		if (value < 0.0) {		/* sigh */
-		    if (dolong)
-			(void)sprintf(buf,s,(long)value);
-		    else
-			(void)sprintf(buf,s,(int)value);
-		}
-		else
-#endif
 		if (dolong)
-		    (void)sprintf(buf,s,(unsigned long)value);
+		    (void)sprintf(buf,s,U_L(value));
 		else
-		    (void)sprintf(buf,s,(unsigned int)value);
+		    (void)sprintf(buf,s,U_I(value));
 		s = t;
 		*(t--) = ch;
 		break;
@@ -616,10 +620,17 @@ register STR **sarg;
 		if (strEQ(t-2,"%s")) {	/* some printfs fail on >128 chars */
 		    *buf = '\0';
 		    str_ncat(str,s,t - s - 2);
+		    *t = ch;
 		    str_ncat(str,xs,xlen);  /* so handle simple case */
 		}
-		else
+		else {
+		    if (origs == xs) {		/* sprintf($s,...$s...) */
+			strcpy(tokenbuf+64,s);
+			s = tokenbuf+64;
+			*t = ch;
+		    }
 		    (void)sprintf(buf,s,xs);
+		}
 		sarg++;
 		s = t;
 		*(t--) = ch;
@@ -1165,7 +1176,7 @@ STR *str;
     register int offset;
     register int size;
     register unsigned char *s = (unsigned char*)mstr->str_ptr;
-    register unsigned long lval = (unsigned long)str_gnum(str);
+    register unsigned long lval = U_L(str_gnum(str));
     int mask;
 
     mstr->str_rare = 0;

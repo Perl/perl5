@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.7 90/03/14 12:26:24 lwall Locked $
+/* $Header: doio.c,v 3.0.1.8 90/03/27 15:44:02 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.8  90/03/27  15:44:02  lwall
+ * patch16: MSDOS support
+ * patch16: support for machines that can't cast negative floats to unsigned ints
+ * patch16: system() can lose arguments passed to shell scripts on SysV machines
+ * 
  * Revision 3.0.1.7  90/03/14  12:26:24  lwall
  * patch15: commands involving execs could cause malloc arena corruption
  * 
@@ -283,7 +288,9 @@ register STAB *stab;
 #ifdef FCHOWN
 		(void)fchown(fileno(stab_io(argvoutstab)->ifp),fileuid,filegid);
 #else
+#ifdef CHOWN
 		(void)chown(oldname,fileuid,filegid);
+#endif
 #endif
 	    }
 	    str_free(str);
@@ -300,6 +307,7 @@ register STAB *stab;
     return Nullfp;
 }
 
+#ifdef PIPE
 void
 do_pipe(str, rstab, wstab)
 STR *str;
@@ -342,6 +350,7 @@ badexit:
     str_sset(str,&str_undef);
     return;
 }
+#endif
 
 bool
 do_close(stab,explicit)
@@ -361,7 +370,7 @@ bool explicit;
 	if (stio->type == '|') {
 	    status = mypclose(stio->ifp);
 	    retval = (status >= 0);
-	    statusvalue = (unsigned)status & 0xffff;
+	    statusvalue = (unsigned short)status & 0xffff;
 	}
 	else if (stio->type == '-')
 	    retval = TRUE;
@@ -897,6 +906,7 @@ char *cmd;
     register char *s;
     char **argv;
     char flags[10];
+    char *cmd2;
 
 #ifdef TAINT
     taintenv();
@@ -949,9 +959,9 @@ char *cmd;
 	}
     }
     New(402,argv, (s - cmd) / 2 + 2, char*);
-
+    cmd2 = nsavestr(cmd, s-cmd);
     a = argv;
-    for (s = cmd; *s;) {
+    for (s = cmd2; *s;) {
 	while (*s && isspace(*s)) s++;
 	if (*s)
 	    *(a++) = s;
@@ -962,9 +972,13 @@ char *cmd;
     *a = Nullch;
     if (argv[0]) {
 	execvp(argv[0],argv);
-	if (errno == ENOEXEC)		/* for system V NIH syndrome */
+	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
+	    Safefree(argv);
+	    Safefree(cmd2);
 	    goto doshell;
+	}
     }
+    Safefree(cmd2);
     Safefree(argv);
     return FALSE;
 }
@@ -1944,6 +1958,7 @@ int *arglast;
 	    }
 	}
 	break;
+#ifdef CHOWN
     case O_CHOWN:
 #ifdef TAINT
 	taintproper("Insecure dependency in chown");
@@ -1959,6 +1974,8 @@ int *arglast;
 	    }
 	}
 	break;
+#endif
+#ifdef KILL
     case O_KILL:
 #ifdef TAINT
 	taintproper("Insecure dependency in kill");
@@ -1994,6 +2011,7 @@ int *arglast;
 	    }
 	}
 	break;
+#endif
     case O_UNLINK:
 #ifdef TAINT
 	taintproper("Insecure dependency in unlink");

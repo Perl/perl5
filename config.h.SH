@@ -83,6 +83,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_bzero	BZERO		/**/
 
+/* CASTNEGFLOAT:
+ *	This symbol, if defined, indicates that this C compiler knows how to
+ *	cast negative numbers to unsigned longs, ints and shorts.
+ */
+#$d_castneg	CASTNEGFLOAT	/**/
+
 /* CHARSPRINTF:
  *	This symbol is defined if this system declares "char *sprintf()" in
  *	stdio.h.  The trend seems to be to declare it as "int sprintf()".  It

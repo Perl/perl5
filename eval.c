@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.5 90/03/12 16:37:40 lwall Locked $
+/* $Header: eval.c,v 3.0.1.6 90/03/27 15:53:51 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.6  90/03/27  15:53:51  lwall
+ * patch16: MSDOS support
+ * patch16: support for machines that can't cast negative floats to unsigned ints
+ * patch16: ioctl didn't return values correctly
+ * 
  * Revision 3.0.1.5  90/03/12  16:37:40  lwall
  * patch13: undef $/ didn't work as advertised
  * patch13: added list slice operator (LIST)[LIST]
@@ -47,6 +52,9 @@
 
 #include <signal.h>
 
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
 #ifdef I_VFORK
 #   include <vfork.h>
 #endif
@@ -289,14 +297,14 @@ register int sp;
 	value = str_gnum(st[1]);
 	anum = (int)str_gnum(st[2]);
 #ifndef lint
-	value = (double)(((unsigned long)value) << anum);
+	value = (double)(U_L(value) << anum);
 #endif
 	goto donumset;
     case O_RIGHT_SHIFT:
 	value = str_gnum(st[1]);
 	anum = (int)str_gnum(st[2]);
 #ifndef lint
-	value = (double)(((unsigned long)value) >> anum);
+	value = (double)(U_L(value) >> anum);
 #endif
 	goto donumset;
     case O_LT:
@@ -332,8 +340,7 @@ register int sp;
 	if (!sawvec || st[1]->str_nok || st[2]->str_nok) {
 	    value = str_gnum(st[1]);
 #ifndef lint
-	    value = (double)(((unsigned long)value) &
-			(unsigned long)str_gnum(st[2]));
+	    value = (double)(U_L(value) & U_L(str_gnum(st[2])));
 #endif
 	    goto donumset;
 	}
@@ -344,8 +351,7 @@ register int sp;
 	if (!sawvec || st[1]->str_nok || st[2]->str_nok) {
 	    value = str_gnum(st[1]);
 #ifndef lint
-	    value = (double)(((unsigned long)value) ^
-			(unsigned long)str_gnum(st[2]));
+	    value = (double)(U_L(value) ^ U_L(str_gnum(st[2])));
 #endif
 	    goto donumset;
 	}
@@ -356,8 +362,7 @@ register int sp;
 	if (!sawvec || st[1]->str_nok || st[2]->str_nok) {
 	    value = str_gnum(st[1]);
 #ifndef lint
-	    value = (double)(((unsigned long)value) |
-			(unsigned long)str_gnum(st[2]));
+	    value = (double)(U_L(value) | U_L(str_gnum(st[2])));
 #endif
 	    goto donumset;
 	}
@@ -436,7 +441,7 @@ register int sp;
 	goto donumset;
     case O_COMPLEMENT:
 #ifndef lint
-	value = (double) ~(unsigned long)str_gnum(st[1]);
+	value = (double) ~U_L(str_gnum(st[1]));
 #endif
 	goto donumset;
     case O_SELECT:
@@ -1330,27 +1335,32 @@ register int sp;
 	}
 	break;
     case O_FORK:
+#ifdef FORK
 	anum = fork();
 	if (!anum && (tmpstab = stabent("$",allstabs)))
 	    str_numset(STAB_STR(tmpstab),(double)getpid());
 	value = (double)anum;
 	goto donumset;
+#else
+	fatal("Unsupported function fork");
+	break;
+#endif
     case O_WAIT:
+#ifdef WAIT
 #ifndef lint
-	/* ihand = signal(SIGINT, SIG_IGN); */
-	/* qhand = signal(SIGQUIT, SIG_IGN); */
 	anum = wait(&argflags);
 	if (anum > 0)
 	    pidgone(anum,argflags);
 	value = (double)anum;
-#else
-	/* ihand = qhand = 0; */
 #endif
-	/* (void)signal(SIGINT, ihand); */
-	/* (void)signal(SIGQUIT, qhand); */
 	statusvalue = (unsigned short)argflags;
 	goto donumset;
+#else
+	fatal("Unsupported function wait");
+	break;
+#endif
     case O_SYSTEM:
+#ifdef FORK
 #ifdef TAINT
 	if (arglast[2] - arglast[1] == 1) {
 	    taintenv();
@@ -1392,6 +1402,16 @@ register int sp;
 	    value = (double)do_exec(str_get(str_static(st[2])));
 	}
 	_exit(-1);
+#else /* ! FORK */
+	if ((arg[1].arg_type & A_MASK) == A_STAB)
+	    value = (double)do_aspawn(st[1],arglast);
+	else if (arglast[2] - arglast[1] != 1)
+	    value = (double)do_aspawn(Nullstr,arglast);
+	else {
+	    value = (double)do_spawn(str_get(str_static(st[2])));
+	}
+	goto donumset;
+#endif /* FORK */
     case O_EXEC:
 	if ((arg[1].arg_type & A_MASK) == A_STAB)
 	    value = (double)do_aexec(st[1],arglast);
@@ -1443,14 +1463,29 @@ register int sp;
       out:
 	value = (double)anum;
 	goto donumset;
-    case O_CHMOD:
     case O_CHOWN:
+#ifdef CHOWN
+	value = (double)apply(optype,arglast);
+	goto donumset;
+#else
+	fatal("Unsupported function chown");
+	break;
+#endif
     case O_KILL:
+#ifdef KILL
+	value = (double)apply(optype,arglast);
+	goto donumset;
+#else
+	fatal("Unsupported function kill");
+	break;
+#endif
     case O_UNLINK:
+    case O_CHMOD:
     case O_UTIME:
 	value = (double)apply(optype,arglast);
 	goto donumset;
     case O_UMASK:
+#ifdef UMASK
 	if (maxarg < 1) {
 	    anum = umask(0);
 	    (void)umask(anum);
@@ -1462,6 +1497,10 @@ register int sp;
 	taintproper("Insecure dependency in umask");
 #endif
 	goto donumset;
+#else
+	fatal("Unsupported function umask");
+	break;
+#endif
     case O_RENAME:
 	tmps = str_get(st[1]);
 	tmps2 = str_get(st[2]);
@@ -1480,6 +1519,7 @@ register int sp;
 #endif
 	goto donumset;
     case O_LINK:
+#ifdef LINK
 	tmps = str_get(st[1]);
 	tmps2 = str_get(st[2]);
 #ifdef TAINT
@@ -1487,6 +1527,10 @@ register int sp;
 #endif
 	value = (double)(link(tmps,tmps2) >= 0);
 	goto donumset;
+#else
+	fatal("Unsupported function link");
+	break;
+#endif
     case O_MKDIR:
 	tmps = str_get(st[1]);
 	anum = (int)str_gnum(st[2]);
@@ -1566,8 +1610,13 @@ register int sp;
 	goto one_liner;		/* see above in MKDIR */
 #endif
     case O_GETPPID:
+#ifdef GETPPID
 	value = (double)getppid();
 	goto donumset;
+#else
+	fatal("Unsupported function getppid");
+	break;
+#endif
     case O_GETPGRP:
 #ifdef GETPGRP
 	if (maxarg < 1)
@@ -1618,6 +1667,7 @@ register int sp;
 	break;
 #endif
     case O_CHROOT:
+#ifdef CHROOT
 	if (maxarg < 1)
 	    tmps = str_get(stab_val(defstab));
 	else
@@ -1627,6 +1677,10 @@ register int sp;
 #endif
 	value = (double)(chroot(tmps) >= 0);
 	goto donumset;
+#else
+	fatal("Unsupported function chroot");
+	break;
+#endif
     case O_FCNTL:
     case O_IOCTL:
 	if (maxarg <= 0)
@@ -1635,15 +1689,17 @@ register int sp;
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
-	argtype = (unsigned int)str_gnum(st[2]);
+	argtype = U_I(str_gnum(st[2]));
 #ifdef TAINT
 	taintproper("Insecure dependency in ioctl");
 #endif
 	anum = do_ctl(optype,stab,argtype,st[3]);
 	if (anum == -1)
 	    goto say_undef;
-	if (anum != 0)
+	if (anum != 0) {
+	    value = (double)anum;
 	    goto donumset;
+	}
 	str_set(str,"0 but true");
 	STABSET(str);
 	break;
@@ -1762,8 +1818,12 @@ register int sp;
 	anum = S_IFCHR;
 	goto check_file_type;
     case O_FTBLK:
+#ifdef S_IFBLK
 	anum = S_IFBLK;
 	goto check_file_type;
+#else
+	goto say_no;
+#endif
     case O_FTFILE:
 	anum = S_IFREG;
 	goto check_file_type;
@@ -1802,7 +1862,7 @@ register int sp;
 	value = (double)(symlink(tmps,tmps2) >= 0);
 	goto donumset;
 #else
-	fatal("Unsupported function symlink()");
+	fatal("Unsupported function symlink");
 #endif
     case O_READLINK:
 #ifdef SYMLINK
@@ -1816,16 +1876,28 @@ register int sp;
 	str_nset(str,buf,anum);
 	break;
 #else
-	fatal("Unsupported function readlink()");
+	fatal("Unsupported function readlink");
 #endif
     case O_FTSUID:
+#ifdef S_ISUID
 	anum = S_ISUID;
 	goto check_xid;
+#else
+	goto say_no;
+#endif
     case O_FTSGID:
+#ifdef S_ISGID
 	anum = S_ISGID;
 	goto check_xid;
+#else
+	goto say_no;
+#endif
     case O_FTSVTX:
+#ifdef S_ISVTX
 	anum = S_ISVTX;
+#else
+	goto say_no;
+#endif
       check_xid:
 	if (mystat(arg,st[1]) < 0)
 	    goto say_undef;
@@ -2058,12 +2130,29 @@ register int sp;
 	    goto say_undef;
 	value = fileno(fp);
 	goto donumset;
+    case O_BINMODE:
+	if (maxarg < 1)
+	    goto say_undef;
+	if ((arg[1].arg_type & A_MASK) == A_WORD)
+	    stab = arg[1].arg_ptr.arg_stab;
+	else
+	    stab = stabent(str_get(st[1]),TRUE);
+	if (!stab || !(stio = stab_io(stab)) || !(fp = stio->ifp))
+	    goto say_undef;
+#ifdef MSDOS
+	str_set(str, (setmode(fileno(fp), O_BINARY) != -1) ? Yes : No);
+#else
+	str_set(str, Yes);
+#endif
+	STABSET(str);
+	break;
     case O_VEC:
 	sp = do_vec(str == st[1], arg->arg_ptr.arg_str, arglast);
 	goto array_return;
     case O_GPWNAM:
     case O_GPWUID:
     case O_GPWENT:
+#ifdef PASSWD
 	sp = do_gpwent(optype,
 	  gimme,arglast);
 	goto array_return;
@@ -2073,9 +2162,16 @@ register int sp;
     case O_EPWENT:
 	value = (double) endpwent();
 	goto donumset;
+#else
+    case O_EPWENT:
+    case O_SPWENT:
+	fatal("Unsupported password function");
+	break;
+#endif
     case O_GGRNAM:
     case O_GGRGID:
     case O_GGRENT:
+#ifdef GROUP
 	sp = do_ggrent(optype,
 	  gimme,arglast);
 	goto array_return;
@@ -2085,10 +2181,20 @@ register int sp;
     case O_EGRENT:
 	value = (double) endgrent();
 	goto donumset;
+#else
+    case O_EGRENT:
+    case O_SGRENT:
+	fatal("Unsupported group function");
+	break;
+#endif
     case O_GETLOGIN:
+#ifdef GETLOGIN
 	if (!(tmps = getlogin()))
 	    goto say_undef;
 	str_set(str,tmps);
+#else
+	fatal("Unsupported function getlogin");
+#endif
 	break;
     case O_OPENDIR:
     case O_READDIR:
@@ -2108,6 +2214,7 @@ register int sp;
 	value = (double)do_syscall(arglast);
 	goto donumset;
     case O_PIPE:
+#ifdef PIPE
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
@@ -2118,6 +2225,9 @@ register int sp;
 	    stab2 = stabent(str_get(st[2]),TRUE);
 	do_pipe(str,stab,stab2);
 	STABSET(str);
+#else
+	fatal("Unsupported function pipe");
+#endif
 	break;
     }
 

@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 3.0.1.4 90/03/12 16:24:40 lwall Locked $
+/* $Header: consarg.c,v 3.0.1.5 90/03/27 15:36:45 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
+ * Revision 3.0.1.5  90/03/27  15:36:45  lwall
+ * patch16: support for machines that can't cast negative floats to unsigned ints
+ * 
  * Revision 3.0.1.4  90/03/12  16:24:40  lwall
  * patch13: return (@array) did counter-intuitive things
  * 
@@ -338,7 +341,7 @@ register ARG *arg;
 		str_numset(str,str_gnum(s1) / value);
 	    break;
 	case O_MODULO:
-	    tmplong = (long)str_gnum(s2);
+	    tmplong = (unsigned long)str_gnum(s2);
 	    if (tmplong == 0L) {
 		yyerror("Illegal modulus of constant zero");
 		break;
@@ -407,19 +410,19 @@ register ARG *arg;
 	case O_BIT_AND:
 	    value = str_gnum(s1);
 #ifndef lint
-	    str_numset(str,(double)(((long)value) & ((long)str_gnum(s2))));
+	    str_numset(str,(double)(U_L(value) & U_L(str_gnum(s2))));
 #endif
 	    break;
 	case O_XOR:
 	    value = str_gnum(s1);
 #ifndef lint
-	    str_numset(str,(double)(((long)value) ^ ((long)str_gnum(s2))));
+	    str_numset(str,(double)(U_L(value) ^ U_L(str_gnum(s2))));
 #endif
 	    break;
 	case O_BIT_OR:
 	    value = str_gnum(s1);
 #ifndef lint
-	    str_numset(str,(double)(((long)value) | ((long)str_gnum(s2))));
+	    str_numset(str,(double)(U_L(value) | U_L(str_gnum(s2))));
 #endif
 	    break;
 	case O_AND:
@@ -455,7 +458,7 @@ register ARG *arg;
 	    break;
 	case O_COMPLEMENT:
 #ifndef lint
-	    str_numset(str,(double)(~(long)str_gnum(s1)));
+	    str_numset(str,(double)(~U_L(str_gnum(s1))));
 #endif
 	    break;
 	case O_SIN:

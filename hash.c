@@ -1,4 +1,4 @@
-/* $Header: hash.c,v 3.0.1.2 89/12/21 20:03:39 lwall Locked $
+/* $Header: hash.c,v 3.0.1.3 90/03/27 15:59:09 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.c,v $
+ * Revision 3.0.1.3  90/03/27  15:59:09  lwall
+ * patch16: @dbmvalues{'foo','bar'} could use the same cache entry for both values
+ * 
  * Revision 3.0.1.2  89/12/21  20:03:39  lwall
  * patch7: errno may now be a macro with an lvalue
  * 
@@ -161,12 +164,14 @@ register int hash;
     }
 #ifdef SOME_DBM
     else if (tb->tbl_dbm) {		/* is this just a cache for dbm file? */
+	void hentdelayfree();
+
 	entry = tb->tbl_array[hash & tb->tbl_max];
 	oentry = &entry->hent_next;
 	entry = *oentry;
 	while (entry) {	/* trim chain down to 1 entry */
 	    *oentry = entry->hent_next;
-	    hentfree(entry);		/* no doubt they'll want this next. */
+	    hentdelayfree(entry);	/* no doubt they'll want this next. */
 	    entry = *oentry;
 	}
     }
@@ -312,6 +317,17 @@ register HENT *hent;
     if (!hent)
 	return;
     str_free(hent->hent_val);
+    Safefree(hent->hent_key);
+    Safefree(hent);
+}
+
+void
+hentdelayfree(hent)
+register HENT *hent;
+{
+    if (!hent)
+	return;
+    str_2static(hent->hent_val);	/* free between statements */
     Safefree(hent->hent_key);
     Safefree(hent);
 }

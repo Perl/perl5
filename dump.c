@@ -1,4 +1,4 @@
-/* $Header: dump.c,v 3.0 89/10/18 15:11:16 lwall Locked $
+/* $Header: dump.c,v 3.0.1.1 90/03/27 15:49:58 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dump.c,v $
+ * Revision 3.0.1.1  90/03/27  15:49:58  lwall
+ * patch16: changed unsigned to unsigned int
+ * 
  * Revision 3.0  89/10/18  15:11:16  lwall
  * 3.0 baseline
  * 
@@ -217,7 +220,7 @@ register ARG *arg;
 
 dump_flags(b,flags)
 char *b;
-unsigned flags;
+unsigned int flags;
 {
     *b = '\0';
     if (flags & AF_ARYOK)

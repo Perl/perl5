@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.6 90/03/12 16:33:02 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.7 90/03/27 15:48:42 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.7  90/03/27  15:48:42  lwall
+ * patch16: MSDOS support
+ * patch16: use of $`, $& or $' sometimes causes memory leakage
+ * patch16: splice(@array,0,$n) case cause duplicate free
+ * patch16: grep blows up on undefined array values
+ * patch16: .. now works using magical string increment
+ * 
  * Revision 3.0.1.6  90/03/12  16:33:02  lwall
  * patch13: added list slice operator (LIST)[LIST]
  * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
@@ -42,6 +49,10 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+
+#ifdef BUGGY_MSC
+ #pragma function(memcmp)
+#endif /* BUGGY_MSC */
 
 int
 do_match(str,arg,gimme,arglast)
@@ -242,6 +253,8 @@ yup:
     if (sawampersand) {
 	char *tmps;
 
+	if (spat->spat_regexp->subbase)
+	    Safefree(spat->spat_regexp->subbase);
 	tmps = spat->spat_regexp->subbase = nsavestr(t,strend-t);
 	tmps = spat->spat_regexp->startp[0] = tmps + (s - t);
 	spat->spat_regexp->endp[0] = tmps + spat->spat_short->str_cur;
@@ -261,6 +274,10 @@ nope:
     st[++sp] = str;
     return sp;
 }
+
+#ifdef BUGGY_MSC
+ #pragma intrinsic(memcmp)
+#endif /* BUGGY_MSC */
 
 int
 do_split(str,spat,limit,gimme,arglast)
@@ -846,6 +863,7 @@ int *arglast;
 		for (i = offset; i > 0; i--)	/* can't trust Copy */
 		    *dst-- = *src--;
 	    }
+	    Zero(ary->ary_array, -diff, STR*);
 	    ary->ary_array -= diff;		/* diff is negative */
 	    ary->ary_max += diff;
 	}
@@ -956,7 +974,10 @@ int *arglast;
     }
     arg = arg[1].arg_ptr.arg_arg;
     while (i-- > 0) {
-	stab_val(defstab) = st[src];
+	if (st[src])
+	    stab_val(defstab) = st[src];
+	else
+	    stab_val(defstab) = str_static(&str_undef);
 	(void)eval(arg,G_SCALAR,sp);
 	st = stack->ary_array;
 	if (str_true(st[sp+1]))
@@ -1124,17 +1145,36 @@ int *arglast;
 {
     STR **st = stack->ary_array;
     register int sp = arglast[0];
-    register int i = (int)str_gnum(st[sp+1]);
+    register int i;
     register ARRAY *ary = stack;
     register STR *str;
-    int max = (int)str_gnum(st[sp+2]);
+    int max;
 
     if (gimme != G_ARRAY)
 	fatal("panic: do_range");
 
-    while (i <= max) {
-	(void)astore(ary, ++sp, str = str_static(&str_no));
-	str_numset(str,(double)i++);
+    if (st[sp+1]->str_nok ||
+      (looks_like_number(st[sp+1]) && *st[sp+1]->str_ptr != '0') ) {
+	i = (int)str_gnum(st[sp+1]);
+	max = (int)str_gnum(st[sp+2]);
+	while (i <= max) {
+	    (void)astore(ary, ++sp, str = str_static(&str_no));
+	    str_numset(str,(double)i++);
+	}
+    }
+    else {
+	STR *final = str_static(st[sp+2]);
+	char *tmps = str_get(final);
+
+	str = str_static(st[sp+1]);
+	while (!str->str_nok && str->str_cur <= final->str_cur &&
+	    strNE(str->str_ptr,tmps) ) {
+	    (void)astore(ary, ++sp, str);
+	    str = str_static(str);
+	    str_inc(str);
+	}
+	if (strEQ(str->str_ptr,tmps))
+	    (void)astore(ary, ++sp, str);
     }
     return sp;
 }
