@@ -69,6 +69,127 @@ Version 5.004_68        Developer release working toward 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1207] By: gsar                                  on 1998/06/23  10:55:05
+        Log: final touches to 5.004_68
+     Branch: perl
+           ! perl.c
+____________________________________________________________________________
+[  1206] By: gsar                                  on 1998/06/23  10:50:10
+        Log: more MULTIPLICITY tweaks
+     Branch: perl
+	   ! objpp.h perl.c perl.h proto.h win32/GenCAPI.pl win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/config_H.bc
+           ! win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  1205] By: gsar                                  on 1998/06/23  09:03:46
+        Log: partial MULTIPLICITY cleanup
+     Branch: perl
+	   ! embedvar.h interp.sym intrpvar.h perl.c perlvars.h proto.h
+           ! thrdvar.h
+____________________________________________________________________________
+[  1204] By: gsar                                  on 1998/06/23  09:00:48
+        Log: tweak MANIFEST, add Dev_t to POSIX/typemap
+     Branch: perl
+           ! MANIFEST Porting/makerel README.win32 ext/POSIX/typemap
+____________________________________________________________________________
+[  1203] By: gsar                                  on 1998/06/23  07:08:02
+        Log: bump patchlevel to 68, Porting/makerel tweaks
+     Branch: perl
+	   ! Porting/makerel patchlevel.h win32/Makefile win32/config_H.bc
+           ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
+[  1202] By: gsar                                  on 1998/06/23  06:16:19
+        Log: remove atomic.h pending resolution of licensing issues,
+             EMULATE_ATOMIC_REFCOUNTS everywhere
+     Branch: perl
+           - atomic.h
+           ! MANIFEST perl.h sv.h
+____________________________________________________________________________
+[  1201] By: gsar                                  on 1998/06/23  06:06:23
+        Log: applied patch, regen headers
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Message-Id: <199806220819.EAA03295@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_67] Malloc size feedback
+             Date: Mon, 22 Jun 1998 04:19:45 -0400 (EDT)
+     Branch: perl
+	   ! ObjXSub.h av.c embed.h global.sym hv.c malloc.c objpp.h perl.c
+           ! pp_sys.c proto.h sv.c toke.c
+____________________________________________________________________________
+[  1200] By: gsar                                  on 1998/06/23  05:59:09
+        Log: Message-Id: <m0yoIgR-000EP2C@alias-2.pr.mcs.net>
+             Date: Mon, 22 Jun 1998 21:19:43 -0500 (CDT)
+             From: Stephen McCamant <alias@mcs.com>
+             Subject: [PATCH] Inheritance of B:: classes
+     Branch: perl
+           ! ext/B/B.pm
+____________________________________________________________________________
+[  1199] By: gsar                                  on 1998/06/23  05:57:58
+        Log: applied patch, moved #define mkfifo ... from perl.h to POSIX.xs
+             Date: Tue, 23 Jun 1998 00:01:02 +0300 (EET DST)
+             Message-Id: <199806222101.AAA16456@alpha.hut.fi>
+             Subject: [PATCH] _67: somebody said POSIX::mknod?
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+     Branch: perl
+	   ! Configure config_h.SH ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod
+           ! ext/POSIX/POSIX.xs perl.h
+____________________________________________________________________________
+[  1198] By: gsar                                  on 1998/06/23  05:48:56
+        Log: Date: Mon, 22 Jun 1998 14:10:46 -0600 (MDT)
+             From: Daniel Grisinger <dgris@perrin.dimensional.com>
+             Subject: PATCH [5.004_67] perldoc.PL
+             Message-ID: <Pine.LNX.3.96.980622135953.10412A-100000@perrin.dimensional.com>
+     Branch: perl
+           ! utils/perldoc.PL
+____________________________________________________________________________
+[  1197] By: gsar                                  on 1998/06/23  05:47:24
+        Log: Message-Id: <3.0.5.32.19980622092918.00aa46e0@ous.edu>
+             Date: Mon, 22 Jun 1998 09:29:18 -0700
+             From: Dan Sugalski <sugalskd@ous.edu>
+             Subject: [PATCH 5.004_67] Autosplit's not qite case-insensitive enough on VMS
+     Branch: perl
+           ! lib/AutoSplit.pm
+____________________________________________________________________________
+[  1196] By: gsar                                  on 1998/06/23  05:45:19
+        Log: Date: Mon, 22 Jun 1998 18:58:55 +0300 (EET DST)
+             Message-Id: <199806221558.SAA18626@alpha.hut.fi>
+             Subject: [PATCH] 5.004_67: Fcntl: add few constants, enhance maintainability
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+     Branch: perl
+           ! ext/Fcntl/Fcntl.pm ext/Fcntl/Fcntl.xs
+____________________________________________________________________________
+[  1195] By: gsar                                  on 1998/06/23  05:43:32
+        Log: Message-Id: <v03110700b1b41e1760b2@[195.95.102.55]>
+             Date: Mon, 22 Jun 1998 15:22:24 +0000
+             From: Dominic Dunlop <domo@vo.lu>
+             Subject: [PATCH 5.004_67] Amend tests/regexp.t for variable REG_INFTY;
+             update machten.sh to vary REG_INFTY
+     Branch: perl
+           ! hints/machten.sh t/op/re_tests t/op/regexp.t
+____________________________________________________________________________
+[  1194] By: gsar                                  on 1998/06/23  05:38:36
+        Log: filter out array subscripts when generating symbols for AIX
+             Date: Mon, 22 Jun 1998 12:14:31 +0300 (EET DST)
+             Message-Id: <199806220914.MAA13631@alpha.hut.fi>
+             Subject: [PATCH] 5.004_67: perl.exp bug, AIX unhappy
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+     Branch: perl
+           ! perl_exp.SH
+____________________________________________________________________________
+[  1193] By: gsar                                  on 1998/06/23  05:32:52
+        Log: updated hints file to cope with buggy sigsetjmp() on Solaris-x86
+             Message-Id: <199806221102.NAA12106@alanya.m.isar.de>
+             Date: Mon, 22 Jun 1998 13:02:45 +0200 (MET DST)
+             From: Lupe Christoph <lupe@alanya.m.isar.de>
+             Subject: Re: Perl 5.004_67: Death is on vacation - miniperl can't die 
+     Branch: perl
+           ! hints/solaris_2.sh
+____________________________________________________________________________
+[  1192] By: gsar                                  on 1998/06/23  05:27:13
+        Log: add detailed changelogs and 'genlog'--the script which generates them
+     Branch: perl
+           + Porting/genlog
+           ! Changes INSTALL
+____________________________________________________________________________
 [  1191] By: gsar                                  on 1998/06/22  15:56:27
         Log: tweak win32 makefiles for PERL_OBJECT build
      Branch: perl

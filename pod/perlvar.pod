@@ -717,6 +717,12 @@ Start with single-step on.
 Note that some bits may be relevent at compile-time only, some at
 run-time only. This is a new mechanism and the details may change.
 
+=item $^R
+
+The result of evaluation of the last successful L<perlre/C<(?{ code })>> 
+regular expression assertion.  (Excluding those used as switches.)  May
+be written to.
+
 =item $^S
 
 Current state of the interpreter.  Undefined if parsing of the current
