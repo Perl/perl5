@@ -94,3 +94,8 @@ NOOP
 SAVE_DEFSV
 PERL_UNUSED_DECL
 dNOOP
+
+get_cv
+get_av
+get_hv
+get_sv

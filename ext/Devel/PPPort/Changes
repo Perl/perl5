@@ -1,3 +1,6 @@
+2.003 - 8th May 2003
+
+    * Added get_av, get_cv, get_hv and get_sv
 
 2.002 - 2nd December 2001
 
