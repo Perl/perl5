@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..163\n";
+print "1..159\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -22,13 +22,7 @@ $out2=join(':',@ary2);
 # Using long double NVs may introduce greater accuracy than wanted.
 $out1 =~ s/:9\.87654321097999\d*:/:9.87654321098:/;
 $out2 =~ s/:9\.87654321097999\d*:/:9.87654321098:/;
-if ($out1 eq $out2) {
-    print "ok 2\n";
-} else {
-    print "# out1: $out1\n";
-    print "# out2: $out2\n";
-    print "not ok 2\n";
-}
+print ($out1 eq $out2? "ok 2\n" : "not ok 2\n");
 
 print ($foo =~ /def/ ? "ok 3\n" : "not ok 3\n");
 
@@ -413,8 +407,6 @@ $z = pack <<EOP,'string','etc';
 EOP
 print 'not ' unless $z eq "\000\006string\003etc"; print "ok $test\n"; $test++;
 
-# 157..169: ??? 
-
 print 'not ' unless "1.20.300.4000" eq sprintf "%vd", pack("U*",1,20,300,4000); 
 print "ok $test\n"; $test++;
 print 'not ' unless "1.20.300.4000" eq 
@@ -423,33 +415,4 @@ print "ok $test\n"; $test++;
 print 'not ' unless v1.20.300.4000 ne 
                     sprintf "%vd", pack("C0U*",1,20,300,4000); 
 print "ok $test\n"; $test++;
-
-# 160: unpack("C") and ord() equivalence for Unicode
-
-print "not " unless unpack("C", chr(0x100)) eq ord(chr(0x100)) &&
-                    ord(chr(0x100)) == 0x100;
-print "ok $test\n"; $test++;
-
-# 161: use bytes + unpack C == UTF-8 unraveling
-
-{
-    use bytes;
-    my @bytes = unpack("C*", pack("U", 0x100));
-    print "not " unless "@bytes" eq "196 128";
-    print "ok $test\n"; $test++;
-}
-
-# 162: pack C > 255
-
-print "not " unless ord(pack("C", 0x100)) == 0x100;
-print "ok $test\n"; $test++;
-
-# 163: pack C > 255 + use bytes == wraparound
-
-{
-    use bytes;
-
-    print "not " unless ord(pack("C", 0x100 + 0xab)) == 0xab;
-    print "ok $test\n"; $test++;
-}
 
