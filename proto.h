@@ -1068,7 +1068,7 @@ STATIC void	S_force_ident(pTHX_ char *s, int kind);
 STATIC void	S_incline(pTHX_ char *s);
 STATIC int	S_intuit_method(pTHX_ char *s, GV *gv);
 STATIC int	S_intuit_more(pTHX_ char *s);
-STATIC I32	S_lop(pTHX_ I32 f, expectation x, char *s);
+STATIC I32	S_lop(pTHX_ I32 f, int x, char *s);
 STATIC void	S_missingterm(pTHX_ char *s);
 STATIC void	S_no_op(pTHX_ char *what, char *s);
 STATIC void	S_set_csh(pTHX);

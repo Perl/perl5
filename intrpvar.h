@@ -234,7 +234,7 @@ PERLVAR(Icshlen,	I32)
 
 PERLVAR(Ilex_state,	U32)		/* next token is determined */
 PERLVAR(Ilex_defer,	U32)		/* state after determined token */
-PERLVAR(Ilex_expect,	expectation)	/* expect after determined token */
+PERLVAR(Ilex_expect,	int)		/* expect after determined token */
 PERLVAR(Ilex_brackets,	I32)		/* bracket count */
 PERLVAR(Ilex_formbrack,	I32)		/* bracket count at outer format level */
 PERLVAR(Ilex_casemods,	I32)		/* casemod count */
@@ -258,7 +258,7 @@ PERLVAR(Ibufptr,	char *)
 PERLVAR(Ioldbufptr,	char *)
 PERLVAR(Ioldoldbufptr,	char *)
 PERLVAR(Ibufend,	char *)
-PERLVARI(Iexpect,expectation,	XSTATE)	/* how to interpret ambiguous tokens */
+PERLVARI(Iexpect,int,	XSTATE)		/* how to interpret ambiguous tokens */
 
 PERLVAR(Imulti_start,	I32)		/* 1st line of multi-line string */
 PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */

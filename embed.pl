@@ -2141,7 +2141,7 @@ s	|void	|force_ident	|char *s|int kind
 s	|void	|incline	|char *s
 s	|int	|intuit_method	|char *s|GV *gv
 s	|int	|intuit_more	|char *s
-s	|I32	|lop		|I32 f|expectation x|char *s
+s	|I32	|lop		|I32 f|int x|char *s
 s	|void	|missingterm	|char *s
 s	|void	|no_op		|char *what|char *s
 s	|void	|set_csh

@@ -672,7 +672,7 @@ S_uni(pTHX_ I32 f, char *s)
  */
 
 STATIC I32
-S_lop(pTHX_ I32 f, expectation x, char *s)
+S_lop(pTHX_ I32 f, int x, char *s)
 {
     dTHR;
     yylval.ival = f;
@@ -5707,7 +5707,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 			funny, dest, brack, funny, dest, brack);
 		}
 		bracket++;
-		PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR | XFAKEBRACK;
+		PL_lex_brackstack[PL_lex_brackets++] = (char)(XOPERATOR | XFAKEBRACK);
 		return s;
 	    }
 	} 
