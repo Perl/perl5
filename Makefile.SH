@@ -904,8 +904,8 @@ regen_all: $(PERLYVMS) regen regen_pods
 .PHONY:	manisort manicheck
 
 manisort:	FORCE
-	LC_ALL=C sort -fc MANIFEST || (echo "WARNING: re-sorting MANIFEST"; \
-		LC_ALL=C sort -fo MANIFEST MANIFEST)
+	LC_ALL=C sort -fdc MANIFEST || (echo "WARNING: re-sorting MANIFEST"; \
+		LC_ALL=C sort -fdo MANIFEST MANIFEST)
 
 manicheck:	FORCE
 	perl Porting/manicheck

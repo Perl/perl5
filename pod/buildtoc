@@ -547,7 +547,7 @@ sub do_manifest {
   # Dictionary order - fold and handle non-word chars as nothing
   map  { $_->[0] }
   sort { $a->[1] cmp $b->[1] || $a->[0] cmp $b->[0] }
-  map  { [ $_, lc $_ ] }
+  map  { my $f = $_; $f =~ s/[^a-z\s]//g; [ $_, $f ] }
     @manifest,
       &generate_manifest_pod(),
 	&generate_manifest_readme();
