@@ -143,7 +143,8 @@ Perl_ithread_hook(pTHX)
     int veto_cleanup = 0;
     MUTEX_LOCK(&create_destruct_mutex);
     if (aTHX == PL_curinterp && active_threads != 1) {
-	Perl_warn(aTHX_ "Cleanup skipped %d active threads", active_threads);
+	Perl_warn(aTHX_ "A thread exited while %" IVdf " other threads were still running",
+						(IV)active_threads);
 	veto_cleanup = 1;
     }
     MUTEX_UNLOCK(&create_destruct_mutex);
@@ -279,7 +280,7 @@ Perl_ithread_run(void * arg) {
 		}
 		PUTBACK;
 		if (SvTRUE(ERRSV)) {
-		    Perl_warn(aTHX_ "Died:%_",ERRSV);
+		    Perl_warn(aTHX_ "Died:%" SVf,ERRSV);
 		}
 		FREETMPS;
 		LEAVE;
@@ -467,7 +468,7 @@ Perl_ithread_CLONE(pTHX_ SV *obj)
   }
  else
   {
-   Perl_warn(aTHX_ "CLONE %_",obj);
+   Perl_warn(aTHX_ "CLONE %" SVf,obj);
   }
 }
 
@@ -600,7 +601,12 @@ PPCODE:
 }
 
 void
-ithread_yield(ithread *thread)
+yield(...)
+CODE:
+{
+    YIELD;
+}
+	
 
 void
 ithread_detach(ithread *thread)

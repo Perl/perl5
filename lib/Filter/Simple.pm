@@ -4,7 +4,7 @@ use Text::Balanced ':ALL';
 
 use vars qw{ $VERSION @EXPORT };
 
-$VERSION = '0.77';
+$VERSION = '0.78';
 
 use Filter::Util::Call;
 use Carp;
@@ -20,7 +20,7 @@ sub import {
 sub FILTER (&;$) {
 	my $caller = caller;
 	my ($filter, $terminator) = @_;
-	no warnings 'redefine';
+	local $SIG{__WARN__} = sub{};
 	*{"${caller}::import"} = gen_filter_import($caller,$filter,$terminator);
 	*{"${caller}::unimport"} = gen_filter_unimport($caller);
 }
@@ -98,6 +98,7 @@ my %selector_for = (
 sub gen_std_filter_for {
 	my ($type, $transform) = @_;
 	return sub { my (@pieces, $instr);
+			$DB::single=1;
 		     for (extract_multiple($_,$extractor_for{$type})) {
 			if (ref())     { push @pieces, $_; $instr=0 }
 			elsif ($instr) { $pieces[-1] .= $_ }
@@ -388,6 +389,8 @@ In other words, the previous example, would become:
 
         1 ;
 
+Note that the source code is passed as a single string, so any regex that
+uses C<^> or C<$> to detect line boundaries will need the C</m> flag.
 
 =head2 Disabling or changing <no> behaviour
 
@@ -453,7 +456,7 @@ or:
         }
         { terminator => "" };
 
-B<Note that, no matter what you set the terminator pattern too,
+B<Note that, no matter what you set the terminator pattern to,
 the actual terminator itself I<must> be contained on a single source line.>
 
 
@@ -525,7 +528,7 @@ For example:
 
 	FILTER_ONLY
 		code      => sub { s/BANG\s+BANG/die 'BANG' if \$BANG/g },
-		quotelike => sub { s/BANG\s+BANG/CHITTY CHITYY/g };
+		quotelike => sub { s/BANG\s+BANG/CHITTY CHITTY/g };
 
 The C<"code"> subroutine will only be used to filter parts of the source
 code that are not quotelikes, POD, or C<__DATA__>. The C<quotelike>
@@ -573,7 +576,7 @@ found in the source code.
 Note that you can also apply two or more of the same type of filter in
 a single C<FILTER_ONLY>. For example, here's a simple 
 macro-preprocessor that is only applied within regexes,
-with a final debugging pass that printd the resulting source code:
+with a final debugging pass that prints the resulting source code:
 
 	use Regexp::Common;
 	FILTER_ONLY
@@ -651,7 +654,7 @@ C<import> subroutine you might have explicitly declared.
 
 However, Filter::Simple is smart enough to notice your existing
 C<import> and Do The Right Thing with it.
-That is, if you explcitly define an C<import> subroutine in a package
+That is, if you explicitly define an C<import> subroutine in a package
 that's using Filter::Simple, that C<import> subroutine will still
 be invoked immediately after any filter you install.
 

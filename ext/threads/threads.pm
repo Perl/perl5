@@ -45,7 +45,7 @@ require DynaLoader;
 
 our @ISA = qw(Exporter DynaLoader);
 
-our %EXPORT_TAGS = ( all => [qw()]);
+our %EXPORT_TAGS = ( all => [qw(yield)]);
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -161,7 +161,10 @@ to get current thread id if you don't have your thread handy.
 =item threads->yield();
 
 This will tell the OS to let this thread yield CPU time to other threads.
-However this is highly depending on the underlying thread implmentation.
+However this is highly depending on the underlying thread implementation.
+
+You may do C<use threads qw(yield)> then use just a bare C<yield> in your
+code.
 
 =item threads->list();
 
@@ -180,11 +183,12 @@ returns a thread object.
 
 =over 4
 
-=item Cleanup skipped %d active threads
+=item A thread exited while %d other threads were still running
 
-The main thread exited while there were still other threads running.
-This is not a good sign: you should either explicitly join the threads,
-or somehow be certain that all the non-main threads have finished.
+A thread (not necessarily the main thread) exited while there were
+still other threads running.  Usually it's a good idea to first collect
+the return values of the created threads by joining them, and only then
+exit from then main thread.
 
 =back
 
@@ -243,9 +247,6 @@ Vipul Ved Prakash E<lt>mail at vipul.netE<gt>
 Helping with debugging.
 
 please join perl-ithreads@perl.org for more information
-
-
-
 
 =head1 SEE ALSO
 

@@ -74,6 +74,7 @@ SKIP: {
 	}
 
 	main::skip("Win32: different stat-info on filehandle", 1) if $^O eq 'MSWin32';
+	main::skip("dos: inode number is fake on dos", 1) if $^O eq 'dos';
 
 	main::is( "@$stat", "@$stat3", '... and must match normal stat' );
 }

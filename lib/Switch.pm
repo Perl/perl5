@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.06';
+$VERSION = '2.07';
 
 
 # LOAD FILTERING MODULE...
@@ -22,7 +22,6 @@ my ($Perl5, $Perl6) = (0,0);
 
 sub import
 {
-	$DB::single = 1;
 	$fallthrough = grep /\bfallthrough\b/, @_;
 	$offset = (caller)[2]+1;
 	filter_add({}) unless @_>1 && $_[1] eq 'noimport';
@@ -92,6 +91,7 @@ sub filter_blocks
 			   || $Perl6 && $source =~ /when|given/;
 	pos $source = 0;
 	my $text = "";
+	$DB::single = 1;
 	component: while (pos $source < length $source)
 	{
 		if ($source =~ m/(\G\s*use\s+Switch\b)/gc)
@@ -116,15 +116,20 @@ sub filter_blocks
 		}
 
 		if ($Perl5 && $source =~ m/\G(\n*)(\s*)(switch)\b(?=\s*[(])/gc
-		 || $Perl6 && $source =~ m/\G(\n*)(\s*)(given)\b(?=\s*[(])/gc)
+		 || $Perl6 && $source =~ m/\G(\n*)(\s*)(given)\b(?=\s*[(])/gc
+		 || $Perl6 && $source =~ m/\G(\n*)(\s*)(given)\b(.*)(?=\{)/gc)
 		{
 			my $keyword = $3;
+			my $arg = $4;
+			# print  STDERR "[$arg]\n";
 			$text .= $1.$2.'S_W_I_T_C_H: while (1) ';
-			@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\(/,qr/\)/,qr/[[{(<]/,qr/[]})>]/,undef) 
-			or do {
-				die "Bad $keyword statement (problem in the parentheses?) near $Switch::file line ", line(substr($source,0,pos $source),$line), "\n";
-			};
-			my $arg = filter_blocks(substr($source,$pos[0],$pos[4]-$pos[0]),line(substr($source,0,$pos[0]),$line));
+			unless ($arg) {
+				@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\(/,qr/\)/,qr/[[{(<]/,qr/[]})>]/,undef) 
+				or do {
+					die "Bad $keyword statement (problem in the parentheses?) near $Switch::file line ", line(substr($source,0,pos $source),$line), "\n";
+				};
+				$arg = filter_blocks(substr($source,$pos[0],$pos[4]-$pos[0]),line(substr($source,0,$pos[0]),$line));
+			}
 			$arg =~ s {^\s*[(]\s*%}   { ( \\\%}	||
 			$arg =~ s {^\s*[(]\s*m\b} { ( qr}	||
 			$arg =~ s {^\s*[(]\s*/}   { ( qr/}	||
@@ -171,7 +176,7 @@ sub filter_blocks
 				$text .= " $code)";
 			}
 			elsif ($Perl5 && $source =~ m/\G\s*(([^\$\@{])[^\$\@{]*)(?=\s*{)/gc
-			   ||  $Perl6 && $source =~ m/\G\s*([^:;]*)()/gc) {
+			   ||  $Perl6 && $source =~ m/\G\s*([^;{]*)()/gc) {
 				my $code = filter_blocks($1,line(substr($source,0,pos $source),$line));
 				$text .= ' \\' if $2 eq '%';
 				$text .= " $code)";
@@ -180,8 +185,8 @@ sub filter_blocks
 				die "Bad $keyword statement (invalid $keyword value?) near $Switch::file line ", line(substr($source,0,pos $source), $line), "\n";
 			}
 
-		        die "Missing colon or semi-colon after 'when' value near $Switch::file line ", line(substr($source,0,pos $source), $line), "\n"
-				unless !$Perl6 || $source =~ m/\G(\s*)(:|(?=;))/gc;
+		        die "Missing opening brace or semi-colon after 'when' value near $Switch::file line ", line(substr($source,0,pos $source), $line), "\n"
+				unless !$Perl6 || $source =~ m/\G(\s*)(?=;|\{)/gc;
 
 			do{@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\{/,qr/\}/,qr/\{/,qr/\}/,undef)}
 			or do {
@@ -487,8 +492,8 @@ Switch - A switch statement for Perl
 
 =head1 VERSION
 
-This document describes version 2.06 of Switch,
-released November 14, 2001.
+This document describes version 2.07 of Switch,
+released May 15, 2002.
 
 =head1 SYNOPSIS
 
@@ -739,23 +744,25 @@ Perl 6 will provide a built-in switch statement with essentially the
 same semantics as those offered by Switch.pm, but with a different
 pair of keywords. In Perl 6 C<switch> with be spelled C<given>, and
 C<case> will be pronounced C<when>. In addition, the C<when> statement
-will use a colon between its case value and its block (removing the
-need to parenthesize variables.
+will not require switch or case values to be parenthesized.
 
-This future syntax is also available via the Switch.pm module, by
+This future syntax is also (largely) available via the Switch.pm module, by
 importing it with the argument C<"Perl6">.  For example:
 
         use Switch 'Perl6';
 
         given ($val) {
-                when 1 :      { handle_num_1(); }
-                when $str1 :  { handle_str_1(); }
-                when [0..9] : { handle_num_any(); last }
-                when /\d/ :   { handle_dig_any(); }
-                when /.*/ :   { handle_str_any(); }
+                when 1       { handle_num_1(); }
+                when ($str1) { handle_str_1(); }
+                when [0..9]  { handle_num_any(); last }
+                when /\d/    { handle_dig_any(); }
+                when /.*/    { handle_str_any(); }
         }
 
-Note that you can mix and match both syntaxes by importing the module
+Note that scalars still need to be parenthesized, since they would be
+ambiguous in Perl 5.
+
+Note too that you can mix and match both syntaxes by importing the module
 with:
 
 	use Switch 'Perl5', 'Perl6';

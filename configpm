@@ -541,6 +541,7 @@ sub import {
     $platform = '***replace-marker***';
   }
   @INC = map {/\blib\b/?(do{local $_=$_;s/\blib\b/xlib\/$platform/;$_},$_):($_)} @INC;
+  $::Cross::platform = $platform;
 }
 
 1;

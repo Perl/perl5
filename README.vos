@@ -316,6 +316,22 @@ supported epoch is January 1, 1980 to January 17, 2038.
 See the file pod/perlport.pod for more information about the VOS
 port of Perl.
 
+=head2 Handling of underflow and overflow
+
+VOS does not support automatically mapping overflowed
+floating-point values to +infinity, nor automatically mapping
+underflowed floating-point values to -infinity, unlike many
+other platforms.  The Perl pack function has been modified to
+perform such mapping in software on VOS.  Performing other
+floating-point computations that underflow or overflow will
+probably result in SIGFPE.  Don't push your luck.
+
+=head1 TEST STATUS
+
+When Perl is built using the native build process on VOS Release
+14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
+pass or result in TODO (ignored) failures.
+
 =head1 SUPPORT STATUS
 
 I'm offering this port "as is".  You can ask me questions, but I
@@ -334,6 +350,6 @@ Paul Green (Paul.Green@stratus.com)
 
 =head1 LAST UPDATE
 
-May 5, 2002
+May 13, 2002
 
 =cut

@@ -437,9 +437,9 @@ CROSS_NAME	= wince
 
 PROCESSOR_ARCHITECTURE = $(TARGETCPU)
 ARCHNAME	= $(PLATFORM)-$(OSVERSION)-$(PROCESSOR_ARCHITECTURE)
-# unused yet
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
+XCOREDIR	= ..\xlib\$(CROSS_NAME)\CORE
 AUTODIR		= ..\lib\auto
 LIBDIR		= ..\lib
 EXTDIR		= ..\ext
@@ -516,15 +516,21 @@ $(o).dll:
 	$(RSC) -i.. $<
 
 # This must be relative to ../lib/CORE, else the ext dll build fails...
-PERLIMPLIB_EXP	= ..\..\wince\$(MACHINE)\perl$(PV).lib
+PERLIMPLIB_EXP	= ..\..\..\xlib\$(CROSS_NAME)\CORE\perl$(PV).lib
 PERLIMPLIB	= $(PERLCEDIR)\$(MACHINE)\perl$(PV).lib
 PERLDLL		= $(MACHINE)\perl$(PV).dll
 
 DLLDIR          = $(MACHINE)\dll
 PERLEXE		= $(MACHINE)\perl.exe
 
-CONFIGPM	= ..\lib\Config.pm
+CONFIGPM	= ..\xlib\$(CROSS_NAME)\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
+
+# Nominate a target which causes extensions to be re-built
+# This used to be $(PERLEXE), but at worst it is the .dll that they depend
+# on and really only the interface - i.e. the .def file used to export symbols
+# from the .dll
+PERLDEP		= perldll.def
 
 MAKE		= nmake -nologo
 
@@ -534,7 +540,7 @@ CFGH_TMPL	= config_H.ce
 #
 # filenames given to xsubpp must have forward slashes (since it puts
 # full pathnames in #line strings)
-XSUBPP		= $(HPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
+XSUBPP		= $(HPERL) -I..\..\lib -MCross=$(CROSS_NAME) ..\$(EXTUTILSDIR)\xsubpp \
 		-C++ -prototypes
 
 MICROCORE_SRC	=		\
@@ -759,18 +765,22 @@ all: hostminiperl $(MINIMOD) $(CONFIGPM) $(PERLEXE)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
-$(CONFIGPM): config.h ..\config.sh ..\minimod.pl
-	cd .. && $(HPERL) configpm
+$(CONFIGPM): .\config.h ..\config.sh ..\minimod.pl
 	cd .. && $(HPERL) configpm --cross=$(CROSS_NAME) --no-glossary
-	-mkdir $(COREDIR)
-	$(XCOPY) ..\*.h $(COREDIR)\*.*
-	$(XCOPY) *.h $(COREDIR)\*.*
+	-mkdir $(XCOREDIR)
+	$(XCOPY) ..\*.h $(XCOREDIR)\*.*
+	$(XCOPY) *.h $(XCOREDIR)\*.*
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
-	$(RCOPY) include $(COREDIR)\*.*
-	$(HPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)"
+	$(RCOPY) include $(XCOREDIR)\*.*
+	-$(HPERL) -I..\lib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(XCOREDIR)"
+	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
-..\config.sh config.h: config.ce config_sh.PL
-	$(HPERL) -I..\lib config_sh.PL $(CFG_VARS) config.ce > ..\config.sh
+.\config.h:
+	-del /f config.h
+	copy config_H.ce config.h
+
+..\config.sh: config.ce config_sh.PL
+	$(HPERL) -I..\lib -I..\win32 config_sh.PL $(CFG_VARS) config.ce > ..\config.sh
 
 $(MINIMOD) : ..\minimod.pl
 	cd .. && $(HPERL) minimod.pl > lib\ExtUtils\Miniperl.pm
@@ -781,8 +791,8 @@ perlmain.c : runperl.c
 $(DYNALOADER).c: $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib $(*B)_pm.PL
-	$(HPERL) -I..\..\lib XSLoader_pm.PL
+	$(HPERL) -I..\..\lib -MCross=$(CROSS_NAME) $(*B)_pm.PL
+	$(HPERL) -I..\..\lib -MCross=$(CROSS_NAME) XSLoader_pm.PL
 	cd ..\..\wince
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	$(XCOPY) $(EXTDIR)\$(*B)\XSLoader.pm $(LIBDIR)\$(NULL)
@@ -793,105 +803,115 @@ $(DYNALOADER).c: $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	$(COPY) dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
+#----------------------------------------------------------------------------------
+Extensions: ..\win32\buildext.pl $(PERLDEP) $(CONFIGPM)
+	$(HPERL) -I..\lib -I..\win32 -MCross=$(CROSS_NAME) ..\win32\buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) \
+	!Errno !File/Glob !POSIX !Time/HiRes
+
+Extensions_clean: 
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
+
+#----------------------------------------------------------------------------------
+
 $(DUMPER_DLL): $(PERLEXE) $(DUMPER).xs
 	cd $(EXTDIR)\Data\$(*B)
-	$(HPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(DPROF_DLL): $(PERLEXE) $(DPROF).xs
 	cd $(EXTDIR)\Devel\$(*B)
-	$(HPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(GLOB_DLL): $(PERLEXE) $(GLOB).xs
 	cd $(EXTDIR)\File\$(*B)
-	$(HPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(PEEK_DLL): $(PERLEXE) $(PEEK).xs
 	cd $(EXTDIR)\Devel\$(*B)
-	$(HPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(RE_DLL): $(PERLEXE) $(RE).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(B_DLL): $(PERLEXE) $(B).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(THREAD_DLL): $(PERLEXE) $(THREAD).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(POSIX_DLL): $(PERLEXE) $(POSIX).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(IO_DLL): $(PERLEXE) $(IO).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(SDBM_FILE_DLL) : $(PERLEXE) $(SDBM_FILE).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(FCNTL_DLL): $(PERLEXE) $(FCNTL).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(OPCODE_DLL): $(PERLEXE) $(OPCODE).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(HOSTNAME_DLL): $(PERLEXE) $(HOSTNAME).xs
 	cd $(EXTDIR)\Sys\$(*B)
-	$(HPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B)
-	$(HPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(HPERL) -I..\..\lib -MCross Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
@@ -1051,7 +1071,8 @@ XPERLEXEOBJS = \
 $(MACHINE)\perlmain.obj
 
 $(PERLEXE) : $(PERLDLL) $(CONFIGPM) $(XPERLEXEOBJS) $(PERLEXE_RES) $(STARTOBJS)
-	$(LINK32) $(SUBSYS) $(LDLIBPATH) \
+	$(XCOPY) $(MACHINE)\*.lib $(XCOREDIR)
+        $(LINK32) $(SUBSYS) $(LDLIBPATH) \
             -entry:wWinMainCRTStartup \
             -out:$(MACHINE)\perl.exe \
             -stack:0x100000 $(LINK_FLAGS) $(STARTOBJS) $(XPERLEXEOBJS) \
@@ -1100,7 +1121,7 @@ install: all
 	-cemkdir "$(INSTALL_ROOT)\lib"
 	$(CECOPY) "pc:$(MACHINE)/perl.exe" "ce:$(INSTALL_ROOT)/bin"
 	$(CECOPY) "pc:$(MACHINE)/perl$(PV).dll" "ce:$(INSTALL_ROOT)/bin"
-	$(CECOPY) "pc:../xlib/wince/Config.pm" "ce:$(INSTALL_ROOT)/lib"
+	$(CECOPY) "pc:../xlib/$(CROSS_NAME)/Config.pm" "ce:$(INSTALL_ROOT)/lib"
 !endif
 
 perl.ico:

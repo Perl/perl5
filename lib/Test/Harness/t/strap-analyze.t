@@ -168,7 +168,7 @@ my %samples = (
                                          ({ 'ok'=> 1, actual_ok => 1 }) x 2
                                        ],
                           },
-               
+
    simple           => {
                         passing     => 1,
 
@@ -177,12 +177,12 @@ my %samples = (
 
                         max         => 5,
                         seen        => 5,
-                        
+
                         'ok'          => 5,
                         'todo'        => 0,
                         'skip'        => 0,
                         bonus       => 0,
-                        
+
                         details     => [ ({ 'ok' => 1, actual_ok => 1 }) x 5
                                        ]
                        },
@@ -195,12 +195,12 @@ my %samples = (
 
                         max         => 5,
                         seen        => 5,
-                        
+
                         'ok'          => 3,
                         'todo'        => 0,
                         'skip'        => 0,
                         bonus       => 0,
-                        
+
                         details     => [ { 'ok' => 1, actual_ok => 1 },
                                          { 'ok' => 0, actual_ok => 0 },
                                          { 'ok' => 1, actual_ok => 1 },
@@ -222,7 +222,7 @@ my %samples = (
                         'todo'        => 0,
                         'skip'        => 1,
                         bonus       => 0,
-                        
+
                         details     => [ { 'ok' => 1, actual_ok => 1 },
                                          { 'ok'   => 1, actual_ok => 1,
                                            type   => 'skip',
@@ -246,7 +246,7 @@ my %samples = (
                           'todo'    => 0,
                           'skip'    => 0,
                           bonus     => 0,
-                          
+
                           details   => [],
                          },
 
@@ -258,7 +258,7 @@ my %samples = (
 
                         max         => 5,
                         seen        => 5,
-                                    
+
                         'ok'          => 5,
                         'todo'        => 2,
                         'skip'        => 0,
@@ -370,27 +370,35 @@ my %samples = (
 
                         max         => 2,
                         seen        => 4,
-                        
+
                         'ok'          => 4,
                         'todo'        => 0,
                         'skip'        => 0,
                         bonus       => 0,
-                        
+
                         details     => [ { 'ok' => 1, actual_ok => 1 },
                                          { 'ok' => 1, actual_ok => 1 },
                                        ]
                        },
 );
 
-
 $SIG{__WARN__} = sub { 
     warn @_ unless $_[0] =~ /^Enourmous test number/ ||
                    $_[0] =~ /^Can't detailize/
 };
 while( my($test, $expect) = each %samples ) {
+    for (0..$#{$expect->{details}}) {
+        $expect->{details}[$_]{type} = ''
+            unless exists $expect->{details}[$_]{type};
+        $expect->{details}[$_]{name} = ''
+            unless exists $expect->{details}[$_]{name};
+        $expect->{details}[$_]{reason} = ''
+            unless exists $expect->{details}[$_]{reason};
+    }
+
     my $strap = Test::Harness::Straps->new;
     my %results = $strap->analyze_file("$SAMPLE_TESTS/$test");
-    
+
     is_deeply($results{details}, $expect->{details}, "$test details" );
 
     delete $expect->{details};

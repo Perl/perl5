@@ -744,6 +744,7 @@ my @layer_syms = qw(
 			 PerlIOBuf_bufsiz
 			 PerlIOBuf_fill
 			 PerlIOBuf_flush
+			 PerlIOBuf_get_base
 			 PerlIOBuf_get_cnt
 			 PerlIOBuf_get_ptr
 			 PerlIOBuf_open
@@ -1052,6 +1053,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    win32_link
 			    win32_unlink
 			    win32_utime
+			    win32_gettimeofday
 			    win32_uname
 			    win32_wait
 			    win32_waitpid

@@ -39,10 +39,21 @@ use vars qw(@RESTRICT_TESTS %R_HASH %U_HASH $UTF8_CROAK $RESTRICTED_CROAK);
 %R_HASH = (perl => 'rules');
 
 if ($] >= 5.007003) {
+  # This is cheating. "\xdf" in Latin 1 is beta S, so will match \w if it
+  # is stored in utf8, not bytes.
+  # "\xdf" is y diaresis in EBCDIC (except for cp875, but so far no-one seems
+  # to use that) which has exactly the same properties for \w
+  # So the tests happen to pass.
   my $utf8 = "Schlo\xdf" . chr 256;
   chop $utf8;
 
-  %U_HASH = (map {$_, $_} 'castle', "ch\xe5teau", $utf8, chr 0x57CE);
+  # \xe5 is V in EBCDIC. That doesn't have the same properties w.r.t. \w as
+  # an a circumflex, so we need to be explicit.
+
+  # and its these very properties we're trying to test - an edge case
+  # involving whether scalars are being stored in bytes or in utf8.
+  my $a_circumflex = (ord ('A') == 193 ? "\x47" : "\xe5");
+  %U_HASH = (map {$_, $_} 'castle', "ch${a_circumflex}teau", $utf8, chr 0x57CE);
   plan tests => 169;
 } elsif ($] >= 5.006) {
   plan tests => 59;
@@ -397,7 +408,7 @@ begin 301 Short 8 bit utf8 data as bytes
 end
 
 begin 301 Long 8 bit utf8 data
-M!04!```"`(MSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMS
+M!048```"`(MSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMS
 MBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+
 M<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMS
 MBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+<XMSBW.+
@@ -423,7 +434,7 @@ begin 301 Short 24 bit utf8 data as bytes
 end
 
 begin 301 Long 24 bit utf8 data
-M!04!```&`/M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M3
+M!048```&`/M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M3
 M0G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S
 M5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M3
 M0G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S5?M30G-S
@@ -467,25 +478,25 @@ begin 301 Hash with utf8 flag but no utf8 keys
 end
 
 begin 301 Hash with utf8 keys
-M!049``````0*!H.!HJ.3A0`````&@X&BHY.%%P3<9')5`0````3<9')5%P?B
-F@XB3EHMS`@````;B@XB3EM\*!X.(Y:.%@:0`````!X.(Y:.%@:0`
+M!049``````0*!X.(1Z.%@:0`````!X.(1Z.%@:0*!H.!HJ.3A0`````&@X&B
+FHY.%%P3<9')5`0````3<9')5%P?B@XB3EHMS`@````;B@XB3EM\`
 
 end
 
 begin 301 Locked hash with utf8 keys
-M!049`0````0*!H.!HJ.3A00````&@X&BHY.%%P3<9')5!0````3<9')5%P?B
-F@XB3EHMS!@````;B@XB3EM\*!X.(Y:.%@:0$````!X.(Y:.%@:0`
+M!049`0````0*!X.(1Z.%@:0$````!X.(1Z.%@:0*!H.!HJ.3A00````&@X&B
+FHY.%%P3<9')5!0````3<9')5%P?B@XB3EHMS!@````;B@XB3EM\`
 
 end
 
 begin 301 Hash with utf8 keys for pre 5.6
-M!049``````0*!H.!HJ.3A0`````&@X&BHY.%"@>#B.6CA8&D``````>#B.6C
-FA8&D"@?B@XB3EHMS`@````;B@XB3EM\*!-QD<E4`````!-QD<E4`
+M!049``````0*!H.!HJ.3A0`````&@X&BHY.%"@B#B(M&HX6!I``````'@XA'
+GHX6!I`H'XH.(DY:+<P(````&XH.(DY;?"@3<9')5``````3<9')5
 
 end
 
 begin 301 Hash with utf8 keys for 5.6
-M!049``````0*!H.!HJ.3A0`````&@X&BHY.%"@>#B.6CA8&D``````>#B.6C
+M!049``````0*!H.!HJ.3A0`````&@X&BHY.%"@>#B$>CA8&D``````>#B$>C
 FA8&D%P?B@XB3EHMS`@````;B@XB3EM\7!-QD<E4`````!-QD<E4`
 
 end

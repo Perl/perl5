@@ -1,3 +1,5 @@
+use warnings;
+
 BEGIN {
 #    chdir 't' if -d 't';
 #    push @INC ,'../lib';
@@ -12,6 +14,7 @@ BEGIN {
 sub ok {
     my ($id, $ok, $name) = @_;
 
+    $name = '' unless defined $name;
     # You have to do it this way or VMS will get confused.
     print $ok ? "ok $id - $name\n" : "not ok $id - $name\n";
 
@@ -36,7 +39,7 @@ share($foo);
 my %foo;
 share(%foo);
 $foo{"foo"} = \$foo;
-ok(2, ${$foo{foo}} == undef, "Check deref");
+ok(2, !defined ${$foo{foo}}, "Check deref");
 $foo = "test";
 ok(3, ${$foo{foo}} eq "test", "Check deref after assign");
 threads->create(sub{${$foo{foo}} = "test2";})->join();
@@ -58,7 +61,7 @@ ok(9, ${$foo{test}} eq "test", "Check reference");
 skip(10, _thrcnt($gg) == 2, "Check refcount");
 my $gg2 = delete($foo{test});
 skip(11, _thrcnt($gg) == 1, "Check refcount");
-ok(12, _id($gg) == _id($gg2),
+ok(12, _id($$gg) == _id($$gg2),
        sprintf("Check we get the same thing (%x vs %x)",
        _id($$gg),_id($$gg2)));
 ok(13, $$gg eq $$gg2, "And check the values are the same");

@@ -10,6 +10,11 @@
 ;# Baseline for first official release.
 ;#
 
+# NOTE THAT THIS FILE IS COPIED FROM ext/Storable/t/st-dump.pl
+# TO t/lib/st-dump.pl.  One could also play games with
+# File::Spec->updir and catdir to get the st-dump.pl in
+# ext/Storable into @INC.
+
 sub ok {
 	my ($num, $ok, $name) = @_;
         $num .= " - $name" if defined $name and length $name;

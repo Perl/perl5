@@ -13,6 +13,9 @@ $VERSION = '0.03';
 # most efficient. However streams are dodgy - see _syslog_send_stream
 #my @connectMethods = ( 'stream', 'unix', 'tcp', 'udp' );
 my @connectMethods = ( 'tcp', 'udp', 'unix', 'stream', 'console' );
+if ($^O =~ /^(freebsd|linux)$/) {
+    @connectMethods = grep { $_ ne 'udp' } @connectMethods;
+}
 my @defaultMethods = @connectMethods;
 my $syslog_path = undef;
 my $transmit_ok = 0;
@@ -557,7 +560,7 @@ sub connect_console {
 # 'protocol' never provides anything for us to read. But with 
 # judicious use of select(), we can see if it would be readable...
 sub connection_ok {
-    return 1 if ($current_proto eq 'console');
+    return 1 if (defined $current_proto && $current_proto eq 'console');
     my $rin = '';
     vec($rin, fileno(SYSLOG), 1) = 1;
     my $ret = select $rin, undef, $rin, 0;

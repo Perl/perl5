@@ -935,7 +935,7 @@ _cleaner2:
 	rm -rf lib/Encode
 	-rmdir lib/IO/Socket lib/IO/t lib/IO
 	-rmdir lib/Filter/Util lib/List lib/MIME lib/PerlIO lib/Scalar lib/Sys
-	-rmdir lib/Thread lib/XS lib/threads/shared lib/threads
+	-rmdir lib/Thread lib/XS lib/threads/shared lib/threads t/lib/B
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean
@@ -980,7 +980,7 @@ makedepend: makedepend.SH config.sh
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre _test_prep \
 	test_tty test-tty _test_tty test_notty test-notty _test_notty \
-	utest ucheck test.utf8 check.utf8 \
+	utest ucheck test.utf8 check.utf8 test.torture torturetest \
 	test.third check.third utest.third ucheck.third test_notty.third \
 	test.deparse test_notty.deparse \
 	minitest coretest
@@ -1036,6 +1036,11 @@ test-prep:	test_prep
 test-tty:	test_tty
 
 test-notty:	test_notty
+
+# Torture testing
+
+test.torture torturetest:	test_prep
+	PERL=./perl TEST_ARGS=-torture $(MAKE) _test
 
 # Targets for Third Degree testing.
 

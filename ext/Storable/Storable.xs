@@ -179,9 +179,9 @@ typedef double NV;			/* Older perls lack the NV type */
 #define SX_BYTE		C(8)	/* (signed) byte forthcoming */
 #define SX_NETINT	C(9)	/* Integer in network order forthcoming */
 #define SX_SCALAR	C(10)	/* Scalar (binary, small) follows (length, data) */
-#define SX_TIED_ARRAY  C(11)  /* Tied array forthcoming */
-#define SX_TIED_HASH   C(12)  /* Tied hash forthcoming */
-#define SX_TIED_SCALAR C(13)  /* Tied scalar forthcoming */
+#define SX_TIED_ARRAY	C(11)	/* Tied array forthcoming */
+#define SX_TIED_HASH	C(12)	/* Tied hash forthcoming */
+#define SX_TIED_SCALAR	C(13)	/* Tied scalar forthcoming */
 #define SX_SV_UNDEF	C(14)	/* Perl's immortal PL_sv_undef */
 #define SX_SV_YES	C(15)	/* Perl's immortal PL_sv_yes */
 #define SX_SV_NO	C(16)	/* Perl's immortal PL_sv_no */
@@ -189,11 +189,11 @@ typedef double NV;			/* Older perls lack the NV type */
 #define SX_IX_BLESS	C(18)	/* Object is blessed, classname given by index */
 #define SX_HOOK		C(19)	/* Stored via hook, user-defined */
 #define SX_OVERLOAD	C(20)	/* Overloaded reference */
-#define SX_TIED_KEY C(21)   /* Tied magic key forthcoming */
-#define SX_TIED_IDX C(22)   /* Tied magic index forthcoming */
-#define SX_UTF8STR	C(23)   /* UTF-8 string forthcoming (small) */
-#define SX_LUTF8STR	C(24)   /* UTF-8 string forthcoming (large) */
-#define SX_FLAG_HASH	C(25)   /* Hash with flags forthcoming (size, flags, key/flags/value triplet list) */
+#define SX_TIED_KEY	C(21)	/* Tied magic key forthcoming */
+#define SX_TIED_IDX	C(22)	/* Tied magic index forthcoming */
+#define SX_UTF8STR	C(23)	/* UTF-8 string forthcoming (small) */
+#define SX_LUTF8STR	C(24)	/* UTF-8 string forthcoming (large) */
+#define SX_FLAG_HASH	C(25)	/* Hash with flags forthcoming (size, flags, key/flags/value triplet list) */
 #define SX_ERROR	C(26)	/* Error */
 
 /*
@@ -210,7 +210,7 @@ typedef double NV;			/* Older perls lack the NV type */
  */
 
 #define SX_CLASS	'b'		/* Object is blessed, class name length <255 */
-#define SX_LG_CLASS 'B'		/* Object is blessed, class name length >255 */
+#define SX_LG_CLASS	'B'		/* Object is blessed, class name length >255 */
 #define SX_STORED	'X'		/* End of object */
 
 /*
@@ -378,7 +378,7 @@ typedef struct stcxt {
 
 #define dSTCXT_PTR(T,name)							\
 	T name = ((perinterp_sv && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)	\
-				? (T)SvPVX(SvRV((SV*)SvIVX(perinterp_sv))) : (T) 0))
+				? (T)SvPVX(SvRV(INT2PTR(SV*,SvIVX(perinterp_sv)))) : (T) 0))
 #define dSTCXT										\
 	dSTCXT_SV;										\
 	dSTCXT_PTR(stcxt_t *, cxt)
@@ -2954,7 +2954,7 @@ static int store_other(stcxt_t *cxt, SV *sv)
 
 	len = strlen(buf);
 	STORE_SCALAR(buf, len);
-	TRACEME(("ok (dummy \"%s\", length = %"IVdf")", buf, len));
+	TRACEME(("ok (dummy \"%s\", length = %"IVdf")", buf, (IV) len));
 
 	return 0;
 }
@@ -3784,7 +3784,7 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 	 */
 
 	TRACEME(("calling STORABLE_thaw on %s at 0x%"UVxf" (%"IVdf" args)",
-		 class, PTR2UV(sv), AvFILLp(av) + 1));
+		 class, PTR2UV(sv), (IV) AvFILLp(av) + 1));
 
 	rv = newRV(sv);
 	(void) scalar_call(rv, hook, clone, av, G_SCALAR|G_DISCARD);
@@ -4125,7 +4125,7 @@ static SV *retrieve_lscalar(stcxt_t *cxt, char *cname)
 	SV *sv;
 
 	RLEN(len);
-	TRACEME(("retrieve_lscalar (#%d), len = %"IVdf, cxt->tagnum, len));
+	TRACEME(("retrieve_lscalar (#%d), len = %"IVdf, cxt->tagnum, (IV) len));
 
 	/*
 	 * Allocate an empty scalar of the suitable length.
@@ -4150,7 +4150,7 @@ static SV *retrieve_lscalar(stcxt_t *cxt, char *cname)
 	if (cxt->s_tainted)				/* Is input source tainted? */
 		SvTAINT(sv);				/* External data cannot be trusted */
 
-	TRACEME(("large scalar len %"IVdf" '%s'", len, SvPVX(sv)));
+	TRACEME(("large scalar len %"IVdf" '%s'", (IV) len, SvPVX(sv)));
 	TRACEME(("ok (retrieve_lscalar at 0x%"UVxf")", PTR2UV(sv)));
 
 	return sv;

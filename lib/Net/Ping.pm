@@ -1,6 +1,6 @@
 package Net::Ping;
 
-# $Id: Ping.pm,v 1.33 2002/05/03 21:54:59 rob Exp $
+# $Id: Ping.pm,v 1.34 2002/05/06 17:37:54 rob Exp $
 
 require 5.002;
 require Exporter;
@@ -16,7 +16,7 @@ use POSIX qw(ECONNREFUSED);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.17";
+$VERSION = "2.18";
 
 # Constants
 
@@ -672,7 +672,7 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.33 2002/05/03 21:54:59 rob Exp $
+$Id: Ping.pm,v 1.34 2002/05/06 17:37:54 rob Exp $
 
 =head1 SYNOPSIS
 

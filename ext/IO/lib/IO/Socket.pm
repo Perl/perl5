@@ -381,7 +381,7 @@ failure.
 
 The timeout in the [PKG] can be specified as zero to effect a "poll",
 but you shouldn't do that because a new IO::Select object will be
-created behind the scenes just do to the single poll.  This is
+created behind the scenes just to do the single poll.  This is
 horrendously inefficient.  Use rather true select() with a zero
 timeout on the handle, or non-blocking IO.
 

@@ -1681,6 +1681,12 @@ PerlProcSignal(struct IPerlProc* piPerl, int sig, Sighandler_t subcode)
     return win32_signal(sig, subcode);
 }
 
+int
+PerlProcGetTimeOfDay(struct IPerlProc* piPerl, struct timeval *t, void *z)
+{
+    return win32_gettimeofday(t, z);
+}
+
 #ifdef USE_ITHREADS
 static THREAD_RET_TYPE
 win32_start_child(LPVOID arg)
@@ -1934,7 +1940,8 @@ struct IPerlProc perlProc =
     PerlProcSpawnvp,
     PerlProcASpawn,
     PerlProcLastHost,
-    PerlProcPopenList
+    PerlProcPopenList,
+    PerlProcGetTimeOfDay
 };
 
 

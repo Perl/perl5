@@ -41,11 +41,7 @@ static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #ifdef USE_UTF8_SCRIPTS
 #   define UTF (!IN_BYTES)
 #else
-#   ifdef EBCDIC /* For now 'use utf8' does not affect tokenizer on EBCDIC */
-#       define UTF (PL_linestr && DO_UTF8(PL_linestr))
-#   else
-#       define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || (PL_hints & HINT_UTF8))
-#   endif
+#   define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || (PL_hints & HINT_UTF8))
 #endif
 
 /* In variables named $^X, these are the legal values for X.
@@ -4051,7 +4047,7 @@ Perl_yylex(pTHX)
 		    if (ckWARN(WARN_RESERVED)) {
 			if (lastchar != '-') {
 			    for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
-			    if (!*d && strNE(PL_tokenbuf,"main"))
+			    if (!*d && !gv_stashpv(PL_tokenbuf,FALSE))
 				Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
 				       PL_tokenbuf);
 			}

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May  2 01:39:49 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Thu May 16 17:03:39 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1858,6 +1858,11 @@ if test X"$trnl" = X; then
 	esac
 fi
 if test X"$trnl" = X; then
+       case "`echo foo|tr '\r\n' xy 2>/dev/null`" in
+       fooxy) trnl='\n\r' ;;
+       esac
+fi
+if test X"$trnl" = X; then
 	cat <<EOM >&2
 
 $me: Fatal Error: cannot figure out how to translate newlines with 'tr'.
@@ -3435,11 +3440,10 @@ cat <<EOM
 Perl can be built to take advantage of threads on some systems.
 To do so, Configure can be run with -Dusethreads.
 
-Note that threading is a highly experimental feature, and
-some known race conditions still remain.  If you choose to try
-it, be very sure to not actually deploy it for production
-purposes.  README.threads has more details, and is required
-reading if you enable threads.
+Note that Perl built with threading support runs slightly slower
+and uses more memory than plain Perl. The current implementation
+is believed to be stable, but it is fairly new, and so should be
+treated with caution.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
@@ -3456,11 +3460,13 @@ case "$usethreads" in
 $define)
 	$cat <<EOM
 
-As of release 5.6, Perl has two different threading implementations,
-an interpreter-based version (ithreads) with one interpreter per
-thread, and the 5.005 version (5005threads).  Both implementations
-are considered experimental, but since 5.8 ithreads somewhat less so.
-The 5005threads is effectively unmaintained.
+Since release 5.6, Perl has had two different threading implementations,
+the newer interpreter-based version (ithreads) with one interpreter per
+thread, and the older 5.005 version (5005threads).
+The 5005threads version is effectively unmaintained and will probably be
+removed in Perl 5.10, so there should be no need to build a Perl using it
+unless needed for backwards compatibility with some existing 5.005threads
+code.
 
 EOM
 	: Default to ithreads unless overridden on command line or with
@@ -3472,7 +3478,7 @@ EOM
 	case "$useithreads" in
 		$undef|false|[nN]*) dflt='n';;
 	esac
-	rp='Use interpreter-based ithreads?'
+	rp='Use the newer interpreter-based ithreads?'
 	. ./myread
 	case "$ans" in
 	y|Y)    val="$define" ;;
@@ -4847,131 +4853,6 @@ EOM
 esac
 $rm -f try try.*
 
-: check for void type
-echo " "
-echo "Checking to see how well your C compiler groks the void type..." >&4
-case "$voidflags" in
-'')
-	$cat >try.c <<'EOCP'
-#if TRY & 1
-void sub() {
-#else
-sub() {
-#endif
-	extern void moo();	/* function returning void */
-	void (*goo)();		/* ptr to func returning void */
-#if TRY & 8
-	void *hue;		/* generic ptr */
-#endif
-#if TRY & 2
-	void (*foo[10])();
-#endif
-
-#if TRY & 4
-	if(goo == moo) {
-		exit(0);
-	}
-#endif
-	exit(0);
-}
-int main() { sub(); }
-EOCP
-	if $cc $ccflags -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
-		voidflags=$defvoidused
-	echo "Good.  It appears to support void to the level $package wants.">&4
-		if $contains warning .out >/dev/null 2>&1; then
-			echo "However, you might get some warnings that look like this:"
-			$cat .out
-		fi
-	else
-echo "Hmm, your compiler has some difficulty with void. Checking further..." >&4
-		if $cc $ccflags -c -DTRY=1 try.c >/dev/null 2>&1; then
-			echo "It supports 1..."
-			if $cc $ccflags -c -DTRY=3 try.c >/dev/null 2>&1; then
-				echo "It also supports 2..."
-				if $cc $ccflags -c -DTRY=7 try.c >/dev/null 2>&1; then
-					voidflags=7
-					echo "And it supports 4 but not 8 definitely."
-				else
-					echo "It doesn't support 4..."
-					if $cc $ccflags -c -DTRY=11 try.c >/dev/null 2>&1; then
-						voidflags=11
-						echo "But it supports 8."
-					else
-						voidflags=3
-						echo "Neither does it support 8."
-					fi
-				fi
-			else
-				echo "It does not support 2..."
-				if $cc $ccflags -c -DTRY=13 try.c >/dev/null 2>&1; then
-					voidflags=13
-					echo "But it supports 4 and 8."
-				else
-					if $cc $ccflags -c -DTRY=5 try.c >/dev/null 2>&1; then
-						voidflags=5
-						echo "And it supports 4 but has not heard about 8."
-					else
-						echo "However it supports 8 but not 4."
-					fi
-				fi
-			fi
-		else
-			echo "There is no support at all for void."
-			voidflags=0
-		fi
-	fi
-esac
-case "$voidflags" in
-"$defvoidused") ;;
-*)	$cat >&4 <<'EOM'
-  Support flag bits are:
-    1: basic void declarations.
-    2: arrays of pointers to functions returning void.
-    4: operations between pointers to and addresses of void functions.
-    8: generic void pointers.
-EOM
-	dflt="$voidflags";
-	rp="Your void support flags add up to what?"
-	. ./myread
-	voidflags="$ans"
-	;;
-esac
-$rm -f try.* .out
-
-: check for length of pointer
-echo " "
-case "$ptrsize" in
-'')
-	echo "Checking to see how big your pointers are..." >&4
-	if test "$voidflags" -gt 7; then
-		echo '#define VOID_PTR char *' > try.c
-	else
-		echo '#define VOID_PTR void *' > try.c
-	fi
-	$cat >>try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof(VOID_PTR));
-    exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		ptrsize=`$run ./try`
-		echo "Your pointers are $ptrsize bytes long."
-	else
-		dflt='4'
-		echo "(I can't seem to compile the test program.  Guessing...)" >&4
-		rp="What is the size of a pointer (in bytes)?"
-		. ./myread
-		ptrsize="$ans"
-	fi
-	;;
-esac
-$rm -f try.c try
-
 : check for long long
 echo " "
 echo "Checking to see if you have long long..." >&4
@@ -5367,31 +5248,6 @@ Since you have chosen a maximally 64-bit build, I'm also turning on
 the use of 64-bit integers.
 EOM
 		use64bitint="$define" ;;
-	esac
-	;;
-esac
-
-case "$use64bitall" in
-"$define"|true|[yY]*)
-	case "$ptrsize" in
-	4)	cat <<EOM >&4
-
-*** You have chosen a maximally 64-bit build, but your pointers
-*** are only 4 bytes wide, disabling maximal 64-bitness.
-
-EOM
-		use64bitall="$undef"
-		case "$use64bitint" in
-		"$define"|true|[yY]*) ;;
-		*)	cat <<EOM >&4
-
-*** Downgrading from maximal 64-bitness to using 64-bit integers.
-
-EOM
-			use64bitint="$define"
-			;;
-		esac
-		;;
 	esac
 	;;
 esac
@@ -6757,6 +6613,156 @@ eval $inhdr
 : see if stdlib is available
 set stdlib.h i_stdlib
 eval $inhdr
+
+: check for void type
+echo " "
+echo "Checking to see how well your C compiler groks the void type..." >&4
+case "$voidflags" in
+'')
+	$cat >try.c <<'EOCP'
+#if TRY & 1
+void sub() {
+#else
+sub() {
+#endif
+	extern void moo();	/* function returning void */
+	void (*goo)();		/* ptr to func returning void */
+#if TRY & 8
+	void *hue;		/* generic ptr */
+#endif
+#if TRY & 2
+	void (*foo[10])();
+#endif
+
+#if TRY & 4
+	if(goo == moo) {
+		exit(0);
+	}
+#endif
+	exit(0);
+}
+int main() { sub(); }
+EOCP
+	if $cc $ccflags -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
+		voidflags=$defvoidused
+	echo "Good.  It appears to support void to the level $package wants.">&4
+		if $contains warning .out >/dev/null 2>&1; then
+			echo "However, you might get some warnings that look like this:"
+			$cat .out
+		fi
+	else
+echo "Hmm, your compiler has some difficulty with void. Checking further..." >&4
+		if $cc $ccflags -c -DTRY=1 try.c >/dev/null 2>&1; then
+			echo "It supports 1..."
+			if $cc $ccflags -c -DTRY=3 try.c >/dev/null 2>&1; then
+				echo "It also supports 2..."
+				if $cc $ccflags -c -DTRY=7 try.c >/dev/null 2>&1; then
+					voidflags=7
+					echo "And it supports 4 but not 8 definitely."
+				else
+					echo "It doesn't support 4..."
+					if $cc $ccflags -c -DTRY=11 try.c >/dev/null 2>&1; then
+						voidflags=11
+						echo "But it supports 8."
+					else
+						voidflags=3
+						echo "Neither does it support 8."
+					fi
+				fi
+			else
+				echo "It does not support 2..."
+				if $cc $ccflags -c -DTRY=13 try.c >/dev/null 2>&1; then
+					voidflags=13
+					echo "But it supports 4 and 8."
+				else
+					if $cc $ccflags -c -DTRY=5 try.c >/dev/null 2>&1; then
+						voidflags=5
+						echo "And it supports 4 but has not heard about 8."
+					else
+						echo "However it supports 8 but not 4."
+					fi
+				fi
+			fi
+		else
+			echo "There is no support at all for void."
+			voidflags=0
+		fi
+	fi
+esac
+case "$voidflags" in
+"$defvoidused") ;;
+*)	$cat >&4 <<'EOM'
+  Support flag bits are:
+    1: basic void declarations.
+    2: arrays of pointers to functions returning void.
+    4: operations between pointers to and addresses of void functions.
+    8: generic void pointers.
+EOM
+	dflt="$voidflags";
+	rp="Your void support flags add up to what?"
+	. ./myread
+	voidflags="$ans"
+	;;
+esac
+$rm -f try.* .out
+
+: check for length of pointer
+echo " "
+case "$ptrsize" in
+'')
+	echo "Checking to see how big your pointers are..." >&4
+	if test "$voidflags" -gt 7; then
+		echo '#define VOID_PTR char *' > try.c
+	else
+		echo '#define VOID_PTR void *' > try.c
+	fi
+	$cat >>try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof(VOID_PTR));
+    exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		ptrsize=`$run ./try`
+		echo "Your pointers are $ptrsize bytes long."
+	else
+		dflt='4'
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
+		rp="What is the size of a pointer (in bytes)?"
+		. ./myread
+		ptrsize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
+case "$use64bitall" in
+"$define"|true|[yY]*)
+	case "$ptrsize" in
+	4)	cat <<EOM >&4
+
+*** You have chosen a maximally 64-bit build, but your pointers
+*** are only 4 bytes wide, disabling maximal 64-bitness.
+
+EOM
+		use64bitall="$undef"
+		case "$use64bitint" in
+		"$define"|true|[yY]*) ;;
+		*)	cat <<EOM >&4
+
+*** Downgrading from maximal 64-bitness to using 64-bit integers.
+
+EOM
+			use64bitint="$define"
+			;;
+		esac
+		;;
+	esac
+	;;
+esac
+
 
 : determine which malloc to compile in
 echo " "
@@ -18900,7 +18906,7 @@ for i in \`$cc -v -c tmp.c 2>&1 $postprocess_cc_v\`
 do
 	case "\$i" in
 	-D*) echo "\$i" | $sed 's/^-D//';;
-	-A*) $test "$gccversion" && echo "\$i" | $sed 's/^-A\(.*\)(\(.*\))/\1=\2/';;
+	-A*) $test "$gccversion" && echo "\$i" | $sed 's/^-A//' | $sed 's/\(.*\)(\(.*\))/\1=\2/';;
 	esac
 done
 $rm -f try.c

@@ -587,7 +587,7 @@ prime_env_iter(void)
         Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Ill-formed message in prime_env_iter: |%s|",buf);
         continue;
       }
-      PERL_HASH(hash,key,keylen);
+      PERL_HASH(hash,(U8*)key,keylen);
       sv = newSVpvn(cp2,cp1 - cp2 + 1);
       SvTAINTED_on(sv);
       hv_store(envhv,key,keylen,sv,hash);
@@ -788,7 +788,7 @@ Perl_my_setenv(pTHX_ char *lnm,char *eqv)
 }
 /*}}}*/
 
-/*{{{static void vmssetuserlnm(char *name, char *eqv);
+/*{{{static void vmssetuserlnm(char *name, char *eqv); */
 /*  vmssetuserlnm
  *  sets a user-mode logical in the process logical name table
  *  used for redirection of sys$error

@@ -243,6 +243,12 @@ to be removed in a future release.
 
 =item *
 
+The 5.005 threads model (module C<Thread>) is deprecated and expected
+to be removed in Perl 5.10.  Multithreaded code should be migrated to
+the new ithreads model (see L<threads> and L<threads::shared>).
+
+=item *
+
 The long deprecated uppercase aliases for the string comparison
 operators (EQ, NE, LT, LE, GE, GT) have now been removed.
 
@@ -1577,8 +1583,9 @@ warning that there may be trouble ahead.
 
 =item *
 
-If binary compatibility with the 5.005 release is not wanted, Configure
-no longer suggests including the 5.005 modules in @INC.
+Since Perl 5.8 is not binary-compatible with previous releases
+of Perl, Configure no longer suggests including the 5.005
+modules in @INC.
 
 =item *
 
@@ -1720,6 +1727,15 @@ floating-point numbers is now more picky about using sprintf %.*g
 rules for the conversion.  Some platforms that used to use gcvt may
 now resort to the slower sprintf.
 
+=item *
+
+The obsolete method of making a special (e.g., debugging) flavor
+of perl by saying
+
+	make LIBPERL=libperld.a
+
+has been removed. Use -DDEBUGGING instead.
+
 =back
 
 =head2 New Or Improved Platforms
@@ -1811,6 +1827,13 @@ Perl has been tested with the GNU pth userlevel thread package
 ( http://www.gnu.org/software/pth/pth.html ) . All but one thread
 test worked, and that one failure was because of test results arriving
 in unexpected order.
+
+=item *
+
+Stratus VOS is now supported using Perl's native build method
+(Configure).  This is the recommended method to build Perl on
+VOS.  The older methods, which build miniperl, are still
+available.  See L<perlvos>.
 
 =item *
 
@@ -2321,6 +2344,15 @@ Solaris
 
 =item *
 
+Stratus VOS
+
+The native build method requires at least VOS Release 14.5.0
+and GNU C++/GNU Tools 2.0.1 or later.  The Perl pack function
+now maps overflowed values to +infinity and underflowed values
+to -infinity.
+
+=item *
+
 Tru64 (aka Digital UNIX, aka DEC OSF/1)
 
 The operating system version letter now recorded in $Config{osvers}.
@@ -2733,6 +2765,12 @@ One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
 works, but for example C<bin:perl -v> doesn't.  The exact reason isn't
 known but the current suspect is the F<ixemul> library.
 
+=head2 ext/threads/t/libc
+
+If this test fails, it indicates that your libc (C library) is not
+threadsafe.  This particular test stress tests the localtime() call to
+find out whether it is threadsafe.  See L<perlthrtut> for more information.
+
 =head2 FreeBSD Failing locale Test 117 For ISO8859-15 Locales
 
 The ISO8859-15 locales may fail the locale test 117 in FreeBSD.
@@ -2779,11 +2817,18 @@ The following tests are known to fail:
  -------------------------------------------------------------------------
  ../ext/DB_File/t/db-btree.t    0    11    ??   ??       %  ??
  ../ext/DB_File/t/db-recno.t              149    3   2.01%  61 63 65
- ../ext/POSIX/t/posix.t                    31    1   3.23%  10
 
 If you are building on a UFS partition, you will also probably see
 t/op/stat.t subtest #9 fail.  This is caused by Darwin's UFS not
 supporting inode change time.
+
+Also the ext/POSIX/t/posix.t subtest #10 fails but it is skipped for
+now because the failure is Apple's fault, not Perl's (blocked signals
+are lost).
+
+If you Configure with ithreads, ext/threads/t/libc.t will fail, again
+not Perl's fault-- the libc of Mac OS X is not threadsafe (in this
+particular test the localtime() call is found to be threadunsafe.)
 
 =head2 op/sprintf tests 91, 129, and 130
 
@@ -2805,10 +2850,17 @@ In case you are still using Solaris 2.5 (aka SunOS 5.5), you may
 experience failures (the test core dumping) in lib/locale.t.
 The suggested cure is to upgrade your Solaris.
 
+=head2 Stratus VOS
+
+When Perl is built using the native build process on VOS Release
+14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
+pass or result in TODO (ignored) failures.
+
 =head2 Failure of Thread (5.005-style) tests
 
-B<Note that support for 5.005-style threading remains experimental
-and practically unsupported.>
+B<Note that support for 5.005-style threading is deprecated,
+experimental and practically unsupported.  In 5.10 it is expected
+to be removed.>
 
 The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
@@ -2821,19 +2873,23 @@ the 5.005 threading implementation. These are not new failures--Perl
  ../lib/autouse.t                                10    1  10.00%  4
  op/flip.t                                       15    1   6.67%  15
 
-These failures are unlikely to get fixed as the 5.005-style
-threads are considered fundamentally broken.
+These failures are unlikely to get fixed as the 5.005-style threads
+are considered fundamentally broken.  (Basically what happens is that
+competing threads can corrupt shared global state.)
 
 =head2 UNICOS
 
  Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
  -------------------------------------------------------------------------
- ../ext/Socket/socketpair.t    1   256    45    1   2.22%  12
  ../lib/Math/Trig.t                       26    1   3.85%  25
  ../lib/warnings.t                       460    1   0.22%  425
- io/fs.t                                  36    1   2.78%  31
  op/numconvert.t                        1440   13   0.90%  208 509-510
  657-658 665-666 829-830 989-990 1149-1150
+
+The Trig and numconvert failures are caused by the slighly differing
+(from IEEE) floating point implementation of UNICOS.  The warnings
+failure is also related: the test assumes a certain floating point
+output format, this assumption fails in UNICOS.
 
 =head2 UNICOS/mk
 
@@ -2900,23 +2956,27 @@ better than it was in 5.6.0, it's just that so many new modules and
 tests have been added.
 
  Failed Test                   Stat Wstat Total Fail  Failed  List of Failed
- -------------------------------------------------------------------------------
- ../ext/Data/Dumper/t/dumper.t              339    8   2.36%  311 314 325 327
+ ---------------------------------------------------------------------------
+ ../ext/Data/Dumper/t/dumper.t              357    8   2.24%  311 314 325 327
                                                               331 333 337 339
  ../ext/IO/lib/IO/t/io_unix.t                 5    4  80.00%  2-5
- ../ext/Storable/t/utf8hash.t    10  2560   148   10   6.76%  1 5 72 76 143-148
- ../lib/utf8.t                               94   13  13.83%  27 30-31 43 46 73
-                                                              76 79 82 85 88 91
-                                                              94
+ ../ext/Storable/t/downgrade.t   12  3072   169   12   7.10%  14-15 46-47 78-79
+                                                              110-111 150 161
  ../lib/ExtUtils/t/Constant.t   121 30976    48   48 100.00%  1-48
  ../lib/ExtUtils/t/Embed.t                    9    9 100.00%  1-9
- op/pat.t                                   900    9   1.00%  242-243 665 776
-                                                              785 832-834 845
+ op/pat.t                                   910    7   0.77%  665 776 785 832-
+                                                              834 845
  op/sprintf.t                               224    3   1.34%  98 100 136
  op/tr.t                                     97    5   5.15%  63 71-74
- run/fresh_perl.t                            94    3   3.19%  92-94
  uni/fold.t                                 780    6   0.77%  61 169 196 661
                                                               710-711
+
+The dumper.t and downgrade.t are problems in the tests, the io_unix
+and sprintf are problems in the USS (UDP sockets and printf formats).
+The pat, tr, and fold are genuine Perl problems caused by EBCDIC (and
+in the pat and fold cases, combining that with Unicode).  The Constant
+and Embed are probably problems in the tests (since they test Perl's
+ability to build extensions, and that seems to be working reasonably well.)
 
 =head2 Localising Tied Arrays and Hashes Is Broken
 

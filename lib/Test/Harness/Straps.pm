@@ -1,12 +1,12 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Straps.pm,v 1.3 2002/04/30 04:55:27 schwern Exp $
+# $Id: Straps.pm,v 1.4 2002/05/05 02:32:54 schwern Exp $
 
 package Test::Harness::Straps;
 
 use strict;
 use vars qw($VERSION);
 use Config;
-$VERSION = '0.09';
+$VERSION = '0.10';
 
 use Test::Harness::Assert;
 use Test::Harness::Iterator;
@@ -137,11 +137,12 @@ sub _analyze_iterator {
                    todo     => 0,
                    skip     => 0,
                    bonus    => 0,
-                   
+
                    details  => []
                   );
 
-
+    # Set them up here so callbacks can have them.
+    $self->{totals}{$name}         = \%totals;
     while( defined(my $line = $it->next) ) {
         $self->_analyze_line($line, \%totals);
         last if $self->{saw_bailout};
@@ -155,7 +156,6 @@ sub _analyze_iterator {
                    $totals{max} == $totals{ok});
     $totals{passing} = $passed ? 1 : 0;
 
-    $self->{totals}{$name} = \%totals;
     return %totals;
 }
 
@@ -164,7 +164,7 @@ sub _analyze_line {
     my($self, $line, $totals) = @_;
 
     my %result = ();
-        
+
     $self->{line}++;
 
     my $type;
@@ -172,7 +172,7 @@ sub _analyze_line {
         $type = 'header';
 
         $self->{saw_header}++;
-        
+
         $totals->{max} += $self->{max};
     }
     elsif( $self->_is_test($line, \%result) ) {
@@ -633,8 +633,11 @@ sub _detailize {
     assert( !(grep !defined $details{$_}, keys %details),
             'test contains the ok and actual_ok info' );
 
+    # We don't want these to be undef because they are often
+    # checked and don't want the checker to have to deal with
+    # uninitialized vars.
     foreach my $piece (qw(name type reason)) {
-        $details{$piece} = $test->{$piece} if $test->{$piece};
+        $details{$piece} = defined $test->{$piece} ? $test->{$piece} : '';
     }
 
     return %details;

@@ -15,4 +15,4 @@ eval {
     'base'->import(qw(I::do::not::exist));
 };
 
-is( $@, '',   'diagnostics not tripped up by "use base qw(Dont::Exist)"' );
+like( $@, qr/^Base class package "I::do::not::exist" is empty/);

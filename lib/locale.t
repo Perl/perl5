@@ -725,6 +725,7 @@ foreach $Locale (@Locale) {
 	    print "# UPPER $x lc $y ",
 	    $x =~ /$y/i ? 1 : 0, " ",
 	    $y =~ /$x/i ? 1 : 0, "\n" if 0;
+	    #
 	    # If $x and $y contain regular expression characters
 	    # AND THEY lowercase (/i) to regular expression characters,
 	    # regcomp() will be mightily confused.  No, the \Q doesn't
@@ -732,12 +733,22 @@ foreach $Locale (@Locale) {
 	    # is done after the \Q?)  An example of this happening is
 	    # the bg_BG (Bulgarian) locale under EBCDIC (OS/390 USS):
 	    # the chr(173) (the "[") is the lowercase of the chr(235).
+	    #
 	    # Similarly losing EBCDIC locales include cs_cz, cs_CZ,
 	    # el_gr, el_GR, en_us.IBM-037 (!), en_US.IBM-037 (!),
 	    # et_ee, et_EE, hr_hr, hr_HR, hu_hu, hu_HU, lt_LT,
 	    # mk_mk, mk_MK, nl_nl.IBM-037, nl_NL.IBM-037,
 	    # pl_pl, pl_PL, ro_ro, ro_RO, ru_ru, ru_RU,
 	    # sk_sk, sk_SK, sl_si, sl_SI, tr_tr, tr_TR.
+	    #
+	    # Similar things can happen even under (bastardised)
+	    # non-EBCDIC locales: in many European countries before the
+	    # advent of ISO 8859-x nationally customised versions of
+	    # ISO 646 were devised, reusing certain punctuation
+	    # characters for modified characters needed by the
+	    # country/language.  For example, the "|" might have
+	    # stood for U+00F6 or LATIN SMALL LETTER O WITH DIAERESIS.
+	    #
 	    if ($x =~ $re || $y =~ $re) {
 		print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
 		next;

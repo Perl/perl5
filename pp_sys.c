@@ -173,6 +173,8 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 #  define FD_CLOEXEC 1		/* NeXT needs this */
 #endif
 
+#include "reentr.h"
+
 #undef PERL_EFF_ACCESS_R_OK	/* EFFective uid/gid ACCESS R_OK */
 #undef PERL_EFF_ACCESS_W_OK
 #undef PERL_EFF_ACCESS_X_OK
@@ -608,6 +610,7 @@ PP(pp_pipe_op)
 
     IoIFP(rstio) = PerlIO_fdopen(fd[0], "r");
     IoOFP(wstio) = PerlIO_fdopen(fd[1], "w");
+    IoOFP(rstio) = IoIFP(rstio);
     IoIFP(wstio) = IoOFP(wstio);
     IoTYPE(rstio) = IoTYPE_RDONLY;
     IoTYPE(wstio) = IoTYPE_WRONLY;
@@ -824,9 +827,7 @@ PP(pp_tie)
     if (sv_isobject(sv)) {
 	sv_unmagic(varsv, how);
 	/* Croak if a self-tie on an aggregate is attempted. */
-	if (varsv == SvRV(sv) &&
-	    (SvTYPE(sv) == SVt_PVAV ||
-	     SvTYPE(sv) == SVt_PVHV))
+	if (varsv == SvRV(sv) && how == PERL_MAGIC_tied)
 	    Perl_croak(aTHX_
 		       "Self-ties of arrays and hashes are not supported");
 	sv_magic(varsv, sv, how, Nullch, 0);

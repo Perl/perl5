@@ -1,4 +1,4 @@
-
+use warnings;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -10,11 +10,11 @@ BEGIN {
     }
 }
 
-
+use strict;
 use threads;
 use threads::shared::queue;
 
-$q = new threads::shared::queue;
+my $q = new threads::shared::queue;
 $|++;
 print "1..26\n";
 

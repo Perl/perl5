@@ -64,3 +64,18 @@ Revision history for Perl extension Filter::Simple
 0.77	Sat Nov 24 06:48:47 2001
 
 	- Re-allowed user-defined terminators to be regexes
+
+
+0.78	Fri May 17 09:38:56 2002
+
+	- Re-corified test modules in line with Jarkko's new scheme
+
+	- Various POD nits unknitted (thanks Autrijus)
+
+	- Added the missing DotsForArrows.pm demo file (thanks Autrijus)
+
+	- Added support for Perl 5.005
+
+	- added prereq for Text::Balanced in Makefile.PL
+
+	- Added note about use of /m flag when using ^ or $ in filter regexes

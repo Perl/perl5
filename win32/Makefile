@@ -824,12 +824,12 @@ config.w32 : $(CFGSH_TMPL)
 regen_config_h:
 	perl config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
 	cd ..
-	-del /f perl.exe
+	-del /f perl.exe perl*.dll
 	perl configpm
 	cd win32
 	-del /f $(CFGH_TMPL)
 	-mkdir $(COREDIR)
-	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
+	-perl config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl

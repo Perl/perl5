@@ -3192,14 +3192,16 @@ would lose the UTF-8'ness of the PV.
 void
 Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
-    SV *tmpsv = sv_newmortal();
+    SV *tmpsv;
 
-    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) ) {
-	tmpsv = AMG_CALLun(ssv,string);
+    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) && 
+	 (tmpsv = AMG_CALLun(ssv,string))) {
 	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv))) {
 	    SvSetSV(dsv,tmpsv);
 	    return;
 	}
+    } else {
+        tmpsv = sv_newmortal();
     }
     {
 	STRLEN len;
@@ -4466,7 +4468,9 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 	(SvTYPE(obj) == SVt_PVGV &&
 	    (GvSV(obj) == sv || GvHV(obj) == (HV*)sv || GvAV(obj) == (AV*)sv ||
 	    GvCV(obj) == (CV*)sv || GvIOp(obj) == (IO*)sv ||
-	    GvFORM(obj) == (CV*)sv)))
+	    GvFORM(obj) == (CV*)sv)) ||
+	(how == PERL_MAGIC_tiedscalar &&
+	    SvROK(obj) && (SvRV(obj) == sv || GvIO(SvRV(obj)) == (IO*)sv)))
     {
 	mg->mg_obj = obj;
     }
@@ -6334,7 +6338,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 	len = tmplen;
     }
     if (!hash)
-	PERL_HASH(hash, src, len);
+	PERL_HASH(hash, (U8*)src, len);
     new_SV(sv);
     sv_upgrade(sv, SVt_PVIV);
     SvPVX(sv) = sharepvn(src, is_utf8?-len:len, hash);
@@ -10470,9 +10474,10 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	  PUTBACK;
 	  s = SvPV(uni, len);
 	  if (s != SvPVX(sv)) {
-	       SvGROW(sv, len);
+	       SvGROW(sv, len + 1);
 	       Move(s, SvPVX(sv), len, char);
 	       SvCUR_set(sv, len);
+	       SvPVX(sv)[len] = 0;	
 	  }
 	  FREETMPS;
 	  LEAVE;

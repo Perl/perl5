@@ -1,3 +1,4 @@
+use warnings;
 
 BEGIN {
 #    chdir 't' if -d 't';
@@ -13,6 +14,7 @@ BEGIN {
 sub ok {
     my ($id, $ok, $name) = @_;
 
+    $name = '' unless defined $name;
     # You have to do it this way or VMS will get confused.
     print $ok ? "ok $id - $name\n" : "not ok $id - $name\n";
 
@@ -44,15 +46,15 @@ threads->create(sub { ok(3,$hash{"bar"} eq "thread1", "Check thread get and writ
     my $foo = delete($hash{"bar"});
     ok(4, $foo eq "thread1", "Check delete, want 'thread1' got '$foo'");
     $foo = delete($hash{"bar"});
-    ok(5, $foo == undef, "Check delete on empty value");
+    ok(5, !defined $foo, "Check delete on empty value");
 }
 ok(6, keys %hash == 1, "Check keys");
 $hash{"1"} = 1;
 $hash{"2"} = 2;
 $hash{"3"} = 3;
 ok(7, keys %hash == 4, "Check keys");
-ok(8, exists($hash{"1"}) == 1, "Exist on existing key");
-ok(9, exists($hash{"4"}) == undef, "Exists on non existing key");
+ok(8, exists($hash{"1"}), "Exist on existing key");
+ok(9, !exists($hash{"4"}), "Exists on non existing key");
 my %seen;
 foreach my $key ( keys %hash) {
     $seen{$key}++;

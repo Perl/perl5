@@ -147,6 +147,7 @@ sub postamble
 	    }
 	}
 	my $plib   = $self->{PERL_CORE} ? '"-I$(PERL_LIB)"' : '';
+	$plib .= " -MCross=$::Cross::platform" if defined $::Cross::platform;
 	my $ucopts = '-"Q"';
 	$str .=  
 	    qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};

@@ -1,5 +1,5 @@
 ==============================================================================
-                      Release of version 2.06 of Switch
+                      Release of version 2.07 of Switch
 ==============================================================================
 
 
@@ -26,16 +26,14 @@ COPYRIGHT
 
 ==============================================================================
 
-CHANGES IN VERSION 2.06
+CHANGES IN VERSION 2.07
 
 
-	- Fixed parsing of ternary operators in Switch'ed source code
-	  (at the expense of no longer correctly parsing ?...? regexes)
-	  (thanks Mark)
+	- Corified tests
 
-	- Fixed the parsing of embedded POD (thanks Brent)
-
-	- Fixed bug encountered when -s or -m file test used (thanks Jochen)
+	- Updated "Perl6" syntax to reflect current design
+	  (as far as possible -- can't eliminate need to parenthesize
+	  variables, since they're ambiguous in Perl 5)
 
 
 ==============================================================================

@@ -2011,7 +2011,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     meth = newSVpvn("import", 6);
     (void)SvUPGRADE(meth, SVt_PVIV);
     (void)SvIOK_on(meth);
-    PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
+    PERL_HASH(SvUVX(meth), (U8*)SvPVX(meth), SvCUR(meth));
     imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
 		   append_elem(OP_LIST,
 			       prepend_elem(OP_LIST, pack, list(arg)),
@@ -3402,7 +3402,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	    meth = newSVpvn("VERSION",7);
 	    sv_upgrade(meth, SVt_PVIV);
 	    (void)SvIOK_on(meth);
-	    PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
+	    PERL_HASH(SvUVX(meth), (U8*)SvPVX(meth), SvCUR(meth));
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 			    append_elem(OP_LIST,
 					prepend_elem(OP_LIST, pack, list(version)),
@@ -3426,7 +3426,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	meth = aver ? newSVpvn("import",6) : newSVpvn("unimport", 8);;
 	(void)SvUPGRADE(meth, SVt_PVIV);
 	(void)SvIOK_on(meth);
-	PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
+	PERL_HASH(SvUVX(meth), (U8*)SvPVX(meth), SvCUR(meth));
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 		       append_elem(OP_LIST,
 				   prepend_elem(OP_LIST, pack, list(arg)),

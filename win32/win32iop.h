@@ -134,6 +134,7 @@ DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
 DllExport  int          win32_link(const char *oldname, const char *newname);
 DllExport  int		win32_unlink(const char *f);
 DllExport  int		win32_utime(const char *f, struct utimbuf *t);
+DllExport  int		win32_gettimeofday(struct timeval *tp, void *not_used);
 DllExport  int		win32_uname(struct utsname *n);
 DllExport  int		win32_wait(int *status);
 DllExport  int		win32_waitpid(int pid, int *status, int flags);
@@ -178,6 +179,7 @@ END_EXTERN_C
 #undef ioctl
 #undef unlink
 #undef utime
+#undef gettimeofday
 #undef uname
 #undef wait
 
@@ -292,6 +294,7 @@ END_EXTERN_C
 #define link			win32_link
 #define unlink			win32_unlink
 #define utime			win32_utime
+#define gettimeofday		win32_gettimeofday
 #define uname			win32_uname
 #define wait			win32_wait
 #define waitpid			win32_waitpid

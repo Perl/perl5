@@ -19,6 +19,7 @@ if ($#ARGV >= 0) {
 	push( @argv, $ARGV[$idx] ), next unless $ARGV[$idx] =~ /^-(\S+)$/;
 	$core    = 1 if $1 eq 'core';
 	$verbose = 1 if $1 eq 'v';
+	$torture = 1 if $1 eq 'torture';
 	$with_utf= 1 if $1 eq 'utf8';
         $byte_compile = 1 if $1 eq 'bytecompile';
         $compile = 1 if $1 eq 'compile';
@@ -110,9 +111,11 @@ unless (@ARGV) {
     } else {
         warn "$0: cannot open $mani: $!\n";
     }
-    _find_tests('pod')  unless $core;
-    _find_tests('x2p')  unless $core;
-    _find_tests('japh') unless $core;
+    unless ($core) {
+	_find_tests('pod');  
+	_find_tests('x2p');
+	_find_tests('japh') if $torture;
+    }
 }
 
 # Tests known to cause infinite loops for the perlcc tests.
@@ -203,7 +206,7 @@ EOT
  	open(SCRIPT,"<$test") or die "Can't run $test.\n";
  	$_ = <SCRIPT>;
  	close(SCRIPT) unless ($type eq 'deparse');
- 	if (/#!.*\bperl.*-\w*([tT])/) {
+ 	if (/#!.*\bperl.*\s-\w*([tT])/) {
  	    $switch = qq{"-$1"};
  	}
  	else {
@@ -318,11 +321,11 @@ EOT
 	}
 	if ($ENV{PERL_3LOG}) {
 	    my $tpp = $test;
-	    $tpp =~ s:^../::;
+	    $tpp =~ s:^\.\./::;
 	    $tpp =~ s:/:_:g;
-	    $tpp =~ s:\.t$::;
-	    rename("perl.3log", "perl.3log.$tpp") ||
-		die "rename: perl3.log to perl.3log.$tpp: $!\n";
+	    $tpp =~ s:\.t$:.3log:;
+	    rename("perl.3log", $tpp) ||
+		die "rename: perl3.log to $tpp: $!\n";
 	}
 	$next = $next - 1;
         # test if the compiler compiled something

@@ -746,7 +746,7 @@ setitimer(which, seconds, interval = 0)
 	struct itimerval oldit;
     PPCODE:
 	if (seconds < 0.0 || interval < 0.0)
-	    croak("Time::HiRes::setitimer(%"IVdf", %"NVgf", %"NVgf"): negative time not invented yet", which, seconds, interval);
+	    croak("Time::HiRes::setitimer(%"IVdf", %"NVgf", %"NVgf"): negative time not invented yet", (IV)which, seconds, interval);
 	newit.it_value.tv_sec  = seconds;
 	newit.it_value.tv_usec =
 	  (seconds  - (NV)newit.it_value.tv_sec)    * 1000000.0;
