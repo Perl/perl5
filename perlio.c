@@ -308,6 +308,7 @@ char *buf;
  return fgetname(f,buf);
 #else
  croak("Don't know how to get file name");
+ return NULL;
 #endif
 }
 
