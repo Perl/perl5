@@ -28,6 +28,208 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15328] By: jhi                                   on 2002/03/19  15:25:58
+        Log: Take away _GNU_SOURCE since that does not seem
+             to play well with other software (like Apache),
+             just hint away the WHOAs.
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 15327] By: jhi                                   on 2002/03/19  15:17:12
+        Log: metaconfig unit change for #15326.
+     Branch: metaconfig
+	   ! U/threads/d_crypt_r.U
+____________________________________________________________________________
+[ 15326] By: jhi                                   on 2002/03/19  15:16:43
+        Log: Support crypt_r(const char*,const char*, CRYPTD*).
+     Branch: perl
+	   ! Configure reentr.h reentr.pl
+____________________________________________________________________________
+[ 15325] By: jhi                                   on 2002/03/19  14:54:21
+        Log: VMS acrobatics from Peter Prymmer.
+     Branch: perl
+	   ! lib/ExtUtils/t/ExtUtils.t
+____________________________________________________________________________
+[ 15324] By: jhi                                   on 2002/03/19  14:51:56
+        Log: Subject: [PATCH lib/Pod/Html.pm] remove warning
+             From: Stas Bekman <stas@stason.org>
+             Date: Tue, 19 Mar 2002 13:14:53 +0800 (SGT)
+             Message-ID: <Pine.LNX.4.44.0203191311530.14113-100000@hope.stason.org>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 15323] By: jhi                                   on 2002/03/19  14:51:09
+        Log: Subject: [PATCH] Re: ext/B/t/xref.t @15300 on VMS
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 19 Mar 2002 10:49:27 +0100
+             Message-ID: <20020319104927.C705@rafael>   
+     Branch: perl
+	   ! ext/B/t/xref.t
+____________________________________________________________________________
+[ 15322] By: jhi                                   on 2002/03/19  14:50:02
+        Log: Integrate perlio;
+             
+             Move docs for Encode::valid_utf8 (which does not exist)
+             to be docs for utf8::valid() (which does).
+     Branch: perl
+	  !> ext/Encode/Encode.pm lib/utf8.pm
+____________________________________________________________________________
+[ 15321] By: jhi                                   on 2002/03/19  14:48:57
+        Log: Remove Encode::Tcl::Extended, suggested by
+             SADAHIRO Tomoyuki.
+     Branch: perl
+	   - ext/Encode/Encode/euc-jp-0212.enc
+	   - ext/Encode/lib/Encode/Tcl/Extended.pm
+	   ! MANIFEST ext/Encode/MANIFEST
+	   ! ext/Encode/lib/Encode/Tcl/Escape.pm
+	   ! ext/Encode/lib/Encode/Tcl/Table.pm ext/Encode/t/Tcl.t
+____________________________________________________________________________
+[ 15320] By: jhi                                   on 2002/03/19  14:44:18
+        Log: Encode 0.90 (the one with jisx0212-1990) from Dan Kogai.
+     Branch: perl
+	   + ext/Encode/Encode/euc-jp+0212.ucm ext/Encode/t/jisx0208.euc
+	   + ext/Encode/t/jisx0208.ref ext/Encode/t/jisx0212.euc
+	   + ext/Encode/t/jisx0212.ref
+	   - ext/Encode/t/japanese.pl ext/Encode/t/table.euc
+	   - ext/Encode/t/table.ref
+	   ! MANIFEST ext/Encode/CN/CN.pm ext/Encode/Encode.pm
+	   ! ext/Encode/Encode.xs ext/Encode/JP/JP.pm
+	   ! ext/Encode/JP/Makefile.PL ext/Encode/KR/KR.pm
+	   ! ext/Encode/MANIFEST ext/Encode/TW/TW.pm
+	   ! ext/Encode/lib/Encode/CN/HZ.pm
+	   ! ext/Encode/lib/Encode/Encoding.pm
+	   ! ext/Encode/lib/Encode/Internal.pm
+	   ! ext/Encode/lib/Encode/JP/Constants.pm
+	   ! ext/Encode/lib/Encode/JP/H2Z.pm
+	   ! ext/Encode/lib/Encode/JP/ISO_2022_JP.pm
+	   ! ext/Encode/lib/Encode/JP/JIS.pm ext/Encode/lib/Encode/Tcl.pm
+	   ! ext/Encode/lib/Encode/Tcl/Escape.pm
+	   ! ext/Encode/lib/Encode/Tcl/Extended.pm
+	   ! ext/Encode/lib/Encode/Tcl/Table.pm
+	   ! ext/Encode/lib/Encode/Unicode.pm ext/Encode/lib/Encode/XS.pm
+	   ! ext/Encode/lib/Encode/iso10646_1.pm
+	   ! ext/Encode/lib/Encode/ucs2_le.pm ext/Encode/lib/Encode/utf8.pm
+	   ! ext/Encode/t/CN.t ext/Encode/t/Encode.t ext/Encode/t/JP.t
+	   ! ext/Encode/t/TW.t ext/Encode/t/Tcl.t
+____________________________________________________________________________
+[ 15319] By: jhi                                   on 2002/03/19  14:36:41
+        Log: constness+signedness nit.
+     Branch: perl
+	   ! ext/Unicode/Normalize/Normalize.xs
+____________________________________________________________________________
+[ 15318] By: jhi                                   on 2002/03/19  14:04:55
+        Log: Update to Unicode::Normalize 0.15 (+ the EBCDIC guards)
+     Branch: perl
+	   ! ext/Unicode/Normalize/Changes
+	   ! ext/Unicode/Normalize/Normalize.pm
+	   ! ext/Unicode/Normalize/Normalize.xs
+	   ! ext/Unicode/Normalize/README ext/Unicode/Normalize/mkheader
+	   ! ext/Unicode/Normalize/t/func.t
+____________________________________________________________________________
+[ 15317] By: jhi                                   on 2002/03/19  13:56:27
+        Log: Split the ebcdic details to perlebcdic.
+     Branch: perl
+	   ! pod/perlebcdic.pod pod/perluniintro.pod
+____________________________________________________________________________
+[ 15316] By: jhi                                   on 2002/03/19  13:31:55
+        Log: Be explicit.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 15315] By: nick                                  on 2002/03/19  09:24:18
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/List/Util/t/openhan.t
+	  !> (integrate 53 files)
+____________________________________________________________________________
+[ 15314] By: nick                                  on 2002/03/19  07:39:07
+        Log: Move docs for Encode::valid_utf8 (which does not exist)
+             to be docs for utf8::valid() (which does).
+     Branch: perlio
+	   ! ext/Encode/Encode.pm lib/utf8.pm
+____________________________________________________________________________
+[ 15313] By: jhi                                   on 2002/03/19  04:58:22
+        Log: Update the Unicode vs EBCDIC situation.
+     Branch: perl
+	   ! pod/perlebcdic.pod pod/perluniintro.pod
+____________________________________________________________________________
+[ 15312] By: jhi                                   on 2002/03/19  04:01:39
+        Log: Subject: [DOC PATCH] end.t (was RE: perl@15300 )
+             From: Robert Spier <rspier@pobox.com>
+             Date: Mon, 18 Mar 2002 19:22:55 -0800
+             Message-ID: <15510.44815.383439.823671@rls.cx>
+     Branch: perl
+	   ! ext/threads/t/end.t
+____________________________________________________________________________
+[ 15311] By: jhi                                   on 2002/03/19  04:00:38
+        Log: UTF-8 walk errors that become visible in EBCDIC.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 15310] By: jhi                                   on 2002/03/19  03:48:27
+        Log: s/regcinclasslen/reginclass/ and remove the old
+             reginclass since nothing is using it.
+     Branch: perl
+	   ! embed.fnc embed.h proto.h regexec.c
+____________________________________________________________________________
+[ 15309] By: jhi                                   on 2002/03/18  22:18:37
+        Log: Close the file so it can be (a) removed (b) reopened.
+     Branch: perl
+	   ! ext/B/t/xref.t
+____________________________________________________________________________
+[ 15308] By: jhi                                   on 2002/03/18  22:17:25
+        Log: Subject: [PATCH utf8.c B.xs] B::perlstring and unicode
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 18 Mar 2002 23:14:31 +0100
+             Message-ID: <20020318231431.A699@rafael>
+     Branch: perl
+	   ! ext/B/B.xs utf8.c
+____________________________________________________________________________
+[ 15307] By: jhi                                   on 2002/03/18  20:54:07
+        Log: Failed patch hunk reapplied.
+     Branch: perl
+	   ! lib/Tie/File/t/32_defer_misc.t
+____________________________________________________________________________
+[ 15306] By: jhi                                   on 2002/03/18  20:18:25
+        Log: For DEBUGGING threaded builds.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 15305] By: jhi                                   on 2002/03/18  19:11:43
+        Log: AUTHORS update.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 15304] By: jhi                                   on 2002/03/18  19:08:32
+        Log: Someone (*cough* *cough*) stole VMS' getpwent prototype.
+             (Fix from Craig Berry)
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 15303] By: jhi                                   on 2002/03/18  18:54:27
+        Log: Subject: [PATCH] configure.com home-grown kill() check
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 18 Mar 2002 13:52:59 -0600
+             Message-Id: <5.1.0.14.2.20020318134016.01c5ee00@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 15302] By: jhi                                   on 2002/03/18  15:58:00
+        Log: Upgrade to Tie::File 0.50.
+     Branch: perl
+	   ! lib/Tie/File.pm lib/Tie/File/t/00_version.t
+	   ! lib/Tie/File/t/32_defer_misc.t
+____________________________________________________________________________
+[ 15301] By: jhi                                   on 2002/03/18  15:54:52
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 15300] By: jhi                                   on 2002/03/18  14:58:27
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15299] By: jhi                                   on 2002/03/18  14:53:11
         Log: OS/390 update.
      Branch: perl
