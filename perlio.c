@@ -62,7 +62,11 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
     return 0;
 #  else
     dTHX;
+	#ifdef NETWARE
+	if (PerlLIO_setmode(fp, mode) != -1) {
+	#else
     if (PerlLIO_setmode(fileno(fp), mode) != -1) {
+	#endif
 #    if defined(WIN32) && defined(__BORLANDC__)
 	/* The translation mode of the stream is maintained independent
 	 * of the translation mode of the fd in the Borland RTL (heavy

@@ -24,7 +24,7 @@ chdir 't' if -f 't/TEST';
 die "You need to run \"make test\" first to set things up.\n"
   unless -e 'perl' or -e 'perl.exe';
 
-if ($ENV{PERL_3LOG}) {
+if ($ENV{PERL_3LOG}) { # Tru64 third(1) tool, see perlhack
     unless (-x 'perl.third') {
 	unless (-x '../perl.third') {
 	    die "You need to run \"make perl.third first.\n";
@@ -43,7 +43,6 @@ if ($ENV{PERL_3LOG}) {
 $ENV{PERL_DESTRUCT_LEVEL} = 2 unless exists $ENV{PERL_DESTRUCT_LEVEL};
 
 $ENV{EMXSHELL} = 'sh';        # For OS/2
-
 
 # Roll your own File::Find!
 use TestInit;
@@ -65,11 +64,24 @@ sub _find_tests {
 }
 
 unless (@ARGV) {
-    foreach my $dir (qw(base comp cmd run io op pragma lib pod)) {
+    foreach my $dir (qw(base comp cmd run io op lib)) {
         _find_tests($dir);
     }
+    my $mani = File::Spec->catdir($updir, "MANIFEST");
+    if (open(MANI, $mani)) {
+        while (<MANI>) { # similar code in t/harness
+	    if (m!^(ext/\S+/([^/]+\.t|test\.pl)|lib/\S+?(\.t|test\.pl))\s!) {
+		push @ARGV, $1;
+		$OVER{$1} = File::Spec->catdir($updir, $1);
+	    }
+	}
+    } else {
+        warn "$0: cannot open $mani: $!\n";
+    }
+    _find_tests('pod');
 }
 
+# Tests known to cause infinite loops for the perlcc tests.
 # %infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 );
 %infinite = ();
 
@@ -84,17 +96,16 @@ sub _testprogs {
     $type = shift @_;
     @tests = @_;
 
-
     print <<'EOT' if ($type eq 'compile');
---------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 TESTING COMPILER
---------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 EOT
 
     print <<'EOT' if ($type eq 'deparse');
---------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 TESTING DEPARSER
---------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 EOT
 
     $ENV{PERLCC_TIMEOUT} = 120
@@ -105,14 +116,17 @@ EOT
     $total = @tests;
     $files  = 0;
     $totmax = 0;
-    $maxlen = 0;
-    foreach (@tests) {
-	$len = length;
-	$maxlen = $len if $len > $maxlen;
+    my $maxlen = 0;
+    my $maxsuflen = 0;
+    foreach (@tests) { # The same code in lib/Test/Harness.pm:_run_all_tests
+	my $suf    = /\.(\w+)$/ ? $1 : '';
+	my $len    = length;
+	my $suflen = length $suf;
+	$maxlen    = $len    if $len    > $maxlen;
+	$maxsuflen = $suflen if $suflen > $maxsuflen;
     }
-    # +3 : we want three dots between the test name and the "ok"
-    # -2 : the .t suffix
-    $dotdotdot = $maxlen + 3 - 2;
+    # + 3 : we want three dots between the test name and the "ok"
+    $dotdotdot = $maxlen + 3 - $maxsuflen;
     while ($test = shift @tests) {
 
 	if ( $infinite{$test} && $type eq 'compile' ) {
@@ -133,8 +147,10 @@ EOT
 	    }
 	}
 	$te = $test;
-	chop($te);
+	$te =~ s/\.\w+$/./;
 	print "$te" . '.' x ($dotdotdot - length($te));
+
+	$test = $OVER{$test} if exists $OVER{$test};
 
 	open(SCRIPT,"<$test") or die "Can't run $test.\n";
 	$_ = <SCRIPT>;
@@ -159,15 +175,17 @@ EOT
 	    }
 	    close(SCRIPT);
 	}
-	my $utf = $with_utf ? '-I../lib -Mutf8'
-	                    : '';
+
+	$test = $OVER{$test} if exists $OVER{$test};
+
+	my $utf = $with_utf ? '-I../lib -Mutf8' : '';
 	my $testswitch = '-I. -MTestInit'; # -T will strict . from @INC
 	if ($type eq 'deparse') {
 	    my $deparse =
 		"./perl $testswitch $switch -I../lib -MO=-qq,Deparse,".
 		"-l$deparse_opts$file_opts ".
-		"./$test > ./$test.dp ".
-		"&& ./perl $testswitch $switch -I../lib ./$test.dp |";
+		"$test > $test.dp ".
+		"&& ./perl $testswitch $switch -I../lib $test.dp |";
 	    open(RESULTS, $deparse)
 		or print "can't deparse '$deparse': $!.\n";
 	}
@@ -178,11 +196,11 @@ EOT
 	else {
 	    my $compile =
 		"./perl $testswitch -I../lib ../utils/perlcc -o ".
-                "./$test.plc $utf ./$test ".
-		" && ./$test.plc |";
+                "$test.plc $utf $test ".
+		" && $test.plc |";
 	    open(RESULTS, $compile)
 		or print "can't compile '$compile': $!.\n";
-	    unlink "./$test.plc";
+	    unlink "$test.plc";
 	}
 
 	$ok = 0;

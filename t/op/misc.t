@@ -17,7 +17,7 @@ $tmpfile = "misctmp000";
 1 while -f ++$tmpfile;
 END { while($tmpfile && unlink $tmpfile){} }
 
-$CAT = (($^O eq 'MSWin32') ? '.\perl -e "print <>"' : 'cat');
+$CAT = (($^O eq 'MSWin32') ? '.\perl -e "print <>"' : (($^O eq 'NetWare') ? 'perl -e "print <>"' : 'cat'));
 
 for (@prgs){
     my $switch;
@@ -34,6 +34,9 @@ for (@prgs){
 
     if ($^O eq 'MSWin32') {
       $results = `.\\perl -I../lib $switch $tmpfile 2>&1`;
+    }
+	elsif ($^O eq 'NetWare') {
+      $results = `perl -I../lib $switch $tmpfile 2>&1`;
     }
     else {
       $results = `./perl $switch $tmpfile 2>&1`;
@@ -624,7 +627,7 @@ my $have_setlocale = $Config{d_setlocale} eq 'define';
 $have_setlocale = 0 if $@;
 # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
 # and mingw32 uses said silly CRT
-$have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
+$have_setlocale = 0 if (($^O eq 'MSWin32' || $^O eq 'NetWare') && $Config{cc} =~ /^(cl|gcc)/i);
 exit(0) unless $have_setlocale;
 my @locales;
 if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {

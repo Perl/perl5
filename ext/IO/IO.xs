@@ -430,7 +430,11 @@ sockatmark (sock)
      {
        int flag = 0;
 #   ifdef SIOCATMARK
-       if (ioctl(fd, SIOCATMARK, &flag) != 0)
+	#ifdef NETWARE
+       if (ioctl(fd, SIOCATMARK, (void*)&flag) != 0)
+	#else
+	   if (ioctl(fd, SIOCATMARK, &flag) != 0)
+	#endif
 	 XSRETURN_UNDEF;
 #   else
        not_here("IO::Socket::atmark");

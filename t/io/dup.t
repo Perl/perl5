@@ -28,7 +28,7 @@ close(STDERR);
 open(STDOUT,">&dupout");
 open(STDERR,">&duperr");
 
-if ($^O eq 'MSWin32') { print `type Io.dup` }
+if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) { print `type Io.dup` }
 else                  { system 'cat Io.dup' }
 unlink 'Io.dup';
 

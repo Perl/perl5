@@ -1102,6 +1102,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.macos	..\pod\perlmacos.pod
 	copy ..\README.mint	..\pod\perlmint.pod
 	copy ..\README.mpeix	..\pod\perlmpeix.pod
+	copy ..\README.netware	..\pod\perlnetware.pod
 	copy ..\README.os2	..\pod\perlos2.pod
 	copy ..\README.os390	..\pod\perlos390.pod
 	copy ..\README.plan9	..\pod\perlplan9.pod
@@ -1155,7 +1156,8 @@ distclean: clean
 	    perlbeos.pod perlbs2000.pod perlcygwin.pod perldgux.pod \
 	    perldos.pod perlepoc.pod perlhpux.pod perlhurd.pod \
 	    perlmachten.pod perlmint.pod \
-	    perlmacos.pod perlmpeix.pod perlos2.pod perlos390.pod \
+	    perlmacos.pod perlmpeix.pod perlnetware.pod \
+	    perlos2.pod perlos390.pod \
 	    perlplan9.pod perlqnx.pod \
 	    perlsolaris.pod perlvmesa.pod perlvms.pod perlvos.pod \
 	    perlwin32.pod pod2html pod2latex pod2man pod2text pod2usage \

@@ -36,7 +36,7 @@ if ($z eq $y) {print "ok 2\n";} else {print "not ok 2\n";}
 
 if ($count == 7) {print "ok 3\n";} else {print "not ok 3\n";}
 
-$_ = ($^O eq 'MSWin32') ? `type Comp.try`
+$_ = (($^O eq 'MSWin32') || $^O eq 'NetWare') ? `type Comp.try`
     : ($^O eq 'MacOS') ? `catenate Comp.try`
     : `cat Comp.try`;
 

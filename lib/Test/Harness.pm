@@ -395,8 +395,19 @@ sub _run_all_tests {
     my @dir_files = _globdir $Files_In_Dir if defined $Files_In_Dir;
     my $t_start = new Benchmark;
 
+    my $maxlen = 0;
+    my $maxsuflen = 0;
+    foreach (@tests) { # The same code in t/TEST
+	my $suf    = /\.(\w+)$/ ? $1 : '';
+	my $len    = length;
+	my $suflen = length $suf;
+	$maxlen    = $len    if $len    > $maxlen;
+	$maxsuflen = $suflen if $suflen > $maxsuflen;
+    }
+    # + 3 : we want three dots between the test name and the "ok"
+    my $width = $maxlen + 3 - $maxsuflen;
     foreach my $tfile (@tests) {
-        my($leader, $ml) = _mk_leader($tfile);
+        my($leader, $ml) = _mk_leader($tfile, $width);
         print $leader;
 
         my $fh = _open_test($tfile);
@@ -531,22 +542,23 @@ sub _run_all_tests {
 
 =item B<_mk_leader>
 
-  my($leader, $ml) = _mk_leader($test_file);
+  my($leader, $ml) = _mk_leader($test_file, $width);
 
 Generates the 't/foo........' $leader for the given $test_file as well
 as a similar version which will overwrite the current line (by use of
 \r and such).  $ml may be empty if Test::Harness doesn't think you're
-on TTY.
+on TTY.  The width is the width of the "yada/blah..." string.
 
 =cut
 
 sub _mk_leader {
-    my $te = shift;
-    chop($te);      # XXX chomp?
+    my ($te, $width) = @_;
+
+    $te =~ s/\.\w+$/./;
 
     if ($^O eq 'VMS') { $te =~ s/^.*\.t\./\[.t./s; }
     my $blank = (' ' x 77);
-    my $leader = "$te" . '.' x (20 - length($te));
+    my $leader = "$te" . '.' x ($width - length($te));
     my $ml = "";
 
     $ml = "\r$blank\r$leader"

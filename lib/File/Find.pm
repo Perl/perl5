@@ -63,7 +63,7 @@ The value should be a code reference. It is invoked just before leaving
 the currently processed directory. It is called in void context with no 
 arguments. The name of the current directory is in $File::Find::dir. This 
 hook is handy for summarizing a directory, such as calculating its disk 
-usage. When I<follow> or I<follow_fast> are in effect, C<preprocess> is a 
+usage. When I<follow> or I<follow_fast> are in effect, C<postprocess> is a 
 no-op.
 
 =item C<follow>
@@ -108,6 +108,13 @@ processed a second time.
 C<follow_skip==2> causes File::Find to ignore any duplicate files and
 directories but to proceed normally otherwise.
 
+=item C<dangling_symlinks>
+
+If true and a code reference, will be called with the symbolic link
+name and the directory it lives in as arguments.  Otherwise, if true
+and warnings are on, warning "symbolic_link_name is a dangling
+symbolic link\n" will be issued.  If false, the dangling symbolic link
+will be silently ignored.
 
 =item C<no_chdir>
 
@@ -293,7 +300,7 @@ require File::Spec;
 our %SLnkSeen;
 our ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
     $follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
-    $pre_process, $post_process);
+    $pre_process, $post_process, $dangling_symlinks);
 
 sub contract_name {
     my ($cdir,$fn) = @_;
@@ -462,23 +469,24 @@ sub _find_opt {
     local %SLnkSeen;
     local ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
 	$follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
-	$pre_process, $post_process);
+	$pre_process, $post_process, $dangling_symlinks);
     local($dir, $name, $fullname, $prune);
 
-    my $cwd           = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::cwd();
-    my $cwd_untainted = $cwd;
-    my $check_t_cwd   = 1;
-    $wanted_callback  = $wanted->{wanted};
-    $bydepth          = $wanted->{bydepth};
-    $pre_process      = $wanted->{preprocess};
-    $post_process     = $wanted->{postprocess};
-    $no_chdir         = $wanted->{no_chdir};
-    $full_check       = $wanted->{follow};
-    $follow           = $full_check || $wanted->{follow_fast};
-    $follow_skip      = $wanted->{follow_skip};
-    $untaint          = $wanted->{untaint};
-    $untaint_pat      = $wanted->{untaint_pattern};
-    $untaint_skip     = $wanted->{untaint_skip};
+    my $cwd            = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::cwd();
+    my $cwd_untainted  = $cwd;
+    my $check_t_cwd    = 1;
+    $wanted_callback   = $wanted->{wanted};
+    $bydepth           = $wanted->{bydepth};
+    $pre_process       = $wanted->{preprocess};
+    $post_process      = $wanted->{postprocess};
+    $no_chdir          = $wanted->{no_chdir};
+    $full_check        = $wanted->{follow};
+    $follow            = $full_check || $wanted->{follow_fast};
+    $follow_skip       = $wanted->{follow_skip};
+    $untaint           = $wanted->{untaint};
+    $untaint_pat       = $wanted->{untaint_pattern};
+    $untaint_skip      = $wanted->{untaint_skip};
+    $dangling_symlinks = $wanted->{dangling_symlinks};
 
     # for compatability reasons (find.pl, find2perl)
     local our ($topdir, $topdev, $topino, $topmode, $topnlink);
@@ -495,7 +503,7 @@ sub _find_opt {
 	if ($Is_MacOS) {
 	    ($topdev,$topino,$topmode,$topnlink) = $follow ? stat $top_item : lstat $top_item;
 	    $top_item = ":$top_item"
-		if ( (-d _) && ($top_item =~ /^[^:]+\z/) );
+		if ( (-d _) && ( $top_item !~ /:/ ) );
 	}
 	else {
 	    $top_item =~ s|/\z|| unless $top_item eq '/';
@@ -515,7 +523,7 @@ sub _find_opt {
 		else {
 		    $abs_dir = contract_name_Mac($cwd, $top_item);
 		    unless (defined $abs_dir) {
-			warn "Can't determine absolute path for $top_item (No such file or directory)\n";
+			warn "Can't determine absolute path for $top_item (No such file or directory)\n" if $^W;
 			next Proc_Top_Item;
 		    }
 		}
@@ -534,7 +542,13 @@ sub _find_opt {
 	    }
 	    $abs_dir= Follow_SymLink($abs_dir);
 	    unless (defined $abs_dir) {
-		warn "$top_item is a dangling symbolic link\n";
+		if ($dangling_symlinks) {
+		    if (ref $dangling_symlinks eq 'CODE') {
+			$dangling_symlinks->($top_item, $cwd);
+		    } else {
+			warn "$top_item is a dangling symbolic link\n" if $^W;
+		    }
+		}
 		next Proc_Top_Item;
 	    }
 
@@ -546,7 +560,7 @@ sub _find_opt {
 	else { # no follow
 	    $topdir = $top_item;
 	    unless (defined $topnlink) {
-		warn "Can't stat $top_item: $!\n";
+		warn "Can't stat $top_item: $!\n" if $^W;
 		next Proc_Top_Item;
 	    }
 	    if (-d _) {
@@ -583,7 +597,7 @@ sub _find_opt {
 	    }
 
 	    unless ($no_chdir || chdir $abs_dir) {
-		warn "Couldn't chdir $abs_dir: $!\n";
+		warn "Couldn't chdir $abs_dir: $!\n" if $^W;
 		next Proc_Top_Item;
 	    }
 
@@ -652,7 +666,7 @@ sub _find_dir($$$) {
 	    }
 	}
 	unless (chdir $udir) {
-	    warn "Can't cd to $udir: $!\n";
+	    warn "Can't cd to $udir: $!\n" if $^W;
 	    return;
 	}
     }
@@ -695,10 +709,10 @@ sub _find_dir($$$) {
 	    }
 	    unless (chdir $udir) {
 		if ($Is_MacOS) {
-		    warn "Can't cd to ($p_dir) $udir: $!\n";
+		    warn "Can't cd to ($p_dir) $udir: $!\n" if $^W;
 		}
 		else {
-		    warn "Can't cd to (" . ($p_dir ne '/' ? $p_dir : '') . "/) $udir: $!\n";
+		    warn "Can't cd to (" . ($p_dir ne '/' ? $p_dir : '') . "/) $udir: $!\n" if $^W;
 		}
 		next;
 	    }
@@ -713,7 +727,7 @@ sub _find_dir($$$) {
 
 	# Get the list of files in the current directory.
 	unless (opendir DIR, ($no_chdir ? $dir_name : $File::Find::current_dir)) {
-	    warn "Can't opendir($dir_name): $!\n";
+	    warn "Can't opendir($dir_name): $!\n" if $^W;
 	    next;
 	}
 	@filenames = readdir DIR;
@@ -883,7 +897,7 @@ sub _find_dir_symlnk($$$) {
 	}
 	$ok = chdir($updir_loc) unless ($p_dir eq $File::Find::current_dir);
 	unless ($ok) {
-	    warn "Can't cd to $updir_loc: $!\n";
+	    warn "Can't cd to $updir_loc: $!\n" if $^W;
 	    return;
 	}
     }
@@ -900,7 +914,7 @@ sub _find_dir_symlnk($$$) {
 	    # change (back) to parent directory (always untainted)
 	    unless ($no_chdir) {
 		unless (chdir $updir_loc) {
-		    warn "Can't cd to $updir_loc: $!\n";
+		    warn "Can't cd to $updir_loc: $!\n" if $^W;
 		    next;
 		}
 	    }
@@ -931,7 +945,7 @@ sub _find_dir_symlnk($$$) {
 		}
 	    }
 	    unless (chdir $updir_loc) {
-		warn "Can't cd to $updir_loc: $!\n";
+		warn "Can't cd to $updir_loc: $!\n" if $^W;
 		next;
 	    }
 	}
@@ -944,7 +958,7 @@ sub _find_dir_symlnk($$$) {
 
 	# Get the list of files in the current directory.
 	unless (opendir DIR, ($no_chdir ? $dir_loc : $File::Find::current_dir)) {
-	    warn "Can't opendir($dir_loc): $!\n";
+	    warn "Can't opendir($dir_loc): $!\n" if $^W;
 	    next;
 	}
 	@filenames = readdir DIR;
@@ -989,7 +1003,7 @@ sub _find_dir_symlnk($$$) {
 	    if ( $byd_flag < 0 ) {  # must be finddepth, report dirname now
 		unless ($no_chdir || ($dir_rel eq $File::Find::current_dir)) {
 		    unless (chdir $updir_loc) { # $updir_loc (parent dir) is always untainted 
-			warn "Can't cd to $updir_loc: $!\n";
+			warn "Can't cd to $updir_loc: $!\n" if $^W;
 			next;
 		    }
 		}
@@ -1077,7 +1091,7 @@ $File::Find::current_dir = File::Spec->curdir || '.';
 
 $File::Find::dont_use_nlink = 1
     if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $^O eq 'MSWin32' ||
-       $^O eq 'cygwin' || $^O eq 'epoc';
+       $^O eq 'cygwin' || $^O eq 'epoc' || $^O eq 'NetWare';
 
 # Set dont_use_nlink in your hint file if your system's stat doesn't
 # report the number of links in a directory as an indication

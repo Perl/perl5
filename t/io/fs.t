@@ -9,7 +9,7 @@ BEGIN {
 
 use Config;
 
-$Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'dos' or
+$Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'dos' or
 	      $^O eq 'os2' or $^O eq 'mint');
 
 if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
@@ -18,17 +18,17 @@ if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
 
 print "1..29\n";
 
-$wd = (($^O eq 'MSWin32') ? `cd` : `pwd`);
+$wd = ((($^O eq 'MSWin32') || ($^O eq 'NetWare')) ? `cd` : `pwd`);
 chop($wd);
 
-if ($^O eq 'MSWin32') { `rmdir /s /q tmp 2>nul`; `mkdir tmp`; }
+if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) { `rmdir /s /q tmp 2>nul`; `mkdir tmp`; }
 else {  `rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`; }
 chdir './tmp';
 `/bin/rm -rf a b c x` if -x '/bin/rm';
 
 umask(022);
 
-if ($^O eq 'MSWin32') { print "ok 1 # skipped: bogus umask()\n"; }
+if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) { print "ok 1 # skipped: bogus umask()\n"; }
 elsif ((umask(0)&0777) == 022) {print "ok 1\n";} else {print "not ok 1\n";}
 open(fh,'>x') || die "Can't create x";
 close(fh);
@@ -58,7 +58,7 @@ elsif (($mode & 0777) == 0666)
     {print "ok 5\n";} 
 else {print "not ok 5\n";}
 
-$newmode = $^O eq 'MSWin32' ? 0444 : 0777;
+$newmode = (($^O eq 'MSWin32') || ($^O eq 'NetWare')) ? 0444 : 0777;
 if ((chmod $newmode,'a') == 1) {print "ok 6\n";} else {print "not ok 6\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
@@ -68,7 +68,7 @@ elsif (($mode & 0777) == $newmode) {print "ok 7\n";}
 else {print "not ok 7\n";}
 
 $newmode = 0700;
-if ($^O eq 'MSWin32') {
+if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
     chmod 0444, 'x';
     $newmode = 0666;
 }
@@ -109,9 +109,9 @@ $foo = (utime 500000000,500000000 + $delta,'b');
 if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
-if ($^O eq 'MSWin32') { print "ok 17 # skipped: bogus (stat)[1]\n"; }
+if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) { print "ok 17 # skipped: bogus (stat)[1]\n"; }
 elsif ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
-if ($wd =~ m#$Config{'afsroot'}/# || $^O eq 'amigaos' || $^O eq 'dos' || $^O eq 'MSWin32')
+if ($wd =~ m#$Config{'afsroot'}/# || $^O eq 'amigaos' || $^O eq 'dos' || $^O eq 'MSWin32' || $^O eq 'NetWare')
     {print "ok 18 # skipped: granularity of the filetime\n";}
 elsif ($atime == 500000000 && $mtime == 500000000 + $delta)
     {print "ok 18\n";}
@@ -135,7 +135,7 @@ unlink 'c';
 chdir $wd || die "Can't cd back to $wd";
 
 unlink 'c';
-if ($^O ne 'MSWin32' and `ls -l perl 2>/dev/null` =~ /^l.*->/) {
+if ((($^O eq 'MSWin32') || ($^O eq 'NetWare')) and `ls -l perl 2>/dev/null` =~ /^l.*->/) {
     # we have symbolic links
     system("cp TEST TEST$$");
     # we have to copy because e.g. GNU grep gets huffy if we have

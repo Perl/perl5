@@ -6,7 +6,7 @@ our($VERSION, @ISA, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS,
 
 use XSLoader ();
 
-@ISA = qw(Exporter AutoLoader);
+@ISA = qw(Exporter);
 
 # NOTE: The glob() export is only here for compatibility with 5.6.0.
 # csh_glob() should not be used directly, unless you know what you're doing.
@@ -56,7 +56,7 @@ use XSLoader ();
     ) ],
 );
 
-$VERSION = '1.0';
+$VERSION = '1.01';
 
 sub import {
     require Exporter;
@@ -84,17 +84,10 @@ sub AUTOLOAD {
 
     my $constname;
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
-    if ($! != 0) {
-	if ($! =~ /Invalid/ || $!{EINVAL}) {
-	    require AutoLoader;
-	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
-	    goto &AutoLoader::AUTOLOAD;
-	}
-	else {
-	    require Carp;
-	    Carp::croak("Your vendor has not defined File::Glob macro $constname");
-	}
+    my ($error, $val) = constant($constname);
+    if ($error) {
+	require Carp;
+	Carp::croak($error);
     }
     eval "sub $AUTOLOAD { $val }";
     goto &$AUTOLOAD;
@@ -105,7 +98,7 @@ XSLoader::load 'File::Glob', $VERSION;
 # Preloaded methods go here.
 
 sub GLOB_ERROR {
-    return constant('GLOB_ERROR', 0);
+    return (constant('GLOB_ERROR'))[1];
 }
 
 sub GLOB_CSH () {

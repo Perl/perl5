@@ -25,8 +25,13 @@
 #    define PERL_SYS_INIT(c,v)	Perl_win32_init(c,v)
 #    define BIT_BUCKET "nul"
 #  else
-#    define PERL_SYS_INIT(c,v)
-#    define BIT_BUCKET "\\dev\\nul" /* "wanna be like, umm, Newlined, or somethin?" */
+#	 ifdef NETWARE
+#      define PERL_SYS_INIT(c,v)	Perl_nw5_init(c,v)
+#      define BIT_BUCKET "nul"
+#    else
+#      define PERL_SYS_INIT(c,v)
+#      define BIT_BUCKET "\\dev\\nul" /* "wanna be like, umm, Newlined, or somethin?" */
+#    endif /* NETWARE */
 #  endif
 #endif	/* DJGPP */
 

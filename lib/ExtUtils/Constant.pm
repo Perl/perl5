@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION %XS_Constant %XS_TypeSet @EXPORT_OK %EXPORT_TAGS);
-$VERSION = '0.06';
+$VERSION = '0.08';
 
 =head1 NAME
 
@@ -8,14 +8,15 @@ ExtUtils::Constant - generate XS code to import C header constants
 
 =head1 SYNOPSIS
 
-    use ExtUtils::Constant qw (constant_types C_constant XS_constant);
-    print constant_types(); # macro defs
-    foreach (C_constant ("Foo", undef, "IV", undef, undef, undef,
-                         @names) ) {
-	print $_, "\n"; # C constant subs
-    }
-    print "MODULE = Foo		PACKAGE = Foo\n";
-    print XS_constant ("Foo", {NV => 1, IV => 1}); # XS for Foo::constant
+    use ExtUtils::Constant qw (WriteConstants);
+    WriteConstants(
+        NAME => 'Foo',
+        NAMES => [qw(FOO BAR BAZ)],
+        C_FILE => 'constants.c',
+        XS_FILE => 'constants.xs',
+    );
+    # Generates wrapper code to make the values of the constants FOO BAR BAZ
+    #  available to perl
 
 =head1 DESCRIPTION
 
@@ -27,8 +28,18 @@ constants.
 
 =head1 USAGE
 
-Generally one only needs to call the 3 functions shown in the synopsis,
-C<constant_types()>, C<C_constant> and C<XS_constant>.
+Generally one only needs to call the C<WriteConstants> function, and then
+
+    #include "constants.c"
+
+in the C section of C<Foo.xs>
+
+    INCLUDE constants.xs
+
+in the XS section of C<Foo.xs>.
+
+For greater flexibility use C<constant_types()>, C<C_constant> and
+C<XS_constant>, with which C<WriteConstants> is implemented.
 
 Currently this module understands the following types. h2xs may only know
 a subset. The sizes of the numeric types are chosen by the C<Configure>
@@ -95,7 +106,7 @@ $Text::Wrap::columns = 80;
 
 %EXPORT_TAGS = ( 'all' => [ qw(
 	XS_constant constant_types return_clause memEQ_clause C_stringify
-	C_constant autoload
+	C_constant autoload WriteConstants
 ) ] );
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -297,7 +308,7 @@ sub return_clause ($$$$$$$$$) {
   ##ifdef thingy
   if (ref $macro) {
     $clause = $macro->[0];
-  } else {
+  } elsif ($macro ne "1") {
     $clause = "#ifdef $macro\n";
   }
 
@@ -306,23 +317,25 @@ sub return_clause ($$$$$$$$$) {
   $clause .= assign ($indent, $type, $pre, $post,
                      ref $value ? @$value : $value);
 
-  ##else
-  $clause .= "#else\n";
+  if (ref $macro or $macro ne "1") {
+    ##else
+    $clause .= "#else\n";
 
-  #      return PERL_constant_NOTDEF;
-  if (!defined $default) {
-    $clause .= "${indent}return PERL_constant_NOTDEF;\n";
-  } else {
-    my @default = ref $default ? @$default : $default;
-    $type = shift @default;
-    $clause .= assign ($indent, $type, $def_pre, $def_post, @default);
-  }
+    #      return PERL_constant_NOTDEF;
+    if (!defined $default) {
+      $clause .= "${indent}return PERL_constant_NOTDEF;\n";
+    } else {
+      my @default = ref $default ? @$default : $default;
+      $type = shift @default;
+      $clause .= assign ($indent, $type, $def_pre, $def_post, @default);
+    }
 
-  ##endif
-  if (ref $macro) {
-    $clause .= $macro->[1];
-  } else {
-    $clause .= "#endif\n";
+    ##endif
+    if (ref $macro) {
+      $clause .= $macro->[1];
+    } else {
+      $clause .= "#endif\n";
+    }
   }
   return $clause
 }
@@ -416,9 +429,8 @@ sub switch_clause {
 =item params WHAT
 
 An internal function. I<WHAT> should be a hashref of types the constant
-function will return. I<params> returns the list of flags C<$use_iv, $use_nv,
-$use_pv> to show which combination of pointers will be needed in the C
-argument list.
+function will return. I<params> returns a hashref keyed IV NV PV SV to show
+which combination of pointers will be needed in the C argument list.
 
 =cut
 
@@ -427,11 +439,12 @@ sub params {
   foreach (sort keys %$what) {
     warn "ExtUtils::Constant doesn't know how to handle values of type $_" unless defined $XS_Constant{$_};
   }
-  my $use_iv = $what->{IV} || $what->{UV} || $what->{PVN};
-  my $use_nv = $what->{NV};
-  my $use_pv = $what->{PV} || $what->{PVN};
-  my $use_sv = $what->{SV};
-  return ($use_iv, $use_nv, $use_pv, $use_sv);
+  my $params = {};
+  $params->{IV} = 1 if $what->{IV} || $what->{UV} || $what->{PVN};
+  $params->{NV} = 1 if $what->{NV};
+  $params->{PV} = 1 if $what->{PV} || $what->{PVN};
+  $params->{SV} = 1 if $what->{SV};
+  return $params;
 }
 
 =item dump_names
@@ -577,6 +590,9 @@ pre-processor constructions such as
 
 to be used to determine if a constant is to be defined.
 
+A "macro" 1 signals that the constant is always defined, so the C<#if>/C<#endif>
+test is omitted.
+
 =item default
 
 Default value to use (instead of C<croak>ing with "your vendor has not
@@ -643,64 +659,66 @@ example C<constant_5> for names 5 characters long.  The default I<BREAKOUT> is
 sub C_constant {
   my ($package, $subname, $default_type, $what, $indent, $breakout, @items)
     = @_;
-  my $namelen;
-  if (ref $breakout) {
-    $namelen = $$breakout;
-  } else {
-    $breakout ||= 3;
-  }
   $package ||= 'Foo';
   $subname ||= 'constant';
   # I'm not using this. But a hashref could be used for full formatting without
   # breaking this API
   # $indent ||= 0;
-   $default_type ||= 'IV';
-  if (!ref $what) {
-    # Convert line of the form IV,UV,NV to hash
-    $what = {map {$_ => 1} split /,\s*/, ($what || '')};
-    # Figure out what types we're dealing with, and assign all unknowns to the
-    # default type
-  }
-  my %items;
-  foreach (@items) {
-    my $name;
-    if (ref $_) {
-      my $orig = $_;
-      # Make a copy which is a normalised version of the ref passed in.
-      $name = $_->{name};
-      my ($type, $macro, $value) = @$_{qw (type macro value)};
-      $type ||= $default_type;
-      $what->{$type} = 1;
-      $_ = {name=>$name, type=>$type};
 
-      undef $macro if defined $macro and $macro eq $name;
-      $_->{macro} = $macro if defined $macro;
-      undef $value if defined $value and $value eq $name;
-      $_->{value} = $value if defined $value;
-      foreach my $key (qw(default pre post def_pre def_post)) {
-        my $value = $orig->{$key};
-        $_->{$key} = $value if defined $value;
-        # warn "$key $value";
+  my ($namelen, $items);
+  if (ref $breakout) {
+    # We are called recursively. We trust @items to be normalised, $what to
+    # be a hashref, and pinch %$items from our parent to save recalculation.
+    ($namelen, $items) = @$breakout;
+  } else {
+    $breakout ||= 3;
+    $default_type ||= 'IV';
+    if (!ref $what) {
+      # Convert line of the form IV,UV,NV to hash
+      $what = {map {$_ => 1} split /,\s*/, ($what || '')};
+      # Figure out what types we're dealing with, and assign all unknowns to the
+      # default type
+    }
+    foreach (@items) {
+      my $name;
+      if (ref $_) {
+        my $orig = $_;
+        # Make a copy which is a normalised version of the ref passed in.
+        $name = $_->{name};
+        my ($type, $macro, $value) = @$_{qw (type macro value)};
+        $type ||= $default_type;
+        $what->{$type} = 1;
+        $_ = {name=>$name, type=>$type};
+
+        undef $macro if defined $macro and $macro eq $name;
+        $_->{macro} = $macro if defined $macro;
+        undef $value if defined $value and $value eq $name;
+        $_->{value} = $value if defined $value;
+        foreach my $key (qw(default pre post def_pre def_post)) {
+          my $value = $orig->{$key};
+          $_->{$key} = $value if defined $value;
+          # warn "$key $value";
+        }
+      } else {
+        $name = $_;
+        $_ = {name=>$_, type=>$default_type};
+        $what->{$default_type} = 1;
       }
-    } else {
-      $name = $_;
-      $_ = {name=>$_, type=>$default_type};
-      $what->{$default_type} = 1;
+      warn "ExtUtils::Constant doesn't know how to handle values of type $_ used in macro $name" unless defined $XS_Constant{$_->{type}};
+      if (exists $items->{$name}) {
+        die "Multiple definitions for macro $name";
+      }
+      $items->{$name} = $_;
     }
-    warn "ExtUtils::Constant doesn't know how to handle values of type $_ used in macro $name" unless defined $XS_Constant{$_->{type}};
-    if (exists $items{$name}) {
-      die "Multiple definitions for macro $name";
-    }
-    $items{$name} = $_;
   }
-  my ($use_iv, $use_nv, $use_pv, $use_sv) = params ($what);
+  my $params = params ($what);
 
   my ($body, @subs) = "static int\n$subname (pTHX_ const char *name";
   $body .= ", STRLEN len" unless defined $namelen;
-  $body .= ", IV *iv_return" if $use_iv;
-  $body .= ", NV *nv_return" if $use_nv;
-  $body .= ", const char **pv_return" if $use_pv;
-  $body .= ", SV **sv_return" if $use_sv;
+  $body .= ", IV *iv_return" if $params->{IV};
+  $body .= ", NV *nv_return" if $params->{NV};
+  $body .= ", const char **pv_return" if $params->{PV};
+  $body .= ", SV **sv_return" if $params->{SV};
   $body .= ") {\n";
 
   if (defined $namelen) {
@@ -708,7 +726,7 @@ sub C_constant {
     my $comment = 'When generated this function returned values for the list'
       . ' of names given here.  However, subsequent manual editing may have'
         . ' added or removed some.';
-    $body .= switch_clause (2, $comment, $namelen, \%items, @items);
+    $body .= switch_clause (2, $comment, $namelen, $items, @items);
   } else {
     # We are the top level.
     $body .= "  /* Initially switch on the length of the name.  */\n";
@@ -735,15 +753,22 @@ sub C_constant {
                                 $default, $pre, $post, $def_pre, $def_post);
         $body .= "    }\n";
       } elsif (@{$by_length[$i]} < $breakout) {
-        $body .= switch_clause (4, '', $i, \%items, @{$by_length[$i]});
+        $body .= switch_clause (4, '', $i, $items, @{$by_length[$i]});
       } else {
-        push @subs, C_constant ($package, "${subname}_$i", $default_type,
-                                $what, $indent, \$i, @{$by_length[$i]});
+        # Only use the minimal set of parameters actually needed by the types
+        # of the names of this length.
+        my $what = {};
+        foreach (@{$by_length[$i]}) {
+          $what->{$_->{type}} = 1;
+        }
+        $params = params ($what);
+        push @subs, C_constant ($package, "${subname}_$i", $default_type, $what,
+                                $indent, [$i, $items], @{$by_length[$i]});
         $body .= "    return ${subname}_$i (aTHX_ name";
-        $body .= ", iv_return" if $use_iv;
-        $body .= ", nv_return" if $use_nv;
-        $body .= ", pv_return" if $use_pv;
-        $body .= ", sv_return" if $use_sv;
+        $body .= ", iv_return" if $params->{IV};
+        $body .= ", nv_return" if $params->{NV};
+        $body .= ", pv_return" if $params->{PV};
+        $body .= ", sv_return" if $params->{SV};
         $body .= ");\n";
       }
       $body .= "    break;\n";
@@ -786,7 +811,7 @@ sub XS_constant {
     # Convert line of the form IV,UV,NV to hash
     $what = {map {$_ => 1} split /,\s*/, ($what)};
   }
-  my ($use_iv, $use_nv, $use_pv, $use_sv) = params ($what);
+  my $params = params ($what);
   my $type;
 
   my $xs = <<"EOT";
@@ -802,17 +827,17 @@ $subname(sv)
         int		type;
 EOT
 
-  if ($use_iv) {
+  if ($params->{IV}) {
     $xs .= "	IV		iv;\n";
   } else {
     $xs .= "	/* IV\t\tiv;\tUncomment this if you need to return IVs */\n";
   }
-  if ($use_nv) {
+  if ($params->{NV}) {
     $xs .= "	NV		nv;\n";
   } else {
     $xs .= "	/* NV\t\tnv;\tUncomment this if you need to return NVs */\n";
   }
-  if ($use_pv) {
+  if ($params->{PV}) {
     $xs .= "	const char	*pv;\n";
   } else {
     $xs .=
@@ -826,17 +851,17 @@ EOT
     PPCODE:
 EOT
 
-  if ($use_iv xor $use_nv) {
+  if ($params->{IV} xor $params->{NV}) {
     $xs .= << "EOT";
         /* Change this to $C_subname(aTHX_ s, len, &iv, &nv);
            if you need to return both NVs and IVs */
 EOT
   }
   $xs .= "	type = $C_subname(aTHX_ s, len";
-  $xs .= ', &iv' if $use_iv;
-  $xs .= ', &nv' if $use_nv;
-  $xs .= ', &pv' if $use_pv;
-  $xs .= ', &sv' if $use_sv;
+  $xs .= ', &iv' if $params->{IV};
+  $xs .= ', &nv' if $params->{NV};
+  $xs .= ', &pv' if $params->{PV};
+  $xs .= ', &sv' if $params->{SV};
   $xs .= ");\n";
 
   $xs .= << "EOT";
@@ -956,6 +981,98 @@ END
 
   return $func;
 }
+
+
+=item WriteConstants ATTRIBUTE =E<gt> VALUE [, ...]
+
+Writes a file of C code and a file of XS code which you should C<#include>
+and C<INCLUDE> in the C and XS sections respectively of your module's XS
+code.  You probaby want to do this in your C<Makefile.PL>, so that you can
+easily edit the list of constants without touching the rest of your module.
+The attributes supported are
+
+=over 4
+
+=item NAME
+
+Name of the module.  This must be specified
+
+=item DEFAULT_TYPE
+
+The default type for the constants.  If not specified C<IV> is assumed.
+
+=item BREAKOUT_AT
+
+The names of the constants are grouped by length.  Generate child subroutines
+for each group with this number or more names in.
+
+=item NAMES
+
+An array of constants' names, either scalars containing names, or hashrefs
+as detailed in L<"C_constant">.
+
+=item C_FILE
+
+The name of the file to write containing the C code.  The default is
+C<constants.c>.
+
+=item XS_FILE
+
+The name of the file to write containing the XS code.  The default is
+C<constants.xs>.
+
+=item SUBNAME
+
+The perl visible name of the XS subroutine generated which will return the
+constants. The default is C<constant>.  
+
+=item C_SUBNAME
+
+The name of the C subroutine generated which will return the constants.
+The default is I<SUBNAME>.  Child subroutines have C<_> and the name
+length appended, so constants with 10 character names would be in
+C<constant_10> with the default I<XS_SUBNAME>.
+
+=back
+
+=cut
+
+sub WriteConstants {
+  my %ARGS =
+    ( # defaults
+     C_FILE =>       'constants.c',
+     XS_FILE =>      'constants.xs',
+     SUBNAME =>      'constant',
+     DEFAULT_TYPE => 'IV',
+     @_);
+
+  $ARGS{C_SUBNAME} ||= $ARGS{SUBNAME}; # No-one sane will have C_SUBNAME eq '0'
+
+  croak "Module name not specified" unless length $ARGS{NAME};
+
+  open my $c_fh, ">$ARGS{C_FILE}" or die "Can't open $ARGS{C_FILE}: $!";
+  open my $xs_fh, ">$ARGS{XS_FILE}" or die "Can't open $ARGS{XS_FILE}: $!";
+
+  # As this subroutine is intended to make code that isn't edited, there's no
+  # need for the user to specify any types that aren't found in the list of
+  # names.
+  my $types = {};
+
+  print $c_fh constant_types(); # macro defs
+  print $c_fh "\n";
+
+  # indent is still undef. Until anyone implents indent style rules with it.
+  foreach (C_constant ($ARGS{NAME}, $ARGS{C_SUBNAME}, $ARGS{DEFAULT_TYPE},
+                       $types, undef, $ARGS{BREAKOUT_AT}, @{$ARGS{NAMES}})) {
+    print $c_fh $_, "\n"; # C constant subs
+  }
+  print $xs_fh XS_constant ($ARGS{NAME}, $types, $ARGS{XS_SUBNAME},
+                            $ARGS{C_SUBNAME});
+
+  close $c_fh or warn "Error closing $ARGS{C_FILE}: $!";
+  close $xs_fh or warn "Error closing $ARGS{XS_FILE}: $!";
+}
+
 1;
 __END__
 

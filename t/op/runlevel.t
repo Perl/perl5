@@ -10,6 +10,7 @@ chdir 't' if -d 't';
 @INC = '../lib';
 $Is_VMS = $^O eq 'VMS';
 $Is_MSWin32 = $^O eq 'MSWin32';
+$Is_NetWare = $^O eq 'NetWare';
 $ENV{PERL5LIB} = "../lib" unless $Is_VMS;
 
 $|=1;
@@ -35,6 +36,8 @@ for (@prgs){
                   `MCR $^X "-I[-.lib]" $switch $tmpfile 2>&1` :
 		      $Is_MSWin32 ?  
 			  `.\\perl -I../lib $switch $tmpfile 2>&1` :
+		      $Is_NetWare ?  
+			  `perl -I../lib $switch $tmpfile 2>&1` :
 			      `./perl $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;

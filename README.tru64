@@ -59,7 +59,7 @@ in INSTALL.  Similarly, there is no need for -Duse64bitall.
 When compiling Perl in Tru64 you may (depending on the compiler
 release) see two warnings like this
 
-    cc: Warning: util.c, line 3797: In this statement, floating-point overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
+    cc: Warning: numeric.c, line 104: In this statement, floating-point overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
         return HUGE_VAL;
     -----------^
 

@@ -502,6 +502,10 @@ if ($notty) {
     $console = undef;
   }
 
+  if ($^O eq 'NetWare') {
+	$console = undef;
+  }
+
   # Around a bug:
   if (defined $ENV{OS2_SHELL} and ($slave_editor or $ENV{WINDOWID})) { # In OS/2
     $console = undef;
@@ -2801,7 +2805,7 @@ sub methods_via {
 }
 
 sub setman { 
-    $doccmd = $^O !~ /^(?:MSWin32|VMS|os2|dos|amigaos|riscos|MacOS)\z/s
+    $doccmd = $^O !~ /^(?:MSWin32|VMS|os2|dos|amigaos|riscos|MacOS|NetWare)\z/s
 		? "man"             # O Happy Day!
 		: "perldoc";        # Alas, poor unfortunates
 }

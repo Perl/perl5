@@ -8,9 +8,12 @@
  * $Log:	a2py.c,v $
  */
 
-#if defined(OS2) || defined(WIN32)
+#if defined(OS2) || defined(WIN32) || defined(NETWARE)
 #if defined(WIN32)
 #include <io.h>
+#endif
+#if defined(NETWARE)
+#include "../netware/clibstuf.h"
 #endif
 #include "../patchlevel.h"
 #endif
@@ -29,7 +32,7 @@ int oper4(int type, int arg1, int arg2, int arg3, int arg4);
 int oper5(int type, int arg1, int arg2, int arg3, int arg4, int arg5);
 STR *walk(int useval, int level, register int node, int *numericptr, int minprec);
 
-#if defined(OS2) || defined(WIN32)
+#if defined(OS2) || defined(WIN32) || defined(NETWARE)
 static void usage(void);
 
 static void
@@ -54,6 +57,10 @@ main(register int argc, register char **argv, register char **env)
     register STR *str;
     int i;
     STR *tmpstr;
+
+	#ifdef NETWARE
+		fnInitGpfGlobals();	// For importing the CLIB calls in place of Watcom calls
+	#endif	/* NETWARE */
 
     myname = argv[0];
     linestr = str_new(80);
@@ -90,7 +97,7 @@ main(register int argc, register char **argv, register char **env)
 	case 0:
 	    break;
 	default:
-#if defined(OS2) || defined(WIN32)
+#if defined(OS2) || defined(WIN32) || defined(NETWARE)
 	    fprintf(stderr, "Unrecognized switch: %s\n",argv[0]);
             usage();
 #else
@@ -103,7 +110,7 @@ main(register int argc, register char **argv, register char **env)
     /* open script */
 
     if (argv[0] == Nullch) {
-#if defined(OS2) || defined(WIN32)
+#if defined(OS2) || defined(WIN32) || defined(NETWARE)
 	if ( isatty(fileno(stdin)) )
 	    usage();
 #endif

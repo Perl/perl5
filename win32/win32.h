@@ -15,7 +15,6 @@
 
 #if defined(PERL_OBJECT) || defined(PERL_IMPLICIT_SYS) || defined(PERL_CAPI)
 #  define DYNAMIC_ENV_FETCH
-#  define ENV_HV_NAME "___ENV_HV_NAME___"
 #  define HAS_GETENV_LEN
 #  define prime_env_iter()
 #  define WIN32IO_IS_STDIO		/* don't pull in custom stdio layer */

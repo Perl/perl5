@@ -107,12 +107,16 @@ sub get_files {
 	open(CPPI,"> errno.c") or
 	    die "Cannot open errno.c";
 
-	print CPPI "#include <errno.h>\n";
+	if ($^O eq 'NetWare') {
+		print CPPI "#include <nwerrno.h>\n";
+	} else {
+		print CPPI "#include <errno.h>\n";
+	}
 
 	close(CPPI);
 
 	# invoke CPP and read the output
-	if ($^O eq 'MSWin32') {
+	if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
 	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
 	} else {
@@ -122,14 +126,14 @@ sub get_files {
 	}
 
 	my $pat;
-	if ($^O eq 'MSWin32' and $Config{cc} =~ /^bcc/i) {
+	if (($^O eq 'MSWin32' || $^O eq 'NetWare') and $Config{cc} =~ /^bcc/i) {
 	    $pat = '^/\*\s+(.+)\s+\d+\s*:\s+\*/';
 	}
 	else {
 	    $pat = '^#\s*(?:line)?\s*\d+\s+"([^"]+)"';
 	}
 	while(<CPPO>) {
-	    if ($^O eq 'os2' or $^O eq 'MSWin32') {
+	    if ($^O eq 'os2' or $^O eq 'MSWin32' or $^O eq 'NetWare') {
 		if (/$pat/o) {
 		   my $f = $1;
 		   $f =~ s,\\\\,/,g;
@@ -157,7 +161,11 @@ sub write_errno_pm {
     open(CPPI,"> errno.c") or
 	die "Cannot open errno.c";
 
-    print CPPI "#include <errno.h>\n";
+    if ($^O eq 'NetWare') {
+		print CPPI "#include <nwerrno.h>\n";
+	} else {
+		print CPPI "#include <errno.h>\n";
+	}
 
     foreach $err (keys %err) {
 	print CPPI '"',$err,'" [[',$err,']]',"\n";
@@ -173,7 +181,7 @@ sub write_errno_pm {
 	    $cpp =~ s/sys\$input//i;
 	    open(CPPO,"$cpp  errno.c |") or
 		die "Cannot exec $Config{cppstdin}";
-	} elsif ($^O eq 'MSWin32') {
+	} elsif ($^O eq 'MSWin32' || $^O eq 'NetWare') {
 	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
 	} else {

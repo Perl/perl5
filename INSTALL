@@ -1737,6 +1737,92 @@ break utime() so that over NFS the timestamps do not get changed
 
 =back
 
+=head2 Cross-compilation
+
+Starting from Perl 5.8 Perl has the beginnings of cross-compilation
+support.  What is known to work is running Configure in a
+cross-compilation environment and building the miniperl executable.
+What is known not work work is building the perl executable because
+that would require building extensions: Dynaloader statically and
+File::Glob dynamically, for extensions one needs MakeMaker and
+MakeMaker is not yet cross-compilation aware, and neither is
+the main Makefile.
+
+    NOTE: Perl is routinely built using cross-compilation
+    in the EPOC environment but the solutions from there
+    can't directly be used.
+
+The one environment where cross-compilation has successfully been used
+as of this writing is the Compaq iPAQ running ARM Linux.  The build
+host was Intel Linux, the networking setup was PPP + SSH, see
+http://www.handhelds.org/ for more information.
+
+To run Configure in cross-compilation mode the basic switch is
+C<-Dusecrosscompile>.
+
+   sh ./Configure -des -Dusecrosscompile -D...
+
+This will make the cpp symbol USE_CROSS_COMPILE and the %Config
+symbol C<usecrosscompile> available.
+
+During the Configure and build, certain helper scripts will be created
+into the Cross/ subdirectory.  The scripts are used to execute a
+cross-compiled executable, and to transfer files to and from the
+target host.  The execution scripts are named F<run-*> and the
+transfer scripts F<to-*> and F<from-*>.  The part after the dash is
+the method to use for remote execution and transfer: by default the
+methods are B<ssh> and B<scp>, thus making the scripts F<run-ssh>,
+F<to-scp>, and F<from-scp>.
+
+To configure the scripts for a target host and a directory (in which
+the execution will happen and which is to and from where the transfer
+happens), supply Configure with
+
+    -Dtargethost=so.me.ho.st -Dtargetdir=/tar/get/dir
+
+The targethost is what e.g. ssh will use as the hostname, the targetdir
+must exists (the scripts won't create it).  You can also specify a
+username to use
+
+    -Dtargetuser=luser
+
+but in case you don't, "root" will be used.
+
+Because this is a cross-compilation effort, you will also need to
+specify which target environment and which compilation environment to
+use.  This includes the compiler, the header files, and the libraries.
+In the below we will use the usual settings for the iPAQ
+cross-compilation environment:
+
+    -Dtargetarch=arm-linux
+    -Dcc=arm-linux-gcc
+    -Dusrinc=/skiff/local/arm-linux/include
+    -Dincpth=/skiff/local/arm-linux/include
+    -Dlibpth=/skiff/local/arm-linux/lib
+
+If the name of the C<cc> has the usual GNU C semantics for cross
+compilers, that is, CPU-OS-gcc, the names of the C<ar>, C<nm>, and
+C<ranlib> will also be automatically chosen to be CPU-OS-ar and so on.
+(The C<ld> requires more thought and will be chosen later by Configure.)
+
+In addition to the default execution/transfer methods you can also
+choose B<rsh> for execution, and B<rcp> or B<cp> for transfer,
+for example:
+
+    -Dtargetrun=rsh -Dtargetto=rcp -Dtargetfrom=cp
+
+Putting it all together:
+
+    sh ./Configure -des -Dusecrosscompile \
+        -Dtargethost=so.me.ho.st -Dtargetdir=/tar/get/dir \
+        -Dtargetuser=root \
+        -Dtargetarch=arm-linux \
+        -Dcc=arm-linux-gcc \
+        -Dusrinc=/skiff/local/arm-linux/include \
+        -Dincpth=/skiff/local/arm-linux/include \
+        -Dlibpth=/skiff/local/arm-linux/lib \
+        -D...
+
 =head1 make test
 
 This will run the regression tests on the perl you just made.  If
@@ -2206,6 +2292,3 @@ If you are distributing a modified version of perl (perhaps as part of
 a larger package) please B<do> modify these installation instructions
 and the contact information to match your distribution.
 
-=head1 LAST MODIFIED
-
-$Id: INSTALL,v 1.58 1999/07/23 14:43:00 doughera Exp $

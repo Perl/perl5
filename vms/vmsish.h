@@ -502,7 +502,6 @@ struct utimbuf {
 
 /* Look up new %ENV values on the fly */
 #define DYNAMIC_ENV_FETCH 1
-#define ENV_HV_NAME "%EnV%VmS%"
   /* Special getenv function for retrieving %ENV elements. */
 #define ENVgetenv(v) my_getenv(v,FALSE)
 #define ENVgetenv_len(v,l) my_getenv_len(v,l,FALSE)

@@ -416,11 +416,16 @@ the printf format "%.0f", most often they produce "0" and "-0".)
 
 =head2  Failure of Thread tests
 
-The subtests 19 and 20 of lib/thr5005.t test are known to fail due to
-fundamental problems in the 5.005 threading implementation. These are
-not new failures--Perl 5.005_0x has the same bugs, but didn't have
-these tests. (Note that support for 5.005-style threading remains
-experimental.)
+B<Note that support for 5.005-style threading remains experimental.>
+
+The following tests are known to fail due to fundamental problems in
+the 5.005 threading implementation. These are not new failures--Perl
+5.005_0x has the same bugs, but didn't have these tests.
+
+lib/Memoize/t/correctness.t  23-25
+lib/Memoize/t/unmemoize.t    2-5
+t/pragma/autouse.t           4
+t/lib/thr5005.t              19-20
 
 =head2 Localising a Tied Variable Leaks Memory
 

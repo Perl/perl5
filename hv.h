@@ -123,7 +123,7 @@ C<SV*>.
 
 
 #define Nullhv Null(HV*)
-#define HvARRAY(hv)	((HE**)((XPVHV*)  SvANY(hv))->xhv_array)
+#define HvARRAY(hv)	(*(HE***)&((XPVHV*)  SvANY(hv))->xhv_array)
 #define HvFILL(hv)	((XPVHV*)  SvANY(hv))->xhv_fill
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 #define HvKEYS(hv)	((XPVHV*)  SvANY(hv))->xhv_keys

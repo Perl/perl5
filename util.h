@@ -21,6 +21,12 @@
 	 || ((f)[0] && (f)[1] == ':')		/* drive name */	\
 	 || ((f)[0] == '\\' && (f)[1] == '\\'))	/* UNC path */
 #  else		/* !WIN32 */
+#  ifdef NETWARE
+#    define PERL_FILE_IS_ABSOLUTE(f) \
+	(((f)[0] && (f)[1] == ':')		/* drive name */	\
+	 || ((f)[0] == '\\' && (f)[1] == '\\')	/* UNC path */	\
+	 ||	((f)[3] == ':'))				/* volume name, currently only sys */
+#  else		/* !NETWARE */
 #    if defined( DOSISH) || defined(EPOC)
 #      define PERL_FILE_IS_ABSOLUTE(f) \
 	(*(f) == '/'							\
@@ -32,5 +38,6 @@
 #        define PERL_FILE_IS_ABSOLUTE(f)	(*(f) == '/')
 #      endif /* MACOS_TRADITIONAL */
 #    endif	/* DOSISH */
+#   endif	/* NETWARE */
 #  endif	/* WIN32 */
 #endif		/* VMS */

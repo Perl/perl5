@@ -402,6 +402,10 @@ Determine libraries to use and how to use them
 
 Methods to override UN*X behaviour in ExtUtils::MakeMaker
 
+=item ExtUtils::MM_NW5
+
+Methods to override UN*X behaviour in ExtUtils::MakeMaker
+
 =item ExtUtils::MM_OS2
 
 Methods to override UN*X behaviour in ExtUtils::MakeMaker
@@ -592,7 +596,7 @@ Article about software localization
 
 =item Math::BigFloat
 
-Arbitrary length float math package
+Arbitrary size floating point math package
 
 =item Math::BigInt
 
@@ -606,6 +610,42 @@ Complex numbers and associated mathematical functions
 
 Trigonometric functions
 
+=item Memoize
+
+Make your functions faster by trading space for time
+
+=item Memoize::AnyDBM_File
+
+Glue to provide EXISTS for AnyDBM_File for Storable use
+
+=item Memoize::Expire
+
+Plug-in module for automatic expiration of memoized values
+
+=item Memoize::ExpireFile
+
+Test for Memoize expiration semantics
+
+=item Memoize::ExpireTest
+
+Test for Memoize expiration semantics
+
+=item Memoize::NDBM_File
+
+Glue to provide EXISTS for NDBM_File for Storable use
+
+=item Memoize::SDBM_File
+
+Glue to provide EXISTS for SDBM_File for Storable use
+
+=item Memoize::Saves
+
+Plug-in module to specify which return values should be memoized
+
+=item Memoize::Storable
+
+Store Memoized data in Storable database
+
 =item NDBM_File
 
 Tied access to ndbm files
@@ -614,13 +654,65 @@ Tied access to ndbm files
 
 Provide a pseudo-class NEXT that allows method redispatch
 
+=item Net::Cmd
+
+Network Command class (as used by FTP, SMTP etc)
+
+=item Net::Config
+
+Local configuration data for libnet
+
+=item Net::Domain
+
+Attempt to evaluate the current host's internet name and domain
+
+=item Net::DummyInetd
+
+A dummy Inetd server
+
+=item Net::FTP
+
+FTP Client class
+
+=item Net::NNTP
+
+NNTP Client class
+
+=item Net::Netrc
+
+OO interface to users netrc file
+
+=item Net::PH
+
+CCSO Nameserver Client class
+
+=item Net::POP3
+
+Post Office Protocol 3 Client class (RFC1081)
+
 =item Net::Ping
 
 Check a remote host for reachability
 
+=item Net::SMTP
+
+Simple Mail Transfer Protocol Client
+
+=item Net::SNPP
+
+Simple Network Pager Protocol Client
+
+=item Net::Time
+
+Time and daytime network client interface
+
 =item Net::hostent
 
 By-name interface to Perl's built-in gethost*() functions
+
+=item Net::libnetFAQ
+
+Libnet Frequently Asked Questions
 
 =item Net::netent
 

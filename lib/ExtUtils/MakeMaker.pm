@@ -71,6 +71,7 @@ $Is_OS2   = $^O eq 'os2';
 $Is_Mac   = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
 $Is_Cygwin= $^O eq 'cygwin';
+$Is_NetWare = $Config{'osname'} eq 'NetWare';
 
 require ExtUtils::MM_Unix;
 
@@ -83,6 +84,11 @@ if ($Is_OS2) {
 }
 if ($Is_Mac) {
     require ExtUtils::MM_MacOS;
+}
+if ($Is_NetWare) {
+	$^O = 'NetWare';
+	require ExtUtils::MM_NW5;
+	$Is_Win32=0;
 }
 if ($Is_Win32) {
     require ExtUtils::MM_Win32;

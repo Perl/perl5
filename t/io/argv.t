@@ -18,6 +18,9 @@ close try;
 if ($^O eq 'MSWin32') {
   $x = `.\\perl -e "while (<>) {print \$.,\$_;}" Io_argv1.tmp Io_argv1.tmp`;
 }
+elsif ($^O eq 'NetWare') {
+  $x = `perl -e "while (<>) {print \$.,\$_;}" Io_argv1.tmp Io_argv1.tmp`;
+}
 else {
   $x = `./perl -e 'while (<>) {print \$.,\$_;}' Io_argv1.tmp Io_argv1.tmp`;
 }
@@ -26,6 +29,9 @@ if ($x eq "1a line\n2a line\n") {print "ok 1\n";} else {print "not ok 1\n";}
 if ($^O eq 'MSWin32') {
   $x = `.\\perl -le "print 'foo'" | .\\perl -e "while (<>) {print \$_;}" Io_argv1.tmp -`;
 }
+elsif ($^O eq 'NetWare') {
+  $x = `perl -le "print 'foo'" | perl -e "while (<>) {print \$_;}" Io_argv1.tmp -`;
+}
 else {
   $x = `echo foo|./perl -e 'while (<>) {print $_;}' Io_argv1.tmp -`;
 }
@@ -33,6 +39,9 @@ if ($x eq "a line\nfoo\n") {print "ok 2\n";} else {print "not ok 2\n";}
 
 if ($^O eq 'MSWin32') {
   $x = `.\\perl -le "print 'foo'" |.\\perl -e "while (<>) {print \$_;}"`;
+}
+elsif ($^O eq 'NetWare') {
+  $x = `perl -le "print 'foo'" | perl -e "while (<>) {print \$_;}"`;
 }
 else {
   $x = `echo foo|./perl -e 'while (<>) {print $_;}'`;

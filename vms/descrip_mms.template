@@ -268,16 +268,16 @@ FULLLIBS2 = $(LIBS2)|$(THRLIBS1)|$(THRLIBS2)
 #### End of system configuration section. ####
 
 c0 = $(MALLOC_C) $(SOCKC) av.c deb.c doio.c doop.c dump.c globals.c gv.c
-c1 = hv.c mg.c miniperlmain.c op.c perl.c perlapi.c perlio.c perly.c pp.c pp_ctl.c
-c2 = pp_hot.c pp_sys.c regcomp.c regexec.c run.c scope.c sv.c taint.c
-c3 = toke.c universal.c utf8.c util.c vms.c xsutils.c
+c1 = hv.c mg.c locale.c miniperlmain.c numeric.c op.c perl.c perlapi.c perlio.c
+c2 = perly.c pp.c pp_ctl.c pp_hot.c pp_sys.c regcomp.c regexec.c run.c scope.c
+c3 = sv.c taint.c toke.c universal.c utf8.c util.c vms.c xsutils.c
 c = $(c0) $(c1) $(c2) $(c3)
 
 obj0 = $(MALLOC_O) $(SOCKO) av$(O) deb$(O) doio$(O) doop$(O) dump$(O)
-obj1 = globals$(O) gv$(O) hv$(O) mg$(O) miniperlmain$(O) op$(O) perl$(O) perlapi$(O)
-obj2 = perlio$(O) perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O) pp_sys$(O) regcomp$(O)
-obj3 = regexec$(O) run$(O) scope$(O) sv$(O) taint$(O) toke$(O) universal$(O)
-obj4 = utf8$(O) util$(O) vms$(O) xsutils$(O)
+obj1 = globals$(O) gv$(O) hv$(O) locale$(O) mg$(O) miniperlmain$(O) numeric$(O)
+obj2 = op$(O) perl$(O) perlapi$(O) perlio$(O) perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O)
+obj3 = pp_sys$(O) regcomp$(O) regexec$(O) run$(O) scope$(O) sv$(O) taint$(O) toke$(O)
+obj4 = universal$(O) utf8$(O) util$(O) vms$(O) xsutils$(O)
 obj = $(obj0) $(obj1) $(obj2) $(obj3) $(obj4)
 
 h0 = av.h cc_runtime.h config.h cop.h cv.h embed.h embedvar.h
@@ -1138,11 +1138,15 @@ gv$(O) : gv.c extern.h perl.h config.h embed.h handy.h vmsish.h $(SOCKH) iperlsy
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 hv$(O) : hv.c extern.h perl.h config.h embed.h handy.h vmsish.h $(SOCKH) iperlsys.h perlsdio.h perl.h regexp.h sv.h util.h form.h gv.h cv.h opnames.h op.h cop.h av.h hv.h mg.h scope.h warnings.h utf8.h perly.h thread.h pp.h proto.h pp_proto.h opcode.h embedvar.h intrpvar.h thrdvar.h perlvars.h patchlevel.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
+locale$(O) : locale.c extern.h perl.h config.h embed.h handy.h vmsish.h $(SOCKH) iperlsys.h perlsdio.h perl.h regexp.h sv.h util.h form.h gv.h cv.h opnames.h op.h cop.h av.h hv.h mg.h scope.h warnings.h utf8.h perly.h thread.h pp.h proto.h pp_proto.h opcode.h embedvar.h intrpvar.h thrdvar.h perlvars.h patchlevel.h
+	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 malloc$(O) : malloc.c extern.h perl.h config.h embed.h handy.h vmsish.h $(SOCKH) iperlsys.h perlsdio.h perl.h regexp.h sv.h util.h form.h gv.h cv.h opnames.h op.h cop.h av.h hv.h mg.h scope.h warnings.h utf8.h perly.h thread.h pp.h proto.h pp_proto.h opcode.h embedvar.h intrpvar.h thrdvar.h perlvars.h patchlevel.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 mg$(O) : mg.c extern.h perl.h config.h embed.h handy.h vmsish.h $(SOCKH) iperlsys.h perlsdio.h perl.h regexp.h sv.h util.h form.h gv.h cv.h opnames.h op.h cop.h av.h hv.h mg.h scope.h warnings.h utf8.h perly.h thread.h pp.h proto.h pp_proto.h opcode.h embedvar.h intrpvar.h thrdvar.h perlvars.h patchlevel.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 miniperlmain$(O) : miniperlmain.c extern.h perl.h config.h embed.h handy.h vmsish.h $(SOCKH) iperlsys.h perlsdio.h perl.h regexp.h sv.h util.h form.h gv.h cv.h opnames.h op.h cop.h av.h hv.h mg.h scope.h warnings.h utf8.h perly.h thread.h pp.h proto.h pp_proto.h opcode.h embedvar.h intrpvar.h thrdvar.h perlvars.h patchlevel.h
+	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
+numeric$(O) : numeric.c extern.h perl.h config.h embed.h handy.h vmsish.h $(SOCKH) iperlsys.h perlsdio.h perl.h regexp.h sv.h util.h form.h gv.h cv.h opnames.h op.h cop.h av.h hv.h mg.h scope.h warnings.h utf8.h perly.h thread.h pp.h proto.h pp_proto.h opcode.h embedvar.h intrpvar.h thrdvar.h perlvars.h patchlevel.h keywords.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 op$(O) : op.c extern.h perl.h config.h embed.h handy.h vmsish.h $(SOCKH) iperlsys.h perlsdio.h perl.h regexp.h sv.h util.h form.h gv.h cv.h opnames.h op.h cop.h av.h hv.h mg.h scope.h warnings.h utf8.h perly.h thread.h pp.h proto.h pp_proto.h opcode.h embedvar.h intrpvar.h thrdvar.h perlvars.h patchlevel.h keywords.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)

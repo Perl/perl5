@@ -11,6 +11,7 @@ $| = 1;
 
 my $Is_VMS     = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
+my $Is_NetWare = $^O eq 'NetWare';
 my $tmpfile = "tmp0000";
 my $i = 0 ;
 1 while -f ++$tmpfile;
@@ -86,6 +87,8 @@ for (@prgs){
                   `./perl "-I../lib" $switch $tmpfile 2>&1` :
 		  $Is_MSWin32 ?
                   `.\\perl -I../lib $switch $tmpfile 2>&1` :
+		  $Is_NetWare ?
+                  `perl -I../lib $switch $tmpfile 2>&1` :
                   `./perl -I../lib $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;

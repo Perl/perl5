@@ -10,6 +10,7 @@ utils/c2ph      # link = utils/pstruct
 utils/dprofpp
 utils/h2ph
 utils/h2xs
+utils/libnetcfg
 utils/perlbug
 utils/perlcc
 utils/perldoc

@@ -29,7 +29,7 @@ label4:
 print "#2\t:$foo: == 4\n";
 if ($foo == 4) {print "ok 2\n";} else {print "not ok 2\n";}
 
-$PERL = ($^O eq 'MSWin32') ? '.\perl' : ($^O eq 'MacOS') ? $^X : './perl';
+$PERL = ($^O eq 'MSWin32') ? '.\perl' : ($^O eq 'MacOS') ? $^X : ($^O eq 'NetWare') ? 'perl' : './perl';
 $CMD = qq[$PERL -e "goto foo;" 2>&1 ];
 $x = `$CMD`;
 

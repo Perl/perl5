@@ -43,7 +43,7 @@ eval {
 
 # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
 # and mingw32 uses said silly CRT
-$have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
+$have_setlocale = 0 if (($^O eq 'MSWin32' || $^O eq 'NetWare') && $Config{cc} =~ /^(cl|gcc)/i);
 
 my $last = $have_setlocale ? &last : &last_without_setlocale;
 

@@ -42,7 +42,7 @@ print "not " unless @a >= 3;
 print "ok 4\n";
 
 # Test Win32 backslash nastiness...
-if ($^O ne 'MSWin32') {
+if ($^O ne 'MSWin32' && $^O ne 'NetWare') {
     print "ok 5\nok 6\nok 7\n";
 }
 else {

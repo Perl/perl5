@@ -75,6 +75,7 @@ sub copy {
 	&& !($from_a_handle && $^O eq 'mpeix')	# and neither can MPE/iX.
 	&& !($from_a_handle && $^O eq 'MSWin32')
 	&& !($from_a_handle && $^O eq 'MacOS')
+	&& !($from_a_handle && $^O eq 'NetWare')
        )
     {
 	return syscopy($from, $to);

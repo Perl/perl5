@@ -149,7 +149,6 @@ void
 perl_construct(pTHXx)
 {
 #ifdef USE_THREADS
-    int i;
 #ifndef FAKE_THREADS
     struct perl_thread *thr = NULL;
 #endif /* FAKE_THREADS */
@@ -817,14 +816,24 @@ perl_free(pTHXx)
 #if defined(PERL_OBJECT)
     PerlMem_free(this);
 #else
-#  if defined(WIN32)
+#  if defined(WIN32) || defined(NETWARE)
 #  if defined(PERL_IMPLICIT_SYS)
-    void *host = w32_internal_host;
-    if (PerlProc_lasthost()) {
+    #ifdef NETWARE
+		void *host = nw_internal_host;
+	#else
+		void *host = w32_internal_host;
+	#endif
+	#ifndef NETWARE
+	if (PerlProc_lasthost()) {
 	PerlIO_cleanup();
-    }
+	}
+	#endif
     PerlMem_free(aTHXx);
-    win32_delete_internal_host(host);
+	#ifdef NETWARE
+		nw5_delete_internal_host(host);
+	#else
+		win32_delete_internal_host(host);
+	#endif
 #else
     PerlIO_cleanup();
     PerlMem_free(aTHXx);
@@ -3434,9 +3443,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	}
 #endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
 #endif /* USE_ENVIRON_ARRAY */
-#ifdef DYNAMIC_ENV_FETCH
-	HvNAME(hv) = savepv(ENV_HV_NAME);
-#endif
     }
     TAINT_NOT;
     if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV)))

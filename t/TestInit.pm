@@ -11,10 +11,10 @@
 # (not require) in the test scripts.
 #
 # PS this is not POD because this should be a very minimalist module in
-# case of fundemental perl breakage.
+# case of funaemental perl breakage.
 
 chdir 't' if -d 't';
 @INC = '../lib';
-$0 =~ s/\.dp$//;
+$0 =~ s/\.dp$//; # for the test.deparse make target
 1;
 
