@@ -1785,9 +1785,10 @@ doesn't use it on its /tmp directory as shipped.  Also as with the
 permissions, some local policy might dictate that the stickiness is
 not used.
 
-(3) If any of the parent directories of the temporary file back to the
-root directory of the are 'unsafe', using the definitions given above
-in (1) and (2).
+(3) If the system supports the POSIX 'chown giveaway' feature and if
+any of the parent directories of the temporary file back to the root
+directory are 'unsafe', using the definitions given above in (1) and
+(2).
 
 See the documentation for the File::Temp module for more information
 about the various security aspects.
