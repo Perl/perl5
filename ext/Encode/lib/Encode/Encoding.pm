@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.27 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 sub Define
 {
@@ -19,6 +19,8 @@ sub toUnicode    { shift->decode(@_) }
 sub fromUnicode  { shift->encode(@_) }
 
 sub new_sequence { return $_[0] }
+
+sub perlio_ok { 0 }
 
 sub needs_lines  { 0 }
 
@@ -50,7 +52,7 @@ when C<encodings()> has scanned C<@INC> for loadable encodings but has
 not actually loaded the encoding in question. This is because the
 current "loading" process is all Perl and a bit slow.
 
-Once an encoding is loaded then value of the hash is object which
+Once an encoding is loaded, the value of the hash is the object which
 implements the encoding. The object should provide the following
 interface:
 
@@ -58,107 +60,153 @@ interface:
 
 =item -E<gt>name
 
-Should return the string representing the canonical name of the encoding.
+MUST return the string representing the canonical name of the encoding.
 
 =item -E<gt>new_sequence
 
 This is a placeholder for encodings with state. It should return an
-object which implements this interface, all current implementations
+object which implements this interface.  All current implementations
 return the original object.
 
 =item -E<gt>encode($string,$check)
 
-Should return the octet sequence representing I<$string>. If I<$check>
-is true it should modify I<$string> in place to remove the converted
-part (i.e.  the whole string unless there is an error).  If an error
-occurs it should return the octet sequence for the fragment of string
-that has been converted, and modify $string in-place to remove the
-converted part leaving it starting with the problem fragment.
+MUST return the octet sequence representing I<$string>. 
 
-If check is is false then C<encode> should make a "best effort" to
-convert the string - for example by using a replacement character.
+=over 2
+
+=item *
+
+If I<$check> is true, it SHOULD modify I<$string> in place to remove
+the converted part (i.e.  the whole string unless there is an error).
+If perlio_ok() is true, SHOULD becomes MUST.
+
+=item *
+
+If an error occurs, it SHOULD return the octet sequence for the
+fragment of string that has been converted and modify $string in-place
+to remove the converted part leaving it starting with the problem
+fragment.  If perlio_ok() is true, SHOULD becomes MUST.
+
+=item *
+
+If I<$check> is is false then C<encode> MUST  make a "best effort" to
+convert the string - for example, by using a replacement character.
+
+=back
 
 =item -E<gt>decode($octets,$check)
 
-Should return the string that I<$octets> represents. If I<$check> is
-true it should modify I<$octets> in place to remove the converted part
-(i.e.  the whole sequence unless there is an error).  If an error
-occurs it should return the fragment of string that has been
-converted, and modify $octets in-place to remove the converted part
-leaving it starting with the problem fragment.
+MUST return the string that I<$octets> represents. 
 
-If check is is false then C<decode> should make a "best effort" to
+=over 2
+
+=item *
+
+If I<$check> is true, it SHOULD modify I<$octets> in place to remove
+the converted part (i.e.  the whole sequence unless there is an
+error).  If perlio_ok() is true, SHOULD becomes MUST.
+
+=item *
+
+If an error occurs, it SHOULD return the fragment of string that has
+been converted and modify $octets in-place to remove the converted
+part leaving it starting with the problem fragment.  If perlio_ok() is
+true, SHOULD becomes MUST.
+
+=item *
+
+If I<$check> is false then C<decode> should make a "best effort" to
 convert the string - for example by using Unicode's "\x{FFFD}" as a
 replacement character.
 
 =back
 
-It should be noted that the check behaviour is different from the
+=item -E<gt>perlio_ok()
+
+If you want your encoding to work with PerlIO, you MUST define this
+method so that it returns 1 when PerlIO is enabled.  Here is an
+example;
+
+ sub perlio_ok { exists $INC{"PerlIO/encoding.pm"} }
+
+By default, this method is defined as follows;
+
+ sub perlio_ok { 0 }
+
+=item -E<gt>needs_lines()
+
+If your encoding can work with PerlIO but needs line buffering, you
+MUST define this method so it returns true.  7bit ISO-2022 encodings
+are one example that needs this.  When this method is missing, false
+is assumed.
+
+=back
+
+It should be noted that the I<$check> behaviour is different from the
 outer public API. The logic is that the "unchecked" case is useful
-when encoding is part of a stream which may be reporting errors
-(e.g. STDERR).  In such cases it is desirable to get everything
+when the encoding is part of a stream which may be reporting errors
+(e.g. STDERR).  In such cases, it is desirable to get everything
 through somehow without causing additional errors which obscure the
-original one. Also the encoding is best placed to know what the
+original one. Also, the encoding is best placed to know what the
 correct replacement character is, so if that is the desired behaviour
 then letting low level code do it is the most efficient.
 
-In contrast if check is true, the scheme above allows the encoding to
-do as much as it can and tell layer above how much that was. What is
-lacking at present is a mechanism to report what went wrong. The most
-likely interface will be an additional method call to the object, or
-perhaps (to avoid forcing per-stream objects on otherwise stateless
-encodings) and additional parameter.
+By contrast, if I<$check> is true, the scheme above allows the
+encoding to do as much as it can and tell the layer above how much
+that was. What is lacking at present is a mechanism to report what
+went wrong. The most likely interface will be an additional method
+call to the object, or perhaps (to avoid forcing per-stream objects
+on otherwise stateless encodings) an additional parameter.
 
 It is also highly desirable that encoding classes inherit from
 C<Encode::Encoding> as a base class. This allows that class to define
-additional behaviour for all encoding objects. For example built in
-Unicode, UCS-2 and UTF-8 classes use :
+additional behaviour for all encoding objects. For example, built-in
+Unicode, UCS-2, and UTF-8 classes use
 
   package Encode::MyEncoding;
   use base qw(Encode::Encoding);
 
   __PACKAGE__->Define(qw(myCanonical myAlias));
 
-To create an object with bless {Name => ...},$class, and call
+to create an object with C<< bless {Name => ...}, $class >>, and call
 define_encoding.  They inherit their C<name> method from
 C<Encode::Encoding>.
 
 =head2 Compiled Encodings
 
-For the sake of speed and efficiency, Most of the encodings are now
-supported via I<Compiled Form> that are XS modules generated from UCM
-files.   Encode provides enc2xs tool to achieve that.  Please see
+For the sake of speed and efficiency, most of the encodings are now
+supported via a I<compiled form>: XS modules generated from UCM
+files.   Encode provides the enc2xs tool to achieve that.  Please see
 L<enc2xs> for more details.
 
 =head1 SEE ALSO
 
 L<perlmod>, L<enc2xs>
 
-=for future
-
+=begin future
 
 =over 4
 
 =item Scheme 1
 
-Passed remaining fragment of string being processed.
-Modifies it in place to remove bytes/characters it can understand
-and returns a string used to represent them.
-e.g.
+The fixup routine gets passed the remaining fragment of string being
+processed.  It modifies it in place to remove bytes/characters it can
+understand and returns a string used to represent them.  For example:
 
  sub fixup {
    my $ch = substr($_[0],0,1,'');
    return sprintf("\x{%02X}",ord($ch);
  }
 
-This scheme is close to how underlying C code for Encode works, but gives
-the fixup routine very little context.
+This scheme is close to how the underlying C code for Encode works,
+but gives the fixup routine very little context.
 
 =item Scheme 2
 
-Passed original string, and an index into it of the problem area, and
-output string so far.  Appends what it will to output string and
-returns new index into original string.  For example:
+The fixup routine gets passed the original string, an index into
+it of the problem area, and the output string so far.  It appends
+what it wants to the output string and returns a new index into the
+original string.  For example:
 
  sub fixup {
    # my ($s,$i,$d) = @_;
@@ -168,17 +216,19 @@ returns new index into original string.  For example:
  }
 
 This scheme gives maximal control to the fixup routine but is more
-complicated to code, and may need internals of Encode to be tweaked to
-keep original string intact.
+complicated to code, and may require that the internals of Encode be tweaked to
+keep the original string intact.
 
 =item Other Schemes
 
-Hybrids of above.
+Hybrids of the above.
 
 Multiple return values rather than in-place modifications.
 
 Index into the string could be C<pos($str)> allowing C<s/\G...//>.
 
 =back
+
+=end future
 
 =cut

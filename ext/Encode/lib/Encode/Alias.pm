@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.28 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.29 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 require Exporter;
 
@@ -269,10 +269,10 @@ Currently I<newName> can be specified in the following ways:
 
   define_alias( qr/^iso8859-(\d+)$/i => '"iso-8859-$1"' );
 
-In this case if I<ENCODING> is not a reference it is C<eval>-ed to
-allow C<$1> etc. to be substituted.  The example is one way to alias
-names as used in X11 fonts to the MIME names for the iso-8859-*
-family.  Note the double quote inside the single quote.
+In this case, if I<ENCODING> is not a reference, it is C<eval>-ed
+in order to allow C<$1> etc. to be substituted.  The example is one
+way to alias names as used in X11 fonts to the MIME names for the
+iso-8859-* family.  Note the double quotes inside the single quotes.
 
 If you are using a regex here, you have to use the quotes as shown or
 it won't work.  Also note that regex handling is tricky even for the
@@ -282,27 +282,27 @@ experienced.  Use it with caution.
 
   define_alias( sub { return /^iso8859-(\d+)$/i ? "iso-8859-$1" : undef } , '');
 
-
-In this case C<$_> will be set to the name that is being looked up and
+In this case, C<$_> will be set to the name that is being looked up and
 I<ENCODING> is passed to the sub as its first argument.  The example
 is another way to alias names as used in X11 fonts to the MIME names
 for the iso-8859-* family.
 
 =back
 
-=head2  Alias overloading
+=head2 Alias overloading
 
 You can override predefined aliases by simply applying define_alias().
-New alias is always evaluated first and when neccessary define_alias()
-flushes internal cache to make new definition available.
+The new alias is always evaluated first, and when neccessary,
+define_alias() flushes the internal cache to make the new definition
+available.
 
-  # redirect  SHIFT_JIS to MS/IBM Code Page 932, which is a
+  # redirect SHIFT_JIS to MS/IBM Code Page 932, which is a
   # superset of SHIFT_JIS
 
   define_alias( qr/shift.*jis$/i  => '"cp932"' );
   define_alias( qr/sjis$/i        => '"cp932"' );
 
-If you want to zap all predefined aliases, you can
+If you want to zap all predefined aliases, you can use
 
   Encode::Alias->undef_aliases;
 
@@ -310,8 +310,7 @@ to do so.  And
 
   Encode::Alias->init_aliases;
 
-gets factory setting back.
-
+gets the factory settings back.
 
 =head1 SEE ALSO
 

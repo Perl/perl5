@@ -2,14 +2,14 @@
 # Demand-load module list
 #
 package Encode::Config;
-our $VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use strict;
 
 our %ExtModule = 
     (
       # Encode::Byte
-      #iso-8859-1 is on Encode.pm itself
+      #iso-8859-1 is in Encode.pm itself
      'iso-8859-2'             => 'Encode::Byte',
      'iso-8859-3'             => 'Encode::Byte',
      'iso-8859-4'             => 'Encode::Byte',

@@ -1,6 +1,6 @@
 package Encode::Symbol;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
@@ -33,7 +33,7 @@ supported are as follows.
 
 =head1 DESCRIPTION
 
-To find how to use this module in detail, see L<Encode>.
+To find out how to use this module in detail, see L<Encode>.
 
 =head1 SEE ALSO
 

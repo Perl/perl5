@@ -4,7 +4,7 @@ BEGIN {
 	die "Encode::CN not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 1.23 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.24 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
@@ -62,12 +62,12 @@ When you see C<charset=gb2312> on mails and web pages, they really
 mean C<euc-cn> encodings.  To fix that, C<gb2312> is aliased to C<euc-cn>.
 Use C<gb2312-raw> when you really mean it.
 
-ASCII part (0x00-0x7f) is preserved for all encodings, even though it
-conflicts with mappings by the Unicode Consortium.  See
+The ASCII region (0x00-0x7f) is preserved for all encodings, even though
+this conflicts with mappings by the Unicode Consortium.  See
 
 L<http://www.debian.or.jp/~kubota/unicode-symbols.html.en>
 
-to find why it is implemented that way.
+to find out why it is implemented that way.
 
 =head1 SEE ALSO
 

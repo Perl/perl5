@@ -5,7 +5,7 @@ BEGIN {
     }
 }
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.24 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
@@ -54,7 +54,7 @@ supported are as follows.
 
 =head1 DESCRIPTION
 
-To find how to use this module in detail, see L<Encode>.
+To find out how to use this module in detail, see L<Encode>.
 
 =head1 Note on ISO-2022-JP(-1)?
 
@@ -63,9 +63,12 @@ adds support for JIS X 0212-1990.  That means you can use the same
 code to decode to utf8 but not vice versa.
 
   $utf8 = decode('iso-2022-jp-1', $stream);
+
+and
+
   $utf8 = decode('iso-2022-jp',   $stream);
 
-Yields the same result but
+yield the same result but
 
   $with_0212 = encode('iso-2022-jp-1', $utf8);
 
@@ -73,19 +76,19 @@ is now different from
 
   $without_0212 = encode('iso-2022-jp', $utf8 );
 
-In the latter case, characters that map to 0212 are at first converted
-to U+3013 (0xA2AE in EUC-JP; a white square also known as 'Tofu') then
-fed to decoding engine.  U+FFFD is not used to preserve text layout as
-much as possible.
+In the latter case, characters that map to 0212 are first converted
+to U+3013 (0xA2AE in EUC-JP; a white square also known as 'Tofu' or
+'geta mark') then fed to the decoding engine.  U+FFFD is not used,
+in order to preserve text layout as much as possible.
 
 =head1 BUGS
 
-ASCII part (0x00-0x7f) is preserved for all encodings, even though it
-conflicts with mappings by the Unicode Consortium.  See
+The ASCII region (0x00-0x7f) is preserved for all encodings, even
+though this conflicts with mappings by the Unicode Consortium.  See
 
 L<http://www.debian.or.jp/~kubota/unicode-symbols.html.en>
 
-to find why it is implemented that way.
+to find out why it is implemented that way.
 
 =head1 SEE ALSO
 

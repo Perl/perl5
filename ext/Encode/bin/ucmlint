@@ -1,10 +1,10 @@
 #!/usr/local/bin/perl
 #
-# $Id: ucmlint,v 0.1 2002/04/09 20:04:30 dankogai Exp $
+# $Id: ucmlint,v 0.2 2002/04/22 02:45:50 dankogai Exp $
 #
 
 use strict;
-our  $VERSION = do { my @r = (q$Revision: 0.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our  $VERSION = do { my @r = (q$Revision: 0.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Getopt::Std;
 our %Opt;
@@ -177,7 +177,7 @@ sub encparse{
 
 __END__
 
-UCM file looks like this.
+A UCM file looks like this.
 
   #
   # Comments

@@ -1,7 +1,7 @@
 package Encode::JP::JIS7;
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -23,6 +23,12 @@ sub new_sequence { $_[0] }
 
 sub needs_lines { 1 }
 
+sub perlio_ok { 
+    exists $INC{"PerlIO/encoding.pm"} or return 0;
+    PerlIO::encoding->VERSION >= 0.03 and return 1;
+    return 0;
+}
+
 use Encode::CJKConstants qw(:all);
 
 our $DEBUG = 0;
@@ -37,7 +43,6 @@ sub decode($$;$)
     my $residue = jis_euc(\$str);
     # This is for PerlIO
     $_[1] = $residue if $chk;
-    # use perlqq fallback for euc-jp -> utf8
     return Encode::decode('euc-jp', $str, FB_PERLQQ);
 }
 
@@ -85,6 +90,7 @@ sub jis_euc {
 }
 
 sub euc_jis{
+    no warnings qw(uninitialized);
     my $r_str = shift;
     my $jis0212 = shift;
     $$r_str =~ s{

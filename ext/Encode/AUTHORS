@@ -1,11 +1,11 @@
-# To give due honor to those who have made Encode module  what is is today,
-# here are easily-from-changelogs-extractable people and their
-# (hopefully) current and preferred email addresses (as of early 2001,
+# To give due honour to those who have made the Encode module what it
+# is today, here are easily-from-changelogs-extractable people and their
+# (hopefully) current and preferred email addresses (as of early 2002,
 # if known).
 #
 # The use of this database for anything else than Encode and/or Perl 
 # development is strictly forbidden.  (Passive distribution with the Perl 
-# source code kit or CPAN is naturally allowed.)
+# source code kit or CPAN is, of course, allowed.)
 #
 # This list is in alphabetical order.
 -- 
@@ -16,10 +16,12 @@ Benjamin Goldberg               <goldbb2@earthlink.net>
 Craig A. Berry			<craigberry@mac.com>
 Dan Kogai			<dankogai@dan.co.jp>
 Gerrit P. Haase			<gp@familiehaase.de>
+Gurusamy Sarathy		<gsar@activestate.com>
 Jarkko Hietaniemi		<jhi@iki.fi>
 Jungshik Shin                   <jshin@mailaps.org>
 Laszlo Molnar			<ml1050@freemail.hu>
 Mark-Jason Dominus              <mjd@plover.com>
+Mattia Barbon			<mbarbon@dsi.unive.it>
 Michael G Schwern               <schwern@pobox.com>
 Nicholas Clark			<nick@ccl4.org>
 Nick Ing-Simmons		<nick@ing-simmons.net>
