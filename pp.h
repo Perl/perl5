@@ -55,9 +55,12 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define MARK mark
 #define TARG targ
 
-#define PUSHMARK(p) if (++PL_markstack_ptr == PL_markstack_max)	\
-			markstack_grow();			\
-		    *PL_markstack_ptr = (p) - PL_stack_base
+#define PUSHMARK(p)	\
+	STMT_START {					\
+	    if (++PL_markstack_ptr == PL_markstack_max)	\
+	    markstack_grow();				\
+	    *PL_markstack_ptr = (p) - PL_stack_base;	\
+	} STMT_END
 
 #define TOPMARK		(*PL_markstack_ptr)
 #define POPMARK		(*PL_markstack_ptr--)
@@ -70,7 +73,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define ORIGMARK	(PL_stack_base + origmark)
 
 #define SPAGAIN		sp = PL_stack_sp
-#define MSPAGAIN	sp = PL_stack_sp; mark = ORIGMARK
+#define MSPAGAIN	STMT_START { sp = PL_stack_sp; mark = ORIGMARK; } STMT_END
 
 #define GETTARGETSTACKED targ = (PL_op->op_flags & OPf_STACKED ? POPs : PAD_SV(PL_op->op_targ))
 #define dTARGETSTACKED SV * GETTARGETSTACKED
@@ -437,17 +440,20 @@ and C<PUSHu>.
 #define tryAMAGICun(meth)	tryAMAGICunW(meth,SETsvUN,0,RETURN)
 #define tryAMAGICunSET(meth)	tryAMAGICunW(meth,SETs,0,RETURN)
 #define tryAMAGICunTARGET(meth, shift)					\
-	{ dSP; sp--; 	/* get TARGET from below PL_stack_sp */		\
+	STMT_START { dSP; sp--; 	/* get TARGET from below PL_stack_sp */		\
 	    { dTARGETSTACKED; 						\
-		{ dSP; tryAMAGICunW(meth,FORCE_SETs,shift,RETURN);}}}
+		{ dSP; tryAMAGICunW(meth,FORCE_SETs,shift,RETURN);}}} STMT_END
 
-#define setAGAIN(ref) sv = ref;							\
-  if (!SvROK(ref))								\
-      Perl_croak(aTHX_ "Overloaded dereference did not return a reference");	\
-  if (ref != arg && SvRV(ref) != SvRV(arg)) {					\
-      arg = ref;								\
-      goto am_again;								\
-  }
+#define setAGAIN(ref)	\
+    STMT_START {					\
+	sv = ref;					\
+	if (!SvROK(ref))				\
+	    Perl_croak(aTHX_ "Overloaded dereference did not return a reference");	\
+	if (ref != arg && SvRV(ref) != SvRV(arg)) {	\
+	    arg = ref;					\
+	    goto am_again;				\
+	}						\
+    } STMT_END
 
 #define tryAMAGICunDEREF(meth) tryAMAGICunW(meth,setAGAIN,0,(void)0)
 
