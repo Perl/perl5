@@ -3764,8 +3764,6 @@ register SV *sv;
 {
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     if (SvPOK(sv)) {
 	register XPV* Xpv;
 	if ((Xpv = (XPV*)SvANY(sv)) &&
