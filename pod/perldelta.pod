@@ -1397,8 +1397,11 @@ large file (more than 4GB) access Note that the O_LARGEFILE is
 automatically/transparently added to sysopen() flags if large file
 support has been configured), Free/Net/OpenBSD locking behaviour flags
 F_FLOCK, F_POSIX, Linux F_SHLCK, and O_ACCMODE: the combined mask of
-O_RDONLY, O_WRONLY, and O_RDWR.  Also SEEK_SET, SEEK_CUR, and SEEK_END
-added for one-stop shopping of the seek/sysseek constants.
+O_RDONLY, O_WRONLY, and O_RDWR.  The seek()/sysseek() constants
+SEEK_SET, SEEK_CUR, and SEEK_END are available via the C<:seek> tag.
+The chmod()/stat() S_IF* constants and S_IS* functions are available
+via the C<:mode> tag.
+
 
 =item File::Compare
 

@@ -662,6 +662,24 @@ constant(char *name, int arg)
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "SHUT_RD"))
+#ifdef SHUT_RD
+	    return SHUT_RD;
+#else
+	    return 0;
+#endif
+	if (strEQ(name, "SHUT_RDWR"))
+#ifdef SHUT_RDWR
+	    return SHUT_RDWR;
+#else
+	    return 2;
+#endif
+	if (strEQ(name, "SHUT_WR"))
+#ifdef SHUT_WR
+	    return SHUT_WR;
+#else
+	    return 1;
+#endif
 	if (strEQ(name, "SOCK_DGRAM"))
 #ifdef SOCK_DGRAM
 	    return SOCK_DGRAM;
