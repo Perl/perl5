@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.13 $, $Date: 2002/02/08 22:32:47 $)
+perlfaq3 - Programming Tools ($Revision: 1.15 $, $Date: 2002/02/11 19:29:52 $)
 
 =head1 DESCRIPTION
 
@@ -832,6 +832,9 @@ For example:
     print "Hello world\n"
      (then Run "Myscript" or Shift-Command-R)
 
+    # MPW
+    perl -e 'print "Hello world\n"'
+
     # VMS
     perl -e "print ""Hello world\n"""
 
@@ -850,8 +853,7 @@ characters as control characters.
 Using qq(), q(), and qx(), instead of "double quotes", 'single
 quotes', and `backticks`, may make one-liners easier to write.
 
-There is no general solution to all of this.  It is a mess, pure and
-simple.  Sucks to be away from Unix, huh? :-)
+There is no general solution to all of this.  It is a mess.
 
 [Some of this answer was contributed by Kenneth Albanowski.]
 

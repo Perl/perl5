@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.8 $, $Date: 2002/01/28 04:17:26 $)
+perlfaq5 - Files and Formats ($Revision: 1.9 $, $Date: 2002/02/11 19:30:21 $)
 
 =head1 DESCRIPTION
 
@@ -607,24 +607,18 @@ For more information, see also the new L<perlopentut> if you have it
 
 =head2 How can I reliably rename a file?
 
-Well, usually you just use Perl's rename() function.  That may not
-work everywhere, though, particularly when renaming files across file systems.
-Some sub-Unix systems have broken ports that corrupt the semantics of
-rename()--for example, WinNT does this right, but Win95 and Win98
-are broken.  (The last two parts are not surprising, but the first is. :-)
-
-If your operating system supports a proper mv(1) program or its moral
+If your operating system supports a proper mv(1) utility or its functional
 equivalent, this works:
 
     rename($old, $new) or system("mv", $old, $new);
 
-It may be more compelling to use the File::Copy module instead.  You
-just copy to the new file to the new name (checking return values),
-then delete the old one.  This isn't really the same semantically as a
-real rename(), though, which preserves metainformation like
+It may be more portable to use the File::Copy module instead.
+You just copy to the new file to the new name (checking return
+values), then delete the old one.  This isn't really the same
+semantically as a rename(), which preserves meta-information like
 permissions, timestamps, inode info, etc.
 
-Newer versions of File::Copy exports a move() function.
+Newer versions of File::Copy export a move() function.
 
 =head2 How can I lock a file?
 
