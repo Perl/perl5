@@ -138,8 +138,6 @@ L<File::chdir>
 
 use strict;
 
-use Carp;
-
 our $VERSION = '2.08';
 
 use base qw/ Exporter /;
@@ -360,7 +358,8 @@ sub _perl_abs_path
 
     unless (@cst = stat( $start ))
     {
-	carp "stat($start): $!";
+	require Carp;
+	Carp::carp ("stat($start): $!");
 	return '';
     }
     $cwd = '';
@@ -372,12 +371,14 @@ sub _perl_abs_path
 	local *PARENT;
 	unless (opendir(PARENT, $dotdots))
 	{
-	    carp "opendir($dotdots): $!";
+	    require Carp;
+	    Carp::carp ("opendir($dotdots): $!");
 	    return '';
 	}
 	unless (@cst = stat($dotdots))
 	{
-	    carp "stat($dotdots): $!";
+	    require Carp;
+	    Carp::carp ("stat($dotdots): $!");
 	    closedir(PARENT);
 	    return '';
 	}
@@ -391,7 +392,8 @@ sub _perl_abs_path
 	    {
 		unless (defined ($dir = readdir(PARENT)))
 	        {
-		    carp "readdir($dotdots): $!";
+		    require Carp;
+		    Carp::carp ("readdir($dotdots): $!");
 		    closedir(PARENT);
 		    return '';
 		}
@@ -423,10 +425,15 @@ sub fast_abs_path {
     ($path) = $path =~ /(.*)/;
     ($cwd)  = $cwd  =~ /(.*)/;
 
-    CORE::chdir($path) || croak "Cannot chdir to $path: $!";
+    if (!CORE::chdir($path)) {
+ 	require Carp;
+ 	Carp::croak ("Cannot chdir to $path: $!");
+    }
     my $realpath = getcwd();
-    -d $cwd && CORE::chdir($cwd) ||
-	croak "Cannot chdir back to $cwd: $!";
+    if (! ((-d $cwd) && (CORE::chdir($cwd)))) {
+ 	require Carp;
+ 	Carp::croak ("Cannot chdir back to $cwd: $!");
+    }
     $realpath;
 }
 
@@ -452,7 +459,11 @@ sub _vms_cwd {
 sub _vms_abs_path {
     return $ENV{'DEFAULT'} unless @_;
     my $path = VMS::Filespec::pathify($_[0]);
-    croak("Invalid path name $_[0]") unless defined $path;
+    if (! defined $path)
+	{
+	require Carp;
+	Carp::croak("Invalid path name $_[0]")
+	}
     return VMS::Filespec::rmsexpand($path);
 }
 
