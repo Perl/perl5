@@ -123,7 +123,7 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 #endif
 
 static void
-S_init_tls_and_interp(pTHX)
+S_init_tls_and_interp(PerlInterpreter *my_perl)
 {
     if (!PL_curinterp) {			
 	PERL_SET_INTERP(my_perl);
