@@ -31,6 +31,144 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9884] By: jhi                                   on 2001/04/27  14:14:12
+        Log: Subject: [DOC PATCH bleadperl] Document underscores in numeric literals
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Fri, 27 Apr 2001 16:40:13 +0200
+             Message-ID: <3AE9A0ED.5248.CEA127@localhost>
+     Branch: perl
+	   ! pod/perldata.pod
+____________________________________________________________________________
+[  9883] By: jhi                                   on 2001/04/27  13:28:19
+        Log: Add LOG_PERROR; prettify the "removed".
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.xs
+____________________________________________________________________________
+[  9882] By: jhi                                   on 2001/04/27  13:13:18
+        Log: h2xs tweaks: use NV instead of double, "quote" the removed
+             prefixes for clarity (especially when nothing is removed),
+             slight pod reformats.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9881] By: jhi                                   on 2001/04/27  12:58:48
+        Log: Don't bother creating existing directories.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9880] By: jhi                                   on 2001/04/27  12:45:39
+        Log: Subject: MakeMaker 'make test' weirdness -- fix for h2xs provided
+             From: Mike Schilli <m@perlmeister.com>
+             Date: Wed, 25 Apr 2001 01:29:21 -0700
+             Message-id: <3AE68AE1.6A981723@perlmeister.com>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9879] By: jhi                                   on 2001/04/27  12:40:55
+        Log: break is not yet Perl.  Added the template license also to README.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9878] By: jhi                                   on 2001/04/27  03:08:20
+        Log: Subject: Re: [ID 20010426.003] Not OK: perl v5.7.1 +DEVEL9849 on i686-linux-thread-multi-64int-ld 2.2.13
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Thu, 26 Apr 2001 15:30:17 -1000 (HST)
+             Message-ID: <Pine.LNX.4.33.0104261529300.13049-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! t/lib/xs-typemap.t
+____________________________________________________________________________
+[  9877] By: jhi                                   on 2001/04/26  23:54:40
+        Log: Subject: [PATCH: utils/h2xs.PL (bleadperl)] Fill in details we're likely to know.
+             From: "Abigail" <abigail@foad.org>
+             Date: Fri, 27 Apr 2001 01:44:28 +0200
+             Message-ID: <20010426234428.19786.qmail@foad.org>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9876] By: jhi                                   on 2001/04/26  23:52:06
+        Log: Subject: [PATCH: perl@9865] vms specific tweak to new selfstubber.t
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 26 Apr 2001 17:41:58 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10104261738370.338047-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9875] By: jhi                                   on 2001/04/26  23:48:10
+        Log: Deparse nits.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm t/lib/b-deparse.t
+____________________________________________________________________________
+[  9874] By: jhi                                   on 2001/04/26  22:46:05
+        Log: Document ANYOF_CLASS.
+     Branch: perl
+	   ! regcomp.h
+____________________________________________________________________________
+[  9873] By: jhi                                   on 2001/04/26  22:35:03
+        Log: Subject: Re: [PATCH @9846] dumping ANYOF
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 26 Apr 2001 23:33:38 +0100
+             Message-Id: <200104262233.XAA22352@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c regcomp.h
+____________________________________________________________________________
+[  9872] By: jhi                                   on 2001/04/26  22:34:31
+        Log: Subject: [PATCH] more for Devel::SelfStubber
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 27 Apr 2001 00:13:52 +0100
+             Message-ID: <20010427001351.K88186@plum.flirble.org>
+     Branch: perl
+	   ! lib/Devel/SelfStubber.pm lib/SelfLoader.pm t/lib/selfstubber.t
+____________________________________________________________________________
+[  9871] By: jhi                                   on 2001/04/26  21:59:17
+        Log: Subject: [PATCH B::Deparse] formats must be flush left
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 26 Apr 2001 23:54:29 +0100
+             Message-ID: <20010426235429.A28747@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9870] By: jhi                                   on 2001/04/26  21:57:37
+        Log: If some of the constants are prefixes of others,
+             the prefixes may never get recognized.  (See 20010426.006.)
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9869] By: jhi                                   on 2001/04/26  21:50:42
+        Log: Subject: [ID 20010426.006] Sys::Syslog ignores LOG_AUTH constant
+             From: Chris Bongaarts <cab@tc.umn.edu>
+             Date: Thu, 26 Apr 2001 17:10:31 -0500
+             Message-Id: <iss.2042.3ae89cd7.6cfba.1@earth.tc.umn.edu>
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.xs
+____________________________________________________________________________
+[  9868] By: jhi                                   on 2001/04/26  21:35:12
+        Log: Further cuts and more docs from Graham Barr.
+     Branch: perl
+	   ! ext/List/Util/lib/List/Util.pm
+	   ! ext/List/Util/lib/Scalar/Util.pm
+____________________________________________________________________________
+[  9867] By: jhi                                   on 2001/04/26  21:18:57
+        Log: Subject: [PATCH 5.7.1] DB_File-1.77
+             From: "Paul Marquess" <Paul.Marquess@Openwave.com>
+             Date: Thu, 26 Apr 2001 22:37:53 +0100
+             Message-ID: <000a01c0ce99$269cc3e0$99dcfea9@bfs.phone.com>
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/DB_File.xs ext/DB_File/version.c
+____________________________________________________________________________
+[  9866] By: jhi                                   on 2001/04/26  21:12:31
+        Log: Subject: [PATCH B::Deparse] fix easy bugs
+             From: Robin Houston <robin@kitsite.com>
+             Date: Thu, 26 Apr 2001 23:03:33 +0100
+             Message-ID: <20010426230333.A28657@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9865] By: jhi                                   on 2001/04/26  20:26:13
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9864] By: jhi                                   on 2001/04/26  19:27:48
         Log: Dethinko from Robin Houston.
      Branch: perl
