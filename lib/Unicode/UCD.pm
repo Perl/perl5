@@ -125,6 +125,7 @@ you will need also the compexcl(), casefold(), and casespec() functions.
 
 =cut
 
+# NB: This function is duplicated in charnames.pm
 sub _getcode {
     my $arg = shift;
 
