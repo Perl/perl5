@@ -2235,7 +2235,10 @@ print "# some Unicode properties\n";
     print "not " unless "a" =~ /\p{LowercaseLetter}/;
     print "ok 745\n";
 
-    print "not " if     "A" =~ /\p{LowercaseLetter}/;
+    print "not " if     "A" =~ /\p{
+					Lowercase
+				        Letter
+				  }/x;
     print "ok 746\n";
 }
 
