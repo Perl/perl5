@@ -718,7 +718,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    break;
 	if (sv_type > SVt_PV && PL_curcop != &PL_compiling) {
 	    HV* stash = gv_stashpvn("Errno",5,FALSE);
-	    if(!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
+	    if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 		dSP;
 		PUTBACK;
 		require_pv("Errno.pm");

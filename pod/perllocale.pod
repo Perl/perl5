@@ -613,7 +613,7 @@ called by extensions outside the standard Perl distribution and by the
 operating system and its utilities.  Note especially that the string
 value of C<$!> and the error messages given by external utilities may
 be changed by C<LC_MESSAGES>.  If you want to have portable error
-codes, use the Errno extension.
+codes, use C<%!>.  See L<Errno>.
 
 =head1 SECURITY
 

@@ -2771,7 +2771,7 @@ S_init_perllib(pTHX)
 #endif
 #if defined(PERL_VENDORLIB_EXP)
 #if defined(WIN32) 
-    incpush(PERLVENDORLIB_EXP, TRUE);
+    incpush(PERL_VENDORLIB_EXP, TRUE);
 #else
     incpush(PERL_VENDORLIB_EXP, FALSE);
 #endif

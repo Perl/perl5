@@ -19,7 +19,6 @@ use Config ();
 use Cwd ();
 use DirHandle;
 use Exporter ();
-use Errno ();
 use ExtUtils::MakeMaker (); # $SelfLoader::DEBUG=1;
 use File::Basename ();
 use File::Copy ();
@@ -576,7 +575,7 @@ Please make sure the directory exists and is writable.
     }
     my $fh;
     unless ($fh = FileHandle->new(">$lockfile")) {
-	if ($!{EACCES} || $! =~ /Permission/) {
+	if ($! =~ /Permission/ || $!{EACCES}) {
 	    my $incc = $INC{'CPAN/Config.pm'};
 	    my $myincc = MM->catfile($ENV{HOME},'.cpan','CPAN','MyConfig.pm');
 	    $CPAN::Frontend->myprint(qq{
