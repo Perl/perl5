@@ -731,10 +731,11 @@ EOF
 	    chop $action;
 
 	    if ($action =~ /^(f|sa)/i) { # <F>ile/<Sa>ve
-		print "\n\nName of file to save message in [perlbug.rep]: ";
+		my $file_save = $outfile || "perlbug.rep";
+		print "\n\nName of file to save message in [$file_save]: ";
 		my $file = scalar <>;
 		chop $file;
-		$file = "perlbug.rep" if $file eq "";
+		$file = $file_save if $file eq "";
 
 		unless (open(FILE, ">$file")) {
 		    print "\nError opening $file: $!\n\n";
