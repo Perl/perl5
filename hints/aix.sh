@@ -351,6 +351,11 @@ EOM
 		exit 1
 		;;
 	    esac
+	    # XXX In 64-bit AIX 5L (oslevel 5.1.0.0, ccversion 5.0.2.0)
+	    # the Configure library symbol probe mysteriously finds all
+	    # symbols but these two --jhi XXX
+	    d_pipe='define'
+	    d_times='define'
 	    ;;
 esac
 EOCBU
