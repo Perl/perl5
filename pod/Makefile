@@ -139,7 +139,7 @@ TEX = 	\
 	perlxs.tex	\
 	perlxstut.tex
 
-man:	pod2man ($MAN)
+man:  pod2man $(MAN)
 
 # pod2html normally runs on all the pods at once in order to build up
 # cross-references.
