@@ -175,7 +175,7 @@ transfer and store numbers always in text format, instead of raw
 binary, or consider using modules like C<Data::Dumper> (included in
 the standard distribution as of Perl 5.005) and C<Storable>.
 
-=head2 Files
+=head2 Files and Filesystems
 
 Most platforms these days structure files in a hierarchical fashion.
 So, it is reasonably safe to assume that any platform supports the
@@ -193,6 +193,14 @@ root directories and various "unrooted" device files such NIL: and
 LPT:).
 
 S<Mac OS> uses C<:> as a path separator instead of C</>.
+
+The filesystem may support neither hard links (C<link()>) nor
+symbolic links (C<symlink()>, C<readlink()>, C<lstat()>).
+
+The filesystem may not support neither access timestamp nor change
+timestamp (meaning that about the only portable timestamp is the
+modification timestamp), or one second granularity of any timestamps
+(e.g. the FAT filesystem limits the time granularity to two seconds).
 
 VOS perl can emulate Unix filenames with C</> as path separator.  The
 native pathname characters greater-than, less-than, number-sign, and
@@ -252,8 +260,11 @@ Likewise, if using C<AutoSplit>, try to keep the split functions to
 make it so the resulting files have a unique (case-insensitively)
 first 8 characters.
 
-Don't assume C<E<gt>> won't be the first character of a filename.  Always
-use C<E<lt>> explicitly to open a file for reading.
+There certainly can be whitespace in filenames.  Many systems (DOS,
+VMS) cannot have more than one C<"."> in their filenames.
+
+Don't assume C<E<gt>> won't be the first character of a filename.
+Always use C<E<lt>> explicitly to open a file for reading.
 
     open(FILE, "<$existing_file") or die $!;
 
@@ -829,7 +840,7 @@ an effect on what happens with some perl functions (such as C<chr>,
 C<pack>, C<print>, C<printf>, C<ord>, C<sort>, C<sprintf>, C<unpack>), as
 well as bit-fiddling with ASCII constants using operators like C<^>, C<&>
 and C<|>, not to mention dealing with socket interfaces to ASCII computers
-(see L<"NEWLINES">).
+(see L<Newlines>).
 
 Fortunately, most web servers for the mainframe will correctly translate
 the C<\n> in the following statement to its ASCII equivalent (note that
@@ -1314,6 +1325,9 @@ method of spawning a process. (Win32)
 
 Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
 
+Link count not updated because hard links are not quite that hard
+(They are sort of half-way between hard and soft links). (AmigaOS)
+
 =item lstat FILEHANDLE
 
 =item lstat EXPR
@@ -1346,6 +1360,8 @@ open to C<|-> and C<-|> are unsupported. (S<Mac OS>, Win32, S<RISC OS>)
 =item pipe READHANDLE,WRITEHANDLE
 
 Not implemented. (S<Mac OS>)
+
+Very limited functionality. (MiNT)
 
 =item readlink EXPR
 
@@ -1444,6 +1460,11 @@ the child program uses a compatible version of the emulation library.
 I<scalar> will call the native command line direct and no such emulation
 of a child Unix program will exists.  Mileage B<will> vary.  (S<RISC OS>)
 
+Far from being POSIX compliant.  Because there may be no underlying
+/bin/sh tries to work around the problem by forking and execing the
+first token in its argument string.  Handles basic redirection
+("E<lt>" or "E<gt>") on its own behalf. (MiNT)
+
 =item times
 
 Only the first entry returned is nonzero. (S<Mac OS>)
@@ -1473,6 +1494,9 @@ should not be held open elsewhere. (Win32)
 
 Returns undef where unavailable, as of version 5.005.
 
+C<umask()> works but the correct permissions are only set when the file
+is finally close()d. (AmigaOS)
+
 =item utime LIST
 
 Only the modification time is updated. (S<Mac OS>, VMS, S<RISC OS>)
@@ -1499,6 +1523,10 @@ Not useful. (S<RISC OS>)
 =head1 CHANGES
 
 =over 4
+
+=item v1.38, 31 December 1998
+
+More changes from Jarkko.
 
 =item v1.37, 19 December 1998
 
@@ -1568,5 +1596,4 @@ E<lt>pudge@pobox.comE<gt>.
 
 =head1 VERSION
 
-Version 1.37, last modified 19 December 1998
-
+Version 1.38, last modified 31 December 1998
