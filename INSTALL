@@ -730,11 +730,30 @@ or by
 Eventually (by perl v5.6.0) this internal confusion ought to disappear,
 and these options may disappear as well.
 
+=head2 Large file support.
+
+Since Perl 5.6.0 Perl has supported large files (files larger than
+2 gigabytes), and in many common platforms like Linux or Solaris this
+support is on by default.
+
+This is both good and bad. It is good in that you can use large files,
+seek(), stat(), and -s them.  It is bad if you are interfacing Perl
+using some extension, also the components you are connecting to must
+be large file aware: if Perl thinks files can be large but the other
+parts of the software puzzle do not understand the concept, bad things
+will happen.  One popular extension suffering from this ailment is the
+Apache extension mod_perl.
+
+There's also one known limitation with the current large files
+implementation: unless you also have 64-bit integers (see the next
+section), you cannot use the printf/sprintf non-decimal integer
+formats like C<%x> to print filesizes.  You can use C<%d>, though.
+
 =head2 64 bit support.
 
-If your platform does not have 64 bits natively, but can simulate them with
-compiler flags and/or C<long long> or C<int64_t>, you can build a perl that
-uses 64 bits.
+If your platform does not have 64 bits natively, but can simulate them
+with compiler flags and/or C<long long> or C<int64_t>, you can build a
+perl that uses 64 bits.
 
 There are actually two modes of 64-bitness: the first one is achieved
 using Configure -Duse64bitint and the second one using Configure
