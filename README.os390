@@ -1,5 +1,6 @@
-This is a fully ported perl for OS/390 Release 3.  It may work on
-other versions, but that's the one we've tested it on.
+This is a fully ported perl for OS/390 Release 3 && 5.
+It may work on other versions, but those are the ones we've 
+tested it on.
 
 If you've downloaded the binary distribution, it needs to be
 installed below /usr/local.  Source code distributions have an
@@ -21,8 +22,8 @@ is available from:
 
   http://www.mks.com/s390/gnu/index.htm
 
-Once you've unpacked the distribution, run Configure (see INSTALL for
-full discussion of the Configure options), and then run make, then
+Once you've unpacked the distribution, run "sh Configure" (see INSTALL for
+a full discussion of the Configure options), and then run "make", then
 "make test" then "make install" (this last step may require UID=0
 privileges)
 
@@ -73,14 +74,10 @@ using perl on EBCDIC platforms.  To subscibe, send a message of:
 
 to majordomo@perl.org.
 
-Regression tests: as the 5.005 kit was was being assembled
-the following "failures" were known to appear on some machines
-during `make test` (mostly due to ASCII vs. EBCDIC conflicts),
-your results may differ:
+Regression tests: as the 5.005_03 kit was was being assembled the
+following failure was known to appear on some machines during
+`make test`, your results may differ:
 
-comp/cpp..........FAILED at test 0
-op/pack...........FAILED at test 58
-op/stat...........Out of memory!
-op/taint..........FAILED at test 73
-lib/errno.........FAILED at test 1
 lib/posix.........FAILED at test 19
+
+__END__
