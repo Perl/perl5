@@ -30,12 +30,15 @@ BEGIN {
 	print "1..0\n";
 	exit;
     }
+
+    use strict;
+
     my @incpath = (split(/\s+/, $Config{usrinc}), split(/\s+/ ,$Config{locincpth}));
     my %done = ();
     my %define = ();
 
     sub process_file {
-	my($file) = @_;
+	my($file,$level) = @_;
 
 	return unless defined $file;
 
@@ -52,15 +55,18 @@ BEGIN {
 	$done{$path} = 1;
 
 	unless(defined $path) {
-	    warn "Cannot find '$file'";
+	    warn "Cannot find '$file'" if $level == 0;
 	    return;
 	}
 
+        local *F;
+
 	open(F,$path) or return;
+	$level = 0 unless defined $level;
 	while(<F>) {
 	    s#/\*.*(\*/|$)##;
 
-	    process_file($mm,$1)
+	    process_file($1,$level+1)
 		    if /^#\s*include\s*[<"]([^>"]+)[>"]/;
 
 	    s/(?:\([^)]*\)\s*)//;
@@ -75,7 +81,7 @@ BEGIN {
     process_file("sys/ipc.h");
     process_file("sys/stat.h");
 
-    foreach $d (@define) {
+    foreach my $d (@define) {
 	while(defined($define{$d}) && $define{$d} !~ /^(0x)?\d+$/) {
 	    $define{$d} = exists $define{$define{$d}}
 		    ? $define{$define{$d}} : undef;
@@ -83,8 +89,11 @@ BEGIN {
 	unless(defined $define{$d}) {
 	    print "1..0\n";
 	    exit;
-	};
-	${ $d } = eval $define{$d};
+	}
+	{
+	    no strict 'refs';
+	    ${ $d } = eval $define{$d};
+	}
     }
 }
 
