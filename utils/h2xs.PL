@@ -808,8 +808,9 @@ if( ! $opt_X ){  # use XS, unless it was disabled
 	$filter = $';
       }
       warn "Scanning $filename for functions...\n";
+      my @styles = $Config{gccversion} ? qw(C++ C9X GNU) : qw(C++ C9X);
       $c = new C::Scan 'filename' => $filename, 'filename_filter' => $filter,
-	'add_cppflags' => $addflags, 'c_styles' => [qw(C++ C9X)];
+	'add_cppflags' => $addflags, 'c_styles' => \@styles;
       $c->set('includeDirs' => ["$Config::Config{archlib}/CORE"]);
 
       push @$fdecls_parsed, @{ $c->get('parsed_fdecls') };
