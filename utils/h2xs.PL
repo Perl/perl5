@@ -41,7 +41,7 @@ h2xs - convert .h C header files to Perl extensions
 
 =head1 SYNOPSIS
 
-B<h2xs> [B<-AOPXcdf>] [B<-v> version] [B<-n> module_name] [B<-p> prefix] [B<-s> sub] [headerfile ... [extra_libraries]]
+B<h2xs> [B<-ACOPXcdf>] [B<-v> version] [B<-n> module_name] [B<-p> prefix] [B<-s> sub] [headerfile ... [extra_libraries]]
 
 B<h2xs> B<-h>
 
@@ -72,6 +72,11 @@ in the extra-libraries argument.
 
 Omit all autoload facilities.  This is the same as B<-c> but also removes the
 S<C<use AutoLoader>> statement from the .pm file.
+
+=item B<-C>
+
+Omits creation of the F<Changes> file, and adds a HISTORY section to
+the POD template.
 
 =item B<-F>
 
@@ -218,9 +223,10 @@ use Getopt::Std;
 
 sub usage{
 	warn "@_\n" if @_;
-    die "h2xs [-AOPXcdfh] [-v version] [-n module_name] [-p prefix] [-s subs] [headerfile [extra_libraries]]
+    die "h2xs [-ACOPXcdfh] [-v version] [-n module_name] [-p prefix] [-s subs] [headerfile [extra_libraries]]
 version: $H2XS_VERSION
     -A   Omit all autoloading facilities (implies -c).
+    -C   Omit creating the Changes file, add HISTORY heading to stub POD.
     -F   Additional flags for C preprocessor (used with -x).
     -O   Allow overwriting of a pre-existing extension directory.
     -P   Omit the stub POD section.
@@ -241,7 +247,7 @@ extra_libraries
 }
 
 
-getopts("AF:OPXcdfhn:p:s:v:x") || usage;
+getopts("ACF:OPXcdfhn:p:s:v:x") || usage;
 
 usage if $opt_h;
 
@@ -518,11 +524,26 @@ END
 $author = "A. U. Thor";
 $email = 'a.u.thor@a.galaxy.far.far.away';
 
+my $revhist = '';
+$revhist = <<EOT if $opt_C;
+
+=head1 HISTORY
+
+=over 8
+
+=item $TEMPLATE_VERSION
+
+Original version; created by h2xs $H2XS_VERSION
+
+=back
+
+EOT
+
 my $const_doc = '';
 my $fdecl_doc = '';
 if (@const_names and not $opt_P) {
   $const_doc = <<EOD;
-\n=head1 Exported constants
+\n=head2 Exported constants
 
   @{[join "\n  ", @const_names]}
 
@@ -530,7 +551,7 @@ EOD
 }
 if (defined $fdecls and @$fdecls and not $opt_P) {
   $fdecl_doc = <<EOD;
-\n=head1 Exported functions
+\n=head2 Exported functions
 
   @{[join "\n  ", @$fdecls]}
 
@@ -556,7 +577,7 @@ $pod = <<"END" unless $opt_P;
 #unedited.
 #
 #Blah blah blah.
-#$const_doc$fdecl_doc
+#$const_doc$fdecl_doc$revhist
 #=head1 AUTHOR
 #
 #$author, $email
@@ -848,12 +869,14 @@ print "ok 1\n";
 _END_
 close(EX) || die "Can't close $ext$modpname/test.pl: $!\n";
 
-warn "Writing $ext$modpname/Changes\n";
-open(EX, ">Changes") || die "Can't create $ext$modpname/Changes: $!\n";
-print EX "Revision history for Perl extension $module.\n\n";
-print EX "$TEMPLATE_VERSION  ",scalar localtime,"\n";
-print EX "\t- original version; created by h2xs $H2XS_VERSION\n\n";
-close(EX) || die "Can't close $ext$modpname/Changes: $!\n";
+unless ($opt_C) {
+    warn "Writing $ext$modpname/Changes\n";
+    open(EX, ">Changes") || die "Can't create $ext$modpname/Changes: $!\n";
+    print EX "Revision history for Perl extension $module.\n\n";
+    print EX "$TEMPLATE_VERSION  ",scalar localtime,"\n";
+    print EX "\t- original version; created by h2xs $H2XS_VERSION\n\n";
+    close(EX) || die "Can't close $ext$modpname/Changes: $!\n";
+}
 
 warn "Writing $ext$modpname/MANIFEST\n";
 open(MANI,'>MANIFEST') or die "Can't create MANIFEST: $!";
