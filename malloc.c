@@ -458,6 +458,11 @@ union	overhead {
 	double	strut;			/* alignment problems */
 #endif
 	struct {
+/*
+ * Keep the ovu_index and ovu_magic in this order, having a char
+ * field first gives alignment indigestion in some systems, such as
+ * MachTen.
+ */
 		u_char	ovu_index;	/* bucket # */
 		u_char	ovu_magic;	/* magic number */
 #ifdef RCHECK
