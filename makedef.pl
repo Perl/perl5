@@ -227,6 +227,7 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_safexrealloc
 		     Perl_same_dirent
 		     Perl_unlnk
+		     Perl_sys_intern_dup
 		     PL_cryptseen
 		     PL_opsave
 		     PL_statusvalue_vms
