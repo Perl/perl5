@@ -13,6 +13,9 @@ Project	:	Perl5				-
 File	:	config.h			-	Mac configuration
 
 $Log: config.h,v $
+Revision 1.11  2002/01/03 21:53:51  neeri
+Disable sigaction (MacPerl Bug #470321)
+
 Revision 1.10  2001/10/03 19:31:55  pudge
 Sync with perforce maint-5.6/macperl
 
@@ -1955,7 +1958,7 @@ First build released to public
  *	This symbol, if defined, indicates that Vr4's sigaction() routine
  *	is available.
  */
-#define HAS_SIGACTION /**/
+#undef HAS_SIGACTION /**/
 
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
@@ -2969,9 +2972,10 @@ First build released to public
  *	This variable contains the number of elements of the sig_name
  *	and sig_num arrays, excluding the final NULL entry.
  */
-#define SIG_NAME "NUM0", "NUM1", "INT", "NUM3", "ILL", "NUM5", "NUM6", "NUM7", "FPE", "NUM9", "NUM10", "SEGV", "NUM12", "NUM13", "ALRM", "TERM", 0
-#define SIG_NUM 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
-#define SIG_SIZE 16			/**/
+#define SIG_NAME "NUM0", "NUM1", "INT", "NUM3", "ILL", "NUM5", "NUM6", "NUM7", "FPE", "NUM9", "NUM10", "SEGV", "NUM12", "NUM13", "ALRM", "TERM", \
+	"NUM16", "NUM17", "NUM18", "NUM19", "NUM20", "NUM11", "NUM22", "NUM23", "HUP", "NUM25", "NUM26", "NUM27", "NUM28", "NUM29", "NUM30", "NUM31", 0
+#define SIG_NUM 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0
+#define SIG_SIZE 32			/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
