@@ -463,6 +463,35 @@ If you have already selected -Duseperlio, and if Configure detects
 that you have sfio, then sfio will be the default suggested by
 Configure.
 
+I<Note:>  On some systems, sfio's B<iffe> configuration script fails
+to detect that you have an C<atexit> function (or equivalent).
+Apparently, this is a problem at least for some versions of Linux
+and SunOS 4.
+
+You can test if you have this problem by trying the following shell
+script.  (You may have to add some extra cflags and libraries.  A
+portable version of this may eventually make its way into Configure.)
+
+    #!/bin/sh
+    cat > try.c <<'EOCP'
+    #include <stdio.h>
+    main() { printf("42\n"); }
+    EOCP
+    cc -o try try.c -lsfio
+    val=`./try`
+    if test X$val = X42; then
+	echo "Your sfio looks ok"
+    else
+	echo "Your sfio has the exit problem."
+    fi
+
+If you have this problem, the fix is to go back to your sfio sources
+and correct iffe's guess about atexit (or whatever is appropriate for
+your platform.)
+
+There also might be a more recent release of Sfio that fixes your
+problem.
+
 =item 2.
 
 Normal stdio IO, but with all IO going through calls to the PerlIO
@@ -1244,4 +1273,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-24 February 1997
+$Id: INSTALL,v 1.3 1997/02/28 16:34:11 doughera Released $
