@@ -499,6 +499,11 @@ perl_destruct(pTHXx)
 	PL_e_script = Nullsv;
     }
 
+    while (--PL_origargc >= 0) {
+        Safefree(PL_origargv[PL_origargc]);
+    }
+    Safefree(PL_origargv);
+
     /* magical thingies */
 
     SvREFCNT_dec(PL_ofs_sv);	/* $, */
@@ -895,8 +900,21 @@ setuid perl scripts securely.\n");
 	("__environ", (unsigned long *) &environ_pointer, NULL);
 #endif /* environ */
 
-    PL_origargv = argv;
     PL_origargc = argc;
+    {
+        /* we copy rather than point to argv
+         * since perl_clone will copy and perl_destruct
+         * has no way of knowing if we've made a copy or 
+         * just point to argv
+         */
+        int i = PL_origargc;
+        New(0, PL_origargv, i+1, char*);
+        PL_origargv[i] = '\0';
+        while (i-- > 0) {
+            PL_origargv[i] = savepv(argv[i]);
+        }
+    }
+
 #ifdef  USE_ENVIRON_ARRAY
     PL_origenviron = environ;
 #endif
