@@ -14,7 +14,7 @@ BEGIN {
 	require Config; import Config;
 	# Don't bother if there are no quad offsets.
 	if ($Config{lseeksize} < 8) {
-		print "1..0\n# no 64-bit offsets\n";
+		print "1..0\n# no 64-bit file offsets\n";
 		bye();
 	}
 	require Fcntl; import Fcntl;
@@ -78,14 +78,14 @@ close BIG;
 print "# @s\n";
 
 sub fail () {
-    print " not ";
+    print "not ";
     $fail++;
 }
 
-fail unless $s[7] == 5_000_000_003;
+fail unless $s[7] == 5_000_000_003;	# exercizes pp_stat
 print "ok 1\n";
 
-fail unless -s "big" == 5_000_000_003;
+fail unless -s "big" == 5_000_000_003;	# exercizes pp_ftsize
 print "ok 2\n";
 
 sysopen(BIG, "big", O_RDONLY) or do { warn "sysopen failed: $!\n"; bye };

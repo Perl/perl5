@@ -14,7 +14,7 @@ BEGIN {
 	# Don't bother if there are no quad offsets.
 	require Config; import Config;
 	if ($Config{lseeksize} < 8) {
-		print "1..0\n# no 64-bit offsets\n";
+		print "1..0\n# no 64-bit file offsets\n";
 		bye();
 	}
 }
@@ -32,6 +32,8 @@ if ($^O eq 'win32' || $^O eq 'vms') {
 }
 
 # Then try to deduce whether we have sparse files.
+
+# Let's not depend on Fcntl or any other extension.
 
 my ($SEEK_SET, $SEEK_CUR, $SEEK_END) = (0, 1, 2);
 
@@ -79,14 +81,14 @@ close BIG;
 print "# @s\n";
 
 sub fail () {
-    print " not ";
+    print "not ";
     $fail++;
 }
 
-fail unless $s[7] == 5_000_000_003;
+fail unless $s[7] == 5_000_000_003;	# exercizes pp_stat
 print "ok 1\n";
 
-fail unless -s "big" == 5_000_000_003;
+fail unless -s "big" == 5_000_000_003;	# exercizes pp_ftsize
 print "ok 2\n";
 
 open(BIG, "big") or do { warn "open failed: $!\n"; bye };
