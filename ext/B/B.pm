@@ -654,6 +654,8 @@ This returns the op description from the global C PL_op_desc array
 
 =item sv
 
+=item gv
+
 =back
 
 =head2 B::PADOP METHOD

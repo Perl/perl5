@@ -691,11 +691,16 @@ PMOP_precomp(o)
 	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
 
 #define SVOP_sv(o)	cSVOPo->op_sv
+#define SVOP_gv(o)	((GV*)cSVOPo->op_sv)
 
 MODULE = B	PACKAGE = B::SVOP		PREFIX = SVOP_
 
 B::SV
 SVOP_sv(o)
+	B::SVOP	o
+
+B::SV
+SVOP_gv(o)
 	B::SVOP	o
 
 #define PADOP_padix(o)	o->op_padix
