@@ -95,7 +95,7 @@ sub test_security {
   # Create the tempfile
   my $template = "temptestXXXXXXXX";
   my ($fh1, $fname1) = tempfile ( $template, 
-				  DIR => File::Spec->curdir,
+				  DIR => File::Spec->tmpdir,
 				  UNLINK => 1,
 				);
   print "# Fname1 = $fname1\n";
