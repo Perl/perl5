@@ -665,6 +665,133 @@ Here's how to use our little example:
     print FOO $a, " plus ", $b, " equals ", $a + $b, "\n";
     print <FOO>;
 
+=head2 The C<untie> Gotcha
+
+If you intend making use of the object returned from either tie() or
+tied(), and if the tie's target class defines a destructor, there is a
+subtle gotcha you I<must> guard against.
+
+As setup, consider this (admittedly rather contrived) example of a
+tie; all it does is use a file to keep a log of the values assigned to
+a scalar.
+
+    package Remember;
+
+    use strict;
+    use IO::File;
+
+    sub TIESCALAR {
+        my $class = shift;
+        my $filename = shift;
+        my $handle = new IO::File "> $filename"
+                         or die "Cannot open $filename: $!\n";
+
+        print $handle "The Start\n";
+        bless {FH => $handle, Value => 0}, $class;
+    }
+
+    sub FETCH {
+        my $self = shift;
+        return $self->{Value};
+    }
+
+    sub STORE {
+        my $self = shift;
+        my $value = shift;
+        my $handle = $self->{FH};
+        print $handle "$value\n";
+        $self->{Value} = $value;
+    }
+
+    sub DESTROY {
+        my $self = shift;
+        my $handle = $self->{FH};
+        print $handle "The End\n";
+        close $handle;
+    }
+
+    1;
+
+Here is an example that makes use of this tie:
+
+    use strict;
+    use Remember;
+
+    my $fred;
+    tie $fred, 'Remember', 'myfile.txt';
+    $fred = 1;
+    $fred = 4;
+    $fred = 5;
+    untie $fred;
+    system "cat myfile.txt";
+
+This is the output when it is executed:
+
+    The Start
+    1
+    4
+    5
+    The End
+
+So far so good.  Those of you who have been paying attention will have
+spotted that the tied object hasn't been used so far.  So lets add an
+extra method to the Remember class to allow comments to be included in
+the file -- say, something like this:
+
+    sub comment {
+        my $self = shift;
+        my $text = shift;
+        my $handle = $self->{FH};
+        print $handle $text, "\n";
+    }
+
+And here is the previous example modified to use the C<comment> method
+(which requires the tied object):
+
+    use strict;
+    use Remember;
+
+    my ($fred, $x);
+    $x = tie $fred, 'Remember', 'myfile.txt';
+    $fred = 1;
+    $fred = 4;
+    comment $x "changing...";
+    $fred = 5;
+    untie $fred;
+    system "cat myfile.txt";
+
+When this code is executed there is no output.  Here's why:
+
+When a variable is tied, it is associated with the object which is the
+return value of the TIESCALAR, TIEARRAY, or TIEHASH function.  This
+object normally has only one reference, namely, the implicit reference
+from the tied variable.  When untie() is called, that reference is
+destroyed.  Then, as in the first example above, the object's
+destructor (DESTROY) is called, which is normal for objects that have
+no more valid references; and thus the file is closed.
+
+In the second example, however, we have stored another reference to
+the tied object in C<$x>.  That means that when untie() gets called
+there will still be a valid reference to the object in existence, so
+the destructor is not called at that time, and thus the file is not
+closed.  The reason there is no output is because the file buffers
+have not been flushed to disk.
+
+Now that you know what the problem is, what can you do to avoid it?
+Well, the good old C<-w> flag will spot any instances where you call
+untie() and there are still valid references to the tied object.  If
+the second script above is run with the C<-w> flag, Perl prints this
+warning message:
+
+    untie attempted while 1 inner references still exist
+
+To get the script to work properly and silence the warning make sure
+there are no valid references to the tied object I<before> untie() is
+called:
+
+    undef $x;
+    untie $fred;
+
 =head1 SEE ALSO
 
 See L<DB_File> or L<Config> for some interesting tie() implementations.
