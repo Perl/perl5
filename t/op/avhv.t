@@ -17,7 +17,7 @@ sub STORESIZE { $#{$_[0]} = $_[1]+1 }
 
 package main;
 
-print "1..12\n";
+print "1..15\n";
 
 $sch = {
     'abc' => 1,
@@ -108,3 +108,13 @@ f($a->{key});
 print "not " unless $a->[1] eq 'b';
 print "ok 12\n";
 
+# check if exists() is behaving properly
+$avhv = [{foo=>1,bar=>2,pants=>3}];
+print "not " if exists $avhv->{bar};
+print "ok 13\n";
+
+$avhv->{pants} = undef;
+print "not " unless exists $avhv->{pants};
+print "ok 14\n";
+print "not " if exists $avhv->{bar};
+print "ok 15\n";
