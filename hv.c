@@ -2288,7 +2288,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	xhv->xhv_keys++; /* HvKEYS(hv)++ */
 	if (i) {				/* initial entry? */
 	    xhv->xhv_fill++; /* HvFILL(hv)++ */
-	    if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */)
+	} else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
 		hsplit(PL_strtab);
 	}
     }
