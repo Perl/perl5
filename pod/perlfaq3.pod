@@ -184,13 +184,15 @@ transfer them in ASCII mode so the ends of lines are appropriately mangled.
 
 PerlBuilder (http://www.solutionsoft.com/perl.htm) is an integrated
 development environment for Windows that supports Perl development.
-PerlDevKit (http://www.activestate.com/Products/Perl_Dev_Kit/index.html)
-is an IDE from ActiveState supporting the ActivePerl.  (VisualPerl,
-a Visual Studio (or Studio.NET, in time) component is currently
-(late 2000) in beta).  The visiPerl+ IDE is available from Help
-Consulting (http://helpconsulting.net/visiperl/).  Perl code magic is
+Komodo, ActiveState's cross-platform, multi-language IDE has Perl
+support, including a regular expression debugger and remote debugging
+(http://www.ActiveState.com/Products/Komodo/index.html).  (Visual Perl,
+a Visual Studio.NET plug-in is currently in beta (late 2000)
+(http://www.ActiveState.com/Products/VisualPerl/index.html)).
+The visiPerl+ IDE is available from Help Consulting
+(http://helpconsulting.net/visiperl/).  Perl code magic is
 another IDE (http://www.petes-place.com/codemagic.html).  CodeMagicCD
-(http://www.codemagiccd.com/) is a commercial IDE.  The Object System
+(http://www.codemagiccd.com/) is another IDE.  The Object System
 (http://www.castlelink.co.uk/object_system/) is a Perl web
 applications development IDE.
 
