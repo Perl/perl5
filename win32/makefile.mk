@@ -59,7 +59,8 @@ CCTYPE		*= BORLAND
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
 # Highly recommended.  It has patches that fix known bugs in MSVCRT.DLL.
-# Get it from CPAN at http://www.perl.com/authors/id/D/DO/DOUGL/
+# This currently requires VC 5.0 with Service Pack 3.
+# Get it from CPAN at http://www.perl.com/CPAN/authors/id/D/DO/DOUGL/
 # and follow the directions in the package to install.
 #
 #USE_PERLCRT	*= define

@@ -78,6 +78,11 @@ Version 5.005_02        Second maintenance release of 5.005 (trial2)
 ----------------
 
 ____________________________________________________________________________
+[  1740] By: gsar                                  on 1998/08/05  10:05:46
+        Log: update Changes, patchlevel, tweak Liblist.pm
+     Branch: maint-5.005/perl
+           ! Changes lib/ExtUtils/Liblist.pm patchlevel.h
+____________________________________________________________________________
 [  1739] By: gsar                                  on 1998/08/05  09:10:45
         Log: newer cperl-mode.el
              From: Ilya Zakharevich <ilya@math.ohio-state.edu>
