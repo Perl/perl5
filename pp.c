@@ -2120,15 +2120,15 @@ PP(pp_sprintf)
 PP(pp_ord)
 {
     djSP; dTARGET;
-    I32 value;
+    UV value;
     U8 *tmps = (U8*)POPp;
     I32 retlen;
 
     if (IN_UTF8 && (*tmps & 0x80))
-	value = (I32) utf8_to_uv(tmps, &retlen);
+	value = utf8_to_uv(tmps, &retlen);
     else
-	value = (I32) (*tmps & 255);
-    XPUSHi(value);
+	value = (UV)(*tmps & 255);
+    XPUSHu(value);
     RETURN;
 }
 
@@ -3433,7 +3433,7 @@ PP(pp_unpack)
 		    auint = utf8_to_uv((U8*)s, &along);
 		    s += along;
 		    sv = NEWSV(37, 0);
-		    sv_setiv(sv, (IV)auint);
+		    sv_setuv(sv, (UV)auint);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
