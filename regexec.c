@@ -2245,6 +2245,7 @@ regmatch(regnode *prog)
 	    sayYES;			/* Success! */
 	case SUSPEND:
 	    n = 1;
+	    PL_reginput = locinput;
 	    goto do_ifmatch;	    
 	case UNLESSM:
 	    n = 0;
