@@ -438,11 +438,7 @@ sub concise_op {
 	if (defined $padname and class($padname) ne "SPECIAL") {
 	    $h{targarg}  = $padname->PVX;
 	    if ($padname->FLAGS & SVf_FAKE) {
-		my $fake = '';
-		$fake .= 'a' if $padname->IVX & 1; # PAD_FAKELEX_ANON
-		$fake .= 'm' if $padname->IVX & 2; # PAD_FAKELEX_MULTI
-		$fake .= ':' . $padname->NVX if $curcv->CvFLAGS & CVf_ANON;
-		$h{targarglife} = "$h{targarg}:FAKE:$fake";
+		$h{targarglife} = "$h{targarg}:FAKE";
 	    }
 	    else {
 		my $intro = $padname->NVX - $cop_seq_base;
