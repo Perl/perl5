@@ -29,6 +29,12 @@ sub process_file {
             warn "Cannot open '$file'";
             return;
 	}     
+    } elsif ($Config{gccversion} ne '') { 
+	# With the -dM option, gcc outputs every #define it finds
+	unless(open(FH,"$Config{cc} -E -dM $file |")) {
+            warn "Cannot open '$file'";
+            return;
+	}     
     } else {
 	unless(open(FH,"< $file")) {
 	    # This file could be a temporary file created by cppstdin
@@ -79,6 +85,10 @@ sub get_files {
     } elsif ($^O eq 'vmesa') {
 	# OS/390 C compiler doesn't generate #file or #line directives
 	$file{'../../vmesa/errno.h'} = 1;
+    } elsif ($^O eq 'linux') {
+	# Some Linuxes have weird errno.hs which generate
+	# no #file or #line directives
+	$file{'/usr/include/errno.h'} = 1;
     } else {
 	open(CPPI,"> errno.c") or
 	    die "Cannot open errno.c";
