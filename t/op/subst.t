@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 89 );
+plan( tests => 92 );
 
 $x = 'foo';
 $_ = "x";
@@ -372,10 +372,32 @@ ok( $_ eq "C B" && $snum == 12 );
     my $l = my $r = $s;
     $l =~ s/[^\w]//g;
     $r =~ s/[^\w\.]//g;
-    is($l, $r, "use utf8");
+    is($l, $r, "use utf8 \\w");
 }
 
 my $pv1 = my $pv2  = "Andreas J. K\303\266nig";
 $pv1 =~ s/A/\x{100}/;
 substr($pv2,0,1) = "\x{100}";
 is($pv1, $pv2);
+
+{   
+    use utf8;
+    $a = 'Espa&ntilde;a';
+    $a =~ s/&ntilde;/ñ/;
+    like($a, qr/ñ/, "use utf8 RHS");
+}
+
+{
+    use utf8;
+    $a = 'España España';
+    $a =~ s/ñ/&ntilde;/;
+    like($a, qr/ñ/, "use utf8 LHS");
+}
+
+{
+    use utf8;
+    $a = 'España';
+    $a =~ s/ñ/ñ/;
+    like($a, qr/ñ/, "use utf8 LHS and RHS");
+}
+

@@ -2089,6 +2089,8 @@ PP(pp_subst)
 	    SPAGAIN;
 	}
 	SvTAINT(TARG);
+	if (doutf8)
+	    SvUTF8_on(TARG);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
