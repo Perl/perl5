@@ -28,6 +28,8 @@ to offer patches and suggestions.
 
 =pod
 
+=over 4
+
 =item canonpath
 
 Any C<\> (backslashes) are converted to C</> (forward slashes),
@@ -77,5 +79,9 @@ sub tmpdir {
     my $self = shift;
     $tmpdir = $self->_tmpdir( $ENV{TMPDIR}, "/tmp", 'C:/temp' );
 }
+
+=back
+
+=cut
 
 1;
