@@ -365,7 +365,7 @@ pod3 = [.lib.pod]perlapio.pod [.lib.pod]perlapollo.pod [.lib.pod]perlbeos.pod [.
 pod4 = [.lib.pod]perlbot.pod [.lib.pod]perlbs2000.pod [.lib.pod]perlcall.pod [.lib.pod]perlce.pod [.lib.pod]perlclib.pod
 pod5 = [.lib.pod]perlcn.pod [.lib.pod]perlcompile.pod [.lib.pod]perlcygwin.pod [.lib.pod]perldata.pod
 pod6 = [.lib.pod]perldbmfilter.pod [.lib.pod]perldebguts.pod [.lib.pod]perldebtut.pod [.lib.pod]perldebug.pod
-pod7 = [.lib.pod]perldelta.pod [.lib.pod]perldgux.pod [.lib.pod]perldiag.pod [.lib.pod]perldos.pod [.lib.pod]perldsc.pod
+pod7 = [.lib.pod]perldelta.pod [.lib.pod]perldgux.pod [.lib.pod]perldiag.pod [.lib.pod]perldoc.pod [.lib.pod]perldos.pod [.lib.pod]perldsc.pod
 pod8 = [.lib.pod]perlebcdic.pod [.lib.pod]perlembed.pod [.lib.pod]perlepoc.pod [.lib.pod]perlfaq.pod [.lib.pod]perlfaq1.pod
 pod9 = [.lib.pod]perlfaq2.pod [.lib.pod]perlfaq3.pod [.lib.pod]perlfaq4.pod [.lib.pod]perlfaq5.pod [.lib.pod]perlfaq6.pod
 pod10 = [.lib.pod]perlfaq7.pod [.lib.pod]perlfaq8.pod [.lib.pod]perlfaq9.pod [.lib.pod]perlfilter.pod [.lib.pod]perlfork.pod
@@ -383,7 +383,7 @@ pod21 = [.lib.pod]perlrun.pod [.lib.pod]perlsec.pod [.lib.pod]perlsolaris.pod [.
 pod22 = [.lib.pod]perlsyn.pod [.lib.pod]perlthrtut.pod [.lib.pod]perltie.pod [.lib.pod]perltoc.pod [.lib.pod]perltodo.pod
 pod23 = [.lib.pod]perltooc.pod [.lib.pod]perltoot.pod [.lib.pod]perltrap.pod [.lib.pod]perltru64.pod [.lib.pod]perltw.pod
 pod24 = [.lib.pod]perlunicode.pod [.lib.pod]perluniintro.pod [.lib.pod]perlutil.pod [.lib.pod]perluts.pod [.lib.pod]perlvar.pod
-pod25 = [.lib.pod]perlvmesa.pod [.lib.pod]perlvos.pod [.lib.pod]perlwin32.pod [.lib.pod]perlxs.pod [.lib.pod]perlxstut.pod
+pod25 = [.lib.pod]perlvmesa.pod [.lib.pod]perlvms.pod [.lib.pod]perlvos.pod [.lib.pod]perlwin32.pod [.lib.pod]perlxs.pod [.lib.pod]perlxstut.pod
 pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) $(pod11) $(pod12) $(pod13) $(pod14) $(pod15) $(pod16) $(pod17) $(pod18) $(pod19) $(pod20) $(pod21) $(pod22) $(pod23) $(pod24) $(pod25)
 
 perlpods : $(pod)
@@ -767,6 +767,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ)
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 
+[.lib.pod]perldoc.pod : [.pod]perldoc.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
+
 [.lib.pod]perldos.pod : [.pod]perldos.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
@@ -1106,6 +1110,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ)
 [.lib.pod]perlvmesa.pod : [.pod]perlvmesa.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
+
+[.lib.pod]perlvms.pod : [.vms]perlvms.pod
+        @ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+        Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 
 [.lib.pod]perlvos.pod : [.pod]perlvos.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]

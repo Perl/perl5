@@ -2141,6 +2141,7 @@ PP(pp_goto)
 	    }
 
 	    /* First do some returnish stuff. */
+	    SvREFCNT_inc(cv); /* avoid premature free during unwind */
 	    FREETMPS;
 	    cxix = dopoptosub(cxstack_ix);
 	    if (cxix < 0)
@@ -2194,6 +2195,7 @@ PP(pp_goto)
 
 	    /* Now do some callish stuff. */
 	    SAVETMPS;
+	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvXSUB(cv)) {
 #ifdef PERL_XSUB_OLDSTYLE
 		if (CvOLDSTYLE(cv)) {
