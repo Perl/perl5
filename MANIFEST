@@ -247,6 +247,13 @@ ext/Errno/Makefile.PL		Errno extension makefile writer
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs		Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL		Fcntl extension makefile writer
+ext/File/Glob/Changes		File::Glob extension changelog
+ext/File/Glob/Glob.pm		File::Glob extension module
+ext/File/Glob/Glob.xs		File::Glob extension external subroutines
+ext/File/Glob/Makefile.PL	File::Glob extension makefile writer
+ext/File/Glob/TODO		File::Glob extension todo list
+ext/File/Glob/bsd_glob.c	File::Glob extension run time code
+ext/File/Glob/bsd_glob.h	File::Glob extension header file
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
@@ -1187,6 +1194,9 @@ t/lib/filespec.t	See if File::Spec works
 t/lib/findbin.t		See if FindBin works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/getopt.t		See if Getopt::Std and Getopt::Long work
+t/lib/glob-basic.t	See if File::Glob works
+t/lib/glob-global.t	See if File::Glob works
+t/lib/glob-taint.t	See if File::Glob works
 t/lib/gol-basic.t	See if Getopt::Long works
 t/lib/gol-compat.t	See if Getopt::Long works
 t/lib/gol-linkage.t	See if Getopt::Long works

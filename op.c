@@ -3351,14 +3351,20 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    if (k2 && k2->op_type == OP_READLINE
 		  && (k2->op_flags & OPf_STACKED)
 		  && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR)) 
+	    {
 		warnop = k2->op_type;
+	    }
 	    break;
 
 	case OP_SASSIGN:
 	    if (k1->op_type == OP_READDIR
 		  || k1->op_type == OP_GLOB
+		  || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
 		  || k1->op_type == OP_EACH)
-		warnop = k1->op_type;
+	    {
+		warnop = ((k1->op_type == OP_NULL)
+			  ? k1->op_targ : k1->op_type);
+	    }
 	    break;
 	}
 	if (warnop) {
@@ -3530,6 +3536,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 	      case OP_SASSIGN:
 		if (k1->op_type == OP_READDIR
 		      || k1->op_type == OP_GLOB
+		      || (k1->op_type == OP_NULL && k1->op_targ == OP_NULL)
 		      || k1->op_type == OP_EACH)
 		    expr = newUNOP(OP_DEFINED, 0, expr);
 		break;
@@ -3583,6 +3590,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	  case OP_SASSIGN:
 	    if (k1->op_type == OP_READDIR
 		  || k1->op_type == OP_GLOB
+		  || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
 		  || k1->op_type == OP_EACH)
 		expr = newUNOP(OP_DEFINED, 0, expr);
 	    break;
@@ -5172,6 +5180,19 @@ Perl_ck_glob(pTHX_ OP *o)
 
     if (!((gv = gv_fetchpv("glob", FALSE, SVt_PVCV)) && GvIMPORTED_CV(gv)))
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
+
+#if 1 /*def PERL_INTERNAL_GLOB */
+    /* XXX this can be tightened up and made more failsafe. */
+    if (!gv) {
+	OP *modname = newSVOP(OP_CONST, 0, newSVpvn("File::Glob", 10));
+	modname->op_private |= OPpCONST_BARE;
+	ENTER;
+	utilize(1, start_subparse(FALSE, 0), Nullop, modname,
+		newSVOP(OP_CONST, 0, newSVpvn("globally", 8)));
+	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
+	LEAVE;
+    }
+#endif /* PERL_INTERNAL_GLOB */
 
     if (gv && GvIMPORTED_CV(gv)) {
 	append_elem(OP_GLOB, o,

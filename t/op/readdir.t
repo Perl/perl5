@@ -1,5 +1,10 @@
 #!./perl
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
+}
+
 eval 'opendir(NOSUCH, "no/such/directory");';
 if ($@) { print "1..0\n"; exit; }
 
