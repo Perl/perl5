@@ -93,6 +93,51 @@ Version v5.6.1 Trial release 1
 --------------
 
 ____________________________________________________________________________
+[  8182] By: gsar                                  on 2000/12/18  09:53:47
+        Log: delete spurious files
+     Branch: maint-5.6/perl
+	   - lib/CGI/eg/make_links.pl lib/CGI/eg/wilogo.gif vos/config.def
+	   - vos/config.h vos/config_h.SH_orig
+____________________________________________________________________________
+[  8181] By: gsar                                  on 2000/12/18  09:46:08
+        Log: regen perltoc
+     Branch: maint-5.6/perl
+	   ! pod/buildtoc.PL pod/perl.pod pod/perlapi.pod pod/perltoc.pod
+____________________________________________________________________________
+[  8180] By: gsar                                  on 2000/12/18  09:20:27
+        Log: integrate changes#7924..7926,7946,7952 from mainline
+     Branch: maint-5.6/perl
+	  !> lib/CPAN.pm lib/CPAN/FirstTime.pm lib/ExtUtils/MM_Unix.pm
+	  !> lib/File/stat.pm t/lib/class-struct.t
+____________________________________________________________________________
+[  8179] By: gsar                                  on 2000/12/18  08:55:54
+        Log: integrate changes#7889,7890,7900,7903,7904,7907,7910,7917,
+             7918,7919,7988,8907 from mainline (various)
+     Branch: maint-5.6/perl
+	  +> t/lib/class-struct.t
+	  !> MANIFEST README.amiga ext/Sys/Syslog/Syslog.pm gv.c
+	  !> lib/Class/Struct.pm pod/perlipc.pod pod/perltie.pod
+	  !> t/lib/syslfs.t t/op/lfs.t utils/perlcc.PL
+____________________________________________________________________________
+[  8178] By: gsar                                  on 2000/12/18  08:16:30
+        Log: avoid redefinition warnings on windows due to sys/socket.h getting
+             #included before win32.h
+     Branch: maint-5.6/perl
+	   ! win32/include/sys/socket.h
+____________________________________________________________________________
+[  8177] By: gsar                                  on 2000/12/18  05:24:04
+        Log: make regen_headers; fix POSIX.xs problems; remove outdated
+             code from sys/socket.h that makes build fail now
+     Branch: maint-5.6/perl
+	   ! ext/POSIX/POSIX.xs global.sym objXSUB.h perlapi.c
+	   ! pod/perlapi.pod
+	  !> win32/include/sys/socket.h
+____________________________________________________________________________
+[  8176] By: gsar                                  on 2000/12/18  05:20:17
+        Log: update Changes
+     Branch: maint-5.6/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8175] By: gsar                                  on 2000/12/18  04:57:48
         Log: integrate changes#7643,7646..7649,7651..7654,7658,7659,
              7661..7665,7667..7669,7671,7673,7676,7677,7681..7683,
