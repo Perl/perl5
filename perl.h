@@ -3012,24 +3012,26 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(Atol) && defined(HAS_LONG_LONG)
+#if !defined(Atol) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
 #   if !defined(Atol) && defined(HAS_STRTOLL)
 #       define Atol(s) strtoll(s, (char**)NULL, 10)
 #   endif
 #   if !defined(Atol) && defined(HAS_ATOLL)
 #       define Atol atoll
 #   endif
-#endif
 /* is there atoq() anywhere? */
+#endif
 #if !defined(Atol)
 #   define Atol atol /* we assume atol being available anywhere */
 #endif
 
-#if !defined(Strtoul) && defined(HAS_LONG_LONG) && defined(HAS_STRTOULL)
-#   define Strtoul strtoull
+#if !defined(Strtoul) && defined(UV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#    if !defined(Strtoul) && defined(HAS_STRTOULL)
+#       define Strtoul strtoull
+#    endif
 #endif
 /* is there atouq() anywhere? */
-#if !defined(Strtoul) && defined(USE_64_BITS) && defined(HAS_STRTOUQ)
+#if !defined(Strtoul) && defined(HAS_STRTOUQ)
 #   define Strtoul strtouq
 #endif
 #if !defined(Strtoul)

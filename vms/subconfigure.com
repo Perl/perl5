@@ -3687,7 +3687,6 @@ $ WC "d_oldpthreads='" + perl_d_oldpthreads + "'"
 $ WC "d_longdbl='" + perl_d_longdbl + "'"
 $ WC "longdblsize='" + perl_longdblsize + "'"
 $ WC "d_longlong='" + perl_d_longlong + "'"
-$ WC "uselonglong='" + perl_d_longlong + "'"
 $ WC "longlongsize='" + perl_longlongsize + "'"
 $ WC "d_mkstemp='" + perl_d_mkstemp + "'"
 $ WC "d_mkstemps='" + perl_d_mkstemps + "'"
@@ -3947,7 +3946,7 @@ $    WRITE CONFIG "#undef ALWAYS_DEFTYPES"
 $ ENDIF
 $ if use_64bit.eqs."Y"
 $ THEN
-$    WRITE CONFIG "#define USE_LONG_LONG"
+$    WRITE CONFIG "#define USE_64_BITS"
 $    WRITE CONFIG "#define USE_LONG_DOUBLE"
 $ ENDIF
 $ WRITE CONFIG "#define HAS_ENVGETENV"

@@ -296,22 +296,28 @@ case "$use64bits" in
 $define|true|[yY]*)
 	if [ "$xxOsRevMajor" -lt 11 ]; then
 		cat <<EOM >&4
+
 64-bit compilation is not supported on HP-UX $xxOsRevMajor.
 You need at least HP-UX 11.0.
 Cannot continue, aborting.
-EOM
-		exit 1
-	fi
-	if [ ! -f /lib/pa20_64/libc.sl ]; then
-		cat <<EOM >&4
-You do not seem to have the 64-bit libraries in /lib/pa20_64.
-Most importantly, I cannot find /lib/pa20_64/libc.sl.
-Cannot continue, aborting.
+
 EOM
 		exit 1
 	fi
 
+	# Without the 64-bit libc we cannot do much.
+	if [ ! -f /lib/pa20_64/libc.sl ]; then
+		cat <<EOM >&4
+
+You do not seem to have the 64-bit libraries in /lib/pa20_64.
+Most importantly, I cannot find /lib/pa20_64/libc.sl.
+Cannot continue, aborting.
+
+EOM
+		exit 1
+	fi
         ccflags="$ccflags +DD64"
+        ldflags="$ldflags +DD64"
 	ld=/usr/bin/ld
 	ar=/usr/bin/ar
 	loclibpth="/lib/pa20_64 $loclibpth"
@@ -322,12 +328,6 @@ EOM
 	set `echo " $libswanted " | sed -e 's@ dl @ @'`
 	libswanted="$*"
 
-	libscheck='
-case "`/usr/bin/file $xxx`" in
-*LP64*) ;;
-*) xxx=/non/64/bit$xxx ;;
-esac
-'
 	;;
 esac
 EOCBU
@@ -337,10 +337,9 @@ EOCBU
 cat > UU/uselfs.cbu <<'EOCBU'
 case "$uselargefiles" in
 $define|true|[yY]*)
-        ccflags="$ccflags `getconf _CS_XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
-        ldflags="$ldflags `getconf _CS_XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
-
-        libswanted="$libswanted `getconf _CS_XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+	# there are largefile flags available via getconf(1)
+	# but we cheat for now.
+	ccflags="$ccflags -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
         # The strict ANSI mode (-Aa) doesn't like large files.
 	ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`

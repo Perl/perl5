@@ -2553,14 +2553,6 @@
 #define	USE_LONG_DOUBLE		/**/
 #endif
 
-/* USE_LONG_LONG:
- *	This symbol, if defined, indicates that long longs should
- *	be used when available.
- */
-#ifndef USE_LONG_LONG
-/*#define	USE_LONG_LONG		/**/
-#endif
-
 #ifndef USE_MORE_BITS
 /*#define	USE_MORE_BITS		/**/
 #endif
