@@ -2031,22 +2031,31 @@ PP(pp_truncate)
         STRLEN n_a;
 	int result = 1;
 	GV *tmpgv;
-	
+	IO *io;
+
 	if (PL_op->op_flags & OPf_SPECIAL) {
 	    tmpgv = gv_fetchpv(POPpx, FALSE, SVt_PVIO);
 
-	do_ftruncate:
-	    TAINT_PROPER("truncate");
-	    if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)))
-	        result = 0;
+	do_ftruncate_gv:
+	    if (!GvIO(tmpgv))
+		result = 0;
 	    else {
-	        PerlIO_flush(IoIFP(GvIOp(tmpgv)));
-#ifdef HAS_TRUNCATE
-		if (ftruncate(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-#else
-		if (my_chsize(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-#endif
+		PerlIO *fp;
+		io = GvIOp(tmpgv);
+	    do_ftruncate_io:
+		TAINT_PROPER("truncate");
+		if (!(fp = IoIFP(io))) {
 		    result = 0;
+		}
+		else {
+		    PerlIO_flush(fp);
+#ifdef HAS_TRUNCATE
+		    if (ftruncate(PerlIO_fileno(fp), len) < 0)
+#else
+		    if (my_chsize(PerlIO_fileno(fp), len) < 0)
+#endif
+			result = 0;
+		}
 	    }
 	}
 	else {
@@ -2055,11 +2064,15 @@ PP(pp_truncate)
 	
 	    if (SvTYPE(sv) == SVt_PVGV) {
 	        tmpgv = (GV*)sv;		/* *main::FRED for example */
-		goto do_ftruncate;
+		goto do_ftruncate_gv;
 	    }
 	    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
 	        tmpgv = (GV*) SvRV(sv);	/* \*main::FRED for example */
-		goto do_ftruncate;
+		goto do_ftruncate_gv;
+	    }
+	    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
+		io = (IO*) SvRV(sv); /* *main::FRED{IO} for example */
+		goto do_ftruncate_io;
 	    }
 
 	    name = SvPV(sv, n_a);
