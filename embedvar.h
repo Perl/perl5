@@ -852,7 +852,6 @@
 #define rsfp			(Perl_Vars.Grsfp)
 #define rsfp_filters		(Perl_Vars.Grsfp_filters)
 #define runops			(Perl_Vars.Grunops)
-#define scrgv			(Perl_Vars.Gscrgv)
 #define sh_path			(Perl_Vars.Gsh_path)
 #define sighandlerp		(Perl_Vars.Gsighandlerp)
 #define specialsv_list		(Perl_Vars.Gspecialsv_list)
@@ -972,7 +971,6 @@
 #define Grsfp			rsfp
 #define Grsfp_filters		rsfp_filters
 #define Grunops			runops
-#define Gscrgv			scrgv
 #define Gsh_path		sh_path
 #define Gsighandlerp		sighandlerp
 #define Gspecialsv_list		specialsv_list
@@ -1092,7 +1090,6 @@
 #define rsfp			Perl_rsfp
 #define rsfp_filters		Perl_rsfp_filters
 #define runops			Perl_runops
-#define scrgv			Perl_scrgv
 #define sh_path			Perl_sh_path
 #define sighandlerp		Perl_sighandlerp
 #define specialsv_list		Perl_specialsv_list

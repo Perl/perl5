@@ -544,8 +544,6 @@
 #define screamfirst		pPerl->Perl_screamfirst
 #undef  screamnext
 #define screamnext		pPerl->Perl_screamnext
-#undef  scrgv
-#define scrgv			pPerl->Perl_scrgv
 #undef  secondgv
 #define secondgv		pPerl->Perl_secondgv
 #undef  seen_zerolen
