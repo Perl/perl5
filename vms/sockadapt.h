@@ -32,6 +32,9 @@
    void endprotoent(void);
    void setservent(int);
    void endservent(void);
+#  if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 50200000)
+#    define Sock_size_t unsigned int
+#  endif
 
 #else
     /* Pull in SOCKETSHR's header, and set up structures for

@@ -8,7 +8,7 @@
  * GenConfig.pl when producing Config.pm.
  *
  * config.h for VMS
- * Version: 5.003_08
+ * Version: 5.004
  */                 
 
 /* Configuration time: 19-Nov-1996 23:34
@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00399"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_004"     /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
 /* ARCHNAME:
@@ -962,7 +962,11 @@
  *	is defined, and 'int *' otherwise.  This is only useful if you 
  *	have select(), of course.
  */
-#define Select_fd_set_t 	int *	/**/
+#if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 50200000)
+#define Select_fd_set_t		fd_set *	/* config-skip */
+#else
+#define Select_fd_set_t		int *		/**/
+#endif
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.

@@ -2880,6 +2880,22 @@ my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)
 }  /* end of my_fwrite() */
 /*}}}*/
 
+/*{{{ int my_flush(FILE *fp)*/
+int
+my_flush(FILE *fp)
+{
+    int res;
+    if ((res = fflush(fp)) == 0) {
+#ifdef VMS_DO_SOCKETS
+	struct mystat s;
+	if (Fstat(fileno(fp), &s) == 0 && !S_ISSOCK(s.st_mode))
+#endif
+	    res = fsync(fileno(fp));
+    }
+    return res;
+}
+/*}}}*/
+
 /*
  * Here are replacements for the following Unix routines in the VMS environment:
  *      getpwuid    Get information for a particular UIC or UID

@@ -125,6 +125,7 @@
 #  define do_aspawn		Perl_do_aspawn
 #  define do_spawn		Perl_do_spawn
 #  define my_fwrite		Perl_my_fwrite
+#  define my_flush		Perl_my_flush
 #  define my_binmode		Perl_my_binmode
 #  define my_getpwnam		Perl_my_getpwnam
 #  define my_getpwuid		Perl_my_getpwuid
@@ -284,6 +285,9 @@
  */
 #define fwrite1 my_fwrite
 
+/* By default, flush data all the way to disk, not just to RMS buffers */
+#define Fflush(fp) my_flush(fp)
+
 /* Use our own rmdir() */
 #define rmdir(name) do_rmdir(name)
 
@@ -356,9 +360,6 @@ struct utimbuf {
 /* Use our own stat() clones, which handle Unix-style directory names */
 #define Stat(name,bufptr) flex_stat(name,bufptr)
 #define Fstat(fd,bufptr) flex_fstat(fd,bufptr)
-
-/* By default, flush data all the way to disk, not just to RMS buffers */
-#define Fflush(fp) ((fflush(fp) || fsync(fileno(fp))) ? EOF : 0)
 
 /* Setup for the dirent routines:
  * opendir(), closedir(), readdir(), seekdir(), telldir(), and
@@ -546,6 +547,7 @@ bool	vms_do_exec _((char *));
 unsigned long int	do_aspawn _((SV *, SV **, SV **));
 unsigned long int	do_spawn _((char *));
 int	my_fwrite _((void *, size_t, size_t, FILE *));
+int	my_flush _((FILE *));
 FILE *	my_binmode _((FILE *, char));
 struct passwd *	my_getpwnam _((char *name));
 struct passwd *	my_getpwuid _((Uid_t uid));
