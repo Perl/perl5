@@ -55,4 +55,4 @@ open(F, ">:xyz", "bb");
 close F;
 END { 1 while unlink "bb" } # KEEP THIS WITH THE LAST TEST.
 EXPECT
-perlio: unknown layer "xyz".
+perlio: unknown layer "xyz" at - line 5.
