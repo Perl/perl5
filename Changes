@@ -31,6 +31,150 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12420] By: jhi                                   on 2001/10/12  22:51:17
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod
+____________________________________________________________________________
+[ 12419] By: jhi                                   on 2001/10/12  22:46:49
+        Log: Subject: RE: [PATCH File::Copy] Silence warnings for tied filehandles     
+             From: "Wilson, Doug" <Doug_Wilson@intuit.com>
+             Date: Fri, 12 Oct 2001 11:51:05 -0700
+             Message-ID: <35A280DF784CD411A06B0008C7B130AD0115DDAE@sdex04.sd.intuit.com>
+     Branch: perl
+	   ! lib/File/Copy.pm
+____________________________________________________________________________
+[ 12418] By: jhi                                   on 2001/10/12  22:44:24
+        Log: Subject: [PATCH lib/Term/Complete.t] Rethinking the Test
+             From: "chromatic" <chromatic@rmci.net>     
+             Date: Thu, 11 Oct 2001 10:57:55 -0600
+             Message-ID: <20011011170354.74354.qmail@onion.perl.org>
+             
+             Subject: [PATCH Complete.pm] Re: [PATCH lib/Term/Complete.t] Rethinking the Test
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 11 Oct 2001 22:34:21 +0200
+             Message-ID: <20011011223421.A693@rafael>     
+             
+             plus undef $Term::Complete::stty as suggested by Rafael.
+     Branch: perl
+	   ! lib/Term/Complete.pm lib/Term/Complete.t
+____________________________________________________________________________
+[ 12417] By: jhi                                   on 2001/10/12  20:35:49
+        Log: UUnndduupplleexx..
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 12416] By: sky                                   on 2001/10/12  20:16:19
+        Log: Subject: Re: Sparc/Linux/ithreads unhappy @12391 [PATCH]
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 12 Oct 2001 16:53:03 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10110121647360.11279-100000@maxwell.phys.lafayette.edu>
+             (Potentially only band-aid)
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 12415] By: jhi                                   on 2001/10/12  20:13:06
+        Log: VMS pre-7.0 (which doesn't have sigaction()) uniformly
+             mishandles kill(), and therefore the sigaction test
+             should be skipped, from Charles Lane.
+     Branch: perl
+	   ! ext/POSIX/t/sigaction.t
+____________________________________________________________________________
+[ 12414] By: sky                                   on 2001/10/12  18:47:49
+        Log: Perhaps other OLD_POSIX_API systems might be happy and not only HP-UX 10.20
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 12413] By: jhi                                   on 2001/10/12  18:35:31
+        Log: Upgrade to Math::BigInt 1.44 from Tels and
+             further fixes from John Peacock.
+     Branch: perl
+	   + lib/Math/BigInt/t/Math/Subclass.pm
+	   + lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/calling.t
+	   + lib/Math/BigInt/t/subclass.t
+	   ! MANIFEST lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintc.t lib/Math/BigInt/t/bigintpm.t
+	   ! lib/Math/BigInt/t/mbimbf.t
+____________________________________________________________________________
+[ 12412] By: sky                                   on 2001/10/12  18:28:23
+        Log: perhaps pthread_attr_t really needs to be set for the old api
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12411] By: sky                                   on 2001/10/12  18:11:45
+        Log: pthread_keycreate not pthread_key_create under the here be dragons API
+     Branch: perl
+	   ! ext/threads/threads.h
+____________________________________________________________________________
+[ 12410] By: sky                                   on 2001/10/12  18:07:37
+        Log: Apperently OLD PTHREADS API is a bit retarded.
+             This should fix another set of compile failures in HP-UX 10.20.
+     Branch: perl
+	   ! ext/threads/threads.h ext/threads/threads.xs
+____________________________________________________________________________
+[ 12409] By: nick                                  on 2001/10/12  15:30:01
+        Log: Blind integrate of mainline
+     Branch: perlio
+	  +> (branch 32 files)
+	   - lib/unicode/README
+	  !> (integrate 121 files)
+____________________________________________________________________________
+[ 12408] By: sky                                   on 2001/10/12  14:55:08
+        Log: Let us avoid being smart for now.
+     Branch: perl
+	   ! ext/threads/threads.h
+____________________________________________________________________________
+[ 12407] By: sky                                   on 2001/10/12  14:38:12
+        Log: (void*) the argument to make sure we work with picky compilers
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12406] By: ams                                   on 2001/10/12  13:26:04
+        Log: Subject: [PATCH 5.6.1 perldoc] use File::Temp
+             From: Mikhail Zabaluev <mhz@alt-linux.org>
+             Date: Fri, 12 Oct 2001 12:47:47 +0400
+             Message-Id: <20011012124747.E13918@localhost.localdomain>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[ 12405] By: ams                                   on 2001/10/12  13:05:32
+        Log: Subject: [PATCH] (Was: lib/Memoize/t/speed.................FAILED at test 2)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 12 Oct 2001 11:12:07 +0200
+             Message-Id: <m3wv21te6w.fsf_-_@anima.de>
+     Branch: perl
+	   ! lib/Memoize/t/speed.t
+____________________________________________________________________________
+[ 12404] By: sky                                   on 2001/10/12  12:46:15
+        Log: A) Support OLD_PTHREADS_API
+             B) Change from using pthread_t to using a TLS to store the
+             index of the thread in an hash, this is to avoid problems when
+             in fact pthread_t was not a seralizable type.
+             Both these changes are because of HP-UX 10.20
+             This has not been tested on win32 but should work there.
+             Need to add support for NetWare.
+     Branch: perl
+	   ! ext/threads/threads.h ext/threads/threads.xs
+____________________________________________________________________________
+[ 12403] By: ams                                   on 2001/10/12  07:34:19
+        Log: Subject: Re: New module XML::Clean
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 12 Oct 2001 10:20:35 +0200
+             Message-Id: <m3elo9uv58.fsf@anima.de>
+     Branch: perl
+	   ! pod/perlnewmod.pod
+____________________________________________________________________________
+[ 12402] By: jhi                                   on 2001/10/11  19:51:04
+        Log: More HP model tweaks from Merijn.
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 12401] By: jhi                                   on 2001/10/11  13:03:10
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12400] By: jhi                                   on 2001/10/11  11:33:20
         Log: HP-UX update from H.Merijn Brand.
      Branch: perl
