@@ -380,13 +380,13 @@ AV *
 Perl_av_make(pTHX_ register I32 size, register SV **strp)
 {
     register AV *av;
-    register I32 i;
-    register SV** ary;
 
     av = (AV*)NEWSV(8,0);
     sv_upgrade((SV *) av,SVt_PVAV);
     AvFLAGS(av) = AVf_REAL;
     if (size) {		/* `defined' was returning undef for size==0 anyway. */
+        register SV** ary;
+        register I32 i;
 	New(4,ary,size,SV*);
 	AvALLOC(av) = ary;
 	SvPVX(av) = (char*)ary;
@@ -438,7 +438,6 @@ void
 Perl_av_clear(pTHX_ register AV *av)
 {
     register I32 key;
-    SV** ary;
 
 #ifdef DEBUGGING
     if (SvREFCNT(av) == 0 && ckWARN_d(WARN_DEBUGGING)) {
@@ -460,7 +459,7 @@ Perl_av_clear(pTHX_ register AV *av)
 	return;
 
     if (AvREAL(av)) {
-	ary = AvARRAY(av);
+        SV** ary = AvARRAY(av);
 	key = AvFILLp(av) + 1;
 	while (key) {
 	    SV * sv = ary[--key];

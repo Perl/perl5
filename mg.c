@@ -427,6 +427,7 @@ U32
 Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 {
     register const REGEXP *rx;
+    (void)sv;
 
     if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	if (mg->mg_obj)		/* @+ */
@@ -474,10 +475,9 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)sv; (void)mg;
     Perl_croak(aTHX_ PL_no_modify);
     /* NOT REACHED */
-    (void)sv; (void)mg;
-    return 0;
 }
 
 U32
@@ -485,7 +485,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 {
     register I32 paren;
     register I32 i;
-    register REGEXP *rx;
+    register const REGEXP *rx;
     I32 s1, t1;
 
     switch (*mg->mg_ptr) {
@@ -1034,6 +1034,7 @@ int
 Perl_magic_clearenv(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN n_a;
+    (void)sv;
     my_setenv(MgPV(mg,n_a),Nullch);
     return 0;
 }
@@ -1093,6 +1094,8 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 #   endif /* PERL_IMPLICIT_SYS || WIN32 */
 #endif /* VMS || EPOC */
 #endif /* !PERL_MICRO */
+    (void)sv;
+    (void)mg;
     return 0;
 }
 
@@ -1152,8 +1155,8 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
      * refactoring might be in order.
      */
     STRLEN n_a;
-    SV* to_dec;
     register const char *s = MgPV(mg,n_a);
+    (void)sv;
     if (*s == '_') {
 	SV** svp;
 	if (strEQ(s,"__DIE__"))
@@ -1163,7 +1166,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 	else
 	    Perl_croak(aTHX_ "No such hook: %s", s);
 	if (*svp) {
-	    to_dec = *svp;
+            SV *to_dec = *svp;
 	    *svp = 0;
     	    SvREFCNT_dec(to_dec);
 	}
@@ -1200,7 +1203,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     		PL_psig_name[i]=0;
     	    }
     	    if(PL_psig_ptr[i]) {
-		to_dec=PL_psig_ptr[i];
+                SV *to_dec=PL_psig_ptr[i];
     		PL_psig_ptr[i]=0;
 		LEAVE;
     		SvREFCNT_dec(to_dec);
@@ -1212,8 +1215,8 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
-void
-Perl_raise_signal(pTHX_ int sig)
+static void
+S_raise_signal(pTHX_ int sig)
 {
     /* Set a flag to say this signal is pending */
     PL_psig_pend[sig]++;
@@ -1246,7 +1249,7 @@ Perl_csighandler(int sig)
 	 * with risk we may be in malloc() etc. */
 	(*PL_sighandlerp)(sig);
    else
-	Perl_raise_signal(aTHX_ sig);
+	S_raise_signal(aTHX_ sig);
 }
 
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
@@ -1411,6 +1414,8 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)sv;
+    (void)mg;
     PL_sub_generation++;
     return 0;
 }
@@ -1418,6 +1423,8 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setamagic(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)sv;
+    (void)mg;
     /* HV_badAMAGIC_on(Sv_STASH(sv)); */
     PL_amagic_generation++;
 
@@ -1427,8 +1434,9 @@ Perl_magic_setamagic(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 {
-    HV *hv = (HV*)LvTARG(sv);
+    HV * const hv = (HV*)LvTARG(sv);
     I32 i = 0;
+    (void)mg;
 
     if (hv) {
          (void) hv_iterinit(hv);
@@ -1447,6 +1455,7 @@ Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)mg;
     if (LvTARG(sv)) {
 	hv_ksplit((HV*)LvTARG(sv), SvIV(sv));
     }
@@ -1741,6 +1750,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getglob(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)mg;
     if (SvFAKE(sv)) {			/* FAKE globs can get coerced */
 	SvFAKE_off(sv);
 	gv_efullname3(sv,((GV*)sv), "*");
@@ -1755,6 +1765,7 @@ int
 Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
 {
     GV* gv;
+    (void)mg;
  
     if (!SvOK(sv))
 	return 0;
@@ -1775,6 +1786,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     const char * const tmps = SvPV(lsv,len);
     I32 offs = LvTARGOFF(sv);
     I32 rem = LvTARGLEN(sv);
+    (void)mg;
 
     if (SvUTF8(lsv))
 	sv_pos_u2b(lsv, &offs, &rem);
@@ -1793,9 +1805,10 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
     char *tmps = SvPV(sv, len);
-    SV *lsv = LvTARG(sv);
+    SV * const lsv = LvTARG(sv);
     I32 lvoff = LvTARGOFF(sv);
     I32 lvlen = LvTARGLEN(sv);
+    (void)mg;
 
     if (DO_UTF8(sv)) {
 	sv_utf8_upgrade(lsv);
@@ -1831,6 +1844,7 @@ Perl_magic_gettaint(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_settaint(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)sv;
     if (PL_localizing) {
 	if (PL_localizing == 1)
 	    mg->mg_len <<= 1;
@@ -1848,6 +1862,7 @@ int
 Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
 {
     SV * const lsv = LvTARG(sv);
+    (void)mg;
 
     if (!lsv) {
 	SvOK_off(sv);
@@ -1861,6 +1876,7 @@ Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setvec(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)mg;
     do_vecset(sv);	/* XXX slurp this routine */
     return 0;
 }
@@ -1900,6 +1916,7 @@ Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setdefelem(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)mg;
     if (LvTARGLEN(sv))
 	vivify_defelem(sv);
     if (LvTARG(sv)) {
@@ -1951,6 +1968,8 @@ Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
     AV *av = (AV*)mg->mg_obj;
     SV **svp = AvARRAY(av);
     I32 i = AvFILLp(av);
+    (void)sv;
+
     while (i >= 0) {
 	if (svp[i]) {
 	    if (!SvWEAKREF(svp[i]))
@@ -1978,6 +1997,7 @@ Perl_magic_setmglob(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setbm(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)mg;
     sv_unmagic(sv, PERL_MAGIC_bm);
     SvVALID_off(sv);
     return 0;
@@ -1986,6 +2006,7 @@ Perl_magic_setbm(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setfm(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)mg;
     sv_unmagic(sv, PERL_MAGIC_fm);
     SvCOMPILED_off(sv);
     return 0;
@@ -2004,6 +2025,7 @@ Perl_magic_setuvar(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setregexp(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)mg;
     sv_unmagic(sv, PERL_MAGIC_qr);
     return 0;
 }
@@ -2013,6 +2035,7 @@ Perl_magic_freeregexp(pTHX_ SV *sv, MAGIC *mg)
 {
     regexp *re = (regexp *)mg->mg_obj;
     ReREFCNT_dec(re);
+    (void)sv;
     return 0;
 }
 
@@ -2024,6 +2047,7 @@ Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)
      * RenE<eacute> Descartes said "I think not."
      * and vanished with a faint plop.
      */
+    (void)sv;
     if (mg->mg_ptr) {
 	Safefree(mg->mg_ptr);
 	mg->mg_ptr = NULL;
@@ -2037,6 +2061,7 @@ Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
 {
+    (void)sv;
     Safefree(mg->mg_ptr);	/* The mg_ptr holds the pos cache. */
     mg->mg_ptr = 0;
     mg->mg_len = -1;		/* The mg_len holds the len cache. */

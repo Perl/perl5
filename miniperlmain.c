@@ -48,6 +48,7 @@ int
 main(int argc, char **argv, char **env)
 {
     int exitstatus;
+    (void)env;
 #ifndef PERL_USE_SAFE_PUTENV
     PL_use_safe_putenv = 0;
 #endif /* PERL_USE_SAFE_PUTENV */

@@ -329,7 +329,7 @@ PP(pp_backtick)
 	mode = "rb";
     else if (PL_op->op_private & OPpOPEN_IN_CRLF)
 	mode = "rt";
-    fp = PerlProc_popen(tmps, mode);
+    fp = PerlProc_popen(tmps, (char *)mode);
     if (fp) {
         const char *type = NULL;
 	if (PL_curcop->cop_io) {
@@ -1968,7 +1968,7 @@ PP(pp_eof)
 		if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
 		    IoLINES(io) = 0;
 		    IoFLAGS(io) &= ~IOf_START;
-		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, Nullfp);
+		    do_open(gv, (char *)"-", 1, FALSE, O_RDONLY, 0, Nullfp);
 		    sv_setpvn(GvSV(gv), "-", 1);
 		    SvSETMAGIC(GvSV(gv));
 		}

@@ -672,7 +672,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     I32 len;
     register const char *namend;
     HV *stash = 0;
-    I32 add = flags & ~SVf_UTF8;
+    const I32 add = flags & ~SVf_UTF8;
+    (void)full_len;
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
 	name++;
@@ -1230,7 +1231,7 @@ Perl_gv_check(pTHX_ HV *stash)
 		}
 		CopLINE_set(PL_curcop, GvLINE(gv));
 #ifdef USE_ITHREADS
-		CopFILE(PL_curcop) = file;	/* set for warning */
+		CopFILE(PL_curcop) = (char *)file;	/* set for warning */
 #else
 		CopFILEGV(PL_curcop) = gv_fetchfile(file);
 #endif
@@ -1317,6 +1318,8 @@ int
 Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 {
     AMT *amtp = (AMT*)mg->mg_ptr;
+    (void)sv;
+
     if (amtp && AMT_AMAGIC(amtp)) {
 	int i;
 	for (i = 1; i < NofAMmeth; i++) {
@@ -1867,6 +1870,7 @@ pointers returned by SvPV.
 bool
 Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
 {
+    (void)flags;
     if (len > 1) {
 	const char *name1 = name + 1;
 	switch (*name) {

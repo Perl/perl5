@@ -2603,14 +2603,14 @@ Perl_yylex(pTHX)
 			    /* The count here deliberately includes the NUL
 			       that terminates the C string constant.  This
 			       embeds the opening NUL into the string.  */
+			    const char *splits = PL_splitstr;
 			    sv_catpvn(PL_linestr, "our @F=split(q", 15);
-			    s = PL_splitstr;
 			    do {
 				/* Need to \ \s  */
-				if (*s == '\\')
-				    sv_catpvn(PL_linestr, s, 1);
-				sv_catpvn(PL_linestr, s, 1);
-			    } while (*s++);
+				if (*splits == '\\')
+				    sv_catpvn(PL_linestr, splits, 1);
+				sv_catpvn(PL_linestr, splits, 1);
+			    } while (*splits++);
 			    /* This loop will embed the trailing NUL of
 			       PL_linestr as the last thing it does before
 			       terminating.  */

@@ -987,7 +987,7 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op);
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 STATIC void	S_find_beginning(pTHX);
 STATIC void	S_forbid_setid(pTHX_ const char * s);
-STATIC void	S_incpush(pTHX_ const char *, int, int, int, int);
+STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
 STATIC void	S_init_lexer(pTHX);
@@ -997,15 +997,15 @@ STATIC void	S_init_postdump_symbols(pTHX_ int, char **, char **);
 STATIC void	S_init_predump_symbols(pTHX);
 STATIC void	S_my_exit_jump(pTHX) __attribute__((noreturn));
 STATIC void	S_nuke_stacks(pTHX);
-STATIC void	S_open_script(pTHX_ char *, bool, SV *);
-STATIC void	S_usage(pTHX_ const char *);
+STATIC void	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv);
+STATIC void	S_usage(pTHX_ const char *name);
 STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname);
 #  if defined(IAMSUID)
 STATIC int	S_fd_on_nosuid_fs(pTHX_ int fd);
 #  endif
 STATIC void*	S_parse_body(pTHX_ char **env, XSINIT_t xsinit);
-STATIC void*	S_run_body(pTHX_ I32 oldscope);
-STATIC void	S_call_body(pTHX_ const OP *myop, int is_eval);
+STATIC void	S_run_body(pTHX_ I32 oldscope) __attribute__((noreturn));
+STATIC void	S_call_body(pTHX_ const OP *myop, bool is_eval);
 STATIC void*	S_call_list_body(pTHX_ CV *cv);
 #endif
 

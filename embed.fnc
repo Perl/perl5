@@ -1028,7 +1028,7 @@ Ap	|void	|Slab_Free	|void *op
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 s	|void	|find_beginning
 s	|void	|forbid_setid	|const char * s
-s	|void	|incpush	|const char *|int|int|int|int
+s	|void	|incpush	|const char *dir|bool addsubdirs|bool addoldvers|bool usesep|bool canrelocate
 s	|void	|init_interp
 s	|void	|init_ids
 s	|void	|init_lexer
@@ -1038,15 +1038,15 @@ s	|void	|init_postdump_symbols|int|char **|char **
 s	|void	|init_predump_symbols
 rs	|void	|my_exit_jump
 s	|void	|nuke_stacks
-s	|void	|open_script	|char *|bool|SV *
-s	|void	|usage		|const char *
+s	|void	|open_script	|const char *scriptname|bool dosearch|SV *sv
+s	|void	|usage		|const char *name
 s	|void	|validate_suid	|const char *validarg|const char *scriptname
 #  if defined(IAMSUID)
 s	|int	|fd_on_nosuid_fs|int fd
 #  endif
 s	|void*	|parse_body	|char **env|XSINIT_t xsinit
-s	|void*	|run_body	|I32 oldscope
-s	|void	|call_body	|const OP *myop|int is_eval
+rs	|void	|run_body	|I32 oldscope
+s	|void	|call_body	|const OP *myop|bool is_eval
 s	|void*	|call_list_body	|CV *cv
 #endif
 

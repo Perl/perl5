@@ -4624,7 +4624,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
     }
     CvGV(cv) = gv;
     (void)gv_fetchfile(filename);
-    CvFILE(cv) = filename;	/* NOTE: not copied, as it is expected to be
+    CvFILE(cv) = (char *)filename; /* NOTE: not copied, as it is expected to be
 				   an external constant string */
     CvXSUB(cv) = subaddr;
 

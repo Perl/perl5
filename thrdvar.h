@@ -108,7 +108,7 @@ PERLVAR(Trs,		SV *)		/* input record separator $/ */
 PERLVAR(Tlast_in_gv,	GV *)		/* GV used in last <FH> */
 PERLVAR(Tofs_sv,	SV *)		/* output field separator $, */
 PERLVAR(Tdefoutgv,	GV *)		/* default FH for output */
-PERLVARI(Tchopset,	char *,	" \n-")	/* $: */
+PERLVARI(Tchopset,	const char *,	" \n-")	/* $: */
 PERLVAR(Tformtarget,	SV *)
 PERLVAR(Tbodytarget,	SV *)
 PERLVAR(Ttoptarget,	SV *)

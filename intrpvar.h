@@ -30,7 +30,7 @@ PERLVAR(Iwarnhook,	SV *)
 PERLVAR(Iminus_c,	bool)
 PERLVAR(Ipatchlevel,	SV *)
 PERLVAR(Ilocalpatches,	const char **)
-PERLVARI(Isplitstr,	char *,	" ")
+PERLVARI(Isplitstr,	const char *, " ")
 PERLVAR(Ipreprocess,	bool)
 PERLVAR(Iminus_n,	bool)
 PERLVAR(Iminus_p,	bool)
@@ -243,7 +243,7 @@ PERLVARI(Imaxo,	int,	MAXO)		/* maximum number of ops */
 PERLVAR(Iosname,	char *)		/* operating system */
 
 /* For binary compatibility with older versions only */
-PERLVARI(Ish_path_compat,	char *,	SH_PATH)/* full path of shell */
+PERLVARI(Ish_path_compat,	const char *,	SH_PATH)/* full path of shell */
 
 PERLVAR(Isighandlerp,	Sighandler_t)
 
@@ -288,7 +288,7 @@ PERLVAR(Isv_no,		SV)
 PERLVAR(Isv_yes,	SV)
 
 #ifdef CSH
-PERLVARI(Icshname,	char *,	CSH)
+PERLVARI(Icshname,	const char *,	CSH)
 PERLVARI(Icshlen,	I32,	0)
 #endif
 
