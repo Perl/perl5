@@ -154,3 +154,4 @@ END_EXTERN_C
 #define ASCII_TO_NEED(enc,ch)    (ch)
 #endif
 
+#define UTF8_IS_INVARIANT(c) UTF8_IS_ASCII(c)

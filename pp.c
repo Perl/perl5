@@ -3962,7 +3962,7 @@ PP(pp_reverse)
 		U8* s = (U8*)SvPVX(TARG);
 		U8* send = (U8*)(s + len);
 		while (s < send) {
-		    if (UTF8_IS_ASCII(*s)) {
+		    if (UTF8_IS_INVARIANT(*s)) {
 			s++;
 			continue;
 		    }
@@ -4789,7 +4789,8 @@ PP(pp_unpack)
 		
 		while ((len > 0) && (s < strend)) {
 		    auv = (auv << 7) | (*s & 0x7f);
-		    if (UTF8_IS_ASCII(*s++)) {
+		    /* UTF8_IS_XXXXX not right here - using constant 0x80 */
+		    if ((U8)(*s++) < 0x80) {
 			bytes = 0;
 			sv = NEWSV(40, 0);
 			sv_setuv(sv, auv);
