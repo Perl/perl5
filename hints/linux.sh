@@ -30,7 +30,8 @@ esac
 ccflags="-Dbool=char -DHAS_BOOL $ccflags"
 
 # BSD compatability library no longer needed
-set `echo X "$libswanted "| sed -e 's/ bsd / /'`
+# 'kaffe' has a /usr/lib/libnet.so which is not at all relevent for perl.
+set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /'`
 shift
 libswanted="$*"
 
