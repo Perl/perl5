@@ -261,12 +261,19 @@ bsd_glob(const char *pattern, int flags,
 #ifndef MACOS_TRADITIONAL
 	patnext = (U8 *) pattern;
 #endif
+	/* TODO: GLOB_APPEND / GLOB_DOOFFS aren't supported yet */
+#if 0
 	if (!(flags & GLOB_APPEND)) {
 		pglob->gl_pathc = 0;
 		pglob->gl_pathv = NULL;
 		if (!(flags & GLOB_DOOFFS))
 			pglob->gl_offs = 0;
 	}
+#else
+	pglob->gl_pathc = 0;
+	pglob->gl_pathv = NULL;
+	pglob->gl_offs = 0;
+#endif
 	pglob->gl_flags = flags & ~GLOB_MAGCHAR;
 	pglob->gl_errfunc = errfunc;
 	pglob->gl_matchc = 0;
