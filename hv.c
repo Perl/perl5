@@ -1050,8 +1050,8 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	/* Slow way */
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext(ohv))) {
-	    hv_store(hv, HeKEY(entry), HeKLEN(entry), 
-		     SvREFCNT_inc(HeVAL(entry)), HeHASH(entry));
+	    hv_store(hv, HeKEY(entry), HeKLEN(entry),
+		     newSVsv(HeVAL(entry)), HeHASH(entry));
 	}
 	HvRITER(ohv) = hv_riter;
 	HvEITER(ohv) = hv_eiter;
