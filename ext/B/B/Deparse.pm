@@ -586,7 +586,7 @@ sub compile {
 sub coderef2text {
     my $self = shift;
     my $sub = shift;
-    croak "Usage: ->coderef2text(CODEREF)" unless ref($sub) eq "CODE";
+    croak "Usage: ->coderef2text(CODEREF)" unless UNIVERSAL::isa($sub, "CODE");
 
     $self->init();
     return $self->indent($self->deparse_sub(svref_2object($sub)));
