@@ -2683,7 +2683,9 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	if (!squash) {
 		if (t == r ||
 		    (tlen == rlen && memEQ((char *)t, (char *)r, tlen)))
+		{
 		    o->op_private |= OPpTRANS_IDENTICAL;
+		}
 	}
 
 	while (t < tend || tfirst <= tlast) {

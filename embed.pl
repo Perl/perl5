@@ -1375,7 +1375,7 @@ Ap	|bool	|Gv_AMupdate	|HV* stash
 p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
-Afp	|void	|apply_attrs_string|char *stashpv|CV *cv|char *attrstr|STRLEN len
+Ap	|void	|apply_attrs_string|char *stashpv|CV *cv|char *attrstr|STRLEN len
 Ap	|SV*	|avhv_delete_ent|AV *ar|SV* keysv|I32 flags|U32 hash
 Ap	|bool	|avhv_exists_ent|AV *ar|SV* keysv|U32 hash
 Ap	|SV**	|avhv_fetch_ent	|AV *ar|SV* keysv|I32 lval|U32 hash
@@ -2474,7 +2474,7 @@ s	|char*	|scan_trans	|char *start
 s	|char*	|scan_word	|char *s|char *dest|STRLEN destlen \
 				|int allow_package|STRLEN *slp
 s	|char*	|skipspace	|char *s
-s	|char*	|swallow_bom	|char *s
+s	|char*	|swallow_bom	|U8 *s
 s	|void	|checkcomma	|char *s|char *name|char *what
 s	|void	|force_ident	|char *s|int kind
 s	|void	|incline	|char *s

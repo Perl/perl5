@@ -13,7 +13,7 @@ sub MY::libscan
  return '' 
 	if($path =~ m:/(RCS|CVS|SCCS)/: ||
 	   $path =~ m:[~%]$: ||
-	   $path =~ m:(\.(orig|rej)|~)$:
+	   $path =~ m:\.(orig|rej)$:
 	  );
  
  $path;

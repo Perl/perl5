@@ -61,11 +61,7 @@ PERL_CALLCONV bool	Perl_Gv_AMupdate(pTHX_ HV* stash);
 PERL_CALLCONV OP*	Perl_append_elem(pTHX_ I32 optype, OP* head, OP* tail);
 PERL_CALLCONV OP*	Perl_append_list(pTHX_ I32 optype, LISTOP* first, LISTOP* last);
 PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp);
-PERL_CALLCONV void	Perl_apply_attrs_string(pTHX_ char *stashpv, CV *cv, char *attrstr, STRLEN len)
-#ifdef CHECK_FORMAT
- __attribute__((format(printf,pTHX_3,pTHX_4)))
-#endif
-;
+PERL_CALLCONV void	Perl_apply_attrs_string(pTHX_ char *stashpv, CV *cv, char *attrstr, STRLEN len);
 PERL_CALLCONV SV*	Perl_avhv_delete_ent(pTHX_ AV *ar, SV* keysv, I32 flags, U32 hash);
 PERL_CALLCONV bool	Perl_avhv_exists_ent(pTHX_ AV *ar, SV* keysv, U32 hash);
 PERL_CALLCONV SV**	Perl_avhv_fetch_ent(pTHX_ AV *ar, SV* keysv, I32 lval, U32 hash);
@@ -1018,7 +1014,6 @@ STATIC char*	S_gv_ename(pTHX_ GV *gv);
 STATIC void	S_cv_dump(pTHX_ CV *cv);
 STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 STATIC bool	S_scalar_mod_type(pTHX_ OP *o, I32 type);
-STATIC OP *	S_method_2entersub(pTHX_ OP *o, OP *o2, OP *svop);
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs);
 STATIC OP *	S_dup_attrlist(pTHX_ OP *o);
 STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs);
@@ -1228,7 +1223,7 @@ STATIC char*	S_scan_subst(pTHX_ char *start);
 STATIC char*	S_scan_trans(pTHX_ char *start);
 STATIC char*	S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp);
 STATIC char*	S_skipspace(pTHX_ char *s);
-STATIC char*	S_swallow_bom(pTHX_ char *s);
+STATIC char*	S_swallow_bom(pTHX_ U8 *s);
 STATIC void	S_checkcomma(pTHX_ char *s, char *name, char *what);
 STATIC void	S_force_ident(pTHX_ char *s, int kind);
 STATIC void	S_incline(pTHX_ char *s);

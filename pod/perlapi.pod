@@ -1913,6 +1913,9 @@ Returns the size of the string buffer in the SV.  See C<SvCUR>.
 
 	STRLEN	SvLEN(SV* sv)
 
+=for hackers
+Found in file sv.h
+
 =item SvNIOK
 
 Returns a boolean indicating whether the SV contains a number, integer or
@@ -2331,6 +2334,9 @@ Found in file sv.h
 =item SVt_PVMG
 
 Type flag for blessed scalars.  See C<svtype>.
+
+=for hackers
+Found in file sv.h
 
 =item SvUPGRADE
 

@@ -897,7 +897,6 @@
 #define cv_dump			S_cv_dump
 #define cv_clone2		S_cv_clone2
 #define scalar_mod_type		S_scalar_mod_type
-#define method_2entersub	S_method_2entersub
 #define my_kid			S_my_kid
 #define dup_attrlist		S_dup_attrlist
 #define apply_attrs		S_apply_attrs
@@ -2345,7 +2344,6 @@
 #define cv_dump(a)		S_cv_dump(aTHX_ a)
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
-#define method_2entersub(a,b,c)	S_method_2entersub(aTHX_ a,b,c)
 #define my_kid(a,b)		S_my_kid(aTHX_ a,b)
 #define dup_attrlist(a)		S_dup_attrlist(aTHX_ a)
 #define apply_attrs(a,b,c)	S_apply_attrs(aTHX_ a,b,c)
@@ -4581,8 +4579,6 @@
 #define cv_clone2		S_cv_clone2
 #define S_scalar_mod_type	CPerlObj::S_scalar_mod_type
 #define scalar_mod_type		S_scalar_mod_type
-#define S_method_2entersub	CPerlObj::S_method_2entersub
-#define method_2entersub	S_method_2entersub
 #define S_my_kid		CPerlObj::S_my_kid
 #define my_kid			S_my_kid
 #define S_dup_attrlist		CPerlObj::S_dup_attrlist
