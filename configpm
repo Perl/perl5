@@ -60,7 +60,7 @@ $in_v = 0;
 
 while (<>) {
     next if m:^#!/bin/sh:;
-    # Catch CONFIGDOTSH=true and PERL_VERSION=n line from Configure.
+    # Catch PERL_CONFIG_SH=true and PERL_VERSION=n line from Configure.
     s/^(\w+)=(true|\d+)\s*$/$1='$2'\n/;
     my ($k,$v) = ($1,$2);
     # grandfather PATCHLEVEL and SUBVERSION and CONFIG
@@ -71,7 +71,7 @@ while (<>) {
 	elsif ($k eq 'PERL_SUBVERSION') {
 	    push @v_others, "SUBVERSION='$v'\n";
 	}
-	elsif ($k eq 'CONFIGDOTSH') {
+	elsif ($k eq 'PERL_CONFIG_SH') {
 	    push @v_others, "CONFIG='$v'\n";
 	}
     }
@@ -474,11 +474,11 @@ require $config_pm;
 import Config;
 
 die "$0: $config_pm not valid"
-	unless $Config{'CONFIGDOTSH'} eq 'true';
+	unless $Config{'PERL_CONFIG_SH'} eq 'true';
 
 die "$0: error processing $config_pm"
 	if defined($Config{'an impossible name'})
-	or $Config{'CONFIGDOTSH'} ne 'true' # test cache
+	or $Config{'PERL_CONFIG_SH'} ne 'true' # test cache
 	;
 
 die "$0: error processing $config_pm"
