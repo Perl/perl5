@@ -9,6 +9,16 @@ releases.)
 
 
 ----------------
+Version 5.003_15
+----------------
+
+As soon as I posted 5.003_14, I found a fatal error in it.  :-(
+
+This release is strictly a bug fix -- it removes some function caching
+changes that were supposed to be improvements, but weren't.
+
+
+----------------
 Version 5.003_14
 ----------------
 
