@@ -1,5 +1,5 @@
 
-# Time-stamp: "2001-06-21 22:50:34 MDT"
+# Time-stamp: "2002-02-02 20:43:03 MST"
 # Sean M. Burke <sburke@cpan.org>
 
 require 5.000;
@@ -17,7 +17,7 @@ require Exporter;
                );
 %EXPORT_TAGS = ('ALL' => \@EXPORT_OK);
 
-$VERSION = "0.26";
+$VERSION = "0.27";
 
 =head1 NAME
 
@@ -768,7 +768,7 @@ Continuations".
 "Language Tagging in Unicode Plain Text".
 
 * Locale::Codes, in
-C<http://www.cpan.org/modules/by-module/Locale/>
+C<http://www.perl.com/CPAN/modules/by-module/Locale/>
 
 * ISO 639, "Code for the representation of names of languages",
 C<http://www.indigo.ie/egt/standards/iso639/iso639-1-en.html>

@@ -1,6 +1,12 @@
 Revision history for Perl module I18N::LangTags.
-                                        Time-stamp: "2001-06-21 23:04:08 MDT"
+                                        Time-stamp: "2002-02-02 20:45:47 MST"
 
+2002-02-02  Sean M. Burke  sburke@cpan.org
+
+	* Release 0.27 -- minor mods to ::List:
+	Fixing its entries for sv-se and sv-fi.
+	Typo-fixes and rewordings in the incidental Pod text elsewhere.
+	
 2001-06-21  Sean M. Burke  sburke@cpan.org
 	
 	* Release 0.26 -- just making cosmetic changes
