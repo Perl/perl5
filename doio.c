@@ -646,13 +646,17 @@ Perl_nextargv(pTHX_ register GV *gv)
 	else {
 	    dTHR;
 	    if (ckWARN_d(WARN_INPLACE)) {
-		if (!S_ISREG(PL_statbuf.st_mode))	
+		int eno = errno;
+		if (PerlLIO_stat(PL_oldname, &PL_statbuf) >= 0
+		    && !S_ISREG(PL_statbuf.st_mode))	
+		{
 		    Perl_warner(aTHX_ WARN_INPLACE,
 				"Can't do inplace edit: %s is not a regular file",
 				PL_oldname);
+		}
 		else
 		    Perl_warner(aTHX_ WARN_INPLACE, "Can't open %s: %s",
-				PL_oldname, Strerror(errno));
+				PL_oldname, Strerror(eno));
 	    }
 	}
     }
