@@ -10,7 +10,9 @@ INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 README			The Instructions
-README.vms		Notes about VMS
+README.os2		Notes about OS/2 port
+README.plan9		Notes about Plan9 port
+README.vms		Notes about VMS port
 Todo			The Wishlist
 XSUB.h			Include file for extension subroutines
 av.c			Array value code
@@ -87,7 +89,7 @@ ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
 ext/DynaLoader/dl_next.xs	Next implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
-ext/DynaLoader/dl_os2.xs	OS/2 implementation
+ext/DynaLoader/dl_os2.xs	OS/2 (non-a.out) implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
@@ -100,6 +102,15 @@ ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/typemap		GDBM extension interface types
+ext/IO/IO.pm			Top-level interface to IO::* classes
+ext/IO/IO.xs			IO extension external subroutines
+ext/IO/Makefile.PL		IO extension makefile writer
+ext/IO/lib/IO/File.pm		IO::File extension Perl module
+ext/IO/lib/IO/Handle.pm		IO::Handle extension Perl module
+ext/IO/lib/IO/Pipe.pm		IO::Pipe extension Perl module
+ext/IO/lib/IO/Seekable.pm	IO::Seekable extension Perl module
+ext/IO/lib/IO/Select.pm		IO::Select extension Perl module
+ext/IO/lib/IO/Socket.pm		IO::Socket extension Perl module
 ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
@@ -114,6 +125,11 @@ ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/typemap		ODBM extension interface types
+ext/Opcode/Opcode.pm		Opcode extension Perl module
+ext/Opcode/Opcode.xs		Opcode extension external subroutines
+ext/Opcode/Safe.pm		Safe extension Perl module
+ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
+ext/Opcode/Makefile.PL		Opcode extension makefile writer
 ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.pod		POSIX extension documentation
@@ -142,16 +158,12 @@ ext/SDBM_File/sdbm/makefile.sdbm	SDBM kit
 ext/SDBM_File/sdbm/pair.c		SDBM kit
 ext/SDBM_File/sdbm/pair.h		SDBM kit
 ext/SDBM_File/sdbm/readme.ms		SDBM kit
-ext/SDBM_File/sdbm/readme.ps		SDBM kit
 ext/SDBM_File/sdbm/sdbm.3		SDBM kit
 ext/SDBM_File/sdbm/sdbm.c		SDBM kit
 ext/SDBM_File/sdbm/sdbm.h		SDBM kit
 ext/SDBM_File/sdbm/tune.h		SDBM kit
 ext/SDBM_File/sdbm/util.c		SDBM kit
 ext/SDBM_File/typemap		SDBM extension interface types
-ext/Safe/Makefile.PL		Safe extension makefile writer
-ext/Safe/Safe.pm		Safe extension Perl module
-ext/Safe/Safe.xs		Safe extension external subroutines
 ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
@@ -215,6 +227,9 @@ hints/ncr_tower.sh	Hints for named architecture
 hints/netbsd.sh		Hints for named architecture
 hints/next_3.sh		Hints for named architecture
 hints/next_3_0.sh	Hints for named architecture
+hints/next_3_2.sh	Hints for named architecture
+hints/next_3_3.sh	Hints for named architecture
+hints/next_4.sh		Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
 hints/powerux.sh	Hints for named architecture
@@ -254,6 +269,7 @@ lib/DirHandle.pm	like FileHandle only for directories
 lib/English.pm		Readable aliases for short variables
 lib/Env.pm		Map environment into ordinary variables
 lib/Exporter.pm		Exporter base class
+lib/ExtUtils/Embed.pm	Utilities for embedding Perl in C programs
 lib/ExtUtils/Install.pm	Handles 'make install' on extensions
 lib/ExtUtils/Liblist.pm	Locates libraries
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
@@ -266,12 +282,14 @@ lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/testlib.pm	Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
+lib/Fatal.pm		Make do-or-die equivalents of functions
 lib/File/Basename.pm	A module to emulate the basename program
 lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 lib/File/Copy.pm	Emulation of cp command
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	A module to do things like `mkdir -p' and `rm -r'
 lib/FileCache.pm	Keep more files open than the system permits
+lib/FindBin.pm		Find name of currently executing program
 lib/Getopt/Long.pm	A module to fetch command options (GetOptions)
 lib/Getopt/Std.pm	A module to fetch command options (getopt, getopts)
 lib/I18N/Collate.pm	Routines to do strxfrm-based collation
@@ -364,10 +382,10 @@ op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
 opcode.pl		Opcode header generatore
 os2/diff.configure	Patches to Configure
-os2/diff.db_file	patch to DB_File
+os2/dl_os2.c		Addon for dl_open
+os2/dlfcn.h		Addon for dl_open
 os2/Makefile.SHs	Shared library generation for OS/2
 os2/POSIX.mkfifo	POSIX.xs patch.
-os2/README		OS/2 port info.
 os2/README.old		previous OS/2 port info, partially relevant.
 os2/notes		Notes for perl maintainer
 os2/os2.c		Additional code for OS/2
@@ -383,6 +401,20 @@ perly.c.diff		Fixup perly.c to allow recursion
 perly.fixer		A program to remove yacc stack limitations
 perly.h			The header file for perly.c
 perly.y			Yacc grammar for perl
+plan9/aperl		Shell to make Perl error messages Acme-friendly
+plan9/arpa/inet.h	Plan9 port: replacement C header file
+plan9/buildinfo		Plan9 port: configuration information
+plan9/config.plan9	Plan9 port: config.h template
+plan9/exclude		Plan9 port: tests to skip
+plan9/fndvers		Plan9 port: update Perl version in config.plan9 
+plan9/genconfig.pl	Plan9 port: generate config.sh
+plan9/mkfile		Plan9 port: Mk driver for build
+plan9/myconfig.plan9	Plan9 port: script to print config summary
+plan9/perlplan9.doc	Plan9 port: Plan9-specific formatted documentation
+plan9/perlplan9.pod	Plan9 port: Plan9-specific pod documentation
+plan9/plan9.c		Plan9 port: Plan9-specific C routines
+plan9/plan9ish.h	Plan9 port: Plan9-specific C header file
+plan9/setup.rc		Plan9 port: script for easy build+install
 pod/Makefile		Make pods into something else
 pod/buildtoc		generate perltoc.pod
 pod/perl.pod		Top level perl man page
@@ -477,11 +509,20 @@ t/lib/db-recno.t	See if DB_File works
 t/lib/dirhand.t		See if DirHandle works
 t/lib/english.t		See if English works
 t/lib/filehand.t	See if FileHandle works
+t/lib/io_dup.t		See if dup()-related methods from IO work
+t/lib/io_pipe.t		See if pipe()-related methods from IO work
+t/lib/io_sock.t		See if INET socket-related methods from IO work
+t/lib/io_tell.t		See if seek()/tell()-related methods from IO work
+t/lib/io_udp.t		See if UDP socket-related methods from IO work
+t/lib/io_xs.t		See if XSUB methods from IO work
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
+t/lib/opcode.t		See if Opcode works
+t/lib/ops.t		See if Opcode works
 t/lib/posix.t		See if POSIX works
-t/lib/safe.t		See if Safe works
+t/lib/safe1.t		See if Safe works
+t/lib/safe2.t		See if Safe works
 t/lib/sdbm.t		See if SDBM_File works
 t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
@@ -533,6 +574,7 @@ t/op/stat.t		See if stat works
 t/op/study.t		See if study works
 t/op/subst.t		See if substitution works
 t/op/substr.t		See if substr works
+t/op/tie.t		See if tie/untie functions work
 t/op/time.t		See if time functions work
 t/op/undef.t		See if undef works
 t/op/unshift.t		See if unshift works
@@ -541,6 +583,7 @@ t/op/write.t		See if write works
 t/re_tests		Regular expressions for regexp.t
 taint.c			Tainting code
 toke.c			The tokener
+universal.c		The default UNIVERSAL package methods
 unixish.h		Defines that are assumed on Unix
 util.c			Utility routines
 util.h			Public declarations for the above
@@ -560,6 +603,7 @@ vms/ext/Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
 vms/ext/Stdio/Stdio.pm	VMS options to stdio routines
 vms/ext/Stdio/Stdio.xs	VMS options to stdio routines
 vms/ext/Stdio/test.pl	regression tests for VMS::Stdio
+vms/ext/filespec.t	See if VMS::Filespec funtions work
 vms/fndvers.com	parse Perl version from patchlevel.h
 vms/gen_shrfls.pl	generate options files and glue for shareable image
 vms/genconfig.pl	retcon config.sh from config.h
