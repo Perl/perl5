@@ -788,11 +788,11 @@ install.perl:	all installperl
 		cd ../pod; $(MAKE) compile; \
 	else :; \
 	fi
-	$(LDLIBPTH) ./perl installperl $(INSTALLFLAGS) $(STRIPFLAGS)
+	$(LDLIBPTH) ./perl installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
 	$(MAKE) extras.install
 
 install.man:	all installman
-	$(LDLIBPTH) ./perl installman $(INSTALLFLAGS)
+	$(LDLIBPTH) ./perl installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
 
 # XXX Experimental. Hardwired values, but useful for testing.
 # Eventually Configure could ask for some of these values.
