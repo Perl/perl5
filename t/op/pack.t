@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 13679;
+plan tests => 13823;
 
 use strict;
 use warnings;
@@ -224,6 +224,54 @@ sub list_eq ($$) {
   eval { $x = pack 'w', '1'x(1 + length ~0) . 'e0' };
   like ($@, qr/^Can only compress unsigned integers/);
 
+  # Check that the warning behaviour on the modifiers !, < and > is as we
+  # expect it for this perl.
+  my $can_endian = $no_endianness ? '' : 'sSiIlLqQjJfFdDpP';
+  my $can_shriek = 'sSiIlL';
+  # h and H can't do either, so act as sanity checks in blead
+  foreach my $base (split '', 'sSiIlLqQjJfFdDpPhH') {
+    foreach my $mod ('', '<', '>', '!', '<!', '>!', '!<', '!>') {
+    SKIP: {
+	# Avoid void context warnings.
+	my $a = eval {pack "$base$mod"};
+	skip "pack can't $base", 1 if $@ =~ /^Invalid type '\w'/;
+	# Which error you get when 2 would be possible seems to be emergent
+	# behaviour of pack's format parser.
+
+	my $fails_shriek = $mod =~ /!/ && index ($can_shriek, $base) == -1;
+	my $fails_endian = $mod =~ /[<>]/ && index ($can_endian, $base) == -1;
+	my $shriek_first = $mod =~ /^!/;
+
+	if ($no_endianness and ($mod eq '<!' or $mod eq '>!')) {
+	  # The ! isn't seem as part of $base. Instead it's seen as a modifier
+	  # on > or <
+	  $fails_shriek = 1;
+	  undef $fails_endian;
+	} elsif ($fails_shriek and $fails_endian) {
+	  if ($shriek_first) {
+	    undef $fails_endian;
+	  }
+	}
+
+	if ($fails_endian) {
+	  if ($no_endianness) {
+	    # < and > are seen as pattern letters, not modifiers
+	    like ($@, qr/^Invalid type '[<>]'/, "pack can't $base$mod");
+	  } else {
+	    like ($@, qr/^'[<>]' allowed only after types/,
+		  "pack can't $base$mod");
+	  }
+	} elsif ($fails_shriek) {
+	  like ($@, qr/^'!' allowed only after types/,
+		"pack can't $base$mod");
+	} else {
+	  is ($@, '', "pack can $base$mod");
+	}
+      }
+    }
+  }
+
+  $can_shriek .= 'nNvV' unless $no_signedness;
  SKIP: {
     skip $no_endianness, 2*3 + 2*8 if $no_endianness;
     for my $mod (qw( ! < > )) {
