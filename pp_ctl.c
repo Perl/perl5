@@ -2454,6 +2454,7 @@ PP(pp_goto)
 
     if (label && *label) {
 	OP *gotoprobe = 0;
+	bool leaving_eval = FALSE;
 
 	/* find label */
 
@@ -2463,6 +2464,7 @@ PP(pp_goto)
 	    cx = &cxstack[ix];
 	    switch (CxTYPE(cx)) {
 	    case CXt_EVAL:
+		leaving_eval = TRUE;
                 if (CxREALEVAL(cx)) {
 		    gotoprobe = PL_eval_root; /* XXX not good for nested eval */
 		    break;
@@ -2504,6 +2506,17 @@ PP(pp_goto)
 	}
 	if (!retop)
 	    DIE(aTHX_ "Can't find label %s", label);
+
+	/* if we're leaving an eval, check before we pop any frames
+           that we're not going to punt, otherwise the error
+	   won't be caught */
+
+	if (leaving_eval && *enterops && enterops[1]) {
+	    I32 i;
+            for (i = 1; enterops[i]; i++)
+                if (enterops[i]->op_type == OP_ENTERITER)
+                    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
+	}
 
 	/* pop unwanted frames */
 
