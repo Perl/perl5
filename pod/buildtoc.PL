@@ -133,6 +133,7 @@ if (-d "pod") {
     perldebguts         
     perlxstut           
     perlxs              
+    perlclib            
     perlguts            
     perlcall            
     perlutil            

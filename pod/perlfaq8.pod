@@ -321,7 +321,7 @@ go bump in the night, finally came up with this:
 	# been opened on a pipe...
 	system("/bin/stty $stty");
 	$_ = <MODEM_IN>;
-	chop;
+	chomp;
 	if ( !m/^Connected/ ) {
 	    print STDERR "$0: cu printed `$_' instead of `Connected'\n";
 	}

@@ -17,7 +17,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.51 $, 10;
+$VERSION = substr q$Revision: 1.53 $, 10;
 
 =head1 NAME
 
@@ -204,7 +204,7 @@ software to CPAN bear names that are outside the ASCII range. If your
 terminal supports UTF-8, you say no to the next question, if it
 supports ISO-8859-1 (also known as LATIN1) then you say yes, and if it
 supports neither nor, your answer does not matter, you will not be
-able to read the names of some authors anyway. If you answer no, nmes
+able to read the names of some authors anyway. If you answer no, names
 will be output in UTF-8.
 
 };
@@ -384,6 +384,44 @@ the \$CPAN::Config takes precedence.
 	$CPAN::Config->{$_} = prompt("Your $_?",$default);
     }
 
+    if ($CPAN::Config->{ftp_proxy} ||
+        $CPAN::Config->{http_proxy}) {
+        $default = $CPAN::Config->{proxy_user} || $CPAN::LWP::UserAgent::USER;
+        print qq{
+
+If your proxy is an authenticating proxy, you can store your username
+permanently. If you do not want that, just press RETURN. You will then
+be asked for your username in every future session.
+
+};
+        if ($CPAN::Config->{proxy_user} = prompt("Your proxy user id?",$default)) {
+            print qq{
+
+Your password for the authenticating proxy can also be stored
+permanently on disk. If this violates your security policy, just press
+RETURN. You will then be asked for the password in every future
+session.
+
+};
+
+            if ($CPAN::META->has_inst("Term::ReadKey")) {
+                Term::ReadKey::ReadMode("noecho");
+            } else {
+                print qq{
+
+Warning: Term::ReadKey seems not to be available, your password will
+be echoed to the terminal!
+
+};
+            }
+            $CPAN::Config->{proxy_pass} = prompt("Your proxy password?");
+            if ($CPAN::META->has_inst("Term::ReadKey")) {
+                Term::ReadKey::ReadMode("restore");
+            }
+            $CPAN::Frontend->myprint("\n\n");
+        }
+    }
+
     #
     # MIRRORED.BY
     #
@@ -426,11 +464,11 @@ sub conf_sites {
       my $mtime = localtime((stat _)[9]);
       my $prompt = qq{Found $mby as of $mtime
 
-  I\'d use that as a database of CPAN sites. If that is OK for you,
-  please answer 'y', but if you want me to get a new database now,
-  please answer 'n' to the following question.
+I\'d use that as a database of CPAN sites. If that is OK for you,
+please answer 'y', but if you want me to get a new database now,
+please answer 'n' to the following question.
 
-  Shall I use the local database in $mby?};
+Shall I use the local database in $mby?};
       my $ans = prompt($prompt,"y");
       $overwrite_local = 1 unless $ans =~ /^y/i;
   }

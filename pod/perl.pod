@@ -87,6 +87,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perldebguts		Perl debugging guts and tips
     perlxstut		Perl XS tutorial
     perlxs		Perl XS application programming interface
+    perlclib		Internal replacements for standard C library functions
     perlguts		Perl internal functions for those doing extensions
     perlcall		Perl calling conventions from C
     perlutil		utilities packaged with the Perl distribution

@@ -1140,6 +1140,7 @@ pod/perlbook.pod	Perl book information
 pod/perlboot.pod	Beginner's Object-oriented Tutorial
 pod/perlbot.pod		Object-oriented Bag o' Tricks
 pod/perlcall.pod	Callback info
+pod/perlclib.pod	Internal replacements for standard C library functions
 pod/perlcompile.pod	Info on using the Compiler suite
 pod/perldata.pod	Data structure info
 pod/perldbmfilter.pod	Info about DBM Filters
@@ -1292,6 +1293,7 @@ t/lib/bigfloat.t	See if bigfloat.pl works
 t/lib/bigfltpm.t	See if BigFloat.pm works
 t/lib/bigint.t		See if bigint.pl works
 t/lib/bigintpm.t	See if BigInt.pm works
+t/lib/cgi-esc.t		See if CGI.pm works
 t/lib/cgi-form.t	See if CGI.pm works
 t/lib/cgi-function.t	See if CGI.pm works
 t/lib/cgi-html.t	See if CGI.pm works
@@ -1586,6 +1588,7 @@ t/pragma/warn/universal	Tests for universal.c for warnings.t
 t/pragma/warn/utf8	Tests for utf8.c for warnings.t
 t/pragma/warn/util	Tests for util.c for warnings.t
 t/pragma/warnings.t	See if warning controls work
+t/run/runenv.t		Test if perl honors its environment variables.
 taint.c			Tainting code
 thrdvar.h		Per-thread variables
 thread.h		Threading header

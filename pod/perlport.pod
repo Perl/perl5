@@ -94,6 +94,26 @@ from) C<\015\012>, depending on whether you're reading or writing.
 Unix does the same thing on ttys in canonical mode.  C<\015\012>
 is commonly referred to as CRLF.
 
+A common cause of unportable programs is the misuse of chop() to trim
+newlines:
+
+    # XXX UNPORTABLE!
+    while(<FILE>) {
+        chop;
+        @array = split(/:/);
+        #...
+    }
+
+You can get away with this on Unix and MacOS (they have a single
+character end-of-line), but the same program will break under DOSish
+perls because you're only chop()ing half the end-of-line.  Instead,
+chomp() should be used to trim newlines.  The Dunce::Files module can
+help audit your code for misuses of chop().
+
+When dealing with binary files (or text files in binary mode) be sure
+to explicitly set $/ to the appropriate value for your file format
+before using chomp().
+
 Because of the "text" mode translation, DOSish perls have limitations
 in using C<seek> and C<tell> on a file accessed in "text" mode.
 Stick to C<seek>-ing to locations you got from C<tell> (and no
