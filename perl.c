@@ -752,6 +752,24 @@ perl_destruct(pTHXx)
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Scalars leaked: %ld\n", (long)PL_sv_count);
 
+#ifdef DEBUG_LEAKING_SCALARS
+    if (PL_sv_count != 0) {
+	SV* sva;
+	SV* sv;
+	register SV* svend;
+
+	for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
+	    svend = &sva[SvREFCNT(sva)];
+	    for (sv = sva + 1; sv < svend; ++sv) {
+		if (SvTYPE(sv) != SVTYPEMASK) {
+		    PerlIO_printf(Perl_debug_log, "leaked: 0x%p\n", sv);
+		}
+	    }
+	}
+    }
+#endif
+
+
 #if defined(PERLIO_LAYERS)
     /* No more IO - including error messages ! */
     PerlIO_cleanup(aTHX);
