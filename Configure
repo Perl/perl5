@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Dec 24 02:45:06 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Dec 24 04:14:27 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -13476,7 +13476,8 @@ EOM
 $cat >try.c <<EOCP
 #include <stdio.h>
 #define U32 $u32type
-#define BYTEORDER $byteorder
+#define BYTEORDER 0x$byteorder
+#define U8 $u8type
 int main() {
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x4321
     U8 buf[] = "\0\0\0\1\0\0\0\0";
@@ -13522,7 +13523,7 @@ int main() {
 EOCP
 set try
 if eval $compile_ok; then
-	echo "(Testing for character data alignment may dump core.)" >&4
+	echo "(Testing for character data alignment may crash the test.  That's okay.)" >&4
 	$run ./try 2>&1 >/dev/null
 	case "$?" in
 	0)	cat >&4 <<EOM
