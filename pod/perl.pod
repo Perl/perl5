@@ -248,28 +248,28 @@ platforms. The following situation is as of February 1999 and Perl
 5.005_03.
 
 The following platforms are able to build Perl straight from the
-standard source code distribution at
+standard source code distribution available at
 F<http://www.perl.com/CPAN/src/index.html>
 
-	Amiga
+	AmigaOS
 	BeOS
 	DOS
 	MPE/iX
 	MiNT
 	OS/2
-	OS390 (aka MVS)
+	OS390 (aka OpenEdition MVS)
 	Plan9
 	QNX
 	Stratus VOS
 	UNIX
 	VMS
-	Windows
+	Windows 3.1/95/98/NT
 
 The following platforms have their own source code distributions and
-binaries at F<http://www.perl.com/CPAN/ports/index.html>.
+binaries available at F<http://www.perl.com/CPAN/ports/index.html>.
 
 	AS/400
-	Mac
+	MacOS
 
 The following platforms have only binaries available at
 F<http://www.perl.com/CPAN/ports/index.html>.
