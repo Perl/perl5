@@ -2137,7 +2137,7 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_null,	/* egrent */
 	ck_null,	/* getlogin */
 	ck_fun,		/* syscall */
-	ck_null,	/* lock */
+	ck_rfun,	/* lock */
 };
 #endif
 

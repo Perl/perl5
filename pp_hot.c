@@ -1866,6 +1866,7 @@ PP(pp_entersub)
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
 				  thr, sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
+	    SvREFCNT_inc(sv);	/* Keep alive until magic_mutexfree */
 	    save_destructor(unlock_condpair, sv);
 	}
 	MUTEX_LOCK(CvMUTEXP(cv));

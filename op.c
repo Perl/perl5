@@ -1288,7 +1288,7 @@ I32 type;
 
     switch (o->op_type) {
     case OP_ENTERSUB:
-	if ((type == OP_DEFINED) &&
+	if ((type == OP_DEFINED || type == OP_LOCK) &&
 	    !(o->op_flags & OPf_STACKED)) {
 	    o->op_type = OP_RV2CV;             /* entersub => rv2cv */
 	    o->op_ppaddr = ppaddr[OP_RV2CV];

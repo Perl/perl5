@@ -1723,6 +1723,7 @@ MAGIC *mg;
 	croak("panic: magic_mutexfree");
     MUTEX_DESTROY(MgMUTEXP(mg));
     COND_DESTROY(MgCONDP(mg));
+    SvREFCNT_dec(sv);
     return 0;
 }
 #endif /* USE_THREADS */
