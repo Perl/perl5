@@ -2239,6 +2239,12 @@ int gimme;
 	}
 	SvREFCNT_dec(rs);
 	rs = SvREFCNT_inc(nrs);
+#ifdef USE_THREADS
+	MUTEX_LOCK(&eval_mutex);
+	eval_owner = 0;
+	COND_SIGNAL(&eval_cond);
+	MUTEX_UNLOCK(&eval_mutex);
+#endif /* USE_THREADS */
 	RETPUSHUNDEF;
     }
     SvREFCNT_dec(rs);
