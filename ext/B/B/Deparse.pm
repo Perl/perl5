@@ -271,6 +271,7 @@ sub next_todo {
 sub begin_is_use {
     my ($self, $cv) = @_;
     my $root = $cv->ROOT;
+    local @$self{qw'curcv curcvlex'} = ($cv);
 #require B::Debug;
 #B::walkoptree($cv->ROOT, "debug");
     my $lineseq = $root->first;
