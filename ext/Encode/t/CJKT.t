@@ -20,9 +20,7 @@ BEGIN {
     $| = 1;
 }
 use strict;
-use Test::More tests => 42;
-#use Test::More tests => 73;
-#use Test::More qw(no_plan);
+use Test::More tests => 60;
 use Encode;
 use File::Basename;
 use File::Spec;
@@ -31,16 +29,15 @@ our $DEBUG = shift || 0;
 
 my %Charset =
     (
-     'big5-eten'  => [qw(big5-eten cp950 MacChineseTrad)],
+     'big5-eten'  => [qw(big5-eten)],
      'big5-hkscs' => [qw(big5-hkscs)],
-     gb2312       => [qw(euc-cn gb2312-raw cp936 MacChineseSimp)],
-     jisx0201     => [qw(euc-jp shiftjis 7bit-jis jis0201-raw
-			 cp932 MacJapanese)],
-     jisx0212     => [qw(euc-jp 7bit-jis iso-2022-jp-1 jis0208-raw)],
-     jisx0208     => [qw(euc-jp shiftjis 7bit-jis cp932 MacJapanese
-		     iso-2022-jp iso-2022-jp-1 jis0212-raw)],
-     ksc5601      => [qw(euc-kr iso-2022-kr ksc5601-raw cp949 MacKorean)],
+     gb2312       => [qw(euc-cn hz)],
+     jisx0201     => [qw(euc-jp shiftjis 7bit-jis)],
+     jisx0208     => [qw(euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1)],
+     jisx0212     => [qw(euc-jp 7bit-jis iso-2022-jp-1)],
+     ksc5601      => [qw(euc-kr iso-2022-kr johab)],
     );
+
 
 my $dir = dirname(__FILE__);
 my $seq = 1;
@@ -111,4 +108,9 @@ for my $charset (sort keys %Charset){
     $seq++;
     
     unlink($dst_utf, $dst_enc);
+
+    for my $encoding (@{$Charset{$charset}}){
+	my $rt = decode($encoding, encode($encoding, $uni));
+	is ($rt, $uni, "RT $encoding");
+    }
 }

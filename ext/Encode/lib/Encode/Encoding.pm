@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.32 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Encode;
 
@@ -129,6 +129,13 @@ convert the string - for example by using Unicode's "\x{FFFD}" as a
 replacement character.
 
 =back
+
+=back
+
+If you want your encoding to work with L<encoding> pragma, you should
+also implement the method below.
+
+=over 4
 
 =item -E<gt>cat_decode($destination, $octets, $offset, $terminator [,$check])
 
