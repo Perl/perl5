@@ -14,6 +14,12 @@ sub canonpath {
     return $self->SUPER::canonpath($path);
 }
 
+sub file_name_is_absolute {
+    my ($self,$file) = @_;
+    return 1 if $file =~ m{^([a-z]:)?[\\/]}is; # C:/test
+    return $self->SUPER::file_name_is_absolute($file);
+}
+
 1;
 __END__
 
