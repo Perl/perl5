@@ -2,6 +2,10 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifdef I_UNISTD
+#   include <unistd.h>
+#endif
+
 /* The realpath() implementation from OpenBSD 2.9 (realpath.c 1.4)
  * Renamed here to bsd_realpath() to avoid library conflicts.
  * --jhi 2000-06-20 */
