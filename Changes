@@ -31,6 +31,151 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14330] By: jhi                                   on 2002/01/18  15:07:49
+        Log: Try to make the connect/read/write timeouting.
+     Branch: perl
+	   ! ext/Socket/Socket.t
+____________________________________________________________________________
+[ 14329] By: jhi                                   on 2002/01/18  14:49:49
+        Log: Netware Makefile tweak from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/Makefile
+____________________________________________________________________________
+[ 14328] By: jhi                                   on 2002/01/18  14:37:02
+        Log: Subject: [PATCH] Re: [PATCH] Re: [ID 20020117.010] File::Find documentation
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 18 Jan 2002 03:10:27 -0500
+             Message-ID: <20020118081027.GE7226@blackrider>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 14327] By: jhi                                   on 2002/01/18  14:33:19
+        Log: Subject: [PATCH] Improving lib/Time/Local.t
+             From: Paul_GreenVOS@vos.stratus.com        
+             Date: Thu, 17 Jan 02 22:36 est
+             Message-Id: <200201180335.WAA08768@mailhub2.stratus.com> 
+     Branch: perl
+	   ! lib/Time/Local.t
+____________________________________________________________________________
+[ 14326] By: jhi                                   on 2002/01/18  14:32:08
+        Log: Subject: [PATCH t/MM_Win32.t] was: [ANNOUNCE] ExtUtils::MakeMaker 5.48_03 
+             From: Abe Timmerman <abe@ztreet.demon.nl>  
+             Date: Fri, 18 Jan 2002 13:18:47 +0100
+             Message-ID: <4l4g4ustql73mlnm5n2jm68vcn4ctf85a1@4ax.com> 
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Win32.t
+____________________________________________________________________________
+[ 14325] By: jhi                                   on 2002/01/18  14:30:49
+        Log: Subject: [PATCH] Syncing with bleadperl 
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 18 Jan 2002 03:04:33 -0500
+             Message-ID: <20020118080432.GC7226@blackrider>
+     Branch: perl
+	   + lib/ExtUtils/Changes lib/ExtUtils/instmodsh t/lib/TieOut.pm
+	   - lib/ExtUtils/inst
+	   ! MANIFEST lib/ExtUtils/Embed.pm lib/ExtUtils/Liblist.pm
+	   ! lib/ExtUtils/MM_Win32.pm lib/ExtUtils/MakeMaker.pm
+	   ! lib/ExtUtils/Manifest.pm lib/ExtUtils/Mkbootstrap.pm
+	   ! lib/ExtUtils/Mksymlists.pm lib/ExtUtils/t/Command.t
+	   ! lib/ExtUtils/t/Embed.t lib/ExtUtils/t/ExtUtils.t
+	   ! lib/ExtUtils/t/Installed.t lib/ExtUtils/t/MM_BeOS.t
+	   ! lib/ExtUtils/t/MM_Cygwin.t lib/ExtUtils/t/MM_OS2.t
+	   ! lib/ExtUtils/t/MM_Unix.t lib/ExtUtils/t/MM_VMS.t
+	   ! lib/ExtUtils/t/MM_Win32.t lib/ExtUtils/t/Manifest.t
+	   ! lib/ExtUtils/t/Mkbootstrap.t lib/ExtUtils/t/Packlist.t
+	   ! lib/ExtUtils/t/hints.t lib/ExtUtils/t/testlib.t
+	   ! lib/ExtUtils/testlib.pm
+____________________________________________________________________________
+[ 14324] By: jhi                                   on 2002/01/18  13:40:56
+        Log: Detypo.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 14323] By: jhi                                   on 2002/01/18  00:35:24
+        Log: Subject: [PATCH] MM check_hints test
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 17 Jan 2002 20:25:57 -0500
+             Message-ID: <20020118012557.GE32762@blackrider>
+     Branch: perl
+	   + lib/ExtUtils/t/hints.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14322] By: jhi                                   on 2002/01/18  00:21:11
+        Log: Subject: [PATCH] Re: [PATCH] Re: ndbm failing on linux ?        
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Thu, 17 Jan 2002 20:12:20 -0500
+             Message-ID: <20020118011220.GC32762@blackrider>
+             
+             (#14317 replaced with this)
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 14321] By: jhi                                   on 2002/01/17  22:51:55
+        Log: Subject: [PATCH perldiag] overload.pm warnings
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 17 Jan 2002 23:53:49 +0100
+             Message-ID: <20020117235349.A14530@rafael>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 14320] By: jhi                                   on 2002/01/17  22:49:36
+        Log: Subject: [PATCH] Re: [ID 20020117.010] File::Find documentation
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 17 Jan 2002 16:35:47 -0500
+             Message-ID: <20020117213546.GD23830@blackrider>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 14319] By: jhi                                   on 2002/01/17  22:43:12
+        Log: Subject: [PATCH pod/perltodo.pod] One TODO is TODONE
+             From: chromatic <chromatic@rmci.net>
+             Date: Thu, 17 Jan 2002 13:04:22 -0700
+             Message-ID: <20020117200557.98720.qmail@onion.perl.org>
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 14318] By: jhi                                   on 2002/01/17  22:42:12
+        Log: Subject: [PATCH lib/ExtUtils/t/Mkbootstrap] Silence warnings (was Re: [ANNOUNCE] ExtUtils::MakeMaker 5.48_01, the CPAN version)
+             From: chromatic <chromatic@rmci.net>
+             Date: Thu, 17 Jan 2002 12:59:04 -0700
+             Message-ID: <20020117200039.96481.qmail@onion.perl.org>
+     Branch: perl
+	   ! lib/ExtUtils/t/Mkbootstrap.t
+____________________________________________________________________________
+[ 14317] By: jhi                                   on 2002/01/17  22:39:48
+        Log: (replaced by #14322)
+             The #14300 broke hints file handling.
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 14315] By: jhi                                   on 2002/01/17  22:13:44
+        Log: Subject: [PATCH] long doubles
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Thu, 17 Jan 2002 17:06:28 +0000
+             Message-ID: <20020117170627.GD513@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14313] By: jhi                                   on 2002/01/17  21:51:05
+        Log: Subject: [PATCH] Trivial Configure patch (really i_ndbm.U)
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 17 Jan 2002 11:44:48 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10201171141280.25122-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14311] By: sky                                   on 2002/01/17  21:01:00
+        Log: Simplify the code that duplicates the threads 
+             init function and the parameters to the thread by using sv_dup. 
+             Note,what happens if you pass a shared variable as a parameter?
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 14310] By: jhi                                   on 2002/01/17  15:23:56
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14309] By: jhi                                   on 2002/01/17  14:39:20
         Log: Rename kill_perl to fresh_perl; replace fresh_perl()
              with fresh_perl_is() and fresh_perl_like().
