@@ -11,8 +11,8 @@ nested hashes.  To enable these, Perl 5 introduced a feature called
 `references', and using references is the key to managing complicated,
 structured data in Perl.  Unfortunately, there's a lot of funny syntax
 to learn, and the main manual page can be hard to follow.  The manual
-is quite complete, and sometimes people find that a problem, because it
-can be hard to tell what is important and what isn't.
+is quite complete, and sometimes people find that a problem, because
+it can be hard to tell what is important and what isn't.
 
 Fortunately, you only need to know 10% of what's in the main page to get
 90% of the benefit.  This page will show you that 10%.
@@ -24,27 +24,27 @@ hash whose values were lists.  Perl 4 had hashes, of course, but the
 values had to be scalars; they couldn't be lists.  
 
 Why would you want a hash of lists?  Let's take a simple example: You
-have a file of city and state names, like this:
+have a file of city and country names, like this:
 
-	Chicago, Illinois
-	New York, New York
-	Albany, New York
-	Springfield, Illinois
-	Trenton, New Jersey
-	Evanston, Illinois
+	Chicago, USA
+	Frankfurt, Germany
+	Berlin, Germany
+	Washington, USA
+	Helsinki, Finland
+	New York, USA
 
-and you want to produce an output like this, with each state mentioned
-once, and then an alphabetical list of the cities in that state:
+and you want to produce an output like this, with each country mentioned
+once, and then an alphabetical list of the cities in that country:
 
-	Illinois:  Chicago, Evanston, Springfield.
-	New Jersey: Trenton.
-	New York: Albany, New York.
+	Finland: Helsinki.
+	Germany: Berlin, Frankfurt.
+	USA:  Chicago, New York, Washington.
 
-The natural way to do this is to have a hash whose keys are state
-names.  Associated with each state name key is a list of the cities in
-that state.  Each time you read a line of input, split it into a state
+The natural way to do this is to have a hash whose keys are country
+names.  Associated with each country name key is a list of the cities in
+that country.  Each time you read a line of input, split it into a country
 and a city, look up the list of cities already known to be in that
-state, and append the new city to the list.  When you're done reading
+country, and append the new city to the list.  When you're done reading
 the input, iterate over the hash as usual, sorting each list of cities
 before you print it out.
 
@@ -59,12 +59,12 @@ use them.
 
 =head1 The Solution
 
-Unfortunately, by the time Perl 5 rolled around, we were already stuck
-with this design: Hash values must be scalars.  The solution to this is
+By the time Perl 5 rolled around, we were already stuck with this
+design: Hash values must be scalars.  The solution to this is
 references.
 
 A reference is a scalar value that I<refers to> an entire array or an
-entire hash (or to just about anything else.)  Names are one kind of
+entire hash (or to just about anything else).  Names are one kind of
 reference that you're already familiar with.  Think of the President:
 a messy, inconvenient bag of blood and bones.  But to talk about him,
 or to represent him in a computer program, all you need is the easy,
@@ -84,7 +84,7 @@ an entire array, and references are scalars, so you can have a hash of
 references to arrays, and it'll act a lot like a hash of arrays, and
 it'll be just as useful as a hash of arrays.
 
-We'll come back to this city-state problem later, after we've seen
+We'll come back to this city-country problem later, after we've seen
 some syntax for managing references.
 
 
@@ -255,18 +255,18 @@ the unreadable C<${${$x[2]}[3]}[5]>.
 
 =head1 Solution
 
-Here's the answer to the problem I posed the the beginning of the
-article, of reformatting a file of city and state names.
+Here's the answer to the problem I posed earlier, of reformatting a
+file of city and country names.
 
     1   while (<>) {
     2     chomp;
-    3     my ($city, $state) = split /, /;
-    4     push @{$table{$state}}, $city;
+    3     my ($city, $country) = split /, /;
+    4     push @{$table{$country}}, $city;
     5   }
     6
-    7   foreach $state (sort keys %table) {
-    8     print "$state: ";
-    9     my @cities = @{$table{$state}};
+    7   foreach $country (sort keys %table) {
+    8     print "$country: ";
+    9     my @cities = @{$table{$country}};
    10     print join ', ', sort @cities;
    11     print ".\n";
    12	}
@@ -277,45 +277,45 @@ data structure, and lines 7--12 analyze the data and print out the
 report.  
 
 In the first part, line 4 is the important one.  We're going to have a
-hash, C<%table>, whose keys are state names, and whose values are
+hash, C<%table>, whose keys are country names, and whose values are
 (references to) arrays of city names.  After acquiring a city and
-state name, the program looks up C<$table{$state}>, which holds (a
-reference to) the list of cities seen in that state so far.  Line 4 is
+country name, the program looks up C<$table{$country}>, which holds (a
+reference to) the list of cities seen in that country so far.  Line 4 is
 totally analogous to
 
 	push @array, $city;
 
 except that the name C<array> has been replaced by the reference
-C<{$table{$state}}>.  The C<push> adds a city name to the end of the
+C<{$table{$country}}>.  The C<push> adds a city name to the end of the
 referred-to array.
 
 In the second part, line 9 is the important one.  Again,
-C<$table{$state}> is (a reference to) the list of cities in the state, so
+C<$table{$country}> is (a reference to) the list of cities in the country, so
 we can recover the original list, and copy it into the array C<@cities>,
-by using C<@{$table{$state}}>.  Line 9 is totally analogous to
+by using C<@{$table{$country}}>.  Line 9 is totally analogous to
 
 	@cities = @array;
 
 except that the name C<array> has been replaced by the reference
-C<{$table{$state}}>.  The C<@> tells Perl to get the entire array.
+C<{$table{$country}}>.  The C<@> tells Perl to get the entire array.
 
 The rest of the program is just familiar uses of C<chomp>, C<split>, C<sort>,
 C<print>, and doesn't involve references at all.
 
 There's one fine point I skipped.  Suppose the program has just read
-the first line in its input that happens to mention the state of Ohio.
-Control is at line 4, C<$state> is C<'Ohio'>, and C<$city> is
-C<'Cleveland'>.  Since this is the first city in Ohio,
-C<$table{$state}> is undefined---in fact there isn't an C<'Ohio'> key
+the first line in its input that happens to mention Greece.
+Control is at line 4, C<$country> is C<'Greece'>, and C<$city> is
+C<'Athens'>.  Since this is the first city in Greece,
+C<$table{$country}> is undefined---in fact there isn't an C<'Greece'> key
 in C<%table> at all.  What does line 4 do here?
 
- 4	push @{$table{$state}}, $city;
+ 4	push @{$table{$country}}, $city;
 
 
 This is Perl, so it does the exact right thing.  It sees that you want
-to push C<Cleveland> onto an array that doesn't exist, so it helpfully
+to push C<Athens> onto an array that doesn't exist, so it helpfully
 makes a new, empty, anonymous array for you, installs it in the table,
-and then pushes C<Cleveland> onto it.  This is called `autovivification'.
+and then pushes C<Athens> onto it.  This is called `autovivification'.
 
 
 =head1 The Rest
@@ -336,9 +336,10 @@ other references.
 
 =item *
 
-In B<USE RULE 1>, you can often omit the curly braces.  For example,
+In B<USE RULE 1>, you can omit the curly braces whenever the thing
+inside them is an atomic scalar variable like C<$aref>.  For example,
 C<@$aref> is the same as C<@{$aref}>, and C<$$aref[1]> is the same as
-C<${$aref}[1]>.  If you're jsut starting out, you might want to adopt
+C<${$aref}[1]>.  If you're just starting out, you may want to adopt
 the habit of always including the curly braces.
 
 =item * 
@@ -346,7 +347,7 @@ the habit of always including the curly braces.
 To see if a variable contains a reference, use the `ref' function.
 It returns true if its argument is a reference.  Actually it's a
 little better than that:  It returns HASH for hash references and
-ARRAYfor array references.
+ARRAY for array references.
 
 =item * 
 
@@ -387,11 +388,29 @@ to do with references.
 
 Author: Mark-Jason Dominus, Plover Systems (C<mjd-perl-ref@plover.com>)
 
-This article originally appeared in I<The Perl Journal> volume 3, #2.
-Reprinted with permission.
+This article originally appeared in I<The Perl Journal>
+(http://tpj.com) volume 3, #2.  Reprinted with permission.  
 
 The original title was I<Understand References Today>.
 
+=head2 Distribution Conditions
+
+Copyright 1998 The Perl Journal.
+
+When included as part of the Standard Version of Perl, or as part of
+its complete documentation whether printed or otherwise, this work may
+be distributed only under the terms of Perl's Artistic License.  Any
+distribution of this file or derivatives thereof outside of that
+package require that special arrangements be made with copyright
+holder.
+
+Irrespective of its distribution, all code examples in these files are
+hereby placed into the public domain.  You are permitted and
+encouraged to use this code in your own programs for fun or for profit
+as you see fit.  A simple comment in the code giving credit would be
+courteous but is not required.
+
+
+
 
 =cut
-
